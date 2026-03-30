@@ -321,6 +321,71 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: true, message: 'Post-Processing gestartet' });
     }
 
+    if (action === 'start-github') {
+      // Trigger GitHub Actions workflow
+      const ghToken = process.env.GITHUB_TOKEN;
+      const repo = process.env.GITHUB_REPO || 'panaemonium141099/oesterreich-events';
+
+      if (!ghToken) {
+        return NextResponse.json({ error: 'GITHUB_TOKEN nicht konfiguriert' }, { status: 500 });
+      }
+
+      const res = await fetch(`https://api.github.com/repos/${repo}/actions/workflows/scrape-events.yml/dispatches`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${ghToken}`,
+          'Accept': 'application/vnd.github.v3+json',
+        },
+        body: JSON.stringify({
+          ref: 'master',
+          inputs: scraperName ? { scraper: scraperName } : {},
+        }),
+      });
+
+      if (res.status === 204) {
+        return NextResponse.json({ success: true, message: 'GitHub Workflow gestartet' });
+      } else {
+        const errText = await res.text();
+        return NextResponse.json({ error: `GitHub API Fehler: ${res.status} ${errText}` }, { status: 500 });
+      }
+    }
+
+    if (action === 'github-status') {
+      // Get latest workflow runs
+      const ghToken = process.env.GITHUB_TOKEN;
+      const repo = process.env.GITHUB_REPO || 'panaemonium141099/oesterreich-events';
+
+      if (!ghToken) {
+        return NextResponse.json({ runs: [], configured: false });
+      }
+
+      try {
+        const res = await fetch(`https://api.github.com/repos/${repo}/actions/workflows/scrape-events.yml/runs?per_page=5`, {
+          headers: {
+            'Authorization': `Bearer ${ghToken}`,
+            'Accept': 'application/vnd.github.v3+json',
+          },
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          const runs = data.workflow_runs?.map((run: { id: number; status: string; conclusion: string | null; created_at: string; updated_at: string; event: string; html_url: string }) => ({
+            id: run.id,
+            status: run.status, // queued, in_progress, completed
+            conclusion: run.conclusion, // success, failure, null
+            createdAt: run.created_at,
+            updatedAt: run.updated_at,
+            trigger: run.event, // schedule, workflow_dispatch
+            url: run.html_url,
+          })) || [];
+          return NextResponse.json({ runs, configured: true });
+        }
+        return NextResponse.json({ runs: [], configured: true, error: 'API Fehler' });
+      } catch {
+        return NextResponse.json({ runs: [], configured: true, error: 'Verbindungsfehler' });
+      }
+    }
+
     return NextResponse.json({ error: 'Unbekannte Aktion' }, { status: 400 });
   } catch (err) {
     console.error('Scraper action error:', err);
