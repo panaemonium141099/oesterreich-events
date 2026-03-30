@@ -1,0 +1,56 @@
+name: Scrape Events
+
+# Runs daily at 3:00 AM Vienna time (1:00 UTC in summer, 2:00 UTC in winter)
+on:
+  schedule:
+    - cron: '0 2 * * *'
+  workflow_dispatch: # Manual trigger from GitHub UI
+    inputs:
+      scraper:
+        description: 'Specific scraper to run (leave empty for all)'
+        required: false
+        default: ''
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    env:
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+      MAPBOX_ACCESS_TOKEN: ${{ secrets.MAPBOX_ACCESS_TOKEN }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run scrapers
+        run: |
+          if [ -n "${{ github.event.inputs.scraper }}" ]; then
+            echo "Running specific scraper: ${{ github.event.inputs.scraper }}"
+            npx tsx src/scripts/scrape.ts --source "${{ github.event.inputs.scraper }}"
+          else
+            echo "Running all scrapers..."
+            npx tsx src/scripts/scrape.ts
+          fi
+
+      - name: Validate events
+        run: node src/scripts/validate-events.js
+
+      - name: Report results
+        if: always()
+        run: |
+          echo "=== Scrape Results ==="
+          echo "Completed at: $(date)"

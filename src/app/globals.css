@@ -1,0 +1,664 @@
+@import "tailwindcss";
+
+/* ═══════════════════════════════════════════════
+   Remove browser default focus outlines — use custom
+   ═══════════════════════════════════════════════ */
+*:focus {
+  outline: none !important;
+  box-shadow: none !important;
+  --tw-ring-shadow: none !important;
+}
+*:focus-visible {
+  outline: 1.5px solid rgba(100, 116, 139, 0.3) !important;
+  outline-offset: 1px;
+}
+input:focus, select:focus, textarea:focus {
+  outline: none !important;
+  box-shadow: none !important;
+  --tw-ring-shadow: none !important;
+}
+.evening-mode *:focus-visible {
+  outline-color: rgba(255, 255, 255, 0.15) !important;
+}
+
+/* ═══════════════════════════════════════════════
+   Design Tokens
+   ═══════════════════════════════════════════════ */
+:root {
+  --color-primary: #2563eb;
+  --color-primary-light: #3b82f6;
+  --color-accent: #f43f5e;
+  --color-bg: #f8fafc;
+  --color-surface: #ffffff;
+  --color-surface-elevated: #f1f5f9;
+  --color-text: #1e293b;
+  --color-text-muted: #64748b;
+  --color-border: #e2e8f0;
+  --color-glow: rgba(59, 130, 246, 0.25);
+}
+
+.evening-mode {
+  --color-primary: #818cf8;
+  --color-primary-light: #a5b4fc;
+  --color-accent: #f43f5e;
+  --color-bg: #0f172a;
+  --color-surface: #1e293b;
+  --color-surface-elevated: #334155;
+  --color-text: #f1f5f9;
+  --color-text-muted: #94a3b8;
+  --color-border: #334155;
+  --color-glow: rgba(129, 140, 248, 0.3);
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  background: var(--color-bg);
+  color: var(--color-text);
+}
+
+/* ═══════════════════════════════════════════════
+   Keyframe Animations
+   ═══════════════════════════════════════════════ */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(40px) scale(0.98); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes slideDown {
+  from { opacity: 1; transform: translateY(0) scale(1); }
+  to   { opacity: 0; transform: translateY(40px) scale(0.98); }
+}
+
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes pulseGlow {
+  0%, 100% { box-shadow: 0 0 4px var(--glow-color, rgba(129,140,248,0.3)); }
+  50%      { box-shadow: 0 0 12px var(--glow-color, rgba(129,140,248,0.5)); }
+}
+
+@keyframes kenBurns {
+  from { transform: scale(1.02); }
+  to   { transform: scale(1.12); }
+}
+
+@keyframes markerPop {
+  0%   { transform: scale(0.6); opacity: 0; }
+  60%  { transform: scale(1.08); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes countBounce {
+  0%, 100% { transform: scale(1); }
+  50%      { transform: scale(1.15); }
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20%      { transform: translateX(-3px); }
+  40%      { transform: translateX(3px); }
+  60%      { transform: translateX(-2px); }
+  80%      { transform: translateX(2px); }
+}
+
+@keyframes twinkle {
+  0%, 100% { opacity: 0.2; }
+  50%      { opacity: 0.8; }
+}
+
+@keyframes floatStar {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-3px); }
+}
+
+/* ═══════════════════════════════════════════════
+   Animation Utility Classes
+   ═══════════════════════════════════════════════ */
+.animate-fade-in-up {
+  animation: fadeInUp 0.4s ease-out both;
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-out both;
+}
+
+.animate-slide-up {
+  animation: slideUp 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.animate-slide-down {
+  animation: slideDown 0.3s ease-in both;
+}
+
+.animate-shimmer {
+  background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.4) 50%, transparent 100%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+.animate-pulse-glow {
+  animation: pulseGlow 2s ease-in-out infinite;
+}
+
+/* Feed item entrance animation */
+@keyframes feedItemEnter {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.feed-item-enter {
+  animation: feedItemEnter 0.35s ease-out both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .feed-item-enter {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Hide scrollbar utility for horizontal scroll */
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.animate-ken-burns {
+  animation: kenBurns 12s ease-in-out both;
+}
+
+.animate-marker-pop {
+  animation: markerPop 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+.animate-count-bounce {
+  animation: countBounce 0.35s ease-out;
+}
+
+.animate-shake {
+  animation: shake 0.4s ease-in-out;
+}
+
+.animate-confetti {
+  animation: confettiFall 1.5s ease-out forwards;
+}
+
+.animate-bounce-fade {
+  animation: bounceFade 2.5s ease-out forwards;
+}
+
+@keyframes confettiFall {
+  0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+  100% { transform: translateY(500px) rotate(720deg); opacity: 0; }
+}
+
+@keyframes bounceFade {
+  0% { transform: translate(-50%, 0) scale(0); opacity: 0; }
+  15% { transform: translate(-50%, 0) scale(1.3); opacity: 1; }
+  30% { transform: translate(-50%, 0) scale(1); opacity: 1; }
+  70% { transform: translate(-50%, 0) scale(1); opacity: 1; }
+  100% { transform: translate(-50%, 10px) scale(0.8); opacity: 0; }
+}
+
+/* ═══════════════════════════════════════════════
+   Micro-interactions — haptic press & hover glow
+   ═══════════════════════════════════════════════ */
+button, a, [role="button"] {
+  transition: transform 0.15s ease-out, opacity 0.15s ease-out;
+}
+button:active, a:active, [role="button"]:active {
+  transform: scale(0.97);
+}
+.hover-glow {
+  transition: box-shadow 0.3s ease, transform 0.3s ease;
+}
+.hover-glow:hover {
+  box-shadow: 0 0 20px rgba(255,255,255,0.05);
+  transform: translateY(-1px);
+}
+/* ═══════════════════════════════════════════════
+   Tilt Effect — subtle 3D on event card images
+   ═══════════════════════════════════════════════ */
+.tilt-card {
+  perspective: 600px;
+}
+.tilt-card > * {
+  transition: transform 0.25s ease-out;
+}
+.tilt-card:hover > * {
+  transform: rotateY(3deg) rotateX(2deg) scale(1.02);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  button, a, [role="button"] { transition: none; }
+  button:active, a:active, [role="button"]:active { transform: none; }
+  .hover-glow { transition: none; }
+  .hover-glow:hover { transform: none; }
+  .tilt-card:hover > * { transform: none; }
+}
+
+/* ═══════════════════════════════════════════════
+   Glassmorphism
+   ═══════════════════════════════════════════════ */
+.glass {
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+.glass-dark {
+  background: rgba(15, 23, 42, 0.75);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+/* ═══════════════════════════════════════════════
+   Skeleton Loading
+   ═══════════════════════════════════════════════ */
+.skeleton {
+  background: linear-gradient(90deg, #e2e8f0 25%, #f1f5f9 50%, #e2e8f0 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+  border-radius: 8px;
+}
+
+.evening-mode .skeleton {
+  background: linear-gradient(90deg, #334155 25%, #475569 50%, #334155 75%);
+  background-size: 200% 100%;
+}
+
+/* ═══════════════════════════════════════════════
+   Stars Overlay (Evening Mode)
+   ═══════════════════════════════════════════════ */
+.stars-overlay {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 45;
+  overflow: hidden;
+}
+
+.stars-overlay::before,
+.stars-overlay::after {
+  content: '';
+  position: absolute;
+  width: 2px;
+  height: 2px;
+  border-radius: 50%;
+  background: white;
+}
+
+.stars-overlay::before {
+  box-shadow:
+    120px 40px 0 0 rgba(255,255,255,0.4),
+    350px 80px 0 0 rgba(255,255,255,0.3),
+    580px 25px 0 0 rgba(255,255,255,0.5),
+    800px 60px 0 0 rgba(255,255,255,0.2),
+    1050px 45px 0 0 rgba(255,255,255,0.4),
+    200px 120px 0 0 rgba(255,255,255,0.3),
+    450px 150px 0 0 rgba(255,255,255,0.5),
+    700px 100px 0 0 rgba(255,255,255,0.2),
+    950px 130px 0 0 rgba(255,255,255,0.4),
+    1200px 90px 0 0 rgba(255,255,255,0.3),
+    100px 200px 0 0 rgba(255,255,255,0.2),
+    330px 230px 0 0 rgba(255,255,255,0.4),
+    600px 180px 0 0 rgba(255,255,255,0.3),
+    880px 220px 0 0 rgba(255,255,255,0.5),
+    1100px 170px 0 0 rgba(255,255,255,0.2);
+  animation: twinkle 3s ease-in-out infinite;
+}
+
+.stars-overlay::after {
+  box-shadow:
+    50px 70px 0 0 rgba(255,255,255,0.3),
+    270px 110px 0 0 rgba(255,255,255,0.5),
+    500px 55px 0 0 rgba(255,255,255,0.2),
+    730px 140px 0 0 rgba(255,255,255,0.4),
+    1000px 75px 0 0 rgba(255,255,255,0.3),
+    160px 180px 0 0 rgba(255,255,255,0.5),
+    400px 200px 0 0 rgba(255,255,255,0.2),
+    650px 160px 0 0 rgba(255,255,255,0.4),
+    900px 190px 0 0 rgba(255,255,255,0.3),
+    1150px 150px 0 0 rgba(255,255,255,0.5);
+  animation: twinkle 4s ease-in-out 1.5s infinite;
+}
+
+/* ═══════════════════════════════════════════════
+   Map Markers — Modern Bubble Design
+   ═══════════════════════════════════════════════ */
+.mapbox-event-marker {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: 3px solid white;
+  box-shadow:
+    0 2px 6px rgba(0, 0, 0, 0.15),
+    0 6px 16px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  background-color: #e2e8f0;
+  cursor: pointer;
+  transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.25s ease;
+  will-change: transform;
+}
+
+.mapbox-event-marker:hover,
+.mapbox-event-marker.hovered {
+  transform: scale(1.35);
+  box-shadow:
+    0 4px 12px rgba(0, 0, 0, 0.2),
+    0 12px 28px rgba(0, 0, 0, 0.15);
+  z-index: 10 !important;
+}
+
+.mapbox-event-marker.marker-enter {
+  animation: markerPop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+/* Evening mode marker */
+.evening-mode .mapbox-event-marker {
+  border-color: rgba(203, 213, 225, 0.4);
+  box-shadow:
+    0 2px 8px rgba(0, 0, 0, 0.4);
+}
+
+.evening-mode .mapbox-event-marker:hover,
+.evening-mode .mapbox-event-marker.hovered {
+  border-color: rgba(203, 213, 225, 0.6);
+  box-shadow:
+    0 4px 20px rgba(0, 0, 0, 0.5);
+}
+
+.mapbox-event-marker.no-image {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-light));
+  color: white;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+/* ═══════════════════════════════════════════════
+   Cluster Markers — Glassmorphic Bubbles
+   ═══════════════════════════════════════════════ */
+.mapbox-cluster-marker {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: -0.02em;
+  color: #1e40af;
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 2.5px solid rgba(255, 255, 255, 0.9);
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.08),
+    0 4px 14px rgba(0, 0, 0, 0.06),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s ease;
+  will-change: transform;
+}
+
+.mapbox-cluster-marker:hover {
+  transform: scale(1.15);
+  box-shadow:
+    0 2px 8px rgba(0, 0, 0, 0.1),
+    0 8px 24px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+
+.evening-mode .mapbox-cluster-marker {
+  background: rgba(30, 41, 59, 0.8);
+  border-color: rgba(148, 163, 184, 0.2);
+  color: #cbd5e1;
+  box-shadow:
+    0 2px 8px rgba(0, 0, 0, 0.25),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.evening-mode .mapbox-cluster-marker:hover {
+  box-shadow:
+    0 4px 16px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+/* ═══════════════════════════════════════════════
+   Event Pulse — today's events pulse on map
+   ═══════════════════════════════════════════════ */
+.marker-today {
+  position: relative;
+  overflow: visible !important;
+}
+.marker-today::after {
+  content: '';
+  position: absolute;
+  inset: -6px;
+  border-radius: 50%;
+  border: 2.5px solid rgba(59, 130, 246, 0.7);
+  animation: pulseRing 2s ease-out infinite;
+  pointer-events: none;
+  z-index: -1;
+}
+.evening-mode .marker-today::after {
+  border-color: rgba(129, 140, 248, 0.6);
+}
+@keyframes pulseRing {
+  0% { transform: scale(1); opacity: 0.6; }
+  100% { transform: scale(1.5); opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .marker-today::after { animation: none; opacity: 0; }
+}
+
+/* ═══════════════════════════════════════════════
+   Popups
+   ═══════════════════════════════════════════════ */
+.mapboxgl-popup-content {
+  border-radius: 14px !important;
+  padding: 0 !important;
+  overflow: hidden;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12) !important;
+}
+
+.mapboxgl-popup-tip {
+  border-top-color: white !important;
+}
+
+.evening-mode .mapboxgl-popup-content {
+  background: #1e293b !important;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4) !important;
+}
+
+.evening-mode .mapboxgl-popup-tip {
+  border-top-color: #1e293b !important;
+}
+
+.event-popup-content {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+/* ═══════════════════════════════════════════════
+   Hide Scrollbar (for horizontal scroll containers)
+   ═══════════════════════════════════════════════ */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* ═══════════════════════════════════════════════
+   Global Scrollbar — ultra-thin, almost invisible
+   ═══════════════════════════════════════════════ */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 0, 0, 0.1) transparent;
+}
+.evening-mode * {
+  scrollbar-color: rgba(255, 255, 255, 0.06) transparent;
+}
+
+::-webkit-scrollbar {
+  width: 3px;
+  height: 3px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.2);
+}
+.evening-mode ::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.06);
+}
+.evening-mode ::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.custom-scrollbar::-webkit-scrollbar,
+.detail-scrollbar::-webkit-scrollbar {
+  width: 3px;
+}
+.custom-scrollbar::-webkit-scrollbar-track,
+.detail-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb,
+.detail-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 3px;
+}
+.evening-mode .custom-scrollbar::-webkit-scrollbar-thumb,
+.evening-mode .detail-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+/* ═══════════════════════════════════════════════
+   Leaflet Overrides
+   ═══════════════════════════════════════════════ */
+.leaflet-popup-content-wrapper {
+  border-radius: 14px !important;
+  padding: 0 !important;
+  overflow: hidden;
+}
+
+.leaflet-popup-content {
+  margin: 0 !important;
+  width: 280px !important;
+}
+
+/* ═══════════════════════════════════════════════
+   Search Glow
+   ═══════════════════════════════════════════════ */
+.search-glow:focus {
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15), 0 0 20px rgba(59, 130, 246, 0.1);
+}
+
+.evening-mode .search-glow:focus {
+  box-shadow: 0 0 0 3px rgba(129, 140, 248, 0.2), 0 0 25px rgba(129, 140, 248, 0.15);
+}
+
+/* ═══════════════════════════════════════════════
+   Evening Mode Gradient BG
+   ═══════════════════════════════════════════════ */
+.evening-mode {
+  background: radial-gradient(ellipse at 30% 20%, rgba(99,102,241,0.06) 0%, transparent 50%),
+              radial-gradient(ellipse at 70% 80%, rgba(129,140,248,0.04) 0%, transparent 50%),
+              #0f172a;
+}
+
+/* ═══════════════════════════════════════════════
+   Gradient Mesh — animated landing background
+   ═══════════════════════════════════════════════ */
+.gradient-mesh {
+  background: #000;
+  background-image:
+    radial-gradient(at 20% 80%, rgba(99, 102, 241, 0.08) 0px, transparent 50%),
+    radial-gradient(at 80% 20%, rgba(168, 85, 247, 0.06) 0px, transparent 50%),
+    radial-gradient(at 50% 50%, rgba(59, 130, 246, 0.04) 0px, transparent 50%);
+  background-size: 200% 200%, 200% 200%, 200% 200%;
+  animation: meshShift 15s ease-in-out infinite alternate;
+}
+@keyframes meshShift {
+  0%   { background-position: 0% 0%, 100% 100%, 50% 50%; }
+  100% { background-position: 100% 100%, 0% 0%, 50% 0%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .gradient-mesh { animation: none; }
+}
+
+/* ═══════════════════════════════════════════════
+   Map Loading Overlay
+   ═══════════════════════════════════════════════ */
+@keyframes mapLoaderRing {
+  0%   { transform: scale(0.8); opacity: 0.6; }
+  50%  { transform: scale(1.15); opacity: 0.2; }
+  100% { transform: scale(0.8); opacity: 0.6; }
+}
+@keyframes mapLoaderRingInner {
+  0%   { transform: scale(1); opacity: 0.4; }
+  50%  { transform: scale(1.25); opacity: 0.1; }
+  100% { transform: scale(1); opacity: 0.4; }
+}
+@keyframes mapLoaderText {
+  0%, 100% { opacity: 0.7; }
+  50%      { opacity: 0.4; }
+}
+.animate-map-loader-ring {
+  animation: mapLoaderRing 2s ease-in-out infinite;
+}
+.animate-map-loader-ring-inner {
+  animation: mapLoaderRingInner 2s ease-in-out 0.3s infinite;
+}
+.animate-map-loader-text {
+  animation: mapLoaderText 2s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .animate-map-loader-ring,
+  .animate-map-loader-ring-inner,
+  .animate-map-loader-text {
+    animation: none;
+  }
+}
+
+/* ═══════════════════════════════════════════════
+   Social Nav Spacing — room for floating bottom bar
+   ═══════════════════════════════════════════════ */
+.pb-social-nav {
+  padding-bottom: 80px;
+}

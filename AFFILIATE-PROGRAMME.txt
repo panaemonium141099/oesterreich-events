@@ -1,0 +1,138 @@
+AFFILIATE & PARTNER PROGRAMME — BESTANDSAUFNAHME
+==================================================
+Stand: 29.03.2026 | 44.964 Events aus 27+ Quellen
+
+==================================================
+TIER 1: BESTÄTIGTE AFFILIATE PROGRAMME (Sofort monetarisierbar)
+==================================================
+
+1. OETICKET.COM (CTS Eventim Austria) — HÖCHSTE PRIORITÄT
+   Events bei uns: 2.695
+   Affiliate: JA, via AWIN (Merchant ID: 13859)
+   Provision: 2% vom Bestellwert pro Kauf
+   Netzwerk: AWIN (ehem. Affiliate Window)
+   Anmeldung: ui.awin.com/publisher-signup → oeticket Programm (Merchant #13859)
+   Kosten: 5 GBP Deposit (erstattbar)
+   Deep Linking: CTS Partner Feed Tool (pft.eventim.com) — API mit Tracking-URLs
+   Zusätzlich: Webshop-Integration möglich, Kontakt: marketing@oeticket.com
+
+2. TICKETMASTER.AT — HOHE PRIORITÄT
+   Events bei uns: 125
+   Affiliate: JA, via Impact
+   Provision: ~1-2% pro Ticketverkauf (Österreich)
+   Netzwerk: Impact (ehem. Impact Radius)
+   Anmeldung: developer.ticketmaster.com/partners/distribution-partners/affiliate-sign-up/
+   API: Discovery API mit automatischem Affiliate-Tracking
+   Deep Linking: Browser Extension, JS Site Code, Partner Dashboard
+
+3. CTS EVENTIM (Mutterkonzern von oeticket) — DE/EU
+   Affiliate: JA, via AWIN (Merchant ID: 11388 DE, 15330 UK)
+   Provision: 20% der Vorverkaufsgebühr (~1.6-2% vom Ticketpreis)
+   Kontakt: kooperationen@eventim.de
+   Cookie: 5 Tage, Session-basiert
+
+4. WIEN.INFO (Vienna Tourist Board) — Vienna City Card
+   Affiliate: JA, für Vienna City Card Verkäufe
+   Provision: 5% pro Card (online), 10% für Reise-/Hotelreseller
+   Anmeldung: b2b.wien.info/en/services/products-services/viennacard/affiliate-registration
+   Kontakt: info@viennacitycard.at
+   Hinweis: Nur für City Card, nicht für einzelne Event-Tickets
+
+==================================================
+TIER 2: INDIREKTE MONETARISIERUNG (Venues die über oeticket/TM verkaufen)
+==================================================
+
+Diese Venues verkaufen Tickets über oeticket → unsere Affiliate-Links funktionieren:
+
+  stadthalle.com (127 Events) → Wien Ticket / oeticket
+  esterhazy.at (38 Events) → oeticket + pan.event
+  chelsea.co.at (52 Events) → oeticket
+  rockhouse.at (31 Events) → oeticket + Reservix
+  posthof.at (12 Events) → oeticket
+
+Strategie: "Tickets kaufen" Button → oeticket Event-Seite mit AWIN Tracking
+
+==================================================
+TIER 3: RESERVIX (Relevant für einige AT Venues)
+==================================================
+
+Reservix / ADticket
+   Affiliate: JA, via AWIN (Merchant #18490 für ADticket)
+   Provision: 25% der Buchungsgebühr (!)
+   Abdeckung: 180.000 Events, 7.500 Veranstalter (DACH)
+   API: Event-Integration via API
+   Relevanz: Rockhouse Salzburg + weitere AT Venues
+
+==================================================
+TIER 4: KEIN AFFILIATE / NUR WERBUNG
+==================================================
+
+  falter.at (616 Events) — Kein Affiliate. B2B Werbung via b2b.falter.at
+  meinbezirk.at (3.754 Events) — Kein Affiliate. Werbung via tbb.at/werben-bei-uns
+  veranstaltungskalender.net (500 Events) — Kein Affiliate
+  ganz-wien.at (81 Events) — Kein Affiliate
+  partytimer.at (166 Events) — Kein Affiliate
+  events.at (25 Events) — Kein Affiliate
+  kultur.graz.at (257 Events) — Kommunal, kein Affiliate
+  linztourismus.at (167 Events) — Kein Affiliate
+  kaernten.live (31 Events) — Kein Affiliate
+
+==================================================
+TIER 5: TOURISMUS-PORTALE (Feratel-powered)
+==================================================
+
+Alle nutzen Feratel Deskline 3.0 — KEINE Affiliate Programme.
+Aber: deren Events linken oft zu oeticket/TM → dort monetarisierbar!
+
+  burgenland.info — Kein Affiliate (Kontakt: info@burgenland.info)
+  neusiedlersee.com — Kein Affiliate
+  salzburgerland.com — Kein Affiliate
+  steiermark.com — Kein Affiliate
+  tirol.at — Kein Affiliate
+  kaernten.at — Partner/Sponsoring, kein Affiliate
+  oberoesterreich.at — Kein Affiliate
+  vorarlberg.travel — Kein Affiliate
+  niederoesterreich.at — Kein Affiliate
+  soelden.com — Kein Affiliate
+
+==================================================
+AKTIONSPLAN
+==================================================
+
+SOFORT (Höchster ROI):
+  1. AWIN Publisher Account anlegen (5 GBP Deposit)
+     → ui.awin.com/publisher-signup/en/awin/step1
+  2. oeticket.com Programm beantragen (AWIN Merchant #13859)
+  3. Ticketmaster Affiliate via Impact beantragen
+     → developer.ticketmaster.com/partners/distribution-partners/affiliate-sign-up/
+
+IMPLEMENTIERUNG:
+  - Bei Events mit oeticket.com/ticketmaster.at Links:
+    → URL mit Affiliate-Tracking-Parameter umschreiben
+  - CTS Partner Feed Tool (pft.eventim.com) nutzen:
+    → Events matchen → Affiliate-URLs generieren
+  - Für Venue-Events (Stadthalle, Chelsea, Rockhouse):
+    → Entsprechende oeticket Event-Seite finden → Affiliate-Link
+
+MITTELFRISTIG:
+  4. Reservix/ADticket via AWIN (Merchant #18490)
+  5. Vienna City Card Affiliate für Tourismus-Features
+
+ERWARTETE PROVISIONEN:
+  oeticket: ~2% vom Ticketpreis
+  Ticketmaster: ~1-2% vom Ticketpreis
+  Reservix: 25% der Buchungsgebühr (großzügiger!)
+
+==================================================
+QUELLEN
+==================================================
+
+  AWIN oeticket: ui.awin.com/merchant-profile/13859
+  oeticket Affiliate: affiliate-toolkit.com/program/oeticket-com/
+  Ticketmaster AT: ticketmaster.at/feature/affiliates/?language=en-us
+  Ticketmaster Sign-Up: developer.ticketmaster.com/partners/distribution-partners/affiliate-sign-up/
+  CTS Eventim Partner: eventim.de/campaign/en/eventim-partner
+  CTS Feed Tool: pft.eventim.com
+  Vienna City Card: b2b.wien.info/en/services/products-services/viennacard/vienna-card-affiliate
+  Reservix: reservix.net/en/affiliate-partnership/
+  AWIN Sign-Up: ui.awin.com/publisher-signup/en/awin/step1

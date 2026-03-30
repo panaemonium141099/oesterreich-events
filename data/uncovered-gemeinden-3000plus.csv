@@ -1,0 +1,309 @@
+rank,name,bundesland,bezirk,population_2024,website
+1,Graz,Steiermark,Graz (Stadt),302749,http://www.graz.gv.at
+2,Linz,Oberösterreich,Linz (Stadt),211944,http://www.linz.gv.at
+3,Innsbruck,Tirol,Innsbruck (Stadt),132188,http://www.innsbruck.gv.at
+4,Klagenfurt am Wörthersee,Kärnten,Klagenfurt (Stadt),104866,https://www.klagenfurt.at
+5,Villach,Kärnten,Villach (Stadt),65600,http://www.villach.at
+6,Wels,Oberösterreich,Wels (Stadt),65287,http://www.wels.gv.at
+7,St. Pölten,Niederösterreich,St. Pölten (Stadt),58856,http://www.st-poelten.gv.at
+8,Dornbirn,Vorarlberg,Dornbirn,51876,https://www.dornbirn.at
+9,Wiener Neustadt,Niederösterreich,Wiener Neustadt (Stadt),48517,http://www.wiener-neustadt.gv.at
+10,Feldkirch,Vorarlberg,Feldkirch,36384,http://www.feldkirch.gv.at
+11,Bregenz,Vorarlberg,Bregenz,29643,http://www.bregenz.gv.at
+12,Klosterneuburg,Niederösterreich,Tulln,28115,http://www.klosterneuburg.gv.at
+13,Baden,Niederösterreich,Baden,25923,https://www.baden.at
+14,Krems an der Donau,Niederösterreich,Krems (Stadt),25363,http://www.krems.gv.at
+15,Traun,Oberösterreich,Linz-Land,25171,http://www.traun.gv.at
+16,Wolfsberg,Kärnten,Wolfsberg,25084,https://www.wolfsberg.at
+17,Lustenau,Vorarlberg,Dornbirn,24223,http://www.lustenau.gv.at
+18,Amstetten,Niederösterreich,Amstetten,23899,http://www.amstetten.noe.gv.at
+19,Kapfenberg,Steiermark,Bruck-Mürzzuschlag,22080,http://www.kapfenberg.gv.at
+20,Kufstein,Tirol,Kufstein,20169,http://www.kufstein.gv.at
+21,Ansfelden,Oberösterreich,Linz-Land,18251,http://www.ansfelden.co.at
+22,Braunau am Inn,Oberösterreich,Braunau/Inn,17628,http://www.braunau.at
+23,Hohenems,Vorarlberg,Dornbirn,17319,https://www.hohenems.at
+24,Stockerau,Niederösterreich,Korneuburg,16999,https://www.stockerau.at
+25,Tulln an der Donau,Niederösterreich,Tulln,16949,http://www.tulln.gv.at
+26,Eisenstadt,Burgenland,Eisenstadt (Stadt),16037,http://www.eisenstadt.gv.at
+27,Bruck an der Mur,Steiermark,Bruck-Mürzzuschlag,15750,https://www.bruck.at
+28,Spittal an der Drau,Kärnten,Spittal an der Drau,15269,http://www.spittal-drau.at
+29,Bludenz,Vorarlberg,Bludenz,15139,http://www.bludenz.at
+30,Perchtoldsdorf,Niederösterreich,Mödling,14909,http://www.perchtoldsdorf.at
+31,Hall in Tirol,Tirol,Innsbruck-Land,14755,https://www.hall-in-tirol.at
+32,Ternitz,Niederösterreich,Neunkirchen,14753,http://www.ternitz.gv.at
+33,Wörgl,Tirol,Kufstein,14487,https://www.woergl.at
+34,Feldkirchen in Kärnten,Kärnten,Feldkirchen,14427,https://www.feldkirchen-kaernten.gv.at
+35,Schwaz,Tirol,Schwaz,14394,http://www.schwaz.gv.at
+36,Bad Ischl,Oberösterreich,Gmunden,14170,https://www.bad-ischl.ooe.gv.at
+37,Hard,Vorarlberg,Bregenz,13787,https://www.hard.at
+38,Korneuburg,Niederösterreich,Korneuburg,13719,http://www.korneuburg.gv.at
+39,Feldbach,Steiermark,Südoststeiermark,13515,http://www.feldbach.gv.at
+40,Leibnitz,Steiermark,Leibnitz,13362,https://www.leibnitz.at
+41,Knittelfeld,Steiermark,Murtal,12719,http://www.knittelfeld.gv.at
+42,Bad Vöslau,Niederösterreich,Baden,12442,http://www.bad-voeslau.gv.at
+43,Enns,Oberösterreich,Linz-Land,12265,http://www.enns.at
+44,St. Veit an der Glan,Kärnten,St. Veit an der Glan,12264,https://www.sv.or.at
+45,Seiersberg-Pirka,Steiermark,Graz-Umgebung,12258,http://www.seiersberg-pirka.gv.at
+46,Götzis,Vorarlberg,Feldkirch,12231,http://www.goetzis.at
+47,Lienz,Tirol,Lienz,12039,http://www.lienz.gv.at
+48,Mistelbach,Niederösterreich,Mistelbach,12036,http://www.mistelbach.gv.at
+49,Strasshof an der Nordbahn,Niederösterreich,Gänserndorf,12006,http://www.strasshof-nordbahn.gv.at
+50,Weiz,Steiermark,Weiz,11993,https://www.weiz.at
+51,Gerasdorf bei Wien,Niederösterreich,Korneuburg,11931,http://www.gerasdorf.at
+52,Gleisdorf,Steiermark,Weiz,11525,https://www.gleisdorf.at
+53,Waidhofen an der Ybbs,Niederösterreich,Waidhofen/Ybbs,11124,http://www.waidhofen-ybbs.gv.at
+54,Trofaiach,Steiermark,Leoben,11007,http://www.trofaiach.gv.at
+55,Völkermarkt,Kärnten,Völkermarkt,10956,https://www.voelkermarkt.gv.at
+56,Altmünster,Oberösterreich,Gmunden,10076,http://www.altmuenster.at
+57,Purkersdorf,Niederösterreich,St. Pölten (Land),9959,http://www.purkersdorf.gv.at
+58,St. Johann in Tirol,Tirol,Kitzbühel,9875,https://www.st.johann.tirol
+59,Laakirchen,Oberösterreich,Gmunden,9733,http://www.laakirchen.at
+60,Judenburg,Steiermark,Murtal,9691,http://www.judenburg.gv.at
+61,Wiener Neudorf,Niederösterreich,Mödling,9628,http://www.wiener-neudorf.gv.at
+62,Voitsberg,Steiermark,Voitsberg,9617,http://www.voitsberg.gv.at
+63,Köflach,Steiermark,Voitsberg,9601,http://www.koeflach.at
+64,Perg,Oberösterreich,Perg,9459,http://www.perg.at
+65,Finkenstein am Faaker See,Kärnten,Villach-Land,9402,http://www.finkenstein.gv.at
+66,Guntramsdorf,Niederösterreich,Mödling,9366,http://www.guntramsdorf.at
+67,St. Valentin,Niederösterreich,Amstetten,9327,http://www.st-valentin.gv.at
+68,Neusiedl am See,Burgenland,Neusiedl am See,8945,https://www.neusiedlamsee.at/gemeinde
+69,Fürstenfeld,Steiermark,Hartberg-Fürstenfeld,8902,https://www.fuerstenfeld.gv.at
+70,Maria Enzersdorf,Niederösterreich,Mödling,8791,http://www.maria-enzersdorf.gv.at
+71,Kalsdorf bei Graz,Steiermark,Graz-Umgebung,8662,http://www.kalsdorfbeigraz.at
+72,Stainz,Steiermark,Deutschlandsberg,8656,http://www.stainz.gv.at
+73,Kindberg,Steiermark,Bruck-Mürzzuschlag,8399,http://www.kindberg.gv.at
+74,Gratkorn,Steiermark,Graz-Umgebung,8310,https://www.gratkorn.gv.at
+75,Liezen,Steiermark,Liezen,8211,https://www.liezen.at
+76,Himberg,Niederösterreich,Bruck/Leitha,8192,http://www.himberg.gv.at
+77,Wattens,Tirol,Innsbruck-Land,8113,https://www.hall-wattens.at
+78,Oberwart,Burgenland,Oberwart,8019,http://www.oberwart.gv.at
+79,Herzogenburg,Niederösterreich,St. Pölten (Land),7963,http://www.herzogenburg.gv.at
+80,Mürzzuschlag,Steiermark,Bruck-Mürzzuschlag,7919,http://www.muerzzuschlag.gv.at
+81,Vorchdorf,Oberösterreich,Gmunden,7769,http://www.vorchdorf.at
+82,Pottendorf,Niederösterreich,Baden,7681,http://www.pottendorf.gv.at
+83,Jenbach,Tirol,Schwaz,7600,http://www.jenbach.at
+84,Fohnsdorf,Steiermark,Murtal,7585,http://www.fohnsdorf.at
+85,Mattersburg,Burgenland,Mattersburg,7527,http://www.mattersburg.gv.at
+86,Langenlois,Niederösterreich,Krems (Land),7490,http://www.langenlois.gv.at
+87,Grödig,Salzburg,Salzburg-Umgebung,7385,http://www.groedig.gv.at
+88,Hitzendorf,Steiermark,Graz-Umgebung,7360,http://www.hitzendorf.gv.at
+89,Feldkirchen bei Graz,Steiermark,Graz-Umgebung,7287,https://www.feldkirchen-graz.at
+90,Eggersdorf bei Graz,Steiermark,Graz-Umgebung,7243,http://www.eggersdorf.at
+91,Arnoldstein,Kärnten,Villach-Land,7143,http://www.arnoldstein.gv.at
+92,Zeltweg,Steiermark,Murtal,7076,http://www.zeltweg.gv.at
+93,Kremsmünster,Oberösterreich,Kirchdorf/Krems,7060,http://www.kremsmuenster.gv.at
+94,Asten,Oberösterreich,Linz-Land,7058,http://www.asten.at
+95,Hainburg a.d. Donau,Niederösterreich,Bruck/Leitha,7033,http://www.hainburg.at
+96,Altach,Vorarlberg,Feldkirch,6999,http://www.altach.at
+97,Seeboden am Millstätter See,Kärnten,Spittal an der Drau,6722,https://www.seeboden.at
+98,Hartberg,Steiermark,Hartberg-Fürstenfeld,6713,http://www.hartberg.at
+99,Bad Hofgastein,Salzburg,St. Johann/Pongau,6703,http://www.badhofgastein.salzburg.at
+100,Gallneukirchen,Oberösterreich,Urfahr-Umgebung,6689,http://www.gallneukirchen.at
+101,Frastanz,Vorarlberg,Feldkirch,6669,http://www.frastanz.at
+102,Lochau,Vorarlberg,Bregenz,6645,http://www.lochau.at
+103,Schladming,Steiermark,Liezen,6548,https://gemeinde.schladming.at
+104,Hörsching,Oberösterreich,Linz-Land,6522,http://www.hoersching.at
+105,Horn,Niederösterreich,Horn,6505,http://www.horn.gv.at
+106,Sankt Barbara im Mürztal,Steiermark,Bruck-Mürzzuschlag,6444,https://www.st-barbara.gv.at
+107,St. Florian,Oberösterreich,Linz-Land,6318,http://www.st-florian.at
+108,Eibiswald,Steiermark,Deutschlandsberg,6301,http://www.eibiswald.gv.at
+109,Oberndorf bei Salzburg,Salzburg,Salzburg-Umgebung,6097,http://www.oberndorf.co.at
+110,Abtenau,Salzburg,Hallein,6041,http://www.abtenau.at
+111,Timelkam,Oberösterreich,Vöcklabruck,6010,http://www.timelkam.at
+112,Pöllau,Steiermark,Hartberg-Fürstenfeld,5931,http://www.poellau.at
+113,Eberndorf,Kärnten,Völkermarkt,5914,http://www.eberndorf.at
+114,Bergheim,Salzburg,Salzburg-Umgebung,5853,https://www.bergheim.at
+115,Gloggnitz,Niederösterreich,Neunkirchen,5828,http://www.gloggnitz.at
+116,Bärnbach,Steiermark,Voitsberg,5816,http://www.baernbach.gv.at
+117,Hopfgarten im Brixental,Tirol,Kitzbühel,5793,https://www.hopfgarten.tirol.gv.at
+118,Bad Hall,Oberösterreich,Steyr-Land,5768,http://www.bad-hall.at
+119,Radenthein,Kärnten,Spittal an der Drau,5756,http://www.radenthein.gv.at
+120,Sankt Ruprecht an der Raab,Steiermark,Weiz,5668,https://www.st.ruprecht.at/startseite.html
+121,Ybbs an der Donau,Niederösterreich,Melk,5644,https://www.ybbs.gv.at
+122,Lieboch,Steiermark,Graz-Umgebung,5581,https://www.lieboch.gv.at
+123,Pregarten,Oberösterreich,Freistadt,5567,https://pregarten.at
+124,Thalheim bei Wels,Oberösterreich,Wels-Land,5548,http://www.thalheim.at
+125,Leopoldsdorf,Niederösterreich,Bruck/Leitha,5476,http://www.leopoldsdorf.gv.at
+126,Sollenau,Niederösterreich,Wiener Neustadt (Land),5455,http://www.sollenau.noe.gv.at
+127,Schärding,Oberösterreich,Schärding,5414,https://www.schaerding.ooe.gv.at
+128,Pettenbach,Oberösterreich,Kirchdorf/Krems,5383,http://www.pettenbach.at
+129,Spielberg,Steiermark,Murtal,5349,http://www.spielberg.gv.at
+130,Parndorf,Burgenland,Neusiedl am See,5331,http://www.gemeinde-parndorf.at
+131,Kirchberg in Tirol,Tirol,Kitzbühel,5320,https://www.kirchberg-tirol.gv.at
+132,Rohrbach-Berg,Oberösterreich,Rohrbach,5295,http://www.rohrbach-berg.at
+133,Schrems,Niederösterreich,Gmünd,5263,http://www.schrems.gv.at
+134,Böheimkirchen,Niederösterreich,St. Pölten (Land),5243,http://www.boeheimkirchen.gv.at
+135,Stadl-Paura,Oberösterreich,Wels-Land,5232,http://www.stadl-paura.at
+136,Bad Gleichenberg,Steiermark,Südoststeiermark,5227,http://www.bad-gleichenberg.gv.at
+137,Waidhofen an der Thaya,Niederösterreich,Waidhofen/Thaya,5206,https://www.waidhofen-thaya.gv.at
+138,Grieskirchen,Oberösterreich,Grieskirchen,5182,http://www.grieskirchen.at
+139,Henndorf am Wallersee,Salzburg,Salzburg-Umgebung,5167,http://www.henndorf.at
+140,Gmünd,Niederösterreich,Gmünd,5146,http://www.gmuend.at
+141,Lengau,Oberösterreich,Braunau/Inn,5127,http://www.gemeindelengau.at
+142,Mittelberg,Vorarlberg,Bregenz,5108,https://www.gde-mittelberg.at
+143,Gablitz,Niederösterreich,St. Pölten (Land),5105,https://www.gablitz.gv.at
+144,Altheim,Oberösterreich,Braunau/Inn,5055,https://www.altheim.ooe.gv.at
+145,Eggendorf,Niederösterreich,Wiener Neustadt (Land),5046,https://www.eggendorf.at
+146,Rottenmann,Steiermark,Liezen,5027,http://www.rottenmann.gv.at
+147,Wöllersdorf-Steinabrückl,Niederösterreich,Wiener Neustadt (Land),5006,http://www.woellersdorf-steinabrueckl.gv.at
+148,Neustift im Stubaital,Tirol,Innsbruck-Land,5006,https://www.neustift.tirol.gv.at
+149,Riegersburg,Steiermark,Südoststeiermark,5005,http://www.riegersburg.gv.at
+150,Bad Aussee,Steiermark,Liezen,5002,https://ausseerland.salzkammergut.at
+151,Raaba-Grambach,Steiermark,Graz-Umgebung,4983,http://www.raaba-grambach.gv.at
+152,Birkfeld,Steiermark,Weiz,4975,http://www.birkfeld.at
+153,Neudörfl,Burgenland,Mattersburg,4971,http://www.neudoerfl.gv.at
+154,Bad Mitterndorf,Steiermark,Liezen,4935,http://www.bad.co.at
+155,Längenfeld,Tirol,Imst,4927,http://www.gemeinde-laengenfeld.at
+156,Ober-Grafendorf,Niederösterreich,St. Pölten (Land),4922,https://gemeinde.ober-grafendorf.at
+157,Admont,Steiermark,Liezen,4906,https://www.admont.at
+158,Haiming,Tirol,Imst,4900,https://www.haiming.gv.at
+159,Koblach,Vorarlberg,Feldkirch,4896,http://www.koblach.at
+160,Bisamberg,Niederösterreich,Korneuburg,4877,http://www.bisamberg.gv.at
+161,Eichgraben,Niederösterreich,St. Pölten (Land),4793,https://eichgraben.gv.at
+162,Wieselburg,Niederösterreich,Scheibbs,4785,http://www.wieselburg.gv.at
+163,Ottensheim,Oberösterreich,Urfahr-Umgebung,4771,http://www.ottensheim.at
+164,Altenberg bei Linz,Oberösterreich,Urfahr-Umgebung,4741,https://www.altenberg.at
+165,Altenmarkt im Pongau,Salzburg,St. Johann/Pongau,4708,https://www.altenmarkt.at
+166,Puchenau,Oberösterreich,Urfahr-Umgebung,4663,https://www.puchenau.at
+167,Kirchberg an der Raab,Steiermark,Südoststeiermark,4634,https://www.kirchberg-raab.gv.at
+168,Treffen am Ossiacher See,Kärnten,Villach-Land,4601,http://www.treffen.at
+169,Fieberbrunn,Tirol,Kitzbühel,4591,https://www.fieberbrunn.gv.at
+170,Volders,Tirol,Innsbruck-Land,4585,https://www.volders.gv.at
+171,Bad Schallerbach,Oberösterreich,Grieskirchen,4540,https://www.bad-schallerbach.at
+172,Wartberg ob der Aist,Oberösterreich,Freistadt,4505,https://www.wartberg-aist.at
+173,Sinabelkirchen,Steiermark,Weiz,4485,https://www.sinabelkirchen.gv.at
+174,Golling an der Salzach,Salzburg,Hallein,4464,http://www.golling.at
+175,Deutschfeistritz,Steiermark,Graz-Umgebung,4464,http://www.deutschfeistritz.gv.at
+176,Sankt Veit in der Südsteiermark,Steiermark,Leibnitz,4462,https://www.sankt-veit.at
+177,Bad Leonfelden,Oberösterreich,Urfahr-Umgebung,4433,https://www.bad-leonfelden.ooe.gv.at
+178,Pinsdorf,Oberösterreich,Gmunden,4381,http://www.pinsdorf.at
+179,Passail,Steiermark,Weiz,4379,http://www.passail.gv.at
+180,Wildschönau,Tirol,Kufstein,4377,http://www.wildschoenau.gv.at
+181,Thaur,Tirol,Innsbruck-Land,4369,https://www.thaur.gv.at
+182,Ried in der Riedmark,Oberösterreich,Perg,4353,https://www.ried-riedmark.at
+183,Söding-Sankt Johann,Steiermark,Voitsberg,4324,http://www.soeding.at
+184,Luftenberg an der Donau,Oberösterreich,Perg,4319,http://www.luftenberg.at
+185,Wies,Steiermark,Deutschlandsberg,4286,https://www.wies.at
+186,Bad St. Leonhard im Lavanttal,Kärnten,Wolfsberg,4265,http://www.bad-st-leonhard-i-lav.at
+187,Retz,Niederösterreich,Hollabrunn,4253,http://www.retz.gv.at
+188,Gössendorf,Steiermark,Graz-Umgebung,4237,http://www.goessendorf.at
+189,Theresienfeld,Niederösterreich,Wiener Neustadt (Land),4218,https://www.theresienfeld.gv.at
+190,Mäder,Vorarlberg,Feldkirch,4217,https://maeder.at
+191,St. Margarethen an der Raab,Steiermark,Weiz,4209,https://www.st-margarethen-raab.at
+192,Irdning-Donnersbachtal,Steiermark,Liezen,4202,http://www.irdning-donnersbachtal.gv.at
+193,Tiefgraben,Oberösterreich,Vöcklabruck,4200,http://www.tiefgraben.at
+194,Zwentendorf an der Donau,Niederösterreich,Tulln,4195,http://www.zwentendorf-donau.gv.at
+195,Götzens,Tirol,Innsbruck-Land,4188,http://www.goetzens.gv.at
+196,Jennersdorf,Burgenland,Jennersdorf,4168,https://www.jennersdorf.eu
+197,Schalchen,Oberösterreich,Braunau/Inn,4154,http://www.schalchen.at
+198,Gaweinstal,Niederösterreich,Mistelbach,4134,http://www.gaweinstal.at
+199,Ottnang am Hausruck,Oberösterreich,Vöcklabruck,4114,http://www.ottnang.at
+200,Inzing,Tirol,Innsbruck-Land,4112,https://www.inzing.gv.at
+201,Buchkirchen,Oberösterreich,Wels-Land,4110,http://www.buchkirchen.at
+202,Sankt Gilgen,Salzburg,Salzburg-Umgebung,4072,http://www.gemgilgen.at
+203,Bramberg am Wildkogel,Salzburg,Zell am See,4062,http://www.bramberg.at
+204,Bleiburg,Kärnten,Völkermarkt,3989,http://www.bleiburg.gv.at
+205,Anger,Steiermark,Weiz,3988,http://www.anger.gv.at
+206,Mondsee,Oberösterreich,Vöcklabruck,3981,http://www.gemeinde-mondsee.at
+207,Fußach,Vorarlberg,Bregenz,3977,http://www.fussach.at
+208,Mayrhofen,Tirol,Schwaz,3975,https://www.mayrhofen.gv.at
+209,Bad Waltersdorf,Steiermark,Hartberg-Fürstenfeld,3948,http://www.bad-waltersdorf.gv.at
+210,Langenwang,Steiermark,Bruck-Mürzzuschlag,3901,http://www.langenwang.at
+211,Hinterbrühl,Niederösterreich,Mödling,3895,http://www.hinterbruehl.gv.at
+212,Loosdorf,Niederösterreich,Melk,3890,http://www.loosdorf.gv.at
+213,Waizenkirchen,Oberösterreich,Grieskirchen,3881,http://www.waizenkirchen.at
+214,Piesendorf,Salzburg,Zell am See,3863,https://www.piesendorf.salzburg.at
+215,Pischelsdorf am Kulm,Steiermark,Weiz,3862,http://www.pischelsdorf-kulm.gv.at
+216,Lambach,Oberösterreich,Wels-Land,3856,https://www.lambach.at
+217,Steindorf am Ossiacher See,Kärnten,Feldkirchen,3850,http://www.steindorf.gv.at
+218,Grünburg,Oberösterreich,Kirchdorf/Krems,3840,http://www.gruenburg.at
+219,Kirchberg am Wagram,Niederösterreich,Tulln,3830,https://www.kirchberg-am-wagram.at
+220,Gföhl,Niederösterreich,Krems (Land),3814,http://www.gfoehl.gv.at
+221,Sankt Stefan im Rosental,Steiermark,Südoststeiermark,3788,http://www.rosental.at
+222,Obdach,Steiermark,Murtal,3783,https://www.obdach.gv.at
+223,Ilz,Steiermark,Hartberg-Fürstenfeld,3778,http://www.ilz.gv.at
+224,Hausmannstätten,Steiermark,Graz-Umgebung,3777,http://www.hausmannstaetten.gv.at
+225,Dobl-Zwaring,Steiermark,Graz-Umgebung,3767,http://www.dobl-zwaring.gv.at
+226,Heidenreichstein,Niederösterreich,Gmünd,3735,http://www.heidenreichstein.gv.at
+227,Kittsee,Burgenland,Neusiedl am See,3727,http://www.kittsee.at
+228,Haidershofen,Niederösterreich,Amstetten,3710,http://www.haidershofen.gv.at
+229,Strobl,Salzburg,Salzburg-Umgebung,3690,http://www.gemeinde-strobl.at
+230,Gramatneusiedl,Niederösterreich,Bruck/Leitha,3677,http://www.gramatneusiedl.gv.at
+231,Sonntagberg,Niederösterreich,Amstetten,3674,http://www.sonntagberg.gv.at
+232,Lannach,Steiermark,Deutschlandsberg,3668,http://www.lannach.gv.at
+233,Zams,Tirol,Landeck,3642,http://www.zams.gv.at
+234,Molln,Oberösterreich,Kirchdorf/Krems,3640,http://www.molln.at
+235,Seefeld in Tirol,Tirol,Innsbruck-Land,3639,http://www.seefeld-tirol.at
+236,Neufeld an der Leitha,Burgenland,Eisenstadt-Umgebung,3621,https://www.neufeld.at
+237,Ardagger,Niederösterreich,Amstetten,3620,http://www.ardagger.gv.at
+238,Münster,Tirol,Kufstein,3604,https://www.muenster.at
+239,Enzersdorf an der Fischa,Niederösterreich,Bruck/Leitha,3601,http://www.enzersdorf-fischa.gv.at
+240,Großpetersdorf,Burgenland,Oberwart,3598,http://www.grosspetersdorf.at
+241,Pyhra,Niederösterreich,St. Pölten (Land),3593,http://www.pyhra.gv.at
+242,Güssing,Burgenland,Güssing,3590,http://www.guessing.co.at
+243,Sankt Michael im Lungau,Salzburg,Tamsweg,3573,https://www.sankt-michael.at
+244,Matrei am Brenner,Tirol,Innsbruck-Land,3556,http://www.matrei-brenner.tirol.gv.at
+245,Leutschach an der Weinstraße,Steiermark,Leibnitz,3536,http://www.leutschach-weinstrasse.gv.at
+246,Kronstorf,Oberösterreich,Linz-Land,3528,http://www.kronstorf.at
+247,Bad Fischau-Brunn,Niederösterreich,Wiener Neustadt (Land),3525,https://www.bad-fischau-brunn.gv.at
+248,Eben am Achensee,Tirol,Schwaz,3518,https://www.eben.at
+249,Eggenburg,Niederösterreich,Horn,3508,http://www.eggenburg.gv.at
+250,Mureck,Steiermark,Südoststeiermark,3508,http://www.mureck.gv.at
+251,Behamberg,Niederösterreich,Amstetten,3465,http://www.behamberg.gv.at
+252,Atzenbrugg,Niederösterreich,Tulln,3465,http://www.atzenbrugg.gv.at
+253,Straden,Steiermark,Südoststeiermark,3450,http://www.straden.gv.at
+254,Dietach,Oberösterreich,Steyr-Land,3432,http://www.dietach.at
+255,Zwischenwasser,Vorarlberg,Feldkirch,3423,http://www.zwischenwasser.at
+256,Traisen,Niederösterreich,Lilienfeld,3415,http://www.traisen.at
+257,Ampflwang im Hausruckwald,Oberösterreich,Vöcklabruck,3412,http://www.ampflwang.at
+258,Ostermiething,Oberösterreich,Braunau/Inn,3407,http://www.ostermiething.at
+259,Hochburg-Ach,Oberösterreich,Braunau/Inn,3405,http://www.hochburg-ach.at
+260,Griffen,Kärnten,Völkermarkt,3393,http://www.griffen.gv.at
+261,Nußdorf-Debant,Tirol,Lienz,3387,http://www.nussdorf-debant.at
+262,Seitenstetten,Niederösterreich,Amstetten,3379,http://www.seitenstetten.gv.at
+263,Ziersdorf,Niederösterreich,Hollabrunn,3373,http://www.ziersdorf.gv.at
+264,Ybbsitz,Niederösterreich,Amstetten,3350,http://www.ybbsitz.gv.at
+265,Kötschach-Mauthen,Kärnten,Hermagor,3341,http://www.koetschach-mauthen.gv.at
+266,Oberpullendorf,Burgenland,Oberpullendorf,3327,http://www.oberpullendorf.gv.at
+267,Tulbing,Niederösterreich,Tulln,3315,https://www.tulbing.at
+268,Hornstein,Burgenland,Eisenstadt-Umgebung,3312,http://www.hornstein.at
+269,Trieben,Steiermark,Liezen,3306,https://www.trieben.net
+270,Kematen in Tirol,Tirol,Innsbruck-Land,3304,https://www.kematen.at
+271,Aigen-Schlägl,Oberösterreich,Rohrbach,3267,http://www.aigen-schlaegl.at
+272,Alberschwende,Vorarlberg,Bregenz,3265,http://www.alberschwende.at
+273,Krenglbach,Oberösterreich,Wels-Land,3254,http://www.krenglbach.at
+274,Siegendorf,Burgenland,Eisenstadt-Umgebung,3247,http://www.siegendorf.gv.at
+275,Neumarkt im Mühlkreis,Oberösterreich,Freistadt,3241,https://www.neumarkt-muehlkreis.ooe.gv.at
+276,Oberneukirchen,Oberösterreich,Urfahr-Umgebung,3229,http://www.oberneukirchen.at
+277,Bad Radkersburg,Steiermark,Südoststeiermark,3227,https://www.bad-radkersburg.gv.at
+278,St. Ulrich bei Steyr,Oberösterreich,Steyr-Land,3215,https://www.st-ulrich.at
+279,Frauental an der Laßnitz,Steiermark,Deutschlandsberg,3213,https://www.gde-frauental.at
+280,Göllersdorf,Niederösterreich,Hollabrunn,3212,http://www.goellersdorf.at
+281,Stallhofen,Steiermark,Voitsberg,3211,http://www.stallhofen.gv.at
+282,Semriach,Steiermark,Graz-Umgebung,3202,http://www.semriach.at
+283,Gröbming,Steiermark,Liezen,3202,http://www.groebming.at
+284,Gamlitz,Steiermark,Leibnitz,3195,http://www.gamlitz.at
+285,Kirchbach-Zerlach,Steiermark,Südoststeiermark,3189,https://www.kirchbach-zerlach.at
+286,Deutschkreutz,Burgenland,Oberpullendorf,3166,http://www.deutschkreutz.at
+287,Arzl im Pitztal,Tirol,Imst,3160,http://www.arzl-pitztal.at
+288,Kirchberg an der Pielach,Niederösterreich,St. Pölten (Land),3142,https://www.kirchberg-pielach.at
+289,Markt Piesting,Niederösterreich,Wiener Neustadt (Land),3139,http://www.piesting.at
+290,Ebenfurth,Niederösterreich,Wiener Neustadt (Land),3134,https://www.ebenfurth.at
+291,Wallern an der Trattnach,Oberösterreich,Grieskirchen,3123,http://www.wallern.at
+292,Gampern,Oberösterreich,Vöcklabruck,3119,http://www.gampern.at
+293,Sölden,Tirol,Imst,3110,https://www.soelden.tirol.gv.at
+294,Oberperfuss,Tirol,Innsbruck-Land,3106,http://www.gemeinde-oberperfuss.at
+295,Pinggau,Steiermark,Hartberg-Fürstenfeld,3094,https://www.pinggau.gv.at
+296,Rauris,Salzburg,Zell am See,3086,http://www.rauris.co.at
+297,Werfen,Salzburg,St. Johann/Pongau,3080,http://www.werfen.at
+298,Schlüßlberg,Oberösterreich,Grieskirchen,3073,http://www.schluesslberg.ooe.gv.at
+299,Bruckneudorf,Burgenland,Neusiedl am See,3069,http://www.bruckneudorf.eu
+300,Neuhofen an der Ybbs,Niederösterreich,Amstetten,3069,http://www.neuhofen-ybbs.at
+301,Grafenstein,Kärnten,Klagenfurt-Land,3063,http://www.grafenstein.gv.at
+302,Laxenburg,Niederösterreich,Mödling,3060,https://www.laxenburg.at
+303,St. Leonhard am Forst,Niederösterreich,Melk,3053,http://www.st-leonhard-forst.gv.at
+304,Steinbrunn,Burgenland,Eisenstadt-Umgebung,3028,http://www.steinbrunn.at
+305,Hagenberg im Mühlkreis,Oberösterreich,Freistadt,3024,http://www.hagenberg.at
+306,Leopoldsdorf im Marchfelde,Niederösterreich,Gänserndorf,3018,https://www.leopoldsdorf.gv.at
+307,Munderfing,Oberösterreich,Braunau/Inn,3006,http://www.munderfing.at
+308,Kaindorf,Steiermark,Hartberg-Fürstenfeld,3003,http://www.kaindorf.gv.at
