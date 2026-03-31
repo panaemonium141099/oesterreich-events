@@ -1,6 +1,30 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
 
+/** Shape of event_data JSON stored in analytics_events rows */
+interface AnalyticsEventData {
+  event_id?: string;
+  event_title?: string;
+  query?: string;
+  results_count?: number;
+  filter_type?: string;
+  value?: string;
+  url?: string;
+  type?: string;
+  to?: string;
+  [key: string]: unknown;
+}
+
+/** Row shape returned by the analytics_events select query */
+interface AnalyticsRow {
+  event_type: string;
+  event_data: AnalyticsEventData;
+  page: string | null;
+  session_id: string | null;
+  user_id: string | null;
+  created_at: string;
+}
+
 export async function GET(request: NextRequest) {
   try {
     const supabase = await createServerSupabaseClient();
@@ -62,7 +86,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Query failed' }, { status: 500 });
     }
 
-    const allEvents = events || [];
+    const allEvents = (events || []) as AnalyticsRow[];
 
     // === Overview stats ===
     const pageViews = allEvents.filter(e => e.event_type === 'page_view');
@@ -110,13 +134,13 @@ export async function GET(request: NextRequest) {
 
     const clickCounts: Record<string, { title: string; clicks: number; saves: number }> = {};
     eventClicks.forEach(e => {
-      const id = (e.event_data as any)?.event_id || 'unknown';
-      const title = (e.event_data as any)?.event_title || 'Unbekannt';
+      const id = e.event_data?.event_id || 'unknown';
+      const title = e.event_data?.event_title || 'Unbekannt';
       if (!clickCounts[id]) clickCounts[id] = { title, clicks: 0, saves: 0 };
       clickCounts[id].clicks++;
     });
     eventSaves.forEach(e => {
-      const id = (e.event_data as any)?.event_id || 'unknown';
+      const id = e.event_data?.event_id || 'unknown';
       if (clickCounts[id]) clickCounts[id].saves++;
     });
 
@@ -128,11 +152,11 @@ export async function GET(request: NextRequest) {
     // === Top searches ===
     const searchCounts: Record<string, { count: number; totalResults: number }> = {};
     searches.forEach(e => {
-      const query = ((e.event_data as any)?.query || '').toLowerCase().trim();
+      const query = (e.event_data?.query || '').toLowerCase().trim();
       if (!query) return;
       if (!searchCounts[query]) searchCounts[query] = { count: 0, totalResults: 0 };
       searchCounts[query].count++;
-      searchCounts[query].totalResults += (e.event_data as any)?.results_count || 0;
+      searchCounts[query].totalResults += e.event_data?.results_count || 0;
     });
 
     const topSearches = Object.entries(searchCounts)
@@ -148,8 +172,8 @@ export async function GET(request: NextRequest) {
     const filterChanges = allEvents.filter(e => e.event_type === 'filter_change');
     const filterCounts: Record<string, number> = {};
     filterChanges.forEach(e => {
-      const filterType = (e.event_data as any)?.filter_type || 'unknown';
-      const value = (e.event_data as any)?.value || '';
+      const filterType = e.event_data?.filter_type || 'unknown';
+      const value = e.event_data?.value || '';
       const key = `${filterType}: ${value}`;
       filterCounts[key] = (filterCounts[key] || 0) + 1;
     });
@@ -193,7 +217,7 @@ export async function GET(request: NextRequest) {
     const linkClicks = allEvents.filter(e => e.event_type === 'link_click');
     const domainCounts: Record<string, { count: number; events: Set<string> }> = {};
     linkClicks.forEach(e => {
-      const url = (e.event_data as any)?.url || '';
+      const url = e.event_data?.url || '';
       let domain: string;
       try {
         domain = new URL(url).hostname;
@@ -202,7 +226,7 @@ export async function GET(request: NextRequest) {
       }
       if (!domainCounts[domain]) domainCounts[domain] = { count: 0, events: new Set() };
       domainCounts[domain].count++;
-      const eventTitle = (e.event_data as any)?.event_title || '';
+      const eventTitle = e.event_data?.event_title || '';
       if (eventTitle) domainCounts[domain].events.add(eventTitle);
     });
 
@@ -219,21 +243,21 @@ export async function GET(request: NextRequest) {
     const funnelPageViews = pageViews.length;
     const funnelClicks = eventClicks.length;
     const funnelSaves = eventSaves.length;
-    const funnelLinks = linkClicks.filter(e => (e.event_data as any)?.type === 'ticket').length;
+    const funnelLinks = linkClicks.filter(e => e.event_data?.type === 'ticket').length;
 
     // === Bundesland heatmap ===
     const blSwitches = allEvents.filter(e => e.event_type === 'bundesland_switch');
     const blCounts: Record<string, number> = {};
     blSwitches.forEach(e => {
-      const to = (e.event_data as any)?.to || '';
+      const to = e.event_data?.to || '';
       if (to) blCounts[to] = (blCounts[to] || 0) + 1;
     });
 
     // Also count page views with bundesland data from filter changes
     const blViewCounts: Record<string, number> = {};
     filterChanges.forEach(e => {
-      if ((e.event_data as any)?.filter_type === 'bundesland') {
-        const bl = (e.event_data as any)?.value || '';
+      if (e.event_data?.filter_type === 'bundesland') {
+        const bl = e.event_data?.value || '';
         if (bl) blViewCounts[bl] = (blViewCounts[bl] || 0) + 1;
       }
     });

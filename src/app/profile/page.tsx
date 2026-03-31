@@ -119,7 +119,7 @@ export default function ProfilePage() {
             )}
           </div>
           <h1 className="text-xl font-semibold">{firstName} {lastName}</h1>
-          <p className="text-sm text-white/40">{user.email}</p>
+          <p className="text-sm text-white/40">{user?.email}</p>
           {profile?.role !== 'user' && (
             <span className="mt-2 px-3 py-0.5 rounded-full text-xs bg-amber-400/20 text-amber-400 font-medium">
               {profile?.role === 'god' ? <><CrownIcon size={14} className="inline-block mr-1 -mt-0.5" /> God Mode</> : profile?.role === 'admin' ? <><BoltIcon size={14} className="inline-block mr-1 -mt-0.5" /> Admin</> : <><BuildingIcon size={14} className="inline-block mr-1 -mt-0.5" /> Business</>}

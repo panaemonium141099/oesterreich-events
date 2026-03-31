@@ -29,9 +29,8 @@ Set up Vitest test infrastructure for the Next.js 16 + React 19 project. No test
 - [ ] At least one smoke test passes
 - [ ] `npm run test:coverage` generates coverage report
 ## Done summary
-TBD
-
+Set up Vitest test infrastructure with vitest.config.ts, test setup with jest-dom matchers, Supabase client mock (thenable query builder), and Next.js navigation mock (with useParams/setMockParams). Added test/test:watch/test:coverage scripts and 7 smoke tests verifying all infrastructure works.
 ## Evidence
-- Commits:
-- Tests:
+- Commits: 7f5a9f8, e9d471e
+- Tests: npm test, npm run test:coverage
 - PRs:

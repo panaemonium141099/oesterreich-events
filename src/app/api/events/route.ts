@@ -2,9 +2,13 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import type { EventFilters } from '@/types/events';
 
+if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
+  throw new Error('SUPABASE_SERVICE_ROLE_KEY is required — refusing to fall back to anon key which bypasses RLS');
+}
+
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  process.env.SUPABASE_SERVICE_ROLE_KEY
 );
 
 export async function GET(request: NextRequest) {
@@ -46,11 +50,11 @@ export async function GET(request: NextRequest) {
   if (offset) filters.offset = parseInt(offset, 10);
 
   try {
-    // Build the query
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // Build the query — use untyped Supabase client (no Database generic),
+    // so the chained filter methods return Record<string, unknown> rows
     let query = supabase
       .from('events')
-      .select('id, title, description, start_date, end_date, location_name, address, postal_code, district, bundesland, latitude, longitude, category, image_url, price_text, price_min, price_max, source_name, source_url, organizer, visibility', { count: 'exact' }) as any;
+      .select('id, title, description, start_date, end_date, location_name, address, postal_code, district, bundesland, latitude, longitude, category, image_url, price_text, price_min, price_max, source_name, source_url, organizer, visibility', { count: 'exact' });
 
     // Only show public events (scraped events default to 'public')
     query = query.or('visibility.eq.public,visibility.is.null');
@@ -81,13 +85,16 @@ export async function GET(request: NextRequest) {
     }
 
     if (filters.search) {
-      // Sanitize search input: strip PostgREST special characters to prevent filter injection
-      const sanitizedSearch = filters.search.replace(/[,.*()]/g, '').trim();
+      // Sanitize search input: strip PostgREST special characters and SQL wildcards
+      // to prevent filter injection and unintended ILIKE pattern matching
+      const sanitizedSearch = filters.search.replace(/[,.*()%_\\]/g, '').trim();
       if (sanitizedSearch) {
         query = query.or(`title.ilike.%${sanitizedSearch}%,location_name.ilike.%${sanitizedSearch}%,description.ilike.%${sanitizedSearch}%`);
       }
     }
 
+    // Price filters intentionally include events with null prices (free/unpriced events)
+    // so users searching by price range still see free events in results
     if (filters.priceMin !== undefined) {
       query = query.or(`price_min.gte.${filters.priceMin},price_min.is.null`);
     }
@@ -122,8 +129,7 @@ export async function GET(request: NextRequest) {
     // Client-side evening filter (events starting at 17:00 or later)
     let filteredEvents = events || [];
     if (filters.eveningOnly) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      filteredEvents = filteredEvents.filter((event: any) => {
+      filteredEvents = filteredEvents.filter((event: Record<string, unknown>) => {
         const startDate = String(event.start_date || '');
         if (!startDate) return false;
         if (!startDate.includes('T')) return true;
