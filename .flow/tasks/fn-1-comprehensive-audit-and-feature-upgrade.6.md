@@ -29,9 +29,8 @@ Fix `BaseScraper.extractImageUrl()` which currently returns `undefined` uncondit
 - [ ] Fallback chain documented: event image → category fallback → generic
 - [ ] `npm run build` succeeds
 ## Done summary
-TBD
-
+Implemented BaseScraper.extractImageUrl() with multi-source extraction (og:image, twitter:image, JSON-LD, scored img tags), added validateImageUrl() HEAD-request validator, extended cleanImageUrl() with 20+ additional placeholder patterns, and consolidated next.config.ts remotePatterns under 50 entries using a broad **.at wildcard. Documented full scraper image source inventory in categoryImages.ts.
 ## Evidence
-- Commits:
-- Tests:
+- Commits: b0360583a33b4b6c48ce523a303b145b3f2f65d9
+- Tests: npx vitest run, npm run build
 - PRs:
