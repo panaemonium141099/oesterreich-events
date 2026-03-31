@@ -1,59 +1,68 @@
 import type { NextConfig } from 'next';
 
+/**
+ * Remote image patterns for Next.js Image component.
+ *
+ * Consolidated to stay within the 50-pattern limit.
+ * Austrian domains (**.at) are covered by a single broad wildcard since
+ * the vast majority of scraper sources are Austrian websites.
+ * Other TLDs are listed individually or grouped where possible.
+ */
 const nextConfig: NextConfig = {
   images: {
     remotePatterns: [
+      // Unsplash (category fallback images)
       { protocol: 'https', hostname: 'images.unsplash.com' },
+      // Google (user-uploaded content)
       { protocol: 'https', hostname: 'lh3.googleusercontent.com' },
+      // Supabase storage
       { protocol: 'https', hostname: '**.supabase.co' },
-      { protocol: 'https', hostname: '**.burgenland.info' },
-      { protocol: 'https', hostname: '**.eventim.at' },
-      { protocol: 'https', hostname: '**.oeticket.com' },
-      { protocol: 'https', hostname: '**.meinbezirk.at' },
-      { protocol: 'https', hostname: '**.events.at' },
+
+      // Austrian domains (.at) — broad wildcard covers all *.at scraper sources
+      // Includes: burgenland.at, esterhazy.at, falter.at, eventim.at, oeticket.at,
+      // flex.at, fluc.at, u4.at, partytimer.at, ganz-wien.at, posthof.at,
+      // linztermine.at, rockhouse.at, mayrhofen.at, stubaital.at, tirol.at,
+      // basilika-mariazell.at, mariazell.at, basiskultur.at, oho.at, b72.at,
+      // otbrauerei.at, salzkammergut.at, zillertal.at, nassfeld.at, graztourismus.at,
+      // schladming-dachstein.at, serfaus-fiss-ladis.at, meinbezirk.at, events.at,
+      // popculture.at, kultur.graz.at, camera-club.at, volksgarten.at, praterdome.at,
+      // wuk.at, gv.at (Gemeinde), etc.
+      { protocol: 'https', hostname: '**.at' },
+      { protocol: 'http', hostname: '**.at' },
+
+      // .wien TLD (Vienna venues: arena.wien, rhiz.wien, cafeleopold.wien)
+      { protocol: 'https', hostname: '**.wien' },
+
+      // .com domains (international & tourism portals)
+      { protocol: 'https', hostname: '**.ticketmaster.com' },
       { protocol: 'https', hostname: '**.feverup.com' },
       { protocol: 'https', hostname: '**.stadthalle.com' },
       { protocol: 'https', hostname: '**.praterwien.com' },
-      { protocol: 'https', hostname: '**.partytimer.at' },
-      { protocol: 'https', hostname: '**.wien.info' },
       { protocol: 'https', hostname: '**.grelleforelle.com' },
-      { protocol: 'https', hostname: '**.flex.at' },
-      { protocol: 'https', hostname: '**.pratersauna.tv' },
-      { protocol: 'https', hostname: '**.praterdome.at' },
-      { protocol: 'https', hostname: '**.volksgarten.at' },
-      { protocol: 'https', hostname: '**.fluc.at' },
-      { protocol: 'https', hostname: '**.daswerk.org' },
-      { protocol: 'https', hostname: '**.sassvienna.com' },
-      { protocol: 'https', hostname: '**.camera-club.at' },
-      { protocol: 'https', hostname: '**.u4.at' },
-      { protocol: 'https', hostname: '**.falter.at' },
       { protocol: 'https', hostname: '**.neusiedlersee.com' },
-      { protocol: 'https', hostname: '**.ticketmaster.com' },
-      { protocol: 'https', hostname: '**.ticketmaster.at' },
-      { protocol: 'https', hostname: '**.kaernten.live' },
-      { protocol: 'https', hostname: '**.veranstaltungskalender.net' },
-      { protocol: 'https', hostname: '**.ganz-wien.at' },
-      { protocol: 'https', hostname: '**.posthof.at' },
-      { protocol: 'https', hostname: '**.kultur.graz.at' },
-      { protocol: 'https', hostname: '**.popculture.at' },
-      { protocol: 'https', hostname: '**.rockhouse.at' },
-      { protocol: 'https', hostname: '**.linztermine.at' },
-      { protocol: 'https', hostname: '**.burgenland.at' },
-      { protocol: 'https', hostname: '**.burgenland.info' },
       { protocol: 'https', hostname: '**.soelden.com' },
       { protocol: 'https', hostname: '**.oetztal.com' },
       { protocol: 'https', hostname: '**.ischgl.com' },
       { protocol: 'https', hostname: '**.saalbach.com' },
-      { protocol: 'https', hostname: '**.mayrhofen.at' },
       { protocol: 'https', hostname: '**.zellamsee-kaprun.com' },
-      { protocol: 'https', hostname: '**.stubaital.at' },
       { protocol: 'https', hostname: '**.bodensee-vorarlberg.com' },
-      { protocol: 'https', hostname: '**.events.tt' },
+      { protocol: 'https', hostname: '**.sassvienna.com' },
+      { protocol: 'https', hostname: '**.achensee.com' },
+      { protocol: 'https', hostname: '**.gastein.com' },
+      { protocol: 'https', hostname: '**.kitzbuehel.com' },
+      { protocol: 'https', hostname: '**.osttirol.com' },
+      { protocol: 'https', hostname: '**.szenewien.com' },
+      { protocol: 'https', hostname: '**.donau.com' },
+
+      // .net / .org / .tv / .info / .live / .travel
+      { protocol: 'https', hostname: '**.veranstaltungskalender.net' },
+      { protocol: 'https', hostname: '**.deskline.net' },
+      { protocol: 'https', hostname: '**.daswerk.org' },
+      { protocol: 'https', hostname: '**.pratersauna.tv' },
+      { protocol: 'https', hostname: '**.burgenland.info' },
+      { protocol: 'https', hostname: '**.kaernten.live' },
       { protocol: 'https', hostname: '**.vorarlberg.travel' },
-      { protocol: 'https', hostname: '**.esterhazy.at' },
-      // Generic GEM2GO Gemeinden (municipality sites have unpredictable domains)
-      { protocol: 'https', hostname: '**.gv.at' },
-      { protocol: 'http', hostname: '**.gv.at' },
+      { protocol: 'https', hostname: '**.events.tt' },
     ],
   },
   // better-sqlite3 only used by scraper scripts, not by API routes

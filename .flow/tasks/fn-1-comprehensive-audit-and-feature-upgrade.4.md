@@ -28,9 +28,8 @@ Extract duplicated code into shared utilities and remove dead dependencies. Key 
 - [ ] `npm run build` succeeds
 - [ ] No functional regression in date display or profile checks
 ## Done summary
-TBD
-
+Extracted duplicated date formatting (formatDate, formatTime, formatDateLong, etc.) into shared src/lib/utils/date.ts and isProfileComplete into src/lib/utils/profile.ts. Removed dead Leaflet dependencies (leaflet, react-leaflet, react-leaflet-cluster, @types/leaflet) and the unused EventMarker.tsx component.
 ## Evidence
-- Commits:
-- Tests:
+- Commits: 5d23755c9506fb0ab155eecc55a99fe81f3910d2
+- Tests: npm run build, npm test
 - PRs:
