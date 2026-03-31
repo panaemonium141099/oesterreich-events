@@ -34,7 +34,8 @@ const nextConfig: NextConfig = {
       // .wien TLD (Vienna venues: arena.wien, rhiz.wien, cafeleopold.wien)
       { protocol: 'https', hostname: '**.wien' },
 
-      // .com domains (international & tourism portals)
+      // .com domains — broad wildcard for scraped event images from arbitrary .com hosts
+      { protocol: 'https', hostname: '**.com' },
       { protocol: 'https', hostname: '**.ticketmaster.com' },
       { protocol: 'https', hostname: '**.feverup.com' },
       { protocol: 'https', hostname: '**.stadthalle.com' },

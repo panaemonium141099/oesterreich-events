@@ -73,15 +73,15 @@ function MapPageInner() {
   const [eveningMode, setEveningMode] = useState(false);
   const [bundesland, setBundesland] = useState<Bundesland>(initialBundesland);
 
-  // Viewport bounding box from map moveend/zoomend
-  const [mapBbox, setMapBbox] = useState<[number, number, number, number] | null>(null);
+  // Viewport bounding box — stored in a ref so viewport changes don't trigger re-fetches
+  const mapBboxRef = useRef<[number, number, number, number] | null>(null);
   const bboxDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Callback for EventMap to report viewport changes — debounced 300ms
+  // Callback for EventMap to report viewport changes — stored in ref, not state
   const handleViewportChange = useCallback((bbox: [number, number, number, number]) => {
     if (bboxDebounceRef.current) clearTimeout(bboxDebounceRef.current);
     bboxDebounceRef.current = setTimeout(() => {
-      setMapBbox(bbox);
+      mapBboxRef.current = bbox;
     }, 300);
   }, []);
 
@@ -103,9 +103,9 @@ function MapPageInner() {
     if (filters.search) params.set('search', filters.search);
     if (filters.eveningOnly) params.set('eveningOnly', 'true');
 
-    // Viewport-based loading: pass bounding box if available
-    if (mapBbox) {
-      params.set('bbox', mapBbox.join(','));
+    // Viewport-based loading: pass bounding box if available (read from ref, not state)
+    if (mapBboxRef.current) {
+      params.set('bbox', mapBboxRef.current.join(','));
     }
 
     // Use a large limit per page to minimize round-trips for map display
@@ -139,7 +139,7 @@ function MapPageInner() {
     } finally {
       setLoading(false);
     }
-  }, [filters, bundesland, mapBbox]);
+  }, [filters, bundesland]);
 
   useEffect(() => {
     fetchEvents();
