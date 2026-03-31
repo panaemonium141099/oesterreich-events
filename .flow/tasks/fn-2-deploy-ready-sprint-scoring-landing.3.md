@@ -29,9 +29,8 @@ Create a single `/api/stats/counts` endpoint returning all region and category e
 - [ ] Framer Motion viewport fade-in animation works (`viewport={{ once: true }}`)
 - [ ] `npm run build` passes
 ## Done summary
-TBD
-
+Added /api/stats/counts endpoint (single Supabase query, Cache-Control: public max-age=3600) and WeeklyHighlights landing component (CSS scroll-snap carousel fetching /api/events/featured, loading skeleton, empty state, Framer Motion viewport fade-in).
 ## Evidence
-- Commits:
-- Tests:
+- Commits: b22207abd0dfbfed621da9742f1e7609c48bbcb0
+- Tests: npm run build
 - PRs:
