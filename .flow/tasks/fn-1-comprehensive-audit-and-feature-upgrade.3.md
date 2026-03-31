@@ -30,9 +30,8 @@ Remove `ignoreBuildErrors: true` from next.config.ts, fix resulting TypeScript e
 - [ ] `src/types/database.ts` updated with all 22 Supabase tables
 - [ ] No `any` types in API route files
 ## Done summary
-TBD
-
+Removed ignoreBuildErrors from next.config.ts, fixed all TypeScript errors across the codebase (strict types for API routes, components, scrapers), addressed security issues (search sanitization, scrape auth). tsc --noEmit passes with 0 errors, build succeeds, all 7 tests pass.
 ## Evidence
 - Commits:
-- Tests:
+- Tests: 7/7 vitest pass, tsc --noEmit clean, npm run build success
 - PRs:
