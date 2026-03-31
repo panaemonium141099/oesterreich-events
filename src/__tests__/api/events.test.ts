@@ -198,16 +198,18 @@ describe('GET /api/events', () => {
 
     await GET(makeRequest({ limit: '20', offset: '40' }));
 
-    expect(query.range).toHaveBeenCalledWith(40, 59);
+    // API fetches limit+1 to detect next page, so fetchLimit=21, range(40, 40+21-1=60)
+    expect(query.range).toHaveBeenCalledWith(40, 60);
   });
 
-  it('uses default limit of 50000 when not specified', async () => {
+  it('uses default page size of 50 when not specified', async () => {
     const query = createChainableQuery({ data: [], error: null, count: 0 });
     mockFrom.mockReturnValue(query);
 
     await GET(makeRequest());
 
-    expect(query.range).toHaveBeenCalledWith(0, 49999);
+    // No offset → uses query.limit(fetchLimit) not range(); default page size is 50
+    expect(query.limit).toHaveBeenCalledWith(51);
   });
 
   it('returns 500 on Supabase query error', async () => {
@@ -226,22 +228,30 @@ describe('GET /api/events', () => {
   });
 
   describe('eveningOnly filter', () => {
-    it('filters events client-side for evening hours (>= 17:00)', async () => {
+    it('applies eveningOnly filter at DB level via .or() with LIKE patterns', async () => {
+      // Filtering is now done at DB level via PostgREST LIKE patterns, not client-side.
+      // Mock returns pre-filtered results (only evening events).
       const mockEvents = [
-        { id: '1', title: 'Morning Event', start_date: '2026-04-01T09:00:00' },
         { id: '2', title: 'Evening Event', start_date: '2026-04-01T19:00:00' },
         { id: '3', title: 'Late Event', start_date: '2026-04-01T22:00:00' },
       ];
-      const query = createChainableQuery({ data: mockEvents, error: null, count: 3 });
+      const query = createChainableQuery({ data: mockEvents, error: null, count: 2 });
       mockFrom.mockReturnValue(query);
 
       const response = await GET(makeRequest({ eveningOnly: 'true' }));
       const json = await response.json();
 
-      // Only evening events should remain
+      // DB already filtered — API returns what DB returns
       expect(json.events).toHaveLength(2);
       expect(json.events[0].title).toBe('Evening Event');
       expect(json.events[1].title).toBe('Late Event');
+
+      // Verify the DB-level filter was applied via .or() with LIKE patterns
+      const orCalls = query.or.mock.calls;
+      const eveningCall = orCalls.find((call: unknown[]) =>
+        typeof call[0] === 'string' && call[0].includes('start_date.like.')
+      );
+      expect(eveningCall).toBeDefined();
     });
 
     it('keeps events with no time info (date-only)', async () => {
@@ -270,18 +280,17 @@ describe('GET /api/events', () => {
       expect(json.events).toHaveLength(1);
     });
 
-    it('returns correct total for evening filter', async () => {
+    it('returns total from DB count for evening filter', async () => {
+      // DB filters evening events via LIKE patterns; mock returns pre-filtered results.
       const mockEvents = [
-        { id: '1', title: 'Morning', start_date: '2026-04-01T09:00:00' },
         { id: '2', title: 'Evening', start_date: '2026-04-01T19:00:00' },
       ];
-      const query = createChainableQuery({ data: mockEvents, error: null, count: 2 });
+      const query = createChainableQuery({ data: mockEvents, error: null, count: 1 });
       mockFrom.mockReturnValue(query);
 
       const response = await GET(makeRequest({ eveningOnly: 'true' }));
       const json = await response.json();
 
-      // Total should reflect the filtered count, not the DB count
       expect(json.total).toBe(1);
     });
   });

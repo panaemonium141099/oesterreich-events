@@ -37,9 +37,8 @@ Final wrap-up: update CHANGELOG.md with all changes from all phases, update CLAU
 - [ ] `npm run build` succeeds
 - [ ] `npm test` passes
 ## Done summary
-TBD
-
+Updated CHANGELOG.md with comprehensive phase-by-phase summaries for all 12 phases of the fn-1 epic (test infrastructure, TypeScript/security audit, code deduplication, image extraction, multi-tag system, performance, Framer Motion animations, chat event search, university scrapers batch 1 & 2, and niche scrapers), plus before/after metrics table and updated known issues. Updated CLAUDE.md to reflect the new tech stack (Mapbox GL JS, Framer Motion, Vitest), all scraper groups (~98 total), new utility paths, and current known issues.
 ## Evidence
-- Commits:
-- Tests:
+- Commits: affc71707b29053965371e9ebf722841892ccdb7
+- Tests: npm test
 - PRs:
