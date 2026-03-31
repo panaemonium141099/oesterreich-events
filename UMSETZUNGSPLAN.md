@@ -367,20 +367,101 @@ Aufgabe: Issues von anderen Agents automatisch beheben.
 
 ---
 
-## PHASE 9: Deployment & Launch
+## PHASE 9: Infrastruktur & Deployment
 
-### 9.1 Vercel Deployment
+### 9.1 Server-Setup: Hetzner CAX31 + Coolify
 
-- Vercel Projekt aufsetzen, Environment Variables konfigurieren
-- Preview Deployments fuer Feature Branches
-- Production auf lasstreffen.at Domain
+**Ein Server fuer alles** — Hetzner Cloud CAX31 (ARM64, 8 vCPU, 16GB RAM, 160GB SSD, €11/Monat):
 
-### 9.2 Domain & DNS
+- Coolify installieren (Open Source, self-hosted Vercel/PaaS)
+  - coolify.io, 1-Click Install Script auf frischem Ubuntu 22.04
+  - GitHub Repo verbinden: Auto-Deploy bei Push auf main
+  - Preview Deployments fuer Feature Branches (wie Vercel, aber gratis)
+  - SSL automatisch via Let's Encrypt (Coolify managed das)
+  - Environment Variables ueber Coolify UI verwalten
 
-- lasstreffen.at -> Vercel
-- SSL automatisch via Vercel
+- **Next.js App** als Docker Container
+  - Dockerfile im Repo (multi-stage build: build + production)
+  - Coolify erkennt Next.js automatisch oder nutzt das Dockerfile
+  - Port 3000 intern, Coolify routet ueber Reverse Proxy (Traefik)
+  - Health Check Endpoint: /api/health
 
-### 9.3 Social Media Praesenz
+- **Scraper** als separater Cron-Service
+  - Eigener Docker Container mit Puppeteer + Chromium
+  - Coolify "Scheduled Task" oder eigener Container mit cron
+  - Schedule: Alle 6 Stunden (0 */6 * * *)
+  - Laeuft: `npm run scrape:all` -> SQLite -> Supabase Sync
+  - Separater Prozess = Scraper-Crash killt nicht die Website
+
+- **AI Agents** als Cron-Services
+  - QA-Pruefer: Taeglich um 04:00 (nach Scraper-Run von 00:00)
+  - Content-Creator: Woechentlich Montag 06:00
+  - Quellen-Waechter: Taeglich um 05:00
+  - Technik Agent: Taeglich um 07:00 (nach QA-Run)
+  - Alle als eigene Container oder als Node Scripts im Scraper-Container
+
+### 9.2 Cloudflare (davor, gratis)
+
+- DNS fuer lasstreffen.at ueber Cloudflare
+- CDN: Statische Assets (Bilder, JS, CSS) gecached am Edge
+- DDoS-Schutz: Gratis Tier reicht fuer >10k User
+- Page Rules: Cache-TTL fuer Event-Seiten, Blog-Posts
+- Cloudflare Tunnel (optional): Server hat keinen offenen Port, Cloudflare tunnelt Traffic rein — extra sicher
+- Analytics: Server-side Analytics als Backup zu Supabase Analytics
+
+### 9.3 Datenbank: Supabase Cloud Pro
+
+- Supabase Pro Plan ($25/Monat)
+  - 8GB Datenbank, 250GB Bandwidth, 100k MAU Auth
+  - Realtime: 500 concurrent connections (reicht fuer 10k User weil nicht alle gleichzeitig chatten)
+  - Daily Backups automatisch
+- Spaeter wenn Kosten steigen: Migration auf self-hosted Supabase (auch via Coolify moeglich)
+- Connection Pooling: Supavisor (in Supabase Pro inkludiert) fuer effiziente DB-Connections
+
+### 9.4 Domain & DNS
+
+- lasstreffen.at Domain registrieren (z.B. bei domain.at oder Cloudflare Registrar)
+- DNS Records bei Cloudflare:
+  - A Record: lasstreffen.at -> Hetzner Server IP (proxied durch Cloudflare)
+  - CNAME: www.lasstreffen.at -> lasstreffen.at
+- SSL: Cloudflare Full (Strict) + Let's Encrypt auf dem Server (End-to-End Verschluesselung)
+
+### 9.5 Monitoring & Alerting
+
+- Coolify Dashboard: Container Health, CPU/RAM/Disk Usage
+- Uptime Kuma (Open Source, auf gleichem Server via Coolify):
+  - Website erreichbar? Check alle 60 Sekunden
+  - API Endpoints gesund? /api/health, /api/events
+  - Supabase erreichbar?
+  - Alert via Telegram/Discord/E-Mail bei Ausfall
+- Scraper Monitoring: agent_alerts Tabelle + Notification an Admin
+
+### 9.6 Backup-Strategie
+
+- Supabase: Automatische Daily Backups (Pro Plan)
+- SQLite (Staging): Taeglich rsync/rclone nach Hetzner Storage Box (€3.50/Monat fuer 1TB) oder S3-kompatibel
+- Git: Code ist eh auf GitHub
+- Coolify Config: Export/Backup der Coolify Konfiguration
+
+### 9.7 Skalierung wenn's waechst
+
+Stufe 1 (jetzt, bis ~10k concurrent):
+- 1x Hetzner CAX31 (€11) + Supabase Pro ($25) + Cloudflare Free
+- Gesamt: ~€40/Monat
+
+Stufe 2 (10k-50k concurrent):
+- Hetzner CAX41 upgrade (16 vCPU, 32GB RAM, €17.50/Monat)
+- Oder: 2x CAX21 mit Cloudflare Load Balancing
+- Supabase Pro reicht noch, eventuell Team Plan ($599/Monat) wenn DB-Last steigt
+
+Stufe 3 (50k+ concurrent):
+- Separater Scraper-Server (CAX21, €5.50)
+- Separater DB-Server mit self-hosted Supabase (CAX31, €11)
+- 2-3 Frontend-Server hinter Cloudflare Load Balancer
+- Redis fuer Session-Cache und Realtime
+- Gesamt: ~€40-60/Monat fuer die Server + API-Kosten
+
+### 9.8 Social Media Praesenz
 
 - Instagram: @lasstreffen.at oder @lasstreffenat
 - TikTok: @lasstreffen
@@ -402,9 +483,11 @@ Aufgabe: Issues von anderen Agents automatisch beheben.
 9. Chat Event-Suche + Social Erweiterungen
 10. UI Animationen (Framer Motion, Transitions)
 11. Affiliate-Integration (Ticket-Tracking, Dashboard)
-12. Deployment auf Vercel (Seite ist jetzt "voll" — Blog hat Content, Scoring laeuft, Agents arbeiten)
+12. Infrastruktur: Hetzner + Coolify + Cloudflare aufsetzen, deployen
 13. Social Media Praesenz (Instagram, TikTok — Content-Creator Agent liefert Posts)
 
 **Logik:** Automation kommt VOR dem Deploy, weil die Seite beim Launch schon gerankte Events, Blog-Inhalte und geprueften Content haben soll. Kein leerer Blog, keine ungepruefte Datenqualitaet beim Go-Live.
+
+**Infrastruktur-Kosten bei Launch:** ~€40/Monat (Hetzner €11 + Supabase $25 + Cloudflare gratis). Volle Kontrolle, kein Vendor Lock-in, skaliert bis 50k+ User ohne Architektur-Aenderung.
 
 Jede Phase ist eigenstaendig commitbar und bringt sichtbaren Mehrwert.

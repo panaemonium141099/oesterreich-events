@@ -5,7 +5,8 @@ import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/lib/supabase/auth-context';
 import { createClient } from '@/lib/supabase/client';
-import { EventPreviewCard } from '@/components/Events/EventPreviewCard';
+import { EventPreviewMessage } from '@/components/Chat/EventPreviewMessage';
+import { EventSearchInline } from '@/components/Chat/EventSearchInline';
 
 interface DirectMessage {
   id: string;
@@ -38,9 +39,6 @@ export default function DMConversationPage() {
   const [loadingData, setLoadingData] = useState(true);
   const [sending, setSending] = useState(false);
   const [showEventSearch, setShowEventSearch] = useState(false);
-  const [eventSearchQuery, setEventSearchQuery] = useState('');
-  const [eventSearchResults, setEventSearchResults] = useState<any[]>([]);
-  const [searchingEvents, setSearchingEvents] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -142,27 +140,7 @@ export default function DMConversationPage() {
     setSending(false);
   };
 
-  const searchEvents = useCallback(async (query: string) => {
-    if (!query.trim()) {
-      setEventSearchResults([]);
-      return;
-    }
-    setSearchingEvents(true);
-    const { data } = await supabase
-      .from('events')
-      .select('id, title, start_date, location_name, image_url')
-      .ilike('title', `%${query}%`)
-      .limit(10);
-    setEventSearchResults(data || []);
-    setSearchingEvents(false);
-  }, [supabase]);
-
-  useEffect(() => {
-    const timer = setTimeout(() => searchEvents(eventSearchQuery), 300);
-    return () => clearTimeout(timer);
-  }, [eventSearchQuery, searchEvents]);
-
-  const shareEvent = async (event: any) => {
+  const shareEvent = async (event: { id: string; title: string }) => {
     if (!user) return;
     await supabase.from('direct_messages').insert({
       sender_id: user.id,
@@ -173,18 +151,11 @@ export default function DMConversationPage() {
       read: false,
     });
     setShowEventSearch(false);
-    setEventSearchQuery('');
-    setEventSearchResults([]);
   };
 
   const formatTime = (dateStr: string) => {
     const d = new Date(dateStr);
     return d.toLocaleTimeString('de-AT', { hour: '2-digit', minute: '2-digit' });
-  };
-
-  const formatDate = (dateStr: string) => {
-    const d = new Date(dateStr);
-    return d.toLocaleDateString('de-AT', { day: 'numeric', month: 'short', year: 'numeric' });
   };
 
   const formatDateSeparator = (dateStr: string) => {
@@ -286,12 +257,9 @@ export default function DMConversationPage() {
                         <div key={msg.id} className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}>
                           <div className={`max-w-[75%]`}>
                             {isEventShare ? (
-                              <EventPreviewCard
+                              <EventPreviewMessage
                                 eventId={msg.event_id!}
                                 isMe={isMe}
-                                onViewDetail={(evt) => {
-                                  if (evt.source_url) window.open(evt.source_url, '_blank');
-                                }}
                               />
                             ) : (
                               <div className={`px-4 py-2.5 rounded-2xl text-sm ${
@@ -353,63 +321,10 @@ export default function DMConversationPage() {
 
       {/* Event Search Modal */}
       {showEventSearch && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm" onClick={() => { setShowEventSearch(false); setEventSearchQuery(''); setEventSearchResults([]); }}>
-          <div className="w-full max-w-md bg-[#111] border border-white/10 rounded-2xl p-6" onClick={(e) => e.stopPropagation()}>
-            <h2 className="text-lg font-bold mb-4">Event teilen</h2>
-            <input
-              type="text"
-              value={eventSearchQuery}
-              onChange={(e) => setEventSearchQuery(e.target.value)}
-              placeholder="Event suchen..."
-              className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-white/20 focus:outline-none focus:border-white/30 transition-colors mb-4"
-              autoFocus
-            />
-            {searchingEvents && (
-              <div className="flex justify-center py-4">
-                <div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin" />
-              </div>
-            )}
-            {eventSearchResults.length > 0 && (
-              <div className="space-y-2 max-h-60 overflow-y-auto">
-                {eventSearchResults.map((evt) => (
-                  <button
-                    key={evt.id}
-                    onClick={() => shareEvent(evt)}
-                    className="w-full flex items-center gap-3 p-3 rounded-xl bg-white/5 border border-white/10 hover:border-white/20 transition-colors text-left"
-                  >
-                    <div className="w-10 h-10 rounded-lg overflow-hidden shrink-0 bg-white/10">
-                      {evt.image_url ? (
-                        <img src={evt.image_url} alt="" className="w-full h-full object-cover" />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center text-white/20 text-xs">
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                          </svg>
-                        </div>
-                      )}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium truncate">{evt.title}</p>
-                      <p className="text-xs text-white/30 truncate">
-                        {evt.start_date ? formatDate(evt.start_date) : ''}
-                        {evt.location_name ? ` - ${evt.location_name}` : ''}
-                      </p>
-                    </div>
-                  </button>
-                ))}
-              </div>
-            )}
-            {eventSearchQuery.trim() && !searchingEvents && eventSearchResults.length === 0 && (
-              <p className="text-center text-white/30 text-sm py-4">Keine Events gefunden</p>
-            )}
-            <button
-              onClick={() => { setShowEventSearch(false); setEventSearchQuery(''); setEventSearchResults([]); }}
-              className="w-full mt-4 py-2 text-sm text-white/40 hover:text-white/60 transition-colors"
-            >
-              Abbrechen
-            </button>
-          </div>
-        </div>
+        <EventSearchInline
+          onSelectEvent={shareEvent}
+          onClose={() => setShowEventSearch(false)}
+        />
       )}
     </div>
   );

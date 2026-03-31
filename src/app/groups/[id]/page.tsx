@@ -6,6 +6,8 @@ import Link from 'next/link';
 import { useAuth } from '@/lib/supabase/auth-context';
 import { SocialNav } from '@/components/Layout/SocialNav';
 import { createClient } from '@/lib/supabase/client';
+import { EventPreviewMessage } from '@/components/Chat/EventPreviewMessage';
+import { EventSearchInline } from '@/components/Chat/EventSearchInline';
 
 interface GroupData {
   id: string;
@@ -123,6 +125,7 @@ export default function EventDashboardPage() {
   const [notesText, setNotesText] = useState('');
   const [contributions, setContributions] = useState<Contribution[]>([]);
   const [newContribution, setNewContribution] = useState('');
+  const [showEventSearch, setShowEventSearch] = useState(false);
 
   // Widget system
   type WidgetType = 'teilnehmer' | 'karte' | 'mitbringen' | 'notizen';
@@ -311,6 +314,18 @@ export default function EventDashboardPage() {
     });
     setMessageText('');
     setSending(false);
+  };
+
+  const shareEvent = async (event: { id: string; title: string }) => {
+    if (!user) return;
+    await supabase.from('group_messages').insert({
+      group_id: groupId,
+      user_id: user.id,
+      content: `Event geteilt: ${event.title}`,
+      message_type: 'event_share',
+      event_id: event.id,
+    });
+    setShowEventSearch(false);
   };
 
   const updateRsvp = async (status: string) => {
@@ -700,16 +715,23 @@ export default function EventDashboardPage() {
                 ) : (
                   messages.map((msg, i) => {
                     const isMe = msg.user_id === user?.id;
+                    const isEventShare = msg.message_type === 'event_share' && msg.event_id;
                     return (
                       <div key={msg.id} className={`flex items-end gap-2 ${isMe ? 'justify-end' : 'justify-start'} animate-[fadeIn_200ms_ease-out_both] motion-reduce:animate-none`}
                         style={{ animationDelay: `${Math.min(i, 10) * 25}ms` }}>
                         {!isMe && <Avatar url={msg.profile?.avatar_url || null} name={msg.profile?.first_name || '?'} size="sm" />}
-                        <div className={`max-w-[75%] px-3.5 py-2.5 rounded-2xl ${isMe ? 'rounded-br-md' : 'rounded-bl-md'} ${
-                          isMe ? 'bg-white/[0.08] text-white/80' : 'bg-white/[0.03] border border-white/[0.06] text-white/70'
-                        }`}>
-                          {!isMe && <p className="text-[10px] text-white/30 mb-0.5 font-medium">{msg.profile?.first_name}</p>}
-                          <p className="text-[13px] leading-relaxed">{msg.content}</p>
-                          <p className="text-[9px] text-white/15 mt-1 text-right">{new Date(msg.created_at).toLocaleTimeString('de', { hour: '2-digit', minute: '2-digit' })}</p>
+                        <div className="max-w-[75%]">
+                          {!isMe && <p className="text-[10px] text-white/30 mb-0.5 font-medium px-1">{msg.profile?.first_name}</p>}
+                          {isEventShare ? (
+                            <EventPreviewMessage eventId={msg.event_id!} isMe={isMe} />
+                          ) : (
+                            <div className={`px-3.5 py-2.5 rounded-2xl ${isMe ? 'rounded-br-md' : 'rounded-bl-md'} ${
+                              isMe ? 'bg-white/[0.08] text-white/80' : 'bg-white/[0.03] border border-white/[0.06] text-white/70'
+                            }`}>
+                              <p className="text-[13px] leading-relaxed">{msg.content}</p>
+                            </div>
+                          )}
+                          <p className="text-[9px] text-white/15 mt-1 text-right px-1">{new Date(msg.created_at).toLocaleTimeString('de', { hour: '2-digit', minute: '2-digit' })}</p>
                         </div>
                       </div>
                     );
@@ -720,6 +742,15 @@ export default function EventDashboardPage() {
               {/* Input bar — feine Linie darüber */}
               <div className="border-t border-white/[0.06] px-3 py-2.5">
                 <div className="flex gap-2">
+                  <button
+                    onClick={() => setShowEventSearch(true)}
+                    className="w-11 h-11 rounded-xl bg-white/[0.04] border border-white/[0.06] hover:border-white/15 flex items-center justify-center transition-all duration-200 shrink-0"
+                    title="Event teilen"
+                  >
+                    <svg className="w-4 h-4 text-white/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                  </button>
                   <input type="text" value={messageText}
                     onChange={(e) => setMessageText(e.target.value)}
                     onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); } }}
@@ -1035,6 +1066,14 @@ export default function EventDashboardPage() {
             </button>
           </div>
         </div>
+      )}
+
+      {/* Event Search Modal */}
+      {showEventSearch && (
+        <EventSearchInline
+          onSelectEvent={shareEvent}
+          onClose={() => setShowEventSearch(false)}
+        />
       )}
     </div>
   );

@@ -30,9 +30,8 @@ Optimize bundle size and implement SSR/ISR where possible. Remove dead Leaflet d
 - [ ] Bundle size reduced (document before/after)
 - [ ] `npm run build` succeeds with no warnings about large chunks
 ## Done summary
-TBD
-
+Installed @next/bundle-analyzer, added ISR (24h revalidation) to legal pages, migrated EventCard/EventDetail/FeedEventMiniCard images to next/image, and added loading.tsx streaming boundaries for 5 route segments. Verified no Leaflet code in production bundle.
 ## Evidence
-- Commits:
-- Tests:
+- Commits: 20835b06d995ece8e17a7259299e855981a358ce
+- Tests: npm run build, npm test
 - PRs:
