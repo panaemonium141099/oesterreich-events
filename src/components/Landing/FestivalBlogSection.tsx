@@ -7,96 +7,99 @@ import { FESTIVAL_POSTS } from '@/content/blog/festivals';
 
 const containerVariants = {
   hidden: {},
-  visible: {
-    transition: { staggerChildren: 0.12 },
-  },
+  visible: { transition: { staggerChildren: 0.1 } },
 };
 
-const cardVariants = {
-  hidden: { opacity: 0, y: 28 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: 'easeOut' as const } },
+const itemVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.55, ease: 'easeOut' as const } },
 };
 
-function FestivalCard({
-  post,
-  featured,
-}: {
-  post: (typeof FESTIVAL_POSTS)[0];
-  featured?: boolean;
-}) {
+function ArrowRight({ className }: { className?: string }) {
   return (
-    <motion.article
-      variants={cardVariants}
-      className={`group relative overflow-hidden rounded-3xl border border-white/10 bg-gray-900/60 backdrop-blur-sm hover:border-white/25 transition-all duration-300 hover:shadow-2xl hover:shadow-black/40 ${featured ? 'md:row-span-2' : ''}`}
-    >
+    <svg className={className} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
+      <path d="M3 8h10M9 4l4 4-4 4" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+/** Large featured card — left column */
+function FeaturedCard({ post }: { post: (typeof FESTIVAL_POSTS)[0] }) {
+  return (
+    <motion.article variants={itemVariants} className="group relative h-full">
       <Link href={`/blog/${post.slug}`} className="block h-full">
-        {/* Image */}
-        <div
-          className={`relative w-full overflow-hidden ${featured ? 'h-72 md:h-80' : 'h-52'}`}
-        >
+        <div className="relative overflow-hidden rounded-2xl h-full min-h-[440px]">
+          {/* Image */}
           <Image
             src={post.thumbnailImage}
             alt={post.title}
             fill
-            className="object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
-            sizes={featured ? '(max-width: 768px) 100vw, 60vw' : '(max-width: 768px) 100vw, 40vw'}
+            className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+            sizes="(max-width: 768px) 100vw, 60vw"
+            priority
           />
-          {/* Gradient overlay on image bottom */}
-          <div className="absolute inset-0 bg-gradient-to-t from-gray-900/80 via-transparent to-transparent" />
+          {/* Gradient overlay — stronger at bottom for text legibility */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-black/10" />
 
-          {/* Category badge */}
-          <span
-            className={`absolute top-4 left-4 text-xs font-bold uppercase tracking-widest px-3 py-1 rounded-full ${post.categoryColor}`}
-          >
-            {post.category}
-          </span>
+          {/* Content pinned to bottom */}
+          <div className="absolute inset-x-0 bottom-0 p-7 md:p-9">
+            {/* Category + Date row */}
+            <div className="flex items-center gap-3 mb-3">
+              <span className="text-[10px] font-bold uppercase tracking-[0.15em] text-white/90 bg-white/15 backdrop-blur-sm px-2.5 py-1 rounded-sm">
+                {post.category}
+              </span>
+              <span className="text-white/40 text-[11px] uppercase tracking-wider">
+                {post.keyFacts.dates}
+              </span>
+            </div>
+
+            {/* Title */}
+            <h3 className="text-white font-extrabold text-2xl md:text-3xl leading-[1.15] tracking-tight mb-2 group-hover:text-white/90 transition-colors">
+              {post.title}
+            </h3>
+
+            {/* Subtitle / location */}
+            <p className="text-white/55 text-sm font-normal mb-5 line-clamp-2 max-w-md">
+              {post.keyFacts.location}
+            </p>
+
+            {/* Read link */}
+            <span className="inline-flex items-center gap-2 text-white text-sm font-semibold border-b border-white/30 pb-0.5 group-hover:border-white/70 transition-colors">
+              Artikel lesen
+              <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
+            </span>
+          </div>
+        </div>
+      </Link>
+    </motion.article>
+  );
+}
+
+/** Smaller card — right column */
+function SecondaryCard({ post }: { post: (typeof FESTIVAL_POSTS)[0] }) {
+  return (
+    <motion.article variants={itemVariants} className="group">
+      <Link href={`/blog/${post.slug}`} className="flex gap-4 items-stretch">
+        {/* Thumbnail */}
+        <div className="relative flex-none w-28 rounded-xl overflow-hidden bg-white/5">
+          <Image
+            src={post.thumbnailImage}
+            alt={post.title}
+            fill
+            className="object-cover transition-transform duration-500 group-hover:scale-105"
+            sizes="112px"
+          />
         </div>
 
-        {/* Content */}
-        <div className={`p-6 ${featured ? 'md:p-8' : ''}`}>
-          {/* Date + Location row */}
-          <div className="flex items-center gap-3 text-white/40 text-xs mb-3">
-            <span>📅 {post.keyFacts.dates}</span>
-            <span>·</span>
-            <span>📍 {post.keyFacts.location}</span>
-          </div>
-
-          {/* Title */}
-          <h3
-            className={`text-white font-extrabold leading-tight mb-3 group-hover:text-white/90 transition-colors ${featured ? 'text-2xl md:text-3xl' : 'text-xl'}`}
-          >
+        {/* Text */}
+        <div className="flex flex-col justify-center gap-1.5 min-w-0">
+          <span className="text-[10px] font-bold uppercase tracking-[0.15em] text-white/40">
+            {post.category}
+          </span>
+          <h3 className="text-white font-bold text-base leading-snug line-clamp-2 group-hover:text-white/80 transition-colors">
             {post.title}
           </h3>
-
-          {/* Subtitle / excerpt */}
-          <p
-            className={`text-white/55 leading-relaxed mb-5 ${featured ? 'text-base line-clamp-3' : 'text-sm line-clamp-2'}`}
-          >
-            {post.excerpt}
-          </p>
-
-          {/* Footer row */}
-          <div className="flex items-center justify-between">
-            {/* Price pill */}
-            <span className="text-xs font-semibold text-white/70 bg-white/8 border border-white/10 px-3 py-1 rounded-full">
-              {post.keyFacts.price.includes('frei') || post.keyFacts.price.toLowerCase().includes('frei')
-                ? '🎟 Gratis'
-                : `🎟 ${post.keyFacts.price.split('|')[0].trim()}`}
-            </span>
-
-            {/* Read more */}
-            <span className="inline-flex items-center gap-1.5 text-white/60 text-sm font-semibold group-hover:text-white group-hover:gap-2.5 transition-all duration-200">
-              Zum Artikel
-              <svg
-                className="w-4 h-4"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
-            </span>
-          </div>
+          <p className="text-white/35 text-xs uppercase tracking-wider">{post.keyFacts.dates}</p>
         </div>
       </Link>
     </motion.article>
@@ -108,54 +111,70 @@ export function FestivalBlogSection() {
 
   return (
     <motion.section
-      className="w-full py-12"
+      className="w-full py-14"
       initial="hidden"
       whileInView="visible"
-      viewport={{ once: true, margin: '-80px' }}
+      viewport={{ once: true, margin: '-60px' }}
       variants={containerVariants}
     >
       {/* Section header */}
-      <motion.div
-        variants={cardVariants}
-        className="flex items-end justify-between mb-7 px-1"
-      >
-        <div>
-          <p className="text-xs font-bold uppercase tracking-[0.2em] text-white/35 mb-2">
-            Große Festivals 2026
-          </p>
-          <h2 className="text-white font-extrabold text-2xl md:text-3xl leading-tight">
+      <motion.div variants={itemVariants} className="mb-8">
+        {/* Thin rule + label */}
+        <div className="flex items-center gap-4 mb-4">
+          <div className="h-px w-8 bg-white/20" />
+          <span className="text-[10px] font-bold uppercase tracking-[0.25em] text-white/35">
+            Festivals 2026
+          </span>
+        </div>
+
+        <div className="flex items-end justify-between">
+          <h2 className="text-white font-extrabold text-2xl md:text-3xl leading-tight tracking-tight">
             Diese Festivals wirst du
             <br className="hidden sm:block" /> nicht verpassen wollen
           </h2>
-        </div>
-        <Link
-          href="/map?category=Musik"
-          className="hidden sm:inline-flex items-center gap-1.5 text-white/50 hover:text-white text-sm font-medium transition-colors group"
-        >
-          Alle Musik-Events
-          <svg
-            className="w-4 h-4 group-hover:translate-x-0.5 transition-transform"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
+
+          <Link
+            href="/blog"
+            className="hidden sm:inline-flex items-center gap-1.5 text-white/40 hover:text-white text-sm font-medium transition-colors group"
           >
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-          </svg>
-        </Link>
+            Alle Artikel
+            <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
+          </Link>
+        </div>
       </motion.div>
 
-      {/* Grid: 1 big + 2 small */}
+      {/* Layout: 1 large card left + 2 stacked cards right */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-        {/* Featured card — spans 2 columns on desktop */}
+        {/* Featured — 2 columns */}
         <div className="md:col-span-2">
-          {featured && <FestivalCard post={featured} featured />}
+          {featured && <FeaturedCard post={featured} />}
         </div>
 
-        {/* Right column with 2 smaller cards */}
-        <div className="flex flex-col gap-5">
-          {rest.map(post => (
-            <FestivalCard key={post.slug} post={post} />
+        {/* Secondary cards — 1 column, stacked */}
+        <div className="flex flex-col gap-5 justify-center">
+          {/* Divider above */}
+          <div className="hidden md:block h-px bg-white/8" />
+
+          {rest.map((post, i) => (
+            <div key={post.slug}>
+              <SecondaryCard post={post} />
+              {i < rest.length - 1 && (
+                <div className="h-px bg-white/8 mt-5" />
+              )}
+            </div>
           ))}
+
+          {/* Divider below */}
+          <div className="hidden md:block h-px bg-white/8" />
+
+          {/* Blog CTA */}
+          <Link
+            href="/blog"
+            className="hidden md:inline-flex items-center gap-2 text-white/40 hover:text-white/80 text-xs font-bold uppercase tracking-[0.15em] transition-colors group"
+          >
+            Alle Festivalberichte
+            <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
+          </Link>
         </div>
       </div>
     </motion.section>

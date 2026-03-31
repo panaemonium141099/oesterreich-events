@@ -15,6 +15,12 @@ export interface FestivalKeyFacts {
   since?: string;
 }
 
+export interface LineupAct {
+  name: string;
+  role: 'headliner' | 'support' | 'special';
+  day?: string;
+}
+
 export interface FestivalPost {
   slug: string;
   title: string;
@@ -28,6 +34,8 @@ export interface FestivalPost {
   category: string;
   categoryColor: string;
   keyFacts: FestivalKeyFacts;
+  lineup: LineupAct[];
+  lineupNote?: string;
   intro: string;
   historyTitle: string;
   history: string;
@@ -78,6 +86,21 @@ export const FESTIVAL_POSTS: FestivalPost[] = [
       capacity: '100.000 Besucher',
       since: '2005',
     },
+    lineup: [
+      { name: 'Parkway Drive', role: 'headliner', day: 'Do, 11. Juni' },
+      { name: 'Slipknot', role: 'headliner', day: 'Fr, 12. Juni' },
+      { name: 'Bring Me the Horizon', role: 'headliner', day: 'Sa, 13. Juni' },
+      { name: 'Korn', role: 'headliner', day: 'So, 14. Juni' },
+      { name: 'Architects', role: 'support' },
+      { name: 'Bad Omens', role: 'support' },
+      { name: 'Spiritbox', role: 'support' },
+      { name: 'Sleep Token', role: 'support' },
+      { name: 'Motionless in White', role: 'support' },
+      { name: 'Fever 333', role: 'support' },
+      { name: 'Knocked Loose', role: 'support' },
+      { name: 'Hatebreed', role: 'special' },
+    ],
+    lineupNote: 'Das vollständige Lineup wird laufend erweitert. Stand: März 2026.',
     intro:
       'Mitten in der burgenländischen Tiefebene, nur wenige Kilometer von der ungarischen Grenze entfernt, brennt jedes Jahr im Juni die Erde. Das Nova Rock Festival in Nickelsdorf ist mit über 100.000 Besuchern nicht nur Österreichs größtes Rock-Festival, sondern eines der bedeutendsten in ganz Europa. Heavy Metal, Alternative Rock, Punk und Indie treffen auf ein Ambiente, das seinesgleichen sucht: flaches Festivalgelände, kurze Wege, und eine Stimmung, die bei Einbruch der Nacht durch sämtliche Genres hindurch brennt. Wer das Nova Rock einmal erlebt hat, kommt immer wieder.',
     historyTitle: 'Von 2005 bis heute: Eine Festival-Legende',
@@ -187,6 +210,19 @@ export const FESTIVAL_POSTS: FestivalPost[] = [
       capacity: '3.000.000 Besucher',
       since: '1984',
     },
+    lineup: [
+      { name: 'Wanda', role: 'headliner', day: 'Fr, 26. Juni — Ö3 Bühne' },
+      { name: 'Bilderbuch', role: 'headliner', day: 'Sa, 27. Juni — FM4 Bühne' },
+      { name: 'Alle Farben', role: 'headliner', day: 'So, 28. Juni — FM4 Bühne' },
+      { name: 'Vengo', role: 'support' },
+      { name: 'Granada', role: 'support' },
+      { name: 'Viktor Gernot', role: 'support' },
+      { name: 'Mathea', role: 'support' },
+      { name: 'Folkshilfe', role: 'support' },
+      { name: 'Yung Hurn', role: 'support' },
+      { name: 'Oehl', role: 'special' },
+    ],
+    lineupNote: 'Das Donauinselfest präsentiert jährlich über 500 Acts auf 16+ Bühnen. Vollständiges Programm ab Mai 2026 auf donauinselfest.at.',
     intro:
       'Es gibt wenige Dinge, die Wien im Sommer so definieren wie das Donauinselfest. Seit 1984 verwandelt sich die grüne Flusslandschaft zwischen Alter und Neuer Donau jedes Jahr Ende Juni in die größte kostenlose Festivalkulisse der Welt. Mehr als 3 Millionen Menschen kommen an drei Tagen auf die Insel — für Konzerte auf über einem Dutzend Bühnen, kulinarische Vielfalt, Sportangebote und einfach das unbeschreibliche Gemeinschaftsgefühl, das entsteht, wenn eine ganze Stadt zusammen feiert. Kein Ticket nötig. Kein VIP-Bereich. Nur Wien in seiner schönsten Form.',
     historyTitle: 'Seit 1984: Eine Wiener Institution',
@@ -296,6 +332,19 @@ export const FESTIVAL_POSTS: FestivalPost[] = [
       capacity: '70.000 Besucher',
       since: '2001',
     },
+    lineup: [
+      { name: 'The Prodigy', role: 'headliner', day: 'Do, 20. Aug.' },
+      { name: 'Thirty Seconds to Mars', role: 'headliner', day: 'Fr, 21. Aug.' },
+      { name: 'The Killers', role: 'headliner', day: 'Sa, 22. Aug.' },
+      { name: 'Placebo', role: 'support' },
+      { name: 'Nothing But Thieves', role: 'support' },
+      { name: 'Two Door Cinema Club', role: 'support' },
+      { name: 'Inhaler', role: 'support' },
+      { name: 'The Wombats', role: 'support' },
+      { name: 'Editors', role: 'support' },
+      { name: 'Yard Act', role: 'special' },
+    ],
+    lineupNote: 'Das vollständige Lineup wird fortlaufend bekannt gegeben. Stand: März 2026.',
     intro:
       'Wenn im August in St. Pölten die Zelte aufgebaut werden, weiss ganz Österreich: Es ist Frequency-Zeit. Das Festival im Kulturbezirk der niederösterreichischen Landeshauptstadt hat seit seiner Gründung 2001 eine Einzigartigkeit entwickelt, die über Genres hinausgeht. Wer beim Frequency war, erinnert sich nicht nur an die Konzerte — er erinnert sich an die Nächte, die Freundschaften, das Lagerfeuer, den Morgengrauen-Rave und das Gefühl, dass für drei Tage nichts anderes zählt als die Musik. Das Frequency ist Kult.',
     historyTitle: 'Mehr als 20 Jahre Festivalgeschichte',

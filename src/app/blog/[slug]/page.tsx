@@ -38,6 +38,107 @@ export async function generateMetadata({
   };
 }
 
+// ── SVG Icon components (no emoji) ──────────────────────────────────────────
+
+function IconTrain() {
+  return (
+    <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-4 h-4 shrink-0">
+      <rect x="3" y="3" width="14" height="10" rx="2" />
+      <path d="M3 10h14M7 16l-1.5 2M13 16l1.5 2M10 16v2" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+function IconCar() {
+  return (
+    <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-4 h-4 shrink-0">
+      <path d="M3 10l1.5-4h11L17 10v4H3v-4z" strokeLinejoin="round" />
+      <circle cx="6" cy="15" r="1.5" />
+      <circle cx="14" cy="15" r="1.5" />
+    </svg>
+  );
+}
+
+function IconTent() {
+  return (
+    <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-4 h-4 shrink-0">
+      <path d="M2 16L10 4l8 12H2z" strokeLinejoin="round" />
+      <path d="M10 4v12" />
+    </svg>
+  );
+}
+
+function IconCalendar() {
+  return (
+    <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-4 h-4 shrink-0">
+      <rect x="2" y="4" width="16" height="14" rx="2" />
+      <path d="M6 2v4M14 2v4M2 9h16" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+function IconCard() {
+  return (
+    <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-4 h-4 shrink-0">
+      <rect x="2" y="5" width="16" height="12" rx="2" />
+      <path d="M2 9h16" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+function IconPin() {
+  return (
+    <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-4 h-4 shrink-0">
+      <path d="M10 2a5 5 0 0 1 5 5c0 4-5 11-5 11S5 11 5 7a5 5 0 0 1 5-5z" />
+      <circle cx="10" cy="7" r="1.5" fill="currentColor" stroke="none" />
+    </svg>
+  );
+}
+
+function IconInfo() {
+  return (
+    <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-4 h-4 shrink-0">
+      <circle cx="10" cy="10" r="8" />
+      <path d="M10 9v5M10 7v.5" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+function IconExternal() {
+  return (
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-3.5 h-3.5 shrink-0">
+      <path d="M6 3H3v10h10v-3M9 3h4v4M13 3L7 9" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+function IconArrowLeft() {
+  return (
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-4 h-4">
+      <path d="M13 8H3M7 4L3 8l4 4" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+function IconArrowRight() {
+  return (
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-4 h-4">
+      <path d="M3 8h10M9 4l4 4-4 4" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+// Map icon label to component
+function PracticalIcon({ label }: { label: string }) {
+  const l = label.toLowerCase();
+  if (l.includes('bahn') || l.includes('zug') || l.includes('növog') || l.includes('westbahn')) return <IconTrain />;
+  if (l.includes('auto') || l.includes('pkw')) return <IconCar />;
+  if (l.includes('camping') || l.includes('zelt')) return <IconTent />;
+  if (l.includes('ticket') || l.includes('kauf') || l.includes('cash')) return <IconCard />;
+  if (l.includes('wetter') || l.includes('datum') || l.includes('wann') || l.includes('pack')) return <IconCalendar />;
+  return <IconPin />;
+}
+
 export default async function BlogPostPage({
   params,
 }: {
@@ -55,30 +156,15 @@ export default async function BlogPostPage({
     image: post.heroImage,
     datePublished: post.publishDate,
     dateModified: post.updatedDate,
-    author: {
-      '@type': 'Organization',
-      name: 'LassTreffen.at',
-      url: 'https://lasstreffen.at',
-    },
-    publisher: {
-      '@type': 'Organization',
-      name: 'LassTreffen.at',
-      url: 'https://lasstreffen.at',
-    },
-    mainEntityOfPage: {
-      '@type': 'WebPage',
-      '@id': `https://lasstreffen.at/blog/${slug}`,
-    },
+    author: { '@type': 'Organization', name: 'LassTreffen.at', url: 'https://lasstreffen.at' },
+    publisher: { '@type': 'Organization', name: 'LassTreffen.at', url: 'https://lasstreffen.at' },
+    mainEntityOfPage: { '@type': 'WebPage', '@id': `https://lasstreffen.at/blog/${slug}` },
     about: {
       '@type': 'Event',
       name: post.jsonLdEvent.name,
       startDate: post.jsonLdEvent.startDate,
       endDate: post.jsonLdEvent.endDate,
-      location: {
-        '@type': 'Place',
-        name: post.jsonLdEvent.location,
-        address: post.keyFacts.address,
-      },
+      location: { '@type': 'Place', name: post.jsonLdEvent.location, address: post.keyFacts.address },
       url: post.jsonLdEvent.url,
       description: post.jsonLdEvent.description,
       isAccessibleForFree: post.keyFacts.price.toLowerCase().includes('frei'),
@@ -89,14 +175,13 @@ export default async function BlogPostPage({
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify(jsonLd).replace(/</g, '\u003c'),
-        }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, '\u003c') }}
       />
 
-      <article className="min-h-screen bg-gray-950 text-white">
-        {/* ── Hero ── */}
-        <div className="relative w-full h-[70vh] min-h-[400px] max-h-[680px] overflow-hidden">
+      <article className="min-h-screen bg-[#f8f6f2] text-gray-900">
+
+        {/* ── HERO ── */}
+        <div className="relative w-full h-[75vh] min-h-[420px] max-h-[700px] overflow-hidden">
           <Image
             src={post.heroImage}
             alt={post.title}
@@ -105,171 +190,203 @@ export default async function BlogPostPage({
             className="object-cover"
             sizes="100vw"
           />
-          {/* Dark gradient overlay */}
-          <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/40 to-black/90" />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/35 to-black/80" />
 
           {/* Back nav */}
-          <div className="absolute top-6 left-6 z-10">
+          <div className="absolute top-8 left-8 z-10">
             <Link
-              href="/"
-              className="inline-flex items-center gap-2 text-white/80 hover:text-white text-sm font-medium transition-colors group"
+              href="/blog"
+              className="inline-flex items-center gap-2 text-white/70 hover:text-white text-sm font-medium transition-colors group"
             >
-              <svg
-                className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-              </svg>
-              LassTreffen.at
+              <IconArrowLeft />
+              <span className="group-hover:underline underline-offset-2">Alle Artikel</span>
             </Link>
           </div>
 
           {/* Hero text */}
-          <div className="absolute bottom-0 left-0 right-0 p-8 md:p-14 max-w-4xl">
-            <span
-              className={`inline-block text-xs font-bold uppercase tracking-widest px-3 py-1 rounded-full mb-4 ${post.categoryColor}`}
-            >
-              {post.category}
-            </span>
-            <h1 className="text-4xl md:text-6xl font-extrabold leading-[1.05] tracking-tight mb-3">
-              {post.title}
-            </h1>
-            <p className="text-lg md:text-xl text-white/70 font-light max-w-2xl">
-              {post.subtitle}
-            </p>
-            <div className="flex items-center gap-4 mt-4 text-white/50 text-sm">
-              <span>📅 {post.keyFacts.dates}</span>
-              <span>·</span>
-              <span>📍 {post.keyFacts.location}</span>
-              <span>·</span>
-              <span>⏱ {post.readingTime} Min. Lesezeit</span>
+          <div className="absolute bottom-0 left-0 right-0 px-8 py-10 md:px-16 md:py-14">
+            <div className="max-w-3xl">
+              <div className="flex items-center gap-3 mb-4">
+                <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/80 border border-white/30 px-3 py-1">
+                  {post.category}
+                </span>
+                <span className="text-white/45 text-xs uppercase tracking-wider">
+                  {post.readingTime} Min. Lesezeit
+                </span>
+              </div>
+
+              <h1 className="text-4xl md:text-6xl font-extrabold text-white leading-[1.05] tracking-tight mb-3">
+                {post.title}
+              </h1>
+              <p className="text-white/65 text-lg md:text-xl font-light max-w-2xl leading-snug">
+                {post.subtitle}
+              </p>
+              <div className="flex items-center gap-3 mt-5 text-white/40 text-xs uppercase tracking-wider">
+                <span>{post.keyFacts.dates}</span>
+                <span>—</span>
+                <span>{post.keyFacts.location}</span>
+              </div>
             </div>
           </div>
         </div>
 
-        {/* ── Content ── */}
-        <div className="max-w-3xl mx-auto px-6 py-14">
+        {/* ── BODY ── */}
+        <div className="max-w-2xl mx-auto px-6 py-14 md:py-20">
 
-          {/* Intro */}
-          <p className="text-xl md:text-2xl text-white/80 font-light leading-relaxed mb-12 border-l-4 border-white/20 pl-6">
+          {/* Lead paragraph */}
+          <p className="text-xl md:text-2xl text-gray-700 font-light leading-relaxed mb-14 border-l-2 border-gray-300 pl-6">
             {post.intro}
           </p>
 
-          {/* Key Facts Box */}
-          <div className="bg-white/5 border border-white/10 rounded-2xl p-6 mb-12">
-            <h2 className="text-white font-bold text-lg mb-5 flex items-center gap-2">
-              <span>📋</span> Auf einen Blick
-            </h2>
-            <dl className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <dt className="text-white/40 text-xs uppercase tracking-wider mb-0.5">Datum</dt>
-                <dd className="text-white font-medium">{post.keyFacts.dates}</dd>
-              </div>
-              <div>
-                <dt className="text-white/40 text-xs uppercase tracking-wider mb-0.5">Ort</dt>
-                <dd className="text-white font-medium">{post.keyFacts.location}</dd>
-              </div>
-              <div>
-                <dt className="text-white/40 text-xs uppercase tracking-wider mb-0.5">Genre</dt>
-                <dd className="text-white font-medium">{post.keyFacts.genre}</dd>
-              </div>
-              <div>
-                <dt className="text-white/40 text-xs uppercase tracking-wider mb-0.5">Eintritt</dt>
-                <dd className="text-white font-medium">{post.keyFacts.price}</dd>
-              </div>
-              {post.keyFacts.capacity && (
-                <div>
-                  <dt className="text-white/40 text-xs uppercase tracking-wider mb-0.5">Kapazität</dt>
-                  <dd className="text-white font-medium">{post.keyFacts.capacity}</dd>
+          {/* Key Facts */}
+          <div className="mb-14 border border-gray-200 rounded-xl overflow-hidden">
+            <div className="bg-gray-50 border-b border-gray-200 px-6 py-4">
+              <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-400">
+                Auf einen Blick
+              </p>
+            </div>
+            <dl className="grid grid-cols-1 sm:grid-cols-2 divide-y sm:divide-y-0 sm:divide-x divide-gray-100">
+              {[
+                { label: 'Datum', value: post.keyFacts.dates },
+                { label: 'Ort', value: post.keyFacts.location },
+                { label: 'Genre', value: post.keyFacts.genre },
+                { label: 'Eintritt', value: post.keyFacts.price },
+                ...(post.keyFacts.capacity ? [{ label: 'Kapazität', value: post.keyFacts.capacity }] : []),
+                ...(post.keyFacts.since ? [{ label: 'Festival seit', value: post.keyFacts.since }] : []),
+              ].map((item, i) => (
+                <div key={i} className="px-6 py-4">
+                  <dt className="text-[10px] font-bold uppercase tracking-[0.15em] text-gray-400 mb-1">
+                    {item.label}
+                  </dt>
+                  <dd className="text-gray-900 font-medium text-sm leading-snug">{item.value}</dd>
                 </div>
-              )}
-              {post.keyFacts.since && (
-                <div>
-                  <dt className="text-white/40 text-xs uppercase tracking-wider mb-0.5">Seit</dt>
-                  <dd className="text-white font-medium">{post.keyFacts.since}</dd>
-                </div>
-              )}
+              ))}
             </dl>
-            <a
-              href={post.keyFacts.website}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 mt-5 text-sm font-semibold text-white bg-white/10 hover:bg-white/20 px-4 py-2 rounded-xl transition-colors"
-            >
-              🌐 Offizielle Website
-              <svg className="w-3.5 h-3.5 opacity-60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-              </svg>
-            </a>
+            <div className="border-t border-gray-100 px-6 py-4 bg-gray-50/50">
+              <a
+                href={post.keyFacts.website}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 text-sm font-semibold text-gray-700 hover:text-gray-900 transition-colors group"
+              >
+                Offizielle Website
+                <IconExternal />
+              </a>
+            </div>
           </div>
 
-          {/* History Section */}
-          <section className="mb-12">
-            <h2 className="text-2xl md:text-3xl font-bold text-white mb-4">
+          {/* History */}
+          <section className="mb-14">
+            <h2 className="text-2xl md:text-3xl font-extrabold text-gray-900 tracking-tight mb-5">
               {post.historyTitle}
             </h2>
-            <p className="text-white/70 leading-relaxed text-lg">
-              {post.history}
-            </p>
+            <p className="text-gray-600 leading-relaxed text-lg">{post.history}</p>
           </section>
 
+          {/* Lineup */}
+          {post.lineup && post.lineup.length > 0 && (
+            <section className="mb-14">
+              <h2 className="text-2xl md:text-3xl font-extrabold text-gray-900 tracking-tight mb-2">
+                Lineup {post.title}
+              </h2>
+              {post.lineupNote && (
+                <p className="text-gray-400 text-xs uppercase tracking-wider mb-6 flex items-center gap-2">
+                  <IconInfo />
+                  {post.lineupNote}
+                </p>
+              )}
+
+              {/* Headliners */}
+              <div className="mb-6">
+                <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-400 mb-3">
+                  Headliner
+                </p>
+                <div className="divide-y divide-gray-100 border-y border-gray-100">
+                  {post.lineup
+                    .filter(a => a.role === 'headliner')
+                    .map((act, i) => (
+                      <div key={i} className="flex items-center justify-between py-3.5">
+                        <span className="font-bold text-gray-900 text-base">{act.name}</span>
+                        {act.day && (
+                          <span className="text-gray-400 text-xs uppercase tracking-wider">
+                            {act.day}
+                          </span>
+                        )}
+                      </div>
+                    ))}
+                </div>
+              </div>
+
+              {/* Support Acts */}
+              {post.lineup.some(a => a.role === 'support') && (
+                <div className="mb-4">
+                  <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-400 mb-3">
+                    Weitere Acts
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    {post.lineup
+                      .filter(a => a.role === 'support' || a.role === 'special')
+                      .map((act, i) => (
+                        <span
+                          key={i}
+                          className="text-sm font-medium text-gray-700 bg-gray-100 px-3 py-1.5 rounded-lg"
+                        >
+                          {act.name}
+                        </span>
+                      ))}
+                  </div>
+                </div>
+              )}
+            </section>
+          )}
+
           {/* Gallery */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-12 rounded-2xl overflow-hidden">
+          <div className="grid grid-cols-3 gap-2 mb-14 -mx-6 md:mx-0 md:rounded-xl overflow-hidden">
             {post.gallery.map((img, i) => (
               <figure key={i} className="relative aspect-[4/3] overflow-hidden group">
                 <Image
                   src={img.src}
                   alt={img.alt}
                   fill
-                  className="object-cover group-hover:scale-105 transition-transform duration-500"
-                  sizes="(max-width: 640px) 100vw, 33vw"
+                  className="object-cover transition-transform duration-500 group-hover:scale-105"
+                  sizes="(max-width: 640px) 33vw, 220px"
                 />
-                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors duration-300 flex items-end">
-                  <figcaption className="text-white text-xs p-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                    {img.caption}
-                  </figcaption>
-                </div>
               </figure>
             ))}
           </div>
 
           {/* What to Expect */}
-          <section className="mb-12">
-            <h2 className="text-2xl md:text-3xl font-bold text-white mb-4">
+          <section className="mb-14">
+            <h2 className="text-2xl md:text-3xl font-extrabold text-gray-900 tracking-tight mb-5">
               {post.whatToExpectTitle}
             </h2>
-            <p className="text-white/70 leading-relaxed text-lg mb-6">
-              {post.whatToExpect}
-            </p>
+            <p className="text-gray-600 leading-relaxed text-lg mb-6">{post.whatToExpect}</p>
             <ul className="space-y-3">
               {post.whatToExpectList.map((item, i) => (
-                <li key={i} className="flex items-start gap-3 text-white/80">
-                  <span className="mt-1 w-5 h-5 rounded-full bg-white/10 flex items-center justify-center flex-shrink-0 text-xs font-bold text-white/60">
+                <li key={i} className="flex items-start gap-4 text-gray-700">
+                  <span className="flex-shrink-0 mt-1 w-5 h-5 rounded-full bg-gray-900 text-white flex items-center justify-center text-[10px] font-bold">
                     {i + 1}
                   </span>
-                  {item}
+                  <span className="leading-snug">{item}</span>
                 </li>
               ))}
             </ul>
           </section>
 
           {/* Practical Info */}
-          <section className="mb-14">
-            <h2 className="text-2xl md:text-3xl font-bold text-white mb-6">
+          <section className="mb-16">
+            <h2 className="text-2xl md:text-3xl font-extrabold text-gray-900 tracking-tight mb-6">
               {post.practicalInfoTitle}
             </h2>
-            <div className="space-y-4">
+            <div className="divide-y divide-gray-100 border-y border-gray-100">
               {post.practicalInfo.map((info, i) => (
-                <div
-                  key={i}
-                  className="flex items-start gap-4 bg-white/4 hover:bg-white/7 border border-white/8 rounded-2xl p-5 transition-colors"
-                >
-                  <span className="text-2xl flex-shrink-0 mt-0.5">{info.icon}</span>
+                <div key={i} className="flex items-start gap-5 py-5">
+                  <div className="mt-0.5 w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center text-gray-500 flex-shrink-0">
+                    <PracticalIcon label={info.label} />
+                  </div>
                   <div>
-                    <p className="text-white font-semibold text-sm mb-1">{info.label}</p>
-                    <p className="text-white/60 text-sm leading-relaxed">{info.text}</p>
+                    <p className="font-semibold text-gray-900 text-sm mb-0.5">{info.label}</p>
+                    <p className="text-gray-500 text-sm leading-relaxed">{info.text}</p>
                   </div>
                 </div>
               ))}
@@ -277,19 +394,19 @@ export default async function BlogPostPage({
           </section>
 
           {/* CTA */}
-          <div className="bg-gradient-to-r from-white/5 to-white/10 border border-white/15 rounded-2xl p-8 text-center">
-            <p className="text-white/60 text-sm uppercase tracking-wider mb-2">Mehr entdecken</p>
-            <p className="text-white font-bold text-xl mb-5">
-              Noch mehr Events in Österreich?
+          <div className="border border-gray-200 rounded-xl p-8 text-center bg-white">
+            <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-400 mb-3">
+              Mehr entdecken
+            </p>
+            <p className="text-gray-900 font-bold text-xl mb-6 tracking-tight">
+              Noch mehr Events in Österreich
             </p>
             <Link
               href={post.ctaLink}
-              className="inline-flex items-center gap-2 bg-white text-gray-900 font-bold px-6 py-3 rounded-xl hover:bg-white/90 transition-colors text-sm"
+              className="inline-flex items-center gap-2 bg-gray-900 text-white font-semibold px-7 py-3 rounded-lg hover:bg-gray-800 transition-colors text-sm group"
             >
               {post.ctaText}
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
+              <IconArrowRight />
             </Link>
           </div>
         </div>

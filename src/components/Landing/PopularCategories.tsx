@@ -5,35 +5,14 @@ import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { CATEGORIES } from '@/lib/categories';
 
-// Map each category to an emoji icon
-const CATEGORY_ICONS: Record<string, string> = {
-  'Musik': '🎵',
-  'Nightlife': '🌙',
-  'Kultur': '🎭',
-  'Sport': '⚽',
-  'Märkte': '🛍️',
-  'Wein & Kulinarik': '🍷',
-  'Familie': '👨‍👩‍👧',
-  'Natur': '🌿',
-  'Feste & Brauchtum': '🎉',
-  'Bildung': '📚',
-  'Gesundheit': '💚',
-  'Religion': '⛪',
-  'Sonstiges': '📌',
-};
-
 const containerVariants = {
   hidden: {},
-  visible: {
-    transition: {
-      staggerChildren: 0.06,
-    },
-  },
+  visible: { transition: { staggerChildren: 0.05 } },
 };
 
 const tileVariants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: 'easeOut' as const } },
+  hidden: { opacity: 0, y: 16 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.38, ease: 'easeOut' as const } },
 };
 
 export function PopularCategories() {
@@ -46,16 +25,10 @@ export function PopularCategories() {
     fetch('/api/stats/counts')
       .then(res => res.json())
       .then(data => {
-        if (!cancelled && data.categories) {
-          setCounts(data.categories);
-        }
+        if (!cancelled && data.categories) setCounts(data.categories);
       })
-      .catch(() => {
-        // silently fail — tiles show without counts
-      })
-      .finally(() => {
-        if (!cancelled) setLoading(false);
-      });
+      .catch(() => {})
+      .finally(() => { if (!cancelled) setLoading(false); });
     return () => { cancelled = true; };
   }, []);
 
@@ -67,37 +40,39 @@ export function PopularCategories() {
       viewport={{ once: true, margin: '-80px' }}
       variants={containerVariants}
     >
-      <motion.h2
-        className="text-white font-bold text-xl md:text-2xl mb-6 px-1"
-        variants={tileVariants}
-      >
-        Beliebte Kategorien
-      </motion.h2>
+      {/* Header */}
+      <motion.div variants={tileVariants} className="mb-6">
+        <div className="flex items-center gap-4 mb-3">
+          <div className="h-px w-6 bg-white/20" />
+          <span className="text-[10px] font-bold uppercase tracking-[0.25em] text-white/30">
+            Kategorien
+          </span>
+        </div>
+        <h2 className="text-white font-extrabold text-2xl md:text-3xl tracking-tight">
+          Was interessiert dich?
+        </h2>
+      </motion.div>
 
-      {/* 4-col desktop, 3-col tablet, 2-col mobile */}
+      {/* Grid */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
         {CATEGORIES.map((category) => {
           const count = counts[category];
-          const icon = CATEGORY_ICONS[category] ?? '📌';
 
           return (
             <motion.button
               key={category}
               variants={tileVariants}
               onClick={() => router.push(`/map?category=${encodeURIComponent(category)}`)}
-              className="bg-gray-800/60 border border-white/10 rounded-2xl p-4 text-left hover:border-white/30 hover:bg-gray-700/60 hover:shadow-lg transition-all duration-200 group focus:outline-none focus:ring-2 focus:ring-white/30"
-              whileHover={{ scale: 1.03 }}
-              whileTap={{ scale: 0.97 }}
+              className="group bg-white/[0.03] hover:bg-white/[0.07] border border-white/[0.07] hover:border-white/20 rounded-xl p-4 text-left transition-all duration-200 focus:outline-none focus:border-white/30"
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
             >
-              <span className="text-2xl mb-2 block" aria-hidden="true">
-                {icon}
-              </span>
-              <p className="text-white font-medium text-sm leading-snug group-hover:text-white/90">
+              <p className="text-white font-semibold text-sm leading-snug mb-1 group-hover:text-white/85 transition-colors">
                 {category}
               </p>
-              <p className="text-white/40 text-xs mt-0.5">
+              <p className="text-white/25 text-xs tabular-nums">
                 {loading ? (
-                  <span className="inline-block w-10 h-2.5 bg-white/10 rounded animate-pulse" />
+                  <span className="inline-block w-12 h-2.5 bg-white/8 rounded animate-pulse" />
                 ) : count !== undefined ? (
                   `${count.toLocaleString('de-AT')} Events`
                 ) : (

@@ -103,10 +103,8 @@ function MapPageInner() {
     if (filters.search) params.set('search', filters.search);
     if (filters.eveningOnly) params.set('eveningOnly', 'true');
 
-    // Viewport-based loading: pass bounding box if available (read from ref, not state)
-    if (mapBboxRef.current) {
-      params.set('bbox', mapBboxRef.current.join(','));
-    }
+    // NOTE: bbox is intentionally NOT passed — all events are always loaded regardless
+    // of viewport. Client-side filtering keeps the map complete at all zoom levels.
 
     // Fetch all events in one request (matches pre-pagination behaviour)
     params.set('limit', '50000');
