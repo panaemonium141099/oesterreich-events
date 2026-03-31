@@ -26,9 +26,8 @@ Write unit and integration tests for core features: events API, category engine,
 - [ ] All tests pass with `npm test`
 - [ ] Test coverage report shows >80% for tested modules
 ## Done summary
-TBD
-
+Added comprehensive unit and integration tests for core features: date utilities (25 tests), profile completeness (13 tests), category engine (32 tests), and events API route (21 tests). All 127 tests pass with >80% coverage for all tested modules.
 ## Evidence
-- Commits:
-- Tests:
+- Commits: 3f974a1dfd07a657b2fa3b6ebb39eeed48473cc4
+- Tests: npx vitest run, npx vitest run --coverage
 - PRs:

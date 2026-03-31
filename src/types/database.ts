@@ -260,6 +260,20 @@ export type Database = {
           created_at: string
         }
       }
+      event_tags: {
+        Row: {
+          event_id: string
+          tag: string
+        }
+        Insert: {
+          event_id: string
+          tag: string
+        }
+        Update: {
+          event_id?: string
+          tag?: string
+        }
+      }
     }
   }
 }

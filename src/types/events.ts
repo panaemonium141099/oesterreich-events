@@ -56,6 +56,8 @@ export interface EventFilters {
   bundesland?: string;
   district?: string;
   category?: string;
+  /** Multi-tag filter: events matching ANY of the provided tags */
+  tags?: string[];
   dateFrom?: string;
   dateTo?: string;
   priceMin?: number;

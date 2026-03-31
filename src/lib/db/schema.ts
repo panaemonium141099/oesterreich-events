@@ -56,5 +56,13 @@ export function initializeDatabase(db: Database.Database): void {
       longitude   REAL NOT NULL,
       cached_at   TEXT DEFAULT (datetime('now'))
     );
+
+    CREATE TABLE IF NOT EXISTS event_tags (
+      event_id    INTEGER NOT NULL REFERENCES events(id) ON DELETE CASCADE,
+      tag         TEXT NOT NULL,
+      PRIMARY KEY (event_id, tag)
+    );
+    CREATE INDEX IF NOT EXISTS idx_event_tags_tag ON event_tags(tag);
+    CREATE INDEX IF NOT EXISTS idx_event_tags_event_id ON event_tags(event_id);
   `);
 }

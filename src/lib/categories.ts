@@ -242,16 +242,31 @@ const FERATEL_TAG_MAP: Record<string, Category> = {
   'Aktivität / Erlebnis': 'Sport',
 };
 
+/**
+ * Categorize an event into a single primary category.
+ * @deprecated Use categorizeEventMulti() for multi-tag support.
+ */
 export function categorizeEvent(title: string, description?: string, tags?: string[]): Category {
+  const allTags = categorizeEventMulti(title, description, tags);
+  return allTags[0];
+}
+
+/**
+ * Categorize an event into multiple categories/tags.
+ * Returns all matching categories ordered by priority, with at least one entry ('Sonstiges' as fallback).
+ * Maximum 3 tags to keep results focused.
+ */
+export function categorizeEventMulti(title: string, description?: string, tags?: string[]): Category[] {
   const titleText = title.toLowerCase();
   const tagList = tags || [];
   const tagText = tagList.join(' ').toLowerCase();
   const descText = (description || '').toLowerCase();
+  const matched = new Set<Category>();
 
   // Priority 0: Map feratel tags directly if available
   for (const tag of tagList) {
     if (FERATEL_TAG_MAP[tag]) {
-      return FERATEL_TAG_MAP[tag];
+      matched.add(FERATEL_TAG_MAP[tag]);
     }
   }
 
@@ -259,7 +274,7 @@ export function categorizeEvent(title: string, description?: string, tags?: stri
   for (const category of PRIORITY_ORDER) {
     const keywords = CATEGORY_KEYWORDS[category];
     if (keywords.some(kw => titleText.includes(kw.trim()))) {
-      return category;
+      matched.add(category);
     }
   }
 
@@ -267,17 +282,25 @@ export function categorizeEvent(title: string, description?: string, tags?: stri
   for (const category of PRIORITY_ORDER) {
     const keywords = CATEGORY_KEYWORDS[category];
     if (keywords.some(kw => tagText.includes(kw.trim()))) {
-      return category;
+      matched.add(category);
     }
   }
 
-  // Priority 3: match against description (less reliable)
-  for (const category of PRIORITY_ORDER) {
-    const keywords = CATEGORY_KEYWORDS[category];
-    if (keywords.some(kw => descText.includes(kw.trim()))) {
-      return category;
+  // Priority 3: match against description (less reliable, only if we have fewer than 2 matches)
+  if (matched.size < 2) {
+    for (const category of PRIORITY_ORDER) {
+      const keywords = CATEGORY_KEYWORDS[category];
+      if (keywords.some(kw => descText.includes(kw.trim()))) {
+        matched.add(category);
+      }
     }
   }
 
-  return 'Sonstiges';
+  if (matched.size === 0) {
+    return ['Sonstiges'];
+  }
+
+  // Return up to 3 tags, ordered by PRIORITY_ORDER
+  const ordered = PRIORITY_ORDER.filter(c => matched.has(c));
+  return ordered.slice(0, 3) as Category[];
 }

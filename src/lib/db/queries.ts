@@ -1,5 +1,6 @@
 import { getDatabase } from './connection';
 import type { Event, EventFilters, ScrapedEvent } from '@/types/events';
+import { categorizeEventMulti } from '@/lib/categories';
 
 export function getEvents(filters: EventFilters = {}): { events: Event[]; total: number } {
   const db = getDatabase();
@@ -16,7 +17,14 @@ export function getEvents(filters: EventFilters = {}): { events: Event[]; total:
     params.district = filters.district;
   }
 
-  if (filters.category) {
+  if (filters.tags && filters.tags.length > 0) {
+    // Multi-tag filter via event_tags junction table (OR logic: any matching tag)
+    const tagPlaceholders = filters.tags.map((_, i) => `@tag_${i}`).join(', ');
+    conditions.push(`id IN (SELECT event_id FROM event_tags WHERE tag IN (${tagPlaceholders}))`);
+    filters.tags.forEach((tag, i) => {
+      params[`tag_${i}`] = tag;
+    });
+  } else if (filters.category) {
     conditions.push('category = @category');
     params.category = filters.category;
   }
@@ -90,7 +98,11 @@ export function upsertEvent(event: ScrapedEvent): { isNew: boolean } {
     'SELECT id FROM events WHERE source_name = ? AND source_id = ?'
   ).get(event.source_name, event.source_id);
 
+  // Compute multi-tags for the event_tags junction table
+  const multiTags = categorizeEventMulti(event.title, event.description, event.tags);
+
   if (existing) {
+    const existingRow = existing as { id: number };
     db.prepare(`
       UPDATE events SET
         source_url = @source_url,
@@ -137,10 +149,14 @@ export function upsertEvent(event: ScrapedEvent): { isNew: boolean } {
       source_name: event.source_name,
       source_id: event.source_id,
     });
+
+    // Sync event_tags junction table
+    syncEventTags(db, existingRow.id, multiTags);
+
     return { isNew: false };
   }
 
-  db.prepare(`
+  const result = db.prepare(`
     INSERT INTO events (
       source_id, source_name, source_url, title, description,
       start_date, end_date, location_name, address, postal_code,
@@ -176,7 +192,23 @@ export function upsertEvent(event: ScrapedEvent): { isNew: boolean } {
     tags: event.tags ? JSON.stringify(event.tags) : null,
   });
 
+  // Write to event_tags junction table
+  const newEventId = result.lastInsertRowid as number;
+  syncEventTags(db, newEventId, multiTags);
+
   return { isNew: true };
+}
+
+/**
+ * Sync the event_tags junction table for a given event.
+ * Replaces all existing tags with the new set.
+ */
+function syncEventTags(db: import('better-sqlite3').Database, eventId: number, tags: string[]): void {
+  db.prepare('DELETE FROM event_tags WHERE event_id = ?').run(eventId);
+  const insert = db.prepare('INSERT OR IGNORE INTO event_tags (event_id, tag) VALUES (?, ?)');
+  for (const tag of tags) {
+    insert.run(eventId, tag);
+  }
 }
 
 export function recordScrapeRun(sourceName: string) {

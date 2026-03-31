@@ -25,6 +25,9 @@ export async function GET(request: NextRequest) {
   const category = searchParams.get('category');
   if (category) filters.category = category;
 
+  const tags = searchParams.get('tags');
+  if (tags) filters.tags = tags.split(',').map(t => t.trim()).filter(Boolean);
+
   const dateFrom = searchParams.get('dateFrom');
   if (dateFrom) filters.dateFrom = dateFrom;
 
@@ -72,7 +75,23 @@ export async function GET(request: NextRequest) {
       query = query.eq('district', filters.district);
     }
 
-    if (filters.category) {
+    if (filters.tags && filters.tags.length > 0) {
+      // Multi-tag filter: find events that have ANY of the specified tags
+      // Uses the event_tags junction table via a subquery
+      const { data: taggedEventIds } = await supabase
+        .from('event_tags')
+        .select('event_id')
+        .in('tag', filters.tags);
+
+      if (taggedEventIds && taggedEventIds.length > 0) {
+        const ids = taggedEventIds.map((r: { event_id: string }) => r.event_id);
+        query = query.in('id', ids);
+      } else {
+        // No events match the tags — return empty
+        return NextResponse.json({ events: [], total: 0 });
+      }
+    } else if (filters.category) {
+      // Backwards compatible: single category filter on the events table
       query = query.eq('category', filters.category);
     }
 
