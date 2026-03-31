@@ -31,9 +31,8 @@ Read the entire codebase and create a comprehensive architecture document in CHA
 - [ ] Known issues section (from HANDOFF.md + newly discovered)
 - [ ] Build passes after changes
 ## Done summary
-TBD
-
+Created comprehensive CHANGELOG.md documenting full codebase architecture including all 22 Supabase tables, 44 scrapers, API routes, auth system, chat system, and dual-DB architecture.
 ## Evidence
-- Commits:
+- Commits: c0eaf53
 - Tests:
 - PRs:

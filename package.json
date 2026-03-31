@@ -41,7 +41,10 @@
     "scrape:gemeinden-generic": "tsx src/scripts/scrape.ts --source gemeinden-generic",
     "post-process": "tsx src/scripts/post-process.ts",
     "validate": "node src/scripts/validate-events.js",
-    "scrape:all": "npm run scrape && npm run scrape:feratel && npm run validate"
+    "scrape:all": "npm run scrape && npm run scrape:feratel && npm run validate",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage"
   },
   "keywords": [],
   "author": "",
@@ -62,8 +65,9 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.2.2",
-    "better-sqlite3": "^12.8.0",
-    "puppeteer-core": "^24.40.0",
+    "@testing-library/dom": "^10.4.1",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
     "@turf/boolean-point-in-polygon": "^7.3.4",
     "@turf/helpers": "^7.3.4",
     "@turf/simplify": "^7.3.4",
@@ -73,10 +77,16 @@
     "@types/node": "^25.5.0",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^6.0.1",
+    "@vitest/coverage-v8": "^4.1.2",
+    "better-sqlite3": "^12.8.0",
     "eslint": "^10.1.0",
+    "happy-dom": "^20.8.9",
     "postcss": "^8.5.8",
+    "puppeteer-core": "^24.40.0",
     "tailwindcss": "^4.2.2",
     "tsx": "^4.21.0",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "vitest": "^4.1.2"
   }
 }
