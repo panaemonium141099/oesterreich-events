@@ -5,8 +5,29 @@ import { AnimatedLayout } from '@/components/UI/AnimatedLayout';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'Österreich Events — Entdecke was los ist',
+  metadataBase: new URL('https://lasstreffen.at'),
+  title: {
+    default: 'LassTreffen.at — Entdecke was los ist in Österreich',
+    template: '%s | LassTreffen.at',
+  },
   description: 'Über 40.000 Veranstaltungen in ganz Österreich auf einer interaktiven Karte. Konzerte, Raves, Märkte, Kultur, Sport und mehr.',
+  openGraph: {
+    type: 'website',
+    locale: 'de_AT',
+    url: 'https://lasstreffen.at',
+    siteName: 'LassTreffen.at',
+    title: 'LassTreffen.at — Entdecke was los ist in Österreich',
+    description: 'Über 40.000 Veranstaltungen in ganz Österreich auf einer interaktiven Karte. Konzerte, Raves, Märkte, Kultur, Sport und mehr.',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'LassTreffen.at — Entdecke was los ist in Österreich',
+    description: 'Über 40.000 Veranstaltungen in ganz Österreich auf einer interaktiven Karte. Konzerte, Raves, Märkte, Kultur, Sport und mehr.',
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
 };
 
 export default function RootLayout({

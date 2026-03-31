@@ -7,6 +7,30 @@ import { Onboarding } from '@/components/Landing/Onboarding';
 import { LiveActivity } from '@/components/Landing/LiveActivity';
 import { Footer } from '@/components/Legal/Footer';
 
+const websiteJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'WebSite',
+  name: 'LassTreffen.at',
+  url: 'https://lasstreffen.at',
+  description: 'Über 40.000 Veranstaltungen in ganz Österreich auf einer interaktiven Karte.',
+  potentialAction: {
+    '@type': 'SearchAction',
+    target: {
+      '@type': 'EntryPoint',
+      urlTemplate: 'https://lasstreffen.at/map?search={search_term_string}',
+    },
+    'query-input': 'required name=search_term_string',
+  },
+};
+
+const organizationJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Organization',
+  name: 'LassTreffen.at',
+  url: 'https://lasstreffen.at',
+  description: 'Österreichische Event-Discovery-Plattform mit über 40.000 Veranstaltungen auf einer interaktiven Karte.',
+};
+
 export default async function LandingPage() {
   return (
     <div
@@ -62,6 +86,16 @@ export default async function LandingPage() {
 
       {/* Footer */}
       <Footer />
+
+      {/* JSON-LD structured data */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd).replace(/</g, '\u003c') }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd).replace(/</g, '\u003c') }}
+      />
     </div>
   );
 }

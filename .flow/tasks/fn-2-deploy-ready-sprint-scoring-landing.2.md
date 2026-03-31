@@ -47,9 +47,8 @@ Add `event_score` column to Supabase events table, implement score calculation s
 - [ ] `npm run build` still passes
 - [ ] `npm test` — 127 tests pass
 ## Done summary
-TBD
-
+Implemented event scoring algorithm, `/api/events/featured` endpoint, `sort=score` for `/api/events`, Supabase migration for `event_score` column, and `npm run score` script that batch-calculates scores (0-100) for all future events based on image, description, ticket URL, price, tags, organizer, engagement, and time proximity.
 ## Evidence
-- Commits:
-- Tests:
+- Commits: 20f8d8fbdef9f4f98cc022089d4831152a155900
+- Tests: npm run build, npm test (127/127 passing)
 - PRs:
