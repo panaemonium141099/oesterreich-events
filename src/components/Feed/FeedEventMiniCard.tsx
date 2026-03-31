@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import { formatEventDate } from './feed-types';
 
 const CATEGORY_COLORS: Record<string, string> = {
@@ -40,7 +41,7 @@ export function FeedEventMiniCard({ event, compact, onClick }: FeedEventMiniCard
       >
         <div className="w-9 h-9 rounded-lg overflow-hidden shrink-0 bg-white/5">
           {event.image_url ? (
-            <img src={event.image_url} alt="" className="w-full h-full object-cover" loading="lazy" referrerPolicy="no-referrer" />
+            <Image src={event.image_url} alt="" width={36} height={36} className="w-full h-full object-cover" loading="lazy" referrerPolicy="no-referrer" />
           ) : (
             <div className="w-full h-full flex items-center justify-center text-white/15">
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -67,10 +68,12 @@ export function FeedEventMiniCard({ event, compact, onClick }: FeedEventMiniCard
     >
       {event.image_url && (
         <div className="w-full h-32 overflow-hidden relative">
-          <img
+          <Image
             src={event.image_url}
             alt=""
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+            fill
+            sizes="(max-width: 768px) 100vw, 400px"
+            className="object-cover group-hover:scale-105 transition-transform duration-300"
             loading="lazy"
             referrerPolicy="no-referrer"
           />

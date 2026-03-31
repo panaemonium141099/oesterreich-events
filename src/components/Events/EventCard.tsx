@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Image from 'next/image';
 import type { Event } from '@/types/events';
 import { getEventImage } from '@/lib/categoryImages';
 import { formatDate, formatTime } from '@/lib/utils/date';
@@ -98,15 +99,17 @@ export function EventCard({ event, isSelected, onSelect, onHover, eveningMode, i
           {!imageLoaded && (
             <div className="absolute inset-0 skeleton rounded-lg" />
           )}
-          <img
+          <Image
             src={getEventImage(event.image_url, event.category)}
             alt=""
+            width={80}
+            height={80}
             className={`w-full h-full object-cover transition-opacity duration-200 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
             loading="lazy"
             referrerPolicy="no-referrer"
             onLoad={() => setImageLoaded(true)}
             onError={(e) => {
-              const img = e.currentTarget;
+              const img = e.currentTarget as HTMLImageElement;
               if (!img.dataset.fallback) {
                 img.dataset.fallback = '1';
                 img.src = getEventImage(null, event.category);

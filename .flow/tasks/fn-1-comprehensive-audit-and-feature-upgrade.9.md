@@ -31,9 +31,8 @@ Replace the 50,000 row default limit on the events API with cursor-based paginat
 - [ ] Default page size 50, max 200
 - [ ] `npm run build` succeeds
 ## Done summary
-TBD
-
+Implemented cursor-based pagination, bounding box viewport filter, and database-level evening filter on the events API. Map now loads events based on visible viewport with 300ms debounced re-fetching.
 ## Evidence
-- Commits:
-- Tests:
+- Commits: de08d1ff68d121547f711cb91818f01281496282
+- Tests: npm run build
 - PRs:

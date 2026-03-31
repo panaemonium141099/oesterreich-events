@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import type { Event } from '@/types/events';
 import { getEventImage, getCategoryFallbackImage } from '@/lib/categoryImages';
 import { useAuth } from '@/lib/supabase/auth-context';
@@ -346,12 +347,15 @@ export function EventDetail({ event, onClose, eveningMode, onTagClick }: EventDe
 
         {/* Hero Image */}
         <div className="w-full h-64 overflow-hidden rounded-t-2xl relative">
-          <img
+          <Image
             src={getEventImage(event.image_url, event.category)}
             alt={event.title || ''}
-            className="w-full h-full object-cover animate-ken-burns"
+            fill
+            sizes="(max-width: 768px) 100vw, 600px"
+            className="object-cover animate-ken-burns"
+            priority
             onError={(e) => {
-              const img = e.currentTarget;
+              const img = e.currentTarget as HTMLImageElement;
               if (!img.dataset.fallback) {
                 img.dataset.fallback = '1';
                 img.src = getCategoryFallbackImage(event.category);

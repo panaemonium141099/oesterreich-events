@@ -1,4 +1,5 @@
 import type { NextConfig } from 'next';
+import bundleAnalyzer from '@next/bundle-analyzer';
 
 /**
  * Remote image patterns for Next.js Image component.
@@ -69,4 +70,8 @@ const nextConfig: NextConfig = {
   serverExternalPackages: ['better-sqlite3'],
 };
 
-export default nextConfig;
+const withBundleAnalyzer = bundleAnalyzer({
+  enabled: process.env.ANALYZE === 'true',
+});
+
+export default withBundleAnalyzer(nextConfig);

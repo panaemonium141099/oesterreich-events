@@ -3,6 +3,8 @@
 import Link from 'next/link';
 import type { Metadata } from 'next';
 
+export const revalidate = 86400; // ISR: revalidate every 24 hours
+
 export const metadata: Metadata = {
   title: 'Impressum — Österreich Events',
   description: 'Impressum und rechtliche Angaben zu Österreich Events.',
