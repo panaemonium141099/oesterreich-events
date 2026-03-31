@@ -44,6 +44,14 @@ import {
   WUScraper, MedUniWienScraper, BOKUScraper, TUGrazScraper,
   UniSalzburgScraper, JKUScraper, AAUScraper, MedUniGrazScraper,
   MontanUniScraper, KunstUniLinzScraper, VetMedUniScraper,
+  // Batch 2
+  AkBildScraper, MozarteumScraper, DonauUniKremsScraper,
+  FHJoanneumScraper, HCWScraper, FHStPoeltenScraper, FHSalzburgScraper,
+  FHBurgenlandScraper, FHVorarlbergScraper, FHKaerntenScraper, FHWNScraper,
+  FHKufsteinScraper, IMCKremsScraper, MCIScraper, FHWienWKWScraper,
+  Campus02Scraper, FHGTirolScraper, FernFHScraper, FHBFIWienScraper,
+  PHNOEScraper, PHSalzburgScraper, PHKaerntenScraper, PHBurgenlandScraper,
+  KPHWienScraper, PPHAugustinumScraper, KPHEdithSteinScraper,
 } from './uni';
 import { closeSharedBrowser } from './puppeteerBrowser';
 import { upsertEvent, recordScrapeRun } from '../db/queries';
@@ -145,6 +153,34 @@ const scrapers: BaseScraper[] = [
   new MontanUniScraper(),
   new KunstUniLinzScraper(),
   new VetMedUniScraper(),
+  // Universitäten und Hochschulen (Batch 2 — FHs, remaining universities, PHs)
+  new AkBildScraper(),
+  new MozarteumScraper(),
+  new DonauUniKremsScraper(),
+  new FHJoanneumScraper(),
+  new HCWScraper(),
+  new FHStPoeltenScraper(),
+  new FHSalzburgScraper(),
+  new FHBurgenlandScraper(),
+  new FHVorarlbergScraper(),
+  new FHKaerntenScraper(),
+  new FHWNScraper(),
+  new FHKufsteinScraper(),
+  new IMCKremsScraper(),
+  new MCIScraper(),
+  new FHWienWKWScraper(),
+  new Campus02Scraper(),
+  new FHGTirolScraper(),
+  new FernFHScraper(),
+  new FHBFIWienScraper(),
+  // Pädagogische Hochschulen
+  new PHNOEScraper(),
+  new PHSalzburgScraper(),
+  new PHKaerntenScraper(),
+  new PHBurgenlandScraper(),
+  new KPHWienScraper(),
+  new PPHAugustinumScraper(),
+  new KPHEdithSteinScraper(),
 ];
 
 export async function runAllScrapers(): Promise<void> {

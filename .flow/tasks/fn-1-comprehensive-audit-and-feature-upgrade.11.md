@@ -36,9 +36,8 @@ Add elegant, performant UI animations using Framer Motion. Implement page transi
 - [ ] `npm run build` succeeds
 - [ ] Bundle impact measured and documented
 ## Done summary
-TBD
-
+Installed framer-motion and implemented UI animations including page transitions (AnimatedLayout with AnimatePresence), staggered EventCard list entry (AnimatedCard with index-based delays matching existing 40ms convention), EventCard hover scale/shadow effects, skeleton-to-content fade transitions, and save/share/like micro-interaction CSS keyframes. All animations respect prefers-reduced-motion via useReducedMotion() and are capped at 300ms.
 ## Evidence
-- Commits:
-- Tests:
+- Commits: c065b5c0e11d32bfdb53f1cbb121a7374316f5a8
+- Tests: npm run build
 - PRs:

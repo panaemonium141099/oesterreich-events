@@ -55,6 +55,9 @@ const nextConfig: NextConfig = {
       { protocol: 'https', hostname: '**.szenewien.com' },
       { protocol: 'https', hostname: '**.donau.com' },
 
+      // .edu domains (MCI Management Center Innsbruck)
+      { protocol: 'https', hostname: '**.mci.edu' },
+
       // .net / .org / .tv / .info / .live / .travel
       { protocol: 'https', hostname: '**.veranstaltungskalender.net' },
       { protocol: 'https', hostname: '**.deskline.net' },
