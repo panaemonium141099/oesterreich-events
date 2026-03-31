@@ -178,6 +178,7 @@ export function FilterBar({ filters, onFiltersChange, eveningMode, bundeslandId,
     const handler = (e: MouseEvent) => {
       if (suggestionsRef.current && !suggestionsRef.current.contains(e.target as Node) &&
           inputRef.current && !inputRef.current.contains(e.target as Node)) {
+        isUserTypingRef.current = false;
         setShowSuggestions(false);
       }
     };
