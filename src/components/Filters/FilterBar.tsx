@@ -43,6 +43,10 @@ export function FilterBar({ filters, onFiltersChange, eveningMode, bundeslandId,
   const inputRef = useRef<HTMLInputElement>(null);
   const suggestionsRef = useRef<HTMLDivElement>(null);
   const eventFetchRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Track whether the user is actively typing so we never reopen a just-closed dropdown
+  const isUserTypingRef = useRef(false);
+  // AbortController for in-flight autocomplete requests
+  const abortControllerRef = useRef<AbortController | null>(null);
 
   // Load gemeinden data on mount
   useEffect(() => {
@@ -72,7 +76,7 @@ export function FilterBar({ filters, onFiltersChange, eveningMode, bundeslandId,
     setSelectedIndex(-1);
   }, [searchValue, gemeinden]);
 
-  // Fetch live event title suggestions (debounced)
+  // Fetch live event title suggestions (debounced, with AbortController for cancellation)
   useEffect(() => {
     if (!searchValue.trim() || searchValue.length < 2) {
       setEventSuggestions([]);
@@ -80,30 +84,44 @@ export function FilterBar({ filters, onFiltersChange, eveningMode, bundeslandId,
     }
     if (eventFetchRef.current) clearTimeout(eventFetchRef.current);
     eventFetchRef.current = setTimeout(async () => {
+      // Cancel any previous in-flight request
+      abortControllerRef.current?.abort();
+      const controller = new AbortController();
+      abortControllerRef.current = controller;
       try {
-        const res = await fetch(`/api/events?search=${encodeURIComponent(searchValue.trim())}&limit=5&sort=score`);
+        // suggest=true → lightweight path: only id/title/category/location_name, no exact count
+        const res = await fetch(
+          `/api/events?search=${encodeURIComponent(searchValue.trim())}&limit=5&sort=score&suggest=true`,
+          { signal: controller.signal }
+        );
+        if (!res.ok) { setEventSuggestions([]); return; }
         const data = await res.json();
         setEventSuggestions((data.events ?? []).slice(0, 5));
-      } catch {
-        setEventSuggestions([]);
+        // Only open dropdown if the user is still typing (not just after a selection)
+        if (isUserTypingRef.current) {
+          setShowSuggestions((data.events ?? []).length > 0 || suggestions.length > 0);
+        }
+      } catch (err) {
+        if ((err as Error).name !== 'AbortError') setEventSuggestions([]);
       }
     }, 250);
     return () => { if (eventFetchRef.current) clearTimeout(eventFetchRef.current); };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchValue]);
 
-  // Show dropdown whenever either list has items
-  useEffect(() => {
-    setShowSuggestions(eventSuggestions.length > 0 || suggestions.length > 0);
-  }, [eventSuggestions, suggestions]);
-
   const handleSelectGemeinde = (g: Gemeinde) => {
+    isUserTypingRef.current = false;
+    abortControllerRef.current?.abort();
     setSearchValue(g.n);
     setShowSuggestions(false);
+    setSuggestions([]);
+    setEventSuggestions([]);
     onFiltersChange({ ...filters, search: g.n });
     onGemeindeSelect?.({ name: g.n, bundeslandId: g.i, lat: g.lat, lng: g.lng });
   };
 
   const handleSearch = () => {
+    isUserTypingRef.current = false;
     setShowSuggestions(false);
     if (searchValue?.trim()) {
       trackEvent('search', { query: searchValue.trim() });
@@ -114,8 +132,12 @@ export function FilterBar({ filters, onFiltersChange, eveningMode, bundeslandId,
   const totalSuggestions = eventSuggestions.length + suggestions.length;
 
   const handleSelectEvent = (ev: EventSuggestion) => {
+    isUserTypingRef.current = false;
+    abortControllerRef.current?.abort();
     setSearchValue(ev.title);
     setShowSuggestions(false);
+    setSuggestions([]);
+    setEventSuggestions([]);
     onFiltersChange({ ...filters, search: ev.title });
   };
 
@@ -135,12 +157,20 @@ export function FilterBar({ filters, onFiltersChange, eveningMode, bundeslandId,
         handleSearch();
       }
     } else if (e.key === 'Escape') {
+      isUserTypingRef.current = false;
       setShowSuggestions(false);
     }
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    isUserTypingRef.current = true;
     setSearchValue(e.target.value);
+    // Show dropdown immediately as soon as gemeinde suggestions exist for new value
+    if (e.target.value.trim().length >= 2) {
+      setShowSuggestions(true);
+    } else {
+      setShowSuggestions(false);
+    }
   };
 
   // Close on outside click
@@ -165,8 +195,12 @@ export function FilterBar({ filters, onFiltersChange, eveningMode, bundeslandId,
   ].filter(Boolean).length;
 
   const clearFilters = () => {
+    isUserTypingRef.current = false;
+    abortControllerRef.current?.abort();
     setSearchValue('');
     setShowSuggestions(false);
+    setSuggestions([]);
+    setEventSuggestions([]);
     onFiltersChange({});
   };
 

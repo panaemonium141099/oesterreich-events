@@ -66,6 +66,10 @@ export async function GET(request: NextRequest) {
   const sortParam = searchParams.get('sort');
   if (sortParam === 'score') filters.sort = 'score';
 
+  // Lightweight suggest mode: returns only id/title/category/location_name, skips exact count
+  // Used by the autocomplete typeahead in FilterBar to avoid heavyweight DB queries on every keystroke
+  const suggestMode = searchParams.get('suggest') === 'true';
+
   // Bounding box filter: bbox=south_lat,west_lng,north_lat,east_lng
   const bboxParam = searchParams.get('bbox');
   if (bboxParam) {
@@ -78,9 +82,14 @@ export async function GET(request: NextRequest) {
   try {
     // Build the query — use untyped Supabase client (no Database generic),
     // so the chained filter methods return Record<string, unknown> rows
-    let query = supabase
-      .from('events')
-      .select('id, title, description, start_date, end_date, location_name, address, postal_code, district, bundesland, latitude, longitude, category, image_url, price_text, price_min, price_max, ticket_url, source_name, source_url, organizer, visibility, event_score', { count: 'exact' });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const baseQuery = (supabase.from('events') as any);
+    let query = suggestMode
+      ? baseQuery.select('id, title, category, location_name')
+      : baseQuery.select(
+          'id, title, description, start_date, end_date, location_name, address, postal_code, district, bundesland, latitude, longitude, category, image_url, price_text, price_min, price_max, ticket_url, source_name, source_url, organizer, visibility, event_score',
+          { count: 'exact' }
+        );
 
     // Only show public events (scraped events default to 'public')
     query = query.or('visibility.eq.public,visibility.is.null');
