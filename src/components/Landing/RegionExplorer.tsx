@@ -3,27 +3,60 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
+import Image from 'next/image';
 
-const BUNDESLAENDER = [
-  'Wien',
-  'Niederösterreich',
-  'Oberösterreich',
-  'Steiermark',
-  'Salzburg',
-  'Tirol',
-  'Vorarlberg',
-  'Kärnten',
-  'Burgenland',
+interface Region {
+  name: string;
+  image: string;
+}
+
+const REGIONS: Region[] = [
+  {
+    name: 'Wien',
+    image: 'https://images.unsplash.com/photo-1516550893923-42d28e5677af?w=600&q=75&auto=format&fit=crop',
+  },
+  {
+    name: 'Niederösterreich',
+    image: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&q=75&auto=format&fit=crop',
+  },
+  {
+    name: 'Oberösterreich',
+    image: 'https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?w=600&q=75&auto=format&fit=crop',
+  },
+  {
+    name: 'Steiermark',
+    image: 'https://images.unsplash.com/photo-1448375240586-882707db888b?w=600&q=75&auto=format&fit=crop',
+  },
+  {
+    name: 'Salzburg',
+    image: 'https://images.unsplash.com/photo-1491557345352-5929e343eb89?w=600&q=75&auto=format&fit=crop',
+  },
+  {
+    name: 'Tirol',
+    image: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600&q=75&auto=format&fit=crop',
+  },
+  {
+    name: 'Vorarlberg',
+    image: 'https://images.unsplash.com/photo-1519681393784-d120267933ba?w=600&q=75&auto=format&fit=crop',
+  },
+  {
+    name: 'Kärnten',
+    image: 'https://images.unsplash.com/photo-1544198365-f5d60b6d8190?w=600&q=75&auto=format&fit=crop',
+  },
+  {
+    name: 'Burgenland',
+    image: 'https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=600&q=75&auto=format&fit=crop',
+  },
 ];
 
 const containerVariants = {
   hidden: {},
-  visible: { transition: { staggerChildren: 0.06 } },
+  visible: { transition: { staggerChildren: 0.07 } },
 };
 
 const tileVariants = {
-  hidden: { opacity: 0, y: 16 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: 'easeOut' as const } },
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.45, ease: 'easeOut' as const } },
 };
 
 export function RegionExplorer() {
@@ -48,7 +81,7 @@ export function RegionExplorer() {
       className="w-full py-10"
       initial="hidden"
       whileInView="visible"
-      viewport={{ once: true, margin: '-80px' }}
+      viewport={{ once: true, margin: '-60px' }}
       variants={containerVariants}
     >
       {/* Header */}
@@ -64,31 +97,52 @@ export function RegionExplorer() {
         </h2>
       </motion.div>
 
-      {/* Grid */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 gap-px bg-white/[0.06] rounded-xl overflow-hidden border border-white/[0.06]">
-        {BUNDESLAENDER.map((land) => {
-          const count = counts[land];
+      {/* Grid — 3 cols desktop, 2 col mobile */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+        {REGIONS.map(region => {
+          const count = counts[region.name];
 
           return (
             <motion.button
-              key={land}
+              key={region.name}
               variants={tileVariants}
-              onClick={() => router.push(`/map?bundesland=${encodeURIComponent(land)}`)}
-              className="bg-gray-950 hover:bg-white/[0.04] p-5 text-left transition-colors duration-150 focus:outline-none focus:bg-white/[0.06] group"
-              whileHover={{ backgroundColor: 'rgba(255,255,255,0.04)' }}
+              onClick={() => router.push(`/map?bundesland=${encodeURIComponent(region.name)}`)}
+              className="group relative overflow-hidden rounded-2xl aspect-[4/3] focus:outline-none focus:ring-2 focus:ring-white/30"
+              whileHover="hover"
             >
-              <p className="text-white font-semibold text-sm leading-snug mb-1 group-hover:text-white/80 transition-colors">
-                {land}
-              </p>
-              <p className="text-white/25 text-xs tabular-nums">
-                {loading ? (
-                  <span className="inline-block w-14 h-2.5 bg-white/8 rounded animate-pulse" />
-                ) : count !== undefined ? (
-                  `${count.toLocaleString('de-AT')} Events`
-                ) : (
-                  'Events'
-                )}
-              </p>
+              {/* Background image */}
+              <motion.div
+                className="absolute inset-0"
+                variants={{ hover: { scale: 1.07 } }}
+                transition={{ duration: 0.5, ease: 'easeOut' }}
+              >
+                <Image
+                  src={region.image}
+                  alt={region.name}
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 640px) 50vw, 33vw"
+                />
+              </motion.div>
+
+              {/* Gradient overlay */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/20 to-black/5 group-hover:from-black/80 transition-all duration-300" />
+
+              {/* Text */}
+              <div className="absolute inset-x-0 bottom-0 p-4 text-left">
+                <p className="text-white font-extrabold text-base leading-tight">
+                  {region.name}
+                </p>
+                <p className="text-white/50 text-xs mt-0.5 tabular-nums">
+                  {loading ? (
+                    <span className="inline-block w-16 h-2.5 bg-white/15 rounded animate-pulse" />
+                  ) : count !== undefined ? (
+                    `${count.toLocaleString('de-AT')} Events`
+                  ) : (
+                    'Events'
+                  )}
+                </p>
+              </div>
             </motion.button>
           );
         })}

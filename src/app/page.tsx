@@ -51,20 +51,6 @@ export default async function LandingPage() {
       <LandingAuth />
 
       <main className="flex-1 flex flex-col items-center justify-center gap-6 md:gap-10 px-6 text-center max-w-3xl w-full">
-        {/* Brand */}
-        <p
-          className="text-xs sm:text-sm tracking-[0.3em] uppercase text-white/40 font-medium animate-fade-in opacity-0"
-          style={{ animationDelay: '0.1s', animationFillMode: 'forwards' }}
-        >
-          Österreich Events
-        </p>
-
-        {/* Decorative line */}
-        <div
-          className="w-12 h-px bg-white/20 animate-fade-in opacity-0"
-          style={{ animationDelay: '0.2s', animationFillMode: 'forwards' }}
-        />
-
         {/* Headline */}
         <h1
           className="text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-bold tracking-tight animate-fade-in-up opacity-0 leading-[1.1]"
@@ -78,8 +64,13 @@ export default async function LandingPage() {
         {/* Stats */}
         <LandingStats />
 
-        {/* Live activity indicator */}
-        <LiveActivity />
+        {/* Tagline */}
+        <p
+          className="text-white/30 text-sm tracking-[0.12em] animate-fade-in opacity-0"
+          style={{ animationDelay: '0.75s', animationFillMode: 'forwards' }}
+        >
+          Die größte Eventdatenbank Österreichs
+        </p>
 
         {/* Search + CTA */}
         <HeroSection />

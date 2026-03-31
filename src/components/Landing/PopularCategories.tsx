@@ -3,7 +3,28 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
+import Image from 'next/image';
 import { CATEGORIES } from '@/lib/categories';
+
+// Unsplash images per category
+const CATEGORY_IMAGES: Record<string, string> = {
+  Musik: 'https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?w=600&q=75&auto=format&fit=crop',
+  Kultur: 'https://images.unsplash.com/photo-1518998053901-5348d3961a04?w=600&q=75&auto=format&fit=crop',
+  Sport: 'https://images.unsplash.com/photo-1461896836934-ffe607ba8211?w=600&q=75&auto=format&fit=crop',
+  Märkte: 'https://images.unsplash.com/photo-1534073828943-f801091bb18c?w=600&q=75&auto=format&fit=crop',
+  'Wein & Kulinarik': 'https://images.unsplash.com/photo-1510812431401-41d2bd2722f3?w=600&q=75&auto=format&fit=crop',
+  Familie: 'https://images.unsplash.com/photo-1536640712-4d4c36ff0e4e?w=600&q=75&auto=format&fit=crop',
+  Natur: 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=600&q=75&auto=format&fit=crop',
+  'Feste & Brauchtum': 'https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=600&q=75&auto=format&fit=crop',
+  Nightlife: 'https://images.unsplash.com/photo-1566737236500-c8ac43014a67?w=600&q=75&auto=format&fit=crop',
+  Bildung: 'https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=600&q=75&auto=format&fit=crop',
+  Gesundheit: 'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=600&q=75&auto=format&fit=crop',
+  Religion: 'https://images.unsplash.com/photo-1548625361-58a9b86aa83b?w=600&q=75&auto=format&fit=crop',
+  Sonstiges: 'https://images.unsplash.com/photo-1514908162061-357ef90f15d3?w=600&q=75&auto=format&fit=crop',
+};
+
+const FALLBACK_IMAGE =
+  'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=600&q=75&auto=format&fit=crop';
 
 const containerVariants = {
   hidden: {},
@@ -12,7 +33,7 @@ const containerVariants = {
 
 const tileVariants = {
   hidden: { opacity: 0, y: 16 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.38, ease: 'easeOut' as const } },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: 'easeOut' as const } },
 };
 
 export function PopularCategories() {
@@ -53,32 +74,51 @@ export function PopularCategories() {
         </h2>
       </motion.div>
 
-      {/* Grid */}
+      {/* Grid — 2 col mobile / 3 col tablet / 4 col desktop */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
-        {CATEGORIES.map((category) => {
+        {CATEGORIES.map(category => {
           const count = counts[category];
+          const image = CATEGORY_IMAGES[category] ?? FALLBACK_IMAGE;
 
           return (
             <motion.button
               key={category}
               variants={tileVariants}
               onClick={() => router.push(`/map?category=${encodeURIComponent(category)}`)}
-              className="group bg-white/[0.03] hover:bg-white/[0.07] border border-white/[0.07] hover:border-white/20 rounded-xl p-4 text-left transition-all duration-200 focus:outline-none focus:border-white/30"
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
+              className="group relative overflow-hidden rounded-xl aspect-[3/2] focus:outline-none focus:ring-2 focus:ring-white/30"
+              whileHover="hover"
             >
-              <p className="text-white font-semibold text-sm leading-snug mb-1 group-hover:text-white/85 transition-colors">
-                {category}
-              </p>
-              <p className="text-white/25 text-xs tabular-nums">
-                {loading ? (
-                  <span className="inline-block w-12 h-2.5 bg-white/8 rounded animate-pulse" />
-                ) : count !== undefined ? (
-                  `${count.toLocaleString('de-AT')} Events`
-                ) : (
-                  'Entdecken'
-                )}
-              </p>
+              {/* Background image */}
+              <motion.div
+                className="absolute inset-0"
+                variants={{ hover: { scale: 1.08 } }}
+                transition={{ duration: 0.5, ease: 'easeOut' }}
+              >
+                <Image
+                  src={image}
+                  alt={category}
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 640px) 50vw, 25vw"
+                />
+              </motion.div>
+
+              {/* Gradient overlay */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent group-hover:from-black/80 transition-all duration-300" />
+
+              {/* Text */}
+              <div className="absolute inset-x-0 bottom-0 p-3 text-left">
+                <p className="text-white font-bold text-sm leading-tight">{category}</p>
+                <p className="text-white/45 text-[10px] mt-0.5 tabular-nums">
+                  {loading ? (
+                    <span className="inline-block w-12 h-2 bg-white/15 rounded animate-pulse" />
+                  ) : count !== undefined ? (
+                    `${count.toLocaleString('de-AT')} Events`
+                  ) : (
+                    'Entdecken'
+                  )}
+                </p>
+              </div>
             </motion.button>
           );
         })}

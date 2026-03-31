@@ -1,12 +1,33 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import type { Event } from '@/types/events';
 import { formatDate } from '@/lib/utils/date';
 import { getEventImage } from '@/lib/categoryImages';
+
+function IconCal({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.4">
+      <rect x="1" y="2" width="12" height="11" rx="1.5" />
+      <path d="M1 6h12M5 1v2M9 1v2" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+function IconLoc({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.4">
+      <path d="M7 1a4 4 0 0 1 4 4c0 3-4 8-4 8S3 8 3 5a4 4 0 0 1 4-4z" />
+      <circle cx="7" cy="5" r="1.2" fill="currentColor" stroke="none" />
+    </svg>
+  );
+}
+
+// Silence unused import warning
+const _unused: ReactNode = null; void _unused;
 
 const CATEGORY_COLORS: Record<string, string> = {
   Musik: 'bg-purple-500/20 text-purple-300 border-purple-500/30',
@@ -28,13 +49,12 @@ const CATEGORY_FALLBACK = 'bg-white/10 text-white/60 border-white/10';
 
 function SkeletonCard() {
   return (
-    <div className="flex-none w-64 snap-start bg-white/4 rounded-2xl overflow-hidden border border-white/8 animate-pulse">
-      <div className="w-full h-44 bg-white/8" />
-      <div className="p-4 space-y-2.5">
+    <div className="flex-none w-60 snap-start bg-white/4 rounded-2xl overflow-hidden border border-white/8 animate-pulse">
+      <div className="w-full h-40 bg-white/8" />
+      <div className="p-4 h-[90px] space-y-2.5">
         <div className="h-4 bg-white/8 rounded w-4/5" />
         <div className="h-3 bg-white/8 rounded w-2/5" />
         <div className="h-3 bg-white/8 rounded w-3/5" />
-        <div className="h-5 bg-white/8 rounded-full w-24 mt-2" />
       </div>
     </div>
   );
@@ -45,54 +65,62 @@ function HighlightCard({ event }: { event: Event }) {
   const imageUrl = getEventImage(event.image_url, event.category);
   const badgeClass = CATEGORY_COLORS[event.category ?? ''] ?? CATEGORY_FALLBACK;
 
+  const locationText = event.location_name || event.bundesland || null;
+
   return (
-    <Link href={`/events/${event.id}`} className="flex-none w-64 snap-start group block">
+    <Link href={`/events/${event.id}`} className="flex-none w-60 snap-start group block">
+      {/* Fixed total height = image 160px + content 90px = 250px — always uniform */}
       <div className="bg-white/4 backdrop-blur-sm rounded-2xl overflow-hidden border border-white/8 hover:border-white/25 hover:shadow-xl hover:shadow-black/30 transition-all duration-200">
-        {/* Image */}
-        <div className="relative w-full h-44 bg-white/8 overflow-hidden">
+        {/* Image — fixed height */}
+        <div className="relative w-full h-40 bg-white/8 overflow-hidden flex-shrink-0">
           {imageUrl && !imgError ? (
             <Image
               src={imageUrl}
               alt={event.title}
               fill
               className="object-cover group-hover:scale-105 transition-transform duration-500"
-              sizes="256px"
+              sizes="240px"
               onError={() => setImgError(true)}
             />
           ) : (
-            <div className="w-full h-full flex items-center justify-center text-white/15 text-5xl select-none">
-              🎪
+            <div className="w-full h-full flex items-center justify-center">
+              <svg className="w-10 h-10 text-white/10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
             </div>
           )}
           {event.event_score && event.event_score >= 55 && (
-            <div className="absolute top-2.5 right-2.5 bg-amber-400/90 text-gray-900 text-[10px] font-bold px-2 py-0.5 rounded-full">
-              ⭐ Top
+            <div className="absolute top-2.5 right-2.5 bg-white/90 text-gray-900 text-[9px] font-bold px-2 py-0.5 rounded-sm uppercase tracking-wide">
+              Top
             </div>
           )}
         </div>
 
-        {/* Content */}
-        <div className="p-4 space-y-1.5">
-          <p className="text-white font-semibold text-sm leading-tight line-clamp-2 group-hover:text-white/90 transition-colors">
+        {/* Content — fixed height 90px, overflow hidden */}
+        <div className="p-3.5 h-[90px] flex flex-col justify-between overflow-hidden">
+          <p className="text-white font-semibold text-[13px] leading-snug line-clamp-2 group-hover:text-white/85 transition-colors">
             {event.title}
           </p>
-          <p className="text-white/45 text-xs font-medium">
-            📅 {formatDate(event.start_date)}
-          </p>
-          {event.location_name && (
-            <p className="text-white/35 text-xs truncate">📍 {event.location_name}</p>
-          )}
-          {!event.location_name && event.bundesland && (
-            <p className="text-white/35 text-xs">📍 {event.bundesland}</p>
-          )}
-          {event.category && (
-            <span
-              className={`inline-flex items-center text-[10px] font-semibold px-2.5 py-0.5 rounded-full mt-1 border ${badgeClass}`}
-            >
-              {event.category}
-            </span>
-          )}
+          <div className="space-y-0.5 mt-1">
+            <div className="flex items-center gap-1.5 text-white/40 text-[11px]">
+              <IconCal className="w-3 h-3 shrink-0" />
+              <span className="truncate">{formatDate(event.start_date)}</span>
+            </div>
+            {locationText && (
+              <div className="flex items-center gap-1.5 text-white/30 text-[11px]">
+                <IconLoc className="w-3 h-3 shrink-0" />
+                <span className="truncate">{locationText}</span>
+              </div>
+            )}
+          </div>
         </div>
+
+        {/* Category strip at bottom */}
+        {event.category && (
+          <div className={`px-3.5 py-1.5 border-t border-white/5 ${badgeClass}`}>
+            <span className="text-[10px] font-semibold">{event.category}</span>
+          </div>
+        )}
       </div>
     </Link>
   );

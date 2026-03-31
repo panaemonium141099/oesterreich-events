@@ -75,31 +75,34 @@ function FeaturedCard({ post }: { post: (typeof FESTIVAL_POSTS)[0] }) {
   );
 }
 
-/** Smaller card — right column */
+/** Smaller card — right column, vertical layout */
 function SecondaryCard({ post }: { post: (typeof FESTIVAL_POSTS)[0] }) {
   return (
-    <motion.article variants={itemVariants} className="group">
-      <Link href={`/blog/${post.slug}`} className="flex gap-4 items-stretch">
-        {/* Thumbnail */}
-        <div className="relative flex-none w-28 rounded-xl overflow-hidden bg-white/5">
+    <motion.article variants={itemVariants} className="group flex-1">
+      <Link href={`/blog/${post.slug}`} className="block h-full">
+        <div className="relative overflow-hidden rounded-2xl h-full min-h-[180px]">
           <Image
             src={post.thumbnailImage}
             alt={post.title}
             fill
-            className="object-cover transition-transform duration-500 group-hover:scale-105"
-            sizes="112px"
+            className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+            sizes="(max-width: 768px) 100vw, 30vw"
           />
-        </div>
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/25 to-black/5" />
 
-        {/* Text */}
-        <div className="flex flex-col justify-center gap-1.5 min-w-0">
-          <span className="text-[10px] font-bold uppercase tracking-[0.15em] text-white/40">
-            {post.category}
-          </span>
-          <h3 className="text-white font-bold text-base leading-snug line-clamp-2 group-hover:text-white/80 transition-colors">
-            {post.title}
-          </h3>
-          <p className="text-white/35 text-xs uppercase tracking-wider">{post.keyFacts.dates}</p>
+          <div className="absolute inset-x-0 bottom-0 p-5">
+            <div className="flex items-center gap-2 mb-2">
+              <span className="text-[9px] font-bold uppercase tracking-[0.15em] text-white/75 border border-white/25 px-2 py-0.5">
+                {post.category}
+              </span>
+              <span className="text-white/35 text-[10px] uppercase tracking-wider">
+                {post.keyFacts.dates}
+              </span>
+            </div>
+            <h3 className="text-white font-extrabold text-lg leading-tight group-hover:text-white/85 transition-colors">
+              {post.title}
+            </h3>
+          </div>
         </div>
       </Link>
     </motion.article>
@@ -150,31 +153,11 @@ export function FestivalBlogSection() {
           {featured && <FeaturedCard post={featured} />}
         </div>
 
-        {/* Secondary cards — 1 column, stacked */}
-        <div className="flex flex-col gap-5 justify-center">
-          {/* Divider above */}
-          <div className="hidden md:block h-px bg-white/8" />
-
-          {rest.map((post, i) => (
-            <div key={post.slug}>
-              <SecondaryCard post={post} />
-              {i < rest.length - 1 && (
-                <div className="h-px bg-white/8 mt-5" />
-              )}
-            </div>
+        {/* Secondary cards — stacked to match the featured card height */}
+        <div className="flex flex-col gap-5">
+          {rest.map(post => (
+            <SecondaryCard key={post.slug} post={post} />
           ))}
-
-          {/* Divider below */}
-          <div className="hidden md:block h-px bg-white/8" />
-
-          {/* Blog CTA */}
-          <Link
-            href="/blog"
-            className="hidden md:inline-flex items-center gap-2 text-white/40 hover:text-white/80 text-xs font-bold uppercase tracking-[0.15em] transition-colors group"
-          >
-            Alle Festivalberichte
-            <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
-          </Link>
         </div>
       </div>
     </motion.section>
