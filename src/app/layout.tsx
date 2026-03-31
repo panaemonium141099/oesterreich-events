@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { AuthProvider } from '@/lib/supabase/auth-context';
 import { CookieBanner } from '@/components/Legal/CookieBanner';
+import { AnimatedLayout } from '@/components/UI/AnimatedLayout';
 import './globals.css';
 
 export const metadata: Metadata = {
@@ -17,9 +18,9 @@ export default function RootLayout({
     <html lang="de">
       <body className="antialiased">
         <AuthProvider>
-          <div className="animate-fade-in" style={{ animationDuration: '200ms' }}>
+          <AnimatedLayout>
             {children}
-          </div>
+          </AnimatedLayout>
           <CookieBanner />
         </AuthProvider>
       </body>

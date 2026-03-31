@@ -6,6 +6,7 @@ import type { Event } from '@/types/events';
 import { getEventImage } from '@/lib/categoryImages';
 import { formatDate, formatTime } from '@/lib/utils/date';
 import { TagChip, TagOverflow } from '@/components/UI/TagChip';
+import { AnimatedCard } from '@/components/UI/AnimatedCard';
 
 interface EventCardProps {
   event: Event;
@@ -77,19 +78,19 @@ export function EventCard({ event, isSelected, onSelect, onHover, eveningMode, i
     : categoryBorderColor + (eveningMode ? '66' : '44');
 
   return (
-    <div
+    <AnimatedCard
+      index={index}
       onClick={onSelect}
       onMouseEnter={() => onHover(true)}
       onMouseLeave={() => onHover(false)}
       className={`
-        group flex gap-3 p-3 cursor-pointer transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md animate-fade-in-up hover-glow
+        group flex gap-3 p-3 cursor-pointer transition-colors duration-200
         ${eveningMode
-          ? `border-b border-gray-700/60 hover:shadow-indigo-500/10 ${isSelected ? 'bg-indigo-900/30 shadow-[-4px_0_8px_rgba(129,140,248,0.2)]' : 'hover:bg-gray-700/50'}`
+          ? `border-b border-gray-700/60 ${isSelected ? 'bg-indigo-900/30 shadow-[-4px_0_8px_rgba(129,140,248,0.2)]' : 'hover:bg-gray-700/50'}`
           : `border-b border-slate-100/80 ${isSelected ? 'bg-blue-50 shadow-[-4px_0_8px_rgba(59,130,246,0.15)]' : 'hover:bg-slate-50'}`
         }
       `}
       style={{
-        animationDelay: `${Math.min(index * 40, 400)}ms`,
         borderLeft: `3px solid ${borderColor}`,
       }}
     >
@@ -104,7 +105,7 @@ export function EventCard({ event, isSelected, onSelect, onHover, eveningMode, i
             alt=""
             width={80}
             height={80}
-            className={`w-full h-full object-cover transition-opacity duration-200 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
+            className={`w-full h-full object-cover transition-all duration-200 group-hover:scale-110 motion-reduce:group-hover:scale-100 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
             loading="lazy"
             referrerPolicy="no-referrer"
             onLoad={() => setImageLoaded(true)}
@@ -181,6 +182,6 @@ export function EventCard({ event, isSelected, onSelect, onHover, eveningMode, i
           </div>
         )}
       </div>
-    </div>
+    </AnimatedCard>
   );
 }

@@ -250,7 +250,111 @@ Aktuell duenn abgedeckte Regionen:
 - Service Worker fuer Offline-Faehigkeit und Caching
 - Preload/Prefetch Strategien fuer wahrscheinliche Navigation
 
-### 5.2 UI Animationen & Interaktionen
+### 5.2 Karten-Marker Redesign (PRIORITAET: HOCH)
+
+> **Problem:** Aktuell sehen alle 41k Marker identisch aus — weisse 48px Kreise mit Event-Bild. Keine Kategorie-Unterscheidung, Cluster sind simple Zahlen-Bubbles. Bei hoher Dichte ist die Karte ueberfordernd und unlesbar.
+
+**Inspiration von Plattformen mit guter Clustering-UX:**
+- Airbnb: Preis-Bubbles statt generische Marker, Hover zeigt Vorschau, Cluster zeigen Preis-Range
+- Google Maps: Farbcodierte Pins nach Typ (Restaurant rot, Hotel blau), Cluster mit Kategorie-Breakdown
+- Spotangels: Heatmap bei Zoom-Out, Details bei Zoom-In — keine Marker-Ueberflutung
+- Padlet Map: Runde Thumbnails die bei Zoom sauber auseinandergehen
+- Citymapper: Simpel, wenige Farben, klare Hierarchie
+
+**Neue Marker-Strategie:**
+
+Zoom Level 0-8 (Oesterreich-Uebersicht):
+- Heatmap-Layer statt einzelne Marker/Cluster
+- Farb-Intensitaet zeigt Event-Dichte pro Region
+- Bundesland-Labels mit Event-Anzahl
+- Keine einzelnen Marker sichtbar
+
+Zoom Level 9-12 (Bundesland/Bezirk):
+- Cluster-Bubbles mit Kategorie-Breakdown (Donut-Chart statt nur Zahl)
+  - Kreis zeigt farbige Segmente pro Kategorie (Musik=lila, Sport=gruen, Nightlife=pink etc.)
+  - Zahl in der Mitte: Gesamtanzahl
+  - Groesse skaliert mit Anzahl (aktuell schon so, aber Stufen verfeinern)
+- Bei Hover ueber Cluster: Tooltip mit Top-3 Events darin
+
+Zoom Level 13-15 (Stadt/Ort):
+- Kleine Cluster brechen auf in einzelne Marker
+- Einzelne Marker: Farbcodierte Kreise nach Kategorie (NICHT mehr alle weiss)
+  - Musik: Lila (#8B5CF6)
+  - Nightlife: Pink (#EC4899)
+  - Kultur: Orange (#F59E0B)
+  - Sport: Gruen (#10B981)
+  - Feste: Rot (#EF4444)
+  - Wein & Kulinarik: Weinrot (#991B1B)
+  - Maerkte: Tuerkis (#06B6D4)
+  - Familie: Hellblau (#3B82F6)
+  - Natur: Dunkelgruen (#059669)
+  - Bildung: Indigo (#6366F1)
+  - Gesundheit: Mint (#34D399)
+  - Religion: Gold (#D97706)
+  - Sonstiges: Grau (#6B7280)
+- Event-Bild nur bei Hover als Popup (nicht permanent im Marker)
+- Marker-Groesse: Normal 32px, bei hohem event_score 40px (grosse Events stechen raus)
+
+Zoom Level 16+ (Strassen-Level):
+- Volle Detail-Marker: Bild + Kategorie-Farbe als Border
+- Event-Name als Label unter dem Marker
+- Jitter-Algorithmus fuer Events am gleichen Ort (existiert schon, Golden-Angle)
+
+**Technische Umsetzung:**
+- Mapbox GL Expressions fuer Kategorie-basierte Farben (kein JS Loop noetig)
+- Heatmap als eigener Mapbox Layer (`heatmap` type), visibility per Zoom
+- Cluster Donut-Chart: Custom HTML Marker mit SVG (Mapbox unclusteredPointCount + Kategorie-Aggregation)
+- Performance: Nur Marker im Viewport rendern (aktuell schon so via querySourceFeatures)
+
+### 5.3 Koordinaten-Rework (PRIORITAET: KRITISCH)
+
+> **Problem:** Ortszuweisung und Koordinaten stimmen bei vielen Events nicht ueberein. Ursachen: Nominatim nimmt blind erstes Ergebnis, Known-Locations matcht per Substring (zu breit), Feratel hat ~2800 Events mit Region-Center statt Venue, keine Validierung nach Geocoding.
+
+**Schritt 1: Geocoding-Pipeline komplett ueberarbeiten**
+
+Aktueller Flow (kaputt):
+1. Known-Locations Substring Match (34 hardcodierte Orte, `includes()` = false positives)
+2. Cache Check
+3. Nominatim erstes Ergebnis (kein Confidence Check)
+4. Post-Process: Bundesland via Polygon
+
+Neuer Flow:
+1. **Exakte Known-Locations** (kein Substring, exakter Match oder Levenshtein-Distanz < 3)
+   - Known-Locations Datenbank erweitern: Nicht nur 34 Burgenland-Venues, sondern alle bekannten Venues aus den Scrapern (Stadthalle Wien, Arena Wien, Posthof Linz etc.)
+   - Neue Tabelle `known_venues`: name, aliases[], lat, lng, address, bundesland, gemeinde
+   - Scraper fuettern die Tabelle automatisch wenn Venue + Koordinaten aus der Quelle kommen
+2. **Strukturierte Adress-Geocodierung**
+   - Wenn PLZ + Ort vorhanden: Geocode "{PLZ} {Ort}, Austria" (viel praeziser als nur Ortsname)
+   - Wenn Adresse vorhanden: Geocode "{Strasse}, {PLZ} {Ort}, Austria"
+   - Nominatim structured query nutzen: `street=...&city=...&postalcode=...&country=AT`
+3. **Confidence Scoring**
+   - Nominatim liefert importance + type Felder
+   - Nur Ergebnisse mit importance > 0.3 akzeptieren
+   - Nur Ergebnisse vom Typ "building", "amenity", "place" akzeptieren (nicht "boundary" oder "highway")
+   - Ergebnis muss innerhalb des angegebenen Bundeslandes liegen (Polygon-Check sofort, nicht erst im Post-Processing)
+4. **Fallback-Kette**
+   - Known Venue -> Strukturierte Adresse -> PLZ-Zentrum -> Gemeinde-Zentrum -> KEIN Marker (besser kein Marker als falscher!)
+5. **Mismatch-Detektion**
+   - Neues Feld `geocoding_confidence` (float 0-1) pro Event
+   - Neues Feld `geocoding_method` (enum: known_venue|address|plz|gemeinde|nominatim|manual|none)
+   - Events mit confidence < 0.5 bekommen Flag und erscheinen im Admin Panel zur manuellen Pruefung
+
+**Schritt 2: Bestehende Daten bereinigen**
+
+- Script das alle 41k Events nochmal durch die neue Pipeline jagt
+- Feratel ~2800 Events: Venue-Name + PLZ aus Beschreibung/Titel extrahieren, neu geocoden
+- Events die vorher Region-Center hatten: Wenn bessere Koordinaten gefunden -> updaten
+- Events wo Bundesland-Zuweisung und Koordinaten widersprechen: Flaggen fuer manuelle Pruefung
+- Ergebnis: Jedes Event hat entweder korrekte Koordinaten ODER keinen Marker (wird in Sidebar gelistet aber nicht auf der Karte gezeigt)
+
+**Schritt 3: Laufende Qualitaetssicherung**
+
+- Jeder neue Scrape-Run: Neue Events durchlaufen die verbesserte Pipeline
+- QA-Agent (Phase 8) prueft taeglich: "Liegt Event X in Stadt Y?" per Reverse Geocoding
+- Admin Panel: "Events ohne Koordinaten" View + "Niedrige Confidence" View
+- Bulk-Fix Tool: Admin kann PLZ/Ort korrigieren, Koordinaten werden automatisch neu berechnet
+
+### 5.4 UI Animationen & Interaktionen
 
 - Framer Motion als Animation Library (bereits im Plan)
 - Page Transitions: Smooth Uebergaenge zwischen Seiten
@@ -474,17 +578,19 @@ Stufe 3 (50k+ concurrent):
 
 1. ~~Security & TypeScript Fixes~~ — Agent arbeitet dran, danach Re-Scan
 2. ~~Uni/FH Scraper~~ — Agent arbeitet dran
-3. Event-Scoring Algorithmus + Multi-Tag System
-4. Blog-System (DB, Seiten, Admin-Editor, SEO)
-5. Automation Agents: QA-Pruefer + Content-Creator (Blog mit Inhalten fuellen VOR Launch!)
-6. Automation Agents: Quellen-Waechter + Technik Agent
-7. Landing Page Redesign (Featured Events, Festivals, Blog-Vorschau, Regionen)
-8. Neue Scraper (Nischen: Clubs, Festivals, Maerkte + regionale Luecken)
-9. Chat Event-Suche + Social Erweiterungen
-10. UI Animationen (Framer Motion, Transitions)
-11. Affiliate-Integration (Ticket-Tracking, Dashboard)
-12. Infrastruktur: Hetzner + Coolify + Cloudflare aufsetzen, deployen
-13. Social Media Praesenz (Instagram, TikTok — Content-Creator Agent liefert Posts)
+3. **Koordinaten-Rework** — Geocoding-Pipeline ueberarbeiten, bestehende Daten bereinigen (KRITISCH, muss vor Karten-Redesign)
+4. Event-Scoring Algorithmus + Multi-Tag System
+5. **Karten-Marker Redesign** — Heatmap bei Zoom-Out, Kategorie-Farben, Cluster-Donuts (nach Koordinaten-Fix!)
+6. Blog-System (DB, Seiten, Admin-Editor, SEO)
+7. Automation Agents: QA-Pruefer + Content-Creator (Blog mit Inhalten fuellen VOR Launch!)
+8. Automation Agents: Quellen-Waechter + Technik Agent
+9. Landing Page Redesign (Featured Events, Festivals, Blog-Vorschau, Regionen)
+10. Neue Scraper (Nischen: Clubs, Festivals, Maerkte + regionale Luecken)
+11. Chat Event-Suche + Social Erweiterungen
+12. UI Animationen (Framer Motion, Transitions)
+13. Affiliate-Integration (Ticket-Tracking, Dashboard)
+14. Infrastruktur: Hetzner + Coolify + Cloudflare aufsetzen, deployen
+15. Social Media Praesenz (Instagram, TikTok — Content-Creator Agent liefert Posts)
 
 **Logik:** Automation kommt VOR dem Deploy, weil die Seite beim Launch schon gerankte Events, Blog-Inhalte und geprueften Content haben soll. Kein leerer Blog, keine ungepruefte Datenqualitaet beim Go-Live.
 

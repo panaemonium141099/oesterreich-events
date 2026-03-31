@@ -34,9 +34,8 @@ Implement event scrapers for the first batch of Austrian universities (largest/m
 - [ ] At least 10 scrapers successfully extract events when run
 - [ ] `npm run build` succeeds
 ## Done summary
-TBD
-
+Implemented 15 university scrapers (Batch 1) for top Austrian universities by student count. Created UniBaseScraper shared base class with JSON-LD parsing, date helpers, and multi-tag support. All scrapers follow BaseScraper pattern with rate limiting, Cheerio HTML parsing, and automatic "Bildung" tagging. Build verified, robots.txt checked for all 15 domains.
 ## Evidence
-- Commits:
-- Tests:
+- Commits: 19bb3da378663d71708be8e8f06b98682a99c557
+- Tests: npm run build
 - PRs:
