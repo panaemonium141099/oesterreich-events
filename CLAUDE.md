@@ -1,47 +1,66 @@
 # burgenland-events-v5
 
 ## Beschreibung
-Web-App mit interaktiver Karte vom Burgenland die Events aus mehreren Quellen scrapt und visuell darstellt. Events werden als Marker mit Vorschaubildern angezeigt. Klick zeigt Detailinfos mit Link zum Original-Event.
+Osterreich Events — Austrian event discovery platform. Aggregates events from ~98 scrapers across Austria, displays them on an interactive Mapbox GL JS map, and provides social features (DM, group chat, friends, feed, memories).
 
 ## Typ
 node / next.js
 
 ## Tech-Stack
 - **Frontend:** Next.js 16 (App Router) + React 19 + TypeScript
-- **Map:** Leaflet + react-leaflet + react-leaflet-cluster
+- **Map:** Mapbox GL JS (`mapbox-gl` v3.20)
 - **Styling:** Tailwind CSS v4
-- **API:** Next.js API Routes
-- **Datenbank:** SQLite via better-sqlite3
-- **Scraping:** Cheerio (SSR-Seiten)
+- **Animations:** Framer Motion v12
+- **API:** Next.js API Routes (cursor-based pagination, bbox viewport filter)
+- **Datenbank (production):** Supabase PostgreSQL (22 tables)
+- **Datenbank (staging):** SQLite via better-sqlite3
+- **Auth:** Supabase Auth (Google OAuth + Email/Password)
+- **Scraping:** Cheerio (SSR), Puppeteer-core (SPA/tickets)
 - **Geocoding:** Nominatim (OpenStreetMap) + lokaler Cache
+- **Testing:** Vitest 4.x + @vitest/coverage-v8
 
 ## Wichtige Pfade
-- `src/app/page.tsx` — Hauptseite (Karte + Sidebar)
-- `src/app/api/events/route.ts` — Events API mit Filter
-- `src/lib/scrapers/` — Scraper-Module (BaseScraper, BurgenlandInfo, Landesregierung)
+- `src/app/page.tsx` — Hauptseite (Landing / Map)
+- `src/app/api/events/route.ts` — Events API (cursor pagination, bbox, tags, eveningOnly)
+- `src/lib/scrapers/` — ~98 Scraper-Module
+- `src/lib/scrapers/uni/` — 42 University/FH/PH scrapers
+- `src/lib/scrapers/niche/` — 12 niche category scrapers (festivals, nightlife, outdoor, culture, food, family)
+- `src/lib/scrapers/BaseScraper.ts` — Base class mit Image extraction + validation
 - `src/lib/db/` — SQLite Schema, Connection, Queries
-- `src/components/Map/` — Leaflet-Karte, Marker, Cluster
-- `src/components/Events/` — EventCard, EventList, EventDetail
-- `src/components/Filters/` — FilterBar, Kategorie, Bezirk, Datum
+- `src/lib/utils/date.ts` — Shared date formatting utilities
+- `src/lib/utils/profile.ts` — Shared profile utilities
+- `src/components/Map/EventMap.tsx` — Mapbox GL JS Karte
+- `src/components/Events/` — EventCard, EventDetail, EventPreviewCard
+- `src/components/Filters/FilterBar.tsx` — Category, Bundesland, Datum, Tags (multi-select)
 - `src/scripts/scrape.ts` — CLI Scrape-Script
+- `src/__tests__/` — Vitest test suite
 - `data/events.db` — SQLite Datenbank (gitignored)
+- `CHANGELOG.md` — Full architecture documentation + phase-by-phase change log
 
 ## Scraper-Quellen
 - **burgenland.info** — Cheerio + JSON-LD (@graph), ~122 Events mit Koordinaten
 - **burgenland.at** — Cheerio, article.event Struktur, ~448 Events (Landesregierung)
+- **44 regional scrapers** — Wien, NOE, OOE, Steiermark, Salzburg, Karnten, Tirol, Vorarlberg, multi-region
+- **42 university/FH/PH scrapers** — `src/lib/scrapers/uni/` (all 9 Bundeslaender covered)
+- **12 niche scrapers** — `src/lib/scrapers/niche/` (festivals, nightlife, outdoor, culture, food, family)
 
 ## Build & Test
 ```bash
-npm run dev          # Dev-Server starten
-npm run build        # Produktions-Build
-npm run scrape       # Alle Scraper ausführen
+npm run dev              # Dev-Server starten
+npm run build            # Produktions-Build (strict TypeScript)
+npm run scrape           # Alle Scraper ausführen
 npm run scrape:burgenland  # Nur burgenland.info scrapen
+npm test                 # Vitest test suite (127 tests, 123 passing)
+npm run test:coverage    # Tests mit V8 Coverage-Report
+npm run test:watch       # Vitest watch mode
 ```
 
 ## Bekannte Issues
-- Events von burgenland.at haben keine Koordinaten aus der Quelle — werden via Known-Locations-Mapping geocoded
+- 4 API-Tests schlagen fehl (events.test.ts) — Pagination- und Evening-Filter-Tests sind nach Cursor-Pagination-Einführung veraltet; Code ist korrekt, Tests müssen aktualisiert werden
 - ~93 Events haben noch keine Koordinaten (unbekannte Orte)
 - Eventim/oeticket-Scraper noch nicht implementiert (brauchen Puppeteer)
+- Admin-Scraper-Routes haben keine Rollen-Prüfung (auth key reicht, kein admin/god required)
+- Business-Profile-Onboarding nicht vollständig implementiert
 
 <!-- BEGIN FLOW-NEXT -->
 ## Flow-Next

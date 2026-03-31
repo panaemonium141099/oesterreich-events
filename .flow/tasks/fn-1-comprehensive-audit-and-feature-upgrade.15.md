@@ -36,9 +36,8 @@ Add event scrapers for niche categories and underrepresented regions. Implement 
 - [ ] Image domains added to remotePatterns
 - [ ] `npm run build` succeeds
 ## Done summary
-TBD
-
+Added 12 niche event scrapers across 6 categories (Festival, Nightlife, Outdoor/Sport, Culture/Theater, Food/Markets, Family) in a new src/lib/scrapers/niche/ directory. Enhanced categorizeEvent() with niche-specific keywords and registered all scrapers in the main index with category tags (Festival, Nightlife, Outdoor, Sport, Theater, Kultur, Markt, Familie). Documented regional coverage gaps in docs/regional-coverage-analysis.md.
 ## Evidence
-- Commits:
-- Tests:
+- Commits: d6ae7d4afea530ef2f8f92a94b4f57b09dd6fdf7
+- Tests: npx tsc --noEmit (0 errors in niche scrapers), npm run build (succeeded)
 - PRs:
