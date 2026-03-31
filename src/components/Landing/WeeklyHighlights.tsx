@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
@@ -9,30 +9,32 @@ import { formatDate } from '@/lib/utils/date';
 import { getEventImage } from '@/lib/categoryImages';
 
 const CATEGORY_COLORS: Record<string, string> = {
-  'Musik': 'bg-purple-100 text-purple-700',
-  'Nightlife': 'bg-violet-100 text-violet-700',
-  'Wein & Kulinarik': 'bg-rose-100 text-rose-700',
-  'Kultur': 'bg-amber-100 text-amber-700',
-  'Märkte': 'bg-green-100 text-green-700',
-  'Sport': 'bg-blue-100 text-blue-700',
-  'Familie': 'bg-pink-100 text-pink-700',
-  'Natur': 'bg-emerald-100 text-emerald-700',
-  'Feste & Brauchtum': 'bg-orange-100 text-orange-700',
-  'Bildung': 'bg-cyan-100 text-cyan-700',
-  'Gesundheit': 'bg-teal-100 text-teal-700',
-  'Religion': 'bg-indigo-100 text-indigo-700',
-  'Sonstiges': 'bg-slate-100 text-slate-700',
+  Musik: 'bg-purple-500/20 text-purple-300 border-purple-500/30',
+  Nightlife: 'bg-violet-500/20 text-violet-300 border-violet-500/30',
+  'Wein & Kulinarik': 'bg-rose-500/20 text-rose-300 border-rose-500/30',
+  Kultur: 'bg-amber-500/20 text-amber-300 border-amber-500/30',
+  Märkte: 'bg-green-500/20 text-green-300 border-green-500/30',
+  Sport: 'bg-blue-500/20 text-blue-300 border-blue-500/30',
+  Familie: 'bg-pink-500/20 text-pink-300 border-pink-500/30',
+  Natur: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30',
+  'Feste & Brauchtum': 'bg-orange-500/20 text-orange-300 border-orange-500/30',
+  Bildung: 'bg-cyan-500/20 text-cyan-300 border-cyan-500/30',
+  Gesundheit: 'bg-teal-500/20 text-teal-300 border-teal-500/30',
+  Religion: 'bg-indigo-500/20 text-indigo-300 border-indigo-500/30',
+  Sonstiges: 'bg-slate-500/20 text-slate-300 border-slate-500/30',
 };
+
+const CATEGORY_FALLBACK = 'bg-white/10 text-white/60 border-white/10';
 
 function SkeletonCard() {
   return (
-    <div className="flex-none w-64 snap-start bg-white/5 rounded-2xl overflow-hidden border border-white/10 animate-pulse">
-      <div className="w-full h-40 bg-white/10" />
-      <div className="p-4 space-y-2">
-        <div className="h-4 bg-white/10 rounded w-3/4" />
-        <div className="h-3 bg-white/10 rounded w-1/2" />
-        <div className="h-3 bg-white/10 rounded w-2/3" />
-        <div className="h-5 bg-white/10 rounded-full w-20 mt-2" />
+    <div className="flex-none w-64 snap-start bg-white/4 rounded-2xl overflow-hidden border border-white/8 animate-pulse">
+      <div className="w-full h-44 bg-white/8" />
+      <div className="p-4 space-y-2.5">
+        <div className="h-4 bg-white/8 rounded w-4/5" />
+        <div className="h-3 bg-white/8 rounded w-2/5" />
+        <div className="h-3 bg-white/8 rounded w-3/5" />
+        <div className="h-5 bg-white/8 rounded-full w-24 mt-2" />
       </div>
     </div>
   );
@@ -41,68 +43,102 @@ function SkeletonCard() {
 function HighlightCard({ event }: { event: Event }) {
   const [imgError, setImgError] = useState(false);
   const imageUrl = getEventImage(event.image_url, event.category);
-  const badgeClass = CATEGORY_COLORS[event.category ?? ''] ?? CATEGORY_COLORS['Sonstiges'];
+  const badgeClass = CATEGORY_COLORS[event.category ?? ''] ?? CATEGORY_FALLBACK;
 
   return (
-    <div className="flex-none w-64 snap-start bg-white/5 backdrop-blur-sm rounded-2xl overflow-hidden border border-white/10 hover:border-white/25 transition-colors duration-200">
-      <div className="relative w-full h-40 bg-white/10">
-        {imageUrl && !imgError ? (
-          <Image
-            src={imageUrl}
-            alt={event.title}
-            fill
-            className="object-cover"
-            sizes="256px"
-            onError={() => setImgError(true)}
-          />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center text-white/20 text-4xl select-none">
-            🎪
-          </div>
-        )}
-      </div>
-      <div className="p-4 space-y-1">
-        <p className="text-white font-semibold text-sm leading-tight line-clamp-2">
-          {event.title}
-        </p>
-        <p className="text-white/50 text-xs">
-          {formatDate(event.start_date)}
-        </p>
-        {event.location_name && (
-          <p className="text-white/40 text-xs truncate">
-            {event.location_name}
+    <Link href={`/events/${event.id}`} className="flex-none w-64 snap-start group block">
+      <div className="bg-white/4 backdrop-blur-sm rounded-2xl overflow-hidden border border-white/8 hover:border-white/25 hover:shadow-xl hover:shadow-black/30 transition-all duration-200">
+        {/* Image */}
+        <div className="relative w-full h-44 bg-white/8 overflow-hidden">
+          {imageUrl && !imgError ? (
+            <Image
+              src={imageUrl}
+              alt={event.title}
+              fill
+              className="object-cover group-hover:scale-105 transition-transform duration-500"
+              sizes="256px"
+              onError={() => setImgError(true)}
+            />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center text-white/15 text-5xl select-none">
+              🎪
+            </div>
+          )}
+          {event.event_score && event.event_score >= 55 && (
+            <div className="absolute top-2.5 right-2.5 bg-amber-400/90 text-gray-900 text-[10px] font-bold px-2 py-0.5 rounded-full">
+              ⭐ Top
+            </div>
+          )}
+        </div>
+
+        {/* Content */}
+        <div className="p-4 space-y-1.5">
+          <p className="text-white font-semibold text-sm leading-tight line-clamp-2 group-hover:text-white/90 transition-colors">
+            {event.title}
           </p>
-        )}
-        {event.category && (
-          <span className={`inline-block text-[10px] font-medium px-2 py-0.5 rounded-full mt-1 ${badgeClass}`}>
-            {event.category}
-          </span>
-        )}
+          <p className="text-white/45 text-xs font-medium">
+            📅 {formatDate(event.start_date)}
+          </p>
+          {event.location_name && (
+            <p className="text-white/35 text-xs truncate">📍 {event.location_name}</p>
+          )}
+          {!event.location_name && event.bundesland && (
+            <p className="text-white/35 text-xs">📍 {event.bundesland}</p>
+          )}
+          {event.category && (
+            <span
+              className={`inline-flex items-center text-[10px] font-semibold px-2.5 py-0.5 rounded-full mt-1 border ${badgeClass}`}
+            >
+              {event.category}
+            </span>
+          )}
+        </div>
       </div>
-    </div>
+    </Link>
   );
 }
 
 export function WeeklyHighlights() {
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
+  const [label, setLabel] = useState('Top Events diese Woche');
+  const fetchedRef = useRef(false);
 
   useEffect(() => {
-    let cancelled = false;
-    fetch('/api/events/featured?limit=8')
-      .then(res => res.json())
-      .then(data => {
-        if (!cancelled) {
-          setEvents(data.events ?? []);
+    if (fetchedRef.current) return;
+    fetchedRef.current = true;
+
+    const loadEvents = async (lat?: number, lng?: number) => {
+      try {
+        const url = new URL('/api/events/featured', window.location.origin);
+        url.searchParams.set('limit', '10');
+        if (lat !== undefined && lng !== undefined) {
+          url.searchParams.set('lat', lat.toFixed(4));
+          url.searchParams.set('lng', lng.toFixed(4));
         }
-      })
-      .catch(() => {
+        const res = await fetch(url.toString());
+        const data = await res.json();
+        setEvents(data.events ?? []);
+      } catch {
         // silently fail — empty state shown
-      })
-      .finally(() => {
-        if (!cancelled) setLoading(false);
-      });
-    return () => { cancelled = true; };
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    // Try geolocation for "Events in deiner Nähe"
+    if (typeof navigator !== 'undefined' && 'geolocation' in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        pos => {
+          setLabel('Top Events in deiner Nähe');
+          loadEvents(pos.coords.latitude, pos.coords.longitude);
+        },
+        () => loadEvents(),
+        { timeout: 3000, maximumAge: 300_000 }
+      );
+    } else {
+      loadEvents();
+    }
   }, []);
 
   return (
@@ -113,38 +149,47 @@ export function WeeklyHighlights() {
       viewport={{ once: true }}
       transition={{ duration: 0.5, ease: 'easeOut' }}
     >
-      <div className="flex items-center justify-between mb-4 px-1">
-        <h2 className="text-white font-bold text-xl md:text-2xl">
-          Highlights der Woche
-        </h2>
+      <div className="flex items-center justify-between mb-5 px-1">
+        <div>
+          <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-white/30 mb-1">
+            Empfohlen für dich
+          </p>
+          <h2 className="text-white font-bold text-xl md:text-2xl">{label}</h2>
+        </div>
+        <Link
+          href="/map"
+          className="hidden sm:inline-flex items-center gap-1.5 text-white/40 hover:text-white text-sm font-medium transition-colors group"
+        >
+          Alle Events
+          <svg className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+          </svg>
+        </Link>
       </div>
 
       <div
-        className="flex gap-4 overflow-x-auto pb-4"
+        className="flex gap-4 overflow-x-auto pb-3 -mx-1 px-1"
         style={{ scrollSnapType: 'x proximity', WebkitOverflowScrolling: 'touch' }}
       >
-        {loading ? (
-          Array.from({ length: 4 }).map((_, i) => <SkeletonCard key={i} />)
-        ) : events.length === 0 ? (
-          <p className="text-white/40 text-sm py-8 px-1">Keine Highlights verfügbar</p>
-        ) : (
-          events.map(event => (
-            <HighlightCard key={event.id} event={event} />
-          ))
-        )}
+        {loading
+          ? Array.from({ length: 5 }).map((_, i) => <SkeletonCard key={i} />)
+          : events.length === 0
+          ? <p className="text-white/35 text-sm py-8 px-1">Keine Highlights verfügbar</p>
+          : events.map(event => <HighlightCard key={event.id} event={event} />)}
 
-        {/* "Alle Events entdecken" link card */}
-        {!loading && (
-          <div className="flex-none w-48 snap-start flex items-center justify-center">
+        {!loading && events.length > 0 && (
+          <div className="flex-none w-44 snap-start flex items-center justify-center">
             <Link
               href="/map"
-              className="group flex flex-col items-center gap-2 text-white/60 hover:text-white transition-colors duration-200"
+              className="group flex flex-col items-center gap-2 text-white/40 hover:text-white/80 transition-colors duration-200 text-center"
             >
-              <span className="text-3xl group-hover:scale-110 transition-transform duration-200">
-                &rarr;
+              <span className="w-12 h-12 rounded-full border border-white/15 flex items-center justify-center group-hover:border-white/40 transition-colors">
+                <svg className="w-5 h-5 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
               </span>
-              <span className="text-sm font-medium text-center leading-snug">
-                Alle Events entdecken
+              <span className="text-xs font-medium leading-snug">
+                Alle Events<br />entdecken
               </span>
             </Link>
           </div>

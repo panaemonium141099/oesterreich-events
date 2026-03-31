@@ -216,7 +216,7 @@ describe('GET /api/events', () => {
     const query = createChainableQuery({
       data: null,
       error: { message: 'Database error', code: '500' },
-      count: null,
+      count: undefined,
     });
     mockFrom.mockReturnValue(query);
 
