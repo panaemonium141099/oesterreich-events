@@ -1,0 +1,14 @@
+node_modules
+.next
+.git
+data/
+.env.local
+.env*.local
+.flow
+*.md
+README*
+CHANGELOG*
+CLAUDE*
+UMSETZUNGSPLAN*
+AGENT-PROMPT*
+scripts/ralph

@@ -77,6 +77,8 @@ const nextConfig: NextConfig = {
   },
   // better-sqlite3 only used by scraper scripts, not by API routes
   serverExternalPackages: ['better-sqlite3'],
+  // Standalone output for Docker deployment (Coolify)
+  output: 'standalone',
 };
 
 const withBundleAnalyzer = bundleAnalyzer({
