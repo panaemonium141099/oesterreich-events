@@ -349,6 +349,7 @@ Four roles in `profiles.role`:
 | `/saved` | Saved/bookmarked events |
 | `/profile` | User profile settings |
 | `/events/create` | Create user event |
+| `/events/[id]` | SEO event detail page with OG meta tags and JSON-LD Event schema |
 | `/spotify-matches` | Spotify artist-event matches |
 | `/admin` | Admin panel (6 tabs: overview, users, events, stats, scrapers, moderation) |
 | `/auth/login` | Login page |
@@ -358,6 +359,11 @@ Four roles in `profiles.role`:
 | `/impressum` | Legal: Impressum |
 | `/datenschutz` | Legal: Privacy Policy |
 | `/agb` | Legal: Terms of Service |
+| `/sitemap.xml` | XML sitemap (chunked via generateSitemaps(), 5000 events per chunk) |
+| `/robots.txt` | robots.txt (disallows /api/, /admin/, /auth/) |
+| `/api/events/featured` | Top events by score with start_date >= today |
+| `/api/stats/counts` | Region and category event counts (single query) |
+| `/api/health` | Container health check — returns `{ "status": "ok" }` |
 
 ## Key Components
 
@@ -454,6 +460,7 @@ npm run validate         # Validate event data quality
 npm run post-process     # Geocoding + Bundesland assignment
 npm run assign-districts # Assign districts to events
 npm run geocode          # Run geocoding for events without coordinates
+npm run score            # Calculate event scores and write to Supabase (run after deploy and daily)
 npm test                 # Run Vitest test suite (123 passing, 4 known failures)
 npm run test:coverage    # Run tests with V8 coverage report
 npm run test:watch       # Vitest in watch mode
@@ -476,7 +483,9 @@ src/
       callback/route.ts         # OAuth callback
       complete-profile/page.tsx # Profile completion
     calendar/page.tsx           # Personal calendar
-    events/create/page.tsx      # Create event form
+    events/
+      create/page.tsx           # Create event form
+      [id]/page.tsx             # SEO event detail (generateMetadata + JSON-LD)
     feed/page.tsx               # Social feed
     friends/page.tsx            # Friend management
     groups/
@@ -494,8 +503,11 @@ src/
     spotify-matches/page.tsx    # Spotify matches
     api/
       events/
-        route.ts                # Events list API
+        route.ts                # Events list API (cursor pagination, sort=score)
         [id]/route.ts           # Event detail API
+        featured/route.ts       # Top events by score (start_date >= today)
+      health/route.ts           # Container health check
+      stats/counts/route.ts     # Region + category counts (single query)
       scrape/route.ts           # Scrape trigger API
       analytics/route.ts        # Analytics ingestion
       admin/
@@ -523,6 +535,9 @@ src/
       HeroSection.tsx
       LandingAuth.tsx
       LandingStats.tsx
+      WeeklyHighlights.tsx      # Top-scored events from /api/events/featured
+      RegionExplorer.tsx        # Region grid from /api/stats/counts
+      PopularCategories.tsx     # Category grid from /api/stats/counts
     Layout/
       Header.tsx
       SocialNav.tsx
@@ -580,7 +595,9 @@ src/
     events.ts                   # Event, ScrapedEvent, EventFilters, Category, District types
   scripts/
     scrape.ts                   # CLI scraper runner
+    calculate-scores.ts         # Event scoring algorithm (writes event_score to Supabase)
     validate-events.js          # Event data validator
+Dockerfile                      # Multi-stage build: node:20-slim + sharp (Coolify deployment)
     post-process.ts             # Geocoding + Bundesland post-processing
     assign-districts.ts         # District assignment script
     geocode.ts                  # Bulk geocoding script
@@ -805,6 +822,35 @@ All niche scrapers extend BaseScraper and are registered in the main scraper ind
 
 ---
 
+### Phase 13: Deploy-Ready Sprint — Scoring, Landing Page, SEO, Docker
+
+**Commits:** `20f8d8f`, `5e892c7`, `b22207a`, `569adba`, `503e8fa`
+
+**Features added:**
+
+- **Docker / standalone build** (`Dockerfile`, `next.config.ts output: 'standalone'`): multi-stage build with `node:20-slim` + explicit `sharp` install; produces a minimal self-contained image for Coolify / Hetzner deployment
+- **Health check** (`/api/health`): returns `{ "status": "ok" }` for container orchestration
+- **Event scoring** (`src/scripts/calculate-scores.ts`, `npm run score`): multi-factor algorithm writing `event_score` to Supabase `events` table; factors: has-image (+20), has-description (+15), has-location (+10), recency, price signal, title length
+- **Featured events API** (`/api/events/featured`): returns top N events by `event_score` with `start_date >= today`; used by landing page
+- **Sort by score** (`/api/events?sort=score`): score-aware cursor pagination using `(event_score, id)` composite cursor
+- **Stats counts API** (`/api/stats/counts`): single Supabase RPC returning all 9 region + 13 category counts; avoids N+1 API calls from landing page
+- **Landing page sections**: `WeeklyHighlights` (top-scored upcoming events), `RegionExplorer` (9-region grid with event counts), `PopularCategories` (13-category grid with event counts); all server components integrated into `src/app/page.tsx`
+- **SEO infrastructure**: `metadataBase` in `layout.tsx`, OG tags + Twitter cards on homepage, `robots.ts` (disallows /api/, /admin/, /auth/), `sitemap.ts` with `generateSitemaps()` (chunks of 5000 events)
+- **Event detail SEO page** (`/events/[id]/page.tsx`): `generateMetadata` with per-event OG title/description/image, JSON-LD `Event` schema (name, startDate, location, image, url)
+
+**New routes:**
+
+| Route | Added in |
+|-------|----------|
+| `/api/health` | `5e892c7` |
+| `/api/events/featured` | `20f8d8f` |
+| `/api/stats/counts` | `b22207a` |
+| `/events/[id]` | `569adba` |
+| `/sitemap.xml` | `569adba` |
+| `/robots.txt` | `5e892c7` |
+
+---
+
 ### Summary: What Changed vs. Baseline
 
 | Area | Before | After |
@@ -821,6 +867,10 @@ All niche scrapers extend BaseScraper and are registered in the main scraper ind
 | Animations | None | Framer Motion page transitions, card entrance, micro-interactions |
 | Chat | Basic text + event_share | Inline `/event` search, rich preview cards |
 | Legal pages | SSR on every request | ISR 24h cache |
+| Docker / deployment | No container support | Multi-stage Dockerfile, `output: standalone`, health endpoint |
+| Landing page | Map only | WeeklyHighlights, RegionExplorer, PopularCategories sections |
+| SEO | No meta tags | OG tags, sitemap.xml, robots.txt, JSON-LD Event schema |
+| Event scoring | No ranking | `event_score` column, scoring script, featured + sort=score APIs |
 
 ---
 

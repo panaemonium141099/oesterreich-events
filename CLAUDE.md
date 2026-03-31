@@ -20,8 +20,16 @@ node / next.js
 - **Testing:** Vitest 4.x + @vitest/coverage-v8
 
 ## Wichtige Pfade
-- `src/app/page.tsx` — Hauptseite (Landing / Map)
-- `src/app/api/events/route.ts` — Events API (cursor pagination, bbox, tags, eveningOnly)
+- `src/app/page.tsx` — Hauptseite (Landing mit WeeklyHighlights, RegionExplorer, PopularCategories)
+- `src/app/api/events/route.ts` — Events API (cursor pagination, bbox, tags, eveningOnly, sort=score)
+- `src/app/api/events/featured/route.ts` — Featured events API (top events by score, start_date >= today)
+- `src/app/api/health/route.ts` — Health check endpoint fur Docker / Coolify
+- `src/app/api/stats/counts/route.ts` — Stats counts API (9 regions + 13 categories in one query)
+- `src/app/events/[id]/page.tsx` — SEO event detail page (generateMetadata + JSON-LD Event schema)
+- `src/app/sitemap.ts` — XML sitemap mit generateSitemaps() (chunked bei 5000 Events)
+- `src/app/robots.ts` — robots.txt (disallows /api/, /admin/, /auth/)
+- `src/scripts/calculate-scores.ts` — Event-Scoring-Algorithmus (schreibt event_score nach Supabase)
+- `Dockerfile` — Multi-stage Docker-Build (node:20-slim + sharp) fur Coolify-Deployment
 - `src/lib/scrapers/` — ~98 Scraper-Module
 - `src/lib/scrapers/uni/` — 42 University/FH/PH scrapers
 - `src/lib/scrapers/niche/` — 12 niche category scrapers (festivals, nightlife, outdoor, culture, food, family)
@@ -32,6 +40,9 @@ node / next.js
 - `src/components/Map/EventMap.tsx` — Mapbox GL JS Karte
 - `src/components/Events/` — EventCard, EventDetail, EventPreviewCard
 - `src/components/Filters/FilterBar.tsx` — Category, Bundesland, Datum, Tags (multi-select)
+- `src/components/Landing/WeeklyHighlights.tsx` — Top-scored events (uses /api/events/featured)
+- `src/components/Landing/RegionExplorer.tsx` — Region-Grid (uses /api/stats/counts)
+- `src/components/Landing/PopularCategories.tsx` — Kategorie-Grid (uses /api/stats/counts)
 - `src/scripts/scrape.ts` — CLI Scrape-Script
 - `src/__tests__/` — Vitest test suite
 - `data/events.db` — SQLite Datenbank (gitignored)
@@ -48,11 +59,25 @@ node / next.js
 ```bash
 npm run dev              # Dev-Server starten
 npm run build            # Produktions-Build (strict TypeScript)
-npm run scrape           # Alle Scraper ausführen
+npm run scrape           # Alle Scraper ausfuhren
 npm run scrape:burgenland  # Nur burgenland.info scrapen
+npm run score            # Event-Scores berechnen und nach Supabase schreiben
 npm test                 # Vitest test suite (127 tests, 123 passing)
 npm run test:coverage    # Tests mit V8 Coverage-Report
 npm run test:watch       # Vitest watch mode
+```
+
+## Docker
+```bash
+# Lokaler Build-Test
+docker build -t lasstreffen-test \
+  --build-arg NEXT_PUBLIC_MAPBOX_TOKEN=test \
+  --build-arg NEXT_PUBLIC_SUPABASE_URL=https://test.supabase.co \
+  --build-arg NEXT_PUBLIC_SUPABASE_ANON_KEY=test \
+  .
+
+# Deployment: Coolify (Hetzner) — Git-Push triggert automatischen Docker-Build
+# Health check: GET /api/health -> { "status": "ok" }
 ```
 
 ## Bekannte Issues
