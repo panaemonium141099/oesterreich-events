@@ -40,6 +40,8 @@
     "fix-gem2go": "tsx src/scripts/fix-gem2go-urls.ts",
     "probe-gemeinden": "tsx src/scripts/probe-gemeinden.ts",
     "scrape:gemeinden-generic": "tsx src/scripts/scrape.ts --source gemeinden-generic",
+    "score": "tsx --env-file=.env.local src/scripts/calculate-scores.ts",
+    "migrate": "tsx --env-file=.env.local src/scripts/apply-migration.ts",
     "post-process": "tsx src/scripts/post-process.ts",
     "validate": "node src/scripts/validate-events.js",
     "scrape:all": "npm run scrape && npm run scrape:feratel && npm run validate",

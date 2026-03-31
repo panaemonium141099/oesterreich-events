@@ -1,0 +1,16 @@
+{
+  "assignee": null,
+  "claim_note": "",
+  "claimed_at": null,
+  "created_at": "2026-03-31T16:39:14.973151Z",
+  "depends_on": [
+    "fn-2-deploy-ready-sprint-scoring-landing.5"
+  ],
+  "epic": "fn-2-deploy-ready-sprint-scoring-landing",
+  "id": "fn-2-deploy-ready-sprint-scoring-landing.6",
+  "priority": null,
+  "spec_path": ".flow/tasks/fn-2-deploy-ready-sprint-scoring-landing.6.md",
+  "status": "todo",
+  "title": "Event Detail Page & Sitemap",
+  "updated_at": "2026-03-31T16:42:11.810376Z"
+}

@@ -1,0 +1,18 @@
+{
+  "assignee": null,
+  "claim_note": "",
+  "claimed_at": null,
+  "created_at": "2026-03-31T16:39:15.919811Z",
+  "depends_on": [
+    "fn-2-deploy-ready-sprint-scoring-landing.2",
+    "fn-2-deploy-ready-sprint-scoring-landing.4",
+    "fn-2-deploy-ready-sprint-scoring-landing.6"
+  ],
+  "epic": "fn-2-deploy-ready-sprint-scoring-landing",
+  "id": "fn-2-deploy-ready-sprint-scoring-landing.7",
+  "priority": null,
+  "spec_path": ".flow/tasks/fn-2-deploy-ready-sprint-scoring-landing.7.md",
+  "status": "todo",
+  "title": "Final Build Validation, Docker Test & Docs",
+  "updated_at": "2026-03-31T16:42:37.868500Z"
+}

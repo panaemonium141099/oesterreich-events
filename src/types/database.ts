@@ -77,6 +77,8 @@ export type Database = {
           view_count: number
           save_count: number
           share_count: number
+          event_score: number | null
+          score_updated_at: string | null
           created_at: string
           updated_at: string
         }

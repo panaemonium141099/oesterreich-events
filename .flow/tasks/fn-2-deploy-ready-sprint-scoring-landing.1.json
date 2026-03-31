@@ -1,0 +1,14 @@
+{
+  "assignee": null,
+  "claim_note": "",
+  "claimed_at": null,
+  "created_at": "2026-03-31T16:39:10.262646Z",
+  "depends_on": [],
+  "epic": "fn-2-deploy-ready-sprint-scoring-landing",
+  "id": "fn-2-deploy-ready-sprint-scoring-landing.1",
+  "priority": null,
+  "spec_path": ".flow/tasks/fn-2-deploy-ready-sprint-scoring-landing.1.md",
+  "status": "todo",
+  "title": "Docker Setup & Standalone Build",
+  "updated_at": "2026-03-31T16:39:44.946304Z"
+}

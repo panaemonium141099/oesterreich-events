@@ -1,0 +1,16 @@
+{
+  "assignee": null,
+  "claim_note": "",
+  "claimed_at": null,
+  "created_at": "2026-03-31T16:39:13.100488Z",
+  "depends_on": [
+    "fn-2-deploy-ready-sprint-scoring-landing.3"
+  ],
+  "epic": "fn-2-deploy-ready-sprint-scoring-landing",
+  "id": "fn-2-deploy-ready-sprint-scoring-landing.4",
+  "priority": null,
+  "spec_path": ".flow/tasks/fn-2-deploy-ready-sprint-scoring-landing.4.md",
+  "status": "todo",
+  "title": "RegionExplorer, PopularCategories & Landing Integration",
+  "updated_at": "2026-03-31T16:41:15.143290Z"
+}

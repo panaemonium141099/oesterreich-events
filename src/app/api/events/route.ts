@@ -62,6 +62,10 @@ export async function GET(request: NextRequest) {
   const offset = searchParams.get('offset');
   if (offset) filters.offset = parseInt(offset, 10);
 
+  // Sort mode: 'date' (default) or 'score'
+  const sortParam = searchParams.get('sort');
+  if (sortParam === 'score') filters.sort = 'score';
+
   // Bounding box filter: bbox=south_lat,west_lng,north_lat,east_lng
   const bboxParam = searchParams.get('bbox');
   if (bboxParam) {
@@ -76,7 +80,7 @@ export async function GET(request: NextRequest) {
     // so the chained filter methods return Record<string, unknown> rows
     let query = supabase
       .from('events')
-      .select('id, title, description, start_date, end_date, location_name, address, postal_code, district, bundesland, latitude, longitude, category, image_url, price_text, price_min, price_max, source_name, source_url, organizer, visibility', { count: 'exact' });
+      .select('id, title, description, start_date, end_date, location_name, address, postal_code, district, bundesland, latitude, longitude, category, image_url, price_text, price_min, price_max, ticket_url, source_name, source_url, organizer, visibility, event_score', { count: 'exact' });
 
     // Only show public events (scraped events default to 'public')
     query = query.or('visibility.eq.public,visibility.is.null');
@@ -173,26 +177,50 @@ export async function GET(request: NextRequest) {
         .lte('longitude', eastLng);
     }
 
-    // Order by start_date, then id for stable cursor pagination
-    query = query.order('start_date', { ascending: true });
-    query = query.order('id', { ascending: true });
+    if (filters.sort === 'score') {
+      // Score sort: highest score first, then id descending for stability
+      query = query.order('event_score', { ascending: false });
+      query = query.order('id', { ascending: false });
 
-    // Cursor-based pagination: fetch events after the cursor event
-    if (filters.cursor) {
-      // Look up the cursor event's start_date to position the query
-      const { data: cursorEvent } = await supabase
-        .from('events')
-        .select('start_date, id')
-        .eq('id', filters.cursor)
-        .single();
+      // Cursor-based pagination for score sort:
+      // Use (event_score < cursor_score) OR (event_score = cursor_score AND id < cursor_id)
+      if (filters.cursor) {
+        const { data: cursorEvent } = await supabase
+          .from('events')
+          .select('event_score, id')
+          .eq('id', filters.cursor)
+          .single();
 
-      if (cursorEvent) {
-        // Get events that come after the cursor in sort order:
-        // (start_date > cursor_date) OR (start_date = cursor_date AND id > cursor_id)
-        query = query.or(
-          `start_date.gt.${cursorEvent.start_date},` +
-          `and(start_date.eq.${cursorEvent.start_date},id.gt.${cursorEvent.id})`
-        );
+        if (cursorEvent) {
+          const cursorScore = cursorEvent.event_score ?? 0;
+          query = query.or(
+            `event_score.lt.${cursorScore},` +
+            `and(event_score.eq.${cursorScore},id.lt.${cursorEvent.id})`
+          );
+        }
+      }
+    } else {
+      // Default: order by start_date, then id for stable cursor pagination
+      query = query.order('start_date', { ascending: true });
+      query = query.order('id', { ascending: true });
+
+      // Cursor-based pagination: fetch events after the cursor event
+      if (filters.cursor) {
+        // Look up the cursor event's start_date to position the query
+        const { data: cursorEvent } = await supabase
+          .from('events')
+          .select('start_date, id')
+          .eq('id', filters.cursor)
+          .single();
+
+        if (cursorEvent) {
+          // Get events that come after the cursor in sort order:
+          // (start_date > cursor_date) OR (start_date = cursor_date AND id > cursor_id)
+          query = query.or(
+            `start_date.gt.${cursorEvent.start_date},` +
+            `and(start_date.eq.${cursorEvent.start_date},id.gt.${cursorEvent.id})`
+          );
+        }
       }
     }
 

@@ -23,7 +23,10 @@ export interface Event {
   image_url: string | null;
   organizer: string | null;
   tags: string[] | null;
+  ticket_url?: string | null;
   visibility?: string;
+  event_score?: number;
+  score_updated_at?: string;
   created_at: string;
   updated_at: string;
 }
@@ -68,6 +71,8 @@ export interface EventFilters {
   offset?: number;
   /** Cursor-based pagination: ID of last event from previous page */
   cursor?: string;
+  /** Sort order: 'date' (default) or 'score' */
+  sort?: 'date' | 'score';
   /** Bounding box filter: [south_lat, west_lng, north_lat, east_lng] */
   bbox?: [number, number, number, number];
 }

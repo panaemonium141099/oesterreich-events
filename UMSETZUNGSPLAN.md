@@ -1,20 +1,28 @@
 # LassTreffen.at - Technischer Umsetzungsplan
 
-## IST-Zustand (Scan 31.03.2026)
+## IST-Zustand (Re-Scan 31.03.2026, nach Agent-Run)
 
-- 44 Scraper, 41.380+ Events, alle 9 Bundeslaender abgedeckt
-- Next.js 16 + React 19 + Supabase + Mapbox GL JS
-- Social Features vorhanden: Chat (DMs + Gruppen), Freunde, Feed, Memories, Kalender
-- Events haben: view_count, save_count, share_count (aber kein Scoring/Ranking-Algorithmus)
-- 13 Kategorien, tags[] Array existiert in DB aber Multi-Tag noch nicht implementiert
-- Admin Panel mit 6 Tabs (Overview, Users, Events, Analytics, Scrapers, Moderation)
-- Kein Blog-System, kein CMS, keine Affiliate-Integration
-- Kein Event-Scoring-Algorithmus
-- Kein automatisiertes Content-System
-- 41% der Events ohne Bild, MeinBezirk ohne Beschreibungen
-- Security Issues: ignoreBuildErrors:true, Service Role Key in API Routes, Admin Routes ungeschuetzt
-- Leaflet Dependencies noch in package.json obwohl auf Mapbox migriert
-- Nicht deployed (Vercel ausstehend)
+ERLEDIGT durch Agent (Tasks 1-16):
+- ~98 Scraper total (44 regional + 37 Uni/FH/PH + 7 Nische + 10 Gemeinde)
+- ignoreBuildErrors ENTFERNT, Bundle Analyzer konfiguriert
+- Leaflet komplett entfernt, Mapbox GL JS v3.20 sauber
+- Multi-Tag System komplett (TagChip, TagFilter, API Support)
+- Framer Motion Animationen (EventList, AnimatedCard, Landing Hero)
+- Chat Event-Suche implementiert (EventSearchInline, EventPreviewMessage)
+- Cursor-basierte Pagination im Events API (50/page statt 50k)
+- ISR + next/image Optimierung konfiguriert (50+ Remote Patterns)
+- 127+ Tests (Vitest), davon 4 API-Tests veraltet
+- Koordinaten-Grundlagen verbessert (Bundesland GeoJSON, PLZ-Mapping)
+
+OFFEN:
+- Kein Blog-System (null — keine Routes, keine Tabellen, keine Components)
+- Kein Event-Scoring Algorithmus (nur Spotify-Match hat Score)
+- Keine Automation Agents
+- Keine Affiliate-Integration
+- Karten-Marker nicht redesigned (immer noch weisse Kreise, keine Kategorie-Farben)
+- Koordinaten-Pipeline nicht ueberarbeitet (Confidence Scoring, Venue-DB fehlt)
+- Landing Page nicht redesigned
+- Nicht deployed
 
 ---
 
@@ -576,24 +584,44 @@ Stufe 3 (50k+ concurrent):
 
 ## Zusammenfassung: Reihenfolge der Umsetzung
 
-1. ~~Security & TypeScript Fixes~~ — Agent arbeitet dran, danach Re-Scan
-2. ~~Uni/FH Scraper~~ — Agent arbeitet dran
-3. **Koordinaten-Rework** — Geocoding-Pipeline ueberarbeiten, bestehende Daten bereinigen (KRITISCH, muss vor Karten-Redesign)
-4. Event-Scoring Algorithmus + Multi-Tag System
-5. **Karten-Marker Redesign** — Heatmap bei Zoom-Out, Kategorie-Farben, Cluster-Donuts (nach Koordinaten-Fix!)
-6. Blog-System (DB, Seiten, Admin-Editor, SEO)
-7. Automation Agents: QA-Pruefer + Content-Creator (Blog mit Inhalten fuellen VOR Launch!)
-8. Automation Agents: Quellen-Waechter + Technik Agent
-9. Landing Page Redesign (Featured Events, Festivals, Blog-Vorschau, Regionen)
-10. Neue Scraper (Nischen: Clubs, Festivals, Maerkte + regionale Luecken)
-11. Chat Event-Suche + Social Erweiterungen
-12. UI Animationen (Framer Motion, Transitions)
-13. Affiliate-Integration (Ticket-Tracking, Dashboard)
-14. Infrastruktur: Hetzner + Coolify + Cloudflare aufsetzen, deployen
-15. Social Media Praesenz (Instagram, TikTok — Content-Creator Agent liefert Posts)
+### ERLEDIGT (Agent-Run Tasks 1-16)
+- ~~Security & TypeScript Fixes~~ DONE
+- ~~Uni/FH/PH Scraper (37 Stueck)~~ DONE
+- ~~Nische-Scraper (7 Stueck)~~ DONE
+- ~~Multi-Tag System~~ DONE
+- ~~Framer Motion Animationen~~ DONE
+- ~~Chat Event-Suche~~ DONE
+- ~~Cursor-Pagination + Performance~~ DONE
+- ~~Bundle Analyzer + ISR + next/image~~ DONE
 
-**Logik:** Automation kommt VOR dem Deploy, weil die Seite beim Launch schon gerankte Events, Blog-Inhalte und geprueften Content haben soll. Kein leerer Blog, keine ungepruefte Datenqualitaet beim Go-Live.
+### NAECHSTER AGENT-RUN (heute Nacht durchackern, morgen deployen)
 
-**Infrastruktur-Kosten bei Launch:** ~€40/Monat (Hetzner €11 + Supabase $25 + Cloudflare gratis). Volle Kontrolle, kein Vendor Lock-in, skaliert bis 50k+ User ohne Architektur-Aenderung.
+**Ziel: Seite muss morgen deploybar sein. Affiliate-Bewerbung kommt NACH Deploy (die wollen die live Seite sehen).**
 
-Jede Phase ist eigenstaendig commitbar und bringt sichtbaren Mehrwert.
+1. **Event-Scoring Algorithmus** — event_score Feld, Berechnung (Venue-Groesse, Ticket, Preis, Engagement, Zeitnaehe), Script das alle Events scored
+2. **Landing Page Upgrade** — "Highlights diese Woche" (Top Events nach Score), "Upcoming Festivals", "Entdecke nach Region" (Bundesland-Kacheln), bestehende Sektionen (Hero, Stats, LiveActivity) behalten und integrieren
+3. **SEO Basics** — Dynamische OG Tags pro Event, sitemap.xml, robots.txt, JSON-LD Event Schema, Canonical URLs
+4. **Deployment-Readiness** — Dockerfile (multi-stage build), /api/health Endpoint, Environment Variables dokumentieren, Build ohne Fehler sicherstellen
+
+### NACH DEPLOY (Phase 2 — naechste Woche+)
+
+5. **Affiliate-Integration** — Bei oeticket, eventbrite, ticketmaster Affiliate beantragen (Seite ist jetzt live als Referenz), nach Zusage: Affiliate-Parameter an ticket_urls, Klick-Tracking (ticket_click Event), Dashboard im Admin Panel
+6. Koordinaten-Rework (Geocoding-Pipeline, Confidence Scoring, Venue-DB, Daten-Bereinigung)
+7. Karten-Marker Redesign (Heatmap, Donut-Cluster, Kategorie-Farben — nach Koordinaten-Fix)
+8. Blog-System (DB Tabellen, /blog Routes, Admin-Editor, SEO)
+9. Automation Agents: QA-Pruefer + Content-Creator (Blog fuellen, Datenqualitaet)
+10. Automation Agents: Quellen-Waechter + Technik Agent
+11. Landing Page Phase 2 (Blog-Vorschau, Nachtleben-Sektion)
+12. Social Media Praesenz (Instagram, TikTok)
+
+### INFRASTRUKTUR (morgen aufsetzen)
+
+- Hetzner CAX31 bestellen (€11/Monat)
+- Coolify installieren, GitHub Repo verbinden
+- Cloudflare DNS + CDN (gratis)
+- Supabase Pro Plan ($25/Monat)
+- Domain: lasstreffen.at
+- SSL: Cloudflare Full Strict + Let's Encrypt
+- Scraper als Cron-Container (alle 6h)
+
+**Gesamt: ~€40/Monat. Morgen live.**
