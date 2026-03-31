@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { downloadICS } from '@/lib/calendar/ics';
+import { formatDateCompact, formatTime } from '@/lib/utils/date';
 
 interface EventData {
   id: string;
@@ -38,17 +39,6 @@ const CATEGORY_COLORS: Record<string, string> = {
   'Sonstiges': 'bg-gray-500/20 text-gray-400',
 };
 
-function formatDate(dateStr: string) {
-  const d = new Date(dateStr);
-  return d.toLocaleDateString('de-AT', { day: 'numeric', month: 'short', year: 'numeric' });
-}
-
-function formatTime(dateStr: string): string | null {
-  if (!dateStr || dateStr.length <= 10 || !dateStr.includes('T')) return null;
-  const d = new Date(dateStr);
-  if (d.getHours() === 0 && d.getMinutes() === 0) return null;
-  return d.toLocaleTimeString('de-AT', { hour: '2-digit', minute: '2-digit' });
-}
 
 export function EventPreviewCard({ eventId, isMe, onViewDetail }: EventPreviewCardProps) {
   const [event, setEvent] = useState<EventData | null>(null);
@@ -133,7 +123,7 @@ export function EventPreviewCard({ eventId, isMe, onViewDetail }: EventPreviewCa
           <svg className="w-3 h-3 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
           </svg>
-          <span>{formatDate(event.start_date)}</span>
+          <span>{formatDateCompact(event.start_date)}</span>
           {time && <span className="text-white/30">{time}</span>}
         </div>
 

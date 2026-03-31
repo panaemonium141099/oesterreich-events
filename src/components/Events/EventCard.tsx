@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import type { Event } from '@/types/events';
 import { getEventImage } from '@/lib/categoryImages';
+import { formatDate, formatTime } from '@/lib/utils/date';
 
 interface EventCardProps {
   event: Event;
@@ -11,42 +12,6 @@ interface EventCardProps {
   onHover: (hovering: boolean) => void;
   eveningMode?: boolean;
   index?: number;
-}
-
-function formatDate(dateStr: string): string {
-  try {
-    // For date-only strings (YYYY-MM-DD), parse as local to avoid UTC timezone shift
-    const dateOnly = dateStr.length === 10 && !dateStr.includes('T');
-    const date = dateOnly ? new Date(dateStr + 'T12:00:00') : new Date(dateStr);
-    return date.toLocaleDateString('de-AT', {
-      weekday: 'short',
-      day: '2-digit',
-      month: 'short',
-      year: 'numeric',
-    });
-  } catch {
-    return dateStr;
-  }
-}
-
-function formatTime(dateStr: string): string | null {
-  try {
-    // If date string has no time component (just YYYY-MM-DD), don't show time
-    if (!dateStr || dateStr.length <= 10 || !dateStr.includes('T')) return null;
-    const date = new Date(dateStr);
-    const hours = date.getHours();
-    const minutes = date.getMinutes();
-    // Hide 00:00 and 01:00 — these indicate no real time was set
-    // (01:00 appears due to UTC+1 CET timezone offset for midnight dates)
-    if (hours === 0 && minutes === 0) return null;
-    if (hours === 1 && minutes === 0) return null;
-    return date.toLocaleTimeString('de-AT', {
-      hour: '2-digit',
-      minute: '2-digit',
-    });
-  } catch {
-    return null;
-  }
 }
 
 const CATEGORY_COLORS: Record<string, string> = {

@@ -10,6 +10,7 @@ import { downloadICS, getGoogleCalendarUrl } from '@/lib/calendar/ics';
 import { CheckIcon, CalendarIcon } from '../UI/Icons';
 import confetti from 'canvas-confetti';
 import { trackEvent } from '@/lib/analytics';
+import { formatDateLong, formatTime } from '@/lib/utils/date';
 
 interface EventDetailProps {
   event: Event;
@@ -17,38 +18,8 @@ interface EventDetailProps {
   eveningMode?: boolean;
 }
 
-function formatDateTime(dateStr: string): string {
-  try {
-    // For date-only strings (YYYY-MM-DD), parse as local to avoid UTC timezone shift
-    const dateOnly = dateStr.length === 10 && !dateStr.includes('T');
-    const date = dateOnly ? new Date(dateStr + 'T12:00:00') : new Date(dateStr);
-    return date.toLocaleDateString('de-AT', {
-      weekday: 'long',
-      day: '2-digit',
-      month: 'long',
-      year: 'numeric',
-    });
-  } catch {
-    return dateStr;
-  }
-}
-
-function formatTime(dateStr: string): string | null {
-  try {
-    // If date string has no time component (just YYYY-MM-DD), don't show time
-    if (!dateStr || dateStr.length <= 10 || !dateStr.includes('T')) return null;
-    const date = new Date(dateStr);
-    const hours = date.getHours();
-    const minutes = date.getMinutes();
-    // Hide 00:00 and 01:00 — these indicate no real time was set
-    // (01:00 appears due to UTC+1 CET timezone offset for midnight dates)
-    if (hours === 0 && minutes === 0) return null;
-    if (hours === 1 && minutes === 0) return null;
-    return date.toLocaleTimeString('de-AT', { hour: '2-digit', minute: '2-digit' });
-  } catch {
-    return null;
-  }
-}
+// formatDateLong provides the long weekday+month format used in detail views
+// formatTime handles midnight/1am business rule for hiding no-time-set values
 
 const REMINDER_OPTIONS = [
   { label: '1 Stunde vorher', hours: 1 },
@@ -411,7 +382,7 @@ export function EventDetail({ event, onClose, eveningMode }: EventDetailProps) {
               </div>
               <div>
                 <p className={`text-sm font-medium ${eveningMode ? 'text-gray-200' : 'text-slate-700'}`}>
-                  {formatDateTime(event.start_date)}
+                  {formatDateLong(event.start_date)}
                 </p>
                 {startTime && (
                   <p className={`text-xs ${eveningMode ? 'text-gray-400' : 'text-slate-500'}`}>
@@ -420,7 +391,7 @@ export function EventDetail({ event, onClose, eveningMode }: EventDetailProps) {
                 )}
                 {event.end_date && event.end_date.split('T')[0] !== event.start_date.split('T')[0] && (
                   <p className={`text-xs ${eveningMode ? 'text-gray-400' : 'text-slate-500'}`}>
-                    bis {formatDateTime(event.end_date)}
+                    bis {formatDateLong(event.end_date)}
                   </p>
                 )}
               </div>

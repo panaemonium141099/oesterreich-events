@@ -31,15 +31,9 @@ export interface Profile {
   updated_at: string;
 }
 
-/** A profile is complete when required fields are filled */
-export function isProfileComplete(profile: Profile | null): boolean {
-  if (!profile) return false;
-  return !!(
-    profile.first_name?.trim() &&
-    profile.last_name?.trim() &&
-    profile.birth_date
-  );
-}
+// Import from shared utility and re-export for backwards compatibility
+import { isProfileComplete } from '@/lib/utils/profile';
+export { isProfileComplete };
 
 interface AuthContextType {
   user: User | null;

@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
+import { isProfileComplete } from '@/lib/utils/profile';
 
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
@@ -19,13 +20,7 @@ export async function GET(request: Request) {
           .eq('id', user.id)
           .single();
 
-        const isComplete = !!(
-          profile?.first_name?.trim() &&
-          profile?.last_name?.trim() &&
-          profile?.birth_date
-        );
-
-        if (!isComplete) {
+        if (!isProfileComplete(profile)) {
           return NextResponse.redirect(`${origin}/auth/complete-profile`);
         }
       }
