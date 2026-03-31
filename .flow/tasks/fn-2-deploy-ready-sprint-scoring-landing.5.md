@@ -29,9 +29,8 @@ Update `layout.tsx` with full OG/Twitter/metadataBase metadata, add `robots.ts`,
 - [ ] JSON-LD passes validation at https://validator.schema.org (check manually after build)
 - [ ] `npm run build` passes
 ## Done summary
-TBD
-
+Updated layout.tsx with full OG/Twitter metadata and metadataBase, created robots.ts disallowing /api/, /admin/, /auth/, /profile/ with sitemap reference, and added WebSite + Organization JSON-LD structured data to the homepage via XSS-safe dangerouslySetInnerHTML.
 ## Evidence
-- Commits:
-- Tests:
+- Commits: 5e892c7f11aed9ae4d0c5e733a2ea74509d33b03
+- Tests: npx tsc --noEmit (no new errors)
 - PRs:
