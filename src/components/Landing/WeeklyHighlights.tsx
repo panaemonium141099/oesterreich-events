@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
@@ -25,9 +25,6 @@ function IconLoc({ className }: { className?: string }) {
     </svg>
   );
 }
-
-// Silence unused import warning
-const _unused: ReactNode = null; void _unused;
 
 const CATEGORY_COLORS: Record<string, string> = {
   Musik: 'bg-purple-500/20 text-purple-300 border-purple-500/30',
@@ -70,7 +67,7 @@ function HighlightCard({ event }: { event: Event }) {
   return (
     <Link href={`/events/${event.id}`} className="flex-none w-60 snap-start group block">
       {/* Fixed total height = image 160px + content 90px = 250px — always uniform */}
-      <div className="bg-white/4 backdrop-blur-sm rounded-2xl overflow-hidden border border-white/8 hover:border-white/25 hover:shadow-xl hover:shadow-black/30 transition-all duration-200">
+      <div className="bg-[#111] rounded-2xl overflow-hidden border border-white/8 hover:border-white/20 hover:shadow-xl hover:shadow-black/40 transition-all duration-200">
         {/* Image — fixed height */}
         <div className="relative w-full h-40 bg-white/8 overflow-hidden flex-shrink-0">
           {imageUrl && !imgError ? (
@@ -87,6 +84,14 @@ function HighlightCard({ event }: { event: Event }) {
               <svg className="w-10 h-10 text-white/10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
               </svg>
+            </div>
+          )}
+          {/* Category pill — top-left overlay on image */}
+          {event.category && (
+            <div className="absolute top-2.5 left-2.5">
+              <span className="text-[9px] font-semibold px-2 py-0.5 rounded-sm bg-black/50 backdrop-blur-sm text-white/70 border border-white/15">
+                {event.category}
+              </span>
             </div>
           )}
           {event.event_score && event.event_score >= 55 && (
@@ -114,13 +119,6 @@ function HighlightCard({ event }: { event: Event }) {
             )}
           </div>
         </div>
-
-        {/* Category strip at bottom */}
-        {event.category && (
-          <div className={`px-3.5 py-1.5 border-t border-white/5 ${badgeClass}`}>
-            <span className="text-[10px] font-semibold">{event.category}</span>
-          </div>
-        )}
       </div>
     </Link>
   );

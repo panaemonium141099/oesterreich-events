@@ -130,10 +130,61 @@ export async function GET(request: NextRequest) {
 
     if (filters.search) {
       // Sanitize search input: strip PostgREST special characters and SQL wildcards
-      // to prevent filter injection and unintended ILIKE pattern matching
       const sanitizedSearch = filters.search.replace(/[,.*()%_\\]/g, '').trim();
       if (sanitizedSearch) {
-        query = query.or(`title.ilike.%${sanitizedSearch}%,location_name.ilike.%${sanitizedSearch}%,description.ilike.%${sanitizedSearch}%`);
+        // Synonym map: common German search terms → category names
+        // Allows searching "festival" to return Nova Rock, Donauinselfest etc.
+        const SEARCH_SYNONYMS: Record<string, string[]> = {
+          festival: ['Musik', 'Feste & Brauchtum'],
+          festivals: ['Musik', 'Feste & Brauchtum'],
+          konzert: ['Musik'],
+          konzerte: ['Musik'],
+          rock: ['Musik'],
+          metal: ['Musik'],
+          jazz: ['Musik'],
+          theater: ['Kultur'],
+          kunst: ['Kultur'],
+          ausstellung: ['Kultur'],
+          kino: ['Kultur'],
+          markt: ['Märkte'],
+          märkte: ['Märkte'],
+          flohmarkt: ['Märkte'],
+          wein: ['Wein & Kulinarik'],
+          kulinarik: ['Wein & Kulinarik'],
+          essen: ['Wein & Kulinarik'],
+          foodtruck: ['Wein & Kulinarik'],
+          laufen: ['Sport'],
+          rennen: ['Sport'],
+          fußball: ['Sport'],
+          schwimmen: ['Sport'],
+          familie: ['Familie'],
+          kinder: ['Familie'],
+          wandern: ['Natur'],
+          natur: ['Natur'],
+          outdoor: ['Natur'],
+          nightlife: ['Nightlife'],
+          club: ['Nightlife'],
+          party: ['Nightlife'],
+          vortrag: ['Bildung'],
+          seminar: ['Bildung'],
+          yoga: ['Gesundheit'],
+          gesundheit: ['Gesundheit'],
+        };
+
+        const normalized = sanitizedSearch.toLowerCase();
+        const synonymCategories = SEARCH_SYNONYMS[normalized] ?? [];
+
+        // Base search: title, location, description, category name
+        let orClause = `title.ilike.%${sanitizedSearch}%,location_name.ilike.%${sanitizedSearch}%,description.ilike.%${sanitizedSearch}%,category.ilike.%${sanitizedSearch}%`;
+
+        // Append exact category matches for synonym terms
+        for (const cat of synonymCategories) {
+          // Escape commas in category name for PostgREST or-clause
+          const safeCat = cat.replace(/,/g, '');
+          orClause += `,category.eq.${safeCat}`;
+        }
+
+        query = query.or(orClause);
       }
     }
 

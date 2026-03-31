@@ -8,19 +8,23 @@ import { CATEGORIES } from '@/lib/categories';
 
 // Unsplash images per category
 const CATEGORY_IMAGES: Record<string, string> = {
-  Musik: 'https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?w=600&q=75&auto=format&fit=crop',
+  // Brass band / Blasmusik — not a rock concert
+  Musik: 'https://images.unsplash.com/photo-1711336622443-d53a1f1156bc?w=600&q=75&auto=format&fit=crop',
   Kultur: 'https://images.unsplash.com/photo-1518998053901-5348d3961a04?w=600&q=75&auto=format&fit=crop',
   Sport: 'https://images.unsplash.com/photo-1461896836934-ffe607ba8211?w=600&q=75&auto=format&fit=crop',
-  Märkte: 'https://images.unsplash.com/photo-1534073828943-f801091bb18c?w=600&q=75&auto=format&fit=crop',
+  // Vienna farmers market
+  Märkte: 'https://images.unsplash.com/photo-1576181456177-2b99ac0aa1ef?w=600&q=75&auto=format&fit=crop',
   'Wein & Kulinarik': 'https://images.unsplash.com/photo-1510812431401-41d2bd2722f3?w=600&q=75&auto=format&fit=crop',
   Familie: 'https://images.unsplash.com/photo-1536640712-4d4c36ff0e4e?w=600&q=75&auto=format&fit=crop',
   Natur: 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=600&q=75&auto=format&fit=crop',
-  'Feste & Brauchtum': 'https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=600&q=75&auto=format&fit=crop',
+  // Folk costumes / Volksfest — traditional dancing in Tracht
+  'Feste & Brauchtum': 'https://images.unsplash.com/photo-1758903134147-c756cd05b9aa?w=600&q=75&auto=format&fit=crop',
   Nightlife: 'https://images.unsplash.com/photo-1566737236500-c8ac43014a67?w=600&q=75&auto=format&fit=crop',
   Bildung: 'https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=600&q=75&auto=format&fit=crop',
   Gesundheit: 'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=600&q=75&auto=format&fit=crop',
-  Religion: 'https://images.unsplash.com/photo-1548625361-58a9b86aa83b?w=600&q=75&auto=format&fit=crop',
-  Sonstiges: 'https://images.unsplash.com/photo-1514908162061-357ef90f15d3?w=600&q=75&auto=format&fit=crop',
+  // Church tower with cross
+  Religion: 'https://images.unsplash.com/photo-1714017971946-49bd73150333?w=600&q=75&auto=format&fit=crop',
+  Sonstiges: 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=600&q=75&auto=format&fit=crop',
 };
 
 const FALLBACK_IMAGE =

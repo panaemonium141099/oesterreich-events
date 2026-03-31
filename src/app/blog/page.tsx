@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
-import { FESTIVAL_POSTS } from '@/content/blog/festivals';
+import { ALL_POSTS as FESTIVAL_POSTS } from '@/content/blog';
 
 export const metadata: Metadata = {
   title: 'Festival-Blog 2026 — Österreichs größte Events | LassTreffen.at',
@@ -72,7 +72,7 @@ export default function BlogPage() {
               {/* Image */}
               <div className="relative aspect-[16/10] overflow-hidden rounded-xl">
                 <Image
-                  src={hero.thumbnailImage}
+                  src={hero.thumbnailImage ?? hero.heroImage}
                   alt={hero.title}
                   fill
                   priority
@@ -126,7 +126,7 @@ export default function BlogPage() {
                 {/* Image */}
                 <div className="relative aspect-[16/9] overflow-hidden rounded-xl mb-5">
                   <Image
-                    src={post.thumbnailImage}
+                    src={post.thumbnailImage ?? post.heroImage}
                     alt={post.title}
                     fill
                     className="object-cover transition-transform duration-700 group-hover:scale-105"

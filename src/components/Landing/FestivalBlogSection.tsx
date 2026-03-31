@@ -3,7 +3,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { FESTIVAL_POSTS } from '@/content/blog/festivals';
+import { ALL_POSTS as FESTIVAL_POSTS } from '@/content/blog';
 
 const containerVariants = {
   hidden: {},
@@ -31,7 +31,7 @@ function FeaturedCard({ post }: { post: (typeof FESTIVAL_POSTS)[0] }) {
         <div className="relative overflow-hidden rounded-2xl h-full min-h-[440px]">
           {/* Image */}
           <Image
-            src={post.thumbnailImage}
+            src={post.thumbnailImage ?? post.heroImage}
             alt={post.title}
             fill
             className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
@@ -82,7 +82,7 @@ function SecondaryCard({ post }: { post: (typeof FESTIVAL_POSTS)[0] }) {
       <Link href={`/blog/${post.slug}`} className="block h-full">
         <div className="relative overflow-hidden rounded-2xl h-full min-h-[180px]">
           <Image
-            src={post.thumbnailImage}
+            src={post.thumbnailImage ?? post.heroImage}
             alt={post.title}
             fill
             className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"

@@ -2,7 +2,7 @@ import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
-import { getFestivalBySlug, getAllFestivalSlugs } from '@/content/blog/festivals';
+import { getPostBySlug, getAllFestivalSlugs } from '@/content/blog';
 
 export function generateStaticParams() {
   return getAllFestivalSlugs().map(slug => ({ slug }));
@@ -14,7 +14,7 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const post = getFestivalBySlug(slug);
+  const post = getPostBySlug(slug);
   if (!post) return { title: 'Nicht gefunden' };
 
   return {
@@ -145,7 +145,7 @@ export default async function BlogPostPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const post = getFestivalBySlug(slug);
+  const post = getPostBySlug(slug);
   if (!post) notFound();
 
   const jsonLd = {

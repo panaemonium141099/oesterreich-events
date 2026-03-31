@@ -50,27 +50,29 @@ export default async function LandingPage() {
       {/* Top-right auth button */}
       <LandingAuth />
 
-      <main className="flex-1 flex flex-col items-center justify-center gap-6 md:gap-10 px-6 text-center max-w-3xl w-full">
-        {/* Headline */}
-        <h1
-          className="text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-bold tracking-tight animate-fade-in-up opacity-0 leading-[1.1]"
-          style={{ animationDelay: '0.3s', animationFillMode: 'forwards' }}
-        >
-          Entdecke was
-          <br />
-          los ist.
-        </h1>
+      <main className="flex-1 min-h-screen flex flex-col items-center justify-center gap-8 md:gap-12 px-6 text-center max-w-3xl w-full">
+        {/* Headline + Stats + Tagline — tightly grouped */}
+        <div className="flex flex-col items-center gap-3 md:gap-4">
+          <h1
+            className="text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-bold tracking-tight animate-fade-in-up opacity-0 leading-[1.1]"
+            style={{ animationDelay: '0.3s', animationFillMode: 'forwards' }}
+          >
+            Entdecke was
+            <br />
+            los ist.
+          </h1>
 
-        {/* Stats */}
-        <LandingStats />
+          {/* Stats */}
+          <LandingStats />
 
-        {/* Tagline */}
-        <p
-          className="text-white/30 text-sm tracking-[0.12em] animate-fade-in opacity-0"
-          style={{ animationDelay: '0.75s', animationFillMode: 'forwards' }}
-        >
-          Die größte Eventdatenbank Österreichs
-        </p>
+          {/* Tagline */}
+          <p
+            className="text-white/30 text-sm tracking-[0.12em] animate-fade-in opacity-0"
+            style={{ animationDelay: '0.75s', animationFillMode: 'forwards' }}
+          >
+            Die größte Eventdatenbank Österreichs
+          </p>
+        </div>
 
         {/* Search + CTA */}
         <HeroSection />

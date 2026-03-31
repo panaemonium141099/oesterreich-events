@@ -12,9 +12,11 @@ import {
 interface LocationBannerProps {
   onLocationFound: (lat: number, lng: number) => void;
   eveningMode?: boolean;
+  /** If true, suppress the auto-fly on mount (e.g. user arrived via URL with explicit context) */
+  suppressAutoFly?: boolean;
 }
 
-export function LocationBanner({ onLocationFound }: LocationBannerProps) {
+export function LocationBanner({ onLocationFound, suppressAutoFly = false }: LocationBannerProps) {
   const [visible, setVisible] = useState(false);
   const [requesting, setRequesting] = useState(false);
   const [closing, setClosing] = useState(false);
@@ -22,7 +24,10 @@ export function LocationBanner({ onLocationFound }: LocationBannerProps) {
   useEffect(() => {
     const stored = getStoredLocation();
     if (stored) {
-      onLocationFound(stored.lat, stored.lng);
+      // Only auto-fly to stored location when the user didn't arrive with explicit URL context
+      if (!suppressAutoFly) {
+        onLocationFound(stored.lat, stored.lng);
+      }
       return;
     }
     if (hasAskedLocation()) return;

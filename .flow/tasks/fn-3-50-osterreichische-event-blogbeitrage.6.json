@@ -1,0 +1,14 @@
+{
+  "assignee": null,
+  "claim_note": "",
+  "claimed_at": null,
+  "created_at": "2026-03-31T22:52:15.638029Z",
+  "depends_on": [],
+  "epic": "fn-3-50-osterreichische-event-blogbeitrage",
+  "id": "fn-3-50-osterreichische-event-blogbeitrage.6",
+  "priority": null,
+  "spec_path": ".flow/tasks/fn-3-50-osterreichische-event-blogbeitrage.6.md",
+  "status": "todo",
+  "title": "T6: Content Batch NOe, Burgenland & Bundesweit (10 posts)",
+  "updated_at": "2026-03-31T22:54:40.013246Z"
+}

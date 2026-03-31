@@ -12,12 +12,14 @@ interface Region {
 
 const REGIONS: Region[] = [
   {
+    // Stephansdom Wien
     name: 'Wien',
-    image: 'https://images.unsplash.com/photo-1516550893923-42d28e5677af?w=600&q=75&auto=format&fit=crop',
+    image: 'https://images.unsplash.com/photo-1578400889704-bbd63485d516?w=600&q=75&auto=format&fit=crop',
   },
   {
+    // Weinviertel / Weinfelder
     name: 'Niederösterreich',
-    image: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&q=75&auto=format&fit=crop',
+    image: 'https://images.unsplash.com/photo-1722352453146-2526151c8a2c?w=600&q=75&auto=format&fit=crop',
   },
   {
     name: 'Oberösterreich',
@@ -28,8 +30,9 @@ const REGIONS: Region[] = [
     image: 'https://images.unsplash.com/photo-1448375240586-882707db888b?w=600&q=75&auto=format&fit=crop',
   },
   {
+    // Hohensalzburg Festung + Altstadt
     name: 'Salzburg',
-    image: 'https://images.unsplash.com/photo-1491557345352-5929e343eb89?w=600&q=75&auto=format&fit=crop',
+    image: 'https://images.unsplash.com/photo-1759765098596-0c1bef505555?w=600&q=75&auto=format&fit=crop',
   },
   {
     name: 'Tirol',

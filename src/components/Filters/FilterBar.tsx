@@ -18,6 +18,13 @@ interface Gemeinde {
   lng: number;
 }
 
+interface EventSuggestion {
+  id: string;
+  title: string;
+  category?: string;
+  location_name?: string;
+}
+
 interface FilterBarProps {
   filters: EventFilters;
   onFiltersChange: (filters: EventFilters) => void;
@@ -29,11 +36,13 @@ interface FilterBarProps {
 export function FilterBar({ filters, onFiltersChange, eveningMode, bundeslandId, onGemeindeSelect }: FilterBarProps) {
   const [searchValue, setSearchValue] = useState(filters.search || '');
   const [suggestions, setSuggestions] = useState<Gemeinde[]>([]);
+  const [eventSuggestions, setEventSuggestions] = useState<EventSuggestion[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(-1);
   const [gemeinden, setGemeinden] = useState<Gemeinde[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
   const suggestionsRef = useRef<HTMLDivElement>(null);
+  const eventFetchRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Load gemeinden data on mount
   useEffect(() => {
@@ -43,11 +52,10 @@ export function FilterBar({ filters, onFiltersChange, eveningMode, bundeslandId,
       .catch(() => {});
   }, []);
 
-  // Filter suggestions
+  // Filter gemeinde suggestions
   useEffect(() => {
     if (!searchValue.trim() || searchValue.length < 2 || gemeinden.length === 0) {
       setSuggestions([]);
-      setShowSuggestions(false);
       return;
     }
     const query = searchValue.toLowerCase().trim();
@@ -59,11 +67,34 @@ export function FilterBar({ filters, onFiltersChange, eveningMode, bundeslandId,
         if (aStarts !== bStarts) return aStarts - bStarts;
         return a.n.localeCompare(b.n);
       })
-      .slice(0, 6);
+      .slice(0, 4);
     setSuggestions(matches);
-    setShowSuggestions(matches.length > 0);
     setSelectedIndex(-1);
   }, [searchValue, gemeinden]);
+
+  // Fetch live event title suggestions (debounced)
+  useEffect(() => {
+    if (!searchValue.trim() || searchValue.length < 2) {
+      setEventSuggestions([]);
+      return;
+    }
+    if (eventFetchRef.current) clearTimeout(eventFetchRef.current);
+    eventFetchRef.current = setTimeout(async () => {
+      try {
+        const res = await fetch(`/api/events?search=${encodeURIComponent(searchValue.trim())}&limit=5&sort=score`);
+        const data = await res.json();
+        setEventSuggestions((data.events ?? []).slice(0, 5));
+      } catch {
+        setEventSuggestions([]);
+      }
+    }, 250);
+    return () => { if (eventFetchRef.current) clearTimeout(eventFetchRef.current); };
+  }, [searchValue]);
+
+  // Show dropdown whenever either list has items
+  useEffect(() => {
+    setShowSuggestions(eventSuggestions.length > 0 || suggestions.length > 0);
+  }, [eventSuggestions, suggestions]);
 
   const handleSelectGemeinde = (g: Gemeinde) => {
     setSearchValue(g.n);
@@ -80,16 +111,26 @@ export function FilterBar({ filters, onFiltersChange, eveningMode, bundeslandId,
     onFiltersChange({ ...filters, search: searchValue || undefined });
   };
 
+  const totalSuggestions = eventSuggestions.length + suggestions.length;
+
+  const handleSelectEvent = (ev: EventSuggestion) => {
+    setSearchValue(ev.title);
+    setShowSuggestions(false);
+    onFiltersChange({ ...filters, search: ev.title });
+  };
+
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'ArrowDown') {
       e.preventDefault();
-      setSelectedIndex(prev => Math.min(prev + 1, suggestions.length - 1));
+      setSelectedIndex(prev => Math.min(prev + 1, totalSuggestions - 1));
     } else if (e.key === 'ArrowUp') {
       e.preventDefault();
       setSelectedIndex(prev => Math.max(prev - 1, -1));
     } else if (e.key === 'Enter') {
-      if (selectedIndex >= 0 && suggestions[selectedIndex]) {
-        handleSelectGemeinde(suggestions[selectedIndex]);
+      if (selectedIndex >= 0 && selectedIndex < eventSuggestions.length) {
+        handleSelectEvent(eventSuggestions[selectedIndex]);
+      } else if (selectedIndex >= eventSuggestions.length && suggestions[selectedIndex - eventSuggestions.length]) {
+        handleSelectGemeinde(suggestions[selectedIndex - eventSuggestions.length]);
       } else {
         handleSearch();
       }
@@ -143,7 +184,7 @@ export function FilterBar({ filters, onFiltersChange, eveningMode, bundeslandId,
           value={searchValue}
           onChange={handleInputChange}
           onKeyDown={handleKeyDown}
-          onFocus={() => { if (suggestions.length > 0) setShowSuggestions(true); }}
+          onFocus={() => { if (suggestions.length > 0 || eventSuggestions.length > 0) setShowSuggestions(true); }}
           autoComplete="off"
           className={`w-full pl-9 pr-3 py-2 text-sm border rounded-lg focus:outline-none transition-all duration-200 ${
             eveningMode
@@ -156,11 +197,13 @@ export function FilterBar({ filters, onFiltersChange, eveningMode, bundeslandId,
         {showSuggestions && typeof document !== 'undefined' && createPortal(
           <SuggestionsDropdown
             suggestions={suggestions}
+            eventSuggestions={eventSuggestions}
             selectedIndex={selectedIndex}
             eveningMode={eveningMode}
             inputRef={inputRef}
             suggestionsRef={suggestionsRef}
             onSelect={handleSelectGemeinde}
+            onSelectEvent={handleSelectEvent}
             onHover={setSelectedIndex}
           />,
           document.body
@@ -213,14 +256,16 @@ export function FilterBar({ filters, onFiltersChange, eveningMode, bundeslandId,
 }
 
 function SuggestionsDropdown({
-  suggestions, selectedIndex, eveningMode, inputRef, suggestionsRef, onSelect, onHover
+  suggestions, eventSuggestions, selectedIndex, eveningMode, inputRef, suggestionsRef, onSelect, onSelectEvent, onHover
 }: {
   suggestions: Gemeinde[];
+  eventSuggestions: EventSuggestion[];
   selectedIndex: number;
   eveningMode?: boolean;
   inputRef: React.RefObject<HTMLInputElement | null>;
   suggestionsRef: React.RefObject<HTMLDivElement | null>;
   onSelect: (g: Gemeinde) => void;
+  onSelectEvent: (ev: EventSuggestion) => void;
   onHover: (i: number) => void;
 }) {
   const [pos, setPos] = useState({ top: 0, left: 0, width: 0 });
@@ -229,7 +274,7 @@ function SuggestionsDropdown({
     const updatePos = () => {
       if (!inputRef.current) return;
       const rect = inputRef.current.getBoundingClientRect();
-      setPos({ top: rect.bottom + 4, left: rect.left, width: rect.width });
+      setPos({ top: rect.bottom + 4, left: rect.left, width: Math.max(rect.width, 280) });
     };
     updatePos();
     window.addEventListener('scroll', updatePos, true);
@@ -240,6 +285,11 @@ function SuggestionsDropdown({
     };
   }, [inputRef]);
 
+  const borderClass = eveningMode ? 'border-gray-700' : 'border-slate-100';
+  const hoverClass = eveningMode ? 'hover:bg-gray-700/50' : 'hover:bg-slate-50';
+  const activeClass = eveningMode ? 'bg-gray-700' : 'bg-blue-50';
+  const labelClass = eveningMode ? 'text-gray-500' : 'text-slate-400';
+
   return (
     <div
       ref={suggestionsRef}
@@ -248,30 +298,64 @@ function SuggestionsDropdown({
         eveningMode ? 'bg-gray-800 border-gray-600' : 'bg-white border-slate-200'
       }`}
     >
-      {suggestions.map((g, i) => (
-        <button
-          key={`${g.n}-${g.p}`}
-          onClick={() => onSelect(g)}
-          onMouseEnter={() => onHover(i)}
-          className={`w-full flex items-center gap-2 px-3 py-2 text-left text-sm transition-colors duration-100
-            ${i === selectedIndex
-              ? eveningMode ? 'bg-gray-700' : 'bg-blue-50'
-              : eveningMode ? 'hover:bg-gray-700/50' : 'hover:bg-slate-50'
-            }
-            ${i !== suggestions.length - 1
-              ? eveningMode ? 'border-b border-gray-700' : 'border-b border-slate-100'
-              : ''
-            }`}
-        >
-          <svg className={`w-3.5 h-3.5 shrink-0 ${eveningMode ? 'text-gray-500' : 'text-slate-400'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-          </svg>
-          <span className={eveningMode ? 'text-gray-200' : 'text-slate-800'}>{g.n}</span>
-          <span className={`text-xs ${eveningMode ? 'text-gray-500' : 'text-slate-400'}`}>{g.b}</span>
-          <span className={`text-xs ml-auto ${eveningMode ? 'text-gray-600' : 'text-slate-300'}`}>{g.p}</span>
-        </button>
-      ))}
+      {/* Event suggestions */}
+      {eventSuggestions.length > 0 && (
+        <>
+          <div className={`px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wider ${labelClass} ${eveningMode ? 'bg-gray-800/80' : 'bg-slate-50'}`}>
+            Events
+          </div>
+          {eventSuggestions.map((ev, i) => (
+            <button
+              key={ev.id}
+              onClick={() => onSelectEvent(ev)}
+              onMouseEnter={() => onHover(i)}
+              className={`w-full flex items-center gap-2 px-3 py-2 text-left text-sm transition-colors duration-100
+                ${i === selectedIndex ? activeClass : hoverClass}
+                ${(i !== eventSuggestions.length - 1 || suggestions.length > 0) ? `border-b ${borderClass}` : ''}
+              `}
+            >
+              <svg className={`w-3.5 h-3.5 shrink-0 ${labelClass}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+              <span className={`truncate flex-1 ${eveningMode ? 'text-gray-200' : 'text-slate-800'}`}>{ev.title}</span>
+              {ev.category && (
+                <span className={`text-[10px] shrink-0 ${labelClass}`}>{ev.category}</span>
+              )}
+            </button>
+          ))}
+        </>
+      )}
+
+      {/* Gemeinde suggestions */}
+      {suggestions.length > 0 && (
+        <>
+          <div className={`px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wider ${labelClass} ${eveningMode ? 'bg-gray-800/80' : 'bg-slate-50'}`}>
+            Orte
+          </div>
+          {suggestions.map((g, i) => {
+            const flatIndex = eventSuggestions.length + i;
+            return (
+              <button
+                key={`${g.n}-${g.p}`}
+                onClick={() => onSelect(g)}
+                onMouseEnter={() => onHover(flatIndex)}
+                className={`w-full flex items-center gap-2 px-3 py-2 text-left text-sm transition-colors duration-100
+                  ${flatIndex === selectedIndex ? activeClass : hoverClass}
+                  ${i !== suggestions.length - 1 ? `border-b ${borderClass}` : ''}
+                `}
+              >
+                <svg className={`w-3.5 h-3.5 shrink-0 ${labelClass}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                <span className={eveningMode ? 'text-gray-200' : 'text-slate-800'}>{g.n}</span>
+                <span className={`text-xs ${labelClass}`}>{g.b}</span>
+                <span className={`text-xs ml-auto ${eveningMode ? 'text-gray-600' : 'text-slate-300'}`}>{g.p}</span>
+              </button>
+            );
+          })}
+        </>
+      )}
     </div>
   );
 }

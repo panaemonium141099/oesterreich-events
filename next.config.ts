@@ -75,6 +75,20 @@ const nextConfig: NextConfig = {
       { protocol: 'https', hostname: '**.tt' },
     ],
   },
+  // Cache headers for static blog content
+  async headers() {
+    return [
+      {
+        source: '/blog/:path*',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=86400, stale-while-revalidate=604800',
+          },
+        ],
+      },
+    ];
+  },
   // better-sqlite3 only used by scraper scripts, not by API routes
   serverExternalPackages: ['better-sqlite3'],
   // Standalone output for Docker deployment (Coolify)

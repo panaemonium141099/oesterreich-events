@@ -55,9 +55,18 @@ function MapPageInner() {
   const searchParams = useSearchParams();
   const initialSearch = searchParams.get('search') || '';
   const initialBundeslandId = searchParams.get('bundesland') || 'all';
+  const initialCategory = searchParams.get('category') || '';
   const initialLat = searchParams.get('lat') ? parseFloat(searchParams.get('lat')!) : null;
   const initialLng = searchParams.get('lng') ? parseFloat(searchParams.get('lng')!) : null;
   const initialZoom = searchParams.get('zoom') ? parseFloat(searchParams.get('zoom')!) : null;
+
+  // Suppress geolocation auto-fly when the user arrived with explicit URL context
+  // (bundesland, category, search or explicit coords from a blog/CTA link)
+  const hasUrlContext =
+    initialBundeslandId !== 'all' ||
+    initialCategory !== '' ||
+    initialSearch !== '' ||
+    (initialLat !== null && initialLng !== null);
 
   // Find initial bundesland from URL param
   const initialBundesland = BUNDESLAENDER.find(b => b.id === initialBundeslandId) || BUNDESLAENDER[0];
@@ -66,7 +75,10 @@ function MapPageInner() {
   const [allEvents, setAllEvents] = useState<Event[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
-  const [filters, setFilters] = useState<EventFilters>(initialSearch ? { search: initialSearch } : {});
+  const [filters, setFilters] = useState<EventFilters>({
+    ...(initialSearch ? { search: initialSearch } : {}),
+    ...(initialCategory ? { category: initialCategory } : {}),
+  });
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   const [hoveredEventId, setHoveredEventId] = useState<string | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -218,7 +230,11 @@ function MapPageInner() {
         <MapLoadingOverlay loading={loading} eventCount={allEvents.length} />
 
         {/* Geolocation banner */}
-        <LocationBanner onLocationFound={(lat, lng) => setDynamicFlyTo({ lat, lng, zoom: 12 })} eveningMode={eveningMode} />
+        <LocationBanner
+          onLocationFound={(lat, lng) => setDynamicFlyTo({ lat, lng, zoom: 12 })}
+          eveningMode={eveningMode}
+          suppressAutoFly={hasUrlContext}
+        />
 
         {/* Desktop sidebar */}
         {sidebarOpen && (

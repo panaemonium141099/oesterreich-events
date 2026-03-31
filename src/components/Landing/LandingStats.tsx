@@ -18,8 +18,17 @@ export async function LandingStats() {
   const formatted = total.toLocaleString('de-AT');
 
   return (
-    <p className="text-white/40 text-lg md:text-xl animate-fade-in opacity-0" style={{ animationDelay: '0.6s', animationFillMode: 'forwards' }}>
-      <span className="text-white font-semibold">{formatted}+</span> Events in ganz Österreich
-    </p>
+    <div className="flex flex-col items-center gap-2 animate-fade-in opacity-0" style={{ animationDelay: '0.6s', animationFillMode: 'forwards' }}>
+      <p className="text-white/40 text-lg md:text-xl">
+        <span className="text-white font-semibold">{formatted}+</span> Events in ganz Österreich
+      </p>
+      <span className="inline-flex items-center gap-1.5 text-[10px] font-medium uppercase tracking-[0.18em] text-white/25">
+        <span className="relative flex h-1.5 w-1.5">
+          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-60" />
+          <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-green-500" />
+        </span>
+        Täglich aktualisiert
+      </span>
+    </div>
   );
 }

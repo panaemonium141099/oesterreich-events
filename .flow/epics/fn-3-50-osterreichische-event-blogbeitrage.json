@@ -1,0 +1,18 @@
+{
+  "branch_name": "fn-3-50-osterreichische-event-blogbeitrage",
+  "completion_review_status": "unknown",
+  "completion_reviewed_at": null,
+  "created_at": "2026-03-31T22:47:14.133074Z",
+  "default_impl": null,
+  "default_review": null,
+  "default_sync": null,
+  "depends_on_epics": [],
+  "id": "fn-3-50-osterreichische-event-blogbeitrage",
+  "next_task": 1,
+  "plan_review_status": "unknown",
+  "plan_reviewed_at": null,
+  "spec_path": ".flow/specs/fn-3-50-osterreichische-event-blogbeitrage.md",
+  "status": "open",
+  "title": "50 \u00f6sterreichische Event-Blogbeitr\u00e4ge: Content, SEO & UI",
+  "updated_at": "2026-03-31T22:51:58.898282Z"
+}

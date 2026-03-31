@@ -1,0 +1,46 @@
+# fn-3-50-osterreichische-event-blogbeitrage.5 T5: Content Batch Steiermark & Kaernten (10 posts)
+
+## Description
+Create 10 long-form blog post TypeScript files for major Steiermark & Kärnten events.
+
+### Events to cover
+
+31. `styriarte-graz` — Styriarte Graz Klassikfestival (Juni-Juli)
+32. `grazer-aufsteirern` — Grazer Aufsteirern (September)
+33. `grazer-christkindlmarkt` — Grazer Christkindlmarkt am Hauptplatz (Dezember)
+34. `klagenfurter-stadtfest` — Klagenfurter Stadtfest (Sommer)
+35. `ironman-austria-klagenfurt` — Ironman Austria Klagenfurt (Juli)
+36. `villacher-fasching` — Villacher Fasching (Jänner-Februar)
+37. `woerthersee-beachvolleyball` — Wörthersee Beachvolleyball Grand Slam (Juli-August)
+38. `carinthian-summer-ossiach` — Carinthian Summer Ossiach (Juli-August)
+39. `murau-stadtfest` — Murau Stadtfest (Sommer)
+40. `woerthersee-regatta` — Klagenfurt Wörthersee Regatta (Sommer)
+
+### Per post requirements (same as T2)
+
+- `description`: 4–6 paragraphs, German
+- `keyFacts`: real dates, venue, admission, website
+- `lineup`: 3–6 acts/highlights where applicable
+- `gallery`: 3 Unsplash images with verified photo-XXXXXXXXXX CDN IDs
+- `practicalInfo`: 3–4 paragraphs
+- `seoTitle`: <=60 chars, `seoDescription`: <=160 chars, `keywords`: 8-12
+- `jsonLdEvent`: Schema.org Event with addressCountry: AT
+
+### After writing posts
+
+Append all 10 imports to `src/content/blog/index.ts` ALL_POSTS array.
+## Acceptance
+- [ ] 10 files created under src/content/blog/posts/ for Steiermark & Kaernten events
+- [ ] Each post: description >=4 paragraphs, keyFacts complete, gallery 3 images, practicalInfo >=3 paragraphs
+- [ ] All seoTitle <=60, seoDescription <=160, keywords 8-12
+- [ ] All jsonLdEvent have required fields with addressCountry: AT
+- [ ] All Unsplash URLs verified photo-XXXXXXXXXX CDN format
+- [ ] All 10 posts appended to ALL_POSTS in index.ts
+- [ ] TypeScript compiles without errors
+## Done summary
+TBD
+
+## Evidence
+- Commits:
+- Tests:
+- PRs:
