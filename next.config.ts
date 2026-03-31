@@ -64,15 +64,14 @@ const nextConfig: NextConfig = {
       { protocol: 'https', hostname: '**.festival.at' },
       { protocol: 'https', hostname: 'festival.at' },
 
-      // .net / .org / .tv / .info / .live / .travel
-      { protocol: 'https', hostname: '**.veranstaltungskalender.net' },
-      { protocol: 'https', hostname: '**.deskline.net' },
-      { protocol: 'https', hostname: '**.daswerk.org' },
-      { protocol: 'https', hostname: '**.pratersauna.tv' },
-      { protocol: 'https', hostname: '**.burgenland.info' },
-      { protocol: 'https', hostname: '**.kaernten.live' },
-      { protocol: 'https', hostname: '**.vorarlberg.travel' },
-      { protocol: 'https', hostname: '**.events.tt' },
+      // Broad wildcards for scraped event images from arbitrary external hosts
+      { protocol: 'https', hostname: '**.net' },
+      { protocol: 'https', hostname: '**.org' },
+      { protocol: 'https', hostname: '**.info' },
+      { protocol: 'https', hostname: '**.tv' },
+      { protocol: 'https', hostname: '**.live' },
+      { protocol: 'https', hostname: '**.travel' },
+      { protocol: 'https', hostname: '**.tt' },
     ],
   },
   // better-sqlite3 only used by scraper scripts, not by API routes
