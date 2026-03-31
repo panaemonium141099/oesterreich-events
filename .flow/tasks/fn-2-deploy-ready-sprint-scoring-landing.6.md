@@ -29,9 +29,8 @@ Create `/events/[id]/page.tsx` (SEO event detail page with `generateMetadata` + 
 - [ ] Sitemap includes static pages: `/`, `/map`
 - [ ] `npm run build` passes (static generation of event pages if any are statically generated)
 ## Done summary
-TBD
-
+Created /events/[id]/page.tsx with generateMetadata (OG/Twitter tags), XSS-sanitized JSON-LD Event schema (name, startDate, location, eventStatus, eventAttendanceMode, organizer, offers), and 404 handling. Created sitemap.ts using generateSitemaps() to split 40k+ events into 5000-event chunks with score-based priority, plus static pages (/, /map, /impressum, /datenschutz) in chunk 0 and 24h ISR revalidation.
 ## Evidence
-- Commits:
-- Tests:
+- Commits: 569adba3398045fe03bbb8654ce61440dd98d855
+- Tests: npx tsc --noEmit
 - PRs:

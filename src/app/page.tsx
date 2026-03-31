@@ -6,6 +6,7 @@ import { ParticleBackground } from '@/components/Landing/ParticleBackground';
 import { Onboarding } from '@/components/Landing/Onboarding';
 import { LiveActivity } from '@/components/Landing/LiveActivity';
 import { Footer } from '@/components/Legal/Footer';
+import { LandingSections } from '@/components/Landing/LandingSections';
 
 const websiteJsonLd = {
   '@context': 'https://schema.org',
@@ -83,6 +84,9 @@ export default async function LandingPage() {
         {/* Search + CTA */}
         <HeroSection />
       </main>
+
+      {/* Landing sections below the hero */}
+      <LandingSections />
 
       {/* Footer */}
       <Footer />
