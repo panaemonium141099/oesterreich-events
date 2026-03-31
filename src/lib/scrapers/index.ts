@@ -63,6 +63,7 @@ import {
 } from './uni';
 import { closeSharedBrowser } from './puppeteerBrowser';
 import { upsertEvent, recordScrapeRun } from '../db/queries';
+import { syncEventsToSupabase } from '../db/supabase-sync';
 import type { ScrapedEvent } from '@/types/events';
 import fs from 'fs';
 import path from 'path';
@@ -272,6 +273,12 @@ export async function runScraper(scraper: BaseScraper): Promise<void> {
           startedAt,
         });
       }
+    }
+
+    // Sync all scraped events to Supabase (dual-write)
+    if (events.length > 0) {
+      const { upserted, errors: syncErrors } = await syncEventsToSupabase(events);
+      console.log(`[${scraper.name}] Supabase sync: ${upserted} upserted, ${syncErrors} errors`);
     }
 
     run.finish({ eventsFound, eventsNew, eventsUpdated });
