@@ -11,6 +11,10 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY
 );
 
+/** Default and maximum page sizes for cursor-based pagination */
+const DEFAULT_PAGE_SIZE = 50;
+const MAX_PAGE_SIZE = 200;
+
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
 
@@ -46,11 +50,26 @@ export async function GET(request: NextRequest) {
   const eveningOnly = searchParams.get('eveningOnly');
   if (eveningOnly === 'true') filters.eveningOnly = true;
 
-  const limit = searchParams.get('limit');
-  if (limit) filters.limit = parseInt(limit, 10);
+  // Pagination params
+  const limitParam = searchParams.get('limit');
+  const requestedLimit = limitParam ? parseInt(limitParam, 10) : DEFAULT_PAGE_SIZE;
+  filters.limit = Math.min(Math.max(1, requestedLimit), MAX_PAGE_SIZE);
 
+  const cursor = searchParams.get('cursor');
+  if (cursor) filters.cursor = cursor;
+
+  // Legacy offset support (backwards compatible)
   const offset = searchParams.get('offset');
   if (offset) filters.offset = parseInt(offset, 10);
+
+  // Bounding box filter: bbox=south_lat,west_lng,north_lat,east_lng
+  const bboxParam = searchParams.get('bbox');
+  if (bboxParam) {
+    const parts = bboxParam.split(',').map(Number);
+    if (parts.length === 4 && parts.every(n => !isNaN(n))) {
+      filters.bbox = parts as [number, number, number, number];
+    }
+  }
 
   try {
     // Build the query — use untyped Supabase client (no Database generic),
@@ -88,7 +107,9 @@ export async function GET(request: NextRequest) {
         query = query.in('id', ids);
       } else {
         // No events match the tags — return empty
-        return NextResponse.json({ events: [], total: 0 });
+        const res = NextResponse.json({ events: [], total: 0 });
+        res.headers.set('X-Total-Count', '0');
+        return res;
       }
     } else if (filters.category) {
       // Backwards compatible: single category filter on the events table
@@ -122,18 +143,67 @@ export async function GET(request: NextRequest) {
       query = query.or(`price_max.lte.${filters.priceMax},price_max.is.null`);
     }
 
-    // Evening only: filter for events starting at 17:00 or later
-    // We handle this client-side since Supabase doesn't have easy time extraction
-    // But we can use a workaround: events with time >= 17:00 on their start_date
+    // Evening filter at database level: events starting at 17:00 or later
+    // Uses start_date::time cast in PostgreSQL via Supabase RPC or filter
+    // Since Supabase PostgREST doesn't support time extraction directly,
+    // we use a workaround: filter where start_date contains 'T17', 'T18', ..., 'T23'
+    // or has no time component (date-only events are included)
+    if (filters.eveningOnly) {
+      // Events with time >= 17:00 OR no time component (date-only, kept for backwards compat)
+      // PostgREST supports gte on text-cast timestamps
+      query = query.or(
+        'start_date.like.*T17:%,' +
+        'start_date.like.*T18:%,' +
+        'start_date.like.*T19:%,' +
+        'start_date.like.*T20:%,' +
+        'start_date.like.*T21:%,' +
+        'start_date.like.*T22:%,' +
+        'start_date.like.*T23:%,' +
+        'start_date.not.like.*T%'
+      );
+    }
 
-    // Order by start_date
+    // Bounding box filter for viewport-based loading
+    if (filters.bbox) {
+      const [southLat, westLng, northLat, eastLng] = filters.bbox;
+      query = query
+        .gte('latitude', southLat)
+        .lte('latitude', northLat)
+        .gte('longitude', westLng)
+        .lte('longitude', eastLng);
+    }
+
+    // Order by start_date, then id for stable cursor pagination
     query = query.order('start_date', { ascending: true });
+    query = query.order('id', { ascending: true });
 
-    // Single request — Supabase max rows must be set to 50000 in dashboard
-    // Settings → API → Max Rows
-    const queryLimit = filters.limit || 50000;
-    const queryOffset = filters.offset || 0;
-    query = query.range(queryOffset, queryOffset + queryLimit - 1);
+    // Cursor-based pagination: fetch events after the cursor event
+    if (filters.cursor) {
+      // Look up the cursor event's start_date to position the query
+      const { data: cursorEvent } = await supabase
+        .from('events')
+        .select('start_date, id')
+        .eq('id', filters.cursor)
+        .single();
+
+      if (cursorEvent) {
+        // Get events that come after the cursor in sort order:
+        // (start_date > cursor_date) OR (start_date = cursor_date AND id > cursor_id)
+        query = query.or(
+          `start_date.gt.${cursorEvent.start_date},` +
+          `and(start_date.eq.${cursorEvent.start_date},id.gt.${cursorEvent.id})`
+        );
+      }
+    }
+
+    // Apply limit (fetch one extra to determine if there's a next page)
+    const fetchLimit = filters.limit + 1;
+    if (filters.offset && !filters.cursor) {
+      // Legacy offset support
+      query = query.range(filters.offset, filters.offset + fetchLimit - 1);
+    } else {
+      query = query.limit(fetchLimit);
+    }
 
     const { data: events, error, count } = await query;
 
@@ -145,23 +215,29 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Client-side evening filter (events starting at 17:00 or later)
-    let filteredEvents = events || [];
-    if (filters.eveningOnly) {
-      filteredEvents = filteredEvents.filter((event: Record<string, unknown>) => {
-        const startDate = String(event.start_date || '');
-        if (!startDate) return false;
-        if (!startDate.includes('T')) return true;
-        const hour = new Date(startDate).getHours();
-        if (hour === 0) return true; // Unknown time
-        return hour >= 17;
-      });
+    const allFetched = events || [];
+    const hasMore = allFetched.length > filters.limit;
+    const pageEvents = hasMore ? allFetched.slice(0, filters.limit) : allFetched;
+    const nextCursor = hasMore && pageEvents.length > 0
+      ? String((pageEvents[pageEvents.length - 1] as Record<string, unknown>).id)
+      : null;
+
+    const totalCount = count ?? 0;
+
+    const response = NextResponse.json({
+      events: pageEvents,
+      total: totalCount,
+      nextCursor,
+      hasMore,
+    });
+
+    // Pagination metadata headers
+    response.headers.set('X-Total-Count', String(totalCount));
+    if (nextCursor) {
+      response.headers.set('X-Next-Cursor', nextCursor);
     }
 
-    return NextResponse.json({
-      events: filteredEvents,
-      total: filters.eveningOnly ? filteredEvents.length : (count ?? 0),
-    });
+    return response;
   } catch (err) {
     console.error('API Error:', err);
     return NextResponse.json(

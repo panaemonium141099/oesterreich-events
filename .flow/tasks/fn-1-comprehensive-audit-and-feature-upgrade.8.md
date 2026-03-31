@@ -30,9 +30,8 @@ Update the frontend to display and filter by multiple tags. Add multi-tag filter
 - [ ] `motion-reduce` support on tag animations
 - [ ] `npm run build` succeeds
 ## Done summary
-TBD
-
+Implemented multi-tag frontend UI: TagChip component with category colors, TagFilter multi-select dropdown in FilterBar, EventCard showing up to 3 tags with overflow, EventDetail with clickable tag chips that filter the map, and map page passing tags[] to the API.
 ## Evidence
-- Commits:
-- Tests:
+- Commits: ca907f77351e8cee2c8d95851351e82d80f952c7
+- Tests: npx tsc --noEmit, npm run build
 - PRs:

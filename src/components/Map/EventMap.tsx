@@ -30,6 +30,8 @@ interface EventMapProps {
   eveningMode?: boolean;
   bundesland: Bundesland;
   flyToCoords?: { lat: number; lng: number; zoom: number } | null;
+  /** Called when the map viewport changes with [south_lat, west_lng, north_lat, east_lng] */
+  onViewportChange?: (bbox: [number, number, number, number]) => void;
 }
 
 function addBaseOverlays(m: mapboxgl.Map, dark: boolean) {
@@ -118,7 +120,7 @@ function updateBundeslandOverlay(m: mapboxgl.Map, bl: Bundesland, dark: boolean)
   }).catch(() => {});
 }
 
-function EventMap({ events, selectedEvent, hoveredEventId, onSelectEvent, eveningMode, bundesland, flyToCoords }: EventMapProps) {
+function EventMap({ events, selectedEvent, hoveredEventId, onSelectEvent, eveningMode, bundesland, flyToCoords, onViewportChange }: EventMapProps) {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
   const markersOnScreen = useRef<Map<string, mapboxgl.Marker>>(new Map());
@@ -158,6 +160,32 @@ function EventMap({ events, selectedEvent, hoveredEventId, onSelectEvent, evenin
       addBaseOverlays(map.current, !!eveningMode);
       updateBundeslandOverlay(map.current, bundesland, !!eveningMode);
       setMapReady(true);
+
+      // Report initial viewport bounds
+      if (onViewportChange && map.current) {
+        const bounds = map.current.getBounds();
+        if (bounds) {
+          onViewportChange([
+            bounds.getSouth(),
+            bounds.getWest(),
+            bounds.getNorth(),
+            bounds.getEast(),
+          ]);
+        }
+      }
+    });
+
+    // Report viewport changes on map move/zoom
+    map.current.on('moveend', () => {
+      if (!map.current || !onViewportChange) return;
+      const bounds = map.current.getBounds();
+      if (!bounds) return;
+      onViewportChange([
+        bounds.getSouth(),
+        bounds.getWest(),
+        bounds.getNorth(),
+        bounds.getEast(),
+      ]);
     });
 
     return () => { map.current?.remove(); map.current = null; };

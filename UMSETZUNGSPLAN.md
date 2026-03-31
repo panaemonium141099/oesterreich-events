@@ -26,6 +26,8 @@ Oesterreichs fuehrende Event-Discovery-Plattform mit Social Network, Blog/Magazi
 
 ## PHASE 1: Fundament & Security (Prioritaet: KRITISCH)
 
+> **STATUS:** Wird aktuell von einem Agent bearbeitet (Security, TypeScript, Performance, Code Quality). Nach Abschluss nochmal scannen um verbleibende Issues zu identifizieren.
+
 ### 1.1 Security Hardening
 
 - `ignoreBuildErrors: true` aus next.config.ts entfernen
@@ -159,6 +161,8 @@ Bestehende Sektionen (HeroSection, LandingStats, LiveActivity) bleiben, werden a
 ---
 
 ## PHASE 4: Neue Event-Quellen
+
+> **STATUS:** Uni/FH Scraper werden aktuell von einem Agent umgesetzt. Nach Abschluss verbleibende Quellen hier abarbeiten.
 
 ### 4.1 Universitaeten & Fachhochschulen (Neue Kategorie: "Uni & Campus")
 
@@ -299,7 +303,7 @@ Aktuell duenn abgedeckte Regionen:
 
 ---
 
-## PHASE 8: Automation Agents (Langfristig)
+## PHASE 8: Automation Agents (VOR Launch — Content-Pipeline muss stehen)
 
 ### 8.1 Quellen-Waechter Agent
 
@@ -387,18 +391,20 @@ Aufgabe: Issues von anderen Agents automatisch beheben.
 
 ## Zusammenfassung: Reihenfolge der Umsetzung
 
-1. Security & TypeScript Fixes (MUSS vor Launch)
-2. Datenqualitaet (Bilder, Beschreibungen, Koordinaten)
-3. Multi-Tag System
-4. Event-Scoring Algorithmus
-5. Blog-System (DB, Seiten, SEO)
-6. Landing Page Redesign (Featured Events, Festivals, Blog-Vorschau)
-7. Neue Scraper (Unis, Nischen, regionale Luecken)
-8. Performance-Optimierung
-9. UI Animationen
-10. Chat Event-Suche
-11. Affiliate-Integration
-12. Deployment auf Vercel
-13. Automation Agents (nach Launch, schrittweise)
+1. ~~Security & TypeScript Fixes~~ — Agent arbeitet dran, danach Re-Scan
+2. ~~Uni/FH Scraper~~ — Agent arbeitet dran
+3. Event-Scoring Algorithmus + Multi-Tag System
+4. Blog-System (DB, Seiten, Admin-Editor, SEO)
+5. Automation Agents: QA-Pruefer + Content-Creator (Blog mit Inhalten fuellen VOR Launch!)
+6. Automation Agents: Quellen-Waechter + Technik Agent
+7. Landing Page Redesign (Featured Events, Festivals, Blog-Vorschau, Regionen)
+8. Neue Scraper (Nischen: Clubs, Festivals, Maerkte + regionale Luecken)
+9. Chat Event-Suche + Social Erweiterungen
+10. UI Animationen (Framer Motion, Transitions)
+11. Affiliate-Integration (Ticket-Tracking, Dashboard)
+12. Deployment auf Vercel (Seite ist jetzt "voll" — Blog hat Content, Scoring laeuft, Agents arbeiten)
+13. Social Media Praesenz (Instagram, TikTok — Content-Creator Agent liefert Posts)
+
+**Logik:** Automation kommt VOR dem Deploy, weil die Seite beim Launch schon gerankte Events, Blog-Inhalte und geprueften Content haben soll. Kein leerer Blog, keine ungepruefte Datenqualitaet beim Go-Live.
 
 Jede Phase ist eigenstaendig commitbar und bringt sichtbaren Mehrwert.

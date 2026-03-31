@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback, Suspense } from 'react';
+import { useState, useEffect, useCallback, useRef, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import type { Event, EventFilters } from '@/types/events';
@@ -73,9 +73,22 @@ function MapPageInner() {
   const [eveningMode, setEveningMode] = useState(false);
   const [bundesland, setBundesland] = useState<Bundesland>(initialBundesland);
 
+  // Viewport bounding box from map moveend/zoomend
+  const [mapBbox, setMapBbox] = useState<[number, number, number, number] | null>(null);
+  const bboxDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Callback for EventMap to report viewport changes — debounced 300ms
+  const handleViewportChange = useCallback((bbox: [number, number, number, number]) => {
+    if (bboxDebounceRef.current) clearTimeout(bboxDebounceRef.current);
+    bboxDebounceRef.current = setTimeout(() => {
+      setMapBbox(bbox);
+    }, 300);
+  }, []);
+
   useEffect(() => { trackEvent('page_view', { path: '/map' }); }, []);
 
-  // Fetch ALL events for the bundesland (no district filter) — used for both map and sidebar
+  // Fetch events for the current viewport with cursor-based pagination
+  // Loads all pages automatically to fill the map and sidebar
   const fetchEvents = useCallback(async () => {
     setLoading(true);
     const params = new URLSearchParams();
@@ -90,17 +103,43 @@ function MapPageInner() {
     if (filters.search) params.set('search', filters.search);
     if (filters.eveningOnly) params.set('eveningOnly', 'true');
 
+    // Viewport-based loading: pass bounding box if available
+    if (mapBbox) {
+      params.set('bbox', mapBbox.join(','));
+    }
+
+    // Use a large limit per page to minimize round-trips for map display
+    params.set('limit', '200');
+
     try {
-      const res = await fetch(`/api/events?${params.toString()}`);
-      const data = await res.json();
-      setAllEvents(data.events || []);
-      setTotal(data.total || 0);
+      let accumulated: Event[] = [];
+      let cursor: string | null = null;
+      let totalCount = 0;
+
+      // Paginate through all results for the viewport
+      // Safety cap at 10 pages (2000 events max) to prevent runaway requests
+      for (let page = 0; page < 10; page++) {
+        const pageParams = new URLSearchParams(params);
+        if (cursor) pageParams.set('cursor', cursor);
+
+        const res = await fetch(`/api/events?${pageParams.toString()}`);
+        const data = await res.json();
+
+        accumulated = [...accumulated, ...(data.events || [])];
+        totalCount = data.total || 0;
+
+        if (!data.hasMore || !data.nextCursor) break;
+        cursor = data.nextCursor;
+      }
+
+      setAllEvents(accumulated);
+      setTotal(totalCount);
     } catch (err) {
       if (process.env.NODE_ENV === 'development') console.error('Fehler beim Laden der Events:', err);
     } finally {
       setLoading(false);
     }
-  }, [filters, bundesland]);
+  }, [filters, bundesland, mapBbox]);
 
   useEffect(() => {
     fetchEvents();
@@ -191,6 +230,7 @@ function MapPageInner() {
           eveningMode={eveningMode}
           flyToCoords={dynamicFlyTo || flyToCoords}
           bundesland={bundesland}
+          onViewportChange={handleViewportChange}
         />
 
         {/* Loading overlay — centered in map area, not covering sidebar */}

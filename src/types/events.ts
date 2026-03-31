@@ -66,6 +66,10 @@ export interface EventFilters {
   eveningOnly?: boolean;
   limit?: number;
   offset?: number;
+  /** Cursor-based pagination: ID of last event from previous page */
+  cursor?: string;
+  /** Bounding box filter: [south_lat, west_lng, north_lat, east_lng] */
+  bbox?: [number, number, number, number];
 }
 
 export type Category =
