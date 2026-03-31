@@ -210,15 +210,23 @@ const scrapers: BaseScraper[] = [
   new KPHEdithSteinScraper(),
 ];
 
+const SCRAPER_CONCURRENCY = 10;
+
 export async function runAllScrapers(): Promise<void> {
   console.log(`\n${'='.repeat(60)}`);
   console.log(`Scraping gestartet: ${new Date().toISOString()}`);
-  console.log(`${scrapers.length} Scraper registriert`);
+  console.log(`${scrapers.length} Scraper registriert (${SCRAPER_CONCURRENCY} parallel)`);
   console.log(`${'='.repeat(60)}\n`);
 
-  for (const scraper of scrapers) {
-    await runScraper(scraper);
-  }
+  // Run up to SCRAPER_CONCURRENCY scrapers in parallel using a queue
+  const queue = [...scrapers];
+  const workers = Array.from({ length: SCRAPER_CONCURRENCY }, async () => {
+    while (queue.length > 0) {
+      const scraper = queue.shift();
+      if (scraper) await runScraper(scraper);
+    }
+  });
+  await Promise.all(workers);
 
   // Cleanup shared Puppeteer browser instance
   await closeSharedBrowser();
