@@ -1,0 +1,15 @@
+export { UniWienScraper } from './UniWienScraper';
+export { TUWienScraper } from './TUWienScraper';
+export { UniGrazScraper } from './UniGrazScraper';
+export { UniInnsbruckScraper } from './UniInnsbruckScraper';
+export { WUScraper } from './WUScraper';
+export { MedUniWienScraper } from './MedUniWienScraper';
+export { BOKUScraper } from './BOKUScraper';
+export { TUGrazScraper } from './TUGrazScraper';
+export { UniSalzburgScraper } from './UniSalzburgScraper';
+export { JKUScraper } from './JKUScraper';
+export { AAUScraper } from './AAUScraper';
+export { MedUniGrazScraper } from './MedUniGrazScraper';
+export { MontanUniScraper } from './MontanUniScraper';
+export { KunstUniLinzScraper } from './KunstUniLinzScraper';
+export { VetMedUniScraper } from './VetMedUniScraper';

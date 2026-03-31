@@ -39,6 +39,12 @@ import { Gem2GoScraper } from './Gem2GoScraper';
 import { GenericGemeindeScraper } from './GenericGemeindeScraper';
 import { MariazellAtScraper, BasilikaMariazellScraper, MariazellGvScraper } from './MariazellScraper';
 import { FeratelScraper } from './FeratelScraper';
+import {
+  UniWienScraper, TUWienScraper, UniGrazScraper, UniInnsbruckScraper,
+  WUScraper, MedUniWienScraper, BOKUScraper, TUGrazScraper,
+  UniSalzburgScraper, JKUScraper, AAUScraper, MedUniGrazScraper,
+  MontanUniScraper, KunstUniLinzScraper, VetMedUniScraper,
+} from './uni';
 import { closeSharedBrowser } from './puppeteerBrowser';
 import { upsertEvent, recordScrapeRun } from '../db/queries';
 import type { ScrapedEvent } from '@/types/events';
@@ -123,6 +129,22 @@ const scrapers: BaseScraper[] = [
   new Gem2GoScraper(),
   // Generic municipality event pages (non-GEM2GO)
   new GenericGemeindeScraper(),
+  // Universitäten und Hochschulen (Batch 1 — Top 15 by student count)
+  new UniWienScraper(),
+  new TUWienScraper(),
+  new UniGrazScraper(),
+  new UniInnsbruckScraper(),
+  new WUScraper(),
+  new MedUniWienScraper(),
+  new BOKUScraper(),
+  new TUGrazScraper(),
+  new UniSalzburgScraper(),
+  new JKUScraper(),
+  new AAUScraper(),
+  new MedUniGrazScraper(),
+  new MontanUniScraper(),
+  new KunstUniLinzScraper(),
+  new VetMedUniScraper(),
 ];
 
 export async function runAllScrapers(): Promise<void> {

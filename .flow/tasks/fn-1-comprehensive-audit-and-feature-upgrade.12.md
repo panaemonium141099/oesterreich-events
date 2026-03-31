@@ -30,9 +30,8 @@ Enhance the chat messaging system with inline event search and rich event previe
 - [ ] Search debounced (300ms) to avoid excessive API calls
 - [ ] `npm run build` succeeds
 ## Done summary
-TBD
-
+Added inline event search and rich event preview cards to both DM and group chat. Created a lightweight /api/events/search endpoint, reusable EventSearchInline and EventPreviewMessage components, with debounced search and deep-linking to the map view.
 ## Evidence
-- Commits:
-- Tests:
+- Commits: 8eaa6af2779124a915d7734a9144d5d554b4f30c
+- Tests: npm run build
 - PRs:
