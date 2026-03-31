@@ -10,30 +10,44 @@ import { vi } from 'vitest';
  *   mockSupabaseClient.from.mockReturnValue({ select: ... });
  */
 
+const defaultResponse = { data: null, error: null };
+
+/**
+ * Creates a thenable query builder that resolves by default.
+ * All chain methods return the same builder, and awaiting any chain
+ * resolves to { data: null, error: null } unless overridden.
+ */
+function createQueryBuilder() {
+  const builder: Record<string, any> = {};
+
+  // Chain methods that return the builder itself
+  const chainMethods = [
+    'select', 'insert', 'update', 'upsert', 'delete',
+    'eq', 'neq', 'gt', 'gte', 'lt', 'lte',
+    'like', 'ilike', 'in', 'contains', 'containedBy',
+    'order', 'limit', 'range', 'filter', 'match',
+    'not', 'or', 'is', 'overlaps', 'textSearch',
+  ];
+
+  for (const method of chainMethods) {
+    builder[method] = vi.fn().mockImplementation(() => builder);
+  }
+
+  // Terminal methods that resolve with data
+  builder.single = vi.fn().mockResolvedValue(defaultResponse);
+  builder.maybeSingle = vi.fn().mockResolvedValue(defaultResponse);
+
+  // Make the builder thenable so `await client.from('x').select('*')` resolves
+  builder.then = vi.fn().mockImplementation(
+    (onFulfilled?: (value: any) => any, onRejected?: (reason: any) => any) =>
+      Promise.resolve(defaultResponse).then(onFulfilled, onRejected)
+  );
+
+  return builder;
+}
+
 export const mockSupabaseClient = {
-  from: vi.fn().mockReturnValue({
-    select: vi.fn().mockReturnThis(),
-    insert: vi.fn().mockReturnThis(),
-    update: vi.fn().mockReturnThis(),
-    upsert: vi.fn().mockReturnThis(),
-    delete: vi.fn().mockReturnThis(),
-    eq: vi.fn().mockReturnThis(),
-    neq: vi.fn().mockReturnThis(),
-    gt: vi.fn().mockReturnThis(),
-    gte: vi.fn().mockReturnThis(),
-    lt: vi.fn().mockReturnThis(),
-    lte: vi.fn().mockReturnThis(),
-    like: vi.fn().mockReturnThis(),
-    ilike: vi.fn().mockReturnThis(),
-    in: vi.fn().mockReturnThis(),
-    contains: vi.fn().mockReturnThis(),
-    order: vi.fn().mockReturnThis(),
-    limit: vi.fn().mockReturnThis(),
-    range: vi.fn().mockReturnThis(),
-    single: vi.fn().mockResolvedValue({ data: null, error: null }),
-    maybeSingle: vi.fn().mockResolvedValue({ data: null, error: null }),
-    then: vi.fn(),
-  }),
+  from: vi.fn().mockImplementation(() => createQueryBuilder()),
   auth: {
     getSession: vi.fn().mockResolvedValue({ data: { session: null }, error: null }),
     getUser: vi.fn().mockResolvedValue({ data: { user: null }, error: null }),

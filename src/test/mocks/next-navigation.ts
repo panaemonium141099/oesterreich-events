@@ -22,6 +22,7 @@ export const mockRouter = {
 
 let currentPathname = '/';
 let currentSearchParams = new URLSearchParams();
+let currentParams: Record<string, string | string[]> = {};
 
 export function useRouter() {
   return mockRouter;
@@ -36,7 +37,7 @@ export function useSearchParams() {
 }
 
 export function useParams() {
-  return {};
+  return currentParams;
 }
 
 export function useSelectedLayoutSegment() {
@@ -66,6 +67,11 @@ export function setMockSearchParams(params: Record<string, string>) {
   currentSearchParams = new URLSearchParams(params);
 }
 
+/** Helper to set mock route params for dynamic routes (e.g. [userId], [id]) */
+export function setMockParams(params: Record<string, string | string[]>) {
+  currentParams = params;
+}
+
 /** Reset all mocks to defaults */
 export function resetNavigationMocks() {
   mockRouter.push.mockClear();
@@ -76,4 +82,5 @@ export function resetNavigationMocks() {
   mockRouter.prefetch.mockClear();
   currentPathname = '/';
   currentSearchParams = new URLSearchParams();
+  currentParams = {};
 }
