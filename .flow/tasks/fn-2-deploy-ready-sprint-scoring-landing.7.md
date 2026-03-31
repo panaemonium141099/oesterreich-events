@@ -44,9 +44,8 @@ Run final `npm run build`, test Docker build, and update CHANGELOG.md + CLAUDE.m
 - [ ] `.env.example` has SCRAPE_API_KEY and ANALYTICS_SALT entries
 - [ ] Git working tree clean after final commit
 ## Done summary
-TBD
-
+Updated CHANGELOG.md with Phase 13 entry documenting all sprint deliverables (Docker, scoring, landing, SEO), new routes table entries, file structure additions, and extended summary table. Updated CLAUDE.md with all new Wichtige Pfade entries, npm run score command, and Docker build section. Build passes with 0 errors; all 127 tests pass.
 ## Evidence
-- Commits:
-- Tests:
+- Commits: e7c003d77a0cf769615c3aceb5c9da65f72e0006
+- Tests: npm test -- 127 passed (127)
 - PRs:

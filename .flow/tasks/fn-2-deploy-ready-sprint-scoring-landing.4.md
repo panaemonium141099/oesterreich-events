@@ -34,9 +34,8 @@ Build `RegionExplorer` and `PopularCategories` landing components (both use `/ap
 - [ ] `npm run build` passes
 - [ ] `npm test` — 127 tests pass
 ## Done summary
-TBD
-
+Added RegionExplorer (9 Bundesland tiles) and PopularCategories (13 category tiles) components, both fetching /api/stats/counts with Framer Motion stagger animations. Integrated all three new landing sections (WeeklyHighlights, PopularCategories, RegionExplorer) into page.tsx via a LandingSections client wrapper that safely uses dynamic + ssr:false within a Server Component.
 ## Evidence
-- Commits:
-- Tests:
+- Commits: 503e8fac2841397751fd1751f53a3999ae5c74f1
+- Tests: npm test (127 passed), npm run build (0 TypeScript errors)
 - PRs:
