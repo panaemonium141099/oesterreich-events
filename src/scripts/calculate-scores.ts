@@ -150,23 +150,29 @@ async function main() {
     score_updated_at: new Date().toISOString(),
   }));
 
-  // Batch update
+  // Batch update — parallel chunks of 50 concurrent .update() calls
+  const CONCURRENCY = 50;
   let updated = 0;
   for (let i = 0; i < scored.length; i += BATCH_SIZE) {
     const batch = scored.slice(i, i + BATCH_SIZE);
-    const { error } = await supabase
-      .from('events')
-      .upsert(
-        batch.map(({ id, event_score, score_updated_at }) => ({
-          id,
-          event_score,
-          score_updated_at,
-        })),
-        { onConflict: 'id' }
-      );
+    let batchError: unknown = null;
 
-    if (error) {
-      console.error(`Error updating batch starting at ${i}:`, error);
+    for (let j = 0; j < batch.length; j += CONCURRENCY) {
+      const chunk = batch.slice(j, j + CONCURRENCY);
+      const results = await Promise.all(
+        chunk.map(row =>
+          supabase
+            .from('events')
+            .update({ event_score: row.event_score, score_updated_at: row.score_updated_at })
+            .eq('id', row.id)
+        )
+      );
+      const failed = results.find(r => r.error);
+      if (failed?.error) { batchError = failed.error; break; }
+    }
+
+    if (batchError) {
+      console.error(`Error updating batch starting at ${i}:`, batchError);
       process.exit(1);
     }
 
