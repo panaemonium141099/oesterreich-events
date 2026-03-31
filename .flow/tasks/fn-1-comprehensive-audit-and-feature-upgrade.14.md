@@ -29,9 +29,8 @@ Implement event scrapers for remaining Austrian universities and Fachhochschulen
 - [ ] Institutions without public event pages documented
 - [ ] `npm run build` succeeds
 ## Done summary
-TBD
-
+Added 27 new university/FH/PH scrapers (Batch 2): 3 remaining universities (AkBild Wien, Mozarteum Salzburg, Donau-Universität Krems), 16 FH scrapers (FH Joanneum, HCW/FH Campus Wien, FH St. Pölten, FH Salzburg, FH Burgenland, FH Vorarlberg, FH Kärnten, FHWN, FH Kufstein, IMC FH Krems, MCI Innsbruck, FHWien WKW, CAMPUS 02, FHG Tirol, FernFH, FH BFI Wien), and 7 PH scrapers. All registered in index.ts (total 85 scrapers). Coverage: 42 Austrian institutions scraped; 8 institutions not covered due to requiring Puppeteer or having no public event page. npm run build succeeds.
 ## Evidence
-- Commits:
-- Tests:
+- Commits: 641f96a9d853eda98465a555d823b45239fd4dbc
+- Tests: npx tsc --noEmit, npm run build
 - PRs:

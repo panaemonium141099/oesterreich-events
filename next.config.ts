@@ -58,6 +58,12 @@ const nextConfig: NextConfig = {
       // .edu domains (MCI Management Center Innsbruck)
       { protocol: 'https', hostname: '**.mci.edu' },
 
+      // Niche scraper domains
+      { protocol: 'https', hostname: '**.ra.co' },
+      { protocol: 'https', hostname: 'ra.co' },
+      { protocol: 'https', hostname: '**.festival.at' },
+      { protocol: 'https', hostname: 'festival.at' },
+
       // .net / .org / .tv / .info / .live / .travel
       { protocol: 'https', hostname: '**.veranstaltungskalender.net' },
       { protocol: 'https', hostname: '**.deskline.net' },

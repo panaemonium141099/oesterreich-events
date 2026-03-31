@@ -40,6 +40,14 @@ import { GenericGemeindeScraper } from './GenericGemeindeScraper';
 import { MariazellAtScraper, BasilikaMariazellScraper, MariazellGvScraper } from './MariazellScraper';
 import { FeratelScraper } from './FeratelScraper';
 import {
+  FestivalAtScraper, FestivalGuideScraper,
+  ResidentAdvisorAustriaScraper, ClubmapScraper,
+  NaturfreundeScraper, AlpenvereinScraper,
+  BundestheaterScraper, TheaterAtScraper,
+  BauernmarktScraper, GenussregionScraper,
+  FamiliiiScraper, FamilienUrlaubScraper,
+} from './niche';
+import {
   UniWienScraper, TUWienScraper, UniGrazScraper, UniInnsbruckScraper,
   WUScraper, MedUniWienScraper, BOKUScraper, TUGrazScraper,
   UniSalzburgScraper, JKUScraper, AAUScraper, MedUniGrazScraper,
@@ -131,6 +139,24 @@ const scrapers: BaseScraper[] = [
   new MeinBezirkScraper(),
   new OeticketScraper(),
   new TicketmasterScraper(),
+  // Nischen-Kategorien: Festivals
+  new FestivalAtScraper(),
+  new FestivalGuideScraper(),
+  // Nischen-Kategorien: Nightlife / Clubs
+  new ResidentAdvisorAustriaScraper(),
+  new ClubmapScraper(),
+  // Nischen-Kategorien: Outdoor & Sport
+  new NaturfreundeScraper(),
+  new AlpenvereinScraper(),
+  // Nischen-Kategorien: Kultur & Theater
+  new BundestheaterScraper(),
+  new TheaterAtScraper(),
+  // Nischen-Kategorien: Märkte & Kulinarik
+  new BauernmarktScraper(),
+  new GenussregionScraper(),
+  // Nischen-Kategorien: Familie
+  new FamiliiiScraper(),
+  new FamilienUrlaubScraper(),
   // Gemeinde-Websites (alle Bundesländer)
   new GemeindeListScraper(),
   // GEM2GO CMS Gemeinden (~2.000 Gemeinden österreichweit)

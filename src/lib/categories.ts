@@ -36,6 +36,9 @@ const CATEGORY_KEYWORDS: Record<Category, string[]> = {
     'karaoke', 'pub quiz',
     'cocktail', 'cocktailnight', 'ladies night',
     'sunday dance', 'hangover party',
+    // Niche nightlife tags
+    'club event', 'rave event', 'club night', 'floorplan', 'line-up', 'resident advisor',
+    'clubmap', 'electronic night', 'night club',
   ],
   'Sport': [
     'sport', 'lauf', 'marathon', 'radmarathon', 'radtour', 'radeln', 'losradeln',
@@ -55,6 +58,11 @@ const CATEGORY_KEYWORDS: Record<Category, string[]> = {
     'schießen', 'preisschnapsen', 'kegelabend', 'kegeln',
     'krafttraining', 'workout', 'crossfit', 'zumba',
     'paddeln', 'rudern', 'rafting', 'canyoning', 'paragleit',
+    // Niche outdoor/sport tags
+    'naturfreunde', 'alpenverein', 'alpine tour', 'bergtour', 'alpentour',
+    'klettersteig', 'via ferrata', 'outdoor event', 'outdoor sport',
+    'wildwasser', 'wildwasserkurs', 'kanufahren', 'kajakfahren',
+    'trail run', 'trailrunning', 'ultramarathon',
   ],
   'Natur': [
     'natur', 'nature', 'nationalpark', 'naturführung', 'naturerlebnis',
@@ -79,6 +87,12 @@ const CATEGORY_KEYWORDS: Record<Category, string[]> = {
     'kasperl', 'kasperltheater', 'märchenstunde',
     'kinderturnen', 'babyschwimmen', 'kinderdisco',
     'kinderkochkurs', 'kinderbacken',
+    // Niche family tags
+    'familiii', 'familienausflug', 'ausflugsziel', 'familienurlaub',
+    'ausflug für kinder', 'tierpark', 'zoo ', 'wildpark',
+    'erlebnispark', 'abenteuerspielplatz', 'abenteuer park',
+    'kinderbauernhof', 'ponyhof', 'bauernhof für kinder',
+    'familienfreundlich', 'family friendly',
   ],
   'Feste & Brauchtum': [
     'dorffest', 'ortsfest', 'volksfest', 'stadtfest', 'straßenfest',
@@ -111,6 +125,10 @@ const CATEGORY_KEYWORDS: Record<Category, string[]> = {
     'samentausch', 'pflanzentausch', 'pflanzenmarkt',
     'kellergasse', 'kellergassenfest',
     'messe ', 'messegelände', 'fachmesse', 'hausmesse',
+    // Niche market/food tags
+    'genussregion', 'regional food', 'street food', 'streetfood', 'foodmarket',
+    'food market', 'bio-markt', 'biomarkt', 'biobauernmarkt',
+    'regional market', 'regional markt',
   ],
   'Wein & Kulinarik': [
     'weinfrühling', 'weinherbst', 'weinverkostung', 'weinfest', 'weinwanderung',
@@ -145,10 +163,16 @@ const CATEGORY_KEYWORDS: Record<Category, string[]> = {
     'open-air-kino', 'sommerkino', 'mondscheinkino',
     'krimi', 'dinner theater', 'mörderdinner',
     'architektur', 'denkmal', 'kulturerbe',
+    // Niche culture/theater tags
+    'staatsoper', 'burgtheater', 'volksoper', 'landestheater', 'stadttheater',
+    'bundestheater', 'spielplan', 'spielzeit', 'premiere ',
+    'kunsthalle', 'kunstmuseum', 'naturhistorisch', 'kunsthistorisch',
+    'uraufführung', 'österreichische erstaufführung',
+    'ensemble', 'schauspiel', 'tanztheater',
   ],
   'Musik': [
     'konzert', 'concert', 'musik', 'music', 'jazz', 'klassik',
-    'chor', 'chorkonzert', 'orchester', 'festival', 'musikfestival',
+    'chor', 'chorkonzert', 'orchester', 'festival', 'musikfestival', 'festivalguide',
     'band ', 'liveband', 'livemusik', 'live-musik', 'live music',
     'rock', 'pop', 'symphonie', 'kammermusik', 'liederabend',
     'blasmusik', 'blasorchester', 'musikkapelle', 'trachtenkapelle',
