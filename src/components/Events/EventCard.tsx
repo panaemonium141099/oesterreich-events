@@ -4,6 +4,7 @@ import { useState } from 'react';
 import type { Event } from '@/types/events';
 import { getEventImage } from '@/lib/categoryImages';
 import { formatDate, formatTime } from '@/lib/utils/date';
+import { TagChip, TagOverflow } from '@/components/UI/TagChip';
 
 interface EventCardProps {
   event: Event;
@@ -144,15 +145,24 @@ export function EventCard({ event, isSelected, onSelect, onHover, eveningMode, i
           </div>
         )}
 
-        <div className="flex items-center gap-2 mt-1.5">
-          {event.category && (
+        <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
+          {event.tags && event.tags.length > 0 ? (
+            <>
+              {event.tags.slice(0, 3).map((tag) => (
+                <TagChip key={tag} tag={tag} eveningMode={eveningMode} size="sm" />
+              ))}
+              {event.tags.length > 3 && (
+                <TagOverflow count={event.tags.length - 3} eveningMode={eveningMode} size="sm" />
+              )}
+            </>
+          ) : event.category ? (
             <span
               className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${categoryColor} ${eveningMode ? 'animate-pulse-glow' : ''}`}
               style={eveningMode ? { '--glow-color': CATEGORY_GLOW_COLORS[event.category] || CATEGORY_GLOW_COLORS['Sonstiges'] } as React.CSSProperties : undefined}
             >
               {event.category}
             </span>
-          )}
+          ) : null}
           {event.price_text && (
             <span className={`text-[10px] font-medium ${eveningMode ? 'text-indigo-400' : 'text-blue-600'}`}>
               {event.price_text}

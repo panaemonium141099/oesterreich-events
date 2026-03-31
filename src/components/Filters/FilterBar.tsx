@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import type { EventFilters } from '@/types/events';
 import { CategoryFilter } from './CategoryFilter';
+import { TagFilter } from './TagFilter';
 import { DistrictFilter } from './DistrictFilter';
 import { DateRangeFilter } from './DateRangeFilter';
 import { trackEvent } from '@/lib/analytics';
@@ -115,6 +116,7 @@ export function FilterBar({ filters, onFiltersChange, eveningMode, bundeslandId,
 
   const activeFilterCount = [
     filters.category,
+    filters.tags && filters.tags.length > 0 ? true : undefined,
     filters.district,
     filters.dateFrom,
     filters.dateTo,
@@ -167,7 +169,13 @@ export function FilterBar({ filters, onFiltersChange, eveningMode, bundeslandId,
 
       <CategoryFilter
         value={filters.category}
-        onChange={(category) => { if (category) trackEvent('filter_change', { filter_type: 'category', value: category }); onFiltersChange({ ...filters, category }); }}
+        onChange={(category) => { if (category) trackEvent('filter_change', { filter_type: 'category', value: category }); onFiltersChange({ ...filters, category, tags: undefined }); }}
+        eveningMode={eveningMode}
+      />
+
+      <TagFilter
+        value={filters.tags}
+        onChange={(tags) => { if (tags) trackEvent('filter_change', { filter_type: 'tags', value: tags.join(',') }); onFiltersChange({ ...filters, tags, category: undefined }); }}
         eveningMode={eveningMode}
       />
 

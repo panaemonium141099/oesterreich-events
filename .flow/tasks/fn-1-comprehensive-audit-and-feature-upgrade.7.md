@@ -33,9 +33,8 @@ Implement multi-category/tag system at the database and API level. Currently eve
 - [ ] SQLite schema updated with `event_tags` table
 - [ ] `npm run build` succeeds
 ## Done summary
-TBD
-
+Implemented multi-tag system with event_tags junction table (Supabase migration + SQLite schema), categorizeEventMulti() returning up to 3 tags per event, and updated events API to support comma-separated tags query param while keeping backwards-compatible category filter.
 ## Evidence
-- Commits:
-- Tests:
+- Commits: b565f84b7c5322b4559773075e0f87b67f8fceea
+- Tests: npm test -- --run, npx tsc --noEmit, npm run build
 - PRs:

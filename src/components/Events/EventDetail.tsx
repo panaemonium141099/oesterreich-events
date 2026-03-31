@@ -8,6 +8,7 @@ import { useAuth } from '@/lib/supabase/auth-context';
 import { createClient } from '@/lib/supabase/client';
 import { downloadICS, getGoogleCalendarUrl } from '@/lib/calendar/ics';
 import { CheckIcon, CalendarIcon } from '../UI/Icons';
+import { TagChip } from '../UI/TagChip';
 import confetti from 'canvas-confetti';
 import { trackEvent } from '@/lib/analytics';
 import { formatDateLong, formatTime } from '@/lib/utils/date';
@@ -16,6 +17,7 @@ interface EventDetailProps {
   event: Event;
   onClose: () => void;
   eveningMode?: boolean;
+  onTagClick?: (tag: string) => void;
 }
 
 // formatDateLong provides the long weekday+month format used in detail views
@@ -27,7 +29,7 @@ const REMINDER_OPTIONS = [
   { label: '1 Woche vorher', hours: 168 },
 ];
 
-export function EventDetail({ event, onClose, eveningMode }: EventDetailProps) {
+export function EventDetail({ event, onClose, eveningMode, onTagClick }: EventDetailProps) {
   const startTime = formatTime(event.start_date);
   const endTime = event.end_date ? formatTime(event.end_date) : null;
   const [visible, setVisible] = useState(false);
@@ -360,14 +362,29 @@ export function EventDetail({ event, onClose, eveningMode }: EventDetailProps) {
         </div>
         {/* Content */}
         <div className="p-6">
-          {/* Category Badge */}
-          {event.category && (
-            <span className={`inline-block text-xs font-medium px-3 py-1 rounded-full mb-3 ${
-              eveningMode ? 'bg-indigo-900/50 text-indigo-300' : 'bg-blue-100 text-blue-700'
-            }`}>
-              {event.category}
-            </span>
-          )}
+          {/* Tags */}
+          {event.tags && event.tags.length > 0 ? (
+            <div className="flex flex-wrap gap-2 mb-3">
+              {event.tags.map((tag) => (
+                <TagChip
+                  key={tag}
+                  tag={tag}
+                  eveningMode={eveningMode}
+                  size="md"
+                  onClick={onTagClick ? () => onTagClick(tag) : undefined}
+                />
+              ))}
+            </div>
+          ) : event.category ? (
+            <div className="mb-3">
+              <TagChip
+                tag={event.category}
+                eveningMode={eveningMode}
+                size="md"
+                onClick={onTagClick ? () => onTagClick(event.category!) : undefined}
+              />
+            </div>
+          ) : null}
 
           <h2 className={`text-xl font-bold mb-4 ${eveningMode ? 'text-gray-100' : 'text-slate-800'}`}>{event.title}</h2>
 

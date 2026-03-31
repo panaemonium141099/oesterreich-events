@@ -81,7 +81,8 @@ function MapPageInner() {
     const params = new URLSearchParams();
     params.set('bundesland', bundesland.id);
     // Do NOT pass district to API — we filter client-side for the sidebar
-    if (filters.category) params.set('category', filters.category);
+    if (filters.tags && filters.tags.length > 0) params.set('tags', filters.tags.join(','));
+    else if (filters.category) params.set('category', filters.category);
     if (filters.dateFrom) params.set('dateFrom', filters.dateFrom);
     if (filters.dateTo) params.set('dateTo', filters.dateTo);
     if (filters.priceMin !== undefined) params.set('priceMin', String(filters.priceMin));
@@ -357,6 +358,10 @@ function MapPageInner() {
             event={selectedEvent}
             onClose={() => setSelectedEvent(null)}
             eveningMode={eveningMode}
+            onTagClick={(tag) => {
+              setFilters(prev => ({ ...prev, tags: [tag], category: undefined }));
+              setSelectedEvent(null);
+            }}
           />
         )}
       </div>
