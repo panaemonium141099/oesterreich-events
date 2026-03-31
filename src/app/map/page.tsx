@@ -108,32 +108,15 @@ function MapPageInner() {
       params.set('bbox', mapBboxRef.current.join(','));
     }
 
-    // Use a large limit per page to minimize round-trips for map display
-    params.set('limit', '200');
+    // Fetch all events in one request (matches pre-pagination behaviour)
+    params.set('limit', '50000');
 
     try {
-      let accumulated: Event[] = [];
-      let cursor: string | null = null;
-      let totalCount = 0;
+      const res = await fetch(`/api/events?${params.toString()}`);
+      const data = await res.json();
 
-      // Paginate through all results for the viewport
-      // Safety cap at 10 pages (2000 events max) to prevent runaway requests
-      for (let page = 0; page < 10; page++) {
-        const pageParams = new URLSearchParams(params);
-        if (cursor) pageParams.set('cursor', cursor);
-
-        const res = await fetch(`/api/events?${pageParams.toString()}`);
-        const data = await res.json();
-
-        accumulated = [...accumulated, ...(data.events || [])];
-        totalCount = data.total || 0;
-
-        if (!data.hasMore || !data.nextCursor) break;
-        cursor = data.nextCursor;
-      }
-
-      setAllEvents(accumulated);
-      setTotal(totalCount);
+      setAllEvents(data.events || []);
+      setTotal(data.total || 0);
     } catch (err) {
       if (process.env.NODE_ENV === 'development') console.error('Fehler beim Laden der Events:', err);
     } finally {

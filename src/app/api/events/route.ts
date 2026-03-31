@@ -13,7 +13,7 @@ const supabase = createClient(
 
 /** Default and maximum page sizes for cursor-based pagination */
 const DEFAULT_PAGE_SIZE = 50;
-const MAX_PAGE_SIZE = 200;
+const MAX_PAGE_SIZE = 50000;
 
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
