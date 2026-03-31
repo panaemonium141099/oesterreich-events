@@ -9,6 +9,7 @@ import { UserIcon, HeartIcon, UsersIcon, ChatBubbleIcon, GroupIcon, NewspaperIco
 import type { EventFilters } from '@/types/events';
 import type { Bundesland } from '@/lib/bundeslaender';
 import { BUNDESLAENDER } from '@/lib/bundeslaender';
+import { trackEvent } from '@/lib/analytics';
 
 interface HeaderProps {
   filters: EventFilters;
@@ -156,7 +157,7 @@ export function Header({ filters, onFiltersChange, totalEvents, onToggleSidebar,
               {BUNDESLAENDER.map(bl => (
                 <button
                   key={bl.id}
-                  onClick={() => { onBundeslandChange(bl); setBlDropdownOpen(false); }}
+                  onClick={() => { trackEvent('bundesland_switch', { from: bundesland.name, to: bl.name }); onBundeslandChange(bl); setBlDropdownOpen(false); }}
                   className={`w-full text-left px-4 py-2.5 text-sm flex items-center gap-3 transition-colors ${
                     bl.id === bundesland.id
                       ? eveningMode ? 'bg-amber-400/10 text-amber-300' : 'bg-slate-50 text-slate-900'
@@ -184,7 +185,7 @@ export function Header({ filters, onFiltersChange, totalEvents, onToggleSidebar,
 
         {/* Evening Mode Toggle */}
         <button
-          onClick={onToggleEveningMode}
+          onClick={() => { trackEvent('nachtleben_toggle', { enabled: !eveningMode }); onToggleEveningMode(); }}
           className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-all duration-300 shrink-0 cursor-pointer ${
             eveningMode
               ? 'text-amber-400'
@@ -206,26 +207,28 @@ export function Header({ filters, onFiltersChange, totalEvents, onToggleSidebar,
           </div>
         </button>
 
-        {/* Social Hub — single button to access social features */}
+        {/* Social Hub — prominent button to access social features */}
         {user && (
           <>
             <div className={`w-px h-6 shrink-0 ${eveningMode ? 'bg-gray-700' : 'bg-slate-200'}`} />
             <Link
-              href="/friends"
+              href="/feed"
               aria-label="Social Hub"
-              className={`relative group p-2.5 rounded-lg transition-colors duration-200 min-w-[44px] min-h-[44px] flex items-center justify-center shrink-0 ${
-                eveningMode ? 'text-gray-400 hover:text-gray-200 hover:bg-gray-700/50' : 'text-slate-400 hover:text-slate-600 hover:bg-slate-100'
+              className={`relative flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-200 shrink-0 min-h-[44px] active:scale-[0.97] motion-reduce:transform-none ${
+                eveningMode
+                  ? 'bg-white text-black hover:bg-white/90'
+                  : 'bg-slate-900 text-white hover:bg-slate-800'
               }`}
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
               </svg>
+              <span className="hidden sm:inline">Social</span>
               {unreadDMs > 0 && (
-                <span className="absolute top-1 right-1 w-4 h-4 rounded-full bg-red-500 text-white text-[9px] font-bold flex items-center justify-center">
+                <span className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center ring-2 ring-white">
                   {unreadDMs > 9 ? '9+' : unreadDMs}
                 </span>
               )}
-              <span className="absolute -bottom-6 left-1/2 -translate-x-1/2 px-2 py-0.5 text-[10px] font-medium bg-black/80 text-white rounded-md whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-150 pointer-events-none z-50">Social</span>
             </Link>
           </>
         )}

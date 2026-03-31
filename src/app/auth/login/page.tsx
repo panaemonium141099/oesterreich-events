@@ -3,11 +3,12 @@
 import { useState, useEffect, type FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { useAuth } from '@/lib/supabase/auth-context';
+import { useAuth, isProfileComplete } from '@/lib/supabase/auth-context';
+import { trackEvent } from '@/lib/analytics';
 
 export default function LoginPage() {
   const router = useRouter();
-  const { user, loading, signInWithGoogle, signInWithEmail } = useAuth();
+  const { user, profile, loading, signInWithGoogle, signInWithEmail } = useAuth();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -15,12 +16,18 @@ export default function LoginPage() {
   const [submitting, setSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
-  // Redirect if already logged in
+  // Redirect if already logged in — check profile completeness
   useEffect(() => {
     if (!loading && user) {
-      router.replace('/map');
+      trackEvent('login', { method: 'email' });
+      if (profile && !isProfileComplete(profile)) {
+        router.replace('/auth/complete-profile');
+      } else if (profile) {
+        router.replace('/map');
+      }
+      // If profile is still null (loading in background), wait for next render
     }
-  }, [user, loading, router]);
+  }, [user, profile, loading, router]);
 
   const handleEmailLogin = async (e: FormEvent) => {
     e.preventDefault();

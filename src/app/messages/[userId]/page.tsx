@@ -109,7 +109,8 @@ export default function DMConversationPage() {
       .on(
         'postgres_changes',
         { event: 'INSERT', schema: 'public', table: 'direct_messages' },
-        async (payload) => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        async (payload: any) => {
           const msg = payload.new as DirectMessage;
           if (
             (msg.sender_id === user.id && msg.receiver_id === friendId) ||
@@ -210,7 +211,7 @@ export default function DMConversationPage() {
     }
   }
 
-  if (loading || !user) {
+  if (loading) {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center">
         <div className="w-8 h-8 border-2 border-white/20 border-t-white rounded-full animate-spin" />
@@ -279,7 +280,7 @@ export default function DMConversationPage() {
                   {/* Messages in this date group */}
                   <div className="space-y-2">
                     {group.messages.map((msg) => {
-                      const isMe = msg.sender_id === user.id;
+                      const isMe = msg.sender_id === user?.id;
                       const isEventShare = msg.message_type === 'event_share' && msg.event_id;
                       return (
                         <div key={msg.id} className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}>

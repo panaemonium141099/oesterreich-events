@@ -7,10 +7,10 @@ import type { User, Session } from '@supabase/supabase-js';
 export interface Profile {
   id: string;
   email: string;
-  first_name: string;
-  last_name: string;
-  birth_date: string;
-  phone: string;
+  first_name: string | null;
+  last_name: string | null;
+  birth_date: string | null;
+  phone: string | null;
   avatar_url: string | null;
   address: string | null;
   postal_code: string | null;
@@ -25,8 +25,20 @@ export interface Profile {
   preferred_bundesland: string | null;
   preferred_categories: string[] | null;
   notification_enabled: boolean;
+  agb_accepted_at: string | null;
+  newsletter_opt_in: boolean;
   created_at: string;
   updated_at: string;
+}
+
+/** A profile is complete when required fields are filled */
+export function isProfileComplete(profile: Profile | null): boolean {
+  if (!profile) return false;
+  return !!(
+    profile.first_name?.trim() &&
+    profile.last_name?.trim() &&
+    profile.birth_date
+  );
 }
 
 interface AuthContextType {
@@ -34,6 +46,7 @@ interface AuthContextType {
   profile: Profile | null;
   session: Session | null;
   loading: boolean;
+  profileComplete: boolean;
   signInWithGoogle: () => Promise<void>;
   signInWithApple: () => Promise<void>;
   signInWithEmail: (email: string, password: string) => Promise<{ error: string | null }>;
@@ -41,11 +54,9 @@ interface AuthContextType {
     first_name: string;
     last_name: string;
     birth_date: string;
-    phone: string;
-    address: string;
-    postal_code: string;
-    city: string;
-    country: string;
+    phone?: string;
+    agb_accepted_at?: string;
+    newsletter_opt_in?: boolean;
   }) => Promise<{ error: string | null }>;
   signOut: () => Promise<void>;
   refreshProfile: () => Promise<void>;
@@ -90,7 +101,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     let mounted = true;
 
     // Get initial session — set loading false IMMEDIATELY after getting user
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(({ data: { session } }: { data: { session: import('@supabase/supabase-js').Session | null } }) => {
       if (!mounted) return;
       setSession(session);
       setUser(session?.user ?? null);
@@ -150,7 +161,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const signUpWithEmail = async (
     email: string,
     password: string,
-    metadata: { first_name: string; last_name: string; birth_date: string; phone: string; address: string; postal_code: string; city: string; country: string }
+    metadata: { first_name: string; last_name: string; birth_date: string; phone?: string; agb_accepted_at?: string; newsletter_opt_in?: boolean }
   ) => {
     const { error } = await supabase.auth.signUp({
       email,
@@ -174,6 +185,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       profile,
       session,
       loading,
+      profileComplete: isProfileComplete(profile),
       signInWithGoogle,
       signInWithApple,
       signInWithEmail,

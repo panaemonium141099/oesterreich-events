@@ -201,7 +201,7 @@ export default function CalendarPage() {
       .eq('status', 'accepted')
       .or(`requester_id.eq.${user.id},addressee_id.eq.${user.id}`);
 
-    const friendIds = (friendships || []).map(f =>
+    const friendIds = (friendships || []).map((f: { requester_id: string; addressee_id: string }) =>
       f.requester_id === user.id ? f.addressee_id : f.requester_id
     );
 
@@ -511,7 +511,7 @@ export default function CalendarPage() {
     return share.status as 'pending' | 'accepted' | 'rejected';
   }, [calendarShares]);
 
-  if (loading || !user) {
+  if (loading) {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center">
         <div className="w-8 h-8 border-2 border-white/20 border-t-white rounded-full animate-spin" />

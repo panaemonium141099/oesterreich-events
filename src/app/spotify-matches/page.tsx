@@ -60,7 +60,7 @@ export default function SpotifyMatchesPage() {
     }
 
     // Enrich with event data
-    const eventIds = data.map(m => m.event_id).filter(Boolean);
+    const eventIds = data.map((m: { event_id: string }) => m.event_id).filter(Boolean);
     const { data: events } = await supabase
       .from('events')
       .select('id, title, start_date, location_name, bundesland, image_url, ticket_url, source_url')
@@ -68,14 +68,14 @@ export default function SpotifyMatchesPage() {
       .gte('start_date', new Date().toISOString())
       .order('start_date', { ascending: true });
 
-    const eventMap = new Map((events || []).map(e => [e.id, e]));
+    const eventMap = new Map((events || []).map((e: { id: string; [key: string]: unknown }) => [e.id, e]));
 
     const enriched: SpotifyMatch[] = data
-      .map(m => ({
+      .map((m: { event_id: string; [key: string]: unknown }) => ({
         ...m,
         event: eventMap.get(m.event_id) || undefined,
       }))
-      .filter(m => m.event); // Only show matches with upcoming events
+      .filter((m: { event?: unknown }) => m.event); // Only show matches with upcoming events
 
     setMatches(enriched);
     setLoadingData(false);
@@ -101,7 +101,7 @@ export default function SpotifyMatchesPage() {
     });
   };
 
-  if (loading || !user) {
+  if (loading) {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center">
         <div className="w-8 h-8 border-2 border-white/20 border-t-white rounded-full animate-spin" />

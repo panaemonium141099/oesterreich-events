@@ -6,6 +6,19 @@ import 'mapbox-gl/dist/mapbox-gl.css';
 import type { Event } from '@/types/events';
 import type { Bundesland } from '@/lib/bundeslaender';
 import { getEventImage, getCategoryFallbackImage } from '@/lib/categoryImages';
+import { createClient } from '@/lib/supabase/client';
+import { useAuth } from '@/lib/supabase/auth-context';
+
+interface PlannedEventMarker {
+  id: string;
+  name: string;
+  event_date: string | null;
+  location_name: string | null;
+  location_lat: number;
+  location_lng: number;
+  is_own: boolean;
+  creator_name: string;
+}
 
 mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN || '';
 
@@ -200,7 +213,9 @@ function EventMap({ events, selectedEvent, hoveredEventId, onSelectEvent, evenin
   const createPopupHTML = useCallback((event: Event, dark?: boolean) => {
     const date = new Date(event.start_date).toLocaleDateString('de-AT', { day: '2-digit', month: '2-digit', year: 'numeric' });
     const time = new Date(event.start_date).toLocaleTimeString('de-AT', { hour: '2-digit', minute: '2-digit' });
-    const showTime = new Date(event.start_date).getHours() !== 0;
+    const startHour = new Date(event.start_date).getHours();
+    const startMin = new Date(event.start_date).getMinutes();
+    const showTime = !(startHour === 0 && startMin === 0) && !(startHour === 1 && startMin === 0);
     const bg = dark ? '#1e293b' : '#ffffff';
     const textColor = dark ? '#f1f5f9' : '#1e293b';
     const subTextColor = dark ? '#94a3b8' : '#64748b';
@@ -467,15 +482,226 @@ function EventMap({ events, selectedEvent, hoveredEventId, onSelectEvent, evenin
     });
   }, [hoveredEventId]);
 
+  // ============ PLANNED EVENTS MARKERS ============
+  const { user, isGod, profile } = useAuth();
+  const supabase = createClient();
+  const plannedMarkers = useRef<Map<string, mapboxgl.Marker>>(new Map());
+  const [plannedEvents, setPlannedEvents] = useState<PlannedEventMarker[]>([]);
+  const [godFilterUser, setGodFilterUser] = useState('');
+  const [godFilterResults, setGodFilterResults] = useState<{ id: string; first_name: string; last_name: string }[]>([]);
+  const [godSelectedUserId, setGodSelectedUserId] = useState<string | null>(null);
+
+  // Fetch planned events for the user (and friends)
+  useEffect(() => {
+    if (!user) return;
+
+    const fetchPlanned = async () => {
+      // Get groups where user is a member and event has location
+      const { data: memberships } = await supabase
+        .from('group_members')
+        .select('group_id')
+        .eq('user_id', user.id);
+
+      if (!memberships || memberships.length === 0) {
+        setPlannedEvents([]);
+        return;
+      }
+
+      const groupIds = memberships.map((m: { group_id: string }) => m.group_id);
+
+      const { data: groups } = await supabase
+        .from('groups')
+        .select('id, name, event_date, location_name, location_lat, location_lng, created_by')
+        .in('id', groupIds)
+        .not('location_lat', 'is', null)
+        .not('location_lng', 'is', null);
+
+      if (!groups) {
+        setPlannedEvents([]);
+        return;
+      }
+
+      // Get creator names
+      const creatorIds = [...new Set(groups.map((g: any) => g.created_by))];
+      const { data: creators } = await supabase
+        .from('profiles')
+        .select('id, first_name, last_name')
+        .in('id', creatorIds);
+
+      const creatorMap = new Map((creators || []).map((c: any) => [c.id, `${c.first_name} ${c.last_name}`]));
+
+      setPlannedEvents(groups.map((g: any) => ({
+        id: g.id,
+        name: g.name,
+        event_date: g.event_date,
+        location_name: g.location_name,
+        location_lat: g.location_lat,
+        location_lng: g.location_lng,
+        is_own: g.created_by === user.id,
+        creator_name: creatorMap.get(g.created_by) || '',
+      })));
+    };
+
+    fetchPlanned();
+  }, [user, supabase]);
+
+  // God-role: filter user events
+  useEffect(() => {
+    if (!isGod || !godFilterUser.trim()) {
+      setGodFilterResults([]);
+      return;
+    }
+    const timer = setTimeout(async () => {
+      const { data } = await supabase
+        .from('profiles')
+        .select('id, first_name, last_name')
+        .or(`first_name.ilike.%${godFilterUser}%,last_name.ilike.%${godFilterUser}%`)
+        .limit(5);
+      setGodFilterResults(data || []);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [isGod, godFilterUser, supabase]);
+
+  // God-role: fetch selected user's events
+  const [godPlannedEvents, setGodPlannedEvents] = useState<PlannedEventMarker[]>([]);
+  useEffect(() => {
+    if (!godSelectedUserId) {
+      setGodPlannedEvents([]);
+      return;
+    }
+    const fetchGodEvents = async () => {
+      const { data: groups } = await supabase
+        .from('groups')
+        .select('id, name, event_date, location_name, location_lat, location_lng, created_by')
+        .eq('created_by', godSelectedUserId)
+        .not('location_lat', 'is', null)
+        .not('location_lng', 'is', null);
+
+      setGodPlannedEvents((groups || []).map((g: any) => ({
+        id: g.id,
+        name: g.name,
+        event_date: g.event_date,
+        location_name: g.location_name,
+        location_lat: g.location_lat,
+        location_lng: g.location_lng,
+        is_own: false,
+        creator_name: '',
+      })));
+    };
+    fetchGodEvents();
+  }, [godSelectedUserId, supabase]);
+
+  // Render planned event markers
+  useEffect(() => {
+    if (!map.current || !mapReady) return;
+    const m = map.current;
+
+    // Clear old planned markers
+    plannedMarkers.current.forEach(marker => marker.remove());
+    plannedMarkers.current.clear();
+
+    const allPlanned = [...plannedEvents, ...godPlannedEvents];
+
+    for (const pe of allPlanned) {
+      // Outer wrapper — Mapbox controls its transform, so we don't touch it
+      const el = document.createElement('div');
+      el.style.cssText = 'cursor:pointer;';
+      // Inner visual element — safe to animate without conflicting with Mapbox positioning
+      const inner = document.createElement('div');
+      const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      inner.style.cssText = `width:40px;height:40px;border-radius:50%;border:3px solid #a855f7;background:#1a1a2e;display:flex;align-items:center;justify-content:center;box-shadow:0 0 12px rgba(168,85,247,0.4);${prefersReducedMotion ? '' : 'transition:transform 0.2s ease-out;'}`;
+      inner.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#a855f7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>';
+      el.appendChild(inner);
+      if (!prefersReducedMotion) {
+        el.onmouseenter = () => { inner.style.transform = 'scale(1.15)'; };
+        el.onmouseleave = () => { inner.style.transform = 'scale(1)'; };
+      }
+
+      const dateStr = pe.event_date
+        ? new Date(pe.event_date).toLocaleDateString('de-AT', { day: 'numeric', month: 'short', year: 'numeric' })
+        : '';
+      const prefix = pe.is_own ? 'Dein Event' : `${pe.creator_name}'s Event`;
+
+      const popup = new mapboxgl.Popup({ offset: 25, closeButton: false, maxWidth: '220px' })
+        .setHTML(`<div style="padding:10px;font-family:Inter,system-ui,sans-serif;background:#1e293b;border-radius:8px;">
+          <div style="font-size:10px;color:#a855f7;font-weight:600;margin-bottom:4px;">${prefix}</div>
+          <div style="font-size:13px;color:#f1f5f9;font-weight:600;margin-bottom:4px;">${pe.name}</div>
+          ${dateStr ? `<div style="font-size:11px;color:#94a3b8;margin-bottom:2px;">${dateStr}</div>` : ''}
+          ${pe.location_name ? `<div style="font-size:11px;color:#94a3b8;">${pe.location_name}</div>` : ''}
+          <a href="/groups/${pe.id}" style="display:block;margin-top:8px;padding:6px;background:#a855f7;color:white;border-radius:6px;font-size:11px;text-align:center;text-decoration:none;font-weight:500;">Dashboard &ouml;ffnen</a>
+        </div>`);
+
+      const marker = new mapboxgl.Marker({ element: el })
+        .setLngLat([pe.location_lng, pe.location_lat])
+        .setPopup(popup)
+        .addTo(m);
+
+      el.addEventListener('click', () => marker.togglePopup());
+
+      plannedMarkers.current.set(`planned-${pe.id}`, marker);
+    }
+
+    return () => {
+      plannedMarkers.current.forEach(marker => marker.remove());
+      plannedMarkers.current.clear();
+    };
+  }, [plannedEvents, godPlannedEvents, mapReady]);
+
   const mapEventCount = events.filter(e => e.latitude && e.longitude).length;
 
   return (
     <div className="absolute inset-0">
       <div ref={mapContainer} className="h-full w-full" />
+
+      {/* God-role filter */}
+      {isGod && (
+        <div className="absolute top-16 right-4 z-20">
+          <div className="relative">
+            <input
+              type="text"
+              value={godFilterUser}
+              onChange={(e) => { setGodFilterUser(e.target.value); setGodSelectedUserId(null); }}
+              placeholder="User-Events filtern..."
+              className="px-3 py-2.5 rounded-lg bg-black/70 backdrop-blur-sm border border-purple-500/30 text-white text-xs placeholder-white/30 focus:outline-none focus:border-purple-500/60 transition-colors duration-200 w-48"
+            />
+            {godFilterResults.length > 0 && (
+              <div className="absolute w-full mt-1 bg-[#111]/95 backdrop-blur-sm border border-white/10 rounded-lg overflow-hidden">
+                {godFilterResults.map(u => (
+                  <button
+                    key={u.id}
+                    onClick={() => {
+                      setGodSelectedUserId(u.id);
+                      setGodFilterUser(`${u.first_name} ${u.last_name}`);
+                      setGodFilterResults([]);
+                    }}
+                    className="w-full px-3 py-2 text-left text-xs text-white/70 hover:bg-white/5 transition-colors"
+                  >
+                    {u.first_name} {u.last_name}
+                  </button>
+                ))}
+              </div>
+            )}
+            {godSelectedUserId && (
+              <button
+                onClick={() => { setGodFilterUser(''); setGodSelectedUserId(null); setGodPlannedEvents([]); }}
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-white/30 hover:text-white transition-colors"
+              >
+                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            )}
+          </div>
+        </div>
+      )}
+
       <div className={`absolute bottom-4 left-4 z-10 backdrop-blur-sm rounded-full px-4 py-2 shadow-lg text-sm font-medium transition-all duration-300 ${
         eveningMode ? 'bg-gray-800/80 text-gray-300' : 'bg-white/90 text-slate-700'
       }`}>
         {mapEventCount} Events auf der Karte
+        {plannedEvents.length > 0 && (
+          <span className="ml-2 text-purple-400">{`+ ${plannedEvents.length} geplant`}</span>
+        )}
       </div>
     </div>
   );

@@ -1,0 +1,16 @@
+{
+  "assignee": null,
+  "claim_note": "",
+  "claimed_at": null,
+  "created_at": "2026-03-31T07:08:33.503462Z",
+  "depends_on": [
+    "fn-1-comprehensive-audit-and-feature-upgrade.3"
+  ],
+  "epic": "fn-1-comprehensive-audit-and-feature-upgrade",
+  "id": "fn-1-comprehensive-audit-and-feature-upgrade.6",
+  "priority": null,
+  "spec_path": ".flow/tasks/fn-1-comprehensive-audit-and-feature-upgrade.6.md",
+  "status": "todo",
+  "title": "Scraper Image Extraction and Validation",
+  "updated_at": "2026-03-31T07:11:29.061181Z"
+}

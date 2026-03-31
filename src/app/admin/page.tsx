@@ -6,8 +6,9 @@ import { useAuth } from '@/lib/supabase/auth-context';
 import { createClient } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
 import ScraperPanel from '@/components/Admin/ScraperPanel';
+import AnalyticsPanel from '@/components/Admin/AnalyticsPanel';
 
-type Tab = 'overview' | 'users' | 'events' | 'scraper' | 'moderation';
+type Tab = 'overview' | 'users' | 'events' | 'statistiken' | 'scraper' | 'moderation';
 
 interface UserRow {
   id: string;
@@ -325,6 +326,7 @@ export default function AdminPage() {
     { key: 'overview', label: '\u00dcbersicht' },
     { key: 'users', label: 'Users' },
     { key: 'events', label: 'Events' },
+    { key: 'statistiken', label: 'Statistiken' },
     { key: 'scraper', label: 'Scraper' },
     { key: 'moderation', label: 'Moderation' },
   ];
@@ -617,6 +619,9 @@ export default function AdminPage() {
             )}
           </div>
         )}
+
+        {/* Statistiken Tab */}
+        {tab === 'statistiken' && <AnalyticsPanel />}
 
         {/* Scraper Tab */}
         {tab === 'scraper' && <ScraperPanel />}

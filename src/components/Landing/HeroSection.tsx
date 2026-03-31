@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
+import { trackEvent } from '@/lib/analytics';
 
 interface Gemeinde {
   n: string;   // name
@@ -21,6 +22,8 @@ export function HeroSection() {
   const inputRef = useRef<HTMLInputElement>(null);
   const suggestionsRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
+
+  useEffect(() => { trackEvent('page_view', { path: '/' }); }, []);
 
   // Lazy load gemeinden data on first keystroke
   const loadGemeinden = useCallback(async () => {

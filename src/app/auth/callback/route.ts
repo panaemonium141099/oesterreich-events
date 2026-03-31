@@ -10,6 +10,26 @@ export async function GET(request: Request) {
     const supabase = await createServerSupabaseClient();
     const { error } = await supabase.auth.exchangeCodeForSession(code);
     if (!error) {
+      // Check if profile is complete before redirecting
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('first_name, last_name, birth_date')
+          .eq('id', user.id)
+          .single();
+
+        const isComplete = !!(
+          profile?.first_name?.trim() &&
+          profile?.last_name?.trim() &&
+          profile?.birth_date
+        );
+
+        if (!isComplete) {
+          return NextResponse.redirect(`${origin}/auth/complete-profile`);
+        }
+      }
+
       return NextResponse.redirect(`${origin}${next}`);
     }
   }

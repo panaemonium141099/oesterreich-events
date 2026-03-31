@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { SocialNav } from '@/components/Layout/SocialNav';
@@ -75,8 +75,8 @@ export default function MemoriesPage() {
       .eq('user_id', user.id);
 
     const memoryIds = new Set<string>();
-    created?.forEach(m => memoryIds.add(m.id));
-    participated?.forEach(m => memoryIds.add(m.memory_id));
+    created?.forEach((m: { id: string }) => memoryIds.add(m.id));
+    participated?.forEach((m: { memory_id: string }) => memoryIds.add(m.memory_id));
 
     if (memoryIds.size === 0) {
       setMemories([]);
@@ -98,7 +98,7 @@ export default function MemoriesPage() {
 
     // Enrich with event, photos count, participants
     const enriched = await Promise.all(
-      memoriesData.map(async (m) => {
+      memoriesData.map(async (m: any) => {
         let event = null;
         if (m.event_id) {
           const { data: e } = await supabase
@@ -207,7 +207,27 @@ export default function MemoriesPage() {
       await supabase.from('memory_participants').insert(
         selectedFriends.map(fid => ({ memory_id: memory.id, user_id: fid }))
       );
+
+      // Notify each participant
+      const notifications = selectedFriends.map(fid => ({
+        user_id: fid,
+        type: 'memory_created' as const,
+        title: 'Neues Memory',
+        body: `Du wurdest zu "${newTitle.trim()}" hinzugefügt`,
+        from_user_id: user.id,
+        action_url: `/memories/${memory.id}`,
+      }));
+      await supabase.from('notifications').insert(notifications);
     }
+
+    // Create activity for feed
+    await supabase.from('activities').insert({
+      user_id: user.id,
+      type: 'memory_created',
+      memory_id: memory.id,
+      event_id: selectedEvent?.id || null,
+      metadata: { title: newTitle.trim(), participant_count: selectedFriends.length + 1 },
+    });
 
     // Upload photos
     for (const photo of photos) {
@@ -240,6 +260,12 @@ export default function MemoriesPage() {
     router.push(`/memories/${memory.id}`);
   };
 
+  // Memoize photo preview URLs and revoke on cleanup
+  const photoPreviewUrls = useMemo(() => photos.map(p => URL.createObjectURL(p)), [photos]);
+  useEffect(() => {
+    return () => { photoPreviewUrls.forEach(url => URL.revokeObjectURL(url)); };
+  }, [photoPreviewUrls]);
+
   const toggleFriend = (id: string) => {
     setSelectedFriends(prev =>
       prev.includes(id) ? prev.filter(f => f !== id) : [...prev, id]
@@ -263,10 +289,10 @@ export default function MemoriesPage() {
     );
   };
 
-  if (loading || !user) {
+  if (loading) {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center">
-        <div className="w-8 h-8 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+        <div className="w-8 h-8 border-2 border-white/20 border-t-white rounded-full animate-spin motion-reduce:animate-none" />
       </div>
     );
   }
@@ -308,7 +334,7 @@ export default function MemoriesPage() {
                     value={newTitle}
                     onChange={(e) => setNewTitle(e.target.value)}
                     placeholder="z.B. Nova Rock 2026"
-                    className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-white/20 focus:outline-none focus:border-white/30 transition-colors"
+                    className="w-full px-4 py-3 rounded-xl bg-white/[0.03] border border-white/[0.06] text-white placeholder-white/20 focus:outline-none focus:border-white/30 transition-colors"
                     autoFocus
                   />
                 </div>
@@ -320,7 +346,7 @@ export default function MemoriesPage() {
                     onChange={(e) => setNewDesc(e.target.value)}
                     placeholder="Was war besonders an diesem Erlebnis?"
                     rows={3}
-                    className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-white/20 focus:outline-none focus:border-white/30 transition-colors resize-none"
+                    className="w-full px-4 py-3 rounded-xl bg-white/[0.03] border border-white/[0.06] text-white placeholder-white/20 focus:outline-none focus:border-white/30 transition-colors resize-none"
                   />
                 </div>
 
@@ -328,7 +354,7 @@ export default function MemoriesPage() {
                 <div>
                   <label className="block text-xs text-white/40 mb-1.5">Event verkn&uuml;pfen</label>
                   {selectedEvent ? (
-                    <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-white/5 border border-white/10">
+                    <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-white/[0.03] border border-white/[0.06]">
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium truncate">{selectedEvent.title}</p>
                         <p className="text-xs text-white/30">{formatDate(selectedEvent.start_date)}</p>
@@ -344,7 +370,7 @@ export default function MemoriesPage() {
                         value={eventSearch}
                         onChange={(e) => setEventSearch(e.target.value)}
                         placeholder="Event suchen..."
-                        className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-white/20 focus:outline-none focus:border-white/30 transition-colors"
+                        className="w-full px-4 py-3 rounded-xl bg-white/[0.03] border border-white/[0.06] text-white placeholder-white/20 focus:outline-none focus:border-white/30 transition-colors"
                       />
                       {eventResults.length > 0 && (
                         <div className="absolute z-10 w-full mt-1 bg-[#1a1a1a] border border-white/10 rounded-xl overflow-hidden max-h-48 overflow-y-auto">
@@ -378,7 +404,7 @@ export default function MemoriesPage() {
                           className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs transition-colors ${
                             selectedFriends.includes(f.id)
                               ? 'bg-white text-black'
-                              : 'bg-white/5 border border-white/10 text-white/60 hover:border-white/20'
+                              : 'bg-white/[0.03] border border-white/[0.06] text-white/60 hover:border-white/20'
                           }`}
                         >
                           <Avatar url={f.avatar_url} name={f.first_name} />
@@ -395,10 +421,10 @@ export default function MemoriesPage() {
                   <div className="flex flex-wrap gap-2">
                     {photos.map((p, i) => (
                       <div key={i} className="relative w-16 h-16 rounded-lg overflow-hidden">
-                        <img src={URL.createObjectURL(p)} alt="" className="w-full h-full object-cover" />
+                        <img src={photoPreviewUrls[i]} alt="" className="w-full h-full object-cover" />
                         <button
                           onClick={() => setPhotos(prev => prev.filter((_, j) => j !== i))}
-                          className="absolute top-0.5 right-0.5 w-4 h-4 bg-black/60 rounded-full flex items-center justify-center text-[10px] text-white"
+                          className="absolute -top-1 -right-1 w-6 h-6 bg-black/80 rounded-full flex items-center justify-center text-xs text-white hover:bg-black transition-colors"
                         >
                           &times;
                         </button>
@@ -435,7 +461,7 @@ export default function MemoriesPage() {
                   className="flex-1 py-3 rounded-xl bg-white text-black font-semibold hover:bg-white/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm flex items-center justify-center"
                 >
                   {creating ? (
-                    <div className="w-5 h-5 border-2 border-black/20 border-t-black rounded-full animate-spin" />
+                    <div className="w-5 h-5 border-2 border-black/20 border-t-black rounded-full animate-spin motion-reduce:animate-none" />
                   ) : (
                     'Erstellen'
                   )}
@@ -447,12 +473,22 @@ export default function MemoriesPage() {
 
         {/* Memories List */}
         {loadingData ? (
-          <div className="flex justify-center py-20">
-            <div className="w-8 h-8 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+          <div className="space-y-3">
+            {[1, 2, 3].map(i => (
+              <div key={i} className="p-4 rounded-xl bg-white/[0.03] border border-white/[0.06] animate-pulse motion-reduce:animate-none">
+                <div className="flex items-start gap-4">
+                  <div className="w-12 h-12 rounded-xl bg-white/10 shrink-0" />
+                  <div className="flex-1 space-y-2">
+                    <div className="h-4 bg-white/10 rounded w-2/3" />
+                    <div className="h-3 bg-white/10 rounded w-1/3" />
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
         ) : memories.length === 0 ? (
           <div className="text-center py-20">
-            <div className="w-16 h-16 rounded-full bg-white/5 border border-white/10 flex items-center justify-center mx-auto mb-4">
+            <div className="w-16 h-16 rounded-full bg-white/[0.03] border border-white/[0.06] flex items-center justify-center mx-auto mb-4">
               <svg className="w-8 h-8 text-white/20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
               </svg>
@@ -466,7 +502,7 @@ export default function MemoriesPage() {
               <Link
                 key={m.id}
                 href={`/memories/${m.id}`}
-                className="block p-4 rounded-xl bg-white/5 border border-white/10 hover:border-white/20 transition-all group"
+                className="block p-4 rounded-xl bg-white/[0.03] border border-white/[0.06] hover:border-white/20 transition-all group"
               >
                 <div className="flex items-start gap-4">
                   <div className="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center shrink-0">

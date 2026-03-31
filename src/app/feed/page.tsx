@@ -11,6 +11,7 @@ import { FeedItem } from '@/components/Feed/FeedItem';
 import { TrendingRow } from '@/components/Feed/TrendingRow';
 import { FeedSkeletonList } from '@/components/Feed/FeedSkeleton';
 import type { FeedActivity } from '@/components/Feed/feed-types';
+import { trackEvent } from '@/lib/analytics';
 
 export default function FeedPage() {
   const { user, profile, loading } = useAuth();
@@ -29,6 +30,8 @@ export default function FeedPage() {
     }
   }, [loading, user, router]);
 
+  useEffect(() => { trackEvent('page_view', { path: '/feed' }); }, []);
+
   const fetchActivities = useCallback(async (offset = 0, append = false) => {
     if (!user) return;
     if (offset === 0) setLoadingData(true);
@@ -41,7 +44,7 @@ export default function FeedPage() {
       .eq('status', 'accepted')
       .or(`requester_id.eq.${user.id},addressee_id.eq.${user.id}`);
 
-    const friendIds = (friendships || []).map(f =>
+    const friendIds = (friendships || []).map((f: { requester_id: string; addressee_id: string }) =>
       f.requester_id === user.id ? f.addressee_id : f.requester_id
     );
 
@@ -96,7 +99,7 @@ export default function FeedPage() {
     router.push(`/map?search=&eventId=${eventId}`);
   };
 
-  if (loading || !user) {
+  if (loading) {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center">
         <div className="w-8 h-8 border-2 border-white/20 border-t-white rounded-full animate-spin" />
@@ -132,9 +135,9 @@ export default function FeedPage() {
         {/* Create Post section */}
         <div className="mb-6">
           <CreatePost
-            userId={user.id}
+            userId={user!.id}
             userAvatar={profile?.avatar_url || null}
-            userInitial={profile?.first_name?.[0]?.toUpperCase() || user.email?.[0]?.toUpperCase() || '?'}
+            userInitial={profile?.first_name?.[0]?.toUpperCase() || user?.email?.[0]?.toUpperCase() || '?'}
             onPostCreated={() => fetchActivities()}
           />
         </div>

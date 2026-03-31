@@ -6,6 +6,7 @@ import type { EventFilters } from '@/types/events';
 import { CategoryFilter } from './CategoryFilter';
 import { DistrictFilter } from './DistrictFilter';
 import { DateRangeFilter } from './DateRangeFilter';
+import { trackEvent } from '@/lib/analytics';
 
 interface Gemeinde {
   n: string;
@@ -72,6 +73,9 @@ export function FilterBar({ filters, onFiltersChange, eveningMode, bundeslandId,
 
   const handleSearch = () => {
     setShowSuggestions(false);
+    if (searchValue?.trim()) {
+      trackEvent('search', { query: searchValue.trim() });
+    }
     onFiltersChange({ ...filters, search: searchValue || undefined });
   };
 
@@ -163,13 +167,13 @@ export function FilterBar({ filters, onFiltersChange, eveningMode, bundeslandId,
 
       <CategoryFilter
         value={filters.category}
-        onChange={(category) => onFiltersChange({ ...filters, category })}
+        onChange={(category) => { if (category) trackEvent('filter_change', { filter_type: 'category', value: category }); onFiltersChange({ ...filters, category }); }}
         eveningMode={eveningMode}
       />
 
       <DistrictFilter
         value={filters.district}
-        onChange={(district) => onFiltersChange({ ...filters, district })}
+        onChange={(district) => { if (district) trackEvent('filter_change', { filter_type: 'district', value: district }); onFiltersChange({ ...filters, district }); }}
         bundeslandId={bundeslandId}
         eveningMode={eveningMode}
       />
@@ -177,7 +181,7 @@ export function FilterBar({ filters, onFiltersChange, eveningMode, bundeslandId,
       <DateRangeFilter
         dateFrom={filters.dateFrom}
         dateTo={filters.dateTo}
-        onChange={(dateFrom, dateTo) => onFiltersChange({ ...filters, dateFrom, dateTo })}
+        onChange={(dateFrom, dateTo) => { if (dateFrom) trackEvent('filter_change', { filter_type: 'date', value: `${dateFrom}-${dateTo}` }); onFiltersChange({ ...filters, dateFrom, dateTo }); }}
         eveningMode={eveningMode}
       />
 

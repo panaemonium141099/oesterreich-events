@@ -4,8 +4,9 @@ import { useState, useEffect, type FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/lib/supabase/auth-context';
+import { trackEvent } from '@/lib/analytics';
 
-type Step = 1 | 2 | 3;
+type Step = 1 | 2;
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -24,11 +25,8 @@ export default function RegisterPage() {
   const [birthDate, setBirthDate] = useState('');
   const [phone, setPhone] = useState('');
 
-  // Step 3 — Adresse
-  const [street, setStreet] = useState('');
-  const [postalCode, setPostalCode] = useState('');
-  const [city, setCity] = useState('');
-  const [country, setCountry] = useState('Österreich');
+  const [agbAccepted, setAgbAccepted] = useState(false);
+  const [newsletterOptIn, setNewsletterOptIn] = useState(false);
 
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -58,7 +56,7 @@ export default function RegisterPage() {
     setStep(2);
   };
 
-  const handleStep2 = (e: FormEvent) => {
+  const handleStep2 = async (e: FormEvent) => {
     e.preventDefault();
     setError(null);
 
@@ -71,29 +69,15 @@ export default function RegisterPage() {
       return;
     }
 
-    setStep(3);
-  };
-
-  const handleStep3 = async (e: FormEvent) => {
-    e.preventDefault();
-    setError(null);
-
-    if (!street.trim() || !postalCode.trim() || !city.trim() || !country.trim()) {
-      setError('Bitte fülle alle Adressfelder aus.');
-      return;
-    }
-
     setSubmitting(true);
 
     const { error: authError } = await signUpWithEmail(email, password, {
       first_name: firstName,
       last_name: lastName,
       birth_date: birthDate,
-      phone,
-      address: street,
-      postal_code: postalCode,
-      city,
-      country,
+      phone: phone || undefined,
+      agb_accepted_at: new Date().toISOString(),
+      newsletter_opt_in: newsletterOptIn,
     });
 
     if (authError) {
@@ -101,6 +85,7 @@ export default function RegisterPage() {
       setSubmitting(false);
     } else {
       setSuccess(true);
+      trackEvent('register', { method: 'email' });
     }
   };
 
@@ -144,7 +129,6 @@ export default function RegisterPage() {
         <div className="flex items-center justify-center gap-2 mt-3">
           <div className={`h-1 w-8 rounded-full transition-colors ${step >= 1 ? 'bg-white/60' : 'bg-white/10'}`} />
           <div className={`h-1 w-8 rounded-full transition-colors ${step >= 2 ? 'bg-white/60' : 'bg-white/10'}`} />
-          <div className={`h-1 w-8 rounded-full transition-colors ${step >= 3 ? 'bg-white/60' : 'bg-white/10'}`} />
         </div>
       </div>
 
@@ -306,88 +290,48 @@ export default function RegisterPage() {
             placeholder="+43 660 1234567"
           />
 
-          {error && (
-            <p className="text-red-400 text-sm animate-shake">{error}</p>
-          )}
+          {/* Legal Consent */}
+          <div className="space-y-3 pt-2">
+            <label className="flex items-start gap-3 cursor-pointer group">
+              <input
+                type="checkbox"
+                checked={agbAccepted}
+                onChange={(e) => setAgbAccepted(e.target.checked)}
+                className="mt-0.5 w-5 h-5 rounded border-white/20 bg-white/5 text-blue-500 focus:ring-blue-500/30 cursor-pointer shrink-0"
+              />
+              <span className="text-sm text-white/50 group-hover:text-white/70 transition-colors leading-relaxed">
+                Ich stimme den{' '}
+                <Link href="/agb" target="_blank" className="text-white/80 underline underline-offset-2 hover:text-white">
+                  AGB
+                </Link>{' '}
+                zu und habe die{' '}
+                <Link href="/datenschutz" target="_blank" className="text-white/80 underline underline-offset-2 hover:text-white">
+                  Datenschutzerklärung
+                </Link>{' '}
+                gelesen. *
+              </span>
+            </label>
 
-          <button
-            type="submit"
-            className="w-full rounded-xl border border-white/20 bg-white/5 text-white font-medium py-3 px-4 hover:bg-white/10 transition-colors cursor-pointer"
-          >
-            Weiter
-          </button>
-        </form>
-      )}
-
-      {/* Step 3: Adresse */}
-      {step === 3 && (
-        <form onSubmit={handleStep3} className="space-y-4 animate-fade-in">
-          <button
-            type="button"
-            onClick={() => { setStep(2); setError(null); }}
-            className="flex items-center gap-1.5 text-white/40 hover:text-white/70 transition-colors text-sm mb-2 cursor-pointer"
-          >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M19 12H5" />
-              <path d="m12 19-7-7 7-7" />
-            </svg>
-            Zurück
-          </button>
-
-          <p className="text-sm text-white/40 mb-2">Adresse</p>
-
-          <InputField
-            id="street"
-            label="Straße"
-            type="text"
-            required
-            autoComplete="street-address"
-            value={street}
-            onChange={setStreet}
-            placeholder="Hauptstraße 1"
-          />
-
-          <div className="grid grid-cols-2 gap-3">
-            <InputField
-              id="postal-code"
-              label="PLZ"
-              type="text"
-              required
-              autoComplete="postal-code"
-              value={postalCode}
-              onChange={setPostalCode}
-              placeholder="7000"
-            />
-            <InputField
-              id="city"
-              label="Stadt"
-              type="text"
-              required
-              autoComplete="address-level2"
-              value={city}
-              onChange={setCity}
-              placeholder="Eisenstadt"
-            />
+            <label className="flex items-start gap-3 cursor-pointer group">
+              <input
+                type="checkbox"
+                checked={newsletterOptIn}
+                onChange={(e) => setNewsletterOptIn(e.target.checked)}
+                className="mt-0.5 w-5 h-5 rounded border-white/20 bg-white/5 text-blue-500 focus:ring-blue-500/30 cursor-pointer shrink-0"
+              />
+              <span className="text-sm text-white/40 group-hover:text-white/60 transition-colors leading-relaxed">
+                Ich möchte über Events und Neuigkeiten per E-Mail informiert werden.
+              </span>
+            </label>
           </div>
 
-          <InputField
-            id="country"
-            label="Land"
-            type="text"
-            required
-            autoComplete="country-name"
-            value={country}
-            onChange={setCountry}
-            placeholder="Österreich"
-          />
-
           {error && (
             <p className="text-red-400 text-sm animate-shake">{error}</p>
           )}
 
           <button
             type="submit"
-            disabled={submitting}
+            disabled={submitting || !agbAccepted}
             className="w-full rounded-xl border border-white/20 bg-white/5 text-white font-medium py-3 px-4 hover:bg-white/10 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer"
           >
             {submitting ? <Spinner /> : 'Registrieren'}
@@ -406,7 +350,7 @@ export default function RegisterPage() {
   );
 }
 
-/* ─── Reusable Input ───────────────────────────────── */
+/* --- Reusable Input ----------------------------------------- */
 
 function InputField({
   id,
@@ -446,7 +390,7 @@ function InputField({
   );
 }
 
-/* ─── Inline Icons ─────────────────────────────────── */
+/* --- Inline Icons ------------------------------------------- */
 
 function Spinner() {
   return (

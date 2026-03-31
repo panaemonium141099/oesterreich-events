@@ -36,7 +36,7 @@ export function SidebarFeed({ eveningMode, onEventClick }: SidebarFeedProps) {
       .eq('status', 'accepted')
       .or(`requester_id.eq.${user.id},addressee_id.eq.${user.id}`);
 
-    const friendIds = (friendships || []).map(f =>
+    const friendIds = (friendships || []).map((f: { requester_id: string; addressee_id: string }) =>
       f.requester_id === user.id ? f.addressee_id : f.requester_id
     );
 

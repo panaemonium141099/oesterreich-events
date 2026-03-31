@@ -34,7 +34,12 @@ function formatTime(dateStr: string): string | null {
     // If date string has no time component (just YYYY-MM-DD), don't show time
     if (!dateStr || dateStr.length <= 10 || !dateStr.includes('T')) return null;
     const date = new Date(dateStr);
-    if (date.getHours() === 0 && date.getMinutes() === 0) return null;
+    const hours = date.getHours();
+    const minutes = date.getMinutes();
+    // Hide 00:00 and 01:00 — these indicate no real time was set
+    // (01:00 appears due to UTC+1 CET timezone offset for midnight dates)
+    if (hours === 0 && minutes === 0) return null;
+    if (hours === 1 && minutes === 0) return null;
     return date.toLocaleTimeString('de-AT', {
       hour: '2-digit',
       minute: '2-digit',

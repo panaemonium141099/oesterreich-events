@@ -9,6 +9,7 @@ import { createClient } from '@/lib/supabase/client';
 import { downloadICS, getGoogleCalendarUrl } from '@/lib/calendar/ics';
 import { CheckIcon, CalendarIcon } from '../UI/Icons';
 import confetti from 'canvas-confetti';
+import { trackEvent } from '@/lib/analytics';
 
 interface EventDetailProps {
   event: Event;
@@ -37,7 +38,12 @@ function formatTime(dateStr: string): string | null {
     // If date string has no time component (just YYYY-MM-DD), don't show time
     if (!dateStr || dateStr.length <= 10 || !dateStr.includes('T')) return null;
     const date = new Date(dateStr);
-    if (date.getHours() === 0 && date.getMinutes() === 0) return null;
+    const hours = date.getHours();
+    const minutes = date.getMinutes();
+    // Hide 00:00 and 01:00 — these indicate no real time was set
+    // (01:00 appears due to UTC+1 CET timezone offset for midnight dates)
+    if (hours === 0 && minutes === 0) return null;
+    if (hours === 1 && minutes === 0) return null;
     return date.toLocaleTimeString('de-AT', { hour: '2-digit', minute: '2-digit' });
   } catch {
     return null;
@@ -73,6 +79,7 @@ export function EventDetail({ event, onClose, eveningMode }: EventDetailProps) {
 
   useEffect(() => {
     setVisible(true);
+    trackEvent('event_click', { event_id: event.id, event_title: event.title, source: event.source_name });
     // Check if event is saved
     if (user && event.id) {
       supabase
@@ -81,7 +88,7 @@ export function EventDetail({ event, onClose, eveningMode }: EventDetailProps) {
         .eq('user_id', user.id)
         .eq('event_id', event.id)
         .maybeSingle()
-        .then(({ data }) => setIsSaved(!!data));
+        .then(({ data }: { data: unknown }) => setIsSaved(!!data));
 
       // Check for active reminder
       supabase
@@ -90,7 +97,7 @@ export function EventDetail({ event, onClose, eveningMode }: EventDetailProps) {
         .eq('user_id', user.id)
         .eq('event_id', event.id)
         .maybeSingle()
-        .then(({ data }) => {
+        .then(({ data }: { data: { id: string; remind_at: string } | null }) => {
           if (data) setActiveReminder(data);
         });
     }
@@ -139,6 +146,7 @@ export function EventDetail({ event, onClose, eveningMode }: EventDetailProps) {
     } else {
       await supabase.from('saved_events').insert({ user_id: user.id, event_id: event.id });
       setIsSaved(true);
+      trackEvent('event_save', { event_id: event.id });
       // Konfetti!
       setJustSaved(true);
       setTimeout(() => setJustSaved(false), 3000);
@@ -176,6 +184,7 @@ export function EventDetail({ event, onClose, eveningMode }: EventDetailProps) {
     setCopied(true);
     setShowShareMenu(false);
     setTimeout(() => setCopied(false), 2000);
+    trackEvent('event_share', { event_id: event.id, method: 'link' });
   };
 
   const handleShareToFriend = async (friendId: string, friendName: string) => {
@@ -191,6 +200,7 @@ export function EventDetail({ event, onClose, eveningMode }: EventDetailProps) {
     setShowFriendShareSearch(false);
     setShowShareMenu(false);
     setTimeout(() => setSharedToFriend(''), 3000);
+    trackEvent('event_share', { event_id: event.id, method: 'chat' });
   };
 
   const searchFriends = async (q: string) => {
@@ -200,7 +210,7 @@ export function EventDetail({ event, onClose, eveningMode }: EventDetailProps) {
       .select('requester_id, addressee_id')
       .eq('status', 'accepted')
       .or(`requester_id.eq.${user.id},addressee_id.eq.${user.id}`);
-    const friendIds = (friendships || []).map(f => f.requester_id === user.id ? f.addressee_id : f.requester_id);
+    const friendIds = (friendships || []).map((f: { requester_id: string; addressee_id: string }) => f.requester_id === user.id ? f.addressee_id : f.requester_id);
     if (friendIds.length === 0) return;
     const { data } = await supabase
       .from('profiles')
@@ -243,6 +253,7 @@ export function EventDetail({ event, onClose, eveningMode }: EventDetailProps) {
       return;
     }
     setSavingReminder(true);
+    trackEvent('event_reminder', { event_id: event.id, type: `${hoursBeforeEvent}h` });
     const eventDate = new Date(event.start_date);
     const remindAt = new Date(eventDate.getTime() - hoursBeforeEvent * 60 * 60 * 1000);
     const remindAtIso = remindAt.toISOString();
@@ -488,6 +499,7 @@ export function EventDetail({ event, onClose, eveningMode }: EventDetailProps) {
               href={event.source_url || '#'}
               target="_blank"
               rel="noopener noreferrer"
+              onClick={() => trackEvent('link_click', { url: event.source_url, event_id: event.id, event_title: event.title, type: 'source' })}
               className={`flex-1 text-white text-sm font-medium rounded-xl py-3 px-4 text-center transition-colors flex items-center justify-center gap-2 ${
                 eveningMode ? 'bg-indigo-600 hover:bg-indigo-700' : 'bg-blue-600 hover:bg-blue-700'
               }`}

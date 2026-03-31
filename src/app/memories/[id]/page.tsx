@@ -104,7 +104,7 @@ export default function MemoryDetailPage() {
 
     if (photosData) {
       const enrichedPhotos = await Promise.all(
-        photosData.map(async (p) => {
+        photosData.map(async (p: any) => {
           const { data: uploader } = await supabase
             .from('profiles')
             .select('first_name, last_name, avatar_url')
@@ -199,18 +199,30 @@ export default function MemoryDetailPage() {
 
   const isCreator = memory?.created_by === user?.id;
 
-  if (loading || !user) {
+  if (loading) {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center">
-        <div className="w-8 h-8 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+        <div className="w-8 h-8 border-2 border-white/20 border-t-white rounded-full animate-spin motion-reduce:animate-none" />
       </div>
     );
   }
 
   if (loadingData) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
-        <div className="w-8 h-8 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+      <div className="min-h-screen text-white" style={{ background: 'radial-gradient(ellipse at 50% 0%, rgba(255,255,255,0.04) 0%, transparent 60%), #000' }}>
+        <header className="flex items-center justify-between px-6 py-4 border-b border-white/[0.06]">
+          <div className="h-4 bg-white/10 rounded w-24 animate-pulse motion-reduce:animate-none" />
+          <div className="h-3 bg-white/10 rounded w-16 animate-pulse motion-reduce:animate-none" />
+        </header>
+        <div className="max-w-3xl mx-auto px-6 py-8 space-y-6">
+          <div className="h-7 bg-white/10 rounded w-2/3 animate-pulse motion-reduce:animate-none" />
+          <div className="h-4 bg-white/10 rounded w-1/3 animate-pulse motion-reduce:animate-none" />
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+            {[1, 2, 3].map(i => (
+              <div key={i} className="aspect-square rounded-xl bg-white/10 animate-pulse motion-reduce:animate-none" />
+            ))}
+          </div>
+        </div>
       </div>
     );
   }
@@ -241,13 +253,13 @@ export default function MemoryDetailPage() {
                 type="text"
                 value={editTitle}
                 onChange={(e) => setEditTitle(e.target.value)}
-                className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white text-xl font-bold focus:outline-none focus:border-white/30 transition-colors"
+                className="w-full px-4 py-3 rounded-xl bg-white/[0.03] border border-white/[0.06] text-white text-xl font-bold focus:outline-none focus:border-white/30 transition-colors"
               />
               <textarea
                 value={editDesc}
                 onChange={(e) => setEditDesc(e.target.value)}
                 rows={3}
-                className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-white/20 focus:outline-none focus:border-white/30 transition-colors resize-none"
+                className="w-full px-4 py-3 rounded-xl bg-white/[0.03] border border-white/[0.06] text-white placeholder-white/20 focus:outline-none focus:border-white/30 transition-colors resize-none"
                 placeholder="Beschreibung..."
               />
               <div className="flex gap-2">
@@ -273,7 +285,7 @@ export default function MemoryDetailPage() {
                 {isCreator && (
                   <button
                     onClick={() => setEditing(true)}
-                    className="text-xs px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 text-white/40 hover:text-white hover:border-white/20 transition-colors"
+                    className="text-xs px-3 py-1.5 rounded-lg bg-white/[0.03] border border-white/[0.06] text-white/40 hover:text-white hover:border-white/20 transition-colors"
                   >
                     Bearbeiten
                   </button>
@@ -290,7 +302,7 @@ export default function MemoryDetailPage() {
         {memory.event && (
           <Link
             href={`/events/${memory.event.id}`}
-            className="block mb-8 p-4 rounded-xl bg-white/5 border border-white/10 hover:border-white/20 transition-colors"
+            className="block mb-8 p-4 rounded-xl bg-white/[0.03] border border-white/[0.06] hover:border-white/20 transition-colors"
           >
             <p className="text-xs text-white/30 uppercase tracking-wider mb-2">Verkn&uuml;pftes Event</p>
             <div className="flex items-center gap-3">
@@ -314,7 +326,7 @@ export default function MemoryDetailPage() {
             <h2 className="text-sm uppercase tracking-[0.15em] text-white/40 font-medium mb-3">Teilnehmer</h2>
             <div className="flex flex-wrap gap-3">
               {participants.map((p) => (
-                <div key={p.id} className="flex items-center gap-2 px-3 py-2 rounded-xl bg-white/5 border border-white/10">
+                <div key={p.id} className="flex items-center gap-2 px-3 py-2 rounded-xl bg-white/[0.03] border border-white/[0.06]">
                   <Avatar url={p.profile?.avatar_url} name={p.profile?.first_name || '?'} size="sm" />
                   <span className="text-sm">{p.profile?.first_name} {p.profile?.last_name}</span>
                 </div>
@@ -337,9 +349,9 @@ export default function MemoryDetailPage() {
             <h2 className="text-sm uppercase tracking-[0.15em] text-white/40 font-medium">
               Fotos ({photos.length})
             </h2>
-            <label className="px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 text-xs text-white/60 hover:text-white hover:border-white/20 transition-colors cursor-pointer flex items-center gap-1.5">
+            <label className="px-3 py-1.5 rounded-lg bg-white/[0.03] border border-white/[0.06] text-xs text-white/60 hover:text-white hover:border-white/20 transition-colors cursor-pointer flex items-center gap-1.5">
               {uploading ? (
-                <div className="w-3 h-3 border border-white/20 border-t-white rounded-full animate-spin" />
+                <div className="w-3 h-3 border border-white/20 border-t-white rounded-full animate-spin motion-reduce:animate-none" />
               ) : (
                 <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />

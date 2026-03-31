@@ -281,6 +281,97 @@ export function BookmarkIcon(props: IconProps & { filled?: boolean }) {
   );
 }
 
+// Eye icon — for page views
+export function EyeIcon(props: IconProps) {
+  return (
+    <svg {...defaultProps(props)}>
+      <path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+      <path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+    </svg>
+  );
+}
+
+// Search icon — for search queries
+export function SearchIcon(props: IconProps) {
+  return (
+    <svg {...defaultProps(props)}>
+      <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+    </svg>
+  );
+}
+
+// Chart bar icon — for analytics/trending
+export function ChartBarIcon(props: IconProps) {
+  return (
+    <svg {...defaultProps(props)}>
+      <path d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+    </svg>
+  );
+}
+
+// Clock icon — for time/hours
+export function ClockIcon(props: IconProps) {
+  return (
+    <svg {...defaultProps(props)}>
+      <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+    </svg>
+  );
+}
+
+// Sliders icon — for filters
+export function SlidersIcon(props: IconProps) {
+  return (
+    <svg {...defaultProps(props)}>
+      <path d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+    </svg>
+  );
+}
+
+// External link icon — for link clicks
+export function ExternalLinkIcon(props: IconProps) {
+  return (
+    <svg {...defaultProps(props)}>
+      <path d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+    </svg>
+  );
+}
+
+// Funnel icon — for conversion funnel
+export function FunnelIcon(props: IconProps) {
+  return (
+    <svg {...defaultProps(props)}>
+      <path d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+    </svg>
+  );
+}
+
+// Map icon — for regions/bundesland
+export function MapIcon(props: IconProps) {
+  return (
+    <svg {...defaultProps(props)}>
+      <path d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+    </svg>
+  );
+}
+
+// Inbox icon — for empty state
+export function InboxIcon(props: IconProps) {
+  return (
+    <svg {...defaultProps(props)}>
+      <path d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+    </svg>
+  );
+}
+
+// BarChart3 icon — for analytics dashboard
+export function BarChart3Icon(props: IconProps) {
+  return (
+    <svg {...defaultProps(props)}>
+      <path d="M3 3v18h18M7 16v-3m4 3v-7m4 7V8m4 8v-5" />
+    </svg>
+  );
+}
+
 // Colored dot — replaces 🟢 (use CSS background-color)
 export function StatusDot({ color = 'bg-green-500', pulse = false, className = '' }: { color?: string; pulse?: boolean; className?: string }) {
   return (
