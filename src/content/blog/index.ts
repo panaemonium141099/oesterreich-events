@@ -32,6 +32,16 @@ import { post as bregenzerFruehling } from './posts/bregenzer-fruehling';
 import { post as montafonerSommertage } from './posts/montafoner-sommertage';
 import { post as feldkirchFestival } from './posts/feldkirch-festival';
 import { post as lustenauMartinimarkt } from './posts/lustenauer-martinimarkt';
+import { post as styriarteGraz } from './posts/styriarte-graz';
+import { post as grazerAufsteirern } from './posts/grazer-aufsteirern';
+import { post as grazerChristkindlmarkt } from './posts/grazer-christkindlmarkt';
+import { post as klagenfurterStadtfest } from './posts/klagenfurter-stadtfest';
+import { post as ironmanAustriaKlagenfurt } from './posts/ironman-austria-klagenfurt';
+import { post as villacherFasching } from './posts/villacher-fasching';
+import { post as woertherseeBeachvolleyball } from './posts/woerthersee-beachvolleyball';
+import { post as carinthianSummerOssiach } from './posts/carinthian-summer-ossiach';
+import { post as murauStadtfest } from './posts/murau-stadtfest';
+import { post as woertherseeRegatta } from './posts/woerthersee-regatta';
 
 export type { FestivalPost, GalleryImage, FestivalKeyFacts, LineupAct } from './types';
 
@@ -70,6 +80,16 @@ export const ALL_POSTS: FestivalPost[] = [
   montafonerSommertage,
   feldkirchFestival,
   lustenauMartinimarkt,
+  styriarteGraz,
+  grazerAufsteirern,
+  grazerChristkindlmarkt,
+  klagenfurterStadtfest,
+  ironmanAustriaKlagenfurt,
+  villacherFasching,
+  woertherseeBeachvolleyball,
+  carinthianSummerOssiach,
+  murauStadtfest,
+  woertherseeRegatta,
 ].sort(
   (a, b) => new Date(b.publishDate).getTime() - new Date(a.publishDate).getTime()
 );

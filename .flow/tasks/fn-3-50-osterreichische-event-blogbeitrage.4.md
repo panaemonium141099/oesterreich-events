@@ -51,9 +51,8 @@ Append all 10 imports to `src/content/blog/index.ts` ALL_POSTS array.
 - [ ] All 10 posts appended to ALL_POSTS in index.ts
 - [ ] TypeScript compiles without errors
 ## Done summary
-TBD
-
+Added 10 long-form blog posts for OOe (Linz Pflasterspektakel, Linzer Klangwolke, Linzer Christkindlmarkt, Ars Electronica Festival, Steyr Stadtfest) and Vorarlberg (Bregenzer Festspiele, Bregenzer Frühling, Montafoner Sommertage, Feldkirch Festival, Lustenauer Martinimarkt) events, all appended to ALL_POSTS in index.ts. All posts include full content structure with correct dates, venues, SEO metadata, and JSON-LD structured data.
 ## Evidence
-- Commits:
-- Tests:
+- Commits: 9fae192d9c0a7c1b90803bf5c80a5dd6782ee8e4
+- Tests: npx tsc --noEmit
 - PRs:
