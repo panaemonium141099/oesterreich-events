@@ -5,6 +5,7 @@
  * - Festivals: FestivalAtScraper, FestivalGuideScraper
  * - Nightlife:  ResidentAdvisorAustriaScraper, ClubmapScraper
  * - Outdoor/Sport: NaturfreundeScraper, AlpenvereinScraper
+ * - Sport Federations: OeAVEventsScraper, LaufenAtScraper, RadNetScraper, OeFBScraper, RunnersFunScraper
  * - Culture/Theater: BundestheaterScraper, TheaterAtScraper
  * - Concert Houses: KonzerthausScraper, MusikvereinScraper
  * - Museums: KHMScraper, AlbertinaScraper, MUMOKScraper, BelvedereScraper, NHMScraper,
@@ -16,6 +17,7 @@
 export { FestivalAtScraper, FestivalGuideScraper } from './FestivalScrapers';
 export { ResidentAdvisorAustriaScraper, ClubmapScraper } from './NightlifeScrapers';
 export { NaturfreundeScraper, AlpenvereinScraper } from './OutdoorSportScrapers';
+export { OeAVEventsScraper, LaufenAtScraper, RadNetScraper, OeFBScraper, RunnersFunScraper } from './SportScrapers';
 export { BundestheaterScraper, TheaterAtScraper } from './CultureTheaterScrapers';
 export { KonzerthausScraper, MusikvereinScraper } from './ConcertHouseScrapers';
 export {

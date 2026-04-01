@@ -59,9 +59,8 @@ Build scrapers for major Austrian cultural institutions: theaters, concert halls
 - [ ] `npm run scrape -- --source <name>` works for each
 - [ ] `npm run build` passes
 ## Done summary
-TBD
-
+Added 10 new cultural institution scrapers: 2 concert houses (Konzerthaus Wien, Musikverein Wien) and 8 museums (KHM, Albertina, MUMOK, Belvedere, NHM, Technisches Museum, Leopold Museum, Ars Electronica Center Linz). All scrapers use hardcoded venue coordinates, extract ticket_url, and are registered in index.ts. No overlap with existing BundestheaterScraper (which covers Staatsoper, Burgtheater, Volksoper).
 ## Evidence
-- Commits:
-- Tests:
+- Commits: 33beddfd765fa5fbd989d30f8637fd9b4a7dd6cb
+- Tests: npx tsc --noEmit, npm test (127 passed), npm run build (compiled successfully)
 - PRs:

@@ -48,6 +48,7 @@ import {
   FestivalAtScraper, FestivalGuideScraper,
   ResidentAdvisorAustriaScraper, ClubmapScraper,
   NaturfreundeScraper, AlpenvereinScraper,
+  OeAVEventsScraper, LaufenAtScraper, RadNetScraper, OeFBScraper, RunnersFunScraper,
   BundestheaterScraper, TheaterAtScraper,
   KonzerthausScraper, MusikvereinScraper,
   KHMScraper, AlbertinaScraper, MUMOKScraper, BelvedereScraper,
@@ -164,6 +165,12 @@ const scrapers: BaseScraper[] = [
   // Nischen-Kategorien: Outdoor & Sport
   new NaturfreundeScraper(),
   new AlpenvereinScraper(),
+  // Nischen-Kategorien: Sport-Verbände & Laufsport
+  new OeAVEventsScraper(),
+  new LaufenAtScraper(),
+  new RadNetScraper(),
+  new OeFBScraper(),
+  new RunnersFunScraper(),
   // Nischen-Kategorien: Kultur & Theater
   new BundestheaterScraper(),
   new TheaterAtScraper(),
