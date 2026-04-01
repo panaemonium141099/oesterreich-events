@@ -16,7 +16,7 @@ export const post: FestivalPost = {
   category: 'Kultur & Tradition',
   categoryColor: 'bg-orange-700 text-white',
   keyFacts: {
-    dates: 'November 2026 (Termin wird im September bekannt gegeben)',
+    dates: '6.–8. November 2026',
     location: 'Lustenau Ortszentrum (Rathausplatz)',
     address: 'Rathausstraße 1, 6890 Lustenau',
     genre: 'Herbstmarkt, Handwerk, Martinszug, Kulinarik',
@@ -31,7 +31,7 @@ export const post: FestivalPost = {
     { name: 'Trachtengruppe Lustenau', role: 'support', stage: 'Rathausplatz', day: 'Samstag' },
   ],
   lineupNote:
-    'Das Programm für den Lustenauer Herbstmarkt 2026 wird im Herbst veröffentlicht. Die Martinimarkt-Tradition in Lustenau beinhaltet Martinszug, Konzerte und regionales Handwerk.',
+    'Das vollständige Bühnenprogramm wird im Oktober veröffentlicht. Die Martinimarkt-Tradition in Lustenau beinhaltet Martinszug, Konzerte und regionales Handwerk.',
   intro:
     'Rund um den Martinitag (11. November) belebt ein traditioneller Herbstmarkt die Lustenauer Ortsmitte am Bodensee. Die Martini-Tradition ist in Vorarlberg tief verwurzelt: Herbstmärkte und Martinszüge gehören zu den ältesten gemeinschaftlichen Festen in der Region. In Lustenau, der größten Marktgemeinde Österreichs, hat dieser Brauch besondere Bedeutung — die Zusammenkunft von Handwerkern, Landwirten und Gemeinschaft am Ende der Erntesaison.',
   historyTitle: 'Martinitradition in Lustenau',
@@ -92,7 +92,7 @@ export const post: FestivalPost = {
   ctaLink: '/map?bundesland=Vorarlberg&category=Kultur',
   seoTitle: 'Lustenauer Martinimarkt 2026 – Herbstmarkt & Tipps',
   seoDescription:
-    'Lustenauer Martinimarkt 2026: Herbstmarkt rund um den Martinitag in Lustenau/Vorarlberg. Martinszug, Handwerk & Gastronomie am Bodensee.',
+    'Lustenauer Martinimarkt 2026 (6.–8. November): Herbstmarkt rund um den Martinitag in Lustenau/Vorarlberg. Martinszug, Handwerk & Gastronomie.',
   keywords: [
     'Lustenauer Martinimarkt 2026',
     'Martinimarkt Lustenau',
