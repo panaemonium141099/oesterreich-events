@@ -16,7 +16,7 @@ export const post: FestivalPost = {
   category: 'Kultur & Tradition',
   categoryColor: 'bg-green-700 text-white',
   keyFacts: {
-    dates: '25.–27. September 2026',
+    dates: '18.–20. September 2026',
     location: 'Grazer Hauptplatz & Altstadt',
     address: 'Hauptplatz 1, 8010 Graz',
     genre: 'Volksmusik, Tracht, Brauchtum, Tanz',
@@ -109,8 +109,8 @@ export const post: FestivalPost = {
   ],
   jsonLdEvent: {
     name: 'Grazer Aufsteirern 2026',
-    startDate: '2026-09-25',
-    endDate: '2026-09-27',
+    startDate: '2026-09-18',
+    endDate: '2026-09-20',
     location: 'Hauptplatz, 8010 Graz, Austria',
     addressCountry: 'AT',
     url: 'https://www.aufsteirern.at',

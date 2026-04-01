@@ -16,7 +16,7 @@ export const post: FestivalPost = {
   category: 'Musik & Konzerte',
   categoryColor: 'bg-indigo-700 text-white',
   keyFacts: {
-    dates: '19. Juni – 19. Juli 2026',
+    dates: '26. Juni – 26. Juli 2026',
     location: 'Helmut-List-Halle, Stadtpfarrkirche, Schloss Eggenberg',
     address: 'Helmut-List-Halle, Conrad-von-Mure-Gasse 1, 8010 Graz',
     genre: 'Klassik, Barockmusik, Kammermusik, Oper',
@@ -109,8 +109,8 @@ export const post: FestivalPost = {
   ],
   jsonLdEvent: {
     name: 'styriarte Graz 2026',
-    startDate: '2026-06-19',
-    endDate: '2026-07-19',
+    startDate: '2026-06-26',
+    endDate: '2026-07-26',
     location: 'Helmut-List-Halle, Conrad-von-Mure-Gasse 1, 8010 Graz, Austria',
     addressCountry: 'AT',
     url: 'https://www.styriarte.com',

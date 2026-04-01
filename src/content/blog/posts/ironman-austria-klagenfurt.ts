@@ -16,7 +16,7 @@ export const post: FestivalPost = {
   category: 'Sport & Outdoor',
   categoryColor: 'bg-blue-700 text-white',
   keyFacts: {
-    dates: '5. Juli 2026',
+    dates: '14. Juni 2026',
     location: 'Strandbad Klagenfurt & Klagenfurter Innenstadt',
     address: 'Strandbad Klagenfurt, Metnitzstrand, 9020 Klagenfurt',
     genre: 'Triathlon, Ausdauersport, Langdistanz',
@@ -26,10 +26,10 @@ export const post: FestivalPost = {
     since: '1998',
   },
   lineup: [
-    { name: 'Elite-Men Start', role: 'headliner', day: '5. Juli', time: '07:00 Uhr', stage: 'Wörthersee-Start' },
-    { name: 'Elite-Women Start', role: 'headliner', day: '5. Juli', time: '07:05 Uhr', stage: 'Wörthersee-Start' },
-    { name: 'Age Group Wellen-Start', role: 'support', day: '5. Juli', time: 'ab 07:20 Uhr', stage: 'Wörthersee-Start' },
-    { name: 'Zieldurchlauf & Siegerehrung', role: 'special', day: '5. Juli', time: 'ab 15:00 Uhr', stage: 'Klagenfurter Innenstadt' },
+    { name: 'Elite-Men Start', role: 'headliner', day: '14. Juni', time: '07:00 Uhr', stage: 'Wörthersee-Start' },
+    { name: 'Elite-Women Start', role: 'headliner', day: '14. Juni', time: '07:05 Uhr', stage: 'Wörthersee-Start' },
+    { name: 'Age Group Wellen-Start', role: 'support', day: '14. Juni', time: 'ab 07:20 Uhr', stage: 'Wörthersee-Start' },
+    { name: 'Zieldurchlauf & Siegerehrung', role: 'special', day: '14. Juni', time: 'ab 15:00 Uhr', stage: 'Klagenfurter Innenstadt' },
   ],
   lineupNote:
     'Die genauen Startwellen und das vollständige Athletenprogramm werden nach Anmeldeschluss auf der offiziellen IRONMAN-Website veröffentlicht.',
@@ -108,8 +108,8 @@ export const post: FestivalPost = {
   ],
   jsonLdEvent: {
     name: 'IRONMAN Austria Klagenfurt 2026',
-    startDate: '2026-07-05',
-    endDate: '2026-07-05',
+    startDate: '2026-06-14',
+    endDate: '2026-06-14',
     location: 'Strandbad Klagenfurt, Metnitzstrand, 9020 Klagenfurt am Wörthersee, Austria',
     addressCountry: 'AT',
     url: 'https://www.ironman.com/im-austria',

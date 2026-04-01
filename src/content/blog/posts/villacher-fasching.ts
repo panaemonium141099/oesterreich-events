@@ -16,7 +16,7 @@ export const post: FestivalPost = {
   category: 'Kultur & Tradition',
   categoryColor: 'bg-orange-600 text-white',
   keyFacts: {
-    dates: '5. Jänner – 3. März 2026 (Fasching 2027: Anfang Jänner bis Aschermittwoch)',
+    dates: '6. Jänner – 17. Februar 2026 (Faschingsdienstag)',
     location: 'Kongresshaus Villach & gesamte Innenstadt',
     address: 'Europaplatz 1, 9500 Villach',
     genre: 'Fasching, Karneval, Kostümball, Umzug',
@@ -108,8 +108,8 @@ export const post: FestivalPost = {
   ],
   jsonLdEvent: {
     name: 'Villacher Fasching 2026',
-    startDate: '2026-01-05',
-    endDate: '2026-03-03',
+    startDate: '2026-01-06',
+    endDate: '2026-02-17',
     location: 'Kongresshaus Villach, Europaplatz 1, 9500 Villach, Austria',
     addressCountry: 'AT',
     url: 'https://www.villacherfasching.at',

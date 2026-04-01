@@ -16,7 +16,7 @@ export const post: FestivalPost = {
   category: 'Festivals & Feste',
   categoryColor: 'bg-amber-600 text-white',
   keyFacts: {
-    dates: 'Juli 2026 (genaues Datum folgt)',
+    dates: '11.–12. Juli 2026',
     location: 'Murauer Stadtplatz & Altstadt',
     address: 'Stadtplatz 1, 8850 Murau, Steiermark',
     genre: 'Stadtfest, Volksmusik, Kulinarik, Brauchtum',

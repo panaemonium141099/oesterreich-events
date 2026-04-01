@@ -16,7 +16,7 @@ export const post: FestivalPost = {
   category: 'Musik & Konzerte',
   categoryColor: 'bg-teal-700 text-white',
   keyFacts: {
-    dates: '10. Juli – 16. August 2026',
+    dates: '2. Juli – 2. August 2026',
     location: 'Stiftskirche Ossiach & Seeufer-Bühne',
     address: 'Stift Ossiach, 9570 Ossiach, Kärnten',
     genre: 'Klassik, Kammermusik, Oper, Chorkonzerte',
@@ -109,8 +109,8 @@ export const post: FestivalPost = {
   ],
   jsonLdEvent: {
     name: 'Carinthian Summer Ossiach 2026',
-    startDate: '2026-07-10',
-    endDate: '2026-08-16',
+    startDate: '2026-07-02',
+    endDate: '2026-08-02',
     location: 'Stift Ossiach, 9570 Ossiach, Kärnten, Austria',
     addressCountry: 'AT',
     url: 'https://www.carinthiansummer.at',

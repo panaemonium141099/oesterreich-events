@@ -16,7 +16,7 @@ export const post: FestivalPost = {
   category: 'Sport & Outdoor',
   categoryColor: 'bg-cyan-700 text-white',
   keyFacts: {
-    dates: 'August 2026 (genaues Datum folgt)',
+    dates: '7.–9. August 2026',
     location: 'Wörthersee, Klagenfurt & Pörtschach',
     address: 'Segelclub Klagenfurt, Metnitzstrand, 9020 Klagenfurt',
     genre: 'Segeln, Regatta, Wassersport, Clubsport',
