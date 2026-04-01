@@ -20,15 +20,24 @@ export const metadata: Metadata = {
 };
 
 // ── Category filter ──────────────────────────────────────────────────────────
-// Maps spec-required tab labels to the actual stored category strings.
-// Multiple stored values can match a single tab (union match).
-// `matchValues: null` means "show all posts" (Alle tab).
+//
+// The spec calls for tabs: "Alle, Musik, Kultur, Märkte, Sport, Brauchtum, Klassik".
+// The actual category strings stored on FestivalPost objects are compound (e.g.
+// "Musik & Festival", "Kultur & Tradition"). The mapping below translates each
+// spec tab to the exact stored category strings that belong in that group.
+// This is intentional — no posts carry bare "Märkte" or "Brauchtum" strings;
+// each spec label is a display-layer concept that groups multiple stored values.
+//
+// Stored values (as of T1-T6): Musik | Musik & Festival | Musik & Konzerte |
+//   Kultur & Tradition | Kultur & Bühne | Kulinarik & Tradition | Essen & Trinken |
+//   Sport & Outdoor | Sport & Fitness | Festivals | Festivals & Feste | Open-Air & Feste
 const FILTER_TABS: Array<{
   label: string;
   query: string;
+  /** Exact stored `category` values that belong to this tab. null = show all. */
   matchValues: string[] | null;
 }> = [
-  { label: 'Alle',      query: 'alle',      matchValues: null },
+  { label: 'Alle',         query: 'alle',      matchValues: null },
   {
     label: 'Musik',
     query: 'musik',
@@ -42,6 +51,7 @@ const FILTER_TABS: Array<{
   {
     label: 'M\u00e4rkte',
     query: 'maerkte',
+    // Posts about markets, food festivals, and culinary traditions
     matchValues: ['Kulinarik & Tradition', 'Essen & Trinken'],
   },
   {
@@ -52,13 +62,13 @@ const FILTER_TABS: Array<{
   {
     label: 'Brauchtum',
     query: 'brauchtum',
-    // Brauchtum (folk customs): subset of traditional/festive culture posts
+    // Folk customs, traditional festivals, and local festive culture
     matchValues: ['Kultur & Tradition', 'Festivals & Feste', 'Open-Air & Feste'],
   },
   {
     label: 'Klassik',
     query: 'klassik',
-    // Classical music: Musik & Konzerte covers opera/chamber/classical events
+    // Classical music: opera, chamber music, and concert events
     matchValues: ['Musik & Konzerte'],
   },
 ];
