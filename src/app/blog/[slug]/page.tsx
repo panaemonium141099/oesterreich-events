@@ -2,10 +2,10 @@ import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
-import { getPostBySlug, getAllFestivalSlugs } from '@/content/blog';
+import { getPostBySlug, getPostsByCategory, ALL_POSTS } from '@/content/blog';
 
 export function generateStaticParams() {
-  return getAllFestivalSlugs().map(slug => ({ slug }));
+  return ALL_POSTS.map(p => ({ slug: p.slug }));
 }
 
 export async function generateMetadata({
@@ -408,7 +408,7 @@ export default async function BlogPostPage({
               Mehr entdecken
             </p>
             <p className="text-gray-900 font-bold text-xl mb-6 tracking-tight">
-              Noch mehr Events in Österreich
+              Noch mehr Events in Oesterreich
             </p>
             <Link
               href={post.ctaLink}
@@ -419,7 +419,68 @@ export default async function BlogPostPage({
             </Link>
           </div>
         </div>
+
+        {/* AEHNLICHE BEITRAEGE */}
+        <RelatedPosts currentSlug={slug} category={post.category} />
       </article>
     </>
+  );
+}
+
+// ── Related Posts section ────────────────────────────────────────────────────
+
+function RelatedPosts({ currentSlug, category }: { currentSlug: string; category: string }) {
+  const related = getPostsByCategory(category)
+    .filter(p => p.slug !== currentSlug)
+    .slice(0, 3);
+
+  if (related.length === 0) return null;
+
+  return (
+    <section className="bg-gray-50 border-t border-gray-200 py-14">
+      <div className="max-w-5xl mx-auto px-6">
+        <div className="flex items-center gap-4 mb-8">
+          <div className="h-px w-8 bg-gray-400" />
+          <span className="text-[10px] font-bold uppercase tracking-[0.25em] text-gray-400">
+            Aehnliche Beitraege
+          </span>
+        </div>
+        <div className="grid sm:grid-cols-3 gap-6">
+          {related.map(p => (
+            <article key={p.slug} className="group">
+              <Link href={`/blog/${p.slug}`} className="block">
+                <div className="relative aspect-[16/9] overflow-hidden rounded-xl mb-4">
+                  <Image
+                    src={p.thumbnailImage ?? p.heroImage}
+                    alt={p.title}
+                    fill
+                    className="object-cover transition-transform duration-700 group-hover:scale-105"
+                    sizes="(max-width: 640px) 100vw, 33vw"
+                  />
+                </div>
+                <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-gray-400 border border-gray-200 px-2 py-0.5 mb-2 inline-block">
+                  {p.category}
+                </span>
+                <h3 className="font-extrabold text-gray-900 text-base leading-tight mb-1 group-hover:text-gray-600 transition-colors line-clamp-2">
+                  {p.title}
+                </h3>
+                <p className="text-gray-400 text-xs uppercase tracking-wider">
+                  {p.keyFacts.dates}
+                </p>
+              </Link>
+            </article>
+          ))}
+        </div>
+        <div className="mt-8 text-center">
+          <Link
+            href="/blog"
+            className="inline-flex items-center gap-2 text-gray-600 hover:text-gray-900 text-sm font-medium transition-colors group"
+          >
+            Alle Beitraege anzeigen
+            <IconArrowRight />
+          </Link>
+        </div>
+      </div>
+    </section>
   );
 }

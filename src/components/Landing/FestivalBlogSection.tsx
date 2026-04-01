@@ -110,7 +110,9 @@ function SecondaryCard({ post }: { post: (typeof FESTIVAL_POSTS)[0] }) {
 }
 
 export function FestivalBlogSection() {
-  const [featured, ...rest] = FESTIVAL_POSTS;
+  // Show top 6 posts (already sorted by publishDate desc in barrel)
+  const top6 = FESTIVAL_POSTS.slice(0, 6);
+  const [featured, ...rest] = top6;
 
   return (
     <motion.section
@@ -140,7 +142,7 @@ export function FestivalBlogSection() {
             href="/blog"
             className="hidden sm:inline-flex items-center gap-1.5 text-white/40 hover:text-white text-sm font-medium transition-colors group"
           >
-            Alle Artikel
+            Alle Beitraege
             <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
           </Link>
         </div>
@@ -153,13 +155,33 @@ export function FestivalBlogSection() {
           {featured && <FeaturedCard post={featured} />}
         </div>
 
-        {/* Secondary cards — stacked to match the featured card height */}
+        {/* Secondary cards — stacked (up to 5, showing 2 per spec) */}
         <div className="flex flex-col gap-5">
-          {rest.map(post => (
+          {rest.slice(0, 2).map(post => (
             <SecondaryCard key={post.slug} post={post} />
           ))}
         </div>
       </div>
+
+      {/* Additional posts row (posts 4-6) */}
+      {rest.length > 2 && (
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 mt-5">
+          {rest.slice(2, 5).map(post => (
+            <SecondaryCard key={post.slug} post={post} />
+          ))}
+        </div>
+      )}
+
+      {/* Mobile "Alle Beitraege" link */}
+      <motion.div variants={itemVariants} className="mt-6 text-center sm:hidden">
+        <Link
+          href="/blog"
+          className="inline-flex items-center gap-1.5 text-white/40 hover:text-white text-sm font-medium transition-colors group"
+        >
+          Alle Beitraege
+          <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
+        </Link>
+      </motion.div>
     </motion.section>
   );
 }

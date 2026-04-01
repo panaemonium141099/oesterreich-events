@@ -8,6 +8,9 @@ export function Footer() {
           &copy; {new Date().getFullYear()} Österreich Events. Alle Rechte vorbehalten.
         </p>
         <nav className="flex items-center gap-6">
+          <Link href="/blog" className="text-xs text-white/30 hover:text-white/60 transition-colors">
+            Blog
+          </Link>
           <Link href="/impressum" className="text-xs text-white/30 hover:text-white/60 transition-colors">
             Impressum
           </Link>
