@@ -47,9 +47,8 @@ Build scrapers for the highest-volume API-based tourism sources. These are the b
 - [ ] `npm run scrape -- --source <name>` works for each new scraper
 - [ ] `npm run build` passes
 ## Done summary
-TBD
-
+Built three new scrapers: TourDataScraper (tourdata.at API with env key, graceful skip if unavailable), WienOGDScraper (category-specific VADB RSS queries complementing existing WienVADB), and WienTicketScraper (JSON-LD extraction from wien-ticket.at detail pages with coords, prices, and ticket URLs). All registered in index.ts, TypeScript compiles clean, 127 tests pass.
 ## Evidence
-- Commits:
-- Tests:
+- Commits: 4eb74e77be5d3c181bb0d1a67c35e08d9f9a92e0
+- Tests: npx tsc --noEmit, npm test
 - PRs:

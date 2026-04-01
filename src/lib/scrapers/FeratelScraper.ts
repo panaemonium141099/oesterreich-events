@@ -95,13 +95,32 @@ const REGIONS: FeratelRegionConfig[] = [
 
   // ── Vorarlberg ──
   // (lech and arlberg listed above under Tirol — they span both)
+  { code: 'klostertal', name: 'Klostertal', bundesland: 'Vorarlberg', fallbackLat: 47.130, fallbackLng: 10.080 },
 
   // ── Kärnten extras ──
   { code: 'hohetauern', name: 'Hohe Tauern', bundesland: 'Kärnten', fallbackLat: 46.910, fallbackLng: 13.150 },
   { code: 'nationalpark', name: 'Nationalpark Region', bundesland: 'Kärnten', fallbackLat: 46.928, fallbackLng: 13.200 },
+  { code: 'klagenfurt', name: 'Klagenfurt', bundesland: 'Kärnten', fallbackLat: 46.624, fallbackLng: 14.308 },
+  { code: 'lesachtal', name: 'Lesachtal', bundesland: 'Kärnten', fallbackLat: 46.700, fallbackLng: 12.840 },
+  { code: 'feldamsee', name: 'Feld am See', bundesland: 'Kärnten', fallbackLat: 46.775, fallbackLng: 13.748 },
+  { code: 'weissensee', name: 'Weissensee', bundesland: 'Kärnten', fallbackLat: 46.713, fallbackLng: 13.300 },
+  { code: 'rosental', name: 'Rosental', bundesland: 'Kärnten', fallbackLat: 46.540, fallbackLng: 14.180 },
 
   // ── Salzburg extras ──
   { code: 'zellkaprun', name: 'Zell am See-Kaprun', bundesland: 'Salzburg', fallbackLat: 47.323, fallbackLng: 12.796 },
+  { code: 'filzmoos', name: 'Filzmoos', bundesland: 'Salzburg', fallbackLat: 47.435, fallbackLng: 13.522 },
+  { code: 'eugendorf', name: 'Eugendorf', bundesland: 'Salzburg', fallbackLat: 47.867, fallbackLng: 13.130 },
+
+  // ── Oberösterreich extras ──
+  { code: 'pyhrn', name: 'Pyhrn-Priel', bundesland: 'Oberösterreich', fallbackLat: 47.715, fallbackLng: 14.116 },
+  { code: 'traunseealmtal', name: 'Traunsee-Almtal', bundesland: 'Oberösterreich', fallbackLat: 47.862, fallbackLng: 13.789 },
+  { code: 'donauooe', name: 'Donau Oberösterreich', bundesland: 'Oberösterreich', fallbackLat: 48.305, fallbackLng: 14.300 },
+
+  // ── Tirol extras ──
+  { code: 'halltirol', name: 'Hall in Tirol', bundesland: 'Tirol', fallbackLat: 47.289, fallbackLng: 11.508 },
+  { code: 'kaiserwinkl', name: 'Kaiserwinkl', bundesland: 'Tirol', fallbackLat: 47.625, fallbackLng: 12.300 },
+  { code: 'hochpustertal', name: 'Hochpustertal', bundesland: 'Tirol', fallbackLat: 46.740, fallbackLng: 12.420 },
+  { code: 'ramsau', name: 'Ramsau am Dachstein', bundesland: 'Steiermark', fallbackLat: 47.421, fallbackLng: 13.643 },
 ];
 
 // ─────────────────── API configuration ───────────────────
