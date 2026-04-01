@@ -1,0 +1,16 @@
+{
+  "assignee": null,
+  "claim_note": "",
+  "claimed_at": null,
+  "created_at": "2026-04-01T18:13:59.409781Z",
+  "depends_on": [
+    "fn-4-massive-event-source-expansion-new.1"
+  ],
+  "epic": "fn-4-massive-event-source-expansion-new",
+  "id": "fn-4-massive-event-source-expansion-new.2",
+  "priority": null,
+  "spec_path": ".flow/tasks/fn-4-massive-event-source-expansion-new.2.md",
+  "status": "todo",
+  "title": "Tourism API Scrapers: tourdata.at + Wien OGD + Wien-Ticket",
+  "updated_at": "2026-04-01T18:14:47.460527Z"
+}

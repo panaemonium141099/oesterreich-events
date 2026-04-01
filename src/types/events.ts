@@ -53,6 +53,7 @@ export interface ScrapedEvent {
   image_url?: string;
   organizer?: string;
   tags?: string[];
+  ticket_url?: string;
 }
 
 export interface EventFilters {
@@ -90,6 +91,7 @@ export type Category =
   | 'Bildung'
   | 'Gesundheit'
   | 'Religion'
+  | 'Wirtschaft'
   | 'Sonstiges';
 
 export type District =

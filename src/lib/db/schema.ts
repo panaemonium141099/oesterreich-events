@@ -25,6 +25,7 @@ export function initializeDatabase(db: Database.Database): void {
       image_url     TEXT,
       organizer     TEXT,
       tags          TEXT,
+      ticket_url    TEXT,
       created_at    TEXT DEFAULT (datetime('now')),
       updated_at    TEXT DEFAULT (datetime('now')),
       UNIQUE(source_name, source_id)
@@ -65,4 +66,10 @@ export function initializeDatabase(db: Database.Database): void {
     CREATE INDEX IF NOT EXISTS idx_event_tags_tag ON event_tags(tag);
     CREATE INDEX IF NOT EXISTS idx_event_tags_event_id ON event_tags(event_id);
   `);
+
+  // Migration: add ticket_url column to existing databases
+  const columns = db.pragma('table_info(events)') as Array<{ name: string }>;
+  if (!columns.some(c => c.name === 'ticket_url')) {
+    db.exec('ALTER TABLE events ADD COLUMN ticket_url TEXT');
+  }
 }
