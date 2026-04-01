@@ -16,7 +16,7 @@ export const post: FestivalPost = {
   category: 'Kultur & Bühne',
   categoryColor: 'bg-cyan-700 text-white',
   keyFacts: {
-    dates: 'Juli – August 2026',
+    dates: '16. Juli – 22. August 2026',
     location: 'Seebühne Mörbisch am See, Burgenland',
     address: 'Seebühne, 7072 Mörbisch am See',
     genre: 'Operette, Musical',
@@ -26,13 +26,13 @@ export const post: FestivalPost = {
     since: '1957',
   },
   lineup: [
-    { name: 'Operetten-Hauptproduktion 2026', role: 'headliner', day: 'Juli–August täglich' },
-    { name: 'Operetten-Galas & Special Nights', role: 'special' },
+    { name: 'Ein Käfig voller Narren – La Cage aux Folles', role: 'headliner', day: '16. Juli – 22. August' },
+    { name: 'Eröffnungsgala', role: 'special', day: '16. Juli 2026' },
     { name: 'Festspielorchester Mörbisch', role: 'support' },
     { name: 'Internationales Solisten-Ensemble', role: 'support' },
     { name: 'Ballett der Seefestspiele', role: 'support' },
   ],
-  lineupNote: 'Die Hauptproduktion 2026 wird Anfang des Jahres bekanntgegeben. Früh reservieren — ausgebuchte Abende schon Wochen vorher möglich.',
+  lineupNote: 'Die Hauptproduktion 2026 ist „Ein Käfig voller Narren – La Cage aux Folles". Frühzeitig buchen — beliebte Abende Wochen im Voraus ausverkauft.',
   intro:
     'Es gibt Kulturerlebnisse, die man einmal im Leben haben sollte — die Seefestspiele Mörbisch gehören unbedingt dazu. Auf der größten Seebühne Europas, direkt auf dem Wasser des Neusiedler Sees im Burgenland, werden jedes Jahr prachtvolle Operetten und Musicals inszeniert. Wenn sich die Sonne über dem See neigt und die Bühnentechnik auf höchstem Niveau zum Einsatz kommt, entsteht ein Theatermagie, die tief berührt. Über 6.000 Zuschauer erleben jeden Abend, wie Musik, Wasser und Bühnenzauber verschmelzen.',
   historyTitle: 'Seit 1957: Eine Sommerbühne fürs Welterbe',
@@ -108,13 +108,13 @@ export const post: FestivalPost = {
   ],
   jsonLdEvent: {
     name: 'Seefestspiele Mörbisch 2026',
-    startDate: '2026-07-09',
+    startDate: '2026-07-16',
     endDate: '2026-08-22',
     location: 'Seebühne Mörbisch, 7072 Mörbisch am See, Austria',
     addressCountry: 'AT',
     url: 'https://www.seefestspiele-moerbisch.at',
     description:
-      'Die Seefestspiele Mörbisch finden auf der größten Seebühne Europas am Neusiedler See im Burgenland statt und bieten Operette und Musical für über 6.000 Zuschauer pro Abend.',
+      'Die Seefestspiele Mörbisch finden vom 16. Juli bis 22. August 2026 auf der größten Seebühne Europas statt. Die Hauptproduktion 2026 ist „Ein Käfig voller Narren – La Cage aux Folles".',
     image:
       'https://images.unsplash.com/photo-1578736641330-3155e606cd40?w=1600&q=85&auto=format&fit=crop',
   },

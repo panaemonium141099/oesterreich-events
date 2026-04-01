@@ -16,12 +16,12 @@ export const post: FestivalPost = {
   category: 'Kulinarik & Tradition',
   categoryColor: 'bg-purple-800 text-white',
   keyFacts: {
-    dates: 'Oktober 2026 (2. Wochenende)',
+    dates: '24. – 27. September 2026',
     location: 'Retz Innenstadt und Hauptplatz, Niederösterreich',
     address: 'Hauptplatz 30, 2070 Retz',
     genre: 'Weinfest, Volksmusik, Kulinarik, Brauchtum',
-    price: 'Eintritt frei | Wein und Speisen vor Ort kaufen',
-    website: 'https://www.weinlesefest.at',
+    price: 'Vorverkauf ab € 9 | Tageskasse ab € 10',
+    website: 'https://www.retzer-land.at/weinlesefest',
     since: '1930',
     capacity: '30.000 Besucher über das Wochenende',
   },
@@ -34,7 +34,7 @@ export const post: FestivalPost = {
   ],
   lineupNote: 'Das genaue Programm mit Musikzeiten wird im Frühherbst 2026 veröffentlicht.',
   intro:
-    'Retz — die beschauliche Stadtgemeinde im Weinviertel nahe der tschechischen Grenze — verwandelt sich jedes Jahr im Oktober in eine lebendige Bühne für das älteste Weinfest Niederösterreichs. Das Retz Weinlesefest hat seinen Ursprung in den Erntedankfeiern der lokalen Winzer und ist heute ein Volksseele-Fest, das Einheimische, Weinliebhaber und Touristen aus der gesamten DACH-Region anzieht. Der Duft von frisch gekelterten Trauben, die Töne burgenländischer Blasmusik und die mittelalterlichen Gassen Retzens verschmelzen zu einem herbstlichen Erlebnis, das tiefe Wurzeln in der regionalen Identität hat.',
+    'Retz — die beschauliche Stadtgemeinde im Weinviertel nahe der tschechischen Grenze — verwandelt sich jeden September in eine lebendige Bühne für das älteste Weinfest Niederösterreichs. Das Retz Weinlesefest hat seinen Ursprung in den Erntedankfeiern der lokalen Winzer und ist heute ein Volksseele-Fest, das Einheimische, Weinliebhaber und Touristen aus der gesamten DACH-Region anzieht. Der Duft von frisch gekelterten Trauben, die Töne burgenländischer Blasmusik und die mittelalterlichen Gassen Retzens verschmelzen zu einem herbstlichen Erlebnis, das tiefe Wurzeln in der regionalen Identität hat.',
   historyTitle: 'Tradition seit 1930: Die Weinlese als Fest',
   history:
     'Das Retz Weinlesefest hat eine fast hundertjährige Geschichte und spiegelt die tiefe Verbindung der Stadt mit dem Weinanbau wider. Retz ist bekannt für sein einzigartiges Unterkellerungssystem — tief unter dem Hauptplatz erstrecken sich Weinkeller aus dem Mittelalter, die heute bei Führungen besichtigt werden können. Die alljährliche Krönung der Weinlesekönigsfamilie ist ein Höhepunkt des Festes und symbolisiert die generationsübergreifende Weitergabe des Weinwissens. Das Festival hat die politischen und wirtschaftlichen Umbrüche des 20. Jahrhunderts überstanden und steht heute als lebendiges Beispiel für gelebtes Brauchtum im Weinviertel.',
@@ -93,7 +93,7 @@ export const post: FestivalPost = {
   ctaLink: '/map?bundesland=Nieder%C3%B6sterreich&category=Kulinarik',
   seoTitle: 'Retz Weinlesefest 2026 – Weinfest im Weinviertel | LassTreffen.at',
   seoDescription:
-    'Retz Weinlesefest 2026 im Oktober: Niederösterreichs ältestes Weinfest mit Wein, Volksmusik und Brauchtum. Termine, Programm und Tipps für Ihren Besuch.',
+    'Retz Weinlesefest 2026 (24.–27. September): Niederösterreichs ältestes Weinfest mit Wein, Volksmusik und Brauchtum. Termine, Programm und Tipps für Ihren Besuch.',
   keywords: [
     'Retz Weinlesefest',
     'Weinlesefest Retz 2026',
@@ -107,11 +107,11 @@ export const post: FestivalPost = {
   ],
   jsonLdEvent: {
     name: 'Retz Weinlesefest 2026',
-    startDate: '2026-10-10',
-    endDate: '2026-10-11',
+    startDate: '2026-09-24',
+    endDate: '2026-09-27',
     location: 'Hauptplatz Retz, 2070 Retz, Austria',
     addressCountry: 'AT',
-    url: 'https://www.weinlesefest.at',
+    url: 'https://www.retzer-land.at/weinlesefest',
     description:
       'Das Retz Weinlesefest ist Niederösterreichs ältestes Weinfest und findet jedes Jahr im Oktober im historischen Stadtzentrum von Retz im Weinviertel statt.',
     image:

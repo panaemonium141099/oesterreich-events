@@ -16,7 +16,7 @@ export const post: FestivalPost = {
   category: 'Kultur & Bühne',
   categoryColor: 'bg-purple-700 text-white',
   keyFacts: {
-    dates: 'Juli – August 2026',
+    dates: '11. Juli – 30. August 2026',
     location: 'Kongress & TheaterHaus, Bad Ischl',
     address: 'Kurhausstraße 8, 4820 Bad Ischl',
     genre: 'Operette, Musical, Klassik',
@@ -106,7 +106,7 @@ export const post: FestivalPost = {
   ],
   jsonLdEvent: {
     name: 'Lehár Festival Bad Ischl 2026',
-    startDate: '2026-07-10',
+    startDate: '2026-07-11',
     endDate: '2026-08-30',
     location: 'Kongress & TheaterHaus, Kurhausstraße 8, 4820 Bad Ischl, Austria',
     addressCountry: 'AT',
