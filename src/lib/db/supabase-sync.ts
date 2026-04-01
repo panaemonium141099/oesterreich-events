@@ -47,6 +47,7 @@ function toSupabaseRow(event: ScrapedEvent) {
     price_max: event.price_max ?? null,
     image_url: event.image_url ?? null,
     organizer: event.organizer ?? null,
+    ticket_url: event.ticket_url ?? null,
     visibility: 'public' as const,
   };
 }

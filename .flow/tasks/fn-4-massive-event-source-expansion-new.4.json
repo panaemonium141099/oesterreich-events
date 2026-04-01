@@ -1,0 +1,16 @@
+{
+  "assignee": null,
+  "claim_note": "",
+  "claimed_at": null,
+  "created_at": "2026-04-01T18:14:01.770325Z",
+  "depends_on": [
+    "fn-4-massive-event-source-expansion-new.1"
+  ],
+  "epic": "fn-4-massive-event-source-expansion-new",
+  "id": "fn-4-massive-event-source-expansion-new.4",
+  "priority": null,
+  "spec_path": ".flow/tasks/fn-4-massive-event-source-expansion-new.4.md",
+  "status": "todo",
+  "title": "Media Portal Scrapers: tips.at + bergfex.at + RSS Feeds",
+  "updated_at": "2026-04-01T18:15:17.562426Z"
+}

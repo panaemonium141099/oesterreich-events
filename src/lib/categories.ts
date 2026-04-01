@@ -13,6 +13,7 @@ export const CATEGORIES: Category[] = [
   'Bildung',
   'Gesundheit',
   'Religion',
+  'Wirtschaft',
   'Sonstiges',
 ];
 
@@ -237,6 +238,15 @@ const CATEGORY_KEYWORDS: Record<Category, string[]> = {
     'herz-jesu', 'florianimesse', 'hubertusmesse',
     'speisensegnung', 'ostereinsegnung',
   ],
+  'Wirtschaft': [
+    'wirtschaft', 'business', 'messe ', 'kongress', 'konferenz',
+    'seminar ', 'networking', 'karriere', 'jobmesse', 'branchentreffen',
+    'fachtagung', 'symposium ', 'handelsmesse', 'gewerbe', 'unternehmer',
+    'startup', 'gründer', 'gruender', 'innovation', 'wirtschaftsforum',
+    'unternehmertag', 'branchentreff', 'geschäftsführer', 'b2b',
+    'fachmesse', 'gewerbemesse', 'wirtschaftskammer', 'wko ',
+    'firmenevent', 'firmenfeier', 'corporate event',
+  ],
   'Sonstiges': [],
 };
 
@@ -244,7 +254,7 @@ const CATEGORY_KEYWORDS: Record<Category, string[]> = {
 const PRIORITY_ORDER: Category[] = [
   'Nightlife', 'Religion', 'Gesundheit', 'Natur', 'Familie',
   'Feste & Brauchtum', 'Märkte', 'Wein & Kulinarik', 'Sport',
-  'Bildung', 'Kultur', 'Musik',
+  'Wirtschaft', 'Bildung', 'Kultur', 'Musik',
 ];
 
 // Feratel tag → Category mapping

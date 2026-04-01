@@ -22,6 +22,7 @@ const TAG_COLORS: Record<string, { light: string; dark: string }> = {
   'Bildung': { light: 'bg-cyan-100 text-cyan-700', dark: 'bg-cyan-900/50 text-cyan-300' },
   'Gesundheit': { light: 'bg-teal-100 text-teal-700', dark: 'bg-teal-900/50 text-teal-300' },
   'Religion': { light: 'bg-indigo-100 text-indigo-700', dark: 'bg-indigo-900/50 text-indigo-300' },
+  'Wirtschaft': { light: 'bg-sky-100 text-sky-700', dark: 'bg-sky-900/50 text-sky-300' },
   'Sonstiges': { light: 'bg-slate-100 text-slate-700', dark: 'bg-gray-700 text-gray-300' },
 };
 
@@ -39,6 +40,7 @@ const TAG_GLOW_COLORS: Record<string, string> = {
   'Bildung': '6,182,212',
   'Gesundheit': '20,184,166',
   'Religion': '99,102,241',
+  'Wirtschaft': '14,165,233',
   'Sonstiges': '148,163,184',
 };
 

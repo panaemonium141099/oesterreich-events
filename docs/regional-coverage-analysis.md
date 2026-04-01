@@ -1,12 +1,12 @@
 # Regional Coverage Analysis — Niche Event Sources
 
-**Date:** 2026-03-31
-**Task:** fn-1-comprehensive-audit-and-feature-upgrade.15
+**Date:** 2026-04-01
+**Task:** fn-4-massive-event-source-expansion-new.8 (updated from fn-1.15)
 
 ## Overview
 
-Analysis of geographic and category coverage gaps across the existing 44+ scrapers,
-and the niche scrapers added in this task to fill them.
+Analysis of geographic and category coverage across 126 registered scraper instances,
+including the original 44+ regional scrapers, 41 university scrapers, and 34 niche scrapers added across epics fn-1 and fn-4.
 
 ## Existing Coverage (pre-task)
 
@@ -104,14 +104,49 @@ and the niche scrapers added in this task to fill them.
   - Tags: `['Familie']`
   - Category: Familie
 
+## New Sources Added (Epic fn-4, April 2026)
+
+### Tourism APIs
+- **TourDataScraper** — tourdata.at / austria.info REST API (all Bundeslaender)
+- **WienOGDScraper** — Wien Open Government Data VADB queries (CC-BY 4.0)
+- **WienTicketScraper** — wien-ticket.at concerts, theater, sport, exhibitions
+
+### Feratel Expansion (+15 Regions)
+71 regions total (up from 56). New regions in Salzburg (Tennengau, Hochkoenig, Fuschlseeregion, Grossarltal, Radstadt, Flachau, Wagrain-Kleinarl, Altenmarkt-Zauchensee, Hallein, Werfen, Abtenau, Golling, Annaberg-Lungoetz, Uttendorf, Krimml).
+
+### Media Portals & RSS
+- **TipsAtScraper** — tips.at (OOE, NOE, Stmk, 8 regions)
+- **BergfexScraper** — bergfex.at outdoor/sport events (all Bundeslaender)
+- **StadtbekanntScraper** — stadtbekannt.at Wien RSS feed
+- **RegionewsScraper** — regionews.at multi-region RSS feed
+
+### Concert Houses & Museums
+- **KonzerthausScraper**, **MusikvereinScraper** — Wien classical music venues
+- **8 Museum scrapers** — KHM, Albertina, MUMOK, Belvedere, NHM, Technisches Museum, Leopold Museum, Ars Electronica Center
+
+### Sport Federations
+- **OeAVEventsScraper** — Alpenverein events API
+- **LaufenAtScraper** — laufen.at running events
+- **RadNetScraper** — rad-net.at cycling events
+- **OeFBScraper** — OeFB football match schedule
+- **RunnersFunScraper** — runnersfun.at running events
+
+### Business & Trade
+- **WKOScraper** — WKO chamber of commerce events (new "Wirtschaft" category)
+- **MesseWienScraper**, **MesseWelsScraper**, **MesseGrazScraper** — Trade fair calendars
+- **AMSScraper** — AMS job fair / career events
+
+### Community & Ticketing
+- **NtryAtScraper** — ntry.at event ticketing platform
+- **MeetupScraper** — Meetup GraphQL API community events
+
 ## Remaining Coverage Gaps
 
 | Source | Type | Reason Deferred |
 |--------|------|----------------|
 | oeticket.com festival section | Festival | Requires Puppeteer (JS-rendered) |
 | Resident Advisor full listings | Nightlife | Rate limiting, consider API |
-| Bergfex.at sport events | Outdoor | Large site, needs pagination analysis |
-| Österreichischer Skiverband | Sport | Small event count, low priority |
+| Oesterreichischer Skiverband | Sport | Small event count, low priority |
 | zoo.at / schoenbrunn.at | Family | Separate scraper per venue needed |
 
 ## New Tag Keywords Added to categorizeEvent()

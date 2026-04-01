@@ -124,6 +124,7 @@ export function upsertEvent(event: ScrapedEvent): { isNew: boolean } {
         image_url = @image_url,
         organizer = @organizer,
         tags = @tags,
+        ticket_url = @ticket_url,
         updated_at = datetime('now')
       WHERE source_name = @source_name AND source_id = @source_id
     `).run({
@@ -146,6 +147,7 @@ export function upsertEvent(event: ScrapedEvent): { isNew: boolean } {
       image_url: event.image_url || null,
       organizer: event.organizer || null,
       tags: event.tags ? JSON.stringify(event.tags) : null,
+      ticket_url: event.ticket_url || null,
       source_name: event.source_name,
       source_id: event.source_id,
     });
@@ -161,12 +163,12 @@ export function upsertEvent(event: ScrapedEvent): { isNew: boolean } {
       source_id, source_name, source_url, title, description,
       start_date, end_date, location_name, address, postal_code,
       bundesland, district, latitude, longitude, category, price_text,
-      price_min, price_max, image_url, organizer, tags
+      price_min, price_max, image_url, organizer, tags, ticket_url
     ) VALUES (
       @source_id, @source_name, @source_url, @title, @description,
       @start_date, @end_date, @location_name, @address, @postal_code,
       @bundesland, @district, @latitude, @longitude, @category, @price_text,
-      @price_min, @price_max, @image_url, @organizer, @tags
+      @price_min, @price_max, @image_url, @organizer, @tags, @ticket_url
     )
   `).run({
     source_id: event.source_id,
@@ -190,6 +192,7 @@ export function upsertEvent(event: ScrapedEvent): { isNew: boolean } {
     image_url: event.image_url || null,
     organizer: event.organizer || null,
     tags: event.tags ? JSON.stringify(event.tags) : null,
+    ticket_url: event.ticket_url || null,
   });
 
   // Write to event_tags junction table

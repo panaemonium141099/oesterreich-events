@@ -140,8 +140,8 @@ describe('categorizeEvent', () => {
   });
 
   describe('CATEGORIES constant', () => {
-    it('contains all 13 categories', () => {
-      expect(CATEGORIES).toHaveLength(13);
+    it('contains all 14 categories', () => {
+      expect(CATEGORIES).toHaveLength(14);
     });
 
     it('includes Sonstiges as fallback', () => {
@@ -152,7 +152,7 @@ describe('categorizeEvent', () => {
       const expected = [
         'Musik', 'Kultur', 'Sport', 'Feste & Brauchtum', 'Märkte',
         'Wein & Kulinarik', 'Familie', 'Natur', 'Nightlife',
-        'Bildung', 'Gesundheit', 'Religion', 'Sonstiges',
+        'Bildung', 'Gesundheit', 'Religion', 'Wirtschaft', 'Sonstiges',
       ];
       for (const cat of expected) {
         expect(CATEGORIES).toContain(cat);

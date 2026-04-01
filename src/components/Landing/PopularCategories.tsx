@@ -24,6 +24,8 @@ const CATEGORY_IMAGES: Record<string, string> = {
   Gesundheit: 'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=600&q=75&auto=format&fit=crop',
   // Church tower with cross
   Religion: 'https://images.unsplash.com/photo-1714017971946-49bd73150333?w=600&q=75&auto=format&fit=crop',
+  // Business conference / trade fair
+  Wirtschaft: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=600&q=75&auto=format&fit=crop',
   Sonstiges: 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=600&q=75&auto=format&fit=crop',
 };
 

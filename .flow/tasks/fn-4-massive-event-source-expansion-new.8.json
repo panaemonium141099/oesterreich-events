@@ -1,0 +1,21 @@
+{
+  "assignee": null,
+  "claim_note": "",
+  "claimed_at": null,
+  "created_at": "2026-04-01T18:14:05.892642Z",
+  "depends_on": [
+    "fn-4-massive-event-source-expansion-new.2",
+    "fn-4-massive-event-source-expansion-new.3",
+    "fn-4-massive-event-source-expansion-new.4",
+    "fn-4-massive-event-source-expansion-new.5",
+    "fn-4-massive-event-source-expansion-new.6",
+    "fn-4-massive-event-source-expansion-new.7"
+  ],
+  "epic": "fn-4-massive-event-source-expansion-new",
+  "id": "fn-4-massive-event-source-expansion-new.8",
+  "priority": null,
+  "spec_path": ".flow/tasks/fn-4-massive-event-source-expansion-new.8.md",
+  "status": "todo",
+  "title": "Integration Test, Full Scrape Run + Docs Update",
+  "updated_at": "2026-04-01T18:16:13.864137Z"
+}

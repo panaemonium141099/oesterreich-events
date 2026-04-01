@@ -23,7 +23,7 @@
 - Admin Panel (/admin) mit 6 Tabs: Übersicht, Users, Events, Statistiken, Scraper, Moderation
 - Analytics Tracking (page_view, event_click, search, etc.)
 - Legal: Impressum, Datenschutz, AGB, Cookie Banner, Consent Checkboxen
-- 44 Scraper registriert (GEM2GO, Feratel, Meinbezirk, OeTicket, etc.)
+- 126 Scraper registriert (GEM2GO, Feratel 71 Regionen, Meinbezirk, OeTicket, TourData, Wien OGD, 8 Museen, 5 Sport-Verbaende, 4 Messen/Business, Meetup, ntry.at, etc.)
 - GitHub Actions Workflow für automatisches Scraping (3:00 Uhr)
 
 ## Was NICHT fertig ist / Bugs
@@ -49,7 +49,7 @@
 14. **Facebook Integration** — noch nicht implementiert
 15. **Business Profiles** — Grundstruktur da, aber Flow nicht fertig
 16. **Mobile App-Verweis Screen** — fehlt noch
-17. **Uni Event Scraper** — User wollte österreichische Uni-Events scrapen
+17. **Uni Event Scraper** — 41 Uni/FH/PH Scraper implementiert (fertig)
 
 ## Wichtige Dateien
 - `CLAUDE.md` — Projekt-Beschreibung und Tech-Stack
@@ -60,7 +60,7 @@
 - `data/gemeinden-event-pages.json` — 923 Gemeinde-Event-Seiten
 - `RESEARCH-austrian-tourism-regions.md` — Tourismus-Regionen Recherche
 - `src/scripts/validate-events.js` — Event-Validator (Garbage, Duplikate, Zeiten)
-- `src/lib/scrapers/FeratelScraper.ts` — Universeller Feratel API Scraper (56 Regionen)
+- `src/lib/scrapers/FeratelScraper.ts` — Universeller Feratel API Scraper (71 Regionen)
 
 ## UI/UX Pro Max Skill
 Installiert unter: `C:\Users\jonag\AppData\Local\Temp\skills-RV52JK\.claude\skills\ui-ux-pro-max\SKILL.md`

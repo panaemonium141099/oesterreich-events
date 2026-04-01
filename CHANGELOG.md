@@ -3,7 +3,7 @@
 ## Architecture Overview
 
 ### Platform Summary
-Osterreich Events is an Austrian event discovery platform built with **Next.js 16** (App Router), **React 19**, **TypeScript**, and **Supabase**. It aggregates events from 44 scrapers across Austria, displays them on an interactive **Mapbox GL JS** map, and provides social features including direct messaging, group event planning, friend system, feed, and memories.
+Osterreich Events is an Austrian event discovery platform built with **Next.js 16** (App Router), **React 19**, **TypeScript**, and **Supabase**. It aggregates events from 126 scrapers across Austria, displays them on an interactive **Mapbox GL JS** map, and provides social features including direct messaging, group event planning, friend system, feed, and memories.
 
 ### Tech Stack
 | Layer | Technology |
@@ -21,7 +21,7 @@ Osterreich Events is an Austrian event discovery platform built with **Next.js 1
 
 ### Dual-Database Architecture
 ```
-Scrapers (44)
+Scrapers (126)
     |
     v
 SQLite (data/events.db) -- staging, local scrape runs
@@ -567,15 +567,15 @@ src/
       queries.ts                # SQLite queries (getEvents, upsertEvent, recordScrapeRun)
     scrapers/
       BaseScraper.ts            # Abstract base class (with image extraction + validation)
-      index.ts                  # ~98-scraper registry + runAllScrapers
+      index.ts                  # ~126-scraper registry + runAllScrapers
       puppeteerBrowser.ts       # Shared Puppeteer browser instance
       [40 scraper files]        # Individual scraper implementations
       gemeinden/                # Municipality scraper data
-      uni/                      # University/FH/PH scrapers (42 scrapers, UniBaseScraper)
+      uni/                      # University/FH/PH scrapers (41 scrapers, UniBaseScraper)
         UniBaseScraper.ts       # University scraper base class
         index.ts                # University scraper registry
         [35+ scraper files]     # Individual university scrapers
-      niche/                    # Niche event category scrapers (12 scrapers)
+      niche/                    # Niche event category scrapers (34 scrapers)
         index.ts                # Niche scraper registry
         FestivalScrapers.ts     # Festival events
         NightlifeScrapers.ts    # Nightlife/clubs
@@ -926,4 +926,79 @@ All niche scrapers extend BaseScraper and are registered in the main scraper ind
 
 ---
 
-*Last updated: 2026-03-31*
+---
+
+## Massive Event Source Expansion (Epic fn-4)
+
+All changes implemented on branch `claude/hungry-shaw` against the codebase from epic fn-1.
+
+### Phase 1: Infrastructure (task .1)
+- Added `ticket_url` field to `ScrapedEvent` type and SQLite schema
+- Added "Wirtschaft" as 14th event category
+- Updated `categorizeEvent()` with business/trade fair keywords
+
+### Phase 2: Tourism API Scrapers (task .2)
+- **TourDataScraper** — tourdata.at / austria.info REST API (all Bundeslaender)
+- **WienOGDScraper** — Wien Open Government Data VADB category queries (CC-BY 4.0)
+- **WienTicketScraper** — wien-ticket.at concerts, theater, sport, exhibitions
+
+### Phase 3: Feratel Region Expansion (task .3)
+- Expanded FeratelScraper from 56 to 71 Deskline TOSC5 regions
+- Added 15 new regions across Salzburg, Kaernten, Tirol (estimated +2,495 events)
+- New regions: Tennengau, Hochkoenig, Fuschlseeregion, Grossarltal, Radstadt, Flachau, Wagrain-Kleinarl, Altenmarkt-Zauchensee, Hallein, Werfen, Abtenau, Golling, Annaberg-Lungoetz, Uttendorf, Krimml
+
+### Phase 4: Media Portal Scrapers (task .4)
+- **TipsAtScraper** — tips.at regional events (OOE, NOE, Steiermark, 8 regions)
+- **BergfexScraper** — bergfex.at outdoor/sport events (Cheerio, all Bundeslaender)
+- **StadtbekanntScraper** — stadtbekannt.at Wien RSS feed events
+- **RegionewsScraper** — regionews.at multi-region RSS feed events
+
+### Phase 5: Kultur-Institutionen (task .5)
+- **KonzerthausScraper** — Wiener Konzerthaus program
+- **MusikvereinScraper** — Musikverein Wien program
+- **8 Museum scrapers** — KHM, Albertina, MUMOK, Belvedere, NHM, Technisches Museum, Leopold Museum, Ars Electronica Center (all via MuseumBaseScraper pattern)
+
+### Phase 6: Sport & Outdoor (task .6)
+- **OeAVEventsScraper** — Alpenverein events API
+- **LaufenAtScraper** — laufen.at running events
+- **RadNetScraper** — rad-net.at cycling events in Austria
+- **OeFBScraper** — OeFB football match schedule
+- **RunnersFunScraper** — runnersfun.at running events
+
+### Phase 7: Business & Community (task .7)
+- **WKOScraper** — WKO chamber of commerce events (Wirtschaft category)
+- **MesseWienScraper** — Messe Wien trade fair calendar
+- **MesseWelsScraper** — Messe Wels trade fair calendar
+- **MesseGrazScraper** — Messe Graz trade fair calendar
+- **AMSScraper** — AMS job fair / career events
+- **NtryAtScraper** — ntry.at event ticketing platform
+- **MeetupScraper** — Meetup GraphQL API community events
+
+### Phase 8: Integration Test + Docs (task .8)
+- Verified TypeScript compilation (zero errors)
+- All 127 tests passing
+- Updated documentation (CLAUDE.md, CHANGELOG.md, SCRAPER-QUELLEN.md, HANDOFF.md)
+
+---
+
+### Summary: What Changed vs. Previous Baseline
+
+| Area | Before (fn-1) | After (fn-4) |
+|------|---------------|--------------|
+| Scraper instances registered | ~98 | 126 |
+| Niche scraper classes | 12 | 34 |
+| Feratel regions | 56 | 71 (+15 new) |
+| Event categories | 13 | 14 (+Wirtschaft) |
+| ScrapedEvent fields | No ticket_url | ticket_url added |
+| Tourism API scrapers | 0 | 3 (TourData, WienOGD, WienTicket) |
+| Media portal scrapers | 0 | 4 (tips.at, bergfex, stadtbekannt, regionews) |
+| Museum scrapers | 0 | 8 (KHM, Albertina, MUMOK, Belvedere, NHM, TM, Leopold, AEC) |
+| Concert house scrapers | 0 | 2 (Konzerthaus, Musikverein) |
+| Sport federation scrapers | 0 | 5 (OeAV, laufen.at, rad-net.at, OeFB, runnersfun) |
+| Business/trade scrapers | 0 | 5 (WKO, Messe Wien/Wels/Graz, AMS) |
+| Community platform scrapers | 0 | 2 (ntry.at, Meetup) |
+| Tests | 127 passing | 127 passing (no regressions) |
+
+---
+
+*Last updated: 2026-04-01*

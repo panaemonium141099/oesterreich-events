@@ -1,7 +1,7 @@
 # burgenland-events-v5
 
 ## Beschreibung
-Osterreich Events — Austrian event discovery platform. Aggregates events from ~98 scrapers across Austria, displays them on an interactive Mapbox GL JS map, and provides social features (DM, group chat, friends, feed, memories).
+Osterreich Events — Austrian event discovery platform. Aggregates events from ~126 scrapers across Austria, displays them on an interactive Mapbox GL JS map, and provides social features (DM, group chat, friends, feed, memories).
 
 ## Typ
 node / next.js
@@ -30,9 +30,9 @@ node / next.js
 - `src/app/robots.ts` — robots.txt (disallows /api/, /admin/, /auth/)
 - `src/scripts/calculate-scores.ts` — Event-Scoring-Algorithmus (schreibt event_score nach Supabase)
 - `Dockerfile` — Multi-stage Docker-Build (node:20-slim + sharp) fur Coolify-Deployment
-- `src/lib/scrapers/` — ~98 Scraper-Module
-- `src/lib/scrapers/uni/` — 42 University/FH/PH scrapers
-- `src/lib/scrapers/niche/` — 12 niche category scrapers (festivals, nightlife, outdoor, culture, food, family)
+- `src/lib/scrapers/` — ~126 Scraper-Module (registered instances in index.ts)
+- `src/lib/scrapers/uni/` — 41 University/FH/PH scrapers
+- `src/lib/scrapers/niche/` — 34 niche category scrapers (festivals, nightlife, outdoor, culture, food, family, sport, museums, concert houses, business, RSS feeds)
 - `src/lib/scrapers/BaseScraper.ts` — Base class mit Image extraction + validation
 - `src/lib/db/` — SQLite Schema, Connection, Queries
 - `src/lib/utils/date.ts` — Shared date formatting utilities
@@ -58,8 +58,16 @@ node / next.js
 - **burgenland.info** — Cheerio + JSON-LD (@graph), ~122 Events mit Koordinaten
 - **burgenland.at** — Cheerio, article.event Struktur, ~448 Events (Landesregierung)
 - **44 regional scrapers** — Wien, NOE, OOE, Steiermark, Salzburg, Karnten, Tirol, Vorarlberg, multi-region
-- **42 university/FH/PH scrapers** — `src/lib/scrapers/uni/` (all 9 Bundeslaender covered)
-- **12 niche scrapers** — `src/lib/scrapers/niche/` (festivals, nightlife, outdoor, culture, food, family)
+- **41 university/FH/PH scrapers** — `src/lib/scrapers/uni/` (all 9 Bundeslaender covered)
+- **34 niche scrapers** — `src/lib/scrapers/niche/` (festivals, nightlife, outdoor, culture, food, family, sport, museums, concert houses, business, RSS feeds)
+- **Feratel Deskline API** — 71 regions across all Bundeslaender via TOSC5 API
+- **TourData / austria.info API** — Official Austrian tourism API (alle Bundeslaender)
+- **Wien OGD** — Open Government Data VADB category queries (CC-BY 4.0)
+- **Wien-Ticket** — Concerts, theater, sport, exhibitions in Wien
+- **tips.at** — Regional event portal (OOE, NOE, Steiermark)
+- **bergfex.at** — Outdoor and sport events across Austria
+- **ntry.at** — Event ticketing platform (concerts, parties)
+- **Meetup** — Community events via GraphQL API
 
 ## Build & Test
 ```bash
@@ -68,7 +76,7 @@ npm run build            # Produktions-Build (strict TypeScript)
 npm run scrape           # Alle Scraper ausfuhren
 npm run scrape:burgenland  # Nur burgenland.info scrapen
 npm run score            # Event-Scores berechnen und nach Supabase schreiben
-npm test                 # Vitest test suite (127 tests, 123 passing)
+npm test                 # Vitest test suite (127 tests, all passing)
 npm run test:coverage    # Tests mit V8 Coverage-Report
 npm run test:watch       # Vitest watch mode
 ```

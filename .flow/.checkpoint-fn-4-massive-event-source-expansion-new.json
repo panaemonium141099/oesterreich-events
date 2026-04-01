@@ -1,0 +1,199 @@
+{
+  "created_at": "2026-04-01T18:16:42.378903Z",
+  "epic": {
+    "data": {
+      "branch_name": "fn-4-massive-event-source-expansion-new",
+      "completion_review_status": "unknown",
+      "completion_reviewed_at": null,
+      "created_at": "2026-04-01T18:12:58.492979Z",
+      "default_impl": null,
+      "default_review": null,
+      "default_sync": null,
+      "depends_on_epics": [],
+      "id": "fn-4-massive-event-source-expansion-new",
+      "next_task": 1,
+      "plan_review_status": "unknown",
+      "plan_reviewed_at": null,
+      "spec_path": ".flow/specs/fn-4-massive-event-source-expansion-new.md",
+      "status": "open",
+      "title": "Massive Event Source Expansion - New Niches & APIs",
+      "updated_at": "2026-04-01T18:13:41.745604Z"
+    },
+    "spec": "# Massive Event Source Expansion - New Niches & APIs\n\n## Overview\n\nTriple the event count from ~36k to ~108k by adding new event source niches across Austria. Research identified ~15-35k achievable new events from untapped sources across 6 niches: Tourism APIs, Media Portals, Cultural Institutions, Sports/Outdoor, Business/Trade, and Open Data portals.\n\n**Current state:** 98 scrapers, ~36k events (Unis, Clubs, Gemeinden, Tourism boards, Niche categories)\n**Target:** ~108k events via 40-50 new scrapers across identified niches\n\n### Source Research Summary\n\n| Niche | Sources | Est. Events | Effort |\n|-------|---------|-------------|--------|\n| Tourism APIs | tourdata.at, Wien OGD, Wien-Ticket, Feratel expansion | 8,000-23,000 | Low |\n| Media Portals | tips.at, bergfex.at, stadtbekannt.at, regionews.at | 500-1,500 | Medium |\n| Cultural Institutions | Bundestheater (3), Konzerth\u00c3\u00a4user (2), Museums (7+) | 2,000-5,000 | Medium |\n| Sports & Outdoor | Alpenverein branches, bergfex, \u00c3\u2013FB | 2,000-5,000 | Medium |\n| Business & Trade | WKO, AMS, Messen, ntry.at | 1,500-5,000 | Medium |\n| Ticketing/Community | ntry.at, Meetup GraphQL | 700-2,800 | Medium |\n\n### Critical Gaps Identified\n\n1. **ScrapedEvent missing `ticket_url`** \u00e2\u20ac\u201d scoring awards +15 for ticket_url but ScrapedEvent interface lacks it. Must add before new ticketing scrapers.\n2. **Cross-source dedup is broken** \u00e2\u20ac\u201d current dedup uses `source_id` which is source-specific. Same event on 5 portals = 5 DB entries. Need fuzzy title+date+location matching.\n3. **Geocoding bottleneck** \u00e2\u20ac\u201d Nominatim at 1 req/sec means 30k new events = 9+ hours geocoding. New API sources (tourdata, Feratel) provide coords natively \u00e2\u20ac\u201d prioritize these.\n4. **No \"Wirtschaft\" category** \u00e2\u20ac\u201d WKO/Messen events don't map to existing 13 categories.\n\n## Scope\n\n### In Scope\n- Infrastructure: ticket_url field, new category, pipeline improvements\n- 40-50 new scrapers across 6 niches\n- Register all scrapers in index.ts, add image domains to next.config.ts\n- Verify events validate correctly through existing pipeline\n- Documentation updates (CLAUDE.md, CHANGELOG.md, SCRAPER-QUELLEN.md)\n\n### Out of Scope\n- Cross-source fuzzy dedup (separate epic \u00e2\u20ac\u201d complex, needs its own design)\n- Self-hosted Nominatim (infrastructure change)\n- Supabase performance optimization (count:exact, etc.)\n- Facebook Events scraping (legally risky, technically complex)\n\n## Quick commands\n\n```bash\nnpm run build          # Must pass after each batch\nnpm test               # Verify no regressions\nnpm run scrape -- --source <name>  # Test individual scraper\n```\n\n## Acceptance\n\n- [ ] 40+ new scrapers registered in index.ts, each extending BaseScraper\n- [ ] Each scraper returns valid ScrapedEvent[] with source_id, source_name, source_url, title, start_date\n- [ ] ticket_url field added to ScrapedEvent interface and flows through pipeline\n- [ ] New \"Wirtschaft\" category in categories.ts with relevant keywords\n- [ ] All new image domains added to next.config.ts remotePatterns\n- [ ] `npm run build` passes\n- [ ] `npm test` passes (no regressions)\n- [ ] CLAUDE.md, CHANGELOG.md, SCRAPER-QUELLEN.md updated with new counts\n- [ ] Total event count significantly increased toward 108k target\n\n## References\n\n- BaseScraper pattern: `src/lib/scrapers/BaseScraper.ts`\n- UniBaseScraper pattern: `src/lib/scrapers/uni/UniBaseScraper.ts`\n- Niche scraper examples: `src/lib/scrapers/niche/`\n- Scraper registry: `src/lib/scrapers/index.ts`\n- ScrapedEvent interface: `src/types/events.ts:34-56`\n- Categories: `src/lib/categories.ts`\n- Eventim public API docs: https://gist.github.com/DeveloperMarius/7e8aff4c69ccbf59238d76163c86d9c9\n- tourdata.at API: https://api.austria.info/\n- data.gv.at Wien Events: https://www.data.gv.at/katalog/dataset/stadt-wien_veranstaltungenwien\n"
+  },
+  "epic_id": "fn-4-massive-event-source-expansion-new",
+  "schema_version": 2,
+  "tasks": [
+    {
+      "data": {
+        "assignee": null,
+        "claim_note": "",
+        "claimed_at": null,
+        "created_at": "2026-04-01T18:13:58.465774Z",
+        "depends_on": [],
+        "epic": "fn-4-massive-event-source-expansion-new",
+        "id": "fn-4-massive-event-source-expansion-new.1",
+        "priority": null,
+        "spec_path": ".flow/tasks/fn-4-massive-event-source-expansion-new.1.md",
+        "status": "todo",
+        "title": "Infrastructure: ticket_url Field + Wirtschaft Category + Pipeline Prep",
+        "updated_at": "2026-04-01T18:14:29.068715Z"
+      },
+      "id": "fn-4-massive-event-source-expansion-new.1",
+      "runtime": null,
+      "spec": "# fn-4-massive-event-source-expansion-new.1 Infrastructure: ticket_url Field + Wirtschaft Category + Pipeline Prep\n\n## Description\nAdd missing infrastructure to support the new scraper niches before building any scrapers.\n\n**Size:** M\n**Files:** `src/types/events.ts`, `src/lib/categories.ts`, `src/lib/db/queries.ts`, `src/lib/db/schema.ts`, `src/lib/db/supabase-sync.ts`\n\n## Approach\n\n1. Add `ticket_url?: string` to `ScrapedEvent` interface at `src/types/events.ts:34`\n2. Add `ticket_url` column to SQLite events table in `src/lib/db/schema.ts`\n3. Update `upsertEvent()` in `src/lib/db/queries.ts` to handle ticket_url field\n4. Update `toSupabaseRow()` in `src/lib/db/supabase-sync.ts` to include ticket_url\n5. Add \"Wirtschaft\" category to `src/lib/categories.ts` with keywords: wirtschaft, business, messe, kongress, konferenz, seminar, workshop, networking, karriere, jobmesse, branchentreffen, fachtagung, symposium, handelsmesse, gewerbe, unternehmer, startup, gruender, innovation\n6. Update `categorizeEvent()` and `categorizeEventMulti()` to include new category\n\n## Key context\n\n- The scoring algorithm at `src/scripts/calculate-scores.ts` already awards +15 for ticket_url presence, but ScrapedEvent never passes it through\n- The Supabase `Event` type already has ticket_url (line 26 of events.ts), so production DB schema is ready\n- Categories are defined with priority order in `src/lib/categories.ts` \u2014 place \"Wirtschaft\" low priority so it doesn't override more specific categories\n## Acceptance\n- [ ] `ticket_url?: string` added to ScrapedEvent interface\n- [ ] SQLite schema includes ticket_url column (with migration for existing DB)\n- [ ] upsertEvent() stores ticket_url in SQLite\n- [ ] toSupabaseRow() includes ticket_url in Supabase sync\n- [ ] \"Wirtschaft\" category added with 15+ keywords covering business, trade, conferences\n- [ ] categorizeEvent() and categorizeEventMulti() handle new category\n- [ ] `npm run build` passes\n- [ ] `npm test` passes\n## Done summary\nTBD\n\n## Evidence\n- Commits:\n- Tests:\n- PRs:\n"
+    },
+    {
+      "data": {
+        "assignee": null,
+        "claim_note": "",
+        "claimed_at": null,
+        "created_at": "2026-04-01T18:13:59.409781Z",
+        "depends_on": [
+          "fn-4-massive-event-source-expansion-new.1"
+        ],
+        "epic": "fn-4-massive-event-source-expansion-new",
+        "id": "fn-4-massive-event-source-expansion-new.2",
+        "priority": null,
+        "spec_path": ".flow/tasks/fn-4-massive-event-source-expansion-new.2.md",
+        "status": "todo",
+        "title": "Tourism API Scrapers: tourdata.at + Wien OGD + Wien-Ticket",
+        "updated_at": "2026-04-01T18:14:47.460527Z"
+      },
+      "id": "fn-4-massive-event-source-expansion-new.2",
+      "runtime": null,
+      "spec": "# fn-4-massive-event-source-expansion-new.2 Tourism API Scrapers: tourdata.at + Wien OGD + Wien-Ticket\n\n## Description\nBuild scrapers for the highest-volume API-based tourism sources. These are the biggest potential volume sources identified in research.\n\n**Size:** M\n**Files:** `src/lib/scrapers/TourDataScraper.ts` (new), `src/lib/scrapers/WienOGDScraper.ts` (new), `src/lib/scrapers/WienTicketScraper.ts` (new), `src/lib/scrapers/index.ts`\n\n## Sources\n\n### 1. tourdata.at / austria.info API (est. 3,000-10,000 events)\n- API: `https://oew.tourdata.at/api/dataspace/GetJsonProxy.php?ApiKey=[key]&ObjectType=Veranstaltung&County=Osterreich`\n- License: CC-BY 4.0 (Open Data)\n- Auth: API key (contact api@austria.info or check if public)\n- Aggregates events from all regional tourism organizations (LTOs)\n- If API key not freely available, try the public endpoint first, or scrape tourism pages directly\n\n### 2. data.gv.at Wien Veranstaltungen (est. 2,000-5,000 events)\n- Dataset: https://www.data.gv.at/katalog/dataset/stadt-wien_veranstaltungenwien\n- Format: CSV/JSON/RSS download, no auth needed\n- License: CC-BY 4.0\n- Source: City of Vienna (data.wien.gv.at)\n- Check for REST API endpoint or direct download URL\n\n### 3. Wien-Ticket OGD (est. 1,000-3,000 events)\n- Listed on data.opendataportal.at with REST API endpoint\n- Vienna cultural events, theater, concerts\n- Check actual data format and availability\n\n## Approach\n\n- Follow BaseScraper pattern at `src/lib/scrapers/BaseScraper.ts`\n- For API sources: use `fetchPage()` with JSON parsing\n- Set bundesland='wien' for Wien sources, derive from data for tourdata.at\n- Extract coordinates when available in source data (tourdata.at likely includes geo)\n- Set ticket_url when available\n- Generate deterministic source_id from event URL or unique ID in source data\n- Register all scrapers in `src/lib/scrapers/index.ts`\n## Acceptance\n- [ ] TourDataScraper built and returns valid ScrapedEvent[] (or documented reason if API unavailable)\n- [ ] WienOGDScraper built, downloads and parses Wien events open data\n- [ ] WienTicketScraper built (or merged with WienOGD if same source)\n- [ ] All scrapers registered in index.ts\n- [ ] Each scraper has stable source_id generation for dedup\n- [ ] Coordinates extracted from source data where available\n- [ ] ticket_url populated where source provides it\n- [ ] `npm run scrape -- --source <name>` works for each new scraper\n- [ ] `npm run build` passes\n## Done summary\nTBD\n\n## Evidence\n- Commits:\n- Tests:\n- PRs:\n"
+    },
+    {
+      "data": {
+        "assignee": null,
+        "claim_note": "",
+        "claimed_at": null,
+        "created_at": "2026-04-01T18:14:00.756651Z",
+        "depends_on": [
+          "fn-4-massive-event-source-expansion-new.1"
+        ],
+        "epic": "fn-4-massive-event-source-expansion-new",
+        "id": "fn-4-massive-event-source-expansion-new.3",
+        "priority": null,
+        "spec_path": ".flow/tasks/fn-4-massive-event-source-expansion-new.3.md",
+        "status": "todo",
+        "title": "Feratel Region Expansion: Missing Regions + Verification",
+        "updated_at": "2026-04-01T18:14:59.396637Z"
+      },
+      "id": "fn-4-massive-event-source-expansion-new.3",
+      "runtime": null,
+      "spec": "# fn-4-massive-event-source-expansion-new.3 Feratel Region Expansion: Missing Regions + Verification\n\n## Description\nExpand the existing FeratelScraper to cover additional regions not yet included. The Deskline API (`webapi.deskline.net`) is already implemented with 42+ regions \u2014 identify and add missing regions.\n\n**Size:** M\n**Files:** `src/lib/scrapers/FeratelScraper.ts`, `src/lib/scrapers/index.ts`\n\n## Approach\n\n- Read current FeratelScraper at `src/lib/scrapers/FeratelScraper.ts` to understand the region config\n- The API pattern is: `https://webapi.deskline.net/{region-code}/de/events`\n- Current coverage: Burgenland, Salzburg (14), K\u00e4rnten (5), Tirol (17), Steiermark (5), O\u00d6 (3), N\u00d6 (1)\n- **Gaps to fill:** Vorarlberg sub-regions, Wien, additional N\u00d6 sub-regions, additional O\u00d6 sub-regions\n- Research available Deskline region codes by probing known patterns or checking Feratel documentation\n- For each new region: verify API returns events, add to region config array\n- Estimate: 2,000-5,000 additional events from new regions\n\n## Key context\n\n- FeratelScraper already handles pagination, JSON parsing, coordinate extraction\n- Each region is a config entry with `code`, `name`, `bundesland`\n- API returns JSON with field selection: `id,name,date,location{place,town,regions,coordinate{long,lat}},descriptions,images,urlFriendlyName`\n- No auth required \u2014 public widget API\n## Acceptance\n- [ ] All missing Feratel/Deskline regions identified\n- [ ] New regions added to FeratelScraper configuration\n- [ ] Each new region verified to return events via API\n- [ ] No duplicate region codes with existing config\n- [ ] `npm run scrape -- --source feratel` returns events from new regions\n- [ ] `npm run build` passes\n## Done summary\nTBD\n\n## Evidence\n- Commits:\n- Tests:\n- PRs:\n"
+    },
+    {
+      "data": {
+        "assignee": null,
+        "claim_note": "",
+        "claimed_at": null,
+        "created_at": "2026-04-01T18:14:01.770325Z",
+        "depends_on": [
+          "fn-4-massive-event-source-expansion-new.1"
+        ],
+        "epic": "fn-4-massive-event-source-expansion-new",
+        "id": "fn-4-massive-event-source-expansion-new.4",
+        "priority": null,
+        "spec_path": ".flow/tasks/fn-4-massive-event-source-expansion-new.4.md",
+        "status": "todo",
+        "title": "Media Portal Scrapers: tips.at + bergfex.at + RSS Feeds",
+        "updated_at": "2026-04-01T18:15:17.562426Z"
+      },
+      "id": "fn-4-massive-event-source-expansion-new.4",
+      "runtime": null,
+      "spec": "# fn-4-massive-event-source-expansion-new.4 Media Portal Scrapers: tips.at + bergfex.at + RSS Feeds\n\n## Description\nBuild scrapers for Austrian media event portals and RSS feeds that have structured event data.\n\n**Size:** M\n**Files:** `src/lib/scrapers/TipsAtScraper.ts` (new), `src/lib/scrapers/BergfexScraper.ts` (new), `src/lib/scrapers/niche/RSSEventScrapers.ts` (new), `src/lib/scrapers/index.ts`\n\n## Sources\n\n### 1. tips.at/events (est. 100-500+ events, O\u00d6 focus)\n- Listing: `https://tips.at/events` with AJAX POST for \"load more\" pagination\n- Detail pages have JSON-LD `@type: Event` schema (startDate, Place, Offer, etc.)\n- AJAX endpoint uses params: `last`, `lastid`, `page`, `filter`\n- Method: Cheerio \u2014 list page crawl + detail page JSON-LD extraction\n- Integrates with OeTicket so has ticket URLs and images\n\n### 2. bergfex.at/veranstaltungen (est. 200-250 events, outdoor/mountain)\n- URL: `https://www.bergfex.at/sommer/oesterreich/veranstaltungen/`\n- Pagination: `?page=N` (5 pages, 45-50 per page)\n- Detail: `/[region]/veranstaltungen/[id]/`\n- No JSON-LD but structured HTML with date, location, region, description\n- Method: Cheerio \u2014 straightforward pagination + detail page parsing\n- Coverage: All Austria, outdoor/mountain/sport niche\n\n### 3. stadtbekannt.at RSS (est. 4-8 events, Wien)\n- RSS: `https://stadtbekannt.at/feed/` (RSS 2.0 with content:encoded)\n- WordPress site, Wien cultural events\n- Method: RSS/XML parsing via Cheerio\n\n### 4. regionews.at RSS (est. varies)\n- RSS: `https://www.regionews.at/rss/general.news.rss.php`\n- Regional news with some event announcements\n- Method: RSS/XML parsing, filter for event-like content\n\n## Approach\n\n- Follow niche scraper barrel pattern at `src/lib/scrapers/niche/`\n- tips.at: Reverse-engineer AJAX POST endpoint, crawl listing, parse JSON-LD on detail pages\n- bergfex.at: Simple page-by-page crawl with Cheerio, set category to \"Natur\" or \"Sport\"\n- RSS scrapers: Parse RSS XML, extract event fields from item elements\n- Set bundesland from source data (tips.at = \"oberoesterreich\", bergfex = varies by region)\n## Acceptance\n- [ ] TipsAtScraper built with AJAX pagination + JSON-LD detail parsing\n- [ ] BergfexScraper built with page-based pagination\n- [ ] RSS scrapers for stadtbekannt.at and regionews.at built\n- [ ] All scrapers registered in index.ts\n- [ ] Each scraper returns valid ScrapedEvent[] with stable source_ids\n- [ ] bundesland correctly set from source data\n- [ ] Images extracted where available\n- [ ] `npm run scrape -- --source <name>` works for each\n- [ ] `npm run build` passes\n## Done summary\nTBD\n\n## Evidence\n- Commits:\n- Tests:\n- PRs:\n"
+    },
+    {
+      "data": {
+        "assignee": null,
+        "claim_note": "",
+        "claimed_at": null,
+        "created_at": "2026-04-01T18:14:02.777711Z",
+        "depends_on": [
+          "fn-4-massive-event-source-expansion-new.1"
+        ],
+        "epic": "fn-4-massive-event-source-expansion-new",
+        "id": "fn-4-massive-event-source-expansion-new.5",
+        "priority": null,
+        "spec_path": ".flow/tasks/fn-4-massive-event-source-expansion-new.5.md",
+        "status": "todo",
+        "title": "Kultur-Institutionen: Theater, Konzerthaeuser, Museen",
+        "updated_at": "2026-04-01T18:15:33.611201Z"
+      },
+      "id": "fn-4-massive-event-source-expansion-new.5",
+      "runtime": null,
+      "spec": "# fn-4-massive-event-source-expansion-new.5 Kultur-Institutionen: Theater, Konzerthaeuser, Museen\n\n## Description\nBuild scrapers for major Austrian cultural institutions: theaters, concert halls, and museums. These are high-quality events with rich metadata (images, descriptions, ticket URLs).\n\n**Size:** M\n**Files:** `src/lib/scrapers/niche/TheaterScrapers.ts` (extend existing or new file), `src/lib/scrapers/niche/MuseumScrapers.ts` (new), `src/lib/scrapers/index.ts`\n\n## Sources\n\n### Theaters & Concert Halls (est. 1,000-2,000 performances)\n\n1. **Wiener Staatsoper** \u2014 `wiener-staatsoper.at/en/calendar/{year}/{month}/`\n   - Month-by-month calendar pages, likely JSON-LD Event schema\n   - opera, ballet performances, bundesland='wien'\n\n2. **Burgtheater** \u2014 `burgtheater.at/spielplan`\n   - Season calendar, structured HTML\n   - Theater performances, bundesland='wien'\n\n3. **Volksoper Wien** \u2014 `volksoper.at/spielplan`\n   - Operetta, musical, opera, bundesland='wien'\n\n4. **Konzerthaus Wien** \u2014 `konzerthaus.at/spielplan`\n   - Classical, jazz, world music concerts, bundesland='wien'\n\n5. **Musikverein Wien** \u2014 `musikverein.at/en/spielplan`\n   - Classical concerts, Neujahrskonzert venue, bundesland='wien'\n\n### Museums (est. 500-2,000 events/exhibitions)\n\n6. **Kunsthistorisches Museum** \u2014 `khm.at/besuchen/veranstaltungen/`\n7. **Albertina** \u2014 `albertina.at/ausstellungen/`\n8. **MUMOK** \u2014 `mumok.at/de/veranstaltungen`\n9. **Belvedere** \u2014 `belvedere.at/veranstaltungen`\n10. **Naturhistorisches Museum** \u2014 `nhm-wien.ac.at/veranstaltungen`\n11. **Technisches Museum** \u2014 `technischesmuseum.at/veranstaltungen`\n12. **Leopold Museum** \u2014 `leopoldmuseum.org/de/ausstellungen`\n13. **Ars Electronica Center** \u2014 `ars.electronica.art/center/de/programm/`\n\n## Approach\n\n- Follow existing niche scraper pattern at `src/lib/scrapers/niche/CultureTheaterScrapers.ts`\n- Note: BundestheaterScraper and TheaterAtScraper already exist \u2014 check what they cover first, avoid overlap\n- For theaters: scrape monthly calendar/Spielplan pages, look for JSON-LD first\n- For museums: scrape events/Veranstaltungen pages, distinguish exhibitions (longer duration) from single events\n- All Wien institutions: set bundesland='wien', use known venue coordinates\n- Extract ticket_url where available (most institutions sell tickets)\n- Category: \"Kultur\" for theater/opera, \"Kunst\" or \"Kultur\" for museums\n## Acceptance\n- [ ] At least 5 theater/concert hall scrapers built (Staatsoper, Burgtheater, Volksoper, Konzerthaus, Musikverein)\n- [ ] At least 5 museum scrapers built (KHM, Albertina, MUMOK, Belvedere, NHM + others)\n- [ ] No overlap with existing BundestheaterScraper/TheaterAtScraper (verified before building)\n- [ ] All scrapers registered in index.ts\n- [ ] ticket_url populated where source provides it\n- [ ] venue coordinates hardcoded for known institutions\n- [ ] Categories correctly assigned (Kultur, Kunst)\n- [ ] Images extracted from event/exhibition pages\n- [ ] `npm run scrape -- --source <name>` works for each\n- [ ] `npm run build` passes\n## Done summary\nTBD\n\n## Evidence\n- Commits:\n- Tests:\n- PRs:\n"
+    },
+    {
+      "data": {
+        "assignee": null,
+        "claim_note": "",
+        "claimed_at": null,
+        "created_at": "2026-04-01T18:14:03.692890Z",
+        "depends_on": [
+          "fn-4-massive-event-source-expansion-new.1"
+        ],
+        "epic": "fn-4-massive-event-source-expansion-new",
+        "id": "fn-4-massive-event-source-expansion-new.6",
+        "priority": null,
+        "spec_path": ".flow/tasks/fn-4-massive-event-source-expansion-new.6.md",
+        "status": "todo",
+        "title": "Sport & Outdoor: Alpenverein Branches + Sportverbaende",
+        "updated_at": "2026-04-01T18:15:45.466506Z"
+      },
+      "id": "fn-4-massive-event-source-expansion-new.6",
+      "runtime": null,
+      "spec": "# fn-4-massive-event-source-expansion-new.6 Sport & Outdoor: Alpenverein Branches + Sportverbaende\n\n## Description\nBuild scrapers for Austrian sports and outdoor event sources beyond the existing Alpenverein/Naturfreunde scrapers.\n\n**Size:** M\n**Files:** `src/lib/scrapers/niche/SportScrapers.ts` (new), `src/lib/scrapers/niche/OutdoorSportScrapers.ts` (extend), `src/lib/scrapers/index.ts`\n\n## Sources\n\n### Alpenverein Expanded (est. 1,500-3,000 events)\n1. **oeav-events.at** \u2014 aggregated \u00d6AV events across all branches\n   - Tours, courses, hikes, climbing events\n   - Multiple Sektionen (branches) across Austria\n   - Check if existing AlpenvereinScraper already covers this\n   - If not: scrape the aggregated events page\n\n### Sports Federations (est. 500-2,000 events)\n2. **\u00d6FB / Bundesliga** \u2014 Austrian football matches\n   - openfootball project (GitHub) has free Austrian league data\n   - OR scrape oefb.at/spielplan directly\n   - ~300-500 matches/season across Bundesliga, 2. Liga, \u00d6FB Cup\n\n3. **laufen.at / running events** \u2014 running races, marathons\n   - Austrian running calendar\n   - Marathons, trail runs, fun runs\n\n4. **ski events / FIS calendar** \u2014 ski races, events at ski resorts\n   - Winter sport events in Tirol, Salzburg, Vorarlberg, Steiermark, K\u00e4rnten\n   - fis-ski.com has Austrian events\n\n5. **rad-net.at** \u2014 cycling events\n   - Road races, MTB events, gravel events\n\n## Approach\n\n- First check existing OutdoorSportScrapers.ts for Alpenverein/Naturfreunde coverage\n- Follow niche scraper pattern\n- For sports: set category to \"Sport\"\n- For outdoor: set category to \"Natur\" or \"Sport\" based on activity\n- Extract coordinates from source data (many outdoor events have GPS data)\n- bundesland derived from event location\n## Acceptance\n- [ ] Alpenverein coverage expanded (verify current AlpenvereinScraper, add branches if needed)\n- [ ] At least 3 sport federation scrapers built (football, running, cycling or ski)\n- [ ] No overlap with existing Naturfreunde/Alpenverein scrapers\n- [ ] All scrapers registered in index.ts\n- [ ] Category correctly set to \"Sport\" or \"Natur\"\n- [ ] Coordinates extracted where available\n- [ ] `npm run scrape -- --source <name>` works for each\n- [ ] `npm run build` passes\n## Done summary\nTBD\n\n## Evidence\n- Commits:\n- Tests:\n- PRs:\n"
+    },
+    {
+      "data": {
+        "assignee": null,
+        "claim_note": "",
+        "claimed_at": null,
+        "created_at": "2026-04-01T18:14:04.786766Z",
+        "depends_on": [
+          "fn-4-massive-event-source-expansion-new.1"
+        ],
+        "epic": "fn-4-massive-event-source-expansion-new",
+        "id": "fn-4-massive-event-source-expansion-new.7",
+        "priority": null,
+        "spec_path": ".flow/tasks/fn-4-massive-event-source-expansion-new.7.md",
+        "status": "todo",
+        "title": "Business & Community: WKO, Messen, ntry.at, Meetup",
+        "updated_at": "2026-04-01T18:16:02.375792Z"
+      },
+      "id": "fn-4-massive-event-source-expansion-new.7",
+      "runtime": null,
+      "spec": "# fn-4-massive-event-source-expansion-new.7 Business & Community: WKO, Messen, ntry.at, Meetup\n\n## Description\nBuild scrapers for business events, trade fairs, and community platforms.\n\n**Size:** M\n**Files:** `src/lib/scrapers/niche/BusinessScrapers.ts` (new), `src/lib/scrapers/NtryAtScraper.ts` (new), `src/lib/scrapers/MeetupScraper.ts` (new), `src/lib/scrapers/index.ts`\n\n## Sources\n\n### Business & Trade (est. 1,000-3,000 events)\n\n1. **WKO Veranstaltungen** \u2014 `wko.at/veranstaltungen/start`\n   - Wirtschaftskammer: seminars, workshops, networking events\n   - Coverage: All Austria (9 Landesorganisationen)\n   - Also: `veranstaltungen.wkooe.at` for O\u00d6, similar per-state URLs\n   - Category: \"Wirtschaft\" (new category from Task 1)\n\n2. **Messe Wien** \u2014 `messecenter.at/events/` or `reedexpo.at`\n   - Reed Exhibitions: ~40 trade fairs/year\n   - bundesland='wien'\n\n3. **Messe Wels** \u2014 `messe-wels.at/veranstaltungen`\n   - O\u00d6 trade fairs (Agraria, Power Days, etc.)\n   - bundesland='oberoesterreich'\n\n4. **Messe Graz** \u2014 `mcg.at/veranstaltungen`\n   - Steiermark trade fairs and congress center\n   - bundesland='steiermark'\n\n5. **AMS Veranstaltungen** \u2014 `ams.at/organisation/veranstaltungen`\n   - Job fairs, career events\n   - Small volume (100-300) but valuable\n\n### Community Platforms (est. 700-2,800 events)\n\n6. **ntry.at** (est. 500-2,000 events)\n   - Austrian concert/club ticketing platform\n   - HTML scraping, no API found\n   - Focus on music/nightlife events\n   - Category: \"Nightlife\" or \"Musik\"\n\n7. **Meetup** (est. 200-800 events)\n   - GraphQL API: `https://www.meetup.com/gql`\n   - Auth: OAuth 2.0\n   - Tech meetups, hobby groups, language exchange\n   - Category: \"Bildung\" or \"Sonstiges\"\n   - Note: Feb 2025 schema change may affect queries\n\n## Approach\n\n- WKO: Scrape listing pages per Bundesland, extract event details\n- Messen: Small volume, scrape annual program pages\n- AMS: Simple listing scrape\n- ntry.at: HTML scraping of event listings, extract ticket links\n- Meetup: GraphQL queries filtered by country=AT, requires OAuth setup\n- Use \"Wirtschaft\" category for WKO/Messen/AMS events\n## Acceptance\n- [ ] WKO events scraper built (at least bundesweit, ideally per-Bundesland)\n- [ ] At least 2 Messe scrapers built (Wien + Wels or Graz)\n- [ ] ntry.at scraper built with ticket_url extraction\n- [ ] Meetup scraper built with OAuth (or documented if API access blocked)\n- [ ] All scrapers registered in index.ts\n- [ ] WKO/Messe events categorized as \"Wirtschaft\"\n- [ ] ntry.at events categorized correctly (Nightlife/Musik)\n- [ ] `npm run scrape -- --source <name>` works for each\n- [ ] `npm run build` passes\n## Done summary\nTBD\n\n## Evidence\n- Commits:\n- Tests:\n- PRs:\n"
+    },
+    {
+      "data": {
+        "assignee": null,
+        "claim_note": "",
+        "claimed_at": null,
+        "created_at": "2026-04-01T18:14:05.892642Z",
+        "depends_on": [
+          "fn-4-massive-event-source-expansion-new.2",
+          "fn-4-massive-event-source-expansion-new.3",
+          "fn-4-massive-event-source-expansion-new.4",
+          "fn-4-massive-event-source-expansion-new.5",
+          "fn-4-massive-event-source-expansion-new.6",
+          "fn-4-massive-event-source-expansion-new.7"
+        ],
+        "epic": "fn-4-massive-event-source-expansion-new",
+        "id": "fn-4-massive-event-source-expansion-new.8",
+        "priority": null,
+        "spec_path": ".flow/tasks/fn-4-massive-event-source-expansion-new.8.md",
+        "status": "todo",
+        "title": "Integration Test, Full Scrape Run + Docs Update",
+        "updated_at": "2026-04-01T18:16:13.864137Z"
+      },
+      "id": "fn-4-massive-event-source-expansion-new.8",
+      "runtime": null,
+      "spec": "# fn-4-massive-event-source-expansion-new.8 Integration Test, Full Scrape Run + Docs Update\n\n## Description\nRun a full scrape pipeline with all new scrapers, verify event quality, and update all documentation with new counts and source references.\n\n**Size:** M\n**Files:** `CLAUDE.md`, `CHANGELOG.md`, `SCRAPER-QUELLEN.md`, `HANDOFF.md`, `docs/regional-coverage-analysis.md`\n\n## Approach\n\n1. Run `npm run scrape` with all new scrapers active\n2. Verify new event counts in SQLite: `SELECT source_name, COUNT(*) FROM events GROUP BY source_name ORDER BY COUNT(*) DESC`\n3. Verify per-bundesland distribution\n4. Check for obvious quality issues (empty titles, invalid dates, missing source_urls)\n5. Verify geocoding works for new events (spot-check a few)\n6. Run `npm run build` to verify no image domain issues\n7. Update documentation:\n   - CLAUDE.md: scraper counts, source descriptions, known issues\n   - CHANGELOG.md: new phase entry with before/after table\n   - SCRAPER-QUELLEN.md: new source rows, updated per-Bundesland counts\n   - HANDOFF.md: updated event and scraper counts\n   - docs/regional-coverage-analysis.md: updated coverage gaps\n\n## Key context\n\n- CHANGELOG.md uses phase summary table pattern: `| Area | Before | After |`\n- SCRAPER-QUELLEN.md has `# | Quelle | URL | Events | Typ | Abdeckung` table\n- CLAUDE.md uses inline `~N` approximation counts\n## Acceptance\n- [ ] Full scrape run completed with all new scrapers\n- [ ] New event counts documented (per source, per bundesland)\n- [ ] No build errors from new image domains\n- [ ] CLAUDE.md updated with new scraper count, source descriptions\n- [ ] CHANGELOG.md has new phase entry with before/after comparison\n- [ ] SCRAPER-QUELLEN.md updated with all new sources in table format\n- [ ] HANDOFF.md updated with current counts\n- [ ] `npm run build` passes\n- [ ] `npm test` passes\n## Done summary\nTBD\n\n## Evidence\n- Commits:\n- Tests:\n- PRs:\n"
+    }
+  ]
+}

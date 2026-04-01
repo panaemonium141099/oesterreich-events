@@ -44,14 +44,27 @@ import { Gem2GoScraper } from './Gem2GoScraper';
 import { GenericGemeindeScraper } from './GenericGemeindeScraper';
 import { MariazellAtScraper, BasilikaMariazellScraper, MariazellGvScraper } from './MariazellScraper';
 import { FeratelScraper } from './FeratelScraper';
+import { TourDataScraper } from './TourDataScraper';
+import { WienOGDScraper } from './WienOGDScraper';
+import { WienTicketScraper } from './WienTicketScraper';
+import { TipsAtScraper } from './TipsAtScraper';
+import { BergfexScraper } from './BergfexScraper';
 import {
   FestivalAtScraper, FestivalGuideScraper,
   ResidentAdvisorAustriaScraper, ClubmapScraper,
   NaturfreundeScraper, AlpenvereinScraper,
+  OeAVEventsScraper, LaufenAtScraper, RadNetScraper, OeFBScraper, RunnersFunScraper,
   BundestheaterScraper, TheaterAtScraper,
+  KonzerthausScraper, MusikvereinScraper,
+  KHMScraper, AlbertinaScraper, MUMOKScraper, BelvedereScraper,
+  NHMScraper, TechnischesMuseumScraper, LeopoldMuseumScraper, ArsElectronicaScraper,
   BauernmarktScraper, GenussregionScraper,
   FamiliiiScraper, FamilienUrlaubScraper,
+  StadtbekanntScraper, RegionewsScraper,
+  WKOScraper, MesseWienScraper, MesseWelsScraper, MesseGrazScraper, AMSScraper,
 } from './niche';
+import { NtryAtScraper } from './NtryAtScraper';
+import { MeetupScraper } from './MeetupScraper';
 import {
   UniWienScraper, TUWienScraper, UniGrazScraper, UniInnsbruckScraper,
   WUScraper, MedUniWienScraper, BOKUScraper, TUGrazScraper,
@@ -133,6 +146,12 @@ const scrapers: BaseScraper[] = [
   new TourismusPortaleScraper(),
   // Feratel Deskline TOSC5 API (55+ Regionen österreichweit)
   new FeratelScraper(),
+  // TourData / austria.info API (alle Bundesländer, API key required)
+  new TourDataScraper(),
+  // Wien Open Government Data (VADB category queries, CC-BY 4.0)
+  new WienOGDScraper(),
+  // Wien-Ticket (Konzerte, Theater, Sport, Ausstellungen in Wien)
+  new WienTicketScraper(),
   // Kärnten
   new KaerntenLiveScraper(),
   // Tirol
@@ -159,15 +178,47 @@ const scrapers: BaseScraper[] = [
   // Nischen-Kategorien: Outdoor & Sport
   new NaturfreundeScraper(),
   new AlpenvereinScraper(),
+  // Nischen-Kategorien: Sport-Verbände & Laufsport
+  new OeAVEventsScraper(),
+  new LaufenAtScraper(),
+  new RadNetScraper(),
+  new OeFBScraper(),
+  new RunnersFunScraper(),
   // Nischen-Kategorien: Kultur & Theater
   new BundestheaterScraper(),
   new TheaterAtScraper(),
+  // Nischen-Kategorien: Konzerthäuser
+  new KonzerthausScraper(),
+  new MusikvereinScraper(),
+  // Nischen-Kategorien: Museen
+  new KHMScraper(),
+  new AlbertinaScraper(),
+  new MUMOKScraper(),
+  new BelvedereScraper(),
+  new NHMScraper(),
+  new TechnischesMuseumScraper(),
+  new LeopoldMuseumScraper(),
+  new ArsElectronicaScraper(),
   // Nischen-Kategorien: Märkte & Kulinarik
   new BauernmarktScraper(),
   new GenussregionScraper(),
   // Nischen-Kategorien: Familie
   new FamiliiiScraper(),
   new FamilienUrlaubScraper(),
+  // Media-Portale & RSS Feeds
+  new TipsAtScraper(),
+  new BergfexScraper(),
+  new StadtbekanntScraper(),
+  new RegionewsScraper(),
+  // Business & Trade (WKO, Messen, AMS)
+  new WKOScraper(),
+  new MesseWienScraper(),
+  new MesseWelsScraper(),
+  new MesseGrazScraper(),
+  new AMSScraper(),
+  // Community & Ticketing Platforms
+  new NtryAtScraper(),
+  new MeetupScraper(),
   // Gemeinde-Websites (alle Bundesländer)
   new GemeindeListScraper(),
   // GEM2GO CMS Gemeinden (~2.000 Gemeinden österreichweit)

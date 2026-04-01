@@ -1,0 +1,14 @@
+{
+  "assignee": null,
+  "claim_note": "",
+  "claimed_at": null,
+  "created_at": "2026-04-01T18:13:58.465774Z",
+  "depends_on": [],
+  "epic": "fn-4-massive-event-source-expansion-new",
+  "id": "fn-4-massive-event-source-expansion-new.1",
+  "priority": null,
+  "spec_path": ".flow/tasks/fn-4-massive-event-source-expansion-new.1.md",
+  "status": "todo",
+  "title": "Infrastructure: ticket_url Field + Wirtschaft Category + Pipeline Prep",
+  "updated_at": "2026-04-01T18:14:29.068715Z"
+}
