@@ -17,6 +17,11 @@ import { PraterWienScraper } from './PraterWienScraper';
 import { PartytimerScraper } from './PartytimerScraper';
 import { WienInfoScraper } from './WienInfoScraper';
 import { WienClubsScraper } from './WienClubsScraper';
+import { GrazClubsScraper } from './GrazClubsScraper';
+import { LinzClubsScraper } from './LinzClubsScraper';
+import { SalzburgClubsScraper } from './SalzburgClubsScraper';
+import { InnsbruckClubsScraper } from './InnsbruckClubsScraper';
+import { KleinstaedteClubsScraper } from './KleinstaedteClubsScraper';
 import { TirolScraper } from './TirolScraper';
 import { DonauNOEScraper } from './DonauNOEScraper';
 import { LinzTermineScraper } from './LinzTermineScraper';
@@ -100,6 +105,11 @@ const scrapers: BaseScraper[] = [
   new PraterWienScraper(),
   new PartytimerScraper(),
   new WienClubsScraper(),
+  new GrazClubsScraper(),
+  new LinzClubsScraper(),
+  new SalzburgClubsScraper(),
+  new InnsbruckClubsScraper(),
+  new KleinstaedteClubsScraper(),
   new BasiskulturScraper(),
   new GanzWienScraper(),
   // Niederösterreich

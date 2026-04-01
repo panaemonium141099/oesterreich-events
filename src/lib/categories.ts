@@ -36,9 +36,11 @@ const CATEGORY_KEYWORDS: Record<Category, string[]> = {
     'karaoke', 'pub quiz',
     'cocktail', 'cocktailnight', 'ladies night',
     'sunday dance', 'hangover party',
-    // Niche nightlife tags
+    // Club venues & niche nightlife tags
     'club event', 'rave event', 'club night', 'floorplan', 'line-up', 'resident advisor',
     'clubmap', 'electronic night', 'night club',
+    // Club tag for city club scrapers
+    'club', 'clubs', 'musikclub', 'jazzclub', 'technoclub',
   ],
   'Sport': [
     'sport', 'lauf', 'marathon', 'radmarathon', 'radtour', 'radeln', 'losradeln',
