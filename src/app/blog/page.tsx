@@ -4,13 +4,14 @@ import Link from 'next/link';
 import { ALL_POSTS } from '@/content/blog';
 
 export const metadata: Metadata = {
-  title: 'Oesterreich Events Blog | Event-Guides & Tipps',
+  title: '\u00d6sterreich Events Blog | Event-Guides & Tipps',
   description:
-    'Event-Guides und Tipps zu den groessten Festivals und Veranstaltungen in Oesterreich. Termine, Lineups, Anreise und Insiderwissen fuer Wien, Salzburg, Graz und alle Bundeslaender.',
+    'Event-Guides und Tipps zu den gr\u00f6\u00dften Festivals und Veranstaltungen in \u00d6sterreich. Termine, Lineups, Anreise und Insiderwissen f\u00fcr Wien, Salzburg, Graz und alle Bundesl\u00e4nder.',
   openGraph: {
-    title: 'Oesterreich Events Blog | Event-Guides & Tipps',
-    description: 'Event-Guides und Tipps zu den groessten Festivals und Veranstaltungen in Oesterreich.',
-    images: [{ url: ALL_POSTS[0]?.heroImage ?? '' }],
+    title: '\u00d6sterreich Events Blog | Event-Guides & Tipps',
+    description:
+      'Event-Guides und Tipps zu den gr\u00f6\u00dften Festivals und Veranstaltungen in \u00d6sterreich.',
+    images: ALL_POSTS[0]?.heroImage ? [{ url: ALL_POSTS[0].heroImage }] : [],
     type: 'website',
   },
   alternates: {
@@ -18,18 +19,24 @@ export const metadata: Metadata = {
   },
 };
 
-const CATEGORIES = ['Alle', 'Musik', 'Kultur', 'Maerkte', 'Sport', 'Brauchtum', 'Klassik'] as const;
+// ── Category filter ──────────────────────────────────────────────────────────
+// Each entry: { label shown in UI, query param value, prefix used to match stored category strings }
+// Stored category strings include compound values like "Musik & Festival", "Kultur & Tradition", etc.
+// We match by checking whether the stored category starts with (or equals) the prefix, case-insensitively.
+const FILTER_TABS = [
+  { label: 'Alle',      query: 'alle',      prefix: null           },
+  { label: 'Musik',     query: 'musik',     prefix: 'musik'        },
+  { label: 'Kultur',    query: 'kultur',    prefix: 'kultur'       },
+  { label: 'Sport',     query: 'sport',     prefix: 'sport'        },
+  { label: 'Festivals', query: 'festivals', prefix: 'festival'     },
+] as const;
 
-// Map display names to data values (categories in posts use German with umlauts)
-const CATEGORY_FILTER_MAP: Record<string, string | null> = {
-  Alle: null,
-  Musik: 'Musik',
-  Kultur: 'Kultur',
-  Maerkte: 'Maerkte',
-  Sport: 'Sport',
-  Brauchtum: 'Brauchtum',
-  Klassik: 'Klassik',
-};
+type FilterQuery = (typeof FILTER_TABS)[number]['query'];
+
+function matchesFilter(category: string, prefix: string | null): boolean {
+  if (prefix === null) return true;
+  return category.toLowerCase().startsWith(prefix);
+}
 
 function ArrowRight() {
   return (
@@ -46,18 +53,15 @@ interface BlogPageProps {
 export default async function BlogPage({ searchParams }: BlogPageProps) {
   const { category } = await searchParams;
 
-  // Determine active category key (default to 'Alle')
-  const activeKey =
-    category && CATEGORIES.includes(category as (typeof CATEGORIES)[number])
-      ? (category as (typeof CATEGORIES)[number])
-      : 'Alle';
+  // Determine the active tab (default to 'alle')
+  const activeQuery: FilterQuery =
+    category && FILTER_TABS.some(t => t.query === category)
+      ? (category as FilterQuery)
+      : 'alle';
 
-  const filterValue = CATEGORY_FILTER_MAP[activeKey];
+  const activeTab = FILTER_TABS.find(t => t.query === activeQuery) ?? FILTER_TABS[0];
 
-  // Filter posts by category; normalize both sides to lowercase for robust matching
-  const filteredPosts = filterValue
-    ? ALL_POSTS.filter(p => p.category.toLowerCase() === filterValue.toLowerCase())
-    : ALL_POSTS;
+  const filteredPosts = ALL_POSTS.filter(p => matchesFilter(p.category, activeTab.prefix));
 
   const [hero, ...rest] = filteredPosts;
 
@@ -94,41 +98,42 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
             </span>
           </div>
           <h1 className="text-5xl md:text-6xl font-extrabold text-gray-900 tracking-tight leading-[1.05] mb-4">
-            Oesterreich
+            {'\u00d6sterreich'}
             <br />
             Events Blog
           </h1>
           <p className="text-gray-500 text-xl font-light max-w-lg leading-relaxed">
-            Event-Guides, Tipps und Insiderwissen zu den groessten Veranstaltungen Oesterreichs.
+            Event-Guides, Tipps und Insiderwissen zu den gr&ouml;&szlig;ten Veranstaltungen {'\u00d6sterreichs'}.
           </p>
         </header>
 
         {/* CATEGORY FILTER TABS */}
         <nav aria-label="Kategorie-Filter" className="mb-12">
           <div className="flex flex-wrap gap-2">
-            {CATEGORIES.map(cat => (
+            {FILTER_TABS.map(tab => (
               <Link
-                key={cat}
-                href={cat === 'Alle' ? '/blog' : `/blog?category=${cat}`}
+                key={tab.query}
+                href={tab.query === 'alle' ? '/blog' : `/blog?category=${tab.query}`}
                 className={`px-4 py-2 text-sm font-medium rounded-full border transition-colors ${
-                  activeKey === cat
+                  activeQuery === tab.query
                     ? 'bg-gray-900 text-white border-gray-900'
                     : 'bg-white text-gray-600 border-gray-200 hover:border-gray-400 hover:text-gray-900'
                 }`}
               >
-                {cat}
+                {tab.label}
               </Link>
             ))}
           </div>
           <p className="mt-3 text-xs text-gray-400">
-            {filteredPosts.length} {filteredPosts.length === 1 ? 'Beitrag' : 'Beitraege'}
-            {activeKey !== 'Alle' ? ` in ${activeKey}` : ' gesamt'}
+            {filteredPosts.length}{' '}
+            {filteredPosts.length === 1 ? 'Beitrag' : 'Beitr\u00e4ge'}
+            {activeTab.prefix !== null ? ` in ${activeTab.label}` : ' gesamt'}
           </p>
         </nav>
 
         {filteredPosts.length === 0 ? (
           <p className="text-gray-400 text-center py-24 text-lg">
-            Keine Beitraege in dieser Kategorie gefunden.
+            Keine Beitr\u00e4ge in dieser Kategorie gefunden.
           </p>
         ) : (
           <>
@@ -203,7 +208,7 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
                       />
                     </div>
 
-                    {/* Category */}
+                    {/* Category badge */}
                     <div className="flex items-center gap-3 mb-3">
                       <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-400 border border-gray-300 px-2.5 py-1">
                         {post.category}
@@ -224,7 +229,7 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
                         {post.keyFacts.dates} — {post.keyFacts.location}
                       </span>
                       <span className="inline-flex items-center gap-1.5 text-gray-900 text-sm font-medium group-hover:text-gray-500 transition-colors">
-                        Lesen
+                        Weiterlesen
                         <ArrowRight />
                       </span>
                     </div>
@@ -236,9 +241,9 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
         )}
 
         {/* FOOTER */}
-        <div className="mt-16 pt-8 border-t border-gray-200 flex items-center justify-between">
+        <div className="mt-16 pt-8 border-t border-gray-200 flex flex-wrap items-center justify-between gap-4">
           <p className="text-gray-400 text-xs uppercase tracking-wider">
-            LassTreffen.at — Oesterreich Events
+            LassTreffen.at &mdash; {'\u00d6sterreich'} Events
           </p>
           <Link
             href="/map"

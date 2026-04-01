@@ -148,7 +148,8 @@ export default async function BlogPostPage({
   const post = getPostBySlug(slug);
   if (!post) notFound();
 
-  const jsonLd = {
+  // BlogPosting schema — describes the article itself
+  const blogPostingJsonLd = {
     '@context': 'https://schema.org',
     '@type': 'BlogPosting',
     headline: post.title,
@@ -159,32 +160,40 @@ export default async function BlogPostPage({
     author: { '@type': 'Organization', name: 'LassTreffen.at', url: 'https://lasstreffen.at' },
     publisher: { '@type': 'Organization', name: 'LassTreffen.at', url: 'https://lasstreffen.at' },
     mainEntityOfPage: { '@type': 'WebPage', '@id': `https://lasstreffen.at/blog/${slug}` },
-    about: {
-      '@type': 'Event',
-      name: post.jsonLdEvent.name,
-      startDate: post.jsonLdEvent.startDate,
-      endDate: post.jsonLdEvent.endDate,
-      location: {
-        '@type': 'Place',
-        name: post.jsonLdEvent.location,
-        address: {
-          '@type': 'PostalAddress',
-          streetAddress: post.keyFacts.address,
-          addressCountry: post.jsonLdEvent.addressCountry,
-        },
+  };
+
+  // Standalone Event schema — satisfies Google's Event rich-result requirements
+  const eventJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Event',
+    name: post.jsonLdEvent.name,
+    startDate: post.jsonLdEvent.startDate,
+    endDate: post.jsonLdEvent.endDate,
+    location: {
+      '@type': 'Place',
+      name: post.jsonLdEvent.location,
+      address: {
+        '@type': 'PostalAddress',
+        streetAddress: post.keyFacts.address,
+        addressCountry: post.jsonLdEvent.addressCountry,
       },
-      image: post.jsonLdEvent.image,
-      url: post.jsonLdEvent.url,
-      description: post.jsonLdEvent.description,
-      isAccessibleForFree: post.keyFacts.price.toLowerCase().includes('frei'),
     },
+    image: post.jsonLdEvent.image,
+    url: post.jsonLdEvent.url,
+    description: post.jsonLdEvent.description,
+    isAccessibleForFree: post.keyFacts.price.toLowerCase().includes('frei'),
+    organizer: { '@type': 'Organization', name: 'LassTreffen.at', url: 'https://lasstreffen.at' },
   };
 
   return (
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, '\u003c') }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(blogPostingJsonLd).replace(/</g, '\u003c') }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(eventJsonLd).replace(/</g, '\u003c') }}
       />
 
       <article className="min-h-screen bg-[#f8f6f2] text-gray-900">
