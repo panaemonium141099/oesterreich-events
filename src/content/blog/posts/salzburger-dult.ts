@@ -4,10 +4,8 @@ export const post: FestivalPost = {
   slug: 'salzburger-dult',
   title: 'Salzburger Dult',
   subtitle: 'Traditionelles Volksfest mit Fahrgeschäften, Kulinarik und Salzburger Volkskultur',
-  heroImage:
-    'https://images.unsplash.com/photo-1565299507177-b0ac66763828?w=1600&q=85&auto=format&fit=crop',
-  thumbnailImage:
-    'https://images.unsplash.com/photo-1565299507177-b0ac66763828?w=800&q=80&auto=format&fit=crop',
+  heroImage: '/images/blog/salzburger-dult/hero.jpg',
+  thumbnailImage: '/images/blog/salzburger-dult/thumb.jpg',
   publishDate: '2026-04-01',
   updatedDate: '2026-04-01',
   readingTime: 5,
@@ -74,17 +72,17 @@ export const post: FestivalPost = {
   ],
   gallery: [
     {
-      src: 'https://images.unsplash.com/photo-1565299507177-b0ac66763828?w=800&q=80&auto=format&fit=crop',
+      src: '/images/blog/salzburger-dult/gallery-1.jpg',
       alt: 'Bunte Fahrgeschäfte auf einem Volksfest',
       caption: 'Volksfestfreude im Salzburger Volksgarten',
     },
     {
-      src: 'https://images.unsplash.com/photo-1504196606672-aef5c9cefc92?w=800&q=80&auto=format&fit=crop',
+      src: '/images/blog/salzburger-dult/gallery-2.jpg',
       alt: 'Festzelt mit Blasmusik und Besuchern',
       caption: 'Blasmusik und Gemütlichkeit im Festzelt',
     },
     {
-      src: 'https://images.unsplash.com/photo-1513553404607-988bf2703777?w=800&q=80&auto=format&fit=crop',
+      src: '/images/blog/salzburger-dult/gallery-3.jpg',
       alt: 'Leuchtende Fahrgeschäfte bei Nacht',
       caption: 'Wenn die Dult abends erstrahlt',
     },

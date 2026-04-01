@@ -4,10 +4,8 @@ export const post: FestivalPost = {
   slug: 'nova-rock-2026',
   title: 'Nova Rock 2026',
   subtitle: 'Europas härtestes Festival kehrt ins Burgenland zurück',
-  heroImage:
-    'https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?w=1600&q=85&auto=format&fit=crop',
-  thumbnailImage:
-    'https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?w=800&q=80&auto=format&fit=crop',
+  heroImage: '/images/blog/nova-rock-2026/hero.jpg',
+  thumbnailImage: '/images/blog/nova-rock-2026/thumb.jpg',
   publishDate: '2026-03-15',
   updatedDate: '2026-03-31',
   readingTime: 6,
@@ -86,17 +84,17 @@ export const post: FestivalPost = {
   ],
   gallery: [
     {
-      src: 'https://images.unsplash.com/photo-1506157786151-b8491531f063?w=800&q=80&auto=format&fit=crop',
+      src: '/images/blog/nova-rock-2026/gallery-1.jpg',
       alt: 'Nova Rock Festival Bühne mit Lichtshow',
       caption: 'Spektakuläre Lichtshow auf der Hauptbühne',
     },
     {
-      src: 'https://images.unsplash.com/photo-1429962714451-bb934ecdc4ec?w=800&q=80&auto=format&fit=crop',
+      src: '/images/blog/nova-rock-2026/gallery-2.jpg',
       alt: 'Begeisterte Menschenmenge beim Nova Rock',
       caption: 'Über 100.000 Fans feiern gemeinsam',
     },
     {
-      src: 'https://images.unsplash.com/photo-1478131143081-80f7f84ca84d?w=800&q=80&auto=format&fit=crop',
+      src: '/images/blog/nova-rock-2026/gallery-3.jpg',
       alt: 'Festival Camping Area',
       caption: 'Die Festival-Stadt: Camping unter freiem Himmel',
     },

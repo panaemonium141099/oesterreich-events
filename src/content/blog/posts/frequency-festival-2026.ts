@@ -4,10 +4,8 @@ export const post: FestivalPost = {
   slug: 'frequency-festival-2026',
   title: 'Frequency Festival 2026',
   subtitle: 'St. Pölten wird im August wieder zur Festivalhauptstadt Österreichs',
-  heroImage:
-    'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=1600&q=85&auto=format&fit=crop',
-  thumbnailImage:
-    'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=800&q=80&auto=format&fit=crop',
+  heroImage: '/images/blog/frequency-festival-2026/hero.jpg',
+  thumbnailImage: '/images/blog/frequency-festival-2026/thumb.jpg',
   publishDate: '2026-03-25',
   updatedDate: '2026-03-31',
   readingTime: 5,
@@ -84,17 +82,17 @@ export const post: FestivalPost = {
   ],
   gallery: [
     {
-      src: 'https://images.unsplash.com/photo-1429962714451-bb934ecdc4ec?w=800&q=80&auto=format&fit=crop',
+      src: '/images/blog/frequency-festival-2026/gallery-1.jpg',
       alt: 'Frequency Festival Bühnenshow',
       caption: 'Lichterspektakel auf der Hauptbühne',
     },
     {
-      src: 'https://images.unsplash.com/photo-1523580494863-6f3031224c94?w=800&q=80&auto=format&fit=crop',
+      src: '/images/blog/frequency-festival-2026/gallery-2.jpg',
       alt: 'Festival-Crowd beim Frequency',
       caption: 'Ausgelassene Stimmung vor der Stage',
     },
     {
-      src: 'https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=800&q=80&auto=format&fit=crop',
+      src: '/images/blog/frequency-festival-2026/gallery-3.jpg',
       alt: 'Camping beim Frequency Festival',
       caption: 'Das Camping-Areal — Zuhause für drei Tage',
     },

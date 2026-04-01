@@ -4,10 +4,8 @@ export const post: FestivalPost = {
   slug: 'pannonia-fields',
   title: 'Pannonia Fields Electronic Festival 2026',
   subtitle: 'Techno, Trance und das weite Burgenland — Europas Outdoor-Rave-Perle',
-  heroImage:
-    'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=1600&q=85&auto=format&fit=crop',
-  thumbnailImage:
-    'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=800&q=80&auto=format&fit=crop',
+  heroImage: '/images/blog/pannonia-fields/hero.jpg',
+  thumbnailImage: '/images/blog/pannonia-fields/thumb.jpg',
   publishDate: '2026-04-01',
   updatedDate: '2026-04-01',
   readingTime: 6,
@@ -74,17 +72,17 @@ export const post: FestivalPost = {
   ],
   gallery: [
     {
-      src: 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=800&q=80&auto=format&fit=crop',
+      src: '/images/blog/pannonia-fields/gallery-1.jpg',
       alt: 'DJ-Set auf einer Outdoor-Festival-Stage',
       caption: 'Elektrisierende DJ-Sets auf den Pannonia Fields',
     },
     {
-      src: 'https://images.unsplash.com/photo-1571266028243-3716a577f93a?w=800&q=80&auto=format&fit=crop',
+      src: '/images/blog/pannonia-fields/gallery-2.jpg',
       alt: 'Tanzende Menge bei einem Elektronik-Festival',
       caption: 'Tausende Techno-Fans feiern im Freien',
     },
     {
-      src: 'https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?w=800&q=80&auto=format&fit=crop',
+      src: '/images/blog/pannonia-fields/gallery-3.jpg',
       alt: 'Lichtshow auf einem Outdoor-Festival',
       caption: 'Beeindruckende Licht- und Bühneninstallationen',
     },

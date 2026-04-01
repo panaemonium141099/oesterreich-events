@@ -4,10 +4,8 @@ export const post: FestivalPost = {
   slug: 'grazer-aufsteirern',
   title: 'Grazer Aufsteirern',
   subtitle: 'Steirische Volkskultur pur – das größte Trachtenvolksfest im Herzen von Graz',
-  heroImage:
-    'https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=1600&q=85&auto=format&fit=crop',
-  thumbnailImage:
-    'https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=800&q=80&auto=format&fit=crop',
+  heroImage: '/images/blog/grazer-aufsteirern/hero.jpg',
+  thumbnailImage: '/images/blog/grazer-aufsteirern/thumb.jpg',
   publishDate: '2026-04-01',
   updatedDate: '2026-04-01',
   readingTime: 6,
@@ -75,17 +73,17 @@ export const post: FestivalPost = {
   ],
   gallery: [
     {
-      src: 'https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=800&q=80&auto=format&fit=crop',
+      src: '/images/blog/grazer-aufsteirern/gallery-1.jpg',
       alt: 'Volksfest mit Tracht auf einem Stadtplatz',
       caption: 'Tracht, Musik und Freude auf dem Grazer Hauptplatz',
     },
     {
-      src: 'https://images.unsplash.com/photo-1558665617-f3e4cf42a78a?w=800&q=80&auto=format&fit=crop',
+      src: '/images/blog/grazer-aufsteirern/gallery-2.jpg',
       alt: 'Steirische Harmonika',
       caption: 'Die Steirische Harmonika – das Herzstück des Aufsteirerns',
     },
     {
-      src: 'https://images.unsplash.com/photo-1467810563316-b5476525c0f9?w=800&q=80&auto=format&fit=crop',
+      src: '/images/blog/grazer-aufsteirern/gallery-3.jpg',
       alt: 'Historische Altstadt mit buntem Markt',
       caption: 'Die Grazer Altstadt als Kulisse für das größte Trachtenfest',
     },

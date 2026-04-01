@@ -4,10 +4,8 @@ export const post: FestivalPost = {
   slug: 'innsbruck-festwochen-alte-musik',
   title: 'Innsbruck Festwochen der Alten Musik',
   subtitle: 'Europas renommiertestes Festival für Barockmusik und Alte Musik in historischer Kulisse',
-  heroImage:
-    'https://images.unsplash.com/photo-1507838153414-b4b713384a76?w=1600&q=85&auto=format&fit=crop',
-  thumbnailImage:
-    'https://images.unsplash.com/photo-1507838153414-b4b713384a76?w=800&q=80&auto=format&fit=crop',
+  heroImage: '/images/blog/innsbruck-festwochen-alte-musik/hero.jpg',
+  thumbnailImage: '/images/blog/innsbruck-festwochen-alte-musik/thumb.jpg',
   publishDate: '2026-04-01',
   updatedDate: '2026-04-01',
   readingTime: 6,
@@ -75,17 +73,17 @@ export const post: FestivalPost = {
   ],
   gallery: [
     {
-      src: 'https://images.unsplash.com/photo-1507838153414-b4b713384a76?w=800&q=80&auto=format&fit=crop',
+      src: '/images/blog/innsbruck-festwochen-alte-musik/gallery-1.jpg',
       alt: 'Barockkonzert in historischer Kirche',
       caption: 'Alte Musik in historischem Ambiente',
     },
     {
-      src: 'https://images.unsplash.com/photo-1571935441008-e6f08abb7551?w=800&q=80&auto=format&fit=crop',
+      src: '/images/blog/innsbruck-festwochen-alte-musik/gallery-2.jpg',
       alt: 'Ensemble mit historischen Instrumenten',
       caption: 'Historisch informierte Aufführungspraxis auf höchstem Niveau',
     },
     {
-      src: 'https://images.unsplash.com/photo-1530103862676-de8c9debad1d?w=800&q=80&auto=format&fit=crop',
+      src: '/images/blog/innsbruck-festwochen-alte-musik/gallery-3.jpg',
       alt: 'Innsbruck Hofburg und Alpen',
       caption: 'Die Hofburg Innsbruck — zentraler Spielort des Festivals',
     },

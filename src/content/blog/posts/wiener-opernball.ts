@@ -4,10 +4,8 @@ export const post: FestivalPost = {
   slug: 'wiener-opernball',
   title: 'Wiener Opernball',
   subtitle: 'Das glamouröseste Ballereignis der Welt in der Wiener Staatsoper',
-  heroImage:
-    'https://images.unsplash.com/photo-1549060279-7e168fcee0c2?w=1600&q=85&auto=format&fit=crop',
-  thumbnailImage:
-    'https://images.unsplash.com/photo-1549060279-7e168fcee0c2?w=800&q=80&auto=format&fit=crop',
+  heroImage: '/images/blog/wiener-opernball/hero.jpg',
+  thumbnailImage: '/images/blog/wiener-opernball/thumb.jpg',
   publishDate: '2026-03-31',
   updatedDate: '2026-03-31',
   readingTime: 7,
@@ -74,17 +72,17 @@ export const post: FestivalPost = {
   ],
   gallery: [
     {
-      src: 'https://images.unsplash.com/photo-1549060279-7e168fcee0c2?w=800&q=80&auto=format&fit=crop',
+      src: '/images/blog/wiener-opernball/gallery-1.jpg',
       alt: 'Eleganter Ballsaal mit Kronleuchtern',
       caption: 'Prachtvoller Ballsaal der Wiener Staatsoper',
     },
     {
-      src: 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=800&q=80&auto=format&fit=crop',
+      src: '/images/blog/wiener-opernball/gallery-2.jpg',
       alt: 'Tanzpaare in Abendgarderobe auf einem Parkett',
       caption: 'Eleganz und Tradition auf dem berühmten Opernball-Parkett',
     },
     {
-      src: 'https://images.unsplash.com/photo-1465495976277-4387d4b0b4c6?w=800&q=80&auto=format&fit=crop',
+      src: '/images/blog/wiener-opernball/gallery-3.jpg',
       alt: 'Wiener Staatsoper bei Nacht beleuchtet',
       caption: 'Die illuminierte Wiener Staatsoper am Opernring',
     },

@@ -4,10 +4,8 @@ export const post: FestivalPost = {
   slug: 'tiroler-volksschauspiele-telfs',
   title: 'Tiroler Volksschauspiele Telfs',
   subtitle: 'Großes Volkstheater unter freiem Himmel — alle vier Jahre in Telfs',
-  heroImage:
-    'https://images.unsplash.com/photo-1503095396549-807759245b35?w=1600&q=85&auto=format&fit=crop',
-  thumbnailImage:
-    'https://images.unsplash.com/photo-1503095396549-807759245b35?w=800&q=80&auto=format&fit=crop',
+  heroImage: '/images/blog/tiroler-volksschauspiele-telfs/hero.jpg',
+  thumbnailImage: '/images/blog/tiroler-volksschauspiele-telfs/thumb.jpg',
   publishDate: '2026-04-01',
   updatedDate: '2026-04-01',
   readingTime: 6,
@@ -74,17 +72,17 @@ export const post: FestivalPost = {
   ],
   gallery: [
     {
-      src: 'https://images.unsplash.com/photo-1503095396549-807759245b35?w=800&q=80&auto=format&fit=crop',
+      src: '/images/blog/tiroler-volksschauspiele-telfs/gallery-1.jpg',
       alt: 'Freilichttheater mit großem Publikum',
       caption: 'Theater unter freiem Himmel — Volksschauspiele Telfs',
     },
     {
-      src: 'https://images.unsplash.com/photo-1460723237483-7a6dc9d0b212?w=800&q=80&auto=format&fit=crop',
+      src: '/images/blog/tiroler-volksschauspiele-telfs/gallery-2.jpg',
       alt: 'Historische Theaterszene mit Kostümen',
       caption: 'Aufwendige Kostüme und Bühnenbildner aus der Region',
     },
     {
-      src: 'https://images.unsplash.com/photo-1530103862676-de8c9debad1d?w=800&q=80&auto=format&fit=crop',
+      src: '/images/blog/tiroler-volksschauspiele-telfs/gallery-3.jpg',
       alt: 'Tiroler Bergdorf mit Inntal-Panorama',
       caption: 'Telfs im Inntal — Heimat der Volksschauspiele',
     },

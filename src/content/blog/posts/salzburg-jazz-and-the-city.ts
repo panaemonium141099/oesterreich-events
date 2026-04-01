@@ -4,10 +4,8 @@ export const post: FestivalPost = {
   slug: 'salzburg-jazz-and-the-city',
   title: 'Jazz & The City Salzburg',
   subtitle: 'Kostenloses Open-Air-Jazzfestival in den Gassen und Plätzen der Salzburger Altstadt',
-  heroImage:
-    'https://images.unsplash.com/photo-1415201364774-f6f0bb35f28f?w=1600&q=85&auto=format&fit=crop',
-  thumbnailImage:
-    'https://images.unsplash.com/photo-1415201364774-f6f0bb35f28f?w=800&q=80&auto=format&fit=crop',
+  heroImage: '/images/blog/salzburg-jazz-and-the-city/hero.jpg',
+  thumbnailImage: '/images/blog/salzburg-jazz-and-the-city/thumb.jpg',
   publishDate: '2026-04-01',
   updatedDate: '2026-04-01',
   readingTime: 5,
@@ -75,17 +73,17 @@ export const post: FestivalPost = {
   ],
   gallery: [
     {
-      src: 'https://images.unsplash.com/photo-1415201364774-f6f0bb35f28f?w=800&q=80&auto=format&fit=crop',
+      src: '/images/blog/salzburg-jazz-and-the-city/gallery-1.jpg',
       alt: 'Jazzmusiker beim Open-Air-Konzert',
       caption: 'Jazz unter freiem Himmel in der Altstadt',
     },
     {
-      src: 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=800&q=80&auto=format&fit=crop',
+      src: '/images/blog/salzburg-jazz-and-the-city/gallery-2.jpg',
       alt: 'Saxofonist im Rampenlicht',
       caption: 'Internationaler Jazz in intimer Atmosphäre',
     },
     {
-      src: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&q=80&auto=format&fit=crop',
+      src: '/images/blog/salzburg-jazz-and-the-city/gallery-3.jpg',
       alt: 'Salzburg Altstadt im Herbst',
       caption: 'Herbstliches Salzburg — ideale Kulisse für Jazz',
     },

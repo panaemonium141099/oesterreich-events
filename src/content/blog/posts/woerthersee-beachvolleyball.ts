@@ -4,10 +4,8 @@ export const post: FestivalPost = {
   slug: 'woerthersee-beachvolleyball',
   title: 'Wörthersee Beach Volleyball Grand Slam',
   subtitle: 'Weltsport am See – Beach Volleyball Elite am traumhaften Wörthersee',
-  heroImage:
-    'https://images.unsplash.com/photo-1612872087720-bb876e2e67d1?w=1600&q=85&auto=format&fit=crop',
-  thumbnailImage:
-    'https://images.unsplash.com/photo-1612872087720-bb876e2e67d1?w=800&q=80&auto=format&fit=crop',
+  heroImage: '/images/blog/woerthersee-beachvolleyball/hero.jpg',
+  thumbnailImage: '/images/blog/woerthersee-beachvolleyball/thumb.jpg',
   publishDate: '2026-04-01',
   updatedDate: '2026-04-01',
   readingTime: 6,
@@ -75,17 +73,17 @@ export const post: FestivalPost = {
   ],
   gallery: [
     {
-      src: 'https://images.unsplash.com/photo-1612872087720-bb876e2e67d1?w=800&q=80&auto=format&fit=crop',
+      src: '/images/blog/woerthersee-beachvolleyball/gallery-1.jpg',
       alt: 'Beach Volleyball Spielerinnen bei einem Turnier',
       caption: 'Weltklasse-Beach-Volleyball am Wörthersee',
     },
     {
-      src: 'https://images.unsplash.com/photo-1559827291-72ee739d0d9a?w=800&q=80&auto=format&fit=crop',
+      src: '/images/blog/woerthersee-beachvolleyball/gallery-2.jpg',
       alt: 'Beachvolleyball-Stadion mit voller Tribüne',
       caption: 'Vollbesetztes Stadion beim Grand Slam in Klagenfurt',
     },
     {
-      src: 'https://images.unsplash.com/photo-1501854140801-50d01698950b?w=800&q=80&auto=format&fit=crop',
+      src: '/images/blog/woerthersee-beachvolleyball/gallery-3.jpg',
       alt: 'Wörthersee-Panorama mit Bergen',
       caption: 'Die einzigartige Kulisse am Wörthersee',
     },

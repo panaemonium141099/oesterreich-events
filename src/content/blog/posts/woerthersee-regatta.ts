@@ -4,10 +4,8 @@ export const post: FestivalPost = {
   slug: 'woerthersee-regatta',
   title: 'Klagenfurter Wörthersee Regatta',
   subtitle: 'Segeln am schönsten See Kärntens – Regatta-Highlight mit Festesstimmung',
-  heroImage:
-    'https://images.unsplash.com/photo-1501854140801-50d01698950b?w=1600&q=85&auto=format&fit=crop',
-  thumbnailImage:
-    'https://images.unsplash.com/photo-1501854140801-50d01698950b?w=800&q=80&auto=format&fit=crop',
+  heroImage: '/images/blog/woerthersee-regatta/hero.jpg',
+  thumbnailImage: '/images/blog/woerthersee-regatta/thumb.jpg',
   publishDate: '2026-04-01',
   updatedDate: '2026-04-01',
   readingTime: 6,
@@ -74,17 +72,17 @@ export const post: FestivalPost = {
   ],
   gallery: [
     {
-      src: 'https://images.unsplash.com/photo-1501854140801-50d01698950b?w=800&q=80&auto=format&fit=crop',
+      src: '/images/blog/woerthersee-regatta/gallery-1.jpg',
       alt: 'Segelboote auf einem klaren blauen See',
       caption: 'Regatta auf dem tiefblauen Wörthersee',
     },
     {
-      src: 'https://images.unsplash.com/photo-1563289929-6ee4ab7f5b49?w=800&q=80&auto=format&fit=crop',
+      src: '/images/blog/woerthersee-regatta/gallery-2.jpg',
       alt: 'Segelboote im Hafenbecken',
       caption: 'Startvorbereitungen im Hafen des Segelclubs',
     },
     {
-      src: 'https://images.unsplash.com/photo-1559827291-72ee739d0d9a?w=800&q=80&auto=format&fit=crop',
+      src: '/images/blog/woerthersee-regatta/gallery-3.jpg',
       alt: 'Panorama eines Sees mit Bergen',
       caption: 'Der Wörthersee – eines der schönsten Segelgewässer Europas',
     },

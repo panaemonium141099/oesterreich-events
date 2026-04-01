@@ -4,10 +4,8 @@ export const post: FestivalPost = {
   slug: 'wiener-genussfestival',
   title: 'Wiener Genussfestival',
   subtitle: 'Österreichs größtes Kulinarik-Festival im Wiener Stadtpark',
-  heroImage:
-    'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=1600&q=85&auto=format&fit=crop',
-  thumbnailImage:
-    'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=800&q=80&auto=format&fit=crop',
+  heroImage: '/images/blog/wiener-genussfestival/hero.jpg',
+  thumbnailImage: '/images/blog/wiener-genussfestival/thumb.jpg',
   publishDate: '2026-03-31',
   updatedDate: '2026-03-31',
   readingTime: 5,
@@ -74,17 +72,17 @@ export const post: FestivalPost = {
   ],
   gallery: [
     {
-      src: 'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=800&q=80&auto=format&fit=crop',
+      src: '/images/blog/wiener-genussfestival/gallery-1.jpg',
       alt: 'Festlich gedeckter Tisch mit österreichischen Spezialitäten',
       caption: 'Österreichische Kulinarik auf höchstem Niveau',
     },
     {
-      src: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&q=80&auto=format&fit=crop',
+      src: '/images/blog/wiener-genussfestival/gallery-2.jpg',
       alt: 'Weingläser und Weinflaschen bei einem Weinfestival',
       caption: 'Österreichische Weine von den besten Winzern',
     },
     {
-      src: 'https://images.unsplash.com/photo-1551218808-94e220e084d2?w=800&q=80&auto=format&fit=crop',
+      src: '/images/blog/wiener-genussfestival/gallery-3.jpg',
       alt: 'Koch bei einer Live-Kochshow auf einer Bühne',
       caption: 'Kochshows mit Österreichs besten Köchen',
     },

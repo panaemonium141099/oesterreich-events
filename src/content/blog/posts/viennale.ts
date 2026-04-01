@@ -4,10 +4,8 @@ export const post: FestivalPost = {
   slug: 'viennale',
   title: 'Viennale',
   subtitle: 'Wiens Internationales Filmfestival – Kino als Ereignis im Oktober',
-  heroImage:
-    'https://images.unsplash.com/photo-1478720568477-152d9b164e26?w=1600&q=85&auto=format&fit=crop',
-  thumbnailImage:
-    'https://images.unsplash.com/photo-1478720568477-152d9b164e26?w=800&q=80&auto=format&fit=crop',
+  heroImage: '/images/blog/viennale/hero.jpg',
+  thumbnailImage: '/images/blog/viennale/thumb.jpg',
   publishDate: '2026-03-31',
   updatedDate: '2026-03-31',
   readingTime: 6,
@@ -74,17 +72,17 @@ export const post: FestivalPost = {
   ],
   gallery: [
     {
-      src: 'https://images.unsplash.com/photo-1478720568477-152d9b164e26?w=800&q=80&auto=format&fit=crop',
+      src: '/images/blog/viennale/gallery-1.jpg',
       alt: 'Historisches Kinogebäude von außen bei Nacht',
       caption: 'Das Gartenbaukino – Wiens schönste Filmspielstätte',
     },
     {
-      src: 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=800&q=80&auto=format&fit=crop',
+      src: '/images/blog/viennale/gallery-2.jpg',
       alt: 'Filmvorführung in einem vollen Kinosaal',
       caption: 'Cinephiles Publikum bei der Viennale',
     },
     {
-      src: 'https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=800&q=80&auto=format&fit=crop',
+      src: '/images/blog/viennale/gallery-3.jpg',
       alt: 'Filmrolle und Kino-Ausrüstung als Symbol',
       caption: 'Zwei Wochen internationales Kino in Wien',
     },

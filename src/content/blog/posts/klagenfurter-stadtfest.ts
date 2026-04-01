@@ -4,10 +4,8 @@ export const post: FestivalPost = {
   slug: 'klagenfurter-stadtfest',
   title: 'Klagenfurter Stadtfest',
   subtitle: 'Drei Tage Lebensfreude am Wörthersee – das größte Stadtfest Kärntens',
-  heroImage:
-    'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=1600&q=85&auto=format&fit=crop',
-  thumbnailImage:
-    'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=800&q=80&auto=format&fit=crop',
+  heroImage: '/images/blog/klagenfurter-stadtfest/hero.jpg',
+  thumbnailImage: '/images/blog/klagenfurter-stadtfest/thumb.jpg',
   publishDate: '2026-04-01',
   updatedDate: '2026-04-01',
   readingTime: 6,
@@ -74,17 +72,17 @@ export const post: FestivalPost = {
   ],
   gallery: [
     {
-      src: 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=800&q=80&auto=format&fit=crop',
+      src: '/images/blog/klagenfurter-stadtfest/gallery-1.jpg',
       alt: 'Stadtfest mit Bühne und Besuchermenge',
       caption: 'Tausende feiern beim Klagenfurter Stadtfest in der Altstadt',
     },
     {
-      src: 'https://images.unsplash.com/photo-1510915361894-db8b60106cb1?w=800&q=80&auto=format&fit=crop',
+      src: '/images/blog/klagenfurter-stadtfest/gallery-2.jpg',
       alt: 'Konzert auf Freilichtbühne',
       caption: 'Livekonzerte unter freiem Himmel in Klagenfurt',
     },
     {
-      src: 'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=800&q=80&auto=format&fit=crop',
+      src: '/images/blog/klagenfurter-stadtfest/gallery-3.jpg',
       alt: 'Gastrostände mit kärntnerischen Spezialitäten',
       caption: 'Kärntner Küche auf dem Stadtfest',
     },

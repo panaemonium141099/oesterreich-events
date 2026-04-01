@@ -4,10 +4,8 @@ export const post: FestivalPost = {
   slug: 'vienna-city-marathon',
   title: 'Vienna City Marathon',
   subtitle: 'Einer der schönsten Marathons Europas – durch das Herz der Weltkulturstadt Wien',
-  heroImage:
-    'https://images.unsplash.com/photo-1513593771513-7b58b6c4af38?w=1600&q=85&auto=format&fit=crop',
-  thumbnailImage:
-    'https://images.unsplash.com/photo-1513593771513-7b58b6c4af38?w=800&q=80&auto=format&fit=crop',
+  heroImage: '/images/blog/vienna-city-marathon/hero.jpg',
+  thumbnailImage: '/images/blog/vienna-city-marathon/thumb.jpg',
   publishDate: '2026-03-31',
   updatedDate: '2026-03-31',
   readingTime: 6,
@@ -74,17 +72,17 @@ export const post: FestivalPost = {
   ],
   gallery: [
     {
-      src: 'https://images.unsplash.com/photo-1513593771513-7b58b6c4af38?w=800&q=80&auto=format&fit=crop',
+      src: '/images/blog/vienna-city-marathon/gallery-1.jpg',
       alt: 'Läufer beim Marathon in einer Stadtkulisse',
       caption: 'Tausende Läufer durch die Wiener Innenstadt',
     },
     {
-      src: 'https://images.unsplash.com/photo-1571008887538-b36bb32f4571?w=800&q=80&auto=format&fit=crop',
+      src: '/images/blog/vienna-city-marathon/gallery-2.jpg',
       alt: 'Marathon Zieleinlauf mit jubelndem Publikum',
       caption: 'Der emotionale Zieleinlauf am Heldenplatz',
     },
     {
-      src: 'https://images.unsplash.com/photo-1530549387789-4c1017266635?w=800&q=80&auto=format&fit=crop',
+      src: '/images/blog/vienna-city-marathon/gallery-3.jpg',
       alt: 'Läufer an einem Verpflegungspunkt beim Marathon',
       caption: 'Wasser und Energie an den Verpflegungspunkten',
     },

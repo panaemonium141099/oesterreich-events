@@ -4,10 +4,8 @@ export const post: FestivalPost = {
   slug: 'grazer-christkindlmarkt',
   title: 'Grazer Christkindlmarkt',
   subtitle: 'Advent auf dem Hauptplatz – der romantischste Weihnachtsmarkt der Steiermark',
-  heroImage:
-    'https://images.unsplash.com/photo-1512909006721-3d6018887383?w=1600&q=85&auto=format&fit=crop',
-  thumbnailImage:
-    'https://images.unsplash.com/photo-1512909006721-3d6018887383?w=800&q=80&auto=format&fit=crop',
+  heroImage: '/images/blog/grazer-christkindlmarkt/hero.jpg',
+  thumbnailImage: '/images/blog/grazer-christkindlmarkt/thumb.jpg',
   publishDate: '2026-04-01',
   updatedDate: '2026-04-01',
   readingTime: 6,
@@ -74,17 +72,17 @@ export const post: FestivalPost = {
   ],
   gallery: [
     {
-      src: 'https://images.unsplash.com/photo-1512909006721-3d6018887383?w=800&q=80&auto=format&fit=crop',
+      src: '/images/blog/grazer-christkindlmarkt/gallery-1.jpg',
       alt: 'Weihnachtsmarkt mit Lichtern und Ständen',
       caption: 'Adventstimmung auf dem Grazer Hauptplatz',
     },
     {
-      src: 'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=800&q=80&auto=format&fit=crop',
+      src: '/images/blog/grazer-christkindlmarkt/gallery-2.jpg',
       alt: 'Glühweinstand auf Weihnachtsmarkt',
       caption: 'Steirischer Punsch in charakteristischen Keramikbechern',
     },
     {
-      src: 'https://images.unsplash.com/photo-1482517967863-00e15c9b44be?w=800&q=80&auto=format&fit=crop',
+      src: '/images/blog/grazer-christkindlmarkt/gallery-3.jpg',
       alt: 'Beleuchtetes Rathaus mit Weihnachtsschmuck',
       caption: 'Das illuminierte Grazer Rathaus als märchenhafte Kulisse',
     },

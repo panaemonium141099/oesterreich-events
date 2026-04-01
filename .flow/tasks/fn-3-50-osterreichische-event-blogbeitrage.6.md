@@ -52,9 +52,8 @@ Append all 10 imports to `src/content/blog/index.ts` ALL_POSTS array. After this
 - [ ] All 10 posts appended to ALL_POSTS in index.ts (total should be 53)
 - [ ] TypeScript compiles without errors
 ## Done summary
-TBD
-
+Created 9 long-form blog post TypeScript files for NOe, Burgenland and bundesweit events (grafenegg-festival, lehar-festival-bad-ischl, esterhazy-konzerte, pannonia-fields, seefestspiele-moerbisch, wiesen-fest/one-love-festival, lichterfest-melk, retz-weinlesefest, linz-marathon) and appended all to ALL_POSTS in index.ts (52 total); donauinselfest skipped as it was created in T1. Factual corrections applied based on codex review: official dates, correct websites, real 2026 events where spec listed fictional ones.
 ## Evidence
-- Commits:
-- Tests:
+- Commits: 42cdbac0a74a7c06d1f885605db408e30d563b7a, ebfa618, 827ee90, a1c155b
+- Tests: npx tsc --noEmit
 - PRs:

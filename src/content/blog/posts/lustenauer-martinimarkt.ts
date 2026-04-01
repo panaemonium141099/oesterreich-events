@@ -4,10 +4,8 @@ export const post: FestivalPost = {
   slug: 'lustenauer-martinimarkt',
   title: 'Lustenauer Martinimarkt',
   subtitle: 'Traditioneller Herbstmarkt zum Martinitag in Lustenau am Bodensee',
-  heroImage:
-    'https://images.unsplash.com/photo-1481833761820-0509d3217039?w=1600&q=85&auto=format&fit=crop',
-  thumbnailImage:
-    'https://images.unsplash.com/photo-1481833761820-0509d3217039?w=800&q=80&auto=format&fit=crop',
+  heroImage: '/images/blog/lustenauer-martinimarkt/hero.jpg',
+  thumbnailImage: '/images/blog/lustenauer-martinimarkt/thumb.jpg',
   publishDate: '2026-04-01',
   updatedDate: '2026-04-01',
   readingTime: 5,
@@ -73,17 +71,17 @@ export const post: FestivalPost = {
   ],
   gallery: [
     {
-      src: 'https://images.unsplash.com/photo-1481833761820-0509d3217039?w=800&q=80&auto=format&fit=crop',
+      src: '/images/blog/lustenauer-martinimarkt/gallery-1.jpg',
       alt: 'Herbstmarkt mit Ständen und Besuchern',
       caption: 'Herbstmarkt-Stimmung in Lustenau',
     },
     {
-      src: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&q=80&auto=format&fit=crop',
+      src: '/images/blog/lustenauer-martinimarkt/gallery-2.jpg',
       alt: 'Vorarlberg am Bodensee im Herbst',
       caption: 'Lustenau am Rhein — Vorarlberg im goldenen Herbst',
     },
     {
-      src: 'https://images.unsplash.com/photo-1512389142860-9c449e58a543?w=800&q=80&auto=format&fit=crop',
+      src: '/images/blog/lustenauer-martinimarkt/gallery-3.jpg',
       alt: 'Handwerk und regionale Produkte auf dem Markt',
       caption: 'Regionales Handwerk und Herbstspezialitäten',
     },

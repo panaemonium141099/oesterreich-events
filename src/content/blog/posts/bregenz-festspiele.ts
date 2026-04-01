@@ -4,10 +4,8 @@ export const post: FestivalPost = {
   slug: 'bregenz-festspiele',
   title: 'Bregenzer Festspiele',
   subtitle: 'Die weltberühmte Seebühne — Oper auf dem Bodensee',
-  heroImage:
-    'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=1600&q=85&auto=format&fit=crop',
-  thumbnailImage:
-    'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&q=80&auto=format&fit=crop',
+  heroImage: '/images/blog/bregenz-festspiele/hero.jpg',
+  thumbnailImage: '/images/blog/bregenz-festspiele/thumb.jpg',
   publishDate: '2026-04-01',
   updatedDate: '2026-04-01',
   readingTime: 7,
@@ -75,17 +73,17 @@ export const post: FestivalPost = {
   ],
   gallery: [
     {
-      src: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&q=80&auto=format&fit=crop',
+      src: '/images/blog/bregenz-festspiele/gallery-1.jpg',
       alt: 'Opernbühne mit Lichtern über dem See',
       caption: 'Die Seebühne — einzigartig in der Welt',
     },
     {
-      src: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&q=80&auto=format&fit=crop',
+      src: '/images/blog/bregenz-festspiele/gallery-2.jpg',
       alt: 'Bodensee und Alpenpanorama im Abendlicht',
       caption: 'Kulisse ohne Gleichen: Bodensee und Alpen',
     },
     {
-      src: 'https://images.unsplash.com/photo-1518998053901-5348d3961a04?w=800&q=80&auto=format&fit=crop',
+      src: '/images/blog/bregenz-festspiele/gallery-3.jpg',
       alt: 'Opernaufführung mit großem Ensemble',
       caption: 'Weltklasse-Oper in einer unvergesslichen Atmosphäre',
     },

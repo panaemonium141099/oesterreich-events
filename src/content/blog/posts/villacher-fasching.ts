@@ -4,10 +4,8 @@ export const post: FestivalPost = {
   slug: 'villacher-fasching',
   title: 'Villacher Fasching',
   subtitle: 'Österreichs bekanntester Fasching – bunte Narren, Gaudi und kärntnerischer Humor',
-  heroImage:
-    'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1600&q=85&auto=format&fit=crop',
-  thumbnailImage:
-    'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&q=80&auto=format&fit=crop',
+  heroImage: '/images/blog/villacher-fasching/hero.jpg',
+  thumbnailImage: '/images/blog/villacher-fasching/thumb.jpg',
   publishDate: '2026-04-01',
   updatedDate: '2026-04-01',
   readingTime: 6,
@@ -74,17 +72,17 @@ export const post: FestivalPost = {
   ],
   gallery: [
     {
-      src: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&q=80&auto=format&fit=crop',
+      src: '/images/blog/villacher-fasching/gallery-1.jpg',
       alt: 'Farbenfrohe Faschingskostüme auf einem Umzug',
       caption: 'Prächtige Kostüme beim Villacher Faschingsumzug',
     },
     {
-      src: 'https://images.unsplash.com/photo-1544636331-e26879cd4d9b?w=800&q=80&auto=format&fit=crop',
+      src: '/images/blog/villacher-fasching/gallery-2.jpg',
       alt: 'Feierliche Ballveranstaltung mit Musik',
       caption: 'Faschingsbälle im Kongresshaus Villach',
     },
     {
-      src: 'https://images.unsplash.com/photo-1513593771513-7b58b6c4af38?w=800&q=80&auto=format&fit=crop',
+      src: '/images/blog/villacher-fasching/gallery-3.jpg',
       alt: 'Menschenmenge auf einer Stadtstraße beim Karneval',
       caption: 'Tausende Narrinnen und Narren auf den Straßen Villachs',
     },

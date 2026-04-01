@@ -4,10 +4,8 @@ export const post: FestivalPost = {
   slug: 'snowbombing-mayrhofen',
   title: 'Snowbombing Festival Mayrhofen',
   subtitle: 'Das weltberühmte Schneefestival: Electronic Music, Live-Acts und Skifahren in den Zillertaler Alpen',
-  heroImage:
-    'https://images.unsplash.com/photo-1516912481808-3406841bd33c?w=1600&q=85&auto=format&fit=crop',
-  thumbnailImage:
-    'https://images.unsplash.com/photo-1516912481808-3406841bd33c?w=800&q=80&auto=format&fit=crop',
+  heroImage: '/images/blog/snowbombing-mayrhofen/hero.jpg',
+  thumbnailImage: '/images/blog/snowbombing-mayrhofen/thumb.jpg',
   publishDate: '2026-04-01',
   updatedDate: '2026-04-01',
   readingTime: 6,
@@ -76,17 +74,17 @@ export const post: FestivalPost = {
   ],
   gallery: [
     {
-      src: 'https://images.unsplash.com/photo-1516912481808-3406841bd33c?w=800&q=80&auto=format&fit=crop',
+      src: '/images/blog/snowbombing-mayrhofen/gallery-1.jpg',
       alt: 'Skifahrer auf verschneitem Hang',
       caption: 'Skifahren tagsüber — Musik bis in die Nacht',
     },
     {
-      src: 'https://images.unsplash.com/photo-1571935441008-e6f08abb7551?w=800&q=80&auto=format&fit=crop',
+      src: '/images/blog/snowbombing-mayrhofen/gallery-2.jpg',
       alt: 'DJ vor jubelndem Publikum',
       caption: 'Worldclass-DJs beim Snowbombing Mayrhofen',
     },
     {
-      src: 'https://images.unsplash.com/photo-1551698618-1dfe5d97d256?w=800&q=80&auto=format&fit=crop',
+      src: '/images/blog/snowbombing-mayrhofen/gallery-3.jpg',
       alt: 'Zillertaler Alpen Winterpanorama',
       caption: 'Das Zillertal — Bühne für das weltweit beste Schneefestival',
     },

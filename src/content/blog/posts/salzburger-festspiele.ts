@@ -4,10 +4,8 @@ export const post: FestivalPost = {
   slug: 'salzburger-festspiele',
   title: 'Salzburger Festspiele',
   subtitle: 'Das renommierteste Klassikfestival der Welt im Herzen Salzburgs',
-  heroImage:
-    'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=1600&q=85&auto=format&fit=crop',
-  thumbnailImage:
-    'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&q=80&auto=format&fit=crop',
+  heroImage: '/images/blog/salzburger-festspiele/hero.jpg',
+  thumbnailImage: '/images/blog/salzburger-festspiele/thumb.jpg',
   publishDate: '2026-04-01',
   updatedDate: '2026-04-01',
   readingTime: 7,
@@ -76,17 +74,17 @@ export const post: FestivalPost = {
   ],
   gallery: [
     {
-      src: 'https://images.unsplash.com/photo-1518998053901-5348d3961a04?w=800&q=80&auto=format&fit=crop',
+      src: '/images/blog/salzburger-festspiele/gallery-1.jpg',
       alt: 'Klassische Konzerthalle mit Publikum',
       caption: 'Weltklasse-Klassik in historischer Kulisse',
     },
     {
-      src: 'https://images.unsplash.com/photo-1571935441008-e6f08abb7551?w=800&q=80&auto=format&fit=crop',
+      src: '/images/blog/salzburger-festspiele/gallery-2.jpg',
       alt: 'Orchester auf großer Bühne',
       caption: 'Die Wiener und Berliner Philharmoniker im Grossen Festspielhaus',
     },
     {
-      src: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&q=80&auto=format&fit=crop',
+      src: '/images/blog/salzburger-festspiele/gallery-3.jpg',
       alt: 'Salzburg Stadtpanorama mit Festung',
       caption: 'Salzburg — die Stadt, die zum Festival wird',
     },

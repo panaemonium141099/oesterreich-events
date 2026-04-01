@@ -4,10 +4,8 @@ export const post: FestivalPost = {
   slug: 'grafenegg-festival',
   title: 'Grafenegg Festival 2026',
   subtitle: 'Klassik unter freiem Himmel im Herz Niederösterreichs',
-  heroImage:
-    'https://images.unsplash.com/photo-1507838153414-b4b713384a76?w=1600&q=85&auto=format&fit=crop',
-  thumbnailImage:
-    'https://images.unsplash.com/photo-1507838153414-b4b713384a76?w=800&q=80&auto=format&fit=crop',
+  heroImage: '/images/blog/grafenegg-festival/hero.jpg',
+  thumbnailImage: '/images/blog/grafenegg-festival/thumb.jpg',
   publishDate: '2026-04-01',
   updatedDate: '2026-04-01',
   readingTime: 6,
@@ -75,17 +73,17 @@ export const post: FestivalPost = {
   ],
   gallery: [
     {
-      src: 'https://images.unsplash.com/photo-1507838153414-b4b713384a76?w=800&q=80&auto=format&fit=crop',
+      src: '/images/blog/grafenegg-festival/gallery-1.jpg',
       alt: 'Klassikkonzert im Freien mit Orchester',
       caption: 'Weltklasse-Orchester unter dem Sternenhimmel',
     },
     {
-      src: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=800&q=80&auto=format&fit=crop',
+      src: '/images/blog/grafenegg-festival/gallery-2.jpg',
       alt: 'Konzertpublikum in einem Schlosspark',
       caption: 'Stimmungsvoller Abend im Schlosspark Grafenegg',
     },
     {
-      src: 'https://images.unsplash.com/photo-1465847899084-d164df4dedc6?w=800&q=80&auto=format&fit=crop',
+      src: '/images/blog/grafenegg-festival/gallery-3.jpg',
       alt: 'Historisches Schloss bei Nacht beleuchtet',
       caption: 'Schloss Grafenegg als stimmungsvolle Festivalkulisse',
     },

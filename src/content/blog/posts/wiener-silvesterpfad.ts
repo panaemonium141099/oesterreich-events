@@ -4,10 +4,8 @@ export const post: FestivalPost = {
   slug: 'wiener-silvesterpfad',
   title: 'Wiener Silvesterpfad',
   subtitle: 'Die größte Open-Air-Silvesterparty Europas – kostenlos in der Innenstadt',
-  heroImage:
-    'https://images.unsplash.com/photo-1467810563316-b5476525c0f9?w=1600&q=85&auto=format&fit=crop',
-  thumbnailImage:
-    'https://images.unsplash.com/photo-1467810563316-b5476525c0f9?w=800&q=80&auto=format&fit=crop',
+  heroImage: '/images/blog/wiener-silvesterpfad/hero.jpg',
+  thumbnailImage: '/images/blog/wiener-silvesterpfad/thumb.jpg',
   publishDate: '2026-03-31',
   updatedDate: '2026-03-31',
   readingTime: 5,
@@ -74,17 +72,17 @@ export const post: FestivalPost = {
   ],
   gallery: [
     {
-      src: 'https://images.unsplash.com/photo-1467810563316-b5476525c0f9?w=800&q=80&auto=format&fit=crop',
+      src: '/images/blog/wiener-silvesterpfad/gallery-1.jpg',
       alt: 'Silvester Feuerwerk über einer Stadt bei Nacht',
       caption: 'Spektakuläres Mitternachts-Feuerwerk über Wien',
     },
     {
-      src: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=800&q=80&auto=format&fit=crop',
+      src: '/images/blog/wiener-silvesterpfad/gallery-2.jpg',
       alt: 'Menschenmenge bei einer Silvesterfeier',
       caption: 'Bis zu 600.000 Besucher feiern gemeinsam',
     },
     {
-      src: 'https://images.unsplash.com/photo-1504196606672-aef5c9cefc92?w=800&q=80&auto=format&fit=crop',
+      src: '/images/blog/wiener-silvesterpfad/gallery-3.jpg',
       alt: 'Beleuchtete Wiener Innenstadt bei Nacht',
       caption: 'Die Wiener Innenstadt erstrahlt in festlichem Glanz',
     },

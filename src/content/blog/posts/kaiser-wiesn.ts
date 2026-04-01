@@ -4,10 +4,8 @@ export const post: FestivalPost = {
   slug: 'kaiser-wiesn',
   title: 'Kaiser Wiesn – Wiener Wiesn-Fest',
   subtitle: 'Das Wiener Oktoberfest im Prater – Bier, Dirndl und Wiener Charme',
-  heroImage:
-    'https://images.unsplash.com/photo-1566842600175-97dca489844f?w=1600&q=85&auto=format&fit=crop',
-  thumbnailImage:
-    'https://images.unsplash.com/photo-1566842600175-97dca489844f?w=800&q=80&auto=format&fit=crop',
+  heroImage: '/images/blog/kaiser-wiesn/hero.jpg',
+  thumbnailImage: '/images/blog/kaiser-wiesn/thumb.jpg',
   publishDate: '2026-03-31',
   updatedDate: '2026-03-31',
   readingTime: 5,
@@ -74,17 +72,17 @@ export const post: FestivalPost = {
   ],
   gallery: [
     {
-      src: 'https://images.unsplash.com/photo-1566842600175-97dca489844f?w=800&q=80&auto=format&fit=crop',
+      src: '/images/blog/kaiser-wiesn/gallery-1.jpg',
       alt: 'Oktoberfest Bierzelt mit fröhlichen Gästen',
       caption: 'Ausgelassene Stimmung im Bierzelt der Kaiserwiesn',
     },
     {
-      src: 'https://images.unsplash.com/photo-1527576539890-dfa815648363?w=800&q=80&auto=format&fit=crop',
+      src: '/images/blog/kaiser-wiesn/gallery-2.jpg',
       alt: 'Maßkrüge beim Bierzeltfest',
       caption: 'Ein Prosit der Gemütlichkeit – Maß-Kultur in Wien',
     },
     {
-      src: 'https://images.unsplash.com/photo-1504032434569-72eca96a5a00?w=800&q=80&auto=format&fit=crop',
+      src: '/images/blog/kaiser-wiesn/gallery-3.jpg',
       alt: 'Festgelände mit bunten Lichtern und Fahrgeschäften',
       caption: 'Abendstimmung auf dem Festgelände im Prater',
     },

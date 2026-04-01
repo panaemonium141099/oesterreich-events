@@ -4,10 +4,8 @@ export const post: FestivalPost = {
   slug: 'salzburger-christkindlmarkt',
   title: 'Salzburger Christkindlmarkt',
   subtitle: 'Adventzauber auf dem Domplatz — einer der ältesten Weihnachtsmärkte der Welt',
-  heroImage:
-    'https://images.unsplash.com/photo-1513553404607-988bf2703777?w=1600&q=85&auto=format&fit=crop',
-  thumbnailImage:
-    'https://images.unsplash.com/photo-1513553404607-988bf2703777?w=800&q=80&auto=format&fit=crop',
+  heroImage: '/images/blog/salzburger-christkindlmarkt/hero.jpg',
+  thumbnailImage: '/images/blog/salzburger-christkindlmarkt/thumb.jpg',
   publishDate: '2026-04-01',
   updatedDate: '2026-04-01',
   readingTime: 5,
@@ -74,17 +72,17 @@ export const post: FestivalPost = {
   ],
   gallery: [
     {
-      src: 'https://images.unsplash.com/photo-1513553404607-988bf2703777?w=800&q=80&auto=format&fit=crop',
+      src: '/images/blog/salzburger-christkindlmarkt/gallery-1.jpg',
       alt: 'Adventmarkt mit Lichterketten und Tannen',
       caption: 'Weihnachtliche Stimmung in der historischen Altstadt',
     },
     {
-      src: 'https://images.unsplash.com/photo-1607344645866-009c320b63e0?w=800&q=80&auto=format&fit=crop',
+      src: '/images/blog/salzburger-christkindlmarkt/gallery-2.jpg',
       alt: 'Glühwein und Weihnachtsdekoration',
       caption: 'Heißer Punsch und Gebäck — unverzichtbar bei Kälte',
     },
     {
-      src: 'https://images.unsplash.com/photo-1543933441-92abb7bd2ca2?w=800&q=80&auto=format&fit=crop',
+      src: '/images/blog/salzburger-christkindlmarkt/gallery-3.jpg',
       alt: 'Handgemachtes Kunsthandwerk am Markt',
       caption: 'Regionales Kunsthandwerk und Salzburger Spezialitäten',
     },

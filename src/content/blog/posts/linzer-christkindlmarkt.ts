@@ -4,10 +4,8 @@ export const post: FestivalPost = {
   slug: 'linzer-christkindlmarkt',
   title: 'Linzer Christkindlmarkt',
   subtitle: 'Weihnachtszauber am Hauptplatz — einer der schönsten Märkte Oberösterreichs',
-  heroImage:
-    'https://images.unsplash.com/photo-1544450671-5975f59e3491?w=1600&q=85&auto=format&fit=crop',
-  thumbnailImage:
-    'https://images.unsplash.com/photo-1544450671-5975f59e3491?w=800&q=80&auto=format&fit=crop',
+  heroImage: '/images/blog/linzer-christkindlmarkt/hero.jpg',
+  thumbnailImage: '/images/blog/linzer-christkindlmarkt/thumb.jpg',
   publishDate: '2026-04-01',
   updatedDate: '2026-04-01',
   readingTime: 5,
@@ -73,17 +71,17 @@ export const post: FestivalPost = {
   ],
   gallery: [
     {
-      src: 'https://images.unsplash.com/photo-1544450671-5975f59e3491?w=800&q=80&auto=format&fit=crop',
+      src: '/images/blog/linzer-christkindlmarkt/gallery-1.jpg',
       alt: 'Weihnachtsmarkt mit Lichtern und Schnee',
       caption: 'Wintermärchen am Linzer Hauptplatz',
     },
     {
-      src: 'https://images.unsplash.com/photo-1512389142860-9c449e58a543?w=800&q=80&auto=format&fit=crop',
+      src: '/images/blog/linzer-christkindlmarkt/gallery-2.jpg',
       alt: 'Glühwein und Weihnachtsmarktstand',
       caption: 'Glühwein, Punsch und weihnachtliche Spezialitäten',
     },
     {
-      src: 'https://images.unsplash.com/photo-1482517967863-00e15c9b44be?w=800&q=80&auto=format&fit=crop',
+      src: '/images/blog/linzer-christkindlmarkt/gallery-3.jpg',
       alt: 'Festlich beleuchteter Platz zur Weihnachtszeit',
       caption: 'Tausende Lichter verwandeln den Hauptplatz',
     },

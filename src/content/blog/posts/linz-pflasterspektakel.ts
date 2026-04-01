@@ -4,10 +4,8 @@ export const post: FestivalPost = {
   slug: 'linz-pflasterspektakel',
   title: 'Linz Pflasterspektakel',
   subtitle: 'Europas größtes Straßenkunstfestival mitten im Herzen von Linz',
-  heroImage:
-    'https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?w=1600&q=85&auto=format&fit=crop',
-  thumbnailImage:
-    'https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?w=800&q=80&auto=format&fit=crop',
+  heroImage: '/images/blog/linz-pflasterspektakel/hero.jpg',
+  thumbnailImage: '/images/blog/linz-pflasterspektakel/thumb.jpg',
   publishDate: '2026-04-01',
   updatedDate: '2026-04-01',
   readingTime: 6,
@@ -76,17 +74,17 @@ export const post: FestivalPost = {
   ],
   gallery: [
     {
-      src: 'https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?w=800&q=80&auto=format&fit=crop',
+      src: '/images/blog/linz-pflasterspektakel/gallery-1.jpg',
       alt: 'Straßenkünstler bei Akrobatikvorführung',
       caption: 'Weltklasseartistik auf dem Linzer Hauptplatz',
     },
     {
-      src: 'https://images.unsplash.com/photo-1560523159-4a9692d222ef?w=800&q=80&auto=format&fit=crop',
+      src: '/images/blog/linz-pflasterspektakel/gallery-2.jpg',
       alt: 'Feuershow bei Nacht',
       caption: 'Feuershow und Lichtkunst begeistern das Publikum',
     },
     {
-      src: 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=800&q=80&auto=format&fit=crop',
+      src: '/images/blog/linz-pflasterspektakel/gallery-3.jpg',
       alt: 'Innenstadt mit Zuschauern beim Straßenfestival',
       caption: 'Die Linzer Innenstadt wird zur Freilichtbühne',
     },

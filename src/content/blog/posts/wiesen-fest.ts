@@ -4,10 +4,8 @@ export const post: FestivalPost = {
   slug: 'wiesen-fest',
   title: 'One Love Festival Wiesen 2026',
   subtitle: 'Reggae, Ska und positive Vibes — das Weltmusik-Highlight im Burgenland',
-  heroImage:
-    'https://images.unsplash.com/photo-1540039155733-5bb30b53aa14?w=1600&q=85&auto=format&fit=crop',
-  thumbnailImage:
-    'https://images.unsplash.com/photo-1540039155733-5bb30b53aa14?w=800&q=80&auto=format&fit=crop',
+  heroImage: '/images/blog/wiesen-fest/hero.jpg',
+  thumbnailImage: '/images/blog/wiesen-fest/thumb.jpg',
   publishDate: '2026-04-01',
   updatedDate: '2026-04-01',
   readingTime: 6,
@@ -73,17 +71,17 @@ export const post: FestivalPost = {
   ],
   gallery: [
     {
-      src: 'https://images.unsplash.com/photo-1540039155733-5bb30b53aa14?w=800&q=80&auto=format&fit=crop',
+      src: '/images/blog/wiesen-fest/gallery-1.jpg',
       alt: 'Reggae-Band auf einer Outdoor-Festivalbühne',
       caption: 'One Love — Reggae under the Burgenland Sky',
     },
     {
-      src: 'https://images.unsplash.com/photo-1429962714451-bb934ecdc4ec?w=800&q=80&auto=format&fit=crop',
+      src: '/images/blog/wiesen-fest/gallery-2.jpg',
       alt: 'Jubelnde Festivalmenge bei einem Reggae-Konzert',
       caption: 'Begeisterte Fans beim One Love Festival in Wiesen',
     },
     {
-      src: 'https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?w=800&q=80&auto=format&fit=crop',
+      src: '/images/blog/wiesen-fest/gallery-3.jpg',
       alt: 'Abendstimmung auf einem Outdoor-Festival',
       caption: 'Festivalabend im Burgenland — unvergessliche Momente',
     },

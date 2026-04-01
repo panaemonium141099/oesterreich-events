@@ -4,10 +4,8 @@ export const post: FestivalPost = {
   slug: 'donauinselfest-2026',
   title: 'Donauinselfest 2026',
   subtitle: 'Das größte kostenlose Open-Air-Festival der Welt kehrt nach Wien zurück',
-  heroImage:
-    'https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?w=1600&q=85&auto=format&fit=crop',
-  thumbnailImage:
-    'https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?w=800&q=80&auto=format&fit=crop',
+  heroImage: '/images/blog/donauinselfest-2026/hero.jpg',
+  thumbnailImage: '/images/blog/donauinselfest-2026/thumb.jpg',
   publishDate: '2026-03-20',
   updatedDate: '2026-03-31',
   readingTime: 5,
@@ -84,17 +82,17 @@ export const post: FestivalPost = {
   ],
   gallery: [
     {
-      src: 'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=800&q=80&auto=format&fit=crop',
+      src: '/images/blog/donauinselfest-2026/gallery-1.jpg',
       alt: 'Riesige Menschenmenge beim Donauinselfest',
       caption: 'Millionen Menschen feiern gemeinsam unter freiem Himmel',
     },
     {
-      src: 'https://images.unsplash.com/photo-1516550893923-42d28e5677af?w=800&q=80&auto=format&fit=crop',
+      src: '/images/blog/donauinselfest-2026/gallery-2.jpg',
       alt: 'Wien Donau bei Sonnenuntergang',
       caption: 'Die Donauinsel bei Sonnenuntergang — magische Stimmung',
     },
     {
-      src: 'https://images.unsplash.com/photo-1493676304819-0d7a8d026dcf?w=800&q=80&auto=format&fit=crop',
+      src: '/images/blog/donauinselfest-2026/gallery-3.jpg',
       alt: 'Konzertbühne beim Donauinselfest',
       caption: 'Weltklasse-Acts auf der Hauptbühne',
     },

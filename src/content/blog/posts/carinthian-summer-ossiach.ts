@@ -4,10 +4,8 @@ export const post: FestivalPost = {
   slug: 'carinthian-summer-ossiach',
   title: 'Carinthian Summer Ossiach',
   subtitle: 'Klassik am Ossiacher See – Kammermusik und Oper in einzigartiger Naturkulisse',
-  heroImage:
-    'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1600&q=85&auto=format&fit=crop',
-  thumbnailImage:
-    'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&q=80&auto=format&fit=crop',
+  heroImage: '/images/blog/carinthian-summer-ossiach/hero.jpg',
+  thumbnailImage: '/images/blog/carinthian-summer-ossiach/thumb.jpg',
   publishDate: '2026-04-01',
   updatedDate: '2026-04-01',
   readingTime: 7,
@@ -75,17 +73,17 @@ export const post: FestivalPost = {
   ],
   gallery: [
     {
-      src: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&q=80&auto=format&fit=crop',
+      src: '/images/blog/carinthian-summer-ossiach/gallery-1.jpg',
       alt: 'Idyllischer See mit grünen Bergen im Hintergrund',
       caption: 'Ossiacher See – die einzigartige Kulisse des Festivals',
     },
     {
-      src: 'https://images.unsplash.com/photo-1465225314224-587cd83d322b?w=800&q=80&auto=format&fit=crop',
+      src: '/images/blog/carinthian-summer-ossiach/gallery-2.jpg',
       alt: 'Konzert in einer romanischen Kirche',
       caption: 'Weltklasse-Musik in der Stiftskirche Ossiach',
     },
     {
-      src: 'https://images.unsplash.com/photo-1519683109079-d5f539e1542f?w=800&q=80&auto=format&fit=crop',
+      src: '/images/blog/carinthian-summer-ossiach/gallery-3.jpg',
       alt: 'Streichquartett im Freien',
       caption: 'Kammermusik im Kreuzgang des historischen Stifts',
     },

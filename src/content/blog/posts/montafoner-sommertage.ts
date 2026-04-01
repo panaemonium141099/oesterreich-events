@@ -4,10 +4,8 @@ export const post: FestivalPost = {
   slug: 'montafoner-sommertage',
   title: 'Montafoner Sommertage Kammermusik',
   subtitle: 'Weltklasse-Kammermusik in den Bergdörfern des Montafons',
-  heroImage:
-    'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=1600&q=85&auto=format&fit=crop',
-  thumbnailImage:
-    'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=800&q=80&auto=format&fit=crop',
+  heroImage: '/images/blog/montafoner-sommertage/hero.jpg',
+  thumbnailImage: '/images/blog/montafoner-sommertage/thumb.jpg',
   publishDate: '2026-04-01',
   updatedDate: '2026-04-01',
   readingTime: 6,
@@ -75,17 +73,17 @@ export const post: FestivalPost = {
   ],
   gallery: [
     {
-      src: 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=800&q=80&auto=format&fit=crop',
+      src: '/images/blog/montafoner-sommertage/gallery-1.jpg',
       alt: 'Streichquartett bei Konzert',
       caption: 'Kammermusik auf höchstem Niveau im Bergdorf',
     },
     {
-      src: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&q=80&auto=format&fit=crop',
+      src: '/images/blog/montafoner-sommertage/gallery-2.jpg',
       alt: 'Alpines Bergdorf im Sommer',
       caption: 'Das Montafon — Bergwelt als Konzertkulisse',
     },
     {
-      src: 'https://images.unsplash.com/photo-1519671482749-fd09be7ccebf?w=800&q=80&auto=format&fit=crop',
+      src: '/images/blog/montafoner-sommertage/gallery-3.jpg',
       alt: 'Intimes Konzert in einer Dorfkirche',
       caption: 'Historische Dorfkirchen als Konzertraum',
     },

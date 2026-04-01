@@ -4,10 +4,8 @@ export const post: FestivalPost = {
   slug: 'linz-marathon',
   title: 'Linz Marathon 2026',
   subtitle: 'Laufen durch die Kulturhauptstadt — Österreichs beliebtester Stadtmarathon',
-  heroImage:
-    'https://images.unsplash.com/photo-1530143584546-02191bc84eb5?w=1600&q=85&auto=format&fit=crop',
-  thumbnailImage:
-    'https://images.unsplash.com/photo-1530143584546-02191bc84eb5?w=800&q=80&auto=format&fit=crop',
+  heroImage: '/images/blog/linz-marathon/hero.jpg',
+  thumbnailImage: '/images/blog/linz-marathon/thumb.jpg',
   publishDate: '2026-04-01',
   updatedDate: '2026-04-01',
   readingTime: 6,
@@ -75,17 +73,17 @@ export const post: FestivalPost = {
   ],
   gallery: [
     {
-      src: 'https://images.unsplash.com/photo-1530143584546-02191bc84eb5?w=800&q=80&auto=format&fit=crop',
+      src: '/images/blog/linz-marathon/gallery-1.jpg',
       alt: 'Läufer bei einem Stadtmarathon',
       caption: 'Tausende Läufer beim Linz Marathon durch die Innenstadt',
     },
     {
-      src: 'https://images.unsplash.com/photo-1571008887538-b36bb32f4571?w=800&q=80&auto=format&fit=crop',
+      src: '/images/blog/linz-marathon/gallery-2.jpg',
       alt: 'Zieleinlauf eines Marathons',
       caption: 'Emotionaler Zieleinlauf am Hauptplatz Linz',
     },
     {
-      src: 'https://images.unsplash.com/photo-1552674605-db6ffd4facb5?w=800&q=80&auto=format&fit=crop',
+      src: '/images/blog/linz-marathon/gallery-3.jpg',
       alt: 'Zuschauer feuern Läufer bei einem Stadtmarathon an',
       caption: 'Linz jubelt seinen Läuferinnen und Läufern zu',
     },

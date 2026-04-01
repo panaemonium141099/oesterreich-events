@@ -4,10 +4,8 @@ export const post: FestivalPost = {
   slug: 'wiener-neujahrskonzert',
   title: 'Wiener Neujahrskonzert',
   subtitle: 'Das meistgesehene Klassikkonzert der Welt – live aus dem Goldenen Saal',
-  heroImage:
-    'https://images.unsplash.com/photo-1507838153414-b4b713384a76?w=1600&q=85&auto=format&fit=crop',
-  thumbnailImage:
-    'https://images.unsplash.com/photo-1507838153414-b4b713384a76?w=800&q=80&auto=format&fit=crop',
+  heroImage: '/images/blog/wiener-neujahrskonzert/hero.jpg',
+  thumbnailImage: '/images/blog/wiener-neujahrskonzert/thumb.jpg',
   publishDate: '2026-03-31',
   updatedDate: '2026-03-31',
   readingTime: 6,
@@ -72,17 +70,17 @@ export const post: FestivalPost = {
   ],
   gallery: [
     {
-      src: 'https://images.unsplash.com/photo-1507838153414-b4b713384a76?w=800&q=80&auto=format&fit=crop',
+      src: '/images/blog/wiener-neujahrskonzert/gallery-1.jpg',
       alt: 'Orchestersaal mit Musikern in feierlicher Atmosphäre',
       caption: 'Die Wiener Philharmoniker im legendären Goldenen Saal',
     },
     {
-      src: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&q=80&auto=format&fit=crop',
+      src: '/images/blog/wiener-neujahrskonzert/gallery-2.jpg',
       alt: 'Violine Nahaufnahme – Klassikkonzert',
       caption: 'Präzision und Leidenschaft der Wiener Philharmoniker',
     },
     {
-      src: 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=800&q=80&auto=format&fit=crop',
+      src: '/images/blog/wiener-neujahrskonzert/gallery-3.jpg',
       alt: 'Prachtsaal mit Blumendekoration und Publikum',
       caption: 'Der Goldene Saal mit seinem jährlichen Blumenschmuck',
     },

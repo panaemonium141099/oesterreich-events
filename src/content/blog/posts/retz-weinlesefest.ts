@@ -4,10 +4,8 @@ export const post: FestivalPost = {
   slug: 'retz-weinlesefest',
   title: 'Retz Weinlesefest 2026',
   subtitle: 'Niederösterreichs ältestes Weinfest feiert die Ernte im historischen Stadtzentrum',
-  heroImage:
-    'https://images.unsplash.com/photo-1506377247377-2a5b3b417ebb?w=1600&q=85&auto=format&fit=crop',
-  thumbnailImage:
-    'https://images.unsplash.com/photo-1506377247377-2a5b3b417ebb?w=800&q=80&auto=format&fit=crop',
+  heroImage: '/images/blog/retz-weinlesefest/hero.jpg',
+  thumbnailImage: '/images/blog/retz-weinlesefest/thumb.jpg',
   publishDate: '2026-04-01',
   updatedDate: '2026-04-01',
   readingTime: 5,
@@ -74,17 +72,17 @@ export const post: FestivalPost = {
   ],
   gallery: [
     {
-      src: 'https://images.unsplash.com/photo-1506377247377-2a5b3b417ebb?w=800&q=80&auto=format&fit=crop',
+      src: '/images/blog/retz-weinlesefest/gallery-1.jpg',
       alt: 'Weintrauben an der Rebe bei der Ernte',
       caption: 'Die Weinernte ist der Anlass für das traditionsreiche Fest',
     },
     {
-      src: 'https://images.unsplash.com/photo-1510812431401-41d2bd2722f3?w=800&q=80&auto=format&fit=crop',
+      src: '/images/blog/retz-weinlesefest/gallery-2.jpg',
       alt: 'Weingläser mit Weißwein bei einer Verkostung',
       caption: 'Grüner Veltliner und Riesling aus dem Weinviertel',
     },
     {
-      src: 'https://images.unsplash.com/photo-1467810563316-b5476525c0f9?w=800&q=80&auto=format&fit=crop',
+      src: '/images/blog/retz-weinlesefest/gallery-3.jpg',
       alt: 'Mittelalterliche Stadtgasse bei einem Volksfest',
       caption: 'Die historische Altstadt Retzens als Festivalkulisse',
     },

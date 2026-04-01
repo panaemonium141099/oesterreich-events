@@ -4,10 +4,8 @@ export const post: FestivalPost = {
   slug: 'wiener-regenbogenparade',
   title: 'Wiener Regenbogenparade',
   subtitle: 'Österreichs größte Pride-Parade – Farben, Musik und Botschaft im Herzen Wiens',
-  heroImage:
-    'https://images.unsplash.com/photo-1559163474-00a5f66a4b06?w=1600&q=85&auto=format&fit=crop',
-  thumbnailImage:
-    'https://images.unsplash.com/photo-1559163474-00a5f66a4b06?w=800&q=80&auto=format&fit=crop',
+  heroImage: '/images/blog/wiener-regenbogenparade/hero.jpg',
+  thumbnailImage: '/images/blog/wiener-regenbogenparade/thumb.jpg',
   publishDate: '2026-03-31',
   updatedDate: '2026-03-31',
   readingTime: 5,
@@ -73,17 +71,17 @@ export const post: FestivalPost = {
   ],
   gallery: [
     {
-      src: 'https://images.unsplash.com/photo-1559163474-00a5f66a4b06?w=800&q=80&auto=format&fit=crop',
+      src: '/images/blog/wiener-regenbogenparade/gallery-1.jpg',
       alt: 'Pride Parade mit Regenbogenfahnen und bunten Teilnehmern',
       caption: 'Ein Meer aus Regenbogenfarben auf der Wiener Ringstraße',
     },
     {
-      src: 'https://images.unsplash.com/photo-1591522811280-a8759970b03f?w=800&q=80&auto=format&fit=crop',
+      src: '/images/blog/wiener-regenbogenparade/gallery-2.jpg',
       alt: 'Bunte Floats bei einer Pride-Parade',
       caption: 'Kreative Floats und Kostüme bei der Parade',
     },
     {
-      src: 'https://images.unsplash.com/photo-1582213782179-e0d53f98f2ca?w=800&q=80&auto=format&fit=crop',
+      src: '/images/blog/wiener-regenbogenparade/gallery-3.jpg',
       alt: 'Fröhliche Menschen mit Regenbogenfahnen',
       caption: 'Sichtbarkeit und Feierlaune – gemeinsam durch Wien',
     },

@@ -4,10 +4,8 @@ export const post: FestivalPost = {
   slug: 'lichterfest-melk',
   title: 'Lichterfest Melk 2026',
   subtitle: 'Wenn Licht und Wachau-Magie zu einem unvergesslichen Fest verschmelzen',
-  heroImage:
-    'https://images.unsplash.com/photo-1519608487953-e999c86e7455?w=1600&q=85&auto=format&fit=crop',
-  thumbnailImage:
-    'https://images.unsplash.com/photo-1519608487953-e999c86e7455?w=800&q=80&auto=format&fit=crop',
+  heroImage: '/images/blog/lichterfest-melk/hero.jpg',
+  thumbnailImage: '/images/blog/lichterfest-melk/thumb.jpg',
   publishDate: '2026-04-01',
   updatedDate: '2026-04-01',
   readingTime: 5,
@@ -73,17 +71,17 @@ export const post: FestivalPost = {
   ],
   gallery: [
     {
-      src: 'https://images.unsplash.com/photo-1519608487953-e999c86e7455?w=800&q=80&auto=format&fit=crop',
+      src: '/images/blog/lichterfest-melk/gallery-1.jpg',
       alt: 'Lichtinstallation an einem historischen Gebäude',
       caption: 'Lichtmagie am Stift Melk — ein unvergesslicher Anblick',
     },
     {
-      src: 'https://images.unsplash.com/photo-1467810563316-b5476525c0f9?w=800&q=80&auto=format&fit=crop',
+      src: '/images/blog/lichterfest-melk/gallery-2.jpg',
       alt: 'Kerzen und Lichter reflektieren sich im Wasser',
       caption: 'Die Donau als Spiegel für tausende Lichter',
     },
     {
-      src: 'https://images.unsplash.com/photo-1465847899084-d164df4dedc6?w=800&q=80&auto=format&fit=crop',
+      src: '/images/blog/lichterfest-melk/gallery-3.jpg',
       alt: 'Historisches Kloster bei Nacht beleuchtet',
       caption: 'Das illuminierte Stift Melk — Wahrzeichen der Wachau',
     },

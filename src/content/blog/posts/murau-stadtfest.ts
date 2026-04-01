@@ -4,10 +4,8 @@ export const post: FestivalPost = {
   slug: 'murau-stadtfest',
   title: 'Murauer Stadtfest',
   subtitle: 'Steirisches Flair im Murtal – das Stadtfest der Bierstadt Murau',
-  heroImage:
-    'https://images.unsplash.com/photo-1467810563316-b5476525c0f9?w=1600&q=85&auto=format&fit=crop',
-  thumbnailImage:
-    'https://images.unsplash.com/photo-1467810563316-b5476525c0f9?w=800&q=80&auto=format&fit=crop',
+  heroImage: '/images/blog/murau-stadtfest/hero.jpg',
+  thumbnailImage: '/images/blog/murau-stadtfest/thumb.jpg',
   publishDate: '2026-04-01',
   updatedDate: '2026-04-01',
   readingTime: 6,
@@ -74,17 +72,17 @@ export const post: FestivalPost = {
   ],
   gallery: [
     {
-      src: 'https://images.unsplash.com/photo-1467810563316-b5476525c0f9?w=800&q=80&auto=format&fit=crop',
+      src: '/images/blog/murau-stadtfest/gallery-1.jpg',
       alt: 'Mittelalterliche Altstadt mit buntem Markt',
       caption: 'Stadtfest in der malerischen Altstadt von Murau',
     },
     {
-      src: 'https://images.unsplash.com/photo-1558618701-0e04e5bfbdb7?w=800&q=80&auto=format&fit=crop',
+      src: '/images/blog/murau-stadtfest/gallery-2.jpg',
       alt: 'Biergarten mit Menschen und Biermaßen',
       caption: 'Murauer Bier – der flüssige Star des Stadtfests',
     },
     {
-      src: 'https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=800&q=80&auto=format&fit=crop',
+      src: '/images/blog/murau-stadtfest/gallery-3.jpg',
       alt: 'Blaskapelle bei einem Volksfest',
       caption: 'Die Stadtkapelle Murau gibt den Ton an',
     },

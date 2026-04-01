@@ -4,10 +4,8 @@ export const post: FestivalPost = {
   slug: 'lehar-festival-bad-ischl',
   title: 'Lehár Festival Bad Ischl 2026',
   subtitle: 'Die Operette lebt — im Salzkammergut trifft Tradition auf Glanz',
-  heroImage:
-    'https://images.unsplash.com/photo-1524368535928-5b5e00ddc76b?w=1600&q=85&auto=format&fit=crop',
-  thumbnailImage:
-    'https://images.unsplash.com/photo-1524368535928-5b5e00ddc76b?w=800&q=80&auto=format&fit=crop',
+  heroImage: '/images/blog/lehar-festival-bad-ischl/hero.jpg',
+  thumbnailImage: '/images/blog/lehar-festival-bad-ischl/thumb.jpg',
   publishDate: '2026-04-01',
   updatedDate: '2026-04-01',
   readingTime: 6,
@@ -73,17 +71,17 @@ export const post: FestivalPost = {
   ],
   gallery: [
     {
-      src: 'https://images.unsplash.com/photo-1524368535928-5b5e00ddc76b?w=800&q=80&auto=format&fit=crop',
+      src: '/images/blog/lehar-festival-bad-ischl/gallery-1.jpg',
       alt: 'Opernaufführung auf einer klassischen Bühne',
       caption: 'Glanzvolle Operetten-Inszenierungen im Kongress & TheaterHaus',
     },
     {
-      src: 'https://images.unsplash.com/photo-1549824628-b68ae3f2d358?w=800&q=80&auto=format&fit=crop',
+      src: '/images/blog/lehar-festival-bad-ischl/gallery-2.jpg',
       alt: 'Historisches Kurort-Ambiente',
       caption: 'Bad Ischl — einst Kaiserresidenz, heute Operetten-Metropole',
     },
     {
-      src: 'https://images.unsplash.com/photo-1501386761578-eac5c94b800a?w=800&q=80&auto=format&fit=crop',
+      src: '/images/blog/lehar-festival-bad-ischl/gallery-3.jpg',
       alt: 'Konzertpublikum in historischem Theater',
       caption: 'Begeistertes Publikum beim Lehár Festival',
     },

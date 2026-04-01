@@ -4,10 +4,8 @@ export const post: FestivalPost = {
   slug: 'esterhazy-konzerte',
   title: 'Schloss Esterházy Konzerte 2026',
   subtitle: 'Haydns Heimat klingt wieder — Barockpracht im Herzen Eisenstadts',
-  heroImage:
-    'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=1600&q=85&auto=format&fit=crop',
-  thumbnailImage:
-    'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=800&q=80&auto=format&fit=crop',
+  heroImage: '/images/blog/esterhazy-konzerte/hero.jpg',
+  thumbnailImage: '/images/blog/esterhazy-konzerte/thumb.jpg',
   publishDate: '2026-04-01',
   updatedDate: '2026-04-01',
   readingTime: 5,
@@ -73,17 +71,17 @@ export const post: FestivalPost = {
   ],
   gallery: [
     {
-      src: 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=800&q=80&auto=format&fit=crop',
+      src: '/images/blog/esterhazy-konzerte/gallery-1.jpg',
       alt: 'Klassisches Konzert in einem Barockpalast',
       caption: 'Musik in einem der schönsten Barockräume Österreichs',
     },
     {
-      src: 'https://images.unsplash.com/photo-1507838153414-b4b713384a76?w=800&q=80&auto=format&fit=crop',
+      src: '/images/blog/esterhazy-konzerte/gallery-2.jpg',
       alt: 'Orchesterkonzert im historischen Saal',
       caption: 'Haydn Philharmoniker im Haydnsaal',
     },
     {
-      src: 'https://images.unsplash.com/photo-1541512416146-3cf58d6b27cc?w=800&q=80&auto=format&fit=crop',
+      src: '/images/blog/esterhazy-konzerte/gallery-3.jpg',
       alt: 'Historisches Schloss bei Abendlicht',
       caption: 'Schloss Esterházy — 350 Jahre Musikgeschichte',
     },

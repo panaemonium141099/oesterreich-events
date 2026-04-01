@@ -4,10 +4,8 @@ export const post: FestivalPost = {
   slug: 'wien-christkindlmarkt',
   title: 'Wiener Christkindlmarkt',
   subtitle: 'Weihnachtszauber am Rathausplatz – der bekannteste Advent-Markt der Welt',
-  heroImage:
-    'https://images.unsplash.com/photo-1512389142860-9c449e58a543?w=1600&q=85&auto=format&fit=crop',
-  thumbnailImage:
-    'https://images.unsplash.com/photo-1512389142860-9c449e58a543?w=800&q=80&auto=format&fit=crop',
+  heroImage: '/images/blog/wien-christkindlmarkt/hero.jpg',
+  thumbnailImage: '/images/blog/wien-christkindlmarkt/thumb.jpg',
   publishDate: '2026-03-31',
   updatedDate: '2026-03-31',
   readingTime: 6,
@@ -73,17 +71,17 @@ export const post: FestivalPost = {
   ],
   gallery: [
     {
-      src: 'https://images.unsplash.com/photo-1512389142860-9c449e58a543?w=800&q=80&auto=format&fit=crop',
+      src: '/images/blog/wien-christkindlmarkt/gallery-1.jpg',
       alt: 'Weihnachtsmarkt Wien bei Nacht mit festlicher Beleuchtung',
       caption: 'Leuchtende Holzhütten vor der illuminierten Rathausfassade',
     },
     {
-      src: 'https://images.unsplash.com/photo-1607344645866-009c320b63e0?w=800&q=80&auto=format&fit=crop',
+      src: '/images/blog/wien-christkindlmarkt/gallery-2.jpg',
       alt: 'Glühwein und Weihnachtsdekoration am Christkindlmarkt',
       caption: 'Glühwein, Punsch und weihnachtliche Delikatessen',
     },
     {
-      src: 'https://images.unsplash.com/photo-1543933441-92abb7bd2ca2?w=800&q=80&auto=format&fit=crop',
+      src: '/images/blog/wien-christkindlmarkt/gallery-3.jpg',
       alt: 'Kunsthandwerk am Wiener Christkindlmarkt',
       caption: 'Hochwertiges Kunsthandwerk aus ganz Österreich',
     },

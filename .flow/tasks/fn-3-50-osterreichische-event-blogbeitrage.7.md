@@ -42,9 +42,8 @@ Integrate the full blog post pool into the UI. This task runs after T1 (barrel e
 - [ ] A "Blog" entry point exists in site navigation
 - [ ] npm run build passes with no TypeScript errors
 ## Done summary
-TBD
-
+Integrated the full blog post pool into the UI: FestivalBlogSection now shows top 6 posts with "Alle Beitraege" link; blog index page has SSR category filter tabs (Alle/Musik/Kultur/Maerkte/Sport/Brauchtum/Klassik) via ?category= URL param; blog detail page shows "Aehnliche Beitraege" section (3 same-category posts) and emits standalone Event JSON-LD alongside BlogPosting; Footer has "Blog" nav entry point; generateStaticParams covers all 52 slugs.
 ## Evidence
-- Commits:
-- Tests:
+- Commits: 72673bebe76c807960ab854d2dc4d2dc509e77fe
+- Tests: npm run build
 - PRs:

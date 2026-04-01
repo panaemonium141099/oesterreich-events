@@ -4,10 +4,8 @@ export const post: FestivalPost = {
   slug: 'steyr-stadtfest',
   title: 'Steyr Stadtfest',
   subtitle: 'Sommerfest in einer der schönsten Altstädte Österreichs',
-  heroImage:
-    'https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=1600&q=85&auto=format&fit=crop',
-  thumbnailImage:
-    'https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=800&q=80&auto=format&fit=crop',
+  heroImage: '/images/blog/steyr-stadtfest/hero.jpg',
+  thumbnailImage: '/images/blog/steyr-stadtfest/thumb.jpg',
   publishDate: '2026-04-01',
   updatedDate: '2026-04-01',
   readingTime: 5,
@@ -74,17 +72,17 @@ export const post: FestivalPost = {
   ],
   gallery: [
     {
-      src: 'https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=800&q=80&auto=format&fit=crop',
+      src: '/images/blog/steyr-stadtfest/gallery-1.jpg',
       alt: 'Sommerfest auf historischem Stadtplatz',
       caption: 'Stadtfest-Stimmung in der mittelalterlichen Altstadt',
     },
     {
-      src: 'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=800&q=80&auto=format&fit=crop',
+      src: '/images/blog/steyr-stadtfest/gallery-2.jpg',
       alt: 'Konzert auf einer Freilichtbühne',
       caption: 'Live-Musik auf dem Steyr Stadtplatz',
     },
     {
-      src: 'https://images.unsplash.com/photo-1567521464027-f127ff144326?w=800&q=80&auto=format&fit=crop',
+      src: '/images/blog/steyr-stadtfest/gallery-3.jpg',
       alt: 'Flussufer mit alten Häusern und Besuchern',
       caption: 'Feiern am Ufer der Enns',
     },

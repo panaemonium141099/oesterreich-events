@@ -4,10 +4,8 @@ export const post: FestivalPost = {
   slug: 'innsbruck-christkindlmarkt',
   title: 'Innsbrucker Christkindlmarkt',
   subtitle: 'Advent auf dem Marktplatz mit Blick auf die verschneiten Nordkette-Gipfel',
-  heroImage:
-    'https://images.unsplash.com/photo-1543933441-92abb7bd2ca2?w=1600&q=85&auto=format&fit=crop',
-  thumbnailImage:
-    'https://images.unsplash.com/photo-1543933441-92abb7bd2ca2?w=800&q=80&auto=format&fit=crop',
+  heroImage: '/images/blog/innsbruck-christkindlmarkt/hero.jpg',
+  thumbnailImage: '/images/blog/innsbruck-christkindlmarkt/thumb.jpg',
   publishDate: '2026-04-01',
   updatedDate: '2026-04-01',
   readingTime: 5,
@@ -74,17 +72,17 @@ export const post: FestivalPost = {
   ],
   gallery: [
     {
-      src: 'https://images.unsplash.com/photo-1543933441-92abb7bd2ca2?w=800&q=80&auto=format&fit=crop',
+      src: '/images/blog/innsbruck-christkindlmarkt/gallery-1.jpg',
       alt: 'Weihnachtsmarkt mit beleuchteten Ständen',
       caption: 'Adventstimmung vor der Tiroler Alpenkulisse',
     },
     {
-      src: 'https://images.unsplash.com/photo-1513553404607-988bf2703777?w=800&q=80&auto=format&fit=crop',
+      src: '/images/blog/innsbruck-christkindlmarkt/gallery-2.jpg',
       alt: 'Handgemachte Weihnachtsdekoration',
       caption: 'Tiroler Handwerk und regionale Spezialitäten',
     },
     {
-      src: 'https://images.unsplash.com/photo-1607344645866-009c320b63e0?w=800&q=80&auto=format&fit=crop',
+      src: '/images/blog/innsbruck-christkindlmarkt/gallery-3.jpg',
       alt: 'Glühwein und Weihnachtsbäckerei',
       caption: 'Wärmendes Tiroler Glühwein-Erlebnis',
     },

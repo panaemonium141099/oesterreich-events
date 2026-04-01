@@ -4,10 +4,8 @@ export const post: FestivalPost = {
   slug: 'seefestspiele-moerbisch',
   title: 'Seefestspiele Mörbisch 2026',
   subtitle: 'Operette auf dem Neusiedler See — das größte Seebühnen-Festival Europas',
-  heroImage:
-    'https://images.unsplash.com/photo-1578736641330-3155e606cd40?w=1600&q=85&auto=format&fit=crop',
-  thumbnailImage:
-    'https://images.unsplash.com/photo-1578736641330-3155e606cd40?w=800&q=80&auto=format&fit=crop',
+  heroImage: '/images/blog/seefestspiele-moerbisch/hero.jpg',
+  thumbnailImage: '/images/blog/seefestspiele-moerbisch/thumb.jpg',
   publishDate: '2026-04-01',
   updatedDate: '2026-04-01',
   readingTime: 7,
@@ -74,17 +72,17 @@ export const post: FestivalPost = {
   ],
   gallery: [
     {
-      src: 'https://images.unsplash.com/photo-1578736641330-3155e606cd40?w=800&q=80&auto=format&fit=crop',
+      src: '/images/blog/seefestspiele-moerbisch/gallery-1.jpg',
       alt: 'Seebühne mit Lichtern bei Nacht',
       caption: 'Die Seebühne Mörbisch leuchtet über dem Neusiedler See',
     },
     {
-      src: 'https://images.unsplash.com/photo-1524368535928-5b5e00ddc76b?w=800&q=80&auto=format&fit=crop',
+      src: '/images/blog/seefestspiele-moerbisch/gallery-2.jpg',
       alt: 'Operetten-Aufführung mit großem Ensemble',
       caption: 'Prachtvoll-inszenierte Operette mit 200 Mitwirkenden',
     },
     {
-      src: 'https://images.unsplash.com/photo-1501386761578-eac5c94b800a?w=800&q=80&auto=format&fit=crop',
+      src: '/images/blog/seefestspiele-moerbisch/gallery-3.jpg',
       alt: 'Zuschauerpublikum bei einer Freiluftveranstaltung',
       caption: '6.200 Zuschauer erleben magische Sommerabende',
     },

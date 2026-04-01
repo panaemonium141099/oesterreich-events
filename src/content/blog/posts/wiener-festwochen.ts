@@ -4,10 +4,8 @@ export const post: FestivalPost = {
   slug: 'wiener-festwochen',
   title: 'Wiener Festwochen',
   subtitle: 'Internationales Festival für Musik, Theater und Performance im Mai und Juni',
-  heroImage:
-    'https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=1600&q=85&auto=format&fit=crop',
-  thumbnailImage:
-    'https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=800&q=80&auto=format&fit=crop',
+  heroImage: '/images/blog/wiener-festwochen/hero.jpg',
+  thumbnailImage: '/images/blog/wiener-festwochen/thumb.jpg',
   publishDate: '2026-03-31',
   updatedDate: '2026-03-31',
   readingTime: 6,
@@ -74,17 +72,17 @@ export const post: FestivalPost = {
   ],
   gallery: [
     {
-      src: 'https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=800&q=80&auto=format&fit=crop',
+      src: '/images/blog/wiener-festwochen/gallery-1.jpg',
       alt: 'Theateraufführung auf einer erleuchteten Bühne',
       caption: 'Internationale Theaterkunst auf Wiens Bühnen',
     },
     {
-      src: 'https://images.unsplash.com/photo-1518909998695-9ba977e4a16d?w=800&q=80&auto=format&fit=crop',
+      src: '/images/blog/wiener-festwochen/gallery-2.jpg',
       alt: 'Open Air Konzert mit begeistertem Publikum',
       caption: 'Kostenloser Kulturgenuss unter freiem Himmel',
     },
     {
-      src: 'https://images.unsplash.com/photo-1460723237483-7a6dc9d0b212?w=800&q=80&auto=format&fit=crop',
+      src: '/images/blog/wiener-festwochen/gallery-3.jpg',
       alt: 'Festliche Illumination eines historischen Theaters',
       caption: 'Die Spielstätten der Wiener Festwochen im Abendlicht',
     },

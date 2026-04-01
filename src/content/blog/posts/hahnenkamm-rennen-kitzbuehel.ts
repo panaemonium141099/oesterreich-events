@@ -4,10 +4,8 @@ export const post: FestivalPost = {
   slug: 'hahnenkamm-rennen-kitzbuehel',
   title: 'Hahnenkamm-Rennen Kitzbühel',
   subtitle: 'Die schnellste und gefährlichste Abfahrt der Welt — Ski-Weltcup live erleben',
-  heroImage:
-    'https://images.unsplash.com/photo-1551698618-1dfe5d97d256?w=1600&q=85&auto=format&fit=crop',
-  thumbnailImage:
-    'https://images.unsplash.com/photo-1551698618-1dfe5d97d256?w=800&q=80&auto=format&fit=crop',
+  heroImage: '/images/blog/hahnenkamm-rennen-kitzbuehel/hero.jpg',
+  thumbnailImage: '/images/blog/hahnenkamm-rennen-kitzbuehel/thumb.jpg',
   publishDate: '2026-04-01',
   updatedDate: '2026-04-01',
   readingTime: 6,
@@ -75,17 +73,17 @@ export const post: FestivalPost = {
   ],
   gallery: [
     {
-      src: 'https://images.unsplash.com/photo-1551698618-1dfe5d97d256?w=800&q=80&auto=format&fit=crop',
+      src: '/images/blog/hahnenkamm-rennen-kitzbuehel/gallery-1.jpg',
       alt: 'Skifahrer auf der Streif Steilhang',
       caption: 'Die Streif — die gefährlichste Abfahrt der Welt',
     },
     {
-      src: 'https://images.unsplash.com/photo-1516912481808-3406841bd33c?w=800&q=80&auto=format&fit=crop',
+      src: '/images/blog/hahnenkamm-rennen-kitzbuehel/gallery-2.jpg',
       alt: 'Jubelnde Fans am Zieleinlauf',
       caption: 'Tausende Fans feiern am Zieleinlauf in der Innenstadt',
     },
     {
-      src: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&q=80&auto=format&fit=crop',
+      src: '/images/blog/hahnenkamm-rennen-kitzbuehel/gallery-3.jpg',
       alt: 'Kitzbühel Altstadt im Winter',
       caption: 'Kitzbühel im Winter — charmante Kulisse für das Weltcup-Event',
     },

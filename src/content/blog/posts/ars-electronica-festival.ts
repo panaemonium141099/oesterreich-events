@@ -4,10 +4,8 @@ export const post: FestivalPost = {
   slug: 'ars-electronica-festival',
   title: 'Ars Electronica Festival',
   subtitle: 'Wo Kunst, Technologie und Gesellschaft die Zukunft erfinden — in Linz',
-  heroImage:
-    'https://images.unsplash.com/photo-1518770660439-4636190af475?w=1600&q=85&auto=format&fit=crop',
-  thumbnailImage:
-    'https://images.unsplash.com/photo-1518770660439-4636190af475?w=800&q=80&auto=format&fit=crop',
+  heroImage: '/images/blog/ars-electronica-festival/hero.jpg',
+  thumbnailImage: '/images/blog/ars-electronica-festival/thumb.jpg',
   publishDate: '2026-04-01',
   updatedDate: '2026-04-01',
   readingTime: 7,
@@ -76,17 +74,17 @@ export const post: FestivalPost = {
   ],
   gallery: [
     {
-      src: 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=800&q=80&auto=format&fit=crop',
+      src: '/images/blog/ars-electronica-festival/gallery-1.jpg',
       alt: 'Leuchtende Technologie-Installation',
       caption: 'Digitale Kunst trifft Architektur',
     },
     {
-      src: 'https://images.unsplash.com/photo-1485827404703-89b55fcc595e?w=800&q=80&auto=format&fit=crop',
+      src: '/images/blog/ars-electronica-festival/gallery-2.jpg',
       alt: 'Roboter und KI-Kunstinstallation',
       caption: 'Robotik und Künstliche Intelligenz als Ausdrucksmittel',
     },
     {
-      src: 'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=800&q=80&auto=format&fit=crop',
+      src: '/images/blog/ars-electronica-festival/gallery-3.jpg',
       alt: 'Datenvisualisierung und Lichtkunst',
       caption: 'Immersive Licht- und Datenkunst in der POSTCITY',
     },

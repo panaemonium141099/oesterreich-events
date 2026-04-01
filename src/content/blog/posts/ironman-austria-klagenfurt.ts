@@ -4,10 +4,8 @@ export const post: FestivalPost = {
   slug: 'ironman-austria-klagenfurt',
   title: 'IRONMAN Austria Klagenfurt',
   subtitle: 'Einer der schönsten Triathlons der Welt – 3,8 km Schwimmen, 180 km Radfahren, 42,2 km Laufen',
-  heroImage:
-    'https://images.unsplash.com/photo-1530549387789-4c1017266635?w=1600&q=85&auto=format&fit=crop',
-  thumbnailImage:
-    'https://images.unsplash.com/photo-1530549387789-4c1017266635?w=800&q=80&auto=format&fit=crop',
+  heroImage: '/images/blog/ironman-austria-klagenfurt/hero.jpg',
+  thumbnailImage: '/images/blog/ironman-austria-klagenfurt/thumb.jpg',
   publishDate: '2026-04-01',
   updatedDate: '2026-04-01',
   readingTime: 7,
@@ -74,17 +72,17 @@ export const post: FestivalPost = {
   ],
   gallery: [
     {
-      src: 'https://images.unsplash.com/photo-1530549387789-4c1017266635?w=800&q=80&auto=format&fit=crop',
+      src: '/images/blog/ironman-austria-klagenfurt/gallery-1.jpg',
       alt: 'Triathleten schwimmen in einem See',
       caption: 'Massenstart im Wörthersee – der IRONMAN beginnt',
     },
     {
-      src: 'https://images.unsplash.com/photo-1517649763962-0c623066013b?w=800&q=80&auto=format&fit=crop',
+      src: '/images/blog/ironman-austria-klagenfurt/gallery-2.jpg',
       alt: 'Radsport in Berglandschaft',
       caption: 'Radstrecke durch die Kärntner Seenlandschaft',
     },
     {
-      src: 'https://images.unsplash.com/photo-1476480862126-209bfaa8edc8?w=800&q=80&auto=format&fit=crop',
+      src: '/images/blog/ironman-austria-klagenfurt/gallery-3.jpg',
       alt: 'Läufer im Zieleinlauf mit jubelndem Publikum',
       caption: 'Der Zieldurchlauf – ein unvergesslicher Moment für jeden Finisher',
     },

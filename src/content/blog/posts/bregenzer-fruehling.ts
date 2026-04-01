@@ -4,10 +4,8 @@ export const post: FestivalPost = {
   slug: 'bregenzer-fruehling',
   title: 'Bregenzer Frühling',
   subtitle: 'Internationales Tanzfestival im Frühjahr am Bodensee',
-  heroImage:
-    'https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?w=1600&q=85&auto=format&fit=crop',
-  thumbnailImage:
-    'https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?w=800&q=80&auto=format&fit=crop',
+  heroImage: '/images/blog/bregenzer-fruehling/hero.jpg',
+  thumbnailImage: '/images/blog/bregenzer-fruehling/thumb.jpg',
   publishDate: '2026-04-01',
   updatedDate: '2026-04-01',
   readingTime: 6,
@@ -74,17 +72,17 @@ export const post: FestivalPost = {
   ],
   gallery: [
     {
-      src: 'https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?w=800&q=80&auto=format&fit=crop',
+      src: '/images/blog/bregenzer-fruehling/gallery-1.jpg',
       alt: 'Tänzer auf moderner Bühne',
       caption: 'Zeitgenössischer Tanz auf internationalem Niveau',
     },
     {
-      src: 'https://images.unsplash.com/photo-1547153760-18fc86324498?w=800&q=80&auto=format&fit=crop',
+      src: '/images/blog/bregenzer-fruehling/gallery-2.jpg',
       alt: 'Balletttänzerin auf der Bühne',
       caption: 'Von Ballett bis zeitgenössischem Tanz',
     },
     {
-      src: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&q=80&auto=format&fit=crop',
+      src: '/images/blog/bregenzer-fruehling/gallery-3.jpg',
       alt: 'Bodensee im Frühjahr',
       caption: 'Bregenz am Bodensee erwacht im Frühling',
     },

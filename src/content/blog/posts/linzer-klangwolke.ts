@@ -4,10 +4,8 @@ export const post: FestivalPost = {
   slug: 'linzer-klangwolke',
   title: 'Linzer Klangwolke',
   subtitle: 'Spektakuläres Open-Air-Klangerlebnis im Donaupark — kostenlos für alle',
-  heroImage:
-    'https://images.unsplash.com/photo-1470229538611-16ba8c7ffbd7?w=1600&q=85&auto=format&fit=crop',
-  thumbnailImage:
-    'https://images.unsplash.com/photo-1470229538611-16ba8c7ffbd7?w=800&q=80&auto=format&fit=crop',
+  heroImage: '/images/blog/linzer-klangwolke/hero.jpg',
+  thumbnailImage: '/images/blog/linzer-klangwolke/thumb.jpg',
   publishDate: '2026-04-01',
   updatedDate: '2026-04-01',
   readingTime: 6,
@@ -74,17 +72,17 @@ export const post: FestivalPost = {
   ],
   gallery: [
     {
-      src: 'https://images.unsplash.com/photo-1470229538611-16ba8c7ffbd7?w=800&q=80&auto=format&fit=crop',
+      src: '/images/blog/linzer-klangwolke/gallery-1.jpg',
       alt: 'Open-Air-Konzert bei Nacht mit Lichtshow',
       caption: 'Bruckner Orchester und Lichtspektakel über der Donau',
     },
     {
-      src: 'https://images.unsplash.com/photo-1493799817216-4b57074be5f7?w=800&q=80&auto=format&fit=crop',
+      src: '/images/blog/linzer-klangwolke/gallery-2.jpg',
       alt: 'Publikum beim Freiluftkonzert',
       caption: 'Bis zu 100.000 Menschen erleben die Klangwolke',
     },
     {
-      src: 'https://images.unsplash.com/photo-1551038247-3d9af20df552?w=800&q=80&auto=format&fit=crop',
+      src: '/images/blog/linzer-klangwolke/gallery-3.jpg',
       alt: 'Donau bei Nacht mit Feuerwerk',
       caption: 'Pyrotechnik über der Linzer Donau',
     },

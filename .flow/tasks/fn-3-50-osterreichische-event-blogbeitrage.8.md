@@ -31,9 +31,8 @@ Final housekeeping: sitemap, CLAUDE.md update, CHANGELOG entry.
 - [ ] npm run build still passes after sitemap changes
 - [ ] No TypeScript errors introduced
 ## Done summary
-TBD
-
+Updated sitemap.ts to include all 52 blog post URLs and the /blog index page in chunk 0, updated CLAUDE.md with blog content paths and routes, and added a Phase 14 CHANGELOG entry covering the full blog feature epic.
 ## Evidence
-- Commits:
-- Tests:
+- Commits: cae49484ffcfa7e49a832fea56dfec2a43c1e6f4
+- Tests: npm run build
 - PRs:

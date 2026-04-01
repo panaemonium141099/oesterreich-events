@@ -4,10 +4,8 @@ export const post: FestivalPost = {
   slug: 'styriarte-graz',
   title: 'styriarte Graz',
   subtitle: 'Nikolaus Harnoncourts Vermächtnis – Klassikfestival mit Seele in der Grazer Altstadt',
-  heroImage:
-    'https://images.unsplash.com/photo-1465225314224-587cd83d322b?w=1600&q=85&auto=format&fit=crop',
-  thumbnailImage:
-    'https://images.unsplash.com/photo-1465225314224-587cd83d322b?w=800&q=80&auto=format&fit=crop',
+  heroImage: '/images/blog/styriarte-graz/hero.jpg',
+  thumbnailImage: '/images/blog/styriarte-graz/thumb.jpg',
   publishDate: '2026-04-01',
   updatedDate: '2026-04-01',
   readingTime: 7,
@@ -75,17 +73,17 @@ export const post: FestivalPost = {
   ],
   gallery: [
     {
-      src: 'https://images.unsplash.com/photo-1465225314224-587cd83d322b?w=800&q=80&auto=format&fit=crop',
+      src: '/images/blog/styriarte-graz/gallery-1.jpg',
       alt: 'Klassisches Konzert in historischer Halle',
       caption: 'Weltklasse-Klassik in der Helmut-List-Halle',
     },
     {
-      src: 'https://images.unsplash.com/photo-1519683109079-d5f539e1542f?w=800&q=80&auto=format&fit=crop',
+      src: '/images/blog/styriarte-graz/gallery-2.jpg',
       alt: 'Streichquartett auf einer Bühne',
       caption: 'Kammermusik im Geist von Nikolaus Harnoncourt',
     },
     {
-      src: 'https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=800&q=80&auto=format&fit=crop',
+      src: '/images/blog/styriarte-graz/gallery-3.jpg',
       alt: 'Schloss mit Park bei Nacht',
       caption: 'Konzerte auf Schloss Eggenberg – einzigartiges Ambiente',
     },
