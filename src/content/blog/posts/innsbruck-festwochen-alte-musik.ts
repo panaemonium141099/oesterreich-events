@@ -94,7 +94,7 @@ export const post: FestivalPost = {
   ctaLink: '/map?bundesland=Tirol&category=Kultur',
   seoTitle: 'Innsbruck Festwochen Alte Musik 2026 – Programm & Tickets',
   seoDescription:
-    'Innsbrucker Festwochen der Alten Musik 2026: Barockoper, Konzerte und Meisterkurse in der Hofburg. Tickets, Programm und Tipps zum renommiertesten Alte-Musik-Festival.',
+    'Innsbrucker Festwochen der Alten Musik 2026: Barockoper und Konzerte in der Hofburg. Tickets, Programm und Tipps zum renommierten Alte-Musik-Festival.',
   keywords: [
     'Innsbruck Festwochen Alte Musik 2026',
     'Barockmusik Innsbruck',

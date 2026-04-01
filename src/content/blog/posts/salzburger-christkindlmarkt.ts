@@ -93,7 +93,7 @@ export const post: FestivalPost = {
   ctaLink: '/map?bundesland=Salzburg&category=Kultur',
   seoTitle: 'Salzburger Christkindlmarkt 2026 – Domplatz & Infos',
   seoDescription:
-    'Salzburger Christkindlmarkt 2026 auf dem Domplatz: Termine, Öffnungszeiten, Programm und Tipps. Einer der ältesten Weihnachtsmärkte Europas im UNESCO-Welterbe.',
+    'Salzburger Christkindlmarkt 2026 auf dem Domplatz: Termine, Öffnungszeiten und Tipps. Einer der ältesten Weihnachtsmärkte Europas im UNESCO-Welterbe.',
   keywords: [
     'Salzburger Christkindlmarkt',
     'Weihnachtsmarkt Salzburg',

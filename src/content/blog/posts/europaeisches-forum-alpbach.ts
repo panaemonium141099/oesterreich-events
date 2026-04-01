@@ -94,7 +94,7 @@ export const post: FestivalPost = {
   ctaLink: '/map?bundesland=Tirol&category=Kultur',
   seoTitle: 'Europäisches Forum Alpbach 2026 – Programm & Infos',
   seoDescription:
-    'Europäisches Forum Alpbach 2026: 3 Wochen Wissenschaft, Politik und Gesellschaft im Tiroler Bergdorf. Programm, Stipendien und Anreise zum renommiertesten Forum Europas.',
+    'Europäisches Forum Alpbach 2026: 3 Wochen Wissenschaft, Politik & Gesellschaft im Tiroler Bergdorf. Programm, Stipendien und Anreise-Tipps.',
   keywords: [
     'Europäisches Forum Alpbach 2026',
     'Forum Alpbach Programm',

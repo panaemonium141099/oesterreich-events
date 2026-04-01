@@ -93,7 +93,7 @@ export const post: FestivalPost = {
   ctaLink: '/map?bundesland=Tirol&category=Kultur',
   seoTitle: 'Innsbrucker Christkindlmarkt 2026 – Termine & Tipps',
   seoDescription:
-    'Innsbrucker Christkindlmarkt 2026: Öffnungszeiten, Programm und Tipps. Advent auf dem historischen Marktplatz mit Nordkette-Panorama — einer der schönsten Weihnachtsmärkte Österreichs.',
+    'Innsbrucker Christkindlmarkt 2026: Öffnungszeiten und Programm. Advent mit Nordkette-Panorama — einer der schönsten Weihnachtsmärkte Österreichs.',
   keywords: [
     'Innsbrucker Christkindlmarkt 2026',
     'Weihnachtsmarkt Innsbruck',

@@ -95,7 +95,7 @@ export const post: FestivalPost = {
   ctaLink: '/map?bundesland=Salzburg&category=Kultur',
   seoTitle: 'Salzburger Festspiele 2026 – Tickets, Programm & Tipps',
   seoDescription:
-    'Salzburger Festspiele 2026: Opern, Konzerte, Jedermann vom 18. Juli bis 31. August. Tickets, Spielplan und Anreise-Tipps für das weltweit renommierteste Klassikfestival.',
+    'Salzburger Festspiele 2026: Opern, Konzerte, Jedermann (18. Juli–31. August). Tickets, Spielplan und Tipps für das renommierteste Klassikfestival der Welt.',
   keywords: [
     'Salzburger Festspiele 2026',
     'Salzburger Festspiele Programm',

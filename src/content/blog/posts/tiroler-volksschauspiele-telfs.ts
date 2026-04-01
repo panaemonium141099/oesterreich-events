@@ -93,7 +93,7 @@ export const post: FestivalPost = {
   ctaLink: '/map?bundesland=Tirol&category=Kultur',
   seoTitle: 'Tiroler Volksschauspiele Telfs – Theater & Tradition',
   seoDescription:
-    'Tiroler Volksschauspiele Telfs: Alle 4 Jahre großes Volkstheater auf der Freilichtbühne. Geschichte, Tickets und Tipps zum einzigartigen Gemeinschaftsprojekt in Tirol.',
+    'Tiroler Volksschauspiele Telfs: Alle 4 Jahre Volkstheater auf der Freilichtbühne. Geschichte, Tickets und Tipps zum Gemeinschaftsprojekt in Tirol.',
   keywords: [
     'Tiroler Volksschauspiele Telfs',
     'Volksschauspiele Tirol',

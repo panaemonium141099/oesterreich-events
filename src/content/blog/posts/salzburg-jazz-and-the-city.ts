@@ -94,7 +94,7 @@ export const post: FestivalPost = {
   ctaLink: '/map?bundesland=Salzburg&category=Musik',
   seoTitle: 'Jazz & The City Salzburg 2026 – Programm & Tipps',
   seoDescription:
-    'Jazz & The City Salzburg 2026: 5 Tage, 100+ Konzerte, 20+ Locations — kostenlos in der UNESCO-Altstadt. Programm, Line-up und Tipps für das Gratis-Jazzfestival.',
+    'Jazz & The City Salzburg 2026: 5 Tage, 100+ Konzerte, 20+ Locations — gratis in der Altstadt. Programm, Line-up und Tipps zum kostenlosen Jazzfestival.',
   keywords: [
     'Jazz The City Salzburg 2026',
     'Jazzfestival Salzburg',

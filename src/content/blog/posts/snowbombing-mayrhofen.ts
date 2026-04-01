@@ -95,7 +95,7 @@ export const post: FestivalPost = {
   ctaLink: '/map?bundesland=Tirol&category=Musik',
   seoTitle: 'Snowbombing Mayrhofen 2026 – Festival, Tickets & Tipps',
   seoDescription:
-    'Snowbombing Festival Mayrhofen 2026: Skiing tagsüber, Weltklasse-Musik nachts. Line-up, Tickets, Packages und Tipps für das weltweit beste Schneefestival in Tirol.',
+    'Snowbombing Mayrhofen 2026: Skiing tagsüber, Weltklasse-Musik nachts. Line-up, Tickets und Tipps für das beste Schneefestival in den Tiroler Alpen.',
   keywords: [
     'Snowbombing 2026',
     'Snowbombing Mayrhofen',
