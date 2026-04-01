@@ -40,7 +40,7 @@ export const post: FestivalPost = {
     'Das Steyr Stadtfest hat in den 1990er Jahren begonnen und sich seitdem zu einem festen Bestandteil des Steyr Sommerkalenders entwickelt. Die Idee war von Anfang an einfach: Die schöne Altstadt soll belebt werden, Einheimische und Gäste zusammenbringen. Was als kleines Straßenfest begann, zieht heute jährlich mehrere zehntausend Besucher an und zeigt, wie lebendig eine mittelalterliche Stadt im 21. Jahrhundert sein kann.',
   whatToExpectTitle: 'Was das Stadtfest 2026 bietet',
   whatToExpect:
-    'Das Stadtfest 2026 bespielte den gesamten Stadtplatz, die Ennspromenade und die historischen Gassen der Altstadt. Mehrere Bühnen bieten gleichzeitig verschiedene Musikrichtungen — von österreichischem Liedermacher bis Brass Band, von Jazz bis Pop. Dazu kommen regionale Gastronomie, Kunsthandwerk und ein Kinderprogramm.',
+    'Das Stadtfest 2026 bespielt den gesamten Stadtplatz, die Ennspromenade und die historischen Gassen der Altstadt. Mehrere Bühnen bieten gleichzeitig verschiedene Musikrichtungen — von österreichischem Liedermacher bis Brass Band, von Jazz bis Pop. Dazu kommen regionale Gastronomie, Kunsthandwerk und ein Kinderprogramm.',
   whatToExpectList: [
     'Mehrere Bühnen in der gesamten Altstadt',
     'Österreichische und internationale Musikacts',

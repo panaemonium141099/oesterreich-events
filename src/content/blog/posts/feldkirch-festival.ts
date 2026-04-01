@@ -33,7 +33,7 @@ export const post: FestivalPost = {
     { name: 'Ensemble für Alte Musik', role: 'special', stage: 'Dom St. Nikolaus' },
   ],
   lineupNote:
-    'Das vollständige Programm wird im Februar 2026 veröffentlicht. Das Festival legt besonderen Wert auf a-cappella-Chormusik und Barockensembles.',
+    'Das vollständige Programm steht auf feldkirchfestival.at. Das Festival legt besonderen Wert auf a-cappella-Chormusik und Barockensembles.',
   intro:
     'Feldkirch ist eine der wenigen Städte Österreichs, in der das Mittelalter noch körperlich spürbar ist: Die Stadtmauern, der Dom, die Gassen und die Schattenburg erzählen von Jahrhunderten Geschichte. Wenn das Feldkirch Festival im Mai die Stadt mit Chorgesang füllt, entsteht eine Resonanz, die über das Akustische hinausgeht. Die Musik der Renaissance in einem Renaissance-Dom — das ist Feldkirch Festival. Alte Polyphonie trifft auf lebendige Steinmauern, und beides atmet zusammen.',
   historyTitle: 'Seit 1999: Alte Musik in alten Mauern',

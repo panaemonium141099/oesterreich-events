@@ -33,7 +33,7 @@ export const post: FestivalPost = {
     { name: 'Nachwuchspreisträger (TBC)', role: 'support', stage: 'Bergkapelle Silbertal' },
   ],
   lineupNote:
-    'Das vollständige Programm wird im März 2026 veröffentlicht. Die Montafoner Sommertage vergeben jährlich einen Förderpreis für junge Kammermusiker.',
+    'Das Programm 2026 steht auf montafonersommertage.at. Die Montafoner Sommertage vergeben jährlich einen Förderpreis für junge Kammermusiker — frühzeitig buchen, viele Konzerte ausverkauft.',
   intro:
     'Im Montafon geschieht etwas Besonderes: Weltklasse-Kammermusiker verlassen die großen Konzertsäle und reisen in ein abgelegenes Vorarlberger Bergtal, um in Dorfkirchen, unter Kastanienbäumen und auf Almwiesen zu spielen. Die Montafoner Sommertage schaffen eine Nähe zwischen Publikum und Künstlern, die in Wien oder Salzburg undenkbar wäre. Nach dem Konzert trifft man den Geiger am Dorfwirtshaus. Das ist das Geheimnis dieses kleinen, feinen Festivals.',
   historyTitle: 'Seit 1996: Kammermusik in den Bergen',

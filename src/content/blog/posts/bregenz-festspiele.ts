@@ -33,7 +33,7 @@ export const post: FestivalPost = {
     { name: 'Symphoniekonzert-Gastdirigent (TBC)', role: 'special', stage: 'Festspielhaus' },
   ],
   lineupNote:
-    'Das Seebühnen-Stück 2026 (zweijähriger Zyklus) und die vollständige Besetzung werden im Herbst 2025 bekannt gegeben. Frühzeitige Buchung wird dringend empfohlen.',
+    'Das Seebühnen-Stück 2026 steht fest. Das vollständige Programm und die Besetzung sind auf bregenzerfestspiele.com abrufbar. Frühzeitige Buchung wird dringend empfohlen — beliebte Vorstellungen sind schnell ausverkauft.',
   intro:
     'Kein Festival in Österreich hat eine Bühne wie die Bregenzer Festspiele. Die Seebühne, die direkt im Bodensee steht, fasst 7.000 Zuschauer und bietet eine Kulisse, die kein Bühnenbildner der Welt erfinden könnte: Wasser, Berge und der unendliche Abendhimmel über dem Bodensee. Hier werden Opern zu Gesamtkunstwerken, die weit über die Musik hinausgehen — monumentale Bühnenbilder, Pyrotechnik, Lichtshow und die akustische Perfektion moderner Beschallungstechnik verschmelzen zu einem Erlebnis, das man ein Leben lang nicht vergisst.',
   historyTitle: 'Seit 1946: Eine Bühne, die Operngeschichte schreibt',

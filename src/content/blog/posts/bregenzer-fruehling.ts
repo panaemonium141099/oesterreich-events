@@ -32,7 +32,7 @@ export const post: FestivalPost = {
     { name: 'Emanuel Gat Dance (Israel/Frankreich)', role: 'special', stage: 'Großer Saal' },
   ],
   lineupNote:
-    'Das vollständige Programm für 2026 wird im Dezember 2025 veröffentlicht. Der Bregenzer Frühling vergibt regelmäßig den Tanzpreis Vorarlberg.',
+    'Das Programm 2026 steht auf bregenzerfruehling.at. Der Bregenzer Frühling vergibt regelmäßig den Tanzpreis Vorarlberg — Auszeichnung heimischer Tanzkünstler.',
   intro:
     'Im März verwandelt sich Bregenz zur Tanzhauptstadt des Bodenseeraums. Der Bregenzer Frühling bringt seit 1989 internationale Tanzcompagnien in die Vorarlberger Landeshauptstadt — von zeitgenössischem Tanz über klassisches Ballett bis zu physischem Theater. Was das Festival besonders macht, ist seine Mischung: internationale Stargäste aus London, Tel Aviv und Johannesburg treffen auf die lokale Tanzszene Vorarlbergs. Das Publikum ist jung und neugierig — und erlebt Tanzkunst auf dem höchsten Niveau.',
   historyTitle: 'Seit 1989: Tanz als Sprache des Frühlings',
