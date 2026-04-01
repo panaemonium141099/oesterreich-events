@@ -12,9 +12,9 @@ Create 10 long-form blog post TypeScript files for major NÖ, Burgenland & bunde
 44. `esterhazy-konzerte` — Schloss Esterhazy Konzerte Eisenstadt (Sommer)
 45. `pannonia-fields` — Pannonia Fields Electronic Festival Burgenland (August)
 46. `seefestspiele-moerbisch` — Seefestspiele Mörbisch (Juli-August)
-47. `wiesen-fest` — Wiesen Fest Burgenland (August) — Punk/Alternative
+47. `wiesen-fest` — Wiesen Fest Burgenland (August) — Punk/Alternative -- NOTE: No official 2026 "Wiesen Fest" punk event exists; substituted with "One Love Festival Wiesen 2026" (reggae/world music), a real official 2026 Wiesen venue event per wiesen.at
 48. `lichterfest-melk` — Lichterfest Melk / Wachau (Sommer)
-49. `retz-weinlesefest` — Retz Weinlesefest (Oktober)
+49. `retz-weinlesefest` — Retz Weinlesefest (Oktober) -- NOTE: Official 2026 dates are Sep 24–27 per retzer-land.at; "Oktober" in spec was an approximation
 50. `linz-marathon` — Linz Marathon (April)
 
 ### Per post requirements (same as T2)
