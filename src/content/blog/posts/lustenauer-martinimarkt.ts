@@ -1,9 +1,9 @@
 import type { FestivalPost } from '../types';
 
 export const post: FestivalPost = {
-  slug: 'luschnouar-kilbi-lustenau',
-  title: 'Luschnouar Kilbi Lustenau',
-  subtitle: 'Traditionelles Volksfest am Bodensee — Lustenaus größte Sommerkirmes',
+  slug: 'lustenauer-martinimarkt',
+  title: 'Lustenauer Kilbi & Herbstfest',
+  subtitle: 'Traditionelles Volksfest am Bodensee — Lustenaus größtes Herbstfest',
   heroImage:
     'https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=1600&q=85&auto=format&fit=crop',
   thumbnailImage:
@@ -90,9 +90,9 @@ export const post: FestivalPost = {
   ],
   ctaText: 'Volksfeste in Vorarlberg entdecken',
   ctaLink: '/map?bundesland=Vorarlberg&category=Kultur',
-  seoTitle: 'Luschnouar Kilbi Lustenau 2026 – Volksfest am Bodensee',
+  seoTitle: 'Lustenauer Kilbi & Herbstfest 2026 – Volksfest am Bodensee',
   seoDescription:
-    'Luschnouar Kilbi Lustenau 2026: Traditionelles Vorarlberger Volksfest mit Fahrgeschäften, Festzelt & Blaskapelle. Infos & Tipps zum Bodensee-Familienfest.',
+    'Lustenauer Kilbi 2026 (7.–10. August): Traditionelles Vorarlberger Volksfest mit Fahrgeschäften, Festzelt & Blaskapelle am Bodensee. Tipps & Infos.',
   keywords: [
     'Luschnouar Kilbi Lustenau',
     'Kilbi Lustenau 2026',
@@ -106,7 +106,7 @@ export const post: FestivalPost = {
     'Bodensee Volksfest',
   ],
   jsonLdEvent: {
-    name: 'Luschnouar Kilbi Lustenau 2026',
+    name: 'Lustenauer Kilbi & Herbstfest 2026',
     startDate: '2026-08-07',
     endDate: '2026-08-10',
     location: 'Festplatz Lustenau, Rathausstraße 1, 6890 Lustenau, Austria',
