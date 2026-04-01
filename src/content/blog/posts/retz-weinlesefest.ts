@@ -12,7 +12,7 @@ export const post: FestivalPost = {
   updatedDate: '2026-04-01',
   readingTime: 5,
   excerpt:
-    'Im historischen Stadtzentrum von Retz, umgeben von Weingärten und dem bedeutendsten Unterkellerungssystem Mitteleuropas, feiert das Weinlesefest jedes Oktober die burgenländisch-weinviertlerische Ernte mit Wein, Musik und Tradition.',
+    'Im historischen Stadtzentrum von Retz, umgeben von Weingärten und dem bedeutendsten Unterkellerungssystem Mitteleuropas, feiert das Weinlesefest Ende September die weinviertlerische Ernte mit Wein, Musik und gelebtem Brauchtum.',
   category: 'Kulinarik & Tradition',
   categoryColor: 'bg-purple-800 text-white',
   keyFacts: {
@@ -113,7 +113,7 @@ export const post: FestivalPost = {
     addressCountry: 'AT',
     url: 'https://www.retzer-land.at/weinlesefest',
     description:
-      'Das Retz Weinlesefest ist Niederösterreichs ältestes Weinfest und findet jedes Jahr im Oktober im historischen Stadtzentrum von Retz im Weinviertel statt.',
+      'Das Retz Weinlesefest ist Niederösterreichs ältestes Weinfest und findet Ende September (24.–27. September 2026) im historischen Stadtzentrum von Retz im Weinviertel statt.',
     image:
       'https://images.unsplash.com/photo-1506377247377-2a5b3b417ebb?w=1600&q=85&auto=format&fit=crop',
   },
