@@ -1,5 +1,6 @@
 import { MetadataRoute } from 'next';
 import { createClient } from '@supabase/supabase-js';
+import { ALL_POSTS } from '@/content/blog';
 
 export const revalidate = 86400; // 24h ISR
 
@@ -85,7 +86,26 @@ export default async function sitemap({
         priority: 0.3,
       },
     ];
-    return [...staticPages, ...eventUrls];
+
+    // Blog index page
+    const blogIndexUrl: MetadataRoute.Sitemap = [
+      {
+        url: `${BASE_URL}/blog`,
+        lastModified: new Date(),
+        changeFrequency: 'weekly' as const,
+        priority: 0.8,
+      },
+    ];
+
+    // Individual blog post URLs
+    const blogPostUrls: MetadataRoute.Sitemap = ALL_POSTS.map((post) => ({
+      url: `${BASE_URL}/blog/${post.slug}`,
+      lastModified: new Date(post.updatedDate ?? post.publishDate),
+      changeFrequency: 'monthly' as const,
+      priority: 0.7,
+    }));
+
+    return [...staticPages, ...blogIndexUrl, ...blogPostUrls, ...eventUrls];
   }
 
   return eventUrls;

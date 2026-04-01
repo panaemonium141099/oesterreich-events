@@ -47,6 +47,12 @@ node / next.js
 - `src/__tests__/` — Vitest test suite
 - `data/events.db` — SQLite Datenbank (gitignored)
 - `CHANGELOG.md` — Full architecture documentation + phase-by-phase change log
+- `src/content/blog/types.ts` — FestivalPost, LineupAct, FestivalKeyFacts, GalleryImage interfaces
+- `src/content/blog/index.ts` — Barrel: exports ALL_POSTS (52 posts), getPostBySlug, getPostsByCategory
+- `src/content/blog/posts/` — One TypeScript file per blog post (52 files)
+- `src/app/blog/page.tsx` — Blog index page (/blog) with category filter tabs
+- `src/app/blog/[slug]/page.tsx` — Blog detail page with generateMetadata + JSON-LD Event schema
+- `src/components/Landing/FestivalBlogSection.tsx` — Blog preview section on landing page
 
 ## Scraper-Quellen
 - **burgenland.info** — Cheerio + JSON-LD (@graph), ~122 Events mit Koordinaten

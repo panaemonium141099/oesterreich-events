@@ -851,6 +851,48 @@ All niche scrapers extend BaseScraper and are registered in the main scraper ind
 
 ---
 
+### Phase 14: 50 Austrian Event Blog Posts — Content, SEO & UI (2026-04-01)
+
+**Epic:** fn-3-50-osterreichische-event-blogbeitrage
+
+**Features added:**
+
+- **Blog content architecture refactor (T1):** Extracted `FestivalPost`, `LineupAct`, `FestivalKeyFacts`, `GalleryImage` interfaces to `src/content/blog/types.ts`. Split monolithic `festivals.ts` into one file per post under `src/content/blog/posts/`. Added barrel `src/content/blog/index.ts` exporting `ALL_POSTS` (sorted newest-first), `getPostBySlug`, `getPostsByCategory`.
+
+- **50 new long-form blog posts (T2-T6):** Added 50 `FestivalPost` objects covering major Austrian events across all 9 Bundeslaender. Each post includes: title, slug, category, hero image (Unsplash CDN), description (3+ paragraphs), keyFacts, gallery (3 images), practicalInfo (2+ paragraphs), lineup (where applicable), `seoTitle` (<=60 chars), `seoDescription` (<=160 chars), `keywords` (8-12), `jsonLdEvent` Schema.org Event type.
+
+  | Batch | Region | Posts |
+  |-------|--------|-------|
+  | T2 | Wien | Christkindlmarkt, Silvesterpfad, Opernball, Neujahrskonzert, Festwochen, Vienna Marathon, Regenbogenparade, Kaiser Wiesn, Genussfestival, Viennale |
+  | T3 | Salzburg & Tirol | Salzburger Festspiele, Salzburger Christkindlmarkt, Jazz & The City, Salzburger Dult, Hahnenkamm Kitzbuehel, Innsbruck Festwochen Alte Musik, Innsbruck Christkindlmarkt, Tiroler Volksschauspiele, SnowBombing Mayrhofen, Forum Alpbach |
+  | T4 | OO & Vorarlberg | Linz Pflasterspektakel, Linzer Klangwolke, Linzer Christkindlmarkt, Ars Electronica, Steyr Stadtfest, Bregenz Festspiele, Bregenzer Fruehling, Montafoner Sommertage, Feldkirch Festival, Lustenauer Martinimarkt |
+  | T5 | Steiermark & Kaernten | Styriarte Graz, Grazer Aufsteirern, Grazer Christkindlmarkt, Klagenfurter Stadtfest, Ironman Austria, Villacher Fasching, Woerthersee Beachvolleyball, Carinthian Summer Ossiach, Murau Stadtfest, Woerthersee Regatta |
+  | T6 | NO, Burgenland & Bundesweit | Grafenegg Festival, Lehar Festival Bad Ischl, Esterhazy Konzerte, Pannonia Fields, Seefestspiele Moerbisch, Wiesen Fest, Lichterfest Melk, Retz Weinlesefest, Linz Marathon |
+
+- **UI integration (T7):** `FestivalBlogSection` component added to landing page, pulling from full `ALL_POSTS` pool. Blog index `/blog` with category filter tabs (Musik, Kultur, Maerkte, Sport, Brauchtum, Klassik). Related posts on blog detail pages.
+
+- **SEO & sitemap (T8):** `src/app/sitemap.ts` updated to include all 52 blog post URLs + `/blog` index URL in chunk 0 (53 blog URLs total). Blog detail pages use `generateMetadata` + JSON-LD `Event` schema.
+
+**New routes:**
+
+| Route | Purpose |
+|-------|---------|
+| `/blog` | Blog index with category filter |
+| `/blog/[slug]` | Blog detail page (52 static routes) |
+
+**Key files:**
+
+| File | Purpose |
+|------|---------|
+| `src/content/blog/types.ts` | Shared TypeScript interfaces |
+| `src/content/blog/index.ts` | Barrel: ALL_POSTS (52 posts) |
+| `src/content/blog/posts/` | 52 individual post files |
+| `src/app/blog/page.tsx` | Blog index page |
+| `src/app/blog/[slug]/page.tsx` | Blog detail page |
+| `src/components/Landing/FestivalBlogSection.tsx` | Landing page blog section |
+
+---
+
 ### Summary: What Changed vs. Baseline
 
 | Area | Before | After |
