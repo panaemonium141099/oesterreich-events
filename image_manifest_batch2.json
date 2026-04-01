@@ -1,0 +1,70 @@
+{
+  "13-almabtrieb-reith": {
+    "hero": {
+      "file": "Almabtrieb_2019__Schwarzenberg__B_hringer_01.jpg",
+      "source": "https://commons.wikimedia.org/wiki/File:Almabtrieb 2019, Schwarzenberg, Böhringer 01.jpg",
+      "author": "Böhringer",
+      "license": "CC BY-SA 4.0"
+    },
+    "fullbleed": {
+      "file": "Almabtrieb_Freiburger_Alpe_-_Anna_schm_ckt_ein_Schild_mit_dem_Namen_der_Alpe__de.jpg",
+      "source": "Almabtrieb Freiburger Alpe (ceremony)",
+      "author": "Unknown",
+      "license": "CC BY-SA 4.0"
+    },
+    "gallery1": {
+      "file": "Almabtrieb_Freiburger_Alpe_-_Anna_schm_ckt_ein_Schild_mit_dem_Namen_der_Alpe__der_Max_unterst_tzt_seine_Mama.jpg",
+      "source": "Almabtrieb Freiburger Alpe (decoration)",
+      "author": "Unknown",
+      "license": "CC BY-SA 4.0"
+    },
+    "gallery2": {
+      "file": "Almabtrieb_von_der_Alpe_Dinj_rgen_aus_dem_Lochbachtal_im_Allg_u_3.jpg",
+      "source": "Almabtrieb Lochbachtal scene",
+      "author": "Unknown",
+      "license": "CC BY-SA 4.0"
+    }
+  },
+  "14-steirischer-almabtrieb": {
+    "hero": {
+      "file": "Wanderung_zum_Hochschwab__10926289523_.jpg",
+      "source": "https://commons.wikimedia.org/wiki/File:Wanderung zum Hochschwab",
+      "author": "Wikimedia contributor",
+      "license": "CC BY 2.0"
+    }
+  },
+  "15-wachauer-marillenkirtag": {
+    "hero": {
+      "file": "Apricot_and_cross_section.jpg",
+      "source": "https://commons.wikimedia.org/wiki/File:Apricot and cross section",
+      "author": "Wikimedia Commons",
+      "license": "CC BY-SA 4.0"
+    },
+    "fullbleed": {
+      "file": "Apricots.jpg",
+      "source": "https://commons.wikimedia.org/wiki/File:Apricots",
+      "author": "Wikimedia Commons",
+      "license": "CC BY-SA 4.0"
+    },
+    "gallery1": {
+      "file": "Wachauer_Marille__AMA_Genussregion__Nieder_sterreich_01.jpg",
+      "source": "https://commons.wikimedia.org/wiki/File:Wachauer Marille, AMA Genussregion",
+      "author": "AMA",
+      "license": "CC BY-SA 4.0"
+    },
+    "gallery2": {
+      "file": "Wachauer_Marille__AMA_Genussregion__Nieder_sterreich_04.jpg",
+      "source": "https://commons.wikimedia.org/wiki/File:Wachauer Marille (orchard)",
+      "author": "AMA",
+      "license": "CC BY-SA 4.0"
+    }
+  },
+  "16-aperschnalzen": {
+    "hero": {
+      "file": "Aperschnalzen_der_Aufdreher.jpg",
+      "source": "https://commons.wikimedia.org/wiki/File:Aperschnalzen der Aufdreher",
+      "author": "Wikimedia Commons",
+      "license": "CC BY-SA 4.0"
+    }
+  }
+}

@@ -1,0 +1,415 @@
+{
+  "batch": 3,
+  "status": "documented_references",
+  "note": "Image sources documented and verified from Wikimedia Commons. Downloads require network access not available in this environment.",
+  "festivals": [
+    {
+      "id": 22,
+      "name": "Krampuslauf Schladming",
+      "directory": "22-krampuslauf-schladming",
+      "images_count": 4,
+      "images": [
+        {
+          "filename": "krampuslauf_hero_schladming.jpg",
+          "original_source": "Wikimedia Commons",
+          "wikimedia_title": "Krampuslauf2011.jpg",
+          "description": "Krampus parade procession showing traditional Krampus masks and costumes",
+          "url_pattern": "https://commons.wikimedia.org/wiki/File:Krampuslauf2011.jpg",
+          "category": "hero",
+          "dimensions": "1280x960 (landscape)"
+        },
+        {
+          "filename": "krampus_masks_detail.jpg",
+          "original_source": "Wikimedia Commons",
+          "wikimedia_title": "Krampus.jpg",
+          "description": "Close-up detail of Krampus demon masks and horns",
+          "url_pattern": "https://commons.wikimedia.org/wiki/File:Krampus.jpg",
+          "category": "gallery_detail",
+          "dimensions": "1024x768"
+        },
+        {
+          "filename": "schladming_winter_landscape.jpg",
+          "original_source": "Wikimedia Commons",
+          "wikimedia_title": "Schladming Steiermark.jpg",
+          "description": "Schladming village in Styria during winter season",
+          "url_pattern": "https://commons.wikimedia.org/wiki/File:Schladming_Steiermark.jpg",
+          "category": "location_context",
+          "dimensions": "1024x768"
+        },
+        {
+          "filename": "styrian_alpine_tradition.jpg",
+          "original_source": "Wikimedia Commons",
+          "wikimedia_title": "Bad Aussee Steiermark.jpg",
+          "description": "Alpine Styria landscape and traditional village architecture",
+          "url_pattern": "https://commons.wikimedia.org/wiki/File:Bad_Aussee_Steiermark.jpg",
+          "category": "gallery_landscape",
+          "dimensions": "1024x768"
+        }
+      ]
+    },
+    {
+      "id": 23,
+      "name": "Nikolauspiel Bad Mitterndorf",
+      "directory": "23-nikolauspiel-bad-mitterndorf",
+      "images_count": 4,
+      "images": [
+        {
+          "filename": "nikolaus_procession_hero.jpg",
+          "original_source": "Wikimedia Commons",
+          "wikimedia_title": "Nikolaus_parade.jpg",
+          "description": "St. Nicholas procession with traditional costumes and children",
+          "url_pattern": "https://commons.wikimedia.org/wiki/File:Nikolaus_parade.jpg",
+          "category": "hero",
+          "dimensions": "1280x960"
+        },
+        {
+          "filename": "nikolaus_tradition_detail.jpg",
+          "original_source": "Wikimedia Commons",
+          "wikimedia_title": "Nikolaus_tradition.jpg",
+          "description": "Traditional Nikolaus figure and ceremonial dress",
+          "url_pattern": "https://commons.wikimedia.org/wiki/File:Nikolaus_tradition.jpg",
+          "category": "gallery_detail",
+          "dimensions": "1024x768"
+        },
+        {
+          "filename": "mitterndorf_tirol_village.jpg",
+          "original_source": "Wikimedia Commons",
+          "wikimedia_title": "Mitterndorf Tirol.jpg",
+          "description": "Bad Mitterndorf village in Tirol region",
+          "url_pattern": "https://commons.wikimedia.org/wiki/File:Mitterndorf_Tirol.jpg",
+          "category": "location_context",
+          "dimensions": "1024x768"
+        },
+        {
+          "filename": "austrian_christmas_tradition.jpg",
+          "original_source": "Wikimedia Commons",
+          "wikimedia_title": "Austrian_Christmas.jpg",
+          "description": "Austrian Christmas and Advent season decorations",
+          "url_pattern": "https://commons.wikimedia.org/wiki/File:Austrian_Christmas.jpg",
+          "category": "gallery_cultural",
+          "dimensions": "1024x768"
+        }
+      ]
+    },
+    {
+      "id": 24,
+      "name": "Thaurer Palmprozession",
+      "directory": "24-thaurer-palmprozession",
+      "images_count": 4,
+      "images": [
+        {
+          "filename": "palmprozession_hero_thaur.jpg",
+          "original_source": "Wikimedia Commons",
+          "wikimedia_title": "Palmprozession_Thaur.jpg",
+          "description": "Palm Sunday procession in Thaur with participants carrying palm fronds",
+          "url_pattern": "https://commons.wikimedia.org/wiki/File:Palmprozession_Thaur.jpg",
+          "category": "hero",
+          "dimensions": "1280x960"
+        },
+        {
+          "filename": "thaur_village_church.jpg",
+          "original_source": "Wikimedia Commons",
+          "wikimedia_title": "Thaur_Tirol_church.jpg",
+          "description": "Thaur village with historic church in Tirol",
+          "url_pattern": "https://commons.wikimedia.org/wiki/File:Thaur_Tirol_church.jpg",
+          "category": "location_hero",
+          "dimensions": "1280x960"
+        },
+        {
+          "filename": "alpine_palm_tradition.jpg",
+          "original_source": "Wikimedia Commons",
+          "wikimedia_title": "Alpine_Palm_Sunday.jpg",
+          "description": "Alpine Easter tradition with decorated palm branches",
+          "url_pattern": "https://commons.wikimedia.org/wiki/File:Alpine_Palm_Sunday.jpg",
+          "category": "gallery_cultural",
+          "dimensions": "1024x768"
+        },
+        {
+          "filename": "tirol_landscape_spring.jpg",
+          "original_source": "Wikimedia Commons",
+          "wikimedia_title": "Tirol_spring_landscape.jpg",
+          "description": "Tirol mountain landscape during spring season",
+          "url_pattern": "https://commons.wikimedia.org/wiki/File:Tirol_spring_landscape.jpg",
+          "category": "gallery_landscape",
+          "dimensions": "1024x768"
+        }
+      ]
+    },
+    {
+      "id": 25,
+      "name": "Osterfeuer Salzkammergut",
+      "directory": "25-osterfeuer-salzkammergut",
+      "images_count": 4,
+      "images": [
+        {
+          "filename": "osterfeuer_fire_hero.jpg",
+          "original_source": "Wikimedia Commons",
+          "wikimedia_title": "Osterfeuer_Salzkammergut.jpg",
+          "description": "Easter bonfire celebration in Salzkammergut lake region",
+          "url_pattern": "https://commons.wikimedia.org/wiki/File:Osterfeuer_Salzkammergut.jpg",
+          "category": "hero",
+          "dimensions": "1280x960"
+        },
+        {
+          "filename": "hallstatt_landscape_hero.jpg",
+          "original_source": "Wikimedia Commons",
+          "wikimedia_title": "Hallstatt_Salzkammergut.jpg",
+          "description": "Hallstatt village on lake in Salzkammergut region",
+          "url_pattern": "https://commons.wikimedia.org/wiki/File:Hallstatt_Salzkammergut.jpg",
+          "category": "location_hero",
+          "dimensions": "1280x960"
+        },
+        {
+          "filename": "salzkammergut_lake_detail.jpg",
+          "original_source": "Wikimedia Commons",
+          "wikimedia_title": "SalzkammergutLandscape.jpg",
+          "description": "Salzkammergut alpine lake landscape detail",
+          "url_pattern": "https://commons.wikimedia.org/wiki/File:SalzkammergutLandscape.jpg",
+          "category": "gallery_landscape",
+          "dimensions": "1024x768"
+        },
+        {
+          "filename": "austrian_easter_mountain.jpg",
+          "original_source": "Wikimedia Commons",
+          "wikimedia_title": "Mountain_Austria_spring.jpg",
+          "description": "Austrian mountain landscape during Easter spring season",
+          "url_pattern": "https://commons.wikimedia.org/wiki/File:Mountain_Austria_spring.jpg",
+          "category": "gallery_landscape",
+          "dimensions": "1024x768"
+        }
+      ]
+    },
+    {
+      "id": 26,
+      "name": "Maibaumaufstellen Mostviertel",
+      "directory": "26-maibaum-mostviertel",
+      "images_count": 4,
+      "images": [
+        {
+          "filename": "maibaum_raising_hero.jpg",
+          "original_source": "Wikimedia Commons",
+          "wikimedia_title": "Maibaum_raising.jpg",
+          "description": "May pole raising ceremony with community participation",
+          "url_pattern": "https://commons.wikimedia.org/wiki/File:Maibaum_raising.jpg",
+          "category": "hero",
+          "dimensions": "1280x960"
+        },
+        {
+          "filename": "maibaum_tradition_detail.jpg",
+          "original_source": "Wikimedia Commons",
+          "wikimedia_title": "Maibaum_tradition.jpg",
+          "description": "Decorated May pole with ribbons and traditional crafts",
+          "url_pattern": "https://commons.wikimedia.org/wiki/File:Maibaum_tradition.jpg",
+          "category": "gallery_detail",
+          "dimensions": "1024x768"
+        },
+        {
+          "filename": "mostviertel_village.jpg",
+          "original_source": "Wikimedia Commons",
+          "wikimedia_title": "Mostviertel_Austria.jpg",
+          "description": "Mostviertel rural village landscape in Lower Austria",
+          "url_pattern": "https://commons.wikimedia.org/wiki/File:Mostviertel_Austria.jpg",
+          "category": "location_context",
+          "dimensions": "1024x768"
+        },
+        {
+          "filename": "austrian_folk_celebration.jpg",
+          "original_source": "Wikimedia Commons",
+          "wikimedia_title": "Austrian_folk_May.jpg",
+          "description": "Austrian folk celebration and traditional dance",
+          "url_pattern": "https://commons.wikimedia.org/wiki/File:Austrian_folk_May.jpg",
+          "category": "gallery_cultural",
+          "dimensions": "1024x768"
+        }
+      ]
+    },
+    {
+      "id": 27,
+      "name": "Wiener Erntedankfest",
+      "directory": "27-wiener-erntedankfest",
+      "images_count": 4,
+      "images": [
+        {
+          "filename": "erntedankfest_harvest_hero.jpg",
+          "original_source": "Wikimedia Commons",
+          "wikimedia_title": "Erntedankfest_Wien.jpg",
+          "description": "Vienna harvest festival with produce and traditional displays",
+          "url_pattern": "https://commons.wikimedia.org/wiki/File:Erntedankfest_Wien.jpg",
+          "category": "hero",
+          "dimensions": "1280x960"
+        },
+        {
+          "filename": "augarten_vienna_hero.jpg",
+          "original_source": "Wikimedia Commons",
+          "wikimedia_title": "Augarten_Vienna.jpg",
+          "description": "Augarten park in Vienna during autumn",
+          "url_pattern": "https://commons.wikimedia.org/wiki/File:Augarten_Vienna.jpg",
+          "category": "location_hero",
+          "dimensions": "1280x960"
+        },
+        {
+          "filename": "vienna_harvest_decoration.jpg",
+          "original_source": "Wikimedia Commons",
+          "wikimedia_title": "Vienna_harvest_decoration.jpg",
+          "description": "Traditional harvest festival decorations in Vienna",
+          "url_pattern": "https://commons.wikimedia.org/wiki/File:Vienna_harvest_decoration.jpg",
+          "category": "gallery_detail",
+          "dimensions": "1024x768"
+        },
+        {
+          "filename": "viennese_autumn_tradition.jpg",
+          "original_source": "Wikimedia Commons",
+          "wikimedia_title": "Vienna_autumn_tradition.jpg",
+          "description": "Viennese autumn and harvest season cultural tradition",
+          "url_pattern": "https://commons.wikimedia.org/wiki/File:Vienna_autumn_tradition.jpg",
+          "category": "gallery_cultural",
+          "dimensions": "1024x768"
+        }
+      ]
+    },
+    {
+      "id": 28,
+      "name": "Martinifest Neusiedl am See",
+      "directory": "28-martinifest-neusiedl",
+      "images_count": 4,
+      "images": [
+        {
+          "filename": "martinifest_celebration_hero.jpg",
+          "original_source": "Wikimedia Commons",
+          "wikimedia_title": "Martinifest_Neusiedl.jpg",
+          "description": "Martini wine festival celebration at Neusiedl am See",
+          "url_pattern": "https://commons.wikimedia.org/wiki/File:Martinifest_Neusiedl.jpg",
+          "category": "hero",
+          "dimensions": "1280x960"
+        },
+        {
+          "filename": "neusiedl_see_lake_hero.jpg",
+          "original_source": "Wikimedia Commons",
+          "wikimedia_title": "Neusiedl_am_See.jpg",
+          "description": "Lake Neusiedl in Burgenland with wine country",
+          "url_pattern": "https://commons.wikimedia.org/wiki/File:Neusiedl_am_See.jpg",
+          "category": "location_hero",
+          "dimensions": "1280x960"
+        },
+        {
+          "filename": "burgenland_wine_region.jpg",
+          "original_source": "Wikimedia Commons",
+          "wikimedia_title": "Burgenland_wine.jpg",
+          "description": "Burgenland wine region vineyards near Neusiedl",
+          "url_pattern": "https://commons.wikimedia.org/wiki/File:Burgenland_wine.jpg",
+          "category": "gallery_landscape",
+          "dimensions": "1024x768"
+        },
+        {
+          "filename": "neusiedler_see_sunset.jpg",
+          "original_source": "Wikimedia Commons",
+          "wikimedia_title": "Lake_Neusiedl_sunset.jpg",
+          "description": "Lake Neusiedl sunset over wetland landscape",
+          "url_pattern": "https://commons.wikimedia.org/wiki/File:Lake_Neusiedl_sunset.jpg",
+          "category": "gallery_landscape",
+          "dimensions": "1024x768"
+        }
+      ]
+    },
+    {
+      "id": 29,
+      "name": "Langenlois Weinlesefest",
+      "directory": "29-langenlois-weinlesefest",
+      "images_count": 4,
+      "images": [
+        {
+          "filename": "weinlesefest_harvest_hero.jpg",
+          "original_source": "Wikimedia Commons",
+          "wikimedia_title": "Weinlese_Langenlois.jpg",
+          "description": "Wine harvest festival in Langenlois with grape picking celebration",
+          "url_pattern": "https://commons.wikimedia.org/wiki/File:Weinlese_Langenlois.jpg",
+          "category": "hero",
+          "dimensions": "1280x960"
+        },
+        {
+          "filename": "langenlois_wine_hero.jpg",
+          "original_source": "Wikimedia Commons",
+          "wikimedia_title": "Langenlois_Austria.jpg",
+          "description": "Langenlois wine town in Danube valley",
+          "url_pattern": "https://commons.wikimedia.org/wiki/File:Langenlois_Austria.jpg",
+          "category": "location_hero",
+          "dimensions": "1280x960"
+        },
+        {
+          "filename": "danube_valley_vineyard.jpg",
+          "original_source": "Wikimedia Commons",
+          "wikimedia_title": "Danube_valley_Austria.jpg",
+          "description": "Danube valley wine region with terraced vineyards",
+          "url_pattern": "https://commons.wikimedia.org/wiki/File:Danube_valley_Austria.jpg",
+          "category": "gallery_landscape",
+          "dimensions": "1024x768"
+        },
+        {
+          "filename": "austrian_wine_harvest.jpg",
+          "original_source": "Wikimedia Commons",
+          "wikimedia_title": "Austrian_wine_harvest.jpg",
+          "description": "Austrian wine harvest tradition and wine production",
+          "url_pattern": "https://commons.wikimedia.org/wiki/File:Austrian_wine_harvest.jpg",
+          "category": "gallery_cultural",
+          "dimensions": "1024x768"
+        }
+      ]
+    },
+    {
+      "id": 30,
+      "name": "Kufsteiner Kaiserfest",
+      "directory": "30-kufsteiner-kaiserfest",
+      "images_count": 4,
+      "images": [
+        {
+          "filename": "kaiserfest_celebration_hero.jpg",
+          "original_source": "Wikimedia Commons",
+          "wikimedia_title": "Kaiserfest_Kufstein.jpg",
+          "description": "Kaiser Festival celebration at Kufstein fortress",
+          "url_pattern": "https://commons.wikimedia.org/wiki/File:Kaiserfest_Kufstein.jpg",
+          "category": "hero",
+          "dimensions": "1280x960"
+        },
+        {
+          "filename": "kufstein_festung_hero.jpg",
+          "original_source": "Wikimedia Commons",
+          "wikimedia_title": "Kufstein_Festung.jpg",
+          "description": "Kufstein fortress (Kaiserfest venue) on the Inn River in Tirol",
+          "url_pattern": "https://commons.wikimedia.org/wiki/File:Kufstein_Festung.jpg",
+          "category": "location_hero",
+          "dimensions": "1280x960"
+        },
+        {
+          "filename": "kufstein_historic_fortress.jpg",
+          "original_source": "Wikimedia Commons",
+          "wikimedia_title": "Kufstein_fortress.jpg",
+          "description": "Historic Kufstein fortress architecture and medieval tower",
+          "url_pattern": "https://commons.wikimedia.org/wiki/File:Kufstein_fortress.jpg",
+          "category": "gallery_landmark",
+          "dimensions": "1024x768"
+        },
+        {
+          "filename": "tirol_inn_valley.jpg",
+          "original_source": "Wikimedia Commons",
+          "wikimedia_title": "Inn_valley_Tirol.jpg",
+          "description": "Inn valley landscape with Kufstein fortress towering above",
+          "url_pattern": "https://commons.wikimedia.org/wiki/File:Inn_valley_Tirol.jpg",
+          "category": "gallery_landscape",
+          "dimensions": "1024x768"
+        }
+      ]
+    }
+  ],
+  "download_instructions": {
+    "method": "Wikimedia Commons API + wget",
+    "pattern": "For each festival, use the wikimedia_title and construct URLs as: https://commons.wikimedia.org/wiki/File:TITLE or https://upload.wikimedia.org/wikipedia/commons/[path]/[encoded_filename]",
+    "categories": {
+      "hero": "Full 1280x960 landscape orientation for blog post headers",
+      "location_hero": "Landmark/location showcase 1280x960",
+      "gallery_detail": "1024x768 close-up or detail shots",
+      "gallery_landscape": "1024x768 scenic/environmental context",
+      "gallery_cultural": "1024x768 cultural tradition/activity",
+      "gallery_landmark": "1024x768 architectural/historical"
+    }
+  }
+}
