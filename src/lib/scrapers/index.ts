@@ -42,6 +42,8 @@ import { FeratelScraper } from './FeratelScraper';
 import { TourDataScraper } from './TourDataScraper';
 import { WienOGDScraper } from './WienOGDScraper';
 import { WienTicketScraper } from './WienTicketScraper';
+import { TipsAtScraper } from './TipsAtScraper';
+import { BergfexScraper } from './BergfexScraper';
 import {
   FestivalAtScraper, FestivalGuideScraper,
   ResidentAdvisorAustriaScraper, ClubmapScraper,
@@ -49,6 +51,7 @@ import {
   BundestheaterScraper, TheaterAtScraper,
   BauernmarktScraper, GenussregionScraper,
   FamiliiiScraper, FamilienUrlaubScraper,
+  StadtbekanntScraper, RegionewsScraper,
 } from './niche';
 import {
   UniWienScraper, TUWienScraper, UniGrazScraper, UniInnsbruckScraper,
@@ -167,6 +170,11 @@ const scrapers: BaseScraper[] = [
   // Nischen-Kategorien: Familie
   new FamiliiiScraper(),
   new FamilienUrlaubScraper(),
+  // Media-Portale & RSS Feeds
+  new TipsAtScraper(),
+  new BergfexScraper(),
+  new StadtbekanntScraper(),
+  new RegionewsScraper(),
   // Gemeinde-Websites (alle Bundesländer)
   new GemeindeListScraper(),
   // GEM2GO CMS Gemeinden (~2.000 Gemeinden österreichweit)

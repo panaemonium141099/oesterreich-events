@@ -30,9 +30,8 @@ Expand the existing FeratelScraper to cover additional regions not yet included.
 - [ ] `npm run scrape -- --source feratel` returns events from new regions
 - [ ] `npm run build` passes
 ## Done summary
-TBD
-
+Added 15 new Deskline/Feratel regions to FeratelScraper, expanding coverage from 47 to 62 regions. New regions span Vorarlberg (1), Kärnten (5), Oberösterreich (3), Tirol (3), Salzburg (2), and Steiermark (1), adding approximately 2,495 additional events. All region codes were verified via API probing to return valid event data with no duplicate codes.
 ## Evidence
-- Commits:
-- Tests:
+- Commits: 281bcdd0b350cd37b5224e330c62c45f5bbbbd45
+- Tests: npx tsc --noEmit, curl verification of all 15 new region endpoints
 - PRs:
