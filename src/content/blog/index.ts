@@ -12,6 +12,16 @@ import { post as wienerRegenbogenparade } from './posts/wiener-regenbogenparade'
 import { post as kaiserWiesn } from './posts/kaiser-wiesn';
 import { post as wienerGenussfestival } from './posts/wiener-genussfestival';
 import { post as viennale } from './posts/viennale';
+import { post as salzburgerFestspiele } from './posts/salzburger-festspiele';
+import { post as salzburgerChristkindlmarkt } from './posts/salzburger-christkindlmarkt';
+import { post as salzburgJazzAndTheCity } from './posts/salzburg-jazz-and-the-city';
+import { post as salzburgerDult } from './posts/salzburger-dult';
+import { post as hahnenkammRennenKitzbuehel } from './posts/hahnenkamm-rennen-kitzbuehel';
+import { post as innsbruckFestwochenAlteMusik } from './posts/innsbruck-festwochen-alte-musik';
+import { post as innsbruckChristkindlmarkt } from './posts/innsbruck-christkindlmarkt';
+import { post as tirolerVolksschauspielesTelfs } from './posts/tiroler-volksschauspiele-telfs';
+import { post as snowbombingMayrhofen } from './posts/snowbombing-mayrhofen';
+import { post as europaeischesForumAlpbach } from './posts/europaeisches-forum-alpbach';
 
 export type { FestivalPost, GalleryImage, FestivalKeyFacts, LineupAct } from './types';
 
@@ -30,6 +40,16 @@ export const ALL_POSTS: FestivalPost[] = [
   kaiserWiesn,
   wienerGenussfestival,
   viennale,
+  salzburgerFestspiele,
+  salzburgerChristkindlmarkt,
+  salzburgJazzAndTheCity,
+  salzburgerDult,
+  hahnenkammRennenKitzbuehel,
+  innsbruckFestwochenAlteMusik,
+  innsbruckChristkindlmarkt,
+  tirolerVolksschauspielesTelfs,
+  snowbombingMayrhofen,
+  europaeischesForumAlpbach,
 ].sort(
   (a, b) => new Date(b.publishDate).getTime() - new Date(a.publishDate).getTime()
 );

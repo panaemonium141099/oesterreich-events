@@ -25,8 +25,15 @@ Create 10 long-form blog post TypeScript files for major NÖ, Burgenland & bunde
 - `gallery`: 3 Unsplash images with verified photo-XXXXXXXXXX CDN IDs
 - `practicalInfo`: array of 3–4 `{ icon: string; label: string; text: string }` objects
 <!-- Updated by plan-sync: fn-3-50...1 used structured content fields not `description`, practicalInfo is {icon,label,text}[] -->
+- `subtitle`: short tagline for the event
+- `categoryColor`: Tailwind class string (e.g. `'bg-red-700 text-white'`)
+- `ctaText`: call-to-action button label (e.g. `'Jetzt entdecken'`)
+- `ctaLink`: CTA URL (typically the event website)
+- `practicalInfoTitle`: heading string (e.g. `'Praktische Infos für Besucher'`)
+- `thumbnailImage`: same Unsplash photo as heroImage but with `w=800` instead of `w=1600`
+<!-- Updated by plan-sync: fn-3-50...2 — FestivalPost requires subtitle, categoryColor, ctaText, ctaLink, practicalInfoTitle; thumbnailImage is optional but recommended -->
 - `seoTitle`: <=60 chars, `seoDescription`: <=160 chars, `keywords`: 8-12
-- `jsonLdEvent`: Schema.org Event with addressCountry: AT
+- `jsonLdEvent`: Schema.org Event with `location` (string), `addressCountry: 'AT'` (sibling field), `image`, `url`, `description`
 
 ### After writing posts
 
@@ -35,7 +42,8 @@ Append all 10 imports to `src/content/blog/index.ts` ALL_POSTS array. After this
 - [ ] 10 files created under src/content/blog/posts/ for NOe/Burgenland/bundesweit events
 - [ ] Each post: intro + history + whatToExpect content filled, keyFacts complete, gallery 3 images, practicalInfo >=3 items
 - [ ] All seoTitle <=60, seoDescription <=160, keywords 8-12
-- [ ] All jsonLdEvent have required fields with addressCountry: AT
+- [ ] All jsonLdEvent have name, startDate, endDate, location (string), addressCountry='AT', url, image, description
+<!-- Updated by plan-sync: fn-3-50...2 — jsonLdEvent.location is a plain string, addressCountry is a sibling field -->
 - [ ] All Unsplash URLs verified photo-XXXXXXXXXX CDN format
 - [ ] All 10 posts appended to ALL_POSTS in index.ts (total should be 53)
 - [ ] TypeScript compiles without errors

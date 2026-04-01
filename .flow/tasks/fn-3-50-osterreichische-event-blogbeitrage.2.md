@@ -45,9 +45,8 @@ Add each post import to `src/content/blog/index.ts` barrel (append to `ALL_POSTS
 - [ ] All 10 posts added to ALL_POSTS barrel in index.ts
 - [ ] TypeScript compiles without errors for all new files
 ## Done summary
-TBD
-
+Created 10 Wien event blog posts (wien-christkindlmarkt, wiener-silvesterpfad, wiener-opernball, wiener-neujahrskonzert, wiener-festwochen, vienna-city-marathon, wiener-regenbogenparade, kaiser-wiesn, wiener-genussfestival, viennale) with full content, SEO metadata, Schema.org JSON-LD with addressCountry=AT and image, and all posts added to the ALL_POSTS barrel in index.ts.
 ## Evidence
-- Commits:
-- Tests:
+- Commits: 21a7aceedff5574dda76b1976f7affd986fb46d9, 9845f3e, 72fd5f6
+- Tests: npx tsc --noEmit
 - PRs:
