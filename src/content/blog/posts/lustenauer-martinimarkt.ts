@@ -16,7 +16,7 @@ export const post: FestivalPost = {
   category: 'Kultur & Tradition',
   categoryColor: 'bg-yellow-600 text-white',
   keyFacts: {
-    dates: 'August 2026 (genaues Datum wird im Mai bekannt gegeben)',
+    dates: '7.–10. August 2026',
     location: 'Lustenau Festplatz',
     address: 'Rathausstraße 1, 6890 Lustenau',
     genre: 'Volksfest, Kirmes, Kulinarik, Unterhaltung',
@@ -31,7 +31,7 @@ export const post: FestivalPost = {
     { name: 'DJ Abend für Jugendliche', role: 'support', stage: 'Festplatz-Bühne', day: 'Samstag Nacht' },
   ],
   lineupNote:
-    'Das vollständige Programm der Luschnouar Kilbi 2026 wird im Mai bekannt gegeben. Die Kilbi ist ein mehrtägiges Familienfest mit Karussells, Schaustellern und Festzelten.',
+    'Das vollständige Programm der Luschnouar Kilbi 2026 wird im Frühsommer veröffentlicht. Die Kilbi ist ein mehrtägiges Familienfest mit Karussells, Schaustellern und Festzelten.',
   intro:
     'Die Kilbi ist in Vorarlberg mehr als ein Jahrmarkt — sie ist ein Stück gelebter Identität. In Lustenau, der größten Marktgemeinde Österreichs direkt am Rhein und Bodensee, findet die Luschnouar Kilbi jedes Jahr im Sommer statt. Familien kommen mit Kindern für die Fahrgeschäfte, Jugendliche treffen sich am Abend, und die Älteren schätzen die Gemütlichkeit des Festzelts mit typischer Vorarlberger Blechmusik. Kurz: Die Kilbi ist Lustenau.',
   historyTitle: 'Ein Volksfest mit jahrhundertealter Tradition',
