@@ -20,22 +20,52 @@ export const metadata: Metadata = {
 };
 
 // ── Category filter ──────────────────────────────────────────────────────────
-// Each entry: { label shown in UI, query param value, prefix used to match stored category strings }
-// Stored category strings include compound values like "Musik & Festival", "Kultur & Tradition", etc.
-// We match by checking whether the stored category starts with (or equals) the prefix, case-insensitively.
-const FILTER_TABS = [
-  { label: 'Alle',      query: 'alle',      prefix: null           },
-  { label: 'Musik',     query: 'musik',     prefix: 'musik'        },
-  { label: 'Kultur',    query: 'kultur',    prefix: 'kultur'       },
-  { label: 'Sport',     query: 'sport',     prefix: 'sport'        },
-  { label: 'Festivals', query: 'festivals', prefix: 'festival'     },
-] as const;
+// Maps spec-required tab labels to the actual stored category strings.
+// Multiple stored values can match a single tab (union match).
+// `matchValues: null` means "show all posts" (Alle tab).
+const FILTER_TABS: Array<{
+  label: string;
+  query: string;
+  matchValues: string[] | null;
+}> = [
+  { label: 'Alle',      query: 'alle',      matchValues: null },
+  {
+    label: 'Musik',
+    query: 'musik',
+    matchValues: ['Musik', 'Musik & Festival', 'Musik & Konzerte'],
+  },
+  {
+    label: 'Kultur',
+    query: 'kultur',
+    matchValues: ['Kultur & Tradition', 'Kultur & B\u00fchne'],
+  },
+  {
+    label: 'M\u00e4rkte',
+    query: 'maerkte',
+    matchValues: ['Kulinarik & Tradition', 'Essen & Trinken'],
+  },
+  {
+    label: 'Sport',
+    query: 'sport',
+    matchValues: ['Sport & Outdoor', 'Sport & Fitness'],
+  },
+  {
+    label: 'Brauchtum',
+    query: 'brauchtum',
+    // Brauchtum (folk customs): subset of traditional/festive culture posts
+    matchValues: ['Kultur & Tradition', 'Festivals & Feste', 'Open-Air & Feste'],
+  },
+  {
+    label: 'Klassik',
+    query: 'klassik',
+    // Classical music: Musik & Konzerte covers opera/chamber/classical events
+    matchValues: ['Musik & Konzerte'],
+  },
+];
 
-type FilterQuery = (typeof FILTER_TABS)[number]['query'];
-
-function matchesFilter(category: string, prefix: string | null): boolean {
-  if (prefix === null) return true;
-  return category.toLowerCase().startsWith(prefix);
+function matchesFilter(category: string, matchValues: string[] | null): boolean {
+  if (matchValues === null) return true;
+  return matchValues.includes(category);
 }
 
 function ArrowRight() {
@@ -54,14 +84,14 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
   const { category } = await searchParams;
 
   // Determine the active tab (default to 'alle')
-  const activeQuery: FilterQuery =
-    category && FILTER_TABS.some(t => t.query === category)
-      ? (category as FilterQuery)
-      : 'alle';
+  const activeQuery =
+    category && FILTER_TABS.some(t => t.query === category) ? category : 'alle';
 
   const activeTab = FILTER_TABS.find(t => t.query === activeQuery) ?? FILTER_TABS[0];
 
-  const filteredPosts = ALL_POSTS.filter(p => matchesFilter(p.category, activeTab.prefix));
+  const filteredPosts = ALL_POSTS.filter(p =>
+    matchesFilter(p.category, activeTab.matchValues)
+  );
 
   const [hero, ...rest] = filteredPosts;
 
@@ -103,7 +133,7 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
             Events Blog
           </h1>
           <p className="text-gray-500 text-xl font-light max-w-lg leading-relaxed">
-            Event-Guides, Tipps und Insiderwissen zu den gr&ouml;&szlig;ten Veranstaltungen {'\u00d6sterreichs'}.
+            Event-Guides, Tipps und Insiderwissen zu den gr\u00f6\u00dften Veranstaltungen \u00d6sterreichs.
           </p>
         </header>
 
@@ -127,7 +157,7 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
           <p className="mt-3 text-xs text-gray-400">
             {filteredPosts.length}{' '}
             {filteredPosts.length === 1 ? 'Beitrag' : 'Beitr\u00e4ge'}
-            {activeTab.prefix !== null ? ` in ${activeTab.label}` : ' gesamt'}
+            {activeTab.matchValues !== null ? ` in ${activeTab.label}` : ' gesamt'}
           </p>
         </nav>
 
@@ -243,7 +273,7 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
         {/* FOOTER */}
         <div className="mt-16 pt-8 border-t border-gray-200 flex flex-wrap items-center justify-between gap-4">
           <p className="text-gray-400 text-xs uppercase tracking-wider">
-            LassTreffen.at &mdash; {'\u00d6sterreich'} Events
+            LassTreffen.at \u2014 \u00d6sterreich Events
           </p>
           <Link
             href="/map"
