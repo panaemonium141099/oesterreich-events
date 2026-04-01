@@ -44,3 +44,8 @@ data/*.db-wal
 # scraper progress & migration files
 data/scraper-progress-*.json
 data/migration-batch-*.json
+
+# Python dev artifacts (blog generator scripts - not part of app)
+*.py
+__pycache__/
+blog-posts-brauchtum/
