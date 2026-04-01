@@ -39,6 +39,9 @@ import { Gem2GoScraper } from './Gem2GoScraper';
 import { GenericGemeindeScraper } from './GenericGemeindeScraper';
 import { MariazellAtScraper, BasilikaMariazellScraper, MariazellGvScraper } from './MariazellScraper';
 import { FeratelScraper } from './FeratelScraper';
+import { TourDataScraper } from './TourDataScraper';
+import { WienOGDScraper } from './WienOGDScraper';
+import { WienTicketScraper } from './WienTicketScraper';
 import {
   FestivalAtScraper, FestivalGuideScraper,
   ResidentAdvisorAustriaScraper, ClubmapScraper,
@@ -123,6 +126,12 @@ const scrapers: BaseScraper[] = [
   new TourismusPortaleScraper(),
   // Feratel Deskline TOSC5 API (55+ Regionen österreichweit)
   new FeratelScraper(),
+  // TourData / austria.info API (alle Bundesländer, API key required)
+  new TourDataScraper(),
+  // Wien Open Government Data (VADB category queries, CC-BY 4.0)
+  new WienOGDScraper(),
+  // Wien-Ticket (Konzerte, Theater, Sport, Ausstellungen in Wien)
+  new WienTicketScraper(),
   // Kärnten
   new KaerntenLiveScraper(),
   // Tirol

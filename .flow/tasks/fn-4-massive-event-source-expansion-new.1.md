@@ -30,9 +30,8 @@ Add missing infrastructure to support the new scraper niches before building any
 - [ ] `npm run build` passes
 - [ ] `npm test` passes
 ## Done summary
-TBD
-
+Added ticket_url field to ScrapedEvent interface and full pipeline (SQLite schema with migration, upsertEvent, toSupabaseRow). Added "Wirtschaft" category with 30 business/trade keywords, integrated into CATEGORIES, PRIORITY_ORDER, TagChip colors, PopularCategories images, and categoryImages fallbacks.
 ## Evidence
-- Commits:
-- Tests:
+- Commits: e693ec24680d7724abed6012f9d0ae9c6fdd010b
+- Tests: npm test (127 passed), npx tsc --noEmit (0 errors)
 - PRs:
