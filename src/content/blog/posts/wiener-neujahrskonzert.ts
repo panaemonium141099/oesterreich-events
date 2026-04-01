@@ -109,8 +109,11 @@ export const post: FestivalPost = {
     startDate: '2026-01-01T11:15:00',
     endDate: '2026-01-01T13:30:00',
     location: 'Musikvereinsplatz 1, 1010 Wien, Austria',
+    addressCountry: 'AT',
     url: 'https://www.wienerphilharmoniker.at/neujahrskonzert',
     description:
       'Das Neujahrskonzert der Wiener Philharmoniker im Goldenen Saal des Musikvereins ist das meistgesehene Klassikkonzert der Welt.',
+    image:
+      'https://images.unsplash.com/photo-1507838153414-b4b713384a76?w=1600&q=85&auto=format&fit=crop',
   },
 };

@@ -16,9 +16,9 @@ export const post: FestivalPost = {
   category: 'Sport & Outdoor',
   categoryColor: 'bg-blue-600 text-white',
   keyFacts: {
-    dates: 'April (Sonntag)',
-    location: 'Startbereich U4-Station Heiligenstadt, Ziel: Heldenplatz',
-    address: 'Startbereich: Heiligenstadt, 1190 Wien; Ziel: Heldenplatz, 1010 Wien',
+    dates: 'Sonntag, 19. April 2026',
+    location: 'Start: Wagramer Straße / Reichsbrücke; Ziel: Ringstraße / Burgtheater',
+    address: 'Start: Wagramer Straße, 1220 Wien; Ziel: Rathausplatz, 1010 Wien',
     genre: 'Marathon, Halbmarathon, 10km Run, Staffel',
     price: 'Marathon ab ca. € 100 | Halbmarathon ab ca. € 65 | 10km ab ca. € 35',
     website: 'https://www.vienna-marathon.com',
@@ -59,7 +59,7 @@ export const post: FestivalPost = {
     {
       icon: '🚇',
       label: 'Anreise',
-      text: 'Startbereich Heiligenstadt: U4 Endstation. Ziel Heldenplatz: U2/U3 Volkstheater oder U3 Herrengasse.',
+      text: 'Start Wagramer Straße: U1 Kaisermühlen/VIC. Ziel Ringstraße/Burgtheater: U2 Rathaus oder U3 Herrengasse.',
     },
     {
       icon: '👟',
@@ -108,11 +108,14 @@ export const post: FestivalPost = {
   ],
   jsonLdEvent: {
     name: 'Vienna City Marathon 2026',
-    startDate: '2026-04-26',
-    endDate: '2026-04-26',
-    location: 'Heiligenstadt, 1190 Wien, Austria',
+    startDate: '2026-04-19',
+    endDate: '2026-04-19',
+    location: 'Wagramer Straße, 1220 Wien, Austria',
+    addressCountry: 'AT',
     url: 'https://www.vienna-marathon.com',
     description:
       'Der Vienna City Marathon ist einer der größten und schönsten Stadtmarathons Europas mit rund 40.000 Teilnehmern.',
+    image:
+      'https://images.unsplash.com/photo-1513593771513-7b58b6c4af38?w=1600&q=85&auto=format&fit=crop',
   },
 };

@@ -111,8 +111,11 @@ export const post: FestivalPost = {
     startDate: '2026-10-15',
     endDate: '2026-10-28',
     location: 'Parkring 12, 1010 Wien, Austria',
+    addressCountry: 'AT',
     url: 'https://www.viennale.at',
     description:
       'Die Viennale ist Österreichs bedeutendstes Filmfestival mit über 200 internationalen Filmen, Weltpremieren und Retrospektiven.',
+    image:
+      'https://images.unsplash.com/photo-1478720568477-152d9b164e26?w=1600&q=85&auto=format&fit=crop',
   },
 };

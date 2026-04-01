@@ -110,8 +110,11 @@ export const post: FestivalPost = {
     startDate: '2026-11-14',
     endDate: '2026-12-26',
     location: 'Rathausplatz 1, 1010 Wien, Austria',
+    addressCountry: 'AT',
     url: 'https://www.christkindlmarkt.at',
     description:
       'Der Wiener Christkindlmarkt am Rathausplatz ist einer der ältesten und schönsten Weihnachtsmärkte der Welt.',
+    image:
+      'https://images.unsplash.com/photo-1512389142860-9c449e58a543?w=1600&q=85&auto=format&fit=crop',
   },
 };

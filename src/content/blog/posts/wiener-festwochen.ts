@@ -111,8 +111,11 @@ export const post: FestivalPost = {
     startDate: '2026-05-08',
     endDate: '2026-06-21',
     location: 'Lehárgasse 11, 1060 Wien, Austria',
+    addressCountry: 'AT',
     url: 'https://www.festwochen.at',
     description:
       'Die Wiener Festwochen sind Wiens internationales Festival für Musik, Theater und Performance mit über 100 Produktionen in 6 Wochen.',
+    image:
+      'https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=1600&q=85&auto=format&fit=crop',
   },
 };

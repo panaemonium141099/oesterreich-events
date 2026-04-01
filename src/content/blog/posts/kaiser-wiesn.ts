@@ -111,8 +111,11 @@ export const post: FestivalPost = {
     startDate: '2026-09-25',
     endDate: '2026-10-05',
     location: 'Kaiserwiese, 1020 Wien, Austria',
+    addressCountry: 'AT',
     url: 'https://www.wienerwiesn.at',
     description:
       'Das Wiener Wiesn-Fest auf der Kaiserwiese im Prater ist Wiens größtes Volksfest mit Bierzelten, Live-Musik und Fahrgeschäften.',
+    image:
+      'https://images.unsplash.com/photo-1566842600175-97dca489844f?w=1600&q=85&auto=format&fit=crop',
   },
 };

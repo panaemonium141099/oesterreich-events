@@ -110,8 +110,11 @@ export const post: FestivalPost = {
     startDate: '2026-06-13',
     endDate: '2026-06-13',
     location: 'Platz der Menschenrechte, 1070 Wien, Austria',
+    addressCountry: 'AT',
     url: 'https://www.hosiwien.at/regenbogenparade/',
     description:
       'Die Wiener Regenbogenparade ist Österreichs größtes Pride-Event mit über 300.000 Teilnehmern auf der Wiener Ringstraße.',
+    image:
+      'https://images.unsplash.com/photo-1559163474-00a5f66a4b06?w=1600&q=85&auto=format&fit=crop',
   },
 };

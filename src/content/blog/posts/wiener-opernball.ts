@@ -111,8 +111,11 @@ export const post: FestivalPost = {
     startDate: '2026-02-26',
     endDate: '2026-02-27',
     location: 'Opernring 2, 1010 Wien, Austria',
+    addressCountry: 'AT',
     url: 'https://www.wiener-staatsoper.at/spielplan-tickets/opernball/',
     description:
       'Der Wiener Opernball in der Wiener Staatsoper ist eines der bekanntesten gesellschaftlichen Ereignisse der Welt.',
+    image:
+      'https://images.unsplash.com/photo-1549060279-7e168fcee0c2?w=1600&q=85&auto=format&fit=crop',
   },
 };
