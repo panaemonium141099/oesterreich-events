@@ -164,7 +164,16 @@ export default async function BlogPostPage({
       name: post.jsonLdEvent.name,
       startDate: post.jsonLdEvent.startDate,
       endDate: post.jsonLdEvent.endDate,
-      location: { '@type': 'Place', name: post.jsonLdEvent.location, address: post.keyFacts.address },
+      location: {
+        '@type': 'Place',
+        name: post.jsonLdEvent.location,
+        address: {
+          '@type': 'PostalAddress',
+          streetAddress: post.keyFacts.address,
+          addressCountry: post.jsonLdEvent.addressCountry,
+        },
+      },
+      image: post.jsonLdEvent.image,
       url: post.jsonLdEvent.url,
       description: post.jsonLdEvent.description,
       isAccessibleForFree: post.keyFacts.price.toLowerCase().includes('frei'),

@@ -3,7 +3,7 @@ import type { FestivalPost } from '../types';
 export const post: FestivalPost = {
   slug: 'wiener-genussfestival',
   title: 'Wiener Genussfestival',
-  subtitle: 'Österreichs größtes Kulinarik-Festival am Wiener Rathausplatz',
+  subtitle: 'Österreichs größtes Kulinarik-Festival im Wiener Stadtpark',
   heroImage:
     'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=1600&q=85&auto=format&fit=crop',
   thumbnailImage:
@@ -91,7 +91,7 @@ export const post: FestivalPost = {
   ],
   ctaText: 'Kulinarik-Events in Wien entdecken',
   ctaLink: '/map?category=Kulinarik&region=Wien',
-  seoTitle: 'Wiener Genussfestival 2026 – Kulinarik am Rathausplatz Wien',
+  seoTitle: 'Wiener Genussfestival 2026 – Kulinarik im Stadtpark Wien',
   seoDescription:
     'Wiener Genussfestival 2026 im Stadtpark: Kulinarik-Festival mit 200+ Ausstellern, Kochshows und heimischen Weinen – rund um den Muttertag.',
   keywords: [
@@ -99,7 +99,7 @@ export const post: FestivalPost = {
     'Genussfestival Wien',
     'Kulinarik Festival Wien',
     'Wien Food Festival',
-    'Rathausplatz Wien Kulinarik',
+    'Stadtpark Wien Kulinarik',
     'Österreich Foodmesse',
     'Wien Genuss 2026',
     'Genussfestival Programm',

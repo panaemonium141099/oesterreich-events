@@ -119,8 +119,11 @@ export const post: FestivalPost = {
     startDate: '2026-06-11',
     endDate: '2026-06-14',
     location: 'Pannonia Fields, 2425 Nickelsdorf, Austria',
+    addressCountry: 'AT',
     url: 'https://www.novarock.at',
     description:
       'Das Nova Rock Festival ist Österreichs größtes Rock- und Metal-Festival mit über 100.000 Besuchern jährlich.',
+    image:
+      'https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?w=1600&q=85&auto=format&fit=crop',
   },
 };

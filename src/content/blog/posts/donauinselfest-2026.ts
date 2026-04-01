@@ -117,8 +117,11 @@ export const post: FestivalPost = {
     startDate: '2026-06-26',
     endDate: '2026-06-28',
     location: 'Donauinsel, 1220 Wien, Austria',
+    addressCountry: 'AT',
     url: 'https://www.donauinselfest.at',
     description:
       'Das weltgrößte kostenlose Open-Air-Festival mit über 3 Millionen Besucherinnen und Besuchern auf der Donauinsel in Wien.',
+    image:
+      'https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?w=1600&q=85&auto=format&fit=crop',
   },
 };

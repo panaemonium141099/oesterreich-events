@@ -56,13 +56,16 @@ export interface FestivalPost {
     name: string;
     startDate: string;
     endDate: string;
-    /** Plain address string used for display. For Schema.org structured data use addressCountry. */
+    /** Human-readable address string used to build the Schema.org Place object. */
     location: string;
-    /** ISO 3166-1 alpha-2 country code, e.g. 'AT' for Austria. */
-    addressCountry?: string;
+    /**
+     * ISO 3166-1 alpha-2 country code for Schema.org PostalAddress.addressCountry.
+     * Required for valid Event structured data (e.g. 'AT' for Austria).
+     */
+    addressCountry: string;
     url: string;
     description: string;
     /** URL of a representative image for Schema.org Event structured data. */
-    image?: string;
+    image: string;
   };
 }

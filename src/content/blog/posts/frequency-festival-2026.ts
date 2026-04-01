@@ -117,8 +117,11 @@ export const post: FestivalPost = {
     startDate: '2026-08-20',
     endDate: '2026-08-22',
     location: 'VAZ St. Pölten, Kulturbezirk 4, 3100 St. Pölten, Austria',
+    addressCountry: 'AT',
     url: 'https://www.frequency.at',
     description:
       'Das Frequency Festival in St. Pölten ist Österreichs führendes Alternative- und Indie-Festival mit über 70.000 Besuchern.',
+    image:
+      'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=1600&q=85&auto=format&fit=crop',
   },
 };
