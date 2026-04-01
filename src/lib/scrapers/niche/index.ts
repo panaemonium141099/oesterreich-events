@@ -13,6 +13,7 @@
  * - Food/Markets: BauernmarktScraper, GenussregionScraper
  * - Family: FamiliiiScraper, FamilienUrlaubScraper
  * - RSS Feeds: StadtbekanntScraper (Wien), RegionewsScraper (regional)
+ * - Business/Trade: WKOScraper, MesseWienScraper, MesseWelsScraper, MesseGrazScraper, AMSScraper
  */
 export { FestivalAtScraper, FestivalGuideScraper } from './FestivalScrapers';
 export { ResidentAdvisorAustriaScraper, ClubmapScraper } from './NightlifeScrapers';
@@ -27,3 +28,4 @@ export {
 export { BauernmarktScraper, GenussregionScraper } from './FoodMarketScrapers';
 export { FamiliiiScraper, FamilienUrlaubScraper } from './FamilyScrapers';
 export { StadtbekanntScraper, RegionewsScraper } from './RSSEventScrapers';
+export { WKOScraper, MesseWienScraper, MesseWelsScraper, MesseGrazScraper, AMSScraper } from './BusinessScrapers';

@@ -56,7 +56,10 @@ import {
   BauernmarktScraper, GenussregionScraper,
   FamiliiiScraper, FamilienUrlaubScraper,
   StadtbekanntScraper, RegionewsScraper,
+  WKOScraper, MesseWienScraper, MesseWelsScraper, MesseGrazScraper, AMSScraper,
 } from './niche';
+import { NtryAtScraper } from './NtryAtScraper';
+import { MeetupScraper } from './MeetupScraper';
 import {
   UniWienScraper, TUWienScraper, UniGrazScraper, UniInnsbruckScraper,
   WUScraper, MedUniWienScraper, BOKUScraper, TUGrazScraper,
@@ -197,6 +200,15 @@ const scrapers: BaseScraper[] = [
   new BergfexScraper(),
   new StadtbekanntScraper(),
   new RegionewsScraper(),
+  // Business & Trade (WKO, Messen, AMS)
+  new WKOScraper(),
+  new MesseWienScraper(),
+  new MesseWelsScraper(),
+  new MesseGrazScraper(),
+  new AMSScraper(),
+  // Community & Ticketing Platforms
+  new NtryAtScraper(),
+  new MeetupScraper(),
   // Gemeinde-Websites (alle Bundesländer)
   new GemeindeListScraper(),
   // GEM2GO CMS Gemeinden (~2.000 Gemeinden österreichweit)

@@ -50,9 +50,8 @@ Build scrapers for Austrian sports and outdoor event sources beyond the existing
 - [ ] `npm run scrape -- --source <name>` works for each
 - [ ] `npm run build` passes
 ## Done summary
-TBD
-
+Added 5 sport federation scrapers: OeAVEventsScraper (expanded Alpenverein Sektionen coverage), LaufenAtScraper (running calendar), RadNetScraper (cycling events), OeFBScraper (football matches with stadium coordinates), and RunnersFunScraper (running/triathlon backup). All registered in index.ts with category "Sport" and appropriate tags.
 ## Evidence
-- Commits:
-- Tests:
+- Commits: 5deeab03799eb9fe42f1d08d71119a109ccb4354
+- Tests: npx tsc --noEmit
 - PRs:
