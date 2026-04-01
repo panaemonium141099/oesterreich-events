@@ -51,9 +51,8 @@ Append all 10 imports to `src/content/blog/index.ts` ALL_POSTS array.
 - [ ] All 10 posts appended to ALL_POSTS in index.ts
 - [ ] TypeScript compiles without errors
 ## Done summary
-TBD
-
+Created 10 long-form blog post TypeScript files for Steiermark & Kaernten events (posts 31-40), covering styriarte Graz, Grazer Aufsteirern, Grazer Christkindlmarkt, Klagenfurter Stadtfest, IRONMAN Austria Klagenfurt, Villacher Fasching, Woerthersee Beachvolleyball Grand Slam, Carinthian Summer Ossiach, Murau Stadtfest, and Woerthersee Regatta. All posts include German-language content, verified Unsplash gallery images, complete keyFacts, jsonLdEvent with addressCountry, SEO fields within limits, and were appended to ALL_POSTS in index.ts. Date accuracy issues found during review were corrected (styriarte, Aufsteirern, Carinthian Summer, Villacher Fasching, Murau, Woerthersee Regatta).
 ## Evidence
-- Commits:
-- Tests:
+- Commits: 9fe8382487939d6faf52bf0fc742fc810f73d729, 480b612, 9fe8382, c386850, fa2c53a, b874a2e
+- Tests: npx tsc --noEmit
 - PRs:

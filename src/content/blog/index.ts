@@ -42,6 +42,15 @@ import { post as woertherseeBeachvolleyball } from './posts/woerthersee-beachvol
 import { post as carinthianSummerOssiach } from './posts/carinthian-summer-ossiach';
 import { post as murauStadtfest } from './posts/murau-stadtfest';
 import { post as woertherseeRegatta } from './posts/woerthersee-regatta';
+import { post as grafeneggFestival } from './posts/grafenegg-festival';
+import { post as leharFestivalBadIschl } from './posts/lehar-festival-bad-ischl';
+import { post as esterhazKonzerte } from './posts/esterhazy-konzerte';
+import { post as pannoniaFields } from './posts/pannonia-fields';
+import { post as seefestspieleMoerbisch } from './posts/seefestspiele-moerbisch';
+import { post as wiesenFest } from './posts/wiesen-fest';
+import { post as lichterfestMelk } from './posts/lichterfest-melk';
+import { post as retzWeinlesefest } from './posts/retz-weinlesefest';
+import { post as linzMarathon } from './posts/linz-marathon';
 
 export type { FestivalPost, GalleryImage, FestivalKeyFacts, LineupAct } from './types';
 
@@ -90,6 +99,15 @@ export const ALL_POSTS: FestivalPost[] = [
   carinthianSummerOssiach,
   murauStadtfest,
   woertherseeRegatta,
+  grafeneggFestival,
+  leharFestivalBadIschl,
+  esterhazKonzerte,
+  pannoniaFields,
+  seefestspieleMoerbisch,
+  wiesenFest,
+  lichterfestMelk,
+  retzWeinlesefest,
+  linzMarathon,
 ].sort(
   (a, b) => new Date(b.publishDate).getTime() - new Date(a.publishDate).getTime()
 );
