@@ -16,9 +16,9 @@ export const post: FestivalPost = {
   category: 'Kultur & Tradition',
   categoryColor: 'bg-purple-800 text-white',
   keyFacts: {
-    dates: '3.–7. September 2026',
-    location: 'POSTCITY Linz, Ars Electronica Center, Tabakfabrik Linz',
-    address: 'POSTCITY, Bahnhofplatz 1, 4020 Linz',
+    dates: '9.–13. September 2026',
+    location: 'OK Quarter, Design Center Linz, Posthof, Martinskirche',
+    address: 'OK Offenes Kulturhaus, Domplatz 1, 4020 Linz',
     genre: 'Digitale Kunst, Technologie, Gesellschaft, KI, Natur',
     price: 'Tagesticket ab 25 €, 5-Tages-Pass ab 80 €',
     website: 'https://ars.electronica.art/festival',
@@ -26,12 +26,12 @@ export const post: FestivalPost = {
     since: '1979',
   },
   lineup: [
-    { name: 'Refik Anadol (Türkei/USA)', role: 'headliner', stage: 'POSTCITY' },
-    { name: 'teamLab (Japan)', role: 'headliner', stage: 'Tabakfabrik' },
-    { name: 'Nonhuman Nonsense (Schweden)', role: 'special', stage: 'Ars Electronica Center' },
-    { name: 'Quadrature (Deutschland)', role: 'special', stage: 'POSTCITY' },
+    { name: 'Refik Anadol (Türkei/USA)', role: 'headliner', stage: 'OK Quarter' },
+    { name: 'teamLab (Japan)', role: 'headliner', stage: 'Design Center Linz' },
+    { name: 'Nonhuman Nonsense (Schweden)', role: 'special', stage: 'Posthof Linz' },
+    { name: 'Quadrature (Deutschland)', role: 'special', stage: 'OK Quarter' },
     { name: 'Prix Ars Electronica Gewinner 2026', role: 'special', stage: 'alle Spielorte' },
-    { name: 'Symposion: KI & Demokratie', role: 'support', stage: 'POSTCITY Konferenzbereich' },
+    { name: 'Symposion: KI & Demokratie', role: 'support', stage: 'Martinskirche Linz' },
   ],
   lineupNote:
     'Das vollständige Künstler- und Konferenzprogramm wird im Juni 2026 veröffentlicht. Der Prix Ars Electronica ist der bedeutendste Preis für digitale Kunst weltweit.',
@@ -42,10 +42,10 @@ export const post: FestivalPost = {
     'Ars Electronica wurde 1979 in Linz gegründet — in einer Zeit, als "Computer" noch Nischenthema war. Die Gründer Hannes Leopoldseder, Herbert W. Franke und Hubert Bognermayr hatten eine Vision: Sie wollten erforschen, was entsteht, wenn Kunst und Technologie wirklich zusammenkommen. Das Festival, das Ars Electronica Center (eröffnet 1996) und der Prix Ars Electronica (seit 1987) sind heute weltweit anerkannte Institutionen. Linz wurde durch Ars Electronica zur internationalen Hauptstadt der Medienkunst.',
   whatToExpectTitle: 'Was das Festival 2026 bietet',
   whatToExpect:
-    'Das Festival 2026 bespielt mehrere große Spielorte in Linz gleichzeitig: die POSTCITY (ehemaliger Hauptbahnhof), das Ars Electronica Center, die Tabakfabrik und den Donaupark. Ausstellungen, Performances, Symposien, Workshops und der Prix Ars Electronica bilden zusammen ein Programm, das in seiner Breite und Tiefe einzigartig ist.',
+    'Das Festival 2026 bespielt mehrere Spielorte in der Linzer Innenstadt gleichzeitig: OK Quarter, Design Center Linz, Posthof und die Martinskirche. Ausstellungen, Performances, Symposien, Workshops und der Prix Ars Electronica bilden zusammen ein Programm, das in seiner Breite und Tiefe einzigartig ist.',
   whatToExpectList: [
     'Prix Ars Electronica 2026: Ausstellung der Gewinner in Digitaler Kunst und KI',
-    'Großinstallationen internationaler Medienkünstler in der POSTCITY',
+    'Großinstallationen internationaler Medienkünstler im OK Quarter und Design Center',
     'Symposien zu KI, Klimatechnologie und digitaler Demokratie',
     'Workshops und Labs: Lötkolben bis Biohacking',
     'Nachtprogramm: Club Culture und Live-Performances',
@@ -61,7 +61,7 @@ export const post: FestivalPost = {
     {
       icon: '🚂',
       label: 'Anreise',
-      text: 'POSTCITY liegt direkt am Linz HBF. Ars Electronica Center: 10 min mit Straßenbahn. Tabakfabrik: 15 min zu Fuß oder Linie 12.',
+      text: 'OK Quarter liegt im Linzer Zentrum (Domplatz, 15 min zu Fuß vom HBF). Design Center Linz: 20 min mit Straßenbahn Linie 2.',
     },
     {
       icon: '🗓️',
@@ -95,7 +95,7 @@ export const post: FestivalPost = {
   ctaLink: '/map?bundesland=Oberoesterreich&category=Kultur',
   seoTitle: 'Ars Electronica Festival Linz 2026 – Programm & Tickets',
   seoDescription:
-    'Ars Electronica Festival Linz 2026 (3.–7. September): Weltführendes Festival für digitale Kunst, KI & Technologie. Programm, Tickets & Tipps.',
+    'Ars Electronica Festival Linz 2026 (9.–13. September): Weltführendes Festival für digitale Kunst, KI & Technologie. Programm, Tickets & Tipps.',
   keywords: [
     'Ars Electronica Festival 2026',
     'Ars Electronica Linz',
@@ -105,14 +105,14 @@ export const post: FestivalPost = {
     'KI Kunst Festival',
     'Linz Technologie Kultur',
     'Ars Electronica September',
-    'POSTCITY Linz Festival',
+    'OK Quarter Linz Festival',
     'Ars Electronica Tickets',
   ],
   jsonLdEvent: {
     name: 'Ars Electronica Festival 2026',
-    startDate: '2026-09-03',
-    endDate: '2026-09-07',
-    location: 'POSTCITY Linz, Bahnhofplatz 1, 4020 Linz, Austria',
+    startDate: '2026-09-09',
+    endDate: '2026-09-13',
+    location: 'OK Quarter (Offenes Kulturhaus), Domplatz 1, 4020 Linz, Austria',
     addressCountry: 'AT',
     url: 'https://ars.electronica.art/festival',
     description:

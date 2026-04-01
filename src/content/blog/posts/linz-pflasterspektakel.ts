@@ -16,7 +16,7 @@ export const post: FestivalPost = {
   category: 'Festivals',
   categoryColor: 'bg-orange-600 text-white',
   keyFacts: {
-    dates: '17.–19. Juli 2026',
+    dates: '23.–25. Juli 2026',
     location: 'Linzer Innenstadt (Hauptplatz, Landstraße, Promenadenstraße)',
     address: 'Hauptplatz 1, 4020 Linz',
     genre: 'Straßenkunst, Artistik, Musik, Theater',
@@ -95,7 +95,7 @@ export const post: FestivalPost = {
   ctaLink: '/map?bundesland=Oberoesterreich&category=Festivals',
   seoTitle: 'Linz Pflasterspektakel 2026 – Programm & Tipps',
   seoDescription:
-    'Linz Pflasterspektakel 2026: 3 Tage kostenlose Straßenkunst (17.–19. Juli). Über 100 internationale Künstler in der Linzer Innenstadt. Programm & Infos.',
+    'Linz Pflasterspektakel 2026: 3 Tage kostenlose Straßenkunst (23.–25. Juli). Über 100 internationale Künstler in der Linzer Innenstadt. Programm & Infos.',
   keywords: [
     'Linz Pflasterspektakel 2026',
     'Straßenkunstfestival Linz',
@@ -110,8 +110,8 @@ export const post: FestivalPost = {
   ],
   jsonLdEvent: {
     name: 'Linz Pflasterspektakel 2026',
-    startDate: '2026-07-17',
-    endDate: '2026-07-19',
+    startDate: '2026-07-23',
+    endDate: '2026-07-25',
     location: 'Linzer Innenstadt, Hauptplatz 1, 4020 Linz, Austria',
     addressCountry: 'AT',
     url: 'https://www.pflasterspektakel.at',
