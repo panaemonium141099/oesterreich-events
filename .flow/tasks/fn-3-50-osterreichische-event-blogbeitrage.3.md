@@ -47,9 +47,8 @@ Append all 10 imports to `src/content/blog/index.ts` ALL_POSTS array.
 - [ ] All 10 posts appended to ALL_POSTS in index.ts
 - [ ] TypeScript compiles without errors
 ## Done summary
-TBD
-
+Created 10 long-form blog post TypeScript files for major Salzburg and Tirol events (Salzburger Festspiele, Christkindlmarkt, Jazz & The City, Dult, Hahnenkamm-Rennen, Innsbrucker Festwochen der Alten Musik, Innsbrucker Christkindlmarkt, Tiroler Volksschauspiele Telfs, Snowbombing Mayrhofen, Europäisches Forum Alpbach), all appended to ALL_POSTS in index.ts; all seoTitles <=60 chars, seoDescriptions <=160 chars, and TypeScript compiles without errors.
 ## Evidence
-- Commits:
-- Tests:
+- Commits: 33de01ad074d0f4054b72cf49c40fa921439f0f4, ac7a3fd6a9f7e3b5a6e9a9dd4cdaa23e1a86ae99
+- Tests: npm test -- --run (127/127 passed), npx tsc --noEmit (0 errors)
 - PRs:

@@ -27,8 +27,12 @@ Create 10 long-form blog post TypeScript files for major Steiermark & Kärnten e
 - `subtitle`: short tagline for the event
 - `categoryColor`: Tailwind class string (e.g. `'bg-red-700 text-white'`)
 - `ctaText`: call-to-action button label (e.g. `'Jetzt entdecken'`)
-- `ctaLink`: CTA URL (typically the event website)
-- `practicalInfoTitle`: heading string (e.g. `'Praktische Infos für Besucher'`)
+- `ctaLink`: internal map URL (e.g. `'/map?bundesland=Steiermark&category=Kultur'`) — use `/map?bundesland=X&category=Y` pattern, NOT external event website
+<!-- Updated by plan-sync: fn-3-50...3 — ctaLink uses internal /map?bundesland=X&category=Y links, not external URLs -->
+- `practicalInfoTitle`: heading string (e.g. `'Praktische Informationen'`)
+- `lineupNote` (optional): contextual note below lineup (e.g. programme availability, booking advice)
+- `keyFacts.capacity` (optional), `keyFacts.since` (optional): extra context fields
+<!-- Updated by plan-sync: fn-3-50...3 — lineupNote, keyFacts.capacity, keyFacts.since are optional but used in T2/T3 posts -->
 - `thumbnailImage`: same Unsplash photo as heroImage but with `w=800` instead of `w=1600`
 <!-- Updated by plan-sync: fn-3-50...2 — FestivalPost requires subtitle, categoryColor, ctaText, ctaLink, practicalInfoTitle; thumbnailImage is optional but recommended -->
 - `seoTitle`: <=60 chars, `seoDescription`: <=160 chars, `keywords`: 8-12

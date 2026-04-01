@@ -22,6 +22,16 @@ import { post as innsbruckChristkindlmarkt } from './posts/innsbruck-christkindl
 import { post as tirolerVolksschauspielesTelfs } from './posts/tiroler-volksschauspiele-telfs';
 import { post as snowbombingMayrhofen } from './posts/snowbombing-mayrhofen';
 import { post as europaeischesForumAlpbach } from './posts/europaeisches-forum-alpbach';
+import { post as linzPflasterspektakel } from './posts/linz-pflasterspektakel';
+import { post as linzerKlangwolke } from './posts/linzer-klangwolke';
+import { post as linzerChristkindlmarkt } from './posts/linzer-christkindlmarkt';
+import { post as arsElectronicaFestival } from './posts/ars-electronica-festival';
+import { post as steyrStadtfest } from './posts/steyr-stadtfest';
+import { post as bregenzFestspiele } from './posts/bregenz-festspiele';
+import { post as bregenzerFruehling } from './posts/bregenzer-fruehling';
+import { post as montafonerSommertage } from './posts/montafoner-sommertage';
+import { post as feldkirchFestival } from './posts/feldkirch-festival';
+import { post as lustenauMartinimarkt } from './posts/lustenauer-martinimarkt';
 
 export type { FestivalPost, GalleryImage, FestivalKeyFacts, LineupAct } from './types';
 
@@ -50,6 +60,16 @@ export const ALL_POSTS: FestivalPost[] = [
   tirolerVolksschauspielesTelfs,
   snowbombingMayrhofen,
   europaeischesForumAlpbach,
+  linzPflasterspektakel,
+  linzerKlangwolke,
+  linzerChristkindlmarkt,
+  arsElectronicaFestival,
+  steyrStadtfest,
+  bregenzFestspiele,
+  bregenzerFruehling,
+  montafonerSommertage,
+  feldkirchFestival,
+  lustenauMartinimarkt,
 ].sort(
   (a, b) => new Date(b.publishDate).getTime() - new Date(a.publishDate).getTime()
 );
