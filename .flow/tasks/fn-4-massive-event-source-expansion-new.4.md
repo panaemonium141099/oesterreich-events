@@ -51,9 +51,8 @@ Build scrapers for Austrian media event portals and RSS feeds that have structur
 - [ ] `npm run scrape -- --source <name>` works for each
 - [ ] `npm run build` passes
 ## Done summary
-TBD
-
+Built 4 media portal/RSS scrapers: TipsAtScraper (tips.at with page-based pagination + JSON-LD detail parsing), BergfexScraper (bergfex.at outdoor/mountain events), StadtbekanntScraper (stadtbekannt.at RSS + HTML for Wien), and RegionewsScraper (regionews.at RSS for regional events). All registered in index.ts and niche barrel exports.
 ## Evidence
-- Commits:
-- Tests:
+- Commits: bc395229548b91056399788383ae522be3cefb7c
+- Tests: npx tsc --noEmit
 - PRs:

@@ -49,6 +49,9 @@ import {
   ResidentAdvisorAustriaScraper, ClubmapScraper,
   NaturfreundeScraper, AlpenvereinScraper,
   BundestheaterScraper, TheaterAtScraper,
+  KonzerthausScraper, MusikvereinScraper,
+  KHMScraper, AlbertinaScraper, MUMOKScraper, BelvedereScraper,
+  NHMScraper, TechnischesMuseumScraper, LeopoldMuseumScraper, ArsElectronicaScraper,
   BauernmarktScraper, GenussregionScraper,
   FamiliiiScraper, FamilienUrlaubScraper,
   StadtbekanntScraper, RegionewsScraper,
@@ -164,6 +167,18 @@ const scrapers: BaseScraper[] = [
   // Nischen-Kategorien: Kultur & Theater
   new BundestheaterScraper(),
   new TheaterAtScraper(),
+  // Nischen-Kategorien: Konzerthäuser
+  new KonzerthausScraper(),
+  new MusikvereinScraper(),
+  // Nischen-Kategorien: Museen
+  new KHMScraper(),
+  new AlbertinaScraper(),
+  new MUMOKScraper(),
+  new BelvedereScraper(),
+  new NHMScraper(),
+  new TechnischesMuseumScraper(),
+  new LeopoldMuseumScraper(),
+  new ArsElectronicaScraper(),
   // Nischen-Kategorien: Märkte & Kulinarik
   new BauernmarktScraper(),
   new GenussregionScraper(),

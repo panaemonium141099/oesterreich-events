@@ -73,6 +73,7 @@ const nextConfig: NextConfig = {
       { protocol: 'https', hostname: '**.live' },
       { protocol: 'https', hostname: '**.travel' },
       { protocol: 'https', hostname: '**.tt' },
+      { protocol: 'https', hostname: '**.art' },
     ],
   },
   // Cache headers for static blog content
