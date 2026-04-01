@@ -94,7 +94,7 @@ export const post: FestivalPost = {
   ctaLink: '/map?bundesland=Kärnten&category=Kultur',
   seoTitle: 'Carinthian Summer Ossiach 2026 – Programm & Tickets',
   seoDescription:
-    'Carinthian Summer Ossiach 2026 (10. Juli–16. August): Klassikfestival am Ossiacher See in Kärnten. Konzerte in der Stiftskirche & Open-Air-Gala am See.',
+    'Carinthian Summer Ossiach 2026 (2. Juli–2. August): Klassikfestival am Ossiacher See in Kärnten. Konzerte in der Stiftskirche & Open-Air-Gala am See.',
   keywords: [
     'Carinthian Summer Ossiach 2026',
     'Klassikfestival Kärnten',

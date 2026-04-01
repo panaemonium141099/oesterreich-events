@@ -94,7 +94,7 @@ export const post: FestivalPost = {
   ctaLink: '/map?bundesland=Steiermark&category=Kultur',
   seoTitle: 'Grazer Aufsteirern 2026 – Programm, Termin & Tipps',
   seoDescription:
-    'Grazer Aufsteirern 2026 (25.–27. September): Das größte Trachtenvolksfest der Steiermark in der Grazer Altstadt. Eintritt frei – alle Infos hier.',
+    'Grazer Aufsteirern 2026 (18.–20. September): Das größte Trachtenvolksfest der Steiermark in der Grazer Altstadt. Eintritt frei – alle Infos hier.',
   keywords: [
     'Grazer Aufsteirern 2026',
     'Aufsteirern Graz',

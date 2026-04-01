@@ -93,7 +93,7 @@ export const post: FestivalPost = {
   ctaLink: '/map?bundesland=Kärnten&category=Sport',
   seoTitle: 'IRONMAN Austria Klagenfurt 2026 – Anmeldung & Infos',
   seoDescription:
-    'IRONMAN Austria Klagenfurt 2026 (5. Juli): Langdistanz-Triathlon im Wörthersee. Startinfo für Athleten und Tipps für Zuschauerinnen und Zuschauer.',
+    'IRONMAN Austria Klagenfurt 2026 (14. Juni): Langdistanz-Triathlon im Wörthersee. Startinfo für Athleten und Tipps für Zuschauerinnen und Zuschauer.',
   keywords: [
     'IRONMAN Austria 2026',
     'Triathlon Klagenfurt',

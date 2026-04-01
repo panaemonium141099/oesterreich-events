@@ -94,7 +94,7 @@ export const post: FestivalPost = {
   ctaLink: '/map?bundesland=Steiermark&category=Kultur',
   seoTitle: 'styriarte Graz 2026 – Tickets, Programm & Tipps',
   seoDescription:
-    'styriarte Graz 2026 (19. Juni–19. Juli): Klassikfestival in Graz. Tickets, Spielplan & Tipps für Konzerte in Helmut-List-Halle und Schloss Eggenberg.',
+    'styriarte Graz 2026 (26. Juni–26. Juli): Klassikfestival in Graz. Tickets, Spielplan & Tipps für Konzerte in Helmut-List-Halle und Schloss Eggenberg.',
   keywords: [
     'styriarte Graz 2026',
     'styriarte Programm',
