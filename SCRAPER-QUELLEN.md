@@ -1,8 +1,8 @@
 # LassTreffen.at — Scraper-Quellen
 
-**Stand:** 28.03.2026
-**Total Events:** ~27.700 (GEM2GO Scrape läuft noch)
-**Aktive Scraper:** 38
+**Stand:** 01.04.2026
+**Total Events:** ~27.700+ (plus new sources not yet scraped)
+**Aktive Scraper:** 126 (registrierte Instanzen in index.ts)
 
 ---
 
@@ -53,6 +53,64 @@
 | EventsTT | Cheerio + JSON-LD | Aktiv |
 | BodenseeVorarlberg | Cheerio | Aktiv |
 | VorarlbergTravel | Cheerio | Aktiv |
+
+### Neue Quellen (Epic fn-4 — April 2026)
+
+#### Tourism API Scrapers
+| Quelle | URL | Typ | Abdeckung |
+|--------|-----|-----|-----------|
+| TourData / austria.info | tourdata.at | REST API | Ganz AT |
+| Wien OGD | data.wien.gv.at | REST API (VADB) | Wien |
+| Wien-Ticket | wien-ticket.at | Cheerio | Wien |
+
+#### Feratel Deskline Expansion (+15 Regionen)
+71 Regionen total (vorher 56). Neue Regionen: Tennengau, Hochkoenig, Fuschlseeregion, Grossarltal, Radstadt, Flachau, Wagrain-Kleinarl, Altenmarkt-Zauchensee, Hallein, Werfen, Abtenau, Golling, Annaberg-Lungoetz, Uttendorf, Krimml.
+
+#### Media-Portal & RSS Scrapers
+| Quelle | URL | Typ | Abdeckung |
+|--------|-----|-----|-----------|
+| tips.at | tips.at | Cheerio (8 Regionen) | OOE, NOE, Stmk |
+| bergfex.at | bergfex.at | Cheerio | Ganz AT |
+| stadtbekannt.at | stadtbekannt.at | RSS Feed | Wien |
+| regionews.at | regionews.at | RSS Feed | Ganz AT |
+
+#### Konzerthaeuser & Museen
+| Quelle | URL | Typ | Abdeckung |
+|--------|-----|-----|-----------|
+| Wiener Konzerthaus | konzerthaus.at | Cheerio | Wien |
+| Musikverein Wien | musikverein.at | Cheerio | Wien |
+| KHM | khm.at | Cheerio | Wien |
+| Albertina | albertina.at | Cheerio | Wien |
+| MUMOK | mumok.at | Cheerio | Wien |
+| Belvedere | belvedere.at | Cheerio | Wien |
+| NHM | nhm-wien.ac.at | Cheerio | Wien |
+| Technisches Museum | technischesmuseum.at | Cheerio | Wien |
+| Leopold Museum | leopoldmuseum.org | Cheerio | Wien |
+| Ars Electronica Center | ars.electronica.art | Cheerio | Linz |
+
+#### Sport-Verbaende
+| Quelle | URL | Typ | Abdeckung |
+|--------|-----|-----|-----------|
+| OeAV Events | alpenverein.at | Cheerio | Ganz AT |
+| laufen.at | laufen.at | Cheerio | Ganz AT |
+| rad-net.at | rad-net.at | Cheerio | Ganz AT |
+| OeFB | oefb.at | Cheerio | Ganz AT |
+| runnersfun.at | runnersfun.at | Cheerio | Ganz AT |
+
+#### Business & Messen
+| Quelle | URL | Typ | Abdeckung |
+|--------|-----|-----|-----------|
+| WKO | wko.at | Cheerio | Ganz AT |
+| Messe Wien | messewien.at | Cheerio | Wien |
+| Messe Wels | messe-wels.at | Cheerio | OOE |
+| Messe Graz | messecongress.at | Cheerio | Stmk |
+| AMS | ams.at | Cheerio | Ganz AT |
+
+#### Community & Ticketing
+| Quelle | URL | Typ | Abdeckung |
+|--------|-----|-----|-----------|
+| ntry.at | ntry.at | Cheerio | Ganz AT |
+| Meetup | meetup.com | GraphQL API | Wien + AT |
 
 ---
 
@@ -139,7 +197,7 @@ Das GEM2GO CMS wird von ~1.300 der 2.094 oesterreichischen Gemeinden genutzt. Al
 ## npm Scripts
 
 ```bash
-npm run scrape              # Alle 38 Scraper ausfuehren
+npm run scrape              # Alle 126 Scraper ausfuehren
 npm run scrape:gem2go       # Nur GEM2GO (~50 Min)
 npm run scrape:gemeinden    # Nur Gemeinde-Websites (~8 Min)
 npm run scrape:meinbezirk   # Nur meinbezirk.at (~15 Min)

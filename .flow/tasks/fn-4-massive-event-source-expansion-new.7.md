@@ -66,9 +66,8 @@ Build scrapers for business events, trade fairs, and community platforms.
 - [ ] `npm run scrape -- --source <name>` works for each
 - [ ] `npm run build` passes
 ## Done summary
-TBD
-
+Added 7 new scrapers for business, trade, and community events: WKO (all 9 Bundeslaender), Messe Wien, Messe Wels, Messe Congress Graz, AMS career events, ntry.at (concert/club ticketing with ticket_url), and Meetup (community events). All scrapers registered in index.ts and categorized correctly (Wirtschaft for WKO/Messe/AMS, Nightlife/Musik for ntry.at).
 ## Evidence
-- Commits:
-- Tests:
+- Commits: 4cf6737f7bb8c79c907badfa45dd07f1fb2ec12f
+- Tests: npx tsc --noEmit
 - PRs:
