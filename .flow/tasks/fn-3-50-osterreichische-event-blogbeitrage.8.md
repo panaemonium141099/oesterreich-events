@@ -6,7 +6,8 @@ Final housekeeping: sitemap, CLAUDE.md update, CHANGELOG entry.
 ### Changes required
 
 1. **`src/app/sitemap.ts`**
-   - Add blog post URLs: for each post in `ALL_POSTS`, add `{ url: 'https://oestereich-events.at/blog/${slug}', lastModified: post.updatedAt ?? post.publishedAt, changeFrequency: 'monthly', priority: 0.7 }`
+   - Add blog post URLs: for each post in `ALL_POSTS`, add `{ url: 'https://oestereich-events.at/blog/${slug}', lastModified: post.updatedDate ?? post.publishDate, changeFrequency: 'monthly', priority: 0.7 }`
+   <!-- Updated by plan-sync: fn-3-50...1 used `updatedDate`/`publishDate` not `updatedAt`/`publishedAt` -->
    - Add `/blog` index page entry with priority 0.8
    - Verify the blog entry count: should be 53 posts + 1 index = 54 blog URLs
 

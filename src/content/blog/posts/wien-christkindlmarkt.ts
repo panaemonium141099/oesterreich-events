@@ -1,0 +1,117 @@
+import type { FestivalPost } from '../types';
+
+export const post: FestivalPost = {
+  slug: 'wien-christkindlmarkt',
+  title: 'Wiener Christkindlmarkt',
+  subtitle: 'Weihnachtszauber am Rathausplatz – der bekannteste Advent-Markt der Welt',
+  heroImage:
+    'https://images.unsplash.com/photo-1512389142860-9c449e58a543?w=1600&q=85&auto=format&fit=crop',
+  thumbnailImage:
+    'https://images.unsplash.com/photo-1512389142860-9c449e58a543?w=800&q=80&auto=format&fit=crop',
+  publishDate: '2026-03-31',
+  updatedDate: '2026-03-31',
+  readingTime: 6,
+  excerpt:
+    'Jedes Jahr im November und Dezember verwandelt sich der Wiener Rathausplatz in ein leuchtendes Weihnachtsdorf. Glühwein, Lebkuchen und festliche Stimmung vor der prachtvollen Kulisse des Rathauses.',
+  category: 'Kultur & Tradition',
+  categoryColor: 'bg-red-700 text-white',
+  keyFacts: {
+    dates: 'Mitte November – 26. Dezember',
+    location: 'Rathausplatz, Wien',
+    address: 'Rathausplatz 1, 1010 Wien',
+    genre: 'Weihnachtsmarkt, Advent, Handwerk, Kulinarik',
+    price: 'Eintritt frei',
+    website: 'https://www.christkindlmarkt.at',
+    capacity: 'bis zu 3 Mio. Besucher pro Saison',
+    since: '1975',
+  },
+  lineup: [
+    { name: 'Adventkonzerte', role: 'special', stage: 'Rathausbühne' },
+    { name: 'Kinderprogramm & Märchenlesungen', role: 'special', stage: 'Kinderwelt' },
+    { name: 'Chorkonzerte & Blasmusik', role: 'support', stage: 'Rathauspark' },
+    { name: 'Kunsthandwerk-Ausstellung', role: 'special', stage: 'Markthalle' },
+  ],
+  lineupNote: 'Das Bühnenprogramm wird jährlich im Oktober bekanntgegeben.',
+  intro:
+    'Wenn im November die ersten Schneeflocken fallen und der Duft von Lebkuchen und Glühwein durch die Wiener Innenstadt zieht, öffnet der Christkindlmarkt am Rathausplatz seine Tore. Mit über 150 Holzhütten, festlicher Illumination der Rathausfassade und einem umfangreichen Bühnenprogramm ist dieser Markt nicht nur der berühmteste Weihnachtsmarkt Österreichs, sondern gilt weltweit als einer der schönsten überhaupt. Familien, Paare und internationale Gäste pilgern Jahr für Jahr in die Wiener Innenstadt, um diesen einzigartigen Advent-Zauber zu erleben.',
+  historyTitle: 'Mehr als ein halbes Jahrhundert Tradition',
+  history:
+    'Der Wiener Christkindlmarkt am Rathausplatz hat seine Wurzeln im mittelalterlichen „Dezembermarkt", der seit dem 13. Jahrhundert in Wien abgehalten wurde. In seiner heutigen Form wurde er 1975 neu konzipiert und am repräsentativen Rathausplatz angesiedelt. Seither wuchs der Markt stetig: Aus wenigen Dutzend Ständen wurden über 150 Hütten, aus lokalen Besuchern ein internationales Publikum. Die aufwendige Beleuchtung der neo-gotischen Rathausfassade – eine der eindrucksvollsten Stadtkulissen Europas – wurde zum Markenzeichen, das in Reisemagazinen weltweit erscheint.',
+  whatToExpectTitle: 'Was erwartet dich am Christkindlmarkt?',
+  whatToExpect:
+    'Der Christkindlmarkt bietet weit mehr als Punsch und Weihnachtsschmuck. Über 150 Aussteller präsentieren hochwertiges Kunsthandwerk aus ganz Österreich und der Region: handgedrechselte Kerzenhalter, handbemalte Glaskugeln, Krippen aus dem Zillertal und Delikatessen aus allen Bundesländern. Ein tägliches Bühnenprogramm auf der Rathausbühne begeistert mit Chor-, Orchester- und Volksmusikkonzerten.',
+  whatToExpectList: [
+    'Über 150 Holzhütten mit Kunsthandwerk, Kulinarik und Dekoration',
+    'Festliche Beleuchtung der Rathausfassade – täglich ab Einbruch der Dämmerung',
+    'Tägliches Bühnenprogramm: Chöre, Orchester, Volksmusik',
+    'Kinderwelt mit Bastelworkshops, Märchenlesungen und Karussell',
+    'Spezialitäten: Punsch, Glühwein, Lebkuchen, Maroni, Stollen',
+    'Eintritt kostenlos – ideal für spontane Besuche',
+  ],
+  practicalInfoTitle: 'Praktische Infos für Besucher',
+  practicalInfo: [
+    {
+      icon: '🚇',
+      label: 'Anreise',
+      text: 'U2 Station Rathaus, Straßenbahnlinien 1, 71 und D (Haltestelle Rathausplatz/Burgtheater).',
+    },
+    {
+      icon: '🕐',
+      label: 'Öffnungszeiten',
+      text: 'Täglich 10:00–21:30 Uhr, Heiligabend (24. Dezember) 10:00–17:00 Uhr.',
+    },
+    {
+      icon: '🎄',
+      label: 'Tipp für ruhige Besuche',
+      text: 'An Wochenenden und Abenden sehr voll – Besuche unter der Woche oder morgens empfohlen.',
+    },
+    {
+      icon: '🧥',
+      label: 'Kleidung',
+      text: 'Dezember in Wien: 0–8 °C, oft feucht. Warme, wasserfeste Kleidung und gutes Schuhwerk empfohlen.',
+    },
+  ],
+  gallery: [
+    {
+      src: 'https://images.unsplash.com/photo-1512389142860-9c449e58a543?w=800&q=80&auto=format&fit=crop',
+      alt: 'Weihnachtsmarkt Wien bei Nacht mit festlicher Beleuchtung',
+      caption: 'Leuchtende Holzhütten vor der illuminierten Rathausfassade',
+    },
+    {
+      src: 'https://images.unsplash.com/photo-1607344645866-009c320b63e0?w=800&q=80&auto=format&fit=crop',
+      alt: 'Glühwein und Weihnachtsdekoration am Christkindlmarkt',
+      caption: 'Glühwein, Punsch und weihnachtliche Delikatessen',
+    },
+    {
+      src: 'https://images.unsplash.com/photo-1543933441-92abb7bd2ca2?w=800&q=80&auto=format&fit=crop',
+      alt: 'Kunsthandwerk am Wiener Christkindlmarkt',
+      caption: 'Hochwertiges Kunsthandwerk aus ganz Österreich',
+    },
+  ],
+  ctaText: 'Advent-Events in Wien entdecken',
+  ctaLink: '/map?category=Kultur&region=Wien',
+  seoTitle: 'Wiener Christkindlmarkt 2026 – Rathausplatz Wien',
+  seoDescription:
+    'Der Wiener Christkindlmarkt am Rathausplatz: Termine, Öffnungszeiten, Anreise & Tipps für den bekanntesten Weihnachtsmarkt Österreichs.',
+  keywords: [
+    'Wiener Christkindlmarkt',
+    'Weihnachtsmarkt Wien',
+    'Rathausplatz Wien Advent',
+    'Christkindlmarkt Wien 2026',
+    'Wien Advent',
+    'Weihnachtsmarkt Rathausplatz',
+    'Christmas market Vienna',
+    'Wien Weihnachten',
+    'Advent Wien Programm',
+    'Christkindlmarkt Öffnungszeiten',
+  ],
+  jsonLdEvent: {
+    name: 'Wiener Christkindlmarkt 2026',
+    startDate: '2026-11-14',
+    endDate: '2026-12-26',
+    location: 'Rathausplatz 1, 1010 Wien, Austria',
+    url: 'https://www.christkindlmarkt.at',
+    description:
+      'Der Wiener Christkindlmarkt am Rathausplatz ist einer der ältesten und schönsten Weihnachtsmärkte der Welt.',
+  },
+};

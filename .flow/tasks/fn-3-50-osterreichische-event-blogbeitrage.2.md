@@ -18,11 +18,12 @@ Create 10 long-form blog post TypeScript files for major Wien events, each as `s
 
 ### Per post requirements
 
-- `description`: 4–6 paragraphs, German, covering history, atmosphere, programme, highlights
+- Content fields: `intro` (1-2 paragraphs), `historyTitle` + `history` (1-2 paragraphs), `whatToExpectTitle` + `whatToExpect` (1-2 paragraphs) + `whatToExpectList` (3-6 bullet strings) — all in German, covering history, atmosphere, programme, highlights
 - `keyFacts`: real dates (typical year), venue, admission info, website
-- `lineup`: 3–6 representative acts/highlights (optional for non-music events, use speakers/films/performers)
+- `lineup`: 3–6 representative `LineupAct` objects (optional for non-music events, use speakers/films/performers); each has `name`, optional `role?`, `day?`, `time?`, `stage?`
 - `gallery`: 3 Unsplash images with verified `photo-XXXXXXXXXX` CDN IDs; alt text in German
-- `practicalInfo`: 3–4 paragraphs on getting there, accommodation tips, what to bring, tickets
+- `practicalInfo`: array of 3–4 `{ icon: string; label: string; text: string }` objects (e.g. icon emoji, label like "Anreise", text with details)
+<!-- Updated by plan-sync: fn-3-50...1 used structured content fields (intro/history/whatToExpect) not a single `description`, and practicalInfo is {icon,label,text}[] not paragraphs -->
 - `seoTitle`: ≤60 chars, includes event name + "Wien" + year context
 - `seoDescription`: ≤160 chars, compelling summary with keywords
 - `keywords`: 8–12 German/English keywords
@@ -37,7 +38,7 @@ For each Unsplash image used, search Unsplash for the topic, get real `photo-` C
 Add each post import to `src/content/blog/index.ts` barrel (append to `ALL_POSTS` array).
 ## Acceptance
 - [ ] 10 files created under `src/content/blog/posts/` for Wien events
-- [ ] Each post: description >=4 paragraphs, keyFacts complete, gallery 3 images, practicalInfo >=3 paragraphs
+- [ ] Each post: intro + history + whatToExpect content filled, keyFacts complete, gallery 3 images, practicalInfo >=3 items
 - [ ] All seoTitle <=60 chars, seoDescription <=160 chars, keywords 8-12 items
 - [ ] All jsonLdEvent objects have name, startDate, endDate, location.addressCountry=AT, image, description
 - [ ] All Unsplash URLs use photo-XXXXXXXXXX CDN format (verified, no 404)

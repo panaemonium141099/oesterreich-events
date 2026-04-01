@@ -5,7 +5,8 @@ Create 10 long-form blog post TypeScript files for major NÖ, Burgenland & bunde
 
 ### Events to cover
 
-41. `donauinselfest` — Donauinselfest Wien/NÖ (Juni) — Europe's largest free music festival
+41. `donauinselfest` — Donauinselfest Wien/NÖ (Juni) — Europe's largest free music festival -- NOTE: already exists as `donauinselfest-2026.ts` from T1, skip or update
+<!-- Updated by plan-sync: fn-3-50...1 already created donauinselfest-2026.ts -->
 42. `grafenegg-festival` — Grafenegg Festival NÖ (August-September)
 43. `lehar-festival-bad-ischl` — Lehár Festival Bad Ischl / Salzkammergut (Juli-August)
 44. `esterhazy-konzerte` — Schloss Esterhazy Konzerte Eisenstadt (Sommer)
@@ -18,11 +19,12 @@ Create 10 long-form blog post TypeScript files for major NÖ, Burgenland & bunde
 
 ### Per post requirements (same as T2)
 
-- `description`: 4–6 paragraphs, German
+- Content fields: `intro` (1-2 paragraphs), `historyTitle` + `history` (1-2 paragraphs), `whatToExpectTitle` + `whatToExpect` (1-2 paragraphs) + `whatToExpectList` (3-6 bullet strings) — all in German
 - `keyFacts`: real dates, venue, admission, website
-- `lineup`: 3–6 acts/highlights where applicable
+- `lineup`: 3–6 `LineupAct` objects; each has `name`, optional `role?`, `day?`, `time?`, `stage?`
 - `gallery`: 3 Unsplash images with verified photo-XXXXXXXXXX CDN IDs
-- `practicalInfo`: 3–4 paragraphs
+- `practicalInfo`: array of 3–4 `{ icon: string; label: string; text: string }` objects
+<!-- Updated by plan-sync: fn-3-50...1 used structured content fields not `description`, practicalInfo is {icon,label,text}[] -->
 - `seoTitle`: <=60 chars, `seoDescription`: <=160 chars, `keywords`: 8-12
 - `jsonLdEvent`: Schema.org Event with addressCountry: AT
 
@@ -31,7 +33,7 @@ Create 10 long-form blog post TypeScript files for major NÖ, Burgenland & bunde
 Append all 10 imports to `src/content/blog/index.ts` ALL_POSTS array. After this task, ALL_POSTS should contain all 53 posts (3 existing + 50 new).
 ## Acceptance
 - [ ] 10 files created under src/content/blog/posts/ for NOe/Burgenland/bundesweit events
-- [ ] Each post: description >=4 paragraphs, keyFacts complete, gallery 3 images, practicalInfo >=3 paragraphs
+- [ ] Each post: intro + history + whatToExpect content filled, keyFacts complete, gallery 3 images, practicalInfo >=3 items
 - [ ] All seoTitle <=60, seoDescription <=160, keywords 8-12
 - [ ] All jsonLdEvent have required fields with addressCountry: AT
 - [ ] All Unsplash URLs verified photo-XXXXXXXXXX CDN format

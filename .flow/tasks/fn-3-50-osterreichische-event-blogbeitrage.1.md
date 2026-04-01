@@ -34,9 +34,8 @@ Refactor the blog content system from a single monolithic file into a maintainab
 - [ ] `npm run build` passes with no TypeScript errors
 - [ ] Navigating to all 3 existing blog URLs still works (no 404, content unchanged)
 ## Done summary
-TBD
-
+Refactored the blog content system into a barrel structure: extracted interfaces to types.ts, migrated all 3 posts to individual files under posts/, created index.ts barrel with ALL_POSTS/getPostBySlug/getPostsByCategory, updated all consumers to import from the barrel, converted festivals.ts to a shim, and added Cache-Control headers for /blog/* routes. Also fixed three autocomplete issues in FilterBar: dropdown-reopen-after-selection bug, missing AbortController for request cancellation, and heavyweight /api/events suggest queries now use a lean mode (suggest=true) that skips count:exact and selects only needed fields.
 ## Evidence
-- Commits:
-- Tests:
+- Commits: 65aef1f2210d31ff44b4b5e1b4c0fcfc44d309b0, c5591f2, 101817d
+- Tests: npm run build
 - PRs:

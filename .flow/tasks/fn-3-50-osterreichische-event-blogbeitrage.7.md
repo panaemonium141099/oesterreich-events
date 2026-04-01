@@ -7,7 +7,8 @@ Integrate the full blog post pool into the UI. This task runs after T1 (barrel e
 
 1. **`src/components/Landing/FestivalBlogSection.tsx`**
    - Import `ALL_POSTS` from `@/content/blog`
-   - Show the top 6 posts (by publishedAt desc, or a `featured` flag if added)
+   - Show the top 6 posts (by `publishDate` desc, or a `featured` flag if added)
+   <!-- Updated by plan-sync: fn-3-50...1 used `publishDate` not `publishedAt` -->
    - Add a "Alle Beiträge" link to `/blog`
 
 2. **Blog index page: `src/app/blog/page.tsx`** (create if not exists)

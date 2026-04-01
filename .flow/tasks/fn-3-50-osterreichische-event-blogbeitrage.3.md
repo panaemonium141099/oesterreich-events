@@ -18,11 +18,12 @@ Create 10 long-form blog post TypeScript files for major Salzburg & Tirol events
 
 ### Per post requirements (same as T2)
 
-- `description`: 4–6 paragraphs, German, covering history, atmosphere, programme, highlights
+- Content fields: `intro` (1-2 paragraphs), `historyTitle` + `history` (1-2 paragraphs), `whatToExpectTitle` + `whatToExpect` (1-2 paragraphs) + `whatToExpectList` (3-6 bullet strings) — all in German
 - `keyFacts`: real dates (typical year), venue, admission, website
-- `lineup`: 3–6 acts/highlights where applicable
+- `lineup`: 3–6 `LineupAct` objects; each has `name`, optional `role?`, `day?`, `time?`, `stage?`
 - `gallery`: 3 Unsplash images with verified photo-XXXXXXXXXX CDN IDs
-- `practicalInfo`: 3–4 paragraphs
+- `practicalInfo`: array of 3–4 `{ icon: string; label: string; text: string }` objects
+<!-- Updated by plan-sync: fn-3-50...1 used structured content fields not `description`, practicalInfo is {icon,label,text}[] -->
 - `seoTitle`: ≤60 chars, `seoDescription`: ≤160 chars, `keywords`: 8–12
 - `jsonLdEvent`: Schema.org Event with addressCountry: AT
 
@@ -31,7 +32,7 @@ Create 10 long-form blog post TypeScript files for major Salzburg & Tirol events
 Append all 10 imports to `src/content/blog/index.ts` ALL_POSTS array.
 ## Acceptance
 - [ ] 10 files created under src/content/blog/posts/ for Salzburg & Tirol events
-- [ ] Each post: description >=4 paragraphs, keyFacts complete, gallery 3 images, practicalInfo >=3 paragraphs
+- [ ] Each post: intro + history + whatToExpect content filled, keyFacts complete, gallery 3 images, practicalInfo >=3 items
 - [ ] All seoTitle <=60, seoDescription <=160, keywords 8-12
 - [ ] All jsonLdEvent have name, startDate, endDate, location.addressCountry=AT, image, description
 - [ ] All Unsplash URLs verified photo-XXXXXXXXXX CDN format
