@@ -33,41 +33,42 @@ export const metadata: Metadata = {
 //   Sport & Outdoor | Sport & Fitness | Festivals | Festivals & Feste | Open-Air & Feste
 const FILTER_TABS: Array<{
   label: string;
+  /** The ?category= URL param value — matches the spec label exactly. */
   query: string;
   /** Exact stored `category` values that belong to this tab. null = show all. */
   matchValues: string[] | null;
 }> = [
-  { label: 'Alle',         query: 'alle',      matchValues: null },
+  { label: 'Alle',         query: 'Alle',      matchValues: null },
   {
     label: 'Musik',
-    query: 'musik',
+    query: 'Musik',
     matchValues: ['Musik', 'Musik & Festival', 'Musik & Konzerte'],
   },
   {
     label: 'Kultur',
-    query: 'kultur',
+    query: 'Kultur',
     matchValues: ['Kultur & Tradition', 'Kultur & B\u00fchne'],
   },
   {
     label: 'M\u00e4rkte',
-    query: 'maerkte',
+    query: 'M\u00e4rkte',
     // Posts about markets, food festivals, and culinary traditions
     matchValues: ['Kulinarik & Tradition', 'Essen & Trinken'],
   },
   {
     label: 'Sport',
-    query: 'sport',
+    query: 'Sport',
     matchValues: ['Sport & Outdoor', 'Sport & Fitness'],
   },
   {
     label: 'Brauchtum',
-    query: 'brauchtum',
+    query: 'Brauchtum',
     // Folk customs, traditional festivals, and local festive culture
     matchValues: ['Kultur & Tradition', 'Festivals & Feste', 'Open-Air & Feste'],
   },
   {
     label: 'Klassik',
-    query: 'klassik',
+    query: 'Klassik',
     // Classical music: opera, chamber music, and concert events
     matchValues: ['Musik & Konzerte'],
   },
@@ -93,9 +94,10 @@ interface BlogPageProps {
 export default async function BlogPage({ searchParams }: BlogPageProps) {
   const { category } = await searchParams;
 
-  // Determine the active tab (default to 'alle')
+  // Determine the active tab (default to 'Alle').
+  // The spec uses ?category=Märkte etc. — URL-decoded values match tab queries directly.
   const activeQuery =
-    category && FILTER_TABS.some(t => t.query === category) ? category : 'alle';
+    category && FILTER_TABS.some(t => t.query === category) ? category : 'Alle';
 
   const activeTab = FILTER_TABS.find(t => t.query === activeQuery) ?? FILTER_TABS[0];
 
@@ -153,7 +155,7 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
             {FILTER_TABS.map(tab => (
               <Link
                 key={tab.query}
-                href={tab.query === 'alle' ? '/blog' : `/blog?category=${tab.query}`}
+                href={tab.query === 'Alle' ? '/blog' : `/blog?category=${encodeURIComponent(tab.query)}`}
                 className={`px-4 py-2 text-sm font-medium rounded-full border transition-colors ${
                   activeQuery === tab.query
                     ? 'bg-gray-900 text-white border-gray-900'
@@ -167,7 +169,7 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
           <p className="mt-3 text-xs text-gray-400">
             {filteredPosts.length}{' '}
             {filteredPosts.length === 1 ? 'Beitrag' : 'Beitr\u00e4ge'}
-            {activeTab.matchValues !== null ? ` in ${activeTab.label}` : ' gesamt'}
+            {activeTab.query !== 'Alle' ? ` in ${activeTab.label}` : ' gesamt'}
           </p>
         </nav>
 
