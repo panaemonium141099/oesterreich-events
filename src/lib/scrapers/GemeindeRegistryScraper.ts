@@ -949,11 +949,16 @@ export class GemeindeRegistryScraper extends BaseScraper {
   private parseNumericDate(text: string): string | null {
     const match = text.match(/(\d{1,2})\.(\d{1,2})\.(\d{4})/);
     if (!match) return null;
-    const [, d, m, y] = match;
+    const [fullDateMatch, d, m, y] = match;
     if (parseInt(y) < 2025 || parseInt(y) > 2030) return null;
-    const timeMatch = text.match(/(\d{1,2})[:.:](\d{2})\s*(?:Uhr|h)?/);
+    if (parseInt(m) > 12 || parseInt(d) > 31) return null;
     const date = `${y}-${m.padStart(2, '0')}-${d.padStart(2, '0')}`;
-    if (timeMatch) return `${date}T${timeMatch[1].padStart(2, '0')}:${timeMatch[2]}:00`;
+    // Search for time AFTER the date match to avoid matching the date itself as time
+    const textAfterDate = text.substring((match.index || 0) + fullDateMatch.length);
+    const timeMatch = textAfterDate.match(/(\d{1,2}):(\d{2})(?:\s*(?:Uhr|h))?/);
+    if (timeMatch && parseInt(timeMatch[1]) <= 23) {
+      return `${date}T${timeMatch[1].padStart(2, '0')}:${timeMatch[2]}:00`;
+    }
     return date;
   }
 
