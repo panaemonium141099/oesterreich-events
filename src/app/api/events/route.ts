@@ -94,9 +94,15 @@ export async function GET(request: NextRequest) {
     // Only show public events (scraped events default to 'public')
     query = query.or('visibility.eq.public,visibility.is.null');
 
-    // Only show future/current events by default
+    // Only show future events within the next 4 months by default (performance)
+    // Users can override with dateFrom/dateTo params
     const today = new Date().toISOString().slice(0, 10);
     query = query.gte('start_date', today);
+    if (!filters.dateTo) {
+      const fourMonths = new Date();
+      fourMonths.setMonth(fourMonths.getMonth() + 4);
+      query = query.lte('start_date', fourMonths.toISOString().slice(0, 10) + 'T23:59:59');
+    }
 
     // Apply filters
     if (filters.bundesland && filters.bundesland !== 'all') {
@@ -303,19 +309,20 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Deduplicate events with identical titles: keep the one with the earliest start_date
+    // Deduplicate: same title + same day = duplicate (keep earliest time)
+    // Same title on different days = keep both (e.g. weekly recurring events)
     const allFetched = events || [];
-    const seenTitles = new Map<string, Record<string, unknown>>();
+    const seenTitleDays = new Set<string>();
     const dedupedEvents: Record<string, unknown>[] = [];
     for (const event of allFetched as Record<string, unknown>[]) {
       const title = (event.title as string || '').trim().toLowerCase();
       if (!title) { dedupedEvents.push(event); continue; }
-      const existing = seenTitles.get(title);
-      if (!existing) {
-        seenTitles.set(title, event);
+      const startDate = (event.start_date as string || '').split('T')[0]; // date part only
+      const key = `${title}::${startDate}`;
+      if (!seenTitleDays.has(key)) {
+        seenTitleDays.add(key);
         dedupedEvents.push(event);
       }
-      // Skip duplicates — the first one is kept (already sorted by start_date ascending)
     }
 
     const hasMore = dedupedEvents.length > filters.limit;
