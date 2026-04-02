@@ -42,6 +42,9 @@ import { TourismusPortaleScraper } from './TourismusPortaleScraper';
 import { GemeindeListScraper } from './GemeindeListScraper';
 import { Gem2GoScraper } from './Gem2GoScraper';
 import { GenericGemeindeScraper } from './GenericGemeindeScraper';
+import { CitiesScraper } from './CitiesScraper';
+import { BurgenlandWPEventsScraper } from './BurgenlandWPEventsScraper';
+import { GemeindeRegistryScraper } from './GemeindeRegistryScraper';
 import { MariazellAtScraper, BasilikaMariazellScraper, MariazellGvScraper } from './MariazellScraper';
 import { FeratelScraper } from './FeratelScraper';
 import { TourDataScraper } from './TourDataScraper';
@@ -225,6 +228,11 @@ const scrapers: BaseScraper[] = [
   new Gem2GoScraper(),
   // Generic municipality event pages (non-GEM2GO)
   new GenericGemeindeScraper(),
+  // CITIES platform municipalities (citiesapps.com)
+  new CitiesScraper(),
+  // WordPress event plugin municipalities (Burgenland)
+  new BurgenlandWPEventsScraper(),
+  new GemeindeRegistryScraper(),
   // Universitäten und Hochschulen (Batch 1 — Top 15 by student count)
   new UniWienScraper(),
   new TUWienScraper(),
