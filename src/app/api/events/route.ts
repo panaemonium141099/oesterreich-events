@@ -303,14 +303,29 @@ export async function GET(request: NextRequest) {
       );
     }
 
+    // Deduplicate events with identical titles: keep the one with the earliest start_date
     const allFetched = events || [];
-    const hasMore = allFetched.length > filters.limit;
-    const pageEvents = hasMore ? allFetched.slice(0, filters.limit) : allFetched;
+    const seenTitles = new Map<string, Record<string, unknown>>();
+    const dedupedEvents: Record<string, unknown>[] = [];
+    for (const event of allFetched as Record<string, unknown>[]) {
+      const title = (event.title as string || '').trim().toLowerCase();
+      if (!title) { dedupedEvents.push(event); continue; }
+      const existing = seenTitles.get(title);
+      if (!existing) {
+        seenTitles.set(title, event);
+        dedupedEvents.push(event);
+      }
+      // Skip duplicates — the first one is kept (already sorted by start_date ascending)
+    }
+
+    const hasMore = dedupedEvents.length > filters.limit;
+    const pageEvents = hasMore ? dedupedEvents.slice(0, filters.limit) : dedupedEvents;
     const nextCursor = hasMore && pageEvents.length > 0
       ? String((pageEvents[pageEvents.length - 1] as Record<string, unknown>).id)
       : null;
 
-    const totalCount = count ?? 0;
+    // Use deduped count if smaller than DB count (dedup removes duplicates)
+    const totalCount = count ? Math.min(count, dedupedEvents.length + (hasMore ? 1 : 0)) : dedupedEvents.length;
 
     const response = NextResponse.json({
       events: pageEvents,
