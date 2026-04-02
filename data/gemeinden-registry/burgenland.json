@@ -62,7 +62,7 @@
   {
     "name": "Hornstein",
     "website": "https://hornstein.at",
-    "eventUrl": "https://hornstein.at/events/upcoming",
+    "eventUrl": "https://hornstein.at/event-calendars/65fd7e1ee34d3871a6508da0",
     "cms": "cities",
     "strategy": "cities-iife",
     "plz": "7053",
@@ -79,7 +79,7 @@
     "website": "https://klingenbach.at",
     "eventUrl": "https://klingenbach.at/events/liste/",
     "cms": "wordpress",
-    "strategy": "generic-dates",
+    "strategy": "tribe-html",
     "plz": "7013",
     "bezirk": "Eisenstadt-Umgebung",
     "bundesland": "Burgenland",
@@ -92,7 +92,7 @@
   {
     "name": "Leithaprodersdorf",
     "website": "https://leithaprodersdorf.at",
-    "eventUrl": "https://leithaprodersdorf.at/events/upcoming",
+    "eventUrl": "https://leithaprodersdorf.at/unsere-gemeinde/veranstaltungen-und-termine",
     "cms": "cities",
     "strategy": "cities-iife",
     "plz": "2443",
@@ -152,7 +152,7 @@
   {
     "name": "Neufeld an der Leitha",
     "website": "https://neufeld-leitha.at",
-    "eventUrl": "https://neufeld-leitha.at/events/upcoming",
+    "eventUrl": "https://neufeld-leitha.at/event-calendars/670d19adb9a37ff113bd6384",
     "cms": "cities",
     "strategy": "cities-iife",
     "plz": "2491",
@@ -212,9 +212,9 @@
   {
     "name": "Sankt Margarethen im Burgenland",
     "website": "https://st-margarethen.at",
-    "eventUrl": "https://st-margarethen.at/events/upcoming",
-    "cms": "cities",
-    "strategy": "cities-iife",
+    "eventUrl": "https://st-margarethen.at/events/",
+    "cms": "wordpress-tribe",
+    "strategy": "tribe-html",
     "plz": "7062",
     "bezirk": "Eisenstadt-Umgebung",
     "bundesland": "Burgenland",
@@ -242,7 +242,7 @@
   {
     "name": "Siegendorf",
     "website": "https://siegendorf.gv.at",
-    "eventUrl": "https://siegendorf.gv.at/events/upcoming",
+    "eventUrl": "https://siegendorf.gv.at/event-calendars/682ef0cff53181270d94c8ec",
     "cms": "cities",
     "strategy": "cities-iife",
     "plz": "7011",
@@ -257,7 +257,7 @@
   {
     "name": "Steinbrunn",
     "website": "https://www.steinbrunn.at",
-    "eventUrl": "https://www.steinbrunn.at/events/upcoming",
+    "eventUrl": "https://www.steinbrunn.at/gesellschaftvereine-und-freizeit/veranstaltungskalender",
     "cms": "cities",
     "strategy": "cities-iife",
     "plz": "7035",
@@ -302,7 +302,7 @@
   {
     "name": "Wimpassing an der Leitha",
     "website": "https://wimpassing-leitha.at",
-    "eventUrl": "https://wimpassing-leitha.at/events/upcoming",
+    "eventUrl": "https://wimpassing-leitha.at/",
     "cms": "cities",
     "strategy": "cities-iife",
     "plz": "2485",
@@ -311,7 +311,7 @@
     "lat": 47.8708,
     "lng": 16.552,
     "status": "active",
-    "notes": "CITIES platform.",
+    "notes": "Events on homepage.",
     "verifiedAt": "2026-04-02"
   },
   {
@@ -407,9 +407,9 @@
   {
     "name": "Eberau",
     "website": "https://www.eberau.at",
-    "eventUrl": "https://www.eberau.at/veranstaltungen/",
+    "eventUrl": "https://eberau.at/events/",
     "cms": "wordpress",
-    "strategy": "generic-dates",
+    "strategy": "tribe-html",
     "plz": "7521",
     "bezirk": "Güssing",
     "bundesland": "Burgenland",
@@ -452,7 +452,7 @@
   {
     "name": "Güssing",
     "website": "https://www.guessing.co.at",
-    "eventUrl": "https://www.guessing.co.at/veranstaltungen",
+    "eventUrl": "https://www.guessing.co.at/index.php/termine",
     "cms": "joomla",
     "strategy": "generic-dates",
     "plz": "7540",
@@ -587,7 +587,7 @@
   {
     "name": "Neuberg im Burgenland",
     "website": "https://www.neuberg-bgld.at",
-    "eventUrl": "https://www.neuberg-bgld.at/veranstaltungen/",
+    "eventUrl": "https://www.neuberg-bgld.at/gemeinde/termine/",
     "cms": "wordpress",
     "strategy": "generic-dates",
     "plz": "7537",
@@ -602,7 +602,7 @@
   {
     "name": "Neustift bei Güssing",
     "website": "https://www.neustift-guessing.at",
-    "eventUrl": "https://www.neustift-guessing.at/events/upcoming",
+    "eventUrl": "https://xn--neustift-bei-gssing-jbc.at/events/upcoming",
     "cms": "cities",
     "strategy": "cities-iife",
     "plz": "7540",
@@ -677,7 +677,7 @@
   {
     "name": "Sankt Michael im Burgenland",
     "website": "https://www.st.michael-bgld.at",
-    "eventUrl": "https://www.st.michael-bgld.at/veranstaltungen/",
+    "eventUrl": "https://www.st.michael-bgld.at/buergerservice/termine-kalenderuebersicht",
     "cms": "typo3",
     "strategy": "generic-dates",
     "plz": "7535",
@@ -692,7 +692,7 @@
   {
     "name": "Stegersbach",
     "website": "https://www.stegersbach.at",
-    "eventUrl": "https://www.stegersbach.at/veranstaltungen/",
+    "eventUrl": "https://gemeinde.stegersbach.at/de/aktuelles/veranstaltungen/",
     "cms": "typo3",
     "strategy": "generic-dates",
     "plz": "7551",
@@ -707,9 +707,9 @@
   {
     "name": "Stinatz",
     "website": "https://www.stinatz.gv.at",
-    "eventUrl": "https://www.stinatz.gv.at/events/upcoming",
+    "eventUrl": "https://www.stinatz.gv.at/bildung-und-kultur/veranstaltungskalender-2026",
     "cms": "cities",
-    "strategy": "cities-iife",
+    "strategy": "generic-dates",
     "plz": "7552",
     "bezirk": "Güssing",
     "bundesland": "Burgenland",
@@ -745,8 +745,8 @@
     "bundesland": "Burgenland",
     "lat": 47.103,
     "lng": 16.2368,
-    "status": "active",
-    "notes": "GEM2GO. SSL issues, use HTTP.",
+    "status": "offline",
+    "notes": "TLS cert error. Site broken.",
     "verifiedAt": "2026-04-02"
   },
   {
@@ -790,8 +790,8 @@
     "bundesland": "Burgenland",
     "lat": 46.9601,
     "lng": 16.1607,
-    "status": "active",
-    "notes": "CITIES platform.",
+    "status": "no-calendar",
+    "notes": "All calendar URLs 404. Site migration.",
     "verifiedAt": "2026-04-02"
   },
   {
@@ -827,9 +827,9 @@
   {
     "name": "Jennersdorf",
     "website": "https://www.jennersdorf.eu",
-    "eventUrl": "https://www.jennersdorf.eu/veranstaltungen.html",
-    "cms": "gemeinde24",
-    "strategy": "gemeinde24",
+    "eventUrl": "https://www.jennersdorf.eu/aktuelle-veranstaltungen/",
+    "cms": "wordpress",
+    "strategy": "generic-dates",
     "plz": "8380",
     "bezirk": "Jennersdorf",
     "bundesland": "Burgenland",
@@ -932,7 +932,7 @@
   {
     "name": "Sankt Martin an der Raab",
     "website": "https://www.sankt-martin.at",
-    "eventUrl": "https://www.sankt-martin.at/veranstaltungen.html",
+    "eventUrl": "https://www.st-martin-raab.at/veranstaltungen1.html",
     "cms": "gemeinde24",
     "strategy": "gemeinde24",
     "plz": "8383",
@@ -1249,7 +1249,7 @@
     "website": "https://www.andau-gemeinde.at",
     "eventUrl": "https://www.andau-gemeinde.at/veranstaltungen/",
     "cms": "wordpress",
-    "strategy": "generic-dates",
+    "strategy": "tribe-html",
     "plz": "7163",
     "bezirk": "Neusiedl am See",
     "bundesland": "Burgenland",
@@ -1579,7 +1579,7 @@
     "website": "https://www.tadten.at",
     "eventUrl": "https://www.tadten.at/events",
     "cms": "wordpress",
-    "strategy": "generic-dates",
+    "strategy": "tribe-html",
     "plz": "7162",
     "bezirk": "Neusiedl am See",
     "bundesland": "Burgenland",
@@ -1819,7 +1819,7 @@
     "website": "https://mannersdorf-adr.at",
     "eventUrl": "https://mannersdorf-adr.at/events/",
     "cms": "wordpress",
-    "strategy": "generic-dates",
+    "strategy": "tribe-html",
     "plz": "7444",
     "bezirk": "Oberpullendorf",
     "bundesland": "Burgenland",
@@ -2432,7 +2432,7 @@
   {
     "name": "Schachendorf",
     "website": "https://www.schachendorf.at",
-    "eventUrl": "https://schachendorf.at/termine/",
+    "eventUrl": "https://schachendorf.at/events/",
     "cms": "wordpress",
     "strategy": "mec-html",
     "plz": "7472",

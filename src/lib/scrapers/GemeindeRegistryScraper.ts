@@ -134,19 +134,43 @@ export class GemeindeRegistryScraper extends BaseScraper {
       return this.parseGenericDates(html, entry);
     }
 
+    // CITIES has multiple data structures depending on URL type:
+    // 1. citiesapps.com: data['page/events'].upcomingEvents[]
+    // 2. citiesapps.com: data['city/events'].events.upcoming[]
+    // 3. /events/upcoming: data['connected-page'].pageEvents.upcomingEvents[]
+    // 4. Custom domains: data.pageEvents.upcomingEvents[]
     const connectedPage = data['connected-page'] as Record<string, unknown> | undefined;
-    const pageEvents = (connectedPage?.pageEvents ?? data.pageEvents) as CitiesPageEvents | undefined;
-    if (!pageEvents) {
-      // INITIAL_DATA/WEBSITE found but no pageEvents — try generic dates fallback
+    const pageSlashEvents = data['page/events'] as CitiesPageEvents | undefined;
+    const cityEvents = data['city/events'] as { events?: { upcoming?: CitiesEvent[]; current?: CitiesEvent[] } } | undefined;
+    const pageEvents = pageSlashEvents
+      ?? (connectedPage?.pageEvents as CitiesPageEvents | undefined)
+      ?? (data.pageEvents as CitiesPageEvents | undefined);
+
+    const allCitiesEvents: CitiesEvent[] = [];
+
+    if (pageEvents) {
+      allCitiesEvents.push(...(pageEvents.upcomingEvents || []));
+      allCitiesEvents.push(...(pageEvents.currentEvents || []));
+    }
+    if (cityEvents?.events) {
+      allCitiesEvents.push(...(cityEvents.events.upcoming || []));
+      allCitiesEvents.push(...(cityEvents.events.current || []));
+    }
+
+    if (allCitiesEvents.length === 0) {
+      // No events found in INITIAL_DATA — fall back to generic HTML parsing
       return this.parseGenericDates(html, entry);
     }
 
-    const allCitiesEvents = [
-      ...(pageEvents.upcomingEvents || []),
-      ...(pageEvents.currentEvents || []),
-    ];
+    // Deduplicate by event ID
+    const seenIds = new Set<string>();
+    const dedupedEvents = allCitiesEvents.filter(evt => {
+      if (!evt._id || seenIds.has(evt._id)) return false;
+      seenIds.add(evt._id);
+      return true;
+    });
 
-    for (const evt of allCitiesEvents) {
+    for (const evt of dedupedEvents) {
       if (!evt.name || !evt.startsAt) continue;
 
       const startDate = this.parseCitiesDate(evt.startsAt, evt.hasStartTime);
@@ -464,8 +488,51 @@ export class GemeindeRegistryScraper extends BaseScraper {
     const events: ScrapedEvent[] = [];
     const seen = new Set<string>();
 
+    // GEM2GO detail card layout (div.veranstaltung with h3 title)
+    $('.veranstaltung').each((_, el) => {
+      try {
+        const $el = $(el);
+        const title = $el.find('h3').first().text().trim();
+        if (!title) return;
+
+        const text = $el.text();
+        const startDate = this.parseNumericDate(text);
+        if (!startDate) return;
+
+        const dedupeKey = `${title}-${startDate}`;
+        if (seen.has(dedupeKey)) return;
+        seen.add(dedupeKey);
+
+        const link = $el.find('a[href*="veranstaltung"]').attr('href');
+        const sourceUrl = link ? (link.startsWith('http') ? link : new URL(link, entry.eventUrl!).href) : entry.eventUrl!;
+
+        let imageUrl = $el.find('img').first().attr('src');
+        if (imageUrl && !imageUrl.startsWith('http')) imageUrl = new URL(imageUrl, entry.eventUrl!).href;
+
+        // Extract location from address li
+        const addressLi = $el.find('li:contains("Adresse")').text().replace('Adresse', '').trim();
+
+        events.push({
+          source_id: `registry-gem2go-${Buffer.from(title + startDate).toString('base64').substring(0, 24)}`,
+          source_name: this.name,
+          source_url: sourceUrl,
+          title,
+          start_date: startDate,
+          location_name: entry.name,
+          address: addressLi || undefined,
+          postal_code: entry.plz,
+          bundesland: entry.bundesland,
+          district: entry.bezirk,
+          latitude: entry.lat,
+          longitude: entry.lng,
+          category: categorizeEvent(title, ''),
+          image_url: this.cleanImageUrl(imageUrl),
+        });
+      } catch { /* skip */ }
+    });
+
     // GEM2GO table layout
-    $('tr').each((_, el) => {
+    if (events.length === 0) $('tr').each((_, el) => {
       try {
         const $el = $(el);
         const dateCell = $el.find('.va_list_day, .va_list_bez, td').first().text().trim();
