@@ -122,9 +122,10 @@ export class PartytimerScraper extends BaseScraper {
         // Image
         let imageUrl: string | undefined;
         const $img = $container.find('img').first();
-        const imgSrc = $img.attr('src') || $img.attr('data-src') || '';
+        const imgSrc = ($img.attr('src') || $img.attr('data-src') || '').trim();
         if (imgSrc && !imgSrc.startsWith('data:')) {
-          imageUrl = imgSrc.startsWith('http') ? imgSrc : `${this.BASE}${imgSrc}`;
+          const resolved = imgSrc.startsWith('http') ? imgSrc : `${this.BASE}${imgSrc.startsWith('/') ? '' : '/'}${imgSrc}`;
+          imageUrl = this.cleanImageUrl(resolved);
         }
 
         const sourceUrl = href.startsWith('http') ? href : `${this.BASE}${href}`;

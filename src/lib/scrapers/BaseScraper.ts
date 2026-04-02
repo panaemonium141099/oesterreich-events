@@ -96,6 +96,9 @@ export abstract class BaseScraper {
     // Reject very common tiny image dimensions in URL (e.g., /1x1/, /2x2/, width=1)
     if (/[/&?](?:w|width|h|height)=(?:1|2)(?:&|$)/i.test(trimmed)) return undefined;
 
+    // Reject URLs with spaces (often double-pasted URLs)
+    if (trimmed.includes(' ')) return undefined;
+
     // Ensure proper URL format
     if (!trimmed.startsWith('http://') && !trimmed.startsWith('https://')) {
       // Relative URL — can't validate further, caller should have made it absolute
