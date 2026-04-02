@@ -361,15 +361,15 @@ export class GemeindeRegistryScraper extends BaseScraper {
     const events: ScrapedEvent[] = [];
     const seen = new Set<string>();
 
-    $('.mec-event-article, .mec-event-item').each((_, el) => {
+    $('.mec-event-article, .mec-event-item, [data-mec-postid]').each((_, el) => {
       try {
         const $el = $(el);
-        const titleEl = $el.find('.mec-event-title a, .mec-event-title');
+        const titleEl = $el.find('h4.mec-event-title a, .mec-event-title a, .mec-event-title');
         const title = titleEl.text().trim();
         if (!title) return;
 
-        const link = titleEl.attr('href') || $el.find('a').first().attr('href') || entry.eventUrl!;
-        const dateText = $el.find('.mec-event-date').text().trim();
+        const link = titleEl.attr('href') || $el.find('a[data-event-id]').attr('href') || $el.find('a').first().attr('href') || entry.eventUrl!;
+        const dateText = $el.find('.mec-event-date, .mec-date-details').text().trim();
         const timeText = $el.find('.mec-time-details, .mec-event-time').text().trim();
         const startDate = this.parseMECDate(dateText, timeText);
         if (!startDate) return;
@@ -676,8 +676,8 @@ export class GemeindeRegistryScraper extends BaseScraper {
       $('.rasterListEntry, .bemCard').each((_, el) => {
         try {
           const $el = $(el);
-          const title = $el.find('.rasterListEntryTitle, .bemCardTitle, h3, h4').first().text().trim();
-          const dateText = $el.find('.rasterListEntryDate, .bemCardDate').text().trim() || $el.text();
+          const title = $el.find('.rasterListInfoContainerTitel, .rasterListEntryTitle, .bemCardTitle, h2, h3, h4').first().text().trim();
+          const dateText = $el.find('.rasterListDateContainerDateTime, .rasterListEntryDate, .bemCardDate').text().trim() || $el.text();
 
           if (!title) return;
           const startDate = this.parseGermanDate(dateText);
@@ -774,7 +774,7 @@ export class GemeindeRegistryScraper extends BaseScraper {
     const events: ScrapedEvent[] = [];
     const seen = new Set<string>();
 
-    $('article, .event-item, .veranstaltung, li, tr, .wp-block-group, .elementor-widget-container, .entry-content a, div[class*="event"], div[class*="veranstaltung"]').each((_, el) => {
+    $('article, .card, .event-item, .veranstaltung, .acc-item, li, tr, .wp-block-group, .elementor-widget-container, .entry-content a, div[class*="event"], div[class*="veranstaltung"], .news-list-view').each((_, el) => {
       try {
         const $el = $(el);
         const text = $el.text().trim();

@@ -340,8 +340,8 @@
     "bundesland": "Burgenland",
     "lat": 47.7978,
     "lng": 16.4936,
-    "status": "active",
-    "notes": "WordPress with Astra/Elementor. Bilingual.",
+    "status": "empty",
+    "notes": "WP+Elementor. Gemeindekalender page exists but empty. No events published.",
     "verifiedAt": "2026-04-02"
   },
   {
@@ -460,8 +460,8 @@
     "bundesland": "Burgenland",
     "lat": 47.0572,
     "lng": 16.3217,
-    "status": "active",
-    "notes": "Joomla site.",
+    "status": "empty",
+    "notes": "Joomla. Termine page empty.",
     "verifiedAt": "2026-04-02"
   },
   {
@@ -535,8 +535,8 @@
     "bundesland": "Burgenland",
     "lat": 47.099,
     "lng": 16.2336,
-    "status": "active",
-    "notes": "WordPress. Old URL path but active.",
+    "status": "no-calendar",
+    "notes": "WP. URL is from 2019, never updated. Pop 336.",
     "verifiedAt": "2026-04-02"
   },
   {
@@ -685,8 +685,8 @@
     "bundesland": "Burgenland",
     "lat": 47.094,
     "lng": 16.2295,
-    "status": "active",
-    "notes": "TYPO3 site.",
+    "status": "empty",
+    "notes": "TYPO3. Calendar JS-rendered, no static HTML events.",
     "verifiedAt": "2026-04-02"
   },
   {
@@ -715,8 +715,8 @@
     "bundesland": "Burgenland",
     "lat": 47.111,
     "lng": 16.2431,
-    "status": "active",
-    "notes": "CITIES platform.",
+    "status": "empty",
+    "notes": "CITIES. JS-rendered calendar, no static events. Already on citiesapps.",
     "verifiedAt": "2026-04-02"
   },
   {
@@ -835,8 +835,8 @@
     "bundesland": "Burgenland",
     "lat": 46.9381,
     "lng": 16.1431,
-    "status": "active",
-    "notes": "Gemeinde24 CMS.",
+    "status": "empty",
+    "notes": "WP event-organiser plugin active but 0 events published. ICS feed empty.",
     "verifiedAt": "2026-04-02"
   },
   {
@@ -1090,8 +1090,8 @@
     "bundesland": "Burgenland",
     "lat": 47.71,
     "lng": 16.39,
-    "status": "active",
-    "notes": "TYPO3 tx_news, 50-60 events, paginated.",
+    "status": "empty",
+    "notes": "TYPO3+FullCalendar. Events via AJAX, not inline. Needs Puppeteer.",
     "verifiedAt": "2026-04-02"
   },
   {
@@ -1196,7 +1196,7 @@
     "lat": 47.69,
     "lng": 16.36,
     "status": "empty",
-    "notes": "WordPress with Newspaper theme. Veranstaltungskalender at /veranstaltungen/ under Freizeit section. Currently shows 'Keine Veranstaltung gefunden!' (no events). Calendar exists but empty.",
+    "notes": "WP MEC plugin installed but 0 events published.",
     "verifiedAt": "2026-04-02"
   },
   {
@@ -1375,8 +1375,8 @@
     "bundesland": "Burgenland",
     "lat": 47.87,
     "lng": 17.05,
-    "status": "active",
-    "notes": "WordPress with Avada theme. Rich event calendar at /veranstaltungskalender/. Many events: Schlosskonzerte, Tschardaken Festival, exhibitions, Weihnachtsmarkt. halbturn.at has SSL cert issues, use halbturn.com.",
+    "status": "pdf-only",
+    "notes": "WP. Events only as PDF: halbturn.com/pdf/veranstaltungskalender2026.pdf",
     "verifiedAt": "2026-04-02"
   },
   {
@@ -1420,8 +1420,8 @@
     "bundesland": "Burgenland",
     "lat": 48.09,
     "lng": 17.06,
-    "status": "active",
-    "notes": "TYPO3. Rich events page at /veranstaltungen-tickets-und-informationen/. Very active with Marillenwandertag, Ostereiersuche, Märchenzeit, Westernball, Klavier Matinee, Kultursalon, Wanderkino events. Uses /fileadmin/user_upload/ structure.",
+    "status": "no-calendar",
+    "notes": "TYPO3. Page is contact info for organizers, not event listing.",
     "verifiedAt": "2026-04-02"
   },
   {
@@ -1435,8 +1435,8 @@
     "bundesland": "Burgenland",
     "lat": 47.88,
     "lng": 16.94,
-    "status": "active",
-    "notes": "WordPress with 'decanto' theme. Events organized by month at /veranstaltungen/janner/ through /veranstaltungen/dezember/. Austria's oldest wine-growing municipality.",
+    "status": "no-calendar",
+    "notes": "Only 2020 PDF calendar. No current events.",
     "verifiedAt": "2026-04-02"
   },
   {
@@ -1540,8 +1540,8 @@
     "bundesland": "Burgenland",
     "lat": 47.85,
     "lng": 16.83,
-    "status": "active",
-    "notes": "WordPress with WPForms and Plyr. Events page at /veranstaltungen/ redirects to external tourism calendar at www.podersdorfamsee.at/events. podersdorf.at shows Apache default page. Use gemeindepodersdorfamsee.at for Gemeinde site.",
+    "status": "empty",
+    "notes": "WP page exists but empty. Tourism events via podersdorfamsee.at.",
     "verifiedAt": "2026-04-02"
   },
   {
@@ -1630,8 +1630,8 @@
     "bundesland": "Burgenland",
     "lat": 47.94,
     "lng": 16.76,
-    "status": "active",
-    "notes": "Custom CMS (possibly static/generator). Events at /start/veranstaltungen/. Site returned 403 on direct fetch but search confirms active event page with Weihnachtsdorf, History-Bike-Escape-Tour events. Also on gem2go at winden-see.gem2go.at.",
+    "status": "empty",
+    "notes": "HTTP 403 on all pages. Bot blocking.",
     "verifiedAt": "2026-04-02"
   },
   {
@@ -1660,8 +1660,8 @@
     "bundesland": "Burgenland",
     "lat": 47.6,
     "lng": 16.6333,
-    "status": "active",
-    "notes": "Custom-built static HTML site. Events listed chronologically with dates, times, locations, descriptions. Grouped by month. Good data quality.",
+    "status": "no-calendar",
+    "notes": "Custom static HTML. Events section empty. Rotweinfestival on external site.",
     "verifiedAt": "2026-04-02"
   },
   {
@@ -1765,8 +1765,8 @@
     "bundesland": "Burgenland",
     "lat": 47.4737,
     "lng": 16.5006,
-    "status": "active",
-    "notes": "Custom proprietary CMS with unusual URL pattern (parenthesized numeric IDs). Termine & Veranstaltungen section exists.",
+    "status": "no-calendar",
+    "notes": "Taoweb 1.0 CMS. No events data.",
     "verifiedAt": "2026-04-02"
   },
   {
@@ -1862,7 +1862,7 @@
   {
     "name": "Neutal",
     "website": "https://www.neutal.at",
-    "eventUrl": "https://www.neutal.at/Veranstaltungen",
+    "eventUrl": "https://www.neutal.at/system/web/veranstaltung.aspx?detailonr=0&gnr_search=2795&menuonr=225068467&page=1",
     "cms": "gem2go",
     "strategy": "gem2go",
     "plz": "7343",
@@ -1871,7 +1871,7 @@
     "lat": 47.4947,
     "lng": 16.5174,
     "status": "active",
-    "notes": "GEM2GO platform (RiS-Kommunal). ASP.NET-style endpoints. Veranstaltungen page at /Veranstaltungen.",
+    "notes": "Direct GEM2GO aspx endpoint.",
     "verifiedAt": "2026-04-02"
   },
   {
@@ -1930,8 +1930,8 @@
     "bundesland": "Burgenland",
     "lat": 47.4927,
     "lng": 16.5158,
-    "status": "active",
-    "notes": "TYPO3 CMS. Veranstaltungen under Online Service section. Shows Easter holidays, football matches, Easter fires etc.",
+    "status": "no-calendar",
+    "notes": "TYPO3. Events page is registration form for organizers, not listing.",
     "verifiedAt": "2026-04-02"
   },
   {
@@ -1945,8 +1945,8 @@
     "bundesland": "Burgenland",
     "lat": 47.5247,
     "lng": 16.5414,
-    "status": "active",
-    "notes": "WordPress (returns 403 to bots but accessible in browser). Veranstaltungskalender at /bei-uns/veranstaltungskalender/. Events include church concerts, card tournaments, harvest festivals, hiking days.",
+    "status": "no-calendar",
+    "notes": "Jimdo. Empty events page.",
     "verifiedAt": "2026-04-02"
   },
   {
@@ -2080,8 +2080,8 @@
     "bundesland": "Burgenland",
     "lat": 47.3333,
     "lng": 16.2167,
-    "status": "active",
-    "notes": "TYPO3 CMS. Events page at /de/events.html. Page uses JavaScript rendering so content may need browser execution to load events. Veranstaltung & Termine section on homepage.",
+    "status": "empty",
+    "notes": "JS SPA. Tourism events via JS only.",
     "verifiedAt": "2026-04-02"
   },
   {
@@ -2230,8 +2230,8 @@
     "bundesland": "Burgenland",
     "lat": 47.2915,
     "lng": 16.2564,
-    "status": "empty",
-    "notes": "TYPO3 CMS. Veranstaltungskalender section exists under Kultur Freizeit Gastronomie but currently shows 'Es gibt keine Veranstaltungen in der aktuellen Ansicht' (no events in current view).",
+    "status": "no-calendar",
+    "notes": "TYPO3. Hash anchor, no events section populated.",
     "verifiedAt": "2026-04-02"
   },
   {
@@ -2260,8 +2260,8 @@
     "bundesland": "Burgenland",
     "lat": 47.2925,
     "lng": 16.2572,
-    "status": "active",
-    "notes": "Joomla CMS. Termine section under Buergerservice. Lists administrative dates (SVS consultation days, office hours) and community events. Not a full events calendar but has scheduled dates.",
+    "status": "no-calendar",
+    "notes": "Joomla. Content is admin (pharmacy, pool schedule), not events.",
     "verifiedAt": "2026-04-02"
   },
   {
@@ -2320,8 +2320,8 @@
     "bundesland": "Burgenland",
     "lat": 47.2825,
     "lng": 16.2492,
-    "status": "active",
-    "notes": "WordPress with Avada theme. Veranstaltungskalender under Aktuelles section (anchor link). Shows Kirtag, Sommerfest etc. Footer says Powered by Acronum.",
+    "status": "no-calendar",
+    "notes": "WP. Hash anchor on news page, no calendar plugin.",
     "verifiedAt": "2026-04-02"
   },
   {
@@ -2410,8 +2410,8 @@
     "bundesland": "Burgenland",
     "lat": 47.2815,
     "lng": 16.2484,
-    "status": "active",
-    "notes": "Joomla CMS. Veranstaltungen at /index.php/veranstaltungen. Also has ALLE VERANSTALTUNGEN at /index.php/dorfleben/alle-veranstaltungen.",
+    "status": "no-calendar",
+    "notes": "Joomla. Empty events page.",
     "verifiedAt": "2026-04-02"
   },
   {
@@ -2425,8 +2425,8 @@
     "bundesland": "Burgenland",
     "lat": 47.2605,
     "lng": 16.2316,
-    "status": "active",
-    "notes": "TYPO3 CMS. Veranstaltungen at /veranstaltungen in main navigation menu.",
+    "status": "no-calendar",
+    "notes": "TYPO3. Empty events page.",
     "verifiedAt": "2026-04-02"
   },
   {
@@ -2441,7 +2441,7 @@
     "lat": 47.3315,
     "lng": 16.2884,
     "status": "active",
-    "notes": "WordPress with Elementor and Modern Events Calendar (MEC) plugin. Termine at /termine/. MEC provides structured event data via mecdata references.",
+    "notes": "MEC with 20+ events, h4.mec-event-title.",
     "verifiedAt": "2026-04-02"
   },
   {
@@ -2552,16 +2552,16 @@
   {
     "name": "Rust",
     "website": "https://www.freistadt-rust.at",
-    "eventUrl": "https://www.freistadt-rust.at/veranstaltungen/",
+    "eventUrl": "https://www.freistadt-rust.at/tourismus/events/",
     "cms": "wordpress",
-    "strategy": "fullcalendar-json",
+    "strategy": "generic-dates",
     "plz": "7071",
     "bezirk": "Rust",
     "bundesland": "Burgenland",
     "lat": 47.8022,
     "lng": 16.6711,
     "status": "active",
-    "notes": "WordPress with Enfold theme.",
+    "notes": "Tourism events page with German dates.",
     "verifiedAt": "2026-04-02"
   }
 ]
