@@ -965,12 +965,17 @@ export class GemeindeRegistryScraper extends BaseScraper {
   private parseGermanDate(text: string): string | null {
     const match = text.match(/(\d{1,2})\.?\s*([\wäöü]+)\.?\s*(\d{4})/i);
     if (!match) return null;
+    const dayNum = parseInt(match[1]);
+    if (dayNum < 1 || dayNum > 31) return null;
     const day = match[1].padStart(2, '0');
     const monthKey = match[2].toLowerCase().replace('.', '');
     const month = this.MONTHS[monthKey];
     if (!month) return null;
     const year = match[3];
     if (parseInt(year) < 2025 || parseInt(year) > 2030) return null;
+    // Validate the date is real
+    const testDate = new Date(`${year}-${month}-${day}`);
+    if (isNaN(testDate.getTime())) return null;
     return `${year}-${month}-${day}`;
   }
 

@@ -67,8 +67,18 @@ export async function syncEventsToSupabase(
   let upserted = 0;
   let errors = 0;
 
-  for (let i = 0; i < events.length; i += BATCH_SIZE) {
-    const batch = events.slice(i, i + BATCH_SIZE).map(toSupabaseRow);
+  // Deduplicate events by source_name+source_id before syncing
+  // (ON CONFLICT DO UPDATE fails if same key appears twice in one batch)
+  const seen = new Set<string>();
+  const dedupedEvents = events.filter(e => {
+    const key = `${e.source_name}::${e.source_id}`;
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+
+  for (let i = 0; i < dedupedEvents.length; i += BATCH_SIZE) {
+    const batch = dedupedEvents.slice(i, i + BATCH_SIZE).map(toSupabaseRow);
     const { error, count } = await supabase
       .from('events')
       .upsert(batch, {
