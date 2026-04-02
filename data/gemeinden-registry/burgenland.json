@@ -40,8 +40,8 @@
     "bundesland": "Burgenland",
     "lat": 47.8678,
     "lng": 16.5496,
-    "status": "active",
-    "notes": "WordPress with Divi.",
+    "status": "covered-by-other",
+    "notes": "Covered by neusiedlersee.com scraper (Feratel Deskline).",
     "verifiedAt": "2026-04-02"
   },
   {
@@ -122,16 +122,16 @@
   {
     "name": "Mörbisch am See",
     "website": "https://moerbisch.gv.at",
-    "eventUrl": "https://moerbisch.com/wo-was-los-ist",
-    "cms": "contao",
-    "strategy": "generic-dates",
+    "eventUrl": "https://citiesapps.com/cities/morbisch-am-see/events",
+    "cms": "cities",
+    "strategy": "cities-iife",
     "plz": "7072",
     "bezirk": "Eisenstadt-Umgebung",
     "bundesland": "Burgenland",
     "lat": 47.7542,
     "lng": 16.6889,
     "status": "active",
-    "notes": "Contao CMS. Tourism site with Feratel Deskline widget.",
+    "notes": "9 events on CITIES. Main site uses Feratel.",
     "verifiedAt": "2026-04-02"
   },
   {
@@ -175,8 +175,8 @@
     "bundesland": "Burgenland",
     "lat": 47.8488,
     "lng": 16.5344,
-    "status": "active",
-    "notes": "WordPress. External Feratel calendar widget.",
+    "status": "covered-by-other",
+    "notes": "Covered by neusiedlersee.com scraper.",
     "verifiedAt": "2026-04-02"
   },
   {
@@ -1022,16 +1022,16 @@
   {
     "name": "Forchtenstein",
     "website": "https://www.forchtenstein.at",
-    "eventUrl": "https://www.forchtenstein.at/leben-in-forchtenstein/termine-kalender/",
-    "cms": "wordpress",
-    "strategy": "generic-dates",
+    "eventUrl": "https://citiesapps.com/cities/forchtenstein/events",
+    "cms": "cities",
+    "strategy": "cities-iife",
     "plz": "7212",
     "bezirk": "Mattersburg",
     "bundesland": "Burgenland",
     "lat": 47.7081,
     "lng": 16.3283,
     "status": "active",
-    "notes": "WordPress with Avada theme. Terminkalender uses FullCalendar integration. URL: /leben-in-forchtenstein/termine-kalender/",
+    "notes": "8 events on CITIES.",
     "verifiedAt": "2026-04-02"
   },
   {
@@ -1091,7 +1091,7 @@
     "lat": 47.71,
     "lng": 16.39,
     "status": "active",
-    "notes": "TYPO3 with bootstrap_package. Events at /freizeit-kultur/veranstaltungen-und-termine. Shows Emmausgang, Bauberatung etc.",
+    "notes": "TYPO3 tx_news, 50-60 events, paginated.",
     "verifiedAt": "2026-04-02"
   },
   {
@@ -1099,7 +1099,7 @@
     "website": "https://mattersburg.gv.at/de/",
     "eventUrl": "https://mattersburg.gv.at/de/veranstaltungen-uebersicht/",
     "cms": "custom",
-    "strategy": "generic-dates",
+    "strategy": "fullcalendar-json",
     "plz": "7210",
     "bezirk": "Mattersburg",
     "bundesland": "Burgenland",
@@ -1174,14 +1174,14 @@
     "website": "https://schattendorf.at",
     "eventUrl": "https://schattendorf.at/events",
     "cms": "wordpress",
-    "strategy": "generic-dates",
+    "strategy": "fullcalendar-json",
     "plz": "7022",
     "bezirk": "Mattersburg",
     "bundesland": "Burgenland",
     "lat": 47.71,
     "lng": 16.51,
-    "status": "active",
-    "notes": "WordPress with Divi theme. Events at /events. Active with Ostereiersuche, Auferstehung events. 'Das Dorf an der Grenze'.",
+    "status": "no-calendar",
+    "notes": "Only PDF/iCal subscription, no HTML events list.",
     "verifiedAt": "2026-04-02"
   },
   {
@@ -1337,31 +1337,31 @@
   {
     "name": "Gattendorf",
     "website": "https://www.gattendorf.at",
-    "eventUrl": "https://www.gattendorf.at/events/",
-    "cms": "wordpress",
-    "strategy": "generic-dates",
+    "eventUrl": "https://citiesapps.com/cities/gattendorf/events",
+    "cms": "cities",
+    "strategy": "cities-iife",
     "plz": "2474",
     "bezirk": "Neusiedl am See",
     "bundesland": "Burgenland",
     "lat": 47.92,
     "lng": 17.09,
     "status": "active",
-    "notes": "WordPress. Events at /events/. Under FREIZEIT & KULTUR with Termine Gemeinde and Termine Turnsaal. Active with Osterhase, wine festival events.",
+    "notes": "3 events on CITIES. MEC on main site needs JS.",
     "verifiedAt": "2026-04-02"
   },
   {
     "name": "Gols",
     "website": "https://www.gols.at",
-    "eventUrl": "https://www.gols.at/echtes-dorfleben/dorfleben/termine-events/",
-    "cms": "wordpress",
-    "strategy": "generic-dates",
+    "eventUrl": "https://citiesapps.com/cities/gols/events",
+    "cms": "cities",
+    "strategy": "cities-iife",
     "plz": "7122",
     "bezirk": "Neusiedl am See",
     "bundesland": "Burgenland",
     "lat": 47.9,
     "lng": 16.91,
     "status": "active",
-    "notes": "WordPress with Elementor and Matomo. Events at /echtes-dorfleben/dorfleben/termine-events/. Marktgemeinde with wine/tourism focus. Uses Instagram Feed plugin.",
+    "notes": "10 events on CITIES.",
     "verifiedAt": "2026-04-02"
   },
   {
@@ -1390,8 +1390,8 @@
     "bundesland": "Burgenland",
     "lat": 47.77,
     "lng": 16.81,
-    "status": "active",
-    "notes": "Custom XS/XStorage CMS. Events page uses embedded Feratel widget (ID: 466e270e-d459-4020-ad97-9a6569aec2a5) for dynamic event loading. Also has tourism site illmitz.info with separate events page. Dual portal: tourism (illmitz.info) and municipal (gemeinde-illmitz.at).",
+    "status": "covered-by-other",
+    "notes": "Covered by neusiedlersee.com/Feratel scraper.",
     "verifiedAt": "2026-04-02"
   },
   {
@@ -1405,8 +1405,8 @@
     "bundesland": "Burgenland",
     "lat": 47.96,
     "lng": 16.8,
-    "status": "active",
-    "notes": "WordPress with Rank Math SEO and WPML. Events at /tourismus/kultur-events/ with Feratel widget for dynamic event loading. Tourism-focused site. Events include Kinderflomarkt, Kirtag, Genussmeile, Feuerwehrfest.",
+    "status": "covered-by-other",
+    "notes": "Covered by neusiedlersee.com/Feratel scraper.",
     "verifiedAt": "2026-04-02"
   },
   {
@@ -1457,16 +1457,16 @@
   {
     "name": "Neusiedl am See",
     "website": "https://www.neusiedlamsee.at",
-    "eventUrl": "https://www.neusiedlamsee.at/stadtleben/aktuelles/veranstaltungen/",
-    "cms": "typo3",
-    "strategy": "generic-dates",
+    "eventUrl": "https://citiesapps.com/cities/neusiedl-am-see/events",
+    "cms": "cities",
+    "strategy": "cities-iife",
     "plz": "7100",
     "bezirk": "Neusiedl am See",
     "bundesland": "Burgenland",
     "lat": 47.95,
     "lng": 16.84,
     "status": "active",
-    "notes": "TYPO3 multi-site installation (/fileadmin-mandant/). Events at /stadtleben/aktuelles/veranstaltungen/ with dynamic Feratel/dw widget and theme filtering (limEVENTTHEME). Stadtgemeinde. Also listed on CITIES (citiesapps.com).",
+    "notes": "10 events. Main site uses Feratel.",
     "verifiedAt": "2026-04-02"
   },
   {
@@ -1607,7 +1607,7 @@
   {
     "name": "Weiden am See",
     "website": "https://weiden-see.at",
-    "eventUrl": "https://weiden-see.at/event-calendars/682ae278f53181270dd7633f",
+    "eventUrl": "https://citiesapps.com/cities/weiden-am-see/events",
     "cms": "cities",
     "strategy": "cities-iife",
     "plz": "7121",
@@ -1616,7 +1616,7 @@
     "lat": 47.92,
     "lng": 16.88,
     "status": "active",
-    "notes": "CITIES platform. weiden.at shows Apache default page, actual site is weiden-see.at. Veranstaltungen under Tourismus menu. Event calendars with MongoDB-style IDs. Events include Weinfrühling, Martiniloben. Marktgemeinde.",
+    "notes": "10 events on CITIES.",
     "verifiedAt": "2026-04-02"
   },
   {
@@ -1744,7 +1744,7 @@
     "website": "https://www.kobersdorf.at",
     "eventUrl": "https://www.kobersdorf.at/veranstaltungen.php",
     "cms": "custom",
-    "strategy": "generic-dates",
+    "strategy": "calendar-table",
     "plz": "7332",
     "bezirk": "Oberpullendorf",
     "bundesland": "Burgenland",
@@ -1900,8 +1900,8 @@
     "bundesland": "Burgenland",
     "lat": 47.5027,
     "lng": 16.5238,
-    "status": "active",
-    "notes": "GEM2GO platform. Interactive calendar for events with daily links. Veranstaltungen-Termine in main navigation.",
+    "status": "no-calendar",
+    "notes": "GEM2GO calendar-only view, needs date-click navigation. Not scrapable.",
     "verifiedAt": "2026-04-02"
   },
   {
@@ -2059,7 +2059,7 @@
     "website": "http://www.weppersdorf.at",
     "eventUrl": "http://www.weppersdorf.at/veranstaltungen.php",
     "cms": "custom",
-    "strategy": "generic-dates",
+    "strategy": "calendar-table",
     "plz": "7331",
     "bezirk": "Oberpullendorf",
     "bundesland": "Burgenland",
@@ -2147,7 +2147,7 @@
   {
     "name": "Großpetersdorf",
     "website": "https://www.grosspetersdorf.at",
-    "eventUrl": "https://www.grosspetersdorf.at/kultur-freizeit/veranstaltungskalender",
+    "eventUrl": "https://www.grosspetersdorf.at/tourismus-gastronomie/veranstaltungen",
     "cms": "typo3",
     "strategy": "generic-dates",
     "plz": "7503",
@@ -2156,7 +2156,7 @@
     "lat": 47.2333,
     "lng": 16.3667,
     "status": "active",
-    "notes": "TYPO3 CMS. Veranstaltungskalender under Kultur & Freizeit. Shows E-Bike courses, Easter fire, community cleanups etc.",
+    "notes": "Plain HTML, 80 events.",
     "verifiedAt": "2026-04-02"
   },
   {
@@ -2387,7 +2387,7 @@
   {
     "name": "Rechnitz",
     "website": "https://www.rechnitz.at",
-    "eventUrl": "https://www.rechnitz.at/de/buergerservice/termine/veranstaltungen/",
+    "eventUrl": "https://www.rechnitz.at/de/buergerservice/termine/veranstaltungen/veranstaltungen-list/",
     "cms": "typo3",
     "strategy": "generic-dates",
     "plz": "7471",
@@ -2396,7 +2396,7 @@
     "lat": 47.3056,
     "lng": 16.4389,
     "status": "active",
-    "notes": "TYPO3 CMS. Veranstaltungen under Buergerservice > Termine. Shows Ostermarkt and other community events with detailed scheduling.",
+    "notes": "Plain HTML list, 127 events. No JS needed.",
     "verifiedAt": "2026-04-02"
   },
   {
@@ -2449,7 +2449,7 @@
     "website": "https://www.schandorf.at",
     "eventUrl": "https://www.schandorf.at/veranstaltungen/",
     "cms": "typo3",
-    "strategy": "generic-dates",
+    "strategy": "fullcalendar-json",
     "plz": "7472",
     "bezirk": "Oberwart",
     "bundesland": "Burgenland",
@@ -2554,7 +2554,7 @@
     "website": "https://www.freistadt-rust.at",
     "eventUrl": "https://www.freistadt-rust.at/veranstaltungen/",
     "cms": "wordpress",
-    "strategy": "generic-dates",
+    "strategy": "fullcalendar-json",
     "plz": "7071",
     "bezirk": "Rust",
     "bundesland": "Burgenland",

@@ -114,6 +114,10 @@ export class GemeindeRegistryScraper extends BaseScraper {
         return this.parseGem2Go(html, entry);
       case 'gemeinde24':
         return this.parseGemeinde24(html, entry);
+      case 'fullcalendar-json':
+        return this.parseFullCalendarJson(html, entry);
+      case 'calendar-table':
+        return this.parseCalendarTable(html, entry);
       case 'generic-dates':
         return this.parseGenericDates(html, entry);
       default:
@@ -488,8 +492,54 @@ export class GemeindeRegistryScraper extends BaseScraper {
     const events: ScrapedEvent[] = [];
     const seen = new Set<string>();
 
+    // GEM2GO BEM card layout (newer version: span.bemHeader--h5, .bemContainer--date)
+    $('.bemCard').each((_, el) => {
+      try {
+        const $el = $(el);
+        const title = $el.find('.bemHeader--h5, .bemHeader').first().text().trim();
+        if (!title) return;
+
+        const dateText = $el.find('.bemContainer--date').text().trim();
+        const startDate = this.parseNumericDate(dateText);
+        if (!startDate) return;
+
+        const timeText = $el.find('.bemContainer--time').text().trim();
+        const fullDate = timeText ? this.appendTime(startDate, timeText) : startDate;
+
+        const dedupeKey = `${title}-${fullDate}`;
+        if (seen.has(dedupeKey)) return;
+        seen.add(dedupeKey);
+
+        const link = $el.find('a.bemLink-detail, a.bemLink').first().attr('href');
+        const sourceUrl = link ? (link.startsWith('http') ? link : new URL(link, entry.eventUrl!).href) : entry.eventUrl!;
+
+        let imageUrl = $el.find('.bemContainer--image img, picture img').first().attr('src');
+        if (imageUrl && !imageUrl.startsWith('http')) imageUrl = new URL(imageUrl, entry.eventUrl!).href;
+
+        const addressLi = $el.find('.fa-map-marker-alt').closest('li').text().replace(/Adresse/i, '').trim();
+        const category = $el.find('.bemHeaderContainer small.text-muted').text().trim();
+
+        events.push({
+          source_id: `registry-gem2go-${Buffer.from(title + fullDate).toString('base64').substring(0, 24)}`,
+          source_name: this.name,
+          source_url: sourceUrl,
+          title,
+          start_date: fullDate,
+          location_name: entry.name,
+          address: addressLi || undefined,
+          postal_code: entry.plz,
+          bundesland: entry.bundesland,
+          district: entry.bezirk,
+          latitude: entry.lat,
+          longitude: entry.lng,
+          category: category ? categorizeEvent(category, '') : categorizeEvent(title, ''),
+          image_url: this.cleanImageUrl(imageUrl),
+        });
+      } catch { /* skip */ }
+    });
+
     // GEM2GO detail card layout (div.veranstaltung with h3 title)
-    $('.veranstaltung').each((_, el) => {
+    if (events.length === 0) $('.veranstaltung').each((_, el) => {
       try {
         const $el = $(el);
         const title = $el.find('h3').first().text().trim();
@@ -570,45 +620,51 @@ export class GemeindeRegistryScraper extends BaseScraper {
       } catch { /* skip */ }
     });
 
-    // GEM2GO list layout (li > a with appointmentTextBlock)
+    // GEM2GO list layout (li with .appointmentTextBlock containing spans)
+    // Span order: 1=date ("Sa, 04.04.2026"), 2=title, 3=category, 4=time
     if (events.length === 0) {
-      $('li').each((_, el) => {
+      $('.appointmentTextBlock').each((_, el) => {
         try {
-          const $el = $(el);
-          const textBlock = $el.find('.appointmentTextBlock');
-          if (textBlock.length === 0) return;
+          const $block = $(el);
+          const $li = $block.closest('li');
+          const spans = $block.find('span');
+          if (spans.length < 2) return;
 
-          const title = $el.find('a').first().contents().filter(function() { return this.type === 'text'; }).text().trim()
-            || textBlock.find('span').first().text().trim();
-          if (!title) return;
+          const dateSpan = $(spans[0]).text().trim();
+          const title = $(spans[1]).text().trim();
+          if (!title || title.length < 2) return;
 
-          const text = $el.text();
-          const startDate = this.parseNumericDate(text);
+          const startDate = this.parseNumericDate(dateSpan);
           if (!startDate) return;
 
-          const dedupeKey = `${title}-${startDate}`;
+          const timeSpan = spans.length >= 4 ? $(spans[3]).text().trim() : '';
+          const fullDate = timeSpan ? this.appendTime(startDate, timeSpan) : startDate;
+
+          const dedupeKey = `${title}-${fullDate}`;
           if (seen.has(dedupeKey)) return;
           seen.add(dedupeKey);
 
-          const link = $el.find('a').attr('href');
-          const sourceUrl = link && link.startsWith('http') ? link : link ? new URL(link, entry.eventUrl!).href : entry.eventUrl!;
+          const link = $li.find('a').first().attr('href');
+          const sourceUrl = link ? (link.startsWith('http') ? link : new URL(link, entry.eventUrl!).href) : entry.eventUrl!;
 
-          let imageUrl = $el.find('img').first().attr('src');
+          let imageUrl = $li.find('img[src*="GetImage"], img[src*="GetRemoteImage"], img').first().attr('src');
           if (imageUrl && !imageUrl.startsWith('http')) imageUrl = new URL(imageUrl, entry.eventUrl!).href;
 
+          const categorySpan = spans.length >= 3 ? $(spans[2]).text().trim() : '';
+
           events.push({
-            source_id: `registry-gem2go-${Buffer.from(title + startDate).toString('base64').substring(0, 24)}`,
+            source_id: `registry-gem2go-${Buffer.from(title + fullDate).toString('base64').substring(0, 24)}`,
             source_name: this.name,
             source_url: sourceUrl,
             title,
-            start_date: startDate,
+            start_date: fullDate,
             location_name: entry.name,
             postal_code: entry.plz,
             bundesland: entry.bundesland,
             district: entry.bezirk,
             latitude: entry.lat,
             longitude: entry.lng,
-            category: categorizeEvent(title, ''),
+            category: categorySpan ? categorizeEvent(categorySpan, '') : categorizeEvent(title, ''),
             image_url: this.cleanImageUrl(imageUrl),
           });
         } catch { /* skip */ }
@@ -765,6 +821,126 @@ export class GemeindeRegistryScraper extends BaseScraper {
       } catch { /* skip */ }
     });
 
+    return events;
+  }
+
+  // ── Strategy: FullCalendar JSON (inline events array) ────────
+
+  private parseFullCalendarJson(html: string, entry: GemeindeRegistryEntry): ScrapedEvent[] {
+    const events: ScrapedEvent[] = [];
+    const seen = new Set<string>();
+
+    // Extract events: [...] from inline <script> tags
+    const eventsMatch = html.match(/events\s*:\s*\[([\s\S]*?)\]\s*[,}]/);
+    if (!eventsMatch) return this.parseGenericDates(html, entry);
+
+    try {
+      // Convert JS object notation to JSON (quote property names)
+      let jsonStr = '[' + eventsMatch[1] + ']';
+      jsonStr = jsonStr.replace(/(\w+)\s*:/g, '"$1":');
+      jsonStr = jsonStr.replace(/'/g, '"');
+      // Remove trailing commas
+      jsonStr = jsonStr.replace(/,\s*([\]}])/g, '$1');
+
+      const fcEvents = JSON.parse(jsonStr) as { title?: string; start?: string; end?: string; url?: string }[];
+
+      for (const fc of fcEvents) {
+        if (!fc.title || !fc.start) continue;
+
+        const title = fc.title.replace(/[,\s]+$/, '').trim();
+        if (!title) continue;
+
+        const startDate = this.parseIsoDate(fc.start) || fc.start;
+        if (!startDate || !startDate.match(/^\d{4}-/)) continue;
+
+        // Only future events
+        if (new Date(startDate.split('T')[0]) < new Date(new Date().toISOString().split('T')[0])) continue;
+
+        const dedupeKey = `${title}-${startDate}`;
+        if (seen.has(dedupeKey)) continue;
+        seen.add(dedupeKey);
+
+        const endDate = fc.end ? (this.parseIsoDate(fc.end) || fc.end) : undefined;
+
+        events.push({
+          source_id: `registry-fc-${Buffer.from(title + startDate).toString('base64').substring(0, 24)}`,
+          source_name: this.name,
+          source_url: fc.url || entry.eventUrl!,
+          title,
+          start_date: startDate,
+          end_date: endDate,
+          location_name: entry.name,
+          postal_code: entry.plz,
+          bundesland: entry.bundesland,
+          district: entry.bezirk,
+          latitude: entry.lat,
+          longitude: entry.lng,
+          category: categorizeEvent(title, ''),
+        });
+      }
+    } catch { /* JSON parse error — fall back */ }
+
+    if (events.length === 0) return this.parseGenericDates(html, entry);
+    return events;
+  }
+
+  // ── Strategy: Calendar Table (td > a with date in title attr) ──
+
+  private parseCalendarTable(html: string, entry: GemeindeRegistryEntry): ScrapedEvent[] {
+    const $ = cheerio.load(html);
+    const events: ScrapedEvent[] = [];
+    const seen = new Set<string>();
+
+    // Find links inside table cells that point to event detail pages
+    $('td a[href*="veranstaltung"], td a[title]').each((_, el) => {
+      try {
+        const $a = $(el);
+        const title = $a.text().trim();
+        if (!title || title.length < 3) return;
+
+        // Date from title attribute: "Sa, 04.04.2026<br>Event Name<br>"
+        const titleAttr = $a.attr('title') || '';
+        let startDate = this.parseNumericDate(titleAttr);
+
+        // Fallback: get day from preceding <strong>, month/year from page context
+        if (!startDate) {
+          const dayText = $a.parent().find('strong').first().text().trim();
+          const pageText = $('h1, h2, h3, .month-header, caption').text();
+          const monthYear = pageText.match(/([\wä]+)\s+(\d{4})/i);
+          if (dayText && monthYear) {
+            const month = this.MONTHS[monthYear[1].toLowerCase()];
+            if (month) startDate = `${monthYear[2]}-${month}-${dayText.padStart(2, '0')}`;
+          }
+        }
+
+        if (!startDate) return;
+        if (new Date(startDate) < new Date(new Date().toISOString().split('T')[0])) return;
+
+        const dedupeKey = `${title}-${startDate}`;
+        if (seen.has(dedupeKey)) return;
+        seen.add(dedupeKey);
+
+        const href = $a.attr('href') || '';
+        const sourceUrl = href.startsWith('http') ? href : new URL(href, entry.eventUrl!).href;
+
+        events.push({
+          source_id: `registry-cal-${Buffer.from(title + startDate).toString('base64').substring(0, 24)}`,
+          source_name: this.name,
+          source_url: sourceUrl,
+          title,
+          start_date: startDate,
+          location_name: entry.name,
+          postal_code: entry.plz,
+          bundesland: entry.bundesland,
+          district: entry.bezirk,
+          latitude: entry.lat,
+          longitude: entry.lng,
+          category: categorizeEvent(title, ''),
+        });
+      } catch { /* skip */ }
+    });
+
+    if (events.length === 0) return this.parseGenericDates(html, entry);
     return events;
   }
 
