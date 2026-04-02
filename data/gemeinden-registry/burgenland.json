@@ -293,8 +293,8 @@
     "plz": "7061",
     "bezirk": "Eisenstadt-Umgebung",
     "bundesland": "Burgenland",
-    "lat": 47.8468,
-    "lng": 16.5328,
+    "lat": 47.8087,
+    "lng": 16.5689,
     "status": "active",
     "notes": "WordPress MEC Plugin, JSON-LD Event schema.",
     "verifiedAt": "2026-04-02"
