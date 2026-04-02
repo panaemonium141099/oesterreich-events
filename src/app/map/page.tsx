@@ -119,7 +119,7 @@ function MapPageInner() {
     // of viewport. Client-side filtering keeps the map complete at all zoom levels.
 
     // Fetch all events in one request (matches pre-pagination behaviour)
-    params.set('limit', '50000');
+    params.set('limit', '200000');
 
     try {
       const res = await fetch(`/api/events?${params.toString()}`);
