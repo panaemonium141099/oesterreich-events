@@ -31,6 +31,7 @@ export const post: FestivalPost = {
     { name: 'Cecilia Bartoli', role: 'special', stage: 'Haus für Mozart' },
     { name: 'Christian Thielemann (Dirigent)', role: 'special', stage: 'Grosses Festspielhaus' },
   ],
+  lineupTitle: 'Programm-Highlights',
   lineupNote:
     'Das vollständige Programm für 2026 wird im Januar veröffentlicht. Karten sind begrenzt — frühzeitige Buchung dringend empfohlen.',
   intro:

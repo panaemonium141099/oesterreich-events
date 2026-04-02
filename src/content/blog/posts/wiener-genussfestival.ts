@@ -30,6 +30,7 @@ export const post: FestivalPost = {
     { name: 'Craft-Beer-Festival', role: 'support', stage: 'Biergarten' },
     { name: 'Kinder-Kochworkshops', role: 'support', stage: 'Kinderzelt' },
   ],
+  lineupTitle: 'Programm-Highlights',
   lineupNote: 'Programm und teilnehmende Aussteller werden im August bekanntgegeben.',
   intro:
     'Im Wiener Stadtpark findet alljährlich rund um den Muttertag das größte Kulinarik-Festival Österreichs statt. Beim Wiener Genussfestival präsentieren über 200 Aussteller das Beste aus österreichischer Küche, Weinkultur und Lebensmittelhandwerk. Top-Köche zeigen an der Genussbühne ihre Kreationen, heimische Produzenten verkaufen direkt an Besucher und Slow-Food-Botschafter vermitteln nachhaltige Kulinarik-Philosophien. Drei Tage lang ist der Stadtpark der duftende Mittelpunkt der österreichischen Gastronomiekultur.',

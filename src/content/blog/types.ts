@@ -37,6 +37,8 @@ export interface FestivalPost {
   categoryColor: string;
   keyFacts: FestivalKeyFacts;
   lineup: LineupAct[];
+  /** Custom heading for the lineup section. Defaults to 'Lineup' if omitted. Use 'Programm-Highlights' for non-music events. */
+  lineupTitle?: string;
   lineupNote?: string;
   intro: string;
   historyTitle: string;

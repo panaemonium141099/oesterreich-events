@@ -30,6 +30,7 @@ export const post: FestivalPost = {
     { name: 'Internationaler Stargast', role: 'headliner', stage: 'Hauptsaal' },
     { name: 'Mitternachtsquadrille', role: 'special', stage: 'Parkett' },
   ],
+  lineupTitle: 'Programm-Highlights',
   lineupNote: 'Der internationale Stargast wird traditionell Anfang des Jahres bekanntgegeben.',
   intro:
     'Kein Ball der Welt erzeugt so viel Aufmerksamkeit wie der Wiener Opernball. Wenn im Februar oder März die Sitze des Orchesters aus dem Zuschauerraum der Staatsoper gehoben werden und sich das Parkett zur Tanzfläche wandelt, beginnt eine Nacht, die zu den glanzvollsten Gesellschaftsereignissen überhaupt zählt. Royals, Staatschefs, Filmstars und die Wiener Gesellschaft tanzen gemeinsam in einem der schönsten Gebäude der Welt. Der Wiener Opernball ist nicht nur ein Ball, er ist ein Kulturphänomen.',

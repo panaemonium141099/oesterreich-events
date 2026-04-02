@@ -29,6 +29,7 @@ export const post: FestivalPost = {
     { name: 'Age Group Wellen-Start', role: 'support', day: '5. Juli', time: 'ab 07:20 Uhr', stage: 'Wörthersee-Start' },
     { name: 'Zieldurchlauf & Siegerehrung', role: 'special', day: '5. Juli', time: 'ab 15:00 Uhr', stage: 'Klagenfurter Innenstadt' },
   ],
+  lineupTitle: 'Programm-Highlights',
   lineupNote:
     'Die genauen Startwellen und das vollständige Athletenprogramm werden nach Anmeldeschluss auf der offiziellen IRONMAN-Website veröffentlicht.',
   intro:

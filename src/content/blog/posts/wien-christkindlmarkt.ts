@@ -29,6 +29,7 @@ export const post: FestivalPost = {
     { name: 'Chorkonzerte & Blasmusik', role: 'support', stage: 'Rathauspark' },
     { name: 'Kunsthandwerk-Ausstellung', role: 'special', stage: 'Markthalle' },
   ],
+  lineupTitle: 'Programm-Highlights',
   lineupNote: 'Das Bühnenprogramm wird jährlich im Oktober bekanntgegeben.',
   intro:
     'Wenn im November die ersten Schneeflocken fallen und der Duft von Lebkuchen und Glühwein durch die Wiener Innenstadt zieht, öffnet der Christkindlmarkt am Rathausplatz seine Tore. Mit über 150 Holzhütten, festlicher Illumination der Rathausfassade und einem umfangreichen Bühnenprogramm ist dieser Markt nicht nur der berühmteste Weihnachtsmarkt Österreichs, sondern gilt weltweit als einer der schönsten überhaupt. Familien, Paare und internationale Gäste pilgern Jahr für Jahr in die Wiener Innenstadt, um diesen einzigartigen Advent-Zauber zu erleben.',

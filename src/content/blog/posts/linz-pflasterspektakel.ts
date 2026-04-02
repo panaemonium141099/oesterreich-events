@@ -31,6 +31,7 @@ export const post: FestivalPost = {
     { name: 'Kolektif Istanbul (Türkei)', role: 'support', stage: 'Graben' },
     { name: 'Gravity & Other Myths (Australien)', role: 'special', stage: 'Hauptplatz' },
   ],
+  lineupTitle: 'Programm-Highlights',
   lineupNote:
     'Das vollständige Programm mit über 100 internationalen Gruppen wird im Juni veröffentlicht. Alle Aufführungen sind kostenlos und erfordern keine Reservierung.',
   intro:

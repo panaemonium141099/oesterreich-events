@@ -305,7 +305,7 @@ export default async function BlogPostPage({
           {post.lineup && post.lineup.length > 0 && (
             <section className="mb-14">
               <h2 className="text-2xl md:text-3xl font-extrabold text-gray-900 tracking-tight mb-2">
-                Lineup {post.title}
+                {post.lineupTitle ?? 'Lineup'} {post.title}
               </h2>
               {post.lineupNote && (
                 <p className="text-gray-400 text-xs uppercase tracking-wider mb-6 flex items-center gap-2">
@@ -317,7 +317,7 @@ export default async function BlogPostPage({
               {/* Headliners */}
               <div className="mb-6">
                 <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-400 mb-3">
-                  Headliner
+                  {post.lineupTitle ? 'Highlights' : 'Headliner'}
                 </p>
                 <div className="divide-y divide-gray-100 border-y border-gray-100">
                   {post.lineup
@@ -339,7 +339,7 @@ export default async function BlogPostPage({
               {post.lineup.some(a => a.role === 'support') && (
                 <div className="mb-4">
                   <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-400 mb-3">
-                    Weitere Acts
+                    {post.lineupTitle ? 'Weiteres Programm' : 'Weitere Acts'}
                   </p>
                   <div className="flex flex-wrap gap-2">
                     {post.lineup

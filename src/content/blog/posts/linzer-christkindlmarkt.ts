@@ -28,6 +28,7 @@ export const post: FestivalPost = {
     { name: 'Kindergarten- und Schulchöre', role: 'support', stage: 'Bühne Mitte', day: 'Wochentags' },
     { name: 'Weihnachtslieder-Ensemble', role: 'support', stage: 'Krippenbereich', day: 'täglich' },
   ],
+  lineupTitle: 'Programm-Highlights',
   lineupNote:
     'Das vollständige Bühnenprogramm wird im November veröffentlicht. Täglich finden mehrere musikalische Auftritte und Adventlesungen statt.',
   intro:

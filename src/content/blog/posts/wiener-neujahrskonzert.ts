@@ -28,6 +28,7 @@ export const post: FestivalPost = {
     { name: 'Gastdirigent (jährlich wechselnd)', role: 'headliner', stage: 'Goldener Saal' },
     { name: 'Balletteinlagen des Wiener Staatsopernballetts', role: 'special', stage: 'diverse Kulissen' },
   ],
+  lineupTitle: 'Programm-Highlights',
   lineupNote: 'Der Dirigent des nächsten Neujahrskonzerts wird traditionell im Frühling bekanntgegeben.',
   intro:
     'Jedes Jahr am Neujahrstag um 11:15 Uhr Wiener Zeit beginnt das meistgesehene Konzert der Welt. Im legendären Goldenen Saal des Wiener Musikvereins spielen die Wiener Philharmoniker unter wechselnden Weltdirigenten Walzer von Strauß, Polkas und Märsche – live in über 90 Länder übertragen und von rund 50 Millionen Menschen verfolgt. Das Neujahrskonzert ist Österreichs bedeutendster Kulturbotschafter und ein Fixpunkt im internationalen Musikkalender.',

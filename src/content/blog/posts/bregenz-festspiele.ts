@@ -30,6 +30,7 @@ export const post: FestivalPost = {
     { name: 'Kammeroper-Ensemble', role: 'special', stage: 'Werkstattbühne' },
     { name: 'Symphoniekonzert-Gastdirigent (TBC)', role: 'special', stage: 'Festspielhaus' },
   ],
+  lineupTitle: 'Programm-Highlights',
   lineupNote:
     'Das Seebühnen-Stück 2026 steht fest. Das vollständige Programm und die Besetzung sind auf bregenzerfestspiele.com abrufbar. Frühzeitige Buchung wird dringend empfohlen — beliebte Vorstellungen sind schnell ausverkauft.',
   intro:

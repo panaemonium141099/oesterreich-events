@@ -29,6 +29,7 @@ export const post: FestivalPost = {
     { name: 'Tanzgruppe Salzburger Volkstanzkreis', role: 'special', stage: 'Festzelt' },
     { name: 'Unterhaltungskapelle Salzkammergut', role: 'support', stage: 'Festzelt' },
   ],
+  lineupTitle: 'Programm-Highlights',
   lineupNote:
     'Das musikalische Rahmenprogramm wird jeweils zwei Wochen vor der Dult auf der Website der Stadt Salzburg veröffentlicht.',
   intro:

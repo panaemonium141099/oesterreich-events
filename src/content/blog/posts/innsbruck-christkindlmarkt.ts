@@ -29,6 +29,7 @@ export const post: FestivalPost = {
     { name: 'Adventkonzert Tiroler Landestheater', role: 'support', stage: 'Landhausplatz' },
     { name: 'Kinderchorkonzerte Wiltener Sängerknaben', role: 'support', stage: 'Marktplatz-Bühne' },
   ],
+  lineupTitle: 'Programm-Highlights',
   lineupNote:
     'Das tägliche Bühnenprogramm mit Volksmusik, Chören und Kinderprogramm wird im Oktober auf der Website von Innsbruck Tourismus veröffentlicht.',
   intro:

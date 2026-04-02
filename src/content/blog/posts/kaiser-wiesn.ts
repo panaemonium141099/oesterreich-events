@@ -30,6 +30,7 @@ export const post: FestivalPost = {
     { name: 'Fahrgeschäfte & Familienprogramm', role: 'support', stage: 'Festgelände' },
     { name: 'Kaffeehauskultur-Zelt', role: 'support', stage: 'Kaiserzelt' },
   ],
+  lineupTitle: 'Programm-Highlights',
   lineupNote: 'Das vollständige Musik- und Abendprogramm wird im August bekanntgegeben.',
   intro:
     'Wenn der Wiener Prater im Oktober in Oktoberfest-Stimmung eintaucht, ist die Kaiserwiesn – das Wiener Wiesn-Fest – der Mittelpunkt des Geschehens. Auf der historischen Kaiserwiese vereinen sich traditionelle Bierzeltkultur mit genuinem Wiener Charme: Dirndl und Lederhosen treffen auf Kaffeehaus-Flair, hausgemachte Wiener Spezialitäten auf bayerische Wiesn-Klassiker. Elf Tage lang genießen täglich tausende Besucher Live-Musik, kühle Maßkrüge und die grüne Atmosphäre des Praterfestgeländes.',

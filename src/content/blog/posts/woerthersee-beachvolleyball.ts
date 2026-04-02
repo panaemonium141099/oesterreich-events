@@ -30,6 +30,7 @@ export const post: FestivalPost = {
     { name: 'Österreichische Nationalteams', role: 'special', stage: 'Center Court' },
     { name: 'Abendshow & DJ-Programme', role: 'support', stage: 'Beachstadion' },
   ],
+  lineupTitle: 'Programm-Highlights',
   lineupNote:
     'Die Teilnehmerliste der Weltklasse-Paare wird nach der offiziellen Welttourbezirksvergabe veröffentlicht, typischerweise im März/April 2026.',
   intro:

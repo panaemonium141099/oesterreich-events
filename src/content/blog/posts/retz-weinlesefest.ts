@@ -30,6 +30,7 @@ export const post: FestivalPost = {
     { name: 'Lokale und regionale Musikgruppen', role: 'support' },
     { name: 'Weinkeller-Führungen und Degustation', role: 'special' },
   ],
+  lineupTitle: 'Programm-Highlights',
   lineupNote: 'Das genaue Programm mit Musikzeiten wird im Frühherbst 2026 veröffentlicht.',
   intro:
     'Retz — die beschauliche Stadtgemeinde im Weinviertel nahe der tschechischen Grenze — verwandelt sich jeden September in eine lebendige Bühne für das älteste Weinfest Niederösterreichs. Das Retz Weinlesefest hat seinen Ursprung in den Erntedankfeiern der lokalen Winzer und ist heute ein Volksseele-Fest, das Einheimische, Weinliebhaber und Touristen aus der gesamten DACH-Region anzieht. Der Duft von frisch gekelterten Trauben, die Töne burgenländischer Blasmusik und die mittelalterlichen Gassen Retzens verschmelzen zu einem herbstlichen Erlebnis, das tiefe Wurzeln in der regionalen Identität hat.',

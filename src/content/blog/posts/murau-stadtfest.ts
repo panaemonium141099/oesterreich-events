@@ -29,6 +29,7 @@ export const post: FestivalPost = {
     { name: 'Steirische Trachtenmusik', role: 'support', stage: 'Biergarten-Bühne' },
     { name: 'Lokal- und Regionalbands', role: 'support', stage: 'Stadtplatz-Hauptbühne' },
   ],
+  lineupTitle: 'Programm-Highlights',
   lineupNote:
     'Das detaillierte Programm mit Bühnenzeiten und Acts wird ab Mai 2026 auf murau.at veröffentlicht.',
   intro:

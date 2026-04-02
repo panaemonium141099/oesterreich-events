@@ -30,6 +30,7 @@ export const post: FestivalPost = {
     { name: 'Kammermusik-Abende', role: 'support', stage: 'Stift Ossiach Kreuzgang' },
     { name: 'Open-Air-Galakonzert', role: 'special', stage: 'Seeufer-Bühne' },
   ],
+  lineupTitle: 'Programm-Highlights',
   lineupNote:
     'Das vollständige Programm des Carinthian Summer erscheint im Frühjahr 2026 auf der offiziellen Website. Frühbucherrabatt bis Ende März.',
   intro:

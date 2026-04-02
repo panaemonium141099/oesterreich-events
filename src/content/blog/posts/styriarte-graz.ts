@@ -30,6 +30,7 @@ export const post: FestivalPost = {
     { name: 'Christoph Prégardien (Tenor)', role: 'special', stage: 'Stadtpfarrkirche' },
     { name: 'Dorothea Röschmann (Sopran)', role: 'special', stage: 'Schloss Eggenberg' },
   ],
+  lineupTitle: 'Programm-Highlights',
   lineupNote:
     'Das vollständige Programm erscheint Anfang März 2026 auf der styriarte-Website. Karten sind erfahrungsgemäß schnell ausverkauft – frühzeitige Buchung empfohlen.',
   intro:

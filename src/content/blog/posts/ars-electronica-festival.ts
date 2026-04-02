@@ -31,6 +31,7 @@ export const post: FestivalPost = {
     { name: 'Prix Ars Electronica Gewinner 2026', role: 'special', stage: 'alle Spielorte' },
     { name: 'Symposion: KI & Demokratie', role: 'support', stage: 'Martinskirche Linz' },
   ],
+  lineupTitle: 'Programm-Highlights',
   lineupNote:
     'Das vollständige Künstler- und Konferenzprogramm wird im Juni 2026 veröffentlicht. Der Prix Ars Electronica ist der bedeutendste Preis für digitale Kunst weltweit.',
   intro:

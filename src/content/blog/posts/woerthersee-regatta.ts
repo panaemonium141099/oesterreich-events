@@ -29,6 +29,7 @@ export const post: FestivalPost = {
     { name: 'Keelboat-Klassen (ORC/IRC)', role: 'headliner', stage: 'Wörthersee Regattastrecke' },
     { name: 'Siegerehrung & Clubabend', role: 'special', stage: 'Segelclub Klagenfurt' },
   ],
+  lineupTitle: 'Programm-Highlights',
   lineupNote:
     'Genaue Startzeiten, Klassen und Regattaprogramm auf der Website des Yacht Club Austria Klagenfurt (yca.at). Nennschluss typischerweise 4 Wochen vor dem Event.',
   intro:

@@ -29,6 +29,7 @@ export const post: FestivalPost = {
     { name: 'Internationale Gastensembles', role: 'support' },
     { name: 'Meisterkurse & Galakonzerte', role: 'special' },
   ],
+  lineupTitle: 'Programm-Highlights',
   lineupNote: 'Das vollständige Konzertprogramm für 2026 erscheint auf schloss-esterhazy.at.',
   intro:
     'Wer das Burgenland besucht und Klassikmusik liebt, kommt am Schloss Esterházy in Eisenstadt nicht vorbei. Der legendäre Haydnsaal — eines der beeindruckendsten Barockinterieurs Österreichs — war über 30 Jahre lang die Wirkungsstätte von Joseph Haydn, dem Vater der Sinfonie und des Streichquartetts. Heute erklingt in denselben Gemäuern Musik von Weltrang: Die Konzertsaison mit Haydn Philharmoniker, internationalen Gästen und den jährlichen Haydn Festspielen macht Eisenstadt zu einem unverzichtbaren Ziel für Klassikliebhaber aus aller Welt.',

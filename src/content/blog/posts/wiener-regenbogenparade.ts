@@ -29,6 +29,7 @@ export const post: FestivalPost = {
     { name: 'Abschlusskundgebung Rathausplatz', role: 'headliner', stage: 'Rathausplatz' },
     { name: 'After-Party & Konzerte', role: 'support', stage: 'Stadtpark & diverse Clubs' },
   ],
+  lineupTitle: 'Programm-Highlights',
   lineupNote: 'Die teilnehmenden Gruppen und Floats werden im Mai bekanntgegeben.',
   intro:
     'Jedes Jahr im Juni verwandelt sich die Wiener Ringstraße in ein Meer aus Regenbogenfarben. Die Wiener Regenbogenparade – Österreichs größtes LGBTQIA+-Event – zieht seit 1996 alljährlich mehr Teilnehmerinnen und Teilnehmer an: Heute sind es über 300.000, die gemeinsam für Sichtbarkeit, Gleichberechtigung und das Recht auf Anderssein eintreten. Die Parade ist zugleich politische Kundgebung und ausgelassenes Fest – mit bunten Floats, Musiktrucks, Drag Queens und einem Publikum, das Wien an diesem Tag mit voller Herzlichkeit vereint.',

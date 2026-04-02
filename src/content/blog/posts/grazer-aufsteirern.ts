@@ -30,6 +30,7 @@ export const post: FestivalPost = {
     { name: 'Klingende Landschaft Steiermark', role: 'special', stage: 'Stadtpark-Bühne' },
     { name: 'Trachtenkapellen aus der Steiermark', role: 'support', stage: 'Glockenspielplatz' },
   ],
+  lineupTitle: 'Programm-Highlights',
   lineupNote:
     'Das vollständige Programm mit allen Musikgruppen und Bühnenzeiten erscheint im August 2026 auf der offiziellen Website.',
   intro:

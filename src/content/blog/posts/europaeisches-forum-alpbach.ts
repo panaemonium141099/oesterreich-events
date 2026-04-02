@@ -30,6 +30,7 @@ export const post: FestivalPost = {
     { name: 'Junge Europäerinnen und Europäer (Stipendiaten)', role: 'support', stage: 'alle Räume' },
     { name: 'Kulturprogramm: Alpbacher Kunstausstellungen', role: 'support', stage: 'Dorfplatz' },
   ],
+  lineupTitle: 'Programm-Highlights',
   lineupNote:
     'Die Sprecher und Referenten für 2026 werden im Mai bekannt gegeben. Das Forum vergibt jährlich Stipendien für junge Teilnehmer bis 30 Jahre.',
   intro:

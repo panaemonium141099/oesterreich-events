@@ -29,6 +29,7 @@ export const post: FestivalPost = {
     { name: 'Kinderchorkonzerte', role: 'support', stage: 'Domplatz' },
     { name: 'Krampuslauf Schlossberg', role: 'special', stage: 'Altstadt' },
   ],
+  lineupTitle: 'Programm-Highlights',
   lineupNote:
     'Das tägliche Bühnenprogramm mit Chören, Bläserquartetten und Kinderaufführungen wird im Oktober auf der Website bekanntgegeben.',
   intro:

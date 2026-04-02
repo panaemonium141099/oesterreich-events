@@ -30,6 +30,7 @@ export const post: FestivalPost = {
     { name: 'Lars Vogt (Deutschland, Klavier)', role: 'special', stage: 'Pfarrkirche Schruns' },
     { name: 'Nachwuchspreisträger (TBC)', role: 'support', stage: 'Bergkapelle Silbertal' },
   ],
+  lineupTitle: 'Programm-Highlights',
   lineupNote:
     'Das Programm 2026 steht auf montafonersommertage.at. Die Montafoner Sommertage vergeben jährlich einen Förderpreis für junge Kammermusiker — frühzeitig buchen, viele Konzerte ausverkauft.',
   intro:

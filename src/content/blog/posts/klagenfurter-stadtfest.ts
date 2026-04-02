@@ -29,6 +29,7 @@ export const post: FestivalPost = {
     { name: 'Kärntner Singkreise', role: 'special', stage: 'Stadtpfarrkirche' },
     { name: 'DJ-Programme für Jugendliche', role: 'support', stage: 'Burggasse-Bühne' },
   ],
+  lineupTitle: 'Programm-Highlights',
   lineupNote:
     'Das vollständige Programm mit allen Bühnenacts und Zeiten wird im April/Mai 2026 unter klagenfurt.at veröffentlicht.',
   intro:

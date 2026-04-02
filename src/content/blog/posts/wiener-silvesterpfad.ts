@@ -30,6 +30,7 @@ export const post: FestivalPost = {
     { name: 'Volksgarten Bühne', role: 'support', stage: 'Volksgarten' },
     { name: 'Graben Walking Act', role: 'special', stage: 'Graben' },
   ],
+  lineupTitle: 'Programm-Highlights',
   lineupNote: 'Das vollständige Bühnenprogramm wird Mitte Dezember bekanntgegeben.',
   intro:
     'Wenn die Uhr in der Nacht auf den 1. Jänner Mitternacht schlägt, verwandelt sich die Wiener Innenstadt in das größte Freilichtfest Europas. Beim Wiener Silvesterpfad strömen bis zu 600.000 Menschen entlang eines Pfades durch die beleuchtete City – von der Kärntner Straße über den Stephansplatz bis hin zum Rathausplatz und Prater. Sechs Bühnen mit Livemusik, atemberaubende Feuerwerke über der Stadt und eine Atmosphäre, die Gänsehaut erzeugt, machen diesen Jahreswechsel zum absoluten Erlebnis. Das Beste: Der Eintritt ist kostenlos.',

@@ -29,6 +29,7 @@ export const post: FestivalPost = {
     { name: 'Studierende der Schule für Tanz (Abschluss)', role: 'support', stage: 'Werkstattbühne' },
     { name: 'Emanuel Gat Dance (Israel/Frankreich)', role: 'special', stage: 'Großer Saal' },
   ],
+  lineupTitle: 'Programm-Highlights',
   lineupNote:
     'Das Programm 2026 steht auf bregenzerfruehling.at. Der Bregenzer Frühling vergibt regelmäßig den Tanzpreis Vorarlberg — Auszeichnung heimischer Tanzkünstler.',
   intro:

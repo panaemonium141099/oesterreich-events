@@ -30,6 +30,7 @@ export const post: FestivalPost = {
     { name: 'Teamstaffel (4 x ca. 10 km)', role: 'support', stage: 'Gesamtstrecke' },
     { name: 'Elitefeld (internationale Top-Runner)', role: 'special', stage: 'Vorabrennen' },
   ],
+  lineupTitle: 'Programm-Highlights',
   lineupNote: 'Die Elitefelder für 2026 werden Anfang März bekanntgegeben.',
   intro:
     'Seit 1984 zählt der Vienna City Marathon zu den faszinierendsten Stadtläufen Europas. Rund 40.000 Läufer aus über 120 Nationen starten jeden April in Wien und laufen durch eine einzige Kulisse: Jugendstilbauten, kaiserliche Palais, den grünen Prater und die prachtvolle Ringstraße. Kaum eine andere Stadt bietet eine vergleichbar dichte Abfolge an UNESCO-Welterbe auf 42 Kilometern. Und wer kein Marathon-Wettkämpfer ist, kann trotzdem dabei sein: beim Halbmarathon, dem 10km-Lauf oder als enthusiastische Zuschauerin.',

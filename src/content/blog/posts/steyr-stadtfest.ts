@@ -29,6 +29,7 @@ export const post: FestivalPost = {
     { name: 'DJ-Abend', role: 'support', stage: 'Stadtplatz-Bühne', day: 'Samstag Nacht' },
     { name: 'Schulband-Showcase', role: 'support', stage: 'Ennsufer-Bühne', day: 'Sonntag' },
   ],
+  lineupTitle: 'Programm-Highlights',
   lineupNote:
     'Das Bühnenprogramm für 2026 wird im April veröffentlicht. Alle Auftritte sind kostenlos zugänglich — kein Ticket erforderlich.',
   intro:

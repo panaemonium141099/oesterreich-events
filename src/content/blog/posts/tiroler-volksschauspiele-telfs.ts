@@ -29,6 +29,7 @@ export const post: FestivalPost = {
     { name: 'Inszenierungsleitung', role: 'special', stage: 'Regie' },
     { name: 'Gastauftritte professioneller Schauspieler', role: 'special', stage: 'Freilichtbühne' },
   ],
+  lineupTitle: 'Programm-Highlights',
   lineupNote:
     'Die Besetzung für die nächste Ausgabe 2027 wird nach dem traditionellen Casting-Prozess innerhalb der Gemeinde Telfs bekannt gegeben.',
   intro:

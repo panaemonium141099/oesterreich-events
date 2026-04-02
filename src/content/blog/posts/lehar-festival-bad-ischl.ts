@@ -29,6 +29,7 @@ export const post: FestivalPost = {
     { name: 'Orchester der Lehár Festspiele', role: 'support' },
     { name: 'Internationales Solistenensemble', role: 'support' },
   ],
+  lineupTitle: 'Programm-Highlights',
   lineupNote: 'Das detaillierte Spielplan 2026 mit Besetzungen wird ab Frühjahr auf der Website veröffentlicht.',
   intro:
     'Bad Ischl — die einstige Sommerresidenz von Kaiser Franz Joseph I. — ist nicht nur für seine k. u. k. Geschichte berühmt, sondern auch für ein Festival, das die Seele der Operette bewahrt und neu belebt. Das Lehár Festival Bad Ischl trägt den Namen des großen Operettenkomponisten Franz Lehár, der in dieser Salzkammergut-Stadt lebte und wirkte. Jedes Jahr von Juli bis August verwandelt sich der Kurort in eine Bühne für die schönsten Melodien des Goldenen Zeitalters der Wiener Operette.',

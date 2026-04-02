@@ -29,6 +29,7 @@ export const post: FestivalPost = {
     { name: 'Chor des Stifts Melk', role: 'support' },
     { name: 'Lokale Musiker und Ensembles', role: 'support' },
   ],
+  lineupTitle: 'Programm-Highlights',
   lineupNote: 'Programm und genaue Termine werden im Sommer 2026 auf der Website des Stifts Melk veröffentlicht.',
   intro:
     'Wenn sich in den Sommerabenden tausende Lichter am Stift Melk spiegeln, das goldene Klosterlicht auf die Donau fällt und Musik durch den Stiftspark zieht, dann ist das Lichterfest Melk. In der UNESCO-Welterberegion Wachau gehört dieses stimmungsvolle Fest zu den romantischsten Sommerveranstaltungen Niederösterreichs. Familien, Paare und Kulturliebhaber kommen zusammen, um in einer Atmosphäre aus Geschichte, Natur und Lichtmagie zu versinken, die selten so harmonisch zusammenkommt.',

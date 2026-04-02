@@ -29,6 +29,7 @@ export const post: FestivalPost = {
     { name: 'Faschingsbälle im Kongresshaus', role: 'support', stage: 'Kongresshaus Ballsaal' },
     { name: 'Kinderfasching', role: 'special', stage: 'Congress Center' },
   ],
+  lineupTitle: 'Programm-Highlights',
   lineupNote:
     'Das vollständige Ball- und Veranstaltungsprogramm für den Faschingsseason 2026/27 wird ab Oktober 2026 veröffentlicht.',
   intro:

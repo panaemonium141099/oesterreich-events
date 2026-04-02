@@ -31,6 +31,7 @@ export const post: FestivalPost = {
     { name: 'Team-Marathon (4 × ~10 km)', role: 'support', day: 'Sonntag' },
     { name: 'Nordic Walking', role: 'support', day: 'Sonntag' },
   ],
+  lineupTitle: 'Programm-Highlights',
   lineupNote: 'Anmeldung unter linzmarathon.at. Frühbucher-Rabatte bis Ende Januar 2026 verfügbar.',
   intro:
     'Jedes Jahr im April verwandelt sich Linz in eine riesige Laufveranstaltung. Der Linz Marathon — einer der meistbesuchten Stadtmarathons Österreichs — führt die Teilnehmenden durch die Altstadt, entlang der Donau und vorbei an den bedeutendsten Sehenswürdigkeiten der oberösterreichischen Landeshauptstadt. Mit bis zu 20.000 Starterinnen und Startern und einem begeisterten Publikum, das die Strecke säumt, ist der Linz Marathon mehr als ein Wettkampf: Es ist ein Stadtfest, bei dem Laufsport und urbane Lebensfreude eine unvergessliche Verbindung eingehen.',

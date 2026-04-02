@@ -30,6 +30,7 @@ export const post: FestivalPost = {
     { name: 'Il Pomo d\'Oro', role: 'special', stage: 'Jesuitenkirche' },
     { name: 'Innsbrucker Promenadenkonzerte', role: 'support', stage: 'Innenhof Hofburg' },
   ],
+  lineupTitle: 'Programm-Highlights',
   lineupNote:
     'Das vollständige Programm für 2026 wird im Februar veröffentlicht. Tickets für Opernpremieren sind erfahrungsgemäß schnell ausverkauft.',
   intro:

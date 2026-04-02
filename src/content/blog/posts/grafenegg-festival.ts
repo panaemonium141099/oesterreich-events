@@ -31,6 +31,7 @@ export const post: FestivalPost = {
     { name: 'Pablo Heras-Casado', role: 'support' },
     { name: 'Patricia Kopatchinskaja', role: 'support' },
   ],
+  lineupTitle: 'Programm-Highlights',
   lineupNote: 'Das vollständige Programm 2026 wird im Frühjahr bekannt gegeben. Frühbuchung empfohlen.',
   intro:
     'Im Schlosspark von Grafenegg, umgeben von jahrhundertealten Bäumen und einem der schönsten Landschaftsparks Österreichs, findet jedes Jahr ein musikalisches Ereignis statt, das Klassikliebhaber aus aller Welt anzieht. Das Grafenegg Festival gilt als einer der bedeutendsten Sommerfestivals für klassische Musik in Mitteleuropa — und das verdient es durch jede Note. Internationale Stardirigenten, Weltklasse-Solisten und erstklassige Orchester geben sich unter dem niederösterreichischen Sternenhimmel ein unvergleichliches Stelldichein.',

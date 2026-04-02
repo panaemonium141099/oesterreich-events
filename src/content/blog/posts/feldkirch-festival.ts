@@ -30,6 +30,7 @@ export const post: FestivalPost = {
     { name: 'Chor der Musikschule Feldkirch', role: 'support', stage: 'Schattenburg' },
     { name: 'Ensemble für Alte Musik', role: 'special', stage: 'Dom St. Nikolaus' },
   ],
+  lineupTitle: 'Programm-Highlights',
   lineupNote:
     'Das vollständige Programm steht auf feldkirchfestival.at. Das Festival legt besonderen Wert auf a-cappella-Chormusik und Barockensembles.',
   intro:

@@ -29,6 +29,7 @@ export const post: FestivalPost = {
     { name: 'Steirische Hausmusikgruppen', role: 'support', stage: 'Franziskanerplatz' },
     { name: 'Nikolausempfang der Stadt Graz', role: 'special', stage: 'Hauptplatz' },
   ],
+  lineupTitle: 'Programm-Highlights',
   lineupNote:
     'Das Bühnenprogramm mit täglichen Adventkonzerten wird ab Oktober 2026 auf der offiziellen Website veröffentlicht.',
   intro:

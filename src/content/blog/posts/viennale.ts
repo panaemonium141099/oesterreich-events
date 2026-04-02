@@ -30,6 +30,7 @@ export const post: FestivalPost = {
     { name: 'Dokumentarfilme', role: 'support', stage: 'Stadtkino' },
     { name: 'Q&A mit Filmemachern', role: 'special', stage: 'Gartenbaukino & Metro' },
   ],
+  lineupTitle: 'Programm-Highlights',
   lineupNote: 'Das Viennale-Programm wird traditionell Anfang Oktober bekanntgegeben.',
   intro:
     'Jeden Oktober öffnet die Viennale ihre Türen und macht Wien für zwei Wochen zur Filmhauptstadt Europas. Das internationale Filmfestival präsentiert seit 1960 das Beste des zeitgenössischen und historischen Kinos: Weltpremieren ambitionierter Autorenfilme, kuratierte Retrospektiven, österreichische Produktionen und Dokumentarfilme, die anderswo nie ins Kino kämen. Die Viennale ist kein Glamour-Festival im Hollywood-Sinne – sie ist cinephiles Kino pur, ein Ort der Begegnung zwischen Filmemachern und einem außergewöhnlich cinephilen Publikum.',

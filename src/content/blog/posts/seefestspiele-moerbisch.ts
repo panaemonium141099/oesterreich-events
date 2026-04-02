@@ -30,6 +30,7 @@ export const post: FestivalPost = {
     { name: 'Internationales Solisten-Ensemble', role: 'support' },
     { name: 'Ballett der Seefestspiele', role: 'support' },
   ],
+  lineupTitle: 'Programm-Highlights',
   lineupNote: 'Die Hauptproduktion 2026 ist „Ein Käfig voller Narren – La Cage aux Folles". Frühzeitig buchen — beliebte Abende Wochen im Voraus ausverkauft.',
   intro:
     'Es gibt Kulturerlebnisse, die man einmal im Leben haben sollte — die Seefestspiele Mörbisch gehören unbedingt dazu. Auf der größten Seebühne Europas, direkt auf dem Wasser des Neusiedler Sees im Burgenland, werden jedes Jahr prachtvolle Operetten und Musicals inszeniert. Wenn sich die Sonne über dem See neigt und die Bühnentechnik auf höchstem Niveau zum Einsatz kommt, entsteht ein Theatermagie, die tief berührt. Über 6.000 Zuschauer erleben jeden Abend, wie Musik, Wasser und Bühnenzauber verschmelzen.',

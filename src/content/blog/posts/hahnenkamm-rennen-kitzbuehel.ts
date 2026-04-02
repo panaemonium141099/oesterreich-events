@@ -30,6 +30,7 @@ export const post: FestivalPost = {
     { name: 'Manuel Feller (AUT)', role: 'special', day: 'Sonntag', stage: 'Ganslernhang Slalom' },
     { name: 'Henrik Kristoffersen (NOR)', role: 'special', day: 'Sonntag', stage: 'Ganslernhang Slalom' },
   ],
+  lineupTitle: 'Programm-Highlights',
   lineupNote:
     'Das Starterfeld 2026 wird nach den FIS-Weltcup-Qualifikationen im Dezember 2025 veröffentlicht. Die Nennung erfolgt nach Weltrangliste.',
   intro:

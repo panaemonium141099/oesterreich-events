@@ -28,6 +28,7 @@ export const post: FestivalPost = {
     { name: 'Brass-Ensemble Vorarlberg', role: 'special', stage: 'Rathausplatz-Bühne', day: 'Freitag' },
     { name: 'Trachtengruppe Lustenau', role: 'support', stage: 'Rathausplatz', day: 'Samstag' },
   ],
+  lineupTitle: 'Programm-Highlights',
   lineupNote:
     'Das vollständige Bühnenprogramm wird im Oktober veröffentlicht. Die Martinimarkt-Tradition in Lustenau beinhaltet Martinszug, Konzerte und regionales Handwerk.',
   intro:
