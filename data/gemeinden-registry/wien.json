@@ -1,0 +1,17 @@
+[
+  {
+    "name": "Wien",
+    "website": "https://www.wien.gv.at",
+    "eventUrl": "https://events.wien.info/de/",
+    "cms": "custom",
+    "strategy": "generic-dates",
+    "plz": "1010",
+    "bezirk": "Wien",
+    "bundesland": "Wien",
+    "lat": 48.2082,
+    "lng": 16.3738,
+    "status": "active",
+    "notes": "Wien events portal. Also covered by WienOGD, WienTicket, and other scrapers.",
+    "verifiedAt": "2026-04-02"
+  }
+]
