@@ -67,7 +67,7 @@
 
 const CATEGORY_IMAGES: Record<string, string> = {
   'Musik': 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400&h=300&fit=crop',
-  'Sport': 'https://images.unsplash.com/photo-1461896836934-bd45ba6343c1?w=400&h=300&fit=crop',
+  'Sport': 'https://images.unsplash.com/photo-1461896836934-ffe607ba8211?w=400&h=300&fit=crop',
   'Kultur': 'https://images.unsplash.com/photo-1518998053901-5348d3961a04?w=400&h=300&fit=crop',
   'Familie': 'https://images.unsplash.com/photo-1536640712-4d4c36ff0e4e?w=400&h=300&fit=crop',
   'Maerkte': 'https://images.unsplash.com/photo-1578916171728-46686eac8d58?w=400&h=300&fit=crop',
