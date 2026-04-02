@@ -62,7 +62,7 @@
   {
     "name": "Hornstein",
     "website": "https://hornstein.at",
-    "eventUrl": "https://hornstein.at/event-calendars/65fd7e1ee34d3871a6508da0",
+    "eventUrl": "https://citiesapps.com/pages/hornstein/events/upcoming",
     "cms": "cities",
     "strategy": "cities-iife",
     "plz": "7053",
@@ -92,7 +92,7 @@
   {
     "name": "Leithaprodersdorf",
     "website": "https://leithaprodersdorf.at",
-    "eventUrl": "https://leithaprodersdorf.at/unsere-gemeinde/veranstaltungen-und-termine",
+    "eventUrl": "https://citiesapps.com/pages/leithaprodersdorf/events/upcoming",
     "cms": "cities",
     "strategy": "cities-iife",
     "plz": "2443",
@@ -152,7 +152,7 @@
   {
     "name": "Neufeld an der Leitha",
     "website": "https://neufeld-leitha.at",
-    "eventUrl": "https://neufeld-leitha.at/event-calendars/670d19adb9a37ff113bd6384",
+    "eventUrl": "https://citiesapps.com/pages/neufeld-an-der-leitha/events/upcoming",
     "cms": "cities",
     "strategy": "cities-iife",
     "plz": "2491",
@@ -242,7 +242,7 @@
   {
     "name": "Siegendorf",
     "website": "https://siegendorf.gv.at",
-    "eventUrl": "https://siegendorf.gv.at/event-calendars/682ef0cff53181270d94c8ec",
+    "eventUrl": "https://citiesapps.com/pages/siegendorf/events/upcoming",
     "cms": "cities",
     "strategy": "cities-iife",
     "plz": "7011",
@@ -257,7 +257,7 @@
   {
     "name": "Steinbrunn",
     "website": "https://www.steinbrunn.at",
-    "eventUrl": "https://www.steinbrunn.at/gesellschaftvereine-und-freizeit/veranstaltungskalender",
+    "eventUrl": "https://citiesapps.com/pages/steinbrunn/events/upcoming",
     "cms": "cities",
     "strategy": "cities-iife",
     "plz": "7035",
@@ -302,7 +302,7 @@
   {
     "name": "Wimpassing an der Leitha",
     "website": "https://wimpassing-leitha.at",
-    "eventUrl": "https://wimpassing-leitha.at/",
+    "eventUrl": "https://citiesapps.com/pages/wimpassing-an-der-leitha/events/upcoming",
     "cms": "cities",
     "strategy": "cities-iife",
     "plz": "2485",
@@ -467,16 +467,16 @@
   {
     "name": "Güttenbach",
     "website": "https://www.guettenbach.at",
-    "eventUrl": null,
-    "cms": "wix",
-    "strategy": "none",
+    "eventUrl": "https://citiesapps.com/cities/guettenbach/events",
+    "cms": "cities",
+    "strategy": "cities-iife",
     "plz": "7536",
     "bezirk": "Güssing",
     "bundesland": "Burgenland",
     "lat": 47.095,
     "lng": 16.2304,
-    "status": "no-calendar",
-    "notes": "Wix site, JS-only.",
+    "status": "active",
+    "notes": "Recovered via citiesapps.com/cities/ — main site had no calendar or was offline.",
     "verifiedAt": "2026-04-02"
   },
   {
@@ -512,7 +512,7 @@
   {
     "name": "Heugraben",
     "website": "https://www.heugraben.gv.at",
-    "eventUrl": "https://www.heugraben.gv.at/events/upcoming",
+    "eventUrl": "https://citiesapps.com/pages/heugraben/events/upcoming",
     "cms": "cities",
     "strategy": "cities-iife",
     "plz": "7551",
@@ -542,16 +542,16 @@
   {
     "name": "Kleinmürbisch",
     "website": "https://www.kleinmuerbisch.at",
-    "eventUrl": null,
-    "cms": "wordpress",
-    "strategy": "none",
+    "eventUrl": "https://citiesapps.com/cities/kleinmuerbisch/events",
+    "cms": "cities",
+    "strategy": "cities-iife",
     "plz": "7540",
     "bezirk": "Güssing",
     "bundesland": "Burgenland",
     "lat": 47.099,
     "lng": 16.2336,
-    "status": "no-calendar",
-    "notes": "WordPress, no events page.",
+    "status": "active",
+    "notes": "Recovered via citiesapps.com/cities/ — main site had no calendar or was offline.",
     "verifiedAt": "2026-04-02"
   },
   {
@@ -602,7 +602,7 @@
   {
     "name": "Neustift bei Güssing",
     "website": "https://www.neustift-guessing.at",
-    "eventUrl": "https://xn--neustift-bei-gssing-jbc.at/events/upcoming",
+    "eventUrl": "https://citiesapps.com/pages/neustift-bei-guessing/events/upcoming",
     "cms": "cities",
     "strategy": "cities-iife",
     "plz": "7540",
@@ -662,16 +662,16 @@
   {
     "name": "Rohr im Burgenland",
     "website": "https://www.rohr-bgld.at",
-    "eventUrl": null,
-    "cms": "wordpress",
-    "strategy": "none",
+    "eventUrl": "https://citiesapps.com/cities/rohr-im-burgenland/events",
+    "cms": "cities",
+    "strategy": "cities-iife",
     "plz": "7551",
     "bezirk": "Güssing",
     "bundesland": "Burgenland",
     "lat": 47.11,
     "lng": 16.2424,
-    "status": "no-calendar",
-    "notes": "No events section.",
+    "status": "active",
+    "notes": "Recovered via citiesapps.com/cities/ — main site had no calendar or was offline.",
     "verifiedAt": "2026-04-02"
   },
   {
@@ -737,16 +737,16 @@
   {
     "name": "Tobaj",
     "website": "https://www.tobaj.gv.at",
-    "eventUrl": "https://www.tobaj.gv.at/system/web/veranstaltung.aspx",
-    "cms": "gem2go",
-    "strategy": "gem2go",
+    "eventUrl": "https://citiesapps.com/cities/tobaj/events",
+    "cms": "cities",
+    "strategy": "cities-iife",
     "plz": "7544",
     "bezirk": "Güssing",
     "bundesland": "Burgenland",
     "lat": 47.103,
     "lng": 16.2368,
-    "status": "offline",
-    "notes": "TLS cert error. Site broken.",
+    "status": "active",
+    "notes": "Recovered via citiesapps.com/cities/ — main site had no calendar or was offline.",
     "verifiedAt": "2026-04-02"
   },
   {
@@ -782,7 +782,7 @@
   {
     "name": "Deutsch Kaltenbrunn",
     "website": "https://www.deutschkaltenbrunn.eu",
-    "eventUrl": "https://www.deutschkaltenbrunn.eu/events/upcoming",
+    "eventUrl": "https://citiesapps.com/cities/deutsch-kaltenbrunn/events",
     "cms": "cities",
     "strategy": "cities-iife",
     "plz": "7572",
@@ -790,8 +790,8 @@
     "bundesland": "Burgenland",
     "lat": 46.9601,
     "lng": 16.1607,
-    "status": "no-calendar",
-    "notes": "All calendar URLs 404. Site migration.",
+    "status": "active",
+    "notes": "Recovered via citiesapps.com/cities/ — main site had no calendar or was offline.",
     "verifiedAt": "2026-04-02"
   },
   {
@@ -1037,7 +1037,7 @@
   {
     "name": "Hirm",
     "website": "https://www.hirm.gv.at",
-    "eventUrl": null,
+    "eventUrl": "https://citiesapps.com/cities/hirm/events",
     "cms": "cities",
     "strategy": "cities-iife",
     "plz": "7024",
@@ -1045,14 +1045,14 @@
     "bundesland": "Burgenland",
     "lat": 47.79,
     "lng": 16.46,
-    "status": "no-calendar",
-    "notes": "CITIES platform. No dedicated Veranstaltungen page visible in navigation. Has Aktuelles & News section under Gemeindeleben but no event calendar.",
+    "status": "active",
+    "notes": "Recovered via citiesapps.com/cities/ — main site had no calendar or was offline.",
     "verifiedAt": "2026-04-02"
   },
   {
     "name": "Krensdorf",
     "website": "https://citiesapps.com/pages/krensdorf",
-    "eventUrl": "https://citiesapps.com/pages/krensdorf",
+    "eventUrl": "https://citiesapps.com/pages/krensdorf/events/upcoming",
     "cms": "cities",
     "strategy": "cities-iife",
     "plz": "7031",
@@ -1202,7 +1202,7 @@
   {
     "name": "Sigleß",
     "website": "https://sigless.at",
-    "eventUrl": null,
+    "eventUrl": "https://citiesapps.com/cities/sigless/events",
     "cms": "cities",
     "strategy": "cities-iife",
     "plz": "7032",
@@ -1210,8 +1210,8 @@
     "bundesland": "Burgenland",
     "lat": 47.78,
     "lng": 16.41,
-    "status": "no-calendar",
-    "notes": "CITIES platform (sigless.at / sigless.eu). No dedicated events page in navigation. Sections: Politik & Verwaltung, Bürgerservice, Gemeindeleben, Wirtschaft.",
+    "status": "active",
+    "notes": "Recovered via citiesapps.com/cities/ — main site had no calendar or was offline.",
     "verifiedAt": "2026-04-02"
   },
   {
@@ -1277,7 +1277,7 @@
   {
     "name": "Bruckneudorf",
     "website": "https://www.bruckneudorf.eu",
-    "eventUrl": "https://www.bruckneudorf.eu/unsere-gemeinde/aktuelles-und-veranstaltungen",
+    "eventUrl": "https://citiesapps.com/pages/bruckneudorf/events/upcoming",
     "cms": "cities",
     "strategy": "cities-iife",
     "plz": "2460",
@@ -1442,7 +1442,7 @@
   {
     "name": "Neudorf bei Parndorf",
     "website": "https://neudorfbeiparndorf.at",
-    "eventUrl": "https://neudorfbeiparndorf.at/unsere-gemeinde/termine-und-veranstaltungen",
+    "eventUrl": "https://citiesapps.com/pages/neudorf-bei-parndorf/events/upcoming",
     "cms": "cities",
     "strategy": "cities-iife",
     "plz": "2475",
@@ -1472,7 +1472,7 @@
   {
     "name": "Nickelsdorf",
     "website": "https://nickelsdorf.gv.at",
-    "eventUrl": "https://nickelsdorf.gv.at/unsere-gemeinde/veranstaltungskalender",
+    "eventUrl": "https://citiesapps.com/pages/nickelsdorf/events/upcoming",
     "cms": "cities",
     "strategy": "cities-iife",
     "plz": "2425",
@@ -1517,16 +1517,16 @@
   {
     "name": "Parndorf",
     "website": "http://www.gemeinde-parndorf.at",
-    "eventUrl": "http://www.gemeinde-parndorf.at/de/kultur_vereine_organisationen/veranstaltungskalender/",
-    "cms": "custom",
-    "strategy": "generic-dates",
+    "eventUrl": "https://citiesapps.com/cities/parndorf/events",
+    "cms": "cities",
+    "strategy": "cities-iife",
     "plz": "7111",
     "bezirk": "Neusiedl am See",
     "bundesland": "Burgenland",
     "lat": 47.99,
     "lng": 16.86,
-    "status": "offline",
-    "notes": "Custom CMS by eloops.at. Veranstaltungskalender at /de/kultur_vereine_organisationen/veranstaltungskalender/. Server returned ECONNREFUSED during testing - may be temporarily offline. Bilingual German/Croatian (Pandrof).",
+    "status": "active",
+    "notes": "Recovered via citiesapps.com/cities/ — main site had no calendar or was offline.",
     "verifiedAt": "2026-04-02"
   },
   {
@@ -1547,7 +1547,7 @@
   {
     "name": "Potzneusiedl",
     "website": "https://www.potzneusiedl.at",
-    "eventUrl": null,
+    "eventUrl": "https://citiesapps.com/cities/potzneusiedl/events",
     "cms": "cities",
     "strategy": "cities-iife",
     "plz": "2473",
@@ -1555,8 +1555,8 @@
     "bundesland": "Burgenland",
     "lat": 47.94,
     "lng": 16.99,
-    "status": "no-calendar",
-    "notes": "CITIES platform. No dedicated events page in main navigation. Has Aktuelles (news) section and data bundle references Veranstaltungskalender but no public-facing event listing found. Sections: Gemeinde, Politik, Bürgerservice, Bildung, Kultur & Freizeit.",
+    "status": "active",
+    "notes": "Recovered via citiesapps.com/cities/ — main site had no calendar or was offline.",
     "verifiedAt": "2026-04-02"
   },
   {
@@ -1637,7 +1637,7 @@
   {
     "name": "Zurndorf",
     "website": "https://www.zurndorf.at",
-    "eventUrl": "https://www.zurndorf.at/unsere-gemeinde/veranstaltungskalender",
+    "eventUrl": "https://citiesapps.com/pages/zurndorf/events/upcoming",
     "cms": "cities",
     "strategy": "cities-iife",
     "plz": "2424",
@@ -1667,7 +1667,7 @@
   {
     "name": "Draßmarkt",
     "website": "https://www.drassmarkt.at",
-    "eventUrl": "https://www.drassmarkt.at/freizeit-und-gastronomie/termine",
+    "eventUrl": "https://citiesapps.com/pages/drassmarkt/events/upcoming",
     "cms": "cities",
     "strategy": "cities-iife",
     "plz": "7372",
@@ -1712,7 +1712,7 @@
   {
     "name": "Horitschon",
     "website": "https://www.horitschon.at",
-    "eventUrl": "https://www.horitschon.at/unsere-marktgemeinde/aktuelles",
+    "eventUrl": "https://citiesapps.com/pages/horitschon/events/upcoming",
     "cms": "cities",
     "strategy": "cities-iife",
     "plz": "7312",
@@ -1728,15 +1728,15 @@
     "name": "Kaisersdorf",
     "website": "http://www.kaisersdorf.com",
     "eventUrl": "https://citiesapps.com/cities/kaisersdorf/events",
-    "cms": "custom",
-    "strategy": "none",
+    "cms": "cities",
+    "strategy": "cities-iife",
     "plz": "7342",
     "bezirk": "Oberpullendorf",
     "bundesland": "Burgenland",
     "lat": 47.4937,
     "lng": 16.5166,
     "status": "active",
-    "notes": "Main site has SSL certificate issues, could not verify directly. Has Joomla-style Veranstaltungskalender at /index.php/buergerservice/main-menu-colors-4. Also on CITIES at citiesapps.com/cities/kaisersdorf/events with actual events listed (Ostereiersuche, Osterfeuer etc).",
+    "notes": "Recovered via citiesapps.com/cities/ — main site had no calendar or was offline.",
     "verifiedAt": "2026-04-02"
   },
   {
@@ -1772,22 +1772,22 @@
   {
     "name": "Lackendorf",
     "website": "https://www.lackendorf.at",
-    "eventUrl": null,
+    "eventUrl": "https://citiesapps.com/cities/lackendorf/events",
     "cms": "cities",
-    "strategy": "none",
+    "strategy": "cities-iife",
     "plz": "7321",
     "bezirk": "Oberpullendorf",
     "bundesland": "Burgenland",
     "lat": 47.4727,
     "lng": 16.4998,
-    "status": "no-calendar",
-    "notes": "CITIES/citiesapps.com platform. No dedicated Veranstaltungen or Events link in navigation. Site has Aktuelles, Betriebe, Vereine sections but no event calendar.",
+    "status": "active",
+    "notes": "Recovered via citiesapps.com/cities/ — main site had no calendar or was offline.",
     "verifiedAt": "2026-04-02"
   },
   {
     "name": "Lockenhaus",
     "website": "https://www.lockenhaus.at",
-    "eventUrl": "https://www.lockenhaus.at/unsere-marktgemeinde/events-und-veranstaltungen",
+    "eventUrl": "https://citiesapps.com/pages/marktgemeinde-lockenhaus/events/upcoming",
     "cms": "cities",
     "strategy": "cities-iife",
     "plz": "7442",
@@ -1952,7 +1952,7 @@
   {
     "name": "Raiding",
     "website": "https://www.raiding-online.at",
-    "eventUrl": "https://www.raiding-online.at/unsere-marktgemeinde/veranstaltungskalender",
+    "eventUrl": "https://citiesapps.com/pages/raiding/events/upcoming",
     "cms": "cities",
     "strategy": "cities-iife",
     "plz": "7321",
@@ -2012,7 +2012,7 @@
   {
     "name": "Unterfrauenhaid",
     "website": "https://www.unterfrauenhaid.at",
-    "eventUrl": "https://www.unterfrauenhaid.at/sites/veranstaltungskalender",
+    "eventUrl": "https://citiesapps.com/pages/unterfrauenhaid/events/upcoming",
     "cms": "cities",
     "strategy": "cities-iife",
     "plz": "7321",
@@ -2102,7 +2102,7 @@
   {
     "name": "Bernstein",
     "website": "https://www.bernstein.gv.at",
-    "eventUrl": "https://www.bernstein.gv.at/sites/veranstaltungskalender",
+    "eventUrl": "https://citiesapps.com/pages/bernstein/events/upcoming",
     "cms": "cities",
     "strategy": "cities-iife",
     "plz": "7434",
@@ -2117,7 +2117,7 @@
   {
     "name": "Deutsch Schützen-Eisenberg",
     "website": "https://www.eisenberg.at",
-    "eventUrl": "https://www.eisenberg.at/tourismus/veranstaltungen-und-termine",
+    "eventUrl": "https://citiesapps.com/pages/deutsch-schuetzen-eisenberg/events/upcoming",
     "cms": "cities",
     "strategy": "cities-iife",
     "plz": "7474",
@@ -2192,7 +2192,7 @@
   {
     "name": "Kemeten",
     "website": "https://www.kemeten.gv.at",
-    "eventUrl": "https://www.kemeten.gv.at/aktuelles/veranstaltungen-und-termine",
+    "eventUrl": "https://citiesapps.com/pages/kemeten/events/upcoming",
     "cms": "cities",
     "strategy": "cities-iife",
     "plz": "7531",
@@ -2207,7 +2207,7 @@
   {
     "name": "Kohfidisch",
     "website": "https://www.kohfidisch.at",
-    "eventUrl": "https://www.kohfidisch.at/tourismus/tourismusinformation-und-veranstaltungen",
+    "eventUrl": "https://citiesapps.com/pages/kohfidisch/events/upcoming",
     "cms": "cities",
     "strategy": "cities-iife",
     "plz": "7512",
@@ -2215,7 +2215,7 @@
     "bundesland": "Burgenland",
     "lat": 47.2715,
     "lng": 16.2404,
-    "status": "empty",
+    "status": "active",
     "notes": "CITIES/citiesapps.com platform. Veranstaltungskalender exists under Tourismus section but currently shows no events (empty calendar). Infrastructure supports events but not populated.",
     "verifiedAt": "2026-04-02"
   },
@@ -2282,16 +2282,16 @@
   {
     "name": "Markt Neuhodis",
     "website": "http://www.markt-neuhodis.at",
-    "eventUrl": null,
+    "eventUrl": "https://citiesapps.com/cities/markt-neuhodis/events",
     "cms": "cities",
-    "strategy": "none",
+    "strategy": "cities-iife",
     "plz": "7464",
     "bezirk": "Oberwart",
     "bundesland": "Burgenland",
     "lat": 47.3235,
     "lng": 16.282,
-    "status": "no-calendar",
-    "notes": "CITIES/citiesapps.com platform (basic). Amtstafel links to citiesapps.com/cities/markt-neuhodis. No visible Veranstaltungen or Events link in navigation. Only Home, Gemeinde, Fotoalben, Links.",
+    "status": "active",
+    "notes": "Recovered via citiesapps.com/cities/ — main site had no calendar or was offline.",
     "verifiedAt": "2026-04-02"
   },
   {
@@ -2492,16 +2492,16 @@
   {
     "name": "Unterwart",
     "website": "https://www.unterwart.at",
-    "eventUrl": null,
-    "cms": "wordpress",
-    "strategy": "none",
+    "eventUrl": "https://citiesapps.com/cities/unterwart/events",
+    "cms": "cities",
+    "strategy": "cities-iife",
     "plz": "7501",
     "bezirk": "Oberwart",
     "bundesland": "Burgenland",
     "lat": 47.2605,
     "lng": 16.2316,
-    "status": "pdf-only",
-    "notes": "WordPress with WPML (multilingual). No dedicated events page. Veranstaltungskalender 2026 available only as PDF download (Veranstaltungskalender-2026-Version-vom-30-01-2026). Events distributed through news announcements.",
+    "status": "active",
+    "notes": "Recovered via citiesapps.com/cities/ — main site had no calendar or was offline.",
     "verifiedAt": "2026-04-02"
   },
   {
