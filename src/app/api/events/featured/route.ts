@@ -52,10 +52,12 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    return NextResponse.json({
+    const res = NextResponse.json({
       events: events ?? [],
       total: count ?? 0,
     });
+    res.headers.set('Cache-Control', 'no-store, max-age=0');
+    return res;
   } catch (err) {
     console.error('API Error (featured):', err);
     return NextResponse.json(

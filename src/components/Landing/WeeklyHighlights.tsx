@@ -142,7 +142,7 @@ export function WeeklyHighlights() {
           url.searchParams.set('lat', lat.toFixed(4));
           url.searchParams.set('lng', lng.toFixed(4));
         }
-        const res = await fetch(url.toString());
+        const res = await fetch(url.toString(), { cache: 'no-store' });
         const data = await res.json();
         setEvents(data.events ?? []);
       } catch {

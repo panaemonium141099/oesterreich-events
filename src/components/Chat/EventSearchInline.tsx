@@ -29,7 +29,7 @@ export function EventSearchInline({ onSelectEvent, onClose }: EventSearchInlineP
     }
     setSearching(true);
     try {
-      const res = await fetch(`/api/events/search?q=${encodeURIComponent(q)}`);
+      const res = await fetch(`/api/events/search?q=${encodeURIComponent(q)}`, { cache: 'no-store' });
       const data = await res.json();
       setResults(data.events || []);
     } catch {

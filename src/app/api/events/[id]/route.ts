@@ -31,7 +31,9 @@ export async function GET(
       return NextResponse.json({ error: 'Event nicht gefunden' }, { status: 404 });
     }
 
-    return NextResponse.json(event);
+    const res = NextResponse.json(event);
+    res.headers.set('Cache-Control', 'no-store, max-age=0');
+    return res;
   } catch (err) {
     console.error('API Error:', err);
     return NextResponse.json(

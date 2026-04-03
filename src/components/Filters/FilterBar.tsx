@@ -92,7 +92,7 @@ export function FilterBar({ filters, onFiltersChange, eveningMode, bundeslandId,
         // suggest=true → lightweight path: only id/title/category/location_name, no exact count
         const res = await fetch(
           `/api/events?search=${encodeURIComponent(searchValue.trim())}&limit=5&sort=score&suggest=true`,
-          { signal: controller.signal }
+          { signal: controller.signal, cache: 'no-store' }
         );
         if (!res.ok) { setEventSuggestions([]); return; }
         const data = await res.json();

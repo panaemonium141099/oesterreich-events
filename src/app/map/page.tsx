@@ -129,11 +129,11 @@ function MapPageInner() {
       const firstParams = buildParams();
       firstParams.set('limit', String(BATCH_SIZE));
 
-      let firstRes = await fetch(`/api/events?${firstParams.toString()}`, { signal: controller.signal });
+      let firstRes = await fetch(`/api/events?${firstParams.toString()}`, { signal: controller.signal, cache: 'no-store' });
       // Retry once without count if timeout
       if (!firstRes.ok) {
         firstParams.set('limit', String(BATCH_SIZE));
-        firstRes = await fetch(`/api/events?${firstParams.toString()}`, { signal: controller.signal });
+        firstRes = await fetch(`/api/events?${firstParams.toString()}`, { signal: controller.signal, cache: 'no-store' });
         if (!firstRes.ok) throw new Error(`HTTP ${firstRes.status}`);
       }
       const firstData = await firstRes.json();
@@ -162,7 +162,7 @@ function MapPageInner() {
         params.set('limit', String(BATCH_SIZE));
         params.set('cursor', cursor);
 
-        const res = await fetch(`/api/events?${params.toString()}`, { signal: controller.signal });
+        const res = await fetch(`/api/events?${params.toString()}`, { signal: controller.signal, cache: 'no-store' });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
 

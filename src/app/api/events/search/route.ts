@@ -49,7 +49,9 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    return NextResponse.json({ events: data || [] });
+    const res = NextResponse.json({ events: data || [] });
+    res.headers.set('Cache-Control', 'no-store, max-age=0');
+    return res;
   } catch (err) {
     console.error('Event search API error:', err);
     return NextResponse.json(
