@@ -59,7 +59,7 @@ export function FeedItem({
   if (isCompactActivity(activity.type)) {
     return (
       <div
-        className="flex items-center gap-3 px-4 py-3 border-b border-white/[0.08] mb-2"
+        className="flex items-center gap-3 px-4 py-3 bg-white/[0.02] border-y border-white/[0.05] my-1"
         style={{ animationDelay: `${Math.min(index * 40, 240)}ms` }}
       >
         {activity.profile?.avatar_url ? (
@@ -181,7 +181,7 @@ export function FeedItem({
 
   // --- Render ---
   return (
-    <article className="border-b border-white/[0.10] mb-3 pb-1">
+    <article>
       {/* Post Header */}
       <div className="flex items-center gap-3 px-4 py-3">
         {activity.profile?.avatar_url ? (
@@ -355,6 +355,9 @@ export function FeedItem({
           url: activity.event ? `/events/${activity.event.id}` : `/feed/${activity.id}`,
         }}
       />
+
+      {/* Post separator — visible spacer block between posts */}
+      <div className="h-[6px] bg-white/[0.03] border-t border-white/[0.06] mt-2" />
     </article>
   );
 }
