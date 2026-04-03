@@ -135,16 +135,6 @@ function MapPageInner() {
     const BATCH_SIZE = 5000;
 
     try {
-      // ── Get total count first (fetch 1 event with exact count) ──
-      const countParams = buildParams();
-      countParams.set('limit', '1');
-      const countRes = await fetch(`/api/events?${countParams.toString()}`, { signal: controller.signal });
-      let totalCount = 0;
-      if (countRes.ok) {
-        const countData = await countRes.json();
-        totalCount = countData.total || 0;
-      }
-
       // ── Phase 1: Fast first batch (location-aware) ──
       const firstParams = buildParams();
       firstParams.set('limit', String(BATCH_SIZE));
@@ -162,27 +152,30 @@ function MapPageInner() {
       const firstData = await firstRes.json();
 
       const firstEvents: Event[] = firstData.events || [];
-      const realTotal = totalCount || firstData.total || firstEvents.length;
 
       setAllEvents(firstEvents);
-      setTotal(realTotal);
       setLoading(false);
 
-      if (firstEvents.length >= realTotal || (!firstData.hasMore && firstEvents.length < BATCH_SIZE)) return;
+      // If first batch is not full, we're done
+      if (!firstData.hasMore && firstEvents.length < BATCH_SIZE) return;
 
-      // ── Phase 2: Background load remaining events ──
-      setLoadProgress({ loaded: firstEvents.length, total: realTotal });
+      // ── Phase 2: Background load ALL remaining events ──
+      // Show loading bar immediately — use known total or estimate
+      let estimatedTotal = firstData.total || firstEvents.length * 15; // estimate ~75k
+      setLoadProgress({ loaded: firstEvents.length, total: estimatedTotal });
+      setTotal(estimatedTotal);
+
       const existingIds = new Set(firstEvents.map(e => e.id));
       let accumulated = [...firstEvents];
-      let cursor: string | null = null;
+      let cursor: string | null = firstData.nextCursor || null;
 
-      while (true) {
+      while (cursor) {
         if (controller.signal.aborted) break;
-        await new Promise(r => setTimeout(r, 300)); // don't hammer API
+        await new Promise(r => setTimeout(r, 300));
 
         const params = buildParams();
         params.set('limit', String(BATCH_SIZE));
-        if (cursor) params.set('cursor', cursor);
+        params.set('cursor', cursor);
 
         const res = await fetch(`/api/events?${params.toString()}`, { signal: controller.signal });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -191,16 +184,21 @@ function MapPageInner() {
         const batch: Event[] = data.events || [];
         if (batch.length === 0) break;
 
-        // Deduplicate against already loaded events
+        // Update total if we get a real count
+        if (data.total && data.total > estimatedTotal) estimatedTotal = data.total;
+
         const unique = batch.filter(e => !existingIds.has(e.id));
         for (const e of unique) existingIds.add(e.id);
         accumulated = [...accumulated, ...unique];
 
         setAllEvents(accumulated);
-        setLoadProgress({ loaded: accumulated.length, total: realTotal });
+        // Ensure total is always ahead of loaded so bar never finishes early
+        const displayTotal = Math.max(estimatedTotal, accumulated.length + (data.hasMore ? 1000 : 0));
+        setLoadProgress({ loaded: accumulated.length, total: displayTotal });
+        setTotal(displayTotal);
 
         cursor = data.nextCursor || null;
-        if (!cursor || batch.length < BATCH_SIZE) break;
+        if (batch.length < BATCH_SIZE) break;
       }
     } catch (err) {
       if ((err as Error).name !== 'AbortError') {
