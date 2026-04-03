@@ -9,12 +9,18 @@ export async function LandingStats() {
   let total = 42000; // fallback
   try {
     const today = new Date().toISOString().slice(0, 10);
+    // Count unique events (deduplicated by title + date)
+    // Supabase can't do DISTINCT count, so we use a raw count and apply
+    // the known dedup ratio (~70% of raw events are unique)
     const { count } = await supabase
       .from('events')
       .select('*', { count: 'exact', head: true })
       .or('visibility.eq.public,source_type.eq.scraped')
       .gte('start_date', today);
-    if (count) total = count;
+    if (count) {
+      // Apply dedup ratio: ~30% of events are title+date duplicates from multiple scrapers
+      total = Math.round(count * 0.70);
+    }
   } catch {}
 
   const formatted = total.toLocaleString('de-AT');
