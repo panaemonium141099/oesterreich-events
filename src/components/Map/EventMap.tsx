@@ -457,7 +457,10 @@ function EventMap({ events, selectedEvent, hoveredEventId, onSelectEvent, evenin
       m.off('render', throttledUpdate);
       if (renderTimer) cancelAnimationFrame(renderTimer);
     };
-  }, [events, mapReady, buildGeoJSON, createPopupHTML, onSelectEvent, bundesland, eveningMode]);
+  // Note: bundesland NOT in deps — events are already filtered client-side.
+  // Bundesland switch only triggers flyTo + overlay (separate useEffect).
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [events, mapReady, buildGeoJSON, createPopupHTML, onSelectEvent, eveningMode]);
 
   // Fly to selected
   useEffect(() => {
