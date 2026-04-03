@@ -40,6 +40,11 @@ async function main() {
   console.log(`Total events in Supabase: ${count}`);
 
   let offset = 0;
+  // Resume from where we left off (pass --offset=N to skip already processed)
+  const offsetArg = process.argv.find(a => a.startsWith('--offset='));
+  if (offsetArg) offset = parseInt(offsetArg.split('=')[1]) || 0;
+  if (offset > 0) console.log(`Resuming from offset ${offset}...`);
+
   let updated = 0;
   let coordsFixed = 0;
   let namesFixed = 0;
@@ -53,7 +58,11 @@ async function main() {
       .range(offset, offset + BATCH_SIZE - 1)
       .order('id', { ascending: true });
 
-    if (error) { console.error('Query error:', error.message); break; }
+    if (error) {
+      console.error('Query error at offset', offset, ':', error.message);
+      console.log('Resume with: npx tsx src/scripts/normalize-locations.ts --offset=' + offset);
+      break;
+    }
     if (!events || events.length === 0) break;
 
     const updates: { id: string; location_name?: string; latitude?: number; longitude?: number }[] = [];

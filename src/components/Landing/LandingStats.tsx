@@ -8,10 +8,12 @@ const supabase = createClient(
 export async function LandingStats() {
   let total = 42000; // fallback
   try {
+    const today = new Date().toISOString().slice(0, 10);
     const { count } = await supabase
       .from('events')
       .select('*', { count: 'exact', head: true })
-      .or('visibility.eq.public,source_type.eq.scraped');
+      .or('visibility.eq.public,source_type.eq.scraped')
+      .gte('start_date', today);
     if (count) total = count;
   } catch {}
 
