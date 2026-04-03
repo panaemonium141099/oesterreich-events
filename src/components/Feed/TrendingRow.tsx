@@ -5,6 +5,16 @@ import { createClient } from '@/lib/supabase/client';
 import type { TrendingEvent } from './feed-types';
 import { StoriesViewer } from './StoriesViewer';
 
+// Shuffle array (Fisher-Yates) with seed from current hour so it changes per refresh but stays stable within a render
+function shuffleArray<T>(arr: T[]): T[] {
+  const shuffled = [...arr];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
+}
+
 export function TrendingRow() {
   const [events, setEvents] = useState<TrendingEvent[]>([]);
   const [loading, setLoading] = useState(true);
@@ -14,25 +24,75 @@ export function TrendingRow() {
   const supabase = createClient();
 
   useEffect(() => {
-    const fetchTrending = async () => {
-      const nextWeek = new Date();
-      nextWeek.setDate(nextWeek.getDate() + 7);
+    const fetchNearbyEvents = async () => {
+      // Get user location via browser geolocation
+      let userLat: number | null = null;
+      let userLng: number | null = null;
+
+      try {
+        const pos = await new Promise<GeolocationPosition>((resolve, reject) => {
+          navigator.geolocation.getCurrentPosition(resolve, reject, {
+            enableHighAccuracy: false,
+            timeout: 5000,
+            maximumAge: 300000, // cache 5 min
+          });
+        });
+        userLat = pos.coords.latitude;
+        userLng = pos.coords.longitude;
+      } catch {
+        // Fallback: center of Austria (47.5, 13.5)
+        userLat = 47.5;
+        userLng = 13.5;
+      }
+
+      // Fetch upcoming events with coordinates, then filter by 15km radius client-side
+      // Supabase doesn't have PostGIS by default, so we fetch a broader set and filter
+      const nextMonth = new Date();
+      nextMonth.setDate(nextMonth.getDate() + 30);
 
       const { data } = await supabase
         .from('events')
-        .select('id, title, start_date, end_date, location_name, image_url, category, save_count')
+        .select('id, title, start_date, end_date, location_name, image_url, category, save_count, latitude, longitude')
         .gte('start_date', new Date().toISOString())
-        .lte('start_date', nextWeek.toISOString())
+        .lte('start_date', nextMonth.toISOString())
         .eq('visibility', 'public')
         .not('image_url', 'is', null)
-        .order('save_count', { ascending: false, nullsFirst: false })
+        .not('latitude', 'is', null)
+        .not('longitude', 'is', null)
         .order('start_date', { ascending: true })
-        .limit(12);
+        .limit(200);
 
-      setEvents((data as TrendingEvent[]) || []);
+      if (!data) {
+        setEvents([]);
+        setLoading(false);
+        return;
+      }
+
+      // Filter by 15km radius using Haversine
+      const RADIUS_KM = 15;
+      const nearby = data.filter((e: Record<string, unknown>) => {
+        const lat = e.latitude as number;
+        const lng = e.longitude as number;
+        if (!lat || !lng || !userLat || !userLng) return false;
+
+        const R = 6371;
+        const dLat = (lat - userLat) * Math.PI / 180;
+        const dLng = (lng - userLng) * Math.PI / 180;
+        const a = Math.sin(dLat / 2) ** 2 +
+          Math.cos(userLat * Math.PI / 180) * Math.cos(lat * Math.PI / 180) *
+          Math.sin(dLng / 2) ** 2;
+        const d = R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        return d <= RADIUS_KM;
+      });
+
+      // Random shuffle so each refresh shows different order
+      const shuffled = shuffleArray(nearby).slice(0, 15);
+
+      setEvents(shuffled as TrendingEvent[]);
       setLoading(false);
     };
-    fetchTrending();
+
+    fetchNearbyEvents();
   }, [supabase]);
 
   if (!loading && events.length === 0) return null;
@@ -89,7 +149,6 @@ export function TrendingRow() {
         </div>
       </div>
 
-      {/* Stories fullscreen viewer */}
       {viewerOpen && events.length > 0 && (
         <StoriesViewer
           events={events}
