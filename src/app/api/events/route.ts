@@ -102,6 +102,11 @@ export async function GET(request: NextRequest) {
     const today = new Date().toISOString().slice(0, 10);
     query = query.gte('start_date', today);
 
+    // Only show events within Austria (exclude German/Swiss events from Feratel etc.)
+    // Austria bounding box: lat 46.3-49.1, lng 9.5-17.2
+    // Also exclude 0,0 coordinates (not geocoded)
+    query = query.gte('latitude', 46.3).lte('latitude', 49.1).gte('longitude', 9.5).lte('longitude', 17.2);
+
     // Apply filters
     if (filters.bundesland && filters.bundesland !== 'all') {
       query = query.eq('bundesland', filters.bundesland);
