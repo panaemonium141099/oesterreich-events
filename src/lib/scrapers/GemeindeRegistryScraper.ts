@@ -60,13 +60,15 @@ export class GemeindeRegistryScraper extends BaseScraper {
 
   async scrape(): Promise<ScrapedEvent[]> {
     const registry = this.loadRegistry();
+    const bundeslandFilter = process.env.REGISTRY_BUNDESLAND?.toLowerCase();
     const scrapeable = registry.filter(e =>
       (e.status === 'active' || e.status === 'empty') &&
       e.strategy !== 'none' &&
-      e.eventUrl
+      e.eventUrl &&
+      (!bundeslandFilter || e.bundesland.toLowerCase().includes(bundeslandFilter))
     );
 
-    this.log(`Starte Registry-Scraping: ${scrapeable.length} scrapbare Gemeinden von ${registry.length} total`);
+    this.log(`Starte Registry-Scraping: ${scrapeable.length} scrapbare Gemeinden von ${registry.length} total${bundeslandFilter ? ` (Filter: ${bundeslandFilter})` : ''}`);
 
     const allEvents: ScrapedEvent[] = [];
     let scraped = 0;
