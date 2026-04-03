@@ -95,23 +95,24 @@ function MapPageInner() {
   const mapBboxRef = useRef<[number, number, number, number] | null>(null);
   const bboxDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Callback for EventMap to report viewport changes — stored in ref, not state
+  // Callback for EventMap to report viewport changes — debounced refetch
   const handleViewportChange = useCallback((bbox: [number, number, number, number]) => {
     if (bboxDebounceRef.current) clearTimeout(bboxDebounceRef.current);
     bboxDebounceRef.current = setTimeout(() => {
       mapBboxRef.current = bbox;
-    }, 300);
-  }, []);
+      fetchEvents();
+    }, 500);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fetchEvents]);
 
   useEffect(() => { trackEvent('page_view', { path: '/map' }); }, []);
 
-  // Fetch events for the current viewport with cursor-based pagination
-  // Loads all pages automatically to fill the map and sidebar
+  // Fetch events — uses bbox viewport filtering to avoid loading 85k+ events at once.
+  // Initial load uses a reasonable limit, subsequent loads use the map viewport.
   const fetchEvents = useCallback(async () => {
     setLoading(true);
     const params = new URLSearchParams();
     params.set('bundesland', bundesland.id);
-    // Do NOT pass district to API — we filter client-side for the sidebar
     if (filters.tags && filters.tags.length > 0) params.set('tags', filters.tags.join(','));
     else if (filters.category) params.set('category', filters.category);
     if (filters.dateFrom) params.set('dateFrom', filters.dateFrom);
@@ -121,14 +122,18 @@ function MapPageInner() {
     if (filters.search) params.set('search', filters.search);
     if (filters.eveningOnly) params.set('eveningOnly', 'true');
 
-    // NOTE: bbox is intentionally NOT passed — all events are always loaded regardless
-    // of viewport. Client-side filtering keeps the map complete at all zoom levels.
+    // Use bbox viewport filtering — only load events visible on the map
+    const bbox = mapBboxRef.current;
+    if (bbox) {
+      params.set('bbox', bbox.join(','));
+    }
 
-    // Fetch all events in one request (matches pre-pagination behaviour)
-    params.set('limit', '200000');
+    // Limit to 10k events per request (Supabase can handle this)
+    params.set('limit', '10000');
 
     try {
       const res = await fetch(`/api/events?${params.toString()}`);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
 
       setAllEvents(data.events || []);
