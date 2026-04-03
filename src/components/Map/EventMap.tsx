@@ -272,27 +272,26 @@ function EventMap({ events, selectedEvent, hoveredEventId, onSelectEvent, evenin
 
     const geojson = buildGeoJSON(events);
 
-    // If source already exists, just update the data — no flicker!
+    // If source already exists, just update the data — no full teardown needed
     if (sourceInitialized.current && m.getSource('events')) {
       (m.getSource('events') as mapboxgl.GeoJSONSource).setData(geojson);
-      return;
-    }
+      // Don't return — let the marker update logic below run
+    } else {
+      // First time: create source + layers
+      if (m.getSource('events')) m.removeSource('events');
 
-    // First time: create source + layers
-    if (m.getSource('events')) m.removeSource('events');
+      markersOnScreen.current.forEach(marker => marker.remove());
+      markersOnScreen.current.clear();
 
-    markersOnScreen.current.forEach(marker => marker.remove());
-    markersOnScreen.current.clear();
+      m.addSource('events', {
+        type: 'geojson',
+        data: geojson,
+        cluster: true,
+        clusterMaxZoom: 15,
+        clusterRadius: 60,
+      });
 
-    m.addSource('events', {
-      type: 'geojson',
-      data: geojson,
-      cluster: true,
-      clusterMaxZoom: 15,
-      clusterRadius: 60,
-    });
-
-    sourceInitialized.current = true;
+      sourceInitialized.current = true;
 
     const isDark = !!eveningMode;
 
@@ -359,6 +358,7 @@ function EventMap({ events, selectedEvent, hoveredEventId, onSelectEvent, evenin
     // Cursor pointer on clusters
     m.on('mouseenter', 'clusters', () => { m.getCanvas().style.cursor = 'pointer'; });
     m.on('mouseleave', 'clusters', () => { m.getCanvas().style.cursor = ''; });
+    } // end of else (first-time source+layer setup)
 
     // Function to render DOM markers for unclustered points
     const updateMarkers = () => {
