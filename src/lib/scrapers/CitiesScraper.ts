@@ -29,38 +29,38 @@ export class CitiesScraper extends BaseScraper {
    */
   private readonly MUNICIPALITIES: CitiesMunicipality[] = [
     // Burgenland — Eisenstadt-Umgebung
-    { name: 'Hornstein', url: 'https://hornstein.at', plz: '7053', bezirk: 'Eisenstadt-Umgebung', bundesland: 'Burgenland', lat: 47.8811, lng: 16.4447 },
-    { name: 'Leithaprodersdorf', url: 'https://leithaprodersdorf.at', plz: '2443', bezirk: 'Eisenstadt-Umgebung', bundesland: 'Burgenland', lat: 47.8288, lng: 16.5184 },
-    { name: 'Oslip', url: 'https://www.oslip.at', plz: '7064', bezirk: 'Eisenstadt-Umgebung', bundesland: 'Burgenland', lat: 47.8205, lng: 16.6314 },
-    { name: 'Siegendorf', url: 'https://siegendorf.gv.at', plz: '7011', bezirk: 'Eisenstadt-Umgebung', bundesland: 'Burgenland', lat: 47.7775, lng: 16.5311 },
-    { name: 'Zagersdorf', url: 'https://www.zagersdorf.at', plz: '7012', bezirk: 'Eisenstadt-Umgebung', bundesland: 'Burgenland', lat: 47.7858, lng: 16.5167 },
+    { name: 'Hornstein', url: 'https://hornstein.at', plz: '7053', bezirk: 'Eisenstadt-Umgebung', bundesland: 'Burgenland', lat: 47.8791, lng: 16.443 },
+    { name: 'Leithaprodersdorf', url: 'https://leithaprodersdorf.at', plz: '2443', bezirk: 'Eisenstadt-Umgebung', bundesland: 'Burgenland', lat: 47.9353, lng: 16.4794 },
+    { name: 'Oslip', url: 'https://www.oslip.at', plz: '7064', bezirk: 'Eisenstadt-Umgebung', bundesland: 'Burgenland', lat: 47.8505, lng: 16.5935 },
+    { name: 'Siegendorf', url: 'https://siegendorf.gv.at', plz: '7011', bezirk: 'Eisenstadt-Umgebung', bundesland: 'Burgenland', lat: 47.7803, lng: 16.5414 },
+    { name: 'Zagersdorf', url: 'https://www.zagersdorf.at', plz: '7012', bezirk: 'Eisenstadt-Umgebung', bundesland: 'Burgenland', lat: 47.7646, lng: 16.5136 },
     // Burgenland — Güssing
-    { name: 'Stinatz', url: 'https://www.stinatz.gv.at', plz: '7552', bezirk: 'Güssing', bundesland: 'Burgenland', lat: 47.2806, lng: 16.2972 },
-    { name: 'Heugraben', url: 'https://www.heugraben.gv.at', plz: '7551', bezirk: 'Güssing', bundesland: 'Burgenland', lat: 47.2333, lng: 16.2500 },
-    { name: 'Moschendorf', url: 'https://citiesapps.com/pages/moschendorf', plz: '7540', bezirk: 'Güssing', bundesland: 'Burgenland', lat: 47.1183, lng: 16.3833 },
-    { name: 'Bildein', url: 'https://bildein.at', plz: '7521', bezirk: 'Güssing', bundesland: 'Burgenland', lat: 47.1500, lng: 16.4667 },
-    { name: 'Inzenhof', url: 'https://www.inzenhof.at', plz: '7540', bezirk: 'Güssing', bundesland: 'Burgenland', lat: 47.1167, lng: 16.3667 },
+    { name: 'Stinatz', url: 'https://www.stinatz.gv.at', plz: '7552', bezirk: 'Güssing', bundesland: 'Burgenland', lat: 47.2044, lng: 16.1332 },
+    { name: 'Heugraben', url: 'https://www.heugraben.gv.at', plz: '7551', bezirk: 'Güssing', bundesland: 'Burgenland', lat: 47.1192, lng: 16.191 },
+    { name: 'Moschendorf', url: 'https://citiesapps.com/pages/moschendorf', plz: '7540', bezirk: 'Güssing', bundesland: 'Burgenland', lat: 47.0568, lng: 16.4784 },
+    { name: 'Bildein', url: 'https://bildein.at', plz: '7521', bezirk: 'Güssing', bundesland: 'Burgenland', lat: 47.1332, lng: 16.4856 },
+    { name: 'Inzenhof', url: 'https://www.inzenhof.at', plz: '7540', bezirk: 'Güssing', bundesland: 'Burgenland', lat: 47.0125, lng: 16.3168 },
     // Burgenland — Jennersdorf
-    { name: 'Deutsch Kaltenbrunn', url: 'https://deutschkaltenbrunn.eu', plz: '7572', bezirk: 'Jennersdorf', bundesland: 'Burgenland', lat: 47.1000, lng: 16.2167 },
+    { name: 'Deutsch Kaltenbrunn', url: 'https://deutschkaltenbrunn.eu', plz: '7572', bezirk: 'Jennersdorf', bundesland: 'Burgenland', lat: 47.0907, lng: 16.1062 },
     // Burgenland — Mattersburg
-    { name: 'Hirm', url: 'https://www.hirm.gv.at', plz: '7024', bezirk: 'Mattersburg', bundesland: 'Burgenland', lat: 47.7967, lng: 16.4478 },
-    { name: 'Krensdorf', url: 'https://citiesapps.com/pages/krensdorf', plz: '7031', bezirk: 'Mattersburg', bundesland: 'Burgenland', lat: 47.7894, lng: 16.3936 },
+    { name: 'Hirm', url: 'https://www.hirm.gv.at', plz: '7024', bezirk: 'Mattersburg', bundesland: 'Burgenland', lat: 47.787, lng: 16.4546 },
+    { name: 'Krensdorf', url: 'https://citiesapps.com/pages/krensdorf', plz: '7031', bezirk: 'Mattersburg', bundesland: 'Burgenland', lat: 47.7845, lng: 16.4155 },
     // Burgenland — Neusiedl am See
-    { name: 'Bruckneudorf', url: 'https://bruckneudorf.eu', plz: '2460', bezirk: 'Neusiedl am See', bundesland: 'Burgenland', lat: 47.9792, lng: 16.7772 },
-    { name: 'Nickelsdorf', url: 'https://nickelsdorf.gv.at', plz: '2425', bezirk: 'Neusiedl am See', bundesland: 'Burgenland', lat: 47.9331, lng: 17.0694 },
-    { name: 'Zurndorf', url: 'https://zurndorf.at', plz: '2424', bezirk: 'Neusiedl am See', bundesland: 'Burgenland', lat: 47.9689, lng: 17.0014 },
-    { name: 'Potzneusiedl', url: 'https://potzneusiedl.at', plz: '2473', bezirk: 'Neusiedl am See', bundesland: 'Burgenland', lat: 47.9825, lng: 16.9622 },
+    { name: 'Bruckneudorf', url: 'https://bruckneudorf.eu', plz: '2460', bezirk: 'Neusiedl am See', bundesland: 'Burgenland', lat: 48.0198, lng: 16.7792 },
+    { name: 'Nickelsdorf', url: 'https://nickelsdorf.gv.at', plz: '2425', bezirk: 'Neusiedl am See', bundesland: 'Burgenland', lat: 47.9403, lng: 17.0662 },
+    { name: 'Zurndorf', url: 'https://zurndorf.at', plz: '2424', bezirk: 'Neusiedl am See', bundesland: 'Burgenland', lat: 47.9842, lng: 17.003 },
+    { name: 'Potzneusiedl', url: 'https://potzneusiedl.at', plz: '2473', bezirk: 'Neusiedl am See', bundesland: 'Burgenland', lat: 48.0448, lng: 16.9477 },
     // Burgenland — Oberpullendorf
-    { name: 'Draßmarkt', url: 'https://drassmarkt.at', plz: '7372', bezirk: 'Oberpullendorf', bundesland: 'Burgenland', lat: 47.4333, lng: 16.3667 },
-    { name: 'Horitschon', url: 'https://www.horitschon.at', plz: '7312', bezirk: 'Oberpullendorf', bundesland: 'Burgenland', lat: 47.5667, lng: 16.5500 },
-    { name: 'Lackendorf', url: 'https://lackendorf.at', plz: '7321', bezirk: 'Oberpullendorf', bundesland: 'Burgenland', lat: 47.5600, lng: 16.5200 },
-    { name: 'Unterfrauenhaid', url: 'https://unterfrauenhaid.at', plz: '7321', bezirk: 'Oberpullendorf', bundesland: 'Burgenland', lat: 47.5456, lng: 16.5089 },
+    { name: 'Draßmarkt', url: 'https://drassmarkt.at', plz: '7372', bezirk: 'Oberpullendorf', bundesland: 'Burgenland', lat: 47.5103, lng: 16.4008 },
+    { name: 'Horitschon', url: 'https://www.horitschon.at', plz: '7312', bezirk: 'Oberpullendorf', bundesland: 'Burgenland', lat: 47.5875, lng: 16.5476 },
+    { name: 'Lackendorf', url: 'https://lackendorf.at', plz: '7321', bezirk: 'Oberpullendorf', bundesland: 'Burgenland', lat: 47.5888, lng: 16.5027 },
+    { name: 'Unterfrauenhaid', url: 'https://unterfrauenhaid.at', plz: '7321', bezirk: 'Oberpullendorf', bundesland: 'Burgenland', lat: 47.5726, lng: 16.4992 },
     // Burgenland — Oberwart
-    { name: 'Bernstein', url: 'https://bernstein.gv.at', plz: '7434', bezirk: 'Oberwart', bundesland: 'Burgenland', lat: 47.4078, lng: 16.2561 },
-    { name: 'Deutsch Schützen-Eisenberg', url: 'https://www.eisenberg.at', plz: '7474', bezirk: 'Oberwart', bundesland: 'Burgenland', lat: 47.1300, lng: 16.4400 },
-    { name: 'Kemeten', url: 'https://kemeten.gv.at', plz: '7531', bezirk: 'Oberwart', bundesland: 'Burgenland', lat: 47.2744, lng: 16.1833 },
-    { name: 'Markt Neuhodis', url: 'https://www.markt-neuhodis.at', plz: '7464', bezirk: 'Oberwart', bundesland: 'Burgenland', lat: 47.3700, lng: 16.3500 },
-    { name: 'Jabing', url: 'https://citiesapps.com/cities/jabing', plz: '7503', bezirk: 'Oberwart', bundesland: 'Burgenland', lat: 47.2500, lng: 16.2333 },
+    { name: 'Bernstein', url: 'https://bernstein.gv.at', plz: '7434', bezirk: 'Oberwart', bundesland: 'Burgenland', lat: 47.4057, lng: 16.2581 },
+    { name: 'Deutsch Schützen-Eisenberg', url: 'https://www.eisenberg.at', plz: '7474', bezirk: 'Oberwart', bundesland: 'Burgenland', lat: 47.1643, lng: 16.4485 },
+    { name: 'Kemeten', url: 'https://kemeten.gv.at', plz: '7531', bezirk: 'Oberwart', bundesland: 'Burgenland', lat: 47.249, lng: 16.1525 },
+    { name: 'Markt Neuhodis', url: 'https://www.markt-neuhodis.at', plz: '7464', bezirk: 'Oberwart', bundesland: 'Burgenland', lat: 47.2958, lng: 16.3944 },
+    { name: 'Jabing', url: 'https://citiesapps.com/cities/jabing', plz: '7503', bezirk: 'Oberwart', bundesland: 'Burgenland', lat: 47.2396, lng: 16.2737 },
   ];
 
   async scrape(): Promise<ScrapedEvent[]> {
