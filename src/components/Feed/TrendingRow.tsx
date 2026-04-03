@@ -28,25 +28,26 @@ export function TrendingRow() {
       // Get user location via browser geolocation
       let userLat: number | null = null;
       let userLng: number | null = null;
+      let hasRealLocation = false;
 
       try {
         const pos = await new Promise<GeolocationPosition>((resolve, reject) => {
           navigator.geolocation.getCurrentPosition(resolve, reject, {
             enableHighAccuracy: false,
-            timeout: 5000,
-            maximumAge: 300000, // cache 5 min
+            timeout: 8000,
+            maximumAge: 600000, // cache 10 min
           });
         });
         userLat = pos.coords.latitude;
         userLng = pos.coords.longitude;
+        hasRealLocation = true;
       } catch {
-        // Fallback: center of Austria (47.5, 13.5)
-        userLat = 47.5;
-        userLng = 13.5;
+        // No location available — will show random events from all of Austria
+        userLat = null;
+        userLng = null;
       }
 
-      // Fetch upcoming events with coordinates, then filter by 15km radius client-side
-      // Supabase doesn't have PostGIS by default, so we fetch a broader set and filter
+      // Fetch upcoming events with coordinates, filter by distance client-side
       const nextMonth = new Date();
       nextMonth.setDate(nextMonth.getDate() + 30);
 
@@ -56,11 +57,10 @@ export function TrendingRow() {
         .gte('start_date', new Date().toISOString())
         .lte('start_date', nextMonth.toISOString())
         .eq('visibility', 'public')
-        .not('image_url', 'is', null)
         .not('latitude', 'is', null)
         .not('longitude', 'is', null)
         .order('start_date', { ascending: true })
-        .limit(200);
+        .limit(500);
 
       if (!data) {
         setEvents([]);
@@ -68,25 +68,41 @@ export function TrendingRow() {
         return;
       }
 
-      // Filter by 15km radius using Haversine
-      const RADIUS_KM = 15;
-      const nearby = data.filter((e: Record<string, unknown>) => {
-        const lat = e.latitude as number;
-        const lng = e.longitude as number;
-        if (!lat || !lng || !userLat || !userLng) return false;
+      let result;
 
-        const R = 6371;
-        const dLat = (lat - userLat) * Math.PI / 180;
-        const dLng = (lng - userLng) * Math.PI / 180;
-        const a = Math.sin(dLat / 2) ** 2 +
-          Math.cos(userLat * Math.PI / 180) * Math.cos(lat * Math.PI / 180) *
-          Math.sin(dLng / 2) ** 2;
-        const d = R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-        return d <= RADIUS_KM;
-      });
+      if (hasRealLocation && userLat && userLng) {
+        // Calculate distance for each event using Haversine
+        const lat1 = userLat;
+        const lng1 = userLng;
+        const withDistance = data.map((e: Record<string, unknown>) => {
+          const lat2 = e.latitude as number;
+          const lng2 = e.longitude as number;
+          if (!lat2 || !lng2) return { ...e, distance: 9999 };
 
-      // Random shuffle so each refresh shows different order
-      const shuffled = shuffleArray(nearby).slice(0, 15);
+          const R = 6371;
+          const dLat = (lat2 - lat1) * Math.PI / 180;
+          const dLng = (lng2 - lng1) * Math.PI / 180;
+          const a = Math.sin(dLat / 2) ** 2 +
+            Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+            Math.sin(dLng / 2) ** 2;
+          const d = R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+          return { ...e, distance: d };
+        });
+
+        // 50km radius, fallback to closest events if too few
+        const RADIUS_KM = 50;
+        let nearby = withDistance.filter((e: { distance: number }) => e.distance <= RADIUS_KM);
+        if (nearby.length < 8) {
+          nearby = withDistance.sort((a: { distance: number }, b: { distance: number }) => a.distance - b.distance);
+        }
+        result = nearby;
+      } else {
+        // No location — just use all events
+        result = data;
+      }
+
+      // Random shuffle so each refresh shows different events
+      const shuffled = shuffleArray(result).slice(0, 15);
 
       setEvents(shuffled as TrendingEvent[]);
       setLoading(false);
