@@ -66,16 +66,16 @@
  */
 
 const CATEGORY_IMAGES: Record<string, string> = {
-  'Musik': 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400&h=300&fit=crop',
-  'Sport': 'https://images.unsplash.com/photo-1461896836934-ffe607ba8211?w=400&h=300&fit=crop',
-  'Kultur': 'https://images.unsplash.com/photo-1518998053901-5348d3961a04?w=400&h=300&fit=crop',
-  'Familie': 'https://images.unsplash.com/photo-1536640712-4d4c36ff0e4e?w=400&h=300&fit=crop',
-  'Maerkte': 'https://images.unsplash.com/photo-1578916171728-46686eac8d58?w=400&h=300&fit=crop',
-  'Wein & Kulinarik': 'https://images.unsplash.com/photo-1510812431401-41d2bd2722f3?w=400&h=300&fit=crop',
-  'Natur': 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=400&h=300&fit=crop',
-  'Rave': 'https://images.unsplash.com/photo-1571266028243-e4733b0f0bb0?w=400&h=300&fit=crop',
-  'Wirtschaft': 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=400&h=300&fit=crop',
-  'Sonstiges': 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=400&h=300&fit=crop',
+  'Musik': '/images/categories/musik.jpg',
+  'Sport': '/images/categories/sport.jpg',
+  'Kultur': '/images/categories/kultur.jpg',
+  'Familie': '/images/categories/familie.jpg',
+  'Maerkte': '/images/categories/maerkte.jpg',
+  'Wein & Kulinarik': '/images/categories/wein.jpg',
+  'Natur': '/images/categories/natur.jpg',
+  'Rave': '/images/categories/rave.jpg',
+  'Wirtschaft': '/images/categories/wirtschaft.jpg',
+  'Sonstiges': '/images/categories/default.jpg',
 };
 
 /** Alternate spellings / legacy category names mapped to canonical keys */
@@ -84,7 +84,7 @@ const CATEGORY_ALIASES: Record<string, string> = {
   'M\u00e4rkte': 'Maerkte',
 };
 
-const DEFAULT_IMAGE = 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=400&h=300&fit=crop';
+const DEFAULT_IMAGE = '/images/categories/default.jpg';
 
 /**
  * Get the fallback image for a given event category.

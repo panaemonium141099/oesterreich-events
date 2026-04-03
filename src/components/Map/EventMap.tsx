@@ -224,7 +224,7 @@ function EventMap({ events, selectedEvent, hoveredEventId, onSelectEvent, evenin
     const subTextColor = dark ? '#94a3b8' : '#64748b';
     const btnBg = dark ? '#4f46e5' : '#2563eb';
     return `<div style="width:240px;font-family:Inter,system-ui,sans-serif;background:${bg};border-radius:8px;">
-      <img src="${getEventImage(event.image_url, event.category)}" style="width:100%;height:120px;object-fit:cover;border-radius:8px 8px 0 0;" onerror="this.src='https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=400&h=300&fit=crop'" />
+      <img src="${getEventImage(event.image_url, event.category)}" style="width:100%;height:120px;object-fit:cover;border-radius:8px 8px 0 0;" onerror="this.src='${getCategoryFallbackImage(event.category)}'" />
       <div style="padding:10px;">
         <div style="font-weight:600;font-size:13px;color:${textColor};margin-bottom:4px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">${event.title}</div>
         <div style="font-size:11px;color:${subTextColor};margin-bottom:2px;">${date}${showTime ? ` um ${time}` : ''}</div>

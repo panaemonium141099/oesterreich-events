@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Image from 'next/image';
 import type { Event } from '@/types/events';
-import { getEventImage } from '@/lib/categoryImages';
+import { getEventImage, getCategoryFallbackImage } from '@/lib/categoryImages';
 import { formatDate, formatTime } from '@/lib/utils/date';
 import { TagChip, TagOverflow } from '@/components/UI/TagChip';
 import { AnimatedCard } from '@/components/UI/AnimatedCard';
@@ -111,10 +111,9 @@ export function EventCard({ event, isSelected, onSelect, onHover, eveningMode, i
             onLoad={() => setImageLoaded(true)}
             onError={(e) => {
               const img = e.currentTarget as HTMLImageElement;
-              if (!img.dataset.fallback) {
-                img.dataset.fallback = '1';
-                img.src = getEventImage(null, event.category);
-              }
+              // Swap to local category fallback (always available) and show immediately
+              img.src = getCategoryFallbackImage(event.category);
+              setImageLoaded(true);
             }}
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent rounded-lg" />
