@@ -291,7 +291,7 @@ function MapPageInner() {
         eveningMode={eveningMode}
         onToggleEveningMode={toggleEveningMode}
         bundesland={bundesland}
-        onBundeslandChange={(bl) => { setBundesland(bl); setFilters(prev => ({ ...prev, district: undefined })); setDynamicFlyTo(null); }}
+        onBundeslandChange={(bl) => { setBundesland(bl); setFilters(prev => prev.district ? { ...prev, district: undefined } : prev); setDynamicFlyTo(null); }}
         onGemeindeSelect={handleGemeindeSelect}
       />
 
