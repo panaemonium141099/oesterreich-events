@@ -118,7 +118,7 @@ function MapPageInner() {
     return params;
   }, [filters, bundesland]);
 
-  // Progressive background loading: load 5k events at a time via cursor pagination
+  // Progressive background loading: first batch fast, then background batches
   const fetchEventsProgressive = useCallback(async () => {
     // Abort any in-flight progressive load
     if (abortRef.current) abortRef.current.abort();
@@ -131,72 +131,66 @@ function MapPageInner() {
     setLoadProgress(null);
 
     const BATCH_SIZE = 5000;
-    let cursor: string | null = null;
-    let accumulated: Event[] = [];
-    let totalCount = 0;
-    let isFirst = true;
 
     try {
+      // ── Phase 1: Fast first batch (location-aware or score-sorted) ──
+      const firstParams = buildParams();
+      firstParams.set('limit', String(BATCH_SIZE));
+
+      // If user has stored location, load nearby events first
+      const storedLoc = typeof window !== 'undefined' ? localStorage.getItem('user_location') : null;
+      if (storedLoc) {
+        try {
+          const { lat, lng } = JSON.parse(storedLoc);
+          firstParams.set('bbox', `${lat - 0.9},${lng - 1.2},${lat + 0.9},${lng + 1.2}`);
+        } catch { /* ignore */ }
+      }
+
+      const firstRes = await fetch(`/api/events?${firstParams.toString()}`, { signal: controller.signal });
+      if (!firstRes.ok) throw new Error(`HTTP ${firstRes.status}`);
+      const firstData = await firstRes.json();
+
+      const firstEvents: Event[] = firstData.events || [];
+      const totalCount = firstData.total || 0;
+
+      setAllEvents(firstEvents);
+      setTotal(totalCount);
+      setLoading(false); // Map is now interactive!
+
+      // If everything fits in first batch, we're done
+      if (firstEvents.length >= totalCount || totalCount <= BATCH_SIZE) return;
+
+      // ── Phase 2: Background load remaining events via cursor pagination ──
+      setLoadProgress({ loaded: firstEvents.length, total: totalCount });
+      const existingIds = new Set(firstEvents.map(e => e.id));
+      let accumulated = [...firstEvents];
+      let cursor: string | null = null;
+
       while (true) {
         if (controller.signal.aborted) break;
+        await new Promise(r => setTimeout(r, 300)); // don't hammer API
 
         const params = buildParams();
         params.set('limit', String(BATCH_SIZE));
-
-        // First batch: if user has location, use bbox around them for relevant results
-        if (isFirst) {
-          const storedLoc = typeof window !== 'undefined' ? localStorage.getItem('user_location') : null;
-          if (storedLoc) {
-            try {
-              const { lat, lng } = JSON.parse(storedLoc);
-              // ~100km radius bbox around user
-              params.set('bbox', `${lat - 0.9},${lng - 1.2},${lat + 0.9},${lng + 1.2}`);
-            } catch { /* ignore parse error */ }
-          }
-          params.set('sort', 'score'); // best events first
-        } else {
-          // Subsequent batches: no bbox, load everything, sorted by date
-          if (cursor) params.set('cursor', cursor);
-        }
+        if (cursor) params.set('cursor', cursor);
 
         const res = await fetch(`/api/events?${params.toString()}`, { signal: controller.signal });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
 
-        const newEvents: Event[] = data.events || [];
-        totalCount = data.total || totalCount;
+        const batch: Event[] = data.events || [];
+        if (batch.length === 0) break;
 
-        if (isFirst) {
-          // First batch replaces everything
-          accumulated = newEvents;
-          setAllEvents(newEvents);
-          setTotal(totalCount);
-          setLoading(false); // Map is now interactive!
-          isFirst = false;
+        // Deduplicate against already loaded events
+        const unique = batch.filter(e => !existingIds.has(e.id));
+        for (const e of unique) existingIds.add(e.id);
+        accumulated = [...accumulated, ...unique];
 
-          // If first batch used bbox, we need to start over without bbox for the full set
-          if (newEvents.length < totalCount) {
-            cursor = null; // Reset cursor — next batch loads from beginning without bbox
-            setLoadProgress({ loaded: newEvents.length, total: totalCount });
-            continue;
-          } else {
-            break; // All events fit in first batch
-          }
-        } else {
-          // Subsequent batches: merge with existing, deduplicate by id
-          const existingIds = new Set(accumulated.map(e => e.id));
-          const unique = newEvents.filter(e => !existingIds.has(e.id));
-          accumulated = [...accumulated, ...unique];
-          setAllEvents(accumulated);
-          setLoadProgress({ loaded: accumulated.length, total: totalCount });
-        }
+        setAllEvents(accumulated);
+        setLoadProgress({ loaded: accumulated.length, total: totalCount });
 
-        // Check if we got a next cursor
         cursor = data.nextCursor || null;
-        if (!cursor || newEvents.length < BATCH_SIZE) break;
-
-        // Small delay to not hammer the API
-        await new Promise(r => setTimeout(r, 200));
+        if (!cursor || batch.length < BATCH_SIZE) break;
       }
     } catch (err) {
       if ((err as Error).name !== 'AbortError') {
