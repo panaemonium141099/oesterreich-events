@@ -59,7 +59,7 @@ export function FeedItem({
   if (isCompactActivity(activity.type)) {
     return (
       <div
-        className="flex items-center gap-3 px-4 py-3 border-b border-white/[0.06]"
+        className="flex items-center gap-3 px-4 py-3 border-b border-white/[0.08] mb-2"
         style={{ animationDelay: `${Math.min(index * 40, 240)}ms` }}
       >
         {activity.profile?.avatar_url ? (
@@ -181,7 +181,7 @@ export function FeedItem({
 
   // --- Render ---
   return (
-    <article className="border-b border-white/[0.06]">
+    <article className="border-b border-white/[0.10] mb-3 pb-1">
       {/* Post Header */}
       <div className="flex items-center gap-3 px-4 py-3">
         {activity.profile?.avatar_url ? (

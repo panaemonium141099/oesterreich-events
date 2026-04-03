@@ -5,8 +5,6 @@ import Link from 'next/link';
 import { useAuth } from '@/lib/supabase/auth-context';
 import { createClient } from '@/lib/supabase/client';
 import { UserIcon, HeartIcon, UsersIcon, ChatBubbleIcon, GroupIcon, NewspaperIcon, BoltIcon, LogoutIcon } from '../UI/Icons';
-import { NotificationBell } from '@/components/Notifications/NotificationBell';
-
 export function ProfileDropdown() {
   const { user, profile, signOut } = useAuth();
   const supabase = createClient();
@@ -47,7 +45,6 @@ export function ProfileDropdown() {
 
   return (
     <div className="relative shrink-0 flex items-center gap-2" ref={ref}>
-      <NotificationBell className="w-9 h-9 rounded-lg hover:bg-white/[0.06]" />
       <button
         onClick={() => setOpen(!open)}
         aria-label="Benutzermenü"
