@@ -11,6 +11,7 @@ import { FeedItem } from '@/components/Feed/FeedItem';
 import { TrendingRow } from '@/components/Feed/TrendingRow';
 import { FeedSkeletonList } from '@/components/Feed/FeedSkeleton';
 import type { FeedActivity } from '@/components/Feed/feed-types';
+import { ProfileDropdown } from '@/components/Layout/ProfileDropdown';
 import { trackEvent } from '@/lib/analytics';
 
 export default function FeedPage() {
@@ -108,7 +109,7 @@ export default function FeedPage() {
   }
 
   return (
-    <div className="min-h-screen text-white pb-24 gradient-mesh">
+    <div className="min-h-screen text-white pb-24 bg-[#141416]">
       <SocialNav />
 
       <main className="max-w-2xl mx-auto px-4 sm:px-6 py-6">
@@ -121,15 +122,18 @@ export default function FeedPage() {
               <p className="text-[11px] text-white/30 mt-0.5">Was deine Freunde machen</p>
             </div>
           </div>
-          <button
-            onClick={() => fetchActivities()}
-            className="flex items-center gap-1.5 text-xs px-3 py-2 rounded-xl bg-white/[0.04] border border-white/[0.06] text-white/30 hover:text-white/60 hover:border-white/[0.12] transition-all duration-200 min-h-[36px]"
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => fetchActivities()}
+              className="flex items-center gap-1.5 text-xs px-3 py-2 rounded-xl bg-white/[0.04] border border-white/[0.06] text-white/30 hover:text-white/60 hover:border-white/[0.12] transition-all duration-200 min-h-[36px]"
           >
             <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
             </svg>
-            <span>Aktualisieren</span>
-          </button>
+              <span>Aktualisieren</span>
+            </button>
+            <ProfileDropdown />
+          </div>
         </div>
 
         {/* Create Post section */}
@@ -190,6 +194,7 @@ export default function FeedPage() {
                 key={activity.id}
                 activity={activity}
                 index={index}
+                currentUserId={user?.id}
                 onEventClick={handleEventClick}
               />
             ))}

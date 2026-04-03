@@ -10,6 +10,7 @@ import type { EventFilters } from '@/types/events';
 import type { Bundesland } from '@/lib/bundeslaender';
 import { BUNDESLAENDER } from '@/lib/bundeslaender';
 import { trackEvent } from '@/lib/analytics';
+import { NotificationBell } from '@/components/Notifications/NotificationBell';
 
 interface HeaderProps {
   filters: EventFilters;
@@ -211,6 +212,9 @@ export function Header({ filters, onFiltersChange, totalEvents, onToggleSidebar,
         {user && (
           <>
             <div className={`w-px h-6 shrink-0 ${eveningMode ? 'bg-gray-700' : 'bg-slate-200'}`} />
+            <NotificationBell className={`w-9 h-9 rounded-lg ${
+              eveningMode ? 'hover:bg-gray-700/50' : 'hover:bg-slate-100'
+            }`} />
             <Link
               href="/feed"
               aria-label="Social Hub"

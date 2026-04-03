@@ -55,7 +55,7 @@ export function FeedActivityIcon({ type, className = 'w-4 h-4' }: FeedActivityIc
     default:
       return (
         <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+          <circle cx="12" cy="12" r="3" strokeWidth={2} />
         </svg>
       );
   }

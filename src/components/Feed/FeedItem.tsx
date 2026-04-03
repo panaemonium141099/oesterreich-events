@@ -1,25 +1,115 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
+import { createClient } from '@/lib/supabase/client';
 import type { FeedActivity } from './feed-types';
 import { getActivityText, getActivityTypeLabel, formatRelativeTime } from './feed-types';
 import { FeedActivityIcon, getTypeColor } from './FeedActivityIcon';
 import { FeedEventMiniCard } from './FeedEventMiniCard';
+import { ShareSheet } from '@/components/Share/ShareSheet';
 
 interface FeedItemProps {
   activity: FeedActivity;
   index: number;
+  currentUserId?: string;
   onEventClick?: (eventId: string) => void;
 }
 
-export function FeedItem({ activity, index, onEventClick }: FeedItemProps) {
+export function FeedItem({ activity, index, currentUserId, onEventClick }: FeedItemProps) {
   const [liked, setLiked] = useState(false);
+  const [likeCount, setLikeCount] = useState(0);
+  const [likeLoading, setLikeLoading] = useState(false);
+  const [commentCount, setCommentCount] = useState(0);
+  const [shareOpen, setShareOpen] = useState(false);
   const isPost = activity.type === 'post';
   const typeColor = getTypeColor(activity.type);
+  const router = useRouter();
+
+  const supabase = createClient();
+
+  // Check if current user has liked + fetch like count
+  useEffect(() => {
+    if (!currentUserId) return;
+
+    const fetchLikeState = async () => {
+      const [{ data: myLike }, { count }] = await Promise.all([
+        supabase
+          .from('activity_likes')
+          .select('id')
+          .eq('user_id', currentUserId)
+          .eq('activity_id', activity.id)
+          .maybeSingle(),
+        supabase
+          .from('activity_likes')
+          .select('*', { count: 'exact', head: true })
+          .eq('activity_id', activity.id),
+      ]);
+
+      setLiked(!!myLike);
+      setLikeCount(count ?? 0);
+    };
+
+    fetchLikeState();
+  }, [currentUserId, activity.id, supabase]);
+
+  // Fetch comment count
+  useEffect(() => {
+    const fetchCommentCount = async () => {
+      const { count } = await supabase
+        .from('activity_comments')
+        .select('*', { count: 'exact', head: true })
+        .eq('activity_id', activity.id);
+
+      setCommentCount(count ?? 0);
+    };
+
+    fetchCommentCount();
+  }, [activity.id, supabase]);
+
+  const handleLike = useCallback(async () => {
+    if (!currentUserId || likeLoading) return;
+    setLikeLoading(true);
+
+    try {
+      if (liked) {
+        // Unlike: delete from activity_likes
+        await supabase
+          .from('activity_likes')
+          .delete()
+          .eq('user_id', currentUserId)
+          .eq('activity_id', activity.id);
+
+        setLiked(false);
+        setLikeCount(prev => Math.max(0, prev - 1));
+      } else {
+        // Like: insert into activity_likes
+        await supabase
+          .from('activity_likes')
+          .insert({ user_id: currentUserId, activity_id: activity.id });
+
+        setLiked(true);
+        setLikeCount(prev => prev + 1);
+
+        // Send notification (but not to yourself)
+        if (activity.user_id !== currentUserId) {
+          await supabase.from('notifications').insert({
+            user_id: activity.user_id,
+            from_user_id: currentUserId,
+            type: 'like',
+            title: 'hat deinen Beitrag geliked',
+            read: false,
+          });
+        }
+      }
+    } finally {
+      setLikeLoading(false);
+    }
+  }, [currentUserId, liked, likeLoading, activity.id, activity.user_id, supabase]);
 
   return (
     <div
-      className="feed-item-enter p-4 rounded-2xl bg-white/[0.03] border border-white/[0.06] hover:border-white/[0.10] transition-all duration-200"
+      className="feed-item-enter p-4 rounded-2xl bg-white/[0.05] border border-white/[0.08] hover:border-white/[0.12] transition-all duration-200"
       style={{ animationDelay: `${Math.min(index * 60, 360)}ms` }}
     >
       <div className="flex gap-3">
@@ -86,10 +176,11 @@ export function FeedItem({ activity, index, onEventClick }: FeedItemProps) {
           {/* Actions */}
           <div className="flex items-center gap-4 mt-3">
             <button
-              onClick={() => setLiked(!liked)}
+              onClick={handleLike}
+              disabled={likeLoading || !currentUserId}
               className={`flex items-center gap-1.5 text-xs transition-all duration-200 group/like ${
                 liked ? 'text-rose-400' : 'text-white/20 hover:text-rose-400/70'
-              }`}
+              } disabled:opacity-50`}
               aria-label={liked ? 'Nicht mehr liken' : 'Liken'}
             >
               <svg
@@ -100,13 +191,23 @@ export function FeedItem({ activity, index, onEventClick }: FeedItemProps) {
               >
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z" />
               </svg>
+              <span className="text-[10px]">{likeCount > 0 ? likeCount : ''}</span>
             </button>
-            <button className="flex items-center gap-1.5 text-xs text-white/20 hover:text-white/50 transition-colors group/comment" aria-label="Kommentieren">
+            <button
+              onClick={() => router.push(`/feed/${activity.id}`)}
+              className="flex items-center gap-1.5 text-xs text-white/20 hover:text-white/50 transition-colors group/comment"
+              aria-label="Kommentieren"
+            >
               <svg className="w-4 h-4 group-hover/comment:scale-110 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" />
               </svg>
+              <span className="text-[10px]">{commentCount > 0 ? commentCount : ''}</span>
             </button>
-            <button className="flex items-center gap-1.5 text-xs text-white/20 hover:text-white/50 transition-colors group/share" aria-label="Teilen">
+            <button
+              onClick={() => setShareOpen(true)}
+              className="flex items-center gap-1.5 text-xs text-white/20 hover:text-white/50 transition-colors group/share"
+              aria-label="Teilen"
+            >
               <svg className="w-4 h-4 group-hover/share:scale-110 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <circle cx="18" cy="5" r="3" strokeWidth={1.5} />
                 <circle cx="6" cy="12" r="3" strokeWidth={1.5} />
@@ -117,6 +218,17 @@ export function FeedItem({ activity, index, onEventClick }: FeedItemProps) {
           </div>
         </div>
       </div>
+
+      <ShareSheet
+        isOpen={shareOpen}
+        onClose={() => setShareOpen(false)}
+        shareData={{
+          type: activity.event ? 'event' : 'post',
+          id: activity.event?.id || activity.id,
+          title: getActivityText(activity),
+          url: activity.event ? `/events/${activity.event.id}` : `/feed/${activity.id}`,
+        }}
+      />
     </div>
   );
 }

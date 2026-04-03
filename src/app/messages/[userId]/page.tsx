@@ -193,7 +193,7 @@ export default function DMConversationPage() {
   return (
     <div
       className="min-h-screen text-white flex flex-col"
-      style={{ background: 'radial-gradient(ellipse at 50% 0%, rgba(255,255,255,0.04) 0%, transparent 60%), #000' }}
+      style={{ background: '#141416' }}
     >
       {/* Header */}
       <header className="flex items-center gap-3 px-6 py-4 border-b border-white/10 shrink-0">

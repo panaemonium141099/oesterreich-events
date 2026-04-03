@@ -188,6 +188,23 @@ export type Database = {
           created_at: string
         }
       }
+      activity_likes: {
+        Row: {
+          id: string
+          user_id: string
+          activity_id: string
+          created_at: string
+        }
+      }
+      activity_comments: {
+        Row: {
+          id: string
+          activity_id: string
+          user_id: string
+          content: string
+          created_at: string
+        }
+      }
       analytics_events: {
         Row: {
           id: string

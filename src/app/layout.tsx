@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { AuthProvider } from '@/lib/supabase/auth-context';
 import { CookieBanner } from '@/components/Legal/CookieBanner';
 import { AnimatedLayout } from '@/components/UI/AnimatedLayout';
+import { NotificationToast } from '@/components/Notifications/NotificationToast';
 import './globals.css';
 
 export const metadata: Metadata = {
@@ -42,6 +43,7 @@ export default function RootLayout({
           <AnimatedLayout>
             {children}
           </AnimatedLayout>
+          <NotificationToast />
           <CookieBanner />
         </AuthProvider>
       </body>

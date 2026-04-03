@@ -1,8 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';
 import { SocialNav } from '@/components/Layout/SocialNav';
 import { useAuth } from '@/lib/supabase/auth-context';
 import { createClient } from '@/lib/supabase/client';
@@ -25,6 +24,8 @@ export default function ProfilePage() {
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState('');
+  const [isEditing, setIsEditing] = useState(false);
+  const avatarInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -86,10 +87,59 @@ export default function ProfilePage() {
       setError(err.message);
     } else {
       setSaved(true);
+      setIsEditing(false);
       await refreshProfile();
       setTimeout(() => setSaved(false), 3000);
     }
     setSaving(false);
+  };
+
+  const handleCancel = () => {
+    if (profile) {
+      setFirstName(profile.first_name || '');
+      setLastName(profile.last_name || '');
+      setPhone(profile.phone || '');
+      setBirthDate(profile.birth_date || '');
+      setBio(profile.bio || '');
+      setCity(profile.city || '');
+      setPostalCode(profile.postal_code || '');
+      setAddress(profile.address || '');
+      setCountry(profile.country || '');
+    }
+    setError('');
+    setIsEditing(false);
+  };
+
+  const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !user) return;
+
+    try {
+      const fileExt = file.name.split('.').pop();
+      const filePath = `${user.id}/avatar.${fileExt}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(filePath, file, { upsert: true });
+
+      if (uploadError) {
+        console.log('Avatar upload error (bucket may not exist):', uploadError.message);
+        return;
+      }
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('avatars')
+        .getPublicUrl(filePath);
+
+      await supabase
+        .from('profiles')
+        .update({ avatar_url: publicUrl })
+        .eq('id', user.id);
+
+      await refreshProfile();
+    } catch (err) {
+      console.log('Avatar upload failed:', err);
+    }
   };
 
   if (loading) {
@@ -102,21 +152,41 @@ export default function ProfilePage() {
 
   return (
     <div
-      className="min-h-screen text-white pb-24 gradient-mesh"
+      className="min-h-screen text-white pb-24 bg-[#141416]"
     >
       <SocialNav />
 
       <main className="max-w-3xl mx-auto px-4 sm:px-6 py-10">
         {/* Avatar */}
         <div className="flex flex-col items-center mb-10">
-          <div className="w-24 h-24 rounded-full bg-white/10 flex items-center justify-center text-3xl font-bold mb-4 border-2 border-white/20">
-            {profile?.avatar_url ? (
-              <img src={profile.avatar_url} alt="" className="w-full h-full rounded-full object-cover" />
-            ) : (
-              <span className="text-white/60">
-                {firstName?.[0]?.toUpperCase() || '?'}{lastName?.[0]?.toUpperCase() || ''}
-              </span>
-            )}
+          <div className="relative mb-4">
+            <div className="w-24 h-24 rounded-full bg-white/10 flex items-center justify-center text-3xl font-bold border-2 border-white/20">
+              {profile?.avatar_url ? (
+                <img src={profile.avatar_url} alt="" className="w-full h-full rounded-full object-cover" />
+              ) : (
+                <span className="text-white/60">
+                  {firstName?.[0]?.toUpperCase() || '?'}{lastName?.[0]?.toUpperCase() || ''}
+                </span>
+              )}
+            </div>
+            <button
+              type="button"
+              onClick={() => avatarInputRef.current?.click()}
+              className="absolute bottom-0 right-0 w-8 h-8 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center cursor-pointer hover:bg-white/30 transition-colors"
+              aria-label="Avatar ändern"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 text-white">
+                <path d="M12 9a3.75 3.75 0 100 7.5A3.75 3.75 0 0012 9z" />
+                <path fillRule="evenodd" d="M9.344 3.071a49.52 49.52 0 015.312 0c.967.052 1.83.585 2.332 1.39l.821 1.317c.2.32.58.529.986.529H19.5a3 3 0 013 3v7.5a3 3 0 01-3 3h-15a3 3 0 01-3-3v-7.5a3 3 0 013-3h.808c.406 0 .786-.21.986-.53l.821-1.316a2.338 2.338 0 012.332-1.39zM12 10.5a3 3 0 100 6 3 3 0 000-6z" clipRule="evenodd" />
+              </svg>
+            </button>
+            <input
+              ref={avatarInputRef}
+              type="file"
+              accept="image/*"
+              onChange={handleAvatarChange}
+              className="hidden"
+            />
           </div>
           <h1 className="text-xl font-semibold">{firstName} {lastName}</h1>
           <p className="text-sm text-white/40">{user?.email}</p>
@@ -129,102 +199,166 @@ export default function ProfilePage() {
 
         {/* Form */}
         <div className="space-y-6">
-          <h2 className="text-sm uppercase tracking-[0.15em] text-white/40 font-medium">Persönliche Daten</h2>
+          <div className="flex items-center justify-between">
+            <h2 className="text-sm uppercase tracking-[0.15em] text-white/40 font-medium">Persönliche Daten</h2>
+            {!isEditing && (
+              <button
+                onClick={() => setIsEditing(true)}
+                className="px-4 py-2 rounded-xl bg-white/[0.08] border border-white/[0.10] text-white/60 hover:text-white hover:border-white/20 text-sm font-medium transition-all"
+              >
+                Bearbeiten
+              </button>
+            )}
+          </div>
 
           <div className="grid grid-cols-2 gap-4">
-            <div>
+            <div className="transition-all duration-200">
               <label className="block text-xs text-white/40 mb-1.5">Vorname *</label>
-              <input
-                type="text"
-                value={firstName}
-                onChange={(e) => setFirstName(e.target.value)}
-                className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-white/20 focus:outline-none focus:border-white/30 transition-colors"
-              />
+              {isEditing ? (
+                <input
+                  type="text"
+                  value={firstName}
+                  onChange={(e) => setFirstName(e.target.value)}
+                  className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-white/20 focus:outline-none focus:border-white/30 transition-colors"
+                />
+              ) : (
+                <p className="px-4 py-3 rounded-xl bg-white/[0.03] border border-white/[0.06] text-sm min-h-[46px]">
+                  {firstName ? <span className="text-white/80">{firstName}</span> : <span className="text-white/20 italic">Nicht angegeben</span>}
+                </p>
+              )}
             </div>
-            <div>
+            <div className="transition-all duration-200">
               <label className="block text-xs text-white/40 mb-1.5">Nachname *</label>
-              <input
-                type="text"
-                value={lastName}
-                onChange={(e) => setLastName(e.target.value)}
-                className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-white/20 focus:outline-none focus:border-white/30 transition-colors"
-              />
+              {isEditing ? (
+                <input
+                  type="text"
+                  value={lastName}
+                  onChange={(e) => setLastName(e.target.value)}
+                  className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-white/20 focus:outline-none focus:border-white/30 transition-colors"
+                />
+              ) : (
+                <p className="px-4 py-3 rounded-xl bg-white/[0.03] border border-white/[0.06] text-sm min-h-[46px]">
+                  {lastName ? <span className="text-white/80">{lastName}</span> : <span className="text-white/20 italic">Nicht angegeben</span>}
+                </p>
+              )}
             </div>
           </div>
 
-          <div>
+          <div className="transition-all duration-200">
             <label className="block text-xs text-white/40 mb-1.5">Geburtsdatum *</label>
-            <input
-              type="date"
-              value={birthDate}
-              onChange={(e) => setBirthDate(e.target.value)}
-              className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white focus:outline-none focus:border-white/30 transition-colors [color-scheme:dark]"
-            />
+            {isEditing ? (
+              <input
+                type="date"
+                value={birthDate}
+                onChange={(e) => setBirthDate(e.target.value)}
+                className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white focus:outline-none focus:border-white/30 transition-colors [color-scheme:dark]"
+              />
+            ) : (
+              <p className="px-4 py-3 rounded-xl bg-white/[0.03] border border-white/[0.06] text-sm min-h-[46px]">
+                {birthDate ? <span className="text-white/80">{new Date(birthDate + 'T00:00:00').toLocaleDateString('de-AT')}</span> : <span className="text-white/20 italic">Nicht angegeben</span>}
+              </p>
+            )}
           </div>
 
-          <div>
+          <div className="transition-all duration-200">
             <label className="block text-xs text-white/40 mb-1.5">Telefonnummer</label>
-            <input
-              type="tel"
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-              placeholder="+43 ..."
-              className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-white/20 focus:outline-none focus:border-white/30 transition-colors"
-            />
+            {isEditing ? (
+              <input
+                type="tel"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                placeholder="+43 ..."
+                className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-white/20 focus:outline-none focus:border-white/30 transition-colors"
+              />
+            ) : (
+              <p className="px-4 py-3 rounded-xl bg-white/[0.03] border border-white/[0.06] text-sm min-h-[46px]">
+                {phone ? <span className="text-white/80">{phone}</span> : <span className="text-white/20 italic">Nicht angegeben</span>}
+              </p>
+            )}
           </div>
 
-          <div>
+          <div className="transition-all duration-200">
             <label className="block text-xs text-white/40 mb-1.5">Bio</label>
-            <textarea
-              value={bio}
-              onChange={(e) => setBio(e.target.value)}
-              placeholder="Erzähl etwas über dich..."
-              rows={3}
-              className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-white/20 focus:outline-none focus:border-white/30 transition-colors resize-none"
-            />
+            {isEditing ? (
+              <textarea
+                value={bio}
+                onChange={(e) => setBio(e.target.value)}
+                placeholder="Erzähl etwas über dich..."
+                rows={3}
+                className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-white/20 focus:outline-none focus:border-white/30 transition-colors resize-none"
+              />
+            ) : (
+              <p className="px-4 py-3 rounded-xl bg-white/[0.03] border border-white/[0.06] text-sm min-h-[46px]">
+                {bio ? <span className="text-white/80 whitespace-pre-wrap">{bio}</span> : <span className="text-white/20 italic">Nicht angegeben</span>}
+              </p>
+            )}
           </div>
 
           <h2 className="text-sm uppercase tracking-[0.15em] text-white/40 font-medium pt-4">Adresse</h2>
 
-          <div>
+          <div className="transition-all duration-200">
             <label className="block text-xs text-white/40 mb-1.5">Straße *</label>
-            <input
-              type="text"
-              value={address}
-              onChange={(e) => setAddress(e.target.value)}
-              className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-white/20 focus:outline-none focus:border-white/30 transition-colors"
-            />
+            {isEditing ? (
+              <input
+                type="text"
+                value={address}
+                onChange={(e) => setAddress(e.target.value)}
+                className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-white/20 focus:outline-none focus:border-white/30 transition-colors"
+              />
+            ) : (
+              <p className="px-4 py-3 rounded-xl bg-white/[0.03] border border-white/[0.06] text-sm min-h-[46px]">
+                {address ? <span className="text-white/80">{address}</span> : <span className="text-white/20 italic">Nicht angegeben</span>}
+              </p>
+            )}
           </div>
 
           <div className="grid grid-cols-2 gap-4">
-            <div>
+            <div className="transition-all duration-200">
               <label className="block text-xs text-white/40 mb-1.5">PLZ *</label>
-              <input
-                type="text"
-                value={postalCode}
-                onChange={(e) => setPostalCode(e.target.value)}
-                className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-white/20 focus:outline-none focus:border-white/30 transition-colors"
-              />
+              {isEditing ? (
+                <input
+                  type="text"
+                  value={postalCode}
+                  onChange={(e) => setPostalCode(e.target.value)}
+                  className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-white/20 focus:outline-none focus:border-white/30 transition-colors"
+                />
+              ) : (
+                <p className="px-4 py-3 rounded-xl bg-white/[0.03] border border-white/[0.06] text-sm min-h-[46px]">
+                  {postalCode ? <span className="text-white/80">{postalCode}</span> : <span className="text-white/20 italic">Nicht angegeben</span>}
+                </p>
+              )}
             </div>
-            <div>
+            <div className="transition-all duration-200">
               <label className="block text-xs text-white/40 mb-1.5">Stadt *</label>
-              <input
-                type="text"
-                value={city}
-                onChange={(e) => setCity(e.target.value)}
-                className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-white/20 focus:outline-none focus:border-white/30 transition-colors"
-              />
+              {isEditing ? (
+                <input
+                  type="text"
+                  value={city}
+                  onChange={(e) => setCity(e.target.value)}
+                  className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-white/20 focus:outline-none focus:border-white/30 transition-colors"
+                />
+              ) : (
+                <p className="px-4 py-3 rounded-xl bg-white/[0.03] border border-white/[0.06] text-sm min-h-[46px]">
+                  {city ? <span className="text-white/80">{city}</span> : <span className="text-white/20 italic">Nicht angegeben</span>}
+                </p>
+              )}
             </div>
           </div>
 
-          <div>
+          <div className="transition-all duration-200">
             <label className="block text-xs text-white/40 mb-1.5">Land *</label>
-            <input
-              type="text"
-              value={country}
-              onChange={(e) => setCountry(e.target.value)}
-              className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-white/20 focus:outline-none focus:border-white/30 transition-colors"
-            />
+            {isEditing ? (
+              <input
+                type="text"
+                value={country}
+                onChange={(e) => setCountry(e.target.value)}
+                className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-white/20 focus:outline-none focus:border-white/30 transition-colors"
+              />
+            ) : (
+              <p className="px-4 py-3 rounded-xl bg-white/[0.03] border border-white/[0.06] text-sm min-h-[46px]">
+                {country ? <span className="text-white/80">{country}</span> : <span className="text-white/20 italic">Nicht angegeben</span>}
+              </p>
+            )}
           </div>
 
           {/* Connected Apps */}
@@ -296,18 +430,28 @@ export default function ProfilePage() {
             <p className="text-sm text-green-400 bg-green-400/10 px-4 py-2 rounded-lg flex items-center gap-1.5"><CheckIcon size={14} /> Profil gespeichert!</p>
           )}
 
-          {/* Save Button */}
-          <button
-            onClick={handleSave}
-            disabled={saving || !firstName || !lastName || !birthDate || !address || !postalCode || !city || !country}
-            className="w-full py-3 rounded-xl bg-white text-black font-semibold hover:bg-white/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-          >
-            {saving ? (
-              <div className="w-5 h-5 border-2 border-black/20 border-t-black rounded-full animate-spin" />
-            ) : (
-              'Speichern'
-            )}
-          </button>
+          {/* Save / Cancel Buttons (edit mode only) */}
+          {isEditing && (
+            <div className="flex gap-3">
+              <button
+                onClick={handleCancel}
+                className="flex-1 py-3 rounded-xl bg-white/[0.08] border border-white/[0.10] text-white/60 hover:text-white hover:border-white/20 font-medium transition-all"
+              >
+                Abbrechen
+              </button>
+              <button
+                onClick={handleSave}
+                disabled={saving || !firstName || !lastName || !birthDate || !address || !postalCode || !city || !country}
+                className="flex-1 py-3 rounded-xl bg-white text-black font-semibold hover:bg-white/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              >
+                {saving ? (
+                  <div className="w-5 h-5 border-2 border-black/20 border-t-black rounded-full animate-spin" />
+                ) : (
+                  'Speichern'
+                )}
+              </button>
+            </div>
+          )}
         </div>
       </main>
     </div>

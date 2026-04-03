@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { SocialNav } from '@/components/Layout/SocialNav';
 import { useAuth } from '@/lib/supabase/auth-context';
 import { createClient } from '@/lib/supabase/client';
+import { ProfileDropdown } from '@/components/Layout/ProfileDropdown';
 import { trackEvent } from '@/lib/analytics';
 
 interface ProfileResult {
@@ -197,11 +198,17 @@ export default function FriendsPage() {
 
   return (
     <div
-      className="min-h-screen text-white pb-24 gradient-mesh"
+      className="min-h-screen text-white pb-24 bg-[#141416]"
     >
       <SocialNav />
 
       <main className="max-w-3xl mx-auto px-4 sm:px-6 py-8">
+        {/* Page header */}
+        <div className="flex items-center justify-between mb-6">
+          <h1 className="text-2xl font-bold">Freunde</h1>
+          <ProfileDropdown />
+        </div>
+
         {/* Search */}
         <div className="relative mb-6">
           <svg className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -7,6 +7,7 @@ import { SocialNav } from '@/components/Layout/SocialNav';
 import { useAuth } from '@/lib/supabase/auth-context';
 import { createClient } from '@/lib/supabase/client';
 import { HeartIcon, HeartBrokenIcon, CalendarIcon, MapPinIcon } from '@/components/UI/Icons';
+import { ProfileDropdown } from '@/components/Layout/ProfileDropdown';
 
 interface SavedEvent {
   id: string;
@@ -85,12 +86,15 @@ export default function SavedEventsPage() {
 
   return (
     <div
-      className="min-h-screen text-white pb-24 gradient-mesh"
+      className="min-h-screen text-white pb-24 bg-[#141416]"
     >
       <SocialNav />
 
       <main className="max-w-3xl mx-auto px-4 sm:px-6 py-10">
-        <h1 className="text-2xl font-bold mb-2 flex items-center gap-2"><HeartIcon size={24} className="text-red-400" /> Gespeicherte Events</h1>
+        <div className="flex items-center justify-between mb-2">
+          <h1 className="text-2xl font-bold flex items-center gap-2"><HeartIcon size={24} className="text-red-400" /> Gespeicherte Events</h1>
+          <ProfileDropdown />
+        </div>
         <p className="text-white/40 text-sm mb-8">
           {savedEvents.length} {savedEvents.length === 1 ? 'Event' : 'Events'} gespeichert
         </p>

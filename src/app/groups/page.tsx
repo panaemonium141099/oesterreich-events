@@ -7,6 +7,7 @@ import { SocialNav } from '@/components/Layout/SocialNav';
 import { useAuth } from '@/lib/supabase/auth-context';
 import { createClient } from '@/lib/supabase/client';
 import { LocationAutocomplete } from '@/components/UI/LocationAutocomplete';
+import { ProfileDropdown } from '@/components/Layout/ProfileDropdown';
 
 interface PlannedEvent {
   id: string;
@@ -417,7 +418,7 @@ export default function EventPlanenPage() {
   }
 
   return (
-    <div className="min-h-screen text-white pb-24 gradient-mesh">
+    <div className="min-h-screen text-white pb-24 bg-[#141416]">
       <SocialNav />
 
       <main className="max-w-3xl mx-auto px-4 sm:px-6 py-8">
@@ -438,6 +439,7 @@ export default function EventPlanenPage() {
             </svg>
             Neues Event planen
           </button>
+          <ProfileDropdown />
         </div>
 
         {/* Create Modal */}

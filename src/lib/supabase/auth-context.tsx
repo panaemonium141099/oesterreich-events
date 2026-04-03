@@ -170,7 +170,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signOut = async () => {
     await supabase.auth.signOut();
+    setUser(null);
     setProfile(null);
+    setSession(null);
+    // Full page reload to clear all in-memory React state
+    if (typeof window !== 'undefined') {
+      window.location.href = '/';
+    }
   };
 
   return (

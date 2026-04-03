@@ -299,7 +299,7 @@ export default function MemoriesPage() {
 
   return (
     <div
-      className="min-h-screen text-white pb-24 gradient-mesh"
+      className="min-h-screen text-white pb-24 bg-[#141416]"
     >
       <SocialNav />
 

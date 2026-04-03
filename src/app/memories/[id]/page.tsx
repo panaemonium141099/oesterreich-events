@@ -209,7 +209,7 @@ export default function MemoryDetailPage() {
 
   if (loadingData) {
     return (
-      <div className="min-h-screen text-white" style={{ background: 'radial-gradient(ellipse at 50% 0%, rgba(255,255,255,0.04) 0%, transparent 60%), #000' }}>
+      <div className="min-h-screen text-white" style={{ background: '#141416' }}>
         <header className="flex items-center justify-between px-6 py-4 border-b border-white/[0.06]">
           <div className="h-4 bg-white/10 rounded w-24 animate-pulse motion-reduce:animate-none" />
           <div className="h-3 bg-white/10 rounded w-16 animate-pulse motion-reduce:animate-none" />
@@ -232,7 +232,7 @@ export default function MemoryDetailPage() {
   return (
     <div
       className="min-h-screen text-white"
-      style={{ background: 'radial-gradient(ellipse at 50% 0%, rgba(255,255,255,0.04) 0%, transparent 60%), #000' }}
+      style={{ background: '#141416' }}
     >
       <header className="flex items-center justify-between px-6 py-4 border-b border-white/10">
         <Link href="/memories" className="text-white/40 hover:text-white transition-colors text-sm flex items-center gap-2">
