@@ -135,11 +135,17 @@ function MapPageInner() {
     const BATCH_SIZE = 5000;
 
     try {
-      // ── Phase 1: Fast first batch (location-aware or score-sorted) ──
+      // ── Get total count first (small HEAD request, no data) ──
+      const countParams = buildParams();
+      countParams.set('limit', '1');
+      countParams.set('suggest', 'true'); // lightweight query
+      const countRes = await fetch(`/api/events?${countParams.toString()}`, { signal: controller.signal });
+      const totalCount = countRes.ok ? parseInt(countRes.headers.get('X-Total-Count') || '0') || 0 : 0;
+
+      // ── Phase 1: Fast first batch (location-aware) ──
       const firstParams = buildParams();
       firstParams.set('limit', String(BATCH_SIZE));
 
-      // If user has stored location, load nearby events first
       const storedLoc = typeof window !== 'undefined' ? localStorage.getItem('user_location') : null;
       if (storedLoc) {
         try {
@@ -153,19 +159,16 @@ function MapPageInner() {
       const firstData = await firstRes.json();
 
       const firstEvents: Event[] = firstData.events || [];
-      // total may be 0 if count timed out — estimate conservatively so progress bar moves visibly
-      const totalCount = firstData.total || (firstData.hasMore ? firstEvents.length * 10 : firstEvents.length);
+      const realTotal = totalCount || firstData.total || firstEvents.length;
 
       setAllEvents(firstEvents);
-      setTotal(totalCount);
-      setLoading(false); // Map is now interactive!
+      setTotal(realTotal);
+      setLoading(false);
 
-      // If first batch is full, there are more events to load
-      const hasMoreToLoad = firstData.hasMore || firstEvents.length >= BATCH_SIZE;
-      if (!hasMoreToLoad) return;
+      if (firstEvents.length >= realTotal || (!firstData.hasMore && firstEvents.length < BATCH_SIZE)) return;
 
-      // ── Phase 2: Background load remaining events via cursor pagination ──
-      setLoadProgress({ loaded: firstEvents.length, total: totalCount });
+      // ── Phase 2: Background load remaining events ──
+      setLoadProgress({ loaded: firstEvents.length, total: realTotal });
       const existingIds = new Set(firstEvents.map(e => e.id));
       let accumulated = [...firstEvents];
       let cursor: string | null = null;
@@ -191,9 +194,7 @@ function MapPageInner() {
         accumulated = [...accumulated, ...unique];
 
         setAllEvents(accumulated);
-        // Update total if we get a real count from a subsequent batch
-        const updatedTotal = data.total && data.total > totalCount ? data.total : totalCount;
-        setLoadProgress({ loaded: accumulated.length, total: Math.max(updatedTotal, accumulated.length + 1) });
+        setLoadProgress({ loaded: accumulated.length, total: realTotal });
 
         cursor = data.nextCursor || null;
         if (!cursor || batch.length < BATCH_SIZE) break;
