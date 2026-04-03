@@ -226,6 +226,7 @@ function EventMap({ events, selectedEvent, hoveredEventId, onSelectEvent, evenin
     const bearing = map.current.getBearing();
 
     setMapReady(false);
+    sourceInitialized.current = false; // Force full re-creation after style change
     map.current.setStyle(eveningMode ? 'mapbox://styles/mapbox/dark-v11' : 'mapbox://styles/mapbox/outdoors-v12');
     map.current.once('style.load', () => {
       if (!map.current) return;
@@ -259,34 +260,20 @@ function EventMap({ events, selectedEvent, hoveredEventId, onSelectEvent, evenin
       </div></div>`;
   }, []);
 
-  // Add GeoJSON source + cluster layers + render individual markers
-  useEffect(() => {
-    if (!map.current || !mapReady) return;
-    const m = map.current;
-
-    const eventsWithCoords = events.filter(e => e.latitude && e.longitude);
-
-    // Wait for style to be loaded
-    if (!m.isStyleLoaded()) {
-      m.once('idle', () => setMapReady(prev => { setTimeout(() => setMapReady(true), 50); return false; }));
-      return;
-    }
-
-    // Jitter overlapping coordinates so stacked events fan out when unclustered
+  // Helper: build GeoJSON from events with jitter for overlapping coords
+  const buildGeoJSON = useCallback((eventList: typeof events): GeoJSON.FeatureCollection => {
+    const eventsWithCoords = eventList.filter(e => e.latitude && e.longitude);
     const coordCounts = new Map<string, number>();
     const jitteredEvents = eventsWithCoords.map(e => {
       const key = `${e.latitude!.toFixed(5)}_${e.longitude!.toFixed(5)}`;
       const idx = coordCounts.get(key) || 0;
       coordCounts.set(key, idx + 1);
-      if (idx === 0) return { ...e }; // first at this location stays put
-      // Fan out in a circle (~30m offset per step)
-      const angle = (idx * 2.399) % (2 * Math.PI); // golden angle for even spread
-      const offset = 0.0003 * Math.ceil(idx / 6); // ~30m, expanding rings
+      if (idx === 0) return { ...e };
+      const angle = (idx * 2.399) % (2 * Math.PI);
+      const offset = 0.0003 * Math.ceil(idx / 6);
       return { ...e, latitude: e.latitude! + Math.sin(angle) * offset, longitude: e.longitude! + Math.cos(angle) * offset };
     });
-
-    // Build GeoJSON
-    const geojson: GeoJSON.FeatureCollection = {
+    return {
       type: 'FeatureCollection',
       features: jitteredEvents.map(e => ({
         type: 'Feature',
@@ -294,18 +281,35 @@ function EventMap({ events, selectedEvent, hoveredEventId, onSelectEvent, evenin
         geometry: { type: 'Point', coordinates: [e.longitude!, e.latitude!] },
       })),
     };
+  }, []);
 
-    // Remove old source/layers if they exist
-    if (m.getLayer('cluster-count')) m.removeLayer('cluster-count');
-    if (m.getLayer('clusters')) m.removeLayer('clusters');
-    if (m.getLayer('unclustered-point')) m.removeLayer('unclustered-point');
+  // Track whether source+layers are already initialized
+  const sourceInitialized = useRef(false);
+
+  // Update GeoJSON data without recreating source/layers (prevents flicker)
+  useEffect(() => {
+    if (!map.current || !mapReady) return;
+    const m = map.current;
+
+    if (!m.isStyleLoaded()) {
+      m.once('idle', () => setMapReady(prev => { setTimeout(() => setMapReady(true), 50); return false; }));
+      return;
+    }
+
+    const geojson = buildGeoJSON(events);
+
+    // If source already exists, just update the data — no flicker!
+    if (sourceInitialized.current && m.getSource('events')) {
+      (m.getSource('events') as mapboxgl.GeoJSONSource).setData(geojson);
+      return;
+    }
+
+    // First time: create source + layers
     if (m.getSource('events')) m.removeSource('events');
 
-    // Clear old DOM markers
     markersOnScreen.current.forEach(marker => marker.remove());
     markersOnScreen.current.clear();
 
-    // Add source with clustering
     m.addSource('events', {
       type: 'geojson',
       data: geojson,
@@ -313,6 +317,8 @@ function EventMap({ events, selectedEvent, hoveredEventId, onSelectEvent, evenin
       clusterMaxZoom: 15,
       clusterRadius: 60,
     });
+
+    sourceInitialized.current = true;
 
     const isDark = !!eveningMode;
 
@@ -477,7 +483,7 @@ function EventMap({ events, selectedEvent, hoveredEventId, onSelectEvent, evenin
       m.off('render', throttledUpdate);
       if (renderTimer) cancelAnimationFrame(renderTimer);
     };
-  }, [events, mapReady, createPopupHTML, onSelectEvent, bundesland, eveningMode]);
+  }, [events, mapReady, buildGeoJSON, createPopupHTML, onSelectEvent, bundesland, eveningMode]);
 
   // Fly to selected
   useEffect(() => {
