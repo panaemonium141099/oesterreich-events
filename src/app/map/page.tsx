@@ -310,13 +310,6 @@ function MapPageInner() {
         onGemeindeSelect={handleGemeindeSelect}
       />
 
-      {/* Progressive loading bar — animated indeterminate bar while background loading */}
-      {backgroundLoading && (
-        <div className="w-full h-[2px] bg-slate-200/50 shrink-0 overflow-hidden">
-          <div className="h-full bg-blue-500 animate-[indeterminate_1.5s_ease-in-out_infinite] w-1/3" />
-          <style>{`@keyframes indeterminate { 0% { transform: translateX(-100%); } 100% { transform: translateX(400%); } }`}</style>
-        </div>
-      )}
 
       <div className="flex-1 overflow-hidden relative">
         <EventMap
