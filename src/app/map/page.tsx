@@ -325,15 +325,13 @@ function MapPageInner() {
         {/* Loading overlay — centered in map area, not covering sidebar */}
         <MapLoadingOverlay loading={loading} eventCount={allEvents.length} />
 
-        {/* Progressive loading indicator — minimal, no numbers */}
+        {/* Progressive loading indicator — thin line at top of map */}
         {loadProgress && loadProgress.loaded < loadProgress.total && (
-          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20">
-            <div className="w-48 h-1 bg-black/10 dark:bg-white/10 rounded-full overflow-hidden">
-              <div
-                className="h-full bg-blue-500/70 rounded-full transition-all duration-1000 ease-out"
-                style={{ width: `${Math.min(99, (loadProgress.loaded / loadProgress.total) * 100)}%` }}
-              />
-            </div>
+          <div className="absolute top-0 left-0 right-0 z-20 h-0.5">
+            <div
+              className="h-full bg-blue-500 transition-all duration-1000 ease-out"
+              style={{ width: `${Math.min(99, (loadProgress.loaded / loadProgress.total) * 100)}%` }}
+            />
           </div>
         )}
 
