@@ -75,7 +75,13 @@ function MapPageInner() {
   const [allEvents, setAllEvents] = useState<Event[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
+  // Default: show events for the next 6 months (visible in datepicker, user can clear it)
+  const defaultDateTo = new Date();
+  defaultDateTo.setMonth(defaultDateTo.getMonth() + 6);
+  const defaultDateToStr = defaultDateTo.toISOString().slice(0, 10);
+
   const [filters, setFilters] = useState<EventFilters>({
+    dateTo: defaultDateToStr,
     ...(initialSearch ? { search: initialSearch } : {}),
     ...(initialCategory ? { category: initialCategory } : {}),
   });

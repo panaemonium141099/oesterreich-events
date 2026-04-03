@@ -98,17 +98,6 @@ export async function GET(request: NextRequest) {
     const today = new Date().toISOString().slice(0, 10);
     query = query.gte('start_date', today);
 
-    // Performance: limit to 6 months ahead when no date filter or bbox is set
-    // This prevents 85k+ event queries that timeout Supabase
-    // Users can override with dateTo param or bbox viewport filtering
-    let defaultDateLimit = false;
-    if (!filters.dateTo && !filters.bbox) {
-      const sixMonths = new Date();
-      sixMonths.setMonth(sixMonths.getMonth() + 6);
-      query = query.lte('start_date', sixMonths.toISOString().slice(0, 10) + 'T23:59:59');
-      defaultDateLimit = true;
-    }
-
     // Apply filters
     if (filters.bundesland && filters.bundesland !== 'all') {
       query = query.eq('bundesland', filters.bundesland);
@@ -344,7 +333,6 @@ export async function GET(request: NextRequest) {
       total: totalCount,
       nextCursor,
       hasMore,
-      ...(defaultDateLimit ? { defaultDateLimit: '6months' } : {}),
     });
 
     // Pagination metadata headers
