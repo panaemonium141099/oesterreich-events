@@ -125,15 +125,13 @@ export default function FeedPage() {
 
       <main className="max-w-lg mx-auto px-0 py-6">
         {/* Create Post section */}
-        <div className="mb-0 px-4">
-          <CreatePost
-            userId={user.id}
-            userAvatar={profile?.avatar_url || null}
-            userInitial={profile?.first_name?.[0]?.toUpperCase() || user?.email?.[0]?.toUpperCase() || '?'}
-            onPostCreated={() => fetchActivities()}
-          />
-        </div>
-        <div className="border-b border-white/[0.06]" />
+        <CreatePost
+          userId={user.id}
+          userAvatar={profile?.avatar_url || null}
+          userInitial={profile?.first_name?.[0]?.toUpperCase() || user?.email?.[0]?.toUpperCase() || '?'}
+          onPostCreated={() => fetchActivities()}
+        />
+        <div className="h-[6px] bg-white/[0.03] border-t border-white/[0.06]" />
 
         {/* Trending section */}
         <div className="mb-2">

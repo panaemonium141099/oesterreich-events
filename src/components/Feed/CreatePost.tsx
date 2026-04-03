@@ -99,7 +99,7 @@ export function CreatePost({ userId, userAvatar, userInitial, onPostCreated }: C
   const canPost = content.trim().length > 0 || linkedEvent !== null;
 
   return (
-    <div className="rounded-2xl bg-white/[0.03] border border-white/[0.06] p-4 transition-all duration-200 focus-within:border-white/[0.12]">
+    <div className="px-4 py-3 transition-all duration-200">
       <div className="flex gap-3">
         {/* Avatar */}
         <div className="shrink-0">

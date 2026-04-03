@@ -55,25 +55,16 @@ export function FeedItem({
   const isOwner = currentUserId === activity.user_id;
   const hasEvent = !!activity.event;
 
-  // --- Compact activity (group_joined, friend_added) ---
+  // --- System notification (group_joined, friend_added) ---
   if (isCompactActivity(activity.type)) {
     return (
-      <div
-        className="flex items-center gap-3 px-4 py-3 bg-white/[0.02] border-y border-white/[0.05] my-1"
-        style={{ animationDelay: `${Math.min(index * 40, 240)}ms` }}
-      >
-        {activity.profile?.avatar_url ? (
-          <img src={activity.profile.avatar_url} alt="" className="w-7 h-7 rounded-full object-cover shrink-0" referrerPolicy="no-referrer" />
-        ) : (
-          <div className="w-7 h-7 rounded-full bg-white/[0.08] flex items-center justify-center text-[10px] font-medium text-white/40 shrink-0">
-            {activity.profile?.first_name?.[0]?.toUpperCase() || '?'}
-          </div>
-        )}
-        <p className="text-sm text-white/40 flex-1 min-w-0 truncate">
-          <span className="font-semibold text-white/60">{username}</span>{' '}
+      <div className="flex items-center gap-2.5 px-5 py-2.5 mx-4 my-2 rounded-lg bg-white/[0.03]">
+        <div className="w-1 h-1 rounded-full bg-white/20 shrink-0" />
+        <p className="text-[13px] text-white/30 flex-1 min-w-0">
+          <span className="text-white/45">{username}</span>{' '}
           {caption}
+          <span className="text-white/15 ml-1.5">{formatRelativeTime(activity.created_at)}</span>
         </p>
-        <span className="text-[10px] text-white/20 shrink-0">{formatRelativeTime(activity.created_at)}</span>
       </div>
     );
   }
