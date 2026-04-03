@@ -369,12 +369,20 @@ export function extractPlaceFromText(
       const matches = index.get(norm);
 
       if (matches && matches.length > 0) {
-        // Skip very generic matches (single common words)
-        if (windowSize === 1 && matches[0].pop < 1000 && matches.length > 3) continue;
-        // Skip words that are likely not place names
-        if (windowSize === 1 && /^(der|die|das|und|mit|von|für|auf|bei|nach|ein|eine|zum|zur|den|dem|des|nicht|auch|noch|oder|als|wie|sie|ihr|wir|uns|hat|ist|war|sind|wird|kann|soll|muss)$/i.test(phrase)) continue;
+        // Skip words that are common German words, not place names
+        if (windowSize === 1 && /^(der|die|das|und|mit|von|für|auf|bei|nach|ein|eine|zum|zur|den|dem|des|nicht|auch|noch|oder|als|wie|sie|ihr|wir|uns|hat|ist|war|sind|wird|kann|soll|muss|ganz|mehr|neue|gute|guten|guter|gutes|ganze|guten|guter)$/i.test(phrase)) continue;
 
         const best = disambiguate(matches, postalCode, bundesland, geoHint);
+
+        // For single-word matches with many ambiguous candidates and no good hint,
+        // only accept if the match is in the same Bundesland
+        if (windowSize === 1 && matches.length > 3 && bundesland) {
+          if (!best.bundesland.toLowerCase().includes(bundesland.toLowerCase()) &&
+              !bundesland.toLowerCase().includes(best.bundesland.toLowerCase())) {
+            continue; // skip — ambiguous single word, wrong Bundesland
+          }
+        }
+
         bestResult = {
           canonicalName: best.name,
           latitude: best.lat,
@@ -383,7 +391,7 @@ export function extractPlaceFromText(
           confidence: 'normalized',
         };
         bestWordCount = windowSize;
-        break; // found a match at this window size, try next size
+        break; // found a match at this window size, move to smaller window
       }
     }
   }
