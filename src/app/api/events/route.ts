@@ -303,40 +303,23 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Deduplicate: same title + same day = duplicate (keep earliest time)
-    // Same title on different days = keep both (e.g. weekly recurring events)
+    // NOTE: Dedup moved to client-side. Server returns all events as-is
+    // to not break cursor-based pagination (dedup was eating events and
+    // causing the progressive loader to stop after ~6k of 77k events).
     const allFetched = events || [];
-    const seenTitleDays = new Set<string>();
-    const dedupedEvents: Record<string, unknown>[] = [];
-    for (const event of allFetched as Record<string, unknown>[]) {
-      const title = (event.title as string || '').trim().toLowerCase();
-      if (!title) { dedupedEvents.push(event); continue; }
-      const startDate = (event.start_date as string || '').split('T')[0]; // date part only
-      const key = `${title}::${startDate}`;
-      if (!seenTitleDays.has(key)) {
-        seenTitleDays.add(key);
-        dedupedEvents.push(event);
-      }
-    }
-
-    // hasMore is based on the raw DB fetch, not the deduped result
-    // (dedup can shrink 5001 → 3500, but there are still more pages in DB)
-    const rawHasMore = (events || []).length > filters.limit;
-    const pageEvents = dedupedEvents.slice(0, filters.limit);
-
-    // Cursor must point to the last RAW event (before dedup) so pagination continues correctly
-    const lastRawEvent = rawHasMore ? (events as Record<string, unknown>[])[filters.limit - 1] : null;
-    const nextCursor = rawHasMore && lastRawEvent
-      ? String(lastRawEvent.id)
+    const hasMore = allFetched.length > filters.limit;
+    const pageEvents = hasMore ? allFetched.slice(0, filters.limit) : allFetched;
+    const nextCursor = hasMore && pageEvents.length > 0
+      ? String((pageEvents[pageEvents.length - 1] as Record<string, unknown>).id)
       : null;
 
-    const totalCount = count ?? dedupedEvents.length;
+    const totalCount = count ?? 0;
 
     const response = NextResponse.json({
       events: pageEvents,
       total: totalCount,
       nextCursor,
-      hasMore: rawHasMore,
+      hasMore,
     });
 
     // Pagination metadata headers

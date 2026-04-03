@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback, useRef, Suspense } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import type { Event, EventFilters } from '@/types/events';
@@ -207,10 +207,21 @@ function MapPageInner() {
     return () => { if (abortRef.current) abortRef.current.abort(); };
   }, [fetchEventsProgressive]);
 
-  // Sidebar shows district-filtered events; map shows ALL events
+  // Client-side dedup: same title + same day = show only first (earliest time)
+  const dedupedEvents = useMemo(() => {
+    const seen = new Set<string>();
+    return allEvents.filter(e => {
+      const key = `${(e.title || '').trim().toLowerCase()}::${(e.start_date || '').split('T')[0]}`;
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+  }, [allEvents]);
+
+  // Sidebar shows district-filtered deduped events; map shows ALL events for clustering
   const sidebarEvents = filters.district
-    ? allEvents.filter(e => e.district === filters.district)
-    : allEvents;
+    ? dedupedEvents.filter(e => e.district === filters.district)
+    : dedupedEvents;
 
   const [dynamicFlyTo, setDynamicFlyTo] = useState<{ lat: number; lng: number; zoom: number } | null>(null);
 
