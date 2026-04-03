@@ -135,7 +135,7 @@ export default function FeedPage() {
 
         {/* Trending section */}
         <div className="mb-2">
-          <TrendingRow onEventClick={handleEventClick} />
+          <TrendingRow />
         </div>
 
         {/* Feed items */}
