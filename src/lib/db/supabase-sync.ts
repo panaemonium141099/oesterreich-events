@@ -11,6 +11,7 @@
 import { createClient } from '@supabase/supabase-js';
 import type { ScrapedEvent } from '@/types/events';
 import { categorizeEventMulti } from '@/lib/categories';
+import { normalizeEventLocation } from '@/lib/location-normalizer';
 
 function getSupabaseAdminClient() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -24,6 +25,34 @@ function getSupabaseAdminClient() {
 /** Maps a ScrapedEvent to the Supabase events row shape. */
 function toSupabaseRow(event: ScrapedEvent) {
   const tags = categorizeEventMulti(event.title, event.description, event.tags);
+
+  // Normalize location: resolve abbreviations and assign canonical coordinates
+  let locationName = event.location_name ?? null;
+  let latitude = event.latitude ?? null;
+  let longitude = event.longitude ?? null;
+
+  try {
+    const normalized = normalizeEventLocation({
+      location_name: event.location_name,
+      address: event.address,
+      postal_code: event.postal_code,
+      bundesland: event.bundesland,
+      latitude: event.latitude,
+      longitude: event.longitude,
+    });
+    if (normalized) {
+      // Only override coordinates if event doesn't already have precise ones
+      if (!latitude || !longitude) {
+        latitude = normalized.latitude;
+        longitude = normalized.longitude;
+      }
+      // Always normalize the location name if we found a canonical one
+      if (normalized.location_name) {
+        locationName = normalized.location_name;
+      }
+    }
+  } catch { /* normalization failure should not block sync */ }
+
   return {
     source_type: 'scraped' as const,
     source_name: event.source_name,
@@ -33,13 +62,13 @@ function toSupabaseRow(event: ScrapedEvent) {
     description: event.description ?? null,
     start_date: event.start_date,
     end_date: event.end_date ?? null,
-    location_name: event.location_name ?? null,
+    location_name: locationName,
     address: event.address ?? null,
     postal_code: event.postal_code ?? null,
     bundesland: event.bundesland ?? null,
     district: event.district ?? null,
-    latitude: event.latitude ?? null,
-    longitude: event.longitude ?? null,
+    latitude,
+    longitude,
     category: event.category ?? null,
     tags: tags.length > 0 ? tags : null,
     price_text: event.price_text ?? null,
