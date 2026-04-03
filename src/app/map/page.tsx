@@ -91,26 +91,20 @@ function MapPageInner() {
   const [eveningMode, setEveningMode] = useState(false);
   const [bundesland, setBundesland] = useState<Bundesland>(initialBundesland);
 
-  // Viewport bounding box — stored in a ref so viewport changes don't trigger re-fetches
+  // Viewport bounding box — stored in ref, no refetch on viewport change
   const mapBboxRef = useRef<[number, number, number, number] | null>(null);
-  const bboxDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [loadProgress, setLoadProgress] = useState<{ loaded: number; total: number } | null>(null);
+  const abortRef = useRef<AbortController | null>(null);
 
-  // Callback for EventMap to report viewport changes — debounced refetch
+  // Callback for EventMap to report viewport changes — only stores ref, no refetch
   const handleViewportChange = useCallback((bbox: [number, number, number, number]) => {
-    if (bboxDebounceRef.current) clearTimeout(bboxDebounceRef.current);
-    bboxDebounceRef.current = setTimeout(() => {
-      mapBboxRef.current = bbox;
-      fetchEvents();
-    }, 500);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [fetchEvents]);
+    mapBboxRef.current = bbox;
+  }, []);
 
   useEffect(() => { trackEvent('page_view', { path: '/map' }); }, []);
 
-  // Fetch events — uses bbox viewport filtering to avoid loading 85k+ events at once.
-  // Initial load uses a reasonable limit, subsequent loads use the map viewport.
-  const fetchEvents = useCallback(async () => {
-    setLoading(true);
+  // Build query params from current filters
+  const buildParams = useCallback(() => {
     const params = new URLSearchParams();
     params.set('bundesland', bundesland.id);
     if (filters.tags && filters.tags.length > 0) params.set('tags', filters.tags.join(','));
@@ -121,33 +115,103 @@ function MapPageInner() {
     if (filters.priceMax !== undefined) params.set('priceMax', String(filters.priceMax));
     if (filters.search) params.set('search', filters.search);
     if (filters.eveningOnly) params.set('eveningOnly', 'true');
-
-    // Use bbox viewport filtering — only load events visible on the map
-    const bbox = mapBboxRef.current;
-    if (bbox) {
-      params.set('bbox', bbox.join(','));
-    }
-
-    // Limit to 10k events per request (Supabase can handle this)
-    params.set('limit', '10000');
-
-    try {
-      const res = await fetch(`/api/events?${params.toString()}`);
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const data = await res.json();
-
-      setAllEvents(data.events || []);
-      setTotal(data.total || 0);
-    } catch (err) {
-      if (process.env.NODE_ENV === 'development') console.error('Fehler beim Laden der Events:', err);
-    } finally {
-      setLoading(false);
-    }
+    return params;
   }, [filters, bundesland]);
 
+  // Progressive background loading: load 5k events at a time via cursor pagination
+  const fetchEventsProgressive = useCallback(async () => {
+    // Abort any in-flight progressive load
+    if (abortRef.current) abortRef.current.abort();
+    const controller = new AbortController();
+    abortRef.current = controller;
+
+    setLoading(true);
+    setAllEvents([]);
+    setTotal(0);
+    setLoadProgress(null);
+
+    const BATCH_SIZE = 5000;
+    let cursor: string | null = null;
+    let accumulated: Event[] = [];
+    let totalCount = 0;
+    let isFirst = true;
+
+    try {
+      while (true) {
+        if (controller.signal.aborted) break;
+
+        const params = buildParams();
+        params.set('limit', String(BATCH_SIZE));
+
+        // First batch: if user has location, use bbox around them for relevant results
+        if (isFirst) {
+          const storedLoc = typeof window !== 'undefined' ? localStorage.getItem('user_location') : null;
+          if (storedLoc) {
+            try {
+              const { lat, lng } = JSON.parse(storedLoc);
+              // ~100km radius bbox around user
+              params.set('bbox', `${lat - 0.9},${lng - 1.2},${lat + 0.9},${lng + 1.2}`);
+            } catch { /* ignore parse error */ }
+          }
+          params.set('sort', 'score'); // best events first
+        } else {
+          // Subsequent batches: no bbox, load everything, sorted by date
+          if (cursor) params.set('cursor', cursor);
+        }
+
+        const res = await fetch(`/api/events?${params.toString()}`, { signal: controller.signal });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+
+        const newEvents: Event[] = data.events || [];
+        totalCount = data.total || totalCount;
+
+        if (isFirst) {
+          // First batch replaces everything
+          accumulated = newEvents;
+          setAllEvents(newEvents);
+          setTotal(totalCount);
+          setLoading(false); // Map is now interactive!
+          isFirst = false;
+
+          // If first batch used bbox, we need to start over without bbox for the full set
+          if (newEvents.length < totalCount) {
+            cursor = null; // Reset cursor — next batch loads from beginning without bbox
+            setLoadProgress({ loaded: newEvents.length, total: totalCount });
+            continue;
+          } else {
+            break; // All events fit in first batch
+          }
+        } else {
+          // Subsequent batches: merge with existing, deduplicate by id
+          const existingIds = new Set(accumulated.map(e => e.id));
+          const unique = newEvents.filter(e => !existingIds.has(e.id));
+          accumulated = [...accumulated, ...unique];
+          setAllEvents(accumulated);
+          setLoadProgress({ loaded: accumulated.length, total: totalCount });
+        }
+
+        // Check if we got a next cursor
+        cursor = data.nextCursor || null;
+        if (!cursor || newEvents.length < BATCH_SIZE) break;
+
+        // Small delay to not hammer the API
+        await new Promise(r => setTimeout(r, 200));
+      }
+    } catch (err) {
+      if ((err as Error).name !== 'AbortError') {
+        if (process.env.NODE_ENV === 'development') console.error('Fehler beim Laden der Events:', err);
+      }
+    } finally {
+      setLoading(false);
+      setLoadProgress(null);
+    }
+  }, [buildParams]);
+
   useEffect(() => {
-    fetchEvents();
-  }, [fetchEvents]);
+    fetchEventsProgressive();
+    return () => { if (abortRef.current) abortRef.current.abort(); };
+  }, [fetchEventsProgressive]);
 
   // Sidebar shows district-filtered events; map shows ALL events
   const sidebarEvents = filters.district
@@ -239,6 +303,21 @@ function MapPageInner() {
 
         {/* Loading overlay — centered in map area, not covering sidebar */}
         <MapLoadingOverlay loading={loading} eventCount={allEvents.length} />
+
+        {/* Progressive loading indicator */}
+        {loadProgress && loadProgress.loaded < loadProgress.total && (
+          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm rounded-full px-4 py-2 shadow-lg flex items-center gap-3 text-sm">
+            <div className="w-32 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+              <div
+                className="h-full bg-blue-500 rounded-full transition-all duration-500"
+                style={{ width: `${Math.min(100, (loadProgress.loaded / loadProgress.total) * 100)}%` }}
+              />
+            </div>
+            <span className="text-gray-600 dark:text-gray-400 whitespace-nowrap">
+              {loadProgress.loaded.toLocaleString('de-AT')} / {loadProgress.total.toLocaleString('de-AT')} Events
+            </span>
+          </div>
+        )}
 
         {/* Geolocation banner */}
         <LocationBanner
