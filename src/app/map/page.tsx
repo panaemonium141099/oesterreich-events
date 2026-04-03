@@ -135,20 +135,17 @@ function MapPageInner() {
     const BATCH_SIZE = 5000;
 
     try {
-      // ── Phase 1: Fast first batch (location-aware) ──
+      // ── Phase 1: Fast first batch (no bbox — just earliest events) ──
       const firstParams = buildParams();
       firstParams.set('limit', String(BATCH_SIZE));
 
-      const storedLoc = typeof window !== 'undefined' ? localStorage.getItem('user_location') : null;
-      if (storedLoc) {
-        try {
-          const { lat, lng } = JSON.parse(storedLoc);
-          firstParams.set('bbox', `${lat - 0.9},${lng - 1.2},${lat + 0.9},${lng + 1.2}`);
-        } catch { /* ignore */ }
+      let firstRes = await fetch(`/api/events?${firstParams.toString()}`, { signal: controller.signal });
+      // Retry once without count if timeout
+      if (!firstRes.ok) {
+        firstParams.set('limit', String(BATCH_SIZE));
+        firstRes = await fetch(`/api/events?${firstParams.toString()}`, { signal: controller.signal });
+        if (!firstRes.ok) throw new Error(`HTTP ${firstRes.status}`);
       }
-
-      const firstRes = await fetch(`/api/events?${firstParams.toString()}`, { signal: controller.signal });
-      if (!firstRes.ok) throw new Error(`HTTP ${firstRes.status}`);
       const firstData = await firstRes.json();
 
       const firstEvents: Event[] = firstData.events || [];

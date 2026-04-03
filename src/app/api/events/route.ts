@@ -84,9 +84,10 @@ export async function GET(request: NextRequest) {
     // so the chained filter methods return Record<string, unknown> rows
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const baseQuery = (supabase.from('events') as any);
-    // Skip exact count for large queries (cursor pagination) — it causes Supabase timeout
-    // Only count when no cursor is set (first page) and limit is small enough
-    const needsCount = !filters.cursor && (filters.limit <= 10000);
+    // Skip exact count for large queries — causes Supabase timeout on 77k+ events
+    // Only count when: no cursor, limit small, AND a bundesland filter is set (not 'all')
+    const hasBundeslandFilter = filters.bundesland && filters.bundesland !== 'all';
+    const needsCount = !filters.cursor && (filters.limit <= 10000) && (hasBundeslandFilter || !!filters.search || !!filters.category);
     let query = suggestMode
       ? baseQuery.select('id, title, category, location_name')
       : baseQuery.select(
