@@ -159,11 +159,19 @@ export function StoriesViewer({ events, initialIndex, onClose }: StoriesViewerPr
           onMouseDown={() => setPaused(true)}
           onMouseUp={() => setPaused(false)}
         >
-          {/* Background image (with category fallback) */}
+          {/* Blurred background layer */}
+          <img
+            src={getEventImage(event.image_url, event.category, event.id)}
+            alt=""
+            className="absolute inset-0 w-full h-full object-cover blur-2xl scale-110 brightness-50"
+            draggable={false}
+            aria-hidden
+          />
+          {/* Sharp centered image */}
           <img
             src={getEventImage(event.image_url, event.category, event.id)}
             alt={event.title}
-            className="w-full h-full object-cover"
+            className="absolute inset-0 w-full h-full object-contain"
             draggable={false}
           />
 
