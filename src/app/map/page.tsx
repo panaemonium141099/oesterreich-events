@@ -153,14 +153,16 @@ function MapPageInner() {
       const firstData = await firstRes.json();
 
       const firstEvents: Event[] = firstData.events || [];
-      const totalCount = firstData.total || 0;
+      // total may be 0 if count timed out — estimate from hasMore flag
+      const totalCount = firstData.total || (firstData.hasMore ? 80000 : firstEvents.length);
 
       setAllEvents(firstEvents);
       setTotal(totalCount);
       setLoading(false); // Map is now interactive!
 
-      // If everything fits in first batch, we're done
-      if (firstEvents.length >= totalCount || totalCount <= BATCH_SIZE) return;
+      // If first batch is full, there are more events to load
+      const hasMoreToLoad = firstData.hasMore || firstEvents.length >= BATCH_SIZE;
+      if (!hasMoreToLoad) return;
 
       // ── Phase 2: Background load remaining events via cursor pagination ──
       setLoadProgress({ loaded: firstEvents.length, total: totalCount });
@@ -189,7 +191,9 @@ function MapPageInner() {
         accumulated = [...accumulated, ...unique];
 
         setAllEvents(accumulated);
-        setLoadProgress({ loaded: accumulated.length, total: totalCount });
+        // Update total if we get a real count from a subsequent batch
+        const updatedTotal = data.total && data.total > totalCount ? data.total : totalCount;
+        setLoadProgress({ loaded: accumulated.length, total: Math.max(updatedTotal, accumulated.length + 1) });
 
         cursor = data.nextCursor || null;
         if (!cursor || batch.length < BATCH_SIZE) break;
