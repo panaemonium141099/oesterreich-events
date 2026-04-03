@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import type { TrendingEvent } from './feed-types';
 import { StoriesViewer } from './StoriesViewer';
+import { getEventImage } from '@/lib/categoryImages';
 
 // Shuffle array (Fisher-Yates) with seed from current hour so it changes per refresh but stays stable within a render
 function shuffleArray<T>(arr: T[]): T[] {
@@ -139,20 +140,12 @@ export function TrendingRow() {
                 <div className="w-[62px] h-[62px] rounded-full p-[2px]" style={{ background: 'linear-gradient(135deg, #833AB4, #FD1D1D, #F77737)' }}>
                   <div className="w-full h-full rounded-full p-[2px] bg-[#141416]">
                     <div className="w-full h-full rounded-full overflow-hidden">
-                      {event.image_url ? (
-                        <img
-                          src={event.image_url}
-                          alt={event.title}
-                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-                          loading="lazy"
-                        />
-                      ) : (
-                        <div className="w-full h-full bg-white/[0.08] flex items-center justify-center">
-                          <svg className="w-5 h-5 text-white/20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                          </svg>
-                        </div>
-                      )}
+                      <img
+                        src={getEventImage(event.image_url, event.category, event.id)}
+                        alt={event.title}
+                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                        loading="lazy"
+                      />
                     </div>
                   </div>
                 </div>

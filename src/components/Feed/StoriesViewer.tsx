@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { TrendingEvent } from './feed-types';
 import { formatEventDate } from './feed-types';
+import { getEventImage } from '@/lib/categoryImages';
 
 const CATEGORY_COLORS: Record<string, string> = {
   'Musik': 'bg-purple-500/30 text-purple-300',
@@ -158,21 +159,13 @@ export function StoriesViewer({ events, initialIndex, onClose }: StoriesViewerPr
           onMouseDown={() => setPaused(true)}
           onMouseUp={() => setPaused(false)}
         >
-          {/* Background image */}
-          {event.image_url ? (
-            <img
-              src={event.image_url}
-              alt={event.title}
-              className="w-full h-full object-cover"
-              draggable={false}
-            />
-          ) : (
-            <div className="w-full h-full bg-gradient-to-br from-zinc-800 to-zinc-900 flex items-center justify-center">
-              <svg className="w-16 h-16 text-white/10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-              </svg>
-            </div>
-          )}
+          {/* Background image (with category fallback) */}
+          <img
+            src={getEventImage(event.image_url, event.category, event.id)}
+            alt={event.title}
+            className="w-full h-full object-cover"
+            draggable={false}
+          />
 
           {/* Top gradient for progress bars */}
           <div className="absolute top-0 left-0 right-0 h-24 bg-gradient-to-b from-black/60 to-transparent pointer-events-none" />
