@@ -49,3 +49,7 @@ data/migration-batch-*.json
 *.py
 __pycache__/
 blog-posts-brauchtum/
+data/archive/*.json.gz
+data/archive/stats-*.json
+data/AT.txt
+data/AT.zip
