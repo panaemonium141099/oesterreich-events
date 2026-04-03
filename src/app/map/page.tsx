@@ -135,12 +135,15 @@ function MapPageInner() {
     const BATCH_SIZE = 5000;
 
     try {
-      // ── Get total count first (small HEAD request, no data) ──
+      // ── Get total count first (fetch 1 event with exact count) ──
       const countParams = buildParams();
       countParams.set('limit', '1');
-      countParams.set('suggest', 'true'); // lightweight query
       const countRes = await fetch(`/api/events?${countParams.toString()}`, { signal: controller.signal });
-      const totalCount = countRes.ok ? parseInt(countRes.headers.get('X-Total-Count') || '0') || 0 : 0;
+      let totalCount = 0;
+      if (countRes.ok) {
+        const countData = await countRes.json();
+        totalCount = countData.total || 0;
+      }
 
       // ── Phase 1: Fast first batch (location-aware) ──
       const firstParams = buildParams();
