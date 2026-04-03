@@ -73,7 +73,6 @@ function MapPageInner() {
   const flyToCoords = initialLat && initialLng ? { lat: initialLat, lng: initialLng, zoom: initialZoom || 13 } : null;
 
   const [allEvents, setAllEvents] = useState<Event[]>([]);
-  const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
   // Default: show events for the next 6 months (visible in datepicker, user can clear it)
   const defaultDateTo = new Date();
@@ -91,16 +90,8 @@ function MapPageInner() {
   const [eveningMode, setEveningMode] = useState(false);
   const [bundesland, setBundesland] = useState<Bundesland>(initialBundesland);
 
-  // Viewport bounding box — stored in ref, no refetch on viewport change
-  const mapBboxRef = useRef<[number, number, number, number] | null>(null);
-  const [loadProgress, setLoadProgress] = useState<{ loaded: number; total: number } | null>(null);
   const [backgroundLoading, setBackgroundLoading] = useState(false);
   const abortRef = useRef<AbortController | null>(null);
-
-  // Callback for EventMap to report viewport changes — only stores ref, no refetch
-  const handleViewportChange = useCallback((bbox: [number, number, number, number]) => {
-    mapBboxRef.current = bbox;
-  }, []);
 
   useEffect(() => { trackEvent('page_view', { path: '/map' }); }, []);
 
@@ -130,8 +121,6 @@ function MapPageInner() {
 
     setLoading(true);
     setAllEvents([]);
-    setTotal(0);
-    setLoadProgress(null);
 
     const BATCH_SIZE = 5000;
 
@@ -160,7 +149,6 @@ function MapPageInner() {
       // ── Phase 2: Background load ALL remaining events ──
       setBackgroundLoading(true);
       let estimatedTotal = firstData.total || firstEvents.length * 15;
-      setLoadProgress({ loaded: firstEvents.length, total: estimatedTotal });
 
       const existingIds = new Set(firstEvents.map(e => e.id));
       let accumulated = [...firstEvents];
@@ -191,8 +179,6 @@ function MapPageInner() {
         setAllEvents(accumulated);
         // Ensure total is always ahead of loaded so bar never finishes early
         const displayTotal = Math.max(estimatedTotal, accumulated.length + (data.hasMore ? 1000 : 0));
-        setLoadProgress({ loaded: accumulated.length, total: displayTotal });
-        setTotal(displayTotal);
 
         cursor = data.nextCursor || null;
         if (batch.length < BATCH_SIZE) break;
@@ -203,8 +189,7 @@ function MapPageInner() {
       }
     } finally {
       setLoading(false);
-      setLoadProgress(null);
-      setBackgroundLoading(false);
+        setBackgroundLoading(false);
     }
   }, [buildParams]);
 
@@ -320,7 +305,6 @@ function MapPageInner() {
           eveningMode={eveningMode}
           flyToCoords={dynamicFlyTo || flyToCoords}
           bundesland={bundesland}
-          onViewportChange={handleViewportChange}
         />
 
         {/* Loading overlay — centered in map area, not covering sidebar */}

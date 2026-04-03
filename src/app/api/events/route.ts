@@ -13,6 +13,44 @@ const supabase = createClient(
 
 /** Default and maximum page sizes for cursor-based pagination */
 const DEFAULT_PAGE_SIZE = 50;
+
+/** Synonym map: common German search terms → category names (module-level, allocated once) */
+const SEARCH_SYNONYMS: Record<string, string[]> = {
+  festival: ['Musik', 'Feste & Brauchtum'],
+  festivals: ['Musik', 'Feste & Brauchtum'],
+  konzert: ['Musik'],
+  konzerte: ['Musik'],
+  rock: ['Musik'],
+  metal: ['Musik'],
+  jazz: ['Musik'],
+  theater: ['Kultur'],
+  kunst: ['Kultur'],
+  ausstellung: ['Kultur'],
+  kino: ['Kultur'],
+  markt: ['Märkte'],
+  märkte: ['Märkte'],
+  flohmarkt: ['Märkte'],
+  wein: ['Wein & Kulinarik'],
+  kulinarik: ['Wein & Kulinarik'],
+  essen: ['Wein & Kulinarik'],
+  foodtruck: ['Wein & Kulinarik'],
+  laufen: ['Sport'],
+  rennen: ['Sport'],
+  fußball: ['Sport'],
+  schwimmen: ['Sport'],
+  familie: ['Familie'],
+  kinder: ['Familie'],
+  wandern: ['Natur'],
+  natur: ['Natur'],
+  outdoor: ['Natur'],
+  nightlife: ['Nightlife'],
+  club: ['Nightlife'],
+  party: ['Nightlife'],
+  vortrag: ['Bildung'],
+  seminar: ['Bildung'],
+  yoga: ['Gesundheit'],
+  gesundheit: ['Gesundheit'],
+};
 const MAX_PAGE_SIZE = 200000;
 
 export async function GET(request: NextRequest) {
@@ -150,45 +188,6 @@ export async function GET(request: NextRequest) {
       // Sanitize search input: strip PostgREST special characters and SQL wildcards
       const sanitizedSearch = filters.search.replace(/[,.*()%_\\]/g, '').trim();
       if (sanitizedSearch) {
-        // Synonym map: common German search terms → category names
-        // Allows searching "festival" to return Nova Rock, Donauinselfest etc.
-        const SEARCH_SYNONYMS: Record<string, string[]> = {
-          festival: ['Musik', 'Feste & Brauchtum'],
-          festivals: ['Musik', 'Feste & Brauchtum'],
-          konzert: ['Musik'],
-          konzerte: ['Musik'],
-          rock: ['Musik'],
-          metal: ['Musik'],
-          jazz: ['Musik'],
-          theater: ['Kultur'],
-          kunst: ['Kultur'],
-          ausstellung: ['Kultur'],
-          kino: ['Kultur'],
-          markt: ['Märkte'],
-          märkte: ['Märkte'],
-          flohmarkt: ['Märkte'],
-          wein: ['Wein & Kulinarik'],
-          kulinarik: ['Wein & Kulinarik'],
-          essen: ['Wein & Kulinarik'],
-          foodtruck: ['Wein & Kulinarik'],
-          laufen: ['Sport'],
-          rennen: ['Sport'],
-          fußball: ['Sport'],
-          schwimmen: ['Sport'],
-          familie: ['Familie'],
-          kinder: ['Familie'],
-          wandern: ['Natur'],
-          natur: ['Natur'],
-          outdoor: ['Natur'],
-          nightlife: ['Nightlife'],
-          club: ['Nightlife'],
-          party: ['Nightlife'],
-          vortrag: ['Bildung'],
-          seminar: ['Bildung'],
-          yoga: ['Gesundheit'],
-          gesundheit: ['Gesundheit'],
-        };
-
         const normalized = sanitizedSearch.toLowerCase();
         const synonymCategories = SEARCH_SYNONYMS[normalized] ?? [];
 
