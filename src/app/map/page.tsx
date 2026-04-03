@@ -314,6 +314,16 @@ function MapPageInner() {
         onGemeindeSelect={handleGemeindeSelect}
       />
 
+      {/* Progressive loading bar — between header and map, always visible */}
+      {loadProgress && loadProgress.loaded < loadProgress.total ? (
+        <div className="w-full h-[3px] bg-slate-200 dark:bg-slate-700 shrink-0">
+          <div
+            className="h-full bg-blue-500 transition-all duration-700 ease-out"
+            style={{ width: `${Math.max(3, Math.min(99, (loadProgress.loaded / loadProgress.total) * 100))}%` }}
+          />
+        </div>
+      ) : null}
+
       <div className="flex-1 overflow-hidden relative">
         <EventMap
           events={bundeslandEvents}
@@ -329,15 +339,6 @@ function MapPageInner() {
         {/* Loading overlay — centered in map area, not covering sidebar */}
         <MapLoadingOverlay loading={loading} eventCount={allEvents.length} />
 
-        {/* Progressive loading indicator — thin blue line at top of map */}
-        {loadProgress && loadProgress.loaded < loadProgress.total && (
-          <div className="absolute top-0 left-0 right-0 z-20 h-[3px] bg-blue-200/30">
-            <div
-              className="h-full bg-blue-500 rounded-r transition-all duration-700 ease-out"
-              style={{ width: `${Math.max(5, Math.min(99, (loadProgress.loaded / loadProgress.total) * 100))}%` }}
-            />
-          </div>
-        )}
 
         {/* Geolocation banner */}
         <LocationBanner
