@@ -101,9 +101,9 @@ function HighlightCard({ event }: { event: Event }) {
           )}
         </div>
 
-        {/* Content — fixed height 90px, overflow hidden */}
-        <div className="p-3.5 h-[90px] flex flex-col justify-between overflow-hidden">
-          <p className="text-white font-semibold text-[13px] leading-snug line-clamp-2 group-hover:text-white/85 transition-colors">
+        {/* Content — fixed height, title can wrap to 3 lines */}
+        <div className="p-3.5 h-[100px] flex flex-col justify-between overflow-hidden">
+          <p className="text-white font-semibold text-[13px] leading-snug line-clamp-3 group-hover:text-white/85 transition-colors">
             {event.title}
           </p>
           <div className="space-y-0.5 mt-1">
