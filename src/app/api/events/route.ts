@@ -94,15 +94,9 @@ export async function GET(request: NextRequest) {
     // Only show public events (scraped events default to 'public')
     query = query.or('visibility.eq.public,visibility.is.null');
 
-    // Only show future events within the next 4 months by default (performance)
-    // Users can override with dateFrom/dateTo params
+    // Only show future/current events by default
     const today = new Date().toISOString().slice(0, 10);
     query = query.gte('start_date', today);
-    if (!filters.dateTo) {
-      const fourMonths = new Date();
-      fourMonths.setMonth(fourMonths.getMonth() + 4);
-      query = query.lte('start_date', fourMonths.toISOString().slice(0, 10) + 'T23:59:59');
-    }
 
     // Apply filters
     if (filters.bundesland && filters.bundesland !== 'all') {
