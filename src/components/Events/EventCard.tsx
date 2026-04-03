@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import Image from 'next/image';
 import type { Event } from '@/types/events';
 import { getEventImage, getCategoryFallbackImage } from '@/lib/categoryImages';
 import { formatDate, formatTime } from '@/lib/utils/date';
@@ -72,6 +71,7 @@ export function EventCard({ event, isSelected, onSelect, onHover, eveningMode, i
   const categoryColor = colors[event.category || ''] || colors['Sonstiges'];
   const categoryBorderColor = CATEGORY_BORDER_CSS[event.category || ''] || CATEGORY_BORDER_CSS['Sonstiges'];
   const [imageLoaded, setImageLoaded] = useState(false);
+  const [imageSrc, setImageSrc] = useState(getEventImage(event.image_url, event.category));
 
   const borderColor = isSelected
     ? eveningMode ? 'rgb(99, 102, 241)' : 'rgb(37, 99, 235)'
@@ -100,8 +100,9 @@ export function EventCard({ event, isSelected, onSelect, onHover, eveningMode, i
           {!imageLoaded && (
             <div className="absolute inset-0 skeleton rounded-lg" />
           )}
-          <Image
-            src={getEventImage(event.image_url, event.category)}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={imageSrc}
             alt=""
             width={80}
             height={80}
@@ -109,10 +110,8 @@ export function EventCard({ event, isSelected, onSelect, onHover, eveningMode, i
             loading="lazy"
             referrerPolicy="no-referrer"
             onLoad={() => setImageLoaded(true)}
-            onError={(e) => {
-              const img = e.currentTarget as HTMLImageElement;
-              // Swap to local category fallback (always available) and show immediately
-              img.src = getCategoryFallbackImage(event.category);
+            onError={() => {
+              setImageSrc(getCategoryFallbackImage(event.category));
               setImageLoaded(true);
             }}
           />
