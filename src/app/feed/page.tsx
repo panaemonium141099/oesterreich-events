@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { SocialNav } from '@/components/Layout/SocialNav';
@@ -11,13 +11,13 @@ import { FeedItem } from '@/components/Feed/FeedItem';
 import { TrendingRow } from '@/components/Feed/TrendingRow';
 import { FeedSkeletonList } from '@/components/Feed/FeedSkeleton';
 import type { FeedActivity } from '@/components/Feed/feed-types';
-import { ProfileDropdown } from '@/components/Layout/ProfileDropdown';
 import { trackEvent } from '@/lib/analytics';
 
 export default function FeedPage() {
   const { user, profile, loading } = useAuth();
   const router = useRouter();
   const supabase = createClient();
+  const sentinelRef = useRef<HTMLDivElement>(null);
 
   const [activities, setActivities] = useState<FeedActivity[]>([]);
   const [loadingData, setLoadingData] = useState(true);
@@ -96,13 +96,24 @@ export default function FeedPage() {
     if (user) fetchActivities();
   }, [user, fetchActivities]);
 
+  useEffect(() => {
+    if (!sentinelRef.current || !hasMore || loadingMore) return;
+    const observer = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting && hasMore && !loadingMore) {
+        fetchActivities(activities.length, true);
+      }
+    }, { threshold: 0.1 });
+    observer.observe(sentinelRef.current);
+    return () => observer.disconnect();
+  }, [hasMore, loadingMore, activities.length, fetchActivities]);
+
   const handleEventClick = (eventId: string) => {
     router.push(`/map?search=&eventId=${eventId}`);
   };
 
-  if (loading) {
+  if (loading || !user) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
+      <div className="min-h-screen bg-[#141416] flex items-center justify-center">
         <div className="w-8 h-8 border-2 border-white/20 border-t-white rounded-full animate-spin" />
       </div>
     );
@@ -112,56 +123,21 @@ export default function FeedPage() {
     <div className="min-h-screen text-white pb-24 bg-[#141416]">
       <SocialNav />
 
-      <main className="max-w-2xl mx-auto px-4 sm:px-6 py-6">
-        {/* Page header */}
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-3">
-            <div className="w-1 h-8 rounded-full bg-white/20" />
-            <div>
-              <h1 className="text-xl font-bold tracking-tight">Feed</h1>
-              <p className="text-[11px] text-white/30 mt-0.5">Was deine Freunde machen</p>
-            </div>
-          </div>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => fetchActivities()}
-              className="flex items-center gap-1.5 text-xs px-3 py-2 rounded-xl bg-white/[0.04] border border-white/[0.06] text-white/30 hover:text-white/60 hover:border-white/[0.12] transition-all duration-200 min-h-[36px]"
-          >
-            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-            </svg>
-              <span>Aktualisieren</span>
-            </button>
-            <ProfileDropdown />
-          </div>
-        </div>
-
+      <main className="max-w-lg mx-auto px-0 py-6">
         {/* Create Post section */}
-        <div className="mb-6">
+        <div className="mb-0 px-4">
           <CreatePost
-            userId={user!.id}
+            userId={user.id}
             userAvatar={profile?.avatar_url || null}
             userInitial={profile?.first_name?.[0]?.toUpperCase() || user?.email?.[0]?.toUpperCase() || '?'}
             onPostCreated={() => fetchActivities()}
           />
         </div>
+        <div className="border-b border-white/[0.06]" />
 
         {/* Trending section */}
-        <div className="mb-6">
+        <div className="mb-2">
           <TrendingRow onEventClick={handleEventClick} />
-        </div>
-
-        {/* Divider */}
-        <div className="flex items-center gap-3 mb-5">
-          <div className="flex-1 h-px bg-white/[0.06]" />
-          <div className="flex items-center gap-1.5 text-[10px] font-medium text-white/20 uppercase tracking-wider">
-            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 11a9 9 0 019 9M4 4a16 16 0 0116 16" />
-              <circle cx="5" cy="19" r="1" fill="currentColor" stroke="none" />
-            </svg>
-            <span>Aktivitäten</span>
-          </div>
-          <div className="flex-1 h-px bg-white/[0.06]" />
         </div>
 
         {/* Feed items */}
@@ -188,36 +164,24 @@ export default function FeedPage() {
             </Link>
           </div>
         ) : (
-          <div className="space-y-3">
+          <div>
             {activities.map((activity, index) => (
               <FeedItem
                 key={activity.id}
                 activity={activity}
                 index={index}
                 currentUserId={user?.id}
+                currentUserAvatar={profile?.avatar_url}
+                currentUserInitial={profile?.first_name?.[0]?.toUpperCase() || user?.email?.[0]?.toUpperCase() || '?'}
                 onEventClick={handleEventClick}
+                onDeleted={(id) => setActivities(prev => prev.filter(a => a.id !== id))}
               />
             ))}
 
-            {/* Load more */}
-            {hasMore && (
-              <div className="text-center pt-4 pb-2">
-                <button
-                  onClick={() => fetchActivities(activities.length, true)}
-                  disabled={loadingMore}
-                  className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-medium bg-white/[0.04] border border-white/[0.06] text-white/30 hover:text-white/60 hover:border-white/[0.12] transition-all duration-200 disabled:opacity-50 min-h-[40px]"
-                >
-                  {loadingMore ? (
-                    <div className="w-4 h-4 border-2 border-white/10 border-t-white/50 rounded-full animate-spin" />
-                  ) : (
-                    <>
-                      <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                      </svg>
-                      <span>Mehr laden</span>
-                    </>
-                  )}
-                </button>
+            <div ref={sentinelRef} className="h-10" />
+            {loadingMore && (
+              <div className="flex justify-center py-4">
+                <div className="w-5 h-5 border-2 border-white/10 border-t-white/50 rounded-full animate-spin" />
               </div>
             )}
           </div>

@@ -27,11 +27,75 @@ interface FeedEventMiniCardProps {
     save_count?: number | null;
   };
   compact?: boolean;
+  fullWidth?: boolean;
   onClick?: (eventId: string) => void;
 }
 
-export function FeedEventMiniCard({ event, compact, onClick }: FeedEventMiniCardProps) {
+export function FeedEventMiniCard({ event, compact, fullWidth, onClick }: FeedEventMiniCardProps) {
   const categoryStyle = CATEGORY_COLORS[event.category || ''] || 'bg-white/10 text-white/50';
+
+  if (fullWidth) {
+    return (
+      <div
+        className="relative w-full cursor-pointer"
+        onClick={() => onClick?.(event.id)}
+      >
+        {event.image_url ? (
+          <div className="relative aspect-[4/5] w-full overflow-hidden">
+            <img
+              src={event.image_url}
+              alt={event.title}
+              className="w-full h-full object-cover"
+              loading="lazy"
+            />
+            {/* Category badge overlay */}
+            {event.category && (
+              <span className={`absolute top-3 left-3 text-[10px] font-semibold px-2 py-0.5 rounded-md backdrop-blur-sm ${categoryStyle}`}>
+                {event.category}
+              </span>
+            )}
+            {/* Bottom gradient with event info */}
+            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent p-4 pt-12">
+              <p className="text-white font-semibold text-sm leading-tight">{event.title}</p>
+              <div className="flex items-center gap-3 mt-1.5">
+                <span className="text-white/60 text-xs flex items-center gap-1">
+                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                  {formatEventDate(event.start_date)}
+                </span>
+                {event.location_name && (
+                  <span className="text-white/60 text-xs flex items-center gap-1 truncate">
+                    <svg className="w-3 h-3 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                    {event.location_name}
+                  </span>
+                )}
+              </div>
+            </div>
+          </div>
+        ) : (
+          /* Gradient placeholder when no image */
+          <div className="relative aspect-[4/5] w-full overflow-hidden bg-gradient-to-br from-white/[0.08] to-white/[0.02] flex items-center justify-center">
+            <div className="text-center px-8">
+              {event.category && (
+                <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-md ${categoryStyle}`}>
+                  {event.category}
+                </span>
+              )}
+              <p className="text-white/70 font-semibold text-lg mt-3 leading-tight">{event.title}</p>
+              <p className="text-white/30 text-sm mt-2">{formatEventDate(event.start_date)}</p>
+              {event.location_name && (
+                <p className="text-white/20 text-xs mt-1">{event.location_name}</p>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  }
 
   if (compact) {
     return (

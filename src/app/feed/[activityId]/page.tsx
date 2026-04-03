@@ -6,9 +6,8 @@ import { SocialNav } from '@/components/Layout/SocialNav';
 import { useAuth } from '@/lib/supabase/auth-context';
 import { createClient } from '@/lib/supabase/client';
 import { CommentItem } from '@/components/Feed/CommentItem';
-import { FeedActivityIcon, getTypeColor } from '@/components/Feed/FeedActivityIcon';
 import { FeedEventMiniCard } from '@/components/Feed/FeedEventMiniCard';
-import { getActivityText, getActivityTypeLabel, formatRelativeTime } from '@/components/Feed/feed-types';
+import { getActivityText, formatRelativeTime } from '@/components/Feed/feed-types';
 import type { FeedActivity } from '@/components/Feed/feed-types';
 
 interface CommentWithUser {
@@ -163,13 +162,12 @@ export default function PostDetailPage() {
   }
 
   const isPost = activity.type === 'post';
-  const typeColor = getTypeColor(activity.type);
 
   return (
     <div className="min-h-screen bg-[#141416] text-white pb-24">
       <SocialNav />
 
-      <main className="max-w-2xl mx-auto px-4 sm:px-6 py-6">
+      <main className="max-w-lg mx-auto px-4 sm:px-6 py-6">
         {/* Back button */}
         <button
           onClick={() => router.push('/feed')}
@@ -181,68 +179,58 @@ export default function PostDetailPage() {
           <span>Zuruck</span>
         </button>
 
-        {/* Activity card (larger version) */}
-        <div className="p-5 rounded-2xl bg-white/[0.05] border border-white/[0.08]">
-          <div className="flex gap-3">
-            {/* Avatar */}
-            <div className="relative shrink-0">
-              {activity.profile?.avatar_url ? (
-                <img
-                  src={activity.profile.avatar_url}
-                  alt=""
-                  className="w-12 h-12 rounded-full object-cover ring-1 ring-white/10"
-                  referrerPolicy="no-referrer"
-                />
-              ) : (
-                <div className="w-12 h-12 rounded-full bg-white/[0.08] ring-1 ring-white/10 flex items-center justify-center text-base font-semibold text-white/50">
-                  {activity.profile?.first_name?.[0]?.toUpperCase() || '?'}
-                </div>
-              )}
-              <div className={`absolute -bottom-1 -right-1 w-5 h-5 rounded-full flex items-center justify-center ${typeColor}`}>
-                <FeedActivityIcon type={activity.type} className="w-2.5 h-2.5" />
+        {/* Activity card — Instagram-style clean layout */}
+        <div className="border-b border-white/[0.06]">
+          {/* Header: avatar + name + time */}
+          <div className="flex items-center gap-3 px-4 py-3">
+            {activity.profile?.avatar_url ? (
+              <img
+                src={activity.profile.avatar_url}
+                alt=""
+                className="w-8 h-8 rounded-full object-cover ring-1 ring-white/10"
+                referrerPolicy="no-referrer"
+              />
+            ) : (
+              <div className="w-8 h-8 rounded-full bg-white/[0.08] ring-1 ring-white/10 flex items-center justify-center text-xs font-semibold text-white/50">
+                {activity.profile?.first_name?.[0]?.toUpperCase() || '?'}
               </div>
-            </div>
-
-            {/* Content */}
+            )}
             <div className="flex-1 min-w-0">
-              <p className="text-base text-white/90 font-medium">
+              <p className="text-sm text-white/90 font-medium truncate">
                 {getActivityText(activity)}
               </p>
-              <div className="flex items-center gap-2 mt-1">
-                <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded-md ${typeColor}`}>
-                  {getActivityTypeLabel(activity.type)}
-                </span>
-                <span className="text-[10px] text-white/20">{formatRelativeTime(activity.created_at)}</span>
-              </div>
-
-              {/* Post content */}
-              {isPost && activity.content && (
-                <p className="mt-3 text-sm text-white/70 leading-relaxed whitespace-pre-wrap">
-                  {activity.content}
-                </p>
-              )}
-
-              {/* Event preview card */}
-              {activity.event && (
-                <div className="mt-3">
-                  <FeedEventMiniCard
-                    event={activity.event}
-                    onClick={handleEventClick}
-                  />
-                </div>
-              )}
-
-              {/* Group reference */}
-              {activity.group && (
-                <div className="mt-3 flex items-center gap-1.5 text-xs text-white/25">
-                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                  </svg>
-                  <span>{activity.group.name}</span>
-                </div>
-              )}
+              <span className="text-[10px] text-white/20">{formatRelativeTime(activity.created_at)}</span>
             </div>
           </div>
+
+          {/* Post content */}
+          {isPost && activity.content && (
+            <div className="px-4 pb-3">
+              <p className="text-sm text-white/70 leading-relaxed whitespace-pre-wrap">
+                {activity.content}
+              </p>
+            </div>
+          )}
+
+          {/* Event preview card */}
+          {activity.event && (
+            <div className="px-4 pb-3">
+              <FeedEventMiniCard
+                event={activity.event}
+                onClick={handleEventClick}
+              />
+            </div>
+          )}
+
+          {/* Group reference */}
+          {activity.group && (
+            <div className="px-4 pb-3 flex items-center gap-1.5 text-xs text-white/25">
+              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+              </svg>
+              <span>{activity.group.name}</span>
+            </div>
+          )}
         </div>
 
         {/* Comments section */}
@@ -279,7 +267,7 @@ export default function PostDetailPage() {
 
       {/* Sticky comment input */}
       <div className="fixed bottom-20 left-0 right-0 px-4 py-3 bg-[#141416]/90 backdrop-blur-xl border-t border-white/[0.06]">
-        <div className="max-w-2xl mx-auto flex items-center gap-2">
+        <div className="max-w-lg mx-auto flex items-center gap-2">
           <input
             type="text"
             value={commentText}

@@ -104,3 +104,30 @@ export function formatEventDate(dateStr: string): string {
   const d = new Date(dateStr);
   return d.toLocaleDateString('de-AT', { day: 'numeric', month: 'short', year: 'numeric' });
 }
+
+/** Activity types that render as compact single-line notifications, not full posts */
+export function isCompactActivity(type: string): boolean {
+  return type === 'group_joined' || type === 'friend_added';
+}
+
+/** Get display name from profile, fallback to "Unbekannt" */
+export function getUsername(profile: { first_name?: string | null; last_name?: string | null } | null): string {
+  if (!profile) return 'Unbekannt';
+  const name = [profile.first_name, profile.last_name].filter(Boolean).join(' ').trim();
+  return name || 'Unbekannt';
+}
+
+/** Get activity caption text without the username prefix (for Instagram-style inline display) */
+export function getActivityCaption(activity: FeedActivity): string {
+  switch (activity.type) {
+    case 'event_saved': return 'hat ein Event gespeichert';
+    case 'event_created': return 'hat ein Event erstellt';
+    case 'event_shared': return 'hat ein Event geteilt';
+    case 'event_attended': return 'nimmt an einem Event teil';
+    case 'group_joined': return `ist "${activity.group?.name || 'einer Gruppe'}" beigetreten`;
+    case 'friend_added': return `ist jetzt mit ${activity.target_user ? [activity.target_user.first_name, activity.target_user.last_name].filter(Boolean).join(' ') : 'jemandem'} befreundet`;
+    case 'memory_created': return 'hat eine Erinnerung erstellt';
+    case 'post': return activity.content || '';
+    default: return '';
+  }
+}

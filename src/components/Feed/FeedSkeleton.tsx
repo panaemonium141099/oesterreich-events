@@ -1,38 +1,37 @@
 'use client';
 
-export function FeedItemSkeleton({ index = 0 }: { index?: number }) {
+export function FeedItemSkeleton() {
   return (
-    <div
-      className="p-4 rounded-2xl bg-white/[0.03] border border-white/[0.06] animate-pulse"
-      style={{ animationDelay: `${index * 100}ms` }}
-    >
-      <div className="flex gap-3">
-        <div className="w-10 h-10 rounded-full bg-white/[0.06] shrink-0" />
-        <div className="flex-1 space-y-2.5">
-          <div className="flex items-center gap-2">
-            <div className="h-4 bg-white/[0.06] rounded w-40" />
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="h-3 bg-white/[0.04] rounded w-16" />
-            <div className="h-3 bg-white/[0.04] rounded w-20" />
-          </div>
-          <div className="h-14 bg-white/[0.03] rounded-xl w-full" />
-          <div className="flex items-center gap-4 pt-1">
-            <div className="h-3 bg-white/[0.04] rounded w-6" />
-            <div className="h-3 bg-white/[0.04] rounded w-6" />
-            <div className="h-3 bg-white/[0.04] rounded w-6" />
-          </div>
+    <div className="border-b border-white/[0.06] animate-pulse">
+      {/* Header */}
+      <div className="flex items-center gap-3 px-4 py-3">
+        <div className="w-8 h-8 rounded-full bg-white/[0.06]" />
+        <div className="flex-1 space-y-1.5">
+          <div className="w-24 h-3 rounded bg-white/[0.06]" />
         </div>
+      </div>
+      {/* Image placeholder */}
+      <div className="aspect-[4/5] w-full bg-white/[0.04]" />
+      {/* Action row */}
+      <div className="flex items-center gap-4 px-4 py-2.5">
+        <div className="w-6 h-6 rounded-full bg-white/[0.06]" />
+        <div className="w-6 h-6 rounded-full bg-white/[0.06]" />
+        <div className="w-6 h-6 rounded-full bg-white/[0.06]" />
+      </div>
+      {/* Text lines */}
+      <div className="px-4 pb-4 space-y-2">
+        <div className="w-20 h-3 rounded bg-white/[0.06]" />
+        <div className="w-48 h-3 rounded bg-white/[0.04]" />
       </div>
     </div>
   );
 }
 
-export function FeedSkeletonList({ count = 4 }: { count?: number }) {
+export function FeedSkeletonList({ count = 3 }: { count?: number }) {
   return (
-    <div className="space-y-3">
+    <div>
       {Array.from({ length: count }).map((_, i) => (
-        <FeedItemSkeleton key={i} index={i} />
+        <FeedItemSkeleton key={i} />
       ))}
     </div>
   );

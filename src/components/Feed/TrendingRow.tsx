@@ -2,23 +2,10 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { createClient } from '@/lib/supabase/client';
-import { FeedEventMiniCard } from './FeedEventMiniCard';
 import type { TrendingEvent } from './feed-types';
 
 interface TrendingRowProps {
   onEventClick?: (eventId: string) => void;
-}
-
-function TrendingCardSkeleton() {
-  return (
-    <div className="w-56 shrink-0 rounded-xl overflow-hidden bg-white/[0.03] border border-white/[0.06] animate-pulse">
-      <div className="h-32 bg-white/[0.04]" />
-      <div className="p-3 space-y-2">
-        <div className="h-4 bg-white/[0.06] rounded w-3/4" />
-        <div className="h-3 bg-white/[0.06] rounded w-1/2" />
-      </div>
-    </div>
-  );
 }
 
 export function TrendingRow({ onEventClick }: TrendingRowProps) {
@@ -49,74 +36,61 @@ export function TrendingRow({ onEventClick }: TrendingRowProps) {
     fetchTrending();
   }, [supabase]);
 
-  const scroll = (direction: 'left' | 'right') => {
-    if (scrollRef.current) {
-      const amount = direction === 'left' ? -240 : 240;
-      scrollRef.current.scrollBy({ left: amount, behavior: 'smooth' });
-    }
-  };
-
-  if (loading) {
-    return (
-      <div className="space-y-3">
-        <div className="flex items-center gap-2 px-1">
-          <svg className="w-4 h-4 text-amber-400/70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-          </svg>
-          <h3 className="text-sm font-semibold text-white/70">Trending diese Woche</h3>
-        </div>
-        <div className="flex gap-3 overflow-hidden">
-          {Array.from({ length: 4 }).map((_, i) => (
-            <TrendingCardSkeleton key={i} />
-          ))}
-        </div>
-      </div>
-    );
-  }
-
-  if (events.length === 0) return null;
+  if (!loading && events.length === 0) return null;
 
   return (
-    <div className="space-y-3">
-      <div className="flex items-center justify-between px-1">
-        <div className="flex items-center gap-2">
-          <svg className="w-4 h-4 text-amber-400/70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-          </svg>
-          <h3 className="text-sm font-semibold text-white/70">Trending diese Woche</h3>
-        </div>
-        <div className="flex items-center gap-1">
-          <button
-            onClick={() => scroll('left')}
-            className="p-1.5 rounded-lg text-white/20 hover:text-white/50 hover:bg-white/[0.04] transition-colors"
-            aria-label="Nach links scrollen"
-          >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-            </svg>
-          </button>
-          <button
-            onClick={() => scroll('right')}
-            className="p-1.5 rounded-lg text-white/20 hover:text-white/50 hover:bg-white/[0.04] transition-colors"
-            aria-label="Nach rechts scrollen"
-          >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-            </svg>
-          </button>
-        </div>
-      </div>
-
+    <div className="relative">
       <div
         ref={scrollRef}
-        className="flex gap-3 overflow-x-auto scrollbar-hide scroll-smooth pb-1"
-        style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+        className="flex gap-4 overflow-x-auto scrollbar-hide px-4 py-3"
+        style={{ scrollSnapType: 'x mandatory' }}
       >
-        {events.map((event) => (
-          <div key={event.id} className="w-56 shrink-0">
-            <FeedEventMiniCard event={event} onClick={onEventClick} />
-          </div>
-        ))}
+        {loading ? (
+          // Skeleton: 8 circles
+          Array.from({ length: 8 }).map((_, i) => (
+            <div key={i} className="flex flex-col items-center gap-1.5 shrink-0" style={{ scrollSnapAlign: 'start' }}>
+              <div className="w-[58px] h-[58px] rounded-full bg-white/[0.06] animate-pulse" />
+              <div className="w-10 h-2 rounded bg-white/[0.04] animate-pulse" />
+            </div>
+          ))
+        ) : (
+          events.map((event) => (
+            <button
+              key={event.id}
+              onClick={() => onEventClick?.(event.id)}
+              className="flex flex-col items-center gap-1.5 shrink-0 group"
+              style={{ scrollSnapAlign: 'start' }}
+            >
+              {/* Instagram gradient ring */}
+              <div className="w-[62px] h-[62px] rounded-full p-[2px]" style={{ background: 'linear-gradient(135deg, #833AB4, #FD1D1D, #F77737)' }}>
+                {/* Dark gap ring */}
+                <div className="w-full h-full rounded-full p-[2px] bg-[#141416]">
+                  {/* Event image */}
+                  <div className="w-full h-full rounded-full overflow-hidden">
+                    {event.image_url ? (
+                      <img
+                        src={event.image_url}
+                        alt={event.title}
+                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                        loading="lazy"
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-white/[0.08] flex items-center justify-center">
+                        <svg className="w-5 h-5 text-white/20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+              {/* Event title below */}
+              <span className="text-[10px] text-white/50 text-center truncate max-w-[66px] leading-tight">
+                {event.title.length > 12 ? event.title.slice(0, 12) + '...' : event.title}
+              </span>
+            </button>
+          ))
+        )}
       </div>
     </div>
   );
