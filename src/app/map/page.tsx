@@ -153,8 +153,8 @@ function MapPageInner() {
       const firstData = await firstRes.json();
 
       const firstEvents: Event[] = firstData.events || [];
-      // total may be 0 if count timed out — estimate from hasMore flag
-      const totalCount = firstData.total || (firstData.hasMore ? 80000 : firstEvents.length);
+      // total may be 0 if count timed out — estimate conservatively so progress bar moves visibly
+      const totalCount = firstData.total || (firstData.hasMore ? firstEvents.length * 10 : firstEvents.length);
 
       setAllEvents(firstEvents);
       setTotal(totalCount);
@@ -325,12 +325,12 @@ function MapPageInner() {
         {/* Loading overlay — centered in map area, not covering sidebar */}
         <MapLoadingOverlay loading={loading} eventCount={allEvents.length} />
 
-        {/* Progressive loading indicator — thin line at top of map */}
+        {/* Progressive loading indicator — thin blue line at top of map */}
         {loadProgress && loadProgress.loaded < loadProgress.total && (
-          <div className="absolute top-0 left-0 right-0 z-20 h-0.5">
+          <div className="absolute top-0 left-0 right-0 z-20 h-[3px] bg-blue-200/30">
             <div
-              className="h-full bg-blue-500 transition-all duration-1000 ease-out"
-              style={{ width: `${Math.min(99, (loadProgress.loaded / loadProgress.total) * 100)}%` }}
+              className="h-full bg-blue-500 rounded-r transition-all duration-700 ease-out"
+              style={{ width: `${Math.max(5, Math.min(99, (loadProgress.loaded / loadProgress.total) * 100))}%` }}
             />
           </div>
         )}
