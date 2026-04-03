@@ -84,11 +84,14 @@ export async function GET(request: NextRequest) {
     // so the chained filter methods return Record<string, unknown> rows
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const baseQuery = (supabase.from('events') as any);
+    // Skip exact count for large queries (cursor pagination) — it causes Supabase timeout
+    // Only count when no cursor is set (first page) and limit is small enough
+    const needsCount = !filters.cursor && (filters.limit <= 10000);
     let query = suggestMode
       ? baseQuery.select('id, title, category, location_name')
       : baseQuery.select(
           'id, title, description, start_date, end_date, location_name, address, postal_code, district, bundesland, latitude, longitude, category, image_url, price_text, price_min, price_max, ticket_url, source_name, source_url, organizer, visibility, event_score',
-          { count: 'exact' }
+          needsCount ? { count: 'exact' } : undefined
         );
 
     // Only show public events (scraped events default to 'public')
