@@ -103,10 +103,12 @@ function MapPageInner() {
 
   useEffect(() => { trackEvent('page_view', { path: '/map' }); }, []);
 
-  // Build query params from current filters
+  // Build query params — always loads ALL bundeslaender, filtering is client-side
+  // Only content filters (category, date, search) trigger API refetch
   const buildParams = useCallback(() => {
     const params = new URLSearchParams();
-    params.set('bundesland', bundesland.id);
+    // Always load all — bundesland filtering is client-side
+    params.set('bundesland', 'all');
     if (filters.tags && filters.tags.length > 0) params.set('tags', filters.tags.join(','));
     else if (filters.category) params.set('category', filters.category);
     if (filters.dateFrom) params.set('dateFrom', filters.dateFrom);
@@ -116,7 +118,7 @@ function MapPageInner() {
     if (filters.search) params.set('search', filters.search);
     if (filters.eveningOnly) params.set('eveningOnly', 'true');
     return params;
-  }, [filters, bundesland]);
+  }, [filters]); // NOTE: bundesland NOT in deps — switching BL doesn't refetch
 
   // Progressive background loading: first batch fast, then background batches
   const fetchEventsProgressive = useCallback(async () => {
@@ -207,18 +209,28 @@ function MapPageInner() {
     return () => { if (abortRef.current) abortRef.current.abort(); };
   }, [fetchEventsProgressive]);
 
+  // Client-side bundesland filter (no refetch needed when switching BL)
+  const bundeslandEvents = useMemo(() => {
+    if (bundesland.id === 'all') return allEvents;
+    return allEvents.filter(e => {
+      const bl = (e.bundesland || '').toLowerCase();
+      const target = bundesland.id.toLowerCase();
+      return bl === target || bl.includes(target) || target.includes(bl);
+    });
+  }, [allEvents, bundesland]);
+
   // Client-side dedup: same title + same day = show only first (earliest time)
   const dedupedEvents = useMemo(() => {
     const seen = new Set<string>();
-    return allEvents.filter(e => {
+    return bundeslandEvents.filter(e => {
       const key = `${(e.title || '').trim().toLowerCase()}::${(e.start_date || '').split('T')[0]}`;
       if (seen.has(key)) return false;
       seen.add(key);
       return true;
     });
-  }, [allEvents]);
+  }, [bundeslandEvents]);
 
-  // Sidebar shows district-filtered deduped events; map shows ALL events for clustering
+  // Sidebar shows district-filtered deduped events; map shows bundesland-filtered events for clustering
   const sidebarEvents = filters.district
     ? dedupedEvents.filter(e => e.district === filters.district)
     : dedupedEvents;
@@ -296,7 +308,7 @@ function MapPageInner() {
 
       <div className="flex-1 overflow-hidden relative">
         <EventMap
-          events={allEvents}
+          events={bundeslandEvents}
           selectedEvent={selectedEvent}
           hoveredEventId={hoveredEventId}
           onSelectEvent={setSelectedEvent}
@@ -309,18 +321,15 @@ function MapPageInner() {
         {/* Loading overlay — centered in map area, not covering sidebar */}
         <MapLoadingOverlay loading={loading} eventCount={allEvents.length} />
 
-        {/* Progressive loading indicator */}
+        {/* Progressive loading indicator — minimal, no numbers */}
         {loadProgress && loadProgress.loaded < loadProgress.total && (
-          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm rounded-full px-4 py-2 shadow-lg flex items-center gap-3 text-sm">
-            <div className="w-32 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20">
+            <div className="w-48 h-1 bg-black/10 dark:bg-white/10 rounded-full overflow-hidden">
               <div
-                className="h-full bg-blue-500 rounded-full transition-all duration-500"
-                style={{ width: `${Math.min(100, (loadProgress.loaded / loadProgress.total) * 100)}%` }}
+                className="h-full bg-blue-500/70 rounded-full transition-all duration-1000 ease-out"
+                style={{ width: `${Math.min(99, (loadProgress.loaded / loadProgress.total) * 100)}%` }}
               />
             </div>
-            <span className="text-gray-600 dark:text-gray-400 whitespace-nowrap">
-              {loadProgress.loaded.toLocaleString('de-AT')} / {loadProgress.total.toLocaleString('de-AT')} Events
-            </span>
           </div>
         )}
 
