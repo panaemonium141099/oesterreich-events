@@ -319,20 +319,24 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    const hasMore = dedupedEvents.length > filters.limit;
-    const pageEvents = hasMore ? dedupedEvents.slice(0, filters.limit) : dedupedEvents;
-    const nextCursor = hasMore && pageEvents.length > 0
-      ? String((pageEvents[pageEvents.length - 1] as Record<string, unknown>).id)
+    // hasMore is based on the raw DB fetch, not the deduped result
+    // (dedup can shrink 5001 → 3500, but there are still more pages in DB)
+    const rawHasMore = (events || []).length > filters.limit;
+    const pageEvents = dedupedEvents.slice(0, filters.limit);
+
+    // Cursor must point to the last RAW event (before dedup) so pagination continues correctly
+    const lastRawEvent = rawHasMore ? (events as Record<string, unknown>[])[filters.limit - 1] : null;
+    const nextCursor = rawHasMore && lastRawEvent
+      ? String(lastRawEvent.id)
       : null;
 
-    // Use deduped count if smaller than DB count (dedup removes duplicates)
-    const totalCount = count ? Math.min(count, dedupedEvents.length + (hasMore ? 1 : 0)) : dedupedEvents.length;
+    const totalCount = count ?? dedupedEvents.length;
 
     const response = NextResponse.json({
       events: pageEvents,
       total: totalCount,
       nextCursor,
-      hasMore,
+      hasMore: rawHasMore,
     });
 
     // Pagination metadata headers
