@@ -224,7 +224,7 @@ function EventMap({ events, selectedEvent, hoveredEventId, onSelectEvent, evenin
     const subTextColor = dark ? '#94a3b8' : '#64748b';
     const btnBg = dark ? '#4f46e5' : '#2563eb';
     return `<div style="width:240px;font-family:Inter,system-ui,sans-serif;background:${bg};border-radius:8px;">
-      <img src="${getEventImage(event.image_url, event.category)}" style="width:100%;height:120px;object-fit:cover;border-radius:8px 8px 0 0;" onerror="this.src='${getCategoryFallbackImage(event.category)}'" />
+      <img src="${getEventImage(event.image_url, event.category, event.title)}" style="width:100%;height:120px;object-fit:cover;border-radius:8px 8px 0 0;" onerror="this.src='${getCategoryFallbackImage(event.category, event.title)}'" />
       <div style="padding:10px;">
         <div style="font-weight:600;font-size:13px;color:${textColor};margin-bottom:4px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">${event.title}</div>
         <div style="font-size:11px;color:${subTextColor};margin-bottom:2px;">${date}${showTime ? ` um ${time}` : ''}</div>
@@ -386,8 +386,8 @@ function EventMap({ events, selectedEvent, hoveredEventId, onSelectEvent, evenin
         const eventDateStr = event.start_date?.slice(0, 10) || '';
         const isToday = eventDateStr === todayStr;
         el.className = `mapbox-event-marker${isToday ? ' marker-today' : ''}`;
-        const imgUrl = getEventImage(event.image_url, event.category);
-        const fallbackUrl = getCategoryFallbackImage(event.category);
+        const imgUrl = getEventImage(event.image_url, event.category, event.title);
+        const fallbackUrl = getCategoryFallbackImage(event.category, event.title);
         const img = document.createElement('img');
         img.src = imgUrl;
         img.alt = '';

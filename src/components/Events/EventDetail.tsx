@@ -347,19 +347,14 @@ export function EventDetail({ event, onClose, eveningMode, onTagClick }: EventDe
 
         {/* Hero Image */}
         <div className="w-full h-64 overflow-hidden rounded-t-2xl relative">
-          <Image
-            src={getEventImage(event.image_url, event.category)}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={getEventImage(event.image_url, event.category, event.title)}
             alt={event.title || ''}
-            fill
-            sizes="(max-width: 768px) 100vw, 600px"
-            className="object-cover animate-ken-burns"
-            priority
+            className="object-cover animate-ken-burns w-full h-full absolute inset-0"
             onError={(e) => {
               const img = e.currentTarget as HTMLImageElement;
-              if (!img.dataset.fallback) {
-                img.dataset.fallback = '1';
-                img.src = getCategoryFallbackImage(event.category);
-              }
+              img.src = getCategoryFallbackImage(event.category, event.title);
             }}
           />
           <div className={`absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t ${eveningMode ? 'from-gray-800' : 'from-white'} to-transparent`} />

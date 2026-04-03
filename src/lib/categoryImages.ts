@@ -65,44 +65,58 @@
  * - GenericGemeindeScraper: varies by municipality, many text-only
  */
 
-const CATEGORY_IMAGES: Record<string, string> = {
-  'Musik': '/images/categories/musik.jpg',
-  'Sport': '/images/categories/sport.jpg',
-  'Kultur': '/images/categories/kultur.jpg',
-  'Familie': '/images/categories/familie.jpg',
-  'Maerkte': '/images/categories/maerkte.jpg',
-  'Wein & Kulinarik': '/images/categories/wein.jpg',
-  'Natur': '/images/categories/natur.jpg',
-  'Rave': '/images/categories/rave.jpg',
-  'Wirtschaft': '/images/categories/wirtschaft.jpg',
-  'Sonstiges': '/images/categories/default.jpg',
+const IMAGES_PER_CATEGORY = 5;
+
+/** Category slug used in filenames: /images/categories/{slug}-{1..5}.jpg */
+const CATEGORY_SLUGS: Record<string, string> = {
+  'Musik': 'musik',
+  'Sport': 'sport',
+  'Kultur': 'kultur',
+  'Familie': 'familie',
+  'Maerkte': 'maerkte',
+  'Wein & Kulinarik': 'wein',
+  'Natur': 'natur',
+  'Rave': 'rave',
+  'Wirtschaft': 'wirtschaft',
+  'Sonstiges': 'default',
 };
 
 /** Alternate spellings / legacy category names mapped to canonical keys */
 const CATEGORY_ALIASES: Record<string, string> = {
   'Markte': 'Maerkte',
-  'M\u00e4rkte': 'Maerkte',
+  'Märkte': 'Maerkte',
 };
 
-const DEFAULT_IMAGE = '/images/categories/default.jpg';
+const DEFAULT_SLUG = 'default';
+
+/** Simple hash for deterministic but varied image selection */
+function simpleHash(str: string): number {
+  let h = 0;
+  for (let i = 0; i < str.length; i++) {
+    h = ((h << 5) - h + str.charCodeAt(i)) | 0;
+  }
+  return Math.abs(h);
+}
 
 /**
  * Get the fallback image for a given event category.
- * Returns a category-specific Unsplash image or the generic default.
+ * Uses a deterministic hash of the seed to pick one of 5 variants per category,
+ * so different events get different fallback images.
  */
-export function getCategoryFallbackImage(category: string | undefined | null): string {
-  if (!category) return DEFAULT_IMAGE;
-  const canonical = CATEGORY_ALIASES[category] || category;
-  return CATEGORY_IMAGES[canonical] || DEFAULT_IMAGE;
+export function getCategoryFallbackImage(category: string | undefined | null, seed?: string): string {
+  const canonical = category ? (CATEGORY_ALIASES[category] || category) : 'Sonstiges';
+  const slug = CATEGORY_SLUGS[canonical] || DEFAULT_SLUG;
+  const variant = seed ? (simpleHash(seed) % IMAGES_PER_CATEGORY) + 1 : 1;
+  return `/images/categories/${slug}-${variant}.jpg`;
 }
 
 /**
  * Get the display image for an event using the fallback chain:
  * 1. event image_url (from scraper)
- * 2. category-specific fallback
+ * 2. category-specific fallback (1 of 5 variants, picked by event title hash)
  * 3. generic default
  */
-export function getEventImage(imageUrl: string | undefined | null, category: string | undefined | null): string {
+export function getEventImage(imageUrl: string | undefined | null, category: string | undefined | null, seed?: string): string {
   if (imageUrl && imageUrl.trim()) return imageUrl;
-  return getCategoryFallbackImage(category);
+  return getCategoryFallbackImage(category, seed);
 }

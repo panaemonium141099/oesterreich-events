@@ -59,7 +59,7 @@ function SkeletonCard() {
 
 function HighlightCard({ event }: { event: Event }) {
   const [imgError, setImgError] = useState(false);
-  const imageUrl = getEventImage(event.image_url, event.category);
+  const imageUrl = getEventImage(event.image_url, event.category, event.title);
   const badgeClass = CATEGORY_COLORS[event.category ?? ''] ?? CATEGORY_FALLBACK;
 
   const locationText = event.location_name || event.bundesland || null;

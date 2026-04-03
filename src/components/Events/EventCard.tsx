@@ -71,7 +71,7 @@ export function EventCard({ event, isSelected, onSelect, onHover, eveningMode, i
   const categoryColor = colors[event.category || ''] || colors['Sonstiges'];
   const categoryBorderColor = CATEGORY_BORDER_CSS[event.category || ''] || CATEGORY_BORDER_CSS['Sonstiges'];
   const [imageLoaded, setImageLoaded] = useState(false);
-  const [imageSrc, setImageSrc] = useState(getEventImage(event.image_url, event.category));
+  const [imageSrc, setImageSrc] = useState(getEventImage(event.image_url, event.category, event.title));
 
   const borderColor = isSelected
     ? eveningMode ? 'rgb(99, 102, 241)' : 'rgb(37, 99, 235)'
@@ -111,7 +111,7 @@ export function EventCard({ event, isSelected, onSelect, onHover, eveningMode, i
             referrerPolicy="no-referrer"
             onLoad={() => setImageLoaded(true)}
             onError={() => {
-              setImageSrc(getCategoryFallbackImage(event.category));
+              setImageSrc(getCategoryFallbackImage(event.category, event.title));
               setImageLoaded(true);
             }}
           />
