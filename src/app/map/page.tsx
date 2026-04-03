@@ -94,6 +94,7 @@ function MapPageInner() {
   // Viewport bounding box — stored in ref, no refetch on viewport change
   const mapBboxRef = useRef<[number, number, number, number] | null>(null);
   const [loadProgress, setLoadProgress] = useState<{ loaded: number; total: number } | null>(null);
+  const [backgroundLoading, setBackgroundLoading] = useState(false);
   const abortRef = useRef<AbortController | null>(null);
 
   // Callback for EventMap to report viewport changes — only stores ref, no refetch
@@ -157,10 +158,9 @@ function MapPageInner() {
       if (!firstData.hasMore && firstEvents.length < BATCH_SIZE) return;
 
       // ── Phase 2: Background load ALL remaining events ──
-      // Show loading bar immediately — use known total or estimate
-      let estimatedTotal = firstData.total || firstEvents.length * 15; // estimate ~75k
+      setBackgroundLoading(true);
+      let estimatedTotal = firstData.total || firstEvents.length * 15;
       setLoadProgress({ loaded: firstEvents.length, total: estimatedTotal });
-      setTotal(estimatedTotal);
 
       const existingIds = new Set(firstEvents.map(e => e.id));
       let accumulated = [...firstEvents];
@@ -204,6 +204,7 @@ function MapPageInner() {
     } finally {
       setLoading(false);
       setLoadProgress(null);
+      setBackgroundLoading(false);
     }
   }, [buildParams]);
 
@@ -309,15 +310,13 @@ function MapPageInner() {
         onGemeindeSelect={handleGemeindeSelect}
       />
 
-      {/* Progressive loading bar — between header and map, always visible */}
-      {loadProgress && loadProgress.loaded < loadProgress.total ? (
-        <div className="w-full h-[3px] bg-slate-200 dark:bg-slate-700 shrink-0">
-          <div
-            className="h-full bg-blue-500 transition-all duration-700 ease-out"
-            style={{ width: `${Math.max(3, Math.min(99, (loadProgress.loaded / loadProgress.total) * 100))}%` }}
-          />
+      {/* Progressive loading bar — animated indeterminate bar while background loading */}
+      {backgroundLoading && (
+        <div className="w-full h-[2px] bg-slate-200/50 shrink-0 overflow-hidden">
+          <div className="h-full bg-blue-500 animate-[indeterminate_1.5s_ease-in-out_infinite] w-1/3" />
+          <style>{`@keyframes indeterminate { 0% { transform: translateX(-100%); } 100% { transform: translateX(400%); } }`}</style>
         </div>
-      ) : null}
+      )}
 
       <div className="flex-1 overflow-hidden relative">
         <EventMap
