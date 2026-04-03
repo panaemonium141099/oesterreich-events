@@ -330,6 +330,9 @@ export async function GET(request: NextRequest) {
       hasMore,
     });
 
+    // Prevent stale browser cache — events change frequently (scraper runs, coord fixes)
+    response.headers.set('Cache-Control', 'no-store, max-age=0');
+
     // Pagination metadata headers
     response.headers.set('X-Total-Count', String(totalCount));
     if (nextCursor) {
