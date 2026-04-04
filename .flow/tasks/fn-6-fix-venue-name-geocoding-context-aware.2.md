@@ -48,8 +48,8 @@ When normalizeEventLocation detects that location_name is a venue (via isVenueNa
 - [ ] All existing tests pass (npm test)
 
 ## Done summary
-TBD
+Added context-based city resolution for venue names with extractCityFromVenueName(), PPL-only filter for text extraction, PLZ fallback for venues, and 22 new venue-specific test cases (50 total normalizer tests). Resolution order follows spec: location_name -> address -> venue suffix -> title -> description -> PLZ.
 ## Evidence
-- Commits:
-- Tests:
+- Commits: 58aef5386af5e25bf39ffeb1e2c208c371b6bf23, 5ca5d8a6893120af7e81321f6a80a94e3311e741, 7104441522c8d9e303a7928b487bffe3dc35bef6
+- Tests: npm test (156 passed), npx tsx src/scripts/test-normalizer.ts (50 passed)
 - PRs:

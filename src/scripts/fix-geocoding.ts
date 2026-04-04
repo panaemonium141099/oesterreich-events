@@ -1,8 +1,12 @@
 /**
  * Fix Geocoding — Re-geocode wrongly-placed events using enhanced location normalizer.
  *
- * Detects events placed at Bundesland capitals via the old +/-0.02 degree jitter fallback,
- * re-normalizes them, and updates or NULLs their coordinates.
+ * Two modes:
+ * 1. Default (jitter): Detects events placed at Bundesland capitals via the old
+ *    +/-0.02 degree jitter fallback, re-normalizes them, and updates or NULLs their coords.
+ * 2. --venue: Detects events with venue-name location_name (e.g., "Schloss Esterhazy")
+ *    that got wrong coordinates from the old word-matching bug. Also fixes events
+ *    whose coords differ from KNOWN_VENUES by >1km.
  *
  * Features:
  * - Durable backup to data/coord-backup-YYYY-MM-DD.json before any changes
@@ -14,10 +18,14 @@
  *   npx tsx src/scripts/fix-geocoding.ts --dry-run
  *   npx tsx src/scripts/fix-geocoding.ts
  *   npx tsx src/scripts/fix-geocoding.ts --resume
+ *   npx tsx src/scripts/fix-geocoding.ts --venue --dry-run
+ *   npx tsx src/scripts/fix-geocoding.ts --venue
+ *   npx tsx src/scripts/fix-geocoding.ts --venue --resume
  */
 
 import { createClient } from '@supabase/supabase-js';
-import { normalizeEventLocation } from '../lib/location-normalizer';
+import { normalizeEventLocation, isVenueName } from '../lib/location-normalizer';
+import { KNOWN_VENUES } from '../lib/known-venues';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -43,6 +51,7 @@ const supabase = createClient(supabaseUrl, supabaseServiceKey);
 // ─── CLI args ──────────────────────────────────────────────────────────────
 const isDryRun = process.argv.includes('--dry-run');
 const isResume = process.argv.includes('--resume');
+const isVenueMode = process.argv.includes('--venue');
 
 // ─── Constants ─────────────────────────────────────────────────────────────
 
@@ -63,7 +72,9 @@ const BUNDESLAND_CENTERS: Record<string, [number, number]> = {
 const JITTER_ENVELOPE = 0.02;
 
 const BATCH_SIZE = 100;
-const CHECKPOINT_FILE = path.resolve('data/fix-geocoding-checkpoint.json');
+const CHECKPOINT_FILE = path.resolve(
+  isVenueMode ? 'data/fix-geocoding-venue-checkpoint.json' : 'data/fix-geocoding-checkpoint.json'
+);
 
 // ─── Helpers ───────────────────────────────────────────────────────────────
 
@@ -134,7 +145,8 @@ async function createBackup(events: Array<Record<string, unknown>>): Promise<str
     fs.mkdirSync(backupDir, { recursive: true });
   }
 
-  const backupPath = path.join(backupDir, `coord-backup-${getDateString()}.json`);
+  const prefix = isVenueMode ? 'coord-backup-venue' : 'coord-backup';
+  const backupPath = path.join(backupDir, `${prefix}-${getDateString()}.json`);
 
   const entries: BackupEntry[] = events.map(e => ({
     id: e.id as string,
@@ -168,6 +180,7 @@ interface CandidateEvent {
 
 interface DryRunEntry {
   event_id: string;
+  location_name: string | null;
   old_lat: number | null;
   old_lng: number | null;
   new_lat: number | null;
@@ -247,8 +260,96 @@ function identifyCandidates(events: Array<Record<string, unknown>>): CandidateEv
   return candidates;
 }
 
+// ─── Venue-mode candidate identification ──────────────────────────────────
+
+/**
+ * Confidences that must NOT be touched — these were set by scrapers or manual edits.
+ */
+const PROTECTED_CONFIDENCES = new Set(['scraper', 'manual']);
+
+/**
+ * Match an event's location_name against KNOWN_VENUES keys.
+ * Uses case-insensitive comparison with basic normalization.
+ */
+function matchKnownVenue(locationName: string): { key: string; latitude: number; longitude: number } | null {
+  const lower = locationName.toLowerCase().trim();
+  for (const [key, coords] of Object.entries(KNOWN_VENUES)) {
+    if (lower === key || lower.includes(key) || key.includes(lower)) {
+      return { key, latitude: coords.latitude, longitude: coords.longitude };
+    }
+  }
+  return null;
+}
+
+/**
+ * Identify events affected by the venue-name word-matching bug.
+ *
+ * Two identification vectors:
+ * 1. location_name starts with a venue prefix AND geocoding_confidence = "normalized"
+ *    AND geocoding_source = "geonames" (these got word-matched to wrong GeoNames entries)
+ * 2. location_name matches a KNOWN_VENUES key but current coords differ by > 1km
+ *    (confirmed wrong regardless of confidence/source)
+ *
+ * Events with confidence "scraper" or "manual" are NEVER touched.
+ */
+function identifyVenueCandidates(events: Array<Record<string, unknown>>): CandidateEvent[] {
+  const candidates: CandidateEvent[] = [];
+  const seen = new Set<string>();
+
+  for (const e of events) {
+    const id = e.id as string;
+    const locationName = (e.location_name as string | null) ?? '';
+    const confidence = (e.geocoding_confidence as string | null) ?? null;
+    const source = (e.geocoding_source as string | null) ?? null;
+    const lat = e.latitude as number | null;
+    const lng = e.longitude as number | null;
+
+    // Never touch scraper or manual confidence
+    if (confidence && PROTECTED_CONFIDENCES.has(confidence)) continue;
+
+    let reason = '';
+
+    // Vector 1: venue-prefix location_name + normalized confidence + geonames source
+    if (locationName && isVenueName(locationName) && confidence === 'normalized' && source === 'geonames') {
+      reason = `venue-prefix location "${locationName}" with normalized/geonames confidence`;
+    }
+
+    // Vector 2: KNOWN_VENUES mismatch (coords differ by > 1km)
+    if (!reason && locationName && lat != null && lng != null) {
+      const knownMatch = matchKnownVenue(locationName);
+      if (knownMatch) {
+        const distKm = haversineKm(lat, lng, knownMatch.latitude, knownMatch.longitude);
+        if (distKm > 1.0) {
+          reason = `KNOWN_VENUES mismatch: "${locationName}" matches "${knownMatch.key}" but ${distKm.toFixed(1)}km away`;
+        }
+      }
+    }
+
+    if (reason && !seen.has(id)) {
+      seen.add(id);
+      candidates.push({
+        id,
+        title: e.title as string,
+        description: (e.description as string | null) ?? null,
+        location_name: (e.location_name as string | null) ?? null,
+        address: (e.address as string | null) ?? null,
+        postal_code: (e.postal_code as string | null) ?? null,
+        bundesland: (e.bundesland as string | null) ?? null,
+        latitude: lat,
+        longitude: lng,
+        geocoding_confidence: confidence,
+        geocoding_source: source,
+        reason,
+      });
+    }
+  }
+
+  return candidates;
+}
+
 async function main() {
-  console.log(`\nFix Geocoding Migration — ${isDryRun ? 'DRY RUN' : 'LIVE MODE'}${isResume ? ' (RESUME)' : ''}`);
+  const modeLabel = isVenueMode ? 'VENUE' : 'JITTER';
+  console.log(`\nFix Geocoding Migration [${modeLabel}] — ${isDryRun ? 'DRY RUN' : 'LIVE MODE'}${isResume ? ' (RESUME)' : ''}`);
   console.log('='.repeat(60));
 
   // 1. Fetch all events
@@ -277,9 +378,9 @@ async function main() {
     backupPath = await createBackup(allEvents);
   }
 
-  // 4. Identify migration candidates
-  console.log('\nIdentifying migration candidates...');
-  const candidates = identifyCandidates(allEvents);
+  // 4. Identify migration candidates (mode-dependent)
+  console.log(`\nIdentifying ${isVenueMode ? 'venue' : 'jitter'} migration candidates...`);
+  const candidates = isVenueMode ? identifyVenueCandidates(allEvents) : identifyCandidates(allEvents);
   console.log(`  Found ${candidates.length} candidates out of ${allEvents.length} total events`);
 
   const byReason: Record<string, number> = {};
@@ -344,6 +445,7 @@ async function main() {
         if (isDryRun) {
           dryRunLog.push({
             event_id: event.id,
+            location_name: event.location_name,
             old_lat: event.latitude,
             old_lng: event.longitude,
             new_lat: result.latitude,
@@ -375,6 +477,7 @@ async function main() {
           if (isDryRun) {
             dryRunLog.push({
               event_id: event.id,
+              location_name: event.location_name,
               old_lat: event.latitude,
               old_lng: event.longitude,
               new_lat: null,
@@ -429,8 +532,11 @@ async function main() {
     console.log(`\n${'─'.repeat(80)}`);
     console.log('DRY RUN DETAILS (first 100):');
     console.log('─'.repeat(80));
+
+    const locCol = isVenueMode ? 'location'.padEnd(30) : '';
     console.log(
       'event_id'.padEnd(40) +
+      locCol +
       'old_lat'.padEnd(10) +
       'old_lng'.padEnd(10) +
       'new_lat'.padEnd(10) +
@@ -440,11 +546,13 @@ async function main() {
       'new_conf'.padEnd(15) +
       'action'
     );
-    console.log('─'.repeat(130));
+    console.log('─'.repeat(isVenueMode ? 160 : 130));
 
     for (const entry of dryRunLog.slice(0, 100)) {
+      const locVal = isVenueMode ? (entry.location_name?.slice(0, 28) ?? '').padEnd(30) : '';
       console.log(
         entry.event_id.slice(0, 38).padEnd(40) +
+        locVal +
         (entry.old_lat?.toFixed(4) ?? 'NULL').padEnd(10) +
         (entry.old_lng?.toFixed(4) ?? 'NULL').padEnd(10) +
         (entry.new_lat?.toFixed(4) ?? 'NULL').padEnd(10) +
