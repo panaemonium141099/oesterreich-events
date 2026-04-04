@@ -99,14 +99,33 @@ function buildIndex(): Map<string, GeoEntry[]> {
  * venue words (e.g., "Schloss") from matching GeoNames building entries.
  */
 const VENUE_PREFIXES = [
+  // Castles, churches, monasteries
   'schloss', 'burg', 'dom', 'kirche', 'stift', 'kloster',
-  'kurpark', 'kurhaus', 'therme', 'gasthof', 'gasthaus',
-  'hotel', 'pension', 'halle', 'stadthalle', 'kulturzentrum',
-  'konzerthaus', 'theater', 'museum', 'galerie', 'rathaus',
-  'arena', 'stadion', 'pfarrkirche', 'kapelle', 'festspielhaus',
-  'kongresszentrum', 'domkirche', 'musikpavillon',
+  'pfarrkirche', 'kapelle', 'domkirche', 'pfarrsaal',
+  // Wellness & parks
+  'kurpark', 'kurhaus', 'therme',
+  // Accommodation & gastronomy
+  'gasthof', 'gasthaus', 'hotel', 'pension', 'seminarhotel',
+  'restaurant', 'wirtshaus', 'beisl', 'cafe', 'kaffeehaus',
+  'bar', 'pub',
+  // Wine
+  'weingut', 'weinhaus', 'vinothek', 'weinkeller',
+  'buschenschank', 'heuriger',
+  // Performance & culture venues
+  'halle', 'stadthalle', 'kulturzentrum', 'konzerthaus',
+  'theater', 'museum', 'galerie', 'festspielhaus',
+  'kongresszentrum', 'musikpavillon',
   'seefestspiele', 'festspiele', 'landesgalerie',
-  'weingut', 'weinhaus', 'vinothek',
+  'veranstaltungszentrum', 'mehrzweckhalle',
+  // Civic & community
+  'rathaus', 'gemeindeamt', 'vereinshaus',
+  'volkshochschule', 'jugendzentrum', 'seniorenzentrum',
+  // Sports & leisure
+  'arena', 'stadion', 'sportplatz',
+  'schwimmbad', 'freibad', 'hallenbad', 'turnhalle',
+  // Education & exhibition
+  'kino', 'bibliothek', 'schulzentrum',
+  'messezentrum', 'messe',
 ];
 
 /**

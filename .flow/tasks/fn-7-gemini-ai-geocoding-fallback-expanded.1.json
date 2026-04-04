@@ -1,0 +1,14 @@
+{
+  "assignee": null,
+  "claim_note": "",
+  "claimed_at": null,
+  "created_at": "2026-04-04T19:13:09.893675Z",
+  "depends_on": [],
+  "epic": "fn-7-gemini-ai-geocoding-fallback-expanded",
+  "id": "fn-7-gemini-ai-geocoding-fallback-expanded.1",
+  "priority": null,
+  "spec_path": ".flow/tasks/fn-7-gemini-ai-geocoding-fallback-expanded.1.md",
+  "status": "todo",
+  "title": "Expand VENUE_PREFIXES + add gemini confidence level",
+  "updated_at": "2026-04-04T19:13:09.893707Z"
+}

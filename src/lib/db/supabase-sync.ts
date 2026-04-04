@@ -32,6 +32,7 @@ const CONFIDENCE_RANK: Record<string, number> = {
   from_title: 4,
   from_description: 5,
   nominatim: 6,
+  gemini: 7,
 };
 
 /** Distance threshold in km; below this we skip overwrite to preserve precise coords. */
