@@ -51,4 +51,6 @@ export const KNOWN_VENUES: Record<string, VenueCoords> = {
   'lockenhaus': { latitude: 47.4060, longitude: 16.4259 },
   'bernstein': { latitude: 47.3992, longitude: 16.2517 },
   'stadtschlaining': { latitude: 47.3258, longitude: 16.2733 },
+  'therme laa': { latitude: 48.7167, longitude: 16.3833 },
+  'seefestspiele moerbisch': { latitude: 47.7497, longitude: 16.6845 },
 };

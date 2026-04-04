@@ -38,8 +38,8 @@ Three changes to the normalizer to prevent venue names from matching as cities:
 - [ ] Existing tests pass (npm test)
 
 ## Done summary
-TBD
+Added venue-prefix detection (isVenueName), PPL-only filtering on step 3b word-by-word matching, and extracted KNOWN_LOCATIONS into shared src/lib/known-venues.ts module. Known venues resolve with exact confidence before step 3b; unknown venue-prefix names return null to fall through to title/address extraction.
 ## Evidence
-- Commits:
-- Tests:
+- Commits: f5f47e6, fc7a9a7
+- Tests: npm test (156 passed), npx tsx src/scripts/test-venue-changes.ts (25/25 passed)
 - PRs:

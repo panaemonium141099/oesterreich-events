@@ -105,6 +105,8 @@ const VENUE_PREFIXES = [
   'konzerthaus', 'theater', 'museum', 'galerie', 'rathaus',
   'arena', 'stadion', 'pfarrkirche', 'kapelle', 'festspielhaus',
   'kongresszentrum', 'domkirche', 'musikpavillon',
+  'seefestspiele', 'festspiele', 'landesgalerie',
+  'weingut', 'weinhaus', 'vinothek',
 ];
 
 /**
@@ -118,6 +120,66 @@ export function isVenueName(name: string): boolean {
     // Must be followed by a space (prefix is a complete word)
     return lower.startsWith(prefix + ' ');
   });
+}
+
+/**
+ * Extract a city name from a venue name by stripping the venue prefix.
+ * E.g., "Kulturzentrum Mattersburg" -> "Mattersburg", "Therme Laa" -> "Laa".
+ * Only accepts the remainder if it matches a PPL-type GeoNames entry (populated place),
+ * rejecting Bundesland names (ADM1) and other non-settlement types.
+ *
+ * @returns NormalizeResult if a valid city was extracted, null otherwise
+ */
+export function extractCityFromVenueName(
+  venueName: string,
+  postalCode?: string,
+  bundesland?: string,
+  hint?: { lat: number; lng: number },
+): NormalizeResult | null {
+  const lower = venueName.toLowerCase().trim();
+  const index = buildIndex();
+  const geoHint = hint || getHint(postalCode, bundesland);
+
+  for (const prefix of VENUE_PREFIXES) {
+    if (!lower.startsWith(prefix + ' ')) continue;
+
+    // Extract remainder after prefix
+    const remainder = venueName.trim().substring(prefix.length + 1).trim();
+    if (remainder.length < 2) continue;
+
+    const norm = normalizeString(remainder);
+    if (norm.length < 2) continue;
+
+    // Look up in GeoNames index
+    const matches = index.get(norm);
+    if (!matches || matches.length === 0) {
+      // Also try with suffix removal (e.g., "Laa" -> "Laa an der Thaya" via base-name index)
+      // The base-name index already handles this, so just check if we get any match
+      continue;
+    }
+
+    // FILTER: Only accept PPL-type entries (populated places).
+    // Reject ADM1 (Bundesland), ADM2, etc. to prevent "Landesgalerie Burgenland"
+    // from resolving to "Burgenland" as a city.
+    const pplMatches = matches.filter(e => e.type.startsWith('PPL'));
+    if (pplMatches.length === 0) continue;
+
+    // AMBIGUITY GUARD: If the remainder has too many PPL matches (>5), it's likely
+    // a saint name or common word (e.g., "St. Martin" has 15+ matches across Austria).
+    // Skip to let title/description extraction handle it with more context.
+    if (pplMatches.length > 5) continue;
+
+    const best = disambiguate(pplMatches, postalCode, bundesland, geoHint);
+    return {
+      canonicalName: best.name,
+      latitude: best.lat,
+      longitude: best.lng,
+      bundesland: best.bundesland,
+      confidence: 'normalized',
+    };
+  }
+
+  return null;
 }
 
 /**
@@ -531,7 +593,7 @@ export function extractPlaceFromText(
   const cleaned = text
     .replace(/\d{1,2}[.:]\d{2}/g, '') // remove times like 17:00
     .replace(/\d{1,2}\.\d{1,2}\.\d{2,4}/g, '') // remove dates like 05.04.2026
-    .replace(/[€$%#@!?&*+="'`´;:()[\]{}]/g, ' ')
+    .replace(/[€$%#@!?&*+="'`´;:.()[\]{}]/g, ' ')
     .replace(/\s+/g, ' ')
     .trim();
 
@@ -558,6 +620,17 @@ export function extractPlaceFromText(
         // Skip common German function words
         if (windowSize === 1 && /^(der|die|das|und|mit|von|für|auf|bei|nach|ein|eine|zum|zur|den|dem|des|nicht|auch|noch|oder|als|wie|sie|ihr|wir|uns|hat|ist|war|sind|wird|kann|soll|muss|ganz|mehr|neue|gute|guten|guter|gutes|ganze)$/i.test(phrase)) continue;
 
+        // PPL-only filter for short (1-2 word) matches: prevent building/church entries
+        // (e.g., "Dom" CH, "Schloss" HTL) from matching as place names in text extraction.
+        // This is consistent with the PPL-only filter on step 3b in normalizeLocation.
+        // Use filtered candidates for disambiguation when applicable.
+        let candidates = matches;
+        if (windowSize <= 2) {
+          const pplOnly = matches.filter(e => e.type.startsWith('PPL'));
+          if (pplOnly.length === 0) continue;
+          candidates = pplOnly;
+        }
+
         // Common-word filter: words that are also common German/English words need
         // Bundesland context to be accepted as place names in text extraction.
         // German capitalizes all nouns, so capitalization alone is not a reliable indicator.
@@ -573,7 +646,7 @@ export function extractPlaceFromText(
 
           // With Bundesland context, require the match to be in that Bundesland
           const blNorm = bundesland.toLowerCase();
-          const hasBlMatch = matches.some(m =>
+          const hasBlMatch = candidates.some(m =>
             m.bundesland.toLowerCase().includes(blNorm) ||
             blNorm.includes(m.bundesland.toLowerCase())
           );
@@ -582,7 +655,7 @@ export function extractPlaceFromText(
 
         // Unicode-aware complete token matching: verify the place name
         // appears as complete tokens in the text, not as a substring
-        const bestCandidate = disambiguate(matches, postalCode, bundesland, geoHint);
+        const bestCandidate = disambiguate(candidates, postalCode, bundesland, geoHint);
         const normalizedCandidateName = normalizeForComparison(bestCandidate.name);
         const normalizedPhrase = normalizeForComparison(phrase);
 
@@ -594,7 +667,7 @@ export function extractPlaceFromText(
 
         // For single-word matches with many ambiguous candidates and no good hint,
         // only accept if the match is in the same Bundesland
-        if (windowSize === 1 && matches.length > 3 && bundesland) {
+        if (windowSize === 1 && candidates.length > 3 && bundesland) {
           if (!bestCandidate.bundesland.toLowerCase().includes(bundesland.toLowerCase()) &&
               !bundesland.toLowerCase().includes(bestCandidate.bundesland.toLowerCase())) {
             continue; // skip — ambiguous single word, wrong Bundesland
@@ -645,7 +718,28 @@ export function normalizeEventLocation(event: {
         confidence: result.confidence,
       };
     }
+
+    // 1b. If location_name is a venue, try extracting city from the venue name suffix.
+    // E.g., "Kulturzentrum Mattersburg" -> strip prefix -> "Mattersburg" -> PPL match.
+    // Per epic design decision #5: venue-resolved results get confidence "normalized".
+    if (isVenueName(event.location_name)) {
+      const venueCity = extractCityFromVenueName(
+        event.location_name, event.postal_code, event.bundesland, hint
+      );
+      if (venueCity) {
+        return {
+          latitude: venueCity.latitude,
+          longitude: venueCity.longitude,
+          confidence: 'normalized',
+        };
+      }
+    }
   }
+
+  // Per epic design decision #5: when location_name is a venue and city was resolved
+  // from context (address, title, description), use confidence "normalized" (rank 3)
+  // instead of "from_title" (rank 4) to ensure venue-context resolutions take precedence.
+  const isVenue = event.location_name ? isVenueName(event.location_name) : false;
 
   // 2. Try address field
   if (event.address) {
@@ -658,7 +752,7 @@ export function normalizeEventLocation(event: {
         return {
           latitude: result.latitude,
           longitude: result.longitude,
-          confidence: result.confidence,
+          confidence: isVenue ? 'normalized' : result.confidence,
         };
       }
     }
@@ -671,7 +765,7 @@ export function normalizeEventLocation(event: {
       return {
         latitude: result.latitude,
         longitude: result.longitude,
-        confidence: 'from_title',
+        confidence: isVenue ? 'normalized' : 'from_title',
       };
     }
   }
@@ -684,7 +778,7 @@ export function normalizeEventLocation(event: {
       return {
         latitude: result.latitude,
         longitude: result.longitude,
-        confidence: 'from_description',
+        confidence: isVenue ? 'normalized' : 'from_description',
       };
     }
   }
