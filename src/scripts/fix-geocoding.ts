@@ -26,6 +26,7 @@
 import { createClient } from '@supabase/supabase-js';
 import { normalizeEventLocation, isVenueName } from '../lib/location-normalizer';
 import { KNOWN_VENUES } from '../lib/known-venues';
+import { matchPlaceName } from '../lib/utils/place-match';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -269,12 +270,13 @@ const PROTECTED_CONFIDENCES = new Set(['scraper', 'manual']);
 
 /**
  * Match an event's location_name against KNOWN_VENUES keys.
- * Uses case-insensitive comparison with basic normalization.
+ * Uses matchPlaceName() for Unicode-aware token matching with umlaut normalization.
+ * This ensures "Seefestspiele Mörbisch" matches "seefestspiele moerbisch" and
+ * prevents false positives from substring matching.
  */
 function matchKnownVenue(locationName: string): { key: string; latitude: number; longitude: number } | null {
-  const lower = locationName.toLowerCase().trim();
   for (const [key, coords] of Object.entries(KNOWN_VENUES)) {
-    if (lower === key || lower.includes(key) || key.includes(lower)) {
+    if (matchPlaceName(locationName, key)) {
       return { key, latitude: coords.latitude, longitude: coords.longitude };
     }
   }
