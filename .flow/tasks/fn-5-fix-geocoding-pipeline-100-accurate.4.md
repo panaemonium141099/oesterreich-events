@@ -51,3 +51,10 @@ manual > scraper > exact > normalized > from_title > from_description > nominati
 - [ ] Existing events with NULL confidence are treated as lowest priority (any new result can overwrite)
 - [ ] Performance: batch-prefetch adds acceptable overhead (<100ms per batch)
 - [ ] Existing tests pass
+
+## Done summary
+Implemented confidence-aware coordinate correction in supabase-sync.ts with batch-prefetch of existing rows, confidence precedence comparison (manual > scraper > exact > normalized > from_title > from_description > nominatim > NULL), 5km distance threshold to preserve precise coords, and safe .in() filter for prefetch queries. Added geocoding_confidence and geocoding_source columns via Supabase migration SQL and updated Event type.
+## Evidence
+- Commits: 048c218, 3cbe851
+- Tests: npx vitest run (156 passed), npx tsc --noEmit (clean)
+- PRs:

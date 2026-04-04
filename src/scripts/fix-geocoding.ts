@@ -1,30 +1,71 @@
 /**
- * Fix Geocoding — Re-normalize all event coordinates using enhanced location normalizer.
+ * Fix Geocoding — Re-geocode wrongly-placed events using enhanced location normalizer.
  *
- * Checks title, location_name, address, description against GeoNames AT database (34k entries).
- * Uses closest-match disambiguation instead of population-based.
- * Updates events in Supabase where the new coordinates differ by >5km from current.
+ * Detects events placed at Bundesland capitals via the old +/-0.02 degree jitter fallback,
+ * re-normalizes them, and updates or NULLs their coordinates.
  *
- * Usage: npx tsx src/scripts/fix-geocoding.ts [--dry-run] [--limit=N]
+ * Features:
+ * - Durable backup to data/coord-backup-YYYY-MM-DD.json before any changes
+ * - Dry-run mode: --dry-run shows what WOULD change without modifying DB
+ * - Batch processing with checkpoint/resume: --resume continues from last checkpoint
+ * - Requires SUPABASE_SERVICE_ROLE_KEY (no anon key fallback)
+ *
+ * Usage:
+ *   npx tsx src/scripts/fix-geocoding.ts --dry-run
+ *   npx tsx src/scripts/fix-geocoding.ts
+ *   npx tsx src/scripts/fix-geocoding.ts --resume
  */
 
 import { createClient } from '@supabase/supabase-js';
 import { normalizeEventLocation } from '../lib/location-normalizer';
+import * as fs from 'fs';
+import * as path from 'path';
 
+// ─── Auth: service role key ONLY ───────────────────────────────────────────
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-if (!supabaseUrl || !supabaseKey) {
-  console.error('Missing NEXT_PUBLIC_SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY');
+if (!supabaseUrl) {
+  console.error('ERROR: Missing NEXT_PUBLIC_SUPABASE_URL');
   console.error('Run with: source .env.local && npx tsx src/scripts/fix-geocoding.ts');
   process.exit(1);
 }
 
-const supabase = createClient(supabaseUrl, supabaseKey);
+if (!supabaseServiceKey) {
+  console.error('ERROR: Missing SUPABASE_SERVICE_ROLE_KEY');
+  console.error('This script requires the service role key. The anon key is NOT accepted.');
+  console.error('Run with: source .env.local && npx tsx src/scripts/fix-geocoding.ts');
+  process.exit(1);
+}
 
+const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+// ─── CLI args ──────────────────────────────────────────────────────────────
 const isDryRun = process.argv.includes('--dry-run');
-const limitArg = process.argv.find(a => a.startsWith('--limit='));
-const limit = limitArg ? parseInt(limitArg.split('=')[1]) : undefined;
+const isResume = process.argv.includes('--resume');
+
+// ─── Constants ─────────────────────────────────────────────────────────────
+
+// Bundesland capital centers — the old fallback assigned these + random jitter of +/- 0.02 degrees
+const BUNDESLAND_CENTERS: Record<string, [number, number]> = {
+  'wien': [48.2082, 16.3738],
+  'niederoesterreich': [48.2000, 15.6333],
+  'oberoesterreich': [48.3064, 14.2858],
+  'salzburg': [47.8000, 13.0400],
+  'steiermark': [47.0707, 15.4395],
+  'kaernten': [46.6247, 14.3089],
+  'tirol': [47.2654, 11.3928],
+  'vorarlberg': [47.5000, 9.7500],
+  'burgenland': [47.8453, 16.5189],
+};
+
+// The old jitter was +/- 0.02 degrees on both axes
+const JITTER_ENVELOPE = 0.02;
+
+const BATCH_SIZE = 100;
+const CHECKPOINT_FILE = path.resolve('data/fix-geocoding-checkpoint.json');
+
+// ─── Helpers ───────────────────────────────────────────────────────────────
 
 function haversineKm(lat1: number, lng1: number, lat2: number, lng2: number): number {
   const R = 6371;
@@ -36,165 +77,382 @@ function haversineKm(lat1: number, lng1: number, lat2: number, lng2: number): nu
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
-async function main() {
-  console.log(`\n🔍 Fix Geocoding — ${isDryRun ? 'DRY RUN' : 'LIVE MODE'}`);
-  console.log('='.repeat(60));
+/**
+ * Detect if an event's coordinates fall within the 0.02-degree jitter envelope
+ * of any Bundesland capital center.
+ */
+function isWithinJitterEnvelope(lat: number, lng: number): string | null {
+  for (const [bundesland, [centerLat, centerLng]] of Object.entries(BUNDESLAND_CENTERS)) {
+    if (
+      Math.abs(lat - centerLat) <= JITTER_ENVELOPE &&
+      Math.abs(lng - centerLng) <= JITTER_ENVELOPE
+    ) {
+      return bundesland;
+    }
+  }
+  return null;
+}
 
-  // Fetch all events
-  let allEvents: Array<Record<string, unknown>> = [];
+function getDateString(): string {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
+function saveCheckpoint(batchNumber: number, lastEventId: string): void {
+  const data = { batchNumber, lastEventId, timestamp: new Date().toISOString() };
+  fs.writeFileSync(CHECKPOINT_FILE, JSON.stringify(data, null, 2));
+}
+
+function loadCheckpoint(): { batchNumber: number; lastEventId: string } | null {
+  if (!fs.existsSync(CHECKPOINT_FILE)) return null;
+  try {
+    return JSON.parse(fs.readFileSync(CHECKPOINT_FILE, 'utf-8'));
+  } catch {
+    return null;
+  }
+}
+
+function clearCheckpoint(): void {
+  if (fs.existsSync(CHECKPOINT_FILE)) {
+    fs.unlinkSync(CHECKPOINT_FILE);
+  }
+}
+
+// ─── Backup ────────────────────────────────────────────────────────────────
+
+interface BackupEntry {
+  id: string;
+  old_latitude: number | null;
+  old_longitude: number | null;
+  old_geocoding_confidence: string | null;
+  old_geocoding_source: string | null;
+}
+
+async function createBackup(events: Array<Record<string, unknown>>): Promise<string> {
+  const backupDir = path.resolve('data');
+  if (!fs.existsSync(backupDir)) {
+    fs.mkdirSync(backupDir, { recursive: true });
+  }
+
+  const backupPath = path.join(backupDir, `coord-backup-${getDateString()}.json`);
+
+  const entries: BackupEntry[] = events.map(e => ({
+    id: e.id as string,
+    old_latitude: (e.latitude as number | null) ?? null,
+    old_longitude: (e.longitude as number | null) ?? null,
+    old_geocoding_confidence: (e.geocoding_confidence as string | null) ?? null,
+    old_geocoding_source: (e.geocoding_source as string | null) ?? null,
+  }));
+
+  fs.writeFileSync(backupPath, JSON.stringify(entries, null, 2));
+  console.log(`  Backup created: ${backupPath} (${entries.length} events)`);
+  return backupPath;
+}
+
+// ─── Main ──────────────────────────────────────────────────────────────────
+
+interface CandidateEvent {
+  id: string;
+  title: string;
+  description: string | null;
+  location_name: string | null;
+  address: string | null;
+  postal_code: string | null;
+  bundesland: string | null;
+  latitude: number | null;
+  longitude: number | null;
+  geocoding_confidence: string | null;
+  geocoding_source: string | null;
+  reason: string; // why it's a candidate
+}
+
+interface DryRunEntry {
+  event_id: string;
+  old_lat: number | null;
+  old_lng: number | null;
+  new_lat: number | null;
+  new_lng: number | null;
+  old_confidence: string | null;
+  new_confidence: string | null;
+  distance_km: number | null;
+  action: 'correct' | 'null' | 'unchanged';
+}
+
+async function fetchAllEvents(): Promise<Array<Record<string, unknown>>> {
+  const allEvents: Array<Record<string, unknown>> = [];
   let offset = 0;
   const pageSize = 1000;
 
   console.log('\nFetching events from Supabase...');
 
   while (true) {
-    const query = supabase
+    const { data, error } = await supabase
       .from('events')
-      .select('id, title, description, location_name, address, postal_code, bundesland, latitude, longitude')
+      .select('id, title, description, location_name, address, postal_code, bundesland, latitude, longitude, geocoding_confidence, geocoding_source')
       .range(offset, offset + pageSize - 1);
 
-    if (limit && offset >= limit) break;
-
-    const { data, error } = await query;
     if (error) { console.error('Fetch error:', error.message); break; }
     if (!data || data.length === 0) break;
 
-    allEvents = allEvents.concat(data);
+    allEvents.push(...data);
     offset += data.length;
     process.stdout.write(`  Fetched ${allEvents.length} events...\r`);
     if (data.length < pageSize) break;
   }
 
-  console.log(`\n  Total events: ${allEvents.length}`);
+  console.log(`  Total events: ${allEvents.length}`);
+  return allEvents;
+}
 
-  if (limit) {
-    allEvents = allEvents.slice(0, limit);
-    console.log(`  Limited to: ${allEvents.length}`);
-  }
+function identifyCandidates(events: Array<Record<string, unknown>>): CandidateEvent[] {
+  const candidates: CandidateEvent[] = [];
 
-  // Process each event
-  let checked = 0;
-  let corrected = 0;
-  let noMatch = 0;
-  let unchanged = 0;
-  let newCoords = 0;
-  const corrections: Array<{ title: string; location: string; oldLat: number; oldLng: number; newLat: number; newLng: number; dist: number; confidence: string }> = [];
-  const updates: Array<{ id: string; latitude: number; longitude: number }> = [];
+  for (const e of events) {
+    const lat = e.latitude as number | null;
+    const lng = e.longitude as number | null;
+    let reason = '';
 
-  for (const event of allEvents) {
-    checked++;
-    if (checked % 500 === 0) {
-      process.stdout.write(`  Processing ${checked}/${allEvents.length}...\r`);
-    }
-
-    const result = normalizeEventLocation({
-      title: event.title as string,
-      description: (event.description as string)?.slice(0, 300),
-      location_name: event.location_name as string,
-      address: event.address as string,
-      postal_code: event.postal_code as string,
-      bundesland: event.bundesland as string,
-      latitude: event.latitude as number,
-      longitude: event.longitude as number,
-    });
-
-    if (!result) {
-      noMatch++;
-      continue;
-    }
-
-    const oldLat = event.latitude as number | null;
-    const oldLng = event.longitude as number | null;
-
-    // Event has no coordinates yet → assign
-    if (!oldLat || !oldLng) {
-      newCoords++;
-      updates.push({ id: event.id as string, latitude: result.latitude, longitude: result.longitude });
-      corrections.push({
-        title: (event.title as string).slice(0, 50),
-        location: (event.location_name as string) || '(none)',
-        oldLat: 0, oldLng: 0,
-        newLat: result.latitude, newLng: result.longitude,
-        dist: 0,
-        confidence: result.confidence,
-      });
-      continue;
-    }
-
-    // Event has coordinates → check if they differ significantly
-    const dist = haversineKm(oldLat, oldLng, result.latitude, result.longitude);
-
-    // Accept exact, normalized, from_title, from_description — only skip fuzzy (too risky)
-    if (dist > 5 && (result.confidence === 'exact' || result.confidence === 'normalized' || result.confidence === 'from_title' || result.confidence === 'from_description')) {
-      corrected++;
-      updates.push({ id: event.id as string, latitude: result.latitude, longitude: result.longitude });
-      corrections.push({
-        title: (event.title as string).slice(0, 50),
-        location: (event.location_name as string) || '(none)',
-        oldLat, oldLng,
-        newLat: result.latitude, newLng: result.longitude,
-        dist: Math.round(dist),
-        confidence: result.confidence,
-      });
-    } else {
-      unchanged++;
-    }
-  }
-
-  // Summary
-  console.log(`\n\n${'='.repeat(60)}`);
-  console.log('RESULTS');
-  console.log('='.repeat(60));
-  console.log(`  Checked:     ${checked}`);
-  console.log(`  No match:    ${noMatch}`);
-  console.log(`  Unchanged:   ${unchanged} (diff < 5km or low confidence)`);
-  console.log(`  Corrected:   ${corrected} (coords moved > 5km, high confidence)`);
-  console.log(`  New coords:  ${newCoords} (had no coordinates before)`);
-  console.log(`  Total updates: ${updates.length}`);
-
-  // Show corrections
-  if (corrections.length > 0) {
-    console.log(`\n${'─'.repeat(60)}`);
-    console.log('CORRECTIONS (showing first 50):');
-    console.log('─'.repeat(60));
-    for (const c of corrections.slice(0, 50)) {
-      if (c.dist === 0) {
-        console.log(`  NEW  "${c.title}" | ${c.location} → [${c.newLat.toFixed(4)}, ${c.newLng.toFixed(4)}] (${c.confidence})`);
-      } else {
-        console.log(`  FIX  "${c.title}" | ${c.location} | ${c.dist}km off → [${c.newLat.toFixed(4)}, ${c.newLng.toFixed(4)}] (${c.confidence})`);
+    // Candidate 1: within jitter envelope of any Bundesland center
+    if (lat != null && lng != null) {
+      const matchedBundesland = isWithinJitterEnvelope(lat, lng);
+      if (matchedBundesland) {
+        reason = `within jitter envelope of ${matchedBundesland} center`;
       }
     }
+
+    // Candidate 2: NULL geocoding_confidence (legacy/unknown placement)
+    if (!reason && (e.geocoding_confidence == null)) {
+      reason = 'geocoding_confidence is NULL';
+    }
+
+    if (reason) {
+      candidates.push({
+        id: e.id as string,
+        title: e.title as string,
+        description: (e.description as string | null) ?? null,
+        location_name: (e.location_name as string | null) ?? null,
+        address: (e.address as string | null) ?? null,
+        postal_code: (e.postal_code as string | null) ?? null,
+        bundesland: (e.bundesland as string | null) ?? null,
+        latitude: lat,
+        longitude: lng,
+        geocoding_confidence: (e.geocoding_confidence as string | null) ?? null,
+        geocoding_source: (e.geocoding_source as string | null) ?? null,
+        reason,
+      });
+    }
   }
 
-  // Apply updates
-  if (!isDryRun && updates.length > 0) {
-    console.log(`\n\nApplying ${updates.length} updates to Supabase...`);
-    const BATCH_SIZE = 100;
-    let applied = 0;
+  return candidates;
+}
 
-    for (let i = 0; i < updates.length; i += BATCH_SIZE) {
-      const batch = updates.slice(i, i + BATCH_SIZE);
+async function main() {
+  console.log(`\nFix Geocoding Migration — ${isDryRun ? 'DRY RUN' : 'LIVE MODE'}${isResume ? ' (RESUME)' : ''}`);
+  console.log('='.repeat(60));
 
-      // Supabase doesn't support bulk update by different IDs in one call,
-      // so we use Promise.all with individual updates
-      const promises = batch.map(u =>
-        supabase.from('events').update({ latitude: u.latitude, longitude: u.longitude }).eq('id', u.id)
+  // 1. Fetch all events
+  const allEvents = await fetchAllEvents();
+
+  // 2. Create durable backup BEFORE any changes
+  if (!isDryRun) {
+    console.log('\nCreating durable backup...');
+    await createBackup(allEvents);
+  }
+
+  // 3. Identify migration candidates
+  console.log('\nIdentifying migration candidates...');
+  const candidates = identifyCandidates(allEvents);
+  console.log(`  Found ${candidates.length} candidates out of ${allEvents.length} total events`);
+
+  const byReason: Record<string, number> = {};
+  for (const c of candidates) {
+    byReason[c.reason] = (byReason[c.reason] || 0) + 1;
+  }
+  for (const [reason, count] of Object.entries(byReason)) {
+    console.log(`    ${reason}: ${count}`);
+  }
+
+  // 4. Handle resume
+  let startBatch = 0;
+  if (isResume) {
+    const checkpoint = loadCheckpoint();
+    if (checkpoint) {
+      startBatch = checkpoint.batchNumber;
+      console.log(`\n  Resuming from batch ${startBatch} (last event: ${checkpoint.lastEventId})`);
+    } else {
+      console.log('\n  No checkpoint found, starting from beginning');
+    }
+  }
+
+  // 5. Process candidates in batches
+  let corrected = 0;
+  let nulled = 0;
+  let unchanged = 0;
+  const dryRunLog: DryRunEntry[] = [];
+
+  const totalBatches = Math.ceil(candidates.length / BATCH_SIZE);
+
+  for (let batchNum = startBatch; batchNum < totalBatches; batchNum++) {
+    const batchStart = batchNum * BATCH_SIZE;
+    const batch = candidates.slice(batchStart, batchStart + BATCH_SIZE);
+
+    for (const event of batch) {
+      // Re-run normalizer with enhanced pipeline
+      const result = normalizeEventLocation({
+        title: event.title,
+        description: event.description?.slice(0, 300),
+        location_name: event.location_name ?? undefined,
+        address: event.address ?? undefined,
+        postal_code: event.postal_code ?? undefined,
+        bundesland: event.bundesland ?? undefined,
+        latitude: event.latitude ?? undefined,
+        longitude: event.longitude ?? undefined,
+      });
+
+      // Check if result has acceptable confidence (not fuzzy)
+      const acceptableConfidence = result && (
+        result.confidence === 'exact' ||
+        result.confidence === 'normalized' ||
+        result.confidence === 'from_title' ||
+        result.confidence === 'from_description'
       );
 
-      const results = await Promise.all(promises);
-      const errors = results.filter(r => r.error);
-      if (errors.length > 0) {
-        console.error(`  Batch ${i / BATCH_SIZE + 1}: ${errors.length} errors`);
-      }
+      if (acceptableConfidence && result) {
+        // Event resolves correctly now
+        const distKm = (event.latitude != null && event.longitude != null)
+          ? haversineKm(event.latitude, event.longitude, result.latitude, result.longitude)
+          : null;
 
-      applied += batch.length;
-      process.stdout.write(`  Applied ${applied}/${updates.length}...\r`);
+        if (isDryRun) {
+          dryRunLog.push({
+            event_id: event.id,
+            old_lat: event.latitude,
+            old_lng: event.longitude,
+            new_lat: result.latitude,
+            new_lng: result.longitude,
+            old_confidence: event.geocoding_confidence,
+            new_confidence: result.confidence,
+            distance_km: distKm != null ? Math.round(distKm * 10) / 10 : null,
+            action: 'correct',
+          });
+        } else {
+          const { error } = await supabase
+            .from('events')
+            .update({
+              latitude: result.latitude,
+              longitude: result.longitude,
+              geocoding_confidence: result.confidence,
+              geocoding_source: 'geonames',
+            })
+            .eq('id', event.id);
+
+          if (error) {
+            console.error(`  Error updating event ${event.id}: ${error.message}`);
+          }
+        }
+        corrected++;
+      } else {
+        // Cannot resolve — set to NULL (better than wrong location)
+        if (event.latitude != null || event.longitude != null) {
+          if (isDryRun) {
+            dryRunLog.push({
+              event_id: event.id,
+              old_lat: event.latitude,
+              old_lng: event.longitude,
+              new_lat: null,
+              new_lng: null,
+              old_confidence: event.geocoding_confidence,
+              new_confidence: null,
+              distance_km: null,
+              action: 'null',
+            });
+          } else {
+            const { error } = await supabase
+              .from('events')
+              .update({
+                latitude: null,
+                longitude: null,
+                geocoding_confidence: null,
+                geocoding_source: null,
+              })
+              .eq('id', event.id);
+
+            if (error) {
+              console.error(`  Error nulling event ${event.id}: ${error.message}`);
+            }
+          }
+          nulled++;
+        } else {
+          // Already NULL coords, already NULL confidence — nothing to do
+          unchanged++;
+        }
+      }
     }
 
-    console.log(`\n  ✅ Done! Applied ${applied} updates.`);
-  } else if (isDryRun) {
-    console.log(`\n  🔍 DRY RUN — no changes applied. Run without --dry-run to apply.`);
+    // Save checkpoint after each batch (live mode only)
+    if (!isDryRun && batch.length > 0) {
+      saveCheckpoint(batchNum + 1, batch[batch.length - 1].id);
+    }
+
+    process.stdout.write(`  Batch ${batchNum + 1}/${totalBatches} processed (${corrected} corrected, ${nulled} nulled, ${unchanged} unchanged)\r`);
+  }
+
+  // 6. Report
+  console.log(`\n\n${'='.repeat(60)}`);
+  console.log('MIGRATION REPORT');
+  console.log('='.repeat(60));
+  console.log(`  Total candidates:  ${candidates.length}`);
+  console.log(`  Corrected:         ${corrected} (re-resolved with acceptable confidence)`);
+  console.log(`  Set to NULL:       ${nulled} (could not resolve, coords removed)`);
+  console.log(`  Unchanged:         ${unchanged} (already NULL, no resolution found)`);
+  console.log(`  Total processed:   ${corrected + nulled + unchanged}`);
+
+  if (isDryRun && dryRunLog.length > 0) {
+    console.log(`\n${'─'.repeat(80)}`);
+    console.log('DRY RUN DETAILS (first 100):');
+    console.log('─'.repeat(80));
+    console.log(
+      'event_id'.padEnd(40) +
+      'old_lat'.padEnd(10) +
+      'old_lng'.padEnd(10) +
+      'new_lat'.padEnd(10) +
+      'new_lng'.padEnd(10) +
+      'dist_km'.padEnd(10) +
+      'old_conf'.padEnd(15) +
+      'new_conf'.padEnd(15) +
+      'action'
+    );
+    console.log('─'.repeat(130));
+
+    for (const entry of dryRunLog.slice(0, 100)) {
+      console.log(
+        entry.event_id.slice(0, 38).padEnd(40) +
+        (entry.old_lat?.toFixed(4) ?? 'NULL').padEnd(10) +
+        (entry.old_lng?.toFixed(4) ?? 'NULL').padEnd(10) +
+        (entry.new_lat?.toFixed(4) ?? 'NULL').padEnd(10) +
+        (entry.new_lng?.toFixed(4) ?? 'NULL').padEnd(10) +
+        (entry.distance_km?.toString() ?? '-').padEnd(10) +
+        (entry.old_confidence ?? 'NULL').padEnd(15) +
+        (entry.new_confidence ?? 'NULL').padEnd(15) +
+        entry.action
+      );
+    }
+
+    if (dryRunLog.length > 100) {
+      console.log(`  ... and ${dryRunLog.length - 100} more entries`);
+    }
+  }
+
+  // Clean up checkpoint on successful completion
+  if (!isDryRun) {
+    clearCheckpoint();
+    console.log('\n  Migration complete. Checkpoint cleared.');
+  } else {
+    console.log(`\n  DRY RUN complete. Run without --dry-run to apply changes.`);
   }
 }
 
-main().catch(console.error);
+main().catch(err => {
+  console.error('Migration failed:', err);
+  process.exit(1);
+});
