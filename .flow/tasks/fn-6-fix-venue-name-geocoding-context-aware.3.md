@@ -46,8 +46,8 @@ This captures events whose location_name was a venue and got word-matched to a w
 - [ ] Batch processing with checkpoint/resume
 
 ## Done summary
-TBD
+Added --venue mode to fix-geocoding.ts that identifies events with venue-prefix location names (Schloss, Burg, etc.) wrongly geocoded via the old word-matching bug, plus KNOWN_VENUES coordinate mismatches >1km. Uses matchPlaceName for proper token-boundary matching with umlaut normalization, protects scraper/manual confidence events, and produces separate venue-specific backup and checkpoint files.
 ## Evidence
-- Commits:
-- Tests:
+- Commits: 2dcd47607b5c1f7d9870b7ce6b2b2dafd4e10fae, f9a4eb984176ad1aa14cd7239009a001129703ab
+- Tests: npm test
 - PRs:
