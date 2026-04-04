@@ -73,6 +73,20 @@ function buildIndex(): Map<string, GeoEntry[]> {
         normalizedIndex.get(altNorm)!.push(entry);
       }
     }
+
+    // Index by base name (without geographic suffix like "am See", "an der Donau")
+    // This allows "Mörbisch" to match "Mörbisch am See", "Rust" to match "Rust", etc.
+    const baseName = norm
+      .replace(/\s+(im|in|am|bei|ob|an der|an dem)\s+\w+(\s+\w+)*$/i, '')
+      .trim();
+    if (baseName !== norm && baseName.length >= 3) {
+      if (!normalizedIndex.has(baseName)) normalizedIndex.set(baseName, []);
+      // Only add if not already in the list (avoid duplicates)
+      const existing = normalizedIndex.get(baseName)!;
+      if (!existing.includes(entry)) {
+        existing.push(entry);
+      }
+    }
   }
 
   return normalizedIndex;
@@ -87,6 +101,13 @@ export function normalizeString(input: string): string {
 
   // Lowercase
   s = s.toLowerCase();
+
+  // Normalize umlaut transliterations (oe→ö, ae→ä, ue→ü) BEFORE other processing
+  // This ensures "Moerbisch" matches "Mörbisch" and "Kaernten" matches "Kärnten"
+  // Only apply where it makes sense: not after 'q' for 'ue'
+  s = s.replace(/oe/g, 'ö');
+  s = s.replace(/ae/g, 'ä');
+  s = s.replace(/(?<!q)ue/g, 'ü');
 
   // Expand common Austrian abbreviations
   s = s.replace(/\bst\.\s*/gi, 'sankt ');
@@ -376,6 +397,7 @@ const COMMON_WORD_PLACE_NAMES = new Set([
   'berg', 'stein', 'au', 'egg', 'hard', 'hof', 'see', 'feld',
   'bach', 'wand', 'mark', 'land', 'rain', 'ort', 'tal',
   'lend', 'gries', 'hall', 'sand', 'ried', 'hub', 'anger',
+  'rust', 'horn', 'tulln', 'bruck',
 ]);
 
 /**
@@ -464,10 +486,20 @@ export function extractPlaceFromText(
         // Skip common German function words
         if (windowSize === 1 && /^(der|die|das|und|mit|von|für|auf|bei|nach|ein|eine|zum|zur|den|dem|des|nicht|auch|noch|oder|als|wie|sie|ihr|wir|uns|hat|ist|war|sind|wird|kann|soll|muss|ganz|mehr|neue|gute|guten|guter|gutes|ganze)$/i.test(phrase)) continue;
 
-        // Common-word filter: short words that are also place names need extra validation
-        if (windowSize === 1 && COMMON_WORD_PLACE_NAMES.has(norm) && norm.length < 5) {
-          // Only allow if confirmed by Bundesland context
-          if (!bundesland) continue;
+        // Common-word filter: words that are also common German/English words need
+        // Bundesland context to be accepted as place names in text extraction.
+        // German capitalizes all nouns, so capitalization alone is not a reliable indicator.
+        // However, ALL-lowercase usage is a strong signal it's NOT a place name.
+        if (windowSize === 1 && COMMON_WORD_PLACE_NAMES.has(norm)) {
+          const originalWord = words[i];
+          const isAllLowercase = originalWord === originalWord.toLowerCase();
+
+          // All-lowercase common words are never place names (even with Bundesland context)
+          if (isAllLowercase) continue;
+
+          if (!bundesland) continue; // no context — skip ambiguous common word
+
+          // With Bundesland context, require the match to be in that Bundesland
           const blNorm = bundesland.toLowerCase();
           const hasBlMatch = matches.some(m =>
             m.bundesland.toLowerCase().includes(blNorm) ||
