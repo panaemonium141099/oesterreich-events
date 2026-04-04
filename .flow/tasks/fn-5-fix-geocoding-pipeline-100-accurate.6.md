@@ -23,6 +23,12 @@ Update project documentation to reflect the overhauled geocoding pipeline.
 **docs/superpowers/specs/2026-04-03-geolocation-normalisierung-design.md:**
 - Check off completed acceptance criteria
 
+## Done summary
+Updated CLAUDE.md with geocoding pipeline paths, corrected Geocoding tech description (GeoNames live, Nominatim batch-only), added geocoding scripts to Build & Test, removed resolved ~93 events issue. Added Geocoding Pipeline Enhancement section to CHANGELOG.md documenting all 6 tasks. Checked off all acceptance criteria in the geolocation design spec.
+## Evidence
+- Commits: cffb1de8310fbbd6841573d3b621afcfb2709669
+- Tests: npm test (156 passed)
+- PRs:
 ## Acceptance
 - [ ] CLAUDE.md Wichtige Pfade includes location-normalizer.ts and geocoding scripts
 - [ ] CLAUDE.md Geocoding description reflects live pipeline (GeoNames via normalizer, NOT Nominatim in sync)

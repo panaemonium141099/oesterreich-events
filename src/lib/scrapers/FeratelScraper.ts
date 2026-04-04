@@ -354,10 +354,47 @@ export class FeratelScraper extends BaseScraper {
     return null;
   }
 
+  /**
+   * Clean Deskline event titles that contain raw calendar metadata.
+   * Some regions return names like:
+   *   "8.4.2026Mi.16:00-18:00UhrKids Soul mit Sofie Amelie Mätzler"
+   *   "Mi.19:00-UhrNutzung GemeindeInternÖFFENTLICHThis is some text..."
+   * Strip date, day, time, visibility, and placeholder prefixes.
+   */
+  private cleanTitle(raw: string): string {
+    let t = raw.trim();
+
+    // Strip leading dates: "8.4.2026" or "30.5.2026"
+    t = t.replace(/^\d{1,2}\.\d{1,2}\.\d{4}/g, '');
+
+    // Strip leading day abbreviations: "Mo." "Di." "Mi." "Do." "Fr." "Sa." "So."
+    t = t.replace(/^(Mo|Di|Mi|Do|Fr|Sa|So)\.?\s*/i, '');
+
+    // Strip time ranges: "16:00-18:00Uhr" or "19:00-Uhr" or "14:00Uhr"
+    t = t.replace(/\d{1,2}:\d{2}(-\d{1,2}:\d{2})?-?\s*Uhr/gi, '');
+
+    // Strip repeated dates that appear mid-string
+    t = t.replace(/\d{1,2}\.\d{1,2}\.\d{4}/g, '');
+
+    // Strip visibility markers: "InternÖFFENTLICH", "ÖFFENTLICH", "Intern"
+    t = t.replace(/Intern(?:ÖFFENTLICH|öffentlich)?|ÖFFENTLICH|öffentlich/g, '');
+
+    // Strip "This is some text..." placeholder
+    t = t.replace(/This is some text[.…]*/gi, '');
+
+    // Strip "Nutzung Gemeinde" prefix (internal booking label)
+    t = t.replace(/^Nutzung\s+Gemeinde\s*/i, '');
+
+    // Clean up leftover whitespace, dots, dashes at start
+    t = t.replace(/^[\s.,\-:]+/, '').replace(/\s+/g, ' ').trim();
+
+    return t;
+  }
+
   private parseEvent(event: DesklineEvent, region: FeratelRegionConfig): ScrapedEvent | null {
     if (!event.name || !event.date) return null;
 
-    const title = event.name.trim();
+    const title = this.cleanTitle(event.name);
     if (title.length < 3) return null;
 
     // Parse date — API returns ISO format "2026-03-29T16:00:00"

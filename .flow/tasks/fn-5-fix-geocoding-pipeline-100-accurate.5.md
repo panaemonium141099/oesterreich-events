@@ -50,3 +50,10 @@ Re-geocode all existing events that have wrong coordinates (especially those pla
 - [ ] Batch processing with checkpoint/resume capability (--resume flag)
 - [ ] No event at Burgruine Landsee, Kobersdorf, or Oggau shows Eisenstadt coordinates after migration
 - [ ] Legitimate Eisenstadt events are NOT moved (they re-resolve to Eisenstadt correctly)
+
+## Done summary
+Overhauled fix-geocoding.ts to detect wrongly-placed events via 0.02-degree jitter envelope around Bundesland capitals, re-geocode with enhanced normalizer, and NULL coords for unresolvable events. Added durable backup (coord-backup-YYYY-MM-DD.json), restore script (restore-coords.ts), --dry-run mode, service-role-key-only auth, and deterministic batch checkpoint/resume.
+## Evidence
+- Commits: 9aeb802, 57fdddc, b3b4f24
+- Tests: npm test (156 passed)
+- PRs:

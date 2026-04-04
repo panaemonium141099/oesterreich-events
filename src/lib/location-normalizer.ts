@@ -10,6 +10,7 @@
  */
 import { readFileSync } from 'fs';
 import { join } from 'path';
+import { KNOWN_VENUES } from './known-venues';
 
 interface GeoEntry {
   name: string;
@@ -90,6 +91,49 @@ function buildIndex(): Map<string, GeoEntry[]> {
   }
 
   return normalizedIndex;
+}
+
+/**
+ * German venue prefixes that indicate a location_name is a venue, not a city.
+ * When detected, step 3b word-by-word matching is skipped to prevent
+ * venue words (e.g., "Schloss") from matching GeoNames building entries.
+ */
+const VENUE_PREFIXES = [
+  'schloss', 'burg', 'dom', 'kirche', 'stift', 'kloster',
+  'kurpark', 'kurhaus', 'therme', 'gasthof', 'gasthaus',
+  'hotel', 'pension', 'halle', 'stadthalle', 'kulturzentrum',
+  'konzerthaus', 'theater', 'museum', 'galerie', 'rathaus',
+  'arena', 'stadion', 'pfarrkirche', 'kapelle', 'festspielhaus',
+  'kongresszentrum', 'domkirche', 'musikpavillon',
+];
+
+/**
+ * Check if a location name starts with a known German venue prefix.
+ * Case-insensitive. Returns true if the name is likely a venue, not a city.
+ */
+export function isVenueName(name: string): boolean {
+  const lower = name.toLowerCase().trim();
+  return VENUE_PREFIXES.some(prefix => {
+    if (lower === prefix) return true;
+    // Must be followed by a space (prefix is a complete word)
+    return lower.startsWith(prefix + ' ');
+  });
+}
+
+/**
+ * Build a normalized index of known venue names for lookup.
+ * Keys are normalizeString() output, values are venue coordinates.
+ */
+let knownVenueIndex: Map<string, { latitude: number; longitude: number }> | null = null;
+
+function buildKnownVenueIndex(): Map<string, { latitude: number; longitude: number }> {
+  if (knownVenueIndex) return knownVenueIndex;
+  knownVenueIndex = new Map();
+  for (const [key, coords] of Object.entries(KNOWN_VENUES)) {
+    const norm = normalizeString(key);
+    knownVenueIndex.set(norm, coords);
+  }
+  return knownVenueIndex;
 }
 
 /**
@@ -340,22 +384,50 @@ export function normalizeLocation(
     }
   }
 
+  // 3b-pre. Check known venues BEFORE word-by-word matching.
+  // This catches "Schloss Esterhazy", "Burg Forchtenstein", etc. with exact coords.
+  const venueIndex = buildKnownVenueIndex();
+  const venueMatch = venueIndex.get(norm);
+  if (venueMatch) {
+    return {
+      canonicalName: locationName,
+      latitude: venueMatch.latitude,
+      longitude: venueMatch.longitude,
+      bundesland: bundesland || '',
+      confidence: 'exact',
+    };
+  }
+
+  // 3b-guard. If the location_name starts with a venue prefix (Schloss, Burg, etc.),
+  // skip step 3b word-by-word matching entirely. This prevents "Schloss" from matching
+  // an HTL entry in GeoNames. Return null so normalizeEventLocation falls through
+  // to title/address/description extraction.
+  if (isVenueName(locationName)) {
+    return null;
+  }
+
   // 3b. Try individual words from the location name (for venue names like "Burgruine Landsee")
-  // Try multi-word then single-word substrings
+  // Try multi-word then single-word substrings.
+  // FILTER: Only match PPL-type entries (populated places) to prevent building/venue
+  // feature codes (HTL, CSTL, CH, MUS, etc.) from matching as cities.
   const nameWords = norm.split(/\s+/).filter(w => w.length >= 3);
   for (let len = Math.min(3, nameWords.length); len >= 1; len--) {
     for (let i = 0; i <= nameWords.length - len; i++) {
       const phrase = nameWords.slice(i, i + len).join(' ');
       const phraseMatches = index.get(phrase);
       if (phraseMatches && phraseMatches.length > 0) {
-        const best = disambiguate(phraseMatches, postalCode, bundesland, geoHint);
-        return {
-          canonicalName: best.name,
-          latitude: best.lat,
-          longitude: best.lng,
-          bundesland: best.bundesland,
-          confidence: 'normalized',
-        };
+        // PPL-only filter: only accept populated place entries for word-by-word matching
+        const pplMatches = phraseMatches.filter(e => e.type.startsWith('PPL'));
+        if (pplMatches.length > 0) {
+          const best = disambiguate(pplMatches, postalCode, bundesland, geoHint);
+          return {
+            canonicalName: best.name,
+            latitude: best.lat,
+            longitude: best.lng,
+            bundesland: best.bundesland,
+            confidence: 'normalized',
+          };
+        }
       }
     }
   }
