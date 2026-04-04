@@ -1,0 +1,14 @@
+{
+  "assignee": null,
+  "claim_note": "",
+  "claimed_at": null,
+  "created_at": "2026-04-04T09:46:00.114067Z",
+  "depends_on": [],
+  "epic": "fn-5-fix-geocoding-pipeline-100-accurate",
+  "id": "fn-5-fix-geocoding-pipeline-100-accurate.1",
+  "priority": null,
+  "spec_path": ".flow/tasks/fn-5-fix-geocoding-pipeline-100-accurate.1.md",
+  "status": "todo",
+  "title": "Fix HTTP 500 on /api/events + NULL-coord handling",
+  "updated_at": "2026-04-04T10:17:57.299812Z"
+}

@@ -1,0 +1,18 @@
+{
+  "branch_name": "fn-5-fix-geocoding-pipeline-100-accurate",
+  "completion_review_status": "unknown",
+  "completion_reviewed_at": null,
+  "created_at": "2026-04-04T09:44:15.200150Z",
+  "default_impl": null,
+  "default_review": null,
+  "default_sync": null,
+  "depends_on_epics": [],
+  "id": "fn-5-fix-geocoding-pipeline-100-accurate",
+  "next_task": 1,
+  "plan_review_status": "ship",
+  "plan_reviewed_at": "2026-04-04T10:23:03.278174Z",
+  "spec_path": ".flow/specs/fn-5-fix-geocoding-pipeline-100-accurate.md",
+  "status": "open",
+  "title": "Fix Geocoding Pipeline: 100% Accurate Location Assignment",
+  "updated_at": "2026-04-04T10:23:03.278196Z"
+}

@@ -27,7 +27,7 @@ interface NormalizeResult {
   latitude: number;
   longitude: number;
   bundesland: string;
-  confidence: 'exact' | 'normalized' | 'fuzzy' | 'none';
+  confidence: 'exact' | 'normalized' | 'fuzzy' | 'none'; // Note: 'fuzzy' is logged but never returned (no coord assignment)
 }
 
 // Lazy-loaded database
@@ -205,23 +205,23 @@ function getHint(plz?: string, bundesland?: string): { lat: number; lng: number 
     } catch { /* PLZ module not available */ }
   }
 
-  // Bundesland center as rough hint
+  // Bundesland geographic centroids (NOT capital cities) for unbiased disambiguation
   if (bundesland) {
-    const BL_CENTERS: Record<string, { lat: number; lng: number }> = {
-      'burgenland': { lat: 47.845, lng: 16.519 },
-      'wien': { lat: 48.208, lng: 16.372 },
-      'niederösterreich': { lat: 48.221, lng: 15.632 },
-      'niederosterreich': { lat: 48.221, lng: 15.632 },
-      'oberösterreich': { lat: 48.306, lng: 14.286 },
-      'oberosterreich': { lat: 48.306, lng: 14.286 },
-      'steiermark': { lat: 47.070, lng: 15.439 },
-      'salzburg': { lat: 47.811, lng: 13.055 },
-      'tirol': { lat: 47.268, lng: 11.393 },
-      'kärnten': { lat: 46.624, lng: 14.305 },
-      'karnten': { lat: 46.624, lng: 14.305 },
-      'vorarlberg': { lat: 47.249, lng: 9.980 },
+    const BL_CENTROIDS: Record<string, { lat: number; lng: number }> = {
+      'burgenland': { lat: 47.35, lng: 16.42 },        // geographic center, south of Oberpullendorf
+      'wien': { lat: 48.208, lng: 16.372 },             // Wien is its own Bundesland
+      'niederösterreich': { lat: 48.10, lng: 15.77 },   // geographic center
+      'niederosterreich': { lat: 48.10, lng: 15.77 },
+      'oberösterreich': { lat: 48.02, lng: 13.98 },     // geographic center
+      'oberosterreich': { lat: 48.02, lng: 13.98 },
+      'steiermark': { lat: 47.25, lng: 14.94 },         // geographic center
+      'salzburg': { lat: 47.27, lng: 13.10 },           // geographic center
+      'tirol': { lat: 47.05, lng: 11.40 },              // geographic center
+      'kärnten': { lat: 46.75, lng: 13.85 },            // geographic center
+      'karnten': { lat: 46.75, lng: 13.85 },
+      'vorarlberg': { lat: 47.20, lng: 9.90 },          // geographic center
     };
-    const center = BL_CENTERS[bundesland.toLowerCase()];
+    const center = BL_CENTROIDS[bundesland.toLowerCase()];
     if (center) return center;
   }
 
@@ -280,11 +280,14 @@ export function normalizeLocation(
     }
   }
 
-  // 3. Try extracting just the last part after comma/dash (often the city)
+  // 3. Try extracting from compound names (comma-separated, dash-separated)
+  // Try LAST part first (often the actual place name, e.g., "Oggau am Neusiedler See")
   const parts = locationName.split(/[,\-–—]/).map(p => p.trim()).filter(Boolean);
-  for (const part of parts.reverse()) {
+  for (const part of [...parts].reverse()) {
     if (part.length < 3) continue;
     const partNorm = normalizeString(part);
+
+    // Try direct match on the part
     const partMatches = index.get(partNorm);
     if (partMatches && partMatches.length > 0) {
       const best = disambiguate(partMatches, postalCode, bundesland, geoHint);
@@ -296,12 +299,52 @@ export function normalizeLocation(
         confidence: 'normalized',
       };
     }
+
+    // Try with suffix removal on this part (e.g., "Oggau am Neusiedler See" → "Oggau")
+    const partWithoutSuffix = partNorm
+      .replace(/\s+(im|in|am|bei|ob|an der|an dem)\s+\w+(\s+\w+)*$/i, '')
+      .trim();
+    if (partWithoutSuffix !== partNorm && partWithoutSuffix.length >= 3) {
+      const suffixPartMatches = index.get(partWithoutSuffix);
+      if (suffixPartMatches && suffixPartMatches.length > 0) {
+        const best = disambiguate(suffixPartMatches, postalCode, bundesland, geoHint);
+        return {
+          canonicalName: best.name,
+          latitude: best.lat,
+          longitude: best.lng,
+          bundesland: best.bundesland,
+          confidence: 'normalized',
+        };
+      }
+    }
   }
 
-  // 4. Fuzzy match (Levenshtein ≤ 2) — only for names ≥ 5 chars
+  // 3b. Try individual words from the location name (for venue names like "Burgruine Landsee")
+  // Try multi-word then single-word substrings
+  const nameWords = norm.split(/\s+/).filter(w => w.length >= 3);
+  for (let len = Math.min(3, nameWords.length); len >= 1; len--) {
+    for (let i = 0; i <= nameWords.length - len; i++) {
+      const phrase = nameWords.slice(i, i + len).join(' ');
+      const phraseMatches = index.get(phrase);
+      if (phraseMatches && phraseMatches.length > 0) {
+        const best = disambiguate(phraseMatches, postalCode, bundesland, geoHint);
+        return {
+          canonicalName: best.name,
+          latitude: best.lat,
+          longitude: best.lng,
+          bundesland: best.bundesland,
+          confidence: 'normalized',
+        };
+      }
+    }
+  }
+
+  // 4. Fuzzy match (Levenshtein ≤ 2) — LOG ONLY, do NOT produce coordinate assignments.
+  // Per epic confidence model: fuzzy matches must not be persisted as coordinates.
   if (norm.length >= 5) {
     let bestMatch: GeoEntry | null = null;
     let bestDist = 3; // threshold
+    let bestKey = '';
 
     for (const [key, entries] of index) {
       // Skip very different lengths
@@ -310,18 +353,14 @@ export function normalizeLocation(
       const dist = levenshtein(norm, key);
       if (dist < bestDist) {
         bestDist = dist;
+        bestKey = key;
         bestMatch = disambiguate(entries, postalCode, bundesland, geoHint);
       }
     }
 
     if (bestMatch) {
-      return {
-        canonicalName: bestMatch.name,
-        latitude: bestMatch.lat,
-        longitude: bestMatch.lng,
-        bundesland: bestMatch.bundesland,
-        confidence: 'fuzzy',
-      };
+      console.warn(`[location-normalizer] Fuzzy match rejected (not persisted): "${locationName}" ≈ "${bestMatch.name}" (key="${bestKey}", distance=${bestDist})`);
+      // Return null — fuzzy matches must NOT produce coordinate assignments
     }
   }
 
@@ -329,9 +368,59 @@ export function normalizeLocation(
 }
 
 /**
- * Extract place names from a text string (title or description) using sliding window.
- * Tries 3-word, 2-word, then 1-word phrases against the GeoNames index.
+ * Common German words that are also Austrian place names.
+ * These should NOT match in title/description extraction unless confirmed
+ * by Bundesland context or the name is long enough (>= 5 chars).
+ */
+const COMMON_WORD_PLACE_NAMES = new Set([
+  'berg', 'stein', 'au', 'egg', 'hard', 'hof', 'see', 'feld',
+  'bach', 'wand', 'mark', 'land', 'rain', 'ort', 'tal',
+  'lend', 'gries', 'hall', 'sand', 'ried', 'hub', 'anger',
+]);
+
+/**
+ * Normalize a string for Unicode-aware comparison.
+ * Collapses umlauts (ae/oe/ue), lowercases, strips diacritics.
+ */
+function normalizeForComparison(input: string): string {
+  return input
+    .toLowerCase()
+    .replace(/ä/g, 'a').replace(/ö/g, 'o').replace(/ü/g, 'u')
+    .replace(/ß/g, 'ss')
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '') // strip diacritics
+    .trim();
+}
+
+/**
+ * Check if a normalized place name appears as complete tokens in normalized text.
+ * Handles multi-word names (e.g., "Sankt Margarethen") and prevents substring matches
+ * (e.g., "Rust" must not match inside "frustrated").
+ */
+function matchesAsCompleteTokens(normalizedPlaceName: string, normalizedText: string): boolean {
+  const placeTokens = normalizedPlaceName.split(/\s+/);
+  const textTokens = normalizedText.split(/[\s,;.!?\-–—/()[\]{}]+/).filter(t => t.length > 0);
+
+  // Find the place name tokens as a contiguous sequence in the text tokens
+  for (let i = 0; i <= textTokens.length - placeTokens.length; i++) {
+    let allMatch = true;
+    for (let j = 0; j < placeTokens.length; j++) {
+      if (textTokens[i + j] !== placeTokens[j]) {
+        allMatch = false;
+        break;
+      }
+    }
+    if (allMatch) return true;
+  }
+  return false;
+}
+
+/**
+ * Extract place names from a text string (title or description) using Unicode-aware
+ * token matching. Tries 3-word, 2-word, then 1-word phrases against the GeoNames index.
  * Returns the best (longest) match found.
+ *
+ * Uses complete token matching to prevent substring false positives (e.g., "Rust" in "frustrated").
+ * Filters out common German words that happen to be place names (Berg, Stein, Au, etc.).
  */
 export function extractPlaceFromText(
   text: string,
@@ -352,9 +441,12 @@ export function extractPlaceFromText(
     .replace(/\s+/g, ' ')
     .trim();
 
+  // Prepare normalized text for token matching
+  const normalizedText = normalizeForComparison(cleaned);
+
   const words = cleaned.split(/\s+/).filter(w => w.length >= 2);
 
-  // Try longest phrases first (3, 2, 1 words)
+  // Try longest phrases first (4, 3, 2, 1 words)
   let bestResult: NormalizeResult | null = null;
   let bestWordCount = 0;
 
@@ -369,25 +461,47 @@ export function extractPlaceFromText(
       const matches = index.get(norm);
 
       if (matches && matches.length > 0) {
-        // Skip words that are common German words, not place names
-        if (windowSize === 1 && /^(der|die|das|und|mit|von|für|auf|bei|nach|ein|eine|zum|zur|den|dem|des|nicht|auch|noch|oder|als|wie|sie|ihr|wir|uns|hat|ist|war|sind|wird|kann|soll|muss|ganz|mehr|neue|gute|guten|guter|gutes|ganze|guten|guter)$/i.test(phrase)) continue;
+        // Skip common German function words
+        if (windowSize === 1 && /^(der|die|das|und|mit|von|für|auf|bei|nach|ein|eine|zum|zur|den|dem|des|nicht|auch|noch|oder|als|wie|sie|ihr|wir|uns|hat|ist|war|sind|wird|kann|soll|muss|ganz|mehr|neue|gute|guten|guter|gutes|ganze)$/i.test(phrase)) continue;
 
-        const best = disambiguate(matches, postalCode, bundesland, geoHint);
+        // Common-word filter: short words that are also place names need extra validation
+        if (windowSize === 1 && COMMON_WORD_PLACE_NAMES.has(norm) && norm.length < 5) {
+          // Only allow if confirmed by Bundesland context
+          if (!bundesland) continue;
+          const blNorm = bundesland.toLowerCase();
+          const hasBlMatch = matches.some(m =>
+            m.bundesland.toLowerCase().includes(blNorm) ||
+            blNorm.includes(m.bundesland.toLowerCase())
+          );
+          if (!hasBlMatch) continue;
+        }
+
+        // Unicode-aware complete token matching: verify the place name
+        // appears as complete tokens in the text, not as a substring
+        const bestCandidate = disambiguate(matches, postalCode, bundesland, geoHint);
+        const normalizedCandidateName = normalizeForComparison(bestCandidate.name);
+        const normalizedPhrase = normalizeForComparison(phrase);
+
+        // Check that either the phrase or the canonical name matches as complete tokens
+        if (!matchesAsCompleteTokens(normalizedPhrase, normalizedText) &&
+            !matchesAsCompleteTokens(normalizedCandidateName, normalizedText)) {
+          continue; // substring match — skip
+        }
 
         // For single-word matches with many ambiguous candidates and no good hint,
         // only accept if the match is in the same Bundesland
         if (windowSize === 1 && matches.length > 3 && bundesland) {
-          if (!best.bundesland.toLowerCase().includes(bundesland.toLowerCase()) &&
-              !bundesland.toLowerCase().includes(best.bundesland.toLowerCase())) {
+          if (!bestCandidate.bundesland.toLowerCase().includes(bundesland.toLowerCase()) &&
+              !bundesland.toLowerCase().includes(bestCandidate.bundesland.toLowerCase())) {
             continue; // skip — ambiguous single word, wrong Bundesland
           }
         }
 
         bestResult = {
-          canonicalName: best.name,
-          latitude: best.lat,
-          longitude: best.lng,
-          bundesland: best.bundesland,
+          canonicalName: bestCandidate.name,
+          latitude: bestCandidate.lat,
+          longitude: bestCandidate.lng,
+          bundesland: bestCandidate.bundesland,
           confidence: 'normalized',
         };
         bestWordCount = windowSize;

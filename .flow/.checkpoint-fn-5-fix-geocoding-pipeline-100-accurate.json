@@ -1,0 +1,149 @@
+{
+  "created_at": "2026-04-04T09:48:54.739135Z",
+  "epic": {
+    "data": {
+      "branch_name": "fn-5-fix-geocoding-pipeline-100-accurate",
+      "completion_review_status": "unknown",
+      "completion_reviewed_at": null,
+      "created_at": "2026-04-04T09:44:15.200150Z",
+      "default_impl": null,
+      "default_review": null,
+      "default_sync": null,
+      "depends_on_epics": [],
+      "id": "fn-5-fix-geocoding-pipeline-100-accurate",
+      "next_task": 1,
+      "plan_review_status": "unknown",
+      "plan_reviewed_at": null,
+      "spec_path": ".flow/specs/fn-5-fix-geocoding-pipeline-100-accurate.md",
+      "status": "open",
+      "title": "Fix Geocoding Pipeline: 100% Accurate Location Assignment",
+      "updated_at": "2026-04-04T09:45:52.099646Z"
+    },
+    "spec": "# Fix Geocoding Pipeline: 100% Accurate Location Assignment\n\n## Overview\n\nCritical bug fix: Events are assigned wrong coordinates. Events at Burgruine Landsee, Kobersdorf, Oggau all appear as Eisenstadt on the map. Additionally, /api/events returns HTTP 500.\n\n**Two distinct bugs:**\n1. **Wrong coordinates**: Multiple root causes in the geocoding pipeline cause events to cluster at Bundesland capitals (especially Eisenstadt)\n2. **HTTP 500**: Module-level throw in route.ts crashes the entire route module\n\n## Root Cause Analysis\n\n### Bug 1: Wrong Coordinates (5 root causes)\n\n| # | Root Cause | File:Line | Impact |\n|---|-----------|-----------|--------|\n| A | force-geocode-all.ts Phase 3 uses BUNDESLAND_CENTERS as last-resort fallback. Burgenland = Eisenstadt [47.8453, 16.5189] | src/scripts/force-geocode-all.ts:270-284 | Every unresolvable Burgenland event gets Eisenstadt coords |\n| B | normalizeEventLocation fails on compound/venue names (Burgruine Landsee, Oggauer Weinbauern) | src/lib/location-normalizer.ts:421-463 | Venue names do not match GeoNames entries |\n| C | getHint for Burgenland defaults to Eisenstadt center for disambiguation, biases closest-match | src/lib/location-normalizer.ts:209-224 | Disambiguation always prefers locations near Eisenstadt |\n| D | supabase-sync.ts only fills missing coords (!latitude or !longitude), never corrects wrong ones | src/lib/db/supabase-sync.ts:44-46 | Once wrong coords assigned, they persist forever |\n| E | KNOWN_LOCATIONS and findCityCoords use .includes() matching. Rust matches frustrated, Hall matches Hallein | src/lib/geocoding.ts:54-57, src/scripts/force-geocode-all.ts:166-175 | Substring false positives assign wrong coords |\n\n### Bug 2: HTTP 500\n\n| # | Root Cause | File:Line | Impact |\n|---|-----------|-----------|--------|\n| F | Module-level throw on missing SUPABASE_SERVICE_ROLE_KEY | src/app/api/events/route.ts:8-9 | Route module fails to load, every request returns 500 |\n| G | Potential: event_score null in cursor pagination .lt.0 filter | src/app/api/events/route.ts:259-272 | Malformed PostgREST query on null scores |\n\n## Architecture: Current Geocoding Pipeline\n\nScraper produces ScrapedEvent -> Has lat/lng? -> Yes: Keep scraper coords / No: supabase-sync calls normalizeEventLocation -> GeoNames match? -> Yes: Use GeoNames coords / No: Try title/description extraction -> Found? -> Yes: GeoNames lookup / No: Nominatim free-form query -> Result? -> Yes: Use Nominatim / No: BUNDESLAND_CENTERS fallback (Eisenstadt for Burgenland) BUG!\n\n## Architecture: Target Pipeline (after fix)\n\nScraper produces ScrapedEvent -> Has lat/lng? -> Yes: Confidence check (in Austria bbox?) / No: Enhanced normalizeEventLocation -> GeoNames exact? -> Yes: confidence=exact / No: Compound name split + each part? -> Match: confidence=normalized / No: Title/desc extraction? -> Match: confidence=from_title / No: Structured Nominatim? -> City-level+ result: confidence=nominatim / No: Leave NULL + log warning (CORRECT!)\n\n## Scope\n\n### In Scope\n- Fix all 7 root causes (A-G)\n- Add geocoding_confidence and geocoding_source columns to Supabase events table\n- Improve normalizer for compound/venue names\n- Remove Bundesland-capital fallback (NULL coords > wrong coords)\n- Fix word-boundary matching in KNOWN_LOCATIONS and findCityCoords\n- Fix supabase-sync to correct high-confidence mismatches\n- Re-geocode all wrongly-placed events with backup\n- Handle NULL-coord events in API (do not exclude entirely)\n- Update CLAUDE.md + CHANGELOG.md\n\n### Out of Scope\n- FeratelScraper per-region center fallback (separate epic)\n- User-facing suggest correction feature\n- Self-hosted Nominatim\n- Geocode cache TTL\n\n## Key Design Decisions\n\n1. **NULL coords over wrong coords**: Events that cannot be accurately geocoded get NULL latitude/longitude. The API and UI must handle this gracefully (show in list view without map pin).\n\n2. **Confidence tracking**: Every coordinate assignment stores its confidence level (exact, normalized, from_title, from_description, nominatim, scraper, manual) and source. Enables future auditing.\n\n3. **Correction threshold**: supabase-sync will correct existing coords only when new confidence is exact or normalized, distance difference > 5km, and existing confidence is lower.\n\n4. **Migration safety**: Back up current coords before re-geocoding. Log all changes for audit.\n\n5. **Word-boundary matching**: Replace .includes() with word-boundary regex or exact-segment matching for all location lookups.\n\n## Risks and Mitigations\n\n| Risk | Likelihood | Impact | Mitigation |\n|------|-----------|--------|------------|\n| Migration corrupts coordinates at scale | Medium | High | Backup table before migration, dry-run mode |\n| Events vanish from map (NULL coords) | High | Medium | Add list-only display path for NULL-coord events |\n| Nominatim rate limiting during re-geocode | Medium | Low | Already has 1.1s delay, cache negative results |\n| Improved normalizer causes new false positives | Low | Medium | Test against known problem cases first |\n| fn-1.7 and fn-1.9 also touch route.ts | Medium | Low | Task 1 is isolated to env-check |\n\n## Rollout Plan\n\n1. Task 1: Fix HTTP 500 (immediate, unblocks everything)\n2. Tasks 2-3: Fix normalizer + geocoding (parallel, different files)\n3. Task 4: Fix supabase-sync (depends on 2+3)\n4. Task 5: Migration (depends on 2+3+4, requires backup first)\n5. Task 6: Docs update (after all code changes)\n\n## Non-Functional Targets\n\n- Accuracy: 0 events with wrong Bundesland-capital fallback coordinates\n- Coverage: <10 events with NULL coordinates (down from ~93 currently)\n- Performance: Geocoding pipeline adds <50ms per event during scraper sync\n- Observability: All geocoding decisions logged with confidence + source\n\n## Quick commands\n\n```bash\n# Run normalizer test cases\nnpx tsx src/scripts/test-normalizer.ts\n\n# Verify no HTTP 500\ncurl -s -o /dev/null -w \"%{http_code}\" http://localhost:3000/api/events\n\n# Run re-geocoding in dry-run mode (after implementation)\nnpx tsx src/scripts/fix-geocoding.ts --dry-run\n```\n\n## Acceptance\n\n- [ ] /api/events returns 200 (not 500) even when env vars are misconfigured\n- [ ] Events at Burgruine Landsee show correct coordinates (near Markt Sankt Martin, not Eisenstadt)\n- [ ] Events in Kobersdorf show correct coordinates (47.5922, 16.3153, not Eisenstadt)\n- [ ] Events in Oggau show correct coordinates (47.7833, 16.6667, not Eisenstadt)\n- [ ] No event has coordinates from BUNDESLAND_CENTERS fallback\n- [ ] geocoding_confidence column exists in Supabase events table\n- [ ] Events with NULL coordinates appear in API response (not filtered out by bbox)\n- [ ] KNOWN_LOCATIONS matching uses word boundaries, not .includes()\n- [ ] supabase-sync.ts corrects wrong coords when normalizer has high confidence\n- [ ] Migration script backs up old coords before overwriting\n- [ ] CLAUDE.md and CHANGELOG.md updated with geocoding pipeline changes\n- [ ] All existing tests pass (npm test)\n\n## References\n\n- src/lib/location-normalizer.ts -- Core normalizer\n- src/lib/geocoding.ts -- Nominatim + KNOWN_LOCATIONS\n- src/scripts/force-geocode-all.ts -- Bundesland fallback\n- src/lib/db/supabase-sync.ts -- Coord-fill logic\n- src/app/api/events/route.ts -- Events API\n- src/scripts/test-normalizer.ts -- Test cases for known problem locations\n- data/geonames-at.json -- 34k+ Austrian places\n- docs/superpowers/specs/2026-04-03-geolocation-normalisierung-design.md -- Existing design spec\n- Nominatim Search API: https://nominatim.org/release-docs/latest/api/Search/\n- Nominatim Place Ranking: https://nominatim.org/release-docs/latest/customize/Ranking/\n"
+  },
+  "epic_id": "fn-5-fix-geocoding-pipeline-100-accurate",
+  "schema_version": 2,
+  "tasks": [
+    {
+      "data": {
+        "assignee": null,
+        "claim_note": "",
+        "claimed_at": null,
+        "created_at": "2026-04-04T09:46:00.114067Z",
+        "depends_on": [],
+        "epic": "fn-5-fix-geocoding-pipeline-100-accurate",
+        "id": "fn-5-fix-geocoding-pipeline-100-accurate.1",
+        "priority": null,
+        "spec_path": ".flow/tasks/fn-5-fix-geocoding-pipeline-100-accurate.1.md",
+        "status": "todo",
+        "title": "Fix HTTP 500 on /api/events + NULL-coord handling",
+        "updated_at": "2026-04-04T09:46:56.008118Z"
+      },
+      "id": "fn-5-fix-geocoding-pipeline-100-accurate.1",
+      "runtime": null,
+      "spec": "# fn-5-fix-geocoding-pipeline-100-accurate.1 Fix HTTP 500 on /api/events + NULL-coord handling\n\n## Description\nFix the HTTP 500 error on /api/events and ensure events with NULL coordinates are not silently excluded from API responses.\n\n**Size:** M\n**Files:** src/app/api/events/route.ts\n\n## Approach\n\n**Root Cause F (HTTP 500):** The module-level throw at route.ts:8-9 crashes the entire route module when SUPABASE_SERVICE_ROLE_KEY is missing. Move the env validation inside the GET handler and return a proper JSON error response (500 with body) instead of an unrecoverable module crash.\n\n**Root Cause G (null score pagination):** Review cursor pagination logic at route.ts:259-272. Ensure event_score null is handled safely in the .lt() PostgREST filter. The fallback to 0 at line 261 may produce .lt.0 which interacts oddly with NULL scores in PostgreSQL.\n\n**NULL-coord handling:** The bbox filter at route.ts:149 uses .gte(latitude, 46.3) which excludes ALL events with NULL coords. Add a separate query path or .or() clause to include NULL-coord events in the response, marked with a flag so the frontend can render them in list-only mode.\n\n## Key context\n\n- Follow Next.js App Router pattern: route handlers should return Response objects, not throw\n- The env check pattern at route.ts:8-9 is a common anti-pattern in Next.js routes\n- The existing try/catch at line 123-352 never executes because the module fails to load\n- events API is called by src/app/map/page.tsx:165-166 (the fetchEventsProgressive callback)\n## Acceptance\n- [ ] /api/events returns JSON error (not raw 500) when SUPABASE_SERVICE_ROLE_KEY is missing\n- [ ] /api/events returns 200 with events when env vars are properly set\n- [ ] Events with NULL latitude/longitude are included in API response with a null_coords flag\n- [ ] Cursor pagination handles null event_score without producing malformed PostgREST queries\n- [ ] No module-level throw statements in route.ts\n- [ ] Existing tests pass (npm test)\n## Done summary\nTBD\n\n## Evidence\n- Commits:\n- Tests:\n- PRs:\n"
+    },
+    {
+      "data": {
+        "assignee": null,
+        "claim_note": "",
+        "claimed_at": null,
+        "created_at": "2026-04-04T09:46:06.672477Z",
+        "depends_on": [],
+        "epic": "fn-5-fix-geocoding-pipeline-100-accurate",
+        "id": "fn-5-fix-geocoding-pipeline-100-accurate.2",
+        "priority": null,
+        "spec_path": ".flow/tasks/fn-5-fix-geocoding-pipeline-100-accurate.2.md",
+        "status": "todo",
+        "title": "Overhaul location-normalizer: compound names, disambiguation, word boundaries",
+        "updated_at": "2026-04-04T09:47:15.394416Z"
+      },
+      "id": "fn-5-fix-geocoding-pipeline-100-accurate.2",
+      "runtime": null,
+      "spec": "# fn-5-fix-geocoding-pipeline-100-accurate.2 Overhaul location-normalizer: compound names, disambiguation, word boundaries\n\n## Description\nOverhaul the location normalizer to correctly handle compound venue names, improve disambiguation away from Bundesland centers, and fix word-boundary matching for place name extraction.\n\n**Size:** M\n**Files:** src/lib/location-normalizer.ts, src/scripts/test-normalizer.ts\n\n## Approach\n\n**Root Cause B (compound names):** The normalizer at location-normalizer.ts:421-463 fails on names like \"Burgruine Landsee\" and \"Oggauer Weinbauern, Oggau am Neusiedler See\". Fix the comma-split logic (lines 284-299) to:\n1. Try each comma-separated part individually with full normalization (including suffix removal)\n2. Try the LAST part first (often the actual place name, e.g., \"Oggau am Neusiedler See\")\n3. After suffix removal (am Neusiedler See, an der, im), try the remaining name against GeoNames\n\n**Root Cause C (disambiguation bias):** The getHint at location-normalizer.ts:209-224 uses Bundesland center coords (Eisenstadt for Burgenland). The disambiguate function then picks the closest match to this center, biasing everything toward the capital. Fix: instead of using the Bundesland center, use the geographic center of the Bundesland polygon (or a centroid that better represents the geographic midpoint, not the capital city). For Burgenland the geographic center is roughly 47.35, 16.42 (south of Oberpullendorf), not 47.845, 16.519 (Eisenstadt).\n\n**Word-boundary fix in extractPlaceFromText:** The text extraction at lines 336-399 should use word-boundary matching to avoid false positives where short place names like \"Au\", \"Egg\", \"Hard\", \"Stein\" match inside longer words. Only match when the place name appears as a standalone word.\n\n**Single-word common-word filter:** Add protection against matching common German words that happen to be place names (Berg, Stein, Au, Egg, Hard). Either skip these in from_title/from_description extraction unless confirmed by Bundesland context, or require a minimum name length for text extraction matches.\n\n## Key context\n\n- The existing test-normalizer.ts has test cases for Landsee, Oggau, Kobersdorf\n- The GeoNames DB has 34k+ entries loaded from data/geonames-at.json\n- The normalizer returns confidence levels: exact, normalized, fuzzy, from_title, from_description\n- Recent commits already added from_title/from_description confidence handling\n- Population=0 entries in GeoNames (small Katastralgemeinden) need special handling in disambiguation\n## Acceptance\n- [ ] \"Burgruine Landsee\" resolves to Markt Sankt Martin area coords, not Eisenstadt\n- [ ] \"Oggauer Weinbauern, Oggau am Neusiedler See\" resolves to Oggau coords\n- [ ] \"Kobersdorf\" resolves correctly (47.5922, 16.3153)\n- [ ] Disambiguation does not bias toward Bundesland capital (use geographic centroid)\n- [ ] Word-boundary matching prevents \"Au\" from matching inside \"Bauer\"\n- [ ] Short common-word place names (Berg, Stein, Au) do not produce false matches in title/description extraction\n- [ ] test-normalizer.ts passes all test cases including Landsee, Oggau, Kobersdorf\n- [ ] Existing normalizer tests still pass\n## Done summary\nTBD\n\n## Evidence\n- Commits:\n- Tests:\n- PRs:\n"
+    },
+    {
+      "data": {
+        "assignee": null,
+        "claim_note": "",
+        "claimed_at": null,
+        "created_at": "2026-04-04T09:46:12.992144Z",
+        "depends_on": [],
+        "epic": "fn-5-fix-geocoding-pipeline-100-accurate",
+        "id": "fn-5-fix-geocoding-pipeline-100-accurate.3",
+        "priority": null,
+        "spec_path": ".flow/tasks/fn-5-fix-geocoding-pipeline-100-accurate.3.md",
+        "status": "todo",
+        "title": "Fix geocoding.ts KNOWN_LOCATIONS + remove Bundesland-capital fallback",
+        "updated_at": "2026-04-04T09:47:33.042299Z"
+      },
+      "id": "fn-5-fix-geocoding-pipeline-100-accurate.3",
+      "runtime": null,
+      "spec": "# fn-5-fix-geocoding-pipeline-100-accurate.3 Fix geocoding.ts KNOWN_LOCATIONS + remove Bundesland-capital fallback\n\n## Description\nFix the KNOWN_LOCATIONS substring matching in geocoding.ts and remove the dangerous Bundesland-capital fallback in force-geocode-all.ts. Also fix findCityCoords substring matching.\n\n**Size:** M\n**Files:** src/lib/geocoding.ts, src/scripts/force-geocode-all.ts\n\n## Approach\n\n**Root Cause A (Bundesland-capital fallback):** Phase 3 in force-geocode-all.ts:270-284 assigns BUNDESLAND_CENTERS coordinates to any event that could not be resolved. This is the most damaging root cause. Remove this entire fallback. Events that cannot be geocoded should keep NULL coordinates with a log warning. Never assign approximate coords that place events in the wrong city.\n\n**Root Cause E (KNOWN_LOCATIONS matching):** The lookup at geocoding.ts:54-57 uses queryLower.includes(key) which causes false positives. Replace with word-boundary matching: check that the key appears as a complete word (surrounded by spaces, punctuation, or string boundaries). Use a regex like new RegExp(\\b${escapeRegex(key)}\\b, i) or equivalent.\n\n**findCityCoords fix:** The same .includes() problem exists in force-geocode-all.ts:166-175 where city names are matched as substrings. Apply the same word-boundary fix.\n\n**Nominatim query improvement:** In geocoding.ts, the free-form q= parameter at line 69 sends venue names directly to Nominatim. When the location_name contains a comma, split and try the city part separately. Consider adding addressdetails=1 to validate the result is in the expected Bundesland.\n\n**Validate Nominatim results:** Check place_rank from Nominatim response. Reject results with place_rank < 16 (state/county level). Verify the result coordinates fall within Austria bounding box (lat 46.3-49.1, lng 9.5-17.2).\n\n## Key context\n\n- KNOWN_LOCATIONS has 37 hardcoded Burgenland venue entries\n- BUNDESLAND_CENTERS maps all 9 Bundeslaender to their capital coords\n- findCityCoords is sorted by key length (longest first) but still uses .includes()\n- Nominatim public API: 1 request/second, countrycodes=at already used\n- The geocode_cache stores results by query+hint key - cache invalidation not needed for this task\n## Acceptance\n- [ ] BUNDESLAND_CENTERS fallback completely removed from force-geocode-all.ts\n- [ ] Events that cannot be geocoded keep NULL coordinates (not capital city coords)\n- [ ] KNOWN_LOCATIONS matching uses word boundaries, not .includes()\n- [ ] findCityCoords matching uses word boundaries, not .includes()\n- [ ] \"Rust\" does not match strings containing \"frustrated\" or \"rustic\"\n- [ ] \"Hall\" does not match \"Hallein\"\n- [ ] Nominatim results with place_rank < 16 are rejected\n- [ ] Nominatim results outside Austria bounding box are rejected\n- [ ] Log warnings emitted for events that could not be geocoded\n- [ ] Existing tests pass\n## Done summary\nTBD\n\n## Evidence\n- Commits:\n- Tests:\n- PRs:\n"
+    },
+    {
+      "data": {
+        "assignee": null,
+        "claim_note": "",
+        "claimed_at": null,
+        "created_at": "2026-04-04T09:46:21.513198Z",
+        "depends_on": [
+          "fn-5-fix-geocoding-pipeline-100-accurate.2",
+          "fn-5-fix-geocoding-pipeline-100-accurate.3"
+        ],
+        "epic": "fn-5-fix-geocoding-pipeline-100-accurate",
+        "id": "fn-5-fix-geocoding-pipeline-100-accurate.4",
+        "priority": null,
+        "spec_path": ".flow/tasks/fn-5-fix-geocoding-pipeline-100-accurate.4.md",
+        "status": "todo",
+        "title": "Fix supabase-sync coord correction + add geocoding_confidence column",
+        "updated_at": "2026-04-04T09:47:49.865020Z"
+      },
+      "id": "fn-5-fix-geocoding-pipeline-100-accurate.4",
+      "runtime": null,
+      "spec": "# fn-5-fix-geocoding-pipeline-100-accurate.4 Fix supabase-sync coord correction + add geocoding_confidence column\n\n## Description\nFix supabase-sync.ts to correct wrong coordinates (not just fill missing ones) and add geocoding_confidence + geocoding_source columns to the Supabase events table.\n\n**Size:** M\n**Files:** src/lib/db/supabase-sync.ts, src/types/events.ts (if ScrapedEvent needs update)\n\n## Approach\n\n**Root Cause D (never corrects wrong coords):** The condition at supabase-sync.ts:44-46 only fills missing coords (!latitude || !longitude). Change this to ALSO correct existing coords when:\n1. The normalizer returns confidence exact or normalized (high confidence)\n2. The distance between existing coords and new coords is > 5km (significant mismatch)\n3. The existing geocoding_confidence is lower than the new confidence (dont overwrite better data with worse)\n\n**Add Supabase columns:** Add two new columns to the events table:\n- geocoding_confidence: text (values: exact, normalized, from_title, from_description, nominatim, scraper, manual, null)\n- geocoding_source: text (values: geonames, nominatim, known_locations, scraper, manual, null)\n\nUse a Supabase migration or ALTER TABLE via the service role key. The columns should be nullable to handle existing events.\n\n**Update supabase-sync flow:** When normalizeEventLocation returns a result, store the confidence and source alongside the coordinates. When a scraper provides its own coordinates, set confidence=scraper and source=scraper.\n\n**Correction logic:** Follow the pattern at fix-geocoding.ts which already uses a 5km distance threshold for corrections. But add the confidence comparison: only overwrite if new confidence >= existing confidence.\n\n## Key context\n\n- supabase-sync.ts is called during every scraper run for every event\n- The normalizer already returns a confidence field (exact, normalized, fuzzy, from_title, from_description)\n- fix-geocoding.ts at line 6 uses a 5km threshold - reuse this constant\n- JavaScript falsy: !0 is true, so longitude=0 would be treated as missing (this is fine since longitude 0 is not in Austria)\n- Performance: normalizeEventLocation should remain fast (<50ms per event)\n## Acceptance\n- [ ] geocoding_confidence column exists in Supabase events table\n- [ ] geocoding_source column exists in Supabase events table\n- [ ] supabase-sync corrects coords when normalizer confidence is exact/normalized and distance > 5km\n- [ ] supabase-sync does NOT overwrite higher-confidence coords with lower-confidence ones\n- [ ] Scraper-provided coordinates stored with confidence=scraper, source=scraper\n- [ ] Normalizer results stored with appropriate confidence and source values\n- [ ] Existing events with NULL confidence are treated as lowest priority (any new result can overwrite)\n- [ ] Performance: normalizeEventLocation adds <50ms per event in sync path\n- [ ] Existing tests pass\n## Done summary\nTBD\n\n## Evidence\n- Commits:\n- Tests:\n- PRs:\n"
+    },
+    {
+      "data": {
+        "assignee": null,
+        "claim_note": "",
+        "claimed_at": null,
+        "created_at": "2026-04-04T09:46:27.512636Z",
+        "depends_on": [
+          "fn-5-fix-geocoding-pipeline-100-accurate.4"
+        ],
+        "epic": "fn-5-fix-geocoding-pipeline-100-accurate",
+        "id": "fn-5-fix-geocoding-pipeline-100-accurate.5",
+        "priority": null,
+        "spec_path": ".flow/tasks/fn-5-fix-geocoding-pipeline-100-accurate.5.md",
+        "status": "todo",
+        "title": "Re-geocode all wrongly-placed events with backup and rollback",
+        "updated_at": "2026-04-04T09:48:06.532610Z"
+      },
+      "id": "fn-5-fix-geocoding-pipeline-100-accurate.5",
+      "runtime": null,
+      "spec": "# fn-5-fix-geocoding-pipeline-100-accurate.5 Re-geocode all wrongly-placed events with backup and rollback\n\n## Description\nRe-geocode all existing events that have wrong coordinates (especially those placed at Bundesland capitals by the old fallback). Includes backup mechanism and dry-run mode for safety.\n\n**Size:** M\n**Files:** src/scripts/fix-geocoding.ts (modify existing), possibly new src/scripts/backup-coords.ts\n\n## Approach\n\n**Backup first:** Before any migration, create a backup of all event coordinates. Either:\n- Add old_latitude, old_longitude columns to Supabase events table, OR\n- Export current coords to a JSON file (simpler, recommended)\n- Log every change to a CSV/JSON report file\n\n**Dry-run mode:** Add a --dry-run flag to fix-geocoding.ts that logs what WOULD change without actually updating. Output: event_id, old_lat, old_lng, new_lat, new_lng, old_confidence, new_confidence, distance_km.\n\n**Migration strategy:**\n1. Identify events with coordinates matching BUNDESLAND_CENTERS (within 2km jitter radius) - these are the force-geocoded events\n2. Re-run normalizeEventLocation on each with the improved normalizer\n3. For events that now resolve: update coords + set confidence\n4. For events that still cannot resolve: set coords to NULL + set confidence to NULL + log\n5. Report: X events corrected, Y events set to NULL, Z events unchanged\n\n**Target events:**\n- Events within 2km of any BUNDESLAND_CENTERS entry (the old fallback added ~2km jitter)\n- Events with geocoding_confidence = NULL (pre-migration events)\n- Events where current location_name does not match a place near their coordinates\n\n**Safety:** Process in batches of 100. After each batch, log a checkpoint. If the script crashes, it can resume from the last checkpoint.\n\n## Key context\n\n- fix-geocoding.ts already exists and re-normalizes all events with a 5km threshold\n- force-geocode-all.ts added ~2km random jitter to fallback coords (line 277-280)\n- BUNDESLAND_CENTERS values are in force-geocode-all.ts:16-26\n- There are ~56k events in production Supabase\n- The normalizer depends on data/geonames-at.json being loaded\n- Nominatim rate limit: 1 req/sec - but most re-geocoding should resolve via GeoNames (no Nominatim needed)\n## Acceptance\n- [ ] Backup of all event coordinates created before migration\n- [ ] --dry-run mode outputs changes without modifying database\n- [ ] All events within 2km of BUNDESLAND_CENTERS are re-evaluated\n- [ ] Events that now resolve correctly are updated with new coords + confidence\n- [ ] Events that cannot resolve are set to NULL coords (not kept at wrong location)\n- [ ] Migration report: count of corrected, nulled, and unchanged events\n- [ ] Batch processing with checkpoint/resume capability\n- [ ] No event at Burgruine Landsee, Kobersdorf, or Oggau shows Eisenstadt coordinates after migration\n- [ ] Legitimate Eisenstadt events are NOT moved (they re-resolve to Eisenstadt correctly)\n## Done summary\nTBD\n\n## Evidence\n- Commits:\n- Tests:\n- PRs:\n"
+    },
+    {
+      "data": {
+        "assignee": null,
+        "claim_note": "",
+        "claimed_at": null,
+        "created_at": "2026-04-04T09:46:33.522856Z",
+        "depends_on": [
+          "fn-5-fix-geocoding-pipeline-100-accurate.5"
+        ],
+        "epic": "fn-5-fix-geocoding-pipeline-100-accurate",
+        "id": "fn-5-fix-geocoding-pipeline-100-accurate.6",
+        "priority": null,
+        "spec_path": ".flow/tasks/fn-5-fix-geocoding-pipeline-100-accurate.6.md",
+        "status": "todo",
+        "title": "Update CLAUDE.md, CHANGELOG.md with geocoding pipeline changes",
+        "updated_at": "2026-04-04T09:48:15.407859Z"
+      },
+      "id": "fn-5-fix-geocoding-pipeline-100-accurate.6",
+      "runtime": null,
+      "spec": "# fn-5-fix-geocoding-pipeline-100-accurate.6 Update CLAUDE.md, CHANGELOG.md with geocoding pipeline changes\n\n## Description\nUpdate project documentation to reflect the overhauled geocoding pipeline.\n\n**Size:** S\n**Files:** CLAUDE.md, CHANGELOG.md\n\n## Approach\n\n**CLAUDE.md updates:**\n- Add location-normalizer.ts, force-geocode-all.ts, fix-geocoding.ts to Wichtige Pfade section\n- Update Geocoding description from \"Nominatim (OpenStreetMap) + lokaler Cache\" to describe the 3-stage pipeline (GeoNames lookup -> normalizer -> Nominatim fallback)\n- Add normalize-locations and fix-geocoding to Build & Test commands\n- Update Bekannte Issues: remove the ~93 events without coordinates issue (should be resolved)\n\n**CHANGELOG.md updates:**\n- Add Geocoding Pipeline Enhancement section documenting all changes\n- Update file tree listing to include location-normalizer.ts and new scripts\n- Update geocode_cache table description if schema changed\n- Document the new geocoding_confidence and geocoding_source columns\n\n**docs/superpowers/specs/2026-04-03-geolocation-normalisierung-design.md:**\n- Check off completed acceptance criteria\n## Acceptance\n- [ ] CLAUDE.md Wichtige Pfade includes location-normalizer.ts and geocoding scripts\n- [ ] CLAUDE.md Geocoding description reflects 3-stage pipeline\n- [ ] CLAUDE.md Bekannte Issues updated (remove resolved geocoding issues)\n- [ ] CHANGELOG.md has Geocoding Pipeline Enhancement section\n- [ ] Design spec acceptance criteria checked off\n## Done summary\nTBD\n\n## Evidence\n- Commits:\n- Tests:\n- PRs:\n"
+    }
+  ]
+}

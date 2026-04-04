@@ -1,10 +1,23 @@
 import { getDatabase } from './db/connection';
 import { DISTRICTS } from './districts';
+import { matchPlaceName } from './utils/place-match';
 
 interface GeoResult {
   latitude: number;
   longitude: number;
 }
+
+// Austria bounding box for validating geocoding results
+const AUSTRIA_BBOX = {
+  minLat: 46.3,
+  maxLat: 49.1,
+  minLng: 9.5,
+  maxLng: 17.2,
+};
+
+// Nominatim place_rank threshold: reject results broader than town/village level
+// place_rank 16 = "major street" level, anything < 16 is too broad (state, county, city district)
+const MIN_PLACE_RANK = 16;
 
 // Known Burgenland venue coordinates for common locations
 const KNOWN_LOCATIONS: Record<string, GeoResult> = {
@@ -50,9 +63,9 @@ export async function geocodeLocation(query: string, hint = 'Austria'): Promise<
 
   const queryLower = query.toLowerCase().trim();
 
-  // Check known locations first
+  // Check known locations first (Unicode-aware token matching, no substring false positives)
   for (const [key, coords] of Object.entries(KNOWN_LOCATIONS)) {
-    if (queryLower.includes(key)) {
+    if (matchPlaceName(query, key)) {
       return coords;
     }
   }
@@ -79,10 +92,24 @@ export async function geocodeLocation(query: string, hint = 'Austria'): Promise<
     const results = await response.json();
     if (results.length === 0) return null;
 
-    const result: GeoResult = {
-      latitude: parseFloat(results[0].lat),
-      longitude: parseFloat(results[0].lon),
-    };
+    const nominatimResult = results[0];
+    const lat = parseFloat(nominatimResult.lat);
+    const lng = parseFloat(nominatimResult.lon);
+    const placeRank = nominatimResult.place_rank ?? 0;
+
+    // Validate: reject results with place_rank < 16 (state/county level, too broad)
+    if (placeRank < MIN_PLACE_RANK) {
+      console.warn(`[geocoding] Rejected Nominatim result for "${query}": place_rank=${placeRank} (< ${MIN_PLACE_RANK}), display_name="${nominatimResult.display_name}"`);
+      return null;
+    }
+
+    // Validate: ensure coordinates fall within Austria bounding box
+    if (lat < AUSTRIA_BBOX.minLat || lat > AUSTRIA_BBOX.maxLat || lng < AUSTRIA_BBOX.minLng || lng > AUSTRIA_BBOX.maxLng) {
+      console.warn(`[geocoding] Rejected Nominatim result for "${query}": coords [${lat}, ${lng}] outside Austria bbox`);
+      return null;
+    }
+
+    const result: GeoResult = { latitude: lat, longitude: lng };
 
     // Cache the result
     db.prepare('INSERT OR REPLACE INTO geocode_cache (query, latitude, longitude) VALUES (?, ?, ?)').run(

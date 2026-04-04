@@ -1,9 +1,10 @@
 /**
  * Force-geocode ALL events without coordinates using multiple strategies:
  * 1. PLZ lookup (instant)
- * 2. City name in location/title (instant)
+ * 2. City name in location/title (instant, Unicode-aware token matching)
  * 3. Nominatim for events with specific addresses (API, slow)
- * 4. Bundesland capital as last resort (instant)
+ *
+ * Events that cannot be geocoded keep NULL coordinates (no fallback).
  *
  * Run with: npx tsx src/scripts/force-geocode-all.ts
  */
@@ -11,6 +12,7 @@
 import { getDatabase } from '../lib/db/connection';
 import { getCoordinatesForPLZ } from '../lib/plzCoordinates';
 import { geocodeLocation } from '../lib/geocoding';
+import { matchPlaceName } from '../lib/utils/place-match';
 
 // Bundesland → Landeshauptstadt-Koordinaten (Fallback)
 const BUNDESLAND_CENTERS: Record<string, [number, number]> = {
@@ -165,11 +167,10 @@ function extractPLZ(text: string | null): string | null {
 
 function findCityCoords(text: string | null): [number, number] | null {
   if (!text) return null;
-  const lower = text.toLowerCase();
   // Check longer names first to avoid partial matches
   const entries = Object.entries(CITY_COORDS).sort((a, b) => b[0].length - a[0].length);
   for (const [city, coords] of entries) {
-    if (lower.includes(city)) return coords;
+    if (matchPlaceName(text, city)) return coords;
   }
   return null;
 }
@@ -193,7 +194,6 @@ async function main() {
   let byPLZ = 0;
   let byCity = 0;
   let byNominatim = 0;
-  let byBundesland = 0;
 
   const update = db.prepare('UPDATE events SET latitude = ?, longitude = ? WHERE id = ?');
 
@@ -266,22 +266,16 @@ async function main() {
   }
   console.log(`Nominatim: ${byNominatim} geocoded`);
 
-  // Phase 3: Bundesland-Hauptstadt als Fallback
-  console.log('\n--- Phase 3: Bundesland-Fallback ---');
-  const batchFallback = db.transaction(() => {
-    for (const event of needFallback) {
-      if (event.bundesland && BUNDESLAND_CENTERS[event.bundesland]) {
-        const coords = BUNDESLAND_CENTERS[event.bundesland];
-        // Add small random jitter (±0.02°, ~2km) to avoid all events stacking
-        const jitterLat = (Math.random() - 0.5) * 0.04;
-        const jitterLng = (Math.random() - 0.5) * 0.04;
-        update.run(coords[0] + jitterLat, coords[1] + jitterLng, event.id);
-        byBundesland++;
-      }
-    }
-  });
-  batchFallback();
-  console.log(`Bundesland-Fallback: ${byBundesland}`);
+  // Phase 3: Log events that could not be geocoded (NULL coords preserved)
+  // REMOVED: Bundesland-capital fallback — assigning approximate coords caused
+  // events to appear in wrong cities (e.g., all Burgenland events at Eisenstadt).
+  // Events that cannot be accurately geocoded keep NULL coordinates.
+  console.log('\n--- Phase 3: Unresolved Events (keeping NULL coords) ---');
+  for (const event of needFallback) {
+    console.warn(`[geocoding] Could not geocode event ${event.id}: "${event.title}" (location: "${event.location_name}", bundesland: ${event.bundesland})`);
+  }
+  const byBundesland = 0; // No fallback assignments
+  console.log(`Unresolved (NULL coords): ${needFallback.length}`);
 
   // Final stats
   const remaining = db.prepare('SELECT COUNT(*) as c FROM events WHERE latitude IS NULL').get() as { c: number };

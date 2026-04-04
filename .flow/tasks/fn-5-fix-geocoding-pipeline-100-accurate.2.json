@@ -1,0 +1,14 @@
+{
+  "assignee": null,
+  "claim_note": "",
+  "claimed_at": null,
+  "created_at": "2026-04-04T09:46:06.672477Z",
+  "depends_on": [],
+  "epic": "fn-5-fix-geocoding-pipeline-100-accurate",
+  "id": "fn-5-fix-geocoding-pipeline-100-accurate.2",
+  "priority": null,
+  "spec_path": ".flow/tasks/fn-5-fix-geocoding-pipeline-100-accurate.2.md",
+  "status": "todo",
+  "title": "Overhaul location-normalizer: compound names, disambiguation, word boundaries",
+  "updated_at": "2026-04-04T10:17:58.521597Z"
+}
