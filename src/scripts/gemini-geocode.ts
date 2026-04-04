@@ -1,0 +1,877 @@
+/**
+ * Gemini Flash Geocoding — Batch geocode events using Gemini 2.5 Flash AI.
+ *
+ * Three modes:
+ * 1. --null (default): Resolve events with NULL coordinates
+ * 2. --verify: Re-verify ALL events — send every unique location to Gemini,
+ *    compare with existing coords. If Gemini disagrees by >500m, flag or correct.
+ * 3. --all: Combines both — resolve NULLs AND verify existing coords
+ *
+ * Features:
+ * - Structured JSON output from Gemini with confidence levels
+ * - Austria bbox validation on all results
+ * - Deduplicates by location_name + bundesland (many events share same venue)
+ * - Caches results in SQLite geocode_cache (prefixed key: gemini::...)
+ * - Checkpoint/resume for interrupted runs
+ * - Durable backup before --verify/--all mode
+ * - Dry-run mode for all modes
+ * - Rate-limited at 200ms between API calls
+ * - Only accepts high/medium confidence from Gemini
+ *
+ * Usage:
+ *   npx tsx src/scripts/gemini-geocode.ts --dry-run
+ *   npx tsx src/scripts/gemini-geocode.ts
+ *   npx tsx src/scripts/gemini-geocode.ts --verify --dry-run
+ *   npx tsx src/scripts/gemini-geocode.ts --verify
+ *   npx tsx src/scripts/gemini-geocode.ts --all --dry-run
+ *   npx tsx src/scripts/gemini-geocode.ts --all
+ *   npx tsx src/scripts/gemini-geocode.ts --resume
+ */
+
+import { readFileSync } from 'fs';
+import { join } from 'path';
+
+// Load .env.local (Next.js does this automatically, but tsx does not)
+try {
+  const envPath = join(process.cwd(), '.env.local');
+  const envContent = readFileSync(envPath, 'utf8');
+  for (const line of envContent.split('\n')) {
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith('#')) continue;
+    const eqIdx = trimmed.indexOf('=');
+    if (eqIdx === -1) continue;
+    const key = trimmed.substring(0, eqIdx).trim();
+    const value = trimmed.substring(eqIdx + 1).trim();
+    if (!process.env[key]) process.env[key] = value;
+  }
+} catch { /* .env.local not found, rely on environment */ }
+
+import { GoogleGenAI, Type } from '@google/genai';
+import { createClient } from '@supabase/supabase-js';
+import { getDatabase } from '../lib/db/connection';
+import { normalizeString } from '../lib/location-normalizer';
+import * as fs from 'fs';
+import * as path from 'path';
+
+// ─── Auth: fail fast if keys missing ──────────────────────────────────────
+const geminiApiKey = process.env.GEMINI_API_KEY;
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+if (!geminiApiKey) {
+  console.error('ERROR: Missing GEMINI_API_KEY');
+  console.error('Add GEMINI_API_KEY to .env.local or set it in environment.');
+  process.exit(1);
+}
+
+if (!supabaseUrl) {
+  console.error('ERROR: Missing NEXT_PUBLIC_SUPABASE_URL');
+  process.exit(1);
+}
+
+if (!supabaseServiceKey) {
+  console.error('ERROR: Missing SUPABASE_SERVICE_ROLE_KEY');
+  console.error('This script requires the service role key.');
+  process.exit(1);
+}
+
+const ai = new GoogleGenAI({ apiKey: geminiApiKey });
+const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+// ─── CLI args ──────────────────────────────────────────────────────────────
+const isDryRun = process.argv.includes('--dry-run');
+const isResume = process.argv.includes('--resume');
+const isVerifyMode = process.argv.includes('--verify');
+const isAllMode = process.argv.includes('--all');
+// Default to --null mode if neither --verify nor --all specified
+const isNullMode = !isVerifyMode && !isAllMode;
+
+// ─── Constants ─────────────────────────────────────────────────────────────
+const BATCH_SIZE = 50;
+const RATE_LIMIT_MS = 200;
+const VERIFY_DISTANCE_THRESHOLD_M = 500; // 500m threshold for --verify overwrites
+const AUSTRIA_BBOX = { minLat: 46.3, maxLat: 49.1, minLng: 9.5, maxLng: 17.2 };
+
+/** Confidences that must NOT be overwritten by Gemini */
+const PROTECTED_CONFIDENCES = new Set(['manual', 'scraper']);
+
+/** Confidence rank — lower = higher priority. Gemini can only overwrite lower-ranked. */
+const CONFIDENCE_RANK: Record<string, number> = {
+  manual: 0,
+  scraper: 1,
+  exact: 2,
+  normalized: 3,
+  from_title: 4,
+  from_description: 5,
+  nominatim: 6,
+  gemini: 7,
+};
+
+function getConfidenceRank(confidence: string | null | undefined): number {
+  if (!confidence) return Infinity;
+  return CONFIDENCE_RANK[confidence] ?? Infinity;
+}
+
+const modeLabel = isAllMode ? 'ALL' : isVerifyMode ? 'VERIFY' : 'NULL';
+const CHECKPOINT_FILE = path.resolve(`data/gemini-geocode-${modeLabel.toLowerCase()}-checkpoint.json`);
+
+// ─── Gemini structured output schema ──────────────────────────────────────
+const GEOCODE_SCHEMA = {
+  type: Type.OBJECT,
+  properties: {
+    latitude: {
+      type: Type.NUMBER,
+      description: 'Latitude of the location in decimal degrees (WGS84). Use 6 decimal places.',
+    },
+    longitude: {
+      type: Type.NUMBER,
+      description: 'Longitude of the location in decimal degrees (WGS84). Use 6 decimal places.',
+    },
+    confidence: {
+      type: Type.STRING,
+      description: 'How confident you are: "high" = exact known location, "medium" = good estimate based on context, "low" = uncertain or guessing.',
+    },
+    resolved_name: {
+      type: Type.STRING,
+      description: 'The full resolved name of the location as you understand it (e.g., "Schloss Esterhazy, Eisenstadt, Burgenland").',
+    },
+  },
+  required: ['latitude', 'longitude', 'confidence', 'resolved_name'],
+};
+
+const SYSTEM_PROMPT = `You are an Austrian geography expert. Given a location name and context (Bundesland, address, PLZ, event title), return the precise coordinates.
+
+RULES:
+- You MUST return coordinates within Austria (lat 46.3-49.1, lng 9.5-17.2)
+- Use 6 decimal places for coordinates
+- For venue names (hotels, restaurants, theaters, etc.), return the venue's exact coordinates
+- For generic names like "Hauptplatz", use the Bundesland context to determine the correct city
+- If the location is a well-known Austrian venue, landmark, or place, use your knowledge
+- confidence must be "high", "medium", or "low":
+  - "high": you know this exact place (e.g., "Schloss Schoenbrunn" -> 48.184516, 16.312236)
+  - "medium": you can make a good estimate based on context (e.g., "Gemeindesaal" + "Burgenland, 7000 Eisenstadt")
+  - "low": you are uncertain or guessing — return your best guess but mark as low
+- If you truly cannot determine any plausible location, return latitude=0, longitude=0, confidence="low"
+
+EXAMPLES:
+- "Schloss Esterhazy" + Burgenland -> { latitude: 47.845833, longitude: 16.518611, confidence: "high", resolved_name: "Schloss Esterhazy, Eisenstadt, Burgenland" }
+- "Hauptplatz" + Steiermark -> { latitude: 47.070714, longitude: 15.438889, confidence: "medium", resolved_name: "Hauptplatz, Graz, Steiermark" }
+- "Wiener Stadthalle" + Wien -> { latitude: 48.201667, longitude: 16.330000, confidence: "high", resolved_name: "Wiener Stadthalle, Wien" }
+- "Kulturhaus" + Burgenland, 7400 -> { latitude: 47.2854, longitude: 16.2646, confidence: "medium", resolved_name: "Kulturhaus, Oberwart, Burgenland" }`;
+
+// ─── Helpers ───────────────────────────────────────────────────────────────
+
+function haversineKm(lat1: number, lng1: number, lat2: number, lng2: number): number {
+  const R = 6371;
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLng = (lng2 - lng1) * Math.PI / 180;
+  const a = Math.sin(dLat / 2) ** 2 +
+    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+    Math.sin(dLng / 2) ** 2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
+function isInAustriaBbox(lat: number, lng: number): boolean {
+  return lat >= AUSTRIA_BBOX.minLat && lat <= AUSTRIA_BBOX.maxLat &&
+    lng >= AUSTRIA_BBOX.minLng && lng <= AUSTRIA_BBOX.maxLng;
+}
+
+function getDateString(): string {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
+function sleep(ms: number): Promise<void> {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+/**
+ * Extract a city hint from the event title, e.g., "Konzert in Eisenstadt" -> "Eisenstadt"
+ */
+function extractCityHint(title: string): string | null {
+  // Common patterns: "... in <City>", "... - <City>", "<City>: ..."
+  const inMatch = title.match(/\bin\s+([A-ZÄÖÜ][a-zäöüß]+(?:\s+(?:am|an|bei|ob)\s+[A-ZÄÖÜ][a-zäöüß]+)?)/);
+  if (inMatch) return inMatch[1];
+
+  const dashMatch = title.match(/\s[-–]\s+([A-ZÄÖÜ][a-zäöüß]+(?:\s+(?:am|an|bei|ob)\s+[A-ZÄÖÜ][a-zäöüß]+)?)$/);
+  if (dashMatch) return dashMatch[1];
+
+  return null;
+}
+
+// ─── Checkpoint ────────────────────────────────────────────────────────────
+
+interface Checkpoint {
+  processedKeys: string[];
+  backupPath?: string;
+  timestamp: string;
+}
+
+function saveCheckpoint(processedKeys: string[], backupPath: string | null): void {
+  const data: Checkpoint = { processedKeys, backupPath: backupPath ?? undefined, timestamp: new Date().toISOString() };
+  fs.writeFileSync(CHECKPOINT_FILE, JSON.stringify(data, null, 2));
+}
+
+function loadCheckpoint(): Checkpoint | null {
+  if (!fs.existsSync(CHECKPOINT_FILE)) return null;
+  try {
+    return JSON.parse(fs.readFileSync(CHECKPOINT_FILE, 'utf-8'));
+  } catch {
+    return null;
+  }
+}
+
+function clearCheckpoint(): void {
+  if (fs.existsSync(CHECKPOINT_FILE)) {
+    fs.unlinkSync(CHECKPOINT_FILE);
+  }
+}
+
+// ─── Backup ────────────────────────────────────────────────────────────────
+
+interface BackupEntry {
+  id: string;
+  old_latitude: number | null;
+  old_longitude: number | null;
+  old_geocoding_confidence: string | null;
+  old_geocoding_source: string | null;
+}
+
+async function createBackup(events: EventRow[]): Promise<string> {
+  const backupDir = path.resolve('data');
+  if (!fs.existsSync(backupDir)) {
+    fs.mkdirSync(backupDir, { recursive: true });
+  }
+
+  const backupPath = path.join(backupDir, `coord-backup-gemini-${getDateString()}.json`);
+
+  const entries: BackupEntry[] = events.map(e => ({
+    id: e.id,
+    old_latitude: e.latitude,
+    old_longitude: e.longitude,
+    old_geocoding_confidence: e.geocoding_confidence,
+    old_geocoding_source: e.geocoding_source,
+  }));
+
+  fs.writeFileSync(backupPath, JSON.stringify(entries, null, 2));
+  console.log(`  Backup created: ${backupPath} (${entries.length} events)`);
+  return backupPath;
+}
+
+// ─── SQLite cache ──────────────────────────────────────────────────────────
+
+interface CachedGeoResult {
+  latitude: number;
+  longitude: number;
+}
+
+function getCachedResult(cacheKey: string): CachedGeoResult | null {
+  const db = getDatabase();
+  const row = db.prepare('SELECT latitude, longitude FROM geocode_cache WHERE query = ?').get(cacheKey) as CachedGeoResult | undefined;
+  return row ?? null;
+}
+
+function setCachedResult(cacheKey: string, lat: number, lng: number): void {
+  const db = getDatabase();
+  db.prepare('INSERT OR REPLACE INTO geocode_cache (query, latitude, longitude) VALUES (?, ?, ?)').run(cacheKey, lat, lng);
+}
+
+// ─── Gemini API call ───────────────────────────────────────────────────────
+
+interface GeminiGeoResult {
+  latitude: number;
+  longitude: number;
+  confidence: 'high' | 'medium' | 'low';
+  resolved_name: string;
+}
+
+async function geocodeWithGemini(
+  locationName: string,
+  bundesland: string | null,
+  address: string | null,
+  postalCode: string | null,
+  titleCityHint: string | null,
+): Promise<GeminiGeoResult | null> {
+  // Build context prompt
+  const parts: string[] = [`Location: "${locationName}"`];
+  if (bundesland) parts.push(`Bundesland: ${bundesland}`);
+  if (postalCode) parts.push(`PLZ: ${postalCode}`);
+  if (address) parts.push(`Address: ${address}`);
+  if (titleCityHint) parts.push(`City hint from event title: ${titleCityHint}`);
+
+  const userPrompt = parts.join('\n');
+
+  try {
+    const response = await ai.models.generateContent({
+      model: 'gemini-2.5-flash',
+      contents: userPrompt,
+      config: {
+        systemInstruction: SYSTEM_PROMPT,
+        responseMimeType: 'application/json',
+        responseJsonSchema: GEOCODE_SCHEMA,
+        temperature: 0.1, // Low temperature for factual geocoding
+      },
+    });
+
+    if (!response.text) return null;
+
+    const parsed = JSON.parse(response.text) as GeminiGeoResult;
+
+    // Validate structure
+    if (typeof parsed.latitude !== 'number' || typeof parsed.longitude !== 'number' ||
+        typeof parsed.confidence !== 'string' || typeof parsed.resolved_name !== 'string') {
+      console.warn(`  [gemini] Invalid response structure for "${locationName}"`);
+      return null;
+    }
+
+    return parsed;
+  } catch (err) {
+    console.error(`  [gemini] API error for "${locationName}": ${err instanceof Error ? err.message : err}`);
+    return null;
+  }
+}
+
+// ─── Main ──────────────────────────────────────────────────────────────────
+
+interface EventRow {
+  id: string;
+  title: string;
+  location_name: string | null;
+  address: string | null;
+  postal_code: string | null;
+  bundesland: string | null;
+  latitude: number | null;
+  longitude: number | null;
+  geocoding_confidence: string | null;
+  geocoding_source: string | null;
+}
+
+interface UniqueLocation {
+  key: string; // normalizedLocation||bundesland||cityHint
+  cacheKey: string; // gemini::normalizedLocation||bundesland
+  locationName: string; // original (first seen)
+  bundesland: string | null;
+  address: string | null; // first non-null address seen
+  postalCode: string | null; // first non-null PLZ seen
+  cityHint: string | null;
+  eventIds: string[]; // all events at this location
+  events: EventRow[]; // all event rows for this location
+}
+
+interface AuditEntry {
+  event_id: string;
+  location_name: string | null;
+  old_lat: number | null;
+  old_lng: number | null;
+  new_lat: number | null;
+  new_lng: number | null;
+  old_confidence: string | null;
+  new_confidence: string;
+  distance_m: number | null;
+  action: 'write' | 'overwrite' | 'skip_protected' | 'skip_close' | 'skip_low_confidence' | 'skip_bbox' | 'skip_gemini_null';
+  gemini_resolved: string;
+}
+
+async function fetchEvents(): Promise<EventRow[]> {
+  const allEvents: EventRow[] = [];
+  let offset = 0;
+  const pageSize = 1000;
+
+  console.log('\nFetching events from Supabase...');
+
+  while (true) {
+    let query = supabase
+      .from('events')
+      .select('id, title, location_name, address, postal_code, bundesland, latitude, longitude, geocoding_confidence, geocoding_source')
+      .order('id', { ascending: true })
+      .range(offset, offset + pageSize - 1);
+
+    // In null mode, only fetch events with NULL coords
+    if (isNullMode) {
+      query = query.is('latitude', null);
+    }
+
+    const { data, error } = await query;
+
+    if (error) { console.error('Fetch error:', error.message); break; }
+    if (!data || data.length === 0) break;
+
+    allEvents.push(...(data as EventRow[]));
+    offset += data.length;
+    process.stdout.write(`  Fetched ${allEvents.length} events...\r`);
+    if (data.length < pageSize) break;
+  }
+
+  console.log(`  Total events fetched: ${allEvents.length}`);
+  return allEvents;
+}
+
+function deduplicateLocations(events: EventRow[]): UniqueLocation[] {
+  const map = new Map<string, UniqueLocation>();
+
+  for (const e of events) {
+    const locationName = e.location_name ?? '';
+    if (!locationName.trim()) continue; // Skip events with no location
+
+    const normalized = normalizeString(locationName);
+    const bundesland = e.bundesland ?? '';
+    const cityHint = extractCityHint(e.title);
+    const key = `${normalized}||${bundesland}`;
+    const cacheKey = `gemini::${normalized}||${bundesland}`;
+
+    const existing = map.get(key);
+    if (existing) {
+      existing.eventIds.push(e.id);
+      existing.events.push(e);
+      // Use first non-null address/PLZ
+      if (!existing.address && e.address) existing.address = e.address;
+      if (!existing.postalCode && e.postal_code) existing.postalCode = e.postal_code;
+      if (!existing.cityHint && cityHint) existing.cityHint = cityHint;
+    } else {
+      map.set(key, {
+        key,
+        cacheKey,
+        locationName,
+        bundesland: e.bundesland,
+        address: e.address,
+        postalCode: e.postal_code,
+        cityHint,
+        eventIds: [e.id],
+        events: [e],
+      });
+    }
+  }
+
+  return Array.from(map.values());
+}
+
+async function main() {
+  console.log(`\nGemini Flash Geocoding [${modeLabel}] — ${isDryRun ? 'DRY RUN' : 'LIVE MODE'}${isResume ? ' (RESUME)' : ''}`);
+  console.log('='.repeat(60));
+
+  // 1. Fetch events
+  const events = await fetchEvents();
+  if (events.length === 0) {
+    console.log('\nNo events to process. Done.');
+    return;
+  }
+
+  // 2. For --verify/--all mode, filter out protected confidences
+  let processableEvents = events;
+  if (!isNullMode) {
+    processableEvents = events.filter(e => {
+      const conf = e.geocoding_confidence;
+      return !conf || !PROTECTED_CONFIDENCES.has(conf);
+    });
+    console.log(`  After filtering protected confidences: ${processableEvents.length} events`);
+  }
+
+  // 3. Deduplicate by location
+  const uniqueLocations = deduplicateLocations(processableEvents);
+  console.log(`  Unique locations to process: ${uniqueLocations.length} (from ${processableEvents.length} events)`);
+
+  // 4. Handle resume
+  let processedKeys = new Set<string>();
+  let backupPath: string | null = null;
+  if (isResume) {
+    const checkpoint = loadCheckpoint();
+    if (checkpoint) {
+      processedKeys = new Set(checkpoint.processedKeys);
+      backupPath = checkpoint.backupPath ?? null;
+      console.log(`\n  Resuming: ${processedKeys.size} locations already processed`);
+      if (backupPath) console.log(`  Using original backup: ${backupPath}`);
+    } else {
+      console.log('\n  No checkpoint found, starting from beginning');
+    }
+  }
+
+  // 5. Create backup before --verify/--all (skip on resume or dry-run)
+  if (!isDryRun && !isNullMode && !backupPath) {
+    console.log('\nCreating durable backup...');
+    backupPath = await createBackup(events);
+  }
+
+  // 6. Filter out already-processed locations (for resume)
+  const locationsToProcess = uniqueLocations.filter(loc => !processedKeys.has(loc.key));
+  console.log(`  Locations remaining: ${locationsToProcess.length}`);
+
+  // 7. Process locations
+  let geminiCalls = 0;
+  let cacheHits = 0;
+  let eventsWritten = 0;
+  let eventsOverwritten = 0;
+  let eventsSkipped = 0;
+  const auditLog: AuditEntry[] = [];
+
+  const totalLocations = locationsToProcess.length;
+  const allProcessedKeys = Array.from(processedKeys);
+
+  for (let i = 0; i < totalLocations; i++) {
+    const loc = locationsToProcess[i];
+
+    // Check SQLite cache first
+    let lat: number | null = null;
+    let lng: number | null = null;
+    let confidence: string = 'gemini';
+    let resolvedName: string = '';
+
+    const cached = getCachedResult(loc.cacheKey);
+    if (cached) {
+      lat = cached.latitude;
+      lng = cached.longitude;
+      confidence = 'gemini';
+      resolvedName = '(cached)';
+      cacheHits++;
+    } else {
+      // Call Gemini
+      const result = await geocodeWithGemini(
+        loc.locationName,
+        loc.bundesland,
+        loc.address,
+        loc.postalCode,
+        loc.cityHint,
+      );
+      geminiCalls++;
+
+      if (result) {
+        // Only accept high/medium confidence
+        if (result.confidence === 'low') {
+          // Log skip for all events at this location
+          for (const event of loc.events) {
+            auditLog.push({
+              event_id: event.id,
+              location_name: event.location_name,
+              old_lat: event.latitude,
+              old_lng: event.longitude,
+              new_lat: result.latitude,
+              new_lng: result.longitude,
+              old_confidence: event.geocoding_confidence,
+              new_confidence: 'gemini',
+              distance_m: null,
+              action: 'skip_low_confidence',
+              gemini_resolved: result.resolved_name,
+            });
+          }
+          eventsSkipped += loc.events.length;
+
+          // Still save checkpoint progress
+          allProcessedKeys.push(loc.key);
+          if (!isDryRun && (i + 1) % BATCH_SIZE === 0) {
+            saveCheckpoint(allProcessedKeys, backupPath);
+          }
+
+          // Rate limit
+          await sleep(RATE_LIMIT_MS);
+          process.stdout.write(`  Processing ${i + 1}/${totalLocations} (${geminiCalls} API calls, ${cacheHits} cache hits)...\r`);
+          continue;
+        }
+
+        // Austria bbox validation
+        if (!isInAustriaBbox(result.latitude, result.longitude)) {
+          for (const event of loc.events) {
+            auditLog.push({
+              event_id: event.id,
+              location_name: event.location_name,
+              old_lat: event.latitude,
+              old_lng: event.longitude,
+              new_lat: result.latitude,
+              new_lng: result.longitude,
+              old_confidence: event.geocoding_confidence,
+              new_confidence: 'gemini',
+              distance_m: null,
+              action: 'skip_bbox',
+              gemini_resolved: result.resolved_name,
+            });
+          }
+          eventsSkipped += loc.events.length;
+
+          console.warn(`\n  [bbox] Rejected: "${loc.locationName}" -> [${result.latitude}, ${result.longitude}] (${result.resolved_name})`);
+
+          allProcessedKeys.push(loc.key);
+          if (!isDryRun && (i + 1) % BATCH_SIZE === 0) {
+            saveCheckpoint(allProcessedKeys, backupPath);
+          }
+          await sleep(RATE_LIMIT_MS);
+          process.stdout.write(`  Processing ${i + 1}/${totalLocations} (${geminiCalls} API calls, ${cacheHits} cache hits)...\r`);
+          continue;
+        }
+
+        // Gemini returned 0,0 = unable to resolve
+        if (result.latitude === 0 && result.longitude === 0) {
+          for (const event of loc.events) {
+            auditLog.push({
+              event_id: event.id,
+              location_name: event.location_name,
+              old_lat: event.latitude,
+              old_lng: event.longitude,
+              new_lat: null,
+              new_lng: null,
+              old_confidence: event.geocoding_confidence,
+              new_confidence: 'gemini',
+              distance_m: null,
+              action: 'skip_gemini_null',
+              gemini_resolved: result.resolved_name,
+            });
+          }
+          eventsSkipped += loc.events.length;
+
+          allProcessedKeys.push(loc.key);
+          if (!isDryRun && (i + 1) % BATCH_SIZE === 0) {
+            saveCheckpoint(allProcessedKeys, backupPath);
+          }
+          await sleep(RATE_LIMIT_MS);
+          process.stdout.write(`  Processing ${i + 1}/${totalLocations} (${geminiCalls} API calls, ${cacheHits} cache hits)...\r`);
+          continue;
+        }
+
+        lat = result.latitude;
+        lng = result.longitude;
+        resolvedName = result.resolved_name;
+
+        // Cache the valid result
+        if (!isDryRun) {
+          setCachedResult(loc.cacheKey, lat, lng);
+        }
+      } else {
+        // Gemini returned null (API error)
+        eventsSkipped += loc.events.length;
+
+        allProcessedKeys.push(loc.key);
+        if (!isDryRun && (i + 1) % BATCH_SIZE === 0) {
+          saveCheckpoint(allProcessedKeys, backupPath);
+        }
+        await sleep(RATE_LIMIT_MS);
+        process.stdout.write(`  Processing ${i + 1}/${totalLocations} (${geminiCalls} API calls, ${cacheHits} cache hits)...\r`);
+        continue;
+      }
+
+      // Rate limit between Gemini calls
+      await sleep(RATE_LIMIT_MS);
+    }
+
+    // Apply results to all events at this location
+    if (lat !== null && lng !== null) {
+      for (const event of loc.events) {
+        // Check if event is protected
+        if (event.geocoding_confidence && PROTECTED_CONFIDENCES.has(event.geocoding_confidence)) {
+          auditLog.push({
+            event_id: event.id,
+            location_name: event.location_name,
+            old_lat: event.latitude,
+            old_lng: event.longitude,
+            new_lat: lat,
+            new_lng: lng,
+            old_confidence: event.geocoding_confidence,
+            new_confidence: confidence,
+            distance_m: null,
+            action: 'skip_protected',
+            gemini_resolved: resolvedName,
+          });
+          eventsSkipped++;
+          continue;
+        }
+
+        if (event.latitude !== null && event.longitude !== null) {
+          // Event has existing coords — verify mode logic
+          const distM = haversineKm(event.latitude, event.longitude, lat, lng) * 1000;
+
+          // Only overwrite if distance > 500m AND existing confidence <= gemini rank
+          if (distM <= VERIFY_DISTANCE_THRESHOLD_M) {
+            auditLog.push({
+              event_id: event.id,
+              location_name: event.location_name,
+              old_lat: event.latitude,
+              old_lng: event.longitude,
+              new_lat: lat,
+              new_lng: lng,
+              old_confidence: event.geocoding_confidence,
+              new_confidence: confidence,
+              distance_m: Math.round(distM),
+              action: 'skip_close',
+              gemini_resolved: resolvedName,
+            });
+            eventsSkipped++;
+            continue;
+          }
+
+          const existingRank = getConfidenceRank(event.geocoding_confidence);
+          const geminiRank = getConfidenceRank('gemini');
+
+          if (existingRank < geminiRank) {
+            // Existing confidence is higher — don't overwrite, just log
+            auditLog.push({
+              event_id: event.id,
+              location_name: event.location_name,
+              old_lat: event.latitude,
+              old_lng: event.longitude,
+              new_lat: lat,
+              new_lng: lng,
+              old_confidence: event.geocoding_confidence,
+              new_confidence: confidence,
+              distance_m: Math.round(distM),
+              action: 'skip_close', // existing has higher confidence
+              gemini_resolved: resolvedName,
+            });
+            eventsSkipped++;
+            continue;
+          }
+
+          // Overwrite: distance > 500m AND gemini rank >= existing rank
+          auditLog.push({
+            event_id: event.id,
+            location_name: event.location_name,
+            old_lat: event.latitude,
+            old_lng: event.longitude,
+            new_lat: lat,
+            new_lng: lng,
+            old_confidence: event.geocoding_confidence,
+            new_confidence: confidence,
+            distance_m: Math.round(distM),
+            action: 'overwrite',
+            gemini_resolved: resolvedName,
+          });
+
+          if (!isDryRun) {
+            const { error } = await supabase
+              .from('events')
+              .update({
+                latitude: lat,
+                longitude: lng,
+                geocoding_confidence: 'gemini',
+                geocoding_source: 'gemini',
+              })
+              .eq('id', event.id);
+            if (error) console.error(`  Error updating event ${event.id}: ${error.message}`);
+          }
+          eventsOverwritten++;
+        } else {
+          // NULL coords — write directly
+          auditLog.push({
+            event_id: event.id,
+            location_name: event.location_name,
+            old_lat: null,
+            old_lng: null,
+            new_lat: lat,
+            new_lng: lng,
+            old_confidence: event.geocoding_confidence,
+            new_confidence: confidence,
+            distance_m: null,
+            action: 'write',
+            gemini_resolved: resolvedName,
+          });
+
+          if (!isDryRun) {
+            const { error } = await supabase
+              .from('events')
+              .update({
+                latitude: lat,
+                longitude: lng,
+                geocoding_confidence: 'gemini',
+                geocoding_source: 'gemini',
+              })
+              .eq('id', event.id);
+            if (error) console.error(`  Error updating event ${event.id}: ${error.message}`);
+          }
+          eventsWritten++;
+        }
+      }
+    }
+
+    // Save checkpoint periodically
+    allProcessedKeys.push(loc.key);
+    if (!isDryRun && (i + 1) % BATCH_SIZE === 0) {
+      saveCheckpoint(allProcessedKeys, backupPath);
+    }
+
+    process.stdout.write(`  Processing ${i + 1}/${totalLocations} (${geminiCalls} API calls, ${cacheHits} cache hits)...\r`);
+  }
+
+  // 8. Report
+  console.log(`\n\n${'='.repeat(60)}`);
+  console.log('GEMINI GEOCODING REPORT');
+  console.log('='.repeat(60));
+  console.log(`  Mode:                ${modeLabel}`);
+  console.log(`  Total events:        ${processableEvents.length}`);
+  console.log(`  Unique locations:    ${uniqueLocations.length}`);
+  console.log(`  Gemini API calls:    ${geminiCalls}`);
+  console.log(`  Cache hits:          ${cacheHits}`);
+  console.log(`  Events written:      ${eventsWritten} (NULL -> coords)`);
+  console.log(`  Events overwritten:  ${eventsOverwritten} (old coords -> Gemini coords)`);
+  console.log(`  Events skipped:      ${eventsSkipped}`);
+
+  // Audit log details
+  if (auditLog.length > 0) {
+    const actionCounts: Record<string, number> = {};
+    for (const entry of auditLog) {
+      actionCounts[entry.action] = (actionCounts[entry.action] || 0) + 1;
+    }
+    console.log('\n  Action breakdown:');
+    for (const [action, count] of Object.entries(actionCounts).sort((a, b) => b[1] - a[1])) {
+      console.log(`    ${action}: ${count}`);
+    }
+
+    // Show corrections (overwrites) in detail
+    const corrections = auditLog.filter(e => e.action === 'overwrite');
+    if (corrections.length > 0) {
+      console.log(`\n${'─'.repeat(100)}`);
+      console.log('CORRECTIONS (first 50):');
+      console.log('─'.repeat(100));
+      console.log(
+        'event_id'.padEnd(40) +
+        'location'.padEnd(25) +
+        'old_lat'.padEnd(10) +
+        'old_lng'.padEnd(10) +
+        'new_lat'.padEnd(10) +
+        'new_lng'.padEnd(10) +
+        'dist_m'.padEnd(8) +
+        'old_conf'
+      );
+      console.log('─'.repeat(100));
+
+      for (const entry of corrections.slice(0, 50)) {
+        console.log(
+          (entry.event_id?.slice(0, 38) ?? '').padEnd(40) +
+          (entry.location_name?.slice(0, 23) ?? '').padEnd(25) +
+          (entry.old_lat?.toFixed(4) ?? 'NULL').padEnd(10) +
+          (entry.old_lng?.toFixed(4) ?? 'NULL').padEnd(10) +
+          (entry.new_lat?.toFixed(4) ?? 'NULL').padEnd(10) +
+          (entry.new_lng?.toFixed(4) ?? 'NULL').padEnd(10) +
+          (entry.distance_m?.toString() ?? '-').padEnd(8) +
+          (entry.old_confidence ?? 'NULL')
+        );
+      }
+      if (corrections.length > 50) {
+        console.log(`  ... and ${corrections.length - 50} more corrections`);
+      }
+    }
+
+    // Show writes (NULL -> coords) summary
+    const writes = auditLog.filter(e => e.action === 'write');
+    if (writes.length > 0 && isDryRun) {
+      console.log(`\n${'─'.repeat(100)}`);
+      console.log(`WRITES (first 50 of ${writes.length}):`)
+      console.log('─'.repeat(100));
+      for (const entry of writes.slice(0, 50)) {
+        console.log(
+          `  ${entry.event_id?.slice(0, 36)} | ${(entry.location_name ?? '').slice(0, 30).padEnd(30)} -> [${entry.new_lat?.toFixed(4)}, ${entry.new_lng?.toFixed(4)}] (${entry.gemini_resolved})`
+        );
+      }
+      if (writes.length > 50) {
+        console.log(`  ... and ${writes.length - 50} more writes`);
+      }
+    }
+  }
+
+  // Clean up
+  if (!isDryRun) {
+    clearCheckpoint();
+    console.log('\n  Geocoding complete. Checkpoint cleared.');
+  } else {
+    console.log(`\n  DRY RUN complete. Run without --dry-run to apply changes.`);
+  }
+}
+
+main().catch(err => {
+  console.error('Gemini geocoding failed:', err);
+  process.exit(1);
+});

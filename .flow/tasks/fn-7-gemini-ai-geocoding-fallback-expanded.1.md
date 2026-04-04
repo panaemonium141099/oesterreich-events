@@ -23,8 +23,8 @@ restaurant, wirtshaus, beisl, cafe, kaffeehaus, bar, pub, kino, bibliothek, volk
 - [ ] test-normalizer.ts still passes
 
 ## Done summary
-TBD
+Expanded VENUE_PREFIXES from 30 to 64 entries with missing German venue types (restaurant, wirtshaus, cafe, heuriger, etc.) and added "gemini" as confidence rank 7 in CONFIDENCE_RANK.
 ## Evidence
-- Commits:
-- Tests:
+- Commits: e40e8da799941855b804dfeb5066302805664728
+- Tests: npm test (156 passed), npx tsx src/scripts/test-normalizer.ts (50 passed)
 - PRs:
