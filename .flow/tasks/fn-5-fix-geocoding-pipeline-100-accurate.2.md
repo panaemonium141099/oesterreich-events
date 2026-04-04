@@ -46,3 +46,10 @@ Overhaul the location normalizer to correctly handle compound venue names, impro
 - [ ] test-normalizer.ts has negative test: "Rust" does not match inside "frustrated"/"rustic"
 - [ ] test-normalizer.ts has test for diacritics: "Moerbisch" matches Moerbisch am See
 - [ ] Existing normalizer tests still pass
+
+## Done summary
+Overhauled location-normalizer with geographic centroid disambiguation, compound venue name handling, fuzzy-match coord rejection, umlaut transliteration, Unicode-aware token matching, and common-word filtering. All 27 normalizer test cases and 156 vitest tests pass.
+## Evidence
+- Commits: 766e93171ad3d5d0ee37af9dab81587c449325dc
+- Tests: npm test (156 passed), npx tsx src/scripts/test-normalizer.ts (27 passed)
+- PRs:

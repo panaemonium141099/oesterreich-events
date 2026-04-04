@@ -48,5 +48,8 @@ Fix the KNOWN_LOCATIONS substring matching in geocoding.ts and remove the danger
 - [ ] Existing tests pass
 
 ## Done summary
-
+Replaced .includes() substring matching with Unicode-aware token matching (matchPlaceName utility) for KNOWN_LOCATIONS and findCityCoords, preventing false positives like "Rust" matching "frustrated". Removed the BUNDESLAND_CENTERS capital fallback so unresolvable events keep NULL coords. Added Nominatim result validation (place_rank >= 16, Austria bounding box). Added Sankt/St. normalization for abbreviation equivalence.
 ## Evidence
+- Commits: 085abdc, 21db137
+- Tests: npx vitest run (156 passed)
+- PRs:

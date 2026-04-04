@@ -25,6 +25,8 @@ export interface Event {
   tags: string[] | null;
   ticket_url?: string | null;
   visibility?: string;
+  geocoding_confidence?: string | null;
+  geocoding_source?: string | null;
   event_score?: number;
   score_updated_at?: string;
   created_at: string;
