@@ -189,6 +189,7 @@ async function fetchAllEvents(): Promise<Array<Record<string, unknown>>> {
     const { data, error } = await supabase
       .from('events')
       .select('id, title, description, location_name, address, postal_code, bundesland, latitude, longitude, geocoding_confidence, geocoding_source')
+      .order('id', { ascending: true })
       .range(offset, offset + pageSize - 1);
 
     if (error) { console.error('Fetch error:', error.message); break; }
@@ -272,15 +273,27 @@ async function main() {
     console.log(`    ${reason}: ${count}`);
   }
 
-  // 4. Handle resume
-  let startBatch = 0;
+  // 4. Handle resume — skip candidates already processed using lastEventId
+  let resumeAfterEventId: string | null = null;
   if (isResume) {
     const checkpoint = loadCheckpoint();
     if (checkpoint) {
-      startBatch = checkpoint.batchNumber;
-      console.log(`\n  Resuming from batch ${startBatch} (last event: ${checkpoint.lastEventId})`);
+      resumeAfterEventId = checkpoint.lastEventId;
+      console.log(`\n  Resuming after event: ${resumeAfterEventId}`);
     } else {
       console.log('\n  No checkpoint found, starting from beginning');
+    }
+  }
+
+  // Skip candidates that were already processed (by stable ID ordering)
+  let candidatesToProcess = candidates;
+  if (resumeAfterEventId) {
+    const resumeIdx = candidates.findIndex(c => c.id === resumeAfterEventId);
+    if (resumeIdx >= 0) {
+      candidatesToProcess = candidates.slice(resumeIdx + 1);
+      console.log(`  Skipped ${resumeIdx + 1} already-processed candidates, ${candidatesToProcess.length} remaining`);
+    } else {
+      console.log(`  WARNING: Resume event ID not found in candidates, starting from beginning`);
     }
   }
 
@@ -290,11 +303,11 @@ async function main() {
   let unchanged = 0;
   const dryRunLog: DryRunEntry[] = [];
 
-  const totalBatches = Math.ceil(candidates.length / BATCH_SIZE);
+  const totalBatches = Math.ceil(candidatesToProcess.length / BATCH_SIZE);
 
-  for (let batchNum = startBatch; batchNum < totalBatches; batchNum++) {
+  for (let batchNum = 0; batchNum < totalBatches; batchNum++) {
     const batchStart = batchNum * BATCH_SIZE;
-    const batch = candidates.slice(batchStart, batchStart + BATCH_SIZE);
+    const batch = candidatesToProcess.slice(batchStart, batchStart + BATCH_SIZE);
 
     for (const event of batch) {
       // Re-run normalizer with enhanced pipeline
