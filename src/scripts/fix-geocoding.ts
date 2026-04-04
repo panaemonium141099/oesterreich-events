@@ -124,7 +124,7 @@ async function main() {
     // Event has coordinates → check if they differ significantly
     const dist = haversineKm(oldLat, oldLng, result.latitude, result.longitude);
 
-    if (dist > 5 && (result.confidence === 'exact' || result.confidence === 'normalized')) {
+    if (dist > 5 && result.confidence !== 'fuzzy') {
       corrected++;
       updates.push({ id: event.id as string, latitude: result.latitude, longitude: result.longitude });
       corrections.push({
