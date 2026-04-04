@@ -707,6 +707,11 @@ export function normalizeEventLocation(event: {
 }): { latitude: number; longitude: number; location_name?: string; confidence: string } | null {
   const hint = getHint(event.postal_code, event.bundesland);
 
+  // Per epic design decision #5: when location_name is a venue and city was resolved
+  // from context (address, title, description), use confidence "normalized" (rank 3)
+  // instead of "from_title" (rank 4) to ensure venue-context resolutions take precedence.
+  const isVenue = event.location_name ? isVenueName(event.location_name) : false;
+
   // 1. Try location_name (most specific)
   if (event.location_name) {
     const result = normalizeLocation(event.location_name, event.postal_code, event.bundesland, hint);
@@ -718,30 +723,9 @@ export function normalizeEventLocation(event: {
         confidence: result.confidence,
       };
     }
-
-    // 1b. If location_name is a venue, try extracting city from the venue name suffix.
-    // E.g., "Kulturzentrum Mattersburg" -> strip prefix -> "Mattersburg" -> PPL match.
-    // Per epic design decision #5: venue-resolved results get confidence "normalized".
-    if (isVenueName(event.location_name)) {
-      const venueCity = extractCityFromVenueName(
-        event.location_name, event.postal_code, event.bundesland, hint
-      );
-      if (venueCity) {
-        return {
-          latitude: venueCity.latitude,
-          longitude: venueCity.longitude,
-          confidence: 'normalized',
-        };
-      }
-    }
   }
 
-  // Per epic design decision #5: when location_name is a venue and city was resolved
-  // from context (address, title, description), use confidence "normalized" (rank 3)
-  // instead of "from_title" (rank 4) to ensure venue-context resolutions take precedence.
-  const isVenue = event.location_name ? isVenueName(event.location_name) : false;
-
-  // 2. Try address field
+  // 2. Try address field (higher priority than venue-name suffix per spec)
   if (event.address) {
     // Extract city from address (usually last part after comma)
     const parts = event.address.split(',').map(p => p.trim());
@@ -755,6 +739,22 @@ export function normalizeEventLocation(event: {
           confidence: isVenue ? 'normalized' : result.confidence,
         };
       }
+    }
+  }
+
+  // 2b. If location_name is a venue, try extracting city from the venue name suffix.
+  // E.g., "Kulturzentrum Mattersburg" -> strip prefix -> "Mattersburg" -> PPL match.
+  // Done after address (more authoritative) but before title (less specific).
+  if (isVenue && event.location_name) {
+    const venueCity = extractCityFromVenueName(
+      event.location_name, event.postal_code, event.bundesland, hint
+    );
+    if (venueCity) {
+      return {
+        latitude: venueCity.latitude,
+        longitude: venueCity.longitude,
+        confidence: 'normalized',
+      };
     }
   }
 
@@ -783,9 +783,10 @@ export function normalizeEventLocation(event: {
     }
   }
 
-  // 5. PLZ fallback: if postal code is available, use PLZ coordinates as last resort.
-  // Especially useful for venue names where no city could be extracted from any context.
-  if (event.postal_code) {
+  // 5. PLZ fallback: if postal code is available and location is a venue, use PLZ
+  // coordinates as last resort. Only for venues to avoid coarse PLZ-based coords
+  // overriding the null (unresolved) result for non-venue locations.
+  if (isVenue && event.postal_code) {
     try {
       const { getCoordinatesForPLZ } = require('./plzCoordinates');
       const coords = getCoordinatesForPLZ(event.postal_code);
@@ -793,7 +794,7 @@ export function normalizeEventLocation(event: {
         return {
           latitude: coords[0],
           longitude: coords[1],
-          confidence: isVenue ? 'normalized' : 'from_plz',
+          confidence: 'normalized',
         };
       }
     } catch { /* PLZ module not available */ }
