@@ -275,18 +275,23 @@ export async function GET(request: NextRequest) {
           .single();
 
         if (cursorEvent) {
-          const cursorScore = cursorEvent.event_score ?? 0;
-          if (cursorScore > 0) {
-            // Events with lower score, OR same score + lower id, OR NULL score (sorts last)
+          const cursorScore = cursorEvent.event_score;
+          if (cursorScore !== null && cursorScore !== undefined && cursorScore > 0) {
+            // Cursor has a positive score. Include: lower scores, same score + lower id, all NULLs
             query = query.or(
               `event_score.lt.${cursorScore},` +
               `and(event_score.eq.${cursorScore},id.lt.${cursorEvent.id}),` +
               `event_score.is.null`
             );
-          } else {
-            // Cursor score is 0 (or was NULL). Only NULL-score events with lower id remain.
+          } else if (cursorScore !== null && cursorScore !== undefined) {
+            // Cursor score is exactly 0 (non-null). Include: same score(0) + lower id, all NULLs
             query = query.or(
               `and(event_score.eq.0,id.lt.${cursorEvent.id}),` +
+              `event_score.is.null`
+            );
+          } else {
+            // Cursor score IS NULL. Continue within the NULL block: only lower ids.
+            query = query.or(
               `and(event_score.is.null,id.lt.${cursorEvent.id})`
             );
           }
