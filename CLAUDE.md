@@ -16,7 +16,7 @@ node / next.js
 - **Datenbank (staging):** SQLite via better-sqlite3
 - **Auth:** Supabase Auth (Google OAuth + Email/Password)
 - **Scraping:** Cheerio (SSR), Puppeteer-core (SPA/tickets)
-- **Geocoding:** GeoNames AT lookup via location-normalizer (live sync), Nominatim (batch-only in geocode.ts scripts)
+- **Geocoding:** GeoNames AT lookup via location-normalizer (live sync), Nominatim (batch-only), Gemini Flash AI (batch fallback for unresolved locations)
 - **Testing:** Vitest 4.x + @vitest/coverage-v8
 
 ## Wichtige Pfade
@@ -46,6 +46,7 @@ node / next.js
 - `src/lib/location-normalizer.ts` — GeoNames-based location normalizer (compound names, disambiguation, word boundaries)
 - `src/lib/geocoding.ts` — Nominatim geocoding + KNOWN_LOCATIONS (batch scripts only)
 - `src/scripts/fix-geocoding.ts` — Re-geocode wrongly-placed events with backup/rollback (dry-run support)
+- `src/scripts/gemini-geocode.ts` — Gemini Flash AI batch geocoding for NULL-coord events (cache, bbox + bundesland validation)
 - `src/scripts/force-geocode-all.ts` — Force-geocode all events (no Bundesland-capital fallback)
 - `src/scripts/normalize-locations.ts` — Batch normalize event locations in Supabase
 - `src/scripts/scrape.ts` — CLI Scrape-Script
@@ -87,6 +88,8 @@ npm run test:watch       # Vitest watch mode
 npx tsx src/scripts/normalize-locations.ts  # Batch normalize event locations in Supabase
 npx tsx src/scripts/fix-geocoding.ts --dry-run  # Re-geocode wrongly-placed events (dry-run)
 npx tsx src/scripts/test-normalizer.ts  # Run normalizer test cases
+npm run gemini-geocode        # Gemini AI batch geocoding for NULL-coord events (requires GEMINI_API_KEY)
+npm run gemini-geocode -- --dry-run  # Dry-run mode (no writes)
 ```
 
 ## Docker

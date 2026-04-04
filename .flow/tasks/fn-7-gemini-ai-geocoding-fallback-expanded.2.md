@@ -81,8 +81,8 @@ New batch script that uses Gemini 2.5 Flash to achieve a CLEAN geocoding state a
 - [ ] All existing tests pass
 
 ## Done summary
-TBD
+Built Gemini Flash batch geocoding script (src/scripts/gemini-geocode.ts) with three modes (--null, --verify, --all), structured JSON output via @google/genai SDK, SQLite caching, Austria bbox validation, confidence filtering, checkpoint/resume, backup, dry-run, and audit logging.
 ## Evidence
-- Commits:
-- Tests:
+- Commits: 2aec9551136b1f535a17ab201b8df6873ce56cfa
+- Tests: npm test (156 passed)
 - PRs:

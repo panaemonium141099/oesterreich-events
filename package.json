@@ -47,7 +47,8 @@
     "scrape:all": "npm run scrape && npm run scrape:feratel && npm run validate",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:coverage": "vitest run --coverage"
+    "test:coverage": "vitest run --coverage",
+    "gemini-geocode": "tsx --env-file=.env.local src/scripts/gemini-geocode.ts"
   },
   "keywords": [],
   "author": "",

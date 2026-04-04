@@ -16,7 +16,7 @@ Osterreich Events is an Austrian event discovery platform built with **Next.js 1
 | Auth | Supabase Auth (Google OAuth + Email/Password) |
 | Realtime | Supabase Channels (postgres_changes) |
 | Scraping | Cheerio (SSR), Puppeteer-core (SPA/tickets) |
-| Geocoding | GeoNames AT lookup via location-normalizer (live sync), Nominatim (batch-only) |
+| Geocoding | GeoNames AT lookup via location-normalizer (live sync), Nominatim (batch-only), Gemini Flash AI (batch fallback) |
 | Analytics | Custom analytics via Supabase `analytics_events` table |
 
 ### Dual-Database Architecture
@@ -1048,6 +1048,51 @@ Events were assigned wrong coordinates -- events at Burgruine Landsee, Kobersdor
 | `src/scripts/fix-geocoding.ts` | New: re-geocode wrongly-placed events with backup/rollback |
 | `src/scripts/force-geocode-all.ts` | Fixed: no Bundesland-capital fallback |
 | `src/scripts/test-normalizer.ts` | Test cases for known problem locations |
+
+---
+
+## Gemini AI Geocoding Fallback + Expanded Venue Prefixes (fn-7, 2026-04-04)
+
+### Problem
+After the fn-5 geocoding pipeline overhaul, ~2,600 events still had NULL coordinates because the GeoNames normalizer could not resolve their location names (ambiguous venues, unusual formatting, missing context). These events were invisible on the map.
+
+### Changes
+
+#### Expanded VENUE_PREFIXES (task .1)
+- Added ~25 new German venue prefixes to `location-normalizer.ts`: restaurant, wirtshaus, beisl, cafe, kaffeehaus, bar, pub, weingut, weinhaus, vinothek, weinkeller, buschenschank, heuriger, galerie, festspielhaus, kongresszentrum, musikpavillon, seefestspiele, festspiele, landesgalerie, veranstaltungszentrum, mehrzweckhalle, volkshochschule, jugendzentrum, seniorenzentrum, schwimmbad, freibad, hallenbad, turnhalle, schulzentrum, messezentrum, messe
+- Venue prefix extraction now covers gastronomy, wine, sports, education, and civic venues
+
+#### Gemini Confidence Level (task .1)
+- Added `gemini` to `CONFIDENCE_RANK` in `supabase-sync.ts` at rank 7 (between nominatim=6 and null)
+- AI geocoding is treated as less reliable than structured geodata; a future Nominatim run can overwrite Gemini results
+
+#### Gemini Flash Batch Geocoding Script (task .2)
+- New `src/scripts/gemini-geocode.ts` using `@google/genai` SDK (Gemini 2.5 Flash)
+- Three modes: `--null` (default, resolve NULL coords), `--verify` (cross-check existing coords), `--all` (both)
+- Structured JSON output with `responseJsonSchema` for guaranteed lat/lng/confidence parsing
+- Deduplicates by `location_name + bundesland` (many events share same venue)
+- Austria bbox validation (lat 46.3-49.1, lng 9.5-17.2) on all results
+- Only accepts high/medium confidence responses from Gemini
+- SQLite geocode_cache with prefixed key `gemini::{location}||{bundesland}`
+- Checkpoint/resume for interrupted batch runs
+- Durable backup before verify/all mode
+- Rate-limited at 200ms between API calls
+- Dry-run mode for safe testing (`--dry-run`)
+- Writes to Supabase with `geocoding_confidence="gemini"`, `geocoding_source="gemini"`
+
+#### Documentation & Scripts (task .3)
+- Added `npm run gemini-geocode` script to package.json
+- Updated CLAUDE.md with Gemini geocoding in tech stack, paths, and build commands
+- Added fn-7 section to CHANGELOG.md
+
+#### Files Added/Changed
+| File | Purpose |
+|------|---------|
+| `src/scripts/gemini-geocode.ts` | New: Gemini Flash AI batch geocoding with cache, validation, checkpoint/resume |
+| `src/lib/location-normalizer.ts` | Expanded: ~25 new VENUE_PREFIXES (gastronomy, wine, sports, civic, education) |
+| `src/lib/db/supabase-sync.ts` | Updated: added `gemini` confidence level (rank 7) to CONFIDENCE_RANK |
+| `package.json` | Added: `gemini-geocode` npm script |
+| `CLAUDE.md` | Updated: Gemini geocoding in tech stack, paths, build commands |
 
 ---
 
