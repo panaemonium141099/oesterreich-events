@@ -46,3 +46,5 @@ Fix the KNOWN_LOCATIONS substring matching in geocoding.ts and remove the danger
 - [ ] Nominatim results outside Austria bounding box are rejected
 - [ ] Log warnings emitted for events that could not be geocoded
 - [ ] Existing tests pass
+
+## Done summary
