@@ -24,6 +24,8 @@ export function normalizePlaceName(s: string): string {
     .replace(/ae/g, 'a')
     .replace(/oe/g, 'o')
     .replace(/ue/g, 'u')
+    // Normalize "Sankt" abbreviation: both "st." and "sankt" → "st"
+    .replace(/\bsankt\b/g, 'st')
     .replace(/\./g, '')
     .trim();
 }

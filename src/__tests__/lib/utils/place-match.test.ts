@@ -12,6 +12,10 @@ describe('normalizePlaceName', () => {
     expect(normalizePlaceName('St. Margarethen')).toBe('st margarethen');
   });
 
+  it('normalizes Sankt to st', () => {
+    expect(normalizePlaceName('Sankt Pölten')).toBe('st polten');
+  });
+
   it('trims whitespace', () => {
     expect(normalizePlaceName('  Rust  ')).toBe('rust');
   });
@@ -96,6 +100,19 @@ describe('matchPlaceName', () => {
 
   it('does NOT match "Lech" in "Schlechtwetter"', () => {
     expect(matchPlaceName('Schlechtwetter Programm', 'lech')).toBe(false);
+  });
+
+  // Sankt/St. equivalence
+  it('matches "Sankt Pölten" against "st. pölten" key', () => {
+    expect(matchPlaceName('Event in Sankt Pölten', 'st. pölten')).toBe(true);
+  });
+
+  it('matches "St. Pölten" against "st. pölten" key', () => {
+    expect(matchPlaceName('Event in St. Pölten', 'st. pölten')).toBe(true);
+  });
+
+  it('matches "Sankt Anton" against "st. anton" key', () => {
+    expect(matchPlaceName('Ski in Sankt Anton am Arlberg', 'st. anton')).toBe(true);
   });
 
   // Edge cases
