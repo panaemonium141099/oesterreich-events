@@ -283,6 +283,20 @@ assert('"Musikpavillon im Kurpark" + description "...Eisenstadt" resolves',
   v11 !== null && Math.abs(v11.latitude - 47.845) < 0.05,
   v11 ? `got lat: ${v11.latitude}` : 'null');
 
+// 9m. PLZ fallback for venue with no other context
+// Use PLZ 1010 (Wien) since Burgenland PLZs (7xxx) are not yet in plzCoordinates.ts
+const v12 = normalizeEventLocation({
+  location_name: 'Festspielhaus Irgendwo',
+  postal_code: '1010',
+  bundesland: 'Wien',
+});
+assert('"Festspielhaus Irgendwo" + PLZ 1010 resolves via PLZ fallback',
+  v12 !== null && Math.abs(v12.latitude - 48.208) < 0.05,
+  v12 ? `got lat: ${v12.latitude}` : 'null');
+assert('"Festspielhaus Irgendwo" + PLZ confidence is normalized (venue)',
+  v12 !== null && v12.confidence === 'normalized',
+  v12 ? `got: ${v12.confidence}` : 'null');
+
 // ============================================================
 // Summary
 // ============================================================

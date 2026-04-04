@@ -783,5 +783,21 @@ export function normalizeEventLocation(event: {
     }
   }
 
+  // 5. PLZ fallback: if postal code is available, use PLZ coordinates as last resort.
+  // Especially useful for venue names where no city could be extracted from any context.
+  if (event.postal_code) {
+    try {
+      const { getCoordinatesForPLZ } = require('./plzCoordinates');
+      const coords = getCoordinatesForPLZ(event.postal_code);
+      if (coords) {
+        return {
+          latitude: coords[0],
+          longitude: coords[1],
+          confidence: isVenue ? 'normalized' : 'from_plz',
+        };
+      }
+    } catch { /* PLZ module not available */ }
+  }
+
   return null;
 }
