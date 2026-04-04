@@ -98,12 +98,12 @@ function getDateString(): string {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 }
 
-function saveCheckpoint(batchNumber: number, lastEventId: string): void {
-  const data = { batchNumber, lastEventId, timestamp: new Date().toISOString() };
+function saveCheckpoint(batchNumber: number, lastEventId: string, backupPath: string): void {
+  const data = { batchNumber, lastEventId, backupPath, timestamp: new Date().toISOString() };
   fs.writeFileSync(CHECKPOINT_FILE, JSON.stringify(data, null, 2));
 }
 
-function loadCheckpoint(): { batchNumber: number; lastEventId: string } | null {
+function loadCheckpoint(): { batchNumber: number; lastEventId: string; backupPath?: string } | null {
   if (!fs.existsSync(CHECKPOINT_FILE)) return null;
   try {
     return JSON.parse(fs.readFileSync(CHECKPOINT_FILE, 'utf-8'));
@@ -254,13 +254,30 @@ async function main() {
   // 1. Fetch all events
   const allEvents = await fetchAllEvents();
 
-  // 2. Create durable backup BEFORE any changes
-  if (!isDryRun) {
-    console.log('\nCreating durable backup...');
-    await createBackup(allEvents);
+  // 2. Handle resume checkpoint (read before backup decision)
+  let resumeAfterEventId: string | null = null;
+  let backupPath: string | null = null;
+  if (isResume) {
+    const checkpoint = loadCheckpoint();
+    if (checkpoint) {
+      resumeAfterEventId = checkpoint.lastEventId;
+      backupPath = checkpoint.backupPath ?? null;
+      console.log(`\n  Resuming after event: ${resumeAfterEventId}`);
+      if (backupPath) {
+        console.log(`  Using original backup: ${backupPath}`);
+      }
+    } else {
+      console.log('\n  No checkpoint found, starting from beginning');
+    }
   }
 
-  // 3. Identify migration candidates
+  // 3. Create durable backup BEFORE any changes (skip on resume — original backup preserved)
+  if (!isDryRun && !backupPath) {
+    console.log('\nCreating durable backup...');
+    backupPath = await createBackup(allEvents);
+  }
+
+  // 4. Identify migration candidates
   console.log('\nIdentifying migration candidates...');
   const candidates = identifyCandidates(allEvents);
   console.log(`  Found ${candidates.length} candidates out of ${allEvents.length} total events`);
@@ -271,18 +288,6 @@ async function main() {
   }
   for (const [reason, count] of Object.entries(byReason)) {
     console.log(`    ${reason}: ${count}`);
-  }
-
-  // 4. Handle resume — skip candidates already processed using lastEventId
-  let resumeAfterEventId: string | null = null;
-  if (isResume) {
-    const checkpoint = loadCheckpoint();
-    if (checkpoint) {
-      resumeAfterEventId = checkpoint.lastEventId;
-      console.log(`\n  Resuming after event: ${resumeAfterEventId}`);
-    } else {
-      console.log('\n  No checkpoint found, starting from beginning');
-    }
   }
 
   // Skip candidates that were already processed (by stable ID ordering)
@@ -404,7 +409,7 @@ async function main() {
 
     // Save checkpoint after each batch (live mode only)
     if (!isDryRun && batch.length > 0) {
-      saveCheckpoint(batchNum + 1, batch[batch.length - 1].id);
+      saveCheckpoint(batchNum + 1, batch[batch.length - 1].id, backupPath ?? '');
     }
 
     process.stdout.write(`  Batch ${batchNum + 1}/${totalBatches} processed (${corrected} corrected, ${nulled} nulled, ${unchanged} unchanged)\r`);
