@@ -1,18 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import type { EventFilters } from '@/types/events';
 
 // Force dynamic — never cache event data server-side
 export const dynamic = 'force-dynamic';
 
-if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
-  throw new Error('SUPABASE_SERVICE_ROLE_KEY is required — refusing to fall back to anon key which bypasses RLS');
+/** Lazy Supabase client — validates env vars at call time, not module load time */
+function getSupabaseClient(): SupabaseClient | null {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!url || !key) return null;
+  return createClient(url, key);
 }
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY
-);
 
 /** Default and maximum page sizes for cursor-based pagination */
 const DEFAULT_PAGE_SIZE = 50;
@@ -57,6 +56,14 @@ const SEARCH_SYNONYMS: Record<string, string[]> = {
 const MAX_PAGE_SIZE = 200000;
 
 export async function GET(request: NextRequest) {
+  const supabase = getSupabaseClient();
+  if (!supabase) {
+    return NextResponse.json(
+      { error: 'Service unavailable', code: 'ENV_MISSING' },
+      { status: 503 }
+    );
+  }
+
   const searchParams = request.nextUrl.searchParams;
 
   const filters: EventFilters = {};
@@ -119,6 +126,9 @@ export async function GET(request: NextRequest) {
       filters.bbox = parts as [number, number, number, number];
     }
   }
+
+  // Include unmapped events (NULL coordinates) in a separate array
+  const includeUnmapped = searchParams.get('includeUnmapped') === 'true';
 
   try {
     // Build the query — use untyped Supabase client (no Database generic),
@@ -249,12 +259,14 @@ export async function GET(request: NextRequest) {
     }
 
     if (filters.sort === 'score') {
-      // Score sort: highest score first, then id descending for stability
-      query = query.order('event_score', { ascending: false });
+      // Score sort: highest score first (NULLS LAST), then id descending for stability
+      query = query.order('event_score', { ascending: false, nullsFirst: false });
       query = query.order('id', { ascending: false });
 
       // Cursor-based pagination for score sort:
-      // Use (event_score < cursor_score) OR (event_score = cursor_score AND id < cursor_id)
+      // NULL scores are treated as 0 via COALESCE semantics.
+      // Use (score < cursor_score) OR (score = cursor_score AND id < cursor_id)
+      // For NULL scores: (score IS NULL AND cursor_score > 0) OR (score IS NULL AND cursor_score = 0 AND id < cursor_id)
       if (filters.cursor) {
         const { data: cursorEvent } = await supabase
           .from('events')
@@ -264,10 +276,20 @@ export async function GET(request: NextRequest) {
 
         if (cursorEvent) {
           const cursorScore = cursorEvent.event_score ?? 0;
-          query = query.or(
-            `event_score.lt.${cursorScore},` +
-            `and(event_score.eq.${cursorScore},id.lt.${cursorEvent.id})`
-          );
+          if (cursorScore > 0) {
+            // Events with lower score, OR same score + lower id, OR NULL score (sorts last)
+            query = query.or(
+              `event_score.lt.${cursorScore},` +
+              `and(event_score.eq.${cursorScore},id.lt.${cursorEvent.id}),` +
+              `event_score.is.null`
+            );
+          } else {
+            // Cursor score is 0 (or was NULL). Only NULL-score events with lower id remain.
+            query = query.or(
+              `and(event_score.eq.0,id.lt.${cursorEvent.id}),` +
+              `and(event_score.is.null,id.lt.${cursorEvent.id})`
+            );
+          }
         }
       }
     } else {
@@ -326,12 +348,44 @@ export async function GET(request: NextRequest) {
 
     const totalCount = count ?? 0;
 
-    const response = NextResponse.json({
+    // Fetch unmapped events (NULL coordinates) separately when requested
+    // These are NOT mixed into the main bbox-filtered results
+    let unmappedEvents: unknown[] | undefined;
+    if (includeUnmapped && !suggestMode) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      let unmappedQuery = (supabase.from('events') as any).select(
+        'id, title, description, start_date, end_date, location_name, address, postal_code, district, bundesland, latitude, longitude, category, image_url, price_text, price_min, price_max, ticket_url, source_name, source_url, organizer, visibility, event_score'
+      );
+      unmappedQuery = unmappedQuery.or('visibility.eq.public,visibility.is.null');
+      unmappedQuery = unmappedQuery.gte('start_date', today);
+      unmappedQuery = unmappedQuery.is('latitude', null);
+
+      // Apply same content filters (bundesland, category, search) but NOT bbox
+      if (filters.bundesland && filters.bundesland !== 'all') {
+        unmappedQuery = unmappedQuery.eq('bundesland', filters.bundesland);
+      }
+      if (filters.category) {
+        unmappedQuery = unmappedQuery.eq('category', filters.category);
+      }
+
+      unmappedQuery = unmappedQuery.order('start_date', { ascending: true }).limit(200);
+
+      const { data: unmappedData } = await unmappedQuery;
+      unmappedEvents = unmappedData || [];
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const responseBody: Record<string, any> = {
       events: pageEvents,
       total: totalCount,
       nextCursor,
       hasMore,
-    });
+    };
+    if (unmappedEvents !== undefined) {
+      responseBody.unmappedEvents = unmappedEvents;
+    }
+
+    const response = NextResponse.json(responseBody);
 
     // Prevent stale browser cache — events change frequently (scraper runs, coord fixes)
     response.headers.set('Cache-Control', 'no-store, max-age=0');
