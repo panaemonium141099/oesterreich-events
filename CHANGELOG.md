@@ -16,7 +16,7 @@ Osterreich Events is an Austrian event discovery platform built with **Next.js 1
 | Auth | Supabase Auth (Google OAuth + Email/Password) |
 | Realtime | Supabase Channels (postgres_changes) |
 | Scraping | Cheerio (SSR), Puppeteer-core (SPA/tickets) |
-| Geocoding | Nominatim (OpenStreetMap) + local cache |
+| Geocoding | GeoNames AT lookup via location-normalizer (live sync), Nominatim (batch-only) |
 | Analytics | Custom analytics via Supabase `analytics_events` table |
 
 ### Dual-Database Architecture
@@ -47,7 +47,7 @@ Scrapers write to SQLite via `src/lib/db/queries.ts` (`upsertEvent`). Events are
 ### Core Event Tables
 | Table | Purpose |
 |-------|---------|
-| `events` | All events (scraped + user-created + business). Fields: id, source_type, source_name, source_id, source_url, title, description, category, tags[], start_date, end_date, location_name, address, postal_code, district, bundesland, latitude, longitude, image_url, images[], price_text, price_min, price_max, ticket_url, visibility, organizer, view_count, save_count, share_count |
+| `events` | All events (scraped + user-created + business). Fields: id, source_type, source_name, source_id, source_url, title, description, category, tags[], start_date, end_date, location_name, address, postal_code, district, bundesland, latitude, longitude, geocoding_confidence, geocoding_source, image_url, images[], price_text, price_min, price_max, ticket_url, visibility, organizer, view_count, save_count, share_count |
 | `saved_events` | User bookmarks. Fields: user_id, event_id, remind_at, reminded, notes |
 | `event_reminders` | Reminder scheduling for saved events |
 
@@ -1001,4 +1001,54 @@ All changes implemented on branch `claude/hungry-shaw` against the codebase from
 
 ---
 
-*Last updated: 2026-04-01*
+## Geocoding Pipeline Enhancement (fn-5, 2026-04-04)
+
+### Problem
+Events were assigned wrong coordinates -- events at Burgruine Landsee, Kobersdorf, Oggau all appeared at Eisenstadt on the map. Root causes: Bundesland-capital fallback in force-geocode-all.ts, compound/venue name failures in location-normalizer, substring false positives in KNOWN_LOCATIONS, supabase-sync never correcting wrong coords, and HTTP 500 on /api/events from module-level env validation.
+
+### Changes
+
+#### API Fix (task .1)
+- Moved env validation and Supabase client creation inside GET handler (no module-level throw)
+- Returns 503 JSON `{ error: "Service unavailable", code: "ENV_MISSING" }` on missing env vars
+- NULL event_score handled with COALESCE in cursor pagination
+- NULL-coord events excluded from bbox queries, available via `includeUnmapped=true`
+
+#### Location Normalizer Overhaul (task .2)
+- Compound/venue name splitting (comma, dash, "bei/am/im" patterns)
+- Unicode-aware normalized token matching (replaces substring .includes())
+- Title and description extraction for place name hints
+- Closest-match disambiguation using event's Bundesland hint (not Eisenstadt-biased)
+- Fuzzy Levenshtein matches logged but NOT persisted as coordinates
+
+#### Geocoding Fixes (task .3)
+- KNOWN_LOCATIONS uses Unicode-aware normalized token matching (no more substring false positives)
+- findCityCoords uses word-boundary matching
+- Removed Bundesland-capital fallback (NULL coords over wrong coords)
+
+#### Supabase Sync + Confidence Columns (task .4)
+- Added `geocoding_confidence` column (enum: manual, scraper, exact, normalized, from_title, from_description, nominatim, null)
+- Added `geocoding_source` column (enum: geonames, nominatim, known_locations, scraper, manual, null)
+- supabase-sync now corrects existing wrong coords using confidence precedence + 5km threshold
+- Batch-prefetch of existing rows for conditional overwrite decisions
+
+#### Re-geocoding Migration (task .5)
+- `src/scripts/fix-geocoding.ts` re-geocodes wrongly-placed events with backup and rollback
+- Durable JSON backup at `data/coord-backup-YYYY-MM-DD.json` before any changes
+- Checkpoint-based resume for interrupted runs
+- Dry-run mode (`--dry-run`) for safe testing
+
+#### Files Added/Changed
+| File | Purpose |
+|------|---------|
+| `src/lib/location-normalizer.ts` | Overhauled: compound names, disambiguation, word boundaries, title/desc extraction |
+| `src/lib/geocoding.ts` | Fixed: Unicode-aware token matching, removed Bundesland-capital fallback |
+| `src/lib/db/supabase-sync.ts` | Fixed: confidence-aware coord correction with 5km threshold |
+| `src/app/api/events/route.ts` | Fixed: lazy env validation, NULL score handling, includeUnmapped param |
+| `src/scripts/fix-geocoding.ts` | New: re-geocode wrongly-placed events with backup/rollback |
+| `src/scripts/force-geocode-all.ts` | Fixed: no Bundesland-capital fallback |
+| `src/scripts/test-normalizer.ts` | Test cases for known problem locations |
+
+---
+
+*Last updated: 2026-04-04*

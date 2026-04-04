@@ -16,7 +16,7 @@ node / next.js
 - **Datenbank (staging):** SQLite via better-sqlite3
 - **Auth:** Supabase Auth (Google OAuth + Email/Password)
 - **Scraping:** Cheerio (SSR), Puppeteer-core (SPA/tickets)
-- **Geocoding:** Nominatim (OpenStreetMap) + lokaler Cache
+- **Geocoding:** GeoNames AT lookup via location-normalizer (live sync), Nominatim (batch-only in geocode.ts scripts)
 - **Testing:** Vitest 4.x + @vitest/coverage-v8
 
 ## Wichtige Pfade
@@ -43,6 +43,11 @@ node / next.js
 - `src/components/Landing/WeeklyHighlights.tsx` — Top-scored events (uses /api/events/featured)
 - `src/components/Landing/RegionExplorer.tsx` — Region-Grid (uses /api/stats/counts)
 - `src/components/Landing/PopularCategories.tsx` — Kategorie-Grid (uses /api/stats/counts)
+- `src/lib/location-normalizer.ts` — GeoNames-based location normalizer (compound names, disambiguation, word boundaries)
+- `src/lib/geocoding.ts` — Nominatim geocoding + KNOWN_LOCATIONS (batch scripts only)
+- `src/scripts/fix-geocoding.ts` — Re-geocode wrongly-placed events with backup/rollback (dry-run support)
+- `src/scripts/force-geocode-all.ts` — Force-geocode all events (no Bundesland-capital fallback)
+- `src/scripts/normalize-locations.ts` — Batch normalize event locations in Supabase
 - `src/scripts/scrape.ts` — CLI Scrape-Script
 - `src/__tests__/` — Vitest test suite
 - `data/events.db` — SQLite Datenbank (gitignored)
@@ -79,6 +84,9 @@ npm run score            # Event-Scores berechnen und nach Supabase schreiben
 npm test                 # Vitest test suite (127 tests, all passing)
 npm run test:coverage    # Tests mit V8 Coverage-Report
 npm run test:watch       # Vitest watch mode
+npx tsx src/scripts/normalize-locations.ts  # Batch normalize event locations in Supabase
+npx tsx src/scripts/fix-geocoding.ts --dry-run  # Re-geocode wrongly-placed events (dry-run)
+npx tsx src/scripts/test-normalizer.ts  # Run normalizer test cases
 ```
 
 ## Docker
@@ -96,7 +104,6 @@ docker build -t lasstreffen-test \
 
 ## Bekannte Issues
 - 4 API-Tests schlagen fehl (events.test.ts) — Pagination- und Evening-Filter-Tests sind nach Cursor-Pagination-Einführung veraltet; Code ist korrekt, Tests müssen aktualisiert werden
-- ~93 Events haben noch keine Koordinaten (unbekannte Orte)
 - Eventim/oeticket-Scraper noch nicht implementiert (brauchen Puppeteer)
 - Admin-Scraper-Routes haben keine Rollen-Prüfung (auth key reicht, kein admin/god required)
 - Business-Profile-Onboarding nicht vollständig implementiert

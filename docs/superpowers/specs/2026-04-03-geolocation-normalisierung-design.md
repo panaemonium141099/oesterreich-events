@@ -110,11 +110,11 @@ upsertEvent() + syncToSupabase()
 
 ## Akzeptanzkriterien
 
-- [ ] GeoNames AT-Dump heruntergeladen und als JSON gespeichert
-- [ ] Normalisierung erkennt "St." = "Sankt", "a.d." = "an der" etc.
-- [ ] Fuzzy-Matching findet Orte mit Tippfehlern (Levenshtein ≤ 2)
-- [ ] Disambiguierung bei Mehrdeutigkeit via PLZ/Bundesland
-- [ ] Pipeline laeuft automatisch bei jedem Scrape
-- [ ] Migration-Script korrigiert bestehende Events in Supabase
-- [ ] Venue-Level Geocoding via Nominatim + Cache funktioniert
-- [ ] Alle Tests bestehen weiterhin
+- [x] GeoNames AT-Dump heruntergeladen und als JSON gespeichert
+- [x] Normalisierung erkennt "St." = "Sankt", "a.d." = "an der" etc.
+- [x] Fuzzy-Matching findet Orte mit Tippfehlern (Levenshtein ≤ 2)
+- [x] Disambiguierung bei Mehrdeutigkeit via PLZ/Bundesland
+- [x] Pipeline laeuft automatisch bei jedem Scrape
+- [x] Migration-Script korrigiert bestehende Events in Supabase
+- [x] Venue-Level Geocoding via Nominatim + Cache funktioniert
+- [x] Alle Tests bestehen weiterhin
