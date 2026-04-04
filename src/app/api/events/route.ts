@@ -358,7 +358,8 @@ export async function GET(request: NextRequest) {
       );
       unmappedQuery = unmappedQuery.or('visibility.eq.public,visibility.is.null');
       unmappedQuery = unmappedQuery.gte('start_date', today);
-      unmappedQuery = unmappedQuery.is('latitude', null);
+      // Match events where either coordinate is NULL
+      unmappedQuery = unmappedQuery.or('latitude.is.null,longitude.is.null');
 
       // Apply same content filters (bundesland, category, search) but NOT bbox
       if (filters.bundesland && filters.bundesland !== 'all') {
@@ -366,6 +367,19 @@ export async function GET(request: NextRequest) {
       }
       if (filters.category) {
         unmappedQuery = unmappedQuery.eq('category', filters.category);
+      }
+      if (filters.search) {
+        const sanitizedSearch = filters.search.replace(/[,.*()%_\\]/g, '').trim();
+        if (sanitizedSearch) {
+          const normalized = sanitizedSearch.toLowerCase();
+          const synonymCategories = SEARCH_SYNONYMS[normalized] ?? [];
+          let orClause = `title.ilike.%${sanitizedSearch}%,location_name.ilike.%${sanitizedSearch}%,description.ilike.%${sanitizedSearch}%,category.ilike.%${sanitizedSearch}%`;
+          for (const cat of synonymCategories) {
+            const safeCat = cat.replace(/,/g, '');
+            orClause += `,category.eq.${safeCat}`;
+          }
+          unmappedQuery = unmappedQuery.or(orClause);
+        }
       }
 
       unmappedQuery = unmappedQuery.order('start_date', { ascending: true }).limit(200);
