@@ -75,6 +75,10 @@ interface ExistingRow {
 /**
  * Batch-prefetch existing rows by composite key (source_name, source_id).
  * Returns a map keyed by "source_name::source_id".
+ *
+ * Strategy: fetch by unique source_names using .in() (safe, no escaping needed
+ * since .in() uses Supabase SDK's array parameter binding), then filter
+ * client-side by source_id to match the exact composite keys.
  */
 async function prefetchExistingRows(
   supabase: SupabaseClient,
@@ -83,18 +87,24 @@ async function prefetchExistingRows(
   const map = new Map<string, ExistingRow>();
   if (keys.length === 0) return map;
 
-  // Supabase .in() filter has a practical limit; split into sub-batches of 200
+  // Build a set of expected composite keys for client-side filtering
+  const expectedKeys = new Set(keys.map(k => `${k.source_name}::${k.source_id}`));
+
+  // Get unique source_names to query (within a batch, usually 1-3 unique scrapers)
+  const uniqueSourceNames = [...new Set(keys.map(k => k.source_name))];
+
+  // Also get unique source_ids for a secondary filter to reduce result set
+  const uniqueSourceIds = [...new Set(keys.map(k => k.source_id))];
+
+  // Supabase .in() has a practical limit; split source_ids into sub-batches
   const SUB_BATCH = 200;
-  for (let i = 0; i < keys.length; i += SUB_BATCH) {
-    const slice = keys.slice(i, i + SUB_BATCH);
-    // Build OR filter: (source_name.eq.X,source_id.eq.Y)
-    const orFilter = slice
-      .map(k => `and(source_name.eq.${k.source_name},source_id.eq.${k.source_id})`)
-      .join(',');
+  for (let i = 0; i < uniqueSourceIds.length; i += SUB_BATCH) {
+    const idSlice = uniqueSourceIds.slice(i, i + SUB_BATCH);
     const { data, error } = await supabase
       .from('events')
       .select('source_name, source_id, latitude, longitude, geocoding_confidence, geocoding_source')
-      .or(orFilter);
+      .in('source_name', uniqueSourceNames)
+      .in('source_id', idSlice);
 
     if (error) {
       console.error('[supabase-sync] prefetch error:', error.message);
@@ -102,7 +112,11 @@ async function prefetchExistingRows(
     }
     if (data) {
       for (const row of data) {
-        map.set(`${row.source_name}::${row.source_id}`, row as ExistingRow);
+        const key = `${row.source_name}::${row.source_id}`;
+        // Client-side filter: only include rows that match our exact composite keys
+        if (expectedKeys.has(key)) {
+          map.set(key, row as ExistingRow);
+        }
       }
     }
   }
