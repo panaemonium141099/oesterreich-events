@@ -4,7 +4,8 @@ import type { ScrapedEvent } from '@/types/events';
 
 /**
  * Universität Mozarteum Salzburg Scraper
- * Server-rendered. 143 events, 10 pages. Very rich source.
+ * Server-rendered. Events are <li> with <h3><a>title</a></h3> and date text.
+ * Pagination uses ?p=N.
  */
 export class MozarteumScraper extends UniBaseScraper {
   readonly name = 'mozarteum-salzburg';
@@ -24,7 +25,7 @@ export class MozarteumScraper extends UniBaseScraper {
     for (let page = 1; page <= this.MAX_PAGES; page++) {
       const url = page === 1
         ? this.eventListUrl
-        : `${this.eventListUrl}?tx_moznews_news%5B%40widget_0%5D%5BcurrentPage%5D=${page}&cHash=dummy`;
+        : `${this.eventListUrl}?p=${page}`;
       try {
         const html = await this.fetchPage(url);
 
@@ -54,32 +55,48 @@ export class MozarteumScraper extends UniBaseScraper {
     const $ = cheerio.load(html);
     const events: ScrapedEvent[] = [];
 
-    $('article, .event-item, .news-item, [class*="event"], .veranstaltung, li.news').each((_, el) => {
+    // Mozarteum: <li> elements containing <h3><a href="/de/veranstaltungen/...">title</a></h3>
+    // with date text like "10.4.2026" or "14.4.2026 18:00 Uhr"
+    $('a[href*="/de/veranstaltungen/"]').each((_, el) => {
       try {
-        const $el = $(el);
-        const title = $el.find('h2, h3, h4, .title, .event-title, .news-header').first().text().trim();
+        const $a = $(el);
+        const href = $a.attr('href') || '';
+        // Skip pagination and list page links
+        if (href === '/de/veranstaltungen' || href === '/de/veranstaltungen/') return;
+        if (!href.match(/\/de\/veranstaltungen\/\d{4}\//)) return;
+
+        const title = $a.text().trim();
         if (!title || title.length < 3) return;
 
-        const href = $el.find('a').first().attr('href') || '';
         const sourceUrl = href.startsWith('http') ? href : `${this.baseUrl}${href}`;
 
-        const dateText = $el.find('time, .date, [class*="date"], .news-date').first().text().trim()
-          || $el.find('[datetime]').first().attr('datetime') || '';
-        const startDate = this.parseDatetime(dateText) || this.parseDate(dateText);
-        if (!startDate) return;
+        // Date is in parent <li> text content, e.g. "10.4.2026" or "10.4.—11.4.2026"
+        const $li = $a.closest('li');
+        const liText = $li.text();
+
+        // Try to extract date: D.M.YYYY pattern
+        const dateMatch = liText.match(/(\d{1,2})\.(\d{1,2})\.(\d{4})/);
+        if (!dateMatch) return;
+        const startDate = `${dateMatch[3]}-${dateMatch[2].padStart(2, '0')}-${dateMatch[1].padStart(2, '0')}`;
+
+        // Try time
+        const timeMatch = liText.match(/(\d{1,2}):(\d{2})\s*Uhr/);
+        const fullDate = timeMatch
+          ? `${startDate}T${timeMatch[1].padStart(2, '0')}:${timeMatch[2]}:00`
+          : startDate;
 
         const slug = title.toLowerCase().replace(/\W+/g, '-').slice(0, 60);
-        const desc = $el.find('.teaser, .description, p, .news-body').first().text().trim();
-        const imgSrc = $el.find('img').first().attr('src');
-        const imageUrl = imgSrc ? this.cleanImageUrl(this.resolveImageUrl(imgSrc, this.baseUrl)) : undefined;
+
+        // Get description from remaining text in the li
+        const allText = $li.find('p').map((_, p) => $(p).text().trim()).get().join(' ');
+        const desc = allText.slice(0, 500) || undefined;
 
         events.push(this.buildEvent({
           slug,
           title,
-          startDate,
-          description: desc || undefined,
+          startDate: fullDate,
+          description: desc,
           sourceUrl,
-          imageUrl,
         }));
       } catch { /* skip */ }
     });

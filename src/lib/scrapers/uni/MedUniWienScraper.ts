@@ -4,7 +4,8 @@ import type { ScrapedEvent } from '@/types/events';
 
 /**
  * Medizinische Universität Wien Scraper
- * Server-rendered, ~20 events per month. Filterable by date range.
+ * Server-rendered. Events are <strong>date</strong> followed by <a>title</a>.
+ * Monthly pagination with ?ed=YYYY-MM.
  */
 export class MedUniWienScraper extends UniBaseScraper {
   readonly name = 'meduni-wien';
@@ -20,20 +21,33 @@ export class MedUniWienScraper extends UniBaseScraper {
     this.log('Starte MedUni Wien Scraping...');
     const allEvents = new Map<string, ScrapedEvent>();
 
-    try {
-      const html = await this.fetchPage(this.eventListUrl);
+    // Fetch current month and next 2 months
+    const urls: string[] = [this.eventListUrl];
+    const now = new Date();
+    for (let i = 1; i <= 2; i++) {
+      const d = new Date(now.getFullYear(), now.getMonth() + i, 1);
+      const yyyy = d.getFullYear();
+      const mm = String(d.getMonth() + 1).padStart(2, '0');
+      urls.push(`${this.eventListUrl}?ed=${yyyy}-${mm}`);
+    }
 
-      const jsonLdEvents = this.parseJsonLdEvents(html, this.eventListUrl);
-      for (const ev of jsonLdEvents) allEvents.set(ev.source_id, ev);
+    for (const url of urls) {
+      try {
+        const html = await this.fetchPage(url);
 
-      const htmlEvents = this.parseHtml(html);
-      for (const ev of htmlEvents) {
-        if (!allEvents.has(ev.source_id)) allEvents.set(ev.source_id, ev);
+        const jsonLdEvents = this.parseJsonLdEvents(html, url);
+        for (const ev of jsonLdEvents) allEvents.set(ev.source_id, ev);
+
+        const htmlEvents = this.parseHtml(html);
+        for (const ev of htmlEvents) {
+          if (!allEvents.has(ev.source_id)) allEvents.set(ev.source_id, ev);
+        }
+
+        this.log(`${url.includes('ed=') ? url.split('ed=')[1] : 'current'}: ${allEvents.size} Events`);
+        await this.rateLimit();
+      } catch (err) {
+        this.log(`Fehler: ${err instanceof Error ? err.message : err}`);
       }
-
-      this.log(`${allEvents.size} Events gefunden`);
-    } catch (err) {
-      this.log(`Fehler: ${err instanceof Error ? err.message : err}`);
     }
 
     const events = Array.from(allEvents.values());
@@ -45,33 +59,38 @@ export class MedUniWienScraper extends UniBaseScraper {
     const $ = cheerio.load(html);
     const events: ScrapedEvent[] = [];
 
-    $('article, .event-item, [class*="event"], .news-list-item, .veranstaltung, .list-item').each((_, el) => {
+    // MedUniWien: events are in .calendar__item blocks
+    // with .calendar__date (date text) and .calendar__time (time text)
+    // and a.calendar__title for the link
+    $('.calendar__item').each((_, el) => {
       try {
-        const $el = $(el);
-        const title = $el.find('h2, h3, h4, .title, .event-title').first().text().trim();
+        const $item = $(el);
+
+        const $titleLink = $item.find('a.calendar__title').first();
+        if (!$titleLink.length) return;
+
+        const title = $titleLink.attr('title') || $titleLink.text().trim();
         if (!title || title.length < 3) return;
 
-        const href = $el.find('a').first().attr('href') || '';
+        const href = $titleLink.attr('href') || '';
         const sourceUrl = href.startsWith('http') ? href : `${this.baseUrl}${href}`;
 
-        const dateText = $el.find('time, .date, [class*="date"]').first().text().trim()
-          || $el.find('[datetime]').first().attr('datetime') || '';
-        const startDate = this.parseDatetime(dateText) || this.parseDate(dateText);
+        // Date from .calendar__date and .calendar__time
+        const dateText = $item.find('.calendar__date').first().text().trim();
+        const timeText = $item.find('.calendar__time').first().text().trim();
+        if (!dateText) return;
+
+        const fullDateText = timeText ? `${dateText} ${timeText}` : dateText;
+        const startDate = this.parseDatetime(fullDateText) || this.parseDate(fullDateText);
         if (!startDate) return;
 
         const slug = title.toLowerCase().replace(/\W+/g, '-').slice(0, 60);
-        const desc = $el.find('.teaser, .description, p').first().text().trim();
-        const imgSrc = $el.find('img').first().attr('src');
-        const imageUrl = imgSrc ? this.cleanImageUrl(this.resolveImageUrl(imgSrc, this.baseUrl)) : undefined;
 
-        // MedUni events often get "Gesundheit" tag too
         const ev = this.buildEvent({
           slug,
           title,
           startDate,
-          description: desc || undefined,
           sourceUrl,
-          imageUrl,
         });
         // Add Gesundheit tag for medical university events
         if (ev.tags && !ev.tags.includes('Gesundheit')) {

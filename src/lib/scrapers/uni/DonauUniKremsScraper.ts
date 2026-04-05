@@ -4,7 +4,8 @@ import type { ScrapedEvent } from '@/types/events';
 
 /**
  * Universität für Weiterbildung Krems (Donau-Universität Krems) Scraper
- * Server-rendered. ~8 visible events with Load More. Mix of online and on-campus events.
+ * Server-rendered. Events are <a> wrappers with <span>day</span><span>month</span><span>year</span> + <h3>title</h3>.
+ * Has "Mehr laden" button (load more), but initial page has events in HTML.
  */
 export class DonauUniKremsScraper extends UniBaseScraper {
   readonly name = 'donau-uni-krems';
@@ -15,6 +16,13 @@ export class DonauUniKremsScraper extends UniBaseScraper {
   protected readonly bundesland = 'niederoesterreich';
   protected readonly defaultLat = 48.4084;
   protected readonly defaultLng = 15.5888;
+
+  /** German abbreviated month map */
+  private readonly MONTHS: Record<string, string> = {
+    'jan': '01', 'feb': '02', 'mär': '03', 'mar': '03', 'apr': '04',
+    'mai': '05', 'jun': '06', 'jul': '07', 'aug': '08',
+    'sep': '09', 'okt': '10', 'nov': '11', 'dez': '12',
+  };
 
   async scrape(): Promise<ScrapedEvent[]> {
     this.log('Starte Donau-Universität Krems Scraping...');
@@ -45,23 +53,44 @@ export class DonauUniKremsScraper extends UniBaseScraper {
     const $ = cheerio.load(html);
     const events: ScrapedEvent[] = [];
 
-    $('article, .event-item, [class*="event"], .veranstaltung, .news-item, .duk-event').each((_, el) => {
+    // DonauUni: <a> wrappers with h3 titles, linking to event detail pages
+    $('a[href*="/veranstaltungen/"]').each((_, el) => {
       try {
-        const $el = $(el);
-        const title = $el.find('h2, h3, h4, .title, .event-title').first().text().trim();
+        const $a = $(el);
+        const href = $a.attr('href') || '';
+        // Skip the main veranstaltungen page link itself
+        if (href.endsWith('/veranstaltungen.html') || href.endsWith('/veranstaltungen/')) return;
+
+        const $h3 = $a.find('h3');
+        if (!$h3.length) return;
+        const title = $h3.text().trim();
         if (!title || title.length < 3) return;
 
-        const href = $el.find('a').first().attr('href') || '';
+        // Date from spans: <span>07</span><span>Apr</span><span>2026</span>
+        const spans = $a.find('span');
+        let day = '', month = '', year = '';
+        spans.each((_, span) => {
+          const text = $(span).text().trim().toLowerCase();
+          if (/^\d{1,2}$/.test(text) && !day) {
+            day = text;
+          } else if (this.MONTHS[text]) {
+            month = this.MONTHS[text];
+          } else if (/^\d{4}$/.test(text) && !year) {
+            year = text;
+          }
+        });
+
+        if (!day || !month || !year) return;
+        const startDate = `${year}-${month}-${day.padStart(2, '0')}`;
+
         const sourceUrl = href.startsWith('http') ? href : `${this.baseUrl}${href}`;
-
-        const dateText = $el.find('time, .date, [class*="date"]').first().text().trim()
-          || $el.find('[datetime]').first().attr('datetime') || '';
-        const startDate = this.parseDatetime(dateText) || this.parseDate(dateText);
-        if (!startDate) return;
-
         const slug = title.toLowerCase().replace(/\W+/g, '-').slice(0, 60);
-        const desc = $el.find('.teaser, .description, p').first().text().trim();
-        const imgSrc = $el.find('img').first().attr('src');
+
+        // Description from <p> inside the link
+        const desc = $a.find('p').first().text().trim();
+
+        // Image
+        const imgSrc = $a.find('img').first().attr('src');
         const imageUrl = imgSrc ? this.cleanImageUrl(this.resolveImageUrl(imgSrc, this.baseUrl)) : undefined;
 
         events.push(this.buildEvent({

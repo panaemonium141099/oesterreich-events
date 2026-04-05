@@ -32,9 +32,8 @@ Follow pattern at `src/lib/scrapers/uni/FHBurgenlandScraper.ts` (canonical worki
 - [ ] All 4 scrapers registered in scrapers/index.ts
 - [ ] `npx tsc --noEmit` passes
 ## Done summary
-TBD
-
+Created 4 new university scrapers: MedUniInnsbruckScraper (1 event from WordPress site), AngewandteWienScraper (8 events from /rss page), MDWWienScraper (113 events from server-rendered list), KUGGrazScraper (7 events from news teasers). All registered in uni/index.ts and scrapers/index.ts.
 ## Evidence
-- Commits:
-- Tests:
+- Commits: 0d353f20ec4197f59032fcf2cf997ce9c265a8dd
+- Tests: npm test (156 passed), npx tsc --noEmit, npx tsx src/scripts/scrape.ts --source meduni-innsbruck (1 event), npx tsx src/scripts/scrape.ts --source angewandte-wien (8 events), npx tsx src/scripts/scrape.ts --source mdw-wien (113 events), npx tsx src/scripts/scrape.ts --source kug-graz (7 events)
 - PRs:
