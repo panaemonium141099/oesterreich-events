@@ -48,7 +48,9 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
-    "gemini-geocode": "tsx --env-file=.env.local src/scripts/gemini-geocode.ts"
+    "gemini-geocode": "tsx --env-file=.env.local src/scripts/gemini-geocode.ts",
+    "import-osm-venues": "tsx --env-file=.env.local src/scripts/import-osm-venues.ts",
+    "import-student-orgs": "tsx --env-file=.env.local src/scripts/import-student-orgs.ts"
   },
   "keywords": [],
   "author": "",
@@ -61,8 +63,10 @@
     "canvas-confetti": "^1.9.4",
     "cheerio": "^1.2.0",
     "framer-motion": "^12.38.0",
+    "luxon": "^3.7.2",
     "mapbox-gl": "^3.20.0",
     "next": "^16.2.1",
+    "node-ical": "^0.26.0",
     "openai": "^6.33.0",
     "react": "^19.2.4",
     "react-dom": "^19.2.4"
@@ -80,6 +84,7 @@
     "@turf/simplify": "^7.3.4",
     "@turf/union": "^7.3.4",
     "@types/better-sqlite3": "^7.6.13",
+    "@types/luxon": "^3.7.1",
     "@types/node": "^25.5.0",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",

@@ -18,6 +18,7 @@ import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import type { ScrapedEvent } from '@/types/events';
 import { categorizeEventMulti } from '@/lib/categories';
 import { normalizeEventLocation } from '@/lib/location-normalizer';
+import { generateFingerprint } from '@/lib/dedup/fingerprint';
 
 /**
  * Confidence precedence order (highest first).
@@ -271,6 +272,7 @@ function toSupabaseRow(
     visibility: 'public' as const,
     geocoding_confidence: finalConfidence,
     geocoding_source: finalSource,
+    content_fingerprint: generateFingerprint(event.title, event.start_date),
   };
 }
 
