@@ -34,6 +34,11 @@ node / next.js
 - `src/lib/scrapers/uni/` — 56 University/FH/PH scrapers
 - `src/lib/scrapers/niche/` — 34 niche category scrapers (festivals, nightlife, outdoor, culture, food, family, sport, museums, concert houses, business, RSS feeds)
 - `src/lib/scrapers/BaseScraper.ts` — Base class mit Image extraction + validation
+- `src/lib/scrapers/RegistryBasedScraper.ts` — Venue feed ingestion orchestrator (ICS/JSON-LD connectors, dedup)
+- `src/lib/connectors/` — Universal feed connectors (ICS, JSON-LD, feed-detector)
+- `src/lib/dedup/` — Content deduplication (fingerprint + Jaro-Winkler fuzzy)
+- `src/lib/series-detection/` — Recurring event series detection
+- `src/scripts/scrape-venues.ts` — CLI script for venue feed ingestion
 - `src/lib/db/` — SQLite Schema, Connection, Queries
 - `src/lib/utils/date.ts` — Shared date formatting utilities
 - `src/lib/utils/profile.ts` — Shared profile utilities
@@ -83,7 +88,8 @@ npm run build            # Produktions-Build (strict TypeScript)
 npm run scrape           # Alle Scraper ausfuhren
 npm run scrape:burgenland  # Nur burgenland.info scrapen
 npm run score            # Event-Scores berechnen und nach Supabase schreiben
-npm test                 # Vitest test suite (127 tests, all passing)
+npm run scrape:venues    # Registry-based venue feed ingestion
+npm test                 # Vitest test suite (436 tests, all passing)
 npm run test:coverage    # Tests mit V8 Coverage-Report
 npm run test:watch       # Vitest watch mode
 npx tsx src/scripts/normalize-locations.ts  # Batch normalize event locations in Supabase
