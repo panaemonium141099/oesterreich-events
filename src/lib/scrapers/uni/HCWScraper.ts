@@ -3,9 +3,10 @@ import { UniBaseScraper } from './UniBaseScraper';
 import type { ScrapedEvent } from '@/types/events';
 
 /**
- * Hochschule Campus Wien (formerly FH Campus Wien) Scraper
- * Rebranded to HCW. Events page at /alle-events.
- * Career fairs, open houses, symposia.
+ * Hochschule Campus Wien (HCW, formerly FH Campus Wien) Scraper
+ * Server-rendered TYPO3 site. Events use `article.event` structure
+ * with event-list-date-day, event-list-date-monthyear, event-list-content, h4 title.
+ * Date format: "07" + "Apr. 26" -> 07.04.2026
  */
 export class HCWScraper extends UniBaseScraper {
   readonly name = 'hcw-wien';
@@ -16,33 +17,23 @@ export class HCWScraper extends UniBaseScraper {
   protected readonly bundesland = 'wien';
   protected readonly defaultLat = 48.1717;
   protected readonly defaultLng = 16.3882;
-  private readonly MAX_PAGES = 3;
 
   async scrape(): Promise<ScrapedEvent[]> {
     this.log('Starte Hochschule Campus Wien (HCW) Scraping...');
     const allEvents = new Map<string, ScrapedEvent>();
 
-    for (let page = 1; page <= this.MAX_PAGES; page++) {
-      const url = page === 1
-        ? this.eventListUrl
-        : `${this.eventListUrl}?page=${page}`;
-      try {
-        const html = await this.fetchPage(url);
+    try {
+      const html = await this.fetchPage(this.eventListUrl);
 
-        const jsonLdEvents = this.parseJsonLdEvents(html, url);
-        for (const ev of jsonLdEvents) allEvents.set(ev.source_id, ev);
+      const jsonLdEvents = this.parseJsonLdEvents(html, this.eventListUrl);
+      for (const ev of jsonLdEvents) allEvents.set(ev.source_id, ev);
 
-        const htmlEvents = this.parseHtml(html);
-        for (const ev of htmlEvents) {
-          if (!allEvents.has(ev.source_id)) allEvents.set(ev.source_id, ev);
-        }
-
-        if (jsonLdEvents.length === 0 && htmlEvents.length === 0) break;
-        await this.rateLimit();
-      } catch (err) {
-        this.log(`Seite ${page} fehlgeschlagen: ${err instanceof Error ? err.message : err}`);
-        break;
+      const htmlEvents = this.parseHtml(html);
+      for (const ev of htmlEvents) {
+        if (!allEvents.has(ev.source_id)) allEvents.set(ev.source_id, ev);
       }
+    } catch (err) {
+      this.log(`Fehler: ${err instanceof Error ? err.message : err}`);
     }
 
     const events = Array.from(allEvents.values());
@@ -54,36 +45,73 @@ export class HCWScraper extends UniBaseScraper {
     const $ = cheerio.load(html);
     const events: ScrapedEvent[] = [];
 
-    $('article, .event-item, [class*="event"], .veranstaltung, .card, .news-item').each((_, el) => {
+    // HCW uses <article class="event"> with event-list-date and event-list-content
+    $('article.event').each((_, el) => {
       try {
         const $el = $(el);
-        const title = $el.find('h2, h3, h4, .title, .event-title').first().text().trim();
+
+        // Title from h4 inside event-list-content
+        const title = $el.find('.event-list-content h4').first().text().trim()
+          || $el.find('h4').first().text().trim();
         if (!title || title.length < 3) return;
 
-        const href = $el.find('a').first().attr('href') || '';
+        // Link from the <a> wrapping the h4
+        const href = $el.find('.event-list-content a').first().attr('href') || '';
         const sourceUrl = href.startsWith('http') ? href : `${this.baseUrl}${href}`;
 
-        const dateText = $el.find('time, .date, [class*="date"]').first().text().trim()
-          || $el.find('[datetime]').first().attr('datetime') || '';
-        const startDate = this.parseDatetime(dateText) || this.parseDate(dateText);
+        // Date: event-list-date-day ("07") + event-list-date-monthyear ("Apr. 26")
+        const day = $el.find('.event-list-date-day').first().text().trim();
+        const monthYear = $el.find('.event-list-date-monthyear').first().text().trim();
+        // monthYear format is like "Apr. 26" -> need to convert to proper date
+        const startDate = this.parseHcwDate(day, monthYear);
         if (!startDate) return;
 
+        // Categories from event-list-categories ul > li
+        const categories: string[] = [];
+        $el.find('.event-list-categories li').each((_, li) => {
+          const cat = $(li).text().trim();
+          if (cat) categories.push(cat);
+        });
+
         const slug = title.toLowerCase().replace(/\W+/g, '-').slice(0, 60);
-        const desc = $el.find('.teaser, .description, p').first().text().trim();
-        const imgSrc = $el.find('img').first().attr('src');
-        const imageUrl = imgSrc ? this.cleanImageUrl(this.resolveImageUrl(imgSrc, this.baseUrl)) : undefined;
 
         events.push(this.buildEvent({
           slug,
           title,
           startDate,
-          description: desc || undefined,
+          description: categories.length > 0 ? categories.join(', ') : undefined,
           sourceUrl,
-          imageUrl,
         }));
       } catch { /* skip */ }
     });
 
     return events;
+  }
+
+  /**
+   * Parse HCW's date format: day="07", monthYear="Apr. 26"
+   * Returns ISO date string like "2026-04-07"
+   */
+  private parseHcwDate(day: string, monthYear: string): string | null {
+    if (!day || !monthYear) return null;
+
+    const monthMap: Record<string, string> = {
+      'jan': '01', 'feb': '02', 'mär': '03', 'mar': '03', 'apr': '04',
+      'mai': '05', 'may': '05', 'jun': '06', 'jul': '07', 'aug': '08',
+      'sep': '09', 'okt': '10', 'oct': '10', 'nov': '11', 'dez': '12', 'dec': '12',
+    };
+
+    // monthYear like "Apr. 26" or "Mär. 26"
+    const match = monthYear.match(/([A-Za-zÄäÖöÜü]+)\.?\s+(\d{2,4})/);
+    if (!match) return null;
+
+    const monthStr = match[1].toLowerCase();
+    const yearStr = match[2];
+
+    const month = monthMap[monthStr];
+    if (!month) return null;
+
+    const year = yearStr.length === 2 ? `20${yearStr}` : yearStr;
+    return `${year}-${month}-${day.padStart(2, '0')}`;
   }
 }

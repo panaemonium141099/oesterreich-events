@@ -29,9 +29,8 @@ For each scraper:
 - [ ] JSON-LD parsing used where available
 - [ ] `npx tsc --noEmit` passes
 ## Done summary
-TBD
-
+Fixed all 8 zero-event university scrapers by updating CSS selectors and pagination to match current site HTML structures. All scrapers now produce events: UniWien (28), UniGraz (11), UniInnsbruck (158), MedUniWien (26), DonauUniKrems (6), Mozarteum (38), VetMedUni (39), AkBild (30) — total 336 events.
 ## Evidence
-- Commits:
-- Tests:
+- Commits: 976ac3f4bdd55f43c5bf0c7b3f6db56aee4a72ea
+- Tests: npx tsc --noEmit, npm test (156 passed), npx tsx src/scripts/scrape.ts --source uni-wien (28 events), npx tsx src/scripts/scrape.ts --source uni-graz (11 events), npx tsx src/scripts/scrape.ts --source uni-innsbruck (158 events), npx tsx src/scripts/scrape.ts --source meduni-wien (26 events), npx tsx src/scripts/scrape.ts --source donau-uni-krems (6 events), npx tsx src/scripts/scrape.ts --source mozarteum-salzburg (38 events), npx tsx src/scripts/scrape.ts --source vetmeduni-wien (39 events), npx tsx src/scripts/scrape.ts --source akbild-wien (30 events)
 - PRs:

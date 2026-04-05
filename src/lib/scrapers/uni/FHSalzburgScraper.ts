@@ -4,7 +4,8 @@ import type { ScrapedEvent } from '@/types/events';
 
 /**
  * FH Salzburg Scraper
- * Events page with info days, conferences, festivals.
+ * Server-rendered TYPO3 site. Events use `div.event` inside `div.event-list`.
+ * Date structure: span.day + span.month-and-year, title in h3.event-title, time in div.event-time.
  */
 export class FHSalzburgScraper extends UniBaseScraper {
   readonly name = 'fh-salzburg';
@@ -15,33 +16,23 @@ export class FHSalzburgScraper extends UniBaseScraper {
   protected readonly bundesland = 'salzburg';
   protected readonly defaultLat = 47.7250;
   protected readonly defaultLng = 13.0893;
-  private readonly MAX_PAGES = 3;
 
   async scrape(): Promise<ScrapedEvent[]> {
     this.log('Starte FH Salzburg Scraping...');
     const allEvents = new Map<string, ScrapedEvent>();
 
-    for (let page = 1; page <= this.MAX_PAGES; page++) {
-      const url = page === 1
-        ? this.eventListUrl
-        : `${this.eventListUrl}?page=${page}`;
-      try {
-        const html = await this.fetchPage(url);
+    try {
+      const html = await this.fetchPage(this.eventListUrl);
 
-        const jsonLdEvents = this.parseJsonLdEvents(html, url);
-        for (const ev of jsonLdEvents) allEvents.set(ev.source_id, ev);
+      const jsonLdEvents = this.parseJsonLdEvents(html, this.eventListUrl);
+      for (const ev of jsonLdEvents) allEvents.set(ev.source_id, ev);
 
-        const htmlEvents = this.parseHtml(html);
-        for (const ev of htmlEvents) {
-          if (!allEvents.has(ev.source_id)) allEvents.set(ev.source_id, ev);
-        }
-
-        if (jsonLdEvents.length === 0 && htmlEvents.length === 0) break;
-        await this.rateLimit();
-      } catch (err) {
-        this.log(`Seite ${page} fehlgeschlagen: ${err instanceof Error ? err.message : err}`);
-        break;
+      const htmlEvents = this.parseHtml(html);
+      for (const ev of htmlEvents) {
+        if (!allEvents.has(ev.source_id)) allEvents.set(ev.source_id, ev);
       }
+    } catch (err) {
+      this.log(`Fehler: ${err instanceof Error ? err.message : err}`);
     }
 
     // Also try German URL
@@ -68,32 +59,57 @@ export class FHSalzburgScraper extends UniBaseScraper {
     const $ = cheerio.load(html);
     const events: ScrapedEvent[] = [];
 
-    $('article, .event-item, [class*="event"], .veranstaltung, .news-item').each((_, el) => {
+    // FH Salzburg: div.event-list > div.event
+    $('div.event-list div.event, div.event').each((_, el) => {
       try {
         const $el = $(el);
-        const title = $el.find('h2, h3, h4, .title, .event-title').first().text().trim();
+        // Skip if this is not an event container (no title)
+        const $titleLink = $el.find('h3.event-title a').first();
+        const title = $titleLink.text().trim() || $el.find('h3.event-title').first().text().trim();
         if (!title || title.length < 3) return;
 
-        const href = $el.find('a').first().attr('href') || '';
+        // Link
+        const href = $titleLink.attr('href') || '';
         const sourceUrl = href.startsWith('http') ? href : `${this.baseUrl}${href}`;
 
-        const dateText = $el.find('time, .date, [class*="date"]').first().text().trim()
-          || $el.find('[datetime]').first().attr('datetime') || '';
-        const startDate = this.parseDatetime(dateText) || this.parseDate(dateText);
+        // Date: first .event-date has span.day and span.month-and-year
+        const $firstDate = $el.find('.event-date').first();
+        const day = $firstDate.find('.day').text().trim();
+        const monthYear = $firstDate.find('.month-and-year').text().trim().replace(/\s+/g, ' ');
+        // monthYear is like "Mar\n2026" or "Apr\n2026"
+        const dateText = `${day}. ${monthYear.replace(/\n/g, ' ')}`;
+        const startDate = this.parseDate(dateText);
         if (!startDate) return;
 
+        // End date from second .event-date if present (for multi-day events)
+        let endDate: string | undefined;
+        const $dates = $el.find('.event-date');
+        if ($dates.length > 1) {
+          const $lastDate = $dates.last();
+          const endDay = $lastDate.find('.day').text().trim();
+          const endMonthYear = $lastDate.find('.month-and-year').text().trim().replace(/\s+/g, ' ');
+          const endDateText = `${endDay}. ${endMonthYear.replace(/\n/g, ' ')}`;
+          endDate = this.parseDate(endDateText) || undefined;
+        }
+
+        // Time from event-time
+        const timeText = $el.find('.event-time').first().text().trim();
+
+        // Build datetime if time available
+        let startDatetime = startDate;
+        if (timeText) {
+          const parsed = this.parseDatetime(`${dateText} ${timeText}`);
+          if (parsed) startDatetime = parsed;
+        }
+
         const slug = title.toLowerCase().replace(/\W+/g, '-').slice(0, 60);
-        const desc = $el.find('.teaser, .description, p').first().text().trim();
-        const imgSrc = $el.find('img').first().attr('src');
-        const imageUrl = imgSrc ? this.cleanImageUrl(this.resolveImageUrl(imgSrc, this.baseUrl)) : undefined;
 
         events.push(this.buildEvent({
           slug,
           title,
-          startDate,
-          description: desc || undefined,
+          startDate: startDatetime,
+          endDate,
           sourceUrl,
-          imageUrl,
         }));
       } catch { /* skip */ }
     });
