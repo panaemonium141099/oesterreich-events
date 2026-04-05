@@ -86,49 +86,114 @@ const OVERPASS_API = 'https://overpass-api.de/api/interpreter';
 const AUSTRIA_BBOX = '46.3,9.5,49.1,17.2';
 
 /**
- * Build the Overpass QL query for bars, pubs, nightclubs, biergartens in Austria.
+ * Regional bounding boxes for Austria (south,west,north,east).
+ * Split into regions to avoid Overpass API timeouts on country-wide queries.
+ */
+const REGIONAL_BBOXES: { name: string; bbox: string }[] = [
+  { name: 'Wien', bbox: '48.10,16.18,48.33,16.58' },
+  { name: 'Niederoesterreich', bbox: '47.40,14.45,49.02,17.07' },
+  { name: 'Burgenland', bbox: '46.83,16.00,48.12,17.17' },
+  { name: 'Oberoesterreich', bbox: '47.46,13.00,48.77,14.99' },
+  { name: 'Salzburg', bbox: '46.95,12.05,48.05,14.00' },
+  { name: 'Steiermark', bbox: '46.60,13.55,47.83,16.17' },
+  { name: 'Kaernten', bbox: '46.37,12.65,47.13,15.05' },
+  { name: 'Tirol', bbox: '46.65,10.10,47.75,12.97' },
+  { name: 'Vorarlberg', bbox: '46.84,9.52,47.59,10.24' },
+];
+
+/**
+ * Build the Overpass QL query for a regional bounding box.
  * Uses `out center` for ways/relations to get a single coordinate point.
  */
-export function buildOverpassQuery(): string {
+export function buildOverpassQuery(bbox?: string): string {
+  const bboxFilter = bbox ? `(${bbox})` : '(area.austria)';
+  const areaSetup = bbox ? '' : 'area["ISO3166-1"="AT"][admin_level=2]->.austria;';
   return `
-[out:json][timeout:300];
-area["ISO3166-1"="AT"][admin_level=2]->.austria;
+[out:json][timeout:120];
+${areaSetup}
 (
-  node["amenity"="bar"](area.austria);
-  way["amenity"="bar"](area.austria);
-  node["amenity"="pub"](area.austria);
-  way["amenity"="pub"](area.austria);
-  node["amenity"="nightclub"](area.austria);
-  way["amenity"="nightclub"](area.austria);
-  node["amenity"="biergarten"](area.austria);
-  way["amenity"="biergarten"](area.austria);
-  node["leisure"="nightclub"](area.austria);
-  way["leisure"="nightclub"](area.austria);
+  node["amenity"="bar"]${bboxFilter};
+  way["amenity"="bar"]${bboxFilter};
+  node["amenity"="pub"]${bboxFilter};
+  way["amenity"="pub"]${bboxFilter};
+  node["amenity"="nightclub"]${bboxFilter};
+  way["amenity"="nightclub"]${bboxFilter};
+  node["amenity"="biergarten"]${bboxFilter};
+  way["amenity"="biergarten"]${bboxFilter};
+  node["leisure"="nightclub"]${bboxFilter};
+  way["leisure"="nightclub"]${bboxFilter};
 );
 out center tags;
 `.trim();
 }
 
 /**
- * Fetch venues from the Overpass API.
+ * Sleep helper for retry backoff.
+ */
+function sleep(ms: number): Promise<void> {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+/**
+ * Fetch venues from a single Overpass query with retry logic.
+ */
+async function fetchOverpassRegion(query: string, regionName: string, retries = 3): Promise<OverpassElement[]> {
+  for (let attempt = 1; attempt <= retries; attempt++) {
+    try {
+      const response = await fetch(OVERPASS_API, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: `data=${encodeURIComponent(query)}`,
+      });
+
+      if (response.status === 429 || response.status === 504) {
+        const waitSec = attempt * 15;
+        console.log(`  ${regionName}: ${response.status} - retrying in ${waitSec}s (attempt ${attempt}/${retries})`);
+        await sleep(waitSec * 1000);
+        continue;
+      }
+
+      if (!response.ok) {
+        throw new Error(`Overpass API error: ${response.status} ${response.statusText}`);
+      }
+
+      const data: OverpassResponse = await response.json();
+      return data.elements;
+    } catch (err: unknown) {
+      if (attempt === retries) throw err;
+      const waitSec = attempt * 15;
+      const msg = err instanceof Error ? err.message : String(err);
+      console.log(`  ${regionName}: ${msg} - retrying in ${waitSec}s (attempt ${attempt}/${retries})`);
+      await sleep(waitSec * 1000);
+    }
+  }
+  return [];
+}
+
+/**
+ * Fetch venues from the Overpass API using regional batches.
+ * Queries each Bundesland separately to avoid 504 timeouts on full-country queries.
  */
 export async function fetchOverpassData(): Promise<OverpassElement[]> {
-  const query = buildOverpassQuery();
-  console.log('Querying Overpass API for Austrian bars/pubs/nightclubs...');
+  console.log('Querying Overpass API for Austrian bars/pubs/nightclubs (9 regions)...\n');
 
-  const response = await fetch(OVERPASS_API, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: `data=${encodeURIComponent(query)}`,
-  });
+  const allElements: OverpassElement[] = [];
 
-  if (!response.ok) {
-    throw new Error(`Overpass API error: ${response.status} ${response.statusText}`);
+  for (const region of REGIONAL_BBOXES) {
+    const query = buildOverpassQuery(region.bbox);
+    process.stdout.write(`  ${region.name}... `);
+    const elements = await fetchOverpassRegion(query, region.name);
+    console.log(`${elements.length} elements`);
+    allElements.push(...elements);
+
+    // Polite delay between requests (Overpass fair-use)
+    if (region !== REGIONAL_BBOXES[REGIONAL_BBOXES.length - 1]) {
+      await sleep(2000);
+    }
   }
 
-  const data: OverpassResponse = await response.json();
-  console.log(`Received ${data.elements.length} elements from Overpass`);
-  return data.elements;
+  console.log(`\nTotal received: ${allElements.length} elements (before dedup)`);
+  return allElements;
 }
 
 // ─── MAPPING LOGIC ──────────────────────────────────────────────────────────

@@ -270,7 +270,7 @@ describe('elementToVenue', () => {
 
 describe('buildOverpassQuery', () => {
   it('includes all required amenity types', () => {
-    const query = buildOverpassQuery();
+    const query = buildOverpassQuery('47.0,13.0,48.0,14.0');
     expect(query).toContain('"amenity"="bar"');
     expect(query).toContain('"amenity"="pub"');
     expect(query).toContain('"amenity"="nightclub"');
@@ -278,14 +278,20 @@ describe('buildOverpassQuery', () => {
     expect(query).toContain('"leisure"="nightclub"');
   });
 
-  it('uses Austria area filter', () => {
+  it('uses bbox filter when provided', () => {
+    const query = buildOverpassQuery('47.0,13.0,48.0,14.0');
+    expect(query).toContain('(47.0,13.0,48.0,14.0)');
+    expect(query).not.toContain('ISO3166-1');
+  });
+
+  it('uses Austria area filter when no bbox', () => {
     const query = buildOverpassQuery();
     expect(query).toContain('ISO3166-1');
     expect(query).toContain('AT');
   });
 
   it('outputs center and tags', () => {
-    const query = buildOverpassQuery();
+    const query = buildOverpassQuery('47.0,13.0,48.0,14.0');
     expect(query).toContain('out center tags');
   });
 
