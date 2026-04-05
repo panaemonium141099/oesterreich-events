@@ -21,7 +21,7 @@ export function normalizeTitle(title: string): string {
   return title
     .normalize('NFC')
     .toLowerCase()
-    .replace(/[^\p{L}\p{N}\s]/gu, '') // strip punctuation, keep letters/digits/spaces
+    .replace(/[^\p{L}\p{N}\s]/gu, ' ') // replace punctuation with space, keep letters/digits/spaces
     .replace(/\s+/g, ' ')
     .trim();
 }
