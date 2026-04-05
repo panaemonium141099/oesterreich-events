@@ -146,10 +146,56 @@ function sleep(ms: number): Promise<void> {
 }
 
 /**
+ * Check Overpass API status to find available query slots.
+ * Returns seconds to wait, or 0 if a slot is available.
+ */
+async function checkOverpassStatus(): Promise<number> {
+  try {
+    const baseUrl = getOverpassUrl().replace('/interpreter', '/status');
+    const res = await fetch(baseUrl, { signal: AbortSignal.timeout(10_000) });
+    const text = await res.text();
+
+    // Look for "Slot available after: ..." or rate limit info
+    const slotMatch = text.match(/Slot available after:.*?(\d+) seconds/);
+    if (slotMatch) return parseInt(slotMatch[1]) + 5;
+
+    // Look for "Rate limit: N"
+    const rateMatch = text.match(/rate_limit:\s*(\d+)/);
+    const runningMatch = text.match(/(\d+) slots? running/i) || text.match(/Running queries.*?(\d+)/);
+
+    if (rateMatch && runningMatch) {
+      const limit = parseInt(rateMatch[1]);
+      const running = parseInt(runningMatch[1]);
+      if (running >= limit) return 30; // All slots busy
+    }
+
+    // If "available now" or no slot info found, assume ready
+    if (text.includes('available now') || text.includes('Available slots: ')) return 0;
+
+    return 0;
+  } catch {
+    return 0; // Can't check status, just try the query
+  }
+}
+
+/**
+ * Wait until an Overpass slot is available, polling status endpoint.
+ */
+async function waitForSlot(regionName: string): Promise<void> {
+  const waitSec = await checkOverpassStatus();
+  if (waitSec > 0) {
+    console.log(`    Waiting ${waitSec}s for Overpass slot...`);
+    await sleep(waitSec * 1000);
+  }
+}
+
+/**
  * Fetch venues from a single Overpass query with retry logic.
  */
 async function fetchOverpassRegion(query: string, regionName: string, retries = 4): Promise<OverpassElement[]> {
   for (let attempt = 1; attempt <= retries; attempt++) {
+    // Check slot availability before querying
+    await waitForSlot(regionName);
     const apiUrl = getOverpassUrl();
     try {
       const response = await fetch(apiUrl, {
@@ -160,12 +206,18 @@ async function fetchOverpassRegion(query: string, regionName: string, retries = 
       });
 
       if (response.status === 429 || response.status === 504) {
-        // Read error body for details
+        // Read error body + Retry-After header
         let detail = '';
         try { detail = (await response.text()).slice(0, 200); } catch { /* ignore */ }
-        const waitSec = attempt * 45;
+        const retryAfter = response.headers.get('Retry-After');
+        const statusWait = await checkOverpassStatus();
+        const waitSec = retryAfter ? parseInt(retryAfter) + 5
+          : statusWait > 0 ? statusWait
+          : attempt * 45;
         console.log(`  ${regionName}: HTTP ${response.status} from ${new URL(apiUrl).hostname}`);
         if (detail) console.log(`    Detail: ${detail.replace(/\n/g, ' ').trim()}`);
+        if (retryAfter) console.log(`    Retry-After header: ${retryAfter}s`);
+        if (statusWait > 0) console.log(`    Status endpoint says: wait ${statusWait}s`);
         // Switch to fallback mirror on repeated failures
         if (attempt >= 2) {
           currentEndpointIdx++;
