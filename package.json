@@ -50,7 +50,8 @@
     "test:coverage": "vitest run --coverage",
     "gemini-geocode": "tsx --env-file=.env.local src/scripts/gemini-geocode.ts",
     "import-osm-venues": "tsx --env-file=.env.local src/scripts/import-osm-venues.ts",
-    "import-student-orgs": "tsx --env-file=.env.local src/scripts/import-student-orgs.ts"
+    "import-student-orgs": "tsx --env-file=.env.local src/scripts/import-student-orgs.ts",
+    "backfill-venue-ids": "tsx --env-file=.env.local src/scripts/backfill-venue-ids.ts"
   },
   "keywords": [],
   "author": "",
