@@ -77,7 +77,18 @@ export interface VenueRow {
 
 // ─── OVERPASS QUERY ─────────────────────────────────────────────────────────
 
-const OVERPASS_API = 'https://overpass-api.de/api/interpreter';
+/**
+ * Overpass API endpoints. Primary + fallback mirrors.
+ * See https://wiki.openstreetmap.org/wiki/Overpass_API#Public_Overpass_API_instances
+ */
+const OVERPASS_ENDPOINTS = [
+  'https://overpass-api.de/api/interpreter',
+  'https://overpass.kumi.systems/api/interpreter',
+];
+let currentEndpointIdx = 0;
+function getOverpassUrl(): string {
+  return OVERPASS_ENDPOINTS[currentEndpointIdx % OVERPASS_ENDPOINTS.length];
+}
 
 /**
  * Austria bounding box: [south, west, north, east]
@@ -137,33 +148,52 @@ function sleep(ms: number): Promise<void> {
 /**
  * Fetch venues from a single Overpass query with retry logic.
  */
-async function fetchOverpassRegion(query: string, regionName: string, retries = 3): Promise<OverpassElement[]> {
+async function fetchOverpassRegion(query: string, regionName: string, retries = 4): Promise<OverpassElement[]> {
   for (let attempt = 1; attempt <= retries; attempt++) {
+    const apiUrl = getOverpassUrl();
     try {
-      const response = await fetch(OVERPASS_API, {
+      const response = await fetch(apiUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: `data=${encodeURIComponent(query)}`,
+        signal: AbortSignal.timeout(120_000),
       });
 
       if (response.status === 429 || response.status === 504) {
-        const waitSec = attempt * 30;
-        console.log(`  ${regionName}: ${response.status} - retrying in ${waitSec}s (attempt ${attempt}/${retries})`);
+        // Read error body for details
+        let detail = '';
+        try { detail = (await response.text()).slice(0, 200); } catch { /* ignore */ }
+        const waitSec = attempt * 45;
+        console.log(`  ${regionName}: HTTP ${response.status} from ${new URL(apiUrl).hostname}`);
+        if (detail) console.log(`    Detail: ${detail.replace(/\n/g, ' ').trim()}`);
+        // Switch to fallback mirror on repeated failures
+        if (attempt >= 2) {
+          currentEndpointIdx++;
+          console.log(`    Switching to mirror: ${new URL(getOverpassUrl()).hostname}`);
+        }
+        console.log(`    Retrying in ${waitSec}s (attempt ${attempt}/${retries})`);
         await sleep(waitSec * 1000);
         continue;
       }
 
       if (!response.ok) {
-        throw new Error(`Overpass API error: ${response.status} ${response.statusText}`);
+        let detail = '';
+        try { detail = (await response.text()).slice(0, 300); } catch { /* ignore */ }
+        throw new Error(`Overpass API error: ${response.status} ${response.statusText}${detail ? ` - ${detail}` : ''}`);
       }
 
       const data: OverpassResponse = await response.json();
       return data.elements;
     } catch (err: unknown) {
       if (attempt === retries) throw err;
-      const waitSec = attempt * 30;
+      const waitSec = attempt * 45;
       const msg = err instanceof Error ? err.message : String(err);
-      console.log(`  ${regionName}: ${msg} - retrying in ${waitSec}s (attempt ${attempt}/${retries})`);
+      console.log(`  ${regionName}: ${msg}`);
+      if (attempt >= 2) {
+        currentEndpointIdx++;
+        console.log(`    Switching to mirror: ${new URL(getOverpassUrl()).hostname}`);
+      }
+      console.log(`    Retrying in ${waitSec}s (attempt ${attempt}/${retries})`);
       await sleep(waitSec * 1000);
     }
   }
@@ -186,9 +216,9 @@ export async function fetchOverpassData(): Promise<OverpassElement[]> {
     console.log(`${elements.length} elements`);
     allElements.push(...elements);
 
-    // Polite delay between requests (Overpass fair-use: 10s minimum)
+    // Polite delay between requests (Overpass fair-use: 15s minimum)
     if (region !== REGIONAL_BBOXES[REGIONAL_BBOXES.length - 1]) {
-      await sleep(12000);
+      await sleep(15000);
     }
   }
 
