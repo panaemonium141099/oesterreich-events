@@ -7,9 +7,8 @@ TBD
 - [ ] TBD
 
 ## Done summary
-TBD
-
+Student org registry import script with 72 curated entries (40 OeH, 16 ESN, 7 IAESTE, 7 AIESEC, 2 AEGEE) across all Austrian university cities. Fixed TypeScript type mismatch in cityInfo() and added documentation to CLAUDE.md.
 ## Evidence
-- Commits:
-- Tests:
+- Commits: d8cf10e99e0555400ce7dcbcbc5bbbd2631ed34e
+- Tests: npx vitest run (323 tests, 15 files passed)
 - PRs:
