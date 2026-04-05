@@ -1,20 +1,22 @@
-import * as cheerio from 'cheerio';
 import { UniBaseScraper } from './UniBaseScraper';
 import type { ScrapedEvent } from '@/types/events';
 
 /**
  * Paris-Lodron-Universität Salzburg (PLUS) Scraper
- * TYPO3-based, server-rendered with JSON-LD schema.
+ * Events are loaded via AJAX on the page, so we use the WP REST API directly.
+ * REST endpoint: /?rest_route=/wp/v2/plus_events_dn_at
  */
 export class UniSalzburgScraper extends UniBaseScraper {
   readonly name = 'uni-salzburg';
   protected readonly shortName = 'UniSalzburg';
   protected readonly baseUrl = 'https://www.plus.ac.at';
-  protected readonly eventListUrl = 'https://www.plus.ac.at/veranstaltungen/';
+  protected readonly eventListUrl = 'https://plus.ac.at/veranstaltungen/';
   protected readonly city = 'Salzburg';
   protected readonly bundesland = 'salzburg';
   protected readonly defaultLat = 47.7953;
   protected readonly defaultLng = 13.0444;
+  private readonly API_URL = 'https://www.plus.ac.at/?rest_route=/wp/v2/plus_events_dn_at';
+  private readonly PER_PAGE = 20;
   private readonly MAX_PAGES = 5;
 
   async scrape(): Promise<ScrapedEvent[]> {
@@ -22,68 +24,128 @@ export class UniSalzburgScraper extends UniBaseScraper {
     const allEvents = new Map<string, ScrapedEvent>();
 
     for (let page = 1; page <= this.MAX_PAGES; page++) {
-      const url = page === 1
-        ? this.eventListUrl
-        : `${this.eventListUrl}?page=${page}`;
       try {
-        const html = await this.fetchPage(url);
+        const url = `${this.API_URL}&per_page=${this.PER_PAGE}&page=${page}`;
+        const response = await fetch(url, {
+          headers: {
+            'User-Agent': 'Mozilla/5.0 (compatible; EventScraper/1.0)',
+            'Accept': 'application/json',
+          },
+        });
 
-        const jsonLdEvents = this.parseJsonLdEvents(html, url);
-        for (const ev of jsonLdEvents) allEvents.set(ev.source_id, ev);
-
-        const htmlEvents = this.parseHtml(html);
-        for (const ev of htmlEvents) {
-          if (!allEvents.has(ev.source_id)) allEvents.set(ev.source_id, ev);
+        if (!response.ok) {
+          if (response.status === 400) break; // No more pages
+          this.log(`API Seite ${page} fehlgeschlagen: ${response.status}`);
+          break;
         }
 
-        if (jsonLdEvents.length === 0 && htmlEvents.length === 0) break;
-        this.log(`Seite ${page}: ${allEvents.size} Events`);
+        const data = await response.json() as PLUSEvent[];
+        if (!Array.isArray(data) || data.length === 0) break;
+
+        for (const item of data) {
+          try {
+            const event = this.parsePLUSEvent(item);
+            if (event) allEvents.set(event.source_id, event);
+          } catch { /* skip */ }
+        }
+
+        this.log(`API Seite ${page}: ${allEvents.size} Events`);
+        if (data.length < this.PER_PAGE) break;
         await this.rateLimit();
       } catch (err) {
-        this.log(`Seite ${page} fehlgeschlagen: ${err instanceof Error ? err.message : err}`);
+        this.log(`API Seite ${page} fehlgeschlagen: ${err instanceof Error ? err.message : err}`);
         break;
       }
     }
+
+    // Also try the HTML page for JSON-LD as fallback
+    try {
+      await this.rateLimit();
+      const html = await this.fetchPage(this.eventListUrl);
+      const jsonLdEvents = this.parseJsonLdEvents(html, this.eventListUrl);
+      for (const ev of jsonLdEvents) {
+        if (!allEvents.has(ev.source_id)) allEvents.set(ev.source_id, ev);
+      }
+    } catch { /* skip */ }
 
     const events = Array.from(allEvents.values());
     this.log(`${events.length} Events gescrapt`);
     return events;
   }
 
-  private parseHtml(html: string): ScrapedEvent[] {
-    const $ = cheerio.load(html);
-    const events: ScrapedEvent[] = [];
+  private parsePLUSEvent(item: PLUSEvent): ScrapedEvent | null {
+    const title = this.stripHtml(item.title?.rendered || '').trim();
+    if (!title || title.length < 3) return null;
 
-    $('article, .event-item, [class*="event"], .veranstaltung, .news-list-item, .list-item').each((_, el) => {
-      try {
-        const $el = $(el);
-        const title = $el.find('h2, h3, h4, .title, .event-title').first().text().trim();
-        if (!title || title.length < 3) return;
+    const acf = item.acf || {};
+    const startEnd = acf.event_start_end_group || {};
+    const startDate = startEnd.event_start || '';
+    if (!startDate) return null;
 
-        const href = $el.find('a').first().attr('href') || '';
-        const sourceUrl = href.startsWith('http') ? href : `${this.baseUrl}${href}`;
+    // Parse the start date - may be in various formats
+    let isoDate = this.parseDatetime(startDate) || this.parseDate(startDate);
+    if (!isoDate) {
+      // Try direct ISO format
+      const isoMatch = startDate.match(/(\d{4}-\d{2}-\d{2})/);
+      if (isoMatch) isoDate = isoMatch[1];
+    }
+    if (!isoDate) return null;
 
-        const dateText = $el.find('time, .date, [class*="date"]').first().text().trim()
-          || $el.find('[datetime]').first().attr('datetime') || '';
-        const startDate = this.parseDatetime(dateText) || this.parseDate(dateText);
-        if (!startDate) return;
+    let endDate: string | undefined;
+    if (startEnd.event_end) {
+      endDate = this.parseDatetime(startEnd.event_end) || this.parseDate(startEnd.event_end) || undefined;
+    }
 
-        const slug = title.toLowerCase().replace(/\W+/g, '-').slice(0, 60);
-        const desc = $el.find('.teaser, .description, p').first().text().trim();
-        const imgSrc = $el.find('img').first().attr('src');
-        const imageUrl = imgSrc ? this.cleanImageUrl(this.resolveImageUrl(imgSrc, this.baseUrl)) : undefined;
+    const slug = (item.slug || title.toLowerCase().replace(/\W+/g, '-')).slice(0, 60);
 
-        events.push(this.buildEvent({
-          slug,
-          title,
-          startDate,
-          description: desc || undefined,
-          sourceUrl,
-          imageUrl,
-        }));
-      } catch { /* skip */ }
+    // Description from ACF
+    const description = acf.event_description
+      ? this.stripHtml(String(acf.event_description)).trim()
+      : undefined;
+
+    // Location
+    const loc = acf.event_location_group || {};
+    const locationParts = [loc.event_location_name, loc.event_address_street, loc.event_address_city]
+      .filter(Boolean).map(s => String(s).trim());
+    const locationName = locationParts.join(', ') || this.city;
+
+    // Source URL
+    const sourceUrl = acf.event_url || item.link || `${this.baseUrl}/veranstaltungen/`;
+
+    return this.buildEvent({
+      slug,
+      title,
+      startDate: isoDate,
+      endDate,
+      description: description?.slice(0, 500) || undefined,
+      locationName,
+      sourceUrl,
     });
-
-    return events;
   }
+
+  private stripHtml(html: string): string {
+    return html.replace(/<[^>]+>/g, '').replace(/&amp;/g, '&').replace(/&lt;/g, '<')
+      .replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#039;/g, "'")
+      .replace(/&nbsp;/g, ' ').trim();
+  }
+}
+
+interface PLUSEvent {
+  id?: number;
+  slug?: string;
+  link?: string;
+  title?: { rendered: string };
+  acf?: {
+    event_start_end_group?: {
+      event_start?: string;
+      event_end?: string;
+    };
+    event_description?: string;
+    event_url?: string;
+    event_location_group?: {
+      event_location_name?: string;
+      event_address_street?: string;
+      event_address_city?: string;
+    };
+  };
 }

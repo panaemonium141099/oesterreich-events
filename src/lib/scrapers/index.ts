@@ -81,6 +81,8 @@ import {
   Campus02Scraper, FHGTirolScraper, FernFHScraper, FHBFIWienScraper,
   PHNOEScraper, PHSalzburgScraper, PHKaerntenScraper, PHBurgenlandScraper,
   KPHWienScraper, PPHAugustinumScraper, KPHEdithSteinScraper,
+  // Batch 3
+  ITULinzScraper, FHTechnikumWienScraper, FHOOEScraper,
 } from './uni';
 import { closeSharedBrowser } from './puppeteerBrowser';
 import { upsertEvent, recordScrapeRun } from '../db/queries';
@@ -277,6 +279,10 @@ const scrapers: BaseScraper[] = [
   new KPHWienScraper(),
   new PPHAugustinumScraper(),
   new KPHEdithSteinScraper(),
+  // Batch 3 — New FH scrapers
+  new ITULinzScraper(),
+  new FHTechnikumWienScraper(),
+  new FHOOEScraper(),
 ];
 
 const SCRAPER_CONCURRENCY = 10;
@@ -354,8 +360,8 @@ export async function runScraper(scraper: BaseScraper): Promise<void> {
 
     // Sync all scraped events to Supabase (dual-write)
     if (events.length > 0) {
-      const { upserted, errors: syncErrors } = await syncEventsToSupabase(events);
-      console.log(`[${scraper.name}] Supabase sync: ${upserted} upserted, ${syncErrors} errors`);
+      const { upserted, errors: syncErrors, filtered } = await syncEventsToSupabase(events);
+      console.log(`[${scraper.name}] Supabase sync: ${upserted} upserted, ${syncErrors} errors${filtered > 0 ? `, ${filtered} filtered (past/invalid)` : ''}`);
     }
 
     run.finish({ eventsFound, eventsNew, eventsUpdated });

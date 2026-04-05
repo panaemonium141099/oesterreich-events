@@ -42,3 +42,7 @@ export {
   PPHAugustinumScraper,
   KPHEdithSteinScraper,
 } from './PHScrapers';
+// Batch 3 — New FH scrapers
+export { ITULinzScraper } from './ITULinzScraper';
+export { FHTechnikumWienScraper } from './FHTechnikumWienScraper';
+export { FHOOEScraper } from './FHOOEScraper';
