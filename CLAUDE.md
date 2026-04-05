@@ -59,6 +59,7 @@ node / next.js
 - `src/app/blog/page.tsx` — Blog index page (/blog) with category filter tabs
 - `src/app/blog/[slug]/page.tsx` — Blog detail page with generateMetadata + JSON-LD Event schema
 - `src/components/Landing/FestivalBlogSection.tsx` — Blog preview section on landing page
+- `src/scripts/import-student-orgs.ts` — Import OeH/ESN/IAESTE/AIESEC/AEGEE sections as venue entries (~72 orgs)
 
 ## Scraper-Quellen
 - **burgenland.info** — Cheerio + JSON-LD (@graph), ~122 Events mit Koordinaten
@@ -90,6 +91,8 @@ npx tsx src/scripts/fix-geocoding.ts --dry-run  # Re-geocode wrongly-placed even
 npx tsx src/scripts/test-normalizer.ts  # Run normalizer test cases
 npm run gemini-geocode        # Gemini AI batch geocoding for NULL-coord events (requires GEMINI_API_KEY)
 npm run gemini-geocode -- --dry-run  # Dry-run mode (no writes)
+npm run import-student-orgs   # Import OeH/ESN/IAESTE/AIESEC/AEGEE sections as venues (~72 orgs)
+npm run import-student-orgs -- --dry-run  # Dry-run mode (no writes)
 ```
 
 ## Docker

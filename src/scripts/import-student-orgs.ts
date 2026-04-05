@@ -98,10 +98,10 @@ const CITY_COORDS: Record<string, { lat: number; lng: number; plz: string; bunde
   'Linz-Urfahr':  { lat: 48.3119, lng: 14.2862, plz: '4040', bundesland: 'Oberoesterreich' },
 };
 
-function cityInfo(city: string) {
+function cityInfo(city: string): { latitude: number; longitude: number; bundesland: string } {
   const info = CITY_COORDS[city];
   if (!info) throw new Error(`Unknown city: ${city}. Add it to CITY_COORDS.`);
-  return info;
+  return { latitude: info.lat, longitude: info.lng, bundesland: info.bundesland };
 }
 
 // ---------------------------------------------------------------------------
