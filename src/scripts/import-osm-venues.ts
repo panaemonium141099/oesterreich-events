@@ -147,7 +147,7 @@ async function fetchOverpassRegion(query: string, regionName: string, retries = 
       });
 
       if (response.status === 429 || response.status === 504) {
-        const waitSec = attempt * 15;
+        const waitSec = attempt * 30;
         console.log(`  ${regionName}: ${response.status} - retrying in ${waitSec}s (attempt ${attempt}/${retries})`);
         await sleep(waitSec * 1000);
         continue;
@@ -161,7 +161,7 @@ async function fetchOverpassRegion(query: string, regionName: string, retries = 
       return data.elements;
     } catch (err: unknown) {
       if (attempt === retries) throw err;
-      const waitSec = attempt * 15;
+      const waitSec = attempt * 30;
       const msg = err instanceof Error ? err.message : String(err);
       console.log(`  ${regionName}: ${msg} - retrying in ${waitSec}s (attempt ${attempt}/${retries})`);
       await sleep(waitSec * 1000);
@@ -186,9 +186,9 @@ export async function fetchOverpassData(): Promise<OverpassElement[]> {
     console.log(`${elements.length} elements`);
     allElements.push(...elements);
 
-    // Polite delay between requests (Overpass fair-use)
+    // Polite delay between requests (Overpass fair-use: 10s minimum)
     if (region !== REGIONAL_BBOXES[REGIONAL_BBOXES.length - 1]) {
-      await sleep(2000);
+      await sleep(12000);
     }
   }
 
