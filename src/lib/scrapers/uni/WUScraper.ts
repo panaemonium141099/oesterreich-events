@@ -10,7 +10,7 @@ export class WUScraper extends UniBaseScraper {
   readonly name = 'wu-wien';
   protected readonly shortName = 'WU';
   protected readonly baseUrl = 'https://www.wu.ac.at';
-  protected readonly eventListUrl = 'https://www.wu.ac.at/events';
+  protected readonly eventListUrl = 'https://www.wu.ac.at/universitaet/news-und-events/events';
   protected readonly city = 'Wien';
   protected readonly bundesland = 'wien';
   protected readonly defaultLat = 48.2134;
@@ -47,23 +47,42 @@ export class WUScraper extends UniBaseScraper {
     const $ = cheerio.load(html);
     const events: ScrapedEvent[] = [];
 
-    $('article, .event-item, [class*="event"], .news-list-item, .ce-textpic, .frame').each((_, el) => {
+    // WU uses div.item[data-id] event cards with:
+    //   div.date > div.day + div.month
+    //   h3.u__h4 (title)
+    //   div.description > p (description)
+    //   div.schedule (date/time text like "07.04.2026 14:00 - 16:00")
+    //   div.image > picture > img
+    $('div.item[data-id]').each((_, el) => {
       try {
         const $el = $(el);
-        const title = $el.find('h2, h3, h4, .title').first().text().trim();
+        const dataId = $el.attr('data-id') || '';
+        const title = $el.find('h3, h4, .u__h4').first().text().trim();
         if (!title || title.length < 3) return;
 
-        const href = $el.find('a').first().attr('href') || '';
-        const sourceUrl = href.startsWith('http') ? href : `${this.baseUrl}${href}`;
+        // Build source URL from TYPO3 news API pattern
+        const sourceUrl = dataId
+          ? `${this.baseUrl}/?type=9901&tx_news_pi1[news]=${dataId}`
+          : this.eventListUrl;
 
-        const dateText = $el.find('time, .date, [class*="date"]').first().text().trim()
-          || $el.find('[datetime]').first().attr('datetime') || '';
-        const startDate = this.parseDatetime(dateText) || this.parseDate(dateText);
+        // Date from .schedule element: "07.04.2026 14:00 - 16:00"
+        const scheduleText = $el.find('.schedule').first().text().trim();
+        let startDate = this.parseDatetime(scheduleText) || this.parseDate(scheduleText);
+
+        // Fallback: date from .date > .day + .month (e.g. "07" + "Apr")
+        if (!startDate) {
+          const day = $el.find('.date .day').text().trim();
+          const month = $el.find('.date .month').text().trim();
+          if (day && month) {
+            const year = new Date().getFullYear();
+            startDate = this.parseDate(`${day}. ${month} ${year}`);
+          }
+        }
         if (!startDate) return;
 
         const slug = title.toLowerCase().replace(/\W+/g, '-').slice(0, 60);
-        const desc = $el.find('.teaser, .description, p').first().text().trim();
-        const imgSrc = $el.find('img').first().attr('src');
+        const desc = $el.find('.description p, .description').first().text().trim();
+        const imgSrc = $el.find('img').first().attr('src') || $el.find('img').first().attr('data-src');
         const imageUrl = imgSrc ? this.cleanImageUrl(this.resolveImageUrl(imgSrc, this.baseUrl)) : undefined;
 
         events.push(this.buildEvent({

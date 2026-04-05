@@ -11,7 +11,7 @@ export class TUWienScraper extends UniBaseScraper {
   readonly name = 'tu-wien';
   protected readonly shortName = 'TUWien';
   protected readonly baseUrl = 'https://www.tuwien.at';
-  protected readonly eventListUrl = 'https://www.tuwien.at/en/tu-wien/news/events';
+  protected readonly eventListUrl = 'https://www.tuwien.at/tu-wien/aktuelles/veranstaltungskalender';
   protected readonly city = 'Wien';
   protected readonly bundesland = 'wien';
   protected readonly defaultLat = 48.1988;
@@ -27,6 +27,7 @@ export class TUWienScraper extends UniBaseScraper {
         ? this.eventListUrl
         : `${this.eventListUrl}?page=${page}`;
       try {
+        const prevSize = allEvents.size;
         const html = await this.fetchPage(url);
 
         const jsonLdEvents = this.parseJsonLdEvents(html, url);
@@ -40,6 +41,7 @@ export class TUWienScraper extends UniBaseScraper {
         }
 
         if (jsonLdEvents.length === 0 && htmlEvents.length === 0) break;
+        if (page > 1 && allEvents.size === prevSize) break;
         this.log(`Seite ${page}: ${allEvents.size} Events`);
         await this.rateLimit();
       } catch (err) {
@@ -57,39 +59,45 @@ export class TUWienScraper extends UniBaseScraper {
     const $ = cheerio.load(html);
     const events: ScrapedEvent[] = [];
 
-    $('article, .event-item, .news-list-item, [class*="event-list"] > *, .content-element').each((_, el) => {
+    // TU Wien uses article.wpListItem with h3 > a.wpListItemEventLink
+    // Dates in p.visually-hidden: "01 Dezember 2025 bis 04 September 2026"
+    $('article.wpListItem, article[aria-labelledby]').each((_, el) => {
       try {
         const $el = $(el);
-        const $link = $el.find('a[href*="event"], a[href*="veranstaltung"]').first();
-        if (!$link.length) {
-          // Try any link within the element
-          const anyLink = $el.find('a').first();
-          if (!anyLink.length) return;
-        }
+        const $link = $el.find('a.wpListItemEventLink, a[href*="veranstaltungskalender/news/"]').first();
+        if (!$link.length) return;
 
-        const title = $el.find('h2, h3, h4, .title').first().text().trim();
+        const title = $link.text().trim();
         if (!title || title.length < 3) return;
 
-        const href = ($link.length ? $link : $el.find('a').first()).attr('href') || '';
+        const href = $link.attr('href') || '';
         const sourceUrl = href.startsWith('http') ? href : `${this.baseUrl}${href}`;
 
-        const dateText = $el.find('time, .date, [class*="date"]').first().text().trim()
-          || $el.find('[datetime]').first().attr('datetime') || '';
+        // Date from visually-hidden paragraph: "01 Dezember 2025 bis 04 September 2026"
+        const dateText = $el.find('p.visually-hidden').first().text().trim();
         const startDate = this.parseDatetime(dateText) || this.parseDate(dateText);
         if (!startDate) return;
 
+        // End date from "bis" part
+        let endDate: string | undefined;
+        const bisMatch = dateText.match(/bis\s+(.+)/);
+        if (bisMatch) {
+          endDate = this.parseDatetime(bisMatch[1]) || this.parseDate(bisMatch[1]) || undefined;
+        }
+
         const slug = title.toLowerCase().replace(/\W+/g, '-').slice(0, 60);
-        const desc = $el.find('.teaser, .description, p').first().text().trim();
-        const imgSrc = $el.find('img').first().attr('src') || $el.find('img').first().attr('data-src');
-        const imageUrl = imgSrc ? this.cleanImageUrl(this.resolveImageUrl(imgSrc, this.baseUrl)) : undefined;
+        const eventType = $el.find('.wpTypeTag').text().trim();
+        const location = $el.find('.wpLocation').text().trim();
+        const desc = [eventType, location].filter(Boolean).join(' - ') || undefined;
 
         events.push(this.buildEvent({
           slug,
           title,
           startDate,
-          description: desc || undefined,
+          endDate,
+          description: desc,
           sourceUrl,
-          imageUrl,
+          locationName: location || undefined,
         }));
       } catch { /* skip */ }
     });

@@ -25,6 +25,8 @@
  *   npx tsx src/scripts/gemini-geocode.ts --verify
  *   npx tsx src/scripts/gemini-geocode.ts --all --dry-run
  *   npx tsx src/scripts/gemini-geocode.ts --all
+ *   npx tsx src/scripts/gemini-geocode.ts --retry-low --dry-run
+ *   npx tsx src/scripts/gemini-geocode.ts --retry-low
  *   npx tsx src/scripts/gemini-geocode.ts --resume
  */
 
@@ -46,7 +48,7 @@ try {
   }
 } catch { /* .env.local not found, rely on environment */ }
 
-import { GoogleGenAI, Type } from '@google/genai';
+import OpenAI from 'openai';
 import { createClient } from '@supabase/supabase-js';
 import { getDatabase } from '../lib/db/connection';
 import { normalizeString } from '../lib/location-normalizer';
@@ -54,13 +56,13 @@ import * as fs from 'fs';
 import * as path from 'path';
 
 // ─── Auth: fail fast if keys missing ──────────────────────────────────────
-const geminiApiKey = process.env.GEMINI_API_KEY;
+const openaiApiKey = process.env.OPENAI_API_KEY;
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-if (!geminiApiKey) {
-  console.error('ERROR: Missing GEMINI_API_KEY');
-  console.error('Add GEMINI_API_KEY to .env.local or set it in environment.');
+if (!openaiApiKey) {
+  console.error('ERROR: Missing OPENAI_API_KEY');
+  console.error('Add OPENAI_API_KEY to .env.local or set it in environment.');
   process.exit(1);
 }
 
@@ -75,7 +77,7 @@ if (!supabaseServiceKey) {
   process.exit(1);
 }
 
-const ai = new GoogleGenAI({ apiKey: geminiApiKey });
+const openai = new OpenAI({ apiKey: openaiApiKey });
 const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
 // ─── CLI args ──────────────────────────────────────────────────────────────
@@ -83,8 +85,9 @@ const isDryRun = process.argv.includes('--dry-run');
 const isResume = process.argv.includes('--resume');
 const isVerifyMode = process.argv.includes('--verify');
 const isAllMode = process.argv.includes('--all');
-// Default to --null mode if neither --verify nor --all specified
-const isNullMode = !isVerifyMode && !isAllMode;
+const isRetryLowMode = process.argv.includes('--retry-low');
+// Default to --null mode if no other mode specified
+const isNullMode = !isVerifyMode && !isAllMode && !isRetryLowMode;
 
 // ─── Constants ─────────────────────────────────────────────────────────────
 const BATCH_SIZE = 50;
@@ -105,6 +108,7 @@ const CONFIDENCE_RANK: Record<string, number> = {
   from_description: 5,
   nominatim: 6,
   gemini: 7,
+  gemini_low: 8,
 };
 
 function getConfidenceRank(confidence: string | null | undefined): number {
@@ -112,32 +116,11 @@ function getConfidenceRank(confidence: string | null | undefined): number {
   return CONFIDENCE_RANK[confidence] ?? Infinity;
 }
 
-const modeLabel = isAllMode ? 'ALL' : isVerifyMode ? 'VERIFY' : 'NULL';
+const modeLabel = isRetryLowMode ? 'RETRY-LOW' : isAllMode ? 'ALL' : isVerifyMode ? 'VERIFY' : 'NULL';
 const CHECKPOINT_FILE = path.resolve(`data/gemini-geocode-${modeLabel.toLowerCase()}-checkpoint.json`);
 
-// ─── Gemini structured output schema ──────────────────────────────────────
-const GEOCODE_SCHEMA = {
-  type: Type.OBJECT,
-  properties: {
-    latitude: {
-      type: Type.NUMBER,
-      description: 'Latitude of the location in decimal degrees (WGS84). Use 6 decimal places.',
-    },
-    longitude: {
-      type: Type.NUMBER,
-      description: 'Longitude of the location in decimal degrees (WGS84). Use 6 decimal places.',
-    },
-    confidence: {
-      type: Type.STRING,
-      description: 'How confident you are: "high" = exact known location, "medium" = good estimate based on context, "low" = uncertain or guessing.',
-    },
-    resolved_name: {
-      type: Type.STRING,
-      description: 'The full resolved name of the location as you understand it (e.g., "Schloss Esterhazy, Eisenstadt, Burgenland").',
-    },
-  },
-  required: ['latitude', 'longitude', 'confidence', 'resolved_name'],
-};
+// ─── OpenAI JSON schema for structured output ────────────────────────────
+// (no special imports needed — OpenAI uses standard JSON Schema)
 
 const SYSTEM_PROMPT = `You are an Austrian geography expert. Given a location name and context (Bundesland, address, PLZ, event title), return the precise coordinates.
 
@@ -276,22 +259,45 @@ function setCachedResult(cacheKey: string, lat: number, lng: number): void {
   db.prepare('INSERT OR REPLACE INTO geocode_cache (query, latitude, longitude) VALUES (?, ?, ?)').run(cacheKey, lat, lng);
 }
 
-// ─── Gemini API call ───────────────────────────────────────────────────────
+// ─── OpenAI API call ──────────────────────────────────────────────────────
 
-interface GeminiGeoResult {
+interface GeoResult {
   latitude: number;
   longitude: number;
   confidence: 'high' | 'medium' | 'low';
   resolved_name: string;
 }
 
-async function geocodeWithGemini(
+const RETRY_LOW_SYSTEM_PROMPT = `You are an expert Austrian geography researcher. You must resolve the given location to precise coordinates.
+
+This location was previously UNRESOLVABLE by a simpler model. Try harder:
+- Search your knowledge thoroughly for Austrian venues, restaurants, hotels, cultural centers, Gasthäuser, Heurige, community halls
+- Consider the Bundesland, PLZ, and any address fragments as strong clues
+- For generic names like "Gemeindesaal" or "Mehrzweckhalle", the PLZ or Bundesland should tell you which town
+- Austrian PLZ codes are 4 digits: first digit = rough region (1=Wien, 2=NOE-east, 3=NOE-west, 4=OOE, 5=Salzburg, 6=Tirol, 7=Burgenland, 8=Steiermark, 9=Kärnten/Vorarlberg)
+- Many Austrian towns have a "Gemeindesaal", "Pfarrsaal", "Kulturhaus" — use the PLZ/town to find the right one
+- For venue names with a town suffix (e.g., "Stadtsaal Oberpullendorf"), the town name IS the location
+
+RULES:
+- Return coordinates within Austria (lat 46.3-49.1, lng 9.5-17.2)
+- Use 6 decimal places
+- confidence: "high" = exact known, "medium" = good estimate from context, "low" = best guess but uncertain
+- If truly impossible (no context at all), return latitude=0, longitude=0, confidence="low"
+- IMPORTANT: Even "medium" confidence is acceptable — only return "low" if you are genuinely lost
+
+EXAMPLES:
+- "Gemeindesaal" + PLZ 7350 + Burgenland -> Oberpullendorf -> { lat: 47.4953, lng: 16.5133, confidence: "medium", resolved: "Gemeindesaal, Oberpullendorf, Burgenland" }
+- "Gasthaus zur Post" + PLZ 2630 + NOE -> Ternitz -> { lat: 47.7167, lng: 16.0333, confidence: "medium", resolved: "Gasthaus zur Post, Ternitz, Niederösterreich" }
+- "Stadtsaal" + PLZ 8010 + Steiermark -> Graz -> { lat: 47.0707, lng: 15.4395, confidence: "medium", resolved: "Stadtsaal Graz, Steiermark" }`;
+
+async function geocodeWithAI(
   locationName: string,
   bundesland: string | null,
   address: string | null,
   postalCode: string | null,
   titleCityHint: string | null,
-): Promise<GeminiGeoResult | null> {
+  useStrongModel: boolean = false,
+): Promise<GeoResult | null> {
   // Build context prompt
   const parts: string[] = [`Location: "${locationName}"`];
   if (bundesland) parts.push(`Bundesland: ${bundesland}`);
@@ -300,33 +306,52 @@ async function geocodeWithGemini(
   if (titleCityHint) parts.push(`City hint from event title: ${titleCityHint}`);
 
   const userPrompt = parts.join('\n');
+  const systemPrompt = useStrongModel ? RETRY_LOW_SYSTEM_PROMPT : SYSTEM_PROMPT;
+  const model = useStrongModel ? 'gpt-4o' : 'gpt-4o-mini';
 
   try {
-    const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
-      contents: userPrompt,
-      config: {
-        systemInstruction: SYSTEM_PROMPT,
-        responseMimeType: 'application/json',
-        responseJsonSchema: GEOCODE_SCHEMA,
-        temperature: 0.1, // Low temperature for factual geocoding
+    const response = await openai.chat.completions.create({
+      model,
+      temperature: 0.1,
+      response_format: {
+        type: 'json_schema',
+        json_schema: {
+          name: 'geocode_result',
+          strict: true,
+          schema: {
+            type: 'object',
+            properties: {
+              latitude: { type: 'number', description: 'Latitude in decimal degrees (WGS84), 6 decimal places' },
+              longitude: { type: 'number', description: 'Longitude in decimal degrees (WGS84), 6 decimal places' },
+              confidence: { type: 'string', enum: ['high', 'medium', 'low'], description: 'high = exact known, medium = good estimate, low = uncertain' },
+              resolved_name: { type: 'string', description: 'Full resolved name e.g. "Schloss Esterhazy, Eisenstadt, Burgenland"' },
+            },
+            required: ['latitude', 'longitude', 'confidence', 'resolved_name'],
+            additionalProperties: false,
+          },
+        },
       },
+      messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: userPrompt },
+      ],
     });
 
-    if (!response.text) return null;
+    const text = response.choices[0]?.message?.content;
+    if (!text) return null;
 
-    const parsed = JSON.parse(response.text) as GeminiGeoResult;
+    const parsed = JSON.parse(text) as GeoResult;
 
     // Validate structure
     if (typeof parsed.latitude !== 'number' || typeof parsed.longitude !== 'number' ||
         typeof parsed.confidence !== 'string' || typeof parsed.resolved_name !== 'string') {
-      console.warn(`  [gemini] Invalid response structure for "${locationName}"`);
+      console.warn(`  [ai] Invalid response structure for "${locationName}"`);
       return null;
     }
 
     return parsed;
   } catch (err) {
-    console.error(`  [gemini] API error for "${locationName}": ${err instanceof Error ? err.message : err}`);
+    console.error(`  [ai] API error for "${locationName}": ${err instanceof Error ? err.message : err}`);
     return null;
   }
 }
@@ -387,6 +412,7 @@ async function fetchEvents(): Promise<EventRow[]> {
       .range(offset, offset + pageSize - 1);
 
     // In null mode, only fetch events with NULL coords
+    // In retry-low mode, fetch ALL events (like verify) to catch previously-skipped locations
     if (isNullMode) {
       query = query.is('latitude', null);
     }
@@ -447,6 +473,9 @@ function deduplicateLocations(events: EventRow[]): UniqueLocation[] {
 
 async function main() {
   console.log(`\nGemini Flash Geocoding [${modeLabel}] — ${isDryRun ? 'DRY RUN' : 'LIVE MODE'}${isResume ? ' (RESUME)' : ''}`);
+  if (isRetryLowMode) {
+    console.log('  Using gpt-4o (stronger model) for previously-skipped locations');
+  }
   console.log('='.repeat(60));
 
   // 1. Fetch events
@@ -456,7 +485,7 @@ async function main() {
     return;
   }
 
-  // 2. For --verify/--all mode, filter out protected confidences
+  // 2. For --verify/--all/--retry-low mode, filter out protected confidences
   let processableEvents = events;
   if (!isNullMode) {
     processableEvents = events.filter(e => {
@@ -467,8 +496,20 @@ async function main() {
   }
 
   // 3. Deduplicate by location
-  const uniqueLocations = deduplicateLocations(processableEvents);
-  console.log(`  Unique locations to process: ${uniqueLocations.length} (from ${processableEvents.length} events)`);
+  let uniqueLocations = deduplicateLocations(processableEvents);
+  console.log(`  Unique locations (before filter): ${uniqueLocations.length} (from ${processableEvents.length} events)`);
+
+  // 3b. For --retry-low: filter to ONLY locations NOT in the cache (= previously skipped)
+  if (isRetryLowMode) {
+    const uncachedLocations = uniqueLocations.filter(loc => {
+      const cached = getCachedResult(loc.cacheKey);
+      return cached === null;
+    });
+    console.log(`  Uncached locations (skipped/errored): ${uncachedLocations.length} of ${uniqueLocations.length}`);
+    uniqueLocations = uncachedLocations;
+  }
+
+  console.log(`  Unique locations to process: ${uniqueLocations.length}`);
 
   // 4. Handle resume
   let processedKeys = new Set<string>();
@@ -485,7 +526,7 @@ async function main() {
     }
   }
 
-  // 5. Create backup before --verify/--all (skip on resume or dry-run)
+  // 5. Create backup before --verify/--all/--retry-low (skip on resume or dry-run)
   if (!isDryRun && !isNullMode && !backupPath) {
     console.log('\nCreating durable backup...');
     backupPath = await createBackup(events);
@@ -523,19 +564,21 @@ async function main() {
       resolvedName = '(cached)';
       cacheHits++;
     } else {
-      // Call Gemini
-      const result = await geocodeWithGemini(
+      // Call AI — gpt-4o for retry-low, gpt-4o-mini otherwise
+      const result = await geocodeWithAI(
         loc.locationName,
         loc.bundesland,
         loc.address,
         loc.postalCode,
         loc.cityHint,
+        isRetryLowMode, // use stronger model
       );
       geminiCalls++;
 
       if (result) {
-        // Only accept high/medium confidence
-        if (result.confidence === 'low') {
+        // In retry-low mode: accept ALL confidence levels (gpt-4o is more reliable)
+        // In normal mode: only accept high/medium confidence
+        if (!isRetryLowMode && result.confidence === 'low') {
           // Log skip for all events at this location
           for (const event of loc.events) {
             auditLog.push({
@@ -627,6 +670,10 @@ async function main() {
         lat = result.latitude;
         lng = result.longitude;
         resolvedName = result.resolved_name;
+        // In retry-low mode, tag low-confidence results distinctly
+        if (isRetryLowMode && result.confidence === 'low') {
+          confidence = 'gemini_low';
+        }
 
         // Cache the valid result
         if (!isDryRun) {

@@ -109,6 +109,7 @@ function MapPageInner() {
     if (filters.priceMax !== undefined) params.set('priceMax', String(filters.priceMax));
     if (filters.search) params.set('search', filters.search);
     if (filters.eveningOnly) params.set('eveningOnly', 'true');
+    if (filters.sourceName) params.set('sourceName', filters.sourceName);
     return params;
   }, [filters]); // NOTE: bundesland NOT in deps — switching BL doesn't refetch
 

@@ -114,6 +114,9 @@ export async function GET(request: NextRequest) {
   const sortParam = searchParams.get('sort');
   if (sortParam === 'score') filters.sort = 'score';
 
+  // Source name filter (god-role only — no auth check here, UI hides it for non-god)
+  const sourceName = searchParams.get('sourceName');
+
   // Lightweight suggest mode: returns only id/title/category/location_name, skips exact count
   // Used by the autocomplete typeahead in FilterBar to avoid heavyweight DB queries on every keystroke
   const suggestMode = searchParams.get('suggest') === 'true';
@@ -165,6 +168,10 @@ export async function GET(request: NextRequest) {
 
     if (filters.district) {
       query = query.eq('district', filters.district);
+    }
+
+    if (sourceName) {
+      query = query.eq('source_name', sourceName);
     }
 
     if (filters.tags && filters.tags.length > 0) {

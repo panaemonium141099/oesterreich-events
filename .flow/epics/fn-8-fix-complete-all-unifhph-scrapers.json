@@ -1,0 +1,13 @@
+{
+  "branch_name": "fn-8-fix-complete-all-unifhph-scrapers",
+  "created_at": "2026-04-05T13:53:35.481147Z",
+  "depends_on_epics": [],
+  "id": "fn-8-fix-complete-all-unifhph-scrapers",
+  "next_task": 1,
+  "plan_review_status": "unknown",
+  "plan_reviewed_at": null,
+  "spec_path": ".flow/specs/fn-8-fix-complete-all-unifhph-scrapers.md",
+  "status": "open",
+  "title": "Fix & complete all Uni/FH/PH scrapers",
+  "updated_at": "2026-04-05T14:25:09.684219Z"
+}

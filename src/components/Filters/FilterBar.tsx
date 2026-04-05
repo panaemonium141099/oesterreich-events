@@ -4,10 +4,11 @@ import { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import type { EventFilters } from '@/types/events';
 import { CategoryFilter } from './CategoryFilter';
-import { TagFilter } from './TagFilter';
+import { SourceFilter } from './SourceFilter';
 import { DistrictFilter } from './DistrictFilter';
 import { DateRangeFilter } from './DateRangeFilter';
 import { trackEvent } from '@/lib/analytics';
+import { useAuth } from '@/lib/supabase/auth-context';
 
 interface Gemeinde {
   n: string;
@@ -34,6 +35,7 @@ interface FilterBarProps {
 }
 
 export function FilterBar({ filters, onFiltersChange, eveningMode, bundeslandId, onGemeindeSelect }: FilterBarProps) {
+  const { isGod } = useAuth();
   const [searchValue, setSearchValue] = useState(filters.search || '');
   const [suggestions, setSuggestions] = useState<Gemeinde[]>([]);
   const [eventSuggestions, setEventSuggestions] = useState<EventSuggestion[]>([]);
@@ -186,9 +188,25 @@ export function FilterBar({ filters, onFiltersChange, eveningMode, bundeslandId,
     return () => document.removeEventListener('mousedown', handler);
   }, []);
 
+  const todayStr = new Date().toISOString().slice(0, 10);
+  const isTodayActive = filters.dateFrom === todayStr && filters.dateTo === todayStr;
+
+  const handleTodayToggle = () => {
+    if (isTodayActive) {
+      // Deactivate: clear dateFrom, restore default dateTo (6 months)
+      const defaultDateTo = new Date();
+      defaultDateTo.setMonth(defaultDateTo.getMonth() + 6);
+      trackEvent('filter_change', { filter_type: 'heute', value: 'off' });
+      onFiltersChange({ ...filters, dateFrom: undefined, dateTo: defaultDateTo.toISOString().slice(0, 10) });
+    } else {
+      trackEvent('filter_change', { filter_type: 'heute', value: 'on' });
+      onFiltersChange({ ...filters, dateFrom: todayStr, dateTo: todayStr });
+    }
+  };
+
   const activeFilterCount = [
     filters.category,
-    filters.tags && filters.tags.length > 0 ? true : undefined,
+    filters.sourceName,
     filters.district,
     filters.dateFrom,
     filters.dateTo,
@@ -202,7 +220,10 @@ export function FilterBar({ filters, onFiltersChange, eveningMode, bundeslandId,
     setShowSuggestions(false);
     setSuggestions([]);
     setEventSuggestions([]);
-    onFiltersChange({});
+    // Restore default dateTo (6 months) when clearing
+    const defaultDateTo = new Date();
+    defaultDateTo.setMonth(defaultDateTo.getMonth() + 6);
+    onFiltersChange({ dateTo: defaultDateTo.toISOString().slice(0, 10) });
   };
 
   return (
@@ -245,17 +266,39 @@ export function FilterBar({ filters, onFiltersChange, eveningMode, bundeslandId,
         )}
       </div>
 
+      {/* Heute Button */}
+      <button
+        onClick={handleTodayToggle}
+        className={`text-sm border rounded-lg px-3 py-2 focus:outline-none focus:ring-1 cursor-pointer min-h-[44px] transition-all duration-200 flex items-center gap-1.5 whitespace-nowrap ${
+          eveningMode
+            ? isTodayActive
+              ? 'border-amber-500/30 bg-amber-900/10 text-amber-200 focus:ring-amber-500/50'
+              : 'border-gray-700 bg-gray-800/50 text-gray-300 focus:ring-gray-600'
+            : isTodayActive
+              ? 'border-slate-800 bg-slate-800 text-white focus:ring-slate-600'
+              : 'border-slate-200 bg-white text-slate-600 focus:ring-slate-400'
+        }`}
+      >
+        <svg className="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+        </svg>
+        Heute
+      </button>
+
       <CategoryFilter
         value={filters.category}
         onChange={(category) => { if (category) trackEvent('filter_change', { filter_type: 'category', value: category }); onFiltersChange({ ...filters, category, tags: undefined }); }}
         eveningMode={eveningMode}
       />
 
-      <TagFilter
-        value={filters.tags}
-        onChange={(tags) => { if (tags) trackEvent('filter_change', { filter_type: 'tags', value: tags.join(',') }); onFiltersChange({ ...filters, tags, category: undefined }); }}
-        eveningMode={eveningMode}
-      />
+      {/* Source filter — god role only */}
+      {isGod && (
+        <SourceFilter
+          value={filters.sourceName}
+          onChange={(sourceName) => { if (sourceName) trackEvent('filter_change', { filter_type: 'source', value: sourceName }); onFiltersChange({ ...filters, sourceName }); }}
+          eveningMode={eveningMode}
+        />
+      )}
 
       <DistrictFilter
         value={filters.district}

@@ -78,6 +78,8 @@ export interface EventFilters {
   sort?: 'date' | 'score';
   /** Bounding box filter: [south_lat, west_lng, north_lat, east_lng] */
   bbox?: [number, number, number, number];
+  /** Filter by scraper source_name (god-role only) */
+  sourceName?: string;
 }
 
 export type Category =

@@ -31,8 +31,8 @@ Execute the Gemini geocoding script on production data and update documentation.
 - [ ] All existing tests pass
 
 ## Done summary
-TBD
+Added npm run gemini-geocode script to package.json, updated CLAUDE.md with Gemini geocoding in tech stack/paths/build commands, and added fn-7 section to CHANGELOG.md documenting all epic changes (expanded VENUE_PREFIXES, gemini confidence level, batch script). Dry-run verified successfully against production Supabase.
 ## Evidence
-- Commits:
-- Tests:
+- Commits: 427fe7d31963da8396d6907dc20319969549d36c
+- Tests: npm test (156 passed), npx tsx --env-file=.env.local src/scripts/gemini-geocode.ts --dry-run (connected to Supabase, found 4306 events, 1590 unique locations)
 - PRs:

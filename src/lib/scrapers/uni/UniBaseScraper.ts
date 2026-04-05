@@ -78,7 +78,12 @@ export abstract class UniBaseScraper extends BaseScraper {
         const items = Array.isArray(json) ? json : json['@graph'] || [json];
 
         for (const item of items) {
-          if (!item || item['@type'] !== 'Event') continue;
+          if (!item) continue;
+          // Accept Event and subtypes (EducationEvent, MusicEvent, SocialEvent, etc.)
+          const rawType = item['@type'];
+          const types = Array.isArray(rawType) ? rawType : [rawType];
+          const isEvent = types.some((t: unknown) => typeof t === 'string' && t.includes('Event'));
+          if (!isEvent) continue;
           const name = String(item.name || '').trim();
           if (!name) continue;
 
@@ -133,25 +138,35 @@ export abstract class UniBaseScraper extends BaseScraper {
       return `${deMatch[3]}-${deMatch[2].padStart(2, '0')}-${deMatch[1].padStart(2, '0')}`;
     }
 
-    // German month names
+    // German month names (full + abbreviated)
     const months: Record<string, string> = {
       'januar': '01', 'jänner': '01', 'februar': '02', 'märz': '03',
       'april': '04', 'mai': '05', 'juni': '06', 'juli': '07',
       'august': '08', 'september': '09', 'oktober': '10',
       'november': '11', 'dezember': '12',
+      // Abbreviated German months (with and without trailing dot)
+      'jän': '01', 'feb': '02', 'mär': '03', 'apr': '04',
+      'jun': '06', 'jul': '07', 'aug': '08', 'sep': '09',
+      'okt': '10', 'nov': '11', 'dez': '12',
       // English
       'january': '01', 'february': '02', 'march': '03',
       'may': '05', 'june': '06', 'july': '07',
       'october': '10', 'december': '12',
+      // Abbreviated English
+      'jan': '01', 'mar': '03',
     };
 
     const monthMatch = text.toLowerCase().match(
-      /(\d{1,2})\.?\s+(jänner|januar|februar|märz|april|mai|juni|juli|august|september|oktober|november|dezember|january|february|march|may|june|july|october|december)\s+(\d{4})/
+      /(\d{1,2})\.?\s+(jänner|januar|jän|februar|feb|märz|mär|april|apr|mai|juni|jun|juli|jul|august|aug|september|sep|sept|oktober|okt|november|nov|dezember|dez|january|jan|february|march|mar|may|june|july|october|december)\.?\s+(\d{2,4})/
     );
     if (monthMatch) {
-      const month = months[monthMatch[2]];
+      // Normalize sept -> sep for lookup
+      const monthKey = monthMatch[2] === 'sept' ? 'sep' : monthMatch[2];
+      const month = months[monthKey];
       if (month) {
-        return `${monthMatch[3]}-${month}-${monthMatch[1].padStart(2, '0')}`;
+        let year = monthMatch[3];
+        if (year.length === 2) year = `20${year}`;
+        return `${year}-${month}-${monthMatch[1].padStart(2, '0')}`;
       }
     }
 
@@ -165,7 +180,8 @@ export abstract class UniBaseScraper extends BaseScraper {
     const date = this.parseDate(text);
     if (!date) return null;
 
-    const timeMatch = text.match(/(\d{1,2}):(\d{2})/);
+    // Match colon separator (18:30) or dot separator (18.30 Uhr)
+    const timeMatch = text.match(/(\d{1,2})[:\.](\d{2})(?:\s*Uhr)?/);
     if (timeMatch) {
       return `${date}T${timeMatch[1].padStart(2, '0')}:${timeMatch[2]}:00`;
     }

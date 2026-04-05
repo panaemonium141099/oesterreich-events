@@ -33,6 +33,7 @@ const CONFIDENCE_RANK: Record<string, number> = {
   from_description: 5,
   nominatim: 6,
   gemini: 7,
+  gemini_low: 8,
 };
 
 /** Distance threshold in km; below this we skip overwrite to preserve precise coords. */
@@ -276,13 +277,79 @@ function toSupabaseRow(
 const BATCH_SIZE = 100;
 
 /**
+ * Validate and filter events before sync:
+ * - Reject events with missing/invalid start_date
+ * - Reject events with start_date in the past (allows today)
+ * - Reject events with end_date < start_date
+ * - Reject events with empty title
+ * Returns filtered events + count of rejected.
+ */
+function filterValidEvents(events: ScrapedEvent[]): { valid: ScrapedEvent[]; rejected: number } {
+  const now = new Date();
+  // Start of today (midnight) — events today are still valid
+  const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+
+  let rejected = 0;
+  const valid = events.filter(e => {
+    // Must have a title
+    if (!e.title || !e.title.trim()) {
+      rejected++;
+      return false;
+    }
+
+    // Must have a parseable start_date
+    if (!e.start_date) {
+      rejected++;
+      return false;
+    }
+    const startDate = new Date(e.start_date);
+    if (isNaN(startDate.getTime())) {
+      rejected++;
+      return false;
+    }
+
+    // start_date must not be in the past (compare date strings to ignore time)
+    const startStr = e.start_date.slice(0, 10); // "YYYY-MM-DD"
+    if (startStr < todayStr) {
+      rejected++;
+      return false;
+    }
+
+    // If end_date exists, it must be valid and >= start_date
+    if (e.end_date) {
+      const endDate = new Date(e.end_date);
+      if (isNaN(endDate.getTime())) {
+        rejected++;
+        return false;
+      }
+      const endStr = e.end_date.slice(0, 10);
+      if (endStr < startStr) {
+        rejected++;
+        return false;
+      }
+    }
+
+    return true;
+  });
+
+  return { valid, rejected };
+}
+
+/**
  * Upserts a list of scraped events into Supabase in batches.
  * Returns counts of inserted/updated rows.
  */
 export async function syncEventsToSupabase(
   events: ScrapedEvent[]
-): Promise<{ upserted: number; errors: number }> {
-  if (events.length === 0) return { upserted: 0, errors: 0 };
+): Promise<{ upserted: number; errors: number; filtered: number }> {
+  if (events.length === 0) return { upserted: 0, errors: 0, filtered: 0 };
+
+  // Validate events before sync
+  const { valid: validEvents, rejected: filtered } = filterValidEvents(events);
+  if (filtered > 0) {
+    console.log(`[supabase-sync] Filtered ${filtered} invalid/past events (${validEvents.length} remaining)`);
+  }
+  if (validEvents.length === 0) return { upserted: 0, errors: 0, filtered };
 
   const supabase = getSupabaseAdminClient();
   let upserted = 0;
@@ -291,7 +358,7 @@ export async function syncEventsToSupabase(
   // Deduplicate events by source_name+source_id before syncing
   // (ON CONFLICT DO UPDATE fails if same key appears twice in one batch)
   const seen = new Set<string>();
-  const dedupedEvents = events.filter(e => {
+  const dedupedEvents = validEvents.filter(e => {
     const key = `${e.source_name}::${e.source_id}`;
     if (seen.has(key)) return false;
     seen.add(key);
@@ -324,5 +391,5 @@ export async function syncEventsToSupabase(
     }
   }
 
-  return { upserted, errors };
+  return { upserted, errors, filtered };
 }

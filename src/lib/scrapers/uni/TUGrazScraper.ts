@@ -10,7 +10,7 @@ export class TUGrazScraper extends UniBaseScraper {
   readonly name = 'tu-graz';
   protected readonly shortName = 'TUGraz';
   protected readonly baseUrl = 'https://www.tugraz.at';
-  protected readonly eventListUrl = 'https://www.tugraz.at/tu-graz/services/news-stories/tu-graz-events/aktuelle-veranstaltungen';
+  protected readonly eventListUrl = 'https://www.tugraz.at/news/tu-graz-events/aktuelle-veranstaltungen';
   protected readonly city = 'Graz';
   protected readonly bundesland = 'steiermark';
   protected readonly defaultLat = 47.0696;
@@ -54,32 +54,71 @@ export class TUGrazScraper extends UniBaseScraper {
     const $ = cheerio.load(html);
     const events: ScrapedEvent[] = [];
 
-    $('article, .event-item, [class*="event"], .veranstaltung, .news-list-item, .list-item').each((_, el) => {
+    // TU Graz uses div.int-content-box containers with:
+    //   div.eventfont > div.padd > a.url (title + link)
+    //   div.event-description (description)
+    //   div.event-bottom > div.default_catheader (date text)
+    $('div.int-content-box').each((_, el) => {
       try {
         const $el = $(el);
-        const title = $el.find('h2, h3, h4, .title, .event-title').first().text().trim();
+        const $link = $el.find('a.url, a[href*="/eventdetails/"]').first();
+        if (!$link.length) return;
+
+        const title = $link.text().trim() || $link.attr('title')?.trim() || '';
         if (!title || title.length < 3) return;
 
-        const href = $el.find('a').first().attr('href') || '';
+        const href = $link.attr('href') || '';
         const sourceUrl = href.startsWith('http') ? href : `${this.baseUrl}${href}`;
 
-        const dateText = $el.find('time, .date, [class*="date"]').first().text().trim()
-          || $el.find('[datetime]').first().attr('datetime') || '';
+        // Date from .default_catheader: "24. Februar 2026, 08:00 - 22. Mai 2026, 19:00"
+        const dateText = $el.find('.default_catheader').text().trim();
         const startDate = this.parseDatetime(dateText) || this.parseDate(dateText);
         if (!startDate) return;
 
+        // End date from "- DD. Month YYYY, HH:MM" part
+        let endDate: string | undefined;
+        const endMatch = dateText.match(/-\s+(\d{1,2}\.\s+\w+\s+\d{4}.*)/);
+        if (endMatch) {
+          endDate = this.parseDatetime(endMatch[1]) || this.parseDate(endMatch[1]) || undefined;
+        }
+
         const slug = title.toLowerCase().replace(/\W+/g, '-').slice(0, 60);
-        const desc = $el.find('.teaser, .description, p').first().text().trim();
-        const imgSrc = $el.find('img').first().attr('src');
-        const imageUrl = imgSrc ? this.cleanImageUrl(this.resolveImageUrl(imgSrc, this.baseUrl)) : undefined;
+        const desc = $el.find('.event-description').text().trim() || undefined;
 
         events.push(this.buildEvent({
           slug,
           title,
           startDate,
-          description: desc || undefined,
+          endDate,
+          description: desc,
           sourceUrl,
-          imageUrl,
+        }));
+      } catch { /* skip */ }
+    });
+
+    // Fallback: also try direct links to eventdetails
+    $('a[href*="/eventdetails/article/"]').each((_, el) => {
+      try {
+        const $el = $(el);
+        const title = $el.text().trim();
+        if (!title || title.length < 3) return;
+
+        const href = $el.attr('href') || '';
+        const sourceUrl = href.startsWith('http') ? href : `${this.baseUrl}${href}`;
+        const slug = title.toLowerCase().replace(/\W+/g, '-').slice(0, 60);
+        if (events.some(e => e.source_id === this.makeSourceId(slug))) return;
+
+        // Try to find date from surrounding context
+        const parentBlock = $el.closest('.int-content-box, .eventfont, div');
+        const blockText = parentBlock.find('.default_catheader').text().trim() || parentBlock.text();
+        const startDate = this.parseDatetime(blockText) || this.parseDate(blockText);
+        if (!startDate) return;
+
+        events.push(this.buildEvent({
+          slug,
+          title,
+          startDate,
+          sourceUrl,
         }));
       } catch { /* skip */ }
     });
