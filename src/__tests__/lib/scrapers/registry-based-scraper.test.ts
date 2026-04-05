@@ -186,7 +186,7 @@ describe('ingestVenueFeed', () => {
       expect(events[0].title).toBe('Pub Quiz Night');
       expect(events[0].source_name).toBe('registry:test-bar');
       // venue_id is attached as extra property
-      expect((events[0] as Record<string, unknown>).venue_id).toBe('venue-001');
+      expect((events[0] as unknown as Record<string, unknown>).venue_id).toBe('venue-001');
       expect(events[0].bundesland).toBe('Wien');
     } finally {
       globalThis.fetch = originalFetch;
@@ -236,7 +236,7 @@ describe('ingestVenueFeed', () => {
       expect(events.length).toBeGreaterThanOrEqual(1);
       expect(events[0].title).toBe('Live Jazz Night');
       expect(events[0].source_name).toBe('registry:test-bar');
-      expect((events[0] as Record<string, unknown>).venue_id).toBe('venue-001');
+      expect((events[0] as unknown as Record<string, unknown>).venue_id).toBe('venue-001');
     } finally {
       globalThis.fetch = originalFetch;
     }
