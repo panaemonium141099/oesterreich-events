@@ -1,7 +1,7 @@
 # burgenland-events-v5
 
 ## Beschreibung
-Osterreich Events — Austrian event discovery platform. Aggregates events from ~126 scrapers across Austria, displays them on an interactive Mapbox GL JS map, and provides social features (DM, group chat, friends, feed, memories).
+Osterreich Events — Austrian event discovery platform. Aggregates events from ~141 scrapers across Austria, displays them on an interactive Mapbox GL JS map, and provides social features (DM, group chat, friends, feed, memories).
 
 ## Typ
 node / next.js
@@ -30,8 +30,8 @@ node / next.js
 - `src/app/robots.ts` — robots.txt (disallows /api/, /admin/, /auth/)
 - `src/scripts/calculate-scores.ts` — Event-Scoring-Algorithmus (schreibt event_score nach Supabase)
 - `Dockerfile` — Multi-stage Docker-Build (node:20-slim + sharp) fur Coolify-Deployment
-- `src/lib/scrapers/` — ~126 Scraper-Module (registered instances in index.ts)
-- `src/lib/scrapers/uni/` — 41 University/FH/PH scrapers
+- `src/lib/scrapers/` — ~141 Scraper-Module (registered instances in index.ts)
+- `src/lib/scrapers/uni/` — 56 University/FH/PH scrapers
 - `src/lib/scrapers/niche/` — 34 niche category scrapers (festivals, nightlife, outdoor, culture, food, family, sport, museums, concert houses, business, RSS feeds)
 - `src/lib/scrapers/BaseScraper.ts` — Base class mit Image extraction + validation
 - `src/lib/db/` — SQLite Schema, Connection, Queries
@@ -64,7 +64,7 @@ node / next.js
 - **burgenland.info** — Cheerio + JSON-LD (@graph), ~122 Events mit Koordinaten
 - **burgenland.at** — Cheerio, article.event Struktur, ~448 Events (Landesregierung)
 - **44 regional scrapers** — Wien, NOE, OOE, Steiermark, Salzburg, Karnten, Tirol, Vorarlberg, multi-region
-- **41 university/FH/PH scrapers** — `src/lib/scrapers/uni/` (all 9 Bundeslaender covered)
+- **56 university/FH/PH scrapers** — `src/lib/scrapers/uni/` (all 9 Bundeslaender covered)
 - **34 niche scrapers** — `src/lib/scrapers/niche/` (festivals, nightlife, outdoor, culture, food, family, sport, museums, concert houses, business, RSS feeds)
 - **Feratel Deskline API** — 71 regions across all Bundeslaender via TOSC5 API
 - **TourData / austria.info API** — Official Austrian tourism API (alle Bundeslaender)

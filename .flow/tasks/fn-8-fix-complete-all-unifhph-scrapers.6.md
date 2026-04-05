@@ -30,9 +30,8 @@ For each scraper:
 - [ ] CSS selectors updated where HTML structure changed
 - [ ] `npx tsc --noEmit` passes
 ## Done summary
-TBD
-
+Fixed 5 FH scrapers (FHWN, MCI, FH Salzburg, IMC Krems, HCW) with site-specific CSS selectors matching actual server-rendered HTML structure, producing 100 total events. Documented 6 scrapers (FH Vorarlberg, FH Kaernten, FH Kufstein, FH Joanneum, Campus02, FernFH) as Puppeteer-deferred since their event data is loaded via client-side JavaScript.
 ## Evidence
-- Commits:
-- Tests:
+- Commits: aa7a7c79eb1f2ac98f7de99565422eae642ddfa1
+- Tests: npx tsc --noEmit, npm test, npx tsx src/scripts/scrape.ts --source fh-wiener-neustadt, npx tsx src/scripts/scrape.ts --source mci-innsbruck, npx tsx src/scripts/scrape.ts --source fh-salzburg, npx tsx src/scripts/scrape.ts --source imc-krems, npx tsx src/scripts/scrape.ts --source hcw-wien, npx tsx src/scripts/scrape.ts --source fh-vorarlberg, npx tsx src/scripts/scrape.ts --source fh-kaernten, npx tsx src/scripts/scrape.ts --source fh-kufstein, npx tsx src/scripts/scrape.ts --source fh-joanneum, npx tsx src/scripts/scrape.ts --source campus02-graz, npx tsx src/scripts/scrape.ts --source fernfh-wien-neustadt
 - PRs:

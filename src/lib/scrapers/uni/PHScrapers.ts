@@ -41,11 +41,60 @@ abstract class PHBaseScraper extends UniBaseScraper {
     return events;
   }
 
+  /**
+   * Extract date from PH event elements.
+   * Handles three patterns:
+   * 1. TYPO3 events_eventlist with span.date > span.day/month/year (kph-edith-stein)
+   * 2. TYPO3 events_eventlist with span.event-date "DD.MM." no year (ph-kaernten)
+   * 3. TYPO3 tx_news with <time datetime="..."> (ph-burgenland)
+   */
+  private extractDate($el: ReturnType<cheerio.CheerioAPI>, $: cheerio.CheerioAPI): string | null {
+    // Pattern 1: span.date with day/month/year sub-spans (kph-edith-stein style)
+    const $dateSpan = $el.find('span.date');
+    if ($dateSpan.length) {
+      const day = $dateSpan.find('.day').text().trim();
+      const monthName = $dateSpan.find('.month').text().trim();
+      const year = $dateSpan.find('.year').text().trim();
+      if (day && monthName && year) {
+        const dateStr = `${day}. ${monthName} ${year}`;
+        return this.parseDatetime(dateStr) || this.parseDate(dateStr);
+      }
+    }
+
+    // Pattern 2: <time datetime="..."> element (ph-burgenland TYPO3 news)
+    const $time = $el.find('time[datetime]');
+    if ($time.length) {
+      const dt = $time.attr('datetime') || '';
+      if (dt) return dt.slice(0, 19); // ISO format
+    }
+
+    // Pattern 3: span.event-date with "DD. MM." format, no year (ph-kaernten)
+    const $eventDate = $el.find('.event-date');
+    if ($eventDate.length) {
+      // Text like "01.\u200904." — contains thin space, remove it
+      const raw = $eventDate.text().replace(/[\u2009\u00a0\s]+/g, '').trim();
+      const m = raw.match(/(\d{1,2})\.(\d{1,2})\./);
+      if (m) {
+        const year = new Date().getFullYear();
+        return `${year}-${m[2].padStart(2, '0')}-${m[1].padStart(2, '0')}`;
+      }
+    }
+
+    // Pattern 4: span.time with "Beginn HH:MM Uhr" (kph-edith-stein)
+    // (handled after date extraction below)
+
+    // Fallback: generic date/time selectors
+    const dateText = $el.find('.date, [class*="date"], .termin-datum').first().text().trim()
+      || $el.find('[datetime]').first().attr('datetime') || '';
+    return this.parseDatetime(dateText) || this.parseDate(dateText);
+  }
+
   protected parseHtml(html: string): ScrapedEvent[] {
     const $ = cheerio.load(html);
     const events: ScrapedEvent[] = [];
 
-    $('article, .event-item, [class*="event"], .veranstaltung, .news-item, .termin, li.termine').each((_, el) => {
+    // Match TYPO3 event articles, news list items, and generic patterns
+    $('article.event, .news-list-item, article, .event-item, [class*="event"], .veranstaltung, .news-item, .termin, li.termine').each((_, el) => {
       try {
         const $el = $(el);
         const title = $el.find('h2, h3, h4, .title, .event-title').first().text().trim();
@@ -54,13 +103,20 @@ abstract class PHBaseScraper extends UniBaseScraper {
         const href = $el.find('a').first().attr('href') || '';
         const sourceUrl = href.startsWith('http') ? href : `${this.baseUrl}${href}`;
 
-        const dateText = $el.find('time, .date, [class*="date"], .termin-datum').first().text().trim()
-          || $el.find('[datetime]').first().attr('datetime') || '';
-        const startDate = this.parseDatetime(dateText) || this.parseDate(dateText);
+        let startDate = this.extractDate($el, $);
         if (!startDate) return;
 
+        // Append time from span.time "Beginn HH:MM Uhr" if date has no time component
+        if (!startDate.includes('T')) {
+          const timeText = $el.find('span.time, .event-time').text().trim();
+          const timeMatch = timeText.match(/(\d{1,2})[:\.](\d{2})/);
+          if (timeMatch) {
+            startDate = `${startDate}T${timeMatch[1].padStart(2, '0')}:${timeMatch[2]}:00`;
+          }
+        }
+
         const slug = title.toLowerCase().replace(/\W+/g, '-').slice(0, 60);
-        const desc = $el.find('.teaser, .description, p').first().text().trim();
+        const desc = $el.find('.teaser, .lead, .description, p').first().text().trim();
         const imgSrc = $el.find('img').first().attr('src');
         const imageUrl = imgSrc ? this.cleanImageUrl(this.resolveImageUrl(imgSrc, this.baseUrl)) : undefined;
 

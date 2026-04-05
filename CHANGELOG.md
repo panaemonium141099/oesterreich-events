@@ -1051,6 +1051,71 @@ Events were assigned wrong coordinates -- events at Burgruine Landsee, Kobersdor
 
 ---
 
+## Fix & Complete All Uni/FH/PH Scrapers (fn-8, 2026-04-05)
+
+### Problem
+Only 6 of 41 university/FH/PH scrapers were producing events. The rest had wrong URLs, broken HTML selectors, or were missing entirely. This meant the vast majority of Austrian university events were invisible on the platform.
+
+### Changes
+
+#### UniBaseScraper shared improvements (task .1)
+- Fixed `parseDate()` to handle abbreviated German months (Jän, Feb, Mär, etc.) and English months
+- Fixed `parseJsonLdEvents()` `@type` check to accept Event subtypes (EducationEvent, MusicEvent, etc.)
+- Added `parseDatetime()` for combined date+time parsing with both colon and dot separators
+
+#### URL fixes — 13 scrapers (task .2)
+- Fixed `eventListUrl` for: uni-salzburg, tu-wien, wu-wien, boku, vetmeduni, jku, aau, montanuni, donau-uni, akbild, kunstuni-linz, mozarteum, uni-graz
+- Many had outdated or wrong paths after university site redesigns
+
+#### New scrapers — 4 universities (task .3)
+- `meduni-innsbruck` — Medical University Innsbruck (i-med.ac.at)
+- `angewandte-wien` — University of Applied Arts Vienna (dieangewandte.at)
+- `mdw-wien` — University of Music and Performing Arts Vienna (mdw.ac.at)
+- `kug-graz` — University of Music and Performing Arts Graz (kug.ac.at)
+
+#### Complex uni/FH scraper fixes (task .4)
+- Fixed 7 scrapers with both URL and structure changes requiring custom parseHtml overrides
+- Includes: uni-wien, tu-graz, uni-innsbruck, fh-campus-wien, fh-technikum-wien, fh-st-poelten, fh-joanneum
+
+#### Zero-event university scraper fixes (task .5)
+- Fixed 8 university scrapers that had correct URLs but broken CSS selectors
+- Updated selectors to match current TYPO3/WordPress/custom CMS structures
+
+#### FH scraper fixes (task .6)
+- Fixed 5 FH scrapers with correct selectors for current site structures
+- Identified and documented 6 JS-rendered FH sites that need Puppeteer (deferred)
+
+#### PH scraper debugging + docs/UI (task .7)
+- Rewrote `PHBaseScraper.parseHtml()` to handle three distinct TYPO3 event structures:
+  - `span.date > span.day/month/year` (kph-edith-stein style)
+  - `span.event-date` with DD.MM. no-year format (ph-kaernten style)
+  - `<time datetime="...">` with TYPO3 tx_news (ph-burgenland style)
+- Added `extractDate()` helper for PH-specific date patterns
+- Updated SourceFilter regex with new prefixes: `angewandte-|mdw-|kug-|itu-`
+- Updated CLAUDE.md: scraper counts from ~126 to ~141 total, 41 to 56 uni/FH/PH
+- Note: ph-noe has no events on their page in April (seasonal/semester break — acceptable)
+
+### Scraper count summary
+| Category | Before | After |
+|----------|--------|-------|
+| Total scrapers | ~126 | ~141 |
+| University/FH/PH | 41 | 56 |
+| Regional | 44 | 44 |
+| Niche | 34 | 34 |
+
+#### Files Added/Changed
+| File | Purpose |
+|------|---------|
+| `src/lib/scrapers/uni/UniBaseScraper.ts` | Fixed: parseDate abbreviations, @type subtype check, parseDatetime |
+| `src/lib/scrapers/uni/PHScrapers.ts` | Fixed: parseHtml with extractDate for 3 TYPO3 patterns |
+| `src/lib/scrapers/uni/*.ts` | Fixed: URLs and selectors across ~20 scraper files |
+| `src/lib/scrapers/index.ts` | Updated: registered 4 new scraper instances |
+| `src/components/Filters/SourceFilter.tsx` | Updated: added angewandte-, mdw-, kug-, itu- to regex |
+| `CLAUDE.md` | Updated: scraper counts (141 total, 56 uni/FH/PH) |
+| `CHANGELOG.md` | Added: fn-8 section |
+
+---
+
 ## Gemini AI Geocoding Fallback + Expanded Venue Prefixes (fn-7, 2026-04-04)
 
 ### Problem

@@ -11,7 +11,7 @@ interface SourceFilterProps {
 
 /** Classify source_name into display groups */
 const SOURCE_GROUP_RULES: Array<{ label: string; test: (name: string) => boolean }> = [
-  { label: 'Universitäten & FH', test: (n) => /^(uni-|tu-|wu-|boku-|meduni-|vetmeduni-|jku-|aau-|montanuni-|donau-uni-|akbild-|kunstuni-|mozarteum-|fh-|fhg-|fernfh-|campus02-|imc-|mci-|hcw-)/.test(n) },
+  { label: 'Universitäten & FH', test: (n) => /^(uni-|tu-|wu-|boku-|meduni-|vetmeduni-|jku-|aau-|montanuni-|donau-uni-|akbild-|kunstuni-|mozarteum-|angewandte-|mdw-|kug-|itu-|fh-|fhg-|fernfh-|campus02-|imc-|mci-|hcw-)/.test(n) },
   { label: 'Pädagogische Hochschulen', test: (n) => /^(ph-|kph-|pph-)/.test(n) },
   { label: 'APIs & Portale', test: (n) => /^(feratel|tourdata|austria-info|wien-ogd|wien-ticket|ntry|bergfex|meetup|tips|gem2go)/.test(n) },
   { label: 'Regional', test: (n) => /^(burgenland|wien|noe|ooe|steiermark|salzburg|kaernten|tirol|vorarlberg)/.test(n) },
