@@ -1,0 +1,13 @@
+{
+  "branch_name": "fn-9-hyperlocal-student-events-venue-centric",
+  "created_at": "2026-04-05T16:59:45.090796Z",
+  "depends_on_epics": [],
+  "id": "fn-9-hyperlocal-student-events-venue-centric",
+  "next_task": 1,
+  "plan_review_status": "unknown",
+  "plan_reviewed_at": null,
+  "spec_path": ".flow/specs/fn-9-hyperlocal-student-events-venue-centric.md",
+  "status": "open",
+  "title": "Hyperlocal Student Events: Venue-Centric Registry Architecture",
+  "updated_at": "2026-04-05T17:01:44.310378Z"
+}

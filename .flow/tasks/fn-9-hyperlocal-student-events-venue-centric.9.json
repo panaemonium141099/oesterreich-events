@@ -1,0 +1,19 @@
+{
+  "assignee": null,
+  "claim_note": "",
+  "claimed_at": null,
+  "created_at": "2026-04-05T17:02:46.851769Z",
+  "depends_on": [
+    "fn-9-hyperlocal-student-events-venue-centric.4",
+    "fn-9-hyperlocal-student-events-venue-centric.5",
+    "fn-9-hyperlocal-student-events-venue-centric.6",
+    "fn-9-hyperlocal-student-events-venue-centric.7"
+  ],
+  "epic": "fn-9-hyperlocal-student-events-venue-centric",
+  "id": "fn-9-hyperlocal-student-events-venue-centric.9",
+  "priority": null,
+  "spec_path": ".flow/tasks/fn-9-hyperlocal-student-events-venue-centric.9.md",
+  "status": "todo",
+  "title": "Registry-Based Scraper: Orchestrate venue feed ingestion pipeline",
+  "updated_at": "2026-04-05T17:02:46.851803Z"
+}

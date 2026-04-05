@@ -29,6 +29,9 @@ export interface Event {
   geocoding_source?: string | null;
   event_score?: number;
   score_updated_at?: string;
+  venue_id?: string | null;
+  event_series_id?: string | null;
+  content_fingerprint?: string | null;
   created_at: string;
   updated_at: string;
 }

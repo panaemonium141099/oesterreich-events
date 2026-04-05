@@ -79,8 +79,53 @@ export type Database = {
           share_count: number
           event_score: number | null
           score_updated_at: string | null
+          venue_id: string | null
+          event_series_id: string | null
+          content_fingerprint: string | null
           created_at: string
           updated_at: string
+        }
+      }
+      venues: {
+        Row: {
+          id: string
+          name: string
+          name_normalized: string
+          type: 'bar' | 'pub' | 'nightclub' | 'club' | 'vereinslokal' | 'university' | 'student_org' | 'cultural_center' | 'concert_hall' | 'theater' | 'museum' | 'other'
+          subtype: string | null
+          address: string | null
+          postal_code: string | null
+          city: string | null
+          bundesland: string | null
+          latitude: number | null
+          longitude: number | null
+          website: string | null
+          facebook_url: string | null
+          instagram_url: string | null
+          event_feed_url: string | null
+          event_feed_type: 'ics' | 'rss' | 'json-ld' | 'html' | 'api' | null
+          osm_id: number | null
+          osm_tags: Json | null
+          registry_source: 'osm' | 'open_data' | 'oeh' | 'esn' | 'iaeste' | 'aiesec' | 'aegee' | 'manual'
+          is_student_relevant: boolean
+          localness_score: number
+          last_scraped_at: string | null
+          scrape_status: 'active' | 'inactive' | 'error' | 'pending'
+          created_at: string
+          updated_at: string
+        }
+      }
+      event_series: {
+        Row: {
+          id: string
+          venue_id: string | null
+          title: string
+          title_normalized: string
+          recurrence_rule: string | null
+          category: string | null
+          day_of_week: number | null
+          start_time: string | null
+          created_at: string
         }
       }
       saved_events: {

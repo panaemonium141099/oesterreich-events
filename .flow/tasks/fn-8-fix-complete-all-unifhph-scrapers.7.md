@@ -40,9 +40,8 @@ Add missing prefixes to SOURCE_GROUP_RULES "Universitäten & FH" pattern in `Sou
 - [ ] `npx tsc --noEmit` passes
 - [ ] All 156+ tests pass
 ## Done summary
-TBD
-
+Debugged PHBaseScraper parseHtml() to handle three distinct TYPO3 event structures found across PH sites, fixing ph-kaernten (8 events), ph-burgenland (5 events), and kph-edith-stein (4 events). Updated SourceFilter regex with angewandte-/mdw-/kug-/itu- prefixes, updated CLAUDE.md scraper counts to 141 total and 56 uni/FH/PH, and added fn-8 CHANGELOG section.
 ## Evidence
-- Commits:
-- Tests:
+- Commits: 5b57b1746660747723e61b4824aa10eb0c2e033f
+- Tests: npm test (156 passed), npx tsc --noEmit, npx tsx src/scripts/scrape.ts --source ph-kaernten (8 events), npx tsx src/scripts/scrape.ts --source ph-burgenland (5 events), npx tsx src/scripts/scrape.ts --source kph-edith-stein (4 events), npx tsx src/scripts/scrape.ts --source ph-salzburg (38 events), npx tsx src/scripts/scrape.ts --source pph-augustinum-graz (13 events), npx tsx src/scripts/scrape.ts --source kph-wien (1 event), npx tsx src/scripts/scrape.ts --source ph-noe (0 events - page empty)
 - PRs:
