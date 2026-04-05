@@ -1,21 +1,72 @@
 import * as cheerio from 'cheerio';
+import https from 'https';
 import { UniBaseScraper } from './UniBaseScraper';
 import type { ScrapedEvent } from '@/types/events';
 
 /**
  * Universität für künstlerische und industrielle Gestaltung Linz Scraper
+ * Domain renamed from events.kunstuni-linz.at to events.ufg.at.
  * Dedicated events subdomain. Server-rendered event listings.
+ * Note: events.ufg.at has SSL certificate issues, so we use a custom fetch with
+ * rejectUnauthorized=false for this specific domain.
  */
 export class KunstUniLinzScraper extends UniBaseScraper {
   readonly name = 'kunstuni-linz';
   protected readonly shortName = 'KunstUniLinz';
-  protected readonly baseUrl = 'https://events.kunstuni-linz.at';
-  protected readonly eventListUrl = 'https://events.kunstuni-linz.at/';
+  protected readonly baseUrl = 'https://events.ufg.at';
+  protected readonly eventListUrl = 'https://events.ufg.at/';
   protected readonly city = 'Linz';
   protected readonly bundesland = 'oberoesterreich';
   protected readonly defaultLat = 48.3090;
   protected readonly defaultLng = 14.2884;
   private readonly MAX_PAGES = 5;
+
+  /**
+   * Custom fetch that bypasses SSL certificate validation for events.ufg.at
+   * which has a broken/self-signed certificate.
+   */
+  protected override async fetchPage(url: string): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const parsedUrl = new URL(url);
+      const options = {
+        hostname: parsedUrl.hostname,
+        port: 443,
+        path: parsedUrl.pathname + parsedUrl.search,
+        method: 'GET',
+        rejectUnauthorized: false,
+        headers: {
+          'User-Agent': this.userAgent,
+          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+          'Accept-Language': 'de-AT,de;q=0.9,en;q=0.5',
+        },
+      };
+
+      const req = https.request(options, (res) => {
+        // Follow redirects
+        if (res.statusCode && res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
+          const redirectUrl = res.headers.location.startsWith('http')
+            ? res.headers.location
+            : `https://${parsedUrl.hostname}${res.headers.location}`;
+          this.fetchPage(redirectUrl).then(resolve).catch(reject);
+          return;
+        }
+
+        let data = '';
+        res.on('data', (chunk) => { data += chunk; });
+        res.on('end', () => {
+          if (res.statusCode && res.statusCode >= 200 && res.statusCode < 300) {
+            resolve(data);
+          } else {
+            reject(new Error(`HTTP ${res.statusCode}`));
+          }
+        });
+      });
+
+      req.on('error', (err) => reject(err));
+      req.setTimeout(15000, () => { req.destroy(); reject(new Error('Request timeout')); });
+      req.end();
+    });
+  }
 
   async scrape(): Promise<ScrapedEvent[]> {
     this.log('Starte KunstUni Linz Scraping...');

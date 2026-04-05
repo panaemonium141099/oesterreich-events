@@ -41,9 +41,8 @@ For each: update `eventListUrl`, fetch the new URL, inspect HTML structure, adap
 - [ ] MontanUni scraper produces ≥1 event
 - [ ] `npx tsc --noEmit` passes
 ## Done summary
-TBD
-
+Fixed UniBaseScraper shared utilities (parseJsonLdEvents accepts Event subtypes, parseDate handles abbreviated German months and dot time separator) and updated URLs + HTML parsers for 6 university scrapers (BOKU, JKU, TU Wien, TU Graz, WU Wien, MontanUni) using the correct event page URLs. All 6 scrapers now produce events successfully.
 ## Evidence
-- Commits:
-- Tests:
+- Commits: f1e28ff80dcba0b56766a3395317e0a5b9fefffe
+- Tests: npm test (156 passed), npx tsc --noEmit, npx tsx src/scripts/scrape.ts --source boku-wien (13 events), npx tsx src/scripts/scrape.ts --source jku-linz (1 event), npx tsx src/scripts/scrape.ts --source tu-wien (10 events), npx tsx src/scripts/scrape.ts --source tu-graz (1 event), npx tsx src/scripts/scrape.ts --source wu-wien (13 events), npx tsx src/scripts/scrape.ts --source montanuni-leoben (13 events)
 - PRs:

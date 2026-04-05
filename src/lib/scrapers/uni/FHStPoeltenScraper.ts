@@ -4,61 +4,40 @@ import type { ScrapedEvent } from '@/types/events';
 
 /**
  * FH St. Pölten (USTP) Scraper
- * Events page with RSS feed. Server-rendered.
- * Now rebranding as USTP.
+ * Domain renamed from fhstp.ac.at to ustp.at.
+ * Events at ustp.at/de/stories/events. "mehr laden" button for load-more.
+ * Event links: /de/stories/events/{slug}
+ * Date format: DD.MM.YYYY. Categories with # prefix.
  */
 export class FHStPoeltenScraper extends UniBaseScraper {
   readonly name = 'fh-stpoelten';
   protected readonly shortName = 'FH-StPoelten';
-  protected readonly baseUrl = 'https://www.fhstp.ac.at';
-  protected readonly eventListUrl = 'https://www.fhstp.ac.at/en/newsroom/events';
+  protected readonly baseUrl = 'https://ustp.at';
+  protected readonly eventListUrl = 'https://ustp.at/de/stories/events';
   protected readonly city = 'St. Pölten';
   protected readonly bundesland = 'niederoesterreich';
   protected readonly defaultLat = 48.2054;
   protected readonly defaultLng = 15.6263;
-  private readonly MAX_PAGES = 3;
 
   async scrape(): Promise<ScrapedEvent[]> {
-    this.log('Starte FH St. Pölten Scraping...');
+    this.log('Starte FH St. Pölten (USTP) Scraping...');
     const allEvents = new Map<string, ScrapedEvent>();
 
-    for (let page = 1; page <= this.MAX_PAGES; page++) {
-      const url = page === 1
-        ? this.eventListUrl
-        : `${this.eventListUrl}?page=${page}`;
-      try {
-        const html = await this.fetchPage(url);
-
-        const jsonLdEvents = this.parseJsonLdEvents(html, url);
-        for (const ev of jsonLdEvents) allEvents.set(ev.source_id, ev);
-
-        const htmlEvents = this.parseHtml(html);
-        for (const ev of htmlEvents) {
-          if (!allEvents.has(ev.source_id)) allEvents.set(ev.source_id, ev);
-        }
-
-        if (jsonLdEvents.length === 0 && htmlEvents.length === 0) break;
-        await this.rateLimit();
-      } catch (err) {
-        this.log(`Seite ${page} fehlgeschlagen: ${err instanceof Error ? err.message : err}`);
-        break;
-      }
-    }
-
-    // Also try German URL
     try {
-      await this.rateLimit();
-      const deUrl = 'https://www.fhstp.ac.at/de/newsroom/events';
-      const deHtml = await this.fetchPage(deUrl);
-      const deEvents = this.parseJsonLdEvents(deHtml, deUrl);
-      for (const ev of deEvents) {
+      const html = await this.fetchPage(this.eventListUrl);
+
+      const jsonLdEvents = this.parseJsonLdEvents(html, this.eventListUrl);
+      for (const ev of jsonLdEvents) allEvents.set(ev.source_id, ev);
+
+      const htmlEvents = this.parseHtml(html);
+      for (const ev of htmlEvents) {
         if (!allEvents.has(ev.source_id)) allEvents.set(ev.source_id, ev);
       }
-      const deHtmlEvents = this.parseHtml(deHtml);
-      for (const ev of deHtmlEvents) {
-        if (!allEvents.has(ev.source_id)) allEvents.set(ev.source_id, ev);
-      }
-    } catch { /* skip */ }
+
+      this.log(`${allEvents.size} Events gefunden`);
+    } catch (err) {
+      this.log(`Fehler: ${err instanceof Error ? err.message : err}`);
+    }
 
     const events = Array.from(allEvents.values());
     this.log(`${events.length} Events gescrapt`);
@@ -69,30 +48,46 @@ export class FHStPoeltenScraper extends UniBaseScraper {
     const $ = cheerio.load(html);
     const events: ScrapedEvent[] = [];
 
-    $('article, .event-item, [class*="event"], .veranstaltung, .news-item, .events-list-item').each((_, el) => {
+    // Event links follow pattern /de/stories/events/{slug}
+    $('a[href*="/de/stories/events/"]').each((_, el) => {
       try {
-        const $el = $(el);
-        const title = $el.find('h2, h3, h4, .title, .event-title').first().text().trim();
+        const $link = $(el);
+        const href = $link.attr('href') || '';
+        // Skip the list page itself
+        if (href.endsWith('/events') || href.endsWith('/events/')) return;
+
+        const title = $link.find('h2, h3, h4').first().text().trim()
+          || $link.text().trim();
         if (!title || title.length < 3) return;
 
-        const href = $el.find('a').first().attr('href') || '';
         const sourceUrl = href.startsWith('http') ? href : `${this.baseUrl}${href}`;
 
-        const dateText = $el.find('time, .date, [class*="date"]').first().text().trim()
-          || $el.find('[datetime]').first().attr('datetime') || '';
-        const startDate = this.parseDatetime(dateText) || this.parseDate(dateText);
+        // Extract slug from URL
+        const slugMatch = href.match(/events\/([^/?]+)/);
+        const urlSlug = slugMatch ? slugMatch[1] : '';
+
+        // Find date in surrounding context or within the link
+        const $parent = $link.closest('article, div, li, section');
+        const contextText = $parent.length ? $parent.text() : $link.text();
+        const startDate = this.parseDatetime(contextText) || this.parseDate(contextText);
         if (!startDate) return;
 
-        const slug = title.toLowerCase().replace(/\W+/g, '-').slice(0, 60);
-        const desc = $el.find('.teaser, .description, p').first().text().trim();
-        const imgSrc = $el.find('img').first().attr('src');
+        const slug = urlSlug || title.toLowerCase().replace(/\W+/g, '-').slice(0, 60);
+
+        // Extract location from text (pattern: "Campus-Platz 1 St. Pölten")
+        const locMatch = contextText.match(/(Campus[^\n,]+(St\.\s*Pölten|Tulln|Krems)[^\n]*)/i);
+        const locationName = locMatch ? locMatch[1].trim() : undefined;
+
+        // Extract image
+        const imgSrc = $link.find('img').first().attr('src')
+          || $parent.find('img').first().attr('src');
         const imageUrl = imgSrc ? this.cleanImageUrl(this.resolveImageUrl(imgSrc, this.baseUrl)) : undefined;
 
         events.push(this.buildEvent({
           slug,
           title,
           startDate,
-          description: desc || undefined,
+          locationName,
           sourceUrl,
           imageUrl,
         }));

@@ -4,13 +4,16 @@ import type { ScrapedEvent } from '@/types/events';
 
 /**
  * FHWien der WKW Scraper
- * Events page with pagination. Multiple categories. Server-rendered.
+ * German events page at /veranstaltungen/. WordPress-based.
+ * Uses .block__news_and_events__item containers.
+ * Date format: "8. April 2026, 16:00 – 19:30"
+ * Event detail links: /veranstaltungen/{slug}/
  */
 export class FHWienWKWScraper extends UniBaseScraper {
   readonly name = 'fh-wien-wkw';
   protected readonly shortName = 'FH-Wien-WKW';
   protected readonly baseUrl = 'https://www.fh-wien.ac.at';
-  protected readonly eventListUrl = 'https://www.fh-wien.ac.at/en/events/';
+  protected readonly eventListUrl = 'https://www.fh-wien.ac.at/veranstaltungen/';
   protected readonly city = 'Wien';
   protected readonly bundesland = 'wien';
   protected readonly defaultLat = 48.2333;
@@ -24,7 +27,7 @@ export class FHWienWKWScraper extends UniBaseScraper {
     for (let page = 1; page <= this.MAX_PAGES; page++) {
       const url = page === 1
         ? this.eventListUrl
-        : `${this.eventListUrl}?page=${page}`;
+        : `${this.eventListUrl}page/${page}/`;
       try {
         const html = await this.fetchPage(url);
 
@@ -37,27 +40,13 @@ export class FHWienWKWScraper extends UniBaseScraper {
         }
 
         if (jsonLdEvents.length === 0 && htmlEvents.length === 0) break;
+        this.log(`Seite ${page}: ${allEvents.size} Events`);
         await this.rateLimit();
       } catch (err) {
         this.log(`Seite ${page} fehlgeschlagen: ${err instanceof Error ? err.message : err}`);
         break;
       }
     }
-
-    // Also try German URL
-    try {
-      await this.rateLimit();
-      const deUrl = 'https://www.fh-wien.ac.at/de/events/';
-      const deHtml = await this.fetchPage(deUrl);
-      const deEvents = this.parseJsonLdEvents(deHtml, deUrl);
-      for (const ev of deEvents) {
-        if (!allEvents.has(ev.source_id)) allEvents.set(ev.source_id, ev);
-      }
-      const deHtmlEvents = this.parseHtml(deHtml);
-      for (const ev of deHtmlEvents) {
-        if (!allEvents.has(ev.source_id)) allEvents.set(ev.source_id, ev);
-      }
-    } catch { /* skip */ }
 
     const events = Array.from(allEvents.values());
     this.log(`${events.length} Events gescrapt`);
@@ -68,32 +57,54 @@ export class FHWienWKWScraper extends UniBaseScraper {
     const $ = cheerio.load(html);
     const events: ScrapedEvent[] = [];
 
-    $('article, .event-item, [class*="event"], .veranstaltung, .news-item').each((_, el) => {
-      try {
-        const $el = $(el);
-        const title = $el.find('h2, h3, h4, .title, .event-title').first().text().trim();
-        if (!title || title.length < 3) return;
+    // WordPress uses .block__news_and_events__item or links to /veranstaltungen/{slug}/
+    // Also try generic article/event selectors
+    const processedSlugs = new Set<string>();
 
-        const href = $el.find('a').first().attr('href') || '';
+    $('a[href*="/veranstaltungen/"]').each((_, el) => {
+      try {
+        const $link = $(el);
+        const href = $link.attr('href') || '';
+
+        // Skip the list page itself and pagination links
+        if (href.endsWith('/veranstaltungen/') || href.match(/\/page\/\d+\//)) return;
+        // Must be a detail page (has slug after /veranstaltungen/)
+        const slugMatch = href.match(/veranstaltungen\/([^/?]+)\/?$/);
+        if (!slugMatch) return;
+
+        const urlSlug = slugMatch[1];
+        if (processedSlugs.has(urlSlug)) return;
+        processedSlugs.add(urlSlug);
+
+        // Get container
+        const $container = $link.closest('.block__news_and_events__item, article, .event-item, div');
+        const title = $container.find('h2, h3, h4').first().text().trim()
+          || $link.text().trim();
+        if (!title || title.length < 3) return;
+        // Skip "Weiterlesen" links
+        if (title.toLowerCase().startsWith('weiterlesen')) return;
+
         const sourceUrl = href.startsWith('http') ? href : `${this.baseUrl}${href}`;
 
-        const dateText = $el.find('time, .date, [class*="date"]').first().text().trim()
-          || $el.find('[datetime]').first().attr('datetime') || '';
-        const startDate = this.parseDatetime(dateText) || this.parseDate(dateText);
+        // Parse date from context - format: "8. April 2026, 16:00 – 19:30"
+        const contextText = $container.length ? $container.text() : '';
+        const startDate = this.parseDatetime(contextText) || this.parseDate(contextText);
         if (!startDate) return;
 
-        const slug = title.toLowerCase().replace(/\W+/g, '-').slice(0, 60);
-        const desc = $el.find('.teaser, .description, p').first().text().trim();
-        const imgSrc = $el.find('img').first().attr('src');
-        const imageUrl = imgSrc ? this.cleanImageUrl(this.resolveImageUrl(imgSrc, this.baseUrl)) : undefined;
+        const slug = urlSlug || title.toLowerCase().replace(/\W+/g, '-').slice(0, 60);
+
+        // Extract description
+        const desc = $container.find('p').first().text().trim();
+
+        // Extract category
+        const category = $container.find('.category, [class*="category"]').first().text().trim();
 
         events.push(this.buildEvent({
           slug,
           title,
           startDate,
-          description: desc || undefined,
+          description: desc || category || undefined,
           sourceUrl,
-          imageUrl,
         }));
       } catch { /* skip */ }
     });
