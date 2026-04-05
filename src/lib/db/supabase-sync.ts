@@ -273,6 +273,8 @@ function toSupabaseRow(
     geocoding_confidence: finalConfidence,
     geocoding_source: finalSource,
     content_fingerprint: generateFingerprint(event.title, event.start_date),
+    // venue_id from registry-based scraper (null for regular scrapers)
+    ...(event.venue_id ? { venue_id: event.venue_id } : {}),
   };
 }
 

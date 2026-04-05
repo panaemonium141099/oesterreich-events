@@ -51,7 +51,8 @@
     "gemini-geocode": "tsx --env-file=.env.local src/scripts/gemini-geocode.ts",
     "import-osm-venues": "tsx --env-file=.env.local src/scripts/import-osm-venues.ts",
     "import-student-orgs": "tsx --env-file=.env.local src/scripts/import-student-orgs.ts",
-    "backfill-venue-ids": "tsx --env-file=.env.local src/scripts/backfill-venue-ids.ts"
+    "backfill-venue-ids": "tsx --env-file=.env.local src/scripts/backfill-venue-ids.ts",
+    "scrape:venues": "tsx --env-file=.env.local src/scripts/scrape-venues.ts"
   },
   "keywords": [],
   "author": "",

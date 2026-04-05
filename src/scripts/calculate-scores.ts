@@ -1,23 +1,20 @@
 /**
  * Event scoring script: calculates quality/relevance scores for future events.
- *
- * Score formula (0-100, clamped):
- *  - Image present (non-empty):               +15
- *  - Description > 50 chars:                  +10
- *  - Description > 200 chars (extra):          +5
- *  - ticket_url present:                      +15
- *  - price_min > 0 OR price_text non-empty:    +5
- *  - price_min > 20 (extra):                   +5
- *  - tags array non-empty:                     +5
- *  - organizer non-empty:                      +5
- *  - source_url present:                       +5
- *  - Engagement (views*0.5 + saves*2 + shares*3, max 20): up to +20
- *  - Time bonus: next 7 days +10, 8-30 days +5
+ * Uses the scoring algorithm from src/lib/utils/scoring.ts.
  *
  * Run with: npm run score
  */
 
 import { createClient } from '@supabase/supabase-js';
+import {
+  calculateScore,
+  LOCAL_VENUE_TYPES,
+  type ScoringEventRow,
+  type ScoringVenueRow,
+} from '../lib/utils/scoring';
+
+// Re-export for backwards compatibility
+export { calculateScore };
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -31,85 +28,33 @@ const supabase = createClient(SUPABASE_URL, SERVICE_ROLE_KEY);
 
 const BATCH_SIZE = 1000;
 
-interface EventRow {
-  id: string;
-  title: string;
-  description: string | null;
-  image_url: string | null;
-  ticket_url: string | null;
-  price_min: number | null;
-  price_text: string | null;
-  tags: string[] | null;
-  organizer: string | null;
-  source_url: string | null;
-  view_count: number;
-  save_count: number;
-  share_count: number;
-  start_date: string;
-}
+async function fetchVenueMap(): Promise<Map<string, ScoringVenueRow>> {
+  const venueMap = new Map<string, ScoringVenueRow>();
+  let from = 0;
 
-function calculateScore(event: EventRow): number {
-  let score = 0;
+  while (true) {
+    const { data, error } = await supabase
+      .from('venues')
+      .select('id, type, is_student_relevant, localness_score, registry_source')
+      .range(from, from + BATCH_SIZE - 1);
 
-  // Image present
-  if (event.image_url && event.image_url.trim().length > 0) {
-    score += 15;
-  }
-
-  // Description length bonuses
-  const descLen = event.description ? event.description.trim().length : 0;
-  if (descLen > 50) score += 10;
-  if (descLen > 200) score += 5;
-
-  // Ticket URL
-  if (event.ticket_url && event.ticket_url.trim().length > 0) {
-    score += 15;
-  }
-
-  // Price signals
-  const hasPriceMin = event.price_min !== null && event.price_min > 0;
-  const hasPriceText = event.price_text !== null && event.price_text.trim().length > 0;
-  if (hasPriceMin || hasPriceText) {
-    score += 5;
-    if (hasPriceMin && event.price_min! > 20) {
-      score += 5;
+    if (error) {
+      console.error('Error fetching venues:', error);
+      // Non-fatal: continue scoring without venue bonuses
+      break;
     }
+
+    if (!data || data.length === 0) break;
+
+    for (const venue of data as ScoringVenueRow[]) {
+      venueMap.set(venue.id, venue);
+    }
+
+    if (data.length < BATCH_SIZE) break;
+    from += BATCH_SIZE;
   }
 
-  // Tags
-  if (event.tags && event.tags.length > 0) {
-    score += 5;
-  }
-
-  // Organizer
-  if (event.organizer && event.organizer.trim().length > 0) {
-    score += 5;
-  }
-
-  // Source URL
-  if (event.source_url && event.source_url.trim().length > 0) {
-    score += 5;
-  }
-
-  // Engagement score (max 20)
-  const engagementScore = Math.min(
-    event.view_count * 0.5 + event.save_count * 2 + event.share_count * 3,
-    20
-  );
-  score += engagementScore;
-
-  // Time bonus
-  const now = new Date();
-  const startDate = new Date(event.start_date);
-  const daysUntil = Math.ceil((startDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
-  if (daysUntil >= 0 && daysUntil <= 7) {
-    score += 10;
-  } else if (daysUntil >= 8 && daysUntil <= 30) {
-    score += 5;
-  }
-
-  // Clamp to 0-100
-  return Math.min(100, Math.max(0, score));
+  return venueMap;
 }
 
 async function main() {
@@ -117,14 +62,19 @@ async function main() {
 
   const today = new Date().toISOString().slice(0, 10);
 
+  // Fetch venue data for bonus calculation
+  console.log('Fetching venue registry...');
+  const venueMap = await fetchVenueMap();
+  console.log(`Loaded ${venueMap.size} venues for scoring bonuses.`);
+
   // Fetch all future events
-  let allEvents: EventRow[] = [];
+  let allEvents: ScoringEventRow[] = [];
   let from = 0;
 
   while (true) {
     const { data, error } = await supabase
       .from('events')
-      .select('id, title, description, image_url, ticket_url, price_min, price_text, tags, organizer, source_url, view_count, save_count, share_count, start_date')
+      .select('id, title, description, image_url, ticket_url, price_min, price_text, tags, organizer, source_url, view_count, save_count, share_count, start_date, venue_id, event_series_id')
       .gte('start_date', today)
       .range(from, from + BATCH_SIZE - 1);
 
@@ -135,20 +85,32 @@ async function main() {
 
     if (!data || data.length === 0) break;
 
-    allEvents = allEvents.concat(data as EventRow[]);
+    allEvents = allEvents.concat(data as ScoringEventRow[]);
     if (data.length < BATCH_SIZE) break;
     from += BATCH_SIZE;
   }
 
   console.log(`Fetched ${allEvents.length} future events. Calculating scores...`);
 
+  // Track venue/series bonus stats
+  let venueBoostCount = 0;
+  let seriesBoostCount = 0;
+  let studentBoostCount = 0;
+
   // Calculate scores
-  const scored = allEvents.map(event => ({
-    id: event.id,
-    title: event.title,
-    event_score: calculateScore(event),
-    score_updated_at: new Date().toISOString(),
-  }));
+  const scored = allEvents.map(event => {
+    const venue = event.venue_id ? venueMap.get(event.venue_id) ?? null : null;
+    if (venue?.is_student_relevant) studentBoostCount++;
+    if (venue && LOCAL_VENUE_TYPES.has(venue.type)) venueBoostCount++;
+    if (event.event_series_id) seriesBoostCount++;
+
+    return {
+      id: event.id,
+      title: event.title,
+      event_score: calculateScore(event, venue),
+      score_updated_at: new Date().toISOString(),
+    };
+  });
 
   // Batch update — parallel chunks of 50 concurrent .update() calls
   const CONCURRENCY = 50;
@@ -181,6 +143,12 @@ async function main() {
   }
 
   console.log(`\nScored ${scored.length} events.`);
+
+  // Log venue/series bonus stats
+  console.log('\nVenue/series bonus stats:');
+  console.log(`  Student-relevant venue boost (+10): ${studentBoostCount} events`);
+  console.log(`  Local venue type boost (+5):        ${venueBoostCount} events`);
+  console.log(`  Recurring series boost (+5):        ${seriesBoostCount} events`);
 
   // Log top 10
   const top10 = scored

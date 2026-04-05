@@ -59,6 +59,8 @@ export interface ScrapedEvent {
   organizer?: string;
   tags?: string[];
   ticket_url?: string;
+  /** Venue ID from the registry (set by RegistryBasedScraper) */
+  venue_id?: string;
 }
 
 export interface EventFilters {
