@@ -85,6 +85,12 @@ export interface EventFilters {
   bbox?: [number, number, number, number];
   /** Filter by scraper source_name (god-role only) */
   sourceName?: string;
+  /** Filter events by venue ID */
+  venueId?: string;
+  /** Only show events at student-relevant venues */
+  studentOnly?: boolean;
+  /** Minimum localness score of the venue (0-100) */
+  localnessMin?: number;
 }
 
 export type Category =

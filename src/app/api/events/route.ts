@@ -117,6 +117,16 @@ export async function GET(request: NextRequest) {
   // Source name filter (god-role only — no auth check here, UI hides it for non-god)
   const sourceName = searchParams.get('sourceName');
 
+  // Venue-centric filters
+  const venueId = searchParams.get('venue_id');
+  if (venueId) filters.venueId = venueId;
+
+  const studentOnly = searchParams.get('student_only');
+  if (studentOnly === 'true') filters.studentOnly = true;
+
+  const localnessMin = searchParams.get('localness_min');
+  if (localnessMin) filters.localnessMin = parseInt(localnessMin, 10);
+
   // Lightweight suggest mode: returns only id/title/category/location_name, skips exact count
   // Used by the autocomplete typeahead in FilterBar to avoid heavyweight DB queries on every keystroke
   const suggestMode = searchParams.get('suggest') === 'true';
@@ -172,6 +182,37 @@ export async function GET(request: NextRequest) {
 
     if (sourceName) {
       query = query.eq('source_name', sourceName);
+    }
+
+    // Venue-centric filters
+    if (filters.venueId) {
+      query = query.eq('venue_id', filters.venueId);
+    }
+
+    if (filters.studentOnly || filters.localnessMin) {
+      // Both student_only and localness_min require a venue lookup.
+      // Fetch qualifying venue IDs, then filter events by those.
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      let venueQuery = (supabase.from('venues') as any).select('id');
+
+      if (filters.studentOnly) {
+        venueQuery = venueQuery.eq('is_student_relevant', true);
+      }
+      if (filters.localnessMin) {
+        venueQuery = venueQuery.gte('localness_score', filters.localnessMin);
+      }
+
+      const { data: qualifyingVenues } = await venueQuery;
+
+      if (qualifyingVenues && qualifyingVenues.length > 0) {
+        const venueIds = qualifyingVenues.map((v: { id: string }) => v.id);
+        query = query.in('venue_id', venueIds);
+      } else {
+        // No venues match criteria -- return empty
+        const res = NextResponse.json({ events: [], total: 0, nextCursor: null, hasMore: false });
+        res.headers.set('X-Total-Count', '0');
+        return res;
+      }
     }
 
     if (filters.tags && filters.tags.length > 0) {
