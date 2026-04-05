@@ -83,6 +83,8 @@ import {
   KPHWienScraper, PPHAugustinumScraper, KPHEdithSteinScraper,
   // Batch 3
   ITULinzScraper, FHTechnikumWienScraper, FHOOEScraper,
+  // Batch 4
+  MedUniInnsbruckScraper, AngewandteWienScraper, MDWWienScraper, KUGGrazScraper,
 } from './uni';
 import { closeSharedBrowser } from './puppeteerBrowser';
 import { upsertEvent, recordScrapeRun } from '../db/queries';
@@ -283,6 +285,11 @@ const scrapers: BaseScraper[] = [
   new ITULinzScraper(),
   new FHTechnikumWienScraper(),
   new FHOOEScraper(),
+  // Batch 4 — New university scrapers
+  new MedUniInnsbruckScraper(),
+  new AngewandteWienScraper(),
+  new MDWWienScraper(),
+  new KUGGrazScraper(),
 ];
 
 const SCRAPER_CONCURRENCY = 10;

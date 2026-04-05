@@ -46,3 +46,8 @@ export {
 export { ITULinzScraper } from './ITULinzScraper';
 export { FHTechnikumWienScraper } from './FHTechnikumWienScraper';
 export { FHOOEScraper } from './FHOOEScraper';
+// Batch 4 — New university scrapers
+export { MedUniInnsbruckScraper } from './MedUniInnsbruckScraper';
+export { AngewandteWienScraper } from './AngewandteWienScraper';
+export { MDWWienScraper } from './MDWWienScraper';
+export { KUGGrazScraper } from './KUGGrazScraper';

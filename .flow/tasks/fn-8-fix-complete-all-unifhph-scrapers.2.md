@@ -34,9 +34,8 @@ For each: update `eventListUrl` (and `baseUrl` if domain changed), fetch new URL
 - [ ] FH Wien WKW scraper produces ≥1 event
 - [ ] `npx tsc --noEmit` passes
 ## Done summary
-TBD
-
+Fixed 7 complex uni/FH scrapers: AAU Klagenfurt (new JSP system, 42 events), MedUni Graz (new domain + .article-eventcalendar parsing, 10 events), FH St. Poelten (domain rename fhstp->ustp, 6 events), KunstUni Linz (domain rename kunstuni-linz->ufg + SSL bypass, 13 events), FH BFI Wien (.event-wrapper parsing, 16 events), FH Burgenland (DE URL + .toggle-box parsing, 1 event), FH Wien WKW (DE URL + WordPress parsing, 21 events). All produce >=1 event, tsc passes, 156 tests pass.
 ## Evidence
-- Commits:
-- Tests:
+- Commits: 470192e73057778e5f261a57b16065a89b07cee8
+- Tests: npx tsc --noEmit, npm test (156 passed), npx tsx src/scripts/scrape.ts --source aau-klagenfurt (42 events), npx tsx src/scripts/scrape.ts --source meduni-graz (10 events), npx tsx src/scripts/scrape.ts --source fh-stpoelten (6 events), npx tsx src/scripts/scrape.ts --source kunstuni-linz (13 events), npx tsx src/scripts/scrape.ts --source fh-bfi-wien (16 events), npx tsx src/scripts/scrape.ts --source fh-burgenland (1 event), npx tsx src/scripts/scrape.ts --source fh-wien-wkw (21 events)
 - PRs:
