@@ -1,0 +1,16 @@
+{
+  "assignee": null,
+  "claim_note": "",
+  "claimed_at": null,
+  "created_at": "2026-04-06T20:13:37.380699Z",
+  "depends_on": [
+    "fn-11-social-features-launch-ready-uxlogic-fix.1"
+  ],
+  "epic": "fn-11-social-features-launch-ready-uxlogic-fix",
+  "id": "fn-11-social-features-launch-ready-uxlogic-fix.8",
+  "priority": null,
+  "spec_path": ".flow/tasks/fn-11-social-features-launch-ready-uxlogic-fix.8.md",
+  "status": "todo",
+  "title": "Profile + Artists: Dead Button Removal + Dark Theme + Avatar Feedback",
+  "updated_at": "2026-04-06T20:15:41.729672Z"
+}

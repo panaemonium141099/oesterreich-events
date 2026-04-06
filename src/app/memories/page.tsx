@@ -96,37 +96,43 @@ export default function MemoriesPage() {
       return;
     }
 
-    // Enrich with event, photos count, participants
-    const enriched = await Promise.all(
-      memoriesData.map(async (m: any) => {
-        let event = null;
-        if (m.event_id) {
-          const { data: e } = await supabase
-            .from('events')
-            .select('id, title, start_date')
-            .eq('id', m.event_id)
-            .single();
-          event = e;
-        }
+    // Batch-fetch related data instead of N+1 queries per memory
+    const memIds = memoriesData.map((m: any) => m.id);
+    const eventIds = memoriesData.map((m: any) => m.event_id).filter(Boolean);
 
-        const { count: photoCount } = await supabase
-          .from('memory_photos')
-          .select('*', { count: 'exact', head: true })
-          .eq('memory_id', m.id);
+    // 3 batch queries instead of 3*N individual queries
+    const [eventsResult, photosResult, participantsResult] = await Promise.all([
+      eventIds.length > 0
+        ? supabase.from('events').select('id, title, start_date').in('id', eventIds)
+        : Promise.resolve({ data: [] }),
+      supabase.from('memory_photos').select('memory_id').in('memory_id', memIds),
+      supabase.from('memory_participants')
+        .select('id, user_id, memory_id, profile:profiles!memory_participants_user_id_fkey(id, first_name, last_name, avatar_url)')
+        .in('memory_id', memIds),
+    ]);
 
-        const { data: parts } = await supabase
-          .from('memory_participants')
-          .select('id, user_id, profile:profiles!memory_participants_user_id_fkey(id, first_name, last_name, avatar_url)')
-          .eq('memory_id', m.id);
+    // Build lookup maps
+    const eventsMap = new Map<string, { id: string; title: string; start_date: string }>();
+    (eventsResult.data || []).forEach((e: any) => eventsMap.set(e.id, e));
 
-        return {
-          ...m,
-          event,
-          photo_count: photoCount || 0,
-          participants: (parts as any) || [],
-        };
-      })
-    );
+    const photoCountMap = new Map<string, number>();
+    (photosResult.data || []).forEach((p: any) => {
+      photoCountMap.set(p.memory_id, (photoCountMap.get(p.memory_id) || 0) + 1);
+    });
+
+    const participantsMap = new Map<string, any[]>();
+    (participantsResult.data || []).forEach((p: any) => {
+      const list = participantsMap.get(p.memory_id) || [];
+      list.push(p);
+      participantsMap.set(p.memory_id, list);
+    });
+
+    const enriched = memoriesData.map((m: any) => ({
+      ...m,
+      event: m.event_id ? eventsMap.get(m.event_id) || null : null,
+      photo_count: photoCountMap.get(m.id) || 0,
+      participants: participantsMap.get(m.id) || [],
+    }));
 
     setMemories(enriched);
     setLoadingData(false);

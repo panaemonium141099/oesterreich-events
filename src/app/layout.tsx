@@ -3,6 +3,7 @@ import { AuthProvider } from '@/lib/supabase/auth-context';
 import { CookieBanner } from '@/components/Legal/CookieBanner';
 import { AnimatedLayout } from '@/components/UI/AnimatedLayout';
 import { NotificationToast } from '@/components/Notifications/NotificationToast';
+import { Toaster } from 'sonner';
 import './globals.css';
 
 export const metadata: Metadata = {
@@ -49,6 +50,17 @@ export default function RootLayout({
           <AnimatedLayout>
             {children}
           </AnimatedLayout>
+          <Toaster
+            theme="dark"
+            position="bottom-center"
+            toastOptions={{
+              style: {
+                background: '#141416',
+                border: '1px solid rgba(255, 255, 255, 0.06)',
+                color: '#f1f5f9',
+              },
+            }}
+          />
           <NotificationToast />
           <CookieBanner />
         </AuthProvider>

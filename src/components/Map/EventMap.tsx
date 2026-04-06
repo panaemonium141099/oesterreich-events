@@ -22,6 +22,16 @@ interface PlannedEventMarker {
 
 mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN || '';
 
+/** Escape HTML special characters to prevent XSS in popup innerHTML */
+function escapeHtml(str: string): string {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 interface EventMapProps {
   events: Event[];
   selectedEvent: Event | null;
@@ -226,10 +236,10 @@ function EventMap({ events, selectedEvent, hoveredEventId, onSelectEvent, evenin
     return `<div style="width:240px;font-family:Inter,system-ui,sans-serif;background:${bg};border-radius:8px;">
       <img src="${getEventImage(event.image_url, event.category, event.title)}" style="width:100%;height:120px;object-fit:cover;border-radius:8px 8px 0 0;" onerror="this.src='${getCategoryFallbackImage(event.category, event.title)}'" />
       <div style="padding:10px;">
-        <div style="font-weight:600;font-size:13px;color:${textColor};margin-bottom:4px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">${event.title}</div>
+        <div style="font-weight:600;font-size:13px;color:${textColor};margin-bottom:4px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">${escapeHtml(event.title)}</div>
         <div style="font-size:11px;color:${subTextColor};margin-bottom:2px;">${date}${showTime ? ` um ${time}` : ''}</div>
-        ${event.location_name ? `<div style="font-size:11px;color:${subTextColor};margin-bottom:4px;display:flex;align-items:center;gap:3px;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="${subTextColor}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>${event.location_name}</div>` : ''}
-        ${event.price_text ? `<div style="font-size:11px;font-weight:600;color:${btnBg};margin-bottom:6px;">${event.price_text}</div>` : ''}
+        ${event.location_name ? `<div style="font-size:11px;color:${subTextColor};margin-bottom:4px;display:flex;align-items:center;gap:3px;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="${subTextColor}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>${escapeHtml(event.location_name)}</div>` : ''}
+        ${event.price_text ? `<div style="font-size:11px;font-weight:600;color:${btnBg};margin-bottom:6px;">${escapeHtml(event.price_text)}</div>` : ''}
         <button data-event-id="${event.id}" style="width:100%;padding:7px;background:${btnBg};color:white;border:none;border-radius:8px;font-size:12px;font-weight:500;cursor:pointer;">Details anzeigen</button>
       </div></div>`;
   }, []);
@@ -631,14 +641,14 @@ function EventMap({ events, selectedEvent, hoveredEventId, onSelectEvent, evenin
       const dateStr = pe.event_date
         ? new Date(pe.event_date).toLocaleDateString('de-AT', { day: 'numeric', month: 'short', year: 'numeric' })
         : '';
-      const prefix = pe.is_own ? 'Dein Event' : `${pe.creator_name}'s Event`;
+      const prefix = pe.is_own ? 'Dein Event' : `${escapeHtml(pe.creator_name)}'s Event`;
 
       const popup = new mapboxgl.Popup({ offset: 25, closeButton: false, maxWidth: '220px' })
         .setHTML(`<div style="padding:10px;font-family:Inter,system-ui,sans-serif;background:#1e293b;border-radius:8px;">
           <div style="font-size:10px;color:#a855f7;font-weight:600;margin-bottom:4px;">${prefix}</div>
-          <div style="font-size:13px;color:#f1f5f9;font-weight:600;margin-bottom:4px;">${pe.name}</div>
+          <div style="font-size:13px;color:#f1f5f9;font-weight:600;margin-bottom:4px;">${escapeHtml(pe.name)}</div>
           ${dateStr ? `<div style="font-size:11px;color:#94a3b8;margin-bottom:2px;">${dateStr}</div>` : ''}
-          ${pe.location_name ? `<div style="font-size:11px;color:#94a3b8;">${pe.location_name}</div>` : ''}
+          ${pe.location_name ? `<div style="font-size:11px;color:#94a3b8;">${escapeHtml(pe.location_name)}</div>` : ''}
           <a href="/groups/${pe.id}" style="display:block;margin-top:8px;padding:6px;background:#a855f7;color:white;border-radius:6px;font-size:11px;text-align:center;text-decoration:none;font-weight:500;">Dashboard &ouml;ffnen</a>
         </div>`);
 

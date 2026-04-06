@@ -36,10 +36,14 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
+# archive (stale research, planning, completed flow tasks)
+/archive/
+
 # database
 data/*.db
 data/*.db-journal
 data/*.db-wal
+data/*.db-shm
 
 # scraper progress & migration files
 data/scraper-progress-*.json

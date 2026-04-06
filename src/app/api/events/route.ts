@@ -53,7 +53,7 @@ const SEARCH_SYNONYMS: Record<string, string[]> = {
   yoga: ['Gesundheit'],
   gesundheit: ['Gesundheit'],
 };
-const MAX_PAGE_SIZE = 200000;
+const MAX_PAGE_SIZE = 5000;
 
 export async function GET(request: NextRequest) {
   const supabase = getSupabaseClient();

@@ -1,6 +1,17 @@
 @import "tailwindcss";
 
 /* ═══════════════════════════════════════════════
+   Dark Theme Tokens — social pages canonical palette
+   Tailwind v4 @theme generates bg-surface, bg-surface-elevated,
+   bg-surface-inset utilities automatically.
+   ═══════════════════════════════════════════════ */
+@theme {
+  --color-surface: #0a0a0c;
+  --color-surface-elevated: #141416;
+  --color-surface-inset: #050506;
+}
+
+/* ═══════════════════════════════════════════════
    Remove browser default focus outlines — use custom
    ═══════════════════════════════════════════════ */
 *:focus {
@@ -29,8 +40,6 @@ input:focus, select:focus, textarea:focus {
   --color-primary-light: #3b82f6;
   --color-accent: #f43f5e;
   --color-bg: #f8fafc;
-  --color-surface: #ffffff;
-  --color-surface-elevated: #f1f5f9;
   --color-text: #1e293b;
   --color-text-muted: #64748b;
   --color-border: #e2e8f0;
@@ -42,8 +51,6 @@ input:focus, select:focus, textarea:focus {
   --color-primary-light: #a5b4fc;
   --color-accent: #f43f5e;
   --color-bg: #0f172a;
-  --color-surface: #1e293b;
-  --color-surface-elevated: #334155;
   --color-text: #f1f5f9;
   --color-text-muted: #94a3b8;
   --color-border: #334155;

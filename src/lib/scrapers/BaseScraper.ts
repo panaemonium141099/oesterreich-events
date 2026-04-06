@@ -9,10 +9,15 @@ export abstract class BaseScraper {
 
   abstract scrape(): Promise<ScrapedEvent[]>;
 
+  /** Request timeout in milliseconds (default: 30s) */
+  protected fetchTimeoutMs: number = 30000;
+
   protected async fetchPage(url: string): Promise<string> {
     let lastError: Error | null = null;
 
     for (let attempt = 1; attempt <= this.maxRetries; attempt++) {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), this.fetchTimeoutMs);
       try {
         const response = await fetch(url, {
           headers: {
@@ -20,6 +25,7 @@ export abstract class BaseScraper {
             'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
             'Accept-Language': 'de-AT,de;q=0.9,en;q=0.5',
           },
+          signal: controller.signal,
         });
 
         if (!response.ok) {
@@ -29,12 +35,17 @@ export abstract class BaseScraper {
         return await response.text();
       } catch (err) {
         lastError = err instanceof Error ? err : new Error(String(err));
+        if (controller.signal.aborted) {
+          lastError = new Error(`Timeout nach ${this.fetchTimeoutMs}ms für ${url}`);
+        }
         this.log(`Versuch ${attempt}/${this.maxRetries} fehlgeschlagen für ${url}: ${lastError.message}`);
 
         if (attempt < this.maxRetries) {
           const backoff = this.delayMs * Math.pow(2, attempt - 1);
           await this.sleep(backoff);
         }
+      } finally {
+        clearTimeout(timer);
       }
     }
 

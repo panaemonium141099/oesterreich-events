@@ -78,9 +78,21 @@ const nextConfig: NextConfig = {
       { protocol: 'https', hostname: '**.art' },
     ],
   },
-  // Cache headers for static blog content
+  // Security + cache headers
   async headers() {
+    const securityHeaders = [
+      { key: 'X-Frame-Options', value: 'DENY' },
+      { key: 'X-Content-Type-Options', value: 'nosniff' },
+      { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
+      { key: 'X-DNS-Prefetch-Control', value: 'on' },
+      { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=(self)' },
+    ];
     return [
+      {
+        // Apply security headers to all routes
+        source: '/(.*)',
+        headers: securityHeaders,
+      },
       {
         source: '/blog/:path*',
         headers: [

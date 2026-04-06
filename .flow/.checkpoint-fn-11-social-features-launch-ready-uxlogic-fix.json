@@ -1,0 +1,221 @@
+{
+  "created_at": "2026-04-06T20:16:39.635504Z",
+  "epic": {
+    "data": {
+      "branch_name": "fn-11-social-features-launch-ready-uxlogic-fix",
+      "completion_review_status": "unknown",
+      "completion_reviewed_at": null,
+      "created_at": "2026-04-06T20:12:12.279191Z",
+      "default_impl": null,
+      "default_review": null,
+      "default_sync": null,
+      "depends_on_epics": [],
+      "id": "fn-11-social-features-launch-ready-uxlogic-fix",
+      "next_task": 1,
+      "plan_review_status": "unknown",
+      "plan_reviewed_at": null,
+      "spec_path": ".flow/specs/fn-11-social-features-launch-ready-uxlogic-fix.md",
+      "status": "open",
+      "title": "Social Features Launch-Ready: UX/Logic Fix",
+      "updated_at": "2026-04-06T20:13:10.197889Z"
+    },
+    "spec": "# Social Features Launch-Ready: UX/Logic Fix\n\n## Overview\n\nFix 24 UX/logic issues across 9 social pages (Saved, Friends, Feed, Messages, Memories, Groups, Profile, Artists, Event Detail) to make the app launch-ready. Every visible touchpoint must navigate or act; every mutation must give feedback; all pages must share one dark theme.\n\n**NOT in scope:** Redesign, new features beyond the 24 listed, backend refactoring, Artists feature changes (only theme).\n\n## Stakeholders\n\n- **End users**: All social pages get navigation fixes, feedback on actions, consistent dark theme\n- **Developers**: New toast system (Sonner), dark theme tokens via Tailwind `@theme`, standardized loading patterns\n- **Operations**: Zero deployment/config changes \u00e2\u20ac\u201d pure frontend\n\n## Architecture & Key Decisions\n\n### Toast System\n- **Library:** Sonner (shadcn/ui standard, 12k+ stars, Next.js compatible)\n- **Mount:** `<Toaster />` in root `layout.tsx` (persists across route changes)\n- **Pattern:** `toast.success()` / `toast.error()` for all user-initiated mutations\n- **Classification:** Only user-initiated actions (save/unsave/friend/message/upload/RSVP) get toasts. Background fetch failures stay as error boundaries or silent.\n\n### Dark Theme Tokens\n- **Canonical background:** `#0a0a0c` \u00e2\u2020\u2019 defined as `--color-surface` via Tailwind v4 `@theme` in `globals.css`\n- **Elevated surface:** `#141416` \u00e2\u2020\u2019 `--color-surface-elevated` (cards, modals)\n- **All hardcoded hex values** replaced with `bg-surface` / `bg-surface-elevated` utilities\n\n### Navigation Decisions\n- **Feed event click:** \u00e2\u2020\u2019 `/events/[id]` (not `/map?eventId=...`)\n- **Event detail back:** `router.back()` with `window.history.length > 1` fallback \u00e2\u2020\u2019 `/`\n- **Saved card click:** Entire card wrapped in `<Link href=\"/events/[id]\">`, unsave button uses `e.stopPropagation()`\n- **Friend name/avatar:** `<Link href=\"/profile/[userId]\">` (or `/friends/[userId]` if profile route exists)\n- **Group event link:** Always link to `/events/[id]`, regardless of `source_url`\n\n### Removed vs Fixed\n- **Facebook button on profile:** REMOVE (no App ID, not implementable in scope)\n- **PostMenu \"Melden\" button:** REMOVE (no backend report endpoint)\n- **Groups widget system:** DELETE dead code entirely\n- **Bookmark icon:** Saved page uses bookmark (not heart). FeedItem.tsx already uses correct bookmark pattern \u00e2\u20ac\u201d follow that.\n\n### Mobile/Touch Pattern\n- **Destructive actions (delete contribution, unsave):** Always-visible icon button, no hover-only\n- **CSS guard:** `@media (hover: hover)` for any remaining hover enhancements\n- **Min touch target:** 44x44px per Apple HIG\n\n### Access Control (Client-Side UX Guards)\n- **Groups:** Non-members see group info + \"Join\" prompt, chat/contributions hidden behind `<MemberOnly>` guard\n- **DMs:** Validate recipient is friend before rendering compose UI; show \"Add as friend first\" if not\n- **Note:** These are UX guards only. Real security is Supabase RLS (not in scope).\n\n## Phases\n\n### Phase 1: Foundation (Task 1)\nInstall Sonner, define `@theme` tokens, create toast provider. All subsequent tasks depend on this.\n\n### Phase 2: Page-Level Fixes (Tasks 2-8, parallelizable)\nEach task fixes one page or page group. Minimal file overlap enables parallel execution.\n\n### Phase 3: Consistency Pass (Task 9)\nUnify loading patterns, auth states, and background colors across all pages. Depends on Phase 2.\n\n## Mermaid: Task Dependencies\n\n```mermaid\ngraph TD\n    T1[Task 1: Foundation<br>Toast + Theme Tokens] --> T2[Task 2: Saved Page]\n    T1 --> T3[Task 3: Friends Page]\n    T1 --> T4[Task 4: Feed Page]\n    T1 --> T5[Task 5: Event Detail]\n    T1 --> T6[Task 6: Groups Page]\n    T1 --> T7[Task 7: Messages + Memories]\n    T1 --> T8[Task 8: Profile + Artists]\n    T2 --> T9[Task 9: Consistency + Docs]\n    T3 --> T9\n    T4 --> T9\n    T5 --> T9\n    T6 --> T9\n    T7 --> T9\n    T8 --> T9\n```\n\n## Alternatives Considered\n\n1. **Custom toast instead of Sonner:** Higher effort, no benefit. Sonner is battle-tested with Next.js.\n2. **CSS variables instead of `@theme`:** Possible but misses Tailwind utility generation. `@theme` is the v4 standard.\n3. **Keep report button with fake confirmation:** Misleads users. Removing is more honest.\n4. **Swipe-to-delete for mobile:** Too complex for launch day. Always-visible buttons are simpler and more discoverable.\n\n## Non-Functional Targets\n\n- All social pages load < 2s on 3G (no new heavy dependencies)\n- Zero hydration errors from `window.history` access (event handlers only, not render)\n- Sonner bundle: ~5KB gzipped \u00e2\u20ac\u201d negligible impact\n- Touch targets \u00e2\u2030\u00a5 44x44px on all interactive elements\n\n## Rollout & Rollback\n\n- **Rollout:** Single branch, all tasks committed, deploy via Coolify git push\n- **Rollback:** `git revert` the merge commit if critical issues found post-launch\n- **No feature flags needed** \u00e2\u20ac\u201d these are fixes to existing features, not new features\n\n## Risks & Mitigations\n\n| Risk | Impact | Mitigation |\n|------|--------|------------|\n| Sonner incompatible with React 19 | Toast system fails | Verify with `npm ls react` before proceeding; fallback: react-hot-toast |\n| Theme token changes cascade beyond scope | Unintended visual changes on non-social pages | Token names are new (`bg-surface`), not replacing existing utilities |\n| fn-1 tasks 11/12 overlap (animations, chat) | Merge conflicts on social components | fn-1 tasks are not started; this epic ships first |\n| 24 fixes in one day | Regressions | Tasks are parallelizable; each task has focused scope |\n| No test coverage for social features | Silent regressions | Add smoke tests in consistency task; run full `npm test` + `npm run build` |\n\n## Quick commands\n\n```bash\nnpm run dev                 # Dev server\nnpm test                    # Run all 547 tests\nnpm run build               # Production build (TypeScript strict)\nnpx sonner --version        # Verify Sonner installed\n```\n\n## Acceptance\n\n- [ ] Every visible touchpoint (card, avatar, name, button) navigates or triggers an action\n- [ ] Every user-initiated mutation (create/update/delete) shows toast feedback\n- [ ] Zero dead buttons, zero dead links, zero silent errors on user actions\n- [ ] All social pages use `bg-surface` (#0a0a0c) or `bg-surface-elevated` (#141416) consistently\n- [ ] Event detail page has Save + Share + dynamic Back button\n- [ ] Artists page converted to dark theme\n- [ ] Mobile: all actions accessible without hover, touch targets \u00e2\u2030\u00a5 44px\n- [ ] `npm run build` passes with zero errors\n- [ ] `npm test` passes (547+ tests)\n- [ ] CHANGELOG.md updated with Phase 11 entry\n- [ ] CLAUDE.md updated with toast component path\n\n## References\n\n- Sonner: https://sonner.emilkowal.ski/\n- Tailwind v4 @theme: https://tailwindcss.com/docs/theme\n- Next.js useRouter: https://nextjs.org/docs/app/api-reference/functions/use-router\n- Framer Motion AnimatePresence: https://motion.dev/docs/react-animate-presence\n- Existing patterns: `src/components/Feed/FeedItem.tsx` (bookmark icon), `src/components/Notifications/NotificationToast.tsx` (toast UI reference)\n"
+  },
+  "epic_id": "fn-11-social-features-launch-ready-uxlogic-fix",
+  "schema_version": 2,
+  "tasks": [
+    {
+      "data": {
+        "assignee": null,
+        "claim_note": "",
+        "claimed_at": null,
+        "created_at": "2026-04-06T20:13:20.553072Z",
+        "depends_on": [],
+        "epic": "fn-11-social-features-launch-ready-uxlogic-fix",
+        "id": "fn-11-social-features-launch-ready-uxlogic-fix.1",
+        "priority": null,
+        "spec_path": ".flow/tasks/fn-11-social-features-launch-ready-uxlogic-fix.1.md",
+        "status": "todo",
+        "title": "Foundation: Toast System (Sonner) + Dark Theme Tokens",
+        "updated_at": "2026-04-06T20:14:06.104171Z"
+      },
+      "id": "fn-11-social-features-launch-ready-uxlogic-fix.1",
+      "runtime": null,
+      "spec": "# fn-11-social-features-launch-ready-uxlogic-fix.1 Foundation: Toast System (Sonner) + Dark Theme Tokens\n\n## Description\nInstall Sonner toast library and define dark theme tokens via Tailwind v4 `@theme`. This is the foundation all other tasks depend on.\n\n**Size:** M\n**Files:** `package.json`, `src/app/globals.css` (or main CSS), `src/app/layout.tsx`\n\n## Approach\n\n- `npm install sonner`\n- Add `<Toaster />` component to root `layout.tsx` (must be in root layout so toasts persist across route changes in App Router)\n- Configure Sonner theme to match dark mode (dark background, light text)\n- Define `@theme` tokens in the main CSS file:\n  - `--color-surface: #0a0a0c` (canonical page background)\n  - `--color-surface-elevated: #141416` (cards, modals, overlays)\n  - `--color-surface-inset: #050506` (inputs, code blocks)\n- Verify `bg-surface` and `bg-surface-elevated` utility classes are generated by Tailwind v4\n- Reference existing dark theme usage in `src/components/Layout/SocialNav.tsx` for glass-morphism style tokens\n\n## Key context\n\n- Tailwind v4 uses `@theme` directive in CSS (not `tailwind.config.js`) to define design tokens\n- Sonner's `<Toaster />` accepts `theme=\"dark\"` prop and `toastOptions` for custom styling\n- Existing `NotificationToast.tsx` is realtime-only (Supabase INSERT events) \u2014 NOT a general toast. Do not modify it.\n- Existing `AuthErrorToast.tsx` is landing-page-only. Do not modify it.\n## Acceptance\n- [ ] Sonner installed and `<Toaster />` renders in root layout\n- [ ] `toast.success('Test')` works from any page (test manually)\n- [ ] Toasts persist when navigating between social pages\n- [ ] `bg-surface` utility applies `#0a0a0c` background\n- [ ] `bg-surface-elevated` utility applies `#141416` background\n- [ ] `npm run build` passes\n- [ ] `npm test` passes\n## Done summary\nTBD\n\n## Evidence\n- Commits:\n- Tests:\n- PRs:\n"
+    },
+    {
+      "data": {
+        "assignee": null,
+        "claim_note": "",
+        "claimed_at": null,
+        "created_at": "2026-04-06T20:13:31.227433Z",
+        "depends_on": [
+          "fn-11-social-features-launch-ready-uxlogic-fix.1"
+        ],
+        "epic": "fn-11-social-features-launch-ready-uxlogic-fix",
+        "id": "fn-11-social-features-launch-ready-uxlogic-fix.2",
+        "priority": null,
+        "spec_path": ".flow/tasks/fn-11-social-features-launch-ready-uxlogic-fix.2.md",
+        "status": "todo",
+        "title": "Saved Page: Click Navigation + Bookmark Icon + Toast Feedback",
+        "updated_at": "2026-04-06T20:14:16.470243Z"
+      },
+      "id": "fn-11-social-features-launch-ready-uxlogic-fix.2",
+      "runtime": null,
+      "spec": "# fn-11-social-features-launch-ready-uxlogic-fix.2 Saved Page: Click Navigation + Bookmark Icon + Toast Feedback\n\n## Description\nFix the Saved page: make event cards clickable, replace heart icon with bookmark, add toast feedback on unsave.\n\n**Size:** M\n**Files:** `src/app/saved/page.tsx`, `src/app/saved/loading.tsx`\n\n## Approach\n\n- Wrap each saved event card in `<Link href=\"/events/[id]\">` for navigation\n- The unsave/remove button must use `e.stopPropagation()` + `e.preventDefault()` to prevent Link navigation when clicking remove\n- Replace heart icon with bookmark icon (follow the pattern in `src/components/Feed/FeedItem.tsx` which already uses filled/unfilled bookmark)\n- Add `toast.success('Event entfernt')` after successful unsave\n- Add `toast.error('Fehler beim Entfernen')` in catch block (currently errors are silently swallowed)\n- Update background to `bg-surface` token (currently hardcoded `bg-[#141416]`)\n\n## Key context\n\n- Saved page currently renders items as non-clickable divs with only a heart-remove action\n- `FeedItem.tsx` already has the correct bookmark icon pattern \u2014 reuse that icon choice\n- Nested interactive elements (button inside Link) need careful event handling to avoid accessibility issues\n## Acceptance\n- [ ] Clicking a saved event card navigates to `/events/[id]`\n- [ ] Unsave button uses bookmark icon (not heart)\n- [ ] Unsave button click does NOT trigger card navigation\n- [ ] Toast appears on successful unsave (\"Event entfernt\" or similar)\n- [ ] Toast appears on unsave error\n- [ ] Page background uses `bg-surface` token\n- [ ] Loading state background matches page background\n## Done summary\nTBD\n\n## Evidence\n- Commits:\n- Tests:\n- PRs:\n"
+    },
+    {
+      "data": {
+        "assignee": null,
+        "claim_note": "",
+        "claimed_at": null,
+        "created_at": "2026-04-06T20:13:32.243806Z",
+        "depends_on": [
+          "fn-11-social-features-launch-ready-uxlogic-fix.1"
+        ],
+        "epic": "fn-11-social-features-launch-ready-uxlogic-fix",
+        "id": "fn-11-social-features-launch-ready-uxlogic-fix.3",
+        "priority": null,
+        "spec_path": ".flow/tasks/fn-11-social-features-launch-ready-uxlogic-fix.3.md",
+        "status": "todo",
+        "title": "Friends Page: Profile Links + Action Feedback",
+        "updated_at": "2026-04-06T20:14:25.922589Z"
+      },
+      "id": "fn-11-social-features-launch-ready-uxlogic-fix.3",
+      "runtime": null,
+      "spec": "# fn-11-social-features-launch-ready-uxlogic-fix.3 Friends Page: Profile Links + Action Feedback\n\n## Description\nFix the Friends page: make friend names/avatars clickable to view profile, add toast feedback for all friend request actions (send/accept/reject).\n\n**Size:** M\n**Files:** `src/app/friends/page.tsx`\n\n## Approach\n\n- Wrap friend name + avatar in each friend row with `<Link href=\"/profile/[userId]\">` (check if `/profile/[userId]` route exists; if not, use appropriate route)\n- Style the link so it looks like current design (no underline, hover effect)\n- Add toast feedback to all friend request mutations:\n  - Send request: `toast.success('Freundschaftsanfrage gesendet')`\n  - Accept request: `toast.success('Freundschaftsanfrage angenommen')`\n  - Reject request: `toast.success('Anfrage abgelehnt')`\n  - Error cases: `toast.error('Fehler bei der Anfrage')` (currently NO error handling)\n- Update background to `bg-surface` token (currently hardcoded `bg-[#141416]`)\n\n## Key context\n\n- Friends page has tabs: friends list, incoming requests, outgoing requests\n- Each friend row already has a \"Nachricht\" (message) link \u2014 the name/avatar should also be clickable\n- Friend request actions currently have zero feedback \u2014 no toast, no animation, no state change indication\n- Check if a user profile viewing route exists (e.g., `/profile/[id]` or `/users/[id]`)\n## Acceptance\n- [ ] Clicking friend name or avatar navigates to their profile\n- [ ] Toast appears after sending friend request\n- [ ] Toast appears after accepting friend request\n- [ ] Toast appears after rejecting friend request\n- [ ] Toast appears on any friend action error\n- [ ] Page background uses `bg-surface` token\n- [ ] Existing \"Nachricht\" link still works\n## Done summary\nTBD\n\n## Evidence\n- Commits:\n- Tests:\n- PRs:\n"
+    },
+    {
+      "data": {
+        "assignee": null,
+        "claim_note": "",
+        "claimed_at": null,
+        "created_at": "2026-04-06T20:13:33.172224Z",
+        "depends_on": [
+          "fn-11-social-features-launch-ready-uxlogic-fix.1"
+        ],
+        "epic": "fn-11-social-features-launch-ready-uxlogic-fix",
+        "id": "fn-11-social-features-launch-ready-uxlogic-fix.4",
+        "priority": null,
+        "spec_path": ".flow/tasks/fn-11-social-features-launch-ready-uxlogic-fix.4.md",
+        "status": "todo",
+        "title": "Feed Page: Event Navigation + End Indicator + Report Cleanup",
+        "updated_at": "2026-04-06T20:14:38.917216Z"
+      },
+      "id": "fn-11-social-features-launch-ready-uxlogic-fix.4",
+      "runtime": null,
+      "spec": "# fn-11-social-features-launch-ready-uxlogic-fix.4 Feed Page: Event Navigation + End Indicator + Report Cleanup\n\n## Description\nFix the Feed page: change event click destination from `/map?eventId=...` to `/events/[id]`, add \"end of feed\" indicator, remove non-functional report button from PostMenu.\n\n**Size:** M\n**Files:** `src/app/feed/page.tsx`, `src/components/Feed/FeedEventMiniCard.tsx`, `src/components/Feed/PostMenu.tsx`\n\n## Approach\n\n- In `feed/page.tsx` (~L110-112): change `router.push('/map?search=&eventId=${eventId}')` to `router.push('/events/${eventId}')`\n- In `FeedEventMiniCard.tsx`: update `onEventClick` handler to navigate to `/events/[id]` instead of `/map`\n- Add \"end of feed\" indicator: when no more items to load, show a subtle message like \"Du hast alles gesehen\" with a small illustration or divider. Reference existing empty state patterns.\n- In `PostMenu.tsx` (~L64-69): remove the \"Melden\" (report) button entirely \u2014 it currently only calls `setOpen(false)` with no actual report functionality. Removing is more honest than a no-op.\n- Update background to `bg-surface` token (currently `bg-[#0a0a0c]` \u2014 will match since #0a0a0c IS the surface token)\n\n## Key context\n\n- Feed page at L110 uses `router.push('/map?search=&eventId=${eventId}')` \u2014 this navigates AWAY from feed context, losing scroll position\n- `FeedEventMiniCard.tsx` fires `onEventClick` which the parent handles with the map navigation\n- PostMenu \"Melden\" button (L64-69) is a confirmed no-op \u2014 just closes menu\n- Feed already has infinite scroll with `FeedSkeleton` \u2014 the end indicator goes after the last item when `hasMore` is false\n## Acceptance\n- [ ] Clicking event in feed navigates to `/events/[id]` (not `/map`)\n- [ ] \"Melden\" button removed from PostMenu\n- [ ] \"End of feed\" indicator shows when all posts are loaded\n- [ ] Empty feed state is handled (zero posts)\n- [ ] Feed scroll position is preserved when navigating back (verify with browser back)\n- [ ] Page background uses `bg-surface` token\n## Done summary\nTBD\n\n## Evidence\n- Commits:\n- Tests:\n- PRs:\n"
+    },
+    {
+      "data": {
+        "assignee": null,
+        "claim_note": "",
+        "claimed_at": null,
+        "created_at": "2026-04-06T20:13:34.244353Z",
+        "depends_on": [
+          "fn-11-social-features-launch-ready-uxlogic-fix.1"
+        ],
+        "epic": "fn-11-social-features-launch-ready-uxlogic-fix",
+        "id": "fn-11-social-features-launch-ready-uxlogic-fix.5",
+        "priority": null,
+        "spec_path": ".flow/tasks/fn-11-social-features-launch-ready-uxlogic-fix.5.md",
+        "status": "todo",
+        "title": "Event Detail: Dynamic Back Button + Social Actions",
+        "updated_at": "2026-04-06T20:15:00.606186Z"
+      },
+      "id": "fn-11-social-features-launch-ready-uxlogic-fix.5",
+      "runtime": null,
+      "spec": "# fn-11-social-features-launch-ready-uxlogic-fix.5 Event Detail: Dynamic Back Button + Social Actions\n\n## Description\nFix the Event Detail page: replace hardcoded back-to-map with dynamic back button, add Save (bookmark) and Share social actions.\n\n**Size:** M\n**Files:** `src/app/events/[id]/page.tsx`\n\n## Approach\n\n**Back button (L154-159):**\n- Currently hardcoded to `/map`. Replace with dynamic back navigation.\n- Use `router.back()` with `window.history.length > 1` fallback to `/` (home).\n- IMPORTANT: `window.history.length` must only be accessed in event handlers (not during render) to avoid hydration mismatch. The back button is a client component.\n- Note: `history.length` is unreliable across browsers. A safer approach: store a `from` query param when navigating TO event detail, use it for back navigation. Fallback: `router.back()` then `/`.\n\n**Social actions:**\n- Add a Save/Bookmark toggle button. Use the bookmark icon pattern from `src/components/Feed/FeedItem.tsx`.\n- Requires Supabase call to check if event is saved + toggle save state. Follow existing saved events API pattern.\n- Add a Share button using Web Share API (`navigator.share()`) with fallback to \"copy link\" (`navigator.clipboard.writeText()`).\n- Show toast on share success (\"Link kopiert\") and save toggle (\"Event gespeichert\" / \"Event entfernt\").\n- Position: floating action bar or inline buttons near the event title area.\n- Update background to use `bg-surface` token (currently `bg-gray-950`).\n\n## Key context\n\n- Event detail page is SSR (`generateMetadata`). Social action bar must be a `'use client'` island component.\n- The page currently has ZERO social integration \u2014 no save, no share, no social context.\n- `window.history` access during SSR/render will cause hydration errors. Only use in event handlers or `useEffect`.\n- Web Share API is available on mobile browsers and modern desktop Chrome/Edge. Safari desktop does NOT support it \u2014 need clipboard fallback.\n## Acceptance\n- [ ] Back button navigates to previous page (not always `/map`)\n- [ ] Back button fallback works when user has no history (direct URL visit)\n- [ ] Save/bookmark button toggles saved state with toast feedback\n- [ ] Share button uses Web Share API on supported browsers\n- [ ] Share button falls back to \"copy link\" on unsupported browsers\n- [ ] Toast appears on share/copy action\n- [ ] No hydration errors from `window.history` access\n- [ ] Page background uses `bg-surface` token\n## Done summary\nTBD\n\n## Evidence\n- Commits:\n- Tests:\n- PRs:\n"
+    },
+    {
+      "data": {
+        "assignee": null,
+        "claim_note": "",
+        "claimed_at": null,
+        "created_at": "2026-04-06T20:13:35.290680Z",
+        "depends_on": [
+          "fn-11-social-features-launch-ready-uxlogic-fix.1"
+        ],
+        "epic": "fn-11-social-features-launch-ready-uxlogic-fix",
+        "id": "fn-11-social-features-launch-ready-uxlogic-fix.6",
+        "priority": null,
+        "spec_path": ".flow/tasks/fn-11-social-features-launch-ready-uxlogic-fix.6.md",
+        "status": "todo",
+        "title": "Groups Page: Event Links + Mobile Delete + Member Guard + Widget Cleanup",
+        "updated_at": "2026-04-06T20:15:16.604910Z"
+      },
+      "id": "fn-11-social-features-launch-ready-uxlogic-fix.6",
+      "runtime": null,
+      "spec": "# fn-11-social-features-launch-ready-uxlogic-fix.6 Groups Page: Event Links + Mobile Delete + Member Guard + Widget Cleanup\n\n## Description\nFix the Groups page: make linked events navigate to `/events/[id]`, make contribution delete button visible on mobile, add member-only guard for chat/contributions, remove dead widget code.\n\n**Size:** M\n**Files:** `src/app/groups/[id]/page.tsx`\n\n## Approach\n\n**Event links (L858-875):**\n- Currently only links to `source_url` (external). Add internal link to `/events/[id]` as primary, `source_url` as secondary \"Original-Quelle\" link.\n- All events in the system have an internal ID \u2014 always link to `/events/[id]`.\n\n**Contribution delete button (L810):**\n- Currently `opacity-0 group-hover:opacity-100` \u2014 invisible on touch devices.\n- Use `@media (hover: hover)` guard: show always on touch, hover-reveal on desktop.\n- Pattern: `.action-btn { opacity: 1; } @media (hover: hover) { .action-btn { opacity: 0; } .card:hover .action-btn { opacity: 1; } }`\n- Ensure touch target is minimum 44x44px.\n\n**Member-only guard:**\n- Non-members should see group info + \"Beitreten\" (join) prompt but NOT chat messages or contribution form.\n- Wrap chat and contribution sections in a guard component that checks membership status.\n- This is a UX guard only \u2014 Supabase RLS handles real security.\n\n**Dead widget code:**\n- Widget system has state defined but UI never rendered. Find and delete all widget-related state, types, and handlers.\n- Verify no other file imports widget types from this page.\n\n**Feedback:**\n- Add toast for RSVP updates (currently no feedback on success/error).\n- Add toast for contribution delete.\n\n## Key context\n\n- Group page is large (~900+ lines). Widget state is dead code bloat.\n- Contribution delete button hover-only pattern is a common mobile UX anti-pattern.\n- Member check likely available from existing Supabase query that loads group data.\n## Acceptance\n- [ ] Linked events navigate to `/events/[id]` (internal link always present)\n- [ ] Contribution delete button visible on touch devices (no hover required)\n- [ ] Delete button touch target >= 44x44px\n- [ ] Non-members see group info but NOT chat or contribution form\n- [ ] Non-members see \"Beitreten\" prompt\n- [ ] All widget-related dead code removed\n- [ ] Toast on RSVP update (success + error)\n- [ ] Toast on contribution delete (success + error)\n- [ ] `npm run build` passes (no broken imports from widget removal)\n## Done summary\nTBD\n\n## Evidence\n- Commits:\n- Tests:\n- PRs:\n"
+    },
+    {
+      "data": {
+        "assignee": null,
+        "claim_note": "",
+        "claimed_at": null,
+        "created_at": "2026-04-06T20:13:36.346027Z",
+        "depends_on": [
+          "fn-11-social-features-launch-ready-uxlogic-fix.1"
+        ],
+        "epic": "fn-11-social-features-launch-ready-uxlogic-fix",
+        "id": "fn-11-social-features-launch-ready-uxlogic-fix.7",
+        "priority": null,
+        "spec_path": ".flow/tasks/fn-11-social-features-launch-ready-uxlogic-fix.7.md",
+        "status": "todo",
+        "title": "Messages + Memories: Error Handling + DM Friend Validation",
+        "updated_at": "2026-04-06T20:15:29.534821Z"
+      },
+      "id": "fn-11-social-features-launch-ready-uxlogic-fix.7",
+      "runtime": null,
+      "spec": "# fn-11-social-features-launch-ready-uxlogic-fix.7 Messages + Memories: Error Handling + DM Friend Validation\n\n## Description\nFix error handling in Messages and Memories pages: add try/catch with toast feedback to message sending, validate DM recipient is friend, add toast for memory photo upload errors.\n\n**Size:** M\n**Files:** `src/app/messages/` (conversation page), `src/app/memories/` (memory detail or upload page)\n\n## Approach\n\n**Messages \u2014 send error handling:**\n- Message sending currently has no try/catch. If Supabase insert fails, the optimistic message disappears without feedback.\n- Wrap send in try/catch, show `toast.error('Nachricht konnte nicht gesendet werden')` on failure.\n- Consider optimistic UI: show message immediately, revert on error with toast.\n\n**Messages \u2014 DM friend validation:**\n- Before rendering compose UI, check if recipient is in user's friend list.\n- If not friend: show \"Ihr muesst Freunde sein um Nachrichten zu senden\" message with option to send friend request.\n- This prevents strangers from DMing via URL manipulation (`/messages/[userId]`).\n- Check if friend list data is already available in the page, or if a new query is needed.\n\n**Memories \u2014 photo upload errors:**\n- Photo upload errors are currently swallowed (no user feedback).\n- Add try/catch around upload, show `toast.error('Foto konnte nicht hochgeladen werden')` on failure.\n- Show `toast.success('Foto hochgeladen')` on success.\n\n## Key context\n\n- Messages page likely uses Supabase Realtime for live updates \u2014 error handling must not break the subscription.\n- DM friend validation is a UX guard. Supabase RLS should enforce the actual security (not in scope here).\n- Memory photo upload may use Supabase Storage \u2014 check the existing upload pattern.\n## Acceptance\n- [ ] Message send failure shows toast error (not silent)\n- [ ] Message send success does NOT show toast (normal flow, no need)\n- [ ] Non-friend visiting `/messages/[userId]` sees friend-required message\n- [ ] Non-friend can send friend request from the DM page\n- [ ] Memory photo upload failure shows toast error\n- [ ] Memory photo upload success shows toast confirmation\n- [ ] Supabase Realtime subscription not broken by error handling changes\n## Done summary\nTBD\n\n## Evidence\n- Commits:\n- Tests:\n- PRs:\n"
+    },
+    {
+      "data": {
+        "assignee": null,
+        "claim_note": "",
+        "claimed_at": null,
+        "created_at": "2026-04-06T20:13:37.380699Z",
+        "depends_on": [
+          "fn-11-social-features-launch-ready-uxlogic-fix.1"
+        ],
+        "epic": "fn-11-social-features-launch-ready-uxlogic-fix",
+        "id": "fn-11-social-features-launch-ready-uxlogic-fix.8",
+        "priority": null,
+        "spec_path": ".flow/tasks/fn-11-social-features-launch-ready-uxlogic-fix.8.md",
+        "status": "todo",
+        "title": "Profile + Artists: Dead Button Removal + Dark Theme + Avatar Feedback",
+        "updated_at": "2026-04-06T20:15:41.729672Z"
+      },
+      "id": "fn-11-social-features-launch-ready-uxlogic-fix.8",
+      "runtime": null,
+      "spec": "# fn-11-social-features-launch-ready-uxlogic-fix.8 Profile + Artists: Dead Button Removal + Dark Theme + Avatar Feedback\n\n## Description\nFix Profile page (remove dead Facebook button, add avatar upload feedback) and convert Artists page from light to dark theme.\n\n**Size:** M\n**Files:** `src/app/profile/page.tsx`, `src/app/artists/page.tsx`, `src/components/Artists/ArtistCard.tsx`, `src/components/Artists/ArtistSearch.tsx`, `src/components/Artists/ImportedArtistsList.tsx`, `src/components/Artists/ArtistEventsSection.tsx`\n\n## Approach\n\n**Profile \u2014 Facebook button (L404-423):**\n- Remove the entire Facebook \"Verbinden\" button. It has no `onClick` handler and no Facebook App ID configured.\n- Clean up any related state or imports.\n\n**Profile \u2014 Avatar upload feedback:**\n- Avatar upload errors currently only logged to `console.log`. Add `toast.error('Avatar konnte nicht hochgeladen werden')` in catch block.\n- Add `toast.success('Avatar aktualisiert')` on success.\n- Update background to `bg-surface` token.\n\n**Artists page \u2014 dark theme conversion:**\n- Currently uses light theme: `bg-[#f8fafc] text-slate-800`\n- Convert to dark theme matching other social pages: `bg-surface text-white`\n- Update all sub-components (ArtistCard, ArtistSearch, ImportedArtistsList, ArtistEventsSection) to dark variants.\n- This is theme-only \u2014 no feature changes to Artists page.\n- Follow existing dark patterns from other social pages (text colors, border colors, input styles).\n\n## Key context\n\n- Profile page Facebook button at L404-423 is a `<button>` with icon but zero functionality.\n- Artists page is the ONLY social page with light theme \u2014 all others are dark.\n- Artists sub-components may use light-specific colors (slate, gray on white) that need dark equivalents.\n- Artists page scope: theme ONLY, no feature changes.\n## Acceptance\n- [ ] Facebook \"Verbinden\" button removed from profile\n- [ ] No dead Facebook-related code remains\n- [ ] Avatar upload error shows toast\n- [ ] Avatar upload success shows toast\n- [ ] Profile background uses `bg-surface` token\n- [ ] Artists page uses dark theme (`bg-surface`, white/gray text)\n- [ ] All Artists sub-components converted to dark theme\n- [ ] Artists page functionality unchanged (search, follow, events still work)\n- [ ] No light-on-light or dark-on-dark contrast issues\n## Done summary\nTBD\n\n## Evidence\n- Commits:\n- Tests:\n- PRs:\n"
+    },
+    {
+      "data": {
+        "assignee": null,
+        "claim_note": "",
+        "claimed_at": null,
+        "created_at": "2026-04-06T20:13:45.859617Z",
+        "depends_on": [
+          "fn-11-social-features-launch-ready-uxlogic-fix.2",
+          "fn-11-social-features-launch-ready-uxlogic-fix.3",
+          "fn-11-social-features-launch-ready-uxlogic-fix.4",
+          "fn-11-social-features-launch-ready-uxlogic-fix.5",
+          "fn-11-social-features-launch-ready-uxlogic-fix.6",
+          "fn-11-social-features-launch-ready-uxlogic-fix.7",
+          "fn-11-social-features-launch-ready-uxlogic-fix.8"
+        ],
+        "epic": "fn-11-social-features-launch-ready-uxlogic-fix",
+        "id": "fn-11-social-features-launch-ready-uxlogic-fix.9",
+        "priority": null,
+        "spec_path": ".flow/tasks/fn-11-social-features-launch-ready-uxlogic-fix.9.md",
+        "status": "todo",
+        "title": "Consistency Pass: Loading Skeletons + Auth States + Background Unification + Docs",
+        "updated_at": "2026-04-06T20:16:05.528849Z"
+      },
+      "id": "fn-11-social-features-launch-ready-uxlogic-fix.9",
+      "runtime": null,
+      "spec": "# fn-11-social-features-launch-ready-uxlogic-fix.9 Consistency Pass: Loading Skeletons + Auth States + Background Unification + Docs\n\n## Description\nFinal consistency pass across all social pages: standardize loading states to skeletons, unify auth loading patterns, verify all backgrounds use theme tokens, update documentation.\n\n**Size:** M\n**Files:** `src/app/saved/loading.tsx`, `src/app/feed/loading.tsx`, `src/app/friends/page.tsx` (inline skeleton), `src/app/groups/[id]/page.tsx` (loading state), `src/app/memories/page.tsx` (loading state), `src/app/notifications/page.tsx` (loading state), `CHANGELOG.md`, `CLAUDE.md`\n\n## Approach\n\n**Loading state unification:**\n- Replace all spinner-based loading states with skeleton screens.\n- Follow the pattern in `src/components/Feed/FeedSkeleton.tsx` (Instagram-style skeletons).\n- Each page needs a skeleton that matches its content layout (list pages = list skeleton, detail pages = detail skeleton).\n- `loading.tsx` files: update background from `bg-black` to `bg-surface` with matching skeleton.\n- Inline loading states (in page components): replace spinner divs with skeleton components.\n\n**Auth loading standardization:**\n- Check how each social page handles the auth loading state (before user data is available).\n- Standardize: show skeleton while auth resolves, redirect to login if unauthenticated.\n- Follow whatever pattern the majority of pages already use.\n\n**Background verification:**\n- Verify ALL social pages now use `bg-surface` or `bg-surface-elevated` tokens (not hardcoded hex).\n- Check: feed, friends, saved, messages, memories, groups, notifications, profile, artists, events/[id].\n\n**Documentation:**\n- `CHANGELOG.md`: Add Phase 11 entry following existing pattern (`### Phase 11: Social Features Launch-Ready (2026-04-07)`) with features list and files changed table.\n- `CLAUDE.md`: Add toast component path to \"Wichtige Pfade\" section if a new toast provider/hook file was created.\n- Update heart\u2192bookmark mention in CHANGELOG L752 if applicable.\n\n**Build validation:**\n- Run `npm run build` \u2014 must pass with zero TypeScript errors.\n- Run `npm test` \u2014 all 547+ tests must pass.\n\n## Key context\n\n- Current loading inconsistency: Feed has `FeedSkeleton`, Friends has inline 4-pulse skeleton, Saved/Groups/Memories use centered spinner.\n- CHANGELOG follows a strict pattern: `### Phase N: Title (date)`, features bullets, files table. See latest phase entry as template.\n- CLAUDE.md paths use format: `- \\`src/path/file.ts\\` \u2014 description`\n## Acceptance\n- [ ] All social pages use skeleton loading (not spinners)\n- [ ] All `loading.tsx` files use `bg-surface` background\n- [ ] Auth loading pattern is consistent across all social pages\n- [ ] No hardcoded hex background colors remain on social pages\n- [ ] CHANGELOG.md has Phase 11 entry with all changes documented\n- [ ] CLAUDE.md updated with toast component path (if new file created)\n- [ ] `npm run build` passes with zero errors\n- [ ] `npm test` passes (547+ tests)\n- [ ] Manual spot-check: navigate between 3+ social pages, verify consistent look\n## Done summary\nTBD\n\n## Evidence\n- Commits:\n- Tests:\n- PRs:\n"
+    }
+  ]
+}

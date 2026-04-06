@@ -1,0 +1,16 @@
+{
+  "assignee": null,
+  "claim_note": "",
+  "claimed_at": null,
+  "created_at": "2026-04-06T20:13:35.290680Z",
+  "depends_on": [
+    "fn-11-social-features-launch-ready-uxlogic-fix.1"
+  ],
+  "epic": "fn-11-social-features-launch-ready-uxlogic-fix",
+  "id": "fn-11-social-features-launch-ready-uxlogic-fix.6",
+  "priority": null,
+  "spec_path": ".flow/tasks/fn-11-social-features-launch-ready-uxlogic-fix.6.md",
+  "status": "todo",
+  "title": "Groups Page: Event Links + Mobile Delete + Member Guard + Widget Cleanup",
+  "updated_at": "2026-04-06T20:15:16.604910Z"
+}

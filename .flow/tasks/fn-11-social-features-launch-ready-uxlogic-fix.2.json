@@ -1,0 +1,16 @@
+{
+  "assignee": null,
+  "claim_note": "",
+  "claimed_at": null,
+  "created_at": "2026-04-06T20:13:31.227433Z",
+  "depends_on": [
+    "fn-11-social-features-launch-ready-uxlogic-fix.1"
+  ],
+  "epic": "fn-11-social-features-launch-ready-uxlogic-fix",
+  "id": "fn-11-social-features-launch-ready-uxlogic-fix.2",
+  "priority": null,
+  "spec_path": ".flow/tasks/fn-11-social-features-launch-ready-uxlogic-fix.2.md",
+  "status": "todo",
+  "title": "Saved Page: Click Navigation + Bookmark Icon + Toast Feedback",
+  "updated_at": "2026-04-06T20:14:16.470243Z"
+}

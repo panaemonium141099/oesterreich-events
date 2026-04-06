@@ -62,7 +62,14 @@ const SCRAPER_REGISTRY: Record<string, { displayName: string; category: string }
 const DATA_DIR = path.join(process.cwd(), 'data');
 
 function getProgressFilePath(name: string): string {
-  return path.join(DATA_DIR, `scraper-progress-${name}.json`);
+  // Sanitize: strip path separators and dots to prevent path traversal
+  const safeName = name.replace(/[/\\. ]/g, '_');
+  const filePath = path.join(DATA_DIR, `scraper-progress-${safeName}.json`);
+  // Double-check the resolved path stays within DATA_DIR
+  if (!filePath.startsWith(DATA_DIR)) {
+    throw new Error('Invalid scraper name');
+  }
+  return filePath;
 }
 
 function readProgress(name: string): { status: string; current: number; total: number; eventsFound: number; message: string; startedAt: string } | null {
@@ -77,8 +84,36 @@ function readProgress(name: string): { status: string; current: number; total: n
   return null;
 }
 
+/** Verify the caller is an authenticated admin/god user. Returns null on success, or an error Response. */
+async function requireAdmin(): Promise<NextResponse | null> {
+  const supabase = await createServerSupabaseClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('role')
+    .eq('id', user.id)
+    .single();
+  if (!profile || !['god', 'admin'].includes(profile.role)) {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+  }
+  return null;
+}
+
+/** Sanitize a scraper name: must exist in SCRAPER_REGISTRY. */
+function validateScraperName(name: unknown): string | null {
+  if (typeof name !== 'string') return null;
+  if (!SCRAPER_REGISTRY[name]) return null;
+  return name;
+}
+
 export async function GET() {
   try {
+    const authError = await requireAdmin();
+    if (authError) return authError;
+
     const supabase = await createServerSupabaseClient();
 
     // Get event counts by source
@@ -141,10 +176,17 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
-    const { action, scraper: scraperName } = body;
+    const authError = await requireAdmin();
+    if (authError) return authError;
 
-    if (action === 'start' && scraperName) {
+    const body = await request.json();
+    const { action, scraper: rawScraperName } = body;
+
+    if (action === 'start' && rawScraperName) {
+      const scraperName = validateScraperName(rawScraperName);
+      if (!scraperName) {
+        return NextResponse.json({ error: 'Unbekannter Scraper' }, { status: 400 });
+      }
       const progressFile = getProgressFilePath(scraperName);
 
       // Check if already running
@@ -166,11 +208,10 @@ export async function POST(request: NextRequest) {
         startedAt: new Date().toISOString(),
       }));
 
-      // Spawn scraper as child process
+      // Spawn scraper as child process (no shell — scraperName is validated against registry)
       const child = spawn('npx', ['tsx', 'src/scripts/scrape.ts', '--source', scraperName], {
         cwd: process.cwd(),
         stdio: 'pipe',
-        shell: true,
         detached: false,
       });
 
@@ -227,7 +268,11 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: true, message: `Scraper ${scraperName} gestartet` });
     }
 
-    if (action === 'stop' && scraperName) {
+    if (action === 'stop' && rawScraperName) {
+      const scraperName = validateScraperName(rawScraperName);
+      if (!scraperName) {
+        return NextResponse.json({ error: 'Unbekannter Scraper' }, { status: 400 });
+      }
       const progressFile = getProgressFilePath(scraperName);
       // Write stopped status
       if (fs.existsSync(progressFile)) {
@@ -257,7 +302,6 @@ export async function POST(request: NextRequest) {
       const child = spawn('node', ['src/scripts/validate-events.js'], {
         cwd: process.cwd(),
         stdio: 'pipe',
-        shell: true,
       });
 
       const progressFile = path.join(DATA_DIR, 'scraper-progress-validate.json');
@@ -291,7 +335,6 @@ export async function POST(request: NextRequest) {
       const child = spawn('npx', ['tsx', 'src/scripts/post-process.ts'], {
         cwd: process.cwd(),
         stdio: 'pipe',
-        shell: true,
       });
 
       const progressFile = path.join(DATA_DIR, 'scraper-progress-post-process.json');
@@ -338,7 +381,7 @@ export async function POST(request: NextRequest) {
         },
         body: JSON.stringify({
           ref: 'master',
-          inputs: scraperName ? { scraper: scraperName } : {},
+          inputs: rawScraperName ? { scraper: validateScraperName(rawScraperName) || '' } : {},
         }),
       });
 
