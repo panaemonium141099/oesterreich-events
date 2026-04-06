@@ -32,9 +32,8 @@ Add Spotify artist search API using Client Credentials flow (app-level token, no
 - [ ] Auth required -- returns 401 for unauthenticated requests
 - [ ] Empty/short queries return empty array (no Spotify call)
 ## Done summary
-TBD
-
+Added Spotify Client Credentials flow with in-memory token caching and artist search API route (GET /api/artists/search) that works for all authenticated users without requiring Spotify OAuth.
 ## Evidence
-- Commits:
-- Tests:
+- Commits: a7635e4f791edbfcb2df26a59a5549746586f4ef
+- Tests: npm test (450 passed), npx tsc --noEmit (clean)
 - PRs:
