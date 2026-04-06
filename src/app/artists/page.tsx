@@ -177,8 +177,30 @@ export default function ArtistsPage() {
 
   if (loading || !user) {
     return (
-      <div className="bg-surface min-h-screen text-white flex items-center justify-center">
-        <div className="w-6 h-6 border-2 border-white/20 border-t-white/60 rounded-full animate-spin" />
+      <div className="bg-surface min-h-screen text-white">
+        <header className="sticky top-0 z-30 bg-surface/80 backdrop-blur-xl border-b border-white/[0.06]">
+          <div className="max-w-2xl mx-auto px-4 py-4 flex items-center justify-between">
+            <div className="h-5 w-24 rounded bg-white/[0.06] animate-pulse motion-reduce:animate-none" />
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-lg bg-white/[0.06] animate-pulse motion-reduce:animate-none" />
+              <div className="w-8 h-8 rounded-full bg-white/[0.06] animate-pulse motion-reduce:animate-none" />
+            </div>
+          </div>
+        </header>
+        <div className="max-w-2xl mx-auto px-4 py-6">
+          <div className="h-12 rounded-xl bg-white/[0.04] border border-white/[0.06] mb-6 animate-pulse motion-reduce:animate-none" />
+          <div className="space-y-3">
+            {[1, 2, 3].map(i => (
+              <div key={i} className="flex items-center gap-3 p-3 rounded-xl bg-white/[0.04] border border-white/[0.06] animate-pulse motion-reduce:animate-none" style={{ animationDelay: `${i * 60}ms` }}>
+                <div className="w-12 h-12 rounded-full bg-white/[0.06] shrink-0" />
+                <div className="flex-1 space-y-2">
+                  <div className="h-4 bg-white/[0.06] rounded w-1/3" />
+                  <div className="h-3 bg-white/[0.04] rounded w-1/4" />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
     );
   }

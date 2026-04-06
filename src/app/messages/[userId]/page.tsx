@@ -228,18 +228,29 @@ export default function DMConversationPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#0a0a0c] flex items-center justify-center">
-        <div className="w-8 h-8 border-2 border-white/20 border-t-white/60 rounded-full animate-spin" />
+      <div className="min-h-screen bg-surface-inset text-white flex flex-col">
+        <header className="flex items-center gap-3 px-6 py-4 border-b border-white/[0.06] shrink-0 bg-surface-elevated">
+          <div className="w-5 h-5 rounded bg-white/[0.06] animate-pulse motion-reduce:animate-none" />
+          <div className="w-9 h-9 rounded-full bg-white/[0.06] animate-pulse motion-reduce:animate-none" />
+          <div className="h-4 w-24 rounded bg-white/[0.06] animate-pulse motion-reduce:animate-none" />
+        </header>
+        <div className="flex-1 px-6 py-4 space-y-4">
+          {[1, 2, 3].map(i => (
+            <div key={i} className={`flex ${i % 2 === 0 ? 'justify-end' : 'justify-start'}`}>
+              <div className={`h-10 rounded-2xl bg-white/[0.06] animate-pulse motion-reduce:animate-none ${i % 2 === 0 ? 'w-2/3' : 'w-1/2'}`} style={{ animationDelay: `${i * 80}ms` }} />
+            </div>
+          ))}
+        </div>
       </div>
     );
   }
 
   return (
     <div
-      className="min-h-screen text-white flex flex-col bg-[#0a0a0c]"
+      className="min-h-screen text-white flex flex-col bg-surface-inset"
     >
       {/* Header */}
-      <header className="flex items-center gap-3 px-6 py-4 border-b border-white/[0.06] shrink-0 bg-[#141416]">
+      <header className="flex items-center gap-3 px-6 py-4 border-b border-white/[0.06] shrink-0 bg-surface-elevated">
         <Link href="/messages" className="text-white/30 hover:text-white/60 transition-colors">
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -332,7 +343,7 @@ export default function DMConversationPage() {
 
       {/* Message Input or Friend Guard */}
       {isFriend === false ? (
-        <div className="px-6 py-4 border-t border-white/[0.06] shrink-0 bg-[#141416]">
+        <div className="px-6 py-4 border-t border-white/[0.06] shrink-0 bg-surface-elevated">
           <div className="max-w-2xl mx-auto text-center py-4">
             <div className="w-12 h-12 rounded-full bg-white/[0.04] border border-white/[0.06] flex items-center justify-center mx-auto mb-3">
               <svg className="w-6 h-6 text-white/20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -358,7 +369,7 @@ export default function DMConversationPage() {
           </div>
         </div>
       ) : (
-        <div className="px-6 py-3 border-t border-white/[0.06] shrink-0 bg-[#141416]">
+        <div className="px-6 py-3 border-t border-white/[0.06] shrink-0 bg-surface-elevated">
           <div className="max-w-2xl mx-auto flex gap-2">
             <button
               onClick={() => setShowEventSearch(true)}

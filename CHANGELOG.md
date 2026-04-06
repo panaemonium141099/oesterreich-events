@@ -1286,4 +1286,65 @@ User -> Follow Artists (Spotify import / manual search / free-text)
 
 ---
 
+## Social Features Launch-Ready UX/Logic Fix (Epic fn-11, 2026-04-06)
+
+### Problem
+Social pages (feed, friends, saved, messages, memories, groups, notifications, profile, artists) had inconsistent loading states (mix of centered spinners and skeletons), hardcoded hex background colors instead of theme tokens, and inconsistent auth loading patterns.
+
+### Phase 1: Sonner Toast System + Theme Tokens (tasks .1-.2)
+- Installed `sonner` toast library with `<Toaster>` provider in root layout
+- Defined `@theme` tokens in global CSS: `bg-surface` (#0a0a0c), `bg-surface-elevated` (#141416), `bg-surface-inset` (#050506)
+
+### Phase 2: Social Page Fixes (tasks .3-.8)
+- **Event detail (T3):** Dynamic back button with page history detection, save/share social actions
+- **Saved events (T4):** Click navigation to event detail, bookmark icon replacing heart, toast feedback on unsave
+- **Feed (T5):** Fixed event card navigation to `/events/[id]`, added end-of-feed indicator, removed dead report button from PostMenu
+- **Groups (T6):** Event links in overview, mobile-safe delete confirmation, member guard on non-member access, removed dead widget sidebar code
+- **Profile + Artists (T7):** Removed Facebook connect button, added avatar upload toast feedback, converted artists page to dark theme with `bg-surface` tokens
+- **Dead code removal (T8):** Removed Facebook button from profile, dead widget code from groups, report button from PostMenu
+
+### Phase 3: Consistency Pass (task .9)
+
+**Loading state unification:**
+- Replaced all spinner-based `loading.tsx` files with content-matching skeleton screens (feed, saved, messages, calendar, map)
+- Replaced all inline auth loading spinners with skeleton screens matching each page's layout
+- Skeleton pattern: `animate-pulse motion-reduce:animate-none` with staggered `animationDelay`
+
+**Background token unification:**
+- Replaced all `bg-black` page backgrounds with `bg-surface`
+- Replaced all `bg-[#141416]` page backgrounds with `bg-surface-elevated`
+- Replaced all `bg-[#0a0a0c]` page backgrounds with `bg-surface-inset`
+- Replaced inline `style={{ background: '#141416' }}` and `style={{ background: '...#000' }}` with token classes
+- Modal/overlay backgrounds (e.g. `bg-black/70`, `bg-[#1c1c1e]`) left as-is (contextual z-elevated surfaces)
+
+**Auth loading standardization:**
+- All social pages now show a skeleton matching their content layout while auth resolves
+- Unauthenticated state redirects to `/auth/login` via `router.push`
+
+### Files Changed
+
+| File | Change |
+|------|--------|
+| `src/app/feed/loading.tsx` | Skeleton replacing spinner, `bg-surface` |
+| `src/app/saved/loading.tsx` | Skeleton replacing spinner, `bg-surface` |
+| `src/app/messages/loading.tsx` | Skeleton replacing spinner, `bg-surface` |
+| `src/app/calendar/loading.tsx` | Skeleton replacing spinner, `bg-surface` |
+| `src/app/map/loading.tsx` | Skeleton replacing spinner, `bg-surface` |
+| `src/app/feed/page.tsx` | Auth skeleton with FeedSkeletonList |
+| `src/app/feed/[activityId]/page.tsx` | Auth skeleton, `bg-surface-elevated` |
+| `src/app/friends/page.tsx` | Auth skeleton with tabs/search, `bg-surface` |
+| `src/app/saved/page.tsx` | Auth + data loading skeletons |
+| `src/app/messages/page.tsx` | `bg-surface-inset` token |
+| `src/app/messages/[userId]/page.tsx` | Auth skeleton, `bg-surface-inset` + `bg-surface-elevated` |
+| `src/app/memories/page.tsx` | Auth skeleton, `bg-surface-elevated` |
+| `src/app/memories/[id]/page.tsx` | Auth + data skeletons, `bg-surface-elevated` |
+| `src/app/groups/page.tsx` | Auth skeleton, `bg-surface-elevated` |
+| `src/app/groups/[id]/page.tsx` | Data skeleton fix, `bg-surface` |
+| `src/app/notifications/page.tsx` | Auth skeleton, `bg-surface-elevated` |
+| `src/app/artists/page.tsx` | Auth skeleton with header/search layout |
+| `src/app/profile/page.tsx` | Auth skeleton with avatar/fields layout |
+| `CHANGELOG.md` | Added fn-11 phase entry |
+
+---
+
 *Last updated: 2026-04-06*

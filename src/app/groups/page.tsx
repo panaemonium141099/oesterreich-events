@@ -411,14 +411,32 @@ export default function EventPlanenPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
-        <div className="w-8 h-8 border-2 border-white/20 border-t-white rounded-full animate-spin motion-reduce:animate-none" />
+      <div className="min-h-screen bg-surface-elevated text-white">
+        <SocialNav />
+        <main className="max-w-3xl mx-auto px-4 sm:px-6 py-8">
+          <div className="flex items-center justify-between mb-6 animate-pulse motion-reduce:animate-none">
+            <div>
+              <div className="h-7 w-32 rounded bg-white/[0.06]" />
+              <div className="h-4 w-24 rounded bg-white/[0.04] mt-1" />
+            </div>
+            <div className="h-10 w-28 rounded-xl bg-white/[0.06]" />
+          </div>
+          <div className="space-y-3">
+            {[1, 2, 3].map(i => (
+              <div key={i} className="rounded-2xl bg-white/[0.04] border border-white/[0.06] p-4 space-y-3 animate-pulse motion-reduce:animate-none" style={{ animationDelay: `${i * 60}ms` }}>
+                <div className="h-5 bg-white/[0.06] rounded w-1/2" />
+                <div className="h-3 bg-white/[0.04] rounded w-1/3" />
+                <div className="h-3 bg-white/[0.04] rounded w-1/4" />
+              </div>
+            ))}
+          </div>
+        </main>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen text-white pb-24 bg-[#141416]">
+    <div className="min-h-screen text-white pb-24 bg-surface-elevated">
       <SocialNav />
 
       <main className="max-w-3xl mx-auto px-4 sm:px-6 py-8">

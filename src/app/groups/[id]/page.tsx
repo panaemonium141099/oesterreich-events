@@ -518,26 +518,26 @@ export default function EventDashboardPage() {
 
   if (loading || !user || loadingData) {
     return (
-      <div className="min-h-screen text-white" style={{ background: 'radial-gradient(ellipse at 50% 0%, rgba(255,255,255,0.04) 0%, transparent 60%), #000' }}>
+      <div className="min-h-screen text-white bg-surface">
         <header className="flex items-center justify-between px-6 py-4 border-b border-white/[0.06]">
-          <div className="h-4 bg-white/10 rounded w-20 animate-pulse motion-reduce:animate-none" />
-          <div className="h-4 bg-white/10 rounded w-16 animate-pulse motion-reduce:animate-none" />
+          <div className="h-4 bg-white/[0.06] rounded w-20 animate-pulse motion-reduce:animate-none" />
+          <div className="h-4 bg-white/[0.06] rounded w-16 animate-pulse motion-reduce:animate-none" />
         </header>
         <div className="px-6 py-5 border-b border-white/[0.06]">
           <div className="max-w-2xl mx-auto space-y-3">
-            <div className="h-3 bg-white/10 rounded w-24 animate-pulse motion-reduce:animate-none" />
-            <div className="h-6 bg-white/10 rounded w-2/3 animate-pulse motion-reduce:animate-none" />
-            <div className="h-4 bg-white/10 rounded w-1/3 animate-pulse motion-reduce:animate-none" />
+            <div className="h-3 bg-white/[0.06] rounded w-24 animate-pulse motion-reduce:animate-none" />
+            <div className="h-6 bg-white/[0.06] rounded w-2/3 animate-pulse motion-reduce:animate-none" />
+            <div className="h-4 bg-white/[0.06] rounded w-1/3 animate-pulse motion-reduce:animate-none" />
             <div className="flex gap-2 mt-4">
               {[1, 2, 3].map(i => (
-                <div key={i} className="flex-1 h-10 rounded-xl bg-white/10 animate-pulse motion-reduce:animate-none" />
+                <div key={i} className="flex-1 h-10 rounded-xl bg-white/[0.06] animate-pulse motion-reduce:animate-none" />
               ))}
             </div>
           </div>
         </div>
         <div className="max-w-2xl mx-auto px-6 py-6 space-y-4">
           {[1, 2].map(i => (
-            <div key={i} className="h-20 rounded-xl bg-white/10 animate-pulse motion-reduce:animate-none" />
+            <div key={i} className="h-20 rounded-xl bg-white/[0.06] animate-pulse motion-reduce:animate-none" />
           ))}
         </div>
       </div>
@@ -546,7 +546,7 @@ export default function EventDashboardPage() {
 
   if (!group) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center text-white">
+      <div className="min-h-screen bg-surface flex items-center justify-center text-white">
         <div className="text-center">
           <p className="text-white/40 mb-4">Event nicht gefunden</p>
           <Link href="/groups" className="text-sm text-white/60 hover:text-white underline">Zur&uuml;ck</Link>
@@ -569,7 +569,7 @@ export default function EventDashboardPage() {
   ];
 
   return (
-    <div className="min-h-screen text-white flex flex-col pb-20" style={{ background: 'radial-gradient(ellipse at 50% 0%, rgba(255,255,255,0.04) 0%, transparent 60%), #000' }}>
+    <div className="min-h-screen text-white flex flex-col pb-20 bg-surface">
       <SocialNav />
       {/* Compact Header — event info + RSVP + tabs in one strip */}
       <header className="px-4 sm:px-6 py-3 border-b border-white/[0.06] shrink-0">

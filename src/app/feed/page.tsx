@@ -113,8 +113,16 @@ export default function FeedPage() {
 
   if (loading || !user) {
     return (
-      <div className="min-h-screen bg-surface flex items-center justify-center">
-        <div className="w-8 h-8 border-2 border-white/20 border-t-white/60 rounded-full animate-spin" />
+      <div className="min-h-screen bg-surface text-white">
+        <SocialNav />
+        <div className="max-w-lg mx-auto px-0 py-6">
+          <div className="px-4 py-3 flex items-center gap-3 animate-pulse motion-reduce:animate-none">
+            <div className="w-9 h-9 rounded-full bg-white/[0.06] shrink-0" />
+            <div className="flex-1 h-10 rounded-xl bg-white/[0.04] border border-white/[0.06]" />
+          </div>
+          <div className="h-[6px] bg-white/[0.03] border-t border-white/[0.06]" />
+          <FeedSkeletonList count={3} />
+        </div>
       </div>
     );
   }

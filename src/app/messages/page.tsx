@@ -183,7 +183,7 @@ export default function MessagesPage() {
   // Rule 5: Skeleton loading instead of spinner for auth loading
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#0a0a0c]">
+      <div className="min-h-screen bg-surface-inset">
         <SocialNav />
         <main className="max-w-3xl mx-auto px-4 sm:px-6 py-8">
           <div className="flex items-center justify-between mb-6">
@@ -212,7 +212,7 @@ export default function MessagesPage() {
 
   return (
     <div
-      className="min-h-screen text-white pb-24 bg-[#0a0a0c]"
+      className="min-h-screen text-white pb-24 bg-surface-inset"
     >
       <SocialNav />
 

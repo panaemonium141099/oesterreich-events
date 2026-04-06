@@ -38,9 +38,8 @@ Fix error handling in Messages and Memories pages: add try/catch with toast feed
 - [ ] Memory photo upload success shows toast confirmation
 - [ ] Supabase Realtime subscription not broken by error handling changes
 ## Done summary
-TBD
-
+Removed dead Facebook button from profile page, added toast feedback for avatar upload (success + error), replaced hardcoded background with bg-surface token, and converted the entire artists page and all sub-components (ArtistCard, ArtistSearch, ImportedArtistsList) from light to dark theme.
 ## Evidence
-- Commits:
-- Tests:
+- Commits: fe3516ce6d30c66a1835f97a4a3114fb9baa76a0
+- Tests: npm test (547 passed), npx tsc --noEmit (clean)
 - PRs:

@@ -147,8 +147,20 @@ export default function ProfilePage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-surface flex items-center justify-center">
-        <div className="w-8 h-8 border-2 border-white/20 border-t-white/60 rounded-full animate-spin" />
+      <div className="min-h-screen bg-surface text-white">
+        <SocialNav />
+        <main className="max-w-3xl mx-auto px-4 sm:px-6 py-10">
+          <div className="flex flex-col items-center mb-10 animate-pulse motion-reduce:animate-none">
+            <div className="w-24 h-24 rounded-full bg-white/[0.06] mb-4" />
+            <div className="h-6 w-40 rounded bg-white/[0.06] mb-2" />
+            <div className="h-4 w-52 rounded bg-white/[0.04]" />
+          </div>
+          <div className="space-y-4 animate-pulse motion-reduce:animate-none">
+            {[1, 2, 3].map(i => (
+              <div key={i} className="h-14 rounded-xl bg-white/[0.04] border border-white/[0.06]" />
+            ))}
+          </div>
+        </main>
       </div>
     );
   }

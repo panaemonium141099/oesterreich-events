@@ -147,8 +147,24 @@ export default function NotificationsPage() {
 
   if (loading || !user) {
     return (
-      <div className="bg-[#141416] min-h-screen text-white flex items-center justify-center">
-        <div className="w-6 h-6 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+      <div className="bg-surface-elevated min-h-screen text-white">
+        <header className="sticky top-0 z-30 bg-surface-elevated/80 backdrop-blur-xl border-b border-white/[0.06]">
+          <div className="max-w-2xl mx-auto px-4 py-4 flex items-center justify-between">
+            <div className="h-5 w-40 rounded bg-white/[0.06] animate-pulse motion-reduce:animate-none" />
+            <div className="h-9 w-9 rounded-lg bg-white/[0.06] animate-pulse motion-reduce:animate-none" />
+          </div>
+        </header>
+        <div className="max-w-2xl mx-auto px-4 py-6 space-y-3">
+          {[1, 2, 3, 4, 5].map(i => (
+            <div key={i} className="flex items-start gap-3 p-3 rounded-xl animate-pulse motion-reduce:animate-none" style={{ animationDelay: `${i * 50}ms` }}>
+              <div className="w-10 h-10 rounded-full bg-white/[0.06] shrink-0" />
+              <div className="flex-1 space-y-2">
+                <div className="h-4 bg-white/[0.06] rounded w-3/4" />
+                <div className="h-3 bg-white/[0.04] rounded w-1/2" />
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
     );
   }
@@ -157,9 +173,9 @@ export default function NotificationsPage() {
   const groups = groupByDate(notifications);
 
   return (
-    <div className="bg-[#141416] min-h-screen text-white pb-24">
+    <div className="bg-surface-elevated min-h-screen text-white pb-24">
       {/* Header */}
-      <header className="sticky top-0 z-30 bg-[#141416]/80 backdrop-blur-xl border-b border-white/[0.06]">
+      <header className="sticky top-0 z-30 bg-surface-elevated/80 backdrop-blur-xl border-b border-white/[0.06]">
         <div className="max-w-2xl mx-auto px-4 py-4 flex items-center justify-between">
           <h1 className="text-lg font-bold">Benachrichtigungen</h1>
           <div className="flex items-center gap-3">

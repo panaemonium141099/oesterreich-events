@@ -139,15 +139,29 @@ export default function PostDetailPage() {
 
   if (loading || loadingActivity) {
     return (
-      <div className="min-h-screen bg-[#141416] flex items-center justify-center">
-        <div className="w-8 h-8 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+      <div className="min-h-screen bg-surface-elevated text-white">
+        <SocialNav />
+        <main className="max-w-lg mx-auto px-4 sm:px-6 py-6">
+          <div className="h-3 w-16 rounded bg-white/[0.06] mb-6 animate-pulse motion-reduce:animate-none" />
+          <div className="border-b border-white/[0.06] animate-pulse motion-reduce:animate-none">
+            <div className="flex items-center gap-3 px-4 py-3">
+              <div className="w-8 h-8 rounded-full bg-white/[0.06]" />
+              <div className="w-24 h-3 rounded bg-white/[0.06]" />
+            </div>
+            <div className="aspect-[4/5] w-full bg-white/[0.04]" />
+            <div className="px-4 py-3 space-y-2">
+              <div className="w-20 h-3 rounded bg-white/[0.06]" />
+              <div className="w-48 h-3 rounded bg-white/[0.04]" />
+            </div>
+          </div>
+        </main>
       </div>
     );
   }
 
   if (!activity) {
     return (
-      <div className="min-h-screen bg-[#141416] text-white flex items-center justify-center">
+      <div className="min-h-screen bg-surface-elevated text-white flex items-center justify-center">
         <div className="text-center">
           <p className="text-white/40 text-sm mb-4">Beitrag nicht gefunden</p>
           <button
@@ -164,7 +178,7 @@ export default function PostDetailPage() {
   const isPost = activity.type === 'post';
 
   return (
-    <div className="min-h-screen bg-[#141416] text-white pb-24">
+    <div className="min-h-screen bg-surface-elevated text-white pb-24">
       <SocialNav />
 
       <main className="max-w-lg mx-auto px-4 sm:px-6 py-6">
@@ -266,7 +280,7 @@ export default function PostDetailPage() {
       </main>
 
       {/* Sticky comment input */}
-      <div className="fixed bottom-20 left-0 right-0 px-4 py-3 bg-[#141416]/90 backdrop-blur-xl border-t border-white/[0.06]">
+      <div className="fixed bottom-20 left-0 right-0 px-4 py-3 bg-surface-elevated/90 backdrop-blur-xl border-t border-white/[0.06]">
         <div className="max-w-lg mx-auto flex items-center gap-2">
           <input
             type="text"

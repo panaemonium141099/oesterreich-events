@@ -47,9 +47,8 @@ Fix the Groups page: make linked events navigate to `/events/[id]`, make contrib
 - [ ] Toast on contribution delete (success + error)
 - [ ] `npm run build` passes (no broken imports from widget removal)
 ## Done summary
-TBD
-
+Fixed Groups page: linked events now navigate to /events/[id] with source_url as secondary link, contribution delete button is always visible on touch devices (44x44px target), non-members see group info + "Beitreten" prompt but not chat/contributions, removed all dead widget system code, and added toast feedback for RSVP updates and contribution deletes.
 ## Evidence
-- Commits:
-- Tests:
+- Commits: 47e8341, efbafa5, fe3516ce6d30c66a1835f97a4a3114fb9baa76a0
+- Tests: npm run build
 - PRs:

@@ -204,15 +204,36 @@ export default function FriendsPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
-        <div className="w-8 h-8 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+      <div className="min-h-screen bg-surface text-white">
+        <SocialNav />
+        <main className="max-w-3xl mx-auto px-4 sm:px-6 py-8">
+          <div className="flex items-center justify-between mb-6 animate-pulse motion-reduce:animate-none">
+            <div className="h-7 w-28 rounded bg-white/[0.06]" />
+            <div className="w-8 h-8 rounded-full bg-white/[0.06]" />
+          </div>
+          <div className="h-12 rounded-xl bg-white/[0.04] border border-white/[0.06] mb-6 animate-pulse motion-reduce:animate-none" />
+          <div className="flex gap-1 mb-6 p-1 rounded-xl bg-white/[0.04] border border-white/[0.06] animate-pulse motion-reduce:animate-none">
+            {[1, 2, 3].map(i => <div key={i} className="flex-1 h-9 rounded-lg bg-white/[0.06]" />)}
+          </div>
+          <div className="space-y-2">
+            {[1, 2, 3, 4].map(i => (
+              <div key={i} className="flex items-center gap-3 p-3 rounded-xl bg-white/[0.03] border border-white/[0.06] animate-pulse motion-reduce:animate-none" style={{ animationDelay: `${i * 50}ms` }}>
+                <div className="w-10 h-10 rounded-full bg-white/[0.06] shrink-0" />
+                <div className="flex-1 space-y-2">
+                  <div className="h-4 bg-white/[0.06] rounded w-1/3" />
+                  <div className="h-3 bg-white/[0.04] rounded w-1/4" />
+                </div>
+              </div>
+            ))}
+          </div>
+        </main>
       </div>
     );
   }
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-black flex flex-col items-center justify-center gap-4 text-white">
+      <div className="min-h-screen bg-surface flex flex-col items-center justify-center gap-4 text-white">
         <p className="text-white/60">Bitte melde dich an um Freunde zu sehen.</p>
         <a href="/auth/login" className="px-4 py-2 bg-white/10 border border-white/20 rounded-xl hover:bg-white/20 transition-colors">Anmelden</a>
       </div>

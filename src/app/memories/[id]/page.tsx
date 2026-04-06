@@ -214,25 +214,37 @@ export default function MemoryDetailPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
-        <div className="w-8 h-8 border-2 border-white/20 border-t-white rounded-full animate-spin motion-reduce:animate-none" />
+      <div className="min-h-screen bg-surface-elevated text-white">
+        <header className="flex items-center justify-between px-6 py-4 border-b border-white/[0.06]">
+          <div className="h-4 bg-white/[0.06] rounded w-24 animate-pulse motion-reduce:animate-none" />
+          <div className="h-3 bg-white/[0.06] rounded w-16 animate-pulse motion-reduce:animate-none" />
+        </header>
+        <div className="max-w-3xl mx-auto px-6 py-8 space-y-6 animate-pulse motion-reduce:animate-none">
+          <div className="h-7 bg-white/[0.06] rounded w-2/3" />
+          <div className="h-4 bg-white/[0.04] rounded w-1/3" />
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+            {[1, 2, 3].map(i => (
+              <div key={i} className="aspect-square rounded-xl bg-white/[0.06]" />
+            ))}
+          </div>
+        </div>
       </div>
     );
   }
 
   if (loadingData) {
     return (
-      <div className="min-h-screen text-white" style={{ background: '#141416' }}>
+      <div className="min-h-screen text-white bg-surface-elevated">
         <header className="flex items-center justify-between px-6 py-4 border-b border-white/[0.06]">
-          <div className="h-4 bg-white/10 rounded w-24 animate-pulse motion-reduce:animate-none" />
-          <div className="h-3 bg-white/10 rounded w-16 animate-pulse motion-reduce:animate-none" />
+          <div className="h-4 bg-white/[0.06] rounded w-24 animate-pulse motion-reduce:animate-none" />
+          <div className="h-3 bg-white/[0.06] rounded w-16 animate-pulse motion-reduce:animate-none" />
         </header>
-        <div className="max-w-3xl mx-auto px-6 py-8 space-y-6">
-          <div className="h-7 bg-white/10 rounded w-2/3 animate-pulse motion-reduce:animate-none" />
-          <div className="h-4 bg-white/10 rounded w-1/3 animate-pulse motion-reduce:animate-none" />
+        <div className="max-w-3xl mx-auto px-6 py-8 space-y-6 animate-pulse motion-reduce:animate-none">
+          <div className="h-7 bg-white/[0.06] rounded w-2/3" />
+          <div className="h-4 bg-white/[0.04] rounded w-1/3" />
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
             {[1, 2, 3].map(i => (
-              <div key={i} className="aspect-square rounded-xl bg-white/10 animate-pulse motion-reduce:animate-none" />
+              <div key={i} className="aspect-square rounded-xl bg-white/[0.06]" />
             ))}
           </div>
         </div>
@@ -244,8 +256,7 @@ export default function MemoryDetailPage() {
 
   return (
     <div
-      className="min-h-screen text-white"
-      style={{ background: '#141416' }}
+      className="min-h-screen text-white bg-surface-elevated"
     >
       <header className="flex items-center justify-between px-6 py-4 border-b border-white/10">
         <Link href="/memories" className="text-white/40 hover:text-white transition-colors text-sm flex items-center gap-2">
