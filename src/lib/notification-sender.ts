@@ -224,3 +224,53 @@ export async function routeNotification(
 
   return result;
 }
+
+// ── Reminder notification helpers ──────────────────────────────────────────
+
+export type ReminderType = '7d_before' | '1d_before';
+
+/**
+ * Build a reminder notification payload for an upcoming artist event.
+ * Used by the send-reminders Edge Function to create conversion-focused
+ * notifications with ticket CTAs.
+ */
+export function buildReminderPayload(opts: {
+  user_id: string;
+  event_id: string;
+  artist_name: string | null;
+  event_title: string;
+  event_date: string;
+  ticket_url: string | null;
+  reminder_type: ReminderType;
+  venue_name?: string | null;
+  location?: string | null;
+}): NotificationPayload {
+  const { user_id, event_id, artist_name, event_title, ticket_url, reminder_type } = opts;
+  const artist = artist_name || 'Dein Kuenstler';
+  const fallbackUrl = `/events/${event_id}`;
+  const url = ticket_url || fallbackUrl;
+
+  const isWeek = reminder_type === '7d_before';
+  const type = isWeek ? 'artist_reminder_7d' : 'artist_reminder_1d';
+  const title = isWeek ? 'In einer Woche!' : 'Morgen!';
+  const body = isWeek
+    ? `In einer Woche: ${artist} bei ${event_title}! Sichere dir jetzt Tickets: ${url}`
+    : `Morgen: ${artist} live! Letzte Chance fuer Tickets: ${url}`;
+
+  return {
+    user_id,
+    type,
+    title,
+    body,
+    event_id,
+    action_url: url,
+    email_data: {
+      artist_name: artist,
+      event_title,
+      event_date: opts.event_date,
+      venue_name: opts.venue_name,
+      location: opts.location || '',
+      ticket_url,
+    },
+  };
+}

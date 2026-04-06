@@ -68,9 +68,8 @@ Extend the existing map sidebar (`src/components/Layout/Sidebar.tsx`, 380px desk
 - [ ] German-language UI throughout
 
 ## Done summary
-TBD
-
+Added artist-events sidebar tab to the map page with tabbed navigation (Alle Events / Kuenstler-Events), ArtistEventCard with match confidence badges and ticket CTAs, time-grouped collapsible sections, infinite scroll, reminder toggles, and smooth sidebar width transition for the desktop view.
 ## Evidence
-- Commits:
-- Tests:
+- Commits: e04ee97b14d7e025b8946383cfef5395a3bccb35, 2808c93
+- Tests: npx tsc --noEmit, npm test -- --run (501 passed)
 - PRs:
