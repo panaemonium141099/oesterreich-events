@@ -65,6 +65,7 @@ import {
   FamiliiiScraper, FamilienUrlaubScraper,
   StadtbekanntScraper, RegionewsScraper,
   WKOScraper, MesseWienScraper, MesseWelsScraper, MesseGrazScraper, AMSScraper,
+  MarxHalleScraper,
 } from './niche';
 import { NtryAtScraper } from './NtryAtScraper';
 import { MeetupScraper } from './MeetupScraper';
@@ -223,6 +224,8 @@ const scrapers: BaseScraper[] = [
   new MesseWelsScraper(),
   new MesseGrazScraper(),
   new AMSScraper(),
+  // Venues (Wien)
+  new MarxHalleScraper(),
   // Community & Ticketing Platforms
   new NtryAtScraper(),
   new MeetupScraper(),

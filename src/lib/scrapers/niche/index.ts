@@ -29,3 +29,4 @@ export { BauernmarktScraper, GenussregionScraper } from './FoodMarketScrapers';
 export { FamiliiiScraper, FamilienUrlaubScraper } from './FamilyScrapers';
 export { StadtbekanntScraper, RegionewsScraper } from './RSSEventScrapers';
 export { WKOScraper, MesseWienScraper, MesseWelsScraper, MesseGrazScraper, AMSScraper } from './BusinessScrapers';
+export { MarxHalleScraper } from './MarxHalleScraper';
