@@ -45,9 +45,8 @@ Create six new database tables (`spotify_tokens`, `imported_spotify_artists`, `f
 - [ ] Migration applies cleanly to Supabase
 
 ## Done summary
-TBD
-
+Created 6 new database tables (spotify_tokens, imported_spotify_artists, followed_artists, artist_event_notifications, notification_preferences, matching_cursor) with RLS policies, indexes, and unique constraints. Updated TypeScript types. Migration applied cleanly to Supabase production.
 ## Evidence
-- Commits:
-- Tests:
+- Commits: f622e8afd18beae5dfa4e3844b16dd0bdaf6cdba
+- Tests: npm test (450 passed), npx tsc --noEmit (clean), Supabase migration applied + verified via SQL queries
 - PRs:

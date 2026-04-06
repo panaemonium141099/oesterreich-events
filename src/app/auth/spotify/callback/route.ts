@@ -1,7 +1,17 @@
 import { NextResponse } from 'next/server';
+import { createClient } from '@supabase/supabase-js';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
-import { exchangeSpotifyCode, getTopArtists, getSpotifyProfile, matchArtistsToEvents } from '@/lib/spotify';
+import { exchangeSpotifyCode, getTopArtists, getSpotifyProfile } from '@/lib/spotify';
 
+/**
+ * Spotify OAuth callback.
+ *
+ * 1. Exchange code for tokens
+ * 2. Store tokens in spotify_tokens via service_role (NOT user client)
+ * 3. Fetch top 50 artists and upsert into imported_spotify_artists
+ * 4. Auto-follow top 10 into followed_artists (source: spotify)
+ * 5. Redirect to /artists?spotify=connected
+ */
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get('code');
@@ -12,6 +22,7 @@ export async function GET(request: Request) {
   }
 
   try {
+    // User client -- for auth check and RLS-enabled operations
     const supabase = await createServerSupabaseClient();
 
     // Verify user is logged in
@@ -20,64 +31,103 @@ export async function GET(request: Request) {
       return NextResponse.redirect(`${origin}/auth/login`);
     }
 
+    // Service role client -- for spotify_tokens (no authenticated RLS)
+    const serviceUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    if (!serviceUrl || !serviceKey) {
+      throw new Error('SUPABASE_SERVICE_ROLE_KEY is required for Spotify token storage');
+    }
+    const serviceClient = createClient(serviceUrl, serviceKey);
+
     const redirectUri = `${origin}/auth/spotify/callback`;
 
-    // Exchange code for tokens
+    // 1. Exchange code for tokens
     const tokens = await exchangeSpotifyCode(code, redirectUri);
 
-    // Get Spotify profile
+    // 2. Get Spotify profile (for spotify_user_id)
     const spotifyProfile = await getSpotifyProfile(tokens.access_token);
 
-    // Update profile with Spotify info
+    // 3. Store tokens in spotify_tokens via service_role
+    const expiresAt = new Date(Date.now() + tokens.expires_in * 1000).toISOString();
+
+    const { error: tokenError } = await serviceClient
+      .from('spotify_tokens')
+      .upsert(
+        {
+          user_id: user.id,
+          access_token: tokens.access_token,
+          refresh_token: tokens.refresh_token,
+          access_token_expires_at: expiresAt,
+          spotify_user_id: spotifyProfile.id,
+          updated_at: new Date().toISOString(),
+        },
+        { onConflict: 'user_id' }
+      );
+
+    if (tokenError) {
+      console.error('Failed to store spotify_tokens:', tokenError);
+      throw new Error('Failed to store Spotify tokens');
+    }
+
+    // Also update the legacy profiles.spotify_connected flag (deprecated, but still read by UI)
     await supabase
       .from('profiles')
       .update({
         spotify_connected: true,
-        spotify_refresh_token: tokens.refresh_token,
         spotify_user_id: spotifyProfile.id,
       })
       .eq('id', user.id);
 
-    // Get top artists and match against events
+    // 4. Fetch top 50 artists and import to staging table
     try {
       const artists = await getTopArtists(tokens.access_token);
 
-      // Get upcoming events
-      const { data: events } = await supabase
-        .from('events')
-        .select('id, title, description, location_name, start_date')
-        .gte('start_date', new Date().toISOString())
-        .order('start_date', { ascending: true })
-        .limit(5000);
-
-      if (events && artists.length > 0) {
-        const matches = matchArtistsToEvents(artists, events);
-
-        // Save matches (clear old ones first)
+      if (artists.length > 0) {
+        // Clear old imported artists for this user, then insert fresh
         await supabase
-          .from('spotify_artist_matches')
+          .from('imported_spotify_artists')
           .delete()
           .eq('user_id', user.id);
 
-        if (matches.length > 0) {
-          await supabase.from('spotify_artist_matches').insert(
-            matches.slice(0, 100).map(m => ({
-              user_id: user.id,
-              spotify_artist_id: m.artist.id,
-              artist_name: m.artist.name,
-              event_id: m.event.id,
-              match_type: m.matchType,
-              match_score: m.score,
-            }))
-          );
+        const importRows = artists.map((artist, index) => ({
+          user_id: user.id,
+          artist_name: artist.name,
+          spotify_artist_id: artist.id,
+          spotify_image_url: artist.images?.[0]?.url || null,
+          genres: artist.genres || [],
+          popularity: artist.popularity || 0,
+          rank: index + 1,
+        }));
+
+        await supabase
+          .from('imported_spotify_artists')
+          .insert(importRows);
+
+        // 5. Auto-follow top 10 artists (source: spotify)
+        const top10 = artists.slice(0, 10);
+
+        for (const artist of top10) {
+          // Upsert to avoid conflicts if already followed
+          await supabase
+            .from('followed_artists')
+            .upsert(
+              {
+                user_id: user.id,
+                artist_name: artist.name,
+                spotify_artist_id: artist.id,
+                spotify_image_url: artist.images?.[0]?.url || null,
+                source: 'spotify',
+              },
+              { onConflict: 'user_id,artist_name_normalized' }
+            );
         }
       }
-    } catch (matchErr) {
-      // Non-critical: matching can fail silently
-      console.error('Spotify matching error:', matchErr);
+    } catch (importErr) {
+      // Non-critical: artist import can fail silently
+      console.error('Spotify artist import error:', importErr);
     }
 
-    return NextResponse.redirect(`${origin}/profile?spotify=connected`);
+    return NextResponse.redirect(`${origin}/artists?spotify=connected`);
   } catch (err) {
     console.error('Spotify callback error:', err);
     return NextResponse.redirect(`${origin}/profile?spotify_error=failed`);
