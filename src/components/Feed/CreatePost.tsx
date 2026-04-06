@@ -104,9 +104,9 @@ export function CreatePost({ userId, userAvatar, userInitial, onPostCreated }: C
         {/* Avatar */}
         <div className="shrink-0">
           {userAvatar ? (
-            <img src={userAvatar} alt="" className="w-10 h-10 rounded-full object-cover ring-1 ring-white/10" referrerPolicy="no-referrer" />
+            <img src={userAvatar} alt="" className="w-10 h-10 rounded-full object-cover ring-1 ring-slate-200" referrerPolicy="no-referrer" />
           ) : (
-            <div className="w-10 h-10 rounded-full bg-white/[0.08] ring-1 ring-white/10 flex items-center justify-center text-sm font-semibold text-white/50">
+            <div className="w-10 h-10 rounded-full bg-slate-100 ring-1 ring-slate-200 flex items-center justify-center text-sm font-semibold text-slate-500">
               {userInitial}
             </div>
           )}
@@ -119,7 +119,7 @@ export function CreatePost({ userId, userAvatar, userInitial, onPostCreated }: C
             value={content}
             onChange={(e) => setContent(e.target.value)}
             placeholder="Was geht ab?"
-            className="w-full bg-transparent text-sm text-white/90 placeholder-white/20 resize-none outline-none min-h-[40px]"
+            className="w-full bg-transparent text-sm text-slate-700 placeholder-slate-400 resize-none outline-none min-h-[40px]"
             rows={1}
             maxLength={500}
           />
@@ -130,10 +130,10 @@ export function CreatePost({ userId, userAvatar, userInitial, onPostCreated }: C
               <FeedEventMiniCard event={linkedEvent} compact />
               <button
                 onClick={() => setLinkedEvent(null)}
-                className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors"
+                className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-slate-200 hover:bg-slate-300 flex items-center justify-center transition-colors"
                 aria-label="Event entfernen"
               >
-                <svg className="w-3 h-3 text-white/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-3 h-3 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>
@@ -141,14 +141,14 @@ export function CreatePost({ userId, userAvatar, userInitial, onPostCreated }: C
           )}
 
           {/* Actions bar */}
-          <div className="flex items-center justify-between mt-3 pt-3 border-t border-white/[0.04]">
+          <div className="flex items-center justify-between mt-3 pt-3 border-t border-slate-100">
             <div className="flex items-center gap-1 relative" ref={searchRef}>
               <button
                 onClick={() => setShowEventSearch(!showEventSearch)}
                 className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs transition-all duration-200 ${
                   showEventSearch || linkedEvent
-                    ? 'bg-white/10 text-white/60'
-                    : 'text-white/25 hover:text-white/50 hover:bg-white/[0.04]'
+                    ? 'bg-slate-100 text-slate-600'
+                    : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50'
                 }`}
                 aria-label="Event verlinken"
               >
@@ -160,10 +160,10 @@ export function CreatePost({ userId, userAvatar, userInitial, onPostCreated }: C
 
               {/* Event search dropdown */}
               {showEventSearch && (
-                <div className="absolute top-full left-0 mt-1 w-72 rounded-xl bg-black/90 backdrop-blur-xl border border-white/10 shadow-2xl z-50 overflow-hidden animate-fade-in">
+                <div className="absolute top-full left-0 mt-1 w-72 rounded-xl bg-white backdrop-blur-xl border border-slate-200 shadow-2xl z-50 overflow-hidden animate-fade-in">
                   <div className="p-2">
-                    <div className="flex items-center gap-2 px-2 py-1.5 rounded-lg bg-white/[0.04] border border-white/[0.06]">
-                      <svg className="w-3.5 h-3.5 text-white/30 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div className="flex items-center gap-2 px-2 py-1.5 rounded-lg bg-slate-50 border border-slate-200">
+                      <svg className="w-3.5 h-3.5 text-slate-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                       </svg>
                       <input
@@ -171,7 +171,7 @@ export function CreatePost({ userId, userAvatar, userInitial, onPostCreated }: C
                         value={eventQuery}
                         onChange={(e) => setEventQuery(e.target.value)}
                         placeholder="Event suchen..."
-                        className="flex-1 bg-transparent text-xs text-white/80 placeholder-white/20 outline-none"
+                        className="flex-1 bg-transparent text-xs text-slate-700 placeholder-slate-400 outline-none"
                         autoFocus
                       />
                     </div>
@@ -179,7 +179,7 @@ export function CreatePost({ userId, userAvatar, userInitial, onPostCreated }: C
                   <div className="max-h-48 overflow-y-auto">
                     {searchLoading ? (
                       <div className="flex items-center justify-center py-4">
-                        <div className="w-4 h-4 border-2 border-white/10 border-t-white/50 rounded-full animate-spin" />
+                        <div className="w-4 h-4 border-2 border-slate-200 border-t-slate-500 rounded-full animate-spin" />
                       </div>
                     ) : eventResults.length > 0 ? (
                       <div className="p-1">
@@ -191,13 +191,13 @@ export function CreatePost({ userId, userAvatar, userInitial, onPostCreated }: C
                               setShowEventSearch(false);
                               setEventQuery('');
                             }}
-                            className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg hover:bg-white/[0.06] transition-colors text-left"
+                            className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg hover:bg-slate-50 transition-colors text-left"
                           >
-                            <div className="w-8 h-8 rounded-lg overflow-hidden shrink-0 bg-white/5">
+                            <div className="w-8 h-8 rounded-lg overflow-hidden shrink-0 bg-slate-50">
                               {ev.image_url ? (
                                 <img src={ev.image_url} alt="" className="w-full h-full object-cover" loading="lazy" referrerPolicy="no-referrer" />
                               ) : (
-                                <div className="w-full h-full flex items-center justify-center text-white/15">
+                                <div className="w-full h-full flex items-center justify-center text-slate-300">
                                   <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                   </svg>
@@ -205,16 +205,16 @@ export function CreatePost({ userId, userAvatar, userInitial, onPostCreated }: C
                               )}
                             </div>
                             <div className="flex-1 min-w-0">
-                              <p className="text-xs font-medium text-white/80 truncate">{ev.title}</p>
-                              <p className="text-[10px] text-white/30 truncate">{ev.location_name || 'Ort unbekannt'}</p>
+                              <p className="text-xs font-medium text-slate-700 truncate">{ev.title}</p>
+                              <p className="text-[10px] text-slate-400 truncate">{ev.location_name || 'Ort unbekannt'}</p>
                             </div>
                           </button>
                         ))}
                       </div>
                     ) : eventQuery.length >= 2 ? (
-                      <p className="text-center text-xs text-white/20 py-4">Keine Events gefunden</p>
+                      <p className="text-center text-xs text-slate-400 py-4">Keine Events gefunden</p>
                     ) : (
-                      <p className="text-center text-xs text-white/20 py-4">Tippe um zu suchen...</p>
+                      <p className="text-center text-xs text-slate-400 py-4">Tippe um zu suchen...</p>
                     )}
                   </div>
                 </div>
@@ -223,19 +223,19 @@ export function CreatePost({ userId, userAvatar, userInitial, onPostCreated }: C
 
             <div className="flex items-center gap-2">
               {content.length > 0 && (
-                <span className="text-[10px] text-white/15">{content.length}/500</span>
+                <span className="text-[10px] text-slate-300">{content.length}/500</span>
               )}
               <button
                 onClick={handlePost}
                 disabled={!canPost || posting}
                 className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-medium transition-all duration-200 min-h-[36px] ${
                   canPost && !posting
-                    ? 'bg-white text-black hover:bg-white/90 active:scale-95'
-                    : 'bg-white/[0.06] text-white/20 cursor-not-allowed'
+                    ? 'bg-slate-800 text-white hover:bg-slate-700 active:scale-95'
+                    : 'bg-slate-100 text-slate-300 cursor-not-allowed'
                 }`}
               >
                 {posting ? (
-                  <div className="w-3.5 h-3.5 border-2 border-black/20 border-t-black rounded-full animate-spin" />
+                  <div className="w-3.5 h-3.5 border-2 border-white/20 border-t-white rounded-full animate-spin" />
                 ) : (
                   <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" />

@@ -58,12 +58,12 @@ export function FeedItem({
   // --- System notification (group_joined, friend_added) ---
   if (isCompactActivity(activity.type)) {
     return (
-      <div className="flex items-center gap-2.5 px-5 py-2.5 mx-4 my-2 rounded-lg bg-white/[0.03]">
-        <div className="w-1 h-1 rounded-full bg-white/20 shrink-0" />
-        <p className="text-[13px] text-white/30 flex-1 min-w-0">
-          <span className="text-white/45">{username}</span>{' '}
+      <div className="flex items-center gap-2.5 px-5 py-2.5 mx-4 my-2 rounded-lg bg-slate-50">
+        <div className="w-1 h-1 rounded-full bg-slate-300 shrink-0" />
+        <p className="text-[13px] text-slate-500 flex-1 min-w-0">
+          <span className="text-slate-600">{username}</span>{' '}
           {caption}
-          <span className="text-white/15 ml-1.5">{formatRelativeTime(activity.created_at)}</span>
+          <span className="text-slate-400 ml-1.5">{formatRelativeTime(activity.created_at)}</span>
         </p>
       </div>
     );
@@ -178,13 +178,13 @@ export function FeedItem({
         {activity.profile?.avatar_url ? (
           <img src={activity.profile.avatar_url} alt="" className="w-8 h-8 rounded-full object-cover" referrerPolicy="no-referrer" />
         ) : (
-          <div className="w-8 h-8 rounded-full bg-white/[0.08] flex items-center justify-center text-xs font-semibold text-white/50">
+          <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-xs font-semibold text-slate-500">
             {activity.profile?.first_name?.[0]?.toUpperCase() || '?'}
           </div>
         )}
         <div className="flex-1 min-w-0">
-          <span className="text-sm font-semibold text-white">{username}</span>
-          <span className="text-xs text-white/30 ml-2">{formatRelativeTime(activity.created_at)}</span>
+          <span className="text-sm font-semibold text-slate-800">{username}</span>
+          <span className="text-xs text-slate-400 ml-2">{formatRelativeTime(activity.created_at)}</span>
         </div>
         <PostMenu
           activityId={activity.id}
@@ -210,7 +210,7 @@ export function FeedItem({
         {/* Text-only post content */}
         {activity.type === 'post' && activity.content && !hasEvent && (
           <div className="px-4 py-3">
-            <p className="text-[15px] text-white/80 leading-relaxed whitespace-pre-wrap">
+            <p className="text-[15px] text-slate-700 leading-relaxed whitespace-pre-wrap">
               {activity.content}
             </p>
           </div>
@@ -219,7 +219,7 @@ export function FeedItem({
         {/* Text post with event — show text above event */}
         {activity.type === 'post' && activity.content && hasEvent && (
           <div className="px-4 pt-2 pb-1">
-            <p className="text-sm text-white/70 leading-relaxed whitespace-pre-wrap">
+            <p className="text-sm text-slate-600 leading-relaxed whitespace-pre-wrap">
               {activity.content}
             </p>
           </div>
@@ -237,7 +237,7 @@ export function FeedItem({
             aria-label={liked ? 'Nicht mehr liken' : 'Liken'}
           >
             <svg
-              className={`w-6 h-6 transition-colors duration-200 ${liked ? 'text-red-500' : 'text-white/80 hover:text-white/50'}`}
+              className={`w-6 h-6 transition-colors duration-200 ${liked ? 'text-red-500' : 'text-slate-600 hover:text-slate-400'}`}
               fill={liked ? 'currentColor' : 'none'}
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -252,7 +252,7 @@ export function FeedItem({
             className="transition-transform duration-200 active:scale-[0.85]"
             aria-label="Kommentieren"
           >
-            <svg className="w-6 h-6 text-white/80 hover:text-white/50 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-6 h-6 text-slate-600 hover:text-slate-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" />
             </svg>
           </button>
@@ -263,7 +263,7 @@ export function FeedItem({
             className="transition-transform duration-200 active:scale-[0.85]"
             aria-label="Teilen"
           >
-            <svg className="w-6 h-6 text-white/80 hover:text-white/50 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-6 h-6 text-slate-600 hover:text-slate-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" />
             </svg>
           </button>
@@ -277,7 +277,7 @@ export function FeedItem({
             aria-label={bookmarked ? 'Nicht mehr speichern' : 'Speichern'}
           >
             <svg
-              className={`w-6 h-6 transition-colors duration-200 ${bookmarked ? 'text-white' : 'text-white/80 hover:text-white/50'}`}
+              className={`w-6 h-6 transition-colors duration-200 ${bookmarked ? 'text-slate-800' : 'text-slate-600 hover:text-slate-400'}`}
               fill={bookmarked ? 'currentColor' : 'none'}
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -290,15 +290,15 @@ export function FeedItem({
 
       {/* Like Count */}
       {likeCount > 0 && (
-        <p className="px-4 text-sm font-semibold text-white">
+        <p className="px-4 text-sm font-semibold text-slate-800">
           {likeCount === 1 ? 'Gefällt 1 Person' : `Gefällt ${likeCount} Personen`}
         </p>
       )}
 
       {/* Caption */}
       <div className="px-4 mt-1">
-        <p className="text-sm text-white/80 leading-relaxed">
-          <span className="font-semibold text-white">{username}</span>{' '}
+        <p className="text-sm text-slate-700 leading-relaxed">
+          <span className="font-semibold text-slate-800">{username}</span>{' '}
           {activity.type !== 'post' ? caption : ''}
         </p>
       </div>
@@ -306,14 +306,14 @@ export function FeedItem({
       {/* Comment Preview */}
       {commentCount > 2 && (
         <Link href={`/feed/${activity.id}`} className="block px-4 mt-1">
-          <span className="text-sm text-white/30">Alle {commentCount} Kommentare ansehen</span>
+          <span className="text-sm text-slate-400">Alle {commentCount} Kommentare ansehen</span>
         </Link>
       )}
       {recentComments.length > 0 && (
         <div className="px-4 mt-1 space-y-0.5">
           {recentComments.map((c) => (
-            <p key={c.id} className="text-sm text-white/60">
-              <span className="font-semibold text-white/80">
+            <p key={c.id} className="text-sm text-slate-600">
+              <span className="font-semibold text-slate-700">
                 {[c.user.first_name, c.user.last_name].filter(Boolean).join(' ')}
               </span>{' '}
               {c.content}
@@ -348,7 +348,7 @@ export function FeedItem({
       />
 
       {/* Post separator — visible spacer block between posts */}
-      <div className="h-[6px] bg-white/[0.03] border-t border-white/[0.06] mt-2" />
+      <div className="h-[6px] bg-slate-50 border-t border-slate-200 mt-2" />
     </article>
   );
 }

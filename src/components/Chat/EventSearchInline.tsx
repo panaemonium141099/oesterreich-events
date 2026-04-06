@@ -57,14 +57,14 @@ export function EventSearchInline({ onSelectEvent, onClose }: EventSearchInlineP
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
       onClick={onClose}
     >
       <div
-        className="w-full max-w-md bg-[#111] border border-white/10 rounded-2xl p-6"
+        className="w-full max-w-md bg-white border border-slate-200 rounded-2xl p-6 shadow-xl"
         onClick={(e) => e.stopPropagation()}
       >
-        <h2 className="text-lg font-bold text-white mb-4">Event teilen</h2>
+        <h2 className="text-lg font-bold text-slate-800 mb-4">Event teilen</h2>
 
         <input
           ref={inputRef}
@@ -72,12 +72,12 @@ export function EventSearchInline({ onSelectEvent, onClose }: EventSearchInlineP
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Event suchen..."
-          className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-white/20 focus:outline-none focus:border-white/30 transition-colors mb-4"
+          className="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 text-slate-800 placeholder-slate-400 focus:outline-none focus:border-slate-400 transition-colors mb-4"
         />
 
         {searching && (
           <div className="flex justify-center py-4">
-            <div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+            <div className="w-5 h-5 border-2 border-slate-200 border-t-slate-600 rounded-full animate-spin" />
           </div>
         )}
 
@@ -87,13 +87,13 @@ export function EventSearchInline({ onSelectEvent, onClose }: EventSearchInlineP
               <button
                 key={evt.id}
                 onClick={() => onSelectEvent(evt)}
-                className="w-full flex items-center gap-3 p-3 rounded-xl bg-white/5 border border-white/10 hover:border-white/20 transition-colors text-left"
+                className="w-full flex items-center gap-3 p-3 rounded-xl bg-slate-50 border border-slate-200 hover:border-slate-300 transition-colors text-left"
               >
-                <div className="w-10 h-10 rounded-lg overflow-hidden shrink-0 bg-white/10">
+                <div className="w-10 h-10 rounded-lg overflow-hidden shrink-0 bg-slate-100">
                   {evt.image_url ? (
                     <img src={evt.image_url} alt="" className="w-full h-full object-cover" />
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center text-white/20 text-xs">
+                    <div className="w-full h-full flex items-center justify-center text-slate-300 text-xs">
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                       </svg>
@@ -101,8 +101,8 @@ export function EventSearchInline({ onSelectEvent, onClose }: EventSearchInlineP
                   )}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-white truncate">{evt.title}</p>
-                  <p className="text-xs text-white/30 truncate">
+                  <p className="text-sm font-medium text-slate-800 truncate">{evt.title}</p>
+                  <p className="text-xs text-slate-400 truncate">
                     {evt.start_date ? formatDate(evt.start_date) : ''}
                     {evt.location_name ? ` - ${evt.location_name}` : ''}
                   </p>
@@ -113,12 +113,12 @@ export function EventSearchInline({ onSelectEvent, onClose }: EventSearchInlineP
         )}
 
         {query.trim() && !searching && results.length === 0 && (
-          <p className="text-center text-white/30 text-sm py-4">Keine Events gefunden</p>
+          <p className="text-center text-slate-400 text-sm py-4">Keine Events gefunden</p>
         )}
 
         <button
           onClick={onClose}
-          className="w-full mt-4 py-2 text-sm text-white/40 hover:text-white/60 transition-colors"
+          className="w-full mt-4 py-2 text-sm text-slate-400 hover:text-slate-600 transition-colors"
         >
           Abbrechen
         </button>

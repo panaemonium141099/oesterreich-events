@@ -101,10 +101,10 @@ export function NotificationToast() {
             exit={{ opacity: 0, x: 100, scale: 0.95 }}
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
             onClick={() => handleClick(toast)}
-            className="bg-[#1a1a1c] border border-white/[0.08] rounded-xl shadow-2xl px-4 py-3 max-w-sm flex items-start gap-3 text-left cursor-pointer hover:bg-white/[0.04] transition-colors"
+            className="bg-white border border-slate-200 rounded-xl shadow-2xl px-4 py-3 max-w-sm flex items-start gap-3 text-left cursor-pointer hover:bg-slate-50 transition-colors"
           >
             {/* From user avatar/initial */}
-            <div className="w-8 h-8 rounded-full bg-white/[0.08] flex items-center justify-center text-xs font-semibold text-white/60 shrink-0 overflow-hidden">
+            <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-xs font-semibold text-slate-500 shrink-0 overflow-hidden">
               {toast.fromAvatar ? (
                 <img
                   src={toast.fromAvatar}
@@ -117,8 +117,8 @@ export function NotificationToast() {
               )}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-white truncate">{toast.title}</p>
-              <p className="text-[11px] text-white/40 mt-0.5">{timeAgo(toast.created_at)}</p>
+              <p className="text-sm font-medium text-slate-800 truncate">{toast.title}</p>
+              <p className="text-[11px] text-slate-500 mt-0.5">{timeAgo(toast.created_at)}</p>
             </div>
           </motion.button>
         ))}

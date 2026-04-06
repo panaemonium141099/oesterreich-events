@@ -125,8 +125,8 @@ export function TrendingRow() {
           {loading ? (
             Array.from({ length: 8 }).map((_, i) => (
               <div key={i} className="flex flex-col items-center gap-1.5 shrink-0" style={{ scrollSnapAlign: 'start' }}>
-                <div className="w-[62px] h-[62px] rounded-full bg-white/[0.06] animate-pulse" />
-                <div className="w-10 h-2 rounded bg-white/[0.04] animate-pulse" />
+                <div className="w-[62px] h-[62px] rounded-full bg-slate-100 animate-pulse" />
+                <div className="w-10 h-2 rounded bg-slate-50 animate-pulse" />
               </div>
             ))
           ) : (
@@ -138,7 +138,7 @@ export function TrendingRow() {
                 style={{ scrollSnapAlign: 'start' }}
               >
                 <div className="w-[62px] h-[62px] rounded-full p-[2px]" style={{ background: 'linear-gradient(135deg, #833AB4, #FD1D1D, #F77737)' }}>
-                  <div className="w-full h-full rounded-full p-[2px] bg-[#141416]">
+                  <div className="w-full h-full rounded-full p-[2px] bg-[#f8fafc]">
                     <div className="w-full h-full rounded-full overflow-hidden">
                       <img
                         src={getEventImage(event.image_url, event.category, event.id)}
@@ -149,7 +149,7 @@ export function TrendingRow() {
                     </div>
                   </div>
                 </div>
-                <span className="text-[10px] text-white/50 text-center truncate max-w-[66px] leading-tight">
+                <span className="text-[10px] text-slate-500 text-center truncate max-w-[66px] leading-tight">
                   {event.title.length > 12 ? event.title.slice(0, 12) + '...' : event.title}
                 </span>
               </button>

@@ -192,7 +192,7 @@ export default function ProfilePage() {
           <h1 className="text-xl font-semibold">{firstName} {lastName}</h1>
           <p className="text-sm text-slate-500">{user?.email}</p>
           {profile?.role !== 'user' && (
-            <span className="mt-2 px-3 py-0.5 rounded-full text-xs bg-amber-400/20 text-amber-400 font-medium">
+            <span className="mt-2 px-3 py-0.5 rounded-full text-xs bg-amber-100 text-amber-700 font-medium">
               {profile?.role === 'god' ? <><CrownIcon size={14} className="inline-block mr-1 -mt-0.5" /> God Mode</> : profile?.role === 'admin' ? <><BoltIcon size={14} className="inline-block mr-1 -mt-0.5" /> Admin</> : <><BuildingIcon size={14} className="inline-block mr-1 -mt-0.5" /> Business</>}
             </span>
           )}
@@ -465,10 +465,10 @@ export default function ProfilePage() {
 
           {/* Error / Success */}
           {error && (
-            <p className="text-sm text-red-400 bg-red-400/10 px-4 py-2 rounded-lg">{error}</p>
+            <p className="text-sm text-red-600 bg-red-50 px-4 py-2 rounded-lg">{error}</p>
           )}
           {saved && (
-            <p className="text-sm text-green-400 bg-green-400/10 px-4 py-2 rounded-lg flex items-center gap-1.5"><CheckIcon size={14} /> Profil gespeichert!</p>
+            <p className="text-sm text-green-600 bg-green-50 px-4 py-2 rounded-lg flex items-center gap-1.5"><CheckIcon size={14} /> Profil gespeichert!</p>
           )}
 
           {/* Save / Cancel Buttons (edit mode only) */}
@@ -486,7 +486,7 @@ export default function ProfilePage() {
                 className="flex-1 py-3 rounded-xl bg-slate-800 text-white font-semibold hover:bg-slate-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
                 {saving ? (
-                  <div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+                  <div className="w-5 h-5 border-2 border-slate-200 border-t-white rounded-full animate-spin" />
                 ) : (
                   'Speichern'
                 )}

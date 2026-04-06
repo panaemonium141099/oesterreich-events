@@ -66,7 +66,7 @@ export const InlineCommentInput = forwardRef<HTMLInputElement, InlineCommentInpu
         {userAvatar ? (
           <img src={userAvatar} alt="" className="w-6 h-6 rounded-full object-cover shrink-0" referrerPolicy="no-referrer" />
         ) : (
-          <div className="w-6 h-6 rounded-full bg-white/[0.08] flex items-center justify-center text-[10px] font-medium text-white/40 shrink-0">
+          <div className="w-6 h-6 rounded-full bg-slate-100 flex items-center justify-center text-[10px] font-medium text-slate-500 shrink-0">
             {userInitial}
           </div>
         )}
@@ -77,7 +77,7 @@ export const InlineCommentInput = forwardRef<HTMLInputElement, InlineCommentInpu
           onChange={(e) => setText(e.target.value)}
           onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSubmit(); } }}
           placeholder="Kommentar hinzufügen..."
-          className="flex-1 bg-transparent text-sm text-white/70 placeholder-white/20 outline-none"
+          className="flex-1 bg-transparent text-sm text-slate-600 placeholder-slate-400 outline-none"
           disabled={submitting}
         />
         {text.trim() && (

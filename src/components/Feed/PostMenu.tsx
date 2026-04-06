@@ -49,7 +49,7 @@ export function PostMenu({ activityId, isOwner, onShare, onDeleted }: PostMenuPr
     <div className="relative" ref={menuRef}>
       <button
         onClick={() => { setOpen(!open); setConfirmDelete(false); }}
-        className="p-1.5 -mr-1.5 text-white/30 hover:text-white/60 transition-colors"
+        className="p-1.5 -mr-1.5 text-slate-400 hover:text-slate-600 transition-colors"
         aria-label="Mehr Optionen"
       >
         <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
@@ -60,22 +60,22 @@ export function PostMenu({ activityId, isOwner, onShare, onDeleted }: PostMenuPr
       </button>
 
       {open && (
-        <div className="absolute right-0 top-full mt-1 w-48 bg-[#262628] border border-white/[0.1] rounded-xl shadow-2xl overflow-hidden z-50 animate-fade-in">
+        <div className="absolute right-0 top-full mt-1 w-48 bg-white border border-slate-200 rounded-xl shadow-2xl overflow-hidden z-50 animate-fade-in">
           <button
             onClick={() => { setOpen(false); }}
-            className="w-full text-left px-4 py-2.5 text-sm text-white/60 hover:bg-white/[0.06] transition-colors"
+            className="w-full text-left px-4 py-2.5 text-sm text-slate-600 hover:bg-slate-50 transition-colors"
           >
             Melden
           </button>
           <button
             onClick={handleCopyLink}
-            className="w-full text-left px-4 py-2.5 text-sm text-white/60 hover:bg-white/[0.06] transition-colors"
+            className="w-full text-left px-4 py-2.5 text-sm text-slate-600 hover:bg-slate-50 transition-colors"
           >
             Link kopieren
           </button>
           <button
             onClick={() => { onShare(); setOpen(false); }}
-            className="w-full text-left px-4 py-2.5 text-sm text-white/60 hover:bg-white/[0.06] transition-colors"
+            className="w-full text-left px-4 py-2.5 text-sm text-slate-600 hover:bg-slate-50 transition-colors"
           >
             Teilen
           </button>
@@ -83,8 +83,8 @@ export function PostMenu({ activityId, isOwner, onShare, onDeleted }: PostMenuPr
             <button
               onClick={handleDelete}
               disabled={deleting}
-              className={`w-full text-left px-4 py-2.5 text-sm transition-colors border-t border-white/[0.06] ${
-                confirmDelete ? 'text-red-400 bg-red-400/10 hover:bg-red-400/20' : 'text-red-400 hover:bg-white/[0.06]'
+              className={`w-full text-left px-4 py-2.5 text-sm transition-colors border-t border-slate-200 ${
+                confirmDelete ? 'text-red-500 bg-red-50 hover:bg-red-100' : 'text-red-500 hover:bg-slate-50'
               } disabled:opacity-50`}
             >
               {deleting ? 'Wird gelöscht...' : confirmDelete ? 'Wirklich löschen?' : 'Löschen'}

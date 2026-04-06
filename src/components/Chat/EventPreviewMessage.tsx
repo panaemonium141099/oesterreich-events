@@ -60,11 +60,11 @@ export function EventPreviewMessage({ eventId, isMe }: EventPreviewMessageProps)
 
   if (loading) {
     return (
-      <div className={`w-64 rounded-xl overflow-hidden ${isMe ? 'bg-white/10' : 'bg-white/5'} border border-white/10 animate-pulse`}>
-        <div className="h-28 bg-white/5" />
+      <div className={`w-64 rounded-xl overflow-hidden ${isMe ? 'bg-slate-100' : 'bg-slate-50'} border border-slate-200 animate-pulse`}>
+        <div className="h-28 bg-slate-100" />
         <div className="p-3 space-y-2">
-          <div className="h-4 bg-white/10 rounded w-3/4" />
-          <div className="h-3 bg-white/10 rounded w-1/2" />
+          <div className="h-4 bg-slate-200 rounded w-3/4" />
+          <div className="h-3 bg-slate-200 rounded w-1/2" />
         </div>
       </div>
     );
@@ -72,14 +72,14 @@ export function EventPreviewMessage({ eventId, isMe }: EventPreviewMessageProps)
 
   if (!event) {
     return (
-      <div className={`px-3 py-2 rounded-xl text-sm ${isMe ? 'bg-white/10 text-white/40' : 'bg-white/5 text-white/30'}`}>
+      <div className={`px-3 py-2 rounded-xl text-sm ${isMe ? 'bg-slate-100 text-slate-500' : 'bg-slate-50 text-slate-400'}`}>
         Event nicht gefunden
       </div>
     );
   }
 
   const time = formatTime(event.start_date);
-  const categoryStyle = CATEGORY_COLORS[event.category || ''] || 'bg-white/10 text-white/50';
+  const categoryStyle = CATEGORY_COLORS[event.category || ''] || 'bg-slate-100 text-slate-500';
 
   // Deep-link: if the event has coordinates, link to map view; otherwise link to source
   const mapLink = event.latitude && event.longitude
@@ -87,7 +87,7 @@ export function EventPreviewMessage({ eventId, isMe }: EventPreviewMessageProps)
     : null;
 
   return (
-    <div className="w-64 rounded-xl overflow-hidden bg-white/5 border border-white/10 hover:border-white/20 transition-colors">
+    <div className="w-64 rounded-xl overflow-hidden bg-white border border-slate-200 hover:border-slate-300 transition-colors shadow-sm">
       {/* Thumbnail */}
       {event.image_url && (
         <div className="w-full h-28 overflow-hidden">
@@ -108,20 +108,20 @@ export function EventPreviewMessage({ eventId, isMe }: EventPreviewMessageProps)
         )}
 
         {/* Title */}
-        <p className="text-sm font-medium text-white truncate mb-1">{event.title}</p>
+        <p className="text-sm font-medium text-slate-800 truncate mb-1">{event.title}</p>
 
         {/* Date + Time */}
-        <div className="flex items-center gap-1.5 text-xs text-white/40 mb-1">
+        <div className="flex items-center gap-1.5 text-xs text-slate-500 mb-1">
           <svg className="w-3 h-3 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
           </svg>
           <span>{formatDateCompact(event.start_date)}</span>
-          {time && <span className="text-white/30">{time}</span>}
+          {time && <span className="text-slate-400">{time}</span>}
         </div>
 
         {/* Location */}
         {event.location_name && (
-          <div className="flex items-center gap-1.5 text-xs text-white/30 mb-2">
+          <div className="flex items-center gap-1.5 text-xs text-slate-400 mb-2">
             <svg className="w-3 h-3 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
             </svg>
@@ -134,7 +134,7 @@ export function EventPreviewMessage({ eventId, isMe }: EventPreviewMessageProps)
           {mapLink ? (
             <Link
               href={mapLink}
-              className="flex-1 py-1.5 rounded-lg bg-white text-black text-xs font-medium hover:bg-white/90 transition-colors text-center"
+              className="flex-1 py-1.5 rounded-lg bg-slate-800 text-white text-xs font-medium hover:bg-slate-700 transition-colors text-center"
             >
               Auf Karte anzeigen
             </Link>
@@ -143,12 +143,12 @@ export function EventPreviewMessage({ eventId, isMe }: EventPreviewMessageProps)
               href={event.source_url}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex-1 py-1.5 rounded-lg bg-white text-black text-xs font-medium hover:bg-white/90 transition-colors text-center"
+              className="flex-1 py-1.5 rounded-lg bg-slate-800 text-white text-xs font-medium hover:bg-slate-700 transition-colors text-center"
             >
               Details anzeigen
             </a>
           ) : (
-            <span className="flex-1 py-1.5 rounded-lg bg-white/10 text-white/40 text-xs font-medium text-center">
+            <span className="flex-1 py-1.5 rounded-lg bg-slate-100 text-slate-500 text-xs font-medium text-center">
               Event
             </span>
           )}

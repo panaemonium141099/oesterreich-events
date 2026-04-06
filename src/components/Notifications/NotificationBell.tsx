@@ -63,7 +63,7 @@ export function NotificationBell({ className }: NotificationBellProps) {
       className={`relative flex items-center justify-center ${className || ''}`}
     >
       <svg
-        className="w-5 h-5 text-white/40 hover:text-white/70 transition-colors"
+        className="w-5 h-5 text-slate-400 hover:text-slate-600 transition-colors"
         fill="none"
         stroke="currentColor"
         viewBox="0 0 24 24"
@@ -76,7 +76,7 @@ export function NotificationBell({ className }: NotificationBellProps) {
         />
       </svg>
       {unreadCount > 0 && (
-        <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center px-1 ring-2 ring-black/40">
+        <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center px-1 ring-2 ring-white">
           {unreadCount > 9 ? '9+' : unreadCount}
         </span>
       )}
