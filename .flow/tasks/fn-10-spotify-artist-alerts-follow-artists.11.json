@@ -1,0 +1,19 @@
+{
+  "assignee": null,
+  "claim_note": "",
+  "claimed_at": null,
+  "created_at": "2026-04-06T10:23:30.070341Z",
+  "depends_on": [
+    "fn-10-spotify-artist-alerts-follow-artists.5",
+    "fn-10-spotify-artist-alerts-follow-artists.10",
+    "fn-10-spotify-artist-alerts-follow-artists.12",
+    "fn-10-spotify-artist-alerts-follow-artists.13"
+  ],
+  "epic": "fn-10-spotify-artist-alerts-follow-artists",
+  "id": "fn-10-spotify-artist-alerts-follow-artists.11",
+  "priority": null,
+  "spec_path": ".flow/tasks/fn-10-spotify-artist-alerts-follow-artists.11.md",
+  "status": "todo",
+  "title": "Integration Testing, E2E Verification, and Documentation Updates",
+  "updated_at": "2026-04-06T11:29:36.222786Z"
+}

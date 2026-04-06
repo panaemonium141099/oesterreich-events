@@ -324,6 +324,175 @@ export type Database = {
           created_at: string
         }
       }
+      spotify_tokens: {
+        Row: {
+          id: string
+          user_id: string
+          access_token: string
+          refresh_token: string
+          access_token_expires_at: string
+          spotify_user_id: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          access_token: string
+          refresh_token: string
+          access_token_expires_at: string
+          spotify_user_id?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          access_token?: string
+          refresh_token?: string
+          access_token_expires_at?: string
+          spotify_user_id?: string | null
+          updated_at?: string
+        }
+      }
+      imported_spotify_artists: {
+        Row: {
+          id: string
+          user_id: string
+          artist_name: string
+          spotify_artist_id: string
+          spotify_image_url: string | null
+          genres: Json | null
+          popularity: number | null
+          rank: number
+          imported_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          artist_name: string
+          spotify_artist_id: string
+          spotify_image_url?: string | null
+          genres?: Json | null
+          popularity?: number | null
+          rank: number
+          imported_at?: string
+        }
+        Update: {
+          artist_name?: string
+          spotify_image_url?: string | null
+          genres?: Json | null
+          popularity?: number | null
+          rank?: number
+          imported_at?: string
+        }
+      }
+      followed_artists: {
+        Row: {
+          id: string
+          user_id: string
+          artist_name: string
+          artist_name_normalized: string
+          spotify_artist_id: string | null
+          spotify_image_url: string | null
+          source: 'spotify' | 'manual'
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          artist_name: string
+          spotify_artist_id?: string | null
+          spotify_image_url?: string | null
+          source?: 'spotify' | 'manual'
+          created_at?: string
+        }
+        Update: {
+          artist_name?: string
+          spotify_artist_id?: string | null
+          spotify_image_url?: string | null
+          source?: 'spotify' | 'manual'
+        }
+      }
+      artist_event_notifications: {
+        Row: {
+          id: string
+          user_id: string
+          event_id: string
+          artist_name: string
+          match_score: number
+          match_source: 'title' | 'description'
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          event_id: string
+          artist_name: string
+          match_score?: number
+          match_source?: 'title' | 'description'
+          created_at?: string
+        }
+        Update: {
+          match_score?: number
+          match_source?: 'title' | 'description'
+        }
+      }
+      notification_preferences: {
+        Row: {
+          id: string
+          user_id: string
+          artist_alerts_enabled: boolean
+          channel_in_app: boolean
+          channel_email: boolean
+          channel_sms: boolean
+          phone_number: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          artist_alerts_enabled?: boolean
+          channel_in_app?: boolean
+          channel_email?: boolean
+          channel_sms?: boolean
+          phone_number?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          artist_alerts_enabled?: boolean
+          channel_in_app?: boolean
+          channel_email?: boolean
+          channel_sms?: boolean
+          phone_number?: string | null
+          updated_at?: string
+        }
+      }
+      matching_cursor: {
+        Row: {
+          id: string
+          last_processed_at: string
+          last_success_at: string | null
+          events_processed: number
+          matches_found: number
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          last_processed_at?: string
+          last_success_at?: string | null
+          events_processed?: number
+          matches_found?: number
+          updated_at?: string
+        }
+        Update: {
+          last_processed_at?: string
+          last_success_at?: string | null
+          events_processed?: number
+          matches_found?: number
+          updated_at?: string
+        }
+      }
       event_tags: {
         Row: {
           event_id: string

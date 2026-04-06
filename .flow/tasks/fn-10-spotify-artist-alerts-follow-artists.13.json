@@ -1,0 +1,17 @@
+{
+  "assignee": null,
+  "claim_note": "",
+  "claimed_at": null,
+  "created_at": "2026-04-06T11:27:55.827761Z",
+  "depends_on": [
+    "fn-10-spotify-artist-alerts-follow-artists.6",
+    "fn-10-spotify-artist-alerts-follow-artists.5"
+  ],
+  "epic": "fn-10-spotify-artist-alerts-follow-artists",
+  "id": "fn-10-spotify-artist-alerts-follow-artists.13",
+  "priority": null,
+  "spec_path": ".flow/tasks/fn-10-spotify-artist-alerts-follow-artists.13.md",
+  "status": "todo",
+  "title": "Meine Artist-Events Page: Upcoming Matched Events with Ticket CTAs",
+  "updated_at": "2026-04-06T11:27:55.827794Z"
+}

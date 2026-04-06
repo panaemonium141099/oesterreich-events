@@ -1,0 +1,21 @@
+{
+  "branch_name": "fn-10-spotify-artist-alerts-follow-artists",
+  "completion_review_status": "unknown",
+  "completion_reviewed_at": null,
+  "created_at": "2026-04-06T10:19:28.279028Z",
+  "default_impl": null,
+  "default_review": null,
+  "default_sync": null,
+  "depends_on_epics": [
+    "fn-1-comprehensive-audit-and-feature-upgrade",
+    "fn-2-deploy-ready-sprint-scoring-landing"
+  ],
+  "id": "fn-10-spotify-artist-alerts-follow-artists",
+  "next_task": 1,
+  "plan_review_status": "ship",
+  "plan_reviewed_at": "2026-04-06T10:52:32.665232Z",
+  "spec_path": ".flow/specs/fn-10-spotify-artist-alerts-follow-artists.md",
+  "status": "open",
+  "title": "Spotify Artist Alerts: Follow Artists, Get Notified on Events",
+  "updated_at": "2026-04-06T10:52:32.665269Z"
+}

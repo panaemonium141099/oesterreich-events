@@ -1,0 +1,261 @@
+{
+  "created_at": "2026-04-06T10:42:04.423950Z",
+  "epic": {
+    "data": {
+      "branch_name": "fn-10-spotify-artist-alerts-follow-artists",
+      "completion_review_status": "unknown",
+      "completion_reviewed_at": null,
+      "created_at": "2026-04-06T10:19:28.279028Z",
+      "default_impl": null,
+      "default_review": null,
+      "default_sync": null,
+      "depends_on_epics": [
+        "fn-1-comprehensive-audit-and-feature-upgrade",
+        "fn-2-deploy-ready-sprint-scoring-landing"
+      ],
+      "id": "fn-10-spotify-artist-alerts-follow-artists",
+      "next_task": 1,
+      "plan_review_status": "needs_work",
+      "plan_reviewed_at": "2026-04-06T10:30:36.301283Z",
+      "spec_path": ".flow/specs/fn-10-spotify-artist-alerts-follow-artists.md",
+      "status": "open",
+      "title": "Spotify Artist Alerts: Follow Artists, Get Notified on Events",
+      "updated_at": "2026-04-06T10:30:36.301300Z"
+    },
+    "spec": "# Spotify Artist Alerts: Follow Artists, Get Notified on Events\n\n## Overview\n\nEnable users to follow music artists and receive multi-channel notifications (in-app, email, SMS) when followed artists have events in Austria. Artists can be sourced from Spotify (auto-import top artists) or added manually (search + free-text). The system continuously monitors the ~109K+ event database for matches against followed artists and fans out notifications to all followers.\n\n**Existing foundation**: Spotify OAuth, token management, basic `.includes()` matching, `spotify_artist_matches` table, `notifications` table with `spotify_match` type, NotificationBell with Realtime subscriptions -- all exist but are incomplete or disconnected.\n\n## Scope\n\n### In scope\n- `followed_artists` table decoupled from Spotify (supports both Spotify and manual sources)\n- Refactor Spotify OAuth callback to populate `followed_artists` instead of `spotify_artist_matches`\n- Artist management UI: top 10 pre-selected from Spotify, search (Spotify API), manual add, follow/unfollow\n- Spotify search API integration (Client Credentials flow for app-level access)\n- Improved artist-event matching engine using `pg_trgm` word_similarity + guards for short names\n- Post-scrape matching pipeline via Supabase Edge Function + pg_cron\n- Notification fan-out: in-app (existing infra), email (Resend), SMS (Twilio)\n- User notification preferences (channel selection, phone number)\n- Notification deduplication (no duplicate alerts for same artist+event)\n- GDPR/DSGVO compliant opt-in for email/SMS\n\n### Out of scope\n- Spotify Extended Quota Mode application (documented as known limitation)\n- Push notifications (web push / mobile)\n- Geographic filtering on alerts (e.g. \"only Wien\")\n- AI/ML artist-event matching (semantic embeddings)\n- Admin dashboard for pipeline health monitoring\n- Digest mode (daily/weekly email summary) -- future enhancement\n\n## Architecture\n\n```mermaid\nflowchart TB\n    subgraph User Actions\n        A[Connect Spotify] --> B[OAuth Callback]\n        B --> C[Fetch Top 50 Artists]\n        C --> D[Pre-select Top 10]\n        D --> E[Artist Management UI]\n        F[Manual Search] --> E\n        G[Free-text Add] --> E\n        E --> H[followed_artists table]\n    end\n\n    subgraph Matching Pipeline\n        I[Scraper runs] --> J[Events upserted to DB]\n        J --> K[pg_cron triggers Edge Function]\n        K --> L[pg_trgm word_similarity matching]\n        L --> M{Match found?}\n        M -->|Yes| N[Check dedup: already notified?]\n        N -->|No| O[Insert artist_event_notifications]\n        N -->|Yes| P[Skip]\n    end\n\n    subgraph Notification Fan-out\n        O --> Q[Insert into notifications table]\n        Q --> R[Supabase Realtime - In-App]\n        Q --> S[Resend - Email]\n        Q --> T[Twilio - SMS]\n    end\n\n    H --> L\n```\n\n```mermaid\nerDiagram\n    profiles ||--o{ followed_artists : has\n    profiles ||--o| notification_preferences : has\n    followed_artists }o--o{ artist_event_notifications : generates\n    events }o--o{ artist_event_notifications : matched\n    artist_event_notifications ||--o{ notifications : creates\n\n    followed_artists {\n        uuid id PK\n        uuid user_id FK\n        text artist_name\n        text artist_name_normalized\n        text spotify_artist_id \"nullable\"\n        text spotify_image_url \"nullable\"\n        text source \"spotify or manual\"\n        boolean active \"default true\"\n        timestamptz created_at\n    }\n\n    artist_event_notifications {\n        uuid id PK\n        uuid user_id FK\n        uuid event_id FK\n        text artist_name\n        real match_score\n        text match_source \"title or description\"\n        boolean notified \"default false\"\n        timestamptz notified_at\n        timestamptz created_at\n        constraint uq \"UNIQUE user_id event_id artist_name\"\n    }\n\n    notification_preferences {\n        uuid id PK\n        uuid user_id FK \"UNIQUE\"\n        boolean artist_alerts_enabled \"default true\"\n        boolean channel_in_app \"default true\"\n        boolean channel_email \"default false\"\n        boolean channel_sms \"default false\"\n        text phone_number \"nullable E.164\"\n        text email_override \"nullable\"\n        timestamptz created_at\n        timestamptz updated_at\n    }\n```\n\n## Phases\n\n### Phase 1: Data Foundation (Tasks 1-2)\nDatabase schema, migrations, RLS policies, pg_trgm setup, followed_artists table, Spotify callback refactor.\n\n### Phase 2: Artist Discovery (Tasks 3-4)\nSpotify search API (Client Credentials), artist management UI with top 10 pre-selection, manual add, search.\n\n### Phase 3: Matching Engine (Task 5)\npg_trgm-based matching with word_similarity, minimum name length guards, normalization, deduplication.\n\n### Phase 4: Pipeline and Notifications (Tasks 6-8)\nEdge Function for post-scrape matching, pg_cron scheduling, Resend email integration, Twilio SMS integration.\n\n### Phase 5: Preferences and Polish (Tasks 9-10)\nNotification preferences UI, phone number validation, E2E testing, documentation updates.\n\n## Alternatives Considered\n\n| Option | Pros | Cons | Decision |\n|--------|------|------|----------|\n| Client-side matching (current) | Simple | Does not scale, no re-matching | **Rejected** -- move to server-side pg_trgm |\n| Database trigger on event INSERT | Real-time, no cron needed | Write amplification on bulk scraper upserts, Edge Function concurrency limits | **Rejected** -- too many triggers during scraper runs |\n| pg_cron + Edge Function (chosen) | Batched, efficient, controllable frequency | Slight delay (minutes, not real-time) | **Chosen** -- best balance of efficiency and reliability |\n| Embedding-based semantic matching | Handles misspellings, translations | Overkill, complex infrastructure, expensive | **Deferred** -- pg_trgm sufficient for artist names |\n| Supabase Auth Spotify provider | Built-in, less code | Cannot control token storage, no Client Credentials flow | **Rejected** -- keep custom OAuth for token control |\n\n## Non-Functional Requirements\n\n- **Matching latency**: < 5 minutes from event insertion to notification delivery\n- **False positive rate**: < 5% for artist names >= 4 characters\n- **Notification delivery**: In-app immediate (Realtime), email within 1 minute, SMS within 2 minutes\n- **Database performance**: pg_trgm GIN index on events.title, matching query < 500ms for 200 followed artists against 109K events\n- **Token security**: Spotify refresh tokens not accessible client-side (RLS deny on SELECT or Vault)\n- **GDPR compliance**: Email/SMS off by default, explicit opt-in required, unsubscribe in every email\n\n## Risks and Mitigations\n\n| Risk | Likelihood | Impact | Mitigation |\n|------|-----------|--------|------------|\n| Spotify Dev Mode 5-user limit | Certain | High -- blocks public launch | Ship manual-first. Spotify behind feature flag. Apply for Extended Quota separately. |\n| False positive matches for short names | High | Medium -- spam, user trust | Minimum 3-char names use exact word match; 4+ use pg_trgm threshold 0.6; 1-2 char names blocked |\n| pg_cron not available on free tier | Medium | High -- no automated pipeline | Check plan tier. Fallback: manual npm script triggered post-scrape |\n| Resend/Twilio API failures | Low | Medium -- missed notifications | Retry queue with 3 attempts, exponential backoff |\n| spotify_refresh_token exposed client-side | Already present | High -- security breach | Add RLS policy: DENY SELECT on spotify_refresh_token for authenticated users |\n| Notification flood from festival events | Medium | Medium -- user annoyance | Deduplicate: max 1 notification per (user, event) regardless of how many artists match |\n\n## Rollout Plan\n\n1. **Phase 1-2**: Deploy DB schema + artist management UI. Manual-only follows first.\n2. **Phase 3**: Deploy matching engine. Dry-run mode first, log matches without notifying.\n3. **Phase 4**: Enable in-app notifications. Monitor for false positives. Then enable email, then SMS.\n4. **Phase 5**: Preferences UI. Full rollout.\n\n**Rollback**: Each phase independently revertible. Edge Function can be disabled via Supabase dashboard.\n\n## Metrics\n\n- Followed artists count per user (avg, p50, p90)\n- Match accuracy (false positive reports / total matches)\n- Notification delivery rate per channel\n- Spotify connect rate (connects / profile views)\n- Artist alert click-through rate\n\n## Quick commands\n\n```bash\n# Run matching pipeline manually (after implementation)\nnpx tsx src/scripts/match-artists.ts --dry-run\n\n# Check followed artists for a user\nnpx tsx src/scripts/match-artists.ts --user-id <uuid> --dry-run\n\n# Run tests\nnpm test\n```\n\n## Acceptance\n\n- [ ] Users can follow artists via Spotify (top artists auto-imported) or manually (search + free-text)\n- [ ] Artist management UI shows top 10 pre-selected from Spotify with toggle on/off\n- [ ] Spotify search returns artist results for connected and non-connected users\n- [ ] When a new event with a followed artist appears, all followers are notified\n- [ ] Notifications delivered via in-app (immediate), email (Resend), and SMS (Twilio)\n- [ ] No duplicate notifications for the same user+event+artist combination\n- [ ] User can configure notification channels (in-app/email/SMS) and provide phone number\n- [ ] Email/SMS are off by default (GDPR opt-in)\n- [ ] Short artist names (< 4 chars) use stricter matching to avoid false positives\n- [ ] Spotify refresh tokens are not accessible client-side\n- [ ] pg_trgm GIN index ensures matching performance at scale\n- [ ] All existing tests pass, new features have test coverage\n- [ ] CLAUDE.md, CHANGELOG.md, HANDOFF.md updated\n\n## References\n\n- Existing Spotify code: `src/lib/spotify.ts`, `src/app/auth/spotify/callback/route.ts`, `src/app/spotify-matches/page.tsx`\n- Notification infra: `src/components/Notifications/NotificationBell.tsx`, `src/app/notifications/page.tsx`\n- Fuzzy matching: `src/lib/dedup/jaro-winkler.ts`\n- DB sync pipeline: `src/lib/db/supabase-sync.ts`\n- Scraper entry: `src/scripts/scrape.ts`\n- Auth context: `src/lib/supabase/auth-context.tsx`\n- [Spotify Web API - Top Artists](https://developer.spotify.com/documentation/web-api/reference/get-users-top-artists-and-tracks)\n- [Spotify Web API - Search](https://developer.spotify.com/documentation/web-api/reference/search)\n- [Spotify Client Credentials Flow](https://developer.spotify.com/documentation/web-api/tutorials/client-credentials-flow)\n- [PostgreSQL pg_trgm](https://www.postgresql.org/docs/current/pgtrgm.html)\n- [Supabase Edge Functions - Schedule](https://supabase.com/docs/guides/functions/schedule-functions)\n- [Supabase Vault](https://supabase.com/docs/guides/database/vault)\n- [Resend + Supabase](https://resend.com/docs/send-with-supabase-edge-functions)\n- [Twilio Node.js](https://www.twilio.com/docs/messaging/quickstart/node)\n\n## Known Limitations\n\n- **Spotify Development Mode**: Limited to 5 authorized users. Manual artist following works for all users. Spotify integration should be behind a feature flag until Extended Quota is approved.\n- **No dedicated artists column on events table**: Matching runs against title + description. Adding a derived column is deferred to avoid modifying 141 scrapers.\n- **Event descriptions may contain negations**: pg_trgm cannot detect negation. Accepted as a low-frequency edge case.\n"
+  },
+  "epic_id": "fn-10-spotify-artist-alerts-follow-artists",
+  "schema_version": 2,
+  "tasks": [
+    {
+      "data": {
+        "assignee": null,
+        "claim_note": "",
+        "claimed_at": null,
+        "created_at": "2026-04-06T10:23:05.885177Z",
+        "depends_on": [],
+        "epic": "fn-10-spotify-artist-alerts-follow-artists",
+        "id": "fn-10-spotify-artist-alerts-follow-artists.1",
+        "priority": null,
+        "spec_path": ".flow/tasks/fn-10-spotify-artist-alerts-follow-artists.1.md",
+        "status": "todo",
+        "title": "Database Schema: followed_artists, artist_event_notifications, notification_preferences",
+        "updated_at": "2026-04-06T10:23:05.885194Z"
+      },
+      "id": "fn-10-spotify-artist-alerts-follow-artists.1",
+      "runtime": null,
+      "spec": "# fn-10-spotify-artist-alerts-follow-artists.1 Database Schema: followed_artists, artist_event_notifications, notification_preferences\n\n## Description\nTBD\n\n## Acceptance\n- [ ] TBD\n\n## Done summary\nTBD\n\n## Evidence\n- Commits:\n- Tests:\n- PRs:\n"
+    },
+    {
+      "data": {
+        "assignee": null,
+        "claim_note": "",
+        "claimed_at": null,
+        "created_at": "2026-04-06T10:23:29.622162Z",
+        "depends_on": [
+          "fn-10-spotify-artist-alerts-follow-artists.8",
+          "fn-10-spotify-artist-alerts-follow-artists.9"
+        ],
+        "epic": "fn-10-spotify-artist-alerts-follow-artists",
+        "id": "fn-10-spotify-artist-alerts-follow-artists.10",
+        "priority": null,
+        "spec_path": ".flow/tasks/fn-10-spotify-artist-alerts-follow-artists.10.md",
+        "status": "todo",
+        "title": "Notification Preferences UI and Phone Number Management",
+        "updated_at": "2026-04-06T10:26:36.051048Z"
+      },
+      "id": "fn-10-spotify-artist-alerts-follow-artists.10",
+      "runtime": null,
+      "spec": "# fn-10-spotify-artist-alerts-follow-artists.10 Notification Preferences UI and Phone Number Management\n\n## Description\nBuild the notification preferences UI where users can configure which channels they want for artist alerts (in-app, email, SMS), provide a phone number for SMS, and see their current settings.\n\n**Size:** M\n**Files:** `src/app/settings/notifications/page.tsx`, `src/app/api/notifications/preferences/route.ts`, `src/components/Settings/NotificationPreferences.tsx`\n\n## Approach\n\n- New settings page at `/settings/notifications` (or section within existing settings/profile page)\n- UI sections:\n  1. **Kuenstler-Benachrichtigungen**: Master toggle for artist alerts\n  2. **Kanaele**: Checkboxes for in-app (always on), email (off by default), SMS (off by default)\n  3. **Telefonnummer**: Input field for SMS (E.164, with +43 prefix helper), only shown when SMS is enabled\n  4. **E-Mail-Adresse**: Shows auth email, optional override field\n- API route `PUT /api/notifications/preferences` -- upsert `notification_preferences` row\n- API route `GET /api/notifications/preferences` -- get current preferences\n- Phone number validation: client-side format check + server-side E.164 validation\n- GDPR: show consent text before enabling email/SMS (\"Ich stimme zu, Benachrichtigungen per E-Mail/SMS zu erhalten\")\n- Follow dark theme, German-language labels\n\n## Key context\n\n- Follow existing settings page patterns if they exist, otherwise create new route\n- Use `useAuth()` for user context, `createClient()` for preferences queries\n- The `notification_preferences` table has a unique constraint on `user_id` -- use upsert (INSERT ON CONFLICT UPDATE)\n- Link to this page from the artist management page and profile page\n## Acceptance\n- [ ] Notification preferences page renders with channel toggles\n- [ ] In-app channel is always enabled (not toggleable)\n- [ ] Email and SMS channels default to off\n- [ ] Phone number input shown only when SMS is enabled\n- [ ] Phone number validated as E.164 format\n- [ ] GDPR consent text shown before enabling email/SMS\n- [ ] Preferences saved via API route with upsert\n- [ ] Preferences loaded on page mount\n- [ ] German-language UI\n- [ ] Link from artist management and profile pages\n## Done summary\nTBD\n\n## Evidence\n- Commits:\n- Tests:\n- PRs:\n"
+    },
+    {
+      "data": {
+        "assignee": null,
+        "claim_note": "",
+        "claimed_at": null,
+        "created_at": "2026-04-06T10:23:30.070341Z",
+        "depends_on": [
+          "fn-10-spotify-artist-alerts-follow-artists.5",
+          "fn-10-spotify-artist-alerts-follow-artists.10"
+        ],
+        "epic": "fn-10-spotify-artist-alerts-follow-artists",
+        "id": "fn-10-spotify-artist-alerts-follow-artists.11",
+        "priority": null,
+        "spec_path": ".flow/tasks/fn-10-spotify-artist-alerts-follow-artists.11.md",
+        "status": "todo",
+        "title": "Integration Testing, E2E Verification, and Documentation Updates",
+        "updated_at": "2026-04-06T10:26:36.591997Z"
+      },
+      "id": "fn-10-spotify-artist-alerts-follow-artists.11",
+      "runtime": null,
+      "spec": "# fn-10-spotify-artist-alerts-follow-artists.11 Integration Testing, E2E Verification, and Documentation Updates\n\n## Description\nWrite integration tests for the full artist alert pipeline (follow -> match -> notify), E2E verification of all flows, and update project documentation (CLAUDE.md, CHANGELOG.md, HANDOFF.md).\n\n**Size:** M\n**Files:** `src/__tests__/artist-alerts.test.ts`, `src/__tests__/artist-matching.test.ts`, `CLAUDE.md`, `CHANGELOG.md`, `HANDOFF.md`\n\n## Approach\n\n- Integration tests (Vitest):\n  - Artist follow/unfollow API routes\n  - Spotify search API route\n  - Matching engine: exact match, fuzzy match, short name rejection, dedup\n  - Notification creation after matching\n  - Notification preferences CRUD\n- E2E verification checklist (manual, documented):\n  - Spotify connect -> top artists appear -> follow/unfollow works\n  - Manual artist add -> appears in followed list\n  - Run matching script -> notifications created for matched artists\n  - In-app notification appears in NotificationBell\n  - Email sent via Resend (test with Resend test mode)\n  - SMS sent via Twilio (test with Twilio test credentials)\n- Documentation updates:\n  - CLAUDE.md: add new paths, scripts, env vars\n  - CHANGELOG.md: new phase section with tables, routes, architecture\n  - HANDOFF.md: update Spotify integration status\n  - Add doc gap items identified by docs-gap-scout\n\n## Key context\n\n- Follow existing test patterns in `src/__tests__/`\n- Vitest config in `vitest.config.ts`\n- 436 existing tests must continue passing\n- CHANGELOG follows a specific format (see existing entries for pattern)\n## Acceptance\n- [ ] Integration tests cover: follow API, search API, matching engine, notification creation, preferences\n- [ ] All new tests pass\n- [ ] All 436 existing tests still pass\n- [ ] CLAUDE.md updated with new paths, scripts, env vars\n- [ ] CHANGELOG.md updated with new phase section\n- [ ] HANDOFF.md updated with current Spotify integration status\n- [ ] E2E verification checklist documented and executed\n## Done summary\nTBD\n\n## Evidence\n- Commits:\n- Tests:\n- PRs:\n"
+    },
+    {
+      "data": {
+        "assignee": null,
+        "claim_note": "",
+        "claimed_at": null,
+        "created_at": "2026-04-06T10:23:11.174153Z",
+        "depends_on": [],
+        "epic": "fn-10-spotify-artist-alerts-follow-artists",
+        "id": "fn-10-spotify-artist-alerts-follow-artists.2",
+        "priority": null,
+        "spec_path": ".flow/tasks/fn-10-spotify-artist-alerts-follow-artists.2.md",
+        "status": "todo",
+        "title": "Database Schema: followed_artists, artist_event_notifications, notification_preferences",
+        "updated_at": "2026-04-06T10:23:53.752788Z"
+      },
+      "id": "fn-10-spotify-artist-alerts-follow-artists.2",
+      "runtime": null,
+      "spec": "# fn-10-spotify-artist-alerts-follow-artists.2 Database Schema: followed_artists, artist_event_notifications, notification_preferences\n\n## Description\nCreate the three new database tables (`followed_artists`, `artist_event_notifications`, `notification_preferences`), enable `pg_trgm` extension, add GIN indexes for matching performance, and write RLS policies. Also add a security fix: RLS policy on `profiles` to deny client-side SELECT of `spotify_refresh_token`.\n\n**Size:** M\n**Files:** `supabase/migrations/20260407_artist_alerts_schema.sql`, `src/types/database.ts`\n\n## Approach\n\n- Follow existing migration pattern in `supabase/migrations/`\n- Enable `pg_trgm` extension with `CREATE EXTENSION IF NOT EXISTS pg_trgm`\n- Create GIN trigram index on `events.title` for `gin_trgm_ops`\n- Add `artist_name_normalized` as a generated column (lowercase, no diacritics) on `followed_artists`\n- RLS: users can only CRUD their own rows in all three tables\n- RLS: deny SELECT on `profiles.spotify_refresh_token` for authenticated role (only service_role can read)\n- Update `src/types/database.ts` with TypeScript interfaces for new tables\n- Unique constraint on `followed_artists(user_id, artist_name_normalized)` to prevent duplicate follows\n- Unique constraint on `artist_event_notifications(user_id, event_id, artist_name)` for dedup\n\n## Key context\n\n- `pg_trgm` word_similarity operator `<%` uses default threshold 0.6 -- tune later in task .6\n- The `notifications` table check constraint already includes `spotify_match` type -- no change needed\n- The existing `spotify_artist_matches` table is NOT dropped (migration path handled in task .3)\n- Austrian/German names need unaccent() -- check if `unaccent` extension is available in Supabase\n## Acceptance\n- [ ] `followed_artists` table created with all columns per ER diagram in epic spec\n- [ ] `artist_event_notifications` table created with unique constraint on (user_id, event_id, artist_name)\n- [ ] `notification_preferences` table created with unique constraint on user_id\n- [ ] `pg_trgm` extension enabled\n- [ ] GIN index on `events.title` using `gin_trgm_ops` for fast fuzzy matching\n- [ ] RLS policies: users can only access their own rows in all three tables\n- [ ] RLS policy: `spotify_refresh_token` column on `profiles` not readable by authenticated users\n- [ ] TypeScript types in `src/types/database.ts` updated for all new tables\n- [ ] Migration applies cleanly to Supabase\n## Done summary\nTBD\n\n## Evidence\n- Commits:\n- Tests:\n- PRs:\n"
+    },
+    {
+      "data": {
+        "assignee": null,
+        "claim_note": "",
+        "claimed_at": null,
+        "created_at": "2026-04-06T10:23:26.488386Z",
+        "depends_on": [
+          "fn-10-spotify-artist-alerts-follow-artists.2"
+        ],
+        "epic": "fn-10-spotify-artist-alerts-follow-artists",
+        "id": "fn-10-spotify-artist-alerts-follow-artists.3",
+        "priority": null,
+        "spec_path": ".flow/tasks/fn-10-spotify-artist-alerts-follow-artists.3.md",
+        "status": "todo",
+        "title": "Refactor Spotify OAuth Callback and Artist Follow API Routes",
+        "updated_at": "2026-04-06T10:24:11.107727Z"
+      },
+      "id": "fn-10-spotify-artist-alerts-follow-artists.3",
+      "runtime": null,
+      "spec": "# fn-10-spotify-artist-alerts-follow-artists.3 Refactor Spotify OAuth Callback and Artist Follow API Routes\n\n## Description\nRefactor the Spotify OAuth callback to write to `followed_artists` instead of `spotify_artist_matches`. Create CRUD API routes for artist follows. Migrate existing `spotify_artist_matches` data to `followed_artists`.\n\n**Size:** M\n**Files:** `src/app/auth/spotify/callback/route.ts`, `src/app/api/artists/follow/route.ts`, `src/app/api/artists/following/route.ts`, `src/lib/spotify.ts`\n\n## Approach\n\n- Refactor callback: after fetching top 50 artists, upsert into `followed_artists` (source: spotify) instead of running `matchArtistsToEvents()`\n- Remove the 5000-event fetch + matching from the callback (matching is now a separate pipeline)\n- Keep `getSpotifyAuthUrl()`, `exchangeSpotifyCode()`, `refreshSpotifyToken()` in `src/lib/spotify.ts`\n- Add `getTopArtists()` result caching (store in `followed_artists` with spotify_artist_id + image_url)\n- API routes:\n  - `POST /api/artists/follow` -- follow an artist (body: { artist_name, spotify_artist_id?, source })\n  - `DELETE /api/artists/follow` -- unfollow (body: { artist_name } or { id })\n  - `GET /api/artists/following` -- list user followed artists (with pagination)\n- All routes require auth (Supabase session check)\n- Follow existing API pattern in `src/app/api/events/route.ts`\n\n## Key context\n\n- The existing `spotify_artist_matches` table stays for now (data migration deferred)\n- The callback currently redirects to `/profile?spotify=connected` -- keep this redirect\n- `refreshSpotifyToken()` exists in `src/lib/spotify.ts` but is never called -- wire it up for token refresh before fetching artists\n## Acceptance\n- [ ] Spotify callback writes top artists to `followed_artists` table (not `spotify_artist_matches`)\n- [ ] Callback no longer fetches 5000 events or runs client-side matching\n- [ ] `POST /api/artists/follow` creates a followed_artists row (auth required)\n- [ ] `DELETE /api/artists/follow` soft-deletes (sets active=false) a followed_artists row\n- [ ] `GET /api/artists/following` returns paginated list of user followed artists\n- [ ] Token refresh is called before fetching top artists if access token is expired\n- [ ] API routes validate auth and return 401 for unauthenticated requests\n- [ ] Existing tests in `src/__tests__/` still pass\n## Done summary\nTBD\n\n## Evidence\n- Commits:\n- Tests:\n- PRs:\n"
+    },
+    {
+      "data": {
+        "assignee": null,
+        "claim_note": "",
+        "claimed_at": null,
+        "created_at": "2026-04-06T10:23:26.960129Z",
+        "depends_on": [
+          "fn-10-spotify-artist-alerts-follow-artists.2"
+        ],
+        "epic": "fn-10-spotify-artist-alerts-follow-artists",
+        "id": "fn-10-spotify-artist-alerts-follow-artists.4",
+        "priority": null,
+        "spec_path": ".flow/tasks/fn-10-spotify-artist-alerts-follow-artists.4.md",
+        "status": "todo",
+        "title": "Spotify Search API Integration with Client Credentials Flow",
+        "updated_at": "2026-04-06T10:24:25.665063Z"
+      },
+      "id": "fn-10-spotify-artist-alerts-follow-artists.4",
+      "runtime": null,
+      "spec": "# fn-10-spotify-artist-alerts-follow-artists.4 Spotify Search API Integration with Client Credentials Flow\n\n## Description\nAdd Spotify artist search API using Client Credentials flow (app-level token, no user context needed). This allows both Spotify-connected and non-connected users to search for artists to follow.\n\n**Size:** M\n**Files:** `src/app/api/artists/search/route.ts`, `src/lib/spotify.ts`\n\n## Approach\n\n- Add Client Credentials flow to `src/lib/spotify.ts`: `getClientCredentialsToken()` -- uses SPOTIFY_CLIENT_ID + SPOTIFY_CLIENT_SECRET to get app-level access token\n- Cache the client credentials token in memory (1 hour TTL, refresh on expiry)\n- New API route `GET /api/artists/search?q=<query>&limit=10`\n  - Calls Spotify `GET /v1/search?type=artist&market=AT&q=<query>`\n  - Returns: `{ artists: [{ id, name, image_url, genres, popularity }] }`\n- Rate limit: debounce client-side (300ms), server-side max 20 requests per minute per user\n- Auth required for the API route (prevents abuse)\n- Handle Spotify 429 responses with `Retry-After` header\n\n## Key context\n\n- Client Credentials flow is different from Authorization Code flow -- it does NOT require user OAuth, only the app client_id + client_secret\n- This works even in Spotify Development Mode (no user limit for app-level search)\n- The `market=AT` parameter localizes results to Austria\n- Existing `SPOTIFY_CLIENT_ID` and `SPOTIFY_CLIENT_SECRET` env vars should already be set\n## Acceptance\n- [ ] `getClientCredentialsToken()` added to `src/lib/spotify.ts` with caching\n- [ ] `GET /api/artists/search?q=<query>` returns Spotify artist search results\n- [ ] Search works for all authenticated users (not just Spotify-connected)\n- [ ] Results include artist id, name, image_url, genres, popularity\n- [ ] Rate limiting: Spotify 429 responses handled gracefully with retry\n- [ ] Auth required -- returns 401 for unauthenticated requests\n- [ ] Empty/short queries return empty array (no Spotify call)\n## Done summary\nTBD\n\n## Evidence\n- Commits:\n- Tests:\n- PRs:\n"
+    },
+    {
+      "data": {
+        "assignee": null,
+        "claim_note": "",
+        "claimed_at": null,
+        "created_at": "2026-04-06T10:23:27.392777Z",
+        "depends_on": [
+          "fn-10-spotify-artist-alerts-follow-artists.3",
+          "fn-10-spotify-artist-alerts-follow-artists.4"
+        ],
+        "epic": "fn-10-spotify-artist-alerts-follow-artists",
+        "id": "fn-10-spotify-artist-alerts-follow-artists.5",
+        "priority": null,
+        "spec_path": ".flow/tasks/fn-10-spotify-artist-alerts-follow-artists.5.md",
+        "status": "todo",
+        "title": "Artist Management UI: Follow, Search, Top Artists Pre-selection",
+        "updated_at": "2026-04-06T10:24:45.637385Z"
+      },
+      "id": "fn-10-spotify-artist-alerts-follow-artists.5",
+      "runtime": null,
+      "spec": "# fn-10-spotify-artist-alerts-follow-artists.5 Artist Management UI: Follow, Search, Top Artists Pre-selection\n\n## Description\nBuild the Artist Management page where users can view, search, follow, and unfollow artists. For Spotify-connected users, show their top 10 pre-selected artists with toggles. All users can search for artists (Spotify search) or add manually by name.\n\n**Size:** M\n**Files:** `src/app/artists/page.tsx`, `src/components/Artists/ArtistCard.tsx`, `src/components/Artists/ArtistSearch.tsx`, `src/components/Artists/TopArtistsList.tsx`\n\n## Approach\n\n- New page at `/artists` (app route: `src/app/artists/page.tsx`)\n- Three sections:\n  1. **Deine Top-Kuenstler** (Spotify): If connected, show top 10 with toggle switches (pre-selected = already in followed_artists). If not connected, show \"Spotify verbinden\" CTA\n  2. **Kuenstler suchen**: Search input with debounced Spotify API calls, result cards with Follow/Unfollow button\n  3. **Manuell hinzufuegen**: Free-text input + Add button for adding artists by name without Spotify\n- Below sections: **Deine gefolgten Kuenstler**: List of all followed artists with unfollow buttons\n- Follow dark theme pattern: `bg-black`, `bg-white/5`, `text-white/40` -- match existing component style\n- Use existing `useAuth()` hook for auth state and `profile.spotify_connected` check\n- Debounce search input at 300ms\n- Add link to Artist Management from profile page and SocialNav\n- German-language UI throughout\n\n## Key context\n\n- Follow component patterns in `src/components/Events/EventCard.tsx` for card layout\n- Use `createClient()` from `src/lib/supabase/client.ts` for client-side queries\n- Profile page at `src/app/profile/page.tsx` already has \"Spotify verbinden\" button -- reuse the pattern\n- SocialNav at `src/components/Social/SocialNav.tsx` provides bottom navigation -- add Artists link\n## Acceptance\n- [ ] `/artists` page renders with three sections: Top Artists, Search, Manual Add\n- [ ] Spotify-connected users see their top 10 artists pre-selected with toggle on/off\n- [ ] Non-connected users see Spotify connect CTA instead of top artists\n- [ ] Search input queries `/api/artists/search` with 300ms debounce\n- [ ] Search results show artist card with name, image, Follow/Unfollow button\n- [ ] Manual add input allows free-text artist name entry\n- [ ] Followed artists list shows all follows with unfollow action\n- [ ] Follow/unfollow calls update `followed_artists` via API routes\n- [ ] UI follows existing dark theme and component patterns\n- [ ] German-language labels throughout\n- [ ] Link to artist management from profile page and SocialNav\n## Done summary\nTBD\n\n## Evidence\n- Commits:\n- Tests:\n- PRs:\n"
+    },
+    {
+      "data": {
+        "assignee": null,
+        "claim_note": "",
+        "claimed_at": null,
+        "created_at": "2026-04-06T10:23:27.854180Z",
+        "depends_on": [
+          "fn-10-spotify-artist-alerts-follow-artists.2"
+        ],
+        "epic": "fn-10-spotify-artist-alerts-follow-artists",
+        "id": "fn-10-spotify-artist-alerts-follow-artists.6",
+        "priority": null,
+        "spec_path": ".flow/tasks/fn-10-spotify-artist-alerts-follow-artists.6.md",
+        "status": "todo",
+        "title": "Artist-Event Matching Engine with pg_trgm Word Similarity",
+        "updated_at": "2026-04-06T10:25:07.257268Z"
+      },
+      "id": "fn-10-spotify-artist-alerts-follow-artists.6",
+      "runtime": null,
+      "spec": "# fn-10-spotify-artist-alerts-follow-artists.6 Artist-Event Matching Engine with pg_trgm Word Similarity\n\n## Description\nBuild the artist-event matching engine using PostgreSQL pg_trgm word_similarity. This replaces the current naive `.includes()` matching with a robust, performant, fuzzy matching system that handles short names, diacritics, and substring matching.\n\n**Size:** M\n**Files:** `src/lib/artist-matching.ts`, `src/scripts/match-artists.ts`, tests\n\n## Approach\n\n- Create `src/lib/artist-matching.ts` with the core matching logic\n- Matching strategy (tiered):\n  1. Names < 3 chars: skip (too many false positives for \"DJ\", \"M\", etc.)\n  2. Names 3 chars: exact word boundary match (case-insensitive, `~*` regex with `\\m...\\M`)\n  3. Names 4+ chars: pg_trgm `word_similarity()` with threshold >= 0.6\n- Normalization: lowercase, strip diacritics (reuse unaccent if available, else manual mapping for ae/oe/ue/ss)\n- Query: match `followed_artists.artist_name_normalized` against `events.title` and `events.description`\n- Only match future events (`start_date >= now()`)\n- Deduplication: check `artist_event_notifications` unique constraint before insert\n- Create CLI script `src/scripts/match-artists.ts` with `--dry-run` flag for testing\n- Reuse Jaro-Winkler from `src/lib/dedup/jaro-winkler.ts` as secondary confirmation for borderline matches\n\n## Key context\n\n- The GIN index on `events.title` (created in task .2) is critical for pg_trgm performance\n- `word_similarity()` checks if the query appears as a substring within the target -- perfect for \"Bilderbuch\" in \"Bilderbuch Open Air Wien\"\n- Festival events may have 50+ artists in description -- each match generates a separate `artist_event_notifications` row but only ONE notification per (user, event)\n- The `match_score` column stores the word_similarity score for later quality analysis\n## Acceptance\n- [ ] `src/lib/artist-matching.ts` implements tiered matching (skip < 3 chars, exact 3 chars, pg_trgm 4+ chars)\n- [ ] Matching normalizes artist names (lowercase, diacritics stripped)\n- [ ] Matches against both `events.title` and `events.description`\n- [ ] Only future events are matched (`start_date >= now()`)\n- [ ] Deduplication via unique constraint on `artist_event_notifications(user_id, event_id, artist_name)`\n- [ ] CLI script `src/scripts/match-artists.ts` with `--dry-run` mode\n- [ ] Match score is stored for quality tracking\n- [ ] False positive rate < 5% for names >= 4 chars (verified with sample data)\n- [ ] Matching query runs < 500ms against 109K events (verified with EXPLAIN ANALYZE)\n- [ ] Tests cover: exact match, fuzzy match, short name rejection, diacritic normalization, dedup\n## Done summary\nTBD\n\n## Evidence\n- Commits:\n- Tests:\n- PRs:\n"
+    },
+    {
+      "data": {
+        "assignee": null,
+        "claim_note": "",
+        "claimed_at": null,
+        "created_at": "2026-04-06T10:23:28.298019Z",
+        "depends_on": [
+          "fn-10-spotify-artist-alerts-follow-artists.6"
+        ],
+        "epic": "fn-10-spotify-artist-alerts-follow-artists",
+        "id": "fn-10-spotify-artist-alerts-follow-artists.7",
+        "priority": null,
+        "spec_path": ".flow/tasks/fn-10-spotify-artist-alerts-follow-artists.7.md",
+        "status": "todo",
+        "title": "Post-Scrape Matching Pipeline: Edge Function and pg_cron",
+        "updated_at": "2026-04-06T10:25:33.744403Z"
+      },
+      "id": "fn-10-spotify-artist-alerts-follow-artists.7",
+      "runtime": null,
+      "spec": "# fn-10-spotify-artist-alerts-follow-artists.7 Post-Scrape Matching Pipeline: Edge Function and pg_cron\n\n## Description\nBuild the automated matching pipeline that runs after scraping: a Supabase Edge Function triggered by pg_cron that matches all followed artists against newly inserted/updated events and creates notifications with fan-out to in-app, email, and SMS channels.\n\n**Size:** M\n**Files:** `supabase/functions/match-artists/index.ts`, `src/lib/notification-sender.ts`, migration for pg_cron job\n\n## Approach\n\n- Supabase Edge Function `match-artists`:\n  - Queries `followed_artists` (all active follows across all users)\n  - Queries events inserted/updated since last run (track via `last_run_at` in a config table or pg_cron metadata)\n  - Runs matching engine (pg_trgm queries from task .6, executed as SQL from the Edge Function via supabase-js service_role)\n  - Inserts new `artist_event_notifications` rows (skip existing via ON CONFLICT DO NOTHING)\n  - For each new notification: insert into `notifications` table (type: `spotify_match`)\n  - Fan-out: check `notification_preferences` per user, send email/SMS if enabled\n- pg_cron schedule: every 2 hours (`0 */2 * * *`)\n- Use `pg_net` to invoke the Edge Function from pg_cron\n- Store Edge Function URL and service key in Supabase Vault\n- Also create `src/lib/notification-sender.ts` as a shared module for sending notifications across channels (in-app is just an INSERT, email calls Resend, SMS calls Twilio)\n- Add npm script `npm run match-artists` as fallback for manual execution\n\n## Key context\n\n- Edge Functions run Deno, not Node.js -- use Deno-compatible imports\n- Edge Function timeout: 150s on free plan, should be enough for batch matching\n- Use `EdgeRuntime.waitUntil()` for email/SMS sending (non-blocking background work)\n- The `notifications` INSERT triggers Supabase Realtime automatically (NotificationBell picks it up)\n- pg_cron requires `pg_cron` and `pg_net` extensions -- verify they are enabled\n- Notification content: title = \"Kuenstler-Alert: {artist_name}\", body = \"{artist_name} tritt bei {event_title} auf! {event_date} in {event_location}\", action_url = \"/events/{event_id}\"\n## Acceptance\n- [ ] Supabase Edge Function `match-artists` deployed and callable\n- [ ] pg_cron job scheduled to invoke the Edge Function every 2 hours\n- [ ] Function matches all active followed artists against new/updated events\n- [ ] New matches inserted into `artist_event_notifications` with dedup\n- [ ] Notifications created in `notifications` table (type: `spotify_match`)\n- [ ] In-app notifications appear immediately via Realtime (existing NotificationBell)\n- [ ] `notification-sender.ts` module handles channel routing (in-app, email, SMS stubs)\n- [ ] Email and SMS sending delegated to tasks .8 and .9 (stubs/no-ops for now)\n- [ ] `npm run match-artists` works as manual fallback\n- [ ] No duplicate notifications for same user+event combination\n- [ ] Edge Function completes within 150s timeout for typical batch sizes\n## Done summary\nTBD\n\n## Evidence\n- Commits:\n- Tests:\n- PRs:\n"
+    },
+    {
+      "data": {
+        "assignee": null,
+        "claim_note": "",
+        "claimed_at": null,
+        "created_at": "2026-04-06T10:23:28.744354Z",
+        "depends_on": [
+          "fn-10-spotify-artist-alerts-follow-artists.7"
+        ],
+        "epic": "fn-10-spotify-artist-alerts-follow-artists",
+        "id": "fn-10-spotify-artist-alerts-follow-artists.8",
+        "priority": null,
+        "spec_path": ".flow/tasks/fn-10-spotify-artist-alerts-follow-artists.8.md",
+        "status": "todo",
+        "title": "Email Notification Service with Resend Integration",
+        "updated_at": "2026-04-06T10:26:01.875281Z"
+      },
+      "id": "fn-10-spotify-artist-alerts-follow-artists.8",
+      "runtime": null,
+      "spec": "# fn-10-spotify-artist-alerts-follow-artists.8 Email Notification Service with Resend Integration\n\n## Description\nIntegrate Resend for email notifications. Build email templates for artist alerts and wire into the notification sender module. Include GDPR-compliant unsubscribe mechanism.\n\n**Size:** M\n**Files:** `src/lib/email.ts`, `src/lib/notification-sender.ts` (update), `src/emails/artist-alert.tsx` (React Email template)\n\n## Approach\n\n- Install `resend` npm package\n- Create `src/lib/email.ts` with `sendArtistAlertEmail()` function\n- Email template using React Email (or plain HTML): artist name, event title, date, location, link to event, unsubscribe link\n- Unsubscribe link: `/api/notifications/unsubscribe?token=<jwt>` -- sets `channel_email=false` in `notification_preferences`\n- Wire into `notification-sender.ts`: if user has `channel_email=true` and verified email, call Resend\n- Env var: `RESEND_API_KEY`\n- From address: `alerts@osterreich.events` (or whatever domain is configured)\n- Error handling: retry up to 3 times with exponential backoff, log failures\n- Rate limit: batch emails, max 100/day on Resend free tier\n\n## Key context\n\n- Resend has a Supabase Edge Function example -- but our notification-sender may run both in Edge Functions (Deno) and Node.js (npm script). Use `fetch()` directly instead of the npm package for Deno compatibility\n- GDPR/DSGVO: email opt-in must be explicit (off by default in notification_preferences)\n- User email comes from `auth.users.email` via Supabase Auth\n## Acceptance\n- [ ] Resend integration sends artist alert emails\n- [ ] Email contains: artist name, event title, date, location, event link\n- [ ] Unsubscribe link in every email that disables email notifications\n- [ ] `notification-sender.ts` checks `channel_email` preference before sending\n- [ ] Retry logic: 3 attempts with exponential backoff on failure\n- [ ] Works in both Deno (Edge Function) and Node.js (script) environments\n- [ ] `RESEND_API_KEY` env var documented\n- [ ] No emails sent to users who have not explicitly opted in\n## Done summary\nTBD\n\n## Evidence\n- Commits:\n- Tests:\n- PRs:\n"
+    },
+    {
+      "data": {
+        "assignee": null,
+        "claim_note": "",
+        "claimed_at": null,
+        "created_at": "2026-04-06T10:23:29.181653Z",
+        "depends_on": [
+          "fn-10-spotify-artist-alerts-follow-artists.7"
+        ],
+        "epic": "fn-10-spotify-artist-alerts-follow-artists",
+        "id": "fn-10-spotify-artist-alerts-follow-artists.9",
+        "priority": null,
+        "spec_path": ".flow/tasks/fn-10-spotify-artist-alerts-follow-artists.9.md",
+        "status": "todo",
+        "title": "SMS Notification Service with Twilio Integration",
+        "updated_at": "2026-04-06T10:26:02.401340Z"
+      },
+      "id": "fn-10-spotify-artist-alerts-follow-artists.9",
+      "runtime": null,
+      "spec": "# fn-10-spotify-artist-alerts-follow-artists.9 SMS Notification Service with Twilio Integration\n\n## Description\nIntegrate Twilio for SMS notifications. Build SMS message formatting and wire into the notification sender module. Include opt-out handling and phone number validation.\n\n**Size:** M\n**Files:** `src/lib/sms.ts`, `src/lib/notification-sender.ts` (update)\n\n## Approach\n\n- Install `twilio` npm package (or use fetch for Deno compatibility)\n- Create `src/lib/sms.ts` with `sendArtistAlertSMS()` function\n- SMS format: \"Kuenstler-Alert: {artist_name} tritt am {date} bei {event_title} in {location} auf! Details: {url}\"\n- Max 160 chars per SMS segment -- truncate event title if needed\n- Phone number validation: E.164 format, Austrian numbers start with +43\n- Wire into `notification-sender.ts`: if user has `channel_sms=true` and valid `phone_number`, call Twilio\n- Env vars: `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_PHONE_NUMBER`\n- Handle opt-out: if Twilio returns \"STOP\" keyword response, set `channel_sms=false`\n- Error handling: retry up to 2 times, log undeliverable numbers\n\n## Key context\n\n- Twilio SMS costs money per message -- consider batching or rate limiting\n- For Deno (Edge Function): use Twilio REST API via fetch, not the npm SDK\n- Austrian mobile numbers: +43 6XX XXX XXXX\n- SMS is the most intrusive channel -- only for users who explicitly opted in AND provided a phone number\n## Acceptance\n- [ ] Twilio integration sends artist alert SMS\n- [ ] SMS message is concise (fits in 1-2 segments)\n- [ ] Phone number validated as E.164 format before sending\n- [ ] `notification-sender.ts` checks `channel_sms` and `phone_number` before sending\n- [ ] Retry logic: 2 attempts on transient failure\n- [ ] Twilio env vars documented\n- [ ] No SMS sent to users who have not explicitly opted in\n- [ ] Works in both Deno and Node.js environments\n## Done summary\nTBD\n\n## Evidence\n- Commits:\n- Tests:\n- PRs:\n"
+    }
+  ]
+}

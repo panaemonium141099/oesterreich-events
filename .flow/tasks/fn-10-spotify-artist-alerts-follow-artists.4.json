@@ -1,0 +1,16 @@
+{
+  "assignee": null,
+  "claim_note": "",
+  "claimed_at": null,
+  "created_at": "2026-04-06T10:23:26.960129Z",
+  "depends_on": [
+    "fn-10-spotify-artist-alerts-follow-artists.2"
+  ],
+  "epic": "fn-10-spotify-artist-alerts-follow-artists",
+  "id": "fn-10-spotify-artist-alerts-follow-artists.4",
+  "priority": null,
+  "spec_path": ".flow/tasks/fn-10-spotify-artist-alerts-follow-artists.4.md",
+  "status": "todo",
+  "title": "Spotify Search API Integration with Client Credentials Flow",
+  "updated_at": "2026-04-06T10:24:25.665063Z"
+}

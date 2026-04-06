@@ -1,0 +1,16 @@
+{
+  "assignee": null,
+  "claim_note": "",
+  "claimed_at": null,
+  "created_at": "2026-04-06T10:23:28.298019Z",
+  "depends_on": [
+    "fn-10-spotify-artist-alerts-follow-artists.6"
+  ],
+  "epic": "fn-10-spotify-artist-alerts-follow-artists",
+  "id": "fn-10-spotify-artist-alerts-follow-artists.7",
+  "priority": null,
+  "spec_path": ".flow/tasks/fn-10-spotify-artist-alerts-follow-artists.7.md",
+  "status": "todo",
+  "title": "Post-Scrape Matching Pipeline: Edge Function and pg_cron",
+  "updated_at": "2026-04-06T10:49:01.483470Z"
+}

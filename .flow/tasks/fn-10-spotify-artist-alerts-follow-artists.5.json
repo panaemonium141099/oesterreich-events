@@ -1,0 +1,17 @@
+{
+  "assignee": null,
+  "claim_note": "",
+  "claimed_at": null,
+  "created_at": "2026-04-06T10:23:27.392777Z",
+  "depends_on": [
+    "fn-10-spotify-artist-alerts-follow-artists.3",
+    "fn-10-spotify-artist-alerts-follow-artists.4"
+  ],
+  "epic": "fn-10-spotify-artist-alerts-follow-artists",
+  "id": "fn-10-spotify-artist-alerts-follow-artists.5",
+  "priority": null,
+  "spec_path": ".flow/tasks/fn-10-spotify-artist-alerts-follow-artists.5.md",
+  "status": "todo",
+  "title": "Artist Management UI: Follow, Search, Top Artists Pre-selection",
+  "updated_at": "2026-04-06T10:48:11.849217Z"
+}

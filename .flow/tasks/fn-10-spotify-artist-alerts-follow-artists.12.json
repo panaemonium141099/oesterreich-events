@@ -1,0 +1,16 @@
+{
+  "assignee": null,
+  "claim_note": "",
+  "claimed_at": null,
+  "created_at": "2026-04-06T11:27:54.950985Z",
+  "depends_on": [
+    "fn-10-spotify-artist-alerts-follow-artists.7"
+  ],
+  "epic": "fn-10-spotify-artist-alerts-follow-artists",
+  "id": "fn-10-spotify-artist-alerts-follow-artists.12",
+  "priority": null,
+  "spec_path": ".flow/tasks/fn-10-spotify-artist-alerts-follow-artists.12.md",
+  "status": "todo",
+  "title": "Event Reminder System: Scheduled Reminders 7d and 1d Before Events",
+  "updated_at": "2026-04-06T11:27:54.951016Z"
+}
