@@ -39,9 +39,8 @@ Build the Artist Management page where users can view, search, follow, and unfol
 - [ ] Link to artist management from profile page and SocialNav
 
 ## Done summary
-TBD
-
+Built the Artist Management UI at /artists with four sections: Spotify imported artists (top 50 ordered by rank with top 10 pre-toggled), debounced Spotify search, manual free-text add, and a followed artists list with unfollow support. Added navigation links in SocialNav and profile page.
 ## Evidence
-- Commits:
-- Tests:
+- Commits: 7a0e3f823f4e62c003dca87d4d5f06ebb8fb726b
+- Tests: npm test (484 passed), npx tsc --noEmit (0 new errors)
 - PRs:
