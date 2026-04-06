@@ -65,7 +65,7 @@ vi.mock('@/lib/spotify', () => ({
 // ── Helpers ─────────────────────────────────────────────────────────────────
 
 function makeRequest(url: string, options?: RequestInit) {
-  return new NextRequest(url, options);
+  return new NextRequest(url, options as never);
 }
 
 // ── Follow API Tests ────────────────────────────────────────────────────────

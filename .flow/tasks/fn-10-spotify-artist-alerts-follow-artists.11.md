@@ -42,9 +42,8 @@ Write integration tests for the full artist alert pipeline (follow -> match -> n
 - [ ] HANDOFF.md updated with current Spotify integration status
 - [ ] E2E verification checklist documented and executed
 ## Done summary
-TBD
-
+Added 19 API integration tests covering follow/unfollow, Spotify search, and notification preferences endpoints. Updated CLAUDE.md (new paths, scripts, env vars, 547 test count), CHANGELOG.md (full fn-10 phase section with architecture, tables, routes, components, design decisions), and HANDOFF.md (Spotify integration status).
 ## Evidence
-- Commits:
-- Tests:
+- Commits: 482aac3d9f1d9dba30306ed9ac021370fd101c80
+- Tests: npm test (547 passed, 27 test files)
 - PRs:
