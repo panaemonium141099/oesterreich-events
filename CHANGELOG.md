@@ -1161,4 +1161,129 @@ After the fn-5 geocoding pipeline overhaul, ~2,600 events still had NULL coordin
 
 ---
 
-*Last updated: 2026-04-04*
+## Spotify Artist Alerts: Follow Artists, Get Notified on Events (fn-10, 2026-04-06)
+
+### Overview
+Full-stack artist alert system enabling users to follow music artists and receive multi-channel notifications (in-app, email, SMS) when followed artists have events in Austria. Artists can be sourced from Spotify (auto-import top artists) or added manually (search + free-text). Server-side pg_trgm matching engine continuously monitors ~109K events.
+
+### Architecture
+
+```
+User -> Follow Artists (Spotify import / manual search / free-text)
+         |
+         v
+  followed_artists table
+         |
+         v
+  Matching Engine (pg_trgm word_similarity on events.title)
+    - 3-char names: exact word boundary match
+    - 4+ char names: fuzzy match (threshold >= 0.6)
+    - 6+ char names: secondary description substring check
+         |
+         v
+  artist_event_notifications (per-artist dedup)
+         |
+         v
+  notifications (grouped: max 1 per user+event)
+         |
+         v
+  Fan-out: In-app (Realtime) + Email (Resend) + SMS (Twilio)
+```
+
+### Database Tables Added (6 new tables)
+
+| Table | Purpose |
+|-------|---------|
+| `spotify_tokens` | Secure server-only Spotify token storage (no RLS SELECT) |
+| `imported_spotify_artists` | Staging table for top 50 Spotify artists per user |
+| `followed_artists` | Actively followed artists (decoupled from Spotify) |
+| `artist_event_notifications` | Per-artist match records with scores |
+| `notification_preferences` | User channel preferences (in-app/email/SMS) |
+| `matching_cursor` | Incremental matching state (idempotent replay) |
+
+### API Routes Added
+
+| Route | Method | Purpose |
+|-------|--------|---------|
+| `/api/artists/follow` | POST | Follow an artist |
+| `/api/artists/follow` | DELETE | Unfollow an artist (hard delete) |
+| `/api/artists/following` | GET | List followed artists (cursor pagination) |
+| `/api/artists/search` | GET | Spotify artist search (Client Credentials) |
+| `/api/artists/events` | GET | Upcoming matched artist events |
+| `/api/spotify/status` | GET | Spotify connection status |
+| `/api/notifications/preferences` | GET/PUT | Notification preferences CRUD |
+| `/api/notifications/unsubscribe` | GET | Email unsubscribe with HMAC token |
+
+### Key Design Decisions
+
+- **Token security**: Spotify tokens in dedicated `spotify_tokens` table, no client-side access
+- **Imported vs followed separation**: Top 50 staged, top 10 auto-followed, user toggles rest
+- **Hard delete on unfollow**: No soft delete, re-follow is fresh INSERT
+- **Notification dedup**: Unique partial index on (user_id, event_id) WHERE type = 'spotify_match'
+- **GDPR opt-in**: Email/SMS off by default, explicit opt-in required
+- **Description matching**: No GIN index on description (too expensive); cheap POSITION() substring check
+
+### Components Added
+
+| Component | Purpose |
+|-----------|---------|
+| `ArtistCard` | Individual artist card with follow/unfollow toggle |
+| `ArtistSearch` | Spotify search with debounce and manual add |
+| `ImportedArtistsList` | Spotify top artists with pre-selection |
+| `ArtistEventsSection` | Sidebar tab showing matched upcoming events |
+| `ArtistEventCard` | Event card with matched artist chips and ticket CTA |
+
+### Scripts and Services
+
+| File | Purpose |
+|------|---------|
+| `src/scripts/match-artists.ts` | CLI matching pipeline (--dry-run, --reset-cursor, --user-id) |
+| `src/lib/artist-matching.ts` | Matching engine (pg_trgm, tiered strategy, cursor management) |
+| `src/lib/email.ts` | Resend email service with retry (3 attempts, exponential backoff) |
+| `src/lib/sms.ts` | Twilio SMS service with E.164 validation |
+| `src/emails/artist-alert.tsx` | Artist discovery email template |
+| `src/emails/artist-reminder.tsx` | 7d/1d reminder email template (amber/red urgency) |
+
+### Test Coverage
+
+| Test File | Tests | Coverage |
+|-----------|-------|----------|
+| `src/__tests__/lib/artist-matching.test.ts` | 19 | Matching engine: classify, normalize, group, cursor, pipeline |
+| `src/__tests__/lib/email.test.ts` | 16 | Email templates, unsubscribe tokens, Resend API |
+| `src/__tests__/lib/sms.test.ts` | 12 | Phone validation, SMS formatting (discovery + reminder) |
+| `src/__tests__/api/artists.test.ts` | 19 | Follow/unfollow, search, preferences APIs |
+| **Total new tests** | **66** | |
+
+### Known Limitations
+
+- **Spotify Development Mode**: Limited to 5 authorized users. Manual following works for all users.
+- **No GIN index on events.description**: Secondary matching uses cheap substring check
+- **pg_cron availability**: Depends on Supabase plan; post-scrape hook is primary trigger
+
+### Files Added/Changed
+
+| File | Purpose |
+|------|---------|
+| `src/lib/artist-matching.ts` | New: Matching engine with pg_trgm word_similarity |
+| `src/lib/email.ts` | New: Resend email notification service |
+| `src/lib/sms.ts` | New: Twilio SMS notification service |
+| `src/lib/spotify.ts` | Updated: Client Credentials flow, token management |
+| `src/emails/artist-alert.tsx` | New: Artist alert email template |
+| `src/emails/artist-reminder.tsx` | New: Artist reminder email template |
+| `src/scripts/match-artists.ts` | New: CLI matching pipeline |
+| `src/app/api/artists/follow/route.ts` | New: Follow/unfollow API |
+| `src/app/api/artists/following/route.ts` | New: Following list API |
+| `src/app/api/artists/search/route.ts` | New: Spotify search API |
+| `src/app/api/artists/events/route.ts` | New: Matched events API |
+| `src/app/api/spotify/status/route.ts` | New: Spotify connection status |
+| `src/app/api/notifications/preferences/route.ts` | New: Preferences CRUD |
+| `src/app/api/notifications/unsubscribe/route.ts` | New: Email unsubscribe |
+| `src/components/Artists/*.tsx` | New: Artist management UI (5 components) |
+| `src/__tests__/api/artists.test.ts` | New: API integration tests |
+| `CLAUDE.md` | Updated: New paths, scripts, env vars, test count |
+| `CHANGELOG.md` | Updated: fn-10 phase section |
+| `HANDOFF.md` | Updated: Spotify integration status |
+
+---
+
+*Last updated: 2026-04-06*

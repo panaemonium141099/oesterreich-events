@@ -39,9 +39,8 @@ Build the notification preferences UI where users can configure which channels t
 - [ ] Link from artist management and profile pages
 
 ## Done summary
-TBD
-
+Added notification preferences UI at /settings/notifications with API routes (GET/PUT), GDPR consent dialogs for email/SMS, phone number input with E.164 validation, always-on in-app channel, and navigation links from profile and artist management pages.
 ## Evidence
-- Commits:
-- Tests:
+- Commits: 1457ad26c0552c7f7d3bcae7fac67cc846848c8d
+- Tests: npx tsc --noEmit, npm test
 - PRs:

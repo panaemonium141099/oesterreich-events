@@ -19,7 +19,7 @@
 - Direktnachrichten (/messages) mit Realtime
 - Feed (/feed) mit Create Post, Trending, Aktivitäten
 - Memories (/memories) mit Foto-Upload
-- Spotify Integration (OAuth Flow gebaut, braucht Credentials)
+- Spotify Artist Alerts (OAuth, top artist import, manual search, pg_trgm matching, in-app/email/SMS notifications, event reminders 7d/1d)
 - Admin Panel (/admin) mit 6 Tabs: Übersicht, Users, Events, Statistiken, Scraper, Moderation
 - Analytics Tracking (page_view, event_click, search, etc.)
 - Legal: Impressum, Datenschutz, AGB, Cookie Banner, Consent Checkboxen
@@ -45,7 +45,7 @@
 12. **Deployment auf Vercel** — noch nicht gemacht
 
 ### Nice to have:
-13. **Spotify Credentials** — Spotify Developer Account nötig, OAuth Flow ist gebaut
+13. **Spotify Extended Quota** — Spotify Dev Mode limited to 5 users; apply for Extended Quota for public launch. Manual artist following works for all users.
 14. **Facebook Integration** — noch nicht implementiert
 15. **Business Profiles** — Grundstruktur da, aber Flow nicht fertig
 16. **Mobile App-Verweis Screen** — fehlt noch
