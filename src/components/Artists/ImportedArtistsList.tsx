@@ -36,13 +36,13 @@ export function ImportedArtistsList({
     return (
       <div className="space-y-2">
         {[...Array(5)].map((_, i) => (
-          <div key={i} className="animate-pulse flex items-center gap-3 p-3 rounded-xl bg-slate-50">
-            <div className="w-12 h-12 rounded-full bg-slate-100" />
+          <div key={i} className="animate-pulse flex items-center gap-3 p-3 rounded-xl bg-white/[0.04]">
+            <div className="w-12 h-12 rounded-full bg-white/[0.06]" />
             <div className="flex-1 space-y-2">
-              <div className="h-4 bg-slate-100 rounded w-2/3" />
-              <div className="h-3 bg-slate-100 rounded w-1/3" />
+              <div className="h-4 bg-white/[0.06] rounded w-2/3" />
+              <div className="h-3 bg-white/[0.06] rounded w-1/3" />
             </div>
-            <div className="w-16 h-7 bg-slate-100 rounded-lg" />
+            <div className="w-16 h-7 bg-white/[0.06] rounded-lg" />
           </div>
         ))}
       </div>
