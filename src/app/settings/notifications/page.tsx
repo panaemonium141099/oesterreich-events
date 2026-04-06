@@ -15,12 +15,12 @@ import { SocialNav } from '@/components/Layout/SocialNav';
 
 export default function NotificationSettingsPage() {
   return (
-    <div className="min-h-screen bg-black text-white">
-      <header className="sticky top-0 z-40 border-b border-zinc-800 bg-black/80 backdrop-blur-md">
+    <div className="min-h-screen bg-[#f8fafc] text-slate-800">
+      <header className="sticky top-0 z-40 border-b border-slate-200 bg-[#f8fafc]/80 backdrop-blur-md">
         <div className="mx-auto flex h-14 max-w-2xl items-center justify-between px-4">
           <Link
             href="/profile"
-            className="flex items-center gap-2 text-sm text-zinc-400 transition hover:text-white"
+            className="flex items-center gap-2 text-sm text-slate-500 transition hover:text-slate-800"
           >
             <svg
               className="h-4 w-4"
@@ -39,7 +39,7 @@ export default function NotificationSettingsPage() {
           </Link>
           <Link
             href="/artists"
-            className="text-sm text-indigo-400 transition hover:text-indigo-300"
+            className="text-sm text-indigo-600 transition hover:text-indigo-500"
           >
             Kuenstler verwalten
           </Link>
@@ -49,7 +49,7 @@ export default function NotificationSettingsPage() {
       <main className="mx-auto max-w-2xl px-4 py-8">
         <div className="mb-6">
           <h1 className="text-2xl font-bold">Benachrichtigungseinstellungen</h1>
-          <p className="mt-1 text-sm text-zinc-400">
+          <p className="mt-1 text-sm text-slate-500">
             Verwalte deine Benachrichtigungskanaele und Erinnerungen.
           </p>
         </div>
