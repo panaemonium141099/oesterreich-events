@@ -142,13 +142,29 @@ export function buildVenueIndex(
 // ─── MATCHING ───────────────────────────────────────────────────────────────
 
 /**
+ * Build a Bundesland-based venue index for faster fuzzy matching.
+ * Instead of scanning all 5600 venues, only scan venues in the same Bundesland.
+ */
+export function buildBundeslandIndex(
+  venues: VenueCandidate[],
+): Map<string, VenueCandidate[]> {
+  const index = new Map<string, VenueCandidate[]>();
+  for (const venue of venues) {
+    const key = venue.bundesland || '__unknown__';
+    const list = index.get(key) ?? [];
+    list.push(venue);
+    index.set(key, list);
+  }
+  return index;
+}
+
+/**
  * Try to match an event to a venue.
  *
  * Strategy:
  * 1. Normalize the event's location_name
- * 2. Check for exact normalized match in the venue index
- * 3. If no exact match, do fuzzy Jaro-Winkler scan against all venue names
- * 4. For fuzzy matches, validate with geo proximity if coordinates available
+ * 2. Check for exact normalized match in the venue index (O(1) via HashMap)
+ * 3. If no exact match AND event has a Bundesland, fuzzy scan only same-Bundesland venues
  *
  * Returns the best match or null if no match meets the confidence threshold.
  */
@@ -156,6 +172,7 @@ export function matchEventToVenue(
   event: EventCandidate,
   venueIndex: Map<string, VenueCandidate[]>,
   allVenues: VenueCandidate[],
+  bundeslandIndex?: Map<string, VenueCandidate[]>,
 ): VenueMatch | null {
   const locationName = event.location_name;
   if (!locationName || !locationName.trim()) return null;
@@ -163,10 +180,9 @@ export function matchEventToVenue(
   const normalizedLocation = normalizeLocationName(locationName);
   if (!normalizedLocation || normalizedLocation.length < 3) return null;
 
-  // Strategy 1: Exact normalized name match
+  // Strategy 1: Exact normalized name match (fast - HashMap lookup)
   const exactMatches = venueIndex.get(normalizedLocation);
   if (exactMatches && exactMatches.length > 0) {
-    // If multiple venues share the name, pick the closest one geographically
     const best = pickClosestVenue(event, exactMatches);
     if (best) {
       const dist = computeDistance(event, best);
@@ -182,11 +198,18 @@ export function matchEventToVenue(
     }
   }
 
-  // Strategy 2: Fuzzy Jaro-Winkler scan
+  // Strategy 2: Fuzzy Jaro-Winkler scan (only same Bundesland to stay fast)
+  // Skip fuzzy if no Bundesland (would require scanning all 5600 venues)
+  const searchVenues = bundeslandIndex && event.bundesland
+    ? bundeslandIndex.get(event.bundesland) ?? []
+    : [];
+
+  if (searchVenues.length === 0) return null;
+
   let bestMatch: VenueCandidate | null = null;
   let bestSimilarity = 0;
 
-  for (const venue of allVenues) {
+  for (const venue of searchVenues) {
     const sim = jaroWinkler(normalizedLocation, venue.name_normalized);
     if (sim >= VENUE_MATCH_THRESHOLD && sim > bestSimilarity) {
       bestSimilarity = sim;
@@ -199,7 +222,6 @@ export function matchEventToVenue(
   // Validate geo proximity if both have coordinates
   const dist = computeDistance(event, bestMatch);
   if (dist !== null && dist > MAX_DISTANCE_KM) {
-    // Name matches but too far away -- likely a different venue with similar name
     return null;
   }
 
@@ -450,9 +472,11 @@ async function main() {
     process.exit(0);
   }
 
-  // 2. Build venue index
+  // 2. Build venue indexes
   const venueIndex = buildVenueIndex(venues);
+  const bundeslandIndex = buildBundeslandIndex(venues);
   console.log(`Venue index: ${venueIndex.size} unique normalized names`);
+  console.log(`Bundesland index: ${bundeslandIndex.size} regions`);
 
   // 3. Fetch unmatched events
   console.log('\nFetching events without venue_id...');
@@ -469,8 +493,9 @@ async function main() {
   const matches: VenueMatch[] = [];
   let processed = 0;
 
+  const startTime = Date.now();
   for (const event of events) {
-    const match = matchEventToVenue(event, venueIndex, venues);
+    const match = matchEventToVenue(event, venueIndex, venues, bundeslandIndex);
     if (match) {
       matches.push(match);
       if (verbose) {
@@ -482,9 +507,10 @@ async function main() {
     }
 
     processed++;
-    if (processed % 10000 === 0) {
+    if (processed % 5000 === 0) {
+      const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
       console.log(
-        `  Processed ${processed}/${events.length} events (${matches.length} matches so far)`,
+        `  Processed ${processed}/${events.length} events (${matches.length} matches, ${elapsed}s)`,
       );
     }
   }
