@@ -7,6 +7,7 @@ import { useAuth } from '@/lib/supabase/auth-context';
 import { createClient } from '@/lib/supabase/client';
 import { EventPreviewMessage } from '@/components/Chat/EventPreviewMessage';
 import { EventSearchInline } from '@/components/Chat/EventSearchInline';
+import { toast } from 'sonner';
 
 interface DirectMessage {
   id: string;
@@ -39,6 +40,8 @@ export default function DMConversationPage() {
   const [loadingData, setLoadingData] = useState(true);
   const [sending, setSending] = useState(false);
   const [showEventSearch, setShowEventSearch] = useState(false);
+  const [isFriend, setIsFriend] = useState<boolean | null>(null); // null = loading
+  const [sendingFriendRequest, setSendingFriendRequest] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -56,6 +59,35 @@ export default function DMConversationPage() {
       .single();
     if (data) setFriend(data);
   }, [friendId, supabase]);
+
+  const checkFriendship = useCallback(async () => {
+    if (!user || !friendId) return;
+    const { data } = await supabase
+      .from('friendships')
+      .select('id')
+      .eq('status', 'accepted')
+      .or(`and(requester_id.eq.${user.id},addressee_id.eq.${friendId}),and(requester_id.eq.${friendId},addressee_id.eq.${user.id})`)
+      .limit(1);
+    setIsFriend((data && data.length > 0) || false);
+  }, [user, friendId, supabase]);
+
+  const sendFriendRequest = async () => {
+    if (!user || !friendId) return;
+    setSendingFriendRequest(true);
+    try {
+      const { error } = await supabase.from('friendships').insert({
+        requester_id: user.id,
+        addressee_id: friendId,
+        status: 'pending',
+      });
+      if (error) throw error;
+      toast.success('Freundschaftsanfrage gesendet');
+    } catch {
+      toast.error('Anfrage konnte nicht gesendet werden');
+    } finally {
+      setSendingFriendRequest(false);
+    }
+  };
 
   const fetchMessages = useCallback(async () => {
     if (!user || !friendId) return;
@@ -85,13 +117,14 @@ export default function DMConversationPage() {
       const init = async () => {
         setLoadingData(true);
         await fetchFriend();
+        await checkFriendship();
         await fetchMessages();
         await markAsRead();
         setLoadingData(false);
       };
       init();
     }
-  }, [user, friendId, fetchFriend, fetchMessages, markAsRead]);
+  }, [user, friendId, fetchFriend, checkFriendship, fetchMessages, markAsRead]);
 
   // Scroll to bottom
   useEffect(() => {
@@ -129,28 +162,39 @@ export default function DMConversationPage() {
   const sendMessage = async () => {
     if (!user || !messageText.trim()) return;
     setSending(true);
-    await supabase.from('direct_messages').insert({
-      sender_id: user.id,
-      receiver_id: friendId,
-      content: messageText.trim(),
-      message_type: 'text',
-      read: false,
-    });
-    setMessageText('');
-    setSending(false);
+    try {
+      const { error } = await supabase.from('direct_messages').insert({
+        sender_id: user.id,
+        receiver_id: friendId,
+        content: messageText.trim(),
+        message_type: 'text',
+        read: false,
+      });
+      if (error) throw error;
+      setMessageText('');
+    } catch {
+      toast.error('Nachricht konnte nicht gesendet werden');
+    } finally {
+      setSending(false);
+    }
   };
 
   const shareEvent = async (event: { id: string; title: string }) => {
     if (!user) return;
-    await supabase.from('direct_messages').insert({
-      sender_id: user.id,
-      receiver_id: friendId,
-      content: `Event geteilt: ${event.title}`,
-      message_type: 'event_share',
-      event_id: event.id,
-      read: false,
-    });
-    setShowEventSearch(false);
+    try {
+      const { error } = await supabase.from('direct_messages').insert({
+        sender_id: user.id,
+        receiver_id: friendId,
+        content: `Event geteilt: ${event.title}`,
+        message_type: 'event_share',
+        event_id: event.id,
+        read: false,
+      });
+      if (error) throw error;
+      setShowEventSearch(false);
+    } catch {
+      toast.error('Event konnte nicht geteilt werden');
+    }
   };
 
   const formatTime = (dateStr: string) => {
@@ -286,37 +330,65 @@ export default function DMConversationPage() {
         </div>
       )}
 
-      {/* Message Input */}
-      <div className="px-6 py-3 border-t border-white/[0.06] shrink-0 bg-[#141416]">
-        <div className="max-w-2xl mx-auto flex gap-2">
-          <button
-            onClick={() => setShowEventSearch(true)}
-            className="p-3 rounded-xl bg-white/[0.06] border border-white/[0.10] hover:border-white/[0.15] transition-colors shrink-0"
-            title="Event teilen"
-          >
-            <svg className="w-5 h-5 text-white/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-            </svg>
-          </button>
-          <input
-            type="text"
-            value={messageText}
-            onChange={(e) => setMessageText(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && sendMessage()}
-            placeholder="Nachricht schreiben..."
-            className="flex-1 px-4 py-3 rounded-xl bg-white/[0.06] border border-white/[0.10] text-white/90 placeholder-white/30 focus:outline-none focus:border-white/[0.15] transition-colors"
-          />
-          <button
-            onClick={sendMessage}
-            disabled={sending || !messageText.trim()}
-            className="p-3 rounded-xl bg-indigo-500 text-white hover:bg-indigo-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shrink-0"
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-            </svg>
-          </button>
+      {/* Message Input or Friend Guard */}
+      {isFriend === false ? (
+        <div className="px-6 py-4 border-t border-white/[0.06] shrink-0 bg-[#141416]">
+          <div className="max-w-2xl mx-auto text-center py-4">
+            <div className="w-12 h-12 rounded-full bg-white/[0.04] border border-white/[0.06] flex items-center justify-center mx-auto mb-3">
+              <svg className="w-6 h-6 text-white/20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+              </svg>
+            </div>
+            <p className="text-white/50 text-sm mb-1">Ihr muesst Freunde sein um Nachrichten zu senden</p>
+            <p className="text-white/30 text-xs mb-3">Sende eine Freundschaftsanfrage, um eine Unterhaltung zu starten.</p>
+            <button
+              onClick={sendFriendRequest}
+              disabled={sendingFriendRequest}
+              className="inline-flex items-center gap-2 px-5 py-2.5 min-h-[44px] rounded-xl bg-indigo-500 text-white text-sm font-semibold hover:bg-indigo-400 transition-all duration-200 ease-out active:scale-[0.97] motion-reduce:transform-none focus-visible:ring-2 focus-visible:ring-white/20 focus-visible:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {sendingFriendRequest ? (
+                <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin motion-reduce:animate-none" />
+              ) : (
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+                </svg>
+              )}
+              Freundschaftsanfrage senden
+            </button>
+          </div>
         </div>
-      </div>
+      ) : (
+        <div className="px-6 py-3 border-t border-white/[0.06] shrink-0 bg-[#141416]">
+          <div className="max-w-2xl mx-auto flex gap-2">
+            <button
+              onClick={() => setShowEventSearch(true)}
+              className="p-3 rounded-xl bg-white/[0.06] border border-white/[0.10] hover:border-white/[0.15] transition-colors shrink-0"
+              title="Event teilen"
+            >
+              <svg className="w-5 h-5 text-white/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+            </button>
+            <input
+              type="text"
+              value={messageText}
+              onChange={(e) => setMessageText(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && sendMessage()}
+              placeholder="Nachricht schreiben..."
+              className="flex-1 px-4 py-3 rounded-xl bg-white/[0.06] border border-white/[0.10] text-white/90 placeholder-white/30 focus:outline-none focus:border-white/[0.15] transition-colors"
+            />
+            <button
+              onClick={sendMessage}
+              disabled={sending || !messageText.trim()}
+              className="p-3 rounded-xl bg-indigo-500 text-white hover:bg-indigo-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shrink-0"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Event Search Modal */}
       {showEventSearch && (

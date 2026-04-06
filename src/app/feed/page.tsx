@@ -108,19 +108,19 @@ export default function FeedPage() {
   }, [hasMore, loadingMore, activities.length, fetchActivities]);
 
   const handleEventClick = (eventId: string) => {
-    router.push(`/map?search=&eventId=${eventId}`);
+    router.push(`/events/${eventId}`);
   };
 
   if (loading || !user) {
     return (
-      <div className="min-h-screen bg-[#0a0a0c] flex items-center justify-center">
+      <div className="min-h-screen bg-surface flex items-center justify-center">
         <div className="w-8 h-8 border-2 border-white/20 border-t-white/60 rounded-full animate-spin" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen text-white pb-24 bg-[#0a0a0c]">
+    <div className="min-h-screen text-white pb-24 bg-surface">
       <SocialNav />
 
       <main className="max-w-lg mx-auto px-0 py-6">
@@ -176,10 +176,17 @@ export default function FeedPage() {
               />
             ))}
 
-            <div ref={sentinelRef} className="h-10" />
+            {hasMore && <div ref={sentinelRef} className="h-10" />}
             {loadingMore && (
               <div className="flex justify-center py-4">
                 <div className="w-5 h-5 border-2 border-white/20 border-t-white/60 rounded-full animate-spin" />
+              </div>
+            )}
+            {!hasMore && !loadingMore && activities.length > 0 && (
+              <div className="flex flex-col items-center py-10 gap-2">
+                <div className="w-10 h-[1px] bg-white/[0.08] mb-2" />
+                <p className="text-white/30 text-xs font-medium">Du hast alles gesehen</p>
+                <p className="text-white/20 text-[10px]">Schau spaeter wieder vorbei</p>
               </div>
             )}
           </div>

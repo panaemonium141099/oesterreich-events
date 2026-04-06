@@ -94,7 +94,7 @@ export function ArtistSearch({ followedNames, onFollow, onUnfollow }: ArtistSear
     <div>
       <div className="relative">
         <svg
-          className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"
+          className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -111,11 +111,11 @@ export function ArtistSearch({ followedNames, onFollow, onUnfollow }: ArtistSear
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Kuenstler suchen..."
-          className="w-full pl-10 pr-4 py-3 rounded-xl bg-white border border-slate-200 text-slate-800 placeholder-slate-400 focus:outline-none focus:border-blue-500 transition-colors text-sm"
+          className="w-full pl-10 pr-4 py-3 rounded-xl bg-white/[0.06] border border-white/[0.10] text-white/90 placeholder-white/30 focus:outline-none focus:border-white/[0.15] transition-colors text-sm"
         />
         {searching && (
           <div className="absolute right-3 top-1/2 -translate-y-1/2">
-            <div className="w-4 h-4 border-2 border-slate-200 border-t-slate-600 rounded-full animate-spin" />
+            <div className="w-4 h-4 border-2 border-white/20 border-t-white/60 rounded-full animate-spin" />
           </div>
         )}
       </div>
@@ -142,7 +142,7 @@ export function ArtistSearch({ followedNames, onFollow, onUnfollow }: ArtistSear
       )}
 
       {query.trim().length >= 2 && !searching && results.length === 0 && !error && (
-        <p className="text-sm text-slate-500 mt-3 text-center py-4">
+        <p className="text-sm text-white/40 mt-3 text-center py-4">
           Keine Ergebnisse gefunden
         </p>
       )}

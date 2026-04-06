@@ -7,6 +7,7 @@ import { SocialNav } from '@/components/Layout/SocialNav';
 import { useAuth } from '@/lib/supabase/auth-context';
 import { createClient } from '@/lib/supabase/client';
 import { CrownIcon, BoltIcon, BuildingIcon, CheckIcon } from '@/components/UI/Icons';
+import { toast } from 'sonner';
 
 export default function ProfilePage() {
   const { user, profile, loading, refreshProfile } = useAuth();
@@ -124,7 +125,7 @@ export default function ProfilePage() {
         .upload(filePath, file, { upsert: true });
 
       if (uploadError) {
-        console.log('Avatar upload error (bucket may not exist):', uploadError.message);
+        toast.error('Avatar konnte nicht hochgeladen werden');
         return;
       }
 
@@ -138,14 +139,15 @@ export default function ProfilePage() {
         .eq('id', user.id);
 
       await refreshProfile();
-    } catch (err) {
-      console.log('Avatar upload failed:', err);
+      toast.success('Avatar aktualisiert');
+    } catch {
+      toast.error('Avatar konnte nicht hochgeladen werden');
     }
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#0a0a0c] flex items-center justify-center">
+      <div className="min-h-screen bg-surface flex items-center justify-center">
         <div className="w-8 h-8 border-2 border-white/20 border-t-white/60 rounded-full animate-spin" />
       </div>
     );
@@ -153,7 +155,7 @@ export default function ProfilePage() {
 
   return (
     <div
-      className="min-h-screen text-white pb-24 bg-[#0a0a0c]"
+      className="min-h-screen text-white pb-24 bg-surface"
     >
       <SocialNav />
 
@@ -398,27 +400,6 @@ export default function ProfilePage() {
                   : 'bg-white/[0.06] text-white/40'
               }`}>
                 {profile?.spotify_connected ? '\u2713' : 'Verbinden'}
-              </span>
-            </button>
-
-            <button className="w-full flex items-center justify-between px-4 py-3 rounded-xl bg-white/[0.04] border border-white/[0.06] hover:border-white/[0.10] transition-colors">
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center">
-                  <span className="text-blue-400 text-sm">f</span>
-                </div>
-                <div className="text-left">
-                  <p className="text-sm font-medium">Facebook</p>
-                  <p className="text-xs text-white/40">
-                    {profile?.facebook_connected ? 'Verbunden' : 'Nicht verbunden'}
-                  </p>
-                </div>
-              </div>
-              <span className={`text-xs px-2 py-1 rounded-full ${
-                profile?.facebook_connected
-                  ? 'bg-blue-500/20 text-blue-400'
-                  : 'bg-white/[0.06] text-white/40'
-              }`}>
-                {profile?.facebook_connected ? <CheckIcon size={14} /> : 'Verbinden'}
               </span>
             </button>
 

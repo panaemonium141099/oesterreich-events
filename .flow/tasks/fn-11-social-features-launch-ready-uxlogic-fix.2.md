@@ -29,9 +29,8 @@ Fix the Saved page: make event cards clickable, replace heart icon with bookmark
 - [ ] Page background uses `bg-surface` token
 - [ ] Loading state background matches page background
 ## Done summary
-TBD
-
+Saved page now navigates to /events/[id] on card click, uses bookmark icon (not heart), shows toast feedback on unsave/error, and uses bg-surface theme token.
 ## Evidence
-- Commits:
-- Tests:
+- Commits: 8b0660e8121244e37545d91483d05651485cbf13
+- Tests: npm test -- --run (547 passed)
 - PRs:

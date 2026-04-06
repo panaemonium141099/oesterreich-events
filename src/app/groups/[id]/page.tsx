@@ -8,6 +8,7 @@ import { SocialNav } from '@/components/Layout/SocialNav';
 import { createClient } from '@/lib/supabase/client';
 import { EventPreviewMessage } from '@/components/Chat/EventPreviewMessage';
 import { EventSearchInline } from '@/components/Chat/EventSearchInline';
+import { toast } from 'sonner';
 
 interface GroupData {
   id: string;
@@ -126,35 +127,6 @@ export default function EventDashboardPage() {
   const [contributions, setContributions] = useState<Contribution[]>([]);
   const [newContribution, setNewContribution] = useState('');
   const [showEventSearch, setShowEventSearch] = useState(false);
-
-  // Widget system
-  type WidgetType = 'teilnehmer' | 'karte' | 'mitbringen' | 'notizen';
-  const [activeWidgets, setActiveWidgets] = useState<WidgetType[]>([]);
-  const [currentWidget, setCurrentWidget] = useState<WidgetType | null>(null);
-  const [showWidgetPicker, setShowWidgetPicker] = useState(false);
-
-  const WIDGET_DEFS: { type: WidgetType; label: string; icon: string }[] = [
-    { type: 'teilnehmer', label: 'Teilnehmer', icon: 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z' },
-    { type: 'karte', label: 'Karte', icon: 'M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z' },
-    { type: 'mitbringen', label: 'Wer bringt was?', icon: 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4' },
-    { type: 'notizen', label: 'Notizen', icon: 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z' },
-  ];
-
-  const addWidget = (type: WidgetType) => {
-    if (!activeWidgets.includes(type)) {
-      setActiveWidgets(prev => [...prev, type]);
-    }
-    setCurrentWidget(type);
-    setShowWidgetPicker(false);
-  };
-
-  const removeWidget = (type: WidgetType) => {
-    setActiveWidgets(prev => prev.filter(w => w !== type));
-    if (currentWidget === type) {
-      const remaining = activeWidgets.filter(w => w !== type);
-      setCurrentWidget(remaining.length > 0 ? remaining[0] : null);
-    }
-  };
 
   // Invite modal
   const [showInvite, setShowInvite] = useState(false);
@@ -330,36 +302,42 @@ export default function EventDashboardPage() {
 
   const updateRsvp = async (status: string) => {
     if (!user || !myMembership) return;
-    await supabase.from('group_members')
-      .update({ rsvp: status, rsvp_at: new Date().toISOString() })
-      .eq('id', myMembership.id);
-
-    // Activity + system chat message
     const labels: Record<string, string> = { accepted: 'zugesagt', maybe: 'vielleicht zugesagt', declined: 'abgesagt' };
-    const firstName = myMembership.profile?.first_name || 'Jemand';
-    await Promise.all([
-      supabase.from('activities').insert({
-        user_id: user.id,
-        type: 'group_joined',
-        group_id: groupId,
-        metadata: { rsvp: status, label: labels[status] || status },
-      }),
-      supabase.from('group_messages').insert({
-        group_id: groupId,
-        user_id: user.id,
-        content: `${firstName} hat ${labels[status] || status}`,
-        message_type: 'text',
-      }),
-    ]);
+    try {
+      const { error } = await supabase.from('group_members')
+        .update({ rsvp: status, rsvp_at: new Date().toISOString() })
+        .eq('id', myMembership.id);
+      if (error) throw error;
 
-    setMyMembership(prev => prev ? { ...prev, rsvp: status, rsvp_at: new Date().toISOString() } : prev);
-    // Refresh members
-    const { data: mems } = await supabase
-      .from('group_members')
-      .select('id, user_id, role, rsvp, rsvp_at, profile:profiles(id, first_name, last_name, avatar_url, email)')
-      .eq('group_id', groupId);
-    if (mems) {
-      setMembers(mems.map((m: any) => ({ ...m, profile: Array.isArray(m.profile) ? m.profile[0] : m.profile })));
+      // Activity + system chat message
+      const firstName = myMembership.profile?.first_name || 'Jemand';
+      await Promise.all([
+        supabase.from('activities').insert({
+          user_id: user.id,
+          type: 'group_joined',
+          group_id: groupId,
+          metadata: { rsvp: status, label: labels[status] || status },
+        }),
+        supabase.from('group_messages').insert({
+          group_id: groupId,
+          user_id: user.id,
+          content: `${firstName} hat ${labels[status] || status}`,
+          message_type: 'text',
+        }),
+      ]);
+
+      setMyMembership(prev => prev ? { ...prev, rsvp: status, rsvp_at: new Date().toISOString() } : prev);
+      // Refresh members
+      const { data: mems } = await supabase
+        .from('group_members')
+        .select('id, user_id, role, rsvp, rsvp_at, profile:profiles(id, first_name, last_name, avatar_url, email)')
+        .eq('group_id', groupId);
+      if (mems) {
+        setMembers(mems.map((m: any) => ({ ...m, profile: Array.isArray(m.profile) ? m.profile[0] : m.profile })));
+      }
+      toast.success(`Status: ${labels[status] || status}`);
+    } catch {
+      toast.error('RSVP konnte nicht aktualisiert werden');
     }
   };
 
@@ -385,8 +363,14 @@ export default function EventDashboardPage() {
   };
 
   const removeContribution = async (id: string) => {
-    await supabase.from('group_contributions').delete().eq('id', id);
-    setContributions(prev => prev.filter(c => c.id !== id));
+    try {
+      const { error } = await supabase.from('group_contributions').delete().eq('id', id);
+      if (error) throw error;
+      setContributions(prev => prev.filter(c => c.id !== id));
+      toast.success('Eintrag entfernt');
+    } catch {
+      toast.error('Eintrag konnte nicht entfernt werden');
+    }
   };
 
   const copiedTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -698,7 +682,8 @@ export default function EventDashboardPage() {
               </div>
             )}
 
-            {/* Block 2: Chat */}
+            {/* Block 2: Chat (member-only) */}
+            {myMembership ? (
             <div className="rounded-2xl bg-white/[0.02] border border-white/[0.06] overflow-hidden">
               {/* Messages area */}
               <div className="px-4 py-4 space-y-3" style={{ minHeight: '280px', maxHeight: '50vh', overflowY: 'auto' }}>
@@ -739,7 +724,7 @@ export default function EventDashboardPage() {
                 )}
                 <div ref={messagesEndRef} />
               </div>
-              {/* Input bar — feine Linie darüber */}
+              {/* Input bar */}
               <div className="border-t border-white/[0.06] px-3 py-2.5">
                 <div className="flex gap-2">
                   <button
@@ -763,6 +748,20 @@ export default function EventDashboardPage() {
                 </div>
               </div>
             </div>
+            ) : (
+              <div className="rounded-2xl bg-white/[0.02] border border-white/[0.06] p-8 text-center">
+                <div className="w-12 h-12 rounded-2xl bg-white/[0.03] border border-white/[0.06] flex items-center justify-center mx-auto mb-3">
+                  <svg className="w-5 h-5 text-white/15" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                  </svg>
+                </div>
+                <p className="text-sm text-white/40 mb-1">Nur für Mitglieder</p>
+                <p className="text-xs text-white/20 mb-4">Tritt der Gruppe bei, um den Chat und Beiträge zu sehen.</p>
+                <button onClick={() => updateRsvp('accepted')} className="px-5 py-2.5 rounded-xl bg-white text-black text-sm font-semibold hover:bg-white/90 transition-all duration-200 active:scale-[0.97] motion-reduce:transform-none">
+                  Beitreten
+                </button>
+              </div>
+            )}
 
             {/* Block 3: Widgets — side by side */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -807,11 +806,14 @@ export default function EventDashboardPage() {
                       <Avatar url={c.profile?.avatar_url || null} name={c.profile?.first_name || '?'} size="sm" />
                       <span className="text-xs text-white/50 truncate flex-1">{c.item}</span>
                       {c.user_id === user?.id && (
-                        <button onClick={() => removeContribution(c.id)} className="opacity-0 group-hover:opacity-100 text-white/20 hover:text-red-400 transition-all duration-150 p-1">×</button>
+                        <button onClick={() => removeContribution(c.id)} className="min-w-[44px] min-h-[44px] flex items-center justify-center text-white/30 hover:text-red-400 transition-all duration-150 opacity-100 [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover:opacity-100 shrink-0" aria-label="Eintrag entfernen">
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                        </button>
                       )}
                     </div>
                   ))}
                 </div>
+                {myMembership && (
                 <div className="flex gap-2 px-3 py-2.5 border-t border-white/[0.04]">
                   <input type="text" value={newContribution} onChange={(e) => setNewContribution(e.target.value)}
                     onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addContribution(); } }}
@@ -822,6 +824,7 @@ export default function EventDashboardPage() {
                     <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
                   </button>
                 </div>
+                )}
               </div>
             </div>
 
@@ -856,7 +859,7 @@ export default function EventDashboardPage() {
 
             {/* Block 5: Linked Event (wenn vorhanden) */}
             {linkedEvent && (
-              <div className="rounded-2xl bg-white/[0.02] border border-white/[0.06] p-4">
+              <Link href={`/events/${linkedEvent.id}`} className="block rounded-2xl bg-white/[0.02] border border-white/[0.06] p-4 hover:border-white/15 transition-colors">
                 <div className="flex items-center gap-3">
                   {linkedEvent.image_url && <img src={linkedEvent.image_url} alt="" className="w-14 h-14 rounded-xl object-cover shrink-0" />}
                   <div className="flex-1 min-w-0">
@@ -864,14 +867,20 @@ export default function EventDashboardPage() {
                     <p className="text-sm font-medium truncate">{linkedEvent.title}</p>
                     <p className="text-xs text-white/30">{formatDate(linkedEvent.start_date)}{linkedEvent.location_name ? ` · ${linkedEvent.location_name}` : ''}</p>
                   </div>
-                  {linkedEvent.source_url && (
-                    <a href={linkedEvent.source_url} target="_blank" rel="noopener noreferrer"
-                      className="px-3 py-2 rounded-xl bg-white/5 border border-white/[0.06] text-xs text-white/40 hover:text-white hover:border-white/15 transition-all duration-200 shrink-0 min-h-[36px] flex items-center">
-                      Zum Event
-                    </a>
-                  )}
+                  <div className="flex items-center gap-2 shrink-0">
+                    {linkedEvent.source_url && (
+                      <a href={linkedEvent.source_url} target="_blank" rel="noopener noreferrer"
+                        onClick={(e) => e.stopPropagation()}
+                        className="px-3 py-2 rounded-xl bg-white/5 border border-white/[0.06] text-xs text-white/40 hover:text-white hover:border-white/15 transition-all duration-200 min-h-[36px] flex items-center">
+                        Original-Quelle
+                      </a>
+                    )}
+                    <svg className="w-4 h-4 text-white/15" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
+                  </div>
                 </div>
-              </div>
+              </Link>
             )}
           </div>
         )}

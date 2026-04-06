@@ -33,9 +33,8 @@ Install Sonner toast library and define dark theme tokens via Tailwind v4 `@them
 - [ ] `npm run build` passes
 - [ ] `npm test` passes
 ## Done summary
-TBD
-
+Installed Sonner toast library and mounted <Toaster /> in root layout with dark theme styling. Defined @theme tokens (--color-surface, --color-surface-elevated, --color-surface-inset) that generate bg-surface, bg-surface-elevated, bg-surface-inset Tailwind utilities.
 ## Evidence
-- Commits:
-- Tests:
+- Commits: a19d3474a61a150e086c15cdb73e063a31b64bcb
+- Tests: npm run build, npm test
 - PRs:

@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { SocialNav } from '@/components/Layout/SocialNav';
 import { useAuth } from '@/lib/supabase/auth-context';
 import { createClient } from '@/lib/supabase/client';
+import { toast } from 'sonner';
 
 interface Memory {
   id: string;
@@ -198,6 +199,7 @@ export default function MemoriesPage() {
       .single();
 
     if (error || !memory) {
+      toast.error('Memory konnte nicht erstellt werden');
       setCreating(false);
       return;
     }
@@ -236,22 +238,31 @@ export default function MemoriesPage() {
     });
 
     // Upload photos
+    let uploadFailCount = 0;
     for (const photo of photos) {
       const ext = photo.name.split('.').pop() || 'jpg';
       const path = `${user.id}/${memory.id}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
 
-      const { error: uploadErr } = await supabase.storage
-        .from('memories')
-        .upload(path, photo);
+      try {
+        const { error: uploadErr } = await supabase.storage
+          .from('memories')
+          .upload(path, photo);
 
-      if (!uploadErr) {
+        if (uploadErr) throw uploadErr;
         const { data: urlData } = supabase.storage.from('memories').getPublicUrl(path);
         await supabase.from('memory_photos').insert({
           memory_id: memory.id,
           uploaded_by: user.id,
           image_url: urlData.publicUrl,
         });
+      } catch {
+        uploadFailCount++;
       }
+    }
+    if (uploadFailCount > 0) {
+      toast.error(`${uploadFailCount} Foto${uploadFailCount > 1 ? 's' : ''} konnte${uploadFailCount > 1 ? 'n' : ''} nicht hochgeladen werden`);
+    } else if (photos.length > 0) {
+      toast.success(`${photos.length} Foto${photos.length > 1 ? 's' : ''} hochgeladen`);
     }
 
     setShowCreate(false);

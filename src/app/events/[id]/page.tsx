@@ -1,10 +1,10 @@
 import { notFound } from 'next/navigation';
-import Link from 'next/link';
 import Image from 'next/image';
 import type { Metadata } from 'next';
 import { createClient } from '@supabase/supabase-js';
 import type { Event } from '@/types/events';
 import { formatDateLong, formatTime } from '@/lib/utils/date';
+import { EventDetailActions } from '@/components/Events/EventDetailActions';
 
 if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
   throw new Error('SUPABASE_SERVICE_ROLE_KEY is required');
@@ -149,14 +149,9 @@ export default async function EventDetailPage({
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: jsonLd }}
       />
-      <main className="min-h-screen bg-gray-950 text-white">
+      <main className="min-h-screen bg-surface text-white">
         <div className="max-w-3xl mx-auto px-4 py-8">
-          <Link
-            href="/map"
-            className="inline-flex items-center gap-2 text-gray-400 hover:text-white transition-colors mb-6 text-sm"
-          >
-            <span aria-hidden="true">&larr;</span> Zuruck zur Karte
-          </Link>
+          <EventDetailActions eventId={event.id} eventTitle={event.title} />
 
           {event.image_url && (
             <div className="relative w-full aspect-video rounded-xl overflow-hidden mb-6">

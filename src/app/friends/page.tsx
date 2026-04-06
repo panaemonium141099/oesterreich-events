@@ -8,6 +8,7 @@ import { useAuth } from '@/lib/supabase/auth-context';
 import { createClient } from '@/lib/supabase/client';
 import { ProfileDropdown } from '@/components/Layout/ProfileDropdown';
 import { trackEvent } from '@/lib/analytics';
+import { toast } from 'sonner';
 
 interface ProfileResult {
   id: string;
@@ -124,36 +125,64 @@ export default function FriendsPage() {
 
   const sendRequest = async (targetId: string) => {
     setActionLoading(targetId);
-    await supabase.from('friendships').insert({
-      requester_id: user!.id,
-      addressee_id: targetId,
-      status: 'pending',
-    });
-    await fetchFriendships();
-    setSearch('');
-    setSearchResults([]);
-    setActionLoading(null);
+    try {
+      const { error } = await supabase.from('friendships').insert({
+        requester_id: user!.id,
+        addressee_id: targetId,
+        status: 'pending',
+      });
+      if (error) throw error;
+      await fetchFriendships();
+      setSearch('');
+      setSearchResults([]);
+      toast.success('Freundschaftsanfrage gesendet');
+    } catch {
+      toast.error('Fehler beim Senden der Anfrage');
+    } finally {
+      setActionLoading(null);
+    }
   };
 
   const acceptRequest = async (friendshipId: string) => {
     setActionLoading(friendshipId);
-    await supabase.from('friendships').update({ status: 'accepted' }).eq('id', friendshipId);
-    await fetchFriendships();
-    setActionLoading(null);
+    try {
+      const { error } = await supabase.from('friendships').update({ status: 'accepted' }).eq('id', friendshipId);
+      if (error) throw error;
+      await fetchFriendships();
+      toast.success('Freundschaftsanfrage angenommen');
+    } catch {
+      toast.error('Fehler bei der Anfrage');
+    } finally {
+      setActionLoading(null);
+    }
   };
 
   const rejectRequest = async (friendshipId: string) => {
     setActionLoading(friendshipId);
-    await supabase.from('friendships').delete().eq('id', friendshipId);
-    await fetchFriendships();
-    setActionLoading(null);
+    try {
+      const { error } = await supabase.from('friendships').delete().eq('id', friendshipId);
+      if (error) throw error;
+      await fetchFriendships();
+      toast.success('Anfrage abgelehnt');
+    } catch {
+      toast.error('Fehler bei der Anfrage');
+    } finally {
+      setActionLoading(null);
+    }
   };
 
   const removeFriend = async (friendshipId: string) => {
     setActionLoading(friendshipId);
-    await supabase.from('friendships').delete().eq('id', friendshipId);
-    await fetchFriendships();
-    setActionLoading(null);
+    try {
+      const { error } = await supabase.from('friendships').delete().eq('id', friendshipId);
+      if (error) throw error;
+      await fetchFriendships();
+      toast.success('Freund entfernt');
+    } catch {
+      toast.error('Fehler beim Entfernen');
+    } finally {
+      setActionLoading(null);
+    }
   };
 
   const isAlreadyFriendOrPending = (userId: string): boolean => {
@@ -198,7 +227,7 @@ export default function FriendsPage() {
 
   return (
     <div
-      className="min-h-screen text-white pb-24 bg-[#141416]"
+      className="min-h-screen text-white pb-24 bg-surface"
     >
       <SocialNav />
 
@@ -234,11 +263,13 @@ export default function FriendsPage() {
             <p className="text-xs text-white/40 uppercase tracking-wider mb-3">Suchergebnisse</p>
             {searchResults.map((p) => (
               <div key={p.id} className="flex items-center gap-3 p-3 rounded-xl bg-white/5 border border-white/10">
-                <Avatar profile={p} />
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium truncate">{p.first_name} {p.last_name}</p>
-                  <p className="text-xs text-white/30 truncate">{p.email}</p>
-                </div>
+                <Link href={`/profile/${p.id}`} className="flex items-center gap-3 flex-1 min-w-0 hover:opacity-80 transition-opacity">
+                  <Avatar profile={p} />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium truncate">{p.first_name} {p.last_name}</p>
+                    <p className="text-xs text-white/30 truncate">{p.email}</p>
+                  </div>
+                </Link>
                 {isAlreadyFriendOrPending(p.id) ? (
                   <span className="text-xs text-white/30 px-3 py-1.5">Bereits verbunden</span>
                 ) : (
@@ -316,11 +347,13 @@ export default function FriendsPage() {
                     const friend = getFriend(f);
                     return (
                       <div key={f.id} className="flex items-center gap-3 p-3 rounded-xl bg-white/5 border border-white/10 hover:border-white/20 transition-colors">
-                        <Avatar profile={friend} />
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium truncate">{friend.first_name} {friend.last_name}</p>
-                          <p className="text-xs text-white/30 truncate">{friend.email}</p>
-                        </div>
+                        <Link href={`/profile/${friend.id}`} className="flex items-center gap-3 flex-1 min-w-0 hover:opacity-80 transition-opacity">
+                          <Avatar profile={friend} />
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium truncate">{friend.first_name} {friend.last_name}</p>
+                            <p className="text-xs text-white/30 truncate">{friend.email}</p>
+                          </div>
+                        </Link>
                         <div className="flex items-center gap-2">
                           <Link
                             href={`/messages/${friend.id}`}
@@ -360,11 +393,13 @@ export default function FriendsPage() {
                     const requester = Array.isArray(f.requester) ? f.requester[0] : f.requester;
                     return (
                       <div key={f.id} className="flex items-center gap-3 p-3 rounded-xl bg-white/5 border border-white/10">
-                        <Avatar profile={requester} />
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium truncate">{requester.first_name} {requester.last_name}</p>
-                          <p className="text-xs text-white/30 truncate">{requester.email}</p>
-                        </div>
+                        <Link href={`/profile/${requester.id}`} className="flex items-center gap-3 flex-1 min-w-0 hover:opacity-80 transition-opacity">
+                          <Avatar profile={requester} />
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium truncate">{requester.first_name} {requester.last_name}</p>
+                            <p className="text-xs text-white/30 truncate">{requester.email}</p>
+                          </div>
+                        </Link>
                         <div className="flex items-center gap-2">
                           <button
                             onClick={() => acceptRequest(f.id)}
@@ -405,11 +440,13 @@ export default function FriendsPage() {
                     const addressee = Array.isArray(f.addressee) ? f.addressee[0] : f.addressee;
                     return (
                       <div key={f.id} className="flex items-center gap-3 p-3 rounded-xl bg-white/5 border border-white/10">
-                        <Avatar profile={addressee} />
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium truncate">{addressee.first_name} {addressee.last_name}</p>
-                          <p className="text-xs text-white/30 truncate">{addressee.email}</p>
-                        </div>
+                        <Link href={`/profile/${addressee.id}`} className="flex items-center gap-3 flex-1 min-w-0 hover:opacity-80 transition-opacity">
+                          <Avatar profile={addressee} />
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium truncate">{addressee.first_name} {addressee.last_name}</p>
+                            <p className="text-xs text-white/30 truncate">{addressee.email}</p>
+                          </div>
+                        </Link>
                         <button
                           onClick={() => rejectRequest(f.id)}
                           disabled={actionLoading === f.id}

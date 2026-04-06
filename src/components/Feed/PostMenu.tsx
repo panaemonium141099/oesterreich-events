@@ -62,12 +62,6 @@ export function PostMenu({ activityId, isOwner, onShare, onDeleted }: PostMenuPr
       {open && (
         <div className="absolute right-0 top-full mt-1 w-48 bg-[#1c1c1e] border border-white/[0.10] rounded-xl shadow-2xl overflow-hidden z-50 animate-fade-in">
           <button
-            onClick={() => { setOpen(false); }}
-            className="w-full text-left px-4 py-2.5 text-sm text-white/60 hover:bg-white/[0.04] transition-colors"
-          >
-            Melden
-          </button>
-          <button
             onClick={handleCopyLink}
             className="w-full text-left px-4 py-2.5 text-sm text-white/60 hover:bg-white/[0.04] transition-colors"
           >
