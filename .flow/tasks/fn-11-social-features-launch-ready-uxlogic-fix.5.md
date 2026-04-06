@@ -38,9 +38,8 @@ Fix the Event Detail page: replace hardcoded back-to-map with dynamic back butto
 - [ ] No hydration errors from `window.history` access
 - [ ] Page background uses `bg-surface` token
 ## Done summary
-TBD
-
+Replaced hardcoded /map back button with dynamic router.back() + fallback, added Save/Bookmark toggle (Supabase saved_events + toast feedback) and Share button (Web Share API + clipboard fallback) as a client component island, updated background to bg-surface token.
 ## Evidence
-- Commits:
-- Tests:
+- Commits: 68b71ef2df8e911938bf66d50b73e7e1de8a6f05
+- Tests: npx tsc --noEmit, npm test
 - PRs:
