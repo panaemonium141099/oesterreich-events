@@ -113,14 +113,14 @@ export default function FeedPage() {
 
   if (loading || !user) {
     return (
-      <div className="min-h-screen bg-[#141416] flex items-center justify-center">
-        <div className="w-8 h-8 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+      <div className="min-h-screen bg-[#f8fafc] flex items-center justify-center">
+        <div className="w-8 h-8 border-2 border-slate-200 border-t-slate-500 rounded-full animate-spin" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen text-white pb-24 bg-[#141416]">
+    <div className="min-h-screen text-[#1e293b] pb-24 bg-[#f8fafc]">
       <SocialNav />
 
       <main className="max-w-lg mx-auto px-0 py-6">
@@ -131,7 +131,7 @@ export default function FeedPage() {
           userInitial={profile?.first_name?.[0]?.toUpperCase() || user?.email?.[0]?.toUpperCase() || '?'}
           onPostCreated={() => fetchActivities()}
         />
-        <div className="h-[6px] bg-white/[0.03] border-t border-white/[0.06]" />
+        <div className="h-[6px] bg-slate-50 border-t border-slate-200" />
 
         {/* Trending section */}
         <div className="mb-2">
@@ -143,17 +143,17 @@ export default function FeedPage() {
           <FeedSkeletonList count={5} />
         ) : activities.length === 0 ? (
           <div className="text-center py-16">
-            <div className="w-16 h-16 rounded-2xl bg-white/[0.04] border border-white/[0.06] flex items-center justify-center mx-auto mb-4">
-              <svg className="w-8 h-8 text-white/15" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="w-16 h-16 rounded-2xl bg-slate-50 border border-slate-200 flex items-center justify-center mx-auto mb-4">
+              <svg className="w-8 h-8 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 11a9 9 0 019 9M4 4a16 16 0 0116 16" />
                 <circle cx="5" cy="19" r="1" fill="currentColor" stroke="none" />
               </svg>
             </div>
-            <p className="text-white/40 text-sm font-medium mb-1">Noch keine Aktivitäten</p>
-            <p className="text-white/20 text-xs mb-4">Füge Freunde hinzu, um ihren Feed zu sehen</p>
+            <p className="text-slate-500 text-sm font-medium mb-1">Noch keine Aktivitäten</p>
+            <p className="text-slate-400 text-xs mb-4">Füge Freunde hinzu, um ihren Feed zu sehen</p>
             <Link
               href="/friends"
-              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-medium bg-white/[0.06] border border-white/[0.08] text-white/50 hover:text-white/80 hover:border-white/[0.15] transition-all duration-200"
+              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-medium bg-white border border-slate-200 text-slate-500 hover:text-slate-700 hover:border-slate-300 transition-all duration-200"
             >
               <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
@@ -179,7 +179,7 @@ export default function FeedPage() {
             <div ref={sentinelRef} className="h-10" />
             {loadingMore && (
               <div className="flex justify-center py-4">
-                <div className="w-5 h-5 border-2 border-white/10 border-t-white/50 rounded-full animate-spin" />
+                <div className="w-5 h-5 border-2 border-slate-200 border-t-slate-500 rounded-full animate-spin" />
               </div>
             )}
           </div>

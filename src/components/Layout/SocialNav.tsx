@@ -109,11 +109,11 @@ export function SocialNav() {
             animate={{ y: 0 }}
             exit={{ y: '100%' }}
             transition={{ type: 'spring', damping: 28, stiffness: 300 }}
-            className="fixed bottom-0 left-0 right-0 z-50 bg-[#1a1a1c]/95 backdrop-blur-xl border border-white/[0.08] rounded-t-2xl px-4 pt-4 pb-24"
+            className="fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-xl border border-slate-200 rounded-t-2xl px-4 pt-4 pb-24"
           >
             {/* Drag handle */}
             <div className="flex justify-center mb-4">
-              <div className="w-10 h-1 rounded-full bg-white/20" />
+              <div className="w-10 h-1 rounded-full bg-slate-300" />
             </div>
             <div className="grid grid-cols-3 gap-2">
               {MORE_ITEMS.map((item) => {
@@ -127,8 +127,8 @@ export function SocialNav() {
                     onClick={() => setMoreOpen(false)}
                     className={`flex flex-col items-center gap-1.5 py-3 px-2 rounded-xl transition-colors ${
                       isActive
-                        ? 'bg-white/10 text-white'
-                        : 'text-white/60 hover:bg-white/[0.06] hover:text-white/90'
+                        ? 'bg-slate-100 text-slate-800'
+                        : 'text-slate-500 hover:bg-slate-50 hover:text-slate-700'
                     }`}
                   >
                     <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -144,7 +144,7 @@ export function SocialNav() {
       </AnimatePresence>
 
       {/* Bottom nav bar */}
-      <nav className="fixed bottom-0 left-1/2 -translate-x-1/2 mb-4 z-50 flex items-center gap-1 px-2 py-2 bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl">
+      <nav className="fixed bottom-0 left-1/2 -translate-x-1/2 mb-4 z-50 flex items-center gap-1 px-2 py-2 bg-white/80 backdrop-blur-xl border border-slate-200 rounded-2xl shadow-2xl">
         {MAIN_ITEMS.map((item) => {
           const isActive = pathname === item.href || pathname.startsWith(item.href + '/');
           const showBadge = 'hasUnread' in item && item.hasUnread && unreadCount > 0;
@@ -155,10 +155,10 @@ export function SocialNav() {
                 onMouseEnter={() => setTooltip(item.label)}
                 onMouseLeave={() => setTooltip(null)}
                 aria-label={item.label}
-                className={`relative flex items-center justify-center w-11 h-11 rounded-xl transition-all duration-200 active:scale-[0.92] motion-reduce:transform-none focus-visible:ring-2 focus-visible:ring-white/20 focus-visible:outline-none ${
+                className={`relative flex items-center justify-center w-11 h-11 rounded-xl transition-all duration-200 active:scale-[0.92] motion-reduce:transform-none focus-visible:ring-2 focus-visible:ring-slate-300 focus-visible:outline-none ${
                   isActive
-                    ? 'bg-white/15 text-white'
-                    : 'text-white/40 hover:text-white/70 hover:bg-white/5'
+                    ? 'bg-slate-100 text-slate-800'
+                    : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50'
                 }`}
               >
                 <svg className="w-5 h-5 shrink-0" fill={isActive ? 'currentColor' : 'none'} stroke="currentColor" viewBox="0 0 24 24">
@@ -168,18 +168,18 @@ export function SocialNav() {
                   )}
                 </svg>
                 {isActive && (
-                  <span className="absolute -bottom-0.5 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-white" />
+                  <span className="absolute -bottom-0.5 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-slate-800" />
                 )}
                 {/* Unread badge */}
                 {showBadge && (
-                  <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center px-1 ring-2 ring-black/40">
+                  <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center px-1 ring-2 ring-white/80">
                     {unreadCount > 9 ? '9+' : unreadCount}
                   </span>
                 )}
               </Link>
               {/* Tooltip */}
               {tooltip === item.label && (
-                <span className="absolute -top-8 left-1/2 -translate-x-1/2 px-2 py-1 text-[10px] font-medium text-white bg-black/80 backdrop-blur-sm rounded-md whitespace-nowrap pointer-events-none animate-fade-in motion-reduce:animate-none">
+                <span className="absolute -top-8 left-1/2 -translate-x-1/2 px-2 py-1 text-[10px] font-medium text-slate-800 bg-white shadow-lg border border-slate-100 backdrop-blur-sm rounded-md whitespace-nowrap pointer-events-none animate-fade-in motion-reduce:animate-none">
                   {item.label}
                 </span>
               )}
@@ -194,22 +194,22 @@ export function SocialNav() {
             onMouseEnter={() => setTooltip('Mehr')}
             onMouseLeave={() => setTooltip(null)}
             aria-label="Mehr"
-            className={`relative flex items-center justify-center w-11 h-11 rounded-xl transition-all duration-200 active:scale-[0.92] motion-reduce:transform-none focus-visible:ring-2 focus-visible:ring-white/20 focus-visible:outline-none ${
+            className={`relative flex items-center justify-center w-11 h-11 rounded-xl transition-all duration-200 active:scale-[0.92] motion-reduce:transform-none focus-visible:ring-2 focus-visible:ring-slate-300 focus-visible:outline-none ${
               isMoreActive || moreOpen
-                ? 'bg-white/15 text-white'
-                : 'text-white/40 hover:text-white/70 hover:bg-white/5'
+                ? 'bg-slate-100 text-slate-800'
+                : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50'
             }`}
           >
             <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M5 12h.01M12 12h.01M19 12h.01" />
             </svg>
             {(isMoreActive && !moreOpen) && (
-              <span className="absolute -bottom-0.5 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-white" />
+              <span className="absolute -bottom-0.5 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-slate-800" />
             )}
           </button>
           {/* Tooltip */}
           {tooltip === 'Mehr' && !moreOpen && (
-            <span className="absolute -top-8 left-1/2 -translate-x-1/2 px-2 py-1 text-[10px] font-medium text-white bg-black/80 backdrop-blur-sm rounded-md whitespace-nowrap pointer-events-none animate-fade-in motion-reduce:animate-none">
+            <span className="absolute -top-8 left-1/2 -translate-x-1/2 px-2 py-1 text-[10px] font-medium text-slate-800 bg-white shadow-lg border border-slate-100 backdrop-blur-sm rounded-md whitespace-nowrap pointer-events-none animate-fade-in motion-reduce:animate-none">
               Mehr
             </span>
           )}
