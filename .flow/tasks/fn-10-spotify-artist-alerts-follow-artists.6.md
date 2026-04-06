@@ -43,9 +43,8 @@ Build the artist-event matching engine using PostgreSQL pg_trgm word_similarity 
 - [ ] Tests cover: exact match, fuzzy match, short name rejection, description secondary, notification grouping, dedup, cursor management
 
 ## Done summary
-TBD
-
+Built the artist-event matching engine with tiered pg_trgm word_similarity matching (skip <3 chars, exact 3 chars, fuzzy 4+ chars on title, substring 6+ chars on description), notification grouping (max 1 per user+event), matching cursor for incremental processing, and CLI script with --dry-run and --reset-cursor flags. Created 3 PostgreSQL RPC functions and 34 tests covering all tiers, dedup, cursor management, and notification grouping.
 ## Evidence
-- Commits:
-- Tests:
+- Commits: 4f34522140a337aa478ca954e612ca9ba0a5b2aa, a7635e4f791edbfcb2df26a59a5549746586f4ef
+- Tests: npx vitest run src/__tests__/lib/artist-matching.test.ts (34 passed), npx tsc --noEmit (clean), Supabase RPC functions verified against production (109K events)
 - PRs:

@@ -11,6 +11,7 @@
  *      npm run scrape:all -- --skip-score       (no score recalc)
  */
 import { execSync } from 'child_process';
+import { triggerMatchArtists } from '../lib/post-scrape-hook';
 
 const args = process.argv.slice(2);
 const skipScrapers = args.includes('--skip-scrapers');
@@ -51,6 +52,12 @@ async function main() {
     run('Step 3/3: Calculating event scores', 'npx tsx --env-file=.env.local src/scripts/calculate-scores.ts');
   } else {
     console.log('\nSkipping score calculation (--skip-score)');
+  }
+
+  // 4. Post-scrape hook: trigger artist-event matching
+  if (!skipScrapers || !skipVenues) {
+    run('Step 4: Artist-event matching', 'echo "Triggering match-artists Edge Function..."');
+    await triggerMatchArtists();
   }
 
   const elapsed = ((Date.now() - start) / 1000 / 60).toFixed(1);
