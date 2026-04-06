@@ -6,8 +6,9 @@ import Link from 'next/link';
 import { SocialNav } from '@/components/Layout/SocialNav';
 import { useAuth } from '@/lib/supabase/auth-context';
 import { createClient } from '@/lib/supabase/client';
-import { HeartIcon, HeartBrokenIcon, CalendarIcon, MapPinIcon } from '@/components/UI/Icons';
+import { CalendarIcon, MapPinIcon } from '@/components/UI/Icons';
 import { ProfileDropdown } from '@/components/Layout/ProfileDropdown';
+import { toast } from 'sonner';
 
 interface SavedEvent {
   id: string;
@@ -63,8 +64,14 @@ export default function SavedEventsPage() {
   };
 
   const removeSaved = async (savedId: string) => {
-    await supabase.from('saved_events').delete().eq('id', savedId);
-    setSavedEvents(prev => prev.filter(s => s.id !== savedId));
+    try {
+      const { error } = await supabase.from('saved_events').delete().eq('id', savedId);
+      if (error) throw error;
+      setSavedEvents(prev => prev.filter(s => s.id !== savedId));
+      toast.success('Event entfernt');
+    } catch {
+      toast.error('Fehler beim Entfernen');
+    }
   };
 
   const formatDate = (dateStr: string) => {
@@ -78,7 +85,7 @@ export default function SavedEventsPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
+      <div className="min-h-screen bg-surface flex items-center justify-center">
         <div className="w-8 h-8 border-2 border-white/20 border-t-white rounded-full animate-spin" />
       </div>
     );
@@ -86,13 +93,18 @@ export default function SavedEventsPage() {
 
   return (
     <div
-      className="min-h-screen text-white pb-24 bg-[#141416]"
+      className="min-h-screen text-white pb-24 bg-surface"
     >
       <SocialNav />
 
       <main className="max-w-3xl mx-auto px-4 sm:px-6 py-10">
         <div className="flex items-center justify-between mb-2">
-          <h1 className="text-2xl font-bold flex items-center gap-2"><HeartIcon size={24} className="text-red-400" /> Gespeicherte Events</h1>
+          <h1 className="text-2xl font-bold flex items-center gap-2">
+            <svg className="w-6 h-6 text-white/80" fill="currentColor" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+            </svg>
+            Gespeicherte Events
+          </h1>
           <ProfileDropdown />
         </div>
         <p className="text-white/40 text-sm mb-8">
@@ -105,7 +117,11 @@ export default function SavedEventsPage() {
           </div>
         ) : savedEvents.length === 0 ? (
           <div className="text-center py-20">
-            <div className="flex justify-center mb-4"><HeartBrokenIcon size={48} className="text-white/30" /></div>
+            <div className="flex justify-center mb-4">
+              <svg className="w-12 h-12 text-white/30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+              </svg>
+            </div>
             <p className="text-white/40 mb-6">Noch keine Events gespeichert</p>
             <Link
               href="/map"
@@ -120,8 +136,9 @@ export default function SavedEventsPage() {
               const event = saved.events;
               if (!event) return null;
               return (
-                <div
+                <Link
                   key={saved.id}
+                  href={`/events/${event.id}`}
                   className="flex items-center gap-4 p-4 rounded-xl bg-white/5 border border-white/10 hover:border-white/20 transition-all group"
                 >
                   {/* Image */}
@@ -153,15 +170,20 @@ export default function SavedEventsPage() {
 
                   {/* Remove button */}
                   <button
-                    onClick={() => removeSaved(saved.id)}
-                    className="text-white/30 hover:text-red-400 transition-colors shrink-0"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      removeSaved(saved.id);
+                    }}
+                    className="text-white/60 hover:text-red-400 transition-colors shrink-0 min-w-[44px] min-h-[44px] flex items-center justify-center"
                     title="Entfernen"
+                    aria-label="Event entfernen"
                   >
-                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+                    <svg className="w-5 h-5" fill="currentColor" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
                     </svg>
                   </button>
-                </div>
+                </Link>
               );
             })}
           </div>
