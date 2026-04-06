@@ -37,6 +37,7 @@ interface MatchingStats {
   events_processed: number;
   matches_found: number;
   notifications_created: number;
+  reminders_scheduled: number;
   artists_checked: number;
   skipped_short_names: number;
   duration_ms: number;
@@ -514,6 +515,127 @@ async function createGroupedNotifications(
   return result;
 }
 
+// ── Reminder scheduling ─────────────────────────────────────────────────────
+
+/**
+ * Schedule 7d and 1d reminders for matched events.
+ * Only creates reminders for future events where the interval is still applicable.
+ * Uses ON CONFLICT to skip duplicates (unique on user_id, event_id, reminder_type).
+ */
+async function scheduleReminders(
+  supabase: SupabaseClient,
+  matches: MatchResult[],
+  prefsMap: Map<string, NotificationPrefs & { reminder_7d?: boolean; reminder_1d?: boolean }>
+): Promise<number> {
+  if (matches.length === 0) return 0;
+
+  // Group by user_id + event_id to get unique (user, event) pairs
+  const uniquePairs = new Map<
+    string,
+    { user_id: string; event_id: string; artist_name: string }
+  >();
+
+  for (const match of matches) {
+    const key = `${match.user_id}:${match.event_id}`;
+    if (!uniquePairs.has(key)) {
+      uniquePairs.set(key, {
+        user_id: match.user_id,
+        event_id: match.event_id,
+        artist_name: match.artist_name,
+      });
+    }
+  }
+
+  // Fetch event start dates for all matched events
+  const eventIds = [...new Set(Array.from(uniquePairs.values()).map((p) => p.event_id))];
+  const { data: events, error: eventsError } = await supabase
+    .from("events")
+    .select("id, start_date, ticket_url, title")
+    .in("id", eventIds);
+
+  if (eventsError || !events) {
+    console.error("Error fetching events for reminders:", eventsError);
+    return 0;
+  }
+
+  const eventMap = new Map<string, { start_date: string; ticket_url: string | null; title: string }>();
+  for (const e of events) {
+    eventMap.set(e.id, { start_date: e.start_date, ticket_url: e.ticket_url, title: e.title });
+  }
+
+  const now = new Date();
+  const reminders: Array<{
+    user_id: string;
+    event_id: string;
+    artist_name: string;
+    reminder_type: string;
+    scheduled_for: string;
+    sent: boolean;
+  }> = [];
+
+  for (const pair of uniquePairs.values()) {
+    const event = eventMap.get(pair.event_id);
+    if (!event || !event.start_date) continue;
+
+    const startDate = new Date(event.start_date);
+    const msUntilEvent = startDate.getTime() - now.getTime();
+    const daysUntilEvent = msUntilEvent / (1000 * 60 * 60 * 24);
+
+    // Check user preferences for reminder toggles
+    const prefs = prefsMap.get(pair.user_id);
+    const reminder7dEnabled = prefs?.reminder_7d ?? true;
+    const reminder1dEnabled = prefs?.reminder_1d ?? true;
+
+    // Schedule 7d reminder if event is > 7 days away and user has it enabled
+    if (daysUntilEvent > 7 && reminder7dEnabled) {
+      const scheduledFor = new Date(startDate.getTime() - 7 * 24 * 60 * 60 * 1000);
+      reminders.push({
+        user_id: pair.user_id,
+        event_id: pair.event_id,
+        artist_name: pair.artist_name,
+        reminder_type: "7d_before",
+        scheduled_for: scheduledFor.toISOString(),
+        sent: false,
+      });
+    }
+
+    // Schedule 1d reminder if event is > 1 day away and user has it enabled
+    if (daysUntilEvent > 1 && reminder1dEnabled) {
+      const scheduledFor = new Date(startDate.getTime() - 1 * 24 * 60 * 60 * 1000);
+      reminders.push({
+        user_id: pair.user_id,
+        event_id: pair.event_id,
+        artist_name: pair.artist_name,
+        reminder_type: "1d_before",
+        scheduled_for: scheduledFor.toISOString(),
+        sent: false,
+      });
+    }
+  }
+
+  if (reminders.length === 0) return 0;
+
+  let totalInserted = 0;
+  for (let i = 0; i < reminders.length; i += BATCH_SIZE) {
+    const batch = reminders.slice(i, i + BATCH_SIZE);
+    const { error, count } = await supabase
+      .from("event_reminders")
+      .upsert(batch, {
+        onConflict: "user_id,event_id,reminder_type",
+        ignoreDuplicates: true,
+        count: "exact",
+      });
+
+    if (error) {
+      console.error("Error inserting reminders:", error);
+    } else {
+      totalInserted += count ?? batch.length;
+    }
+  }
+
+  return totalInserted;
+}
+
 // ── Main pipeline ────────────────────────────────────────────────────────────
 
 async function runMatchingPipeline(
@@ -524,6 +646,7 @@ async function runMatchingPipeline(
     events_processed: 0,
     matches_found: 0,
     notifications_created: 0,
+    reminders_scheduled: 0,
     artists_checked: 0,
     skipped_short_names: 0,
     duration_ms: 0,
@@ -661,6 +784,15 @@ async function runMatchingPipeline(
     console.log(
       `Created ${notifResult.inApp} in-app notifications, ${notifResult.emailStubs} email stubs, ${notifResult.smsStubs} SMS stubs`
     );
+
+    // Step 9b: Schedule 7d and 1d reminders for matched events
+    const remindersScheduled = await scheduleReminders(
+      supabase,
+      allMatches,
+      prefsMap
+    );
+    stats.reminders_scheduled = remindersScheduled;
+    console.log(`Scheduled ${remindersScheduled} event reminders (7d/1d)`);
   }
 
   // Step 10: Count events processed
@@ -716,6 +848,7 @@ Deno.serve(async (req: Request) => {
     console.log(`  Events processed: ${stats.events_processed}`);
     console.log(`  Matches found: ${stats.matches_found}`);
     console.log(`  Notifications created: ${stats.notifications_created}`);
+    console.log(`  Reminders scheduled: ${stats.reminders_scheduled}`);
     console.log(`  Duration: ${stats.duration_ms}ms`);
 
     return new Response(JSON.stringify({ success: true, stats }), {

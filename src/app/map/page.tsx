@@ -6,6 +6,8 @@ import dynamic from 'next/dynamic';
 import type { Event, EventFilters } from '@/types/events';
 import { Header } from '@/components/Layout/Header';
 import { Sidebar } from '@/components/Layout/Sidebar';
+import type { SidebarTab } from '@/components/Layout/Sidebar';
+import type { ArtistEvent } from '@/components/Artists/ArtistEventCard';
 import { EventDetail } from '@/components/Events/EventDetail';
 import { MapLoadingOverlay } from '@/components/Map/MapLoadingOverlay';
 import { LocationBanner } from '@/components/Map/LocationBanner';
@@ -92,6 +94,32 @@ function MapPageInner() {
 
   const [backgroundLoading, setBackgroundLoading] = useState(false);
   const abortRef = useRef<AbortController | null>(null);
+
+  // Sidebar tab state for artist events
+  const [sidebarTab, setSidebarTab] = useState<SidebarTab>('events');
+  const [artistEventCount, setArtistEventCount] = useState(0);
+  const [hasFollowedArtists, setHasFollowedArtists] = useState(false);
+
+  // Fetch artist event count for badge
+  useEffect(() => {
+    if (!user) {
+      setHasFollowedArtists(false);
+      setArtistEventCount(0);
+      return;
+    }
+    (async () => {
+      try {
+        const res = await fetch('/api/artists/events?limit=1');
+        if (res.ok) {
+          const data = await res.json();
+          setHasFollowedArtists(data.has_followed_artists ?? false);
+          setArtistEventCount(data.total ?? 0);
+        }
+      } catch {
+        // silently handle
+      }
+    })();
+  }, [user]);
 
   useEffect(() => { trackEvent('page_view', { path: '/map' }); }, []);
 
@@ -268,6 +296,41 @@ function MapPageInner() {
     // The eveningOnly filter is optional; events stay the same
   };
 
+  const handleSelectArtistEvent = (event: ArtistEvent) => {
+    // Create a minimal Event object for the selectedEvent state
+    const mappedEvent: Event = {
+      id: event.id,
+      source_id: null,
+      source_name: null,
+      source_url: null,
+      title: event.title,
+      description: event.description,
+      start_date: event.start_date,
+      end_date: event.end_date,
+      location_name: event.location_name,
+      address: event.address,
+      postal_code: null,
+      bundesland: event.bundesland,
+      district: event.district,
+      latitude: event.latitude,
+      longitude: event.longitude,
+      category: event.category,
+      price_text: event.price_text,
+      price_min: null,
+      price_max: null,
+      image_url: event.image_url,
+      organizer: event.organizer,
+      tags: event.tags,
+      ticket_url: event.ticket_url,
+      created_at: '',
+      updated_at: '',
+    };
+    setSelectedEvent(mappedEvent);
+    if (event.latitude && event.longitude) {
+      setDynamicFlyTo({ lat: event.latitude, lng: event.longitude, zoom: 14 });
+    }
+  };
+
   const handleGemeindeSelect = (gemeinde: { name: string; bundeslandId: string; lat: number; lng: number }) => {
     // Switch bundesland
     const bl = BUNDESLAENDER.find(b => b.id === gemeinde.bundeslandId);
@@ -336,6 +399,11 @@ function MapPageInner() {
               selectedEventId={selectedEvent?.id ?? null}
               onHoverEvent={setHoveredEventId}
               eveningMode={eveningMode}
+              activeTab={sidebarTab}
+              onTabChange={setSidebarTab}
+              showArtistTab={hasFollowedArtists}
+              artistEventCount={artistEventCount}
+              onSelectArtistEvent={handleSelectArtistEvent}
             />
           </div>
         )}
@@ -378,6 +446,11 @@ function MapPageInner() {
                   selectedEventId={selectedEvent?.id ?? null}
                   onHoverEvent={setHoveredEventId}
                   eveningMode={eveningMode}
+                  activeTab={sidebarTab}
+                  onTabChange={setSidebarTab}
+                  showArtistTab={hasFollowedArtists}
+                  artistEventCount={artistEventCount}
+                  onSelectArtistEvent={(event) => { handleSelectArtistEvent(event); setSidebarOpen(false); }}
                 />
               </div>
             </div>

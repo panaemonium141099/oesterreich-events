@@ -46,9 +46,8 @@ Build the automated matching pipeline: a Supabase Edge Function invoked both as 
 - [ ] Matching latency < 5 minutes from event insertion
 
 ## Done summary
-TBD
-
+Built the post-scrape matching pipeline: deployed Supabase Edge Function `match-artists` that runs the full pg_trgm matching engine incrementally using matching_cursor, added post-scrape hook in scrape.ts and scrape-all.ts, configured pg_cron every 5 minutes via pg_net as fallback, stored Vault secrets for gateway auth, created notification-sender module with email/SMS stubs, and excluded supabase/functions from tsconfig.json for Deno compatibility.
 ## Evidence
-- Commits:
-- Tests:
+- Commits: 7a0e3f823f4e62c003dca87d4d5f06ebb8fb726b, 17f7260b8613fa8798f0a866f725a8d22aa679c4
+- Tests: npx vitest run (484 passed), npx tsc --noEmit (clean), Edge Function deployed and returning 200, pg_cron job active (*/5 * * * *)
 - PRs:

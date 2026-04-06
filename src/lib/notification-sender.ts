@@ -3,13 +3,19 @@
  *
  * Routes notifications to the appropriate channels based on user preferences:
  *   - In-app: INSERT into notifications table (triggers Supabase Realtime)
- *   - Email: STUB (implemented in task .8 via Resend)
- *   - SMS: STUB (implemented in task .9 via Twilio)
+ *   - Email: Resend integration (task .8)
+ *   - SMS: Twilio integration (task .9)
  *
- * Task: fn-10-spotify-artist-alerts-follow-artists.7
+ * Task: fn-10-spotify-artist-alerts-follow-artists.7, .8, .9
  */
 
 import { SupabaseClient } from '@supabase/supabase-js';
+import { sendArtistAlertSMS, isValidE164 } from './sms';
+import {
+  sendArtistAlertEmail as sendAlertViaResend,
+  generateUnsubscribeToken,
+  type ArtistAlertEmailData,
+} from './email';
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -20,6 +26,17 @@ export interface NotificationPayload {
   body: string;
   event_id?: string;
   action_url?: string;
+  /** Optional email-specific data for artist alert emails */
+  email_data?: {
+    artist_name: string;
+    artist_image_url?: string | null;
+    event_title: string;
+    event_date: string;
+    event_time?: string | null;
+    venue_name?: string | null;
+    location: string;
+    ticket_url?: string | null;
+  };
 }
 
 export interface NotificationPreferences {
@@ -33,7 +50,7 @@ export interface NotificationPreferences {
 
 export interface SendResult {
   in_app: boolean;
-  email: 'sent' | 'skipped' | 'stub';
+  email: 'sent' | 'skipped' | 'failed';
   sms: 'sent' | 'skipped' | 'stub';
 }
 
@@ -70,32 +87,93 @@ export async function sendInAppNotification(
 }
 
 /**
- * STUB: Send an email notification.
- * Will be implemented in task .8 using Resend.
+ * Send an email notification via Resend.
+ * Requires email_data in the payload for artist alert emails.
+ * Generates HMAC-based unsubscribe token for GDPR compliance.
  */
 export async function sendEmailNotification(
   _supabase: SupabaseClient,
-  _payload: NotificationPayload,
-  _userEmail: string
-): Promise<'sent' | 'stub'> {
-  // STUB: Email sending not yet implemented
-  // Will use Resend API in task fn-10-spotify-artist-alerts-follow-artists.8
-  console.log(`[STUB] Email notification for user ${_payload.user_id}: ${_payload.title}`);
-  return 'stub';
+  payload: NotificationPayload,
+  userEmail: string
+): Promise<'sent' | 'skipped' | 'failed'> {
+  const emailData = payload.email_data;
+  if (!emailData) {
+    console.warn(`[email] No email_data in payload for user ${payload.user_id}, skipping`);
+    return 'skipped';
+  }
+
+  const secret =
+    process.env.UNSUBSCRIBE_SECRET ??
+    process.env.SUPABASE_JWT_SECRET ??
+    '';
+
+  if (!secret) {
+    console.error('[email] No unsubscribe secret configured');
+    return 'failed';
+  }
+
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://osterreich.events';
+  const token = await generateUnsubscribeToken(payload.user_id, secret);
+
+  const alertData: ArtistAlertEmailData = {
+    artistName: emailData.artist_name,
+    artistImageUrl: emailData.artist_image_url,
+    eventTitle: emailData.event_title,
+    eventDate: emailData.event_date,
+    eventTime: emailData.event_time,
+    venueName: emailData.venue_name,
+    location: emailData.location,
+    ticketUrl: emailData.ticket_url,
+    eventPageUrl: `${baseUrl}/events/${payload.event_id}`,
+    unsubscribeUrl: `${baseUrl}/api/notifications/unsubscribe?user_id=${payload.user_id}&token=${token}`,
+    preferencesUrl: `${baseUrl}/settings/notifications`,
+  };
+
+  return sendAlertViaResend(userEmail, alertData);
 }
 
 /**
- * STUB: Send an SMS notification.
- * Will be implemented in task .9 using Twilio.
+ * Send an SMS notification via Twilio.
+ * Validates phone number (E.164) before sending.
+ * Extracts artist name and event details from the notification payload.
  */
 export async function sendSmsNotification(
-  _payload: NotificationPayload,
-  _phoneNumber: string
-): Promise<'sent' | 'stub'> {
-  // STUB: SMS sending not yet implemented
-  // Will use Twilio API in task fn-10-spotify-artist-alerts-follow-artists.9
-  console.log(`[STUB] SMS notification to ${_phoneNumber}: ${_payload.title}`);
-  return 'stub';
+  payload: NotificationPayload,
+  phoneNumber: string
+): Promise<'sent' | 'skipped' | 'stub'> {
+  if (!isValidE164(phoneNumber)) {
+    console.warn(`[SMS] Invalid phone number, skipping: ${phoneNumber}`);
+    return 'skipped';
+  }
+
+  // Check if Twilio env vars are configured
+  if (!process.env.TWILIO_ACCOUNT_SID || !process.env.TWILIO_AUTH_TOKEN || !process.env.TWILIO_PHONE_NUMBER) {
+    console.log(`[SMS] Twilio not configured, skipping SMS for user ${payload.user_id}`);
+    return 'stub';
+  }
+
+  try {
+    // Use email_data for richer information when available
+    const ed = payload.email_data;
+    const result = await sendArtistAlertSMS(phoneNumber, {
+      artistName: ed?.artist_name || payload.title.replace(/^Neues Event: /, ''),
+      eventDate: ed?.event_date || '',
+      location: ed?.venue_name || ed?.location || '',
+      ticketUrl: ed?.ticket_url || payload.action_url || null,
+      eventId: payload.event_id || '',
+    });
+
+    if (result.success) {
+      console.log(`[SMS] Sent to ${phoneNumber} (SID: ${result.sid})`);
+      return 'sent';
+    }
+
+    console.error(`[SMS] Failed for ${phoneNumber}: ${result.errorCode} - ${result.errorMessage}`);
+    return 'skipped';
+  } catch (err) {
+    console.error(`[SMS] Error sending to ${phoneNumber}:`, err);
+    return 'skipped';
+  }
 }
 
 // ── Channel router ──────────────────────────────────────────────────────────
@@ -130,7 +208,7 @@ export async function routeNotification(
     result.in_app = await sendInAppNotification(supabase, payload);
   }
 
-  // Email notification (stub)
+  // Email notification (Resend)
   if (emailEnabled) {
     // Fetch user email from auth.users via service role
     const { data: userData } = await supabase.auth.admin.getUserById(payload.user_id);
@@ -139,7 +217,7 @@ export async function routeNotification(
     }
   }
 
-  // SMS notification (stub)
+  // SMS notification (Twilio)
   if (smsEnabled && prefs?.phone_number) {
     result.sms = await sendSmsNotification(payload, prefs.phone_number);
   }
