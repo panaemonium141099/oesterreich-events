@@ -41,9 +41,8 @@ Integrate Twilio for SMS notifications with conversion-focused messaging. Each S
 - [ ] Works in both Deno and Node.js environments
 
 ## Done summary
-TBD
-
+Implemented Twilio SMS notification service with raw fetch API (no SDK, Deno-compatible). Created src/lib/sms.ts with sendArtistAlertSMS and sendArtistReminderSMS functions, E.164 phone validation, retry logic (2 attempts), and SMS truncation to 300 chars. Wired into notification-sender.ts to check channel_sms + phone_number before sending. Added 17 tests.
 ## Evidence
-- Commits:
-- Tests:
+- Commits: 2808c9315805a9f2ca3856598d835a06c06144da
+- Tests: npx vitest run src/__tests__/lib/sms.test.ts
 - PRs:

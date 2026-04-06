@@ -6,7 +6,7 @@
  *   - Email: Resend integration (task .8)
  *   - SMS: Twilio integration (task .9)
  *
- * Task: fn-10-spotify-artist-alerts-follow-artists.7, .8, .9
+ * Task: fn-10-spotify-artist-alerts-follow-artists.7, .8, .9, .12
  */
 
 import { SupabaseClient } from '@supabase/supabase-js';
