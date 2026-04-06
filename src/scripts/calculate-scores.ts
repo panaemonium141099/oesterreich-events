@@ -112,8 +112,9 @@ async function main() {
     };
   });
 
-  // Batch update — parallel chunks of 50 concurrent .update() calls
-  const CONCURRENCY = 50;
+  // Batch update — parallel chunks with retry + delay to avoid 502s
+  const CONCURRENCY = 20;
+  const sleep = (ms: number) => new Promise(r => setTimeout(r, ms));
   let updated = 0;
   for (let i = 0; i < scored.length; i += BATCH_SIZE) {
     const batch = scored.slice(i, i + BATCH_SIZE);
@@ -121,16 +122,34 @@ async function main() {
 
     for (let j = 0; j < batch.length; j += CONCURRENCY) {
       const chunk = batch.slice(j, j + CONCURRENCY);
-      const results = await Promise.all(
-        chunk.map(row =>
-          supabase
-            .from('events')
-            .update({ event_score: row.event_score, score_updated_at: row.score_updated_at })
-            .eq('id', row.id)
-        )
-      );
-      const failed = results.find(r => r.error);
-      if (failed?.error) { batchError = failed.error; break; }
+
+      // Retry up to 3 times per chunk
+      for (let attempt = 1; attempt <= 3; attempt++) {
+        const results = await Promise.all(
+          chunk.map(row =>
+            supabase
+              .from('events')
+              .update({ event_score: row.event_score, score_updated_at: row.score_updated_at })
+              .eq('id', row.id)
+          )
+        );
+        const failed = results.find(r => r.error);
+        if (failed?.error) {
+          const msg = typeof failed.error === 'object' && 'message' in failed.error
+            ? (failed.error as { message: string }).message : String(failed.error);
+          if ((msg.includes('502') || msg.includes('504') || msg.includes('Bad gateway')) && attempt < 3) {
+            console.log(`\n  502/504 at batch ${i}, retrying in ${attempt * 15}s...`);
+            await sleep(attempt * 15000);
+            continue;
+          }
+          batchError = failed.error;
+        }
+        break; // success or non-retryable error
+      }
+
+      if (batchError) break;
+      // Small delay between chunks to avoid overwhelming Supabase
+      await sleep(100);
     }
 
     if (batchError) {
