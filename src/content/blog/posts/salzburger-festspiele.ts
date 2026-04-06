@@ -107,6 +107,24 @@ export const post: FestivalPost = {
     'Festspiele Oper 2026',
     'Salzburg Festival',
   ],
+  faqs: [
+    {
+      question: 'Wie bekomme ich Tickets für die Salzburger Festspiele?',
+      answer: 'Tickets sind über die offizielle Website salzburgerfestspiele.at erhältlich. Der Vorverkauf beginnt üblicherweise im Jänner. Für beliebte Premieren und Opernproduktionen empfiehlt sich eine Buchung mindestens 6 Monate im Voraus. Stehplätze sind ab 15 € erhältlich und werden am Veranstaltungstag an der Kasse verkauft.',
+    },
+    {
+      question: 'Welcher Dresscode gilt bei den Salzburger Festspielen?',
+      answer: 'Bei Premieren und Abendveranstaltungen wird elegante Kleidung erwartet — Abendkleid oder Anzug sind üblich. Für Matineen, Konzerte und Stehplätze reicht smart casual. Es gibt keine strenge Kleiderordnung, aber das Publikum kleidet sich traditionell festlich.',
+    },
+    {
+      question: 'Wie lange dauern die Salzburger Festspiele?',
+      answer: 'Die Festspiele erstrecken sich über etwa sechs Wochen von Mitte Juli bis Ende August. 2026 finden sie vom 18. Juli bis 31. August statt. In dieser Zeit werden rund 200 Aufführungen an verschiedenen Spielstätten in Salzburg gegeben.',
+    },
+    {
+      question: 'Sind die Vorstellungen schnell ausverkauft?',
+      answer: 'Ja, besonders Premieren, Opernproduktionen und Konzerte der Wiener Philharmoniker sind sehr begehrt und oft innerhalb weniger Tage ausverkauft. Stehplätze und weniger prominente Veranstaltungen sind leichter verfügbar. Es lohnt sich, den Vorverkaufsstart im Jänner nicht zu verpassen.',
+    },
+  ],
   jsonLdEvent: {
     name: 'Salzburger Festspiele 2026',
     startDate: '2026-07-18',

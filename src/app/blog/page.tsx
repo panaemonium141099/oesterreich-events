@@ -11,11 +11,14 @@ export const metadata: Metadata = {
     title: '\u00d6sterreich Events Blog | Event-Guides & Tipps',
     description:
       'Event-Guides und Tipps zu den gr\u00f6\u00dften Festivals und Veranstaltungen in \u00d6sterreich.',
-    images: ALL_POSTS[0]?.heroImage ? [{ url: ALL_POSTS[0].heroImage }] : [],
     type: 'website',
   },
   alternates: {
     canonical: 'https://lasstreffen.at/blog',
+    languages: {
+      'de-AT': 'https://lasstreffen.at/blog',
+      'x-default': 'https://lasstreffen.at/blog',
+    },
   },
 };
 
@@ -107,7 +110,45 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
 
   const [hero, ...rest] = filteredPosts;
 
+  // BreadcrumbList schema
+  const breadcrumbJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://lasstreffen.at' },
+      { '@type': 'ListItem', position: 2, name: 'Blog' },
+    ],
+  };
+
+  // ItemList schema — helps Google understand the blog listing
+  const itemListJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'CollectionPage',
+    name: 'Österreich Events Blog',
+    description: 'Event-Guides und Tipps zu den größten Festivals und Veranstaltungen in Österreich.',
+    url: 'https://lasstreffen.at/blog',
+    mainEntity: {
+      '@type': 'ItemList',
+      numberOfItems: ALL_POSTS.length,
+      itemListElement: ALL_POSTS.slice(0, 20).map((post, i) => ({
+        '@type': 'ListItem',
+        position: i + 1,
+        url: `https://lasstreffen.at/blog/${post.slug}`,
+        name: post.title,
+      })),
+    },
+  };
+
   return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd).replace(/</g, '\u003c') }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListJsonLd).replace(/</g, '\u003c') }}
+      />
     <div className="min-h-screen bg-[#f8f6f2]">
 
       {/* TOP NAV */}
@@ -297,5 +338,6 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
         </div>
       </div>
     </div>
+    </>
   );
 }

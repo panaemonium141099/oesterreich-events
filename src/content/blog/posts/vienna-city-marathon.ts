@@ -105,6 +105,24 @@ export const post: FestivalPost = {
     'VCM 2026',
     'Marathon Europas schönster',
   ],
+  faqs: [
+    {
+      question: 'Bis wann kann ich mich für den Vienna City Marathon anmelden?',
+      answer: 'Die Anmeldung öffnet ab September des Vorjahres. Beliebte Distanzen wie der Halbmarathon und der 10km-Lauf sind oft schnell ausgebucht. Für den Marathon selbst gibt es in der Regel bis wenige Wochen vor dem Event Startplätze — eine frühzeitige Anmeldung sichert aber günstigere Early-Bird-Preise.',
+    },
+    {
+      question: 'Wie verläuft die Marathonstrecke durch Wien?',
+      answer: 'Der Marathon startet an der Wagramer Straße bei der Reichsbrücke (22. Bezirk) und führt über den Prater, vorbei an Schloss Schönbrunn, durch die Innere Stadt und entlang der Ringstraße zum Ziel am Heldenplatz. Die Strecke ist flach mit minimalen Höhenunterschieden — ideal für schnelle Zeiten.',
+    },
+    {
+      question: 'Wo sind die besten Plätze für Zuschauer?',
+      answer: 'Die emotionalsten Stellen sind zwischen Kilometer 30 und 35 entlang der Ringstraße sowie der Zieleinlauf am Heldenplatz. Auch der Start an der Reichsbrücke und die Passage durch den Prater bieten tolle Atmosphäre. Insgesamt säumen über 250.000 Zuschauer die Strecke.',
+    },
+    {
+      question: 'Welches Wetter ist beim Marathon im April zu erwarten?',
+      answer: 'Im April liegen die Temperaturen in Wien typischerweise zwischen 8 und 18 °C — gute Laufbedingungen. Regen ist möglich, daher sollte man als Läufer leichte Regenbekleidung für vor und nach dem Lauf einpacken. Zuschauer sollten sich auf wechselhaftes Wetter einstellen.',
+    },
+  ],
   jsonLdEvent: {
     name: 'Vienna City Marathon 2026',
     startDate: '2026-04-19',

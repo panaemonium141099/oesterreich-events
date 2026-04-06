@@ -184,19 +184,19 @@ export default function DMConversationPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#f8fafc] flex items-center justify-center">
-        <div className="w-8 h-8 border-2 border-slate-200 border-t-slate-600 rounded-full animate-spin" />
+      <div className="min-h-screen bg-[#0a0a0c] flex items-center justify-center">
+        <div className="w-8 h-8 border-2 border-white/20 border-t-white/60 rounded-full animate-spin" />
       </div>
     );
   }
 
   return (
     <div
-      className="min-h-screen text-slate-800 flex flex-col bg-[#f8fafc]"
+      className="min-h-screen text-white flex flex-col bg-[#0a0a0c]"
     >
       {/* Header */}
-      <header className="flex items-center gap-3 px-6 py-4 border-b border-slate-200 shrink-0 bg-white">
-        <Link href="/messages" className="text-slate-400 hover:text-slate-700 transition-colors">
+      <header className="flex items-center gap-3 px-6 py-4 border-b border-white/[0.06] shrink-0 bg-[#141416]">
+        <Link href="/messages" className="text-white/30 hover:text-white/60 transition-colors">
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
           </svg>
@@ -206,7 +206,7 @@ export default function DMConversationPage() {
             {friend.avatar_url ? (
               <img src={friend.avatar_url} alt="" className="w-9 h-9 rounded-full object-cover" />
             ) : (
-              <div className="w-9 h-9 rounded-full bg-slate-100 flex items-center justify-center text-sm font-semibold text-slate-500">
+              <div className="w-9 h-9 rounded-full bg-white/10 flex items-center justify-center text-sm font-semibold text-white/50">
                 {friend.first_name?.[0]?.toUpperCase() || '?'}
               </div>
             )}
@@ -220,19 +220,19 @@ export default function DMConversationPage() {
       {/* Messages */}
       {loadingData ? (
         <div className="flex-1 flex items-center justify-center">
-          <div className="w-8 h-8 border-2 border-slate-200 border-t-slate-600 rounded-full animate-spin" />
+          <div className="w-8 h-8 border-2 border-white/20 border-t-white/60 rounded-full animate-spin" />
         </div>
       ) : (
         <div className="flex-1 overflow-y-auto px-6 py-4" style={{ maxHeight: 'calc(100vh - 140px)' }}>
           {messages.length === 0 ? (
             <div className="text-center py-16">
-              <div className="w-12 h-12 rounded-full bg-slate-50 border border-slate-200 flex items-center justify-center mx-auto mb-3">
-                <svg className="w-6 h-6 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="w-12 h-12 rounded-full bg-white/[0.04] border border-white/[0.06] flex items-center justify-center mx-auto mb-3">
+                <svg className="w-6 h-6 text-white/20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                 </svg>
               </div>
-              <p className="text-slate-500 text-sm">Noch keine Nachrichten</p>
-              <p className="text-slate-400 text-xs mt-1">Sag Hallo!</p>
+              <p className="text-white/40 text-sm">Noch keine Nachrichten</p>
+              <p className="text-white/30 text-xs mt-1">Sag Hallo!</p>
             </div>
           ) : (
             <div className="max-w-2xl mx-auto space-y-4">
@@ -240,11 +240,11 @@ export default function DMConversationPage() {
                 <div key={gi}>
                   {/* Date separator */}
                   <div className="flex items-center gap-3 my-4">
-                    <div className="flex-1 h-px bg-slate-200" />
-                    <span className="text-[10px] text-slate-400 uppercase tracking-wider">
+                    <div className="flex-1 h-px bg-white/[0.06]" />
+                    <span className="text-[10px] text-white/30 uppercase tracking-wider">
                       {formatDateSeparator(group.date)}
                     </span>
-                    <div className="flex-1 h-px bg-slate-200" />
+                    <div className="flex-1 h-px bg-white/[0.06]" />
                   </div>
 
                   {/* Messages in this date group */}
@@ -263,15 +263,15 @@ export default function DMConversationPage() {
                             ) : (
                               <div className={`px-4 py-2.5 rounded-2xl text-sm ${
                                 isMe
-                                  ? 'bg-slate-800 text-white rounded-br-md'
-                                  : 'bg-white text-slate-800 border border-slate-200 rounded-bl-md'
+                                  ? 'bg-indigo-500 text-white rounded-br-md'
+                                  : 'bg-white/[0.06] text-white/90 border border-white/[0.10] rounded-bl-md'
                               }`}>
                                 {msg.content}
                               </div>
                             )}
-                            <p className={`text-[10px] text-slate-400 mt-0.5 px-1 ${isMe ? 'text-right' : ''}`}>
+                            <p className={`text-[10px] text-white/30 mt-0.5 px-1 ${isMe ? 'text-right' : ''}`}>
                               {formatTime(msg.created_at)}
-                              {isMe && msg.read && <span className="ml-1 text-slate-500">gelesen</span>}
+                              {isMe && msg.read && <span className="ml-1 text-white/40">gelesen</span>}
                             </p>
                           </div>
                         </div>
@@ -287,14 +287,14 @@ export default function DMConversationPage() {
       )}
 
       {/* Message Input */}
-      <div className="px-6 py-3 border-t border-slate-200 shrink-0 bg-white">
+      <div className="px-6 py-3 border-t border-white/[0.06] shrink-0 bg-[#141416]">
         <div className="max-w-2xl mx-auto flex gap-2">
           <button
             onClick={() => setShowEventSearch(true)}
-            className="p-3 rounded-xl bg-slate-50 border border-slate-200 hover:border-slate-300 transition-colors shrink-0"
+            className="p-3 rounded-xl bg-white/[0.06] border border-white/[0.10] hover:border-white/[0.15] transition-colors shrink-0"
             title="Event teilen"
           >
-            <svg className="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-5 h-5 text-white/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
             </svg>
           </button>
@@ -304,12 +304,12 @@ export default function DMConversationPage() {
             onChange={(e) => setMessageText(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && sendMessage()}
             placeholder="Nachricht schreiben..."
-            className="flex-1 px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 text-slate-800 placeholder-slate-400 focus:outline-none focus:border-slate-400 transition-colors"
+            className="flex-1 px-4 py-3 rounded-xl bg-white/[0.06] border border-white/[0.10] text-white/90 placeholder-white/30 focus:outline-none focus:border-white/[0.15] transition-colors"
           />
           <button
             onClick={sendMessage}
             disabled={sending || !messageText.trim()}
-            className="p-3 rounded-xl bg-slate-800 text-white hover:bg-slate-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shrink-0"
+            className="p-3 rounded-xl bg-indigo-500 text-white hover:bg-indigo-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shrink-0"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />

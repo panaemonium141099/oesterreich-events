@@ -112,6 +112,24 @@ export const post: FestivalPost = {
     'Metal Festival 2026',
     'Pannonia Fields',
   ],
+  faqs: [
+    {
+      question: 'Wie funktioniert das Camping beim Nova Rock?',
+      answer: 'Camping-Tickets müssen separat zum Festivalticket gebucht werden. Der Campingplatz öffnet bereits am Mittwoch vor Festivalbeginn. Es gibt Standard-Camping und Premium-Camping mit kürzerem Weg zum Festivalgelände. Sanitäranlagen, Trinkwasserstellen und 24/7-Security sind vorhanden.',
+    },
+    {
+      question: 'Was kosten Tickets für das Nova Rock 2026?',
+      answer: 'Tagestickets sind ab ca. 89 € erhältlich, das 4-Tages-Ticket ab ca. 229 €. Early-Bird-Tickets sind deutlich günstiger — der Vorverkauf startet üblicherweise im Herbst des Vorjahres. Camping-Tickets kosten zusätzlich ca. 30–50 €.',
+    },
+    {
+      question: 'Wo findet das Nova Rock statt und wie komme ich hin?',
+      answer: 'Das Festival findet auf den Pannonia Fields in Nickelsdorf (Burgenland) statt, nahe der ungarischen Grenze. Anreise per Bahn: Direktzüge ab Wien Hauptbahnhof nach Nickelsdorf (ca. 45 Min.), Shuttle-Bus zum Gelände inklusive. Per Auto: A4 Abfahrt Nickelsdorf, Parkplätze sind ausgeschildert.',
+    },
+    {
+      question: 'Wann wird das vollständige Lineup bekannt gegeben?',
+      answer: 'Die ersten Headliner werden meist im Herbst des Vorjahres bestätigt. Das Lineup wird dann laufend bis zum Frühjahr ergänzt. Das vollständige Line-up mit Timetable und Bühnenaufteilung erscheint in der Regel wenige Wochen vor dem Festival auf novarock.at.',
+    },
+  ],
   jsonLdEvent: {
     name: 'Nova Rock Festival 2026',
     startDate: '2026-06-11',

@@ -41,7 +41,7 @@ export function ProfileDropdown() {
 
   if (!user) return null;
 
-  const itemClass = 'block px-4 py-2.5 text-sm text-slate-600 hover:bg-slate-50 hover:text-slate-800 transition-colors';
+  const itemClass = 'block px-4 py-2.5 text-sm text-white/60 hover:bg-white/[0.04] hover:text-white/90 transition-colors';
 
   return (
     <div className="relative shrink-0 flex items-center gap-2" ref={ref}>
@@ -50,9 +50,9 @@ export function ProfileDropdown() {
         aria-label="Benutzermenü"
         aria-expanded={open}
         aria-haspopup="true"
-        className="flex items-center gap-2 px-2 py-1.5 rounded-lg transition-all duration-200 hover:bg-slate-50"
+        className="flex items-center gap-2 px-2 py-1.5 rounded-lg transition-all duration-200 hover:bg-white/[0.04]"
       >
-        <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-semibold overflow-hidden bg-slate-100 text-slate-500">
+        <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-semibold overflow-hidden bg-white/10 text-white/50">
           {profile?.avatar_url ? (
             <img
               src={profile.avatar_url}
@@ -71,18 +71,18 @@ export function ProfileDropdown() {
             {profile?.first_name?.[0] || user.email?.[0]?.toUpperCase() || '?'}
           </span>
         </div>
-        <svg className={`w-3 h-3 transition-transform duration-200 text-slate-400 ${open ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg className={`w-3 h-3 transition-transform duration-200 text-white/40 ${open ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
         </svg>
       </button>
 
       {open && (
-        <div className="absolute right-0 top-full mt-2 w-56 rounded-xl shadow-2xl border z-50 overflow-hidden bg-white border-slate-200">
-          <div className="px-4 py-3 border-b border-slate-200">
-            <p className="text-sm font-medium text-slate-800">
+        <div className="absolute right-0 top-full mt-2 w-56 rounded-xl shadow-2xl border z-50 overflow-hidden bg-[#1c1c1e] border-white/[0.10]">
+          <div className="px-4 py-3 border-b border-white/[0.06]">
+            <p className="text-sm font-medium text-white/90">
               {profile?.first_name} {profile?.last_name}
             </p>
-            <p className="text-xs text-slate-500">
+            <p className="text-xs text-white/50">
               {user.email}
             </p>
           </div>
@@ -109,15 +109,15 @@ export function ProfileDropdown() {
               <NewspaperIcon size={16} className="inline-block mr-1.5 -mt-0.5" /> Feed
             </Link>
             {(profile?.role === 'god' || profile?.role === 'admin') && (
-              <Link href="/admin" onClick={() => setOpen(false)} className="block px-4 py-2.5 text-sm text-amber-600 hover:bg-slate-50 transition-colors">
+              <Link href="/admin" onClick={() => setOpen(false)} className="block px-4 py-2.5 text-sm text-amber-400 hover:bg-white/[0.04] transition-colors">
                 <BoltIcon size={16} className="inline-block mr-1.5 -mt-0.5" /> Admin Panel
               </Link>
             )}
           </div>
-          <div className="py-1 border-t border-slate-200">
+          <div className="py-1 border-t border-white/[0.06]">
             <button
               onClick={() => { signOut(); setOpen(false); }}
-              className="block w-full text-left px-4 py-2.5 text-sm text-red-500 hover:bg-red-50 transition-colors"
+              className="block w-full text-left px-4 py-2.5 text-sm text-red-400 hover:bg-red-500/10 transition-colors"
             >
               <LogoutIcon size={16} className="inline-block mr-1.5 -mt-0.5" /> Abmelden
             </button>

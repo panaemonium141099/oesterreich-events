@@ -110,6 +110,24 @@ export const post: FestivalPost = {
     'Indie Festival 2026',
     'VAZ St. Pölten',
   ],
+  faqs: [
+    {
+      question: 'Gibt es beim Frequency ein Cashless-Bezahlsystem?',
+      answer: 'Ja, das Frequency setzt auf ein Cashless-System mit aufladbarem Festival-Armband. Guthaben kann vorab online oder vor Ort aufgeladen werden. Restguthaben wird nach dem Festival über die Website rückerstattet.',
+    },
+    {
+      question: 'Wie funktioniert das Camping beim Frequency Festival?',
+      answer: 'Der Campingplatz befindet sich direkt neben dem VAZ-Gelände in St. Pölten. Camping ist im Festivalticket inkludiert, Premium-Camping-Upgrades sind separat buchbar. Sanitäranlagen, Duschen und ein Campingplatz-Supermarkt stehen zur Verfügung.',
+    },
+    {
+      question: 'Gibt es eine Altersbeschränkung beim Frequency?',
+      answer: 'Kinder unter 12 Jahren haben in Begleitung eines Erziehungsberechtigten freien Eintritt. Jugendliche von 12 bis 15 Jahren benötigen ein eigenes Ticket und eine unterschriebene Einverständniserklärung der Erziehungsberechtigten. Ab 16 Jahren ist der Zutritt ohne Begleitung möglich.',
+    },
+    {
+      question: 'Wie bereite ich mich auf das Wetter beim Frequency vor?',
+      answer: 'Das Festival findet Ende August statt — tagsüber können es bis zu 30 °C werden, abends kühlt es ab. Sonnencreme, ein Hut, eine Regenjacke und bequeme, wasserfeste Schuhe sind Pflicht. Eine gute Powerbank für das Handy gehört ebenfalls ins Gepäck.',
+    },
+  ],
   jsonLdEvent: {
     name: 'Frequency Festival 2026',
     startDate: '2026-08-20',

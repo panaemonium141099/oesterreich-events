@@ -197,28 +197,28 @@ export default function NotificationPreferences() {
   if (loading) {
     return (
       <div className="animate-pulse space-y-4 p-6">
-        <div className="h-6 w-48 rounded bg-slate-100" />
-        <div className="h-10 w-full rounded bg-slate-100" />
-        <div className="h-10 w-full rounded bg-slate-100" />
+        <div className="h-6 w-48 rounded bg-white/[0.06]" />
+        <div className="h-10 w-full rounded bg-white/[0.06]" />
+        <div className="h-10 w-full rounded bg-white/[0.06]" />
       </div>
     );
   }
 
   if (!isAuthenticated) {
     return (
-      <div className="rounded-xl border border-slate-200 bg-white p-6 text-slate-500">
+      <div className="rounded-xl border border-white/[0.06] bg-[#141416] p-6 text-white/40">
         Bitte melde dich an, um deine Benachrichtigungseinstellungen zu verwalten.
       </div>
     );
   }
 
   return (
-    <div className="space-y-6 rounded-xl border border-slate-200 bg-white p-6">
+    <div className="space-y-6 rounded-xl border border-white/[0.06] bg-[#141416] p-6">
       <div>
-        <h2 className="text-lg font-semibold text-slate-800">
+        <h2 className="text-lg font-semibold text-white/90">
           Kuenstler-Benachrichtigungen
         </h2>
-        <p className="mt-1 text-sm text-slate-500">
+        <p className="mt-1 text-sm text-white/50">
           Steuere, wie und wann du ueber Events deiner Kuenstler informiert wirst.
         </p>
       </div>
@@ -234,8 +234,8 @@ export default function NotificationPreferences() {
       {prefs.artist_alerts_enabled && (
         <>
           {/* Channel toggles */}
-          <div className="space-y-3 border-t border-slate-200 pt-4">
-            <h3 className="text-sm font-medium text-slate-600">Kanaele</h3>
+          <div className="space-y-3 border-t border-white/[0.06] pt-4">
+            <h3 className="text-sm font-medium text-white/60">Kanaele</h3>
 
             <ToggleRow
               label="In-App"
@@ -266,9 +266,9 @@ export default function NotificationPreferences() {
 
           {/* Phone number input (only shown when SMS is enabled) */}
           {prefs.channel_sms && (
-            <div className="space-y-2 border-t border-slate-200 pt-4">
-              <h3 className="text-sm font-medium text-slate-600">Telefonnummer</h3>
-              <p className="text-xs text-slate-400">
+            <div className="space-y-2 border-t border-white/[0.06] pt-4">
+              <h3 className="text-sm font-medium text-white/60">Telefonnummer</h3>
+              <p className="text-xs text-white/40">
                 Fuer SMS-Benachrichtigungen. Format: +43 gefolgt von deiner Nummer (z.B. +436641234567).
               </p>
               <input
@@ -276,8 +276,8 @@ export default function NotificationPreferences() {
                 value={prefs.phone_number}
                 onChange={(e) => handlePhoneChange(e.target.value)}
                 placeholder="+436641234567"
-                className={`w-full rounded-lg border bg-white px-3 py-2 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 ${
-                  phoneError ? 'border-red-500' : 'border-slate-200'
+                className={`w-full rounded-lg border bg-white/[0.06] px-3 py-2 text-sm text-white/90 placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-indigo-400 ${
+                  phoneError ? 'border-red-500' : 'border-white/[0.10]'
                 }`}
               />
               {phoneError && (
@@ -287,8 +287,8 @@ export default function NotificationPreferences() {
           )}
 
           {/* Reminder interval toggles */}
-          <div className="space-y-3 border-t border-slate-200 pt-4">
-            <h3 className="text-sm font-medium text-slate-600">Erinnerungen</h3>
+          <div className="space-y-3 border-t border-white/[0.06] pt-4">
+            <h3 className="text-sm font-medium text-white/60">Erinnerungen</h3>
 
             <ToggleRow
               label="7 Tage vorher"
@@ -326,17 +326,17 @@ export default function NotificationPreferences() {
       )}
 
       {/* Save button */}
-      <div className="flex items-center gap-3 border-t border-slate-200 pt-4">
+      <div className="flex items-center gap-3 border-t border-white/[0.06] pt-4">
         <button
           onClick={handleSave}
           disabled={saving}
-          className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-indigo-700 disabled:opacity-50"
+          className="rounded-lg bg-indigo-500 px-4 py-2 text-sm font-medium text-white transition hover:bg-indigo-400 disabled:opacity-50"
         >
           {saving ? 'Speichern...' : 'Speichern'}
         </button>
 
         {saved && (
-          <span className="text-sm text-green-600">Gespeichert!</span>
+          <span className="text-sm text-green-400">Gespeichert!</span>
         )}
         {error && <span className="text-sm text-red-400">{error}</span>}
       </div>
@@ -356,11 +356,11 @@ function GdprConsent({
   onCancel: () => void;
 }) {
   return (
-    <div className="rounded-lg border border-amber-200 bg-amber-50 p-4">
-      <h4 className="text-sm font-medium text-amber-700">
+    <div className="rounded-lg border border-amber-500/20 bg-amber-500/10 p-4">
+      <h4 className="text-sm font-medium text-amber-400">
         Einwilligung fuer {channel}-Benachrichtigungen
       </h4>
-      <p className="mt-2 text-xs text-slate-500 leading-relaxed">
+      <p className="mt-2 text-xs text-white/50 leading-relaxed">
         Mit der Aktivierung stimmst du zu, {channel}-Benachrichtigungen ueber Events
         deiner gefolgten Kuenstler zu erhalten. Du kannst diese Einwilligung jederzeit
         hier in den Einstellungen oder ueber den Abmelde-Link in jeder E-Mail widerrufen.
@@ -376,7 +376,7 @@ function GdprConsent({
         </button>
         <button
           onClick={onCancel}
-          className="rounded-lg bg-slate-100 px-3 py-1.5 text-xs font-medium text-slate-600 transition hover:bg-slate-200"
+          className="rounded-lg bg-white/[0.06] px-3 py-1.5 text-xs font-medium text-white/60 transition hover:bg-white/[0.10]"
         >
           Abbrechen
         </button>
@@ -405,12 +405,12 @@ function ToggleRow({
       className={`flex items-center justify-between gap-4 rounded-lg p-2 transition ${
         disabled
           ? 'cursor-default opacity-60'
-          : 'cursor-pointer hover:bg-slate-50'
+          : 'cursor-pointer hover:bg-white/[0.04]'
       }`}
     >
       <div>
-        <p className="text-sm font-medium text-slate-800">{label}</p>
-        <p className="text-xs text-slate-400">{description}</p>
+        <p className="text-sm font-medium text-white/90">{label}</p>
+        <p className="text-xs text-white/40">{description}</p>
       </div>
       <div className="relative">
         <input
@@ -422,7 +422,7 @@ function ToggleRow({
         />
         <div
           className={`h-6 w-11 rounded-full transition ${
-            checked ? 'bg-indigo-600' : 'bg-slate-300'
+            checked ? 'bg-indigo-500' : 'bg-white/20'
           }`}
         >
           <div

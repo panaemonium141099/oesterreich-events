@@ -23,6 +23,11 @@ export interface LineupAct {
   stage?: string;
 }
 
+export interface FaqItem {
+  question: string;
+  answer: string;
+}
+
 export interface FestivalPost {
   slug: string;
   title: string;
@@ -70,4 +75,6 @@ export interface FestivalPost {
     /** URL of a representative image for Schema.org Event structured data. */
     image: string;
   };
+  /** Optional FAQ section — rendered as visible Q&A and FAQPage JSON-LD schema for rich results. */
+  faqs?: FaqItem[];
 }

@@ -25,6 +25,12 @@ export const metadata: Metadata = {
     title: 'LassTreffen.at — Entdecke was los ist in Österreich',
     description: 'Über 40.000 Veranstaltungen in ganz Österreich auf einer interaktiven Karte. Konzerte, Raves, Märkte, Kultur, Sport und mehr.',
   },
+  alternates: {
+    languages: {
+      'de-AT': 'https://lasstreffen.at',
+      'x-default': 'https://lasstreffen.at',
+    },
+  },
   robots: {
     index: true,
     follow: true,

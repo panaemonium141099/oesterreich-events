@@ -183,24 +183,24 @@ export default function MessagesPage() {
   // Rule 5: Skeleton loading instead of spinner for auth loading
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#f8fafc]">
+      <div className="min-h-screen bg-[#0a0a0c]">
         <SocialNav />
         <main className="max-w-3xl mx-auto px-4 sm:px-6 py-8">
           <div className="flex items-center justify-between mb-6">
-            <div className="h-7 w-40 bg-slate-100 rounded animate-pulse motion-reduce:animate-none" />
-            <div className="h-[44px] w-36 bg-slate-100 rounded-xl animate-pulse motion-reduce:animate-none" />
+            <div className="h-7 w-40 bg-white/[0.06] rounded animate-pulse motion-reduce:animate-none" />
+            <div className="h-[44px] w-36 bg-white/[0.06] rounded-xl animate-pulse motion-reduce:animate-none" />
           </div>
           <div className="space-y-2">
             {[1, 2, 3, 4].map(i => (
               <div
                 key={i}
-                className="flex items-center gap-3 p-4 rounded-xl bg-white border border-slate-200 animate-pulse motion-reduce:animate-none"
+                className="flex items-center gap-3 p-4 rounded-xl bg-white/[0.04] border border-white/[0.06] animate-pulse motion-reduce:animate-none"
                 style={{ animationDelay: `${i * 40}ms` }}
               >
-                <div className="w-11 h-11 rounded-full bg-slate-100 shrink-0" />
+                <div className="w-11 h-11 rounded-full bg-white/[0.06] shrink-0" />
                 <div className="flex-1 space-y-2">
-                  <div className="h-4 bg-slate-100 rounded w-1/3" />
-                  <div className="h-3 bg-slate-100 rounded w-2/3" />
+                  <div className="h-4 bg-white/[0.06] rounded w-1/3" />
+                  <div className="h-3 bg-white/[0.06] rounded w-2/3" />
                 </div>
               </div>
             ))}
@@ -212,7 +212,7 @@ export default function MessagesPage() {
 
   return (
     <div
-      className="min-h-screen text-[#1e293b] pb-24 bg-[#f8fafc]"
+      className="min-h-screen text-white pb-24 bg-[#0a0a0c]"
     >
       <SocialNav />
 
@@ -223,7 +223,7 @@ export default function MessagesPage() {
           {/* Rule 2: min-h-[44px], Rule 3: active:scale-[0.97], Rule 12: focus-visible ring */}
           <button
             onClick={() => setShowNewMessage(true)}
-            className="flex items-center gap-2 px-4 py-2.5 min-h-[44px] rounded-xl bg-slate-800 text-white text-sm font-semibold hover:bg-slate-700 transition-all duration-200 ease-out active:scale-[0.97] motion-reduce:transform-none focus-visible:ring-2 focus-visible:ring-slate-300 focus-visible:outline-none"
+            className="flex items-center gap-2 px-4 py-2.5 min-h-[44px] rounded-xl bg-indigo-500 text-white text-sm font-semibold hover:bg-indigo-400 transition-all duration-200 ease-out active:scale-[0.97] motion-reduce:transform-none focus-visible:ring-2 focus-visible:ring-white/20 focus-visible:outline-none"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
@@ -241,14 +241,14 @@ export default function MessagesPage() {
             onClick={() => { setShowNewMessage(false); setFriendSearch(''); }}
           >
             <div
-              className="w-full max-w-md bg-white backdrop-blur-xl border border-slate-200 rounded-2xl p-6 max-h-[80vh] flex flex-col animate-[scaleIn_200ms_ease-out] motion-reduce:animate-none shadow-xl"
+              className="w-full max-w-md bg-[#1c1c1e] backdrop-blur-xl border border-white/[0.10] rounded-2xl p-6 max-h-[80vh] flex flex-col animate-[scaleIn_200ms_ease-out] motion-reduce:animate-none shadow-xl"
               onClick={(e) => e.stopPropagation()}
             >
               <h2 className="text-lg font-bold mb-4">Neue Nachricht</h2>
 
               {/* Friend search - Rule 12: focus-visible ring */}
               <div className="relative mb-4">
-                <svg className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
                 <input
@@ -256,7 +256,7 @@ export default function MessagesPage() {
                   value={friendSearch}
                   onChange={(e) => setFriendSearch(e.target.value)}
                   placeholder="Freund suchen..."
-                  className="w-full pl-10 pr-4 py-3 min-h-[44px] rounded-xl bg-white border border-slate-200 text-slate-800 placeholder-slate-400 focus:outline-none focus:border-slate-400 transition-colors duration-200 ease-out focus-visible:ring-2 focus-visible:ring-slate-300"
+                  className="w-full pl-10 pr-4 py-3 min-h-[44px] rounded-xl bg-white/[0.06] border border-white/[0.10] text-white/90 placeholder-white/30 focus:outline-none focus:border-white/[0.15] transition-colors duration-200 ease-out focus-visible:ring-2 focus-visible:ring-white/20"
                   autoFocus
                 />
               </div>
@@ -268,29 +268,29 @@ export default function MessagesPage() {
                     {[1, 2, 3].map(i => (
                       <div
                         key={i}
-                        className="flex items-center gap-3 p-3 rounded-xl bg-white border border-slate-200 animate-pulse motion-reduce:animate-none"
+                        className="flex items-center gap-3 p-3 rounded-xl bg-white/[0.04] border border-white/[0.06] animate-pulse motion-reduce:animate-none"
                         style={{ animationDelay: `${i * 40}ms` }}
                       >
-                        <div className="w-10 h-10 rounded-full bg-slate-100 shrink-0" />
-                        <div className="h-4 bg-slate-100 rounded w-1/3" />
+                        <div className="w-10 h-10 rounded-full bg-white/10 shrink-0" />
+                        <div className="h-4 bg-white/[0.06] rounded w-1/3" />
                       </div>
                     ))}
                   </div>
                 ) : filteredFriends.length === 0 ? (
                   /* Rule 13: Empty state with icon + text + action */
                   <div className="text-center py-8">
-                    <div className="w-12 h-12 rounded-full bg-slate-50 border border-slate-200 flex items-center justify-center mx-auto mb-3">
-                      <svg className="w-6 h-6 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div className="w-12 h-12 rounded-full bg-white/[0.04] border border-white/[0.06] flex items-center justify-center mx-auto mb-3">
+                      <svg className="w-6 h-6 text-white/20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
                       </svg>
                     </div>
-                    <p className="text-slate-400 text-sm leading-relaxed">
+                    <p className="text-white/30 text-sm leading-relaxed">
                       {friends.length === 0 ? 'Noch keine Freunde' : 'Kein Freund gefunden'}
                     </p>
                     {friends.length === 0 && (
                       <Link
                         href="/friends"
-                        className="inline-flex items-center gap-1.5 mt-3 px-4 min-h-[44px] text-sm text-slate-500 hover:text-slate-700 transition-colors duration-200 ease-out focus-visible:ring-2 focus-visible:ring-slate-300 focus-visible:outline-none rounded-lg"
+                        className="inline-flex items-center gap-1.5 mt-3 px-4 min-h-[44px] text-sm text-white/40 hover:text-white/60 transition-colors duration-200 ease-out focus-visible:ring-2 focus-visible:ring-white/20 focus-visible:outline-none rounded-lg"
                       >
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -304,13 +304,13 @@ export default function MessagesPage() {
                     <button
                       key={f.id}
                       onClick={() => { setShowNewMessage(false); setFriendSearch(''); router.push(`/messages/${f.id}`); }}
-                      className="w-full flex items-center gap-3 p-3 min-h-[44px] rounded-xl hover:bg-slate-50 transition-colors duration-200 ease-out text-left active:scale-[0.97] motion-reduce:transform-none focus-visible:ring-2 focus-visible:ring-slate-300 focus-visible:outline-none animate-[fadeIn_200ms_ease-out_both] motion-reduce:animate-none"
+                      className="w-full flex items-center gap-3 p-3 min-h-[44px] rounded-xl hover:bg-white/[0.04] transition-colors duration-200 ease-out text-left active:scale-[0.97] motion-reduce:transform-none focus-visible:ring-2 focus-visible:ring-white/20 focus-visible:outline-none animate-[fadeIn_200ms_ease-out_both] motion-reduce:animate-none"
                       style={{ animationDelay: `${index * 30}ms` }}
                     >
                       {f.avatar_url ? (
                         <img src={f.avatar_url} alt="" className="w-10 h-10 rounded-full object-cover shrink-0" />
                       ) : (
-                        <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-sm font-semibold text-slate-500 shrink-0">
+                        <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-sm font-semibold text-white/50 shrink-0">
                           {f.first_name?.[0]?.toUpperCase() || '?'}
                         </div>
                       )}
@@ -325,7 +325,7 @@ export default function MessagesPage() {
               {/* Rule 2: min-h touch target, Rule 12: focus ring */}
               <button
                 onClick={() => { setShowNewMessage(false); setFriendSearch(''); }}
-                className="w-full mt-4 min-h-[44px] py-2.5 text-sm text-slate-400 hover:text-slate-600 transition-colors duration-200 ease-out rounded-xl active:scale-[0.97] motion-reduce:transform-none focus-visible:ring-2 focus-visible:ring-slate-300 focus-visible:outline-none"
+                className="w-full mt-4 min-h-[44px] py-2.5 text-sm text-white/30 hover:text-white/50 transition-colors duration-200 ease-out rounded-xl active:scale-[0.97] motion-reduce:transform-none focus-visible:ring-2 focus-visible:ring-white/20 focus-visible:outline-none"
               >
                 Abbrechen
               </button>
@@ -339,13 +339,13 @@ export default function MessagesPage() {
             {[1, 2, 3, 4].map(i => (
               <div
                 key={i}
-                className="flex items-center gap-3 p-4 rounded-xl bg-white border border-slate-200 animate-pulse motion-reduce:animate-none"
+                className="flex items-center gap-3 p-4 rounded-xl bg-white/[0.04] border border-white/[0.06] animate-pulse motion-reduce:animate-none"
                 style={{ animationDelay: `${i * 40}ms` }}
               >
-                <div className="w-11 h-11 rounded-full bg-slate-100 shrink-0" />
+                <div className="w-11 h-11 rounded-full bg-white/[0.06] shrink-0" />
                 <div className="flex-1 space-y-2">
-                  <div className="h-4 bg-slate-100 rounded w-1/3" />
-                  <div className="h-3 bg-slate-100 rounded w-2/3" />
+                  <div className="h-4 bg-white/[0.06] rounded w-1/3" />
+                  <div className="h-3 bg-white/[0.06] rounded w-2/3" />
                 </div>
               </div>
             ))}
@@ -353,16 +353,16 @@ export default function MessagesPage() {
         ) : conversations.length === 0 ? (
           /* Rule 13: empty state already good, add focus ring + touch target to link */
           <div className="text-center py-20">
-            <div className="w-16 h-16 rounded-full bg-slate-50 border border-slate-200 flex items-center justify-center mx-auto mb-4">
-              <svg className="w-8 h-8 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="w-16 h-16 rounded-full bg-white/[0.04] border border-white/[0.06] flex items-center justify-center mx-auto mb-4">
+              <svg className="w-8 h-8 text-white/20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
               </svg>
             </div>
-            <p className="text-slate-500 text-sm mb-1 leading-relaxed">Noch keine Nachrichten</p>
-            <p className="text-slate-400 text-xs leading-relaxed">Sende eine Nachricht an einen Freund</p>
+            <p className="text-white/40 text-sm mb-1 leading-relaxed">Noch keine Nachrichten</p>
+            <p className="text-white/30 text-xs leading-relaxed">Sende eine Nachricht an einen Freund</p>
             <Link
               href="/friends"
-              className="inline-flex items-center gap-2 mt-4 px-5 min-h-[44px] py-2.5 text-sm font-medium text-slate-500 hover:text-slate-800 bg-white border border-slate-200 rounded-xl transition-all duration-200 ease-out active:scale-[0.97] motion-reduce:transform-none focus-visible:ring-2 focus-visible:ring-slate-300 focus-visible:outline-none"
+              className="inline-flex items-center gap-2 mt-4 px-5 min-h-[44px] py-2.5 text-sm font-medium text-white/40 hover:text-white/60 bg-white/[0.06] border border-white/[0.10] rounded-xl transition-all duration-200 ease-out active:scale-[0.97] motion-reduce:transform-none focus-visible:ring-2 focus-visible:ring-white/20 focus-visible:outline-none"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -377,14 +377,14 @@ export default function MessagesPage() {
               <Link
                 key={c.friendId}
                 href={`/messages/${c.friendId}`}
-                className="flex items-center gap-3 p-4 min-h-[44px] rounded-xl bg-white border border-slate-200 hover:bg-slate-50 transition-all duration-200 ease-out group active:scale-[0.97] motion-reduce:transform-none focus-visible:ring-2 focus-visible:ring-slate-300 focus-visible:outline-none animate-[fadeIn_200ms_ease-out_both] motion-reduce:animate-none"
+                className="flex items-center gap-3 p-4 min-h-[44px] rounded-xl bg-white/[0.04] border border-white/[0.06] hover:bg-white/[0.06] transition-all duration-200 ease-out group active:scale-[0.97] motion-reduce:transform-none focus-visible:ring-2 focus-visible:ring-white/20 focus-visible:outline-none animate-[fadeIn_200ms_ease-out_both] motion-reduce:animate-none"
                 style={{ animationDelay: `${index * 35}ms` }}
               >
                 {/* Avatar */}
                 {c.friendAvatar ? (
                   <img src={c.friendAvatar} alt="" className="w-11 h-11 rounded-full object-cover shrink-0" />
                 ) : (
-                  <div className="w-11 h-11 rounded-full bg-slate-100 flex items-center justify-center text-sm font-semibold text-slate-500 shrink-0">
+                  <div className="w-11 h-11 rounded-full bg-white/10 flex items-center justify-center text-sm font-semibold text-white/50 shrink-0">
                     {c.friendName?.[0]?.toUpperCase() || '?'}
                   </div>
                 )}
@@ -395,9 +395,9 @@ export default function MessagesPage() {
                     <p className={`text-sm truncate ${c.unreadCount > 0 ? 'font-semibold' : 'font-medium'}`}>
                       {c.friendName}
                     </p>
-                    <span className="text-xs text-slate-400 shrink-0 ml-2">{formatTime(c.lastMessageAt)}</span>
+                    <span className="text-xs text-white/30 shrink-0 ml-2">{formatTime(c.lastMessageAt)}</span>
                   </div>
-                  <p className={`text-xs truncate mt-0.5 leading-relaxed ${c.unreadCount > 0 ? 'text-slate-600' : 'text-slate-400'}`}>
+                  <p className={`text-xs truncate mt-0.5 leading-relaxed ${c.unreadCount > 0 ? 'text-white/60' : 'text-white/30'}`}>
                     {c.lastMessage}
                   </p>
                 </div>

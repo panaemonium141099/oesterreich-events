@@ -21,19 +21,27 @@ export async function generateMetadata({
     title: post.seoTitle,
     description: post.seoDescription,
     keywords: post.keywords,
+    alternates: {
+      canonical: `https://lasstreffen.at/blog/${slug}`,
+      languages: {
+        'de-AT': `https://lasstreffen.at/blog/${slug}`,
+        'x-default': `https://lasstreffen.at/blog/${slug}`,
+      },
+    },
     openGraph: {
       title: post.seoTitle,
       description: post.seoDescription,
-      images: [{ url: post.heroImage, width: 1600, alt: post.title }],
       type: 'article',
       publishedTime: post.publishDate,
       modifiedTime: post.updatedDate,
+      section: post.category,
+      tags: post.keywords,
+      authors: ['https://lasstreffen.at'],
     },
     twitter: {
       card: 'summary_large_image',
       title: post.seoTitle,
       description: post.seoDescription,
-      images: [post.heroImage],
     },
   };
 }
@@ -148,6 +156,17 @@ export default async function BlogPostPage({
   const post = getPostBySlug(slug);
   if (!post) notFound();
 
+  // BreadcrumbList schema — helps Google display navigation path
+  const breadcrumbJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://lasstreffen.at' },
+      { '@type': 'ListItem', position: 2, name: 'Blog', item: 'https://lasstreffen.at/blog' },
+      { '@type': 'ListItem', position: 3, name: post.title },
+    ],
+  };
+
   // BlogPosting schema — describes the article itself
   const blogPostingJsonLd = {
     '@context': 'https://schema.org',
@@ -185,8 +204,26 @@ export default async function BlogPostPage({
     organizer: { '@type': 'Organization', name: 'LassTreffen.at', url: 'https://lasstreffen.at' },
   };
 
+  // FAQPage schema — enables FAQ rich results in Google
+  const faqJsonLd = post.faqs && post.faqs.length > 0 ? {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: post.faqs.map(faq => ({
+      '@type': 'Question',
+      name: faq.question,
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: faq.answer,
+      },
+    })),
+  } : null;
+
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd).replace(/</g, '\u003c') }}
+      />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(blogPostingJsonLd).replace(/</g, '\u003c') }}
@@ -195,6 +232,12 @@ export default async function BlogPostPage({
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(eventJsonLd).replace(/</g, '\u003c') }}
       />
+      {faqJsonLd && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd).replace(/</g, '\u003c') }}
+        />
+      )}
 
       <article className="min-h-screen bg-[#f8f6f2] text-gray-900">
 
@@ -411,13 +454,39 @@ export default async function BlogPostPage({
             </div>
           </section>
 
+          {/* FAQ Section */}
+          {post.faqs && post.faqs.length > 0 && (
+            <section className="mb-16">
+              <h2 className="text-2xl md:text-3xl font-extrabold text-gray-900 tracking-tight mb-6">
+                Häufige Fragen
+              </h2>
+              <div className="divide-y divide-gray-100 border-y border-gray-100">
+                {post.faqs.map((faq, i) => (
+                  <details key={i} className="group py-5">
+                    <summary className="flex items-start justify-between gap-4 cursor-pointer list-none font-semibold text-gray-900 text-sm leading-snug hover:text-gray-600 transition-colors [&::-webkit-details-marker]:hidden">
+                      <span>{faq.question}</span>
+                      <span className="mt-0.5 w-5 h-5 flex-shrink-0 text-gray-400 group-open:rotate-45 transition-transform duration-200">
+                        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5">
+                          <path d="M10 4v12M4 10h12" strokeLinecap="round" />
+                        </svg>
+                      </span>
+                    </summary>
+                    <p className="mt-3 text-gray-500 text-sm leading-relaxed pr-8">
+                      {faq.answer}
+                    </p>
+                  </details>
+                ))}
+              </div>
+            </section>
+          )}
+
           {/* CTA */}
           <div className="border border-gray-200 rounded-xl p-8 text-center bg-white">
             <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-400 mb-3">
               Mehr entdecken
             </p>
             <p className="text-gray-900 font-bold text-xl mb-6 tracking-tight">
-              Noch mehr Events in Oesterreich
+              Noch mehr Events in Österreich
             </p>
             <Link
               href={post.ctaLink}
@@ -451,7 +520,7 @@ function RelatedPosts({ currentSlug, category }: { currentSlug: string; category
         <div className="flex items-center gap-4 mb-8">
           <div className="h-px w-8 bg-gray-400" />
           <span className="text-[10px] font-bold uppercase tracking-[0.25em] text-gray-400">
-            Aehnliche Beitraege
+            Ähnliche Beiträge
           </span>
         </div>
         <div className="grid sm:grid-cols-3 gap-6">
@@ -485,7 +554,7 @@ function RelatedPosts({ currentSlug, category }: { currentSlug: string; category
             href="/blog"
             className="inline-flex items-center gap-2 text-gray-600 hover:text-gray-900 text-sm font-medium transition-colors group"
           >
-            Alle Beitraege anzeigen
+            Alle Beiträge anzeigen
             <IconArrowRight />
           </Link>
         </div>

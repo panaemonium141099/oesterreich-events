@@ -110,6 +110,24 @@ export const post: FestivalPost = {
     'Donauinsel',
     'kostenlose Konzerte Wien',
   ],
+  faqs: [
+    {
+      question: 'Ist das Donauinselfest 2026 kostenlos?',
+      answer: 'Ja, der Eintritt zum Donauinselfest ist komplett kostenlos. Alle Bühnen und Bereiche sind frei zugänglich — kein Ticket nötig.',
+    },
+    {
+      question: 'Wann findet das Donauinselfest 2026 statt?',
+      answer: 'Das Donauinselfest 2026 findet vom 26. bis 28. Juni 2026 statt, traditionell am letzten Juni-Wochenende.',
+    },
+    {
+      question: 'Wie komme ich am besten zum Donauinselfest?',
+      answer: 'Am besten mit der U-Bahn: U1 bis Station Donauinsel (Haupteingang) oder U6 bis Handelskai. Während des Festivals gibt es Sonderzüge und verlängerte Betriebszeiten.',
+    },
+    {
+      question: 'Wie viele Besucher kommen zum Donauinselfest?',
+      answer: 'Das Donauinselfest zieht jährlich über 3 Millionen Besucherinnen und Besucher an und ist damit das größte kostenlose Open-Air-Festival der Welt.',
+    },
+  ],
   jsonLdEvent: {
     name: 'Donauinselfest 2026',
     startDate: '2026-06-26',

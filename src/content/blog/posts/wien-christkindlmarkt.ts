@@ -104,6 +104,24 @@ export const post: FestivalPost = {
     'Advent Wien Programm',
     'Christkindlmarkt Öffnungszeiten',
   ],
+  faqs: [
+    {
+      question: 'Was sind die Öffnungszeiten des Wiener Christkindlmarkts?',
+      answer: 'Der Christkindlmarkt am Rathausplatz ist täglich von 10:00 bis 21:30 Uhr geöffnet. Am Heiligabend (24. Dezember) gelten verkürzte Öffnungszeiten von 10:00 bis 17:00 Uhr. Der Markt läuft von Mitte November bis zum 26. Dezember.',
+    },
+    {
+      question: 'Kostet der Wiener Christkindlmarkt Eintritt?',
+      answer: 'Nein, der Eintritt zum Christkindlmarkt am Rathausplatz ist kostenlos. Es fallen lediglich Kosten für Speisen, Getränke und Einkäufe an den über 150 Holzhütten an.',
+    },
+    {
+      question: 'Wann ist die beste Zeit für einen Besuch?',
+      answer: 'Unter der Woche und vormittags ist es am ruhigsten. An Wochenenden und in den Abendstunden ist der Markt sehr voll. Besonders stimmungsvoll ist ein Besuch bei Einbruch der Dämmerung, wenn die festliche Beleuchtung der Rathausfassade eingeschaltet wird.',
+    },
+    {
+      question: 'Welche kulinarischen Highlights gibt es am Christkindlmarkt?',
+      answer: 'Zu den Klassikern zählen Wiener Punsch und Glühwein, heisse Maroni, frischer Lebkuchen, Kartoffelpuffer und Raclette. Viele Stände bieten auch regionale Spezialitäten aus ganz Österreich an — von Kärntner Kasnudeln bis zu Tiroler Kiachl.',
+    },
+  ],
   jsonLdEvent: {
     name: 'Wiener Christkindlmarkt 2026',
     startDate: '2026-11-14',
