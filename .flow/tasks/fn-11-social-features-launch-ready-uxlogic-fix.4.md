@@ -28,9 +28,8 @@ Fix the Feed page: change event click destination from `/map?eventId=...` to `/e
 - [ ] Feed scroll position is preserved when navigating back (verify with browser back)
 - [ ] Page background uses `bg-surface` token
 ## Done summary
-TBD
-
+Added profile links (Link to /profile/[userId]) for friend names/avatars across all tabs (friends, incoming, outgoing, search results), toast feedback for all friend actions (send/accept/reject/remove) with error handling, and replaced hardcoded bg-[#141416] with bg-surface theme token.
 ## Evidence
-- Commits:
-- Tests:
+- Commits: 47e8341c43d911be8fe112defe008e6860e240e0
+- Tests: npm test -- --run (547 passed)
 - PRs:
