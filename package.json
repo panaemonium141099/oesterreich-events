@@ -9,6 +9,7 @@
     "analyze": "ANALYZE=true next build",
     "start": "next start",
     "scrape": "tsx src/scripts/scrape.ts",
+    "scrape:all": "tsx --env-file=.env.local src/scripts/scrape-all.ts",
     "scrape:burgenland": "tsx src/scripts/scrape.ts --source burgenland.info",
     "scrape:meinbezirk": "tsx src/scripts/scrape.ts --source meinbezirk",
     "scrape:events-at": "tsx src/scripts/scrape.ts --source events.at",
