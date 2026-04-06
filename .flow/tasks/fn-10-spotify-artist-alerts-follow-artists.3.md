@@ -46,9 +46,8 @@ Refactor the Spotify OAuth callback to store tokens in `spotify_tokens` (server-
 - [ ] Existing tests still pass
 
 ## Done summary
-TBD
-
+Refactored Spotify OAuth callback to store tokens in spotify_tokens via service_role, import top 50 artists to imported_spotify_artists staging table, and auto-follow top 10 into followed_artists. Created CRUD API routes for artist follows (POST/DELETE /api/artists/follow, GET /api/artists/following) and a Spotify connectivity status endpoint (GET /api/spotify/status). Added refreshSpotifyTokenForUser() that reads/writes spotify_tokens via service_role. Removed the old 5000-event fetch and client-side matching from the callback.
 ## Evidence
-- Commits:
-- Tests:
+- Commits: ec1c2731b7ca25ac036d57b73868c2efdd915541
+- Tests: npm test
 - PRs:
