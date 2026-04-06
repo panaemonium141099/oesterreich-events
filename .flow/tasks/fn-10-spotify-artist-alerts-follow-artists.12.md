@@ -55,9 +55,8 @@ Build a conversion-driven reminder system that sends scheduled notifications bef
 - [ ] pg_cron job runs hourly to send due reminders
 
 ## Done summary
-TBD
-
+Implemented event reminder system with scheduled 7d and 1d reminders before matched artist events. Added database schema (event_reminders table with artist_name, reminder_type, scheduled_for columns and unique constraint), send-reminders Edge Function deployed to Supabase with pg_cron hourly schedule, reminder scheduling in match-artists pipeline, NotificationPreferences UI with independent 7d/1d toggles, and cleanup trigger for cancelled events. Each reminder includes conversion-focused ticket CTAs across in-app, email, and SMS channels.
 ## Evidence
-- Commits:
-- Tests:
+- Commits: 612e3069e04a6ddad1097e670d1dce17626507d9, 2808c9315805a9f2ca3856598d835a06c06144da
+- Tests: npm test (528 passed)
 - PRs:
