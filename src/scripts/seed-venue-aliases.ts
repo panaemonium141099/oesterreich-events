@@ -56,7 +56,7 @@ interface VenueRecord {
 interface AliasCandidate {
   venue_id: string;
   alias_normalized: string;
-  alias_source: string;
+  source_name: string;
   confidence: number;
 }
 
@@ -158,7 +158,7 @@ function generateAliases(venue: VenueRecord): AliasCandidate[] {
     aliases.push({
       venue_id: venue.id,
       alias_normalized: normalized,
-      alias_source: source,
+      source_name: source,
       confidence,
     });
   }
@@ -250,8 +250,9 @@ async function upsertAliases(
       .upsert(
         batch.map(a => ({
           venue_id: a.venue_id,
+          alias: a.alias_normalized,
           alias_normalized: a.alias_normalized,
-          alias_source: a.alias_source,
+          source_name: a.source_name,
           confidence: a.confidence,
         })),
         {
@@ -361,7 +362,7 @@ async function main() {
   // Count by source
   const bySource = new Map<string, number>();
   for (const a of allAliases) {
-    bySource.set(a.alias_source, (bySource.get(a.alias_source) || 0) + 1);
+    bySource.set(a.source_name, (bySource.get(a.source_name) || 0) + 1);
   }
   console.log('\nAliases by source:');
   for (const [source, count] of Array.from(bySource.entries()).sort((a, b) => b[1] - a[1])) {
@@ -382,7 +383,7 @@ async function main() {
     const genericTag = a.confidence === 0.5 ? ' [GENERIC]' : '';
     console.log(
       `  venue=${a.venue_id.substring(0, 8)}... alias="${a.alias_normalized}" ` +
-        `source=${a.alias_source} confidence=${a.confidence}${genericTag}`,
+        `source=${a.source_name} confidence=${a.confidence}${genericTag}`,
     );
   }
 
