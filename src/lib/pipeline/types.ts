@@ -39,7 +39,7 @@ export interface EventRow {
   end_date?: string | null;
   location_name?: string | null;
   address?: string | null;
-  city?: string | null;
+  district?: string | null;
   postal_code?: string | null;
   bundesland?: string | null;
   latitude?: number | null;

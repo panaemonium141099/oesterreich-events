@@ -52,7 +52,7 @@ export async function checkLiveDedup(
   // Fast query: same day, only published/low_confidence events, limit 100
   const { data: sameDayEvents } = await supabase
     .from('events')
-    .select('id,title,description,start_date,end_date,location_name,address,city,postal_code,bundesland,latitude,longitude,source_url,ticket_url,image_url,category,tags,source_id,source_name,venue_id,venue_match_confidence,venue_match_stage,quality_score,publish_status,content_fingerprint,duplicate_of,organizer,price_text,created_at')
+    .select('id,title,description,start_date,end_date,location_name,address,district,postal_code,bundesland,latitude,longitude,source_url,ticket_url,image_url,category,tags,source_id,source_name,venue_id,venue_match_confidence,venue_match_stage,quality_score,publish_status,content_fingerprint,duplicate_of,organizer,price_text,created_at')
     .gte('start_date', `${day}T00:00:00`)
     .lt('start_date', `${day}T23:59:59.999`)
     .in('publish_status', ['published', 'published_low_confidence'])
@@ -69,7 +69,7 @@ export async function checkLiveDedup(
     end_date: candidate.normalized_end_date ?? null,
     location_name: candidate.normalized_location_name ?? null,
     address: candidate.normalized_address ?? null,
-    city: candidate.normalized_city ?? null,
+    district: null, // NormalizedCandidate doesn't track district; DB events will have it
     postal_code: candidate.normalized_postal_code ?? null,
     bundesland: candidate.normalized_bundesland ?? null,
     latitude: candidate.normalized_latitude ?? null,

@@ -136,10 +136,10 @@ function computeVenueScore(a: EventRow, b: EventRow): number {
   const jw = jaroWinkler(locA, locB);
   if (jw > 0.85) return 0.6;
 
-  // Same city + similar name
-  const cityA = (a.city ?? a.bundesland ?? '').toLowerCase();
-  const cityB = (b.city ?? b.bundesland ?? '').toLowerCase();
-  if (cityA && cityB && cityA === cityB && jw > 0.7) return 0.5;
+  // Same district + similar name
+  const distA = (a.district ?? a.bundesland ?? '').toLowerCase();
+  const distB = (b.district ?? b.bundesland ?? '').toLowerCase();
+  if (distA && distB && distA === distB && jw > 0.7) return 0.5;
 
   return 0;
 }
@@ -235,15 +235,15 @@ function checkHardRules(a: EventRow, b: EventRow): HardRuleResult {
     return { forced: true, decision: 'merge', reason: 'same_ticket_url' };
   }
 
-  // Rule 2: Different city (both non-null/non-empty) → distinct unless hard proof
-  const cityA = (a.city ?? '').toLowerCase().trim();
-  const cityB = (b.city ?? '').toLowerCase().trim();
-  if (cityA && cityB && cityA !== cityB) {
+  // Rule 2: Different district (both non-null/non-empty) → distinct unless hard proof
+  const distA = (a.district ?? '').toLowerCase().trim();
+  const distB = (b.district ?? '').toLowerCase().trim();
+  if (distA && distB && distA !== distB) {
     // Check exceptions: same venue_id already handled above (would be merge if same)
     // Check: same ticket_url already handled above
     // Check: same source_id + source_name already handled above
     // No exception found → distinct
-    return { forced: true, decision: 'distinct', reason: 'different_city' };
+    return { forced: true, decision: 'distinct', reason: 'different_district' };
   }
 
   return { forced: false };

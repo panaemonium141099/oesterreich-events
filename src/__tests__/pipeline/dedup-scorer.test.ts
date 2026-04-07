@@ -34,7 +34,7 @@ describe('dedup-scorer / scorePair', () => {
       start_date: '2026-06-15T19:00:00',
       venue_id: 'v1',
       location_name: 'Rathausplatz',
-      city: 'Wien',
+      district: 'Wien',
       latitude: 48.2106,
       longitude: 16.3569,
       source_url: 'https://example.com/event/1',
@@ -45,7 +45,7 @@ describe('dedup-scorer / scorePair', () => {
       start_date: '2026-06-15T19:00:00',
       venue_id: 'v1',
       location_name: 'Rathausplatz',
-      city: 'Wien',
+      district: 'Wien',
       latitude: 48.2106,
       longitude: 16.3569,
       source_url: 'https://example.com/event/1',
@@ -65,7 +65,7 @@ describe('dedup-scorer / scorePair', () => {
       start_date: '2026-05-01T10:00:00',
       venue_id: 'v-main',
       location_name: 'Hauptplatz Eisenstadt',
-      city: 'Eisenstadt',
+      district: 'Eisenstadt',
       latitude: 47.845,
       longitude: 16.519,
     });
@@ -75,7 +75,7 @@ describe('dedup-scorer / scorePair', () => {
       start_date: '2026-05-01T10:00:00',
       venue_id: 'v-main',
       location_name: 'Hauptplatz Eisenstadt',
-      city: 'Eisenstadt',
+      district: 'Eisenstadt',
       latitude: 47.845,
       longitude: 16.519,
     });
@@ -90,32 +90,32 @@ describe('dedup-scorer / scorePair', () => {
       title: 'Maibaumaufstellen',
       start_date: '2026-05-01',
       venue_id: 'venue-A',
-      city: 'Eisenstadt',
+      district: 'Eisenstadt',
     });
     const b = makeEvent({
       id: 'bbb',
       title: 'Maibaumaufstellen',
       start_date: '2026-05-01',
       venue_id: 'venue-B',
-      city: 'Eisenstadt',
+      district: 'Eisenstadt',
     });
 
     const result = scorePair(a, b);
     expect(result.decision).toBe('distinct');
   });
 
-  it('same title, same day, DIFFERENT city => distinct (hard rule)', () => {
+  it('same title, same day, DIFFERENT district => distinct (hard rule)', () => {
     const a = makeEvent({
       id: 'aaa',
       title: 'Sommerfest',
       start_date: '2026-07-20',
-      city: 'Wien',
+      district: 'Wien',
     });
     const b = makeEvent({
       id: 'bbb',
       title: 'Sommerfest',
       start_date: '2026-07-20',
-      city: 'Graz',
+      district: 'Graz',
     });
 
     const result = scorePair(a, b);
@@ -129,7 +129,7 @@ describe('dedup-scorer / scorePair', () => {
       start_date: '2026-08-01',
       source_id: 'ext-123',
       source_name: 'burgenland.info',
-      city: 'Oberwart',
+      district: 'Oberwart',
     });
     const b = makeEvent({
       id: 'bbb',
@@ -137,7 +137,7 @@ describe('dedup-scorer / scorePair', () => {
       start_date: '2026-08-02',
       source_id: 'ext-123',
       source_name: 'burgenland.info',
-      city: 'Oberwart',
+      district: 'Oberwart',
     });
 
     const result = scorePair(a, b);
@@ -150,14 +150,14 @@ describe('dedup-scorer / scorePair', () => {
       title: 'Rock im Dorf',
       start_date: '2026-09-10',
       ticket_url: 'https://tickets.example.com/rock-im-dorf',
-      city: 'Wien',
+      district: 'Wien',
     });
     const b = makeEvent({
       id: 'bbb',
       title: 'Rock im Dorf Festival',
       start_date: '2026-09-10',
       ticket_url: 'https://tickets.example.com/rock-im-dorf',
-      city: 'Wien',
+      district: 'Wien',
     });
 
     const result = scorePair(a, b);
@@ -169,13 +169,13 @@ describe('dedup-scorer / scorePair', () => {
       id: 'aaa',
       title: 'Wiener Weihnachtsmarkt am Rathausplatz',
       start_date: '2026-12-01',
-      city: 'Wien',
+      district: 'Wien',
     });
     const b = makeEvent({
       id: 'bbb',
       title: 'Weihnachtsmarkt Rathausplatz Wien',
       start_date: '2026-12-01',
-      city: 'Wien',
+      district: 'Wien',
     });
 
     const result = scorePair(a, b);
@@ -189,13 +189,13 @@ describe('dedup-scorer / scorePair', () => {
       id: 'aaa',
       title: 'Wiener Festwochen',
       start_date: '2026-06-15',
-      city: 'Wien',
+      district: 'Wien',
     });
     const b = makeEvent({
       id: 'bbb',
       title: 'Wiener Festwochen',
       start_date: '2026-07-20',
-      city: 'Wien',
+      district: 'Wien',
     });
 
     const result = scorePair(a, b);
@@ -207,13 +207,13 @@ describe('dedup-scorer / scorePair', () => {
       id: 'aaa',
       title: 'Festival Tag 1',
       start_date: '2026-06-15',
-      city: 'Wien',
+      district: 'Wien',
     });
     const b = makeEvent({
       id: 'bbb',
       title: 'Festival Tag 1',
       start_date: '2026-06-16',
-      city: 'Wien',
+      district: 'Wien',
     });
 
     const result = scorePair(a, b);
@@ -225,13 +225,13 @@ describe('dedup-scorer / scorePair', () => {
       id: 'aaa',
       title: 'Konzert',
       start_date: '2026-06-15T19:00:00',
-      city: 'Wien',
+      district: 'Wien',
     });
     const b = makeEvent({
       id: 'bbb',
       title: 'Konzert',
       start_date: '2026-06-15T19:10:00',
-      city: 'Wien',
+      district: 'Wien',
     });
 
     const result = scorePair(a, b);
@@ -265,7 +265,7 @@ describe('dedup-scorer / scorePair', () => {
       start_date: '2026-05-01',
       source_id: 'src-99',
       source_name: 'my-scraper',
-      city: 'Wien',
+      district: 'Wien',
     });
     const b = makeEvent({
       id: 'bbb',
@@ -273,7 +273,7 @@ describe('dedup-scorer / scorePair', () => {
       start_date: '2026-05-01',
       source_id: 'src-99',
       source_name: 'my-scraper',
-      city: 'Graz',
+      district: 'Graz',
     });
 
     const result = scorePair(a, b);
@@ -286,14 +286,14 @@ describe('dedup-scorer / scorePair', () => {
       title: 'Konzert',
       start_date: '2026-06-01',
       ticket_url: 'https://ntry.at/event/42',
-      city: 'Wien',
+      district: 'Wien',
     });
     const b = makeEvent({
       id: 'bbb',
       title: 'Konzert',
       start_date: '2026-06-01',
       ticket_url: 'https://ntry.at/event/42',
-      city: 'Linz',
+      district: 'Linz',
     });
 
     const result = scorePair(a, b);
@@ -305,13 +305,13 @@ describe('dedup-scorer / scorePair', () => {
       id: 'aaa',
       title: 'Opernball Wien',
       start_date: '2026-02-12',
-      city: 'Wien',
+      district: 'Wien',
     });
     const b = makeEvent({
       id: 'bbb',
       title: 'Bauernmarkt Graz',
       start_date: '2026-08-20',
-      city: 'Graz',
+      district: 'Graz',
     });
 
     const result = scorePair(a, b);

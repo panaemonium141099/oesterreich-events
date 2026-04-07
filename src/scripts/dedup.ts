@@ -39,7 +39,7 @@ const supabase = createClient(
 const args = process.argv.slice(2);
 const DRY_RUN = args.includes('--dry-run');
 const RESET = args.includes('--reset');
-const EVENT_SELECT = 'id,title,description,start_date,end_date,location_name,address,city,postal_code,bundesland,latitude,longitude,source_url,ticket_url,image_url,category,tags,source_id,source_name,venue_id,venue_match_confidence,venue_match_stage,quality_score,publish_status,content_fingerprint,duplicate_of,dedup_score,dedup_cluster_id,organizer,price_text,created_at';
+const EVENT_SELECT = 'id,title,description,start_date,end_date,location_name,address,district,postal_code,bundesland,latitude,longitude,source_url,ticket_url,image_url,category,tags,source_id,source_name,venue_id,venue_match_confidence,venue_match_stage,quality_score,publish_status,content_fingerprint,duplicate_of,dedup_score,dedup_cluster_id,organizer,price_text,created_at';
 
 // ---------------------------------------------------------------------------
 // Stats tracking
@@ -200,11 +200,11 @@ function buildBlocks(events: EventRow[]): Map<string, string[]> {
     // Block by venue_id
     if (e.venue_id) keys.push(`venue:${e.venue_id}`);
 
-    // Block by city + first title word
-    const city = (e.city ?? e.bundesland ?? '').toLowerCase().trim();
+    // Block by district + first title word
+    const dist = (e.district ?? e.bundesland ?? '').toLowerCase().trim();
     const firstWord = (e.title ?? '').toLowerCase().split(/\s+/)[0] ?? '';
-    if (city && firstWord.length > 2) {
-      keys.push(`city:${city}:${firstWord}`);
+    if (dist && firstWord.length > 2) {
+      keys.push(`dist:${dist}:${firstWord}`);
     }
 
     // Block by location_name (normalized)
