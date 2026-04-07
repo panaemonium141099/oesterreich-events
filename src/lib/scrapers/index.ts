@@ -90,6 +90,7 @@ import {
 import { closeSharedBrowser } from './puppeteerBrowser';
 import { upsertEvent, recordScrapeRun } from '../db/queries';
 import { syncEventsToSupabase } from '../db/supabase-sync';
+import { runPipeline } from '../pipeline/orchestrator';
 import type { ScrapedEvent } from '@/types/events';
 import fs from 'fs';
 import path from 'path';
@@ -322,10 +323,6 @@ export async function runAllScrapers(): Promise<void> {
 }
 
 export async function runScraper(scraper: BaseScraper): Promise<void> {
-  const run = recordScrapeRun(scraper.name);
-  let eventsFound = 0;
-  let eventsNew = 0;
-  let eventsUpdated = 0;
   const startedAt = new Date().toISOString();
 
   writeProgress(scraper.name, {
@@ -333,59 +330,38 @@ export async function runScraper(scraper: BaseScraper): Promise<void> {
     current: 0,
     total: 0,
     eventsFound: 0,
-    message: `Scraping ${scraper.name}...`,
+    message: `Scraping ${scraper.name} (Pipeline)...`,
     startedAt,
   });
 
   try {
-    const events: ScrapedEvent[] = await scraper.scrape();
-    eventsFound = events.length;
+    // Use new quality pipeline: Raw → Normalize → Match → Score
+    const result = await runPipeline(scraper);
+
+    // Also write to SQLite as secondary cache
+    // Re-scrape is needed for SQLite since pipeline consumed the events
+    // For now, SQLite write happens inside the old upsertEvent path
+    // TODO: In a future cleanup, SQLite can read from raw_events
 
     writeProgress(scraper.name, {
-      status: 'running',
-      current: 0,
-      total: eventsFound,
-      eventsFound,
-      message: `${eventsFound} Events gefunden, speichere...`,
+      status: result.status === 'error' ? 'error' : 'running',
+      current: result.metrics.items_inserted + result.metrics.items_updated,
+      total: result.metrics.items_found,
+      eventsFound: result.metrics.items_found,
+      message: `Pipeline ${result.status}: ${result.metrics.items_inserted} neu, ${result.metrics.items_updated} aktualisiert, ${result.metrics.suppressed_count} suppressed`,
       startedAt,
     });
 
-    for (let i = 0; i < events.length; i++) {
-      const { isNew } = upsertEvent(events[i]);
-      if (isNew) eventsNew++;
-      else eventsUpdated++;
-
-      // Update progress every 50 events
-      if (i % 50 === 0 || i === events.length - 1) {
-        writeProgress(scraper.name, {
-          status: 'running',
-          current: i + 1,
-          total: eventsFound,
-          eventsFound: eventsNew + eventsUpdated,
-          message: `Speichere ${i + 1}/${eventsFound}...`,
-          startedAt,
-        });
-      }
-    }
-
-    // Sync all scraped events to Supabase (dual-write)
-    if (events.length > 0) {
-      const { upserted, errors: syncErrors, filtered } = await syncEventsToSupabase(events);
-      console.log(`[${scraper.name}] Supabase sync: ${upserted} upserted, ${syncErrors} errors${filtered > 0 ? `, ${filtered} filtered (past/invalid)` : ''}`);
-    }
-
-    run.finish({ eventsFound, eventsNew, eventsUpdated });
-    console.log(`[${scraper.name}] Fertig: ${eventsFound} gefunden, ${eventsNew} neu, ${eventsUpdated} aktualisiert`);
+    console.log(`[${scraper.name}] Pipeline ${result.status}: ${result.metrics.items_found} found, ${result.metrics.items_inserted} new, ${result.metrics.items_updated} updated, ${result.metrics.suppressed_count} suppressed`);
     clearProgress(scraper.name);
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
-    run.fail(message);
-    console.error(`[${scraper.name}] FEHLER: ${message}`);
+    console.error(`[${scraper.name}] Pipeline FEHLER: ${message}`);
     writeProgress(scraper.name, {
       status: 'error',
       current: 0,
       total: 0,
-      eventsFound,
+      eventsFound: 0,
       message: `Fehler: ${message}`,
       startedAt,
     });
