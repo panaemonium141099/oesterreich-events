@@ -1,133 +1,122 @@
-/**
- * Pipeline Orchestrator — replaces the old runScraper() flow.
- *
- * Flow: Scraper.scrape() → Raw Layer → Normalization → Matching + Upsert → Quality Scoring
- * All steps run in batches of BATCH_SIZE for stability and granular metrics.
- *
- * Spec: docs/superpowers/specs/2026-04-07-quality-system-phase1-design.md §2.4
- */
-import type { BaseScraper } from '@/lib/scrapers/BaseScraper';
-import type { ScrapedEvent } from '@/types/events';
-import type { PipelineResult, MetricsAccumulator } from './types';
-import { createMetricsAccumulator, chunk } from './types';
-import { createScrapeRun, writeRawEvents, finalizeScrapeRun } from './raw-layer';
-import { normalizeEvents } from './normalizer';
-import { matchAndUpsert } from './canonical-upsert';
+// src/lib/pipeline/orchestrator.ts
+
+import { loadVenueCache, matchVenue, clearVenueCache } from './venue-matcher';
 import { scoreAndPublish } from './quality-scorer';
+import { matchAndUpsert } from './canonical-upsert';
+import type { NormalizedCandidate, UpsertResult } from './types';
 
-const BATCH_SIZE = 100;
+export interface PipelineOptions {
+  /** Maximum candidates per batch. Default: 100 */
+  batchSize?: number;
+  /** If true, skip the canonical upsert step (dry-run). */
+  dryRun?: boolean;
+}
 
-export async function runPipeline(scraper: BaseScraper): Promise<PipelineResult> {
-  const runId = await createScrapeRun(scraper.name);
-  const metrics = createMetricsAccumulator();
-  const startTime = Date.now();
+export interface PipelineResult {
+  totalCandidates: number;
+  totalValid: number;
+  upsert: UpsertResult;
+  durationMs: number;
+}
+
+/**
+ * Normalize raw scraped events into NormalizedCandidates.
+ * This is a placeholder — each scraper adapter will provide its own normalization.
+ */
+export function normalizeEvents(
+  rawEvents: NormalizedCandidate[],
+): NormalizedCandidate[] {
+  // In a full implementation, this would apply field-level normalization,
+  // date parsing, location resolution, etc.
+  // For now, pass through — callers are expected to provide pre-normalized candidates.
+  return rawEvents.filter(
+    (c) => c.normalized_title && c.normalized_start_date,
+  );
+}
+
+/**
+ * Run the full ingestion pipeline:
+ * 1. Normalize
+ * 2. Venue matching
+ * 3. Quality scoring
+ * 4. Canonical upsert
+ */
+export async function runPipeline(
+  rawEvents: NormalizedCandidate[],
+  options: PipelineOptions = {},
+): Promise<PipelineResult> {
+  const start = Date.now();
+  const batchSize = options.batchSize ?? 100;
+
+  // Pre-load venue cache once before processing
+  await loadVenueCache();
+
+  const allUpsertResult: UpsertResult = {
+    inserted: 0,
+    updated: 0,
+    skipped: 0,
+    errors: [],
+  };
+
+  let totalValid = 0;
 
   try {
-    // 1. Execute scraper
-    const scrapedEvents: ScrapedEvent[] = await scraper.scrape();
-    metrics.items_found = scrapedEvents.length;
+    // Process in batches
+    for (let i = 0; i < rawEvents.length; i += batchSize) {
+      const batch = rawEvents.slice(i, i + batchSize);
 
-    if (scrapedEvents.length === 0) {
-      await finalizeScrapeRun(runId, {
-        status: 'success',
-        duration_ms: Date.now() - startTime,
-        ...metrics,
-      });
-      return { runId, metrics, status: 'success' };
-    }
+      // Step 1: Normalize
+      const validCandidates = normalizeEvents(batch);
+      totalValid += validCandidates.length;
 
-    // 2. Process in batches
-    const batches = chunk(scrapedEvents, BATCH_SIZE);
-
-    for (const batch of batches) {
-      try {
-        // Raw Layer
-        const rawEvents = await writeRawEvents(runId, batch);
-        metrics.raw_written += rawEvents.length;
-        metrics.items_parsed += rawEvents.length;
-
-        // Normalization
-        const { candidates, errors: parseErrors } = await normalizeEvents(rawEvents);
-        metrics.normalized_count += candidates.length;
-        metrics.parser_errors += parseErrors.length;
-
-        // Track events without date/location
-        for (const c of candidates) {
-          if (!c.normalized_start_at) metrics.events_without_date++;
-          if (!c.normalized_location_name && !c.normalized_address) metrics.events_without_location++;
-        }
-
-        // Skip candidates without start date (items_skipped)
-        const validCandidates = candidates.filter(c => {
-          if (!c.normalized_start_at) {
-            metrics.items_skipped++;
-            return false;
-          }
-          return true;
+      // Step 2: Venue Matching
+      for (const candidate of validCandidates) {
+        const venueResult = await matchVenue({
+          location_name: candidate.normalized_location_name,
+          address: candidate.normalized_address,
+          city: candidate.normalized_city,
+          postal_code: candidate.normalized_postal_code,
+          latitude: null, // coords not on candidate in Phase 2
+          longitude: null,
+          source_url: candidate.normalized_source_url,
+          ticket_url: candidate.normalized_ticket_url,
         });
-
-        if (validCandidates.length === 0) {
-          metrics.successful_batches++;
-          continue;
+        if (venueResult.venueId) {
+          candidate.venue_id = venueResult.venueId;
+          candidate.venue_match_confidence = venueResult.confidence;
+          candidate.venue_match_stage = venueResult.stage;
         }
-
-        // Matching + Canonical Upsert
-        const upsertResults = await matchAndUpsert(validCandidates);
-        metrics.matched_count += upsertResults.matched;
-        metrics.items_inserted += upsertResults.inserted;
-        metrics.items_updated += upsertResults.updated;
-        metrics.items_skipped += upsertResults.skipped;
-        metrics.duplicate_candidates += upsertResults.matched;
-
-        // Quality Scoring
-        if (upsertResults.eventIds.length > 0) {
-          const qualityResults = await scoreAndPublish(upsertResults.eventIds);
-          metrics.suppressed_count += qualityResults.suppressed;
-          metrics.needs_review_count += qualityResults.needsReview;
-        }
-
-        metrics.successful_batches++;
-      } catch (batchError) {
-        metrics.batch_errors++;
-        console.error(`[Pipeline] Batch error in ${scraper.name}:`, batchError);
       }
+
+      // Step 3: Quality Scoring
+      scoreAndPublish(validCandidates);
+
+      // Step 4: Canonical Upsert
+      if (!options.dryRun) {
+        const batchResult = await matchAndUpsert(validCandidates);
+        allUpsertResult.inserted += batchResult.inserted;
+        allUpsertResult.updated += batchResult.updated;
+        allUpsertResult.skipped += batchResult.skipped;
+        allUpsertResult.errors.push(...batchResult.errors);
+      }
+
+      console.log(
+        `[Pipeline] Batch ${Math.floor(i / batchSize) + 1}: ${validCandidates.length} valid, ${batch.length - validCandidates.length} filtered`,
+      );
     }
-
-    // http_errors from scraper (optional, backwards-compatible)
-    metrics.http_errors = (scraper as unknown as { httpErrorCount?: number }).httpErrorCount ?? 0;
-
-    // Compute avg quality score
-    const totalProcessed = metrics.items_inserted + metrics.items_updated;
-    // avg_quality_score will be computed from event_quality_scores table if needed
-
-    // Status determination
-    const totalBatches = metrics.successful_batches + metrics.batch_errors;
-    const status: PipelineResult['status'] =
-      metrics.successful_batches === 0 && totalBatches > 0
-        ? 'error'
-        : metrics.batch_errors > 0
-          ? 'partial'
-          : 'success';
-
-    await finalizeScrapeRun(runId, {
-      status,
-      duration_ms: Date.now() - startTime,
-      ...metrics,
-    });
-
-    console.log(`[Pipeline] ${scraper.name}: ${status} — ${metrics.items_found} found, ${metrics.items_inserted} new, ${metrics.items_updated} updated, ${metrics.suppressed_count} suppressed`);
-
-    return { runId, metrics, status };
-  } catch (error) {
-    // Scraper-level failure (before batch processing)
-    const message = error instanceof Error ? error.message : String(error);
-    await finalizeScrapeRun(runId, {
-      status: 'error',
-      duration_ms: Date.now() - startTime,
-      error_message: message,
-      ...metrics,
-    });
-    console.error(`[Pipeline] ${scraper.name}: ERROR — ${message}`);
-    return { runId, metrics, status: 'error' };
+  } finally {
+    clearVenueCache();
   }
+
+  const durationMs = Date.now() - start;
+  console.log(
+    `[Pipeline] Complete: ${totalValid} valid of ${rawEvents.length} total in ${durationMs}ms`,
+  );
+
+  return {
+    totalCandidates: rawEvents.length,
+    totalValid,
+    upsert: allUpsertResult,
+    durationMs,
+  };
 }

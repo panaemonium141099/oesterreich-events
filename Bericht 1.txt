@@ -1,0 +1,928 @@
+Bericht 1: Qualität der Events
+Zielbild, Architektur, Umsetzungsweg für Dedup, Standortqualität, Venue-Normalisierung, Qualitätsbewertung und Monitoring
+1. Ausgangslage
+
+Dein Produkt steht und fällt nicht mit der Anzahl der Quellen, sondern mit der Vertrauenswürdigkeit des Ergebnisses. Ein Nutzer verzeiht fehlende Events eher als schlechte Events. Schlechte Events sind:
+
+doppelte Einträge
+falsche Orte
+falsche oder fehlende Uhrzeiten
+tote Links
+falsche Bilder
+deutsche oder schweizer Events im Österreich-Feed
+generische oder nichtssagende Beschreibungen
+dieselbe Veranstaltung in leicht anderer Form mehrfach in Karte, Suche und Empfehlungen
+
+Sobald das auftritt, sinken sofort:
+
+Speichern
+Reminder-Nutzung
+Wiederkehr
+Vertrauen in Spotify-Matches
+Vertrauen in lokale Seiten
+SEO-Wert
+
+Deshalb ist Event-Qualität kein Zusatzmodul, sondern das eigentliche Kernsystem unterhalb des Produkts.
+
+2. Zielbild
+
+Das Ziel ist nicht nur „weniger Duplikate“, sondern ein vollständiges Qualitätsbetriebssystem.
+
+Am Ende sollte dein System diese Eigenschaften haben:
+
+Jede Quelle wird roh gespeichert.
+Jede rohe Veranstaltung wird normalisiert.
+Jede normalisierte Veranstaltung wird gegen bestehende kanonische Events gematcht.
+Jede Veranstaltung erhält einen Quality Score.
+Jede Venue wird gegen eine kanonische Venue gematcht.
+Unsichere Fälle werden nicht blind veröffentlicht, sondern markiert oder zurückgestellt.
+Jede Quelle wird mit Qualitätsmetriken bewertet.
+Jeder Scraper-Lauf ist messbar, historisch und alarmierbar.
+
+Das heißt: nicht nur events speichern, sondern Entscheidungen speichern.
+
+3. Grundprinzip der Architektur
+
+Die saubere Struktur besteht logisch aus fünf Ebenen.
+
+Ebene A: Raw Source Event
+
+Das ist der unbearbeitete Datensatz aus der Quelle.
+
+Enthält zum Beispiel:
+
+source_name
+source_event_id
+raw_title
+raw_description
+raw_location_name
+raw_address
+raw_start_text
+raw_end_text
+raw_image_url
+raw_ticket_url
+raw_payload_json
+fetched_at
+scrape_run_id
+
+Diese Ebene wird nie überschrieben. Sie ist die Wahrheit des Eingangs.
+
+Ebene B: Normalized Event Candidate
+
+Hier werden Felder in eine standardisierte Form gebracht:
+
+normalized_title
+normalized_start_at
+normalized_end_at
+normalized_location_name
+normalized_address
+normalized_city
+normalized_postal_code
+normalized_bundesland
+normalized_category
+normalized_price_text
+normalized_organizer
+normalized_url
+normalized_image_url
+
+Diese Ebene ist noch nicht „kanonisch“, nur bereinigt.
+
+Ebene C: Canonical Event
+
+Das ist das veröffentlichte, zusammengeführte Eventobjekt.
+
+Hier steht genau ein Event für genau eine reale Veranstaltung.
+Mehrere Quellen können auf dieselbe kanonische Veranstaltung zeigen.
+
+Ebene D: Entity Layer
+
+Zusätzliche kanonische Objekte:
+
+canonical venues
+venue aliases
+organizer aliases
+category mappings
+geo confidence
+Ebene E: Quality and Decision Layer
+
+Hier speicherst du:
+
+dedup_score
+venue_match_score
+location_confidence
+quality_score
+publish_status
+review_reason
+source_trust_score_snapshot
+
+Diese Ebene macht das System steuerbar.
+
+4. Datenmodell: Was konkret eingeführt werden sollte
+
+Du brauchst nicht alles auf einmal produktiv, aber die Zielstruktur sollte so aussehen.
+
+4.1 Tabellen für Raw und Processing
+
+scrape_runs
+
+id
+source_name
+started_at
+finished_at
+success
+duration_ms
+items_found
+items_parsed
+items_inserted
+items_updated
+items_skipped
+parser_errors
+http_errors
+duplicate_candidates
+events_without_date
+events_without_location
+events_without_coords
+notes_json
+
+raw_events
+
+id
+scrape_run_id
+source_name
+source_event_id
+source_url
+raw_payload_json
+raw_title
+raw_description
+raw_start_text
+raw_end_text
+raw_location_name
+raw_address
+raw_image_url
+raw_ticket_url
+fetched_at
+content_hash
+
+normalized_event_candidates
+
+id
+raw_event_id
+normalized_title
+normalized_title_compact
+normalized_start_at
+normalized_end_at
+normalized_location_name
+normalized_address
+normalized_city
+normalized_postal_code
+normalized_bundesland
+normalized_category
+normalized_organizer
+normalized_ticket_url
+normalized_source_url
+language_code
+parse_confidence
+normalization_version
+created_at
+4.2 Tabellen für kanonische Entities
+
+venues
+
+id
+canonical_name
+display_name
+street
+postal_code
+city
+bundesland
+latitude
+longitude
+osm_id optional
+is_student_relevant
+localness_score
+trust_score
+created_at
+updated_at
+
+venue_aliases
+
+id
+venue_id
+alias
+alias_normalized
+source_name optional
+confidence
+created_at
+
+organizers
+
+id
+canonical_name
+website
+social_links_json
+created_at
+
+organizer_aliases
+
+id
+organizer_id
+alias
+alias_normalized
+4.3 Tabellen für Matching und Qualitätsentscheidungen
+
+event_match_candidates
+
+id
+normalized_event_candidate_id
+candidate_event_id
+title_score
+datetime_score
+venue_score
+organizer_score
+geo_score
+url_score
+overall_score
+decision
+created_at
+
+event_clusters
+
+id
+canonical_event_id
+source_event_count
+cluster_confidence
+last_recalculated_at
+
+event_cluster_members
+
+id
+canonical_event_id
+raw_event_id
+normalized_event_candidate_id
+source_name
+source_priority
+selected_fields_json
+is_primary_source
+
+event_quality_scores
+
+id
+canonical_event_id
+completeness_score
+date_score
+location_score
+image_score
+link_score
+venue_match_score
+dedup_confidence_score
+source_trust_score
+final_quality_score
+scoring_version
+created_at
+
+quality_flags
+
+id
+canonical_event_id
+flag_type
+severity
+details_json
+resolved_at
+
+Beispiele für flag_type:
+
+missing_time
+location_ambiguous
+outside_austria
+duplicate_uncertain
+dead_ticket_url
+description_too_short
+venue_unmatched
+5. Normalisierung: Der erste harte Schritt
+
+Bevor du deduplizierst, musst du normalisieren. Sonst vergleichst du chaotische Strings miteinander.
+
+5.1 Titel-Normalisierung
+
+Ziel: möglichst viele oberflächliche Unterschiede entfernen, ohne Information zu zerstören.
+
+Schritte:
+
+lowercase
+trim
+mehrfache Leerzeichen reduzieren
+Unicode vereinheitlichen
+Emojis entfernen
+dekorative Separatoren entfernen (|, •, —, >>>)
+Klammerzusätze schwächer gewichten oder aus einer Vergleichsversion entfernen
+Wochentage und Datumsfragmente aus Vergleichsversion entfernen
+generische Marketingwörter runtergewichten
+
+Zwei Versionen erzeugen:
+
+normalized_title_full
+normalized_title_compact
+
+Beispiel:
+
+Aus
+TECHNO FRIDAY | FLEX VIENNA | Official Event
+
+wird etwa:
+
+full: techno friday flex vienna official event
+compact: techno friday flex vienna
+5.2 Datums-Normalisierung
+
+Viele Quellen liefern:
+
+ISO-Format
+deutsches Datumsformat
+Texte wie „Freitag, 14. Juni 2026, 20 Uhr“
+„ab 19:30“
+nur Datum ohne Uhrzeit
+Zeiträume
+
+Du brauchst:
+
+standardisierte UTC-Speicherung
+Original-Zeitzone dokumentiert
+Flag, ob Uhrzeit exakt oder nur geschätzt
+Flag, ob Endzeit fehlt
+Flag, ob Mehrtagesevent
+
+Speicher also nicht nur start_at, sondern auch:
+
+start_precision = exact | day_only | inferred
+end_precision = exact | day_only | inferred | missing
+5.3 URL-Normalisierung
+
+Ticket-URL und Source-URL sind oft hilfreich für Matching.
+
+Schritte:
+
+Trackingparameter entfernen
+trailing slash vereinheitlichen
+http/https bereinigen
+Canonical Host ermitteln
+URL-Hash speichern
+5.4 Bild-Normalisierung
+
+Ein Bild ist kein Hauptkriterium, aber ein Zusatzsignal.
+Speichern:
+
+normalized_image_url
+image_host
+optional image hash
+6. Venue-Normalisierung: Der wichtigste Unterbau
+
+Venue-Normalisierung ist der Hebel, der fast alles verbessert.
+
+Ohne Venue-Layer:
+
+lokale Suche unpräzise
+Studenten-Funnel schwach
+Dedupe schlechter
+Venue-Follows unzuverlässig
+„Events near me“ matschig
+6.1 Ziel
+
+Jede Veranstaltung soll idealerweise einer kanonischen Venue zugeordnet werden.
+
+Nicht nur Freitext:
+
+location_name = Flex Wien
+
+sondern:
+
+venue_id = 123
+venue.display_name = Flex
+city = Wien
+lat/lng = ...
+6.2 Matching-Reihenfolge
+
+Der Matching-Prozess für Venues sollte in Stufen laufen.
+
+Stufe 1: Harte Treffer
+
+exakter Alias-Match
+exakter Name + gleiche Stadt
+exakte URL oder bekannter Venue-Host
+
+Stufe 2: Nahe Treffer
+
+ähnlicher Name
+gleiche Postleitzahl
+kleine Distanz
+ähnliche Straße
+bekannte Aliasformen
+
+Stufe 3: Unsichere Treffer
+
+ähnlicher Name, aber Stadt fehlt
+Name generisch
+Koordinaten nur grob
+mehrere mögliche Treffer
+
+Stufe 3 darf nicht automatisch hart gemappt werden. Dort brauchst du:
+
+low confidence
+Review Queue
+temporär ungemappt
+6.3 Alias-System
+
+Venue-Aliase sind Pflicht.
+
+Beispiele:
+
+Flex
+Flex Wien
+Flex, Vienna
+Flex an der Donau
+
+Diese müssen auf dieselbe Venue zeigen.
+
+6.4 Geometrische Prüfung
+
+Wenn eine Venue bekannt ist und das Event geocodiert wurde, prüfst du:
+
+Distanz Event-Koordinate zur Venue-Koordinate
+wenn Distanz klein: Match stärken
+wenn Distanz groß: Flag setzen
+6.5 Lokale Relevanz
+
+Sobald venue_id stabil ist, kannst du Venue-Metadaten pflegen:
+
+studentenrelevant
+nightlife
+konserthalle
+bar
+club
+campusnah
+öffi-nah
+outdoor
+familienfreundlich
+
+Damit wird später der Funnel besser.
+
+7. Dedup-Engine: Nicht mit einfachen Gleichheiten arbeiten
+
+Ein einfaches Dedupe nach title + day reicht nur als Notnagel in UI-Schichten, aber nicht im Kernsystem.
+
+Du brauchst eine echte Bewertungslogik.
+
+7.1 Was als Dublette gilt
+
+Dublette bedeutet:
+Mehrere Quellen beschreiben dieselbe reale Veranstaltung.
+
+Nicht alles, was ähnlich klingt, ist gleich.
+Deshalb brauchst du Scores.
+
+7.2 Dedup-Score-Komponenten
+
+Titel-Score
+
+string similarity
+token overlap
+compact-title overlap
+Sonderwörter gewichten
+
+DateTime-Score
+
+gleicher Tag
+gleiche Uhrzeit
+kleine Zeitabweichung
+Mehrtagesevent-Logik
+
+Venue-Score
+
+gleiche venue_id
+gleicher Ort
+ähnliche Adresse
+geringe Distanz
+
+Organizer-Score
+
+gleiche Organizer-ID
+ähnlicher Organizername
+
+Geo-Score
+
+Distanz in Metern
+gleiche Stadt
+gleiche Postleitzahl
+
+URL-Score
+
+gleiche Ticket-URL
+gleicher Source-Canonical-Link
+gleiche externe Referenz
+7.3 Score-Entscheidung
+
+Beispielhafte Logik:
+
+Score >= 0.90: automatisch zusammenführen
+0.75–0.89: zusammenführen mit mittlerer Sicherheit oder Review je nach Quelle
+0.55–0.74: unsicher, Review Queue
+darunter: getrennt
+
+Die Schwellen müssen getestet werden.
+Wichtig ist: Entscheidung speichern.
+
+7.4 Cluster statt rein paarweiser Vergleiche
+
+Du solltest nicht nur „A gleich B?“ prüfen, sondern Event-Cluster bilden.
+
+Ein kanonisches Event kann 2, 3, 5 oder 10 Quellen haben.
+Jede neue Quelle wird gegen bestehende Cluster geprüft.
+
+7.5 Source Priority
+
+Wenn mehrere Quellen in einem Cluster landen, muss klar sein, welche Felder Vorrang haben.
+
+Beispiel:
+
+Ticketmaster hat besseren Ticket-Link
+Oeticket hat bessere Zeit
+Venue-Website hat bessere Beschreibung
+Gemeindeportal hat bessere Adresse
+
+Deshalb sollte Feldauswahl regelbasiert sein.
+
+Beispiel:
+
+title: nimm Quelle mit höchster Trust + längstem sinnvollen Titel
+description: nimm reichhaltigste Beschreibung
+ticket_url: nimm Ticketquelle mit höchster Kaufwahrscheinlichkeit
+image_url: nimm beste Bildquelle mit gültigem Host
+location: nimm venue-kanonische Werte, nicht Rohtexte
+8. Quality Score: Jede Veranstaltung braucht eine publizierbare Qualität
+
+Du brauchst pro Event einen Score von zum Beispiel 0–100.
+
+Nicht als Spielerei, sondern als Steuerung.
+
+8.1 Score-Bausteine
+
+Vollständigkeit
+
+Titel vorhanden
+Startdatum vorhanden
+Ort vorhanden
+Kategorie vorhanden
+Beschreibung brauchbar
+
+Datum
+
+Datum parsebar
+Uhrzeit vorhanden
+keine unplausible Vergangenheit
+nicht außerhalb plausibler Range
+
+Standort
+
+Venue gematcht
+Adresse vorhanden
+Koordinaten vorhanden
+Österreich-Check bestanden
+Bezirk/Bundesland konsistent
+
+Links
+
+Source-URL vorhanden und erreichbar
+Ticket-URL erreichbar
+keine tote Weiterleitung
+
+Medien
+
+Bild vorhanden
+Bild erreichbar
+Bild nicht offensichtlich defekt
+
+Dedup Confidence
+
+Event ist sauber geclustert
+kein unsicherer Konflikt
+
+Source Trust
+
+Quelle historisch sauber
+Parser aktuell stabil
+wenige Ausfälle
+8.2 Score-Nutzung
+
+Der Score sollte nicht nur gespeichert werden, sondern aktiv genutzt:
+
+Sortierung verbessern
+low-quality Events abwerten
+SEO nur ab bestimmtem Score
+Student-/Featured-Listen nur ab bestimmtem Score
+Reminder nur für veröffentlichte Events
+Review Queue triggern
+8.3 Publish Status
+
+Statt nur „Event existiert“ brauchst du Statuslogik:
+
+draft
+published
+published_low_confidence
+suppressed
+needs_review
+expired
+9. Standortqualität: Location als eigenes Qualitätssystem behandeln
+
+Viele Eventprodukte sterben an schlechten Orten.
+
+9.1 Standortprüfung in Stufen
+
+Jede Veranstaltung bekommt einen location_confidence.
+
+Beispiel:
+
+100: Venue exakt gematcht + konsistente Adresse + Koordinaten plausibel
+80: Venue gut gematcht + kleine Unsicherheit
+60: Geocoded über Adresse, aber Venue unsicher
+40: nur Stadt bekannt
+20: nur Bundesland bekannt
+0: unbrauchbar
+9.2 Österreich-Validierung
+
+Pflichtprüfungen:
+
+liegt Koordinate in Österreich?
+passt Bundesland zur Geokoordinate?
+passt Postleitzahl grob zur Stadt?
+liegt Venue nicht in Deutschland/Schweiz trotz .at Quelle?
+9.3 Fallback-Hierarchie für Geocoding
+
+Wenn keine Venue bekannt ist:
+
+exakte Adresse geocoden
+Adresse + Stadt
+Venue-Name + Stadt
+Venue-Name + Bundesland
+nur Stadtzentrum, aber dann niedrige Confidence
+
+Wichtig:
+Stadtzentrum als Fallback darf nicht wie präziser Ort behandelt werden.
+
+10. Review Queue: Wo Unsicherheit kontrolliert behandelt wird
+
+Nicht alles kann automatisiert perfekt gelöst werden.
+Deshalb brauchst du eine interne Problemzone.
+
+10.1 Was in die Review Queue kommt
+dedup_score unsicher
+venue_match_score unsicher
+outside_austria conflict
+datum unparsebar
+zu wenig Felder
+wichtige Quelle plötzlich stark abweichend
+tote Links
+Event mit hoher Nutzerinteraktion aber niedriger Qualität
+10.2 Ziel
+
+Nicht manuell alles prüfen, sondern nur die problematischen 1–5 %.
+
+10.3 Review-Oberfläche
+
+Eine Admin-Ansicht sollte pro Problemfall zeigen:
+
+Raw-Daten aller Quellen
+vorgeschlagene Venue
+vorgeschlagenes Canonical Event
+Scores
+Entscheidungsmöglichkeiten:
+merge
+split
+assign venue
+suppress
+publish anyway
+11. Source Trust Score: Quellen bewerten, nicht nur Events
+
+Nicht jede Quelle ist gleich wertvoll.
+Deshalb braucht jede Quelle einen laufenden Vertrauenswert.
+
+11.1 Kennzahlen pro Quelle
+Scrape Success Rate
+Parser Error Rate
+Anteil Events mit Datum
+Anteil Events mit Uhrzeit
+Anteil Events mit Koordinaten
+Anteil Events mit Venue-Match
+Dublettenquote
+tote Linkquote
+Bildquote
+durchschnittlicher Quality Score
+Nutzerinteraktion pro Event
+11.2 Nutzung
+
+Dieser Source Trust Score beeinflusst:
+
+Feldpriorisierung in Clustern
+Ranking
+Alerts
+welche Quellen zuerst repariert werden
+welche Quellen bei Konflikten dominieren
+12. Monitoring für Scraper und API
+
+Das Monitoring ist das Nervensystem.
+
+12.1 Scraper-Monitoring
+
+Jeder Run muss protokolliert werden.
+
+Wichtige Kennzahlen:
+
+Startzeit
+Ende
+Dauer
+Status
+gefundene Seiten
+gefundene Roh-Events
+parsebare Events
+neue kanonische Events
+aktualisierte Events
+suppressed events
+Qualitätsschnitt
+Anzahl Venue-Matches
+Anzahl low-confidence events
+HTTP-Fehler
+Parsingfehler
+Veränderung gegenüber letztem Run
+12.2 Alerts
+
+Alerts bei:
+
+wichtige Quelle liefert 0 Events
+Parser Errors steigen sprunghaft
+Run-Dauer steigt stark
+Quality Score fällt
+Venue-Match-Rate sinkt
+Österreich-Filter schlägt plötzlich oft zu
+Dublettenquote springt hoch
+12.3 API-Monitoring
+
+Pro Endpoint:
+
+request count
+response time p50/p95/p99
+status code Verteilung
+slow query patterns
+Rate-Limit Hits
+Response-Größe
+Cache Hit/Miss falls eingebaut
+
+Für dich besonders relevant:
+
+/api/events
+search/suggest
+reminder routes
+artist routes
+auth-sensitive admin routes
+12.4 Produktqualitäts-Monitoring
+
+Technische Stabilität allein reicht nicht.
+
+Messen:
+
+gespeicherte Events pro Quelle
+Reminder-Aktivierungen pro Quelle
+CTR auf Eventdetails pro Quelle
+Bounce auf Eventdetailseiten
+Nutzerreaktion auf low-quality Events
+
+Wenn bestimmte Quellen zwar viel Content bringen, aber keine Saves, ist das Qualitätsmüll mit schöner Oberfläche.
+
+13. Konkreter Umsetzungsweg in Phasen
+Phase 1: Fundament
+
+Ziel: Transparenz schaffen
+
+Einführen:
+
+scrape_runs
+raw_events
+normalized_event_candidates
+erste Dashboards
+erste Quality Flags
+Event Quality Score v1
+
+Ergebnis:
+
+du siehst erstmals, was jede Quelle wirklich tut
+du verlierst Rohdaten nicht mehr
+du kannst Fehlerursachen nachvollziehen
+Phase 2: Venue-Layer
+
+Ziel: Standortsystem stabil machen
+
+Einführen:
+
+venues
+venue_aliases
+Venue Matcher
+Standort Confidence
+Österreich- und Plausibilitätsregeln
+
+Ergebnis:
+
+bessere lokale Suche
+bessere Studentenrelevanz
+bessere Map-Qualität
+bessere Dedupe-Scores
+Phase 3: Dedup Engine
+
+Ziel: kanonische Events bauen
+
+Einführen:
+
+Match-Kandidaten
+Scoring
+Cluster-Logik
+Feldpriorisierung
+canonical_event_id
+
+Ergebnis:
+
+weniger Dubletten
+bessere Karten
+saubere Detailseiten
+bessere SEO
+Phase 4: Review + Trust
+
+Ziel: Unsicherheit kontrollieren
+
+Einführen:
+
+Review Queue
+Source Trust Score
+suppress / publish logic
+Alerts
+
+Ergebnis:
+
+weniger blinde Automatikfehler
+bessere Wartbarkeit
+schnellere Reparatur bei Scraper-Brüchen
+Phase 5: Optimierung
+
+Ziel: Qualität als Wettbewerbsvorteil
+
+Einführen:
+
+Nutzerfeedback als Qualitätssignal
+Event-Interaktion in Source-Bewertung
+bessere Ranking-Modelle
+Qualitätsgesteuerte SEO-Auswahl
+14. Technische Mindestlogik für die erste produktive Version
+
+Wenn du es pragmatisch halten willst, baue als erste echte Version genau das:
+
+Raw Events nie überschreiben
+Jeden Import normalisieren
+Venue-Matcher mit Alias-System
+Dedup Score aus Titel + Datum + Venue + Geo
+Canonical Event mit Cluster Members
+Quality Score 0–100
+Review Queue für unsichere Fälle
+Scrape-Run Dashboard pro Quelle
+Alerts bei 0 Events, Parser-Fehlern, sinkender Quality
+Source Trust Score
+
+Das ist die kleinste sinnvolle professionelle Version.
+
+15. Klare Priorisierung
+
+Wenn nur wenig Zeit da ist, ist diese Reihenfolge richtig:
+
+Raw Events + Scrape Runs
+Venue-Layer
+Quality Score
+Dedup Engine
+Review Queue
+Source Trust Score
+Alerts und Dashboards
+
+Der Grund ist einfach:
+
+ohne Raw Layer kein Debugging
+ohne Venue-Layer bleibt alles lokal schwach
+ohne Score kannst du nichts steuern
+ohne Dedup bleibt alles sichtbar chaotisch
+ohne Review und Monitoring verrottet das System leise
+16. Endzustand
+
+Der professionelle Endzustand ist nicht „viele Events in DB“, sondern:
+
+jede Quelle ist messbar
+jede Veranstaltung ist nachvollziehbar entstanden
+jede Qualitätsentscheidung ist speicherbar
+jedes Event hat Confidence und Score
+jede Venue ist eine echte Entität
+Dubletten werden kontrolliert zusammengeführt
+Unsicherheit wird sichtbar, nicht versteckt
+schlechte Quellen schwächen das Produkt nicht mehr automatisch
+
+Dann wird deine Eventplattform nicht mehr nur ein Aggregator, sondern eine kuratierende Infrastrukturmaschine.
