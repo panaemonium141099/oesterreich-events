@@ -24,7 +24,8 @@ export async function generateSitemaps(): Promise<{ id: number }[]> {
   const { count, error } = await supabase
     .from('events')
     .select('id', { count: 'exact', head: true })
-    .gte('start_date', today);
+    .gte('start_date', today)
+    .eq('publish_status', 'published');
 
   if (error || count == null) {
     // Fallback: return a single sitemap
@@ -47,6 +48,7 @@ export default async function sitemap({
     .from('events')
     .select('id, updated_at, event_score')
     .gte('start_date', today)
+    .eq('publish_status', 'published')
     .order('event_score', { ascending: false })
     .order('id', { ascending: true })
     .range(id * CHUNK_SIZE, id * CHUNK_SIZE + CHUNK_SIZE - 1);

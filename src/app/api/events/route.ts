@@ -162,6 +162,13 @@ export async function GET(request: NextRequest) {
     // Only show public events (scraped events default to 'public')
     query = query.or('visibility.eq.public,visibility.is.null');
 
+    // Publish status filter: by default only show published or low-confidence events
+    // Admin/god users can pass includeAll=true to see all statuses
+    const includeAll = searchParams.get('includeAll') === 'true';
+    if (!includeAll) {
+      query = query.or('publish_status.eq.published,publish_status.eq.published_low_confidence,publish_status.is.null');
+    }
+
     // Only show future/current events by default
     const today = new Date().toISOString().slice(0, 10);
     query = query.gte('start_date', today);
@@ -410,6 +417,9 @@ export async function GET(request: NextRequest) {
         'id, title, description, start_date, end_date, location_name, address, postal_code, district, bundesland, latitude, longitude, category, image_url, price_text, price_min, price_max, ticket_url, source_name, source_url, organizer, visibility, event_score'
       );
       unmappedQuery = unmappedQuery.or('visibility.eq.public,visibility.is.null');
+      if (!includeAll) {
+        unmappedQuery = unmappedQuery.or('publish_status.eq.published,publish_status.eq.published_low_confidence,publish_status.is.null');
+      }
       unmappedQuery = unmappedQuery.gte('start_date', today);
       // Match events where either coordinate is NULL
       unmappedQuery = unmappedQuery.or('latitude.is.null,longitude.is.null');

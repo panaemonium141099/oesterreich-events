@@ -38,11 +38,19 @@ export async function generateMetadata({
     return { title: 'Event nicht gefunden' };
   }
 
+  // Suppressed or needs_review events should not be indexable
+  if (event.publish_status === 'needs_review' || event.publish_status === 'suppressed') {
+    return {
+      title: 'Event nicht gefunden',
+      robots: { index: false, follow: false },
+    };
+  }
+
   const description = event.description
     ? event.description.slice(0, 160)
     : `${event.title} — ${event.location_name ?? 'Österreich'}`;
 
-  return {
+  const metadata: Metadata = {
     title: event.title,
     description,
     openGraph: {
@@ -58,6 +66,13 @@ export async function generateMetadata({
       ...(event.image_url ? { images: [event.image_url] } : {}),
     },
   };
+
+  // Low-confidence events: noindex to prevent thin/low-quality content in search
+  if (event.publish_status === 'published_low_confidence') {
+    metadata.robots = { index: false, follow: false };
+  }
+
+  return metadata;
 }
 
 function buildJsonLd(event: Event): string {
@@ -139,16 +154,24 @@ export default async function EventDetailPage({
     notFound();
   }
 
-  const jsonLd = buildJsonLd(event);
+  // Hide suppressed/needs_review events from public access
+  if (event.publish_status === 'needs_review' || event.publish_status === 'suppressed') {
+    notFound();
+  }
+
+  // Only emit JSON-LD for fully published events (skip low confidence)
+  const jsonLd = event.publish_status !== 'published_low_confidence' ? buildJsonLd(event) : null;
   const startTime = formatTime(event.start_date);
   const endTime = event.end_date ? formatTime(event.end_date) : null;
 
   return (
     <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: jsonLd }}
-      />
+      {jsonLd && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: jsonLd }}
+        />
+      )}
       <main className="min-h-screen bg-surface text-white">
         <div className="max-w-3xl mx-auto px-4 py-8">
           <EventDetailActions eventId={event.id} eventTitle={event.title} />
