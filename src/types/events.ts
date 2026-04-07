@@ -27,12 +27,17 @@ export interface Event {
   visibility?: string;
   geocoding_confidence?: string | null;
   geocoding_source?: string | null;
-  publish_status?: 'draft' | 'published' | 'published_low_confidence' | 'suppressed' | 'needs_review' | 'expired';
+  publish_status?: 'draft' | 'published' | 'published_low_confidence' | 'suppressed' | 'needs_review' | 'expired' | 'duplicate';
   quality_score?: number | null;
   raw_event_id?: string | null;
+  duplicate_of?: string | null;
+  dedup_score?: number | null;
+  dedup_cluster_id?: string | null;
   event_score?: number;
   score_updated_at?: string;
   venue_id?: string | null;
+  venue_match_confidence?: number | null;
+  venue_match_stage?: number | null;
   event_series_id?: string | null;
   content_fingerprint?: string | null;
   created_at: string;

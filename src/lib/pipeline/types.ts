@@ -10,9 +10,73 @@ export type FlagType =
   | 'missing_location'
   | 'outside_austria'
   | 'short_title'
-  | 'duplicate_suspect'
+  | 'duplicate_uncertain'
+  | 'duplicate_merged'
+  | 'garbage_title'
   | 'venue_unmatched'
   | 'venue_geo_mismatch';
+
+/**
+ * Publish status for events.
+ */
+export type PublishStatus =
+  | 'draft'
+  | 'published'
+  | 'published_low_confidence'
+  | 'needs_review'
+  | 'suppressed'
+  | 'expired'
+  | 'duplicate';
+
+/**
+ * A persisted event row from the events table (subset of fields used in dedup).
+ */
+export interface EventRow {
+  id: string;
+  title: string;
+  description?: string | null;
+  start_date: string;
+  end_date?: string | null;
+  location_name?: string | null;
+  address?: string | null;
+  city?: string | null;
+  postal_code?: string | null;
+  bundesland?: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
+  source_url?: string | null;
+  ticket_url?: string | null;
+  image_url?: string | null;
+  category?: string | null;
+  tags?: string[] | null;
+  source_id?: string | null;
+  source_name?: string | null;
+  venue_id?: string | null;
+  venue_match_confidence?: number | null;
+  venue_match_stage?: number | null;
+  quality_score?: number | null;
+  publish_status?: string | null;
+  content_fingerprint?: string | null;
+  duplicate_of?: string | null;
+  dedup_score?: number | null;
+  dedup_cluster_id?: string | null;
+  organizer?: string | null;
+  price_text?: string | null;
+  created_at?: string | null;
+}
+
+/**
+ * Dedup score breakdown for a pair of events.
+ */
+export interface DedupScoreBreakdown {
+  titleScore: number;
+  datetimeScore: number;
+  venueScore: number;
+  geoScore: number;
+  urlScore: number;
+  overallScore: number;
+  decision: 'merge' | 'uncertain' | 'distinct';
+}
 
 export interface QualityFlag {
   type: FlagType;

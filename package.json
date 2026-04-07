@@ -42,6 +42,7 @@
     "probe-gemeinden": "tsx src/scripts/probe-gemeinden.ts",
     "scrape:gemeinden-generic": "tsx src/scripts/scrape.ts --source gemeinden-generic",
     "score": "tsx --env-file=.env.local src/scripts/calculate-scores.ts",
+    "dedup": "tsx --env-file=.env.local src/scripts/dedup.ts",
     "migrate": "tsx --env-file=.env.local src/scripts/apply-migration.ts",
     "post-process": "tsx src/scripts/post-process.ts",
     "validate": "node src/scripts/validate-events.js",
@@ -64,6 +65,7 @@
     "@supabase/ssr": "^0.9.0",
     "@supabase/supabase-js": "^2.100.1",
     "@types/canvas-confetti": "^1.9.0",
+    "@types/uuid": "^10.0.0",
     "canvas-confetti": "^1.9.4",
     "cheerio": "^1.2.0",
     "framer-motion": "^12.38.0",
@@ -75,7 +77,8 @@
     "openai": "^6.33.0",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
-    "sonner": "^2.0.7"
+    "sonner": "^2.0.7",
+    "uuid": "^13.0.0"
   },
   "devDependencies": {
     "@emnapi/core": "^1.9.1",

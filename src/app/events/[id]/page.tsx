@@ -1,4 +1,4 @@
-import { notFound } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
 import Image from 'next/image';
 import type { Metadata } from 'next';
 import { createClient } from '@supabase/supabase-js';
@@ -38,8 +38,8 @@ export async function generateMetadata({
     return { title: 'Event nicht gefunden' };
   }
 
-  // Suppressed or needs_review events should not be indexable
-  if (event.publish_status === 'needs_review' || event.publish_status === 'suppressed') {
+  // Suppressed, needs_review, or duplicate events should not be indexable
+  if (event.publish_status === 'needs_review' || event.publish_status === 'suppressed' || event.publish_status === 'duplicate') {
     return {
       title: 'Event nicht gefunden',
       robots: { index: false, follow: false },
@@ -152,6 +152,11 @@ export default async function EventDetailPage({
 
   if (!event) {
     notFound();
+  }
+
+  // 301 Redirect duplicates to their primary event
+  if (event.publish_status === 'duplicate' && event.duplicate_of) {
+    redirect(`/events/${event.duplicate_of}`);
   }
 
   // Hide suppressed/needs_review events from public access
