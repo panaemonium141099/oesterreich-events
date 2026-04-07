@@ -53,7 +53,7 @@ describe('dedup-scorer / scorePair', () => {
 
     const result = scorePair(a, b);
     expect(result.decision).toBe('merge');
-    expect(result.overallScore).toBeGreaterThanOrEqual(0.85);
+    expect(result.overallScore).toBeGreaterThanOrEqual(0.80);
     expect(result.titleScore).toBeGreaterThanOrEqual(0.9);
     expect(result.venueScore).toBe(1.0);
   });
@@ -316,7 +316,7 @@ describe('dedup-scorer / scorePair', () => {
 
     const result = scorePair(a, b);
     expect(result.decision).toBe('distinct');
-    expect(result.overallScore).toBeLessThan(0.65);
+    expect(result.overallScore).toBeLessThan(0.75);
   });
 
   it('returns all score dimensions in the breakdown', () => {
@@ -332,6 +332,122 @@ describe('dedup-scorer / scorePair', () => {
     expect(result).toHaveProperty('overallScore');
     expect(result).toHaveProperty('decision');
     expect(['merge', 'uncertain', 'distinct']).toContain(result.decision);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// dedup-scorer.ts — sparse-data boost
+// ---------------------------------------------------------------------------
+
+describe('dedup-scorer / sparse-data boost', () => {
+  it('identical title + same day + no conflicts + no venue/geo/url → merge via boost', () => {
+    // This pair would score ~0.50 without the boost (only title+datetime contribute)
+    const a = makeEvent({
+      id: 'aaa',
+      title: 'Sommerfest im Park',
+      start_date: '2026-07-15',
+    });
+    const b = makeEvent({
+      id: 'bbb',
+      title: 'Sommerfest im Park',
+      start_date: '2026-07-15',
+    });
+
+    const result = scorePair(a, b);
+    expect(result.decision).toBe('merge');
+    expect(result.overallScore).toBeGreaterThanOrEqual(0.80);
+  });
+
+  it('identical title + same day + same district + both no location → merge via boost', () => {
+    const a = makeEvent({
+      id: 'aaa',
+      title: 'Frühschoppen',
+      start_date: '2026-05-01',
+      district: 'Neusiedl am See',
+    });
+    const b = makeEvent({
+      id: 'bbb',
+      title: 'Frühschoppen',
+      start_date: '2026-05-01',
+      district: 'Neusiedl am See',
+    });
+
+    const result = scorePair(a, b);
+    expect(result.decision).toBe('merge');
+  });
+
+  it('identical title + same day but DIFFERENT location_name → NO boost', () => {
+    const a = makeEvent({
+      id: 'aaa',
+      title: 'Maibaumaufstellen',
+      start_date: '2026-05-01',
+      location_name: 'Hauptplatz Eisenstadt',
+    });
+    const b = makeEvent({
+      id: 'bbb',
+      title: 'Maibaumaufstellen',
+      start_date: '2026-05-01',
+      location_name: 'Dorfplatz Rust',
+    });
+
+    const result = scorePair(a, b);
+    // No boost applied — different location_names prevent it
+    // Without venue/geo/url data, score stays below merge threshold
+    expect(result.decision).not.toBe('merge');
+  });
+
+  it('identical title + same day + different district → NO boost (hard conflict)', () => {
+    const a = makeEvent({
+      id: 'aaa',
+      title: 'Sommerfest',
+      start_date: '2026-07-15',
+      district: 'Eisenstadt',
+    });
+    const b = makeEvent({
+      id: 'bbb',
+      title: 'Sommerfest',
+      start_date: '2026-07-15',
+      district: 'Oberwart',
+    });
+
+    const result = scorePair(a, b);
+    // Hard rule kicks in for different district
+    expect(result.decision).toBe('distinct');
+  });
+
+  it('identical title + different day → NO boost', () => {
+    const a = makeEvent({
+      id: 'aaa',
+      title: 'Konzert im Schloss',
+      start_date: '2026-06-15',
+    });
+    const b = makeEvent({
+      id: 'bbb',
+      title: 'Konzert im Schloss',
+      start_date: '2026-07-20',
+    });
+
+    const result = scorePair(a, b);
+    // Different day, no other data → distinct
+    expect(result.decision).toBe('distinct');
+  });
+
+  it('similar but not identical title → NO boost', () => {
+    const a = makeEvent({
+      id: 'aaa',
+      title: 'Wiener Weihnachtsmarkt am Rathausplatz',
+      start_date: '2026-12-01',
+    });
+    const b = makeEvent({
+      id: 'bbb',
+      title: 'Weihnachtsmarkt Rathausplatz Wien',
+      start_date: '2026-12-01',
+    });
+
+    const result = scorePair(a, b);
+    // Titles are similar but not identical after normalization → no boost
+    // May or may not be merge depending on other scores
+    expect(result.overallScore).toBeLessThan(0.80);
   });
 });
 

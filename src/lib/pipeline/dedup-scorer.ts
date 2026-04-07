@@ -24,8 +24,13 @@ const W_GEO = 0.15;
 const W_URL = 0.10;
 
 // Thresholds
-const MERGE_THRESHOLD = 0.85;
-const UNCERTAIN_THRESHOLD = 0.65;
+const MERGE_THRESHOLD = 0.80;
+const UNCERTAIN_THRESHOLD = 0.75;
+
+// Minimum title similarity to allow a merge decision (prevents merging
+// events that share location/date but have completely different titles).
+// Hard rules (same source_id, same ticket_url) bypass this guard.
+const MIN_TITLE_FOR_MERGE = 0.70;
 
 // ---------------------------------------------------------------------------
 // Title Score
@@ -250,6 +255,48 @@ function checkHardRules(a: EventRow, b: EventRow): HardRuleResult {
 }
 
 // ---------------------------------------------------------------------------
+// Sparse-data boost
+// ---------------------------------------------------------------------------
+
+/**
+ * Check if two events are obvious duplicates despite sparse data.
+ * Returns true when ALL conditions are met:
+ * - Identical normalized title (compact form)
+ * - Same calendar day
+ * - No hard conflict (no different venue_id, no different district)
+ * - location_name either identical or both empty
+ */
+function checkSparseDataMatch(a: EventRow, b: EventRow): boolean {
+  // 1. Identical normalized title
+  const titleA = normalizeTitle(a.title);
+  const titleB = normalizeTitle(b.title);
+  if (!titleA || !titleB || titleA !== titleB) return false;
+
+  // 2. Same calendar day
+  const dayA = a.start_date?.slice(0, 10);
+  const dayB = b.start_date?.slice(0, 10);
+  if (!dayA || !dayB || dayA !== dayB) return false;
+
+  // 3. No hard conflicts
+  // Different venue_id → conflict
+  if (a.venue_id && b.venue_id && a.venue_id !== b.venue_id) return false;
+  // Different district → conflict
+  const distA = (a.district ?? '').toLowerCase().trim();
+  const distB = (b.district ?? '').toLowerCase().trim();
+  if (distA && distB && distA !== distB) return false;
+
+  // 4. location_name: either both match or both empty
+  const locA = (a.location_name ?? '').toLowerCase().trim();
+  const locB = (b.location_name ?? '').toLowerCase().trim();
+  if (locA && locB && locA !== locB) {
+    // Both have location_name but they differ → no boost
+    return false;
+  }
+
+  return true;
+}
+
+// ---------------------------------------------------------------------------
 // Main scoring function
 // ---------------------------------------------------------------------------
 
@@ -291,16 +338,29 @@ export function scorePair(a: EventRow, b: EventRow): DedupScoreBreakdown {
   const geoScore = computeGeoScore(a, b, venueScore);
   const urlScore = computeUrlScore(a, b);
 
-  const overallScore =
+  let overallScore =
     titleScore * W_TITLE +
     datetimeScore * W_DATETIME +
     venueScore * W_VENUE +
     geoScore * W_GEO +
     urlScore * W_URL;
 
+  // Sparse-data boost: identical normalized title + same day + no hard conflict
+  // + location_name matches or both empty → floor score at MERGE_THRESHOLD.
+  // Catches obvious duplicates that score low only because venue/geo/url are missing.
+  if (overallScore < MERGE_THRESHOLD) {
+    const sparseDataMatch = checkSparseDataMatch(a, b);
+    if (sparseDataMatch) {
+      overallScore = Math.max(overallScore, MERGE_THRESHOLD);
+    }
+  }
+
   let decision: 'merge' | 'uncertain' | 'distinct';
-  if (overallScore >= MERGE_THRESHOLD) {
+  if (overallScore >= MERGE_THRESHOLD && titleScore >= MIN_TITLE_FOR_MERGE) {
     decision = 'merge';
+  } else if (overallScore >= MERGE_THRESHOLD && titleScore < MIN_TITLE_FOR_MERGE) {
+    // High overall but low title similarity → demote to uncertain
+    decision = 'uncertain';
   } else if (overallScore >= UNCERTAIN_THRESHOLD) {
     decision = 'uncertain';
   } else {

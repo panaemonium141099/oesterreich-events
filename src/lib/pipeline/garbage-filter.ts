@@ -43,6 +43,14 @@ export function isGarbageTitle(title: string): boolean {
   // Too short (< 3 chars after normalization)
   if (normalized.length < 3) return true;
 
+  // Date-only titles: "15.04.2026 15:00 - 17:00 Uhr", "Mi.19:30-21:00Uhr", etc.
+  // After normalization these become mostly digits+spaces — not real event titles.
+  const withoutDigitsAndSpaces = normalized.replace(/[\d\s]/g, '');
+  if (withoutDigitsAndSpaces.length < 4 && normalized.length > 5) return true;
+
+  // Titles that are just "DD.MM.YYYY" or "DD Mon" patterns
+  if (/^\d{1,2}\s+\w{3,4}\s*$/.test(normalized)) return true;
+
   return false;
 }
 
