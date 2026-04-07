@@ -27,6 +27,9 @@ export interface Event {
   visibility?: string;
   geocoding_confidence?: string | null;
   geocoding_source?: string | null;
+  publish_status?: 'draft' | 'published' | 'published_low_confidence' | 'suppressed' | 'needs_review' | 'expired';
+  quality_score?: number | null;
+  raw_event_id?: string | null;
   event_score?: number;
   score_updated_at?: string;
   venue_id?: string | null;
