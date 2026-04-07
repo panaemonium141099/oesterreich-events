@@ -49,9 +49,8 @@ Final consistency pass across all social pages: standardize loading states to sk
 - [ ] `npm test` passes (547+ tests)
 - [ ] Manual spot-check: navigate between 3+ social pages, verify consistent look
 ## Done summary
-TBD
-
+Unified all social page loading states from spinners to content-matching skeleton screens, standardized auth loading patterns with SocialNav + page-layout skeletons, replaced all hardcoded hex page backgrounds with @theme tokens (bg-surface, bg-surface-elevated, bg-surface-inset), and added Phase 11 CHANGELOG entry.
 ## Evidence
-- Commits:
-- Tests:
+- Commits: b8d19674236981774816e31de3f40744f4b788a4
+- Tests: npm run build, npm test
 - PRs:
