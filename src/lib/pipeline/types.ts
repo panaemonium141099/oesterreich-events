@@ -1,6 +1,19 @@
 // src/lib/pipeline/types.ts
 
 /**
+ * Date normalization result types.
+ */
+export type DatePrecision = 'exact' | 'day_only' | 'month_only' | 'inferred' | null;
+export type EndDatePrecision = 'exact' | 'day_only' | 'inferred' | 'missing';
+
+export interface NormalizedDateResult {
+  startAt: Date | string | null;
+  endAt: Date | string | null;
+  startPrecision: DatePrecision;
+  endPrecision: EndDatePrecision;
+}
+
+/**
  * Quality flags that can be attached to events during the pipeline.
  */
 export type FlagType =

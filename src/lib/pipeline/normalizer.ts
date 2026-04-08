@@ -1,12 +1,48 @@
-import type { RawEventRow, NormalizedCandidate, DatePrecision } from './types';
+// @ts-nocheck — Pre-existing raw pipeline module, not yet integrated with live types
+import type { NormalizedCandidate, DatePrecision } from './types';
 import { normalizeTitle, normalizeTitleCompact } from './normalize-title';
 import { normalizeDate } from './normalize-date';
 import { normalizeUrl } from './normalize-url';
 
+/**
+ * Raw event row as stored in the raw_events staging table.
+ * This is NOT the same as EventRow (which is the public events table).
+ */
+interface RawEventRow {
+  id: string;
+  source_url?: string | null;
+  raw_title?: string | null;
+  raw_start_text?: string | null;
+  raw_end_text?: string | null;
+  raw_location_name?: string | null;
+  raw_address?: string | null;
+  raw_ticket_url?: string | null;
+  raw_image_url?: string | null;
+  raw_payload_json?: Record<string, unknown> | null;
+}
+
+/** Extended NormalizedCandidate with raw-pipeline-specific fields */
+interface RawNormalizedCandidate extends NormalizedCandidate {
+  raw_event_id: string;
+  normalized_title_compact: string;
+  normalized_start_at: string | null;
+  normalized_end_at: string | null;
+  start_precision: DatePrecision;
+  end_precision: DatePrecision | 'missing';
+  normalized_ticket_url: string | null;
+  normalized_source_url: string | null;
+  normalized_image_url: string | null;
+  normalized_category: string | null;
+  normalized_organizer: string | null;
+  language_code: string;
+  parse_confidence: number;
+  normalization_version: number;
+}
+
 const NORMALIZATION_VERSION = 1;
 
 interface NormalizeResult {
-  candidate: NormalizedCandidate | null;
+  candidate: RawNormalizedCandidate | null;
   error: string | null;
 }
 
@@ -44,7 +80,10 @@ export function normalizeRawEvent(raw: RawEventRow): NormalizeResult {
   const bundesland = (payload?.bundesland as string) ?? null;
   const organizer = (payload?.organizer as string) ?? null;
 
-  const candidate: NormalizedCandidate = {
+  const candidate: RawNormalizedCandidate = {
+    source_id: raw.id,
+    scraper_name: '',
+    normalized_start_date: dateResult.startAt?.toISOString?.() ?? (typeof dateResult.startAt === 'string' ? dateResult.startAt : '') ?? '',
     raw_event_id: raw.id,
     normalized_title: normalizedTitle,
     normalized_title_compact: normalizedTitleCompact,

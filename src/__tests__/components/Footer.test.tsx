@@ -15,15 +15,19 @@ describe('Footer', () => {
     expect(screen.getByText('Impressum')).toBeDefined();
     expect(screen.getByText('Datenschutz')).toBeDefined();
     expect(screen.getByText('AGB')).toBeDefined();
+    expect(screen.getByText('Datenquellen')).toBeDefined();
     expect(screen.getByText('Kontakt')).toBeDefined();
   });
 
-  it('renders OSM/ODbL attribution in data attribution section', () => {
+  it('renders data attribution section with key sources', () => {
     render(<Footer />);
     const attribution = screen.getByTestId('data-attribution');
     expect(attribution).toBeDefined();
     expect(attribution.textContent).toContain('OpenStreetMap');
     expect(attribution.textContent).toContain('ODbL');
+    expect(attribution.textContent).toContain('CC BY 4.0');
+    expect(attribution.textContent).toContain('Mapbox');
+    expect(attribution.textContent).toContain('Alle Quellen');
   });
 
   it('links to OSM copyright page', () => {

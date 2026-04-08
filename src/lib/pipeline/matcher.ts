@@ -34,9 +34,9 @@ export async function findMatchCandidates(
   // Step 1: Fingerprint-based exact matching
   const fingerprints = new Map<string, string>();
   for (const c of candidates) {
-    if (c.normalized_title && c.normalized_start_at) {
-      const fp = generateFingerprint(c.normalized_title, c.normalized_start_at);
-      if (fp) fingerprints.set(c.raw_event_id, fp);
+    if (c.normalized_title && c.normalized_start_date) {
+      const fp = generateFingerprint(c.normalized_title, c.normalized_start_date);
+      if (fp) fingerprints.set(c.source_id, fp);
     }
   }
 
@@ -68,13 +68,13 @@ export async function findMatchCandidates(
 
   // Step 2: Fuzzy matching for non-fingerprint-matched candidates
   for (const c of candidates) {
-    if (results.has(c.raw_event_id)) continue;
-    if (!c.normalized_start_at || !c.normalized_title_compact) {
-      results.set(c.raw_event_id, { eventId: '', score: 0, decision: 'new' });
+    if (results.has(c.source_id)) continue;
+    if (!c.normalized_start_date || !c.normalized_title.toLowerCase()) {
+      results.set(c.source_id, { eventId: '', score: 0, decision: 'new' });
       continue;
     }
 
-    const dayStart = c.normalized_start_at.slice(0, 10);
+    const dayStart = c.normalized_start_date.slice(0, 10);
     const { data: sameDayEvents } = await supabase
       .from('events')
       .select('id, title, location_name, latitude, longitude')
@@ -85,7 +85,7 @@ export async function findMatchCandidates(
     let bestMatch: MatchCandidate = { eventId: '', score: 0, decision: 'new' };
     for (const existing of sameDayEvents ?? []) {
       const titleScore = jaroWinkler(
-        c.normalized_title_compact,
+        c.normalized_title.toLowerCase(),
         (existing.title ?? '').toLowerCase(),
       );
 
@@ -96,7 +96,7 @@ export async function findMatchCandidates(
         bestMatch = { eventId: existing.id, score: titleScore, decision };
       }
     }
-    results.set(c.raw_event_id, bestMatch);
+    results.set(c.source_id, bestMatch);
   }
 
   return results;

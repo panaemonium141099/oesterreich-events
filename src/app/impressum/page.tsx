@@ -98,6 +98,22 @@ export default function ImpressumPage() {
           </section>
 
           <section>
+            <h2 className="text-lg font-semibold text-white mb-3">Datenquellen & Lizenzen</h2>
+            <p>
+              Veranstaltungsdaten werden aus über 140 öffentlich zugänglichen Quellen aggregiert,
+              darunter Open Data (CC BY 4.0), offizielle Tourismus-APIs und öffentliche
+              Veranstaltungskalender. Eine vollständige Übersicht finden Sie auf unserer{' '}
+              <Link
+                href="/quellen"
+                className="text-white/90 underline underline-offset-2 hover:text-white transition-colors"
+              >
+                Datenquellen & Lizenzen
+              </Link>{' '}
+              Seite.
+            </p>
+          </section>
+
+          <section>
             <h2 className="text-lg font-semibold text-white mb-3">Streitbeilegung</h2>
             <p>
               Die Europäische Kommission stellt eine Plattform zur Online-Streitbeilegung (OS) bereit:{' '}
