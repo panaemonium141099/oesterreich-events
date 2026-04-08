@@ -24,6 +24,8 @@ const GARBAGE_TITLES = new Set([
   'faq', 'hilfe', 'help',
   'jobs', 'karriere', 'career',
   'sponsoren', 'sponsors', 'partner',
+  'mehr informationen', 'more information',
+  'weitere informationen', 'details',
 ]);
 
 /**
@@ -50,6 +52,16 @@ export function isGarbageTitle(title: string): boolean {
 
   // Titles that are just "DD.MM.YYYY" or "DD Mon" patterns
   if (/^\d{1,2}\s+\w{3,4}\s*$/.test(normalized)) return true;
+
+  // Time-only titles: "00:00", "18:00", "Mi.19:30-21:00Uhr", "10:00 Uhr", etc.
+  // After normalization these are mostly digits, colons, weekday abbreviations.
+  const timeOnly = title.trim().replace(/[\s.,:;\-]/g, '').replace(/Uhr/gi, '');
+  const timeLetters = timeOnly.replace(/[\d]/g, '');
+  // If what remains is just a 2-letter weekday abbreviation (or empty), it's a time-only title
+  if (timeOnly.length >= 3 && timeOnly.length <= 20 &&
+      (timeLetters.length === 0 || /^(?:Mo|Di|Mi|Do|Fr|Sa|So)$/i.test(timeLetters))) {
+    return true;
+  }
 
   return false;
 }
