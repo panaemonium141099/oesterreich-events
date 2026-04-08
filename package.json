@@ -55,7 +55,8 @@
     "import-student-orgs": "tsx --env-file=.env.local src/scripts/import-student-orgs.ts",
     "backfill-venue-ids": "tsx --env-file=.env.local src/scripts/backfill-venue-ids.ts",
     "scrape:venues": "tsx --env-file=.env.local src/scripts/scrape-venues.ts",
-    "match-artists": "tsx --env-file=.env.local src/scripts/match-artists.ts"
+    "match-artists": "tsx --env-file=.env.local src/scripts/match-artists.ts",
+    "source-trust": "tsx --env-file=.env.local src/scripts/compute-source-trust.ts"
   },
   "keywords": [],
   "author": "",
