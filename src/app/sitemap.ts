@@ -21,11 +21,13 @@ export async function generateSitemaps(): Promise<{ id: number }[]> {
   const supabase = getSupabase();
   const today = new Date().toISOString().split('T')[0];
 
+  // Quality-gated: only count events with quality_score >= 40 and valid publish status
   const { count, error } = await supabase
     .from('events')
     .select('id', { count: 'exact', head: true })
     .gte('start_date', today)
-    .eq('publish_status', 'published');
+    .eq('publish_status', 'published')
+    .gte('quality_score', 40);
 
   if (error || count == null) {
     // Fallback: return a single sitemap
@@ -44,21 +46,28 @@ export default async function sitemap({
   const supabase = getSupabase();
   const today = new Date().toISOString().split('T')[0];
 
+  // Quality-gated: only include events with quality_score >= 40, exclude suppressed/duplicate/needs_review
   const { data: events } = await supabase
     .from('events')
-    .select('id, updated_at, event_score')
+    .select('id, updated_at, event_score, quality_score')
     .gte('start_date', today)
     .eq('publish_status', 'published')
+    .gte('quality_score', 40)
     .order('event_score', { ascending: false })
     .order('id', { ascending: true })
     .range(id * CHUNK_SIZE, id * CHUNK_SIZE + CHUNK_SIZE - 1);
 
-  const eventUrls: MetadataRoute.Sitemap = (events ?? []).map((event) => ({
-    url: `${BASE_URL}/events/${event.id}`,
-    lastModified: event.updated_at ? new Date(event.updated_at) : new Date(),
-    changeFrequency: 'daily' as const,
-    priority: (event.event_score ?? 0) > 50 ? 0.8 : 0.5,
-  }));
+  // Priority based on quality_score: >= 80 -> 0.8, >= 60 -> 0.6, >= 40 -> 0.4
+  const eventUrls: MetadataRoute.Sitemap = (events ?? []).map((event) => {
+    const qs = event.quality_score ?? 0;
+    const priority = qs >= 80 ? 0.8 : qs >= 60 ? 0.6 : 0.4;
+    return {
+      url: `${BASE_URL}/events/${event.id}`,
+      lastModified: event.updated_at ? new Date(event.updated_at) : new Date(),
+      changeFrequency: 'daily' as const,
+      priority,
+    };
+  });
 
   // Include static pages in chunk 0
   if (id === 0) {

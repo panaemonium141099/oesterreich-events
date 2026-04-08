@@ -55,6 +55,23 @@ const SEARCH_SYNONYMS: Record<string, string[]> = {
 };
 const MAX_PAGE_SIZE = 5000;
 
+/** Compute a relevance score combining quality and recency (0-100). */
+function computeRelevance(event: Record<string, unknown>, nowMs: number): number {
+  const qualityScore = typeof event.event_score === 'number' ? event.event_score : 0;
+
+  // Recency: how soon the event starts (0-7 days: 1.0, 7-30: 0.7, 30+: 0.4)
+  let recency = 0.4;
+  const startDate = event.start_date;
+  if (typeof startDate === 'string') {
+    const daysUntil = (new Date(startDate).getTime() - nowMs) / 86_400_000;
+    if (daysUntil <= 7) recency = 1.0;
+    else if (daysUntil <= 30) recency = 0.7;
+  }
+
+  // Weighted combination: quality * 0.7 + recency * 0.3 (scaled to 100)
+  return qualityScore * 0.7 + recency * 100 * 0.3;
+}
+
 export async function GET(request: NextRequest) {
   const supabase = getSupabaseClient();
   if (!supabase) {
@@ -110,9 +127,10 @@ export async function GET(request: NextRequest) {
   const offset = searchParams.get('offset');
   if (offset) filters.offset = parseInt(offset, 10);
 
-  // Sort mode: 'date' (default) or 'score'
+  // Sort mode: 'date' (default), 'score', or 'relevance'
   const sortParam = searchParams.get('sort');
   if (sortParam === 'score') filters.sort = 'score';
+  if (sortParam === 'relevance') filters.sort = 'relevance';
 
   // Source name filter (god-role only — no auth check here, UI hides it for non-god)
   const sourceName = searchParams.get('sourceName');
@@ -313,7 +331,42 @@ export async function GET(request: NextRequest) {
         .lte('longitude', eastLng);
     }
 
-    if (filters.sort === 'score') {
+    if (filters.sort === 'relevance') {
+      // Relevance sort: fetch by score descending, then re-rank in memory
+      // combining quality_score * 0.7 + recency * 0.3
+      // (interaction_popularity deferred until event_interactions table exists)
+      query = query.order('event_score', { ascending: false, nullsFirst: false });
+      query = query.order('id', { ascending: false });
+
+      // Cursor-based pagination uses same logic as score sort
+      if (filters.cursor) {
+        const { data: cursorEvent } = await supabase
+          .from('events')
+          .select('event_score, id')
+          .eq('id', filters.cursor)
+          .single();
+
+        if (cursorEvent) {
+          const cursorScore = cursorEvent.event_score;
+          if (cursorScore !== null && cursorScore !== undefined && cursorScore > 0) {
+            query = query.or(
+              `event_score.lt.${cursorScore},` +
+              `and(event_score.eq.${cursorScore},id.lt.${cursorEvent.id}),` +
+              `event_score.is.null`
+            );
+          } else if (cursorScore !== null && cursorScore !== undefined) {
+            query = query.or(
+              `and(event_score.eq.0,id.lt.${cursorEvent.id}),` +
+              `event_score.is.null`
+            );
+          } else {
+            query = query.or(
+              `and(event_score.is.null,id.lt.${cursorEvent.id})`
+            );
+          }
+        }
+      }
+    } else if (filters.sort === 'score') {
       // Score sort: highest score first (NULLS LAST), then id descending for stability
       query = query.order('event_score', { ascending: false, nullsFirst: false });
       query = query.order('id', { ascending: false });
@@ -399,7 +452,17 @@ export async function GET(request: NextRequest) {
     // NOTE: Dedup moved to client-side. Server returns all events as-is
     // to not break cursor-based pagination (dedup was eating events and
     // causing the progressive loader to stop after ~6k of 77k events).
-    const allFetched = events || [];
+    let allFetched = events || [];
+
+    // Relevance re-ranking: combine quality_score and recency in memory
+    if (filters.sort === 'relevance' && allFetched.length > 0) {
+      const now = Date.now();
+      allFetched = [...allFetched].sort((a, b) => {
+        const scoreA = computeRelevance(a as Record<string, unknown>, now);
+        const scoreB = computeRelevance(b as Record<string, unknown>, now);
+        return scoreB - scoreA;
+      });
+    }
     const hasMore = allFetched.length > filters.limit;
     const pageEvents = hasMore ? allFetched.slice(0, filters.limit) : allFetched;
     const nextCursor = hasMore && pageEvents.length > 0

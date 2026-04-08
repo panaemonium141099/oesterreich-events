@@ -87,8 +87,8 @@ export interface EventFilters {
   offset?: number;
   /** Cursor-based pagination: ID of last event from previous page */
   cursor?: string;
-  /** Sort order: 'date' (default) or 'score' */
-  sort?: 'date' | 'score';
+  /** Sort order: 'date' (default), 'score', or 'relevance' */
+  sort?: 'date' | 'score' | 'relevance';
   /** Bounding box filter: [south_lat, west_lng, north_lat, east_lng] */
   bbox?: [number, number, number, number];
   /** Filter by scraper source_name (god-role only) */

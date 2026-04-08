@@ -72,6 +72,24 @@ export async function generateMetadata({
     metadata.robots = { index: false, follow: false };
   }
 
+  // Quality-gated SEO: noindex events with very low quality score
+  if (
+    event.quality_score !== undefined &&
+    event.quality_score !== null &&
+    event.quality_score < 30
+  ) {
+    metadata.robots = { index: false, follow: false };
+  }
+
+  // Non-published events should not be indexed
+  if (
+    event.publish_status &&
+    event.publish_status !== 'published' &&
+    event.publish_status !== 'published_low_confidence'
+  ) {
+    metadata.robots = { index: false, follow: false };
+  }
+
   return metadata;
 }
 

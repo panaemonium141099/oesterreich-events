@@ -26,6 +26,7 @@ const NAV_ITEMS = [
   { label: 'Dedup', icon: GitMerge, href: '/admin/dedup' },
   { label: 'Review Queue', icon: ClipboardCheck, href: '/admin/review' },
   { label: 'Source Trust', icon: Shield, href: '/admin/source-trust' },
+  { label: 'Quality Stats', icon: BarChart3, href: '/admin/quality-stats' },
   { label: 'Sources', icon: Database, href: '/admin/sources' },
   { label: 'Events', icon: Calendar, href: '/admin/events' },
   { label: 'Users', icon: Users, href: '/admin/users' },

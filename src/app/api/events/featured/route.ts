@@ -28,15 +28,20 @@ export async function GET(request: NextRequest) {
   try {
     const today = new Date().toISOString().slice(0, 10);
 
+    // Featured events require quality_score >= 50 and prefer events with image + description
     let query = supabase
       .from('events')
       .select(
-        'id, title, description, start_date, end_date, location_name, address, postal_code, district, bundesland, latitude, longitude, category, image_url, price_text, price_min, price_max, ticket_url, source_name, source_url, organizer, visibility, event_score',
+        'id, title, description, start_date, end_date, location_name, address, postal_code, district, bundesland, latitude, longitude, category, image_url, price_text, price_min, price_max, ticket_url, source_name, source_url, organizer, visibility, event_score, quality_score',
         { count: 'exact' }
       )
       .or('visibility.eq.public,visibility.is.null')
+      .or('publish_status.eq.published,publish_status.is.null')
       .gte('start_date', today)
       .gt('event_score', 30)
+      .gte('quality_score', 50)
+      .not('image_url', 'is', null)
+      .not('description', 'is', null)
       .order('event_score', { ascending: false })
       .limit(limit);
 
