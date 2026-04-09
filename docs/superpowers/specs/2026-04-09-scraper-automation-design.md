@@ -157,6 +157,8 @@ Master orchestrator replacing `scrape-all.ts`. Responsibilities:
 3. For Step 1 (scrapers): run each scraper individually, apply retry logic, write `scraper_stats` rows
 4. Update `scrape_runs` with final status and `pipeline_steps` JSONB
 5. Accept CLI flags: `--trigger cron|manual|github_dispatch`, `--skip-scrapers`, `--skip-venues`, `--skip-geocoding`, `--skip-score`, `--dry-run`
+
+**`--dry-run` behavior:** Runs the full pipeline but writes **nothing** to Supabase -- no events, no venues, no scores, no `scrape_runs`, no `scraper_stats`. All results are logged to stdout only. Each sub-script is invoked with its own `--dry-run` flag where supported. This is for local testing of the pipeline orchestration, not for partial writes.
 6. Exit code: 0 on success/partial_failure, 1 on full failure
 
 The script imports and calls the existing scraper functions directly (not via `execSync`). This allows capturing per-scraper results programmatically.
@@ -180,11 +182,13 @@ async function main() {
 ```
 
 Additionally, the GitHub Actions workflow has a **separate fallback step** with `if: always()` that catches the case where the Node process itself is killed (e.g., OOM, timeout). This step runs a lightweight finalizer script that:
-1. Queries `scrape_runs` for any row with `status = 'running'` and `started_at` within the last 8 hours
-2. Sets it to `failed` with `finished_at = now()`
-3. Sends the alert email
+1. Queries `scrape_runs` for **exactly** `WHERE github_run_id = $GITHUB_RUN_ID AND status = 'running'`
+2. If found: sets it to `failed` with `finished_at = now()` and sends the alert email
+3. If not found (pipeline already finalized successfully): no-op
 
-This guarantees that no run is left permanently stuck in `running` status.
+This is scoped to the current GitHub Actions run only — it will never touch runs from parallel manual triggers or other workflow executions.
+
+**Note:** A generic "stale run sweeper" (finding any `running` row older than N hours) is explicitly out of scope here. If needed in the future, that would be a separate scheduled maintenance job, not part of this workflow.
 
 ### `src/lib/scrape-reporter.ts`
 
@@ -197,7 +201,7 @@ Reporting module called by `scrape-pipeline.ts` inside the `finally` block. Resp
 
 ### `src/scripts/finalize-stale-runs.ts`
 
-Lightweight fallback script for the GitHub Actions `if: always()` step. Finds `scrape_runs` stuck in `running` status (started > 1 hour ago) and marks them `failed`. Sends alert email. Idempotent -- safe to run even if `scrape-pipeline.ts` already finalized successfully.
+Lightweight fallback script for the GitHub Actions `if: always()` step. Accepts `--github-run-id` and queries **only** `WHERE github_run_id = $ID AND status = 'running'`. If found, marks it `failed` with `finished_at = now()` and sends the alert email. If not found (normal case where `try/finally` already finalized), it's a no-op. Does not sweep arbitrary stale runs.
 
 Uses the existing `src/lib/email.ts` Resend integration. Admin email address configured via `ALERT_EMAIL` env var.
 
@@ -265,12 +269,11 @@ jobs:
           GITHUB_RUN_ID: ${{ github.run_id }}
           GITHUB_RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
 
-      - name: Finalize stale runs (crash safety)
+      - name: Finalize if pipeline crashed (scoped to this run)
         if: always()
-        run: npx tsx src/scripts/finalize-stale-runs.ts
+        run: npx tsx src/scripts/finalize-stale-runs.ts --github-run-id "$GITHUB_RUN_ID"
         env:
           GITHUB_RUN_ID: ${{ github.run_id }}
-          GITHUB_RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
 ```
 
 ### Required Secrets (new)
@@ -366,7 +369,7 @@ New template `src/emails/scrape-alert.tsx` using the existing React Email patter
 - [ ] `scrape_runs` table created and populated after each pipeline run
 - [ ] `scraper_stats` table with `status IN ('success', 'failed', 'skipped')` and `retry_count` (no `retried` status)
 - [ ] GitHub Actions workflow: single schedule `17 3 * * *` with `timezone: Europe/Vienna` (no dual-cron)
-- [ ] GitHub Actions workflow includes `if: always()` fallback step running `finalize-stale-runs.ts`
+- [ ] GitHub Actions workflow includes `if: always()` fallback step running `finalize-stale-runs.ts --github-run-id $ID` (scoped to current run only)
 - [ ] Pipeline wrapped in top-level `try/finally` — reporter always runs even on crash
 - [ ] Geocoding (normalize + fix-geocoding + gemini-geocode) runs as Step 3-4 of pipeline
 - [ ] Geocoding and scoring are `skipped_dependency` when normalize hard-fails
@@ -374,5 +377,5 @@ New template `src/emails/scrape-alert.tsx` using the existing React Email patter
 - [ ] Admin API routes return scrape run history and per-scraper health
 - [ ] Admin dashboard shows Scrape Runs tab and Scraper Health tab
 - [ ] GitHub Actions run URL stored in `scrape_runs` for cross-reference
-- [ ] Pipeline accepts `--dry-run` flag that logs but doesn't write to production
+- [ ] Pipeline accepts `--dry-run` flag that writes nothing to Supabase (no events, no venues, no scores, no run tracking -- stdout only)
 - [ ] `GEMINI_API_KEY`, `RESEND_API_KEY`, `ALERT_EMAIL` documented as required GitHub secrets
