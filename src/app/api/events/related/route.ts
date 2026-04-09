@@ -81,7 +81,7 @@ export async function GET(request: NextRequest) {
   let query = supabase
     .from('events')
     .select(
-      'id, title, start_date, end_date, location_name, image_url, category, bundesland, address, venue_id, event_score, quality_score',
+      'id, title, start_date, end_date, location_name, image_url, category, bundesland, address, venue_id, event_score, quality_score, slug',
     )
     .neq('id', eventId)
     .eq('publish_status', 'published')

@@ -3,6 +3,7 @@ import { createClient } from '@supabase/supabase-js';
 import { ALL_POSTS } from '@/content/blog';
 import { BUNDESLAENDER } from '@/lib/bundeslaender';
 import { CATEGORY_SLUGS, LANDING_CITIES, STUDENT_CITIES, STUDENT_FILTERS } from '@/lib/landing-slugs';
+import { buildEventUrl } from '@/lib/utils/slugify';
 
 export const revalidate = 86400; // 24h ISR
 
@@ -51,7 +52,7 @@ export default async function sitemap({
   // Quality-gated: only include events with quality_score >= 40, exclude suppressed/duplicate/needs_review
   const { data: events } = await supabase
     .from('events')
-    .select('id, updated_at, event_score, quality_score')
+    .select('id, slug, updated_at, event_score, quality_score')
     .gte('start_date', today)
     .eq('publish_status', 'published')
     .gte('quality_score', 40)
@@ -64,7 +65,7 @@ export default async function sitemap({
     const qs = event.quality_score ?? 0;
     const priority = qs >= 80 ? 0.8 : qs >= 60 ? 0.6 : 0.4;
     return {
-      url: `${BASE_URL}/events/${event.id}`,
+      url: `${BASE_URL}${buildEventUrl(event.id, event.slug)}`,
       lastModified: event.updated_at ? new Date(event.updated_at) : new Date(),
       changeFrequency: 'daily' as const,
       priority,

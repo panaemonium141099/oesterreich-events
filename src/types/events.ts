@@ -35,6 +35,7 @@ export interface Event {
   dedup_cluster_id?: string | null;
   event_score?: number;
   score_updated_at?: string;
+  slug?: string | null;
   venue_id?: string | null;
   venue_match_confidence?: number | null;
   venue_match_stage?: number | null;

@@ -9,6 +9,7 @@ import { createClient } from '@/lib/supabase/client';
 import { CalendarIcon, MapPinIcon } from '@/components/UI/Icons';
 import { ProfileDropdown } from '@/components/Layout/ProfileDropdown';
 import { toast } from 'sonner';
+import { buildEventUrl } from '@/lib/utils/slugify';
 
 interface SavedEvent {
   id: string;
@@ -169,7 +170,7 @@ export default function SavedEventsPage() {
               return (
                 <Link
                   key={saved.id}
-                  href={`/events/${event.id}`}
+                  href={buildEventUrl(event.id, (event as Record<string, unknown>).slug as string | undefined)}
                   className="flex items-center gap-4 p-4 rounded-xl bg-white/5 border border-white/10 hover:border-white/20 transition-all group"
                 >
                   {/* Image */}

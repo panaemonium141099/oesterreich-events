@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { formatDateCompact, formatTime } from '@/lib/utils/date';
+import { buildEventUrl } from '@/lib/utils/slugify';
 
 interface RelatedEvent {
   id: string;
@@ -13,6 +14,7 @@ interface RelatedEvent {
   location_name: string | null;
   image_url: string | null;
   category: string | null;
+  slug?: string | null;
 }
 
 const CATEGORY_COLORS: Record<string, string> = {
@@ -86,7 +88,7 @@ export function RelatedEvents({ eventId }: { eventId: string }) {
               return (
                 <Link
                   key={event.id}
-                  href={`/events/${event.id}`}
+                  href={buildEventUrl(event.id, event.slug)}
                   className="rounded-xl overflow-hidden bg-white/5 border border-white/10 hover:border-white/20 transition-colors group"
                 >
                   {event.image_url && (

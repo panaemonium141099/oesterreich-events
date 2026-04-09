@@ -6,6 +6,7 @@ import { createClient } from '@supabase/supabase-js';
 import type { Event } from '@/types/events';
 import { formatDateLong, formatTime } from '@/lib/utils/date';
 import { extractCity } from '@/lib/utils/city';
+import { buildEventUrl } from '@/lib/utils/slugify';
 import { EventDetailActions } from '@/components/Events/EventDetailActions';
 import { RelatedEvents } from '@/components/Events/RelatedEvents';
 
@@ -18,11 +19,35 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY
 );
 
-async function getEvent(id: string): Promise<Event | null> {
+/**
+ * Loads an event by short ID prefix (first 8 chars of UUID).
+ * Works for both hybrid slug URLs and legacy full-UUID URLs.
+ *
+ * Uses UUID range filtering since PostgREST doesn't support LIKE on UUID columns.
+ * Short ID "154a2761" maps to range 154a2761-0000-0000-0000-000000000000 to 154a2761-ffff-ffff-ffff-ffffffffffff.
+ */
+async function getEventByShortId(slugParam: string): Promise<Event | null> {
+  // If the param looks like a full UUID (36 chars with dashes), try exact match first
+  if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(slugParam)) {
+    const { data, error } = await supabase
+      .from('events')
+      .select('*')
+      .eq('id', slugParam)
+      .single();
+    if (!error && data) return data as Event;
+  }
+
+  // Extract 8-char short ID and do range query
+  const shortId = slugParam.slice(0, 8);
+  const rangeStart = `${shortId}-0000-0000-0000-000000000000`;
+  const rangeEnd = `${shortId}-ffff-ffff-ffff-ffffffffffff`;
+
   const { data, error } = await supabase
     .from('events')
     .select('*')
-    .eq('id', id)
+    .gte('id', rangeStart)
+    .lte('id', rangeEnd)
+    .limit(1)
     .single();
 
   if (error || !data) return null;
@@ -45,10 +70,10 @@ async function getVenue(
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ id: string }>;
+  params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
-  const { id } = await params;
-  const event = await getEvent(id);
+  const { slug: slugParam } = await params;
+  const event = await getEventByShortId(slugParam);
 
   if (!event) {
     return { title: 'Event nicht gefunden' };
@@ -66,13 +91,19 @@ export async function generateMetadata({
     ? event.description.slice(0, 160)
     : `${event.title} — ${event.location_name ?? 'Österreich'}`;
 
+  const canonicalUrl = `https://lasstreffen.at${buildEventUrl(event.id, event.slug)}`;
+
   const metadata: Metadata = {
     title: event.title,
     description,
+    alternates: {
+      canonical: canonicalUrl,
+    },
     openGraph: {
       title: event.title,
       description,
       type: 'article',
+      url: canonicalUrl,
       ...(event.image_url ? { images: [{ url: event.image_url }] } : {}),
     },
     twitter: {
@@ -83,7 +114,7 @@ export async function generateMetadata({
     },
   };
 
-  // Low-confidence events: noindex to prevent thin/low-quality content in search
+  // Low-confidence events: noindex
   if (event.publish_status === 'published_low_confidence') {
     metadata.robots = { index: false, follow: false };
   }
@@ -172,13 +203,9 @@ function buildJsonLd(event: Event): string {
     };
   }
 
-  // XSS-sanitize: escape </script> sequences
   return JSON.stringify(jsonLd).replace(/<\/script>/gi, '<\\/script>');
 }
 
-/**
- * Builds the map link for a location, using city when available.
- */
 function buildLocationLink(
   derivedCity: string | null,
   bundesland: string | null,
@@ -195,13 +222,20 @@ function buildLocationLink(
 export default async function EventDetailPage({
   params,
 }: {
-  params: Promise<{ id: string }>;
+  params: Promise<{ slug: string }>;
 }) {
-  const { id } = await params;
-  const event = await getEvent(id);
+  const { slug: slugParam } = await params;
+  const event = await getEventByShortId(slugParam);
 
   if (!event) {
     notFound();
+  }
+
+  // 301 Redirect to canonical slug URL if current URL is not canonical
+  const canonicalPath = buildEventUrl(event.id, event.slug);
+  const currentPath = `/events/${slugParam}`;
+  if (event.slug && currentPath !== canonicalPath) {
+    redirect(canonicalPath);
   }
 
   // 301 Redirect duplicates to their primary event
@@ -285,7 +319,7 @@ export default async function EventDetailPage({
                 <div className="flex items-center gap-2">
                   <span aria-hidden="true">&#128205;</span>
                   <span>
-                    {/* Venue link — points to /venues/[id] */}
+                    {/* Venue link */}
                     {venue && event.venue_id ? (
                       <Link
                         href={`/venues/${event.venue_id}`}

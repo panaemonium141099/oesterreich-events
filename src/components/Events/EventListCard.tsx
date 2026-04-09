@@ -2,6 +2,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import type { Event } from '@/types/events';
 import { formatDateCompact, formatTime } from '@/lib/utils/date';
+import { buildEventUrl } from '@/lib/utils/slugify';
 
 const CATEGORY_COLORS: Record<string, string> = {
   Musik: 'bg-purple-500/20 text-purple-400',
@@ -35,7 +36,7 @@ export function EventListCard({ event }: EventListCardProps) {
 
   return (
     <Link
-      href={`/events/${event.id}`}
+      href={buildEventUrl(event.id, event.slug)}
       className="flex gap-4 p-3 rounded-xl bg-white/5 border border-white/10 hover:border-white/20 transition-colors group"
     >
       {/* Thumbnail */}
