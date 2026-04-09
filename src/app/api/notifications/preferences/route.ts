@@ -81,6 +81,10 @@ export async function GET() {
     reminder_7d: true,
     reminder_1d: true,
     phone_number: null,
+    city_digest_enabled: true,
+    venue_alerts_enabled: true,
+    today_near_you_enabled: true,
+    student_alerts_enabled: false,
   };
 
   return NextResponse.json({ preferences: prefs });
@@ -130,6 +134,10 @@ export async function PUT(request: NextRequest) {
     reminder_7d: body.reminder_7d !== false,
     reminder_1d: body.reminder_1d !== false,
     phone_number: channelSms ? phoneNumber : null,
+    city_digest_enabled: body.city_digest_enabled !== false,
+    venue_alerts_enabled: body.venue_alerts_enabled !== false,
+    today_near_you_enabled: body.today_near_you_enabled !== false,
+    student_alerts_enabled: body.student_alerts_enabled === true,
     updated_at: new Date().toISOString(),
   };
 

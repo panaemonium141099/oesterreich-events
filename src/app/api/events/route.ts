@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import type { EventFilters } from '@/types/events';
+import { computeStudentScore, isFreeEvent, MIN_STUDENT_SCORE } from '@/lib/utils/student-score';
 
 // Force dynamic — never cache event data server-side
 export const dynamic = 'force-dynamic';
@@ -145,6 +146,18 @@ export async function GET(request: NextRequest) {
   const localnessMin = searchParams.get('localness_min');
   if (localnessMin) filters.localnessMin = parseInt(localnessMin, 10);
 
+  // Quality gate for landing page pagination parity
+  const minQuality = searchParams.get('minQuality');
+
+  // City filter for landing page pagination parity (venue.city + address fallback)
+  const cityFilter = searchParams.get('city');
+
+  // Student score mode: compute student relevance at query time, filter/sort by score
+  const studentScoreMode = searchParams.get('studentScore') === 'true';
+
+  // Free-only filter: only events with explicitly known free price
+  const freeOnly = searchParams.get('freeOnly') === 'true';
+
   // Lightweight suggest mode: returns only id/title/category/location_name, skips exact count
   // Used by the autocomplete typeahead in FilterBar to avoid heavyweight DB queries on every keystroke
   const suggestMode = searchParams.get('suggest') === 'true';
@@ -237,6 +250,34 @@ export async function GET(request: NextRequest) {
         const res = NextResponse.json({ events: [], total: 0, nextCursor: null, hasMore: false });
         res.headers.set('X-Total-Count', '0');
         return res;
+      }
+    }
+
+    // Quality gate: minimum quality_score (for landing page pagination parity)
+    if (minQuality) {
+      const minQ = parseInt(minQuality, 10);
+      if (!isNaN(minQ)) {
+        query = query.gte('quality_score', minQ);
+      }
+    }
+
+    // City filter: deterministic city matching via venue.city + address fallback
+    if (cityFilter) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { data: cityVenues } = await (supabase.from('venues') as any)
+        .select('id')
+        .ilike('city', cityFilter);
+
+      const cityVenueIds = (cityVenues ?? []).map((v: { id: string }) => v.id);
+
+      if (cityVenueIds.length > 0) {
+        // Events at matching venues OR events with city in address
+        query = query.or(
+          `venue_id.in.(${cityVenueIds.join(',')}),address.ilike.%${cityFilter}%`,
+        );
+      } else {
+        // No venues match — fall back to address-only matching
+        query = query.ilike('address', `%${cityFilter}%`);
       }
     }
 
@@ -431,8 +472,9 @@ export async function GET(request: NextRequest) {
     }
 
     // Apply limit (fetch one extra to determine if there's a next page)
-    const fetchLimit = filters.limit + 1;
-    if (filters.offset && !filters.cursor) {
+    // Student score mode loads all candidates (offset-paged after scoring in JS)
+    const fetchLimit = studentScoreMode ? 500 : filters.limit + 1;
+    if (filters.offset && !filters.cursor && !studentScoreMode) {
       // Legacy offset support
       query = query.range(filters.offset, filters.offset + fetchLimit - 1);
     } else {
@@ -463,6 +505,62 @@ export async function GET(request: NextRequest) {
         return scoreB - scoreA;
       });
     }
+
+    // Free-only filter: only events with explicitly known free price
+    if (freeOnly) {
+      allFetched = allFetched.filter((e) =>
+        isFreeEvent(e as { price_min: number | null; price_text: string | null }),
+      );
+    }
+
+    // Student score mode: compute score, filter, sort, offset-paginate
+    if (studentScoreMode) {
+      const scored = allFetched
+        .map((e) => {
+          const ev = e as Record<string, unknown>;
+          return {
+            event: e,
+            studentScore: computeStudentScore({
+              title: String(ev.title ?? ''),
+              category: (ev.category as string) ?? null,
+              price_min: (ev.price_min as number) ?? null,
+              price_text: (ev.price_text as string) ?? null,
+              start_date: String(ev.start_date ?? ''),
+            }),
+          };
+        })
+        .filter((s) => s.studentScore >= MIN_STUDENT_SCORE);
+
+      // Sort by studentScore DESC, then start_date ASC (for time-critical contexts),
+      // then event_score DESC as tiebreaker
+      scored.sort((a, b) => {
+        if (b.studentScore !== a.studentScore) return b.studentScore - a.studentScore;
+        const aDate = new Date(String((a.event as Record<string, unknown>).start_date)).getTime();
+        const bDate = new Date(String((b.event as Record<string, unknown>).start_date)).getTime();
+        if (aDate !== bDate) return aDate - bDate;
+        return ((b.event as Record<string, unknown>).event_score as number ?? 0) -
+               ((a.event as Record<string, unknown>).event_score as number ?? 0);
+      });
+
+      // Offset pagination (not cursor — score is computed at query time)
+      const offsetVal = filters.offset ?? 0;
+      const studentTotal = scored.length;
+      const studentPage = scored.slice(offsetVal, offsetVal + filters.limit);
+      const studentHasMore = offsetVal + filters.limit < studentTotal;
+
+      const responseBody = {
+        events: studentPage.map((s) => s.event),
+        total: studentTotal,
+        hasMore: studentHasMore,
+        nextCursor: null, // offset-based, no cursor
+      };
+
+      const response = NextResponse.json(responseBody);
+      response.headers.set('Cache-Control', 'no-store, max-age=0');
+      response.headers.set('X-Total-Count', String(studentTotal));
+      return response;
+    }
+
     const hasMore = allFetched.length > filters.limit;
     const pageEvents = hasMore ? allFetched.slice(0, filters.limit) : allFetched;
     const nextCursor = hasMore && pageEvents.length > 0

@@ -1,10 +1,13 @@
 import { notFound, redirect } from 'next/navigation';
 import Image from 'next/image';
+import Link from 'next/link';
 import type { Metadata } from 'next';
 import { createClient } from '@supabase/supabase-js';
 import type { Event } from '@/types/events';
 import { formatDateLong, formatTime } from '@/lib/utils/date';
+import { extractCity } from '@/lib/utils/city';
 import { EventDetailActions } from '@/components/Events/EventDetailActions';
+import { RelatedEvents } from '@/components/Events/RelatedEvents';
 
 if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
   throw new Error('SUPABASE_SERVICE_ROLE_KEY is required');
@@ -24,6 +27,19 @@ async function getEvent(id: string): Promise<Event | null> {
 
   if (error || !data) return null;
   return data as Event;
+}
+
+async function getVenue(
+  venueId: string,
+): Promise<{ name: string; city: string | null } | null> {
+  const { data, error } = await supabase
+    .from('venues')
+    .select('name, city')
+    .eq('id', venueId)
+    .single();
+
+  if (error || !data) return null;
+  return data;
 }
 
 export async function generateMetadata({
@@ -160,6 +176,22 @@ function buildJsonLd(event: Event): string {
   return JSON.stringify(jsonLd).replace(/<\/script>/gi, '<\\/script>');
 }
 
+/**
+ * Builds the map link for a location, using city when available.
+ */
+function buildLocationLink(
+  derivedCity: string | null,
+  bundesland: string | null,
+): string | null {
+  if (derivedCity && bundesland) {
+    return `/map?city=${encodeURIComponent(derivedCity)}&bundesland=${encodeURIComponent(bundesland)}`;
+  }
+  if (bundesland) {
+    return `/map?bundesland=${encodeURIComponent(bundesland)}`;
+  }
+  return null;
+}
+
 export default async function EventDetailPage({
   params,
 }: {
@@ -182,10 +214,20 @@ export default async function EventDetailPage({
     notFound();
   }
 
+  // Load venue data if event has a venue_id
+  const venue = event.venue_id ? await getVenue(event.venue_id) : null;
+
+  // Derive city for Follow-City button and links
+  const derivedCity = extractCity(
+    { address: event.address, bundesland: event.bundesland },
+    venue?.city,
+  );
+
   // Only emit JSON-LD for fully published events (skip low confidence)
   const jsonLd = event.publish_status !== 'published_low_confidence' ? buildJsonLd(event) : null;
   const startTime = formatTime(event.start_date);
   const endTime = event.end_date ? formatTime(event.end_date) : null;
+  const locationLink = buildLocationLink(derivedCity, event.bundesland);
 
   return (
     <>
@@ -197,7 +239,15 @@ export default async function EventDetailPage({
       )}
       <main className="min-h-screen bg-surface text-white">
         <div className="max-w-3xl mx-auto px-4 py-8">
-          <EventDetailActions eventId={event.id} eventTitle={event.title} />
+          <EventDetailActions
+            eventId={event.id}
+            eventTitle={event.title}
+            city={derivedCity}
+            bundesland={event.bundesland}
+            venueId={event.venue_id}
+            venueName={venue?.name}
+            startDate={event.start_date}
+          />
 
           {event.image_url && (
             <div className="relative w-full aspect-video rounded-xl overflow-hidden mb-6">
@@ -235,9 +285,33 @@ export default async function EventDetailPage({
                 <div className="flex items-center gap-2">
                   <span aria-hidden="true">&#128205;</span>
                   <span>
-                    {event.location_name}
-                    {event.location_name && event.address && ', '}
-                    {event.address}
+                    {/* Venue link — points to /venues/[id] */}
+                    {venue && event.venue_id ? (
+                      <Link
+                        href={`/venues/${event.venue_id}`}
+                        className="hover:text-white underline underline-offset-2 decoration-white/30 transition-colors"
+                      >
+                        {venue.name}
+                      </Link>
+                    ) : (
+                      event.location_name
+                    )}
+                    {/* City/region link */}
+                    {event.address && (
+                      <>
+                        {(venue || event.location_name) && ', '}
+                        {locationLink ? (
+                          <Link
+                            href={locationLink}
+                            className="hover:text-white underline underline-offset-2 decoration-white/30 transition-colors"
+                          >
+                            {event.address}
+                          </Link>
+                        ) : (
+                          event.address
+                        )}
+                      </>
+                    )}
                   </span>
                 </div>
               )}
@@ -299,6 +373,9 @@ export default async function EventDetailPage({
               )}
             </div>
           </div>
+
+          {/* Related Events */}
+          <RelatedEvents eventId={event.id} />
         </div>
       </main>
     </>

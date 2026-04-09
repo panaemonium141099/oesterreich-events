@@ -7,6 +7,7 @@ import { SocialNav } from '@/components/Layout/SocialNav';
 import { useAuth } from '@/lib/supabase/auth-context';
 import { createClient } from '@/lib/supabase/client';
 import { CrownIcon, BoltIcon, BuildingIcon, CheckIcon } from '@/components/UI/Icons';
+import { NotificationSettings } from '@/components/Notifications/NotificationSettings';
 import { toast } from 'sonner';
 
 export default function ProfilePage() {
@@ -486,6 +487,22 @@ export default function ProfilePage() {
               </button>
             </div>
           )}
+        </div>
+
+        {/* Notification Settings */}
+        <div className="mt-8 p-6 rounded-2xl bg-white/[0.04] border border-white/[0.08]">
+          <NotificationSettings
+            preferredCitySlug={(profile as unknown as Record<string, unknown>)?.preferred_city_slug as string | null ?? null}
+            studentMode={(profile as unknown as Record<string, unknown>)?.student_mode as boolean ?? false}
+            onProfileUpdate={async (fields) => {
+              if (!user) return;
+              await supabase
+                .from('profiles')
+                .update(fields)
+                .eq('id', user.id);
+              await refreshProfile();
+            }}
+          />
         </div>
       </main>
     </div>

@@ -7,47 +7,54 @@ import Image from 'next/image';
 
 interface Region {
   name: string;
+  slug: string;
   image: string;
 }
 
 const REGIONS: Region[] = [
   {
-    // Stephansdom Wien
     name: 'Wien',
+    slug: 'wien',
     image: 'https://images.unsplash.com/photo-1578400889704-bbd63485d516?w=600&q=75&auto=format&fit=crop',
   },
   {
-    // Weinviertel / Weinfelder
     name: 'Niederösterreich',
+    slug: 'niederoesterreich',
     image: 'https://images.unsplash.com/photo-1722352453146-2526151c8a2c?w=600&q=75&auto=format&fit=crop',
   },
   {
     name: 'Oberösterreich',
+    slug: 'oberoesterreich',
     image: 'https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?w=600&q=75&auto=format&fit=crop',
   },
   {
     name: 'Steiermark',
+    slug: 'steiermark',
     image: 'https://images.unsplash.com/photo-1448375240586-882707db888b?w=600&q=75&auto=format&fit=crop',
   },
   {
-    // Hohensalzburg Festung + Altstadt
     name: 'Salzburg',
+    slug: 'salzburg',
     image: 'https://images.unsplash.com/photo-1759765098596-0c1bef505555?w=600&q=75&auto=format&fit=crop',
   },
   {
     name: 'Tirol',
+    slug: 'tirol',
     image: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600&q=75&auto=format&fit=crop',
   },
   {
     name: 'Vorarlberg',
+    slug: 'vorarlberg',
     image: 'https://images.unsplash.com/photo-1519681393784-d120267933ba?w=600&q=75&auto=format&fit=crop',
   },
   {
     name: 'Kärnten',
+    slug: 'kaernten',
     image: 'https://images.unsplash.com/photo-1544198365-f5d60b6d8190?w=600&q=75&auto=format&fit=crop',
   },
   {
     name: 'Burgenland',
+    slug: 'burgenland',
     image: 'https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=600&q=75&auto=format&fit=crop',
   },
 ];
@@ -109,7 +116,7 @@ export function RegionExplorer() {
             <motion.button
               key={region.name}
               variants={tileVariants}
-              onClick={() => router.push(`/map?bundesland=${encodeURIComponent(region.name)}`)}
+              onClick={() => router.push(`/${region.slug}`)}
               className="group relative overflow-hidden rounded-2xl aspect-[4/3] focus:outline-none focus:ring-2 focus:ring-white/30"
               whileHover="hover"
             >

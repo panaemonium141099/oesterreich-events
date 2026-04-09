@@ -1,6 +1,8 @@
 import { MetadataRoute } from 'next';
 import { createClient } from '@supabase/supabase-js';
 import { ALL_POSTS } from '@/content/blog';
+import { BUNDESLAENDER } from '@/lib/bundeslaender';
+import { CATEGORY_SLUGS, LANDING_CITIES, STUDENT_CITIES, STUDENT_FILTERS } from '@/lib/landing-slugs';
 
 export const revalidate = 86400; // 24h ISR
 
@@ -116,7 +118,132 @@ export default async function sitemap({
       priority: 0.7,
     }));
 
-    return [...staticPages, ...blogIndexUrl, ...blogPostUrls, ...eventUrls];
+    // Landing pages: Bundesland + Stadt + Kategorie + Zeitkontext
+    const landingPages: MetadataRoute.Sitemap = [];
+    const bundeslaender = BUNDESLAENDER.filter((b) => b.id !== 'all');
+    const categorySlugs = [...CATEGORY_SLUGS.keys()];
+    const timeFilters = ['heute', 'wochenende'];
+
+    for (const bl of bundeslaender) {
+      // /[bundesland]
+      landingPages.push({
+        url: `${BASE_URL}/${bl.id}`,
+        lastModified: new Date(),
+        changeFrequency: 'daily' as const,
+        priority: 0.8,
+      });
+      // /[bundesland]/heute, /[bundesland]/wochenende
+      for (const tf of timeFilters) {
+        landingPages.push({
+          url: `${BASE_URL}/${bl.id}/${tf}`,
+          lastModified: new Date(),
+          changeFrequency: 'daily' as const,
+          priority: 0.7,
+        });
+      }
+      // /[bundesland]/[category]
+      for (const cs of categorySlugs) {
+        landingPages.push({
+          url: `${BASE_URL}/${bl.id}/${cs}`,
+          lastModified: new Date(),
+          changeFrequency: 'daily' as const,
+          priority: 0.7,
+        });
+        // /[bundesland]/[category]/heute, /wochenende
+        for (const tf of timeFilters) {
+          landingPages.push({
+            url: `${BASE_URL}/${bl.id}/${cs}/${tf}`,
+            lastModified: new Date(),
+            changeFrequency: 'daily' as const,
+            priority: 0.6,
+          });
+        }
+      }
+    }
+
+    // Stadt pages (exclude Wien — handled via /wien bundesland route)
+    const stadtCities = LANDING_CITIES.filter((c) => c.filterMode === 'city');
+    for (const city of stadtCities) {
+      landingPages.push({
+        url: `${BASE_URL}/stadt/${city.slug}`,
+        lastModified: new Date(),
+        changeFrequency: 'daily' as const,
+        priority: 0.8,
+      });
+      for (const tf of timeFilters) {
+        landingPages.push({
+          url: `${BASE_URL}/stadt/${city.slug}/${tf}`,
+          lastModified: new Date(),
+          changeFrequency: 'daily' as const,
+          priority: 0.7,
+        });
+      }
+      for (const cs of categorySlugs) {
+        landingPages.push({
+          url: `${BASE_URL}/stadt/${city.slug}/${cs}`,
+          lastModified: new Date(),
+          changeFrequency: 'daily' as const,
+          priority: 0.7,
+        });
+        for (const tf of timeFilters) {
+          landingPages.push({
+            url: `${BASE_URL}/stadt/${city.slug}/${cs}/${tf}`,
+            lastModified: new Date(),
+            changeFrequency: 'daily' as const,
+            priority: 0.6,
+          });
+        }
+      }
+    }
+
+    // Student pages
+    const studentPages: MetadataRoute.Sitemap = [];
+    studentPages.push({
+      url: `${BASE_URL}/studenten`,
+      lastModified: new Date(),
+      changeFrequency: 'daily' as const,
+      priority: 0.8,
+    });
+    for (const sc of STUDENT_CITIES) {
+      studentPages.push({
+        url: `${BASE_URL}/studenten/${sc.slug}`,
+        lastModified: new Date(),
+        changeFrequency: 'daily' as const,
+        priority: 0.8,
+      });
+      for (const sf of STUDENT_FILTERS) {
+        studentPages.push({
+          url: `${BASE_URL}/studenten/${sc.slug}/${sf}`,
+          lastModified: new Date(),
+          changeFrequency: 'daily' as const,
+          priority: 0.7,
+        });
+      }
+    }
+
+    // Venue pages: only venues with qualifying future events
+    const { data: activeVenueIds } = await supabase
+      .from('events')
+      .select('venue_id')
+      .eq('publish_status', 'published')
+      .gte('start_date', today)
+      .gte('quality_score', 40)
+      .not('venue_id', 'is', null);
+
+    const uniqueVenueIds = [...new Set(
+      (activeVenueIds ?? [])
+        .map((e: { venue_id: string | null }) => e.venue_id)
+        .filter(Boolean),
+    )];
+
+    const venuePages: MetadataRoute.Sitemap = uniqueVenueIds.map((vid) => ({
+      url: `${BASE_URL}/venues/${vid}`,
+      lastModified: new Date(),
+      changeFrequency: 'daily' as const,
+      priority: 0.6,
+    }));
+
+    return [...staticPages, ...blogIndexUrl, ...blogPostUrls, ...landingPages, ...studentPages, ...venuePages, ...eventUrls];
   }
 
   return eventUrls;
