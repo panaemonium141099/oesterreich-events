@@ -27,7 +27,27 @@ The current `scrape-all.ts` is replaced by a new `scrape-pipeline.ts` that orche
 | 6 | Post-scrape hook | Trigger `match-artists` Edge Function |
 | 7 | `report-scrape-run.ts` | Log results to Supabase + send email on failure |
 
-Each step runs regardless of whether the previous step failed (fail-forward). Step 7 aggregates all results.
+### Step Dependencies & Fail-Forward
+
+Steps are fail-forward but **dependency-aware**. If a step fails, downstream steps that depend on its output are marked `skipped_dependency` rather than running blindly:
+
+| Step | Depends on | On dependency failure |
+|------|-----------|----------------------|
+| 1 (Scrapers) | -- | Always runs |
+| 2 (Venues) | -- | Always runs (independent of Step 1) |
+| 3 (Normalize) | 1, 2 | Runs even if some scrapers failed (partial data is still worth normalizing) |
+| 4 (Geocoding) | 3 | **Skipped** if Step 3 hard-failed (normalize crash = location data unreliable) |
+| 5 (Scoring) | 3 | **Skipped** if Step 3 hard-failed (scores depend on normalized locations) |
+| 6 (Artist-Matching) | 1, 2 | Runs if any new events were ingested (Steps 1 or 2 had partial success) |
+| 7 (Report) | -- | Always runs (via `try/finally`, see Crash Safety below) |
+
+A step's `pipeline_steps` status can be:
+- `success` -- completed without errors
+- `failed` -- hard failure during execution
+- `partial_failure` -- some sub-items failed (applies to Step 1 scrapers)
+- `skipped_dependency` -- not executed because a required upstream step failed
+
+This keeps reporting complete and honest: the admin dashboard shows exactly which steps ran, which were skipped, and why.
 
 ### Retry Logic
 
@@ -72,7 +92,7 @@ CREATE INDEX idx_scrape_runs_status ON scrape_runs (status);
 - `partial_failure` -- some scrapers failed but pipeline completed
 - `failed` -- a critical step (normalize, score, or report) failed
 
-**`pipeline_steps` JSONB structure:**
+**`pipeline_steps` JSONB structure** (success example):
 ```json
 {
   "scrapers": { "status": "partial_failure", "duration_ms": 3600000, "succeeded": 138, "failed": 3 },
@@ -80,6 +100,18 @@ CREATE INDEX idx_scrape_runs_status ON scrape_runs (status);
   "normalize": { "status": "success", "duration_ms": 45000 },
   "geocoding": { "status": "success", "duration_ms": 180000, "fix_count": 12, "gemini_count": 8 },
   "scoring": { "status": "success", "duration_ms": 30000 },
+  "artist_matching": { "status": "success", "duration_ms": 15000 }
+}
+```
+
+**`pipeline_steps` JSONB structure** (dependency-skip example):
+```json
+{
+  "scrapers": { "status": "partial_failure", "duration_ms": 3600000, "succeeded": 130, "failed": 11 },
+  "venues": { "status": "success", "duration_ms": 120000 },
+  "normalize": { "status": "failed", "duration_ms": 5000, "error": "Connection refused" },
+  "geocoding": { "status": "skipped_dependency", "reason": "normalize failed" },
+  "scoring": { "status": "skipped_dependency", "reason": "normalize failed" },
   "artist_matching": { "status": "success", "duration_ms": 15000 }
 }
 ```
@@ -93,7 +125,7 @@ CREATE TABLE scraper_stats (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   run_id uuid NOT NULL REFERENCES scrape_runs(id) ON DELETE CASCADE,
   scraper_name text NOT NULL,
-  status text NOT NULL CHECK (status IN ('success', 'failed', 'retried', 'skipped')),
+  status text NOT NULL CHECK (status IN ('success', 'failed', 'skipped')),
   events_found int DEFAULT 0,
   events_updated int DEFAULT 0,
   duration_ms int DEFAULT 0,
@@ -129,14 +161,43 @@ Master orchestrator replacing `scrape-all.ts`. Responsibilities:
 
 The script imports and calls the existing scraper functions directly (not via `execSync`). This allows capturing per-scraper results programmatically.
 
+### Crash Safety
+
+The entire pipeline body runs inside a top-level `try/finally`:
+
+```typescript
+async function main() {
+  const runId = await createScrapeRun(trigger);
+  try {
+    // Steps 1-6...
+  } finally {
+    // Step 7: ALWAYS finalize, even on unhandled exception or OOM
+    await finalizeScrapeRun(runId, results);
+    await sendAlertIfNeeded(runId, results);
+    await writeGitHubSummary(results);
+  }
+}
+```
+
+Additionally, the GitHub Actions workflow has a **separate fallback step** with `if: always()` that catches the case where the Node process itself is killed (e.g., OOM, timeout). This step runs a lightweight finalizer script that:
+1. Queries `scrape_runs` for any row with `status = 'running'` and `started_at` within the last 8 hours
+2. Sets it to `failed` with `finished_at = now()`
+3. Sends the alert email
+
+This guarantees that no run is left permanently stuck in `running` status.
+
 ### `src/lib/scrape-reporter.ts`
 
-Reporting module called by `scrape-pipeline.ts` at the end of the pipeline (not a separate script). Responsibilities:
+Reporting module called by `scrape-pipeline.ts` inside the `finally` block. Responsibilities:
 
 1. Update the `scrape_runs` row with final status, `finished_at`, and `pipeline_steps`
 2. If status is `failed` or `partial_failure`: send alert email via Resend to admin address
 3. Email includes: run status, failed scraper list, total events scraped, duration, link to admin dashboard
 4. If running in GitHub Actions: write Job Summary markdown to `$GITHUB_STEP_SUMMARY`
+
+### `src/scripts/finalize-stale-runs.ts`
+
+Lightweight fallback script for the GitHub Actions `if: always()` step. Finds `scrape_runs` stuck in `running` status (started > 1 hour ago) and marks them `failed`. Sends alert email. Idempotent -- safe to run even if `scrape-pipeline.ts` already finalized successfully.
 
 Uses the existing `src/lib/email.ts` Resend integration. Admin email address configured via `ALERT_EMAIL` env var.
 
@@ -149,8 +210,8 @@ name: Scrape Events Pipeline
 
 on:
   schedule:
-    - cron: '0 1 * * *'  # 3:00 AM Vienna (CEST / summer)
-    - cron: '0 2 * * *'  # 3:00 AM Vienna (CET / winter)
+    - cron: '17 3 * * *'  # 03:17 AM Vienna time (off-minute to avoid GitHub congestion)
+      timezone: Europe/Vienna
   workflow_dispatch:
     inputs:
       scraper:
@@ -200,6 +261,13 @@ jobs:
             ARGS="$ARGS --skip-geocoding"
           fi
           npx tsx src/scripts/scrape-pipeline.ts $ARGS
+        env:
+          GITHUB_RUN_ID: ${{ github.run_id }}
+          GITHUB_RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+
+      - name: Finalize stale runs (crash safety)
+        if: always()
+        run: npx tsx src/scripts/finalize-stale-runs.ts
         env:
           GITHUB_RUN_ID: ${{ github.run_id }}
           GITHUB_RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
@@ -293,12 +361,15 @@ New template `src/emails/scrape-alert.tsx` using the existing React Email patter
 
 ## Acceptance Criteria
 
-- [ ] `scrape-pipeline.ts` runs all 7 steps in sequence, continues on individual step failure
+- [ ] `scrape-pipeline.ts` runs all 7 steps with dependency-aware fail-forward (downstream steps skipped if upstream hard-fails)
 - [ ] Per-scraper retry logic: max 2 retries with 30s/60s backoff for network errors only
 - [ ] `scrape_runs` table created and populated after each pipeline run
-- [ ] `scraper_stats` table created and populated with per-scraper results including retry_count
-- [ ] GitHub Actions workflow uses `scrape-pipeline.ts` instead of `scrape.ts`
+- [ ] `scraper_stats` table with `status IN ('success', 'failed', 'skipped')` and `retry_count` (no `retried` status)
+- [ ] GitHub Actions workflow: single schedule `17 3 * * *` with `timezone: Europe/Vienna` (no dual-cron)
+- [ ] GitHub Actions workflow includes `if: always()` fallback step running `finalize-stale-runs.ts`
+- [ ] Pipeline wrapped in top-level `try/finally` — reporter always runs even on crash
 - [ ] Geocoding (normalize + fix-geocoding + gemini-geocode) runs as Step 3-4 of pipeline
+- [ ] Geocoding and scoring are `skipped_dependency` when normalize hard-fails
 - [ ] Email alert sent via Resend when pipeline status is `failed` or `partial_failure`
 - [ ] Admin API routes return scrape run history and per-scraper health
 - [ ] Admin dashboard shows Scrape Runs tab and Scraper Health tab
