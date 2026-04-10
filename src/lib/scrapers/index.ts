@@ -111,7 +111,7 @@ function clearProgress(name: string) {
   } catch { /* ignore */ }
 }
 
-const scrapers: BaseScraper[] = [
+export const scrapers: BaseScraper[] = [
   // Burgenland-Quellen
   new BurgenlandInfoScraper(),
   new LandesregierungScraper(),
@@ -365,6 +365,65 @@ export async function runScraper(scraper: BaseScraper): Promise<void> {
       message: `Fehler: ${message}`,
       startedAt,
     });
+  }
+}
+
+export interface ScraperRunResult {
+  scraper_name: string;
+  status: 'success' | 'error';
+  events_found: number;
+  events_inserted: number;
+  events_updated: number;
+  duration_ms: number;
+  error_message: string | null;
+}
+
+export async function runScraperWithResult(scraper: BaseScraper): Promise<ScraperRunResult> {
+  const start = Date.now();
+
+  writeProgress(scraper.name, {
+    status: 'running',
+    current: 0,
+    total: 0,
+    eventsFound: 0,
+    message: `Scraping ${scraper.name} (Pipeline)...`,
+    startedAt: new Date().toISOString(),
+  });
+
+  try {
+    const result = await runPipeline(scraper);
+    clearProgress(scraper.name);
+
+    return {
+      scraper_name: scraper.name,
+      status: result.status === 'error' ? 'error' : 'success',
+      events_found: result.metrics.items_found,
+      events_inserted: result.metrics.items_inserted,
+      events_updated: result.metrics.items_updated,
+      duration_ms: Date.now() - start,
+      error_message: null,
+    };
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    console.error(`[${scraper.name}] Pipeline FEHLER: ${message}`);
+    writeProgress(scraper.name, {
+      status: 'error',
+      current: 0,
+      total: 0,
+      eventsFound: 0,
+      message: `Fehler: ${message}`,
+      startedAt: new Date().toISOString(),
+    });
+
+    return {
+      scraper_name: scraper.name,
+      status: 'error',
+      events_found: 0,
+      events_inserted: 0,
+      events_updated: 0,
+      duration_ms: Date.now() - start,
+      error_message: message,
+    };
   }
 }
 
