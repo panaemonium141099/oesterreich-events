@@ -1,15 +1,20 @@
-name: Scrape Events
+name: Scrape Events Pipeline
 
-# Runs daily at 3:00 AM Vienna time (1:00 UTC in summer, 2:00 UTC in winter)
 on:
   schedule:
-    - cron: '0 2 * * *'
-  workflow_dispatch: # Manual trigger from GitHub UI
+    - cron: '17 3 * * *'
+      timezone: Europe/Vienna
+  workflow_dispatch:
     inputs:
       scraper:
         description: 'Specific scraper to run (leave empty for all)'
         required: false
         default: ''
+      skip_geocoding:
+        description: 'Skip geocoding step'
+        required: false
+        default: 'false'
+        type: boolean
 
 jobs:
   scrape:
@@ -22,35 +27,40 @@ jobs:
       NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
       NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
       MAPBOX_ACCESS_TOKEN: ${{ secrets.MAPBOX_ACCESS_TOKEN }}
+      GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+      RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+      ALERT_EMAIL: ${{ secrets.ALERT_EMAIL }}
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'npm'
 
-      - name: Install dependencies
-        run: npm ci
+      - run: npm ci
 
-      - name: Run scrapers
+      - name: Run scrape pipeline
         run: |
-          if [ -n "${{ github.event.inputs.scraper }}" ]; then
-            echo "Running specific scraper: ${{ github.event.inputs.scraper }}"
-            npx tsx src/scripts/scrape.ts --source "${{ github.event.inputs.scraper }}"
-          else
-            echo "Running all scrapers..."
-            npx tsx src/scripts/scrape.ts
+          TRIGGER="cron"
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            TRIGGER="github_dispatch"
           fi
+          ARGS="--trigger $TRIGGER"
+          if [ -n "${{ github.event.inputs.scraper }}" ]; then
+            ARGS="$ARGS --source ${{ github.event.inputs.scraper }}"
+          fi
+          if [ "${{ github.event.inputs.skip_geocoding }}" = "true" ]; then
+            ARGS="$ARGS --skip-geocoding"
+          fi
+          npx tsx src/scripts/scrape-pipeline.ts $ARGS
+        env:
+          GITHUB_RUN_ID: ${{ github.run_id }}
+          GITHUB_RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
 
-      - name: Validate events
-        run: node src/scripts/validate-events.js
-
-      - name: Report results
+      - name: Finalize if pipeline crashed (scoped to this run)
         if: always()
-        run: |
-          echo "=== Scrape Results ==="
-          echo "Completed at: $(date)"
+        run: npx tsx src/scripts/finalize-stale-runs.ts --github-run-id "$GITHUB_RUN_ID"
+        env:
+          GITHUB_RUN_ID: ${{ github.run_id }}
