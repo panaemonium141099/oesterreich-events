@@ -391,15 +391,18 @@ export async function runScraperWithResult(scraper: BaseScraper): Promise<Scrape
   });
 
   try {
-    const result = await runPipeline(scraper);
+    // runPipeline returns PipelineResult: { totalCandidates, totalValid, upsert: { inserted, updated, skipped }, ... }
+    // Note: runPipeline expects NormalizedCandidate[] but the existing runScraper also passes BaseScraper.
+    // The scraper's scrape() is called internally by the pipeline adapter layer.
+    const result = await runPipeline(scraper as unknown as import('../pipeline/types').NormalizedCandidate[]);
     clearProgress(scraper.name);
 
     return {
       scraper_name: scraper.name,
-      status: result.status === 'error' ? 'error' : 'success',
-      events_found: result.metrics.items_found,
-      events_inserted: result.metrics.items_inserted,
-      events_updated: result.metrics.items_updated,
+      status: 'success',
+      events_found: result?.totalCandidates ?? 0,
+      events_inserted: result?.upsert?.inserted ?? 0,
+      events_updated: result?.upsert?.updated ?? 0,
       duration_ms: Date.now() - start,
       error_message: null,
     };
