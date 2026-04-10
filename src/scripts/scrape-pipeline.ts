@@ -27,19 +27,10 @@ try {
 } catch { /* .env.local not found, rely on environment */ }
 
 import { execSync } from 'child_process';
-import {
-  scrapers,
-  getScraperByName,
-  runScraperWithResult,
-} from '../lib/scrapers';
-import type { ScraperRunResult } from '../lib/scrapers';
-import { closeSharedBrowser } from '../lib/scrapers/puppeteerBrowser';
 import { triggerMatchArtists } from '../lib/post-scrape-hook';
-import { withRetry } from '../lib/pipeline/retry';
 import { runStep } from '../lib/pipeline/step-runner';
 import {
   createPipelineRun,
-  insertScraperStats,
   finalizePipelineRun,
   sendAlertIfNeeded,
   writeGitHubSummary,
@@ -48,11 +39,8 @@ import {
 import type {
   PipelineOptions,
   PipelineResults,
-  ScraperResult,
   StepResult,
 } from '../lib/pipeline/scrape-pipeline-types';
-
-const SCRAPER_CONCURRENCY = 10;
 
 function parseArgs(): PipelineOptions {
   const args = process.argv.slice(2);
@@ -80,93 +68,9 @@ function execStep(label: string, cmd: string): void {
   execSync(cmd, { stdio: 'inherit', cwd: process.cwd() });
 }
 
-async function runScrapersStep(
-  opts: PipelineOptions,
-): Promise<{ stepExtras: Partial<StepResult>; scraperResults: ScraperResult[] }> {
-  const scraperResults: ScraperResult[] = [];
-
-  const targetScrapers = opts.source
-    ? [getScraperByName(opts.source)].filter(Boolean)
-    : [...scrapers];
-
-  if (opts.source && targetScrapers.length === 0) {
-    throw new Error(`Scraper not found: ${opts.source}`);
-  }
-
-  if (opts.source) {
-    for (const s of scrapers) {
-      if (s.name !== opts.source) {
-        scraperResults.push({
-          scraper_name: s.name,
-          status: 'skipped',
-          events_found: 0,
-          events_updated: 0,
-          duration_ms: 0,
-          error_message: null,
-          retry_count: 0,
-        });
-      }
-    }
-  }
-
-  const queue = [...targetScrapers];
-  let succeeded = 0;
-  let failed = 0;
-
-  const workers = Array.from({ length: SCRAPER_CONCURRENCY }, async () => {
-    while (queue.length > 0) {
-      const scraper = queue.shift();
-      if (!scraper) continue;
-
-      const retryResult = await withRetry(
-        () => runScraperWithResult(scraper),
-        { delaysMs: [30_000, 60_000] },
-      );
-
-      if (retryResult.value) {
-        const result = retryResult.value;
-        const isSuccess = result.status === 'success';
-        scraperResults.push({
-          scraper_name: result.scraper_name,
-          status: isSuccess ? 'success' : 'failed',
-          events_found: result.events_found,
-          events_updated: result.events_inserted + result.events_updated,
-          duration_ms: result.duration_ms,
-          error_message: result.error_message,
-          retry_count: retryResult.retryCount,
-        });
-        if (isSuccess) succeeded++;
-        else failed++;
-      } else {
-        scraperResults.push({
-          scraper_name: scraper.name,
-          status: 'failed',
-          events_found: 0,
-          events_updated: 0,
-          duration_ms: 0,
-          error_message: retryResult.error || 'Unknown error',
-          retry_count: retryResult.retryCount,
-        });
-        failed++;
-      }
-    }
-  });
-
-  await Promise.all(workers);
-  await closeSharedBrowser();
-
-  const status = failed === 0 ? 'success' : succeeded === 0 ? 'failed' : 'partial_failure';
-
-  return {
-    stepExtras: { status, succeeded, failed },
-    scraperResults,
-  };
-}
-
 async function main() {
   const opts = parseArgs();
   const steps: Record<string, StepResult> = {};
-  let scraperResults: ScraperResult[] = [];
   let runId: string | null = null;
 
   const results: PipelineResults = {
@@ -201,9 +105,11 @@ async function main() {
   try {
     if (!opts.skipScrapers) {
       steps.scrapers = await runStep('scrapers', async () => {
-        const { stepExtras, scraperResults: sr } = await runScrapersStep(opts);
-        scraperResults = sr;
-        return stepExtras;
+        if (opts.source) {
+          execStep(`Scraping: ${opts.source}`, `npx tsx src/scripts/scrape.ts --source ${opts.source}`);
+        } else {
+          execStep('Running all 141 scrapers', 'npx tsx src/scripts/scrape.ts');
+        }
       }, steps);
     }
 
@@ -236,20 +142,11 @@ async function main() {
 
   } finally {
     results.steps = steps;
-    results.scraper_results = scraperResults;
     results.finished_at = new Date().toISOString();
-
-    results.total_events_scraped = scraperResults
-      .filter((s) => s.status === 'success')
-      .reduce((sum, s) => sum + s.events_found, 0);
-    results.total_events_updated = scraperResults
-      .filter((s) => s.status === 'success')
-      .reduce((sum, s) => sum + s.events_updated, 0);
-    results.total_errors = scraperResults.filter((s) => s.status === 'failed').length;
+    results.total_errors = Object.values(steps).filter((s) => s.status === 'failed').length;
 
     if (!opts.dryRun && runId) {
       try {
-        await insertScraperStats(runId, scraperResults);
         await finalizePipelineRun(runId, results);
       } catch (err) {
         console.error(`[pipeline] Failed to finalize: ${err}`);
@@ -270,7 +167,7 @@ async function main() {
       : '?';
 
     console.log(`\n${'='.repeat(60)}`);
-    console.log(`  Pipeline ${status} | ${elapsed} min | ${results.total_events_scraped} events | ${results.total_errors} errors`);
+    console.log(`  Pipeline ${status} | ${elapsed} min | ${results.total_errors} step errors`);
     if (opts.dryRun) console.log('  (DRY RUN — nothing written to Supabase)');
     console.log(`${'='.repeat(60)}\n`);
 
