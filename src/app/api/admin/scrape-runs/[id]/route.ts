@@ -1,13 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
 
-/** Verify the caller is an authenticated admin/god user. Returns null on success, or an error Response. */
 async function requireAdmin(): Promise<NextResponse | null> {
   const supabase = await createServerSupabaseClient();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
+  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   const { data: profile } = await supabase
     .from('profiles')
     .select('role')
@@ -30,31 +27,29 @@ export async function GET(
     const { id } = await params;
     const supabase = await createServerSupabaseClient();
 
-    // Fetch the scrape run
     const { data: run, error: runError } = await supabase
-      .from('scrape_runs')
+      .from('pipeline_runs')
       .select('*')
       .eq('id', id)
       .single();
 
     if (runError || !run) {
-      return NextResponse.json({ error: 'Scrape-Run nicht gefunden' }, { status: 404 });
+      return NextResponse.json({ error: 'Pipeline-Run nicht gefunden' }, { status: 404 });
     }
 
-    // Fetch associated raw events (limited to 100)
-    const { data: rawEvents, error: rawError } = await supabase
-      .from('raw_events')
+    const { data: scraperStats, error: statsError } = await supabase
+      .from('scraper_stats')
       .select('*')
-      .eq('scrape_run_id', id)
-      .limit(100);
+      .eq('run_id', id)
+      .order('started_at', { ascending: true });
 
-    if (rawError) {
-      console.error('Raw events query error:', rawError);
+    if (statsError) {
+      console.error('Scraper stats query error:', statsError);
     }
 
-    return NextResponse.json({ run, rawEvents: rawEvents || [] });
+    return NextResponse.json({ run, scraper_stats: scraperStats || [] });
   } catch (err) {
-    console.error('Scrape run detail error:', err);
-    return NextResponse.json({ error: 'Fehler beim Laden des Scrape-Runs' }, { status: 500 });
+    console.error('Pipeline run detail error:', err);
+    return NextResponse.json({ error: 'Fehler beim Laden des Pipeline-Runs' }, { status: 500 });
   }
 }
