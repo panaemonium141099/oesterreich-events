@@ -56,7 +56,8 @@
     "backfill-venue-ids": "tsx --env-file=.env.local src/scripts/backfill-venue-ids.ts",
     "scrape:venues": "tsx --env-file=.env.local src/scripts/scrape-venues.ts",
     "match-artists": "tsx --env-file=.env.local src/scripts/match-artists.ts",
-    "source-trust": "tsx --env-file=.env.local src/scripts/compute-source-trust.ts"
+    "source-trust": "tsx --env-file=.env.local src/scripts/compute-source-trust.ts",
+    "scrape:pipeline": "tsx src/scripts/scrape-pipeline.ts"
   },
   "keywords": [],
   "author": "",
