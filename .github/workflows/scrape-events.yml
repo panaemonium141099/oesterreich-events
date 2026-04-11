@@ -10,6 +10,11 @@ on:
         description: 'Specific scraper to run (leave empty for all)'
         required: false
         default: ''
+      skip_scrapers:
+        description: 'Skip scrapers (only run post-processing: normalize, geocode, score, report)'
+        required: false
+        default: 'false'
+        type: boolean
       skip_geocoding:
         description: 'Skip geocoding step'
         required: false
@@ -50,6 +55,9 @@ jobs:
           ARGS="--trigger $TRIGGER"
           if [ -n "${{ github.event.inputs.scraper }}" ]; then
             ARGS="$ARGS --source ${{ github.event.inputs.scraper }}"
+          fi
+          if [ "${{ github.event.inputs.skip_scrapers }}" = "true" ]; then
+            ARGS="$ARGS --skip-scrapers"
           fi
           if [ "${{ github.event.inputs.skip_geocoding }}" = "true" ]; then
             ARGS="$ARGS --skip-geocoding"
