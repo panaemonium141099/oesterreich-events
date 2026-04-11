@@ -2042,7 +2042,7 @@
   {
     "name": "Edlbach",
     "website": "http://www.edlbach.at",
-    "eventUrl": null,
+    "eventUrl": "https://edlbach.gem2go.at/Veranstaltungen",
     "cms": "ris",
     "strategy": "gem2go",
     "plz": "4580",
@@ -2057,7 +2057,7 @@
   {
     "name": "Grünburg",
     "website": "http://www.gruenburg.at",
-    "eventUrl": null,
+    "eventUrl": "https://gruenburg.gem2go.at/Veranstaltungen",
     "cms": "gem2go",
     "strategy": "gem2go",
     "plz": "4594",
@@ -2072,7 +2072,7 @@
   {
     "name": "Hinterstoder",
     "website": "https://www.hinterstoder.ooe.gv.at",
-    "eventUrl": null,
+    "eventUrl": "https://hinterstoder.gem2go.at/Veranstaltungen",
     "cms": "ris",
     "strategy": "gem2go",
     "plz": "4573",
@@ -2087,7 +2087,7 @@
   {
     "name": "Inzersdorf im Kremstal",
     "website": "http://www.inzersdorf.ooe.gv.at",
-    "eventUrl": null,
+    "eventUrl": "https://inzersdorf-im-kremstal.gem2go.at/Veranstaltungen",
     "cms": "ris",
     "strategy": "gem2go",
     "plz": "4565",
@@ -2102,7 +2102,7 @@
   {
     "name": "Kirchdorf an der Krems",
     "website": "https://www.kirchdorf.at",
-    "eventUrl": null,
+    "eventUrl": "https://kirchdorf-an-der-krems.gem2go.at/Veranstaltungen",
     "cms": "gem2go",
     "strategy": "gem2go",
     "plz": "4560",
@@ -2117,7 +2117,7 @@
   {
     "name": "Klaus an der Pyhrnbahn",
     "website": "http://www.gemeinde-klaus.at",
-    "eventUrl": null,
+    "eventUrl": "https://klaus-an-der-pyhrnbahn.gem2go.at/Veranstaltungen",
     "cms": "ris",
     "strategy": "gem2go",
     "plz": "4564",
@@ -2132,7 +2132,7 @@
   {
     "name": "Kremsmünster",
     "website": "http://www.kremsmuenster.gv.at",
-    "eventUrl": null,
+    "eventUrl": "https://kremsmuenster.gem2go.at/Veranstaltungen",
     "cms": "ris",
     "strategy": "gem2go",
     "plz": "4550",
@@ -2147,7 +2147,7 @@
   {
     "name": "Micheldorf in Oberösterreich",
     "website": "https://www.micheldorf.at",
-    "eventUrl": null,
+    "eventUrl": "https://micheldorf-in-oberoesterreich.gem2go.at/Veranstaltungen",
     "cms": "ris",
     "strategy": "gem2go",
     "plz": "4563",
@@ -2162,7 +2162,7 @@
   {
     "name": "Molln",
     "website": "http://www.molln.at",
-    "eventUrl": null,
+    "eventUrl": "https://molln.gem2go.at/Veranstaltungen",
     "cms": "ris",
     "strategy": "gem2go",
     "plz": "4591",
@@ -2177,7 +2177,7 @@
   {
     "name": "Nußbach",
     "website": "http://www.gemeinde-nussbach.at",
-    "eventUrl": null,
+    "eventUrl": "http://www.gemeinde-nussbach.at/Veranstaltungen",
     "cms": "custom",
     "strategy": "generic-dates",
     "plz": "4542",
@@ -2192,7 +2192,7 @@
   {
     "name": "Oberschlierbach",
     "website": "https://www.gemeinde-oberschlierbach.at",
-    "eventUrl": null,
+    "eventUrl": "https://www.gemeinde-oberschlierbach.at/Veranstaltungen",
     "cms": "wordpress",
     "strategy": "generic-dates",
     "plz": "4554",
@@ -2207,7 +2207,7 @@
   {
     "name": "Pettenbach",
     "website": "http://www.pettenbach.at",
-    "eventUrl": null,
+    "eventUrl": "https://pettenbach.gem2go.at/Veranstaltungen",
     "cms": "gem2go",
     "strategy": "gem2go",
     "plz": "4643",
@@ -2222,7 +2222,7 @@
   {
     "name": "Ried im Traunkreis",
     "website": "https://www.ried-traunkreis.at",
-    "eventUrl": null,
+    "eventUrl": "https://ried-im-traunkreis.gem2go.at/Veranstaltungen",
     "cms": "gem2go",
     "strategy": "gem2go",
     "plz": "4551",
@@ -2237,7 +2237,7 @@
   {
     "name": "Rosenau am Hengstpaß",
     "website": "http://www.rosenau.at",
-    "eventUrl": null,
+    "eventUrl": "https://rosenau-am-hengstpass.gem2go.at/Veranstaltungen",
     "cms": "ris",
     "strategy": "gem2go",
     "plz": "4581",
@@ -2252,7 +2252,7 @@
   {
     "name": "Roßleithen",
     "website": "http://www.rossleithen.at",
-    "eventUrl": null,
+    "eventUrl": "https://rossleithen.gem2go.at/Veranstaltungen",
     "cms": "ris",
     "strategy": "gem2go",
     "plz": "4575",
@@ -2267,7 +2267,7 @@
   {
     "name": "Schlierbach",
     "website": "http://www.schlierbach.at",
-    "eventUrl": null,
+    "eventUrl": "https://schlierbach.gem2go.at/Veranstaltungen",
     "cms": "gem2go",
     "strategy": "gem2go",
     "plz": "4553",
@@ -2282,7 +2282,7 @@
   {
     "name": "Spital am Pyhrn",
     "website": "http://www.spital-pyhrn.at",
-    "eventUrl": null,
+    "eventUrl": "https://spital-am-pyhrn.gem2go.at/Veranstaltungen",
     "cms": "ris",
     "strategy": "gem2go",
     "plz": "4582",
@@ -2297,7 +2297,7 @@
   {
     "name": "St. Pankraz",
     "website": "http://www.st-pankraz.at",
-    "eventUrl": null,
+    "eventUrl": "https://st-pankraz.gem2go.at/Veranstaltungen",
     "cms": "gem2go",
     "strategy": "gem2go",
     "plz": "4572",
@@ -2312,7 +2312,7 @@
   {
     "name": "Steinbach am Ziehberg",
     "website": "http://www.steinbach-ziehberg.at",
-    "eventUrl": null,
+    "eventUrl": "https://steinbach-am-ziehberg.gem2go.at/Veranstaltungen",
     "cms": "ris",
     "strategy": "gem2go",
     "plz": "4562",
@@ -2327,7 +2327,7 @@
   {
     "name": "Steinbach an der Steyr",
     "website": "http://www.steinbachsteyr.at",
-    "eventUrl": null,
+    "eventUrl": "https://steinbach-an-der-steyr.gem2go.at/Veranstaltungen",
     "cms": "ris",
     "strategy": "gem2go",
     "plz": "4596",
@@ -2342,7 +2342,7 @@
   {
     "name": "Vorderstoder",
     "website": "https://www.vorderstoder.ooe.gv.at",
-    "eventUrl": null,
+    "eventUrl": "https://vorderstoder.gem2go.at/Veranstaltungen",
     "cms": "gem2go",
     "strategy": "gem2go",
     "plz": "4574",
@@ -2357,7 +2357,7 @@
   {
     "name": "Wartberg an der Krems",
     "website": "http://www.wartberg.at",
-    "eventUrl": null,
+    "eventUrl": "https://wartberg-an-der-krems.gem2go.at/Veranstaltungen",
     "cms": "ris",
     "strategy": "gem2go",
     "plz": "4552",
@@ -2372,7 +2372,7 @@
   {
     "name": "Windischgarsten",
     "website": "http://www.windischgarsten.at",
-    "eventUrl": null,
+    "eventUrl": "https://windischgarsten.gem2go.at/Veranstaltungen",
     "cms": "ris",
     "strategy": "gem2go",
     "plz": "4580",
@@ -2387,7 +2387,7 @@
   {
     "name": "Allhaming",
     "website": "http://www.allhaming.at",
-    "eventUrl": null,
+    "eventUrl": "https://allhaming.gem2go.at/Veranstaltungen",
     "cms": "ris",
     "strategy": "gem2go",
     "plz": "4511",
@@ -2402,7 +2402,7 @@
   {
     "name": "Ansfelden",
     "website": "http://www.ansfelden.co.at",
-    "eventUrl": null,
+    "eventUrl": "http://www.ansfelden.co.at/Veranstaltungen",
     "cms": "custom",
     "strategy": "generic-dates",
     "plz": "4053",
@@ -2417,7 +2417,7 @@
   {
     "name": "Asten",
     "website": "http://www.asten.at",
-    "eventUrl": null,
+    "eventUrl": "https://asten.gem2go.at/Veranstaltungen",
     "cms": "ris",
     "strategy": "gem2go",
     "plz": "4481",
@@ -2432,7 +2432,7 @@
   {
     "name": "Eggendorf im Traunkreis",
     "website": "http://www.eggendorf.at",
-    "eventUrl": null,
+    "eventUrl": "https://eggendorf-im-traunkreis.gem2go.at/Veranstaltungen",
     "cms": "ris",
     "strategy": "gem2go",
     "plz": "4622",
@@ -2777,7 +2777,7 @@
   {
     "name": "Dimbach",
     "website": "https://www.dimbach.at",
-    "eventUrl": null,
+    "eventUrl": "https://dimbach.gem2go.at/Veranstaltungen",
     "cms": "gem2go",
     "strategy": "gem2go",
     "plz": "4371",
@@ -2792,7 +2792,7 @@
   {
     "name": "Grein",
     "website": "https://www.grein.at",
-    "eventUrl": null,
+    "eventUrl": "https://grein.gem2go.at/Veranstaltungen",
     "cms": "ris",
     "strategy": "gem2go",
     "plz": "4360",
@@ -2807,7 +2807,7 @@
   {
     "name": "Katsdorf",
     "website": "http://www.katsdorf.at",
-    "eventUrl": null,
+    "eventUrl": "https://katsdorf.gem2go.at/Veranstaltungen",
     "cms": "gem2go",
     "strategy": "gem2go",
     "plz": "4223",
@@ -2822,7 +2822,7 @@
   {
     "name": "Klam",
     "website": "http://www.klam.at",
-    "eventUrl": null,
+    "eventUrl": "https://klam.gem2go.at/Veranstaltungen",
     "cms": "gem2go",
     "strategy": "gem2go",
     "plz": "4352",
@@ -2837,7 +2837,7 @@
   {
     "name": "Langenstein",
     "website": "http://www.langenstein.at",
-    "eventUrl": null,
+    "eventUrl": "https://langenstein.gem2go.at/Veranstaltungen",
     "cms": "ris",
     "strategy": "gem2go",
     "plz": "4222",
@@ -2852,7 +2852,7 @@
   {
     "name": "Luftenberg an der Donau",
     "website": "http://www.luftenberg.at",
-    "eventUrl": null,
+    "eventUrl": "https://luftenberg-an-der-donau.gem2go.at/Veranstaltungen",
     "cms": "ris",
     "strategy": "gem2go",
     "plz": "4225",
@@ -2867,7 +2867,7 @@
   {
     "name": "Mauthausen",
     "website": "http://www.mauthausen.at",
-    "eventUrl": null,
+    "eventUrl": "https://mauthausen.gem2go.at/Veranstaltungen",
     "cms": "ris",
     "strategy": "gem2go",
     "plz": "4310",
@@ -2882,7 +2882,7 @@
   {
     "name": "Mitterkirchen im Machland",
     "website": "http://www.mitterkirchen.at",
-    "eventUrl": null,
+    "eventUrl": "https://mitterkirchen-im-machland.gem2go.at/Veranstaltungen",
     "cms": "gem2go",
     "strategy": "gem2go",
     "plz": "4343",
@@ -2897,7 +2897,7 @@
   {
     "name": "Münzbach",
     "website": "http://www.muenzbach.at",
-    "eventUrl": null,
+    "eventUrl": "https://muenzbach.gem2go.at/Veranstaltungen",
     "cms": "gem2go",
     "strategy": "gem2go",
     "plz": "4323",
@@ -2912,7 +2912,7 @@
   {
     "name": "Naarn im Machlande",
     "website": "http://www.naarn.at",
-    "eventUrl": null,
+    "eventUrl": "https://naarn-im-machlande.gem2go.at/Veranstaltungen",
     "cms": "ris",
     "strategy": "gem2go",
     "plz": "4331",
@@ -2927,7 +2927,7 @@
   {
     "name": "Pabneukirchen",
     "website": "http://www.pabneukirchen.at",
-    "eventUrl": null,
+    "eventUrl": "https://pabneukirchen.gem2go.at/Veranstaltungen",
     "cms": "gem2go",
     "strategy": "gem2go",
     "plz": "4363",
@@ -2942,7 +2942,7 @@
   {
     "name": "Perg",
     "website": "http://www.perg.at",
-    "eventUrl": null,
+    "eventUrl": "http://www.perg.at/Veranstaltungen",
     "cms": "wordpress",
     "strategy": "generic-dates",
     "plz": "4320",
@@ -2957,7 +2957,7 @@
   {
     "name": "Rechberg",
     "website": "http://www.rechberg.at",
-    "eventUrl": null,
+    "eventUrl": "https://rechberg.gem2go.at/Veranstaltungen",
     "cms": "gem2go",
     "strategy": "gem2go",
     "plz": "4324",
@@ -2972,7 +2972,7 @@
   {
     "name": "Ried in der Riedmark",
     "website": "https://www.ried-riedmark.at",
-    "eventUrl": null,
+    "eventUrl": "https://ried-in-der-riedmark.gem2go.at/Veranstaltungen",
     "cms": "gem2go",
     "strategy": "gem2go",
     "plz": "4312",
@@ -2987,7 +2987,7 @@
   {
     "name": "Saxen",
     "website": "http://www.saxen.at",
-    "eventUrl": null,
+    "eventUrl": "http://www.saxen.at/Veranstaltungen",
     "cms": "wordpress",
     "strategy": "generic-dates",
     "plz": "4351",
@@ -3002,7 +3002,7 @@
   {
     "name": "Schwertberg",
     "website": "http://www.schwertberg.at",
-    "eventUrl": null,
+    "eventUrl": "https://schwertberg.gem2go.at/Veranstaltungen",
     "cms": "gem2go",
     "strategy": "gem2go",
     "plz": "4311",
@@ -3017,7 +3017,7 @@
   {
     "name": "St. Georgen an der Gusen",
     "website": "http://www.st-georgen-gusen.at",
-    "eventUrl": null,
+    "eventUrl": "https://st-georgen-an-der-gusen.gem2go.at/Veranstaltungen",
     "cms": "ris",
     "strategy": "gem2go",
     "plz": "4222",
@@ -3032,7 +3032,7 @@
   {
     "name": "St. Nikola an der Donau",
     "website": "http://www.st-nikola-donau.ooe.gv.at",
-    "eventUrl": null,
+    "eventUrl": "https://st-nikola-an-der-donau.gem2go.at/Veranstaltungen",
     "cms": "ris",
     "strategy": "gem2go",
     "plz": "4381",
@@ -3047,7 +3047,7 @@
   {
     "name": "St. Thomas am Blasenstein",
     "website": "https://www.st-thomas.at",
-    "eventUrl": null,
+    "eventUrl": "https://www.st-thomas.at/Veranstaltungen",
     "cms": "wordpress",
     "strategy": "generic-dates",
     "plz": "4364",
@@ -3062,7 +3062,7 @@
   {
     "name": "Waldhausen im Strudengau",
     "website": "https://www.waldhausen.at",
-    "eventUrl": null,
+    "eventUrl": "https://waldhausen-im-strudengau.gem2go.at/Veranstaltungen",
     "cms": "gem2go",
     "strategy": "gem2go",
     "plz": "4391",
@@ -3077,7 +3077,7 @@
   {
     "name": "Windhaag bei Perg",
     "website": "http://www.windhaag-perg.at",
-    "eventUrl": null,
+    "eventUrl": "https://windhaag-bei-perg.gem2go.at/Veranstaltungen",
     "cms": "gem2go",
     "strategy": "gem2go",
     "plz": "4322",
@@ -3857,7 +3857,7 @@
   {
     "name": "Neufelden",
     "website": "http://www.neufelden.at",
-    "eventUrl": null,
+    "eventUrl": "http://www.neufelden.at/Veranstaltungen",
     "cms": "no-calendar",
     "strategy": "generic-dates",
     "plz": "4120",
@@ -5987,7 +5987,7 @@
   {
     "name": "Aichkirchen",
     "website": "http://www.aichkirchen.at",
-    "eventUrl": null,
+    "eventUrl": "https://aichkirchen.gem2go.at/Veranstaltungen",
     "cms": "gem2go",
     "strategy": "gem2go",
     "plz": "4671",
@@ -6002,7 +6002,7 @@
   {
     "name": "Bachmanning",
     "website": "http://www.bachmanning.at",
-    "eventUrl": null,
+    "eventUrl": "https://bachmanning.gem2go.at/Veranstaltungen",
     "cms": "ris",
     "strategy": "gem2go",
     "plz": "4672",
@@ -6017,7 +6017,7 @@
   {
     "name": "Bad Wimsbach-Neydharting",
     "website": "https://www.bad-wimsbach.at",
-    "eventUrl": null,
+    "eventUrl": "https://bad-wimsbach-neydharting.gem2go.at/Veranstaltungen",
     "cms": "gem2go",
     "strategy": "gem2go",
     "plz": "4654",
@@ -6032,7 +6032,7 @@
   {
     "name": "Buchkirchen",
     "website": "http://www.buchkirchen.at",
-    "eventUrl": null,
+    "eventUrl": "https://buchkirchen.gem2go.at/Veranstaltungen",
     "cms": "gem2go",
     "strategy": "gem2go",
     "plz": "4611",
@@ -6047,7 +6047,7 @@
   {
     "name": "Eberstalzell",
     "website": "http://www.eberstalzell.at",
-    "eventUrl": null,
+    "eventUrl": "https://eberstalzell.gem2go.at/Veranstaltungen",
     "cms": "ris",
     "strategy": "gem2go",
     "plz": "4653",
@@ -6062,7 +6062,7 @@
   {
     "name": "Edt bei Lambach",
     "website": "https://www.edtbeilambach.at",
-    "eventUrl": null,
+    "eventUrl": "https://edt-bei-lambach.gem2go.at/Veranstaltungen",
     "cms": "ris",
     "strategy": "gem2go",
     "plz": "4650",
@@ -6077,7 +6077,7 @@
   {
     "name": "Fischlham",
     "website": "http://www.fischlham.gv.at",
-    "eventUrl": null,
+    "eventUrl": "https://fischlham.gem2go.at/Veranstaltungen",
     "cms": "ris",
     "strategy": "gem2go",
     "plz": "4652",
@@ -6092,7 +6092,7 @@
   {
     "name": "Gunskirchen",
     "website": "http://www.gunskirchen.ooe.gv.at",
-    "eventUrl": null,
+    "eventUrl": "https://gunskirchen.gem2go.at/Veranstaltungen",
     "cms": "gem2go",
     "strategy": "gem2go",
     "plz": "4623",
@@ -6107,7 +6107,7 @@
   {
     "name": "Holzhausen",
     "website": "http://www.gemeinde-holzhausen.at",
-    "eventUrl": null,
+    "eventUrl": "http://www.gemeinde-holzhausen.at/Veranstaltungen",
     "cms": "wordpress",
     "strategy": "generic-dates",
     "plz": "4615",
@@ -6122,7 +6122,7 @@
   {
     "name": "Krenglbach",
     "website": "http://www.krenglbach.at",
-    "eventUrl": null,
+    "eventUrl": "http://www.krenglbach.at/Veranstaltungen",
     "cms": "wordpress",
     "strategy": "generic-dates",
     "plz": "4631",
@@ -6137,7 +6137,7 @@
   {
     "name": "Lambach",
     "website": "https://www.lambach.at",
-    "eventUrl": null,
+    "eventUrl": "https://lambach.gem2go.at/Veranstaltungen",
     "cms": "ris",
     "strategy": "gem2go",
     "plz": "4650",
@@ -6152,7 +6152,7 @@
   {
     "name": "Marchtrenk",
     "website": "http://www.marchtrenk.gv.at",
-    "eventUrl": null,
+    "eventUrl": "https://marchtrenk.gem2go.at/Veranstaltungen",
     "cms": "gem2go",
     "strategy": "gem2go",
     "plz": "4614",
@@ -6167,7 +6167,7 @@
   {
     "name": "Neukirchen bei Lambach",
     "website": "http://www.gemeindeneukirchen.at",
-    "eventUrl": null,
+    "eventUrl": "https://neukirchen-bei-lambach.gem2go.at/Veranstaltungen",
     "cms": "ris",
     "strategy": "gem2go",
     "plz": "4671",
@@ -6182,7 +6182,7 @@
   {
     "name": "Offenhausen",
     "website": "http://www.offenhausen.at",
-    "eventUrl": null,
+    "eventUrl": "https://offenhausen.gem2go.at/Veranstaltungen",
     "cms": "gem2go",
     "strategy": "gem2go",
     "plz": "4625",
@@ -6197,7 +6197,7 @@
   {
     "name": "Pennewang",
     "website": "http://www.pennewang.at",
-    "eventUrl": null,
+    "eventUrl": "https://pennewang.gem2go.at/Veranstaltungen",
     "cms": "ris",
     "strategy": "gem2go",
     "plz": "4624",
@@ -6212,7 +6212,7 @@
   {
     "name": "Pichl bei Wels",
     "website": "http://www.pichl.co.at",
-    "eventUrl": null,
+    "eventUrl": "https://pichl-bei-wels.gem2go.at/Veranstaltungen",
     "cms": "ris",
     "strategy": "gem2go",
     "plz": "4632",
@@ -6227,7 +6227,7 @@
   {
     "name": "Sattledt",
     "website": "http://www.sattledt.at",
-    "eventUrl": null,
+    "eventUrl": "https://sattledt.gem2go.at/Veranstaltungen",
     "cms": "gem2go",
     "strategy": "gem2go",
     "plz": "4642",
@@ -6242,7 +6242,7 @@
   {
     "name": "Schleißheim",
     "website": "http://www.schleissheim.at",
-    "eventUrl": null,
+    "eventUrl": "https://schleissheim.gem2go.at/Veranstaltungen",
     "cms": "ris",
     "strategy": "gem2go",
     "plz": "4600",
@@ -6257,7 +6257,7 @@
   {
     "name": "Sipbachzell",
     "website": "http://www.sipbachzell.at",
-    "eventUrl": null,
+    "eventUrl": "https://sipbachzell.gem2go.at/Veranstaltungen",
     "cms": "ris",
     "strategy": "gem2go",
     "plz": "4621",
@@ -6272,7 +6272,7 @@
   {
     "name": "Stadl-Paura",
     "website": "http://www.stadl-paura.at",
-    "eventUrl": null,
+    "eventUrl": "https://stadl-paura.gem2go.at/Veranstaltungen",
     "cms": "ris",
     "strategy": "gem2go",
     "plz": "4651",
@@ -6287,7 +6287,7 @@
   {
     "name": "Steinerkirchen an der Traun",
     "website": "https://www.steinerkirchen.at",
-    "eventUrl": null,
+    "eventUrl": "https://steinerkirchen-an-der-traun.gem2go.at/Veranstaltungen",
     "cms": "ris",
     "strategy": "gem2go",
     "plz": "4652",
@@ -6302,7 +6302,7 @@
   {
     "name": "Steinhaus",
     "website": "https://www.gem-steinhaus.at",
-    "eventUrl": null,
+    "eventUrl": "https://steinhaus.gem2go.at/Veranstaltungen",
     "cms": "gem2go",
     "strategy": "gem2go",
     "plz": "4641",
@@ -6317,7 +6317,7 @@
   {
     "name": "Thalheim bei Wels",
     "website": "http://www.thalheim.at",
-    "eventUrl": null,
+    "eventUrl": "https://thalheim-bei-wels.gem2go.at/Veranstaltungen",
     "cms": "gem2go",
     "strategy": "gem2go",
     "plz": "4600",
@@ -6332,7 +6332,7 @@
   {
     "name": "Weißkirchen an der Traun",
     "website": "http://www.weisskirchen.at",
-    "eventUrl": null,
+    "eventUrl": "https://weisskirchen-an-der-traun.gem2go.at/Veranstaltungen",
     "cms": "ris",
     "strategy": "gem2go",
     "plz": "4616",

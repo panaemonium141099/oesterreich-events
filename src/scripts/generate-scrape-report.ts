@@ -15,6 +15,7 @@
 import { createClient } from '@supabase/supabase-js';
 import { readFileSync, writeFileSync, readdirSync, existsSync, mkdirSync } from 'fs';
 import { join } from 'path';
+import type { PaginationLogEntry } from '../lib/scrapers/GemeindeRegistryScraper';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -271,6 +272,18 @@ async function fetchAllEventCounts(): Promise<{
 
   console.log(`\n[report] Total: ${totalEvents.toLocaleString()} events, ${futureEvents.toLocaleString()} upcoming`);
   return { gemeindeSourceCounts, gemeindeBundesland, sourceTotals, bundeslandTotals, totalEvents, futureEvents };
+}
+
+// ─── Pagination Log ─────────────────────────────────────────────────────────
+
+function loadPaginationLog(): PaginationLogEntry[] {
+  const logPath = join(REPORTS_DIR, 'pagination-log.json');
+  if (!existsSync(logPath)) return [];
+  try {
+    return JSON.parse(readFileSync(logPath, 'utf8'));
+  } catch {
+    return [];
+  }
 }
 
 // ─── Report Generation ───────────────────────────────────────────────────────
@@ -559,9 +572,70 @@ function generateReport(
 
   lines.push('');
 
-  // ── Section 5: Coverage Heatmap (ASCII) ──
+  // ── Section 5: Pagination Report ──
+  const paginationLog = loadPaginationLog();
+  if (paginationLog.length > 0) {
+    lines.push('═══════════════════════════════════════════════════════════════════════════════');
+    lines.push('  TEIL 5: PAGINATION-REPORT');
+    lines.push('═══════════════════════════════════════════════════════════════════════════════');
+    lines.push('');
+
+    const paginated = paginationLog.filter(e => e.pagesScraped > 1);
+    const failedPag = paginationLog.filter(e => e.failedNextUrl);
+    const singlePage = paginationLog.filter(e => e.pagesScraped === 1 && e.paginationType === 'none');
+    const singlePageWithEvents = singlePage.filter(e => e.eventsTotal > 0);
+
+    lines.push(`  Gemeinden mit Pagination:     ${paginated.length}`);
+    lines.push(`  Pagination fehlgeschlagen:     ${failedPag.length}`);
+    lines.push(`  Nur 1 Seite (keine Pagination):  ${singlePage.length} (davon ${singlePageWithEvents.length} mit Events)`);
+    lines.push('');
+
+    // Show successfully paginated sites
+    if (paginated.length > 0) {
+      lines.push('  ✅ ERFOLGREICH PAGINIERT:');
+      const pagHeader = `  ${'Gemeinde'.padEnd(35)} | ${'Seiten'.padStart(6)} | ${'Typ'.padEnd(12)} | ${'Pg1'.padStart(4)} | ${'Ges.'.padStart(5)} | URL`;
+      lines.push(pagHeader);
+      lines.push('  ' + '─'.repeat(pagHeader.length));
+      for (const e of paginated.sort((a, b) => b.pagesScraped - a.pagesScraped)) {
+        lines.push(`  ${e.gemeinde.padEnd(35)} | ${String(e.pagesScraped).padStart(6)} | ${e.paginationType.padEnd(12)} | ${String(e.eventsPage1).padStart(4)} | ${String(e.eventsTotal).padStart(5)} | ${e.url}`);
+      }
+      lines.push('');
+    }
+
+    // Show failed pagination
+    if (failedPag.length > 0) {
+      lines.push('  ❌ PAGINATION FEHLGESCHLAGEN (Fetch der nächsten Seite gescheitert):');
+      const failHeader = `  ${'Gemeinde'.padEnd(35)} | ${'Strategie'.padEnd(16)} | Fehlgeschlagene URL`;
+      lines.push(failHeader);
+      lines.push('  ' + '─'.repeat(failHeader.length));
+      for (const e of failedPag) {
+        lines.push(`  ${e.gemeinde.padEnd(35)} | ${e.strategy.padEnd(16)} | ${e.failedNextUrl}`);
+      }
+      lines.push('');
+    }
+
+    // Show sites with events but no pagination detected (potential missed events)
+    const suspectSites = paginationLog.filter(
+      e => e.pagesScraped === 1 && e.paginationType === 'none' && e.eventsPage1 > 0 && e.eventsPage1 <= 10
+    );
+    if (suspectSites.length > 0) {
+      lines.push(`  ⚠️  VERDACHT AUF FEHLENDE PAGINATION (1 Seite, ≤10 Events — evtl. mehr auf Folgeseiten):`);
+      const suspHeader = `  ${'Gemeinde'.padEnd(35)} | ${'Events'.padStart(6)} | ${'Strategie'.padEnd(16)} | URL`;
+      lines.push(suspHeader);
+      lines.push('  ' + '─'.repeat(suspHeader.length));
+      for (const e of suspectSites.sort((a, b) => a.eventsPage1 - b.eventsPage1).slice(0, 50)) {
+        lines.push(`  ${e.gemeinde.padEnd(35)} | ${String(e.eventsPage1).padStart(6)} | ${e.strategy.padEnd(16)} | ${e.url}`);
+      }
+      if (suspectSites.length > 50) {
+        lines.push(`  ... und ${suspectSites.length - 50} weitere`);
+      }
+      lines.push('');
+    }
+  }
+
+  // ── Section 6: Coverage Heatmap (ASCII) ──
   lines.push('═══════════════════════════════════════════════════════════════════════════════');
-  lines.push('  TEIL 5: QUELLEN-DIVERSITÄT PRO BUNDESLAND');
+  lines.push(`  TEIL ${paginationLog.length > 0 ? '6' : '5'}: QUELLEN-DIVERSITÄT PRO BUNDESLAND`);
   lines.push('═══════════════════════════════════════════════════════════════════════════════');
   lines.push('');
   lines.push('  Wie viele verschiedene Quellen liefern Events pro Bundesland:');

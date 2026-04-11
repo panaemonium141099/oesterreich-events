@@ -1,10 +1,24 @@
 import * as cheerio from 'cheerio';
 import * as vm from 'vm';
-import { readFileSync, readdirSync } from 'fs';
+import { readFileSync, readdirSync, writeFileSync, existsSync, mkdirSync } from 'fs';
 import { join } from 'path';
 import { BaseScraper } from './BaseScraper';
 import { categorizeEvent } from '../categories';
+import { detectNextPage, detectMonthNavigation, MAX_PAGES_PER_SITE } from './pagination';
 import type { ScrapedEvent } from '@/types/events';
+
+export interface PaginationLogEntry {
+  gemeinde: string;
+  bundesland: string;
+  strategy: string;
+  url: string;
+  pagesScraped: number;
+  paginationType: 'next-link' | 'numbered' | 'wp-page' | 'month-nav' | 'none';
+  /** If pagination was detected but a subsequent fetch failed */
+  failedNextUrl?: string;
+  eventsPage1: number;
+  eventsTotal: number;
+}
 
 /**
  * GemeindeRegistryScraper: Scrapt Veranstaltungen von österreichischen Gemeinden
@@ -71,18 +85,25 @@ export class GemeindeRegistryScraper extends BaseScraper {
     this.log(`Starte Registry-Scraping: ${scrapeable.length} scrapbare Gemeinden von ${registry.length} total${bundeslandFilter ? ` (Filter: ${bundeslandFilter})` : ''}`);
 
     const allEvents: ScrapedEvent[] = [];
+    const paginationLog: PaginationLogEntry[] = [];
     let scraped = 0;
     let failed = 0;
+    let fetchErrors = 0;
     let noEvents = 0;
 
     for (let i = 0; i < scrapeable.length; i++) {
       const entry = scrapeable[i];
       try {
-        const events = await this.scrapeGemeinde(entry);
-        if (events.length > 0) {
-          allEvents.push(...events);
+        const result = await this.scrapeGemeinde(entry, paginationLog);
+        if (result === 'fetch-error') {
+          fetchErrors++;
+          if ((i + 1) % 50 === 0 || fetchErrors <= 10) {
+            this.log(`  [${i + 1}/${scrapeable.length}] ${entry.name}: FETCH FEHLER [${entry.strategy}] ${entry.eventUrl}`);
+          }
+        } else if (result.length > 0) {
+          allEvents.push(...result);
           scraped++;
-          this.log(`  [${i + 1}/${scrapeable.length}] ${entry.name}: ${events.length} Events [${entry.strategy}]`);
+          this.log(`  [${i + 1}/${scrapeable.length}] ${entry.name}: ${result.length} Events [${entry.strategy}]`);
         } else {
           noEvents++;
         }
@@ -93,16 +114,98 @@ export class GemeindeRegistryScraper extends BaseScraper {
       await this.sleep(this.gemeindeDelayMs);
     }
 
-    this.log(`Registry-Scraping fertig: ${allEvents.length} Events von ${scraped} Gemeinden (${noEvents} ohne Events, ${failed} fehlgeschlagen)`);
+    this.log(`Registry-Scraping fertig: ${allEvents.length} Events von ${scraped} Gemeinden (${noEvents} ohne Events, ${fetchErrors} Fetch-Fehler, ${failed} Exceptions)`);
+
+    // Write pagination log for the report generator
+    try {
+      const reportsDir = join(process.cwd(), 'reports');
+      if (!existsSync(reportsDir)) mkdirSync(reportsDir, { recursive: true });
+      writeFileSync(
+        join(reportsDir, 'pagination-log.json'),
+        JSON.stringify(paginationLog, null, 2),
+      );
+      const paginatedCount = paginationLog.filter(e => e.pagesScraped > 1).length;
+      const failedPagCount = paginationLog.filter(e => e.failedNextUrl).length;
+      this.log(`Pagination-Log: ${paginatedCount} paginiert, ${failedPagCount} fehlgeschlagen → reports/pagination-log.json`);
+    } catch { /* non-critical */ }
+
     return allEvents;
   }
 
-  private async scrapeGemeinde(entry: GemeindeRegistryEntry): Promise<ScrapedEvent[]> {
+  private async scrapeGemeinde(entry: GemeindeRegistryEntry, paginationLog: PaginationLogEntry[]): Promise<ScrapedEvent[] | 'fetch-error'> {
     if (!entry.eventUrl) return [];
 
-    const html = await this.fetchWithTimeout(entry.eventUrl);
-    if (!html) return [];
+    const { html, error } = await this.fetchWithTimeout(entry.eventUrl);
+    if (!html) return error ? 'fetch-error' : [];
 
+    // Parse the first page
+    const events = this.parsePage(html, entry);
+    const eventsPage1 = events.length;
+    let pagesScraped = 1;
+    let paginationType: PaginationLogEntry['paginationType'] = 'none';
+    let failedNextUrl: string | undefined;
+
+    // Pagination: follow next pages (skip for cities-iife which handles its own data)
+    if (entry.strategy !== 'cities-iife') {
+      let currentUrl = entry.eventUrl;
+      let currentHtml = html;
+      for (let page = 1; page < MAX_PAGES_PER_SITE; page++) {
+        const detection = detectNextPage(currentHtml, currentUrl);
+        if (!detection.nextUrl) break;
+
+        if (paginationType === 'none') paginationType = detection.type;
+
+        await this.sleep(800);
+        const nextResult = await this.fetchWithTimeout(detection.nextUrl);
+        if (!nextResult.html) {
+          failedNextUrl = detection.nextUrl;
+          break;
+        }
+
+        const pageEvents = this.parsePage(nextResult.html, entry);
+        if (pageEvents.length === 0) break; // empty page = stop
+
+        pagesScraped++;
+        events.push(...pageEvents);
+        currentUrl = detection.nextUrl;
+        currentHtml = nextResult.html;
+      }
+
+      // Month navigation: if initial page had few events, try upcoming months
+      if (events.length < 5) {
+        const monthUrls = detectMonthNavigation(html, entry.eventUrl);
+        if (monthUrls.length > 0 && paginationType === 'none') paginationType = 'month-nav';
+        for (const { url } of monthUrls.slice(0, 3)) {
+          await this.sleep(800);
+          const monthResult = await this.fetchWithTimeout(url);
+          if (!monthResult.html) {
+            if (!failedNextUrl) failedNextUrl = url;
+            continue;
+          }
+          const monthEvents = this.parsePage(monthResult.html, entry);
+          if (monthEvents.length > 0) pagesScraped++;
+          events.push(...monthEvents);
+        }
+      }
+    }
+
+    // Log pagination info
+    paginationLog.push({
+      gemeinde: entry.name,
+      bundesland: entry.bundesland,
+      strategy: entry.strategy,
+      url: entry.eventUrl,
+      pagesScraped,
+      paginationType,
+      failedNextUrl,
+      eventsPage1,
+      eventsTotal: events.length,
+    });
+
+    return events;
+  }
+
+  private parsePage(html: string, entry: GemeindeRegistryEntry): ScrapedEvent[] {
     switch (entry.strategy) {
       case 'cities-iife':
         return this.parseCities(html, entry);
@@ -1008,7 +1111,7 @@ export class GemeindeRegistryScraper extends BaseScraper {
       .trim();
   }
 
-  private async fetchWithTimeout(url: string): Promise<string | null> {
+  private async fetchWithTimeout(url: string): Promise<{ html: string | null; error?: string }> {
     try {
       const response = await fetch(url, {
         redirect: 'follow',
@@ -1019,10 +1122,14 @@ export class GemeindeRegistryScraper extends BaseScraper {
           'Accept-Language': 'de-AT,de;q=0.9,en;q=0.5',
         },
       });
-      if (response.status !== 200) return null;
-      return await response.text();
-    } catch {
-      return null;
+      if (response.status !== 200) {
+        return { html: null, error: `HTTP ${response.status}` };
+      }
+      return { html: await response.text() };
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      const error = msg.includes('abort') || msg.includes('timeout') ? 'timeout' : msg.substring(0, 80);
+      return { html: null, error };
     }
   }
 }
