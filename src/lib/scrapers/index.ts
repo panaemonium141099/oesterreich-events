@@ -322,7 +322,9 @@ export async function runAllScrapers(): Promise<void> {
 }
 
 export async function runScraper(scraper: BaseScraper): Promise<void> {
-  const run = recordScrapeRun(scraper.name);
+  // In CI (GitHub Actions), skip SQLite — write directly to Supabase only
+  const isCI = !!process.env.CI;
+  const run = isCI ? null : recordScrapeRun(scraper.name);
   let eventsFound = 0;
   let eventsNew = 0;
   let eventsUpdated = 0;
@@ -350,35 +352,42 @@ export async function runScraper(scraper: BaseScraper): Promise<void> {
       startedAt,
     });
 
-    for (let i = 0; i < events.length; i++) {
-      const { isNew } = upsertEvent(events[i]);
-      if (isNew) eventsNew++;
-      else eventsUpdated++;
+    // Write to local SQLite (dev/local only — skipped in CI)
+    if (!isCI) {
+      for (let i = 0; i < events.length; i++) {
+        const { isNew } = upsertEvent(events[i]);
+        if (isNew) eventsNew++;
+        else eventsUpdated++;
 
-      if (i % 50 === 0 || i === events.length - 1) {
-        writeProgress(scraper.name, {
-          status: 'running',
-          current: i + 1,
-          total: eventsFound,
-          eventsFound: eventsNew + eventsUpdated,
-          message: `Speichere ${i + 1}/${eventsFound}...`,
-          startedAt,
-        });
+        if (i % 50 === 0 || i === events.length - 1) {
+          writeProgress(scraper.name, {
+            status: 'running',
+            current: i + 1,
+            total: eventsFound,
+            eventsFound: eventsNew + eventsUpdated,
+            message: `Speichere ${i + 1}/${eventsFound}...`,
+            startedAt,
+          });
+        }
       }
     }
 
-    // Sync all scraped events to Supabase (dual-write)
+    // Sync all scraped events to Supabase
     if (events.length > 0) {
       const { upserted, errors: syncErrors, filtered } = await syncEventsToSupabase(events);
+      if (isCI) {
+        eventsNew = upserted;
+        eventsUpdated = eventsFound - upserted - filtered;
+      }
       console.log(`[${scraper.name}] Supabase sync: ${upserted} upserted, ${syncErrors} errors${filtered > 0 ? `, ${filtered} filtered (past/invalid)` : ''}`);
     }
 
-    run.finish({ eventsFound, eventsNew, eventsUpdated });
+    run?.finish({ eventsFound, eventsNew, eventsUpdated });
     console.log(`[${scraper.name}] Fertig: ${eventsFound} gefunden, ${eventsNew} neu, ${eventsUpdated} aktualisiert`);
     clearProgress(scraper.name);
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
-    run.fail(message);
+    run?.fail(message);
     console.error(`[${scraper.name}] FEHLER: ${message}`);
     writeProgress(scraper.name, {
       status: 'error',

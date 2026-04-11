@@ -2,6 +2,7 @@ import * as cheerio from 'cheerio';
 import { BaseScraper } from './BaseScraper';
 import { categorizeEvent } from '../categories';
 import type { ScrapedEvent } from '@/types/events';
+import { detectNextPage, MAX_PAGES_PER_SITE } from './pagination';
 
 /**
  * WordPress Event Scraper for Burgenland municipalities.
@@ -60,26 +61,36 @@ export class BurgenlandWPEventsScraper extends BaseScraper {
         const html = await this.fetchWithTimeout(m.eventUrl);
         if (!html) continue;
 
-        const $ = cheerio.load(html);
-        let events: ScrapedEvent[] = [];
+        let allPageEvents = this.parseSinglePage(html, m);
 
-        // Strategy 1: JSON-LD Event schema (best quality)
-        events = this.parseJsonLd($, m);
+        // Pagination: follow next-page links
+        if (allPageEvents.length > 0) {
+          let currentHtml = html;
+          let currentUrl = m.eventUrl;
+          const visitedUrls = new Set<string>([currentUrl]);
 
-        // Strategy 2: MEC HTML parsing
-        if (events.length === 0) {
-          events = this.parseMEC($, m);
+          for (let p = 1; p < MAX_PAGES_PER_SITE; p++) {
+            const { nextUrl } = detectNextPage(currentHtml, currentUrl);
+            if (!nextUrl || visitedUrls.has(nextUrl)) break;
+            visitedUrls.add(nextUrl);
+
+            const nextHtml = await this.fetchWithTimeout(nextUrl);
+            if (!nextHtml) break;
+
+            const nextEvents = this.parseSinglePage(nextHtml, m);
+            if (nextEvents.length === 0) break;
+
+            allPageEvents.push(...nextEvents);
+            currentHtml = nextHtml;
+            currentUrl = nextUrl;
+            await this.rateLimit();
+          }
         }
 
-        // Strategy 3: Generic date+title extraction
-        if (events.length === 0) {
-          events = this.parseGeneric($, m);
-        }
-
-        if (events.length > 0) {
-          allEvents.push(...events);
+        if (allPageEvents.length > 0) {
+          allEvents.push(...allPageEvents);
           scraped++;
-          this.log(`  [${i + 1}/${this.MUNICIPALITIES.length}] ${m.name}: ${events.length} Events`);
+          this.log(`  [${i + 1}/${this.MUNICIPALITIES.length}] ${m.name}: ${allPageEvents.length} Events`);
         }
       } catch (err) {
         this.log(`  [${i + 1}/${this.MUNICIPALITIES.length}] ${m.name}: FEHLER - ${err instanceof Error ? err.message : err}`);
@@ -89,6 +100,15 @@ export class BurgenlandWPEventsScraper extends BaseScraper {
 
     this.log(`WP-Events fertig: ${allEvents.length} Events von ${scraped} Gemeinden`);
     return allEvents;
+  }
+
+  /** Parse a single page with all 3 strategies */
+  private parseSinglePage(html: string, m: WPMunicipality): ScrapedEvent[] {
+    const $ = cheerio.load(html);
+    let events = this.parseJsonLd($, m);
+    if (events.length === 0) events = this.parseMEC($, m);
+    if (events.length === 0) events = this.parseGeneric($, m);
+    return events;
   }
 
   // ── Strategy 1: JSON-LD ─────────────────────────────────────────

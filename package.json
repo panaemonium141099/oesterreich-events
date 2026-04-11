@@ -57,7 +57,8 @@
     "scrape:venues": "tsx --env-file=.env.local src/scripts/scrape-venues.ts",
     "match-artists": "tsx --env-file=.env.local src/scripts/match-artists.ts",
     "source-trust": "tsx --env-file=.env.local src/scripts/compute-source-trust.ts",
-    "scrape:pipeline": "tsx --env-file=.env.local src/scripts/scrape-pipeline.ts"
+    "scrape:pipeline": "tsx --env-file=.env.local src/scripts/scrape-pipeline.ts",
+    "scrape:report": "tsx --env-file=.env.local src/scripts/generate-scrape-report.ts"
   },
   "keywords": [],
   "author": "",

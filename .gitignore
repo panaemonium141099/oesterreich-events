@@ -57,3 +57,6 @@ data/archive/*.json.gz
 data/archive/stats-*.json
 data/AT.txt
 data/AT.zip
+
+# Scrape reports
+reports/

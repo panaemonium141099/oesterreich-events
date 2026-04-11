@@ -27,7 +27,7 @@ export class Gem2GoScraper extends BaseScraper {
   private readonly gemeindeDelayMs = 1500;
 
   /** Maximale Seiten pro Gemeinde */
-  private readonly maxPages = 5;
+  private readonly maxPages = 6;
 
   /** Deutsche Monatsnamen -> Monatsnummer */
   private readonly MONTHS: Record<string, string> = {

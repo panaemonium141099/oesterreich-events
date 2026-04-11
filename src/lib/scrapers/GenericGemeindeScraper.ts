@@ -17,6 +17,7 @@ import type { ScrapedEvent } from '@/types/events';
 import * as cheerio from 'cheerio';
 import { readFileSync, existsSync } from 'fs';
 import { join } from 'path';
+import { detectNextPage, detectMonthNavigation, MAX_PAGES_PER_SITE } from './pagination';
 
 interface GemeindeEventPage {
   gemeinde: {
@@ -97,17 +98,55 @@ export class GenericGemeindeScraper extends BaseScraper {
     const html = await this.fetchPageSafe(page.eventPageUrl);
     if (!html) return [];
 
-    const $ = cheerio.load(html);
     const g = page.gemeinde;
     const bundesland = this.normalizeBundesland(g.bundesland);
 
-    // Try different parsing strategies in order
-    let events = this.parseWordPressEvents($, page);
-    if (events.length === 0) events = this.parseTypo3Events($, page);
-    if (events.length === 0) events = this.parseGenericEvents($, page);
+    // Parse first page
+    let allEvents = this.parsePage(html, page);
+
+    // ── Pagination: follow next pages ──
+    if (allEvents.length > 0) {
+      let currentHtml = html;
+      let currentUrl = page.eventPageUrl;
+      const visitedUrls = new Set<string>([currentUrl]);
+
+      for (let p = 1; p < MAX_PAGES_PER_SITE; p++) {
+        const { nextUrl } = detectNextPage(currentHtml, currentUrl);
+        if (!nextUrl || visitedUrls.has(nextUrl)) break;
+        visitedUrls.add(nextUrl);
+
+        const nextHtml = await this.fetchPageSafe(nextUrl);
+        if (!nextHtml) break;
+
+        const nextEvents = this.parsePage(nextHtml, { ...page, eventPageUrl: nextUrl });
+        if (nextEvents.length === 0) break;
+
+        allEvents.push(...nextEvents);
+        currentHtml = nextHtml;
+        currentUrl = nextUrl;
+        await new Promise(r => setTimeout(r, 500)); // rate limit between pages
+      }
+
+      // ── Month navigation: try upcoming months ──
+      if (allEvents.length > 0 && allEvents.length < 5) {
+        // Few events found — might be a month-view calendar, try next months
+        const monthUrls = detectMonthNavigation(html, page.eventPageUrl);
+        for (const mu of monthUrls) {
+          if (visitedUrls.has(mu.url)) continue;
+          visitedUrls.add(mu.url);
+
+          const mHtml = await this.fetchPageSafe(mu.url);
+          if (!mHtml) continue;
+
+          const mEvents = this.parsePage(mHtml, { ...page, eventPageUrl: mu.url });
+          allEvents.push(...mEvents);
+          await new Promise(r => setTimeout(r, 500));
+        }
+      }
+    }
 
     // Enrich with gemeinde metadata
-    return events.map(e => ({
+    return allEvents.map(e => ({
       ...e,
       bundesland,
       latitude: e.latitude || g.lat,
@@ -115,6 +154,15 @@ export class GenericGemeindeScraper extends BaseScraper {
       postal_code: e.postal_code || g.plz,
       district: e.district || g.bezirk,
     }));
+  }
+
+  /** Parse a single page with all strategies */
+  private parsePage(html: string, page: GemeindeEventPage): ScrapedEvent[] {
+    const $ = cheerio.load(html);
+    let events = this.parseWordPressEvents($, page);
+    if (events.length === 0) events = this.parseTypo3Events($, page);
+    if (events.length === 0) events = this.parseGenericEvents($, page);
+    return events;
   }
 
   // ─── WordPress Event Plugins ────────────────────────────────────────

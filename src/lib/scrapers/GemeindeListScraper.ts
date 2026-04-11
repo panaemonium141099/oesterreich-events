@@ -3,6 +3,7 @@ import { BaseScraper } from './BaseScraper';
 import { categorizeEvent } from '../categories';
 import { GEMEINDEN, type GemeindeInfo } from './gemeinden/gemeindeList';
 import type { ScrapedEvent } from '@/types/events';
+import { detectNextPage, detectMonthNavigation, MAX_PAGES_PER_SITE } from './pagination';
 
 /**
  * Meta-Scraper der systematisch österreichische Gemeinde-Websites
@@ -156,8 +157,8 @@ export class GemeindeListScraper extends BaseScraper {
   // ─── KALENDER SCRAPEN ────────────────────────────────────────────────────
 
   /**
-   * Scrapt eine Kalender-Seite mit mehreren Strategien.
-   * Gibt alle gefundenen Events mit Gemeinde-Koordinaten zurück.
+   * Scrapt eine Kalender-Seite mit mehreren Strategien + Pagination.
+   * Folgt "Nächste Seite"-Links und Monats-Navigation.
    */
   private async scrapeCalendar(url: string, gemeinde: GemeindeInfo): Promise<ScrapedEvent[]> {
     let html: string;
@@ -167,32 +168,55 @@ export class GemeindeListScraper extends BaseScraper {
       return [];
     }
 
-    const $ = cheerio.load(html);
-    let events: ScrapedEvent[] = [];
+    // Parse first page
+    let allEvents = this.parseCalendarPage(html, url, gemeinde);
+    const visitedUrls = new Set<string>([url]);
 
-    // Strategie 1: JSON-LD (strukturierte Daten — beste Qualität)
-    const jsonLdEvents = this.extractJsonLdEvents($, url, gemeinde);
-    if (jsonLdEvents.length > 0) {
-      events = jsonLdEvents;
+    // Follow pagination links (next page)
+    if (allEvents.length > 0) {
+      let currentHtml = html;
+      let currentUrl = url;
+
+      for (let p = 1; p < MAX_PAGES_PER_SITE; p++) {
+        const { nextUrl } = detectNextPage(currentHtml, currentUrl);
+        if (!nextUrl || visitedUrls.has(nextUrl)) break;
+        visitedUrls.add(nextUrl);
+
+        try {
+          const nextHtml = await this.fetchPage(nextUrl);
+          const nextEvents = this.parseCalendarPage(nextHtml, nextUrl, gemeinde);
+          if (nextEvents.length === 0) break;
+
+          allEvents.push(...nextEvents);
+          currentHtml = nextHtml;
+          currentUrl = nextUrl;
+          await this.sleep(500);
+        } catch {
+          break;
+        }
+      }
     }
 
-    // Strategie 2: Strukturierte Event-Container
-    if (events.length === 0) {
-      events = this.extractStructuredEvents($, url, gemeinde);
-    }
+    // Try month navigation for calendars with few events (month-view)
+    if (allEvents.length > 0 && allEvents.length < 5) {
+      const monthUrls = detectMonthNavigation(html, url);
+      for (const mu of monthUrls) {
+        if (visitedUrls.has(mu.url)) continue;
+        visitedUrls.add(mu.url);
 
-    // Strategie 3: Tabellen/Listen mit Datum
-    if (events.length === 0) {
-      events = this.extractTableListEvents($, url, gemeinde);
-    }
-
-    // Strategie 4: Links mit Datum im umgebenden Text
-    if (events.length === 0) {
-      events = this.extractLinkEvents($, url, gemeinde);
+        try {
+          const mHtml = await this.fetchPage(mu.url);
+          const mEvents = this.parseCalendarPage(mHtml, mu.url, gemeinde);
+          allEvents.push(...mEvents);
+          await this.sleep(500);
+        } catch {
+          continue;
+        }
+      }
     }
 
     // Koordinaten und Metadaten für alle Events setzen
-    return events.map(e => ({
+    return allEvents.map(e => ({
       ...e,
       latitude: e.latitude ?? gemeinde.lat,
       longitude: e.longitude ?? gemeinde.lng,
@@ -201,6 +225,20 @@ export class GemeindeListScraper extends BaseScraper {
       district: e.district ?? gemeinde.bezirk,
       location_name: e.location_name ?? gemeinde.name,
     }));
+  }
+
+  /** Parse a single calendar page with all 4 strategies */
+  private parseCalendarPage(html: string, url: string, gemeinde: GemeindeInfo): ScrapedEvent[] {
+    const $ = cheerio.load(html);
+    let events: ScrapedEvent[] = [];
+
+    const jsonLdEvents = this.extractJsonLdEvents($, url, gemeinde);
+    if (jsonLdEvents.length > 0) events = jsonLdEvents;
+    if (events.length === 0) events = this.extractStructuredEvents($, url, gemeinde);
+    if (events.length === 0) events = this.extractTableListEvents($, url, gemeinde);
+    if (events.length === 0) events = this.extractLinkEvents($, url, gemeinde);
+
+    return events;
   }
 
   // ─── STRATEGIE 1: JSON-LD ───────────────────────────────────────────────

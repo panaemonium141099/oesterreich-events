@@ -73,7 +73,7 @@ async function main() {
   const steps: Record<string, StepResult> = {};
   let runId: string | null = null;
 
-  const results: PipelineResults = {
+  const results: PipelineResults & { _exitCode?: number } = {
     trigger: opts.trigger,
     run_id: null,
     started_at: new Date().toISOString(),
@@ -140,14 +140,21 @@ async function main() {
       await triggerMatchArtists();
     }, steps);
 
+    // Report generation (always runs, no dependencies)
+    steps.report = await runStep('report', async () => {
+      execStep('Generate scrape report', 'npx tsx --env-file=.env.local src/scripts/generate-scrape-report.ts');
+    }, steps);
+
   } finally {
     results.steps = steps;
     results.finished_at = new Date().toISOString();
     results.total_errors = Object.values(steps).filter((s) => s.status === 'failed').length;
 
     if (!opts.dryRun && runId) {
+      console.log(`[pipeline] Finalizing run ${runId}...`);
       try {
         await finalizePipelineRun(runId, results);
+        console.log(`[pipeline] Run ${runId} finalized successfully`);
       } catch (err) {
         console.error(`[pipeline] Failed to finalize: ${err}`);
       }
@@ -171,10 +178,19 @@ async function main() {
     if (opts.dryRun) console.log('  (DRY RUN — nothing written to Supabase)');
     console.log(`${'='.repeat(60)}\n`);
 
-    if (status === 'failed') {
-      process.exit(1);
-    }
+    // Store exit code but don't call process.exit() inside finally —
+    // let main() resolve first so all async work completes.
+    results._exitCode = status === 'failed' ? 1 : 0;
   }
+
+  return results;
 }
 
-main();
+main()
+  .then((results) => {
+    if (results._exitCode) process.exit(results._exitCode);
+  })
+  .catch((err) => {
+    console.error(`[pipeline] Unhandled error: ${err}`);
+    process.exit(1);
+  });
