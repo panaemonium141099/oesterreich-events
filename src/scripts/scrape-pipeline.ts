@@ -8,7 +8,7 @@
  *   npx tsx src/scripts/scrape-pipeline.ts --trigger github_dispatch --skip-geocoding
  *   npx tsx src/scripts/scrape-pipeline.ts --dry-run --trigger manual
  */
-import { readFileSync } from 'fs';
+import { readFileSync, existsSync } from 'fs';
 import { join } from 'path';
 
 // Load .env.local (Next.js does this automatically, but tsx does not)
@@ -28,6 +28,10 @@ try {
 
 import { execSync } from 'child_process';
 import { triggerMatchArtists } from '../lib/post-scrape-hook';
+
+// In CI there's no .env.local — env vars come from GitHub Secrets.
+// Only pass --env-file flag when the file actually exists.
+const envFlag = existsSync(join(process.cwd(), '.env.local')) ? '--env-file=.env.local ' : '';
 import { runStep } from '../lib/pipeline/step-runner';
 import {
   createPipelineRun,
@@ -115,24 +119,24 @@ async function main() {
 
     if (!opts.skipVenues) {
       steps.venues = await runStep('venues', async () => {
-        execStep('Venue feed ingestion', 'npx tsx --env-file=.env.local src/scripts/scrape-venues.ts');
+        execStep('Venue feed ingestion', `npx tsx ${envFlag}src/scripts/scrape-venues.ts`);
       }, steps);
     }
 
     steps.normalize = await runStep('normalize', async () => {
-      execStep('Normalize locations', 'npx tsx --env-file=.env.local src/scripts/normalize-locations.ts');
+      execStep('Normalize locations', `npx tsx ${envFlag}src/scripts/normalize-locations.ts`);
     }, steps);
 
     if (!opts.skipGeocoding) {
       steps.geocoding = await runStep('geocoding', async () => {
-        execStep('Fix geocoding', 'npx tsx --env-file=.env.local src/scripts/fix-geocoding.ts');
-        execStep('Gemini geocode NULLs', 'npx tsx --env-file=.env.local src/scripts/gemini-geocode.ts --null');
+        execStep('Fix geocoding', `npx tsx ${envFlag}src/scripts/fix-geocoding.ts`);
+        execStep('Gemini geocode NULLs', `npx tsx ${envFlag}src/scripts/gemini-geocode.ts --null`);
       }, steps);
     }
 
     if (!opts.skipScore) {
       steps.scoring = await runStep('scoring', async () => {
-        execStep('Calculate scores', 'npx tsx --env-file=.env.local src/scripts/calculate-scores.ts');
+        execStep('Calculate scores', `npx tsx ${envFlag}src/scripts/calculate-scores.ts`);
       }, steps);
     }
 
@@ -142,7 +146,7 @@ async function main() {
 
     // Report generation (always runs, no dependencies)
     steps.report = await runStep('report', async () => {
-      execStep('Generate scrape report', 'npx tsx --env-file=.env.local src/scripts/generate-scrape-report.ts');
+      execStep('Generate scrape report', `npx tsx ${envFlag}src/scripts/generate-scrape-report.ts`);
     }, steps);
 
   } finally {
