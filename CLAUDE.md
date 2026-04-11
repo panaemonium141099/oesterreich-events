@@ -53,7 +53,7 @@ node / next.js
 - `src/lib/location-normalizer.ts` — GeoNames-based location normalizer (compound names, disambiguation, word boundaries)
 - `src/lib/geocoding.ts` — Nominatim geocoding + KNOWN_LOCATIONS (batch scripts only)
 - `src/scripts/fix-geocoding.ts` — Re-geocode wrongly-placed events with backup/rollback (dry-run support)
-- `src/scripts/gemini-geocode.ts` — Gemini Flash AI batch geocoding for NULL-coord events (cache, bbox + bundesland validation)
+- `src/scripts/openai-geocode.ts` — OpenAI batch geocoding for NULL-coord events (cache, bbox + bundesland validation)
 - `src/scripts/force-geocode-all.ts` — Force-geocode all events (no Bundesland-capital fallback)
 - `src/scripts/normalize-locations.ts` — Batch normalize event locations in Supabase
 - `src/scripts/scrape.ts` — CLI Scrape-Script
@@ -113,8 +113,8 @@ npm run test:watch       # Vitest watch mode
 npx tsx src/scripts/normalize-locations.ts  # Batch normalize event locations in Supabase
 npx tsx src/scripts/fix-geocoding.ts --dry-run  # Re-geocode wrongly-placed events (dry-run)
 npx tsx src/scripts/test-normalizer.ts  # Run normalizer test cases
-npm run gemini-geocode        # Gemini AI batch geocoding for NULL-coord events (requires GEMINI_API_KEY)
-npm run gemini-geocode -- --dry-run  # Dry-run mode (no writes)
+npm run openai-geocode        # OpenAI batch geocoding for NULL-coord events (requires OPENAI_API_KEY)
+npm run openai-geocode -- --dry-run  # Dry-run mode (no writes)
 npm run import-student-orgs   # Import OeH/ESN/IAESTE/AIESEC/AEGEE sections as venues (~72 orgs)
 npm run import-student-orgs -- --dry-run  # Dry-run mode (no writes)
 npx tsx src/scripts/match-artists.ts --dry-run  # Artist-event matching pipeline (dry-run)

@@ -130,7 +130,7 @@ async function main() {
     if (!opts.skipGeocoding) {
       steps.geocoding = await runStep('geocoding', async () => {
         execStep('Fix geocoding', `npx tsx ${envFlag}src/scripts/fix-geocoding.ts`);
-        execStep('Gemini geocode NULLs', `npx tsx ${envFlag}src/scripts/gemini-geocode.ts --null`);
+        execStep('OpenAI geocode NULLs', `npx tsx ${envFlag}src/scripts/openai-geocode.ts --null`);
       }, steps);
     }
 

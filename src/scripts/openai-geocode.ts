@@ -1,14 +1,14 @@
 /**
- * Gemini Flash Geocoding — Batch geocode events using Gemini 2.5 Flash AI.
+ * OpenAI Geocoding — Batch geocode events using OpenAI API.
  *
  * Three modes:
  * 1. --null (default): Resolve events with NULL coordinates
- * 2. --verify: Re-verify ALL events — send every unique location to Gemini,
- *    compare with existing coords. If Gemini disagrees by >500m, flag or correct.
+ * 2. --verify: Re-verify ALL events — send every unique location to OpenAI,
+ *    compare with existing coords. If OpenAI disagrees by >500m, flag or correct.
  * 3. --all: Combines both — resolve NULLs AND verify existing coords
  *
  * Features:
- * - Structured JSON output from Gemini with confidence levels
+ * - Structured JSON output from OpenAI with confidence levels
  * - Austria bbox validation on all results
  * - Deduplicates by location_name + bundesland (many events share same venue)
  * - Caches results in SQLite geocode_cache (prefixed key: gemini::...)
@@ -16,18 +16,18 @@
  * - Durable backup before --verify/--all mode
  * - Dry-run mode for all modes
  * - Rate-limited at 200ms between API calls
- * - Only accepts high/medium confidence from Gemini
+ * - Only accepts high/medium confidence from OpenAI
  *
  * Usage:
- *   npx tsx src/scripts/gemini-geocode.ts --dry-run
- *   npx tsx src/scripts/gemini-geocode.ts
- *   npx tsx src/scripts/gemini-geocode.ts --verify --dry-run
- *   npx tsx src/scripts/gemini-geocode.ts --verify
- *   npx tsx src/scripts/gemini-geocode.ts --all --dry-run
- *   npx tsx src/scripts/gemini-geocode.ts --all
- *   npx tsx src/scripts/gemini-geocode.ts --retry-low --dry-run
- *   npx tsx src/scripts/gemini-geocode.ts --retry-low
- *   npx tsx src/scripts/gemini-geocode.ts --resume
+ *   npx tsx src/scripts/openai-geocode.ts --dry-run
+ *   npx tsx src/scripts/openai-geocode.ts
+ *   npx tsx src/scripts/openai-geocode.ts --verify --dry-run
+ *   npx tsx src/scripts/openai-geocode.ts --verify
+ *   npx tsx src/scripts/openai-geocode.ts --all --dry-run
+ *   npx tsx src/scripts/openai-geocode.ts --all
+ *   npx tsx src/scripts/openai-geocode.ts --retry-low --dry-run
+ *   npx tsx src/scripts/openai-geocode.ts --retry-low
+ *   npx tsx src/scripts/openai-geocode.ts --resume
  */
 
 import { readFileSync } from 'fs';
@@ -95,10 +95,10 @@ const RATE_LIMIT_MS = 200;
 const VERIFY_DISTANCE_THRESHOLD_M = 500; // 500m threshold for --verify overwrites
 const AUSTRIA_BBOX = { minLat: 46.3, maxLat: 49.1, minLng: 9.5, maxLng: 17.2 };
 
-/** Confidences that must NOT be overwritten by Gemini */
+/** Confidences that must NOT be overwritten by AI geocoding */
 const PROTECTED_CONFIDENCES = new Set(['manual', 'scraper']);
 
-/** Confidence rank — lower = higher priority. Gemini can only overwrite lower-ranked. */
+/** Confidence rank — lower = higher priority. AI geocoding can only overwrite lower-ranked. */
 const CONFIDENCE_RANK: Record<string, number> = {
   manual: 0,
   scraper: 1,
@@ -472,7 +472,7 @@ function deduplicateLocations(events: EventRow[]): UniqueLocation[] {
 }
 
 async function main() {
-  console.log(`\nGemini Flash Geocoding [${modeLabel}] — ${isDryRun ? 'DRY RUN' : 'LIVE MODE'}${isResume ? ' (RESUME)' : ''}`);
+  console.log(`\nOpenAI Geocoding [${modeLabel}] — ${isDryRun ? 'DRY RUN' : 'LIVE MODE'}${isResume ? ' (RESUME)' : ''}`);
   if (isRetryLowMode) {
     console.log('  Using gpt-4o (stronger model) for previously-skipped locations');
   }
@@ -639,7 +639,7 @@ async function main() {
           continue;
         }
 
-        // Gemini returned 0,0 = unable to resolve
+        // OpenAI returned 0,0 = unable to resolve
         if (result.latitude === 0 && result.longitude === 0) {
           for (const event of loc.events) {
             auditLog.push({
@@ -680,7 +680,7 @@ async function main() {
           setCachedResult(loc.cacheKey, lat, lng);
         }
       } else {
-        // Gemini returned null (API error)
+        // OpenAI returned null (API error)
         eventsSkipped += loc.events.length;
 
         allProcessedKeys.push(loc.key);
@@ -692,7 +692,7 @@ async function main() {
         continue;
       }
 
-      // Rate limit between Gemini calls
+      // Rate limit between OpenAI calls
       await sleep(RATE_LIMIT_MS);
     }
 
@@ -840,10 +840,10 @@ async function main() {
   console.log(`  Mode:                ${modeLabel}`);
   console.log(`  Total events:        ${processableEvents.length}`);
   console.log(`  Unique locations:    ${uniqueLocations.length}`);
-  console.log(`  Gemini API calls:    ${geminiCalls}`);
+  console.log(`  OpenAI API calls:    ${geminiCalls}`);
   console.log(`  Cache hits:          ${cacheHits}`);
   console.log(`  Events written:      ${eventsWritten} (NULL -> coords)`);
-  console.log(`  Events overwritten:  ${eventsOverwritten} (old coords -> Gemini coords)`);
+  console.log(`  Events overwritten:  ${eventsOverwritten} (old coords -> OpenAI coords)`);
   console.log(`  Events skipped:      ${eventsSkipped}`);
 
   // Audit log details
@@ -919,6 +919,6 @@ async function main() {
 }
 
 main().catch(err => {
-  console.error('Gemini geocoding failed:', err);
+  console.error('OpenAI geocoding failed:', err);
   process.exit(1);
 });
