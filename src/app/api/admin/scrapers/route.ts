@@ -299,7 +299,8 @@ export async function POST(request: NextRequest) {
     }
 
     if (action === 'validate') {
-      const child = spawn('node', ['src/scripts/validate-events.js'], {
+      const scriptPath = ['src', 'scripts', 'validate-events.js'].join('/');
+      const child = spawn('node', [scriptPath], {
         cwd: process.cwd(),
         stdio: 'pipe',
       });

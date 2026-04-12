@@ -287,7 +287,10 @@ function EventMap({ events, selectedEvent, hoveredEventId, onSelectEvent, evenin
       (m.getSource('events') as mapboxgl.GeoJSONSource).setData(geojson);
       // Don't return — let the marker update logic below run
     } else {
-      // First time: create source + layers
+      // First time: create source + layers — remove layers before source
+      for (const layerId of ['unclustered-point', 'cluster-count', 'clusters']) {
+        if (m.getLayer(layerId)) m.removeLayer(layerId);
+      }
       if (m.getSource('events')) m.removeSource('events');
 
       markersOnScreen.current.forEach(marker => marker.remove());
