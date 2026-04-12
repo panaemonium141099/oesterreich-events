@@ -91,7 +91,9 @@ export async function generateMetadata({
     ? event.description.slice(0, 160)
     : `${event.title} — ${event.location_name ?? 'Österreich'}`;
 
-  const canonicalUrl = `https://lasstreffen.at${buildEventUrl(event.id, event.slug)}`;
+  const canonicalPath = buildEventUrl(event.id, event.slug);
+  const canonicalUrl = `https://lasstreffen.at${canonicalPath}`;
+  const ogImageUrl = `${canonicalUrl}/opengraph-image`;
 
   const metadata: Metadata = {
     title: event.title,
@@ -104,13 +106,20 @@ export async function generateMetadata({
       description,
       type: 'article',
       url: canonicalUrl,
-      ...(event.image_url ? { images: [{ url: event.image_url }] } : {}),
+      images: [
+        {
+          url: ogImageUrl,
+          width: 1200,
+          height: 630,
+          alt: event.title,
+        },
+      ],
     },
     twitter: {
       card: 'summary_large_image',
       title: event.title,
       description,
-      ...(event.image_url ? { images: [event.image_url] } : {}),
+      images: [ogImageUrl],
     },
   };
 
@@ -276,6 +285,7 @@ export default async function EventDetailPage({
           <EventDetailActions
             eventId={event.id}
             eventTitle={event.title}
+            eventSlug={event.slug}
             city={derivedCity}
             bundesland={event.bundesland}
             venueId={event.venue_id}

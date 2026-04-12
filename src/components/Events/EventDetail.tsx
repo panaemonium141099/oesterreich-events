@@ -99,7 +99,8 @@ export function EventDetail({ event, onClose, eveningMode, onTagClick }: EventDe
   };
 
   const handleShare = () => {
-    navigator.clipboard.writeText(event.source_url || window.location.href);
+    const shareUrl = `${window.location.origin}${buildEventUrl(event.id, event.slug)}`;
+    navigator.clipboard.writeText(shareUrl);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -155,7 +156,8 @@ export function EventDetail({ event, onClose, eveningMode, onTagClick }: EventDe
   const shareMenuRef = useRef<HTMLDivElement>(null);
 
   const handleShareLink = () => {
-    navigator.clipboard.writeText(event.source_url || window.location.href);
+    const shareUrl = `${window.location.origin}${buildEventUrl(event.id, event.slug)}`;
+    navigator.clipboard.writeText(shareUrl);
     setCopied(true);
     setShowShareMenu(false);
     setTimeout(() => setCopied(false), 2000);

@@ -6,10 +6,12 @@ import { createClient } from '@/lib/supabase/client';
 import { useAuth } from '@/lib/supabase/auth-context';
 import { AfterSavePanel } from './AfterSavePanel';
 import { toast } from 'sonner';
+import { buildEventUrl } from '@/lib/utils/slugify';
 
 interface EventDetailActionsProps {
   eventId: string;
   eventTitle: string;
+  eventSlug?: string | null;
   city?: string | null;
   bundesland?: string | null;
   venueId?: string | null;
@@ -20,6 +22,7 @@ interface EventDetailActionsProps {
 export function EventDetailActions({
   eventId,
   eventTitle,
+  eventSlug,
   city,
   bundesland,
   venueId,
@@ -88,7 +91,7 @@ export function EventDetailActions({
   }, [user, bookmarked, bookmarkLoading, eventId, supabase]);
 
   const handleShare = useCallback(async () => {
-    const shareUrl = `${window.location.origin}/events/${eventId}`;
+    const shareUrl = `${window.location.origin}${buildEventUrl(eventId, eventSlug)}`;
     const shareData = {
       title: eventTitle,
       url: shareUrl,
@@ -112,7 +115,7 @@ export function EventDetailActions({
     } catch {
       toast.error('Link konnte nicht kopiert werden');
     }
-  }, [eventId, eventTitle]);
+  }, [eventId, eventSlug, eventTitle]);
 
   return (
     <>

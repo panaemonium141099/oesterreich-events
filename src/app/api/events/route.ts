@@ -186,7 +186,7 @@ export async function GET(request: NextRequest) {
     let query = suggestMode
       ? baseQuery.select('id, title, category, location_name')
       : baseQuery.select(
-          'id, title, description, start_date, end_date, location_name, address, postal_code, district, bundesland, latitude, longitude, category, image_url, price_text, price_min, price_max, ticket_url, source_name, source_url, organizer, visibility, event_score',
+          'id, title, description, start_date, end_date, location_name, address, postal_code, district, bundesland, latitude, longitude, category, image_url, price_text, price_min, price_max, ticket_url, source_name, source_url, organizer, visibility, event_score, slug',
           needsCount ? { count: 'exact' } : undefined
         );
 
@@ -576,7 +576,7 @@ export async function GET(request: NextRequest) {
     if (includeUnmapped && !suggestMode) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       let unmappedQuery = (supabase.from('events') as any).select(
-        'id, title, description, start_date, end_date, location_name, address, postal_code, district, bundesland, latitude, longitude, category, image_url, price_text, price_min, price_max, ticket_url, source_name, source_url, organizer, visibility, event_score'
+        'id, title, description, start_date, end_date, location_name, address, postal_code, district, bundesland, latitude, longitude, category, image_url, price_text, price_min, price_max, ticket_url, source_name, source_url, organizer, visibility, event_score, slug'
       );
       unmappedQuery = unmappedQuery.or('visibility.eq.public,visibility.is.null');
       if (!includeAll) {
