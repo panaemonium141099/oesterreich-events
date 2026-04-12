@@ -3,6 +3,7 @@ import type { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
 import { getPostBySlug, getPostsByCategory, ALL_POSTS } from '@/content/blog';
+import { AdSlot } from '@/components/Ads/AdSlot';
 
 export function generateStaticParams() {
   return ALL_POSTS.map(p => ({ slug: p.slug }));
@@ -299,6 +300,9 @@ export default async function BlogPostPage({
             {post.intro}
           </p>
 
+          {/* Ad: after lead */}
+          <AdSlot slot="after-lead" format="auto" className="mb-14" />
+
           {/* Key Facts */}
           <div className="mb-14 border border-gray-200 rounded-xl overflow-hidden">
             <div className="bg-gray-50 border-b border-gray-200 px-6 py-4">
@@ -416,6 +420,9 @@ export default async function BlogPostPage({
             ))}
           </div>
 
+          {/* Ad: mid-content */}
+          <AdSlot slot="mid-content" format="horizontal" className="mb-14" />
+
           {/* What to Expect */}
           <section className="mb-14">
             <h2 className="text-2xl md:text-3xl font-extrabold text-gray-900 tracking-tight mb-5">
@@ -479,6 +486,9 @@ export default async function BlogPostPage({
               </div>
             </section>
           )}
+
+          {/* Ad: end-of-article */}
+          <AdSlot slot="end-of-article" format="rectangle" className="mb-16" />
 
           {/* CTA */}
           <div className="border border-gray-200 rounded-xl p-8 text-center bg-white">

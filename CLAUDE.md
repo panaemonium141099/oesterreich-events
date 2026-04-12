@@ -25,13 +25,13 @@ node / next.js
 - `src/app/page.tsx` — Hauptseite (Landing mit WeeklyHighlights, RegionExplorer, PopularCategories)
 - `src/app/api/events/route.ts` — Events API (cursor pagination, bbox, tags, eveningOnly, sort=score)
 - `src/app/api/events/featured/route.ts` — Featured events API (top events by score, start_date >= today)
-- `src/app/api/health/route.ts` — Health check endpoint fur Docker / Coolify
+- `src/app/api/health/route.ts` — Health check endpoint
 - `src/app/api/stats/counts/route.ts` — Stats counts API (9 regions + 13 categories in one query)
 - `src/app/events/[id]/page.tsx` — SEO event detail page (generateMetadata + JSON-LD Event schema)
 - `src/app/sitemap.ts` — XML sitemap mit generateSitemaps() (chunked bei 5000 Events)
 - `src/app/robots.ts` — robots.txt (disallows /api/, /admin/, /auth/)
 - `src/scripts/calculate-scores.ts` — Event-Scoring-Algorithmus (schreibt event_score nach Supabase)
-- `Dockerfile` — Multi-stage Docker-Build (node:20-slim + sharp) fur Coolify-Deployment
+- `Dockerfile` — Multi-stage Docker-Build (node:20-slim + sharp)
 - `src/lib/scrapers/` — ~141 Scraper-Module (registered instances in index.ts)
 - `src/lib/scrapers/uni/` — 56 University/FH/PH scrapers
 - `src/lib/scrapers/niche/` — 34 niche category scrapers (festivals, nightlife, outdoor, culture, food, family, sport, museums, concert houses, business, RSS feeds)
@@ -131,18 +131,10 @@ TWILIO_AUTH_TOKEN         # Twilio auth token
 TWILIO_PHONE_NUMBER       # Twilio sender phone number (E.164)
 ```
 
-## Docker
-```bash
-# Lokaler Build-Test
-docker build -t lasstreffen-test \
-  --build-arg NEXT_PUBLIC_MAPBOX_TOKEN=test \
-  --build-arg NEXT_PUBLIC_SUPABASE_URL=https://test.supabase.co \
-  --build-arg NEXT_PUBLIC_SUPABASE_ANON_KEY=test \
-  .
-
-# Deployment: Coolify (Hetzner) — Git-Push triggert automatischen Docker-Build
-# Health check: GET /api/health -> { "status": "ok" }
-```
+## Deployment
+- **Hosting:** Vercel (Git-Push triggert automatisches Deployment)
+- **Domain:** lasstreffen.at
+- **Health check:** GET /api/health -> { "status": "ok" }
 
 ## Bekannte Issues
 - 4 API-Tests schlagen fehl (events.test.ts) — Pagination- und Evening-Filter-Tests sind nach Cursor-Pagination-Einführung veraltet; Code ist korrekt, Tests müssen aktualisiert werden
