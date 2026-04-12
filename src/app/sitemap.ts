@@ -11,17 +11,19 @@ const BASE_URL = 'https://lasstreffen.at';
 const CHUNK_SIZE = 5000;
 
 function getSupabase() {
-  if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
-    throw new Error('SUPABASE_SERVICE_ROLE_KEY is required');
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!url || !key) {
+    console.error('[sitemap] Missing SUPABASE env vars, url:', !!url, 'key:', !!key);
+    return null;
   }
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY
-  );
+  return createClient(url, key);
 }
 
 export async function generateSitemaps(): Promise<{ id: number }[]> {
   const supabase = getSupabase();
+  if (!supabase) return [{ id: 0 }];
+
   const today = new Date().toISOString().split('T')[0];
 
   // Quality-gated: only count events with quality_score >= 40 and valid publish status
@@ -33,10 +35,11 @@ export async function generateSitemaps(): Promise<{ id: number }[]> {
     .gte('quality_score', 40);
 
   if (error || count == null) {
-    // Fallback: return a single sitemap
+    console.error('[sitemap] generateSitemaps query error:', error?.message);
     return [{ id: 0 }];
   }
 
+  console.log(`[sitemap] generateSitemaps: ${count} eligible events, ${Math.ceil(count / CHUNK_SIZE)} chunks`);
   const total = Math.ceil(count / CHUNK_SIZE);
   return Array.from({ length: Math.max(total, 1) }, (_, i) => ({ id: i }));
 }
@@ -47,10 +50,12 @@ export default async function sitemap({
   id: number;
 }): Promise<MetadataRoute.Sitemap> {
   const supabase = getSupabase();
+  if (!supabase) return [];
+
   const today = new Date().toISOString().split('T')[0];
 
   // Quality-gated: only include events with quality_score >= 40, exclude suppressed/duplicate/needs_review
-  const { data: events } = await supabase
+  const { data: events, error: eventsError } = await supabase
     .from('events')
     .select('id, slug, updated_at, event_score, quality_score')
     .gte('start_date', today)
@@ -59,6 +64,11 @@ export default async function sitemap({
     .order('event_score', { ascending: false })
     .order('id', { ascending: true })
     .range(id * CHUNK_SIZE, id * CHUNK_SIZE + CHUNK_SIZE - 1);
+
+  if (eventsError) {
+    console.error(`[sitemap] chunk ${id} query error:`, eventsError.message);
+  }
+  console.log(`[sitemap] chunk ${id}: ${(events ?? []).length} events fetched`);
 
   // Priority based on quality_score: >= 80 -> 0.8, >= 60 -> 0.6, >= 40 -> 0.4
   const eventUrls: MetadataRoute.Sitemap = (events ?? []).map((event) => {
