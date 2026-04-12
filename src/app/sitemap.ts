@@ -92,7 +92,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     return [...staticPages, ...blogPages, ...landingPages, ...studentPages];
   }
 
-  // Top events by quality score (limit 5000 to keep sitemap size reasonable)
+  // Top events by quality score (50k URL limit per sitemap spec)
   const { data: events } = await supabase
     .from('events')
     .select('id, slug, updated_at, quality_score')
@@ -101,7 +101,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     .gte('quality_score', 40)
     .order('quality_score', { ascending: false })
     .order('id', { ascending: true })
-    .limit(5000);
+    .limit(45000);
 
   const eventUrls: MetadataRoute.Sitemap = (events ?? []).map((event) => {
     const qs = event.quality_score ?? 0;
