@@ -6,6 +6,7 @@ import 'mapbox-gl/dist/mapbox-gl.css';
 import type { Event } from '@/types/events';
 import type { Bundesland } from '@/lib/bundeslaender';
 import { getEventImage, getCategoryFallbackImage } from '@/lib/categoryImages';
+import { formatDateNumeric, formatDateCompact, formatTime } from '@/lib/utils/date';
 import { createClient } from '@/lib/supabase/client';
 import { useAuth } from '@/lib/supabase/auth-context';
 
@@ -224,11 +225,9 @@ function EventMap({ events, selectedEvent, hoveredEventId, onSelectEvent, evenin
 
   // Popup builder
   const createPopupHTML = useCallback((event: Event, dark?: boolean) => {
-    const date = new Date(event.start_date).toLocaleDateString('de-AT', { day: '2-digit', month: '2-digit', year: 'numeric' });
-    const time = new Date(event.start_date).toLocaleTimeString('de-AT', { hour: '2-digit', minute: '2-digit' });
-    const startHour = new Date(event.start_date).getHours();
-    const startMin = new Date(event.start_date).getMinutes();
-    const showTime = !(startHour === 0 && startMin === 0) && !(startHour === 1 && startMin === 0);
+    const date = formatDateNumeric(event.start_date);
+    const time = formatTime(event.start_date);
+    const showTime = time !== null;
     const bg = dark ? '#1e293b' : '#ffffff';
     const textColor = dark ? '#f1f5f9' : '#1e293b';
     const subTextColor = dark ? '#94a3b8' : '#64748b';
@@ -642,7 +641,7 @@ function EventMap({ events, selectedEvent, hoveredEventId, onSelectEvent, evenin
       }
 
       const dateStr = pe.event_date
-        ? new Date(pe.event_date).toLocaleDateString('de-AT', { day: 'numeric', month: 'short', year: 'numeric' })
+        ? formatDateCompact(pe.event_date)
         : '';
       const prefix = pe.is_own ? 'Dein Event' : `${escapeHtml(pe.creator_name)}'s Event`;
 

@@ -51,7 +51,9 @@ export function EventSearchInline({ onSelectEvent, onClose }: EventSearchInlineP
   }, []);
 
   const formatDate = (dateStr: string) => {
-    const d = new Date(dateStr);
+    // Use date-only safe parsing: append T12:00 to avoid UTC timezone shift
+    const dateOnly = dateStr.length === 10 && !dateStr.includes('T');
+    const d = dateOnly ? new Date(dateStr + 'T12:00:00') : new Date(dateStr);
     return d.toLocaleDateString('de-AT', { day: 'numeric', month: 'short', year: 'numeric' });
   };
 

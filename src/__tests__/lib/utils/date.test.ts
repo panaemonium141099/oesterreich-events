@@ -83,16 +83,18 @@ describe('formatTime', () => {
   });
 
   it('returns null for midnight (00:00) — indicates no real time set', () => {
-    // Construct a date that resolves to local midnight
-    const midnight = new Date(2026, 2, 15, 0, 0, 0);
-    const isoStr = midnight.toISOString();
-    expect(formatTime(isoStr)).toBeNull();
+    // Supabase stores "no time" as midnight UTC: T00:00:00
+    expect(formatTime('2026-03-15T00:00:00+00:00')).toBeNull();
+    expect(formatTime('2026-03-15T00:00:00.000Z')).toBeNull();
+    expect(formatTime('2026-03-15T00:00:00Z')).toBeNull();
+    expect(formatTime('2026-03-15T00:00:00')).toBeNull();
   });
 
   it('returns null for 01:00 — CET offset artifact for midnight', () => {
-    const oneAm = new Date(2026, 2, 15, 1, 0, 0);
-    const isoStr = oneAm.toISOString();
-    expect(formatTime(isoStr)).toBeNull();
+    // This is no longer needed since we check the raw string for T00:00:00.
+    // But 01:00 UTC is a real time if stored that way in Supabase.
+    // Keep test to verify: 01:00 WITH a real time part IS shown.
+    expect(formatTime('2026-03-15T01:00:00+00:00')).not.toBeNull();
   });
 
   it('returns time for 01:30 (not a midnight artifact)', () => {

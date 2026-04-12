@@ -21,17 +21,18 @@ function parseDateSafe(dateStr: string): Date {
 
 /**
  * Check whether a date string has a meaningful time component.
- * Returns false for date-only strings or times at midnight/1am
- * which indicate no real time was set.
+ * Returns false for date-only strings or times that represent "no time set".
+ *
+ * We check the RAW STRING (not parsed Date) to avoid timezone issues:
+ * "2026-04-12T00:00:00Z" stored as midnight UTC would show as 02:00 in
+ * Europe/Vienna (CEST, UTC+2) if we relied on getHours().
  */
 function hasRealTime(dateStr: string): boolean {
   if (!dateStr || dateStr.length <= 10 || !dateStr.includes('T')) return false;
-  const date = new Date(dateStr);
-  const hours = date.getHours();
-  const minutes = date.getMinutes();
-  // 00:00 = no time set, 01:00 = UTC+1 CET offset for midnight
-  if (hours === 0 && minutes === 0) return false;
-  if (hours === 1 && minutes === 0) return false;
+  // Extract the time portion from the ISO string (after 'T', before timezone)
+  const timePart = dateStr.split('T')[1]?.replace(/[Z+\-].*$/, '') || '';
+  // "00:00:00" or "00:00" = no real time was set
+  if (timePart === '00:00:00' || timePart === '00:00' || timePart.startsWith('00:00:00.')) return false;
   return true;
 }
 
