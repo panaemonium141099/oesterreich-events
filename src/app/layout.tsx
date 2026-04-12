@@ -1,10 +1,13 @@
 import type { Metadata } from 'next';
+import Script from 'next/script';
 import { AuthProvider } from '@/lib/supabase/auth-context';
 import { CookieBanner } from '@/components/Legal/CookieBanner';
 import { AnimatedLayout } from '@/components/UI/AnimatedLayout';
 import { NotificationToast } from '@/components/Notifications/NotificationToast';
 import { Toaster } from 'sonner';
 import './globals.css';
+
+const ADSENSE_CLIENT_ID = process.env.NEXT_PUBLIC_ADSENSE_CLIENT_ID;
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://lasstreffen.at'),
@@ -45,6 +48,16 @@ export default function RootLayout({
 }) {
   return (
     <html lang="de">
+      <head>
+        {ADSENSE_CLIENT_ID && (
+          <Script
+            async
+            src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${ADSENSE_CLIENT_ID}`}
+            crossOrigin="anonymous"
+            strategy="afterInteractive"
+          />
+        )}
+      </head>
       <body className="antialiased">
         <AuthProvider>
           <AnimatedLayout>
