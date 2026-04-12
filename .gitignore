@@ -60,3 +60,5 @@ data/AT.zip
 
 # Scrape reports
 reports/
+# Added by code-review-graph
+.code-review-graph/
