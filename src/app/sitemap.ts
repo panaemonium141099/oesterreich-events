@@ -5,8 +5,7 @@ import { BUNDESLAENDER } from '@/lib/bundeslaender';
 import { CATEGORY_SLUGS, LANDING_CITIES, STUDENT_CITIES, STUDENT_FILTERS } from '@/lib/landing-slugs';
 import { buildEventUrl } from '@/lib/utils/slugify';
 
-// Force fresh generation on every request until cache is warm, then switch back to 86400
-export const revalidate = 0;
+export const dynamic = 'force-dynamic';
 
 const BASE_URL = 'https://lasstreffen.at';
 const CHUNK_SIZE = 5000;
