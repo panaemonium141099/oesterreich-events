@@ -494,7 +494,8 @@ export async function GET(request: NextRequest) {
     // NOTE: Dedup moved to client-side. Server returns all events as-is
     // to not break cursor-based pagination (dedup was eating events and
     // causing the progressive loader to stop after ~6k of 77k events).
-    let allFetched = events || [];
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let allFetched: any[] = events || [];
 
     // Relevance re-ranking: combine quality_score and recency in memory
     if (filters.sort === 'relevance' && allFetched.length > 0) {
