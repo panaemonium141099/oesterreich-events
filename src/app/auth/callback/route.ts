@@ -1,34 +1,55 @@
 import { NextResponse } from 'next/server';
-import { createServerSupabaseClient } from '@/lib/supabase/server';
-import { isProfileComplete } from '@/lib/utils/profile';
+import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
-
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || '';
+import { isProfileComplete } from '@/lib/utils/profile';
 
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get('code');
   const next = searchParams.get('next') ?? '/map';
-  const redirectOrigin = SITE_URL || origin;
 
   if (code) {
-    // Log cookies for debugging PKCE issues
     const cookieStore = await cookies();
-    const allCookies = cookieStore.getAll();
-    const codeVerifierCookie = allCookies.find(c => c.name.includes('code-verifier'));
-    console.log('Auth callback: code received, cookies:', allCookies.length,
-      '| code-verifier present:', !!codeVerifierCookie,
-      '| origin:', origin, '| redirectOrigin:', redirectOrigin);
 
-    const supabase = await createServerSupabaseClient();
+    // Create Supabase client INLINE — critical for Route Handlers
+    // so that setAll can write cookies without try/catch swallowing errors
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          getAll() {
+            return cookieStore.getAll();
+          },
+          setAll(cookiesToSet) {
+            cookiesToSet.forEach(({ name, value, options }) =>
+              cookieStore.set(name, value, options)
+            );
+          },
+        },
+      }
+    );
+
     const { error } = await supabase.auth.exchangeCodeForSession(code);
+
     if (error) {
-      console.error('Auth callback FAILED:', error.message,
-        '| status:', error.status,
-        '| code length:', code.length,
-        '| cookies:', allCookies.map(c => c.name).join(', '));
+      console.error('Auth callback error:', error.message, '| status:', error.status);
     }
+
     if (!error) {
+      // Use x-forwarded-host for production redirect (Vercel sets this)
+      const forwardedHost = request.headers.get('x-forwarded-host');
+      const isLocalEnv = process.env.NODE_ENV === 'development';
+      let redirectBase: string;
+
+      if (isLocalEnv) {
+        redirectBase = origin;
+      } else if (forwardedHost) {
+        redirectBase = `https://${forwardedHost}`;
+      } else {
+        redirectBase = origin;
+      }
+
       // Check if profile is complete before redirecting
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
@@ -39,14 +60,16 @@ export async function GET(request: Request) {
           .single();
 
         if (!isProfileComplete(profile)) {
-          return NextResponse.redirect(`${redirectOrigin}/auth/complete-profile`);
+          return NextResponse.redirect(`${redirectBase}/auth/complete-profile`);
         }
       }
 
-      return NextResponse.redirect(`${redirectOrigin}${next}`);
+      return NextResponse.redirect(`${redirectBase}${next}`);
     }
   }
 
-  // Auth error — redirect to landing with error
-  return NextResponse.redirect(`${redirectOrigin}/?auth_error=true`);
+  // Auth error — redirect to landing
+  const forwardedHost = request.headers.get('x-forwarded-host');
+  const errorBase = forwardedHost ? `https://${forwardedHost}` : origin;
+  return NextResponse.redirect(`${errorBase}/?auth_error=true`);
 }
