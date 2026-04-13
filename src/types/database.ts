@@ -45,7 +45,7 @@ export type Database = {
       events: {
         Row: {
           id: string
-          source_type: 'scraped' | 'user' | 'business'
+          source_type: 'scraped' | 'user' | 'business' | 'derived'
           source_name: string | null
           source_id: string | null
           source_url: string | null
@@ -82,6 +82,7 @@ export type Database = {
           venue_id: string | null
           event_series_id: string | null
           content_fingerprint: string | null
+          parent_event_id: string | null
           created_at: string
           updated_at: string
         }
@@ -505,6 +506,122 @@ export type Database = {
         Update: {
           event_id?: string
           tag?: string
+        }
+      }
+      festivals: {
+        Row: {
+          id: string
+          canonical_name: string
+          slug: string
+          website_url: string | null
+          lineup_url: string | null
+          city: string | null
+          state: string | null
+          starts_at: string | null
+          ends_at: string | null
+          genres: string | null
+          registry_source: string | null
+          spotify_priority: string | null
+          direct_lineup_candidate: boolean
+          lineup_fetch_mode: string | null
+          lineup_status: 'unknown' | 'fetched' | 'error' | 'no_lineup'
+          lineup_hash: string | null
+          lineup_last_checked_at: string | null
+          parent_event_id: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          canonical_name: string
+          slug: string
+          website_url?: string | null
+          lineup_url?: string | null
+          city?: string | null
+          state?: string | null
+          starts_at?: string | null
+          ends_at?: string | null
+          genres?: string | null
+          registry_source?: string | null
+          spotify_priority?: string | null
+          direct_lineup_candidate?: boolean
+          lineup_fetch_mode?: string | null
+          lineup_status?: 'unknown' | 'fetched' | 'error' | 'no_lineup'
+          lineup_hash?: string | null
+          lineup_last_checked_at?: string | null
+          parent_event_id?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          canonical_name?: string
+          slug?: string
+          website_url?: string | null
+          lineup_url?: string | null
+          city?: string | null
+          state?: string | null
+          starts_at?: string | null
+          ends_at?: string | null
+          genres?: string | null
+          registry_source?: string | null
+          spotify_priority?: string | null
+          direct_lineup_candidate?: boolean
+          lineup_fetch_mode?: string | null
+          lineup_status?: 'unknown' | 'fetched' | 'error' | 'no_lineup'
+          lineup_hash?: string | null
+          lineup_last_checked_at?: string | null
+          parent_event_id?: string | null
+          updated_at?: string
+        }
+      }
+      festival_artists: {
+        Row: {
+          id: string
+          festival_id: string
+          artist_name_raw: string
+          artist_name_normalized: string
+          day_label: string | null
+          stage_name: string | null
+          billing: string | null
+          source_url: string | null
+          source_type: string | null
+          confidence_score: number | null
+          spotify_artist_id: string | null
+          matched_by: string | null
+          derived_event_id: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          festival_id: string
+          artist_name_raw: string
+          artist_name_normalized: string
+          day_label?: string | null
+          stage_name?: string | null
+          billing?: string | null
+          source_url?: string | null
+          source_type?: string | null
+          confidence_score?: number | null
+          spotify_artist_id?: string | null
+          matched_by?: string | null
+          derived_event_id?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          artist_name_raw?: string
+          artist_name_normalized?: string
+          day_label?: string | null
+          stage_name?: string | null
+          billing?: string | null
+          source_url?: string | null
+          source_type?: string | null
+          confidence_score?: number | null
+          spotify_artist_id?: string | null
+          matched_by?: string | null
+          derived_event_id?: string | null
+          updated_at?: string
         }
       }
     }
