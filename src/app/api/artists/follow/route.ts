@@ -28,8 +28,10 @@ async function matchSingleArtist(
   const tier = classifyName(normalized);
   if (tier === 'skip') return 0;
 
-  // Match against events from the last 90 days (catch upcoming events)
-  const since = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString();
+  // Match against ALL existing events (epoch) — this is a fresh follow,
+  // so we need to check all events, not just recently updated ones.
+  // The RPC functions filter on `updated_at > p_since` AND `start_date >= now()`.
+  const since = '1970-01-01T00:00:00Z';
 
   let titleMatches: Array<{ event_id: string; event_title: string; matched_name: string; score: number }> = [];
 
