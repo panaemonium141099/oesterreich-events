@@ -12,7 +12,7 @@ node / next.js
 - **Styling:** Tailwind CSS v4
 - **Animations:** Framer Motion v12
 - **API:** Next.js API Routes (cursor-based pagination, bbox viewport filter)
-- **Datenbank (production):** Supabase PostgreSQL (28 tables)
+- **Datenbank (production):** Supabase PostgreSQL (30 tables)
 - **Datenbank (staging):** SQLite via better-sqlite3
 - **Auth:** Supabase Auth (Google OAuth + Email/Password)
 - **Notifications:** Resend (email), Twilio (SMS), Supabase Realtime (in-app)
@@ -67,12 +67,22 @@ node / next.js
 - `src/app/blog/[slug]/page.tsx` — Blog detail page with generateMetadata + JSON-LD Event schema
 - `src/components/Landing/FestivalBlogSection.tsx` — Blog preview section on landing page
 - `src/scripts/import-student-orgs.ts` — Import OeH/ESN/IAESTE/AIESEC/AEGEE sections as venue entries (~72 orgs)
-- `src/lib/artist-matching.ts` — Artist-event matching engine (pg_trgm word_similarity, tiered strategy)
+- `src/lib/artist-matching.ts` — Artist-event matching engine (pg_trgm word_similarity, tiered strategy + direct lineup lookup)
+- `src/lib/lineup/` — Festival lineup ingestion pipeline (scrapers, orchestrator, derived events, watcher)
+- `src/lib/lineup/orchestrator.ts` — Lineup orchestrator (scrape, diff, upsert, derive events)
+- `src/lib/lineup/derive-events.ts` — Derived event generator (festival_artists -> events rows)
+- `src/lib/lineup/watcher.ts` — Lineup change detection + stale festival re-check
+- `src/lib/lineup/normalize.ts` — Artist name normalization (feat., b2b, DJ Set, diacritics)
+- `src/lib/lineup/BaseLineupScraper.ts` — Base class for festival lineup scrapers
+- `src/lib/lineup/scrapers/` — 9 festival lineup scrapers (Frequency, Nova Rock, Electric Love, etc.)
+- `src/lib/post-scrape-hook.ts` — Post-scrape hook (lineup pipeline + artist matching trigger)
 - `src/lib/email.ts` — Email notification service (Resend API, artist alerts + reminders)
 - `src/lib/sms.ts` — SMS notification service (Twilio API, E.164 validation)
 - `src/lib/spotify.ts` — Spotify API integration (OAuth, Client Credentials search, token management)
 - `src/emails/artist-alert.tsx` — Artist alert email template (HTML)
 - `src/emails/artist-reminder.tsx` — Artist reminder email template (7d/1d)
+- `src/scripts/seed-festivals.ts` — Seed festivals table from mica austria registry JSON
+- `src/scripts/scrape-festival-lineups.ts` — CLI script for festival lineup ingestion pipeline
 - `src/scripts/match-artists.ts` — CLI script for manual artist-event matching pipeline
 - `src/app/api/artists/follow/route.ts` — Follow/unfollow artist API (POST/DELETE)
 - `src/app/api/artists/following/route.ts` — List followed artists API (GET, cursor pagination)
@@ -81,6 +91,7 @@ node / next.js
 - `src/app/api/spotify/status/route.ts` — Spotify connection status API (GET)
 - `src/app/api/notifications/preferences/route.ts` — Notification preferences CRUD (GET/PUT)
 - `src/app/api/notifications/unsubscribe/route.ts` — Email unsubscribe endpoint (GET)
+- `src/types/festivals.ts` — Festival and FestivalArtist database types
 - `src/components/Artists/` — Artist management UI (ArtistCard, ArtistSearch, ImportedArtistsList, ArtistEventsSection)
 - `src/components/Notifications/NotificationBell.tsx` — In-app notification bell with Realtime subscriptions
 
@@ -117,6 +128,10 @@ npm run openai-geocode        # OpenAI batch geocoding for NULL-coord events (re
 npm run openai-geocode -- --dry-run  # Dry-run mode (no writes)
 npm run import-student-orgs   # Import OeH/ESN/IAESTE/AIESEC/AEGEE sections as venues (~72 orgs)
 npm run import-student-orgs -- --dry-run  # Dry-run mode (no writes)
+npx tsx src/scripts/seed-festivals.ts             # Seed festivals table from mica registry
+npm run scrape:festival-lineups                    # Scrape festival lineups + derive events
+npm run scrape:festival-lineups -- --dry-run       # Dry-run lineup scrape (no DB writes)
+npm run scrape:festival-lineups -- --festival nova-rock --verbose  # Scrape single festival
 npx tsx src/scripts/match-artists.ts --dry-run  # Artist-event matching pipeline (dry-run)
 npx tsx src/scripts/match-artists.ts --reset-cursor --dry-run  # Reset cursor + re-process all events
 ```

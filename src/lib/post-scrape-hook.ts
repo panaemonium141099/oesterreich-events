@@ -1,14 +1,53 @@
 /**
- * Post-scrape hook: triggers the match-artists Edge Function
- * after scraper runs complete.
+ * Post-scrape hook: runs the lineup pipeline (lineup scraping + derived
+ * event generation) and then triggers artist-event matching.
  *
- * Falls back gracefully if the Edge Function is not deployed or
- * environment variables are missing.
+ * Pipeline order: scrapers -> lineup scraping + derivation -> artist matching
  *
- * Task: fn-10-spotify-artist-alerts-follow-artists.7
+ * Falls back gracefully if environment variables are missing or
+ * any step fails.
+ *
+ * Tasks: fn-10-spotify-artist-alerts-follow-artists.7,
+ *        fn-12-festival-lineup-ingestion-pipeline.8
  */
 
+import { runLineupOrchestrator } from './lineup/orchestrator';
+
 const EDGE_FUNCTION_TIMEOUT_MS = 150_000; // 150s (Edge Function limit)
+
+/**
+ * Run the festival lineup pipeline: scrape lineups and generate derived events.
+ * Non-blocking: logs result but does not throw on failure.
+ */
+export async function triggerLineupPipeline(): Promise<void> {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+  if (!supabaseUrl || !serviceRoleKey) {
+    console.log('[post-scrape] Skipping lineup pipeline: missing SUPABASE_URL or SERVICE_ROLE_KEY');
+    return;
+  }
+
+  console.log('\n[post-scrape] Running festival lineup pipeline...');
+
+  try {
+    const stats = await runLineupOrchestrator({ verbose: false });
+    console.log('[post-scrape] Lineup pipeline completed:', {
+      festivals_checked: stats.festivals_checked,
+      festivals_changed: stats.festivals_changed,
+      artists_added: stats.artists_added,
+      artists_removed: stats.artists_removed,
+      events_derived: stats.events_derived,
+      duration_ms: stats.duration_ms,
+    });
+  } catch (error) {
+    // Non-fatal: log and continue to artist matching
+    console.error(
+      '[post-scrape] Lineup pipeline error (non-fatal):',
+      error instanceof Error ? error.message : error
+    );
+  }
+}
 
 /**
  * Trigger the match-artists Edge Function via HTTP POST.

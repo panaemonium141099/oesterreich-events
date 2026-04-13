@@ -1347,4 +1347,118 @@ Social pages (feed, friends, saved, messages, memories, groups, notifications, p
 
 ---
 
-*Last updated: 2026-04-06*
+## Festival Lineup Ingestion Pipeline (fn-12, 2026-04-13)
+
+### Overview
+Transforms the platform's festival handling from single-event entries into a structured parent-child hierarchy: Festival -> Lineup Artists -> Derived Artist Events. Closes the gap where festival-attending artists were invisible to the Spotify follow-matching system because lineups don't appear in event titles/descriptions. Scrapes official lineup pages for 9 high-value Austrian festivals, stores structured `festival_artists` rows, generates derived events ("Volbeat at Nova Rock 2026") in the existing `events` table, and adds a direct-lookup matching path that bypasses fuzzy text search.
+
+### Architecture
+
+```
+Seed Data (mica austria registry, 172 festivals)
+     |
+     v
+festivals table (metadata + lineup_url + lineup_hash)
+     |
+     v
+Lineup Scrapers (9 festival-specific, BaseLineupScraper base class)
+     |
+     v
+Artist Name Normalizer (feat., b2b, DJ Set, diacritics, collaboratives)
+     |
+     v
+festival_artists table (normalized names, day/stage, confidence)
+     |
+     v
+Derived Event Generator ("Artist at Festival 2026" -> events table)
+     |
+     v
+Direct-Lookup Matching (btree equality on festival_artists.artist_name_normalized)
+     |
+     v
+Notifications (lineup-specific copy: "Artist spielt beim Festival")
+```
+
+### Database Tables Added (2 new tables)
+
+| Table | Purpose |
+|-------|---------|
+| `festivals` | Festival metadata, lineup URLs, hash-based change detection |
+| `festival_artists` | Structured lineup data: raw/normalized names, day/stage, billing, confidence |
+
+### Events Table Extensions
+
+| Column | Purpose |
+|--------|---------|
+| `parent_event_id` | FK to parent event for derived events |
+| `source_type = 'derived'` | Marks derived events (widened CHECK constraint) |
+
+### Key Design Decisions
+
+- **Derived events in `events` table**: No separate table -- derived events appear on map, search, APIs, and scoring without touching any consumer
+- **Separate lineup module**: `src/lib/lineup/` with `FestivalArtist[]` return type, NOT in flat scraper array (different type contract)
+- **Dedup bypass**: Derived events bypass `deduplicateEvents()` entirely -- ON CONFLICT content_fingerprint handles uniqueness
+- **Direct-lookup matching**: New step in matching pipeline uses btree equality on normalized names before fuzzy search, deterministic and fast
+- **Lineup hash change detection**: `sha256(sorted normalized names)` stored on `festivals.lineup_hash` -- only processes diff when hash changes
+- **Orchestrator owns add/remove**: Watcher triggers orchestrator, which handles full diff + deletion via `delete_derived_event` RPC + derivation
+- **Notification type stays `spotify_match`**: Differentiated via title/body copy keyed on `match_source`, not a new notification type
+
+### Pipeline Integration
+
+Post-scrape hook order: **scrapers -> lineup scraping + derivation -> artist matching**
+
+The lineup pipeline runs after regular scrapers complete and before artist matching, ensuring derived events exist when the matcher runs.
+
+### Scripts and Modules
+
+| File | Purpose |
+|------|---------|
+| `src/scripts/seed-festivals.ts` | Seed festivals table from mica austria registry JSON (172 entries) |
+| `src/scripts/scrape-festival-lineups.ts` | CLI: lineup scraping + derived event generation |
+| `src/lib/lineup/orchestrator.ts` | Orchestrator: fetch festivals, dispatch scrapers, diff, upsert, derive |
+| `src/lib/lineup/derive-events.ts` | Generate derived events from un-derived festival_artists rows |
+| `src/lib/lineup/watcher.ts` | Lineup change detection + stale festival re-check (24h threshold) |
+| `src/lib/lineup/normalize.ts` | Artist name normalization module |
+| `src/lib/lineup/BaseLineupScraper.ts` | Base class for lineup scrapers |
+| `src/lib/lineup/scrapers/` | 9 festival-specific lineup scrapers |
+| `src/lib/lineup/types.ts` | Scraper-facing types (FestivalArtist, FestivalLineupResult) |
+| `src/types/festivals.ts` | Database-mapped Festival and FestivalArtist types |
+
+### Lineup Scrapers (9 festivals)
+
+| Festival | Slug | Scraper |
+|----------|------|---------|
+| Frequency | `frequency` | FrequencyLineupScraper |
+| Nova Rock | `nova-rock` | NovaRockLineupScraper |
+| Electric Love | `electric-love` | ElectricLoveLineupScraper |
+| Shutdown | `shutdown` | ShutdownLineupScraper |
+| Lake Festival | `lake-festival` | LakeFestivalLineupScraper |
+| Donauinselfest | `donauinselfest` | DonauinselfestLineupScraper |
+| Lovely Days | `lovely-days` | LovelyDaysLineupScraper |
+| Woodstockr | `woodstockr` | WoodstockrLineupScraper |
+| Szene Openair | `szene-openair` | SzeneOpenairLineupScraper |
+
+### Files Added/Changed
+
+| File | Purpose |
+|------|---------|
+| `supabase/migrations/20260413_festival_lineup_schema.sql` | DB schema: festivals, festival_artists, events extensions, RPC |
+| `src/types/festivals.ts` | New: Festival and FestivalArtist database types |
+| `src/lib/lineup/orchestrator.ts` | New: Lineup orchestrator with scraper registry |
+| `src/lib/lineup/derive-events.ts` | New: Derived event generator |
+| `src/lib/lineup/watcher.ts` | New: Lineup change detection and stale festival watcher |
+| `src/lib/lineup/normalize.ts` | New: Artist name normalization module |
+| `src/lib/lineup/BaseLineupScraper.ts` | New: Base class for lineup scrapers |
+| `src/lib/lineup/scrapers/*.ts` | New: 9 festival-specific lineup scrapers |
+| `src/lib/lineup/types.ts` | New: Scraper-facing type definitions |
+| `src/scripts/seed-festivals.ts` | New: Festival seed script |
+| `src/scripts/scrape-festival-lineups.ts` | New: CLI lineup ingestion script |
+| `src/lib/artist-matching.ts` | Updated: direct lineup lookup step, lineup notification copy |
+| `src/lib/post-scrape-hook.ts` | Updated: lineup pipeline before artist matching |
+| `src/scripts/scrape.ts` | Updated: post-scrape hook calls lineup pipeline |
+| `CLAUDE.md` | Updated: table count (30), lineup paths, scripts |
+| `CHANGELOG.md` | Updated: fn-12 phase section |
+
+---
+
+*Last updated: 2026-04-13*

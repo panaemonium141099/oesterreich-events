@@ -17,7 +17,7 @@ try {
 } catch { /* .env.local not found, rely on environment */ }
 
 import { runAllScrapers, getScraperByName, runScraper, getAvailableScrapers } from '../lib/scrapers';
-import { triggerMatchArtists } from '../lib/post-scrape-hook';
+import { triggerLineupPipeline, triggerMatchArtists } from '../lib/post-scrape-hook';
 
 async function main() {
   const args = process.argv.slice(2);
@@ -38,7 +38,8 @@ async function main() {
     await runAllScrapers();
   }
 
-  // Post-scrape hook: trigger artist-event matching pipeline
+  // Post-scrape hook: scrapers -> lineup scraping + derivation -> artist matching
+  await triggerLineupPipeline();
   await triggerMatchArtists();
 }
 

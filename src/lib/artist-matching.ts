@@ -200,16 +200,32 @@ export function buildExactMatchRegex(normalizedName: string): string {
 
 /**
  * Format notification body listing all matched artist names.
- * Example: "Kuenstler X, Y und Z treten bei {event_title} auf!"
+ *
+ * For lineup matches (isLineup=true), uses festival-specific copy:
+ *   "Artist spielt beim {festival_name}"
+ * For regular matches:
+ *   "Artist tritt bei {event_title} auf!"
  */
 export function formatNotificationBody(
   artistNames: string[],
-  eventTitle: string
+  eventTitle: string,
+  isLineup = false
 ): string {
   if (artistNames.length === 0) return '';
 
   const uniqueNames = [...new Set(artistNames)];
 
+  if (isLineup) {
+    // Lineup matches: "Artist spielt beim Festival" copy
+    if (uniqueNames.length === 1) {
+      return `${uniqueNames[0]} spielt beim ${eventTitle}!`;
+    }
+    const last = uniqueNames[uniqueNames.length - 1];
+    const rest = uniqueNames.slice(0, -1);
+    return `${rest.join(', ')} und ${last} spielen beim ${eventTitle}!`;
+  }
+
+  // Regular matches: "Artist tritt bei Event auf!" copy
   if (uniqueNames.length === 1) {
     return `${uniqueNames[0]} tritt bei ${eventTitle} auf!`;
   }
@@ -657,7 +673,7 @@ export async function createGroupedNotifications(
       user_id: g.user_id,
       type: 'spotify_match',
       title: g.festival_name ? `Lineup Match: ${g.festival_name}` : 'Artist Match!',
-      body: formatNotificationBody(g.artists, g.festival_name ?? g.event_title),
+      body: formatNotificationBody(g.artists, g.festival_name ?? g.event_title, !!g.festival_name),
       event_id: g.event_id,
       action_url: `/events/${g.event_id}`,
       read: false,
