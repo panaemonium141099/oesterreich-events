@@ -59,7 +59,9 @@ export type MatchTier = 'skip' | 'exact' | 'fuzzy';
 export function classifyName(normalizedName: string): MatchTier {
   const len = normalizedName.trim().length;
   if (len < 3) return 'skip';
-  if (len === 3) return 'exact';
+  // Short names (3-5 chars) use exact word boundary match to avoid false positives
+  // e.g., "Dame" should NOT match "Damenturngruppe" or "Madame"
+  if (len <= 5) return 'exact';
   return 'fuzzy';
 }
 
@@ -121,7 +123,9 @@ export function formatNotificationBody(
 
 // ── Core matching engine ─────────────────────────────────────────────────────
 
-const WORD_SIMILARITY_THRESHOLD = 0.6;
+// Raised from 0.6 to 0.75 to reduce false positives
+// (0.6 caused "ILLENIUM" → "Millenium", "Nu Aspect" → "Aspects")
+const WORD_SIMILARITY_THRESHOLD = 0.75;
 const BATCH_SIZE = 500;
 
 /**
