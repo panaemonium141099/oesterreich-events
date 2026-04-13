@@ -79,7 +79,7 @@ export function Header({ filters, onFiltersChange, totalEvents, onToggleSidebar,
         ? 'bg-slate-900/70 backdrop-blur-xl border-b border-slate-700/30 shadow-lg shadow-black/20'
         : 'bg-white/70 backdrop-blur-xl border-b border-slate-200/50 shadow-sm'
     }`}>
-      <div className="flex items-center gap-3 px-4 py-3 overflow-hidden">
+      <div className="flex items-center gap-3 px-4 py-3">
         <button
           onClick={onToggleSidebar}
           className={`p-2 rounded-lg transition-colors lg:hidden ${
@@ -180,7 +180,7 @@ export function Header({ filters, onFiltersChange, totalEvents, onToggleSidebar,
           )}
         </div>
 
-        <div className="flex-1 min-w-0">
+        <div className="flex-1 min-w-0 overflow-hidden">
           <FilterBar filters={filters} onFiltersChange={onFiltersChange} eveningMode={eveningMode} bundeslandId={bundesland.id} onGemeindeSelect={onGemeindeSelect} />
         </div>
 
