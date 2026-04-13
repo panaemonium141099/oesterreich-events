@@ -3,260 +3,238 @@ import { categorizeEvent } from '../categories';
 import { getDistrictByPostalCodeAT, getDistrictByCoordsAT } from '../districtsAT';
 import type { ScrapedEvent } from '@/types/events';
 
-interface OeticketProduct {
-  productGroupId: number;
+/**
+ * oeticket.com Scraper — uses the public Eventim API directly (no Puppeteer).
+ * Fetches all Austrian concerts, festivals, theater, and events.
+ * API: https://public-api.eventim.com/websearch/search/api/exploration/v1/products
+ *
+ * This scraper paginates through ALL results (up to 50 per page) and filters
+ * to Austrian events by checking city/venue against known AT cities and coords.
+ */
+
+interface EventimProduct {
+  productId: string;
+  productGroupId: string;
   name: string;
-  typeAttributes?: string[];
-  startDate?: string;
-  endDate?: string;
   description?: string;
-  products?: Record<string, unknown>[];
-  venue?: {
-    name: string;
-    city: string;
-    postalCode?: string;
-    street?: string;
-    country?: string;
-    state?: string;
-    latitude?: number;
-    longitude?: number;
-  };
+  status: string;
+  link?: string;
+  url?: { path?: string; domain?: string };
   imageUrl?: string;
-  url?: string | { pathname: string };
-  priceFrom?: number;
-  priceTo?: number;
-  currency?: string;
+  inStock: boolean;
+  typeAttributes?: {
+    liveEntertainment?: {
+      startDate?: string;
+      endDate?: string;
+      location?: {
+        name?: string;
+        city?: string;
+        postalCode?: string;
+        street?: string;
+        country?: string;
+        state?: string;
+        geoLocation?: { latitude?: number; longitude?: number };
+      };
+    };
+  };
   categories?: Array<{ name: string; parentCategory?: { name: string } }>;
-  attractions?: Array<{ name: string }>;
 }
 
 const CITY_TO_BUNDESLAND: Record<string, string> = {
   'wien': 'wien', 'vienna': 'wien',
-  'graz': 'steiermark', 'leoben': 'steiermark', 'kapfenberg': 'steiermark', 'leibnitz': 'steiermark', 'hartberg': 'steiermark', 'fürstenfeld': 'steiermark', 'judenburg': 'steiermark', 'knittelfeld': 'steiermark', 'weiz': 'steiermark',
-  'linz': 'oberoesterreich', 'wels': 'oberoesterreich', 'steyr': 'oberoesterreich', 'gmunden': 'oberoesterreich', 'ried': 'oberoesterreich', 'braunau': 'oberoesterreich', 'vöcklabruck': 'oberoesterreich', 'freistadt': 'oberoesterreich',
-  'salzburg': 'salzburg', 'hallein': 'salzburg', 'zell am see': 'salzburg', 'saalfelden': 'salzburg', 'st. johann im pongau': 'salzburg', 'bischofshofen': 'salzburg',
-  'innsbruck': 'tirol', 'kufstein': 'tirol', 'kitzbühel': 'tirol', 'schwaz': 'tirol', 'lienz': 'tirol', 'wörgl': 'tirol', 'hall in tirol': 'tirol', 'imst': 'tirol', 'landeck': 'tirol', 'reutte': 'tirol',
-  'klagenfurt': 'kaernten', 'villach': 'kaernten', 'spittal': 'kaernten', 'wolfsberg': 'kaernten', 'st. veit': 'kaernten', 'feldkirchen': 'kaernten', 'völkermarkt': 'kaernten',
-  'bregenz': 'vorarlberg', 'dornbirn': 'vorarlberg', 'feldkirch': 'vorarlberg', 'hohenems': 'vorarlberg', 'lustenau': 'vorarlberg', 'bludenz': 'vorarlberg', 'rankweil': 'vorarlberg', 'hard': 'vorarlberg',
-  'st. pölten': 'niederoesterreich', 'krems': 'niederoesterreich', 'wiener neustadt': 'niederoesterreich', 'baden': 'niederoesterreich', 'mödling': 'niederoesterreich', 'amstetten': 'niederoesterreich', 'tulln': 'niederoesterreich', 'zwettl': 'niederoesterreich', 'korneuburg': 'niederoesterreich', 'hollabrunn': 'niederoesterreich', 'mistelbach': 'niederoesterreich',
-  'eisenstadt': 'burgenland', 'oberwart': 'burgenland', 'güssing': 'burgenland', 'neusiedl': 'burgenland', 'mattersburg': 'burgenland', 'oberpullendorf': 'burgenland', 'jennersdorf': 'burgenland', 'mörbisch': 'burgenland', 'rust': 'burgenland',
+  'graz': 'steiermark', 'leoben': 'steiermark', 'kapfenberg': 'steiermark', 'leibnitz': 'steiermark', 'hartberg': 'steiermark', 'fürstenfeld': 'steiermark', 'judenburg': 'steiermark', 'knittelfeld': 'steiermark', 'weiz': 'steiermark', 'voitsberg': 'steiermark', 'murau': 'steiermark', 'liezen': 'steiermark', 'schladming': 'steiermark', 'bad aussee': 'steiermark',
+  'linz': 'oberoesterreich', 'wels': 'oberoesterreich', 'steyr': 'oberoesterreich', 'gmunden': 'oberoesterreich', 'ried': 'oberoesterreich', 'braunau': 'oberoesterreich', 'vöcklabruck': 'oberoesterreich', 'freistadt': 'oberoesterreich', 'bad ischl': 'oberoesterreich', 'enns': 'oberoesterreich', 'attnang-puchheim': 'oberoesterreich', 'kirchdorf': 'oberoesterreich',
+  'salzburg': 'salzburg', 'hallein': 'salzburg', 'zell am see': 'salzburg', 'saalfelden': 'salzburg', 'st. johann im pongau': 'salzburg', 'bischofshofen': 'salzburg', 'plainfeld': 'salzburg',
+  'innsbruck': 'tirol', 'kufstein': 'tirol', 'kitzbühel': 'tirol', 'schwaz': 'tirol', 'lienz': 'tirol', 'wörgl': 'tirol', 'hall in tirol': 'tirol', 'imst': 'tirol', 'landeck': 'tirol', 'reutte': 'tirol', 'mayrhofen': 'tirol', 'erl': 'tirol',
+  'klagenfurt': 'kaernten', 'villach': 'kaernten', 'spittal': 'kaernten', 'wolfsberg': 'kaernten', 'st. veit': 'kaernten', 'feldkirchen': 'kaernten', 'völkermarkt': 'kaernten', 'ossiach': 'kaernten',
+  'bregenz': 'vorarlberg', 'dornbirn': 'vorarlberg', 'feldkirch': 'vorarlberg', 'hohenems': 'vorarlberg', 'lustenau': 'vorarlberg', 'bludenz': 'vorarlberg', 'rankweil': 'vorarlberg', 'hard': 'vorarlberg', 'götzis': 'vorarlberg',
+  'st. pölten': 'niederoesterreich', 'krems': 'niederoesterreich', 'wiener neustadt': 'niederoesterreich', 'baden': 'niederoesterreich', 'mödling': 'niederoesterreich', 'amstetten': 'niederoesterreich', 'tulln': 'niederoesterreich', 'zwettl': 'niederoesterreich', 'korneuburg': 'niederoesterreich', 'hollabrunn': 'niederoesterreich', 'mistelbach': 'niederoesterreich', 'grafenegg': 'niederoesterreich', 'melk': 'niederoesterreich', 'spitz': 'niederoesterreich',
+  'eisenstadt': 'burgenland', 'oberwart': 'burgenland', 'güssing': 'burgenland', 'neusiedl': 'burgenland', 'mattersburg': 'burgenland', 'oberpullendorf': 'burgenland', 'jennersdorf': 'burgenland', 'mörbisch': 'burgenland', 'rust': 'burgenland', 'kobersdorf': 'burgenland', 'nickelsdorf': 'burgenland',
 };
+
+// Austrian postal codes start with 1-9 and are 4 digits
+function isAustrianPostalCode(code?: string): boolean {
+  if (!code) return false;
+  return /^[1-9]\d{3}$/.test(code);
+}
 
 export class OeticketScraper extends BaseScraper {
   readonly name = 'oeticket';
-  private readonly API_BASE = 'https://public-api.eventim.com/websearch/search/api/exploration/v2';
-  private readonly HEADERS: Record<string, string> = {
-    'Accept': 'application/json',
-    'oidc-client-id': 'web__oeticket-at',
-    'x-requested-with': 'XMLHttpRequest',
-    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
-    'Referer': 'https://www.oeticket.com/',
-    'Origin': 'https://www.oeticket.com',
-  };
-
-  // Austrian cities to search - covers all Bundesländer
-  private readonly SEARCH_CITIES = [
-    'Wien', 'Graz', 'Linz', 'Salzburg', 'Innsbruck', 'Klagenfurt',
-    'Bregenz', 'Eisenstadt', 'St. Pölten', 'Villach', 'Wels',
-    'Dornbirn', 'Wiener Neustadt', 'Steyr', 'Feldkirch', 'Wolfsberg',
-    'Baden', 'Mödling', 'Krems', 'Amstetten', 'Kapfenberg', 'Leoben',
-    'Hallein', 'Kufstein', 'Oberwart', 'Güssing', 'Neusiedl',
-    'Mattersburg', 'Kitzbühel', 'Zell am See', 'Tulln', 'Korneuburg',
-    'Gmunden', 'Mörbisch', 'St. Margarethen',
-  ];
+  private readonly API_BASE = 'https://public-api.eventim.com/websearch/search/api/exploration/v1/products';
+  private readonly PAGE_SIZE = 50; // max allowed by API
+  private readonly MAX_PAGES = 200; // 200 * 50 = 10.000 events max
 
   async scrape(): Promise<ScrapedEvent[]> {
-    this.log('Starte oeticket Scraping für ganz Österreich via Puppeteer...');
+    this.log('Starte oeticket API-Scraping (direkt, kein Puppeteer)...');
 
-    try {
-      const puppeteer = require('puppeteer-core');
-      const browser = await puppeteer.launch({
-        executablePath: 'C:/Program Files/Google/Chrome/Application/chrome.exe',
-        headless: 'shell',
-        args: ['--no-sandbox', '--disable-http2'],
-      });
+    const allProducts = new Map<string, EventimProduct>();
+    let page = 0;
+    let totalResults = 0;
 
-      const page = await browser.newPage();
-      await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36');
+    // Paginate through ALL concert results
+    while (page < this.MAX_PAGES) {
+      try {
+        const url = `${this.API_BASE}?webId=web__oeticket-at&language=de&page=${page}&sort=DateAsc&top=${this.PAGE_SIZE}`;
+        const response = await fetch(url, {
+          headers: {
+            'Accept': 'application/json',
+            'User-Agent': this.userAgent,
+          },
+          signal: AbortSignal.timeout(15000),
+        });
 
-      const allProducts = new Map<number, OeticketProduct>();
-
-      for (const city of this.SEARCH_CITIES) {
-        try {
-          // Navigate to search page to trigger API call
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          let apiResult: any = null;
-
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const responseHandler = async (res: any) => {
-            if (res.url().includes('productGroups') && res.url().includes('exploration') && res.status() === 200) {
-              try { apiResult = await res.json() as typeof apiResult; } catch {}
-            }
-          };
-          page.on('response', responseHandler);
-
-          await page.goto(`https://www.oeticket.com/search/?searchterm=${encodeURIComponent(city)}`, {
-            waitUntil: 'networkidle0', timeout: 30000,
-          });
-          await this.sleep(4000);
-
-          page.removeAllListeners('response');
-
-          if (!apiResult) {
-            this.log(`${city}: keine API-Antwort`);
+        if (!response.ok) {
+          if (response.status === 429) {
+            this.log(`Rate limited auf Seite ${page}, warte 5s...`);
+            await this.sleep(5000);
             continue;
           }
-
-          const total = apiResult.totalResults;
-          const firstPage = apiResult.productGroups || [];
-          firstPage.forEach((p: OeticketProduct) => allProducts.set(p.productGroupId, p));
-          this.log(`${city}: ${total} total, ${firstPage.length} auf Seite 1`);
-
-          // Fetch remaining pages via browser context
-          if (total > 20) {
-            const totalPages = Math.min(apiResult.totalPages, 10); // Max 10 pages per city
-            for (let pg = 1; pg < totalPages; pg++) {
-              const data = await page.evaluate(async (searchTerm: string, pageNum: number) => {
-                const r = await fetch(`https://public-api.eventim.com/websearch/search/api/exploration/v2/productGroups?webId=web__oeticket-at&search_term=${encodeURIComponent(searchTerm)}&language=de&retail_partner=EOE&sort=DateAsc&page=${pageNum}&tags=DISABLE_FBS`);
-                return await r.json();
-              }, city, pg);
-
-              if (data?.productGroups) {
-                data.productGroups.forEach((p: OeticketProduct) => allProducts.set(p.productGroupId, p));
-              }
-              await this.sleep(500);
-            }
-          }
-        } catch (err) {
-          this.log(`${city}: Fehler - ${err instanceof Error ? err.message : err}`);
+          this.log(`API Fehler ${response.status} auf Seite ${page}`);
+          break;
         }
-      }
 
-      await browser.close();
+        const data = await response.json() as { products: EventimProduct[]; totalResults: number };
+        totalResults = data.totalResults;
 
-      // Map all products to events - each sub-product (with its own venue/date) becomes an event
-      const events: ScrapedEvent[] = [];
-      const seenIds = new Set<string>();
-      for (const pg of allProducts.values()) {
-        const subEvents = this.mapProductGroup(pg);
-        for (const e of subEvents) {
-          if (!seenIds.has(e.source_id)) {
-            seenIds.add(e.source_id);
-            events.push(e);
-          }
+        if (!data.products || data.products.length === 0) break;
+
+        for (const p of data.products) {
+          allProducts.set(p.productId, p);
         }
-      }
 
-      this.log(`${events.length} AT-Events gemappt (${allProducts.size} unique product groups)`);
-      return events;
-    } catch (err) {
-      this.log(`Puppeteer fehlgeschlagen: ${err instanceof Error ? err.message : err}`);
-      return [];
+        if (page === 0) {
+          this.log(`${totalResults} Gesamt-Events gefunden, starte Paginierung...`);
+        }
+
+        if (page % 20 === 0 && page > 0) {
+          this.log(`Seite ${page}/${Math.ceil(totalResults / this.PAGE_SIZE)} — ${allProducts.size} Events geladen`);
+        }
+
+        // All pages fetched?
+        if (allProducts.size >= totalResults || data.products.length < this.PAGE_SIZE) break;
+
+        page++;
+        // Gentle rate limiting
+        await this.sleep(200);
+      } catch (err) {
+        this.log(`Fehler auf Seite ${page}: ${err instanceof Error ? err.message : err}`);
+        break;
+      }
     }
+
+    this.log(`${allProducts.size} Produkte geladen, filtere nach Österreich...`);
+
+    // Map products to events, filtering to Austria only
+    const events: ScrapedEvent[] = [];
+    const seenIds = new Set<string>();
+
+    for (const product of allProducts.values()) {
+      if (product.status === 'Cancelled') continue;
+
+      const mapped = this.mapProduct(product);
+      if (mapped && !seenIds.has(mapped.source_id)) {
+        seenIds.add(mapped.source_id);
+        events.push(mapped);
+      }
+    }
+
+    this.log(`${events.length} österreichische Events gemappt (von ${allProducts.size} Produkten)`);
+    return events;
   }
 
-  private mapProductGroup(pg: OeticketProduct): ScrapedEvent[] {
-    const events: ScrapedEvent[] = [];
-    const products = pg.products;
+  private mapProduct(product: EventimProduct): ScrapedEvent | null {
+    const la = product.typeAttributes?.liveEntertainment;
+    if (!la?.startDate) return null;
 
-    // Category from productGroup categories
-    let category = categorizeEvent(pg.name);
-    if (category === 'Sonstiges' && pg.categories?.length) {
-      const cats = pg.categories.map(c => c.name).join(' ').toLowerCase();
-      if (cats.includes('konzert') || cats.includes('rock') || cats.includes('pop') || cats.includes('jazz') || cats.includes('klassik')) category = 'Musik';
+    const location = la.location;
+    if (!location?.city) return null;
+
+    const city = location.city;
+    const cityLower = city.toLowerCase().trim();
+
+    // Determine Bundesland — by city name or postal code or coordinates
+    let bundesland: string | undefined = CITY_TO_BUNDESLAND[cityLower];
+
+    if (!bundesland) {
+      // Try partial match
+      for (const [key, bl] of Object.entries(CITY_TO_BUNDESLAND)) {
+        if (cityLower.includes(key) || key.includes(cityLower)) {
+          bundesland = bl;
+          break;
+        }
+      }
+    }
+
+    const geo = location.geoLocation;
+    const lat = geo?.latitude;
+    const lng = geo?.longitude;
+
+    if (!bundesland && isAustrianPostalCode(location.postalCode)) {
+      const districtResult = getDistrictByPostalCodeAT(location.postalCode!);
+      if (districtResult) bundesland = districtResult.bundesland;
+    }
+
+    if (!bundesland && lat && lng) {
+      bundesland = this.getBundeslandByCoords(lat, lng);
+    }
+
+    // Skip non-Austrian events
+    if (!bundesland) return null;
+
+    // Category detection
+    let category = categorizeEvent(product.name);
+    if (category === 'Sonstiges' && product.categories?.length) {
+      const cats = product.categories.map(c => c.name).join(' ').toLowerCase();
+      if (cats.includes('konzert') || cats.includes('rock') || cats.includes('pop') || cats.includes('jazz') || cats.includes('klassik') || cats.includes('hip-hop') || cats.includes('electronic')) category = 'Musik';
       else if (cats.includes('sport')) category = 'Sport';
       else if (cats.includes('theater') || cats.includes('kabarett') || cats.includes('comedy') || cats.includes('musical')) category = 'Kultur';
       else if (cats.includes('family') || cats.includes('kinder') || cats.includes('familie')) category = 'Familie';
       else if (cats.includes('festival') || cats.includes('party')) category = 'Musik';
+      else if (cats.includes('ausstellung') || cats.includes('messe')) category = 'Kultur';
     }
 
-    if (!products || products.length === 0) {
-      // No sub-products, skip
-      return events;
+    // District
+    let district: string | undefined;
+    if (location.postalCode) {
+      const result = getDistrictByPostalCodeAT(location.postalCode);
+      if (result?.bundesland === bundesland) district = result.district;
+    }
+    if (!district && lat && lng) {
+      district = getDistrictByCoordsAT(lat, lng, bundesland) || undefined;
     }
 
-    for (const product of products) {
-      const typeAttrs = product.typeAttributes as Record<string, unknown> | undefined;
-      const liveEnt = typeAttrs?.liveEntertainment as Record<string, unknown> | undefined;
-      const location = liveEnt?.location as Record<string, unknown> | undefined;
-
-      if (!location?.city) continue;
-
-      const city = String(location.city);
-      const cityLower = city.toLowerCase().trim();
-
-      // Determine Bundesland
-      let bundesland: string | undefined = CITY_TO_BUNDESLAND[cityLower];
-      if (!bundesland) {
-        for (const [key, bl] of Object.entries(CITY_TO_BUNDESLAND)) {
-          if (cityLower.includes(key) || key.includes(cityLower)) {
-            bundesland = bl;
-            break;
-          }
-        }
-      }
-
-      const geoLoc = location.geoLocation as Record<string, number> | undefined;
-      const lat = geoLoc?.latitude;
-      const lng = geoLoc?.longitude;
-
-      if (!bundesland && lat && lng) {
-        bundesland = this.getBundeslandByCoords(lat, lng);
-      }
-
-      if (!bundesland) continue;
-
-      const startDate = String(liveEnt?.startDate || pg.startDate || new Date().toISOString().slice(0, 10));
-      const venueName = String(location.name || city);
-      const postalCode = location.postalCode ? String(location.postalCode) : undefined;
-      const street = location.street ? String(location.street) : undefined;
-
-      // District assignment
-      let district: string | undefined;
-      if (postalCode) {
-        const districtResult = getDistrictByPostalCodeAT(postalCode);
-        if (districtResult && districtResult.bundesland === bundesland) {
-          district = districtResult.district;
-        }
-      }
-      if (!district && lat && lng) {
-        district = getDistrictByCoordsAT(lat, lng, bundesland) || undefined;
-      }
-
-      // URL
-      const productUrl = product.url as { path?: string; domain?: string } | string | undefined;
-      let sourceUrl = 'https://www.oeticket.com';
-      if (productUrl) {
-        if (typeof productUrl === 'string') {
-          sourceUrl = productUrl.startsWith('http') ? productUrl : `https://www.oeticket.com${productUrl}`;
-        } else if (productUrl.path) {
-          sourceUrl = `${productUrl.domain || 'https://www.oeticket.com'}${productUrl.path}`;
-        }
-      } else if (product.link) {
-        sourceUrl = String(product.link);
-      }
-
-      events.push({
-        source_id: `oeticket-${product.productId || pg.productGroupId}`,
-        source_name: this.name,
-        source_url: sourceUrl,
-        title: pg.name,
-        description: pg.description?.slice(0, 500) || undefined,
-        start_date: startDate,
-        location_name: venueName,
-        address: street ? `${street}, ${postalCode || ''} ${city}` : city,
-        postal_code: postalCode,
-        district,
-        bundesland,
-        latitude: lat || undefined,
-        longitude: lng || undefined,
-        category,
-        image_url: pg.imageUrl || undefined,
-        organizer: pg.name.split(' - ')[0] || undefined,
-      });
+    // URL
+    let sourceUrl = 'https://www.oeticket.com';
+    if (product.link) {
+      sourceUrl = product.link;
+    } else if (product.url?.path) {
+      sourceUrl = `${product.url.domain || 'https://www.oeticket.com'}${product.url.path}`;
     }
 
-    return events;
+    // Price from URL or description
+    const priceMatch = product.description?.match(/(?:ab|from)\s*€?\s*(\d+[.,]\d{2})/i);
+    const priceText = priceMatch ? `ab € ${priceMatch[1]}` : undefined;
+
+    return {
+      source_id: `oeticket-${product.productId}`,
+      source_name: this.name,
+      source_url: sourceUrl,
+      title: product.name,
+      description: product.description?.slice(0, 1000) || undefined,
+      start_date: la.startDate,
+      end_date: la.endDate || undefined,
+      location_name: location.name || city,
+      address: location.street ? `${location.street}, ${location.postalCode || ''} ${city}`.trim() : city,
+      postal_code: location.postalCode || undefined,
+      district,
+      bundesland,
+      latitude: lat || undefined,
+      longitude: lng || undefined,
+      category,
+      image_url: product.imageUrl || undefined,
+      price_text: priceText,
+      ticket_url: sourceUrl,
+    };
   }
 
   private getBundeslandByCoords(lat: number, lng: number): string | undefined {
