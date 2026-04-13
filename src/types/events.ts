@@ -41,6 +41,8 @@ export interface Event {
   venue_match_stage?: number | null;
   event_series_id?: string | null;
   content_fingerprint?: string | null;
+  /** FK to parent event (e.g. festival umbrella event for derived artist events). */
+  parent_event_id?: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -70,6 +72,10 @@ export interface ScrapedEvent {
   ticket_url?: string;
   /** Venue ID from the registry (set by RegistryBasedScraper) */
   venue_id?: string;
+  /** FK to parent event for derived events (e.g. "Artist at Festival"). */
+  parent_event_id?: string;
+  /** Source type override (e.g. 'derived' for lineup-generated events). */
+  source_type?: string;
 }
 
 export interface EventFilters {
