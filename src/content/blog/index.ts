@@ -51,6 +51,18 @@ import { post as wiesenFest } from './posts/wiesen-fest';
 import { post as lichterfestMelk } from './posts/lichterfest-melk';
 import { post as retzWeinlesefest } from './posts/retz-weinlesefest';
 import { post as linzMarathon } from './posts/linz-marathon';
+import { post as electricLove } from './posts/electric-love-festival-2026';
+import { post as poolbarFestival } from './posts/poolbar-festival-2026';
+import { post as impulsTanz } from './posts/impulstanz-2026';
+import { post as narzissenfest } from './posts/narzissenfest-2026';
+import { post as sommernachtskonzert } from './posts/sommernachtskonzert-schoenbrunn-2026';
+import { post as musikfestivalSteyr } from './posts/musikfestival-steyr-2026';
+import { post as glattUndVerkehrt } from './posts/glatt-und-verkehrt-2026';
+import { post as jazzfestWien } from './posts/jazzfest-wien-2026';
+import { post as schlosspieleKobersdorf } from './posts/schlossspiele-kobersdorf-2026';
+import { post as tirolerFestspiele } from './posts/tiroler-festspiele-erl-2026';
+import { post as festDerFreude } from './posts/fest-der-freude-2026';
+import { post as spitzerMarillenkirtag } from './posts/spitzer-marillenkirtag-2026';
 
 export type { FestivalPost, GalleryImage, FestivalKeyFacts, LineupAct } from './types';
 
@@ -108,6 +120,18 @@ export const ALL_POSTS: FestivalPost[] = [
   lichterfestMelk,
   retzWeinlesefest,
   linzMarathon,
+  electricLove,
+  poolbarFestival,
+  impulsTanz,
+  narzissenfest,
+  sommernachtskonzert,
+  musikfestivalSteyr,
+  glattUndVerkehrt,
+  jazzfestWien,
+  schlosspieleKobersdorf,
+  tirolerFestspiele,
+  festDerFreude,
+  spitzerMarillenkirtag,
 ].sort(
   (a, b) => new Date(b.publishDate).getTime() - new Date(a.publishDate).getTime()
 );
