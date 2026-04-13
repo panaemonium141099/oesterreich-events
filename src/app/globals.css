@@ -534,6 +534,77 @@ button:active, a:active, [role="button"]:active {
 }
 
 /* ═══════════════════════════════════════════════
+   Artist Match Markers — gold highlight, always visible
+   ═══════════════════════════════════════════════ */
+.marker-artist {
+  width: 56px !important;
+  height: 56px !important;
+  border: 3px solid #f59e0b !important;
+  box-shadow:
+    0 0 0 3px rgba(245, 158, 11, 0.3),
+    0 4px 12px rgba(245, 158, 11, 0.25),
+    0 8px 24px rgba(0, 0, 0, 0.15) !important;
+  z-index: 5 !important;
+  position: relative;
+  overflow: visible !important;
+}
+.marker-artist::before {
+  content: '';
+  position: absolute;
+  inset: -8px;
+  border-radius: 50%;
+  border: 2.5px solid rgba(245, 158, 11, 0.6);
+  animation: artistPulse 2.5s ease-out infinite;
+  pointer-events: none;
+  z-index: -1;
+}
+.marker-artist::after {
+  content: '';
+  position: absolute;
+  top: -8px;
+  right: -4px;
+  width: 18px;
+  height: 18px;
+  background: #f59e0b;
+  border-radius: 50%;
+  border: 2px solid white;
+  z-index: 6;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='white' width='12' height='12'%3E%3Cpath d='M12 3v10.55c-.59-.34-1.27-.55-2-.55C7.79 13 6 14.79 6 17s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 11px 11px;
+}
+.marker-artist:hover {
+  transform: scale(1.3) !important;
+  box-shadow:
+    0 0 0 4px rgba(245, 158, 11, 0.4),
+    0 6px 20px rgba(245, 158, 11, 0.35),
+    0 12px 32px rgba(0, 0, 0, 0.2) !important;
+}
+.evening-mode .marker-artist {
+  border-color: #fbbf24 !important;
+  box-shadow:
+    0 0 0 3px rgba(251, 191, 36, 0.25),
+    0 4px 16px rgba(251, 191, 36, 0.3),
+    0 8px 24px rgba(0, 0, 0, 0.4) !important;
+}
+.evening-mode .marker-artist::before {
+  border-color: rgba(251, 191, 36, 0.5);
+}
+.evening-mode .marker-artist::after {
+  background-color: #fbbf24;
+  border-color: rgba(30, 41, 59, 0.9);
+}
+@keyframes artistPulse {
+  0% { transform: scale(1); opacity: 0.5; }
+  100% { transform: scale(1.6); opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .marker-artist::before { animation: none; opacity: 0; }
+}
+
+/* ═══════════════════════════════════════════════
    Popups
    ═══════════════════════════════════════════════ */
 .mapboxgl-popup-content {

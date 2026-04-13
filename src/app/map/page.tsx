@@ -99,21 +99,25 @@ function MapPageInner() {
   const [sidebarTab, setSidebarTab] = useState<SidebarTab>('events');
   const [artistEventCount, setArtistEventCount] = useState(0);
   const [hasFollowedArtists, setHasFollowedArtists] = useState(false);
+  const [artistEventIds, setArtistEventIds] = useState<Set<string>>(new Set());
 
-  // Fetch artist event count for badge
+  // Fetch artist events — IDs for map highlighting + count for badge
   useEffect(() => {
     if (!user) {
       setHasFollowedArtists(false);
       setArtistEventCount(0);
+      setArtistEventIds(new Set());
       return;
     }
     (async () => {
       try {
-        const res = await fetch('/api/artists/events?limit=1');
+        const res = await fetch('/api/artists/events?limit=200');
         if (res.ok) {
           const data = await res.json();
           setHasFollowedArtists(data.has_followed_artists ?? false);
           setArtistEventCount(data.total ?? 0);
+          const ids = new Set<string>((data.events || []).map((e: { event_id?: string; id?: string }) => e.event_id || e.id));
+          setArtistEventIds(ids);
         }
       } catch {
         // silently handle
@@ -369,6 +373,7 @@ function MapPageInner() {
           eveningMode={eveningMode}
           flyToCoords={dynamicFlyTo || flyToCoords}
           bundesland={bundesland}
+          artistEventIds={artistEventIds}
         />
 
         {/* Loading overlay — centered in map area, not covering sidebar */}

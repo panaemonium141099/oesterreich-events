@@ -41,7 +41,8 @@ interface EventMapProps {
   eveningMode?: boolean;
   bundesland: Bundesland;
   flyToCoords?: { lat: number; lng: number; zoom: number } | null;
-  /** Called when the map viewport changes with [south_lat, west_lng, north_lat, east_lng] */
+  /** Set of event IDs that matched followed artists — displayed as special markers */
+  artistEventIds?: Set<string>;
 }
 
 function addBaseOverlays(m: mapboxgl.Map, dark: boolean) {
@@ -130,13 +131,19 @@ function updateBundeslandOverlay(m: mapboxgl.Map, bl: Bundesland, dark: boolean)
   }).catch(() => {});
 }
 
-function EventMap({ events, selectedEvent, hoveredEventId, onSelectEvent, eveningMode, bundesland, flyToCoords }: EventMapProps) {
+function EventMap({ events, selectedEvent, hoveredEventId, onSelectEvent, eveningMode, bundesland, flyToCoords, artistEventIds }: EventMapProps) {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
   const markersOnScreen = useRef<Map<string, mapboxgl.Marker>>(new Map());
   const eventLookup = useRef<Map<string, Event>>(new Map());
+  const artistIdsRef = useRef<Set<string>>(new Set());
   const [mapReady, setMapReady] = useState(false);
   const prevBundeslandRef = useRef(bundesland.id);
+
+  // Keep artist IDs ref in sync
+  useEffect(() => {
+    artistIdsRef.current = artistEventIds ?? new Set();
+  }, [artistEventIds]);
 
   // Build event lookup
   useEffect(() => {
@@ -281,15 +288,39 @@ function EventMap({ events, selectedEvent, hoveredEventId, onSelectEvent, evenin
 
     const geojson = buildGeoJSON(events);
 
+    // Build separate GeoJSON for artist-match events (no clustering)
+    const artistIds = artistIdsRef.current;
+    const artistGeojson: GeoJSON.FeatureCollection = {
+      type: 'FeatureCollection',
+      features: artistIds.size > 0
+        ? events
+            .filter(e => artistIds.has(e.id) && e.latitude && e.longitude)
+            .map(e => ({
+              type: 'Feature' as const,
+              properties: { id: e.id, title: e.title, image_url: e.image_url || '' },
+              geometry: { type: 'Point' as const, coordinates: [e.longitude!, e.latitude!] },
+            }))
+        : [],
+    };
+
+    // Filter artist events OUT of the main clustered source to avoid duplicates
+    const mainGeojson: GeoJSON.FeatureCollection = artistIds.size > 0
+      ? { ...geojson, features: geojson.features.filter(f => !artistIds.has(f.properties?.id)) }
+      : geojson;
+
     // If source already exists, just update the data — no full teardown needed
     if (sourceInitialized.current && m.getSource('events')) {
-      (m.getSource('events') as mapboxgl.GeoJSONSource).setData(geojson);
+      (m.getSource('events') as mapboxgl.GeoJSONSource).setData(mainGeojson);
+      if (m.getSource('artist-events')) {
+        (m.getSource('artist-events') as mapboxgl.GeoJSONSource).setData(artistGeojson);
+      }
       // Don't return — let the marker update logic below run
     } else {
       // First time: create source + layers — remove layers before source
-      for (const layerId of ['unclustered-point', 'cluster-count', 'clusters']) {
+      for (const layerId of ['unclustered-artist-point', 'unclustered-point', 'cluster-count', 'clusters']) {
         if (m.getLayer(layerId)) m.removeLayer(layerId);
       }
+      if (m.getSource('artist-events')) m.removeSource('artist-events');
       if (m.getSource('events')) m.removeSource('events');
 
       markersOnScreen.current.forEach(marker => marker.remove());
@@ -297,10 +328,16 @@ function EventMap({ events, selectedEvent, hoveredEventId, onSelectEvent, evenin
 
       m.addSource('events', {
         type: 'geojson',
-        data: geojson,
+        data: mainGeojson,
         cluster: true,
         clusterMaxZoom: 15,
         clusterRadius: 60,
+      });
+
+      // Artist events: separate source, NO clustering
+      m.addSource('artist-events', {
+        type: 'geojson',
+        data: artistGeojson,
       });
 
       sourceInitialized.current = true;
@@ -351,6 +388,17 @@ function EventMap({ events, selectedEvent, hoveredEventId, onSelectEvent, evenin
       },
     });
 
+    // Invisible artist-event points (separate unclustered source)
+    m.addLayer({
+      id: 'unclustered-artist-point',
+      type: 'circle',
+      source: 'artist-events',
+      paint: {
+        'circle-radius': 0,
+        'circle-opacity': 0,
+      },
+    });
+
     // Click on cluster -> zoom in
     m.on('click', 'clusters', (e) => {
       try {
@@ -376,9 +424,14 @@ function EventMap({ events, selectedEvent, hoveredEventId, onSelectEvent, evenin
     const updateMarkers = () => {
       if (!m.getSource('events')) return;
       const features = m.querySourceFeatures('events', { sourceLayer: '' });
+      // Also include artist-event features (unclustered, always visible)
+      const artistFeatures = m.getSource('artist-events')
+        ? m.querySourceFeatures('artist-events', { sourceLayer: '' })
+        : [];
+      const allFeatures = [...features, ...artistFeatures];
       const newMarkerIds = new Set<string>();
 
-      for (const feature of features) {
+      for (const feature of allFeatures) {
         if (feature.properties?.cluster) continue; // Skip clusters
 
         const id = feature.properties?.id;
@@ -397,7 +450,8 @@ function EventMap({ events, selectedEvent, hoveredEventId, onSelectEvent, evenin
         const todayStr = new Date().toISOString().slice(0, 10);
         const eventDateStr = event.start_date?.slice(0, 10) || '';
         const isToday = eventDateStr === todayStr;
-        el.className = `mapbox-event-marker${isToday ? ' marker-today' : ''}`;
+        const isArtistMatch = artistIdsRef.current.has(id);
+        el.className = `mapbox-event-marker${isToday ? ' marker-today' : ''}${isArtistMatch ? ' marker-artist' : ''}`;
         const imgUrl = getEventImage(event.image_url, event.category, event.title);
         const fallbackUrl = getCategoryFallbackImage(event.category, event.title);
         const img = document.createElement('img');
