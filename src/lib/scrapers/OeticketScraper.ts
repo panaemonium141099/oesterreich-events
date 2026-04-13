@@ -64,62 +64,69 @@ export class OeticketScraper extends BaseScraper {
   private readonly PAGE_SIZE = 50; // max allowed by API
   private readonly MAX_PAGES = 200; // 200 * 50 = 10.000 events max
 
+  // Top-level categories to scrape — each separately to stay under API pagination limit (~103 pages)
+  // Names from the API facets (hierarchicalItems)
+  private readonly CATEGORIES = [
+    'Konzerte',
+    'Kabarett & Comedy',
+    'Musical & Show',
+    'Klassik & Kultur',
+    'Sport',
+    'Freizeit',
+  ];
+
   async scrape(): Promise<ScrapedEvent[]> {
     this.log('Starte oeticket API-Scraping (direkt, kein Puppeteer)...');
 
     const allProducts = new Map<string, EventimProduct>();
-    let page = 0;
-    let totalResults = 0;
 
-    // Paginate through ALL concert results
-    while (page < this.MAX_PAGES) {
-      try {
-        const url = `${this.API_BASE}?webId=web__oeticket-at&language=de&page=${page}&sort=DateAsc&top=${this.PAGE_SIZE}`;
-        const response = await fetch(url, {
-          headers: {
-            'Accept': 'application/json',
-            'User-Agent': this.userAgent,
-          },
-          signal: AbortSignal.timeout(15000),
-        });
+    for (const category of this.CATEGORIES) {
+      let page = 1;
+      let categoryTotal = 0;
+      const beforeCount = allProducts.size;
 
-        if (!response.ok) {
-          if (response.status === 429) {
-            this.log(`Rate limited auf Seite ${page}, warte 5s...`);
-            await this.sleep(5000);
-            continue;
+      while (page <= this.MAX_PAGES) {
+        try {
+          const url = `${this.API_BASE}?webId=web__oeticket-at&language=de&page=${page}&categories=${encodeURIComponent(category)}&sort=DateAsc&top=${this.PAGE_SIZE}`;
+          const response = await fetch(url, {
+            headers: {
+              'Accept': 'application/json',
+              'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
+            },
+            signal: AbortSignal.timeout(15000),
+          });
+
+          if (!response.ok) {
+            if (response.status === 429) {
+              this.log(`Rate limited (${category} Seite ${page}), warte 5s...`);
+              await this.sleep(5000);
+              continue;
+            }
+            // API pagination limit reached — move to next category
+            break;
           }
-          this.log(`API Fehler ${response.status} auf Seite ${page}`);
+
+          const data = await response.json() as { products: EventimProduct[]; totalResults: number };
+          if (page === 1) categoryTotal = data.totalResults;
+
+          if (!data.products || data.products.length === 0) break;
+
+          for (const p of data.products) {
+            allProducts.set(p.productId, p);
+          }
+
+          if (data.products.length < this.PAGE_SIZE) break;
+
+          page++;
+          await this.sleep(150);
+        } catch (err) {
+          this.log(`Fehler bei ${category} Seite ${page}: ${err instanceof Error ? err.message : err}`);
           break;
         }
-
-        const data = await response.json() as { products: EventimProduct[]; totalResults: number };
-        totalResults = data.totalResults;
-
-        if (!data.products || data.products.length === 0) break;
-
-        for (const p of data.products) {
-          allProducts.set(p.productId, p);
-        }
-
-        if (page === 0) {
-          this.log(`${totalResults} Gesamt-Events gefunden, starte Paginierung...`);
-        }
-
-        if (page % 20 === 0 && page > 0) {
-          this.log(`Seite ${page}/${Math.ceil(totalResults / this.PAGE_SIZE)} — ${allProducts.size} Events geladen`);
-        }
-
-        // All pages fetched?
-        if (allProducts.size >= totalResults || data.products.length < this.PAGE_SIZE) break;
-
-        page++;
-        // Gentle rate limiting
-        await this.sleep(200);
-      } catch (err) {
-        this.log(`Fehler auf Seite ${page}: ${err instanceof Error ? err.message : err}`);
-        break;
       }
+
+      const newInCategory = allProducts.size - beforeCount;
+      this.log(`${category}: ${newInCategory} neue (${categoryTotal} total in API, ${page - 1} Seiten)`);
     }
 
     this.log(`${allProducts.size} Produkte geladen, filtere nach Österreich...`);
