@@ -388,7 +388,7 @@ export default function ProfilePage() {
                     client_id: process.env.NEXT_PUBLIC_SPOTIFY_CLIENT_ID || '',
                     response_type: 'code',
                     redirect_uri: `${window.location.origin}/auth/spotify/callback`,
-                    scope: 'user-top-artists user-read-recently-played',
+                    scope: 'user-top-read user-read-recently-played user-follow-read',
                     show_dialog: 'true',
                   });
                   window.location.href = `https://accounts.spotify.com/authorize?${params.toString()}`;

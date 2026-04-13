@@ -132,7 +132,7 @@ export function getSpotifyAuthUrl(redirectUri: string): string {
     client_id: SPOTIFY_CLIENT_ID,
     response_type: 'code',
     redirect_uri: redirectUri,
-    scope: 'user-top-artists user-read-recently-played',
+    scope: 'user-top-read user-read-recently-played user-follow-read',
     show_dialog: 'true',
   });
   return `https://accounts.spotify.com/authorize?${params.toString()}`;
