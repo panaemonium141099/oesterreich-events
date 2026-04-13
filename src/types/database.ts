@@ -420,7 +420,7 @@ export type Database = {
           event_id: string
           artist_name: string
           match_score: number
-          match_source: 'title' | 'description'
+          match_source: 'title' | 'description' | 'lineup'
           created_at: string
         }
         Insert: {
@@ -429,12 +429,12 @@ export type Database = {
           event_id: string
           artist_name: string
           match_score?: number
-          match_source?: 'title' | 'description'
+          match_source?: 'title' | 'description' | 'lineup'
           created_at?: string
         }
         Update: {
           match_score?: number
-          match_source?: 'title' | 'description'
+          match_source?: 'title' | 'description' | 'lineup'
         }
       }
       notification_preferences: {

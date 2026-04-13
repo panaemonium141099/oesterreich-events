@@ -15,6 +15,7 @@
  */
 
 import { SupabaseClient } from '@supabase/supabase-js';
+import { normalizeArtistName as lineupNormalize } from '@/lib/lineup/normalize';
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -31,7 +32,9 @@ export interface MatchResult {
   event_title: string;
   artist_name: string;
   match_score: number;
-  match_source: 'title' | 'description';
+  match_source: 'title' | 'description' | 'lineup';
+  /** Festival name for lineup matches (used by notification copy) */
+  festival_name?: string;
 }
 
 export interface MatchingCursorState {
@@ -47,6 +50,7 @@ export interface MatchingStats {
   notifications_created: number;
   artists_checked: number;
   skipped_short_names: number;
+  lineupMatches: number;
 }
 
 // ── Name classification ──────────────────────────────────────────────────────
@@ -88,6 +92,100 @@ export function normalizeArtistName(name: string): string {
   return stripDiacritics(name.toLowerCase().trim());
 }
 
+// ── False-positive filter ────────────────────────────────────────────────────
+
+/**
+ * Check if an artist name match in a title is a false positive.
+ * Returns true if the match should be REJECTED.
+ *
+ * Catches patterns where the artist name appears as a reference rather than
+ * the actual performer:
+ *  - "Musikkapelle Patsch: Von Sisi bis zu Coldplay" (cover/repertoire range)
+ *  - "Tribute to Coldplay" (tribute show)
+ *  - "Die besten Hits von Queen bis ACDC" (compilation reference)
+ */
+export function isFalsePositiveMatch(
+  artistName: string,
+  eventTitle: string
+): boolean {
+  const titleLower = eventTitle.toLowerCase();
+  const nameLower = artistName.toLowerCase();
+  const nameIndex = titleLower.indexOf(nameLower);
+  if (nameIndex === -1) {
+    // Try without diacritics
+    const titleNorm = stripDiacritics(titleLower);
+    const nameNorm = stripDiacritics(nameLower);
+    const normIndex = titleNorm.indexOf(nameNorm);
+    if (normIndex === -1) return false;
+    return checkFalsePositiveContext(titleLower, normIndex);
+  }
+  return checkFalsePositiveContext(titleLower, nameIndex);
+}
+
+function checkFalsePositiveContext(
+  titleLower: string,
+  nameIndex: number
+): boolean {
+  // Text before the artist name
+  const before = titleLower.substring(0, nameIndex).trimEnd();
+
+  // ── 1. Reference patterns right before the name ───────────────────────────
+  const refPatterns = [
+    /\bbis\s+(zu\s+)?$/,             // "bis (zu) [Artist]"  — range endpoint
+    /\bvon\s+\S+\s+bis\s+(zu\s+)?$/, // "von X bis (zu) [Artist]"
+    /\btribute\s+(to\s+|an?\s+)?$/,  // "tribute to [Artist]"
+    /\bhommage\s+(an?\s+)?$/,        // "hommage an [Artist]"
+    /\bcovers?\s+(von\s+)?$/,        // "cover(s) von [Artist]"
+    /\bhits\s+(von\s+)?$/,           // "hits von [Artist]"
+    /\bsongs\s+(von\s+)?$/,          // "songs von [Artist]"
+    /\blieder\s+(von\s+)?$/,         // "lieder von [Artist]"
+    /\bmelodien\s+(von\s+)?$/,       // "melodien von [Artist]"
+    /\bwerke\s+(von\s+)?$/,          // "werke von [Artist]"
+    /\bnach\s+$/,                     // "nach [Artist]"  — inspired by
+    /\bà la\s+$/,                     // "à la [Artist]"
+  ];
+
+  for (const pattern of refPatterns) {
+    if (pattern.test(before)) return true;
+  }
+
+  // ── 2. Cover-band / brass-band indicator ──────────────────────────────────
+  const coverPrefixes = [
+    'musikkapelle', 'blasmusik', 'musikverein', 'trachtenkapelle',
+    'stadtkapelle', 'harmoniemusik', 'bürgermusik', 'bürgerkapelle',
+    'feuerwehrkapelle', 'jugendkapelle', 'werkskapelle',
+  ];
+  if (coverPrefixes.some(p => titleLower.startsWith(p)) && nameIndex > 15) {
+    return true;
+  }
+
+  // ── 3. Headliner-position check ──────────────────────────────────────────
+  // Most concert titles: "Artist - Tour/Show Name" or "Konzert: Artist - Tour"
+  // If the matched name only appears AFTER " - " and a DIFFERENT artist/name
+  // is before it, the match is likely in the tour/show title, not the performer.
+  // Example: "David Garrett - Millenium Symphony" → ILLENIUM matches "Millenium"
+  //          but "David Garrett" is the headliner, not ILLENIUM.
+  const separators = [' - ', ' – ', ' — ', ': '];
+  for (const sep of separators) {
+    const sepIndex = titleLower.indexOf(sep);
+    if (sepIndex > 0 && nameIndex > sepIndex + sep.length) {
+      // Artist name is AFTER the separator — it's in the tour/show part
+      // Only flag if the headliner part (before separator) has actual text
+      // and doesn't contain the artist name
+      const headlinerPart = titleLower.substring(0, sepIndex).trim();
+      // Strip common prefixes like "Konzert:", "Live:" from headliner
+      const cleaned = headlinerPart
+        .replace(/^(konzert|live|open air|show|event)\s*:\s*/i, '')
+        .trim();
+      if (cleaned.length >= 3) {
+        return true; // Different headliner before separator
+      }
+    }
+  }
+
+  return false;
+}
+
 // ── Matching queries ─────────────────────────────────────────────────────────
 
 /**
@@ -123,8 +221,9 @@ export function formatNotificationBody(
 
 // ── Core matching engine ─────────────────────────────────────────────────────
 
-// Raised from 0.6 to 0.75 to reduce false positives
-// (0.6 caused "ILLENIUM" → "Millenium", "Nu Aspect" → "Aspects")
+// Raised from 0.6 to 0.75 to reduce false positives (0.6 caused "Nu Aspect" → "Aspects")
+// NOT 0.8 — that would kill "Pizzera und Jaus" → "Pizzera & Jaus" (0.76)
+// False positives like "ILLENIUM" → "Millenium" are caught by isFalsePositiveMatch() instead
 const WORD_SIMILARITY_THRESHOLD = 0.75;
 const BATCH_SIZE = 500;
 
@@ -390,6 +489,84 @@ export async function matchDescriptionNames(
 }
 
 /**
+ * Run direct lineup lookup for followed artist names against festival_artists.
+ * Uses the lineup normalizer (authoritative for both sides) for equality join.
+ * Returns matches with derived_event_id, event_title, and festival_name.
+ */
+export async function matchLineupArtists(
+  supabase: SupabaseClient,
+  artists: FollowedArtist[],
+  sinceTimestamp: string
+): Promise<Array<{
+  derived_event_id: string;
+  event_title: string;
+  festival_name: string;
+  artist_name_normalized: string;
+  followed_artist: FollowedArtist;
+}>> {
+  if (artists.length === 0) return [];
+
+  // Build a map from lineup-normalized name -> followed artists.
+  // The lineup normalizer is the authoritative normalizer for equality matching;
+  // the DB-stored followed_artists.artist_name_normalized (which is just lower())
+  // is NOT sufficient for lineup joins.
+  const normalizedMap = new Map<string, FollowedArtist[]>();
+  for (const artist of artists) {
+    const normalized = lineupNormalize(artist.artist_name);
+    if (!normalized) continue;
+    const list = normalizedMap.get(normalized) || [];
+    list.push(artist);
+    normalizedMap.set(normalized, list);
+  }
+
+  const normalizedNames = Array.from(normalizedMap.keys());
+  if (normalizedNames.length === 0) return [];
+
+  const { data, error } = await supabase.rpc('match_lineup_artists', {
+    p_artist_names: normalizedNames,
+    p_since: sinceTimestamp,
+  });
+
+  if (error) {
+    console.error('Lineup match error:', error);
+    // Non-fatal: lineup matching is additive
+    return [];
+  }
+
+  if (!data) return [];
+
+  // Fan out results to all followed artists that share the normalized name
+  const results: Array<{
+    derived_event_id: string;
+    event_title: string;
+    festival_name: string;
+    artist_name_normalized: string;
+    followed_artist: FollowedArtist;
+  }> = [];
+
+  for (const row of data as Array<{
+    derived_event_id: string;
+    event_title: string;
+    festival_name: string;
+    artist_name_raw: string;
+    artist_name_normalized: string;
+  }>) {
+    const followedArtists = normalizedMap.get(row.artist_name_normalized) || [];
+    for (const fa of followedArtists) {
+      results.push({
+        derived_event_id: row.derived_event_id,
+        event_title: row.event_title,
+        festival_name: row.festival_name,
+        artist_name_normalized: row.artist_name_normalized,
+        followed_artist: fa,
+      });
+    }
+  }
+
+  return results;
+}
+
+/**
  * Insert artist-event match records with ON CONFLICT DO NOTHING for dedup.
  */
 export async function insertArtistEventMatches(
@@ -441,7 +618,13 @@ export async function createGroupedNotifications(
   if (matches.length === 0) return 0;
 
   // Group by user_id + event_id
-  const groups = new Map<string, { user_id: string; event_id: string; event_title: string; artists: string[] }>();
+  const groups = new Map<string, {
+    user_id: string;
+    event_id: string;
+    event_title: string;
+    artists: string[];
+    festival_name?: string;
+  }>();
 
   for (const match of matches) {
     const key = `${match.user_id}:${match.event_id}`;
@@ -450,12 +633,17 @@ export async function createGroupedNotifications(
       if (!group.artists.includes(match.artist_name)) {
         group.artists.push(match.artist_name);
       }
+      // Carry festival_name from lineup matches for notification copy
+      if (match.festival_name && !group.festival_name) {
+        group.festival_name = match.festival_name;
+      }
     } else {
       groups.set(key, {
         user_id: match.user_id,
         event_id: match.event_id,
         event_title: match.event_title,
         artists: [match.artist_name],
+        festival_name: match.festival_name,
       });
     }
   }
@@ -468,8 +656,8 @@ export async function createGroupedNotifications(
     const batch = groupValues.slice(i, i + BATCH_SIZE).map(g => ({
       user_id: g.user_id,
       type: 'spotify_match',
-      title: 'Artist Match!',
-      body: formatNotificationBody(g.artists, g.event_title),
+      title: g.festival_name ? `Lineup Match: ${g.festival_name}` : 'Artist Match!',
+      body: formatNotificationBody(g.artists, g.festival_name ?? g.event_title),
       event_id: g.event_id,
       action_url: `/events/${g.event_id}`,
       read: false,
@@ -530,6 +718,7 @@ export async function runMatchingPipeline(
     notifications_created: 0,
     artists_checked: 0,
     skipped_short_names: 0,
+    lineupMatches: 0,
   };
 
   // Step 0: Optionally reset cursor
@@ -563,6 +752,14 @@ export async function runMatchingPipeline(
     console.log(`  Skipped names: ${skipped.join(', ')}`);
   }
 
+  // Step 3b: Direct lineup lookup (before fuzzy/exact title matching)
+  // Uses the lineup normalizer (authoritative for both sides) for equality join.
+  // Lineup matching runs IN ADDITION TO fuzzy matching -- a followed artist can
+  // match both a lineup entry and a separate concert event.
+  const lineupResults = await matchLineupArtists(supabase, allArtists, cursor.last_processed_at);
+  stats.lineupMatches = lineupResults.length;
+  console.log(`Lineup matches (direct): ${lineupResults.length}`);
+
   // Step 4a: Exact matching (3-char names)
   const exactNames = Array.from(exact.keys());
   const exactMatches = await matchExactNames(supabase, exactNames, cursor.last_processed_at);
@@ -574,6 +771,7 @@ export async function runMatchingPipeline(
   console.log(`Fuzzy matches (title): ${fuzzyMatches.length}`);
 
   // Collect all title-matched event IDs for description exclusion
+  // (use unfiltered here — FP filter runs after description matching)
   const titleMatchedEventIds = new Set<string>();
   for (const m of [...exactMatches, ...fuzzyMatches]) {
     titleMatchedEventIds.add(m.event_id);
@@ -589,11 +787,31 @@ export async function runMatchingPipeline(
   );
   console.log(`Description matches (secondary): ${descriptionMatches.length}`);
 
+  // Step 5b: Filter out false positives (cover bands, tribute shows, repertoire references)
+  let falsePositiveCount = 0;
+  const filterFP = (matches: typeof exactMatches) => {
+    return matches.filter(m => {
+      if (isFalsePositiveMatch(m.matched_name, m.event_title)) {
+        falsePositiveCount++;
+        console.log(`  FP rejected: "${m.matched_name}" in "${m.event_title}"`);
+        return false;
+      }
+      return true;
+    });
+  };
+
+  const filteredExact = filterFP(exactMatches);
+  const filteredFuzzy = filterFP(fuzzyMatches);
+  const filteredDesc = filterFP(descriptionMatches);
+  if (falsePositiveCount > 0) {
+    console.log(`Rejected ${falsePositiveCount} false positives`);
+  }
+
   // Step 6: Build full match results with user mappings
   const allMatches: MatchResult[] = [];
 
   // Map exact matches to users
-  for (const match of exactMatches) {
+  for (const match of filteredExact) {
     const artists = exact.get(match.matched_name) || [];
     for (const artist of artists) {
       allMatches.push({
@@ -608,7 +826,7 @@ export async function runMatchingPipeline(
   }
 
   // Map fuzzy matches to users
-  for (const match of fuzzyMatches) {
+  for (const match of filteredFuzzy) {
     const artists = fuzzy.get(match.matched_name) || [];
     for (const artist of artists) {
       allMatches.push({
@@ -623,7 +841,7 @@ export async function runMatchingPipeline(
   }
 
   // Map description matches to users (check both exact and fuzzy maps)
-  for (const match of descriptionMatches) {
+  for (const match of filteredDesc) {
     const exactArtists = exact.get(match.matched_name) || [];
     const fuzzyArtists = fuzzy.get(match.matched_name) || [];
     const artists = [...exactArtists, ...fuzzyArtists];
@@ -637,6 +855,23 @@ export async function runMatchingPipeline(
         match_source: 'description',
       });
     }
+  }
+
+  // Map lineup matches to users.
+  // Uses the user's followed artist display name (not lineup raw name)
+  // for artist_event_notifications.artist_name to keep dedup stable
+  // across lineup formatting changes.
+  // Notifications are inserted against derived_event_id.
+  for (const match of lineupResults) {
+    allMatches.push({
+      user_id: match.followed_artist.user_id,
+      event_id: match.derived_event_id,
+      event_title: match.event_title,
+      artist_name: match.followed_artist.artist_name,
+      match_score: 1.0,
+      match_source: 'lineup',
+      festival_name: match.festival_name,
+    });
   }
 
   stats.matches_found = allMatches.length;
