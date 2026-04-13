@@ -75,7 +75,7 @@ export class ElectricLoveLineupScraper extends BaseLineupScraper {
    * Override run() to attempt Algolia API fetch first, then fall back to
    * standard HTML scraping.
    */
-  async run(): Promise<ReturnType<BaseLineupScraper['run']>> {
+  async run(): Promise<import('../types').FestivalLineupResult> {
     const startedAt = new Date();
     this.log(`Starting lineup scrape for Electric Love`);
 
