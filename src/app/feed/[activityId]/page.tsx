@@ -272,7 +272,13 @@ export default function PostDetailPage() {
           ) : (
             <div className="space-y-4">
               {comments.map(comment => (
-                <CommentItem key={comment.id} comment={comment} />
+                <CommentItem
+                  key={comment.id}
+                  comment={comment}
+                  currentUserId={user?.id}
+                  postOwnerId={activity?.user_id}
+                  onDeleted={(id) => setComments(prev => prev.filter(c => c.id !== id))}
+                />
               ))}
             </div>
           )}

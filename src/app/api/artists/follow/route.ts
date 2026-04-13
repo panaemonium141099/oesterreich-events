@@ -1,11 +1,84 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
+import type { SupabaseClient } from '@supabase/supabase-js';
+import {
+  normalizeArtistName,
+  classifyName,
+  qualifiesForDescriptionMatch,
+  matchExactNames,
+  matchFuzzyNames,
+  matchDescriptionNames,
+  insertArtistEventMatches,
+  createGroupedNotifications,
+  type MatchResult,
+} from '@/lib/artist-matching';
 
 export const dynamic = 'force-dynamic';
 
 /**
+ * Run a lightweight single-artist match against recent events.
+ * Called after a user follows an artist so they see results immediately.
+ */
+async function matchSingleArtist(
+  supabase: SupabaseClient,
+  userId: string,
+  artistName: string
+): Promise<number> {
+  const normalized = normalizeArtistName(artistName);
+  const tier = classifyName(normalized);
+  if (tier === 'skip') return 0;
+
+  // Match against events from the last 90 days (catch upcoming events)
+  const since = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString();
+
+  let titleMatches: Array<{ event_id: string; event_title: string; matched_name: string; score: number }> = [];
+
+  if (tier === 'exact') {
+    titleMatches = await matchExactNames(supabase, [normalized], since);
+  } else {
+    titleMatches = await matchFuzzyNames(supabase, [normalized], since);
+  }
+
+  // Secondary: description matching for 6+ char names
+  let descMatches: typeof titleMatches = [];
+  if (qualifiesForDescriptionMatch(normalized)) {
+    const titleEventIds = new Set(titleMatches.map(m => m.event_id));
+    descMatches = await matchDescriptionNames(supabase, [normalized], since, titleEventIds);
+  }
+
+  // Build MatchResults for this user
+  const allMatches: MatchResult[] = [
+    ...titleMatches.map(m => ({
+      user_id: userId,
+      event_id: m.event_id,
+      event_title: m.event_title,
+      artist_name: artistName,
+      match_score: m.score,
+      match_source: 'title' as const,
+    })),
+    ...descMatches.map(m => ({
+      user_id: userId,
+      event_id: m.event_id,
+      event_title: m.event_title,
+      artist_name: artistName,
+      match_score: m.score,
+      match_source: 'description' as const,
+    })),
+  ];
+
+  if (allMatches.length === 0) return 0;
+
+  // Insert matches and create notifications
+  await insertArtistEventMatches(supabase, allMatches);
+  await createGroupedNotifications(supabase, allMatches);
+
+  return allMatches.length;
+}
+
+/**
  * POST /api/artists/follow
  * Follow an artist. Inserts into followed_artists.
+ * Then runs immediate matching against existing events.
  * Body: { artist_name: string, spotify_artist_id?: string, spotify_image_url?: string, source?: 'spotify' | 'manual' }
  */
 export async function POST(request: NextRequest) {
@@ -46,7 +119,16 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Failed to follow artist' }, { status: 500 });
     }
 
-    return NextResponse.json({ followed_artist: data }, { status: 201 });
+    // Run immediate matching so user sees events right away
+    let matchCount = 0;
+    try {
+      matchCount = await matchSingleArtist(supabase, user.id, artist_name.trim());
+    } catch (matchErr) {
+      // Non-fatal: follow succeeded, matching is best-effort
+      console.error('Auto-match after follow failed:', matchErr);
+    }
+
+    return NextResponse.json({ followed_artist: data, matches_found: matchCount }, { status: 201 });
   } catch (err) {
     console.error('POST /api/artists/follow error:', err);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
