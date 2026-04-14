@@ -186,7 +186,7 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
             Events Blog
           </h1>
           <p className="text-gray-500 text-xl font-light max-w-lg leading-relaxed">
-            Event-Guides, Tipps und Insiderwissen zu den gr\u00f6\u00dften Veranstaltungen \u00d6sterreichs.
+            Event-Guides, Tipps und Insiderwissen zu den größten Veranstaltungen Österreichs.
           </p>
         </header>
 
@@ -326,7 +326,7 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
         {/* FOOTER */}
         <div className="mt-16 pt-8 border-t border-gray-200 flex flex-wrap items-center justify-between gap-4">
           <p className="text-gray-400 text-xs uppercase tracking-wider">
-            LassTreffen.at \u2014 \u00d6sterreich Events
+            LassTreffen.at — Österreich Events
           </p>
           <Link
             href="/map"
