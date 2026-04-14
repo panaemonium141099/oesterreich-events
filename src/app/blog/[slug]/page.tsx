@@ -405,20 +405,22 @@ export default async function BlogPostPage({
             </section>
           )}
 
-          {/* Gallery */}
-          <div className="grid grid-cols-3 gap-2 mb-14 -mx-6 md:mx-0 md:rounded-xl overflow-hidden">
-            {post.gallery.map((img, i) => (
-              <figure key={i} className="relative aspect-[4/3] overflow-hidden group">
-                <Image
-                  src={img.src}
-                  alt={img.alt}
-                  fill
-                  className="object-cover transition-transform duration-500 group-hover:scale-105"
-                  sizes="(max-width: 640px) 33vw, 220px"
-                />
-              </figure>
-            ))}
-          </div>
+          {/* Gallery (only if images exist) */}
+          {post.gallery.length > 0 && (
+            <div className="grid grid-cols-3 gap-2 mb-14 -mx-6 md:mx-0 md:rounded-xl overflow-hidden">
+              {post.gallery.map((img, i) => (
+                <figure key={i} className="relative aspect-[4/3] overflow-hidden group">
+                  <Image
+                    src={img.src}
+                    alt={img.alt}
+                    fill
+                    className="object-cover transition-transform duration-500 group-hover:scale-105"
+                    sizes="(max-width: 640px) 33vw, 220px"
+                  />
+                </figure>
+              ))}
+            </div>
+          )}
 
           {/* Ad: mid-content */}
           <AdSlot slot="mid-content" format="horizontal" className="mb-14" />
