@@ -55,11 +55,14 @@ export class FrequencyLineupScraper extends BaseLineupScraper {
       // The <p> contains the day label; extract it separately
       const dayText = $link.find('p').first().text().trim() || null;
 
-      // Artist name is the text before the day paragraph
-      // Clone, remove children, get remaining text
+      // Artist name is the text with day suffix stripped.
+      // Some Frequency pages embed the day as a <p>, others as raw text.
       const $clone = $link.clone();
       $clone.find('p, img, picture, figure').remove();
-      const artistName = $clone.text().trim();
+      let artistName = $clone.text().replace(/[\n\r\t]+/g, ' ').replace(/\s{2,}/g, ' ').trim();
+
+      // Strip day suffix if the scraper didn't catch it in a <p>
+      artistName = artistName.replace(/\s+(Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday)\s*$/i, '').trim();
 
       if (!artistName) return;
 
