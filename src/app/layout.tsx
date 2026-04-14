@@ -4,6 +4,7 @@ import { AuthProvider } from '@/lib/supabase/auth-context';
 import { CookieBanner } from '@/components/Legal/CookieBanner';
 import { AnimatedLayout } from '@/components/UI/AnimatedLayout';
 import { NotificationToast } from '@/components/Notifications/NotificationToast';
+import { SocialNav } from '@/components/Layout/SocialNav';
 import { Toaster } from 'sonner';
 import './globals.css';
 
@@ -74,6 +75,7 @@ export default function RootLayout({
               },
             }}
           />
+          <SocialNav />
           <NotificationToast />
           <CookieBanner />
         </AuthProvider>

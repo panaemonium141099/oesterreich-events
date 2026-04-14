@@ -3,7 +3,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { SocialNav } from '@/components/Layout/SocialNav';
 import { useAuth } from '@/lib/supabase/auth-context';
 import { createClient } from '@/lib/supabase/client';
 import { CreatePost } from '@/components/Feed/CreatePost';
@@ -114,8 +113,7 @@ export default function FeedPage() {
   if (loading || !user) {
     return (
       <div className="min-h-screen bg-surface text-white">
-        <SocialNav />
-        <div className="max-w-lg mx-auto px-0 py-6">
+<div className="max-w-lg mx-auto px-0 py-6">
           <div className="px-4 py-3 flex items-center gap-3 animate-pulse motion-reduce:animate-none">
             <div className="w-9 h-9 rounded-full bg-white/[0.06] shrink-0" />
             <div className="flex-1 h-10 rounded-xl bg-white/[0.04] border border-white/[0.06]" />
@@ -129,9 +127,7 @@ export default function FeedPage() {
 
   return (
     <div className="min-h-screen text-white pb-24 bg-surface">
-      <SocialNav />
-
-      <main className="max-w-lg mx-auto px-0 py-6">
+<main className="max-w-lg mx-auto px-0 py-6">
         {/* Create Post section */}
         <CreatePost
           userId={user.id}

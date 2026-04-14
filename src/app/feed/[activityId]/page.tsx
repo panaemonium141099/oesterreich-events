@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter, useParams } from 'next/navigation';
-import { SocialNav } from '@/components/Layout/SocialNav';
 import { useAuth } from '@/lib/supabase/auth-context';
 import { createClient } from '@/lib/supabase/client';
 import { CommentItem } from '@/components/Feed/CommentItem';
@@ -140,8 +139,7 @@ export default function PostDetailPage() {
   if (loading || loadingActivity) {
     return (
       <div className="min-h-screen bg-surface-elevated text-white">
-        <SocialNav />
-        <main className="max-w-lg mx-auto px-4 sm:px-6 py-6">
+<main className="max-w-lg mx-auto px-4 sm:px-6 py-6">
           <div className="h-3 w-16 rounded bg-white/[0.06] mb-6 animate-pulse motion-reduce:animate-none" />
           <div className="border-b border-white/[0.06] animate-pulse motion-reduce:animate-none">
             <div className="flex items-center gap-3 px-4 py-3">
@@ -179,9 +177,7 @@ export default function PostDetailPage() {
 
   return (
     <div className="min-h-screen bg-surface-elevated text-white pb-24">
-      <SocialNav />
-
-      <main className="max-w-lg mx-auto px-4 sm:px-6 py-6">
+<main className="max-w-lg mx-auto px-4 sm:px-6 py-6">
         {/* Back button */}
         <button
           onClick={() => router.push('/feed')}

@@ -3,7 +3,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { SocialNav } from '@/components/Layout/SocialNav';
 import { ProfileDropdown } from '@/components/Layout/ProfileDropdown';
 import { NotificationBell } from '@/components/Notifications/NotificationBell';
 import { useAuth } from '@/lib/supabase/auth-context';
@@ -361,8 +360,6 @@ export default function ArtistsPage() {
           </Link>
         </section>
       </main>
-
-      <SocialNav />
-    </div>
+</div>
   );
 }

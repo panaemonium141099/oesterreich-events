@@ -11,8 +11,6 @@
 
 import Link from 'next/link';
 import NotificationPreferences from '@/components/Settings/NotificationPreferences';
-import { SocialNav } from '@/components/Layout/SocialNav';
-
 export default function NotificationSettingsPage() {
   return (
     <div className="min-h-screen bg-[#0a0a0c] text-white">
@@ -56,8 +54,6 @@ export default function NotificationSettingsPage() {
 
         <NotificationPreferences />
       </main>
-
-      <SocialNav />
-    </div>
+</div>
   );
 }

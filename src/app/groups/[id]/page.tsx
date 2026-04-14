@@ -4,7 +4,6 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/lib/supabase/auth-context';
-import { SocialNav } from '@/components/Layout/SocialNav';
 import { createClient } from '@/lib/supabase/client';
 import { EventPreviewMessage } from '@/components/Chat/EventPreviewMessage';
 import { EventSearchInline } from '@/components/Chat/EventSearchInline';
@@ -570,8 +569,7 @@ export default function EventDashboardPage() {
 
   return (
     <div className="min-h-screen text-white flex flex-col pb-20 bg-surface">
-      <SocialNav />
-      {/* Compact Header — event info + RSVP + tabs in one strip */}
+{/* Compact Header — event info + RSVP + tabs in one strip */}
       <header className="px-4 sm:px-6 py-3 border-b border-white/[0.06] shrink-0">
         <div className="max-w-3xl mx-auto">
           {/* Top row: back + title + invite code */}

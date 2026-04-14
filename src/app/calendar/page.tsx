@@ -3,7 +3,6 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { SocialNav } from '@/components/Layout/SocialNav';
 import { useAuth } from '@/lib/supabase/auth-context';
 import { createClient } from '@/lib/supabase/client';
 
@@ -523,9 +522,7 @@ export default function CalendarPage() {
     <div
       className="min-h-screen text-white pb-24 gradient-mesh"
     >
-      <SocialNav />
-
-      {/* View Mode Toggle */}
+{/* View Mode Toggle */}
       <div className="px-6 py-3 border-b border-white/10">
         <div className="max-w-3xl mx-auto flex gap-1 p-1 rounded-xl bg-white/5 border border-white/10">
           {viewModes.map((v) => (

@@ -83,6 +83,9 @@ export function SocialNav() {
     (href) => href === '/?home' ? pathname === '/' : pathname === href || pathname.startsWith(href + '/')
   );
 
+  // Only render for logged-in users
+  if (!user) return null;
+
   return (
     <>
       {/* Overlay */}

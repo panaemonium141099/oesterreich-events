@@ -3,7 +3,6 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { SocialNav } from '@/components/Layout/SocialNav';
 import { useAuth } from '@/lib/supabase/auth-context';
 import { createClient } from '@/lib/supabase/client';
 import { toast } from 'sonner';
@@ -309,8 +308,7 @@ export default function MemoriesPage() {
   if (loading) {
     return (
       <div className="min-h-screen bg-surface-elevated text-white">
-        <SocialNav />
-        <main className="max-w-3xl mx-auto px-4 sm:px-6 py-8">
+<main className="max-w-3xl mx-auto px-4 sm:px-6 py-8">
           <div className="flex items-center justify-between mb-6 animate-pulse motion-reduce:animate-none">
             <div>
               <div className="h-7 w-28 rounded bg-white/[0.06]" />
@@ -338,9 +336,7 @@ export default function MemoriesPage() {
     <div
       className="min-h-screen text-white pb-24 bg-surface-elevated"
     >
-      <SocialNav />
-
-      <main className="max-w-3xl mx-auto px-4 sm:px-6 py-8">
+<main className="max-w-3xl mx-auto px-4 sm:px-6 py-8">
         <div className="flex items-center justify-between mb-6">
           <div>
             <h1 className="text-2xl font-bold">Memories</h1>

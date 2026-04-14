@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { SocialNav } from '@/components/Layout/SocialNav';
 import { useAuth } from '@/lib/supabase/auth-context';
 import { createClient } from '@/lib/supabase/client';
 import { CalendarIcon, MapPinIcon } from '@/components/UI/Icons';
@@ -87,8 +86,7 @@ export default function SavedEventsPage() {
   if (loading) {
     return (
       <div className="min-h-screen bg-surface text-white">
-        <SocialNav />
-        <main className="max-w-3xl mx-auto px-4 sm:px-6 py-10">
+<main className="max-w-3xl mx-auto px-4 sm:px-6 py-10">
           <div className="flex items-center justify-between mb-2 animate-pulse motion-reduce:animate-none">
             <div className="flex items-center gap-2">
               <div className="w-6 h-6 rounded bg-white/[0.06]" />
@@ -118,9 +116,7 @@ export default function SavedEventsPage() {
     <div
       className="min-h-screen text-white pb-24 bg-surface"
     >
-      <SocialNav />
-
-      <main className="max-w-3xl mx-auto px-4 sm:px-6 py-10">
+<main className="max-w-3xl mx-auto px-4 sm:px-6 py-10">
         <div className="flex items-center justify-between mb-2">
           <h1 className="text-2xl font-bold flex items-center gap-2">
             <svg className="w-6 h-6 text-white/80" fill="currentColor" stroke="currentColor" viewBox="0 0 24 24">

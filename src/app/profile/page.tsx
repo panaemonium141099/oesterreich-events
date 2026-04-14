@@ -3,7 +3,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { SocialNav } from '@/components/Layout/SocialNav';
 import { useAuth } from '@/lib/supabase/auth-context';
 import { createClient } from '@/lib/supabase/client';
 import { CrownIcon, BoltIcon, BuildingIcon, CheckIcon } from '@/components/UI/Icons';
@@ -149,8 +148,7 @@ export default function ProfilePage() {
   if (loading) {
     return (
       <div className="min-h-screen bg-surface text-white">
-        <SocialNav />
-        <main className="max-w-3xl mx-auto px-4 sm:px-6 py-10">
+<main className="max-w-3xl mx-auto px-4 sm:px-6 py-10">
           <div className="flex flex-col items-center mb-10 animate-pulse motion-reduce:animate-none">
             <div className="w-24 h-24 rounded-full bg-white/[0.06] mb-4" />
             <div className="h-6 w-40 rounded bg-white/[0.06] mb-2" />
@@ -170,9 +168,7 @@ export default function ProfilePage() {
     <div
       className="min-h-screen text-white pb-24 bg-surface"
     >
-      <SocialNav />
-
-      <main className="max-w-3xl mx-auto px-4 sm:px-6 py-10">
+<main className="max-w-3xl mx-auto px-4 sm:px-6 py-10">
         {/* Avatar */}
         <div className="flex flex-col items-center mb-10">
           <div className="relative mb-4">

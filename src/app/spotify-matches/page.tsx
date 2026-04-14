@@ -3,7 +3,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { SocialNav } from '@/components/Layout/SocialNav';
 import { useAuth } from '@/lib/supabase/auth-context';
 import { createClient } from '@/lib/supabase/client';
 
@@ -115,9 +114,7 @@ export default function SpotifyMatchesPage() {
     <div
       className="min-h-screen text-white pb-24 gradient-mesh"
     >
-      <SocialNav />
-
-      <main className="max-w-3xl mx-auto px-4 sm:px-6 py-8">
+<main className="max-w-3xl mx-auto px-4 sm:px-6 py-8">
         <div className="flex items-center gap-3 mb-6">
           <div className="w-10 h-10 rounded-full bg-green-500/20 flex items-center justify-center">
             <span className="text-green-400 text-lg">&#9834;</span>
