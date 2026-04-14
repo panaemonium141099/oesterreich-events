@@ -1,3 +1,5 @@
+import { redirect } from 'next/navigation';
+import { createServerSupabaseClient } from '@/lib/supabase/server';
 import { HeroSection } from '@/components/Landing/HeroSection';
 import { LandingStats } from '@/components/Landing/LandingStats';
 import { LandingAuth } from '@/components/Landing/LandingAuth';
@@ -33,6 +35,13 @@ const organizationJsonLd = {
 };
 
 export default async function LandingPage() {
+  // Logged-in users go straight to their feed
+  const supabase = await createServerSupabaseClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (user) {
+    redirect('/feed');
+  }
+
   return (
     <div
       id="landing-curtain"
