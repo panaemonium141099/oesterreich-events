@@ -51,17 +51,17 @@ export const LINEUP_SCRAPER_REGISTRY: Record<
   string,
   new () => BaseLineupScraper
 > = {
-  // Batch 1 (task 4)
-  frequency: FrequencyLineupScraper,
+  // Batch 1 (task 4) — slugs match festivals.slug in DB
+  'fm4-frequency-festival': FrequencyLineupScraper,
   'nova-rock': NovaRockLineupScraper,
-  'electric-love': ElectricLoveLineupScraper,
-  shutdown: ShutdownLineupScraper,
+  'electric-love-festival': ElectricLoveLineupScraper,
+  'shutdown-festival': ShutdownLineupScraper,
 
   // Batch 2 (task 5)
   'isle-of-summer': IsleOfSummerLineupScraper,
-  'one-love': OneLoveLineupScraper,
-  'woodstock-blasmusik': WoodstockBlasmusikLineupScraper,
-  poolbar: PoolbarLineupScraper,
+  'one-love-festival': OneLoveLineupScraper,
+  'woodstock-der-blasmusik-festival': WoodstockBlasmusikLineupScraper,
+  'poolbar-festival': PoolbarLineupScraper,
   'sbam-fest': SbamFestLineupScraper,
 };
 

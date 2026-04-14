@@ -16,12 +16,7 @@ import type { Festival, FestivalArtist as DbFestivalArtist } from '@/types/festi
 import type { FestivalArtist as ScrapedArtist, FestivalLineupResult } from './types';
 import { normalizeArtistName } from './normalize';
 import { BaseLineupScraper } from './BaseLineupScraper';
-import {
-  FrequencyLineupScraper,
-  NovaRockLineupScraper,
-  ElectricLoveLineupScraper,
-  ShutdownLineupScraper,
-} from './scrapers';
+import { createLineupScraper } from './scrapers';
 import { deriveFestivalEvents, type DeriveEventsResult } from './derive-events';
 
 // ── Types ───────────────────────────────────────────────────────────────────
@@ -51,22 +46,15 @@ export interface OrchestratorStats {
 }
 
 // ── Scraper registry ────────────────────────────────────────────────────────
-// Maps festival slug to its scraper constructor.
-
-const SCRAPER_REGISTRY: Record<string, () => BaseLineupScraper> = {
-  frequency: () => new FrequencyLineupScraper(),
-  'nova-rock': () => new NovaRockLineupScraper(),
-  'electric-love': () => new ElectricLoveLineupScraper(),
-  shutdown: () => new ShutdownLineupScraper(),
-};
+// Uses the centralized LINEUP_SCRAPER_REGISTRY from ./scrapers/index.ts.
+// All 9 festival scrapers are registered there with DB-matching slugs.
 
 /**
  * Look up a scraper by festival slug.
- * Returns null if no scraper is registered for the slug.
+ * Delegates to the centralized registry in ./scrapers/index.ts.
  */
 export function getScraperForSlug(slug: string): BaseLineupScraper | null {
-  const factory = SCRAPER_REGISTRY[slug];
-  return factory ? factory() : null;
+  return createLineupScraper(slug);
 }
 
 // ── Helpers ─────────────────────────────────────────────────────────────────
