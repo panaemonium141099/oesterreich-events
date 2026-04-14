@@ -125,19 +125,44 @@ export function ArtistSearch({ followedNames, onFollow, onUnfollow }: ArtistSear
       )}
 
       {results.length > 0 && (
-        <div className="mt-3 space-y-2">
-          {results.map((artist) => (
-            <ArtistCard
-              key={artist.id}
-              name={artist.name}
-              imageUrl={artist.image_url}
-              genres={artist.genres}
-              popularity={artist.popularity}
-              isFollowed={followedNames.has(artist.name.toLowerCase())}
-              isLoading={loadingArtist === artist.id}
-              onToggleFollow={() => handleToggle(artist)}
-            />
-          ))}
+        <div className="mt-3">
+          {/* Best match */}
+          <p className="text-[10px] uppercase tracking-[0.15em] text-emerald-400/70 font-medium mb-2">
+            Bester Treffer
+          </p>
+          <ArtistCard
+            key={results[0].id}
+            name={results[0].name}
+            imageUrl={results[0].image_url}
+            genres={results[0].genres}
+            popularity={results[0].popularity}
+            isFollowed={followedNames.has(results[0].name.toLowerCase())}
+            isLoading={loadingArtist === results[0].id}
+            onToggleFollow={() => handleToggle(results[0])}
+          />
+
+          {/* Similar results */}
+          {results.length > 1 && (
+            <>
+              <p className="text-[10px] uppercase tracking-[0.15em] text-white/30 font-medium mt-5 mb-2">
+                Ähnliche Künstler
+              </p>
+              <div className="space-y-2">
+                {results.slice(1).map((artist) => (
+                  <ArtistCard
+                    key={artist.id}
+                    name={artist.name}
+                    imageUrl={artist.image_url}
+                    genres={artist.genres}
+                    popularity={artist.popularity}
+                    isFollowed={followedNames.has(artist.name.toLowerCase())}
+                    isLoading={loadingArtist === artist.id}
+                    onToggleFollow={() => handleToggle(artist)}
+                  />
+                ))}
+              </div>
+            </>
+          )}
         </div>
       )}
 
