@@ -1,0 +1,17 @@
+{
+  "assignee": null,
+  "claim_note": "",
+  "claimed_at": null,
+  "created_at": "2026-04-13T17:36:55.755393Z",
+  "depends_on": [
+    "fn-12-festival-lineup-ingestion-pipeline.6",
+    "fn-12-festival-lineup-ingestion-pipeline.7"
+  ],
+  "epic": "fn-12-festival-lineup-ingestion-pipeline",
+  "id": "fn-12-festival-lineup-ingestion-pipeline.8",
+  "priority": null,
+  "spec_path": ".flow/tasks/fn-12-festival-lineup-ingestion-pipeline.8.md",
+  "status": "todo",
+  "title": "Watcher job, notification wiring, and documentation",
+  "updated_at": "2026-04-13T18:09:04.557058Z"
+}

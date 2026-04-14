@@ -1,0 +1,14 @@
+{
+  "assignee": null,
+  "claim_note": "",
+  "claimed_at": null,
+  "created_at": "2026-04-13T17:36:38.309039Z",
+  "depends_on": [],
+  "epic": "fn-12-festival-lineup-ingestion-pipeline",
+  "id": "fn-12-festival-lineup-ingestion-pipeline.1",
+  "priority": null,
+  "spec_path": ".flow/tasks/fn-12-festival-lineup-ingestion-pipeline.1.md",
+  "status": "todo",
+  "title": "Database schema migration: festivals, festival_artists, events extensions",
+  "updated_at": "2026-04-13T18:08:59.751505Z"
+}

@@ -1,0 +1,16 @@
+{
+  "assignee": null,
+  "claim_note": "",
+  "claimed_at": null,
+  "created_at": "2026-04-13T17:36:48.449059Z",
+  "depends_on": [
+    "fn-12-festival-lineup-ingestion-pipeline.4"
+  ],
+  "epic": "fn-12-festival-lineup-ingestion-pipeline",
+  "id": "fn-12-festival-lineup-ingestion-pipeline.5",
+  "priority": null,
+  "spec_path": ".flow/tasks/fn-12-festival-lineup-ingestion-pipeline.5.md",
+  "status": "todo",
+  "title": "Second batch lineup scrapers (5 festivals)",
+  "updated_at": "2026-04-13T17:41:10.095675Z"
+}

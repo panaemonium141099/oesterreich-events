@@ -1,0 +1,17 @@
+{
+  "assignee": null,
+  "claim_note": "",
+  "claimed_at": null,
+  "created_at": "2026-04-13T17:36:53.373627Z",
+  "depends_on": [
+    "fn-12-festival-lineup-ingestion-pipeline.1",
+    "fn-12-festival-lineup-ingestion-pipeline.6"
+  ],
+  "epic": "fn-12-festival-lineup-ingestion-pipeline",
+  "id": "fn-12-festival-lineup-ingestion-pipeline.7",
+  "priority": null,
+  "spec_path": ".flow/tasks/fn-12-festival-lineup-ingestion-pipeline.7.md",
+  "status": "todo",
+  "title": "Extend artist matching with direct lineup lookup",
+  "updated_at": "2026-04-13T18:09:03.534632Z"
+}

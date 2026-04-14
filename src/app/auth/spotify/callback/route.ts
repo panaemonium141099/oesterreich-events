@@ -2,6 +2,18 @@ import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
 import { exchangeSpotifyCode, getTopArtists, getSpotifyProfile } from '@/lib/spotify';
+import {
+  normalizeArtistName,
+  classifyName,
+  qualifiesForDescriptionMatch,
+  isFalsePositiveMatch,
+  matchExactNames,
+  matchFuzzyNames,
+  matchDescriptionNames,
+  insertArtistEventMatches,
+  createGroupedNotifications,
+  type MatchResult,
+} from '@/lib/artist-matching';
 
 /**
  * Spotify OAuth callback.
@@ -120,6 +132,69 @@ export async function GET(request: Request) {
               },
               { onConflict: 'user_id,artist_name_normalized' }
             );
+        }
+
+        // 6. Auto-match all followed artists against ALL existing events
+        //    so the user sees matches immediately after Spotify import
+        try {
+          const since = '1970-01-01T00:00:00Z'; // epoch = match ALL events
+          let totalMatches = 0;
+
+          for (const artist of top10) {
+            const normalized = normalizeArtistName(artist.name);
+            const tier = classifyName(normalized);
+            if (tier === 'skip') continue;
+
+            let titleMatches: Array<{ event_id: string; event_title: string; matched_name: string; score: number }> = [];
+
+            if (tier === 'exact') {
+              titleMatches = await matchExactNames(supabase, [normalized], since);
+            } else {
+              titleMatches = await matchFuzzyNames(supabase, [normalized], since);
+            }
+
+            let descMatches: typeof titleMatches = [];
+            if (qualifiesForDescriptionMatch(normalized)) {
+              const titleEventIds = new Set(titleMatches.map(m => m.event_id));
+              descMatches = await matchDescriptionNames(supabase, [normalized], since, titleEventIds);
+            }
+
+            // Filter out false positives (cover bands, tribute shows, repertoire refs)
+            const fpFilter = (m: { matched_name: string; event_title: string }) =>
+              !isFalsePositiveMatch(m.matched_name, m.event_title);
+            titleMatches = titleMatches.filter(fpFilter);
+            descMatches = descMatches.filter(fpFilter);
+
+            const allMatches: MatchResult[] = [
+              ...titleMatches.map(m => ({
+                user_id: user.id,
+                event_id: m.event_id,
+                event_title: m.event_title,
+                artist_name: artist.name,
+                match_score: m.score,
+                match_source: 'title' as const,
+              })),
+              ...descMatches.map(m => ({
+                user_id: user.id,
+                event_id: m.event_id,
+                event_title: m.event_title,
+                artist_name: artist.name,
+                match_score: m.score,
+                match_source: 'description' as const,
+              })),
+            ];
+
+            if (allMatches.length > 0) {
+              await insertArtistEventMatches(supabase, allMatches);
+              await createGroupedNotifications(supabase, allMatches);
+              totalMatches += allMatches.length;
+            }
+          }
+
+          console.log(`Spotify auto-match: ${totalMatches} matches for ${top10.length} artists`);
+        } catch (matchErr) {
+          // Non-fatal: follow succeeded, matching is best-effort
+          console.error('Spotify auto-match failed:', matchErr);
         }
       }
     } catch (importErr) {

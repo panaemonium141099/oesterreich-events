@@ -1,0 +1,21 @@
+{
+  "branch_name": "fn-12-festival-lineup-ingestion-pipeline",
+  "completion_review_status": "unknown",
+  "completion_reviewed_at": null,
+  "created_at": "2026-04-13T17:33:30.719617Z",
+  "default_impl": null,
+  "default_review": null,
+  "default_sync": null,
+  "depends_on_epics": [
+    "fn-10-spotify-artist-alerts-follow-artists",
+    "fn-9-hyperlocal-student-events-venue-centric"
+  ],
+  "id": "fn-12-festival-lineup-ingestion-pipeline",
+  "next_task": 1,
+  "plan_review_status": "unknown",
+  "plan_reviewed_at": null,
+  "spec_path": ".flow/specs/fn-12-festival-lineup-ingestion-pipeline.md",
+  "status": "open",
+  "title": "Festival Lineup Ingestion Pipeline",
+  "updated_at": "2026-04-13T17:41:53.675092Z"
+}

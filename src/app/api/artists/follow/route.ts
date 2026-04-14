@@ -5,6 +5,7 @@ import {
   normalizeArtistName,
   classifyName,
   qualifiesForDescriptionMatch,
+  isFalsePositiveMatch,
   matchExactNames,
   matchFuzzyNames,
   matchDescriptionNames,
@@ -47,6 +48,12 @@ async function matchSingleArtist(
     const titleEventIds = new Set(titleMatches.map(m => m.event_id));
     descMatches = await matchDescriptionNames(supabase, [normalized], since, titleEventIds);
   }
+
+  // Filter out false positives (cover bands, tribute shows, repertoire references)
+  const fpFilter = (m: { matched_name: string; event_title: string }) =>
+    !isFalsePositiveMatch(m.matched_name, m.event_title);
+  titleMatches = titleMatches.filter(fpFilter);
+  descMatches = descMatches.filter(fpFilter);
 
   // Build MatchResults for this user
   const allMatches: MatchResult[] = [
