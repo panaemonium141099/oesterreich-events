@@ -2,6 +2,7 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
+import { useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { ALL_POSTS } from '@/content/blog';
 import type { FestivalPost } from '@/content/blog/types';
@@ -24,31 +25,57 @@ function ArrowRight({ className }: { className?: string }) {
   );
 }
 
-/** Pick posts with max 2 per category for diversity */
-function selectDiversePosts(posts: FestivalPost[], count: number): FestivalPost[] {
-  const selected: FestivalPost[] = [];
+/** Categories that qualify for the large featured card */
+const FESTIVAL_CATEGORIES = new Set([
+  'Musik & Festival',
+  'Festivals & Feste',
+  'Festivals',
+  'Musik',
+  'Open-Air & Feste',
+]);
+
+/** Shuffle array (Fisher-Yates) */
+function shuffle<T>(arr: T[]): T[] {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+/**
+ * Select posts for the landing page:
+ * - Featured: random festival post (from FESTIVAL_CATEGORIES)
+ * - Rest: random mix with max 2 per category for diversity
+ */
+function selectRandomPosts(posts: FestivalPost[]): { featured: FestivalPost; rest: FestivalPost[] } {
+  // Pick a random festival post for the featured slot
+  const festivalPosts = posts.filter(p => FESTIVAL_CATEGORIES.has(p.category));
+  const shuffledFestivals = shuffle(festivalPosts);
+  const featured = shuffledFestivals[0] || posts[0];
+
+  // Pick 5 diverse posts for the remaining slots (exclude featured)
+  const remaining = shuffle(posts.filter(p => p.slug !== featured.slug));
+  const rest: FestivalPost[] = [];
   const categoryCounts: Record<string, number> = {};
 
-  for (const post of posts) {
-    if (selected.length >= count) break;
+  for (const post of remaining) {
+    if (rest.length >= 5) break;
     const cat = post.category;
     if ((categoryCounts[cat] ?? 0) < 2) {
-      selected.push(post);
+      rest.push(post);
       categoryCounts[cat] = (categoryCounts[cat] ?? 0) + 1;
     }
   }
 
-  // Fill remaining slots if diversity filter was too strict
-  if (selected.length < count) {
-    for (const post of posts) {
-      if (selected.length >= count) break;
-      if (!selected.includes(post)) {
-        selected.push(post);
-      }
-    }
+  // Fill if diversity was too strict
+  for (const post of remaining) {
+    if (rest.length >= 5) break;
+    if (!rest.includes(post)) rest.push(post);
   }
 
-  return selected;
+  return { featured, rest };
 }
 
 /** Large featured card — left column */
@@ -68,7 +95,6 @@ function FeaturedCard({ post }: { post: FestivalPost }) {
           <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-black/10" />
 
           <div className="absolute inset-x-0 bottom-0 p-7 md:p-9">
-            {/* Category + Date + Reading time */}
             <div className="flex items-center gap-3 mb-3 flex-wrap">
               <span className={`text-[10px] font-bold uppercase tracking-[0.15em] px-2.5 py-1 rounded-sm ${post.categoryColor}`}>
                 {post.category}
@@ -85,7 +111,6 @@ function FeaturedCard({ post }: { post: FestivalPost }) {
               {post.title}
             </h3>
 
-            {/* Excerpt teaser */}
             <p className="text-white/50 text-sm font-normal mb-5 line-clamp-2 max-w-lg">
               {post.excerpt}
             </p>
@@ -139,8 +164,8 @@ function SecondaryCard({ post }: { post: FestivalPost }) {
 }
 
 export function FestivalBlogSection() {
-  const top6 = selectDiversePosts(ALL_POSTS, 6);
-  const [featured, ...rest] = top6;
+  // Randomize on each mount (page load)
+  const { featured, rest } = useMemo(() => selectRandomPosts(ALL_POSTS), []);
 
   return (
     <motion.section
@@ -166,7 +191,7 @@ export function FestivalBlogSection() {
             id="event-guide-heading"
             className="text-white font-extrabold text-2xl md:text-3xl leading-tight tracking-tight"
           >
-            Oesterreichs Events
+            Österreichs Events
             <br className="hidden sm:block" /> entdecken
           </h2>
 
@@ -183,7 +208,7 @@ export function FestivalBlogSection() {
       {/* Layout: 1 large card left + 2 stacked cards right */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
         <div className="md:col-span-2">
-          {featured && <FeaturedCard post={featured} />}
+          <FeaturedCard post={featured} />
         </div>
 
         <div className="flex flex-col gap-5">
