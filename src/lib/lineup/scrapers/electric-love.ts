@@ -2,22 +2,23 @@
  * Electric Love Festival Lineup Scraper
  *
  * Source: https://www.electriclove.at/en/line-up/
- * Structure: Client-side rendered via Algolia search. The HTML page embeds
- *   an Algolia configuration (appId + public search API key + index name).
- *   We query the Algolia REST API directly to get all artists.
+ * Structure: WordPress site with artist pages at /en/artist/[slug]/.
+ *   Previously used Algolia DEV_ARTISTS index (now returns 404).
+ *   Primary extraction: parse all <a href="/en/artist/[slug]/"> links
+ *   and extract artist names from the slug (slugified artist name).
  *
- * Algolia index: DEV_ARTISTS (appId: 5QVRQ5REXW, public search key embedded in page)
+ * Algolia fallback: Still attempted first in case the API returns.
  *
- * Fallback: If Algolia fails or config changes, fall back to parsing
- * any artist links present in the static HTML.
+ * Location: Plainfeld bei Salzburg
+ * Genre: EDM / Electronic / Dance
  *
  * Task: fn-12-festival-lineup-ingestion-pipeline.4
  */
 
 import { BaseLineupScraper } from '../BaseLineupScraper';
-import type { FestivalArtist } from '../types';
+import type { FestivalArtist, FestivalLineupResult } from '../types';
 
-/** Shape of an Algolia artist hit (subset of fields we care about) */
+/** Shape of an Algolia artist hit */
 interface AlgoliaArtistHit {
   name?: string;
   title?: string;
@@ -37,68 +38,45 @@ interface AlgoliaSearchResponse {
 
 export class ElectricLoveLineupScraper extends BaseLineupScraper {
   readonly name = 'ElectricLoveLineup';
-  readonly festivalSlug = 'electric-love';
+  readonly festivalSlug = 'electric-love-festival';
   readonly lineupUrl = 'https://www.electriclove.at/en/line-up/';
 
-  // Algolia public search credentials (embedded in the lineup page source)
+  // Algolia public search credentials (may be outdated)
   private algoliaAppId = '5QVRQ5REXW';
   private algoliaApiKey = '074690868e3c707f03aa1e755b866065';
   private algoliaIndex = 'DEV_ARTISTS';
 
-  scrapeLineup(html: string): FestivalArtist[] {
-    // 1. Try JSON-LD first (spec requirement)
-    const jsonLdNames = this.extractFromJsonLd(html);
-    if (jsonLdNames.length > 0) {
-      this.log(`Found ${jsonLdNames.length} artists via JSON-LD`);
-      const artists: FestivalArtist[] = [];
-      for (const name of jsonLdNames) {
-        artists.push(
-          ...this.processArtistName(name, {
-            dayLabel: null,
-            stageName: null,
-            billing: null,
-          })
-        );
-      }
-      return this.deduplicateArtists(artists);
-    }
-
-    // 2. Try extracting Algolia config from HTML (in case it changed)
-    this.extractAlgoliaConfig(html);
-
-    // 3. Fall back to static HTML parsing (artist links)
-    this.log('Attempting static HTML artist link extraction as fallback');
-    return this.parseStaticHtml(html);
-  }
-
   /**
-   * Override run() to attempt Algolia API fetch first, then fall back to
-   * standard HTML scraping.
+   * Override run() to attempt Algolia API first, then fall back to HTML.
    */
-  async run(): Promise<import('../types').FestivalLineupResult> {
+  async run(): Promise<FestivalLineupResult> {
     const startedAt = new Date();
     this.log(`Starting lineup scrape for Electric Love`);
 
     try {
-      // First, fetch the HTML page to get current Algolia config
+      // Fetch the HTML page
       const html = await this.fetchPage(this.lineupUrl);
       this.extractAlgoliaConfig(html);
 
-      // Try Algolia API
-      const algoliaArtists = await this.fetchFromAlgolia();
-      if (algoliaArtists.length > 0) {
-        this.log(`Fetched ${algoliaArtists.length} artists from Algolia API`);
-        return {
-          festivalId: this.festivalSlug,
-          artists: algoliaArtists,
-          scrapedAt: startedAt.toISOString(),
-          success: true,
-        };
+      // Try Algolia API (may fail with 404)
+      let artists: FestivalArtist[] = [];
+      try {
+        artists = await this.fetchFromAlgolia();
+        if (artists.length > 0) {
+          this.log(`Fetched ${artists.length} artists from Algolia API`);
+          return {
+            festivalId: this.festivalSlug,
+            artists,
+            scrapedAt: startedAt.toISOString(),
+            success: true,
+          };
+        }
+      } catch {
+        this.log('Algolia API unavailable, using HTML fallback');
       }
 
-      // Fall back to HTML parsing
-      this.log('Algolia returned 0 results, falling back to HTML');
-      const artists = this.scrapeLineup(html);
+      // HTML fallback — primary extraction method
+      artists = this.scrapeLineup(html);
       this.log(`Extracted ${artists.length} artists from HTML`);
 
       return {
@@ -122,154 +100,200 @@ export class ElectricLoveLineupScraper extends BaseLineupScraper {
   }
 
   /**
-   * Extract Algolia configuration from the page HTML.
-   * Updates instance fields if found.
+   * Parse artists from static HTML.
+   *
+   * Primary pattern: <a href="/en/artist/[slug]/">
+   * Artist name is derived from:
+   *   1. Text content near the link (heading, span, adjacent text)
+   *   2. URL slug (deslugified: "armin-van-buuren" -> "Armin Van Buuren")
    */
-  private extractAlgoliaConfig(html: string): void {
-    // Look for Algolia app ID pattern
-    const appIdMatch = html.match(
-      /(?:appId|applicationId|app_id)\s*[:=]\s*['"]([A-Z0-9]{10})['"/]/i
-    );
-    if (appIdMatch) {
-      this.algoliaAppId = appIdMatch[1];
-    }
-
-    // Look for API key
-    const apiKeyMatch = html.match(
-      /(?:apiKey|searchOnlyApiKey|search_api_key|api_key)\s*[:=]\s*['"]([a-f0-9]{32})['"]/i
-    );
-    if (apiKeyMatch) {
-      this.algoliaApiKey = apiKeyMatch[1];
-    }
-
-    // Look for index name
-    const indexMatch = html.match(
-      /(?:indexName|index_name|index)\s*[:=]\s*['"]([\w_-]+ARTISTS[\w_-]*)['"]/i
-    );
-    if (indexMatch) {
-      this.algoliaIndex = indexMatch[1];
-    }
-  }
-
-  /**
-   * Fetch all artists from the Algolia search API.
-   * Pages through results (1000 per page max) until all are retrieved.
-   */
-  private async fetchFromAlgolia(): Promise<FestivalArtist[]> {
-    const artists: FestivalArtist[] = [];
-    let page = 0;
-    const hitsPerPage = 1000;
-
-    // eslint-disable-next-line no-constant-condition
-    while (true) {
-      const url = `https://${this.algoliaAppId}-dsn.algolia.net/1/indexes/${this.algoliaIndex}/query`;
-
-      const controller = new AbortController();
-      const timer = setTimeout(() => controller.abort(), this.fetchTimeoutMs);
-
-      try {
-        const response = await fetch(url, {
-          method: 'POST',
-          headers: {
-            'X-Algolia-Application-Id': this.algoliaAppId,
-            'X-Algolia-API-Key': this.algoliaApiKey,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            query: '',
-            hitsPerPage,
-            page,
-          }),
-          signal: controller.signal,
-        });
-
-        if (!response.ok) {
-          this.log(
-            `Algolia API returned ${response.status}: ${response.statusText}`
-          );
-          break;
-        }
-
-        const data: AlgoliaSearchResponse = await response.json();
-
-        for (const hit of data.hits) {
-          const name = hit.name || hit.title;
-          if (!name) continue;
-
-          const dayLabel = hit.day || hit.date || null;
-          const stageName = hit.stage || hit.stage_name || null;
-          const billing = this.inferBilling(hit);
-
-          artists.push(
-            ...this.processArtistName(name, {
-              dayLabel,
-              stageName,
-              billing,
-            })
-          );
-        }
-
-        // Check if we need more pages
-        if (page >= data.nbPages - 1 || data.hits.length < hitsPerPage) {
-          break;
-        }
-
-        page++;
-        await this.rateLimit();
-      } catch (err) {
-        const msg = err instanceof Error ? err.message : String(err);
-        this.log(`Algolia fetch error on page ${page}: ${msg}`);
-        break;
-      } finally {
-        clearTimeout(timer);
+  scrapeLineup(html: string): FestivalArtist[] {
+    // 1. Try JSON-LD first
+    const jsonLdNames = this.extractFromJsonLd(html);
+    if (jsonLdNames.length > 0) {
+      this.log(`Found ${jsonLdNames.length} artists via JSON-LD`);
+      const artists: FestivalArtist[] = [];
+      for (const name of jsonLdNames) {
+        artists.push(
+          ...this.processArtistName(name, { dayLabel: null, stageName: null, billing: null })
+        );
       }
+      return this.deduplicateArtists(artists);
     }
 
-    return this.deduplicateArtists(artists);
-  }
-
-  /**
-   * Infer billing tier from Algolia hit data.
-   */
-  private inferBilling(
-    hit: AlgoliaArtistHit
-  ): 'headliner' | 'support' | null {
-    const showType = (hit.show_type || hit.category || '').toLowerCase();
-    if (showType.includes('headliner')) return 'headliner';
-    if (showType.includes('support') || showType.includes('opener'))
-      return 'support';
-    return null;
-  }
-
-  /**
-   * Parse artist names from static HTML (fallback when Algolia is unavailable).
-   */
-  private parseStaticHtml(html: string): FestivalArtist[] {
+    // 2. HTML: extract from /artist/ links
+    this.log('Extracting artists from /artist/ links');
     const $ = this.loadHtml(html);
     const artists: FestivalArtist[] = [];
+    const seenSlugs = new Set<string>();
 
-    // Electric Love uses <a href="/en/artist/..."> for artist links
     $('a[href*="/artist/"]').each((_, el) => {
       const $link = $(el);
       const href = $link.attr('href') || '';
-      if (!href.match(/\/artist\/[^/]+\/?$/)) return;
 
-      const artistName =
-        $link.find('h3, h2, h4').first().text().trim() ||
-        $link.find('img').first().attr('alt')?.trim() ||
-        $link.text().trim();
+      // Extract slug from URL: /en/artist/hugel/ -> "hugel"
+      const slugMatch = href.match(/\/artist\/([^/]+)\/?$/);
+      if (!slugMatch) return;
+      const slug = slugMatch[1];
 
-      if (!artistName) return;
+      // Skip duplicates
+      if (seenSlugs.has(slug)) return;
+      seenSlugs.add(slug);
+
+      // Try to get the artist name from visible text
+      let artistName = '';
+
+      // Check for headings or text in the link's context
+      const $parent = $link.closest('[class*="artist"], [class*="card"], article, li, div');
+      if ($parent.length > 0) {
+        artistName = $parent.find('h2, h3, h4, .title, .name').first().text().trim();
+      }
+
+      // Try link text (filter out generic "View artist" text)
+      if (!artistName) {
+        const linkText = $link.text().trim();
+        if (linkText && !linkText.toLowerCase().includes('view artist') && linkText.length < 60) {
+          artistName = linkText;
+        }
+      }
+
+      // Fall back to deslugifying the URL
+      if (!artistName) {
+        artistName = this.deslugify(slug);
+      }
+
+      if (!artistName || artistName.length < 2) return;
+
+      // Try to extract stage/date from nearby elements
+      let stageName: string | null = null;
+      let dayLabel: string | null = null;
+      if ($parent.length > 0) {
+        const stageText = $parent.find('[class*="stage"]').first().text().trim();
+        if (stageText && stageText.length < 30) stageName = stageText;
+        const dateText = $parent.find('[class*="date"], time').first().text().trim();
+        if (dateText && dateText.length < 30) dayLabel = dateText;
+      }
 
       artists.push(
         ...this.processArtistName(artistName, {
-          dayLabel: null,
-          stageName: null,
+          dayLabel,
+          stageName,
           billing: null,
         })
       );
     });
 
+    // 3. Fallback: look for artist names in page text near "line-up" sections
+    if (artists.length === 0) {
+      this.log('No /artist/ links found, trying text extraction');
+
+      $('h2, h3, h4').each((_, el) => {
+        const text = $(el).text().trim();
+        if (!text || text.length < 2 || text.length > 60) return;
+        if (this.isSkipText(text)) return;
+
+        artists.push(
+          ...this.processArtistName(text, {
+            dayLabel: null,
+            stageName: null,
+            billing: null,
+          })
+        );
+      });
+    }
+
+    this.log(`Parsed ${artists.length} artists from HTML`);
     return this.deduplicateArtists(artists);
+  }
+
+  /**
+   * Convert a URL slug back to a readable name.
+   * "armin-van-buuren" -> "Armin Van Buuren"
+   * "kshmr" -> "KSHMR" (all-caps if 5 chars or less)
+   */
+  private deslugify(slug: string): string {
+    const words = slug.split('-');
+    return words.map((w) => {
+      if (w.length <= 4 && w === w.toLowerCase()) {
+        // Short words that are likely acronyms/DJ names: uppercase
+        return w.toUpperCase();
+      }
+      return w.charAt(0).toUpperCase() + w.slice(1);
+    }).join(' ');
+  }
+
+  /** Extract Algolia config from page HTML */
+  private extractAlgoliaConfig(html: string): void {
+    const appIdMatch = html.match(/(?:appId|applicationId)\s*[:=]\s*['"]([A-Z0-9]{10})['"]/i);
+    if (appIdMatch) this.algoliaAppId = appIdMatch[1];
+
+    const apiKeyMatch = html.match(/(?:apiKey|searchOnlyApiKey)\s*[:=]\s*['"]([a-f0-9]{32})['"]/i);
+    if (apiKeyMatch) this.algoliaApiKey = apiKeyMatch[1];
+
+    const indexMatch = html.match(/(?:indexName|index)\s*[:=]\s*['"]([\w_-]+ARTISTS[\w_-]*)['"]/i);
+    if (indexMatch) this.algoliaIndex = indexMatch[1];
+  }
+
+  /** Fetch artists from Algolia API (may fail if index is gone) */
+  private async fetchFromAlgolia(): Promise<FestivalArtist[]> {
+    const url = `https://${this.algoliaAppId}-dsn.algolia.net/1/indexes/${this.algoliaIndex}/query`;
+
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), this.fetchTimeoutMs);
+
+    try {
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'X-Algolia-Application-Id': this.algoliaAppId,
+          'X-Algolia-API-Key': this.algoliaApiKey,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ query: '', hitsPerPage: 1000, page: 0 }),
+        signal: controller.signal,
+      });
+
+      if (!response.ok) {
+        this.log(`Algolia API returned ${response.status}`);
+        return [];
+      }
+
+      const data: AlgoliaSearchResponse = await response.json();
+      const artists: FestivalArtist[] = [];
+
+      for (const hit of data.hits) {
+        const name = hit.name || hit.title;
+        if (!name) continue;
+
+        artists.push(
+          ...this.processArtistName(name, {
+            dayLabel: hit.day || hit.date || null,
+            stageName: hit.stage || hit.stage_name || null,
+            billing: this.inferBilling(hit),
+          })
+        );
+      }
+
+      return this.deduplicateArtists(artists);
+    } finally {
+      clearTimeout(timer);
+    }
+  }
+
+  private inferBilling(hit: AlgoliaArtistHit): 'headliner' | 'support' | null {
+    const showType = (hit.show_type || hit.category || '').toLowerCase();
+    if (showType.includes('headliner')) return 'headliner';
+    if (showType.includes('support') || showType.includes('opener')) return 'support';
+    return null;
+  }
+
+  private isSkipText(text: string): boolean {
+    const lower = text.toLowerCase().trim();
+    const skip = [
+      'line-up', 'lineup', 'tickets', 'info', 'anreise', 'kontakt',
+      'electric love', 'festival', 'view artist', 'load more',
+      'filter', 'search', 'all stages', 'all dates',
+    ];
+    return skip.some((w) => lower === w);
   }
 }

@@ -2,14 +2,13 @@
  * Woodstock der Blasmusik Lineup Scraper
  *
  * Sources:
- *   - Artists page: https://www.woodstockderblasmusik.at/kuenstlerinnen/
- *   - Timetable page: https://www.woodstockderblasmusik.at/spielplan/
+ *   - Artists page: https://www.woodstockderblasmusik.at/programm/kuenstlerinnen/
+ *   - Timetable page: https://www.woodstockderblasmusik.at/programm/spielplan/
  *
  * Structure: TWO pages that need to be merged.
- *   - kuenstlerinnen/ lists all performing artists/bands
- *   - spielplan/ provides the schedule with day/stage assignments
- *   Merge strategy: scrape artists from kuenstlerinnen/, then enrich
- *   with day/stage data from spielplan/ where available.
+ *   - kuenstlerinnen/ lists artists as linked figure cards:
+ *     <a href="/programm/kuenstler/[slug]/"><figure><img><figcaption><h3>Name</h3></figcaption></figure></a>
+ *   - spielplan/ provides schedule with day/stage assignments
  *
  * Location: Ort im Innkreis, Oberösterreich
  * Genre: Blasmusik / Volksmusik / Schlager
@@ -22,12 +21,12 @@ import type { FestivalArtist, FestivalLineupResult } from '../types';
 
 export class WoodstockBlasmusikLineupScraper extends BaseLineupScraper {
   readonly name = 'WoodstockBlasmusikLineup';
-  readonly festivalSlug = 'woodstock-blasmusik';
-  readonly lineupUrl = 'https://www.woodstockderblasmusik.at/kuenstlerinnen/';
+  readonly festivalSlug = 'woodstock-der-blasmusik-festival';
+  readonly lineupUrl = 'https://www.woodstockderblasmusik.at/programm/kuenstlerinnen/';
 
   /** Second URL for the timetable / Spielplan */
   private readonly spielplanUrl =
-    'https://www.woodstockderblasmusik.at/spielplan/';
+    'https://www.woodstockderblasmusik.at/programm/spielplan/';
 
   /**
    * Override run() to fetch and merge both pages (artists + timetable).
@@ -37,23 +36,33 @@ export class WoodstockBlasmusikLineupScraper extends BaseLineupScraper {
     this.log(`Starting lineup scrape (2-page merge)`);
 
     try {
-      // Fetch both pages
-      const [artistsHtml, spielplanHtml] = await this.fetchBothPages();
-
-      // Extract base artist list from kuenstlerinnen page
+      // Fetch artists page first
+      const artistsHtml = await this.fetchPage(this.lineupUrl);
       const artists = this.scrapeLineup(artistsHtml);
       this.log(`Extracted ${artists.length} artists from kuenstlerinnen page`);
 
-      // Parse timetable and enrich artists with day/stage info
-      const enriched = this.enrichWithTimetable(artists, spielplanHtml);
-      this.log(`Enriched with timetable data`);
+      // Try timetable enrichment (non-fatal if it fails)
+      try {
+        await this.rateLimit();
+        const spielplanHtml = await this.fetchPage(this.spielplanUrl);
+        const enriched = this.enrichWithTimetable(artists, spielplanHtml);
+        this.log(`Enriched with timetable data`);
 
-      return {
-        festivalId: this.festivalSlug,
-        artists: enriched,
-        scrapedAt: startedAt.toISOString(),
-        success: true,
-      };
+        return {
+          festivalId: this.festivalSlug,
+          artists: enriched,
+          scrapedAt: startedAt.toISOString(),
+          success: true,
+        };
+      } catch {
+        this.log('Timetable fetch failed, returning unenriched artists');
+        return {
+          festivalId: this.festivalSlug,
+          artists,
+          scrapedAt: startedAt.toISOString(),
+          success: true,
+        };
+      }
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
       this.log(`Scrape failed: ${message}`);
@@ -69,17 +78,15 @@ export class WoodstockBlasmusikLineupScraper extends BaseLineupScraper {
   }
 
   /**
-   * Fetch both the artists page and timetable page with rate limiting.
-   */
-  private async fetchBothPages(): Promise<[string, string]> {
-    const artistsHtml = await this.fetchPage(this.lineupUrl);
-    await this.rateLimit();
-    const spielplanHtml = await this.fetchPage(this.spielplanUrl);
-    return [artistsHtml, spielplanHtml];
-  }
-
-  /**
    * Scrape artist names from the kuenstlerinnen (artists) page.
+   *
+   * DOM structure:
+   *   <a href="/programm/kuenstler/[slug]/">
+   *     <figure>
+   *       <img src="..." alt="Artist Name">
+   *       <figcaption><h3>Artist Name</h3></figcaption>
+   *     </figure>
+   *   </a>
    */
   scrapeLineup(html: string): FestivalArtist[] {
     // 1. Try JSON-LD first
@@ -99,54 +106,62 @@ export class WoodstockBlasmusikLineupScraper extends BaseLineupScraper {
       return this.deduplicateArtists(artists);
     }
 
-    // 2. HTML fallback
+    // 2. HTML fallback — primary strategy: artist links with figcaption/h3
     this.log('No JSON-LD found, falling back to HTML selectors');
     const $ = this.loadHtml(html);
     const artists: FestivalArtist[] = [];
 
-    // Strategy A: Artist cards/links with dedicated artist paths
-    $('a[href*="/kuenstler"], a[href*="/artist/"], a[href*="/band/"]').each(
-      (_, el) => {
-        const $link = $(el);
-        const href = $link.attr('href') || '';
+    // Strategy A: Links to /programm/kuenstler/[slug]/ with figcaption>h3 or img alt
+    $('a[href*="/programm/kuenstler/"], a[href*="/kuenstler/"]').each((_, el) => {
+      const $link = $(el);
+      const href = $link.attr('href') || '';
 
-        // Skip the index pages themselves
-        if (
-          href.endsWith('/kuenstlerinnen/') ||
-          href.endsWith('/kuenstler/') ||
-          href.endsWith('/artists/')
-        ) {
-          return;
-        }
+      // Skip the index page itself
+      if (href.endsWith('/kuenstlerinnen/') || href.endsWith('/kuenstler/')) return;
 
-        const artistName =
-          $link.find('h2, h3, h4').first().text().trim() ||
-          $link.find('img').first().attr('alt')?.trim() ||
-          $link.text().trim();
+      // Extract name: h3 in figcaption > img alt > link text
+      const artistName =
+        $link.find('figcaption h3').first().text().trim() ||
+        $link.find('h3, h2, h4').first().text().trim() ||
+        $link.find('img').first().attr('alt')?.trim() ||
+        $link.text().trim();
 
-        if (!artistName || artistName.length > 100) return;
-        if (this.isNavigationText(artistName)) return;
+      if (!artistName || artistName.length > 100 || artistName.length < 2) return;
+      if (this.isNavigationText(artistName)) return;
+
+      artists.push(
+        ...this.processArtistName(artistName, {
+          dayLabel: null,
+          stageName: null,
+          billing: null,
+        })
+      );
+    });
+
+    // Strategy B: figure elements with h3 (if links don't have /kuenstler/ path)
+    if (artists.length === 0) {
+      this.log('No kuenstler links found, trying figure>figcaption>h3 pattern');
+
+      $('figure figcaption h3').each((_, el) => {
+        const name = $(el).text().trim();
+        if (!name || name.length > 100 || name.length < 2) return;
+        if (this.isNavigationText(name)) return;
 
         artists.push(
-          ...this.processArtistName(artistName, {
+          ...this.processArtistName(name, {
             dayLabel: null,
             stageName: null,
             billing: null,
           })
         );
-      }
-    );
+      });
+    }
 
-    // Strategy B: Heading-based extraction from content area
+    // Strategy C: Any h3 inside main content
     if (artists.length === 0) {
-      this.log('No artist links found, trying heading/list extraction');
+      this.log('Trying h3 extraction from main content');
 
-      const content = $(
-        '.entry-content, .page-content, article, main, ' +
-          '[class*="artist"], [class*="lineup"], [class*="kuenstler"]'
-      );
-
-      content.find('h2, h3, h4, li').each((_, el) => {
+      $('main h3, .entry-content h3, article h3').each((_, el) => {
         const text = $(el).text().trim();
         if (!text || text.length > 80 || text.length < 2) return;
         if (this.isNavigationText(text)) return;
@@ -161,39 +176,12 @@ export class WoodstockBlasmusikLineupScraper extends BaseLineupScraper {
       });
     }
 
-    // Strategy C: Grid items (image cards with names)
-    if (artists.length === 0) {
-      this.log('Trying grid/card-based extraction');
-
-      $(
-        '[class*="grid"] > *, [class*="artist"] > *, ' +
-          '[class*="lineup"] > *, [class*="band"] > *'
-      ).each((_, el) => {
-        const $item = $(el);
-        const name =
-          $item.find('h2, h3, h4, .title, .name').first().text().trim() ||
-          $item.find('img').first().attr('alt')?.trim();
-
-        if (!name || name.length > 80) return;
-        if (this.isNavigationText(name)) return;
-
-        artists.push(
-          ...this.processArtistName(name, {
-            dayLabel: null,
-            stageName: null,
-            billing: null,
-          })
-        );
-      });
-    }
-
     this.log(`Parsed ${artists.length} artists from HTML`);
     return this.deduplicateArtists(artists);
   }
 
   /**
    * Enrich artists with day and stage information from the Spielplan page.
-   * Builds a lookup map from the timetable, then updates matching artists.
    */
   private enrichWithTimetable(
     artists: FestivalArtist[],
@@ -206,9 +194,7 @@ export class WoodstockBlasmusikLineupScraper extends BaseLineupScraper {
       return artists;
     }
 
-    this.log(
-      `Timetable contains ${timetable.size} entries, enriching artists`
-    );
+    this.log(`Timetable contains ${timetable.size} entries, enriching artists`);
 
     return artists.map((artist) => {
       const scheduleInfo = timetable.get(artist.artist_name_normalized);
@@ -224,31 +210,20 @@ export class WoodstockBlasmusikLineupScraper extends BaseLineupScraper {
   }
 
   /**
-   * Parse the Spielplan (timetable) page into a map of normalized artist
-   * name -> { day, stage }.
+   * Parse the Spielplan (timetable) page into a lookup map.
    */
   private parseTimetable(
     html: string
   ): Map<string, { day: string | null; stage: string | null }> {
     const $ = this.loadHtml(html);
-    const map = new Map<
-      string,
-      { day: string | null; stage: string | null }
-    >();
+    const map = new Map<string, { day: string | null; stage: string | null }>();
 
     let currentDay: string | null = null;
     let currentStage: string | null = null;
 
-    // Walk through the timetable structure. Common patterns:
-    // - Day headings (h2/h3): "Donnerstag", "Freitag", "Samstag"
-    // - Stage headings (h3/h4): "Hauptbühne", "Festzelt"
-    // - Artist entries: table rows, list items, or spans
-    const content = $(
-      '.entry-content, .page-content, main, article, ' +
-        '[class*="spielplan"], [class*="timetable"], [class*="schedule"]'
-    );
+    const content = $('main, .entry-content, article, body');
 
-    content.find('h2, h3, h4, tr, li, p').each((_, el) => {
+    content.find('h2, h3, h4, tr, li, p, a').each((_, el) => {
       const $el = $(el);
       const tagName = el.tagName?.toLowerCase() || '';
       const text = $el.text().trim();
@@ -256,43 +231,34 @@ export class WoodstockBlasmusikLineupScraper extends BaseLineupScraper {
       if (!text) return;
 
       // Detect day headings
-      if (
-        (tagName === 'h2' || tagName === 'h3') &&
-        this.isDayLabel(text)
-      ) {
+      if ((tagName === 'h2' || tagName === 'h3') && this.isDayLabel(text)) {
         currentDay = text;
         return;
       }
 
       // Detect stage headings
-      if (
-        (tagName === 'h3' || tagName === 'h4') &&
-        this.isStageLabel(text)
-      ) {
+      if ((tagName === 'h3' || tagName === 'h4') && this.isStageLabel(text)) {
         currentStage = text;
         return;
       }
 
-      // Extract artist name from timetable rows or list items
-      if (tagName === 'tr' || tagName === 'li') {
-        // For table rows, skip header rows
+      // Extract artist name from schedule entries
+      if (tagName === 'tr' || tagName === 'li' || tagName === 'a') {
         if ($el.find('th').length > 0) return;
 
-        // Get the artist name (usually the main text cell)
-        const cells = $el.find('td');
         let name: string;
+        const cells = $el.find('td');
         if (cells.length > 0) {
-          // Typically: time | artist | stage  or  artist | time
-          name =
-            cells.length >= 2
-              ? $(cells[1]).text().trim() || $(cells[0]).text().trim()
-              : $(cells[0]).text().trim();
+          name = cells.length >= 2
+            ? $(cells[1]).text().trim() || $(cells[0]).text().trim()
+            : $(cells[0]).text().trim();
         } else {
-          name = text;
+          name = tagName === 'a'
+            ? ($el.find('h3').text().trim() || $el.text().trim())
+            : text;
         }
 
         if (name && name.length > 1 && name.length < 80) {
-          // Normalize for lookup
           const processed = this.processArtistName(name, {
             dayLabel: currentDay,
             stageName: currentStage,
@@ -311,27 +277,14 @@ export class WoodstockBlasmusikLineupScraper extends BaseLineupScraper {
     return map;
   }
 
-  /**
-   * Check if text is a day label.
-   */
   private isDayLabel(text: string): boolean {
-    return /^(montag|dienstag|mittwoch|donnerstag|freitag|samstag|sonntag|tag\s*\d|day\s*\d)/i.test(
-      text.trim()
-    );
+    return /^(montag|dienstag|mittwoch|donnerstag|freitag|samstag|sonntag|tag\s*\d|day\s*\d)/i.test(text.trim());
   }
 
-  /**
-   * Check if text is a stage label.
-   */
   private isStageLabel(text: string): boolean {
-    return /stage|bühne|buhne|festzelt|hauptbühne|zelt|floor|area/i.test(
-      text.trim()
-    );
+    return /stage|bühne|buhne|festzelt|hauptbühne|zelt|floor|area/i.test(text.trim());
   }
 
-  /**
-   * Check if text is a navigation or section label to skip.
-   */
   private isNavigationText(text: string): boolean {
     const lower = text.toLowerCase().trim();
     const skipWords = [
