@@ -296,13 +296,13 @@ function ToggleRow({
         aria-checked={checked}
         disabled={disabled}
         onClick={onChange}
-        className={`relative inline-flex h-5 w-9 shrink-0 rounded-full transition-colors ${
+        className={`relative inline-flex h-5 w-9 shrink-0 rounded-full transition-colors items-center ${
           checked ? 'bg-indigo-600' : 'bg-white/20'
         } ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
       >
         <span
-          className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform mt-0.5 ${
-            checked ? 'translate-x-4 ml-0.5' : 'translate-x-0.5'
+          className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+            checked ? 'translate-x-[18px]' : 'translate-x-[2px]'
           }`}
         />
       </button>
