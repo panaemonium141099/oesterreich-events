@@ -71,14 +71,26 @@ export interface SpotifySearchArtist {
   popularity: number;
 }
 
+// In-memory search cache to avoid hitting Spotify rate limits on repeated queries
+const searchCache = new Map<string, { results: SpotifySearchArtist[]; expiresAt: number }>();
+const SEARCH_CACHE_TTL = 120_000; // 2 minutes
+
 /**
  * Search for artists via the Spotify Search API using Client Credentials token.
  * Localizes results to Austria (market=AT).
+ * Results are cached in memory for 2 minutes per query to avoid rate limiting.
  */
 export async function searchSpotifyArtists(
   query: string,
   limit: number = 10
 ): Promise<SpotifySearchArtist[]> {
+  // Check cache first
+  const cacheKey = `${query.toLowerCase().trim()}:${limit}`;
+  const cached = searchCache.get(cacheKey);
+  if (cached && Date.now() < cached.expiresAt) {
+    return cached.results;
+  }
+
   const token = await getClientCredentialsToken();
 
   const params = new URLSearchParams({
@@ -109,13 +121,26 @@ export async function searchSpotifyArtists(
   const data = await res.json();
   const artists = data.artists?.items || [];
 
-  return artists.map((a: SpotifyArtist & { images?: { url: string }[] }) => ({
+  const results = artists.map((a: SpotifyArtist & { images?: { url: string }[] }) => ({
     id: a.id,
     name: a.name,
     image_url: a.images?.[0]?.url || null,
     genres: a.genres || [],
     popularity: a.popularity || 0,
   }));
+
+  // Cache the results
+  searchCache.set(cacheKey, { results, expiresAt: Date.now() + SEARCH_CACHE_TTL });
+
+  // Evict old entries periodically (keep cache small)
+  if (searchCache.size > 200) {
+    const now = Date.now();
+    for (const [key, val] of searchCache) {
+      if (now > val.expiresAt) searchCache.delete(key);
+    }
+  }
+
+  return results;
 }
 
 export class SpotifyRateLimitError extends Error {

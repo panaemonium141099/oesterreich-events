@@ -63,7 +63,7 @@ export function ArtistSearch({ followedNames, onFollow, onUnfollow }: ArtistSear
 
     debounceRef.current = setTimeout(() => {
       search(query);
-    }, 300);
+    }, 600);
 
     return () => {
       if (debounceRef.current) clearTimeout(debounceRef.current);
