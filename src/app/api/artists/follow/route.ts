@@ -9,9 +9,11 @@ import {
   matchExactNames,
   matchFuzzyNames,
   matchDescriptionNames,
+  matchLineupArtists,
   insertArtistEventMatches,
   createGroupedNotifications,
   type MatchResult,
+  type FollowedArtist,
 } from '@/lib/artist-matching';
 
 export const dynamic = 'force-dynamic';
@@ -31,9 +33,33 @@ async function matchSingleArtist(
 
   // Match against ALL existing events (epoch) — this is a fresh follow,
   // so we need to check all events, not just recently updated ones.
-  // The RPC functions filter on `updated_at > p_since` AND `start_date >= now()`.
   const since = '1970-01-01T00:00:00Z';
 
+  const allMatches: MatchResult[] = [];
+
+  // Step 1: Direct lineup lookup (festival lineups)
+  // This catches artists playing at festivals where we have structured lineup data
+  const fakeFollowed: FollowedArtist = {
+    id: 'temp',
+    user_id: userId,
+    artist_name: artistName,
+    artist_name_normalized: normalized,
+  };
+  const lineupResults = await matchLineupArtists(supabase, [fakeFollowed], since);
+  for (const lr of lineupResults) {
+    allMatches.push({
+      user_id: userId,
+      event_id: lr.derived_event_id,
+      event_title: lr.event_title,
+      artist_name: artistName,
+      match_score: 1.0,
+      match_source: 'lineup',
+      festival_name: lr.festival_name,
+    });
+  }
+
+  // Step 2: Title matching (exact or fuzzy depending on name length)
+  // Note: derived events (source_type='derived') are excluded from these RPCs
   let titleMatches: Array<{ event_id: string; event_title: string; matched_name: string; score: number }> = [];
 
   if (tier === 'exact') {
@@ -42,38 +68,47 @@ async function matchSingleArtist(
     titleMatches = await matchFuzzyNames(supabase, [normalized], since);
   }
 
-  // Secondary: description matching for 6+ char names
+  // Step 3: Secondary description matching for 6+ char names
   let descMatches: typeof titleMatches = [];
   if (qualifiesForDescriptionMatch(normalized)) {
     const titleEventIds = new Set(titleMatches.map(m => m.event_id));
     descMatches = await matchDescriptionNames(supabase, [normalized], since, titleEventIds);
   }
 
-  // Filter out false positives (cover bands, tribute shows, repertoire references)
+  // Filter out false positives (cover bands, tribute shows, substring matches)
   const fpFilter = (m: { matched_name: string; event_title: string }) =>
     !isFalsePositiveMatch(m.matched_name, m.event_title);
   titleMatches = titleMatches.filter(fpFilter);
   descMatches = descMatches.filter(fpFilter);
 
-  // Build MatchResults for this user
-  const allMatches: MatchResult[] = [
-    ...titleMatches.map(m => ({
-      user_id: userId,
-      event_id: m.event_id,
-      event_title: m.event_title,
-      artist_name: artistName,
-      match_score: m.score,
-      match_source: 'title' as const,
-    })),
-    ...descMatches.map(m => ({
-      user_id: userId,
-      event_id: m.event_id,
-      event_title: m.event_title,
-      artist_name: artistName,
-      match_score: m.score,
-      match_source: 'description' as const,
-    })),
-  ];
+  // Add title + description matches (skip event IDs already matched by lineup)
+  const lineupEventIds = new Set(allMatches.map(m => m.event_id));
+
+  for (const m of titleMatches) {
+    if (!lineupEventIds.has(m.event_id)) {
+      allMatches.push({
+        user_id: userId,
+        event_id: m.event_id,
+        event_title: m.event_title,
+        artist_name: artistName,
+        match_score: m.score,
+        match_source: 'title',
+      });
+    }
+  }
+
+  for (const m of descMatches) {
+    if (!lineupEventIds.has(m.event_id)) {
+      allMatches.push({
+        user_id: userId,
+        event_id: m.event_id,
+        event_title: m.event_title,
+        artist_name: artistName,
+        match_score: m.score,
+        match_source: 'description',
+      });
+    }
+  }
 
   if (allMatches.length === 0) return 0;
 
