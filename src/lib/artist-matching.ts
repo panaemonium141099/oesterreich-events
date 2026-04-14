@@ -110,11 +110,35 @@ export function isFalsePositiveMatch(
 ): boolean {
   const titleLower = eventTitle.toLowerCase();
   const nameLower = artistName.toLowerCase();
+
+  // ── 0. Short-name word-boundary check ──────────────────────────────────────
+  // For short artist names (≤ 8 chars), check if the name appears only as a
+  // SUBSTRING of a longer word. "Dame" in "Damen", "Zedd" fuzzy→ "Zederhaus".
+  // Skip this check for long names (9+ chars) — fuzzy matches on long names
+  // are almost always legitimate (e.g., "Pizzera und Jaus" ≈ "Pizzera & Jaus").
+  const titleNorm = stripDiacritics(titleLower);
+  const nameNorm = stripDiacritics(nameLower);
+
+  if (nameLower.length <= 10) {
+    const escaped = nameLower.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const escapedNorm = stripDiacritics(escaped);
+    const sep = `[\\s,;|/\\-()"'!?.]`;
+    const wbRegex = new RegExp(`(?:^|${sep})${escaped}(?:$|${sep})`, 'i');
+    const wbRegexNorm = new RegExp(`(?:^|${sep})${escapedNorm}(?:$|${sep})`, 'i');
+
+    const hasWholeWordMatch =
+      wbRegex.test(titleLower) ||
+      wbRegex.test(titleNorm) ||
+      wbRegexNorm.test(titleNorm);
+
+    if (!hasWholeWordMatch) {
+      // Short artist name is only a substring of a longer word → false positive
+      return true;
+    }
+  }
+
   const nameIndex = titleLower.indexOf(nameLower);
   if (nameIndex === -1) {
-    // Try without diacritics
-    const titleNorm = stripDiacritics(titleLower);
-    const nameNorm = stripDiacritics(nameLower);
     const normIndex = titleNorm.indexOf(nameNorm);
     if (normIndex === -1) return false;
     return checkFalsePositiveContext(titleLower, normIndex);
