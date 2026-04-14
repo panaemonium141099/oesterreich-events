@@ -219,22 +219,7 @@ export default function ArtistsPage() {
       </header>
 
       <main className="max-w-2xl mx-auto px-4 pt-6 space-y-8">
-        {/* Section 1: Spotify Artists */}
-        <section>
-          <h2 className="text-sm uppercase tracking-[0.15em] text-white/40 font-medium mb-3">
-            Deine Spotify-Kuenstler
-          </h2>
-          <ImportedArtistsList
-            artists={importedArtists}
-            followedNames={followedNames}
-            onFollow={handleFollow}
-            onUnfollow={handleUnfollow}
-            loading={spotifyLoading || importedLoading}
-            spotifyConnected={spotifyConnected}
-          />
-        </section>
-
-        {/* Section 2: Search */}
+        {/* Section 1: Search (always first) */}
         <section>
           <h2 className="text-sm uppercase tracking-[0.15em] text-white/40 font-medium mb-3">
             Kuenstler suchen
@@ -246,7 +231,7 @@ export default function ArtistsPage() {
           />
         </section>
 
-        {/* Section 3: Manual Add */}
+        {/* Section 2: Manual Add (always second) */}
         <section>
           <h2 className="text-sm uppercase tracking-[0.15em] text-white/40 font-medium mb-3">
             Manuell hinzufuegen
@@ -281,6 +266,21 @@ export default function ArtistsPage() {
               Du folgst diesem Kuenstler bereits
             </p>
           )}
+        </section>
+
+        {/* Section 3: Spotify Artists */}
+        <section>
+          <h2 className="text-sm uppercase tracking-[0.15em] text-white/40 font-medium mb-3">
+            Deine Spotify-Kuenstler
+          </h2>
+          <ImportedArtistsList
+            artists={importedArtists}
+            followedNames={followedNames}
+            onFollow={handleFollow}
+            onUnfollow={handleUnfollow}
+            loading={spotifyLoading || importedLoading}
+            spotifyConnected={spotifyConnected}
+          />
         </section>
 
         {/* Section 4: Followed Artists */}
