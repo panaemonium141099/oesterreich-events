@@ -72,23 +72,7 @@ export const post: FestivalPost = {
       text: 'Das Fest findet bei jedem Wetter statt. Ende Mai im Gebirge: 15–22 °C, Regenjacke empfohlen.',
     },
   ],
-  gallery: [
-    {
-      src: '/images/blog/narzissenfest-2026/gallery-1.jpg',
-      alt: 'Kunstvolle Narzissenfigur aus tausenden Blüten',
-      caption: 'Handgefertigte Blumenkunst aus echten Narzissen',
-    },
-    {
-      src: '/images/blog/narzissenfest-2026/gallery-2.jpg',
-      alt: 'Bootsparade auf dem Grundlsee mit Bergpanorama',
-      caption: 'Die berühmte Bootsparade vor dem Toten Gebirge',
-    },
-    {
-      src: '/images/blog/narzissenfest-2026/gallery-3.jpg',
-      alt: 'Blühende Narzissenwiesen im Ausseerland',
-      caption: 'Die Narzissenwiesen des Ausseerlandes in voller Blüte',
-    },
-  ],
+  gallery: [],
   ctaText: 'Brauchtum-Events in der Steiermark entdecken',
   ctaLink: '/map?category=Kultur&region=Steiermark',
   seoTitle: 'Narzissenfest Bad Aussee 2026 – Termine, Programm & Tipps | LassTreffen.at',

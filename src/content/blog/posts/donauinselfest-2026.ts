@@ -80,23 +80,7 @@ export const post: FestivalPost = {
       text: 'Die Insel ist 6 km lang — die Donauinselfest-App mit Bühnenplan ist ein Muss.',
     },
   ],
-  gallery: [
-    {
-      src: '/images/blog/donauinselfest-2026/gallery-1.jpg',
-      alt: 'Riesige Menschenmenge beim Donauinselfest',
-      caption: 'Millionen Menschen feiern gemeinsam unter freiem Himmel',
-    },
-    {
-      src: '/images/blog/donauinselfest-2026/gallery-2.jpg',
-      alt: 'Wien Donau bei Sonnenuntergang',
-      caption: 'Die Donauinsel bei Sonnenuntergang — magische Stimmung',
-    },
-    {
-      src: '/images/blog/donauinselfest-2026/gallery-3.jpg',
-      alt: 'Konzertbühne beim Donauinselfest',
-      caption: 'Weltklasse-Acts auf der Hauptbühne',
-    },
-  ],
+  gallery: [],
   ctaText: 'Wien-Events entdecken',
   ctaLink: '/map?bundesland=Wien',
   seoTitle: 'Donauinselfest 2026 – Alles Infos zum Gratis-Festival | LassTreffen.at',

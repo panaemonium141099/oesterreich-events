@@ -70,23 +70,7 @@ export const post: FestivalPost = {
       text: 'Der Heldenplatz ist flach und rollstuhlgerecht zugänglich.',
     },
   ],
-  gallery: [
-    {
-      src: '/images/blog/fest-der-freude-2026/gallery-1.jpg',
-      alt: 'Wiener Symphoniker spielen am Heldenplatz bei Abenddämmerung',
-      caption: 'Die Wiener Symphoniker auf dem historischen Heldenplatz',
-    },
-    {
-      src: '/images/blog/fest-der-freude-2026/gallery-2.jpg',
-      alt: 'Publikum am Heldenplatz beim Fest der Freude',
-      caption: 'Tausende feiern Freiheit und Demokratie mit Musik',
-    },
-    {
-      src: '/images/blog/fest-der-freude-2026/gallery-3.jpg',
-      alt: 'Hofburg Wien und Heldenplatz bei Sonnenuntergang',
-      caption: 'Ein Ort der Geschichte — neu besetzt mit Musik und Hoffnung',
-    },
-  ],
+  gallery: [],
   ctaText: 'Kultur-Events in Wien entdecken',
   ctaLink: '/map?category=Kultur&region=Wien',
   seoTitle: 'Fest der Freude 2026 Wien – Gratis-Konzert am Heldenplatz | LassTreffen.at',

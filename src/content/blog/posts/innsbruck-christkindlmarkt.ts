@@ -71,23 +71,7 @@ export const post: FestivalPost = {
       text: 'Hauptmarkt am Marktplatz, weiterer Markt am Landhausplatz, und der stimmungsvolle Weihnachtsmarkt am Bergiselweg.',
     },
   ],
-  gallery: [
-    {
-      src: '/images/blog/innsbruck-christkindlmarkt/gallery-1.jpg',
-      alt: 'Weihnachtsmarkt mit beleuchteten Ständen',
-      caption: 'Adventstimmung vor der Tiroler Alpenkulisse',
-    },
-    {
-      src: '/images/blog/innsbruck-christkindlmarkt/gallery-2.jpg',
-      alt: 'Handgemachte Weihnachtsdekoration',
-      caption: 'Tiroler Handwerk und regionale Spezialitäten',
-    },
-    {
-      src: '/images/blog/innsbruck-christkindlmarkt/gallery-3.jpg',
-      alt: 'Glühwein und Weihnachtsbäckerei',
-      caption: 'Wärmendes Tiroler Glühwein-Erlebnis',
-    },
-  ],
+  gallery: [],
   ctaText: 'Advent-Events in Tirol entdecken',
   ctaLink: '/map?bundesland=Tirol&category=Kultur',
   seoTitle: 'Innsbrucker Christkindlmarkt 2026 – Termine & Tipps',

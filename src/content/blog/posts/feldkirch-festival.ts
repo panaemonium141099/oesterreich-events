@@ -72,23 +72,7 @@ export const post: FestivalPost = {
       text: 'Mai ist ideal für einen Ausflug nach Vorarlberg — Temperaturen angenehm, Natur erwacht, und das Festival-Wochenende bietet einen perfekten Rahmen.',
     },
   ],
-  gallery: [
-    {
-      src: '/images/blog/feldkirch-festival/gallery-1.jpg',
-      alt: 'Chor in historischer Kathedrale',
-      caption: 'Polyphonie im Dom St. Nikolaus Feldkirch',
-    },
-    {
-      src: '/images/blog/feldkirch-festival/gallery-2.jpg',
-      alt: 'Mittelalterliche Stadtmauern und Türme',
-      caption: 'Feldkirch — Kulisse aus dem Mittelalter',
-    },
-    {
-      src: '/images/blog/feldkirch-festival/gallery-3.jpg',
-      alt: 'Chorensemble bei Aufführung',
-      caption: 'Internationale Spitzenchöre in einzigartiger Akustik',
-    },
-  ],
+  gallery: [],
   ctaText: 'Kulturevents in Vorarlberg entdecken',
   ctaLink: '/map?bundesland=Vorarlberg&category=Musik',
   seoTitle: 'Feldkirch Festival 2026 – Chormusik & Alte Musik Tipps',

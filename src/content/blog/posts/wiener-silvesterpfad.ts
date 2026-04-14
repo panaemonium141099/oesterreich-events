@@ -71,23 +71,7 @@ export const post: FestivalPost = {
       text: 'Praterstern und Rathausplatz bieten die spektakulärste Aussicht auf das Mitternachts-Feuerwerk.',
     },
   ],
-  gallery: [
-    {
-      src: '/images/blog/wiener-silvesterpfad/gallery-1.jpg',
-      alt: 'Silvester Feuerwerk über einer Stadt bei Nacht',
-      caption: 'Spektakuläres Mitternachts-Feuerwerk über Wien',
-    },
-    {
-      src: '/images/blog/wiener-silvesterpfad/gallery-2.jpg',
-      alt: 'Menschenmenge bei einer Silvesterfeier',
-      caption: 'Bis zu 600.000 Besucher feiern gemeinsam',
-    },
-    {
-      src: '/images/blog/wiener-silvesterpfad/gallery-3.jpg',
-      alt: 'Beleuchtete Wiener Innenstadt bei Nacht',
-      caption: 'Die Wiener Innenstadt erstrahlt in festlichem Glanz',
-    },
-  ],
+  gallery: [],
   ctaText: 'Silvester-Events in Wien entdecken',
   ctaLink: '/map?category=Musik&region=Wien',
   seoTitle: 'Wiener Silvesterpfad 2026 – Silvester Wien',

@@ -70,23 +70,7 @@ export const post: FestivalPost = {
       text: 'Ticketbüro in der Landesgalerie NÖ, Museumsplatz 1, Krems. Oder per E-Mail: tickets@noe-festival.at.',
     },
   ],
-  gallery: [
-    {
-      src: '/images/blog/glatt-und-verkehrt-2026/gallery-1.jpg',
-      alt: 'Konzert im Innenhof der Winzer Krems bei Nacht',
-      caption: 'Weltmusik im stimmungsvollen Weingut-Hof',
-    },
-    {
-      src: '/images/blog/glatt-und-verkehrt-2026/gallery-2.jpg',
-      alt: 'Wachau Landschaft mit Donau und Weinbergen',
-      caption: 'UNESCO-Welterbe Wachau als Festival-Kulisse',
-    },
-    {
-      src: '/images/blog/glatt-und-verkehrt-2026/gallery-3.jpg',
-      alt: 'Musiker auf der Bühne mit traditionellen Instrumenten',
-      caption: 'Musikalische Begegnungen aus allen Kontinenten',
-    },
-  ],
+  gallery: [],
   ctaText: 'Musik-Events in Niederösterreich entdecken',
   ctaLink: '/map?category=Musik&region=Niederösterreich',
   seoTitle: 'Glatt&Verkehrt 2026 Krems – 30 Jahre Weltmusik-Festival | LassTreffen.at',

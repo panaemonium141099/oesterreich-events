@@ -71,23 +71,7 @@ export const post: FestivalPost = {
       text: 'Das Gartenbaukino hat eine hauseigene Bar. Nachgespräche und Zufallsbegegnungen gehören zum Festival-Erlebnis.',
     },
   ],
-  gallery: [
-    {
-      src: '/images/blog/viennale/gallery-1.jpg',
-      alt: 'Historisches Kinogebäude von außen bei Nacht',
-      caption: 'Das Gartenbaukino – Wiens schönste Filmspielstätte',
-    },
-    {
-      src: '/images/blog/viennale/gallery-2.jpg',
-      alt: 'Filmvorführung in einem vollen Kinosaal',
-      caption: 'Cinephiles Publikum bei der Viennale',
-    },
-    {
-      src: '/images/blog/viennale/gallery-3.jpg',
-      alt: 'Filmrolle und Kino-Ausrüstung als Symbol',
-      caption: 'Zwei Wochen internationales Kino in Wien',
-    },
-  ],
+  gallery: [],
   ctaText: 'Film- und Kultur-Events in Wien entdecken',
   ctaLink: '/map?category=Kultur&region=Wien',
   seoTitle: 'Viennale 2026 – Wiener Internationales Filmfestival Oktober',

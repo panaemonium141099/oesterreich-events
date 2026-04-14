@@ -71,23 +71,7 @@ export const post: FestivalPost = {
       text: 'Wiederverwendbare Tasche mitbringen – viele Aussteller verkaufen Produkte zum Mitnehmen.',
     },
   ],
-  gallery: [
-    {
-      src: '/images/blog/wiener-genussfestival/gallery-1.jpg',
-      alt: 'Festlich gedeckter Tisch mit österreichischen Spezialitäten',
-      caption: 'Österreichische Kulinarik auf höchstem Niveau',
-    },
-    {
-      src: '/images/blog/wiener-genussfestival/gallery-2.jpg',
-      alt: 'Weingläser und Weinflaschen bei einem Weinfestival',
-      caption: 'Österreichische Weine von den besten Winzern',
-    },
-    {
-      src: '/images/blog/wiener-genussfestival/gallery-3.jpg',
-      alt: 'Koch bei einer Live-Kochshow auf einer Bühne',
-      caption: 'Kochshows mit Österreichs besten Köchen',
-    },
-  ],
+  gallery: [],
   ctaText: 'Kulinarik-Events in Wien entdecken',
   ctaLink: '/map?category=Kulinarik&region=Wien',
   seoTitle: 'Wiener Genussfestival 2026 – Kulinarik im Stadtpark Wien',

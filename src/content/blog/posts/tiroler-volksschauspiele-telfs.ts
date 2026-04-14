@@ -71,23 +71,7 @@ export const post: FestivalPost = {
       text: 'Die Volksschauspiele finden alle vier Jahre statt. Nächste Ausgabe: Sommer 2027. Aktuelle Infos auf volksschauspiele.at.',
     },
   ],
-  gallery: [
-    {
-      src: '/images/blog/tiroler-volksschauspiele-telfs/gallery-1.jpg',
-      alt: 'Freilichttheater mit großem Publikum',
-      caption: 'Theater unter freiem Himmel — Volksschauspiele Telfs',
-    },
-    {
-      src: '/images/blog/tiroler-volksschauspiele-telfs/gallery-2.jpg',
-      alt: 'Historische Theaterszene mit Kostümen',
-      caption: 'Aufwendige Kostüme und Bühnenbildner aus der Region',
-    },
-    {
-      src: '/images/blog/tiroler-volksschauspiele-telfs/gallery-3.jpg',
-      alt: 'Tiroler Bergdorf mit Inntal-Panorama',
-      caption: 'Telfs im Inntal — Heimat der Volksschauspiele',
-    },
-  ],
+  gallery: [],
   ctaText: 'Theaterveranstaltungen in Tirol entdecken',
   ctaLink: '/map?bundesland=Tirol&category=Kultur',
   seoTitle: 'Tiroler Volksschauspiele Telfs – Theater & Tradition',

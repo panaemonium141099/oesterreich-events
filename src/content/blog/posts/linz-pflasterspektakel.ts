@@ -73,23 +73,7 @@ export const post: FestivalPost = {
       text: 'Das Festival findet bei (fast) jedem Wetter statt. Bei Regen weichen Künstler auf überdachte Bereiche aus. Leichte Regenjacke empfehlenswert.',
     },
   ],
-  gallery: [
-    {
-      src: '/images/blog/linz-pflasterspektakel/gallery-1.jpg',
-      alt: 'Straßenkünstler bei Akrobatikvorführung',
-      caption: 'Weltklasseartistik auf dem Linzer Hauptplatz',
-    },
-    {
-      src: '/images/blog/linz-pflasterspektakel/gallery-2.jpg',
-      alt: 'Feuershow bei Nacht',
-      caption: 'Feuershow und Lichtkunst begeistern das Publikum',
-    },
-    {
-      src: '/images/blog/linz-pflasterspektakel/gallery-3.jpg',
-      alt: 'Innenstadt mit Zuschauern beim Straßenfestival',
-      caption: 'Die Linzer Innenstadt wird zur Freilichtbühne',
-    },
-  ],
+  gallery: [],
   ctaText: 'Events in Oberösterreich entdecken',
   ctaLink: '/map?bundesland=Oberoesterreich&category=Festivals',
   seoTitle: 'Linz Pflasterspektakel 2026 – Programm & Tipps',

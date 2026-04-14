@@ -69,23 +69,7 @@ export const post: FestivalPost = {
       text: 'Vorstellungsbeginn bei Einbruch der Dämmerung. Der Arkadenhof bietet etwas Wetterschutz.',
     },
   ],
-  gallery: [
-    {
-      src: '/images/blog/schlossspiele-kobersdorf-2026/gallery-1.jpg',
-      alt: 'Renaissance-Arkadenhof von Schloss Kobersdorf',
-      caption: 'Der Arkadenhof als einzigartige Freiluftbühne',
-    },
-    {
-      src: '/images/blog/schlossspiele-kobersdorf-2026/gallery-2.jpg',
-      alt: 'Theateraufführung im Schlosshof bei Abenddämmerung',
-      caption: 'Komödientheater unter dem burgenländischen Sternenhimmel',
-    },
-    {
-      src: '/images/blog/schlossspiele-kobersdorf-2026/gallery-3.jpg',
-      alt: 'Schloss Kobersdorf im Mittelburgenland',
-      caption: 'Schloss Kobersdorf — seit 1972 Heimat erstklassiger Sommerkomödien',
-    },
-  ],
+  gallery: [],
   ctaText: 'Theater-Events im Burgenland entdecken',
   ctaLink: '/map?category=Kultur&region=Burgenland',
   seoTitle: 'Schloss-Spiele Kobersdorf 2026 – Der nackte Wahnsinn | LassTreffen.at',

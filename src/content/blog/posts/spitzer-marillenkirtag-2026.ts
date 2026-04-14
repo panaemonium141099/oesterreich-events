@@ -70,23 +70,7 @@ export const post: FestivalPost = {
       text: 'Spitz liegt direkt am Donauradweg — perfekte Anreise per Fahrrad durch die Wachau.',
     },
   ],
-  gallery: [
-    {
-      src: '/images/blog/spitzer-marillenkirtag-2026/gallery-1.jpg',
-      alt: 'Frische Wachauer Marillen auf einem Marktstand',
-      caption: 'Goldgelbe Wachauer Marillen — geschützte Ursprungsbezeichnung',
-    },
-    {
-      src: '/images/blog/spitzer-marillenkirtag-2026/gallery-2.jpg',
-      alt: 'Mittelalterlicher Marktplatz von Spitz an der Donau',
-      caption: 'Der historische Marktplatz als Festkulisse',
-    },
-    {
-      src: '/images/blog/spitzer-marillenkirtag-2026/gallery-3.jpg',
-      alt: 'Wachau Landschaft mit Weinbergen und Donau',
-      caption: 'UNESCO-Welterbe Wachau — Marillen, Wein und Donaulandschaft',
-    },
-  ],
+  gallery: [],
   ctaText: 'Kulinarik-Events in Niederösterreich entdecken',
   ctaLink: '/map?category=Essen&region=Niederösterreich',
   seoTitle: 'Spitzer Marillenkirtag 2026 – Wachauer Marillen-Fest | LassTreffen.at',

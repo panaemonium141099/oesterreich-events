@@ -70,23 +70,7 @@ export const post: FestivalPost = {
       text: 'Getränke und Speisen werden direkt am Tisch serviert. Keine Selbstversorgung nötig.',
     },
   ],
-  gallery: [
-    {
-      src: '/images/blog/musikfestival-steyr-2026/gallery-1.jpg',
-      alt: 'Open-Air-Bühne im Schlossgraben von Schloss Lamberg',
-      caption: 'Der Schlossgraben als einzigartige Freiluftbühne',
-    },
-    {
-      src: '/images/blog/musikfestival-steyr-2026/gallery-2.jpg',
-      alt: 'Bistro-Bestuhlung mit Zuschauern im Schlossgraben',
-      caption: 'Theater genießen im Bistro-Ambiente unter Sternen',
-    },
-    {
-      src: '/images/blog/musikfestival-steyr-2026/gallery-3.jpg',
-      alt: 'Historische Altstadt von Steyr bei Abenddämmerung',
-      caption: 'Die romantische Altstadt von Steyr als Festival-Kulisse',
-    },
-  ],
+  gallery: [],
   ctaText: 'Theater-Events in Oberösterreich entdecken',
   ctaLink: '/map?category=Kultur&region=Oberösterreich',
   seoTitle: 'Musikfestival Steyr 2026: HAIR im Schlossgraben | LassTreffen.at',

@@ -71,23 +71,7 @@ export const post: FestivalPost = {
       text: 'Jänner und Februar in Villach sind kalt. Warme Kostüme für den Umzug im Freien empfohlen.',
     },
   ],
-  gallery: [
-    {
-      src: '/images/blog/villacher-fasching/gallery-1.jpg',
-      alt: 'Farbenfrohe Faschingskostüme auf einem Umzug',
-      caption: 'Prächtige Kostüme beim Villacher Faschingsumzug',
-    },
-    {
-      src: '/images/blog/villacher-fasching/gallery-2.jpg',
-      alt: 'Feierliche Ballveranstaltung mit Musik',
-      caption: 'Faschingsbälle im Kongresshaus Villach',
-    },
-    {
-      src: '/images/blog/villacher-fasching/gallery-3.jpg',
-      alt: 'Menschenmenge auf einer Stadtstraße beim Karneval',
-      caption: 'Tausende Narrinnen und Narren auf den Straßen Villachs',
-    },
-  ],
+  gallery: [],
   ctaText: 'Fasching-Events in Kärnten entdecken',
   ctaLink: '/map?bundesland=Kärnten&category=Kultur',
   seoTitle: 'Villacher Fasching 2026 – Programm, Umzug & Tickets',

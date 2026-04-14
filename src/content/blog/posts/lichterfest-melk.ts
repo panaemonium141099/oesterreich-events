@@ -70,23 +70,7 @@ export const post: FestivalPost = {
       text: 'Die Rieden rund um Melk produzieren exzellenten Grünen Veltliner und Riesling — Weinstand besuchen!',
     },
   ],
-  gallery: [
-    {
-      src: '/images/blog/lichterfest-melk/gallery-1.jpg',
-      alt: 'Lichtinstallation an einem historischen Gebäude',
-      caption: 'Lichtmagie am Stift Melk — ein unvergesslicher Anblick',
-    },
-    {
-      src: '/images/blog/lichterfest-melk/gallery-2.jpg',
-      alt: 'Kerzen und Lichter reflektieren sich im Wasser',
-      caption: 'Die Donau als Spiegel für tausende Lichter',
-    },
-    {
-      src: '/images/blog/lichterfest-melk/gallery-3.jpg',
-      alt: 'Historisches Kloster bei Nacht beleuchtet',
-      caption: 'Das illuminierte Stift Melk — Wahrzeichen der Wachau',
-    },
-  ],
+  gallery: [],
   ctaText: 'Kulturevents in der Wachau entdecken',
   ctaLink: '/map?bundesland=Nieder%C3%B6sterreich&category=Kultur',
   seoTitle: 'Lichterfest Melk 2026 – Lichtmagie in der Wachau | LassTreffen.at',

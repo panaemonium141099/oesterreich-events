@@ -72,23 +72,7 @@ export const post: FestivalPost = {
       text: 'Innsbruck bietet gutes Hotelandebot. Für Premierenwochenenden frühzeitig buchen. Ferienwohnungen im Inntal als Alternative.',
     },
   ],
-  gallery: [
-    {
-      src: '/images/blog/innsbruck-festwochen-alte-musik/gallery-1.jpg',
-      alt: 'Barockkonzert in historischer Kirche',
-      caption: 'Alte Musik in historischem Ambiente',
-    },
-    {
-      src: '/images/blog/innsbruck-festwochen-alte-musik/gallery-2.jpg',
-      alt: 'Ensemble mit historischen Instrumenten',
-      caption: 'Historisch informierte Aufführungspraxis auf höchstem Niveau',
-    },
-    {
-      src: '/images/blog/innsbruck-festwochen-alte-musik/gallery-3.jpg',
-      alt: 'Innsbruck Hofburg und Alpen',
-      caption: 'Die Hofburg Innsbruck — zentraler Spielort des Festivals',
-    },
-  ],
+  gallery: [],
   ctaText: 'Kulturevents in Innsbruck entdecken',
   ctaLink: '/map?bundesland=Tirol&category=Kultur',
   seoTitle: 'Innsbruck Festwochen Alte Musik 2026 – Programm & Tickets',

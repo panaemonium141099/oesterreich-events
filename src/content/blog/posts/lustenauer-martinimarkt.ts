@@ -70,23 +70,7 @@ export const post: FestivalPost = {
       text: 'November in Vorarlberg kann kalt und nass sein. Warme Kleidung und festes Schuhwerk für den Außenmarkt sind empfehlenswert.',
     },
   ],
-  gallery: [
-    {
-      src: '/images/blog/lustenauer-martinimarkt/gallery-1.jpg',
-      alt: 'Herbstmarkt mit Ständen und Besuchern',
-      caption: 'Herbstmarkt-Stimmung in Lustenau',
-    },
-    {
-      src: '/images/blog/lustenauer-martinimarkt/gallery-2.jpg',
-      alt: 'Vorarlberg am Bodensee im Herbst',
-      caption: 'Lustenau am Rhein — Vorarlberg im goldenen Herbst',
-    },
-    {
-      src: '/images/blog/lustenauer-martinimarkt/gallery-3.jpg',
-      alt: 'Handwerk und regionale Produkte auf dem Markt',
-      caption: 'Regionales Handwerk und Herbstspezialitäten',
-    },
-  ],
+  gallery: [],
   ctaText: 'Herbstevents in Vorarlberg entdecken',
   ctaLink: '/map?bundesland=Vorarlberg&category=Kultur',
   seoTitle: 'Lustenauer Martinimarkt 2026 – Herbstmarkt & Tipps',

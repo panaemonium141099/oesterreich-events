@@ -72,23 +72,7 @@ export const post: FestivalPost = {
       text: 'Auch ohne Tanzerfahrung: Anfänger-Workshops ermöglichen den Einstieg. Frühzeitig buchen — beliebte Kurse sind schnell voll.',
     },
   ],
-  gallery: [
-    {
-      src: '/images/blog/impulstanz-2026/gallery-1.jpg',
-      alt: 'Zeitgenössische Tanzperformance auf einer Bühne',
-      caption: 'Weltklasse-Choreografie auf Wiens bedeutendsten Bühnen',
-    },
-    {
-      src: '/images/blog/impulstanz-2026/gallery-2.jpg',
-      alt: 'Tänzer im Workshop-Studio',
-      caption: 'Über 200 Workshops für alle Levels',
-    },
-    {
-      src: '/images/blog/impulstanz-2026/gallery-3.jpg',
-      alt: 'Open-Air-Tanzperformance im MuseumsQuartier Wien',
-      caption: 'Tanz unter freiem Himmel beim Open-Doors-Programm',
-    },
-  ],
+  gallery: [],
   ctaText: 'Tanz- und Kultur-Events in Wien',
   ctaLink: '/map?category=Kultur&region=Wien',
   seoTitle: 'ImPulsTanz 2026 Wien – Programm, Workshops & Tickets | LassTreffen.at',

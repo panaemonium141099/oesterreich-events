@@ -71,23 +71,7 @@ export const post: FestivalPost = {
       text: 'Einlass ab 20:00 Uhr, Eröffnung um 22:00 Uhr. Ballnacht dauert offiziell bis 05:00 Uhr morgens.',
     },
   ],
-  gallery: [
-    {
-      src: '/images/blog/wiener-opernball/gallery-1.jpg',
-      alt: 'Eleganter Ballsaal mit Kronleuchtern',
-      caption: 'Prachtvoller Ballsaal der Wiener Staatsoper',
-    },
-    {
-      src: '/images/blog/wiener-opernball/gallery-2.jpg',
-      alt: 'Tanzpaare in Abendgarderobe auf einem Parkett',
-      caption: 'Eleganz und Tradition auf dem berühmten Opernball-Parkett',
-    },
-    {
-      src: '/images/blog/wiener-opernball/gallery-3.jpg',
-      alt: 'Wiener Staatsoper bei Nacht beleuchtet',
-      caption: 'Die illuminierte Wiener Staatsoper am Opernring',
-    },
-  ],
+  gallery: [],
   ctaText: 'Kulturevents in Wien entdecken',
   ctaLink: '/map?category=Kultur&region=Wien',
   seoTitle: 'Wiener Opernball 2026 – Tickets, Termin & Infos',

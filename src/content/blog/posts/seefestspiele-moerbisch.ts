@@ -71,23 +71,7 @@ export const post: FestivalPost = {
       text: 'Frühzeitig online buchen — beliebte Abende sind Wochen im Voraus ausverkauft.',
     },
   ],
-  gallery: [
-    {
-      src: '/images/blog/seefestspiele-moerbisch/gallery-1.jpg',
-      alt: 'Seebühne mit Lichtern bei Nacht',
-      caption: 'Die Seebühne Mörbisch leuchtet über dem Neusiedler See',
-    },
-    {
-      src: '/images/blog/seefestspiele-moerbisch/gallery-2.jpg',
-      alt: 'Operetten-Aufführung mit großem Ensemble',
-      caption: 'Prachtvoll-inszenierte Operette mit 200 Mitwirkenden',
-    },
-    {
-      src: '/images/blog/seefestspiele-moerbisch/gallery-3.jpg',
-      alt: 'Zuschauerpublikum bei einer Freiluftveranstaltung',
-      caption: '6.200 Zuschauer erleben magische Sommerabende',
-    },
-  ],
+  gallery: [],
   ctaText: 'Kulturevents am Neusiedler See entdecken',
   ctaLink: '/map?bundesland=Burgenland&category=Kultur',
   seoTitle: 'Seefestspiele Mörbisch 2026 – Operette am Neusiedler See',

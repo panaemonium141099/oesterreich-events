@@ -82,23 +82,7 @@ export const post: FestivalPost = {
       text: 'Cashless-Armband als Zahlungsmittel. Online aufladen spart Zeit am Einlass.',
     },
   ],
-  gallery: [
-    {
-      src: '/images/blog/nova-rock-2026/gallery-1.jpg',
-      alt: 'Nova Rock Festival Bühne mit Lichtshow',
-      caption: 'Spektakuläre Lichtshow auf der Hauptbühne',
-    },
-    {
-      src: '/images/blog/nova-rock-2026/gallery-2.jpg',
-      alt: 'Begeisterte Menschenmenge beim Nova Rock',
-      caption: 'Über 100.000 Fans feiern gemeinsam',
-    },
-    {
-      src: '/images/blog/nova-rock-2026/gallery-3.jpg',
-      alt: 'Festival Camping Area',
-      caption: 'Die Festival-Stadt: Camping unter freiem Himmel',
-    },
-  ],
+  gallery: [],
   ctaText: 'Rock-Events in Österreich entdecken',
   ctaLink: '/map?category=Musik',
   seoTitle: 'Nova Rock 2026 – Alles was du wissen musst | LassTreffen.at',

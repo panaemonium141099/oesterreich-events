@@ -77,23 +77,7 @@ export const post: FestivalPost = {
       text: 'Juli in Salzburg: tagsüber warm (22–30 °C), nachts frisch. Regenjacke und Sonnencreme einpacken.',
     },
   ],
-  gallery: [
-    {
-      src: '/images/blog/electric-love-festival-2026/gallery-1.jpg',
-      alt: 'Electric Love Mainstage mit Lasershow bei Nacht',
-      caption: 'Die Mainstage des Electric Love in voller Pracht',
-    },
-    {
-      src: '/images/blog/electric-love-festival-2026/gallery-2.jpg',
-      alt: 'Begeisterte Menschenmenge vor der Bühne',
-      caption: 'Über 100.000 Fans feiern auf dem Salzburgring',
-    },
-    {
-      src: '/images/blog/electric-love-festival-2026/gallery-3.jpg',
-      alt: 'Festivalgelände am Salzburgring bei Sonnenuntergang',
-      caption: 'Alpine Kulisse trifft elektronische Musik',
-    },
-  ],
+  gallery: [],
   ctaText: 'EDM-Events in Österreich entdecken',
   ctaLink: '/map?category=Musik',
   seoTitle: 'Electric Love Festival 2026 – Lineup, Tickets & Camping | LassTreffen.at',

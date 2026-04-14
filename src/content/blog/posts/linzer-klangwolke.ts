@@ -70,23 +70,7 @@ export const post: FestivalPost = {
       text: 'ORF Radio Oberösterreich überträgt die Klangwolke live. Wer nicht vor Ort sein kann, hört das Konzert bequem zuhause.',
     },
   ],
-  gallery: [
-    {
-      src: '/images/blog/linzer-klangwolke/gallery-1.jpg',
-      alt: 'Open-Air-Konzert bei Nacht mit Lichtshow',
-      caption: 'Bruckner Orchester und Lichtspektakel über der Donau',
-    },
-    {
-      src: '/images/blog/linzer-klangwolke/gallery-2.jpg',
-      alt: 'Publikum beim Freiluftkonzert',
-      caption: 'Bis zu 100.000 Menschen erleben die Klangwolke',
-    },
-    {
-      src: '/images/blog/linzer-klangwolke/gallery-3.jpg',
-      alt: 'Donau bei Nacht mit Feuerwerk',
-      caption: 'Pyrotechnik über der Linzer Donau',
-    },
-  ],
+  gallery: [],
   ctaText: 'Musikevents in Oberösterreich entdecken',
   ctaLink: '/map?bundesland=Oberoesterreich&category=Musik',
   seoTitle: 'Linzer Klangwolke 2026 – Programm, Termin & Tipps',

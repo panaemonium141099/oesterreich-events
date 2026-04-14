@@ -71,23 +71,7 @@ export const post: FestivalPost = {
       text: 'Das vollständige Programm erscheint im Frühjahr. Newsletter abonnieren für Vorverkaufsstart.',
     },
   ],
-  gallery: [
-    {
-      src: '/images/blog/jazzfest-wien-2026/gallery-1.jpg',
-      alt: 'Jazz-Konzert in der Wiener Staatsoper',
-      caption: 'Jazz auf der Bühne der Wiener Staatsoper',
-    },
-    {
-      src: '/images/blog/jazzfest-wien-2026/gallery-2.jpg',
-      alt: 'Open-Air-Konzert am Rathausplatz Wien bei Nacht',
-      caption: 'Kostenlose Open-Air-Konzerte vor dem Rathaus',
-    },
-    {
-      src: '/images/blog/jazzfest-wien-2026/gallery-3.jpg',
-      alt: 'Saxophonist auf einer Bühne mit stimmungsvoller Beleuchtung',
-      caption: 'Weltklasse-Jazz in intimem Club-Ambiente',
-    },
-  ],
+  gallery: [],
   ctaText: 'Jazz- und Musik-Events in Wien',
   ctaLink: '/map?category=Musik&region=Wien',
   seoTitle: 'JazzFest Wien 2026 – Programm, Tickets & Gratis-Konzerte | LassTreffen.at',

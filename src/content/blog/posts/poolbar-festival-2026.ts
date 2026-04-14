@@ -73,23 +73,7 @@ export const post: FestivalPost = {
       text: 'Flughafen Zürich (~1,5 h per Bahn), Friedrichshafen (~45 Min.) oder Innsbruck (~2 h).',
     },
   ],
-  gallery: [
-    {
-      src: '/images/blog/poolbar-festival-2026/gallery-1.jpg',
-      alt: 'Konzert im alten Hallenbad Feldkirch',
-      caption: 'Intime Club-Atmosphäre im umfunktionierten Hallenbad',
-    },
-    {
-      src: '/images/blog/poolbar-festival-2026/gallery-2.jpg',
-      alt: 'Open-Air-Bühne auf der Reichenfeldwiese',
-      caption: 'Sommerliche Konzerte unter freiem Himmel',
-    },
-    {
-      src: '/images/blog/poolbar-festival-2026/gallery-3.jpg',
-      alt: 'Feldkirch Altstadt bei Nacht',
-      caption: 'Das Festival belebt die historische Altstadt Feldkirchs',
-    },
-  ],
+  gallery: [],
   ctaText: 'Kultur-Events in Vorarlberg entdecken',
   ctaLink: '/map?category=Kultur&region=Vorarlberg',
   seoTitle: 'Poolbar Festival 2026 Feldkirch – Programm, Tickets & Infos | LassTreffen.at',

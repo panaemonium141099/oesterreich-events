@@ -70,23 +70,7 @@ export const post: FestivalPost = {
       text: 'Regenbogenfarben, Glitzer und Kostüme herzlich willkommen. Sonnencreme und Wasser nicht vergessen.',
     },
   ],
-  gallery: [
-    {
-      src: '/images/blog/wiener-regenbogenparade/gallery-1.jpg',
-      alt: 'Pride Parade mit Regenbogenfahnen und bunten Teilnehmern',
-      caption: 'Ein Meer aus Regenbogenfarben auf der Wiener Ringstraße',
-    },
-    {
-      src: '/images/blog/wiener-regenbogenparade/gallery-2.jpg',
-      alt: 'Bunte Floats bei einer Pride-Parade',
-      caption: 'Kreative Floats und Kostüme bei der Parade',
-    },
-    {
-      src: '/images/blog/wiener-regenbogenparade/gallery-3.jpg',
-      alt: 'Fröhliche Menschen mit Regenbogenfahnen',
-      caption: 'Sichtbarkeit und Feierlaune – gemeinsam durch Wien',
-    },
-  ],
+  gallery: [],
   ctaText: 'Community-Events in Wien entdecken',
   ctaLink: '/map?category=Kultur&region=Wien',
   seoTitle: 'Wiener Regenbogenparade 2026 – Wien Pride Infos & Programm',

@@ -70,23 +70,7 @@ export const post: FestivalPost = {
       text: 'Dezember in Wien: 0–8 °C, oft feucht. Warme, wasserfeste Kleidung und gutes Schuhwerk empfohlen.',
     },
   ],
-  gallery: [
-    {
-      src: '/images/blog/wien-christkindlmarkt/gallery-1.jpg',
-      alt: 'Weihnachtsmarkt Wien bei Nacht mit festlicher Beleuchtung',
-      caption: 'Leuchtende Holzhütten vor der illuminierten Rathausfassade',
-    },
-    {
-      src: '/images/blog/wien-christkindlmarkt/gallery-2.jpg',
-      alt: 'Glühwein und Weihnachtsdekoration am Christkindlmarkt',
-      caption: 'Glühwein, Punsch und weihnachtliche Delikatessen',
-    },
-    {
-      src: '/images/blog/wien-christkindlmarkt/gallery-3.jpg',
-      alt: 'Kunsthandwerk am Wiener Christkindlmarkt',
-      caption: 'Hochwertiges Kunsthandwerk aus ganz Österreich',
-    },
-  ],
+  gallery: [],
   ctaText: 'Advent-Events in Wien entdecken',
   ctaLink: '/map?category=Kultur&region=Wien',
   seoTitle: 'Wiener Christkindlmarkt 2026 – Rathausplatz Wien',

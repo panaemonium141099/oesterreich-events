@@ -70,23 +70,7 @@ export const post: FestivalPost = {
       text: 'Bei 24h-Programm und hohen dB-Pegeln: Hochwertiger Gehörschutz zum Schutz des Gehörs mitbringen.',
     },
   ],
-  gallery: [
-    {
-      src: '/images/blog/pannonia-fields/gallery-1.jpg',
-      alt: 'DJ-Set auf einer Outdoor-Festival-Stage',
-      caption: 'Elektrisierende DJ-Sets auf den Pannonia Fields',
-    },
-    {
-      src: '/images/blog/pannonia-fields/gallery-2.jpg',
-      alt: 'Tanzende Menge bei einem Elektronik-Festival',
-      caption: 'Tausende Techno-Fans feiern im Freien',
-    },
-    {
-      src: '/images/blog/pannonia-fields/gallery-3.jpg',
-      alt: 'Lichtshow auf einem Outdoor-Festival',
-      caption: 'Beeindruckende Licht- und Bühneninstallationen',
-    },
-  ],
+  gallery: [],
   ctaText: 'Elektronik-Events im Burgenland entdecken',
   ctaLink: '/map?bundesland=Burgenland&category=Musik',
   seoTitle: 'Pannonia Fields Electronic Festival 2026 | LassTreffen.at',

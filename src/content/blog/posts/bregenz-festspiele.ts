@@ -72,23 +72,7 @@ export const post: FestivalPost = {
       text: 'Restaurants und Caféterrassen im Festspielbereich. Reservierung für Abendessen vor der Vorstellung früh vornehmen — beliebt bei Festspielgästen.',
     },
   ],
-  gallery: [
-    {
-      src: '/images/blog/bregenz-festspiele/gallery-1.jpg',
-      alt: 'Opernbühne mit Lichtern über dem See',
-      caption: 'Die Seebühne — einzigartig in der Welt',
-    },
-    {
-      src: '/images/blog/bregenz-festspiele/gallery-2.jpg',
-      alt: 'Bodensee und Alpenpanorama im Abendlicht',
-      caption: 'Kulisse ohne Gleichen: Bodensee und Alpen',
-    },
-    {
-      src: '/images/blog/bregenz-festspiele/gallery-3.jpg',
-      alt: 'Opernaufführung mit großem Ensemble',
-      caption: 'Weltklasse-Oper in einer unvergesslichen Atmosphäre',
-    },
-  ],
+  gallery: [],
   ctaText: 'Klassik-Events in Vorarlberg entdecken',
   ctaLink: '/map?bundesland=Vorarlberg&category=Musik',
   seoTitle: 'Bregenzer Festspiele 2026 – Seebühne, Tickets & Tipps',

@@ -72,23 +72,7 @@ export const post: FestivalPost = {
       text: 'Hotels in Kitzbühel für das Rennwochenende sind 6–12 Monate im Voraus ausgebucht. Alternativen: Wörgl, St. Johann, Fieberbrunn.',
     },
   ],
-  gallery: [
-    {
-      src: '/images/blog/hahnenkamm-rennen-kitzbuehel/gallery-1.jpg',
-      alt: 'Skifahrer auf der Streif Steilhang',
-      caption: 'Die Streif — die gefährlichste Abfahrt der Welt',
-    },
-    {
-      src: '/images/blog/hahnenkamm-rennen-kitzbuehel/gallery-2.jpg',
-      alt: 'Jubelnde Fans am Zieleinlauf',
-      caption: 'Tausende Fans feiern am Zieleinlauf in der Innenstadt',
-    },
-    {
-      src: '/images/blog/hahnenkamm-rennen-kitzbuehel/gallery-3.jpg',
-      alt: 'Kitzbühel Altstadt im Winter',
-      caption: 'Kitzbühel im Winter — charmante Kulisse für das Weltcup-Event',
-    },
-  ],
+  gallery: [],
   ctaText: 'Wintersport-Events in Tirol entdecken',
   ctaLink: '/map?bundesland=Tirol&category=Sport',
   seoTitle: 'Hahnenkamm-Rennen Kitzbühel 2026 – Tickets & Tipps',

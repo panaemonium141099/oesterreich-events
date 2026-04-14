@@ -72,23 +72,7 @@ export const post: FestivalPost = {
       text: 'Online-Buchung unter grafenegg.com. Für populäre Konzerte frühzeitig buchen.',
     },
   ],
-  gallery: [
-    {
-      src: '/images/blog/grafenegg-festival/gallery-1.jpg',
-      alt: 'Klassikkonzert im Freien mit Orchester',
-      caption: 'Weltklasse-Orchester unter dem Sternenhimmel',
-    },
-    {
-      src: '/images/blog/grafenegg-festival/gallery-2.jpg',
-      alt: 'Konzertpublikum in einem Schlosspark',
-      caption: 'Stimmungsvoller Abend im Schlosspark Grafenegg',
-    },
-    {
-      src: '/images/blog/grafenegg-festival/gallery-3.jpg',
-      alt: 'Historisches Schloss bei Nacht beleuchtet',
-      caption: 'Schloss Grafenegg als stimmungsvolle Festivalkulisse',
-    },
-  ],
+  gallery: [],
   ctaText: 'Klassik-Events in Niederösterreich entdecken',
   ctaLink: '/map?bundesland=Nieder%C3%B6sterreich&category=Kultur',
   seoTitle: 'Grafenegg Festival 2026 – Klassik im Schlosspark | LassTreffen.at',

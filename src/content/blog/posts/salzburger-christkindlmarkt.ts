@@ -71,23 +71,7 @@ export const post: FestivalPost = {
       text: 'Dezember in Salzburg: 0–5 °C, häufig Schnee. Gutes Schuhwerk und warme Kleidung sind wichtig.',
     },
   ],
-  gallery: [
-    {
-      src: '/images/blog/salzburger-christkindlmarkt/gallery-1.jpg',
-      alt: 'Adventmarkt mit Lichterketten und Tannen',
-      caption: 'Weihnachtliche Stimmung in der historischen Altstadt',
-    },
-    {
-      src: '/images/blog/salzburger-christkindlmarkt/gallery-2.jpg',
-      alt: 'Glühwein und Weihnachtsdekoration',
-      caption: 'Heißer Punsch und Gebäck — unverzichtbar bei Kälte',
-    },
-    {
-      src: '/images/blog/salzburger-christkindlmarkt/gallery-3.jpg',
-      alt: 'Handgemachtes Kunsthandwerk am Markt',
-      caption: 'Regionales Kunsthandwerk und Salzburger Spezialitäten',
-    },
-  ],
+  gallery: [],
   ctaText: 'Advent-Events in Salzburg entdecken',
   ctaLink: '/map?bundesland=Salzburg&category=Kultur',
   seoTitle: 'Salzburger Christkindlmarkt 2026 – Domplatz & Infos',

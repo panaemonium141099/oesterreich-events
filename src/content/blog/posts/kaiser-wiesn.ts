@@ -71,23 +71,7 @@ export const post: FestivalPost = {
       text: 'Dirndl und Lederhosen sind sehr willkommen und typisch – aber keine Pflicht. Modisches Casual ebenfalls OK.',
     },
   ],
-  gallery: [
-    {
-      src: '/images/blog/kaiser-wiesn/gallery-1.jpg',
-      alt: 'Oktoberfest Bierzelt mit fröhlichen Gästen',
-      caption: 'Ausgelassene Stimmung im Bierzelt der Kaiserwiesn',
-    },
-    {
-      src: '/images/blog/kaiser-wiesn/gallery-2.jpg',
-      alt: 'Maßkrüge beim Bierzeltfest',
-      caption: 'Ein Prosit der Gemütlichkeit – Maß-Kultur in Wien',
-    },
-    {
-      src: '/images/blog/kaiser-wiesn/gallery-3.jpg',
-      alt: 'Festgelände mit bunten Lichtern und Fahrgeschäften',
-      caption: 'Abendstimmung auf dem Festgelände im Prater',
-    },
-  ],
+  gallery: [],
   ctaText: 'Volksfest-Events in Wien entdecken',
   ctaLink: '/map?category=Musik&region=Wien',
   seoTitle: 'Kaiser Wiesn Wien 2026 – Wiener Wiesn-Fest im Prater',

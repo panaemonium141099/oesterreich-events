@@ -71,23 +71,7 @@ export const post: FestivalPost = {
       text: 'Retz ist auch ohne Fest sehenswert: Windmühle, historischer Hauptplatz und mittelalterliche Stadtmauer.',
     },
   ],
-  gallery: [
-    {
-      src: '/images/blog/retz-weinlesefest/gallery-1.jpg',
-      alt: 'Weintrauben an der Rebe bei der Ernte',
-      caption: 'Die Weinernte ist der Anlass für das traditionsreiche Fest',
-    },
-    {
-      src: '/images/blog/retz-weinlesefest/gallery-2.jpg',
-      alt: 'Weingläser mit Weißwein bei einer Verkostung',
-      caption: 'Grüner Veltliner und Riesling aus dem Weinviertel',
-    },
-    {
-      src: '/images/blog/retz-weinlesefest/gallery-3.jpg',
-      alt: 'Mittelalterliche Stadtgasse bei einem Volksfest',
-      caption: 'Die historische Altstadt Retzens als Festivalkulisse',
-    },
-  ],
+  gallery: [],
   ctaText: 'Weinfeste in Niederösterreich entdecken',
   ctaLink: '/map?bundesland=Nieder%C3%B6sterreich&category=Kulinarik',
   seoTitle: 'Retz Weinlesefest 2026 – Weinfest im Weinviertel | LassTreffen.at',

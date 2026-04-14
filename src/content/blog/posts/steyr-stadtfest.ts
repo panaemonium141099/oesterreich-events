@@ -71,23 +71,7 @@ export const post: FestivalPost = {
       text: 'Hotels und Pensionen in Steyr rechtzeitig buchen — Festwochenenden sind begehrt. Steyr bietet charmante Altstadtunterkünfte für ein volles Erlebnis.',
     },
   ],
-  gallery: [
-    {
-      src: '/images/blog/steyr-stadtfest/gallery-1.jpg',
-      alt: 'Sommerfest auf historischem Stadtplatz',
-      caption: 'Stadtfest-Stimmung in der mittelalterlichen Altstadt',
-    },
-    {
-      src: '/images/blog/steyr-stadtfest/gallery-2.jpg',
-      alt: 'Konzert auf einer Freilichtbühne',
-      caption: 'Live-Musik auf dem Steyr Stadtplatz',
-    },
-    {
-      src: '/images/blog/steyr-stadtfest/gallery-3.jpg',
-      alt: 'Flussufer mit alten Häusern und Besuchern',
-      caption: 'Feiern am Ufer der Enns',
-    },
-  ],
+  gallery: [],
   ctaText: 'Sommerfeste in Oberösterreich entdecken',
   ctaLink: '/map?bundesland=Oberoesterreich&category=Festivals',
   seoTitle: 'Steyr Stadtfest 2026 – Programm, Termin & Tipps',

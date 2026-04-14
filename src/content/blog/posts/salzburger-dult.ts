@@ -71,23 +71,7 @@ export const post: FestivalPost = {
       text: 'Die Frühjahrs-Dult dauert ca. 10 Tage, die Herbst-Dult ca. 14 Tage. Täglich ab 14 Uhr geöffnet, Wochenende ab 10 Uhr.',
     },
   ],
-  gallery: [
-    {
-      src: '/images/blog/salzburger-dult/gallery-1.jpg',
-      alt: 'Bunte Fahrgeschäfte auf einem Volksfest',
-      caption: 'Volksfestfreude im Salzburger Volksgarten',
-    },
-    {
-      src: '/images/blog/salzburger-dult/gallery-2.jpg',
-      alt: 'Festzelt mit Blasmusik und Besuchern',
-      caption: 'Blasmusik und Gemütlichkeit im Festzelt',
-    },
-    {
-      src: '/images/blog/salzburger-dult/gallery-3.jpg',
-      alt: 'Leuchtende Fahrgeschäfte bei Nacht',
-      caption: 'Wenn die Dult abends erstrahlt',
-    },
-  ],
+  gallery: [],
   ctaText: 'Volkskultur-Events in Salzburg entdecken',
   ctaLink: '/map?bundesland=Salzburg&category=Kultur',
   seoTitle: 'Salzburger Dult 2026 – Volksfest Termine & Tipps',

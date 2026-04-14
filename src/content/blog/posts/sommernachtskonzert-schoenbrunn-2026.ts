@@ -69,23 +69,7 @@ export const post: FestivalPost = {
       text: 'Wer keinen Platz bekommt: Das Konzert wird live auf ORF und in vielen Ländern übertragen.',
     },
   ],
-  gallery: [
-    {
-      src: '/images/blog/sommernachtskonzert-schoenbrunn-2026/gallery-1.jpg',
-      alt: 'Wiener Philharmoniker auf der Bühne im Schlosspark Schönbrunn',
-      caption: 'Die Wiener Philharmoniker vor der beleuchteten Gloriette',
-    },
-    {
-      src: '/images/blog/sommernachtskonzert-schoenbrunn-2026/gallery-2.jpg',
-      alt: 'Tausende Besucher im Schlosspark bei Sonnenuntergang',
-      caption: 'Über 100.000 Besucher genießen das Gratiskonzert',
-    },
-    {
-      src: '/images/blog/sommernachtskonzert-schoenbrunn-2026/gallery-3.jpg',
-      alt: 'Schloss Schönbrunn und Park bei Abenddämmerung',
-      caption: 'UNESCO-Welterbe als Konzertsaal unter freiem Himmel',
-    },
-  ],
+  gallery: [],
   ctaText: 'Klassik-Events in Wien entdecken',
   ctaLink: '/map?category=Musik&region=Wien',
   seoTitle: 'Sommernachtskonzert Schönbrunn 2026 – Gratis Open-Air der Wiener Philharmoniker',

@@ -72,23 +72,7 @@ export const post: FestivalPost = {
       text: 'Zahlreiche Gastgärten und Standln rund um den Hauptplatz bieten steirische Spezialitäten, Sturm und Wein.',
     },
   ],
-  gallery: [
-    {
-      src: '/images/blog/grazer-aufsteirern/gallery-1.jpg',
-      alt: 'Volksfest mit Tracht auf einem Stadtplatz',
-      caption: 'Tracht, Musik und Freude auf dem Grazer Hauptplatz',
-    },
-    {
-      src: '/images/blog/grazer-aufsteirern/gallery-2.jpg',
-      alt: 'Steirische Harmonika',
-      caption: 'Die Steirische Harmonika – das Herzstück des Aufsteirerns',
-    },
-    {
-      src: '/images/blog/grazer-aufsteirern/gallery-3.jpg',
-      alt: 'Historische Altstadt mit buntem Markt',
-      caption: 'Die Grazer Altstadt als Kulisse für das größte Trachtenfest',
-    },
-  ],
+  gallery: [],
   ctaText: 'Kultur-Events in Graz entdecken',
   ctaLink: '/map?bundesland=Steiermark&category=Kultur',
   seoTitle: 'Grazer Aufsteirern 2026 – Programm, Termin & Tipps',

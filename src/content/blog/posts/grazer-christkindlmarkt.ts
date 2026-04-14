@@ -71,23 +71,7 @@ export const post: FestivalPost = {
       text: 'Dezembertemperaturen in Graz können kalt sein – warme Kleidung und festes Schuhwerk empfohlen.',
     },
   ],
-  gallery: [
-    {
-      src: '/images/blog/grazer-christkindlmarkt/gallery-1.jpg',
-      alt: 'Weihnachtsmarkt mit Lichtern und Ständen',
-      caption: 'Adventstimmung auf dem Grazer Hauptplatz',
-    },
-    {
-      src: '/images/blog/grazer-christkindlmarkt/gallery-2.jpg',
-      alt: 'Glühweinstand auf Weihnachtsmarkt',
-      caption: 'Steirischer Punsch in charakteristischen Keramikbechern',
-    },
-    {
-      src: '/images/blog/grazer-christkindlmarkt/gallery-3.jpg',
-      alt: 'Beleuchtetes Rathaus mit Weihnachtsschmuck',
-      caption: 'Das illuminierte Grazer Rathaus als märchenhafte Kulisse',
-    },
-  ],
+  gallery: [],
   ctaText: 'Advent-Events in Graz entdecken',
   ctaLink: '/map?bundesland=Steiermark&category=Kultur',
   seoTitle: 'Grazer Christkindlmarkt 2026 – Öffnungszeiten & Tipps',

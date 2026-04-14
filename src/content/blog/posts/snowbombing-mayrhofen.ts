@@ -72,23 +72,7 @@ export const post: FestivalPost = {
       text: 'Hotels und Chalets in Mayrhofen für das Festivalwochenende früh buchen. Offizielle Partnerpakete auf snowbombing.com verfügbar.',
     },
   ],
-  gallery: [
-    {
-      src: '/images/blog/snowbombing-mayrhofen/gallery-1.jpg',
-      alt: 'Skifahrer auf verschneitem Hang',
-      caption: 'Skifahren tagsüber — Musik bis in die Nacht',
-    },
-    {
-      src: '/images/blog/snowbombing-mayrhofen/gallery-2.jpg',
-      alt: 'DJ vor jubelndem Publikum',
-      caption: 'Worldclass-DJs beim Snowbombing Mayrhofen',
-    },
-    {
-      src: '/images/blog/snowbombing-mayrhofen/gallery-3.jpg',
-      alt: 'Zillertaler Alpen Winterpanorama',
-      caption: 'Das Zillertal — Bühne für das weltweit beste Schneefestival',
-    },
-  ],
+  gallery: [],
   ctaText: 'Musik-Events in Tirol entdecken',
   ctaLink: '/map?bundesland=Tirol&category=Musik',
   seoTitle: 'Snowbombing Mayrhofen 2026 – Festival, Tickets & Tipps',

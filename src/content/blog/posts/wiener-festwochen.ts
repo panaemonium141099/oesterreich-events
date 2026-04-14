@@ -70,23 +70,7 @@ export const post: FestivalPost = {
       text: 'Spätestens bei Programmveröffentlichung (April) buchen – internationale Topproduktionen sind rasch vergriffen.',
     },
   ],
-  gallery: [
-    {
-      src: '/images/blog/wiener-festwochen/gallery-1.jpg',
-      alt: 'Theateraufführung auf einer erleuchteten Bühne',
-      caption: 'Internationale Theaterkunst auf Wiens Bühnen',
-    },
-    {
-      src: '/images/blog/wiener-festwochen/gallery-2.jpg',
-      alt: 'Open Air Konzert mit begeistertem Publikum',
-      caption: 'Kostenloser Kulturgenuss unter freiem Himmel',
-    },
-    {
-      src: '/images/blog/wiener-festwochen/gallery-3.jpg',
-      alt: 'Festliche Illumination eines historischen Theaters',
-      caption: 'Die Spielstätten der Wiener Festwochen im Abendlicht',
-    },
-  ],
+  gallery: [],
   ctaText: 'Theater- und Kultur-Events in Wien',
   ctaLink: '/map?category=Kultur&region=Wien',
   seoTitle: 'Wiener Festwochen 2026 – Programm, Tickets & Infos',

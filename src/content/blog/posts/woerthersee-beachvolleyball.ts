@@ -72,23 +72,7 @@ export const post: FestivalPost = {
       text: 'Das Stadion liegt direkt am See – Badegelegenheit vor und nach dem Turnier in den nahegelegenen Strandbädern.',
     },
   ],
-  gallery: [
-    {
-      src: '/images/blog/woerthersee-beachvolleyball/gallery-1.jpg',
-      alt: 'Beach Volleyball Spielerinnen bei einem Turnier',
-      caption: 'Weltklasse-Beach-Volleyball am Wörthersee',
-    },
-    {
-      src: '/images/blog/woerthersee-beachvolleyball/gallery-2.jpg',
-      alt: 'Beachvolleyball-Stadion mit voller Tribüne',
-      caption: 'Vollbesetztes Stadion beim Grand Slam in Klagenfurt',
-    },
-    {
-      src: '/images/blog/woerthersee-beachvolleyball/gallery-3.jpg',
-      alt: 'Wörthersee-Panorama mit Bergen',
-      caption: 'Die einzigartige Kulisse am Wörthersee',
-    },
-  ],
+  gallery: [],
   ctaText: 'Sport-Events am Wörthersee entdecken',
   ctaLink: '/map?bundesland=Kärnten&category=Sport',
   seoTitle: 'Beach Volleyball Wörthersee 2026 – Tickets & Programm',

@@ -71,23 +71,7 @@ export const post: FestivalPost = {
       text: 'Kilometer 30–35 entlang der Ringstraße und der Zieleinlauf am Heldenplatz sind die emotionalsten Stellen.',
     },
   ],
-  gallery: [
-    {
-      src: '/images/blog/vienna-city-marathon/gallery-1.jpg',
-      alt: 'Läufer beim Marathon in einer Stadtkulisse',
-      caption: 'Tausende Läufer durch die Wiener Innenstadt',
-    },
-    {
-      src: '/images/blog/vienna-city-marathon/gallery-2.jpg',
-      alt: 'Marathon Zieleinlauf mit jubelndem Publikum',
-      caption: 'Der emotionale Zieleinlauf am Heldenplatz',
-    },
-    {
-      src: '/images/blog/vienna-city-marathon/gallery-3.jpg',
-      alt: 'Läufer an einem Verpflegungspunkt beim Marathon',
-      caption: 'Wasser und Energie an den Verpflegungspunkten',
-    },
-  ],
+  gallery: [],
   ctaText: 'Sport-Events in Wien entdecken',
   ctaLink: '/map?category=Sport&region=Wien',
   seoTitle: 'Vienna City Marathon 2026 – Anmeldung, Strecke & Tipps',

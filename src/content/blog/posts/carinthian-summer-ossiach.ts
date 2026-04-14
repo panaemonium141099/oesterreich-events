@@ -72,23 +72,7 @@ export const post: FestivalPost = {
       text: 'Abendveranstaltungen: elegante Kleidung empfohlen. Open-Air-Events: sommerlich-legere Kleidung. Immer etwas Wärmeres einpacken.',
     },
   ],
-  gallery: [
-    {
-      src: '/images/blog/carinthian-summer-ossiach/gallery-1.jpg',
-      alt: 'Idyllischer See mit grünen Bergen im Hintergrund',
-      caption: 'Ossiacher See – die einzigartige Kulisse des Festivals',
-    },
-    {
-      src: '/images/blog/carinthian-summer-ossiach/gallery-2.jpg',
-      alt: 'Konzert in einer romanischen Kirche',
-      caption: 'Weltklasse-Musik in der Stiftskirche Ossiach',
-    },
-    {
-      src: '/images/blog/carinthian-summer-ossiach/gallery-3.jpg',
-      alt: 'Streichquartett im Freien',
-      caption: 'Kammermusik im Kreuzgang des historischen Stifts',
-    },
-  ],
+  gallery: [],
   ctaText: 'Musik-Events in Kärnten entdecken',
   ctaLink: '/map?bundesland=Kärnten&category=Kultur',
   seoTitle: 'Carinthian Summer Ossiach 2026 – Programm & Tickets',

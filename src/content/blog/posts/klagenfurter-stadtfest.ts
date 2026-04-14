@@ -71,23 +71,7 @@ export const post: FestivalPost = {
       text: 'Klagenfurt im Juni ist meist warm und sonnig. Sonnenschutz tagsüber empfohlen, Abende können kühler werden.',
     },
   ],
-  gallery: [
-    {
-      src: '/images/blog/klagenfurter-stadtfest/gallery-1.jpg',
-      alt: 'Stadtfest mit Bühne und Besuchermenge',
-      caption: 'Tausende feiern beim Klagenfurter Stadtfest in der Altstadt',
-    },
-    {
-      src: '/images/blog/klagenfurter-stadtfest/gallery-2.jpg',
-      alt: 'Konzert auf Freilichtbühne',
-      caption: 'Livekonzerte unter freiem Himmel in Klagenfurt',
-    },
-    {
-      src: '/images/blog/klagenfurter-stadtfest/gallery-3.jpg',
-      alt: 'Gastrostände mit kärntnerischen Spezialitäten',
-      caption: 'Kärntner Küche auf dem Stadtfest',
-    },
-  ],
+  gallery: [],
   ctaText: 'Stadtfest-Events in Kärnten entdecken',
   ctaLink: '/map?bundesland=Kärnten&category=Festival',
   seoTitle: 'Klagenfurter Stadtfest 2026 – Programm, Termin & Tipps',

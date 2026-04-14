@@ -72,23 +72,7 @@ export const post: FestivalPost = {
       text: 'Linz bietet viele Hotels in Bahnhofsnähe. Für Marathon-Sonntag frühzeitig buchen — gut ausgebucht.',
     },
   ],
-  gallery: [
-    {
-      src: '/images/blog/linz-marathon/gallery-1.jpg',
-      alt: 'Läufer bei einem Stadtmarathon',
-      caption: 'Tausende Läufer beim Linz Marathon durch die Innenstadt',
-    },
-    {
-      src: '/images/blog/linz-marathon/gallery-2.jpg',
-      alt: 'Zieleinlauf eines Marathons',
-      caption: 'Emotionaler Zieleinlauf am Hauptplatz Linz',
-    },
-    {
-      src: '/images/blog/linz-marathon/gallery-3.jpg',
-      alt: 'Zuschauer feuern Läufer bei einem Stadtmarathon an',
-      caption: 'Linz jubelt seinen Läuferinnen und Läufern zu',
-    },
-  ],
+  gallery: [],
   ctaText: 'Laufsport-Events in Österreich entdecken',
   ctaLink: '/map?bundesland=Ober%C3%B6sterreich&category=Sport',
   seoTitle: 'Linz Marathon 2026 – Stadtmarathon an der Donau | LassTreffen.at',

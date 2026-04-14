@@ -71,23 +71,7 @@ export const post: FestivalPost = {
       text: 'Das Murtal bietet tolle Wanderungen und Radtouren – ideal zum Kombinieren mit dem Stadtfestbesuch.',
     },
   ],
-  gallery: [
-    {
-      src: '/images/blog/murau-stadtfest/gallery-1.jpg',
-      alt: 'Mittelalterliche Altstadt mit buntem Markt',
-      caption: 'Stadtfest in der malerischen Altstadt von Murau',
-    },
-    {
-      src: '/images/blog/murau-stadtfest/gallery-2.jpg',
-      alt: 'Biergarten mit Menschen und Biermaßen',
-      caption: 'Murauer Bier – der flüssige Star des Stadtfests',
-    },
-    {
-      src: '/images/blog/murau-stadtfest/gallery-3.jpg',
-      alt: 'Blaskapelle bei einem Volksfest',
-      caption: 'Die Stadtkapelle Murau gibt den Ton an',
-    },
-  ],
+  gallery: [],
   ctaText: 'Events im Murtal entdecken',
   ctaLink: '/map?bundesland=Steiermark&category=Festival',
   seoTitle: 'Murauer Stadtfest 2026 – Programm, Termin & Tipps',

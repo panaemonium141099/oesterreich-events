@@ -69,23 +69,7 @@ export const post: FestivalPost = {
       text: 'U1/U2/U4 Karlsplatz, dann 5 Minuten zu Fuß zum Musikverein. Straßenbahn D, 1, 2 (Oper/Karlsplatz).',
     },
   ],
-  gallery: [
-    {
-      src: '/images/blog/wiener-neujahrskonzert/gallery-1.jpg',
-      alt: 'Orchestersaal mit Musikern in feierlicher Atmosphäre',
-      caption: 'Die Wiener Philharmoniker im legendären Goldenen Saal',
-    },
-    {
-      src: '/images/blog/wiener-neujahrskonzert/gallery-2.jpg',
-      alt: 'Violine Nahaufnahme – Klassikkonzert',
-      caption: 'Präzision und Leidenschaft der Wiener Philharmoniker',
-    },
-    {
-      src: '/images/blog/wiener-neujahrskonzert/gallery-3.jpg',
-      alt: 'Prachtsaal mit Blumendekoration und Publikum',
-      caption: 'Der Goldene Saal mit seinem jährlichen Blumenschmuck',
-    },
-  ],
+  gallery: [],
   ctaText: 'Klassik-Events in Wien entdecken',
   ctaLink: '/map?category=Kultur&region=Wien',
   seoTitle: 'Wiener Neujahrskonzert 2026 – Tickets, Programm & Infos',

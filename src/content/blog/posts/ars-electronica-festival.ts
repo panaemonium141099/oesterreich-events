@@ -73,23 +73,7 @@ export const post: FestivalPost = {
       text: 'Das Festival ist international — Programm größtenteils auf Englisch und Deutsch. Simultanübersetzung bei Hauptsymposien verfügbar.',
     },
   ],
-  gallery: [
-    {
-      src: '/images/blog/ars-electronica-festival/gallery-1.jpg',
-      alt: 'Leuchtende Technologie-Installation',
-      caption: 'Digitale Kunst trifft Architektur',
-    },
-    {
-      src: '/images/blog/ars-electronica-festival/gallery-2.jpg',
-      alt: 'Roboter und KI-Kunstinstallation',
-      caption: 'Robotik und Künstliche Intelligenz als Ausdrucksmittel',
-    },
-    {
-      src: '/images/blog/ars-electronica-festival/gallery-3.jpg',
-      alt: 'Datenvisualisierung und Lichtkunst',
-      caption: 'Immersive Licht- und Datenkunst in der POSTCITY',
-    },
-  ],
+  gallery: [],
   ctaText: 'Kulturevents in Linz entdecken',
   ctaLink: '/map?bundesland=Oberoesterreich&category=Kultur',
   seoTitle: 'Ars Electronica Festival Linz 2026 – Programm & Tickets',

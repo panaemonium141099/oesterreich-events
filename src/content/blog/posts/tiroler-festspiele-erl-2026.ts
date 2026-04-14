@@ -72,23 +72,7 @@ export const post: FestivalPost = {
       text: 'Das Kaisergebirge und der Walchsee sind in unmittelbarer Nähe — Oper und Alpenwanderung kombinieren.',
     },
   ],
-  gallery: [
-    {
-      src: '/images/blog/tiroler-festspiele-erl-2026/gallery-1.jpg',
-      alt: 'Festspielhaus Erl — moderner Betonbau in alpiner Landschaft',
-      caption: 'Architektonisches Meisterwerk: Das Festspielhaus Erl',
-    },
-    {
-      src: '/images/blog/tiroler-festspiele-erl-2026/gallery-2.jpg',
-      alt: 'Opernaufführung im Festspielhaus Erl',
-      caption: 'Weltklasse-Oper in intimem 732-Plätze-Haus',
-    },
-    {
-      src: '/images/blog/tiroler-festspiele-erl-2026/gallery-3.jpg',
-      alt: 'Tiroler Alpenlandschaft mit Inntal',
-      caption: 'Oper trifft Alpenpanorama: Erl im Tiroler Inntal',
-    },
-  ],
+  gallery: [],
   ctaText: 'Klassik-Events in Tirol entdecken',
   ctaLink: '/map?category=Kultur&region=Tirol',
   seoTitle: 'Tiroler Festspiele Erl 2026 – Oper, Programm & Tickets | LassTreffen.at',

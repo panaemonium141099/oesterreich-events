@@ -69,23 +69,7 @@ export const post: FestivalPost = {
       text: 'One Love: Toleranz, Respekt und positive Energie sind die Grundwerte des Festivals.',
     },
   ],
-  gallery: [
-    {
-      src: '/images/blog/wiesen-fest/gallery-1.jpg',
-      alt: 'Reggae-Band auf einer Outdoor-Festivalbühne',
-      caption: 'One Love — Reggae under the Burgenland Sky',
-    },
-    {
-      src: '/images/blog/wiesen-fest/gallery-2.jpg',
-      alt: 'Jubelnde Festivalmenge bei einem Reggae-Konzert',
-      caption: 'Begeisterte Fans beim One Love Festival in Wiesen',
-    },
-    {
-      src: '/images/blog/wiesen-fest/gallery-3.jpg',
-      alt: 'Abendstimmung auf einem Outdoor-Festival',
-      caption: 'Festivalabend im Burgenland — unvergessliche Momente',
-    },
-  ],
+  gallery: [],
   ctaText: 'Musik-Events im Burgenland entdecken',
   ctaLink: '/map?bundesland=Burgenland&category=Musik',
   seoTitle: 'One Love Festival Wiesen 2026 – Reggae im Burgenland',

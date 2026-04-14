@@ -71,23 +71,7 @@ export const post: FestivalPost = {
       text: 'Hotels in Klagenfurt und am Wörthersee sind für das IRONMAN-Wochenende früh ausgebucht – 6–12 Monate im Voraus planen.',
     },
   ],
-  gallery: [
-    {
-      src: '/images/blog/ironman-austria-klagenfurt/gallery-1.jpg',
-      alt: 'Triathleten schwimmen in einem See',
-      caption: 'Massenstart im Wörthersee – der IRONMAN beginnt',
-    },
-    {
-      src: '/images/blog/ironman-austria-klagenfurt/gallery-2.jpg',
-      alt: 'Radsport in Berglandschaft',
-      caption: 'Radstrecke durch die Kärntner Seenlandschaft',
-    },
-    {
-      src: '/images/blog/ironman-austria-klagenfurt/gallery-3.jpg',
-      alt: 'Läufer im Zieleinlauf mit jubelndem Publikum',
-      caption: 'Der Zieldurchlauf – ein unvergesslicher Moment für jeden Finisher',
-    },
-  ],
+  gallery: [],
   ctaText: 'Sport-Events in Kärnten entdecken',
   ctaLink: '/map?bundesland=Kärnten&category=Sport',
   seoTitle: 'IRONMAN Austria Klagenfurt 2026 – Anmeldung & Infos',

@@ -72,23 +72,7 @@ export const post: FestivalPost = {
       text: 'Das Montafon ist ein Wanderparadies — viele Besucher verbinden das Festival mit Bergtouren. Wanderwege direkt ab den Konzertorten zugänglich.',
     },
   ],
-  gallery: [
-    {
-      src: '/images/blog/montafoner-sommertage/gallery-1.jpg',
-      alt: 'Streichquartett bei Konzert',
-      caption: 'Kammermusik auf höchstem Niveau im Bergdorf',
-    },
-    {
-      src: '/images/blog/montafoner-sommertage/gallery-2.jpg',
-      alt: 'Alpines Bergdorf im Sommer',
-      caption: 'Das Montafon — Bergwelt als Konzertkulisse',
-    },
-    {
-      src: '/images/blog/montafoner-sommertage/gallery-3.jpg',
-      alt: 'Intimes Konzert in einer Dorfkirche',
-      caption: 'Historische Dorfkirchen als Konzertraum',
-    },
-  ],
+  gallery: [],
   ctaText: 'Klassik-Events in Vorarlberg entdecken',
   ctaLink: '/map?bundesland=Vorarlberg&category=Musik',
   seoTitle: 'Montafoner Sommertage 2026 – Kammermusik im Bergdorf',

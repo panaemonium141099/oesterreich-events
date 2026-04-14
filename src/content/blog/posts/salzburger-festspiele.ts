@@ -73,23 +73,7 @@ export const post: FestivalPost = {
       text: 'Hotels in Salzburg sind im Juli/August ausgebucht — mindestens 6 Monate im Voraus buchen. Alternativ: Unterkunft im Umland.',
     },
   ],
-  gallery: [
-    {
-      src: '/images/blog/salzburger-festspiele/gallery-1.jpg',
-      alt: 'Klassische Konzerthalle mit Publikum',
-      caption: 'Weltklasse-Klassik in historischer Kulisse',
-    },
-    {
-      src: '/images/blog/salzburger-festspiele/gallery-2.jpg',
-      alt: 'Orchester auf großer Bühne',
-      caption: 'Die Wiener und Berliner Philharmoniker im Grossen Festspielhaus',
-    },
-    {
-      src: '/images/blog/salzburger-festspiele/gallery-3.jpg',
-      alt: 'Salzburg Stadtpanorama mit Festung',
-      caption: 'Salzburg — die Stadt, die zum Festival wird',
-    },
-  ],
+  gallery: [],
   ctaText: 'Klassik-Events in Salzburg entdecken',
   ctaLink: '/map?bundesland=Salzburg&category=Kultur',
   seoTitle: 'Salzburger Festspiele 2026 – Tickets, Programm & Tipps',

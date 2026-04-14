@@ -71,23 +71,7 @@ export const post: FestivalPost = {
       text: 'Kärntner Sommer mit bis zu 35 °C. Sonnenschutz, ausreichend Wasser und Badekleidung für den anschließenden Seebad empfohlen.',
     },
   ],
-  gallery: [
-    {
-      src: '/images/blog/woerthersee-regatta/gallery-1.jpg',
-      alt: 'Segelboote auf einem klaren blauen See',
-      caption: 'Regatta auf dem tiefblauen Wörthersee',
-    },
-    {
-      src: '/images/blog/woerthersee-regatta/gallery-2.jpg',
-      alt: 'Segelboote im Hafenbecken',
-      caption: 'Startvorbereitungen im Hafen des Segelclubs',
-    },
-    {
-      src: '/images/blog/woerthersee-regatta/gallery-3.jpg',
-      alt: 'Panorama eines Sees mit Bergen',
-      caption: 'Der Wörthersee – eines der schönsten Segelgewässer Europas',
-    },
-  ],
+  gallery: [],
   ctaText: 'Wassersport-Events am Wörthersee entdecken',
   ctaLink: '/map?bundesland=Kärnten&category=Sport',
   seoTitle: 'Wörthersee Regatta 2026 – Programm & Infos',

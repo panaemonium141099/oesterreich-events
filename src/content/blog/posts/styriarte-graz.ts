@@ -72,23 +72,7 @@ export const post: FestivalPost = {
       text: 'Graz bietet ein breites Hotelangebot. Im Juli frühzeitig buchen – das Festival zieht viele Besucherinnen und Besucher von außerhalb an.',
     },
   ],
-  gallery: [
-    {
-      src: '/images/blog/styriarte-graz/gallery-1.jpg',
-      alt: 'Klassisches Konzert in historischer Halle',
-      caption: 'Weltklasse-Klassik in der Helmut-List-Halle',
-    },
-    {
-      src: '/images/blog/styriarte-graz/gallery-2.jpg',
-      alt: 'Streichquartett auf einer Bühne',
-      caption: 'Kammermusik im Geist von Nikolaus Harnoncourt',
-    },
-    {
-      src: '/images/blog/styriarte-graz/gallery-3.jpg',
-      alt: 'Schloss mit Park bei Nacht',
-      caption: 'Konzerte auf Schloss Eggenberg – einzigartiges Ambiente',
-    },
-  ],
+  gallery: [],
   ctaText: 'Klassik-Events in Graz entdecken',
   ctaLink: '/map?bundesland=Steiermark&category=Kultur',
   seoTitle: 'styriarte Graz 2026 – Tickets, Programm & Tipps',

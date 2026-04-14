@@ -70,23 +70,7 @@ export const post: FestivalPost = {
       text: 'Eisenstadt bietet ausgezeichnete Weinstuben und Restaurants in der Schloss-Nähe.',
     },
   ],
-  gallery: [
-    {
-      src: '/images/blog/esterhazy-konzerte/gallery-1.jpg',
-      alt: 'Klassisches Konzert in einem Barockpalast',
-      caption: 'Musik in einem der schönsten Barockräume Österreichs',
-    },
-    {
-      src: '/images/blog/esterhazy-konzerte/gallery-2.jpg',
-      alt: 'Orchesterkonzert im historischen Saal',
-      caption: 'Haydn Philharmoniker im Haydnsaal',
-    },
-    {
-      src: '/images/blog/esterhazy-konzerte/gallery-3.jpg',
-      alt: 'Historisches Schloss bei Abendlicht',
-      caption: 'Schloss Esterházy — 350 Jahre Musikgeschichte',
-    },
-  ],
+  gallery: [],
   ctaText: 'Klassik-Events im Burgenland entdecken',
   ctaLink: '/map?bundesland=Burgenland&category=Kultur',
   seoTitle: 'Schloss Esterházy Konzerte 2026 – Haydn in Eisenstadt',

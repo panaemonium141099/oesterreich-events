@@ -70,23 +70,7 @@ export const post: FestivalPost = {
       text: 'Online unter leharfestival.at oder per Telefon. Abendgarderobe erwünscht bei Premieren.',
     },
   ],
-  gallery: [
-    {
-      src: '/images/blog/lehar-festival-bad-ischl/gallery-1.jpg',
-      alt: 'Opernaufführung auf einer klassischen Bühne',
-      caption: 'Glanzvolle Operetten-Inszenierungen im Kongress & TheaterHaus',
-    },
-    {
-      src: '/images/blog/lehar-festival-bad-ischl/gallery-2.jpg',
-      alt: 'Historisches Kurort-Ambiente',
-      caption: 'Bad Ischl — einst Kaiserresidenz, heute Operetten-Metropole',
-    },
-    {
-      src: '/images/blog/lehar-festival-bad-ischl/gallery-3.jpg',
-      alt: 'Konzertpublikum in historischem Theater',
-      caption: 'Begeistertes Publikum beim Lehár Festival',
-    },
-  ],
+  gallery: [],
   ctaText: 'Kulturevents im Salzkammergut entdecken',
   ctaLink: '/map?bundesland=Ober%C3%B6sterreich&category=Kultur',
   seoTitle: 'Lehár Festival Bad Ischl 2026 – Operette im Salzkammergut',

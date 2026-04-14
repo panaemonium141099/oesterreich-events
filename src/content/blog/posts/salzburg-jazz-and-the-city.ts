@@ -71,23 +71,7 @@ export const post: FestivalPost = {
       text: 'Oktober in Salzburg: 8–15 °C, möglicher Regen. Wetterfeste Jacke mitbringen, da viele Konzerte im Freien stattfinden.',
     },
   ],
-  gallery: [
-    {
-      src: '/images/blog/salzburg-jazz-and-the-city/gallery-1.jpg',
-      alt: 'Jazzmusiker beim Open-Air-Konzert',
-      caption: 'Jazz unter freiem Himmel in der Altstadt',
-    },
-    {
-      src: '/images/blog/salzburg-jazz-and-the-city/gallery-2.jpg',
-      alt: 'Saxofonist im Rampenlicht',
-      caption: 'Internationaler Jazz in intimer Atmosphäre',
-    },
-    {
-      src: '/images/blog/salzburg-jazz-and-the-city/gallery-3.jpg',
-      alt: 'Salzburg Altstadt im Herbst',
-      caption: 'Herbstliches Salzburg — ideale Kulisse für Jazz',
-    },
-  ],
+  gallery: [],
   ctaText: 'Musik-Events in Salzburg entdecken',
   ctaLink: '/map?bundesland=Salzburg&category=Musik',
   seoTitle: 'Jazz & The City Salzburg 2026 – Programm & Tipps',

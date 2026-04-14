@@ -70,23 +70,7 @@ export const post: FestivalPost = {
       text: 'Handgemachte Keramik, Holzschnitzereien, Kerzen und Schmuck direkt vom Hersteller. Stöbern lohnt sich — Qualität ist hier Programm.',
     },
   ],
-  gallery: [
-    {
-      src: '/images/blog/linzer-christkindlmarkt/gallery-1.jpg',
-      alt: 'Weihnachtsmarkt mit Lichtern und Schnee',
-      caption: 'Wintermärchen am Linzer Hauptplatz',
-    },
-    {
-      src: '/images/blog/linzer-christkindlmarkt/gallery-2.jpg',
-      alt: 'Glühwein und Weihnachtsmarktstand',
-      caption: 'Glühwein, Punsch und weihnachtliche Spezialitäten',
-    },
-    {
-      src: '/images/blog/linzer-christkindlmarkt/gallery-3.jpg',
-      alt: 'Festlich beleuchteter Platz zur Weihnachtszeit',
-      caption: 'Tausende Lichter verwandeln den Hauptplatz',
-    },
-  ],
+  gallery: [],
   ctaText: 'Weihnachtsmärkte in Oberösterreich entdecken',
   ctaLink: '/map?bundesland=Oberoesterreich&category=Weihnachtsmarkt',
   seoTitle: 'Linzer Christkindlmarkt 2026 – Termine & Tipps',

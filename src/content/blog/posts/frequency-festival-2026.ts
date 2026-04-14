@@ -80,23 +80,7 @@ export const post: FestivalPost = {
       text: 'August in NÖ: Sonnencreme, Regenjacke, Komfort-Schuhe und eine gute Powerbank sind Pflicht.',
     },
   ],
-  gallery: [
-    {
-      src: '/images/blog/frequency-festival-2026/gallery-1.jpg',
-      alt: 'Frequency Festival Bühnenshow',
-      caption: 'Lichterspektakel auf der Hauptbühne',
-    },
-    {
-      src: '/images/blog/frequency-festival-2026/gallery-2.jpg',
-      alt: 'Festival-Crowd beim Frequency',
-      caption: 'Ausgelassene Stimmung vor der Stage',
-    },
-    {
-      src: '/images/blog/frequency-festival-2026/gallery-3.jpg',
-      alt: 'Camping beim Frequency Festival',
-      caption: 'Das Camping-Areal — Zuhause für drei Tage',
-    },
-  ],
+  gallery: [],
   ctaText: 'Musik-Events in Österreich entdecken',
   ctaLink: '/map?category=Musik&bundesland=Nieder%C3%B6sterreich',
   seoTitle: 'Frequency Festival 2026 – Tickets, Lineup & Tipps | LassTreffen.at',

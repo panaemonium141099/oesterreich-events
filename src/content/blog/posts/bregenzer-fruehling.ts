@@ -71,23 +71,7 @@ export const post: FestivalPost = {
       text: 'Bregenz im Frühjahr ist wunderschön — Bodenseepromenade, Pfänder und erste Frühlingsblüten ergänzen das Festivalprogramm.',
     },
   ],
-  gallery: [
-    {
-      src: '/images/blog/bregenzer-fruehling/gallery-1.jpg',
-      alt: 'Tänzer auf moderner Bühne',
-      caption: 'Zeitgenössischer Tanz auf internationalem Niveau',
-    },
-    {
-      src: '/images/blog/bregenzer-fruehling/gallery-2.jpg',
-      alt: 'Balletttänzerin auf der Bühne',
-      caption: 'Von Ballett bis zeitgenössischem Tanz',
-    },
-    {
-      src: '/images/blog/bregenzer-fruehling/gallery-3.jpg',
-      alt: 'Bodensee im Frühjahr',
-      caption: 'Bregenz am Bodensee erwacht im Frühling',
-    },
-  ],
+  gallery: [],
   ctaText: 'Kulturevents in Vorarlberg entdecken',
   ctaLink: '/map?bundesland=Vorarlberg&category=Kultur',
   seoTitle: 'Bregenzer Frühling 2026 – Tanzfestival Programm & Tickets',

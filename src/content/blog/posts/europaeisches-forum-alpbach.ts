@@ -72,23 +72,7 @@ export const post: FestivalPost = {
       text: 'Alpbach liegt auf 1.000 m Seehöhe. Wanderwege um das Dorf sind ein besonderes Plus — informelle Gespräche finden oft auf dem Alpbacher Hochplateau statt.',
     },
   ],
-  gallery: [
-    {
-      src: '/images/blog/europaeisches-forum-alpbach/gallery-1.jpg',
-      alt: 'Tiroler Bergdorf in den Alpen',
-      caption: 'Alpbach — eines der schönsten Bergdörfer Österreichs',
-    },
-    {
-      src: '/images/blog/europaeisches-forum-alpbach/gallery-2.jpg',
-      alt: 'Konferenz mit internationalem Publikum',
-      caption: 'Intellektueller Austausch auf höchstem Niveau',
-    },
-    {
-      src: '/images/blog/europaeisches-forum-alpbach/gallery-3.jpg',
-      alt: 'Tiroler Alpenpanorama im Sommer',
-      caption: 'Hochalpines Ambiente inspiriert neue Ideen',
-    },
-  ],
+  gallery: [],
   ctaText: 'Kulturveranstaltungen in Tirol entdecken',
   ctaLink: '/map?bundesland=Tirol&category=Kultur',
   seoTitle: 'Europäisches Forum Alpbach 2026 – Programm & Infos',
