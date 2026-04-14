@@ -34,12 +34,21 @@ const organizationJsonLd = {
   description: 'Österreichische Event-Discovery-Plattform mit über 40.000 Veranstaltungen auf einer interaktiven Karte.',
 };
 
-export default async function LandingPage() {
-  // Logged-in users go straight to their feed
-  const supabase = await createServerSupabaseClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (user) {
-    redirect('/feed');
+export default async function LandingPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+}) {
+  const params = await searchParams;
+  // Allow ?home to bypass redirect and show landing page
+  const forceHome = 'home' in params;
+
+  if (!forceHome) {
+    const supabase = await createServerSupabaseClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
+      redirect('/feed');
+    }
   }
 
   return (

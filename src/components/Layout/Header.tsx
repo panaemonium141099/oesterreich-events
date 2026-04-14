@@ -110,7 +110,7 @@ export function Header({ filters, onFiltersChange, totalEvents, onToggleSidebar,
             requestAnimationFrame(() => {
               curtain.style.transform = 'translateY(0)';
             });
-            setTimeout(() => window.location.href = '/', 500);
+            setTimeout(() => window.location.href = '/?home', 500);
           }}
           className={`flex items-center gap-1.5 px-1.5 py-1 lg:px-2 lg:py-1.5 rounded-lg transition-all duration-200 group shrink-0 ${
             eveningMode ? 'hover:bg-gray-700/50' : 'hover:bg-slate-50'
