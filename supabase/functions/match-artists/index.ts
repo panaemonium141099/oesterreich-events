@@ -54,9 +54,33 @@ interface NotificationPrefs {
 
 // ── Constants ────────────────────────────────────────────────────────────────
 
-const WORD_SIMILARITY_THRESHOLD = 0.6;
+// Raised from 0.6 to 0.75 to reduce false positives (0.6 caused "Nu Aspect" → "Aspects")
+const WORD_SIMILARITY_THRESHOLD = 0.75;
 const BATCH_SIZE = 500;
 const DEFAULT_CURSOR = "1970-01-01T00:00:00Z";
+
+/**
+ * Artist names that are also common German/English words.
+ * These require the event to have a music category ('Musik' or 'Nightlife') to match.
+ */
+const COMMON_WORD_BLOCKLIST = new Set([
+  // German common words that are artist names
+  "dame", "wanda", "nino", "falco", "sido", "nena", "juli",
+  "gold", "felix", "lina", "pur", "selig", "wolf", "karat",
+  "echt", "frei", "august", "ernst", "otto", "hans",
+  // English common words that are artist names
+  "muse", "oasis", "rush", "seal", "fuel", "live", "heart",
+  "hole", "tool", "cake", "bush", "bond", "haze", "salt",
+  "ice", "rain", "lemon", "cream", "yes",
+  // DJ/producer names that overlap with common words
+  "kream", "zedd", "kygo", "avicii",
+  // Multi-word names where a component is a common word
+  "lo spirit",
+]);
+
+function isBlocklistedName(normalizedName: string): boolean {
+  return COMMON_WORD_BLOCKLIST.has(normalizedName.trim());
+}
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -68,10 +92,12 @@ function normalizeArtistName(name: string): string {
   return stripDiacritics(name.toLowerCase().trim());
 }
 
-function classifyName(normalizedName: string): "skip" | "exact" | "fuzzy" {
+function classifyName(normalizedName: string): "skip" | "exact" | "exact_short" | "fuzzy" {
   const len = normalizedName.trim().length;
   if (len < 3) return "skip";
-  if (len === 3) return "exact";
+  // Short names (3-5 chars) use exact word boundary match to avoid false positives
+  if (len <= 5) return "exact";
+  if (len <= 7) return "exact_short";
   return "fuzzy";
 }
 
@@ -92,6 +118,96 @@ function formatNotificationBody(
   const last = uniqueNames[uniqueNames.length - 1];
   const rest = uniqueNames.slice(0, -1);
   return `${rest.join(", ")} und ${last} treten bei ${eventTitle} auf!`;
+}
+
+// ── False-positive filter ────────────────────────────────────────────────────
+
+function isFalsePositiveMatch(
+  artistName: string,
+  eventTitle: string
+): boolean {
+  const titleLower = eventTitle.toLowerCase();
+  const nameLower = artistName.toLowerCase();
+
+  const titleNorm = stripDiacritics(titleLower);
+  const nameNorm = stripDiacritics(nameLower);
+
+  // Short-name word-boundary check (≤10 chars)
+  if (nameLower.length <= 10) {
+    const escaped = nameLower.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const escapedNorm = stripDiacritics(escaped);
+    const sep = `[\\s,;|/\\-()"'!?.]`;
+    const wbRegex = new RegExp(`(?:^|${sep})${escaped}(?:$|${sep})`, "i");
+    const wbRegexNorm = new RegExp(`(?:^|${sep})${escapedNorm}(?:$|${sep})`, "i");
+
+    const hasWholeWordMatch =
+      wbRegex.test(titleLower) ||
+      wbRegex.test(titleNorm) ||
+      wbRegexNorm.test(titleNorm);
+
+    if (!hasWholeWordMatch) {
+      return true;
+    }
+  }
+
+  const nameIndex = titleLower.indexOf(nameLower);
+  if (nameIndex === -1) {
+    const normIndex = titleNorm.indexOf(nameNorm);
+    if (normIndex === -1) return false;
+    return checkFalsePositiveContext(titleLower, normIndex);
+  }
+  return checkFalsePositiveContext(titleLower, nameIndex);
+}
+
+function checkFalsePositiveContext(
+  titleLower: string,
+  nameIndex: number
+): boolean {
+  const before = titleLower.substring(0, nameIndex).trimEnd();
+
+  const refPatterns = [
+    /\bbis\s+(zu\s+)?$/,
+    /\bvon\s+\S+\s+bis\s+(zu\s+)?$/,
+    /\btribute\s+(to\s+|an?\s+)?$/,
+    /\bhommage\s+(an?\s+)?$/,
+    /\bcovers?\s+(von\s+)?$/,
+    /\bhits\s+(von\s+)?$/,
+    /\bsongs\s+(von\s+)?$/,
+    /\blieder\s+(von\s+)?$/,
+    /\bmelodien\s+(von\s+)?$/,
+    /\bwerke\s+(von\s+)?$/,
+    /\bnach\s+$/,
+    /\bà la\s+$/,
+  ];
+
+  for (const pattern of refPatterns) {
+    if (pattern.test(before)) return true;
+  }
+
+  const coverPrefixes = [
+    "musikkapelle", "blasmusik", "musikverein", "trachtenkapelle",
+    "stadtkapelle", "harmoniemusik", "bürgermusik", "bürgerkapelle",
+    "feuerwehrkapelle", "jugendkapelle", "werkskapelle",
+  ];
+  if (coverPrefixes.some((p) => titleLower.startsWith(p)) && nameIndex > 15) {
+    return true;
+  }
+
+  const separators = [" - ", " – ", " — ", ": "];
+  for (const sep of separators) {
+    const sepIndex = titleLower.indexOf(sep);
+    if (sepIndex > 0 && nameIndex > sepIndex + sep.length) {
+      const headlinerPart = titleLower.substring(0, sepIndex).trim();
+      const cleaned = headlinerPart
+        .replace(/^(konzert|live|open air|show|event)\s*:\s*/i, "")
+        .trim();
+      if (cleaned.length >= 3) {
+        return true;
+      }
+    }
+  }
+
+  return false;
 }
 
 // ── Core matching functions ──────────────────────────────────────────────────
@@ -165,10 +281,14 @@ async function fetchAllFollowedArtists(
 
 function groupArtistsByTier(artists: FollowedArtist[]): {
   exact: Map<string, FollowedArtist[]>;
+  exactShort: Map<string, FollowedArtist[]>;
+  blocklisted: Map<string, FollowedArtist[]>;
   fuzzy: Map<string, FollowedArtist[]>;
   skipped: string[];
 } {
   const exact = new Map<string, FollowedArtist[]>();
+  const exactShort = new Map<string, FollowedArtist[]>();
+  const blocklisted = new Map<string, FollowedArtist[]>();
   const fuzzy = new Map<string, FollowedArtist[]>();
   const skipped: string[] = [];
 
@@ -176,14 +296,30 @@ function groupArtistsByTier(artists: FollowedArtist[]): {
     const normalized = normalizeArtistName(artist.artist_name);
     const tier = classifyName(normalized);
 
+    if (tier === "skip") {
+      skipped.push(artist.artist_name);
+      continue;
+    }
+
+    // Blocklisted names get category-gated matching regardless of length
+    if (isBlocklistedName(normalized)) {
+      const list = blocklisted.get(normalized) || [];
+      list.push(artist);
+      blocklisted.set(normalized, list);
+      continue;
+    }
+
     switch (tier) {
-      case "skip":
-        skipped.push(artist.artist_name);
-        break;
       case "exact": {
         const list = exact.get(normalized) || [];
         list.push(artist);
         exact.set(normalized, list);
+        break;
+      }
+      case "exact_short": {
+        const list = exactShort.get(normalized) || [];
+        list.push(artist);
+        exactShort.set(normalized, list);
         break;
       }
       case "fuzzy": {
@@ -195,7 +331,7 @@ function groupArtistsByTier(artists: FollowedArtist[]): {
     }
   }
 
-  return { exact, fuzzy, skipped };
+  return { exact, exactShort, blocklisted, fuzzy, skipped };
 }
 
 async function matchExactNames(
@@ -288,6 +424,78 @@ async function matchFuzzyNames(
   );
 }
 
+async function matchExactNamesBatch(
+  supabase: SupabaseClient,
+  names: string[],
+  sinceTimestamp: string
+): Promise<
+  Array<{
+    event_id: string;
+    event_title: string;
+    matched_name: string;
+    score: number;
+  }>
+> {
+  if (names.length === 0) return [];
+
+  const { data, error } = await supabase.rpc("match_exact_artist_titles_batch", {
+    p_artist_names: names,
+    p_since: sinceTimestamp,
+  });
+
+  if (error) {
+    console.error("Exact batch match error:", error);
+    throw error;
+  }
+
+  if (!data) return [];
+
+  return data.map(
+    (row: { event_id: string; event_title: string; artist_name: string }) => ({
+      event_id: row.event_id,
+      event_title: row.event_title,
+      matched_name: row.artist_name,
+      score: 1.0,
+    })
+  );
+}
+
+async function matchBlocklistedNames(
+  supabase: SupabaseClient,
+  names: string[],
+  sinceTimestamp: string
+): Promise<
+  Array<{
+    event_id: string;
+    event_title: string;
+    matched_name: string;
+    score: number;
+  }>
+> {
+  if (names.length === 0) return [];
+
+  const { data, error } = await supabase.rpc("match_exact_artist_titles_music_only", {
+    p_artist_names: names,
+    p_since: sinceTimestamp,
+  });
+
+  if (error) {
+    console.error("Blocklisted match error:", error);
+    throw error;
+  }
+
+  if (!data) return [];
+
+  return data.map(
+    (row: { event_id: string; event_title: string; artist_name: string }) => ({
+      event_id: row.event_id,
+      event_title: row.event_title,
+      matched_name: row.artist_name,
+      score: 1.0,
+    })
+  );
+}
+
 async function matchDescriptionNames(
   supabase: SupabaseClient,
   names: string[],
@@ -303,7 +511,8 @@ async function matchDescriptionNames(
 > {
   if (names.length === 0) return [];
 
-  const qualifiedNames = names.filter((n) => n.trim().length >= 6);
+  // Filter to 6+ chars and exclude blocklisted names
+  const qualifiedNames = names.filter((n) => n.trim().length >= 6 && !isBlocklistedName(n));
   if (qualifiedNames.length === 0) return [];
 
   const { data, error } = await supabase.rpc("match_artist_descriptions", {
@@ -670,11 +879,14 @@ async function runMatchingPipeline(
   }
 
   // Step 3: Group by tier
-  const { exact, fuzzy, skipped } = groupArtistsByTier(allArtists);
+  const { exact, exactShort, blocklisted, fuzzy, skipped } = groupArtistsByTier(allArtists);
   stats.skipped_short_names = skipped.length;
   console.log(
-    `Tiers: ${exact.size} exact (3-char), ${fuzzy.size} fuzzy (4+), ${skipped.length} skipped (<3)`
+    `Tiers: ${exact.size} exact (3-char), ${exactShort.size} exact-short (4-7), ${blocklisted.size} blocklisted, ${fuzzy.size} fuzzy (8+), ${skipped.length} skipped (<3)`
   );
+  if (blocklisted.size > 0) {
+    console.log(`  Blocklisted names (music-category-gated): ${Array.from(blocklisted.keys()).join(", ")}`);
+  }
 
   // Step 4a: Exact matching (3-char names)
   const exactNames = Array.from(exact.keys());
@@ -683,25 +895,43 @@ async function runMatchingPipeline(
     exactNames,
     lastProcessedAt
   );
-  console.log(`Exact matches (title): ${exactMatches.length}`);
+  console.log(`Exact matches (3-char, title): ${exactMatches.length}`);
 
-  // Step 4b: Fuzzy matching (4+ char names)
+  // Step 4b: Exact-short batch matching (4-7 char names, not blocklisted)
+  const exactShortNames = Array.from(exactShort.keys());
+  const exactShortMatches = await matchExactNamesBatch(
+    supabase,
+    exactShortNames,
+    lastProcessedAt
+  );
+  console.log(`Exact-short matches (4-7 char, title): ${exactShortMatches.length}`);
+
+  // Step 4c: Blocklisted matching (common-word names, music category gate)
+  const blocklistedNames = Array.from(blocklisted.keys());
+  const blocklistedMatches = await matchBlocklistedNames(
+    supabase,
+    blocklistedNames,
+    lastProcessedAt
+  );
+  console.log(`Blocklisted matches (music-only, title): ${blocklistedMatches.length}`);
+
+  // Step 4d: Fuzzy matching (8+ char names)
   const fuzzyNames = Array.from(fuzzy.keys());
   const fuzzyMatches = await matchFuzzyNames(
     supabase,
     fuzzyNames,
     lastProcessedAt
   );
-  console.log(`Fuzzy matches (title): ${fuzzyMatches.length}`);
+  console.log(`Fuzzy matches (8+ char, title): ${fuzzyMatches.length}`);
 
   // Collect all title-matched event IDs
   const titleMatchedEventIds = new Set<string>();
-  for (const m of [...exactMatches, ...fuzzyMatches]) {
+  for (const m of [...exactMatches, ...exactShortMatches, ...blocklistedMatches, ...fuzzyMatches]) {
     titleMatchedEventIds.add(m.event_id);
   }
 
-  // Step 5: Secondary description matching
-  const allNames = [...exactNames, ...fuzzyNames];
+  // Step 5: Secondary description matching (excludes blocklisted names)
+  const allNames = [...exactNames, ...exactShortNames, ...fuzzyNames];
   const descriptionMatches = await matchDescriptionNames(
     supabase,
     allNames,
@@ -710,42 +940,65 @@ async function runMatchingPipeline(
   );
   console.log(`Description matches (secondary): ${descriptionMatches.length}`);
 
+  // Step 5b: Filter out false positives (cover bands, tribute shows, word-boundary)
+  let falsePositiveCount = 0;
+  const filterFP = (
+    matches: Array<{ event_id: string; event_title: string; matched_name: string; score: number }>
+  ) => {
+    return matches.filter((m) => {
+      if (isFalsePositiveMatch(m.matched_name, m.event_title)) {
+        falsePositiveCount++;
+        console.log(`  FP rejected: "${m.matched_name}" in "${m.event_title}"`);
+        return false;
+      }
+      return true;
+    });
+  };
+
+  const filteredExact = filterFP(exactMatches);
+  const filteredExactShort = filterFP(exactShortMatches);
+  const filteredBlocklisted = filterFP(blocklistedMatches);
+  const filteredFuzzy = filterFP(fuzzyMatches);
+  const filteredDesc = filterFP(descriptionMatches);
+  if (falsePositiveCount > 0) {
+    console.log(`Rejected ${falsePositiveCount} false positives`);
+  }
+
   // Step 6: Build full match results with user mappings
   const allMatches: MatchResult[] = [];
 
-  for (const match of exactMatches) {
-    const artists = exact.get(match.matched_name) || [];
-    for (const artist of artists) {
-      allMatches.push({
-        user_id: artist.user_id,
-        event_id: match.event_id,
-        event_title: match.event_title,
-        artist_name: artist.artist_name,
-        match_score: match.score,
-        match_source: "title",
-      });
+  const mapMatchesToUsers = (
+    matches: Array<{ event_id: string; event_title: string; matched_name: string; score: number }>,
+    artistMap: Map<string, FollowedArtist[]>,
+    source: "title" | "description"
+  ) => {
+    for (const match of matches) {
+      const artists = artistMap.get(match.matched_name) || [];
+      for (const artist of artists) {
+        allMatches.push({
+          user_id: artist.user_id,
+          event_id: match.event_id,
+          event_title: match.event_title,
+          artist_name: artist.artist_name,
+          match_score: match.score,
+          match_source: source,
+        });
+      }
     }
-  }
+  };
 
-  for (const match of fuzzyMatches) {
-    const artists = fuzzy.get(match.matched_name) || [];
-    for (const artist of artists) {
-      allMatches.push({
-        user_id: artist.user_id,
-        event_id: match.event_id,
-        event_title: match.event_title,
-        artist_name: artist.artist_name,
-        match_score: match.score,
-        match_source: "title",
-      });
-    }
-  }
+  mapMatchesToUsers(filteredExact, exact, "title");
+  mapMatchesToUsers(filteredExactShort, exactShort, "title");
+  mapMatchesToUsers(filteredBlocklisted, blocklisted, "title");
+  mapMatchesToUsers(filteredFuzzy, fuzzy, "title");
 
-  for (const match of descriptionMatches) {
-    const exactArtists = exact.get(match.matched_name) || [];
-    const fuzzyArtists = fuzzy.get(match.matched_name) || [];
-    const artists = [...exactArtists, ...fuzzyArtists];
-    for (const artist of artists) {
+  for (const match of filteredDesc) {
+    const candidates = [
+      ...(exact.get(match.matched_name) || []),
+      ...(exactShort.get(match.matched_name) || []),
+      ...(fuzzy.get(match.matched_name) || []),
+    ];
+    for (const artist of candidates) {
       allMatches.push({
         user_id: artist.user_id,
         event_id: match.event_id,
