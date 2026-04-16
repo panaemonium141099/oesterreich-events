@@ -137,6 +137,10 @@ function EventMap({ events, selectedEvent, hoveredEventId, onSelectEvent, evenin
   const markersOnScreen = useRef<Map<string, mapboxgl.Marker>>(new Map());
   const eventLookup = useRef<Map<string, Event>>(new Map());
   const artistIdsRef = useRef<Set<string>>(new Set());
+  /** Currently-open hover popup across all markers. Closing the previous
+      popup before opening a new one prevents two popups from fighting
+      each other when markers overlap. */
+  const activePopupRef = useRef<{ popup: mapboxgl.Popup; close: () => void } | null>(null);
   const [mapReady, setMapReady] = useState(false);
   const prevBundeslandRef = useRef(bundesland.id);
 
@@ -489,9 +493,22 @@ function EventMap({ events, selectedEvent, hoveredEventId, onSelectEvent, evenin
         let popupIsOpen = false;
         let closeTimer: ReturnType<typeof setTimeout> | null = null;
 
+        const closeSelf = () => {
+          if (closeTimer) { clearTimeout(closeTimer); closeTimer = null; }
+          if (popupIsOpen) {
+            popup?.remove();
+            popupIsOpen = false;
+          }
+        };
+
         const openPopup = () => {
           if (closeTimer) { clearTimeout(closeTimer); closeTimer = null; }
           if (popupIsOpen) return;
+          // Close any other marker's popup immediately — prevents two popups
+          // from fighting when markers overlap.
+          if (activePopupRef.current && activePopupRef.current.popup !== popup) {
+            activePopupRef.current.close();
+          }
           if (!popup) {
             popup = new mapboxgl.Popup({ offset: popupOffset, closeButton: false, closeOnClick: false, maxWidth: '260px' })
               .setHTML(createPopupHTML(event, !!eveningMode));
@@ -505,14 +522,14 @@ function EventMap({ events, selectedEvent, hoveredEventId, onSelectEvent, evenin
                 scheduleClose();
               });
               pe.querySelector('button[data-event-id]')?.addEventListener('click', () => {
-                popup?.remove();
-                popupIsOpen = false;
+                closeSelf();
                 onSelectEvent(event);
               });
             });
           }
           popup.setLngLat([coords[0], coords[1]]).addTo(m);
           popupIsOpen = true;
+          activePopupRef.current = { popup, close: closeSelf };
         };
 
         const scheduleClose = () => {
@@ -524,6 +541,9 @@ function EventMap({ events, selectedEvent, hoveredEventId, onSelectEvent, evenin
             if (!hoveringPopup && !hoveringMarker && popupIsOpen) {
               popup?.remove();
               popupIsOpen = false;
+              if (activePopupRef.current?.popup === popup) {
+                activePopupRef.current = null;
+              }
             }
             closeTimer = null;
           }, 250);
