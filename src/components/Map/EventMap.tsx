@@ -424,10 +424,25 @@ function EventMap({ events, selectedEvent, hoveredEventId, onSelectEvent, evenin
     const updateMarkers = () => {
       if (!m.getSource('events')) return;
       const features = m.querySourceFeatures('events', { sourceLayer: '' });
-      // Also include artist-event features (unclustered, always visible)
-      const artistFeatures = m.getSource('artist-events')
-        ? m.querySourceFeatures('artist-events', { sourceLayer: '' })
-        : [];
+      // Artist-events come from a stable in-memory source — building features
+      // directly from the event lookup avoids querySourceFeatures returning
+      // transient empty/partial results during map interactions (which caused
+      // markers to be removed and re-created every frame → flicker on hover).
+      const artistFeatures = Array.from(artistIdsRef.current)
+        .map((id) => {
+          const ev = eventLookup.current.get(id);
+          if (!ev || ev.latitude == null || ev.longitude == null) return null;
+          const feature: GeoJSON.Feature = {
+            type: 'Feature',
+            properties: { id },
+            geometry: {
+              type: 'Point',
+              coordinates: [ev.longitude, ev.latitude],
+            },
+          };
+          return feature;
+        })
+        .filter((f): f is GeoJSON.Feature => f !== null);
       const allFeatures = [...features, ...artistFeatures];
       const newMarkerIds = new Set<string>();
 
