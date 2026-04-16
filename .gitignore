@@ -62,3 +62,16 @@ data/AT.zip
 reports/
 # Added by code-review-graph
 .code-review-graph/
+
+# Local tooling & session state
+.claude/settings.local.json
+.flow/.checkpoint-*.json
+.superpowers/
+supabase/.temp/
+
+# Runtime backfill state
+.backfill-cursor.txt
+data/coord-backup-*.json
+
+# Scratch notes
+Bericht*.txt
