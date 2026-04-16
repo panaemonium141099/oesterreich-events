@@ -465,30 +465,57 @@ function EventMap({ events, selectedEvent, hoveredEventId, onSelectEvent, evenin
           .setLngLat([coords[0], coords[1]])
           .addTo(m);
 
-        // Lazy popup — only create on hover for performance
+        // Lazy popup — only create on hover for performance.
+        // Artist markers are larger (56px + scale + pulse-ring) so the popup
+        // needs a bigger offset to stay clear of the marker hitbox; otherwise
+        // the popup overlaps the marker and mouseenter/leave fires rapidly.
         let popup: mapboxgl.Popup | null = null;
-        el.addEventListener('mouseenter', () => {
+        const popupOffset = isArtistMatch ? 44 : 25;
+        let popupIsOpen = false;
+        let closeTimer: ReturnType<typeof setTimeout> | null = null;
+
+        const openPopup = () => {
+          if (closeTimer) { clearTimeout(closeTimer); closeTimer = null; }
+          if (popupIsOpen) return;
           if (!popup) {
-            popup = new mapboxgl.Popup({ offset: 25, closeButton: false, closeOnClick: false, maxWidth: '260px' })
+            popup = new mapboxgl.Popup({ offset: popupOffset, closeButton: false, closeOnClick: false, maxWidth: '260px' })
               .setHTML(createPopupHTML(event, !!eveningMode));
-            marker.setPopup(popup);
             popup.on('open', () => {
               const pe = popup?.getElement();
               if (!pe) return;
-              pe.addEventListener('mouseleave', () => {
-                setTimeout(() => { if (pe && !pe.matches(':hover') && !el.matches(':hover')) popup?.remove(); }, 250);
+              pe.addEventListener('mouseenter', () => {
+                if (closeTimer) { clearTimeout(closeTimer); closeTimer = null; }
               });
-              pe.querySelector('button[data-event-id]')?.addEventListener('click', () => { popup?.remove(); onSelectEvent(event); });
+              pe.addEventListener('mouseleave', () => {
+                scheduleClose();
+              });
+              pe.querySelector('button[data-event-id]')?.addEventListener('click', () => {
+                popup?.remove();
+                popupIsOpen = false;
+                onSelectEvent(event);
+              });
             });
           }
-          marker.togglePopup();
-        });
-        el.addEventListener('mouseleave', () => {
-          setTimeout(() => {
+          popup.setLngLat([coords[0], coords[1]]).addTo(m);
+          popupIsOpen = true;
+        };
+
+        const scheduleClose = () => {
+          if (closeTimer) clearTimeout(closeTimer);
+          closeTimer = setTimeout(() => {
             const pe = popup?.getElement();
-            if (pe && !pe.matches(':hover')) marker.togglePopup();
+            const hoveringPopup = pe?.matches(':hover');
+            const hoveringMarker = el.matches(':hover');
+            if (!hoveringPopup && !hoveringMarker && popupIsOpen) {
+              popup?.remove();
+              popupIsOpen = false;
+            }
+            closeTimer = null;
           }, 250);
-        });
+        };
+
+        el.addEventListener('mouseenter', openPopup);
+        el.addEventListener('mouseleave', scheduleClose);
 
         markersOnScreen.current.set(markerId, marker);
       }
