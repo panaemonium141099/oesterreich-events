@@ -1,6 +1,5 @@
 'use client';
 
-import { useState } from 'react';
 import type { Event } from '@/types/events';
 import { getCategoryMeta, getCategoryBadgeClass } from '@/lib/event-images';
 import { formatDate, formatTime } from '@/lib/utils/date';
@@ -21,7 +20,6 @@ export function EventCard({ event, isSelected, onSelect, onHover, eveningMode, i
   const time = formatTime(event.start_date);
   const meta = getCategoryMeta(event.category);
   const categoryColor = eveningMode ? meta.badgeDark : meta.badgeLight;
-  const [imageLoaded, setImageLoaded] = useState(false);
 
   const borderColor = isSelected
     ? eveningMode ? 'rgb(99, 102, 241)' : 'rgb(37, 99, 235)'
@@ -50,7 +48,7 @@ export function EventCard({ event, isSelected, onSelect, onHover, eveningMode, i
           src={event.image_url}
           category={event.category}
           title={event.title}
-          className={`w-full h-full transition-all duration-200 group-hover:scale-110 motion-reduce:group-hover:scale-100 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
+          className="w-full h-full transition-all duration-200 group-hover:scale-110 motion-reduce:group-hover:scale-100"
           wrapperClassName="w-full h-full"
           showSkeleton={true}
           showGradientOverlay={true}
