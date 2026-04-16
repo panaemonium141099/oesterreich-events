@@ -148,29 +148,33 @@ export function StoriesViewer({ events, initialIndex, onClose }: StoriesViewerPr
           onMouseUp={() => setPaused(false)}
         >
           {/* Blurred background layer */}
-          <EventImage
-            src={event.image_url}
-            category={event.category}
-            title={event.id}
-            alt=""
-            className="absolute inset-0 w-full h-full blur-2xl scale-110 brightness-50"
-            wrapperClassName="absolute inset-0"
-            showSkeleton={false}
-            loading="eager"
-          />
+          <div className="absolute inset-0">
+            <EventImage
+              src={event.image_url}
+              category={event.category}
+              title={event.id}
+              alt=""
+              className="w-full h-full blur-2xl scale-110 brightness-50"
+              wrapperClassName="w-full h-full"
+              showSkeleton={false}
+              loading="eager"
+            />
+          </div>
           {/* Sharp centered image */}
-          <EventImage
-            src={event.image_url}
-            category={event.category}
-            title={event.id}
-            alt={event.title}
-            className="absolute inset-0 w-full h-full"
-            wrapperClassName="absolute inset-0"
-            objectFit="contain"
-            showSkeleton={false}
-            loading="eager"
-            fetchPriority="high"
-          />
+          <div className="absolute inset-0">
+            <EventImage
+              src={event.image_url}
+              category={event.category}
+              title={event.id}
+              alt={event.title}
+              className="w-full h-full"
+              wrapperClassName="w-full h-full"
+              objectFit="contain"
+              showSkeleton={false}
+              loading="eager"
+              fetchPriority="high"
+            />
+          </div>
 
           {/* Top gradient for progress bars */}
           <div className="absolute top-0 left-0 right-0 h-24 bg-gradient-to-b from-black/60 to-transparent pointer-events-none" />

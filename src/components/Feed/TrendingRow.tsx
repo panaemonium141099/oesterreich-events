@@ -48,7 +48,7 @@ export function TrendingRow() {
       // enough — some rows store empty strings — additional client-side filter below.
       const { data } = await supabase
         .from('events')
-        .select('id, title, start_date, end_date, location_name, image_url, category, save_count, latitude, longitude')
+        .select('id, title, start_date, end_date, location_name, image_url, category, save_count, latitude, longitude, event_series_id, content_fingerprint')
         .gte('start_date', new Date().toISOString())
         .lte('start_date', nextMonth.toISOString())
         .eq('visibility', 'public')
@@ -70,13 +70,33 @@ export function TrendingRow() {
         isUsableImageCandidate(e.image_url),
       );
 
-      let result: typeof withRealImages;
+      // Deduplicate recurring series / near-duplicates. Keep the earliest
+      // occurrence per group. Key preference: event_series_id → content_fingerprint
+      // → normalized title + location.
+      const seen = new Set<string>();
+      const deduped: typeof withRealImages = [];
+      for (const e of withRealImages) {
+        const row = e as Record<string, unknown>;
+        const seriesId = row.event_series_id as string | null;
+        const fingerprint = row.content_fingerprint as string | null;
+        const title = (row.title as string | null) ?? '';
+        const location = (row.location_name as string | null) ?? '';
+        const key =
+          seriesId ||
+          fingerprint ||
+          `${title.toLowerCase().replace(/\s+/g, ' ').trim()}|${location.toLowerCase().trim()}`;
+        if (seen.has(key)) continue;
+        seen.add(key);
+        deduped.push(e);
+      }
+
+      let result: typeof deduped;
 
       if (hasRealLocation && userLat && userLng) {
         // Haversine distance sort — nearest first
         const lat1 = userLat;
         const lng1 = userLng;
-        const withDistance = withRealImages.map((e: Record<string, unknown>) => {
+        const withDistance = deduped.map((e: Record<string, unknown>) => {
           const lat2 = e.latitude as number;
           const lng2 = e.longitude as number;
           const R = 6371;
@@ -94,7 +114,7 @@ export function TrendingRow() {
         );
       } else {
         // No location — just keep start_date order
-        result = withRealImages;
+        result = deduped;
       }
 
       setEvents(result.slice(0, 15) as TrendingEvent[]);
