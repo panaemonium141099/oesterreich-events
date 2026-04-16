@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import { getEventImage, getCategoryFallbackImage } from '@/lib/categoryImages';
+import { getCategoryMeta } from '@/lib/event-images';
+import { EventImage } from '@/components/Events/EventImage';
 import { formatDate, formatTime } from '@/lib/utils/date';
 import { AnimatedCard } from '@/components/UI/AnimatedCard';
 
@@ -46,17 +46,6 @@ interface ArtistEventCardProps {
   onToggleReminder?: () => void;
 }
 
-const CATEGORY_BORDER_CSS: Record<string, string> = {
-  'Musik': '#a855f7',
-  'Rave': '#8b5cf6',
-  'Wein & Kulinarik': '#f43f5e',
-  'Kultur': '#f59e0b',
-  'Maerkte': '#22c55e',
-  'Sport': '#3b82f6',
-  'Familie': '#ec4899',
-  'Natur': '#10b981',
-  'Sonstiges': '#94a3b8',
-};
 
 function MatchBadge({ score, eveningMode }: { score: number; eveningMode?: boolean }) {
   if (score >= 0.8) {
@@ -94,9 +83,7 @@ export function ArtistEventCard({
   onToggleReminder,
 }: ArtistEventCardProps) {
   const time = formatTime(event.start_date);
-  const categoryBorderColor = CATEGORY_BORDER_CSS[event.category || ''] || CATEGORY_BORDER_CSS['Sonstiges'];
-  const [imageLoaded, setImageLoaded] = useState(false);
-  const [imageSrc, setImageSrc] = useState(getEventImage(event.image_url, event.category, event.title));
+  const categoryBorderColor = getCategoryMeta(event.category).borderColor;
   const primaryArtist = event.matched_artists[0];
 
   const borderColor = isSelected
@@ -122,25 +109,16 @@ export function ArtistEventCard({
       <div className="flex gap-3">
         {/* Thumbnail */}
         <div className={`w-20 h-20 rounded-lg overflow-hidden shrink-0 ${eveningMode ? 'bg-gray-700' : 'bg-slate-200'}`}>
-          <div className="relative w-full h-full">
-            {!imageLoaded && <div className="absolute inset-0 skeleton rounded-lg" />}
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={imageSrc}
-              alt=""
-              width={80}
-              height={80}
-              className={`w-full h-full object-cover transition-all duration-200 group-hover:scale-110 motion-reduce:group-hover:scale-100 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
-              loading="lazy"
-              referrerPolicy="no-referrer"
-              onLoad={() => setImageLoaded(true)}
-              onError={() => {
-                setImageSrc(getCategoryFallbackImage(event.category, event.title));
-                setImageLoaded(true);
-              }}
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent rounded-lg" />
-          </div>
+          <EventImage
+            src={event.image_url}
+            category={event.category}
+            title={event.title}
+            className="w-full h-full transition-all duration-200 group-hover:scale-110 motion-reduce:group-hover:scale-100"
+            wrapperClassName="w-full h-full"
+            showSkeleton={true}
+            showGradientOverlay={true}
+            loading="lazy"
+          />
         </div>
 
         {/* Content */}

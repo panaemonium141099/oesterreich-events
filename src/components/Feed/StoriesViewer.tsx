@@ -5,20 +5,8 @@ import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { TrendingEvent } from './feed-types';
 import { formatEventDate } from './feed-types';
-import { getEventImage } from '@/lib/categoryImages';
-
-const CATEGORY_COLORS: Record<string, string> = {
-  'Musik': 'bg-purple-500/30 text-purple-300',
-  'Nightlife': 'bg-pink-500/30 text-pink-300',
-  'Wein & Kulinarik': 'bg-amber-500/30 text-amber-300',
-  'Kultur': 'bg-blue-500/30 text-blue-300',
-  'Märkte': 'bg-orange-500/30 text-orange-300',
-  'Sport': 'bg-green-500/30 text-green-300',
-  'Familie': 'bg-cyan-500/30 text-cyan-300',
-  'Natur': 'bg-emerald-500/30 text-emerald-300',
-  'Feste & Brauchtum': 'bg-red-500/30 text-red-300',
-  'Sonstiges': 'bg-gray-500/30 text-gray-300',
-};
+import { getCategoryBadgeClass } from '@/lib/event-images';
+import { EventImage } from '@/components/Events/EventImage';
 
 const DURATION = 5000; // 5s per story
 
@@ -115,7 +103,7 @@ export function StoriesViewer({ events, initialIndex, onClose }: StoriesViewerPr
     }
   };
 
-  const categoryStyle = event?.category ? CATEGORY_COLORS[event.category] || 'bg-white/20 text-white/70' : '';
+  const categoryStyle = event?.category ? getCategoryBadgeClass(event.category, true) : '';
 
   return (
     <div className="fixed inset-0 z-[60] bg-black">
@@ -160,19 +148,28 @@ export function StoriesViewer({ events, initialIndex, onClose }: StoriesViewerPr
           onMouseUp={() => setPaused(false)}
         >
           {/* Blurred background layer */}
-          <img
-            src={getEventImage(event.image_url, event.category, event.id)}
+          <EventImage
+            src={event.image_url}
+            category={event.category}
+            title={event.id}
             alt=""
-            className="absolute inset-0 w-full h-full object-cover blur-2xl scale-110 brightness-50"
-            draggable={false}
-            aria-hidden
+            className="absolute inset-0 w-full h-full blur-2xl scale-110 brightness-50"
+            wrapperClassName="absolute inset-0"
+            showSkeleton={false}
+            loading="eager"
           />
           {/* Sharp centered image */}
-          <img
-            src={getEventImage(event.image_url, event.category, event.id)}
+          <EventImage
+            src={event.image_url}
+            category={event.category}
+            title={event.id}
             alt={event.title}
-            className="absolute inset-0 w-full h-full object-contain"
-            draggable={false}
+            className="absolute inset-0 w-full h-full"
+            wrapperClassName="absolute inset-0"
+            objectFit="contain"
+            showSkeleton={false}
+            loading="eager"
+            fetchPriority="high"
           />
 
           {/* Top gradient for progress bars */}

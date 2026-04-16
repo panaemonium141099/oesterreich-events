@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/lib/supabase/auth-context';
 import { createClient } from '@/lib/supabase/client';
+import { EventImage } from '@/components/Events/EventImage';
 
 interface SpotifyMatch {
   id: string;
@@ -164,11 +165,16 @@ export default function SpotifyMatchesPage() {
               >
                 <div className="flex gap-4 p-4">
                   {/* Event Image */}
-                  {m.event?.image_url && (
-                    <div className="w-20 h-20 rounded-lg overflow-hidden shrink-0">
-                      <img src={m.event.image_url} alt="" className="w-full h-full object-cover" />
-                    </div>
-                  )}
+                  <div className="w-20 h-20 rounded-lg overflow-hidden shrink-0">
+                    <EventImage
+                      src={m.event?.image_url}
+                      title={m.event?.title}
+                      className="w-full h-full"
+                      wrapperClassName="w-full h-full"
+                      showSkeleton={false}
+                      loading="lazy"
+                    />
+                  </div>
 
                   <div className="flex-1 min-w-0">
                     {/* Match Tag */}

@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import type { TrendingEvent } from './feed-types';
 import { StoriesViewer } from './StoriesViewer';
-import { getEventImage } from '@/lib/categoryImages';
+import { EventImage } from '@/components/Events/EventImage';
 
 // Shuffle array (Fisher-Yates) with seed from current hour so it changes per refresh but stays stable within a render
 function shuffleArray<T>(arr: T[]): T[] {
@@ -140,10 +140,14 @@ export function TrendingRow() {
                 <div className="w-[62px] h-[62px] rounded-full p-[2px]" style={{ background: 'linear-gradient(135deg, #833AB4, #FD1D1D, #F77737)' }}>
                   <div className="w-full h-full rounded-full p-[2px] bg-[#f8fafc]">
                     <div className="w-full h-full rounded-full overflow-hidden">
-                      <img
-                        src={getEventImage(event.image_url, event.category, event.id)}
+                      <EventImage
+                        src={event.image_url}
+                        category={event.category}
+                        title={event.id}
                         alt={event.title}
-                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                        className="w-full h-full group-hover:scale-110 transition-transform duration-300"
+                        wrapperClassName="w-full h-full"
+                        showSkeleton={false}
                         loading="lazy"
                       />
                     </div>

@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { useAuth } from '@/lib/supabase/auth-context';
 import { createClient } from '@/lib/supabase/client';
 import { toast } from 'sonner';
+import { EventImage } from '@/components/Events/EventImage';
 
 interface Photo {
   id: string;
@@ -29,7 +30,7 @@ interface MemoryDetail {
   created_by: string;
   event_id: string | null;
   created_at: string;
-  event?: { id: string; title: string; start_date: string; location_name: string | null; image_url: string | null } | null;
+  event?: { id: string; title: string; start_date: string; location_name: string | null; image_url: string | null; category: string | null } | null;
   creator?: { first_name: string; last_name: string; avatar_url: string | null };
 }
 
@@ -79,7 +80,7 @@ export default function MemoryDetailPage() {
     if (m.event_id) {
       const { data: e } = await supabase
         .from('events')
-        .select('id, title, start_date, location_name, image_url')
+        .select('id, title, start_date, location_name, image_url, category')
         .eq('id', m.event_id)
         .single();
       event = e;
@@ -330,9 +331,15 @@ export default function MemoryDetailPage() {
           >
             <p className="text-xs text-white/30 uppercase tracking-wider mb-2">Verkn&uuml;pftes Event</p>
             <div className="flex items-center gap-3">
-              {memory.event.image_url && (
-                <img src={memory.event.image_url} alt="" className="w-12 h-12 rounded-lg object-cover" />
-              )}
+              <EventImage
+                src={memory.event.image_url}
+                category={memory.event.category}
+                title={memory.event.title}
+                className="w-full h-full"
+                wrapperClassName="w-12 h-12 rounded-lg shrink-0"
+                showSkeleton={false}
+                loading="lazy"
+              />
               <div>
                 <p className="text-sm font-medium">{memory.event.title}</p>
                 <p className="text-xs text-white/40">

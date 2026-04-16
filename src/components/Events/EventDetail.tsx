@@ -2,9 +2,8 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import Image from 'next/image';
 import type { Event } from '@/types/events';
-import { getEventImage, getCategoryFallbackImage } from '@/lib/categoryImages';
+import { EventImage } from './EventImage';
 import { useAuth } from '@/lib/supabase/auth-context';
 import { createClient } from '@/lib/supabase/client';
 import { downloadICS, getGoogleCalendarUrl } from '@/lib/calendar/ics';
@@ -350,15 +349,15 @@ export function EventDetail({ event, onClose, eveningMode, onTagClick }: EventDe
 
         {/* Hero Image */}
         <div className="w-full h-64 overflow-hidden rounded-t-2xl relative">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={getEventImage(event.image_url, event.category, event.title)}
+          <EventImage
+            src={event.image_url}
+            category={event.category}
+            title={event.title}
             alt={event.title || ''}
-            className="object-cover animate-ken-burns w-full h-full absolute inset-0"
-            onError={(e) => {
-              const img = e.currentTarget as HTMLImageElement;
-              img.src = getCategoryFallbackImage(event.category, event.title);
-            }}
+            className="animate-ken-burns w-full h-full absolute inset-0"
+            wrapperClassName="w-full h-full"
+            loading="eager"
+            fetchPriority="high"
           />
           <div className={`absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t ${eveningMode ? 'from-gray-800' : 'from-white'} to-transparent`} />
         </div>

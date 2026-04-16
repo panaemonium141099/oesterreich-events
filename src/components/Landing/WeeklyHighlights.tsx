@@ -1,12 +1,12 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import Image from 'next/image';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import type { Event } from '@/types/events';
 import { formatDate } from '@/lib/utils/date';
-import { getEventImage } from '@/lib/categoryImages';
+import { getCategoryBadgeClass } from '@/lib/event-images';
+import { EventImage } from '@/components/Events/EventImage';
 import { buildEventUrl } from '@/lib/utils/slugify';
 
 function IconCal({ className }: { className?: string }) {
@@ -27,24 +27,6 @@ function IconLoc({ className }: { className?: string }) {
   );
 }
 
-const CATEGORY_COLORS: Record<string, string> = {
-  Musik: 'bg-purple-500/20 text-purple-300 border-purple-500/30',
-  Nightlife: 'bg-violet-500/20 text-violet-300 border-violet-500/30',
-  'Wein & Kulinarik': 'bg-rose-500/20 text-rose-300 border-rose-500/30',
-  Kultur: 'bg-amber-500/20 text-amber-300 border-amber-500/30',
-  Märkte: 'bg-green-500/20 text-green-300 border-green-500/30',
-  Sport: 'bg-blue-500/20 text-blue-300 border-blue-500/30',
-  Familie: 'bg-pink-500/20 text-pink-300 border-pink-500/30',
-  Natur: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30',
-  'Feste & Brauchtum': 'bg-orange-500/20 text-orange-300 border-orange-500/30',
-  Bildung: 'bg-cyan-500/20 text-cyan-300 border-cyan-500/30',
-  Gesundheit: 'bg-teal-500/20 text-teal-300 border-teal-500/30',
-  Religion: 'bg-indigo-500/20 text-indigo-300 border-indigo-500/30',
-  Sonstiges: 'bg-slate-500/20 text-slate-300 border-slate-500/30',
-};
-
-const CATEGORY_FALLBACK = 'bg-white/10 text-white/60 border-white/10';
-
 function SkeletonCard() {
   return (
     <div className="flex-none w-60 snap-start bg-white/4 rounded-2xl overflow-hidden border border-white/8 animate-pulse">
@@ -59,10 +41,6 @@ function SkeletonCard() {
 }
 
 function HighlightCard({ event }: { event: Event }) {
-  const [imgError, setImgError] = useState(false);
-  const imageUrl = getEventImage(event.image_url, event.category, event.title);
-  const badgeClass = CATEGORY_COLORS[event.category ?? ''] ?? CATEGORY_FALLBACK;
-
   const locationText = event.location_name || event.bundesland || null;
 
   return (
@@ -71,32 +49,26 @@ function HighlightCard({ event }: { event: Event }) {
       <div className="bg-[#111] rounded-2xl overflow-hidden border border-white/8 hover:border-white/20 hover:shadow-xl hover:shadow-black/40 transition-all duration-200">
         {/* Image — fixed height */}
         <div className="relative w-full h-40 bg-white/8 overflow-hidden flex-shrink-0">
-          {imageUrl && !imgError ? (
-            <Image
-              src={imageUrl}
-              alt={event.title}
-              fill
-              className="object-cover group-hover:scale-105 transition-transform duration-500"
-              sizes="240px"
-              onError={() => setImgError(true)}
-            />
-          ) : (
-            <div className="w-full h-full flex items-center justify-center">
-              <svg className="w-10 h-10 text-white/10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-              </svg>
-            </div>
-          )}
+          <EventImage
+            src={event.image_url}
+            category={event.category}
+            title={event.title}
+            alt={event.title}
+            className="w-full h-full group-hover:scale-105 transition-transform duration-500"
+            wrapperClassName="w-full h-full"
+            showSkeleton={false}
+            loading="lazy"
+          />
           {/* Category pill — top-left overlay on image */}
           {event.category && (
-            <div className="absolute top-2.5 left-2.5">
+            <div className="absolute top-2.5 left-2.5 z-10">
               <span className="text-[9px] font-semibold px-2 py-0.5 rounded-sm bg-black/50 backdrop-blur-sm text-white/70 border border-white/15">
                 {event.category}
               </span>
             </div>
           )}
           {event.event_score && event.event_score >= 55 && (
-            <div className="absolute top-2.5 right-2.5 bg-white/90 text-gray-900 text-[9px] font-bold px-2 py-0.5 rounded-sm uppercase tracking-wide">
+            <div className="absolute top-2.5 right-2.5 z-10 bg-white/90 text-gray-900 text-[9px] font-bold px-2 py-0.5 rounded-sm uppercase tracking-wide">
               Top
             </div>
           )}

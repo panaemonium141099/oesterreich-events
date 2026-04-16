@@ -1,5 +1,4 @@
 import { notFound, redirect } from 'next/navigation';
-import Image from 'next/image';
 import Link from 'next/link';
 import type { Metadata } from 'next';
 import { createClient } from '@supabase/supabase-js';
@@ -7,7 +6,9 @@ import type { Event } from '@/types/events';
 import { formatDateLong, formatTime } from '@/lib/utils/date';
 import { extractCity } from '@/lib/utils/city';
 import { buildEventUrl } from '@/lib/utils/slugify';
+import { resolvePrimaryEventImage } from '@/lib/event-images';
 import { EventDetailActions } from '@/components/Events/EventDetailActions';
+import { EventImage } from '@/components/Events/EventImage';
 import { RelatedEvents } from '@/components/Events/RelatedEvents';
 
 if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
@@ -167,9 +168,8 @@ function buildJsonLd(event: Event): string {
     jsonLd.description = event.description.slice(0, 500);
   }
 
-  if (event.image_url) {
-    jsonLd.image = event.image_url;
-  }
+  // Use resolver so JSON-LD always has an image (category fallback if needed)
+  jsonLd.image = resolvePrimaryEventImage({ imageUrl: event.image_url, category: event.category, title: event.title });
 
   const locationName = event.location_name ?? event.address ?? 'Österreich';
   const location: Record<string, unknown> = {
@@ -293,18 +293,18 @@ export default async function EventDetailPage({
             startDate={event.start_date}
           />
 
-          {event.image_url && (
-            <div className="relative w-full aspect-video rounded-xl overflow-hidden mb-6">
-              <Image
-                src={event.image_url}
-                alt={event.title}
-                fill
-                className="object-cover"
-                sizes="(max-width: 768px) 100vw, 768px"
-                priority
-              />
-            </div>
-          )}
+          <div className="relative w-full aspect-video rounded-xl overflow-hidden mb-6">
+            <EventImage
+              src={event.image_url}
+              category={event.category}
+              title={event.title}
+              alt={event.title}
+              className="w-full h-full"
+              wrapperClassName="w-full h-full"
+              loading="eager"
+              fetchPriority="high"
+            />
+          </div>
 
           <div className="space-y-4">
             {event.category && (

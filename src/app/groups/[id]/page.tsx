@@ -7,6 +7,7 @@ import { useAuth } from '@/lib/supabase/auth-context';
 import { createClient } from '@/lib/supabase/client';
 import { EventPreviewMessage } from '@/components/Chat/EventPreviewMessage';
 import { EventSearchInline } from '@/components/Chat/EventSearchInline';
+import { EventImage } from '@/components/Events/EventImage';
 import { toast } from 'sonner';
 
 interface GroupData {
@@ -859,7 +860,15 @@ export default function EventDashboardPage() {
             {linkedEvent && (
               <Link href={`/events/${linkedEvent.id}`} className="block rounded-2xl bg-white/[0.02] border border-white/[0.06] p-4 hover:border-white/15 transition-colors">
                 <div className="flex items-center gap-3">
-                  {linkedEvent.image_url && <img src={linkedEvent.image_url} alt="" className="w-14 h-14 rounded-xl object-cover shrink-0" />}
+                  <EventImage
+                    src={linkedEvent.image_url}
+                    category={linkedEvent.category}
+                    title={linkedEvent.title}
+                    className="w-full h-full"
+                    wrapperClassName="w-14 h-14 rounded-xl shrink-0"
+                    showSkeleton={false}
+                    loading="lazy"
+                  />
                   <div className="flex-1 min-w-0">
                     <p className="text-[10px] text-white/20 uppercase tracking-wider mb-0.5">Verknüpftes Event</p>
                     <p className="text-sm font-medium truncate">{linkedEvent.title}</p>

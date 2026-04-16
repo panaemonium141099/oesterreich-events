@@ -7,6 +7,7 @@ import { useAuth } from '@/lib/supabase/auth-context';
 import { createClient } from '@/lib/supabase/client';
 import { LocationAutocomplete } from '@/components/UI/LocationAutocomplete';
 import { ProfileDropdown } from '@/components/Layout/ProfileDropdown';
+import { EventImage } from '@/components/Events/EventImage';
 
 interface PlannedEvent {
   id: string;
@@ -47,6 +48,7 @@ interface EventResult {
   latitude: number | null;
   longitude: number | null;
   image_url: string | null;
+  category: string | null;
 }
 
 type CreateMode = null | 'custom' | 'existing';
@@ -209,7 +211,7 @@ export default function EventPlanenPage() {
     const timer = setTimeout(async () => {
       const { data } = await supabase
         .from('events')
-        .select('id, title, start_date, location_name, address, latitude, longitude, image_url')
+        .select('id, title, start_date, location_name, address, latitude, longitude, image_url, category')
         .ilike('title', `%${eventSearch}%`)
         .order('start_date', { ascending: true })
         .limit(8);
@@ -725,9 +727,15 @@ export default function EventPlanenPage() {
                       <label className="block text-xs text-white/40 mb-1.5">Event suchen *</label>
                       {selectedEvent ? (
                         <div className="flex items-center gap-3 p-3 rounded-xl bg-white/5 border border-white/20">
-                          {selectedEvent.image_url && (
-                            <img src={selectedEvent.image_url} alt="" className="w-12 h-12 rounded-lg object-cover shrink-0" />
-                          )}
+                          <EventImage
+                            src={selectedEvent.image_url}
+                            category={selectedEvent.category}
+                            title={selectedEvent.title}
+                            className="w-full h-full"
+                            wrapperClassName="w-12 h-12 rounded-lg shrink-0"
+                            showSkeleton={false}
+                            loading="lazy"
+                          />
                           <div className="flex-1 min-w-0">
                             <p className="text-sm font-medium truncate">{selectedEvent.title}</p>
                             <p className="text-xs text-white/30">
@@ -762,9 +770,15 @@ export default function EventPlanenPage() {
                                   onClick={() => { setSelectedEvent(e); setEventSearch(''); setEventResults([]); }}
                                   className="w-full flex items-center gap-3 px-4 py-3 hover:bg-white/5 transition-colors text-left"
                                 >
-                                  {e.image_url && (
-                                    <img src={e.image_url} alt="" className="w-10 h-10 rounded-lg object-cover shrink-0" />
-                                  )}
+                                  <EventImage
+                                    src={e.image_url}
+                                    category={e.category}
+                                    title={e.title}
+                                    className="w-full h-full"
+                                    wrapperClassName="w-10 h-10 rounded-lg shrink-0"
+                                    showSkeleton={false}
+                                    loading="lazy"
+                                  />
                                   <div className="flex-1 min-w-0">
                                     <p className="text-sm truncate">{e.title}</p>
                                     <p className="text-xs text-white/30">

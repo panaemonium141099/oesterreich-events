@@ -1,20 +1,8 @@
 'use client';
 
-import Image from 'next/image';
 import { formatEventDate } from './feed-types';
-
-const CATEGORY_COLORS: Record<string, string> = {
-  'Musik': 'bg-purple-500/20 text-purple-400',
-  'Nightlife': 'bg-pink-500/20 text-pink-400',
-  'Wein & Kulinarik': 'bg-amber-500/20 text-amber-400',
-  'Kultur': 'bg-blue-500/20 text-blue-400',
-  'Märkte': 'bg-orange-500/20 text-orange-400',
-  'Sport': 'bg-green-500/20 text-green-400',
-  'Familie': 'bg-cyan-500/20 text-cyan-400',
-  'Natur': 'bg-emerald-500/20 text-emerald-400',
-  'Feste & Brauchtum': 'bg-red-500/20 text-red-400',
-  'Sonstiges': 'bg-gray-500/20 text-gray-400',
-};
+import { getCategoryBadgeClass } from '@/lib/event-images';
+import { EventImage } from '@/components/Events/EventImage';
 
 interface FeedEventMiniCardProps {
   event: {
@@ -32,7 +20,7 @@ interface FeedEventMiniCardProps {
 }
 
 export function FeedEventMiniCard({ event, compact, fullWidth, onClick }: FeedEventMiniCardProps) {
-  const categoryStyle = CATEGORY_COLORS[event.category || ''] || 'bg-white/[0.06] text-white/40';
+  const categoryStyle = getCategoryBadgeClass(event.category, true);
 
   if (fullWidth) {
     return (
@@ -40,59 +28,45 @@ export function FeedEventMiniCard({ event, compact, fullWidth, onClick }: FeedEv
         className="relative w-full cursor-pointer"
         onClick={() => onClick?.(event.id)}
       >
-        {event.image_url ? (
-          <div className="relative aspect-[4/5] w-full overflow-hidden bg-[#141416]">
-            <img
-              src={event.image_url}
-              alt={event.title}
-              className="w-full h-full object-cover"
-              loading="lazy"
-            />
-            {/* Category badge overlay */}
-            {event.category && (
-              <span className={`absolute top-3 left-3 text-[10px] font-semibold px-2 py-0.5 rounded-md backdrop-blur-sm ${categoryStyle}`}>
-                {event.category}
+        <div className="relative aspect-[4/5] w-full overflow-hidden bg-[#141416]">
+          <EventImage
+            src={event.image_url}
+            category={event.category}
+            title={event.title}
+            alt={event.title}
+            className="w-full h-full"
+            wrapperClassName="w-full h-full"
+            showSkeleton={false}
+            loading="lazy"
+          />
+          {/* Category badge overlay */}
+          {event.category && (
+            <span className={`absolute top-3 left-3 z-10 text-[10px] font-semibold px-2 py-0.5 rounded-md backdrop-blur-sm ${categoryStyle}`}>
+              {event.category}
+            </span>
+          )}
+          {/* Bottom gradient with event info */}
+          <div className="absolute bottom-0 left-0 right-0 z-10 bg-gradient-to-t from-black/70 via-black/30 to-transparent p-4 pt-12">
+            <p className="text-white font-semibold text-sm leading-tight">{event.title}</p>
+            <div className="flex items-center gap-3 mt-1.5">
+              <span className="text-white/60 text-xs flex items-center gap-1">
+                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                {formatEventDate(event.start_date)}
               </span>
-            )}
-            {/* Bottom gradient with event info */}
-            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent p-4 pt-12">
-              <p className="text-white font-semibold text-sm leading-tight">{event.title}</p>
-              <div className="flex items-center gap-3 mt-1.5">
-                <span className="text-white/60 text-xs flex items-center gap-1">
-                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                  </svg>
-                  {formatEventDate(event.start_date)}
-                </span>
-                {event.location_name && (
-                  <span className="text-white/60 text-xs flex items-center gap-1 truncate">
-                    <svg className="w-3 h-3 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                    </svg>
-                    {event.location_name}
-                  </span>
-                )}
-              </div>
-            </div>
-          </div>
-        ) : (
-          /* Gradient placeholder when no image */
-          <div className="relative aspect-[4/5] w-full overflow-hidden bg-[#141416] flex items-center justify-center">
-            <div className="text-center px-8">
-              {event.category && (
-                <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-md ${categoryStyle}`}>
-                  {event.category}
-                </span>
-              )}
-              <p className="text-white/70 font-semibold text-lg mt-3 leading-tight">{event.title}</p>
-              <p className="text-white/50 text-sm mt-2">{formatEventDate(event.start_date)}</p>
               {event.location_name && (
-                <p className="text-white/30 text-xs mt-1">{event.location_name}</p>
+                <span className="text-white/60 text-xs flex items-center gap-1 truncate">
+                  <svg className="w-3 h-3 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                  {event.location_name}
+                </span>
               )}
             </div>
           </div>
-        )}
+        </div>
       </div>
     );
   }
@@ -104,15 +78,15 @@ export function FeedEventMiniCard({ event, compact, fullWidth, onClick }: FeedEv
         className="flex items-center gap-2.5 w-full p-2 rounded-lg bg-white/[0.06] border border-white/[0.06] hover:border-white/[0.10] transition-all duration-200 text-left group"
       >
         <div className="w-9 h-9 rounded-lg overflow-hidden shrink-0 bg-white/[0.06]">
-          {event.image_url ? (
-            <Image src={event.image_url} alt="" width={36} height={36} className="w-full h-full object-cover" loading="lazy" referrerPolicy="no-referrer" />
-          ) : (
-            <div className="w-full h-full flex items-center justify-center text-white/20">
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-              </svg>
-            </div>
-          )}
+          <EventImage
+            src={event.image_url}
+            category={event.category}
+            title={event.title}
+            className="w-full h-full"
+            wrapperClassName="w-full h-full"
+            showSkeleton={false}
+            loading="lazy"
+          />
         </div>
         <div className="flex-1 min-w-0">
           <p className="text-xs font-medium text-white/70 truncate group-hover:text-white/90 transition-colors">{event.title}</p>
@@ -130,31 +104,24 @@ export function FeedEventMiniCard({ event, compact, fullWidth, onClick }: FeedEv
       onClick={() => onClick?.(event.id)}
       className="w-full rounded-xl overflow-hidden bg-white/[0.06] border border-white/[0.06] hover:border-white/[0.10] transition-all duration-200 text-left group"
     >
-      {event.image_url && (
-        <div className="w-full h-32 overflow-hidden relative">
-          <Image
-            src={event.image_url}
-            alt=""
-            fill
-            sizes="(max-width: 768px) 100vw, 400px"
-            className="object-cover group-hover:scale-105 transition-transform duration-300"
-            loading="lazy"
-            referrerPolicy="no-referrer"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
-          {event.category && (
-            <span className={`absolute top-2 left-2 text-[10px] font-medium px-2 py-0.5 rounded-full backdrop-blur-sm ${categoryStyle}`}>
-              {event.category}
-            </span>
-          )}
-        </div>
-      )}
-      <div className="p-3">
-        {!event.image_url && event.category && (
-          <span className={`inline-block text-[10px] font-medium px-2 py-0.5 rounded-full mb-1.5 ${categoryStyle}`}>
+      <div className="w-full h-32 overflow-hidden relative">
+        <EventImage
+          src={event.image_url}
+          category={event.category}
+          title={event.title}
+          className="w-full h-full group-hover:scale-105 transition-transform duration-300"
+          wrapperClassName="w-full h-full"
+          showSkeleton={false}
+          loading="lazy"
+          showGradientOverlay={true}
+        />
+        {event.category && (
+          <span className={`absolute top-2 left-2 z-10 text-[10px] font-medium px-2 py-0.5 rounded-full backdrop-blur-sm ${categoryStyle}`}>
             {event.category}
           </span>
         )}
+      </div>
+      <div className="p-3">
         <p className="text-sm font-medium text-white/70 truncate group-hover:text-white/90 transition-colors">{event.title}</p>
         <div className="flex items-center gap-1.5 mt-1 text-xs text-white/50">
           <svg className="w-3 h-3 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">

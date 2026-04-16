@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { FeedEventMiniCard } from './FeedEventMiniCard';
+import { EventImage } from '@/components/Events/EventImage';
 
 interface CreatePostProps {
   userId: string;
@@ -193,17 +194,15 @@ export function CreatePost({ userId, userAvatar, userInitial, onPostCreated }: C
                             }}
                             className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg hover:bg-white/[0.04] transition-colors text-left"
                           >
-                            <div className="w-8 h-8 rounded-lg overflow-hidden shrink-0 bg-white/[0.06]">
-                              {ev.image_url ? (
-                                <img src={ev.image_url} alt="" className="w-full h-full object-cover" loading="lazy" referrerPolicy="no-referrer" />
-                              ) : (
-                                <div className="w-full h-full flex items-center justify-center text-white/30">
-                                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                  </svg>
-                                </div>
-                              )}
-                            </div>
+                            <EventImage
+                              src={ev.image_url}
+                              category={ev.category}
+                              title={ev.title}
+                              className="w-full h-full"
+                              wrapperClassName="w-8 h-8 rounded-lg shrink-0 bg-white/[0.06]"
+                              showSkeleton={false}
+                              loading="lazy"
+                            />
                             <div className="flex-1 min-w-0">
                               <p className="text-xs font-medium text-white/70 truncate">{ev.title}</p>
                               <p className="text-[10px] text-white/40 truncate">{ev.location_name || 'Ort unbekannt'}</p>

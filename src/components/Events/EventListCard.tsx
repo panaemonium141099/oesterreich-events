@@ -1,25 +1,9 @@
-import Image from 'next/image';
 import Link from 'next/link';
 import type { Event } from '@/types/events';
 import { formatDateCompact, formatTime } from '@/lib/utils/date';
 import { buildEventUrl } from '@/lib/utils/slugify';
-
-const CATEGORY_COLORS: Record<string, string> = {
-  Musik: 'bg-purple-500/20 text-purple-400',
-  Nightlife: 'bg-pink-500/20 text-pink-400',
-  'Wein & Kulinarik': 'bg-amber-500/20 text-amber-400',
-  Kultur: 'bg-blue-500/20 text-blue-400',
-  'Märkte': 'bg-orange-500/20 text-orange-400',
-  Sport: 'bg-green-500/20 text-green-400',
-  Familie: 'bg-cyan-500/20 text-cyan-400',
-  Natur: 'bg-emerald-500/20 text-emerald-400',
-  'Feste & Brauchtum': 'bg-red-500/20 text-red-400',
-  Bildung: 'bg-indigo-500/20 text-indigo-400',
-  Gesundheit: 'bg-teal-500/20 text-teal-400',
-  Religion: 'bg-yellow-500/20 text-yellow-400',
-  Wirtschaft: 'bg-slate-500/20 text-slate-400',
-  Sonstiges: 'bg-gray-500/20 text-gray-400',
-};
+import { getCategoryBadgeClass } from '@/lib/event-images';
+import { EventImage } from './EventImage';
 
 interface EventListCardProps {
   event: Event;
@@ -27,12 +11,11 @@ interface EventListCardProps {
 
 /**
  * Simplified event card for listing/landing pages.
- * Server Component — no client state, no map interaction.
+ * Server Component — delegates image rendering to EventImage (client).
  */
 export function EventListCard({ event }: EventListCardProps) {
   const time = formatTime(event.start_date);
-  const categoryStyle =
-    CATEGORY_COLORS[event.category || ''] || 'bg-white/10 text-white/50';
+  const categoryStyle = getCategoryBadgeClass(event.category, true);
 
   return (
     <Link
@@ -40,19 +23,15 @@ export function EventListCard({ event }: EventListCardProps) {
       className="flex gap-4 p-3 rounded-xl bg-white/5 border border-white/10 hover:border-white/20 transition-colors group"
     >
       {/* Thumbnail */}
-      {event.image_url ? (
-        <div className="relative w-24 h-24 sm:w-28 sm:h-28 rounded-lg overflow-hidden shrink-0">
-          <Image
-            src={event.image_url}
-            alt=""
-            fill
-            className="object-cover group-hover:scale-105 transition-transform duration-300"
-            sizes="112px"
-          />
-        </div>
-      ) : (
-        <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-lg bg-white/5 shrink-0" />
-      )}
+      <EventImage
+        src={event.image_url}
+        category={event.category}
+        title={event.title}
+        className="w-full h-full group-hover:scale-105 transition-transform duration-300"
+        wrapperClassName="w-24 h-24 sm:w-28 sm:h-28 rounded-lg shrink-0"
+        showSkeleton={false}
+        loading="lazy"
+      />
 
       {/* Content */}
       <div className="flex flex-col justify-center min-w-0 flex-1">

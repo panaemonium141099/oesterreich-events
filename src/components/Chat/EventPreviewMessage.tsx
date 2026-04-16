@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { formatDateCompact, formatTime } from '@/lib/utils/date';
 import Link from 'next/link';
+import { getCategoryBadgeClass } from '@/lib/event-images';
+import { EventImage } from '@/components/Events/EventImage';
 
 interface EventData {
   id: string;
@@ -22,22 +24,6 @@ interface EventPreviewMessageProps {
   eventId: string;
   isMe: boolean;
 }
-
-const CATEGORY_COLORS: Record<string, string> = {
-  'Musik': 'bg-purple-500/20 text-purple-400',
-  'Nightlife': 'bg-pink-500/20 text-pink-400',
-  'Wein & Kulinarik': 'bg-amber-500/20 text-amber-400',
-  'Kultur': 'bg-blue-500/20 text-blue-400',
-  'Märkte': 'bg-orange-500/20 text-orange-400',
-  'Sport': 'bg-green-500/20 text-green-400',
-  'Familie': 'bg-cyan-500/20 text-cyan-400',
-  'Natur': 'bg-emerald-500/20 text-emerald-400',
-  'Feste & Brauchtum': 'bg-red-500/20 text-red-400',
-  'Bildung': 'bg-indigo-500/20 text-indigo-400',
-  'Gesundheit': 'bg-teal-500/20 text-teal-400',
-  'Religion': 'bg-yellow-500/20 text-yellow-400',
-  'Sonstiges': 'bg-gray-500/20 text-gray-400',
-};
 
 export function EventPreviewMessage({ eventId, isMe }: EventPreviewMessageProps) {
   const [event, setEvent] = useState<EventData | null>(null);
@@ -79,7 +65,7 @@ export function EventPreviewMessage({ eventId, isMe }: EventPreviewMessageProps)
   }
 
   const time = formatTime(event.start_date);
-  const categoryStyle = CATEGORY_COLORS[event.category || ''] || 'bg-white/[0.06] text-white/40';
+  const categoryStyle = getCategoryBadgeClass(event.category, true);
 
   // Deep-link: if the event has coordinates, link to map view; otherwise link to source
   const mapLink = event.latitude && event.longitude
@@ -89,15 +75,15 @@ export function EventPreviewMessage({ eventId, isMe }: EventPreviewMessageProps)
   return (
     <div className="w-64 rounded-xl overflow-hidden bg-[#141416] border border-white/[0.06] hover:border-white/[0.10] transition-colors shadow-sm">
       {/* Thumbnail */}
-      {event.image_url && (
-        <div className="w-full h-28 overflow-hidden">
-          <img
-            src={event.image_url}
-            alt=""
-            className="w-full h-full object-cover"
-          />
-        </div>
-      )}
+      <EventImage
+        src={event.image_url}
+        category={event.category}
+        title={event.title}
+        className="w-full h-full"
+        wrapperClassName="w-full h-28"
+        showSkeleton={false}
+        loading="lazy"
+      />
 
       <div className="p-3">
         {/* Category Badge */}

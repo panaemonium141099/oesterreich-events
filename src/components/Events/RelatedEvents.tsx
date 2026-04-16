@@ -2,9 +2,10 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 import { formatDateCompact, formatTime } from '@/lib/utils/date';
 import { buildEventUrl } from '@/lib/utils/slugify';
+import { getCategoryBadgeClass } from '@/lib/event-images';
+import { EventImage } from './EventImage';
 
 interface RelatedEvent {
   id: string;
@@ -16,22 +17,6 @@ interface RelatedEvent {
   category: string | null;
   slug?: string | null;
 }
-
-const CATEGORY_COLORS: Record<string, string> = {
-  Musik: 'bg-purple-500/20 text-purple-400',
-  Nightlife: 'bg-pink-500/20 text-pink-400',
-  'Wein & Kulinarik': 'bg-amber-500/20 text-amber-400',
-  Kultur: 'bg-blue-500/20 text-blue-400',
-  'Markte': 'bg-orange-500/20 text-orange-400',
-  Sport: 'bg-green-500/20 text-green-400',
-  Familie: 'bg-cyan-500/20 text-cyan-400',
-  Natur: 'bg-emerald-500/20 text-emerald-400',
-  'Feste & Brauchtum': 'bg-red-500/20 text-red-400',
-  Bildung: 'bg-indigo-500/20 text-indigo-400',
-  Gesundheit: 'bg-teal-500/20 text-teal-400',
-  Religion: 'bg-yellow-500/20 text-yellow-400',
-  Sonstiges: 'bg-gray-500/20 text-gray-400',
-};
 
 function SkeletonCard() {
   return (
@@ -81,9 +66,7 @@ export function RelatedEvents({ eventId }: { eventId: string }) {
           ? Array.from({ length: 4 }).map((_, i) => <SkeletonCard key={i} />)
           : events.map((event) => {
               const time = formatTime(event.start_date);
-              const categoryStyle =
-                CATEGORY_COLORS[event.category || ''] ||
-                'bg-white/10 text-white/50';
+              const categoryStyle = getCategoryBadgeClass(event.category, true);
 
               return (
                 <Link
@@ -91,17 +74,15 @@ export function RelatedEvents({ eventId }: { eventId: string }) {
                   href={buildEventUrl(event.id, event.slug)}
                   className="rounded-xl overflow-hidden bg-white/5 border border-white/10 hover:border-white/20 transition-colors group"
                 >
-                  {event.image_url && (
-                    <div className="relative h-32 overflow-hidden">
-                      <Image
-                        src={event.image_url}
-                        alt=""
-                        fill
-                        className="object-cover group-hover:scale-105 transition-transform duration-300"
-                        sizes="(max-width: 640px) 100vw, 50vw"
-                      />
-                    </div>
-                  )}
+                  <EventImage
+                    src={event.image_url}
+                    category={event.category}
+                    title={event.title}
+                    className="w-full h-full group-hover:scale-105 transition-transform duration-300"
+                    wrapperClassName="h-32"
+                    showSkeleton={false}
+                    loading="lazy"
+                  />
 
                   <div className="p-3">
                     {event.category && (

@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/lib/supabase/auth-context';
 import { createClient } from '@/lib/supabase/client';
+import { EventImage } from '@/components/Events/EventImage';
 
 interface CalendarEvent {
   id: string;
@@ -894,17 +895,15 @@ export default function CalendarPage() {
                       className="w-full flex items-center gap-3 p-3 rounded-xl bg-white/5 border border-white/10 hover:border-white/20 transition-colors text-left"
                       style={friendColor ? { borderLeftWidth: '3px', borderLeftColor: friendColor.hex } : {}}
                     >
-                      <div className="w-12 h-12 rounded-lg overflow-hidden shrink-0 bg-white/10">
-                        {evt.image_url ? (
-                          <img src={evt.image_url} alt="" className="w-full h-full object-cover" />
-                        ) : (
-                          <div className={`w-full h-full flex items-center justify-center ${CATEGORY_COLORS[evt.category || ''] || 'bg-white/10'}`}>
-                            <svg className="w-5 h-5 text-white/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                            </svg>
-                          </div>
-                        )}
-                      </div>
+                      <EventImage
+                        src={evt.image_url}
+                        category={evt.category}
+                        title={evt.title}
+                        className="w-full h-full"
+                        wrapperClassName="w-12 h-12 rounded-lg shrink-0 bg-white/10"
+                        showSkeleton={false}
+                        loading="lazy"
+                      />
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
                           <p className="text-sm font-medium truncate">{evt.title}</p>
@@ -950,11 +949,15 @@ export default function CalendarPage() {
             onClick={(e) => e.stopPropagation()}
           >
             {/* Image */}
-            {selectedEvent.image_url && (
-              <div className="w-full h-48 overflow-hidden">
-                <img src={selectedEvent.image_url} alt="" className="w-full h-full object-cover" />
-              </div>
-            )}
+            <EventImage
+              src={selectedEvent.image_url}
+              category={selectedEvent.category}
+              title={selectedEvent.title}
+              className="w-full h-full"
+              wrapperClassName="w-full h-48"
+              showSkeleton={false}
+              loading="eager"
+            />
             <div className="p-6">
               {/* Friend badge in modal */}
               {viewMode === 'friends' && selectedEvent.friend_id && (

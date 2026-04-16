@@ -9,6 +9,7 @@ import { CalendarIcon, MapPinIcon } from '@/components/UI/Icons';
 import { ProfileDropdown } from '@/components/Layout/ProfileDropdown';
 import { toast } from 'sonner';
 import { buildEventUrl } from '@/lib/utils/slugify';
+import { EventImage } from '@/components/Events/EventImage';
 
 interface SavedEvent {
   id: string;
@@ -171,13 +172,15 @@ export default function SavedEventsPage() {
                 >
                   {/* Image */}
                   <div className="w-16 h-16 rounded-lg overflow-hidden shrink-0 bg-white/10">
-                    {event.image_url ? (
-                      <img src={event.image_url} alt="" className="w-full h-full object-cover" />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center text-white/20">
-                        <CalendarIcon size={24} />
-                      </div>
-                    )}
+                    <EventImage
+                      src={event.image_url}
+                      category={event.category}
+                      title={event.title}
+                      className="w-full h-full"
+                      wrapperClassName="w-full h-full"
+                      showSkeleton={false}
+                      loading="lazy"
+                    />
                   </div>
 
                   {/* Info */}
