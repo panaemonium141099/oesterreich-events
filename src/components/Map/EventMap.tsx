@@ -432,16 +432,32 @@ function EventMap({ events, selectedEvent, hoveredEventId, onSelectEvent, evenin
       // directly from the event lookup avoids querySourceFeatures returning
       // transient empty/partial results during map interactions (which caused
       // markers to be removed and re-created every frame → flicker on hover).
+      // Artist events at identical coordinates (e.g. multi-day tour stops at the
+      // same venue) must be jittered apart; otherwise two markers sit on the
+      // exact same pixel and the cursor randomly hits one or the other →
+      // popup content flips between the overlapping events.
+      const artistCoordCounts = new Map<string, number>();
       const artistFeatures = Array.from(artistIdsRef.current)
         .map((id) => {
           const ev = eventLookup.current.get(id);
           if (!ev || ev.latitude == null || ev.longitude == null) return null;
+          const key = `${ev.latitude.toFixed(5)}_${ev.longitude.toFixed(5)}`;
+          const idx = artistCoordCounts.get(key) ?? 0;
+          artistCoordCounts.set(key, idx + 1);
+          let lat = ev.latitude;
+          let lng = ev.longitude;
+          if (idx > 0) {
+            const angle = (idx * 2.399) % (2 * Math.PI);
+            const offset = 0.0003 * Math.ceil(idx / 6);
+            lat += Math.sin(angle) * offset;
+            lng += Math.cos(angle) * offset;
+          }
           const feature: GeoJSON.Feature = {
             type: 'Feature',
             properties: { id },
             geometry: {
               type: 'Point',
-              coordinates: [ev.longitude, ev.latitude],
+              coordinates: [lng, lat],
             },
           };
           return feature;
