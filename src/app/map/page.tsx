@@ -6,7 +6,8 @@ import dynamic from 'next/dynamic';
 import type { Event, EventFilters } from '@/types/events';
 import { Header } from '@/components/Layout/Header';
 import { Sidebar } from '@/components/Layout/Sidebar';
-import type { SidebarTab } from '@/components/Layout/Sidebar';
+import type { SidebarTab, SidebarSize } from '@/components/Layout/Sidebar';
+import type { SortMode } from '@/components/Layout/SortBar';
 import type { ArtistEvent } from '@/components/Artists/ArtistEventCard';
 import { EventDetail } from '@/components/Events/EventDetail';
 import { MapLoadingOverlay } from '@/components/Map/MapLoadingOverlay';
@@ -17,6 +18,7 @@ import { getDistrictsByBundesland } from '@/lib/districtsAT';
 import { trackEvent } from '@/lib/analytics';
 import { useAuth } from '@/lib/supabase/auth-context';
 import { createClient } from '@/lib/supabase/client';
+import { distanceKm, getStoredLocation, storeLocation } from '@/lib/geolocation';
 import Link from 'next/link';
 
 const EventMap = dynamic(() => import('@/components/Map/EventMap'), {
@@ -100,6 +102,20 @@ function MapPageInner() {
   const [artistEventCount, setArtistEventCount] = useState(0);
   const [hasFollowedArtists, setHasFollowedArtists] = useState(false);
   const [artistEventIds, setArtistEventIds] = useState<Set<string>>(new Set());
+
+  // Sidebar resize + sort + user location for distance sort
+  const [sidebarSize, setSidebarSize] = useState<SidebarSize>('compact');
+  const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const [sortMode, setSortMode] = useState<SortMode>('date-asc');
+
+  // On mount: hydrate stored location; default to distance-sort when available
+  useEffect(() => {
+    const stored = getStoredLocation();
+    if (stored) {
+      setUserLocation(stored);
+      setSortMode('distance');
+    }
+  }, []);
 
   // Fetch artist events — IDs for map highlighting + count for badge
   useEffect(() => {
@@ -253,9 +269,38 @@ function MapPageInner() {
   }, [bundeslandEvents]);
 
   // Sidebar shows district-filtered deduped events; map shows bundesland-filtered events for clustering
-  const sidebarEvents = filters.district
-    ? dedupedEvents.filter(e => e.district === filters.district)
-    : dedupedEvents;
+  const sidebarEvents = useMemo(() => {
+    const base = filters.district
+      ? dedupedEvents.filter(e => e.district === filters.district)
+      : dedupedEvents;
+
+    if (sortMode === 'alpha-asc' || sortMode === 'alpha-desc') {
+      const sorted = [...base].sort((a, b) =>
+        (a.title ?? '').localeCompare(b.title ?? '', 'de-AT', { sensitivity: 'base' })
+      );
+      return sortMode === 'alpha-desc' ? sorted.reverse() : sorted;
+    }
+
+    if (sortMode === 'distance' && userLocation) {
+      // Pre-compute distances once, sort by index (avoids recomputing in every comparison)
+      const withDist = base.map(e => ({
+        e,
+        d: e.latitude != null && e.longitude != null
+          ? distanceKm(userLocation.lat, userLocation.lng, e.latitude, e.longitude)
+          : Number.POSITIVE_INFINITY,
+      }));
+      withDist.sort((a, b) => a.d - b.d);
+      return withDist.map(x => x.e);
+    }
+
+    // Default: date ascending/descending
+    const byDate = [...base].sort((a, b) => {
+      const ta = new Date(a.start_date).getTime();
+      const tb = new Date(b.start_date).getTime();
+      return ta - tb;
+    });
+    return sortMode === 'date-desc' ? byDate.reverse() : byDate;
+  }, [dedupedEvents, filters.district, sortMode, userLocation]);
 
   const [dynamicFlyTo, setDynamicFlyTo] = useState<{ lat: number; lng: number; zoom: number } | null>(null);
 
@@ -389,7 +434,13 @@ function MapPageInner() {
 
         {/* Geolocation banner */}
         <LocationBanner
-          onLocationFound={(lat, lng) => setDynamicFlyTo({ lat, lng, zoom: 12 })}
+          onLocationFound={(lat, lng) => {
+            setUserLocation({ lat, lng });
+            storeLocation(lat, lng);
+            // Promote distance-sort if the user is still on the default date-sort
+            setSortMode(prev => (prev === 'date-asc' ? 'distance' : prev));
+            setDynamicFlyTo({ lat, lng, zoom: 12 });
+          }}
           eveningMode={eveningMode}
           suppressAutoFly={hasUrlContext}
         />
@@ -400,7 +451,11 @@ function MapPageInner() {
         {sidebarOpen && (
           <div className="absolute top-0 left-0 bottom-0 z-40 hidden lg:block">
             <Sidebar
+              variant="desktop"
+              size={sidebarSize}
+              onSizeChange={setSidebarSize}
               events={sidebarEvents}
+              allEventsForFilters={dedupedEvents}
               loading={loading}
               onSelectEvent={setSelectedEvent}
               selectedEventId={selectedEvent?.id ?? null}
@@ -411,6 +466,12 @@ function MapPageInner() {
               showArtistTab={hasFollowedArtists}
               artistEventCount={artistEventCount}
               onSelectArtistEvent={handleSelectArtistEvent}
+              sortMode={sortMode}
+              onSortChange={setSortMode}
+              hasLocation={userLocation !== null}
+              filters={filters}
+              onFiltersChange={setFilters}
+              bundeslandId={bundesland.id}
             />
           </div>
         )}
@@ -447,6 +508,7 @@ function MapPageInner() {
               </div>
               <div className="overflow-y-auto flex-1">
                 <Sidebar
+                  variant="mobile"
                   events={sidebarEvents}
                   loading={loading}
                   onSelectEvent={(event) => { setSelectedEvent(event); setSidebarOpen(false); }}
@@ -458,6 +520,9 @@ function MapPageInner() {
                   showArtistTab={hasFollowedArtists}
                   artistEventCount={artistEventCount}
                   onSelectArtistEvent={(event) => { handleSelectArtistEvent(event); setSidebarOpen(false); }}
+                  sortMode={sortMode}
+                  onSortChange={setSortMode}
+                  hasLocation={userLocation !== null}
                 />
               </div>
             </div>

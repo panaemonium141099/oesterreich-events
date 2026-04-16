@@ -1,12 +1,29 @@
 'use client';
 
+import { useEffect, useRef } from 'react';
+import {
+  AnimatePresence,
+  motion,
+  useMotionValue,
+  animate,
+  useReducedMotion,
+  type PanInfo,
+} from 'framer-motion';
 import { EventList } from '../Events/EventList';
 import { ArtistEventsSection } from '../Artists/ArtistEventsSection';
 import { SkeletonList } from '../UI/Skeleton';
-import type { Event } from '@/types/events';
+import { SortBar, type SortMode } from './SortBar';
+import { FilterPanel } from './FilterPanel';
+import type { Event, EventFilters } from '@/types/events';
 import type { ArtistEvent } from '../Artists/ArtistEventCard';
 
 export type SidebarTab = 'events' | 'artists';
+export type SidebarSize = 'compact' | 'wide' | 'full';
+
+const COMPACT_WIDTH = 380;
+const WIDE_WIDTH = 640;
+const PEEK_WIDTH = 48; // map strip on the right in full mode
+const MIN_WIDTH = 320;
 
 interface SidebarProps {
   events: Event[];
@@ -15,15 +32,36 @@ interface SidebarProps {
   selectedEventId: string | null;
   onHoverEvent: (id: string | null) => void;
   eveningMode?: boolean;
-  // Artist events tab
+  // Artist tab
   activeTab?: SidebarTab;
   onTabChange?: (tab: SidebarTab) => void;
   showArtistTab?: boolean;
   artistEventCount?: number;
   onSelectArtistEvent?: (event: ArtistEvent) => void;
+  // Sort
+  sortMode: SortMode;
+  onSortChange: (m: SortMode) => void;
+  hasLocation: boolean;
+  // Resize + filters (desktop only)
+  variant?: 'desktop' | 'mobile';
+  size?: SidebarSize;
+  onSizeChange?: (s: SidebarSize) => void;
+  filters?: EventFilters;
+  onFiltersChange?: (f: EventFilters) => void;
+  bundeslandId?: string;
+  allEventsForFilters?: Event[]; // unfiltered set used for tag aggregation in FilterPanel
 }
 
-export function Sidebar({
+export function Sidebar(props: SidebarProps) {
+  if (props.variant === 'mobile') {
+    return <MobileSidebar {...props} />;
+  }
+  return <DesktopSidebar {...props} />;
+}
+
+/* ─── Mobile Sidebar ───────────────────────────────────────────── */
+
+function MobileSidebar({
   events,
   loading,
   onSelectEvent,
@@ -35,19 +73,263 @@ export function Sidebar({
   showArtistTab = false,
   artistEventCount = 0,
   onSelectArtistEvent,
+  sortMode,
+  onSortChange,
+  hasLocation,
 }: SidebarProps) {
   const isArtistTab = activeTab === 'artists' && showArtistTab;
+  return (
+    <aside className={`h-full w-full flex flex-col overflow-hidden ${
+      eveningMode ? 'bg-slate-900/95' : 'bg-white/95'
+    }`}>
+      <SidebarHeader
+        events={events}
+        eveningMode={eveningMode}
+        activeTab={activeTab}
+        onTabChange={onTabChange}
+        showArtistTab={showArtistTab}
+        artistEventCount={artistEventCount}
+        sortMode={sortMode}
+        onSortChange={onSortChange}
+        hasLocation={hasLocation}
+      />
+      <div className="flex-1 overflow-y-auto custom-scrollbar">
+        <SidebarBody
+          events={events}
+          loading={loading}
+          onSelectEvent={onSelectEvent}
+          selectedEventId={selectedEventId}
+          onHoverEvent={onHoverEvent}
+          eveningMode={eveningMode}
+          isArtistTab={isArtistTab}
+          onSelectArtistEvent={onSelectArtistEvent}
+        />
+      </div>
+    </aside>
+  );
+}
+
+/* ─── Desktop Sidebar (resizable) ──────────────────────────────── */
+
+function DesktopSidebar({
+  events,
+  loading,
+  onSelectEvent,
+  selectedEventId,
+  onHoverEvent,
+  eveningMode,
+  activeTab = 'events',
+  onTabChange,
+  showArtistTab = false,
+  artistEventCount = 0,
+  onSelectArtistEvent,
+  sortMode,
+  onSortChange,
+  hasLocation,
+  size = 'compact',
+  onSizeChange,
+  filters,
+  onFiltersChange,
+  bundeslandId,
+  allEventsForFilters,
+}: SidebarProps) {
+  const reduceMotion = useReducedMotion();
+  const isArtistTab = activeTab === 'artists' && showArtistTab;
+  const widthMV = useMotionValue(COMPACT_WIDTH);
+  const dragging = useRef(false);
+
+  const getTargetWidth = (s: SidebarSize): number => {
+    if (typeof window === 'undefined') return s === 'compact' ? COMPACT_WIDTH : WIDE_WIDTH;
+    if (s === 'compact') return COMPACT_WIDTH;
+    if (s === 'wide') return WIDE_WIDTH;
+    return Math.max(WIDE_WIDTH, window.innerWidth - PEEK_WIDTH);
+  };
+
+  // Sync external size changes → animate the width
+  useEffect(() => {
+    if (dragging.current) return;
+    const target = getTargetWidth(size);
+    const controls = animate(widthMV, target, {
+      duration: reduceMotion ? 0 : 0.42,
+      ease: [0.32, 0.72, 0, 1],
+    });
+    return () => controls.stop();
+  }, [size, widthMV, reduceMotion]);
+
+  // Keep full-mode width correct on window resize
+  useEffect(() => {
+    if (size !== 'full') return;
+    const onResize = () => widthMV.set(Math.max(WIDE_WIDTH, window.innerWidth - PEEK_WIDTH));
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, [size, widthMV]);
+
+  const handleDrag = (_: PointerEvent | MouseEvent | TouchEvent, info: PanInfo) => {
+    dragging.current = true;
+    const maxW = typeof window !== 'undefined' ? window.innerWidth - PEEK_WIDTH : 1400;
+    const next = Math.min(maxW, Math.max(MIN_WIDTH, widthMV.get() + info.delta.x));
+    widthMV.set(next);
+  };
+
+  const handleDragEnd = () => {
+    dragging.current = false;
+    const w = widthMV.get();
+    const maxW = typeof window !== 'undefined' ? window.innerWidth - PEEK_WIDTH : 1400;
+    const midCompactWide = (COMPACT_WIDTH + WIDE_WIDTH) / 2;
+    const midWideFull = (WIDE_WIDTH + maxW) / 2;
+
+    const nextSize: SidebarSize =
+      w < midCompactWide ? 'compact' : w < midWideFull ? 'wide' : 'full';
+
+    onSizeChange?.(nextSize);
+    // Re-snap exactly to the target (onSizeChange effect handles animation when state updates)
+    // But if the size is unchanged the effect won't fire — snap manually
+    const target = getTargetWidth(nextSize);
+    if (Math.abs(w - target) > 0.5) {
+      animate(widthMV, target, {
+        duration: reduceMotion ? 0 : 0.35,
+        ease: [0.32, 0.72, 0, 1],
+      });
+    }
+  };
+
+  const cycleSize = () => {
+    const order: SidebarSize[] = ['compact', 'wide', 'full'];
+    const idx = order.indexOf(size);
+    const next = order[(idx + 1) % order.length];
+    onSizeChange?.(next);
+  };
+
+  const collapse = () => {
+    if (size === 'compact') return;
+    onSizeChange?.(size === 'full' ? 'wide' : 'compact');
+  };
+
+  const showFilterPanel = size !== 'compact' && !isArtistTab && filters && onFiltersChange;
 
   return (
-    <aside className={`h-full flex flex-col overflow-hidden transition-all duration-500 ${
-      isArtistTab ? 'w-[500px]' : 'w-[380px]'
-    } ${
-      eveningMode
-        ? 'bg-slate-900/65 backdrop-blur-xl border-r border-slate-700/30'
-        : 'bg-white/65 backdrop-blur-xl border-r border-slate-200/50'
-    }`}>
-      {/* Header with tabs */}
-      <div className={`px-4 pt-3 pb-2 border-b ${eveningMode ? 'border-gray-800/50' : 'border-slate-100'}`}>
+    <motion.aside
+      style={{ width: widthMV }}
+      className={`h-full flex overflow-hidden relative shadow-[8px_0_32px_-12px_rgba(15,23,42,0.18)] ${
+        eveningMode
+          ? 'bg-slate-900/80 backdrop-blur-xl border-r border-slate-700/40'
+          : 'bg-white/85 backdrop-blur-xl border-r border-slate-200/60'
+      }`}
+    >
+      {/* Left: FilterPanel (only in wide/full) */}
+      <AnimatePresence initial={false}>
+        {showFilterPanel && (
+          <motion.div
+            key="filter-panel"
+            initial={reduceMotion ? undefined : { width: 0, opacity: 0 }}
+            animate={{ width: size === 'full' ? 320 : 260, opacity: 1 }}
+            exit={reduceMotion ? undefined : { width: 0, opacity: 0 }}
+            transition={{ duration: reduceMotion ? 0 : 0.32, ease: [0.32, 0.72, 0, 1] }}
+            className="shrink-0 overflow-hidden"
+          >
+            <div style={{ width: size === 'full' ? 320 : 260 }} className="h-full">
+              <FilterPanel
+                filters={filters!}
+                onFiltersChange={onFiltersChange!}
+                bundeslandId={bundeslandId ?? 'all'}
+                events={allEventsForFilters ?? events}
+                eveningMode={eveningMode}
+              />
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Right: list column */}
+      <div className="flex-1 min-w-0 flex flex-col">
+        <SidebarHeader
+          events={events}
+          eveningMode={eveningMode}
+          activeTab={activeTab}
+          onTabChange={onTabChange}
+          showArtistTab={showArtistTab}
+          artistEventCount={artistEventCount}
+          sortMode={sortMode}
+          onSortChange={onSortChange}
+          hasLocation={hasLocation}
+          size={size}
+          onCycleSize={cycleSize}
+          onCollapse={collapse}
+        />
+        <div className="flex-1 overflow-y-auto custom-scrollbar">
+          <SidebarBody
+            events={events}
+            loading={loading}
+            onSelectEvent={onSelectEvent}
+            selectedEventId={selectedEventId}
+            onHoverEvent={onHoverEvent}
+            eveningMode={eveningMode}
+            isArtistTab={isArtistTab}
+            onSelectArtistEvent={onSelectArtistEvent}
+          />
+        </div>
+      </div>
+
+      {/* Drag handle on right edge */}
+      <motion.div
+        role="separator"
+        aria-orientation="vertical"
+        aria-label="Seitenleiste vergrößern"
+        tabIndex={0}
+        onKeyDown={(e) => {
+          if (e.key === 'ArrowRight') { e.preventDefault(); cycleSize(); }
+          else if (e.key === 'ArrowLeft') { e.preventDefault(); collapse(); }
+        }}
+        onPan={handleDrag}
+        onPanEnd={handleDragEnd}
+        className={`absolute top-0 right-0 bottom-0 w-1.5 cursor-ew-resize group touch-none select-none focus-visible:outline-none`}
+      >
+        <div className={`absolute inset-y-0 right-0 w-px transition-colors ${
+          eveningMode
+            ? 'bg-gray-700/50 group-hover:bg-amber-400/70 group-focus-visible:bg-amber-400/70'
+            : 'bg-slate-200/70 group-hover:bg-blue-500/70 group-focus-visible:bg-blue-500/70'
+        }`} />
+        <div className={`absolute top-1/2 right-0 -translate-y-1/2 h-10 w-1 rounded-l opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100 transition-opacity ${
+          eveningMode ? 'bg-amber-400/80' : 'bg-blue-500/80'
+        }`} />
+      </motion.div>
+    </motion.aside>
+  );
+}
+
+/* ─── Header (tabs + sort + size controls) ─────────────────────── */
+
+function SidebarHeader({
+  events,
+  eveningMode,
+  activeTab = 'events',
+  onTabChange,
+  showArtistTab = false,
+  artistEventCount = 0,
+  sortMode,
+  onSortChange,
+  hasLocation,
+  size,
+  onCycleSize,
+  onCollapse,
+}: {
+  events: Event[];
+  eveningMode?: boolean;
+  activeTab?: SidebarTab;
+  onTabChange?: (t: SidebarTab) => void;
+  showArtistTab?: boolean;
+  artistEventCount?: number;
+  sortMode: SortMode;
+  onSortChange: (m: SortMode) => void;
+  hasLocation: boolean;
+  size?: SidebarSize;
+  onCycleSize?: () => void;
+  onCollapse?: () => void;
+}) {
+  const isArtistTab = activeTab === 'artists' && showArtistTab;
+  return (
+    <div className={`border-b shrink-0 ${eveningMode ? 'border-gray-800/60' : 'border-slate-100'}`}>
+      <div className="px-4 pt-3 pb-2">
         {showArtistTab ? (
           <div className="flex items-center gap-1">
             <TabButton
@@ -66,60 +348,151 @@ export function Sidebar({
               Kuenstler-Events
             </TabButton>
             <div className="flex-1" />
-            <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded-md ${
-              eveningMode ? 'bg-amber-400/15 text-amber-400/80' : 'bg-slate-200/80 text-slate-600'
-            }`}>
+            <HeaderBadge eveningMode={eveningMode}>
               {activeTab === 'events'
                 ? `${events.length.toLocaleString('de-AT')} Ergebnisse`
-                : `${artistEventCount} Events`
-              }
-            </span>
+                : `${artistEventCount} Events`}
+            </HeaderBadge>
+            {onCycleSize && <SizeControls size={size} onCycle={onCycleSize} onCollapse={onCollapse} eveningMode={eveningMode} />}
           </div>
         ) : (
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2 min-w-0">
               <span className={`text-xs font-semibold tracking-wider uppercase ${
                 eveningMode ? 'text-gray-400' : 'text-slate-500'
               }`}>Veranstaltungen</span>
             </div>
-            <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded-md ${
-              eveningMode ? 'bg-amber-400/15 text-amber-400/80' : 'bg-slate-200/80 text-slate-600'
-            }`}>
-              {events.length.toLocaleString('de-AT')} Ergebnisse
-            </span>
+            <div className="flex items-center gap-2">
+              <HeaderBadge eveningMode={eveningMode}>
+                {events.length.toLocaleString('de-AT')} Ergebnisse
+              </HeaderBadge>
+              {onCycleSize && <SizeControls size={size} onCycle={onCycleSize} onCollapse={onCollapse} eveningMode={eveningMode} />}
+            </div>
           </div>
         )}
       </div>
+      {!isArtistTab && (
+        <div className="px-4 pb-2.5">
+          <SortBar
+            value={sortMode}
+            onChange={onSortChange}
+            hasLocation={hasLocation}
+            eveningMode={eveningMode}
+          />
+        </div>
+      )}
+    </div>
+  );
+}
 
-      {/* Content */}
-      <div className="flex-1 overflow-y-auto custom-scrollbar">
-        {isArtistTab ? (
-          <ArtistEventsSection
-            onSelectEvent={(event) => {
-              // Convert ArtistEvent to Event-compatible object for map fly-to
-              if (onSelectArtistEvent) {
-                onSelectArtistEvent(event);
-              }
-            }}
-            selectedEventId={selectedEventId}
-            onHoverEvent={onHoverEvent}
-            eveningMode={eveningMode}
-          />
-        ) : loading ? (
-          <SkeletonList count={6} eveningMode={eveningMode} />
-        ) : events.length === 0 ? (
-          <EmptyState eveningMode={eveningMode} />
+function HeaderBadge({ children, eveningMode }: { children: React.ReactNode; eveningMode?: boolean }) {
+  return (
+    <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded-md whitespace-nowrap ${
+      eveningMode ? 'bg-amber-400/15 text-amber-400/80' : 'bg-slate-200/80 text-slate-600'
+    }`}>
+      {children}
+    </span>
+  );
+}
+
+function SizeControls({
+  size,
+  onCycle,
+  onCollapse,
+  eveningMode,
+}: {
+  size?: SidebarSize;
+  onCycle: () => void;
+  onCollapse?: () => void;
+  eveningMode?: boolean;
+}) {
+  const canCollapse = size !== 'compact';
+  return (
+    <div className={`flex items-center gap-0.5 rounded-md p-0.5 ${
+      eveningMode ? 'bg-gray-800/50' : 'bg-slate-100'
+    }`}>
+      <button
+        onClick={onCollapse}
+        disabled={!canCollapse}
+        title="Verkleinern"
+        aria-label="Seitenleiste verkleinern"
+        className={`p-1 rounded transition-colors ${
+          canCollapse
+            ? eveningMode
+              ? 'text-gray-400 hover:text-white hover:bg-gray-700 cursor-pointer'
+              : 'text-slate-500 hover:text-slate-900 hover:bg-white cursor-pointer'
+            : 'opacity-30 cursor-not-allowed'
+        }`}
+      >
+        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
+        </svg>
+      </button>
+      <button
+        onClick={onCycle}
+        title={size === 'full' ? 'Zurück zu kompakt' : 'Erweitern'}
+        aria-label={size === 'full' ? 'Seitenleiste zurücksetzen' : 'Seitenleiste erweitern'}
+        className={`p-1 rounded transition-colors ${
+          eveningMode
+            ? 'text-gray-400 hover:text-white hover:bg-gray-700 cursor-pointer'
+            : 'text-slate-500 hover:text-slate-900 hover:bg-white cursor-pointer'
+        }`}
+      >
+        {size === 'full' ? (
+          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 20l-5-5 5-5m5 10l5-5-5-5" />
+          </svg>
         ) : (
-          <EventList
-            events={events}
-            onSelectEvent={onSelectEvent}
-            selectedEventId={selectedEventId}
-            onHoverEvent={onHoverEvent}
-            eveningMode={eveningMode}
-          />
+          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 5l7 7-7 7M5 5l7 7-7 7" />
+          </svg>
         )}
-      </div>
-    </aside>
+      </button>
+    </div>
+  );
+}
+
+/* ─── Body (list / artist / loading / empty) ───────────────────── */
+
+function SidebarBody({
+  events,
+  loading,
+  onSelectEvent,
+  selectedEventId,
+  onHoverEvent,
+  eveningMode,
+  isArtistTab,
+  onSelectArtistEvent,
+}: {
+  events: Event[];
+  loading: boolean;
+  onSelectEvent: (e: Event) => void;
+  selectedEventId: string | null;
+  onHoverEvent: (id: string | null) => void;
+  eveningMode?: boolean;
+  isArtistTab: boolean;
+  onSelectArtistEvent?: (e: ArtistEvent) => void;
+}) {
+  if (isArtistTab) {
+    return (
+      <ArtistEventsSection
+        onSelectEvent={(event) => onSelectArtistEvent?.(event)}
+        selectedEventId={selectedEventId}
+        onHoverEvent={onHoverEvent}
+        eveningMode={eveningMode}
+      />
+    );
+  }
+  if (loading) return <SkeletonList count={6} eveningMode={eveningMode} />;
+  if (events.length === 0) return <EmptyState eveningMode={eveningMode} />;
+  return (
+    <EventList
+      events={events}
+      onSelectEvent={onSelectEvent}
+      selectedEventId={selectedEventId}
+      onHoverEvent={onHoverEvent}
+      eveningMode={eveningMode}
+    />
   );
 }
 
