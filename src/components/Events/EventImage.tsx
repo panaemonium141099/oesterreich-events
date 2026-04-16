@@ -16,6 +16,9 @@ interface EventImageProps {
   category?: string | null;
   /** Event title — used as seed for deterministic fallback variant. */
   title?: string | null;
+  /** Event bundesland — picks region-specific fallback pool (Burgenland ->
+   *  pannonian, Wien -> urban, else alpine). */
+  bundesland?: string | null;
   alt?: string;
   className?: string;
   wrapperClassName?: string;
@@ -43,6 +46,7 @@ export function EventImage({
   src,
   category,
   title,
+  bundesland,
   alt = '',
   className = '',
   wrapperClassName = '',
@@ -54,8 +58,8 @@ export function EventImage({
   objectFit = 'cover',
 }: EventImageProps) {
   const computePrimary = useCallback(
-    () => resolvePrimaryEventImage({ imageUrl: src, category, title }),
-    [src, category, title],
+    () => resolvePrimaryEventImage({ imageUrl: src, category, title, bundesland }),
+    [src, category, title, bundesland],
   );
 
   const [currentSrc, setCurrentSrc] = useState(computePrimary);
@@ -89,7 +93,7 @@ export function EventImage({
   const handleError = useCallback(() => {
     switch (stage) {
       case 'primary': {
-        const fallback = resolveCategoryFallbackImage(category, title ?? undefined);
+        const fallback = resolveCategoryFallbackImage(category, title ?? undefined, bundesland);
         setCurrentSrc(fallback);
         setStage('category');
         break;
@@ -106,7 +110,7 @@ export function EventImage({
       default:
         break;
     }
-  }, [stage, category, title]);
+  }, [stage, category, title, bundesland]);
 
   if (stage === 'placeholder') {
     return (

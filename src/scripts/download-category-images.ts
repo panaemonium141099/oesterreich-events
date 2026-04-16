@@ -100,16 +100,25 @@ const QUERIES: Record<string, string[]> = {
     'fruit vegetable stall',
     'craft market outdoor',
   ],
+  // One "Sport" event can be a marathon, a hike, a football match, yoga —
+  // keep the pool wide so a hike event doesn't pull a running-race photo.
+  // Round-robin ensures each sub-sport gets ~equal representation.
   sport: [
-    'running race outdoors',
-    'mountain cycling',
-    'hiking trail alps',
-    'football match stadium',
-    'ski slope winter',
-    'tennis match court',
-    'yoga outdoors sunrise',
-    'swimming pool lanes',
-    'climbing rock wall',
+    'hiking trail mountains',
+    'wanderung alpen',
+    'trail running forest',
+    'mountain biking austria',
+    'road cycling tour',
+    'football amateur match',
+    'ski touring powder',
+    'cross country skiing',
+    'tennis club match',
+    'yoga class studio',
+    'climbing indoor wall',
+    'volleyball beach',
+    'swimming lake',
+    'marathon runners city',
+    'gym workout',
   ],
   familie: [
     'family picnic park',
@@ -130,17 +139,39 @@ const QUERIES: Record<string, string[]> = {
     'waterfall rock forest',
     'winter snow mountain',
   ],
-  // Shared by Feste & Brauchtum, Bildung, Gesundheit, Religion, Sonstiges
-  // — stays intentionally broad / atmospheric.
+  // Austrian / Alpine village + tradition. Used by Feste & Brauchtum.
+  // Queries are intentionally German / place-specific — generic "folk costume
+  // parade" returned Vietnamese / Turkish / Bulgarian results before.
+  fest: [
+    'oktoberfest tent',
+    'bavarian beer garden people',
+    'tracht dirndl lederhosen',
+    'alpine village festival',
+    'maypole bavaria',
+    'christkindlmarkt vienna',
+    'wiesn munich crowd',
+    'alpine brass band',
+    'tyrolean parade',
+    'almabtrieb cows',
+    'austrian wedding country',
+    'folk music bavaria',
+  ],
+  // Shared by Bildung, Gesundheit, Religion, Sonstiges.
+  // Neutral alpine / Austrian landscape + architecture so a lecture event or
+  // a yoga retreat still shows an Austria-feeling photo.
   default: [
-    'community festival village',
-    'austrian tradition celebration',
-    'folk costume parade',
-    'candles church interior',
-    'lecture auditorium people',
-    'meditation yoga calm',
-    'volunteers gathering',
-    'local event town square',
+    'hallstatt austria',
+    'salzburg old town',
+    'vienna coffeehouse interior',
+    'austrian alps village',
+    'tyrolean village mountains',
+    'wachau danube vineyards',
+    'alpine mountain hut',
+    'austrian church alps',
+    'alpine pasture summer',
+    'innsbruck old town',
+    'vienna street evening',
+    'alpine meadow wildflowers',
   ],
   wirtschaft: [
     'business conference room',
@@ -150,6 +181,69 @@ const QUERIES: Record<string, string[]> = {
     'professional summit stage',
     'startup team whiteboard',
     'trade fair booth',
+  ],
+
+  // ─── Regional pools ───────────────────────────────────────────
+  // Burgenland + NÖ: pannonian plain, Neusiedler See, wine country
+  'fest-bgld': [
+    'austrian wine festival',
+    'heuriger music wine',
+    'burgenland vineyard festival',
+    'wine harvest celebration',
+    'outdoor wine garden people',
+    'folk music austria wine',
+    'village wine fest',
+  ],
+  'default-bgld': [
+    'neusiedler see lake',
+    'burgenland vineyards',
+    'austrian wine village',
+    'pannonian plain sunset',
+    'rust austria town',
+    'eisenstadt palace',
+    'rolling hills vineyards austria',
+    'lake neusiedl boats',
+  ],
+  'natur-bgld': [
+    'neusiedler see reeds',
+    'lavender field sunset',
+    'sunflower field austria',
+    'lake sunset reeds',
+    'pannonian plain grass',
+    'vineyard rolling hills',
+    'austrian steppe flat',
+    'marshland birds europe',
+  ],
+
+  // Wien: urban, cafes, architecture, parks
+  'fest-wien': [
+    'christkindlmarkt vienna',
+    'vienna street festival',
+    'vienna opera ball',
+    'vienna new year fireworks',
+    'vienna food festival',
+    'vienna christmas market night',
+    'vienna concert urban',
+  ],
+  'default-wien': [
+    'vienna stephansdom',
+    'vienna coffeehouse interior',
+    'vienna tram street',
+    'vienna opera house',
+    'vienna hofburg palace',
+    'vienna old town evening',
+    'vienna ringstrasse',
+    'schönbrunn palace',
+  ],
+  'natur-wien': [
+    'vienna stadtpark',
+    'vienna prater park',
+    'wienerwald forest',
+    'danube vienna riverside',
+    'botanical garden vienna',
+    'schönbrunn gardens',
+    'vienna park autumn',
+    'urban garden green city',
   ],
 };
 
@@ -242,23 +336,31 @@ async function main() {
     const startIndex = (await highestExistingIndex(slug)) + 1;
     console.log(`   existing: ${startIndex - 1}, starting at index ${startIndex}`);
 
+    // Fetch first — round-robin picks one from each query per round so no
+    // single query dominates (the earlier greedy version filled 8 marathon
+    // photos from "running race outdoors" before moving to hike queries).
+    const photosByQuery: Array<{ query: string; photos: PexelsPhoto[] }> = [];
+    const perQuery = Math.max(2, Math.ceil((TARGET_PER_SLUG - startIndex + 1) / queries.length) + 1);
+    for (const query of queries) {
+      try {
+        const photos = await searchPexels(query, Math.min(perQuery, 10));
+        photosByQuery.push({ query, photos });
+      } catch (err) {
+        console.warn(`   ✗ query "${query}": ${(err as Error).message}`);
+        photosByQuery.push({ query, photos: [] });
+      }
+    }
+
     let index = startIndex;
     const entries: ManifestEntry[] = manifest[slug] ?? [];
     const seenIds = new Set<number>();
+    const maxRounds = Math.max(...photosByQuery.map(q => q.photos.length));
 
-    for (const query of queries) {
-      if (index > TARGET_PER_SLUG) break;
-      let photos: PexelsPhoto[] = [];
-      try {
-        photos = await searchPexels(query, 8);
-      } catch (err) {
-        console.warn(`   ✗ query "${query}": ${(err as Error).message}`);
-        continue;
-      }
-
-      for (const photo of photos) {
-        if (index > TARGET_PER_SLUG) break;
-        if (seenIds.has(photo.id)) continue;
+    outer: for (let round = 0; round < maxRounds; round++) {
+      for (const { query, photos } of photosByQuery) {
+        if (index > TARGET_PER_SLUG) break outer;
+        const photo = photos[round];
+        if (!photo || seenIds.has(photo.id)) continue;
         seenIds.add(photo.id);
         const file = `${slug}-${index}.jpg`;
         const dest = path.join(OUTPUT_DIR, file);

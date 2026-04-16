@@ -30,12 +30,31 @@ export interface CategoryMeta {
   borderColor: string;
   /** RGB triplet string for glow effects (e.g. "168,85,247") */
   glowRgb: string;
-  /** Slug used in /images/categories/{slug}-{1..N}.jpg */
+  /** Default (alpine) slug used in /images/categories/{slug}-{1..N}.jpg */
   fallbackSlug: string;
-  /** Number of image variants available for this slug. Bump this after
-   *  dropping additional {slug}-{n}.jpg files into public/images/categories/
-   *  (e.g. via `npm run download-category-images`). */
+  /** Number of image variants available for the default slug. */
   imageCount: number;
+  /** Optional region-specific sub-pools. Burgenland is pannonian (flat, wine
+   *  country, Neusiedler See), Wien is urban — an alpine mountain-village
+   *  photo would look wrong. Resolver picks these over `fallbackSlug` when
+   *  the event's bundesland matches. */
+  regions?: {
+    bgld?: { slug: string; imageCount: number };
+    wien?: { slug: string; imageCount: number };
+  };
+}
+
+/** Map a bundesland string (id or label) to the regional pool key. Pannonian
+ *  covers Burgenland + NÖ; urban is Wien; else the alpine fallback is used. */
+export function bundeslandToRegionKey(
+  bundesland: string | null | undefined,
+): 'bgld' | 'wien' | null {
+  if (!bundesland) return null;
+  const b = bundesland.trim().toLowerCase();
+  if (b.includes('wien') || b === 'vienna') return 'wien';
+  if (b.includes('burgenland') || b === 'bgld') return 'bgld';
+  if (b.includes('niederösterreich') || b.includes('niederoesterreich') || b === 'nö' || b === 'noe') return 'bgld';
+  return null;
 }
 
 const META: Record<CanonicalCategory, CategoryMeta> = {
@@ -110,6 +129,10 @@ const META: Record<CanonicalCategory, CategoryMeta> = {
     glowRgb: '16,185,129',
     fallbackSlug: 'natur',
     imageCount: 30,
+    regions: {
+      bgld: { slug: 'natur-bgld', imageCount: 15 },
+      wien: { slug: 'natur-wien', imageCount: 15 },
+    },
   },
   'Feste & Brauchtum': {
     label: 'Feste & Brauchtum',
@@ -117,8 +140,12 @@ const META: Record<CanonicalCategory, CategoryMeta> = {
     badgeDark: 'bg-red-900/50 text-red-300',
     borderColor: '#ef4444',
     glowRgb: '239,68,68',
-    fallbackSlug: 'default',
+    fallbackSlug: 'fest',
     imageCount: 30,
+    regions: {
+      bgld: { slug: 'fest-bgld', imageCount: 15 },
+      wien: { slug: 'fest-wien', imageCount: 15 },
+    },
   },
   'Bildung': {
     label: 'Bildung',
@@ -128,6 +155,10 @@ const META: Record<CanonicalCategory, CategoryMeta> = {
     glowRgb: '99,102,241',
     fallbackSlug: 'default',
     imageCount: 30,
+    regions: {
+      bgld: { slug: 'default-bgld', imageCount: 15 },
+      wien: { slug: 'default-wien', imageCount: 15 },
+    },
   },
   'Gesundheit': {
     label: 'Gesundheit',
@@ -137,6 +168,10 @@ const META: Record<CanonicalCategory, CategoryMeta> = {
     glowRgb: '20,184,166',
     fallbackSlug: 'default',
     imageCount: 30,
+    regions: {
+      bgld: { slug: 'default-bgld', imageCount: 15 },
+      wien: { slug: 'default-wien', imageCount: 15 },
+    },
   },
   'Religion': {
     label: 'Religion',
@@ -146,6 +181,10 @@ const META: Record<CanonicalCategory, CategoryMeta> = {
     glowRgb: '234,179,8',
     fallbackSlug: 'default',
     imageCount: 30,
+    regions: {
+      bgld: { slug: 'default-bgld', imageCount: 15 },
+      wien: { slug: 'default-wien', imageCount: 15 },
+    },
   },
   'Wirtschaft': {
     label: 'Wirtschaft',
@@ -164,6 +203,10 @@ const META: Record<CanonicalCategory, CategoryMeta> = {
     glowRgb: '148,163,184',
     fallbackSlug: 'default',
     imageCount: 30,
+    regions: {
+      bgld: { slug: 'default-bgld', imageCount: 15 },
+      wien: { slug: 'default-wien', imageCount: 15 },
+    },
   },
 };
 

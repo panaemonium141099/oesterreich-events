@@ -1,4 +1,4 @@
-import { normalizeEventCategory, getCategoryMeta } from './categoryMeta';
+import { normalizeEventCategory, getCategoryMeta, bundeslandToRegionKey } from './categoryMeta';
 
 /** Simple deterministic hash for varied image selection. */
 function simpleHash(str: string): number {
@@ -26,19 +26,30 @@ export function isUsableImageCandidate(url: string | null | undefined): boolean 
 
 /**
  * Get a category-specific local fallback image.
- * Deterministically picks one of N variants per category using the seed —
- * the variant count lives on each category's meta so we can bump it to 20-50+
- * once additional images are dropped into public/images/categories/ (see
- * `npm run download-category-images`).
+ *
+ * If the event's bundesland maps to a regional pool (`bgld` for
+ * Burgenland/NÖ — pannonian landscapes, `wien` for Vienna — urban), the
+ * resolver uses that pool so a Burgenland event never shows an alpine
+ * mountain photo. Falls back to the alpine default when no region matches
+ * or no regional pool is configured for the category.
  */
 export function resolveCategoryFallbackImage(
   category: string | null | undefined,
   seed?: string,
+  bundesland?: string | null,
 ): string {
   const meta = getCategoryMeta(category);
-  const count = Math.max(1, meta.imageCount);
+  let slug = meta.fallbackSlug;
+  let count = Math.max(1, meta.imageCount);
+
+  const region = bundeslandToRegionKey(bundesland);
+  if (region && meta.regions?.[region]) {
+    slug = meta.regions[region]!.slug;
+    count = Math.max(1, meta.regions[region]!.imageCount);
+  }
+
   const variant = seed ? (simpleHash(seed) % count) + 1 : 1;
-  return `/images/categories/${meta.fallbackSlug}-${variant}.jpg`;
+  return `/images/categories/${slug}-${variant}.jpg`;
 }
 
 /**
@@ -53,15 +64,16 @@ export function resolveGenericFallbackImage(): string {
  *
  * Priority:
  * 1. event's own image_url (if it passes the usability check)
- * 2. category-specific fallback
+ * 2. category + region specific fallback (bundesland-aware)
  */
 export function resolvePrimaryEventImage(opts: {
   imageUrl?: string | null;
   category?: string | null;
   title?: string | null;
+  bundesland?: string | null;
 }): string {
   if (isUsableImageCandidate(opts.imageUrl)) {
     return opts.imageUrl!.trim();
   }
-  return resolveCategoryFallbackImage(opts.category, opts.title ?? undefined);
+  return resolveCategoryFallbackImage(opts.category, opts.title ?? undefined, opts.bundesland);
 }

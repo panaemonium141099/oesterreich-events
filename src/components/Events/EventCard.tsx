@@ -49,6 +49,7 @@ export function EventCard({ event, isSelected, onSelect, onHover, eveningMode, i
             src={event.image_url}
             category={event.category}
             title={event.title}
+            bundesland={event.bundesland}
             className="w-full h-full transition-transform duration-500 group-hover:scale-105 motion-reduce:group-hover:scale-100"
             wrapperClassName="w-full h-full"
             showSkeleton={true}
@@ -153,6 +154,7 @@ export function EventCard({ event, isSelected, onSelect, onHover, eveningMode, i
           src={event.image_url}
           category={event.category}
           title={event.title}
+          bundesland={event.bundesland}
           className="w-full h-full transition-all duration-200 group-hover:scale-110 motion-reduce:group-hover:scale-100"
           wrapperClassName="w-full h-full"
           showSkeleton={true}

@@ -266,7 +266,7 @@ function EventMap({ events, selectedEvent, hoveredEventId, onSelectEvent, evenin
       : '';
     return `<div style="width:240px;font-family:Inter,system-ui,sans-serif;background:${bg};border-radius:8px;">
       <div style="position:relative;">
-        <img src="${getEventImage(event.image_url, event.category, event.title)}" style="width:100%;height:120px;object-fit:cover;border-radius:8px 8px 0 0;display:block;" onerror="this.src='${getCategoryFallbackImage(event.category, event.title)}'" />
+        <img src="${getEventImage(event.image_url, event.category, event.title, event.bundesland)}" style="width:100%;height:120px;object-fit:cover;border-radius:8px 8px 0 0;display:block;" onerror="this.src='${getCategoryFallbackImage(event.category, event.title, event.bundesland)}'" />
         ${savedBadge}
       </div>
       <div style="padding:10px;">
@@ -521,8 +521,8 @@ function EventMap({ events, selectedEvent, hoveredEventId, onSelectEvent, evenin
         const isArtistMatch = artistIdsRef.current.has(id);
         const isSavedEvent = savedIdsRef.current.has(id);
         body.className = `mapbox-event-marker${isToday ? ' marker-today' : ''}${isArtistMatch ? ' marker-artist' : ''}${isSavedEvent ? ' marker-saved' : ''}`;
-        const imgUrl = getEventImage(event.image_url, event.category, event.title);
-        const fallbackUrl = getCategoryFallbackImage(event.category, event.title);
+        const imgUrl = getEventImage(event.image_url, event.category, event.title, event.bundesland);
+        const fallbackUrl = getCategoryFallbackImage(event.category, event.title, event.bundesland);
         const img = document.createElement('img');
         img.src = imgUrl;
         img.alt = '';
