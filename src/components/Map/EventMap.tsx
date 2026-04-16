@@ -482,6 +482,13 @@ function EventMap({ events, selectedEvent, hoveredEventId, onSelectEvent, evenin
         const coords = (feature.geometry as GeoJSON.Point).coordinates;
 
         const el = document.createElement('div');
+        // Hide the marker until Mapbox has positioned it. Otherwise a newly
+        // created <div> briefly renders at translate(0,0) = the top-left of
+        // the map container. Because artist markers use z-index: 5/20 they
+        // show THROUGH the sidebar as a "ghost bubble" during that one
+        // transient frame. We re-enable visibility via rAF after Mapbox has
+        // applied its transform.
+        el.style.visibility = 'hidden';
         const todayStr = new Date().toISOString().slice(0, 10);
         const eventDateStr = event.start_date?.slice(0, 10) || '';
         const isToday = eventDateStr === todayStr;
@@ -499,6 +506,10 @@ function EventMap({ events, selectedEvent, hoveredEventId, onSelectEvent, evenin
         const marker = new mapboxgl.Marker({ element: el })
           .setLngLat([coords[0], coords[1]])
           .addTo(m);
+        // Mapbox has now written the translate() transform. Reveal the marker
+        // on the next frame so we skip any in-between paint where transform
+        // might still be at the default (0,0).
+        requestAnimationFrame(() => { el.style.visibility = ''; });
 
         // Lazy popup — only create on hover for performance.
         // Artist markers are larger (56px + scale + pulse-ring) so the popup
