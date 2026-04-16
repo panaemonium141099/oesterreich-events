@@ -128,6 +128,12 @@ export default function FeedPage() {
   return (
     <div className="min-h-screen text-white pb-24 bg-surface">
 <main className="max-w-lg mx-auto px-0 py-6">
+        {/* Trending section — above the post field so users see nearby events first */}
+        <div className="mb-2">
+          <TrendingRow />
+        </div>
+        <div className="h-[6px] bg-white/[0.03] border-t border-white/[0.06]" />
+
         {/* Create Post section */}
         <CreatePost
           userId={user.id}
@@ -136,11 +142,6 @@ export default function FeedPage() {
           onPostCreated={() => fetchActivities()}
         />
         <div className="h-[6px] bg-white/[0.03] border-t border-white/[0.06]" />
-
-        {/* Trending section */}
-        <div className="mb-2">
-          <TrendingRow />
-        </div>
 
         {/* Feed items */}
         {loadingData ? (

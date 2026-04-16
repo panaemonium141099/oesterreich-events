@@ -7,6 +7,43 @@ import { StoriesViewer } from './StoriesViewer';
 import { EventImage } from '@/components/Events/EventImage';
 import { isUsableImageCandidate } from '@/lib/event-images';
 
+// Pool size for daily rotation — we randomize within the N nearest events,
+// so the user still sees local events but different ones each day.
+const POOL_SIZE = 50;
+const VISIBLE_COUNT = 15;
+
+/** Deterministic per-day seed: hash "YYYY-MM-DD" to a 32-bit uint. */
+function dailySeed(): number {
+  const d = new Date();
+  const key = `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`;
+  let h = 2166136261;
+  for (let i = 0; i < key.length; i++) {
+    h ^= key.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  return h >>> 0;
+}
+
+/** mulberry32: small, fast, seeded PRNG — deterministic for a given seed. */
+function mulberry32(seed: number): () => number {
+  return function () {
+    let t = (seed += 0x6d2b79f5);
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+/** Fisher-Yates shuffle driven by a seeded PRNG — stable within the day. */
+function seededShuffle<T>(arr: T[], rng: () => number): T[] {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(rng() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
 export function TrendingRow() {
   const [events, setEvents] = useState<TrendingEvent[]>([]);
   const [loading, setLoading] = useState(true);
@@ -90,7 +127,7 @@ export function TrendingRow() {
         deduped.push(e);
       }
 
-      let result: typeof deduped;
+      let pool: typeof deduped;
 
       if (hasRealLocation && userLat && userLng) {
         // Haversine distance sort — nearest first
@@ -108,16 +145,20 @@ export function TrendingRow() {
           const d = R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
           return { ...e, distance: d };
         });
-        // Nearest first; take top 15 (no shuffle — stable ordering by distance)
-        result = withDistance.sort(
+        // Take nearest POOL_SIZE as candidates for daily rotation
+        pool = withDistance.sort(
           (a: { distance: number }, b: { distance: number }) => a.distance - b.distance,
-        );
+        ).slice(0, POOL_SIZE);
       } else {
-        // No location — just keep start_date order
-        result = deduped;
+        // No location — rotate within the nearest-by-date-only pool
+        pool = deduped.slice(0, POOL_SIZE);
       }
 
-      setEvents(result.slice(0, 15) as TrendingEvent[]);
+      // Shuffle the pool with a daily seed → varies once per day, stable within the day
+      const rng = mulberry32(dailySeed());
+      const picked = seededShuffle(pool, rng).slice(0, VISIBLE_COUNT);
+
+      setEvents(picked as TrendingEvent[]);
       setLoading(false);
     };
 
