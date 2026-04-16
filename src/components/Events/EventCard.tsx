@@ -14,9 +14,10 @@ interface EventCardProps {
   onHover: (hovering: boolean) => void;
   eveningMode?: boolean;
   index?: number;
+  variant?: 'compact' | 'expanded';
 }
 
-export function EventCard({ event, isSelected, onSelect, onHover, eveningMode, index = 0 }: EventCardProps) {
+export function EventCard({ event, isSelected, onSelect, onHover, eveningMode, index = 0, variant = 'compact' }: EventCardProps) {
   const time = formatTime(event.start_date);
   const meta = getCategoryMeta(event.category);
   const categoryColor = eveningMode ? meta.badgeDark : meta.badgeLight;
@@ -24,6 +25,102 @@ export function EventCard({ event, isSelected, onSelect, onHover, eveningMode, i
   const borderColor = isSelected
     ? eveningMode ? 'rgb(99, 102, 241)' : 'rgb(37, 99, 235)'
     : meta.borderColor + (eveningMode ? '66' : '44');
+
+  if (variant === 'expanded') {
+    return (
+      <AnimatedCard
+        index={index}
+        onClick={onSelect}
+        onMouseEnter={() => onHover(true)}
+        onMouseLeave={() => onHover(false)}
+        className={`group flex flex-col overflow-hidden rounded-xl border cursor-pointer transition-all duration-200 ${
+          eveningMode
+            ? `bg-gray-800/60 border-gray-700/50 hover:border-gray-500/60 ${isSelected ? 'ring-2 ring-indigo-400/60 border-indigo-400/60' : ''}`
+            : `bg-white border-slate-200/70 hover:border-slate-300 hover:shadow-md ${isSelected ? 'ring-2 ring-blue-500/50 border-blue-300' : ''}`
+        }`}
+      >
+        {/* Image with category badge */}
+        <div className={`relative aspect-[16/10] overflow-hidden ${eveningMode ? 'bg-gray-700' : 'bg-slate-200'}`}>
+          <EventImage
+            src={event.image_url}
+            category={event.category}
+            title={event.title}
+            className="w-full h-full transition-transform duration-500 group-hover:scale-105 motion-reduce:group-hover:scale-100"
+            wrapperClassName="w-full h-full"
+            showSkeleton={true}
+            showGradientOverlay={false}
+            loading="lazy"
+          />
+          {event.category && (
+            <span
+              className={`absolute top-2 left-2 text-[10px] font-semibold px-2 py-1 rounded-md backdrop-blur-md ${categoryColor}`}
+            >
+              {meta.label}
+            </span>
+          )}
+          {event.price_text && (
+            <span className={`absolute top-2 right-2 text-[11px] font-semibold px-2 py-1 rounded-md backdrop-blur-md ${
+              eveningMode ? 'bg-indigo-500/80 text-white' : 'bg-white/90 text-blue-700 ring-1 ring-blue-200'
+            }`}>
+              {event.price_text}
+            </span>
+          )}
+        </div>
+
+        {/* Content */}
+        <div className="flex flex-col gap-2 p-3.5 flex-1">
+          <h3 className={`font-semibold text-[15px] leading-snug line-clamp-2 ${
+            eveningMode ? 'text-gray-100' : 'text-slate-900'
+          }`}>
+            {event.title}
+          </h3>
+
+          <div className={`flex items-center gap-1.5 text-xs ${eveningMode ? 'text-gray-400' : 'text-slate-500'}`}>
+            <svg className="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+            <span className="truncate">
+              {formatDate(event.start_date)}
+              {time && ` • ${time}`}
+            </span>
+          </div>
+
+          {event.location_name && (
+            <div className={`flex items-center gap-1.5 text-xs ${eveningMode ? 'text-gray-400' : 'text-slate-500'}`}>
+              <svg className="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+              <span className="truncate">{event.location_name}</span>
+            </div>
+          )}
+
+          {event.description && (
+            <p className={`text-xs line-clamp-3 leading-relaxed ${eveningMode ? 'text-gray-500' : 'text-slate-500'}`}>
+              {event.description}
+            </p>
+          )}
+
+          {event.tags && event.tags.length > 0 && (
+            <div className="flex items-center gap-1 mt-auto pt-1 flex-wrap">
+              {event.tags.slice(0, 5).map((tag) => (
+                <TagChip key={tag} tag={tag} eveningMode={eveningMode} size="sm" />
+              ))}
+              {event.tags.length > 5 && (
+                <TagOverflow count={event.tags.length - 5} eveningMode={eveningMode} size="sm" />
+              )}
+            </div>
+          )}
+        </div>
+
+        <div
+          className="h-0.5 w-full"
+          style={{ backgroundColor: borderColor }}
+          aria-hidden="true"
+        />
+      </AnimatedCard>
+    );
+  }
 
   return (
     <AnimatedCard

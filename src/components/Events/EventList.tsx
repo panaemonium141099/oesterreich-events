@@ -13,11 +13,12 @@ interface EventListProps {
   onHoverEvent: (id: string | null) => void;
   eveningMode?: boolean;
   loading?: boolean;
+  variant?: 'compact' | 'expanded';
 }
 
 const BATCH_SIZE = 50;
 
-export function EventList({ events, onSelectEvent, selectedEventId, onHoverEvent, eveningMode, loading }: EventListProps) {
+export function EventList({ events, onSelectEvent, selectedEventId, onHoverEvent, eveningMode, loading, variant = 'compact' }: EventListProps) {
   const [visibleCount, setVisibleCount] = useState(BATCH_SIZE);
   const loaderRef = useRef<HTMLDivElement>(null);
   const shouldReduceMotion = useReducedMotion();
@@ -67,17 +68,34 @@ export function EventList({ events, onSelectEvent, selectedEventId, onHoverEvent
             animate={{ opacity: 1 }}
             transition={{ duration: 0.25 }}
           >
-            {visibleEvents.map((event, index) => (
-              <EventCard
-                key={event.id}
-                event={event}
-                index={index}
-                isSelected={selectedEventId === event.id}
-                onSelect={() => onSelectEvent(event)}
-                onHover={(hovering) => onHoverEvent(hovering ? event.id : null)}
-                eveningMode={eveningMode}
-              />
-            ))}
+            {variant === 'expanded' ? (
+              <div className="grid gap-3 p-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+                {visibleEvents.map((event, index) => (
+                  <EventCard
+                    key={event.id}
+                    event={event}
+                    index={index}
+                    isSelected={selectedEventId === event.id}
+                    onSelect={() => onSelectEvent(event)}
+                    onHover={(hovering) => onHoverEvent(hovering ? event.id : null)}
+                    eveningMode={eveningMode}
+                    variant="expanded"
+                  />
+                ))}
+              </div>
+            ) : (
+              visibleEvents.map((event, index) => (
+                <EventCard
+                  key={event.id}
+                  event={event}
+                  index={index}
+                  isSelected={selectedEventId === event.id}
+                  onSelect={() => onSelectEvent(event)}
+                  onHover={(hovering) => onHoverEvent(hovering ? event.id : null)}
+                  eveningMode={eveningMode}
+                />
+              ))
+            )}
           </motion.div>
         )}
       </AnimatePresence>

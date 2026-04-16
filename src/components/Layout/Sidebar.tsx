@@ -16,14 +16,16 @@ import { SortBar, type SortMode } from './SortBar';
 import { FilterPanel } from './FilterPanel';
 import type { Event, EventFilters } from '@/types/events';
 import type { ArtistEvent } from '../Artists/ArtistEventCard';
+import type { Bundesland } from '@/lib/bundeslaender';
 
 export type SidebarTab = 'events' | 'artists';
 export type SidebarSize = 'compact' | 'wide' | 'full';
 
 const COMPACT_WIDTH = 380;
 const WIDE_WIDTH = 640;
-const PEEK_WIDTH = 48; // map strip on the right in full mode
 const MIN_WIDTH = 320;
+const FILTER_PANEL_WIDE = 260;
+const FILTER_PANEL_FULL = 360;
 
 interface SidebarProps {
   events: Event[];
@@ -48,7 +50,8 @@ interface SidebarProps {
   onSizeChange?: (s: SidebarSize) => void;
   filters?: EventFilters;
   onFiltersChange?: (f: EventFilters) => void;
-  bundeslandId?: string;
+  bundesland?: Bundesland;
+  onBundeslandChange?: (bl: Bundesland) => void;
   allEventsForFilters?: Event[]; // unfiltered set used for tag aggregation in FilterPanel
 }
 
@@ -130,7 +133,8 @@ function DesktopSidebar({
   onSizeChange,
   filters,
   onFiltersChange,
-  bundeslandId,
+  bundesland,
+  onBundeslandChange,
   allEventsForFilters,
 }: SidebarProps) {
   const reduceMotion = useReducedMotion();
@@ -142,7 +146,7 @@ function DesktopSidebar({
     if (typeof window === 'undefined') return s === 'compact' ? COMPACT_WIDTH : WIDE_WIDTH;
     if (s === 'compact') return COMPACT_WIDTH;
     if (s === 'wide') return WIDE_WIDTH;
-    return Math.max(WIDE_WIDTH, window.innerWidth - PEEK_WIDTH);
+    return window.innerWidth; // full-screen overlay, no peek
   };
 
   // Sync external size changes → animate the width
@@ -159,14 +163,14 @@ function DesktopSidebar({
   // Keep full-mode width correct on window resize
   useEffect(() => {
     if (size !== 'full') return;
-    const onResize = () => widthMV.set(Math.max(WIDE_WIDTH, window.innerWidth - PEEK_WIDTH));
+    const onResize = () => widthMV.set(window.innerWidth);
     window.addEventListener('resize', onResize);
     return () => window.removeEventListener('resize', onResize);
   }, [size, widthMV]);
 
   const handleDrag = (_: PointerEvent | MouseEvent | TouchEvent, info: PanInfo) => {
     dragging.current = true;
-    const maxW = typeof window !== 'undefined' ? window.innerWidth - PEEK_WIDTH : 1400;
+    const maxW = typeof window !== 'undefined' ? window.innerWidth : 1400;
     const next = Math.min(maxW, Math.max(MIN_WIDTH, widthMV.get() + info.delta.x));
     widthMV.set(next);
   };
@@ -174,7 +178,7 @@ function DesktopSidebar({
   const handleDragEnd = () => {
     dragging.current = false;
     const w = widthMV.get();
-    const maxW = typeof window !== 'undefined' ? window.innerWidth - PEEK_WIDTH : 1400;
+    const maxW = typeof window !== 'undefined' ? window.innerWidth : 1400;
     const midCompactWide = (COMPACT_WIDTH + WIDE_WIDTH) / 2;
     const midWideFull = (WIDE_WIDTH + maxW) / 2;
 
@@ -205,7 +209,10 @@ function DesktopSidebar({
     onSizeChange?.(size === 'full' ? 'wide' : 'compact');
   };
 
-  const showFilterPanel = size !== 'compact' && !isArtistTab && filters && onFiltersChange;
+  const showFilterPanel =
+    size !== 'compact' && !isArtistTab && filters && onFiltersChange && bundesland && onBundeslandChange;
+  const filterPanelWidth = size === 'full' ? FILTER_PANEL_FULL : FILTER_PANEL_WIDE;
+  const cardVariant: 'compact' | 'expanded' = size === 'full' ? 'expanded' : 'compact';
 
   return (
     <motion.aside
@@ -222,18 +229,20 @@ function DesktopSidebar({
           <motion.div
             key="filter-panel"
             initial={reduceMotion ? undefined : { width: 0, opacity: 0 }}
-            animate={{ width: size === 'full' ? 320 : 260, opacity: 1 }}
+            animate={{ width: filterPanelWidth, opacity: 1 }}
             exit={reduceMotion ? undefined : { width: 0, opacity: 0 }}
             transition={{ duration: reduceMotion ? 0 : 0.32, ease: [0.32, 0.72, 0, 1] }}
             className="shrink-0 overflow-hidden"
           >
-            <div style={{ width: size === 'full' ? 320 : 260 }} className="h-full">
+            <div style={{ width: filterPanelWidth }} className="h-full">
               <FilterPanel
                 filters={filters!}
                 onFiltersChange={onFiltersChange!}
-                bundeslandId={bundeslandId ?? 'all'}
+                bundesland={bundesland!}
+                onBundeslandChange={onBundeslandChange!}
                 events={allEventsForFilters ?? events}
                 eveningMode={eveningMode}
+                expanded={size === 'full'}
               />
             </div>
           </motion.div>
@@ -266,6 +275,7 @@ function DesktopSidebar({
             eveningMode={eveningMode}
             isArtistTab={isArtistTab}
             onSelectArtistEvent={onSelectArtistEvent}
+            cardVariant={cardVariant}
           />
         </div>
       </div>
@@ -463,6 +473,7 @@ function SidebarBody({
   eveningMode,
   isArtistTab,
   onSelectArtistEvent,
+  cardVariant = 'compact',
 }: {
   events: Event[];
   loading: boolean;
@@ -472,6 +483,7 @@ function SidebarBody({
   eveningMode?: boolean;
   isArtistTab: boolean;
   onSelectArtistEvent?: (e: ArtistEvent) => void;
+  cardVariant?: 'compact' | 'expanded';
 }) {
   if (isArtistTab) {
     return (
@@ -492,6 +504,7 @@ function SidebarBody({
       selectedEventId={selectedEventId}
       onHoverEvent={onHoverEvent}
       eveningMode={eveningMode}
+      variant={cardVariant}
     />
   );
 }

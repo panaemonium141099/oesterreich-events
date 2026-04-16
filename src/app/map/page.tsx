@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef, useMemo, Suspense } from 'react';
+import { motion } from 'framer-motion';
 import { useSearchParams, useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import type { Event, EventFilters } from '@/types/events';
@@ -107,6 +108,19 @@ function MapPageInner() {
   const [sidebarSize, setSidebarSize] = useState<SidebarSize>('compact');
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [sortMode, setSortMode] = useState<SortMode>('date-asc');
+
+  // Measure header height so the desktop sidebar knows where to sit in non-full mode
+  // and where to animate FROM when expanding to fullscreen overlay
+  const [headerHeight, setHeaderHeight] = useState(76);
+  useEffect(() => {
+    const header = document.querySelector('header');
+    if (!header) return;
+    const measure = () => setHeaderHeight(header.offsetHeight);
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(header);
+    return () => ro.disconnect();
+  }, []);
 
   // On mount: hydrate stored location; default to distance-sort when available
   useEffect(() => {
@@ -445,11 +459,20 @@ function MapPageInner() {
           suppressAutoFly={hasUrlContext}
         />
 
-        {/* Desktop sidebar — z-index must stay ABOVE any Mapbox marker
-            z-index (artist markers reach z:20 on hover). Otherwise stray
-            markers leak through the sidebar tabs area at the top-left. */}
+        {/* Desktop sidebar — in compact/wide mode sits below the header; in
+            full mode animates up to cover the entire viewport (header + map).
+            z-index also bumps above the header (z-50) during full mode. */}
         {sidebarOpen && (
-          <div className="absolute top-0 left-0 bottom-0 z-40 hidden lg:block">
+          <motion.div
+            key="desktop-sidebar-wrap"
+            initial={false}
+            animate={{
+              top: sidebarSize === 'full' ? 0 : headerHeight,
+            }}
+            transition={{ duration: 0.42, ease: [0.32, 0.72, 0, 1] }}
+            style={{ zIndex: sidebarSize === 'full' ? 60 : 40 }}
+            className="fixed left-0 bottom-0 hidden lg:block"
+          >
             <Sidebar
               variant="desktop"
               size={sidebarSize}
@@ -471,9 +494,10 @@ function MapPageInner() {
               hasLocation={userLocation !== null}
               filters={filters}
               onFiltersChange={setFilters}
-              bundeslandId={bundesland.id}
+              bundesland={bundesland}
+              onBundeslandChange={(bl) => { setBundesland(bl); setFilters(prev => prev.district ? { ...prev, district: undefined } : prev); setDynamicFlyTo(null); }}
             />
-          </div>
+          </motion.div>
         )}
 
         {/* Mobile bottom sheet sidebar */}

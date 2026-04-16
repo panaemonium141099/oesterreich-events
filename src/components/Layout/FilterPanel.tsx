@@ -6,22 +6,28 @@ import type { Event, EventFilters } from '@/types/events';
 import { CategoryFilter } from '../Filters/CategoryFilter';
 import { DistrictFilter } from '../Filters/DistrictFilter';
 import { DateRangeFilter } from '../Filters/DateRangeFilter';
+import { BUNDESLAENDER, type Bundesland } from '@/lib/bundeslaender';
 import { trackEvent } from '@/lib/analytics';
 
 interface FilterPanelProps {
   filters: EventFilters;
   onFiltersChange: (f: EventFilters) => void;
-  bundeslandId: string;
+  bundesland: Bundesland;
+  onBundeslandChange: (bl: Bundesland) => void;
   events: Event[];
   eveningMode?: boolean;
+  /** Render extras for the fullscreen overlay (wider columns, search input, etc.) */
+  expanded?: boolean;
 }
 
 export function FilterPanel({
   filters,
   onFiltersChange,
-  bundeslandId,
+  bundesland,
+  onBundeslandChange,
   events,
   eveningMode,
+  expanded = false,
 }: FilterPanelProps) {
   const reduceMotion = useReducedMotion();
   const enter = reduceMotion
@@ -137,6 +143,33 @@ export function FilterPanel({
           />
         </Section>
 
+        <Section title="Bundesland" eveningMode={eveningMode}>
+          <select
+            value={bundesland.id}
+            onChange={(e) => {
+              const next = BUNDESLAENDER.find(b => b.id === e.target.value);
+              if (next) {
+                trackEvent('filter_change', { filter_type: 'bundesland', value: next.name });
+                onBundeslandChange(next);
+              }
+            }}
+            style={eveningMode ? { colorScheme: 'dark' } : undefined}
+            className={`w-full text-sm border rounded-lg px-3 py-2 focus:outline-none focus:ring-1 appearance-none cursor-pointer transition-all duration-200 ${
+              eveningMode
+                ? bundesland.id !== 'all'
+                  ? 'border-amber-500/30 bg-amber-900/10 text-amber-200 focus:ring-amber-500/50'
+                  : 'border-gray-700 bg-gray-800/50 text-gray-300 focus:ring-gray-600'
+                : bundesland.id !== 'all'
+                  ? 'border-slate-800 bg-slate-800 text-white focus:ring-slate-600'
+                  : 'border-slate-200 bg-white text-slate-600 focus:ring-slate-400'
+            }`}
+          >
+            {BUNDESLAENDER.map(bl => (
+              <option key={bl.id} value={bl.id}>{bl.name}</option>
+            ))}
+          </select>
+        </Section>
+
         <Section title="Bezirk" eveningMode={eveningMode}>
           <DistrictFilter
             value={filters.district}
@@ -144,9 +177,14 @@ export function FilterPanel({
               if (district) trackEvent('filter_change', { filter_type: 'district', value: district });
               onFiltersChange({ ...filters, district });
             }}
-            bundeslandId={bundeslandId}
+            bundeslandId={bundesland.id}
             eveningMode={eveningMode}
           />
+          {bundesland.id === 'all' && (
+            <p className={`text-[10px] mt-1 ${eveningMode ? 'text-gray-500' : 'text-slate-400'}`}>
+              Bundesland wählen, um Bezirke zu filtern
+            </p>
+          )}
         </Section>
 
         <Section title="Datum" eveningMode={eveningMode}>
