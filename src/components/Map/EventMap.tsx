@@ -481,19 +481,21 @@ function EventMap({ events, selectedEvent, hoveredEventId, onSelectEvent, evenin
 
         const coords = (feature.geometry as GeoJSON.Point).coordinates;
 
+        // Two-element structure — CRITICAL:
+        //   el (root)  : gets Mapbox's inline style `transform: translate(x,y)
+        //                translate(-50%,-50%)`. No classes that define CSS
+        //                transforms, otherwise the hover rule `transform: scale`
+        //                would OVERRIDE the translate and the marker would
+        //                teleport to (0,0) = top-left of the map container.
+        //   body (child): holds all visual styling and the hover scale. Its
+        //                 transform is independent of the root's translate.
         const el = document.createElement('div');
-        // Hide the marker until Mapbox has positioned it. Otherwise a newly
-        // created <div> briefly renders at translate(0,0) = the top-left of
-        // the map container. Because artist markers use z-index: 5/20 they
-        // show THROUGH the sidebar as a "ghost bubble" during that one
-        // transient frame. We re-enable visibility via rAF after Mapbox has
-        // applied its transform.
-        el.style.visibility = 'hidden';
+        const body = document.createElement('div');
         const todayStr = new Date().toISOString().slice(0, 10);
         const eventDateStr = event.start_date?.slice(0, 10) || '';
         const isToday = eventDateStr === todayStr;
         const isArtistMatch = artistIdsRef.current.has(id);
-        el.className = `mapbox-event-marker${isToday ? ' marker-today' : ''}${isArtistMatch ? ' marker-artist' : ''}`;
+        body.className = `mapbox-event-marker${isToday ? ' marker-today' : ''}${isArtistMatch ? ' marker-artist' : ''}`;
         const imgUrl = getEventImage(event.image_url, event.category, event.title);
         const fallbackUrl = getCategoryFallbackImage(event.category, event.title);
         const img = document.createElement('img');
@@ -501,15 +503,12 @@ function EventMap({ events, selectedEvent, hoveredEventId, onSelectEvent, evenin
         img.alt = '';
         img.style.cssText = 'width:100%;height:100%;object-fit:cover;border-radius:50%;pointer-events:none;';
         img.onerror = () => { img.onerror = null; img.src = fallbackUrl; };
-        el.appendChild(img);
+        body.appendChild(img);
+        el.appendChild(body);
 
         const marker = new mapboxgl.Marker({ element: el })
           .setLngLat([coords[0], coords[1]])
           .addTo(m);
-        // Mapbox has now written the translate() transform. Reveal the marker
-        // on the next frame so we skip any in-between paint where transform
-        // might still be at the default (0,0).
-        requestAnimationFrame(() => { el.style.visibility = ''; });
 
         // Lazy popup — only create on hover for performance.
         // Artist markers are larger (56px + scale + pulse-ring) so the popup
@@ -650,11 +649,15 @@ function EventMap({ events, selectedEvent, hoveredEventId, onSelectEvent, evenin
     }, 800);
   }, [mapReady, flyToCoords]);
 
-  // Highlight hovered
+  // Highlight hovered — toggle on the .mapbox-event-marker child (body), not
+  // the Mapbox root. The root carries translate(); the body carries the hover
+  // class and the CSS scale rule.
   useEffect(() => {
     markersOnScreen.current.forEach((marker, id) => {
       const eventId = id.replace('marker-', '');
-      marker.getElement().classList.toggle('hovered', eventId === hoveredEventId);
+      const root = marker.getElement();
+      const body = root.querySelector<HTMLDivElement>(':scope > .mapbox-event-marker') ?? root;
+      body.classList.toggle('hovered', eventId === hoveredEventId);
     });
   }, [hoveredEventId]);
 
