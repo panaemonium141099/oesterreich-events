@@ -13,7 +13,6 @@ node / next.js
 - **Animations:** Framer Motion v12
 - **API:** Next.js API Routes (cursor-based pagination, bbox viewport filter)
 - **Datenbank (production):** Supabase PostgreSQL (30 tables)
-- **Datenbank (staging):** SQLite via better-sqlite3
 - **Auth:** Supabase Auth (Google OAuth + Email/Password)
 - **Notifications:** Resend (email), Twilio (SMS), Supabase Realtime (in-app)
 - **Artist Matching:** PostgreSQL pg_trgm word_similarity + GIN indexes
