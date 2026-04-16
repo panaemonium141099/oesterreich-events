@@ -534,6 +534,59 @@ button:active, a:active, [role="button"]:active {
 }
 
 /* ═══════════════════════════════════════════════
+   Saved Markers — subtle emerald ring + corner bookmark
+   User has this event in their saved list
+   ═══════════════════════════════════════════════ */
+.mapbox-event-marker.marker-saved {
+  border: 3px solid #10b981 !important;
+  box-shadow:
+    0 0 0 2px rgba(16, 185, 129, 0.35),
+    0 4px 12px rgba(16, 185, 129, 0.25),
+    0 8px 20px rgba(0, 0, 0, 0.12) !important;
+  overflow: visible !important;
+}
+.mapbox-event-marker.marker-saved::before {
+  /* Solid emerald circle behind the bookmark glyph (white on green pin) */
+  content: '';
+  position: absolute;
+  top: -7px;
+  right: -7px;
+  width: 18px;
+  height: 18px;
+  background: #10b981;
+  border: 2px solid #ffffff;
+  border-radius: 50%;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  z-index: 3;
+  pointer-events: none;
+}
+.mapbox-event-marker.marker-saved::after {
+  /* White bookmark glyph on top, rendered via mask-image for DPI-crisp rendering */
+  content: '';
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  width: 14px;
+  height: 14px;
+  background: #ffffff;
+  -webkit-mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='white'><path d='M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z'/></svg>") center/10px 10px no-repeat;
+  mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='white'><path d='M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z'/></svg>") center/10px 10px no-repeat;
+  z-index: 4;
+  pointer-events: none;
+}
+.evening-mode .mapbox-event-marker.marker-saved {
+  border-color: #34d399 !important;
+  box-shadow:
+    0 0 0 2px rgba(52, 211, 153, 0.35),
+    0 4px 12px rgba(52, 211, 153, 0.3),
+    0 8px 20px rgba(0, 0, 0, 0.4) !important;
+}
+.evening-mode .mapbox-event-marker.marker-saved::before,
+.evening-mode .mapbox-event-marker.marker-saved::after {
+  border-color: #0b1220;
+}
+
+/* ═══════════════════════════════════════════════
    Artist Match Markers — gold highlight, always visible
    ═══════════════════════════════════════════════ */
 .marker-artist {

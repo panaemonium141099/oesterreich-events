@@ -20,6 +20,7 @@ import { trackEvent } from '@/lib/analytics';
 import { useAuth } from '@/lib/supabase/auth-context';
 import { createClient } from '@/lib/supabase/client';
 import { distanceKm, getStoredLocation, storeLocation } from '@/lib/geolocation';
+import { SavedEventsProvider, useSavedEvents } from '@/lib/saved-events-context';
 import Link from 'next/link';
 
 const EventMap = dynamic(() => import('@/components/Map/EventMap'), {
@@ -41,7 +42,9 @@ export default function MapPage() {
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600" />
       </div>
     }>
-      <MapPageInner />
+      <SavedEventsProvider>
+        <MapPageInner />
+      </SavedEventsProvider>
     </Suspense>
   );
 }
@@ -49,6 +52,7 @@ export default function MapPage() {
 function MapPageInner() {
   const router = useRouter();
   const { user, profile, loading: authLoading, profileComplete } = useAuth();
+  const { savedIds, refresh: refreshSaved } = useSavedEvents();
 
   // Redirect to complete-profile if logged in but profile incomplete
   useEffect(() => {
@@ -672,7 +676,12 @@ function MapPageInner() {
         {selectedEvent && (
           <EventDetail
             event={selectedEvent}
-            onClose={() => setSelectedEvent(null)}
+            onClose={() => {
+              setSelectedEvent(null);
+              // EventDetail writes directly to saved_events; re-fetch so the
+              // sidebar + map markers pick up the new state.
+              refreshSaved();
+            }}
             eveningMode={eveningMode}
             onTagClick={(tag) => {
               setFilters(prev => ({ ...prev, tags: [tag], category: undefined }));

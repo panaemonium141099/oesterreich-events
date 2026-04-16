@@ -1,7 +1,5 @@
 import { normalizeEventCategory, getCategoryMeta } from './categoryMeta';
 
-const IMAGES_PER_CATEGORY = 5;
-
 /** Simple deterministic hash for varied image selection. */
 function simpleHash(str: string): number {
   let h = 0;
@@ -28,14 +26,18 @@ export function isUsableImageCandidate(url: string | null | undefined): boolean 
 
 /**
  * Get a category-specific local fallback image.
- * Deterministically picks one of 5 variants per category using the seed.
+ * Deterministically picks one of N variants per category using the seed —
+ * the variant count lives on each category's meta so we can bump it to 20-50+
+ * once additional images are dropped into public/images/categories/ (see
+ * `npm run download-category-images`).
  */
 export function resolveCategoryFallbackImage(
   category: string | null | undefined,
   seed?: string,
 ): string {
   const meta = getCategoryMeta(category);
-  const variant = seed ? (simpleHash(seed) % IMAGES_PER_CATEGORY) + 1 : 1;
+  const count = Math.max(1, meta.imageCount);
+  const variant = seed ? (simpleHash(seed) % count) + 1 : 1;
   return `/images/categories/${meta.fallbackSlug}-${variant}.jpg`;
 }
 

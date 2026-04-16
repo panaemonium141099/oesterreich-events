@@ -9,6 +9,7 @@ import { getEventImage, getCategoryFallbackImage } from '@/lib/categoryImages';
 import { formatDateNumeric, formatDateCompact, formatTime } from '@/lib/utils/date';
 import { createClient } from '@/lib/supabase/client';
 import { useAuth } from '@/lib/supabase/auth-context';
+import { useSavedEvents } from '@/lib/saved-events-context';
 
 interface PlannedEventMarker {
   id: string;
@@ -144,6 +145,22 @@ function EventMap({ events, selectedEvent, hoveredEventId, onSelectEvent, evenin
   const [mapReady, setMapReady] = useState(false);
   const prevBundeslandRef = useRef(bundesland.id);
 
+  // Saved-event state — kept in a ref so save/unsave doesn't force markers to
+  // rebuild. A dedicated effect toggles the `.marker-saved` class on existing
+  // marker DOM nodes whenever the set changes.
+  const { savedIds } = useSavedEvents();
+  const savedIdsRef = useRef<Set<string>>(savedIds);
+  useEffect(() => {
+    savedIdsRef.current = savedIds;
+    // Sync existing markers
+    markersOnScreen.current.forEach((marker, markerId) => {
+      const eventId = markerId.startsWith('marker-') ? markerId.slice(7) : markerId;
+      const body = marker.getElement()?.firstElementChild as HTMLElement | null;
+      if (!body) return;
+      body.classList.toggle('marker-saved', savedIds.has(eventId));
+    });
+  }, [savedIds]);
+
   // Keep artist IDs ref in sync
   useEffect(() => {
     artistIdsRef.current = artistEventIds ?? new Set();
@@ -243,8 +260,15 @@ function EventMap({ events, selectedEvent, hoveredEventId, onSelectEvent, evenin
     const textColor = dark ? '#f1f5f9' : '#1e293b';
     const subTextColor = dark ? '#94a3b8' : '#64748b';
     const btnBg = dark ? '#4f46e5' : '#2563eb';
+    const saved = savedIdsRef.current.has(event.id);
+    const savedBadge = saved
+      ? `<div style="position:absolute;top:8px;right:8px;display:inline-flex;align-items:center;gap:4px;padding:3px 7px 3px 5px;background:#10b981;color:#fff;border-radius:6px;font-size:10px;font-weight:600;box-shadow:0 1px 3px rgba(0,0,0,0.3);letter-spacing:0.02em;"><svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"/></svg>Gespeichert</div>`
+      : '';
     return `<div style="width:240px;font-family:Inter,system-ui,sans-serif;background:${bg};border-radius:8px;">
-      <img src="${getEventImage(event.image_url, event.category, event.title)}" style="width:100%;height:120px;object-fit:cover;border-radius:8px 8px 0 0;" onerror="this.src='${getCategoryFallbackImage(event.category, event.title)}'" />
+      <div style="position:relative;">
+        <img src="${getEventImage(event.image_url, event.category, event.title)}" style="width:100%;height:120px;object-fit:cover;border-radius:8px 8px 0 0;display:block;" onerror="this.src='${getCategoryFallbackImage(event.category, event.title)}'" />
+        ${savedBadge}
+      </div>
       <div style="padding:10px;">
         <div style="font-weight:600;font-size:13px;color:${textColor};margin-bottom:4px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">${escapeHtml(event.title)}</div>
         <div style="font-size:11px;color:${subTextColor};margin-bottom:2px;">${date}${showTime ? ` um ${time}` : ''}</div>
@@ -495,7 +519,8 @@ function EventMap({ events, selectedEvent, hoveredEventId, onSelectEvent, evenin
         const eventDateStr = event.start_date?.slice(0, 10) || '';
         const isToday = eventDateStr === todayStr;
         const isArtistMatch = artistIdsRef.current.has(id);
-        body.className = `mapbox-event-marker${isToday ? ' marker-today' : ''}${isArtistMatch ? ' marker-artist' : ''}`;
+        const isSavedEvent = savedIdsRef.current.has(id);
+        body.className = `mapbox-event-marker${isToday ? ' marker-today' : ''}${isArtistMatch ? ' marker-artist' : ''}${isSavedEvent ? ' marker-saved' : ''}`;
         const imgUrl = getEventImage(event.image_url, event.category, event.title);
         const fallbackUrl = getCategoryFallbackImage(event.category, event.title);
         const img = document.createElement('img');

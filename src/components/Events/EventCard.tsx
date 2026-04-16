@@ -6,6 +6,7 @@ import { formatDate, formatTime } from '@/lib/utils/date';
 import { TagChip, TagOverflow } from '@/components/UI/TagChip';
 import { AnimatedCard } from '@/components/UI/AnimatedCard';
 import { EventImage } from './EventImage';
+import { useSavedEvents } from '@/lib/saved-events-context';
 
 interface EventCardProps {
   event: Event;
@@ -21,6 +22,8 @@ export function EventCard({ event, isSelected, onSelect, onHover, eveningMode, i
   const time = formatTime(event.start_date);
   const meta = getCategoryMeta(event.category);
   const categoryColor = eveningMode ? meta.badgeDark : meta.badgeLight;
+  const { isSaved } = useSavedEvents();
+  const saved = isSaved(event.id);
 
   const borderColor = isSelected
     ? eveningMode ? 'rgb(99, 102, 241)' : 'rgb(37, 99, 235)'
@@ -59,13 +62,16 @@ export function EventCard({ event, isSelected, onSelect, onHover, eveningMode, i
               {meta.label}
             </span>
           )}
-          {event.price_text && (
-            <span className={`absolute top-2 right-2 text-[11px] font-semibold px-2 py-1 rounded-md backdrop-blur-md ${
-              eveningMode ? 'bg-indigo-500/80 text-white' : 'bg-white/90 text-blue-700 ring-1 ring-blue-200'
-            }`}>
-              {event.price_text}
-            </span>
-          )}
+          <div className="absolute top-2 right-2 flex flex-col items-end gap-1.5">
+            {saved && <SavedBadge eveningMode={eveningMode} />}
+            {event.price_text && (
+              <span className={`text-[11px] font-semibold px-2 py-1 rounded-md backdrop-blur-md ${
+                eveningMode ? 'bg-indigo-500/80 text-white' : 'bg-white/90 text-blue-700 ring-1 ring-blue-200'
+              }`}>
+                {event.price_text}
+              </span>
+            )}
+          </div>
         </div>
 
         {/* Content */}
@@ -142,7 +148,7 @@ export function EventCard({ event, isSelected, onSelect, onHover, eveningMode, i
       }}
     >
       {/* Thumbnail */}
-      <div className={`w-20 h-20 rounded-lg overflow-hidden shrink-0 tilt-card ${eveningMode ? 'bg-gray-700' : 'bg-slate-200'}`}>
+      <div className={`relative w-20 h-20 rounded-lg overflow-hidden shrink-0 tilt-card ${eveningMode ? 'bg-gray-700' : 'bg-slate-200'}`}>
         <EventImage
           src={event.image_url}
           category={event.category}
@@ -153,6 +159,17 @@ export function EventCard({ event, isSelected, onSelect, onHover, eveningMode, i
           showGradientOverlay={true}
           loading="lazy"
         />
+        {saved && (
+          <span
+            className="absolute top-1 right-1 inline-flex items-center justify-center w-5 h-5 rounded-md bg-emerald-500 text-white shadow-[0_1px_3px_rgba(0,0,0,0.3)] ring-1 ring-white/30"
+            title="Gespeichert"
+            aria-label="Gespeichert"
+          >
+            <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+            </svg>
+          </span>
+        )}
       </div>
 
       {/* Content */}
@@ -217,5 +234,24 @@ export function EventCard({ event, isSelected, onSelect, onHover, eveningMode, i
         )}
       </div>
     </AnimatedCard>
+  );
+}
+
+function SavedBadge({ eveningMode }: { eveningMode?: boolean }) {
+  return (
+    <span
+      className={`inline-flex items-center gap-1 text-[10px] font-semibold px-1.5 py-0.5 rounded-md backdrop-blur-md shadow-[0_1px_3px_rgba(0,0,0,0.25)] ${
+        eveningMode
+          ? 'bg-emerald-500/90 text-white ring-1 ring-emerald-300/40'
+          : 'bg-emerald-500 text-white ring-1 ring-white/40'
+      }`}
+      title="Gespeichert"
+      aria-label="Gespeichert"
+    >
+      <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+      </svg>
+      Gespeichert
+    </span>
   );
 }

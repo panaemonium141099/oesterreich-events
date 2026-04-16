@@ -30,8 +30,12 @@ export interface CategoryMeta {
   borderColor: string;
   /** RGB triplet string for glow effects (e.g. "168,85,247") */
   glowRgb: string;
-  /** Slug used in /images/categories/{slug}-{1..5}.jpg */
+  /** Slug used in /images/categories/{slug}-{1..N}.jpg */
   fallbackSlug: string;
+  /** Number of image variants available for this slug. Bump this after
+   *  dropping additional {slug}-{n}.jpg files into public/images/categories/
+   *  (e.g. via `npm run download-category-images`). */
+  imageCount: number;
 }
 
 const META: Record<CanonicalCategory, CategoryMeta> = {
@@ -42,6 +46,7 @@ const META: Record<CanonicalCategory, CategoryMeta> = {
     borderColor: '#a855f7',
     glowRgb: '168,85,247',
     fallbackSlug: 'musik',
+    imageCount: 30,
   },
   'Nightlife': {
     label: 'Nightlife',
@@ -50,6 +55,7 @@ const META: Record<CanonicalCategory, CategoryMeta> = {
     borderColor: '#8b5cf6',
     glowRgb: '139,92,246',
     fallbackSlug: 'rave',
+    imageCount: 30,
   },
   'Wein & Kulinarik': {
     label: 'Wein & Kulinarik',
@@ -58,6 +64,7 @@ const META: Record<CanonicalCategory, CategoryMeta> = {
     borderColor: '#f43f5e',
     glowRgb: '244,63,94',
     fallbackSlug: 'wein',
+    imageCount: 30,
   },
   'Kultur': {
     label: 'Kultur',
@@ -66,6 +73,7 @@ const META: Record<CanonicalCategory, CategoryMeta> = {
     borderColor: '#f59e0b',
     glowRgb: '245,158,11',
     fallbackSlug: 'kultur',
+    imageCount: 30,
   },
   'Märkte': {
     label: 'Märkte',
@@ -74,6 +82,7 @@ const META: Record<CanonicalCategory, CategoryMeta> = {
     borderColor: '#22c55e',
     glowRgb: '34,197,94',
     fallbackSlug: 'maerkte',
+    imageCount: 30,
   },
   'Sport': {
     label: 'Sport',
@@ -82,6 +91,7 @@ const META: Record<CanonicalCategory, CategoryMeta> = {
     borderColor: '#3b82f6',
     glowRgb: '59,130,246',
     fallbackSlug: 'sport',
+    imageCount: 30,
   },
   'Familie': {
     label: 'Familie',
@@ -90,6 +100,7 @@ const META: Record<CanonicalCategory, CategoryMeta> = {
     borderColor: '#ec4899',
     glowRgb: '236,72,153',
     fallbackSlug: 'familie',
+    imageCount: 30,
   },
   'Natur': {
     label: 'Natur',
@@ -98,6 +109,7 @@ const META: Record<CanonicalCategory, CategoryMeta> = {
     borderColor: '#10b981',
     glowRgb: '16,185,129',
     fallbackSlug: 'natur',
+    imageCount: 30,
   },
   'Feste & Brauchtum': {
     label: 'Feste & Brauchtum',
@@ -106,6 +118,7 @@ const META: Record<CanonicalCategory, CategoryMeta> = {
     borderColor: '#ef4444',
     glowRgb: '239,68,68',
     fallbackSlug: 'default',
+    imageCount: 30,
   },
   'Bildung': {
     label: 'Bildung',
@@ -114,6 +127,7 @@ const META: Record<CanonicalCategory, CategoryMeta> = {
     borderColor: '#6366f1',
     glowRgb: '99,102,241',
     fallbackSlug: 'default',
+    imageCount: 30,
   },
   'Gesundheit': {
     label: 'Gesundheit',
@@ -122,6 +136,7 @@ const META: Record<CanonicalCategory, CategoryMeta> = {
     borderColor: '#14b8a6',
     glowRgb: '20,184,166',
     fallbackSlug: 'default',
+    imageCount: 30,
   },
   'Religion': {
     label: 'Religion',
@@ -130,6 +145,7 @@ const META: Record<CanonicalCategory, CategoryMeta> = {
     borderColor: '#eab308',
     glowRgb: '234,179,8',
     fallbackSlug: 'default',
+    imageCount: 30,
   },
   'Wirtschaft': {
     label: 'Wirtschaft',
@@ -138,6 +154,7 @@ const META: Record<CanonicalCategory, CategoryMeta> = {
     borderColor: '#64748b',
     glowRgb: '100,116,139',
     fallbackSlug: 'wirtschaft',
+    imageCount: 30,
   },
   'Sonstiges': {
     label: 'Sonstiges',
@@ -146,6 +163,7 @@ const META: Record<CanonicalCategory, CategoryMeta> = {
     borderColor: '#94a3b8',
     glowRgb: '148,163,184',
     fallbackSlug: 'default',
+    imageCount: 30,
   },
 };
 

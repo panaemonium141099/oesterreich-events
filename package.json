@@ -51,6 +51,7 @@
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "openai-geocode": "tsx --env-file=.env.local src/scripts/openai-geocode.ts",
+    "download-category-images": "tsx --env-file=.env.local src/scripts/download-category-images.ts",
     "import-osm-venues": "tsx --env-file=.env.local src/scripts/import-osm-venues.ts",
     "import-student-orgs": "tsx --env-file=.env.local src/scripts/import-student-orgs.ts",
     "backfill-venue-ids": "tsx --env-file=.env.local src/scripts/backfill-venue-ids.ts",
