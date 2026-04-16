@@ -394,9 +394,11 @@ function MapPageInner() {
           suppressAutoFly={hasUrlContext}
         />
 
-        {/* Desktop sidebar */}
+        {/* Desktop sidebar — z-index must stay ABOVE any Mapbox marker
+            z-index (artist markers reach z:20 on hover). Otherwise stray
+            markers leak through the sidebar tabs area at the top-left. */}
         {sidebarOpen && (
-          <div className="absolute top-0 left-0 bottom-0 z-10 hidden lg:block">
+          <div className="absolute top-0 left-0 bottom-0 z-40 hidden lg:block">
             <Sidebar
               events={sidebarEvents}
               loading={loading}
