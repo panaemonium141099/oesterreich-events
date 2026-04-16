@@ -14,8 +14,13 @@
  * Task: fn-10-spotify-artist-alerts-follow-artists.6
  */
 
-import { SupabaseClient } from '@supabase/supabase-js';
+import { SupabaseClient, createClient as createSupabaseClient } from '@supabase/supabase-js';
 import { normalizeArtistName as lineupNormalize } from '@/lib/lineup/normalize';
+import {
+  sendArtistAlertEmail,
+  generateUnsubscribeToken,
+  type ArtistAlertEmailData,
+} from '@/lib/email';
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -154,19 +159,22 @@ function checkFalsePositiveContext(
   const before = titleLower.substring(0, nameIndex).trimEnd();
 
   // ── 1. Reference patterns right before the name ───────────────────────────
+  // Uses \b word boundaries + \s*$ to handle trimEnd() stripping trailing spaces.
+  // "before" is the text left of the artist name, trimmed — so "bis zu" or "bis"
+  // may appear at the very end with no trailing whitespace.
   const refPatterns = [
-    /\bbis\s+(zu\s+)?$/,             // "bis (zu) [Artist]"  — range endpoint
-    /\bvon\s+\S+\s+bis\s+(zu\s+)?$/, // "von X bis (zu) [Artist]"
-    /\btribute\s+(to\s+|an?\s+)?$/,  // "tribute to [Artist]"
-    /\bhommage\s+(an?\s+)?$/,        // "hommage an [Artist]"
-    /\bcovers?\s+(von\s+)?$/,        // "cover(s) von [Artist]"
-    /\bhits\s+(von\s+)?$/,           // "hits von [Artist]"
-    /\bsongs\s+(von\s+)?$/,          // "songs von [Artist]"
-    /\blieder\s+(von\s+)?$/,         // "lieder von [Artist]"
-    /\bmelodien\s+(von\s+)?$/,       // "melodien von [Artist]"
-    /\bwerke\s+(von\s+)?$/,          // "werke von [Artist]"
-    /\bnach\s+$/,                     // "nach [Artist]"  — inspired by
-    /\bà la\s+$/,                     // "à la [Artist]"
+    /\bbis\b(\s+zu\b)?\s*$/,             // "bis (zu) [Artist]"  — range endpoint
+    /\bvon\s+\S+\s+bis\b(\s+zu\b)?\s*$/, // "von X bis (zu) [Artist]"
+    /\btribute\b(\s+to\b|\s+an?\b)?\s*$/, // "tribute (to/an) [Artist]"
+    /\bhommage\b(\s+an?\b)?\s*$/,         // "hommage (an) [Artist]"
+    /\bcovers?\b(\s+von\b)?\s*$/,         // "cover(s) (von) [Artist]"
+    /\bhits\b(\s+von\b)?\s*$/,            // "hits (von) [Artist]"
+    /\bsongs?\b(\s+von\b)?\s*$/,          // "song(s) (von) [Artist]"
+    /\blieder\b(\s+von\b)?\s*$/,          // "lieder (von) [Artist]"
+    /\bmelodien\b(\s+von\b)?\s*$/,        // "melodien (von) [Artist]"
+    /\bwerke\b(\s+von\b)?\s*$/,           // "werke (von) [Artist]"
+    /\bnach\b\s*$/,                        // "nach [Artist]"  — inspired by
+    /\bà la\b\s*$/,                        // "à la [Artist]"
   ];
 
   for (const pattern of refPatterns) {
@@ -733,7 +741,150 @@ export async function createGroupedNotifications(
     }
   }
 
+  // Dispatch email alerts for users with email channel enabled (best-effort)
+  try {
+    await dispatchMatchAlertEmails(Array.from(groups.values()));
+  } catch (err) {
+    console.error('[email-dispatch] Failed (non-fatal):', err);
+  }
+
   return created;
+}
+
+// ── Email dispatch for match alerts ─────────────────────────────────────────
+
+/**
+ * Format a date string to German locale for email display.
+ */
+function formatDateDE(dateStr: string): string {
+  try {
+    return new Date(dateStr).toLocaleDateString('de-AT', {
+      weekday: 'long',
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+    });
+  } catch {
+    return dateStr;
+  }
+}
+
+/**
+ * Send email alerts for new artist match notifications.
+ *
+ * Best-effort: failures are logged but do not block the matching pipeline.
+ * Only sends to users who have explicitly enabled email notifications
+ * (channel_email = true) and have artist alerts enabled.
+ *
+ * Requires SUPABASE_SERVICE_ROLE_KEY + RESEND_API_KEY to be configured.
+ */
+async function dispatchMatchAlertEmails(
+  groups: Array<{
+    user_id: string;
+    event_id: string;
+    event_title: string;
+    artists: string[];
+    festival_name?: string;
+  }>
+): Promise<void> {
+  if (groups.length === 0) return;
+
+  // Guard: require env vars for email sending
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!url || !key) {
+    console.log('[email-dispatch] SUPABASE_SERVICE_ROLE_KEY not set, skipping');
+    return;
+  }
+  if (!process.env.RESEND_API_KEY) {
+    console.log('[email-dispatch] RESEND_API_KEY not set, skipping');
+    return;
+  }
+
+  const serviceClient = createSupabaseClient(url, key);
+
+  // 1. Batch-fetch notification preferences for all affected users
+  const userIds = [...new Set(groups.map(g => g.user_id))];
+  const { data: prefsData } = await serviceClient
+    .from('notification_preferences')
+    .select('user_id, artist_alerts_enabled, channel_email')
+    .in('user_id', userIds);
+
+  const prefsMap = new Map<string, { artist_alerts_enabled: boolean; channel_email: boolean }>();
+  for (const p of prefsData || []) {
+    prefsMap.set(p.user_id, p);
+  }
+
+  // 2. Filter to users with email explicitly enabled
+  const emailUserIds = new Set(
+    userIds.filter(uid => {
+      const prefs = prefsMap.get(uid);
+      // Default for channel_email is OFF — only send if explicitly enabled
+      return prefs?.channel_email === true && prefs?.artist_alerts_enabled !== false;
+    })
+  );
+
+  if (emailUserIds.size === 0) return;
+
+  // 3. Fetch event details for email template
+  const emailGroups = groups.filter(g => emailUserIds.has(g.user_id));
+  const eventIds = [...new Set(emailGroups.map(g => g.event_id))];
+  const { data: events } = await serviceClient
+    .from('events')
+    .select('id, title, start_date, location_name, ticket_url, image_url')
+    .in('id', eventIds);
+
+  type EventRow = {
+    id: string;
+    title: string;
+    start_date: string;
+    location_name: string | null;
+    ticket_url: string | null;
+    image_url: string | null;
+  };
+  const eventMap = new Map<string, EventRow>();
+  for (const e of (events || []) as EventRow[]) {
+    eventMap.set(e.id, e);
+  }
+
+  // 4. Send emails per eligible group
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://osterreich.events';
+  const secret = process.env.UNSUBSCRIBE_SECRET ?? process.env.SUPABASE_JWT_SECRET ?? '';
+  let sentCount = 0;
+
+  for (const group of emailGroups) {
+    const event = eventMap.get(group.event_id);
+    if (!event) continue;
+
+    try {
+      const { data: userData } = await serviceClient.auth.admin.getUserById(group.user_id);
+      if (!userData?.user?.email) continue;
+
+      const token = secret ? await generateUnsubscribeToken(group.user_id, secret) : '';
+
+      const emailData: ArtistAlertEmailData = {
+        artistName: group.artists.join(', '),
+        artistImageUrl: event.image_url,
+        eventTitle: group.festival_name ?? event.title,
+        eventDate: formatDateDE(event.start_date),
+        venueName: null,
+        location: event.location_name || 'Österreich',
+        ticketUrl: event.ticket_url,
+        eventPageUrl: `${baseUrl}/events/${group.event_id}`,
+        unsubscribeUrl: `${baseUrl}/api/notifications/unsubscribe?user_id=${group.user_id}&token=${token}`,
+        preferencesUrl: `${baseUrl}/settings`,
+      };
+
+      const result = await sendArtistAlertEmail(userData.user.email, emailData);
+      if (result === 'sent') sentCount++;
+    } catch (err) {
+      console.error(`[email-dispatch] Error for user ${group.user_id}:`, err);
+    }
+  }
+
+  if (sentCount > 0) {
+    console.log(`[email-dispatch] Sent ${sentCount} match alert email(s)`);
+  }
 }
 
 /**

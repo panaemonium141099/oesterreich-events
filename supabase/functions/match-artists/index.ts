@@ -166,18 +166,18 @@ function checkFalsePositiveContext(
   const before = titleLower.substring(0, nameIndex).trimEnd();
 
   const refPatterns = [
-    /\bbis\s+(zu\s+)?$/,
-    /\bvon\s+\S+\s+bis\s+(zu\s+)?$/,
-    /\btribute\s+(to\s+|an?\s+)?$/,
-    /\bhommage\s+(an?\s+)?$/,
-    /\bcovers?\s+(von\s+)?$/,
-    /\bhits\s+(von\s+)?$/,
-    /\bsongs\s+(von\s+)?$/,
-    /\blieder\s+(von\s+)?$/,
-    /\bmelodien\s+(von\s+)?$/,
-    /\bwerke\s+(von\s+)?$/,
-    /\bnach\s+$/,
-    /\bà la\s+$/,
+    /\bbis\b(\s+zu\b)?\s*$/,             // "bis (zu) [Artist]"  — range endpoint
+    /\bvon\s+\S+\s+bis\b(\s+zu\b)?\s*$/, // "von X bis (zu) [Artist]"
+    /\btribute\b(\s+to\b|\s+an?\b)?\s*$/, // "tribute (to/an) [Artist]"
+    /\bhommage\b(\s+an?\b)?\s*$/,         // "hommage (an) [Artist]"
+    /\bcovers?\b(\s+von\b)?\s*$/,         // "cover(s) (von) [Artist]"
+    /\bhits\b(\s+von\b)?\s*$/,            // "hits (von) [Artist]"
+    /\bsongs?\b(\s+von\b)?\s*$/,          // "song(s) (von) [Artist]"
+    /\blieder\b(\s+von\b)?\s*$/,          // "lieder (von) [Artist]"
+    /\bmelodien\b(\s+von\b)?\s*$/,        // "melodien (von) [Artist]"
+    /\bwerke\b(\s+von\b)?\s*$/,           // "werke (von) [Artist]"
+    /\bnach\b\s*$/,                        // "nach [Artist]"  — inspired by
+    /\bà la\b\s*$/,                        // "à la [Artist]"
   ];
 
   for (const pattern of refPatterns) {

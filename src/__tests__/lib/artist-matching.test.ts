@@ -6,6 +6,7 @@ import {
   normalizeArtistName,
   buildExactMatchRegex,
   formatNotificationBody,
+  isFalsePositiveMatch,
   groupArtistsByTier,
   type FollowedArtist,
   getMatchingCursor,
@@ -32,16 +33,24 @@ describe('classifyName', () => {
     expect(classifyName('SIA')).toBe('exact'); // before normalization
   });
 
-  it('should classify 4+ char names as fuzzy', () => {
-    expect(classifyName('abcd')).toBe('fuzzy');
-    expect(classifyName('Falco')).toBe('fuzzy');
+  it('should classify 4-5 char names as exact (short-name protection)', () => {
+    expect(classifyName('abcd')).toBe('exact');
+    expect(classifyName('Falco')).toBe('exact');
+    expect(classifyName('Dame')).toBe('exact');
+    expect(classifyName('Zedd')).toBe('exact');
+  });
+
+  it('should classify 6+ char names as fuzzy', () => {
     expect(classifyName('Bilderbuch')).toBe('fuzzy');
+    expect(classifyName('Pizzera')).toBe('fuzzy');
+    expect(classifyName('ILLENIUM')).toBe('fuzzy');
   });
 
   it('should trim whitespace before measuring length', () => {
     expect(classifyName('  ab  ')).toBe('skip');
     expect(classifyName(' abc ')).toBe('exact');
-    expect(classifyName(' abcd ')).toBe('fuzzy');
+    expect(classifyName(' abcd ')).toBe('exact');
+    expect(classifyName(' abcdef ')).toBe('fuzzy');
   });
 });
 
@@ -126,6 +135,109 @@ describe('formatNotificationBody', () => {
   });
 });
 
+// ── False positive detection tests ──────────────────────────────────────────
+
+describe('isFalsePositiveMatch', () => {
+  // ── SHOULD BE REJECTED (return true = false positive) ──
+
+  describe('word-boundary check (short names ≤ 10 chars)', () => {
+    it('rejects "Dame" in "Damenturngruppe"', () => {
+      expect(isFalsePositiveMatch('Dame', 'Damenturngruppe Sportfest')).toBe(true);
+    });
+
+    it('rejects "Zedd" when fuzzy-matched to "Zederhaus"', () => {
+      expect(isFalsePositiveMatch('Zedd', 'Wandern in Zederhaus')).toBe(true);
+    });
+
+    it('rejects "ILLENIUM" when not in title at all', () => {
+      expect(isFalsePositiveMatch('ILLENIUM', 'Brass Fest: Thomas Gansch Blasmusik Supergroup')).toBe(true);
+    });
+
+    it('rejects "Stockmann" when not in title', () => {
+      expect(isFalsePositiveMatch('Stockmann', 'Natur und Religion im einKLANG')).toBe(true);
+    });
+  });
+
+  describe('reference patterns (bis zu, tribute, cover)', () => {
+    it('rejects "bis zu [Artist]"', () => {
+      expect(isFalsePositiveMatch('Coldplay', 'Musikkapelle Patsch: Von Sisi bis zu Coldplay')).toBe(true);
+    });
+
+    it('rejects "bis [Artist]"', () => {
+      expect(isFalsePositiveMatch('ACDC', 'Die besten Hits von Queen bis ACDC')).toBe(true);
+    });
+
+    it('rejects "tribute to [Artist]"', () => {
+      expect(isFalsePositiveMatch('Queen', 'Tribute to Queen - Die Show')).toBe(true);
+    });
+
+    it('rejects "hommage an [Artist]"', () => {
+      expect(isFalsePositiveMatch('Mozart', 'Hommage an Mozart')).toBe(true);
+    });
+
+    it('rejects "cover von [Artist]"', () => {
+      expect(isFalsePositiveMatch('Beatles', 'Covers von Beatles und Rolling Stones')).toBe(true);
+    });
+
+    it('rejects "hits von [Artist]"', () => {
+      expect(isFalsePositiveMatch('Madonna', 'Die groessten Hits von Madonna')).toBe(true);
+    });
+  });
+
+  describe('cover-band / brass-band prefix', () => {
+    it('rejects "musikkapelle" title with artist far from start', () => {
+      expect(isFalsePositiveMatch('Coldplay', 'Musikkapelle Patsch: Von Sisi bis zu Coldplay')).toBe(true);
+    });
+
+    it('rejects "blasmusik" title with artist far from start', () => {
+      expect(isFalsePositiveMatch('Queen', 'Blasmusik Konzert: Von Falco bis Queen')).toBe(true);
+    });
+  });
+
+  describe('headliner-position check', () => {
+    it('rejects artist in tour name after separator', () => {
+      expect(isFalsePositiveMatch('ILLENIUM', 'David Garrett - Millenium Symphony')).toBe(true);
+    });
+
+    it('rejects artist after " – " separator', () => {
+      expect(isFalsePositiveMatch('Rain', 'Volksmusik Abend – Purple Rain Tribute')).toBe(true);
+    });
+  });
+
+  // ── SHOULD BE KEPT (return false = legitimate match) ──
+
+  describe('legitimate matches (should NOT be rejected)', () => {
+    it('keeps exact headliner match', () => {
+      expect(isFalsePositiveMatch('Dame', 'Dame - Der Weg ist das Ziel 2.0 - Live 2026')).toBe(false);
+    });
+
+    it('keeps "Pizzera und Jaus" fuzzy match to "Pizzera & Jaus"', () => {
+      expect(isFalsePositiveMatch('Pizzera und Jaus', 'Pizzera & Jaus - Wien Live')).toBe(false);
+    });
+
+    it('keeps lineup match (festival derived event)', () => {
+      expect(isFalsePositiveMatch('Bad Omens', 'Bad Omens at Nova Rock')).toBe(false);
+    });
+
+    it('keeps exact name in short title', () => {
+      expect(isFalsePositiveMatch('Wanda', 'Wanda live in Wien')).toBe(false);
+    });
+
+    it('keeps artist as sole headliner before separator', () => {
+      expect(isFalsePositiveMatch('Tream', 'Tream - Zur Weissbier-Probe Tour 2026')).toBe(false);
+    });
+
+    it('keeps VICKY when name is standalone in title', () => {
+      expect(isFalsePositiveMatch('VICKY', 'Vicky live im WUK')).toBe(false);
+    });
+
+    it('keeps long name even without title match', () => {
+      // Long names (>10 chars) bypass word-boundary check — description matches are trusted
+      expect(isFalsePositiveMatch('Bring Me The Horizon', 'Nova Rock 2026')).toBe(false);
+    });
+  });
+});
+
 describe('groupArtistsByTier', () => {
   const makeArtist = (name: string, userId: string = 'user-1'): FollowedArtist => ({
     id: `id-${name}`,
@@ -138,7 +250,7 @@ describe('groupArtistsByTier', () => {
     const artists = [
       makeArtist('DJ'), // 2 chars -> skip
       makeArtist('SIA'), // 3 chars -> exact
-      makeArtist('Wanda'), // 5 chars -> fuzzy
+      makeArtist('Wanda'), // 5 chars -> exact (≤5 = exact)
       makeArtist('Bilderbuch'), // 10 chars -> fuzzy
     ];
 
@@ -146,10 +258,10 @@ describe('groupArtistsByTier', () => {
 
     expect(result.skipped).toHaveLength(1);
     expect(result.skipped[0]).toBe('DJ');
-    expect(result.exact.size).toBe(1);
+    expect(result.exact.size).toBe(2);
     expect(result.exact.has('sia')).toBe(true);
-    expect(result.fuzzy.size).toBe(2);
-    expect(result.fuzzy.has('wanda')).toBe(true);
+    expect(result.exact.has('wanda')).toBe(true);
+    expect(result.fuzzy.size).toBe(1);
     expect(result.fuzzy.has('bilderbuch')).toBe(true);
   });
 
@@ -161,7 +273,8 @@ describe('groupArtistsByTier', () => {
 
     const result = groupArtistsByTier(artists);
 
-    expect(result.fuzzy.get('wanda')).toHaveLength(2);
+    // 'Wanda' = 5 chars → exact tier (≤5)
+    expect(result.exact.get('wanda')).toHaveLength(2);
   });
 
   it('should normalize names with diacritics', () => {

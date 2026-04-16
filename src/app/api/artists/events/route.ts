@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
+import { isFalsePositiveMatch } from '@/lib/artist-matching';
 
 export const dynamic = 'force-dynamic';
 
@@ -95,6 +96,8 @@ export async function GET(request: NextRequest) {
     }
 
     // Group by event_id -- multiple artists may match the same event
+    // Re-validate against isFalsePositiveMatch() to catch stale DB entries
+    // that were created before the filter existed.
     const eventMap = new Map<string, {
       event: Record<string, unknown>;
       matched_artists: { name: string; match_score: number; match_source: string }[];
@@ -103,6 +106,15 @@ export async function GET(request: NextRequest) {
     for (const notification of notifications || []) {
       const event = notification.events as unknown as Record<string, unknown>;
       const eventId = notification.event_id;
+      const eventTitle = (event.title as string) || '';
+
+      // Server-side re-validation: skip stale false positives
+      // Lineup matches (score 1.0, source 'lineup') are always trusted
+      if (notification.match_source !== 'lineup') {
+        if (isFalsePositiveMatch(notification.artist_name, eventTitle)) {
+          continue;
+        }
+      }
 
       if (!eventMap.has(eventId)) {
         eventMap.set(eventId, {

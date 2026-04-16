@@ -446,6 +446,12 @@ export type Database = {
           channel_email: boolean
           channel_sms: boolean
           phone_number: string | null
+          reminder_7d: boolean
+          reminder_1d: boolean
+          city_digest_enabled: boolean
+          venue_alerts_enabled: boolean
+          today_near_you_enabled: boolean
+          student_alerts_enabled: boolean
           created_at: string
           updated_at: string
         }
@@ -457,6 +463,12 @@ export type Database = {
           channel_email?: boolean
           channel_sms?: boolean
           phone_number?: string | null
+          reminder_7d?: boolean
+          reminder_1d?: boolean
+          city_digest_enabled?: boolean
+          venue_alerts_enabled?: boolean
+          today_near_you_enabled?: boolean
+          student_alerts_enabled?: boolean
           created_at?: string
           updated_at?: string
         }
@@ -466,6 +478,12 @@ export type Database = {
           channel_email?: boolean
           channel_sms?: boolean
           phone_number?: string | null
+          reminder_7d?: boolean
+          reminder_1d?: boolean
+          city_digest_enabled?: boolean
+          venue_alerts_enabled?: boolean
+          today_near_you_enabled?: boolean
+          student_alerts_enabled?: boolean
           updated_at?: string
         }
       }
