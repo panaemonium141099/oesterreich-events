@@ -582,12 +582,22 @@ function EventMap({ events, selectedEvent, hoveredEventId, onSelectEvent, evenin
         markersOnScreen.current.set(markerId, marker);
       }
 
-      // Remove markers no longer visible
-      markersOnScreen.current.forEach((marker, id) => {
-        if (!newMarkerIds.has(id)) {
-          marker.remove();
-          markersOnScreen.current.delete(id);
-        }
+      // Remove markers no longer visible.
+      // CRITICAL: artist markers live in a stable unclustered source and must
+      // NOT be removed just because querySourceFeatures returned transient
+      // partial/empty results during a render transient (hover scale anim,
+      // tile reload, style change). If they were removed here, the next
+      // render-frame recreated them at the default (0,0) of the map container
+      // for one paint → ghost bubble over the sidebar. Artist markers are
+      // torn down only when the artist-id set itself changes (handled below).
+      const currentArtistIds = artistIdsRef.current;
+      markersOnScreen.current.forEach((marker, markerId) => {
+        if (newMarkerIds.has(markerId)) return;
+        // Extract event id from `marker-${eventId}`
+        const eventId = markerId.slice('marker-'.length);
+        if (currentArtistIds.has(eventId)) return; // still a valid artist marker → keep
+        marker.remove();
+        markersOnScreen.current.delete(markerId);
       });
     };
 
