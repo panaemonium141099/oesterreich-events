@@ -30,6 +30,7 @@ export function EventCard({ event, isSelected, onSelect, onHover, eveningMode, i
     return (
       <AnimatedCard
         index={index}
+        animateEnter={false}
         onClick={onSelect}
         onMouseEnter={() => onHover(true)}
         onMouseLeave={() => onHover(false)}
@@ -125,6 +126,7 @@ export function EventCard({ event, isSelected, onSelect, onHover, eveningMode, i
   return (
     <AnimatedCard
       index={index}
+      animateEnter={false}
       onClick={onSelect}
       onMouseEnter={() => onHover(true)}
       onMouseLeave={() => onHover(false)}

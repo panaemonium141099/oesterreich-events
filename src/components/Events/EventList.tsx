@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { EventCard } from './EventCard';
 import { SkeletonList } from '@/components/UI/Skeleton';
 import type { Event } from '@/types/events';
@@ -21,12 +20,13 @@ const BATCH_SIZE = 50;
 export function EventList({ events, onSelectEvent, selectedEventId, onHoverEvent, eveningMode, loading, variant = 'compact' }: EventListProps) {
   const [visibleCount, setVisibleCount] = useState(BATCH_SIZE);
   const loaderRef = useRef<HTMLDivElement>(null);
-  const shouldReduceMotion = useReducedMotion();
 
-  // Reset visible count when events change
+  // Reset visible count only when the event SET changes (not reorder).
+  // Using `events.length` as the key prevents a full reset when sort swaps
+  // items in place, which keeps the scroll position stable.
   useEffect(() => {
     setVisibleCount(BATCH_SIZE);
-  }, [events]);
+  }, [events.length]);
 
   // Intersection observer for infinite scroll
   useEffect(() => {
@@ -48,60 +48,45 @@ export function EventList({ events, onSelectEvent, selectedEventId, onHoverEvent
 
   const visibleEvents = events.slice(0, visibleCount);
 
+  // Loading state without cross-fade: if we already have events to show,
+  // render them and the fresh batch replaces them in place — no blank flash.
+  if (loading && events.length === 0) {
+    return <SkeletonList count={8} eveningMode={eveningMode} />;
+  }
+
   return (
     <div>
-      <AnimatePresence mode="wait">
-        {loading ? (
-          <motion.div
-            key="skeleton"
-            initial={shouldReduceMotion ? undefined : { opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={shouldReduceMotion ? undefined : { opacity: 0 }}
-            transition={{ duration: 0.2 }}
-          >
-            <SkeletonList count={8} eveningMode={eveningMode} />
-          </motion.div>
-        ) : (
-          <motion.div
-            key="content"
-            initial={shouldReduceMotion ? undefined : { opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.25 }}
-          >
-            {variant === 'expanded' ? (
-              <div className="grid gap-3 p-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
-                {visibleEvents.map((event, index) => (
-                  <EventCard
-                    key={event.id}
-                    event={event}
-                    index={index}
-                    isSelected={selectedEventId === event.id}
-                    onSelect={() => onSelectEvent(event)}
-                    onHover={(hovering) => onHoverEvent(hovering ? event.id : null)}
-                    eveningMode={eveningMode}
-                    variant="expanded"
-                  />
-                ))}
-              </div>
-            ) : (
-              visibleEvents.map((event, index) => (
-                <EventCard
-                  key={event.id}
-                  event={event}
-                  index={index}
-                  isSelected={selectedEventId === event.id}
-                  onSelect={() => onSelectEvent(event)}
-                  onHover={(hovering) => onHoverEvent(hovering ? event.id : null)}
-                  eveningMode={eveningMode}
-                />
-              ))
-            )}
-          </motion.div>
-        )}
-      </AnimatePresence>
-      {!loading && visibleCount < events.length && (
+      {variant === 'expanded' ? (
+        <div className="grid gap-3 p-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+          {visibleEvents.map((event, index) => (
+            <EventCard
+              key={event.id}
+              event={event}
+              index={index}
+              isSelected={selectedEventId === event.id}
+              onSelect={() => onSelectEvent(event)}
+              onHover={(hovering) => onHoverEvent(hovering ? event.id : null)}
+              eveningMode={eveningMode}
+              variant="expanded"
+            />
+          ))}
+        </div>
+      ) : (
+        visibleEvents.map((event, index) => (
+          <EventCard
+            key={event.id}
+            event={event}
+            index={index}
+            isSelected={selectedEventId === event.id}
+            onSelect={() => onSelectEvent(event)}
+            onHover={(hovering) => onHoverEvent(hovering ? event.id : null)}
+            eveningMode={eveningMode}
+          />
+        ))
+      )}
+      {visibleCount < events.length && (
         <div ref={loaderRef} className="py-4 text-center">
-          <p className={`text-sm animate-fade-in ${eveningMode ? 'text-gray-400' : 'text-slate-500'}`}>
+          <p className={`text-sm ${eveningMode ? 'text-gray-400' : 'text-slate-500'}`}>
             {visibleCount} von {events.length} angezeigt — scrolle für mehr
           </p>
         </div>

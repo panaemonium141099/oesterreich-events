@@ -11,6 +11,9 @@ interface AnimatedCardProps {
   onMouseEnter?: () => void;
   onMouseLeave?: () => void;
   style?: React.CSSProperties;
+  /** Skip the staggered enter animation — useful for lists that already use
+   *  virtualization/infinite scroll where re-ordering should feel instant. */
+  animateEnter?: boolean;
 }
 
 const cardVariants = {
@@ -40,12 +43,14 @@ export function AnimatedCard({
   onMouseEnter,
   onMouseLeave,
   style,
+  animateEnter = true,
 }: AnimatedCardProps) {
   const shouldReduceMotion = useReducedMotion();
 
-  if (shouldReduceMotion) {
+  if (shouldReduceMotion || !animateEnter) {
     return (
-      <div
+      <motion.div
+        whileHover={shouldReduceMotion ? undefined : hoverEffect}
         className={className}
         onClick={onClick}
         onMouseEnter={onMouseEnter}
@@ -53,7 +58,7 @@ export function AnimatedCard({
         style={style}
       >
         {children}
-      </div>
+      </motion.div>
     );
   }
 

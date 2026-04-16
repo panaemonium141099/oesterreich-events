@@ -97,6 +97,9 @@ function MapPageInner() {
 
   const [backgroundLoading, setBackgroundLoading] = useState(false);
   const abortRef = useRef<AbortController | null>(null);
+  // Ref tracks sidebarSize so the long-running progressive loader can pause
+  // its background phase while the user is browsing in full mode.
+  const sidebarSizeRef = useRef<SidebarSize>('compact');
 
   // Sidebar tab state for artist events
   const [sidebarTab, setSidebarTab] = useState<SidebarTab>('events');
@@ -106,6 +109,7 @@ function MapPageInner() {
 
   // Sidebar resize + sort + user location for distance sort
   const [sidebarSize, setSidebarSize] = useState<SidebarSize>('compact');
+  useEffect(() => { sidebarSizeRef.current = sidebarSize; }, [sidebarSize]);
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [sortMode, setSortMode] = useState<SortMode>('date-asc');
 
@@ -218,6 +222,12 @@ function MapPageInner() {
       let cursor: string | null = firstData.nextCursor || null;
 
       while (cursor) {
+        if (controller.signal.aborted) break;
+        // Pause background loading while the list overlay is open — the user
+        // is browsing and further appends would reshuffle the visible list.
+        while (sidebarSizeRef.current === 'full' && !controller.signal.aborted) {
+          await new Promise(r => setTimeout(r, 400));
+        }
         if (controller.signal.aborted) break;
         await new Promise(r => setTimeout(r, 300));
 
@@ -425,14 +435,14 @@ function MapPageInner() {
 
       <div className="flex-1 overflow-hidden relative">
         <EventMap
-          events={bundeslandEvents}
+          events={sidebarSize === 'full' ? [] : bundeslandEvents}
           selectedEvent={selectedEvent}
           hoveredEventId={hoveredEventId}
           onSelectEvent={setSelectedEvent}
           eveningMode={eveningMode}
           flyToCoords={dynamicFlyTo || flyToCoords}
           bundesland={bundesland}
-          artistEventIds={artistEventIds}
+          artistEventIds={sidebarSize === 'full' ? new Set<string>() : artistEventIds}
         />
 
         {/* Loading overlay — centered in map area, not covering sidebar */}
