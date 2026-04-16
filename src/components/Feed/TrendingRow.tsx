@@ -5,16 +5,7 @@ import { createClient } from '@/lib/supabase/client';
 import type { TrendingEvent } from './feed-types';
 import { StoriesViewer } from './StoriesViewer';
 import { EventImage } from '@/components/Events/EventImage';
-
-// Shuffle array (Fisher-Yates) with seed from current hour so it changes per refresh but stays stable within a render
-function shuffleArray<T>(arr: T[]): T[] {
-  const shuffled = [...arr];
-  for (let i = shuffled.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-  }
-  return shuffled;
-}
+import { isUsableImageCandidate } from '@/lib/event-images';
 
 export function TrendingRow() {
   const [events, setEvents] = useState<TrendingEvent[]>([]);
@@ -52,6 +43,9 @@ export function TrendingRow() {
       const nextMonth = new Date();
       nextMonth.setDate(nextMonth.getDate() + 30);
 
+      // Fetch only events with a real image (no placeholders in story circles)
+      // and coordinates so we can distance-sort. image_url IS NOT NULL alone isn't
+      // enough — some rows store empty strings — additional client-side filter below.
       const { data } = await supabase
         .from('events')
         .select('id, title, start_date, end_date, location_name, image_url, category, save_count, latitude, longitude')
@@ -60,6 +54,8 @@ export function TrendingRow() {
         .eq('visibility', 'public')
         .not('latitude', 'is', null)
         .not('longitude', 'is', null)
+        .not('image_url', 'is', null)
+        .neq('image_url', '')
         .order('start_date', { ascending: true })
         .limit(500);
 
@@ -69,17 +65,20 @@ export function TrendingRow() {
         return;
       }
 
-      let result;
+      // Extra client-side guard: reject data URIs / obviously-bad URLs
+      const withRealImages = data.filter((e: { image_url: string | null }) =>
+        isUsableImageCandidate(e.image_url),
+      );
+
+      let result: typeof withRealImages;
 
       if (hasRealLocation && userLat && userLng) {
-        // Calculate distance for each event using Haversine
+        // Haversine distance sort — nearest first
         const lat1 = userLat;
         const lng1 = userLng;
-        const withDistance = data.map((e: Record<string, unknown>) => {
+        const withDistance = withRealImages.map((e: Record<string, unknown>) => {
           const lat2 = e.latitude as number;
           const lng2 = e.longitude as number;
-          if (!lat2 || !lng2) return { ...e, distance: 9999 };
-
           const R = 6371;
           const dLat = (lat2 - lat1) * Math.PI / 180;
           const dLng = (lng2 - lng1) * Math.PI / 180;
@@ -89,23 +88,16 @@ export function TrendingRow() {
           const d = R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
           return { ...e, distance: d };
         });
-
-        // 50km radius, fallback to closest events if too few
-        const RADIUS_KM = 50;
-        let nearby = withDistance.filter((e: { distance: number }) => e.distance <= RADIUS_KM);
-        if (nearby.length < 8) {
-          nearby = withDistance.sort((a: { distance: number }, b: { distance: number }) => a.distance - b.distance);
-        }
-        result = nearby;
+        // Nearest first; take top 15 (no shuffle — stable ordering by distance)
+        result = withDistance.sort(
+          (a: { distance: number }, b: { distance: number }) => a.distance - b.distance,
+        );
       } else {
-        // No location — just use all events
-        result = data;
+        // No location — just keep start_date order
+        result = withRealImages;
       }
 
-      // Random shuffle so each refresh shows different events
-      const shuffled = shuffleArray(result).slice(0, 15);
-
-      setEvents(shuffled as TrendingEvent[]);
+      setEvents(result.slice(0, 15) as TrendingEvent[]);
       setLoading(false);
     };
 

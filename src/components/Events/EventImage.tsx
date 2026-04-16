@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import {
   resolvePrimaryEventImage,
   resolveCategoryFallbackImage,
@@ -61,6 +61,7 @@ export function EventImage({
   const [currentSrc, setCurrentSrc] = useState(computePrimary);
   const [stage, setStage] = useState<FallbackStage>('primary');
   const [loaded, setLoaded] = useState(false);
+  const imgRef = useRef<HTMLImageElement>(null);
 
   // Reset when props change
   useEffect(() => {
@@ -69,6 +70,21 @@ export function EventImage({
     setStage('primary');
     setLoaded(false);
   }, [computePrimary]);
+
+  // Handle cached-image race: if the browser served <img> from cache synchronously,
+  // onLoad may have fired before React attached the handler. Check img.complete
+  // after each src change and flip loaded manually.
+  useEffect(() => {
+    const img = imgRef.current;
+    if (!img) return;
+    if (img.complete && img.naturalWidth > 0) {
+      setLoaded(true);
+    } else if (img.complete && img.naturalWidth === 0) {
+      // Cached as broken — trigger error flow
+      handleError();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentSrc]);
 
   const handleError = useCallback(() => {
     switch (stage) {
@@ -123,6 +139,7 @@ export function EventImage({
       )}
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
+        ref={imgRef}
         src={currentSrc}
         alt={alt}
         className={`${loaded ? 'opacity-100' : 'opacity-0'} transition-opacity duration-200 ${className}`}
