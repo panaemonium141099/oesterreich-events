@@ -100,6 +100,10 @@ function MapPageInner() {
   // Ref tracks sidebarSize so the long-running progressive loader can pause
   // its background phase while the user is browsing in full mode.
   const sidebarSizeRef = useRef<SidebarSize>('compact');
+  // Total matches for the current server-side filter (tells the user how many
+  // events exist beyond what Phase 1 already loaded, so the count doesn't
+  // appear stuck at 5k while Phase 2 is paused in full mode).
+  const [apiTotalCount, setApiTotalCount] = useState<number | null>(null);
 
   // Sidebar tab state for artist events
   const [sidebarTab, setSidebarTab] = useState<SidebarTab>('events');
@@ -188,6 +192,7 @@ function MapPageInner() {
 
     setLoading(true);
     setAllEvents([]);
+    setApiTotalCount(null);
 
     const BATCH_SIZE = 5000;
 
@@ -208,6 +213,7 @@ function MapPageInner() {
       const firstEvents: Event[] = firstData.events || [];
 
       setAllEvents(firstEvents);
+      if (typeof firstData.total === 'number') setApiTotalCount(firstData.total);
       setLoading(false);
 
       // If first batch is not full, we're done
@@ -506,6 +512,8 @@ function MapPageInner() {
               onFiltersChange={setFilters}
               bundesland={bundesland}
               onBundeslandChange={(bl) => { setBundesland(bl); setFilters(prev => prev.district ? { ...prev, district: undefined } : prev); setDynamicFlyTo(null); }}
+              totalMatchCount={bundesland.id === 'all' && !filters.district ? apiTotalCount : null}
+              backgroundLoading={backgroundLoading}
             />
           </motion.div>
         )}
@@ -557,6 +565,8 @@ function MapPageInner() {
                   sortMode={sortMode}
                   onSortChange={setSortMode}
                   hasLocation={userLocation !== null}
+                  totalMatchCount={bundesland.id === 'all' && !filters.district ? apiTotalCount : null}
+                  backgroundLoading={backgroundLoading}
                 />
               </div>
             </div>

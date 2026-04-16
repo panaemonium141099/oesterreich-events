@@ -53,6 +53,13 @@ interface SidebarProps {
   bundesland?: Bundesland;
   onBundeslandChange?: (bl: Bundesland) => void;
   allEventsForFilters?: Event[]; // unfiltered set used for tag aggregation in FilterPanel
+  /** Total matches reported by the API (may exceed loaded events when background
+   *  loading is paused, e.g. in full mode). Null when client-side filters
+   *  invalidate the count (bundesland != all, district set). */
+  totalMatchCount?: number | null;
+  /** Background loader is still fetching batches — surfaces as a subtle
+   *  "lädt…" hint in the header. */
+  backgroundLoading?: boolean;
 }
 
 export function Sidebar(props: SidebarProps) {
@@ -60,6 +67,23 @@ export function Sidebar(props: SidebarProps) {
     return <MobileSidebar {...props} />;
   }
   return <DesktopSidebar {...props} />;
+}
+
+/** Format the count badge for the sidebar header — shows a truthful
+ *  "loaded of total" when more events exist server-side than are loaded. */
+function formatCountLabel(
+  loaded: number,
+  total: number | null | undefined,
+  backgroundLoading: boolean | undefined,
+): string {
+  const loadedStr = loaded.toLocaleString('de-AT');
+  if (total != null && total > loaded) {
+    return `${loadedStr} von ${total.toLocaleString('de-AT')}`;
+  }
+  if (backgroundLoading && total == null) {
+    return `${loadedStr}+`;
+  }
+  return `${loadedStr}${loaded === 1 ? ' Ergebnis' : ' Ergebnisse'}`;
 }
 
 /* ─── Mobile Sidebar ───────────────────────────────────────────── */
@@ -79,6 +103,8 @@ function MobileSidebar({
   sortMode,
   onSortChange,
   hasLocation,
+  totalMatchCount,
+  backgroundLoading,
 }: SidebarProps) {
   const isArtistTab = activeTab === 'artists' && showArtistTab;
   return (
@@ -95,6 +121,8 @@ function MobileSidebar({
         sortMode={sortMode}
         onSortChange={onSortChange}
         hasLocation={hasLocation}
+        totalMatchCount={totalMatchCount}
+        backgroundLoading={backgroundLoading}
       />
       <div className="flex-1 overflow-y-auto custom-scrollbar">
         <SidebarBody
@@ -136,6 +164,8 @@ function DesktopSidebar({
   bundesland,
   onBundeslandChange,
   allEventsForFilters,
+  totalMatchCount,
+  backgroundLoading,
 }: SidebarProps) {
   const reduceMotion = useReducedMotion();
   const isArtistTab = activeTab === 'artists' && showArtistTab;
@@ -264,6 +294,8 @@ function DesktopSidebar({
           size={size}
           onCycleSize={cycleSize}
           onCollapse={collapse}
+          totalMatchCount={totalMatchCount}
+          backgroundLoading={backgroundLoading}
         />
         <div className="flex-1 overflow-y-auto custom-scrollbar">
           <SidebarBody
@@ -322,6 +354,8 @@ function SidebarHeader({
   size,
   onCycleSize,
   onCollapse,
+  totalMatchCount,
+  backgroundLoading,
 }: {
   events: Event[];
   eveningMode?: boolean;
@@ -335,8 +369,11 @@ function SidebarHeader({
   size?: SidebarSize;
   onCycleSize?: () => void;
   onCollapse?: () => void;
+  totalMatchCount?: number | null;
+  backgroundLoading?: boolean;
 }) {
   const isArtistTab = activeTab === 'artists' && showArtistTab;
+  const countLabel = formatCountLabel(events.length, totalMatchCount, backgroundLoading);
   return (
     <div className={`border-b shrink-0 ${eveningMode ? 'border-gray-800/60' : 'border-slate-100'}`}>
       <div className="px-4 pt-3 pb-2">
@@ -358,10 +395,8 @@ function SidebarHeader({
               Kuenstler-Events
             </TabButton>
             <div className="flex-1" />
-            <HeaderBadge eveningMode={eveningMode}>
-              {activeTab === 'events'
-                ? `${events.length.toLocaleString('de-AT')} Ergebnisse`
-                : `${artistEventCount} Events`}
+            <HeaderBadge eveningMode={eveningMode} pulsing={backgroundLoading && activeTab === 'events'}>
+              {activeTab === 'events' ? countLabel : `${artistEventCount} Events`}
             </HeaderBadge>
             {onCycleSize && <SizeControls size={size} onCycle={onCycleSize} onCollapse={onCollapse} eveningMode={eveningMode} />}
           </div>
@@ -373,8 +408,8 @@ function SidebarHeader({
               }`}>Veranstaltungen</span>
             </div>
             <div className="flex items-center gap-2">
-              <HeaderBadge eveningMode={eveningMode}>
-                {events.length.toLocaleString('de-AT')} Ergebnisse
+              <HeaderBadge eveningMode={eveningMode} pulsing={backgroundLoading}>
+                {countLabel}
               </HeaderBadge>
               {onCycleSize && <SizeControls size={size} onCycle={onCycleSize} onCollapse={onCollapse} eveningMode={eveningMode} />}
             </div>
@@ -395,11 +430,30 @@ function SidebarHeader({
   );
 }
 
-function HeaderBadge({ children, eveningMode }: { children: React.ReactNode; eveningMode?: boolean }) {
+function HeaderBadge({
+  children,
+  eveningMode,
+  pulsing,
+}: {
+  children: React.ReactNode;
+  eveningMode?: boolean;
+  pulsing?: boolean;
+}) {
   return (
-    <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded-md whitespace-nowrap ${
-      eveningMode ? 'bg-amber-400/15 text-amber-400/80' : 'bg-slate-200/80 text-slate-600'
-    }`}>
+    <span
+      title={pulsing ? 'Lädt weitere Events…' : undefined}
+      className={`inline-flex items-center gap-1 text-[10px] font-medium px-1.5 py-0.5 rounded-md whitespace-nowrap ${
+        eveningMode ? 'bg-amber-400/15 text-amber-400/80' : 'bg-slate-200/80 text-slate-600'
+      }`}
+    >
+      {pulsing && (
+        <span
+          aria-hidden="true"
+          className={`inline-block w-1.5 h-1.5 rounded-full animate-pulse motion-reduce:animate-none ${
+            eveningMode ? 'bg-amber-400' : 'bg-blue-500'
+          }`}
+        />
+      )}
       {children}
     </span>
   );
