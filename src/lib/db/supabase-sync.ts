@@ -11,12 +11,32 @@
  * - Skips overwrite when distance < 5km and existing confidence is not NULL
  * - Fuzzy normalizer results are never stored as coordinates
  *
+ * Confidence-aware category handling (central classifier):
+ * - Raw scraper-provided category/tags are persisted as source_category_raw /
+ *   source_tags_raw and are only signals, never the final answer.
+ * - The deterministic classifier runs inline on every upsert and writes
+ *   category + tags + category_confidence + category_source + category_version.
+ * - category_locked=true on an existing row prevents any overwrite.
+ * - New deterministic confidence only overwrites existing categorization when
+ *   its rank is <= the existing rank (never downgrades ai -> ai_low silently).
+ * - Events that the deterministic stage cannot accept are flagged
+ *   category_needs_review=true for the batch AI script.
+ *
  * Used by runScraper() so every scraper writes directly to Supabase
  * in addition to SQLite (dual-write pattern).
  */
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
-import type { ScrapedEvent } from '@/types/events';
-import { categorizeEventMulti } from '@/lib/categories';
+import type {
+  CategoryCandidate,
+  CategoryConfidence,
+  CategorySource,
+  ScrapedEvent,
+} from '@/types/events';
+import {
+  classifyDeterministic,
+  categoryConfidenceRank,
+  CLASSIFIER_VERSION,
+} from '@/lib/category-classifier';
 import { normalizeEventLocation } from '@/lib/location-normalizer';
 import { generateFingerprint } from '@/lib/dedup/fingerprint';
 
@@ -73,6 +93,15 @@ interface ExistingRow {
   longitude: number | null;
   geocoding_confidence: string | null;
   geocoding_source: string | null;
+  category: string | null;
+  tags: string[] | null;
+  category_confidence: string | null;
+  category_source: string | null;
+  category_version: string | null;
+  category_locked: boolean | null;
+  category_needs_review: boolean | null;
+  category_reason: string | null;
+  category_candidates: unknown;
 }
 
 /**
@@ -105,7 +134,11 @@ async function prefetchExistingRows(
     const idSlice = uniqueSourceIds.slice(i, i + SUB_BATCH);
     const { data, error } = await supabase
       .from('events')
-      .select('source_name, source_id, latitude, longitude, geocoding_confidence, geocoding_source')
+      .select(
+        'source_name, source_id, latitude, longitude, geocoding_confidence, geocoding_source, ' +
+          'category, tags, category_confidence, category_source, category_version, ' +
+          'category_locked, category_needs_review, category_reason, category_candidates',
+      )
       .in('source_name', uniqueSourceNames)
       .in('source_id', idSlice);
 
@@ -113,13 +146,15 @@ async function prefetchExistingRows(
       console.error('[supabase-sync] prefetch error:', error.message);
       continue;
     }
-    if (data) {
-      for (const row of data) {
-        const key = `${row.source_name}::${row.source_id}`;
-        // Client-side filter: only include rows that match our exact composite keys
-        if (expectedKeys.has(key)) {
-          map.set(key, row as ExistingRow);
-        }
+    // Supabase's generated types infer a narrow row shape from the SELECT
+    // string; our SELECT is long enough that it falls back to a pessimistic
+    // union, so we widen to ExistingRow[] explicitly.
+    const rows = (data ?? []) as unknown as ExistingRow[];
+    for (const row of rows) {
+      const key = `${row.source_name}::${row.source_id}`;
+      // Client-side filter: only include rows that match our exact composite keys
+      if (expectedKeys.has(key)) {
+        map.set(key, row);
       }
     }
   }
@@ -219,12 +254,93 @@ function shouldOverwriteCoords(
   return true;
 }
 
+interface ResolvedCategory {
+  category: string | null;
+  tags: string[] | null;
+  confidence: CategoryConfidence | null;
+  source: CategorySource | null;
+  version: string | null;
+  needsReview: boolean;
+  reason: string | null;
+  candidates: CategoryCandidate[] | null;
+  locked: boolean;
+}
+
+/**
+ * Resolve the canonical category for an incoming event by running the central
+ * deterministic classifier and reconciling with any existing row (lock + rank).
+ * `source_category_raw` / `source_tags_raw` are returned separately; callers
+ * persist them without modification.
+ */
+function resolveCategory(
+  event: ScrapedEvent,
+  existing: ExistingRow | undefined,
+): ResolvedCategory {
+  const outcome = classifyDeterministic({
+    title: event.title,
+    description: event.description ?? null,
+    source_tags_raw: event.tags ?? null,
+    source_category_raw: event.category ?? null,
+    source_name: event.source_name,
+    organizer: event.organizer ?? null,
+    location_name: event.location_name ?? null,
+  });
+
+  // Lock overrides everything: keep existing canonical values as-is.
+  if (existing && existing.category_locked) {
+    return {
+      category: existing.category,
+      tags: existing.tags,
+      confidence: (existing.category_confidence as CategoryConfidence | null) ?? null,
+      source: (existing.category_source as CategorySource | null) ?? null,
+      version: existing.category_version ?? null,
+      needsReview: Boolean(existing.category_needs_review),
+      reason: existing.category_reason,
+      candidates: (existing.category_candidates as CategoryCandidate[] | null) ?? null,
+      locked: true,
+    };
+  }
+
+  // If the new deterministic outcome is strictly worse than what is already
+  // stored, keep the existing canonical values. This prevents the pipeline
+  // from silently downgrading an `ai` decision to an `ai_low` provisional.
+  if (existing?.category_confidence) {
+    const existingRank = categoryConfidenceRank(existing.category_confidence);
+    const newRank = categoryConfidenceRank(outcome.confidence);
+    const existingIsCurrentVersion = existing.category_version === CLASSIFIER_VERSION;
+    if (existingIsCurrentVersion && existingRank < newRank) {
+      return {
+        category: existing.category,
+        tags: existing.tags,
+        confidence: existing.category_confidence as CategoryConfidence,
+        source: (existing.category_source as CategorySource | null) ?? null,
+        version: existing.category_version,
+        needsReview: Boolean(existing.category_needs_review),
+        reason: existing.category_reason,
+        candidates: (existing.category_candidates as CategoryCandidate[] | null) ?? null,
+        locked: false,
+      };
+    }
+  }
+
+  return {
+    category: outcome.category,
+    tags: outcome.tags,
+    confidence: outcome.confidence,
+    source: outcome.source,
+    version: outcome.version,
+    needsReview: outcome.needsReview,
+    reason: outcome.reason,
+    candidates: outcome.candidates,
+    locked: Boolean(existing?.category_locked),
+  };
+}
+
 /** Maps a ScrapedEvent to the Supabase events row shape. */
 function toSupabaseRow(
   event: ScrapedEvent,
   existingMap: Map<string, ExistingRow>
 ) {
-  const tags = categorizeEventMulti(event.title, event.description, event.tags);
   const resolved = resolveCoordinates(event);
 
   const key = `${event.source_name}::${event.source_id}`;
@@ -245,6 +361,8 @@ function toSupabaseRow(
     }
   }
 
+  const categoryResult = resolveCategory(event, existing);
+
   return {
     source_type: 'scraped' as const,
     source_name: event.source_name,
@@ -261,8 +379,17 @@ function toSupabaseRow(
     district: event.district ?? null,
     latitude: finalLat,
     longitude: finalLng,
-    category: event.category ?? null,
-    tags: tags.length > 0 ? tags : null,
+    category: categoryResult.category,
+    tags: categoryResult.tags && categoryResult.tags.length > 0 ? categoryResult.tags : null,
+    source_category_raw: event.category ?? null,
+    source_tags_raw: event.tags ?? null,
+    category_confidence: categoryResult.confidence,
+    category_source: categoryResult.source,
+    category_version: categoryResult.version,
+    category_locked: categoryResult.locked,
+    category_needs_review: categoryResult.needsReview,
+    category_reason: categoryResult.reason,
+    category_candidates: categoryResult.candidates,
     price_text: event.price_text ?? null,
     price_min: event.price_min ?? null,
     price_max: event.price_max ?? null,

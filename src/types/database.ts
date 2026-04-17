@@ -83,6 +83,15 @@ export type Database = {
           event_series_id: string | null
           content_fingerprint: string | null
           parent_event_id: string | null
+          source_category_raw: string | null
+          source_tags_raw: string[] | null
+          category_confidence: string | null
+          category_source: string | null
+          category_version: string | null
+          category_locked: boolean
+          category_needs_review: boolean
+          category_reason: string | null
+          category_candidates: Json | null
           created_at: string
           updated_at: string
         }

@@ -61,6 +61,7 @@ function parseArgs(): PipelineOptions {
     skipVenues: has('--skip-venues'),
     skipGeocoding: has('--skip-geocoding'),
     skipScore: has('--skip-score'),
+    skipCategorization: has('--skip-categorization'),
     dryRun: has('--dry-run'),
   };
 }
@@ -126,6 +127,16 @@ async function main() {
     steps.normalize = await runStep('normalize', async () => {
       execStep('Normalize locations', `npx tsx ${envFlag}src/scripts/normalize-locations.ts`);
     }, steps);
+
+    if (!opts.skipCategorization) {
+      steps.categorization = await runStep('categorization', async () => {
+        // Deterministic classification already ran inline during upsert; this
+        // step resolves the hard cases with OpenAI. --all is not passed here;
+        // the default filter targets needs-review / stale / Sonstiges rows.
+        execStep('Categorize events (AI fallback for hard cases)',
+          `npx tsx ${envFlag}src/scripts/categorize-events.ts`);
+      }, steps);
+    }
 
     if (!opts.skipGeocoding) {
       steps.geocoding = await runStep('geocoding', async () => {

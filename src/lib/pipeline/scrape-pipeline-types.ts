@@ -53,6 +53,7 @@ export interface PipelineOptions {
   skipVenues?: boolean;
   skipGeocoding?: boolean;
   skipScore?: boolean;
+  skipCategorization?: boolean;
   dryRun?: boolean;
 }
 

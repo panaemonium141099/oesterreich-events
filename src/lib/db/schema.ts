@@ -65,6 +65,19 @@ export function initializeDatabase(db: Database.Database): void {
     );
     CREATE INDEX IF NOT EXISTS idx_event_tags_tag ON event_tags(tag);
     CREATE INDEX IF NOT EXISTS idx_event_tags_event_id ON event_tags(event_id);
+
+    CREATE TABLE IF NOT EXISTS category_cache (
+      input_hash          TEXT PRIMARY KEY,
+      classifier_version  TEXT NOT NULL,
+      category            TEXT NOT NULL,
+      tags                TEXT NOT NULL,       -- JSON array
+      confidence          TEXT NOT NULL,
+      source              TEXT NOT NULL,
+      reason              TEXT,
+      candidates          TEXT,                -- JSON array
+      cached_at           TEXT DEFAULT (datetime('now'))
+    );
+    CREATE INDEX IF NOT EXISTS idx_category_cache_version ON category_cache(classifier_version);
   `);
 
   // Migration: add ticket_url column to existing databases
@@ -72,4 +85,31 @@ export function initializeDatabase(db: Database.Database): void {
   if (!columns.some(c => c.name === 'ticket_url')) {
     db.exec('ALTER TABLE events ADD COLUMN ticket_url TEXT');
   }
+
+  // Migration: add category classifier columns to existing databases. These
+  // mirror the Postgres columns added in 20260417_add_category_classifier.sql
+  // so both sides of the dual-write speak the same schema.
+  const refreshedColumns = db.pragma('table_info(events)') as Array<{ name: string }>;
+  const columnNames = new Set(refreshedColumns.map(c => c.name));
+  const classifierColumns: Array<[string, string]> = [
+    ['source_category_raw', 'TEXT'],
+    ['source_tags_raw', 'TEXT'],           // JSON array on SQLite side
+    ['category_confidence', 'TEXT'],
+    ['category_source', 'TEXT'],
+    ['category_version', 'TEXT'],
+    ['category_locked', 'INTEGER DEFAULT 0'],
+    ['category_needs_review', 'INTEGER DEFAULT 0'],
+    ['category_reason', 'TEXT'],
+    ['category_candidates', 'TEXT'],        // JSON array on SQLite side
+  ];
+  for (const [name, type] of classifierColumns) {
+    if (!columnNames.has(name)) {
+      db.exec(`ALTER TABLE events ADD COLUMN ${name} ${type}`);
+    }
+  }
+  db.exec(`
+    CREATE INDEX IF NOT EXISTS idx_events_category_confidence ON events(category_confidence);
+    CREATE INDEX IF NOT EXISTS idx_events_category_needs_review ON events(category_needs_review);
+    CREATE INDEX IF NOT EXISTS idx_events_category_version ON events(category_version);
+  `);
 }

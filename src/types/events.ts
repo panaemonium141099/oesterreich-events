@@ -43,8 +43,34 @@ export interface Event {
   content_fingerprint?: string | null;
   /** FK to parent event (e.g. festival umbrella event for derived artist events). */
   parent_event_id?: string | null;
+  // Category classifier provenance. The canonical `category` and `tags` above
+  // are produced by the central classifier; these fields record how.
+  source_category_raw?: string | null;
+  source_tags_raw?: string[] | null;
+  category_confidence?: CategoryConfidence | null;
+  category_source?: CategorySource | null;
+  category_version?: string | null;
+  category_locked?: boolean;
+  category_needs_review?: boolean;
+  category_reason?: string | null;
+  category_candidates?: CategoryCandidate[] | null;
   created_at: string;
   updated_at: string;
+}
+
+export type CategoryConfidence =
+  | 'manual'
+  | 'rules_high'
+  | 'rules_medium'
+  | 'ai'
+  | 'ai_low';
+
+export type CategorySource = 'manual' | 'rules' | 'ai';
+
+export interface CategoryCandidate {
+  category: string;
+  score: number;
+  evidence?: string[];
 }
 
 export interface ScrapedEvent {

@@ -1,6 +1,10 @@
 import { getDatabase } from './connection';
 import type { Event, EventFilters, ScrapedEvent } from '@/types/events';
-import { categorizeEventMulti } from '@/lib/categories';
+import {
+  classifyDeterministic,
+  categoryConfidenceRank,
+  CLASSIFIER_VERSION,
+} from '@/lib/category-classifier';
 
 export function getEvents(filters: EventFilters = {}): { events: Event[]; total: number } {
   const db = getDatabase();
@@ -95,14 +99,77 @@ export function upsertEvent(event: ScrapedEvent): { isNew: boolean } {
   }
 
   const existing = db.prepare(
-    'SELECT id FROM events WHERE source_name = ? AND source_id = ?'
-  ).get(event.source_name, event.source_id);
+    `SELECT id, category, tags, category_confidence, category_source,
+            category_version, category_locked, category_needs_review,
+            category_reason, category_candidates
+       FROM events WHERE source_name = ? AND source_id = ?`,
+  ).get(event.source_name, event.source_id) as
+    | {
+        id: number;
+        category: string | null;
+        tags: string | null;
+        category_confidence: string | null;
+        category_source: string | null;
+        category_version: string | null;
+        category_locked: number | null;
+        category_needs_review: number | null;
+        category_reason: string | null;
+        category_candidates: string | null;
+      }
+    | undefined;
 
-  // Compute multi-tags for the event_tags junction table
-  const multiTags = categorizeEventMulti(event.title, event.description, event.tags);
+  // Central classifier: deterministic run using the full signal set.
+  const outcome = classifyDeterministic({
+    title: event.title,
+    description: event.description ?? null,
+    source_tags_raw: event.tags ?? null,
+    source_category_raw: event.category ?? null,
+    source_name: event.source_name,
+    organizer: event.organizer ?? null,
+    location_name: event.location_name ?? null,
+  });
+
+  // Reconcile with existing row: respect the lock, and never downgrade
+  // confidence silently when the stored row was already classified at a
+  // higher rank with the current classifier version.
+  const existingLocked = Boolean(existing?.category_locked);
+  const existingRank = categoryConfidenceRank(existing?.category_confidence);
+  const newRank = categoryConfidenceRank(outcome.confidence);
+  const existingIsCurrentVersion = existing?.category_version === CLASSIFIER_VERSION;
+  const keepExistingCategory =
+    existingLocked ||
+    (!!existing?.category_confidence && existingIsCurrentVersion && existingRank < newRank);
+
+  const finalCategory = keepExistingCategory && existing
+    ? existing.category
+    : outcome.category;
+  const finalTags = keepExistingCategory && existing?.tags
+    ? (JSON.parse(existing.tags) as string[])
+    : outcome.tags;
+  const finalConfidence = keepExistingCategory && existing
+    ? existing.category_confidence
+    : outcome.confidence;
+  const finalSource = keepExistingCategory && existing
+    ? existing.category_source
+    : outcome.source;
+  const finalVersion = keepExistingCategory && existing
+    ? existing.category_version
+    : outcome.version;
+  const finalNeedsReview = keepExistingCategory && existing
+    ? Boolean(existing.category_needs_review)
+    : outcome.needsReview;
+  const finalReason = keepExistingCategory && existing
+    ? existing.category_reason
+    : outcome.reason;
+  const finalCandidates = keepExistingCategory && existing?.category_candidates
+    ? existing.category_candidates
+    : JSON.stringify(outcome.candidates);
+  const finalLocked = existingLocked ? 1 : 0;
+
+  const sourceCategoryRaw = event.category ?? null;
+  const sourceTagsRawJson = event.tags ? JSON.stringify(event.tags) : null;
 
   if (existing) {
-    const existingRow = existing as { id: number };
     db.prepare(`
       UPDATE events SET
         source_url = @source_url,
@@ -125,6 +192,15 @@ export function upsertEvent(event: ScrapedEvent): { isNew: boolean } {
         organizer = @organizer,
         tags = @tags,
         ticket_url = @ticket_url,
+        source_category_raw = @source_category_raw,
+        source_tags_raw = @source_tags_raw,
+        category_confidence = @category_confidence,
+        category_source = @category_source,
+        category_version = @category_version,
+        category_locked = @category_locked,
+        category_needs_review = @category_needs_review,
+        category_reason = @category_reason,
+        category_candidates = @category_candidates,
         updated_at = datetime('now')
       WHERE source_name = @source_name AND source_id = @source_id
     `).run({
@@ -140,20 +216,29 @@ export function upsertEvent(event: ScrapedEvent): { isNew: boolean } {
       district: event.district || null,
       latitude: event.latitude || null,
       longitude: event.longitude || null,
-      category: event.category || null,
+      category: finalCategory,
       price_text: event.price_text || null,
       price_min: event.price_min || null,
       price_max: event.price_max || null,
       image_url: event.image_url || null,
       organizer: event.organizer || null,
-      tags: event.tags ? JSON.stringify(event.tags) : null,
+      tags: finalTags ? JSON.stringify(finalTags) : null,
       ticket_url: event.ticket_url || null,
+      source_category_raw: sourceCategoryRaw,
+      source_tags_raw: sourceTagsRawJson,
+      category_confidence: finalConfidence,
+      category_source: finalSource,
+      category_version: finalVersion,
+      category_locked: finalLocked,
+      category_needs_review: finalNeedsReview ? 1 : 0,
+      category_reason: finalReason,
+      category_candidates: finalCandidates,
       source_name: event.source_name,
       source_id: event.source_id,
     });
 
-    // Sync event_tags junction table
-    syncEventTags(db, existingRow.id, multiTags);
+    // Sync event_tags junction table with the final canonical tags.
+    syncEventTags(db, existing.id, finalTags);
 
     return { isNew: false };
   }
@@ -163,12 +248,18 @@ export function upsertEvent(event: ScrapedEvent): { isNew: boolean } {
       source_id, source_name, source_url, title, description,
       start_date, end_date, location_name, address, postal_code,
       bundesland, district, latitude, longitude, category, price_text,
-      price_min, price_max, image_url, organizer, tags, ticket_url
+      price_min, price_max, image_url, organizer, tags, ticket_url,
+      source_category_raw, source_tags_raw, category_confidence,
+      category_source, category_version, category_locked,
+      category_needs_review, category_reason, category_candidates
     ) VALUES (
       @source_id, @source_name, @source_url, @title, @description,
       @start_date, @end_date, @location_name, @address, @postal_code,
       @bundesland, @district, @latitude, @longitude, @category, @price_text,
-      @price_min, @price_max, @image_url, @organizer, @tags, @ticket_url
+      @price_min, @price_max, @image_url, @organizer, @tags, @ticket_url,
+      @source_category_raw, @source_tags_raw, @category_confidence,
+      @category_source, @category_version, @category_locked,
+      @category_needs_review, @category_reason, @category_candidates
     )
   `).run({
     source_id: event.source_id,
@@ -185,19 +276,28 @@ export function upsertEvent(event: ScrapedEvent): { isNew: boolean } {
     district: event.district || null,
     latitude: event.latitude || null,
     longitude: event.longitude || null,
-    category: event.category || null,
+    category: finalCategory,
     price_text: event.price_text || null,
     price_min: event.price_min || null,
     price_max: event.price_max || null,
     image_url: event.image_url || null,
     organizer: event.organizer || null,
-    tags: event.tags ? JSON.stringify(event.tags) : null,
+    tags: finalTags ? JSON.stringify(finalTags) : null,
     ticket_url: event.ticket_url || null,
+    source_category_raw: sourceCategoryRaw,
+    source_tags_raw: sourceTagsRawJson,
+    category_confidence: finalConfidence,
+    category_source: finalSource,
+    category_version: finalVersion,
+    category_locked: finalLocked,
+    category_needs_review: finalNeedsReview ? 1 : 0,
+    category_reason: finalReason,
+    category_candidates: finalCandidates,
   });
 
-  // Write to event_tags junction table
+  // Write to event_tags junction table with final canonical tags.
   const newEventId = result.lastInsertRowid as number;
-  syncEventTags(db, newEventId, multiTags);
+  syncEventTags(db, newEventId, finalTags);
 
   return { isNew: true };
 }

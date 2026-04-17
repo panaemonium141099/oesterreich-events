@@ -4,6 +4,7 @@ export const STEP_DEPENDENCIES: Record<string, string[]> = {
   scrapers: [],
   venues: [],
   normalize: [],
+  categorization: ['normalize'],
   geocoding: ['normalize'],
   scoring: ['normalize'],
   artist_matching: [],
