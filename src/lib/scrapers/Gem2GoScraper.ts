@@ -1,6 +1,6 @@
 import * as cheerio from 'cheerio';
 import { BaseScraper } from './BaseScraper';
-import { categorizeEvent } from '../categories';
+import { categorizeEvent } from '../categorize';
 import { GEM2GO_GEMEINDEN, type Gem2GoGemeinde } from './gemeinden/gem2goGemeinden';
 import type { ScrapedEvent } from '@/types/events';
 

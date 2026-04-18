@@ -1,6 +1,6 @@
 import * as cheerio from 'cheerio';
 import { BaseScraper } from './BaseScraper';
-import { categorizeEvent } from '../categories';
+import { categorizeEvent } from '../categorize';
 import { getDistrictByPostalCode, getDistrictByLocation, getDistrictByCoordinates } from '../districts';
 import type { ScrapedEvent } from '@/types/events';
 

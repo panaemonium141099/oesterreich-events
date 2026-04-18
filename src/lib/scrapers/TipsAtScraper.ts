@@ -9,7 +9,7 @@
  */
 import * as cheerio from 'cheerio';
 import { BaseScraper } from './BaseScraper';
-import { categorizeEvent } from '../categories';
+import { categorizeEvent } from '../categorize';
 import type { ScrapedEvent } from '@/types/events';
 
 export class TipsAtScraper extends BaseScraper {

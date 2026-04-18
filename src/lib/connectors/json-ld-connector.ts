@@ -13,7 +13,7 @@
  */
 
 import * as cheerio from 'cheerio';
-import { categorizeEvent } from '../categories';
+import { categorizeEvent } from '../categorize';
 import type { ScrapedEvent } from '@/types/events';
 import type { Venue } from '@/types/venues';
 

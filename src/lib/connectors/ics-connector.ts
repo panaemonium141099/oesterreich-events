@@ -18,7 +18,7 @@
 
 import * as ical from 'node-ical';
 import { DateTime } from 'luxon';
-import { categorizeEvent } from '../categories';
+import { categorizeEvent } from '../categorize';
 import type { ScrapedEvent } from '@/types/events';
 import type { VEvent, ParameterValue, CalendarComponent, EventInstance } from 'node-ical';
 

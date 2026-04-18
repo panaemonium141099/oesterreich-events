@@ -1,5 +1,5 @@
 import { BaseScraper } from './BaseScraper';
-import { categorizeEvent } from '../categories';
+import { categorizeEvent } from '../categorize';
 import type { ScrapedEvent } from '@/types/events';
 
 /**

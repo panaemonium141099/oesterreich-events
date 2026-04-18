@@ -65,19 +65,6 @@ export function initializeDatabase(db: Database.Database): void {
     );
     CREATE INDEX IF NOT EXISTS idx_event_tags_tag ON event_tags(tag);
     CREATE INDEX IF NOT EXISTS idx_event_tags_event_id ON event_tags(event_id);
-
-    CREATE TABLE IF NOT EXISTS category_cache (
-      input_hash          TEXT PRIMARY KEY,
-      classifier_version  TEXT NOT NULL,
-      category            TEXT NOT NULL,
-      tags                TEXT NOT NULL,       -- JSON array
-      confidence          TEXT NOT NULL,
-      source              TEXT NOT NULL,
-      reason              TEXT,
-      candidates          TEXT,                -- JSON array
-      cached_at           TEXT DEFAULT (datetime('now'))
-    );
-    CREATE INDEX IF NOT EXISTS idx_category_cache_version ON category_cache(classifier_version);
   `);
 
   // Migration: add ticket_url column to existing databases

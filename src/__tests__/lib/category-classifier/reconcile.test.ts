@@ -16,11 +16,11 @@ function make(existing: Partial<ExistingCategoryRow>): ExistingCategoryRow {
   };
 }
 
-const incoming = (overrides: Partial<Parameters<typeof reconcile>[1]> = {}) => ({
-  category: 'Musik' as const,
-  tags: ['Musik'] as const,
-  confidence: 'rules_high' as const,
-  source: 'rules' as const,
+const incoming = (overrides: Partial<Parameters<typeof reconcile>[1]> = {}): Parameters<typeof reconcile>[1] => ({
+  category: 'Musik',
+  tags: ['Musik'],
+  confidence: 'rules_high',
+  source: 'rules',
   version: CLASSIFIER_VERSION,
   needsReview: false,
   reason: 'gate2',

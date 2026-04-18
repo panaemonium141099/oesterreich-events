@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { categorizeEvent, CATEGORIES } from '@/lib/categories';
+import { CATEGORIES } from '@/lib/categories';
+import { categorizeEvent } from '@/lib/categorize';
 
 describe('categorizeEvent', () => {
   describe('Feratel tag mapping (highest priority)', () => {

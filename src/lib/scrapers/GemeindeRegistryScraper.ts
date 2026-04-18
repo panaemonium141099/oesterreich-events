@@ -3,7 +3,7 @@ import * as vm from 'vm';
 import { readFileSync, readdirSync, writeFileSync, existsSync, mkdirSync } from 'fs';
 import { join } from 'path';
 import { BaseScraper } from './BaseScraper';
-import { categorizeEvent } from '../categories';
+import { categorizeEvent } from '../categorize';
 import { detectNextPage, detectMonthNavigation, MAX_PAGES_PER_SITE } from './pagination';
 import type { ScrapedEvent } from '@/types/events';
 

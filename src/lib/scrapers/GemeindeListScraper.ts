@@ -1,6 +1,6 @@
 import * as cheerio from 'cheerio';
 import { BaseScraper } from './BaseScraper';
-import { categorizeEvent } from '../categories';
+import { categorizeEvent } from '../categorize';
 import { GEMEINDEN, type GemeindeInfo } from './gemeinden/gemeindeList';
 import type { ScrapedEvent } from '@/types/events';
 import { detectNextPage, detectMonthNavigation, MAX_PAGES_PER_SITE } from './pagination';

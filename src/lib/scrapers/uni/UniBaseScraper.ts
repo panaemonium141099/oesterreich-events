@@ -1,6 +1,6 @@
 import * as cheerio from 'cheerio';
 import { BaseScraper } from '../BaseScraper';
-import { categorizeEventMulti } from '../../categories';
+import { categorizeEventMulti } from '../../categorize';
 import type { ScrapedEvent } from '@/types/events';
 
 /**

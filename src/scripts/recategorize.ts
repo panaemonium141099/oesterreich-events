@@ -5,7 +5,7 @@
 
 import Database from 'better-sqlite3';
 import path from 'path';
-import { categorizeEvent } from '../lib/categories';
+import { categorizeEvent } from '../lib/categorize';
 
 const DB_PATH = path.join(process.cwd(), 'data', 'events.db');
 const db = new Database(DB_PATH);
