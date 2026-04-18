@@ -12,7 +12,22 @@
 
 import type { Category } from '@/types/events';
 
-export const CLASSIFIER_VERSION = 'cat-v1' as const;
+/**
+ * Compound classifier version. Three independent components allow us to
+ * invalidate caches and trigger re-runs at different granularities:
+ *
+ * - `cat-vN`      — fundamental confidence model / gate structure change
+ * - `rulesN`      — lexicon, scoring weights, blocker or disambiguator change
+ * - `promptN`     — OpenAI system prompt change
+ *
+ * Events with `category_version` not matching `cat-v2-rules1-*` are considered
+ * stale and are re-run by the deterministic-backfill pass. Cache keys embed
+ * the full version string so any bump invalidates them automatically.
+ */
+export const CLASSIFIER_VERSION = 'cat-v2-rules1-prompt1' as const;
+
+/** Prefix used by the backfill query's LIKE filter. Bump when rules change. */
+export const CLASSIFIER_VERSION_PREFIX = 'cat-v2-rules1-' as const;
 
 export const CATEGORIES: Category[] = [
   'Musik',
@@ -177,13 +192,23 @@ export const CATEGORY_DEFINITIONS: Record<Category, CategoryDefinition> = {
   },
 };
 
-/** Confidence precedence helper — used by supabase-sync and batch script. */
+/**
+ * Confidence precedence helper. Lower rank = higher priority.
+ *
+ * Used by `reconcile.ts` to enforce overwrite semantics centrally:
+ *   manual  untouchable
+ *   rules_exact / rules_high  never overwritten by rules_low
+ *   ai_low  never overwrites manual or rules_high
+ *   same-rank + same-version + same-category  → no-op
+ */
 export const CATEGORY_CONFIDENCE_RANK: Record<string, number> = {
   manual: 0,
-  rules_high: 1,
-  rules_medium: 2,
-  ai: 3,
-  ai_low: 4,
+  rules_exact: 1,
+  rules_high: 2,
+  rules_medium: 3,
+  rules_low: 4,
+  ai: 5,
+  ai_low: 6,
 };
 
 export function categoryConfidenceRank(

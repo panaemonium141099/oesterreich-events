@@ -1,7 +1,27 @@
 /**
- * Signal extraction: turn a normalised classifier input into an array of
- * scored evidence rows. Each row records (category, score, evidence) so the
- * audit log can later explain exactly why a category won.
+ * Signal extraction — cat-v2.
+ *
+ * Turns a normalised classifier input into evidence rows per category. The
+ * matcher uses four distinct strategies in priority order:
+ *
+ *   1. Trusted raw-tag exact match               → +100  (trusted_raw_tag)
+ *   2. Trusted source_name exact match            → +100 (trusted_source)
+ *   3. High-precision phrase (word-boundary)      → +20  (precision_phrase)
+ *   4. High-precision pattern (curated regex)     → +20  (precision_pattern)
+ *   5. High-precision token (exact whole-word)    → +14  (precision_token)
+ *   6. Weak stem contains (substring, ≥6 chars)   → +8   (weak_stem) ← corroboration only
+ *   7. Weak context token (exact whole-word)      → +6   (weak_context) ← corroboration only
+ *   8. Description signal (any of the above on cleaned description) → +4 ← corroboration only
+ *   9. Negative blocker (substring on full text)  → -18  (blocker)
+ *
+ * After raw extraction the signals are:
+ *   - Deduped within a category by match span (phrase vs token on same range counts once).
+ *   - Deduped by stem-family (konzert + sommerkonzert count once).
+ *   - Deduped across title/description (keyword in both counts once).
+ *   - Capped by family (max 2 title, 1 raw-tag, 1 source, 1 description, 1 weak-stem, 1 disambiguator).
+ *
+ * Location detox runs at the top of `extractSignals` — trailing place names
+ * are stripped via GeoNames-backed `stripLocationTails` before lexing.
  */
 
 import type { Category } from '@/types/events';
@@ -9,276 +29,481 @@ import type { NormalizedInput } from './normalization';
 import { normalizeText } from './normalization';
 import {
   SCORE,
-  TRUSTED_RAW_TAG_MAP,
-  STRONG_TITLE_PHRASES,
-  CATEGORY_TOKENS,
-  BLOCKERS,
-  SOURCE_PRIORS,
+  LEXICON,
+  NEGATIVE_BLOCKERS,
 } from './rules';
+import { trustedSourceCategoryFor } from './source-registry';
 import { CATEGORIES } from './taxonomy';
+import { stripLocationTails } from './location-detox';
+
+export type EvidenceFamily =
+  | 'trusted_raw_tag'
+  | 'trusted_source'
+  | 'title_precision'
+  | 'raw_tag_match'
+  | 'source_prior'
+  | 'description'
+  | 'weak_stem'
+  | 'weak_context'
+  | 'blocker';
 
 export interface Evidence {
   category: Category;
   score: number;
-  /** Short description of what matched, e.g. 'title_token:konzert' */
+  family: EvidenceFamily;
+  /** Short match descriptor (e.g. "phrase:weihnachtsmarkt"). */
   kind: string;
+  /** Raw substring / token that matched. */
   source: string;
-}
-
-/**
- * Check if any of the needles appears as a substring inside haystack. Substring
- * match (not whole-word) because normalised text already folds dashes/spaces.
- */
-function anyIn(haystack: string, needles: readonly string[]): string | null {
-  if (!haystack) return null;
-  for (const needle of needles) {
-    if (!needle) continue;
-    if (haystack.includes(needle)) return needle;
-  }
-  return null;
-}
-
-/**
- * Match a needle inside haystack with a soft word-boundary guard for short
- * tokens: needles of length < 5 must be surrounded by non-letter characters to
- * avoid false positives like "rad" matching inside "paradeiser". Longer tokens
- * are allowed to substring-match (so German compounds like "kindertheater"
- * trigger the "kinder" keyword naturally).
- */
-function matchKeyword(haystack: string, needle: string): boolean {
-  if (!haystack || !needle) return false;
-  if (needle.length >= 5) return haystack.includes(needle);
-  // Short token: require boundary (start/end of string or non-letter adjacent)
-  const idx = haystack.indexOf(needle);
-  if (idx === -1) return false;
-  const before = idx === 0 ? ' ' : haystack[idx - 1];
-  const afterIdx = idx + needle.length;
-  const after = afterIdx >= haystack.length ? ' ' : haystack[afterIdx];
-  const isLetter = (c: string) => /[a-z0-9]/i.test(c);
-  if (isLetter(before) || isLetter(after)) {
-    // Try next occurrence
-    const rest = haystack.slice(idx + 1);
-    return matchKeyword(rest, needle);
-  }
-  return true;
-}
-
-function firstKeywordHit(haystack: string, keywords: readonly string[]): string | null {
-  for (const kw of keywords) {
-    if (matchKeyword(haystack, kw)) return kw;
-  }
-  return null;
+  /** `[start, end)` span in the searched text (title or description). -1 if N/A. */
+  span: readonly [number, number];
+  /** Stem-family id if this evidence belongs to one (for dedupe). */
+  stem?: string;
+  /** Whether this evidence originated from the cleaned description. */
+  fromDescription?: boolean;
 }
 
 export interface ExtractedSignals {
   evidence: Evidence[];
-  /** Whether any title or exact-raw-tag evidence existed for the *eventual*
-   *  winning category. Needed for the deterministic accept gate. */
-  hasTitleEvidenceFor: Map<Category, boolean>;
-  hasRawTagEvidenceFor: Map<Category, boolean>;
-  /** Set of categories blocked by some rule. */
   blocked: Map<Category, string[]>;
+  /** Normalized title AFTER location detox (for disambiguators to inspect). */
+  detoxedTitle: string;
+}
+
+// ─── Low-level matchers ───────────────────────────────────────────────────
+
+/**
+ * Exact-word match: tokens must appear as standalone words. Short needles
+ * (< 4 chars) are rejected here as unsafe; the lexicon should not list them
+ * as highPrecisionTokens. Returns the `[start, end)` span of the first hit.
+ */
+function exactWordMatch(text: string, needle: string): [number, number] | null {
+  if (!text || !needle) return null;
+  if (needle.length < 3) return null;
+  const re = new RegExp(`\\b${escapeRegex(needle)}\\b`, 'u');
+  const m = re.exec(text);
+  if (!m) return null;
+  return [m.index, m.index + m[0].length];
+}
+
+/**
+ * Word-boundary phrase match. Uses \b at start and end, which means short
+ * phrases and those with non-letter chars are matched safely.
+ */
+function phraseMatch(text: string, phrase: string): [number, number] | null {
+  if (!text || !phrase) return null;
+  const re = new RegExp(`\\b${escapeRegex(phrase)}\\b`, 'u');
+  const m = re.exec(text);
+  if (!m) return null;
+  return [m.index, m.index + m[0].length];
+}
+
+/** Curated pattern — applied as-is. */
+function patternMatch(text: string, pattern: RegExp): [number, number] | null {
+  if (!text) return null;
+  const re = new RegExp(pattern.source, pattern.flags.includes('u') ? pattern.flags : pattern.flags + 'u');
+  const m = re.exec(text);
+  if (!m) return null;
+  return [m.index, m.index + m[0].length];
+}
+
+/** Weak-stem contains: substring match allowed ONLY for needles ≥ 6 chars. */
+function weakStemContains(text: string, needle: string): [number, number] | null {
+  if (!text || !needle) return null;
+  if (needle.length < 6) return null;
+  const idx = text.indexOf(needle);
+  if (idx === -1) return null;
+  return [idx, idx + needle.length];
+}
+
+function escapeRegex(s: string): string {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+// ─── Extraction ───────────────────────────────────────────────────────────
+
+function stemFor(category: Category, matchedText: string): string | undefined {
+  const lex = LEXICON[category];
+  if (!lex) return undefined;
+  for (const [stemId, variants] of Object.entries(lex.stemFamilies)) {
+    for (const v of variants) {
+      const norm = normalizeText(v);
+      if (norm && matchedText.includes(norm)) return stemId;
+    }
+  }
+  return undefined;
+}
+
+/** Push an evidence, avoiding duplicate stems within the same family+category. */
+function pushEvidence(bag: Evidence[], ev: Evidence): void {
+  bag.push(ev);
 }
 
 export function extractSignals(norm: NormalizedInput): ExtractedSignals {
   const evidence: Evidence[] = [];
-  const hasTitleEvidenceFor = new Map<Category, boolean>();
-  const hasRawTagEvidenceFor = new Map<Category, boolean>();
   const blocked = new Map<Category, string[]>();
 
-  const titleText = norm.title;
-  const descriptionText = norm.description;
-  const sourceContext = [norm.sourceName, norm.organizer, norm.locationName]
-    .filter(Boolean)
-    .join(' ');
+  // --- Location detox ---------------------------------------------------
+  const detoxedTitle = stripLocationTails(norm.title);
 
-  // --- 1. Trusted raw-tag map (highest priority) ------------------------
-  for (const rawTag of norm.tags) {
-    const direct = TRUSTED_RAW_TAG_MAP[rawTag];
-    if (direct) {
-      evidence.push({
-        category: direct,
-        score: SCORE.TRUSTED_EXACT,
-        kind: 'trusted_raw_tag',
-        source: rawTag,
-      });
-      hasRawTagEvidenceFor.set(direct, true);
-      continue;
-    }
-    // Lowercased fallback — Feratel tags we keep in canonical casing; anything
-    // else we compare case-insensitively.
-    const lower = rawTag.toLowerCase();
-    for (const [key, cat] of Object.entries(TRUSTED_RAW_TAG_MAP)) {
-      if (key.toLowerCase() === lower) {
-        evidence.push({
-          category: cat,
-          score: SCORE.TRUSTED_EXACT,
-          kind: 'trusted_raw_tag',
-          source: rawTag,
-        });
-        hasRawTagEvidenceFor.set(cat, true);
-        break;
-      }
-    }
-  }
-
-  // --- 2. Strong title phrases (+20) ------------------------------------
-  for (const category of CATEGORIES) {
-    const phrases = STRONG_TITLE_PHRASES[category];
-    if (!phrases || phrases.length === 0) continue;
-    const normalizedPhrases = phrases.map(p => normalizeText(p));
-    const hit = anyIn(titleText, normalizedPhrases);
-    if (hit) {
-      evidence.push({
-        category,
-        score: SCORE.STRONG_TITLE_PHRASE,
-        kind: 'strong_title_phrase',
-        source: hit,
-      });
-      hasTitleEvidenceFor.set(category, true);
-    }
-  }
-
-  // --- 3. Title / tag / description token matches -----------------------
-  for (const category of CATEGORIES) {
-    const tokens = CATEGORY_TOKENS[category];
-    if (!tokens || tokens.length === 0) continue;
-    const normalizedTokens = tokens.map(t => normalizeText(t)).filter(Boolean);
-
-    const titleHit = firstKeywordHit(titleText, normalizedTokens);
-    if (titleHit) {
-      evidence.push({
-        category,
-        score: SCORE.TITLE_TOKEN,
-        kind: 'title_token',
-        source: titleHit,
-      });
-      hasTitleEvidenceFor.set(category, true);
-    }
-
-    // Token appearing inside a raw tag (not the trusted exact map) — treat as
-    // exact-raw-tag mapping signal because the scraper saw it as a category
-    // label in the source feed.
-    for (const rawTag of norm.tags) {
-      const normalizedRawTag = normalizeText(rawTag);
-      if (!normalizedRawTag) continue;
-      const rawHit = firstKeywordHit(normalizedRawTag, normalizedTokens);
-      if (rawHit) {
-        evidence.push({
-          category,
-          score: SCORE.EXACT_RAW_TAG_MAP,
-          kind: 'raw_tag_token',
-          source: `${rawTag}->${rawHit}`,
-        });
-        hasRawTagEvidenceFor.set(category, true);
-        break;
-      }
-    }
-
-    const descHit = firstKeywordHit(descriptionText, normalizedTokens);
-    if (descHit) {
-      evidence.push({
-        category,
-        score: SCORE.DESCRIPTION_SIGNAL,
-        kind: 'description_signal',
-        source: descHit,
-      });
-    }
-  }
-
-  // --- 4. Source / venue / organizer priors -----------------------------
-  if (sourceContext) {
-    const normalizedContext = normalizeText(sourceContext);
-    for (const prior of SOURCE_PRIORS) {
-      const hit = anyIn(normalizedContext, prior.whenAnyToken.map(normalizeText));
+  // --- 1. Trusted raw-tag matches --------------------------------------
+  const rawTagNormalized = norm.tags.map(t => normalizeText(t));
+  for (let i = 0; i < CATEGORIES.length; i++) {
+    const category = CATEGORIES[i];
+    const lex = LEXICON[category];
+    if (!lex) continue;
+    for (const trustedTag of lex.trustedRawTags) {
+      const needle = normalizeText(trustedTag);
+      if (!needle) continue;
+      const hit = rawTagNormalized.find(t => t === needle);
       if (hit) {
-        evidence.push({
-          category: prior.target,
-          score: prior.trustedExact ? SCORE.TRUSTED_EXACT : SCORE.SOURCE_PRIOR,
-          kind: prior.trustedExact ? 'trusted_source' : 'source_prior',
-          source: `${hit} (${prior.reason})`,
+        pushEvidence(evidence, {
+          category,
+          score: SCORE.TRUSTED_EXACT,
+          family: 'trusted_raw_tag',
+          kind: 'trusted_raw_tag',
+          source: trustedTag,
+          span: [-1, -1],
         });
       }
     }
   }
 
-  // Source-provided category is a (weak) source prior when it normalises to a
-  // known category name — treat it like a +8 nudge, not a decision.
+  // --- 2. Trusted source exact -----------------------------------------
+  const trustedSourceCategory = trustedSourceCategoryFor(norm.sourceName);
+  if (trustedSourceCategory) {
+    pushEvidence(evidence, {
+      category: trustedSourceCategory,
+      score: SCORE.TRUSTED_EXACT,
+      family: 'trusted_source',
+      kind: 'trusted_source',
+      source: norm.sourceName,
+      span: [-1, -1],
+    });
+  }
+
+  // --- 3-5. Title-based precision matches (phrase → pattern → token) ---
+  for (const category of CATEGORIES) {
+    if (category === 'Sonstiges') continue;
+    const lex = LEXICON[category];
+    if (!lex) continue;
+
+    // Phrases (normalized)
+    for (const phrase of lex.highPrecisionPhrases) {
+      const n = normalizeText(phrase);
+      if (!n) continue;
+      const span = phraseMatch(detoxedTitle, n);
+      if (span) {
+        pushEvidence(evidence, {
+          category,
+          score: SCORE.HIGH_PRECISION_PHRASE,
+          family: 'title_precision',
+          kind: 'precision_phrase',
+          source: phrase,
+          span,
+          stem: stemFor(category, n),
+        });
+      }
+    }
+
+    // Patterns
+    for (const pattern of lex.highPrecisionPatterns) {
+      const span = patternMatch(detoxedTitle, pattern);
+      if (span) {
+        const matched = detoxedTitle.slice(span[0], span[1]);
+        pushEvidence(evidence, {
+          category,
+          score: SCORE.HIGH_PRECISION_PATTERN,
+          family: 'title_precision',
+          kind: 'precision_pattern',
+          source: matched,
+          span,
+          stem: stemFor(category, matched),
+        });
+      }
+    }
+
+    // Tokens
+    for (const token of lex.highPrecisionTokens) {
+      const n = normalizeText(token);
+      const span = exactWordMatch(detoxedTitle, n);
+      if (span) {
+        pushEvidence(evidence, {
+          category,
+          score: SCORE.HIGH_PRECISION_TOKEN,
+          family: 'title_precision',
+          kind: 'precision_token',
+          source: token,
+          span,
+          stem: stemFor(category, n),
+        });
+      }
+    }
+
+    // Weak stems (corroboration only)
+    for (const stem of lex.weakStemContains) {
+      const n = normalizeText(stem);
+      const span = weakStemContains(detoxedTitle, n);
+      if (span) {
+        pushEvidence(evidence, {
+          category,
+          score: SCORE.WEAK_STEM_CONTAINS,
+          family: 'weak_stem',
+          kind: 'weak_stem',
+          source: stem,
+          span,
+          stem: stemFor(category, n),
+        });
+      }
+    }
+
+    // Weak context tokens
+    for (const token of lex.weakContextTokens) {
+      const n = normalizeText(token);
+      const span = exactWordMatch(detoxedTitle, n);
+      if (span) {
+        pushEvidence(evidence, {
+          category,
+          score: SCORE.WEAK_CONTEXT_TOKEN,
+          family: 'weak_context',
+          kind: 'weak_context',
+          source: token,
+          span,
+          stem: stemFor(category, n),
+        });
+      }
+    }
+  }
+
+  // --- 6. Raw-tag token matches (raw tag contains a category keyword) ---
+  for (const category of CATEGORIES) {
+    if (category === 'Sonstiges') continue;
+    const lex = LEXICON[category];
+    if (!lex) continue;
+
+    let rawHit: string | null = null;
+    for (const rawTag of rawTagNormalized) {
+      if (!rawTag) continue;
+      for (const token of lex.highPrecisionTokens) {
+        const n = normalizeText(token);
+        if (exactWordMatch(rawTag, n)) {
+          rawHit = `${rawTag} ~ ${token}`;
+          break;
+        }
+      }
+      if (rawHit) break;
+    }
+    if (rawHit) {
+      pushEvidence(evidence, {
+        category,
+        score: SCORE.HIGH_PRECISION_TOKEN,
+        family: 'raw_tag_match',
+        kind: 'raw_tag_token',
+        source: rawHit,
+        span: [-1, -1],
+      });
+    }
+  }
+
+  // --- 7. Description corroboration -------------------------------------
+  // Apply the same lexicon to the cleaned description, but scored at
+  // DESCRIPTION_SIGNAL (+4). Skip weak-stem + weak-context for description
+  // to keep description firmly in corroboration territory only.
+  if (norm.description) {
+    for (const category of CATEGORIES) {
+      if (category === 'Sonstiges') continue;
+      const lex = LEXICON[category];
+      if (!lex) continue;
+
+      let hit: { source: string; span: [number, number]; stem?: string } | null = null;
+
+      for (const phrase of lex.highPrecisionPhrases) {
+        const n = normalizeText(phrase);
+        const span = phraseMatch(norm.description, n);
+        if (span) { hit = { source: phrase, span, stem: stemFor(category, n) }; break; }
+      }
+      if (!hit) {
+        for (const pattern of lex.highPrecisionPatterns) {
+          const span = patternMatch(norm.description, pattern);
+          if (span) {
+            const matched = norm.description.slice(span[0], span[1]);
+            hit = { source: matched, span, stem: stemFor(category, matched) };
+            break;
+          }
+        }
+      }
+      if (!hit) {
+        for (const token of lex.highPrecisionTokens) {
+          const n = normalizeText(token);
+          const span = exactWordMatch(norm.description, n);
+          if (span) { hit = { source: token, span, stem: stemFor(category, n) }; break; }
+        }
+      }
+      if (hit) {
+        pushEvidence(evidence, {
+          category,
+          score: SCORE.DESCRIPTION_SIGNAL,
+          family: 'description',
+          kind: 'description_signal',
+          source: hit.source,
+          span: hit.span,
+          stem: hit.stem,
+          fromDescription: true,
+        });
+      }
+    }
+  }
+
+  // --- 8. Source category hint (treated as weak raw-tag prior) ---------
   if (norm.sourceCategory) {
     for (const category of CATEGORIES) {
-      if (normalizeText(category).includes(norm.sourceCategory) ||
-          norm.sourceCategory.includes(normalizeText(category))) {
-        evidence.push({
+      const n = normalizeText(category);
+      if (n && (n.includes(norm.sourceCategory) || norm.sourceCategory.includes(n))) {
+        pushEvidence(evidence, {
           category,
-          score: SCORE.SOURCE_PRIOR,
+          score: SCORE.WEAK_CONTEXT_TOKEN,
+          family: 'source_prior',
           kind: 'source_category_prior',
           source: norm.sourceCategory,
+          span: [-1, -1],
         });
         break;
       }
     }
   }
 
-  // --- 5. Blockers (-18) ------------------------------------------------
-  const blockerContext = [titleText, descriptionText, sourceContext]
+  // --- 9. Negative blockers (substring-OK on full text) -----------------
+  const blockerHaystack = [detoxedTitle, norm.description, norm.sourceName, norm.organizer, norm.locationName]
     .filter(Boolean)
     .join(' ');
-  const normalizedBlockerContext = normalizeText(blockerContext);
-  for (const blocker of BLOCKERS) {
-    const hit = anyIn(normalizedBlockerContext, blocker.whenAnyToken.map(normalizeText));
-    if (hit) {
-      evidence.push({
-        category: blocker.target,
-        score: SCORE.BLOCKER,
-        kind: 'blocker',
-        source: `${hit} (${blocker.reason})`,
-      });
-      const existing = blocked.get(blocker.target) ?? [];
-      existing.push(blocker.reason);
-      blocked.set(blocker.target, existing);
+  for (const blocker of NEGATIVE_BLOCKERS) {
+    for (const tok of blocker.whenAnyToken) {
+      const n = normalizeText(tok);
+      if (n && blockerHaystack.includes(n)) {
+        pushEvidence(evidence, {
+          category: blocker.target,
+          score: SCORE.BLOCKER,
+          family: 'blocker',
+          kind: 'blocker',
+          source: `${tok} (${blocker.reason})`,
+          span: [-1, -1],
+        });
+        const list = blocked.get(blocker.target) ?? [];
+        list.push(blocker.reason);
+        blocked.set(blocker.target, list);
+        break;
+      }
     }
   }
 
-  return { evidence, hasTitleEvidenceFor, hasRawTagEvidenceFor, blocked };
+  return { evidence, blocked, detoxedTitle };
 }
 
-/** Aggregate evidence into per-category totals, preserving evidence breakdown. */
+// ─── Aggregation with dedupe + capping ───────────────────────────────────
+
 export interface AggregatedScore {
   category: Category;
   score: number;
   evidence: Evidence[];
-  hasTitleEvidence: boolean;
-  hasRawTagEvidence: boolean;
+  /** High-precision evidences in the title (after dedupe + cap). */
+  titlePrecisionCount: number;
+  /** Distinct evidence families represented after dedupe. */
+  familyCount: number;
   hasBlocker: boolean;
   blockerReasons: string[];
 }
 
+function dedupeSpansAndStems(category: Category, evidences: Evidence[]): Evidence[] {
+  // 1. If two title_precision evidences share an overlapping span, keep the
+  //    higher-scoring one.
+  const sorted = [...evidences].sort((a, b) => b.score - a.score);
+  const kept: Evidence[] = [];
+  const occupied: Array<[number, number]> = [];
+  for (const ev of sorted) {
+    if (ev.family !== 'title_precision' || ev.span[0] < 0) { kept.push(ev); continue; }
+    const [s, e] = ev.span;
+    const overlap = occupied.some(([os, oe]) => s < oe && e > os);
+    if (overlap) continue;
+    occupied.push([s, e]);
+    kept.push(ev);
+  }
+
+  // 2. Within title_precision: dedupe by stem-family, keeping the highest score.
+  const byStem = new Map<string, Evidence>();
+  const noStem: Evidence[] = [];
+  const result: Evidence[] = [];
+  for (const ev of kept) {
+    if (ev.family !== 'title_precision') { result.push(ev); continue; }
+    if (!ev.stem) { noStem.push(ev); continue; }
+    const cur = byStem.get(ev.stem);
+    if (!cur || ev.score > cur.score) byStem.set(ev.stem, ev);
+  }
+  result.push(...byStem.values(), ...noStem);
+
+  // 3. Title-description dedupe: if the same stem appears in both title and
+  //    description for this category, drop the description signal (title wins).
+  const titleStems = new Set<string>();
+  for (const ev of result) {
+    if (ev.family === 'title_precision' && ev.stem) titleStems.add(ev.stem);
+    if (ev.family === 'weak_stem' && ev.stem) titleStems.add(ev.stem);
+  }
+  return result.filter(ev => !(ev.family === 'description' && ev.stem && titleStems.has(ev.stem)));
+}
+
+function capByFamily(category: Category, evidences: Evidence[]): Evidence[] {
+  const caps: Record<EvidenceFamily, number> = {
+    trusted_raw_tag: 1,
+    trusted_source: 1,
+    title_precision: 2,
+    raw_tag_match: 1,
+    source_prior: 1,
+    description: 1,
+    weak_stem: 1,
+    weak_context: 2,
+    blocker: 10, // blockers don't get capped; summed -18 is the desired behaviour
+  };
+  const countsByFamily = new Map<EvidenceFamily, Evidence[]>();
+  const sorted = [...evidences].sort((a, b) => b.score - a.score);
+  const out: Evidence[] = [];
+  for (const ev of sorted) {
+    const bucket = countsByFamily.get(ev.family) ?? [];
+    if (bucket.length < caps[ev.family]) {
+      bucket.push(ev);
+      countsByFamily.set(ev.family, bucket);
+      out.push(ev);
+    }
+  }
+  return out;
+}
+
 export function aggregate(signals: ExtractedSignals): AggregatedScore[] {
-  const byCategory = new Map<Category, AggregatedScore>();
-  for (const cat of CATEGORIES) {
-    byCategory.set(cat, {
-      category: cat,
-      score: 0,
-      evidence: [],
-      hasTitleEvidence: signals.hasTitleEvidenceFor.get(cat) ?? false,
-      hasRawTagEvidence: signals.hasRawTagEvidenceFor.get(cat) ?? false,
-      hasBlocker: signals.blocked.has(cat),
-      blockerReasons: signals.blocked.get(cat) ?? [],
+  // Group by category
+  const byCat = new Map<Category, Evidence[]>();
+  for (const ev of signals.evidence) {
+    const list = byCat.get(ev.category) ?? [];
+    list.push(ev);
+    byCat.set(ev.category, list);
+  }
+
+  const result: AggregatedScore[] = [];
+  for (const category of CATEGORIES) {
+    if (category === 'Sonstiges') continue; // never scored
+    const raw = byCat.get(category) ?? [];
+    const deduped = dedupeSpansAndStems(category, raw);
+    const capped = capByFamily(category, deduped);
+    const score = capped.reduce((acc, ev) => acc + ev.score, 0);
+    const titlePrecisionCount = capped.filter(e => e.family === 'title_precision').length;
+    const familyCount = new Set(capped.filter(e => e.family !== 'blocker').map(e => e.family)).size;
+    const blockerReasons = signals.blocked.get(category) ?? [];
+    result.push({
+      category,
+      score,
+      evidence: capped,
+      titlePrecisionCount,
+      familyCount,
+      hasBlocker: blockerReasons.length > 0,
+      blockerReasons,
     });
   }
-
-  for (const ev of signals.evidence) {
-    const slot = byCategory.get(ev.category);
-    if (!slot) continue;
-    slot.score += ev.score;
-    slot.evidence.push(ev);
-  }
-
-  // Sonstiges never scores above zero via evidence — it is only a fallback.
-  const sonstiges = byCategory.get('Sonstiges');
-  if (sonstiges) sonstiges.score = 0;
-
-  return Array.from(byCategory.values())
-    .filter(s => s.category !== 'Sonstiges')
-    .sort((a, b) => b.score - a.score || 0);
+  return result.sort((a, b) => b.score - a.score);
 }

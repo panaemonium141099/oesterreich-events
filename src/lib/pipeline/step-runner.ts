@@ -4,7 +4,11 @@ export const STEP_DEPENDENCIES: Record<string, string[]> = {
   scrapers: [],
   venues: [],
   normalize: [],
-  categorization: ['normalize'],
+  // Deterministic backfill runs first — cheap, free, bulk. Writes cat-v2 rules_*
+  // confidence on every stale row, so the AI-residue step only sees events the
+  // rules genuinely could not resolve.
+  categorization_backfill: ['normalize'],
+  categorization: ['normalize', 'categorization_backfill'],
   geocoding: ['normalize'],
   scoring: ['normalize'],
   artist_matching: [],

@@ -26,16 +26,10 @@
  * in addition to SQLite (dual-write pattern).
  */
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
-import type {
-  CategoryCandidate,
-  CategoryConfidence,
-  CategorySource,
-  ScrapedEvent,
-} from '@/types/events';
+import type { ScrapedEvent } from '@/types/events';
 import {
-  classifyDeterministic,
-  categoryConfidenceRank,
-  CLASSIFIER_VERSION,
+  resolveCanonicalCategory,
+  type ExistingCategoryRow,
 } from '@/lib/category-classifier';
 import { normalizeEventLocation } from '@/lib/location-normalizer';
 import { generateFingerprint } from '@/lib/dedup/fingerprint';
@@ -254,85 +248,22 @@ function shouldOverwriteCoords(
   return true;
 }
 
-interface ResolvedCategory {
-  category: string | null;
-  tags: string[] | null;
-  confidence: CategoryConfidence | null;
-  source: CategorySource | null;
-  version: string | null;
-  needsReview: boolean;
-  reason: string | null;
-  candidates: CategoryCandidate[] | null;
-  locked: boolean;
-}
-
 /**
- * Resolve the canonical category for an incoming event by running the central
- * deterministic classifier and reconciling with any existing row (lock + rank).
- * `source_category_raw` / `source_tags_raw` are returned separately; callers
- * persist them without modification.
+ * Build the category-reconciliation input shape from an existing row.
+ * Returns null when there is no pre-existing event (fresh insert path).
  */
-function resolveCategory(
-  event: ScrapedEvent,
-  existing: ExistingRow | undefined,
-): ResolvedCategory {
-  const outcome = classifyDeterministic({
-    title: event.title,
-    description: event.description ?? null,
-    source_tags_raw: event.tags ?? null,
-    source_category_raw: event.category ?? null,
-    source_name: event.source_name,
-    organizer: event.organizer ?? null,
-    location_name: event.location_name ?? null,
-  });
-
-  // Lock overrides everything: keep existing canonical values as-is.
-  if (existing && existing.category_locked) {
-    return {
-      category: existing.category,
-      tags: existing.tags,
-      confidence: (existing.category_confidence as CategoryConfidence | null) ?? null,
-      source: (existing.category_source as CategorySource | null) ?? null,
-      version: existing.category_version ?? null,
-      needsReview: Boolean(existing.category_needs_review),
-      reason: existing.category_reason,
-      candidates: (existing.category_candidates as CategoryCandidate[] | null) ?? null,
-      locked: true,
-    };
-  }
-
-  // If the new deterministic outcome is strictly worse than what is already
-  // stored, keep the existing canonical values. This prevents the pipeline
-  // from silently downgrading an `ai` decision to an `ai_low` provisional.
-  if (existing?.category_confidence) {
-    const existingRank = categoryConfidenceRank(existing.category_confidence);
-    const newRank = categoryConfidenceRank(outcome.confidence);
-    const existingIsCurrentVersion = existing.category_version === CLASSIFIER_VERSION;
-    if (existingIsCurrentVersion && existingRank < newRank) {
-      return {
-        category: existing.category,
-        tags: existing.tags,
-        confidence: existing.category_confidence as CategoryConfidence,
-        source: (existing.category_source as CategorySource | null) ?? null,
-        version: existing.category_version,
-        needsReview: Boolean(existing.category_needs_review),
-        reason: existing.category_reason,
-        candidates: (existing.category_candidates as CategoryCandidate[] | null) ?? null,
-        locked: false,
-      };
-    }
-  }
-
+function toExistingCategoryRow(row: ExistingRow | undefined): ExistingCategoryRow | null {
+  if (!row) return null;
   return {
-    category: outcome.category,
-    tags: outcome.tags,
-    confidence: outcome.confidence,
-    source: outcome.source,
-    version: outcome.version,
-    needsReview: outcome.needsReview,
-    reason: outcome.reason,
-    candidates: outcome.candidates,
-    locked: Boolean(existing?.category_locked),
+    category: row.category,
+    tags: row.tags,
+    category_confidence: row.category_confidence,
+    category_source: row.category_source,
+    category_version: row.category_version,
+    category_locked: row.category_locked,
+    category_needs_review: row.category_needs_review,
+    category_reason: row.category_reason,
+    category_candidates: row.category_candidates,
   };
 }
 
@@ -361,7 +292,18 @@ function toSupabaseRow(
     }
   }
 
-  const categoryResult = resolveCategory(event, existing);
+  const canonical = resolveCanonicalCategory(
+    {
+      title: event.title,
+      description: event.description ?? null,
+      source_tags_raw: event.tags ?? null,
+      source_category_raw: event.category ?? null,
+      source_name: event.source_name,
+      organizer: event.organizer ?? null,
+      location_name: event.location_name ?? null,
+    },
+    toExistingCategoryRow(existing),
+  );
 
   return {
     source_type: 'scraped' as const,
@@ -379,17 +321,17 @@ function toSupabaseRow(
     district: event.district ?? null,
     latitude: finalLat,
     longitude: finalLng,
-    category: categoryResult.category,
-    tags: categoryResult.tags && categoryResult.tags.length > 0 ? categoryResult.tags : null,
+    category: canonical.category,
+    tags: canonical.tags && canonical.tags.length > 0 ? canonical.tags : null,
     source_category_raw: event.category ?? null,
     source_tags_raw: event.tags ?? null,
-    category_confidence: categoryResult.confidence,
-    category_source: categoryResult.source,
-    category_version: categoryResult.version,
-    category_locked: categoryResult.locked,
-    category_needs_review: categoryResult.needsReview,
-    category_reason: categoryResult.reason,
-    category_candidates: categoryResult.candidates,
+    category_confidence: canonical.category_confidence,
+    category_source: canonical.category_source,
+    category_version: canonical.category_version,
+    category_locked: canonical.category_locked,
+    category_needs_review: canonical.category_needs_review,
+    category_reason: canonical.category_reason,
+    category_candidates: canonical.category_candidates,
     price_text: event.price_text ?? null,
     price_min: event.price_min ?? null,
     price_max: event.price_max ?? null,

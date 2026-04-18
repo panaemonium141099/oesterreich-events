@@ -1,9 +1,8 @@
 import { getDatabase } from './connection';
 import type { Event, EventFilters, ScrapedEvent } from '@/types/events';
 import {
-  classifyDeterministic,
-  categoryConfidenceRank,
-  CLASSIFIER_VERSION,
+  resolveCanonicalCategory,
+  type ExistingCategoryRow,
 } from '@/lib/category-classifier';
 
 export function getEvents(filters: EventFilters = {}): { events: Event[]; total: number } {
@@ -118,53 +117,46 @@ export function upsertEvent(event: ScrapedEvent): { isNew: boolean } {
       }
     | undefined;
 
-  // Central classifier: deterministic run using the full signal set.
-  const outcome = classifyDeterministic({
-    title: event.title,
-    description: event.description ?? null,
-    source_tags_raw: event.tags ?? null,
-    source_category_raw: event.category ?? null,
-    source_name: event.source_name,
-    organizer: event.organizer ?? null,
-    location_name: event.location_name ?? null,
-  });
+  // Central classifier + reconcile — the exact same call site used by the
+  // Supabase write path. Any drift bug would show up in both or neither.
+  const existingRow: ExistingCategoryRow | null = existing ? {
+    category: existing.category,
+    tags: existing.tags ? (JSON.parse(existing.tags) as string[]) : null,
+    category_confidence: existing.category_confidence,
+    category_source: existing.category_source,
+    category_version: existing.category_version,
+    category_locked: !!existing.category_locked,
+    category_needs_review: !!existing.category_needs_review,
+    category_reason: existing.category_reason,
+    category_candidates: existing.category_candidates
+      ? JSON.parse(existing.category_candidates)
+      : null,
+  } : null;
 
-  // Reconcile with existing row: respect the lock, and never downgrade
-  // confidence silently when the stored row was already classified at a
-  // higher rank with the current classifier version.
-  const existingLocked = Boolean(existing?.category_locked);
-  const existingRank = categoryConfidenceRank(existing?.category_confidence);
-  const newRank = categoryConfidenceRank(outcome.confidence);
-  const existingIsCurrentVersion = existing?.category_version === CLASSIFIER_VERSION;
-  const keepExistingCategory =
-    existingLocked ||
-    (!!existing?.category_confidence && existingIsCurrentVersion && existingRank < newRank);
+  const canonical = resolveCanonicalCategory(
+    {
+      title: event.title,
+      description: event.description ?? null,
+      source_tags_raw: event.tags ?? null,
+      source_category_raw: event.category ?? null,
+      source_name: event.source_name,
+      organizer: event.organizer ?? null,
+      location_name: event.location_name ?? null,
+    },
+    existingRow,
+  );
 
-  const finalCategory = keepExistingCategory && existing
-    ? existing.category
-    : outcome.category;
-  const finalTags = keepExistingCategory && existing?.tags
-    ? (JSON.parse(existing.tags) as string[])
-    : outcome.tags;
-  const finalConfidence = keepExistingCategory && existing
-    ? existing.category_confidence
-    : outcome.confidence;
-  const finalSource = keepExistingCategory && existing
-    ? existing.category_source
-    : outcome.source;
-  const finalVersion = keepExistingCategory && existing
-    ? existing.category_version
-    : outcome.version;
-  const finalNeedsReview = keepExistingCategory && existing
-    ? Boolean(existing.category_needs_review)
-    : outcome.needsReview;
-  const finalReason = keepExistingCategory && existing
-    ? existing.category_reason
-    : outcome.reason;
-  const finalCandidates = keepExistingCategory && existing?.category_candidates
-    ? existing.category_candidates
-    : JSON.stringify(outcome.candidates);
-  const finalLocked = existingLocked ? 1 : 0;
+  const finalCategory = canonical.category;
+  const finalTags = canonical.tags ?? [];
+  const finalConfidence = canonical.category_confidence;
+  const finalSource = canonical.category_source;
+  const finalVersion = canonical.category_version;
+  const finalNeedsReview = canonical.category_needs_review;
+  const finalReason = canonical.category_reason;
+  const finalCandidates = canonical.category_candidates
+    ? JSON.stringify(canonical.category_candidates)
+    : null;
+  const finalLocked = canonical.category_locked ? 1 : 0;
 
   const sourceCategoryRaw = event.category ?? null;
   const sourceTagsRawJson = event.tags ? JSON.stringify(event.tags) : null;

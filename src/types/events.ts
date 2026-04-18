@@ -60,8 +60,10 @@ export interface Event {
 
 export type CategoryConfidence =
   | 'manual'
+  | 'rules_exact'
   | 'rules_high'
   | 'rules_medium'
+  | 'rules_low'
   | 'ai'
   | 'ai_low';
 

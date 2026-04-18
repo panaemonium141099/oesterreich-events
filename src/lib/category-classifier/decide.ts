@@ -1,58 +1,81 @@
 /**
- * Deterministic decision layer.
+ * Deterministic decision layer — cat-v2.
  *
- * Turns the aggregated evidence scores into a final ClassifierResult, or
- * a "needs-AI" verdict that the batch script can pick up. This is the single
- * place where the accept thresholds live.
+ * Four acceptance gates evaluated in order (first match wins):
+ *
+ *   Gate 1  rules_exact  — trusted raw-tag OR trusted source OR trusted phrase
+ *                           AND no blocker AND no trusted-map conflict
+ *   Gate 2  rules_high   — single precise winner
+ *                           (≥1 high-precision phrase/pattern/token on winner;
+ *                            NO high-precision signal on any other category;
+ *                            no blocker)
+ *   Gate 3  rules_medium — corroborated
+ *                           (≥2 distinct evidence families, gap ≥ 6,
+ *                            runner-up has no high-precision signal, no blocker)
+ *   Gate 4  rules_low    — weak deterministic
+ *                           (winner has ≥1 high-precision signal, all other
+ *                            categories have only weak_context / weak_stem /
+ *                            description / source_prior, no blocker)
+ *   needs_ai             — otherwise
+ *
+ * Between Gate 1 (if it failed) and Gate 2 the pairwise disambiguator
+ * matrix runs when top1 − top2 ≤ 5 and the pair is registered. The
+ * disambiguator may override `top` (without mutating scores).
+ *
+ * Description alone can never open any gate — enforced inside every gate
+ * predicate by requiring at least one title-level precision evidence.
+ * Sonstiges is never a scoring participant; it only returns as a final
+ * fallback when `topScore === 0`.
  */
 
 import type { Category, CategoryCandidate } from '@/types/events';
 import type { NormalizedInput } from './normalization';
-import { PRIORITY_ORDER, CLASSIFIER_VERSION } from './taxonomy';
+import { CLASSIFIER_VERSION } from './taxonomy';
 import {
   aggregate,
   extractSignals,
   type AggregatedScore,
-  type Evidence,
 } from './signals';
-import { SCORE } from './rules';
+import { DISAMBIGUATOR_PAIRS } from './rules';
+
+export type GateId = 'gate1_trusted' | 'gate2_single_precise' | 'gate3_corroborated' | 'gate4_weak_deterministic' | 'needs_ai';
 
 export interface DeterministicResult {
   category: Category;
   tags: Category[];
-  confidence: 'rules_high' | 'rules_medium';
+  confidence: 'rules_exact' | 'rules_high' | 'rules_medium' | 'rules_low';
   source: 'rules';
   version: string;
   candidates: CategoryCandidate[];
   reason: string;
-  needsReview: false;
+  gate: GateId;
+  disambiguatorFired: boolean;
+  needsReview: boolean;
   inputHash: string;
-  /** True when downstream should run AI; never true when deterministic passed. */
   needsAi: false;
 }
 
 export interface NeedsAiResult {
-  /** Provisional deterministic best guess (or 'Sonstiges') shown while AI is pending. */
   provisionalCategory: Category;
   provisionalTags: Category[];
   candidates: CategoryCandidate[];
   reason: string;
+  gate: 'needs_ai';
+  disambiguatorFired: boolean;
   inputHash: string;
   topScore: number;
   gap: number;
-  winningHasTitleEvidence: boolean;
-  winningHasRawTagEvidence: boolean;
-  winningHasBlocker: boolean;
-  winningRelyOnlyOnDescriptionOrSource: boolean;
-  trustedSourceConflictsLexical: boolean;
   needsAi: true;
 }
 
 export type ClassifierDecision = DeterministicResult | NeedsAiResult;
 
-/** Minimum score and gap required for deterministic accept condition #2. */
-export const DETERMINISTIC_MIN_SCORE = 24;
-export const DETERMINISTIC_MIN_GAP = 10;
+/** Gate 3 gap threshold. Gate 1/2/4 use structural exclusivity, not gap. */
+export const GATE3_MIN_GAP = 6;
+/** Disambiguator trigger: only run when top1 − top2 ≤ this. */
+export const DISAMBIGUATOR_MAX_GAP = 5;
+
+// ─── Helpers ─────────────────────────────────────────────────────────────
 
 function toCandidates(scores: AggregatedScore[]): CategoryCandidate[] {
   return scores
@@ -61,157 +84,261 @@ function toCandidates(scores: AggregatedScore[]): CategoryCandidate[] {
     .map(s => ({
       category: s.category,
       score: s.score,
-      evidence: s.evidence.map(e => `${e.kind}:${e.source}`),
+      evidence: s.evidence.map(e => `${e.family}:${e.kind}:${e.source}`),
     }));
 }
 
-function collectMultiTags(
-  scores: AggregatedScore[],
-  primary: Category,
-): Category[] {
-  // Consider any category that is independently above half the primary's score
-  // OR has TRUSTED_EXACT / STRONG_TITLE_PHRASE / EXACT_RAW_TAG_MAP evidence of
-  // its own. Up to 3 tags, ordered by PRIORITY_ORDER.
-  const primaryScore = scores.find(s => s.category === primary)?.score ?? 0;
-  const keep = new Set<Category>([primary]);
-  const halfPrimary = Math.max(primaryScore / 2, SCORE.EXACT_RAW_TAG_MAP);
+function pickTop(scores: AggregatedScore[]): AggregatedScore | null {
+  // Scores are already sorted descending by `aggregate`.
+  if (scores.length === 0) return null;
+  if (scores[0].score <= 0) return null;
+  return scores[0];
+}
+
+function findRunnerUp(scores: AggregatedScore[], top: AggregatedScore): AggregatedScore | null {
+  for (const s of scores) {
+    if (s.category !== top.category) return s;
+  }
+  return null;
+}
+
+function hasTrustedExactFor(category: Category, scores: AggregatedScore[]): boolean {
+  const s = scores.find(x => x.category === category);
+  return !!s && s.evidence.some(e => e.family === 'trusted_raw_tag' || e.family === 'trusted_source');
+}
+
+function trustedMapConflicts(top: AggregatedScore, scores: AggregatedScore[]): boolean {
+  // True if a trusted signal exists for a category OTHER than the top.
+  for (const s of scores) {
+    if (s.category === top.category) continue;
+    const trusted = s.evidence.some(e => e.family === 'trusted_raw_tag' || e.family === 'trusted_source');
+    if (trusted) return true;
+  }
+  return false;
+}
+
+/** Does any non-top category have title_precision evidence? */
+function otherHasTitlePrecision(top: AggregatedScore, scores: AggregatedScore[]): boolean {
+  return scores.some(s => s.category !== top.category && s.titlePrecisionCount > 0);
+}
+
+/**
+ * Collect secondary tags for the final result. A tag is included when it
+ * has at least one high-precision evidence (phrase/pattern/token) OR a
+ * trusted raw-tag OR a trusted source prior, AND it's not blocked, AND
+ * it's different from primary. Up to N.
+ */
+function collectSecondaryTags(primary: Category, scores: AggregatedScore[], max: number): Category[] {
+  const out: Category[] = [];
   for (const s of scores) {
     if (s.category === primary) continue;
-    if (s.score <= 0) continue;
-    const strongEvidence = s.evidence.some(
-      (e: Evidence) =>
-        e.kind === 'trusted_raw_tag' ||
-        e.kind === 'strong_title_phrase' ||
-        e.kind === 'raw_tag_token',
+    if (s.hasBlocker) continue;
+    const strong = s.evidence.some(e =>
+      e.family === 'trusted_raw_tag' ||
+      e.family === 'trusted_source' ||
+      e.family === 'title_precision' ||
+      e.family === 'raw_tag_match',
     );
-    if (strongEvidence || s.score >= halfPrimary) {
-      keep.add(s.category);
-    }
+    if (strong && !out.includes(s.category)) out.push(s.category);
+    if (out.length >= max) break;
   }
-  return PRIORITY_ORDER.filter(c => keep.has(c)).slice(0, 3);
+  return out;
 }
 
-function reasonFrom(top: AggregatedScore, runnerUp: AggregatedScore | undefined): string {
-  const ev = top.evidence
-    .map(e => e.kind)
-    .reduce<Record<string, number>>((acc, k) => {
-      acc[k] = (acc[k] ?? 0) + 1;
-      return acc;
-    }, {});
-  const evStr = Object.entries(ev)
-    .map(([k, v]) => `${k}×${v}`)
-    .join(', ');
-  const gap = runnerUp ? top.score - runnerUp.score : top.score;
-  return `rules: ${top.category}@${top.score} gap=${gap} [${evStr}]`;
+function runDisambiguator(norm: NormalizedInput, scores: AggregatedScore[]): Category | null {
+  const top = pickTop(scores);
+  if (!top) return null;
+  const runner = findRunnerUp(scores, top);
+  if (!runner) return null;
+  const gap = top.score - runner.score;
+  if (gap > DISAMBIGUATOR_MAX_GAP) return null;
+
+  for (const d of DISAMBIGUATOR_PAIRS) {
+    const [a, b] = d.pair;
+    const pairMatches =
+      (top.category === a && runner.category === b) ||
+      (top.category === b && runner.category === a);
+    if (!pairMatches) continue;
+    const picked = d.resolve({
+      title: norm.title,
+      description: norm.description,
+      sourceName: norm.sourceName,
+      organizer: norm.organizer,
+    });
+    if (picked === a || picked === b) return picked;
+  }
+  return null;
 }
 
-function pickPrimary(scores: AggregatedScore[]): AggregatedScore {
-  // Prefer the highest score. Break ties with PRIORITY_ORDER (specific first).
-  const top = scores[0];
-  if (scores.length < 2) return top;
-  const tied = scores.filter(s => s.score === top.score);
-  if (tied.length === 1) return top;
-  for (const cat of PRIORITY_ORDER) {
-    const hit = tied.find(s => s.category === cat);
-    if (hit) return hit;
-  }
-  return top;
+function reasonFrom(
+  gate: GateId,
+  chosen: AggregatedScore,
+  runnerUp: AggregatedScore | null,
+  disambiguatorFired: boolean,
+): string {
+  const ev = chosen.evidence.map(e => e.family).reduce<Record<string, number>>((acc, k) => {
+    acc[k] = (acc[k] ?? 0) + 1;
+    return acc;
+  }, {});
+  const evStr = Object.entries(ev).map(([k, v]) => `${k}×${v}`).join(', ');
+  const gap = runnerUp ? chosen.score - runnerUp.score : chosen.score;
+  const disambig = disambiguatorFired ? ' [disambig:' + chosen.category + ']' : '';
+  return `${gate}: ${chosen.category}@${chosen.score} gap=${gap} [${evStr}]${disambig}`;
 }
+
+// ─── Main entry point ────────────────────────────────────────────────────
 
 export function decideDeterministic(norm: NormalizedInput): ClassifierDecision {
   const signals = extractSignals(norm);
   const scores = aggregate(signals);
   const candidates = toCandidates(scores);
 
-  const top = pickPrimary(scores);
-  const runnerUp = scores.find(s => s.category !== top.category);
-  const topScore = top.score;
-  const gap = runnerUp ? topScore - runnerUp.score : topScore;
-
-  // Extract "was a trusted_raw_tag present for the top category?"
-  const topEvidence = top.evidence;
-  const hasTrustedExactForTop = topEvidence.some(e =>
-    e.kind === 'trusted_raw_tag' || e.kind === 'trusted_source',
-  );
-  const winningHasBlocker = top.hasBlocker;
-  const winningHasTitleEvidence = top.hasTitleEvidence;
-  const winningHasRawTagEvidence = top.hasRawTagEvidence;
-  const winningRelyOnlyOnDescriptionOrSource = topEvidence.every(e =>
-    e.kind === 'description_signal' ||
-    e.kind === 'source_prior' ||
-    e.kind === 'source_category_prior',
-  );
-
-  // Trusted-source mapping conflict detection: a trusted exact row exists for
-  // category X, but the highest-scoring category after mixing priors is Y != X.
-  const trustedExactEvidence = signals.evidence.filter(
-    e => e.kind === 'trusted_raw_tag' || e.kind === 'trusted_source',
-  );
-  let trustedSourceConflictsLexical = false;
-  if (trustedExactEvidence.length > 0) {
-    const trustedCats = new Set(trustedExactEvidence.map(e => e.category));
-    if (!trustedCats.has(top.category)) {
-      trustedSourceConflictsLexical = true;
-    }
+  const topInitial = pickTop(scores);
+  if (!topInitial) {
+    return {
+      provisionalCategory: 'Sonstiges',
+      provisionalTags: ['Sonstiges'],
+      candidates,
+      reason: 'needs_ai: no evidence from rules',
+      gate: 'needs_ai',
+      disambiguatorFired: false,
+      inputHash: norm.inputHash,
+      topScore: 0,
+      gap: 0,
+      needsAi: true,
+    };
   }
 
-  // ----- Deterministic accept condition #1: trusted exact + no blocker -----
-  const acceptCondition1 =
-    hasTrustedExactForTop && !winningHasBlocker && !trustedSourceConflictsLexical;
+  // ----- Gate 1 — trusted exact -----------------------------------------
+  const topHasTrustedExact = hasTrustedExactFor(topInitial.category, scores);
+  const topHasBlocker = topInitial.hasBlocker;
+  const conflict = trustedMapConflicts(topInitial, scores);
 
-  // ----- Deterministic accept condition #2: score + gap + title/raw-tag + no blocker -----
-  const acceptCondition2 =
-    topScore >= DETERMINISTIC_MIN_SCORE &&
-    gap >= DETERMINISTIC_MIN_GAP &&
-    (winningHasTitleEvidence || winningHasRawTagEvidence) &&
-    !winningHasBlocker &&
-    !trustedSourceConflictsLexical;
-
-  if (acceptCondition1 || acceptCondition2) {
-    const confidence: DeterministicResult['confidence'] = acceptCondition1
-      ? 'rules_high'
-      : 'rules_medium';
-    const tags = collectMultiTags(scores, top.category);
+  if (topHasTrustedExact && !topHasBlocker && !conflict) {
+    const runner = findRunnerUp(scores, topInitial);
     return {
-      category: top.category,
-      tags,
-      confidence,
+      category: topInitial.category,
+      tags: [topInitial.category, ...collectSecondaryTags(topInitial.category, scores, 2)],
+      confidence: 'rules_exact',
       source: 'rules',
       version: CLASSIFIER_VERSION,
       candidates,
-      reason: reasonFrom(top, runnerUp),
+      reason: reasonFrom('gate1_trusted', topInitial, runner, false),
+      gate: 'gate1_trusted',
+      disambiguatorFired: false,
       needsReview: false,
       inputHash: norm.inputHash,
       needsAi: false,
     };
   }
 
-  // Deterministic accept did not pass — this event is a hard case.
-  const provisional: Category = topScore > 0 ? top.category : 'Sonstiges';
-  const provisionalTags: Category[] = topScore > 0
-    ? collectMultiTags(scores, provisional)
-    : ['Sonstiges'];
+  // ----- Disambiguator pass (only when Gate 1 failed) -------------------
+  let disambiguatorFired = false;
+  let effectiveTop = topInitial;
+  const picked = runDisambiguator(norm, scores);
+  if (picked) {
+    const pickedScore = scores.find(s => s.category === picked);
+    if (pickedScore && pickedScore.score > 0) {
+      effectiveTop = pickedScore;
+      disambiguatorFired = true;
+    }
+  }
 
-  const reason = topScore > 0
-    ? `needs_ai: low-confidence rules: ${top.category}@${topScore} gap=${gap} ` +
-      (winningHasBlocker ? '[blocker fired] ' : '') +
-      (trustedSourceConflictsLexical ? '[trusted-map conflict] ' : '') +
-      (winningRelyOnlyOnDescriptionOrSource ? '[desc/source only] ' : '')
-    : 'needs_ai: no evidence from rules';
+  const effectiveTopHasBlocker = effectiveTop.hasBlocker;
+  const runnerUp = findRunnerUp(scores, effectiveTop);
+  const gap = runnerUp ? effectiveTop.score - runnerUp.score : effectiveTop.score;
 
+  // ----- Gate 2 — single precise winner ---------------------------------
+  if (
+    effectiveTop.titlePrecisionCount >= 1 &&
+    !otherHasTitlePrecision(effectiveTop, scores) &&
+    !effectiveTopHasBlocker
+  ) {
+    return {
+      category: effectiveTop.category,
+      tags: [effectiveTop.category, ...collectSecondaryTags(effectiveTop.category, scores, 2)],
+      confidence: 'rules_high',
+      source: 'rules',
+      version: CLASSIFIER_VERSION,
+      candidates,
+      reason: reasonFrom('gate2_single_precise', effectiveTop, runnerUp, disambiguatorFired),
+      gate: 'gate2_single_precise',
+      disambiguatorFired,
+      needsReview: false,
+      inputHash: norm.inputHash,
+      needsAi: false,
+    };
+  }
+
+  // ----- Gate 3 — corroborated medium -----------------------------------
+  const runnerUpHasTitlePrecision = runnerUp ? runnerUp.titlePrecisionCount > 0 : false;
+  if (
+    effectiveTop.familyCount >= 2 &&
+    effectiveTop.titlePrecisionCount >= 1 &&
+    gap >= GATE3_MIN_GAP &&
+    !effectiveTopHasBlocker &&
+    !runnerUpHasTitlePrecision
+  ) {
+    return {
+      category: effectiveTop.category,
+      tags: [effectiveTop.category, ...collectSecondaryTags(effectiveTop.category, scores, 2)],
+      confidence: 'rules_medium',
+      source: 'rules',
+      version: CLASSIFIER_VERSION,
+      candidates,
+      reason: reasonFrom('gate3_corroborated', effectiveTop, runnerUp, disambiguatorFired),
+      gate: 'gate3_corroborated',
+      disambiguatorFired,
+      needsReview: false,
+      inputHash: norm.inputHash,
+      needsAi: false,
+    };
+  }
+
+  // ----- Gate 4 — weak deterministic ------------------------------------
+  // Winner must have ≥1 title-precision; others may have only weak families.
+  const othersOnlyWeak = scores.every(s => {
+    if (s.category === effectiveTop.category) return true;
+    if (s.score <= 0) return true;
+    return s.titlePrecisionCount === 0;
+  });
+  if (
+    effectiveTop.titlePrecisionCount >= 1 &&
+    othersOnlyWeak &&
+    !effectiveTopHasBlocker
+  ) {
+    return {
+      category: effectiveTop.category,
+      tags: [effectiveTop.category, ...collectSecondaryTags(effectiveTop.category, scores, 2)],
+      confidence: 'rules_low',
+      source: 'rules',
+      version: CLASSIFIER_VERSION,
+      candidates,
+      reason: reasonFrom('gate4_weak_deterministic', effectiveTop, runnerUp, disambiguatorFired),
+      gate: 'gate4_weak_deterministic',
+      disambiguatorFired,
+      needsReview: false,
+      inputHash: norm.inputHash,
+      needsAi: false,
+    };
+  }
+
+  // ----- Otherwise: needs AI -------------------------------------------
+  const provisionalTags: Category[] = [effectiveTop.category, ...collectSecondaryTags(effectiveTop.category, scores, 2)];
   return {
-    provisionalCategory: provisional,
+    provisionalCategory: effectiveTop.category,
     provisionalTags,
     candidates,
-    reason,
+    reason: `needs_ai: top=${effectiveTop.category}@${effectiveTop.score} gap=${gap} ` +
+      (effectiveTopHasBlocker ? '[blocker] ' : '') +
+      (conflict ? '[trusted-conflict] ' : '') +
+      (runnerUpHasTitlePrecision ? '[runner-precision] ' : '') +
+      (effectiveTop.titlePrecisionCount === 0 ? '[no-title-precision]' : ''),
+    gate: 'needs_ai',
+    disambiguatorFired,
     inputHash: norm.inputHash,
-    topScore,
+    topScore: effectiveTop.score,
     gap,
-    winningHasTitleEvidence,
-    winningHasRawTagEvidence,
-    winningHasBlocker,
-    winningRelyOnlyOnDescriptionOrSource,
-    trustedSourceConflictsLexical,
     needsAi: true,
   };
 }

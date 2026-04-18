@@ -62,6 +62,7 @@ function parseArgs(): PipelineOptions {
     skipGeocoding: has('--skip-geocoding'),
     skipScore: has('--skip-score'),
     skipCategorization: has('--skip-categorization'),
+    skipCategorizationBackfill: has('--skip-categorization-backfill'),
     dryRun: has('--dry-run'),
   };
 }
@@ -129,11 +130,20 @@ async function main() {
     }, steps);
 
     if (!opts.skipCategorization) {
+      if (!opts.skipCategorizationBackfill) {
+        steps.categorization_backfill = await runStep('categorization_backfill', async () => {
+          // Step 4a: free, deterministic, idempotent. Brings all stale rows
+          // to the current classifier version using rules only. Must run
+          // before the AI-residue step so 4b only sees genuinely hard cases.
+          execStep('Categorize events (deterministic backfill)',
+            `npx tsx ${envFlag}src/scripts/categorize-events.ts --deterministic-backfill`);
+        }, steps);
+      }
+
       steps.categorization = await runStep('categorization', async () => {
-        // Deterministic classification already ran inline during upsert; this
-        // step resolves the hard cases with OpenAI. --all is not passed here;
-        // the default filter targets needs-review / stale / Sonstiges rows.
-        execStep('Categorize events (AI fallback for hard cases)',
+        // Step 4b: AI on the reduced residue. Runs only on events where the
+        // deterministic backfill could not resolve (`category_needs_review=true`).
+        execStep('Categorize events (AI residue for hard cases)',
           `npx tsx ${envFlag}src/scripts/categorize-events.ts`);
       }, steps);
     }

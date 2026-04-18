@@ -67,7 +67,7 @@ describe('AI cache behavior', () => {
       shouldReview: false,
     });
 
-    await classifyWithAiFallback({ title: 'Forest Rave 2026' }, { ai });
+    await classifyWithAiFallback({ title: 'Veranstaltung im Zeitalter' }, { ai });
 
     expect(cacheModule.setCached).toHaveBeenCalledOnce();
     const store = (cacheModule as unknown as { __store: Map<string, unknown> }).__store;
@@ -82,7 +82,7 @@ describe('AI cache behavior', () => {
       shortReason: 'club',
       shouldReview: false,
     });
-    await classifyWithAiFallback({ title: 'Forest Rave 2026' }, { ai: firstAi });
+    await classifyWithAiFallback({ title: 'Veranstaltung im Zeitalter' }, { ai: firstAi });
     expect(firstAi.chat.completions.create).toHaveBeenCalledOnce();
 
     const secondAi = makeAi({
@@ -93,7 +93,7 @@ describe('AI cache behavior', () => {
       shouldReview: false,
     });
     const outcome = await classifyWithAiFallback(
-      { title: 'Forest Rave 2026' },
+      { title: 'Veranstaltung im Zeitalter' },
       { ai: secondAi },
     );
 
@@ -113,7 +113,7 @@ describe('AI cache behavior', () => {
     });
 
     await classifyWithAiFallback(
-      { title: 'Forest Rave 2026' },
+      { title: 'Veranstaltung im Zeitalter' },
       { ai, bypassCache: true },
     );
 

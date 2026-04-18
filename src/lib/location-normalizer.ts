@@ -132,6 +132,23 @@ const VENUE_PREFIXES = [
  * Check if a location name starts with a known German venue prefix.
  * Case-insensitive. Returns true if the name is likely a venue, not a city.
  */
+/**
+ * Check whether the given normalized string matches a known Austrian
+ * populated place (PPL-type GeoNames entry). Used by the category
+ * classifier's location-detox to strip trailing place names from event
+ * titles safely — i.e., only strip when the suffix really is a place,
+ * so "Konzert im Park" and "Jazz bei Kerzenschein" stay intact.
+ *
+ * Expects the input to already be `normalizeString()`-normalized.
+ */
+export function isKnownAustrianPlace(normalized: string): boolean {
+  if (!normalized || normalized.length < 2) return false;
+  const index = buildIndex();
+  const matches = index.get(normalized);
+  if (!matches || matches.length === 0) return false;
+  return matches.some(m => m.type.startsWith('PPL'));
+}
+
 export function isVenueName(name: string): boolean {
   const lower = name.toLowerCase().trim();
   return VENUE_PREFIXES.some(prefix => {

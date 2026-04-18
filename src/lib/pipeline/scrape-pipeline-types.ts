@@ -53,7 +53,10 @@ export interface PipelineOptions {
   skipVenues?: boolean;
   skipGeocoding?: boolean;
   skipScore?: boolean;
+  /** Skip both categorization sub-steps (backfill + AI residue). */
   skipCategorization?: boolean;
+  /** Skip only the deterministic backfill sub-step (4a), keep AI residue (4b). */
+  skipCategorizationBackfill?: boolean;
   dryRun?: boolean;
 }
 
