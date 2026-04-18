@@ -40,19 +40,37 @@ let cachedToken: CachedToken | null = null;
 /**
  * Load the service-account JSON from the env var. Accepts both raw JSON
  * and base64-encoded JSON so Vercel UI multi-line quirks don't matter.
- * Also repairs private_key fields where literal "\n" was stored instead
- * of real newlines (common when pasting into CI/secrets UIs).
+ * Repairs a few common mangling modes of the private_key field caused by
+ * env-var pipelines (literal backslash-n, Windows \r\n line-endings,
+ * surrounding quotes).
+ *
+ * Logs a specific reason when it returns null — makes the
+ * "no_credentials" failure in the submit script debuggable.
  */
 function loadServiceAccount(): ServiceAccount | null {
   const raw = process.env.GOOGLE_INDEXING_API_SA_KEY;
-  if (!raw || raw.trim().length === 0) return null;
+  if (!raw || raw.trim().length === 0) {
+    console.error('[indexing-api] GOOGLE_INDEXING_API_SA_KEY is empty or unset');
+    return null;
+  }
 
+  // Strip surrounding quotes (some shells add them automatically).
   let json = raw.trim();
+  if ((json.startsWith('"') && json.endsWith('"')) || (json.startsWith("'") && json.endsWith("'"))) {
+    json = json.slice(1, -1);
+  }
+
   if (!json.startsWith('{')) {
-    // Assume base64.
     try {
-      json = Buffer.from(json, 'base64').toString('utf-8');
+      const decoded = Buffer.from(json, 'base64').toString('utf-8');
+      if (decoded.trim().startsWith('{')) {
+        json = decoded;
+      } else {
+        console.error('[indexing-api] env var is neither JSON nor valid base64 JSON (starts with:', json.slice(0, 20), '...)');
+        return null;
+      }
     } catch {
+      console.error('[indexing-api] env var is not JSON and base64 decode failed');
       return null;
     }
   }
@@ -60,17 +78,35 @@ function loadServiceAccount(): ServiceAccount | null {
   let sa: ServiceAccount;
   try {
     sa = JSON.parse(json) as ServiceAccount;
-  } catch {
+  } catch (err) {
+    console.error('[indexing-api] JSON.parse failed:', err instanceof Error ? err.message : err);
     return null;
   }
 
-  if (!sa.client_email || !sa.private_key || !sa.token_uri) return null;
-
-  // Repair escaped newlines that survive round-trips through shells/UIs.
-  if (sa.private_key.includes('\\n')) {
-    sa.private_key = sa.private_key.replace(/\\n/g, '\n');
+  if (!sa.client_email || !sa.private_key || !sa.token_uri) {
+    console.error('[indexing-api] JSON is missing required fields (need: client_email, private_key, token_uri)');
+    return null;
   }
 
+  // Repair the private_key in three steps so the key actually parses as a PEM:
+  //   1. Literal \n → real newlines (common when single-line env-var pasting)
+  //   2. Normalise \r\n (Windows) and lone \r to plain \n
+  //   3. Ensure there's a trailing newline (some PEM parsers insist on it)
+  let pk = sa.private_key;
+  if (pk.includes('\\n')) pk = pk.replace(/\\n/g, '\n');
+  pk = pk.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+  if (!pk.endsWith('\n')) pk += '\n';
+
+  if (!pk.startsWith('-----BEGIN')) {
+    console.error(
+      '[indexing-api] private_key does not start with "-----BEGIN" (starts with:',
+      JSON.stringify(pk.slice(0, 40)),
+      '). Check env-var format.',
+    );
+    return null;
+  }
+
+  sa.private_key = pk;
   return sa;
 }
 

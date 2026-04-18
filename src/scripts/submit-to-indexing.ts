@@ -138,6 +138,14 @@ async function main() {
   console.log(`  Mode:        ${mode}${opts.dryRun ? ' (DRY RUN)' : ''}`);
   console.log(`  Since:       ${opts.since ?? (opts.all ? 'ALL TIME' : 'last 48h')}`);
   console.log(`  Limit:       ${opts.limit ?? 'default'}`);
+
+  // Diagnostic: show whether the Google env var was actually loaded.
+  // Makes "no_credentials" failures debuggable at a glance.
+  const gsa = process.env.GOOGLE_INDEXING_API_SA_KEY;
+  const gsaStatus = gsa
+    ? `loaded (${gsa.length} chars, starts with ${JSON.stringify(gsa.slice(0, 12))}...)`
+    : 'NOT SET';
+  console.log(`  Google SA:   ${gsaStatus}`);
   console.log('='.repeat(60));
 
   const events = await fetchCandidates();
