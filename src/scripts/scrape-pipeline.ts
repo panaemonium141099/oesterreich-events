@@ -63,6 +63,7 @@ function parseArgs(): PipelineOptions {
     skipScore: has('--skip-score'),
     skipCategorization: has('--skip-categorization'),
     skipCategorizationBackfill: has('--skip-categorization-backfill'),
+    skipDedup: has('--skip-dedup'),
     dryRun: has('--dry-run'),
   };
 }
@@ -158,6 +159,15 @@ async function main() {
     if (!opts.skipScore) {
       steps.scoring = await runStep('scoring', async () => {
         execStep('Calculate scores', `npx tsx ${envFlag}src/scripts/calculate-scores.ts`);
+      }, steps);
+    }
+
+    if (!opts.skipDedup) {
+      steps.dedup = await runStep('dedup', async () => {
+        // Cross-source dedup: garbage filter + fingerprint blocks + fuzzy
+        // within (date, venue, location) blocks. Marks losers with
+        // publish_status='duplicate'; the app filters those out.
+        execStep('Deduplicate events', `npx tsx ${envFlag}src/scripts/dedup.ts`);
       }, steps);
     }
 

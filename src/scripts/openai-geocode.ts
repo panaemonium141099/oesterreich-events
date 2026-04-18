@@ -50,8 +50,8 @@ try {
 
 import OpenAI from 'openai';
 import { createClient } from '@supabase/supabase-js';
-import { getDatabase } from '../lib/db/connection';
 import { normalizeString } from '../lib/location-normalizer';
+import { getCachedGeo, setCachedGeo } from '../lib/geocode-cache';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -243,21 +243,9 @@ async function createBackup(events: EventRow[]): Promise<string> {
 
 // ─── SQLite cache ──────────────────────────────────────────────────────────
 
-interface CachedGeoResult {
-  latitude: number;
-  longitude: number;
-}
-
-function getCachedResult(cacheKey: string): CachedGeoResult | null {
-  const db = getDatabase();
-  const row = db.prepare('SELECT latitude, longitude FROM geocode_cache WHERE query = ?').get(cacheKey) as CachedGeoResult | undefined;
-  return row ?? null;
-}
-
-function setCachedResult(cacheKey: string, lat: number, lng: number): void {
-  const db = getDatabase();
-  db.prepare('INSERT OR REPLACE INTO geocode_cache (query, latitude, longitude) VALUES (?, ?, ?)').run(cacheKey, lat, lng);
-}
+// Shared geocode cache is backed by Supabase via `../lib/geocode-cache`.
+// The per-process memo in that module keeps repeated lookups free within a
+// single run; the helpers are async because Supabase I/O is async.
 
 // ─── OpenAI API call ──────────────────────────────────────────────────────
 
@@ -501,10 +489,11 @@ async function main() {
 
   // 3b. For --retry-low: filter to ONLY locations NOT in the cache (= previously skipped)
   if (isRetryLowMode) {
-    const uncachedLocations = uniqueLocations.filter(loc => {
-      const cached = getCachedResult(loc.cacheKey);
-      return cached === null;
-    });
+    const uncachedLocations: UniqueLocation[] = [];
+    for (const loc of uniqueLocations) {
+      const cached = await getCachedGeo(loc.cacheKey);
+      if (cached === null) uncachedLocations.push(loc);
+    }
     console.log(`  Uncached locations (skipped/errored): ${uncachedLocations.length} of ${uniqueLocations.length}`);
     uniqueLocations = uncachedLocations;
   }
@@ -550,13 +539,13 @@ async function main() {
   for (let i = 0; i < totalLocations; i++) {
     const loc = locationsToProcess[i];
 
-    // Check SQLite cache first
+    // Check shared Supabase cache first
     let lat: number | null = null;
     let lng: number | null = null;
     let confidence: string = 'gemini';
     let resolvedName: string = '';
 
-    const cached = getCachedResult(loc.cacheKey);
+    const cached = await getCachedGeo(loc.cacheKey);
     if (cached) {
       lat = cached.latitude;
       lng = cached.longitude;
@@ -675,9 +664,9 @@ async function main() {
           confidence = 'gemini_low';
         }
 
-        // Cache the valid result
+        // Cache the valid result (shared Supabase cache).
         if (!isDryRun) {
-          setCachedResult(loc.cacheKey, lat, lng);
+          await setCachedGeo(loc.cacheKey, lat, lng);
         }
       } else {
         // OpenAI returned null (API error)

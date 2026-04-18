@@ -11,7 +11,11 @@ export const STEP_DEPENDENCIES: Record<string, string[]> = {
   categorization: ['normalize', 'categorization_backfill'],
   geocoding: ['normalize'],
   scoring: ['normalize'],
-  artist_matching: [],
+  // Dedup runs after scoring so the cluster-primary selection can use the
+  // quality score as a tiebreaker. Writes publish_status='duplicate' and
+  // duplicate_of=<primary> on losers; the App filters those out.
+  dedup: ['normalize', 'scoring'],
+  artist_matching: ['dedup'],
   report: [],
 };
 

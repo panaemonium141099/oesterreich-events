@@ -57,6 +57,8 @@ export interface PipelineOptions {
   skipCategorization?: boolean;
   /** Skip only the deterministic backfill sub-step (4a), keep AI residue (4b). */
   skipCategorizationBackfill?: boolean;
+  /** Skip the cross-source dedup pass (not recommended — duplicates bleed through). */
+  skipDedup?: boolean;
   dryRun?: boolean;
 }
 
