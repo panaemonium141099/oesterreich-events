@@ -240,14 +240,10 @@ export default async function EventDetailPage({
     notFound();
   }
 
-  // 301 Redirect to canonical slug URL if current URL is not canonical
-  const canonicalPath = buildEventUrl(event.id, event.slug);
-  const currentPath = `/events/${slugParam}`;
-  if (event.slug && currentPath !== canonicalPath) {
-    redirect(canonicalPath);
-  }
-
-  // 301 Redirect duplicates to their primary event
+  // 301 Redirect duplicates to their primary event FIRST — otherwise a
+  // duplicate with a populated slug would first bounce to its own canonical
+  // slug-URL and only then to the primary. One hop instead of two keeps
+  // reminders/emails pointing straight at the canonical row.
   if (event.publish_status === 'duplicate' && event.duplicate_of) {
     redirect(`/events/${event.duplicate_of}`);
   }
@@ -255,6 +251,13 @@ export default async function EventDetailPage({
   // Hide suppressed/needs_review events from public access
   if (event.publish_status === 'needs_review' || event.publish_status === 'suppressed') {
     notFound();
+  }
+
+  // 301 Redirect to canonical slug URL if current URL is not canonical.
+  const canonicalPath = buildEventUrl(event.id, event.slug);
+  const currentPath = `/events/${slugParam}`;
+  if (event.slug && currentPath !== canonicalPath) {
+    redirect(canonicalPath);
   }
 
   // Load venue data if event has a venue_id

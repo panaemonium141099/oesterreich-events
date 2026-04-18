@@ -365,6 +365,20 @@ async function applyMerges(
       }
     }
   }
+
+  // Rewire user references (saved_events + artist_event_notifications) from
+  // newly-marked duplicates to their primaries. Keeps the user's saved list
+  // intact and ensures pending reminders link to the canonical event row.
+  if (!DRY_RUN) {
+    const { data: rewireResult, error: rewireErr } = await supabase
+      .rpc('rewire_saved_events_to_primaries');
+    if (rewireErr) {
+      stats.errors.push(`Rewire saved_events failed: ${rewireErr.message}`);
+    } else if (rewireResult && Array.isArray(rewireResult) && rewireResult.length > 0) {
+      const row = rewireResult[0] as { rewired_saved_events: number; rewired_artist_notifications: number };
+      console.log(`  Rewired ${row.rewired_saved_events} saved_events + ${row.rewired_artist_notifications} notifications to primaries.`);
+    }
+  }
 }
 
 // ---------------------------------------------------------------------------

@@ -93,25 +93,33 @@ async function processWindow(
   const windowStart = new Date(now.getTime() + (daysAhead - 0.5) * 86_400_000).toISOString();
   const windowEnd = new Date(now.getTime() + (daysAhead + 0.5) * 86_400_000).toISOString();
 
-  // 1. Find saved events in the window
+  // 1. Find saved events in the window.
+  //    Exclude duplicates / suppressed rows so the reminder link doesn't
+  //    point at a hidden event_id. The `events!inner` join already filters
+  //    the parent; publish_status is added as an AND predicate below.
+  const publishableClause =
+    'publish_status.eq.published,publish_status.eq.published_low_confidence,publish_status.is.null';
+
   const { data: savedRows } = await supabase
     .from('saved_events')
     .select(`
       user_id, event_id,
-      events!inner (id, title, start_date, location_name, ticket_url, image_url)
+      events!inner (id, title, start_date, location_name, ticket_url, image_url, publish_status)
     `)
     .gte('events.start_date', windowStart)
-    .lt('events.start_date', windowEnd);
+    .lt('events.start_date', windowEnd)
+    .or(publishableClause, { foreignTable: 'events' });
 
-  // 2. Find artist-matched events in the window
+  // 2. Find artist-matched events in the window (same filter).
   const { data: matchedRows } = await supabase
     .from('artist_event_notifications')
     .select(`
       user_id, event_id, artist_name,
-      events!inner (id, title, start_date, location_name, ticket_url, image_url)
+      events!inner (id, title, start_date, location_name, ticket_url, image_url, publish_status)
     `)
     .gte('events.start_date', windowStart)
-    .lt('events.start_date', windowEnd);
+    .lt('events.start_date', windowEnd)
+    .or(publishableClause, { foreignTable: 'events' });
 
   // 3. Build unified target list (deduplicate by user_id + event_id)
   const targetMap = new Map<string, ReminderTarget>();

@@ -826,13 +826,15 @@ async function dispatchMatchAlertEmails(
 
   if (emailUserIds.size === 0) return;
 
-  // 3. Fetch event details for email template
+  // 3. Fetch event details for email template — skip duplicates so users
+  //    don't receive an email pointing at a hidden event_id.
   const emailGroups = groups.filter(g => emailUserIds.has(g.user_id));
   const eventIds = [...new Set(emailGroups.map(g => g.event_id))];
   const { data: events } = await serviceClient
     .from('events')
     .select('id, title, start_date, location_name, ticket_url, image_url')
-    .in('id', eventIds);
+    .in('id', eventIds)
+    .or('publish_status.eq.published,publish_status.eq.published_low_confidence,publish_status.is.null');
 
   type EventRow = {
     id: string;
@@ -1090,12 +1092,15 @@ export async function runMatchingPipeline(
     console.log(`Created ${notificationsCreated} grouped notifications`);
   }
 
-  // Step 9: Count events processed (query the count of future events since cursor)
+  // Step 9: Count events processed (query the count of future events since cursor).
+  // Only count publish-eligible rows so the progress metric doesn't include
+  // cross-source duplicates that the RPCs already skip.
   const { count: eventsCount } = await supabase
     .from('events')
     .select('id', { count: 'exact', head: true })
     .gte('start_date', new Date().toISOString())
-    .gt('updated_at', cursor.last_processed_at);
+    .gt('updated_at', cursor.last_processed_at)
+    .or('publish_status.eq.published,publish_status.eq.published_low_confidence,publish_status.is.null');
 
   stats.events_processed = eventsCount ?? 0;
 
