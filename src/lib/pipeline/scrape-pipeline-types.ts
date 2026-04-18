@@ -59,6 +59,8 @@ export interface PipelineOptions {
   skipCategorizationBackfill?: boolean;
   /** Skip the cross-source dedup pass (not recommended — duplicates bleed through). */
   skipDedup?: boolean;
+  /** Skip submitting new URLs to IndexNow + Google Indexing API. */
+  skipIndexing?: boolean;
   dryRun?: boolean;
 }
 

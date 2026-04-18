@@ -16,6 +16,10 @@ export const STEP_DEPENDENCIES: Record<string, string[]> = {
   // duplicate_of=<primary> on losers; the App filters those out.
   dedup: ['normalize', 'scoring'],
   artist_matching: ['dedup'],
+  // Indexing submits event URLs to IndexNow (Bing/Yandex) and Google Indexing
+  // API. Runs last, after dedup has marked canonical rows, so we don't spend
+  // API quota on duplicates the apps then redirect away from.
+  indexing: ['dedup'],
   report: [],
 };
 

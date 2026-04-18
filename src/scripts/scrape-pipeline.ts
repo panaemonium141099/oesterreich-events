@@ -64,6 +64,7 @@ function parseArgs(): PipelineOptions {
     skipCategorization: has('--skip-categorization'),
     skipCategorizationBackfill: has('--skip-categorization-backfill'),
     skipDedup: has('--skip-dedup'),
+    skipIndexing: has('--skip-indexing'),
     dryRun: has('--dry-run'),
   };
 }
@@ -174,6 +175,17 @@ async function main() {
     steps.artist_matching = await runStep('artist_matching', async () => {
       await triggerMatchArtists();
     }, steps);
+
+    if (!opts.skipIndexing) {
+      steps.indexing = await runStep('indexing', async () => {
+        // Submits event URLs to IndexNow (Bing/Yandex) and Google Indexing
+        // API. Defaults to --since<pipeline_start_iso> so only freshly-
+        // scraped or updated rows are notified, saving daily API quota.
+        const since = results.started_at;
+        execStep('Submit URLs to IndexNow + Google Indexing API',
+          `npx tsx ${envFlag}src/scripts/submit-to-indexing.ts --since ${since}`);
+      }, steps);
+    }
 
     // Report generation (always runs, no dependencies)
     steps.report = await runStep('report', async () => {
