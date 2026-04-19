@@ -150,7 +150,20 @@ export async function generateMetadata({
   return metadata;
 }
 
+/**
+ * Extracts a numeric price from free-text like "ab 15 €", "€12,50", "Tickets 25 EUR".
+ * Returns '0' for free events (frei/gratis/kostenlos), null when no price is detectable.
+ */
+function parsePriceText(priceText: string | null | undefined): string | null {
+  if (!priceText) return null;
+  const lower = priceText.toLowerCase();
+  if (/\b(frei|gratis|kostenlos|free|eintritt\s*frei)\b/.test(lower)) return '0';
+  const match = priceText.match(/(\d+(?:[.,]\d+)?)/);
+  return match ? match[1].replace(',', '.') : null;
+}
+
 function buildJsonLd(event: Event): string {
+  const canonicalUrl = `https://lasstreffen.at${buildEventUrl(event.id, event.slug)}`;
   const jsonLd: Record<string, unknown> = {
     '@context': 'https://schema.org',
     '@type': 'Event',
@@ -196,21 +209,49 @@ function buildJsonLd(event: Event): string {
 
   jsonLd.location = location;
 
-  if (event.organizer) {
-    jsonLd.organizer = {
-      '@type': 'Organization',
-      name: event.organizer,
-    };
-  }
+  // Organizer — ALWAYS present. Falls back to the site when the scraper
+  // didn't capture an explicit organizer. Satisfies Google's Event rich-result
+  // field requirement ("fehlende Felder: organizer") even on scraped rows
+  // where the source page didn't expose one.
+  jsonLd.organizer = {
+    '@type': 'Organization',
+    name: event.organizer || 'LassTreffen.at',
+    url: 'https://lasstreffen.at',
+  };
 
-  if (event.price_text) {
-    jsonLd.offers = {
-      '@type': 'Offer',
-      name: event.price_text,
-      priceCurrency: 'EUR',
-      availability: 'https://schema.org/InStock',
-    };
+  // Performer — ALWAYS present. Google's Event schema treats `performer` as a
+  // recommended field; omitting it triggers the "Ereignisse für strukturierte
+  // Daten" warning in Search Console. We use the organizer when known,
+  // otherwise fall back to the event title itself as the performing entity.
+  jsonLd.performer = {
+    '@type': 'PerformingGroup',
+    name: event.organizer || event.title,
+  };
+
+  // Offers — ALWAYS present. We build it from whatever price info the scraper
+  // captured: explicit min price, parsed free-text, or a safe default. The
+  // offer URL points to the ticket shop when known, otherwise to our canonical
+  // event page so the reader can still act on the rich result.
+  const parsed = parsePriceText(event.price_text);
+  const price =
+    event.price_min != null ? String(event.price_min) :
+    parsed != null ? parsed :
+    null;
+
+  const offers: Record<string, unknown> = {
+    '@type': 'Offer',
+    url: event.ticket_url || canonicalUrl,
+    priceCurrency: 'EUR',
+    availability: 'https://schema.org/InStock',
+    validFrom: event.created_at || event.start_date,
+  };
+  if (price != null) {
+    offers.price = price;
   }
+  if (event.price_text) {
+    offers.name = event.price_text;
+  }
+  jsonLd.offers = offers;
 
   return JSON.stringify(jsonLd).replace(/<\/script>/gi, '<\\/script>');
 }

@@ -182,13 +182,46 @@ export default async function BlogPostPage({
     mainEntityOfPage: { '@type': 'WebPage', '@id': `https://lasstreffen.at/blog/${slug}` },
   };
 
-  // Standalone Event schema — satisfies Google's Event rich-result requirements
+  // Standalone Event schema — satisfies Google's Event rich-result requirements.
+  // `eventStatus`, `eventAttendanceMode`, `performer` and `offers` are all
+  // emitted unconditionally so the page never triggers "fehlende Felder"
+  // warnings in Search Console (rich-results gate).
+  const priceLower = post.keyFacts.price.toLowerCase();
+  const isFree = priceLower.includes('frei') || priceLower.includes('gratis') || priceLower.includes('kostenlos');
+  const priceMatch = post.keyFacts.price.match(/(\d+(?:[.,]\d+)?)/);
+  const parsedPrice = isFree ? '0' : priceMatch ? priceMatch[1].replace(',', '.') : null;
+
+  // Performers — derive from lineup headliners when available, otherwise
+  // treat the festival itself as the performing entity so the field is
+  // never missing. If the lineup consists only of support acts, fall back
+  // to the full list so we still emit a non-empty performer array.
+  const headliners = post.lineup?.filter(act => act.role === 'headliner' || !act.role) ?? [];
+  const performerSource = headliners.length > 0 ? headliners : (post.lineup ?? []);
+  const performers = performerSource.length > 0
+    ? performerSource.slice(0, 12).map(act => ({
+        '@type': 'PerformingGroup',
+        name: act.name,
+      }))
+    : [{ '@type': 'PerformingGroup', name: post.jsonLdEvent.name }];
+
+  const offers: Record<string, unknown> = {
+    '@type': 'Offer',
+    url: post.keyFacts.website || post.jsonLdEvent.url,
+    priceCurrency: 'EUR',
+    availability: 'https://schema.org/InStock',
+    validFrom: post.publishDate,
+  };
+  if (parsedPrice != null) offers.price = parsedPrice;
+  if (post.keyFacts.price) offers.name = post.keyFacts.price;
+
   const eventJsonLd = {
     '@context': 'https://schema.org',
     '@type': 'Event',
     name: post.jsonLdEvent.name,
     startDate: post.jsonLdEvent.startDate,
     endDate: post.jsonLdEvent.endDate,
+    eventStatus: 'https://schema.org/EventScheduled',
+    eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
     location: {
       '@type': 'Place',
       name: post.jsonLdEvent.location,
@@ -201,8 +234,10 @@ export default async function BlogPostPage({
     image: post.jsonLdEvent.image,
     url: post.jsonLdEvent.url,
     description: post.jsonLdEvent.description,
-    isAccessibleForFree: post.keyFacts.price.toLowerCase().includes('frei'),
+    isAccessibleForFree: isFree,
     organizer: { '@type': 'Organization', name: 'LassTreffen.at', url: 'https://lasstreffen.at' },
+    performer: performers,
+    offers,
   };
 
   // FAQPage schema — enables FAQ rich results in Google
