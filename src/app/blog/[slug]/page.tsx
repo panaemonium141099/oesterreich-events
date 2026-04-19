@@ -19,7 +19,11 @@ export async function generateMetadata({
   if (!post) return { title: 'Nicht gefunden' };
 
   return {
-    title: post.seoTitle,
+    // `absolute` bypasses the root layout's `%s | LassTreffen.at` template.
+    // Blog SEO titles already include the full marketing phrasing we want
+    // indexed, and letting the template append " | LassTreffen.at" on top
+    // pushes every post past Bing's 60-char title warning.
+    title: { absolute: post.seoTitle },
     description: post.seoDescription,
     keywords: post.keywords,
     alternates: {

@@ -74,7 +74,7 @@ export const post: FestivalPost = {
   gallery: [],
   ctaText: 'Weinfeste in Niederösterreich entdecken',
   ctaLink: '/map?bundesland=Nieder%C3%B6sterreich&category=Kulinarik',
-  seoTitle: 'Retz Weinlesefest 2026 – Weinfest im Weinviertel | LassTreffen.at',
+  seoTitle: 'Retz Weinlesefest 2026 – Weinfest im Weinviertel',
   seoDescription:
     'Retz Weinlesefest 2026 (24.–27. September): Niederösterreichs ältestes Weinfest mit Wein, Volksmusik und Brauchtum. Termine, Programm und Tipps für Ihren Besuch.',
   keywords: [

@@ -75,7 +75,7 @@ export const post: FestivalPost = {
   gallery: [],
   ctaText: 'Klassik-Events in Tirol entdecken',
   ctaLink: '/map?category=Kultur&region=Tirol',
-  seoTitle: 'Tiroler Festspiele Erl 2026 – Oper, Programm & Tickets | LassTreffen.at',
+  seoTitle: 'Tiroler Festspiele Erl 2026 – Oper, Programm & Tickets',
   seoDescription:
     'Tiroler Festspiele Erl 2026: Wagner, Carmen, Kammermusik unter Jonas Kaufmanns Leitung. Programm, Tickets, Anreise zum Festspielhaus im Inntal.',
   keywords: [

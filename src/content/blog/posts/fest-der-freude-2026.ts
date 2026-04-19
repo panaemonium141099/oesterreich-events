@@ -73,7 +73,7 @@ export const post: FestivalPost = {
   gallery: [],
   ctaText: 'Kultur-Events in Wien entdecken',
   ctaLink: '/map?category=Kultur&region=Wien',
-  seoTitle: 'Fest der Freude 2026 Wien – Gratis-Konzert am Heldenplatz | LassTreffen.at',
+  seoTitle: 'Fest der Freude 2026 Wien – Gratis-Konzert am Heldenplatz',
   seoDescription:
     'Fest der Freude 2026: Wiener Symphoniker gratis am Heldenplatz am 8. Mai. Gedenken an die Befreiung 1945 mit Konzert, Ansprachen & Ode an die Freude.',
   keywords: [

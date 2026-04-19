@@ -84,7 +84,11 @@ export async function loadBundeslandPage(
     sortByDate,
   });
 
-  const metaTitle = `${title} | LassTreffen.at`;
+  // The root layout's title.template already appends " | LassTreffen.at",
+  // so we keep metaTitle brand-free here. Including the suffix again would
+  // render a double-brand title (e.g. "Events Wien | LassTreffen.at | LassTreffen.at")
+  // and trips Bing's "Title too long" warning.
+  const metaTitle = title;
   const metaDescription = `Entdecke ${totalCount} Events in ${blName}${timeFilter ? ` ${timeFilter}` : ''}${category ? ` — ${category}` : ''}. Alle Veranstaltungen auf einen Blick.`;
 
   return {
@@ -145,7 +149,11 @@ export async function loadStadtPage(
     sortByDate,
   });
 
-  const metaTitle = `${title} | LassTreffen.at`;
+  // The root layout's title.template already appends " | LassTreffen.at",
+  // so we keep metaTitle brand-free here. Including the suffix again would
+  // render a double-brand title (e.g. "Events Wien | LassTreffen.at | LassTreffen.at")
+  // and trips Bing's "Title too long" warning.
+  const metaTitle = title;
   const metaDescription = `Entdecke ${totalCount} Events in ${cityConfig.name}${timeFilter ? ` ${timeFilter}` : ''}${category ? ` — ${category}` : ''}. Alle Veranstaltungen auf einen Blick.`;
 
   return {

@@ -74,7 +74,7 @@ export const post: FestivalPost = {
   gallery: [],
   ctaText: 'Jazz- und Musik-Events in Wien',
   ctaLink: '/map?category=Musik&region=Wien',
-  seoTitle: 'JazzFest Wien 2026 – Programm, Tickets & Gratis-Konzerte | LassTreffen.at',
+  seoTitle: 'JazzFest Wien 2026 – Programm, Tickets & Gratis-Konzerte',
   seoDescription:
     'JazzFest Wien 2026: 70 Konzerte in 10 Tagen — Staatsoper, Rathausplatz, Clubs. Programm, Tickets, Gratis-Events und Anreise-Infos.',
   keywords: [

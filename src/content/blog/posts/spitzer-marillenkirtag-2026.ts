@@ -73,7 +73,7 @@ export const post: FestivalPost = {
   gallery: [],
   ctaText: 'Kulinarik-Events in Niederösterreich entdecken',
   ctaLink: '/map?category=Essen&region=Niederösterreich',
-  seoTitle: 'Spitzer Marillenkirtag 2026 – Wachauer Marillen-Fest | LassTreffen.at',
+  seoTitle: 'Spitzer Marillenkirtag 2026 – Wachauer Marillen-Fest',
   seoDescription:
     'Spitzer Marillenkirtag 2026: Frische Marillen, Knödel & Schnaps am Marktplatz in der Wachau. Gratis Eintritt, Programm, Anreise per Bahn, Schiff oder Rad.',
   keywords: [

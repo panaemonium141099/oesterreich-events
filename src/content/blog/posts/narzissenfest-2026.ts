@@ -75,7 +75,7 @@ export const post: FestivalPost = {
   gallery: [],
   ctaText: 'Brauchtum-Events in der Steiermark entdecken',
   ctaLink: '/map?category=Kultur&region=Steiermark',
-  seoTitle: 'Narzissenfest Bad Aussee 2026 – Termine, Programm & Tipps | LassTreffen.at',
+  seoTitle: 'Narzissenfest Bad Aussee 2026 – Termine, Programm & Tipps',
   seoDescription:
     'Narzissenfest 2026 in Bad Aussee: Bootsparade, Blumenfiguren & Volkskultur im Ausseerland. Termin 28.–31. Mai, Tickets, Anreise und Programm.',
   keywords: [

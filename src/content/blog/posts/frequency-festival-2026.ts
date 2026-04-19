@@ -83,7 +83,7 @@ export const post: FestivalPost = {
   gallery: [],
   ctaText: 'Musik-Events in Österreich entdecken',
   ctaLink: '/map?category=Musik&bundesland=Nieder%C3%B6sterreich',
-  seoTitle: 'Frequency Festival 2026 – Tickets, Lineup & Tipps | LassTreffen.at',
+  seoTitle: 'Frequency Festival 2026 – Tickets, Lineup & Tipps',
   seoDescription:
     'Frequency Festival 2026 in St. Pölten: Datum, Lineup, Tickets und Camping-Tipps. Österreichs bestes Alternative- und Indie-Festival vom 20.–22. August 2026.',
   keywords: [

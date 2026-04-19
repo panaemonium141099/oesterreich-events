@@ -6,11 +6,12 @@ import { EventListCard } from '@/components/Events/EventListCard';
 export const revalidate = 3600;
 
 export const metadata: Metadata = {
-  title: 'Events fur Studenten | LassTreffen.at',
+  // Layout template appends " | LassTreffen.at" — no manual suffix here.
+  title: 'Events für Studenten',
   description:
     'Finde Events rund um deine Uni — Nightlife, gratis Events, Pub Quizzes und mehr in Wien, Graz, Innsbruck und Salzburg.',
   openGraph: {
-    title: 'Events fur Studenten | LassTreffen.at',
+    title: 'Events für Studenten | LassTreffen.at',
     description:
       'Finde Events rund um deine Uni — Nightlife, gratis Events und mehr.',
   },

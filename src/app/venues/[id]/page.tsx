@@ -47,7 +47,8 @@ export async function generateMetadata({
 
   if (!venue) return { title: 'Venue nicht gefunden' };
 
-  const title = `${venue.name}${venue.city ? ` — ${venue.city}` : ''} | LassTreffen.at`;
+  // Layout template already appends " | LassTreffen.at" — skip the manual suffix.
+  const title = `${venue.name}${venue.city ? ` — ${venue.city}` : ''}`;
   const description = `Kommende Events bei ${venue.name}${venue.city ? ` in ${venue.city}` : ''}. Programm, Termine und Tickets.`;
 
   return {

@@ -75,7 +75,7 @@ export const post: FestivalPost = {
   gallery: [],
   ctaText: 'Laufsport-Events in Österreich entdecken',
   ctaLink: '/map?bundesland=Ober%C3%B6sterreich&category=Sport',
-  seoTitle: 'Linz Marathon 2026 – Stadtmarathon an der Donau | LassTreffen.at',
+  seoTitle: 'Linz Marathon 2026 – Stadtmarathon an der Donau',
   seoDescription:
     'Linz Marathon 2026: Österreichs beliebtester Stadtmarathon in April. Anmeldung, Strecke, Distanzen und Tipps für Marathon, Halbmarathon und 10km-Lauf in Linz.',
   keywords: [

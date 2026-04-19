@@ -73,7 +73,7 @@ export const post: FestivalPost = {
   gallery: [],
   ctaText: 'Elektronik-Events im Burgenland entdecken',
   ctaLink: '/map?bundesland=Burgenland&category=Musik',
-  seoTitle: 'Pannonia Fields Electronic Festival 2026 | LassTreffen.at',
+  seoTitle: 'Pannonia Fields Electronic Festival 2026',
   seoDescription:
     'Pannonia Fields Electronic Festival 2026 in Nickelsdorf: Techno, Trance & House unter freiem Himmel. Tickets, Line-up, Camping-Tipps für das Burgenland-Festival.',
   keywords: [

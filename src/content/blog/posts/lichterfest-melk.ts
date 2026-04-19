@@ -73,7 +73,7 @@ export const post: FestivalPost = {
   gallery: [],
   ctaText: 'Kulturevents in der Wachau entdecken',
   ctaLink: '/map?bundesland=Nieder%C3%B6sterreich&category=Kultur',
-  seoTitle: 'Lichterfest Melk 2026 – Lichtmagie in der Wachau | LassTreffen.at',
+  seoTitle: 'Lichterfest Melk 2026 – Lichtmagie in der Wachau',
   seoDescription:
     'Lichterfest Melk 2026: Illuminiertes Stift Melk, Konzerte und Wachau-Zauber. Termine, Programm und Tipps für das romantische Sommerfest in Niederösterreich.',
   keywords: [

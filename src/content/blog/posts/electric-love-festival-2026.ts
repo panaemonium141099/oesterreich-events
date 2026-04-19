@@ -80,7 +80,7 @@ export const post: FestivalPost = {
   gallery: [],
   ctaText: 'EDM-Events in Österreich entdecken',
   ctaLink: '/map?category=Musik',
-  seoTitle: 'Electric Love Festival 2026 – Lineup, Tickets & Camping | LassTreffen.at',
+  seoTitle: 'Electric Love Festival 2026 – Lineup, Tickets & Camping',
   seoDescription:
     'Electric Love Festival 2026 am Salzburgring: Swedish House Mafia, Armin van Buuren, 200+ Acts. Alle Infos zu Tickets, Camping, Anreise und Lineup.',
   keywords: [

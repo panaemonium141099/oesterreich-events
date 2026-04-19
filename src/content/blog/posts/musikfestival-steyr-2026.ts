@@ -73,7 +73,7 @@ export const post: FestivalPost = {
   gallery: [],
   ctaText: 'Theater-Events in Oberösterreich entdecken',
   ctaLink: '/map?category=Kultur&region=Oberösterreich',
-  seoTitle: 'Musikfestival Steyr 2026: HAIR im Schlossgraben | LassTreffen.at',
+  seoTitle: 'Musikfestival Steyr 2026: HAIR im Schlossgraben',
   seoDescription:
     'Musikfestival Steyr 2026: Rock-Musical HAIR im Schlossgraben von Schloss Lamberg. Tickets, Programm, Anreise — Open-Air-Theater im Bistro-Ambiente.',
   keywords: [

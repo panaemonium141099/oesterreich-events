@@ -75,7 +75,7 @@ export const post: FestivalPost = {
   gallery: [],
   ctaText: 'Klassik-Events in Niederösterreich entdecken',
   ctaLink: '/map?bundesland=Nieder%C3%B6sterreich&category=Kultur',
-  seoTitle: 'Grafenegg Festival 2026 – Klassik im Schlosspark | LassTreffen.at',
+  seoTitle: 'Grafenegg Festival 2026 – Klassik im Schlosspark',
   seoDescription:
     'Grafenegg Festival 2026: Weltklasse-Klassikkonzerte im Schlosspark Niederösterreichs. Termine, Programm, Tickets und Anreise zum Top-Sommerfestival.',
   keywords: [

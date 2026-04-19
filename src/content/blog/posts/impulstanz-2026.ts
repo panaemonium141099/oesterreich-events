@@ -75,7 +75,7 @@ export const post: FestivalPost = {
   gallery: [],
   ctaText: 'Tanz- und Kultur-Events in Wien',
   ctaLink: '/map?category=Kultur&region=Wien',
-  seoTitle: 'ImPulsTanz 2026 Wien – Programm, Workshops & Tickets | LassTreffen.at',
+  seoTitle: 'ImPulsTanz 2026 Wien – Programm, Workshops & Tickets',
   seoDescription:
     'ImPulsTanz 2026 Wien: Weltweit größtes Festival für zeitgenössischen Tanz. Performances, 200+ Workshops, kostenlose Events. Programm, Tickets & Infos.',
   keywords: [

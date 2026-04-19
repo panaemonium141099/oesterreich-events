@@ -42,6 +42,11 @@ export default function MapPage() {
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600" />
       </div>
     }>
+      {/* Screen-reader H1 — satisfies Bing/Google "missing H1" SEO checks
+          without changing the visual map UI. */}
+      <h1 className="sr-only">
+        Event-Karte Österreich — Konzerte, Festivals, Märkte und Veranstaltungen auf Karte
+      </h1>
       <SavedEventsProvider>
         <MapPageInner />
       </SavedEventsProvider>

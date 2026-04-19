@@ -83,7 +83,7 @@ export const post: FestivalPost = {
   gallery: [],
   ctaText: 'Wien-Events entdecken',
   ctaLink: '/map?bundesland=Wien',
-  seoTitle: 'Donauinselfest 2026 – Alles Infos zum Gratis-Festival | LassTreffen.at',
+  seoTitle: 'Donauinselfest 2026 – Alles Infos zum Gratis-Festival',
   seoDescription:
     'Donauinselfest 2026 Wien: Termine, Programm, Bühnen und Tipps. Das weltgrößte kostenlose Open-Air-Festival vom 26.–28. Juni 2026 auf der Donauinsel.',
   keywords: [

@@ -85,7 +85,7 @@ export const post: FestivalPost = {
   gallery: [],
   ctaText: 'Rock-Events in Österreich entdecken',
   ctaLink: '/map?category=Musik',
-  seoTitle: 'Nova Rock 2026 – Alles was du wissen musst | LassTreffen.at',
+  seoTitle: 'Nova Rock 2026 – Alles was du wissen musst',
   seoDescription:
     'Nova Rock 2026 in Nickelsdorf: Termine, Lineup, Tickets, Camping und Anreise-Tipps. Österreichs größtes Rock-Festival vom 11.–14. Juni 2026.',
   keywords: [

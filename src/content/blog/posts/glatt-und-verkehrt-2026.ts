@@ -73,7 +73,7 @@ export const post: FestivalPost = {
   gallery: [],
   ctaText: 'Musik-Events in Niederösterreich entdecken',
   ctaLink: '/map?category=Musik&region=Niederösterreich',
-  seoTitle: 'Glatt&Verkehrt 2026 Krems – 30 Jahre Weltmusik-Festival | LassTreffen.at',
+  seoTitle: 'Glatt&Verkehrt 2026 Krems – 30 Jahre Weltmusik-Festival',
   seoDescription:
     'Glatt&Verkehrt 2026 in Krems: 30 Jahre Weltmusik-Festival in der Wachau. Programm, Tickets, Anreise & Infos zum Jubiläum beim Winzer Krems.',
   keywords: [

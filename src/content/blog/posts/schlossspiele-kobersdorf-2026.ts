@@ -72,7 +72,7 @@ export const post: FestivalPost = {
   gallery: [],
   ctaText: 'Theater-Events im Burgenland entdecken',
   ctaLink: '/map?category=Kultur&region=Burgenland',
-  seoTitle: 'Schloss-Spiele Kobersdorf 2026 – Der nackte Wahnsinn | LassTreffen.at',
+  seoTitle: 'Schloss-Spiele Kobersdorf 2026 – Der nackte Wahnsinn',
   seoDescription:
     'Schloss-Spiele Kobersdorf 2026: „Der nackte Wahnsinn" im Arkadenhof. Tickets, Termine, Anreise — 54. Saison im burgenländischen Renaissance-Schloss.',
   keywords: [

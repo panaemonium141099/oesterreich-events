@@ -96,8 +96,17 @@ export async function generateMetadata({
   const canonicalUrl = `https://lasstreffen.at${canonicalPath}`;
   const ogImageUrl = `${canonicalUrl}/opengraph-image`;
 
+  // Truncate overly long event titles so Bing/Google don't flag them as
+  // "Title too long". Cut at 57 chars (room for " …") so the rendered
+  // absolute title stays ≤ 60.
+  const titleTrimmed = event.title.length > 57
+    ? event.title.slice(0, 57).trimEnd() + '…'
+    : event.title;
+
   const metadata: Metadata = {
-    title: event.title,
+    // `absolute` bypasses the layout template " | LassTreffen.at" suffix.
+    // Event titles + suffix regularly exceed 60 chars and Bing flags them.
+    title: { absolute: titleTrimmed },
     description,
     alternates: {
       canonical: canonicalUrl,
@@ -294,10 +303,18 @@ export default async function EventDetailPage({
     notFound();
   }
 
-  // 301 Redirect to canonical slug URL if current URL is not canonical.
+  // 301 Redirect to canonical URL whenever the current path isn't canonical.
+  // This covers both:
+  //   - legacy full-UUID URLs (e.g. /events/641d90c0-7a97-4561-ab39-e9f4c191ca79)
+  //     redirecting to /events/641d90c0 (short-ID) when no slug exists, and
+  //   - legacy short-ID URLs redirecting to /events/641d90c0-<slug> once a
+  //     slug has been generated.
+  // Previously we gated this on `event.slug && ...` which left slug-less
+  // events reachable under two URLs (full UUID + short ID) — duplicate
+  // content from Google's point of view.
   const canonicalPath = buildEventUrl(event.id, event.slug);
   const currentPath = `/events/${slugParam}`;
-  if (event.slug && currentPath !== canonicalPath) {
+  if (currentPath !== canonicalPath) {
     redirect(canonicalPath);
   }
 

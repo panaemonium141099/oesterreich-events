@@ -76,7 +76,7 @@ export const post: FestivalPost = {
   gallery: [],
   ctaText: 'Kultur-Events in Vorarlberg entdecken',
   ctaLink: '/map?category=Kultur&region=Vorarlberg',
-  seoTitle: 'Poolbar Festival 2026 Feldkirch – Programm, Tickets & Infos | LassTreffen.at',
+  seoTitle: 'Poolbar Festival 2026 Feldkirch – Programm, Tickets & Infos',
   seoDescription:
     'Poolbar Festival 2026 in Feldkirch: 6 Wochen Konzerte, Kino & Kultur im alten Hallenbad. Apparat, Donots, José González — Tickets, Programm & Anreise.',
   keywords: [
