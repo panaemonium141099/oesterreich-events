@@ -33,6 +33,7 @@ import {
 } from '@/lib/category-classifier';
 import { normalizeEventLocation } from '@/lib/location-normalizer';
 import { generateFingerprint } from '@/lib/dedup/fingerprint';
+import { generateEventSlug } from '@/lib/utils/slugify';
 
 /**
  * Confidence precedence order (highest first).
@@ -342,6 +343,12 @@ function toSupabaseRow(
     geocoding_confidence: finalConfidence,
     geocoding_source: finalSource,
     content_fingerprint: generateFingerprint(event.title, event.start_date),
+    // Human-readable slug for SEO-friendly URLs like
+    // /events/641d90c0-nikita-miller-globe-wien. Always regenerated from the
+    // latest title + location so the URL stays in sync when scrapers update
+    // canonical titles. The 8-char short-ID prefix in the URL stays stable,
+    // so old indexed URLs still resolve (redirect logic handles it).
+    slug: generateEventSlug(event.title, resolved.locationName ?? event.location_name),
     // venue_id from registry-based scraper (null for regular scrapers)
     ...(event.venue_id ? { venue_id: event.venue_id } : {}),
   };

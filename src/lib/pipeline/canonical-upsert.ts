@@ -2,6 +2,7 @@
 
 import { createClient } from '@supabase/supabase-js';
 import type { NormalizedCandidate, UpsertResult } from './types';
+import { generateEventSlug } from '@/lib/utils/slugify';
 
 function getSupabaseAdmin() {
   return createClient(
@@ -63,6 +64,14 @@ export async function matchAndUpsert(
         category: candidate.normalized_category ?? null,
         tags: candidate.normalized_tags ?? null,
         quality_score: candidate.quality_score ?? null,
+        // SEO-friendly slug. Same note as in supabase-sync: regenerated on
+        // every upsert because title+location may drift as scrapers refine
+        // the canonical form. The 8-char short-ID prefix in the URL is
+        // stable so indexed URLs still resolve.
+        slug: generateEventSlug(
+          candidate.normalized_title,
+          candidate.normalized_location_name,
+        ),
       };
 
       // Venue fields — apply conflict rule
