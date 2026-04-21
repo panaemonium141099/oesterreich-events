@@ -1,0 +1,596 @@
+/**
+ * Batch-enrich events using OpenAI's API directly (no CLI subprocesses).
+ *
+ * Why this exists: Claude via `claude -p` hits Max-plan rate limits fast
+ * and each event costs ~3s of process-spawn overhead per worker. Direct
+ * OpenAI SDK skips both issues — pure async HTTPS calls at ~100ms each,
+ * tier-2+ key handles ~450k tokens/min without breaking a sweat.
+ *
+ * Cost math (gpt-4o-mini, as of 2026-04):
+ *   Per event: ~3500 input + 400 output tokens
+ *   Per event: $0.00053 input + $0.00024 output = $0.00077 total
+ *   80k events: ~$62 for the full run
+ *
+ * Uses the same taxonomy + prompt + validation as the Claude version so
+ * results are schema-compatible. Same resume-safe logic via
+ * enrichment_version — re-running is a no-op for already-processed rows.
+ *
+ * Usage:
+ *   npm run enrich-openai                            # full run, gpt-4o-mini, 40 workers
+ *   npm run enrich-openai -- --limit 50              # cap (verify first!)
+ *   npm run enrich-openai -- --dry-run               # verbose, no DB writes
+ *   npm run enrich-openai -- --concurrency 80        # go wider
+ *   npm run enrich-openai -- --model gpt-4o          # use the bigger model
+ *   npm run enrich-openai -- --log-file enrich.jsonl # audit log
+ *   npm run enrich-openai -- --force                 # redo already-done rows
+ */
+
+import { readFileSync, appendFileSync, mkdirSync, existsSync } from 'fs';
+import { join, dirname } from 'path';
+
+try {
+  const envPath = join(process.cwd(), '.env.local');
+  const env = readFileSync(envPath, 'utf8');
+  for (const line of env.split('\n')) {
+    const t = line.trim();
+    if (!t || t.startsWith('#')) continue;
+    const i = t.indexOf('=');
+    if (i === -1) continue;
+    const k = t.substring(0, i).trim();
+    const v = t.substring(i + 1).trim();
+    if (!process.env[k]) process.env[k] = v;
+  }
+} catch { /* absent */ }
+
+import OpenAI from 'openai';
+import { createClient, type SupabaseClient } from '@supabase/supabase-js';
+import { fetchEventPage, closeSharedBrowser } from '../lib/category-classifier/fetch-page';
+import { validateEnrichment, ENRICHMENT_VERSION } from '../lib/category-classifier/enrichment-taxonomy';
+import {
+  TAGS, AUDIENCES, VIBES, SETTINGS,
+  LANGUAGES, PRICE_TIERS, DURATION_TYPES,
+} from '../lib/category-classifier/enrichment-taxonomy';
+
+// ─────────────────────────────────────────────────────────────────────
+// CLI args
+// ─────────────────────────────────────────────────────────────────────
+
+interface CliOpts {
+  limit: number;
+  concurrency: number;
+  dryRun: boolean;
+  noFetch: boolean;
+  force: boolean;
+  verbose: boolean;
+  model: string;
+  logFile: string | null;
+}
+
+function parseArgs(): CliOpts {
+  const args = process.argv.slice(2);
+  const get = (flag: string) => {
+    const i = args.indexOf(flag);
+    return i !== -1 && args[i + 1] ? args[i + 1] : undefined;
+  };
+  const p = (v: string | undefined, d: number) => (v ? parseInt(v, 10) : d);
+  return {
+    limit: p(get('--limit'), Infinity as unknown as number),
+    concurrency: p(get('--concurrency'), 40),
+    dryRun: args.includes('--dry-run'),
+    noFetch: args.includes('--no-fetch'),
+    force: args.includes('--force'),
+    verbose: args.includes('--verbose') || args.includes('--dry-run'),
+    model: get('--model') ?? 'gpt-4o-mini',
+    logFile: get('--log-file') ?? null,
+  };
+}
+
+// ─────────────────────────────────────────────────────────────────────
+// System + user prompt — shared structure with Claude version
+// ─────────────────────────────────────────────────────────────────────
+
+const SYSTEM_PROMPT = `Du bist ein Klassifikator für österreichische Veranstaltungen. Gib für jedes Event GENAU EIN JSON-Objekt zurück (kein Markdown, keine Code-Fences, kein Erklärungstext drumherum). Nutze ausschließlich Werte aus den erlaubten Listen — erfinde nichts.
+
+ERLAUBTE TAGS (0-5): ${TAGS.join(', ')}
+
+ERLAUBTE AUDIENCE (1-4): ${AUDIENCES.join(', ')}
+
+ERLAUBTE VIBE (1-2): ${VIBES.join(', ')}
+
+ERLAUBTE SETTING (1-2): ${SETTINGS.join(', ')}
+
+ERLAUBTE LANGUAGE (exactly 1): ${LANGUAGES.join(', ')}
+
+ERLAUBTE PRICE_TIER (exactly 1): ${PRICE_TIERS.join(', ')}
+  gratis=0€ · günstig=bis 15€ · mittel=15-50€ · premium=über 50€ · unbekannt=nicht ableitbar
+  DEFAULT: Wenn weder im Event-Text noch im QUELLTEXT ein Preis steht → "gratis".
+  Viele österreichische Events (Frühschoppen, Kirtag, Pfarrfest, Gottesdienst,
+  Dorffest, Gemeindeveranstaltung) sind kostenlos. "unbekannt" nur bei klarer
+  Ambiguität ("Spende erbeten", ticket_url ohne Betrag).
+
+ERLAUBTE DURATION_TYPE (exactly 1): ${DURATION_TYPES.join(', ')}
+  kurz<2h · abend=2-5h · ganztag · mehrtägig · dauerausstellung
+  · nacht-bis-morgen=22h-6h · 24-stunden · 48-stunden
+
+BOOLEAN FLAGS (KRITISCH — nur TRUE bei EXPLIZITER Evidenz):
+
+is_student_friendly = TRUE nur bei EINER dieser Bedingungen:
+  (a) Titel/Text nennt "Studenten", "Studierende", "Uni-Party", "Semester-Opening"
+  (b) Veranstaltungsort ist eine Universität/FH (TU/WU/Uni Wien/Graz/Linz/Salzburg/Innsbruck, FH Burgenland, etc.)
+  (c) Veranstalter ist Studentenvereinigung (ÖH, ESN, AIESEC, IAESTE, AEGEE, Fachschaft)
+  (d) Explizite Studenten-Ermäßigung im Preis
+  SONST → FALSE. Normales Konzert/Club/Festival/Markt ist NICHT automatisch studentfriendly.
+
+is_family_friendly = TRUE nur bei EINER dieser Bedingungen:
+  (a) Titel/Text nennt "Familie", "Kinder", "ab 3/6 Jahren", "Kinderprogramm"
+  (b) Inhärent kinderorientiert: Kindertheater, Puppentheater, Kinderkino, Kinderzirkus,
+      Familienpicknick, Spielfest, Kinder-Workshop, Kirtag, Adventmarkt (tagsüber),
+      Erntedank, Maibaumfest, Ferienprogramm
+  (c) Ort/Veranstalter ist familienorientiert (Familienzentrum, Naturpark, Zoo, Kindermuseum)
+  SONST → FALSE. Konzerte/Clubs/Bars/Abend-Events/Heurige/Rave/Sport sind NICHT automatisch family-friendly.
+
+IM ZWEIFEL für BEIDE Flags: FALSE. False-Positives zerstören den Wizard-Filter.
+
+SUGGESTED_DESCRIPTION: wenn QUELLTEXT vorliegt UND BESCHREIBUNG leer/sehr kurz ist, schreibe saubere 150-400 Zeichen Beschreibung. Sonst null.
+SUGGESTED_PRICE_TEXT: wenn QUELLTEXT einen Preis nennt UND PREIS-Feld leer ist, extrahiere ihn ("ab 25€", "Eintritt frei", "Erwachsene 15€"). Sonst null.
+
+Österreichische Hinweise: Kirtag/Zeltfest = traditionell + familien-mit-kindern + dörflich · Wallfahrt = spirituell + traditionell + senioren · Heuriger = gemütlich + erwachsene-allgemein + dörflich · Goa-Festival im Wald = psytrance+goa+rave+psychedelic+forest+open-air-rave · DnB-Rave im Club = drum-and-bass+rave+club-night+energetisch+nacht-bis-morgen.`;
+
+const OUTPUT_JSON_SCHEMA = {
+  name: 'event_enrichment',
+  strict: true,
+  schema: {
+    type: 'object',
+    properties: {
+      tags: { type: 'array', items: { type: 'string' }, maxItems: 5 },
+      audience: { type: 'array', items: { type: 'string' }, maxItems: 4 },
+      vibe: { type: 'array', items: { type: 'string' }, maxItems: 2 },
+      setting: { type: 'array', items: { type: 'string' }, maxItems: 2 },
+      language: { type: 'string' },
+      price_tier: { type: 'string' },
+      duration_type: { type: 'string' },
+      is_student_friendly: { type: 'boolean' },
+      is_family_friendly: { type: 'boolean' },
+      suggested_description: { type: ['string', 'null'] },
+      suggested_price_text: { type: ['string', 'null'] },
+    },
+    required: [
+      'tags', 'audience', 'vibe', 'setting',
+      'language', 'price_tier', 'duration_type',
+      'is_student_friendly', 'is_family_friendly',
+      'suggested_description', 'suggested_price_text',
+    ],
+    additionalProperties: false,
+  },
+} as const;
+
+interface EventRow {
+  id: string;
+  title: string;
+  description: string | null;
+  category: string | null;
+  tags: string[] | null;
+  source_tags_raw: string[] | null;
+  location_name: string | null;
+  organizer: string | null;
+  start_date: string | null;
+  end_date: string | null;
+  price_text: string | null;
+  price_min: number | null;
+  price_max: number | null;
+  source_url: string | null;
+}
+
+function buildUserMessage(ev: EventRow, pageContent: string | null): string {
+  const parts: string[] = [];
+  parts.push(`TITEL: ${ev.title}`);
+  parts.push(`BESCHREIBUNG: ${ev.description ? ev.description.slice(0, 600) : '(leer)'}`);
+  if (ev.category) parts.push(`BISHERIGE KATEGORIE: ${ev.category}`);
+  const rawTags = ev.source_tags_raw ?? ev.tags;
+  if (rawTags && rawTags.length > 0) parts.push(`ROH-TAGS: ${rawTags.slice(0, 10).join(', ')}`);
+  if (ev.location_name) parts.push(`ORT: ${ev.location_name}`);
+  if (ev.organizer) parts.push(`VERANSTALTER: ${ev.organizer}`);
+  if (ev.start_date) {
+    const d = new Date(ev.start_date);
+    if (!isNaN(d.getTime())) {
+      const hour = d.getHours();
+      const weekday = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'][d.getDay()];
+      parts.push(`ZEIT: ${weekday} ${hour}:${String(d.getMinutes()).padStart(2, '0')} Uhr`);
+    }
+  }
+  parts.push(`PREIS: ${ev.price_text ?? '(leer)'}`);
+  if (pageContent) {
+    parts.push('');
+    parts.push('───────── QUELLTEXT DER EVENT-SEITE ─────────');
+    parts.push(pageContent);
+  }
+  return parts.join('\n');
+}
+
+// ─────────────────────────────────────────────────────────────────────
+// OpenAI client + call
+// ─────────────────────────────────────────────────────────────────────
+
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+  // Default timeout 60s; our page content can be long so we bump it.
+  timeout: 120_000,
+  maxRetries: 3, // SDK handles network blips + 429 backoff natively
+});
+
+async function classifyOpenai(
+  userMessage: string,
+  model: string,
+): Promise<{ parsed: unknown; tokensIn: number; tokensOut: number }> {
+  const res = await openai.chat.completions.create({
+    model,
+    messages: [
+      { role: 'system', content: SYSTEM_PROMPT },
+      { role: 'user', content: userMessage },
+    ],
+    // Force structured output via response_format — the API enforces the
+    // schema on its side, so we get validated JSON back.
+    response_format: { type: 'json_schema', json_schema: OUTPUT_JSON_SCHEMA },
+    temperature: 0.2,
+    max_tokens: 600,
+  });
+
+  const content = res.choices[0]?.message?.content;
+  if (!content) throw new Error('OpenAI returned no content');
+  const parsed = JSON.parse(content);
+  return {
+    parsed,
+    tokensIn: res.usage?.prompt_tokens ?? 0,
+    tokensOut: res.usage?.completion_tokens ?? 0,
+  };
+}
+
+function cleanSuggested(v: unknown): string | null {
+  if (typeof v !== 'string') return null;
+  const t = v.trim();
+  if (!t || /^null$/i.test(t)) return null;
+  return t;
+}
+
+// ─────────────────────────────────────────────────────────────────────
+// Stats
+// ─────────────────────────────────────────────────────────────────────
+
+interface Stats {
+  processed: number;
+  enriched: number;
+  failed: number;
+  fetchOk: number;
+  fetchSkipped: number;
+  fetchFailed: number;
+  descFilled: number;
+  priceFilled: number;
+  rateLimited: number;
+  studentTrue: number;
+  familyTrue: number;
+  tokensIn: number;
+  tokensOut: number;
+  startedAt: number;
+}
+
+function newStats(): Stats {
+  return {
+    processed: 0, enriched: 0, failed: 0,
+    fetchOk: 0, fetchSkipped: 0, fetchFailed: 0,
+    descFilled: 0, priceFilled: 0, rateLimited: 0,
+    studentTrue: 0, familyTrue: 0,
+    tokensIn: 0, tokensOut: 0,
+    startedAt: Date.now(),
+  };
+}
+
+/** Price per million tokens — update when switching models. */
+const PRICING = {
+  'gpt-4o-mini': { in: 0.15, out: 0.60 },
+  'gpt-4o': { in: 2.5, out: 10.0 },
+  'gpt-4.1-mini': { in: 0.40, out: 1.60 },
+  'gpt-4.1': { in: 2.0, out: 8.0 },
+  'gpt-5-mini': { in: 0.25, out: 2.0 },
+  'gpt-5': { in: 1.25, out: 10.0 },
+} as const;
+
+function estimateCostUsd(model: string, tokensIn: number, tokensOut: number): number {
+  const price = (PRICING as Record<string, { in: number; out: number } | undefined>)[model];
+  if (!price) return 0;
+  return (tokensIn / 1_000_000) * price.in + (tokensOut / 1_000_000) * price.out;
+}
+
+function reportLine(s: Stats, total: number | undefined, model: string): string {
+  const elapsed = (Date.now() - s.startedAt) / 1000;
+  const rate = s.processed / Math.max(elapsed, 0.001);
+  const etaStr = total && rate > 0
+    ? `eta=${(((total - s.processed) / rate) / 60).toFixed(0)}min`
+    : '';
+  const costUsd = estimateCostUsd(model, s.tokensIn, s.tokensOut);
+  return `p=${s.processed}${total ? '/' + total : ''} ✓=${s.enriched} ✗=${s.failed} ` +
+    `fetch(ok=${s.fetchOk} fail=${s.fetchFailed}) ` +
+    `filled(d=${s.descFilled} p=${s.priceFilled}) ` +
+    `flags(stu=${s.studentTrue} fam=${s.familyTrue}) ` +
+    `429=${s.rateLimited} $=${costUsd.toFixed(2)} rate=${rate.toFixed(1)}/s ${etaStr}`;
+}
+
+function appendLog(logFile: string | null, entry: Record<string, unknown>): void {
+  if (!logFile) return;
+  try {
+    const dir = dirname(logFile);
+    if (dir && dir !== '.' && !existsSync(dir)) mkdirSync(dir, { recursive: true });
+    appendFileSync(logFile, JSON.stringify({ ts: new Date().toISOString(), ...entry }) + '\n');
+  } catch (err) {
+    console.error(`\n[log] append failed: ${err instanceof Error ? err.message : err}`);
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────
+// Per-event worker
+// ─────────────────────────────────────────────────────────────────────
+
+async function processOne(
+  supabase: SupabaseClient,
+  row: EventRow,
+  opts: CliOpts,
+  stats: Stats,
+): Promise<void> {
+  // 1. Fetch source URL
+  let pageContent: string | null = null;
+  let fetchErr: string | undefined;
+  if (!opts.noFetch && row.source_url) {
+    try {
+      const page = await fetchEventPage(row.source_url);
+      if (page.ok) { pageContent = page.text; stats.fetchOk += 1; }
+      else { stats.fetchFailed += 1; fetchErr = page.error; }
+    } catch (err) {
+      stats.fetchFailed += 1;
+      fetchErr = err instanceof Error ? err.message : String(err);
+    }
+  } else {
+    stats.fetchSkipped += 1;
+  }
+
+  // 2. Call OpenAI. SDK's maxRetries handles 429 + network blips.
+  let parsed: unknown = null;
+  let tokensIn = 0, tokensOut = 0;
+  let lastErr: string | undefined;
+  try {
+    const result = await classifyOpenai(buildUserMessage(row, pageContent), opts.model);
+    parsed = result.parsed;
+    tokensIn = result.tokensIn;
+    tokensOut = result.tokensOut;
+    stats.tokensIn += tokensIn;
+    stats.tokensOut += tokensOut;
+  } catch (err) {
+    lastErr = err instanceof Error ? err.message : String(err);
+    if (/429|rate.limit/i.test(lastErr)) stats.rateLimited += 1;
+  }
+
+  if (!parsed) {
+    console.error(`\n[${row.id.slice(0, 8)}] openai failed: ${lastErr?.slice(0, 200) ?? '?'}`);
+    stats.failed += 1;
+    stats.processed += 1;
+    appendLog(opts.logFile, { event_id: row.id, title: row.title, status: 'failed', error: lastErr });
+    return;
+  }
+
+  // 3. Validate
+  const validated = validateEnrichment(parsed);
+  const pRec = (parsed ?? {}) as Record<string, unknown>;
+  const suggestedDesc = cleanSuggested(pRec.suggested_description);
+  const suggestedPrice = cleanSuggested(pRec.suggested_price_text);
+
+  stats.enriched += 1;
+  if (validated.is_student_friendly) stats.studentTrue += 1;
+  if (validated.is_family_friendly) stats.familyTrue += 1;
+
+  if (opts.verbose) {
+    const lines: string[] = [];
+    const titleCut = row.title.length > 65 ? row.title.slice(0, 65) + '…' : row.title;
+    lines.push('');
+    lines.push(`━━ [${row.id.slice(0, 8)}] ${titleCut}`);
+    lines.push(`   ort:            ${row.location_name ?? '-'}`);
+    lines.push(`   cat-v2 says:    ${row.category ?? '-'}   (page-fetch: ${pageContent ? `${pageContent.length} chars` : fetchErr ? `✗ ${fetchErr}` : 'skipped'})`);
+    lines.push(`   tags:           ${validated.tags.join(', ') || '(none)'}`);
+    lines.push(`   audience:       ${validated.audience.join(', ') || '(none)'}`);
+    lines.push(`   vibe:           ${validated.vibe.join(', ') || '(none)'}`);
+    lines.push(`   setting:        ${validated.setting.join(', ') || '(none)'}`);
+    lines.push(`   language:       ${validated.language ?? '-'}`);
+    lines.push(`   price_tier:     ${validated.price_tier ?? '-'}`);
+    lines.push(`   duration_type:  ${validated.duration_type ?? '-'}`);
+    lines.push(`   flags:          student=${validated.is_student_friendly}   family=${validated.is_family_friendly}`);
+    lines.push(`   tokens:         in=${tokensIn} out=${tokensOut}   cost=$${estimateCostUsd(opts.model, tokensIn, tokensOut).toFixed(4)}`);
+    if (suggestedDesc) {
+      const s = suggestedDesc.length > 120 ? suggestedDesc.slice(0, 120) + '…' : suggestedDesc;
+      lines.push(`   → suggest desc: ${s}`);
+    }
+    if (suggestedPrice) lines.push(`   → suggest price: ${suggestedPrice}`);
+    process.stdout.write(lines.join('\n') + '\n');
+  }
+
+  // 4. Build + commit atomic DB update
+  const update: Record<string, unknown> = {
+    audience: validated.audience.length > 0 ? validated.audience : null,
+    vibe: validated.vibe.length > 0 ? validated.vibe : null,
+    setting: validated.setting.length > 0 ? validated.setting : null,
+    language: validated.language,
+    price_tier: validated.price_tier,
+    duration_type: validated.duration_type,
+    is_student_friendly: validated.is_student_friendly,
+    is_family_friendly: validated.is_family_friendly,
+    enrichment_version: ENRICHMENT_VERSION,
+    enrichment_at: new Date().toISOString(),
+  };
+  if (validated.tags.length > 0) {
+    const existing = Array.isArray(row.tags) ? row.tags : [];
+    update.tags = Array.from(new Set([...existing, ...validated.tags])).slice(0, 8);
+  }
+  const descEmpty = !row.description || row.description.trim().length < 40;
+  if (descEmpty && suggestedDesc) { update.description = suggestedDesc; stats.descFilled += 1; }
+  const priceEmpty = !row.price_text || row.price_text.trim().length === 0;
+  if (priceEmpty && suggestedPrice) { update.price_text = suggestedPrice; stats.priceFilled += 1; }
+
+  if (!opts.dryRun) {
+    const { error } = await supabase.from('events').update(update).eq('id', row.id);
+    if (error) {
+      console.error(`\n[${row.id.slice(0, 8)}] update failed: ${error.message}`);
+      stats.enriched -= 1;
+      stats.failed += 1;
+      appendLog(opts.logFile, { event_id: row.id, title: row.title, status: 'db_error', error: error.message });
+      stats.processed += 1;
+      return;
+    }
+  }
+
+  appendLog(opts.logFile, {
+    event_id: row.id,
+    title: row.title,
+    status: opts.dryRun ? 'dry_run_ok' : 'ok',
+    tags_added: validated.tags,
+    audience: validated.audience,
+    is_student_friendly: validated.is_student_friendly,
+    is_family_friendly: validated.is_family_friendly,
+    tokens_in: tokensIn,
+    tokens_out: tokensOut,
+  });
+  stats.processed += 1;
+}
+
+async function worker(
+  queue: EventRow[],
+  supabase: SupabaseClient,
+  opts: CliOpts,
+  stats: Stats,
+  total: number | undefined,
+): Promise<void> {
+  while (queue.length > 0) {
+    const row = queue.shift();
+    if (!row) break;
+    try {
+      await processOne(supabase, row, opts, stats);
+    } catch (err) {
+      stats.failed += 1;
+      stats.processed += 1;
+      console.error(`\nworker error on ${row.id.slice(0, 8)}: ${err instanceof Error ? err.message : err}`);
+    }
+    if (stats.processed % 10 === 0 || stats.processed <= 10) {
+      process.stdout.write('  ' + reportLine(stats, total, opts.model) + '\r');
+    }
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────
+// Main
+// ─────────────────────────────────────────────────────────────────────
+
+async function main() {
+  const opts = parseArgs();
+
+  if (!process.env.OPENAI_API_KEY) {
+    console.error('OPENAI_API_KEY missing from env / .env.local');
+    process.exit(1);
+  }
+
+  const supaUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supaKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!supaUrl || !supaKey) {
+    console.error('Missing NEXT_PUBLIC_SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY');
+    process.exit(1);
+  }
+  const supabase = createClient(supaUrl, supaKey);
+  const today = new Date().toISOString().split('T')[0];
+
+  const { count: alreadyDone } = await supabase
+    .from('events')
+    .select('*', { count: 'exact', head: true })
+    .eq('publish_status', 'published')
+    .gte('start_date', today)
+    .gte('quality_score', 40)
+    .eq('enrichment_version', ENRICHMENT_VERSION);
+
+  let pendingQuery = supabase
+    .from('events')
+    .select('*', { count: 'exact', head: true })
+    .eq('publish_status', 'published')
+    .gte('start_date', today)
+    .gte('quality_score', 40);
+  if (!opts.force) pendingQuery = pendingQuery.or(`enrichment_version.is.null,enrichment_version.neq.${ENRICHMENT_VERSION}`);
+  const { count: totalPending } = await pendingQuery;
+
+  console.log('\nEvent Enrichment — OpenAI direct');
+  console.log(`  Model:           ${opts.model}`);
+  console.log(`  Concurrency:     ${opts.concurrency} workers`);
+  console.log(`  Dry-run:         ${opts.dryRun}`);
+  console.log(`  Fetch URLs:      ${!opts.noFetch}`);
+  console.log(`  Force re-run:    ${opts.force}`);
+  console.log(`  Log file:        ${opts.logFile ?? '(none)'}`);
+  console.log(`  Limit:           ${opts.limit === Infinity ? 'none' : opts.limit}`);
+  console.log(`  Target version:  ${ENRICHMENT_VERSION}`);
+  console.log(`  Already done:    ${alreadyDone ?? '?'}   (resume-safe — these are skipped)`);
+  console.log(`  Still pending:   ${totalPending ?? '?'}`);
+  const pricing = (PRICING as Record<string, { in: number; out: number } | undefined>)[opts.model];
+  if (pricing && totalPending) {
+    const estCost = (totalPending * (3500 * pricing.in + 400 * pricing.out)) / 1_000_000;
+    console.log(`  Cost estimate:   ~$${estCost.toFixed(2)} for full run`);
+  }
+  console.log('─'.repeat(70));
+
+  const stats = newStats();
+  appendLog(opts.logFile, { status: 'run_start', model: opts.model, concurrency: opts.concurrency, already_done: alreadyDone, pending: totalPending });
+
+  const PAGE_SIZE = 400;
+
+  while (stats.processed < opts.limit) {
+    let q = supabase
+      .from('events')
+      .select('id, title, description, category, tags, source_tags_raw, location_name, organizer, start_date, end_date, price_text, price_min, price_max, source_url')
+      .eq('publish_status', 'published')
+      .gte('start_date', today)
+      .gte('quality_score', 40)
+      .order('id', { ascending: true })
+      .limit(PAGE_SIZE);
+    if (!opts.force) q = q.or(`enrichment_version.is.null,enrichment_version.neq.${ENRICHMENT_VERSION}`);
+    const { data, error } = await q;
+    if (error) { console.error('\nquery:', error.message); break; }
+    if (!data || data.length === 0) break;
+
+    const rows = data as unknown as EventRow[];
+    const remaining = opts.limit - stats.processed;
+    const toProcess = remaining < rows.length ? rows.slice(0, remaining) : rows;
+    const queue = [...toProcess];
+    const workers = Array.from({ length: opts.concurrency }, () =>
+      worker(queue, supabase, opts, stats, totalPending ?? undefined),
+    );
+    await Promise.all(workers);
+
+    if (opts.dryRun || opts.force) break;
+    if (rows.length < PAGE_SIZE) break;
+  }
+
+  process.stdout.write('\n' + '─'.repeat(70) + '\n');
+  console.log(reportLine(stats, totalPending ?? undefined, opts.model));
+  const elapsed = (Date.now() - stats.startedAt) / 60000;
+  console.log(`Elapsed: ${elapsed.toFixed(1)}min`);
+  appendLog(opts.logFile, {
+    status: 'run_end',
+    processed: stats.processed,
+    enriched: stats.enriched,
+    failed: stats.failed,
+    elapsed_min: elapsed,
+    total_cost_usd: estimateCostUsd(opts.model, stats.tokensIn, stats.tokensOut),
+  });
+
+  await closeSharedBrowser();
+}
+
+process.on('SIGINT', () => {
+  console.log('\n\n⚠  SIGINT received. In-flight events may be lost, but DB is consistent —');
+  console.log('   re-run the same command to pick up from where you were.');
+  closeSharedBrowser().finally(() => process.exit(130));
+});
+
+main().catch((err) => {
+  console.error('enrich-openai failed:', err);
+  closeSharedBrowser().finally(() => process.exit(1));
+});

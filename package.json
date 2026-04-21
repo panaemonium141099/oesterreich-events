@@ -53,6 +53,7 @@
     "test-enrichment": "tsx --env-file=.env.local src/scripts/test-enrichment.ts",
     "enrich-batch": "tsx --env-file=.env.local src/scripts/enrich-batch.ts",
     "enrich-claude": "tsx --env-file=.env.local src/scripts/enrich-claude-cli.ts",
+    "enrich-openai": "tsx --env-file=.env.local src/scripts/enrich-openai.ts",
     "install-google-sa": "tsx src/scripts/install-google-sa.ts",
     "download-category-images": "tsx --env-file=.env.local src/scripts/download-category-images.ts",
     "import-osm-venues": "tsx --env-file=.env.local src/scripts/import-osm-venues.ts",

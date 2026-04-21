@@ -185,9 +185,16 @@ async function main() {
     // the script's own default; tweak via ENRICH_ARGS env var if needed.
     if (!opts.skipEnrichment) {
       steps.enrichment = await runStep('enrichment', async () => {
+        // OpenAI (gpt-4o-mini default) is the production path — cheap
+        // ($60 for 80k events), fast (real async concurrency, no subprocess
+        // spawn), and not Max-plan-rate-limited. The claude-cli script
+        // stays available as `npm run enrich-claude` if you ever want to
+        // use it on a smaller batch, but it's no longer scheduled in the
+        // pipeline. Set ENRICH_ARGS env var to pass extra flags (e.g.
+        // `ENRICH_ARGS="--model gpt-4o --concurrency 60"`).
         const extraArgs = process.env.ENRICH_ARGS ?? '';
-        execStep('Enrich new events with Claude (tags/audience/vibe/setting/flags)',
-          `npx tsx ${envFlag}src/scripts/enrich-claude-cli.ts ${extraArgs}`);
+        execStep('Enrich new events with OpenAI (tags/audience/vibe/setting/flags)',
+          `npx tsx ${envFlag}src/scripts/enrich-openai.ts ${extraArgs}`);
       }, steps);
     }
 
