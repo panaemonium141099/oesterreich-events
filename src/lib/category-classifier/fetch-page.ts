@@ -224,8 +224,38 @@ export async function closeSharedBrowser(): Promise<void> {
 // Public API — orchestrator
 // ─────────────────────────────────────────────────────────────────────
 
+/**
+ * URLs that look like API/backend endpoints rather than web pages.
+ * These typically require specific auth headers and return empty HTML or
+ * errors to Chrome — Puppeteer fallback is a waste. Known Austrian culprits:
+ *   webapi.deskline.net/*   — Feratel API for Tourismus-Portale (needs DW-Source header)
+ *   api.*.at/events         — raw JSON APIs
+ *   */api/events/*          — RESTful endpoints
+ */
+function looksLikeApiEndpoint(url: string): boolean {
+  try {
+    const u = new URL(url);
+    const host = u.hostname.toLowerCase();
+    if (host.startsWith('webapi.') || host.startsWith('api.')) return true;
+    if (u.pathname.toLowerCase().includes('/api/')) return true;
+    if (u.pathname.endsWith('.json') || u.pathname.endsWith('.xml')) return true;
+    return false;
+  } catch {
+    return false;
+  }
+}
+
 export async function fetchEventPage(url: string): Promise<FetchedPage> {
   await rateLimit(url);
+
+  // API endpoints can't be rendered — skip straight to 'fail' without
+  // eating the Chrome-startup cost on every one of these.
+  if (looksLikeApiEndpoint(url)) {
+    return {
+      ok: false, text: null, status: 0,
+      error: 'URL is an API endpoint (scraper data bug — should point to event page, not backend)',
+    };
+  }
 
   // Stage 1: plain fetch
   const plain = await fetchPlain(url);
@@ -251,8 +281,15 @@ export async function fetchEventPage(url: string): Promise<FetchedPage> {
     }
   }
 
-  // Neither worked — return the original plain error so stats stay accurate
-  return plain.ok ? plain : plain;
+  // Neither worked — surface BOTH errors so the operator can diagnose
+  // whether the plain fetch was misleading or Puppeteer also hit the wall.
+  return {
+    ok: false,
+    text: null,
+    status: plain.status || browser.status,
+    via: browser.via,
+    error: `http: ${plain.error ?? 'ok-but-thin'} | browser: ${browser.error ?? 'ok-but-thin'}`,
+  };
 }
 
 /**

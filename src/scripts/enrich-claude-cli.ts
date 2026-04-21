@@ -130,6 +130,14 @@ LANGUAGE (exactly 1): ${LANGUAGES.join(', ')}
 
 PRICE_TIER (exactly 1): ${PRICE_TIERS.join(', ')}
   gratis=0€ · günstig=bis 15€ · mittel=15-50€ · premium=über 50€ · unbekannt=nicht ableitbar
+  DEFAULT-REGEL: Wenn weder in den Event-Metadaten (TITEL, BESCHREIBUNG, PREIS) noch
+  im QUELLTEXT der Seite ein Preis erkennbar ist → "gratis". Viele österreichische
+  Events (Frühschoppen, Kirtag, Pfarrfest, Gottesdienst, Seniorennachmittag,
+  Dorffest, Gemeindeveranstaltung) sind tatsächlich kostenlos und nennen keinen
+  Preis weil es selbstverständlich ist. "unbekannt" nur bei klaren Ausnahmefällen
+  wo ein Preis ANGEDEUTET aber nicht quantifizierbar ist ("Eintritt bei der Tür",
+  "Spende erbeten"). Bei kommerziellen Events mit ticket_url aber fehlendem Betrag:
+  trotzdem "unbekannt", nicht "gratis".
 
 DURATION_TYPE (exactly 1): ${DURATION_TYPES.join(', ')}
   kurz<2h · abend=2-5h · ganztag · mehrtägig · dauerausstellung · nacht-bis-morgen=22h-6h · 24-stunden · 48-stunden
@@ -536,6 +544,10 @@ async function processOne(
     lines.push('');
     lines.push(`━━ [${row.id.slice(0, 8)}] ${titleCut}`);
     lines.push(`   ort:            ${row.location_name ?? '-'}`);
+    if (row.source_url) {
+      const u = row.source_url.length > 80 ? row.source_url.slice(0, 80) + '…' : row.source_url;
+      lines.push(`   url:            ${u}`);
+    }
     lines.push(`   cat-v2 says:    ${row.category ?? '-'}   (page-fetch: ${pageContent ? `${pageContent.length} chars` : fetchErr ? `✗ ${fetchErr}` : 'skipped'})`);
     lines.push(`   tags:           ${validated.tags.join(', ') || '(none)'}`);
     lines.push(`   audience:       ${validated.audience.join(', ') || '(none)'}`);
