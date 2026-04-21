@@ -116,6 +116,32 @@ export async function GET(request: NextRequest) {
   const eveningOnly = searchParams.get('eveningOnly');
   if (eveningOnly === 'true') filters.eveningOnly = true;
 
+  // ── Enrichment filters (from Claude classification) ──
+  const studentFriendly = searchParams.get('studentFriendly');
+  if (studentFriendly === 'true') filters.studentFriendly = true;
+
+  const familyFriendly = searchParams.get('familyFriendly');
+  if (familyFriendly === 'true') filters.familyFriendly = true;
+
+  const priceTier = searchParams.get('priceTier');
+  if (priceTier && ['gratis', 'günstig', 'mittel', 'premium', 'unbekannt'].includes(priceTier)) {
+    filters.priceTier = priceTier as NonNullable<typeof filters.priceTier>;
+  }
+
+  const audience = searchParams.get('audience');
+  if (audience) filters.audience = audience.split(',').map(t => t.trim()).filter(Boolean);
+
+  const vibe = searchParams.get('vibe');
+  if (vibe) filters.vibe = vibe.split(',').map(t => t.trim()).filter(Boolean);
+
+  const setting = searchParams.get('setting');
+  if (setting) filters.setting = setting.split(',').map(t => t.trim()).filter(Boolean);
+
+  const language = searchParams.get('language');
+  if (language && ['deutsch', 'dialekt', 'englisch', 'mehrsprachig', 'ohne-sprache'].includes(language)) {
+    filters.language = language as NonNullable<typeof filters.language>;
+  }
+
   // Pagination params
   const limitParam = searchParams.get('limit');
   const requestedLimit = limitParam ? parseInt(limitParam, 10) : DEFAULT_PAGE_SIZE;
@@ -360,6 +386,35 @@ export async function GET(request: NextRequest) {
         'start_date.like.*T23:%,' +
         'start_date.not.like.*T%'
       );
+    }
+
+    // ── Enrichment filters ──
+    // These apply to events classified by the Claude-based enrichment
+    // step. Events without enrichment data fall out of these filters —
+    // acceptable because the wizard-type UX these power is only
+    // meaningful against enriched rows anyway.
+    if (filters.studentFriendly) {
+      query = query.eq('is_student_friendly', true);
+    }
+    if (filters.familyFriendly) {
+      query = query.eq('is_family_friendly', true);
+    }
+    if (filters.priceTier) {
+      query = query.eq('price_tier', filters.priceTier);
+    }
+    if (filters.language) {
+      query = query.eq('language', filters.language);
+    }
+    if (filters.audience && filters.audience.length > 0) {
+      // PostgREST `ov` operator on text[] columns (GIN-indexed):
+      // matches when the column shares ANY element with the filter list.
+      query = query.overlaps('audience', filters.audience);
+    }
+    if (filters.vibe && filters.vibe.length > 0) {
+      query = query.overlaps('vibe', filters.vibe);
+    }
+    if (filters.setting && filters.setting.length > 0) {
+      query = query.overlaps('setting', filters.setting);
     }
 
     // Bounding box filter for viewport-based loading

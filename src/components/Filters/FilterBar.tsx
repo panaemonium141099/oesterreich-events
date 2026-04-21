@@ -7,6 +7,7 @@ import { CategoryFilter } from './CategoryFilter';
 import { SourceFilter } from './SourceFilter';
 import { DistrictFilter } from './DistrictFilter';
 import { DateRangeFilter } from './DateRangeFilter';
+import { EnrichmentFilters } from './EnrichmentFilters';
 import { trackEvent } from '@/lib/analytics';
 import { useAuth } from '@/lib/supabase/auth-context';
 
@@ -211,6 +212,13 @@ export function FilterBar({ filters, onFiltersChange, eveningMode, bundeslandId,
     filters.dateFrom,
     filters.dateTo,
     filters.search,
+    filters.studentFriendly,
+    filters.familyFriendly,
+    filters.priceTier,
+    filters.language,
+    filters.audience && filters.audience.length > 0,
+    filters.vibe && filters.vibe.length > 0,
+    filters.setting && filters.setting.length > 0,
   ].filter(Boolean).length;
 
   const clearFilters = () => {
@@ -220,7 +228,8 @@ export function FilterBar({ filters, onFiltersChange, eveningMode, bundeslandId,
     setShowSuggestions(false);
     setSuggestions([]);
     setEventSuggestions([]);
-    // Restore default dateTo (6 months) when clearing
+    // Restore default dateTo (6 months) when clearing. Also wipes all the
+    // enrichment filters (studentFriendly/familyFriendly/priceTier/etc).
     const defaultDateTo = new Date();
     defaultDateTo.setMonth(defaultDateTo.getMonth() + 6);
     onFiltersChange({ dateTo: defaultDateTo.toISOString().slice(0, 10) });
@@ -311,6 +320,13 @@ export function FilterBar({ filters, onFiltersChange, eveningMode, bundeslandId,
         dateFrom={filters.dateFrom}
         dateTo={filters.dateTo}
         onChange={(dateFrom, dateTo) => { if (dateFrom) trackEvent('filter_change', { filter_type: 'date', value: `${dateFrom}-${dateTo}` }); onFiltersChange({ ...filters, dateFrom, dateTo }); }}
+        eveningMode={eveningMode}
+      />
+
+      {/* Claude-enrichment quick filters: Familie / Studenten + Preis-Chips */}
+      <EnrichmentFilters
+        filters={filters}
+        onFiltersChange={onFiltersChange}
         eveningMode={eveningMode}
       />
 

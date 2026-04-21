@@ -5,9 +5,15 @@ export const STEP_DEPENDENCIES: Record<string, string[]> = {
   venues: [],
   normalize: [],
   // Deterministic backfill runs first — cheap, free, bulk. Writes cat-v2 rules_*
-  // confidence on every stale row, so the AI-residue step only sees events the
-  // rules genuinely could not resolve.
+  // confidence + the 14-way `category` on every stale row. Still needed because
+  // the enrichment step below does NOT overwrite `category` (only tags/audience/
+  // vibe/setting/flags).
   categorization_backfill: ['normalize'],
+  // OLD: AI-residue step via OpenAI (categorize-events.ts without flags).
+  // Superseded by the `enrichment` step below which uses Claude via the
+  // local CLI and produces richer per-event metadata (tags/audience/vibe/
+  // setting/flags/price_tier/duration_type). Kept in the map so downstream
+  // code that references it doesn't break, but never scheduled.
   categorization: ['normalize', 'categorization_backfill'],
   geocoding: ['normalize'],
   scoring: ['normalize'],
@@ -16,10 +22,16 @@ export const STEP_DEPENDENCIES: Record<string, string[]> = {
   // duplicate_of=<primary> on losers; the App filters those out.
   dedup: ['normalize', 'scoring'],
   artist_matching: ['dedup'],
+  // Enrichment runs AFTER dedup so Claude only processes the canonical
+  // events, not the duplicate losers. Relies on the enricher's own
+  // resume-safe filter (enrichment_version IS NULL OR != current) to
+  // skip already-enriched rows — i.e. only NEW events from this scrape
+  // get enriched. Re-runs are cheap: a second pass is a ~no-op.
+  enrichment: ['dedup'],
   // Indexing submits event URLs to IndexNow (Bing/Yandex) and Google Indexing
   // API. Runs last, after dedup has marked canonical rows, so we don't spend
   // API quota on duplicates the apps then redirect away from.
-  indexing: ['dedup'],
+  indexing: ['dedup', 'enrichment'],
   report: [],
 };
 

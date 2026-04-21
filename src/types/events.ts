@@ -140,6 +140,21 @@ export interface EventFilters {
   studentOnly?: boolean;
   /** Minimum localness score of the venue (0-100) */
   localnessMin?: number;
+  // ── Enrichment filters (populated by Claude-based event enrichment) ──
+  /** Only events where Claude flagged is_student_friendly=true. */
+  studentFriendly?: boolean;
+  /** Only events where Claude flagged is_family_friendly=true. */
+  familyFriendly?: boolean;
+  /** Price tier filter: gratis | günstig | mittel | premium | unbekannt */
+  priceTier?: 'gratis' | 'günstig' | 'mittel' | 'premium' | 'unbekannt';
+  /** Audience filter: studenten | familien-mit-kindern | senioren | paare | ... */
+  audience?: string[];
+  /** Vibe filter: rave | gemütlich | kulturell | romantisch | ... */
+  vibe?: string[];
+  /** Setting filter: indoor | outdoor | am-see | in-den-bergen | warehouse | ... */
+  setting?: string[];
+  /** Language: deutsch | dialekt | englisch | mehrsprachig | ohne-sprache */
+  language?: 'deutsch' | 'dialekt' | 'englisch' | 'mehrsprachig' | 'ohne-sprache';
 }
 
 export type Category =

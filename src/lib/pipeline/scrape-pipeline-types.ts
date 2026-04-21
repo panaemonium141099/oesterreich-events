@@ -59,6 +59,14 @@ export interface PipelineOptions {
   skipCategorizationBackfill?: boolean;
   /** Skip the cross-source dedup pass (not recommended — duplicates bleed through). */
   skipDedup?: boolean;
+  /**
+   * Skip the Claude-based enrichment step. Enrichment tags new events with
+   * audience/vibe/setting/language/price_tier/duration_type/student+family
+   * flags. Expensive (Claude API) but resume-safe — only processes events
+   * without an up-to-date enrichment_version. Safe to skip during dev if
+   * you want a fast pipeline run.
+   */
+  skipEnrichment?: boolean;
   /** Skip submitting new URLs to IndexNow + Google Indexing API. */
   skipIndexing?: boolean;
   dryRun?: boolean;

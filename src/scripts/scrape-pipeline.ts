@@ -64,6 +64,7 @@ function parseArgs(): PipelineOptions {
     skipCategorization: has('--skip-categorization'),
     skipCategorizationBackfill: has('--skip-categorization-backfill'),
     skipDedup: has('--skip-dedup'),
+    skipEnrichment: has('--skip-enrichment'),
     skipIndexing: has('--skip-indexing'),
     dryRun: has('--dry-run'),
   };
@@ -135,19 +136,19 @@ async function main() {
       if (!opts.skipCategorizationBackfill) {
         steps.categorization_backfill = await runStep('categorization_backfill', async () => {
           // Step 4a: free, deterministic, idempotent. Brings all stale rows
-          // to the current classifier version using rules only. Must run
-          // before the AI-residue step so 4b only sees genuinely hard cases.
+          // to the current classifier version using rules only. Writes
+          // the 14-way `category` field which the new Claude-enrichment
+          // step (see below) does NOT touch — so this step is still load-
+          // bearing for the primary category.
           execStep('Categorize events (deterministic backfill)',
             `npx tsx ${envFlag}src/scripts/categorize-events.ts --deterministic-backfill`);
         }, steps);
       }
 
-      steps.categorization = await runStep('categorization', async () => {
-        // Step 4b: AI on the reduced residue. Runs only on events where the
-        // deterministic backfill could not resolve (`category_needs_review=true`).
-        execStep('Categorize events (AI residue for hard cases)',
-          `npx tsx ${envFlag}src/scripts/categorize-events.ts`);
-      }, steps);
+      // OLD step 4b: AI-residue via categorize-events.ts (OpenAI).
+      // Superseded by the Claude-enrichment step below which produces
+      // richer metadata (tags, audience, vibe, setting, flags, price_tier,
+      // duration_type) in a single pass. Intentionally NOT scheduled.
     }
 
     if (!opts.skipGeocoding) {
@@ -175,6 +176,20 @@ async function main() {
     steps.artist_matching = await runStep('artist_matching', async () => {
       await triggerMatchArtists();
     }, steps);
+
+    // Claude-based enrichment of NEW events only. The enricher's own
+    // resume-safe filter (`enrichment_version IS NULL OR != current`)
+    // means it naturally skips everything we've already classified — so
+    // running this every pipeline run is idempotent and just processes
+    // the delta. Expensive per event, so default --concurrency stays at
+    // the script's own default; tweak via ENRICH_ARGS env var if needed.
+    if (!opts.skipEnrichment) {
+      steps.enrichment = await runStep('enrichment', async () => {
+        const extraArgs = process.env.ENRICH_ARGS ?? '';
+        execStep('Enrich new events with Claude (tags/audience/vibe/setting/flags)',
+          `npx tsx ${envFlag}src/scripts/enrich-claude-cli.ts ${extraArgs}`);
+      }, steps);
+    }
 
     if (!opts.skipIndexing) {
       steps.indexing = await runStep('indexing', async () => {
