@@ -224,14 +224,13 @@ export async function closeSharedBrowser(): Promise<void> {
 // Public API — orchestrator
 // ─────────────────────────────────────────────────────────────────────
 
-/**
- * URLs that look like API/backend endpoints rather than web pages.
- * These typically require specific auth headers and return empty HTML or
- * errors to Chrome — Puppeteer fallback is a waste. Known Austrian culprits:
- *   webapi.deskline.net/*   — Feratel API for Tourismus-Portale (needs DW-Source header)
- *   api.*.at/events         — raw JSON APIs
- *   */api/events/*          — RESTful endpoints
- */
+// URLs that look like API/backend endpoints rather than web pages.
+// These typically require specific auth headers and return empty HTML or
+// errors to Chrome — Puppeteer fallback is a waste. Known Austrian culprits:
+//   webapi.deskline.net/*   — Feratel API for Tourismus-Portale (needs DW-Source header)
+//   api.*.at/events         — raw JSON APIs
+//   .../api/events/...      — RESTful endpoints
+//   *.json / *.xml          — raw data formats
 function looksLikeApiEndpoint(url: string): boolean {
   try {
     const u = new URL(url);
