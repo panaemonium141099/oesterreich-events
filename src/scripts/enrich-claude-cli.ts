@@ -65,6 +65,7 @@ interface CliOpts {
   dryRun: boolean;
   noFetch: boolean;
   force: boolean;
+  verbose: boolean;
   model: 'sonnet' | 'haiku' | 'opus';
   claudeBin: string;
 }
@@ -84,6 +85,9 @@ function parseArgs(): CliOpts {
     dryRun: args.includes('--dry-run'),
     noFetch: args.includes('--no-fetch'),
     force: args.includes('--force'),
+    // --verbose prints each event's classification. Auto-on in dry-run
+    // because otherwise there's nothing to look at.
+    verbose: args.includes('--verbose') || args.includes('--dry-run'),
     model,
     // Just 'claude' on all platforms — on Windows with shell=true, PATHEXT
     // handles finding claude.exe / claude.cmd / claude.bat automatically.
@@ -424,6 +428,31 @@ async function processOne(
   stats.enriched += 1;
   if (validated.is_student_friendly) stats.studentTrue += 1;
   if (validated.is_family_friendly) stats.familyTrue += 1;
+
+  // 3b. Verbose per-event print (auto-on in --dry-run). Built as one big
+  // string so 5 concurrent workers don't interleave mid-event.
+  if (opts.verbose) {
+    const lines: string[] = [];
+    const titleCut = row.title.length > 65 ? row.title.slice(0, 65) + '…' : row.title;
+    lines.push('');
+    lines.push(`━━ [${row.id.slice(0, 8)}] ${titleCut}`);
+    lines.push(`   ort:            ${row.location_name ?? '-'}`);
+    lines.push(`   cat-v2 says:    ${row.category ?? '-'}   (page-fetch: ${pageContent ? `${pageContent.length} chars` : 'skipped'})`);
+    lines.push(`   tags:           ${validated.tags.join(', ') || '(none)'}`);
+    lines.push(`   audience:       ${validated.audience.join(', ') || '(none)'}`);
+    lines.push(`   vibe:           ${validated.vibe.join(', ') || '(none)'}`);
+    lines.push(`   setting:        ${validated.setting.join(', ') || '(none)'}`);
+    lines.push(`   language:       ${validated.language ?? '-'}`);
+    lines.push(`   price_tier:     ${validated.price_tier ?? '-'}`);
+    lines.push(`   duration_type:  ${validated.duration_type ?? '-'}`);
+    lines.push(`   flags:          student=${validated.is_student_friendly}   family=${validated.is_family_friendly}`);
+    if (suggestedDesc) {
+      const s = suggestedDesc.length > 120 ? suggestedDesc.slice(0, 120) + '…' : suggestedDesc;
+      lines.push(`   → suggest desc: ${s}`);
+    }
+    if (suggestedPrice) lines.push(`   → suggest price: ${suggestedPrice}`);
+    process.stdout.write(lines.join('\n') + '\n');
+  }
 
   // 4. Build DB update — guard description/price writes on NULL/empty
   const update: Record<string, unknown> = {
