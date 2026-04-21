@@ -263,15 +263,26 @@ async function callClaudeCli(
     '-p',
     '--model', model,
     '--max-turns', '1',
-    '--output-format', 'json',
-    '--json-schema', JSON.stringify(OUTPUT_SCHEMA),
-    '--tools', '',                  // disable all tools
-    '--no-session-persistence',     // skip session files
-    '--permission-mode', 'bypassPermissions',
+    '--output-format', 'text',      // proven-working in last green run
+    '--no-session-persistence',     // skip session files — safe
   ];
+  // --bare is all-or-nothing and needs API key. When available it skips
+  // plugin sync, hooks, LSP, auto-memory, CLAUDE.md auto-discovery.
   if (opts.bareMode) {
     args.push('--bare');
   }
+  // NOTE on flags we TRIED and reverted:
+  //   --json-schema: silently produced empty stdout for many events
+  //     (maybe unsupported combo with --output-format json in 2.1.104).
+  //     Schema enforcement is handled by the imperative prompt +
+  //     extractJson() post-parse — already bulletproof for the 20/20
+  //     run we had before this rewrite.
+  //   --tools "": intermittent empty stdout on Windows (shell=true may
+  //     be mangling the empty string).
+  //   --permission-mode bypassPermissions: not needed with --print, may
+  //     interact badly with --max-turns 1.
+  //   --output-format json: produced {type, result, ...} wrapper but
+  //     fragile when paired with other flags. `text` is predictable.
 
   return new Promise<unknown>((resolve, reject) => {
     const child = spawn(opts.claudeBin, args, {
@@ -308,25 +319,24 @@ async function callClaudeCli(
         return;
       }
 
-      // With --output-format json, stdout is a JSON object that wraps
-      // Claude's response. Shape (as of 2.1):
-      //   { type: "result", subtype: "success", result: "<text>", ... }
-      // The `result` field should itself be valid JSON when --json-schema
-      // is honored. We unwrap + parse.
+      // Empty-stdout diagnosis: include stderr so we can see why Claude
+      // produced nothing despite exit 0.
+      if (!stdout.trim()) {
+        reject(new Error(
+          `claude produced empty stdout | exit=0 | stderr=${stderr.slice(0, 400) || '(empty)'}`,
+        ));
+        return;
+      }
+
+      // --output-format text → stdout is Claude's response directly.
+      // extractJson handles code fences + prose stripping.
       try {
-        const wrapper = JSON.parse(stdout) as { result?: string; is_error?: boolean; error?: unknown };
-        if (wrapper.is_error) {
-          reject(new Error(`claude reported is_error: ${JSON.stringify(wrapper.error).slice(0, 300)}`));
-          return;
-        }
-        if (typeof wrapper.result !== 'string') {
-          reject(new Error(`claude wrapper missing .result: ${stdout.slice(0, 300)}`));
-          return;
-        }
-        // Parse the inner JSON (Claude's actual response).
-        resolve(extractJson(wrapper.result));
+        resolve(extractJson(stdout));
       } catch (err) {
-        reject(new Error(`failed to parse claude output: ${err instanceof Error ? err.message : err} | stdout=${stdout.slice(0, 200)}`));
+        reject(new Error(
+          `failed to parse claude output: ${err instanceof Error ? err.message : err} | ` +
+          `stdout=${stdout.slice(0, 200)} | stderr=${stderr.slice(0, 200)}`,
+        ));
       }
     });
 
