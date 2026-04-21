@@ -39,9 +39,44 @@
  */
 
 import { readFileSync, appendFileSync, mkdirSync, existsSync } from 'fs';
-import { join, dirname } from 'path';
+import { join, dirname, isAbsolute, delimiter as pathDelimiter } from 'path';
 import { spawn } from 'child_process';
 import { tmpdir } from 'os';
+
+/**
+ * Resolve `claudeBin` (typically just "claude") to an absolute path of the
+ * actual executable on disk. Prefers `.exe` over `.cmd`/`.bat` on Windows
+ * because spawning an .exe directly uses zero shell overhead — no cmd.exe
+ * wrapper = no flashing console window no matter how many workers run.
+ *
+ * Falls back to the original string if nothing is found, which lets
+ * spawn() produce its own not-found error with a helpful message.
+ */
+function resolveClaudeBinary(prefBin: string): { path: string; useShell: boolean } {
+  // Absolute path already — just use it
+  if (isAbsolute(prefBin) && existsSync(prefBin)) {
+    return { path: prefBin, useShell: false };
+  }
+
+  const pathDirs = (process.env.PATH ?? '').split(pathDelimiter).filter(Boolean);
+  // Order matters: prefer .exe because it doesn't need a shell host.
+  const extensions = process.platform === 'win32'
+    ? ['.exe', '.cmd', '.bat', '']
+    : [''];
+
+  for (const dir of pathDirs) {
+    for (const ext of extensions) {
+      const candidate = join(dir, prefBin + ext);
+      if (existsSync(candidate)) {
+        // .exe + direct path = no shell needed = no window flash
+        const useShell = process.platform === 'win32' && ext !== '.exe';
+        return { path: candidate, useShell };
+      }
+    }
+  }
+  // Not found — return original so spawn's error is the operator's clue
+  return { path: prefBin, useShell: process.platform === 'win32' };
+}
 
 try {
   const envPath = join(process.cwd(), '.env.local');
@@ -260,11 +295,18 @@ const MODEL_MAP: Record<string, string> = {
  * mode is enabled (API key present), also adds --bare to skip plugin
  * sync, hooks, LSP, auto-memory, and CLAUDE.md auto-discovery.
  */
+// Cached — resolved once on first call, reused by every worker.
+let cachedResolvedClaude: { path: string; useShell: boolean } | null = null;
+
 async function callClaudeCli(
   userMessage: string,
   opts: CliOpts,
 ): Promise<unknown> {
   const model = MODEL_MAP[opts.model];
+  if (!cachedResolvedClaude) {
+    cachedResolvedClaude = resolveClaudeBinary(opts.claudeBin);
+  }
+  const resolved = cachedResolvedClaude;
   const fullPrompt = TASK_PROMPT_PREFIX + userMessage;
 
   const args = [
@@ -293,7 +335,7 @@ async function callClaudeCli(
   //     fragile when paired with other flags. `text` is predictable.
 
   return new Promise<unknown>((resolve, reject) => {
-    const child = spawn(opts.claudeBin, args, {
+    const child = spawn(resolved.path, args, {
       cwd: tmpdir(),
       env: {
         ...process.env,
@@ -302,14 +344,12 @@ async function callClaudeCli(
         DISABLE_AUTOUPDATER: '1',
       },
       stdio: ['pipe', 'pipe', 'pipe'],
-      shell: process.platform === 'win32',
-      // CRITICAL on Windows: without this, every claude spawn creates a
-      // visible cmd.exe window that flashes briefly before closing.
-      // With 30 concurrent workers (and each claude internally spawning
-      // plugin / MCP / etc. subprocesses), the laptop becomes unusable
-      // — windows popping up and disappearing continuously. Sets the
-      // CREATE_NO_WINDOW flag under the hood so claude + its children
-      // run completely headless. No effect on macOS/Linux.
+      // shell:true on Windows spawns cmd.exe as a wrapper and the window
+      // flashes even with windowsHide. For .exe binaries we skip the
+      // shell entirely — direct process spawn = no wrapper = no window.
+      // Only .cmd/.bat fall back to shell mode because they need cmd.exe
+      // to interpret them.
+      shell: resolved.useShell,
       windowsHide: true,
     });
 
@@ -645,9 +685,13 @@ async function main() {
 
   // Best-effort version check — warn but don't abort on failure.
   try {
+    // Pre-resolve the binary once so the warning (if any) fires early
+    // AND so every worker spawn below reuses the same cached path.
+    cachedResolvedClaude = resolveClaudeBinary(opts.claudeBin);
+    const resolved = cachedResolvedClaude;
     const version = await new Promise<string>((resolve, reject) => {
-      const c = spawn(opts.claudeBin, ['--version'], {
-        shell: process.platform === 'win32',
+      const c = spawn(resolved.path, ['--version'], {
+        shell: resolved.useShell,
         stdio: ['ignore', 'pipe', 'pipe'],
         windowsHide: true,
       });
@@ -657,6 +701,7 @@ async function main() {
       c.on('error', reject);
     });
     console.log(`  claude CLI:      ${version}`);
+    console.log(`  claude bin:      ${resolved.path}${resolved.useShell ? '  (via shell)' : '  (direct spawn, no window)'}`);
   } catch (err) {
     console.warn(`  ⚠ claude --version check failed: ${err instanceof Error ? err.message : err}`);
   }
