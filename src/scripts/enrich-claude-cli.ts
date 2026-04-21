@@ -98,54 +98,68 @@ function parseArgs(): CliOpts {
 // ─────────────────────────────────────────────────────────────────────
 
 /**
- * System prompt shipped inside every call. We CAN'T benefit from LM Studio's
- * KV-cache here — each `claude -p` process is a fresh session — so we keep
- * it tight but complete. Claude understands the taxonomy without needing
- * the full 180-tag dump to be prefix-stable.
+ * The entire instruction set — shipped as the user message (via stdin)
+ * rather than --append-system-prompt.
+ *
+ * Why: Windows cmd.exe has an 8191-char command-line limit and
+ * `--append-system-prompt` stuffs the whole string into the argv. Even
+ * when it fits, `--append-system-prompt` APPENDS to Claude Code's default
+ * helpful-assistant prompt, which caused Claude to reply with clarifying
+ * questions instead of JSON ("It looks like you've shared event data,
+ * but I'm not sure what you'd like me to do with it").
+ *
+ * Stuffing everything into stdin sidesteps both problems. The first line
+ * is an imperative command ("CLASSIFY THIS EVENT. OUTPUT JSON ONLY."),
+ * so Claude knows exactly what to do regardless of any system prompt
+ * context Claude Code loaded in front.
  */
-const SYSTEM_PROMPT = `Du bist ein Klassifikator für österreichische Veranstaltungen. Du bekommst Event-Metadaten und optional den extrahierten Text der Event-Seite. Deine Aufgabe: gib GENAU EIN JSON-Objekt zurück (kein Markdown, keine Code-Fences, kein Erklärungstext drumherum), das diese 11 Felder enthält.
+const TASK_PROMPT_PREFIX = `CLASSIFY AN AUSTRIAN EVENT. Output ONLY one JSON object on a single line — no prose before or after, no markdown fences, no explanation. Just the JSON.
 
-ERLAUBTE TAGS (wähle 0-5): ${TAGS.join(', ')}
+The JSON must have EXACTLY these 11 fields: tags (array), audience (array), vibe (array), setting (array), language (string), price_tier (string), duration_type (string), is_student_friendly (boolean), is_family_friendly (boolean), suggested_description (string or null), suggested_price_text (string or null).
 
-ERLAUBTE AUDIENCE (wähle 1-4): ${AUDIENCES.join(', ')}
+Allowed values for each array/enum field (you MUST pick only from these lists):
 
-ERLAUBTE VIBE (wähle 1-2): ${VIBES.join(', ')}
+TAGS (0-5 values): ${TAGS.join(', ')}
 
-ERLAUBTE SETTING (wähle 1-2): ${SETTINGS.join(', ')}
+AUDIENCE (1-4 values): ${AUDIENCES.join(', ')}
 
-ERLAUBTE LANGUAGE (genau 1): ${LANGUAGES.join(', ')}
+VIBE (1-2 values): ${VIBES.join(', ')}
 
-ERLAUBTE PRICE_TIER (genau 1): ${PRICE_TIERS.join(', ')}
-  gratis = 0€ · günstig = bis 15€ · mittel = 15-50€ · premium = über 50€ · unbekannt = nicht ableitbar
+SETTING (1-2 values): ${SETTINGS.join(', ')}
 
-ERLAUBTE DURATION_TYPE (genau 1): ${DURATION_TYPES.join(', ')}
+LANGUAGE (exactly 1): ${LANGUAGES.join(', ')}
+
+PRICE_TIER (exactly 1): ${PRICE_TIERS.join(', ')}
+  gratis=0€ · günstig=bis 15€ · mittel=15-50€ · premium=über 50€ · unbekannt=nicht ableitbar
+
+DURATION_TYPE (exactly 1): ${DURATION_TYPES.join(', ')}
   kurz<2h · abend=2-5h · ganztag · mehrtägig · dauerausstellung · nacht-bis-morgen=22h-6h · 24-stunden · 48-stunden
 
-BOOLEAN-FLAGS (KRITISCH — nur TRUE bei expliziter Evidenz):
+BOOLEAN FLAGS — critical, only TRUE with explicit evidence:
 
-is_student_friendly = TRUE nur bei EINER dieser Bedingungen:
-  - Titel/Text nennt explizit "Studenten", "Studierende", "Uni-Party", "Semester-Opening"
-  - Veranstaltungsort ist nachweislich eine Universität/FH (TU/WU/Uni Wien/Graz/Linz/Salzburg/Innsbruck, FH Burgenland, etc.)
-  - Veranstalter ist eine Studentenvereinigung (ÖH, ESN, AIESEC, IAESTE, AEGEE, Fachschaft)
-  - Explizite Studenten-Ermäßigung im Preis
-  SONST → FALSE. Konzert/Club/Festival/Markt ist NICHT automatisch studentfriendly.
+is_student_friendly = TRUE only if one of:
+  (a) title/text explicitly says "Studenten", "Studierende", "Uni-Party", "Semester-Opening"
+  (b) venue is a known university/FH (TU/WU/Uni Wien/Graz/Linz/Salzburg/Innsbruck, FH Burgenland, etc.)
+  (c) organizer is a student body (ÖH, ESN, AIESEC, IAESTE, AEGEE, Fachschaft)
+  (d) explicit student discount mentioned
+  Otherwise → FALSE. A regular concert/club/festival/market is NOT automatically student-friendly.
 
-is_family_friendly = TRUE nur bei EINER dieser Bedingungen:
-  - Titel/Text nennt explizit "Familie", "Kinder", "familien-geeignet", "ab 3/6 Jahren", "Kinderprogramm"
-  - Event-Typ ist inhärent kinderorientiert: Kindertheater, Puppentheater, Kinderkino, Kinderzirkus, Familienpicknick, Spielfest, Kinder-Workshop, Kirtag, Adventmarkt (tagsüber), Erntedank, Maibaumfest, Ferienprogramm
-  - Ort/Veranstalter ist familienorientiert (Familienzentrum, Naturpark-Führung, Zoo, Kindermuseum)
-  SONST → FALSE. Konzerte/Clubs/Bars/Abend-Events/Heurige/Rave/Sportwettkämpfe/Vorträge sind NICHT automatisch family-friendly.
+is_family_friendly = TRUE only if one of:
+  (a) title/text explicitly mentions "Familie", "Kinder", "ab 3/6 Jahren", "Kinderprogramm", "familien-geeignet"
+  (b) event type is inherently child-oriented: Kindertheater, Puppentheater, Kinderkino, Kinderzirkus, Familienpicknick, Spielfest, Kinder-Workshop, Kirtag, Adventmarkt (daytime), Erntedank, Maibaumfest, Ferienprogramm
+  (c) venue/organizer is family-focused (Familienzentrum, Naturpark-Führung, Zoo, Kindermuseum)
+  Otherwise → FALSE. Concerts/clubs/bars/evening events/Heurige/rave/sport/adult lectures are NOT automatically family-friendly.
 
-IM ZWEIFEL bei den Flags: IMMER FALSE. Ein False-Positive auf einem Rave oder Heurigen zerstört den späteren Wizard-Filter.
+WHEN IN DOUBT FOR THE FLAGS: FALSE. A false-positive on a rave breaks the wizard filter.
 
-SUGGESTED_DESCRIPTION: wenn QUELLTEXT vorliegt UND die aktuelle BESCHREIBUNG leer/sehr kurz ist, schreibe eine saubere 150-400 Zeichen lange Beschreibung. Sonst: null.
+suggested_description: if QUELLTEXT is present AND current BESCHREIBUNG is empty/very short, write a clean 150-400-char description. Otherwise null.
+suggested_price_text: if QUELLTEXT names a price AND PREIS field is empty, extract it ("ab 25€", "Eintritt frei", "Erwachsene 15€ / Kinder frei"). Otherwise null.
 
-SUGGESTED_PRICE_TEXT: wenn QUELLTEXT einen Preis nennt UND das PREIS-Feld leer ist, extrahiere den Preis ("ab 25€", "Eintritt frei", "Erwachsene 15€ / Kinder frei"). Sonst: null.
+Austrian shorthand: Kirtag/Zeltfest=traditionell+familien-mit-kindern+dörflich; Wallfahrt=spirituell+traditionell+senioren; Heuriger=gemütlich+erwachsene-allgemein+dörflich; Goa-Festival im Wald=psytrance+goa+rave+psychedelic+forest+open-air-rave; DnB-Rave im Club=drum-and-bass+rave+club-night+energetisch+nacht-bis-morgen.
 
-Gib ausschließlich dieses JSON-Objekt zurück:
-{"tags":[],"audience":[],"vibe":[],"setting":[],"language":"...","price_tier":"...","duration_type":"...","is_student_friendly":false,"is_family_friendly":false,"suggested_description":null,"suggested_price_text":null}
+Output the JSON on one line with no leading or trailing whitespace or prose. EVENT DATA FOLLOWS:
 
-Österreichische Hinweise: Kirtag/Zeltfest = traditionell + familien-mit-kindern + dörflich; Wallfahrt = spirituell + traditionell + senioren; Heuriger = gemütlich + erwachsene-allgemein + dörflich; Goa-Festival im Wald = psytrance+goa+rave+psychedelic+forest+open-air-rave; DnB-Rave im Club = drum-and-bass+rave+club-night+energetisch+nacht-bis-morgen.`;
+`;
 
 interface EventRow {
   id: string;
@@ -203,17 +217,24 @@ const MODEL_MAP: Record<string, string> = {
 };
 
 /**
- * Spawn `claude -p` with the system prompt + user message piped via stdin.
- * Returns the raw text response. No retries here — caller handles them.
+ * Spawn `claude -p` and pipe the complete instruction+data prompt via
+ * stdin. No --append-system-prompt (hits cmd.exe's 8191-char limit on
+ * Windows and gets appended to Claude Code's default helpful-assistant
+ * system prompt, causing clarifying-question replies instead of JSON).
+ *
+ * Returns the raw text response. Caller handles retries.
  */
 async function callClaudeCli(
   userMessage: string,
   opts: CliOpts,
 ): Promise<string> {
   const model = MODEL_MAP[opts.model];
+  // Full prompt = imperative task + allowed-value tables + event data.
+  // Keeping all of this in stdin avoids Windows' command-line size limits.
+  const fullPrompt = TASK_PROMPT_PREFIX + userMessage + '\n\nJSON:';
+
   const args = [
     '-p',
-    '--append-system-prompt', SYSTEM_PROMPT,
     '--model', model,
     '--max-turns', '1',
     '--output-format', 'text',
@@ -221,8 +242,8 @@ async function callClaudeCli(
 
   return new Promise<string>((resolve, reject) => {
     const child = spawn(opts.claudeBin, args, {
-      cwd: tmpdir(),       // isolated from project — Claude shouldn't read CLAUDE.md here
-      env: { ...process.env, NO_COLOR: '1' },
+      cwd: tmpdir(),       // avoid picking up the project's CLAUDE.md
+      env: { ...process.env, NO_COLOR: '1', CLAUDE_CODE_SUPPRESS_UPDATE_CHECK: '1' },
       stdio: ['pipe', 'pipe', 'pipe'],
       shell: process.platform === 'win32',
     });
@@ -251,7 +272,7 @@ async function callClaudeCli(
       }
     });
 
-    child.stdin.write(userMessage);
+    child.stdin.write(fullPrompt);
     child.stdin.end();
   });
 }
