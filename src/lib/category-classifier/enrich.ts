@@ -3,18 +3,22 @@
  *
  * Talks to an OpenAI-compatible endpoint (typically LM Studio at
  * http://localhost:1234/v1, serving Qwen 2.5 14B Instruct Q4_K_M) and
- * returns a validated `EnrichmentResult` per event.
+ * returns a validated `EnrichmentResult` per event. If a `pageContent`
+ * is provided, Qwen reads the fetched source page alongside the DB
+ * metadata — produces noticeably better tagging and lets us fill in
+ * missing description/price from the upstream source.
  *
  * Design:
- * - The prompt embeds the FULL allowed vocabularies so Qwen literally sees
- *   every valid tag/audience/vibe/etc. at inference time. No extra
- *   reasoning needed — the model just picks applicable values.
- * - Response format is forced to JSON (LM Studio + Qwen 2.5 supports
- *   `response_format: { type: 'json_object' }`).
- * - `validateEnrichment` silently drops anything not in the closed sets,
- *   so even if Qwen hallucinates a tag we never write garbage to the DB.
- * - One retry on invalid/empty output; after that we return a conservative
- *   empty-ish result rather than throwing.
+ * - Prompt embeds the FULL allowed vocabularies so Qwen sees every valid
+ *   tag/audience/vibe/etc. at inference time. Stable prefix = KV-cache
+ *   hit across events.
+ * - `response_format: json_schema` enforces the output shape; the closed
+ *   vocabularies are enforced post-hoc in `validateEnrichment()` (too
+ *   expensive to encode 180 tags as enum in the grammar).
+ * - `suggested_description` / `suggested_price_text` are OPTIONAL — only
+ *   populated when Qwen reads the page and thinks it has better info.
+ *   Caller decides whether to persist (typically only when DB is NULL).
+ * - One retry on failure, conservative empty result on permanent failure.
  */
 
 import {
@@ -41,6 +45,18 @@ export interface EnrichmentInput {
   priceText: string | null;
   priceMin: number | null;
   priceMax: number | null;
+  /** Optional extracted main-text from the event's source URL. */
+  pageContent: string | null;
+}
+
+/**
+ * What Qwen returns. Extends the base enrichment with optional page-derived
+ * fills. The batch runner decides whether to persist them (typically only
+ * when the DB column is NULL / empty).
+ */
+export interface EnrichmentOutput extends EnrichmentResult {
+  suggested_description: string | null;
+  suggested_price_text: string | null;
 }
 
 export interface LocalAiConfig {
@@ -54,19 +70,57 @@ const DEFAULT_CONFIG: LocalAiConfig = {
   baseUrl: process.env.LOCAL_AI_BASE_URL ?? 'http://localhost:1234/v1',
   apiKey: process.env.LOCAL_AI_KEY ?? 'lm-studio',
   model: process.env.LOCAL_AI_MODEL ?? 'qwen2.5-14b-instruct',
-  timeoutMs: 60_000,
+  timeoutMs: 120_000,  // 2min — with page content the prompt can be long
 };
 
 /**
- * Build the system prompt — the taxonomy itself is embedded here so Qwen
- * sees every allowed value. Keeps the prompt stable across events (great
- * for LM Studio's KV-cache — shared prefix means second+ events only pay
- * for the user-message tokens).
+ * JSON schema forcing the exact shape we want Qwen to produce.
+ *
+ * Enum values are NOT listed in the schema (grammar-guided decoding with
+ * 180 tag enums is too slow). The prompt tells Qwen which values are
+ * allowed; `validateEnrichment()` post-filters anything invalid.
+ *
+ * The two suggested_* fields can be null (when Qwen has nothing to add).
  */
+const RESPONSE_JSON_SCHEMA = {
+  name: 'event_enrichment',
+  strict: false,
+  schema: {
+    type: 'object',
+    properties: {
+      tags: { type: 'array', items: { type: 'string' }, maxItems: 5 },
+      audience: { type: 'array', items: { type: 'string' }, maxItems: 4 },
+      vibe: { type: 'array', items: { type: 'string' }, maxItems: 2 },
+      setting: { type: 'array', items: { type: 'string' }, maxItems: 2 },
+      language: { type: 'string' },
+      price_tier: { type: 'string' },
+      duration_type: { type: 'string' },
+      is_student_friendly: { type: 'boolean' },
+      is_family_friendly: { type: 'boolean' },
+      suggested_description: { type: ['string', 'null'] },
+      suggested_price_text: { type: ['string', 'null'] },
+    },
+    required: [
+      'tags', 'audience', 'vibe', 'setting',
+      'language', 'price_tier', 'duration_type',
+      'is_student_friendly', 'is_family_friendly',
+      'suggested_description', 'suggested_price_text',
+    ],
+    additionalProperties: false,
+  },
+} as const;
+
+/**
+ * Module-level system prompt — built once. The taxonomy is static, so
+ * there's no reason to regenerate per event. Also keeps the prompt prefix
+ * identical across calls so LM Studio can KV-cache it.
+ */
+const SYSTEM_PROMPT = buildSystemPrompt();
+
 function buildSystemPrompt(): string {
   return `Du bist ein Klassifikator für österreichische Veranstaltungen. Deine Aufgabe: analysiere ein Event und gib strukturierte JSON-Metadaten zurück, die wir in einer Datenbank speichern.
 
-WICHTIG: Du darfst ausschließlich Werte aus den untenstehenden Listen verwenden. Wenn etwas nicht in der Liste ist, lasse es weg — erfinde nichts.
+WICHTIG: Du darfst für tags/audience/vibe/setting/language/price_tier/duration_type ausschließlich Werte aus den untenstehenden Listen verwenden. Wenn etwas nicht in der Liste ist, lasse es weg — erfinde nichts. Für suggested_description/suggested_price_text darfst du frei formulieren, aber nur füllen wenn der Quelltext tatsächlich brauchbare Info enthält.
 
 ────────── ERLAUBTE TAGS (tags, 0-5 Stück) ──────────
 ${TAGS.join(', ')}
@@ -103,29 +157,25 @@ ${DURATION_TYPES.join(', ')}
 - 48-stunden: Festival-Weekender
 
 ────────── BOOLEAN-FLAGS ──────────
-is_student_friendly: true wenn studentenorientiert, spät, günstig, uni-nah, oder "studenten" im Titel erwähnt
+is_student_friendly: true wenn studentenorientiert, spät, günstig, uni-nah, oder "studenten" im Titel/Text erwähnt
 is_family_friendly: true wenn Kinder willkommen, tagsüber oder frühabends, keine 18+-Inhalte
 
-────────── OUTPUT-FORMAT ──────────
-Gib ausschließlich ein JSON-Objekt mit dieser Struktur zurück (keine Erklärung, kein Text drumherum):
-{
-  "tags": ["..."],
-  "audience": ["..."],
-  "vibe": ["..."],
-  "setting": ["..."],
-  "language": "...",
-  "price_tier": "...",
-  "duration_type": "...",
-  "is_student_friendly": true/false,
-  "is_family_friendly": true/false
-}
+────────── SUGGESTED_DESCRIPTION ──────────
+Wenn dir der Quelltext (QUELLTEXT-Abschnitt unten) vorliegt UND die bisherige BESCHREIBUNG leer oder sehr kurz ist: schreibe eine saubere, informative Beschreibung (150-400 Zeichen) aus dem Quelltext. Sonst: null.
 
-Denk an österreichische Kultur: Kirtag ist ein Dorffest mit Musik/Essen (traditionell, familien-mit-kindern). Wallfahrt ist religiös (spirituell, traditionell). Heuriger ist Weinlokal (gemütlich, erwachsene-allgemein). Ein Goa-Festival im Wald ist psytrance+goa+rave+psychedelic+forest+open-air-rave.`;
+────────── SUGGESTED_PRICE_TEXT ──────────
+Wenn dir der Quelltext vorliegt UND dort ein Preis steht UND im PREIS-Feld oben nichts ist: extrahiere den Preis-Text (z.B. "ab 25€", "Erwachsene 15€, Kinder frei", "Eintritt frei"). Sonst: null.
+
+────────── OUTPUT ──────────
+Gib ausschließlich ein JSON-Objekt mit genau diesen 11 Feldern zurück — keine Erklärung, kein Text drumherum.
+
+Denk an österreichische Kultur: Kirtag ist Dorffest mit Musik/Essen (traditionell, familien-mit-kindern). Wallfahrt ist religiös (spirituell, traditionell). Heuriger ist Weinlokal (gemütlich, erwachsene-allgemein). Ein Goa-Festival im Wald ist psytrance+goa+rave+psychedelic+forest+open-air-rave. Ein DnB-Rave ist drum-and-bass+rave+club-night / underground / energetisch / nacht-bis-morgen.`;
 }
 
 /**
- * Build the per-event user message — keeps only the fields that actually
- * help the model decide. Bloat here hurts throughput more than quality.
+ * Per-event user message. Pattern: event metadata block first, then the
+ * fetched QUELLTEXT block if present, so Qwen can cross-check what the
+ * scraper captured against what the source actually says.
  */
 function buildUserMessage(input: EnrichmentInput): string {
   const parts: string[] = [];
@@ -133,6 +183,8 @@ function buildUserMessage(input: EnrichmentInput): string {
   if (input.description) {
     const desc = input.description.slice(0, 600);
     parts.push(`BESCHREIBUNG: ${desc}${input.description.length > 600 ? '…' : ''}`);
+  } else {
+    parts.push('BESCHREIBUNG: (leer)');
   }
   if (input.category) parts.push(`BISHERIGE KATEGORIE: ${input.category}`);
   if (input.tagsRaw && input.tagsRaw.length > 0) {
@@ -151,17 +203,25 @@ function buildUserMessage(input: EnrichmentInput): string {
   if (input.priceText) parts.push(`PREIS: ${input.priceText}`);
   else if (input.priceMin != null || input.priceMax != null) {
     parts.push(`PREIS: ab ${input.priceMin ?? '?'}€ bis ${input.priceMax ?? '?'}€`);
+  } else {
+    parts.push('PREIS: (leer)');
   }
+
+  if (input.pageContent) {
+    parts.push('');
+    parts.push('────────── QUELLTEXT DER EVENT-SEITE (extrahiert) ──────────');
+    parts.push(input.pageContent);
+  }
+
   return parts.join('\n');
 }
 
 async function callLocalAi(
-  systemPrompt: string,
   userMessage: string,
   cfg: LocalAiConfig,
 ): Promise<unknown> {
   const ctrl = new AbortController();
-  const timer = setTimeout(() => ctrl.abort(), cfg.timeoutMs ?? 60_000);
+  const timer = setTimeout(() => ctrl.abort(), cfg.timeoutMs ?? 120_000);
 
   try {
     const res = await fetch(`${cfg.baseUrl}/chat/completions`, {
@@ -173,12 +233,12 @@ async function callLocalAi(
       body: JSON.stringify({
         model: cfg.model,
         messages: [
-          { role: 'system', content: systemPrompt },
+          { role: 'system', content: SYSTEM_PROMPT },
           { role: 'user', content: userMessage },
         ],
-        response_format: { type: 'json_object' },
-        temperature: 0.2,  // low — classification is not creative writing
-        max_tokens: 400,
+        response_format: { type: 'json_schema', json_schema: RESPONSE_JSON_SCHEMA },
+        temperature: 0.2,
+        max_tokens: 600,   // bumped for suggested_description
       }),
       signal: ctrl.signal,
     });
@@ -201,25 +261,40 @@ async function callLocalAi(
 }
 
 /**
- * Classify a single event. Returns a validated EnrichmentResult — never
- * throws, never returns invalid fields. On hard failure (LLM down, timeout,
- * unparseable output after retry) returns an empty result and the caller
- * decides whether to write it or skip.
+ * Post-validate suggested text — Qwen sometimes returns "" or "null" as
+ * a string when it means "nothing". Coerce those to real null.
+ */
+function cleanSuggested(value: unknown): string | null {
+  if (typeof value !== 'string') return null;
+  const trimmed = value.trim();
+  if (!trimmed) return null;
+  if (/^null$/i.test(trimmed)) return null;
+  return trimmed;
+}
+
+/**
+ * Classify + optionally enrich description/price. Never throws, never
+ * returns invalid fields. On hard failure returns a no-op result.
  */
 export async function enrichEvent(
   input: EnrichmentInput,
   config: Partial<LocalAiConfig> = {},
-): Promise<{ result: EnrichmentResult; ok: boolean; error?: string }> {
+): Promise<{ result: EnrichmentOutput; ok: boolean; error?: string }> {
   const cfg = { ...DEFAULT_CONFIG, ...config };
-  const systemPrompt = buildSystemPrompt();
   const userMessage = buildUserMessage(input);
 
   let lastErr: string | undefined;
   for (let attempt = 0; attempt < 2; attempt++) {
     try {
-      const raw = await callLocalAi(systemPrompt, userMessage, cfg);
+      const raw = await callLocalAi(userMessage, cfg);
       const validated = validateEnrichment(raw);
-      return { result: validated, ok: true };
+      const rawObj = (raw ?? {}) as Record<string, unknown>;
+      const output: EnrichmentOutput = {
+        ...validated,
+        suggested_description: cleanSuggested(rawObj.suggested_description),
+        suggested_price_text: cleanSuggested(rawObj.suggested_price_text),
+      };
+      return { result: output, ok: true };
     } catch (err) {
       lastErr = err instanceof Error ? err.message : String(err);
     }
@@ -230,6 +305,7 @@ export async function enrichEvent(
       tags: [], audience: [], vibe: [], setting: [],
       language: null, price_tier: null, duration_type: null,
       is_student_friendly: false, is_family_friendly: false,
+      suggested_description: null, suggested_price_text: null,
     },
     ok: false,
     error: lastErr,
