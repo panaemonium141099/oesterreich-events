@@ -58,7 +58,7 @@ try {
 } catch { /* absent */ }
 
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
-import { fetchEventPage } from '../lib/category-classifier/fetch-page';
+import { fetchEventPage, closeSharedBrowser } from '../lib/category-classifier/fetch-page';
 import { validateEnrichment, ENRICHMENT_VERSION } from '../lib/category-classifier/enrichment-taxonomy';
 import {
   TAGS, AUDIENCES, VIBES, SETTINGS,
@@ -718,13 +718,18 @@ async function main() {
   const elapsed = (Date.now() - stats.startedAt) / 60000;
   console.log(`Elapsed: ${elapsed.toFixed(1)}min`);
   appendLog(opts.logFile, { status: 'run_end', processed: stats.processed, enriched: stats.enriched, failed: stats.failed, elapsed_min: elapsed });
+
+  // Release the shared Puppeteer browser (if started). Safe to call
+  // unconditionally — no-op if it never launched.
+  await closeSharedBrowser();
 }
 
 // Graceful shutdown: log SIGINT so the user knows resume is safe.
 process.on('SIGINT', () => {
   console.log('\n\n⚠  SIGINT received. In-flight events may be lost, but the DB is consistent —');
   console.log('   re-run the same command and it will pick up from where you were.');
-  process.exit(130);
+  // Close the browser synchronously-ish to avoid zombie Chrome processes.
+  closeSharedBrowser().finally(() => process.exit(130));
 });
 
 main().catch((err) => {
