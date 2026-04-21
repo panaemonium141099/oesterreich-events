@@ -156,9 +156,22 @@ ${DURATION_TYPES.join(', ')}
 - 24-stunden: Wochenend-Rave
 - 48-stunden: Festival-Weekender
 
-────────── BOOLEAN-FLAGS ──────────
-is_student_friendly: true wenn studentenorientiert, spät, günstig, uni-nah, oder "studenten" im Titel/Text erwähnt
-is_family_friendly: true wenn Kinder willkommen, tagsüber oder frühabends, keine 18+-Inhalte
+────────── BOOLEAN-FLAGS (KRITISCH: nur TRUE bei expliziter Evidenz) ──────────
+
+is_student_friendly → TRUE nur wenn MINDESTENS EINE dieser Bedingungen erfüllt ist:
+  1. Titel/Beschreibung erwähnt explizit "Studenten", "Studierende", "Uni-Party", "Semester-Opening"
+  2. Veranstaltungsort ist nachweislich eine Universität/FH/Hochschule (TU Wien, WU, FH Burgenland, etc.)
+  3. Veranstalter ist eine Studentenvereinigung (ÖH, ESN, AIESEC, IAESTE, AEGEE, Fachschaft, Studiengang)
+  4. Explizite Studenten-Ermäßigung oder Studenten-Sonderpreis im Preistext
+Andernfalls FALSE. Ein normales Konzert, Theater, Club-Event, Festival oder Markt ist NICHT automatisch "student-friendly" nur weil Studenten hingehen könnten. IM ZWEIFEL: FALSE.
+
+is_family_friendly → TRUE nur wenn MINDESTENS EINE dieser Bedingungen erfüllt ist:
+  1. Titel/Beschreibung erwähnt explizit "Familie", "Kinder", "familien-geeignet", "ab 0/3/6 Jahren", "Kinderprogramm"
+  2. Event-Typ ist inhärent kinderorientiert: Kindertheater, Puppentheater, Kinderkino, Kinderzirkus, Familien-Picknick, Spielfest, Kinder-Workshop, Adventmarkt/Christkindlmarkt (tagsüber), Kirtag, Erntedank, Maibaumfest, Ferienprogramm
+  3. Veranstaltungsort/Veranstalter ist explizit familienorientiert (Familienzentrum, Naturpark-Führung, Zoo, Kindermuseum)
+Andernfalls FALSE. Konzerte/Club-Events/Bar-Events/Abend-Events/Weinverkostungen/Heurige/Sportwettkämpfe/Bildungsvorträge für Erwachsene sind NICHT automatisch family-friendly nur weil sie nicht explizit 18+ sind. IM ZWEIFEL: FALSE.
+
+Diese beiden Flags werden später im Wizard-Filter verwendet — ein false-positive "ist familienfreundlich" auf einem DnB-Rave zerstört das Vertrauen des Nutzers. Lieber zurückhaltend flaggen.
 
 ────────── SUGGESTED_DESCRIPTION ──────────
 Wenn dir der Quelltext (QUELLTEXT-Abschnitt unten) vorliegt UND die bisherige BESCHREIBUNG leer oder sehr kurz ist: schreibe eine saubere, informative Beschreibung (150-400 Zeichen) aus dem Quelltext. Sonst: null.
