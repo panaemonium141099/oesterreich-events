@@ -64,6 +64,8 @@ interface CliOpts {
   verbose: boolean;
   model: string;
   logFile: string | null;
+  /** OpenAI tokens-per-minute budget. Default 180k (safe for tier-1's 200k). */
+  tpmLimit: number;
 }
 
 function parseArgs(): CliOpts {
@@ -75,14 +77,59 @@ function parseArgs(): CliOpts {
   const p = (v: string | undefined, d: number) => (v ? parseInt(v, 10) : d);
   return {
     limit: p(get('--limit'), Infinity as unknown as number),
-    concurrency: p(get('--concurrency'), 40),
+    // Default 12 workers is safe for tier-1 (200k TPM). Bump to 40-80 once
+    // you're on tier-2 (2M TPM) or use --tpm-limit 2000000 to override.
+    concurrency: p(get('--concurrency'), 12),
     dryRun: args.includes('--dry-run'),
     noFetch: args.includes('--no-fetch'),
     force: args.includes('--force'),
     verbose: args.includes('--verbose') || args.includes('--dry-run'),
     model: get('--model') ?? 'gpt-4o-mini',
     logFile: get('--log-file') ?? null,
+    // Tier-1 default: 180k leaves 10% headroom under the 200k cap so that
+    // burst variance from inaccurate token estimates doesn't overflow.
+    tpmLimit: p(get('--tpm-limit'), 180_000),
   };
+}
+
+/**
+ * Global client-side rate limiter. Tracks token "reservations" in the
+ * last 60 seconds and throttles new requests if adding them would exceed
+ * the TPM cap. Prevents the bursty-400-workers-hit-the-wall-together
+ * problem where OpenAI's SDK-level retry alone isn't enough — if every
+ * retry happens at the same time, they all 429 again.
+ *
+ * Reservations are based on ESTIMATED tokens (worst-case ~4500 per call
+ * for our prompt). The actual usage from the response comes in after and
+ * is ignored by the limiter — the reservation ages out of the window
+ * naturally after 60s, so being slightly over-conservative is fine.
+ */
+class TpmLimiter {
+  private readonly events: { ts: number; tokens: number }[] = [];
+
+  constructor(private readonly tpm: number) {}
+
+  async acquire(tokens: number): Promise<void> {
+    // Sanity — don't try to reserve more than the full budget
+    const need = Math.min(tokens, this.tpm);
+
+    while (true) {
+      const now = Date.now();
+      // Prune entries older than 60s
+      while (this.events.length > 0 && now - this.events[0].ts >= 60_000) {
+        this.events.shift();
+      }
+      const used = this.events.reduce((s, e) => s + e.tokens, 0);
+      if (used + need <= this.tpm) {
+        this.events.push({ ts: now, tokens: need });
+        return;
+      }
+      // Wait until the oldest entry falls out of the window, +100ms buffer.
+      const oldestAge = now - this.events[0].ts;
+      const waitMs = Math.max(100, 60_000 - oldestAge + 100);
+      await new Promise(r => setTimeout(r, waitMs));
+    }
+  }
 }
 
 // ─────────────────────────────────────────────────────────────────────
@@ -334,6 +381,7 @@ async function processOne(
   row: EventRow,
   opts: CliOpts,
   stats: Stats,
+  limiter: TpmLimiter,
 ): Promise<void> {
   // 1. Fetch source URL
   let pageContent: string | null = null;
@@ -351,12 +399,20 @@ async function processOne(
     stats.fetchSkipped += 1;
   }
 
-  // 2. Call OpenAI. SDK's maxRetries handles 429 + network blips.
+  // 2. Call OpenAI with client-side TPM throttle + SDK retries.
+  //    - Estimate tokens for the reservation (worst-case budget).
+  //    - Limiter blocks until tokens are available in the last-60s window.
+  //    - SDK's maxRetries:3 still handles any residual 429s or network blips.
+  const userMsg = buildUserMessage(row, pageContent);
+  // Rough estimate: system (~1000) + user (~0.3 tokens/char) + output budget.
+  const estimatedTokens = 1100 + Math.ceil(userMsg.length * 0.3) + 500;
+  await limiter.acquire(estimatedTokens);
+
   let parsed: unknown = null;
   let tokensIn = 0, tokensOut = 0;
   let lastErr: string | undefined;
   try {
-    const result = await classifyOpenai(buildUserMessage(row, pageContent), opts.model);
+    const result = await classifyOpenai(userMsg, opts.model);
     parsed = result.parsed;
     tokensIn = result.tokensIn;
     tokensOut = result.tokensOut;
@@ -463,12 +519,13 @@ async function worker(
   opts: CliOpts,
   stats: Stats,
   total: number | undefined,
+  limiter: TpmLimiter,
 ): Promise<void> {
   while (queue.length > 0) {
     const row = queue.shift();
     if (!row) break;
     try {
-      await processOne(supabase, row, opts, stats);
+      await processOne(supabase, row, opts, stats, limiter);
     } catch (err) {
       stats.failed += 1;
       stats.processed += 1;
@@ -521,6 +578,7 @@ async function main() {
   console.log('\nEvent Enrichment — OpenAI direct');
   console.log(`  Model:           ${opts.model}`);
   console.log(`  Concurrency:     ${opts.concurrency} workers`);
+  console.log(`  TPM limit:       ${opts.tpmLimit.toLocaleString()} (client-side throttle)`);
   console.log(`  Dry-run:         ${opts.dryRun}`);
   console.log(`  Fetch URLs:      ${!opts.noFetch}`);
   console.log(`  Force re-run:    ${opts.force}`);
@@ -537,7 +595,8 @@ async function main() {
   console.log('─'.repeat(70));
 
   const stats = newStats();
-  appendLog(opts.logFile, { status: 'run_start', model: opts.model, concurrency: opts.concurrency, already_done: alreadyDone, pending: totalPending });
+  const limiter = new TpmLimiter(opts.tpmLimit);
+  appendLog(opts.logFile, { status: 'run_start', model: opts.model, concurrency: opts.concurrency, tpm_limit: opts.tpmLimit, already_done: alreadyDone, pending: totalPending });
 
   const PAGE_SIZE = 400;
 
@@ -560,7 +619,7 @@ async function main() {
     const toProcess = remaining < rows.length ? rows.slice(0, remaining) : rows;
     const queue = [...toProcess];
     const workers = Array.from({ length: opts.concurrency }, () =>
-      worker(queue, supabase, opts, stats, totalPending ?? undefined),
+      worker(queue, supabase, opts, stats, totalPending ?? undefined, limiter),
     );
     await Promise.all(workers);
 
