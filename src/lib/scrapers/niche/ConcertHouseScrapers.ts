@@ -9,6 +9,7 @@ import * as cheerio from 'cheerio';
 import { BaseScraper } from '../BaseScraper';
 import { categorizeEvent } from '../../categorize';
 import type { ScrapedEvent } from '@/types/events';
+import { isEventType } from '../../connectors/json-ld-connector';
 
 /**
  * konzerthaus.at — Wiener Konzerthaus.
@@ -69,7 +70,7 @@ export class KonzerthausScraper extends BaseScraper {
         const data = JSON.parse($(el).html() || '');
         const items = Array.isArray(data) ? data : data['@graph'] ? data['@graph'] : [data];
         for (const item of items) {
-          if (!item || (item['@type'] !== 'Event' && item['@type'] !== 'MusicEvent')) continue;
+          if (!item || (!isEventType(item['@type']))) continue;
           const ev = this.parseJsonLdEvent(item, pageUrl);
           if (ev) events.push(ev);
         }
@@ -242,7 +243,7 @@ export class MusikvereinScraper extends BaseScraper {
         const data = JSON.parse($(el).html() || '');
         const items = Array.isArray(data) ? data : data['@graph'] ? data['@graph'] : [data];
         for (const item of items) {
-          if (!item || (item['@type'] !== 'Event' && item['@type'] !== 'MusicEvent')) continue;
+          if (!item || (!isEventType(item['@type']))) continue;
           const ev = this.parseJsonLdEvent(item, pageUrl);
           if (ev) events.push(ev);
         }

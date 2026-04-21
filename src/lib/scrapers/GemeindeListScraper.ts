@@ -4,6 +4,7 @@ import { categorizeEvent } from '../categorize';
 import { GEMEINDEN, type GemeindeInfo } from './gemeinden/gemeindeList';
 import type { ScrapedEvent } from '@/types/events';
 import { detectNextPage, detectMonthNavigation, MAX_PAGES_PER_SITE } from './pagination';
+import { isEventType } from '../connectors/json-ld-connector';
 
 /**
  * Meta-Scraper der systematisch österreichische Gemeinde-Websites
@@ -304,7 +305,7 @@ export class GemeindeListScraper extends BaseScraper {
 
       // Direkt ein Event
       const type = obj['@type'];
-      if (type === 'Event' || (Array.isArray(type) && type.includes('Event'))) {
+      if (isEventType(type)) {
         results.push(obj);
       }
     }

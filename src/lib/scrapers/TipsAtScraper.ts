@@ -11,6 +11,7 @@ import * as cheerio from 'cheerio';
 import { BaseScraper } from './BaseScraper';
 import { categorizeEvent } from '../categorize';
 import type { ScrapedEvent } from '@/types/events';
+import { isEventType } from '../connectors/json-ld-connector';
 
 export class TipsAtScraper extends BaseScraper {
   readonly name = 'tips.at';
@@ -103,7 +104,7 @@ export class TipsAtScraper extends BaseScraper {
         const data = JSON.parse($(el).html() || '');
         const items = Array.isArray(data) ? data : data['@graph'] ? data['@graph'] : [data];
         for (const item of items) {
-          if (!item || item['@type'] !== 'Event') continue;
+          if (!item || !isEventType(item['@type'])) continue;
           const ev = this.jsonLdToEvent(item, pageUrl);
           if (ev) events.push(ev);
         }
@@ -157,7 +158,7 @@ export class TipsAtScraper extends BaseScraper {
         const data = JSON.parse($(el).html() || '');
         const items = Array.isArray(data) ? data : data['@graph'] ? data['@graph'] : [data];
         for (const item of items) {
-          if (!item || item['@type'] !== 'Event') continue;
+          if (!item || !isEventType(item['@type'])) continue;
           const ev = this.jsonLdToEvent(item, detailUrl);
           if (ev) events.push(ev);
         }

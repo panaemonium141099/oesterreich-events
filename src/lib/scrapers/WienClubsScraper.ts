@@ -3,6 +3,7 @@ import { BaseScraper } from './BaseScraper';
 import { categorizeEvent } from '../categorize';
 import { getSharedBrowser } from './puppeteerBrowser';
 import type { ScrapedEvent } from '@/types/events';
+import { isEventType } from '../connectors/json-ld-connector';
 
 interface ClubConfig {
   id: string;
@@ -1049,7 +1050,7 @@ export class WienClubsScraper extends BaseScraper {
         const json = JSON.parse($(el).html() || '');
         const items = Array.isArray(json) ? json : json['@graph'] ? json['@graph'] : [json];
         for (const item of items) {
-          if (item['@type'] !== 'Event') continue;
+          if (!isEventType(item['@type'])) continue;
           const ev = this.mapJsonLdEvent(item, club);
           if (ev && !seen.has(ev.source_id)) {
             seen.add(ev.source_id);

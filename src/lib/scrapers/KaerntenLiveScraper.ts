@@ -2,6 +2,7 @@ import * as cheerio from 'cheerio';
 import { BaseScraper } from './BaseScraper';
 import { categorizeEvent } from '../categorize';
 import type { ScrapedEvent } from '@/types/events';
+import { isEventType } from '../connectors/json-ld-connector';
 
 /**
  * kaernten.live Scraper
@@ -32,7 +33,7 @@ export class KaerntenLiveScraper extends BaseScraper {
         const items = Array.isArray(json) ? json : [json];
 
         for (const item of items) {
-          if (item['@type'] !== 'Event') continue;
+          if (!isEventType(item['@type'])) continue;
 
           const name = String(item.name || '').trim();
           if (!name) continue;

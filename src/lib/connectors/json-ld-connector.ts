@@ -17,8 +17,8 @@ import { categorizeEvent } from '../categorize';
 import type { ScrapedEvent } from '@/types/events';
 import type { Venue } from '@/types/venues';
 
-/** Schema.org Event types we recognize */
-const EVENT_TYPES = new Set([
+/** Schema.org Event types we recognize (exported for scrapers and fetchers). */
+export const EVENT_TYPES = new Set([
   'Event',
   'MusicEvent',
   'SportsEvent',
@@ -233,7 +233,7 @@ function extractEventObjects(
   }
 
   // Check if this object itself is an Event type
-  if (isEventType(obj)) {
+  if (isEventObject(obj)) {
     out.push(obj);
 
     // Also check subEvent / subEvents
@@ -247,21 +247,35 @@ function extractEventObjects(
 }
 
 /**
- * Check whether a JSON-LD object has an Event @type.
+ * Check whether a JSON-LD `@type` value represents a Schema.org Event.
+ * Accepts any of:
+ *   - a bare string  e.g. "Event", "MusicEvent", "TheaterEvent"
+ *   - an array       e.g. ["Event", "SomeOtherType"]
+ *   - null/undefined (returns false)
+ *
+ * Matches against the full Schema.org Event type tree (MusicEvent,
+ * TheaterEvent, ComedyEvent, Festival, etc.) — NOT just the narrow
+ * `=== 'Event'` check that was buggy in many scrapers.
+ *
+ * This is the ONE PLACE that decides what counts as an Event for the
+ * entire pipeline. fetch-page.ts and individual scrapers import this
+ * instead of rolling their own check.
  */
-function isEventType(obj: Record<string, unknown>): boolean {
-  const type = obj['@type'];
-  if (!type) return false;
-
-  if (typeof type === 'string') {
-    return EVENT_TYPES.has(type);
+export function isEventType(typeValue: unknown): boolean {
+  if (!typeValue) return false;
+  if (typeof typeValue === 'string') return EVENT_TYPES.has(typeValue);
+  if (Array.isArray(typeValue)) {
+    return typeValue.some((t) => typeof t === 'string' && EVENT_TYPES.has(t));
   }
-
-  if (Array.isArray(type)) {
-    return type.some((t) => typeof t === 'string' && EVENT_TYPES.has(t));
-  }
-
   return false;
+}
+
+/**
+ * Convenience overload: accepts the whole JSON-LD object and reads `@type`
+ * from it. Kept for internal callers that already have the object in hand.
+ */
+function isEventObject(obj: Record<string, unknown>): boolean {
+  return isEventType(obj['@type']);
 }
 
 /**

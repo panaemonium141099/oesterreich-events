@@ -3,6 +3,7 @@ import { BaseScraper } from './BaseScraper';
 import { categorizeEvent } from '../categorize';
 import { geocodeLocation } from '../geocoding';
 import type { ScrapedEvent } from '@/types/events';
+import { isEventType } from '../connectors/json-ld-connector';
 
 const MONTHS: Record<string, string> = {
   'jan': '01', 'feb': '02', 'mar': '03', 'mär': '03', 'apr': '04',
@@ -88,7 +89,7 @@ export class EventsAtScraper extends BaseScraper {
         const items = Array.isArray(json) ? json : json['@graph'] || [json];
 
         for (const item of items) {
-          if (item['@type'] !== 'Event') continue;
+          if (!isEventType(item['@type'])) continue;
 
           const name = String(item.name || '').trim();
           if (!name) continue;

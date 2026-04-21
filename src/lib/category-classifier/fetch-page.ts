@@ -19,6 +19,7 @@
 import { load as cheerioLoad } from 'cheerio';
 import { existsSync } from 'fs';
 import { join } from 'path';
+import { isEventType } from '@/lib/connectors/json-ld-connector';
 
 const TIMEOUT_MS = 15_000;
 const PUPPETEER_TIMEOUT_MS = 30_000;
@@ -299,12 +300,12 @@ export async function fetchEventPage(url: string): Promise<FetchedPage> {
 export function extractMainText(html: string): string {
   const $ = cheerioLoad(html);
 
-  $(
-    'script, style, noscript, nav, header, footer, aside, iframe, svg, ' +
-      '.menu, .nav, .navbar, .header, .site-header, .footer, .site-footer, ' +
-      '.sidebar, .cookie, .cookie-banner, .banner, .ads, .advertisement',
-  ).remove();
-
+  // ── Step 1: extract JSON-LD BEFORE stripping <script> tags ──
+  //
+  // The obvious bug this order guards against: `$('script').remove()`
+  // would wipe out <script type="application/ld+json"> too. For SPAs
+  // like oeticket where the visible <body> is just "Loading..." until
+  // JS hydrates, the JSON-LD IS the only usable content.
   let jsonLdText = '';
   $('script[type="application/ld+json"]').each((_i, el) => {
     try {
@@ -317,16 +318,25 @@ export function extractMainText(html: string): string {
         const candidates: unknown[] = graph ? [...graph, item] : [item];
         for (const c of candidates) {
           const type = (c as { '@type'?: unknown })['@type'];
-          if (
-            type === 'Event' ||
-            (Array.isArray(type) && type.includes('Event'))
-          ) {
+          // Accept every Schema.org Event subtype — MusicEvent (oeticket,
+          // eventim, ticketmaster), TheaterEvent, ComedyEvent, Festival,
+          // etc. Previously this check was `=== 'Event'` which silently
+          // dropped all the rich ticket-vendor JSON-LD and forced the
+          // extractor to fall back to a nearly-empty SPA <body>.
+          if (isEventType(type)) {
             jsonLdText += JSON.stringify(c) + '\n';
           }
         }
       }
     } catch { /* bad JSON-LD — skip */ }
   });
+
+  // ── Step 2: NOW strip chrome and scripts for <body> text extraction ──
+  $(
+    'script, style, noscript, nav, header, footer, aside, iframe, svg, ' +
+      '.menu, .nav, .navbar, .header, .site-header, .footer, .site-footer, ' +
+      '.sidebar, .cookie, .cookie-banner, .banner, .ads, .advertisement',
+  ).remove();
 
   const mainSelectors = [
     'main', 'article', '[role="main"]', '#main', '#content',

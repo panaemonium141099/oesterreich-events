@@ -3,6 +3,7 @@ import { BaseScraper } from './BaseScraper';
 import { categorizeEvent } from '../categorize';
 import { getSharedBrowser } from './puppeteerBrowser';
 import type { ScrapedEvent } from '@/types/events';
+import { isEventType } from '../connectors/json-ld-connector';
 
 /**
  * Portal config for an Austrian tourism site.
@@ -861,7 +862,7 @@ export class TourismusPortaleScraper extends BaseScraper {
         const json = JSON.parse($(el).html() || '');
         const items = Array.isArray(json) ? json : json['@graph'] ? json['@graph'] : [json];
         for (const item of items) {
-          if (item['@type'] !== 'Event') continue;
+          if (!isEventType(item['@type'])) continue;
           const title = String(item.name || '').trim();
           if (!title || title.length < 3) continue;
 

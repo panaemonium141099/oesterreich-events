@@ -2,6 +2,7 @@ import * as cheerio from 'cheerio';
 import { BaseScraper } from './BaseScraper';
 import { categorizeEvent } from '../categorize';
 import type { ScrapedEvent } from '@/types/events';
+import { isEventType } from '../connectors/json-ld-connector';
 
 const MONTHS: Record<string, string> = {
   'jan': '01', 'feb': '02', 'mär': '03', 'mar': '03', 'apr': '04',
@@ -93,7 +94,7 @@ export class PosthofScraper extends BaseScraper {
         const items = Array.isArray(json) ? json : [json];
 
         for (const item of items) {
-          if (item['@type'] !== 'Event') continue;
+          if (!isEventType(item['@type'])) continue;
 
           const name = String(item.name || '').trim();
           if (!name) continue;
@@ -139,7 +140,7 @@ export class PosthofScraper extends BaseScraper {
         const json = JSON.parse($(el).html() || '');
         const items = Array.isArray(json) ? json : [json];
         for (const item of items) {
-          if (item['@type'] === 'Event') {
+          if (isEventType(item['@type'])) {
             title = String(item.name || '').trim();
             startDate = this.parsePosthofDate(String(item.startDate || ''));
           }

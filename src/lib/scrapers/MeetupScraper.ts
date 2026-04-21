@@ -10,6 +10,7 @@
 import * as cheerio from 'cheerio';
 import { BaseScraper } from './BaseScraper';
 import type { ScrapedEvent } from '@/types/events';
+import { isEventType } from '../connectors/json-ld-connector';
 
 // Bundesland lookup from Austrian city names
 const CITY_BUNDESLAND: Record<string, string> = {
@@ -132,7 +133,7 @@ export class MeetupScraper extends BaseScraper {
         const data = JSON.parse($(el).html() || '');
         const items = Array.isArray(data) ? data : data['@graph'] ? data['@graph'] : [data];
         for (const item of items) {
-          if (!item || item['@type'] !== 'Event') continue;
+          if (!item || !isEventType(item['@type'])) continue;
           const name = String(item.name || '').trim();
           if (!name) continue;
           const startDate = String(item.startDate || '').slice(0, 19);

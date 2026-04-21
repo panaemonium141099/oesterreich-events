@@ -9,6 +9,7 @@ import * as cheerio from 'cheerio';
 import { BaseScraper } from '../BaseScraper';
 import { categorizeEvent } from '../../categorize';
 import type { ScrapedEvent } from '@/types/events';
+import { isEventType } from '../../connectors/json-ld-connector';
 
 const MONTHS: Record<string, string> = {
   jan: '01', feb: '02', mar: '03', mär: '03', apr: '04',
@@ -65,7 +66,7 @@ export class ResidentAdvisorAustriaScraper extends BaseScraper {
         const data = JSON.parse($(el).html() || '');
         const items = Array.isArray(data) ? data : data['@graph'] ? data['@graph'] : [data];
         for (const item of items) {
-          if (!item || item['@type'] !== 'Event') continue;
+          if (!item || !isEventType(item['@type'])) continue;
           const name = String(item.name || '').trim();
           if (!name) return;
           const startDate = String(item.startDate || '').slice(0, 19);

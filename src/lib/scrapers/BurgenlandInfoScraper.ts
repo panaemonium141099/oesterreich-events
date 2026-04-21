@@ -3,6 +3,7 @@ import { BaseScraper } from './BaseScraper';
 import { categorizeEvent } from '../categorize';
 import { getDistrictByPostalCode, getDistrictByLocation, getDistrictByCoordinates } from '../districts';
 import type { ScrapedEvent } from '@/types/events';
+import { isEventType } from '../connectors/json-ld-connector';
 
 interface EventLink {
   url: string;
@@ -185,13 +186,13 @@ export class BurgenlandInfoScraper extends BaseScraper {
         eventData = Array.isArray(graph)
           ? graph.find((item: Record<string, unknown>) => {
               const type = item['@type'];
-              return (Array.isArray(type) && type.includes('Event')) || type === 'Event';
+              return isEventType(type);
             })
           : graph;
       } else if (Array.isArray(jsonLd)) {
         eventData = jsonLd.find((item: Record<string, unknown>) => {
           const type = item['@type'];
-          return type === 'Event' || (Array.isArray(type) && type.includes('Event'));
+          return isEventType(type);
         });
       }
 

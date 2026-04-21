@@ -436,9 +436,30 @@ export class FeratelScraper extends BaseScraper {
       imageUrl = this.cleanImageUrl(url);
     }
 
-    // Source URL — construct from region code and urlFriendlyName
-    const slug = event.urlFriendlyName || event.id;
-    const sourceUrl = `https://webapi.deskline.net/${region.code}/de/events/${event.id}`;
+    // Source URL — deliberately null.
+    //
+    // The Deskline API (webapi.deskline.net) requires a `DW-Source: desklineweb`
+    // header and is not a user-facing page. Pointing source_url at the API
+    // endpoint fails for both humans (404/400 in a browser) and for our
+    // enrichment fetcher (which doesn't know about the auth header).
+    //
+    // Each region has its own user-facing portal (e.g. woerthersee.com,
+    // salzkammergut.at, lungau.at) with URL patterns like
+    //   /veranstaltungen/<slug>.html?tvbEventId=<id>
+    // but the API response doesn't include a direct webUrl/portalUrl field
+    // and portal URL patterns differ per region — not worth hard-coding a
+    // region→portal mapping here.
+    //
+    // Downstream effect: the enrichment fetcher sees source_url=null and
+    // skips the page-fetch step. Claude still classifies cleanly from
+    // title + description + location + organizer metadata.
+    //
+    // The `urlFriendlyName` slug is dropped intentionally — not useful
+    // without a portal domain to pin it to. Referenced here for future
+    // work: once we have a region→portal-domain map, we can reconstruct
+    // `https://{portal}.at/veranstaltung/{slug}` properly.
+    // const slug = event.urlFriendlyName || event.id;
+    const sourceUrl: string | null = null;
 
     // Category
     const category = categorizeEvent(title + ' ' + (description || ''));

@@ -9,6 +9,7 @@ import * as cheerio from 'cheerio';
 import { BaseScraper } from '../BaseScraper';
 import { categorizeEvent } from '../../categorize';
 import type { ScrapedEvent } from '@/types/events';
+import { isEventType } from '../../connectors/json-ld-connector';
 
 /**
  * naturfreunde.at — Naturfreunde Österreich outdoor events.
@@ -53,7 +54,7 @@ export class NaturfreundeScraper extends BaseScraper {
         const data = JSON.parse($(el).html() || '');
         const items = Array.isArray(data) ? data : data['@graph'] ? data['@graph'] : [data];
         for (const item of items) {
-          if (!item || item['@type'] !== 'Event') continue;
+          if (!item || !isEventType(item['@type'])) continue;
           const name = String(item.name || '').trim();
           if (!name) continue;
           const startDate = String(item.startDate || '').slice(0, 19);
@@ -168,7 +169,7 @@ export class AlpenvereinScraper extends BaseScraper {
         const data = JSON.parse($(el).html() || '');
         const items = Array.isArray(data) ? data : data['@graph'] ? data['@graph'] : [data];
         for (const item of items) {
-          if (!item || item['@type'] !== 'Event') continue;
+          if (!item || !isEventType(item['@type'])) continue;
           const name = String(item.name || '').trim();
           if (!name) continue;
           const startDate = String(item.startDate || '').slice(0, 19);

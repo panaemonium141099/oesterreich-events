@@ -9,6 +9,7 @@ import * as cheerio from 'cheerio';
 import { BaseScraper } from '../BaseScraper';
 import { categorizeEvent } from '../../categorize';
 import type { ScrapedEvent } from '@/types/events';
+import { isEventType } from '../../connectors/json-ld-connector';
 
 /**
  * festival.at — Austria-wide festival listing portal.
@@ -54,7 +55,7 @@ export class FestivalAtScraper extends BaseScraper {
         const data = JSON.parse($(el).html() || '');
         const items = Array.isArray(data) ? data : data['@graph'] ? data['@graph'] : [data];
         for (const item of items) {
-          if (!item || item['@type'] !== 'Event') continue;
+          if (!item || !isEventType(item['@type'])) continue;
           const ev = this.parseJsonLdEvent(item, baseUrl);
           if (ev) events.push(ev);
         }
@@ -193,7 +194,7 @@ export class FestivalGuideScraper extends BaseScraper {
         const data = JSON.parse($(el).html() || '');
         const items = Array.isArray(data) ? data : [data];
         for (const item of items) {
-          if (!item || item['@type'] !== 'Event') continue;
+          if (!item || !isEventType(item['@type'])) continue;
           const name = String(item.name || '').trim();
           if (!name) continue;
           const startDate = String(item.startDate || '').slice(0, 10);

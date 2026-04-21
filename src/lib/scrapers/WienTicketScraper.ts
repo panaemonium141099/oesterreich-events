@@ -2,6 +2,7 @@ import * as cheerio from 'cheerio';
 import { BaseScraper } from './BaseScraper';
 import { categorizeEvent } from '../categorize';
 import type { ScrapedEvent } from '@/types/events';
+import { isEventType } from '../connectors/json-ld-connector';
 
 /**
  * Wien-Ticket Scraper
@@ -174,7 +175,7 @@ export class WienTicketScraper extends BaseScraper {
         const parsed = JSON.parse(text);
         const items: WienTicketJsonLd[] = Array.isArray(parsed) ? parsed : [parsed];
         for (const item of items) {
-          if (item['@type'] === 'Event') {
+          if (isEventType(item['@type'])) {
             result = item;
             return;
           }

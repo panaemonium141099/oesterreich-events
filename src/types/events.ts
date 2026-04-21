@@ -78,7 +78,13 @@ export interface CategoryCandidate {
 export interface ScrapedEvent {
   source_id: string;
   source_name: string;
-  source_url: string;
+  /**
+   * Public-facing source URL. Nullable because some scrapers (notably
+   * Feratel-Deskline via webapi.deskline.net) only have backend API
+   * endpoints which aren't usable by humans or our enrichment fetcher.
+   * The DB column allows NULL to match.
+   */
+  source_url: string | null;
   title: string;
   description?: string;
   start_date: string;

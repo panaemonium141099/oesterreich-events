@@ -2,6 +2,7 @@ import * as cheerio from 'cheerio';
 import { BaseScraper } from './BaseScraper';
 import { categorizeEvent } from '../categorize';
 import type { ScrapedEvent } from '@/types/events';
+import { isEventType } from '../connectors/json-ld-connector';
 
 export class WienGvScraper extends BaseScraper {
   readonly name = 'wien-gv';
@@ -53,9 +54,9 @@ export class WienGvScraper extends BaseScraper {
     $('script[type="application/ld+json"]').each((_, el) => {
       try {
         const data = JSON.parse($(el).html() || '');
-        if (data['@type'] === 'Event') jsonLd = data;
+        if (isEventType(data['@type'])) jsonLd = data;
         if (data['@graph']) {
-          const ev = data['@graph'].find((g: Record<string, unknown>) => g['@type'] === 'Event');
+          const ev = data['@graph'].find((g: Record<string, unknown>) => isEventType(g['@type']));
           if (ev) jsonLd = ev;
         }
       } catch { /* skip */ }

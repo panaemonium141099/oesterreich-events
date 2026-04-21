@@ -2,6 +2,7 @@ import * as cheerio from 'cheerio';
 import { BaseScraper } from './BaseScraper';
 import { categorizeEvent } from '../categorize';
 import type { ScrapedEvent } from '@/types/events';
+import { isEventType } from '../connectors/json-ld-connector';
 
 /**
  * linztermine.at Scraper
@@ -73,7 +74,7 @@ export class LinzTermineScraper extends BaseScraper {
         const json = JSON.parse($(el).html() || '');
         const items = Array.isArray(json) ? json : json['@graph'] || [json];
         for (const item of items) {
-          if (item['@type'] === 'Event') {
+          if (isEventType(item['@type'])) {
             jsonLdEvent = item;
             return false;
           }

@@ -11,6 +11,7 @@ import * as cheerio from 'cheerio';
 import { BaseScraper } from './BaseScraper';
 import { categorizeEvent } from '../categorize';
 import type { ScrapedEvent } from '@/types/events';
+import { isEventType } from '../connectors/json-ld-connector';
 
 export class BergfexScraper extends BaseScraper {
   readonly name = 'bergfex.at';
@@ -62,7 +63,7 @@ export class BergfexScraper extends BaseScraper {
         const data = JSON.parse($(el).html() || '');
         const items = Array.isArray(data) ? data : data['@graph'] ? data['@graph'] : [data];
         for (const item of items) {
-          if (!item || item['@type'] !== 'Event') continue;
+          if (!item || !isEventType(item['@type'])) continue;
           const ev = this.jsonLdToEvent(item, pageUrl);
           if (ev) events.push(ev);
         }

@@ -215,6 +215,10 @@ export class MeinBezirkScraper extends BaseScraper {
     let failed = 0;
 
     for (const event of toEnrich) {
+      // Skip events without a source_url — MeinBezirk always has one,
+      // but the type is nullable now (other scrapers like Feratel return
+      // null). Narrow here so we don't pass null into fetchPage.
+      if (!event.source_url) continue;
       try {
         const html = await this.fetchPage(event.source_url);
         const detail = this.parseDetailPage(html);

@@ -3,6 +3,7 @@ import { BaseScraper } from './BaseScraper';
 import { categorizeEvent } from '../categorize';
 import type { ScrapedEvent } from '@/types/events';
 import { detectNextPage, MAX_PAGES_PER_SITE } from './pagination';
+import { isEventType } from '../connectors/json-ld-connector';
 
 /**
  * WordPress Event Scraper for Burgenland municipalities.
@@ -125,7 +126,7 @@ export class BurgenlandWPEventsScraper extends BaseScraper {
         const items = this.extractEventItems(data);
 
         for (const item of items) {
-          if (item['@type'] !== 'Event' && !item['@type']?.includes?.('Event')) continue;
+          if (!isEventType(item['@type'])) continue;
           if (!item.name || !item.startDate) continue;
 
           const dedupeKey = `${item.name}-${item.startDate}`;
@@ -171,7 +172,7 @@ export class BurgenlandWPEventsScraper extends BaseScraper {
   private extractEventItems(data: any): any[] {
     if (Array.isArray(data)) return data.flatMap((d: unknown) => this.extractEventItems(d));
     if (typeof data !== 'object' || !data) return [];
-    if (data['@type'] === 'Event' || (Array.isArray(data['@type']) && data['@type'].includes('Event'))) return [data];
+    if (isEventType(data['@type'])) return [data];
     if (data['@graph'] && Array.isArray(data['@graph'])) return data['@graph'].flatMap((g: unknown) => this.extractEventItems(g));
     return [];
   }
