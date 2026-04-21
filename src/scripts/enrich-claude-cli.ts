@@ -303,6 +303,14 @@ async function callClaudeCli(
       },
       stdio: ['pipe', 'pipe', 'pipe'],
       shell: process.platform === 'win32',
+      // CRITICAL on Windows: without this, every claude spawn creates a
+      // visible cmd.exe window that flashes briefly before closing.
+      // With 30 concurrent workers (and each claude internally spawning
+      // plugin / MCP / etc. subprocesses), the laptop becomes unusable
+      // — windows popping up and disappearing continuously. Sets the
+      // CREATE_NO_WINDOW flag under the hood so claude + its children
+      // run completely headless. No effect on macOS/Linux.
+      windowsHide: true,
     });
 
     let stdout = '';
@@ -641,6 +649,7 @@ async function main() {
       const c = spawn(opts.claudeBin, ['--version'], {
         shell: process.platform === 'win32',
         stdio: ['ignore', 'pipe', 'pipe'],
+        windowsHide: true,
       });
       let out = '';
       c.stdout.on('data', (d: Buffer) => { out += d.toString('utf8'); });
