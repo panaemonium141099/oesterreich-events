@@ -77,9 +77,11 @@ function parseArgs(): CliOpts {
   const p = (v: string | undefined, d: number) => (v ? parseInt(v, 10) : d);
   return {
     limit: p(get('--limit'), Infinity as unknown as number),
-    // Default 12 workers is safe for tier-1 (200k TPM). Bump to 40-80 once
-    // you're on tier-2 (2M TPM) or use --tpm-limit 2000000 to override.
-    concurrency: p(get('--concurrency'), 12),
+    // Default 6 workers for tier-1 (200k TPM). With ~4000-token prompts and
+    // ~6s per call, 6 workers ≈ 60 events/min ≈ 240k TPM. The limiter
+    // throttles below 180k → workers idle slightly but no 429s. Once on
+    // tier-2 (2M TPM) bump to 40-80 via --concurrency + --tpm-limit.
+    concurrency: p(get('--concurrency'), 6),
     dryRun: args.includes('--dry-run'),
     noFetch: args.includes('--no-fetch'),
     force: args.includes('--force'),
@@ -399,28 +401,53 @@ async function processOne(
     stats.fetchSkipped += 1;
   }
 
-  // 2. Call OpenAI with client-side TPM throttle + SDK retries.
-  //    - Estimate tokens for the reservation (worst-case budget).
+  // 2. Call OpenAI with client-side TPM throttle + explicit retry loop.
+  //    - Estimate tokens for the reservation (generous so we don't
+  //      under-book the limiter — the embedded 180-tag taxonomy pushes
+  //      the system prompt to ~2500 tokens alone, far more than a naive
+  //      "~1000" estimate).
   //    - Limiter blocks until tokens are available in the last-60s window.
-  //    - SDK's maxRetries:3 still handles any residual 429s or network blips.
+  //    - Explicit retry loop around 429s + SDK's 3 auto-retries underneath.
   const userMsg = buildUserMessage(row, pageContent);
-  // Rough estimate: system (~1000) + user (~0.3 tokens/char) + output budget.
-  const estimatedTokens = 1100 + Math.ceil(userMsg.length * 0.3) + 500;
-  await limiter.acquire(estimatedTokens);
+  // Actual measured: system ~2500 + user 0.4 tok/char + output ~400-600.
+  // German tokenizes worse than English → 0.4 chars/token is closer than 0.3.
+  const estimatedTokens = 2500 + Math.ceil(userMsg.length * 0.4) + 600;
 
+  const MAX_ATTEMPTS = 6;
   let parsed: unknown = null;
   let tokensIn = 0, tokensOut = 0;
   let lastErr: string | undefined;
-  try {
-    const result = await classifyOpenai(userMsg, opts.model);
-    parsed = result.parsed;
-    tokensIn = result.tokensIn;
-    tokensOut = result.tokensOut;
-    stats.tokensIn += tokensIn;
-    stats.tokensOut += tokensOut;
-  } catch (err) {
-    lastErr = err instanceof Error ? err.message : String(err);
-    if (/429|rate.limit/i.test(lastErr)) stats.rateLimited += 1;
+
+  for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
+    // Reserve budget for this attempt. On retry after 429 the previous
+    // reservation is still in the window (ages out naturally after 60s)
+    // so this acquire naturally waits for capacity.
+    await limiter.acquire(estimatedTokens);
+
+    try {
+      const result = await classifyOpenai(userMsg, opts.model);
+      parsed = result.parsed;
+      tokensIn = result.tokensIn;
+      tokensOut = result.tokensOut;
+      stats.tokensIn += tokensIn;
+      stats.tokensOut += tokensOut;
+      break;
+    } catch (err) {
+      lastErr = err instanceof Error ? err.message : String(err);
+      const is429 = /429|rate.limit|Rate.limit/i.test(lastErr);
+      if (is429) stats.rateLimited += 1;
+      if (attempt === MAX_ATTEMPTS - 1) break;
+
+      // Respect server's "try again in Xms" hint when present, else exp backoff.
+      const hintMatch = lastErr.match(/try again in (\d+)ms/i);
+      const serverHintMs = hintMatch ? parseInt(hintMatch[1], 10) : 0;
+      const baseBackoff = is429 ? 2000 : 1000;
+      const backoffMs = Math.max(
+        serverHintMs + 200,
+        baseBackoff * Math.pow(2, attempt), // 2s, 4s, 8s, 16s, 32s for 429
+      );
+      await new Promise(r => setTimeout(r, backoffMs));
+    }
   }
 
   if (!parsed) {
