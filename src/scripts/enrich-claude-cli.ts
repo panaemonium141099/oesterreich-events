@@ -565,7 +565,8 @@ async function main() {
     .from('events')
     .select('*', { count: 'exact', head: true })
     .eq('publish_status', 'published')
-    .gte('start_date', today);
+    .gte('start_date', today)
+    .gte('quality_score', 40);  // match sitemap standard — skip low-quality
   if (!opts.force) countQuery = countQuery.or(`enrichment_version.is.null,enrichment_version.neq.${ENRICHMENT_VERSION}`);
   const { count: totalPending } = await countQuery;
   console.log(`  Pending:         ${totalPending ?? 'unknown'}`);
@@ -580,6 +581,7 @@ async function main() {
       .select('id, title, description, category, tags, source_tags_raw, location_name, organizer, start_date, end_date, price_text, price_min, price_max, source_url')
       .eq('publish_status', 'published')
       .gte('start_date', today)
+      .gte('quality_score', 40)  // defense-in-depth against scraper chrome titles
       .order('id', { ascending: true })
       .limit(PAGE_SIZE);
     if (!opts.force) q = q.or(`enrichment_version.is.null,enrichment_version.neq.${ENRICHMENT_VERSION}`);
