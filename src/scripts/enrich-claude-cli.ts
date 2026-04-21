@@ -1,35 +1,45 @@
 /**
  * Batch-enrich every event using Claude Code headless (`claude -p`).
  *
- * Why this exists: the local Qwen run gave unreliable `is_student_friendly` /
- * `is_family_friendly` flags and was slow. Claude is smarter and the
- * headless CLI reuses the user's existing Claude Code auth (Max plan)
- * instead of needing a separate ANTHROPIC_API_KEY.
+ * Flow per event:
+ *   1. Fetch source_url → extract main text
+ *   2. Invoke `claude -p` with event metadata + page content
+ *   3. Write enrichment fields back to DB (atomic per-event UPDATE)
+ *   4. Mark row with `enrichment_version` so next run skips it
  *
- * Trade-off: per-invocation overhead is high (each call spawns a full
- * `claude` process, loads config, authenticates, one-shots the prompt).
- * That's ~3-8s of overhead per event. We compensate by running many
- * workers in parallel.
+ * Resume guarantees (100%):
+ *   - Every enriched event is persisted to DB in a single atomic UPDATE
+ *     before the worker moves on. No batched writes, no in-memory staging.
+ *   - On crash / Ctrl+C / laptop-poweroff, at most `concurrency` events
+ *     are "in flight" and lost. Those rows stay at enrichment_version=NULL
+ *     and get redone on the next run.
+ *   - No checkpoint file to corrupt; the DB is the single source of truth.
+ *   - Startup query shows both "already done" and "still pending" counts
+ *     so you can verify resume is working.
+ *   - Optional --log-file appends one JSON line per event (successful or
+ *     failed) for forensic review or external progress tracking.
  *
- * Rate-limit reality: Claude Max plans cap messages per 5-hour session.
- * Even with 10 parallel workers you'll hit the cap on 81k events in one
- * shot. This script handles 429s by backing off exponentially and
- * resuming from the checkpoint (`enrichment_version` column). Just let
- * it run in the background — it'll grind through the backlog whenever
- * rate-limit budget refreshes.
+ * Plugin / hook suppression:
+ *   - `--tools ""` disables ALL tools so plugins can't execute anything
+ *   - `--no-session-persistence` skips .claude/ session files
+ *   - `--bare` (if ANTHROPIC_API_KEY is set) additionally skips hooks,
+ *     LSP, plugin sync, auto-memory, CLAUDE.md discovery — pure speed.
+ *     Only works with API key; Max OAuth does not survive --bare.
  *
  * Usage:
- *   npm run enrich-claude                            # everything, 5 workers
- *   npm run enrich-claude -- --limit 50              # just 50 (verify first!)
- *   npm run enrich-claude -- --concurrency 10        # more parallel
- *   npm run enrich-claude -- --dry-run               # no DB writes
- *   npm run enrich-claude -- --no-fetch              # skip URL fetch (faster)
- *   npm run enrich-claude -- --model sonnet          # sonnet (default) / haiku
+ *   npm run enrich-claude                            # full run, 20 workers
+ *   npm run enrich-claude -- --limit 50              # cap (test first!)
+ *   npm run enrich-claude -- --concurrency 30        # more parallel
+ *   npm run enrich-claude -- --dry-run               # verbose, no DB writes
+ *   npm run enrich-claude -- --no-fetch              # skip URL fetch
+ *   npm run enrich-claude -- --model sonnet          # sonnet (default) | haiku | opus
+ *   npm run enrich-claude -- --bare                  # speed mode (needs API key)
+ *   npm run enrich-claude -- --log-file enrich.jsonl # audit log
  *   npm run enrich-claude -- --force                 # redo already-done rows
  */
 
-import { readFileSync } from 'fs';
-import { join } from 'path';
+import { readFileSync, appendFileSync, mkdirSync, existsSync } from 'fs';
+import { join, dirname } from 'path';
 import { spawn } from 'child_process';
 import { tmpdir } from 'os';
 
@@ -68,6 +78,8 @@ interface CliOpts {
   verbose: boolean;
   model: 'sonnet' | 'haiku' | 'opus';
   claudeBin: string;
+  bareMode: boolean;     // --bare flag (requires ANTHROPIC_API_KEY)
+  logFile: string | null;
 }
 
 function parseArgs(): CliOpts {
@@ -79,57 +91,40 @@ function parseArgs(): CliOpts {
   const p = (v: string | undefined, d: number) => (v ? parseInt(v, 10) : d);
   const rawModel = get('--model') ?? 'sonnet';
   const model = ['sonnet', 'haiku', 'opus'].includes(rawModel) ? rawModel as 'sonnet' | 'haiku' | 'opus' : 'sonnet';
+  const wantsBare = args.includes('--bare');
+  const hasApiKey = !!process.env.ANTHROPIC_API_KEY;
   return {
     limit: p(get('--limit'), Infinity as unknown as number),
-    concurrency: p(get('--concurrency'), 5),
+    concurrency: p(get('--concurrency'), 30),
     dryRun: args.includes('--dry-run'),
     noFetch: args.includes('--no-fetch'),
     force: args.includes('--force'),
-    // --verbose prints each event's classification. Auto-on in dry-run
-    // because otherwise there's nothing to look at.
     verbose: args.includes('--verbose') || args.includes('--dry-run'),
     model,
-    // Just 'claude' on all platforms — on Windows with shell=true, PATHEXT
-    // handles finding claude.exe / claude.cmd / claude.bat automatically.
-    // The curl-installer variant is claude.exe; the npm-global variant is
-    // claude.cmd. Both work when we let the shell resolve.
+    // Only enable --bare if an API key is present — it disables OAuth/keychain.
+    bareMode: wantsBare && hasApiKey,
     claudeBin: get('--claude-bin') ?? 'claude',
+    logFile: get('--log-file') ?? null,
   };
 }
 
 // ─────────────────────────────────────────────────────────────────────
-// Prompt — self-contained, drops into a single `claude -p` call
+// Prompt + response schema
 // ─────────────────────────────────────────────────────────────────────
 
-/**
- * The entire instruction set — shipped as the user message (via stdin)
- * rather than --append-system-prompt.
- *
- * Why: Windows cmd.exe has an 8191-char command-line limit and
- * `--append-system-prompt` stuffs the whole string into the argv. Even
- * when it fits, `--append-system-prompt` APPENDS to Claude Code's default
- * helpful-assistant prompt, which caused Claude to reply with clarifying
- * questions instead of JSON ("It looks like you've shared event data,
- * but I'm not sure what you'd like me to do with it").
- *
- * Stuffing everything into stdin sidesteps both problems. The first line
- * is an imperative command ("CLASSIFY THIS EVENT. OUTPUT JSON ONLY."),
- * so Claude knows exactly what to do regardless of any system prompt
- * context Claude Code loaded in front.
- */
-const TASK_PROMPT_PREFIX = `CLASSIFY AN AUSTRIAN EVENT. Output ONLY one JSON object on a single line — no prose before or after, no markdown fences, no explanation. Just the JSON.
+const TASK_PROMPT_PREFIX = `CLASSIFY AN AUSTRIAN EVENT. Output ONLY one JSON object — no prose before or after, no markdown fences.
 
 The JSON must have EXACTLY these 11 fields: tags (array), audience (array), vibe (array), setting (array), language (string), price_tier (string), duration_type (string), is_student_friendly (boolean), is_family_friendly (boolean), suggested_description (string or null), suggested_price_text (string or null).
 
-Allowed values for each array/enum field (you MUST pick only from these lists):
+Allowed values — MUST pick only from these lists:
 
-TAGS (0-5 values): ${TAGS.join(', ')}
+TAGS (0-5): ${TAGS.join(', ')}
 
-AUDIENCE (1-4 values): ${AUDIENCES.join(', ')}
+AUDIENCE (1-4): ${AUDIENCES.join(', ')}
 
-VIBE (1-2 values): ${VIBES.join(', ')}
+VIBE (1-2): ${VIBES.join(', ')}
 
-SETTING (1-2 values): ${SETTINGS.join(', ')}
+SETTING (1-2): ${SETTINGS.join(', ')}
 
 LANGUAGE (exactly 1): ${LANGUAGES.join(', ')}
 
@@ -146,7 +141,7 @@ is_student_friendly = TRUE only if one of:
   (b) venue is a known university/FH (TU/WU/Uni Wien/Graz/Linz/Salzburg/Innsbruck, FH Burgenland, etc.)
   (c) organizer is a student body (ÖH, ESN, AIESEC, IAESTE, AEGEE, Fachschaft)
   (d) explicit student discount mentioned
-  Otherwise → FALSE. A regular concert/club/festival/market is NOT automatically student-friendly.
+  Otherwise → FALSE. Regular concert/club/festival/market is NOT automatically student-friendly.
 
 is_family_friendly = TRUE only if one of:
   (a) title/text explicitly mentions "Familie", "Kinder", "ab 3/6 Jahren", "Kinderprogramm", "familien-geeignet"
@@ -154,16 +149,46 @@ is_family_friendly = TRUE only if one of:
   (c) venue/organizer is family-focused (Familienzentrum, Naturpark-Führung, Zoo, Kindermuseum)
   Otherwise → FALSE. Concerts/clubs/bars/evening events/Heurige/rave/sport/adult lectures are NOT automatically family-friendly.
 
-WHEN IN DOUBT FOR THE FLAGS: FALSE. A false-positive on a rave breaks the wizard filter.
+WHEN IN DOUBT FOR THE FLAGS: FALSE.
 
 suggested_description: if QUELLTEXT is present AND current BESCHREIBUNG is empty/very short, write a clean 150-400-char description. Otherwise null.
 suggested_price_text: if QUELLTEXT names a price AND PREIS field is empty, extract it ("ab 25€", "Eintritt frei", "Erwachsene 15€ / Kinder frei"). Otherwise null.
 
 Austrian shorthand: Kirtag/Zeltfest=traditionell+familien-mit-kindern+dörflich; Wallfahrt=spirituell+traditionell+senioren; Heuriger=gemütlich+erwachsene-allgemein+dörflich; Goa-Festival im Wald=psytrance+goa+rave+psychedelic+forest+open-air-rave; DnB-Rave im Club=drum-and-bass+rave+club-night+energetisch+nacht-bis-morgen.
 
-Output the JSON on one line with no leading or trailing whitespace or prose. EVENT DATA FOLLOWS:
+EVENT DATA FOLLOWS:
 
 `;
+
+/**
+ * JSON Schema passed to Claude's native structured-output mode via
+ * --json-schema. Claude will be constrained to emit a JSON body that
+ * validates against this — eliminates the "please just return JSON"
+ * prompt-dance and makes parsing bulletproof.
+ */
+const OUTPUT_SCHEMA = {
+  type: 'object',
+  properties: {
+    tags: { type: 'array', items: { type: 'string' }, maxItems: 5 },
+    audience: { type: 'array', items: { type: 'string' }, maxItems: 4 },
+    vibe: { type: 'array', items: { type: 'string' }, maxItems: 2 },
+    setting: { type: 'array', items: { type: 'string' }, maxItems: 2 },
+    language: { type: 'string' },
+    price_tier: { type: 'string' },
+    duration_type: { type: 'string' },
+    is_student_friendly: { type: 'boolean' },
+    is_family_friendly: { type: 'boolean' },
+    suggested_description: { type: ['string', 'null'] },
+    suggested_price_text: { type: ['string', 'null'] },
+  },
+  required: [
+    'tags', 'audience', 'vibe', 'setting',
+    'language', 'price_tier', 'duration_type',
+    'is_student_friendly', 'is_family_friendly',
+    'suggested_description', 'suggested_price_text',
+  ],
+  additionalProperties: false,
+};
 
 interface EventRow {
   id: string;
@@ -202,7 +227,7 @@ function buildUserMessage(ev: EventRow, pageContent: string | null): string {
   parts.push(`PREIS: ${ev.price_text ?? '(leer)'}`);
   if (pageContent) {
     parts.push('');
-    parts.push('───────── QUELLTEXT (extrahiert aus der Event-URL) ─────────');
+    parts.push('───────── QUELLTEXT DER EVENT-SEITE ─────────');
     parts.push(pageContent);
   }
   return parts.join('\n');
@@ -221,33 +246,42 @@ const MODEL_MAP: Record<string, string> = {
 };
 
 /**
- * Spawn `claude -p` and pipe the complete instruction+data prompt via
- * stdin. No --append-system-prompt (hits cmd.exe's 8191-char limit on
- * Windows and gets appended to Claude Code's default helpful-assistant
- * system prompt, causing clarifying-question replies instead of JSON).
- *
- * Returns the raw text response. Caller handles retries.
+ * Spawn `claude -p` and pipe the full prompt via stdin. Uses --json-schema
+ * to force structured output, --tools "" to disable all tools, and
+ * --no-session-persistence to skip .claude/ session files. If --bare
+ * mode is enabled (API key present), also adds --bare to skip plugin
+ * sync, hooks, LSP, auto-memory, and CLAUDE.md auto-discovery.
  */
 async function callClaudeCli(
   userMessage: string,
   opts: CliOpts,
-): Promise<string> {
+): Promise<unknown> {
   const model = MODEL_MAP[opts.model];
-  // Full prompt = imperative task + allowed-value tables + event data.
-  // Keeping all of this in stdin avoids Windows' command-line size limits.
-  const fullPrompt = TASK_PROMPT_PREFIX + userMessage + '\n\nJSON:';
+  const fullPrompt = TASK_PROMPT_PREFIX + userMessage;
 
   const args = [
     '-p',
     '--model', model,
     '--max-turns', '1',
-    '--output-format', 'text',
+    '--output-format', 'json',
+    '--json-schema', JSON.stringify(OUTPUT_SCHEMA),
+    '--tools', '',                  // disable all tools
+    '--no-session-persistence',     // skip session files
+    '--permission-mode', 'bypassPermissions',
   ];
+  if (opts.bareMode) {
+    args.push('--bare');
+  }
 
-  return new Promise<string>((resolve, reject) => {
+  return new Promise<unknown>((resolve, reject) => {
     const child = spawn(opts.claudeBin, args, {
-      cwd: tmpdir(),       // avoid picking up the project's CLAUDE.md
-      env: { ...process.env, NO_COLOR: '1', CLAUDE_CODE_SUPPRESS_UPDATE_CHECK: '1' },
+      cwd: tmpdir(),
+      env: {
+        ...process.env,
+        NO_COLOR: '1',
+        CLAUDE_CODE_SUPPRESS_UPDATE_CHECK: '1',
+        DISABLE_AUTOUPDATER: '1',
+      },
       stdio: ['pipe', 'pipe', 'pipe'],
       shell: process.platform === 'win32',
     });
@@ -269,10 +303,30 @@ async function callClaudeCli(
 
     child.on('close', (code) => {
       clearTimeout(timer);
-      if (code === 0) {
-        resolve(stdout);
-      } else {
+      if (code !== 0) {
         reject(new Error(`claude exited ${code}: ${stderr.slice(0, 400)}`));
+        return;
+      }
+
+      // With --output-format json, stdout is a JSON object that wraps
+      // Claude's response. Shape (as of 2.1):
+      //   { type: "result", subtype: "success", result: "<text>", ... }
+      // The `result` field should itself be valid JSON when --json-schema
+      // is honored. We unwrap + parse.
+      try {
+        const wrapper = JSON.parse(stdout) as { result?: string; is_error?: boolean; error?: unknown };
+        if (wrapper.is_error) {
+          reject(new Error(`claude reported is_error: ${JSON.stringify(wrapper.error).slice(0, 300)}`));
+          return;
+        }
+        if (typeof wrapper.result !== 'string') {
+          reject(new Error(`claude wrapper missing .result: ${stdout.slice(0, 300)}`));
+          return;
+        }
+        // Parse the inner JSON (Claude's actual response).
+        resolve(extractJson(wrapper.result));
+      } catch (err) {
+        reject(new Error(`failed to parse claude output: ${err instanceof Error ? err.message : err} | stdout=${stdout.slice(0, 200)}`));
       }
     });
 
@@ -282,16 +336,20 @@ async function callClaudeCli(
 }
 
 /**
- * Pull the first `{ ... }` JSON blob out of Claude's stdout. Claude usually
- * complies with "return only JSON" but sometimes prefixes prose or wraps
- * in code fences — this strips both.
+ * Extract the first top-level JSON object from a string. Handles optional
+ * code fences and leading/trailing prose that sometimes slip past schema
+ * enforcement.
  */
 function extractJson(raw: string): unknown {
   const trimmed = raw.trim();
-  // Strip code fences if present
+  // Fast path: the whole thing is JSON
+  if (trimmed.startsWith('{') && trimmed.endsWith('}')) {
+    try { return JSON.parse(trimmed); } catch { /* fall through */ }
+  }
+  // Strip fences
   const fence = trimmed.match(/^```(?:json)?\s*([\s\S]*?)\s*```$/);
   const body = fence ? fence[1] : trimmed;
-  // Find first '{' and its matching '}' — simple brace counter
+  // Brace-counting scan for first complete JSON object
   const start = body.indexOf('{');
   if (start === -1) throw new Error(`no JSON found in: ${body.slice(0, 120)}`);
   let depth = 0;
@@ -306,9 +364,7 @@ function extractJson(raw: string): unknown {
     if (c === '{') depth += 1;
     else if (c === '}') {
       depth -= 1;
-      if (depth === 0) {
-        return JSON.parse(body.slice(start, i + 1));
-      }
+      if (depth === 0) return JSON.parse(body.slice(start, i + 1));
     }
   }
   throw new Error('unterminated JSON');
@@ -322,7 +378,7 @@ function cleanSuggested(v: unknown): string | null {
 }
 
 // ─────────────────────────────────────────────────────────────────────
-// Per-event worker
+// Stats + per-event worker
 // ─────────────────────────────────────────────────────────────────────
 
 interface Stats {
@@ -363,6 +419,17 @@ function reportLine(s: Stats, total?: number): string {
     `429=${s.rateLimited} rate=${rate.toFixed(2)}/s ${etaStr}`;
 }
 
+function appendLog(logFile: string | null, entry: Record<string, unknown>): void {
+  if (!logFile) return;
+  try {
+    const dir = dirname(logFile);
+    if (dir && dir !== '.' && !existsSync(dir)) mkdirSync(dir, { recursive: true });
+    appendFileSync(logFile, JSON.stringify({ ts: new Date().toISOString(), ...entry }) + '\n');
+  } catch (err) {
+    console.error(`\n[log] append failed: ${err instanceof Error ? err.message : err}`);
+  }
+}
+
 async function processOne(
   supabase: SupabaseClient,
   row: EventRow,
@@ -371,55 +438,78 @@ async function processOne(
 ): Promise<void> {
   // 1. Fetch source URL
   let pageContent: string | null = null;
+  let fetchErr: string | undefined;
   if (!opts.noFetch && row.source_url) {
     try {
       const page = await fetchEventPage(row.source_url);
       if (page.ok) { pageContent = page.text; stats.fetchOk += 1; }
-      else stats.fetchFailed += 1;
-    } catch { stats.fetchFailed += 1; }
+      else { stats.fetchFailed += 1; fetchErr = page.error; }
+    } catch (err) {
+      stats.fetchFailed += 1;
+      fetchErr = err instanceof Error ? err.message : String(err);
+    }
   } else {
     stats.fetchSkipped += 1;
   }
 
-  // 2. Call Claude (with backoff on 429)
-  let raw: string | null = null;
-  for (let attempt = 0; attempt < 4; attempt++) {
+  // 2. Call Claude with full retry logic — 5 attempts, error-type aware.
+  //    - rate-limit: 15s → 30s → 60s → 120s → 240s
+  //    - network:    3s  → 6s  → 12s  → 24s  → 48s
+  //    - auth:       bail immediately (retry won't help, needs human)
+  //    - other:      2s  → 4s  → 8s   → 16s  → 32s
+  //
+  //    After all 5 attempts fail, the event stays at enrichment_version=NULL
+  //    in DB → picked up on next run. No data loss.
+  const MAX_ATTEMPTS = 5;
+  let parsed: unknown = null;
+  let lastErr: string | undefined;
+  for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
     try {
-      const userMsg = buildUserMessage(row, pageContent);
-      raw = await callClaudeCli(userMsg, opts);
+      parsed = await callClaudeCli(buildUserMessage(row, pageContent), opts);
       break;
     } catch (err) {
-      const msg = err instanceof Error ? err.message : String(err);
-      const isRate = /429|rate.limit|rate_limit|too.many.request/i.test(msg);
+      lastErr = err instanceof Error ? err.message : String(err);
+      if (attempt === MAX_ATTEMPTS - 1) break; // final attempt, give up
+
+      const isRate = /429|rate.limit|rate_limit|too.many.request|usage.limit|quota/i.test(lastErr);
+      const isNetwork = /ETIMEDOUT|ECONNRESET|ECONNREFUSED|ENOTFOUND|EAI_AGAIN|socket|network|timeout/i.test(lastErr);
+      const isAuth = /\b(401|403|unauthorized|forbidden|authentication|invalid.api.key|credentials)\b/i.test(lastErr);
+
+      if (isAuth) {
+        console.error(`\n[${row.id.slice(0, 8)}] AUTH FAILURE — run 'claude /login' or set ANTHROPIC_API_KEY: ${lastErr.slice(0, 180)}`);
+        break; // retry won't help
+      }
+
+      let backoff: number;
+      let tag: string;
       if (isRate) {
         stats.rateLimited += 1;
-        const backoff = 15_000 * Math.pow(2, attempt); // 15s, 30s, 60s, 120s
-        console.error(`\n[${row.id.slice(0, 8)}] rate limited, back off ${backoff / 1000}s`);
-        await new Promise(r => setTimeout(r, backoff));
-        continue;
+        backoff = 15_000 * Math.pow(2, attempt);
+        tag = 'rate-limit';
+      } else if (isNetwork) {
+        backoff = 3_000 * Math.pow(2, attempt);
+        tag = 'network';
+      } else {
+        backoff = 2_000 * Math.pow(2, attempt);
+        tag = 'error';
       }
-      if (attempt === 3) {
-        console.error(`\n[${row.id.slice(0, 8)}] claude failed: ${msg.slice(0, 200)}`);
-        stats.failed += 1;
-        stats.processed += 1;
-        return;
-      }
-      await new Promise(r => setTimeout(r, 2000 * (attempt + 1)));
+      console.error(
+        `\n[${row.id.slice(0, 8)}] ${tag} attempt ${attempt + 1}/${MAX_ATTEMPTS}: ` +
+        `back off ${(backoff / 1000).toFixed(0)}s | ${lastErr.slice(0, 120)}`,
+      );
+      await new Promise(r => setTimeout(r, backoff));
     }
   }
-  if (!raw) { stats.failed += 1; stats.processed += 1; return; }
 
-  // 3. Parse + validate
-  let parsed: unknown;
-  try {
-    parsed = extractJson(raw);
-  } catch (err) {
-    console.error(`\n[${row.id.slice(0, 8)}] JSON parse failed: ${err instanceof Error ? err.message : err}`);
+  if (!parsed) {
+    console.error(`\n[${row.id.slice(0, 8)}] claude failed: ${lastErr?.slice(0, 200) ?? '?'}`);
     stats.failed += 1;
     stats.processed += 1;
+    appendLog(opts.logFile, { event_id: row.id, title: row.title, status: 'failed', error: lastErr });
     return;
   }
 
+  // 3. Validate
   const validated = validateEnrichment(parsed);
   const pRec = (parsed ?? {}) as Record<string, unknown>;
   const suggestedDesc = cleanSuggested(pRec.suggested_description);
@@ -429,15 +519,14 @@ async function processOne(
   if (validated.is_student_friendly) stats.studentTrue += 1;
   if (validated.is_family_friendly) stats.familyTrue += 1;
 
-  // 3b. Verbose per-event print (auto-on in --dry-run). Built as one big
-  // string so 5 concurrent workers don't interleave mid-event.
+  // Verbose per-event print
   if (opts.verbose) {
     const lines: string[] = [];
     const titleCut = row.title.length > 65 ? row.title.slice(0, 65) + '…' : row.title;
     lines.push('');
     lines.push(`━━ [${row.id.slice(0, 8)}] ${titleCut}`);
     lines.push(`   ort:            ${row.location_name ?? '-'}`);
-    lines.push(`   cat-v2 says:    ${row.category ?? '-'}   (page-fetch: ${pageContent ? `${pageContent.length} chars` : 'skipped'})`);
+    lines.push(`   cat-v2 says:    ${row.category ?? '-'}   (page-fetch: ${pageContent ? `${pageContent.length} chars` : fetchErr ? `✗ ${fetchErr}` : 'skipped'})`);
     lines.push(`   tags:           ${validated.tags.join(', ') || '(none)'}`);
     lines.push(`   audience:       ${validated.audience.join(', ') || '(none)'}`);
     lines.push(`   vibe:           ${validated.vibe.join(', ') || '(none)'}`);
@@ -454,7 +543,7 @@ async function processOne(
     process.stdout.write(lines.join('\n') + '\n');
   }
 
-  // 4. Build DB update — guard description/price writes on NULL/empty
+  // 4. Build + commit atomic DB update
   const update: Record<string, unknown> = {
     audience: validated.audience.length > 0 ? validated.audience : null,
     vibe: validated.vibe.length > 0 ? validated.vibe : null,
@@ -467,21 +556,14 @@ async function processOne(
     enrichment_version: ENRICHMENT_VERSION,
     enrichment_at: new Date().toISOString(),
   };
-  // Tag union with existing (preserve cat-v2 output).
   if (validated.tags.length > 0) {
     const existing = Array.isArray(row.tags) ? row.tags : [];
     update.tags = Array.from(new Set([...existing, ...validated.tags])).slice(0, 8);
   }
   const descEmpty = !row.description || row.description.trim().length < 40;
-  if (descEmpty && suggestedDesc) {
-    update.description = suggestedDesc;
-    stats.descFilled += 1;
-  }
+  if (descEmpty && suggestedDesc) { update.description = suggestedDesc; stats.descFilled += 1; }
   const priceEmpty = !row.price_text || row.price_text.trim().length === 0;
-  if (priceEmpty && suggestedPrice) {
-    update.price_text = suggestedPrice;
-    stats.priceFilled += 1;
-  }
+  if (priceEmpty && suggestedPrice) { update.price_text = suggestedPrice; stats.priceFilled += 1; }
 
   if (!opts.dryRun) {
     const { error } = await supabase.from('events').update(update).eq('id', row.id);
@@ -489,14 +571,23 @@ async function processOne(
       console.error(`\n[${row.id.slice(0, 8)}] update failed: ${error.message}`);
       stats.enriched -= 1;
       stats.failed += 1;
+      appendLog(opts.logFile, { event_id: row.id, title: row.title, status: 'db_error', error: error.message });
+      stats.processed += 1;
+      return;
     }
   }
+
+  appendLog(opts.logFile, {
+    event_id: row.id,
+    title: row.title,
+    status: opts.dryRun ? 'dry_run_ok' : 'ok',
+    tags_added: validated.tags,
+    audience: validated.audience,
+    is_student_friendly: validated.is_student_friendly,
+    is_family_friendly: validated.is_family_friendly,
+  });
   stats.processed += 1;
 }
-
-// ─────────────────────────────────────────────────────────────────────
-// Main
-// ─────────────────────────────────────────────────────────────────────
 
 async function worker(queue: EventRow[], supabase: SupabaseClient, opts: CliOpts, stats: Stats, total?: number): Promise<void> {
   while (queue.length > 0) {
@@ -509,18 +600,20 @@ async function worker(queue: EventRow[], supabase: SupabaseClient, opts: CliOpts
       stats.processed += 1;
       console.error(`\nworker error on ${row.id.slice(0, 8)}: ${err instanceof Error ? err.message : err}`);
     }
-    if (stats.processed % 5 === 0) {
+    if (stats.processed % 5 === 0 || stats.processed <= 10) {
       process.stdout.write('  ' + reportLine(stats, total) + '\r');
     }
   }
 }
 
+// ─────────────────────────────────────────────────────────────────────
+// Main
+// ─────────────────────────────────────────────────────────────────────
+
 async function main() {
   const opts = parseArgs();
 
-  // Best-effort sanity check. If `claude --version` fails, we warn but
-  // proceed anyway — the user may have a non-standard install and the
-  // real errors from the first classification call will be more useful.
+  // Best-effort version check — warn but don't abort on failure.
   try {
     const version = await new Promise<string>((resolve, reject) => {
       const c = spawn(opts.claudeBin, ['--version'], {
@@ -528,19 +621,13 @@ async function main() {
         stdio: ['ignore', 'pipe', 'pipe'],
       });
       let out = '';
-      let err = '';
       c.stdout.on('data', (d: Buffer) => { out += d.toString('utf8'); });
-      c.stderr.on('data', (d: Buffer) => { err += d.toString('utf8'); });
-      c.on('close', (code) => {
-        if (code === 0) resolve(out.trim());
-        else reject(new Error(`exited ${code}: ${err.trim() || out.trim()}`));
-      });
-      c.on('error', (e) => reject(e));
+      c.on('close', (code) => code === 0 ? resolve(out.trim()) : reject(new Error(`exited ${code}`)));
+      c.on('error', reject);
     });
     console.log(`  claude CLI:      ${version}`);
   } catch (err) {
     console.warn(`  ⚠ claude --version check failed: ${err instanceof Error ? err.message : err}`);
-    console.warn(`    Continuing anyway — if real calls fail, check that "claude" is on PATH.`);
   }
 
   const supaUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -552,27 +639,41 @@ async function main() {
   const supabase = createClient(supaUrl, supaKey);
   const today = new Date().toISOString().split('T')[0];
 
-  console.log('\nEvent Enrichment — Claude CLI');
-  console.log(`  Model:           ${opts.model} (${MODEL_MAP[opts.model]})`);
-  console.log(`  Concurrency:     ${opts.concurrency}`);
-  console.log(`  Dry-run:         ${opts.dryRun}`);
-  console.log(`  Fetch URLs:      ${!opts.noFetch}`);
-  console.log(`  Force re-run:    ${opts.force}`);
-  console.log(`  Limit:           ${opts.limit === Infinity ? 'none' : opts.limit}`);
-  console.log(`  Target version:  ${ENRICHMENT_VERSION}`);
-
-  let countQuery = supabase
+  // Startup: show resume state (already-done vs pending).
+  const { count: alreadyDone } = await supabase
     .from('events')
     .select('*', { count: 'exact', head: true })
     .eq('publish_status', 'published')
     .gte('start_date', today)
-    .gte('quality_score', 40);  // match sitemap standard — skip low-quality
-  if (!opts.force) countQuery = countQuery.or(`enrichment_version.is.null,enrichment_version.neq.${ENRICHMENT_VERSION}`);
-  const { count: totalPending } = await countQuery;
-  console.log(`  Pending:         ${totalPending ?? 'unknown'}`);
+    .gte('quality_score', 40)
+    .eq('enrichment_version', ENRICHMENT_VERSION);
+
+  let pendingQuery = supabase
+    .from('events')
+    .select('*', { count: 'exact', head: true })
+    .eq('publish_status', 'published')
+    .gte('start_date', today)
+    .gte('quality_score', 40);
+  if (!opts.force) pendingQuery = pendingQuery.or(`enrichment_version.is.null,enrichment_version.neq.${ENRICHMENT_VERSION}`);
+  const { count: totalPending } = await pendingQuery;
+
+  console.log('\nEvent Enrichment — Claude CLI');
+  console.log(`  Model:           ${opts.model} (${MODEL_MAP[opts.model]})`);
+  console.log(`  Concurrency:     ${opts.concurrency} workers`);
+  console.log(`  Dry-run:         ${opts.dryRun}`);
+  console.log(`  Fetch URLs:      ${!opts.noFetch}`);
+  console.log(`  Force re-run:    ${opts.force}`);
+  console.log(`  Bare mode:       ${opts.bareMode ? 'YES (plugins skipped, API key auth)' : 'no (plugins load, Max-OAuth auth ok)'}`);
+  console.log(`  Log file:        ${opts.logFile ?? '(none)'}`);
+  console.log(`  Limit:           ${opts.limit === Infinity ? 'none' : opts.limit}`);
+  console.log(`  Target version:  ${ENRICHMENT_VERSION}`);
+  console.log(`  Already done:    ${alreadyDone ?? '?'}   (resume-safe — these are skipped)`);
+  console.log(`  Still pending:   ${totalPending ?? '?'}`);
   console.log('─'.repeat(70));
 
   const stats = newStats();
+  appendLog(opts.logFile, { status: 'run_start', model: opts.model, concurrency: opts.concurrency, already_done: alreadyDone, pending: totalPending });
+
   const PAGE_SIZE = 200;
 
   while (stats.processed < opts.limit) {
@@ -581,7 +682,7 @@ async function main() {
       .select('id, title, description, category, tags, source_tags_raw, location_name, organizer, start_date, end_date, price_text, price_min, price_max, source_url')
       .eq('publish_status', 'published')
       .gte('start_date', today)
-      .gte('quality_score', 40)  // defense-in-depth against scraper chrome titles
+      .gte('quality_score', 40)
       .order('id', { ascending: true })
       .limit(PAGE_SIZE);
     if (!opts.force) q = q.or(`enrichment_version.is.null,enrichment_version.neq.${ENRICHMENT_VERSION}`);
@@ -596,14 +697,25 @@ async function main() {
     const workers = Array.from({ length: opts.concurrency }, () => worker(queue, supabase, opts, stats, totalPending ?? undefined));
     await Promise.all(workers);
 
+    // --dry-run and --force don't advance the "pending" filter, so break
+    // after first batch to avoid infinite loops.
     if (opts.dryRun || opts.force) break;
     if (rows.length < PAGE_SIZE) break;
   }
 
   process.stdout.write('\n' + '─'.repeat(70) + '\n');
   console.log(reportLine(stats, totalPending ?? undefined));
-  console.log(`Elapsed: ${((Date.now() - stats.startedAt) / 60000).toFixed(1)}min`);
+  const elapsed = (Date.now() - stats.startedAt) / 60000;
+  console.log(`Elapsed: ${elapsed.toFixed(1)}min`);
+  appendLog(opts.logFile, { status: 'run_end', processed: stats.processed, enriched: stats.enriched, failed: stats.failed, elapsed_min: elapsed });
 }
+
+// Graceful shutdown: log SIGINT so the user knows resume is safe.
+process.on('SIGINT', () => {
+  console.log('\n\n⚠  SIGINT received. In-flight events may be lost, but the DB is consistent —');
+  console.log('   re-run the same command and it will pick up from where you were.');
+  process.exit(130);
+});
 
 main().catch((err) => {
   console.error('enrich-claude-cli failed:', err);
