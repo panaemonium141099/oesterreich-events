@@ -85,7 +85,11 @@ function parseArgs(): CliOpts {
     noFetch: args.includes('--no-fetch'),
     force: args.includes('--force'),
     model,
-    claudeBin: get('--claude-bin') ?? (process.platform === 'win32' ? 'claude.cmd' : 'claude'),
+    // Just 'claude' on all platforms — on Windows with shell=true, PATHEXT
+    // handles finding claude.exe / claude.cmd / claude.bat automatically.
+    // The curl-installer variant is claude.exe; the npm-global variant is
+    // claude.cmd. Both work when we let the shell resolve.
+    claudeBin: get('--claude-bin') ?? 'claude',
   };
 }
 
@@ -464,25 +468,29 @@ async function worker(queue: EventRow[], supabase: SupabaseClient, opts: CliOpts
 async function main() {
   const opts = parseArgs();
 
-  // Sanity: check `claude` actually works before we spawn 5 of them.
+  // Best-effort sanity check. If `claude --version` fails, we warn but
+  // proceed anyway — the user may have a non-standard install and the
+  // real errors from the first classification call will be more useful.
   try {
-    await new Promise<void>((resolve, reject) => {
+    const version = await new Promise<string>((resolve, reject) => {
       const c = spawn(opts.claudeBin, ['--version'], {
         shell: process.platform === 'win32',
         stdio: ['ignore', 'pipe', 'pipe'],
       });
       let out = '';
+      let err = '';
       c.stdout.on('data', (d: Buffer) => { out += d.toString('utf8'); });
+      c.stderr.on('data', (d: Buffer) => { err += d.toString('utf8'); });
       c.on('close', (code) => {
-        if (code === 0) { console.log(`  claude CLI: ${out.trim()}`); resolve(); }
-        else reject(new Error(`claude --version exited ${code}`));
+        if (code === 0) resolve(out.trim());
+        else reject(new Error(`exited ${code}: ${err.trim() || out.trim()}`));
       });
-      c.on('error', reject);
+      c.on('error', (e) => reject(e));
     });
+    console.log(`  claude CLI:      ${version}`);
   } catch (err) {
-    console.error(`\n❌ Claude CLI check failed: ${err instanceof Error ? err.message : err}`);
-    console.error('   Make sure "claude" is in your PATH. Install: npm i -g @anthropic-ai/claude-code');
-    process.exit(1);
+    console.warn(`  ⚠ claude --version check failed: ${err instanceof Error ? err.message : err}`);
+    console.warn(`    Continuing anyway — if real calls fail, check that "claude" is on PATH.`);
   }
 
   const supaUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
