@@ -11,7 +11,7 @@
  * - Soft paper color + subtle shadow; intentionally NOT neon, NOT candy.
  */
 
-import { motion, type PanInfo } from 'framer-motion';
+import { motion, useMotionValue, type PanInfo } from 'framer-motion';
 import { useState, useRef, useEffect } from 'react';
 import type { RefObject } from 'react';
 import { toast } from 'sonner';
@@ -89,19 +89,34 @@ const COLOR_STYLE: Record<PostitColor, { bg: string; shadow: string; ink: string
 
 export function PostitNote({ note, boardRef, isMine, isAdmin, onMove, onEdit, onDelete }: PostitNoteProps) {
   const canDelete = isMine || isAdmin;
+  // Framer Motion drag transforms the element via x/y motion values. We own
+  // these so we can reset them to 0 after dragEnd — otherwise the element
+  // keeps the drag translate AND gets re-positioned via the new left/top %,
+  // making the note "fly out" on the next frame (doubled movement).
+  const x = useMotionValue(0);
+  const y = useMotionValue(0);
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(note.content ?? '');
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const style = COLOR_STYLE[note.color];
 
-  // Commit position after drag ends
+  // Commit position after drag ends, THEN reset the drag transform.
+  // Order matters: first update parent state so the note's left/top % pulls
+  // it to the new position on re-render, then wipe x/y so the transform
+  // doesn't double-apply on top of the new anchor.
   const handleDragEnd = (_: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
     const board = boardRef.current;
-    if (!board) return;
+    if (!board) { x.set(0); y.set(0); return; }
     const rect = board.getBoundingClientRect();
     const newX = ((note.position_x / 100) * rect.width + info.offset.x) / rect.width * 100;
     const newY = ((note.position_y / 100) * rect.height + info.offset.y) / rect.height * 100;
-    onMove(note.id, Math.max(0, Math.min(95, newX)), Math.max(0, Math.min(95, newY)));
+    const clampedX = Math.max(0, Math.min(95, newX));
+    const clampedY = Math.max(0, Math.min(95, newY));
+    onMove(note.id, clampedX, clampedY);
+    // Reset the drag-transform so the new left/top % is the only source of
+    // truth. Must happen AFTER onMove so React has the new position_x/y.
+    x.set(0);
+    y.set(0);
   };
 
   useEffect(() => {
@@ -120,7 +135,7 @@ export function PostitNote({ note, boardRef, isMine, isAdmin, onMove, onEdit, on
     <motion.div
       drag={isMine}
       dragMomentum={false}
-      dragElastic={0.1}
+      dragElastic={0}
       onDragEnd={handleDragEnd}
       initial={{ opacity: 0, scale: 0.85, rotate: 0 }}
       animate={{
@@ -137,6 +152,12 @@ export function PostitNote({ note, boardRef, isMine, isAdmin, onMove, onEdit, on
         isMine ? 'cursor-grab active:cursor-grabbing' : 'cursor-pointer',
       ].join(' ')}
       style={{
+        // x/y are our own motion values so we can reset them after dragEnd.
+        // Framer drives the drag through them and we clear them back to 0
+        // on release so the next render's new left/top % isn't doubled by
+        // a leftover translate.
+        x,
+        y,
         left: `${note.position_x}%`,
         top: `${note.position_y}%`,
         width: '168px',
