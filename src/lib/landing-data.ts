@@ -20,6 +20,7 @@ import {
 import { BUNDESLAENDER } from './bundeslaender';
 import type { FilterChip } from '@/components/Landing/FilterChips';
 import type { LinkGroup } from '@/components/Landing/InternalLinks';
+import { BUNDESLAND_INTROS, STADT_INTROS } from '@/content/landing-intros';
 
 const PAGE_SIZE = 20;
 const MIN_QUALITY = 40;
@@ -43,6 +44,16 @@ export interface LandingPageData {
   paginationParams: Record<string, string>;
   metaTitle: string;
   metaDescription: string;
+  /**
+   * Editorial intro — only set for "root" landing pages (/<bundesland>
+   * and /stadt/<city>), not for sub-filter permutations, to avoid
+   * duplicate-content penalties and keep the intro truly curated.
+   */
+  intro?: {
+    lead: string;
+    body: string;
+    tips?: string;
+  };
 }
 
 // ---------------------------------------------------------------------------
@@ -91,6 +102,11 @@ export async function loadBundeslandPage(
   const metaTitle = title;
   const metaDescription = `Entdecke ${totalCount} Events in ${blName}${timeFilter ? ` ${timeFilter}` : ''}${category ? ` — ${category}` : ''}. Alle Veranstaltungen auf einen Blick.`;
 
+  // Only the ROOT page for each Bundesland carries the editorial intro
+  // (no category, no time filter). Sub-views inherit from the crawlable
+  // parent — avoids duplicate-content across the hundred permutations.
+  const intro = (!category && !timeFilter) ? BUNDESLAND_INTROS[bundesland] : undefined;
+
   return {
     events,
     totalCount,
@@ -103,6 +119,7 @@ export async function loadBundeslandPage(
     paginationParams,
     metaTitle,
     metaDescription,
+    intro,
   };
 }
 
@@ -156,6 +173,10 @@ export async function loadStadtPage(
   const metaTitle = title;
   const metaDescription = `Entdecke ${totalCount} Events in ${cityConfig.name}${timeFilter ? ` ${timeFilter}` : ''}${category ? ` — ${category}` : ''}. Alle Veranstaltungen auf einen Blick.`;
 
+  // Only the Stadt root page shows the intro — same rationale as the
+  // Bundesland root pages above.
+  const intro = (!category && !timeFilter) ? STADT_INTROS[cityConfig.slug] : undefined;
+
   return {
     events,
     totalCount,
@@ -168,6 +189,7 @@ export async function loadStadtPage(
     paginationParams,
     metaTitle,
     metaDescription,
+    intro,
   };
 }
 

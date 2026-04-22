@@ -24,6 +24,16 @@ interface LandingPageShellProps {
   jsonLd: object;
   /** API params for LoadMoreEvents pagination parity */
   paginationParams: Record<string, string>;
+  /**
+   * Optional editorial intro shown ABOVE the event list — required by
+   * AdSense "thin content" policy on aggregator landing pages. Comes from
+   * src/content/landing-intros.ts (curated, not auto-generated).
+   */
+  intro?: {
+    lead: string;
+    body: string;
+    tips?: string;
+  };
 }
 
 /**
@@ -40,6 +50,7 @@ export function LandingPageShell({
   internalLinks,
   jsonLd,
   paginationParams,
+  intro,
 }: LandingPageShellProps) {
   // Cursor for pagination: last event's ID from server batch
   const lastEvent = events[events.length - 1];
@@ -83,6 +94,25 @@ export function LandingPageShell({
             </h1>
             <p className="text-sm text-white/50">{subtitle}</p>
           </div>
+
+          {/* Editorial intro — renders only on routes that have a curated
+              entry in landing-intros.ts (typically Bundesland + Stadt root
+              pages). Sub-filter views (/wien/heute, /wien/musik/heute)
+              deliberately don't carry the intro to avoid duplicate content. */}
+          {intro && (
+            <section className="mb-8 max-w-3xl text-white/70 leading-relaxed text-sm md:text-base">
+              <p className="text-base md:text-lg text-white/85 mb-4 font-medium">
+                {intro.lead}
+              </p>
+              <p className="mb-4">{intro.body}</p>
+              {intro.tips && (
+                <p className="text-white/60 border-l-2 border-white/20 pl-4 italic">
+                  <span className="text-white/80 font-semibold not-italic">Insider-Tipp: </span>
+                  {intro.tips}
+                </p>
+              )}
+            </section>
+          )}
 
           {/* Filter Chips */}
           <div className="mb-6">

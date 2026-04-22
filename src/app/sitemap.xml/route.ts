@@ -77,6 +77,7 @@ export async function GET(): Promise<NextResponse> {
     { loc: BASE_URL, lastmod: toISO(now), changefreq: 'daily', priority: 1.0 },
     { loc: `${BASE_URL}/map`, lastmod: toISO(now), changefreq: 'daily', priority: 0.8 },
     { loc: `${BASE_URL}/blog`, lastmod: toISO(now), changefreq: 'weekly', priority: 0.8 },
+    { loc: `${BASE_URL}/ueber-uns`, lastmod: toISO(now), changefreq: 'monthly', priority: 0.7 },
     { loc: `${BASE_URL}/quellen`, lastmod: toISO(now), changefreq: 'monthly', priority: 0.4 },
     { loc: `${BASE_URL}/impressum`, lastmod: toISO(now), changefreq: 'yearly', priority: 0.3 },
     { loc: `${BASE_URL}/datenschutz`, lastmod: toISO(now), changefreq: 'yearly', priority: 0.3 },
