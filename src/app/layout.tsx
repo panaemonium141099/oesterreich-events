@@ -1,7 +1,14 @@
 import type { Metadata } from 'next';
 import Script from 'next/script';
 import { AuthProvider } from '@/lib/supabase/auth-context';
-import { CookieBanner } from '@/components/Legal/CookieBanner';
+// Custom CookieBanner removed — Google AdSense Privacy & messaging (Funding
+// Choices) is active on this property and delivers a TCF 2.2-certified,
+// Consent-Mode-v2-integrated banner automatically via the adsbygoogle.js
+// script loaded below. The old custom banner only wrote localStorage and
+// did not send Consent-Mode signals to Google, which would have blocked
+// EU-traffic monetization. Keeping both would show two banners to EU
+// users and create conflicting consent state.
+// File kept at src/components/Legal/CookieBanner.tsx for reference/rollback.
 import { AnimatedLayout } from '@/components/UI/AnimatedLayout';
 import { NotificationToast } from '@/components/Notifications/NotificationToast';
 import { SocialNav } from '@/components/Layout/SocialNav';
@@ -171,7 +178,7 @@ export default function RootLayout({
           />
           <SocialNav />
           <NotificationToast />
-          <CookieBanner />
+          {/* <CookieBanner /> — see import comment above */}
         </AuthProvider>
       </body>
     </html>
