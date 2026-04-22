@@ -9,6 +9,25 @@
   --color-surface: #0a0a0c;
   --color-surface-elevated: #141416;
   --color-surface-inset: #050506;
+
+  /* Planer-scope — cinematic editorial palette
+     Only used inside `.planer-scope` descendants. Rest of the app keeps its
+     current neutral palette untouched. */
+  --color-planer-void: #07060a;
+  --color-planer-surface: #0f0d11;
+  --color-planer-raised: #1a161d;
+  --color-planer-ink: #f6efe4;   /* warm off-white text */
+  --color-planer-dim: #9c9088;   /* warm muted */
+  --color-planer-whisper: #5a524e;
+  --color-planer-amber: #e8a94e;     /* primary accent */
+  --color-planer-amber-deep: #b77a28;
+  --color-planer-sage: #7bb794;      /* "dabei" */
+  --color-planer-rose: #c67079;      /* "absage" */
+  --color-planer-plum: #8a6b9a;      /* "vielleicht" */
+
+  /* Expose the font vars as Tailwind font-family tokens */
+  --font-display: var(--font-fraunces), ui-serif, Georgia, serif;
+  --font-body: var(--font-geist), ui-sans-serif, system-ui, sans-serif;
 }
 
 /* ═══════════════════════════════════════════════
@@ -853,4 +872,197 @@ button:active, a:active, [role="button"]:active {
    ═══════════════════════════════════════════════ */
 .pb-social-nav {
   padding-bottom: 80px;
+}
+
+/* ═══════════════════════════════════════════════
+   PLANER SCOPE — cinematic editorial atmosphere
+   ═══════════════════════════════════════════════
+   Opt-in via `<div className="planer-scope">`. Switches:
+    - body font to Geist
+    - background to deep warm black
+    - ink color to warm off-white
+    - installs grain + vignette layers
+   Leaves the rest of the site alone.
+   ═══════════════════════════════════════════════ */
+.planer-scope {
+  font-family: var(--font-body);
+  color: var(--color-planer-ink);
+  background-color: var(--color-planer-void);
+  position: relative;
+  isolation: isolate;
+  /* Sharper letterforms for Geist */
+  font-feature-settings: 'ss01', 'cv11';
+  letter-spacing: -0.005em;
+}
+
+.planer-scope .font-display,
+.planer-scope .serif-display {
+  font-family: var(--font-display);
+  font-feature-settings: 'ss01', 'ss02';
+  letter-spacing: -0.025em;
+}
+
+/* Subtle grain overlay — SVG turbulence baked into a data-URI so no extra HTTP
+   request. Sits at z=1 above the page background but under content. */
+.planer-grain::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.08;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.95 0 0 0 0 0.85 0 0 0 0 0.7 0 0 0 0.5 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+}
+
+/* Warm radial vignette anchored top-center — creates a "spotlight" feel */
+.planer-spotlight::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 70% 50% at 50% 0%, rgba(232, 169, 78, 0.08) 0%, transparent 60%),
+    radial-gradient(ellipse 100% 60% at 50% 100%, rgba(138, 107, 154, 0.04) 0%, transparent 70%);
+}
+
+/* All children of a spotlit/grainy section need z>0 to sit above the layers */
+.planer-spotlight > *,
+.planer-grain > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* Editorial numeric label — "03 / 04" step indicator, film credit style */
+.editorial-num {
+  font-family: var(--font-display);
+  font-variation-settings: 'opsz' 14, 'SOFT' 50;
+  font-feature-settings: 'tnum', 'lnum';
+  letter-spacing: 0.08em;
+}
+
+/* Magnetic CTA — amber glow on hover, slight lift */
+.magnetic-cta {
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.4s cubic-bezier(0.19, 1, 0.22, 1),
+              box-shadow 0.4s cubic-bezier(0.19, 1, 0.22, 1);
+}
+.magnetic-cta::before {
+  content: '';
+  position: absolute;
+  inset: -40%;
+  background: radial-gradient(circle at var(--mx, 50%) var(--my, 50%),
+    rgba(232, 169, 78, 0.25) 0%, transparent 55%);
+  opacity: 0;
+  transition: opacity 0.4s ease-out;
+  pointer-events: none;
+}
+.magnetic-cta:hover {
+  transform: translateY(-1px);
+  box-shadow:
+    0 8px 32px -8px rgba(232, 169, 78, 0.35),
+    0 2px 8px -2px rgba(0, 0, 0, 0.4);
+}
+.magnetic-cta:hover::before {
+  opacity: 1;
+}
+@media (prefers-reduced-motion: reduce) {
+  .magnetic-cta { transition: none; }
+  .magnetic-cta:hover { transform: none; }
+}
+
+/* Hairline divider variant — amber-tinted, used as editorial accent */
+.hairline-amber {
+  height: 1px;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    rgba(232, 169, 78, 0.3) 30%,
+    rgba(232, 169, 78, 0.6) 50%,
+    rgba(232, 169, 78, 0.3) 70%,
+    transparent 100%);
+}
+
+/* Kinetic underline — draws itself on load, used beneath display headings */
+@keyframes underlineDraw {
+  from { transform: scaleX(0); }
+  to   { transform: scaleX(1); }
+}
+.kinetic-underline {
+  position: relative;
+  display: inline-block;
+}
+.kinetic-underline::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -0.15em;
+  height: 2px;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    var(--color-planer-amber) 15%,
+    var(--color-planer-amber) 85%,
+    transparent 100%);
+  transform-origin: left;
+  animation: underlineDraw 1.4s cubic-bezier(0.77, 0, 0.175, 1) 0.2s both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .kinetic-underline::after { animation: none; transform: none; }
+}
+
+/* Staggered reveal keyframe — Framer handles most cases but plain CSS
+   is handy for server-rendered lists */
+@keyframes risingType {
+  from { opacity: 0; transform: translateY(22px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.rising-type {
+  animation: risingType 0.8s cubic-bezier(0.19, 1, 0.22, 1) both;
+}
+
+/* Step-rail dot — pulses when active */
+@keyframes stepPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(232, 169, 78, 0.5); }
+  50%      { box-shadow: 0 0 0 6px rgba(232, 169, 78, 0); }
+}
+.step-active-dot {
+  animation: stepPulse 2s ease-out infinite;
+}
+
+/* Editorial letter-carry — used for big numeric hero figures */
+.tabular {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum', 'lnum';
+}
+
+/* Planer form-field resets — darker, warmer than site default */
+.planer-scope input[type="text"],
+.planer-scope input[type="date"],
+.planer-scope input[type="time"],
+.planer-scope textarea {
+  background-color: rgba(246, 239, 228, 0.02);
+  border-color: rgba(246, 239, 228, 0.08);
+  color: var(--color-planer-ink);
+  transition: border-color 0.25s ease, background-color 0.25s ease;
+}
+.planer-scope input:focus,
+.planer-scope textarea:focus {
+  border-color: rgba(232, 169, 78, 0.45) !important;
+  background-color: rgba(232, 169, 78, 0.03) !important;
+}
+.planer-scope input::placeholder,
+.planer-scope textarea::placeholder {
+  color: rgba(156, 144, 136, 0.5);
+}
+
+/* Prevent date/time inputs showing the native picker icon in bright mode */
+.planer-scope input[type="date"],
+.planer-scope input[type="time"] {
+  color-scheme: dark;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rising-type, .step-active-dot { animation: none; }
 }
