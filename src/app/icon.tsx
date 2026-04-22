@@ -13,7 +13,7 @@ export const contentType = 'image/png';
  * sizes, unlike a complex illustration that would muddy.
  */
 export default async function Icon() {
-  const fraunces = await loadGoogleFont({ family: 'Fraunces', weight: 600 });
+  const fraunces = await loadGoogleFont({ family: 'Fraunces', weight: 600, text: 'L' });
 
   return new ImageResponse(
     (

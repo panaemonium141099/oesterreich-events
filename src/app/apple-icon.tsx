@@ -11,8 +11,12 @@ export const contentType = 'image/png';
  * pulls up their home-screen grid.
  */
 export default async function AppleIcon() {
-  const fraunces = await loadGoogleFont({ family: 'Fraunces', weight: 600 });
-  const geist = await loadGoogleFont({ family: 'Geist', weight: 500 });
+  const fraunces = await loadGoogleFont({ family: 'Fraunces', weight: 600, text: 'L' });
+  const geist = await loadGoogleFont({
+    family: 'Geist',
+    weight: 500,
+    text: 'LASS TREFFEN',
+  });
 
   return new ImageResponse(
     (

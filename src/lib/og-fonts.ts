@@ -1,17 +1,15 @@
 /**
  * Google Fonts loader for next/og's ImageResponse.
  *
- * Fetches a single-weight woff2 font file at request/build time so the
- * Satori renderer inside ImageResponse can actually use the glyphs.
- * next/font doesn't expose raw font bytes, which is why this helper
- * exists — OG routes need the buffer.
+ * IMPORTANT: Satori (the rasterizer inside ImageResponse) does NOT
+ * support WOFF2 — it needs TTF/OTF bytes. By default, Google Fonts'
+ * CSS2 endpoint serves WOFF2 to any UA that accepts it. The workaround:
+ * pass a `text=` subset parameter, which flips Google to a per-request
+ * TTF slice containing just those glyphs. Smaller, faster, AND decodable
+ * by Satori.
  *
- * The CSS endpoint returns a stylesheet with a URL pointing at the
- * actual woff2; we regex that out and fetch the binary.
- *
- * Requires a realistic User-Agent. Google Fonts CSS2 serves woff2 only
- * to UAs that claim to support it — a bare "node-fetch" string gets you
- * older ttf URLs.
+ * Caller is responsible for passing the text that will actually be
+ * rendered, so Google knows which glyphs to include.
  */
 
 export type FontSpec = {
@@ -19,13 +17,15 @@ export type FontSpec = {
   family: string;
   /** Numeric weight, e.g. 400, 500, 700 */
   weight?: number;
-  /** "normal" or "italic" — italic requires the `ital,wght@1,...` syntax */
+  /** "normal" or "italic" */
   style?: 'normal' | 'italic';
+  /**
+   * Characters that will be rendered. REQUIRED — this flips Google to
+   * TTF instead of WOFF2. Pass a superset if you're not sure what
+   * exact chars you need; Google will silently ignore unused ones.
+   */
+  text: string;
 };
-
-const BROWSER_UA =
-  'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 ' +
-  '(KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36';
 
 export async function loadGoogleFont(spec: FontSpec): Promise<ArrayBuffer> {
   const weight = spec.weight ?? 400;
@@ -33,15 +33,21 @@ export async function loadGoogleFont(spec: FontSpec): Promise<ArrayBuffer> {
   const axis = italic ? `ital,wght@1,${weight}` : `wght@${weight}`;
   const cssUrl =
     `https://fonts.googleapis.com/css2?family=${encodeURIComponent(spec.family)}:${axis}` +
-    `&display=swap`;
+    `&text=${encodeURIComponent(spec.text)}`;
 
-  const css = await fetch(cssUrl, { headers: { 'User-Agent': BROWSER_UA } }).then(r => {
-    if (!r.ok) throw new Error(`CSS fetch failed: ${r.status}`);
-    return r.text();
-  });
-  const match = css.match(/src:\s*url\(([^)]+)\)\s*format\(['"]woff2['"]\)/);
-  if (!match) throw new Error(`No woff2 URL found in CSS for ${spec.family}`);
+  const cssResp = await fetch(cssUrl);
+  if (!cssResp.ok) throw new Error(`Google Fonts CSS fetch failed: ${cssResp.status}`);
+  const css = await cssResp.text();
+
+  // Only match TTF/OTF — WOFF2 is not supported by Satori.
+  const match = css.match(/src:\s*url\(([^)]+)\)\s*format\(['"](?:truetype|opentype)['"]\)/);
+  if (!match) {
+    throw new Error(
+      `No TTF/OTF URL found in Google Fonts CSS for "${spec.family}". ` +
+      `First 200 chars of response: ${css.substring(0, 200)}`,
+    );
+  }
   const fontResp = await fetch(match[1]);
-  if (!fontResp.ok) throw new Error(`Font fetch failed: ${fontResp.status}`);
+  if (!fontResp.ok) throw new Error(`Font file fetch failed: ${fontResp.status}`);
   return await fontResp.arrayBuffer();
 }

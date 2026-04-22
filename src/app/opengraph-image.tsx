@@ -16,11 +16,21 @@ export const alt = 'LassTreffen.at — Entdecke was los ist in Österreich';
  * browser tab to social embed.
  */
 export default async function Image() {
+  // Every glyph that appears on the rendered card — merged superset so
+  // Google returns a single TTF subset we can hand to Satori. Keep this
+  // in sync with the text literals in the JSX below.
+  const frauncesText = 'LassTreffen.· Österreich0123456789seit';
+  const geistText =
+    'LASS TREFFEN · ÖSTERREICH lasstreffen.at ' +
+    'Events in Wien, Graz, Salzburg und ganz Österreich — ' +
+    '40 000 Konzerte, Festivals, Märkte, Partys auf einer Karte. ' +
+    'Gemeinsam hingehen gemeinsam planen';
+
   const [frauncesRegular, frauncesItalic, geist, geistMedium] = await Promise.all([
-    loadGoogleFont({ family: 'Fraunces', weight: 500 }),
-    loadGoogleFont({ family: 'Fraunces', weight: 500, style: 'italic' }),
-    loadGoogleFont({ family: 'Geist', weight: 400 }),
-    loadGoogleFont({ family: 'Geist', weight: 500 }),
+    loadGoogleFont({ family: 'Fraunces', weight: 500, text: frauncesText }),
+    loadGoogleFont({ family: 'Fraunces', weight: 500, style: 'italic', text: frauncesText }),
+    loadGoogleFont({ family: 'Geist', weight: 400, text: geistText }),
+    loadGoogleFont({ family: 'Geist', weight: 500, text: geistText }),
   ]);
 
   return new ImageResponse(
