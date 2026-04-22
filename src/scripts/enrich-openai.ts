@@ -271,14 +271,21 @@ async function classifyOpenai(
   userMessage: string,
   model: string,
 ): Promise<{ parsed: unknown; tokensIn: number; tokensOut: number }> {
-  // gpt-5 family and reasoning-style models (o1, o3, o4) dropped
-  // `max_tokens` in favor of `max_completion_tokens`. Older families
-  // (gpt-4o-mini, gpt-4.1-*) still accept `max_tokens`. Pick the right
-  // key based on the model string so we don't 400 on either.
-  const isNewTokenParam = /^(gpt-5|o[134]-)/i.test(model);
-  const tokenBudget: Record<string, number> = isNewTokenParam
+  // gpt-5 family + reasoning-style models (o1/o3/o4) differ from the
+  // older Chat Completions API in two places:
+  //   - parameter name: `max_completion_tokens` instead of `max_tokens`
+  //   - temperature:    only default (=1) is accepted; any other value 400s
+  // Pick sane flags based on the model string so a --model switch doesn't
+  // break the request.
+  const isNewApi = /^(gpt-5|o[134]-)/i.test(model);
+  const tokenBudget: Record<string, number> = isNewApi
     ? { max_completion_tokens: 600 }
     : { max_tokens: 600 };
+  // For older families we want deterministic-ish classification → low temp.
+  // For gpt-5 family we omit the key so the server default (1) is used.
+  const tempParam: Record<string, number> = isNewApi
+    ? {}
+    : { temperature: 0.2 };
 
   const res = await openai.chat.completions.create({
     model,
@@ -289,7 +296,7 @@ async function classifyOpenai(
     // Force structured output via response_format — the API enforces the
     // schema on its side, so we get validated JSON back.
     response_format: { type: 'json_schema', json_schema: OUTPUT_JSON_SCHEMA },
-    temperature: 0.2,
+    ...tempParam,
     ...tokenBudget,
   });
 
