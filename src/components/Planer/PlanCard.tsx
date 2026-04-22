@@ -24,8 +24,13 @@ export interface PlanCardData {
 
 interface PlanCardProps {
   plan: PlanCardData;
-  /** Featured style = bigger, with prominent map hero and amber glow */
-  featured?: boolean;
+  /**
+   * Dezenter „↓ als nächstes"-Indikator auf dem obersten kommenden Treffen.
+   * Das Card-Layout bleibt identisch — Hierarchie entsteht nur über den
+   * Caption-Marker, nicht über Größe (sonst wirken alle anderen als
+   * Runner-ups).
+   */
+  isNext?: boolean;
   index?: number;
 }
 
@@ -40,22 +45,17 @@ function formatDateLine(dateStr: string | null): { day: string; month: string; t
   return { day, month, time };
 }
 
-function getMapThumbnail(lat: number | null, lng: number | null, width = 480, height = 320): string | null {
+function getMapThumbnail(lat: number | null, lng: number | null, width = 540, height = 360): string | null {
   if (!lat || !lng) return null;
   const token = process.env.NEXT_PUBLIC_MAPBOX_TOKEN || '';
-  // Dark style + amber-tinted marker (our accent)
-  return `https://api.mapbox.com/styles/v1/mapbox/dark-v11/static/pin-s+e8a94e(${lng},${lat})/${lng},${lat},12.5,0/${width}x${height}@2x?access_token=${token}`;
+  // Dark style + plum-tinted marker (our accent)
+  return `https://api.mapbox.com/styles/v1/mapbox/dark-v11/static/pin-s+8a7aa4(${lng},${lat})/${lng},${lat},12.5,0/${width}x${height}@2x?access_token=${token}`;
 }
 
-export function PlanCard({ plan, featured = false, index = 0 }: PlanCardProps) {
+export function PlanCard({ plan, isNext = false, index = 0 }: PlanCardProps) {
   const date = formatDateLine(plan.event_date);
   const bgImg = plan.image_url || plan.linked_event_image_url;
-  const mapImg = getMapThumbnail(
-    plan.location_lat,
-    plan.location_lng,
-    featured ? 900 : 480,
-    featured ? 500 : 320,
-  );
+  const mapImg = getMapThumbnail(plan.location_lat, plan.location_lng);
 
   const totalConfirmed = plan.rsvp_counts.accepted;
   const totalMaybe = plan.rsvp_counts.maybe;
@@ -65,31 +65,30 @@ export function PlanCard({ plan, featured = false, index = 0 }: PlanCardProps) {
       variants={riseItem}
       custom={index}
       layoutId={`plan-card-${plan.id}`}
-      className={featured ? '' : ''}
     >
       <Link
         href={`/groups/${plan.id}`}
         className={[
           'group relative block overflow-hidden rounded-[22px] isolate',
           'border transition-all duration-500',
-          featured
-            ? 'border-[color:var(--color-planer-amber)]/20 hover:border-[color:var(--color-planer-amber)]/45'
-            : 'border-white/[0.06] hover:border-white/20',
+          isNext
+            ? 'border-[color:var(--color-planer-accent)]/30 hover:border-[color:var(--color-planer-accent)]/55'
+            : 'border-white/[0.06] hover:border-white/18',
           'bg-[color:var(--color-planer-surface)]',
         ].join(' ')}
         style={{
-          boxShadow: featured
-            ? '0 30px 60px -30px rgba(232, 169, 78, 0.25), 0 10px 30px -10px rgba(0,0,0,0.5)'
-            : '0 12px 40px -20px rgba(0,0,0,0.5)',
+          boxShadow: isNext
+            ? '0 24px 50px -28px rgba(138, 122, 164, 0.35), 0 6px 20px -6px rgba(0,0,0,0.4)'
+            : '0 10px 32px -18px rgba(0,0,0,0.5)',
         }}
       >
-        {/* Inner grid: map left, content right. Featured: full-width hero image. */}
-        <div className={featured ? 'grid grid-cols-1 md:grid-cols-[1.1fr_1fr]' : 'grid grid-cols-[140px_1fr] sm:grid-cols-[170px_1fr]'}>
+        {/* Uniform inner grid: map on the left, content on the right */}
+        <div className="grid grid-cols-[150px_1fr] sm:grid-cols-[190px_1fr] min-h-[180px]">
 
           {/* Visual side */}
           <div className="relative overflow-hidden">
             {mapImg ? (
-              <div className="w-full h-full min-h-[140px] relative">
+              <div className="w-full h-full relative">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={mapImg}
@@ -97,12 +96,11 @@ export function PlanCard({ plan, featured = false, index = 0 }: PlanCardProps) {
                   className="w-full h-full object-cover transition-transform duration-[900ms] group-hover:scale-105"
                   loading="lazy"
                 />
-                {/* warm overlay */}
-                <div className="absolute inset-0 bg-gradient-to-t from-[color:var(--color-planer-void)]/90 via-[color:var(--color-planer-void)]/10 to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-t from-[color:var(--color-planer-void)]/85 via-[color:var(--color-planer-void)]/10 to-transparent" />
                 <div className="absolute inset-0 bg-gradient-to-r from-transparent to-[color:var(--color-planer-surface)]/50" />
               </div>
             ) : bgImg ? (
-              <div className="w-full h-full min-h-[140px] relative">
+              <div className="w-full h-full relative">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={bgImg}
@@ -110,15 +108,15 @@ export function PlanCard({ plan, featured = false, index = 0 }: PlanCardProps) {
                   className="w-full h-full object-cover transition-transform duration-[900ms] group-hover:scale-105"
                   loading="lazy"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-[color:var(--color-planer-void)]/90 via-[color:var(--color-planer-void)]/30 to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-t from-[color:var(--color-planer-void)]/85 via-[color:var(--color-planer-void)]/30 to-transparent" />
               </div>
             ) : (
-              // Pattern-only fallback — radial amber echo
-              <div className="w-full h-full min-h-[140px] bg-[color:var(--color-planer-raised)] relative">
+              // Pattern fallback — radial plum echo with subtle pin icon
+              <div className="w-full h-full bg-[color:var(--color-planer-raised)] relative">
                 <div
-                  className="absolute inset-0 opacity-40"
+                  className="absolute inset-0 opacity-50"
                   style={{
-                    backgroundImage: `radial-gradient(circle at 30% 40%, rgba(232,169,78,0.22), transparent 55%)`,
+                    backgroundImage: `radial-gradient(circle at 30% 40%, rgba(138,122,164,0.22), transparent 55%)`,
                   }}
                 />
                 <svg
@@ -137,7 +135,7 @@ export function PlanCard({ plan, featured = false, index = 0 }: PlanCardProps) {
                 <span className="serif-display text-[22px] leading-none font-light text-[color:var(--color-planer-ink)] tabular">
                   {date.day}
                 </span>
-                <span className="text-[9px] tracking-[0.18em] text-[color:var(--color-planer-amber)] mt-0.5">
+                <span className="text-[9px] tracking-[0.18em] text-[color:var(--color-planer-accent)] mt-0.5">
                   {date.month}
                 </span>
                 {date.time && (
@@ -154,29 +152,24 @@ export function PlanCard({ plan, featured = false, index = 0 }: PlanCardProps) {
                 className={[
                   'inline-block text-[9px] uppercase tracking-[0.22em] px-2 py-1 rounded-full backdrop-blur-sm border',
                   plan.event_type === 'existing_event'
-                    ? 'bg-[color:var(--color-planer-plum)]/15 border-[color:var(--color-planer-plum)]/30 text-[color:var(--color-planer-plum)]'
-                    : 'bg-[color:var(--color-planer-amber)]/10 border-[color:var(--color-planer-amber)]/30 text-[color:var(--color-planer-amber)]',
+                    ? 'bg-[color:var(--color-planer-maybe)]/15 border-[color:var(--color-planer-maybe)]/30 text-[color:var(--color-planer-maybe)]'
+                    : 'bg-[color:var(--color-planer-accent)]/15 border-[color:var(--color-planer-accent)]/30 text-[color:var(--color-planer-accent)]',
                 ].join(' ')}
               >
-                {plan.event_type === 'existing_event' ? 'Öffentliches Event' : 'Privater Plan'}
+                {plan.event_type === 'existing_event' ? 'Öffentlich' : 'Privat'}
               </span>
             </div>
           </div>
 
           {/* Content side */}
-          <div className={featured ? 'p-6 sm:p-8 flex flex-col justify-between gap-5' : 'p-4 sm:p-5 flex flex-col justify-between gap-3'}>
+          <div className="p-5 sm:p-6 flex flex-col justify-between gap-3">
             <div>
-              <h3
-                className={[
-                  'serif-display font-light text-[color:var(--color-planer-ink)] tracking-tight leading-tight',
-                  featured ? 'text-[28px] sm:text-[34px]' : 'text-[18px] sm:text-[20px]',
-                ].join(' ')}
-              >
+              <h3 className="serif-display font-light text-[color:var(--color-planer-ink)] tracking-tight leading-tight text-[20px] sm:text-[22px]">
                 {plan.name}
               </h3>
               {plan.location_name && (
-                <p className={`mt-1.5 text-[color:var(--color-planer-dim)] flex items-center gap-1.5 ${featured ? 'text-sm' : 'text-xs'}`}>
-                  <svg className="w-3 h-3 shrink-0 text-[color:var(--color-planer-amber)]/70" fill="currentColor" viewBox="0 0 24 24">
+                <p className="mt-1.5 text-[color:var(--color-planer-dim)] flex items-center gap-1.5 text-xs sm:text-sm">
+                  <svg className="w-3 h-3 shrink-0 text-[color:var(--color-planer-accent)]/70" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M12 2a8 8 0 00-8 8c0 5.4 7 11.5 7.3 11.8.4.3.9.3 1.3 0C13 21.5 20 15.4 20 10a8 8 0 00-8-8zm0 11a3 3 0 110-6 3 3 0 010 6z" />
                   </svg>
                   <span className="truncate">{plan.location_name}</span>
@@ -184,23 +177,24 @@ export function PlanCard({ plan, featured = false, index = 0 }: PlanCardProps) {
               )}
             </div>
 
-            {/* Bottom row: participants + message preview */}
+            {/* Bottom row: participants + message preview + arrow */}
             <div className="flex items-end justify-between gap-3">
               <div className="flex items-center gap-3">
                 {plan.participant_avatars && plan.participant_avatars.length > 0 && (
-                  <AvatarStack avatars={plan.participant_avatars} size={featured ? 32 : 26} max={featured ? 5 : 3} />
+                  <AvatarStack avatars={plan.participant_avatars} size={28} max={3} />
                 )}
                 <div className="flex flex-col">
                   <span className="text-[11px] text-[color:var(--color-planer-ink)]">
                     <span className="tabular text-[color:var(--color-planer-sage)]">{totalConfirmed}</span>
-                    {totalMaybe > 0 && (
+                    {totalMaybe > 0 ? (
                       <>
                         <span className="text-[color:var(--color-planer-whisper)] mx-1">·</span>
-                        <span className="tabular text-[color:var(--color-planer-plum)]">{totalMaybe}</span>
+                        <span className="tabular text-[color:var(--color-planer-maybe)]">{totalMaybe}</span>
                         <span className="text-[color:var(--color-planer-whisper)] ml-1">vielleicht</span>
                       </>
+                    ) : (
+                      <span className="text-[color:var(--color-planer-dim)] ml-1">dabei</span>
                     )}
-                    {totalMaybe === 0 && <span className="text-[color:var(--color-planer-dim)] ml-1">dabei</span>}
                   </span>
                   <span className="text-[10px] text-[color:var(--color-planer-whisper)]">
                     {plan.member_count} eingeladen
@@ -210,7 +204,7 @@ export function PlanCard({ plan, featured = false, index = 0 }: PlanCardProps) {
 
               {/* Subtle arrow that magnetically shifts on hover */}
               <motion.span
-                className="shrink-0 text-[color:var(--color-planer-amber)]/40 group-hover:text-[color:var(--color-planer-amber)] transition-colors"
+                className="shrink-0 text-[color:var(--color-planer-accent)]/40 group-hover:text-[color:var(--color-planer-accent)] transition-colors"
                 whileHover={{ x: 4 }}
                 transition={{ duration: 0.3, ease: EASE_OUT_EXPO }}
               >
@@ -231,12 +225,12 @@ export function PlanCard({ plan, featured = false, index = 0 }: PlanCardProps) {
           </div>
         </div>
 
-        {/* Amber sheen on hover — very subtle */}
+        {/* Plum sheen on hover — subtle */}
         <div className="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700">
           <div
             className="absolute inset-0"
             style={{
-              background: 'radial-gradient(circle at 20% 0%, rgba(232,169,78,0.06), transparent 50%)',
+              background: 'radial-gradient(circle at 20% 0%, rgba(138,122,164,0.07), transparent 50%)',
             }}
           />
         </div>

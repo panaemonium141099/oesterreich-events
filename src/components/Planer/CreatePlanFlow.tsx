@@ -510,7 +510,7 @@ function StepAnlass({
       </motion.div>
       <motion.div variants={riseItem}>
         <EditorialHeading size="hero" className="mb-3">
-          Was schwebt euch <em className="italic text-[color:var(--color-planer-amber)]">vor</em>?
+          Was schwebt euch <em className="italic text-[color:var(--color-planer-accent)]">vor</em>?
         </EditorialHeading>
       </motion.div>
       <motion.p variants={riseItem} className="text-[color:var(--color-planer-dim)] text-[15px] mb-10 max-w-[32rem] leading-relaxed">
@@ -550,8 +550,8 @@ function ChoiceCard({
   tone: 'amber' | 'plum';
 }) {
   const toneColor = tone === 'amber'
-    ? 'var(--color-planer-amber)'
-    : 'var(--color-planer-plum)';
+    ? 'var(--color-planer-accent)'
+    : 'var(--color-planer-maybe)';
   return (
     <motion.button
       type="button"
@@ -563,7 +563,7 @@ function ChoiceCard({
         'group relative text-left overflow-hidden rounded-2xl border transition-all duration-500',
         'p-6 sm:p-8 min-h-[220px] flex flex-col',
         active
-          ? 'border-[color:var(--color-planer-amber)]/60 bg-[color:var(--color-planer-surface)]'
+          ? 'border-[color:var(--color-planer-accent)]/60 bg-[color:var(--color-planer-surface)]'
           : 'border-white/[0.06] bg-[color:var(--color-planer-surface)]/60 hover:border-white/15',
       ].join(' ')}
       style={active ? { boxShadow: `0 24px 60px -30px ${toneColor}` } : undefined}
@@ -636,8 +636,8 @@ function StepEssenz({
       <motion.div variants={riseItem}>
         <EditorialHeading size="hero" className="mb-3">
           {draft.mode === 'custom'
-            ? <>Der <em className="italic text-[color:var(--color-planer-amber)]">Kern</em> deines Plans.</>
-            : <>Zu welchem <em className="italic text-[color:var(--color-planer-amber)]">Event</em> zieht's euch?</>
+            ? <>Der <em className="italic text-[color:var(--color-planer-accent)]">Kern</em> deines Plans.</>
+            : <>Zu welchem <em className="italic text-[color:var(--color-planer-accent)]">Event</em> zieht's euch?</>
           }
         </EditorialHeading>
       </motion.div>
@@ -700,7 +700,7 @@ function StepEssenz({
                 transition={{ duration: 0.35, ease: EASE_OUT_EXPO }}
                 className="overflow-hidden"
               >
-                <div className="pl-4 border-l-2 border-[color:var(--color-planer-amber)]/30 space-y-2">
+                <div className="pl-4 border-l-2 border-[color:var(--color-planer-accent)]/30 space-y-2">
                   <FormField label="Adresse">
                     <PlanerInput
                       type="text"
@@ -709,7 +709,7 @@ function StepEssenz({
                     />
                   </FormField>
                   {draft.locationLat && draft.locationLng && (
-                    <p className="text-[11px] italic text-[color:var(--color-planer-amber)]/70 flex items-center gap-1.5">
+                    <p className="text-[11px] italic text-[color:var(--color-planer-accent)]/70 flex items-center gap-1.5">
                       <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                       </svg>
@@ -735,7 +735,7 @@ function StepEssenz({
       {draft.mode === 'existing' && (
         <motion.div variants={riseItem} className="space-y-6 max-w-xl">
           {draft.selectedEvent ? (
-            <div className="rounded-2xl border border-[color:var(--color-planer-amber)]/30 bg-[color:var(--color-planer-surface)] p-4 flex items-center gap-4">
+            <div className="rounded-2xl border border-[color:var(--color-planer-accent)]/30 bg-[color:var(--color-planer-surface)] p-4 flex items-center gap-4">
               <EventImage
                 src={draft.selectedEvent.image_url}
                 category={draft.selectedEvent.category}
@@ -793,7 +793,7 @@ function StepEssenz({
                           key={ev.id}
                           type="button"
                           onClick={() => { patch({ selectedEvent: ev }); setEventSearch(''); setEventResults([]); }}
-                          className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-[color:var(--color-planer-amber)]/5 transition-colors border-b border-white/[0.04] last:border-b-0"
+                          className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-[color:var(--color-planer-accent)]/5 transition-colors border-b border-white/[0.04] last:border-b-0"
                           style={{ animationDelay: `${i * 30}ms` }}
                         >
                           <EventImage
@@ -863,7 +863,7 @@ function StepGäste({
       </motion.div>
       <motion.div variants={riseItem}>
         <EditorialHeading size="hero" className="mb-3">
-          Wer kommt <em className="italic text-[color:var(--color-planer-amber)]">mit</em>?
+          Wer kommt <em className="italic text-[color:var(--color-planer-accent)]">mit</em>?
         </EditorialHeading>
       </motion.div>
       <motion.p variants={riseItem} className="text-[color:var(--color-planer-dim)] mb-6 max-w-[32rem]">
@@ -881,12 +881,12 @@ function StepGäste({
                 initial={{ opacity: 0, y: -8 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -8 }}
-                className="mb-6 flex items-center gap-4 p-4 rounded-2xl border border-[color:var(--color-planer-amber)]/20 bg-[color:var(--color-planer-amber)]/[0.04]"
+                className="mb-6 flex items-center gap-4 p-4 rounded-2xl border border-[color:var(--color-planer-accent)]/20 bg-[color:var(--color-planer-accent)]/[0.04]"
               >
                 <AvatarStack avatars={selectedAvatars} size={34} max={6} />
                 <div className="flex-1">
                   <p className="serif-display text-[20px] font-light text-[color:var(--color-planer-ink)]">
-                    <span className="tabular text-[color:var(--color-planer-amber)]">{selectedCount}</span> eingeladen
+                    <span className="tabular text-[color:var(--color-planer-accent)]">{selectedCount}</span> eingeladen
                   </p>
                   <p className="text-xs text-[color:var(--color-planer-dim)] italic">
                     {selectedCount === 1 ? 'Es könnte der Beginn von etwas Schönem sein.' : 'Genug für einen richtig guten Abend.'}
@@ -923,7 +923,7 @@ function StepGäste({
                     className={[
                       'w-full flex items-center gap-3 p-3 rounded-2xl border transition-all duration-300',
                       selected
-                        ? 'border-[color:var(--color-planer-amber)]/60 bg-[color:var(--color-planer-amber)]/[0.06]'
+                        ? 'border-[color:var(--color-planer-accent)]/60 bg-[color:var(--color-planer-accent)]/[0.06]'
                         : 'border-white/[0.06] bg-[color:var(--color-planer-surface)]/50 hover:border-white/15',
                     ].join(' ')}
                   >
@@ -940,7 +940,7 @@ function StepGäste({
                           initial={{ scale: 0 }}
                           animate={{ scale: 1 }}
                           transition={springy}
-                          className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-[color:var(--color-planer-amber)] flex items-center justify-center text-[color:var(--color-planer-void)]"
+                          className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-[color:var(--color-planer-accent)] flex items-center justify-center text-[color:var(--color-planer-void)]"
                         >
                           <svg className="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
@@ -994,7 +994,7 @@ function StepFeinschliff({
       </motion.div>
       <motion.div variants={riseItem}>
         <EditorialHeading size="hero" className="mb-3">
-          Fast <em className="italic text-[color:var(--color-planer-amber)]">fertig</em>.
+          Fast <em className="italic text-[color:var(--color-planer-accent)]">fertig</em>.
         </EditorialHeading>
       </motion.div>
       <motion.p variants={riseItem} className="text-[color:var(--color-planer-dim)] mb-10 max-w-[32rem]">
@@ -1003,7 +1003,7 @@ function StepFeinschliff({
 
       {/* Preview card */}
       <motion.div variants={riseItem} className="mb-10">
-        <div className="rounded-3xl border border-[color:var(--color-planer-amber)]/15 overflow-hidden bg-gradient-to-br from-[color:var(--color-planer-surface)] to-[color:var(--color-planer-raised)]">
+        <div className="rounded-3xl border border-[color:var(--color-planer-accent)]/15 overflow-hidden bg-gradient-to-br from-[color:var(--color-planer-surface)] to-[color:var(--color-planer-raised)]">
           <div className="p-6 sm:p-8">
             <EditorialCaption className="mb-3">Vorschau</EditorialCaption>
             <h3 className="serif-display text-[28px] sm:text-[34px] font-light leading-tight text-[color:var(--color-planer-ink)]">
@@ -1011,19 +1011,19 @@ function StepFeinschliff({
             </h3>
             <div className="mt-4 flex flex-wrap items-center gap-x-6 gap-y-2 text-sm">
               <span className="flex items-center gap-2 text-[color:var(--color-planer-dim)]">
-                <svg className="w-3.5 h-3.5 text-[color:var(--color-planer-amber)]" fill="currentColor" viewBox="0 0 24 24">
+                <svg className="w-3.5 h-3.5 text-[color:var(--color-planer-accent)]" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M7 4h10a2 2 0 012 2v12a2 2 0 01-2 2H7a2 2 0 01-2-2V6a2 2 0 012-2zm0 6h10v8H7v-8z" />
                 </svg>
                 {previewDate}
               </span>
               <span className="flex items-center gap-2 text-[color:var(--color-planer-dim)]">
-                <svg className="w-3.5 h-3.5 text-[color:var(--color-planer-amber)]" fill="currentColor" viewBox="0 0 24 24">
+                <svg className="w-3.5 h-3.5 text-[color:var(--color-planer-accent)]" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M12 2a8 8 0 00-8 8c0 5.4 7 11.5 7.3 11.8.4.3.9.3 1.3 0C13 21.5 20 15.4 20 10a8 8 0 00-8-8zm0 11a3 3 0 110-6 3 3 0 010 6z" />
                 </svg>
                 {previewLocation}
               </span>
               <span className="flex items-center gap-2 text-[color:var(--color-planer-dim)]">
-                <svg className="w-3.5 h-3.5 text-[color:var(--color-planer-amber)]" fill="currentColor" viewBox="0 0 24 24">
+                <svg className="w-3.5 h-3.5 text-[color:var(--color-planer-accent)]" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z" />
                 </svg>
                 {draft.selectedFriends.length} {draft.selectedFriends.length === 1 ? 'Freund:in' : 'Freund:innen'}
@@ -1054,7 +1054,7 @@ function StepFeinschliff({
               </button>
             </div>
           ) : (
-            <label className="flex flex-col items-center justify-center gap-2 w-full h-28 rounded-2xl border-2 border-dashed border-white/[0.08] hover:border-[color:var(--color-planer-amber)]/40 bg-white/[0.02] cursor-pointer transition-all text-[color:var(--color-planer-whisper)] hover:text-[color:var(--color-planer-amber)]/80">
+            <label className="flex flex-col items-center justify-center gap-2 w-full h-28 rounded-2xl border-2 border-dashed border-white/[0.08] hover:border-[color:var(--color-planer-accent)]/40 bg-white/[0.02] cursor-pointer transition-all text-[color:var(--color-planer-whisper)] hover:text-[color:var(--color-planer-accent)]/80">
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
               </svg>

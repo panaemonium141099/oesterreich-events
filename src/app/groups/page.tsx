@@ -179,8 +179,9 @@ export default function EventPlanenPage() {
     if (ev.event_date && new Date(ev.event_date) < now) past.push(ev);
     else upcoming.push(ev);
   });
-  const featured = upcoming[0] ?? null;
-  const rest = featured ? upcoming.slice(1) : upcoming;
+  // First upcoming = "next" — gets a subtle accent ring + "↓ ALS NÄCHSTES"
+  // caption above it. All cards otherwise share the same layout so the rhythm
+  // stays consistent (no feature-vs-runner-up mismatch).
   const totalPeople = events.reduce((n, e) => n + e.rsvp_counts.accepted, 0);
 
   // ─── Loading skeleton ───
@@ -201,7 +202,7 @@ export default function EventPlanenPage() {
   return (
     <PlanerShell>
       {/* Background faint editorial rule at top */}
-      <div className="pointer-events-none absolute top-24 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[color:var(--color-planer-amber)]/20 to-transparent z-0" />
+      <div className="pointer-events-none absolute top-24 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[color:var(--color-planer-accent)]/20 to-transparent z-0" />
 
       <main className="relative max-w-5xl mx-auto px-5 sm:px-8 pt-8 sm:pt-12 pb-32">
         {/* Top row — profile */}
@@ -231,7 +232,7 @@ export default function EventPlanenPage() {
 
           <motion.div variants={riseItem} className="max-w-3xl">
             <EditorialHeading size="hero" className="mb-4">
-              Lass uns etwas <em className="italic kinetic-underline text-[color:var(--color-planer-amber)]">vorhaben</em>.
+              Lass uns etwas <em className="italic kinetic-underline text-[color:var(--color-planer-accent)]">vorhaben</em>.
             </EditorialHeading>
           </motion.div>
 
@@ -254,7 +255,7 @@ export default function EventPlanenPage() {
           </motion.div>
 
           {/* Decorative hairline */}
-          <motion.div variants={riseItem} className="hairline-amber mt-10" />
+          <motion.div variants={riseItem} className="hairline-accent mt-10" />
         </motion.section>
 
         {/* LOADING */}
@@ -268,7 +269,7 @@ export default function EventPlanenPage() {
           <EmptyState onCreate={() => setShowCreate(true)} />
         ) : (
           <motion.div variants={staggerContainer} initial="hidden" animate="visible" className="space-y-8">
-            {/* Upcoming — featured + list */}
+            {/* Upcoming — all cards uniform, first one gets a subtle marker */}
             {upcoming.length > 0 && (
               <section>
                 <motion.div variants={riseItem} className="mb-4 flex items-baseline justify-between">
@@ -278,18 +279,25 @@ export default function EventPlanenPage() {
                   </span>
                 </motion.div>
 
-                {featured && (
-                  <div className="mb-5">
-                    <PlanCard plan={featured} featured index={0} />
-                  </div>
+                {/* "↓ Als nächstes" caption sits above the first card —
+                    marks hierarchy via position + accent, never via size. */}
+                {upcoming.length > 0 && (
+                  <motion.div
+                    variants={riseItem}
+                    className="flex items-center gap-2 mb-3 ml-1"
+                  >
+                    <span className="text-[color:var(--color-planer-accent)] text-sm leading-none">↓</span>
+                    <span className="text-[10px] uppercase tracking-[0.24em] text-[color:var(--color-planer-accent)] font-medium">
+                      Als nächstes
+                    </span>
+                  </motion.div>
                 )}
-                {rest.length > 0 && (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {rest.map((ev, i) => (
-                      <PlanCard key={ev.id} plan={ev} index={i + 1} />
-                    ))}
-                  </div>
-                )}
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {upcoming.map((ev, i) => (
+                    <PlanCard key={ev.id} plan={ev} isNext={i === 0} index={i} />
+                  ))}
+                </div>
               </section>
             )}
 
@@ -338,7 +346,7 @@ function EmptyState({ onCreate }: { onCreate: () => void }) {
       className="py-10 sm:py-20 text-center max-w-xl mx-auto"
     >
       <svg
-        className="w-16 h-16 mx-auto mb-8 text-[color:var(--color-planer-amber)]/60"
+        className="w-16 h-16 mx-auto mb-8 text-[color:var(--color-planer-accent)]/60"
         viewBox="0 0 48 48" fill="none" stroke="currentColor" strokeWidth="0.8"
       >
         <circle cx="24" cy="24" r="22" strokeDasharray="2 3" />
@@ -346,7 +354,7 @@ function EmptyState({ onCreate }: { onCreate: () => void }) {
       </svg>
 
       <EditorialHeading size="section" className="mb-4">
-        Die <em className="italic text-[color:var(--color-planer-amber)]">erste</em> Einladung<br />
+        Die <em className="italic text-[color:var(--color-planer-accent)]">erste</em> Einladung<br />
         schreibt sich von selbst.
       </EditorialHeading>
 

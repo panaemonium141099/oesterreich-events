@@ -79,7 +79,7 @@ export function EditorialCaption({ children, className = '' }: CaptionProps) {
 }
 
 // ───────────────────────────────────────────────────────────────
-// PlanerButton — magnetic CTA with amber glow. Mouse-follow gradient
+// PlanerButton — magnetic CTA with plum glow. Mouse-follow gradient
 // enabled via CSS vars + a tiny motion hook.
 // ───────────────────────────────────────────────────────────────
 
@@ -118,8 +118,8 @@ export function PlanerButton({
     lg: 'px-7 py-3.5 text-[15px]',
   }[size];
   const variants = {
-    primary: 'bg-[color:var(--color-planer-amber)] text-[color:var(--color-planer-void)] hover:bg-[#f0b559]',
-    outline: 'border border-[color:var(--color-planer-amber)]/40 text-[color:var(--color-planer-amber)] hover:border-[color:var(--color-planer-amber)]/70 hover:bg-[color:var(--color-planer-amber)]/5',
+    primary: 'bg-[color:var(--color-planer-accent)] text-[color:var(--color-planer-ink)] hover:bg-[#9a8ab5]',
+    outline: 'border border-[color:var(--color-planer-accent)]/40 text-[color:var(--color-planer-accent)] hover:border-[color:var(--color-planer-accent)]/70 hover:bg-[color:var(--color-planer-accent)]/5',
     ghost: 'text-[color:var(--color-planer-dim)] hover:text-[color:var(--color-planer-ink)] hover:bg-white/[0.03]',
   }[variant];
 
@@ -161,7 +161,7 @@ export function FormField({ label, hint, required, children, className = '' }: F
         <span className="text-[11px] uppercase tracking-[0.18em] text-[color:var(--color-planer-dim)] font-medium">
           {label}
         </span>
-        {required && <span className="text-[color:var(--color-planer-amber)] text-[10px]">•</span>}
+        {required && <span className="text-[color:var(--color-planer-accent)] text-[10px]">•</span>}
         {hint && <span className="text-[10px] text-[color:var(--color-planer-whisper)] italic">— {hint}</span>}
       </span>
       {children}
@@ -242,9 +242,9 @@ export function StepRail({ steps, current, onStepClick }: StepRailProps) {
               className={[
                 'w-2 h-2 rounded-full transition-all duration-300',
                 isActive
-                  ? 'bg-[color:var(--color-planer-amber)] step-active-dot'
+                  ? 'bg-[color:var(--color-planer-accent)] step-active-dot'
                   : isDone
-                  ? 'bg-[color:var(--color-planer-amber)]/70'
+                  ? 'bg-[color:var(--color-planer-accent)]/70'
                   : 'bg-white/15',
               ].join(' ')}
             />
