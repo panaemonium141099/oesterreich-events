@@ -402,6 +402,17 @@ export default function EventPlanenPage() {
     return () => window.removeEventListener('keydown', handler);
   }, [showCreate, requestClose]);
 
+  // Hide the floating SocialNav while the create-modal is open. The nav is
+  // fixed bottom-0 z-50 — same stacking context as the modal — so it bleeds
+  // through the 70%-opacity backdrop and stays clickable, which looks sloppy
+  // and can pull the user off the form. Toggling a body class lets globals.css
+  // hide the nav with a single rule.
+  useEffect(() => {
+    if (showCreate) document.body.classList.add('has-modal-open');
+    else document.body.classList.remove('has-modal-open');
+    return () => document.body.classList.remove('has-modal-open');
+  }, [showCreate]);
+
   const toggleFriend = (id: string) => {
     setSelectedFriends(prev =>
       prev.includes(id) ? prev.filter(f => f !== id) : [...prev, id]

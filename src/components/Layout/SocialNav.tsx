@@ -103,6 +103,7 @@ export function SocialNav() {
             transition={{ duration: 0.2 }}
             className="fixed inset-0 z-40 bg-black/40"
             onClick={() => setMoreOpen(false)}
+            data-social-nav
           />
         )}
       </AnimatePresence>
@@ -117,6 +118,7 @@ export function SocialNav() {
             exit={{ y: '100%' }}
             transition={{ type: 'spring', damping: 28, stiffness: 300 }}
             className="fixed bottom-0 left-0 right-0 z-50 bg-[#1c1c1e]/95 backdrop-blur-xl border border-white/[0.06] rounded-t-2xl px-4 pt-4 pb-24"
+            data-social-nav
           >
             {/* Drag handle */}
             <div className="flex justify-center mb-4">
@@ -151,7 +153,10 @@ export function SocialNav() {
       </AnimatePresence>
 
       {/* Bottom nav bar */}
-      <nav className="fixed bottom-0 left-1/2 -translate-x-1/2 mb-4 z-50 flex items-center gap-1 px-2 py-2 bg-[#1c1c1e]/90 backdrop-blur-xl border border-white/[0.06] rounded-2xl shadow-2xl">
+      <nav
+        className="fixed bottom-0 left-1/2 -translate-x-1/2 mb-4 z-50 flex items-center gap-1 px-2 py-2 bg-[#1c1c1e]/90 backdrop-blur-xl border border-white/[0.06] rounded-2xl shadow-2xl"
+        data-social-nav
+      >
         {MAIN_ITEMS.map((item) => {
           const isActive = pathname === item.href || pathname.startsWith(item.href + '/');
           const showBadge = 'hasUnread' in item && item.hasUnread && unreadCount > 0;

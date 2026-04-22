@@ -12,6 +12,17 @@
 }
 
 /* ═══════════════════════════════════════════════
+   Global modal-overlay behavior — hide the floating
+   SocialNav + related fixed bottom chrome when any
+   page opens a modal (by toggling body.has-modal-open).
+   Keeps the modal focus clean and prevents the nav
+   from bleeding through the backdrop.
+   ═══════════════════════════════════════════════ */
+body.has-modal-open [data-social-nav] {
+  display: none !important;
+}
+
+/* ═══════════════════════════════════════════════
    Remove browser default focus outlines — use custom
    ═══════════════════════════════════════════════ */
 *:focus {

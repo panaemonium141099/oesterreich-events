@@ -9,7 +9,13 @@ import Link from 'next/link';
  */
 export function Footer() {
   return (
-    <footer className="w-full border-t border-white/[0.06] mt-auto">
+    // pb-32 (= 8rem) prevents the fixed SocialNav pill at `bottom-0 mb-4`
+    // from overlapping the footer links (Impressum / Datenschutz / AGB /
+    // Quellen / Kontakt) when the user scrolls to the very bottom of the
+    // landing page. The pill is ~60px tall + 16px bottom margin + breathing
+    // room; 128px of padding guarantees the last row stays clearly above it
+    // on both mobile and desktop.
+    <footer className="w-full border-t border-white/[0.06] mt-auto pb-32">
       <div className="max-w-5xl mx-auto px-6 py-8 flex flex-col gap-6">
         {/* Main footer row */}
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
