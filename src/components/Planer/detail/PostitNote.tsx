@@ -40,31 +40,38 @@ interface PostitNoteProps {
   onDelete: (id: string) => void;
 }
 
-// Paper-inspired palette — muted, neither Day-Glo nor chalk pastels.
-const COLOR_STYLE: Record<PostitColor, { bg: string; text: string; shadow: string; ink: string }> = {
+// Paper-inspired palette — muted hues aligned with the app's accent system.
+// All four sit around L~70 C~20 so they read as cousins on the board;
+// hue is the only thing separating them. No candy pastels, no Day-Glo.
+//   creme   ← family of --color-planer-maybe (#c9a86a, warm ochre)
+//   sage    ← family of --color-planer-sage (#7bb794)
+//   rose    ← family of --color-planer-rose (#c67079)
+//   lavender← family of --color-planer-accent (#8a7aa4, muted plum)
+// DB key "lavender" kept so the existing CHECK constraint still passes.
+const COLOR_STYLE: Record<PostitColor, { bg: string; shadow: string; ink: string; inkSoft: string }> = {
   creme: {
-    bg: 'linear-gradient(135deg, #f3e8c9 0%, #e8d9a7 100%)',
-    text: '#2a2314',
-    shadow: '0 10px 24px -10px rgba(0,0,0,0.55), 0 4px 10px -4px rgba(232, 210, 150, 0.25)',
-    ink: '#4a3c1e',
+    bg: 'linear-gradient(135deg, #dcc990 0%, #c4ae70 100%)',
+    shadow: '0 10px 24px -10px rgba(0,0,0,0.55), 0 4px 10px -4px rgba(196, 174, 112, 0.22)',
+    ink: '#3e3010',
+    inkSoft: '#6e5a2a',
   },
   sage: {
-    bg: 'linear-gradient(135deg, #c9dcc9 0%, #a8c5a8 100%)',
-    text: '#1d2a1d',
-    shadow: '0 10px 24px -10px rgba(0,0,0,0.55), 0 4px 10px -4px rgba(163, 195, 163, 0.25)',
-    ink: '#2d4a2d',
+    bg: 'linear-gradient(135deg, #aac8ab 0%, #86a98a 100%)',
+    shadow: '0 10px 24px -10px rgba(0,0,0,0.55), 0 4px 10px -4px rgba(134, 169, 138, 0.22)',
+    ink: '#1e2d1f',
+    inkSoft: '#3d5a3f',
   },
   rose: {
-    bg: 'linear-gradient(135deg, #e8c9c9 0%, #d4a5a5 100%)',
-    text: '#2a1818',
-    shadow: '0 10px 24px -10px rgba(0,0,0,0.55), 0 4px 10px -4px rgba(212, 165, 165, 0.25)',
-    ink: '#5a2828',
+    bg: 'linear-gradient(135deg, #d2a6ab 0%, #b17d85 100%)',
+    shadow: '0 10px 24px -10px rgba(0,0,0,0.55), 0 4px 10px -4px rgba(177, 125, 133, 0.22)',
+    ink: '#2a1416',
+    inkSoft: '#5a2d34',
   },
   lavender: {
-    bg: 'linear-gradient(135deg, #d4c9e0 0%, #b8a5cf 100%)',
-    text: '#1e1828',
-    shadow: '0 10px 24px -10px rgba(0,0,0,0.55), 0 4px 10px -4px rgba(184, 165, 207, 0.25)',
-    ink: '#342a4a',
+    bg: 'linear-gradient(135deg, #b2a4c4 0%, #8f7ea5 100%)',
+    shadow: '0 10px 24px -10px rgba(0,0,0,0.55), 0 4px 10px -4px rgba(143, 126, 165, 0.22)',
+    ink: '#1e1628',
+    inkSoft: '#3d2e54',
   },
 };
 
@@ -123,7 +130,7 @@ export function PostitNote({ note, boardRef, canEdit, isMine, onMove, onEdit, on
         minHeight: '160px',
         background: style.bg,
         boxShadow: style.shadow,
-        color: style.text,
+        color: style.ink,
       }}
     >
       {/* Paper grain overlay */}

@@ -18,9 +18,20 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { SupabaseClient, User } from '@supabase/supabase-js';
+import { toast } from 'sonner';
 import { PostitNote, type PostitData, type PostitColor } from './PostitNote';
 import { PlanerButton, EditorialCaption } from '../primitives';
 import { springy } from '../motion';
+
+// Palette that matches the app's accent system, used by the color picker
+// swatches. Same gradients as the rendered note paper for visual consistency.
+// Keys align with the DB CHECK constraint on group_pinboard_notes.color.
+const SWATCH: Record<PostitColor, string> = {
+  creme: '#d1bb82',
+  sage: '#96bc9b',
+  rose: '#c49398',
+  lavender: '#a093b8',
+};
 
 interface PinboardProps {
   supabase: SupabaseClient;
@@ -76,9 +87,9 @@ export function Pinboard({ supabase, user, groupId, canCreate, isOwner }: Pinboa
   // ─── CRUD operations ───
   const handleCreate = async () => {
     const content = newContent.trim();
-    if (!content) { setAdding(false); return; }
-    // Randomish position in a plausible spawn-zone (upper-center) so
-    // notes don't all stack at exactly the same spot.
+    if (!content) return; // keep form open so user sees why nothing happened
+    // Random position in a plausible spawn-zone (upper-center) so notes
+    // don't all stack at exactly the same spot.
     const position_x = 35 + Math.random() * 25;
     const position_y = 10 + Math.random() * 15;
     const rotation = (Math.random() - 0.5) * 0.12; // ±0.06 rad
@@ -91,31 +102,41 @@ export function Pinboard({ supabase, user, groupId, canCreate, isOwner }: Pinboa
       position_y,
       rotation,
     });
-    if (!error) {
-      setNewContent('');
-      setAdding(false);
-      // Realtime will pick it up, but refetch for immediate feedback
-      fetchNotes();
+    if (error) {
+      console.error('[pinboard] insert failed:', error);
+      const hint = error.message.includes('row-level security')
+        ? 'Keine Berechtigung — prüfe ob die Migration gelaufen ist und du Gruppen-Mitglied bist.'
+        : error.message.includes('does not exist') || error.message.includes('relation')
+        ? 'Tabelle fehlt. Die Migration wurde noch nicht appliziert.'
+        : `Fehler: ${error.message}`;
+      toast.error(hint);
+      return;
     }
+    setNewContent('');
+    setAdding(false);
+    fetchNotes();
   };
 
   const handleMove = async (id: string, x: number, y: number) => {
     // Optimistic update
     setNotes(prev => prev.map(n => n.id === id ? { ...n, position_x: x, position_y: y } : n));
-    await supabase
+    const { error } = await supabase
       .from('group_pinboard_notes')
       .update({ position_x: x, position_y: y })
       .eq('id', id);
+    if (error) { console.error('[pinboard] move failed:', error); toast.error('Position nicht gespeichert'); }
   };
 
   const handleEdit = async (id: string, content: string) => {
     setNotes(prev => prev.map(n => n.id === id ? { ...n, content } : n));
-    await supabase.from('group_pinboard_notes').update({ content }).eq('id', id);
+    const { error } = await supabase.from('group_pinboard_notes').update({ content }).eq('id', id);
+    if (error) { console.error('[pinboard] edit failed:', error); toast.error('Änderung nicht gespeichert'); }
   };
 
   const handleDelete = async (id: string) => {
     setNotes(prev => prev.filter(n => n.id !== id));
-    await supabase.from('group_pinboard_notes').delete().eq('id', id);
+    const { error } = await supabase.from('group_pinboard_notes').delete().eq('id', id);
+    if (error) { console.error('[pinboard] delete failed:', error); toast.error('Konnte nicht gelöscht werden'); }
   };
 
   return (
@@ -210,11 +231,16 @@ export function Pinboard({ supabase, user, groupId, canCreate, isOwner }: Pinboa
                 animate={{ scale: 1, y: 0 }}
                 exit={{ scale: 0.95, y: 6 }}
                 transition={springy}
-                className="w-[280px] p-5 rounded-sm"
+                className="w-[340px] max-w-[calc(100vw-2rem)] p-6 rounded-sm"
                 style={{
-                  background: 'linear-gradient(135deg, #f3e8c9 0%, #e8d9a7 100%)',
-                  boxShadow: '0 20px 50px -20px rgba(0,0,0,0.6), 0 8px 20px -8px rgba(232, 210, 150, 0.3)',
+                  // Match the creme paper exactly (so compose view previews the note)
+                  background: newColor === 'creme' ? 'linear-gradient(135deg, #dcc990 0%, #c4ae70 100%)'
+                    : newColor === 'sage' ? 'linear-gradient(135deg, #aac8ab 0%, #86a98a 100%)'
+                    : newColor === 'rose' ? 'linear-gradient(135deg, #d2a6ab 0%, #b17d85 100%)'
+                    : 'linear-gradient(135deg, #b2a4c4 0%, #8f7ea5 100%)',
+                  boxShadow: '0 20px 50px -20px rgba(0,0,0,0.6), 0 8px 20px -8px rgba(0,0,0,0.2)',
                   transform: 'rotate(-1deg)',
+                  transition: 'background 0.3s ease',
                 }}
                 onClick={e => e.stopPropagation()}
               >
@@ -224,52 +250,85 @@ export function Pinboard({ supabase, user, groupId, canCreate, isOwner }: Pinboa
                   placeholder="Schreib was drauf …"
                   autoFocus
                   rows={5}
-                  className="w-full bg-transparent resize-none outline-none text-base leading-relaxed placeholder-black/30"
-                  style={{ color: '#4a3c1e', fontFamily: 'var(--font-caveat), "Segoe Script", cursive', fontSize: '18px' }}
+                  className="w-full bg-transparent resize-none outline-none text-base leading-relaxed placeholder-black/25"
+                  style={{
+                    color: newColor === 'creme' ? '#3e3010'
+                      : newColor === 'sage' ? '#1e2d1f'
+                      : newColor === 'rose' ? '#2a1416'
+                      : '#1e1628',
+                    fontFamily: 'var(--font-caveat), "Segoe Script", cursive',
+                    fontSize: '19px',
+                  }}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) handleCreate();
                     if (e.key === 'Escape') { setAdding(false); setNewContent(''); }
                   }}
                 />
 
-                {/* Color picker + actions */}
-                <div className="mt-4 flex items-center justify-between gap-3">
-                  <div className="flex gap-1.5">
-                    {COLORS.map(c => (
+                {/* Color picker — larger, clearer active state */}
+                <div className="mt-4 flex items-center gap-2">
+                  {COLORS.map(c => {
+                    const active = newColor === c;
+                    return (
                       <button
                         key={c}
                         type="button"
                         onClick={() => setNewColor(c)}
-                        className="w-5 h-5 rounded-full ring-1 ring-black/10 transition-transform"
+                        className="relative w-7 h-7 rounded-full transition-all hover:scale-110"
                         style={{
-                          background: c === 'creme' ? '#e8d9a7'
-                            : c === 'sage' ? '#a8c5a8'
-                            : c === 'rose' ? '#d4a5a5'
-                            : '#b8a5cf',
-                          transform: newColor === c ? 'scale(1.2)' : 'scale(1)',
-                          boxShadow: newColor === c ? '0 0 0 2px rgba(0,0,0,0.4)' : 'none',
+                          background: SWATCH[c],
+                          boxShadow: active
+                            ? '0 0 0 2px rgba(0,0,0,0.85), 0 0 0 4px rgba(255,255,255,0.4)'
+                            : '0 0 0 1px rgba(0,0,0,0.15)',
                         }}
                         aria-label={c}
-                      />
-                    ))}
-                  </div>
-                  <div className="flex gap-2">
-                    <button
-                      type="button"
-                      onClick={() => { setAdding(false); setNewContent(''); }}
-                      className="text-xs text-[#4a3c1e]/70 hover:text-[#4a3c1e] px-3 py-1.5"
-                    >
-                      Abbrechen
-                    </button>
-                    <button
-                      type="button"
-                      onClick={handleCreate}
-                      disabled={!newContent.trim()}
-                      className="text-xs font-medium px-3 py-1.5 rounded-full bg-[#4a3c1e] text-[#f3e8c9] hover:bg-[#2a2314] disabled:opacity-40 transition-colors"
-                    >
-                      Anpinnen
-                    </button>
-                  </div>
+                        aria-pressed={active}
+                      >
+                        {active && (
+                          <svg
+                            className="absolute inset-0 m-auto w-3.5 h-3.5"
+                            fill="none" stroke="#1a1a1a" strokeWidth={3} viewBox="0 0 24 24"
+                          >
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                          </svg>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Actions — clean text links, no pill buttons (paper aesthetic) */}
+                <div className="mt-5 flex items-center justify-end gap-5">
+                  <button
+                    type="button"
+                    onClick={() => { setAdding(false); setNewContent(''); }}
+                    className="text-[13px] opacity-60 hover:opacity-100 transition-opacity"
+                    style={{
+                      color: newColor === 'creme' ? '#3e3010'
+                        : newColor === 'sage' ? '#1e2d1f'
+                        : newColor === 'rose' ? '#2a1416'
+                        : '#1e1628',
+                    }}
+                  >
+                    Abbrechen
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleCreate}
+                    disabled={!newContent.trim()}
+                    className="text-[13px] font-semibold inline-flex items-center gap-1.5 disabled:opacity-30 disabled:cursor-not-allowed hover:gap-2 transition-all"
+                    style={{
+                      color: newColor === 'creme' ? '#3e3010'
+                        : newColor === 'sage' ? '#1e2d1f'
+                        : newColor === 'rose' ? '#2a1416'
+                        : '#1e1628',
+                    }}
+                  >
+                    Anpinnen
+                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={2.2} viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                    </svg>
+                  </button>
                 </div>
               </motion.div>
             </motion.div>
