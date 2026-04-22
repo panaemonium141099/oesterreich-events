@@ -130,21 +130,60 @@ export default function UeberUnsPage() {
             </p>
           </section>
 
+          {/* Finanzierung */}
+          <section>
+            <h2 className="text-2xl md:text-3xl font-bold text-white mb-4">
+              Wie wir uns finanzieren
+            </h2>
+            <p className="mb-4">
+              Die Plattform ist kostenlos für Nutzer und soll das auch bleiben. Damit
+              der Betrieb und die Weiterentwicklung sich tragen, setzen wir auf zwei
+              transparente Einnahmequellen:
+            </p>
+            <ul className="space-y-3 list-disc list-inside pl-1">
+              <li>
+                <span className="text-white">Display-Werbung</span> (Google AdSense):
+                standardisierte Werbeanzeigen, klar als Werbung gekennzeichnet und
+                optisch vom redaktionellen Inhalt getrennt. Welche Anzeigen wer sieht,
+                entscheidet Google — wir haben keinen Einfluss darauf und bekommen auch
+                keine personenbezogenen Daten dazu.
+              </li>
+              <li>
+                <span className="text-white">Affiliate-Links</span> (oeticket, Eventim,
+                weitere): wenn ihr über unsere Ticket-Buttons zu einem Vendor wechselt
+                und dort ein Ticket kauft, erhalten wir eine kleine Provision vom
+                Vendor. <span className="text-white">Für euch ändert sich am Preis
+                nichts.</span> Die Ticketabwicklung läuft weiter komplett beim
+                jeweiligen Vendor, wir bekommen nur eine Transaktions-Bestätigung.
+              </li>
+            </ul>
+          </section>
+
           {/* Was wir nicht tun */}
           <section>
             <h2 className="text-2xl md:text-3xl font-bold text-white mb-4">
               Was wir bewusst nicht tun
             </h2>
             <ul className="space-y-2 list-disc list-inside pl-1">
-              <li>Wir verkaufen keine Tickets. Kauf und Abwicklung laufen immer über
-                den jeweiligen Original-Vendor.</li>
-              <li>Wir nehmen kein Geld von Veranstaltern für bessere Platzierung.
-                Ranking ist Quality-Score-basiert und transparent.</li>
-              <li>Wir leiten keine persönlichen Daten an Dritte weiter. Details siehe&nbsp;
+              <li>Wir verkaufen keine Tickets selbst. Kauf und Abwicklung laufen
+                immer über den jeweiligen Original-Vendor.</li>
+              <li>
+                <span className="text-white">Event-Ranking ist nicht käuflich.</span>
+                Die Reihenfolge der angezeigten Events richtet sich ausschließlich nach
+                unserem Quality-Score (Vollständigkeit der Daten, Qualität der Quelle,
+                Aktualität). Ein großer Ticket-Vendor wird gleich bewertet wie ein
+                Dorffest im Burgenland — wer höher platziert ist, hat die besseren
+                Daten, nicht die höhere Provision.
+              </li>
+              <li>Wir leiten keine persönlichen Daten an Dritte weiter (über das
+                hinaus, was Google AdSense zur reinen Anzeigen-Auslieferung braucht).
+                Details und Opt-out-Möglichkeiten siehe&nbsp;
                 <Link href="/datenschutz" className="underline underline-offset-2 text-white/90 hover:text-white">Datenschutz</Link>.
               </li>
-              <li>Wir akzeptieren keine gesponsorten Events ohne sichtbare Kennzeichnung.
-                Falls wir jemals Werbung zulassen, wird sie als solche markiert.</li>
+              <li>Wir akzeptieren keine gesponserten oder bezahlten Event-Einträge
+                ohne sichtbare Kennzeichnung. Falls ein Veranstalter jemals zahlt,
+                um einen Eintrag prominent zu platzieren, wird das explizit als
+                „Gesponsert" markiert.</li>
             </ul>
           </section>
 
