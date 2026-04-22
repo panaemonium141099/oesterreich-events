@@ -285,16 +285,23 @@ interface AvatarStackProps {
 export function AvatarStack({ avatars, size = 28, max = 4 }: AvatarStackProps) {
   const shown = avatars.slice(0, max);
   const rest = avatars.length - shown.length;
+  // Separator ring: explicit dark (void) box-shadow gives each avatar a
+  // clear cut-out edge regardless of the parent card's background color.
+  // Using surface-color made the overlaps look glued when the parent
+  // was also surface-colored (as on the PlanCard). Reduced overlap from
+  // -size/3 to -size/3.5 gives the rings breathing room.
+  const separator = `0 0 0 2px var(--color-planer-void)`;
   return (
     <div className="flex items-center">
       {shown.map((a, i) => (
         <div
           key={i}
-          className="rounded-full ring-2 ring-[color:var(--color-planer-surface)] overflow-hidden bg-white/10 flex items-center justify-center text-[10px] font-medium text-white/60"
+          className="rounded-full overflow-hidden bg-[color:var(--color-planer-raised)] flex items-center justify-center text-[11px] font-medium text-[color:var(--color-planer-ink)]/70"
           style={{
             width: size, height: size,
-            marginLeft: i === 0 ? 0 : -size / 3,
+            marginLeft: i === 0 ? 0 : -Math.round(size / 3.5),
             zIndex: shown.length - i,
+            boxShadow: separator,
           }}
         >
           {a.url ? (
@@ -307,10 +314,11 @@ export function AvatarStack({ avatars, size = 28, max = 4 }: AvatarStackProps) {
       ))}
       {rest > 0 && (
         <div
-          className="rounded-full ring-2 ring-[color:var(--color-planer-surface)] bg-[color:var(--color-planer-raised)] flex items-center justify-center text-[10px] font-medium text-[color:var(--color-planer-dim)]"
+          className="rounded-full bg-[color:var(--color-planer-raised)] flex items-center justify-center text-[11px] font-medium text-[color:var(--color-planer-dim)]"
           style={{
             width: size, height: size,
-            marginLeft: -size / 3,
+            marginLeft: -Math.round(size / 3.5),
+            boxShadow: separator,
           }}
         >
           +{rest}
