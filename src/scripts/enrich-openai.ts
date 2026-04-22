@@ -271,6 +271,15 @@ async function classifyOpenai(
   userMessage: string,
   model: string,
 ): Promise<{ parsed: unknown; tokensIn: number; tokensOut: number }> {
+  // gpt-5 family and reasoning-style models (o1, o3, o4) dropped
+  // `max_tokens` in favor of `max_completion_tokens`. Older families
+  // (gpt-4o-mini, gpt-4.1-*) still accept `max_tokens`. Pick the right
+  // key based on the model string so we don't 400 on either.
+  const isNewTokenParam = /^(gpt-5|o[134]-)/i.test(model);
+  const tokenBudget: Record<string, number> = isNewTokenParam
+    ? { max_completion_tokens: 600 }
+    : { max_tokens: 600 };
+
   const res = await openai.chat.completions.create({
     model,
     messages: [
@@ -281,7 +290,7 @@ async function classifyOpenai(
     // schema on its side, so we get validated JSON back.
     response_format: { type: 'json_schema', json_schema: OUTPUT_JSON_SCHEMA },
     temperature: 0.2,
-    max_tokens: 600,
+    ...tokenBudget,
   });
 
   const content = res.choices[0]?.message?.content;
