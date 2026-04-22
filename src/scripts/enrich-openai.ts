@@ -267,47 +267,87 @@ const openai = new OpenAI({
   maxRetries: 3, // SDK handles network blips + 429 backoff natively
 });
 
+/**
+ * Two Chat Completions API dialects in the wild right now:
+ *
+ *   CLASSIC   (gpt-4o-mini, gpt-4.1-*, gpt-3.5-*, etc.)
+ *     - `max_tokens` bounds total output
+ *     - `temperature` accepts any 0..2
+ *     - Response `message.content` is always populated
+ *
+ *   REASONING (gpt-5-*, o1-*, o3-*, o4-*)
+ *     - `max_tokens` 400s → must use `max_completion_tokens`
+ *     - `temperature` != 1 → 400s, must omit the key
+ *     - `max_completion_tokens` INCLUDES reasoning tokens, which at
+ *       the default `reasoning_effort: 'medium'` burn 200-500+ tokens
+ *       before any message is produced. Low budgets → empty content.
+ *     - Fix: set `reasoning_effort: 'minimal'` (sufficient for closed-
+ *       vocabulary classification — there's nothing to reason about)
+ *       AND give a generous budget (3000) so content survives even
+ *       if the server ignores minimal and still thinks for a bit.
+ *
+ * Source: openai/openai-python #2546, community.openai.com threads on
+ * empty GPT-5 output.
+ */
+const REASONING_MODEL = /^(gpt-5|o[134]-)/i;
+
 async function classifyOpenai(
   userMessage: string,
   model: string,
-): Promise<{ parsed: unknown; tokensIn: number; tokensOut: number }> {
-  // gpt-5 family + reasoning-style models (o1/o3/o4) differ from the
-  // older Chat Completions API in two places:
-  //   - parameter name: `max_completion_tokens` instead of `max_tokens`
-  //   - temperature:    only default (=1) is accepted; any other value 400s
-  // Pick sane flags based on the model string so a --model switch doesn't
-  // break the request.
-  const isNewApi = /^(gpt-5|o[134]-)/i.test(model);
-  const tokenBudget: Record<string, number> = isNewApi
-    ? { max_completion_tokens: 600 }
-    : { max_tokens: 600 };
-  // For older families we want deterministic-ish classification → low temp.
-  // For gpt-5 family we omit the key so the server default (1) is used.
-  const tempParam: Record<string, number> = isNewApi
-    ? {}
-    : { temperature: 0.2 };
+): Promise<{ parsed: unknown; tokensIn: number; tokensOut: number; reasoningTokens: number }> {
+  const isReasoning = REASONING_MODEL.test(model);
 
-  const res = await openai.chat.completions.create({
+  // Build request body with the right dialect's keys.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const body: Record<string, any> = {
     model,
     messages: [
       { role: 'system', content: SYSTEM_PROMPT },
       { role: 'user', content: userMessage },
     ],
-    // Force structured output via response_format — the API enforces the
-    // schema on its side, so we get validated JSON back.
     response_format: { type: 'json_schema', json_schema: OUTPUT_JSON_SCHEMA },
-    ...tempParam,
-    ...tokenBudget,
-  });
+  };
+
+  if (isReasoning) {
+    // Reasoning-style model: big enough budget for reasoning + JSON output,
+    // and tell the server we want minimal reasoning (we're doing trivial
+    // pick-from-list classification, not chain-of-thought).
+    body.max_completion_tokens = 3000;
+    body.reasoning_effort = 'minimal';
+    // NOTE: `temperature` intentionally omitted — only default (1) is accepted.
+  } else {
+    // Classic model: tight budget, deterministic-ish temperature.
+    body.max_tokens = 600;
+    body.temperature = 0.2;
+  }
+
+  // The SDK types don't yet know about `reasoning_effort` for all model
+  // families, and our body is dynamically keyed. Cast is safe — the
+  // OpenAI API accepts the extra fields on reasoning-style models.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const res = await openai.chat.completions.create(body as any);
 
   const content = res.choices[0]?.message?.content;
-  if (!content) throw new Error('OpenAI returned no content');
+  const usage = res.usage;
+  const tokensIn = usage?.prompt_tokens ?? 0;
+  const tokensOut = usage?.completion_tokens ?? 0;
+  const reasoningTokens =
+    (usage as { completion_tokens_details?: { reasoning_tokens?: number } } | undefined)
+      ?.completion_tokens_details?.reasoning_tokens ?? 0;
+
+  if (!content) {
+    // Give an actionable error: tell the caller exactly why content is empty.
+    const finishReason = res.choices[0]?.finish_reason ?? 'unknown';
+    throw new Error(
+      `OpenAI returned empty content (finish_reason=${finishReason}, ` +
+      `reasoning_tokens=${reasoningTokens}, completion_tokens=${tokensOut}). ` +
+      `For reasoning models this usually means the reasoning-effort ate the ` +
+      `max_completion_tokens budget before the message could be produced.`
+    );
+  }
+
   const parsed = JSON.parse(content);
-  return {
-    parsed,
-    tokensIn: res.usage?.prompt_tokens ?? 0,
-    tokensOut: res.usage?.completion_tokens ?? 0,
-  };
+  return { parsed, tokensIn, tokensOut, reasoningTokens };
 }
 
 function cleanSuggested(v: unknown): string | null {
