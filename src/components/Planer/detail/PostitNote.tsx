@@ -95,10 +95,19 @@ export function PostitNote({ note, boardRef, isMine, isAdmin, onMove, onEdit, on
   // making the note "fly out" on the next frame (doubled movement).
   const x = useMotionValue(0);
   const y = useMotionValue(0);
+  // Track whether a real drag just happened, so the `click` event that
+  // browsers fire on mouseup doesn't also trigger edit-mode. Without this,
+  // a fast drag ends → click bubbles → textarea mounts + auto-selects →
+  // user sees the text highlighted in blue after releasing.
+  const wasDraggedRef = useRef(false);
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(note.content ?? '');
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const style = COLOR_STYLE[note.color];
+
+  const handleDragStart = () => {
+    wasDraggedRef.current = true;
+  };
 
   // Commit position after drag ends, THEN reset the drag transform.
   // Order matters: first update parent state so the note's left/top % pulls
@@ -106,23 +115,39 @@ export function PostitNote({ note, boardRef, isMine, isAdmin, onMove, onEdit, on
   // doesn't double-apply on top of the new anchor.
   const handleDragEnd = (_: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
     const board = boardRef.current;
-    if (!board) { x.set(0); y.set(0); return; }
-    const rect = board.getBoundingClientRect();
-    const newX = ((note.position_x / 100) * rect.width + info.offset.x) / rect.width * 100;
-    const newY = ((note.position_y / 100) * rect.height + info.offset.y) / rect.height * 100;
-    const clampedX = Math.max(0, Math.min(95, newX));
-    const clampedY = Math.max(0, Math.min(95, newY));
-    onMove(note.id, clampedX, clampedY);
+    if (board) {
+      const rect = board.getBoundingClientRect();
+      const newX = ((note.position_x / 100) * rect.width + info.offset.x) / rect.width * 100;
+      const newY = ((note.position_y / 100) * rect.height + info.offset.y) / rect.height * 100;
+      const clampedX = Math.max(0, Math.min(95, newX));
+      const clampedY = Math.max(0, Math.min(95, newY));
+      onMove(note.id, clampedX, clampedY);
+    }
     // Reset the drag-transform so the new left/top % is the only source of
     // truth. Must happen AFTER onMove so React has the new position_x/y.
     x.set(0);
     y.set(0);
+    // Nuke any accidental browser-level text selection the drag motion
+    // may have triggered in WebKit.
+    window.getSelection()?.removeAllRanges();
+    // Keep the drag flag up for a tick so the synthetic click event that
+    // fires on mouseup doesn't sneak through and open edit mode.
+    setTimeout(() => { wasDraggedRef.current = false; }, 50);
+  };
+
+  const handleTextClick = () => {
+    if (wasDraggedRef.current) return;   // click was really the tail of a drag
+    if (isMine) setEditing(true);
   };
 
   useEffect(() => {
     if (editing && textareaRef.current) {
       textareaRef.current.focus();
-      textareaRef.current.select();
+      // Place cursor at end — do NOT select all. Auto-select used to
+      // make a drag-then-accidental-click look like "the text stays
+      // highlighted after I dropped the note" which was confusing.
+      const len = textareaRef.current.value.length;
+      textareaRef.current.setSelectionRange(len, len);
     }
   }, [editing]);
 
@@ -136,6 +161,7 @@ export function PostitNote({ note, boardRef, isMine, isAdmin, onMove, onEdit, on
       drag={isMine}
       dragMomentum={false}
       dragElastic={0}
+      onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
       initial={{ opacity: 0, scale: 0.85, rotate: 0 }}
       animate={{
@@ -209,7 +235,7 @@ export function PostitNote({ note, boardRef, isMine, isAdmin, onMove, onEdit, on
           />
         ) : (
           <p
-            onClick={() => isMine && setEditing(true)}
+            onClick={handleTextClick}
             className="flex-1 text-sm leading-relaxed whitespace-pre-wrap break-words select-none cursor-pointer"
             style={{ color: style.ink, fontFamily: 'var(--font-caveat), "Segoe Script", cursive', fontSize: '16px' }}
           >
