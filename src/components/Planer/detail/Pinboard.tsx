@@ -52,20 +52,49 @@ export function Pinboard({ supabase, user, groupId, canCreate, isOwner }: Pinboa
   const boardRef = useRef<HTMLDivElement>(null);
 
   // ─── Fetch existing notes ───
+  // Note: we can't embed profiles via PostgREST's FK-hint syntax because
+  // group_pinboard_notes.user_id references auth.users (not profiles).
+  // Instead, fetch the notes, collect unique author ids, and batch-fetch
+  // profiles in a second round-trip. One extra query, no 400s.
   const fetchNotes = useCallback(async () => {
-    const { data } = await supabase
+    const { data: raw, error } = await supabase
       .from('group_pinboard_notes')
-      .select('id, content, image_url, color, rotation, position_x, position_y, user_id, created_at, profile:profiles!group_pinboard_notes_user_id_fkey(first_name, avatar_url)')
+      .select('id, content, image_url, color, rotation, position_x, position_y, user_id, created_at')
       .eq('group_id', groupId)
       .order('created_at', { ascending: true });
-    if (data) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const normalized = data.map((n: any) => ({
-        ...n,
-        profile: Array.isArray(n.profile) ? n.profile[0] : n.profile,
-      })) as PostitData[];
-      setNotes(normalized);
+
+    if (error) {
+      console.error('[pinboard] fetch failed:', error);
+      if (error.message.includes('does not exist') || error.message.includes('relation')) {
+        toast.error('Pinnwand-Tabelle fehlt — Migration noch nicht appliziert.');
+      } else {
+        toast.error(`Pinnwand konnte nicht geladen werden: ${error.message}`);
+      }
+      setLoading(false);
+      return;
     }
+
+    if (!raw || raw.length === 0) {
+      setNotes([]);
+      setLoading(false);
+      return;
+    }
+
+    // Enrich with profiles in a second query
+    const userIds = [...new Set(raw.map(n => n.user_id))];
+    const { data: profiles } = await supabase
+      .from('profiles')
+      .select('id, first_name, avatar_url')
+      .in('id', userIds);
+    const profileMap = new Map((profiles ?? []).map(p => [p.id, p]));
+
+    const enriched = raw.map(n => ({
+      ...n,
+      profile: profileMap.get(n.user_id)
+        ? { first_name: profileMap.get(n.user_id)!.first_name, avatar_url: profileMap.get(n.user_id)!.avatar_url }
+        : undefined,
+    })) as PostitData[];
+    setNotes(enriched);
     setLoading(false);
   }, [supabase, groupId]);
 
