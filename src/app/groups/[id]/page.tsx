@@ -691,13 +691,26 @@ export default function EventDashboardPage() {
         </div>
       </motion.section>
 
-      {/* ══════════ MAIN GRID ══════════ */}
+      {/* ══════════ MAIN ══════════ */}
       <main className="relative max-w-6xl mx-auto px-5 sm:px-8 py-10 pb-32">
+        {/* Erinnerungen — wide horizontal strip directly below the hero,
+            before the 3-col grid. Acts as a visual prelude: what this
+            group has already produced together. */}
+        <MemoriesSection
+          memories={memories}
+          creatingMemory={creatingMemory}
+          setCreatingMemory={setCreatingMemory}
+          newMemoryTitle={newMemoryTitle}
+          setNewMemoryTitle={setNewMemoryTitle}
+          onCreate={createMemory}
+          formatRelative={formatRelativeTime}
+        />
+
         <motion.div
           variants={staggerContainer}
           initial="hidden"
           animate="visible"
-          className="grid grid-cols-1 md:grid-cols-[1fr_1.6fr_1fr] gap-5"
+          className="grid grid-cols-1 md:grid-cols-[1fr_1.6fr_1fr] gap-5 mt-8"
         >
           {/* ─── LEFT — Participants panel ─── */}
           <motion.div variants={riseItem} className="rounded-2xl bg-[color:var(--color-planer-surface)] border border-white/[0.05] p-5 flex flex-col min-h-[420px]">
@@ -908,17 +921,6 @@ export default function EventDashboardPage() {
           isOwner={isOwner}
         />
 
-        {/* ══════════ ERINNERUNGEN ══════════ */}
-        <MemoriesSection
-          memories={memories}
-          creatingMemory={creatingMemory}
-          setCreatingMemory={setCreatingMemory}
-          newMemoryTitle={newMemoryTitle}
-          setNewMemoryTitle={setNewMemoryTitle}
-          onCreate={createMemory}
-          formatRelative={formatRelativeTime}
-        />
-
         {/* ══════════ CHRONIK ══════════ */}
         <ChronikSection activities={activities} formatRelative={formatRelativeTime} />
       </main>
@@ -968,12 +970,12 @@ function MemoriesSection({
   formatRelative: (d: string) => string;
 }) {
   return (
-    <section className="mt-12">
-      <div className="mb-5 flex items-baseline justify-between gap-4">
+    <section>
+      <div className="mb-4 flex items-baseline justify-between gap-4">
         <div>
-          <EditorialCaption className="mb-2">Erinnerungen</EditorialCaption>
-          <p className="text-sm text-[color:var(--color-planer-dim)] italic">
-            Fotoalben aus eurem Treffen — landen später hier.
+          <EditorialCaption className="mb-1.5">Erinnerungen</EditorialCaption>
+          <p className="text-xs text-[color:var(--color-planer-dim)] italic">
+            Fotoalben aus eurem Treffen.
           </p>
         </div>
         {!creatingMemory && (
@@ -985,7 +987,7 @@ function MemoriesSection({
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M12 5v14m7-7H5" />
             </svg>
-            Erinnerung
+            Album
           </PlanerButton>
         )}
       </div>
@@ -995,7 +997,7 @@ function MemoriesSection({
           initial={{ opacity: 0, y: -8 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -8 }}
-          className="mb-4 p-4 rounded-2xl bg-[color:var(--color-planer-surface)] border border-white/[0.06] flex items-center gap-3"
+          className="mb-3 p-3 rounded-2xl bg-[color:var(--color-planer-surface)] border border-white/[0.06] flex items-center gap-3"
         >
           <input
             type="text"
@@ -1026,56 +1028,65 @@ function MemoriesSection({
         </motion.div>
       )}
 
-      {memories.length === 0 ? (
-        <div className="rounded-2xl bg-[color:var(--color-planer-surface)] border border-white/[0.04] p-10 text-center">
-          <svg className="w-10 h-10 mx-auto mb-3 text-[color:var(--color-planer-whisper)]" fill="none" stroke="currentColor" strokeWidth={1} viewBox="0 0 24 24">
-            <rect x="3" y="5" width="18" height="14" rx="2" />
-            <circle cx="9" cy="11" r="2" />
-            <path d="M3 17l5-5 4 4 3-3 6 6" />
-          </svg>
-          <p className="text-sm italic text-[color:var(--color-planer-dim)]">
-            Noch keine Erinnerungen — nach dem Treffen werden daraus Alben.
-          </p>
-        </div>
-      ) : (
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
-          {memories.map(m => (
-            <Link
-              key={m.id}
-              href={`/memories/${m.id}`}
-              className="group relative rounded-2xl overflow-hidden border border-white/[0.06] hover:border-white/20 bg-[color:var(--color-planer-surface)] aspect-[4/5] flex flex-col transition-all"
-            >
-              {/* Placeholder thumbnail — gradient since we don't have a cover image yet */}
-              <div className="relative flex-1 overflow-hidden">
-                <div
-                  className="absolute inset-0 transition-transform duration-[900ms] group-hover:scale-105"
-                  style={{
-                    background: `radial-gradient(circle at 30% 30%, rgba(245,239,226,0.1), transparent 60%), linear-gradient(135deg, #15120f 0%, #1a1613 100%)`,
-                  }}
-                />
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <svg className="w-8 h-8 text-[color:var(--color-planer-whisper)]" fill="none" stroke="currentColor" strokeWidth={0.8} viewBox="0 0 24 24">
-                    <rect x="3" y="5" width="18" height="14" rx="2" />
-                    <circle cx="9" cy="11" r="2" />
-                    <path d="M3 17l5-5 4 4 3-3 6 6" />
-                  </svg>
-                </div>
-                <div className="absolute top-2 right-2 text-[10px] uppercase tracking-[0.18em] text-[color:var(--color-planer-accent)]/70 bg-[color:var(--color-planer-void)]/60 backdrop-blur-sm px-2 py-1 rounded-full">
-                  {m.photo_count} {m.photo_count === 1 ? 'Foto' : 'Fotos'}
-                </div>
+      {/* Horizontal strip — always renders so the "Kein Album"-Tile is a
+          compact call-to-create even when empty. Constant height so the
+          page rhythm stays stable whether 0 or 20 albums exist. */}
+      <div
+        className="flex gap-3 overflow-x-auto scrollbar-hide -mx-5 sm:-mx-8 px-5 sm:px-8 pb-2"
+        style={{ scrollSnapType: 'x mandatory' }}
+      >
+        {memories.length === 0 && !creatingMemory && (
+          <button
+            onClick={() => setCreatingMemory(true)}
+            className="group shrink-0 w-[200px] h-[140px] rounded-2xl border border-dashed border-white/[0.12] hover:border-[color:var(--color-planer-accent)]/40 bg-white/[0.02] flex flex-col items-center justify-center gap-2 text-[color:var(--color-planer-whisper)] hover:text-[color:var(--color-planer-accent)]/80 transition-all"
+            style={{ scrollSnapAlign: 'start' }}
+          >
+            <svg className="w-7 h-7" fill="none" stroke="currentColor" strokeWidth={1} viewBox="0 0 24 24">
+              <rect x="3" y="5" width="18" height="14" rx="2" />
+              <circle cx="9" cy="11" r="2" />
+              <path d="M3 17l5-5 4 4 3-3 6 6" />
+            </svg>
+            <span className="text-[11px] italic">
+              Noch kein Album
+            </span>
+          </button>
+        )}
+        {memories.map(m => (
+          <Link
+            key={m.id}
+            href={`/memories/${m.id}`}
+            className="group relative shrink-0 w-[200px] h-[140px] rounded-2xl overflow-hidden border border-white/[0.06] hover:border-white/20 bg-[color:var(--color-planer-surface)] flex flex-col transition-all"
+            style={{ scrollSnapAlign: 'start' }}
+          >
+            <div className="relative flex-1 overflow-hidden">
+              <div
+                className="absolute inset-0 transition-transform duration-[900ms] group-hover:scale-105"
+                style={{
+                  background: `radial-gradient(circle at 30% 30%, rgba(245,239,226,0.1), transparent 60%), linear-gradient(135deg, #15120f 0%, #1a1613 100%)`,
+                }}
+              />
+              <div className="absolute inset-0 flex items-center justify-center">
+                <svg className="w-7 h-7 text-[color:var(--color-planer-whisper)]" fill="none" stroke="currentColor" strokeWidth={0.8} viewBox="0 0 24 24">
+                  <rect x="3" y="5" width="18" height="14" rx="2" />
+                  <circle cx="9" cy="11" r="2" />
+                  <path d="M3 17l5-5 4 4 3-3 6 6" />
+                </svg>
               </div>
-              <div className="p-3 border-t border-white/[0.04]">
-                <h4 className="serif-display font-light text-[color:var(--color-planer-ink)] text-[15px] leading-tight truncate">
-                  {m.title || 'Ohne Titel'}
-                </h4>
-                <p className="text-[10px] text-[color:var(--color-planer-whisper)] mt-1">
-                  {formatRelative(m.created_at)}
-                </p>
+              <div className="absolute top-2 right-2 text-[9px] uppercase tracking-[0.18em] text-[color:var(--color-planer-accent)]/70 bg-[color:var(--color-planer-void)]/60 backdrop-blur-sm px-2 py-0.5 rounded-full">
+                {m.photo_count}
               </div>
-            </Link>
-          ))}
-        </div>
-      )}
+            </div>
+            <div className="p-2.5 border-t border-white/[0.04]">
+              <h4 className="serif-display font-light text-[color:var(--color-planer-ink)] text-[13px] leading-tight truncate">
+                {m.title || 'Ohne Titel'}
+              </h4>
+              <p className="text-[9px] text-[color:var(--color-planer-whisper)] mt-0.5">
+                {formatRelative(m.created_at)}
+              </p>
+            </div>
+          </Link>
+        ))}
+      </div>
     </section>
   );
 }
