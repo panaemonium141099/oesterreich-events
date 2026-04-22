@@ -1,14 +1,19 @@
 import { ImageResponse } from 'next/og';
+import { loadGoogleFont } from '@/lib/og-fonts';
 
 export const size = { width: 180, height: 180 };
 export const contentType = 'image/png';
 
 /**
- * iOS home-screen icon (180×180). Richer than the 32px favicon because iOS
- * can show gradients + type at this size. Keeps the brand palette
- * (rose → pink → violet) with a white pin mark.
+ * iOS home-screen icon (180×180). Same Fraunces L silhouette as the
+ * 64px favicon, but room to breathe — slightly larger letter with a
+ * tiny editorial caption below to hint at the brand name when the user
+ * pulls up their home-screen grid.
  */
-export default function AppleIcon() {
+export default async function AppleIcon() {
+  const fraunces = await loadGoogleFont({ family: 'Fraunces', weight: 600 });
+  const geist = await loadGoogleFont({ family: 'Geist', weight: 500 });
+
   return new ImageResponse(
     (
       <div
@@ -19,38 +24,48 @@ export default function AppleIcon() {
           flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'center',
-          background: 'linear-gradient(135deg, #f43f5e 0%, #ec4899 45%, #8b5cf6 100%)',
-          borderRadius: '36px',
+          background: '#07060a',
+          // iOS auto-rounds at ~22% — don't double-round. Slight inner
+          // vignette for depth.
+          backgroundImage:
+            'radial-gradient(circle at 30% 20%, rgba(245,239,226,0.08), transparent 55%)',
+          fontFamily: 'Fraunces',
+          color: '#f5efe2',
+          gap: 10,
         }}
       >
-        <svg
-          viewBox="0 0 24 24"
-          width={100}
-          height={100}
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path
-            d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"
-            fill="#ffffff"
-          />
-          <circle cx="12" cy="9" r="2.5" fill="#f43f5e" />
-        </svg>
         <div
           style={{
-            marginTop: 6,
-            fontSize: 22,
-            fontWeight: 800,
-            color: '#ffffff',
-            fontFamily: 'sans-serif',
-            letterSpacing: '0.02em',
-            textShadow: '0 2px 8px rgba(0,0,0,0.25)',
+            fontFamily: 'Fraunces',
+            fontSize: 120,
+            fontWeight: 600,
+            letterSpacing: '-0.03em',
+            lineHeight: 1,
+            marginBottom: -8,
           }}
         >
-          LassTreffen
+          L
+        </div>
+        <div
+          style={{
+            fontFamily: 'Geist',
+            fontSize: 14,
+            fontWeight: 500,
+            letterSpacing: '0.28em',
+            textTransform: 'uppercase',
+            color: '#9a938a',
+          }}
+        >
+          Lass Treffen
         </div>
       </div>
     ),
-    { ...size },
+    {
+      ...size,
+      fonts: [
+        { name: 'Fraunces', data: fraunces, style: 'normal', weight: 600 },
+        { name: 'Geist', data: geist, style: 'normal', weight: 500 },
+      ],
+    },
   );
 }
