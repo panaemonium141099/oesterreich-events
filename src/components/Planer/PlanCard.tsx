@@ -85,10 +85,15 @@ export function PlanCard({ plan, isNext = false, index = 0 }: PlanCardProps) {
         {/* Uniform inner grid: map on the left, content on the right */}
         <div className="grid grid-cols-[150px_1fr] sm:grid-cols-[190px_1fr] min-h-[180px]">
 
-          {/* Visual side */}
+          {/* Visual side — layered:
+                BASE layer: map preview (or pattern fallback)
+                COVER layer: title image, if any — fades out on hover to
+                reveal the map/info underneath. This makes the card feel
+                like an event poster at rest and a data card on inspection. */}
           <div className="relative overflow-hidden">
+            {/* ─── BASE: map or pattern fallback ─── */}
             {mapImg ? (
-              <div className="w-full h-full relative">
+              <div className="absolute inset-0">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={mapImg}
@@ -99,20 +104,8 @@ export function PlanCard({ plan, isNext = false, index = 0 }: PlanCardProps) {
                 <div className="absolute inset-0 bg-gradient-to-t from-[color:var(--color-planer-void)]/85 via-[color:var(--color-planer-void)]/10 to-transparent" />
                 <div className="absolute inset-0 bg-gradient-to-r from-transparent to-[color:var(--color-planer-surface)]/50" />
               </div>
-            ) : bgImg ? (
-              <div className="w-full h-full relative">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={bgImg}
-                  alt=""
-                  className="w-full h-full object-cover transition-transform duration-[900ms] group-hover:scale-105"
-                  loading="lazy"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-[color:var(--color-planer-void)]/85 via-[color:var(--color-planer-void)]/30 to-transparent" />
-              </div>
             ) : (
-              // Pattern fallback — radial plum echo with subtle pin icon
-              <div className="w-full h-full bg-[color:var(--color-planer-raised)] relative">
+              <div className="absolute inset-0 bg-[color:var(--color-planer-raised)]">
                 <div
                   className="absolute inset-0 opacity-50"
                   style={{
@@ -129,9 +122,25 @@ export function PlanCard({ plan, isNext = false, index = 0 }: PlanCardProps) {
               </div>
             )}
 
-            {/* Date badge — floats over the map */}
+            {/* ─── COVER: title image (fades out on hover) ─── */}
+            {bgImg && (
+              <div className="absolute inset-0 transition-opacity duration-500 ease-out group-hover:opacity-0 pointer-events-none">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={bgImg}
+                  alt=""
+                  className="w-full h-full object-cover"
+                  loading="lazy"
+                />
+                {/* subtle vignette for badge legibility when image is showing */}
+                <div className="absolute inset-0 bg-gradient-to-t from-[color:var(--color-planer-void)]/70 via-transparent to-[color:var(--color-planer-void)]/25" />
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent to-[color:var(--color-planer-surface)]/40" />
+              </div>
+            )}
+
+            {/* Date badge — always visible, floats over whichever layer is showing */}
             {date && (
-              <div className="absolute top-3 left-3 flex flex-col items-center justify-center rounded-xl bg-[color:var(--color-planer-void)]/80 backdrop-blur-md border border-white/10 px-2.5 py-2 min-w-[54px]">
+              <div className="absolute top-3 left-3 flex flex-col items-center justify-center rounded-xl bg-[color:var(--color-planer-void)]/80 backdrop-blur-md border border-white/10 px-2.5 py-2 min-w-[54px] z-10">
                 <span className="serif-display text-[22px] leading-none font-light text-[color:var(--color-planer-ink)] tabular">
                   {date.day}
                 </span>
@@ -147,7 +156,7 @@ export function PlanCard({ plan, isNext = false, index = 0 }: PlanCardProps) {
             )}
 
             {/* Type badge bottom-left */}
-            <div className="absolute bottom-3 left-3">
+            <div className="absolute bottom-3 left-3 z-10">
               <span
                 className={[
                   'inline-block text-[9px] uppercase tracking-[0.22em] px-2 py-1 rounded-full backdrop-blur-sm border',
@@ -159,6 +168,13 @@ export function PlanCard({ plan, isNext = false, index = 0 }: PlanCardProps) {
                 {plan.event_type === 'existing_event' ? 'Öffentlich' : 'Privat'}
               </span>
             </div>
+
+            {/* "Hover"-hint — only when there's a cover to reveal */}
+            {bgImg && (
+              <span className="absolute bottom-3 right-3 text-[9px] uppercase tracking-[0.18em] text-[color:var(--color-planer-ink)]/60 opacity-80 group-hover:opacity-0 transition-opacity duration-300 z-10">
+                Hover
+              </span>
+            )}
           </div>
 
           {/* Content side */}

@@ -121,6 +121,22 @@ interface Contribution {
   profile?: { first_name: string; last_name: string; avatar_url: string | null };
 }
 
+interface Activity {
+  id: string;
+  type: string;
+  user_id: string;
+  created_at: string;
+  metadata: { rsvp?: string; label?: string; name?: string; event_type?: string; invited_user_id?: string } | null;
+  profile?: { first_name: string; last_name: string };
+}
+
+interface MemoryItem {
+  id: string;
+  title: string | null;
+  created_at: string;
+  photo_count: number;
+}
+
 // ──────────────────────────────────────────────────
 // Page
 // ──────────────────────────────────────────────────
@@ -143,6 +159,10 @@ export default function EventDashboardPage() {
   const [myMembership, setMyMembership] = useState<Member | null>(null);
   const [contributions, setContributions] = useState<Contribution[]>([]);
   const [newContribution, setNewContribution] = useState('');
+  const [activities, setActivities] = useState<Activity[]>([]);
+  const [memories, setMemories] = useState<MemoryItem[]>([]);
+  const [creatingMemory, setCreatingMemory] = useState(false);
+  const [newMemoryTitle, setNewMemoryTitle] = useState('');
   const [showEventSearch, setShowEventSearch] = useState(false);
   const [showInvite, setShowInvite] = useState(false);
   const [friends, setFriends] = useState<FriendProfile[]>([]);
@@ -212,6 +232,41 @@ export default function EventDashboardPage() {
         ...c,
         profile: Array.isArray(c.profile) ? c.profile[0] : c.profile,
       })) as Contribution[]);
+    }
+
+    // Activity log for this group
+    const { data: acts } = await supabase
+      .from('activities')
+      .select('id, type, user_id, created_at, metadata, profile:profiles!activities_user_id_fkey(first_name, last_name)')
+      .eq('group_id', groupId)
+      .order('created_at', { ascending: false })
+      .limit(50);
+    if (acts) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      setActivities(acts.map((a: any) => ({
+        ...a,
+        profile: Array.isArray(a.profile) ? a.profile[0] : a.profile,
+      })) as Activity[]);
+    }
+
+    // Memories + photo counts
+    const { data: mems2 } = await supabase
+      .from('memories')
+      .select('id, title, created_at')
+      .eq('group_id', groupId)
+      .order('created_at', { ascending: false });
+    if (mems2) {
+      const enriched = await Promise.all(
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        mems2.map(async (m: any) => {
+          const { count } = await supabase
+            .from('memory_photos')
+            .select('*', { count: 'exact', head: true })
+            .eq('memory_id', m.id);
+          return { ...m, photo_count: count || 0 };
+        })
+      );
+      setMemories(enriched);
     }
 
     setLoadingData(false);
@@ -334,6 +389,23 @@ export default function EventDashboardPage() {
       setContributions(prev => prev.filter(c => c.id !== id));
     } catch {
       toast.error('Eintrag konnte nicht entfernt werden');
+    }
+  };
+
+  const createMemory = async () => {
+    const title = newMemoryTitle.trim();
+    if (!user || !title) return;
+    const { data, error } = await supabase
+      .from('memories')
+      .insert({ group_id: groupId, title })
+      .select('id, title, created_at')
+      .single();
+    if (error) { toast.error('Erinnerung konnte nicht angelegt werden'); return; }
+    if (data) {
+      setMemories(prev => [{ ...data, photo_count: 0 }, ...prev]);
+      setNewMemoryTitle('');
+      setCreatingMemory(false);
+      toast.success('Erinnerung angelegt');
     }
   };
 
@@ -835,6 +907,20 @@ export default function EventDashboardPage() {
           canCreate={canPin}
           isOwner={isOwner}
         />
+
+        {/* ══════════ ERINNERUNGEN ══════════ */}
+        <MemoriesSection
+          memories={memories}
+          creatingMemory={creatingMemory}
+          setCreatingMemory={setCreatingMemory}
+          newMemoryTitle={newMemoryTitle}
+          setNewMemoryTitle={setNewMemoryTitle}
+          onCreate={createMemory}
+          formatRelative={formatRelativeTime}
+        />
+
+        {/* ══════════ CHRONIK ══════════ */}
+        <ChronikSection activities={activities} formatRelative={formatRelativeTime} />
       </main>
 
       {/* Event share modal (for chat) */}
@@ -864,6 +950,197 @@ export default function EventDashboardPage() {
 // ──────────────────────────────────────────────────
 // Small inline components
 // ──────────────────────────────────────────────────
+
+// ──────────────────────────────────────────────────
+// MemoriesSection — photo albums linked to this plan
+// ──────────────────────────────────────────────────
+
+function MemoriesSection({
+  memories, creatingMemory, setCreatingMemory,
+  newMemoryTitle, setNewMemoryTitle, onCreate, formatRelative,
+}: {
+  memories: MemoryItem[];
+  creatingMemory: boolean;
+  setCreatingMemory: (v: boolean) => void;
+  newMemoryTitle: string;
+  setNewMemoryTitle: (s: string) => void;
+  onCreate: () => void;
+  formatRelative: (d: string) => string;
+}) {
+  return (
+    <section className="mt-12">
+      <div className="mb-5 flex items-baseline justify-between gap-4">
+        <div>
+          <EditorialCaption className="mb-2">Erinnerungen</EditorialCaption>
+          <p className="text-sm text-[color:var(--color-planer-dim)] italic">
+            Fotoalben aus eurem Treffen — landen später hier.
+          </p>
+        </div>
+        {!creatingMemory && (
+          <PlanerButton
+            onClick={() => setCreatingMemory(true)}
+            size="md"
+            variant="outline"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M12 5v14m7-7H5" />
+            </svg>
+            Erinnerung
+          </PlanerButton>
+        )}
+      </div>
+
+      {creatingMemory && (
+        <motion.div
+          initial={{ opacity: 0, y: -8 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -8 }}
+          className="mb-4 p-4 rounded-2xl bg-[color:var(--color-planer-surface)] border border-white/[0.06] flex items-center gap-3"
+        >
+          <input
+            type="text"
+            value={newMemoryTitle}
+            onChange={(e) => setNewMemoryTitle(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') { e.preventDefault(); onCreate(); }
+              if (e.key === 'Escape') { setNewMemoryTitle(''); setCreatingMemory(false); }
+            }}
+            autoFocus
+            placeholder="z. B. Der Abend am See"
+            className="flex-1 bg-transparent border border-white/[0.08] rounded-xl px-4 py-2.5 text-sm text-[color:var(--color-planer-ink)] placeholder-[color:var(--color-planer-whisper)] outline-none"
+          />
+          <button
+            onClick={() => { setNewMemoryTitle(''); setCreatingMemory(false); }}
+            className="text-xs text-[color:var(--color-planer-dim)] hover:text-[color:var(--color-planer-ink)] px-2"
+          >
+            Abbrechen
+          </button>
+          <PlanerButton
+            onClick={onCreate}
+            size="md"
+            variant="primary"
+            disabled={!newMemoryTitle.trim()}
+          >
+            Anlegen
+          </PlanerButton>
+        </motion.div>
+      )}
+
+      {memories.length === 0 ? (
+        <div className="rounded-2xl bg-[color:var(--color-planer-surface)] border border-white/[0.04] p-10 text-center">
+          <svg className="w-10 h-10 mx-auto mb-3 text-[color:var(--color-planer-whisper)]" fill="none" stroke="currentColor" strokeWidth={1} viewBox="0 0 24 24">
+            <rect x="3" y="5" width="18" height="14" rx="2" />
+            <circle cx="9" cy="11" r="2" />
+            <path d="M3 17l5-5 4 4 3-3 6 6" />
+          </svg>
+          <p className="text-sm italic text-[color:var(--color-planer-dim)]">
+            Noch keine Erinnerungen — nach dem Treffen werden daraus Alben.
+          </p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+          {memories.map(m => (
+            <Link
+              key={m.id}
+              href={`/memories/${m.id}`}
+              className="group relative rounded-2xl overflow-hidden border border-white/[0.06] hover:border-white/20 bg-[color:var(--color-planer-surface)] aspect-[4/5] flex flex-col transition-all"
+            >
+              {/* Placeholder thumbnail — gradient since we don't have a cover image yet */}
+              <div className="relative flex-1 overflow-hidden">
+                <div
+                  className="absolute inset-0 transition-transform duration-[900ms] group-hover:scale-105"
+                  style={{
+                    background: `radial-gradient(circle at 30% 30%, rgba(245,239,226,0.1), transparent 60%), linear-gradient(135deg, #15120f 0%, #1a1613 100%)`,
+                  }}
+                />
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <svg className="w-8 h-8 text-[color:var(--color-planer-whisper)]" fill="none" stroke="currentColor" strokeWidth={0.8} viewBox="0 0 24 24">
+                    <rect x="3" y="5" width="18" height="14" rx="2" />
+                    <circle cx="9" cy="11" r="2" />
+                    <path d="M3 17l5-5 4 4 3-3 6 6" />
+                  </svg>
+                </div>
+                <div className="absolute top-2 right-2 text-[10px] uppercase tracking-[0.18em] text-[color:var(--color-planer-accent)]/70 bg-[color:var(--color-planer-void)]/60 backdrop-blur-sm px-2 py-1 rounded-full">
+                  {m.photo_count} {m.photo_count === 1 ? 'Foto' : 'Fotos'}
+                </div>
+              </div>
+              <div className="p-3 border-t border-white/[0.04]">
+                <h4 className="serif-display font-light text-[color:var(--color-planer-ink)] text-[15px] leading-tight truncate">
+                  {m.title || 'Ohne Titel'}
+                </h4>
+                <p className="text-[10px] text-[color:var(--color-planer-whisper)] mt-1">
+                  {formatRelative(m.created_at)}
+                </p>
+              </div>
+            </Link>
+          ))}
+        </div>
+      )}
+    </section>
+  );
+}
+
+// ──────────────────────────────────────────────────
+// ChronikSection — activity log, editorial timeline
+// ──────────────────────────────────────────────────
+
+function ChronikSection({
+  activities, formatRelative,
+}: {
+  activities: Activity[];
+  formatRelative: (d: string) => string;
+}) {
+  if (activities.length === 0) return null;
+
+  const describe = (a: Activity): string => {
+    const name = a.profile?.first_name ?? 'Jemand';
+    if (a.type === 'group_created') return `${name} hat den Plan erstellt`;
+    if (a.type === 'group_joined') {
+      if (a.metadata?.invited_user_id) return `${name} hat jemanden eingeladen`;
+      if (a.metadata?.label) return `${name} hat ${a.metadata.label}`;
+      if (a.metadata?.rsvp) return `${name} hat ${a.metadata.rsvp === 'accepted' ? 'zugesagt' : a.metadata.rsvp === 'maybe' ? 'vielleicht zugesagt' : 'abgesagt'}`;
+      return `${name} ist der Gruppe beigetreten`;
+    }
+    return `${name}: ${a.type}`;
+  };
+
+  const iconFor = (a: Activity): string => {
+    if (a.type === 'group_created') return 'M12 4v16m8-8H4';
+    if (a.metadata?.invited_user_id) return 'M18 9v6m-3-3h6M12 12a4 4 0 100-8 4 4 0 000 8zM5 20v-1a6 6 0 016-6h1';
+    if (a.metadata?.rsvp === 'accepted') return 'M5 13l4 4L19 7';
+    if (a.metadata?.rsvp === 'declined') return 'M6 18L18 6M6 6l12 12';
+    return 'M8 12h.01M12 12h.01M16 12h.01';
+  };
+
+  return (
+    <section className="mt-12">
+      <EditorialCaption className="mb-5">Chronik</EditorialCaption>
+      <ol className="relative space-y-0">
+        {/* vertical rule */}
+        <div className="absolute left-[11px] top-2 bottom-2 w-px bg-white/[0.06]" aria-hidden />
+        {activities.map(a => (
+          <li key={a.id} className="relative flex items-start gap-4 py-3">
+            <span
+              className="relative z-10 w-[22px] h-[22px] rounded-full bg-[color:var(--color-planer-surface)] border border-white/[0.1] flex items-center justify-center text-[color:var(--color-planer-dim)] shrink-0 mt-0.5"
+            >
+              <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d={iconFor(a)} />
+              </svg>
+            </span>
+            <div className="flex-1 min-w-0 flex items-baseline justify-between gap-3">
+              <p className="text-sm text-[color:var(--color-planer-ink)]/90 truncate">
+                {describe(a)}
+              </p>
+              <span className="text-[10px] uppercase tracking-[0.18em] text-[color:var(--color-planer-whisper)] shrink-0">
+                {formatRelative(a.created_at)}
+              </span>
+            </div>
+          </li>
+        ))}
+      </ol>
+    </section>
+  );
+}
 
 function StatBlock({ value, label, tone }: { value: number; label: string; tone: 'sage' | 'maybe' | 'rose' | 'dim' }) {
   const color = {

@@ -232,7 +232,7 @@ export default function EventPlanenPage() {
 
           <motion.div variants={riseItem} className="max-w-3xl">
             <EditorialHeading size="hero" className="mb-4">
-              Lass uns etwas <em className="italic kinetic-underline text-[color:var(--color-planer-accent)]">vorhaben</em>.
+              Lass <em className="italic kinetic-underline text-[color:var(--color-planer-accent)]">Treffen</em>.
             </EditorialHeading>
           </motion.div>
 
