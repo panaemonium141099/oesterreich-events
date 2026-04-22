@@ -137,10 +137,9 @@ export default function UeberUnsPage() {
             </h2>
             <p className="mb-4">
               Die Plattform ist kostenlos für Nutzer und soll das auch bleiben. Damit
-              der Betrieb und die Weiterentwicklung sich tragen, setzen wir auf zwei
-              transparente Einnahmequellen:
+              der Betrieb und die Weiterentwicklung sich tragen, nutzen wir aktuell:
             </p>
-            <ul className="space-y-3 list-disc list-inside pl-1">
+            <ul className="space-y-3 list-disc list-inside pl-1 mb-4">
               <li>
                 <span className="text-white">Display-Werbung</span> (Google AdSense):
                 standardisierte Werbeanzeigen, klar als Werbung gekennzeichnet und
@@ -148,15 +147,14 @@ export default function UeberUnsPage() {
                 entscheidet Google — wir haben keinen Einfluss darauf und bekommen auch
                 keine personenbezogenen Daten dazu.
               </li>
-              <li>
-                <span className="text-white">Affiliate-Links</span> (oeticket, Eventim,
-                weitere): wenn ihr über unsere Ticket-Buttons zu einem Vendor wechselt
-                und dort ein Ticket kauft, erhalten wir eine kleine Provision vom
-                Vendor. <span className="text-white">Für euch ändert sich am Preis
-                nichts.</span> Die Ticketabwicklung läuft weiter komplett beim
-                jeweiligen Vendor, wir bekommen nur eine Transaktions-Bestätigung.
-              </li>
             </ul>
+            <p>
+              Weitere Monetarisierungsoptionen über Affiliate-Kooperationen mit
+              Ticket-Vendorn sind in Prüfung. Sobald eine solche Kooperation live geht,
+              wird sie hier klar ausgewiesen — inklusive Vendor-Name, Art der
+              Zusammenarbeit und den Auswirkungen für euch (Preis bleibt für den
+              Nutzer identisch, da die Provision vom Vendor getragen wird).
+            </p>
           </section>
 
           {/* Was wir nicht tun */}
