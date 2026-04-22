@@ -378,6 +378,19 @@ function appendLog(logFile: string | null, entry: Record<string, unknown>): void
 // Per-event worker
 // ─────────────────────────────────────────────────────────────────────
 
+/**
+ * Thrown when we hit OpenAI's per-day request cap. Distinct from the
+ * per-minute TPM/RPM caps because RPD resets only at midnight Pacific —
+ * no amount of waiting within the current script run will clear it, so
+ * we exit cleanly rather than burning hours of backoff loops.
+ */
+class RpdExhaustedError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'RpdExhaustedError';
+  }
+}
+
 async function processOne(
   supabase: SupabaseClient,
   row: EventRow,
@@ -436,6 +449,16 @@ async function processOne(
       lastErr = err instanceof Error ? err.message : String(err);
       const is429 = /429|rate.limit|Rate.limit/i.test(lastErr);
       if (is429) stats.rateLimited += 1;
+
+      // Hard-stop on DAILY limit — retrying within the same day just
+      // wastes hours of backoff against a wall that won't budge until
+      // midnight Pacific (~9am CET). Bubble a special marker up and let
+      // the main loop terminate cleanly with instructions.
+      const isRpd = /requests per day|RPD|daily limit/i.test(lastErr);
+      if (isRpd) {
+        throw new RpdExhaustedError(lastErr);
+      }
+
       if (attempt === MAX_ATTEMPTS - 1) break;
 
       // Respect server's "try again in Xms" hint when present, else exp backoff.
@@ -554,6 +577,11 @@ async function worker(
     try {
       await processOne(supabase, row, opts, stats, limiter);
     } catch (err) {
+      // RPD exhausted — drain the queue so all workers exit, then let main bubble up.
+      if (err instanceof RpdExhaustedError) {
+        queue.length = 0;
+        throw err;
+      }
       stats.failed += 1;
       stats.processed += 1;
       console.error(`\nworker error on ${row.id.slice(0, 8)}: ${err instanceof Error ? err.message : err}`);
@@ -648,7 +676,37 @@ async function main() {
     const workers = Array.from({ length: opts.concurrency }, () =>
       worker(queue, supabase, opts, stats, totalPending ?? undefined, limiter),
     );
-    await Promise.all(workers);
+
+    try {
+      await Promise.all(workers);
+    } catch (err) {
+      if (err instanceof RpdExhaustedError) {
+        process.stdout.write('\n\n');
+        console.log('━'.repeat(70));
+        console.log('  ⏸  OPENAI DAILY REQUEST CAP REACHED (RPD)');
+        console.log('━'.repeat(70));
+        console.log('');
+        console.log('  Tier 1 allows 10.000 Requests pro Tag über alle Modelle hinweg.');
+        console.log('  Das ist ein harter Cap — Retrys helfen heute nicht mehr.');
+        console.log('');
+        console.log(`  Bis hierhin erfolgreich enriched:  ${stats.enriched} Events`);
+        console.log(`  Verbrannt:                         $${estimateCostUsd(opts.model, stats.tokensIn, stats.tokensOut).toFixed(2)}`);
+        console.log('');
+        console.log('  Optionen:');
+        console.log('    1) $50 Credit aufladen → Tier 2 meist binnen Stunden');
+        console.log('       → RPD 10k → 30k+, TPM 200k → 2M');
+        console.log('       https://platform.openai.com/settings/organization/billing');
+        console.log('');
+        console.log('    2) Warten: RPD resettet um 00:00 Pacific ≈ 09:00 MESZ');
+        console.log('       Dann einfach Script neu starten — resume-safe.');
+        console.log('');
+        console.log(`  Letzter Server-Fehler:`);
+        console.log(`  ${(err as Error).message.slice(0, 300)}`);
+        console.log('━'.repeat(70));
+        break;
+      }
+      throw err;
+    }
 
     if (opts.dryRun || opts.force) break;
     if (rows.length < PAGE_SIZE) break;
