@@ -377,7 +377,7 @@ export function CreatePlanFlow({ open, onClose, supabase, user, friends }: Creat
           <div
             className="pointer-events-none fixed top-0 left-0 right-0 h-[420px] -z-10"
             style={{
-              background: 'radial-gradient(ellipse 70% 60% at 50% 0%, rgba(138, 122, 164, 0.12), transparent 70%)',
+              background: 'radial-gradient(ellipse 70% 60% at 50% 0%, rgba(245, 239, 226, 0.08), transparent 70%)',
             }}
           />
 
@@ -579,7 +579,7 @@ function ChoiceCard({
           ? 'border-[color:var(--color-planer-accent)]/60 bg-[color:var(--color-planer-surface)]'
           : 'border-white/[0.06] bg-[color:var(--color-planer-surface)]/60 hover:border-white/15',
       ].join(' ')}
-      style={active ? { boxShadow: `0 14px 40px -28px rgba(138, 122, 164, 0.22)` } : undefined}
+      style={active ? { boxShadow: `0 14px 40px -28px rgba(245, 239, 226, 0.18)` } : undefined}
     >
       {/* Decorative letter in the corner */}
       <span

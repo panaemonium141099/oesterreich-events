@@ -10,25 +10,31 @@
   --color-surface-elevated: #141416;
   --color-surface-inset: #050506;
 
-  /* Planer-scope — cinematic editorial palette
+  /* Planer-scope — cinematic editorial palette (monochrome revision)
      Only used inside `.planer-scope` descendants. Rest of the app keeps its
      current neutral palette untouched.
 
-     Palette note: we moved off gold/amber after it tipped into
-     casino/barbershop territory. Primary accent is now a muted plum —
-     same editorial weight, none of the sleaze. */
+     Palette history:
+       v1: warm gold/amber accent → tipped into casino/barbershop territory
+       v2: muted plum → user felt "too lila"
+       v3 (current): pure monochrome. Primary "accent" is now a warm off-
+                     white that's one shade brighter than ink. Hierarchy
+                     carried by typography weight, scale, and negative
+                     space — not color. Semantic RSVP colors (sage / rose
+                     / maybe-amber) are kept because they encode meaning,
+                     not decoration. */
   --color-planer-void: #07060a;
   --color-planer-surface: #100d14;
   --color-planer-raised: #1a1620;
-  --color-planer-ink: #ebe6ee;            /* cool off-white */
-  --color-planer-dim: #9a93a2;            /* muted lavender-grey */
-  --color-planer-whisper: #5a5361;
-  --color-planer-accent: #8a7aa4;         /* primary — muted plum */
-  --color-planer-accent-deep: #5d4966;
-  --color-planer-accent-soft: rgba(138, 122, 164, 0.12);
-  --color-planer-sage: #7bb794;           /* "dabei" */
-  --color-planer-rose: #c67079;           /* "absage" */
-  --color-planer-maybe: #c9a86a;          /* "vielleicht" — used sparingly */
+  --color-planer-ink: #ede6d8;            /* warm off-white (primary text) */
+  --color-planer-dim: #9a938a;            /* warm muted */
+  --color-planer-whisper: #5a544d;
+  --color-planer-accent: #f5efe2;         /* one shade brighter than ink */
+  --color-planer-accent-deep: #c9c3b5;
+  --color-planer-accent-soft: rgba(245, 239, 226, 0.08);
+  --color-planer-sage: #7bb794;           /* "dabei" — kept, semantic */
+  --color-planer-rose: #c67079;           /* "absage" — kept, semantic */
+  --color-planer-maybe: #c9a86a;          /* "vielleicht" — kept, semantic */
 
   /* Expose the font vars as Tailwind font-family tokens */
   --font-display: var(--font-fraunces), ui-serif, Georgia, serif;
@@ -928,8 +934,8 @@ button:active, a:active, [role="button"]:active {
   z-index: 0;
   pointer-events: none;
   background:
-    radial-gradient(ellipse 70% 50% at 50% 0%, rgba(138, 122, 164, 0.10) 0%, transparent 60%),
-    radial-gradient(ellipse 100% 60% at 50% 100%, rgba(93, 73, 102, 0.05) 0%, transparent 70%);
+    radial-gradient(ellipse 70% 50% at 50% 0%, rgba(245, 239, 226, 0.06) 0%, transparent 60%),
+    radial-gradient(ellipse 100% 60% at 50% 100%, rgba(120, 112, 98, 0.04) 0%, transparent 70%);
 }
 
 /* All children of a spotlit/grainy section need z>0 to sit above the layers */
@@ -947,7 +953,7 @@ button:active, a:active, [role="button"]:active {
   letter-spacing: 0.08em;
 }
 
-/* Magnetic CTA — plum glow on hover, slight lift */
+/* Magnetic CTA — neutral warm-white glow on hover, slight lift */
 .magnetic-cta {
   position: relative;
   overflow: hidden;
@@ -959,7 +965,7 @@ button:active, a:active, [role="button"]:active {
   position: absolute;
   inset: -40%;
   background: radial-gradient(circle at var(--mx, 50%) var(--my, 50%),
-    rgba(138, 122, 164, 0.10) 0%, transparent 55%);
+    rgba(245, 239, 226, 0.08) 0%, transparent 55%);
   opacity: 0;
   transition: opacity 0.4s ease-out;
   pointer-events: none;
@@ -967,7 +973,7 @@ button:active, a:active, [role="button"]:active {
 .magnetic-cta:hover {
   transform: translateY(-1px);
   box-shadow:
-    0 6px 20px -10px rgba(138, 122, 164, 0.18),
+    0 6px 20px -10px rgba(255, 255, 255, 0.06),
     0 2px 8px -2px rgba(0, 0, 0, 0.4);
 }
 .magnetic-cta:hover::before {
@@ -978,14 +984,14 @@ button:active, a:active, [role="button"]:active {
   .magnetic-cta:hover { transform: none; }
 }
 
-/* Hairline divider variant — plum-tinted, used as editorial accent */
+/* Hairline divider variant — warm off-white, used as editorial accent */
 .hairline-accent {
   height: 1px;
   background: linear-gradient(90deg,
     transparent 0%,
-    rgba(138, 122, 164, 0.3) 30%,
-    rgba(138, 122, 164, 0.55) 50%,
-    rgba(138, 122, 164, 0.3) 70%,
+    rgba(245, 239, 226, 0.15) 30%,
+    rgba(245, 239, 226, 0.35) 50%,
+    rgba(245, 239, 226, 0.15) 70%,
     transparent 100%);
 }
 
@@ -1029,8 +1035,8 @@ button:active, a:active, [role="button"]:active {
 
 /* Step-rail dot — pulses when active */
 @keyframes stepPulse {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(138, 122, 164, 0.5); }
-  50%      { box-shadow: 0 0 0 6px rgba(138, 122, 164, 0); }
+  0%, 100% { box-shadow: 0 0 0 0 rgba(245, 239, 226, 0.45); }
+  50%      { box-shadow: 0 0 0 6px rgba(245, 239, 226, 0); }
 }
 .step-active-dot {
   animation: stepPulse 2s ease-out infinite;
@@ -1054,8 +1060,8 @@ button:active, a:active, [role="button"]:active {
 }
 .planer-scope input:focus,
 .planer-scope textarea:focus {
-  border-color: rgba(138, 122, 164, 0.5) !important;
-  background-color: rgba(138, 122, 164, 0.04) !important;
+  border-color: rgba(245, 239, 226, 0.3) !important;
+  background-color: rgba(245, 239, 226, 0.03) !important;
 }
 .planer-scope input::placeholder,
 .planer-scope textarea::placeholder {

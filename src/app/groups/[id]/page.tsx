@@ -434,7 +434,7 @@ export default function EventDashboardPage() {
   const heroImage = group?.image_url
     || linkedEvent?.image_url
     || (group?.location_lat && group?.location_lng
-      ? `https://api.mapbox.com/styles/v1/mapbox/dark-v11/static/pin-l+8a7aa4(${group.location_lng},${group.location_lat})/${group.location_lng},${group.location_lat},13,0/1600x700@2x?access_token=${process.env.NEXT_PUBLIC_MAPBOX_TOKEN || ''}`
+      ? `https://api.mapbox.com/styles/v1/mapbox/dark-v11/static/pin-l+d0c9bd(${group.location_lng},${group.location_lat})/${group.location_lng},${group.location_lat},13,0/1600x700@2x?access_token=${process.env.NEXT_PUBLIC_MAPBOX_TOKEN || ''}`
       : null);
 
   // ─── Render ───
@@ -480,9 +480,9 @@ export default function EventDashboardPage() {
           <div
             className="absolute inset-0"
             style={{
-              background: `radial-gradient(ellipse at 30% 40%, rgba(138,122,164,0.25), transparent 60%),
-                           radial-gradient(ellipse at 70% 80%, rgba(93,73,102,0.2), transparent 60%),
-                           linear-gradient(135deg, #0f0d13 0%, #15121a 100%)`,
+              background: `radial-gradient(ellipse at 30% 40%, rgba(245,239,226,0.16), transparent 60%),
+                           radial-gradient(ellipse at 70% 80%, rgba(120,112,98,0.12), transparent 60%),
+                           linear-gradient(135deg, #0f0d0c 0%, #15120f 100%)`,
             }}
           />
         )}

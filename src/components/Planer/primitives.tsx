@@ -118,7 +118,7 @@ export function PlanerButton({
     lg: 'px-7 py-3.5 text-[15px]',
   }[size];
   const variants = {
-    primary: 'bg-[color:var(--color-planer-accent)] text-[color:var(--color-planer-ink)] hover:bg-[#9a8ab5]',
+    primary: 'bg-[color:var(--color-planer-accent)] text-[color:var(--color-planer-void)] hover:bg-[#ffffff]',
     outline: 'border border-[color:var(--color-planer-accent)]/40 text-[color:var(--color-planer-accent)] hover:border-[color:var(--color-planer-accent)]/70 hover:bg-[color:var(--color-planer-accent)]/5',
     ghost: 'text-[color:var(--color-planer-dim)] hover:text-[color:var(--color-planer-ink)] hover:bg-white/[0.03]',
   }[variant];

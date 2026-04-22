@@ -48,8 +48,8 @@ function formatDateLine(dateStr: string | null): { day: string; month: string; t
 function getMapThumbnail(lat: number | null, lng: number | null, width = 540, height = 360): string | null {
   if (!lat || !lng) return null;
   const token = process.env.NEXT_PUBLIC_MAPBOX_TOKEN || '';
-  // Dark style + plum-tinted marker (our accent)
-  return `https://api.mapbox.com/styles/v1/mapbox/dark-v11/static/pin-s+8a7aa4(${lng},${lat})/${lng},${lat},12.5,0/${width}x${height}@2x?access_token=${token}`;
+  // Dark style + warm off-white marker (matches the accent token)
+  return `https://api.mapbox.com/styles/v1/mapbox/dark-v11/static/pin-s+d0c9bd(${lng},${lat})/${lng},${lat},12.5,0/${width}x${height}@2x?access_token=${token}`;
 }
 
 export function PlanCard({ plan, isNext = false, index = 0 }: PlanCardProps) {
@@ -78,7 +78,7 @@ export function PlanCard({ plan, isNext = false, index = 0 }: PlanCardProps) {
         ].join(' ')}
         style={{
           boxShadow: isNext
-            ? '0 14px 36px -24px rgba(138, 122, 164, 0.18), 0 6px 20px -10px rgba(0,0,0,0.4)'
+            ? '0 14px 36px -24px rgba(245, 239, 226, 0.14), 0 6px 20px -10px rgba(0,0,0,0.5)'
             : '0 10px 32px -18px rgba(0,0,0,0.5)',
         }}
       >
@@ -116,7 +116,7 @@ export function PlanCard({ plan, isNext = false, index = 0 }: PlanCardProps) {
                 <div
                   className="absolute inset-0 opacity-50"
                   style={{
-                    backgroundImage: `radial-gradient(circle at 30% 40%, rgba(138,122,164,0.22), transparent 55%)`,
+                    backgroundImage: `radial-gradient(circle at 30% 40%, rgba(245,239,226,0.14), transparent 55%)`,
                   }}
                 />
                 <svg
@@ -230,7 +230,7 @@ export function PlanCard({ plan, isNext = false, index = 0 }: PlanCardProps) {
           <div
             className="absolute inset-0"
             style={{
-              background: 'radial-gradient(circle at 20% 0%, rgba(138,122,164,0.04), transparent 50%)',
+              background: 'radial-gradient(circle at 20% 0%, rgba(245,239,226,0.03), transparent 50%)',
             }}
           />
         </div>

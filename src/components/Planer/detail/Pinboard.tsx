@@ -201,9 +201,9 @@ export function Pinboard({ supabase, user, groupId, canCreate, isOwner }: Pinboa
         style={{
           minHeight: '460px',
           background: `
-            radial-gradient(ellipse at 20% 10%, rgba(138,122,164,0.08) 0%, transparent 50%),
-            radial-gradient(ellipse at 80% 80%, rgba(93,73,102,0.05) 0%, transparent 50%),
-            linear-gradient(135deg, #0f0d13 0%, #15121a 100%)
+            radial-gradient(ellipse at 20% 10%, rgba(245,239,226,0.05) 0%, transparent 50%),
+            radial-gradient(ellipse at 80% 80%, rgba(120,112,98,0.04) 0%, transparent 50%),
+            linear-gradient(135deg, #0f0d0c 0%, #15120f 100%)
           `,
         }}
       >

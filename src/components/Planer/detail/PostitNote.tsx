@@ -52,14 +52,16 @@ interface PostitNoteProps {
   onDelete: (id: string) => void;
 }
 
-// Paper-inspired palette — muted hues aligned with the app's accent system.
-// All four sit around L~70 C~20 so they read as cousins on the board;
-// hue is the only thing separating them. No candy pastels, no Day-Glo.
-//   creme   ← family of --color-planer-maybe (#c9a86a, warm ochre)
-//   sage    ← family of --color-planer-sage (#7bb794)
-//   rose    ← family of --color-planer-rose (#c67079)
-//   lavender← family of --color-planer-accent (#8a7aa4, muted plum)
-// DB key "lavender" kept so the existing CHECK constraint still passes.
+// Paper-inspired palette — four muted hues for variety on the board.
+// The rest of the app is monochrome, but post-its keep color because they
+// need to be visually distinguishable at a glance. All four sit around
+// L~70 C~15-20 so they read as cousins, not as competing primaries.
+//   creme    — warm ochre (family of --color-planer-maybe)
+//   sage     — muted green (family of --color-planer-sage)
+//   rose     — dusty pink (family of --color-planer-rose)
+//   lavender — muted plum (intentional on the sticky palette — the user
+//              explicitly opted to keep a purple paper option even after
+//              the primary app accent dropped plum)
 const COLOR_STYLE: Record<PostitColor, { bg: string; shadow: string; ink: string; inkSoft: string }> = {
   creme: {
     bg: 'linear-gradient(135deg, #dcc990 0%, #c4ae70 100%)',
