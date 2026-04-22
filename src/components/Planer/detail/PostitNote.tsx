@@ -14,6 +14,7 @@
 import { motion, type PanInfo } from 'framer-motion';
 import { useState, useRef, useEffect } from 'react';
 import type { RefObject } from 'react';
+import { toast } from 'sonner';
 
 export type PostitColor = 'creme' | 'sage' | 'rose' | 'lavender';
 
@@ -33,8 +34,19 @@ export interface PostitData {
 interface PostitNoteProps {
   note: PostitData;
   boardRef: RefObject<HTMLDivElement | null>;
-  canEdit: boolean;
+  /**
+   * True when the current user is the author of THIS note. Only authors
+   * can drag, edit, or delete their own notes. Separate from the board's
+   * create-permission (owner-only boards still let existing authors edit
+   * their previously-pinned notes).
+   */
   isMine: boolean;
+  /**
+   * True when the current user is the group creator. Admin rights = can
+   * delete any note on the board (moderation safety net). Admin CANNOT
+   * edit other users' notes (author-only).
+   */
+  isAdmin: boolean;
   onMove: (id: string, x: number, y: number) => void;
   onEdit: (id: string, content: string) => void;
   onDelete: (id: string) => void;
@@ -75,7 +87,8 @@ const COLOR_STYLE: Record<PostitColor, { bg: string; shadow: string; ink: string
   },
 };
 
-export function PostitNote({ note, boardRef, canEdit, isMine, onMove, onEdit, onDelete }: PostitNoteProps) {
+export function PostitNote({ note, boardRef, isMine, isAdmin, onMove, onEdit, onDelete }: PostitNoteProps) {
+  const canDelete = isMine || isAdmin;
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(note.content ?? '');
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -121,7 +134,7 @@ export function PostitNote({ note, boardRef, canEdit, isMine, onMove, onEdit, on
       className={[
         'absolute rounded-[3px] select-none overflow-hidden',
         'flex flex-col',
-        isMine ? 'cursor-grab active:cursor-grabbing' : 'cursor-default',
+        isMine ? 'cursor-grab active:cursor-grabbing' : 'cursor-pointer',
       ].join(' ')}
       style={{
         left: `${note.position_x}%`,
@@ -141,17 +154,8 @@ export function PostitNote({ note, boardRef, canEdit, isMine, onMove, onEdit, on
         }}
       />
 
-      {/* Pin thumbtack */}
-      <div
-        className="absolute top-2 left-1/2 -translate-x-1/2 w-2.5 h-2.5 rounded-full z-10"
-        style={{
-          background: 'radial-gradient(circle at 30% 30%, #c8a2c8, #6b4a6b 70%, #3a2a3a 100%)',
-          boxShadow: '0 1px 2px rgba(0,0,0,0.5), inset 0 1px 1px rgba(255,255,255,0.3)',
-        }}
-      />
-
       {/* Content */}
-      <div className="relative flex-1 p-4 pt-6 flex flex-col">
+      <div className="relative flex-1 p-4 flex flex-col">
         {note.image_url ? (
           // Image note — fills, rest of the note is ambient
           <>
@@ -184,8 +188,8 @@ export function PostitNote({ note, boardRef, canEdit, isMine, onMove, onEdit, on
           />
         ) : (
           <p
-            onClick={() => canEdit && isMine && setEditing(true)}
-            className={`flex-1 text-sm leading-relaxed whitespace-pre-wrap break-words ${isMine ? 'cursor-text' : ''}`}
+            onClick={() => isMine && setEditing(true)}
+            className="flex-1 text-sm leading-relaxed whitespace-pre-wrap break-words select-none cursor-pointer"
             style={{ color: style.ink, fontFamily: 'var(--font-caveat), "Segoe Script", cursive', fontSize: '16px' }}
           >
             {note.content || (isMine ? 'Tap zum Schreiben' : '')}
@@ -202,18 +206,45 @@ export function PostitNote({ note, boardRef, canEdit, isMine, onMove, onEdit, on
           </div>
         )}
 
-        {/* Delete X — visible on hover, owner only */}
-        {isMine && !editing && (
-          <button
-            type="button"
-            onClick={(e) => { e.stopPropagation(); if (confirm('Post-it löschen?')) onDelete(note.id); }}
-            className="absolute top-1 right-1 w-5 h-5 rounded-full bg-black/10 hover:bg-black/25 flex items-center justify-center opacity-0 hover:opacity-100 group-hover:opacity-100 transition-opacity"
-            aria-label="Löschen"
-          >
-            <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24" style={{ color: style.ink }}>
-              <path d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
+        {/* Action icons — top-right corner.
+              - Copy: everyone, always (one click → clipboard).
+              - Delete: author OR plan admin only. */}
+        {!editing && (
+          <div className="absolute top-1 right-1 flex items-center gap-0.5">
+            {note.content && (
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  navigator.clipboard.writeText(note.content ?? '').then(
+                    () => toast.success('Kopiert'),
+                    () => toast.error('Konnte nicht kopieren'),
+                  );
+                }}
+                className="w-5 h-5 rounded-full bg-black/10 hover:bg-black/25 flex items-center justify-center opacity-60 hover:opacity-100 transition-opacity"
+                aria-label="Text kopieren"
+                title="Kopieren"
+              >
+                <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24" style={{ color: style.ink }}>
+                  <rect x="9" y="9" width="11" height="11" rx="1.5" />
+                  <path d="M5 15V5a2 2 0 012-2h8" />
+                </svg>
+              </button>
+            )}
+            {canDelete && (
+              <button
+                type="button"
+                onClick={(e) => { e.stopPropagation(); if (confirm('Post-it löschen?')) onDelete(note.id); }}
+                className="w-5 h-5 rounded-full bg-black/10 hover:bg-black/25 flex items-center justify-center opacity-60 hover:opacity-100 transition-opacity"
+                aria-label="Löschen"
+                title="Löschen"
+              >
+                <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24" style={{ color: style.ink }}>
+                  <path d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            )}
+          </div>
         )}
       </div>
     </motion.div>

@@ -236,8 +236,8 @@ export function Pinboard({ supabase, user, groupId, canCreate, isOwner }: Pinboa
               key={note.id}
               note={note}
               boardRef={boardRef}
-              canEdit={canCreate}
               isMine={note.user_id === user.id}
+              isAdmin={isOwner}
               onMove={handleMove}
               onEdit={handleEdit}
               onDelete={handleDelete}
