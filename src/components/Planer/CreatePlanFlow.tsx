@@ -366,13 +366,20 @@ export function CreatePlanFlow({ open, onClose, supabase, user, friends }: Creat
       {open && (
         <motion.div
           key="create-curtain"
-          className="fixed inset-0 z-[100] planer-scope planer-grain overflow-y-auto"
+          // Outer stays pure `fixed inset-0` — no `.planer-scope` here.
+          // That scope class sets `position: relative`, which (because it
+          // lives in unlayered CSS and Tailwind utilities live in @layer
+          // utilities) wins the cascade and neuters the `fixed`. Would
+          // make the overlay render inline at 0-size: invisible, but body
+          // scroll still locked via has-modal-open class → page frozen.
+          // Move the scope to an inner wrapper below.
+          className="fixed inset-0 z-[100] overflow-y-auto"
           variants={curtainEnter}
           initial="hidden"
           animate="visible"
           exit="exit"
-          style={{ backgroundColor: 'var(--color-planer-void)' }}
         >
+        <div className="planer-scope planer-grain min-h-full w-full" style={{ backgroundColor: 'var(--color-planer-void)' }}>
           {/* Ambient light wash at top */}
           <div
             className="pointer-events-none fixed top-0 left-0 right-0 h-[420px] -z-10"
@@ -496,6 +503,7 @@ export function CreatePlanFlow({ open, onClose, supabase, user, friends }: Creat
               </div>
             </div>
           </footer>
+        </div>
         </motion.div>
       )}
     </AnimatePresence>,
