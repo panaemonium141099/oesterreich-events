@@ -353,6 +353,55 @@ export default function EventPlanenPage() {
     setFriendSearch('');
   };
 
+  /**
+   * Returns true when the user has entered ANY non-trivial data into the
+   * create form. Used to decide whether a backdrop click / Cancel / ESC
+   * should warn about losing the draft.
+   */
+  const hasUnsavedDraft = useCallback((): boolean => {
+    return (
+      newName.trim().length > 0 ||
+      newDesc.trim().length > 0 ||
+      newDate.length > 0 ||
+      newTime.length > 0 ||
+      newLocation.trim().length > 0 ||
+      newAddress.trim().length > 0 ||
+      newNotes.trim().length > 0 ||
+      newImage !== null ||
+      selectedEvent !== null ||
+      selectedFriends.length > 0
+    );
+  }, [
+    newName, newDesc, newDate, newTime, newLocation, newAddress,
+    newNotes, newImage, selectedEvent, selectedFriends,
+  ]);
+
+  /**
+   * Attempt to close the create modal. If there's an unsaved draft, show a
+   * confirmation prompt — otherwise just reset. This prevents the common
+   * "accidentally clicked outside the card and lost everything" bug.
+   */
+  const requestClose = useCallback(() => {
+    if (!hasUnsavedDraft()) {
+      resetForm();
+      return;
+    }
+    const ok = typeof window !== 'undefined'
+      ? window.confirm('Eingaben verwerfen? Dein aktueller Entwurf geht verloren.')
+      : true;
+    if (ok) resetForm();
+  }, [hasUnsavedDraft]); // resetForm intentionally omitted — it's stable enough, closure over state fields is fine
+
+  // ESC-to-close with the same draft-guard behaviour.
+  useEffect(() => {
+    if (!showCreate) return;
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') requestClose();
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [showCreate, requestClose]);
+
   const toggleFriend = (id: string) => {
     setSelectedFriends(prev =>
       prev.includes(id) ? prev.filter(f => f !== id) : [...prev, id]
@@ -460,7 +509,7 @@ export default function EventPlanenPage() {
 
         {/* Create Modal */}
         {showCreate && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm" onClick={resetForm}>
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm" onClick={requestClose}>
             <div
               className="w-full max-w-lg max-h-[90vh] overflow-y-auto bg-[#0a0a0a]/95 backdrop-blur-xl border border-white/10 rounded-2xl p-6"
               onClick={(e) => e.stopPropagation()}
@@ -496,7 +545,7 @@ export default function EventPlanenPage() {
                     </button>
                   </div>
                   <button
-                    onClick={resetForm}
+                    onClick={requestClose}
                     className="w-full mt-4 py-2.5 text-sm text-white/40 hover:text-white/60 transition-colors"
                   >
                     Abbrechen
@@ -689,7 +738,7 @@ export default function EventPlanenPage() {
 
                   <div className="flex gap-3 mt-6">
                     <button
-                      onClick={resetForm}
+                      onClick={requestClose}
                       className="flex-1 py-3 rounded-xl border border-white/10 text-white/60 hover:text-white hover:border-white/20 transition-colors text-sm"
                     >
                       Abbrechen
@@ -859,7 +908,7 @@ export default function EventPlanenPage() {
 
                   <div className="flex gap-3 mt-6">
                     <button
-                      onClick={resetForm}
+                      onClick={requestClose}
                       className="flex-1 py-3 rounded-xl border border-white/10 text-white/60 hover:text-white hover:border-white/20 transition-colors text-sm"
                     >
                       Abbrechen
