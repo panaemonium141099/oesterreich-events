@@ -913,6 +913,9 @@ export default function EventDashboardPage() {
         </motion.div>
 
         {/* ══════════ PINBOARD ══════════ */}
+        {/* ══════════ CHRONIK ══════════ */}
+        <ChronikSection activities={activities} formatRelative={formatRelativeTime} />
+
         <Pinboard
           supabase={supabase}
           user={user}
@@ -920,9 +923,6 @@ export default function EventDashboardPage() {
           canCreate={canPin}
           isOwner={isOwner}
         />
-
-        {/* ══════════ CHRONIK ══════════ */}
-        <ChronikSection activities={activities} formatRelative={formatRelativeTime} />
       </main>
 
       {/* Event share modal (for chat) */}
@@ -1123,32 +1123,54 @@ function ChronikSection({
     return 'M8 12h.01M12 12h.01M16 12h.01';
   };
 
+  // Timeline convention: past on the left, newest on the right.
+  // activities arrives newest-first, so we reverse for display.
+  const chronological = [...activities].reverse();
+
   return (
-    <section className="mt-12">
-      <EditorialCaption className="mb-5">Chronik</EditorialCaption>
-      <ol className="relative space-y-0">
-        {/* vertical rule */}
-        <div className="absolute left-[11px] top-2 bottom-2 w-px bg-white/[0.06]" aria-hidden />
-        {activities.map(a => (
-          <li key={a.id} className="relative flex items-start gap-4 py-3">
-            <span
-              className="relative z-10 w-[22px] h-[22px] rounded-full bg-[color:var(--color-planer-surface)] border border-white/[0.1] flex items-center justify-center text-[color:var(--color-planer-dim)] shrink-0 mt-0.5"
+    <section className="mt-10 mb-10">
+      <div className="mb-5 flex items-baseline justify-between">
+        <EditorialCaption>Chronik</EditorialCaption>
+        <span className="text-[10px] uppercase tracking-[0.18em] text-[color:var(--color-planer-whisper)]">
+          <span className="tabular">{String(chronological.length).padStart(2, '0')}</span>
+          {' '}{chronological.length === 1 ? 'Ereignis' : 'Ereignisse'}
+        </span>
+      </div>
+
+      {/* Horizontal timeline — bleeds into the page gutters so it reads as
+          a continuous strip, scrolls horizontally if wider than viewport. */}
+      <div className="relative overflow-x-auto scrollbar-hide -mx-5 sm:-mx-8 px-5 sm:px-8 py-2">
+        <div className="relative flex min-w-max">
+          {/* Continuous rule through all the dots — soft fade at both ends */}
+          <div
+            className="absolute top-[38px] left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/[0.10] to-transparent"
+            aria-hidden
+          />
+          {chronological.map((a) => (
+            <div
+              key={a.id}
+              className="relative flex flex-col items-center gap-2 px-4 w-[140px] shrink-0"
             >
-              <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" d={iconFor(a)} />
-              </svg>
-            </span>
-            <div className="flex-1 min-w-0 flex items-baseline justify-between gap-3">
-              <p className="text-sm text-[color:var(--color-planer-ink)]/90 truncate">
+              {/* Description above the line (2-line clamp) */}
+              <p
+                className="text-[11px] text-[color:var(--color-planer-ink)]/75 text-center leading-snug h-[28px] overflow-hidden line-clamp-2 w-full"
+              >
                 {describe(a)}
               </p>
-              <span className="text-[10px] uppercase tracking-[0.18em] text-[color:var(--color-planer-whisper)] shrink-0">
+              {/* Node on the line */}
+              <span className="relative z-10 w-[22px] h-[22px] rounded-full bg-[color:var(--color-planer-surface)] border border-white/[0.18] flex items-center justify-center text-[color:var(--color-planer-dim)]">
+                <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d={iconFor(a)} />
+                </svg>
+              </span>
+              {/* Time below */}
+              <span className="text-[9px] uppercase tracking-[0.18em] text-[color:var(--color-planer-whisper)]">
                 {formatRelative(a.created_at)}
               </span>
             </div>
-          </li>
-        ))}
-      </ol>
+          ))}
+        </div>
+      </div>
     </section>
   );
 }
