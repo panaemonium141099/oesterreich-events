@@ -78,7 +78,7 @@ export function PlanCard({ plan, isNext = false, index = 0 }: PlanCardProps) {
         ].join(' ')}
         style={{
           boxShadow: isNext
-            ? '0 24px 50px -28px rgba(138, 122, 164, 0.35), 0 6px 20px -6px rgba(0,0,0,0.4)'
+            ? '0 14px 36px -24px rgba(138, 122, 164, 0.18), 0 6px 20px -10px rgba(0,0,0,0.4)'
             : '0 10px 32px -18px rgba(0,0,0,0.5)',
         }}
       >
@@ -225,12 +225,12 @@ export function PlanCard({ plan, isNext = false, index = 0 }: PlanCardProps) {
           </div>
         </div>
 
-        {/* Plum sheen on hover — subtle */}
+        {/* Hover sheen — whisper of warmth, no drama */}
         <div className="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700">
           <div
             className="absolute inset-0"
             style={{
-              background: 'radial-gradient(circle at 20% 0%, rgba(138,122,164,0.07), transparent 50%)',
+              background: 'radial-gradient(circle at 20% 0%, rgba(138,122,164,0.04), transparent 50%)',
             }}
           />
         </div>

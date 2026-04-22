@@ -959,7 +959,7 @@ button:active, a:active, [role="button"]:active {
   position: absolute;
   inset: -40%;
   background: radial-gradient(circle at var(--mx, 50%) var(--my, 50%),
-    rgba(138, 122, 164, 0.28) 0%, transparent 55%);
+    rgba(138, 122, 164, 0.10) 0%, transparent 55%);
   opacity: 0;
   transition: opacity 0.4s ease-out;
   pointer-events: none;
@@ -967,7 +967,7 @@ button:active, a:active, [role="button"]:active {
 .magnetic-cta:hover {
   transform: translateY(-1px);
   box-shadow:
-    0 8px 32px -8px rgba(138, 122, 164, 0.4),
+    0 6px 20px -10px rgba(138, 122, 164, 0.18),
     0 2px 8px -2px rgba(0, 0, 0, 0.4);
 }
 .magnetic-cta:hover::before {

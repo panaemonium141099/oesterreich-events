@@ -21,6 +21,7 @@
  */
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { User } from '@supabase/supabase-js';
@@ -349,12 +350,18 @@ export function CreatePlanFlow({ open, onClose, supabase, user, friends }: Creat
       })
     : friends;
 
-  return (
+  // Render into document.body via portal — escapes the AnimatedLayout's
+  // transform-wrapped parent (`position: fixed` would otherwise be
+  // relative to the ancestor motion.div, not the viewport, making the
+  // overlay render in an unreachable coordinate space).
+  if (typeof document === 'undefined') return null;
+
+  return createPortal(
     <AnimatePresence>
       {open && (
         <motion.div
           key="create-curtain"
-          className="fixed inset-0 z-50 planer-scope planer-grain overflow-y-auto"
+          className="fixed inset-0 z-[100] planer-scope planer-grain overflow-y-auto"
           variants={curtainEnter}
           initial="hidden"
           animate="visible"
@@ -365,7 +372,7 @@ export function CreatePlanFlow({ open, onClose, supabase, user, friends }: Creat
           <div
             className="pointer-events-none fixed top-0 left-0 right-0 h-[420px] -z-10"
             style={{
-              background: 'radial-gradient(ellipse 70% 60% at 50% 0%, rgba(232, 169, 78, 0.10), transparent 70%)',
+              background: 'radial-gradient(ellipse 70% 60% at 50% 0%, rgba(138, 122, 164, 0.12), transparent 70%)',
             }}
           />
 
@@ -478,7 +485,7 @@ export function CreatePlanFlow({ open, onClose, supabase, user, friends }: Creat
                     size="lg"
                     variant="primary"
                   >
-                    Treffen starten
+                    Plan starten
                   </PlanerButton>
                 )}
               </div>
@@ -486,7 +493,8 @@ export function CreatePlanFlow({ open, onClose, supabase, user, friends }: Creat
           </footer>
         </motion.div>
       )}
-    </AnimatePresence>
+    </AnimatePresence>,
+    document.body,
   );
 }
 
@@ -566,7 +574,7 @@ function ChoiceCard({
           ? 'border-[color:var(--color-planer-accent)]/60 bg-[color:var(--color-planer-surface)]'
           : 'border-white/[0.06] bg-[color:var(--color-planer-surface)]/60 hover:border-white/15',
       ].join(' ')}
-      style={active ? { boxShadow: `0 24px 60px -30px ${toneColor}` } : undefined}
+      style={active ? { boxShadow: `0 14px 40px -28px rgba(138, 122, 164, 0.22)` } : undefined}
     >
       {/* Decorative letter in the corner */}
       <span

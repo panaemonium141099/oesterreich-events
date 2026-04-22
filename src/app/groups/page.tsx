@@ -220,7 +220,7 @@ export default function EventPlanenPage() {
           <motion.div variants={riseItem} className="mb-5">
             <EditorialCaption>
               <span className="editorial-num mr-2">{String(events.length).padStart(2, '0')}</span>
-              / {events.length === 1 ? 'aktives Treffen' : 'aktive Treffen'}
+              / {events.length === 1 ? 'aktiver Plan' : 'aktive Pläne'}
               {totalPeople > 0 && (
                 <>
                   <span className="mx-3 text-[color:var(--color-planer-whisper)]">—</span>
@@ -250,7 +250,7 @@ export default function EventPlanenPage() {
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 5v14m7-7H5" />
               </svg>
-              Neues Treffen planen
+              Neuen Plan anlegen
             </PlanerButton>
           </motion.div>
 
@@ -273,7 +273,7 @@ export default function EventPlanenPage() {
             {upcoming.length > 0 && (
               <section>
                 <motion.div variants={riseItem} className="mb-4 flex items-baseline justify-between">
-                  <EditorialCaption>Kommende Treffen</EditorialCaption>
+                  <EditorialCaption>In Kürze</EditorialCaption>
                   <span className="text-[10px] uppercase tracking-[0.22em] text-[color:var(--color-planer-whisper)]">
                     <span className="tabular">{String(upcoming.length).padStart(2, '0')}</span>
                   </span>
@@ -354,7 +354,7 @@ function EmptyState({ onCreate }: { onCreate: () => void }) {
       </svg>
 
       <EditorialHeading size="section" className="mb-4">
-        Die <em className="italic text-[color:var(--color-planer-accent)]">erste</em> Einladung<br />
+        Der <em className="italic text-[color:var(--color-planer-accent)]">erste</em> Plan<br />
         schreibt sich von selbst.
       </EditorialHeading>
 
@@ -366,7 +366,7 @@ function EmptyState({ onCreate }: { onCreate: () => void }) {
         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 5v14m7-7H5" />
         </svg>
-        Erstes Treffen planen
+        Ersten Plan anlegen
       </PlanerButton>
     </motion.div>
   );
