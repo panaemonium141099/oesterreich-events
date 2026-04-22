@@ -72,6 +72,8 @@ interface EventResult {
   category: string | null;
 }
 
+type PinboardPermission = 'all_members' | 'owner_only';
+
 interface DraftState {
   mode: CreateMode | null;
   name: string;
@@ -87,6 +89,7 @@ interface DraftState {
   imagePreview: string | null;
   selectedEvent: EventResult | null;
   selectedFriends: string[];
+  pinboardPermission: PinboardPermission;
 }
 
 const EMPTY_DRAFT: DraftState = {
@@ -104,6 +107,7 @@ const EMPTY_DRAFT: DraftState = {
   imagePreview: null,
   selectedEvent: null,
   selectedFriends: [],
+  pinboardPermission: 'all_members',
 };
 
 interface CreatePlanFlowProps {
@@ -282,6 +286,7 @@ export function CreatePlanFlow({ open, onClose, supabase, user, friends }: Creat
         event_date: eventDate,
         notes: draft.notes.trim() || null,
         visibility: 'private',
+        pinboard_permission: draft.pinboardPermission,
       };
 
       const { data: group, error } = await supabase
@@ -1080,13 +1085,45 @@ function StepFeinschliff({
           )}
         </FormField>
 
-        <FormField label="Notizen" hint="Anfahrt, Parking, mitbringen …">
+        <FormField label="Erste Notiz" hint="landet als Post-it auf der Pinnwand">
           <PlanerTextarea
             rows={3}
             value={draft.notes}
             onChange={e => patch({ notes: e.target.value })}
             placeholder="Parken hinter dem Haus. Wer kann Kohle besorgen?"
           />
+        </FormField>
+
+        {/* Pinboard permission — segmented control */}
+        <FormField label="Pinnwand-Rechte" hint="wer darf Notizen anpinnen?">
+          <div className="grid grid-cols-2 gap-2 p-1 rounded-xl bg-white/[0.03] border border-white/[0.06]">
+            {([
+              { key: 'all_members', label: 'Alle Eingeladenen', sub: 'Jeder kann pinnen' },
+              { key: 'owner_only', label: 'Nur ich', sub: 'Lesezugriff für andere' },
+            ] as const).map(opt => {
+              const active = draft.pinboardPermission === opt.key;
+              return (
+                <button
+                  key={opt.key}
+                  type="button"
+                  onClick={() => patch({ pinboardPermission: opt.key })}
+                  className={[
+                    'px-3 py-2.5 rounded-lg text-left transition-all',
+                    active
+                      ? 'bg-[color:var(--color-planer-accent)]/12 ring-1 ring-[color:var(--color-planer-accent)]/40'
+                      : 'hover:bg-white/[0.03]',
+                  ].join(' ')}
+                >
+                  <div className={`text-[13px] font-medium ${active ? 'text-[color:var(--color-planer-ink)]' : 'text-[color:var(--color-planer-dim)]'}`}>
+                    {opt.label}
+                  </div>
+                  <div className="text-[10px] text-[color:var(--color-planer-whisper)] mt-0.5">
+                    {opt.sub}
+                  </div>
+                </button>
+              );
+            })}
+          </div>
         </FormField>
       </motion.div>
     </motion.div>

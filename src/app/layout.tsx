@@ -13,7 +13,7 @@ import { AnimatedLayout } from '@/components/UI/AnimatedLayout';
 import { NotificationToast } from '@/components/Notifications/NotificationToast';
 import { SocialNav } from '@/components/Layout/SocialNav';
 import { Toaster } from 'sonner';
-import { fraunces, geist } from '@/lib/fonts';
+import { fraunces, geist, caveat } from '@/lib/fonts';
 import './globals.css';
 
 const ADSENSE_CLIENT_ID = process.env.NEXT_PUBLIC_ADSENSE_CLIENT_ID;
@@ -138,7 +138,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="de" className={`${fraunces.variable} ${geist.variable}`}>
+    <html lang="de" className={`${fraunces.variable} ${geist.variable} ${caveat.variable}`}>
       <head>
         <Script
           id="ld-website"

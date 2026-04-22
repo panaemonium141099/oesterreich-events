@@ -17,6 +17,7 @@
  */
 import { Fraunces } from 'next/font/google';
 import { Geist } from 'next/font/google';
+import { Caveat } from 'next/font/google';
 
 export const fraunces = Fraunces({
   subsets: ['latin'],
@@ -36,5 +37,14 @@ export const geist = Geist({
   subsets: ['latin'],
   weight: 'variable',
   variable: '--font-geist',
+  display: 'swap',
+});
+
+// Handwritten font for pinboard post-its. Keeps things "analogue" on the
+// stickies against the editorial serif + clean sans elsewhere.
+export const caveat = Caveat({
+  subsets: ['latin'],
+  weight: 'variable',
+  variable: '--font-caveat',
   display: 'swap',
 });

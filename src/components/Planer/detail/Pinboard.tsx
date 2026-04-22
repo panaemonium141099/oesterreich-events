@@ -1,0 +1,288 @@
+'use client';
+
+/**
+ * Full-width pinboard that holds the plan's post-it notes.
+ *
+ * Board surface is a warm-dark felt texture. Notes are positioned via
+ * percentage coordinates so the board stays responsive. Notes can be:
+ *  - created (anyone in the group if `canCreate` is true)
+ *  - dragged (only by their author)
+ *  - edited (only by their author)
+ *  - deleted (author or group creator)
+ *
+ * Realtime sync: subscribes to `group_pinboard_notes` channel for this
+ * group so when one participant pins something, others see it appear
+ * without refresh.
+ */
+
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import type { SupabaseClient, User } from '@supabase/supabase-js';
+import { PostitNote, type PostitData, type PostitColor } from './PostitNote';
+import { PlanerButton, EditorialCaption } from '../primitives';
+import { springy } from '../motion';
+
+interface PinboardProps {
+  supabase: SupabaseClient;
+  user: User;
+  groupId: string;
+  canCreate: boolean;        // false if pinboard_permission=owner_only and user is not owner
+  isOwner: boolean;          // group creator (can delete any note)
+}
+
+const COLORS: PostitColor[] = ['creme', 'sage', 'rose', 'lavender'];
+
+export function Pinboard({ supabase, user, groupId, canCreate, isOwner }: PinboardProps) {
+  const [notes, setNotes] = useState<PostitData[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [adding, setAdding] = useState(false);
+  const [newContent, setNewContent] = useState('');
+  const [newColor, setNewColor] = useState<PostitColor>('creme');
+  const boardRef = useRef<HTMLDivElement>(null);
+
+  // ─── Fetch existing notes ───
+  const fetchNotes = useCallback(async () => {
+    const { data } = await supabase
+      .from('group_pinboard_notes')
+      .select('id, content, image_url, color, rotation, position_x, position_y, user_id, created_at, profile:profiles!group_pinboard_notes_user_id_fkey(first_name, avatar_url)')
+      .eq('group_id', groupId)
+      .order('created_at', { ascending: true });
+    if (data) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const normalized = data.map((n: any) => ({
+        ...n,
+        profile: Array.isArray(n.profile) ? n.profile[0] : n.profile,
+      })) as PostitData[];
+      setNotes(normalized);
+    }
+    setLoading(false);
+  }, [supabase, groupId]);
+
+  useEffect(() => { fetchNotes(); }, [fetchNotes]);
+
+  // ─── Realtime subscription ───
+  useEffect(() => {
+    const channel = supabase
+      .channel(`pinboard:${groupId}`)
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'group_pinboard_notes', filter: `group_id=eq.${groupId}` },
+        () => { fetchNotes(); }
+      )
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [supabase, groupId, fetchNotes]);
+
+  // ─── CRUD operations ───
+  const handleCreate = async () => {
+    const content = newContent.trim();
+    if (!content) { setAdding(false); return; }
+    // Randomish position in a plausible spawn-zone (upper-center) so
+    // notes don't all stack at exactly the same spot.
+    const position_x = 35 + Math.random() * 25;
+    const position_y = 10 + Math.random() * 15;
+    const rotation = (Math.random() - 0.5) * 0.12; // ±0.06 rad
+    const { error } = await supabase.from('group_pinboard_notes').insert({
+      group_id: groupId,
+      user_id: user.id,
+      content,
+      color: newColor,
+      position_x,
+      position_y,
+      rotation,
+    });
+    if (!error) {
+      setNewContent('');
+      setAdding(false);
+      // Realtime will pick it up, but refetch for immediate feedback
+      fetchNotes();
+    }
+  };
+
+  const handleMove = async (id: string, x: number, y: number) => {
+    // Optimistic update
+    setNotes(prev => prev.map(n => n.id === id ? { ...n, position_x: x, position_y: y } : n));
+    await supabase
+      .from('group_pinboard_notes')
+      .update({ position_x: x, position_y: y })
+      .eq('id', id);
+  };
+
+  const handleEdit = async (id: string, content: string) => {
+    setNotes(prev => prev.map(n => n.id === id ? { ...n, content } : n));
+    await supabase.from('group_pinboard_notes').update({ content }).eq('id', id);
+  };
+
+  const handleDelete = async (id: string) => {
+    setNotes(prev => prev.filter(n => n.id !== id));
+    await supabase.from('group_pinboard_notes').delete().eq('id', id);
+  };
+
+  return (
+    <section className="mt-12">
+      {/* Section header */}
+      <div className="mb-5 flex items-baseline justify-between gap-4">
+        <div>
+          <EditorialCaption className="mb-2">Pinnwand</EditorialCaption>
+          <p className="text-sm text-[color:var(--color-planer-dim)] italic">
+            {canCreate
+              ? 'Notizen, Anfahrtsbilder, spontane Ideen. Klebt hin was euch einfällt.'
+              : 'Lesezugriff — nur der Ersteller darf hier pinnen.'}
+          </p>
+        </div>
+        {canCreate && (
+          <PlanerButton
+            onClick={() => setAdding(true)}
+            size="md"
+            variant="outline"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M12 5v14m7-7H5" />
+            </svg>
+            Post-it
+          </PlanerButton>
+        )}
+      </div>
+
+      {/* Board surface — warm dark felt */}
+      <div
+        ref={boardRef}
+        className="relative rounded-2xl overflow-hidden border border-white/[0.05]"
+        style={{
+          minHeight: '460px',
+          background: `
+            radial-gradient(ellipse at 20% 10%, rgba(138,122,164,0.08) 0%, transparent 50%),
+            radial-gradient(ellipse at 80% 80%, rgba(93,73,102,0.05) 0%, transparent 50%),
+            linear-gradient(135deg, #0f0d13 0%, #15121a 100%)
+          `,
+        }}
+      >
+        {/* Felt-grain texture */}
+        <div
+          className="pointer-events-none absolute inset-0 opacity-50"
+          style={{
+            backgroundImage: `url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2'/><feColorMatrix values='0 0 0 0 0.12 0 0 0 0 0.10 0 0 0 0 0.16 0 0 0 0.4 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>")`,
+          }}
+        />
+
+        {/* Notes */}
+        {loading ? (
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="text-[color:var(--color-planer-whisper)] text-xs italic">Lade Notizen …</div>
+          </div>
+        ) : notes.length === 0 && !adding ? (
+          <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 p-8 text-center">
+            <svg className="w-10 h-10 text-[color:var(--color-planer-whisper)]" fill="none" stroke="currentColor" strokeWidth={1} viewBox="0 0 24 24">
+              <rect x="5" y="5" width="14" height="14" rx="1" />
+              <path d="M9 9h6M9 13h4" />
+            </svg>
+            <p className="text-[color:var(--color-planer-dim)] text-sm italic max-w-xs">
+              Noch keine Notizen — {canCreate ? 'kleb die erste hin.' : 'wartet auf die erste.'}
+            </p>
+          </div>
+        ) : (
+          notes.map(note => (
+            <PostitNote
+              key={note.id}
+              note={note}
+              boardRef={boardRef}
+              canEdit={canCreate}
+              isMine={note.user_id === user.id}
+              onMove={handleMove}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+            />
+          ))
+        )}
+
+        {/* Add-note compose overlay */}
+        <AnimatePresence>
+          {adding && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="absolute inset-0 flex items-center justify-center bg-[color:var(--color-planer-void)]/70 backdrop-blur-sm z-[200]"
+              onClick={() => { setAdding(false); setNewContent(''); }}
+            >
+              <motion.div
+                initial={{ scale: 0.9, y: 12 }}
+                animate={{ scale: 1, y: 0 }}
+                exit={{ scale: 0.95, y: 6 }}
+                transition={springy}
+                className="w-[280px] p-5 rounded-sm"
+                style={{
+                  background: 'linear-gradient(135deg, #f3e8c9 0%, #e8d9a7 100%)',
+                  boxShadow: '0 20px 50px -20px rgba(0,0,0,0.6), 0 8px 20px -8px rgba(232, 210, 150, 0.3)',
+                  transform: 'rotate(-1deg)',
+                }}
+                onClick={e => e.stopPropagation()}
+              >
+                <textarea
+                  value={newContent}
+                  onChange={e => setNewContent(e.target.value)}
+                  placeholder="Schreib was drauf …"
+                  autoFocus
+                  rows={5}
+                  className="w-full bg-transparent resize-none outline-none text-base leading-relaxed placeholder-black/30"
+                  style={{ color: '#4a3c1e', fontFamily: 'var(--font-caveat), "Segoe Script", cursive', fontSize: '18px' }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) handleCreate();
+                    if (e.key === 'Escape') { setAdding(false); setNewContent(''); }
+                  }}
+                />
+
+                {/* Color picker + actions */}
+                <div className="mt-4 flex items-center justify-between gap-3">
+                  <div className="flex gap-1.5">
+                    {COLORS.map(c => (
+                      <button
+                        key={c}
+                        type="button"
+                        onClick={() => setNewColor(c)}
+                        className="w-5 h-5 rounded-full ring-1 ring-black/10 transition-transform"
+                        style={{
+                          background: c === 'creme' ? '#e8d9a7'
+                            : c === 'sage' ? '#a8c5a8'
+                            : c === 'rose' ? '#d4a5a5'
+                            : '#b8a5cf',
+                          transform: newColor === c ? 'scale(1.2)' : 'scale(1)',
+                          boxShadow: newColor === c ? '0 0 0 2px rgba(0,0,0,0.4)' : 'none',
+                        }}
+                        aria-label={c}
+                      />
+                    ))}
+                  </div>
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => { setAdding(false); setNewContent(''); }}
+                      className="text-xs text-[#4a3c1e]/70 hover:text-[#4a3c1e] px-3 py-1.5"
+                    >
+                      Abbrechen
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleCreate}
+                      disabled={!newContent.trim()}
+                      className="text-xs font-medium px-3 py-1.5 rounded-full bg-[#4a3c1e] text-[#f3e8c9] hover:bg-[#2a2314] disabled:opacity-40 transition-colors"
+                    >
+                      Anpinnen
+                    </button>
+                  </div>
+                </div>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+
+      {/* Ownership hint */}
+      {isOwner && (
+        <p className="mt-3 text-[10px] text-[color:var(--color-planer-whisper)] italic">
+          Als Ersteller kannst du alle Post-its moderieren und die Pinn-Rechte in den Plan-Einstellungen ändern.
+        </p>
+      )}
+    </section>
+  );
+}
