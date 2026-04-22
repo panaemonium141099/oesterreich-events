@@ -72,7 +72,7 @@ interface EventResult {
   category: string | null;
 }
 
-type PinboardPermission = 'all_members' | 'owner_only';
+type PinboardPermission = 'all_members' | 'owner_only' | 'specific_users';
 
 interface DraftState {
   mode: CreateMode | null;
@@ -90,6 +90,8 @@ interface DraftState {
   selectedEvent: EventResult | null;
   selectedFriends: string[];
   pinboardPermission: PinboardPermission;
+  /** User IDs that may pin when pinboardPermission === 'specific_users' */
+  pinboardAllowedUsers: string[];
 }
 
 const EMPTY_DRAFT: DraftState = {
@@ -108,6 +110,7 @@ const EMPTY_DRAFT: DraftState = {
   selectedEvent: null,
   selectedFriends: [],
   pinboardPermission: 'all_members',
+  pinboardAllowedUsers: [],
 };
 
 interface CreatePlanFlowProps {
@@ -287,6 +290,8 @@ export function CreatePlanFlow({ open, onClose, supabase, user, friends }: Creat
         notes: draft.notes.trim() || null,
         visibility: 'private',
         pinboard_permission: draft.pinboardPermission,
+        pinboard_allowed_users:
+          draft.pinboardPermission === 'specific_users' ? draft.pinboardAllowedUsers : [],
       };
 
       const { data: group, error } = await supabase
@@ -443,7 +448,7 @@ export function CreatePlanFlow({ open, onClose, supabase, user, friends }: Creat
                     setFriendSearch={setFriendSearch}
                   />
                 )}
-                {step === 3 && <StepFeinschliff draft={draft} patch={patch} />}
+                {step === 3 && <StepFeinschliff draft={draft} patch={patch} friends={friends} />}
               </motion.div>
             </AnimatePresence>
 
@@ -988,11 +993,23 @@ function StepGäste({
 // ───────────────────────────────────────────────────────────────
 
 function StepFeinschliff({
-  draft, patch,
+  draft, patch, friends,
 }: {
   draft: DraftState;
   patch: (p: Partial<DraftState>) => void;
+  friends: FriendProfile[];
 }) {
+  // Only friends the user actually invited are eligible to be pin-authorized.
+  // Someone you haven't included on the guest list shouldn't be in this picker.
+  const invitedFriends = friends.filter(f => draft.selectedFriends.includes(f.id));
+  const togglePinUser = (id: string) => {
+    const current = draft.pinboardAllowedUsers;
+    patch({
+      pinboardAllowedUsers: current.includes(id)
+        ? current.filter(u => u !== id)
+        : [...current, id],
+    });
+  };
   const formatDate = (dateStr: string | null) => {
     if (!dateStr) return '';
     return new Date(dateStr).toLocaleDateString('de-AT', { day: 'numeric', month: 'long' });
@@ -1102,12 +1119,13 @@ function StepFeinschliff({
           />
         </FormField>
 
-        {/* Pinboard permission — segmented control */}
+        {/* Pinboard permission — segmented control, three modes */}
         <FormField label="Pinnwand-Rechte" hint="wer darf Notizen anpinnen?">
-          <div className="grid grid-cols-2 gap-2 p-1 rounded-xl bg-white/[0.03] border border-white/[0.06]">
+          <div className="grid grid-cols-3 gap-2 p-1 rounded-xl bg-white/[0.03] border border-white/[0.06]">
             {([
-              { key: 'all_members', label: 'Alle Eingeladenen', sub: 'Jeder kann pinnen' },
-              { key: 'owner_only', label: 'Nur ich', sub: 'Lesezugriff für andere' },
+              { key: 'all_members', label: 'Alle Eingeladenen', sub: 'jeder' },
+              { key: 'specific_users', label: 'Bestimmte', sub: 'du wählst' },
+              { key: 'owner_only', label: 'Nur ich', sub: 'rest liest' },
             ] as const).map(opt => {
               const active = draft.pinboardPermission === opt.key;
               return (
@@ -1122,10 +1140,10 @@ function StepFeinschliff({
                       : 'hover:bg-white/[0.03]',
                   ].join(' ')}
                 >
-                  <div className={`text-[13px] font-medium ${active ? 'text-[color:var(--color-planer-ink)]' : 'text-[color:var(--color-planer-dim)]'}`}>
+                  <div className={`text-[12px] font-medium leading-tight ${active ? 'text-[color:var(--color-planer-ink)]' : 'text-[color:var(--color-planer-dim)]'}`}>
                     {opt.label}
                   </div>
-                  <div className="text-[10px] text-[color:var(--color-planer-whisper)] mt-0.5">
+                  <div className="text-[9px] text-[color:var(--color-planer-whisper)] mt-0.5">
                     {opt.sub}
                   </div>
                 </button>
@@ -1133,6 +1151,59 @@ function StepFeinschliff({
             })}
           </div>
         </FormField>
+
+        {/* Friend-picker — only when 'specific_users' is selected */}
+        <AnimatePresence>
+          {draft.pinboardPermission === 'specific_users' && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.3, ease: EASE_OUT_EXPO }}
+              className="overflow-hidden"
+            >
+              <FormField label="Wer darf pinnen" hint="tap zum aus-/abwählen — nur aus den Eingeladenen">
+                {invitedFriends.length === 0 ? (
+                  <p className="text-xs italic text-[color:var(--color-planer-whisper)]">
+                    Du hast in Schritt 2 noch niemanden eingeladen. Geh zurück und wähle ein paar aus.
+                  </p>
+                ) : (
+                  <div className="flex flex-wrap gap-2">
+                    {invitedFriends.map(f => {
+                      const selected = draft.pinboardAllowedUsers.includes(f.id);
+                      return (
+                        <button
+                          key={f.id}
+                          type="button"
+                          onClick={() => togglePinUser(f.id)}
+                          className={[
+                            'inline-flex items-center gap-2 pl-1.5 pr-3 py-1 rounded-full border transition-all',
+                            selected
+                              ? 'border-[color:var(--color-planer-accent)]/60 bg-[color:var(--color-planer-accent)]/[0.08]'
+                              : 'border-white/[0.08] hover:border-white/20',
+                          ].join(' ')}
+                        >
+                          <span className="w-6 h-6 rounded-full overflow-hidden bg-white/10 flex items-center justify-center text-[10px] text-white/60">
+                            {f.avatar_url
+                              // eslint-disable-next-line @next/next/no-img-element
+                              ? <img src={f.avatar_url} alt="" className="w-full h-full object-cover" />
+                              : f.first_name[0]?.toUpperCase() || '?'}
+                          </span>
+                          <span className={`text-xs ${selected ? 'text-[color:var(--color-planer-ink)]' : 'text-[color:var(--color-planer-dim)]'}`}>
+                            {f.first_name}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+              </FormField>
+              <p className="text-[10px] text-[color:var(--color-planer-whisper)] italic mt-2">
+                Du als Ersteller darfst sowieso immer pinnen.
+              </p>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </motion.div>
     </motion.div>
   );

@@ -49,7 +49,34 @@ export function Pinboard({ supabase, user, groupId, canCreate, isOwner }: Pinboa
   const [adding, setAdding] = useState(false);
   const [newContent, setNewContent] = useState('');
   const [newColor, setNewColor] = useState<PostitColor>('creme');
+  const [newImage, setNewImage] = useState<File | null>(null);
+  const [newImagePreview, setNewImagePreview] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
   const boardRef = useRef<HTMLDivElement>(null);
+
+  // Clean up object URL when the preview changes or unmounts — otherwise
+  // we'd leak blob URLs.
+  useEffect(() => {
+    return () => { if (newImagePreview) URL.revokeObjectURL(newImagePreview); };
+  }, [newImagePreview]);
+
+  const handleImagePick = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith('image/')) { toast.error('Nur Bilder'); return; }
+    if (file.size > 5 * 1024 * 1024) { toast.error('Max. 5 MB'); return; }
+    if (newImagePreview) URL.revokeObjectURL(newImagePreview);
+    setNewImage(file);
+    setNewImagePreview(URL.createObjectURL(file));
+  };
+
+  const resetCompose = () => {
+    if (newImagePreview) URL.revokeObjectURL(newImagePreview);
+    setNewContent('');
+    setNewImage(null);
+    setNewImagePreview(null);
+    setAdding(false);
+  };
 
   // ─── Fetch existing notes ───
   // Note: we can't embed profiles via PostgREST's FK-hint syntax because
@@ -116,7 +143,31 @@ export function Pinboard({ supabase, user, groupId, canCreate, isOwner }: Pinboa
   // ─── CRUD operations ───
   const handleCreate = async () => {
     const content = newContent.trim();
-    if (!content) return; // keep form open so user sees why nothing happened
+    // DB constraint: either content or image_url must exist. Mirror in UI
+    // so the user doesn't submit an empty note and get a cryptic 23514.
+    if (!content && !newImage) return;
+
+    setUploading(true);
+
+    // Upload image first (if any) — get public URL to store on the note.
+    // Reusing the existing group-images bucket under a pinboard/ prefix.
+    let imageUrl: string | null = null;
+    if (newImage) {
+      const ext = newImage.name.split('.').pop() || 'jpg';
+      const path = `pinboard/${groupId}/${user.id}-${Date.now()}.${ext}`;
+      const { error: uploadErr } = await supabase.storage
+        .from('group-images')
+        .upload(path, newImage, { contentType: newImage.type, upsert: false });
+      if (uploadErr) {
+        console.error('[pinboard] upload failed:', uploadErr);
+        toast.error('Bild-Upload fehlgeschlagen');
+        setUploading(false);
+        return;
+      }
+      const { data: urlData } = supabase.storage.from('group-images').getPublicUrl(path);
+      imageUrl = urlData.publicUrl;
+    }
+
     // Random position in a plausible spawn-zone (upper-center) so notes
     // don't all stack at exactly the same spot.
     const position_x = 35 + Math.random() * 25;
@@ -125,7 +176,8 @@ export function Pinboard({ supabase, user, groupId, canCreate, isOwner }: Pinboa
     const { error } = await supabase.from('group_pinboard_notes').insert({
       group_id: groupId,
       user_id: user.id,
-      content,
+      content: content || null,
+      image_url: imageUrl,
       color: newColor,
       position_x,
       position_y,
@@ -139,10 +191,11 @@ export function Pinboard({ supabase, user, groupId, canCreate, isOwner }: Pinboa
         ? 'Tabelle fehlt. Die Migration wurde noch nicht appliziert.'
         : `Fehler: ${error.message}`;
       toast.error(hint);
+      setUploading(false);
       return;
     }
-    setNewContent('');
-    setAdding(false);
+    resetCompose();
+    setUploading(false);
     fetchNotes();
   };
 
@@ -253,7 +306,7 @@ export function Pinboard({ supabase, user, groupId, canCreate, isOwner }: Pinboa
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               className="absolute inset-0 flex items-center justify-center bg-[color:var(--color-planer-void)]/70 backdrop-blur-sm z-[200]"
-              onClick={() => { setAdding(false); setNewContent(''); }}
+              onClick={resetCompose}
             >
               <motion.div
                 initial={{ scale: 0.9, y: 12 }}
@@ -273,12 +326,39 @@ export function Pinboard({ supabase, user, groupId, canCreate, isOwner }: Pinboa
                 }}
                 onClick={e => e.stopPropagation()}
               >
+                {/* Image preview (if picked) — sits above the textarea */}
+                {newImagePreview && (
+                  <div className="relative mb-3 rounded-sm overflow-hidden">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={newImagePreview}
+                      alt=""
+                      className="w-full h-32 object-cover"
+                      draggable={false}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (newImagePreview) URL.revokeObjectURL(newImagePreview);
+                        setNewImage(null);
+                        setNewImagePreview(null);
+                      }}
+                      className="absolute top-1.5 right-1.5 w-6 h-6 rounded-full bg-black/50 hover:bg-black/70 text-white flex items-center justify-center backdrop-blur-sm"
+                      aria-label="Bild entfernen"
+                    >
+                      <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                        <path d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  </div>
+                )}
+
                 <textarea
                   value={newContent}
                   onChange={e => setNewContent(e.target.value)}
-                  placeholder="Schreib was drauf …"
+                  placeholder={newImagePreview ? 'Bildunterschrift (optional)…' : 'Schreib was drauf …'}
                   autoFocus
-                  rows={5}
+                  rows={newImagePreview ? 2 : 5}
                   className="w-full bg-transparent resize-none outline-none text-base leading-relaxed placeholder-black/25"
                   style={{
                     color: newColor === 'creme' ? '#3e3010'
@@ -290,47 +370,71 @@ export function Pinboard({ supabase, user, groupId, canCreate, isOwner }: Pinboa
                   }}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) handleCreate();
-                    if (e.key === 'Escape') { setAdding(false); setNewContent(''); }
+                    if (e.key === 'Escape') resetCompose();
                   }}
                 />
 
-                {/* Color picker — larger, clearer active state */}
-                <div className="mt-4 flex items-center gap-2">
-                  {COLORS.map(c => {
-                    const active = newColor === c;
-                    return (
-                      <button
-                        key={c}
-                        type="button"
-                        onClick={() => setNewColor(c)}
-                        className="relative w-7 h-7 rounded-full transition-all hover:scale-110"
-                        style={{
-                          background: SWATCH[c],
-                          boxShadow: active
-                            ? '0 0 0 2px rgba(0,0,0,0.85), 0 0 0 4px rgba(255,255,255,0.4)'
-                            : '0 0 0 1px rgba(0,0,0,0.15)',
-                        }}
-                        aria-label={c}
-                        aria-pressed={active}
-                      >
-                        {active && (
-                          <svg
-                            className="absolute inset-0 m-auto w-3.5 h-3.5"
-                            fill="none" stroke="#1a1a1a" strokeWidth={3} viewBox="0 0 24 24"
-                          >
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                          </svg>
-                        )}
-                      </button>
-                    );
-                  })}
+                {/* Toolbar: color picker on the left, image-attach on the right */}
+                <div className="mt-4 flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2">
+                    {COLORS.map(c => {
+                      const active = newColor === c;
+                      return (
+                        <button
+                          key={c}
+                          type="button"
+                          onClick={() => setNewColor(c)}
+                          className="relative w-7 h-7 rounded-full transition-all hover:scale-110"
+                          style={{
+                            background: SWATCH[c],
+                            boxShadow: active
+                              ? '0 0 0 2px rgba(0,0,0,0.85), 0 0 0 4px rgba(255,255,255,0.4)'
+                              : '0 0 0 1px rgba(0,0,0,0.15)',
+                          }}
+                          aria-label={c}
+                          aria-pressed={active}
+                        >
+                          {active && (
+                            <svg
+                              className="absolute inset-0 m-auto w-3.5 h-3.5"
+                              fill="none" stroke="#1a1a1a" strokeWidth={3} viewBox="0 0 24 24"
+                            >
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                            </svg>
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  {/* Image-attach button */}
+                  <label
+                    className="relative w-8 h-8 rounded-full flex items-center justify-center cursor-pointer transition-colors"
+                    style={{
+                      background: 'rgba(0,0,0,0.12)',
+                      color: newColor === 'creme' ? '#3e3010'
+                        : newColor === 'sage' ? '#1e2d1f'
+                        : newColor === 'rose' ? '#2a1416'
+                        : '#1e1628',
+                    }}
+                    title="Bild anhängen"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
+                    </svg>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={handleImagePick}
+                    />
+                  </label>
                 </div>
 
                 {/* Actions — clean text links, no pill buttons (paper aesthetic) */}
                 <div className="mt-5 flex items-center justify-end gap-5">
                   <button
                     type="button"
-                    onClick={() => { setAdding(false); setNewContent(''); }}
+                    onClick={resetCompose}
                     className="text-[13px] opacity-60 hover:opacity-100 transition-opacity"
                     style={{
                       color: newColor === 'creme' ? '#3e3010'
@@ -344,7 +448,7 @@ export function Pinboard({ supabase, user, groupId, canCreate, isOwner }: Pinboa
                   <button
                     type="button"
                     onClick={handleCreate}
-                    disabled={!newContent.trim()}
+                    disabled={uploading || (!newContent.trim() && !newImage)}
                     className="text-[13px] font-semibold inline-flex items-center gap-1.5 disabled:opacity-30 disabled:cursor-not-allowed hover:gap-2 transition-all"
                     style={{
                       color: newColor === 'creme' ? '#3e3010'
@@ -353,10 +457,12 @@ export function Pinboard({ supabase, user, groupId, canCreate, isOwner }: Pinboa
                         : '#1e1628',
                     }}
                   >
-                    Anpinnen
-                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={2.2} viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                    </svg>
+                    {uploading ? 'Lade hoch …' : 'Anpinnen'}
+                    {!uploading && (
+                      <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={2.2} viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                      </svg>
+                    )}
                   </button>
                 </div>
               </motion.div>

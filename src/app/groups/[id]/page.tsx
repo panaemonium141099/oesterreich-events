@@ -61,7 +61,8 @@ interface GroupData {
   event_date: string | null;
   notes: string | null;
   visibility: string;
-  pinboard_permission: 'all_members' | 'owner_only';
+  pinboard_permission: 'all_members' | 'owner_only' | 'specific_users';
+  pinboard_allowed_users: string[] | null;
 }
 
 interface Member {
@@ -500,7 +501,13 @@ export default function EventDashboardPage() {
   });
 
   const isOwner = group ? group.created_by === user?.id : false;
-  const canPin = group ? (group.pinboard_permission === 'all_members' || isOwner) : false;
+  const canPin = group ? (
+    isOwner
+    || group.pinboard_permission === 'all_members'
+    || (group.pinboard_permission === 'specific_users'
+        && !!user?.id
+        && (group.pinboard_allowed_users ?? []).includes(user.id))
+  ) : false;
 
   // Hero visual — image priority
   const heroImage = group?.image_url
