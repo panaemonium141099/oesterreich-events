@@ -333,14 +333,24 @@ function newStats(): Stats {
   };
 }
 
-/** Price per million tokens — update when switching models. */
+/**
+ * Price per million tokens — update when switching models.
+ *
+ * Note on RPD strategy: OpenAI rate limits are **per-model, per-org**, so
+ * hitting the daily cap on gpt-4o-mini doesn't touch gpt-4.1-nano's
+ * budget. The `-nano` variants are both cheaper AND give you a fresh
+ * quota when -mini is exhausted. Order here roughly reflects cost-
+ * per-event ascending.
+ */
 const PRICING = {
+  'gpt-5-nano': { in: 0.05, out: 0.40 },
+  'gpt-4.1-nano': { in: 0.10, out: 0.40 },
   'gpt-4o-mini': { in: 0.15, out: 0.60 },
-  'gpt-4o': { in: 2.5, out: 10.0 },
+  'gpt-5-mini': { in: 0.25, out: 2.00 },
   'gpt-4.1-mini': { in: 0.40, out: 1.60 },
-  'gpt-4.1': { in: 2.0, out: 8.0 },
-  'gpt-5-mini': { in: 0.25, out: 2.0 },
-  'gpt-5': { in: 1.25, out: 10.0 },
+  'gpt-5': { in: 1.25, out: 10.00 },
+  'gpt-4.1': { in: 2.00, out: 8.00 },
+  'gpt-4o': { in: 2.50, out: 10.00 },
 } as const;
 
 function estimateCostUsd(model: string, tokensIn: number, tokensOut: number): number {
