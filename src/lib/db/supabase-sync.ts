@@ -106,6 +106,10 @@ interface ExistingRow {
   category_needs_review: boolean | null;
   category_reason: string | null;
   category_candidates: unknown;
+  /** The URL slug. Once persisted it MUST NOT change — it's baked into
+   *  Google-indexed URLs, bookmarks, and social shares. See
+   *  `resolveStableSlug()` below. */
+  slug: string | null;
 }
 
 /**
@@ -141,7 +145,7 @@ async function prefetchExistingRows(
       .select(
         'source_name, source_id, latitude, longitude, geocoding_confidence, geocoding_source, ' +
           'category, tags, category_confidence, category_source, category_version, ' +
-          'category_locked, category_needs_review, category_reason, category_candidates',
+          'category_locked, category_needs_review, category_reason, category_candidates, slug',
       )
       .in('source_name', uniqueSourceNames)
       .in('source_id', idSlice);
@@ -352,12 +356,19 @@ function toSupabaseRow(
     geocoding_confidence: finalConfidence,
     geocoding_source: finalSource,
     content_fingerprint: generateFingerprint(event.title, event.start_date),
-    // Human-readable slug for SEO-friendly URLs like
-    // /events/641d90c0-nikita-miller-globe-wien. Always regenerated from the
-    // latest title + location so the URL stays in sync when scrapers update
-    // canonical titles. The 8-char short-ID prefix in the URL stays stable,
-    // so old indexed URLs still resolve (redirect logic handles it).
-    slug: generateEventSlug(event.title, resolved.locationName ?? event.location_name),
+    // Slug preservation rule:
+    //   - If the row already has a slug in the DB, KEEP IT. The slug is a
+    //     path segment in the canonical URL (/events/{plz-ort}/{date}/{slug})
+    //     and changing it would silently break every Google-indexed URL
+    //     because the catch-all's (slug, date) lookup would miss.
+    //   - If the row is new (or legacy without slug), generate one from
+    //     title + location_name.
+    //
+    // We learned this the hard way — pre-phase-1 the slug was regenerated
+    // every upsert, which was fine when the URL was {shortId}-{slug} because
+    // the shortId anchored the lookup. With the new {plz-ort}/{date}/{slug}
+    // shape, slug = primary lookup key, so it MUST be stable.
+    slug: existing?.slug ?? generateEventSlug(event.title, resolved.locationName ?? event.location_name),
     // venue_id from registry-based scraper (null for regular scrapers)
     ...(event.venue_id ? { venue_id: event.venue_id } : {}),
   };

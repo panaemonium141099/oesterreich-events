@@ -93,19 +93,17 @@ export function generateEventSlug(
 }
 
 /**
- * Builds the canonical event URL using the hybrid shortId-slug format.
+ * @deprecated Legacy shortId-based URL builder — superseded by
+ * `buildEventUrlV2(event)` which emits the canonical V3 form
+ * `/events/{plz-ort}/{yyyy-mm-dd}/{slug}`.
  *
- * For events without slug we fall back to the 8-char short ID — never the
- * full 36-char UUID. Rationale: short IDs are cleaner in search results and
- * the event detail page already resolves both forms via a range query on
- * the UUID. Keeping the canonical form short also keeps the "we serve only
- * one URL per event" invariant the redirect logic in `events/[slug]/page.tsx`
- * depends on.
+ * Kept exported (but unused internally — see `grep -r buildEventUrl`)
+ * for backwards compatibility with any external consumer that might
+ * still import it. Will be removed in a future cleanup pass once we're
+ * certain no integration references it.
  *
- * @param id - Full UUID of the event
- * @param slug - Generated slug (nullable for events without slug)
- * @returns URL path like "/events/888a6421-weinverkostung-mehr-rose-parndorf"
- *          or "/events/888a6421" for events without a slug
+ * New code MUST use `buildEventUrlV2(event)`. Any internal call sites
+ * touched during development should be migrated in the same commit.
  */
 export function buildEventUrl(id: string, slug?: string | null): string {
   const shortId = id.slice(0, 8);

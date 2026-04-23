@@ -40,7 +40,7 @@ export async function matchAndUpsert(
       // to let this scraper run clobber already-refined coords.
       const { data: existing } = await supabase
         .from('events')
-        .select('id, venue_id, venue_match_confidence, latitude, longitude, location_name, geocoding_source')
+        .select('id, venue_id, venue_match_confidence, latitude, longitude, location_name, geocoding_source, slug')
         .eq('source_id', candidate.source_id)
         .eq('scraper_name', candidate.scraper_name)
         .maybeSingle();
@@ -66,11 +66,14 @@ export async function matchAndUpsert(
         category: candidate.normalized_category ?? null,
         tags: candidate.normalized_tags ?? null,
         quality_score: candidate.quality_score ?? null,
-        // SEO-friendly slug. Same note as in supabase-sync: regenerated on
-        // every upsert because title+location may drift as scrapers refine
-        // the canonical form. The 8-char short-ID prefix in the URL is
-        // stable so indexed URLs still resolve.
-        slug: generateEventSlug(
+        // Slug preservation — once persisted the slug is a path segment
+        // of the canonical URL `/events/{plz-ort}/{date}/{slug}` and is
+        // used as the primary lookup key in the catch-all page handler.
+        // Regenerating on every scrape would silently break every
+        // Google-indexed URL. If the existing row already has a slug we
+        // keep it; only new rows (or legacy rows without a slug) get a
+        // freshly generated one.
+        slug: existing?.slug ?? generateEventSlug(
           candidate.normalized_title,
           candidate.normalized_location_name,
         ),

@@ -146,6 +146,38 @@ async function getEventBySlugAndDate(slug: string, date: string): Promise<Event 
   return getEventBySlugAndDateCached(slug, date);
 }
 
+/**
+ * Slug-only fallback lookup. Used when (slug, date) misses — happens when
+ * an event gets rescheduled (scraper updates start_date to a later day).
+ * The old date is no longer in the DB for this slug, but the slug itself
+ * is stable (preserved across re-upserts since phase-1.5). We look for
+ * any future event with this slug, highest event_score wins.
+ *
+ * Caller triggers a 301 to the canonical URL so Google moves the
+ * rescheduled event's index entry without a 404.
+ */
+const getEventBySlugOnlyCached = unstable_cache(
+  async (slug: string): Promise<Event | null> => {
+    const today = new Date().toISOString().slice(0, 10);
+    const { data, error } = await supabase
+      .from('events')
+      .select('*')
+      .eq('slug', slug)
+      .gte('start_date', today)
+      .eq('publish_status', 'published')
+      .order('event_score', { ascending: false, nullsFirst: false })
+      .limit(1);
+    if (error || !data || data.length === 0) return null;
+    return data[0] as Event;
+  },
+  ['event-by-slug-only'],
+  { revalidate: 3600, tags: ['event'] },
+);
+
+async function getEventBySlugOnly(slug: string): Promise<Event | null> {
+  return getEventBySlugOnlyCached(slug);
+}
+
 const getVenueCached = unstable_cache(
   async (venueId: string): Promise<{ name: string; city: string | null } | null> => {
     const { data, error } = await supabase
@@ -203,7 +235,16 @@ function parseSlugArray(slug: string[]): ParsedSlugArray {
 
 async function resolveEvent(parsed: ParsedSlugArray): Promise<Event | null> {
   if (parsed.mode === 'v2-3seg' && parsed.slug && parsed.date) {
-    return getEventBySlugAndDate(parsed.slug, parsed.date);
+    // Primary: exact match by (slug, date)
+    const exact = await getEventBySlugAndDate(parsed.slug, parsed.date);
+    if (exact) return exact;
+    // Fallback: same slug on any future date — catches the "event got
+    // rescheduled" case (scraper updates start_date → old URL has wrong
+    // date segment but slug is still the stable lookup key).
+    // The page-level 301 below will redirect the client to the canonical
+    // URL with the new date, so Google's old index entry rolls over
+    // cleanly without a 404.
+    return getEventBySlugOnly(parsed.slug);
   }
   if (parsed.shortId) {
     return getEventByShortId(parsed.shortId);
