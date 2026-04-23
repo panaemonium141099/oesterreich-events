@@ -487,16 +487,20 @@ export function EventDetail({ event, onClose, eveningMode, onTagClick }: EventDe
             );
           })()}
 
-          {/* Enrichment — tags, flags, audience/vibe/setting, price tier.
-              Populated by src/scripts/enrich-openai.ts. All optional; if
-              no enrichment fields exist we render nothing here. */}
-          {(event.tags?.length || event.audience?.length || event.vibe?.length || event.setting?.length
+          {/* Enrichment — tags, flags, audience/vibe/occasion/setting,
+              price tier + price flags. Populated by enrich-openai.ts
+              (schema v2, see docs/TAXONOMY.md §3). All optional; if no
+              enrichment fields exist we render nothing here. */}
+          {(event.tags?.length || event.audience?.length || event.vibe?.length
+            || event.occasion_tags?.length || event.setting?.length
+            || event.price_flags?.length
             || event.is_student_friendly || event.is_family_friendly
             || (event.price_tier && event.price_tier !== 'unbekannt')) && (
             <div className="mb-5 space-y-3">
-              {/* Top row — flags + price chip */}
+              {/* Top row — flags + price chip + price-flag chips (NEU v3) */}
               {(event.is_student_friendly || event.is_family_friendly
-                || (event.price_tier && event.price_tier !== 'unbekannt')) && (
+                || (event.price_tier && event.price_tier !== 'unbekannt')
+                || event.price_flags?.length) && (
                 <div className="flex flex-wrap gap-1.5">
                   {event.is_student_friendly && (
                     <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium ${eveningMode ? 'bg-cyan-900/40 text-cyan-300' : 'bg-cyan-100 text-cyan-700'}`}>
@@ -534,6 +538,69 @@ export function EventDetail({ event, onClose, eveningMode, onTagClick }: EventDe
                         : event.duration_type}
                     </span>
                   )}
+                  {/* Price flags — v3 additions (happy-hour, studentenrabatt, …) */}
+                  {event.price_flags?.map(pf => (
+                    <span key={`pf-${pf}`} className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium ${
+                      pf === 'happy-hour' || pf === 'getraenke-special'
+                        ? (eveningMode ? 'bg-orange-900/40 text-orange-300' : 'bg-orange-100 text-orange-700')
+                        : pf === 'studentenrabatt' || pf === 'damenrabatt'
+                        ? (eveningMode ? 'bg-cyan-900/40 text-cyan-300' : 'bg-cyan-100 text-cyan-700')
+                        : pf === 'freier-eintritt'
+                        ? (eveningMode ? 'bg-emerald-900/40 text-emerald-300' : 'bg-emerald-100 text-emerald-700')
+                        : pf === 'barrierefrei' || pf === 'kinderwagengeeignet'
+                        ? (eveningMode ? 'bg-indigo-900/40 text-indigo-300' : 'bg-indigo-100 text-indigo-700')
+                        : (eveningMode ? 'bg-slate-800 text-slate-400' : 'bg-slate-100 text-slate-600')
+                    }`}>
+                      {pf === 'happy-hour' ? '🍹 Happy Hour'
+                        : pf === 'freier-eintritt' ? '🎟 Frei'
+                        : pf === 'studentenrabatt' ? '🎓 Studentenrabatt'
+                        : pf === 'damenrabatt' ? '💃 Damen-Rabatt'
+                        : pf === 'getraenke-special' ? '🍻 Drink-Special'
+                        : pf === 'mit-anmeldung' ? 'Mit Anmeldung'
+                        : pf === 'ohne-anmeldung' ? 'Ohne Anmeldung'
+                        : pf === 'barrierefrei' ? '♿ Barrierefrei'
+                        : pf === 'kinderwagengeeignet' ? '🚼 Kinderwagen-OK'
+                        : pf === 'fuer-anfaenger' ? 'Für Anfänger'
+                        : pf === 'unter-20-euro' ? 'Unter 20€'
+                        : pf}
+                    </span>
+                  ))}
+                </div>
+              )}
+
+              {/* Occasion-Tags — v3 additions. "Wofür ist das Event gut?" */}
+              {event.occasion_tags && event.occasion_tags.length > 0 && (
+                <div>
+                  <h4 className={`text-[10px] uppercase tracking-wider mb-1.5 font-medium ${eveningMode ? 'text-slate-500' : 'text-slate-400'}`}>
+                    Wofür gut
+                  </h4>
+                  <div className="flex flex-wrap gap-1.5">
+                    {event.occasion_tags.slice(0, 4).map(o => (
+                      <span key={`occ-${o}`} className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${
+                        eveningMode
+                          ? 'bg-violet-900/30 text-violet-300 border border-violet-800/40'
+                          : 'bg-violet-50 text-violet-700 border border-violet-200'
+                      }`}>
+                        {o === 'ausgehen' ? '🌃 Ausgehen'
+                          : o === 'saufen-gehen' ? '🍻 Saufen gehen'
+                          : o === 'date-night' ? '💕 Date Night'
+                          : o === 'afterwork' ? '🕕 Afterwork'
+                          : o === 'wochenendplan' ? 'Wochenendplan'
+                          : o === 'teamevent' ? 'Teamevent'
+                          : o === 'spontan' ? 'Spontan'
+                          : o === 'tagesausflug' ? '🚗 Tagesausflug'
+                          : o === 'regentag' ? '🌧 Regentag'
+                          : o === 'geburtstagsidee' ? '🎂 Geburtstag'
+                          : o === 'erstes-date' ? 'Erstes Date'
+                          : o === 'fuer-den-abend' ? 'Für den Abend'
+                          : o === 'kennenlernen' ? 'Kennenlernen'
+                          : o === 'networking-anlass' ? 'Networking'
+                          : o === 'feierabend' ? 'Feierabend'
+                          : o === 'kurzfristig-heute' ? 'Kurzfristig heute'
+                          : o}
+                      </span>
+                    ))}
+                  </div>
                 </div>
               )}
 

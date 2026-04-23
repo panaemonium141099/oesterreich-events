@@ -137,6 +137,16 @@ export async function GET(request: NextRequest) {
   const setting = searchParams.get('setting');
   if (setting) filters.setting = setting.split(',').map(t => t.trim()).filter(Boolean);
 
+  // v3: Anlass-Tags (ausgehen, date-night, afterwork, saufen-gehen, …).
+  // Comma-separated. Matches events whose occasion_tags overlap ANY.
+  const occasion = searchParams.get('occasion');
+  if (occasion) filters.occasion = occasion.split(',').map(t => t.trim()).filter(Boolean);
+
+  // v3: Binary price/barrier flags (happy-hour, studentenrabatt, barrierefrei, …).
+  // Comma-separated. Matches events whose price_flags overlap ANY.
+  const priceFlagsParam = searchParams.get('priceFlags');
+  if (priceFlagsParam) filters.priceFlags = priceFlagsParam.split(',').map(t => t.trim()).filter(Boolean);
+
   const language = searchParams.get('language');
   if (language && ['deutsch', 'dialekt', 'englisch', 'mehrsprachig', 'ohne-sprache'].includes(language)) {
     filters.language = language as NonNullable<typeof filters.language>;
@@ -213,7 +223,8 @@ export async function GET(request: NextRequest) {
       ? baseQuery.select('id, title, category, location_name')
       : baseQuery.select(
           'id, title, description, start_date, end_date, location_name, address, postal_code, district, bundesland, latitude, longitude, category, tags, image_url, price_text, price_min, price_max, ticket_url, source_name, source_url, organizer, visibility, event_score, slug, ' +
-          'audience, vibe, setting, language, price_tier, duration_type, is_student_friendly, is_family_friendly, suggested_description, suggested_price_text',
+          'audience, vibe, setting, language, price_tier, duration_type, is_student_friendly, is_family_friendly, suggested_description, suggested_price_text, ' +
+          'occasion_tags, price_flags',
           needsCount ? { count: 'exact' } : undefined
         );
 
@@ -416,6 +427,13 @@ export async function GET(request: NextRequest) {
     }
     if (filters.setting && filters.setting.length > 0) {
       query = query.overlaps('setting', filters.setting);
+    }
+    // v3 additions — occasion_tags + price_flags. Same `ov` semantics.
+    if (filters.occasion && filters.occasion.length > 0) {
+      query = query.overlaps('occasion_tags', filters.occasion);
+    }
+    if (filters.priceFlags && filters.priceFlags.length > 0) {
+      query = query.overlaps('price_flags', filters.priceFlags);
     }
 
     // Bounding box filter for viewport-based loading
