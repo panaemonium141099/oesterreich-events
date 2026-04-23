@@ -177,9 +177,66 @@ Deviation > 20% → Anomalie, Untersuchung nötig.
 
 ---
 
+## Phase 0.5 — Critical Pre-Phase-1 Fix (added 2026-04-23 nach GSC-Check)
+
+**Trigger:** User öffnete Google Search Console und berichtete:
+- **Indexiert: 9**
+- **Nicht indexiert: 45.656**
+
+Das ist eine Indexing-Rate von **0,02%** — ein grundsätzliches Crawling-Problem, nicht ein "Hubs fehlen"-Problem. Phase 1 (URL-Rework) bringt keinen Traffic wenn Google die Seiten grundsätzlich nicht indexiert.
+
+### Root-Cause-Analyse
+
+Per curl-Response-Header-Check auf live Production gefunden:
+
+| Route | Cache-Control (vorher) | Problem |
+|-------|-----------------------|---------|
+| `/events/[slug]` (42k URLs!) | `private, no-cache, no-store` | Google liest das als „personalisierter Content, skip indexing" |
+| `/blog` | `private, no-cache, no-store` | dito |
+| `/` (Landing) | `private, no-cache, no-store` | dito (user-aware, komplex — später) |
+| `/blog/[slug]` | `public, max-age=86400, s-w-r=604800` | OK — next.config.ts Rule `/blog/:path*` wirkt |
+| `/[bundesland]` | `public, max-age=0, must-revalidate` + `X-Nextjs-Prerender: 1` | OK — ISR aktiv |
+
+Grund: die vier kritischen Routes haben kein `export const revalidate = ...` in ihren page.tsx. Next.js 16 rendert sie deshalb default als **dynamic on every request** und setzt `private, no-store` Header.
+
+**Zusätzlicher Fund:** `www.lasstreffen.at` → `lasstreffen.at` ist eine `307 Temporary Redirect` statt `301 Permanent Redirect`. 307 sagt Google „die www-Version könnte vielleicht zurückkommen", Google behält beide Varianten in Erinnerung und konsolidiert Signal nicht sauber.
+
+### Fix in diesem Commit
+
+- ✅ `src/app/events/[slug]/page.tsx` → `export const revalidate = 3600`
+- ✅ `src/app/blog/page.tsx` → `export const revalidate = 3600`
+- ⏳ `src/app/page.tsx` (Landing) → **verschoben auf Phase 2**, zu komplex (user-aware redirect)
+- ⏳ `www` → `root` Redirect von 307 → 301 → **zu prüfen**, läuft wahrscheinlich auf Vercel-Config-Ebene
+
+### Erwartung nach Deploy
+
+Nach dem Deploy (Vercel triggert automatisch auf git push master):
+- `/events/[slug]` Response-Header: `public, max-age=0, must-revalidate` + `X-Nextjs-Prerender: 1` + `X-Nextjs-Stale-Time: 300` (analog zu `/[bundesland]`)
+- Google sollte die Event-Seiten innerhalb 2-4 Wochen re-crawlen und indexieren
+- GSC-Indexing-Count sollte von 9 auf mindestens einige Tausend steigen
+
+### Regression-Check
+
+- TypeScript compile: ✅ sauber (keine neuen errors)
+- Layout-Änderungen: ✅ keine (nur `export const` hinzugefügt)
+- DB-Queries: ✅ unverändert
+- Scrape-Pipeline: ✅ unverändert
+- Der einzige Unterschied ist: Next.js baut die Event-Seiten jetzt als ISR statt dynamic — identischer Output HTML, aber cacheable
+
+### Testfälle Phase 0.5
+
+- `T0.5.1`: `curl -sIL https://lasstreffen.at/events/<any-slug>` nach Deploy → Response enthält `X-Nextjs-Prerender: 1`
+- `T0.5.2`: `curl -sIL https://lasstreffen.at/events/<any-slug>` nach Deploy → Cache-Control enthält `public` statt `private`
+- `T0.5.3`: `curl -sIL https://lasstreffen.at/blog` nach Deploy → analog
+- `T0.5.4`: GSC "Seitenindexierung" nach +14 Tagen → Indexiert ≥ 1.000 (von aktuell 9)
+
+---
+
 ## Entscheidung für nächste Phase
 
-**Phase 1 kann starten.** Die Baseline ist gesetzt, Regressionsgefahr ist null, GSC-Blocker ist nicht blockierend.
+**Phase 1 kann starten nach Phase-0.5-Deploy** (den Cache-Control-Fix erst live sehen bevor URL-Rework).
+
+Empfehlung: 48-72h nach diesem Commit GSC-Check wiederholen, Test T0.5.1-T0.5.3 verifizieren, dann Phase 1.
 
 **Empfehlung für Phase 1 erste Task:** URL-Rework auf `/events/[plz]-[ort]/[slug]-[shortid]`. Pipeline:
 

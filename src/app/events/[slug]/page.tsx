@@ -11,6 +11,20 @@ import { EventDetailActions } from '@/components/Events/EventDetailActions';
 import { EventImage } from '@/components/Events/EventImage';
 import { RelatedEvents } from '@/components/Events/RelatedEvents';
 
+/**
+ * ISR revalidation interval.
+ *
+ * Without this export Next.js renders the page on every request as a pure
+ * dynamic route, which makes it ship `Cache-Control: private, no-store,
+ * no-cache, max-age=0` — fatal for Google indexing (we observed 9 of 45 656
+ * pages actually indexed in Search Console because of this).
+ *
+ * 3600s (1h) is a safe compromise: event data updates once per scraper-cycle
+ * (every few hours), and stale-while-revalidate keeps served pages fast while
+ * the first visit after expiry triggers a silent re-render.
+ */
+export const revalidate = 3600;
+
 if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
   throw new Error('SUPABASE_SERVICE_ROLE_KEY is required');
 }

@@ -3,6 +3,18 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { ALL_POSTS } from '@/content/blog';
 
+/**
+ * ISR revalidation. Without it the category `searchParams` access forces the
+ * page to be rendered on every request with `Cache-Control: private, no-store`
+ * — Google reads that as "personalised, skip indexing".
+ *
+ * With `revalidate = 3600` the canonical /blog URL gets pre-rendered and
+ * served with `public, s-maxage=3600, stale-while-revalidate` — query-string
+ * variants (`/blog?category=X`) stay dynamic but are noindexed by Google
+ * anyway since they're not in the sitemap.
+ */
+export const revalidate = 3600;
+
 export const metadata: Metadata = {
   title: '\u00d6sterreich Events Blog | Event-Guides & Tipps',
   description:
