@@ -1,0 +1,13 @@
+{
+  "branch_name": "fn-13-seo-content-parity-vs-wasmachmaat",
+  "created_at": "2026-04-23T15:34:15.242910Z",
+  "depends_on_epics": [],
+  "id": "fn-13-seo-content-parity-vs-wasmachmaat",
+  "next_task": 1,
+  "plan_review_status": "unknown",
+  "plan_reviewed_at": null,
+  "spec_path": ".flow/specs/fn-13-seo-content-parity-vs-wasmachmaat.md",
+  "status": "open",
+  "title": "SEO + Content Parity vs wasmachma.at \u2014 additiv, non-destructive",
+  "updated_at": "2026-04-23T15:34:15.242943Z"
+}
