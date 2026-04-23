@@ -26,6 +26,31 @@ import { RelatedEvents } from '@/components/Events/RelatedEvents';
  */
 export const revalidate = 3600;
 
+/**
+ * ISR opt-in for on-demand generation.
+ *
+ * In Next.js 16 a dynamic route (`/events/[slug]`) is treated as
+ * fully dynamic unless you either
+ *   a) pre-build its params at build time via `generateStaticParams()`, or
+ *   b) declare that new params should be generated on-demand via an empty
+ *      `generateStaticParams()` + `dynamicParams = true`.
+ *
+ * Option (a) would require pre-building ~42 000 event pages at every
+ * Vercel build — minutes of CI time for marginal value. Option (b) is
+ * the ISR pattern: zero pages pre-built, each unique slug cached on
+ * first hit and served from CDN on subsequent hits for `revalidate`
+ * seconds.
+ *
+ * Side-effect: Next.js now ships `Cache-Control: public, max-age=0,
+ * must-revalidate` + `X-Nextjs-Prerender: 1` instead of `private,
+ * no-store`. That's what Googlebot needs to index the page.
+ */
+export const dynamicParams = true;
+
+export async function generateStaticParams() {
+  return [];
+}
+
 if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
   throw new Error('SUPABASE_SERVICE_ROLE_KEY is required');
 }
