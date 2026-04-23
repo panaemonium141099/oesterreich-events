@@ -13,7 +13,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Über LassTreffen.at',
     description:
-      'Eine unabhängige, von Studenten entwickelte Plattform, die rund 80.000 Veranstaltungen in Österreich auf einer interaktiven Karte bündelt.',
+      'Eine unabhängige, von einem Studenten entwickelte Plattform, die österreichische Veranstaltungen auf einer interaktiven Karte bündelt.',
     type: 'website',
     url: 'https://lasstreffen.at/ueber-uns',
   },
@@ -55,10 +55,16 @@ export default function UeberUnsPage() {
             </h2>
             <p className="mb-4">
               Ich heiße <span className="text-white">Jonathan Glatz</span> und studiere an der
-              Fachhochschule Burgenland. 2025 habe ich versucht, mit Freunden ein paar coole
-              Events für ein Wochenende zu finden — und gemerkt, dass es für österreichische
-              Veranstaltungen keinen zentralen Ort gibt. Tickets liegen auf oeticket, Eventim
-              und hundert kleinen Ticket-Vendors. Gemeinde-Events leben auf
+              Fachhochschule Burgenland. Die Idee zu dieser Plattform hatte ich eigentlich schon
+              2016 — damals als Schüler habe ich einen ersten Prototypen als Android-App gebaut,
+              aus dem aber nie mehr als eine technische Spielerei geworden ist. Anfang 2026 habe ich
+              das Projekt wieder aufgenommen — diesmal zuerst als Webapp, damit man sie ohne
+              Installation nutzen kann. Native Apps für Android und iOS sind der nächste Schritt.
+            </p>
+            <p className="mb-4">
+              Der Ausgangspunkt ist bis heute derselbe: Für österreichische Veranstaltungen gibt es
+              keinen zentralen Ort. Tickets liegen auf oeticket, Eventim und hundert kleinen
+              Ticket-Vendors. Gemeinde-Events leben auf
               &nbsp;
               <Link href="/quellen" className="underline underline-offset-2 text-white/90 hover:text-white">Gemeinde-Websites</Link>
               . Nightlife-Termine stehen in Instagram-Stories. Festival-Lineups kommen als PDF.
@@ -77,12 +83,11 @@ export default function UeberUnsPage() {
               Wie wir Events sammeln
             </h2>
             <p className="mb-4">
-              Hinter der Seite laufen rund <span className="text-white">140 individuelle Scraper</span>,
-              die täglich Veranstaltungsdaten aus offiziellen Quellen ziehen: Austria Tourism,
-              Feratel-Deskline-Portale (zB Salzkammergut, Wörthersee, Zillertal), über 2000
+              Täglich ziehen Hintergrund-Jobs neue Veranstaltungsdaten aus offiziellen Quellen:
+              Austria Tourism, Feratel-Deskline-Portale (zB Salzkammergut, Wörthersee, Zillertal),
               österreichische Gemeinde-Websites via CMS-Konnektoren, Ticket-Vendors wie oeticket
-              und Ö-Ticket, Universitäts-Kalender aller 56 österreichischen Hochschulen, und die
-              wichtigsten Club- und Festival-Portale der Republik.
+              und Ö-Ticket, Universitäts-Kalender österreichischer Hochschulen und die wichtigsten
+              Club- und Festival-Portale der Republik.
             </p>
             <p className="mb-4">
               Gesammelt wird nur das, was rechtlich erlaubt ist: offene Daten (Creative Commons,
