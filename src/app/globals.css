@@ -26,7 +26,7 @@
   --color-planer-void: #07060a;
   --color-planer-surface: #100d14;
   --color-planer-raised: #1a1620;
-  --color-planer-ink: #ede6d8;            /* warm off-white (primary text) */
+  --color-planer-ink: #ffffff;            /* pure white (primary text) */
   --color-planer-dim: #9a938a;            /* warm muted */
   --color-planer-whisper: #5a544d;
   --color-planer-accent: #f5efe2;         /* one shade brighter than ink */
