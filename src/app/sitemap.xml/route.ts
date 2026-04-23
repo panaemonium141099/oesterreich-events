@@ -182,7 +182,7 @@ export async function GET(): Promise<NextResponse> {
       while (eventsAdded < MAX_EVENTS) {
         const { data, error } = await supabase
           .from('events')
-          .select('id, slug, updated_at, quality_score, postal_code, address, bundesland, location_name')
+          .select('id, slug, start_date, updated_at, quality_score, postal_code, address, bundesland, location_name')
           .gte('start_date', today)
           .eq('publish_status', 'published')
           .gte('quality_score', 40)

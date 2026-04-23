@@ -110,6 +110,42 @@ async function getEventByShortId(slugParam: string): Promise<Event | null> {
   return getEventByShortIdCached(slugParam);
 }
 
+/**
+ * Loads an event by (slug, yyyy-mm-dd). This is the preferred lookup for V2
+ * URLs of the shape `/events/{plz-ort}/{date}/{slug}`.
+ *
+ * DB has ~42k events; `slug` values are title-based so collisions with the
+ * SAME slug on the SAME day are effectively zero. If multiple hits do
+ * happen we rank by event_score descending — the more trustworthy row wins.
+ */
+const getEventBySlugAndDateCached = unstable_cache(
+  async (slug: string, date: string): Promise<Event | null> => {
+    // Date-range filter: [yyyy-mm-dd 00:00, yyyy-mm-dd+1 00:00)
+    const dayStart = `${date}T00:00:00.000Z`;
+    const nextDay = new Date(date + 'T00:00:00Z');
+    nextDay.setUTCDate(nextDay.getUTCDate() + 1);
+    const dayEnd = nextDay.toISOString();
+
+    const { data, error } = await supabase
+      .from('events')
+      .select('*')
+      .eq('slug', slug)
+      .gte('start_date', dayStart)
+      .lt('start_date', dayEnd)
+      .order('event_score', { ascending: false, nullsFirst: false })
+      .limit(1);
+
+    if (error || !data || data.length === 0) return null;
+    return data[0] as Event;
+  },
+  ['event-by-slug-date'],
+  { revalidate: 3600, tags: ['event'] },
+);
+
+async function getEventBySlugAndDate(slug: string, date: string): Promise<Event | null> {
+  return getEventBySlugAndDateCached(slug, date);
+}
+
 const getVenueCached = unstable_cache(
   async (venueId: string): Promise<{ name: string; city: string | null } | null> => {
     const { data, error } = await supabase
@@ -132,19 +168,47 @@ async function getVenue(
 }
 
 /**
- * Catch-all route params. Accepts both URL schemes:
- *   Legacy  (1 segment):  /events/abc12345-event-slug
- *   V2      (2 segments): /events/1010-wien/event-slug-abc12345
+ * Catch-all route params — three URL schemas coexist during the migration:
  *
- * We normalise to a single "token for DB lookup" regardless of format.
+ *   A) Legacy  (1 segment):  /events/abc12345-event-slug
+ *   B) V2-old  (2 segments): /events/1010-wien/event-slug-abc12345
+ *   C) V2-new  (3 segments): /events/1010-wien/2026-09-15/event-slug
+ *
+ * The handler resolves them to `{event, currentPath}` regardless of shape:
+ *   - C: `(slug, date)` DB lookup
+ *   - B: shortId extraction from the tail of segment[1]
+ *   - A: shortId extraction from segment[0]
+ *
+ * A + B both 301-redirect to the canonical C form. Only C renders directly.
  */
-function shortIdFromSlugArray(slug: string[]): string {
-  if (slug.length >= 2) {
-    // V2: shortId is at the END of the last segment (e.g. "festival-abc12345")
-    return extractShortId(slug[slug.length - 1]);
+interface ParsedSlugArray {
+  mode: 'legacy-1seg' | 'v2-2seg' | 'v2-3seg';
+  shortId?: string;
+  slug?: string;
+  date?: string;
+}
+
+function parseSlugArray(slug: string[]): ParsedSlugArray {
+  // Shape C — /events/{plz-ort}/{yyyy-mm-dd}/{slug}
+  if (slug.length === 3 && /^\d{4}-\d{2}-\d{2}$/.test(slug[1])) {
+    return { mode: 'v2-3seg', date: slug[1], slug: slug[2] };
   }
-  // Legacy: first 8 chars ARE the shortId
-  return extractShortId(slug[0] ?? '');
+  // Shape B — /events/{plz-ort}/{slug-shortId}
+  if (slug.length === 2) {
+    return { mode: 'v2-2seg', shortId: extractShortId(slug[1]) };
+  }
+  // Shape A — /events/{shortId-slug}  (catches everything else)
+  return { mode: 'legacy-1seg', shortId: extractShortId(slug[0] ?? '') };
+}
+
+async function resolveEvent(parsed: ParsedSlugArray): Promise<Event | null> {
+  if (parsed.mode === 'v2-3seg' && parsed.slug && parsed.date) {
+    return getEventBySlugAndDate(parsed.slug, parsed.date);
+  }
+  if (parsed.shortId) {
+    return getEventByShortId(parsed.shortId);
+  }
+  return null;
 }
 
 export async function generateMetadata({
@@ -153,8 +217,7 @@ export async function generateMetadata({
   params: Promise<{ slug: string[] }>;
 }): Promise<Metadata> {
   const { slug: slugArr } = await params;
-  const shortId = shortIdFromSlugArray(slugArr);
-  const event = await getEventByShortId(shortId);
+  const event = await resolveEvent(parseSlugArray(slugArr));
 
   if (!event) {
     return { title: 'Event nicht gefunden' };
@@ -369,8 +432,7 @@ export default async function EventDetailPage({
   params: Promise<{ slug: string[] }>;
 }) {
   const { slug: slugArr } = await params;
-  const shortId = shortIdFromSlugArray(slugArr);
-  const event = await getEventByShortId(shortId);
+  const event = await resolveEvent(parseSlugArray(slugArr));
 
   if (!event) {
     notFound();

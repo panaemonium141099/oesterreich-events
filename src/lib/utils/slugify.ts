@@ -251,6 +251,8 @@ function parseCityFromAddress(address: string | null | undefined): string | null
 export interface EventForUrl {
   id: string;
   slug?: string | null;
+  /** ISO timestamp — only the date portion is used in the URL */
+  start_date?: string | null;
   postal_code?: string | null;
   address?: string | null;
   bundesland?: string | null;
@@ -260,33 +262,66 @@ export interface EventForUrl {
 /**
  * Builds the canonical Phase-1 event URL.
  *
- *   /events/{plz}-{ort}/{slug}-{shortId}
+ *   /events/{plz}-{ort}/{yyyy-mm-dd}/{slug}
  *
- * Priority for the `{plz}-{ort}` prefix:
- *   1. event.postal_code + city parsed from address       → "1010-wien"
+ * Example: `/events/8010-irdning/2026-09-15/irdninger-kirtag`
+ *
+ * Design notes:
+ *   - Three path segments keep every token meaningful to humans + Google.
+ *   - Date as middle segment gives Google an "event-like" structural hint
+ *     (similar to news-article URL patterns) and makes the URL self-
+ *     describing: a reader sees `/2026-09-15/` and immediately knows when.
+ *   - No shortId suffix. DB lookup uses `(slug, date)` which is unique in
+ *     practice across 42k events. On the extremely rare collision the
+ *     handler picks the row with the highest event_score.
+ *
+ * Priority for the `{plz}-{ort}` prefix (unchanged from before):
+ *   1. event.postal_code + parsed city from address       → "1010-wien"
  *   2. event.postal_code + location_name                  → "8952-irdning"
  *   3. event.postal_code + bundesland capital slug        → "4020-linz"
- *   4. bundesland-capital PLZ + city/location_name        → "8010-irdning"
- *      (keeps the real place name even when we don't know its PLZ)
+ *   4. bundesland-capital PLZ + location_name             → "8010-irdning"
  *   5. bundesland-capital PLZ + bundesland-capital slug   → "7000-eisenstadt"
  *   6. hard fallback                                      → "0000-at"
  *
- * This means **every event gets a deterministic, keyword-rich URL**, even
- * rows with missing postal_code or city. Worst case is "0000-at" — which
- * is rare (<1% of rows) and still legal SEO-wise.
+ * Date fallback — if the row has no `start_date` (shouldn't happen in
+ * production, but be defensive) we fall back to the legacy V2-with-shortId
+ * form so the URL still uniquely identifies the event.
  */
 export function buildEventUrlV2(event: EventForUrl): string {
   const shortId = event.id.slice(0, 8);
   const slug = event.slug ?? shortId;
-
   const { plz, ort } = resolveEventUrlPrefix(event);
   const prefix = `${plz}-${ort}`;
 
-  // Slug must end with `-shortId` so the catch-all route can reliably extract
-  // it from the last hyphen-delimited token.
-  const slugWithId = slug.endsWith(`-${shortId}`) ? slug : `${slug}-${shortId}`;
+  const date = extractDatePart(event.start_date);
+  if (date) {
+    return `/events/${prefix}/${date}/${slug}`;
+  }
 
+  // Defensive fallback — no usable date. Use shortId-suffixed slug so the
+  // catch-all can still resolve uniquely via shortId extraction.
+  const slugWithId = slug.endsWith(`-${shortId}`) ? slug : `${slug}-${shortId}`;
   return `/events/${prefix}/${slugWithId}`;
+}
+
+/**
+ * Extracts the `yyyy-mm-dd` portion of a date input. Accepts both:
+ *   - "2026-09-15T19:30:00+00:00"  (common DB format)
+ *   - "2026-09-15"                  (already a date)
+ * Returns null if the input doesn't parse.
+ */
+function extractDatePart(input: string | null | undefined): string | null {
+  if (!input) return null;
+  // Fast-path: already looks like yyyy-mm-dd at the start
+  const match = /^(\d{4}-\d{2}-\d{2})/.exec(input.trim());
+  if (match) return match[1];
+  // Slow-path: try Date parsing
+  const d = new Date(input);
+  if (isNaN(d.getTime())) return null;
+  const yyyy = d.getUTCFullYear();
+  const mm = String(d.getUTCMonth() + 1).padStart(2, '0');
+  const dd = String(d.getUTCDate()).padStart(2, '0');
+  return `${yyyy}-${mm}-${dd}`;
 }
 
 /**
