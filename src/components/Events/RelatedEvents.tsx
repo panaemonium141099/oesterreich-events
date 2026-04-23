@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { formatDateCompact, formatTime } from '@/lib/utils/date';
-import { buildEventUrl } from '@/lib/utils/slugify';
+import { buildEventUrlV2 } from '@/lib/utils/slugify';
 import { getCategoryBadgeClass } from '@/lib/event-images';
 import { EventImage } from './EventImage';
 
@@ -16,6 +16,11 @@ interface RelatedEvent {
   image_url: string | null;
   category: string | null;
   slug?: string | null;
+  // Additional fields for V2 URL generation (via buildEventUrlV2). All
+  // optional because the API may still serve older rows without them.
+  postal_code?: string | null;
+  address?: string | null;
+  bundesland?: string | null;
 }
 
 function SkeletonCard() {
@@ -71,7 +76,7 @@ export function RelatedEvents({ eventId }: { eventId: string }) {
               return (
                 <Link
                   key={event.id}
-                  href={buildEventUrl(event.id, event.slug)}
+                  href={buildEventUrlV2(event)}
                   className="rounded-xl overflow-hidden bg-white/5 border border-white/10 hover:border-white/20 transition-colors group"
                 >
                   <EventImage

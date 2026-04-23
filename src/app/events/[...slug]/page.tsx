@@ -503,6 +503,9 @@ export default async function EventDetailPage({
             venueId={event.venue_id}
             venueName={venue?.name}
             startDate={event.start_date}
+            postalCode={event.postal_code}
+            address={event.address}
+            locationName={event.location_name}
           />
 
           <div className="relative w-full aspect-video rounded-xl overflow-hidden mb-6">

@@ -8,7 +8,7 @@ import { createClient } from '@/lib/supabase/client';
 import { CalendarIcon, MapPinIcon } from '@/components/UI/Icons';
 import { ProfileDropdown } from '@/components/Layout/ProfileDropdown';
 import { toast } from 'sonner';
-import { buildEventUrl } from '@/lib/utils/slugify';
+import { buildEventUrlV2 } from '@/lib/utils/slugify';
 import { EventImage } from '@/components/Events/EventImage';
 
 interface SavedEvent {
@@ -25,6 +25,10 @@ interface SavedEvent {
     image_url: string | null;
     category: string | null;
     bundesland: string | null;
+    // Fields for V2 URL generation (added as part of Phase-1 cleanup)
+    slug?: string | null;
+    postal_code?: string | null;
+    address?: string | null;
   };
 }
 
@@ -53,7 +57,7 @@ export default function SavedEventsPage() {
       .from('saved_events')
       .select(`
         id, event_id, remind_at, notes, created_at,
-        events (id, title, start_date, location_name, image_url, category, bundesland)
+        events (id, title, start_date, location_name, image_url, category, bundesland, slug, postal_code, address)
       `)
       .eq('user_id', user!.id)
       .order('created_at', { ascending: false });
@@ -167,7 +171,7 @@ export default function SavedEventsPage() {
               return (
                 <Link
                   key={saved.id}
-                  href={buildEventUrl(event.id, (event as Record<string, unknown>).slug as string | undefined)}
+                  href={buildEventUrlV2(event)}
                   className="flex items-center gap-4 p-4 rounded-xl bg-white/5 border border-white/10 hover:border-white/20 transition-all group"
                 >
                   {/* Image */}

@@ -6,7 +6,7 @@ import { createClient } from '@/lib/supabase/client';
 import { useAuth } from '@/lib/supabase/auth-context';
 import { AfterSavePanel } from './AfterSavePanel';
 import { toast } from 'sonner';
-import { buildEventUrl } from '@/lib/utils/slugify';
+import { buildEventUrlV2 } from '@/lib/utils/slugify';
 
 interface EventDetailActionsProps {
   eventId: string;
@@ -17,6 +17,12 @@ interface EventDetailActionsProps {
   venueId?: string | null;
   venueName?: string | null;
   startDate?: string;
+  // Fields needed by buildEventUrlV2 so share links point to the canonical V2
+  // URL rather than a legacy shortId-slug form. Optional because some edge
+  // cases (future components) may not have them.
+  postalCode?: string | null;
+  address?: string | null;
+  locationName?: string | null;
 }
 
 export function EventDetailActions({
@@ -28,6 +34,9 @@ export function EventDetailActions({
   venueId,
   venueName,
   startDate,
+  postalCode,
+  address,
+  locationName,
 }: EventDetailActionsProps) {
   const router = useRouter();
   const { user } = useAuth();
@@ -91,7 +100,15 @@ export function EventDetailActions({
   }, [user, bookmarked, bookmarkLoading, eventId, supabase]);
 
   const handleShare = useCallback(async () => {
-    const shareUrl = `${window.location.origin}${buildEventUrl(eventId, eventSlug)}`;
+    const shareUrl = `${window.location.origin}${buildEventUrlV2({
+      id: eventId,
+      slug: eventSlug,
+      start_date: startDate,
+      postal_code: postalCode,
+      address,
+      bundesland,
+      location_name: locationName,
+    })}`;
     const shareData = {
       title: eventTitle,
       url: shareUrl,

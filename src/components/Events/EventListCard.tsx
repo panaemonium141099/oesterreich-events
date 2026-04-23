@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import type { Event } from '@/types/events';
 import { formatDateCompact, formatTime } from '@/lib/utils/date';
-import { buildEventUrl } from '@/lib/utils/slugify';
+import { buildEventUrlV2 } from '@/lib/utils/slugify';
 import { getCategoryBadgeClass } from '@/lib/event-images';
 import { EventImage } from './EventImage';
 
@@ -19,7 +19,7 @@ export function EventListCard({ event }: EventListCardProps) {
 
   return (
     <Link
-      href={buildEventUrl(event.id, event.slug)}
+      href={buildEventUrlV2(event)}
       className="flex gap-4 p-3 rounded-xl bg-white/5 border border-white/10 hover:border-white/20 transition-colors group"
     >
       {/* Thumbnail */}

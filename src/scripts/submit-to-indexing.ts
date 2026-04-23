@@ -81,20 +81,20 @@ function sleep(ms: number): Promise<void> {
   return new Promise(r => setTimeout(r, ms));
 }
 
-/**
- * Hybrid slug URL (same shape as sitemap.ts buildEventUrl).
- * Slug may be null; we fall back to the pure short-id URL.
- */
-function buildEventUrl(id: string, slug: string | null | undefined): string {
-  const shortId = id.slice(0, 8);
-  if (!slug) return `${BASE_URL}/events/${shortId}`;
-  return `${BASE_URL}/events/${shortId}-${slug}`;
-}
+// V2 URL builder imported from the single source of truth. Phase-1 migration:
+// IndexNow + Google Indexing API now receive canonical 3-segment URLs with
+// date, no legacy shortId-suffix form anymore.
+import { buildEventUrlV2 } from '@/lib/utils/slugify';
 
 // ─── Event fetch ─────────────────────────────────────────────────────────
 interface EventRow {
   id: string;
   slug: string | null;
+  start_date: string;
+  postal_code: string | null;
+  address: string | null;
+  bundesland: string | null;
+  location_name: string | null;
   quality_score: number | null;
   updated_at: string | null;
 }
@@ -109,7 +109,7 @@ async function fetchCandidates(): Promise<EventRow[]> {
 
   let query = supabase
     .from('events')
-    .select('id, slug, quality_score, updated_at')
+    .select('id, slug, start_date, postal_code, address, bundesland, location_name, quality_score, updated_at')
     .gte('start_date', today)
     .eq('publish_status', 'published')
     .gte('quality_score', 60)  // higher bar than sitemap (40); we don't want
@@ -155,7 +155,7 @@ async function main() {
     return;
   }
 
-  const urls = events.map(e => buildEventUrl(e.id, e.slug));
+  const urls = events.map(e => `${BASE_URL}${buildEventUrlV2(e)}`);
 
   // ── IndexNow (Bing/Yandex/etc) ────────────────────────────────────────
   if (!opts.googleOnly) {

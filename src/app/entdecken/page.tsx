@@ -15,7 +15,7 @@
 
 import { useState, useRef } from 'react';
 import Link from 'next/link';
-import { buildEventUrl } from '@/lib/utils/slugify';
+import { buildEventUrlV2 } from '@/lib/utils/slugify';
 import { TagChip } from '@/components/UI/TagChip';
 
 interface SearchMatch {
@@ -36,6 +36,12 @@ interface SearchMatch {
   is_student_friendly: boolean | null;
   is_family_friendly: boolean | null;
   _similarity: number;
+  // Fields needed by buildEventUrlV2 for canonical V3 URLs. Optional —
+  // older API responses may not include them (buildEventUrlV2 falls back
+  // gracefully).
+  postal_code?: string | null;
+  address?: string | null;
+  bundesland?: string | null;
 }
 
 interface SearchResponse {
@@ -201,7 +207,7 @@ export default function EntdeckenPage() {
               {result.matches.map((ev) => (
                 <Link
                   key={ev.id}
-                  href={buildEventUrl(ev.id, ev.slug)}
+                  href={buildEventUrlV2(ev)}
                   className="block rounded-xl bg-white/[0.03] border border-white/10 hover:border-white/20 overflow-hidden transition-colors"
                 >
                   {ev.image_url && (

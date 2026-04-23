@@ -32,7 +32,7 @@ export async function GET(request: NextRequest) {
     let query = supabase
       .from('events')
       .select(
-        'id, title, description, start_date, end_date, location_name, address, postal_code, district, bundesland, latitude, longitude, category, image_url, price_text, price_min, price_max, ticket_url, source_name, source_url, organizer, visibility, event_score, quality_score',
+        'id, slug, title, description, start_date, end_date, location_name, address, postal_code, district, bundesland, latitude, longitude, category, image_url, price_text, price_min, price_max, ticket_url, source_name, source_url, organizer, visibility, event_score, quality_score',
         { count: 'exact' }
       )
       .or('visibility.eq.public,visibility.is.null')

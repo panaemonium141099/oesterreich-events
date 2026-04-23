@@ -12,7 +12,7 @@ import { TagChip } from '../UI/TagChip';
 import confetti from 'canvas-confetti';
 import { trackEvent } from '@/lib/analytics';
 import { formatDateLong, formatTime } from '@/lib/utils/date';
-import { buildEventUrl } from '@/lib/utils/slugify';
+import { buildEventUrlV2 } from '@/lib/utils/slugify';
 
 interface EventDetailProps {
   event: Event;
@@ -98,7 +98,7 @@ export function EventDetail({ event, onClose, eveningMode, onTagClick }: EventDe
   };
 
   const handleShare = () => {
-    const shareUrl = `${window.location.origin}${buildEventUrl(event.id, event.slug)}`;
+    const shareUrl = `${window.location.origin}${buildEventUrlV2(event)}`;
     navigator.clipboard.writeText(shareUrl);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
@@ -155,7 +155,7 @@ export function EventDetail({ event, onClose, eveningMode, onTagClick }: EventDe
   const shareMenuRef = useRef<HTMLDivElement>(null);
 
   const handleShareLink = () => {
-    const shareUrl = `${window.location.origin}${buildEventUrl(event.id, event.slug)}`;
+    const shareUrl = `${window.location.origin}${buildEventUrlV2(event)}`;
     navigator.clipboard.writeText(shareUrl);
     setCopied(true);
     setShowShareMenu(false);
@@ -667,7 +667,7 @@ export function EventDetail({ event, onClose, eveningMode, onTagClick }: EventDe
               </a>
             ) : (
               <a
-                href={buildEventUrl(event.id, event.slug)}
+                href={buildEventUrlV2(event)}
                 onClick={() => trackEvent('link_click', { event_id: event.id, event_title: event.title, type: 'detail' })}
                 className={`flex-1 text-white text-sm font-medium rounded-xl py-3 px-4 text-center transition-colors flex items-center justify-center gap-2 ${
                   eveningMode ? 'bg-indigo-600 hover:bg-indigo-700' : 'bg-blue-600 hover:bg-blue-700'

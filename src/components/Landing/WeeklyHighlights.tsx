@@ -7,7 +7,7 @@ import type { Event } from '@/types/events';
 import { formatDate } from '@/lib/utils/date';
 import { getCategoryBadgeClass } from '@/lib/event-images';
 import { EventImage } from '@/components/Events/EventImage';
-import { buildEventUrl } from '@/lib/utils/slugify';
+import { buildEventUrlV2 } from '@/lib/utils/slugify';
 
 function IconCal({ className }: { className?: string }) {
   return (
@@ -44,7 +44,7 @@ function HighlightCard({ event }: { event: Event }) {
   const locationText = event.location_name || event.bundesland || null;
 
   return (
-    <Link href={buildEventUrl(event.id, event.slug)} className="flex-none w-60 snap-start group block">
+    <Link href={buildEventUrlV2(event)} className="flex-none w-60 snap-start group block">
       {/* Fixed total height = image 160px + content 90px = 250px — always uniform */}
       <div className="bg-[#111] rounded-2xl overflow-hidden border border-white/8 hover:border-white/20 hover:shadow-xl hover:shadow-black/40 transition-all duration-200">
         {/* Image — fixed height */}

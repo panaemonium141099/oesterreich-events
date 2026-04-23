@@ -193,7 +193,7 @@ export async function POST(req: NextRequest) {
   const ids = matchList.map(m => m.id);
   const { data: events } = await supabase
     .from('events')
-    .select('id, title, description, start_date, end_date, location_name, latitude, longitude, category, tags, image_url, price_text, price_tier, slug, audience, vibe, occasion_tags, is_student_friendly, is_family_friendly, duration_type')
+    .select('id, title, description, start_date, end_date, location_name, postal_code, address, bundesland, latitude, longitude, category, tags, image_url, price_text, price_tier, slug, audience, vibe, occasion_tags, is_student_friendly, is_family_friendly, duration_type')
     .in('id', ids);
 
   // Preserve similarity order
