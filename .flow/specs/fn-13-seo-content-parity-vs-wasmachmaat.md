@@ -15,10 +15,22 @@ Was er **nicht** hat und wir schon: JSON-LD Event-Schema, dynamische OG-Bilder, 
 **Kernprinzip:** Alles was wir jetzt bauen ist **additiv zu bestehendem Code**. Scraper-Pipeline, Taxonomy v3, Enrichment-Pipeline, Planer-UI, Social-Features — nichts davon wird verändert. Wir bauen **nur neue URLs, neue Quellen, neue Schemas, neue Hubs oben drauf**.
 
 **Erfolgskriterium auf Portfolio-Ebene:**
-- **Google Search Console**: indexierte URLs von aktuell <5k auf >50k in 8 Wochen
-- **Organic Traffic** laut GA4: mindestens 3x aktueller Wert in 8 Wochen
-- **Keyword-Coverage**: Top-50-Positionen für 500+ Long-Tail-Queries ("Events [Stadt]", "[Kategorie] [Bundesland]", "Veranstaltungen [Datum]" usw.)
-- **AI-Citability**: testbare Anfragen an ChatGPT/Perplexity zitieren lasstreffen.at
+
+Referenz-Baseline aus Phase 0 (2026-04-23, `data/seo-baseline/2026-04-23-baseline.json`):
+- Sitemap URLs: **42.615** (höher als vorab geschätzt — existingr Sitemap-Generator liefert bereits Event-URLs + Static-Pages + Blog)
+- DB future published events: **70.505** (zum Vergleich wasmachma.at: 76.644)
+- Enriched v2: **18.817** / 70.505 = 27% (Enrichment läuft weiter, wird Baseline verbessern)
+- Embeddings: **0** (build-embeddings muss einmal durchlaufen)
+- Interne Analytics 30d: **1 Session** (≈ aktueller production traffic praktisch null)
+
+Ziele nach 8 Wochen:
+- **Sitemap URLs**: 42.615 → **120.000+** (durch Gemeinde-Hubs + Themen-Hubs + Erlebnisse + neue Quellen)
+- **Google Search Console indexierte URLs**: unbekannt (GSC-Setup in Phase 0 pending) → **≥50.000 indexed**
+- **Organic Traffic (GSC + internal analytics)**: 1 Session/30d → **≥1.000 Sessions/30d**
+- **Keyword-Coverage**: unbekannt → **500+ Queries auf Top-50** (aus der 50-Query-Liste + via DataForSEO-Discovery zu tracken)
+- **AI-Citability**: 0 referrals from chat.openai.com / perplexity.ai / claude.ai → **≥10 Referrals/Woche** nach Phase 7
+
+Ziele nach 12 Wochen: Organic Traffic 3.000+ Sessions/30d, 1.000+ Top-50-Keywords, erste Medien-Erwähnung.
 
 ## Architecture & Data Models
 
@@ -540,7 +552,8 @@ Jede Phase hat sowohl **funktionale Testfälle** (rendert die Seite? sind die Da
 ## Definition of Done (für die gesamte Epic)
 
 - [ ] Alle 10 Phasen abgeschlossen mit grünen Testfällen
-- [ ] Organic Traffic (GA4): **3x** Baseline-Wert aus Phase 0
+- [ ] Organic Traffic: **≥1.000 Sessions / 30d** (Baseline: 1 Session / 30d) — 1000× Faktor, absolut aber von niedriger Basis
+- [ ] Sitemap URLs: **≥120.000** (Baseline: 42.615)
 - [ ] Indexed URLs (GSC): **≥50.000**
 - [ ] Keyword-Positionen: **500+** Queries auf Top-50
 - [ ] AI-Citations: nachweisbare Zitate in ChatGPT + Perplexity für mindestens 5 Test-Queries

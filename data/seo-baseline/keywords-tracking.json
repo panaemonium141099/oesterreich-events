@@ -1,0 +1,88 @@
+{
+  "_meta": {
+    "version": 1,
+    "created_at": "2026-04-23",
+    "description": "50 tracked queries for Phase 0 baseline + ongoing ranking monitoring. Grouped by intent. Each query tracked for: impressions, clicks, CTR, avg_position. Re-scored weekly via GSC API.",
+    "update_cadence": "weekly",
+    "target_language": "de-AT",
+    "reference_epic": "fn-13-seo-content-parity-vs-wasmachmaat"
+  },
+  "buckets": {
+    "city_generic": {
+      "description": "High-volume local intent — core SEO battleground vs wasmachma.at",
+      "queries": [
+        "events wien",
+        "events graz",
+        "events linz",
+        "events salzburg",
+        "events innsbruck",
+        "events klagenfurt",
+        "events eisenstadt",
+        "veranstaltungen wien",
+        "veranstaltungen graz",
+        "veranstaltungen burgenland"
+      ]
+    },
+    "category_bundesland": {
+      "description": "Long-tail Kategorie × Bundesland — Schlüsselpfad für Hub-Seiten aus Phase 3",
+      "queries": [
+        "konzerte wien",
+        "konzerte steiermark",
+        "festivals burgenland",
+        "festivals österreich 2026",
+        "nightlife wien",
+        "nightlife linz",
+        "theater wien heute",
+        "musik events kärnten",
+        "sport events oberösterreich",
+        "familien events tirol"
+      ]
+    },
+    "temporal": {
+      "description": "Zeit-bezogene Queries — leben von Freshness + Index-Geschwindigkeit",
+      "queries": [
+        "was ist heute los in wien",
+        "was ist heute los in graz",
+        "events heute österreich",
+        "events wochenende wien",
+        "events dieses wochenende",
+        "events morgen wien",
+        "veranstaltungen heute burgenland",
+        "was mach ich am samstag wien",
+        "ausgehen wien heute",
+        "events nächste woche wien"
+      ]
+    },
+    "occasion_intent": {
+      "description": "Occasion-basiert — passt zu unserer v3-Taxonomy (occasion_tags). Wasmachma hat das nicht.",
+      "queries": [
+        "date ideen wien",
+        "studenten events wien",
+        "studenten events graz",
+        "günstig ausgehen wien",
+        "kino open air wien",
+        "escape room wien",
+        "flohmarkt wien",
+        "weihnachtsmarkt wien 2026",
+        "silvester events wien",
+        "halloween party wien"
+      ]
+    },
+    "branded_and_longtail": {
+      "description": "Marken-Queries + ultra-spezifische Long-Tail — Signale für Brand-Awareness + AI-Search-Readiness",
+      "queries": [
+        "lasstreffen",
+        "lasstreffen österreich",
+        "lasstreffen events",
+        "event kalender burgenland",
+        "veranstaltungen 1010 wien",
+        "veranstaltungen 8010 graz",
+        "konzerte stadthalle wien april",
+        "wochenmarkt eisenstadt",
+        "ausflugsziele niederösterreich",
+        "festival wien sommer 2026"
+      ]
+    }
+  },
+  "query_count": 50
+}

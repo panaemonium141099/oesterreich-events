@@ -1,0 +1,249 @@
+{
+  "_meta": {
+    "version": 1,
+    "taken_at": "2026-04-23T15:51:04.801Z",
+    "site_url": "https://www.lasstreffen.at",
+    "script": "src/scripts/seo-baseline-snapshot.ts",
+    "epic": "fn-13-seo-content-parity-vs-wasmachmaat"
+  },
+  "sitemap": {
+    "fetched": true,
+    "url_count": 42615,
+    "partitions": [
+      {
+        "loc": "https://www.lasstreffen.at/sitemap.xml",
+        "url_count": 42615
+      }
+    ],
+    "fetched_at": "2026-04-23T15:50:58.771Z",
+    "error": null
+  },
+  "database": {
+    "events_total": 157347,
+    "events_future_published": 70505,
+    "events_with_coords": 152770,
+    "events_with_null_coords": 4577,
+    "events_by_source": {
+      "feratel-deskline": 15410,
+      "gem2go": 27498,
+      "gemeinde-registry": 19873,
+      "oeticket": 3932,
+      "gemeinden-generic": 20356,
+      "ntry.at": 264,
+      "meinbezirk": 5349,
+      "falter": 582,
+      "registry:frau-mayer": 30,
+      "kaernten.live": 51,
+      "imc-krems": 29,
+      "kultur-graz": 429,
+      "gemeinden": 1392,
+      "vetmeduni-wien": 34,
+      "burgenland.at": 370,
+      "mariazell.at": 272,
+      "uni-salzburg": 29,
+      "pph-augustinum-graz": 11,
+      "marxhalle": 143,
+      "ticketmaster": 100,
+      "aau-klagenfurt": 33,
+      "mariazell.gv.at": 171,
+      "wien-clubs": 196,
+      "oho.at": 17,
+      "meetup.com": 57,
+      "basilika-mariazell": 50,
+      "neusiedlersee.com": 196,
+      "veranstaltungskalender.net": 953,
+      "uni-innsbruck": 141,
+      "tourismus-portale": 68,
+      "stadthalle": 122,
+      "gemeinden-wp-burgenland": 37,
+      "fh-ooe": 37,
+      "akbild-wien": 28,
+      "fh-wiener-neustadt": 3,
+      "burgenland.info": 173,
+      "mdw-wien": 58,
+      "esterhazy.at": 14,
+      "wien-ticket": 37,
+      "registry:caf-nexus": 24,
+      "hcw-wien": 43,
+      "registry:3fiori": 2,
+      "mozarteum-salzburg": 39,
+      "ganz-wien": 26,
+      "kunstuni-linz": 20,
+      "wien-gv": 29,
+      "nhm-wien.ac.at": 4,
+      "technischesmuseum.at": 4,
+      "oeticket.com": 26,
+      "festival-lineup": 456,
+      "events.at": 23,
+      "partytimer": 193,
+      "registry:flex": 11,
+      "innsbruck-clubs": 159,
+      "fh-technikum-wien": 16,
+      "linz-clubs": 37,
+      "uni-wien": 47,
+      "fh-wien-wkw": 21,
+      "graz-clubs": 13,
+      "fh-stpoelten": 5,
+      "fh-salzburg": 5,
+      "meduni-graz": 10,
+      "mci-innsbruck": 10,
+      "jku-linz": 1,
+      "montanuni-leoben": 15,
+      "meduni-wien": 18,
+      "donau-uni-krems": 4,
+      "boku-wien": 16,
+      "salzburg-clubs": 8,
+      "mcg.at": 16,
+      "popculture": 26,
+      "posthof": 13,
+      "fh-bfi-wien": 15,
+      "uni-graz": 12,
+      "tu-wien": 7,
+      "cities": 12,
+      "angewandte-wien": 6,
+      "registry:club-wakuum": 5,
+      "ph-kaernten": 7,
+      "fhg-tirol": 1,
+      "kug-graz": 3,
+      "ph-burgenland": 6,
+      "ph-salzburg": 8,
+      "kleinstadte-clubs": 9,
+      "rockhouse": 8,
+      "wu-wien": 7,
+      "registry:hotel-lobby-bar": 1,
+      "kph-edith-stein": 3,
+      "regionews.at": 2,
+      "itu-linz": 2,
+      "fh-burgenland": 1
+    },
+    "events_by_category": {
+      "Märkte & Feste": 9892,
+      "Familie & Kinder": 3499,
+      "Sonstiges": 21040,
+      "Kultur & Bühne": 6956,
+      "Wellness & Spiritualität": 4604,
+      "Sport & Bewegung": 5703,
+      "Musik": 7758,
+      "Natur & Abenteuer": 2838,
+      "Wissen & Karriere": 3923,
+      "Essen & Trinken": 1663,
+      "Community & Freizeit": 1482,
+      "Nightlife & Party": 1147
+    },
+    "events_by_bundesland": {
+      "Burgenland": 1691,
+      "Salzburg": 3495,
+      "Tirol": 5196,
+      "Niederösterreich": 11046,
+      "wien": 2658,
+      "kaernten": 3866,
+      "Oberösterreich": 9319,
+      "oberoesterreich": 6608,
+      "niederoesterreich": 7297,
+      "Steiermark": 2560,
+      "burgenland": 1215,
+      "salzburg": 2895,
+      "(null)": 737,
+      "tirol": 3196,
+      "steiermark": 3606,
+      "Kärnten": 2324,
+      "vorarlberg": 1087,
+      "Vorarlberg": 1620,
+      "Wien": 53,
+      "ooe": 34,
+      "Niederoesterreich": 2
+    },
+    "events_with_embeddings": 0,
+    "events_enriched_v2": 18817
+  },
+  "internal_analytics": {
+    "events_last_30d": 1568,
+    "page_views_last_30d": 1307,
+    "unique_sessions_last_30d": 1,
+    "top_referrers": [
+      {
+        "referrer": "localhost",
+        "count": 315
+      },
+      {
+        "referrer": "www.lasstreffen.at",
+        "count": 209
+      },
+      {
+        "referrer": "lasstreffen.at",
+        "count": 53
+      },
+      {
+        "referrer": "accounts.google.com",
+        "count": 35
+      },
+      {
+        "referrer": "accounts.spotify.com",
+        "count": 15
+      }
+    ],
+    "top_pages": [
+      {
+        "page": "/map",
+        "count": 873
+      },
+      {
+        "page": "/",
+        "count": 402
+      },
+      {
+        "page": "/feed",
+        "count": 212
+      },
+      {
+        "page": "/notifications",
+        "count": 54
+      },
+      {
+        "page": "/friends",
+        "count": 25
+      },
+      {
+        "page": "/auth/complete-profile",
+        "count": 1
+      },
+      {
+        "page": "/auth/register",
+        "count": 1
+      }
+    ],
+    "event_types": {
+      "page_view": 1307,
+      "bundesland_switch": 57,
+      "filter_change": 39,
+      "profile_completed": 1,
+      "event_click": 98,
+      "nachtleben_toggle": 3,
+      "search": 38,
+      "event_save": 4,
+      "link_click": 17,
+      "register": 1,
+      "event_reminder": 2,
+      "event_share": 1
+    }
+  },
+  "indexable_url_inventory": {
+    "event_detail_pages": 70505,
+    "bundesland_hubs": 10,
+    "category_hubs": 110,
+    "city_hubs": 13,
+    "student_hubs": 6,
+    "blog_posts": 64,
+    "static_pages": 12,
+    "estimated_total": 70720
+  },
+  "search_console": {
+    "configured": false,
+    "impressions": null,
+    "clicks": null,
+    "ctr": null,
+    "avg_position": null,
+    "indexed_urls": null,
+    "note": "GSC API integration not yet set up. See data/seo-baseline/README.md. Fill once OAuth credentials are available."
+  }
+}
