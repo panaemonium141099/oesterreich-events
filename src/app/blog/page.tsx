@@ -4,14 +4,15 @@ import Link from 'next/link';
 import { ALL_POSTS } from '@/content/blog';
 
 /**
- * ISR revalidation. Without it the category `searchParams` access forces the
- * page to be rendered on every request with `Cache-Control: private, no-store`
- * — Google reads that as "personalised, skip indexing".
+ * ISR. `/blog` is not a dynamic route so `generateStaticParams` doesn't
+ * apply — the blocker here is the `searchParams` access for the category
+ * filter. As long as the page function awaits `searchParams`, Next.js
+ * treats the whole route as per-request dynamic and ships
+ * `Cache-Control: private, no-store`.
  *
- * With `revalidate = 3600` the canonical /blog URL gets pre-rendered and
- * served with `public, s-maxage=3600, stale-while-revalidate` — query-string
- * variants (`/blog?category=X`) stay dynamic but are noindexed by Google
- * anyway since they're not in the sitemap.
+ * TODO(phase 6+): lift the category filter into a client component so the
+ * server page stays static. Until then, `/blog` is one URL — acceptable
+ * cost versus the 42 000 event pages that now index correctly.
  */
 export const revalidate = 3600;
 

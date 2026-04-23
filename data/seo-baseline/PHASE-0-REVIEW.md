@@ -238,6 +238,45 @@ Nach dem Deploy (Vercel triggert automatisch auf git push master):
 
 Empfehlung: 48-72h nach diesem Commit GSC-Check wiederholen, Test T0.5.1-T0.5.3 verifizieren, dann Phase 1.
 
+---
+
+## Phase 0.5 — Final Resolution Log (2026-04-23 abends)
+
+Nach mehreren gescheiterten Deploy-Zyklen (GitHub HTTP-500 Transient + falsche Diagnose-Pfade) haben wir **4 unabhängige Layer** identifiziert und fixen müssen, um ISR überhaupt anzuschalten:
+
+1. ✅ `export const revalidate = 3600` auf Event-Page (commit `bb1035f`)
+2. ✅ `unstable_cache` wrapper um Supabase-Queries (commit `9a41e9f`)
+3. ✅ `www` → `root` redirect block in `next.config.ts` (commit `9a41e9f`) — siehe Pending unten, wirkt nicht
+4. ✅ **Middleware-Bypass** für anonyme Requests (commit `7aa8550`) — DAS war der eigentliche Blocker
+5. ✅ `generateStaticParams() => []` + `dynamicParams = true` (commit `25410a0`) — letzter Schritt für ISR-Qualifikation
+
+### Verifikation (live auf Production)
+
+| URL | Cache-Control | X-Nextjs-Prerender | Ergebnis |
+|-----|---------------|---------------------|----------|
+| `/seo-test` | `public, max-age=0, must-revalidate` | 1 | ✅ HIT |
+| `/[bundesland]` | `public, max-age=0, must-revalidate` | 1 | ✅ PRERENDER |
+| `/events/[slug]` (42k URLs!) | `public, max-age=0, must-revalidate` | 1 | ✅ MISS→HIT |
+| `/blog` | `private, no-store` | — | ⚠️ noch dynamic wegen searchParams (1 URL, akzeptabel) |
+| `/blog/[slug]` | `public, max-age=86400` | 1 | ✅ (durch next.config header rule) |
+| `www.lasstreffen.at` → `/` | `HTTP 307 Temporary` | — | ⚠️ immer noch 307 |
+
+### Final Testfälle
+
+- `T0.5.1` ✅ Event-URL Response enthält `X-Nextjs-Prerender: 1`
+- `T0.5.2` ✅ Event-URL Cache-Control enthält `public` statt `private`
+- `T0.5.3` ⚠️ `/blog` wird später gefixt durch Umbau Category-Filter in Client Component
+- `T0.5.4` Pending — wird in 7-14 Tagen gemessen (GSC Indexed-Count von 9 → >1.000)
+
+### Noch offen (für den User)
+
+1. **`www` → `root` 301-Fix** — lässt sich nicht über Next.js config lösen (Vercel Platform greift vor). Muss im **Vercel Dashboard → Settings → Domains** eingestellt werden:
+   - `www.lasstreffen.at` als Domain hinzufügen (falls noch nicht)
+   - Als "Redirect to" → `lasstreffen.at` mit **Status Code: 308 Permanent** (oder 301)
+   - Alternative: DNS-CNAME behalten, aber im Dashboard Toggle „Redirect as Permanent" aktivieren
+2. **GSC Sitemap refresh** — Sitemap entfernen + re-adden in GSC (erzwingt Re-Crawl mit sauberen Headers)
+3. **5-8 manuelle Indexierungsanfragen** für strategische URLs (Home, Bundesländer, Blog, eine Beispiel-Event-URL)
+
 **Empfehlung für Phase 1 erste Task:** URL-Rework auf `/events/[plz]-[ort]/[slug]-[shortid]`. Pipeline:
 
 1. Route-Dateistruktur umbauen
