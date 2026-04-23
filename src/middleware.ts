@@ -1,7 +1,51 @@
 import { createServerClient } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
 
+/**
+ * Supabase session refresh middleware — with a critical SEO bypass.
+ *
+ * **Why the bypass exists:** `supabase.auth.getUser()` reads request cookies
+ * and writes `Set-Cookie` response headers for session refresh. Once the
+ * middleware writes a cookie, Next.js correctly marks the response as
+ * personalised (`Cache-Control: private, no-store`) and disables ISR
+ * prerendering. Result: Google refuses to index the page.
+ *
+ * Until we observed the GSC report (9 / 45 656 indexed on 2026-04-23) this
+ * was applied to every request. For anonymous visitors — which is **every
+ * Googlebot hit** and most first-time human visitors — the cookie write is
+ * wasted work AND it actively kills indexability.
+ *
+ * **The fix:** check whether a Supabase auth cookie is present on the
+ * incoming request. If not, the request is anonymous, there is no session
+ * to refresh, and we return a plain `NextResponse.next()` without ever
+ * touching `getUser()`. Logged-in users keep their session refresh because
+ * their browsers send the `sb-*-auth-token` cookie with every request.
+ *
+ * Trade-off: if a user signs in in tab A, a Server Component in tab B that
+ * was rendered before sign-in won't see them as authenticated until the
+ * next refresh. Acceptable — client components (`use client`) subscribe to
+ * Supabase's auth state changes directly via `onAuthStateChange`, so UI
+ * updates within the active tab remain instant.
+ */
+function hasSupabaseAuthCookie(request: NextRequest): boolean {
+  for (const cookie of request.cookies.getAll()) {
+    // Supabase SSR cookies look like `sb-<projectRef>-auth-token` or
+    // `sb-<projectRef>-auth-token.0` / `.1` (split when too large).
+    if (cookie.name.startsWith('sb-') && cookie.name.includes('auth-token')) {
+      return true;
+    }
+  }
+  return false;
+}
+
 export async function middleware(request: NextRequest) {
+  // Anonymous request? Skip the session refresh entirely so Next.js can
+  // prerender + ISR-cache the response. This is what unblocks Google
+  // indexing for the ~42 000 public event pages.
+  if (!hasSupabaseAuthCookie(request)) {
+    return NextResponse.next();
+  }
+
   let supabaseResponse = NextResponse.next({
     request,
   });
@@ -15,7 +59,7 @@ export async function middleware(request: NextRequest) {
           return request.cookies.getAll();
         },
         setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value, options }) =>
+          cookiesToSet.forEach(({ name, value }) =>
             request.cookies.set(name, value)
           );
           supabaseResponse = NextResponse.next({
