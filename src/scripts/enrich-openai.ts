@@ -574,6 +574,20 @@ class RpdExhaustedError extends Error {
   }
 }
 
+/**
+ * Thrown when Supabase rejects the UPDATE because a column referenced by
+ * the payload doesn't exist in its schema cache. Typically means a
+ * migration hasn't run yet, or PostgREST's schema cache is stale. Either
+ * way, retrying thousands of times won't help — every row will fail the
+ * same way. Bail early with a clear message.
+ */
+class SchemaMismatchError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'SchemaMismatchError';
+  }
+}
+
 async function processOne(
   supabase: SupabaseClient,
   row: EventRow,
@@ -763,6 +777,15 @@ async function processOne(
   if (!opts.dryRun) {
     const { error } = await supabase.from('events').update(update).eq('id', row.id);
     if (error) {
+      // Schema errors mean every subsequent row will fail identically —
+      // bail fast instead of prosecuting 40k doomed attempts.
+      const isSchemaError =
+        /Could not find.+column/i.test(error.message) ||
+        /schema cache/i.test(error.message) ||
+        /does not exist/i.test(error.message);
+      if (isSchemaError) {
+        throw new SchemaMismatchError(error.message);
+      }
       console.error(`\n[${row.id.slice(0, 8)}] update failed: ${error.message}`);
       stats.enriched -= 1;
       stats.failed += 1;
@@ -800,6 +823,13 @@ async function worker(
     try {
       await processOne(supabase, row, opts, stats, limiter);
     } catch (err) {
+      // Schema mismatch — every row will fail the same way. Drain and
+      // bubble so main prints a useful error and exits instead of
+      // grinding through 40k doomed attempts.
+      if (err instanceof SchemaMismatchError) {
+        queue.length = 0;
+        throw err;
+      }
       // RPD exhausted — drain the queue so all workers exit, then let main bubble up.
       if (err instanceof RpdExhaustedError) {
         queue.length = 0;
@@ -903,6 +933,31 @@ async function main() {
     try {
       await Promise.all(workers);
     } catch (err) {
+      if (err instanceof SchemaMismatchError) {
+        process.stdout.write('\n\n');
+        console.log('━'.repeat(70));
+        console.log('  ⛔  DB-SCHEMA PASST NICHT — ABGEBROCHEN');
+        console.log('━'.repeat(70));
+        console.log('');
+        console.log('  Supabase meldet, dass eine Spalte im events-Table fehlt oder');
+        console.log('  die REST-API sie noch nicht kennt.');
+        console.log('');
+        console.log('  Häufige Ursachen:');
+        console.log('    • Die Taxonomy-v3-Migration wurde nicht (vollständig) ausgeführt');
+        console.log('    • PostgREST schema cache ist veraltet');
+        console.log('');
+        console.log('  Fix: paste diese Migration im Supabase SQL-Editor:');
+        console.log('    supabase/migrations/20260423_taxonomy_v3_combined.sql');
+        console.log('');
+        console.log('  Die Migration ist idempotent + endet mit einer Selbst-Verifikation');
+        console.log('  (DO $$ … RAISE EXCEPTION wenn Spalten fehlen). Wenn sie durchläuft,');
+        console.log('  kannst du dieses Script sofort neu starten — resume-safe.');
+        console.log('');
+        console.log(`  Server-Fehler: ${(err as Error).message.slice(0, 250)}`);
+        console.log('━'.repeat(70));
+        process.exitCode = 1;
+        break;
+      }
       if (err instanceof RpdExhaustedError) {
         process.stdout.write('\n\n');
         console.log('━'.repeat(70));
