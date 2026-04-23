@@ -136,6 +136,27 @@ export async function GET(): Promise<NextResponse> {
     }
   }
 
+  // ─── 5b. Gemeinde hubs (Phase 2) ────────────────────────────────────────
+  // ~2 028 URLs, one per registered Austrian municipality. Each hub
+  // page renders events inside a 10 km radius around the village centre.
+  // Lower priority than city/bundesland hubs because the content density
+  // per gemeinde is variable (many tiny villages have only a handful of
+  // events). Google still gets them all in the index via ISR when the
+  // page has ≥3 events; thin ones are noindex'd at the page level.
+  try {
+    const { ALL_GEMEINDEN } = await import('@/lib/gemeinden/data');
+    for (const g of ALL_GEMEINDEN) {
+      entries.push({
+        loc: `${BASE_URL}/gemeinde/${g.slug}`,
+        lastmod: toISO(now),
+        changefreq: 'daily',
+        priority: 0.5,
+      });
+    }
+  } catch (err) {
+    console.error('[sitemap] gemeinde import failed:', err);
+  }
+
   // ─── 6. Venue + 7. Event pages (require Supabase) ──────────────────────
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
