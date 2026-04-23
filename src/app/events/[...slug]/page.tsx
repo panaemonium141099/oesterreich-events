@@ -6,7 +6,7 @@ import { createClient } from '@supabase/supabase-js';
 import type { Event } from '@/types/events';
 import { formatDateLong, formatTime } from '@/lib/utils/date';
 import { extractCity } from '@/lib/utils/city';
-import { buildEventUrl } from '@/lib/utils/slugify';
+import { buildEventUrl, buildEventUrlV2, extractShortId } from '@/lib/utils/slugify';
 import { resolvePrimaryEventImage } from '@/lib/event-images';
 import { EventDetailActions } from '@/components/Events/EventDetailActions';
 import { EventImage } from '@/components/Events/EventImage';
@@ -131,13 +131,30 @@ async function getVenue(
   return getVenueCached(venueId);
 }
 
+/**
+ * Catch-all route params. Accepts both URL schemes:
+ *   Legacy  (1 segment):  /events/abc12345-event-slug
+ *   V2      (2 segments): /events/1010-wien/event-slug-abc12345
+ *
+ * We normalise to a single "token for DB lookup" regardless of format.
+ */
+function shortIdFromSlugArray(slug: string[]): string {
+  if (slug.length >= 2) {
+    // V2: shortId is at the END of the last segment (e.g. "festival-abc12345")
+    return extractShortId(slug[slug.length - 1]);
+  }
+  // Legacy: first 8 chars ARE the shortId
+  return extractShortId(slug[0] ?? '');
+}
+
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ slug: string }>;
+  params: Promise<{ slug: string[] }>;
 }): Promise<Metadata> {
-  const { slug: slugParam } = await params;
-  const event = await getEventByShortId(slugParam);
+  const { slug: slugArr } = await params;
+  const shortId = shortIdFromSlugArray(slugArr);
+  const event = await getEventByShortId(shortId);
 
   if (!event) {
     return { title: 'Event nicht gefunden' };
@@ -155,7 +172,9 @@ export async function generateMetadata({
     ? event.description.slice(0, 160)
     : `${event.title} — ${event.location_name ?? 'Österreich'}`;
 
-  const canonicalPath = buildEventUrl(event.id, event.slug);
+  // Canonical URL always uses the V2 schema — Google consolidates signals on
+  // this form regardless of which URL the client originally requested.
+  const canonicalPath = buildEventUrlV2(event);
   const canonicalUrl = `https://lasstreffen.at${canonicalPath}`;
   const ogImageUrl = `${canonicalUrl}/opengraph-image`;
 
@@ -235,7 +254,7 @@ function parsePriceText(priceText: string | null | undefined): string | null {
 }
 
 function buildJsonLd(event: Event): string {
-  const canonicalUrl = `https://lasstreffen.at${buildEventUrl(event.id, event.slug)}`;
+  const canonicalUrl = `https://lasstreffen.at${buildEventUrlV2(event)}`;
   const jsonLd: Record<string, unknown> = {
     '@context': 'https://schema.org',
     '@type': 'Event',
@@ -344,10 +363,11 @@ function buildLocationLink(
 export default async function EventDetailPage({
   params,
 }: {
-  params: Promise<{ slug: string }>;
+  params: Promise<{ slug: string[] }>;
 }) {
-  const { slug: slugParam } = await params;
-  const event = await getEventByShortId(slugParam);
+  const { slug: slugArr } = await params;
+  const shortId = shortIdFromSlugArray(slugArr);
+  const event = await getEventByShortId(shortId);
 
   if (!event) {
     notFound();
@@ -366,17 +386,20 @@ export default async function EventDetailPage({
     notFound();
   }
 
-  // 301 Redirect to canonical URL whenever the current path isn't canonical.
-  // This covers both:
-  //   - legacy full-UUID URLs (e.g. /events/641d90c0-7a97-4561-ab39-e9f4c191ca79)
-  //     redirecting to /events/641d90c0 (short-ID) when no slug exists, and
-  //   - legacy short-ID URLs redirecting to /events/641d90c0-<slug> once a
-  //     slug has been generated.
-  // Previously we gated this on `event.slug && ...` which left slug-less
-  // events reachable under two URLs (full UUID + short ID) — duplicate
-  // content from Google's point of view.
-  const canonicalPath = buildEventUrl(event.id, event.slug);
-  const currentPath = `/events/${slugParam}`;
+  // 301 Redirect to canonical V2 URL whenever the current path isn't canonical.
+  //
+  // Covers three classes of non-canonical hits:
+  //   1. Legacy 1-segment URLs `/events/{shortId}-{slug}` (old sitemap entries,
+  //      Google index, email links, bookmarks) → /events/{plz}-{ort}/{slug}-{shortId}
+  //   2. Full-UUID URLs `/events/641d90c0-7a97-4561-ab39-e9f4c191ca79` →
+  //      canonical V2 form
+  //   3. V2 URLs with the wrong prefix (user typed /events/1010-wien/... for an
+  //      event that's actually in Eisenstadt) → canonical /events/7000-eisenstadt/...
+  //
+  // All three produce a single 301 hop so Google consolidates signal on the
+  // V2 canonical URL. One redirect, not a chain.
+  const canonicalPath = buildEventUrlV2(event);
+  const currentPath = `/events/${slugArr.join('/')}`;
   if (currentPath !== canonicalPath) {
     redirect(canonicalPath);
   }

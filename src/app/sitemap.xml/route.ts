@@ -26,7 +26,7 @@ import {
   STUDENT_CITIES,
   STUDENT_FILTERS,
 } from '@/lib/landing-slugs';
-import { buildEventUrl } from '@/lib/utils/slugify';
+import { buildEventUrlV2 } from '@/lib/utils/slugify';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 300;
@@ -182,7 +182,7 @@ export async function GET(): Promise<NextResponse> {
       while (eventsAdded < MAX_EVENTS) {
         const { data, error } = await supabase
           .from('events')
-          .select('id, slug, updated_at, quality_score')
+          .select('id, slug, updated_at, quality_score, postal_code, address, bundesland, location_name')
           .gte('start_date', today)
           .eq('publish_status', 'published')
           .gte('quality_score', 40)
@@ -201,7 +201,7 @@ export async function GET(): Promise<NextResponse> {
           const qs = event.quality_score ?? 0;
           const priority = qs >= 80 ? 0.8 : qs >= 60 ? 0.6 : 0.4;
           entries.push({
-            loc: `${BASE_URL}${buildEventUrl(event.id, event.slug)}`,
+            loc: `${BASE_URL}${buildEventUrlV2(event)}`,
             lastmod: event.updated_at ? toISO(event.updated_at) : toISO(now),
             changefreq: 'daily',
             priority,

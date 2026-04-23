@@ -1,5 +1,6 @@
 import { ImageResponse } from 'next/og';
 import { createClient } from '@supabase/supabase-js';
+import { extractShortId } from '@/lib/utils/slugify';
 
 export const size = { width: 1200, height: 630 };
 export const contentType = 'image/png';
@@ -10,19 +11,19 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
-async function getEventByShortId(slugParam: string) {
+async function getEventByShortIdOrSlug(token: string) {
   // Full UUID exact match
-  if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(slugParam)) {
+  if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(token)) {
     const { data } = await supabase
       .from('events')
       .select('id, title, start_date, location_name, bundesland, category, slug')
-      .eq('id', slugParam)
+      .eq('id', token)
       .single();
     if (data) return data;
   }
 
-  // Short ID range query
-  const shortId = slugParam.slice(0, 8);
+  // Short ID range query — `token` is already a ≤8-char hex prefix
+  const shortId = extractShortId(token);
   const rangeStart = `${shortId}-0000-0000-0000-000000000000`;
   const rangeEnd = `${shortId}-ffff-ffff-ffff-ffffffffffff`;
 
@@ -40,10 +41,16 @@ async function getEventByShortId(slugParam: string) {
 export default async function Image({
   params,
 }: {
-  params: Promise<{ slug: string }>;
+  // Catch-all matches both the legacy `/events/[slug]/opengraph-image` (1 seg)
+  // and the V2 `/events/[plz-ort]/[slug]/opengraph-image` (2 segs).
+  params: Promise<{ slug: string[] }>;
 }) {
-  const { slug } = await params;
-  const event = await getEventByShortId(slug);
+  const { slug: slugArr } = await params;
+  // Extract the shortId from whichever segment holds the event identity:
+  //   Legacy:  slug[0] = "abc12345-event-name"                  → shortId from start
+  //   V2:      slug[1] = "event-name-abc12345"                  → shortId from end
+  const lastSegment = slugArr[slugArr.length - 1] ?? '';
+  const event = await getEventByShortIdOrSlug(lastSegment);
 
   const title = event?.title ?? 'Event in Österreich';
   const subtitle = [
