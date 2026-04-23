@@ -1,4 +1,4 @@
-import { notFound, redirect } from 'next/navigation';
+import { notFound, permanentRedirect } from 'next/navigation';
 import Link from 'next/link';
 import type { Metadata } from 'next';
 import { unstable_cache } from 'next/cache';
@@ -479,12 +479,11 @@ export default async function EventDetailPage({
     notFound();
   }
 
-  // 301 Redirect duplicates to their primary event FIRST — otherwise a
-  // duplicate with a populated slug would first bounce to its own canonical
-  // slug-URL and only then to the primary. One hop instead of two keeps
-  // reminders/emails pointing straight at the canonical row.
+  // PERMANENT redirect duplicates to their primary — these will never
+  // revert, so 308 is correct. Placed FIRST so a duplicate-with-slug
+  // doesn't bounce via its own canonical first.
   if (event.publish_status === 'duplicate' && event.duplicate_of) {
-    redirect(`/events/${event.duplicate_of}`);
+    permanentRedirect(`/events/${event.duplicate_of}`);
   }
 
   // Hide suppressed/needs_review events from public access
@@ -492,22 +491,27 @@ export default async function EventDetailPage({
     notFound();
   }
 
-  // 301 Redirect to canonical V2 URL whenever the current path isn't canonical.
+  // 308 Permanent Redirect to canonical V3 URL whenever the current path
+  // isn't canonical.
   //
   // Covers three classes of non-canonical hits:
-  //   1. Legacy 1-segment URLs `/events/{shortId}-{slug}` (old sitemap entries,
-  //      Google index, email links, bookmarks) → /events/{plz}-{ort}/{slug}-{shortId}
-  //   2. Full-UUID URLs `/events/641d90c0-7a97-4561-ab39-e9f4c191ca79` →
-  //      canonical V2 form
-  //   3. V2 URLs with the wrong prefix (user typed /events/1010-wien/... for an
-  //      event that's actually in Eisenstadt) → canonical /events/7000-eisenstadt/...
+  //   1. Legacy 1-segment URLs `/events/{shortId}-{slug}` (old sitemap
+  //      entries, Google index, email links, bookmarks) → V3
+  //   2. Full-UUID URLs → canonical V3
+  //   3. V2-old 2-segment URLs `/events/{plz-ort}/{slug-shortId}` → V3
   //
-  // All three produce a single 301 hop so Google consolidates signal on the
-  // V2 canonical URL. One redirect, not a chain.
+  // `permanentRedirect()` emits 308 (SEO-equivalent to 301 Moved
+  // Permanently — Google consolidates ranking signals onto the canonical
+  // URL and drops the legacy ones from the index over time). Using 308
+  // instead of the default `redirect()` (307 Temporary) is critical here
+  // because Next.js 16 ISR serialises 307 redirects to a `<meta refresh>`
+  // in the rendered HTML rather than a real HTTP status — which works for
+  // Google but leaves a ~1s client-side delay. 308 is emitted as an
+  // actual HTTP response.
   const canonicalPath = buildEventUrlV2(event);
   const currentPath = `/events/${slugArr.join('/')}`;
   if (currentPath !== canonicalPath) {
-    redirect(canonicalPath);
+    permanentRedirect(canonicalPath);
   }
 
   // Load venue data if event has a venue_id
