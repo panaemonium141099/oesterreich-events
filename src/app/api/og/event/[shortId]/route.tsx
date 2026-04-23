@@ -1,18 +1,34 @@
+/**
+ * Dynamic Open-Graph image for an event.
+ *
+ * Moved from the route-file convention (`opengraph-image.tsx` next to the
+ * page) to an API route because Next.js forbids metadata files inside
+ * catch-all routes:
+ *
+ *   Error: Catch-all must be the last part of the URL in route
+ *          "/events/[...slug]/opengraph-image"
+ *
+ * Now reachable at `/api/og/event/<8-char-shortId>` and referenced from the
+ * event page's `metadata.openGraph.images[0].url`. Cached by Next.js so
+ * each unique event image is regenerated at most once per revalidate
+ * window.
+ */
+
 import { ImageResponse } from 'next/og';
 import { createClient } from '@supabase/supabase-js';
 import { extractShortId } from '@/lib/utils/slugify';
 
-export const size = { width: 1200, height: 630 };
-export const contentType = 'image/png';
-export const alt = 'Event-Vorschau';
+export const runtime = 'nodejs';
+export const revalidate = 86400; // re-render OG image once per day per event
+
+const size = { width: 1200, height: 630 };
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
+  process.env.SUPABASE_SERVICE_ROLE_KEY!,
 );
 
-async function getEventByShortIdOrSlug(token: string) {
-  // Full UUID exact match
+async function getEvent(token: string) {
   if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(token)) {
     const { data } = await supabase
       .from('events')
@@ -21,12 +37,9 @@ async function getEventByShortIdOrSlug(token: string) {
       .single();
     if (data) return data;
   }
-
-  // Short ID range query — `token` is already a ≤8-char hex prefix
   const shortId = extractShortId(token);
   const rangeStart = `${shortId}-0000-0000-0000-000000000000`;
   const rangeEnd = `${shortId}-ffff-ffff-ffff-ffffffffffff`;
-
   const { data } = await supabase
     .from('events')
     .select('id, title, start_date, location_name, bundesland, category, slug')
@@ -34,23 +47,15 @@ async function getEventByShortIdOrSlug(token: string) {
     .lte('id', rangeEnd)
     .limit(1)
     .single();
-
   return data;
 }
 
-export default async function Image({
-  params,
-}: {
-  // Catch-all matches both the legacy `/events/[slug]/opengraph-image` (1 seg)
-  // and the V2 `/events/[plz-ort]/[slug]/opengraph-image` (2 segs).
-  params: Promise<{ slug: string[] }>;
-}) {
-  const { slug: slugArr } = await params;
-  // Extract the shortId from whichever segment holds the event identity:
-  //   Legacy:  slug[0] = "abc12345-event-name"                  → shortId from start
-  //   V2:      slug[1] = "event-name-abc12345"                  → shortId from end
-  const lastSegment = slugArr[slugArr.length - 1] ?? '';
-  const event = await getEventByShortIdOrSlug(lastSegment);
+export async function GET(
+  _request: Request,
+  { params }: { params: Promise<{ shortId: string }> },
+) {
+  const { shortId } = await params;
+  const event = await getEvent(shortId);
 
   const title = event?.title ?? 'Event in Österreich';
   const subtitle = [
@@ -131,6 +136,12 @@ export default async function Image({
         </div>
       </div>
     ),
-    size,
+    {
+      ...size,
+      headers: {
+        'Cache-Control': 'public, max-age=0, s-maxage=86400, must-revalidate',
+        'Content-Type': 'image/png',
+      },
+    },
   );
 }

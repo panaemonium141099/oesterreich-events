@@ -176,7 +176,10 @@ export async function generateMetadata({
   // this form regardless of which URL the client originally requested.
   const canonicalPath = buildEventUrlV2(event);
   const canonicalUrl = `https://lasstreffen.at${canonicalPath}`;
-  const ogImageUrl = `${canonicalUrl}/opengraph-image`;
+  // OG image moved to an API route because Next.js forbids metadata files
+  // (like opengraph-image.tsx) inside catch-all route segments. The image
+  // is cacheable by the shortId alone — no need to include the full slug.
+  const ogImageUrl = `https://lasstreffen.at/api/og/event/${event.id.slice(0, 8)}`;
 
   // Truncate overly long event titles so Bing/Google don't flag them as
   // "Title too long". Cut at 57 chars (room for " …") so the rendered
