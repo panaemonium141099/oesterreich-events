@@ -15,10 +15,24 @@ const BUNDESLAENDER = [
   'Salzburg', 'Steiermark', 'Tirol', 'Vorarlberg', 'Wien',
 ];
 
+// v3 taxonomy — must match the 11 Hauptkategorien from docs/TAXONOMY.md.
+// Old names ('Kultur', 'Nightlife', 'Wein & Kulinarik', 'Märkte',
+// 'Feste & Brauchtum', 'Bildung', 'Gesundheit', 'Business', 'Familie',
+// 'Natur') were migrated via 20260423_taxonomy_v3_combined.sql. Keeping
+// them in this list would match zero events post-migration.
 const CATEGORIES = [
-  'Musik', 'Kultur', 'Sport', 'Familie', 'Natur', 'Nightlife',
-  'Wein & Kulinarik', 'Märkte', 'Feste & Brauchtum', 'Bildung',
-  'Gesundheit', 'Business', 'Sonstiges',
+  'Musik',
+  'Kultur & Bühne',
+  'Nightlife & Party',
+  'Essen & Trinken',
+  'Märkte & Feste',
+  'Sport & Bewegung',
+  'Natur & Abenteuer',
+  'Wissen & Karriere',
+  'Familie & Kinder',
+  'Community & Freizeit',
+  'Wellness & Spiritualität',
+  'Sonstiges',
 ];
 
 export async function GET() {

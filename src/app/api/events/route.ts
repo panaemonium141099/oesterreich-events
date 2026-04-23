@@ -222,8 +222,13 @@ export async function GET(request: NextRequest) {
     let query = suggestMode
       ? baseQuery.select('id, title, category, location_name')
       : baseQuery.select(
+          // NOTE: `suggested_description` / `suggested_price_text` were removed
+          // in the v3 enrichment rework — the v2 pipeline writes directly to
+          // `description`/`price_text`. Frontend falls back cleanly when these
+          // props are undefined. Keeping them in the SELECT broke the entire
+          // API call because PostgREST 400s on missing columns.
           'id, title, description, start_date, end_date, location_name, address, postal_code, district, bundesland, latitude, longitude, category, tags, image_url, price_text, price_min, price_max, ticket_url, source_name, source_url, organizer, visibility, event_score, slug, ' +
-          'audience, vibe, setting, language, price_tier, duration_type, is_student_friendly, is_family_friendly, suggested_description, suggested_price_text, ' +
+          'audience, vibe, setting, language, price_tier, duration_type, is_student_friendly, is_family_friendly, ' +
           'occasion_tags, price_flags',
           needsCount ? { count: 'exact' } : undefined
         );
