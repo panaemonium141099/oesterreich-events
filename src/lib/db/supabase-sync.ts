@@ -40,16 +40,25 @@ import { generateEventSlug } from '@/lib/utils/slugify';
  * Index = rank; lower index = higher confidence.
  * NULL is treated as lowest priority (rank = Infinity).
  */
+// Priority order (lower number = higher confidence = wins on overwrite).
+//
+// Rationale: refinement pipelines (openai-geocode, manual fixes, fix-geocoding)
+// run AFTER scraping with full context (venue name + address + bundesland),
+// so they deserve priority over raw scraper coords. Scrapers often give
+// bundesland-capital fallback coordinates (see the Georgi Kirtag case:
+// Feratel placed it at Eisenstadt-Hauptplatz instead of St. Georgen) — those
+// must not clobber a targeted geocode.
 const CONFIDENCE_RANK: Record<string, number> = {
-  manual: 0,
-  scraper: 1,
-  exact: 2,
-  normalized: 3,
-  from_title: 4,
-  from_description: 5,
-  nominatim: 6,
-  gemini: 7,
-  gemini_low: 8,
+  manual: 0,           // Hand-fixed by admin / user — never overwrite
+  openai: 1,           // openai-geocode.ts refinement
+  gemini: 1,           // legacy alias for openai
+  exact: 2,            // normalizer exact match
+  normalized: 3,       // normalizer best-guess
+  nominatim: 4,        // reverse-geocoded
+  scraper: 5,          // raw scraper output — lowest among "ok" values
+  from_title: 6,
+  from_description: 7,
+  gemini_low: 8,       // low-confidence fallback
 };
 
 /** Distance threshold in km; below this we skip overwrite to preserve precise coords. */

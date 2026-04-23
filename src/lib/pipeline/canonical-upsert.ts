@@ -35,10 +35,12 @@ export async function matchAndUpsert(
 
   for (const candidate of candidates) {
     try {
-      // Try to find existing event by source_id + scraper_name
+      // Try to find existing event by source_id + scraper_name.
+      // Include the coordinate + geocoding fields so we can decide whether
+      // to let this scraper run clobber already-refined coords.
       const { data: existing } = await supabase
         .from('events')
-        .select('id, venue_id, venue_match_confidence')
+        .select('id, venue_id, venue_match_confidence, latitude, longitude, location_name, geocoding_source')
         .eq('source_id', candidate.source_id)
         .eq('scraper_name', candidate.scraper_name)
         .maybeSingle();
@@ -73,6 +75,41 @@ export async function matchAndUpsert(
           candidate.normalized_location_name,
         ),
       };
+
+      // ─── Coordinate protection ──────────────────────────────────────
+      // If the row has been refined by a targeted geocoder or the user
+      // (geocoding_source ∈ {manual, openai, gemini, nominatim, exact,
+      // normalized}), don't let a plain scraper re-upsert blow it away.
+      // This is the same rule supabase-sync applies via shouldOverwriteCoords,
+      // ported here because the pipeline's NormalizedCandidate has no
+      // confidence metadata to compare ranks with — we just defer to the
+      // more-informed existing value.
+      //
+      // Two preservation cases:
+      //   a) existing was refined (source set) AND has coords        → keep
+      //   b) existing has coords AND candidate would write NULL      → keep
+      if (existing) {
+        const existingHasCoords =
+          existing.latitude != null && existing.longitude != null;
+        const existingRefined =
+          typeof existing.geocoding_source === 'string' &&
+          existing.geocoding_source.length > 0 &&
+          existing.geocoding_source !== 'scraper';
+        const newHasCoords =
+          candidate.normalized_latitude != null &&
+          candidate.normalized_longitude != null;
+
+        if (
+          (existingHasCoords && existingRefined) ||
+          (existingHasCoords && !newHasCoords)
+        ) {
+          delete payload.latitude;
+          delete payload.longitude;
+          // The refined location_name is usually the canonical venue string
+          // the geocoder resolved — keep it in sync with the preserved coords.
+          delete payload.location_name;
+        }
+      }
 
       // Venue fields — apply conflict rule
       if (candidate.venue_id) {
