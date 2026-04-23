@@ -66,7 +66,8 @@
     "source-trust": "tsx --env-file=.env.local src/scripts/compute-source-trust.ts",
     "scrape:pipeline": "tsx --env-file=.env.local src/scripts/scrape-pipeline.ts",
     "scrape:report": "tsx --env-file=.env.local src/scripts/generate-scrape-report.ts",
-    "scrape:festival-lineups": "tsx --env-file=.env.local src/scripts/scrape-festival-lineups.ts"
+    "scrape:festival-lineups": "tsx --env-file=.env.local src/scripts/scrape-festival-lineups.ts",
+    "refresh": "tsx --env-file=.env.local src/scripts/scrape-pipeline.ts --trigger manual"
   },
   "keywords": [],
   "author": "",

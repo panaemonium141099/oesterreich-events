@@ -67,6 +67,12 @@ export interface PipelineOptions {
    * you want a fast pipeline run.
    */
   skipEnrichment?: boolean;
+  /**
+   * Skip building pgvector embeddings for /entdecken (semantic search).
+   * Resume-safe + hash-gated — only new or content-changed rows are
+   * embedded, so running it every cycle is cheap (~$0 for a quiet cycle).
+   */
+  skipEmbeddings?: boolean;
   /** Skip submitting new URLs to IndexNow + Google Indexing API. */
   skipIndexing?: boolean;
   dryRun?: boolean;
