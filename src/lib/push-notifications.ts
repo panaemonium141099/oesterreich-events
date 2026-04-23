@@ -7,7 +7,7 @@
  * Required env vars:
  *   VAPID_PUBLIC_KEY          — uncompressed P-256 public key (base64url)
  *   VAPID_PRIVATE_KEY         — matching private scalar (base64url)
- *   VAPID_SUBJECT             — mailto:info@lasstreffen.at  (spec requires mailto: or URL)
+ *   VAPID_SUBJECT             — mailto:dev@glatzdev.com  (spec requires mailto: or URL)
  *   NEXT_PUBLIC_VAPID_PUBLIC_KEY — mirror of VAPID_PUBLIC_KEY for the client
  *
  * Generate new keys with:
@@ -18,7 +18,7 @@ import webpush from 'web-push';
 
 const VAPID_PUBLIC_KEY  = process.env.VAPID_PUBLIC_KEY;
 const VAPID_PRIVATE_KEY = process.env.VAPID_PRIVATE_KEY;
-const VAPID_SUBJECT     = process.env.VAPID_SUBJECT ?? 'mailto:info@lasstreffen.at';
+const VAPID_SUBJECT     = process.env.VAPID_SUBJECT ?? 'mailto:dev@glatzdev.com';
 
 let configured = false;
 let warned     = false;
