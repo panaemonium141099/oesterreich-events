@@ -1,6 +1,7 @@
 import { notFound, redirect } from 'next/navigation';
 import Link from 'next/link';
 import type { Metadata } from 'next';
+import { unstable_cache } from 'next/cache';
 import { createClient } from '@supabase/supabase-js';
 import type { Event } from '@/types/events';
 import { formatDateLong, formatTime } from '@/lib/utils/date';
@@ -40,46 +41,69 @@ const supabase = createClient(
  *
  * Uses UUID range filtering since PostgREST doesn't support LIKE on UUID columns.
  * Short ID "154a2761" maps to range 154a2761-0000-0000-0000-000000000000 to 154a2761-ffff-ffff-ffff-ffffffffffff.
+ *
+ * **ISR-Cache:** wrapped with `unstable_cache` because the Supabase JS client
+ * sends `Cache-Control: no-cache` on its internal fetch() calls, which opts
+ * the whole page out of Next.js ISR. Without this wrapper we observed
+ * `X-Vercel-Cache: MISS` on every request and Google refused to index the
+ * ~42 000 event-detail pages. The cache tag allows targeted invalidation
+ * via `revalidateTag('event')` if we ever want to push fresh data immediately.
  */
-async function getEventByShortId(slugParam: string): Promise<Event | null> {
-  // If the param looks like a full UUID (36 chars with dashes), try exact match first
-  if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(slugParam)) {
+const getEventByShortIdCached = unstable_cache(
+  async (slugParam: string): Promise<Event | null> => {
+    // If the param looks like a full UUID (36 chars with dashes), try exact match first
+    if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(slugParam)) {
+      const { data, error } = await supabase
+        .from('events')
+        .select('*')
+        .eq('id', slugParam)
+        .single();
+      if (!error && data) return data as Event;
+    }
+
+    // Extract 8-char short ID and do range query
+    const shortId = slugParam.slice(0, 8);
+    const rangeStart = `${shortId}-0000-0000-0000-000000000000`;
+    const rangeEnd = `${shortId}-ffff-ffff-ffff-ffffffffffff`;
+
     const { data, error } = await supabase
       .from('events')
       .select('*')
-      .eq('id', slugParam)
+      .gte('id', rangeStart)
+      .lte('id', rangeEnd)
+      .limit(1)
       .single();
-    if (!error && data) return data as Event;
-  }
 
-  // Extract 8-char short ID and do range query
-  const shortId = slugParam.slice(0, 8);
-  const rangeStart = `${shortId}-0000-0000-0000-000000000000`;
-  const rangeEnd = `${shortId}-ffff-ffff-ffff-ffffffffffff`;
+    if (error || !data) return null;
+    return data as Event;
+  },
+  ['event-detail'],
+  { revalidate: 3600, tags: ['event'] },
+);
 
-  const { data, error } = await supabase
-    .from('events')
-    .select('*')
-    .gte('id', rangeStart)
-    .lte('id', rangeEnd)
-    .limit(1)
-    .single();
-
-  if (error || !data) return null;
-  return data as Event;
+async function getEventByShortId(slugParam: string): Promise<Event | null> {
+  return getEventByShortIdCached(slugParam);
 }
+
+const getVenueCached = unstable_cache(
+  async (venueId: string): Promise<{ name: string; city: string | null } | null> => {
+    const { data, error } = await supabase
+      .from('venues')
+      .select('name, city')
+      .eq('id', venueId)
+      .single();
+
+    if (error || !data) return null;
+    return data;
+  },
+  ['venue-detail'],
+  { revalidate: 3600, tags: ['venue'] },
+);
 
 async function getVenue(
   venueId: string,
 ): Promise<{ name: string; city: string | null } | null> {
-  const { data, error } = await supabase
-    .from('venues')
-    .select('name, city')
-    .eq('id', venueId)
-    .single();
-
-  if (error || !data) return null;
-  return data;
+  return getVenueCached(venueId);
 }
 
 export async function generateMetadata({

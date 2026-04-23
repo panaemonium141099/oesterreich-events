@@ -104,6 +104,28 @@ const nextConfig: NextConfig = {
       },
     ];
   },
+  /**
+   * `www.lasstreffen.at` → `lasstreffen.at` consolidation.
+   *
+   * Without this redirect block Vercel ships a **307 Temporary Redirect**
+   * for the www host. 307 tells Google "the www version might come back"
+   * and Google refuses to consolidate ranking signals — result: `Seite
+   * mit Weiterleitung` warning in Search Console and www URLs sit as
+   * ghost entries in the index that never get indexed.
+   *
+   * `permanent: true` emits a **301 Permanent Redirect**, the correct
+   * signal for a canonical host change.
+   */
+  async redirects() {
+    return [
+      {
+        source: '/:path*',
+        has: [{ type: 'host', value: 'www.lasstreffen.at' }],
+        destination: 'https://lasstreffen.at/:path*',
+        permanent: true,
+      },
+    ];
+  },
   // better-sqlite3 only used by scraper scripts, not by API routes
   serverExternalPackages: ['better-sqlite3'],
   // Standalone output for Docker deployment (Coolify)
