@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useEffect, type FormEvent } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect, useMemo, type FormEvent } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/lib/supabase/auth-context';
 import { trackEvent } from '@/lib/analytics';
@@ -10,7 +10,15 @@ type Step = 1 | 2;
 
 export default function RegisterPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { user, loading, signInWithGoogle, signUpWithEmail } = useAuth();
+
+  // Preserve downstream redirect (e.g. from /join/[code]) through the auth flow.
+  const redirectTarget = useMemo(() => {
+    const raw = searchParams.get('redirect');
+    return raw && raw.startsWith('/') && !raw.startsWith('//') ? raw : '/map';
+  }, [searchParams]);
+  const passthrough = redirectTarget === '/map' ? '' : `?redirect=${encodeURIComponent(redirectTarget)}`;
 
   const [step, setStep] = useState<Step>(1);
 
@@ -33,12 +41,12 @@ export default function RegisterPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [success, setSuccess] = useState(false);
 
-  // Redirect if already logged in
+  // Redirect if already logged in — honor the redirect target.
   useEffect(() => {
     if (!loading && user) {
-      router.replace('/map');
+      router.replace(redirectTarget);
     }
-  }, [user, loading, router]);
+  }, [user, loading, router, redirectTarget]);
 
   const handleStep1 = (e: FormEvent) => {
     e.preventDefault();
@@ -112,7 +120,7 @@ export default function RegisterPage() {
           Bitte bestätige deine E-Mail-Adresse.
         </p>
         <Link
-          href="/auth/login"
+          href={`/auth/login${passthrough}`}
           className="inline-block mt-4 text-sm text-white/50 hover:text-white/80 underline underline-offset-2 transition-colors"
         >
           Zum Login
@@ -138,7 +146,7 @@ export default function RegisterPage() {
           <div className="space-y-3">
             <button
               type="button"
-              onClick={signInWithGoogle}
+              onClick={() => signInWithGoogle(redirectTarget)}
               className="w-full flex items-center justify-center gap-3 rounded-xl bg-white text-gray-900 font-medium py-3 px-4 hover:bg-gray-100 transition-colors cursor-pointer"
             >
               <GoogleIcon />
@@ -342,7 +350,7 @@ export default function RegisterPage() {
       {/* Link to login */}
       <p className="text-center text-sm text-white/30">
         Bereits ein Konto?{' '}
-        <Link href="/auth/login" className="text-white/70 hover:text-white transition-colors underline underline-offset-2">
+        <Link href={`/auth/login${passthrough}`} className="text-white/70 hover:text-white transition-colors underline underline-offset-2">
           Anmelden
         </Link>
       </p>

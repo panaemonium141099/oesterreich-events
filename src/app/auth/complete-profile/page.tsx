@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useEffect, type FormEvent } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect, useMemo, type FormEvent } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/lib/supabase/auth-context';
 import { isProfileComplete } from '@/lib/supabase/auth-context';
@@ -10,8 +10,16 @@ import { trackEvent } from '@/lib/analytics';
 
 export default function CompleteProfilePage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { user, profile, loading, refreshProfile } = useAuth();
   const [supabase] = useState(() => createClient());
+
+  // Safe same-origin redirect target for post-completion navigation.
+  const redirectTarget = useMemo(() => {
+    const raw = searchParams.get('redirect');
+    return raw && raw.startsWith('/') && !raw.startsWith('//') ? raw : '/map';
+  }, [searchParams]);
+  const loginPassthrough = redirectTarget === '/map' ? '' : `?redirect=${encodeURIComponent(redirectTarget)}`;
 
   // Form state — pre-filled from profile if available
   const [firstName, setFirstName] = useState('');
@@ -54,19 +62,19 @@ export default function CompleteProfilePage() {
     }
   }, [profile]);
 
-  // If not logged in, redirect to login
+  // If not logged in, redirect to login (preserving the downstream redirect).
   useEffect(() => {
     if (!loading && !user) {
-      router.replace('/auth/login');
+      router.replace(`/auth/login${loginPassthrough}`);
     }
-  }, [user, loading, router]);
+  }, [user, loading, router, loginPassthrough]);
 
-  // If profile is already complete, redirect to map
+  // If profile is already complete, jump straight to the final destination.
   useEffect(() => {
     if (!loading && profile && isProfileComplete(profile)) {
-      router.replace('/map');
+      router.replace(redirectTarget);
     }
-  }, [loading, profile, router]);
+  }, [loading, profile, router, redirectTarget]);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -119,7 +127,7 @@ export default function CompleteProfilePage() {
 
     await refreshProfile();
     trackEvent('profile_completed', { method: 'complete-profile' });
-    router.replace('/map');
+    router.replace(redirectTarget);
   };
 
   // Show spinner while loading

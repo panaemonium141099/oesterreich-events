@@ -1,13 +1,14 @@
 'use client';
 
-import { useState, useEffect, type FormEvent } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect, useMemo, type FormEvent } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth, isProfileComplete } from '@/lib/supabase/auth-context';
 import { trackEvent } from '@/lib/analytics';
 
 export default function LoginPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { user, profile, loading, signInWithGoogle, signInWithEmail } = useAuth();
 
   const [email, setEmail] = useState('');
@@ -16,18 +17,27 @@ export default function LoginPage() {
   const [submitting, setSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
+  // Safe same-origin redirect target (prevents open-redirect).
+  const redirectTarget = useMemo(() => {
+    const raw = searchParams.get('redirect');
+    return raw && raw.startsWith('/') && !raw.startsWith('//') ? raw : '/map';
+  }, [searchParams]);
+
+  // Preserve redirect when bouncing to complete-profile / register.
+  const passthrough = redirectTarget === '/map' ? '' : `?redirect=${encodeURIComponent(redirectTarget)}`;
+
   // Redirect if already logged in — check profile completeness
   useEffect(() => {
     if (!loading && user) {
       trackEvent('login', { method: 'email' });
       if (profile && !isProfileComplete(profile)) {
-        router.replace('/auth/complete-profile');
+        router.replace(`/auth/complete-profile${passthrough}`);
       } else if (profile) {
-        router.replace('/map');
+        router.replace(redirectTarget);
       }
       // If profile is still null (loading in background), wait for next render
     }
-  }, [user, profile, loading, router]);
+  }, [user, profile, loading, router, redirectTarget, passthrough]);
 
   const handleEmailLogin = async (e: FormEvent) => {
     e.preventDefault();
@@ -59,7 +69,7 @@ export default function LoginPage() {
       <div className="space-y-3">
         <button
           type="button"
-          onClick={signInWithGoogle}
+          onClick={() => signInWithGoogle(redirectTarget)}
           className="w-full flex items-center justify-center gap-3 rounded-xl bg-white text-gray-900 font-medium py-3 px-4 hover:bg-gray-100 transition-colors cursor-pointer"
         >
           <GoogleIcon />
@@ -152,7 +162,7 @@ export default function LoginPage() {
         </Link>
         <p className="text-white/30">
           Noch kein Konto?{' '}
-          <Link href="/auth/register" className="text-white/70 hover:text-white transition-colors underline underline-offset-2">
+          <Link href={`/auth/register${passthrough}`} className="text-white/70 hover:text-white transition-colors underline underline-offset-2">
             Registrieren
           </Link>
         </p>

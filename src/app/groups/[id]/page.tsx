@@ -21,7 +21,7 @@
  * pinboard both subscribe independently.
  */
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
@@ -158,6 +158,7 @@ export default function EventDashboardPage() {
   const [loadingData, setLoadingData] = useState(true);
   const [sending, setSending] = useState(false);
   const [copiedCode, setCopiedCode] = useState(false);
+  const [copiedLink, setCopiedLink] = useState(false);
   const [myMembership, setMyMembership] = useState<Member | null>(null);
   const [contributions, setContributions] = useState<Contribution[]>([]);
   const [newContribution, setNewContribution] = useState('');
@@ -433,6 +434,13 @@ export default function EventDashboardPage() {
   };
 
   const copiedTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const copiedLinkTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const inviteUrl = useMemo(
+    () => (group && typeof window !== 'undefined'
+      ? `${window.location.origin}/join/${group.invite_code}`
+      : ''),
+    [group],
+  );
   const copyInviteCode = () => {
     if (group) {
       navigator.clipboard.writeText(group.invite_code);
@@ -441,7 +449,36 @@ export default function EventDashboardPage() {
       copiedTimerRef.current = setTimeout(() => setCopiedCode(false), 2000);
     }
   };
-  useEffect(() => () => { if (copiedTimerRef.current) clearTimeout(copiedTimerRef.current); }, []);
+  const copyInviteLink = () => {
+    if (!inviteUrl) return;
+    navigator.clipboard.writeText(inviteUrl);
+    setCopiedLink(true);
+    if (copiedLinkTimerRef.current) clearTimeout(copiedLinkTimerRef.current);
+    copiedLinkTimerRef.current = setTimeout(() => setCopiedLink(false), 2000);
+  };
+  const shareInviteLink = async () => {
+    if (!group || !inviteUrl) return;
+    const shareData = {
+      title: `Einladung: ${group.name}`,
+      text: `Du bist zu „${group.name}" eingeladen. Öffne den Link und steig ein.`,
+      url: inviteUrl,
+    };
+    try {
+      if (typeof navigator !== 'undefined' && 'share' in navigator && navigator.canShare?.(shareData) !== false) {
+        await navigator.share(shareData);
+        return;
+      }
+    } catch (e) {
+      // user cancelled or share unsupported — fall through to clipboard
+      if (e instanceof Error && e.name === 'AbortError') return;
+    }
+    copyInviteLink();
+    toast.success('Link kopiert — teile ihn mit deinen Freunden');
+  };
+  useEffect(() => () => {
+    if (copiedTimerRef.current) clearTimeout(copiedTimerRef.current);
+    if (copiedLinkTimerRef.current) clearTimeout(copiedLinkTimerRef.current);
+  }, []);
 
   const loadFriendsForInvite = async () => {
     if (!user) return;
@@ -995,8 +1032,12 @@ export default function EventDashboardPage() {
           onInvite={inviteFriend}
           onClose={() => setShowInvite(false)}
           inviteCode={group.invite_code}
+          inviteUrl={inviteUrl}
           onCopyCode={copyInviteCode}
+          onCopyLink={copyInviteLink}
+          onShareLink={shareInviteLink}
           copiedCode={copiedCode}
+          copiedLink={copiedLink}
         />
       )}
 
@@ -1324,23 +1365,32 @@ function StatBlock({ value, label, tone }: { value: number; label: string; tone:
 }
 
 function InviteSheet({
-  friends, invitingId, onInvite, onClose, inviteCode, onCopyCode, copiedCode,
+  friends, invitingId, onInvite, onClose,
+  inviteCode, inviteUrl, onCopyCode, onCopyLink, onShareLink,
+  copiedCode, copiedLink,
 }: {
   friends: FriendProfile[];
   invitingId: string | null;
   onInvite: (id: string) => void;
   onClose: () => void;
   inviteCode: string;
+  inviteUrl: string;
   onCopyCode: () => void;
+  onCopyLink: () => void;
+  onShareLink: () => void;
   copiedCode: boolean;
+  copiedLink: boolean;
 }) {
+  // Strip protocol for a cleaner visual — `lasstreffen.at/join/ABC123`
+  const prettyUrl = inviteUrl.replace(/^https?:\/\//, '');
+
   return (
     <div className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm flex items-end sm:items-center justify-center p-4" onClick={onClose}>
       <div
         className="w-full max-w-md bg-[color:var(--color-planer-surface)] border border-white/[0.08] rounded-t-2xl sm:rounded-2xl p-6"
         onClick={e => e.stopPropagation()}
       >
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center justify-between mb-5">
           <EditorialCaption>Freunde einladen</EditorialCaption>
           <button onClick={onClose} className="text-[color:var(--color-planer-whisper)] hover:text-[color:var(--color-planer-ink)]">
             <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
@@ -1349,51 +1399,104 @@ function InviteSheet({
           </button>
         </div>
 
-        {/* Invite code block */}
+        {/* ──── Shareable link — hero action ──── */}
+        <div className="mb-5 p-4 rounded-xl bg-white/[0.03] border border-white/[0.06]">
+          <div className="text-[10px] uppercase tracking-[0.2em] text-[color:var(--color-planer-whisper)] mb-2">
+            Einladungslink
+          </div>
+          <button
+            onClick={onCopyLink}
+            title="Link kopieren"
+            className="block w-full text-left font-mono text-[13px] text-[color:var(--color-planer-ink)]/90 hover:text-[color:var(--color-planer-ink)] truncate mb-3 transition-colors"
+          >
+            {prettyUrl || 'Link wird vorbereitet …'}
+          </button>
+          <div className="grid grid-cols-2 gap-2">
+            <button
+              onClick={onShareLink}
+              className="inline-flex items-center justify-center gap-2 px-3 py-2.5 rounded-lg bg-[color:var(--color-planer-accent)] text-[color:var(--color-planer-void)] text-sm font-medium hover:opacity-90 transition-opacity"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+              </svg>
+              Teilen
+            </button>
+            <button
+              onClick={onCopyLink}
+              className="inline-flex items-center justify-center gap-2 px-3 py-2.5 rounded-lg bg-white/[0.04] border border-white/[0.08] text-sm text-[color:var(--color-planer-ink)] hover:bg-white/[0.08] transition-colors"
+            >
+              {copiedLink ? (
+                <>
+                  <svg className="w-4 h-4 text-[color:var(--color-planer-accent)]" fill="none" stroke="currentColor" strokeWidth={2.2} viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                  </svg>
+                  Kopiert
+                </>
+              ) : (
+                <>
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2" />
+                  </svg>
+                  Link kopieren
+                </>
+              )}
+            </button>
+          </div>
+        </div>
+
+        {/* ──── Code fallback — for manual entry on /join ──── */}
         <button
           onClick={onCopyCode}
-          className="w-full mb-5 p-4 rounded-xl bg-white/[0.03] border border-white/[0.06] hover:border-[color:var(--color-planer-accent)]/30 transition-all flex items-center justify-between"
+          className="w-full mb-6 p-3 rounded-xl bg-white/[0.02] border border-dashed border-white/[0.08] hover:border-[color:var(--color-planer-accent)]/30 transition-all flex items-center justify-between"
         >
-          <div className="text-left">
-            <div className="text-[10px] uppercase tracking-[0.2em] text-[color:var(--color-planer-whisper)] mb-1">Einladungscode</div>
-            <div className="serif-display tabular text-2xl text-[color:var(--color-planer-ink)]">{inviteCode}</div>
+          <div className="text-left flex items-baseline gap-3">
+            <span className="text-[10px] uppercase tracking-[0.2em] text-[color:var(--color-planer-whisper)]">
+              Code
+            </span>
+            <span className="serif-display tabular text-lg text-[color:var(--color-planer-ink)]">{inviteCode}</span>
           </div>
           <span className="text-xs text-[color:var(--color-planer-accent)]">
             {copiedCode ? '✓ Kopiert' : 'Kopieren'}
           </span>
         </button>
 
+        {/* ──── Friend shortlist ──── */}
         {friends.length === 0 ? (
           <p className="text-sm italic text-[color:var(--color-planer-dim)] text-center py-6">
             Alle deine Freunde sind schon dabei — oder es sind noch keine in deiner Liste.
           </p>
         ) : (
-          <div className="space-y-1 max-h-64 overflow-y-auto custom-scrollbar">
-            {friends.map(f => {
-              const inviting = invitingId === f.id;
-              return (
-                <button
-                  key={f.id}
-                  onClick={() => onInvite(f.id)}
-                  disabled={inviting}
-                  className="w-full flex items-center gap-3 p-2.5 rounded-xl hover:bg-white/[0.04] transition-colors text-left disabled:opacity-50"
-                >
-                  {f.avatar_url ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={f.avatar_url} alt="" className="w-9 h-9 rounded-full object-cover" />
-                  ) : (
-                    <div className="w-9 h-9 rounded-full bg-white/10 flex items-center justify-center text-sm text-white/60">
-                      {f.first_name[0]?.toUpperCase()}
-                    </div>
-                  )}
-                  <span className="flex-1 text-sm text-[color:var(--color-planer-ink)]">{f.first_name} {f.last_name}</span>
-                  <span className="text-xs text-[color:var(--color-planer-accent)]">
-                    {inviting ? '…' : 'Einladen'}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
+          <>
+            <div className="text-[10px] uppercase tracking-[0.2em] text-[color:var(--color-planer-whisper)] mb-2">
+              Oder direkt einladen
+            </div>
+            <div className="space-y-1 max-h-56 overflow-y-auto custom-scrollbar">
+              {friends.map(f => {
+                const inviting = invitingId === f.id;
+                return (
+                  <button
+                    key={f.id}
+                    onClick={() => onInvite(f.id)}
+                    disabled={inviting}
+                    className="w-full flex items-center gap-3 p-2.5 rounded-xl hover:bg-white/[0.04] transition-colors text-left disabled:opacity-50"
+                  >
+                    {f.avatar_url ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={f.avatar_url} alt="" className="w-9 h-9 rounded-full object-cover" />
+                    ) : (
+                      <div className="w-9 h-9 rounded-full bg-white/10 flex items-center justify-center text-sm text-white/60">
+                        {f.first_name[0]?.toUpperCase()}
+                      </div>
+                    )}
+                    <span className="flex-1 text-sm text-[color:var(--color-planer-ink)]">{f.first_name} {f.last_name}</span>
+                    <span className="text-xs text-[color:var(--color-planer-accent)]">
+                      {inviting ? '…' : 'Einladen'}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </>
         )}
       </div>
     </div>

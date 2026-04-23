@@ -41,8 +41,8 @@ interface AuthContextType {
   session: Session | null;
   loading: boolean;
   profileComplete: boolean;
-  signInWithGoogle: () => Promise<void>;
-  signInWithApple: () => Promise<void>;
+  signInWithGoogle: (next?: string) => Promise<void>;
+  signInWithApple: (next?: string) => Promise<void>;
   signInWithEmail: (email: string, password: string) => Promise<{ error: string | null }>;
   signUpWithEmail: (email: string, password: string, metadata: {
     first_name: string;
@@ -132,20 +132,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
   }, [supabase, fetchProfile]);
 
-  const signInWithGoogle = async () => {
+  // Safe same-origin redirect target (or undefined) → forwarded to the callback as ?next=
+  const buildCallbackUrl = (next?: string) => {
+    const safeNext = next && next.startsWith('/') && !next.startsWith('//') ? next : null;
+    return safeNext
+      ? `${SITE_ORIGIN}/auth/callback?next=${encodeURIComponent(safeNext)}`
+      : `${SITE_ORIGIN}/auth/callback`;
+  };
+
+  const signInWithGoogle = async (next?: string) => {
     await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: `${SITE_ORIGIN}/auth/callback`,
+        redirectTo: buildCallbackUrl(next),
       },
     });
   };
 
-  const signInWithApple = async () => {
+  const signInWithApple = async (next?: string) => {
     await supabase.auth.signInWithOAuth({
       provider: 'apple',
       options: {
-        redirectTo: `${SITE_ORIGIN}/auth/callback`,
+        redirectTo: buildCallbackUrl(next),
       },
     });
   };
