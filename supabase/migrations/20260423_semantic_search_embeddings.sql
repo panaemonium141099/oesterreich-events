@@ -10,6 +10,9 @@
 -- all 42k events one-time). Re-embedded only when content changes.
 -- ============================================================================
 
+-- Raise timeout for the ivfflat index build on a table with ~50k rows.
+set statement_timeout = '10min';
+
 -- 1. pgvector extension — Supabase already supports this, just enable
 create extension if not exists vector;
 

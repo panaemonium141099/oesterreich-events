@@ -10,7 +10,15 @@
 --   2. Map old category values → new ones (mass UPDATE)
 --   3. Optionally reset enrichment_version so the next enrichment run
 --      picks up all rows with the new v3 prompt.
+--
+-- TIMEOUT NOTE: Supabase SQL-Editor default is 60s which isn't enough
+-- for the mass UPDATEs on 90k+ events. We raise it to 10min per
+-- session below. When running via `supabase db push` or psql directly
+-- this isn't necessary.
 -- ============================================================================
+
+-- Raise per-session timeout so the mass UPDATEs below don't abort.
+set statement_timeout = '10min';
 
 -- ────────────────── 1. New array columns ──────────────────
 
