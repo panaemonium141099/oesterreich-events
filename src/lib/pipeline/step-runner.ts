@@ -4,16 +4,16 @@ export const STEP_DEPENDENCIES: Record<string, string[]> = {
   scrapers: [],
   venues: [],
   normalize: [],
-  // Deterministic backfill runs first — cheap, free, bulk. Writes cat-v2 rules_*
-  // confidence + the 14-way `category` on every stale row. Still needed because
-  // the enrichment step below does NOT overwrite `category` (only tags/audience/
-  // vibe/setting/flags).
+  // Deterministic rule-based backfill runs first as a cheap fallback.
+  // Writes a coarse `category` on every stale row so events without
+  // enrichment still have SOMETHING. Since v3 (2026-04-23) the enrichment
+  // step further down overwrites this with a better AI-derived category
+  // using the 11-Hauptkategorie taxonomy — but this step stays as the
+  // safety net for events that skip enrichment (--skip-enrichment flag).
   categorization_backfill: ['normalize'],
-  // OLD: AI-residue step via OpenAI (categorize-events.ts without flags).
-  // Superseded by the `enrichment` step below which uses Claude via the
-  // local CLI and produces richer per-event metadata (tags/audience/vibe/
-  // setting/flags/price_tier/duration_type). Kept in the map so downstream
-  // code that references it doesn't break, but never scheduled.
+  // Legacy AI-residue step via OpenAI (categorize-events.ts without flags).
+  // Fully superseded by the enrichment step, kept in the map only so code
+  // referencing it doesn't break. Never scheduled.
   categorization: ['normalize', 'categorization_backfill'],
   geocoding: ['normalize'],
   scoring: ['normalize'],

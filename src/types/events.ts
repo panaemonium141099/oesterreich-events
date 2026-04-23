@@ -57,6 +57,8 @@ export interface Event {
   // Enrichment layer — populated by src/scripts/enrich-openai.ts. All
   // are nullable because older rows (or rows from scrapers that
   // haven't been enriched yet) won't have them.
+  //
+  // See docs/TAXONOMY.md §3 for the full closed vocabulary of each axis.
   audience?: string[] | null;
   vibe?: string[] | null;
   setting?: string[] | null;
@@ -65,6 +67,17 @@ export interface Event {
   duration_type?: 'kurz' | 'abend' | 'ganztag' | 'mehrtägig' | 'dauerausstellung' | 'nacht-bis-morgen' | '24-stunden' | '48-stunden' | null;
   is_student_friendly?: boolean | null;
   is_family_friendly?: boolean | null;
+  /**
+   * Taxonomy v3 additions — "Anlass-Tags" like ausgehen, date-night,
+   * afterwork, saufen-gehen, wochenendplan. 0-3 per event.
+   */
+  occasion_tags?: string[] | null;
+  /**
+   * Taxonomy v3 additions — binary price/barrier flags: happy-hour,
+   * studentenrabatt, barrierefrei, kinderwagengeeignet, freier-eintritt.
+   * Complements price_tier (which is a coarse bucket).
+   */
+  price_flags?: string[] | null;
   suggested_description?: string | null;
   suggested_price_text?: string | null;
   enrichment_version?: string | null;
@@ -82,7 +95,7 @@ export type CategoryConfidence =
   | 'ai'
   | 'ai_low';
 
-export type CategorySource = 'manual' | 'rules' | 'ai';
+export type CategorySource = 'manual' | 'rules' | 'ai' | 'enrichment';
 
 export interface CategoryCandidate {
   category: string;
@@ -170,23 +183,64 @@ export interface EventFilters {
   setting?: string[];
   /** Language: deutsch | dialekt | englisch | mehrsprachig | ohne-sprache */
   language?: 'deutsch' | 'dialekt' | 'englisch' | 'mehrsprachig' | 'ohne-sprache';
+  /** Occasion filter: ausgehen | afterwork | date-night | saufen-gehen | ... */
+  occasion?: string[];
+  /** Price flag filter: happy-hour | studentenrabatt | barrierefrei | ... */
+  priceFlags?: string[];
 }
 
+/**
+ * Event Hauptkategorien.
+ * Single source of truth: docs/TAXONOMY.md §2.
+ * Code mirror: src/lib/category-classifier/taxonomy.ts CATEGORIES[].
+ *
+ * Union of v3 (current, 11 + Sonstiges) and v1/v2 legacy names kept as
+ * deprecated aliases so the rule-based classifier (`src/lib/category-
+ * classifier/rules.ts`) still compiles. Legacy values get migrated to v3
+ * at the DB boundary via migrateOldCategory() in taxonomy.ts, and by the
+ * SQL migration 20260423_taxonomy_v3.sql at runtime.
+ */
 export type Category =
+  // v3 Hauptkategorien (target state)
   | 'Musik'
-  | 'Nightlife'
-  | 'Wein & Kulinarik'
+  | 'Kultur & Bühne'
+  | 'Nightlife & Party'
+  | 'Essen & Trinken'
+  | 'Märkte & Feste'
+  | 'Sport & Bewegung'
+  | 'Natur & Abenteuer'
+  | 'Wissen & Karriere'
+  | 'Familie & Kinder'
+  | 'Community & Freizeit'
+  | 'Wellness & Spiritualität'
+  | 'Sonstiges'
+  // v1/v2 legacy names — kept as aliases so rules.ts compiles and old
+  // DB rows don't produce type errors. @deprecated, will be removed
+  // after the enrichment rerun and SQL migration are both done.
+  /** @deprecated Use 'Kultur & Bühne' */
   | 'Kultur'
-  | 'Märkte'
+  /** @deprecated Use 'Sport & Bewegung' */
   | 'Sport'
-  | 'Familie'
-  | 'Natur'
+  /** @deprecated Use 'Märkte & Feste' (merged with Feste & Brauchtum) */
+  | 'Märkte'
+  /** @deprecated Use 'Märkte & Feste' (merged with Märkte) */
   | 'Feste & Brauchtum'
+  /** @deprecated Use 'Essen & Trinken' */
+  | 'Wein & Kulinarik'
+  /** @deprecated Use 'Familie & Kinder' */
+  | 'Familie'
+  /** @deprecated Use 'Natur & Abenteuer' */
+  | 'Natur'
+  /** @deprecated Use 'Nightlife & Party' */
+  | 'Nightlife'
+  /** @deprecated Use 'Wissen & Karriere' (merged with Wirtschaft) */
   | 'Bildung'
-  | 'Gesundheit'
-  | 'Religion'
+  /** @deprecated Use 'Wissen & Karriere' (merged with Bildung) */
   | 'Wirtschaft'
-  | 'Sonstiges';
+  /** @deprecated Use 'Wellness & Spiritualität' (merged with Religion) */
+  | 'Gesundheit'
+  /** @deprecated Use 'Wellness & Spiritualität' (merged with Gesundheit) */
+  | 'Religion';
 
 export type District =
   | 'Neusiedl am See'

@@ -315,8 +315,9 @@ export async function enrichEvent(
 
   return {
     result: {
-      tags: [], audience: [], vibe: [], setting: [],
-      language: null, price_tier: null, duration_type: null,
+      primary_category: null,
+      tags: [], audience: [], vibe: [], occasion: [], setting: [],
+      language: null, price_tier: null, price_flags: [], duration_type: null,
       is_student_friendly: false, is_family_friendly: false,
       suggested_description: null, suggested_price_text: null,
     },

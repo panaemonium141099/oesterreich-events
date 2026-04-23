@@ -1,13 +1,17 @@
 /**
- * Canonical category taxonomy used by the central classifier.
+ * Canonical category taxonomy — v3, 11 Hauptkategorien.
  *
- * The 14 names must exactly match the legacy values used throughout the app
- * (map filters, API query params, saved-event badges, blog schema, ...), so
- * these strings are considered a stable public API.
+ * **Single source of truth:** `docs/TAXONOMY.md`. Jede Änderung hier muss
+ * dort nachgezogen werden — und umgekehrt.
  *
- * `definitions` carry the disambiguation notes the AI fallback prompt reads
- * verbatim — they encode the project-specific judgement calls for the pairs
- * that confused the old keyword-only classifier.
+ * Rework note (2026-04-23): The old 14-cat taxonomy (Kultur / Nightlife /
+ * Bildung + Wirtschaft separate / Gesundheit + Religion separate) has been
+ * consolidated into 11 cleaner buckets. Categories = Datenrückgrat, Tags =
+ * Verkaufsmaschine. Nightlife is now a Hauptkategorie called "Nightlife &
+ * Party" (as an umbrella), NOT a tag — but the tag system carries the
+ * emotional/discovery load (Studentenleben, Date Night, Afterwork, …).
+ *
+ * Migration guide (alt → neu) in docs/TAXONOMY.md §5.
  */
 
 import type { Category } from '@/types/events';
@@ -16,196 +20,219 @@ import type { Category } from '@/types/events';
  * Compound classifier version. Three independent components allow us to
  * invalidate caches and trigger re-runs at different granularities:
  *
- * - `cat-vN`      — fundamental confidence model / gate structure change
+ * - `cat-vN`      — fundamental confidence model / category structure change
  * - `rulesN`      — lexicon, scoring weights, blocker or disambiguator change
  * - `promptN`     — OpenAI system prompt change
  *
- * Events with `category_version` not matching `cat-v2-rules1-*` are considered
- * stale and are re-run by the deterministic-backfill pass. Cache keys embed
- * the full version string so any bump invalidates them automatically.
+ * Bumped to cat-v3 with the 11-category rework.
  */
-export const CLASSIFIER_VERSION = 'cat-v2-rules1-prompt1' as const;
+export const CLASSIFIER_VERSION = 'cat-v3-rules1-prompt1' as const;
 
 /** Prefix used by the backfill query's LIKE filter. Bump when rules change. */
-export const CLASSIFIER_VERSION_PREFIX = 'cat-v2-rules1-' as const;
+export const CLASSIFIER_VERSION_PREFIX = 'cat-v3-rules1-' as const;
 
 export const CATEGORIES: Category[] = [
   'Musik',
-  'Kultur',
-  'Sport',
-  'Feste & Brauchtum',
-  'Märkte',
-  'Wein & Kulinarik',
-  'Familie',
-  'Natur',
-  'Nightlife',
-  'Bildung',
-  'Gesundheit',
-  'Religion',
-  'Wirtschaft',
+  'Kultur & Bühne',
+  'Nightlife & Party',
+  'Essen & Trinken',
+  'Märkte & Feste',
+  'Sport & Bewegung',
+  'Natur & Abenteuer',
+  'Wissen & Karriere',
+  'Familie & Kinder',
+  'Community & Freizeit',
+  'Wellness & Spiritualität',
   'Sonstiges',
 ];
 
 /**
- * Priority order for the deterministic tie-breaker and legacy compatibility
- * with `categorizeEventMulti`. When scores tie, earlier wins.
- *
- * Specific niches first, broad culture/music last. `Sonstiges` is never in
- * this list — it is only selected as an explicit fallback.
+ * Priority order for deterministic tie-breaking. Earlier wins.
+ * Specific niches first, broad ones last.
  */
 export const PRIORITY_ORDER: Category[] = [
-  'Nightlife',
-  'Religion',
-  'Gesundheit',
-  'Natur',
-  'Familie',
-  'Feste & Brauchtum',
-  'Märkte',
-  'Wein & Kulinarik',
-  'Sport',
-  'Wirtschaft',
-  'Bildung',
-  'Kultur',
-  'Musik',
+  'Wellness & Spiritualität',   // Religion + Gesundheit — very specific
+  'Natur & Abenteuer',          // outdoor niche
+  'Familie & Kinder',           // audience-defined
+  'Märkte & Feste',             // format-defined
+  'Essen & Trinken',
+  'Sport & Bewegung',
+  'Wissen & Karriere',          // Bildung + Wirtschaft merged
+  'Community & Freizeit',       // social/hobby
+  'Nightlife & Party',          // now a Hauptkategorie
+  'Kultur & Bühne',             // broad performing arts
+  'Musik',                      // broadest, last tiebreaker winner
 ];
 
 export interface CategoryDefinition {
-  /** Short one-liner shown to the AI fallback. */
+  /** Short one-liner shown to the AI prompt. */
   summary: string;
   /** Disambiguation guidance vs confusable siblings. */
   notes: string[];
 }
 
 /**
- * Explicit definitions the AI prompt consumes. These encode the project's
- * judgement calls for the pairs the rules layer cannot cleanly separate.
+ * Definitions the AI enrichment prompt consumes. Partial because only the
+ * 11 v3-Hauptkategorien + Sonstiges need definitions — the deprecated v1/v2
+ * aliases in the Category type are just DB-migration scaffolding, not AI
+ * targets.
  */
-export const CATEGORY_DEFINITIONS: Record<Category, CategoryDefinition> = {
+export const CATEGORY_DEFINITIONS: Partial<Record<Category, CategoryDefinition>> = {
   Musik: {
     summary:
-      'Live concerts, orchestra, jazz, classical, choir, bands, singer-songwriter, open air concerts — music where listening is the point.',
+      'Konzert, Live-Musik, Orchester, Chor, Band, Singer-Songwriter, Jazz, Klassik, Open-Air-Konzert, volkstümliche/traditionelle Musik (Tamburica, Blasmusik, Chor). Hauptfokus: Musik hören.',
     notes: [
-      'Nightlife vs Musik: if the event centres on club culture, DJs, techno/house/electronic dance or late-night partying, pick Nightlife. Pick Musik when the draw is a named artist/band/ensemble performing a set.',
-      'Kultur vs Musik: opera, operetta, musical and ballet are Kultur (staged theatre) — not Musik — unless the event is explicitly a concert performance.',
-      'Religion vs Musik: Kirchenkonzert / Orgelkonzert are Musik; Gottesdienst mit Musik bleibt Religion.',
+      'Musik vs Nightlife & Party: Wenn der Draw ein benannter Künstler / Band / Ensemble ist, ist es Musik. DJ-Lineup / Club-Night / Electronic-Dance-Party mit Tanzen als Fokus → Nightlife & Party.',
+      'Musik vs Kultur & Bühne: Oper, Operette, Musical, Ballett sind Kultur & Bühne (inszeniert). Reines Konzert = Musik.',
+      'Musik vs Wellness & Spiritualität: Kirchenkonzert / Orgelkonzert (Performance) = Musik. Gottesdienst mit Musik = Wellness & Spiritualität.',
+      'Musik vs Märkte & Feste: Adventmarkt mit Live-Band = Märkte & Feste. Reines Konzert in einer Kirche = Musik.',
     ],
   },
-  Kultur: {
+  'Kultur & Bühne': {
     summary:
-      'Theatre, opera, musical, ballet, film, kabarett, lesung, ausstellung, exhibition, museum, burg-/schloss-/stadtführung.',
+      'Theater, Kabarett, Comedy, Stand-up, Lesung, Musical, Oper, Ausstellung, Museum, Kino, Performance-Art, Improtheater, Burg-/Schloss-/Stadtführung.',
     notes: [
-      'Kultur vs Musik: staged performances (Theater/Oper/Musical/Ballett) are Kultur even if music is involved.',
-      'Kultur vs Feste & Brauchtum: a "Kulturfest" that is really a dorffest/volksfest goes to Feste & Brauchtum; a curated festival of theatre/film goes to Kultur.',
-      'Kultur vs Bildung: guided tours (Stadtführung/Burgführung) are Kultur even though they are educational.',
+      'Kultur & Bühne vs Musik: Inszenierte Performances (Theater/Oper/Musical/Ballett) sind Kultur & Bühne auch wenn Musik dabei ist.',
+      'Kultur & Bühne vs Familie & Kinder: Kindertheater, Puppentheater, Kinderkino → Familie & Kinder wenn Zielgruppe explizit Kinder.',
+      'Kultur & Bühne vs Wissen & Karriere: Stadtführung / Burgführung = Kultur & Bühne, auch wenn edukativ. Vortrag mit Lernfokus = Wissen & Karriere.',
+      'Kultur & Bühne vs Märkte & Feste: Ein kuratiertes Theaterfestival = Kultur & Bühne. Dorffest mit Puppentheater-Ecke = Märkte & Feste.',
     ],
   },
-  Sport: {
+  'Nightlife & Party': {
     summary:
-      'Laufen, Wandern, Radfahren, Skifahren, Ballsport, Kampfsport, Yoga, Fitness, Turniere, Motorsport, Wassersport, Klettern.',
+      'Clubbing, Rave, Afterparty, Club-Night, Cocktail-Night, Tanznacht, Pub-Crawl, DJ-Set, Motto-Party (80s/90s/Latino/Erasmus), Bar-Events mit Party-Charakter, Ladies/Student Nights, Warehouse-Parties.',
     notes: [
-      'Sport vs Natur: guided hikes with a wildlife/nature educator are Natur; regular Wanderungen are Sport.',
-      'Sport vs Familie: Kinderturnen and Familienwandertag skew Familie when the audience is explicitly kids.',
+      'Nightlife & Party vs Musik: Band/Ensemble headlined = Musik. DJ headlined / Electronic-Music-Focus / Tanzen = Nightlife & Party.',
+      'Nightlife & Party vs Essen & Trinken: Bar mit Trink-/Heurigen-Fokus ohne Tanz = Essen & Trinken. Bar mit DJ/Party-Charakter = Nightlife & Party.',
+      'Nightlife & Party vs Märkte & Feste: Faschings-Ball / Feuerwehr-Ball = Märkte & Feste (Brauchtum). Club-Party im selben Venue = Nightlife & Party.',
     ],
   },
-  'Feste & Brauchtum': {
+  'Essen & Trinken': {
     summary:
-      'Dorffest, Stadtfest, Volksfest, Kirtag, Maibaum, Fasching, Erntedank, Silvester/Punsch, Feuerwehrfest, Heurigenfest, Advent­zauber.',
+      'Weinverkostung, Tasting, Street Food, Brunch, Dinner Event, Kulinarik-Tour, Heuriger, Buschenschank, Food Festival, Bierverkostung, Kochkurs, Gourmet-Dinner.',
     notes: [
-      'Feste & Brauchtum vs Märkte: a Christkindlmarkt/Weihnachtsmarkt/Flohmarkt is Märkte. A Dorffest that merely has a market stand is Feste & Brauchtum.',
-      'Feste & Brauchtum vs Religion: Pfarrfest/Kirtag are Feste & Brauchtum; Gottesdienst/Wallfahrt/Prozession are Religion.',
+      'Essen & Trinken vs Märkte & Feste: Food-Markt / Bauernmarkt = Märkte & Feste. Kuratiertes Tasting / Food-Festival mit Verkostungs-Fokus = Essen & Trinken.',
+      'Essen & Trinken vs Märkte & Feste: Heurigenfest mit Brauchtum-Dominanz = Märkte & Feste. Heuriger als Lokal-Abend = Essen & Trinken.',
+      'Essen & Trinken vs Nightlife & Party: Weinfest mit Musik/Tanz-Fokus (DJ, spät) = Nightlife & Party. Mit Wein/Verkostungs-Fokus = Essen & Trinken.',
     ],
   },
-  Märkte: {
+  'Märkte & Feste': {
     summary:
-      'Weihnachts-, Oster-, Wochen-, Bauern-, Floh-, Trödel-, Handwerks-, Antik-, Genuss- and Kunst-handwerksmärkte.',
+      'Christkindlmarkt, Adventmarkt, Ostermarkt, Flohmarkt, Bauernmarkt, Wochenmarkt, Designmarkt, Kunsthandwerkermarkt, Dorffest, Stadtfest, Kirtag, Pfarrfest, Feuerwehrfest, Maibaumfest, Sonnwendfeier, Erntedank, Fasching, Perchtenlauf, Krampuslauf.',
     notes: [
-      'Märkte vs Wein & Kulinarik: a Weinmarkt/Bauernmarkt with multiple food vendors is Märkte; a Weinverkostung/Weinfest with a tasting focus is Wein & Kulinarik.',
-      'Märkte vs Wirtschaft: consumer fairs (Messe als Verkaufsmesse) with generic goods are Märkte; trade fairs / B2B / Gewerbemesse are Wirtschaft.',
+      'Märkte & Feste vs Essen & Trinken: Weinmarkt/Bauernmarkt mit mehreren Ständen = Märkte & Feste. Weinverkostung/Kochkurs/Tasting = Essen & Trinken.',
+      'Märkte & Feste vs Wellness & Spiritualität: Pfarrfest/Kirtag = Märkte & Feste (Brauchtum). Gottesdienst/Wallfahrt/Prozession = Wellness & Spiritualität.',
+      'Märkte & Feste vs Wissen & Karriere: Gewerbemesse / B2B-Messe = Wissen & Karriere. Verkaufsmesse für Konsumenten mit Marktcharakter = Märkte & Feste.',
     ],
   },
-  'Wein & Kulinarik': {
+  'Sport & Bewegung': {
     summary:
-      'Weinverkostung, Weinfest, Heuriger, Kochkurs, Kulinarik-Wanderung, Bierfest, Brauereiführung, Gin/Whiskey Tasting, Gourmet Dinner.',
+      'Lauf, Marathon, Radfahren, Yoga (Fitness-Fokus), Turnier, Fitness, Fußball, Eishockey, Tennis, Schwimmen, Klettern, Tanzkurs (sportlich), Vereinsaktivitäten.',
     notes: [
-      'Wein & Kulinarik vs Märkte: the tasting / curated-food / gastronomy-school focus is Kulinarik; the sells-many-things format is Märkte.',
-      'Wein & Kulinarik vs Feste & Brauchtum: Heurigenfest/Weinlesefest leaning celebratory goes to Feste & Brauchtum when the brauchtum aspect dominates.',
+      'Sport & Bewegung vs Natur & Abenteuer: Reiner Stadtlauf / Fitness-Wanderung / Turnier = Sport & Bewegung. Geführte Wanderung mit Natur-Fokus / Rafting / Klettertour = Natur & Abenteuer.',
+      'Sport & Bewegung vs Wellness & Spiritualität: Yoga-Kurs / Fitness-Yoga = Sport & Bewegung. Yoga-Retreat / Meditation / Breathwork = Wellness & Spiritualität.',
+      'Sport & Bewegung vs Familie & Kinder: Kinderturnen / Familienwandertag skewed zu Familie & Kinder wenn Publikum explizit Kinder.',
     ],
   },
-  Familie: {
+  'Natur & Abenteuer': {
     summary:
-      'Kinderfest, Kindertheater, Familientag, Osterhasenfest, Ferienprogramm, Spielnachmittag, Eltern-Kind, Kinderworkshop.',
+      'Wanderung, Outdoor-Tour, Klettern, Rafting, Kanutour, Naturführung, Vogelbeobachtung, Kräuterwanderung, Astronomie, Pilzwanderung, Expedition, Trekking, Erlebnistour, Escape Room (Abenteuer-Fokus).',
     notes: [
-      'Familie vs Kultur: Kindertheater / Puppentheater / Kinderkonzert stay in Familie when the target audience is explicitly children.',
+      'Natur & Abenteuer vs Sport & Bewegung: Geführte Wanderung mit Natur-Guide / Nationalpark / Botanik = Natur & Abenteuer. Stadtlauf / Marathon / reine Fitness = Sport & Bewegung.',
+      'Natur & Abenteuer vs Wissen & Karriere: Vortrag über Natur = Wissen & Karriere. Draußen erlebte Naturführung = Natur & Abenteuer.',
     ],
   },
-  Natur: {
+  'Wissen & Karriere': {
     summary:
-      'Naturführung, Nationalpark, Vogelbeobachtung, Kräuterwanderung, Imkerei, Sternwarte, Botanik, Klimaschutz, Pilzwanderung.',
+      'Vortrag, Workshop, Kurs, Seminar, Fortbildung, Sprachkurs, Networking, Startup-Pitch, Tech-Meetup, Gründer-Event, Karrieremesse, Messe, Konferenz, Gewerbemesse, WKO-Event, Campus-Info, B2B-Networking.',
     notes: [
-      'Natur vs Sport: "Wanderung" alone usually goes to Sport; if paired with Naturführung/Nationalpark/Botanik/Vogelbeobachtung it goes to Natur.',
-      'Natur vs Bildung: a Vortrag about nature is Bildung; a guided outdoor experience is Natur.',
+      'Wissen & Karriere vs Community & Freizeit: Pub-Quiz / Stammtisch / Hobbygruppe = Community & Freizeit. Lern-Workshop / Seminar mit Fach-Fokus = Wissen & Karriere.',
+      'Wissen & Karriere vs Kultur & Bühne: Ticketed Lesung als Performance = Kultur & Bühne. Autoren-Q&A / Sachbuch-Lesung mit Diskussion = Wissen & Karriere.',
+      'Wissen & Karriere vs Märkte & Feste: Gewerbe-/B2B-/Fachmesse = Wissen & Karriere. Verkaufsmesse für Konsumgüter = Märkte & Feste.',
     ],
   },
-  Nightlife: {
+  'Familie & Kinder': {
     summary:
-      'Clubbing, DJ sets, techno, house, psytrance, rave, afterhour, karaoke, pub quiz, ladies/cocktail nights, warehouse parties.',
+      'Kinderprogramm, Familiennachmittag, Basteln, Kindertheater, Puppentheater, Kinderkino, Familien-Picknick, Spielfest, Ferienprogramm, Kinder-Workshop, Osterhasenfest.',
     notes: [
-      'Nightlife vs Musik: if a specific band / ensemble / orchestra / singer headlines, prefer Musik. If the event is a DJ lineup / club night / electronic-music party with dancing as the focus, prefer Nightlife.',
-      'Nightlife vs Feste & Brauchtum: Faschingsball/Feuerwehrball are Feste & Brauchtum; club parties in the same venue are Nightlife.',
+      'Familie & Kinder vs Kultur & Bühne: Kindertheater / Puppentheater bleibt Familie & Kinder wenn Zielgruppe explizit Kinder.',
+      'Familie & Kinder vs Märkte & Feste: Adventmarkt mit Familienprogramm = Märkte & Feste (Adventmarkt dominiert). Reines Kinderfest = Familie & Kinder.',
     ],
   },
-  Bildung: {
+  'Community & Freizeit': {
     summary:
-      'Vortrag, Seminar, Workshop, Kurs, Fortbildung, Sprachkurs, Informationsabend, Podiumsdiskussion, offene Werkstatt.',
+      'Stammtisch, Pub Quiz, Brettspielabend, Game Night, LAN-Party, Speed Dating, Single-Night, Vereinstreffen, Community Meetup, Hobbygruppen, Nachbarschaftsevents, Stand-up-Abend.',
     notes: [
-      'Bildung vs Wirtschaft: if the event is aimed at business development / networking / jobmessen / B2B, prefer Wirtschaft. Purely educational offerings without a business focus stay in Bildung.',
-      'Bildung vs Kultur: Autorenlesung with Q&A is Bildung; a ticketed Lesung as a performance is Kultur.',
+      'Community & Freizeit vs Nightlife & Party: Pub Quiz im Studentenclub = Community & Freizeit (Pub Quiz primär). Reine Club-Night im selben Venue = Nightlife & Party.',
+      'Community & Freizeit vs Wissen & Karriere: Stammtisch zum Austausch = Community & Freizeit. Networking-Event mit Business-Fokus = Wissen & Karriere.',
     ],
   },
-  Gesundheit: {
+  'Wellness & Spiritualität': {
     summary:
-      'Blutspende, Gesundheitsvortrag, Selbsthilfegruppe, Meditation, Wellness, Vorsorgeuntersuchung, Pflegeberatung, Trauergruppe.',
+      'Meditation, Achtsamkeit, Breathwork, Wellness, Retreat, Sound Healing, Sauna-Special, Therme-Special, Yoga-Retreat, Gottesdienst, Hochamt, Wallfahrt, Prozession, Pilgern, Selbsthilfegruppe, Gesundheitsvortrag, spirituelle Veranstaltungen.',
     notes: [
-      'Gesundheit vs Sport: Yoga/Pilates/Fitness stay in Sport; meditation / achtsamkeit / selbsthilfe sind Gesundheit.',
-    ],
-  },
-  Religion: {
-    summary:
-      'Gottesdienst, Hochamt, Andacht, Wallfahrt, Prozession, Firmung, Erstkommunion, Taufe, Orgelkonzert (liturgisch), Rorate.',
-    notes: [
-      'Religion vs Kultur: Sakralkonzerte/Orgelkonzerte are Musik when purely performance, Religion when embedded in a Messe/Liturgie.',
-      'Religion vs Feste & Brauchtum: Prozession/Wallfahrt sind Religion; Pfarrfest/Kirtag sind Feste & Brauchtum.',
-    ],
-  },
-  Wirtschaft: {
-    summary:
-      'Fachmesse, Gewerbemesse, Unternehmertag, Branchentreff, Startup-Event, Karrieremesse, WKO-Veranstaltung, B2B Networking.',
-    notes: [
-      'Wirtschaft vs Bildung: a WKO / Gewerbe / Fachmesse / Branchentreff is Wirtschaft even if it contains seminars.',
-      'Wirtschaft vs Märkte: a Verkaufsmesse with consumer goods is Märkte; B2B / Gewerbemesse is Wirtschaft.',
+      'Wellness & Spiritualität vs Sport & Bewegung: Yoga-Retreat / Meditation / Achtsamkeit = Wellness & Spiritualität. Yoga-Fitness-Kurs = Sport & Bewegung.',
+      'Wellness & Spiritualität vs Musik: Orgelkonzert als Performance = Musik. Gottesdienst mit Orgel = Wellness & Spiritualität.',
+      'Wellness & Spiritualität vs Märkte & Feste: Wallfahrt/Prozession = Wellness & Spiritualität. Pfarrfest = Märkte & Feste.',
     ],
   },
   Sonstiges: {
     summary:
-      'Fallback only — pick this ONLY when no other category fits the event at all.',
+      'Fallback only — pick this ONLY when no other category fits the event at all. In Discovery-UI nicht anzeigen.',
     notes: ['Never pick Sonstiges to avoid having to decide.'],
   },
 };
 
 /**
+ * Migration map: old 14-cat taxonomy → new 11-cat taxonomy.
+ * Used by the SQL migration in supabase/migrations/20260423_taxonomy_v3.sql
+ * AND by the TypeScript normalizer in migrateOldCategory() below.
+ */
+export const OLD_TO_NEW_CATEGORY: Record<string, Category> = {
+  'Musik': 'Musik',
+  'Kultur': 'Kultur & Bühne',
+  'Sport': 'Sport & Bewegung',
+  'Feste & Brauchtum': 'Märkte & Feste',
+  'Märkte': 'Märkte & Feste',
+  'Wein & Kulinarik': 'Essen & Trinken',
+  'Familie': 'Familie & Kinder',
+  'Natur': 'Natur & Abenteuer',
+  'Nightlife': 'Nightlife & Party',
+  'Bildung': 'Wissen & Karriere',
+  'Wirtschaft': 'Wissen & Karriere',
+  'Gesundheit': 'Wellness & Spiritualität',
+  'Religion': 'Wellness & Spiritualität',
+  'Sonstiges': 'Sonstiges',
+};
+
+/**
+ * Normalize any category string (old or new) to the current canonical value.
+ * Used by the API layer as a safety net while the migration is in flight.
+ */
+export function migrateOldCategory(input: string | null | undefined): Category | null {
+  if (!input) return null;
+  const mapped = OLD_TO_NEW_CATEGORY[input];
+  if (mapped) return mapped;
+  // Already a new category? Pass through.
+  if ((CATEGORIES as readonly string[]).includes(input)) return input as Category;
+  return null;
+}
+
+/**
  * Confidence precedence helper. Lower rank = higher priority.
  *
  * Used by `reconcile.ts` to enforce overwrite semantics centrally:
- *   manual  untouchable
- *   rules_exact / rules_high  never overwritten by rules_low
- *   ai_low  never overwrites manual or rules_high
- *   same-rank + same-version + same-category  → no-op
+ *   manual          untouchable
+ *   rules_exact     never overwritten by anything weaker
+ *   enrichment      AI-derived from full-context enrichment prompt (new!)
+ *   ai_low          never overwrites manual or rules_high
  */
 export const CATEGORY_CONFIDENCE_RANK: Record<string, number> = {
   manual: 0,
   rules_exact: 1,
   rules_high: 2,
   rules_medium: 3,
+  enrichment: 3,   // AI via enrichment prompt — same rank as rules_medium
   rules_low: 4,
   ai: 5,
   ai_low: 6,

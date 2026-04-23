@@ -59,11 +59,18 @@ export const AI_DEFAULT_MODEL = 'gpt-4o-mini';
 export const AI_STRONG_MODEL = 'gpt-4o';
 
 function buildSystemPrompt(): string {
-  const defs = CATEGORIES.map(cat => {
-    const d = CATEGORY_DEFINITIONS[cat];
-    const notes = d.notes.length > 0 ? `\n   Notes: ${d.notes.join(' | ')}` : '';
-    return `- ${cat}: ${d.summary}${notes}`;
-  }).join('\n');
+  // Some Categories in the union are legacy aliases without definitions
+  // (the deprecated v1/v2 entries that only exist for DB-migration). Skip
+  // those — only v3 Hauptkategorien have CATEGORY_DEFINITIONS entries.
+  const defs = CATEGORIES
+    .map(cat => {
+      const d = CATEGORY_DEFINITIONS[cat];
+      if (!d) return null;
+      const notes = d.notes.length > 0 ? `\n   Notes: ${d.notes.join(' | ')}` : '';
+      return `- ${cat}: ${d.summary}${notes}`;
+    })
+    .filter((s): s is string => s !== null)
+    .join('\n');
 
   return `You classify Austrian events into one primary category and up to 3 secondary tags.
 

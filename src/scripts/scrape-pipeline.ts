@@ -135,20 +135,19 @@ async function main() {
     if (!opts.skipCategorization) {
       if (!opts.skipCategorizationBackfill) {
         steps.categorization_backfill = await runStep('categorization_backfill', async () => {
-          // Step 4a: free, deterministic, idempotent. Brings all stale rows
-          // to the current classifier version using rules only. Writes
-          // the 14-way `category` field which the new Claude-enrichment
-          // step (see below) does NOT touch — so this step is still load-
-          // bearing for the primary category.
+          // Free, deterministic, idempotent. Writes a coarse `category`
+          // to every stale row so events without enrichment still have
+          // SOMETHING. Since v3 (2026-04-23) the enrichment step below
+          // overwrites this with the AI-derived 11-Hauptkategorie from
+          // docs/TAXONOMY.md — but this step stays as the safety net
+          // for pipeline runs with --skip-enrichment.
           execStep('Categorize events (deterministic backfill)',
             `npx tsx ${envFlag}src/scripts/categorize-events.ts --deterministic-backfill`);
         }, steps);
       }
 
-      // OLD step 4b: AI-residue via categorize-events.ts (OpenAI).
-      // Superseded by the Claude-enrichment step below which produces
-      // richer metadata (tags, audience, vibe, setting, flags, price_tier,
-      // duration_type) in a single pass. Intentionally NOT scheduled.
+      // Legacy AI-residue step (categorize-events.ts without flags).
+      // Fully superseded by the enrichment step below. Not scheduled.
     }
 
     if (!opts.skipGeocoding) {
@@ -177,24 +176,24 @@ async function main() {
       await triggerMatchArtists();
     }, steps);
 
-    // Claude-based enrichment of NEW events only. The enricher's own
-    // resume-safe filter (`enrichment_version IS NULL OR != current`)
-    // means it naturally skips everything we've already classified — so
-    // running this every pipeline run is idempotent and just processes
-    // the delta. Expensive per event, so default --concurrency stays at
-    // the script's own default; tweak via ENRICH_ARGS env var if needed.
+    // OpenAI enrichment of NEW events only. Writes the authoritative
+    // primary_category (v3: 11 Hauptkategorien) + tags/audience/vibe/
+    // occasion/setting/price_tier/price_flags/duration_type/flags in one
+    // pass. Source-of-truth prompt: docs/TAXONOMY.md.
+    //
+    // Resume-safe via enrichment_version filter — a pipeline run only
+    // processes the delta (newly scraped/updated events), so running
+    // this every time is idempotent and cheap (~$0.001/event with
+    // gpt-5-mini). Default model: gpt-5-mini via ENRICH_ARGS fallback.
     if (!opts.skipEnrichment) {
       steps.enrichment = await runStep('enrichment', async () => {
-        // OpenAI (gpt-4o-mini default) is the production path — cheap
-        // ($60 for 80k events), fast (real async concurrency, no subprocess
-        // spawn), and not Max-plan-rate-limited. The claude-cli script
-        // stays available as `npm run enrich-claude` if you ever want to
-        // use it on a smaller batch, but it's no longer scheduled in the
-        // pipeline. Set ENRICH_ARGS env var to pass extra flags (e.g.
-        // `ENRICH_ARGS="--model gpt-4o --concurrency 60"`).
-        const extraArgs = process.env.ENRICH_ARGS ?? '';
-        execStep('Enrich new events with OpenAI (tags/audience/vibe/setting/flags)',
-          `npx tsx ${envFlag}src/scripts/enrich-openai.ts ${extraArgs}`);
+        // Override with ENRICH_ARGS env var if you need a bigger model
+        // or higher concurrency: ENRICH_ARGS="--model gpt-5 --concurrency 12"
+        const extraArgs = process.env.ENRICH_ARGS ?? '--model gpt-5-mini';
+        execStep(
+          'Enrich new events with OpenAI (category + tags + occasion + vibe + flags)',
+          `npx tsx ${envFlag}src/scripts/enrich-openai.ts ${extraArgs}`,
+        );
       }, steps);
     }
 

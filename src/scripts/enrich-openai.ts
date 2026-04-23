@@ -47,8 +47,8 @@ import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import { fetchEventPage, closeSharedBrowser } from '../lib/category-classifier/fetch-page';
 import { validateEnrichment, ENRICHMENT_VERSION } from '../lib/category-classifier/enrichment-taxonomy';
 import {
-  TAGS, AUDIENCES, VIBES, SETTINGS,
-  LANGUAGES, PRICE_TIERS, DURATION_TYPES,
+  TAGS, AUDIENCES, VIBES, SETTINGS, OCCASIONS, PRICE_FLAGS,
+  LANGUAGES, PRICE_TIERS, DURATION_TYPES, PRIMARY_CATEGORIES,
 } from '../lib/category-classifier/enrichment-taxonomy';
 
 // ─────────────────────────────────────────────────────────────────────
@@ -138,52 +138,165 @@ class TpmLimiter {
 // System + user prompt — shared structure with Claude version
 // ─────────────────────────────────────────────────────────────────────
 
-const SYSTEM_PROMPT = `Du bist ein Klassifikator für österreichische Veranstaltungen. Gib für jedes Event GENAU EIN JSON-Objekt zurück (kein Markdown, keine Code-Fences, kein Erklärungstext drumherum). Nutze ausschließlich Werte aus den erlaubten Listen — erfinde nichts.
+const SYSTEM_PROMPT = `Du bist der Event-Klassifikator für LassTreffen.at, eine österreichische Event-Discovery-Plattform. Gib für jedes Event GENAU EIN JSON-Objekt zurück (kein Markdown, keine Code-Fences, kein Erklärungstext). Nutze ausschließlich Werte aus den erlaubten Listen — erfinde nichts.
 
-ERLAUBTE TAGS (0-5): ${TAGS.join(', ')}
+══════════════════════════════════════════════════════════════
+PRIMARY_CATEGORY (exactly 1) — die 11 Hauptkategorien
+══════════════════════════════════════════════════════════════
+Wähle EINE aus diesen exakten Strings:
+  ${PRIMARY_CATEGORIES.join(' | ')}
 
-ERLAUBTE AUDIENCE (1-4): ${AUDIENCES.join(', ')}
+Entscheidungsregeln:
 
-ERLAUBTE VIBE (1-2): ${VIBES.join(', ')}
+1. Musik — Konzert, Live-Musik, Chor/Orchester/Band, Tamburica, Blasmusik,
+   volkstümliche Musik. Fokus = Musik hören.
+   GEGEN Nightlife & Party: benannter Künstler/Band → Musik. DJ-Lineup,
+   Club, Electronic-Dance → Nightlife & Party.
+   GEGEN Kultur & Bühne: Oper/Operette/Musical/Ballett sind Kultur & Bühne.
 
-ERLAUBTE SETTING (1-2): ${SETTINGS.join(', ')}
+2. Kultur & Bühne — Theater, Kabarett, Comedy, Lesung, Musical, Oper,
+   Ausstellung, Museum, Kino, Performance-Art, Stadt-/Burgführung.
 
-ERLAUBTE LANGUAGE (exactly 1): ${LANGUAGES.join(', ')}
+3. Nightlife & Party — Clubbing, Rave, DJ-Set, Club-Night, Cocktail-Night,
+   Pub-Crawl, Motto-Party (80s/90s/Latino/Erasmus), Bar-Events mit Party-
+   Charakter, Ladies/Student-Nights. Tanz/Party-Fokus.
 
-ERLAUBTE PRICE_TIER (exactly 1): ${PRICE_TIERS.join(', ')}
-  gratis=0€ · günstig=bis 15€ · mittel=15-50€ · premium=über 50€ · unbekannt=nicht ableitbar
-  DEFAULT: Wenn weder im Event-Text noch im QUELLTEXT ein Preis steht → "gratis".
-  Viele österreichische Events (Frühschoppen, Kirtag, Pfarrfest, Gottesdienst,
-  Dorffest, Gemeindeveranstaltung) sind kostenlos. "unbekannt" nur bei klarer
-  Ambiguität ("Spende erbeten", ticket_url ohne Betrag).
+4. Essen & Trinken — Weinverkostung, Tasting, Street Food, Brunch,
+   Kulinarik-Tour, Heuriger, Kochkurs, Food Festival. Tasting/Trink-Fokus.
+   GEGEN Märkte & Feste: Bauernmarkt/Foodmarkt = Märkte & Feste.
+   GEGEN Nightlife & Party: Weinfest mit DJ/Tanz-Fokus = Nightlife.
 
-ERLAUBTE DURATION_TYPE (exactly 1): ${DURATION_TYPES.join(', ')}
-  kurz<2h · abend=2-5h · ganztag · mehrtägig · dauerausstellung
-  · nacht-bis-morgen=22h-6h · 24-stunden · 48-stunden
+5. Märkte & Feste — Weihnachtsmarkt, Adventmarkt, Flohmarkt, Bauernmarkt,
+   Dorffest, Stadtfest, Kirtag, Pfarrfest, Feuerwehrfest, Brauchtum
+   (Perchten, Krampuslauf, Fasching, Sonnwend, Erntedank).
 
-BOOLEAN FLAGS (KRITISCH — nur TRUE bei EXPLIZITER Evidenz):
+6. Sport & Bewegung — Lauf, Marathon, Radfahren, Yoga (Fitness-Fokus),
+   Turnier, Fußball, Eishockey, Tennis, Klettern, Tanzkurs (sportlich).
+   GEGEN Natur & Abenteuer: Reiner Stadtlauf/Fitness = Sport. Naturführung,
+   Rafting, Bergtour = Natur & Abenteuer.
+   GEGEN Wellness & Spiritualität: Yoga-Kurs = Sport. Yoga-Retreat / Meditation = Wellness.
 
-is_student_friendly = TRUE nur bei EINER dieser Bedingungen:
+7. Natur & Abenteuer — Wanderung, Outdoor-Tour, Klettern, Rafting,
+   Naturführung, Vogelbeobachtung, Astronomie, Escape Room, Erlebnistour.
+
+8. Wissen & Karriere — Vortrag, Workshop, Kurs, Seminar, Sprachkurs,
+   Networking, Startup-Pitch, Tech-Meetup, Gründer-Event, Karrieremesse,
+   Fach-/Gewerbe-Konferenz, WKO-Event, Campus-Info.
+
+9. Familie & Kinder — Kindertheater, Puppentheater, Kinderkino,
+   Kinder-Workshop, Familien-Picknick, Spielfest, Ferienprogramm.
+
+10. Community & Freizeit — Pub Quiz, Brettspielabend, Game-Night, LAN-Party,
+    Speed-Dating, Single-Night, Stammtisch, Vereinstreffen, Community
+    Meetup, Hobby-Gruppen, Nachbarschaftsevents.
+
+11. Wellness & Spiritualität — Meditation, Breathwork, Achtsamkeit, Sound
+    Healing, Retreat, Wellness-Day, Yoga-Retreat, Sauna/Therme-Special,
+    Gottesdienst, Hochamt, Wallfahrt, Prozession, Pilgern,
+    Selbsthilfegruppe.
+
+Sonstiges NUR wenn absolut nichts passt. Niemals als Notausgang, wenn
+zwei Kategorien in Frage kommen — dann die PRIMÄRE Absicht wählen (was
+steht groß auf dem Flyer?).
+
+BEISPIELE (einprägen):
+- "Tamburicaabend am Sportplatz Trausdorf" → Musik (NICHT Sport, Sportplatz ist bloß der Ort)
+- "Pub Quiz im Studentenclub" → Community & Freizeit (Quiz dominiert)
+- "Weinwanderung mit Verkostung" → Natur & Abenteuer (Wandern dominiert)
+- "Adventmarkt mit Live-Band" → Märkte & Feste (Markt dominiert)
+- "Rave im Wald" → Nightlife & Party
+- "Yoga-Retreat am Wochenende" → Wellness & Spiritualität (NICHT Sport)
+- "Kindertheater am Adventmarkt" → Familie & Kinder
+- "Orgelkonzert in der Stiftskirche" → Musik (Performance, nicht Gottesdienst)
+
+══════════════════════════════════════════════════════════════
+TAGS (0-5) — secondary Aktivitäts-/Genre-Tags
+══════════════════════════════════════════════════════════════
+Erlaubt: ${TAGS.join(', ')}
+
+══════════════════════════════════════════════════════════════
+AUDIENCE (0-3)
+══════════════════════════════════════════════════════════════
+${AUDIENCES.join(', ')}
+
+══════════════════════════════════════════════════════════════
+VIBE (0-3) — emotionaler Ton
+══════════════════════════════════════════════════════════════
+${VIBES.join(', ')}
+
+══════════════════════════════════════════════════════════════
+OCCASION (0-3) — Anlass-Tags für Discovery ("wofür ist es gut?")
+══════════════════════════════════════════════════════════════
+Erlaubt: ${OCCASIONS.join(', ')}
+
+Hinweise:
+- "saufen-gehen" → bei Bar-Events, Club-Nights mit Drink-Fokus, Heurigen-
+  Abenden mit Trink-Fokus, Weinverkostungen mit Party-Charakter.
+- "date-night" → romantische Atmosphäre, Dinner, Weinverkostung für Paare,
+  Konzerte mit intimer Stimmung.
+- "afterwork" → ab 17-19h, auf Wochentagen, relaxed.
+- "ausgehen" → breiter Oberbegriff für alles abendliche Nightlife/Bar/Club.
+- "tagesausflug" → ganztägig, außerhalb des Wohnorts, Natur/Sightseeing.
+- "regentag" → Indoor-Event, gut bei schlechtem Wetter.
+
+══════════════════════════════════════════════════════════════
+SETTING (0-3) — Ort + Zeit + Format
+══════════════════════════════════════════════════════════════
+${SETTINGS.join(', ')}
+
+══════════════════════════════════════════════════════════════
+PRICE_TIER (exactly 1): ${PRICE_TIERS.join(', ')}
+══════════════════════════════════════════════════════════════
+gratis=0€ · günstig=bis 15€ · mittel=15-50€ · premium=über 50€
+DEFAULT: Wenn kein Preis erkennbar → "gratis" (viele österreichische
+Events sind frei: Frühschoppen, Kirtag, Pfarrfest, Gottesdienst,
+Dorffest, Gemeindeveranstaltung). "unbekannt" NUR bei klarer Ambiguität
+("Spende erbeten", ticket_url ohne Betrag im Text).
+
+══════════════════════════════════════════════════════════════
+PRICE_FLAGS (0-6) — binäre Preis-/Barriere-Flags
+══════════════════════════════════════════════════════════════
+${PRICE_FLAGS.join(', ')}
+
+══════════════════════════════════════════════════════════════
+DURATION_TYPE (exactly 1): ${DURATION_TYPES.join(', ')}
+══════════════════════════════════════════════════════════════
+kurz<2h · abend=2-5h · ganztag · mehrtägig · dauerausstellung
+nacht-bis-morgen=22h-6h · 24-stunden · 48-stunden
+
+══════════════════════════════════════════════════════════════
+LANGUAGE (exactly 1): ${LANGUAGES.join(', ')}
+══════════════════════════════════════════════════════════════
+
+══════════════════════════════════════════════════════════════
+BOOLEAN FLAGS (KRITISCH — nur TRUE bei EXPLIZITER Evidenz)
+══════════════════════════════════════════════════════════════
+
+is_student_friendly = TRUE nur bei:
   (a) Titel/Text nennt "Studenten", "Studierende", "Uni-Party", "Semester-Opening"
-  (b) Veranstaltungsort ist eine Universität/FH (TU/WU/Uni Wien/Graz/Linz/Salzburg/Innsbruck, FH Burgenland, etc.)
-  (c) Veranstalter ist Studentenvereinigung (ÖH, ESN, AIESEC, IAESTE, AEGEE, Fachschaft)
+  (b) Ort ist Uni/FH (TU/WU/Uni Wien/Graz/Linz/Salzburg/Innsbruck, FH Burgenland)
+  (c) Veranstalter ist Studentenvereinigung (ÖH, ESN, AIESEC, IAESTE, AEGEE)
   (d) Explizite Studenten-Ermäßigung im Preis
-  SONST → FALSE. Normales Konzert/Club/Festival/Markt ist NICHT automatisch studentfriendly.
+  SONST → FALSE. Normales Konzert/Club/Markt ist NICHT automatisch student-friendly.
 
-is_family_friendly = TRUE nur bei EINER dieser Bedingungen:
+is_family_friendly = TRUE nur bei:
   (a) Titel/Text nennt "Familie", "Kinder", "ab 3/6 Jahren", "Kinderprogramm"
-  (b) Inhärent kinderorientiert: Kindertheater, Puppentheater, Kinderkino, Kinderzirkus,
-      Familienpicknick, Spielfest, Kinder-Workshop, Kirtag, Adventmarkt (tagsüber),
-      Erntedank, Maibaumfest, Ferienprogramm
-  (c) Ort/Veranstalter ist familienorientiert (Familienzentrum, Naturpark, Zoo, Kindermuseum)
-  SONST → FALSE. Konzerte/Clubs/Bars/Abend-Events/Heurige/Rave/Sport sind NICHT automatisch family-friendly.
+  (b) Inhärent kinderorientiert: Kindertheater, Puppentheater, Kinderkino,
+      Familienpicknick, Spielfest, Kirtag, Adventmarkt tagsüber, Erntedank,
+      Maibaumfest, Ferienprogramm
+  (c) Ort/Veranstalter familienorientiert (Familienzentrum, Zoo, Kindermuseum)
+  SONST → FALSE. Konzerte/Clubs/Bars/Abend-Events sind NICHT automatisch family-friendly.
 
-IM ZWEIFEL für BEIDE Flags: FALSE. False-Positives zerstören den Wizard-Filter.
+IM ZWEIFEL bei beiden Flags: FALSE. False-Positives zerstören den Wizard-Filter.
 
-SUGGESTED_DESCRIPTION: wenn QUELLTEXT vorliegt UND BESCHREIBUNG leer/sehr kurz ist, schreibe saubere 150-400 Zeichen Beschreibung. Sonst null.
-SUGGESTED_PRICE_TEXT: wenn QUELLTEXT einen Preis nennt UND PREIS-Feld leer ist, extrahiere ihn ("ab 25€", "Eintritt frei", "Erwachsene 15€"). Sonst null.
-
-Österreichische Hinweise: Kirtag/Zeltfest = traditionell + familien-mit-kindern + dörflich · Wallfahrt = spirituell + traditionell + senioren · Heuriger = gemütlich + erwachsene-allgemein + dörflich · Goa-Festival im Wald = psytrance+goa+rave+psychedelic+forest+open-air-rave · DnB-Rave im Club = drum-and-bass+rave+club-night+energetisch+nacht-bis-morgen.`;
+══════════════════════════════════════════════════════════════
+SUGGESTED fields
+══════════════════════════════════════════════════════════════
+SUGGESTED_DESCRIPTION: wenn QUELLTEXT vorliegt UND BESCHREIBUNG leer/sehr kurz/
+  HTML-verpackt, schreibe eine saubere 150-400 Zeichen Beschreibung in natürlichem
+  Deutsch. Ohne HTML-Tags, ohne Marketing-Geschwurbel. Sonst null.
+SUGGESTED_PRICE_TEXT: wenn QUELLTEXT einen Preis nennt UND PREIS-Feld leer ist,
+  extrahiere ihn ("ab 25€", "Eintritt frei", "Erwachsene 15€"). Sonst null.`;
 
 const OUTPUT_JSON_SCHEMA = {
   name: 'event_enrichment',
@@ -191,12 +304,15 @@ const OUTPUT_JSON_SCHEMA = {
   schema: {
     type: 'object',
     properties: {
+      primary_category: { type: 'string' },
       tags: { type: 'array', items: { type: 'string' }, maxItems: 5 },
-      audience: { type: 'array', items: { type: 'string' }, maxItems: 4 },
-      vibe: { type: 'array', items: { type: 'string' }, maxItems: 2 },
-      setting: { type: 'array', items: { type: 'string' }, maxItems: 2 },
+      audience: { type: 'array', items: { type: 'string' }, maxItems: 3 },
+      vibe: { type: 'array', items: { type: 'string' }, maxItems: 3 },
+      occasion: { type: 'array', items: { type: 'string' }, maxItems: 3 },
+      setting: { type: 'array', items: { type: 'string' }, maxItems: 3 },
       language: { type: 'string' },
       price_tier: { type: 'string' },
+      price_flags: { type: 'array', items: { type: 'string' }, maxItems: 6 },
       duration_type: { type: 'string' },
       is_student_friendly: { type: 'boolean' },
       is_family_friendly: { type: 'boolean' },
@@ -204,8 +320,9 @@ const OUTPUT_JSON_SCHEMA = {
       suggested_price_text: { type: ['string', 'null'] },
     },
     required: [
-      'tags', 'audience', 'vibe', 'setting',
-      'language', 'price_tier', 'duration_type',
+      'primary_category',
+      'tags', 'audience', 'vibe', 'occasion', 'setting',
+      'language', 'price_tier', 'price_flags', 'duration_type',
       'is_student_friendly', 'is_family_friendly',
       'suggested_description', 'suggested_price_text',
     ],
@@ -582,10 +699,30 @@ async function processOne(
   }
 
   // 4. Build + commit atomic DB update
+  //
+  // v2 changes (2026-04-23):
+  //   - primary_category is now set from the AI output → writes `category`
+  //     + `category_source='enrichment'`, respecting category_locked.
+  //     Fixes the "Tamburicaabend stays classified as Sport" bug where
+  //     v1 enrichment only touched multi-dim tags and left the rule-based
+  //     classification alone.
+  //   - New columns: occasion_tags, price_flags.
+  //   - Scrub \u0000 from all string fields to avoid the Postgres
+  //     "unsupported Unicode escape sequence" error that killed 3 events
+  //     in the v1 run.
+  const scrubNulls = (s: string | null | undefined): string | null => {
+    if (!s) return null;
+    return s.replace(/\u0000/g, '').replace(/\\u0000/g, '');
+  };
+  const scrubArray = (arr: string[]): string[] =>
+    arr.map(s => s.replace(/\u0000/g, '').replace(/\\u0000/g, ''));
+
   const update: Record<string, unknown> = {
-    audience: validated.audience.length > 0 ? validated.audience : null,
-    vibe: validated.vibe.length > 0 ? validated.vibe : null,
-    setting: validated.setting.length > 0 ? validated.setting : null,
+    audience: validated.audience.length > 0 ? scrubArray(validated.audience) : null,
+    vibe: validated.vibe.length > 0 ? scrubArray(validated.vibe) : null,
+    occasion_tags: validated.occasion.length > 0 ? scrubArray(validated.occasion) : [],
+    setting: validated.setting.length > 0 ? scrubArray(validated.setting) : null,
+    price_flags: validated.price_flags.length > 0 ? scrubArray(validated.price_flags) : [],
     language: validated.language,
     price_tier: validated.price_tier,
     duration_type: validated.duration_type,
@@ -594,14 +731,34 @@ async function processOne(
     enrichment_version: ENRICHMENT_VERSION,
     enrichment_at: new Date().toISOString(),
   };
+
+  // Primary category: only write if the AI produced a valid v3 category,
+  // AND the event isn't category_locked. This becomes the authoritative
+  // category going forward — the old rule-based classification gets
+  // overwritten because the AI has richer context (title + desc + tags +
+  // page content) than the keyword lexicon.
+  const notLocked = !(row as { category_locked?: boolean }).category_locked;
+  if (validated.primary_category && notLocked) {
+    update.category = validated.primary_category;
+    update.category_source = 'enrichment';
+  }
+
   if (validated.tags.length > 0) {
     const existing = Array.isArray(row.tags) ? row.tags : [];
-    update.tags = Array.from(new Set([...existing, ...validated.tags])).slice(0, 8);
+    update.tags = scrubArray(
+      Array.from(new Set([...existing, ...validated.tags])).slice(0, 8),
+    );
   }
   const descEmpty = !row.description || row.description.trim().length < 40;
-  if (descEmpty && suggestedDesc) { update.description = suggestedDesc; stats.descFilled += 1; }
+  if (descEmpty && suggestedDesc) {
+    update.description = scrubNulls(suggestedDesc);
+    stats.descFilled += 1;
+  }
   const priceEmpty = !row.price_text || row.price_text.trim().length === 0;
-  if (priceEmpty && suggestedPrice) { update.price_text = suggestedPrice; stats.priceFilled += 1; }
+  if (priceEmpty && suggestedPrice) {
+    update.price_text = scrubNulls(suggestedPrice);
+    stats.priceFilled += 1;
+  }
 
   if (!opts.dryRun) {
     const { error } = await supabase.from('events').update(update).eq('id', row.id);
@@ -724,7 +881,7 @@ async function main() {
   while (stats.processed < opts.limit) {
     let q = supabase
       .from('events')
-      .select('id, title, description, category, tags, source_tags_raw, location_name, organizer, start_date, end_date, price_text, price_min, price_max, source_url')
+      .select('id, title, description, category, category_locked, tags, source_tags_raw, location_name, organizer, start_date, end_date, price_text, price_min, price_max, source_url')
       .eq('publish_status', 'published')
       .gte('start_date', today)
       .gte('quality_score', 40)

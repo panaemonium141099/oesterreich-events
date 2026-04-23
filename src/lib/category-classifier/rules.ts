@@ -51,10 +51,21 @@ export interface CategoryLexicon {
 }
 
 /**
- * Build a per-category lexicon. Some categories are denser than others; the
- * structure is the same for all 14.
+ * Per-category lexicon for the rule-based fallback classifier.
+ *
+ * Note: this still uses the legacy v1/v2 category names (Nightlife, Märkte,
+ * Wein & Kulinarik, Bildung, Wirtschaft, Gesundheit, Religion). The rule-
+ * based classifier is now only the backfill/fallback — the AI-enrichment
+ * step (see src/scripts/enrich-openai.ts) writes the authoritative v3
+ * categories from docs/TAXONOMY.md. Events processed by enrichment get
+ * their legacy rule-category overwritten; events that skip enrichment
+ * keep the legacy value until the SQL migration maps them over.
+ *
+ * Partial<Record> because the v3 target categories ("Nightlife & Party",
+ * "Wissen & Karriere", etc.) have no legacy lexicon — they exist only
+ * for AI output.
  */
-export const LEXICON: Record<Category, CategoryLexicon> = {
+export const LEXICON: Partial<Record<Category, CategoryLexicon>> = {
   Musik: {
     trustedRawTags: ['Musik', 'Konzert', 'Unterhaltung & Tanzmusik'],
     highPrecisionPhrases: [
