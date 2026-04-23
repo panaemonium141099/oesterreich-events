@@ -28,6 +28,7 @@ import { motion } from 'framer-motion';
 import { toast } from 'sonner';
 import { useAuth } from '@/lib/supabase/auth-context';
 import { createClient } from '@/lib/supabase/client';
+import { dispatchToUser } from '@/lib/notifications/dispatch';
 import {
   PlanerShell,
   PlanerButton,
@@ -154,26 +155,24 @@ export default function JoinPage() {
       return;
     }
 
-    // 2. Fire-and-forget side effects (join activity + owner notification).
+    // 2. Fire-and-forget side effects — join activity + owner notification/push.
     // We don't await errors from these — the join itself already succeeded,
     // missing activity rows are a minor issue, not worth blocking the UX.
-    void Promise.all([
-      supabase.from('activities').insert({
-        user_id: user.id,
-        type: 'group_joined',
-        group_id: plan.id,
-        metadata: { via: 'invite_code', code: rawCode },
-      }),
-      supabase.from('notifications').insert({
-        user_id: plan.created_by,
-        type: 'group_join',
-        title: 'Neuer Teilnehmer',
-        body: `Jemand ist deinem Plan „${plan.name}" über den Einladungs-Code beigetreten.`,
-        from_user_id: user.id,
-        group_id: plan.id,
-        action_url: `/groups/${plan.id}`,
-      }),
-    ]).catch(err => console.warn('[join] side-effects failed (non-fatal):', err));
+    void supabase.from('activities').insert({
+      user_id: user.id,
+      type: 'group_joined',
+      group_id: plan.id,
+      metadata: { via: 'invite_code', code: rawCode },
+    }).then((res: { error: unknown }) => {
+      if (res.error) console.warn('[join] activity insert failed (non-fatal):', res.error);
+    });
+    dispatchToUser({
+      userId:    plan.created_by,
+      type:      'group_join',
+      title:     'Neuer Teilnehmer',
+      body:      `Jemand ist deinem Plan „${plan.name}" über den Einladungs-Code beigetreten.`,
+      actionUrl: `/groups/${plan.id}`,
+    });
 
     // 3. Land on the plan dashboard
     router.replace(`/groups/${plan.id}`);

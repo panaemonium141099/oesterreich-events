@@ -30,6 +30,7 @@ import { createClient } from '@/lib/supabase/client';
 import { EventPreviewMessage } from '@/components/Chat/EventPreviewMessage';
 import { EventSearchInline } from '@/components/Chat/EventSearchInline';
 import { toast } from 'sonner';
+import { dispatchToGroup, dispatchToUser } from '@/lib/notifications/dispatch';
 import {
   PlanerShell,
   EditorialCaption,
@@ -313,20 +314,30 @@ export default function EventDashboardPage() {
 
   // ─── Actions ───
   const sendMessage = async () => {
-    if (!user || !messageText.trim()) return;
+    if (!user || !messageText.trim() || !group) return;
+    const text = messageText.trim();
     setSending(true);
     await supabase.from('group_messages').insert({
       group_id: groupId,
       user_id: user.id,
-      content: messageText.trim(),
+      content: text,
       message_type: 'text',
+    });
+    // Fan out — every other member gets a notification + (optional) desktop push.
+    const senderName = myMembership?.profile?.first_name || 'Jemand';
+    dispatchToGroup({
+      groupId,
+      type:      'group_message',
+      title:     `${senderName} in „${group.name}"`,
+      body:      text.length > 140 ? text.slice(0, 137) + '…' : text,
+      actionUrl: `/groups/${groupId}`,
     });
     setMessageText('');
     setSending(false);
   };
 
   const shareEvent = async (event: { id: string; title: string }) => {
-    if (!user) return;
+    if (!user || !group) return;
     await supabase.from('group_messages').insert({
       group_id: groupId,
       user_id: user.id,
@@ -334,11 +345,19 @@ export default function EventDashboardPage() {
       message_type: 'event_share',
       event_id: event.id,
     });
+    const senderName = myMembership?.profile?.first_name || 'Jemand';
+    dispatchToGroup({
+      groupId,
+      type:      'group_message',
+      title:     `${senderName} in „${group.name}"`,
+      body:      `Event geteilt: ${event.title}`,
+      actionUrl: `/groups/${groupId}`,
+    });
     setShowEventSearch(false);
   };
 
   const updateRsvp = async (status: string) => {
-    if (!user || !myMembership) return;
+    if (!user || !myMembership || !group) return;
     const labels: Record<string, string> = { accepted: 'zugesagt', maybe: 'vielleicht zugesagt', declined: 'abgesagt' };
     try {
       await supabase.from('group_members')
@@ -356,6 +375,15 @@ export default function EventDashboardPage() {
           content: `${firstName} hat ${labels[status] || status}`, message_type: 'text',
         }),
       ]);
+
+      // Notify other members of the RSVP change (in-app + desktop push).
+      dispatchToGroup({
+        groupId,
+        type:      'group_rsvp',
+        title:     `${firstName} hat ${labels[status] || status}`,
+        body:      `Plan: „${group.name}"`,
+        actionUrl: `/groups/${groupId}`,
+      });
 
       setMyMembership(prev => prev ? { ...prev, rsvp: status, rsvp_at: new Date().toISOString() } : prev);
       const { data: mems } = await supabase
@@ -507,14 +535,57 @@ export default function EventDashboardPage() {
     await supabase.from('group_members').insert({
       group_id: groupId, user_id: friendId, role: 'member', rsvp: 'pending',
     });
-    await supabase.from('notifications').insert({
-      user_id: friendId, type: 'group_invite', title: 'Event-Einladung',
-      body: `Du wurdest zu "${group.name}" eingeladen`,
-      from_user_id: user.id, group_id: groupId, action_url: `/groups/${groupId}`,
+    // Single-user dispatch: inserts the notification row AND fires Web-Push.
+    dispatchToUser({
+      userId:    friendId,
+      type:      'group_invite',
+      title:     'Event-Einladung',
+      body:      `Du wurdest zu „${group.name}" eingeladen`,
+      actionUrl: `/groups/${groupId}`,
     });
     setFriends(prev => prev.filter(f => f.id !== friendId));
     setInvitingId(null);
     await fetchAll();
+  };
+
+  // ─── Co-owner management (promote / demote) ───
+  const promoteToCoOwner = async (memberId: string, memberUserId: string, firstName: string) => {
+    if (!isOwner || !group) return;
+    try {
+      const { error } = await supabase
+        .from('group_members')
+        .update({ role: 'admin' })
+        .eq('id', memberId);
+      if (error) throw error;
+      toast.success(`${firstName} ist jetzt Co-Organisator*in`);
+      dispatchToUser({
+        userId:    memberUserId,
+        type:      'group_role_promoted',
+        title:     'Du bist jetzt Co-Organisator*in',
+        body:      `In „${group.name}" kannst du den Plan jetzt mit-bearbeiten.`,
+        actionUrl: `/groups/${group.id}`,
+      });
+      await fetchAll();
+    } catch (e) {
+      console.error('[promote]', e);
+      toast.error(e instanceof Error ? e.message : 'Hochstufen fehlgeschlagen');
+    }
+  };
+
+  const demoteFromCoOwner = async (memberId: string, firstName: string) => {
+    if (!isOwner) return;
+    try {
+      const { error } = await supabase
+        .from('group_members')
+        .update({ role: 'member' })
+        .eq('id', memberId);
+      if (error) throw error;
+      toast.success(`${firstName} ist wieder Mitglied`);
+      await fetchAll();
+    } catch (e) {
+      console.error('[demote]', e);
+      toast.error(e instanceof Error ? e.message : 'Zurückstufen fehlgeschlagen');
+    }
   };
 
   const openInMaps = () => {
@@ -560,8 +631,12 @@ export default function EventDashboardPage() {
   });
 
   const isOwner = group ? group.created_by === user?.id : false;
+  // Co-organizers have role 'admin' on group_members. They can edit the plan
+  // and invite, but deleting the plan stays with the original creator only.
+  const isCoOwner = myMembership?.role === 'admin';
+  const canEditPlan = isOwner || isCoOwner;
   const canPin = group ? (
-    isOwner
+    canEditPlan
     || group.pinboard_permission === 'all_members'
     || (group.pinboard_permission === 'specific_users'
         && !!user?.id
@@ -663,30 +738,33 @@ export default function EventDashboardPage() {
               )}
             </button>
 
-            {isOwner && (
-              <>
-                <button
-                  onClick={loadFriendsForInvite}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs bg-[color:var(--color-planer-void)]/80 backdrop-blur-md border border-white/10 text-[color:var(--color-planer-dim)] hover:text-[color:var(--color-planer-ink)] hover:border-white/20 transition-all"
-                >
-                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
-                  </svg>
-                  Einladen
-                </button>
-                <button
-                  onClick={() => setShowSettings(true)}
-                  aria-label="Plan-Einstellungen"
-                  title="Plan-Einstellungen"
-                  className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-[color:var(--color-planer-void)]/80 backdrop-blur-md border border-white/10 text-[color:var(--color-planer-dim)] hover:text-[color:var(--color-planer-ink)] hover:border-white/20 transition-all"
-                >
-                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                  </svg>
-                </button>
-              </>
+            {/* Einladen — owners + co-owners can invite */}
+            {canEditPlan && (
+              <button
+                onClick={loadFriendsForInvite}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs bg-[color:var(--color-planer-void)]/80 backdrop-blur-md border border-white/10 text-[color:var(--color-planer-dim)] hover:text-[color:var(--color-planer-ink)] hover:border-white/20 transition-all"
+              >
+                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+                </svg>
+                Einladen
+              </button>
             )}
+            {/* Settings gear — owners + co-owners (delete is still owner-only, gated inside the drawer) */}
+            {canEditPlan && (
+              <button
+                onClick={() => setShowSettings(true)}
+                aria-label="Plan-Einstellungen"
+                title="Plan-Einstellungen"
+                className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-[color:var(--color-planer-void)]/80 backdrop-blur-md border border-white/10 text-[color:var(--color-planer-dim)] hover:text-[color:var(--color-planer-ink)] hover:border-white/20 transition-all"
+              >
+                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+              </button>
+            )}
+            {/* Leave — everyone who isn't the creator (co-owners can leave too, they're still just a member in DB terms) */}
             {!isOwner && myMembership && (
               <button
                 onClick={() => setShowLeaveConfirm(true)}
@@ -1041,14 +1119,28 @@ export default function EventDashboardPage() {
         />
       )}
 
-      {/* Owner-only settings drawer (edit + delete plan) */}
-      {isOwner && (
+      {/* Settings drawer — owners + co-owners can edit. Delete zone stays owner-only (gated inside). */}
+      {canEditPlan && (
         <PlanSettingsDrawer
           open={showSettings}
           onClose={() => setShowSettings(false)}
           plan={group}
           supabase={supabase}
           user={user}
+          isOwner={isOwner}
+          members={members.map(m => ({
+            id:          m.id,
+            user_id:     m.user_id,
+            role:        (m.role === 'admin' || m.role === 'owner') ? m.role : 'member',
+            profile:     m.profile
+              ? {
+                  id: m.profile.id,
+                  first_name: m.profile.first_name,
+                  last_name: m.profile.last_name,
+                  avatar_url: m.profile.avatar_url,
+                }
+              : null,
+          }))}
           invitedFriends={members
             .filter(m => m.user_id !== user.id && m.profile)
             .map(m => ({
@@ -1057,6 +1149,8 @@ export default function EventDashboardPage() {
               last_name: m.profile.last_name,
               avatar_url: m.profile.avatar_url,
             }))}
+          onPromote={promoteToCoOwner}
+          onDemote={demoteFromCoOwner}
           onSaved={fetchAll}
         />
       )}

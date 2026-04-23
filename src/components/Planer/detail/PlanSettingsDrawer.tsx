@@ -62,14 +62,35 @@ export interface FriendProfile {
   avatar_url: string | null;
 }
 
+export interface MemberMini {
+  id: string;
+  user_id: string;
+  role: 'owner' | 'admin' | 'member';
+  profile: {
+    id: string;
+    first_name: string;
+    last_name: string;
+    avatar_url: string | null;
+  } | null;
+}
+
 interface Props {
   open: boolean;
   onClose: () => void;
   plan: PlanForSettings;
   supabase: SupabaseClient;
   user: User;
+  /** Is the viewing user the original creator? Co-owners (admin role) can edit
+   *  but only the creator can delete the plan and manage roles. */
+  isOwner: boolean;
+  /** All members of this plan — needed for the role-management section */
+  members: MemberMini[];
   /** Friends invited to this plan — the pool for specific_users permission */
   invitedFriends: FriendProfile[];
+  /** Promote a plain member to co-organizer (admin role). Owner-only. */
+  onPromote: (memberId: string, memberUserId: string, firstName: string) => void;
+  /** Demote a co-organizer back to regular member. Owner-only. */
+  onDemote: (memberId: string, firstName: string) => void;
   /** Fired after a successful save so the parent can re-fetch */
   onSaved: () => void;
 }
@@ -133,7 +154,9 @@ function buildDraft(plan: PlanForSettings): Draft {
 // ───────────────────────────────────────────────────────────────
 
 export function PlanSettingsDrawer({
-  open, onClose, plan, supabase, user, invitedFriends, onSaved,
+  open, onClose, plan, supabase, user,
+  isOwner, members, invitedFriends,
+  onPromote, onDemote, onSaved,
 }: Props) {
   const router = useRouter();
   const [draft, setDraft] = useState<Draft>(() => buildDraft(plan));
@@ -558,57 +581,121 @@ export function PlanSettingsDrawer({
                   </PlanerButton>
                 </div>
 
-                {/* Danger zone */}
-                <section className="mt-10 pt-6 border-t border-[color:var(--color-planer-rose)]/20">
-                  <EditorialCaption className="mb-2 text-[color:var(--color-planer-rose)]/80">
-                    Danger Zone
-                  </EditorialCaption>
-                  <p className="text-xs text-[color:var(--color-planer-dim)] mb-4 leading-relaxed">
-                    Löscht diesen Plan unwiderruflich, inklusive Chat-Verlauf, Post-its,
-                    Mitbringsel-Liste, Erinnerungen und allen Aktivitäten. Teilnehmer werden
-                    nicht benachrichtigt — mach das nur wenn du sicher bist.
-                  </p>
-                  {!confirmDelete ? (
-                    <button
-                      type="button"
-                      onClick={() => setConfirmDelete(true)}
-                      className="px-4 py-2.5 rounded-xl border border-[color:var(--color-planer-rose)]/30 text-[color:var(--color-planer-rose)] text-sm hover:bg-[color:var(--color-planer-rose)]/10 hover:border-[color:var(--color-planer-rose)]/60 transition-all"
-                    >
-                      Plan löschen
-                    </button>
-                  ) : (
-                    <div className="space-y-3 p-4 rounded-xl border border-[color:var(--color-planer-rose)]/40 bg-[color:var(--color-planer-rose)]/5">
-                      <p className="text-xs text-[color:var(--color-planer-ink)]">
-                        Tippe den Plan-Namen <span className="font-mono bg-white/5 px-1.5 py-0.5 rounded border border-white/10">{plan.name}</span> um das Löschen zu bestätigen:
-                      </p>
-                      <PlanerInput
-                        type="text"
-                        value={deleteConfirmText}
-                        onChange={e => setDeleteConfirmText(e.target.value)}
-                        placeholder={plan.name}
-                        autoFocus
-                      />
-                      <div className="flex items-center justify-end gap-3">
-                        <button
-                          type="button"
-                          onClick={() => { setConfirmDelete(false); setDeleteConfirmText(''); }}
-                          disabled={deleting}
-                          className="text-xs text-[color:var(--color-planer-dim)] hover:text-[color:var(--color-planer-ink)] px-3 py-2"
-                        >
-                          Abbrechen
-                        </button>
-                        <button
-                          type="button"
-                          onClick={handleDelete}
-                          disabled={deleting || deleteConfirmText.trim().toLowerCase() !== plan.name.trim().toLowerCase()}
-                          className="px-4 py-2 rounded-full bg-[color:var(--color-planer-rose)] text-white text-xs font-semibold hover:bg-[color:var(--color-planer-rose)]/90 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
-                        >
-                          {deleting ? 'Lösche …' : 'Unwiderruflich löschen'}
-                        </button>
+                {/* Role management — owner only */}
+                {isOwner && members.filter(m => m.user_id !== user.id && m.profile).length > 0 && (
+                  <section className="mt-10 pt-6 border-t border-white/[0.05]">
+                    <EditorialCaption className="mb-2">Co-Organisator*innen</EditorialCaption>
+                    <p className="text-xs text-[color:var(--color-planer-dim)] mb-4 leading-relaxed">
+                      Co-Organisator*innen können den Plan bearbeiten und einladen — löschen kannst nur du.
+                    </p>
+                    <ul className="space-y-1.5">
+                      {members.filter(m => m.user_id !== user.id && m.profile).map(m => {
+                        const isAdmin = m.role === 'admin';
+                        const name = `${m.profile!.first_name} ${m.profile!.last_name}`.trim();
+                        return (
+                          <li key={m.id} className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-white/[0.025] transition-colors">
+                            {m.profile?.avatar_url ? (
+                              // eslint-disable-next-line @next/next/no-img-element
+                              <img src={m.profile.avatar_url} alt="" className="w-9 h-9 rounded-full object-cover" />
+                            ) : (
+                              <div className="w-9 h-9 rounded-full bg-white/10 flex items-center justify-center text-sm text-white/60">
+                                {m.profile!.first_name[0]?.toUpperCase()}
+                              </div>
+                            )}
+                            <div className="flex-1 min-w-0">
+                              <div className="text-sm text-[color:var(--color-planer-ink)] truncate">{name}</div>
+                              {isAdmin && (
+                                <div className="text-[10px] uppercase tracking-[0.15em] text-[color:var(--color-planer-accent)]">
+                                  Co-Organisator*in
+                                </div>
+                              )}
+                            </div>
+                            {isAdmin ? (
+                              <button
+                                type="button"
+                                onClick={() => onDemote(m.id, m.profile!.first_name)}
+                                className="text-xs text-[color:var(--color-planer-dim)] hover:text-[color:var(--color-planer-rose)] px-2 py-1 transition-colors"
+                              >
+                                Zurückstufen
+                              </button>
+                            ) : (
+                              <button
+                                type="button"
+                                onClick={() => onPromote(m.id, m.user_id, m.profile!.first_name)}
+                                className="text-xs text-[color:var(--color-planer-accent)] hover:opacity-80 px-2 py-1 transition-opacity"
+                              >
+                                Hochstufen
+                              </button>
+                            )}
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  </section>
+                )}
+
+                {/* Danger zone — only the original creator can delete the plan */}
+                {isOwner && (
+                  <section className="mt-10 pt-6 border-t border-[color:var(--color-planer-rose)]/20">
+                    <EditorialCaption className="mb-2 text-[color:var(--color-planer-rose)]/80">
+                      Danger Zone
+                    </EditorialCaption>
+                    <p className="text-xs text-[color:var(--color-planer-dim)] mb-4 leading-relaxed">
+                      Löscht diesen Plan unwiderruflich, inklusive Chat-Verlauf, Post-its,
+                      Mitbringsel-Liste, Erinnerungen und allen Aktivitäten. Teilnehmer werden
+                      nicht benachrichtigt — mach das nur wenn du sicher bist.
+                    </p>
+                    {!confirmDelete ? (
+                      <button
+                        type="button"
+                        onClick={() => setConfirmDelete(true)}
+                        className="px-4 py-2.5 rounded-xl border border-[color:var(--color-planer-rose)]/30 text-[color:var(--color-planer-rose)] text-sm hover:bg-[color:var(--color-planer-rose)]/10 hover:border-[color:var(--color-planer-rose)]/60 transition-all"
+                      >
+                        Plan löschen
+                      </button>
+                    ) : (
+                      <div className="space-y-3 p-4 rounded-xl border border-[color:var(--color-planer-rose)]/40 bg-[color:var(--color-planer-rose)]/5">
+                        <p className="text-xs text-[color:var(--color-planer-ink)]">
+                          Tippe den Plan-Namen <span className="font-mono bg-white/5 px-1.5 py-0.5 rounded border border-white/10">{plan.name}</span> um das Löschen zu bestätigen:
+                        </p>
+                        <PlanerInput
+                          type="text"
+                          value={deleteConfirmText}
+                          onChange={e => setDeleteConfirmText(e.target.value)}
+                          placeholder={plan.name}
+                          autoFocus
+                        />
+                        <div className="flex items-center justify-end gap-3">
+                          <button
+                            type="button"
+                            onClick={() => { setConfirmDelete(false); setDeleteConfirmText(''); }}
+                            disabled={deleting}
+                            className="text-xs text-[color:var(--color-planer-dim)] hover:text-[color:var(--color-planer-ink)] px-3 py-2"
+                          >
+                            Abbrechen
+                          </button>
+                          <button
+                            type="button"
+                            onClick={handleDelete}
+                            disabled={deleting || deleteConfirmText.trim().toLowerCase() !== plan.name.trim().toLowerCase()}
+                            className="px-4 py-2 rounded-full bg-[color:var(--color-planer-rose)] text-white text-xs font-semibold hover:bg-[color:var(--color-planer-rose)]/90 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+                          >
+                            {deleting ? 'Lösche …' : 'Unwiderruflich löschen'}
+                          </button>
+                        </div>
                       </div>
-                    </div>
-                  )}
-                </section>
+                    )}
+                  </section>
+                )}
+
+                {/* Co-owner hint — they can edit but not delete */}
+                {!isOwner && (
+                  <section className="mt-10 pt-6 border-t border-white/[0.05]">
+                    <p className="text-xs italic text-[color:var(--color-planer-dim)]">
+                      Du bist Co-Organisator*in. Nur der/die Ersteller*in kann den Plan löschen.
+                    </p>
+                  </section>
+                )}
               </div>
             </div>
           </motion.aside>

@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { ProfileDropdown } from '@/components/Layout/ProfileDropdown';
 import { NotificationBell } from '@/components/Notifications/NotificationBell';
+import { DesktopPushToggle } from '@/components/Notifications/DesktopPushToggle';
 import { useAuth } from '@/lib/supabase/auth-context';
 import { createClient } from '@/lib/supabase/client';
 import { trackEvent } from '@/lib/analytics';
@@ -185,6 +186,11 @@ export default function NotificationsPage() {
       </header>
 
       <main className="max-w-2xl mx-auto px-4 pt-4">
+        {/* Desktop-push toggle — lives above the list so users discover it */}
+        <div className="mb-5">
+          <DesktopPushToggle />
+        </div>
+
         {/* Mark all read button */}
         {hasUnread && (
           <button

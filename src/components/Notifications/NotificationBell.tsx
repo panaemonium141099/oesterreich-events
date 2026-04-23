@@ -54,6 +54,22 @@ export function NotificationBell({ className }: NotificationBellProps) {
     return () => { supabase.removeChannel(channel); };
   }, [user, supabase, fetchCount]);
 
+  // Tab-title badge — prefix "(N) " while there are unread notifications, restore on cleanup.
+  useEffect(() => {
+    if (typeof document === 'undefined') return;
+    const stripBadge = (t: string) => t.replace(/^\(\d+\)\s+/, '');
+    const base = stripBadge(document.title);
+    const newTitle = unreadCount > 0
+      ? `(${unreadCount > 99 ? '99+' : unreadCount}) ${base}`
+      : base;
+    if (document.title !== newTitle) document.title = newTitle;
+    return () => {
+      if (typeof document !== 'undefined') {
+        document.title = stripBadge(document.title);
+      }
+    };
+  }, [unreadCount]);
+
   if (!user) return null;
 
   return (
