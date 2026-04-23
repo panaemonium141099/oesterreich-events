@@ -480,7 +480,10 @@ export function EventDetail({ event, onClose, eveningMode, onTagClick }: EventDe
             return (
               <div className="mb-5">
                 <h3 className={`text-sm font-semibold mb-2 ${eveningMode ? 'text-gray-300' : 'text-slate-700'}`}>Beschreibung</h3>
-                <p className={`text-sm leading-relaxed whitespace-pre-line line-clamp-6 ${eveningMode ? 'text-gray-400' : 'text-slate-600'}`}>
+                {/* Preview only — 3 lines. Full text lives on the
+                    /events/{plz-ort}/{date}/{slug} detail page the CTA
+                    at the bottom of this panel navigates to. */}
+                <p className={`text-sm leading-relaxed whitespace-pre-line line-clamp-3 ${eveningMode ? 'text-gray-400' : 'text-slate-600'}`}>
                   {chosen}
                 </p>
               </div>
@@ -647,38 +650,26 @@ export function EventDetail({ event, onClose, eveningMode, onTagClick }: EventDe
             <span>Quelle: {event.source_name}</span>
           </div>
 
-          {/* Action Buttons — Clean Flow: Merken → Erinnern + Teilen */}
+          {/* Action Buttons — primary CTA always navigates to our own
+              detail page (/events/{plz-ort}/{date}/{slug}). From there the
+              user finds the "Zur Quelle" / ticket link. This preview panel
+              is explicitly a PREVIEW — full content + external links live
+              on the detail page to keep the UX consistent regardless of
+              whether the user came from a map pin, sidebar item, saved
+              list, etc. */}
           <div className="flex gap-3">
-            {/* Zum Event — links to source if available, otherwise to detail page */}
-            {event.source_url ? (
-              <a
-                href={event.source_url}
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={() => trackEvent('link_click', { url: event.source_url, event_id: event.id, event_title: event.title, type: 'source' })}
-                className={`flex-1 text-white text-sm font-medium rounded-xl py-3 px-4 text-center transition-colors flex items-center justify-center gap-2 ${
-                  eveningMode ? 'bg-indigo-600 hover:bg-indigo-700' : 'bg-blue-600 hover:bg-blue-700'
-                }`}
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                </svg>
-                Zur Quelle
-              </a>
-            ) : (
-              <a
-                href={buildEventUrlV2(event)}
-                onClick={() => trackEvent('link_click', { event_id: event.id, event_title: event.title, type: 'detail' })}
-                className={`flex-1 text-white text-sm font-medium rounded-xl py-3 px-4 text-center transition-colors flex items-center justify-center gap-2 ${
-                  eveningMode ? 'bg-indigo-600 hover:bg-indigo-700' : 'bg-blue-600 hover:bg-blue-700'
-                }`}
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                Details
-              </a>
-            )}
+            <a
+              href={buildEventUrlV2(event)}
+              onClick={() => trackEvent('link_click', { event_id: event.id, event_title: event.title, type: 'detail' })}
+              className={`flex-1 text-white text-sm font-medium rounded-xl py-3 px-4 text-center transition-colors flex items-center justify-center gap-2 ${
+                eveningMode ? 'bg-indigo-600 hover:bg-indigo-700' : 'bg-blue-600 hover:bg-blue-700'
+              }`}
+            >
+              Zur Event-Seite
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+              </svg>
+            </a>
 
             {/* Merken / Erinnern — transforming button */}
             {!isSaved ? (

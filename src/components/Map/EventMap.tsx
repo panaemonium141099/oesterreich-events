@@ -275,7 +275,7 @@ function EventMap({ events, selectedEvent, hoveredEventId, onSelectEvent, evenin
         <div style="font-size:11px;color:${subTextColor};margin-bottom:2px;">${date}${showTime ? ` um ${time}` : ''}</div>
         ${event.location_name ? `<div style="font-size:11px;color:${subTextColor};margin-bottom:4px;display:flex;align-items:center;gap:3px;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="${subTextColor}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>${escapeHtml(event.location_name)}</div>` : ''}
         ${event.price_text ? `<div style="font-size:11px;font-weight:600;color:${btnBg};margin-bottom:6px;">${escapeHtml(event.price_text)}</div>` : ''}
-        <a href="${escapeHtml(buildEventUrlV2(event))}" data-event-id="${event.id}" style="display:block;text-align:center;width:100%;padding:7px;background:${btnBg};color:white;border:none;border-radius:8px;font-size:12px;font-weight:500;cursor:pointer;text-decoration:none;box-sizing:border-box;">Details anzeigen</a>
+        <button data-event-id="${event.id}" style="width:100%;padding:7px;background:${btnBg};color:white;border:none;border-radius:8px;font-size:12px;font-weight:500;cursor:pointer;">Vorschau öffnen</button>
       </div></div>`;
   }, []);
 
@@ -573,12 +573,13 @@ function EventMap({ events, selectedEvent, hoveredEventId, onSelectEvent, evenin
               pe.addEventListener('mouseleave', () => {
                 scheduleClose();
               });
-              // The "Details anzeigen" button is now a real `<a href>` to the
-              // event detail page — native browser navigation handles the
-              // click, no JS needed. We keep the close on click so the
-              // popup vanishes cleanly before the navigation.
-              pe.querySelector('a[data-event-id]')?.addEventListener('click', () => {
+              // "Vorschau öffnen" → opens the rich inline preview panel
+              // (same experience for pin click + sidebar click). The panel
+              // has a CTA at the bottom that navigates to the canonical
+              // /events/{plz-ort}/{date}/{slug} detail page.
+              pe.querySelector('button[data-event-id]')?.addEventListener('click', () => {
                 closeSelf();
+                onSelectEvent(event);
               });
             });
           }
