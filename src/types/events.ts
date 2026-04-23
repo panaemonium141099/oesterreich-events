@@ -54,6 +54,21 @@ export interface Event {
   category_needs_review?: boolean;
   category_reason?: string | null;
   category_candidates?: CategoryCandidate[] | null;
+  // Enrichment layer — populated by src/scripts/enrich-openai.ts. All
+  // are nullable because older rows (or rows from scrapers that
+  // haven't been enriched yet) won't have them.
+  audience?: string[] | null;
+  vibe?: string[] | null;
+  setting?: string[] | null;
+  language?: string | null;
+  price_tier?: 'gratis' | 'günstig' | 'mittel' | 'premium' | 'unbekannt' | null;
+  duration_type?: 'kurz' | 'abend' | 'ganztag' | 'mehrtägig' | 'dauerausstellung' | 'nacht-bis-morgen' | '24-stunden' | '48-stunden' | null;
+  is_student_friendly?: boolean | null;
+  is_family_friendly?: boolean | null;
+  suggested_description?: string | null;
+  suggested_price_text?: string | null;
+  enrichment_version?: string | null;
+  enrichment_at?: string | null;
   created_at: string;
   updated_at: string;
 }

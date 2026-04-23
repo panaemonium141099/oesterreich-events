@@ -212,7 +212,8 @@ export async function GET(request: NextRequest) {
     let query = suggestMode
       ? baseQuery.select('id, title, category, location_name')
       : baseQuery.select(
-          'id, title, description, start_date, end_date, location_name, address, postal_code, district, bundesland, latitude, longitude, category, image_url, price_text, price_min, price_max, ticket_url, source_name, source_url, organizer, visibility, event_score, slug',
+          'id, title, description, start_date, end_date, location_name, address, postal_code, district, bundesland, latitude, longitude, category, tags, image_url, price_text, price_min, price_max, ticket_url, source_name, source_url, organizer, visibility, event_score, slug, ' +
+          'audience, vibe, setting, language, price_tier, duration_type, is_student_friendly, is_family_friendly, suggested_description, suggested_price_text',
           needsCount ? { count: 'exact' } : undefined
         );
 

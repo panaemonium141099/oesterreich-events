@@ -466,13 +466,112 @@ export function EventDetail({ event, onClose, eveningMode, onTagClick }: EventDe
             )}
           </div>
 
-          {/* Description */}
-          {event.description && (
-            <div className="mb-5">
-              <h3 className={`text-sm font-semibold mb-2 ${eveningMode ? 'text-gray-300' : 'text-slate-700'}`}>Beschreibung</h3>
-              <p className={`text-sm leading-relaxed whitespace-pre-line line-clamp-6 ${eveningMode ? 'text-gray-400' : 'text-slate-600'}`}>
-                {event.description}
-              </p>
+          {/* Description — prefer the AI-cleaned `suggested_description`
+              when the scraper left literal HTML tags (<p>, <br>) in the
+              raw `description`; otherwise fall back to the raw one with
+              HTML stripped so we never show <p>...</p> to the user. */}
+          {(() => {
+            const raw = event.description ?? '';
+            const hasHtml = /<\/?[a-z][^>]*>/i.test(raw);
+            const chosen = hasHtml && event.suggested_description
+              ? event.suggested_description
+              : raw.replace(/<[^>]+>/g, '').replace(/&nbsp;/g, ' ').replace(/\s+/g, ' ').trim();
+            if (!chosen) return null;
+            return (
+              <div className="mb-5">
+                <h3 className={`text-sm font-semibold mb-2 ${eveningMode ? 'text-gray-300' : 'text-slate-700'}`}>Beschreibung</h3>
+                <p className={`text-sm leading-relaxed whitespace-pre-line line-clamp-6 ${eveningMode ? 'text-gray-400' : 'text-slate-600'}`}>
+                  {chosen}
+                </p>
+              </div>
+            );
+          })()}
+
+          {/* Enrichment — tags, flags, audience/vibe/setting, price tier.
+              Populated by src/scripts/enrich-openai.ts. All optional; if
+              no enrichment fields exist we render nothing here. */}
+          {(event.tags?.length || event.audience?.length || event.vibe?.length || event.setting?.length
+            || event.is_student_friendly || event.is_family_friendly
+            || (event.price_tier && event.price_tier !== 'unbekannt')) && (
+            <div className="mb-5 space-y-3">
+              {/* Top row — flags + price chip */}
+              {(event.is_student_friendly || event.is_family_friendly
+                || (event.price_tier && event.price_tier !== 'unbekannt')) && (
+                <div className="flex flex-wrap gap-1.5">
+                  {event.is_student_friendly && (
+                    <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium ${eveningMode ? 'bg-cyan-900/40 text-cyan-300' : 'bg-cyan-100 text-cyan-700'}`}>
+                      🎓 Studentisch
+                    </span>
+                  )}
+                  {event.is_family_friendly && (
+                    <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium ${eveningMode ? 'bg-pink-900/40 text-pink-300' : 'bg-pink-100 text-pink-700'}`}>
+                      👨‍👩‍👧 Familienfreundlich
+                    </span>
+                  )}
+                  {event.price_tier && event.price_tier !== 'unbekannt' && (
+                    <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium ${
+                      event.price_tier === 'gratis'
+                        ? (eveningMode ? 'bg-emerald-900/40 text-emerald-300' : 'bg-emerald-100 text-emerald-700')
+                        : event.price_tier === 'günstig'
+                        ? (eveningMode ? 'bg-lime-900/40 text-lime-300' : 'bg-lime-100 text-lime-700')
+                        : event.price_tier === 'mittel'
+                        ? (eveningMode ? 'bg-amber-900/40 text-amber-300' : 'bg-amber-100 text-amber-700')
+                        : (eveningMode ? 'bg-rose-900/40 text-rose-300' : 'bg-rose-100 text-rose-700')
+                    }`}>
+                      {event.price_tier === 'gratis' ? 'Gratis'
+                        : event.price_tier === 'günstig' ? '💶 Günstig'
+                        : event.price_tier === 'mittel' ? '💶 Mittel'
+                        : '💶 Premium'}
+                    </span>
+                  )}
+                  {event.duration_type && event.duration_type !== 'kurz' && (
+                    <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium ${eveningMode ? 'bg-slate-800 text-slate-400' : 'bg-slate-100 text-slate-600'}`}>
+                      {event.duration_type === 'abend' ? 'Abend'
+                        : event.duration_type === 'ganztag' ? 'Ganztag'
+                        : event.duration_type === 'mehrtägig' ? 'Mehrtägig'
+                        : event.duration_type === 'dauerausstellung' ? 'Dauerausstellung'
+                        : event.duration_type === 'nacht-bis-morgen' ? 'Nacht → Morgen'
+                        : event.duration_type}
+                    </span>
+                  )}
+                </div>
+              )}
+
+              {/* Tags — the content/genre row (multi-dim labels from AI) */}
+              {event.tags && event.tags.length > 0 && (
+                <div>
+                  <h4 className={`text-[10px] uppercase tracking-wider mb-1.5 font-medium ${eveningMode ? 'text-slate-500' : 'text-slate-400'}`}>
+                    Tags
+                  </h4>
+                  <div className="flex flex-wrap gap-1.5">
+                    {event.tags.slice(0, 8).map(t => (
+                      <TagChip key={t} tag={t} onClick={onTagClick ? () => onTagClick(t) : undefined} eveningMode={eveningMode} size="sm" />
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Audience + Vibe + Setting — softer inline chips, all in
+                  one row to avoid visual heaviness */}
+              {((event.audience?.length ?? 0) + (event.vibe?.length ?? 0) + (event.setting?.length ?? 0)) > 0 && (
+                <div className="flex flex-wrap gap-1.5">
+                  {event.audience?.slice(0, 3).map(a => (
+                    <span key={`aud-${a}`} className={`text-[10px] px-2 py-0.5 rounded-full ${eveningMode ? 'bg-slate-800/60 text-slate-400 border border-slate-700' : 'bg-slate-50 text-slate-500 border border-slate-200'}`}>
+                      {a}
+                    </span>
+                  ))}
+                  {event.vibe?.slice(0, 2).map(v => (
+                    <span key={`vib-${v}`} className={`text-[10px] px-2 py-0.5 rounded-full ${eveningMode ? 'bg-purple-900/30 text-purple-300 border border-purple-800/40' : 'bg-purple-50 text-purple-600 border border-purple-200'}`}>
+                      {v}
+                    </span>
+                  ))}
+                  {event.setting?.slice(0, 2).map(s => (
+                    <span key={`set-${s}`} className={`text-[10px] px-2 py-0.5 rounded-full ${eveningMode ? 'bg-teal-900/30 text-teal-300 border border-teal-800/40' : 'bg-teal-50 text-teal-600 border border-teal-200'}`}>
+                      {s}
+                    </span>
+                  ))}
+                </div>
+              )}
             </div>
           )}
 
