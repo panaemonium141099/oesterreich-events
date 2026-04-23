@@ -162,6 +162,61 @@ const BUNDESLAND_DEFAULTS: Record<string, { plz: string; citySlug: string }> = {
   'Wien':             { plz: '1010', citySlug: 'wien' },
 };
 
+/**
+ * Normalises a bundesland field to its canonical capitalised form.
+ *
+ * Our production data has ~15 different spellings in the same column
+ * (legacy tech-debt noted in Phase-0 review): `Steiermark` alongside
+ * `steiermark`, `Niederösterreich` alongside `niederoesterreich`, even
+ * short codes like `ooe`. Returns null for unrecognised inputs so the
+ * caller can fall through to the hard `0000-at` default.
+ *
+ * Two-pass matcher:
+ *   1. Shortcodes (`ooe`, `noe`, `bgld`, `stmk`, …) handled BEFORE text
+ *      normalisation, because stripping umlaut-alternatives collapses
+ *      "ooe" to "oo" (the `/oe/g → /o/` rule eats the first `oe`).
+ *   2. Text normalisation (lowercase → NFD-strip → `ae/oe/ue → a/o/u`)
+ *      handles variants like `Kärnten`, `kaernten`, `KÄRNTEN`.
+ */
+function normalizeBundesland(name: string | null | undefined): string | null {
+  if (!name) return null;
+  const raw = name.trim().toLowerCase();
+
+  // 1) Shortcodes — resolve before any further mangling.
+  const shortcodes: Record<string, string> = {
+    'bgld': 'Burgenland',
+    'ktn':  'Kärnten',
+    'noe':  'Niederösterreich',
+    'ooe':  'Oberösterreich',
+    'sbg':  'Salzburg',
+    'stmk': 'Steiermark',
+    't':    'Tirol',
+    'vbg':  'Vorarlberg',
+    'w':    'Wien',
+  };
+  if (shortcodes[raw]) return shortcodes[raw];
+
+  // 2) Text-normalised lookup: `kaernten`, `Kärnten`, `KAERNTEN` all
+  //    collapse to `karnten`.
+  const key = raw
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .replace(/ae/g, 'a').replace(/oe/g, 'o').replace(/ue/g, 'u')
+    .replace(/[^a-z]/g, '');
+
+  const map: Record<string, string> = {
+    'burgenland':       'Burgenland',
+    'karnten':          'Kärnten',
+    'niederosterreich': 'Niederösterreich',
+    'oberosterreich':   'Oberösterreich',
+    'salzburg':         'Salzburg',
+    'steiermark':       'Steiermark',
+    'tirol':            'Tirol',
+    'vorarlberg':       'Vorarlberg',
+    'wien':             'Wien',
+  };
+  return map[key] ?? null;
+}
+
 /** Slug a single location-ish string (city name, address fragment). */
 function slugifyLocation(value: string): string {
   let s = value;
@@ -208,10 +263,13 @@ export interface EventForUrl {
  *   /events/{plz}-{ort}/{slug}-{shortId}
  *
  * Priority for the `{plz}-{ort}` prefix:
- *   1. event.postal_code + city parsed from address     → "1010-wien"
- *   2. event.postal_code + bundesland capital slug      → "4020-linz"  (when city unparseable)
- *   3. bundesland-capital PLZ + bundesland-capital slug → "7000-eisenstadt"
- *   4. hard fallback                                    → "0000-at"
+ *   1. event.postal_code + city parsed from address       → "1010-wien"
+ *   2. event.postal_code + location_name                  → "8952-irdning"
+ *   3. event.postal_code + bundesland capital slug        → "4020-linz"
+ *   4. bundesland-capital PLZ + city/location_name        → "8010-irdning"
+ *      (keeps the real place name even when we don't know its PLZ)
+ *   5. bundesland-capital PLZ + bundesland-capital slug   → "7000-eisenstadt"
+ *   6. hard fallback                                      → "0000-at"
  *
  * This means **every event gets a deterministic, keyword-rich URL**, even
  * rows with missing postal_code or city. Worst case is "0000-at" — which
@@ -233,23 +291,66 @@ export function buildEventUrlV2(event: EventForUrl): string {
 
 /**
  * Just the prefix part. Exposed because the sitemap / tests need it too.
+ *
+ * Implementation strategy: resolve each field independently against its own
+ * fallback chain so a row with `postal_code=null, bundesland='steiermark',
+ * location_name='Irdning'` yields the useful `/events/8010-irdning/...`
+ * rather than the generic `/events/0000-at/...`. Google still sees a real
+ * place name in the URL even when we lack the exact PLZ.
  */
 export function resolveEventUrlPrefix(
   event: Pick<EventForUrl, 'postal_code' | 'address' | 'bundesland' | 'location_name'>,
 ): { plz: string; ort: string } {
-  const fallback = event.bundesland && BUNDESLAND_DEFAULTS[event.bundesland]
-    ? BUNDESLAND_DEFAULTS[event.bundesland]
-    : { plz: '0000', citySlug: 'at' };
+  const canonicalBl = normalizeBundesland(event.bundesland);
+  const blDefault = canonicalBl ? BUNDESLAND_DEFAULTS[canonicalBl] : null;
 
-  const city =
-    parseCityFromAddress(event.address) ??
-    (event.bundesland === 'Wien' ? 'Wien' : null);
+  // ─── ort resolution ──────────────────────────────────────────────────
+  // Try real city sources in order of precision, only falling back to the
+  // bundesland capital when nothing else is available.
+  const addressCity = parseCityFromAddress(event.address);
+  const locationCity = normaliseLocationName(event.location_name);
+  const cityStateWien = canonicalBl === 'Wien' ? 'Wien' : null;
 
-  const ort = city ? slugifyLocation(city) : fallback.citySlug;
-  const plz = (event.postal_code ?? '').trim().match(/^\d{4}$/)
-    ? (event.postal_code as string).trim()
-    : fallback.plz;
+  const cityChoice = addressCity ?? locationCity ?? cityStateWien;
+  const ort = cityChoice
+    ? slugifyLocation(cityChoice)
+    : (blDefault?.citySlug ?? 'at');
+
+  // ─── plz resolution ──────────────────────────────────────────────────
+  const plzFromRow = (event.postal_code ?? '').trim();
+  const plz = /^\d{4}$/.test(plzFromRow)
+    ? plzFromRow
+    : (blDefault?.plz ?? '0000');
 
   return { plz, ort };
+}
+
+/**
+ * Extracts a plausible city from the free-text `location_name` column.
+ *
+ * `location_name` is messy — often a single clean town name ("Irdning",
+ * "Feldkirchen"), often a venue ("Gasthof zur Post"), sometimes a venue+
+ * city combo ("Volkshaus Eisenstadt"). We take the strict-but-safe path:
+ * only accept a **single clean word** as a city candidate. Multi-word
+ * strings are treated as venues and fall through to the bundesland
+ * capital, which is always a correct-at-bundesland-level substitute.
+ *
+ * Losing "Volkshaus Eisenstadt" → "eisenstadt" in exchange for never
+ * accidentally labelling "Gasthof zur Post" as "post" is the right
+ * trade-off for URL quality.
+ */
+function normaliseLocationName(raw: string | null | undefined): string | null {
+  if (!raw) return null;
+  const trimmed = raw.trim();
+  if (!trimmed) return null;
+
+  const words = trimmed.split(/\s+/);
+  if (words.length !== 1) return null;
+
+  const w = words[0];
+  if (w.length < 3) return null;
+  // Accept German proper-noun pattern: capitalised start, letters + hyphen.
+  if (!/^[A-ZÄÖÜ][a-zäöüß\-]+$/.test(w)) return null;
+  return w;
 }
 
