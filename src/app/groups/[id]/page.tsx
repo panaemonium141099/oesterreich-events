@@ -39,6 +39,7 @@ import {
   AvatarStack,
 } from '@/components/Planer/primitives';
 import { Pinboard } from '@/components/Planer/detail/Pinboard';
+import { PlanSettingsDrawer } from '@/components/Planer/detail/PlanSettingsDrawer';
 import { staggerContainer, riseItem, EASE_OUT_EXPO } from '@/components/Planer/motion';
 
 // ──────────────────────────────────────────────────
@@ -164,6 +165,9 @@ export default function EventDashboardPage() {
   const [memories, setMemories] = useState<MemoryItem[]>([]);
   const [creatingMemory, setCreatingMemory] = useState(false);
   const [newMemoryTitle, setNewMemoryTitle] = useState('');
+  const [showSettings, setShowSettings] = useState(false);
+  const [showLeaveConfirm, setShowLeaveConfirm] = useState(false);
+  const [leaving, setLeaving] = useState(false);
   const [showEventSearch, setShowEventSearch] = useState(false);
   const [showInvite, setShowInvite] = useState(false);
   const [friends, setFriends] = useState<FriendProfile[]>([]);
@@ -393,6 +397,24 @@ export default function EventDashboardPage() {
     }
   };
 
+  const leavePlan = async () => {
+    if (!user || !myMembership) return;
+    setLeaving(true);
+    try {
+      const { error } = await supabase
+        .from('group_members')
+        .delete()
+        .eq('id', myMembership.id);
+      if (error) throw error;
+      toast.success('Plan verlassen');
+      router.replace('/groups');
+    } catch (e) {
+      console.error('[leave plan]', e);
+      toast.error(e instanceof Error ? e.message : 'Verlassen fehlgeschlagen');
+      setLeaving(false);
+    }
+  };
+
   const createMemory = async () => {
     const title = newMemoryTitle.trim();
     if (!user || !title) return;
@@ -605,14 +627,39 @@ export default function EventDashboardPage() {
             </button>
 
             {isOwner && (
+              <>
+                <button
+                  onClick={loadFriendsForInvite}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs bg-[color:var(--color-planer-void)]/80 backdrop-blur-md border border-white/10 text-[color:var(--color-planer-dim)] hover:text-[color:var(--color-planer-ink)] hover:border-white/20 transition-all"
+                >
+                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+                  </svg>
+                  Einladen
+                </button>
+                <button
+                  onClick={() => setShowSettings(true)}
+                  aria-label="Plan-Einstellungen"
+                  title="Plan-Einstellungen"
+                  className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-[color:var(--color-planer-void)]/80 backdrop-blur-md border border-white/10 text-[color:var(--color-planer-dim)] hover:text-[color:var(--color-planer-ink)] hover:border-white/20 transition-all"
+                >
+                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                </button>
+              </>
+            )}
+            {!isOwner && myMembership && (
               <button
-                onClick={loadFriendsForInvite}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs bg-[color:var(--color-planer-void)]/80 backdrop-blur-md border border-white/10 text-[color:var(--color-planer-dim)] hover:text-[color:var(--color-planer-ink)] hover:border-white/20 transition-all"
+                onClick={() => setShowLeaveConfirm(true)}
+                aria-label="Plan verlassen"
+                title="Plan verlassen"
+                className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-[color:var(--color-planer-void)]/80 backdrop-blur-md border border-white/10 text-[color:var(--color-planer-dim)] hover:text-[color:var(--color-planer-rose)] hover:border-[color:var(--color-planer-rose)]/40 transition-all"
               >
-                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                 </svg>
-                Einladen
               </button>
             )}
           </div>
@@ -952,7 +999,86 @@ export default function EventDashboardPage() {
           copiedCode={copiedCode}
         />
       )}
+
+      {/* Owner-only settings drawer (edit + delete plan) */}
+      {isOwner && (
+        <PlanSettingsDrawer
+          open={showSettings}
+          onClose={() => setShowSettings(false)}
+          plan={group}
+          supabase={supabase}
+          user={user}
+          invitedFriends={members
+            .filter(m => m.user_id !== user.id && m.profile)
+            .map(m => ({
+              id: m.profile.id,
+              first_name: m.profile.first_name,
+              last_name: m.profile.last_name,
+              avatar_url: m.profile.avatar_url,
+            }))}
+          onSaved={fetchAll}
+        />
+      )}
+
+      {/* Leave-plan confirmation (non-owners) */}
+      {showLeaveConfirm && !isOwner && (
+        <LeavePlanDialog
+          planName={group.name}
+          leaving={leaving}
+          onCancel={() => setShowLeaveConfirm(false)}
+          onConfirm={leavePlan}
+        />
+      )}
     </PlanerShell>
+  );
+}
+
+// ──────────────────────────────────────────────────
+// LeavePlanDialog — small confirm modal for non-owners
+// ──────────────────────────────────────────────────
+
+function LeavePlanDialog({
+  planName, leaving, onCancel, onConfirm,
+}: {
+  planName: string;
+  leaving: boolean;
+  onCancel: () => void;
+  onConfirm: () => void;
+}) {
+  return (
+    <div
+      className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm flex items-end sm:items-center justify-center p-4"
+      onClick={onCancel}
+    >
+      <div
+        className="w-full max-w-md bg-[color:var(--color-planer-surface)] border border-white/[0.08] rounded-t-2xl sm:rounded-2xl p-6"
+        onClick={e => e.stopPropagation()}
+      >
+        <h3 className="serif-display text-[22px] font-light text-[color:var(--color-planer-ink)] mb-2">
+          Plan verlassen?
+        </h3>
+        <p className="text-sm text-[color:var(--color-planer-dim)] mb-6 leading-relaxed">
+          Du verlässt „<span className="text-[color:var(--color-planer-ink)]">{planName}</span>" und siehst ihn
+          nicht mehr in deiner Übersicht. Der Ersteller kann dich später wieder einladen.
+        </p>
+        <div className="flex items-center justify-end gap-3">
+          <button
+            onClick={onCancel}
+            disabled={leaving}
+            className="text-sm text-[color:var(--color-planer-dim)] hover:text-[color:var(--color-planer-ink)] px-3 py-2 transition-colors"
+          >
+            Abbrechen
+          </button>
+          <button
+            onClick={onConfirm}
+            disabled={leaving}
+            className="px-4 py-2 rounded-full bg-[color:var(--color-planer-rose)]/90 hover:bg-[color:var(--color-planer-rose)] text-white text-sm font-medium disabled:opacity-40 transition-colors"
+          >
+            {leaving ? 'Verlasse …' : 'Ja, verlassen'}
+          </button>
+        </div>
+      </div>
+    </div>
   );
 }
 
