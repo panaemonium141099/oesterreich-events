@@ -1,5 +1,12 @@
 # burgenland-events-v5
 
+> **⚠️ Wichtig — vor jedem Task zur Event-Klassifikation / Tags / Kategorien lesen:**
+> **`docs/TAXONOMY.md`** ist die Single-Source-of-Truth für Hauptkategorien, Tags,
+> Audience-/Vibe-/Occasion-/Price-Achsen und den Enrichment-Prompt. Wenn Code davon
+> abweicht, hat der Code Unrecht. NICHT auf `taxonomy.ts` oder `enrichment-taxonomy.ts`
+> allein verlassen — die werden bei jedem Rework angepasst, das Spec-File ist die
+> Referenz.
+
 ## Beschreibung
 Osterreich Events — Austrian event discovery platform. Aggregates events from ~141 scrapers across Austria, displays them on an interactive Mapbox GL JS map, and provides social features (DM, group chat, friends, feed, memories).
 
