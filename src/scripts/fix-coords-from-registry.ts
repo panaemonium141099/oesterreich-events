@@ -67,6 +67,45 @@ function haversineKm(a: number, b: number, c: number, d: number): number {
   return 2 * R * Math.atan2(Math.sqrt(aa), Math.sqrt(1 - aa));
 }
 
+/**
+ * Case-fold + strip umlauts + strip non-alphanumerics — makes "Pöttsching",
+ * "POETTSCHING", "poettsching ", and "Pöttsching" all collide to one token
+ * so we can compare a scraper's `location_name` against a Gemeinde's `name`
+ * without worrying about encoding or whitespace drift.
+ */
+function normalizeForMatch(s: string | null | undefined): string {
+  if (!s) return '';
+  return s
+    .toLowerCase()
+    .replace(/ä/g, 'ae').replace(/ö/g, 'oe').replace(/ü/g, 'ue').replace(/ß/g, 'ss')
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]/g, '');
+}
+
+/**
+ * True when the event's `location_name` IS the Gemeinde itself — not a
+ * specific venue within the Gemeinde. In that case the 2 km threshold
+ * should not protect a scraper-provided coord, because there's no
+ * venue-level precision at stake: the whole event IS "at Pöttsching",
+ * so it belongs exactly at Pöttsching's registry centroid.
+ *
+ * Matches:
+ *  - empty / null location_name (scraper didn't specify a venue)
+ *  - exact match: "Pöttsching", "poettsching", "POETTSCHING  "
+ *  - with PLZ prefix or suffix: "7033 Pöttsching", "Pöttsching 7033"
+ *  - common Gemeinde prefix stripped: "Gemeinde Pöttsching"
+ */
+function isGemeindeLevelLocation(locationName: string | null, gemeindeName: string): boolean {
+  const loc = normalizeForMatch(locationName);
+  const gem = normalizeForMatch(gemeindeName);
+  if (!loc) return true;
+  if (loc === gem) return true;
+  // Strip a leading "gemeinde" / "markt" / "stadt" token, or any 4-digit PLZ.
+  const stripped = loc.replace(/^\d{4}/, '').replace(/\d{4}$/, '').replace(/^(gemeinde|markt|stadt)/, '');
+  if (stripped === gem) return true;
+  return false;
+}
+
 // Build PLZ → gemeinde lookup (first match wins when multiple gemeinden share a PLZ)
 const BY_PLZ = new Map<string, (typeof ALL_GEMEINDEN)[number]>();
 for (const g of ALL_GEMEINDEN) {
@@ -85,6 +124,9 @@ console.log(`Registry covers ${BY_PLZ.size.toLocaleString()} unique PLZ codes ($
     no_coords: 0,
     protected_source: 0,
     within_threshold: 0,
+    /** NEW: events where threshold would protect them but location_name
+     *  is the Gemeinde itself — we snap anyway to dedupe scraper-DB drift. */
+    gemeinde_level_override: 0,
     candidates: 0,
     by_distance_bucket: { '2-5km': 0, '5-10km': 0, '10-50km': 0, '50km+': 0 },
     updated: 0,
@@ -103,7 +145,7 @@ console.log(`Registry covers ${BY_PLZ.size.toLocaleString()} unique PLZ codes ($
   while (true) {
     let q = supabase
       .from('events')
-      .select('id, title, postal_code, latitude, longitude, geocoding_source, geocoding_confidence')
+      .select('id, title, location_name, postal_code, latitude, longitude, geocoding_source, geocoding_confidence')
       .gte('start_date', today)
       .eq('publish_status', 'published')
       .order('id', { ascending: true })
@@ -126,7 +168,19 @@ console.log(`Registry covers ${BY_PLZ.size.toLocaleString()} unique PLZ codes ($
       if (PROTECTED.has(e.geocoding_source ?? '')) { stats.protected_source++; continue; }
 
       const dist = haversineKm(e.latitude, e.longitude, g.lat, g.lng);
-      if (dist < DISTANCE_THRESHOLD_KM) { stats.within_threshold++; continue; }
+      const gemeindeLevel = isGemeindeLevelLocation(e.location_name, g.name);
+
+      // Threshold bypass: when the location IS the Gemeinde (not a specific
+      // venue), we always snap — otherwise one scraper's internal "Pöttsching"
+      // coord 1.8 km off the registry stays there for ever, and we end up
+      // with N different "centres" for the same village. That's exactly
+      // the drift the user complained about.
+      if (!gemeindeLevel && dist < DISTANCE_THRESHOLD_KM) {
+        stats.within_threshold++; continue;
+      }
+      if (gemeindeLevel && dist < DISTANCE_THRESHOLD_KM) {
+        stats.gemeinde_level_override++;
+      }
 
       stats.candidates++;
       if (dist < 5) stats.by_distance_bucket['2-5km']++;
@@ -181,6 +235,7 @@ console.log(`Registry covers ${BY_PLZ.size.toLocaleString()} unique PLZ codes ($
   console.log(`  No coords:                 ${stats.no_coords.toLocaleString()}`);
   console.log(`  Protected (manual/gemini): ${stats.protected_source.toLocaleString()}`);
   console.log(`  Within threshold (<2km):   ${stats.within_threshold.toLocaleString()}`);
+  console.log(`  Gemeinde-level override:   ${stats.gemeinde_level_override.toLocaleString()}  (snapped despite <2km because location_name = gemeinde)`);
   console.log(`  CANDIDATES for fix:        ${stats.candidates.toLocaleString()}`);
   console.log();
   console.log(`  Distance breakdown:`);
