@@ -14,6 +14,7 @@ import {
   BarChart3,
   Shield,
   ClipboardCheck,
+  LineChart,
   ArrowLeft,
   Menu,
   X,
@@ -31,6 +32,8 @@ const NAV_ITEMS = [
   { label: 'Events', icon: Calendar, href: '/admin/events' },
   { label: 'Users', icon: Users, href: '/admin/users' },
   { label: 'Analytics', icon: BarChart3, href: '/admin/analytics' },
+  // SEO KPI dashboard — fn-13 phase 10. Pulls GSC + CrUX + internal.
+  { label: 'SEO', icon: LineChart, href: '/admin/seo' },
   { label: 'Moderation', icon: Shield, href: '/admin/moderation' },
 ] as const;
 
