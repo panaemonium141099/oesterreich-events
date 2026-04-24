@@ -216,3 +216,22 @@ export async function sendArtistReminderEmail(
 
   return 'sent';
 }
+
+// ────────────────────────────────────────────────────────────────────
+// Generic HTML-email send — used by admin/cron code that already
+// produces a rendered HTML string (e.g. the SEO weekly report and the
+// traffic-drop alert). Thin wrapper around sendViaResend so the cron
+// routes don't have to know about Resend's payload shape.
+// ────────────────────────────────────────────────────────────────────
+
+export async function sendGenericEmail(
+  to: string,
+  subject: string,
+  html: string,
+): Promise<{ success: boolean; id?: string; error?: string }> {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) {
+    return { success: false, error: 'RESEND_API_KEY not configured' };
+  }
+  return sendViaResend({ from: FROM_ADDRESS, to, subject, html }, apiKey);
+}
