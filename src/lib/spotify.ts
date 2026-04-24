@@ -309,8 +309,16 @@ export async function getSpotifyProfile(accessToken: string) {
 // forbidden now, so they're intentionally NOT exposed here.
 // ═══════════════════════════════════════════════════════════════
 
-const SPOTIFY_ARTIST_RE = /(?:open\.spotify\.com\/artist\/|spotify:artist:)([a-zA-Z0-9]+)/;
-const SPOTIFY_TRACK_RE = /(?:open\.spotify\.com\/track\/|spotify:track:)([a-zA-Z0-9]+)/;
+// Spotify's share links now carry a locale prefix like `/intl-de/` or
+// `/intl-en/` — the app inserts it automatically when a user copies a
+// link on a German-set device. Pre-2024 links don't have it. Regex
+// therefore allows the `/intl-XX/` segment as an OPTIONAL group so both
+// formats resolve:
+//   https://open.spotify.com/track/3uBy64hFwBlmt48c2xnUlg            ← legacy
+//   https://open.spotify.com/intl-de/track/3uBy64hFwBlmt48c2xnUlg    ← localised
+//   spotify:track:3uBy64hFwBlmt48c2xnUlg                             ← URI
+const SPOTIFY_ARTIST_RE = /(?:open\.spotify\.com\/(?:intl-[a-z-]{2,8}\/)?artist\/|spotify:artist:)([a-zA-Z0-9]+)/;
+const SPOTIFY_TRACK_RE = /(?:open\.spotify\.com\/(?:intl-[a-z-]{2,8}\/)?track\/|spotify:track:)([a-zA-Z0-9]+)/;
 
 export function parseSpotifyArtistId(input: string): string | null {
   const trimmed = input.trim();

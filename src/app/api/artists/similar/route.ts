@@ -60,6 +60,8 @@ export async function POST(request: NextRequest) {
     // the wrong artist; that's why the UI lets the user review + untick.
     // We run searches in parallel with a small concurrency limit to
     // stay polite to Spotify's ~180 req/min Client-Credentials budget.
+    // `seed_name` flows through from Last.fm's aggregation step so the
+    // UI can render "Weil du {seed_name} folgst" under each card.
     const CONCURRENCY = 5;
     const hydrated: Array<{
       id: string;
@@ -68,6 +70,7 @@ export async function POST(request: NextRequest) {
       genres: string[];
       popularity: number;
       match_score: number;
+      seed_name: string;
     }> = [];
 
     for (let i = 0; i < similar.length; i += CONCURRENCY) {
@@ -83,7 +86,7 @@ export async function POST(request: NextRequest) {
             // "The Beatles" matching "Beatles" while rejecting unrelated
             // same-initial artists.
             if (!nameRoughlyMatches(top.name, s.name)) return null;
-            return { ...top, match_score: s.match };
+            return { ...top, match_score: s.match, seed_name: s.seedName };
           } catch (err) {
             if (err instanceof SpotifyRateLimitError) throw err; // propagate
             return null; // soft-fail per artist

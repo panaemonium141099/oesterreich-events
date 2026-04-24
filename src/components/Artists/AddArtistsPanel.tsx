@@ -121,19 +121,25 @@ function isFollowed(name: string, followedNames: Set<string>): boolean {
   return followedNames.has(name.toLowerCase());
 }
 
-/** Compact artist tile with a checkbox for bulk-select flows. */
+/** Compact artist tile with a checkbox for bulk-select flows.
+ *
+ *  Optional `reason` line (e.g. "Weil du NF folgst") is rendered under
+ *  the genres — gives the user the provenance of a similarity-based
+ *  suggestion so the list doesn't feel random. */
 function SelectableArtistTile({
   artist,
   checked,
   onToggle,
   disabled,
   alreadyFollowed,
+  reason,
 }: {
   artist: SpotifySearchArtist;
   checked: boolean;
   onToggle: () => void;
   disabled?: boolean;
   alreadyFollowed?: boolean;
+  reason?: string | null;
 }) {
   return (
     <label
@@ -175,6 +181,11 @@ function SelectableArtistTile({
         {artist.genres.length > 0 && (
           <p className="text-[11px] text-white/45 truncate">
             {artist.genres.slice(0, 2).join(' · ')}
+          </p>
+        )}
+        {reason && (
+          <p className="text-[10px] text-white/35 truncate italic">
+            Weil du <span className="text-white/55 not-italic">{reason}</span> folgst
           </p>
         )}
       </div>
@@ -333,6 +344,14 @@ function SearchTab({
 // Tab: Ähnliche finden — Last.fm-backed, invisible to end user
 // ═══════════════════════════════════════════════════════════════
 
+/** Artist-with-provenance — returned by /api/artists/similar. The
+ *  `seed_name` carries which of the user's followed artists was the
+ *  strongest driver of this suggestion, so the UI can render
+ *  "Weil du {seed_name} folgst" under the card. */
+interface SimilarArtist extends SpotifySearchArtist {
+  seed_name?: string;
+}
+
 function SimilarTab({
   followedNames,
   followedArtistNames,
@@ -342,7 +361,7 @@ function SimilarTab({
   followedArtistNames: string[];
   onFollow: (a: FollowPayload) => Promise<void>;
 }) {
-  const [results, setResults] = useState<SpotifySearchArtist[]>([]);
+  const [results, setResults] = useState<SimilarArtist[]>([]);
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -365,7 +384,7 @@ function SimilarTab({
       });
       const data = await res.json();
       if (!res.ok) { setError(data.message || 'Ähnliche-Suche fehlgeschlagen.'); return; }
-      const artists = (data.artists ?? []) as SpotifySearchArtist[];
+      const artists = (data.artists ?? []) as SimilarArtist[];
       const fresh = artists.filter(a => !isFollowed(a.name, followedNames));
       setResults(fresh);
       setSelected(new Set(fresh.map(a => a.id)));
@@ -444,6 +463,7 @@ function SimilarTab({
                 artist={a}
                 checked={selected.has(a.id)}
                 onToggle={() => toggleOne(a.id)}
+                reason={a.seed_name ?? null}
               />
             ))}
           </div>

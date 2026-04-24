@@ -172,6 +172,15 @@ export async function getTopArtistsByCountry(
   }
 }
 
+/** Like LastFmSimilarArtist but carries the seed that drove this pick the
+ *  strongest — used by the UI to render "Weil du {seedName} folgst". */
+export interface LastFmSimilarArtistWithSeed extends LastFmSimilarArtist {
+  /** The one seed-artist name with the HIGHEST individual Last.fm match
+   *  score against this similar artist. If multiple seeds matched equally,
+   *  the first-encountered wins (seed-order-stable). */
+  seedName: string;
+}
+
 /**
  * Aggregate similar-artist results across multiple seeds.
  *
@@ -181,6 +190,8 @@ export async function getTopArtistsByCountry(
  *     back what the user already follows)
  *   - sum match scores when the same artist is similar to multiple
  *     seeds (cross-seed overlap → stronger signal)
+ *   - remember the seed with the highest individual match for each
+ *     aggregated artist, so the UI can show "Weil du X folgst"
  *   - return top `total` by summed score
  *
  * This is a better signal than just taking Last.fm's per-seed top 30 and
@@ -191,30 +202,52 @@ export async function getAggregatedSimilarArtists(
   seedNames: string[],
   perSeed = 50,
   total = 30,
-): Promise<LastFmSimilarArtist[]> {
+): Promise<LastFmSimilarArtistWithSeed[]> {
   const seedLower = new Set(seedNames.map(n => n.toLowerCase()));
   // Fetch seeds in parallel — Last.fm's rate limit is 5 req/s which is
   // more than enough headroom for up to 5 seed queries.
-  const results = await Promise.all(
-    seedNames.slice(0, 5).map(name => getSimilarArtists(name, perSeed)),
+  const perSeedResults = await Promise.all(
+    seedNames.slice(0, 5).map(async name => ({
+      seed: name,
+      list: await getSimilarArtists(name, perSeed),
+    })),
   );
 
-  // Sum match scores across seeds. When the same artist appears under
-  // two different seeds, their scores add up and they float to the top.
-  const merged = new Map<string, LastFmSimilarArtist>();
-  for (const list of results) {
+  interface Entry {
+    artist: LastFmSimilarArtist;
+    totalMatch: number;
+    bestSeed: string;
+    bestSeedMatch: number;
+  }
+  const merged = new Map<string, Entry>();
+  for (const { seed, list } of perSeedResults) {
     for (const a of list) {
       if (seedLower.has(a.name.toLowerCase())) continue; // skip seeds themselves
-      const existing = merged.get(a.name.toLowerCase());
+      const key = a.name.toLowerCase();
+      const existing = merged.get(key);
       if (existing) {
-        existing.match += a.match;
+        existing.totalMatch += a.match;
+        if (a.match > existing.bestSeedMatch) {
+          existing.bestSeedMatch = a.match;
+          existing.bestSeed = seed;
+        }
       } else {
-        merged.set(a.name.toLowerCase(), { ...a });
+        merged.set(key, {
+          artist: { ...a },
+          totalMatch: a.match,
+          bestSeed: seed,
+          bestSeedMatch: a.match,
+        });
       }
     }
   }
 
   return [...merged.values()]
-    .sort((a, b) => b.match - a.match)
-    .slice(0, total);
+    .sort((a, b) => b.totalMatch - a.totalMatch)
+    .slice(0, total)
+    .map(e => ({
+      ...e.artist,
+      match: e.totalMatch, // report aggregated score, not per-seed
+      seedName: e.bestSeed,
+    }));
 }
