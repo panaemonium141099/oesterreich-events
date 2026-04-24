@@ -37,7 +37,25 @@
 import { SignJWT, importPKCS8 } from 'jose';
 import { requireGoogleServiceAccount, type GoogleServiceAccount } from '@/lib/google-auth';
 
-const GSC_BASE_URL = 'https://searchconsole.googleapis.com/v1';
+// Search Console API uses TWO different path prefixes that share the
+// same host:
+//
+//   /webmasters/v3/  → sites, searchAnalytics, sitemaps (the legacy
+//                       Webmaster Tools API — rehomed under searchconsole.googleapis.com
+//                       but the path kept its historical v3 shape)
+//   /v1/             → urlInspection (the newer dedicated endpoint)
+//
+// Verified empirically 2026-04-24:
+//   curl -H "Authorization: Bearer invalid" .../webmasters/v3/sites  → 401 (path exists)
+//   curl -H "Authorization: Bearer invalid" .../v1/sites             → 404 HTML (path does not exist)
+//
+// An earlier revision used /v1/ for everything, which produced the
+// user-visible "Search Console nicht erreichbar" 404 banner on the
+// admin SEO dashboard. Keep these constants distinct so the right
+// prefix lands on each call.
+const GSC_HOST = 'https://searchconsole.googleapis.com';
+const GSC_SITES_API = `${GSC_HOST}/webmasters/v3`;
+const GSC_INSPECT_API = `${GSC_HOST}/v1`;
 const OAUTH_TOKEN_URL = 'https://oauth2.googleapis.com/token';
 const OAUTH_SCOPE = 'https://www.googleapis.com/auth/webmasters.readonly';
 
@@ -172,12 +190,16 @@ async function getAccessToken(): Promise<string> {
 // Public API
 // ─────────────────────────────────────────────────────────────────
 
+type ApiFamily = 'sites' | 'inspect';
+
 async function gscFetch<T>(
   path: string,
   init?: RequestInit,
+  family: ApiFamily = 'sites',
 ): Promise<T> {
   const token = await getAccessToken();
-  const res = await fetch(`${GSC_BASE_URL}${path}`, {
+  const base = family === 'inspect' ? GSC_INSPECT_API : GSC_SITES_API;
+  const res = await fetch(`${base}${path}`, {
     ...init,
     headers: {
       ...(init?.headers ?? {}),
@@ -187,7 +209,7 @@ async function gscFetch<T>(
   });
   if (!res.ok) {
     const body = await res.text();
-    throw new Error(`[seo/gsc] ${res.status} ${path}: ${body}`);
+    throw new Error(`[seo/gsc] ${res.status} ${family}${path}: ${body}`);
   }
   return res.json() as Promise<T>;
 }
@@ -237,6 +259,7 @@ export async function urlInspection(
   const result = await gscFetch<{ inspectionResult: InspectionResult }>(
     '/urlInspection/index:inspect',
     { method: 'POST', body: JSON.stringify(body) },
+    'inspect',
   );
   return result.inspectionResult;
 }
