@@ -39,8 +39,20 @@ export function PostMenu({ activityId, isOwner, onShare, onDeleted }: PostMenuPr
       return;
     }
     setDeleting(true);
-    await supabase.from('activities').delete().eq('id', activityId);
+    // Check the error explicitly — RLS blocks are returned as { error } with
+    // no exception, so a silent failure would make the post *look* deleted
+    // (menu closes, onDeleted fires) while the row is still in the DB.
+    // This was the bug when the activities DELETE policy was missing;
+    // keeping the check in defends against future policy drift.
+    const { error } = await supabase.from('activities').delete().eq('id', activityId);
     setDeleting(false);
+    if (error) {
+      console.error('[PostMenu] delete failed:', error);
+      // Reset confirmation so the user can try again rather than being stuck
+      // on "Wirklich löschen?".
+      setConfirmDelete(false);
+      return;
+    }
     setOpen(false);
     onDeleted?.();
   };

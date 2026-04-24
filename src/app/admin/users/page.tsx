@@ -1,7 +1,10 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
 import { Users, Search, ChevronRight, Trash2, Bookmark, UsersRound, UserCheck } from 'lucide-react';
+import { useAuth } from '@/lib/supabase/auth-context';
 import { createClient } from '@/lib/supabase/client';
 
 interface UserRow {
@@ -23,6 +26,15 @@ const ROLE_STYLES: Record<string, string> = {
 
 export default function UsersPage() {
   const supabase = createClient();
+  const router = useRouter();
+  // Auth gate — mirrors the pattern used by admin/overview/page.tsx and
+  // admin/sources/page.tsx. Without this, anyone who knew the /admin/users
+  // URL could read every profile + change roles + attempt deletes. RLS
+  // would block most of the mutations, but listing all profiles is
+  // allowed by the `profiles` SELECT policy (`qual = true`), so the
+  // page itself needs its own guard regardless of what the backend does.
+  const { user, profile, loading: authLoading } = useAuth();
+
   const [users, setUsers] = useState<UserRow[]>([]);
   const [userSearch, setUserSearch] = useState('');
   const [loading, setLoading] = useState(false);
@@ -33,6 +45,20 @@ export default function UsersPage() {
     friends: number;
   } | null>(null);
   const [roleChanging, setRoleChanging] = useState<string | null>(null);
+  const [deletingUser, setDeletingUser] = useState<string | null>(null);
+
+  // Auth gate — redirect non-admins away before any fetch runs.
+  useEffect(() => {
+    if (!authLoading && !user) {
+      router.push('/auth/login');
+      return;
+    }
+    if (!authLoading && user && profile && profile.role !== 'god' && profile.role !== 'admin') {
+      router.push('/map');
+    }
+  }, [authLoading, user, profile, router]);
+
+  const isAdmin = !!profile && (profile.role === 'god' || profile.role === 'admin');
 
   const fetchUsers = useCallback(async () => {
     setLoading(true);
@@ -54,9 +80,12 @@ export default function UsersPage() {
   }, [supabase, userSearch]);
 
   useEffect(() => {
+    // Only run the fetch for actual admins — prevents a flash of
+    // "loading..." for regular users before the redirect fires.
+    if (!isAdmin) return;
     const timer = setTimeout(() => fetchUsers(), 300);
     return () => clearTimeout(timer);
-  }, [fetchUsers]);
+  }, [fetchUsers, isAdmin]);
 
   const toggleExpandUser = async (userId: string) => {
     if (expandedUser === userId) {
@@ -96,10 +125,29 @@ export default function UsersPage() {
   };
 
   const deleteUser = async (userId: string) => {
-    if (!confirm('Benutzer wirklich loschen? Diese Aktion kann nicht ruckgangig gemacht werden.'))
+    if (!confirm('Benutzer wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden.'))
       return;
-    await supabase.from('profiles').delete().eq('id', userId);
-    setUsers((prev) => prev.filter((u) => u.id !== userId));
+    // The old code did `supabase.from('profiles').delete()` from the client,
+    // which was silently blocked by RLS (no DELETE policy on profiles) and
+    // would have left auth.users behind anyway — the user would have come
+    // right back on next login via auto-profile creation. The new route
+    // goes through service-role + auth.admin.deleteUser(id), which
+    // cascade-kills the profile + all downstream data (FKs).
+    setDeletingUser(userId);
+    try {
+      const res = await fetch(`/api/admin/users/${userId}`, { method: 'DELETE' });
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error(body.error || `HTTP ${res.status}`);
+      }
+      setUsers((prev) => prev.filter((u) => u.id !== userId));
+      toast.success('Benutzer gelöscht');
+    } catch (err) {
+      console.error('[admin/users] delete failed:', err);
+      toast.error(err instanceof Error ? err.message : 'Löschen fehlgeschlagen');
+    } finally {
+      setDeletingUser(null);
+    }
   };
 
   const formatDate = (dateStr: string) =>
@@ -108,6 +156,18 @@ export default function UsersPage() {
       month: 'short',
       year: 'numeric',
     });
+
+  // Auth still loading or non-admin: render nothing (the useEffect above
+  // will have already dispatched the router.push, but we still need to
+  // return something React-safe in the meantime).
+  if (authLoading || !user || !profile) {
+    return (
+      <div className="flex items-center justify-center py-20">
+        <div className="w-6 h-6 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+      </div>
+    );
+  }
+  if (!isAdmin) return null;
 
   return (
     <div>
@@ -207,10 +267,21 @@ export default function UsersPage() {
                     </select>
                     <button
                       onClick={() => deleteUser(u.id)}
-                      className="flex items-center gap-1 text-xs px-3 py-1 rounded-lg text-red-400/60 hover:bg-red-400/10 hover:text-red-400 transition-colors ml-auto"
+                      disabled={deletingUser === u.id || u.id === user?.id}
+                      title={u.id === user?.id ? 'Du kannst dich nicht selbst löschen' : 'Benutzer löschen'}
+                      className="flex items-center gap-1 text-xs px-3 py-1 rounded-lg text-red-400/60 hover:bg-red-400/10 hover:text-red-400 transition-colors ml-auto disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-red-400/60"
                     >
-                      <Trash2 className="w-3 h-3" />
-                      Delete
+                      {deletingUser === u.id ? (
+                        <>
+                          <span className="w-3 h-3 border border-current border-t-transparent rounded-full animate-spin" />
+                          Deleting
+                        </>
+                      ) : (
+                        <>
+                          <Trash2 className="w-3 h-3" />
+                          Delete
+                        </>
+                      )}
                     </button>
                   </div>
                 </div>
