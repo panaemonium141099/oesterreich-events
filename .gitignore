@@ -75,3 +75,6 @@ data/coord-backup-*.json
 
 # Scratch notes
 Bericht*.txt
+
+# Vercel CLI local link
+.vercel
