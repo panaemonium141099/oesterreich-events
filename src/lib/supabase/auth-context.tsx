@@ -97,21 +97,63 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     let mounted = true;
 
-    // Get initial session — set loading false IMMEDIATELY after getting user
-    supabase.auth.getSession().then(({ data: { session } }: { data: { session: import('@supabase/supabase-js').Session | null } }) => {
+    // Initial auth bootstrap — runs once per page load.
+    //
+    // We do TWO checks in sequence:
+    //   1) `getSession()` reads the locally cached session (JWT from cookie).
+    //      Instant — no network — so we can flip `loading` to false right
+    //      away and render the shell with the user's cached identity.
+    //   2) In parallel, verify the session is still valid server-side by
+    //      checking the `profiles` row. Supabase JWTs are signature-valid
+    //      for up to an hour, so a user deleted by an admin still appears
+    //      "logged in" locally until the token expires. profiles row
+    //      existence is the ground-truth (FK CASCADE from auth.users).
+    //      If the profile is gone, treat this as a ghost session: clear
+    //      local state + call signOut to wipe cookies + hard-reload so
+    //      any stale React state (avatar, user-specific data) evaporates.
+    (async () => {
+      const { data: { session } } = await supabase.auth.getSession();
       if (!mounted) return;
       setSession(session);
       setUser(session?.user ?? null);
-      setLoading(false); // IMMEDIATELY — don't wait for profile
-      // Fetch profile in background (non-blocking)
-      if (session?.user) {
-        fetchProfile(session.user.id);
-      }
-    }).catch(() => {
-      if (mounted) setLoading(false);
-    });
+      setLoading(false);
 
-    // Listen for auth changes
+      if (session?.user) {
+        // Fire the profile fetch — it doubles as the ghost-session probe.
+        // fetchProfile sets `profile` when found; we explicitly handle the
+        // missing case here so there's no silent logged-in-but-no-profile
+        // state.
+        const { data: profileRow } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', session.user.id)
+          .maybeSingle();
+
+        if (!mounted) return;
+
+        if (!profileRow) {
+          // Ghost session — user was deleted (probably by an admin). Nuke
+          // everything local and bounce to the root so the next navigation
+          // starts fresh. signOut({ scope: 'local' }) just wipes local
+          // cookies/storage — we skip the /auth/v1/logout round-trip that
+          // would fail anyway since refresh_tokens were CASCADED too.
+          await supabase.auth.signOut({ scope: 'local' });
+          setUser(null);
+          setProfile(null);
+          setSession(null);
+          if (typeof window !== 'undefined') {
+            // Hard reload — guarantees no in-memory client state leaks
+            // from before the signOut.
+            window.location.href = '/';
+          }
+          return;
+        }
+
+        setProfile(profileRow as Profile);
+      }
+    })();
+
+    // Listen for auth changes (sign-in in another tab, token refresh, etc.)
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event: import('@supabase/supabase-js').AuthChangeEvent, session: import('@supabase/supabase-js').Session | null) => {
         if (!mounted) return;

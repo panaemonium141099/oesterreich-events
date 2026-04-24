@@ -74,7 +74,38 @@ export async function middleware(request: NextRequest) {
   );
 
   // Refresh session if expired
-  await supabase.auth.getUser();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  // Ghost-session detection. Supabase JWTs are self-contained — signature
+  // valid until the 1h access-token expiry. When an admin deletes a user
+  // via auth.admin.deleteUser(), `auth.users` is gone and so is the
+  // user's `profiles` row (FK CASCADE), but the deleted user's browser
+  // still holds a signature-valid JWT. Without this check they would
+  // appear logged-in on public pages (homepage, map, hub pages) until
+  // their access token expires up to an hour later.
+  //
+  // Profile row existence is our ground-truth indicator. If the JWT
+  // maps to a user without a profile, treat it as a ghost session and
+  // nuke the cookies. signOut({ scope: 'local' }) fires the cookies
+  // setAll callback above with expired entries — those get written
+  // onto `supabaseResponse`, the SSR pages reading `request.cookies`
+  // see cleared state, and the browser's next request no longer sends
+  // the dead cookie.
+  //
+  // We skip the profile round-trip when there's no user at all, so the
+  // lookup cost only applies to authenticated requests (a tiny, cached
+  // index lookup on `profiles.id` — primary key).
+  if (user) {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('id')
+      .eq('id', user.id)
+      .maybeSingle();
+
+    if (!profile) {
+      await supabase.auth.signOut({ scope: 'local' });
+    }
+  }
 
   return supabaseResponse;
 }
