@@ -908,6 +908,19 @@ async function main() {
 
   const PAGE_SIZE = 400;
 
+  // Cursor-based pagination on `id`. Without a cursor, every iteration would
+  // re-issue `ORDER BY id LIMIT 400` against the filtered set — and as
+  // enrichment_version fills in, Postgres has to scan further into the table
+  // to collect another 400 "pending" rows, quickly exceeding PostgREST's
+  // ~8-15s statement_timeout (symptom: `canceling statement due to
+  // statement timeout` after exactly one successful page per run). A cursor
+  // makes each page a forward btree seek → constant-time regardless of how
+  // many rows we've already processed.
+  //
+  // The cursor is per-run-only; next invocation starts at null and the
+  // `enrichment_version` filter re-finds anything a worker failed to mark.
+  let cursorId: string | null = null;
+
   while (stats.processed < opts.limit) {
     let q = supabase
       .from('events')
@@ -918,9 +931,15 @@ async function main() {
       .order('id', { ascending: true })
       .limit(PAGE_SIZE);
     if (!opts.force) q = q.or(`enrichment_version.is.null,enrichment_version.neq.${ENRICHMENT_VERSION}`);
+    if (cursorId) q = q.gt('id', cursorId);
     const { data, error } = await q;
     if (error) { console.error('\nquery:', error.message); break; }
     if (!data || data.length === 0) break;
+
+    // Advance cursor to the last id of this page so the next iteration
+    // continues forward through the btree instead of re-scanning from the
+    // start of the filtered set.
+    cursorId = data[data.length - 1].id;
 
     const rows = data as unknown as EventRow[];
     const remaining = opts.limit - stats.processed;
