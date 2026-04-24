@@ -11,6 +11,7 @@
 import { readFileSync } from 'fs';
 import { join } from 'path';
 import { KNOWN_VENUES } from './known-venues';
+import { ALL_GEMEINDEN } from './gemeinden/data';
 
 interface GeoEntry {
   name: string;
@@ -731,6 +732,35 @@ export function extractPlaceFromText(
  * Checks location_name, address, title, and description for place names.
  * Uses closest-match disambiguation when multiple candidates exist.
  */
+/**
+ * Reverse-lookup a PLZ for a given (lat, lng) by finding the nearest Gemeinde
+ * centroid in the hand-verified registry. Returns null when no Gemeinde is
+ * closer than `maxKm` — avoids pulling in an unrelated neighbour for points
+ * that aren't in any small-village catchment (e.g. a lat/lng in Wien proper,
+ * where every "gemeinde" is a district).
+ *
+ * Linear scan over ~2 028 entries is fine for hot paths — each call is
+ * sub-millisecond. Adding a spatial index (quadtree etc.) is not worth the
+ * complexity at this volume.
+ */
+function resolveNearestGemeindePlz(lat: number, lng: number, maxKm = 8): string | null {
+  let bestPlz: string | null = null;
+  let bestDist = Infinity;
+  for (const g of ALL_GEMEINDEN) {
+    const d = haversineKm(lat, lng, g.lat, g.lng);
+    if (d < bestDist) { bestDist = d; bestPlz = g.plz; }
+  }
+  return bestDist <= maxKm ? bestPlz : null;
+}
+
+/** Pick the best PLZ to attach to a normalized result: honour the input
+ *  event's PLZ first (it's authoritative when given), otherwise derive from
+ *  the resolved coordinates via nearest-Gemeinde lookup. */
+function pickPlz(eventPlz: string | undefined, lat: number, lng: number): string | null {
+  if (eventPlz && /^\d{4}$/.test(eventPlz.trim())) return eventPlz.trim();
+  return resolveNearestGemeindePlz(lat, lng);
+}
+
 export function normalizeEventLocation(event: {
   title?: string;
   description?: string;
@@ -740,7 +770,17 @@ export function normalizeEventLocation(event: {
   bundesland?: string;
   latitude?: number;
   longitude?: number;
-}): { latitude: number; longitude: number; location_name?: string; confidence: string } | null {
+}): {
+  latitude: number;
+  longitude: number;
+  location_name?: string;
+  confidence: string;
+  /** 4-digit Austrian PLZ for the resolved place — either echoed from the
+   *  input event's postal_code, or derived via nearest-Gemeinde lookup
+   *  against our hand-verified registry. Null when the lookup finds no
+   *  Gemeinde within ~8 km. */
+  postal_code: string | null;
+} | null {
   const hint = getHint(event.postal_code, event.bundesland);
 
   // Per epic design decision #5: when location_name is a venue and city was resolved
@@ -757,6 +797,7 @@ export function normalizeEventLocation(event: {
         longitude: result.longitude,
         location_name: result.canonicalName,
         confidence: result.confidence,
+        postal_code: pickPlz(event.postal_code, result.latitude, result.longitude),
       };
     }
   }
@@ -773,6 +814,7 @@ export function normalizeEventLocation(event: {
           latitude: result.latitude,
           longitude: result.longitude,
           confidence: isVenue ? 'normalized' : result.confidence,
+          postal_code: pickPlz(event.postal_code, result.latitude, result.longitude),
         };
       }
     }
@@ -790,6 +832,7 @@ export function normalizeEventLocation(event: {
         latitude: venueCity.latitude,
         longitude: venueCity.longitude,
         confidence: 'normalized',
+        postal_code: pickPlz(event.postal_code, venueCity.latitude, venueCity.longitude),
       };
     }
   }
@@ -802,6 +845,7 @@ export function normalizeEventLocation(event: {
         latitude: result.latitude,
         longitude: result.longitude,
         confidence: isVenue ? 'normalized' : 'from_title',
+        postal_code: pickPlz(event.postal_code, result.latitude, result.longitude),
       };
     }
   }
@@ -815,6 +859,7 @@ export function normalizeEventLocation(event: {
         latitude: result.latitude,
         longitude: result.longitude,
         confidence: isVenue ? 'normalized' : 'from_description',
+        postal_code: pickPlz(event.postal_code, result.latitude, result.longitude),
       };
     }
   }
@@ -831,6 +876,9 @@ export function normalizeEventLocation(event: {
           latitude: coords[0],
           longitude: coords[1],
           confidence: 'normalized',
+          // Here the input PLZ *is* the coord source, so echo it back —
+          // pickPlz() would also return it, but this is cheaper.
+          postal_code: event.postal_code.trim(),
         };
       }
     } catch { /* PLZ module not available */ }

@@ -122,7 +122,7 @@ const CHECKPOINT_FILE = path.resolve(`data/gemini-geocode-${modeLabel.toLowerCas
 // ─── OpenAI JSON schema for structured output ────────────────────────────
 // (no special imports needed — OpenAI uses standard JSON Schema)
 
-const SYSTEM_PROMPT = `You are an Austrian geography expert. Given a location name and context (Bundesland, address, PLZ, event title), return the precise coordinates.
+const SYSTEM_PROMPT = `You are an Austrian geography expert. Given a location name and context (Bundesland, address, PLZ, event title), return the precise coordinates AND the 4-digit Austrian postal code.
 
 RULES:
 - You MUST return coordinates within Austria (lat 46.3-49.1, lng 9.5-17.2)
@@ -130,17 +130,21 @@ RULES:
 - For venue names (hotels, restaurants, theaters, etc.), return the venue's exact coordinates
 - For generic names like "Hauptplatz", use the Bundesland context to determine the correct city
 - If the location is a well-known Austrian venue, landmark, or place, use your knowledge
+- postal_code: always return the 4-digit Austrian PLZ for the resolved location.
+  - If the input already contains a PLZ, verify it and echo it back.
+  - If no PLZ was supplied, derive it from the resolved city/venue (every point in Austria falls in some PLZ).
+  - Return null ONLY if you are returning lat=0, lng=0 (truly unresolvable).
 - confidence must be "high", "medium", or "low":
   - "high": you know this exact place (e.g., "Schloss Schoenbrunn" -> 48.184516, 16.312236)
   - "medium": you can make a good estimate based on context (e.g., "Gemeindesaal" + "Burgenland, 7000 Eisenstadt")
   - "low": you are uncertain or guessing — return your best guess but mark as low
-- If you truly cannot determine any plausible location, return latitude=0, longitude=0, confidence="low"
+- If you truly cannot determine any plausible location, return latitude=0, longitude=0, confidence="low", postal_code=null
 
 EXAMPLES:
-- "Schloss Esterhazy" + Burgenland -> { latitude: 47.845833, longitude: 16.518611, confidence: "high", resolved_name: "Schloss Esterhazy, Eisenstadt, Burgenland" }
-- "Hauptplatz" + Steiermark -> { latitude: 47.070714, longitude: 15.438889, confidence: "medium", resolved_name: "Hauptplatz, Graz, Steiermark" }
-- "Wiener Stadthalle" + Wien -> { latitude: 48.201667, longitude: 16.330000, confidence: "high", resolved_name: "Wiener Stadthalle, Wien" }
-- "Kulturhaus" + Burgenland, 7400 -> { latitude: 47.2854, longitude: 16.2646, confidence: "medium", resolved_name: "Kulturhaus, Oberwart, Burgenland" }`;
+- "Schloss Esterhazy" + Burgenland -> { latitude: 47.845833, longitude: 16.518611, confidence: "high", resolved_name: "Schloss Esterhazy, Eisenstadt, Burgenland", postal_code: "7000" }
+- "Hauptplatz" + Steiermark -> { latitude: 47.070714, longitude: 15.438889, confidence: "medium", resolved_name: "Hauptplatz, Graz, Steiermark", postal_code: "8010" }
+- "Wiener Stadthalle" + Wien -> { latitude: 48.201667, longitude: 16.330000, confidence: "high", resolved_name: "Wiener Stadthalle, Wien", postal_code: "1150" }
+- "Kulturhaus" + Burgenland, 7400 -> { latitude: 47.2854, longitude: 16.2646, confidence: "medium", resolved_name: "Kulturhaus, Oberwart, Burgenland", postal_code: "7400" }`;
 
 // ─── Helpers ───────────────────────────────────────────────────────────────
 
@@ -254,6 +258,9 @@ interface GeoResult {
   longitude: number;
   confidence: 'high' | 'medium' | 'low';
   resolved_name: string;
+  /** 4-digit Austrian postcode the AI resolved along with the coords.
+   *  Null only for unresolvable inputs (lat=0, lng=0). */
+  postal_code: string | null;
 }
 
 const RETRY_LOW_SYSTEM_PROMPT = `You are an expert Austrian geography researcher. You must resolve the given location to precise coordinates.
@@ -269,14 +276,15 @@ This location was previously UNRESOLVABLE by a simpler model. Try harder:
 RULES:
 - Return coordinates within Austria (lat 46.3-49.1, lng 9.5-17.2)
 - Use 6 decimal places
+- postal_code: always return the 4-digit Austrian PLZ for the resolved location (echo input PLZ if given, otherwise derive from the resolved town). Return null only if you return lat=0, lng=0.
 - confidence: "high" = exact known, "medium" = good estimate from context, "low" = best guess but uncertain
-- If truly impossible (no context at all), return latitude=0, longitude=0, confidence="low"
+- If truly impossible (no context at all), return latitude=0, longitude=0, confidence="low", postal_code=null
 - IMPORTANT: Even "medium" confidence is acceptable — only return "low" if you are genuinely lost
 
 EXAMPLES:
-- "Gemeindesaal" + PLZ 7350 + Burgenland -> Oberpullendorf -> { lat: 47.4953, lng: 16.5133, confidence: "medium", resolved: "Gemeindesaal, Oberpullendorf, Burgenland" }
-- "Gasthaus zur Post" + PLZ 2630 + NOE -> Ternitz -> { lat: 47.7167, lng: 16.0333, confidence: "medium", resolved: "Gasthaus zur Post, Ternitz, Niederösterreich" }
-- "Stadtsaal" + PLZ 8010 + Steiermark -> Graz -> { lat: 47.0707, lng: 15.4395, confidence: "medium", resolved: "Stadtsaal Graz, Steiermark" }`;
+- "Gemeindesaal" + PLZ 7350 + Burgenland -> Oberpullendorf -> { lat: 47.4953, lng: 16.5133, confidence: "medium", resolved: "Gemeindesaal, Oberpullendorf, Burgenland", postal_code: "7350" }
+- "Gasthaus zur Post" + PLZ 2630 + NOE -> Ternitz -> { lat: 47.7167, lng: 16.0333, confidence: "medium", resolved: "Gasthaus zur Post, Ternitz, Niederösterreich", postal_code: "2630" }
+- "Stadtsaal" + PLZ 8010 + Steiermark -> Graz -> { lat: 47.0707, lng: 15.4395, confidence: "medium", resolved: "Stadtsaal Graz, Steiermark", postal_code: "8010" }`;
 
 async function geocodeWithAI(
   locationName: string,
@@ -313,8 +321,12 @@ async function geocodeWithAI(
               longitude: { type: 'number', description: 'Longitude in decimal degrees (WGS84), 6 decimal places' },
               confidence: { type: 'string', enum: ['high', 'medium', 'low'], description: 'high = exact known, medium = good estimate, low = uncertain' },
               resolved_name: { type: 'string', description: 'Full resolved name e.g. "Schloss Esterhazy, Eisenstadt, Burgenland"' },
+              postal_code: {
+                type: ['string', 'null'],
+                description: '4-digit Austrian PLZ for the resolved location, or null if unresolvable (lat=0, lng=0)',
+              },
             },
-            required: ['latitude', 'longitude', 'confidence', 'resolved_name'],
+            required: ['latitude', 'longitude', 'confidence', 'resolved_name', 'postal_code'],
             additionalProperties: false,
           },
         },
@@ -544,6 +556,10 @@ async function main() {
     let lng: number | null = null;
     let confidence: string = 'gemini';
     let resolvedName: string = '';
+    // Only set from fresh AI calls — the cross-run geocode_cache stores
+    // only lat/lng today, so cached hits leave this null and skip PLZ
+    // back-fill. Acceptable: the initial run already wrote the PLZ.
+    let aiPostalCode: string | null = null;
 
     const cached = await getCachedGeo(loc.cacheKey);
     if (cached) {
@@ -663,6 +679,11 @@ async function main() {
         if (isRetryLowMode && result.confidence === 'low') {
           confidence = 'gemini_low';
         }
+        // Capture PLZ only if AI returned a well-formed 4-digit code;
+        // otherwise leave null so we don't pollute the DB with garbage.
+        if (result.postal_code && /^\d{4}$/.test(result.postal_code.trim())) {
+          aiPostalCode = result.postal_code.trim();
+        }
 
         // Cache the valid result (shared Supabase cache).
         if (!isDryRun) {
@@ -768,14 +789,21 @@ async function main() {
           });
 
           if (!isDryRun) {
+            // Back-fill postal_code only when event had none — never
+            // overwrite an existing PLZ (that came from the scraper or
+            // a prior manual entry and is trusted over AI inference).
+            const update: Record<string, unknown> = {
+              latitude: lat,
+              longitude: lng,
+              geocoding_confidence: 'gemini',
+              geocoding_source: 'gemini',
+            };
+            if (!event.postal_code && aiPostalCode) {
+              update.postal_code = aiPostalCode;
+            }
             const { error } = await supabase
               .from('events')
-              .update({
-                latitude: lat,
-                longitude: lng,
-                geocoding_confidence: 'gemini',
-                geocoding_source: 'gemini',
-              })
+              .update(update)
               .eq('id', event.id);
             if (error) console.error(`  Error updating event ${event.id}: ${error.message}`);
           }
@@ -797,14 +825,20 @@ async function main() {
           });
 
           if (!isDryRun) {
+            // Same postal_code rule as the overwrite branch — write only
+            // when the event currently has none.
+            const update: Record<string, unknown> = {
+              latitude: lat,
+              longitude: lng,
+              geocoding_confidence: 'gemini',
+              geocoding_source: 'gemini',
+            };
+            if (!event.postal_code && aiPostalCode) {
+              update.postal_code = aiPostalCode;
+            }
             const { error } = await supabase
               .from('events')
-              .update({
-                latitude: lat,
-                longitude: lng,
-                geocoding_confidence: 'gemini',
-                geocoding_source: 'gemini',
-              })
+              .update(update)
               .eq('id', event.id);
             if (error) console.error(`  Error updating event ${event.id}: ${error.message}`);
           }

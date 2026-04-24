@@ -185,6 +185,11 @@ function resolveCoordinates(event: ScrapedEvent): {
   locationName: string | null;
   confidence: string | null;
   source: string | null;
+  /** PLZ derived from the normalizer's Gemeinde lookup. Only set when the
+   *  scraper didn't supply one — we never override an existing PLZ with an
+   *  inferred guess. Populated whether or not we use the normalizer's
+   *  coords, because PLZ is orthogonal to coord confidence. */
+  postalCode: string | null;
 } {
   // Start with scraper-provided values
   let latitude = event.latitude ?? null;
@@ -192,6 +197,7 @@ function resolveCoordinates(event: ScrapedEvent): {
   let locationName = event.location_name ?? null;
   let confidence: string | null = null;
   let source: string | null = null;
+  let postalCode: string | null = event.postal_code ?? null;
 
   // If scraper provides coords, mark as scraper confidence
   if (latitude != null && longitude != null) {
@@ -228,12 +234,21 @@ function resolveCoordinates(event: ScrapedEvent): {
         source = 'geonames';
       }
       // If scraper provided coords, keep them (scraper rank > normalizer rank)
+
+      // Back-fill postal_code from the normalizer's nearest-Gemeinde
+      // lookup if the scraper didn't provide one. Regardless of which
+      // coord source wins above, the PLZ is always useful downstream
+      // (URL prefix resolution, gemeinde-hub linking, registry-based
+      // coord correction) so we write it even when keeping scraper coords.
+      if (!postalCode && normalized.postal_code) {
+        postalCode = normalized.postal_code;
+      }
     }
   } catch {
     /* normalization failure should not block sync */
   }
 
-  return { latitude, longitude, locationName, confidence, source };
+  return { latitude, longitude, locationName, confidence, source, postalCode };
 }
 
 /**
@@ -336,7 +351,12 @@ function toSupabaseRow(
     end_date: event.end_date ?? null,
     location_name: resolved.locationName,
     address: event.address ?? null,
-    postal_code: event.postal_code ?? null,
+    // postal_code is handled below via conditional spread — when
+    // resolved.postalCode is null we OMIT the field entirely so the
+    // Supabase upsert preserves whatever the existing row has (e.g.
+    // a value written earlier by the backfill-plz-from-coords script).
+    // Writing `null` explicitly here would clobber that value.
+    ...(resolved.postalCode !== null ? { postal_code: resolved.postalCode } : {}),
     bundesland: event.bundesland ?? null,
     district: event.district ?? null,
     latitude: finalLat,
