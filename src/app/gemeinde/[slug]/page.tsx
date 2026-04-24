@@ -36,6 +36,8 @@ import { buildEventUrlV2 } from '@/lib/utils/slugify';
 import { formatDateLong, formatTime } from '@/lib/utils/date';
 import { resolvePrimaryEventImage } from '@/lib/event-images';
 import { buildFAQPageSchema, faqForGemeinde } from '@/lib/seo/faq';
+import { resolveExperimentForScope } from '@/lib/seo/experiments-server';
+import { ExperimentImpressionLogger } from '@/components/SEO/ExperimentImpressionLogger';
 
 export const revalidate = 3600;
 export const dynamicParams = true;
@@ -134,7 +136,19 @@ export async function generateMetadata({
     ? `${count} Veranstaltungen in ${g.name}${g.bezirk ? ` (${g.bezirk})` : ''} — heute und in den kommenden Wochen. Konzerte, Feste, Kultur und mehr auf LassTreffen.at.`
     : `Veranstaltungen und Events in ${g.name}${g.bezirk ? ` (${g.bezirk})` : ''}. Aktueller Veranstaltungskalender für ${g.bundesland} auf LassTreffen.at.`;
 
-  const title = `Events in ${g.name} ${g.plz} — ${count > 0 ? `${count} Veranstaltungen` : 'Veranstaltungskalender'}`;
+  // Resolve the A/B experiment (if one is running for 'gemeinde' scope).
+  // Override the title ONLY when the variant explicitly provides a
+  // title_template — otherwise fall through to the default below. Kept
+  // local to generateMetadata so the page component can compute its
+  // own variant for the H1 without a second DB call (cache handles it).
+  const experiment = await resolveExperimentForScope('gemeinde', {
+    name: g.name,
+    count,
+    plz: g.plz,
+    bundesland: g.bundesland,
+  });
+  const defaultTitle = `Events in ${g.name} ${g.plz} — ${count > 0 ? `${count} Veranstaltungen` : 'Veranstaltungskalender'}`;
+  const title = experiment?.payload.title ?? defaultTitle;
   const canonicalUrl = `https://lasstreffen.at/gemeinde/${g.slug}`;
 
   const metadata: Metadata = {
@@ -250,9 +264,34 @@ export default async function GemeindeHubPage({
   const neighbours = findNeighbourGemeinden(g, 8);
   const jsonLd = buildJsonLd(g, events);
 
+  // fn-13 phase 10 — A/B title experiment. `resolveExperimentForScope`
+  // returns null when no experiment is running for 'gemeinde' scope
+  // (normal case), so this call is a zero-cost in-memory lookup for
+  // most renders. When a live experiment exists it emits the chosen
+  // variant's title + heading_prefix and an impression-logger island
+  // that fires once on mount. Time-based variant picking keeps ISR
+  // deterministic within a period. See src/lib/seo/experiments.ts.
+  const experiment = await resolveExperimentForScope('gemeinde', {
+    name: g.name,
+    count: events.length,
+    plz: g.plz,
+    bundesland: g.bundesland,
+  });
+
+  const h1Text = experiment?.payload.heading_prefix
+    ? `${experiment.payload.heading_prefix} ${g.name}`
+    : `Events in ${g.name}`;
+
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd }} />
+      {experiment && (
+        <ExperimentImpressionLogger
+          experimentId={experiment.experimentId}
+          variant={experiment.variant}
+          path={`/gemeinde/${g.slug}`}
+        />
+      )}
       <main className="min-h-screen bg-surface text-white">
         <div className="max-w-5xl mx-auto px-4 py-8">
           {/* Breadcrumb */}
@@ -269,7 +308,7 @@ export default async function GemeindeHubPage({
           {/* Header */}
           <header className="mb-8">
             <h1 className="text-3xl md:text-4xl font-bold mb-2">
-              Events in {g.name}
+              {h1Text}
             </h1>
             <p className="text-white/60">
               {g.plz} {g.name}
