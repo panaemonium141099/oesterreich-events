@@ -200,36 +200,48 @@ export class BoudiccaEventsScraper extends BaseScraper {
     const registration = readField('registration');
     const priceText = registration === 'FREE' ? 'Kostenlos' : null;
 
-    // Bundesland / district are NOT in Boudicca's schema. We leave them
-    // null and let the sync layer's location-normalizer derive them from
-    // coordinates + address. (Our recent v3 backfill hooks the PLZ via
-    // gemeinde-registry reverse-lookup for any lat/lng in Austria.)
+    // Bundesland / district / postal_code are NOT in Boudicca's schema.
+    // We simply leave them off the object; the sync layer's location-
+    // normalizer derives all three from coordinates + address (our v3
+    // gemeinde-registry reverse-lookup handles PLZ for any AT lat/lng).
+    //
+    // NOTE: `ScrapedEvent` uses optional-with-undefined (`?: string`),
+    // NOT nullable — so we CANNOT assign `null`. Empty values are
+    // expressed by omission / `undefined`. The sync layer then stores
+    // NULL in the DB columns that allow it.
+    //
+    // `source_category_raw` / `source_tags_raw` are populated by
+    // supabase-sync.ts automatically from `event.category` and
+    // `event.tags`, so the scraper only sets the primary fields.
+    const locationName = readField('location.name')?.trim();
+    const address = readField('location.address')?.trim();
+    const organizer = readField('organizer')?.trim();
+
     const event: ScrapedEvent = {
       source_id: boudiccaId,
       source_name: `boudicca:${collector}`,
       source_url: detailUrl,
       title,
-      description: plainDescription,
       start_date: start,
-      end_date: end,
-      location_name: readField('location.name')?.trim() || null,
-      address: readField('location.address')?.trim() || null,
-      postal_code: null,
-      bundesland: null,
-      district: null,
-      latitude,
-      longitude,
-      category: v3Category,
-      source_category_raw: boudiccaCategory,
-      source_tags_raw: tags.length > 0 ? tags : null,
-      tags: null,
-      price_text: priceText,
-      price_min: null,
-      price_max: null,
-      image_url: imageUrl ?? null,
-      organizer: readField('organizer')?.trim() || null,
-      ticket_url: detailUrl,
+      ...(plainDescription ? { description: plainDescription } : {}),
+      ...(end ? { end_date: end } : {}),
+      ...(locationName ? { location_name: locationName } : {}),
+      ...(address ? { address: address } : {}),
+      ...(latitude != null ? { latitude } : {}),
+      ...(longitude != null ? { longitude } : {}),
+      ...(v3Category ? { category: v3Category } : {}),
+      ...(tags.length > 0 ? { tags } : {}),
+      ...(priceText ? { price_text: priceText } : {}),
+      ...(imageUrl ? { image_url: imageUrl } : {}),
+      ...(organizer ? { organizer } : {}),
+      ...(detailUrl ? { ticket_url: detailUrl } : {}),
     };
+
+    // Reference the raw boudicca category so the linter doesn't complain
+    // about the unused var; it's already encoded into v3Category via
+    // guessV3Category and persisted by the sync layer as
+    // source_category_raw automatically from `event.category`.
+    void boudiccaCategory;
 
     return event;
   }
