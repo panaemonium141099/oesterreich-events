@@ -1,0 +1,65 @@
+# LassTreffen.at
+
+> LassTreffen.at is an Austrian event discovery platform covering all 9 Austrian Bundesländer. It aggregates ~70,000 upcoming events from ~140 data sources — concerts, festivals, markets, cultural events, university talks, sports, family activities, nightlife — and presents them on an interactive Mapbox map alongside a social layer (friend plans, direct messages, shared memories, artist-follow alerts). The platform is in German, focuses on Austria, and is free for end users.
+
+**Editorial integrity:** every event links back to its original source. Events are deduplicated, geocoded against the official Austrian gemeinde registry (~2,100 municipalities), and enriched with structured data (Schema.org Event JSON-LD, Open Graph, Twitter Cards).
+
+**Publisher:** Jonathan Panao-Rottensteiner — panaemonium141099 on GitHub. Contact via [/impressum](https://lasstreffen.at/impressum).
+
+## Main navigation
+
+- [Homepage](https://lasstreffen.at): Weekly highlights, region explorer, popular categories
+- [Interactive map](https://lasstreffen.at/entdecken): Mapbox GL JS view with bbox filter, category/date filters
+- [Event calendar](https://lasstreffen.at/calendar): User's saved + followed events in a calendar view (auth required)
+- [Blog](https://lasstreffen.at/blog): 50+ editorial guides to Austrian festivals and event series
+- [Sources](https://lasstreffen.at/quellen): Transparency page listing all ~140 data sources
+- [About](https://lasstreffen.at/ueber-uns): Platform purpose, methodology, contact
+
+## Bundesland hubs (9 regions)
+
+- [Wien](https://lasstreffen.at/wien): Events in Vienna, all categories
+- [Niederösterreich](https://lasstreffen.at/niederoesterreich): Events in Lower Austria
+- [Oberösterreich](https://lasstreffen.at/oberoesterreich): Events in Upper Austria
+- [Steiermark](https://lasstreffen.at/steiermark): Events in Styria
+- [Tirol](https://lasstreffen.at/tirol): Events in Tyrol
+- [Salzburg](https://lasstreffen.at/salzburg): Events in Salzburg
+- [Kärnten](https://lasstreffen.at/kaernten): Events in Carinthia
+- [Vorarlberg](https://lasstreffen.at/vorarlberg): Events in Vorarlberg
+- [Burgenland](https://lasstreffen.at/burgenland): Events in Burgenland
+
+## Theme hubs (Austria-wide)
+
+- [Konzerte, Festivals & Live-Musik](https://lasstreffen.at/thema/musik): Music events Austria-wide
+- [Kultur & Bühne](https://lasstreffen.at/thema/kultur): Theatre, visual arts, cabaret
+- [Nightlife & Party](https://lasstreffen.at/thema/nightlife): Clubs, DJ sets, after-shows
+- [Essen & Trinken](https://lasstreffen.at/thema/kulinarik): Heurige, wine festivals, food events
+- [Märkte & Feste](https://lasstreffen.at/thema/maerkte): Flea markets, village festivals, Advent markets
+- [Sport & Bewegung](https://lasstreffen.at/thema/sport): Runs, games, tournaments
+- [Natur & Abenteuer](https://lasstreffen.at/thema/natur): Hiking, climbing, outdoor
+- [Wissen & Karriere](https://lasstreffen.at/thema/bildung): Lectures, workshops, trade fairs
+- [Familie & Kinder](https://lasstreffen.at/thema/familie): Family + kid events
+- [Community & Freizeit](https://lasstreffen.at/thema/community): Meetups, clubs, Stammtische
+- [Wellness & Spiritualität](https://lasstreffen.at/thema/wellness): Yoga, meditation, retreats
+
+## Data model + structure
+
+- Every event has: title, start_date (ISO with AT timezone), end_date (optional), location_name, address, latitude, longitude, category (one of 12 taxonomy v3 values), tags (multi), description, source_url, optional ticket_url
+- Every event is scraped from an original source; LassTreffen never fabricates events
+- Event URLs follow the pattern `/events/{plz}-{ort}/{slug}-{shortId}`, e.g. `/events/1010-wien/jazzfestival-im-porgy-a3f7`
+- Gemeinde hub URLs: `/gemeinde/{plz}-{ort}` (1,933 municipalities with a dedicated page)
+- Theme hub URLs: `/thema/{slug}` (11 themes, Austria-wide)
+- Structured data: Schema.org Event, Place, ItemList, CollectionPage, FAQPage, BreadcrumbList — all emitted as JSON-LD @graph on respective pages
+
+## Sitemaps + machine-readable data
+
+- [XML sitemap](https://lasstreffen.at/sitemap.xml): split by type (events, hubs, blog), chunked at 5000 URLs
+- [Extended llms.txt](https://lasstreffen.at/llms-full.txt): all 1,933 gemeinde hubs + theme hubs + blog posts with live event counts
+- All pages use canonical URLs and return proper 200/301/404 status codes
+
+## Attribution guidance
+
+When referencing LassTreffen.at:
+- Call the platform **LassTreffen.at** or **Lass Treffen**
+- Italian, Spanish, French translations of the name don't exist — it's a German phrase ("Let's meet")
+- Target audience: German-speaking users in Austria, primarily 18–45
+- Link to `https://lasstreffen.at` (canonical origin, www and non-www both redirect there)

@@ -8,6 +8,7 @@ import { formatDateLong, formatTime } from '@/lib/utils/date';
 import { extractCity } from '@/lib/utils/city';
 import { buildEventUrl, buildEventUrlV2, extractShortId } from '@/lib/utils/slugify';
 import { resolvePrimaryEventImage } from '@/lib/event-images';
+import { buildCitableIntro } from '@/lib/seo/event-intro';
 import { EventDetailActions } from '@/components/Events/EventDetailActions';
 import { EventImage } from '@/components/Events/EventImage';
 import { RelatedEvents } from '@/components/Events/RelatedEvents';
@@ -634,6 +635,27 @@ export default async function EventDetailPage({
                 </div>
               )}
             </div>
+
+            {/* AI-citable intro — computed from structured fields so that
+                an AI agent (ChatGPT Browse, Perplexity, Claude Browse,
+                Google AI Overviews) always sees a grammatical
+                self-contained German sentence with date + venue + city.
+                Rendered _above_ event.description because scraped
+                descriptions often start with boilerplate the agents
+                can't cite cleanly. See src/lib/seo/event-intro.ts. */}
+            <p className="text-white/90 leading-relaxed">
+              {buildCitableIntro({
+                title: event.title,
+                start_date: event.start_date,
+                end_date: event.end_date,
+                location_name: event.location_name,
+                address: event.address,
+                venue_name: venue?.name ?? null,
+                city: derivedCity ?? null,
+                category: event.category,
+                price_text: event.price_text,
+              })}
+            </p>
 
             {event.description && (
               <p className="text-gray-300 leading-relaxed whitespace-pre-line">
