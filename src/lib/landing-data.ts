@@ -21,6 +21,9 @@ import { BUNDESLAENDER } from './bundeslaender';
 import type { FilterChip } from '@/components/Landing/FilterChips';
 import type { LinkGroup } from '@/components/Landing/InternalLinks';
 import { BUNDESLAND_INTROS, STADT_INTROS } from '@/content/landing-intros';
+import { buildFAQPageSchema, faqForBundesland } from './seo/faq';
+
+const BASE_URL = 'https://lasstreffen.at';
 
 const PAGE_SIZE = 20;
 const MIN_QUALITY = 40;
@@ -87,7 +90,23 @@ export async function loadBundeslandPage(
   const breadcrumbs = buildBreadcrumbs(blName, basePath, category, timeFilter);
   const filterChips = buildFilterChips(basePath, category, timeFilter);
   const internalLinks = buildBundeslandLinks(bundesland, blName, category);
-  const jsonLd = buildJsonLd(title, totalCount, events);
+  // Canonical pathname for JSON-LD URLs — matches what generateMetadata
+  // returns and what the route actually resolves to.
+  const pathname = [basePath, category ? getCategorySlug(category) : null, timeFilter]
+    .filter((p): p is string => Boolean(p))
+    .join('/');
+  const metaDescription = `Entdecke ${totalCount} Events in ${blName}${timeFilter ? ` ${timeFilter}` : ''}${category ? ` — ${category}` : ''}. Alle Veranstaltungen auf einen Blick.`;
+  const jsonLd = buildJsonLd({
+    title,
+    description: metaDescription,
+    totalCount,
+    events,
+    pathname: pathname.startsWith('/') ? pathname : `/${pathname}`,
+    breadcrumbs,
+    where: blName,
+    category,
+    timeFilter,
+  });
   const paginationParams = buildPaginationParams({
     bundesland,
     category,
@@ -100,7 +119,6 @@ export async function loadBundeslandPage(
   // render a double-brand title (e.g. "Events Wien | LassTreffen.at | LassTreffen.at")
   // and trips Bing's "Title too long" warning.
   const metaTitle = title;
-  const metaDescription = `Entdecke ${totalCount} Events in ${blName}${timeFilter ? ` ${timeFilter}` : ''}${category ? ` — ${category}` : ''}. Alle Veranstaltungen auf einen Blick.`;
 
   // Only the ROOT page for each Bundesland carries the editorial intro
   // (no category, no time filter). Sub-views inherit from the crawlable
@@ -156,7 +174,21 @@ export async function loadStadtPage(
   );
   const filterChips = buildFilterChips(basePath, category, timeFilter);
   const internalLinks = buildStadtLinks(cityConfig, category);
-  const jsonLd = buildJsonLd(title, totalCount, events);
+  const pathname = [basePath, category ? getCategorySlug(category) : null, timeFilter]
+    .filter((p): p is string => Boolean(p))
+    .join('/');
+  const metaDescription = `Entdecke ${totalCount} Events in ${cityConfig.name}${timeFilter ? ` ${timeFilter}` : ''}${category ? ` — ${category}` : ''}. Alle Veranstaltungen auf einen Blick.`;
+  const jsonLd = buildJsonLd({
+    title,
+    description: metaDescription,
+    totalCount,
+    events,
+    pathname: pathname.startsWith('/') ? pathname : `/${pathname}`,
+    breadcrumbs,
+    where: cityConfig.name,
+    category,
+    timeFilter,
+  });
   const paginationParams = buildPaginationParams({
     bundesland:
       cityConfig.filterMode === 'bundesland' ? cityConfig.bundesland : null,
@@ -171,7 +203,6 @@ export async function loadStadtPage(
   // render a double-brand title (e.g. "Events Wien | LassTreffen.at | LassTreffen.at")
   // and trips Bing's "Title too long" warning.
   const metaTitle = title;
-  const metaDescription = `Entdecke ${totalCount} Events in ${cityConfig.name}${timeFilter ? ` ${timeFilter}` : ''}${category ? ` — ${category}` : ''}. Alle Veranstaltungen auf einen Blick.`;
 
   // Only the Stadt root page shows the intro — same rationale as the
   // Bundesland root pages above.
@@ -444,14 +475,36 @@ function buildStadtLinks(
   return groups;
 }
 
-function buildJsonLd(
-  title: string,
-  totalCount: number,
-  events: Event[],
-): object {
-  return {
-    '@context': 'https://schema.org',
+/**
+ * Emit a `@graph` wrapping four coordinated schemas:
+ *   1. ItemList        — ranked list of events for Rich Results.
+ *   2. CollectionPage  — page-level context so Google knows this is a
+ *                        curated list rather than organic search results.
+ *   3. BreadcrumbList   — nav hierarchy for Sitelinks + Overview boxes.
+ *   4. FAQPage          — 3-5 Q/A pairs tailored to the page context
+ *                         (where + category + timeFilter). Eligible for
+ *                         featured snippets and AI-search citations.
+ *
+ * All four share the canonical page URL via `@id` references so crawlers
+ * treat them as parts of the same entity.
+ */
+function buildJsonLd(params: {
+  title: string;
+  description: string;
+  totalCount: number;
+  events: Event[];
+  pathname: string;                                            // "/wien" or "/stadt/graz/musik/heute"
+  breadcrumbs: { label: string; href?: string }[];
+  where: string;                                               // "Wien" | "Graz"
+  category: string | null;
+  timeFilter: 'heute' | 'wochenende' | null;
+}): object {
+  const { title, description, totalCount, events, pathname, breadcrumbs, where, category, timeFilter } = params;
+  const pageUrl = `${BASE_URL}${pathname}`;
+
+  const itemList = {
     '@type': 'ItemList',
+    '@id': `${pageUrl}#itemlist`,
     name: title,
     numberOfItems: totalCount,
     itemListElement: events.slice(0, 10).map((event, i) => ({
@@ -464,11 +517,45 @@ function buildJsonLd(
         ...(event.end_date ? { endDate: event.end_date } : {}),
         location: {
           '@type': 'Place',
-          name: event.location_name ?? event.address ?? 'Osterreich',
+          name: event.location_name ?? event.address ?? 'Österreich',
         },
         ...(event.image_url ? { image: event.image_url } : {}),
       },
     })),
+  };
+
+  const collectionPage = {
+    '@type': 'CollectionPage',
+    '@id': `${pageUrl}#page`,
+    url: pageUrl,
+    name: title,
+    description,
+    inLanguage: 'de-AT',
+    isPartOf: { '@id': `${BASE_URL}/#website` }, // matches root layout WebSite
+    about: { '@id': `${pageUrl}#itemlist` },
+  };
+
+  // Breadcrumb: prepend Home, use href for intermediates, omit for current.
+  const breadcrumbList = {
+    '@type': 'BreadcrumbList',
+    '@id': `${pageUrl}#breadcrumbs`,
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Home', item: BASE_URL },
+      ...breadcrumbs.map((b, idx) => ({
+        '@type': 'ListItem',
+        position: idx + 2,
+        name: b.label,
+        ...(b.href ? { item: `${BASE_URL}${b.href}` } : {}),
+      })),
+    ],
+  };
+
+  const faqEntries = faqForBundesland({ where, category, timeFilter });
+  const faqPage = buildFAQPageSchema(faqEntries);
+
+  return {
+    '@context': 'https://schema.org',
+    '@graph': [itemList, collectionPage, breadcrumbList, ...(faqPage ? [faqPage] : [])],
   };
 }
 

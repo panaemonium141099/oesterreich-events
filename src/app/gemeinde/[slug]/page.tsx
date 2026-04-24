@@ -35,6 +35,7 @@ import {
 import { buildEventUrlV2 } from '@/lib/utils/slugify';
 import { formatDateLong, formatTime } from '@/lib/utils/date';
 import { resolvePrimaryEventImage } from '@/lib/event-images';
+import { buildFAQPageSchema, faqForGemeinde } from '@/lib/seo/faq';
 
 export const revalidate = 3600;
 export const dynamicParams = true;
@@ -167,8 +168,8 @@ function buildJsonLd(g: AustrianGemeinde, events: NearbyEvent[]): string {
   const canonicalUrl = `https://lasstreffen.at/gemeinde/${g.slug}`;
 
   const place = {
-    '@context': 'https://schema.org',
     '@type': 'Place',
+    '@id': `${canonicalUrl}#place`,
     name: g.name,
     address: {
       '@type': 'PostalAddress',
@@ -182,8 +183,9 @@ function buildJsonLd(g: AustrianGemeinde, events: NearbyEvent[]): string {
   };
 
   const itemList = {
-    '@context': 'https://schema.org',
     '@type': 'ItemList',
+    '@id': `${canonicalUrl}#itemlist`,
+    numberOfItems: events.length,
     itemListElement: events.slice(0, 10).map((e, idx) => ({
       '@type': 'ListItem',
       position: idx + 1,
@@ -193,8 +195,8 @@ function buildJsonLd(g: AustrianGemeinde, events: NearbyEvent[]): string {
   };
 
   const breadcrumb = {
-    '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
+    '@id': `${canonicalUrl}#breadcrumbs`,
     itemListElement: [
       { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://lasstreffen.at' },
       { '@type': 'ListItem', position: 2, name: g.bundesland, item: `https://lasstreffen.at/${slugifyBundesland(g.bundesland)}` },
@@ -202,9 +204,22 @@ function buildJsonLd(g: AustrianGemeinde, events: NearbyEvent[]): string {
     ],
   };
 
-  return [place, itemList, breadcrumb]
-    .map(o => JSON.stringify(o).replace(/<\/script>/gi, '<\\/script>'))
-    .join('\n');
+  // Gemeinde-specific FAQ — only emitted when there are enough events
+  // for the page to not be thin. Skipped otherwise (low-content guard).
+  const faqEntries = faqForGemeinde({
+    gemeinde: g.name,
+    bundesland: g.bundesland,
+    plz: g.plz,
+    eventCount: events.length,
+  });
+  const faqPage = events.length >= 3 ? buildFAQPageSchema(faqEntries) : null;
+
+  const graph = {
+    '@context': 'https://schema.org',
+    '@graph': [place, itemList, breadcrumb, ...(faqPage ? [faqPage] : [])],
+  };
+
+  return JSON.stringify(graph).replace(/<\/script>/gi, '<\\/script>');
 }
 
 function slugifyBundesland(bl: string): string {

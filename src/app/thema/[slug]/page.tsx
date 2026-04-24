@@ -32,6 +32,7 @@ import { ALL_THEMES, getThemeBySlug, type Theme } from '@/lib/themes/data';
 import { buildEventUrlV2 } from '@/lib/utils/slugify';
 import { formatDateLong, formatTime } from '@/lib/utils/date';
 import { resolvePrimaryEventImage } from '@/lib/event-images';
+import { buildFAQPageSchema, faqForTheme } from '@/lib/seo/faq';
 
 export const revalidate = 3600;
 export const dynamicParams = false;
@@ -183,12 +184,12 @@ export async function generateMetadata({
 // JSON-LD
 // ───────────────────────────────────────────────────────────────────────
 
-function buildJsonLd(theme: Theme, events: ThemeEvent[]): string {
+function buildJsonLd(theme: Theme, events: ThemeEvent[], totalEvents: number): string {
   const canonicalUrl = `https://lasstreffen.at/thema/${theme.slug}`;
 
   const itemList = {
-    '@context': 'https://schema.org',
     '@type': 'ItemList',
+    '@id': `${canonicalUrl}#itemlist`,
     name: theme.title,
     description: theme.description,
     url: canonicalUrl,
@@ -202,8 +203,8 @@ function buildJsonLd(theme: Theme, events: ThemeEvent[]): string {
   };
 
   const breadcrumb = {
-    '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
+    '@id': `${canonicalUrl}#breadcrumbs`,
     itemListElement: [
       { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://lasstreffen.at' },
       { '@type': 'ListItem', position: 2, name: 'Themen', item: 'https://lasstreffen.at/thema' },
@@ -212,18 +213,34 @@ function buildJsonLd(theme: Theme, events: ThemeEvent[]): string {
   };
 
   const collection = {
-    '@context': 'https://schema.org',
     '@type': 'CollectionPage',
+    '@id': `${canonicalUrl}#page`,
     name: theme.seoTitle,
     description: theme.description,
     url: canonicalUrl,
     inLanguage: 'de-AT',
-    isPartOf: { '@type': 'WebSite', url: 'https://lasstreffen.at', name: 'LassTreffen.at' },
+    isPartOf: { '@id': 'https://lasstreffen.at/#website' },
+    about: { '@id': `${canonicalUrl}#itemlist` },
   };
 
-  return [itemList, breadcrumb, collection]
-    .map(o => JSON.stringify(o).replace(/<\/script>/gi, '<\\/script>'))
-    .join('\n');
+  // Category-specific FAQ (4-5 Q/A pairs). Boosts featured-snippet and
+  // AI-citation eligibility. Skipped when theme has <3 events so we don't
+  // emit a FAQPage for a near-empty hub (Google's threshold).
+  const heroNoun = theme.title.split(' — ')[0]; // "Konzerte, Festivals & Live-Musik" → keeps
+  const faqEntries = faqForTheme({
+    slug: theme.slug,
+    category: theme.category,
+    heroNoun: heroNoun.toLowerCase(),
+    eventCount: totalEvents,
+  });
+  const faqPage = buildFAQPageSchema(faqEntries);
+
+  const graph = {
+    '@context': 'https://schema.org',
+    '@graph': [itemList, breadcrumb, collection, ...(faqPage ? [faqPage] : [])],
+  };
+
+  return JSON.stringify(graph).replace(/<\/script>/gi, '<\\/script>');
 }
 
 // ───────────────────────────────────────────────────────────────────────
@@ -245,7 +262,7 @@ export default async function ThemePage({
   ]);
 
   const totalEvents = Object.values(blCounts).reduce((a, b) => a + b, 0);
-  const jsonLd = buildJsonLd(theme, events);
+  const jsonLd = buildJsonLd(theme, events, totalEvents);
 
   // Other themes — small "Verwandte Themen" block at the bottom for cross-link density.
   const otherThemes = ALL_THEMES.filter(t => t.slug !== theme.slug);
