@@ -380,10 +380,14 @@ export default function ProfilePage() {
             <button
               onClick={() => {
                 if (!profile?.spotify_connected) {
+                  // Canonical origin only — Spotify does exact-string match
+                  // on redirect_uri. Using window.location.origin breaks when
+                  // a user lands on the non-www host.
+                  const ORIGIN = process.env.NEXT_PUBLIC_SITE_URL || window.location.origin;
                   const params = new URLSearchParams({
                     client_id: process.env.NEXT_PUBLIC_SPOTIFY_CLIENT_ID || '',
                     response_type: 'code',
-                    redirect_uri: `${window.location.origin}/auth/spotify/callback`,
+                    redirect_uri: `${ORIGIN}/auth/spotify/callback`,
                     scope: 'user-top-read user-read-recently-played user-follow-read',
                     show_dialog: 'true',
                   });

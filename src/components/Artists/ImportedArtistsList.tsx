@@ -65,10 +65,16 @@ export function ImportedArtistsList({
         </p>
         <button
           onClick={() => {
+            // Always use the canonical domain for redirect_uri — Spotify does
+            // exact-string matching against the Developer Dashboard list, so
+            // "lasstreffen.at" vs "www.lasstreffen.at" (or http vs https) are
+            // different registrations. NEXT_PUBLIC_SITE_URL is our single
+            // source of truth for the canonical origin.
+            const ORIGIN = process.env.NEXT_PUBLIC_SITE_URL || window.location.origin;
             const params = new URLSearchParams({
               client_id: process.env.NEXT_PUBLIC_SPOTIFY_CLIENT_ID || '',
               response_type: 'code',
-              redirect_uri: `${window.location.origin}/auth/spotify/callback`,
+              redirect_uri: `${ORIGIN}/auth/spotify/callback`,
               scope: 'user-top-read user-read-recently-played user-follow-read',
               show_dialog: 'true',
             });

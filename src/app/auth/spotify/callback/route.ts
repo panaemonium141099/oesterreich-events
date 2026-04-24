@@ -51,7 +51,13 @@ export async function GET(request: Request) {
     }
     const serviceClient = createClient(serviceUrl, serviceKey);
 
-    const redirectUri = `${origin}/auth/spotify/callback`;
+    // MUST match byte-for-byte what was sent to /authorize. The client-side
+    // buttons now use NEXT_PUBLIC_SITE_URL as the canonical origin, so we do
+    // the same here. Fallback to `origin` (the host Spotify sent the user
+    // back to) is kept for safety in dev / preview deployments where the
+    // env var might not be set.
+    const canonicalOrigin = process.env.NEXT_PUBLIC_SITE_URL || origin;
+    const redirectUri = `${canonicalOrigin}/auth/spotify/callback`;
 
     // 1. Exchange code for tokens
     const tokens = await exchangeSpotifyCode(code, redirectUri);

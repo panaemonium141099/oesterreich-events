@@ -6,29 +6,41 @@ import { motion } from 'framer-motion';
 import Image from 'next/image';
 import { CATEGORIES } from '@/lib/categories';
 
-// Unsplash images per category
+// Unsplash images per category — keys MUST match the canonical taxonomy
+// in src/lib/category-classifier/taxonomy.ts exactly (same & signs, umlauts,
+// and casing). When the taxonomy was rewritten (Musik, Kultur & Bühne,
+// Nightlife & Party, …) this map kept the old flat keys (Musik, Kultur,
+// Nightlife, …), so 10 of 12 tiles fell through to FALLBACK_IMAGE — that
+// was the "all tiles look the same" bug on the landing page.
 const CATEGORY_IMAGES: Record<string, string> = {
-  // Brass band / Blasmusik — not a rock concert
-  Musik: 'https://images.unsplash.com/photo-1711336622443-d53a1f1156bc?w=600&q=75&auto=format&fit=crop',
-  Kultur: 'https://images.unsplash.com/photo-1518998053901-5348d3961a04?w=600&q=75&auto=format&fit=crop',
-  Sport: 'https://images.unsplash.com/photo-1461896836934-ffe607ba8211?w=600&q=75&auto=format&fit=crop',
-  // Vienna farmers market
-  Märkte: 'https://images.unsplash.com/photo-1576181456177-2b99ac0aa1ef?w=600&q=75&auto=format&fit=crop',
-  'Wein & Kulinarik': 'https://images.unsplash.com/photo-1510812431401-41d2bd2722f3?w=600&q=75&auto=format&fit=crop',
-  Familie: 'https://images.unsplash.com/photo-1536640712-4d4c36ff0e4e?w=600&q=75&auto=format&fit=crop',
-  Natur: 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=600&q=75&auto=format&fit=crop',
-  // Folk costumes / Volksfest — traditional dancing in Tracht
-  'Feste & Brauchtum': 'https://images.unsplash.com/photo-1758903134147-c756cd05b9aa?w=600&q=75&auto=format&fit=crop',
-  Nightlife: 'https://images.unsplash.com/photo-1566737236500-c8ac43014a67?w=600&q=75&auto=format&fit=crop',
-  Bildung: 'https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=600&q=75&auto=format&fit=crop',
-  Gesundheit: 'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=600&q=75&auto=format&fit=crop',
-  // Church tower with cross
-  Religion: 'https://images.unsplash.com/photo-1714017971946-49bd73150333?w=600&q=75&auto=format&fit=crop',
-  // Business conference / trade fair
-  Wirtschaft: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=600&q=75&auto=format&fit=crop',
-  Sonstiges: 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=600&q=75&auto=format&fit=crop',
+  // Brass band / Blasmusik — not a rock concert stock cliché
+  'Musik': 'https://images.unsplash.com/photo-1711336622443-d53a1f1156bc?w=600&q=75&auto=format&fit=crop',
+  // Opera house / theatre stage
+  'Kultur & Bühne': 'https://images.unsplash.com/photo-1518998053901-5348d3961a04?w=600&q=75&auto=format&fit=crop',
+  // Dark club with laser haze
+  'Nightlife & Party': 'https://images.unsplash.com/photo-1566737236500-c8ac43014a67?w=600&q=75&auto=format&fit=crop',
+  // Wine / Heurige / Austrian kulinarik
+  'Essen & Trinken': 'https://images.unsplash.com/photo-1510812431401-41d2bd2722f3?w=600&q=75&auto=format&fit=crop',
+  // Vienna farmers market — produce stalls
+  'Märkte & Feste': 'https://images.unsplash.com/photo-1576181456177-2b99ac0aa1ef?w=600&q=75&auto=format&fit=crop',
+  // Runners / stadium sport
+  'Sport & Bewegung': 'https://images.unsplash.com/photo-1461896836934-ffe607ba8211?w=600&q=75&auto=format&fit=crop',
+  // Alpine pines / mountain trail
+  'Natur & Abenteuer': 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=600&q=75&auto=format&fit=crop',
+  // Business conference / trade fair — "Karriere" tilts it business
+  'Wissen & Karriere': 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=600&q=75&auto=format&fit=crop',
+  // Family with kids outdoors
+  'Familie & Kinder': 'https://images.unsplash.com/photo-1536640712-4d4c36ff0e4e?w=600&q=75&auto=format&fit=crop',
+  // Group of friends socialising outdoors — community vibe
+  'Community & Freizeit': 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=600&q=75&auto=format&fit=crop',
+  // Hands / yoga / meditation — covers both Gesundheit and Religion
+  'Wellness & Spiritualität': 'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=600&q=75&auto=format&fit=crop',
+  // Confetti burst — catch-all "it's happening"
+  'Sonstiges': 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=600&q=75&auto=format&fit=crop',
 };
 
+// Kept as a last-resort fallback (all known categories are mapped above,
+// so this only fires for future categories we haven't imaged yet).
 const FALLBACK_IMAGE =
   'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=600&q=75&auto=format&fit=crop';
 
