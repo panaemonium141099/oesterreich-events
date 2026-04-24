@@ -7,10 +7,25 @@ import { useAuth } from '@/lib/supabase/auth-context';
 import { createClient } from '@/lib/supabase/client';
 import { CalendarIcon, GlobeIcon, LockIcon, PartyIcon } from '@/components/UI/Icons';
 
+// Taxonomy v3 — matches src/lib/category-classifier/taxonomy.ts exactly so
+// user-submitted events land in the DB with a category that our filters,
+// landing pages and classifier actually know about. Old names (Kultur,
+// Nightlife, Märkte, Wein & Kulinarik, Feste & Brauchtum, Religion,
+// Gesundheit, Bildung) were migrated; submitting them now would strand
+// the event outside every downstream filter.
 const CATEGORIES = [
-  'Musik', 'Nightlife', 'Kultur', 'Sport', 'Märkte',
-  'Familie', 'Natur', 'Wein & Kulinarik', 'Feste & Brauchtum',
-  'Religion', 'Gesundheit', 'Bildung', 'Sonstiges',
+  'Musik',
+  'Kultur & Bühne',
+  'Nightlife & Party',
+  'Essen & Trinken',
+  'Märkte & Feste',
+  'Sport & Bewegung',
+  'Natur & Abenteuer',
+  'Wissen & Karriere',
+  'Familie & Kinder',
+  'Community & Freizeit',
+  'Wellness & Spiritualität',
+  'Sonstiges',
 ];
 
 const BUNDESLAENDER = [

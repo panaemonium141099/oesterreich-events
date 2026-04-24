@@ -17,42 +17,58 @@ function getSupabaseClient(): SupabaseClient | null {
 /** Default and maximum page sizes for cursor-based pagination */
 const DEFAULT_PAGE_SIZE = 50;
 
-/** Synonym map: common German search terms → category names (module-level, allocated once) */
+/**
+ * Synonym map: common German search terms → taxonomy-v3 category names.
+ * Values must match the category strings stored in `events.category` exactly
+ * — the taxonomy was migrated via 20260423_taxonomy_v3_combined.sql to the
+ * 12 compound names ("Kultur & Bühne", "Märkte & Feste", "Essen & Trinken",
+ * …). Before this fix the synonyms still pointed at the old flat names
+ * (Kultur, Märkte, Feste & Brauchtum, Wein & Kulinarik, Nightlife, Familie,
+ * Natur, Sport, Bildung, Gesundheit) so every `?search=konzert`-style
+ * query matched zero events.
+ */
 const SEARCH_SYNONYMS: Record<string, string[]> = {
-  festival: ['Musik', 'Feste & Brauchtum'],
-  festivals: ['Musik', 'Feste & Brauchtum'],
+  festival: ['Musik', 'Märkte & Feste'],
+  festivals: ['Musik', 'Märkte & Feste'],
   konzert: ['Musik'],
   konzerte: ['Musik'],
   rock: ['Musik'],
   metal: ['Musik'],
   jazz: ['Musik'],
-  theater: ['Kultur'],
-  kunst: ['Kultur'],
-  ausstellung: ['Kultur'],
-  kino: ['Kultur'],
-  markt: ['Märkte'],
-  märkte: ['Märkte'],
-  flohmarkt: ['Märkte'],
-  wein: ['Wein & Kulinarik'],
-  kulinarik: ['Wein & Kulinarik'],
-  essen: ['Wein & Kulinarik'],
-  foodtruck: ['Wein & Kulinarik'],
-  laufen: ['Sport'],
-  rennen: ['Sport'],
-  fußball: ['Sport'],
-  schwimmen: ['Sport'],
-  familie: ['Familie'],
-  kinder: ['Familie'],
-  wandern: ['Natur'],
-  natur: ['Natur'],
-  outdoor: ['Natur'],
-  nightlife: ['Nightlife'],
-  club: ['Nightlife'],
-  party: ['Nightlife'],
-  vortrag: ['Bildung'],
-  seminar: ['Bildung'],
-  yoga: ['Gesundheit'],
-  gesundheit: ['Gesundheit'],
+  theater: ['Kultur & Bühne'],
+  kunst: ['Kultur & Bühne'],
+  ausstellung: ['Kultur & Bühne'],
+  kino: ['Kultur & Bühne'],
+  markt: ['Märkte & Feste'],
+  märkte: ['Märkte & Feste'],
+  flohmarkt: ['Märkte & Feste'],
+  fest: ['Märkte & Feste'],
+  feste: ['Märkte & Feste'],
+  wein: ['Essen & Trinken'],
+  kulinarik: ['Essen & Trinken'],
+  essen: ['Essen & Trinken'],
+  foodtruck: ['Essen & Trinken'],
+  laufen: ['Sport & Bewegung'],
+  rennen: ['Sport & Bewegung'],
+  fußball: ['Sport & Bewegung'],
+  schwimmen: ['Sport & Bewegung'],
+  familie: ['Familie & Kinder'],
+  kinder: ['Familie & Kinder'],
+  wandern: ['Natur & Abenteuer'],
+  natur: ['Natur & Abenteuer'],
+  outdoor: ['Natur & Abenteuer'],
+  nightlife: ['Nightlife & Party'],
+  club: ['Nightlife & Party'],
+  party: ['Nightlife & Party'],
+  vortrag: ['Wissen & Karriere'],
+  seminar: ['Wissen & Karriere'],
+  karriere: ['Wissen & Karriere'],
+  business: ['Wissen & Karriere'],
+  yoga: ['Wellness & Spiritualität'],
+  gesundheit: ['Wellness & Spiritualität'],
+  wellness: ['Wellness & Spiritualität'],
+  meditation: ['Wellness & Spiritualität'],
+  community: ['Community & Freizeit'],
 };
 const MAX_PAGE_SIZE = 5000;
 

@@ -11,18 +11,37 @@ import { BUNDESLAENDER } from './bundeslaender';
 // Category Slugs
 // ---------------------------------------------------------------------------
 
-/** Map from URL slug → DB category name (only high-volume categories) */
+/**
+ * Map from URL slug → DB category name.
+ *
+ * Slugs are the SEO-facing path segment (`/wien/kultur`); values must match
+ * the taxonomy v3 category names exactly (see docs/TAXONOMY.md), because
+ * landing-data/student-data queries do `.eq('category', value)` and the DB
+ * was migrated to these names via 20260423_taxonomy_v3_combined.sql.
+ *
+ * History: values used to be the OLD flat names (Kultur, Nightlife, Wein &
+ * Kulinarik, Märkte, Feste & Brauchtum, Bildung, Familie, Natur). After the
+ * v3 migration those stopped existing in the DB and every `/wien/kultur`-
+ * style landing page silently showed 0 events — broken SEO across ~500 URLs.
+ *
+ * Two slugs (`feste`, `maerkte`) intentionally map to the same category
+ * `Märkte & Feste` because those two old top-level categories were merged
+ * in v3. Both URL paths keep working; CATEGORY_REVERSE picks `maerkte` as
+ * the canonical outbound slug (last-write-wins on insertion order).
+ */
 export const CATEGORY_SLUGS = new Map<string, string>([
   ['musik', 'Musik'],
-  ['kultur', 'Kultur'],
-  ['sport', 'Sport'],
-  ['feste', 'Feste & Brauchtum'],
-  ['maerkte', 'Märkte'],
-  ['kulinarik', 'Wein & Kulinarik'],
-  ['familie', 'Familie'],
-  ['natur', 'Natur'],
-  ['nightlife', 'Nightlife'],
-  ['bildung', 'Bildung'],
+  ['kultur', 'Kultur & Bühne'],
+  ['sport', 'Sport & Bewegung'],
+  ['feste', 'Märkte & Feste'],
+  ['maerkte', 'Märkte & Feste'],
+  ['kulinarik', 'Essen & Trinken'],
+  ['familie', 'Familie & Kinder'],
+  ['natur', 'Natur & Abenteuer'],
+  ['nightlife', 'Nightlife & Party'],
+  ['bildung', 'Wissen & Karriere'],
+  ['wellness', 'Wellness & Spiritualität'],
+  ['community', 'Community & Freizeit'],
 ]);
 
 /** Reverse map: DB category name → URL slug */

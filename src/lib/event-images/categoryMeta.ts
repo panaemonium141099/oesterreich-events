@@ -212,13 +212,32 @@ const META: Record<CanonicalCategory, CategoryMeta> = {
 
 /**
  * Alias map: maps legacy / alternate spellings to canonical category.
- * Covers known drift: Rave->Nightlife, Maerkte/Markte/Märkte->Märkte.
+ *
+ * Post-taxonomy-v3 migration, the DB stores compound names ("Kultur & Bühne",
+ * "Märkte & Feste", "Essen & Trinken", …) that this file's META doesn't know
+ * about. Without an alias every event would fall through to 'Sonstiges' and
+ * show the default image. The aliases below map each v3 name to its closest
+ * pre-v3 canonical so the existing image pools in /public/images/categories/
+ * and the badge colors keep rendering. The UI layer (calendar, TagChip)
+ * carries the new display labels — this file is strictly about image/color
+ * resolution, so we don't need to rename anything in META.
  */
 const ALIASES: Record<string, CanonicalCategory> = {
+  // v1/v2 minor drift
   'Rave': 'Nightlife',
   'Maerkte': 'Märkte',
   'Markte': 'Märkte',
-  // 'Märkte' is already canonical — no alias needed
+  // Taxonomy v3 (migration 20260423_taxonomy_v3_combined.sql)
+  'Kultur & Bühne': 'Kultur',
+  'Nightlife & Party': 'Nightlife',
+  'Essen & Trinken': 'Wein & Kulinarik',
+  'Märkte & Feste': 'Märkte',
+  'Sport & Bewegung': 'Sport',
+  'Natur & Abenteuer': 'Natur',
+  'Wissen & Karriere': 'Bildung',
+  'Familie & Kinder': 'Familie',
+  'Community & Freizeit': 'Familie',       // closest — community + leisure skew family
+  'Wellness & Spiritualität': 'Gesundheit',
 };
 
 /**

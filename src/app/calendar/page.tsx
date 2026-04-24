@@ -67,20 +67,24 @@ const BUNDESLAND_OPTIONS = [
   { value: 'wien', label: 'Wien' },
 ];
 
+// Taxonomy v3 — values MUST match categories in `events.category`.
+// Pre-v3 names (Kultur, Nightlife, Wein & Kulinarik, Märkte, Feste & Brauchtum,
+// Bildung, Gesundheit, Religion, Familie, Natur, Sport) were merged/renamed
+// via 20260423_taxonomy_v3_combined.sql; the old-name filter tabs always
+// returned 0 events after the migration.
 const CATEGORY_OPTIONS = [
   { value: '', label: 'Alle Kategorien' },
   { value: 'Musik', label: 'Musik' },
-  { value: 'Nightlife', label: 'Nightlife' },
-  { value: 'Wein & Kulinarik', label: 'Wein & Kulinarik' },
-  { value: 'Kultur', label: 'Kultur' },
-  { value: 'Märkte', label: 'Märkte' },
-  { value: 'Sport', label: 'Sport' },
-  { value: 'Familie', label: 'Familie' },
-  { value: 'Natur', label: 'Natur' },
-  { value: 'Feste & Brauchtum', label: 'Feste & Brauchtum' },
-  { value: 'Bildung', label: 'Bildung' },
-  { value: 'Gesundheit', label: 'Gesundheit' },
-  { value: 'Religion', label: 'Religion' },
+  { value: 'Kultur & Bühne', label: 'Kultur & Bühne' },
+  { value: 'Nightlife & Party', label: 'Nightlife & Party' },
+  { value: 'Essen & Trinken', label: 'Essen & Trinken' },
+  { value: 'Märkte & Feste', label: 'Märkte & Feste' },
+  { value: 'Sport & Bewegung', label: 'Sport & Bewegung' },
+  { value: 'Natur & Abenteuer', label: 'Natur & Abenteuer' },
+  { value: 'Wissen & Karriere', label: 'Wissen & Karriere' },
+  { value: 'Familie & Kinder', label: 'Familie & Kinder' },
+  { value: 'Community & Freizeit', label: 'Community & Freizeit' },
+  { value: 'Wellness & Spiritualität', label: 'Wellness & Spiritualität' },
   { value: 'Sonstiges', label: 'Sonstiges' },
 ];
 
@@ -91,17 +95,16 @@ interface CustomFilters {
 
 const CATEGORY_COLORS: Record<string, string> = {
   'Musik': 'bg-purple-500',
-  'Nightlife': 'bg-pink-500',
-  'Wein & Kulinarik': 'bg-amber-500',
-  'Kultur': 'bg-blue-500',
-  'Märkte': 'bg-orange-500',
-  'Sport': 'bg-green-500',
-  'Familie': 'bg-cyan-500',
-  'Natur': 'bg-emerald-500',
-  'Feste & Brauchtum': 'bg-red-500',
-  'Bildung': 'bg-indigo-500',
-  'Gesundheit': 'bg-teal-500',
-  'Religion': 'bg-yellow-500',
+  'Kultur & Bühne': 'bg-blue-500',
+  'Nightlife & Party': 'bg-pink-500',
+  'Essen & Trinken': 'bg-amber-500',
+  'Märkte & Feste': 'bg-orange-500',
+  'Sport & Bewegung': 'bg-green-500',
+  'Natur & Abenteuer': 'bg-emerald-500',
+  'Wissen & Karriere': 'bg-indigo-500',
+  'Familie & Kinder': 'bg-cyan-500',
+  'Community & Freizeit': 'bg-red-500',
+  'Wellness & Spiritualität': 'bg-teal-500',
   'Sonstiges': 'bg-gray-500',
 };
 
