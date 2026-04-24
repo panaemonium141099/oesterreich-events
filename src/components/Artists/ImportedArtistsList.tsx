@@ -49,44 +49,13 @@ export function ImportedArtistsList({
     );
   }
 
-  if (!spotifyConnected) {
-    return (
-      <div className="flex flex-col items-center py-8 text-center">
-        <div className="w-14 h-14 rounded-full bg-green-500/20 flex items-center justify-center mb-4">
-          <svg className="w-7 h-7 text-green-400" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z" />
-          </svg>
-        </div>
-        <p className="text-sm text-white/50 mb-2">
-          Verbinde Spotify, um deine Top-Kuenstler zu importieren
-        </p>
-        <p className="text-xs text-white/30 mb-4 max-w-sm">
-          Wir importieren deine 50 meistgehoerten Kuenstler und folgen automatisch den Top 10
-        </p>
-        <button
-          onClick={() => {
-            // Always use the canonical domain for redirect_uri — Spotify does
-            // exact-string matching against the Developer Dashboard list, so
-            // "lasstreffen.at" vs "www.lasstreffen.at" (or http vs https) are
-            // different registrations. NEXT_PUBLIC_SITE_URL is our single
-            // source of truth for the canonical origin.
-            const ORIGIN = process.env.NEXT_PUBLIC_SITE_URL || window.location.origin;
-            const params = new URLSearchParams({
-              client_id: process.env.NEXT_PUBLIC_SPOTIFY_CLIENT_ID || '',
-              response_type: 'code',
-              redirect_uri: `${ORIGIN}/auth/spotify/callback`,
-              scope: 'user-top-read user-read-recently-played user-follow-read',
-              show_dialog: 'true',
-            });
-            window.location.href = `https://accounts.spotify.com/authorize?${params.toString()}`;
-          }}
-          className="px-5 py-2.5 rounded-xl bg-green-500/20 text-green-400 hover:bg-green-500/30 font-medium text-sm transition-colors"
-        >
-          Spotify verbinden
-        </button>
-      </div>
-    );
-  }
+  // When not connected, render nothing — the AddArtistsPanel + the
+  // collapsed "Spotify Pioneer Programm" section in src/app/artists/page.tsx
+  // handle discovery + the limited-slot OAuth path. Previously this fallback
+  // was the primary call-to-action on the page, but after Spotify's May-2025
+  // quota clampdown (only 5 Dev-Mode users per app) the auto-import can't
+  // scale and shouldn't be presented as the default flow.
+  if (!spotifyConnected) return null;
 
   if (artists.length === 0) {
     return (

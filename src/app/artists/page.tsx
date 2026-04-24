@@ -8,7 +8,8 @@ import { NotificationBell } from '@/components/Notifications/NotificationBell';
 import { useAuth } from '@/lib/supabase/auth-context';
 import { createClient } from '@/lib/supabase/client';
 import { ImportedArtistsList } from '@/components/Artists/ImportedArtistsList';
-import { ArtistSearch } from '@/components/Artists/ArtistSearch';
+import { AddArtistsPanel } from '@/components/Artists/AddArtistsPanel';
+import { PopularArtistsSuggestions } from '@/components/Artists/PopularArtistsSuggestions';
 import { ArtistCard } from '@/components/Artists/ArtistCard';
 
 interface ImportedArtist {
@@ -218,69 +219,88 @@ export default function ArtistsPage() {
       </header>
 
       <main className="max-w-2xl mx-auto px-4 pt-6 space-y-8">
-        {/* Section 1: Search (always first) */}
-        <section>
-          <h2 className="text-sm uppercase tracking-[0.15em] text-white/40 font-medium mb-3">
-            Kuenstler suchen
-          </h2>
-          <ArtistSearch
-            followedNames={followedNames}
-            onFollow={handleFollow}
-            onUnfollow={handleUnfollow}
-          />
-        </section>
+        {/* Section 1: Add Artists — four Spotify-backed discovery methods
+            in one unified panel (Suche / Playlist / Link / Empfehlungen).
+            All four use Client-Credentials (no OAuth cap) and land in the
+            same followed_artists table via /api/artists/follow. */}
+        <AddArtistsPanel
+          followedNames={followedNames}
+          followedArtistNames={followedArtists.map(a => a.artist_name)}
+          onFollow={handleFollow}
+          onUnfollow={handleUnfollow}
+        />
 
-        {/* Section 2: Manual Add (always second) */}
+        {/* Curated popular-artists starter block — shows when user hasn't
+            built up their own momentum yet (auto-hides past 10 follows).
+            Replaces the OAuth top-artists-import grid for the 99 % who
+            aren't Pioneer-slot users. */}
+        <PopularArtistsSuggestions
+          followedNames={followedNames}
+          onFollow={handleFollow}
+        />
+
+        {/* Section 2: Manual add — ONLY for artists that aren't on Spotify
+            at all (indie/underground). Kept small + secondary because the
+            Suche tab above already covers 99 % of cases with richer data. */}
         <section>
-          <h2 className="text-sm uppercase tracking-[0.15em] text-white/40 font-medium mb-3">
-            Manuell hinzufuegen
-          </h2>
-          <div className="flex gap-2">
-            <input
-              type="text"
-              value={manualInput}
-              onChange={(e) => setManualInput(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' && manualInput.trim()) {
-                  handleManualAdd();
-                }
-              }}
-              placeholder="Kuenstlername eingeben..."
-              className="flex-1 px-4 py-3 rounded-xl bg-white/[0.06] border border-white/[0.10] text-white/90 placeholder-white/30 focus:outline-none focus:border-white/[0.15] transition-colors text-sm"
-            />
-            <button
-              onClick={handleManualAdd}
-              disabled={!manualInput.trim() || manualAdding}
-              className="px-4 py-3 rounded-xl bg-white/[0.06] text-white/70 hover:bg-white/[0.10] font-medium text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed shrink-0"
-            >
-              {manualAdding ? (
-                <div className="w-4 h-4 border-2 border-white/20 border-t-white/60 rounded-full animate-spin" />
-              ) : (
-                'Hinzufuegen'
+          <details className="rounded-xl bg-white/[0.02] border border-white/[0.05] overflow-hidden">
+            <summary className="cursor-pointer px-4 py-2.5 text-xs text-white/50 hover:text-white/80 transition-colors select-none">
+              Artist nicht auf Spotify? Manuell hinzufügen
+            </summary>
+            <div className="px-4 pb-4 pt-1">
+              <p className="text-[11px] text-white/40 mb-2 leading-relaxed">
+                Ohne Spotify-ID können wir nur gegen den Namen matchen — kein Bild,
+                keine Empfehlungen. Nutz die Suche oben wenn möglich.
+              </p>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={manualInput}
+                  onChange={(e) => setManualInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && manualInput.trim()) handleManualAdd();
+                  }}
+                  placeholder="Artist-Name …"
+                  className="flex-1 px-3 py-2 rounded-lg bg-white/[0.04] border border-white/[0.08] text-sm text-white/90 placeholder-white/30 focus:outline-none focus:border-white/15 transition-colors"
+                />
+                <button
+                  onClick={handleManualAdd}
+                  disabled={!manualInput.trim() || manualAdding}
+                  className="px-4 py-2 rounded-lg bg-white/[0.06] text-white/70 hover:bg-white/[0.10] font-medium text-sm transition-colors disabled:opacity-50 shrink-0"
+                >
+                  {manualAdding ? '…' : 'Hinzufügen'}
+                </button>
+              </div>
+              {manualInput.trim() && followedNames.has(manualInput.trim().toLowerCase()) && (
+                <p className="text-xs text-amber-400 mt-2">Folgst du schon.</p>
               )}
-            </button>
-          </div>
-          {manualInput.trim() && followedNames.has(manualInput.trim().toLowerCase()) && (
-            <p className="text-xs text-amber-400 mt-2">
-              Du folgst diesem Kuenstler bereits
-            </p>
-          )}
+            </div>
+          </details>
         </section>
 
-        {/* Section 3: Spotify Artists */}
-        <section>
-          <h2 className="text-sm uppercase tracking-[0.15em] text-white/40 font-medium mb-3">
-            Deine Spotify-Kuenstler
-          </h2>
-          <ImportedArtistsList
-            artists={importedArtists}
-            followedNames={followedNames}
-            onFollow={handleFollow}
-            onUnfollow={handleUnfollow}
-            loading={spotifyLoading || importedLoading}
-            spotifyConnected={spotifyConnected}
-          />
-        </section>
+        {/* Section 3: Imported Spotify artists — only shown when the user
+            HAS imported via the OAuth flow (i.e. one of the 5 Dev-Mode
+            Pioneers). The OAuth-connect empty state was hidden — a small
+            "Spotify Pioneer Programm" link at the bottom reveals it on
+            demand without blocking the new discovery flows. */}
+        {spotifyConnected && importedArtists.length > 0 && (
+          <section>
+            <h2 className="text-sm uppercase tracking-[0.15em] text-white/40 font-medium mb-3">
+              Deine Spotify-Top-Artists
+              <span className="ml-2 text-white/30 normal-case tracking-normal text-xs">
+                (aus Spotify importiert)
+              </span>
+            </h2>
+            <ImportedArtistsList
+              artists={importedArtists}
+              followedNames={followedNames}
+              onFollow={handleFollow}
+              onUnfollow={handleUnfollow}
+              loading={spotifyLoading || importedLoading}
+              spotifyConnected={spotifyConnected}
+            />
+          </section>
+        )}
 
         {/* Section 4: Followed Artists */}
         <section>
@@ -359,6 +379,49 @@ export default function ArtistsPage() {
             </svg>
           </Link>
         </section>
+
+        {/* Spotify Pioneer Programm — only shown to users who haven't
+            OAuth'd yet. Tiny + secondary on purpose: Spotify's May-2025
+            quota policy caps this at 5 users/app in Dev Mode, so the
+            auto-import is a limited-edition path, not the primary one.
+            Everyone else uses the four discovery methods above. */}
+        {!spotifyConnected && (
+          <section>
+            <details className="rounded-xl bg-white/[0.02] border border-white/[0.05] overflow-hidden">
+              <summary className="cursor-pointer px-4 py-2.5 text-xs text-white/50 hover:text-white/80 transition-colors select-none flex items-center gap-2">
+                <svg className="w-3.5 h-3.5 text-green-400/60" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z" />
+                </svg>
+                Spotify Pioneer Programm
+                <span className="ml-auto text-[10px] text-white/30 uppercase tracking-wider">5 Plätze</span>
+              </summary>
+              <div className="px-4 pb-4 pt-1 space-y-2.5">
+                <p className="text-[11px] text-white/50 leading-relaxed">
+                  Experimentelles Feature: verbinde dein Spotify-Konto und wir importieren
+                  automatisch deine 50 meistgehörten Artists. Seit Mai 2025 cappt Spotify diese
+                  Funktion auf wenige Tester:innen pro App — wenn dein Spot noch frei ist
+                  läuft's, sonst bleibt dein regulärer Zugang hier unverändert.
+                </p>
+                <button
+                  onClick={() => {
+                    const ORIGIN = process.env.NEXT_PUBLIC_SITE_URL || window.location.origin;
+                    const params = new URLSearchParams({
+                      client_id: process.env.NEXT_PUBLIC_SPOTIFY_CLIENT_ID || '',
+                      response_type: 'code',
+                      redirect_uri: `${ORIGIN}/auth/spotify/callback`,
+                      scope: 'user-top-read user-read-recently-played user-follow-read',
+                      show_dialog: 'true',
+                    });
+                    window.location.href = `https://accounts.spotify.com/authorize?${params.toString()}`;
+                  }}
+                  className="text-xs px-3 py-1.5 rounded-lg bg-green-500/15 text-green-400 hover:bg-green-500/25 transition-colors"
+                >
+                  Spotify verbinden (Pionier-Slot prüfen)
+                </button>
+              </div>
+            </details>
+          </section>
+        )}
       </main>
 </div>
   );

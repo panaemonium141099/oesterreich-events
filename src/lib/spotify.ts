@@ -299,6 +299,77 @@ export async function getSpotifyProfile(accessToken: string) {
  * Match artists against event titles/descriptions.
  * Returns matches with artist info and event data.
  */
+// ═══════════════════════════════════════════════════════════════
+// Public-data flows (Client Credentials only — no user-OAuth cap)
+// Added for the post-May-2025 Spotify quota world: auto-import of a
+// user's top artists is capped at 5 users in Development Mode, but the
+// endpoints below run on an app-level token and scale without per-user
+// enrollment. Verified working post-Nov-2024 restrictions; most other
+// endpoints (playlist tracks, /recommendations, /related-artists) are
+// forbidden now, so they're intentionally NOT exposed here.
+// ═══════════════════════════════════════════════════════════════
+
+const SPOTIFY_ARTIST_RE = /(?:open\.spotify\.com\/artist\/|spotify:artist:)([a-zA-Z0-9]+)/;
+const SPOTIFY_TRACK_RE = /(?:open\.spotify\.com\/track\/|spotify:track:)([a-zA-Z0-9]+)/;
+
+export function parseSpotifyArtistId(input: string): string | null {
+  const trimmed = input.trim();
+  if (!trimmed) return null;
+  const m = trimmed.match(SPOTIFY_ARTIST_RE);
+  if (m) return m[1];
+  // Bare base-62 ID (Spotify IDs are exactly 22 chars).
+  if (/^[a-zA-Z0-9]{22}$/.test(trimmed)) return trimmed;
+  return null;
+}
+
+/** Returns the ID if the input is a Spotify TRACK URL/URI. Callers use this
+ *  to gracefully degrade a pasted track link into "here's the track's
+ *  artist". */
+export function parseSpotifyTrackId(input: string): string | null {
+  const trimmed = input.trim();
+  if (!trimmed) return null;
+  const m = trimmed.match(SPOTIFY_TRACK_RE);
+  return m ? m[1] : null;
+}
+
+/** Single artist by ID. */
+export async function getSpotifyArtistById(artistId: string): Promise<SpotifySearchArtist | null> {
+  const token = await getClientCredentialsToken();
+  const res = await fetch(`https://api.spotify.com/v1/artists/${artistId}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (res.status === 404) return null;
+  if (res.status === 429) {
+    const retryAfter = res.headers.get('Retry-After');
+    throw new SpotifyRateLimitError('rate limited', retryAfter ? parseInt(retryAfter, 10) : undefined);
+  }
+  if (!res.ok) throw new Error(`Spotify artist fetch failed: ${res.status}`);
+  const a = (await res.json()) as SpotifyArtist & { images?: Array<{ url: string }> };
+  return {
+    id: a.id,
+    name: a.name,
+    image_url: a.images?.[0]?.url || null,
+    genres: a.genres || [],
+    popularity: a.popularity || 0,
+  };
+}
+
+/** Given a track ID, return its PRIMARY artist (first credit). Used when a
+ *  user pastes a Spotify track URL — we still want to offer them the artist
+ *  follow even though they pasted the track. */
+export async function getSpotifyArtistFromTrack(trackId: string): Promise<SpotifySearchArtist | null> {
+  const token = await getClientCredentialsToken();
+  const res = await fetch(`https://api.spotify.com/v1/tracks/${trackId}?market=AT`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (res.status === 404) return null;
+  if (!res.ok) throw new Error(`Spotify track fetch failed: ${res.status}`);
+  const data = (await res.json()) as { artists?: Array<{ id: string }> };
+  const firstArtistId = data.artists?.[0]?.id;
+  if (!firstArtistId) return null;
+  return getSpotifyArtistById(firstArtistId);
+}
+
 export function matchArtistsToEvents(
   artists: SpotifyArtist[],
   events: { id: string; title: string; description: string | null; location_name: string | null; start_date: string }[]
