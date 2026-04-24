@@ -7,6 +7,7 @@ import type { TrendingEvent } from './feed-types';
 import { formatEventDate } from './feed-types';
 import { getCategoryBadgeClass } from '@/lib/event-images';
 import { EventImage } from '@/components/Events/EventImage';
+import { buildEventUrlV2 } from '@/lib/utils/slugify';
 
 const DURATION = 5000; // 5s per story
 
@@ -207,7 +208,18 @@ export function StoriesViewer({ events, initialIndex, onClose }: StoriesViewerPr
               )}
             </div>
             <button
-              onClick={(e) => { e.stopPropagation(); router.push(`/events/${event.id}`); }}
+              onClick={(e) => {
+                e.stopPropagation();
+                // Use the V3 canonical URL so the browser never sees the
+                // legacy UUID form. Previously this was
+                //   router.push(`/events/${event.id}`)
+                // which 308-redirected client-side once the page mounted —
+                // visible to the user as a URL-flicker and, in the
+                // ad29851f/5a5b2484 "Eisenstadt in Weiß" incident,
+                // triggered an infinite redirect loop when the duplicate
+                // row's `duplicate_of` pointed back to the UUID form.
+                router.push(buildEventUrlV2(event));
+              }}
               className="pointer-events-auto inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white text-black text-sm font-semibold hover:bg-white/90 active:scale-[0.97] transition-all"
             >
               Event ansehen

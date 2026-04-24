@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
+import { buildEventUrlV2 } from '@/lib/utils/slugify';
 import type { FeedActivity } from './feed-types';
 import { getActivityText, getActivityCaption, getUsername, isCompactActivity, formatRelativeTime } from './feed-types';
 import { FeedEventMiniCard } from './FeedEventMiniCard';
@@ -343,7 +344,10 @@ export function FeedItem({
           type: activity.event ? 'event' : 'post',
           id: activity.event?.id || activity.id,
           title: getActivityText(activity),
-          url: activity.event ? `/events/${activity.event.id}` : `/feed/${activity.id}`,
+          // Canonical V3 URL for events — never the UUID form, otherwise
+          // the shared link 308-hops client-side on first load + is
+          // vulnerable to the duplicate-redirect class of bug.
+          url: activity.event ? buildEventUrlV2(activity.event) : `/feed/${activity.id}`,
         }}
       />
 

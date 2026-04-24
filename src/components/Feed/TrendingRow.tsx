@@ -85,7 +85,7 @@ export function TrendingRow() {
       // enough — some rows store empty strings — additional client-side filter below.
       const { data } = await supabase
         .from('events')
-        .select('id, title, start_date, end_date, location_name, image_url, category, save_count, latitude, longitude, event_series_id, content_fingerprint')
+        .select('id, title, start_date, end_date, location_name, image_url, category, save_count, latitude, longitude, event_series_id, content_fingerprint, slug, postal_code, address, bundesland')
         .gte('start_date', new Date().toISOString())
         .lte('start_date', nextMonth.toISOString())
         .eq('visibility', 'public')

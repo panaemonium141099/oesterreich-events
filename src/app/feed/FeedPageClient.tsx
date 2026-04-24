@@ -71,7 +71,7 @@ export function FeedPageClient() {
       .select(`
         id, user_id, type, event_id, group_id, target_user_id, memory_id, content, metadata, created_at,
         profile:profiles!activities_user_id_fkey(first_name, last_name, avatar_url),
-        event:events(id, title, start_date, end_date, location_name, image_url, category, save_count),
+        event:events(id, title, start_date, end_date, location_name, image_url, category, save_count, slug, postal_code, address, bundesland),
         group:groups(id, name),
         target_user:profiles!activities_target_user_id_fkey(first_name, last_name)
       `)

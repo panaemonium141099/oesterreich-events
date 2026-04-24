@@ -7,6 +7,7 @@ import { useAuth } from '@/lib/supabase/auth-context';
 import { createClient } from '@/lib/supabase/client';
 import { toast } from 'sonner';
 import { EventImage } from '@/components/Events/EventImage';
+import { buildEventUrlV2 } from '@/lib/utils/slugify';
 
 interface Photo {
   id: string;
@@ -30,7 +31,12 @@ interface MemoryDetail {
   created_by: string;
   event_id: string | null;
   created_at: string;
-  event?: { id: string; title: string; start_date: string; location_name: string | null; image_url: string | null; category: string | null } | null;
+  event?: {
+    id: string; title: string; start_date: string; location_name: string | null;
+    image_url: string | null; category: string | null;
+    // URL-builder fields so we can link with the canonical V3 URL.
+    slug?: string | null; postal_code?: string | null; address?: string | null; bundesland?: string | null;
+  } | null;
   creator?: { first_name: string; last_name: string; avatar_url: string | null };
 }
 
@@ -80,7 +86,7 @@ export function MemoryDetailPageClient() {
     if (m.event_id) {
       const { data: e } = await supabase
         .from('events')
-        .select('id, title, start_date, location_name, image_url, category')
+        .select('id, title, start_date, location_name, image_url, category, slug, postal_code, address, bundesland')
         .eq('id', m.event_id)
         .single();
       event = e;
@@ -326,7 +332,7 @@ export function MemoryDetailPageClient() {
         {/* Linked Event */}
         {memory.event && (
           <Link
-            href={`/events/${memory.event.id}`}
+            href={buildEventUrlV2(memory.event)}
             className="block mb-8 p-4 rounded-xl bg-white/[0.03] border border-white/[0.06] hover:border-white/20 transition-colors"
           >
             <p className="text-xs text-white/30 uppercase tracking-wider mb-2">Verkn&uuml;pftes Event</p>

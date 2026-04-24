@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { useAuth } from '@/lib/supabase/auth-context';
 import { createClient } from '@/lib/supabase/client';
 import { EventImage } from '@/components/Events/EventImage';
+import { buildEventUrlV2 } from '@/lib/utils/slugify';
 
 interface SpotifyMatch {
   id: string;
@@ -24,6 +25,10 @@ interface SpotifyMatch {
     image_url: string | null;
     ticket_url: string | null;
     source_url: string | null;
+    // URL-builder fields — see feed-types.ts TrendingEvent for why
+    slug?: string | null;
+    postal_code?: string | null;
+    address?: string | null;
   };
 }
 
@@ -63,7 +68,7 @@ export function SpotifyMatchesPageClient() {
     const eventIds = data.map((m: { event_id: string }) => m.event_id).filter(Boolean);
     const { data: events } = await supabase
       .from('events')
-      .select('id, title, start_date, location_name, bundesland, image_url, ticket_url, source_url')
+      .select('id, title, start_date, location_name, bundesland, image_url, ticket_url, source_url, slug, postal_code, address')
       .in('id', eventIds)
       .gte('start_date', new Date().toISOString())
       .order('start_date', { ascending: true });
@@ -209,12 +214,14 @@ export function SpotifyMatchesPageClient() {
 
                     {/* Actions */}
                     <div className="flex items-center gap-2 mt-3">
-                      <Link
-                        href={`/events/${m.event?.id}`}
-                        className="text-xs px-3 py-1.5 rounded-lg bg-white text-black font-medium hover:bg-white/90 transition-colors"
-                      >
-                        Event ansehen
-                      </Link>
+                      {m.event && (
+                        <Link
+                          href={buildEventUrlV2(m.event)}
+                          className="text-xs px-3 py-1.5 rounded-lg bg-white text-black font-medium hover:bg-white/90 transition-colors"
+                        >
+                          Event ansehen
+                        </Link>
+                      )}
                       {(m.event?.ticket_url || m.event?.source_url) && (
                         <a
                           href={m.event?.ticket_url || m.event?.source_url || '#'}

@@ -82,7 +82,7 @@ export function SidebarFeed({ eveningMode, onEventClick }: SidebarFeedProps) {
 
     const { data } = await supabase
       .from('events')
-      .select('id, title, start_date, end_date, location_name, image_url, category, save_count')
+      .select('id, title, start_date, end_date, location_name, image_url, category, save_count, slug, postal_code, address, bundesland')
       .gte('start_date', new Date().toISOString())
       .lte('start_date', nextWeek.toISOString())
       .eq('visibility', 'public')

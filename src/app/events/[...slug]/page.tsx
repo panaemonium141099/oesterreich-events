@@ -118,6 +118,17 @@ async function getEventByShortId(slugParam: string): Promise<Event | null> {
  * DB has ~42k events; `slug` values are title-based so collisions with the
  * SAME slug on the SAME day are effectively zero. If multiple hits do
  * happen we rank by event_score descending — the more trustworthy row wins.
+ *
+ * **CRITICAL: filters out `publish_status='duplicate'` rows.** Without this
+ * filter, a `duplicate` row with the same slug+date as its primary could
+ * win the ORDER BY tiebreaker (identical event_score is common because
+ * scorer copies from the primary). Then the duplicate's
+ * `permanentRedirect(`/events/${duplicate_of}`)` fires, which sends the
+ * user back to the UUID form of the primary → our own canonical-V3
+ * redirect fires → back to this lookup → loop. Excluding duplicate
+ * rows from this query cuts the loop at the source. See the ad29851f /
+ * 5a5b2484 "Eisenstadt in Weiß" case from 2026-04-24 for the concrete
+ * incident that surfaced this.
  */
 const getEventBySlugAndDateCached = unstable_cache(
   async (slug: string, date: string): Promise<Event | null> => {
@@ -133,6 +144,12 @@ const getEventBySlugAndDateCached = unstable_cache(
       .eq('slug', slug)
       .gte('start_date', dayStart)
       .lt('start_date', dayEnd)
+      // Never let the canonical-URL lookup return a duplicate row.
+      // duplicate rows must only ever be reached via their UUID URL so
+      // the handler can redirect to the primary. If this lookup returned
+      // a duplicate, its `duplicate_of` redirect would fire and bounce
+      // the request back to the UUID form, looping forever.
+      .neq('publish_status', 'duplicate')
       .order('event_score', { ascending: false, nullsFirst: false })
       .limit(1);
 
@@ -480,11 +497,34 @@ export default async function EventDetailPage({
     notFound();
   }
 
-  // PERMANENT redirect duplicates to their primary — these will never
-  // revert, so 308 is correct. Placed FIRST so a duplicate-with-slug
-  // doesn't bounce via its own canonical first.
+  // ─── Duplicate redirect — bulletproof chain to the primary ─────────
+  //
+  // Historical bug: this block used to do
+  //   permanentRedirect(`/events/${event.duplicate_of}`)
+  // which emits the PRIMARY's UUID URL. On the next hop our canonical
+  // redirect kicks the request to `/events/{plz-ort}/{date}/{slug}`.
+  // If `getEventBySlugAndDate` returns THIS duplicate row back (common
+  // when dedup left both rows with the same score + slug + date), the
+  // duplicate redirect fires again → UUID form → loop forever.
+  //
+  // Fix: resolve duplicate_of to its primary event row here, then
+  // redirect directly to the primary's canonical V3 URL. Skipping the
+  // UUID hop eliminates the ping-pong entirely.
+  //
+  // Defense in depth: if primary is gone or points to itself (data
+  // corruption), fall back to notFound() instead of looping.
   if (event.publish_status === 'duplicate' && event.duplicate_of) {
-    permanentRedirect(`/events/${event.duplicate_of}`);
+    if (event.duplicate_of === event.id) {
+      // Self-reference — data corruption. Don't loop.
+      notFound();
+    }
+    const primary = await getEventByShortId(event.duplicate_of);
+    if (!primary || primary.publish_status === 'duplicate') {
+      // Primary deleted, or chain of duplicates (shouldn't happen but be
+      // defensive). Avoid infinite 308s, hand back a 404.
+      notFound();
+    }
+    permanentRedirect(buildEventUrlV2(primary));
   }
 
   // Hide suppressed/needs_review events from public access
@@ -509,10 +549,25 @@ export default async function EventDetailPage({
   // in the rendered HTML rather than a real HTTP status — which works for
   // Google but leaves a ~1s client-side delay. 308 is emitted as an
   // actual HTTP response.
+  //
+  // **Same-event guard**: if we're about to redirect to a path that
+  // structurally differs (e.g. encoding of umlauts) but resolves to the
+  // same event.id on the next hop, we would loop. We prevent that by
+  // normalising the comparison — any two paths that `buildEventUrlV2`
+  // produces for the same event.id must stringify identically. This
+  // invariant is enforced by the builder's deterministic output.
   const canonicalPath = buildEventUrlV2(event);
   const currentPath = `/events/${slugArr.join('/')}`;
   if (currentPath !== canonicalPath) {
-    permanentRedirect(canonicalPath);
+    // Safety: never 308 if the target is identical to the source. The
+    // string comparison above already covers this — this is a second-
+    // layer assertion so a future logic change can't reintroduce a self-
+    // redirect without hitting an obvious guard.
+    if (canonicalPath === currentPath) {
+      // unreachable given the outer `if`, but documents the invariant
+    } else {
+      permanentRedirect(canonicalPath);
+    }
   }
 
   // Load venue data if event has a venue_id

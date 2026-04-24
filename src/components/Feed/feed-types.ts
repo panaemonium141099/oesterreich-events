@@ -23,6 +23,13 @@ export interface FeedActivity {
     image_url: string | null;
     category: string | null;
     save_count: number | null;
+    // URL-builder fields — allow FeedItem share + any link rendering
+    // through `buildEventUrlV2()` to land on the canonical URL without
+    // a UUID-form 308 hop.
+    slug?: string | null;
+    postal_code?: string | null;
+    address?: string | null;
+    bundesland?: string | null;
   } | null;
   group?: {
     id: string;
@@ -43,6 +50,15 @@ export interface TrendingEvent {
   image_url: string | null;
   category: string | null;
   save_count: number;
+  // URL-builder fields — needed by `buildEventUrlV2()` so Story / Sidebar
+  // navigation lands on the canonical `/events/{plz-ort}/{date}/{slug}`
+  // form directly instead of taking a 308 hop through the legacy UUID
+  // URL. Missing fields degrade gracefully (slug → shortId, plz → '0000',
+  // ort → bundesland-capital or 'at').
+  slug?: string | null;
+  postal_code?: string | null;
+  address?: string | null;
+  bundesland?: string | null;
 }
 
 export function getActivityText(activity: FeedActivity): string {
