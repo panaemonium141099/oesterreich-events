@@ -38,6 +38,7 @@ import { resolvePrimaryEventImage } from '@/lib/event-images';
 import { buildFAQPageSchema, faqForGemeinde } from '@/lib/seo/faq';
 import { resolveExperimentForScope } from '@/lib/seo/experiments-server';
 import { ExperimentImpressionLogger } from '@/components/SEO/ExperimentImpressionLogger';
+import { getHubIntro } from '@/lib/seo/hub-refresh';
 
 export const revalidate = 3600;
 export const dynamicParams = true;
@@ -282,6 +283,18 @@ export default async function GemeindeHubPage({
     ? `${experiment.payload.heading_prefix} ${g.name}`
     : `Events in ${g.name}`;
 
+  // fn-13 phase 10 — rotating intro paragraph. The monthly content-
+  // refresh cron picks top-traffic hubs and increments their
+  // `intro_variant_index`, cycling through the curated pool in
+  // `src/lib/seo/intro-pool.ts`. Freshness signal to Google without
+  // rewriting everything by hand.
+  const { intro: introParagraph } = await getHubIntro('gemeinde', `/gemeinde/${g.slug}`, {
+    name: g.name,
+    count: events.length,
+    plz: g.plz,
+    bundesland: g.bundesland,
+  });
+
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd }} />
@@ -317,12 +330,7 @@ export default async function GemeindeHubPage({
             </p>
             <p className="mt-3 text-white/80 leading-relaxed max-w-2xl">
               {events.length > 0 ? (
-                <>
-                  Aktuell <strong className="text-white">{events.length}</strong>{' '}
-                  Veranstaltungen im Umkreis von 10 km um {g.name} — von Konzerten
-                  und Festen bis zu Kulturevents. Alle Termine werden täglich aus
-                  offiziellen Quellen aktualisiert.
-                </>
+                introParagraph
               ) : (
                 <>
                   Aktuell keine Events im Umkreis von 10 km um {g.name} gefunden.

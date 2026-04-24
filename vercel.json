@@ -15,6 +15,10 @@
     {
       "path": "/api/cron/seo-weekly-report",
       "schedule": "0 10 * * 5"
+    },
+    {
+      "path": "/api/cron/seo-content-refresh",
+      "schedule": "0 4 1 * *"
     }
   ]
 }
