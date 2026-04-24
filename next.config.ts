@@ -124,6 +124,25 @@ const nextConfig: NextConfig = {
         destination: 'https://lasstreffen.at/:path*',
         permanent: true,
       },
+      // /admin → /admin/overview at the CDN edge.
+      //
+      // Previously this was a Server-Component `redirect('/admin/overview')`
+      // inside src/app/admin/page.tsx, which forced the full Next.js
+      // pipeline (middleware session-refresh → RSC render → redirect
+      // throw) to run before the browser saw the 307. On cold Vercel
+      // Function starts — or when the RSC payload fetch from a client
+      // navigation flaked — Chrome rendered "This page couldn't load"
+      // and only a hard reload recovered, because a reload triggers a
+      // plain top-level fetch instead of the RSC path.
+      //
+      // Moving the redirect to `redirects()` turns it into a CDN-level
+      // 307 that fires before any function is invoked. No cold start,
+      // no RSC race, no middleware dependency.
+      {
+        source: '/admin',
+        destination: '/admin/overview',
+        permanent: false, // 307 — may add a real /admin dashboard later
+      },
     ];
   },
   // better-sqlite3 only used by scraper scripts, not by API routes

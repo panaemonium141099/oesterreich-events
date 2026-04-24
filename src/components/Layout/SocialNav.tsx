@@ -7,10 +7,26 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '@/lib/supabase/auth-context';
 import { createClient } from '@/lib/supabase/client';
 
-const MAIN_ITEMS = [
+/** Main bottom-nav items. `unreadKey` routes the badge to the right
+ *  live-count state (chat vs. notifications). Without it the notification
+ *  bell had no mobile access point — the desktop header bell isn't
+ *  rendered on small screens, so new follow-invites, event alerts, artist
+ *  matches etc. stayed invisible to phone users until they opened the
+ *  "More" sheet (not obvious). Adding the 4th item keeps the nav bar at
+ *  5 slots total (44 px each ≈ 230 px wide, fits every viewport). */
+const MAIN_ITEMS: Array<{
+  href: string;
+  label: string;
+  icon: string;
+  extraPath?: string;
+  /** Which live-count state to read for the unread badge. Omit for
+   *  items that don't show a count. */
+  unreadKey?: 'messages' | 'notifications';
+}> = [
   { href: '/map', label: 'Karte', icon: 'M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7' },
   { href: '/feed', label: 'Feed', icon: 'M4 11a9 9 0 019 9M4 4a16 16 0 0116 16', extraPath: 'M5 19a1 1 0 100-2 1 1 0 000 2z' },
-  { href: '/messages', label: 'Chat', icon: 'M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z', hasUnread: true },
+  { href: '/notifications', label: 'Benachrichtigungen', icon: 'M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9', unreadKey: 'notifications' },
+  { href: '/messages', label: 'Chat', icon: 'M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z', unreadKey: 'messages' },
 ];
 
 const MORE_ITEMS = [
@@ -36,9 +52,10 @@ export function SocialNav() {
   const [moreOpen, setMoreOpen] = useState(false);
   const { user } = useAuth();
   const supabase = createClient();
-  const [unreadCount, setUnreadCount] = useState(0);
+  const [unreadMessages, setUnreadMessages] = useState(0);
+  const [unreadNotifications, setUnreadNotifications] = useState(0);
 
-  const fetchUnread = useCallback(async () => {
+  const fetchUnreadMessages = useCallback(async () => {
     if (!user) return;
     try {
       const { count } = await supabase
@@ -46,19 +63,39 @@ export function SocialNav() {
         .select('*', { count: 'exact', head: true })
         .eq('receiver_id', user.id)
         .eq('read', false);
-      setUnreadCount(count || 0);
-    } catch {
-      // ignore
-    }
+      setUnreadMessages(count || 0);
+    } catch { /* ignore */ }
+  }, [user, supabase]);
+
+  const fetchUnreadNotifications = useCallback(async () => {
+    if (!user) return;
+    try {
+      // `notifications` table uses `read_at IS NULL` to mark unread (same
+      // pattern NotificationBell uses on desktop). Covers all notification
+      // types: group invites, friend requests, artist matches, reminders.
+      const { count } = await supabase
+        .from('notifications')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', user.id)
+        .is('read_at', null);
+      setUnreadNotifications(count || 0);
+    } catch { /* ignore */ }
   }, [user, supabase]);
 
   useEffect(() => {
-    fetchUnread();
-    const interval = setInterval(fetchUnread, 30000);
+    fetchUnreadMessages();
+    fetchUnreadNotifications();
+    // 30 s fallback poll in case Realtime drops a frame (PWA background
+    // tabs, flaky connections). Realtime below still handles the fast path.
+    const interval = setInterval(() => {
+      fetchUnreadMessages();
+      fetchUnreadNotifications();
+    }, 30_000);
     return () => clearInterval(interval);
-  }, [fetchUnread]);
+  }, [fetchUnreadMessages, fetchUnreadNotifications]);
 
-  // Realtime subscription for new messages
+  // Realtime subscription — both direct_messages and notifications land
+  // on the same channel for a single WebSocket rather than two.
   useEffect(() => {
     if (!user) return;
     const channel = supabase
@@ -66,17 +103,27 @@ export function SocialNav() {
       .on(
         'postgres_changes',
         { event: 'INSERT', schema: 'public', table: 'direct_messages', filter: `receiver_id=eq.${user.id}` },
-        () => { fetchUnread(); }
+        () => { fetchUnreadMessages(); },
       )
       .on(
         'postgres_changes',
         { event: 'UPDATE', schema: 'public', table: 'direct_messages', filter: `receiver_id=eq.${user.id}` },
-        () => { fetchUnread(); }
+        () => { fetchUnreadMessages(); },
+      )
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'notifications', filter: `user_id=eq.${user.id}` },
+        () => { fetchUnreadNotifications(); },
+      )
+      .on(
+        'postgres_changes',
+        { event: 'UPDATE', schema: 'public', table: 'notifications', filter: `user_id=eq.${user.id}` },
+        () => { fetchUnreadNotifications(); },
       )
       .subscribe();
 
     return () => { supabase.removeChannel(channel); };
-  }, [user, supabase, fetchUnread]);
+  }, [user, supabase, fetchUnreadMessages, fetchUnreadNotifications]);
 
   // Close More sheet when navigating
   useEffect(() => {
@@ -159,7 +206,15 @@ export function SocialNav() {
       >
         {MAIN_ITEMS.map((item) => {
           const isActive = pathname === item.href || pathname.startsWith(item.href + '/');
-          const showBadge = 'hasUnread' in item && item.hasUnread && unreadCount > 0;
+          // Route the badge to the right live-count state. `unreadKey` is
+          // set on items that carry a live count (chat, notifications),
+          // undefined on the ones that don't (map, feed).
+          const unreadCount = item.unreadKey === 'notifications'
+            ? unreadNotifications
+            : item.unreadKey === 'messages'
+            ? unreadMessages
+            : 0;
+          const showBadge = unreadCount > 0;
           return (
             <div key={item.href} className="relative">
               <Link
