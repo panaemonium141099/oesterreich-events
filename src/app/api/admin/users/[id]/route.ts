@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
+import { requireAdminWithCaller } from '@/lib/supabase/require-admin';
 
 /**
  * DELETE /api/admin/users/[id] — remove a user from the system completely.
@@ -21,7 +22,7 @@ import { createServerSupabaseClient } from '@/lib/supabase/server';
  *   on a service-role client can do this — hence this server route.
  *
  * Safeguards:
- *   - Caller must be admin/god (same pattern as /api/admin/dedup/... etc).
+ *   - Caller must be admin/god (requireAdminWithCaller).
  *   - Self-delete is blocked (prevents accidentally locking yourself out).
  *   - Deleting a 'god' user requires the caller to be 'god' as well, so
  *     an admin can't escalate to "nuke the owner".
@@ -33,35 +34,12 @@ import { createServerSupabaseClient } from '@/lib/supabase/server';
  *   404 if target profile does not exist
  *   500 on unexpected failure
  */
-
-/** Verify the caller is an authenticated admin/god user. Returns either the caller's
- *  profile (with id + role) on success, or a NextResponse error to return. */
-async function requireAdmin(): Promise<
-  | { error: NextResponse }
-  | { caller: { id: string; role: string } }
-> {
-  const supabase = await createServerSupabaseClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) {
-    return { error: NextResponse.json({ error: 'Unauthorized' }, { status: 401 }) };
-  }
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('role')
-    .eq('id', user.id)
-    .single();
-  if (!profile || !['god', 'admin'].includes(profile.role)) {
-    return { error: NextResponse.json({ error: 'Forbidden' }, { status: 403 }) };
-  }
-  return { caller: { id: user.id, role: profile.role } };
-}
-
 export async function DELETE(
   _request: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
   try {
-    const auth = await requireAdmin();
+    const auth = await requireAdminWithCaller();
     if ('error' in auth) return auth.error;
     const { caller } = auth;
 
