@@ -49,16 +49,22 @@ import { generateEventSlug } from '@/lib/utils/slugify';
 // Feratel placed it at Eisenstadt-Hauptplatz instead of St. Georgen) — those
 // must not clobber a targeted geocode.
 const CONFIDENCE_RANK: Record<string, number> = {
-  manual: 0,           // Hand-fixed by admin / user — never overwrite
-  openai: 1,           // openai-geocode.ts refinement
-  gemini: 1,           // legacy alias for openai
-  exact: 2,            // normalizer exact match
-  normalized: 3,       // normalizer best-guess
-  nominatim: 4,        // reverse-geocoded
-  scraper: 5,          // raw scraper output — lowest among "ok" values
+  manual: 0,                 // Hand-fixed by admin / user — never overwrite
+  'gemeinde-registry': 0,    // Mapbox-verified Austrian Gemeinde centroids from
+                             // data/gemeinden-registry/*.json — authoritative
+                             // truth for PLZ→(lat,lng). Tied with manual at
+                             // rank 0: once a row wears this confidence, no
+                             // scraper/normalizer/nominatim pass is allowed
+                             // to move the pin. See refresh-gemeinden-coords.ts.
+  openai: 1,                 // openai-geocode.ts refinement
+  gemini: 1,                 // legacy alias for openai
+  exact: 2,                  // normalizer exact match
+  normalized: 3,             // normalizer best-guess
+  nominatim: 4,              // reverse-geocoded
+  scraper: 5,                // raw scraper output — lowest among "ok" values
   from_title: 6,
   from_description: 7,
-  gemini_low: 8,       // low-confidence fallback
+  gemini_low: 8,             // low-confidence fallback
 };
 
 /** Distance threshold in km; below this we skip overwrite to preserve precise coords. */
