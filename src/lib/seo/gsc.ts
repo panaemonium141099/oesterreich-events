@@ -18,11 +18,15 @@
  *      Lists the sitemaps GSC knows about + each sitemap's last-
  *      submitted/last-downloaded timestamps and indexed-URL count.
  *
- * **Auth** — Service account + Search Console API enabled in Google Cloud,
- * service-account email granted as a *user* on the GSC property. See
- * `docs/seo/gsc-setup.md` for the exact clicks. Env var
- * `GOOGLE_SEARCH_CONSOLE_SA_KEY` is the full service-account JSON key
- * stringified (escaped newlines for the PEM survive `.env.local` fine).
+ * **Auth** — Reuses the `GOOGLE_INDEXING_API_SA_KEY` service-account that
+ * was set up for the Indexing API (fn-13 phase 1). The SAME JSON key
+ * works for Search Console too — we just need the Search Console API
+ * enabled in GCP and the service-account email added as a user on the
+ * GSC property. See `docs/seo/gsc-setup.md` for the 2-step setup.
+ *
+ * The env var name is "INDEXING_API" historically but the key is a plain
+ * Google Service Account — scope is granted at JWT-request time, not at
+ * SA creation, so one key serves multiple APIs.
  *
  * **Why direct fetch over google-auth-library:** the auth-library pulls
  * in ~15 MB of deps and requires the legacy `googleapis` wrapper for
@@ -31,6 +35,7 @@
  */
 
 import { SignJWT, importPKCS8 } from 'jose';
+import { requireGoogleServiceAccount, type GoogleServiceAccount } from '@/lib/google-auth';
 
 const GSC_BASE_URL = 'https://searchconsole.googleapis.com/v1';
 const OAUTH_TOKEN_URL = 'https://oauth2.googleapis.com/token';
@@ -40,11 +45,9 @@ const OAUTH_SCOPE = 'https://www.googleapis.com/auth/webmasters.readonly';
 // Types — mirror the GSC REST API minus the undocumented/empty fields
 // ─────────────────────────────────────────────────────────────────
 
-export interface ServiceAccountKey {
-  client_email: string;
-  private_key: string;
-  token_uri?: string;
-}
+// Re-exported alias so existing imports keep working; the shared loader
+// in @/lib/google-auth owns the actual shape.
+export type ServiceAccountKey = GoogleServiceAccount;
 
 export interface SearchAnalyticsRow {
   keys: string[]; // order matches the `dimensions` request field
@@ -118,26 +121,11 @@ interface CachedToken {
 let tokenCache: CachedToken | null = null;
 
 function getServiceAccountKey(): ServiceAccountKey {
-  const raw = process.env.GOOGLE_SEARCH_CONSOLE_SA_KEY;
-  if (!raw) {
-    throw new Error(
-      '[seo/gsc] GOOGLE_SEARCH_CONSOLE_SA_KEY env var missing. ' +
-      'See docs/seo/gsc-setup.md for the service-account setup steps.',
-    );
-  }
-  try {
-    const parsed = JSON.parse(raw) as ServiceAccountKey;
-    if (!parsed.client_email || !parsed.private_key) {
-      throw new Error('JSON is valid but missing client_email / private_key');
-    }
-    return parsed;
-  } catch (err) {
-    throw new Error(
-      '[seo/gsc] GOOGLE_SEARCH_CONSOLE_SA_KEY is not valid JSON — ' +
-      'verify it was pasted as the entire service-account file contents. ' +
-      `Original error: ${err instanceof Error ? err.message : String(err)}`,
-    );
-  }
+  // Delegates to the shared loader in @/lib/google-auth — same robust
+  // parse/repair logic that's battle-tested by the Indexing API. Handles
+  // base64 form, literal \\n repair, Windows line endings, PEM trailing
+  // newline, etc. Throws on miss so the caller can render a setup-banner.
+  return requireGoogleServiceAccount();
 }
 
 async function getAccessToken(): Promise<string> {
