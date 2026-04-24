@@ -6,6 +6,7 @@ import { OhoScraper } from './OhoScraper';
 import { NeusiedlerseeScraper } from './NeusiedlerseeScraper';
 import { OeticketScraper } from './OeticketScraper';
 import { TicketmasterScraper } from './TicketmasterScraper';
+import { BoudiccaEventsScraper } from './BoudiccaEventsScraper';
 import { WienGvScraper } from './WienGvScraper';
 import { WienVADBScraper } from './WienVADBScraper';
 import { FalterScraper } from './FalterScraper';
@@ -176,6 +177,9 @@ export const scrapers: BaseScraper[] = [
   new MeinBezirkScraper(),
   new OeticketScraper(),
   new TicketmasterScraper(),
+  // Austria-wide open-source aggregator (JKU Linz, GPL-3.0).
+  // Adds Vienna + OÖ dense coverage — see BoudiccaEventsScraper.ts notes.
+  new BoudiccaEventsScraper(),
   // Nischen-Kategorien: Festivals
   new FestivalAtScraper(),
   new FestivalGuideScraper(),
