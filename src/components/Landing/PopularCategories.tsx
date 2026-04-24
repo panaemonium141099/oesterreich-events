@@ -1,10 +1,11 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
+import Link from 'next/link';
 import { CATEGORIES } from '@/lib/categories';
+import { getCategorySlug } from '@/lib/landing-slugs';
 
 // Unsplash images per category — keys MUST match the canonical taxonomy
 // in src/lib/category-classifier/taxonomy.ts exactly (same & signs, umlauts,
@@ -55,7 +56,6 @@ const tileVariants = {
 };
 
 export function PopularCategories() {
-  const router = useRouter();
   const [counts, setCounts] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(true);
 
@@ -97,47 +97,51 @@ export function PopularCategories() {
         {CATEGORIES.map(category => {
           const count = counts[category];
           const image = CATEGORY_IMAGES[category] ?? FALLBACK_IMAGE;
+          // Map the v3 category name → URL slug → theme hub. Sonstiges and
+          // any future unmapped category fall back to the map filter URL.
+          const slug = getCategorySlug(category);
+          const href = slug
+            ? `/thema/${slug}`
+            : `/map?category=${encodeURIComponent(category)}`;
 
           return (
-            <motion.button
-              key={category}
-              variants={tileVariants}
-              onClick={() => router.push(`/map?category=${encodeURIComponent(category)}`)}
-              className="group relative overflow-hidden rounded-xl aspect-[3/2] focus:outline-none focus:ring-2 focus:ring-white/30"
-              whileHover="hover"
-            >
-              {/* Background image */}
-              <motion.div
-                className="absolute inset-0"
-                variants={{ hover: { scale: 1.08 } }}
-                transition={{ duration: 0.5, ease: 'easeOut' }}
+            <motion.div key={category} variants={tileVariants}>
+              <Link
+                href={href}
+                className="group relative block overflow-hidden rounded-xl aspect-[3/2] focus:outline-none focus:ring-2 focus:ring-white/30"
               >
-                <Image
-                  src={image}
-                  alt={category}
-                  fill
-                  className="object-cover"
-                  sizes="(max-width: 640px) 50vw, 25vw"
-                />
-              </motion.div>
+                {/* Background image — scales on group hover via CSS for
+                    crawlable-anchor friendliness. Previously this was
+                    `motion.button` with `onClick={router.push}`, which
+                    Google couldn't see as a link. */}
+                <div className="absolute inset-0 transition-transform duration-500 ease-out group-hover:scale-[1.08]">
+                  <Image
+                    src={image}
+                    alt={category}
+                    fill
+                    className="object-cover"
+                    sizes="(max-width: 640px) 50vw, 25vw"
+                  />
+                </div>
 
-              {/* Gradient overlay */}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent group-hover:from-black/80 transition-all duration-300" />
+                {/* Gradient overlay */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent group-hover:from-black/80 transition-all duration-300" />
 
-              {/* Text */}
-              <div className="absolute inset-x-0 bottom-0 p-3 text-left">
-                <p className="text-white font-bold text-sm leading-tight">{category}</p>
-                <p className="text-white/45 text-[10px] mt-0.5 tabular-nums">
-                  {loading ? (
-                    <span className="inline-block w-12 h-2 bg-white/15 rounded animate-pulse" />
-                  ) : count !== undefined ? (
-                    `${count.toLocaleString('de-AT')} Events`
-                  ) : (
-                    'Entdecken'
-                  )}
-                </p>
-              </div>
-            </motion.button>
+                {/* Text */}
+                <div className="absolute inset-x-0 bottom-0 p-3 text-left">
+                  <p className="text-white font-bold text-sm leading-tight">{category}</p>
+                  <p className="text-white/45 text-[10px] mt-0.5 tabular-nums">
+                    {loading ? (
+                      <span className="inline-block w-12 h-2 bg-white/15 rounded animate-pulse" />
+                    ) : count !== undefined ? (
+                      `${count.toLocaleString('de-AT')} Events`
+                    ) : (
+                      'Entdecken'
+                    )}
+                  </p>
+                </div>
+              </Link>
+            </motion.div>
           );
         })}
       </div>

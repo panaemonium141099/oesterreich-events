@@ -136,6 +136,24 @@ export async function GET(): Promise<NextResponse> {
     }
   }
 
+  // ─── 5a. Theme hubs (Phase 3) ───────────────────────────────────────────
+  // 12 Austria-wide category hubs (`/thema/musik`, `/thema/kultur`, …).
+  // High priority — each hub aggregates thousands of events and is a
+  // top-level conceptual landing for the category's core search intent.
+  try {
+    const { ALL_THEMES } = await import('@/lib/themes/data');
+    for (const t of ALL_THEMES) {
+      entries.push({
+        loc: `${BASE_URL}/thema/${t.slug}`,
+        lastmod: toISO(now),
+        changefreq: 'daily',
+        priority: 0.85,
+      });
+    }
+  } catch (err) {
+    console.error('[sitemap] theme import failed:', err);
+  }
+
   // ─── 5b. Gemeinde hubs (Phase 2) ────────────────────────────────────────
   // ~2 028 URLs, one per registered Austrian municipality. Each hub
   // page renders events inside a 10 km radius around the village centre.
