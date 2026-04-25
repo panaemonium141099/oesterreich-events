@@ -4,7 +4,7 @@
 
 **Editorial integrity:** every event links back to its original source. Events are deduplicated, geocoded against the official Austrian gemeinde registry (~2,100 municipalities), and enriched with structured data (Schema.org Event JSON-LD, Open Graph, Twitter Cards).
 
-**Publisher:** Jonathan Panao-Rottensteiner — panaemonium141099 on GitHub. Contact via [/impressum](https://lasstreffen.at/impressum).
+**Publisher:** Jonathan Glatz — solo founder + builder. GitHub: panaemonium141099. Contact via [/impressum](https://lasstreffen.at/impressum).
 
 ## Main navigation
 
