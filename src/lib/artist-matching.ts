@@ -16,6 +16,7 @@
 
 import { SupabaseClient, createClient as createSupabaseClient } from '@supabase/supabase-js';
 import { normalizeArtistName as lineupNormalize } from '@/lib/lineup/normalize';
+import { buildEventUrlV2 } from '@/lib/utils/slugify';
 import {
   sendArtistAlertEmail,
   generateUnsubscribeToken,
@@ -698,18 +699,63 @@ export async function createGroupedNotifications(
 
   let created = 0;
 
-  // Insert notifications in batches
+  // ── Pre-fetch event URL fields ────────────────────────────────────
+  // Bulk-load slug/postal_code/address/bundesland for every distinct
+  // event_id so we can construct canonical V3 URLs in `action_url`
+  // instead of UUID-form. UUID URLs work for the server-side 308
+  // redirect but break client-side router.push() from notifications
+  // (RSC fetch chokes on the 308 — user sees "This page couldn't load",
+  // has to reload manually).
   const groupValues = Array.from(groups.values());
+  const eventIds = [...new Set(groupValues.map(g => g.event_id))];
+  const urlFieldsByEventId = new Map<string, {
+    slug: string | null;
+    postal_code: string | null;
+    address: string | null;
+    bundesland: string | null;
+    start_date: string | null;
+    location_name: string | null;
+  }>();
+  if (eventIds.length > 0) {
+    const { data: eventRows } = await supabase
+      .from('events')
+      .select('id, slug, postal_code, address, bundesland, start_date, location_name')
+      .in('id', eventIds);
+    for (const row of (eventRows ?? []) as Array<Record<string, string | null>>) {
+      urlFieldsByEventId.set(row.id as string, {
+        slug: row.slug,
+        postal_code: row.postal_code,
+        address: row.address,
+        bundesland: row.bundesland,
+        start_date: row.start_date,
+        location_name: row.location_name,
+      });
+    }
+  }
+
+  // Insert notifications in batches
   for (let i = 0; i < groupValues.length; i += BATCH_SIZE) {
-    const batch = groupValues.slice(i, i + BATCH_SIZE).map(g => ({
-      user_id: g.user_id,
-      type: 'spotify_match',
-      title: g.festival_name ? `Lineup Match: ${g.festival_name}` : 'Artist Match!',
-      body: formatNotificationBody(g.artists, g.festival_name ?? g.event_title, !!g.festival_name),
-      event_id: g.event_id,
-      action_url: `/events/${g.event_id}`,
-      read: false,
-    }));
+    const batch = groupValues.slice(i, i + BATCH_SIZE).map(g => {
+      const ev = urlFieldsByEventId.get(g.event_id);
+      const action_url = buildEventUrlV2({
+        id: g.event_id,
+        slug: ev?.slug ?? null,
+        start_date: ev?.start_date ?? null,
+        postal_code: ev?.postal_code ?? null,
+        address: ev?.address ?? null,
+        bundesland: ev?.bundesland ?? null,
+        location_name: ev?.location_name ?? null,
+      });
+      return {
+        user_id: g.user_id,
+        type: 'spotify_match',
+        title: g.festival_name ? `Lineup Match: ${g.festival_name}` : 'Artist Match!',
+        body: formatNotificationBody(g.artists, g.festival_name ?? g.event_title, !!g.festival_name),
+        event_id: g.event_id,
+        action_url,
+        read: false,
+      };
+    });
 
     // Use upsert with the partial unique index -- duplicates are ignored
     const { error, count } = await supabase

@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '@/lib/supabase/auth-context';
 import { createClient } from '@/lib/supabase/client';
+import { navigateFromNotification } from '@/lib/utils/notification-nav';
 
 interface ToastNotification {
   id: string;
@@ -39,7 +40,7 @@ export function NotificationToast() {
 
   const handleClick = useCallback((toast: ToastNotification) => {
     dismissToast(toast.id);
-    router.push(toast.action_url || '/notifications');
+    navigateFromNotification(toast.action_url || '/notifications', router);
   }, [dismissToast, router]);
 
   // Auto-dismiss after 5 seconds

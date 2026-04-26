@@ -8,6 +8,7 @@ import { DesktopPushToggle } from '@/components/Notifications/DesktopPushToggle'
 import { useAuth } from '@/lib/supabase/auth-context';
 import { createClient } from '@/lib/supabase/client';
 import { trackEvent } from '@/lib/analytics';
+import { navigateFromNotification } from '@/lib/utils/notification-nav';
 
 interface NotificationRow {
   id: string;
@@ -141,7 +142,10 @@ export function NotificationsPageClient() {
       );
     }
     if (notification.action_url) {
-      router.push(notification.action_url);
+      // Use the legacy-aware navigator — UUID-form event URLs need a
+      // hard nav so the server-side 308 lands cleanly. See
+      // src/lib/utils/notification-nav.ts for the rationale.
+      navigateFromNotification(notification.action_url, router);
     }
   };
 

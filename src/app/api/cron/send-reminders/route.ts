@@ -14,6 +14,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
+import { buildEventUrlV2 } from '@/lib/utils/slugify';
 import {
   sendArtistReminderEmail,
   generateUnsubscribeToken,
@@ -58,6 +59,16 @@ interface ReminderTarget {
   image_url: string | null;
   artist_name: string | null;
   source: 'saved' | 'artist_match';
+  // URL-builder fields — passed to buildEventUrlV2() so the
+  // notification's action_url is the canonical /events/{plz-ort}/{date}/
+  // {slug} form. Without these the URL falls back to the legacy UUID
+  // form, which works for the server-side 308-redirect but breaks
+  // client-side router.push() navigation from notifications (RSC fetch
+  // chokes on the 308 — user sees "This page couldn't load").
+  slug: string | null;
+  postal_code: string | null;
+  address: string | null;
+  bundesland: string | null;
 }
 
 interface WindowStats {
@@ -104,7 +115,7 @@ async function processWindow(
     .from('saved_events')
     .select(`
       user_id, event_id,
-      events!inner (id, title, start_date, location_name, ticket_url, image_url, publish_status)
+      events!inner (id, title, start_date, location_name, ticket_url, image_url, publish_status, slug, postal_code, address, bundesland)
     `)
     .gte('events.start_date', windowStart)
     .lt('events.start_date', windowEnd)
@@ -115,7 +126,7 @@ async function processWindow(
     .from('artist_event_notifications')
     .select(`
       user_id, event_id, artist_name,
-      events!inner (id, title, start_date, location_name, ticket_url, image_url, publish_status)
+      events!inner (id, title, start_date, location_name, ticket_url, image_url, publish_status, slug, postal_code, address, bundesland)
     `)
     .gte('events.start_date', windowStart)
     .lt('events.start_date', windowEnd)
@@ -139,6 +150,10 @@ async function processWindow(
         image_url: event.image_url,
         artist_name: null,
         source: 'saved',
+        slug: event.slug ?? null,
+        postal_code: event.postal_code ?? null,
+        address: event.address ?? null,
+        bundesland: event.bundesland ?? null,
       });
     }
   }
@@ -162,6 +177,10 @@ async function processWindow(
         image_url: event.image_url,
         artist_name: row.artist_name,
         source: 'artist_match',
+        slug: event.slug ?? null,
+        postal_code: event.postal_code ?? null,
+        address: event.address ?? null,
+        bundesland: event.bundesland ?? null,
       });
     }
   }
@@ -199,6 +218,19 @@ async function processWindow(
 
     const displayName = target.artist_name || target.event_title;
 
+    // Canonical event URL — uses slug + plz-ort + date so the notification
+    // click does a clean client-side navigation instead of triggering a
+    // 308 in the RSC fetch. See ReminderTarget interface for context.
+    const eventCanonicalPath = buildEventUrlV2({
+      id: target.event_id,
+      slug: target.slug,
+      start_date: target.event_date,
+      postal_code: target.postal_code,
+      address: target.address,
+      bundesland: target.bundesland,
+      location_name: target.location_name,
+    });
+
     // 5a. In-app notification (unique partial index prevents duplicates)
     const inAppEnabled = prefs ? prefs.channel_in_app !== false : true;
     if (inAppEnabled) {
@@ -210,7 +242,7 @@ async function processWindow(
           ? `In einer Woche: ${displayName} – Sichere dir jetzt Tickets!`
           : `Morgen: ${displayName} – Letzte Chance fuer Tickets!`,
         event_id: target.event_id,
-        action_url: `/events/${target.event_id}`,
+        action_url: eventCanonicalPath,
         read: false,
       });
 
@@ -242,7 +274,7 @@ async function processWindow(
             venueName: null,
             location: target.location_name || 'Österreich',
             ticketUrl: target.ticket_url,
-            eventPageUrl: `${baseUrl}/events/${target.event_id}`,
+            eventPageUrl: `${baseUrl}${eventCanonicalPath}`,
             unsubscribeUrl: `${baseUrl}/api/notifications/unsubscribe?user_id=${target.user_id}&token=${token}`,
             preferencesUrl: `${baseUrl}/settings`,
             daysUntil: daysAhead,
