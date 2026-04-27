@@ -9,6 +9,7 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { createClient } from '@supabase/supabase-js';
+import { scoreEvent } from '../lib/quality/score-event';
 
 // Load .env.local (tsx does not auto-load like Next.js does)
 try {
@@ -24,83 +25,12 @@ try {
     if (!process.env[key]) process.env[key] = value;
   }
 } catch { /* .env.local not found, rely on environment */ }
-// Self-contained scoring functions for backfill (independent of quality-scorer.ts)
-// These match the Phase 1 spec: 7 dimensions, max 100 points
-
-const AT_LAT_MIN = 46.3, AT_LAT_MAX = 49.1, AT_LNG_MIN = 9.5, AT_LNG_MAX = 17.2;
-
-function isOutsideAustria(lat: number | null, lng: number | null): boolean {
-  if (lat === null || lng === null) return false;
-  return lat < AT_LAT_MIN || lat > AT_LAT_MAX || lng < AT_LNG_MIN || lng > AT_LNG_MAX;
-}
-
-function scoreToPublishStatus(score: number): string {
-  if (score >= 60) return 'published';
-  if (score >= 40) return 'published_low_confidence';
-  if (score >= 20) return 'needs_review';
-  return 'suppressed';
-}
-
-function computeCompletenessScore(e: Record<string, unknown>): number {
-  let s = 0;
-  if (e.title && (e.title as string).length > 5) s += 5;
-  if (e.start_date) s += 5;
-  if (e.location_name) s += 5;
-  if (e.category) s += 3;
-  if (e.description && (e.description as string).length > 50) s += 4;
-  if (e.description && (e.description as string).length > 200) s += 3;
-  return s;
-}
-
-function computeDateScore(e: Record<string, unknown>): number {
-  let s = 0;
-  if (e.start_date) s += 5;
-  // Assume exact if time component present
-  const sd = e.start_date as string | null;
-  if (sd && sd.includes('T') && !sd.endsWith('T00:00:00')) s += 5;
-  if (sd) {
-    const d = new Date(sd);
-    const now = new Date();
-    const twoYears = new Date(); twoYears.setFullYear(twoYears.getFullYear() + 2);
-    if (d >= now && d <= twoYears) s += 3;
-  }
-  if (e.end_date) s += 2;
-  return s;
-}
-
-function computeLocationScore(e: Record<string, unknown>): number {
-  let s = 0;
-  if (e.latitude && e.longitude) s += 7;
-  if (e.address) s += 5;
-  if (e.location_name) s += 3;
-  if (e.latitude && e.longitude && !isOutsideAustria(e.latitude as number, e.longitude as number)) s += 5;
-  if (e.bundesland && e.postal_code) s += 5;
-  return Math.min(25, s);
-}
-
-function computeImageScore(e: Record<string, unknown>): number {
-  return e.image_url ? 10 : 0;
-}
-
-function computeLinkScore(e: Record<string, unknown>): number {
-  let s = 0;
-  if (e.source_url) s += 3;
-  if (e.ticket_url) s += 3;
-  if (e.source_url || e.ticket_url) s += 4;
-  return s;
-}
-
-function generateBackfillFlags(e: Record<string, unknown>): Array<{ event_id: string; flag_type: string; severity: string; details_json: unknown }> {
-  const flags: Array<{ event_id: string; flag_type: string; severity: string; details_json: unknown }> = [];
-  const id = e.id as string;
-  if (isOutsideAustria(e.latitude as number | null, e.longitude as number | null)) {
-    flags.push({ event_id: id, flag_type: 'outside_austria', severity: 'critical', details_json: { latitude: e.latitude, longitude: e.longitude } });
-  }
-  if (!e.location_name && !e.latitude) flags.push({ event_id: id, flag_type: 'missing_location', severity: 'high', details_json: null });
-  if (!e.description || (e.description as string).length < 20) flags.push({ event_id: id, flag_type: 'missing_description', severity: 'low', details_json: null });
-  if (!e.image_url) flags.push({ event_id: id, flag_type: 'missing_image', severity: 'low', details_json: null });
-  return flags;
-}
+// Scoring is delegated to src/lib/quality/score-event.ts so this script
+// and the at-ingest path in supabase-sync.ts produce IDENTICAL scores.
+// This file used to carry its own copies of the scoring helpers; that
+// duplication had already drifted (the old completeness call here
+// passed camelCase keys that the snake_case-keyed function couldn't
+// read, silently dropping ~10 points from every backfilled event).
 
 const BATCH_SIZE = 1000;
 const isDryRun = process.argv.includes('--dry-run');
@@ -128,37 +58,42 @@ async function main() {
   let totalProcessed = 0;
   const sourceScores: Map<string, { total: number; count: number }> = new Map();
 
-  // Fetch events in batches
-  let offset = 0;
+  // Fetch events in batches using cursor-based pagination on id.
+  //
+  // Why id-cursor instead of offset+range:
+  //   In LIVE mode every batch's UPDATE removes the just-processed events
+  //   from the (quality_score IS NULL) filter set. With offset-based
+  //   pagination the next .range(500, 999) then reads positions 500–999
+  //   of the SHRUNKEN set — which corresponds to events 1000–1499 of the
+  //   original ordering. Events 500–999 are silently skipped. Result:
+  //   ~50% of rows never get scored (~23k of 57k on the prior run).
+  //
+  //   Cursor-based on id avoids this entirely: each batch reads
+  //   `id > lastSeenId` from the still-NULL set. Even after rows leave
+  //   the filter, the next id-range is unambiguous and never re-reads or
+  //   skips. Works correctly in both DRY-RUN (filter stable) and LIVE
+  //   (filter shrinks).
+  let lastId: string | null = null;
   let hasMore = true;
 
   while (hasMore) {
-    const { data: events, error } = await supabase
+    let query = supabase
       .from('events')
       .select('*')
       .is('quality_score', null)
-      .range(offset, offset + BATCH_SIZE - 1)
-      .order('id');
+      .order('id')
+      .limit(BATCH_SIZE);
+    if (lastId !== null) {
+      query = query.gt('id', lastId);
+    }
+
+    const { data: events, error } = await query;
 
     if (error) {
       console.error('Fetch error:', error.message);
-      // Retry once after 5s
+      // Retry once after 5s. lastId is unchanged so the next iteration
+      // re-attempts the SAME batch — no skip on transient failures.
       await new Promise(r => setTimeout(r, 5000));
-      const retry = await supabase
-        .from('events')
-        .select('*')
-        .is('quality_score', null)
-        .range(offset, offset + BATCH_SIZE - 1)
-        .order('id');
-      if (retry.error) {
-        console.error('Retry failed, skipping batch:', retry.error.message);
-        offset += BATCH_SIZE;
-        continue;
-      }
-      // Use retry data
-      if (!retry.data || retry.data.length === 0) { hasMore = false; break; }
-      // fall through with retry.data below won't work cleanly, so just continue
-      offset += BATCH_SIZE;
       continue;
     }
     if (!events || events.length === 0) {
@@ -167,84 +102,78 @@ async function main() {
     }
 
     for (const event of events) {
-      // Generate flags
-      const flags = generateBackfillFlags(event);
-      const isBlocked = flags.some(f => f.flag_type === 'outside_austria');
-
-      let finalScore = 0;
-      let status: string;
-
-      if (isBlocked) {
-        finalScore = 0;
-        status = 'suppressed';
-        outsideAustriaCount++;
-      } else {
-        const completeness = computeCompletenessScore(event);
-        const dateScore = computeDateScore(event);
-        const locationScore = computeLocationScore(event);
-        const imageScore = computeImageScore(event);
-        const linkScore = computeLinkScore(event);
-        const dedupScore = 10; // Phase 1: no cluster, assume unique
-        const sourceTrust = 2; // Neutral for backfill (no run history yet)
-
-        finalScore = completeness + dateScore + locationScore + imageScore + linkScore + dedupScore + sourceTrust;
-        status = scoreToPublishStatus(finalScore);
-      }
+      // Single source of truth for scoring — see src/lib/quality/score-event.ts.
+      // dedup=10 (assume unique), source_trust=2 (neutral) for backfill,
+      // matching the previous self-contained logic.
+      const result = scoreEvent(event);
+      if (result.outside_austria) outsideAustriaCount++;
 
       // Histogram
-      if (finalScore < 20) scoreBuckets['0-19']++;
-      else if (finalScore < 40) scoreBuckets['20-39']++;
-      else if (finalScore < 60) scoreBuckets['40-59']++;
+      if (result.quality_score < 20) scoreBuckets['0-19']++;
+      else if (result.quality_score < 40) scoreBuckets['20-39']++;
+      else if (result.quality_score < 60) scoreBuckets['40-59']++;
       else scoreBuckets['60-100']++;
 
-      statusCounts[status as keyof typeof statusCounts]++;
+      statusCounts[result.publish_status]++;
 
       // Source tracking
       const src = (event.source_name as string) ?? 'unknown';
       const existing = sourceScores.get(src) ?? { total: 0, count: 0 };
-      existing.total += finalScore;
+      existing.total += result.quality_score;
       existing.count++;
       sourceScores.set(src, existing);
 
-      // LIVE MODE: Write to database
+      // LIVE MODE: persist flags + per-dimension breakdown + final score
       if (!isDryRun) {
-        // Write quality flags
+        // Replace flags for this event
         await supabase.from('quality_flags').delete().eq('event_id', event.id);
-        if (flags.length > 0) {
-          await supabase.from('quality_flags').insert(flags);
+        if (result.flags.length > 0) {
+          await supabase.from('quality_flags').insert(
+            result.flags.map(f => ({
+              event_id: event.id,
+              flag_type: f.flag_type,
+              severity: f.severity,
+              details_json: f.details ?? null,
+            })),
+          );
         }
 
-        // Write quality score
+        // Write per-dimension breakdown
         await supabase.from('event_quality_scores').upsert(
           {
             event_id: event.id,
-            completeness_score: isBlocked
-              ? 0
-              : computeCompletenessScore({
-                  title: event.title,
-                  startDate: event.start_date,
-                  locationName: event.location_name,
-                  category: event.category,
-                  description: event.description,
-                }),
-            date_score: isBlocked ? 0 : computeDateScore(event),
-            location_score: isBlocked ? 0 : computeLocationScore(event),
-            image_score: isBlocked ? 0 : computeImageScore(event),
-            link_score: isBlocked ? 0 : computeLinkScore(event),
-            dedup_confidence_score: isBlocked ? 0 : 10,
-            source_trust_score: isBlocked ? 0 : 2,
-            final_quality_score: finalScore,
+            completeness_score: result.breakdown.completeness,
+            date_score: result.breakdown.date,
+            location_score: result.breakdown.location,
+            image_score: result.breakdown.image,
+            link_score: result.breakdown.link,
+            dedup_confidence_score: result.breakdown.dedup,
+            source_trust_score: result.breakdown.source_trust,
+            final_quality_score: result.quality_score,
             scoring_version: 1,
           },
           { onConflict: 'event_id,scoring_version' },
         );
 
-        // Update event
+        // Update event row with score + computed publish_status.
+        // Note: like supabase-sync.ts, this preserves non-computed
+        // statuses (e.g. 'duplicate') so a backfill can't promote a
+        // dedup'd row back to 'published'.
+        const { data: existing } = await supabase
+          .from('events')
+          .select('publish_status')
+          .eq('id', event.id)
+          .single();
+        const COMPUTED = new Set(['published', 'published_low_confidence', 'needs_review', 'suppressed']);
+        const finalStatus =
+          existing?.publish_status && !COMPUTED.has(existing.publish_status)
+            ? existing.publish_status
+            : result.publish_status;
         await supabase
           .from('events')
           .update({
-            quality_score: finalScore,
-            publish_status: status,
+            quality_score: result.quality_score,
+            publish_status: finalStatus,
           })
           .eq('id', event.id);
       }
@@ -252,7 +181,10 @@ async function main() {
       totalProcessed++;
     }
 
-    offset += BATCH_SIZE;
+    // Cursor advance — next batch starts strictly after the last id we
+    // just processed. Monotonic in id-order, so it works regardless of
+    // whether the filter set is stable (dry-run) or shrinking (live).
+    lastId = events[events.length - 1].id;
     process.stdout.write(`\r  Processed: ${totalProcessed} events...`);
 
     if (events.length < BATCH_SIZE) hasMore = false;

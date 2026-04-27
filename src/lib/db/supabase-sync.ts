@@ -34,6 +34,7 @@ import {
 import { normalizeEventLocation } from '@/lib/location-normalizer';
 import { generateFingerprint } from '@/lib/dedup/fingerprint';
 import { generateEventSlug } from '@/lib/utils/slugify';
+import { scoreEvent } from '@/lib/quality/score-event';
 
 /**
  * Confidence precedence order (highest first).
@@ -116,7 +117,22 @@ interface ExistingRow {
    *  Google-indexed URLs, bookmarks, and social shares. See
    *  `resolveStableSlug()` below. */
   slug: string | null;
+  /** Existing publish_status — used to preserve non-computed values
+   *  (e.g. 'duplicate' set by dedup, or any future manual admin status)
+   *  on re-upsert. See COMPUTED_PUBLISH_STATUSES below. */
+  publish_status: string | null;
 }
+
+/** Statuses that the scoring pipeline owns. Everything else (e.g.
+ *  'duplicate' from dedup, future admin overrides) is preserved on
+ *  re-upsert so a routine scrape can't accidentally promote a
+ *  duplicate row back to 'published'. */
+const COMPUTED_PUBLISH_STATUSES = new Set([
+  'published',
+  'published_low_confidence',
+  'needs_review',
+  'suppressed',
+]);
 
 /**
  * Batch-prefetch existing rows by composite key (source_name, source_id).
@@ -151,7 +167,8 @@ async function prefetchExistingRows(
       .select(
         'source_name, source_id, latitude, longitude, geocoding_confidence, geocoding_source, ' +
           'category, tags, category_confidence, category_source, category_version, ' +
-          'category_locked, category_needs_review, category_reason, category_candidates, slug',
+          'category_locked, category_needs_review, category_reason, category_candidates, slug, ' +
+          'publish_status',
       )
       .in('source_name', uniqueSourceNames)
       .in('source_id', idSlice);
@@ -340,6 +357,37 @@ function toSupabaseRow(
     toExistingCategoryRow(existing),
   );
 
+  // ─── Quality scoring at ingest ───────────────────────────────────
+  // Compute against the FINAL resolved values (post-geocoding,
+  // post-canonical-category) so the score reflects what we'll actually
+  // persist, not the raw scraper input. Identical scoring function as
+  // backfill-quality.ts — they share src/lib/quality/score-event.ts.
+  //
+  // publish_status: only overwrite when the existing value is one of
+  // the computed statuses (or absent). Preserves dedup's 'duplicate'
+  // marking and any future admin overrides.
+  const score = scoreEvent({
+    title: event.title,
+    description: event.description ?? null,
+    start_date: event.start_date,
+    end_date: event.end_date ?? null,
+    location_name: resolved.locationName,
+    address: event.address ?? null,
+    postal_code: resolved.postalCode,
+    bundesland: event.bundesland ?? null,
+    category: canonical.category,
+    latitude: finalLat,
+    longitude: finalLng,
+    image_url: event.image_url ?? null,
+    source_url: event.source_url,
+    ticket_url: event.ticket_url ?? null,
+  });
+
+  const finalPublishStatus =
+    existing?.publish_status && !COMPUTED_PUBLISH_STATUSES.has(existing.publish_status)
+      ? existing.publish_status
+      : score.publish_status;
+
   return {
     source_type: 'scraped' as const,
     source_name: event.source_name,
@@ -379,6 +427,12 @@ function toSupabaseRow(
     organizer: event.organizer ?? null,
     ticket_url: event.ticket_url ?? null,
     visibility: 'public' as const,
+    // Quality score + publish_status set at ingest. Eliminates the
+    // "scrape writes qs=NULL → backfill-quality runs later" cycle.
+    // Same scoring function as backfill (src/lib/quality/score-event.ts);
+    // preserves non-computed publish_status values like 'duplicate'.
+    quality_score: score.quality_score,
+    publish_status: finalPublishStatus,
     geocoding_confidence: finalConfidence,
     geocoding_source: finalSource,
     content_fingerprint: generateFingerprint(event.title, event.start_date),
