@@ -73,37 +73,69 @@ export async function middleware(request: NextRequest) {
     }
   );
 
+  // ─── Supabase calls with hard timeout ──────────────────────────
+  //
+  // Both the session-refresh getUser() and the profile-existence
+  // lookup go to Supabase. On 2026-04-28 we observed every request
+  // 504-ing because Supabase was unreachable and these calls hung
+  // until Vercel's 25s middleware limit killed the function. The
+  // entire site went down for the duration of the Supabase incident.
+  //
+  // Defense in depth: race each call against a 3s timeout. If
+  // Supabase doesn't answer, we return `NextResponse.next()` without
+  // touching auth — the user is served the ISR-cached page the same
+  // way an anonymous request would be. The trade-off:
+  //   - they MAY momentarily appear logged-out on server-rendered
+  //     surfaces until Supabase recovers, but
+  //   - the site stays UP for everyone (most importantly Googlebot)
+  //     and the client-side AuthContext re-establishes the session
+  //     within seconds via its own subscription.
+  //
+  // Without this guard a 30-second Supabase blip becomes a 30-second
+  // total outage. With it, only auth-aware features degrade.
+  const withTimeout = async <T>(p: Promise<T>, ms = 3000): Promise<T | null> => {
+    let t: ReturnType<typeof setTimeout> | null = null;
+    try {
+      return await Promise.race<T | null>([
+        p,
+        new Promise<null>((resolve) => {
+          t = setTimeout(() => resolve(null), ms);
+        }),
+      ]);
+    } finally {
+      if (t) clearTimeout(t);
+    }
+  };
+
   // Refresh session if expired
-  const { data: { user } } = await supabase.auth.getUser();
+  const userResult = await withTimeout(
+    (async () => await supabase.auth.getUser())(),
+  );
+  if (!userResult) {
+    // Supabase didn't answer in time — bail out without session
+    // touch. Browser keeps its cookies; next refresh will retry.
+    return NextResponse.next({ request });
+  }
+  const { data: { user } } = userResult;
 
-  // Ghost-session detection. Supabase JWTs are self-contained — signature
-  // valid until the 1h access-token expiry. When an admin deletes a user
-  // via auth.admin.deleteUser(), `auth.users` is gone and so is the
-  // user's `profiles` row (FK CASCADE), but the deleted user's browser
-  // still holds a signature-valid JWT. Without this check they would
-  // appear logged-in on public pages (homepage, map, hub pages) until
-  // their access token expires up to an hour later.
-  //
-  // Profile row existence is our ground-truth indicator. If the JWT
-  // maps to a user without a profile, treat it as a ghost session and
-  // nuke the cookies. signOut({ scope: 'local' }) fires the cookies
-  // setAll callback above with expired entries — those get written
-  // onto `supabaseResponse`, the SSR pages reading `request.cookies`
-  // see cleared state, and the browser's next request no longer sends
-  // the dead cookie.
-  //
-  // We skip the profile round-trip when there's no user at all, so the
-  // lookup cost only applies to authenticated requests (a tiny, cached
-  // index lookup on `profiles.id` — primary key).
+  // Ghost-session detection — also timeout-protected. If the
+  // profile lookup hangs we pessimistically allow the request rather
+  // than block forever; a real ghost session is a much rarer harm
+  // than a sitewide outage. The next request will retry the check.
   if (user) {
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('id')
-      .eq('id', user.id)
-      .maybeSingle();
-
-    if (!profile) {
-      await supabase.auth.signOut({ scope: 'local' });
+    const profileResult = await withTimeout(
+      (async () =>
+        await supabase
+          .from('profiles')
+          .select('id')
+          .eq('id', user.id)
+          .maybeSingle())(),
+    );
+    if (profileResult && !profileResult.data) {
+      await withTimeout(
+        (async () => await supabase.auth.signOut({ scope: 'local' }))(),
+        1500,
+      );
     }
   }
 

@@ -840,21 +840,47 @@ function EventMap({ events, selectedEvent, hoveredEventId, onSelectEvent, evenin
     if (!map.current || !mapReady || !flyToCoords) return;
     const key = `${flyToCoords.lat},${flyToCoords.lng},${flyToCoords.zoom}`;
     if (lastFlyTo.current === key) return; // Already flew here
+
+    // ─── Don't auto-fly when we're already there ───────────────────
+    // Bug we're guarding against: the URL-state writeback in
+    // `moveend → replaceState` can — depending on Next.js's
+    // useSearchParams reactivity — round-trip into a new
+    // `flyToCoords` prop reference that holds the very coords the
+    // user just panned to. Without this distance check, that re-emit
+    // would trigger the `else` branch below, fly with `pitch: 45`
+    // for 2 seconds, and yank the camera mid-interaction. The user
+    // experience: "Kamera bewegt sich von alleine, Winkel ändert
+    // sich schlagartig". Skipping the fly when we're already at the
+    // target eliminates the surprise without breaking explicit
+    // user-driven dynamicFlyTo (sidebar click, search) which always
+    // jumps to a clearly different position.
+    const c = map.current.getCenter();
+    const z = map.current.getZoom();
+    const closeEnough =
+      Math.abs(c.lat - flyToCoords.lat) < 0.01 &&
+      Math.abs(c.lng - flyToCoords.lng) < 0.01 &&
+      Math.abs(z - flyToCoords.zoom) < 0.5;
+    if (closeEnough) {
+      lastFlyTo.current = key;
+      return;
+    }
+
     const isFirstFlyTo = lastFlyTo.current === null;
     lastFlyTo.current = key;
     if (isFirstFlyTo) {
       // First mount with URL-restored coords (user pressed Back from
       // an event detail page). Use jumpTo for an INSTANT restore — a
-      // 2s flyTo animation here would feel exactly like the page is
-      // "loading from scratch", which is the pain point we're fixing.
+      // 2s flyTo here would feel exactly like the page is "loading
+      // from scratch".
       map.current.jumpTo({
         center: [flyToCoords.lng, flyToCoords.lat],
         zoom: flyToCoords.zoom,
       });
     } else {
-      // Subsequent flyToCoords change during the same session (e.g. user
-      // clicked an event in the sidebar) — keep the smooth animation so
-      // the focal change is legible.
+      // Explicit user-driven dynamicFlyTo (sidebar click, search) —
+      // legitimate animation since the user just asked for a focal
+      // change. The closeEnough guard above already filtered out the
+      // "same position re-emit" case.
       setTimeout(() => {
         map.current?.flyTo({
           center: [flyToCoords.lng, flyToCoords.lat],
