@@ -1,17 +1,12 @@
 import { notFound, permanentRedirect } from 'next/navigation';
-import Link from 'next/link';
 import type { Metadata } from 'next';
 import { unstable_cache } from 'next/cache';
 import { createClient } from '@supabase/supabase-js';
 import type { Event } from '@/types/events';
-import { formatDateLong, formatTime } from '@/lib/utils/date';
 import { extractCity } from '@/lib/utils/city';
-import { buildEventUrl, buildEventUrlV2, extractShortId } from '@/lib/utils/slugify';
+import { buildEventUrlV2, extractShortId } from '@/lib/utils/slugify';
 import { resolvePrimaryEventImage } from '@/lib/event-images';
-import { buildCitableIntro } from '@/lib/seo/event-intro';
-import { EventDetailActions } from '@/components/Events/EventDetailActions';
-import { EventImage } from '@/components/Events/EventImage';
-import { RelatedEvents } from '@/components/Events/RelatedEvents';
+import { EventDetailV2, type FriendAttendee, type LineupAct } from '@/components/Events/EventDetailV2';
 
 /**
  * ISR revalidation interval.
@@ -472,18 +467,98 @@ function buildJsonLd(event: Event): string {
   return JSON.stringify(jsonLd).replace(/<\/script>/gi, '<\\/script>');
 }
 
-function buildLocationLink(
-  derivedCity: string | null,
-  bundesland: string | null,
-): string | null {
-  if (derivedCity && bundesland) {
-    return `/map?city=${encodeURIComponent(derivedCity)}&bundesland=${encodeURIComponent(bundesland)}`;
-  }
-  if (bundesland) {
-    return `/map?bundesland=${encodeURIComponent(bundesland)}`;
-  }
-  return null;
+function buildBundeslandHref(bundesland: string | null): string | null {
+  if (!bundesland) return null;
+  return `/map?bundesland=${encodeURIComponent(bundesland)}`;
 }
+
+/**
+ * Loads RSVP-style friends for an event.
+ *
+ * Strategy: an event is "social" if at least one `groups` row has it as
+ * `linked_event_id`. We then collect all members of those groups + their
+ * RSVP + profile so the friends section can render a real roster.
+ *
+ * For scraped events with no group attached this returns an empty array
+ * — the component gracefully degrades to a "Plan erstellen" CTA.
+ *
+ * Cached per-event-id; the cost is a single 2-step query but ISR caches
+ * the page for 1h anyway, so this only fires on cold renders.
+ */
+const getFriendsForEventCached = unstable_cache(
+  async (eventId: string): Promise<{ friends: FriendAttendee[]; rsvpTotals: { going: number; maybe: number } }> => {
+    const empty = { friends: [], rsvpTotals: { going: 0, maybe: 0 } };
+
+    const { data: groups, error: groupsErr } = await supabase
+      .from('groups')
+      .select('id')
+      .eq('linked_event_id', eventId);
+    if (groupsErr || !groups || groups.length === 0) return empty;
+
+    const groupIds = groups.map((g: { id: string }) => g.id);
+    const { data: members, error: membersErr } = await supabase
+      .from('group_members')
+      .select('user_id, rsvp, profile:profiles(id, first_name, last_name, avatar_url)')
+      .in('group_id', groupIds);
+    if (membersErr || !members) return empty;
+
+    type RawMember = {
+      user_id: string;
+      rsvp: 'accepted' | 'maybe' | 'declined' | 'pending' | null;
+      profile: { id: string; first_name: string; last_name: string | null; avatar_url: string | null } | { id: string; first_name: string; last_name: string | null; avatar_url: string | null }[] | null;
+    };
+    // Dedup by user_id (one person may sit in multiple groups linked to the
+    // same event). Prefer the "strongest" RSVP: accepted > maybe > pending > declined.
+    const rank: Record<string, number> = { accepted: 4, maybe: 3, pending: 2, declined: 1 };
+    const byUser = new Map<string, FriendAttendee>();
+    for (const m of (members as RawMember[])) {
+      const profile = Array.isArray(m.profile) ? m.profile[0] : m.profile;
+      if (!profile) continue;
+      const rsvp = (m.rsvp ?? 'pending') as FriendAttendee['rsvp'];
+      const existing = byUser.get(m.user_id);
+      if (existing && rank[existing.rsvp] >= rank[rsvp]) continue;
+      byUser.set(m.user_id, {
+        user_id: m.user_id,
+        first_name: profile.first_name,
+        last_name: profile.last_name,
+        avatar_url: profile.avatar_url,
+        rsvp,
+        city: null,
+      });
+    }
+    const friends = Array.from(byUser.values());
+    const going = friends.filter(f => f.rsvp === 'accepted').length;
+    const maybe = friends.filter(f => f.rsvp === 'maybe').length;
+    return { friends, rsvpTotals: { going, maybe } };
+  },
+  ['event-friends'],
+  { revalidate: 3600, tags: ['event'] },
+);
+
+/**
+ * Loads festival lineup acts ordered by start_time. Returns [] for
+ * non-festival events. Skip when no festival_artists table on a fresh
+ * deployment (graceful failure on missing relation).
+ */
+const getLineupForEventCached = unstable_cache(
+  async (eventId: string): Promise<LineupAct[]> => {
+    const { data, error } = await supabase
+      .from('festival_artists')
+      .select('artist_name_raw, stage, start_time')
+      .eq('derived_event_id', eventId)
+      .order('start_time', { ascending: true, nullsFirst: false });
+    if (error || !data) return [];
+    return data.map((a: { artist_name_raw: string; stage: string | null; start_time: string | null }) => ({
+      artist_name: a.artist_name_raw,
+      stage: a.stage,
+      start_time: a.start_time
+        ? new Date(a.start_time).toLocaleTimeString('de-AT', { hour: '2-digit', minute: '2-digit' })
+        : null,
+    }));
+  },
+  ['event-lineup'],
+  { revalidate: 3600, tags: ['event'] },
+);
 
 export default async function EventDetailPage({
   params,
@@ -570,10 +645,14 @@ export default async function EventDetailPage({
     }
   }
 
-  // Load venue data if event has a venue_id
-  const venue = event.venue_id ? await getVenue(event.venue_id) : null;
+  // Load venue + friends + lineup in parallel — they're independent.
+  const [venue, friendsData, lineup] = await Promise.all([
+    event.venue_id ? getVenue(event.venue_id) : Promise.resolve(null),
+    getFriendsForEventCached(event.id),
+    getLineupForEventCached(event.id),
+  ]);
 
-  // Derive city for Follow-City button and links
+  // Derive city for breadcrumb / map / stats
   const derivedCity = extractCity(
     { address: event.address, bundesland: event.bundesland },
     venue?.city,
@@ -581,9 +660,7 @@ export default async function EventDetailPage({
 
   // Only emit JSON-LD for fully published events (skip low confidence)
   const jsonLd = event.publish_status !== 'published_low_confidence' ? buildJsonLd(event) : null;
-  const startTime = formatTime(event.start_date);
-  const endTime = event.end_date ? formatTime(event.end_date) : null;
-  const locationLink = buildLocationLink(derivedCity, event.bundesland);
+  const bundeslandHref = buildBundeslandHref(event.bundesland);
 
   return (
     <>
@@ -593,172 +670,15 @@ export default async function EventDetailPage({
           dangerouslySetInnerHTML={{ __html: jsonLd }}
         />
       )}
-      <main className="min-h-screen bg-surface text-white">
-        <div className="max-w-3xl mx-auto px-4 py-8">
-          <EventDetailActions
-            eventId={event.id}
-            eventTitle={event.title}
-            eventSlug={event.slug}
-            city={derivedCity}
-            bundesland={event.bundesland}
-            venueId={event.venue_id}
-            venueName={venue?.name}
-            startDate={event.start_date}
-            postalCode={event.postal_code}
-            address={event.address}
-            locationName={event.location_name}
-          />
-
-          <div className="relative w-full aspect-video rounded-xl overflow-hidden mb-6">
-            <EventImage
-              src={event.image_url}
-              category={event.category}
-              title={event.title}
-              alt={event.title}
-              className="w-full h-full"
-              wrapperClassName="w-full h-full"
-              loading="eager"
-              fetchPriority="high"
-            />
-          </div>
-
-          <div className="space-y-4">
-            {event.category && (
-              <span className="inline-block bg-indigo-600/30 text-indigo-300 text-xs font-medium px-3 py-1 rounded-full border border-indigo-500/30">
-                {event.category}
-              </span>
-            )}
-
-            <h1 className="text-3xl font-bold leading-tight">{event.title}</h1>
-
-            <div className="flex flex-col gap-2 text-gray-300">
-              <div className="flex items-center gap-2">
-                <span aria-hidden="true">&#128197;</span>
-                <span>
-                  {formatDateLong(event.start_date)}
-                  {startTime && ` um ${startTime}`}
-                  {endTime && ` bis ${endTime}`}
-                </span>
-              </div>
-
-              {(event.location_name || event.address) && (
-                <div className="flex items-center gap-2">
-                  <span aria-hidden="true">&#128205;</span>
-                  <span>
-                    {/* Venue link */}
-                    {venue && event.venue_id ? (
-                      <Link
-                        href={`/venues/${event.venue_id}`}
-                        className="hover:text-white underline underline-offset-2 decoration-white/30 transition-colors"
-                      >
-                        {venue.name}
-                      </Link>
-                    ) : (
-                      event.location_name
-                    )}
-                    {/* City/region link */}
-                    {event.address && (
-                      <>
-                        {(venue || event.location_name) && ', '}
-                        {locationLink ? (
-                          <Link
-                            href={locationLink}
-                            className="hover:text-white underline underline-offset-2 decoration-white/30 transition-colors"
-                          >
-                            {event.address}
-                          </Link>
-                        ) : (
-                          event.address
-                        )}
-                      </>
-                    )}
-                  </span>
-                </div>
-              )}
-
-              {event.price_text && (
-                <div className="flex items-center gap-2">
-                  <span aria-hidden="true">&#127881;</span>
-                  <span>{event.price_text}</span>
-                </div>
-              )}
-
-              {event.organizer && (
-                <div className="flex items-center gap-2">
-                  <span aria-hidden="true">&#128101;</span>
-                  <span>{event.organizer}</span>
-                </div>
-              )}
-            </div>
-
-            {/* AI-citable intro — computed from structured fields so that
-                an AI agent (ChatGPT Browse, Perplexity, Claude Browse,
-                Google AI Overviews) always sees a grammatical
-                self-contained German sentence with date + venue + city.
-                Rendered _above_ event.description because scraped
-                descriptions often start with boilerplate the agents
-                can't cite cleanly. See src/lib/seo/event-intro.ts. */}
-            <p className="text-white/90 leading-relaxed">
-              {buildCitableIntro({
-                title: event.title,
-                start_date: event.start_date,
-                end_date: event.end_date,
-                location_name: event.location_name,
-                address: event.address,
-                venue_name: venue?.name ?? null,
-                city: derivedCity ?? null,
-                category: event.category,
-                price_text: event.price_text,
-              })}
-            </p>
-
-            {event.description && (
-              <p className="text-gray-300 leading-relaxed whitespace-pre-line">
-                {event.description}
-              </p>
-            )}
-
-            {event.tags && event.tags.length > 0 && (
-              <div className="flex flex-wrap gap-2">
-                {event.tags.map((tag) => (
-                  <span
-                    key={tag}
-                    className="bg-gray-800 text-gray-300 text-xs px-2 py-1 rounded-full"
-                  >
-                    {tag}
-                  </span>
-                ))}
-              </div>
-            )}
-
-            <div className="flex flex-wrap gap-3 pt-4">
-              {event.source_url && (
-                <a
-                  href={event.source_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
-                >
-                  Zur Veranstaltung
-                </a>
-              )}
-              {event.ticket_url && (
-                <a
-                  href={event.ticket_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="bg-green-600 hover:bg-green-500 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
-                >
-                  Tickets kaufen
-                </a>
-              )}
-            </div>
-          </div>
-
-          {/* Related Events */}
-          <RelatedEvents eventId={event.id} />
-        </div>
-      </main>
+      <EventDetailV2
+        event={event}
+        venue={venue}
+        derivedCity={derivedCity}
+        bundeslandHref={bundeslandHref}
+        friends={friendsData.friends}
+        rsvpTotals={friendsData.rsvpTotals}
+        lineup={lineup}
+      />
     </>
   );
 }
