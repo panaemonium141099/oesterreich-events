@@ -123,13 +123,29 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         // fetchProfile sets `profile` when found; we explicitly handle the
         // missing case here so there's no silent logged-in-but-no-profile
         // state.
-        const { data: profileRow } = await supabase
+        //
+        // CRITICAL: distinguish between "profile genuinely missing" (ghost
+        // session — user was deleted) and "query failed" (network blip,
+        // Supabase timeout, mobile flaky WiFi). Without the error check we
+        // observed an infinite reload loop on mobile devices: every flaky
+        // network = reload, reload runs the same flaky network call,
+        // forever. The user sees a white-screen + reload loop.
+        const { data: profileRow, error: profileError } = await supabase
           .from('profiles')
           .select('*')
           .eq('id', session.user.id)
           .maybeSingle();
 
         if (!mounted) return;
+
+        if (profileError) {
+          // Network / Supabase error. NOT a ghost session — keep what we
+          // have, leave the user logged in. The session can be re-checked
+          // on next interaction without nuking local state. Worst case:
+          // the user sees stale profile data for a few seconds.
+          console.warn('[auth] profile probe failed (keeping session):', profileError.message);
+          return;
+        }
 
         if (!profileRow) {
           // Ghost session — user was deleted (probably by an admin). Nuke
