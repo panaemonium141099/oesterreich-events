@@ -12,6 +12,7 @@ import { AuthProvider } from '@/lib/supabase/auth-context';
 import { AnimatedLayout } from '@/components/UI/AnimatedLayout';
 import { NotificationToast } from '@/components/Notifications/NotificationToast';
 import { SocialNav } from '@/components/Layout/SocialNav';
+import { SavedEventsProvider } from '@/lib/saved-events-context';
 import { Toaster } from 'sonner';
 import { fraunces, geist, caveat } from '@/lib/fonts';
 import './globals.css';
@@ -132,10 +133,33 @@ const organizationJsonLd = {
   },
 };
 
+/**
+ * Root layout with parallel `@modal` slot for intercepting routes.
+ *
+ * The `modal` prop is bound by Next.js to whatever the `@modal/...`
+ * folder resolves to for the current URL:
+ *   - default URL (e.g. /map, /feed, /)            → app/@modal/default.tsx → null
+ *   - /events/... reached via soft-nav from a sibling route
+ *                                                  → app/@modal/(.)events/[...slug]/page.tsx → EventSheet
+ *   - /events/... reached directly (refresh, hard nav, share)
+ *                                                  → app/@modal/default.tsx → null,
+ *                                                    children renders the full event page
+ *
+ * Effect: clicking "Details öffnen" on the map bubble opens the event
+ * detail as a sheet *over* the map (map stays mounted — back button
+ * just dismisses the sheet, all 13k events still loaded). Direct URL
+ * access still serves the canonical full page.
+ *
+ * Constraint: SavedEventsProvider lifted to root so children + modal
+ * share the same saved-events state. Saving from inside the sheet
+ * updates the marker's saved-class on the underlying map immediately.
+ */
 export default function RootLayout({
   children,
+  modal,
 }: {
   children: React.ReactNode;
+  modal: React.ReactNode;
 }) {
   return (
     <html lang="de" className={`${fraunces.variable} ${geist.variable} ${caveat.variable}`}>
@@ -163,23 +187,26 @@ export default function RootLayout({
       </head>
       <body className="antialiased">
         <AuthProvider>
-          <AnimatedLayout>
-            {children}
-          </AnimatedLayout>
-          <Toaster
-            theme="dark"
-            position="bottom-center"
-            toastOptions={{
-              style: {
-                background: '#141416',
-                border: '1px solid rgba(255, 255, 255, 0.06)',
-                color: '#f1f5f9',
-              },
-            }}
-          />
-          <SocialNav />
-          <NotificationToast />
-          {/* <CookieBanner /> — see import comment above */}
+          <SavedEventsProvider>
+            <AnimatedLayout>
+              {children}
+            </AnimatedLayout>
+            {modal}
+            <Toaster
+              theme="dark"
+              position="bottom-center"
+              toastOptions={{
+                style: {
+                  background: '#141416',
+                  border: '1px solid rgba(255, 255, 255, 0.06)',
+                  color: '#f1f5f9',
+                },
+              }}
+            />
+            <SocialNav />
+            <NotificationToast />
+            {/* <CookieBanner /> — see import comment above */}
+          </SavedEventsProvider>
         </AuthProvider>
       </body>
     </html>

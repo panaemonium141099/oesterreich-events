@@ -20,7 +20,7 @@ import { trackEvent } from '@/lib/analytics';
 import { useAuth } from '@/lib/supabase/auth-context';
 import { createClient } from '@/lib/supabase/client';
 import { distanceKm, getStoredLocation, storeLocation } from '@/lib/geolocation';
-import { SavedEventsProvider, useSavedEvents } from '@/lib/saved-events-context';
+import { useSavedEvents } from '@/lib/saved-events-context';
 import Link from 'next/link';
 
 const EventMap = dynamic(() => import('@/components/Map/EventMap'), {
@@ -47,9 +47,11 @@ export default function MapPage() {
       <h1 className="sr-only">
         Event-Karte Österreich — Konzerte, Festivals, Märkte und Veranstaltungen auf Karte
       </h1>
-      <SavedEventsProvider>
-        <MapPageInner />
-      </SavedEventsProvider>
+      {/* SavedEventsProvider lifted to root layout — see src/app/layout.tsx.
+          Hoist was needed for the @modal intercepting route to share the same
+          saved-events state with the map (so saving from inside the event
+          sheet updates the marker's saved-class on the underlying map). */}
+      <MapPageInner />
     </Suspense>
   );
 }
