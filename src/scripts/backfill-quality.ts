@@ -10,6 +10,7 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { createClient } from '@supabase/supabase-js';
 import { scoreEvent } from '../lib/quality/score-event';
+import { makeBulkUpdater } from '../lib/db/bulk-update';
 
 // Load .env.local (tsx does not auto-load like Next.js does)
 try {
@@ -47,6 +48,16 @@ async function main() {
   const supabase = createClient(supabaseUrl, serviceRoleKey, {
     auth: { persistSession: false },
   });
+
+  // 3 Bulk-Updater statt 5 Round-Trips pro Event.
+  // Pre-Refactor: pro Event = DELETE flags + INSERT flags + UPSERT scores
+  //   + SELECT publish_status + UPDATE event = 5 PostgREST round-trips.
+  // Now: pro 500-Event-Batch = 3 RPC-Calls (flags ersetzen, scores
+  //   upserten, events publish setzen). Der Publish-RPC hat den
+  //   duplicate/archived guard eingebaut, also kein SELECT pro Event mehr.
+  const flagsUpdater = makeBulkUpdater(supabase, 'bulk_replace_event_quality_flags');
+  const scoresUpdater = makeBulkUpdater(supabase, 'bulk_upsert_event_quality_scores');
+  const publishUpdater = makeBulkUpdater(supabase, 'bulk_update_event_publish');
 
   console.log(`\nBackfill Quality Scores (${isDryRun ? 'DRY RUN' : 'LIVE'})`);
   console.log('='.repeat(60));
@@ -123,59 +134,44 @@ async function main() {
       existing.count++;
       sourceScores.set(src, existing);
 
-      // LIVE MODE: persist flags + per-dimension breakdown + final score
+      // LIVE MODE: queue flags + score-breakdown + publish update.
+      // Alle 3 Updater auto-flushen bei 500. Final flush nach der Loop.
       if (!isDryRun) {
-        // Replace flags for this event
-        await supabase.from('quality_flags').delete().eq('event_id', event.id);
-        if (result.flags.length > 0) {
-          await supabase.from('quality_flags').insert(
-            result.flags.map(f => ({
-              event_id: event.id,
-              flag_type: f.flag_type,
-              severity: f.severity,
-              details_json: f.details ?? null,
-            })),
-          );
-        }
+        // 1) Flags-Replacement (DELETE+INSERT atomic im RPC)
+        await flagsUpdater.add({
+          id: event.id,                     // BulkUpdater fordert id; wird nicht
+          event_id: event.id,               // benutzt vom RPC, nutzt event_id stattdessen
+          flags: result.flags.map(f => ({
+            flag_type: f.flag_type,
+            severity: f.severity,
+            details_json: f.details ?? null,
+          })),
+        });
 
-        // Write per-dimension breakdown
-        await supabase.from('event_quality_scores').upsert(
-          {
-            event_id: event.id,
-            completeness_score: result.breakdown.completeness,
-            date_score: result.breakdown.date,
-            location_score: result.breakdown.location,
-            image_score: result.breakdown.image,
-            link_score: result.breakdown.link,
-            dedup_confidence_score: result.breakdown.dedup,
-            source_trust_score: result.breakdown.source_trust,
-            final_quality_score: result.quality_score,
-            scoring_version: 1,
-          },
-          { onConflict: 'event_id,scoring_version' },
-        );
+        // 2) Per-Dimension Breakdown (UPSERT)
+        await scoresUpdater.add({
+          id: event.id,
+          event_id: event.id,
+          completeness_score: result.breakdown.completeness,
+          date_score: result.breakdown.date,
+          location_score: result.breakdown.location,
+          image_score: result.breakdown.image,
+          link_score: result.breakdown.link,
+          dedup_confidence_score: result.breakdown.dedup,
+          source_trust_score: result.breakdown.source_trust,
+          final_quality_score: result.quality_score,
+          scoring_version: 1,
+        });
 
-        // Update event row with score + computed publish_status.
-        // Note: like supabase-sync.ts, this preserves non-computed
-        // statuses (e.g. 'duplicate') so a backfill can't promote a
-        // dedup'd row back to 'published'.
-        const { data: existing } = await supabase
-          .from('events')
-          .select('publish_status')
-          .eq('id', event.id)
-          .single();
-        const COMPUTED = new Set(['published', 'published_low_confidence', 'needs_review', 'suppressed']);
-        const finalStatus =
-          existing?.publish_status && !COMPUTED.has(existing.publish_status)
-            ? existing.publish_status
-            : result.publish_status;
-        await supabase
-          .from('events')
-          .update({
-            quality_score: result.quality_score,
-            publish_status: finalStatus,
-          })
-          .eq('id', event.id);
+        // 3) Publish-Status + Quality-Score am events-Row.
+        // RPC hat duplicate/archived guard eingebaut → kein SELECT pro
+        // Event nötig. Der Status wird einfach gesetzt; Rows mit
+        // publish_status='duplicate' werden vom RPC übersprungen.
+        await publishUpdater.add({
+          id: event.id,
+          publish_status: result.publish_status,
+          quality_score: result.quality_score,
+        });
       }
 
       totalProcessed++;
@@ -188,6 +184,21 @@ async function main() {
     process.stdout.write(`\r  Processed: ${totalProcessed} events...`);
 
     if (events.length < BATCH_SIZE) hasMore = false;
+  }
+
+  // Final flushes — verbleibende <500 Rows aus jedem Updater rauspushen
+  if (!isDryRun) {
+    await Promise.all([
+      flagsUpdater.flush().catch(e => console.error(`flags flush: ${e.message}`)),
+      scoresUpdater.flush().catch(e => console.error(`scores flush: ${e.message}`)),
+      publishUpdater.flush().catch(e => console.error(`publish flush: ${e.message}`)),
+    ]);
+    console.log(
+      `\n  Bulk-RPC summary:\n`
+      + `    flags:   ${flagsUpdater.stats.flushes} calls, ${flagsUpdater.stats.affected} inserted, ${flagsUpdater.stats.errors} errs\n`
+      + `    scores:  ${scoresUpdater.stats.flushes} calls, ${scoresUpdater.stats.affected} affected, ${scoresUpdater.stats.errors} errs\n`
+      + `    publish: ${publishUpdater.stats.flushes} calls, ${publishUpdater.stats.affected} affected, ${publishUpdater.stats.errors} errs`,
+    );
   }
 
   // Print results

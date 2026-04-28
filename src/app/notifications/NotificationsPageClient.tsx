@@ -1,34 +1,17 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { ProfileDropdown } from '@/components/Layout/ProfileDropdown';
 import { NotificationBell } from '@/components/Notifications/NotificationBell';
 import { DesktopPushToggle } from '@/components/Notifications/DesktopPushToggle';
 import { useAuth } from '@/lib/supabase/auth-context';
-import { createClient } from '@/lib/supabase/client';
 import { trackEvent } from '@/lib/analytics';
 import { navigateFromNotification } from '@/lib/utils/notification-nav';
-
-interface NotificationRow {
-  id: string;
-  user_id: string;
-  type: string;
-  title: string;
-  body: string | null;
-  event_id: string | null;
-  group_id: string | null;
-  from_user_id: string | null;
-  action_url: string | null;
-  read: boolean;
-  read_at: string | null;
-  created_at: string;
-  from_user: {
-    first_name: string;
-    last_name: string;
-    avatar_url: string | null;
-  } | null;
-}
+import {
+  useNotifications,
+  type NotificationRow,
+} from '@/components/Notifications/NotificationsProvider';
 
 function timeAgo(dateStr: string): string {
   const seconds = Math.floor((Date.now() - new Date(dateStr).getTime()) / 1000);
@@ -75,9 +58,15 @@ function groupByDate(notifications: NotificationRow[]): { label: string; items: 
 export function NotificationsPageClient() {
   const { user, loading } = useAuth();
   const router = useRouter();
-  const supabase = createClient();
-  const [notifications, setNotifications] = useState<NotificationRow[]>([]);
-  const [loadingData, setLoadingData] = useState(true);
+  // Pre-Refactor: hatte eigenen Channel + eigene fetch/state-Logik. Jetzt:
+  // alles aus dem NotificationsProvider Context — eine shared Subscription
+  // pro User für Bell + Toast + Page.
+  const {
+    notifications,
+    loading: loadingData,
+    markAllRead,
+    markOneRead: providerMarkOneRead,
+  } = useNotifications();
 
   useEffect(() => {
     if (!loading && !user) {
@@ -87,60 +76,8 @@ export function NotificationsPageClient() {
 
   useEffect(() => { trackEvent('page_view', { path: '/notifications' }); }, []);
 
-  const fetchNotifications = useCallback(async () => {
-    if (!user) return;
-    setLoadingData(true);
-    const { data } = await supabase
-      .from('notifications')
-      .select('*, from_user:profiles!notifications_from_user_id_fkey(first_name, last_name, avatar_url)')
-      .eq('user_id', user.id)
-      .order('created_at', { ascending: false })
-      .limit(50);
-
-    setNotifications((data as NotificationRow[]) || []);
-    setLoadingData(false);
-  }, [user, supabase]);
-
-  useEffect(() => {
-    fetchNotifications();
-  }, [fetchNotifications]);
-
-  // Realtime: refresh on INSERT
-  useEffect(() => {
-    if (!user) return;
-    const channel = supabase
-      .channel('notifications-page')
-      .on(
-        'postgres_changes',
-        { event: 'INSERT', schema: 'public', table: 'notifications', filter: `user_id=eq.${user.id}` },
-        () => { fetchNotifications(); }
-      )
-      .subscribe();
-    return () => { supabase.removeChannel(channel); };
-  }, [user, supabase, fetchNotifications]);
-
-  const markAllRead = async () => {
-    if (!user) return;
-    const now = new Date().toISOString();
-    await supabase
-      .from('notifications')
-      .update({ read: true, read_at: now })
-      .eq('user_id', user.id)
-      .eq('read', false);
-    setNotifications((prev) => prev.map((n) => ({ ...n, read: true, read_at: now })));
-  };
-
   const markOneRead = async (notification: NotificationRow) => {
-    if (!notification.read) {
-      const now = new Date().toISOString();
-      await supabase
-        .from('notifications')
-        .update({ read: true, read_at: now })
-        .eq('id', notification.id);
-      setNotifications((prev) =>
-        prev.map((n) => n.id === notification.id ? { ...n, read: true, read_at: now } : n)
-      );
-    }
+    await providerMarkOneRead(notification);
     if (notification.action_url) {
       // Use the legacy-aware navigator — UUID-form event URLs need a
       // hard nav so the server-side 308 lands cleanly. See

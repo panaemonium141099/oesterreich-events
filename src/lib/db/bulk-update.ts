@@ -39,7 +39,9 @@ export type BulkRpcName =
   | 'bulk_update_event_geocoding'
   | 'bulk_update_event_enrichment'
   | 'bulk_update_event_slugs'
-  | 'bulk_update_event_publish';
+  | 'bulk_update_event_publish'
+  | 'bulk_replace_event_quality_flags'
+  | 'bulk_upsert_event_quality_scores';
 
 export interface BulkUpdaterOptions {
   /** Ziel-RPC (muss in der DB existieren). */

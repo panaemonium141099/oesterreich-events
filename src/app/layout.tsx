@@ -11,6 +11,7 @@ import { AuthProvider } from '@/lib/supabase/auth-context';
 // File kept at src/components/Legal/CookieBanner.tsx for reference/rollback.
 import { AnimatedLayout } from '@/components/UI/AnimatedLayout';
 import { NotificationToast } from '@/components/Notifications/NotificationToast';
+import { NotificationsProvider } from '@/components/Notifications/NotificationsProvider';
 import { SocialNav } from '@/components/Layout/SocialNav';
 import { SavedEventsProvider } from '@/lib/saved-events-context';
 import { Toaster } from 'sonner';
@@ -187,26 +188,28 @@ export default function RootLayout({
       </head>
       <body className="antialiased">
         <AuthProvider>
-          <SavedEventsProvider>
-            <AnimatedLayout>
-              {children}
-            </AnimatedLayout>
-            {modal}
-            <Toaster
-              theme="dark"
-              position="bottom-center"
-              toastOptions={{
-                style: {
-                  background: '#141416',
-                  border: '1px solid rgba(255, 255, 255, 0.06)',
-                  color: '#f1f5f9',
-                },
-              }}
-            />
-            <SocialNav />
-            <NotificationToast />
-            {/* <CookieBanner /> — see import comment above */}
-          </SavedEventsProvider>
+          <NotificationsProvider>
+            <SavedEventsProvider>
+              <AnimatedLayout>
+                {children}
+              </AnimatedLayout>
+              {modal}
+              <Toaster
+                theme="dark"
+                position="bottom-center"
+                toastOptions={{
+                  style: {
+                    background: '#141416',
+                    border: '1px solid rgba(255, 255, 255, 0.06)',
+                    color: '#f1f5f9',
+                  },
+                }}
+              />
+              <SocialNav />
+              <NotificationToast />
+              {/* <CookieBanner /> — see import comment above */}
+            </SavedEventsProvider>
+          </NotificationsProvider>
         </AuthProvider>
       </body>
     </html>

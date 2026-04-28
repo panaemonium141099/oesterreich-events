@@ -1,58 +1,24 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useEffect } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/lib/supabase/auth-context';
-import { createClient } from '@/lib/supabase/client';
+import { useNotifications } from '@/components/Notifications/NotificationsProvider';
 
 interface NotificationBellProps {
   className?: string;
 }
 
+/**
+ * Pre-Refactor: hatte einen eigenen `supabase.channel('notification-bell')`
+ * Subscription mit user-id Filter. Drei Komponenten (Bell, Toast,
+ * NotificationsPage) hatten alle ihren eigenen Channel = 3× WAL-Decode pro
+ * Notification-Event pro eingeloggtem User. Jetzt: lesen aus dem
+ * NotificationsProvider Context, der EINE shared Subscription pro User hält.
+ */
 export function NotificationBell({ className }: NotificationBellProps) {
   const { user } = useAuth();
-  const supabase = createClient();
-  const [unreadCount, setUnreadCount] = useState(0);
-
-  const fetchCount = useCallback(async () => {
-    if (!user) return;
-    try {
-      const { count } = await supabase
-        .from('notifications')
-        .select('*', { count: 'exact', head: true })
-        .eq('user_id', user.id)
-        .eq('read', false);
-      setUnreadCount(count || 0);
-    } catch {
-      // ignore
-    }
-  }, [user, supabase]);
-
-  useEffect(() => {
-    fetchCount();
-    const interval = setInterval(fetchCount, 30000);
-    return () => clearInterval(interval);
-  }, [fetchCount]);
-
-  // Realtime subscription for new notifications
-  useEffect(() => {
-    if (!user) return;
-    const channel = supabase
-      .channel('notification-bell')
-      .on(
-        'postgres_changes',
-        { event: 'INSERT', schema: 'public', table: 'notifications', filter: `user_id=eq.${user.id}` },
-        () => { fetchCount(); }
-      )
-      .on(
-        'postgres_changes',
-        { event: 'UPDATE', schema: 'public', table: 'notifications', filter: `user_id=eq.${user.id}` },
-        () => { fetchCount(); }
-      )
-      .subscribe();
-
-    return () => { supabase.removeChannel(channel); };
-  }, [user, supabase, fetchCount]);
+  const { unreadCount } = useNotifications();
 
   // Tab-title badge — prefix "(N) " while there are unread notifications, restore on cleanup.
   useEffect(() => {

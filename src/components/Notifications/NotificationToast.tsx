@@ -1,11 +1,12 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '@/lib/supabase/auth-context';
 import { createClient } from '@/lib/supabase/client';
 import { navigateFromNotification } from '@/lib/utils/notification-nav';
+import { useNotifications } from '@/components/Notifications/NotificationsProvider';
 
 interface ToastNotification {
   id: string;
@@ -28,10 +29,18 @@ function timeAgo(dateStr: string): string {
   return `vor ${Math.floor(hours / 24)} T.`;
 }
 
+/**
+ * Pre-Refactor: eigener `supabase.channel('notification-toast')` mit
+ * INSERT-Listener — fetchte das from_user-Profil pro Toast separat. Jetzt:
+ * NotificationsProvider hält die shared Subscription, gibt uns via
+ * `onNewNotification` Callback Bescheid. Das from_user-Profil ist im
+ * Provider-Fetch schon mit drin (notifications joined mit profiles).
+ */
 export function NotificationToast() {
   const { user } = useAuth();
   const supabase = createClient();
   const router = useRouter();
+  const { onNewNotification } = useNotifications();
   const [toasts, setToasts] = useState<ToastNotification[]>([]);
 
   const dismissToast = useCallback((id: string) => {
@@ -52,43 +61,44 @@ export function NotificationToast() {
     return () => timers.forEach(clearTimeout);
   }, [toasts, dismissToast]);
 
-  // Realtime subscription for new notifications
+  // Subscribe to new-notification events from the shared Provider channel.
   useEffect(() => {
     if (!user) return;
 
-    const channel = supabase
-      .channel('notification-toast')
-      .on(
-        'postgres_changes',
-        { event: 'INSERT', schema: 'public', table: 'notifications', filter: `user_id=eq.${user.id}` },
-        async (payload: { new: Record<string, unknown> }) => {
-          const n = payload.new as unknown as ToastNotification;
-          let fromInitial = '?';
-          let fromAvatar: string | null = null;
+    const unsubscribe = onNewNotification(async (n) => {
+      let fromInitial = '?';
+      let fromAvatar: string | null = null;
 
-          if (n.from_user_id) {
-            const { data: profile } = await supabase
-              .from('profiles')
-              .select('first_name, avatar_url')
-              .eq('id', n.from_user_id)
-              .single();
-            if (profile) {
-              fromInitial = profile.first_name?.[0]?.toUpperCase() || '?';
-              fromAvatar = profile.avatar_url;
-            }
-          }
-
-          setToasts((prev) => {
-            const next = [{ ...n, fromInitial, fromAvatar }, ...prev];
-            // Max 3 visible
-            return next.slice(0, 3);
-          });
+      // Provider's INSERT-Payload kommt direkt vom Realtime-Event (kein
+      // join), also nochmal das Profil holen. Nur 1 Query pro neuer
+      // Notification, nicht pro Subscriber.
+      if (n.from_user_id) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('first_name, avatar_url')
+          .eq('id', n.from_user_id)
+          .single();
+        if (profile) {
+          fromInitial = profile.first_name?.[0]?.toUpperCase() || '?';
+          fromAvatar = profile.avatar_url;
         }
-      )
-      .subscribe();
+      }
 
-    return () => { supabase.removeChannel(channel); };
-  }, [user, supabase]);
+      const toast: ToastNotification = {
+        id: n.id,
+        title: n.title,
+        body: n.body,
+        action_url: n.action_url,
+        from_user_id: n.from_user_id,
+        created_at: n.created_at,
+        fromInitial,
+        fromAvatar,
+      };
+      setToasts((prev) => [toast, ...prev].slice(0, 3));  // max 3 visible
+    });
+
+    return unsubscribe;
+  }, [user, supabase, onNewNotification]);
 
   return (
     <div className="fixed bottom-20 right-4 z-50 flex flex-col gap-2">
