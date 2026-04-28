@@ -91,9 +91,21 @@ export function AfterSavePanel({
           transition={{ duration: 0.2, ease: 'easeOut' }}
           className="overflow-hidden"
         >
-          <div className="mt-4 p-4 rounded-xl bg-white/5 border border-white/10">
+          {/* Solid dark surface — the panel can render on top of a
+              full-bleed hero image (event detail page or sheet), so a
+              5%-white tint was barely legible against bright photos.
+              Now: opaque #141416 (matches design-system surface-elevated)
+              with backdrop-blur as a fallback for the rare case the
+              parent surface peeks through transparent corners. */}
+          <div
+            className="mt-4 p-4 rounded-xl border border-white/10 shadow-lg"
+            style={{
+              background: '#141416',
+              backdropFilter: 'blur(12px)',
+            }}
+          >
             <div className="flex items-center justify-between mb-3">
-              <p className="text-sm font-medium text-white/80">
+              <p className="text-sm font-semibold text-white">
                 Event gespeichert
               </p>
               <button
@@ -102,7 +114,7 @@ export function AfterSavePanel({
                 aria-label="Schliessen"
               >
                 <svg
-                  className="w-4 h-4 text-white/40"
+                  className="w-4 h-4 text-white/60"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -122,10 +134,10 @@ export function AfterSavePanel({
               <button
                 onClick={handleSetReminder}
                 disabled={reminderLoading || reminderSet}
-                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-200 ${
+                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-all duration-200 ${
                   reminderSet
-                    ? 'bg-green-600/20 text-green-400 border border-green-500/30'
-                    : 'bg-white/5 text-white/60 border border-white/10 hover:bg-white/10 hover:text-white/80'
+                    ? 'bg-green-600/30 text-green-300 border border-green-500/40'
+                    : 'bg-white/10 text-white border border-white/15 hover:bg-white/20'
                 }`}
               >
                 <svg
@@ -157,7 +169,7 @@ export function AfterSavePanel({
               {/* Share */}
               <button
                 onClick={() => setShowShareSheet(true)}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium bg-white/5 text-white/60 border border-white/10 hover:bg-white/10 hover:text-white/80 transition-all duration-200"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-white/10 text-white border border-white/15 hover:bg-white/20 transition-all duration-200"
               >
                 <svg
                   className="w-3.5 h-3.5"
