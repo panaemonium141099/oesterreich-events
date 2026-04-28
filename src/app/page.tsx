@@ -23,10 +23,31 @@ export default async function LandingPage({
   const forceHome = 'home' in params;
 
   if (!forceHome) {
-    const supabase = await createServerSupabaseClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (user) {
-      redirect('/feed');
+    // Auth check with hard timeout — Supabase outages were causing the
+    // landing page to hang at 50% loading on mobile (verified 2026-04-28
+    // when Supabase had a connection-timeout incident; auth.getUser()
+    // never returned, the server render blocked indefinitely, the user
+    // saw an unfinished progress bar).
+    //
+    // Wrap the call in Promise.race against a 2s timer. If Supabase
+    // doesn't answer in time we render the landing page anonymously
+    // (no redirect to /feed). A logged-in user might briefly see the
+    // landing page during a Supabase blip — they can click "Map" /
+    // "Feed" and re-auth via client-side flows that recover quickly.
+    // Trade-off: degraded auth-aware UX during outages, vs. site
+    // staying alive for everyone (anonymous traffic, Googlebot,
+    // first-time visitors).
+    try {
+      const supabase = await createServerSupabaseClient();
+      const userResult = await Promise.race<{ data: { user: unknown | null } } | null>([
+        supabase.auth.getUser(),
+        new Promise<null>((resolve) => setTimeout(() => resolve(null), 2000)),
+      ]);
+      if (userResult?.data?.user) {
+        redirect('/feed');
+      }
+    } catch {
+      // Server-side Supabase fetch threw — render anonymously.
     }
   }
 
