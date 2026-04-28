@@ -123,13 +123,30 @@ DROP INDEX IF EXISTS public.idx_quality_flags_severity;          -- 952 kB
 
 
 -- ============================================================
--- 7. work_mem Bump
--- Default ist 3500 KB → führt zu 20 GB temp_files Lifetime. 16 MB
--- pro Connection ist auf eu-central-1 (~1 GB Postgres RAM) safe.
+-- 7. work_mem Bump — DEAKTIVIERT
 -- ============================================================
-ALTER ROLE anon          SET work_mem = '16MB';
-ALTER ROLE authenticated SET work_mem = '16MB';
-ALTER ROLE service_role  SET work_mem = '32MB';
+-- ⚠️ Lehre aus dem 2026-04-28 Run: work_mem über `ALTER ROLE` setzen
+-- bricht die PostgREST/Supavisor Connection. Der Pool-Code lowercased
+-- den Wert ('16MB' → '16mb') und Postgres rejected lowercase Units
+-- ("invalid value for parameter work_mem: '16mb'"). Selbst nach
+-- ALTER ROLE … RESET work_mem bleibt der Pool-Cache bis zum nächsten
+-- `NOTIFY pgrst, 'reload config'`.
+--
+-- Falls work_mem wirklich pro-Role hochgesetzt werden soll, dann via
+-- raw kB-Integer (ohne Unit) UND danach `NOTIFY pgrst, 'reload config'`:
+--
+--   ALTER ROLE service_role SET work_mem TO '32768';  -- 32 MB in kB
+--   NOTIFY pgrst, 'reload config';
+--
+-- Für jetzt: kein per-role Override. Wenn 20 GB temp_files wieder
+-- problematisch werden, eher pro-Query SET LOCAL setzen statt rolconfig.
+-- (Der Default 3500 kB ist safe; die temp-files kamen größtenteils
+-- aus alten Backfill-Scripts die jetzt durch Bulk-RPCs ersetzt sind.)
+
+-- Idempotent: existierende work_mem rolconfig entfernen falls da.
+ALTER ROLE anon          RESET work_mem;
+ALTER ROLE authenticated RESET work_mem;
+ALTER ROLE service_role  RESET work_mem;
 
 
 -- ============================================================
