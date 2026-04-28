@@ -13,18 +13,11 @@ import { LandingPageShell } from '@/components/Landing/LandingPageShell';
 
 export const revalidate = 3600;
 
+// On-demand ISR — see [bundesland]/[filter]/[subfilter]/page.tsx
+// for the rationale.
+export const dynamicParams = true;
 export function generateStaticParams() {
-  const cities = LANDING_CITIES.filter((c) => c.filterMode === 'city');
-  const params: { city: string; filter: string; subfilter: string }[] = [];
-
-  for (const c of cities) {
-    for (const [slug] of CATEGORY_SLUGS) {
-      params.push({ city: c.slug, filter: slug, subfilter: 'heute' });
-      params.push({ city: c.slug, filter: slug, subfilter: 'wochenende' });
-    }
-  }
-
-  return params;
+  return [];
 }
 
 export async function generateMetadata({

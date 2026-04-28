@@ -7,10 +7,13 @@ import { LandingPageShell } from '@/components/Landing/LandingPageShell';
 
 export const revalidate = 3600;
 
+// On-demand ISR — build-time pre-render disabled to avoid Supabase
+// outages aborting the entire deploy. See sibling page.tsx files
+// (e.g. [bundesland]/[filter]/[subfilter]/page.tsx) for the same
+// pattern + rationale.
+export const dynamicParams = true;
 export function generateStaticParams() {
-  return BUNDESLAENDER.filter((b) => b.id !== 'all').map((b) => ({
-    bundesland: b.id,
-  }));
+  return [];
 }
 
 export async function generateMetadata({

@@ -10,10 +10,11 @@ import { LandingPageShell } from '@/components/Landing/LandingPageShell';
 
 export const revalidate = 3600;
 
+// On-demand ISR — see [bundesland]/[filter]/[subfilter]/page.tsx
+// for the rationale (Supabase outages must not abort the build).
+export const dynamicParams = true;
 export function generateStaticParams() {
-  return LANDING_CITIES.filter((c) => c.filterMode === 'city').map((c) => ({
-    city: c.slug,
-  }));
+  return [];
 }
 
 export async function generateMetadata({

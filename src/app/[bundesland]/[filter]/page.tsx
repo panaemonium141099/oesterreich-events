@@ -12,21 +12,11 @@ import { LandingPageShell } from '@/components/Landing/LandingPageShell';
 
 export const revalidate = 3600;
 
+// On-demand ISR — see [bundesland]/[filter]/[subfilter]/page.tsx for
+// the rationale.
+export const dynamicParams = true;
 export function generateStaticParams() {
-  const bundeslaender = BUNDESLAENDER.filter((b) => b.id !== 'all');
-  const params: { bundesland: string; filter: string }[] = [];
-
-  for (const b of bundeslaender) {
-    // Time filters
-    params.push({ bundesland: b.id, filter: 'heute' });
-    params.push({ bundesland: b.id, filter: 'wochenende' });
-    // Category filters
-    for (const [slug] of CATEGORY_SLUGS) {
-      params.push({ bundesland: b.id, filter: slug });
-    }
-  }
-
-  return params;
+  return [];
 }
 
 export async function generateMetadata({

@@ -10,8 +10,11 @@ import { LandingPageShell } from '@/components/Landing/LandingPageShell';
 
 export const revalidate = 3600;
 
+// On-demand ISR — see [bundesland]/[filter]/[subfilter]/page.tsx
+// for the rationale.
+export const dynamicParams = true;
 export function generateStaticParams() {
-  return STUDENT_CITIES.map((c) => ({ city: c.slug }));
+  return [];
 }
 
 export async function generateMetadata({

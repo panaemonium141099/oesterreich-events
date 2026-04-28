@@ -35,10 +35,14 @@ import { resolvePrimaryEventImage } from '@/lib/event-images';
 import { buildFAQPageSchema, faqForTheme } from '@/lib/seo/faq';
 
 export const revalidate = 3600;
-export const dynamicParams = false;
-
+// On-demand ISR — was build-time pre-rendered for all 12 themes,
+// but each pre-render queries Supabase. Outages were aborting the
+// whole build. Now each theme renders + caches on first visit.
+// dynamicParams flipped to `true` so an unmatched slug still hits
+// the route handler (which then notFound()s based on getThemeBySlug).
+export const dynamicParams = true;
 export function generateStaticParams() {
-  return ALL_THEMES.map(t => ({ slug: t.slug }));
+  return [];
 }
 
 // ───────────────────────────────────────────────────────────────────────

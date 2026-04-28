@@ -44,10 +44,13 @@ export const revalidate = 3600;
 export const dynamicParams = true;
 
 export async function generateStaticParams() {
-  // Pre-build the slug list so Next knows the universe of valid URLs.
-  // Returning an empty array would also work (pure ISR), but listing
-  // them lets the build phase spot typos early via the validator.
-  return ALL_GEMEINDEN.map(g => ({ slug: g.slug }));
+  // On-demand ISR — was returning ALL_GEMEINDEN.map(g => ({ slug })),
+  // but each of the 2k pre-builds queries Supabase, and a single
+  // outage was failing the entire deploy. Empty list = no pre-build,
+  // each gemeinde renders + caches on first visit. The slug list is
+  // still the universe of VALID URLs (validated inside the page
+  // handler via getGemeindeBySlug).
+  return [];
 }
 
 // ───────────────────────────────────────────────────────────────────────
