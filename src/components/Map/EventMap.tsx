@@ -35,6 +35,31 @@ function escapeHtml(str: string): string {
     .replace(/'/g, '&#39;');
 }
 
+/** Maps an event.category onto one of the 6 chip-tone styles defined in
+ *  the design system. Mirrors the helper in EventDetailV2 so the marker
+ *  popup and the detail page show the same chip color for the same
+ *  category. Falls back to "kultur" (blue) on unknowns. */
+type CatTone = 'music' | 'kultur' | 'fest' | 'familie' | 'maerkte' | 'sport';
+const CAT_TONE_STYLES: Record<CatTone, { fg: string; bg: string; bd: string }> = {
+  music:   { fg: '#d8b4fe', bg: 'rgba(168,85,247,0.18)', bd: 'rgba(168,85,247,0.40)' },
+  kultur:  { fg: '#93c5fd', bg: 'rgba(59,130,246,0.18)', bd: 'rgba(59,130,246,0.40)' },
+  fest:    { fg: '#fcd34d', bg: 'rgba(245,158,11,0.18)', bd: 'rgba(245,158,11,0.40)' },
+  familie: { fg: '#f9a8d4', bg: 'rgba(236,72,153,0.18)', bd: 'rgba(236,72,153,0.40)' },
+  maerkte: { fg: '#6ee7b7', bg: 'rgba(16,185,129,0.18)', bd: 'rgba(16,185,129,0.40)' },
+  sport:   { fg: '#fca5a5', bg: 'rgba(239,68,68,0.18)',  bd: 'rgba(239,68,68,0.40)' },
+};
+function categoryToTone(category: string | null): CatTone {
+  if (!category) return 'kultur';
+  const c = category.toLowerCase();
+  if (/(konzert|musik|nightlife|club|techno|dj|festival)/.test(c)) return 'music';
+  if (/(theater|kabarett|kultur|literatur|film|kino|ausstellung|museum|kunst)/.test(c)) return 'kultur';
+  if (/(fest|brauchtum|kirtag|jahrmarkt)/.test(c)) return 'fest';
+  if (/(familie|kinder)/.test(c)) return 'familie';
+  if (/(markt|kulinarik|wein|essen|food)/.test(c)) return 'maerkte';
+  if (/(sport|outdoor|wandern|lauf)/.test(c)) return 'sport';
+  return 'kultur';
+}
+
 interface EventMapProps {
   events: Event[];
   selectedEvent: Event | null;
@@ -148,11 +173,16 @@ function EventMap({ events, selectedEvent, hoveredEventId, onSelectEvent, evenin
 
   // Saved-event state — kept in a ref so save/unsave doesn't force markers to
   // rebuild. A dedicated effect toggles the `.marker-saved` class on existing
-  // marker DOM nodes whenever the set changes.
-  const { savedIds } = useSavedEvents();
+  // marker DOM nodes whenever the set changes. `toggleSaved` is also held in
+  // a ref so the bubble-popup click handler (defined inside the marker
+  // creation closure) always calls the latest implementation without
+  // requiring marker re-creation.
+  const { savedIds, toggleSaved } = useSavedEvents();
   const savedIdsRef = useRef<Set<string>>(savedIds);
+  const toggleSavedRef = useRef(toggleSaved);
   useEffect(() => {
     savedIdsRef.current = savedIds;
+    toggleSavedRef.current = toggleSaved;
     // Sync existing markers
     markersOnScreen.current.forEach((marker, markerId) => {
       const eventId = markerId.startsWith('marker-') ? markerId.slice(7) : markerId;
@@ -160,7 +190,7 @@ function EventMap({ events, selectedEvent, hoveredEventId, onSelectEvent, evenin
       if (!body) return;
       body.classList.toggle('marker-saved', savedIds.has(eventId));
     });
-  }, [savedIds]);
+  }, [savedIds, toggleSaved]);
 
   // Keep artist IDs ref in sync
   useEffect(() => {
@@ -252,31 +282,90 @@ function EventMap({ events, selectedEvent, hoveredEventId, onSelectEvent, evenin
     });
   }, [eveningMode, mapReady, bundesland]);
 
-  // Popup builder
-  const createPopupHTML = useCallback((event: Event, dark?: boolean) => {
+  // Popup builder — implements the BubbleMini design from the
+  // claude-design system (lasstreffen-at-design-system/project/mockups/
+  // detail-v2.jsx, function `BubbleMini`). Compact map popover that:
+  //   - shows date/title/location on a 132px photo header with scrim,
+  //   - tints the category chip with the same 6-tone palette used on
+  //     the event-detail page,
+  //   - exposes ONE primary "Details öffnen" anchor that navigates
+  //     directly to the canonical /events/{plz-ort}/{date}/{slug} URL
+  //     (no inline preview panel — user explicitly requested this),
+  //   - has a secondary save toggle that hits supabase via the
+  //     SavedEvents context.
+  // Returns an HTML string so it can be fed to mapboxgl.Popup.setHTML.
+  // Click handlers are attached after `popup.on('open')` further down.
+  const createPopupHTML = useCallback((event: Event) => {
     const date = formatDateNumeric(event.start_date);
     const time = formatTime(event.start_date);
     const showTime = time !== null;
-    const bg = dark ? '#1e293b' : '#ffffff';
-    const textColor = dark ? '#f1f5f9' : '#1e293b';
-    const subTextColor = dark ? '#94a3b8' : '#64748b';
-    const btnBg = dark ? '#4f46e5' : '#2563eb';
     const saved = savedIdsRef.current.has(event.id);
-    const savedBadge = saved
-      ? `<div style="position:absolute;top:8px;right:8px;display:inline-flex;align-items:center;gap:4px;padding:3px 7px 3px 5px;background:#10b981;color:#fff;border-radius:6px;font-size:10px;font-weight:600;box-shadow:0 1px 3px rgba(0,0,0,0.3);letter-spacing:0.02em;"><svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"/></svg>Gespeichert</div>`
+    const canonicalUrl = buildEventUrlV2(event);
+    const imgUrl = getEventImage(event.image_url, event.category, event.title, event.bundesland);
+    const fallbackUrl = getCategoryFallbackImage(event.category, event.title, event.bundesland);
+
+    const tone = categoryToTone(event.category);
+    const chip = CAT_TONE_STYLES[tone];
+    const chipLabel = event.category ?? 'Event';
+
+    const isFree = event.price_text
+      ? /\b(frei|gratis|kostenlos|free|eintritt\s*frei)\b/i.test(event.price_text)
+      : event.price_min === 0;
+    const priceBadge = isFree
+      ? `<span style="font-size:10px;font-weight:600;padding:3px 8px;border-radius:9999px;background:rgba(0,0,0,0.45);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,0.18);color:rgba(255,255,255,0.85);text-transform:uppercase;letter-spacing:0.06em;">kostenlos</span>`
       : '';
-    return `<div style="width:240px;font-family:Inter,system-ui,sans-serif;background:${bg};border-radius:8px;">
-      <div style="position:relative;">
-        <img src="${getEventImage(event.image_url, event.category, event.title, event.bundesland)}" style="width:100%;height:120px;object-fit:cover;border-radius:8px 8px 0 0;display:block;" onerror="this.src='${getCategoryFallbackImage(event.category, event.title, event.bundesland)}'" />
-        ${savedBadge}
+
+    // Bookmark icon — outline when not saved, filled when saved.
+    const bookmarkSVG = (filled: boolean) =>
+      filled
+        ? `<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>`
+        : `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>`;
+
+    return `<div class="bubble-mini-wrapper" style="
+      width:320px;font-family:Inter,system-ui,sans-serif;
+      background:#141416;color:#fff;
+      border:1px solid rgba(255,255,255,0.10);
+      border-radius:18px;overflow:hidden;
+      box-shadow:0 12px 32px rgba(0,0,0,0.55), 0 4px 8px rgba(0,0,0,0.4);
+    ">
+      <div style="position:relative;height:132px;">
+        <img src="${imgUrl}" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;" onerror="this.src='${fallbackUrl}'" />
+        <div style="position:absolute;inset:0;background:linear-gradient(180deg, transparent 40%, rgba(20,20,22,0.7) 100%);pointer-events:none;"></div>
+        <div style="position:absolute;top:10px;left:12px;right:12px;display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+          <span style="display:inline-flex;align-items:center;gap:6px;padding:4px 9px;font-size:11px;font-weight:600;border-radius:9999px;color:${chip.fg};background:${chip.bg};border:1px solid ${chip.bd};">${escapeHtml(chipLabel)}</span>
+          ${priceBadge}
+        </div>
       </div>
-      <div style="padding:10px;">
-        <div style="font-weight:600;font-size:13px;color:${textColor};margin-bottom:4px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">${escapeHtml(event.title)}</div>
-        <div style="font-size:11px;color:${subTextColor};margin-bottom:2px;">${date}${showTime ? ` um ${time}` : ''}</div>
-        ${event.location_name ? `<div style="font-size:11px;color:${subTextColor};margin-bottom:4px;display:flex;align-items:center;gap:3px;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="${subTextColor}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>${escapeHtml(event.location_name)}</div>` : ''}
-        ${event.price_text ? `<div style="font-size:11px;font-weight:600;color:${btnBg};margin-bottom:6px;">${escapeHtml(event.price_text)}</div>` : ''}
-        <button data-event-id="${event.id}" style="width:100%;padding:7px;background:${btnBg};color:white;border:none;border-radius:8px;font-size:12px;font-weight:500;cursor:pointer;">Vorschau öffnen</button>
-      </div></div>`;
+      <div style="padding:14px 16px 16px;">
+        <div style="font-size:11px;color:rgba(255,255,255,0.6);margin-bottom:4px;display:flex;align-items:center;gap:6px;">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          ${date}${showTime ? ` · ${time}` : ''}
+        </div>
+        <div style="font-size:16px;font-weight:600;letter-spacing:-0.01em;line-height:1.2;margin-bottom:4px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">${escapeHtml(event.title)}</div>
+        ${event.location_name ? `<div style="font-size:12px;color:rgba(255,255,255,0.6);display:flex;align-items:center;gap:5px;margin-bottom:14px;">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escapeHtml(event.location_name)}</span>
+        </div>` : '<div style="margin-bottom:14px;"></div>'}
+        <div style="display:flex;gap:8px;">
+          <a href="${escapeHtml(canonicalUrl)}" data-bubble-details="${event.id}" style="
+            flex:1;background:#fff;color:#0a0a0c;border:none;border-radius:12px;
+            padding:10px;font-size:13px;font-weight:700;cursor:pointer;
+            display:inline-flex;align-items:center;justify-content:center;gap:6px;
+            text-decoration:none;
+          ">
+            Details öffnen
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12,5 19,12 12,19"/></svg>
+          </a>
+          <button data-bubble-save="${event.id}" aria-label="${saved ? 'Aus gespeichert entfernen' : 'Speichern'}" aria-pressed="${saved}" style="
+            width:40px;background:rgba(255,255,255,0.06);
+            color:${saved ? '#10b981' : '#fff'};
+            border:1px solid rgba(255,255,255,0.10);border-radius:12px;
+            cursor:pointer;display:inline-flex;align-items:center;justify-content:center;
+            transition:color 150ms ease, background 150ms ease;
+          ">${bookmarkSVG(saved)}</button>
+        </div>
+      </div>
+    </div>`;
   }, []);
 
   // Helper: build GeoJSON from events with jitter for overlapping coords
@@ -562,8 +651,13 @@ function EventMap({ events, selectedEvent, hoveredEventId, onSelectEvent, evenin
             activePopupRef.current.close();
           }
           if (!popup) {
-            popup = new mapboxgl.Popup({ offset: popupOffset, closeButton: false, closeOnClick: false, maxWidth: '260px' })
-              .setHTML(createPopupHTML(event, !!eveningMode));
+            popup = new mapboxgl.Popup({
+              offset: popupOffset,
+              closeButton: false,
+              closeOnClick: false,
+              maxWidth: '340px',
+              className: 'bubble-mini-popup',
+            }).setHTML(createPopupHTML(event));
             popup.on('open', () => {
               const pe = popup?.getElement();
               if (!pe) return;
@@ -573,13 +667,36 @@ function EventMap({ events, selectedEvent, hoveredEventId, onSelectEvent, evenin
               pe.addEventListener('mouseleave', () => {
                 scheduleClose();
               });
-              // "Vorschau öffnen" → opens the rich inline preview panel
-              // (same experience for pin click + sidebar click). The panel
-              // has a CTA at the bottom that navigates to the canonical
-              // /events/{plz-ort}/{date}/{slug} detail page.
-              pe.querySelector('button[data-event-id]')?.addEventListener('click', () => {
+              // "Details öffnen" — primary anchor that navigates straight
+              // to the canonical /events/{plz-ort}/{date}/{slug} URL. We
+              // close the popup synchronously so it doesn't linger across
+              // the navigation (the click bubbles to the anchor's default
+              // behaviour, no preventDefault).
+              pe.querySelector('a[data-bubble-details]')?.addEventListener('click', () => {
                 closeSelf();
-                onSelectEvent(event);
+              });
+              // "Speichern" — toggles supabase saved_events via the
+              // SavedEvents context. Optimistic; the icon state is
+              // re-rendered from `savedIdsRef` afterwards.
+              const saveBtn = pe.querySelector<HTMLButtonElement>('button[data-bubble-save]');
+              saveBtn?.addEventListener('click', async (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                const result = await toggleSavedRef.current(event.id);
+                if (result === 'noop') return;
+                // Re-render bookmark visual state — icon swaps outline ↔ filled,
+                // color swaps white ↔ emerald. We rebuild the inner SVG so
+                // we don't have to track a separate hover/press state.
+                const isSaved = savedIdsRef.current.has(event.id);
+                saveBtn.style.color = isSaved ? '#10b981' : '#fff';
+                saveBtn.setAttribute('aria-pressed', String(isSaved));
+                saveBtn.setAttribute(
+                  'aria-label',
+                  isSaved ? 'Aus gespeichert entfernen' : 'Speichern',
+                );
+                saveBtn.innerHTML = isSaved
+                  ? `<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>`
+                  : `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>`;
               });
             });
           }

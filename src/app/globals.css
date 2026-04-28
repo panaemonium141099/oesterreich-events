@@ -730,6 +730,43 @@ button:active, a:active, [role="button"]:active {
 }
 
 /* ═══════════════════════════════════════════════
+   BubbleMini popup — design-system v2 marker popover.
+   The card is fully self-styled (dark surface + rounded
+   corners + custom shadow), so we strip Mapbox's default
+   wrapper chrome (white bg, padding, soft shadow) and
+   re-color the tip to match the dark surface.
+   ═══════════════════════════════════════════════ */
+.bubble-mini-popup .mapboxgl-popup-content {
+  background: transparent !important;
+  border-radius: 18px !important;
+  padding: 0 !important;
+  box-shadow: none !important;
+  overflow: visible;
+}
+.bubble-mini-popup.mapboxgl-popup-anchor-bottom .mapboxgl-popup-tip,
+.bubble-mini-popup.mapboxgl-popup-anchor-bottom-left .mapboxgl-popup-tip,
+.bubble-mini-popup.mapboxgl-popup-anchor-bottom-right .mapboxgl-popup-tip {
+  border-top-color: #141416 !important;
+}
+.bubble-mini-popup.mapboxgl-popup-anchor-top .mapboxgl-popup-tip,
+.bubble-mini-popup.mapboxgl-popup-anchor-top-left .mapboxgl-popup-tip,
+.bubble-mini-popup.mapboxgl-popup-anchor-top-right .mapboxgl-popup-tip {
+  border-bottom-color: #141416 !important;
+}
+.bubble-mini-popup.mapboxgl-popup-anchor-left .mapboxgl-popup-tip {
+  border-right-color: #141416 !important;
+}
+.bubble-mini-popup.mapboxgl-popup-anchor-right .mapboxgl-popup-tip {
+  border-left-color: #141416 !important;
+}
+.bubble-mini-popup [data-bubble-details]:hover {
+  background: #f5f5f5 !important;
+}
+.bubble-mini-popup [data-bubble-save]:hover {
+  background: rgba(255,255,255,0.10) !important;
+}
+
+/* ═══════════════════════════════════════════════
    Hide Scrollbar (for horizontal scroll containers)
    ═══════════════════════════════════════════════ */
 .scrollbar-hide {
