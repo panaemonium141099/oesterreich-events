@@ -31,11 +31,17 @@ interface EventSheetProps {
 
 export function EventSheet({ children }: EventSheetProps) {
   const router = useRouter();
+  const overlayRef = useRef<HTMLDivElement>(null);
   const closingRef = useRef(false);
 
   const close = () => {
     if (closingRef.current) return;
     closingRef.current = true;
+    // router.back() is the only reliable way to dismiss an intercepting
+    // route. router.push('/map') changes the URL bar but Next.js doesn't
+    // always re-resolve the parallel `modal` slot to default.tsx — the
+    // modal stays visible. back() pops the URL off history, which the
+    // router treats as a proper modal-close event.
     if (window.history.length > 1) {
       router.back();
     } else {
@@ -63,9 +69,45 @@ export function EventSheet({ children }: EventSheetProps) {
     return () => { document.body.style.overflow = original; };
   }, []);
 
+  // Intercept clicks on internal "back to map" links. EventDetailV2's
+  // hero has a `<Link href="/map">` breadcrumb arrow + "Karte" label,
+  // and the bundesland chip is `<Link href="/map?bundesland=...">`.
+  // When clicked inside the intercepted-route overlay, those Links do a
+  // soft nav that updates the URL but leaves the modal slot stuck on the
+  // intercepted page (parallel-route quirk in Next.js — see
+  // github.com/vercel/next.js/issues/53037 and friends).
+  //
+  // Fix: catch all map-bound link clicks on the overlay's capture phase
+  // and route them through close() → router.back(). Browser-back is the
+  // navigation gesture Next.js handles cleanly for parallel-route
+  // dismissal. Other links (/thema/, /events/other, etc.) bubble
+  // through unchanged.
+  useEffect(() => {
+    const node = overlayRef.current;
+    if (!node) return;
+    const onClick = (e: MouseEvent) => {
+      // Respect modifier-clicks → let browser open in new tab/window
+      if (e.metaKey || e.ctrlKey || e.shiftKey || e.button === 1) return;
+      const link = (e.target as HTMLElement | null)?.closest?.('a');
+      if (!link) return;
+      const href = link.getAttribute('href') ?? '';
+      // Strict prefix check — must be the literal /map path so a future
+      // /map-something route doesn't get accidentally swallowed.
+      if (href === '/map' || href.startsWith('/map?') || href.startsWith('/map#')) {
+        e.preventDefault();
+        e.stopPropagation();
+        close();
+      }
+    };
+    node.addEventListener('click', onClick, true); // capture phase
+    return () => node.removeEventListener('click', onClick, true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   return (
     <AnimatePresence>
       <motion.div
+        ref={overlayRef}
         key="event-overlay"
         role="dialog"
         aria-modal="true"
