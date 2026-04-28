@@ -4,6 +4,19 @@ import { StudentCityGrid } from '@/components/Landing/StudentCityGrid';
 import { EventListCard } from '@/components/Events/EventListCard';
 
 export const revalidate = 3600;
+// On-demand ISR (no build-time pre-render). Empty generateStaticParams
+// + dynamicParams=true is the same pattern used by every other
+// Supabase-querying hub page in the app — see the comment in
+// /[bundesland]/[filter]/[subfilter]/page.tsx for the rationale.
+// Combined with the per-role statement_timeout set by
+// migrations/20260428193000_set_statement_timeouts.sql, the build
+// is now fully immune to Supabase outages: even if the page DOES
+// render at build time, Postgres aborts any single query at 8s
+// rather than letting it consume the 60s static-page budget.
+export const dynamicParams = true;
+export function generateStaticParams() {
+  return [];
+}
 
 export const metadata: Metadata = {
   // Layout template appends " | LassTreffen.at" — no manual suffix here.

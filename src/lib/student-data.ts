@@ -57,28 +57,60 @@ export async function loadStudentIndex(): Promise<StudentIndexData> {
   const supabase = getReadClient();
   const today = new Date().toISOString().split('T')[0];
 
-  // Load event counts per student city
-  const cities: { city: StudentCity; eventCount: number }[] = [];
+  // ─── Per-city counts in ONE query, not N ───────────────────────────
+  // The previous version did `for city of STUDENT_CITIES` with one
+  // round-trip per city — exactly the N+1 anti-pattern. Even after
+  // parallelising it was still N requests against PostgREST, eating
+  // connection-pool slots.
+  //
+  // Now: a single GROUP BY query that returns counts for all
+  // bundesländer at once. Trade-off: this counts events meeting the
+  // basic quality bar (`quality_score >= MIN_QUALITY`) and skips the
+  // TypeScript-side `computeStudentScore` filter. That filter is still
+  // applied on the dedicated /studenten/[city] pages where the actual
+  // event list is rendered — the index just needs an indicator of how
+  // many events are *available*, not a precise post-filter count.
+  //
+  // For pages where the exact count matters, query that page directly.
+  const todayRange = getDateRange('heute');
 
-  for (const city of STUDENT_CITIES) {
-    const candidates = await loadCandidates(supabase, city, null, null);
-    const scored = scoreAndFilter(candidates);
-    cities.push({ city, eventCount: scored.length });
+  const studentBundeslaender = STUDENT_CITIES.map((c) => c.bundesland);
+
+  const [countResult, todayResult] = await Promise.all([
+    // ONE query, server-side aggregation. RPC returns N rows
+    // (where N = number of bundesländer that have events), not
+    // thousands. See migrations/20260428193100_student_index_rpc.sql.
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (supabase.rpc as any)('student_event_counts_by_bundesland', {
+      p_min_quality: MIN_QUALITY,
+      p_bundeslaender: studentBundeslaender,
+    }),
+    // Today's top student events across all student bundesländer.
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (supabase.from('events') as any)
+      .select('id, title, start_date, end_date, location_name, image_url, category, price_min, price_text, event_score, quality_score, bundesland, address')
+      .or('publish_status.eq.published,publish_status.eq.published_low_confidence,publish_status.is.null')
+      .gte('start_date', todayRange.from)
+      .lt('start_date', todayRange.to)
+      .gte('quality_score', MIN_QUALITY)
+      .in('bundesland', studentBundeslaender)
+      .order('event_score', { ascending: false, nullsFirst: false })
+      .limit(50),
+  ]);
+
+  // RPC returns rows like { bundesland: 'wien', event_count: 1234 }
+  type CountRow = { bundesland: string; event_count: number | string };
+  const bundeslandCounts = new Map<string, number>();
+  for (const row of ((countResult.data ?? []) as CountRow[])) {
+    bundeslandCounts.set(row.bundesland, Number(row.event_count));
   }
 
-  // Load today's top student events across all cities
-  const todayRange = getDateRange('heute');
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: todayCandidates } = await (supabase.from('events') as any)
-    .select('id, title, start_date, end_date, location_name, image_url, category, price_min, price_text, event_score, quality_score')
-    .or('publish_status.eq.published,publish_status.eq.published_low_confidence,publish_status.is.null')
-    .gte('start_date', todayRange.from)
-    .lt('start_date', todayRange.to)
-    .gte('quality_score', MIN_QUALITY)
-    .order('event_score', { ascending: false, nullsFirst: false })
-    .limit(50);
+  const cities = STUDENT_CITIES.map((city) => ({
+    city,
+    eventCount: bundeslandCounts.get(city.bundesland) ?? 0,
+  }));
 
-  const todayScored = scoreAndFilter((todayCandidates ?? []) as Event[])
+  const todayScored = scoreAndFilter(((todayResult.data ?? []) as Event[]))
     .slice(0, 4);
 
   return { cities, todayEvents: todayScored.map((s) => s.event) };
