@@ -775,10 +775,31 @@ async function processOne(
   }
 
   if (!opts.dryRun) {
-    const { error } = await supabase.from('events').update(update).eq('id', row.id);
-    if (error) {
+    // Retry the UPDATE up to 3 times for transient network errors
+    // ("TypeError: fetch failed" — Supabase blips, edge connection
+    // resets). Each retry waits exponentially longer (1s → 3s → 8s),
+    // which gives a typical 30-second Supabase blip enough time to
+    // recover before we mark the event failed. Real schema/auth errors
+    // are NOT retried — they'd just produce 3× the log noise.
+    const isTransient = (msg: string) =>
+      /fetch failed/i.test(msg) ||
+      /network/i.test(msg) ||
+      /ECONN/i.test(msg) ||
+      /timeout/i.test(msg) ||
+      /503|504|408/.test(msg);
+    const retryDelaysMs = [1000, 3000, 8000];
+
+    let lastError: { message: string } | null = null;
+    let attempt = 0;
+    while (attempt <= retryDelaysMs.length) {
+      const { error } = await supabase.from('events').update(update).eq('id', row.id);
+      if (!error) {
+        lastError = null;
+        break;
+      }
+
       // Schema errors mean every subsequent row will fail identically —
-      // bail fast instead of prosecuting 40k doomed attempts.
+      // bail fast instead of prosecuting 40k doomed attempts. (Skip retry.)
       const isSchemaError =
         /Could not find.+column/i.test(error.message) ||
         /schema cache/i.test(error.message) ||
@@ -786,10 +807,21 @@ async function processOne(
       if (isSchemaError) {
         throw new SchemaMismatchError(error.message);
       }
-      console.error(`\n[${row.id.slice(0, 8)}] update failed: ${error.message}`);
+
+      lastError = error;
+      if (!isTransient(error.message) || attempt >= retryDelaysMs.length) {
+        break;
+      }
+      // Transient error + retry budget left — wait and try again
+      await new Promise(r => setTimeout(r, retryDelaysMs[attempt]));
+      attempt++;
+    }
+
+    if (lastError) {
+      console.error(`\n[${row.id.slice(0, 8)}] update failed after ${attempt + 1} attempt(s): ${lastError.message}`);
       stats.enriched -= 1;
       stats.failed += 1;
-      appendLog(opts.logFile, { event_id: row.id, title: row.title, status: 'db_error', error: error.message });
+      appendLog(opts.logFile, { event_id: row.id, title: row.title, status: 'db_error', error: lastError.message, attempts: attempt + 1 });
       stats.processed += 1;
       return;
     }
