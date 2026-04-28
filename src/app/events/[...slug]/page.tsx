@@ -536,25 +536,60 @@ const getFriendsForEventCached = unstable_cache(
 );
 
 /**
- * Loads festival lineup acts ordered by start_time. Returns [] for
- * non-festival events. Skip when no festival_artists table on a fresh
- * deployment (graceful failure on missing relation).
+ * Loads festival lineup acts. Returns [] for non-festival events.
+ *
+ * Schema reality (verified against information_schema 2026-04-28):
+ *   - artist_name_raw (text)        — display name
+ *   - stage_name      (text)        — stage label, may be null
+ *   - day_label       (text)        — "Freitag" / "Tag 1" — no concrete time
+ *   - billing         (text)        — headliner/main/support — used to order
+ *   - confidence_score (real)       — secondary order key (best matches first)
+ *
+ * There's no `start_time` column, so the left "time" slot in the lineup
+ * column is filled with `day_label` instead, and the sub-line uses
+ * `stage_name`. Order: day → billing rank → confidence desc.
  */
 const getLineupForEventCached = unstable_cache(
   async (eventId: string): Promise<LineupAct[]> => {
     const { data, error } = await supabase
       .from('festival_artists')
-      .select('artist_name_raw, stage, start_time')
-      .eq('derived_event_id', eventId)
-      .order('start_time', { ascending: true, nullsFirst: false });
+      .select('artist_name_raw, stage_name, day_label, billing, confidence_score')
+      .eq('derived_event_id', eventId);
     if (error || !data) return [];
-    return data.map((a: { artist_name_raw: string; stage: string | null; start_time: string | null }) => ({
-      artist_name: a.artist_name_raw,
-      stage: a.stage,
-      start_time: a.start_time
-        ? new Date(a.start_time).toLocaleTimeString('de-AT', { hour: '2-digit', minute: '2-digit' })
-        : null,
-    }));
+    type RawAct = {
+      artist_name_raw: string;
+      stage_name: string | null;
+      day_label: string | null;
+      billing: string | null;
+      confidence_score: number | null;
+    };
+    // Headliner first (rank 0) → main (1) → support (2) → unknown (3)
+    const billingRank = (b: string | null) => {
+      if (!b) return 3;
+      const lo = b.toLowerCase();
+      if (lo.includes('headliner') || lo.includes('headline')) return 0;
+      if (lo.includes('main')) return 1;
+      if (lo.includes('support')) return 2;
+      return 3;
+    };
+    return (data as RawAct[])
+      .sort((a, b) => {
+        // 1. day_label asc (alpha order works for "Freitag/Samstag/Sonntag"
+        //    and "Tag 1/Tag 2"); nulls last
+        const da = a.day_label ?? '~';
+        const db = b.day_label ?? '~';
+        if (da !== db) return da < db ? -1 : 1;
+        // 2. billing rank (headliner first)
+        const br = billingRank(a.billing) - billingRank(b.billing);
+        if (br !== 0) return br;
+        // 3. confidence desc — best matches up top
+        return (b.confidence_score ?? 0) - (a.confidence_score ?? 0);
+      })
+      .map(a => ({
+        artist_name: a.artist_name_raw,
+        stage: a.stage_name,
+        start_time: a.day_label,
+      }));
   },
   ['event-lineup'],
   { revalidate: 3600, tags: ['event'] },
