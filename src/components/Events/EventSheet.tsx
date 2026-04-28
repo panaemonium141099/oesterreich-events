@@ -112,7 +112,13 @@ export function EventSheet({ children }: EventSheetProps) {
         role="dialog"
         aria-modal="true"
         aria-label="Event Details"
-        className="fixed inset-0 z-[60] overflow-y-auto overscroll-contain"
+        // z-[1100] sits above the mobile bottom-sheet sidebar (z-[1000]
+        // in src/app/map/page.tsx). Without this the sidebar list would
+        // stay rendered ON TOP of the event detail on mobile because
+        // map page's parallel `children` slot keeps mounting it. The
+        // user reported "anzeige der verschiedenen events bleibt im
+        // vordergrund" exactly because of this z-index inversion.
+        className="fixed inset-0 z-[1100] overflow-y-auto overscroll-contain"
         style={{ background: '#0a0a0c' }}
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
