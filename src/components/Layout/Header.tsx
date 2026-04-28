@@ -180,7 +180,14 @@ export function Header({ filters, onFiltersChange, totalEvents, onToggleSidebar,
           )}
         </div>
 
-        <div className="flex-1 min-w-0 overflow-hidden">
+        {/* Desktop search slot — inline between bundesland-selector and
+            evening-mode toggle. On mobile this slot is hidden because the
+            hamburger + ÖE-logo + bundesland-selector + evening-toggle
+            fill the entire 390px viewport row, leaving 0px for a flex-1
+            input. The search bar is rendered in a dedicated 2nd row
+            below for mobile (see the `lg:hidden` block after this
+            container). */}
+        <div className="hidden lg:block flex-1 min-w-0 overflow-hidden">
           <FilterBar filters={filters} onFiltersChange={onFiltersChange} eveningMode={eveningMode} bundeslandId={bundesland.id} onGemeindeSelect={onGemeindeSelect} />
         </div>
 
@@ -389,6 +396,18 @@ export function Header({ filters, onFiltersChange, totalEvents, onToggleSidebar,
             )}
           </div>
         )}
+      </div>
+
+      {/* Mobile-only search row — the desktop FilterBar slot is hidden
+          (lg:block) on viewports < 1024px because the top row's fixed-
+          width children (hamburger + ÖE + divider + bundesland-selector
+          + evening-toggle + auth) consume the entire 390-414px mobile
+          viewport, squashing flex-1 to 0. Putting the search bar in
+          its own row below the title row gives it the full available
+          width on mobile and keeps the existing desktop layout
+          unchanged. */}
+      <div className="lg:hidden px-4 pb-3">
+        <FilterBar filters={filters} onFiltersChange={onFiltersChange} eveningMode={eveningMode} bundeslandId={bundesland.id} onGemeindeSelect={onGemeindeSelect} />
       </div>
     </header>
   );
