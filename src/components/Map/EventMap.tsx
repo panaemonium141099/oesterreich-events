@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import type { Event } from '@/types/events';
@@ -192,6 +193,15 @@ function EventMap({ events, selectedEvent, hoveredEventId, onSelectEvent, evenin
     });
   }, [savedIds, toggleSaved]);
 
+  // Router ref — held so the bubble-popup "Details öffnen" click handler
+  // (which lives inside the marker creation closure) can call client-side
+  // navigation instead of letting the <a> tag trigger a full page reload.
+  // Full reload was the main reason "back to map" felt sluggish: every
+  // navigation rebuilt the Mapbox instance from scratch.
+  const router = useRouter();
+  const routerRef = useRef(router);
+  useEffect(() => { routerRef.current = router; }, [router]);
+
   // Keep artist IDs ref in sync
   useEffect(() => {
     artistIdsRef.current = artistEventIds ?? new Set();
@@ -281,6 +291,42 @@ function EventMap({ events, selectedEvent, hoveredEventId, onSelectEvent, evenin
       setTimeout(() => setMapReady(true), 150);
     });
   }, [eveningMode, mapReady, bundesland]);
+
+  // ─── URL state writeback ───────────────────────────────────────────
+  // Persist map center+zoom into the URL so a navigate-away + back lands
+  // the user exactly where they left off instead of resetting to the
+  // bundesland default. MapPageClient already reads `lat/lng/zoom` from
+  // searchParams on mount, so all we have to do is keep the URL in sync
+  // while the user pans/zooms.
+  //
+  // We use `window.history.replaceState` directly rather than
+  // `router.replace` to avoid triggering Next.js router internals on
+  // every move — this is a pure URL-bar update with no re-render.
+  // Throttled to 250ms after the last move so quick pans don't spam
+  // history. `replaceState` (not pushState) so the back button still
+  // takes the user out of the map, not through every panned position.
+  useEffect(() => {
+    if (!map.current || !mapReady) return;
+    const m = map.current;
+    let timer: ReturnType<typeof setTimeout> | null = null;
+    const handle = () => {
+      if (timer) clearTimeout(timer);
+      timer = setTimeout(() => {
+        const c = m.getCenter();
+        const z = m.getZoom();
+        const params = new URLSearchParams(window.location.search);
+        params.set('lat', c.lat.toFixed(5));
+        params.set('lng', c.lng.toFixed(5));
+        params.set('zoom', z.toFixed(2));
+        window.history.replaceState(null, '', `${window.location.pathname}?${params.toString()}`);
+      }, 250);
+    };
+    m.on('moveend', handle);
+    return () => {
+      if (timer) clearTimeout(timer);
+      m.off('moveend', handle);
+    };
+  }, [mapReady]);
 
   // Popup builder — implements the BubbleMini design from the
   // claude-design system (lasstreffen-at-design-system/project/mockups/
@@ -667,13 +713,22 @@ function EventMap({ events, selectedEvent, hoveredEventId, onSelectEvent, evenin
               pe.addEventListener('mouseleave', () => {
                 scheduleClose();
               });
-              // "Details öffnen" — primary anchor that navigates straight
-              // to the canonical /events/{plz-ort}/{date}/{slug} URL. We
-              // close the popup synchronously so it doesn't linger across
-              // the navigation (the click bubbles to the anchor's default
-              // behaviour, no preventDefault).
-              pe.querySelector('a[data-bubble-details]')?.addEventListener('click', () => {
+              // "Details öffnen" — navigate via Next.js client-side router
+              // instead of letting the <a> tag trigger a full page load.
+              // preventDefault stops the default navigation; routerRef.push
+              // does a soft transition that preserves the bfcache + the
+              // already-loaded Mapbox tiles & vector source for when the
+              // user navigates back. The href stays in place so middle-
+              // click / right-click "open in new tab" still works.
+              pe.querySelector<HTMLAnchorElement>('a[data-bubble-details]')?.addEventListener('click', (e) => {
+                // Respect modifier-clicks (cmd/ctrl/middle) → let the
+                // browser open in new tab.
+                const me = e as MouseEvent;
+                if (me.metaKey || me.ctrlKey || me.shiftKey || me.button === 1) return;
+                e.preventDefault();
+                const href = (e.currentTarget as HTMLAnchorElement).getAttribute('href') ?? '';
                 closeSelf();
+                if (href) routerRef.current.push(href);
               });
               // "Speichern" — toggles supabase saved_events via the
               // SavedEvents context. Optimistic; the icon state is
@@ -785,15 +840,30 @@ function EventMap({ events, selectedEvent, hoveredEventId, onSelectEvent, evenin
     if (!map.current || !mapReady || !flyToCoords) return;
     const key = `${flyToCoords.lat},${flyToCoords.lng},${flyToCoords.zoom}`;
     if (lastFlyTo.current === key) return; // Already flew here
+    const isFirstFlyTo = lastFlyTo.current === null;
     lastFlyTo.current = key;
-    setTimeout(() => {
-      map.current?.flyTo({
+    if (isFirstFlyTo) {
+      // First mount with URL-restored coords (user pressed Back from
+      // an event detail page). Use jumpTo for an INSTANT restore — a
+      // 2s flyTo animation here would feel exactly like the page is
+      // "loading from scratch", which is the pain point we're fixing.
+      map.current.jumpTo({
         center: [flyToCoords.lng, flyToCoords.lat],
         zoom: flyToCoords.zoom,
-        pitch: 45,
-        duration: 2000,
       });
-    }, 800);
+    } else {
+      // Subsequent flyToCoords change during the same session (e.g. user
+      // clicked an event in the sidebar) — keep the smooth animation so
+      // the focal change is legible.
+      setTimeout(() => {
+        map.current?.flyTo({
+          center: [flyToCoords.lng, flyToCoords.lat],
+          zoom: flyToCoords.zoom,
+          pitch: 45,
+          duration: 2000,
+        });
+      }, 800);
+    }
   }, [mapReady, flyToCoords]);
 
   // Highlight hovered — toggle on the .mapbox-event-marker child (body), not
