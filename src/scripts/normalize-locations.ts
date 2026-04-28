@@ -7,6 +7,7 @@ import { readFileSync } from 'fs';
 import { join } from 'path';
 import { createClient } from '@supabase/supabase-js';
 import { normalizeEventLocation } from '../lib/location-normalizer';
+import { makeBulkUpdater } from '../lib/db/bulk-update';
 
 // Load .env.local
 try {
@@ -34,6 +35,7 @@ async function main() {
   }
 
   const supabase = createClient(url, key, { auth: { persistSession: false } });
+  const updater = makeBulkUpdater(supabase, 'bulk_update_event_geocoding');
 
   // Count total events
   const { count } = await supabase.from('events').select('id', { count: 'exact', head: true });
@@ -107,36 +109,44 @@ async function main() {
       }
     }
 
-    // Batch update
+    // Batch update via bulk_update_event_geocoding RPC.
+    // Pre-Refactor: 500 single-row UPDATEs pro Batch (Promise.all hatte
+    // sich getarnt als parallel, aber war 500× Round-Trip via PostgREST).
+    // Jetzt: ein RPC-Call pro 500 events. queue() flusht automatisch
+    // wenn >=500 — am Ende des Scripts ein finaler flush().
     if (updates.length > 0) {
       for (const upd of updates) {
-        const { error: updError } = await supabase
-          .from('events')
-          .update({
-            ...(upd.location_name ? { location_name: upd.location_name } : {}),
-            ...(upd.latitude ? { latitude: upd.latitude, longitude: upd.longitude } : {}),
-          })
-          .eq('id', upd.id);
-
-        if (updError) {
-          console.error(`Update error for ${upd.id}:`, updError.message);
-        } else {
-          updated++;
+        const payload: Record<string, unknown> = { id: upd.id };
+        if (upd.location_name !== undefined) payload.location_name = upd.location_name;
+        if (upd.latitude !== undefined) {
+          payload.latitude = upd.latitude;
+          payload.longitude = upd.longitude;
         }
+        await updater.add(payload as { id: string });
       }
+      // queue() auto-flusht bei >=500. Hier zählen wir die enqueued als
+      // "updated" optimistisch — der finale flush() liefert die echte
+      // affected-Zahl, die wir am Ende loggen.
+      updated += updates.length;
     }
 
     offset += events.length;
     if (offset % 5000 === 0 || events.length < BATCH_SIZE) {
-      console.log(`Progress: ${offset}/${count} — ${updated} updated, ${coordsFixed} coords fixed, ${namesFixed} names fixed, ${noMatch} no match`);
+      console.log(`Progress: ${offset}/${count} — ${updated} queued, ${coordsFixed} coords fixed, ${namesFixed} names fixed, ${noMatch} no match`);
     }
 
     if (events.length < BATCH_SIZE) break;
   }
 
+  // Letzter Flush — die übriggebliebenen <500 Rows raus
+  const finalAffected = await updater.flush();
+  console.log(`Final flush: ${finalAffected} affected`);
+
   console.log('\n=== MIGRATION COMPLETE ===');
   console.log(`Total processed: ${offset}`);
-  console.log(`Updated: ${updated}`);
+  console.log(`Queued (sent to RPC): ${updated}`);
+  console.log(`DB-affected: ${updater.stats.affected}`);
+  console.log(`RPC calls: ${updater.stats.flushes} (retries: ${updater.stats.retries}, errors: ${updater.stats.errors})`);
   console.log(`Coordinates fixed: ${coordsFixed}`);
   console.log(`Names normalized: ${namesFixed}`);
   console.log(`Already correct: ${alreadyGood}`);

@@ -157,11 +157,31 @@ export function MessagesPageClient() {
   useEffect(() => {
     if (!user) return;
 
+    // Server-side Filter — ohne dieses bekommt jeder eingeloggte Browser
+    // ALLE direct_messages-Inserts der ganzen DB als WAL-Stream geliefert
+    // (RLS verhindert dass die Daten gelesen werden, aber das WAL-Decoding
+    // passiert pro Listener trotzdem). Filter auf sender_id ODER receiver_id
+    // = current user reduziert das massiv.
     const channel = supabase
-      .channel('dm-list')
+      .channel(`dm-list:${user.id}`)
       .on(
         'postgres_changes',
-        { event: 'INSERT', schema: 'public', table: 'direct_messages' },
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'direct_messages',
+          filter: `receiver_id=eq.${user.id}`,
+        },
+        () => { fetchConversations(); }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'direct_messages',
+          filter: `sender_id=eq.${user.id}`,
+        },
         () => { fetchConversations(); }
       )
       .subscribe();

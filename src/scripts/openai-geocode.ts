@@ -52,6 +52,7 @@ import OpenAI from 'openai';
 import { createClient } from '@supabase/supabase-js';
 import { normalizeString } from '../lib/location-normalizer';
 import { getCachedGeo, setCachedGeo } from '../lib/geocode-cache';
+import { makeBulkUpdater } from '../lib/db/bulk-update';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -79,6 +80,11 @@ if (!supabaseServiceKey) {
 
 const openai = new OpenAI({ apiKey: openaiApiKey });
 const supabase = createClient(supabaseUrl, supabaseServiceKey);
+// Bulk-Updater statt N Single-Row UPDATEs gegen events.
+// Pre-Refactor: 449k Calls in pg_stat_statements. Beide UPDATE-Branches
+// (overwrite + write/NULL→coords) sprechen die gleiche Sparse-RPC, mit
+// optionalem postal_code. queue() flusht automatisch alle 500 events.
+const geocodeUpdater = makeBulkUpdater(supabase, 'bulk_update_event_geocoding');
 
 // ─── CLI args ──────────────────────────────────────────────────────────────
 const isDryRun = process.argv.includes('--dry-run');
@@ -792,20 +798,17 @@ async function main() {
             // Back-fill postal_code only when event had none — never
             // overwrite an existing PLZ (that came from the scraper or
             // a prior manual entry and is trusted over AI inference).
-            const update: Record<string, unknown> = {
+            const payload: Record<string, unknown> = {
+              id: event.id,
               latitude: lat,
               longitude: lng,
               geocoding_confidence: 'gemini',
               geocoding_source: 'gemini',
             };
             if (!event.postal_code && aiPostalCode) {
-              update.postal_code = aiPostalCode;
+              payload.postal_code = aiPostalCode;
             }
-            const { error } = await supabase
-              .from('events')
-              .update(update)
-              .eq('id', event.id);
-            if (error) console.error(`  Error updating event ${event.id}: ${error.message}`);
+            await geocodeUpdater.add(payload as { id: string });
           }
           eventsOverwritten++;
         } else {
@@ -827,20 +830,17 @@ async function main() {
           if (!isDryRun) {
             // Same postal_code rule as the overwrite branch — write only
             // when the event currently has none.
-            const update: Record<string, unknown> = {
+            const payload: Record<string, unknown> = {
+              id: event.id,
               latitude: lat,
               longitude: lng,
               geocoding_confidence: 'gemini',
               geocoding_source: 'gemini',
             };
             if (!event.postal_code && aiPostalCode) {
-              update.postal_code = aiPostalCode;
+              payload.postal_code = aiPostalCode;
             }
-            const { error } = await supabase
-              .from('events')
-              .update(update)
-              .eq('id', event.id);
-            if (error) console.error(`  Error updating event ${event.id}: ${error.message}`);
+            await geocodeUpdater.add(payload as { id: string });
           }
           eventsWritten++;
         }
@@ -930,6 +930,17 @@ async function main() {
         console.log(`  ... and ${writes.length - 50} more writes`);
       }
     }
+  }
+
+  // Final flush: verbleibende <500 events queued an die RPC
+  if (!isDryRun) {
+    await geocodeUpdater.flush();
+    console.log(
+      `\n  Bulk-RPC summary: ${geocodeUpdater.stats.flushes} calls, `
+      + `${geocodeUpdater.stats.affected} rows affected, `
+      + `${geocodeUpdater.stats.retries} retries, `
+      + `${geocodeUpdater.stats.errors} errors`,
+    );
   }
 
   // Clean up

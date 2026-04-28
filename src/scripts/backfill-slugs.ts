@@ -39,9 +39,9 @@ try {
 
 import { createClient } from '@supabase/supabase-js';
 import { generateEventSlug } from '../lib/utils/slugify';
+import { makeBulkUpdater } from '../lib/db/bulk-update';
 
 const BATCH_SIZE = 500;
-const CONCURRENT_UPDATES = 25; // how many UPDATEs in flight at once
 
 async function main() {
   const dryRun = process.argv.includes('--dry-run');
@@ -54,6 +54,10 @@ async function main() {
   }
 
   const supabase = createClient(url, key);
+  // Pre-Refactor: Promise.all-Pools mit 25× concurrent UPDATEs pro Chunk =
+  // 500 Round-Trips pro Batch (in pg_stat_statements als 150k+ Calls
+  // sichtbar). Jetzt: ein RPC-Call pro 500 events.
+  const slugsUpdater = makeBulkUpdater(supabase, 'bulk_update_event_slugs');
   let processed = 0;
   let updated = 0;
   let errors = 0;
@@ -88,24 +92,15 @@ async function main() {
     }));
 
     if (!dryRun) {
-      // Issue updates in parallel pools of CONCURRENT_UPDATES to keep Supabase
-      // connection count reasonable while still finishing each 500-row batch
-      // in about a second.
-      for (let i = 0; i < updates.length; i += CONCURRENT_UPDATES) {
-        const chunk = updates.slice(i, i + CONCURRENT_UPDATES);
-        const results = await Promise.all(
-          chunk.map((u) =>
-            supabase.from('events').update({ slug: u.slug }).eq('id', u.id),
-          ),
-        );
-        for (const r of results) {
-          if (r.error) {
-            errors += 1;
-            if (errors < 10) console.error(`update error: ${r.error.message}`);
-          } else {
-            updated += 1;
-          }
+      // Queue alle 500 in einem Schwung — BulkUpdater auto-flusht bei 500.
+      try {
+        for (const u of updates) {
+          await slugsUpdater.add(u);
         }
+        updated += updates.length;
+      } catch (err) {
+        errors += updates.length;
+        console.error(`bulk slug update batch failed: ${(err as Error).message}`);
       }
     } else {
       updated += updates.length;
@@ -125,12 +120,28 @@ async function main() {
     if (events.length < BATCH_SIZE) break;
   }
 
+  // Final flush: verbleibende <500 events queued
+  if (!dryRun) {
+    try {
+      await slugsUpdater.flush();
+    } catch (err) {
+      console.error(`final flush failed: ${(err as Error).message}`);
+    }
+  }
+
   const elapsed = (Date.now() - startedAt) / 1000;
   process.stdout.write('\n');
   console.log(
     `Done. processed=${processed} updated=${updated} errors=${errors} ` +
     `elapsed=${elapsed.toFixed(1)}s${dryRun ? ' (dry run)' : ''}`,
   );
+  if (!dryRun) {
+    console.log(
+      `Bulk-RPC: ${slugsUpdater.stats.flushes} calls, `
+      + `${slugsUpdater.stats.affected} affected, `
+      + `${slugsUpdater.stats.retries} retries, ${slugsUpdater.stats.errors} errs`,
+    );
+  }
 }
 
 main().catch((err) => {

@@ -46,6 +46,7 @@ import OpenAI from 'openai';
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import { fetchEventPage, closeSharedBrowser } from '../lib/category-classifier/fetch-page';
 import { validateEnrichment, ENRICHMENT_VERSION } from '../lib/category-classifier/enrichment-taxonomy';
+import { makeBulkUpdater, type BulkUpdater } from '../lib/db/bulk-update';
 import {
   TAGS, AUDIENCES, VIBES, SETTINGS, OCCASIONS, PRICE_FLAGS,
   LANGUAGES, PRICE_TIERS, DURATION_TYPES, PRIMARY_CATEGORIES,
@@ -594,6 +595,7 @@ async function processOne(
   opts: CliOpts,
   stats: Stats,
   limiter: TpmLimiter,
+  updater: BulkUpdater,
 ): Promise<void> {
   // 1. Fetch source URL
   let pageContent: string | null = null;
@@ -775,53 +777,22 @@ async function processOne(
   }
 
   if (!opts.dryRun) {
-    // Retry the UPDATE up to 3 times for transient network errors
-    // ("TypeError: fetch failed" — Supabase blips, edge connection
-    // resets). Each retry waits exponentially longer (1s → 3s → 8s),
-    // which gives a typical 30-second Supabase blip enough time to
-    // recover before we mark the event failed. Real schema/auth errors
-    // are NOT retried — they'd just produce 3× the log noise.
-    const isTransient = (msg: string) =>
-      /fetch failed/i.test(msg) ||
-      /network/i.test(msg) ||
-      /ECONN/i.test(msg) ||
-      /timeout/i.test(msg) ||
-      /503|504|408/.test(msg);
-    const retryDelaysMs = [1000, 3000, 8000];
-
-    let lastError: { message: string } | null = null;
-    let attempt = 0;
-    while (attempt <= retryDelaysMs.length) {
-      const { error } = await supabase.from('events').update(update).eq('id', row.id);
-      if (!error) {
-        lastError = null;
-        break;
+    // Statt N Single-Row UPDATEs in den BulkUpdater queuen.
+    // BulkUpdater hat 3-attempt retry für transiente Fehler (502/504/
+    // fetch-failed/timeout) eingebaut. Schema-Fehler treten erst beim
+    // Auto-Flush auf (alle 500 events) — wir wrappen die Exception
+    // damit der existierende SchemaMismatchError-Bail bestehen bleibt.
+    try {
+      await updater.add({ id: row.id, ...update });
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      if (/Could not find.+column/i.test(msg) || /schema cache/i.test(msg) || /does not exist/i.test(msg)) {
+        throw new SchemaMismatchError(msg);
       }
-
-      // Schema errors mean every subsequent row will fail identically —
-      // bail fast instead of prosecuting 40k doomed attempts. (Skip retry.)
-      const isSchemaError =
-        /Could not find.+column/i.test(error.message) ||
-        /schema cache/i.test(error.message) ||
-        /does not exist/i.test(error.message);
-      if (isSchemaError) {
-        throw new SchemaMismatchError(error.message);
-      }
-
-      lastError = error;
-      if (!isTransient(error.message) || attempt >= retryDelaysMs.length) {
-        break;
-      }
-      // Transient error + retry budget left — wait and try again
-      await new Promise(r => setTimeout(r, retryDelaysMs[attempt]));
-      attempt++;
-    }
-
-    if (lastError) {
-      console.error(`\n[${row.id.slice(0, 8)}] update failed after ${attempt + 1} attempt(s): ${lastError.message}`);
+      console.error(`\n[${row.id.slice(0, 8)}] queued-batch update failed: ${msg}`);
       stats.enriched -= 1;
       stats.failed += 1;
-      appendLog(opts.logFile, { event_id: row.id, title: row.title, status: 'db_error', error: lastError.message, attempts: attempt + 1 });
+      appendLog(opts.logFile, { event_id: row.id, title: row.title, status: 'db_error', error: msg });
       stats.processed += 1;
       return;
     }
@@ -848,12 +819,13 @@ async function worker(
   stats: Stats,
   total: number | undefined,
   limiter: TpmLimiter,
+  updater: BulkUpdater,
 ): Promise<void> {
   while (queue.length > 0) {
     const row = queue.shift();
     if (!row) break;
     try {
-      await processOne(supabase, row, opts, stats, limiter);
+      await processOne(supabase, row, opts, stats, limiter, updater);
     } catch (err) {
       // Schema mismatch — every row will fail the same way. Drain and
       // bubble so main prints a useful error and exits instead of
@@ -896,6 +868,9 @@ async function main() {
     process.exit(1);
   }
   const supabase = createClient(supaUrl, supaKey);
+  // Shared BulkUpdater über alle Worker. JS ist single-threaded → push/splice
+  // sind atomic. Auto-Flush bei 500. Final flush am Ende des main().
+  const enrichmentUpdater = makeBulkUpdater(supabase, 'bulk_update_event_enrichment');
   const today = new Date().toISOString().split('T')[0];
 
   const { count: alreadyDone } = await supabase
@@ -978,7 +953,7 @@ async function main() {
     const toProcess = remaining < rows.length ? rows.slice(0, remaining) : rows;
     const queue = [...toProcess];
     const workers = Array.from({ length: opts.concurrency }, () =>
-      worker(queue, supabase, opts, stats, totalPending ?? undefined, limiter),
+      worker(queue, supabase, opts, stats, totalPending ?? undefined, limiter, enrichmentUpdater),
     );
 
     try {
@@ -1039,6 +1014,22 @@ async function main() {
 
     if (opts.dryRun || opts.force) break;
     if (rows.length < PAGE_SIZE) break;
+  }
+
+  // Final flush: verbleibende <500 events queued an die RPC schicken.
+  if (!opts.dryRun) {
+    try {
+      await enrichmentUpdater.flush();
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      console.error(`\nFinal bulk flush failed: ${msg}`);
+    }
+    console.log(
+      `Bulk-RPC summary: ${enrichmentUpdater.stats.flushes} calls, `
+      + `${enrichmentUpdater.stats.affected} rows affected, `
+      + `${enrichmentUpdater.stats.retries} retries, `
+      + `${enrichmentUpdater.stats.errors} errors`,
+    );
   }
 
   process.stdout.write('\n' + '─'.repeat(70) + '\n');

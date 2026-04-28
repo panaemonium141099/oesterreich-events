@@ -27,6 +27,7 @@ import { createClient } from '@supabase/supabase-js';
 import { normalizeEventLocation, isVenueName } from '../lib/location-normalizer';
 import { KNOWN_VENUES } from '../lib/known-venues';
 import { matchPlaceName } from '../lib/utils/place-match';
+import { makeBulkUpdater } from '../lib/db/bulk-update';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -48,6 +49,11 @@ if (!supabaseServiceKey) {
 }
 
 const supabase = createClient(supabaseUrl, supabaseServiceKey);
+// Bulk-Updater statt N Single-Row UPDATEs gegen events.
+// Beide Branches (correct + null) sprechen dieselbe RPC (Sparse-Pattern
+// in bulk_update_event_geocoding erlaubt explizite NULL-Werte für die
+// null-Branch via key-existence test in CASE WHEN).
+const geocodeUpdater = makeBulkUpdater(supabase, 'bulk_update_event_geocoding');
 
 // ─── CLI args ──────────────────────────────────────────────────────────────
 const isDryRun = process.argv.includes('--dry-run');
@@ -458,19 +464,14 @@ async function main() {
             action: 'correct',
           });
         } else {
-          const { error } = await supabase
-            .from('events')
-            .update({
-              latitude: result.latitude,
-              longitude: result.longitude,
-              geocoding_confidence: result.confidence,
-              geocoding_source: 'geonames',
-            })
-            .eq('id', event.id);
-
-          if (error) {
-            console.error(`  Error updating event ${event.id}: ${error.message}`);
-          }
+          // Queue → bulk RPC. Auto-flusht bei 500.
+          await geocodeUpdater.add({
+            id: event.id,
+            latitude: result.latitude,
+            longitude: result.longitude,
+            geocoding_confidence: result.confidence,
+            geocoding_source: 'geonames',
+          });
         }
         corrected++;
       } else {
@@ -490,19 +491,15 @@ async function main() {
               action: 'null',
             });
           } else {
-            const { error } = await supabase
-              .from('events')
-              .update({
-                latitude: null,
-                longitude: null,
-                geocoding_confidence: null,
-                geocoding_source: null,
-              })
-              .eq('id', event.id);
-
-            if (error) {
-              console.error(`  Error nulling event ${event.id}: ${error.message}`);
-            }
+            // Queue NULL-payload — Sparse-RPC erkennt Keys mit value=null
+            // und setzt die DB-Spalte explizit auf NULL.
+            await geocodeUpdater.add({
+              id: event.id,
+              latitude: null,
+              longitude: null,
+              geocoding_confidence: null,
+              geocoding_source: null,
+            });
           }
           nulled++;
         } else {
@@ -518,6 +515,18 @@ async function main() {
     }
 
     process.stdout.write(`  Batch ${batchNum + 1}/${totalBatches} processed (${corrected} corrected, ${nulled} nulled, ${unchanged} unchanged)\r`);
+  }
+
+  // Final flush — verbleibende <500 events queued an die RPC schicken.
+  if (!isDryRun) {
+    const finalAffected = await geocodeUpdater.flush();
+    console.log(
+      `\n  Bulk-RPC summary: ${geocodeUpdater.stats.flushes} calls, `
+      + `${geocodeUpdater.stats.affected} rows affected, `
+      + `${geocodeUpdater.stats.retries} retries, `
+      + `${geocodeUpdater.stats.errors} errors`
+      + (finalAffected > 0 ? ` (final: ${finalAffected})` : ''),
+    );
   }
 
   // 6. Report
