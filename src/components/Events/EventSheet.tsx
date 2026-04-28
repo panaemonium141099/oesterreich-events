@@ -119,33 +119,14 @@ export function EventSheet({ children }: EventSheetProps) {
         exit={{ opacity: 0, y: 12 }}
         transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
       >
-        {/* Floating close button — pinned top-right, always reachable
-            even while the user scrolls through the event content. The
-            same exit is also bound to ESC and the browser back button. */}
-        <button
-          type="button"
-          onClick={close}
-          aria-label="Schließen — zurück zur Karte"
-          className="
-            fixed top-4 right-4 z-[70]
-            w-10 h-10 rounded-full
-            flex items-center justify-center
-            transition-colors hover:bg-black/80
-          "
-          style={{
-            background: 'rgba(0,0,0,0.55)',
-            backdropFilter: 'blur(10px)',
-            border: '1px solid rgba(255,255,255,0.18)',
-            color: '#fff',
-          }}
-        >
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
-            stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <line x1="18" y1="6" x2="6" y2="18"/>
-            <line x1="6" y1="6" x2="18" y2="18"/>
-          </svg>
-        </button>
-
+        {/* No floating close button — it would collide with the
+            EventDetailActions panel (save/share/AfterSavePanel) that
+            already lives top-right on the hero. The user has three
+            unambiguous ways to dismiss the overlay:
+              1. Breadcrumb back-arrow / "Karte" link top-left
+              2. Escape key
+              3. Browser back button (incl. mobile gesture)
+            All three end up in close() → router.back(). */}
         {children}
       </motion.div>
     </AnimatePresence>
