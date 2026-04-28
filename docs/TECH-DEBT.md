@@ -35,6 +35,30 @@ the scrapers have specific bugs.
 
 ---
 
+## Realtime channel redundancy (Supabase advisor 2026-04-28)
+
+Top item in pg_stat_statements: WAL replication queries account for **27 %
+of total DB time** across 1.7 million calls. Caused by multiple `supabase
+.channel(...)` subscriptions all watching the same `notifications` /
+`direct_messages` rows for the same user:
+
+| Component | Channel | Tables watched |
+|---|---|---|
+| `SocialNav` (always-on, root) | `social-nav-unread` | direct_messages, notifications |
+| `NotificationBell` (always-on, root) | `notification-bell` | notifications |
+| `NotificationToast` (always-on, root) | `notification-toast` | notifications |
+| `NotificationsPageClient` (on /notifications) | `notifications-page` | notifications |
+| `MessagesPageClient` (on /messages) | `dm-list` | direct_messages |
+
+For every logged-in user that's **3-4 simultaneous WAL streams against the
+same table**. Each stream eats ~10ms per WAL event in pg_stat_statements.
+
+**Fix path**: lift notifications-realtime into a single
+`NotificationsProvider` mounted in the root layout. One channel,
+one WAL stream. NotificationBell, NotificationToast, NotificationsPage
+all subscribe via React context. Estimated 30-60 min refactor; should
+cut total DB time by ~25 % alone.
+
 ## Other tech debt (from session handoff 2026-04-26)
 
 - **4 broken tests in `events.test.ts`** — outdated since cursor-pagination migration. Code is correct, tests need update.

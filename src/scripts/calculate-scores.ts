@@ -112,53 +112,71 @@ async function main() {
     };
   });
 
-  // Batch update — parallel chunks with retry + delay to avoid 502s
-  const CONCURRENCY = 20;
+  // Bulk update via RPC — single UPDATE … FROM jsonb_to_recordset() per
+  // batch instead of N individual UPDATE … WHERE id = ?.
+  //
+  // Old behaviour (pre-2026-04-28): Promise.all over 20 parallel updates
+  // per chunk × N chunks per batch × M batches. Across runs this
+  // accumulated to 2.27 million single-row UPDATEs visible in
+  // pg_stat_statements (7.5 % of all DB time, second-biggest tax on the
+  // free-tier Supabase compute behind WAL replication). It was also the
+  // root cause of repeated connection-pool exhaustion: 20 concurrent
+  // statements × multi-second tail → workers blocked on each other.
+  //
+  // New behaviour: chunk into batches of BATCH_SIZE rows, send each
+  // batch as a single jsonb payload to bulk_update_event_scores. One
+  // UPDATE statement, one parsed JSON, one round-trip, one row-level
+  // write per event. ~50 RPC calls instead of ~73k single UPDATEs for
+  // a typical full-DB rescore run.
   const sleep = (ms: number) => new Promise(r => setTimeout(r, ms));
   let updated = 0;
   for (let i = 0; i < scored.length; i += BATCH_SIZE) {
     const batch = scored.slice(i, i + BATCH_SIZE);
-    let batchError: unknown = null;
+    const payload = batch.map(row => ({
+      id: row.id,
+      event_score: row.event_score,
+      score_updated_at: row.score_updated_at,
+    }));
 
-    for (let j = 0; j < batch.length; j += CONCURRENCY) {
-      const chunk = batch.slice(j, j + CONCURRENCY);
-
-      // Retry up to 3 times per chunk
-      for (let attempt = 1; attempt <= 3; attempt++) {
-        const results = await Promise.all(
-          chunk.map(row =>
-            supabase
-              .from('events')
-              .update({ event_score: row.event_score, score_updated_at: row.score_updated_at })
-              .eq('id', row.id)
-          )
-        );
-        const failed = results.find(r => r.error);
-        if (failed?.error) {
-          const msg = typeof failed.error === 'object' && 'message' in failed.error
-            ? (failed.error as { message: string }).message : String(failed.error);
-          if ((msg.includes('502') || msg.includes('504') || msg.includes('Bad gateway')) && attempt < 3) {
-            console.log(`\n  502/504 at batch ${i}, retrying in ${attempt * 15}s...`);
-            await sleep(attempt * 15000);
-            continue;
-          }
-          batchError = failed.error;
+    let lastError: unknown = null;
+    for (let attempt = 1; attempt <= 3; attempt++) {
+      const { data, error } = await supabase.rpc('bulk_update_event_scores', {
+        p_updates: payload,
+      });
+      if (!error) {
+        // `data` is the affected-row count from the RPC; mismatch usually
+        // means a concurrent delete killed an event mid-flight — log but
+        // don't abort.
+        const affected = typeof data === 'number' ? data : batch.length;
+        if (affected !== batch.length) {
+          console.warn(`\n  affected=${affected} but batch=${batch.length} — concurrent delete?`);
         }
-        break; // success or non-retryable error
+        lastError = null;
+        break;
       }
-
-      if (batchError) break;
-      // Small delay between chunks to avoid overwhelming Supabase
-      await sleep(100);
+      lastError = error;
+      const msg = error.message ?? String(error);
+      const isTransient =
+        msg.includes('502') || msg.includes('504') ||
+        msg.includes('Bad gateway') || msg.includes('fetch failed') ||
+        msg.includes('timeout') || msg.includes('ECONN');
+      if (!isTransient || attempt >= 3) break;
+      console.log(`\n  ${msg.slice(0, 60)} at batch ${i}, retrying in ${attempt * 15}s...`);
+      await sleep(attempt * 15000);
     }
 
-    if (batchError) {
-      console.error(`Error updating batch starting at ${i}:`, batchError);
+    if (lastError) {
+      console.error(`Error updating batch starting at ${i}:`, lastError);
       process.exit(1);
     }
 
     updated += batch.length;
     process.stdout.write(`\rUpdated ${updated}/${scored.length} events...`);
+    // Modest yield between batches so other Supabase traffic gets
+    // breathing room. The single RPC call is much cheaper than the
+    // old 20-parallel-UPDATE storm, so the previous 100ms-per-chunk
+    // delay was over-protective; 25ms here is plenty.
+    await sleep(25);
   }
 
   console.log(`\nScored ${scored.length} events.`);
