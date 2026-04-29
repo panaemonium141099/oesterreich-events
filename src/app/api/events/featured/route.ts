@@ -28,15 +28,17 @@ export async function GET(request: NextRequest) {
   try {
     const today = new Date().toISOString().slice(0, 10);
 
-    // Featured events require quality_score >= 50 and prefer events with image + description
+    // Featured events require quality_score >= 50 and prefer events with image + description.
+    // visibility + publish_status sind seit 2026-04-29 NOT NULL — kein OR IS NULL mehr nötig.
+    // count='estimated' statt 'exact' weil Top-Events-Carousel die Total-Zahl nicht anzeigt.
     let query = supabase
       .from('events')
       .select(
         'id, slug, title, description, start_date, end_date, location_name, address, postal_code, district, bundesland, latitude, longitude, category, image_url, price_text, price_min, price_max, ticket_url, source_name, source_url, organizer, visibility, event_score, quality_score',
-        { count: 'exact' }
+        { count: 'estimated' }
       )
-      .or('visibility.eq.public,visibility.is.null')
-      .or('publish_status.eq.published,publish_status.is.null')
+      .eq('visibility', 'public')
+      .eq('publish_status', 'published')
       .gte('start_date', today)
       .gt('event_score', 30)
       .gte('quality_score', 50)

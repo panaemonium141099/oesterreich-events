@@ -89,7 +89,7 @@ export async function loadStudentIndex(): Promise<StudentIndexData> {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (supabase.from('events') as any)
       .select('id, title, start_date, end_date, location_name, image_url, category, price_min, price_text, event_score, quality_score, bundesland, address')
-      .or('publish_status.eq.published,publish_status.eq.published_low_confidence,publish_status.is.null')
+      .in('publish_status', ['published', 'published_low_confidence'])
       .gte('start_date', todayRange.from)
       .lt('start_date', todayRange.to)
       .gte('quality_score', MIN_QUALITY)
@@ -211,7 +211,7 @@ async function loadCandidates(
     .select(
       'id, title, description, start_date, end_date, location_name, address, bundesland, latitude, longitude, category, image_url, price_text, price_min, price_max, event_score, quality_score, venue_id',
     )
-    .or('publish_status.eq.published,publish_status.eq.published_low_confidence,publish_status.is.null')
+    .in('publish_status', ['published', 'published_low_confidence'])
     .gte('start_date', today)
     .gte('quality_score', MIN_QUALITY)
     .eq('bundesland', city.bundesland);

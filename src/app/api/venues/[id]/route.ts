@@ -47,7 +47,7 @@ export async function GET(
       { count: 'exact' },
     )
     .eq('venue_id', id)
-    .or('publish_status.eq.published,publish_status.eq.published_low_confidence,publish_status.is.null')
+    .in('publish_status', ['published', 'published_low_confidence'])
     .gte('start_date', today)
     .gte('quality_score', MIN_QUALITY)
     .order('start_date', { ascending: true })
@@ -80,7 +80,7 @@ export async function GET(
       const { data: venueEventCounts } = await (supabase.from('events') as any)
         .select('venue_id')
         .in('venue_id', candidateIds)
-        .or('publish_status.eq.published,publish_status.eq.published_low_confidence,publish_status.is.null')
+        .in('publish_status', ['published', 'published_low_confidence'])
         .gte('start_date', today)
         .gte('quality_score', MIN_QUALITY);
 
@@ -117,7 +117,7 @@ export async function GET(
           const { data: newEventCounts } = await (supabase.from('events') as any)
             .select('venue_id')
             .in('venue_id', newIds)
-            .or('publish_status.eq.published,publish_status.eq.published_low_confidence,publish_status.is.null')
+            .in('publish_status', ['published', 'published_low_confidence'])
             .gte('start_date', today)
             .gte('quality_score', MIN_QUALITY);
 

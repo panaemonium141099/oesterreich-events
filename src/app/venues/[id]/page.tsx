@@ -89,7 +89,7 @@ export default async function VenueDetailPage({
       { count: 'exact' },
     )
     .eq('venue_id', id)
-    .or('publish_status.eq.published,publish_status.eq.published_low_confidence,publish_status.is.null')
+    .in('publish_status', ['published', 'published_low_confidence'])
     .gte('start_date', today)
     .gte('quality_score', MIN_QUALITY)
     .order('start_date', { ascending: true })
@@ -118,7 +118,7 @@ export default async function VenueDetailPage({
       const { data: venueCounts } = await (supabase.from('events') as any)
         .select('venue_id')
         .in('venue_id', candidateIds)
-        .or('publish_status.eq.published,publish_status.eq.published_low_confidence,publish_status.is.null')
+        .in('publish_status', ['published', 'published_low_confidence'])
         .gte('start_date', today)
         .gte('quality_score', MIN_QUALITY);
 

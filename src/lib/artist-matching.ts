@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Artist-Event Matching Engine
  *
  * Uses PostgreSQL pg_trgm word_similarity for fuzzy matching of followed artist
@@ -23,7 +23,7 @@ import {
   type ArtistAlertEmailData,
 } from '@/lib/email';
 
-// ── Types ────────────────────────────────────────────────────────────────────
+// â”€â”€ Types â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 export interface FollowedArtist {
   id: string;
@@ -59,7 +59,7 @@ export interface MatchingStats {
   lineupMatches: number;
 }
 
-// ── Name classification ──────────────────────────────────────────────────────
+// â”€â”€ Name classification â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 export type MatchTier = 'skip' | 'exact' | 'fuzzy';
 
@@ -98,7 +98,7 @@ export function normalizeArtistName(name: string): string {
   return stripDiacritics(name.toLowerCase().trim());
 }
 
-// ── False-positive filter ────────────────────────────────────────────────────
+// â”€â”€ False-positive filter â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 /**
  * Check if an artist name match in a title is a false positive.
@@ -117,11 +117,11 @@ export function isFalsePositiveMatch(
   const titleLower = eventTitle.toLowerCase();
   const nameLower = artistName.toLowerCase();
 
-  // ── 0. Short-name word-boundary check ──────────────────────────────────────
-  // For short artist names (≤ 8 chars), check if the name appears only as a
-  // SUBSTRING of a longer word. "Dame" in "Damen", "Zedd" fuzzy→ "Zederhaus".
-  // Skip this check for long names (9+ chars) — fuzzy matches on long names
-  // are almost always legitimate (e.g., "Pizzera und Jaus" ≈ "Pizzera & Jaus").
+  // â”€â”€ 0. Short-name word-boundary check â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // For short artist names (â‰¤ 8 chars), check if the name appears only as a
+  // SUBSTRING of a longer word. "Dame" in "Damen", "Zedd" fuzzyâ†’ "Zederhaus".
+  // Skip this check for long names (9+ chars) â€” fuzzy matches on long names
+  // are almost always legitimate (e.g., "Pizzera und Jaus" â‰ˆ "Pizzera & Jaus").
   const titleNorm = stripDiacritics(titleLower);
   const nameNorm = stripDiacritics(nameLower);
 
@@ -138,7 +138,7 @@ export function isFalsePositiveMatch(
       wbRegexNorm.test(titleNorm);
 
     if (!hasWholeWordMatch) {
-      // Short artist name is only a substring of a longer word → false positive
+      // Short artist name is only a substring of a longer word â†’ false positive
       return true;
     }
   }
@@ -159,12 +159,12 @@ function checkFalsePositiveContext(
   // Text before the artist name
   const before = titleLower.substring(0, nameIndex).trimEnd();
 
-  // ── 1. Reference patterns right before the name ───────────────────────────
+  // â”€â”€ 1. Reference patterns right before the name â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   // Uses \b word boundaries + \s*$ to handle trimEnd() stripping trailing spaces.
-  // "before" is the text left of the artist name, trimmed — so "bis zu" or "bis"
+  // "before" is the text left of the artist name, trimmed â€” so "bis zu" or "bis"
   // may appear at the very end with no trailing whitespace.
   const refPatterns = [
-    /\bbis\b(\s+zu\b)?\s*$/,             // "bis (zu) [Artist]"  — range endpoint
+    /\bbis\b(\s+zu\b)?\s*$/,             // "bis (zu) [Artist]"  â€” range endpoint
     /\bvon\s+\S+\s+bis\b(\s+zu\b)?\s*$/, // "von X bis (zu) [Artist]"
     /\btribute\b(\s+to\b|\s+an?\b)?\s*$/, // "tribute (to/an) [Artist]"
     /\bhommage\b(\s+an?\b)?\s*$/,         // "hommage (an) [Artist]"
@@ -174,35 +174,35 @@ function checkFalsePositiveContext(
     /\blieder\b(\s+von\b)?\s*$/,          // "lieder (von) [Artist]"
     /\bmelodien\b(\s+von\b)?\s*$/,        // "melodien (von) [Artist]"
     /\bwerke\b(\s+von\b)?\s*$/,           // "werke (von) [Artist]"
-    /\bnach\b\s*$/,                        // "nach [Artist]"  — inspired by
-    /\bà la\b\s*$/,                        // "à la [Artist]"
+    /\bnach\b\s*$/,                        // "nach [Artist]"  â€” inspired by
+    /\bÃ  la\b\s*$/,                        // "Ã  la [Artist]"
   ];
 
   for (const pattern of refPatterns) {
     if (pattern.test(before)) return true;
   }
 
-  // ── 2. Cover-band / brass-band indicator ──────────────────────────────────
+  // â”€â”€ 2. Cover-band / brass-band indicator â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const coverPrefixes = [
     'musikkapelle', 'blasmusik', 'musikverein', 'trachtenkapelle',
-    'stadtkapelle', 'harmoniemusik', 'bürgermusik', 'bürgerkapelle',
+    'stadtkapelle', 'harmoniemusik', 'bÃ¼rgermusik', 'bÃ¼rgerkapelle',
     'feuerwehrkapelle', 'jugendkapelle', 'werkskapelle',
   ];
   if (coverPrefixes.some(p => titleLower.startsWith(p)) && nameIndex > 15) {
     return true;
   }
 
-  // ── 3. Headliner-position check ──────────────────────────────────────────
+  // â”€â”€ 3. Headliner-position check â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   // Most concert titles: "Artist - Tour/Show Name" or "Konzert: Artist - Tour"
   // If the matched name only appears AFTER " - " and a DIFFERENT artist/name
   // is before it, the match is likely in the tour/show title, not the performer.
-  // Example: "David Garrett - Millenium Symphony" → ILLENIUM matches "Millenium"
+  // Example: "David Garrett - Millenium Symphony" â†’ ILLENIUM matches "Millenium"
   //          but "David Garrett" is the headliner, not ILLENIUM.
-  const separators = [' - ', ' – ', ' — ', ': '];
+  const separators = [' - ', ' â€“ ', ' â€” ', ': '];
   for (const sep of separators) {
     const sepIndex = titleLower.indexOf(sep);
     if (sepIndex > 0 && nameIndex > sepIndex + sep.length) {
-      // Artist name is AFTER the separator — it's in the tour/show part
+      // Artist name is AFTER the separator â€” it's in the tour/show part
       // Only flag if the headliner part (before separator) has actual text
       // and doesn't contain the artist name
       const headlinerPart = titleLower.substring(0, sepIndex).trim();
@@ -219,7 +219,7 @@ function checkFalsePositiveContext(
   return false;
 }
 
-// ── Matching queries ─────────────────────────────────────────────────────────
+// â”€â”€ Matching queries â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 /**
  * Build the SQL for exact word boundary match (3-char names).
@@ -268,11 +268,11 @@ export function formatNotificationBody(
   return `${rest.join(', ')} und ${last} treten bei ${eventTitle} auf!`;
 }
 
-// ── Core matching engine ─────────────────────────────────────────────────────
+// â”€â”€ Core matching engine â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
-// Raised from 0.6 to 0.75 to reduce false positives (0.6 caused "Nu Aspect" → "Aspects")
-// NOT 0.8 — that would kill "Pizzera und Jaus" → "Pizzera & Jaus" (0.76)
-// False positives like "ILLENIUM" → "Millenium" are caught by isFalsePositiveMatch() instead
+// Raised from 0.6 to 0.75 to reduce false positives (0.6 caused "Nu Aspect" â†’ "Aspects")
+// NOT 0.8 â€” that would kill "Pizzera und Jaus" â†’ "Pizzera & Jaus" (0.76)
+// False positives like "ILLENIUM" â†’ "Millenium" are caught by isFalsePositiveMatch() instead
 const WORD_SIMILARITY_THRESHOLD = 0.75;
 const BATCH_SIZE = 500;
 
@@ -699,12 +699,12 @@ export async function createGroupedNotifications(
 
   let created = 0;
 
-  // ── Pre-fetch event URL fields ────────────────────────────────────
+  // â”€â”€ Pre-fetch event URL fields â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   // Bulk-load slug/postal_code/address/bundesland for every distinct
   // event_id so we can construct canonical V3 URLs in `action_url`
   // instead of UUID-form. UUID URLs work for the server-side 308
   // redirect but break client-side router.push() from notifications
-  // (RSC fetch chokes on the 308 — user sees "This page couldn't load",
+  // (RSC fetch chokes on the 308 â€” user sees "This page couldn't load",
   // has to reload manually).
   const groupValues = Array.from(groups.values());
   const eventIds = [...new Set(groupValues.map(g => g.event_id))];
@@ -775,7 +775,7 @@ export async function createGroupedNotifications(
           .from('notifications')
           .insert(notification);
 
-        // 23505 = unique_violation — expected for duplicates
+        // 23505 = unique_violation â€” expected for duplicates
         if (insertError && !insertError.code?.includes('23505')) {
           console.error('Error creating notification:', insertError);
         } else if (!insertError) {
@@ -797,7 +797,7 @@ export async function createGroupedNotifications(
   return created;
 }
 
-// ── Email dispatch for match alerts ─────────────────────────────────────────
+// â”€â”€ Email dispatch for match alerts â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 /**
  * Format a date string to German locale for email display.
@@ -865,14 +865,14 @@ async function dispatchMatchAlertEmails(
   const emailUserIds = new Set(
     userIds.filter(uid => {
       const prefs = prefsMap.get(uid);
-      // Default for channel_email is OFF — only send if explicitly enabled
+      // Default for channel_email is OFF â€” only send if explicitly enabled
       return prefs?.channel_email === true && prefs?.artist_alerts_enabled !== false;
     })
   );
 
   if (emailUserIds.size === 0) return;
 
-  // 3. Fetch event details for email template — skip duplicates so users
+  // 3. Fetch event details for email template â€” skip duplicates so users
   //    don't receive an email pointing at a hidden event_id.
   const emailGroups = groups.filter(g => emailUserIds.has(g.user_id));
   const eventIds = [...new Set(emailGroups.map(g => g.event_id))];
@@ -880,7 +880,7 @@ async function dispatchMatchAlertEmails(
     .from('events')
     .select('id, title, start_date, location_name, ticket_url, image_url')
     .in('id', eventIds)
-    .or('publish_status.eq.published,publish_status.eq.published_low_confidence,publish_status.is.null');
+    .in('publish_status', ['published', 'published_low_confidence']);
 
   type EventRow = {
     id: string;
@@ -916,7 +916,7 @@ async function dispatchMatchAlertEmails(
         eventTitle: group.festival_name ?? event.title,
         eventDate: formatDateDE(event.start_date),
         venueName: null,
-        location: event.location_name || 'Österreich',
+        location: event.location_name || 'Ã–sterreich',
         ticketUrl: event.ticket_url,
         eventPageUrl: `${baseUrl}/events/${group.event_id}`,
         unsubscribeUrl: `${baseUrl}/api/notifications/unsubscribe?user_id=${group.user_id}&token=${token}`,
@@ -1010,7 +1010,7 @@ export async function runMatchingPipeline(
   console.log(`Fuzzy matches (title): ${fuzzyMatches.length}`);
 
   // Collect all title-matched event IDs for description exclusion
-  // (use unfiltered here — FP filter runs after description matching)
+  // (use unfiltered here â€” FP filter runs after description matching)
   const titleMatchedEventIds = new Set<string>();
   for (const m of [...exactMatches, ...fuzzyMatches]) {
     titleMatchedEventIds.add(m.event_id);
@@ -1146,7 +1146,7 @@ export async function runMatchingPipeline(
     .select('id', { count: 'exact', head: true })
     .gte('start_date', new Date().toISOString())
     .gt('updated_at', cursor.last_processed_at)
-    .or('publish_status.eq.published,publish_status.eq.published_low_confidence,publish_status.is.null');
+    .in('publish_status', ['published', 'published_low_confidence']);
 
   stats.events_processed = eventsCount ?? 0;
 

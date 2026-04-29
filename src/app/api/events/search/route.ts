@@ -37,7 +37,7 @@ export async function GET(request: NextRequest) {
     const { data, error } = await supabase
       .from('events')
       .select('id, title, start_date, location_name, image_url, category')
-      .or('visibility.eq.public,visibility.is.null')
+      .eq('visibility', 'public')
       .gte('start_date', today)
       .or(`title.ilike.%${sanitized}%,location_name.ilike.%${sanitized}%`)
       .order('start_date', { ascending: true })

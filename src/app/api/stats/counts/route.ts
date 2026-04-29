@@ -47,15 +47,17 @@ export async function GET() {
   try {
     const today = new Date().toISOString().slice(0, 10);
 
-    // Run all count queries in parallel — each returns just a number, not full rows
+    // Run all count queries in parallel — each returns just a number, not full rows.
+    // visibility ist seit 2026-04-29 NOT NULL DEFAULT 'public', kein OR IS NULL nötig.
+    // count='estimated' statt 'exact' — Region/Category-Pillen zeigen Annäherung.
     const [regionResults, categoryResults] = await Promise.all([
       Promise.all(
         BUNDESLAENDER.map(async (bl) => {
           const { count } = await supabase
             .from('events')
-            .select('*', { count: 'exact', head: true })
+            .select('*', { count: 'estimated', head: true })
             .eq('bundesland', bl)
-            .or('visibility.eq.public,visibility.is.null')
+            .eq('visibility', 'public')
             .gte('start_date', today);
           return [bl, count || 0] as const;
         })
@@ -64,9 +66,9 @@ export async function GET() {
         CATEGORIES.map(async (cat) => {
           const { count } = await supabase
             .from('events')
-            .select('*', { count: 'exact', head: true })
+            .select('*', { count: 'estimated', head: true })
             .eq('category', cat)
-            .or('visibility.eq.public,visibility.is.null')
+            .eq('visibility', 'public')
             .gte('start_date', today);
           return [cat, count || 0] as const;
         })

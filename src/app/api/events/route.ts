@@ -678,9 +678,9 @@ export async function GET(request: NextRequest) {
       let unmappedQuery = (supabase.from('events') as any).select(
         'id, title, description, start_date, end_date, location_name, address, postal_code, district, bundesland, latitude, longitude, category, image_url, price_text, price_min, price_max, ticket_url, source_name, source_url, organizer, visibility, event_score, slug'
       );
-      unmappedQuery = unmappedQuery.or('visibility.eq.public,visibility.is.null');
+      unmappedQuery = unmappedQuery.eq('visibility', 'public');
       if (!includeAll) {
-        unmappedQuery = unmappedQuery.or('publish_status.eq.published,publish_status.eq.published_low_confidence,publish_status.is.null');
+        unmappedQuery = unmappedQuery.in('publish_status', ['published', 'published_low_confidence']);
       }
       unmappedQuery = unmappedQuery.gte('start_date', today);
       // Match events where either coordinate is NULL

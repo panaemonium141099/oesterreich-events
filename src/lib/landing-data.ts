@@ -243,17 +243,18 @@ async function queryEvents(
 ): Promise<{ events: Event[]; totalCount: number }> {
   const today = new Date().toISOString().split('T')[0];
 
+  // count='estimated' statt 'exact' — landing-page paginator nutzt estimated total
+  // count, exact count macht zweite Vollscan-Query auf der 175k events-Tabelle.
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let query = (supabase.from('events') as any).select(
     'id, title, description, start_date, end_date, location_name, address, bundesland, latitude, longitude, category, image_url, price_text, price_min, price_max, event_score, quality_score, venue_id',
-    { count: 'exact' },
+    { count: 'estimated' },
   );
 
-  // Only published, quality-gated, future events
+  // Only published, quality-gated, future events.
+  // publish_status ist seit 2026-04-29 NOT NULL DEFAULT 'published', kein OR IS NULL nötig.
   query = query
-    .or(
-      'publish_status.eq.published,publish_status.eq.published_low_confidence,publish_status.is.null',
-    )
+    .in('publish_status', ['published', 'published_low_confidence'])
     .gte('start_date', today)
     .gte('quality_score', MIN_QUALITY);
 

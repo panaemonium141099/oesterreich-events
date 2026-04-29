@@ -12,10 +12,13 @@ export async function LandingStats() {
     // Count unique events (deduplicated by title + date)
     // Supabase can't do DISTINCT count, so we use a raw count and apply
     // the known dedup ratio (~70% of raw events are unique)
+    // count='estimated' — landing-page total ist eh "circa", exact count
+    // braucht zweite Vollscan-Query auf 175k events.
+    // visibility ist NOT NULL DEFAULT 'public' seit 2026-04-29.
     const { count } = await supabase
       .from('events')
-      .select('*', { count: 'exact', head: true })
-      .or('visibility.eq.public,source_type.eq.scraped')
+      .select('*', { count: 'estimated', head: true })
+      .eq('visibility', 'public')
       .gte('start_date', today);
     if (count) {
       // Apply dedup ratio: ~30% of events are title+date duplicates from multiple scrapers
