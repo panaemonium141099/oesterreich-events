@@ -205,7 +205,10 @@ function MapPageInner() {
     setAllEvents([]);
     setApiTotalCount(null);
 
-    const BATCH_SIZE = 5000;
+    // 5000 → 10000: weniger Batches, schnellere Gesamt-Ladezeit.
+    // 76k events / 10k = 8 Batches statt 16. Plus Inter-Batch-Delay (300ms)
+    // wurde gestrichen. User-Wunsch: "in kürzeren Abständen".
+    const BATCH_SIZE = 10000;
 
     try {
       // ── Phase 1: Fast first batch (no bbox — just earliest events) ──
@@ -246,7 +249,9 @@ function MapPageInner() {
           await new Promise(r => setTimeout(r, 400));
         }
         if (controller.signal.aborted) break;
-        await new Promise(r => setTimeout(r, 300));
+        // Kein 300ms-Delay zwischen Batches — User wollte explizit
+        // "in kürzeren Abständen". DB+PostgREST haben statement_timeout
+        // als natürliche Drossel, mehr Pausen bringen nichts.
 
         const params = buildParams();
         params.set('limit', String(BATCH_SIZE));

@@ -70,7 +70,9 @@ const SEARCH_SYNONYMS: Record<string, string[]> = {
   meditation: ['Wellness & Spiritualität'],
   community: ['Community & Freizeit'],
 };
-const MAX_PAGE_SIZE = 5000;
+// 10000 statt 5000 — Map lädt in größeren Batches damit weniger
+// Round-Trips für die 76k events nötig sind.
+const MAX_PAGE_SIZE = 10000;
 
 /** Compute a relevance score combining quality and recency (0-100). */
 function computeRelevance(event: Record<string, unknown>, nowMs: number): number {

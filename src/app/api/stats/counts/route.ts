@@ -32,6 +32,7 @@ interface CountsPayload {
   regions: Record<string, number>;
   categories: Record<string, number>;
   total: number;
+  dedup_total: number;
 }
 
 export async function GET() {
@@ -79,6 +80,10 @@ export async function GET() {
         regions: mergedRegions,
         categories,
         total: payload.total ?? 0,
+        // dedup_total = was die Map als "X Veranstaltungen" zeigt (post
+        // client-side title+date dedup). LandingStats nutzt das damit
+        // beide Zahlen matchen.
+        dedup_total: payload.dedup_total ?? 0,
       },
       {
         headers: {

@@ -25,11 +25,15 @@ export function LandingStats() {
 
   useEffect(() => {
     let cancelled = false;
+    // dedup_total = was Map-Header zeigt (post title+date Dedup) —
+    // damit Landing-Badge dieselbe Zahl rendert. Falls dedup_total
+    // fehlt (Cache von vor diesem Deploy), Fallback auf raw total.
     fetch('/api/stats/counts')
       .then(res => res.ok ? res.json() : null)
-      .then((data: { total?: number } | null) => {
-        if (cancelled || !data?.total) return;
-        if (data.total > 0) setTotal(data.total);
+      .then((data: { total?: number; dedup_total?: number } | null) => {
+        if (cancelled || !data) return;
+        const n = data.dedup_total ?? data.total ?? 0;
+        if (n > 0) setTotal(n);
       })
       .catch(() => { /* keep fallback */ });
     return () => { cancelled = true; };
