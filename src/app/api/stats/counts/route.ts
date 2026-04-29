@@ -89,7 +89,11 @@ export async function GET() {
       { regions, categories },
       {
         headers: {
-          'Cache-Control': 'public, max-age=3600',
+          // Edge-Cache via s-maxage damit Vercel global den Pillen-Count
+          // shared cached. max-age=3600 war Browser-only — jeder Nutzer
+          // hat seinen eigenen Cache-Eintrag erzeugt.
+          'Cache-Control':
+            'public, max-age=3600, s-maxage=3600, stale-while-revalidate=86400',
         },
       }
     );

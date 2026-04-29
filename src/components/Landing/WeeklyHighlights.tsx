@@ -107,15 +107,15 @@ export function WeeklyHighlights() {
     if (fetchedRef.current) return;
     fetchedRef.current = true;
 
-    const loadEvents = async (lat?: number, lng?: number) => {
+    // KEINE lat/lng-Params an /api/events/featured.
+    // Pre-Refactor: bei jedem unique lat/lng spawnte Vercel eine neue
+    // Lambda-Instanz (cold-start ~13s) und der Edge-Cache hatte für jeden
+    // Nutzer einen anderen Key. Der API-Endpunkt nutzt lat/lng eh nicht
+    // zum Filtern — wir kennzeichnen "in deiner Nähe" nur im Label.
+    // Eine generische URL → einen Edge-Cache-Eintrag → instant für alle.
+    const loadEvents = async () => {
       try {
-        const url = new URL('/api/events/featured', window.location.origin);
-        url.searchParams.set('limit', '10');
-        if (lat !== undefined && lng !== undefined) {
-          url.searchParams.set('lat', lat.toFixed(4));
-          url.searchParams.set('lng', lng.toFixed(4));
-        }
-        const res = await fetch(url.toString(), { cache: 'no-store' });
+        const res = await fetch('/api/events/featured?limit=10');
         const data = await res.json();
         setEvents(data.events ?? []);
       } catch {
@@ -125,19 +125,15 @@ export function WeeklyHighlights() {
       }
     };
 
-    // Try geolocation for "Events in deiner Nähe"
+    // Try geolocation just for the LABEL ("in deiner Nähe" vs "diese Woche")
     if (typeof navigator !== 'undefined' && 'geolocation' in navigator) {
       navigator.geolocation.getCurrentPosition(
-        pos => {
-          setLabel('Top Events in deiner Nähe');
-          loadEvents(pos.coords.latitude, pos.coords.longitude);
-        },
-        () => loadEvents(),
+        () => setLabel('Top Events in deiner Nähe'),
+        () => { /* keep default label */ },
         { timeout: 3000, maximumAge: 300_000 }
       );
-    } else {
-      loadEvents();
     }
+    loadEvents();
   }, []);
 
   return (

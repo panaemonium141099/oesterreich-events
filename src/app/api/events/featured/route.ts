@@ -65,7 +65,16 @@ export async function GET(request: NextRequest) {
       events: events ?? [],
       total: count ?? 0,
     });
-    res.headers.set('Cache-Control', 'no-store, max-age=0');
+    // Edge-Cache: 5 Min frisch + 10 Min stale-while-revalidate.
+    // /api/events/featured bekommt mehrere Hundert Hits/min auf Landing
+    // (jeder Browser ruft es beim Hero-Load); Cold-Start war 13 s.
+    // Mit s-maxage cached Vercel den ersten Aufruf 5 min — restliche
+    // Nutzer kriegen ihn instant (<50 ms) bis er stale wird, dann SWR.
+    // Top Events ändern sich eh nur mit jedem Pipeline-Lauf (1× pro Tag).
+    res.headers.set(
+      'Cache-Control',
+      'public, s-maxage=300, stale-while-revalidate=600'
+    );
     return res;
   } catch (err) {
     console.error('API Error (featured):', err);
