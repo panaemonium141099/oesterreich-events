@@ -249,14 +249,19 @@ export async function GET(request: NextRequest) {
           needsCount ? { count: 'exact' } : undefined
         );
 
-    // Only show public events (scraped events default to 'public')
-    query = query.or('visibility.eq.public,visibility.is.null');
+    // visibility ist seit 20260428220000 NOT NULL DEFAULT 'public'
+    // (verifiziert: alle 175k events haben visibility='public', 0 sind NULL).
+    // Direkter eq-Filter erlaubt dem Planner Index-Nutzung — vorher hat
+    // `OR visibility IS NULL` Bitmap-AND verhindert und SeqScan erzwungen.
+    query = query.eq('visibility', 'public');
 
     // Publish status filter: by default only show published or low-confidence events
-    // Admin/god users can pass includeAll=true to see all statuses
+    // Admin/god users can pass includeAll=true to see all statuses.
+    // publish_status ist seit 2026-04-29 NOT NULL DEFAULT 'published' —
+    // also kein OR IS NULL mehr nötig. Nutzt jetzt idx_events_map_publishable.
     const includeAll = searchParams.get('includeAll') === 'true';
     if (!includeAll) {
-      query = query.or('publish_status.eq.published,publish_status.eq.published_low_confidence,publish_status.is.null');
+      query = query.in('publish_status', ['published', 'published_low_confidence']);
     }
 
     // Only show future/current events by default
