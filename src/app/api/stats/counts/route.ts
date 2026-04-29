@@ -9,31 +9,30 @@ function getSupabaseClient() {
   return createClient(url, key);
 }
 
-/** All valid Bundesland and category values for counting */
-const BUNDESLAENDER = [
-  'Burgenland', 'Kärnten', 'Niederösterreich', 'Oberösterreich',
-  'Salzburg', 'Steiermark', 'Tirol', 'Vorarlberg', 'Wien',
-];
+/**
+ * Display-form Bundesländer mit slug-/lowercase-Aliasen die wir mergen.
+ * Daten haben historisch beide Varianten (z. B. 'Wien' AND 'wien' AND 'Wien'),
+ * weil verschiedene Scraper unterschiedlich schreiben. Frontend braucht
+ * eine Zahl pro Bundesland — also: lowercase + uppercase werden zur
+ * uppercase-Variante summiert.
+ */
+const BUNDESLAND_ALIASES: Record<string, string> = {
+  'Burgenland': 'Burgenland', 'burgenland': 'Burgenland',
+  'Kärnten': 'Kärnten', 'kaernten': 'Kärnten', 'Kaernten': 'Kärnten',
+  'Niederösterreich': 'Niederösterreich', 'niederoesterreich': 'Niederösterreich', 'Niederoesterreich': 'Niederösterreich',
+  'Oberösterreich': 'Oberösterreich', 'oberoesterreich': 'Oberösterreich', 'Oberoesterreich': 'Oberösterreich', 'ooe': 'Oberösterreich',
+  'Salzburg': 'Salzburg', 'salzburg': 'Salzburg',
+  'Steiermark': 'Steiermark', 'steiermark': 'Steiermark',
+  'Tirol': 'Tirol', 'tirol': 'Tirol',
+  'Vorarlberg': 'Vorarlberg', 'vorarlberg': 'Vorarlberg',
+  'Wien': 'Wien', 'wien': 'Wien',
+};
 
-// v3 taxonomy — must match the 11 Hauptkategorien from docs/TAXONOMY.md.
-// Old names ('Kultur', 'Nightlife', 'Wein & Kulinarik', 'Märkte',
-// 'Feste & Brauchtum', 'Bildung', 'Gesundheit', 'Business', 'Familie',
-// 'Natur') were migrated via 20260423_taxonomy_v3_combined.sql. Keeping
-// them in this list would match zero events post-migration.
-const CATEGORIES = [
-  'Musik',
-  'Kultur & Bühne',
-  'Nightlife & Party',
-  'Essen & Trinken',
-  'Märkte & Feste',
-  'Sport & Bewegung',
-  'Natur & Abenteuer',
-  'Wissen & Karriere',
-  'Familie & Kinder',
-  'Community & Freizeit',
-  'Wellness & Spiritualität',
-  'Sonstiges',
-];
+interface CountsPayload {
+  regions: Record<string, number>;
+  categories: Record<string, number>;
+  total: number;
+}
 
 export async function GET() {
   const supabase = getSupabaseClient();
@@ -45,53 +44,44 @@ export async function GET() {
   }
 
   try {
-    const today = new Date().toISOString().slice(0, 10);
+    // EINE RPC statt 21 individuelle counts. Server-side GROUP BY
+    // aggregation auf events. Returns { regions, categories, total }
+    // wo total = map-equivalent (publishable + geocoded + bbox).
+    // Migration: 20260429110000_stats_counts_rpc.sql
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data, error } = await (supabase.rpc as any)('event_counts_for_stats');
 
-    // Run all count queries in parallel — each returns just a number, not full rows.
-    // visibility ist seit 2026-04-29 NOT NULL DEFAULT 'public', kein OR IS NULL nötig.
-    // count='estimated' statt 'exact' — Region/Category-Pillen zeigen Annäherung.
-    const [regionResults, categoryResults] = await Promise.all([
-      Promise.all(
-        BUNDESLAENDER.map(async (bl) => {
-          const { count } = await supabase
-            .from('events')
-            .select('*', { count: 'estimated', head: true })
-            .eq('bundesland', bl)
-            .eq('visibility', 'public')
-            .gte('start_date', today);
-          return [bl, count || 0] as const;
-        })
-      ),
-      Promise.all(
-        CATEGORIES.map(async (cat) => {
-          const { count } = await supabase
-            .from('events')
-            .select('*', { count: 'estimated', head: true })
-            .eq('category', cat)
-            .eq('visibility', 'public')
-            .gte('start_date', today);
-          return [cat, count || 0] as const;
-        })
-      ),
-    ]);
+    if (error) {
+      console.error('event_counts_for_stats RPC error:', error);
+      return NextResponse.json(
+        { error: 'Fehler beim Laden der Event-Statistiken' },
+        { status: 500 }
+      );
+    }
 
-    const regions: Record<string, number> = {};
-    for (const [bl, count] of regionResults) {
-      if (count > 0) regions[bl] = count;
+    const payload = (data ?? {}) as CountsPayload;
+
+    // Merge lowercase/slug-variants in display-form bundesland
+    const mergedRegions: Record<string, number> = {};
+    for (const [name, count] of Object.entries(payload.regions ?? {})) {
+      const display = BUNDESLAND_ALIASES[name];
+      if (!display || count <= 0) continue;
+      mergedRegions[display] = (mergedRegions[display] ?? 0) + count;
     }
 
     const categories: Record<string, number> = {};
-    for (const [cat, count] of categoryResults) {
-      if (count > 0) categories[cat] = count;
+    for (const [name, count] of Object.entries(payload.categories ?? {})) {
+      if (count > 0) categories[name] = count;
     }
 
     return NextResponse.json(
-      { regions, categories },
+      {
+        regions: mergedRegions,
+        categories,
+        total: payload.total ?? 0,
+      },
       {
         headers: {
-          // Edge-Cache via s-maxage damit Vercel global den Pillen-Count
-          // shared cached. max-age=3600 war Browser-only — jeder Nutzer
-          // hat seinen eigenen Cache-Eintrag erzeugt.
           'Cache-Control':
             'public, max-age=3600, s-maxage=3600, stale-while-revalidate=86400',
         },

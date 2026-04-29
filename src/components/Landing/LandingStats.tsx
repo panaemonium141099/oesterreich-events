@@ -7,29 +7,29 @@ import { useEffect, useState } from 'react';
  *
  * Pre-Refactor: war ein async Server-Component der per Render einen
  * supabase count('estimated') gegen events feuerte. Das blockierte den
- * Streaming-Render der Landing-Page um ~18-26 s (selbst nach
- * count=estimated, weil Vercel-Cold-Start + DB-Round-Trip + Planner-
- * Lookup pro Render passiert).
+ * Streaming-Render der Landing-Page um ~18-26 s.
  *
- * Jetzt: Render initialer fallback (43000+) instant. Der echte Count
- * kommt async über /api/stats/counts (das aggregiert eh schon Region+
- * Category — ein Total ist ableitbar). Falls der Fetch fehlschlägt
- * bleibt der Fallback stehen.
+ * Jetzt: Render initialer fallback (75000+) instant. Der echte Count
+ * kommt aus /api/stats/counts.total — die GLEICHE Zahl die der Map-
+ * Counter zeigt (visibility=public AND publish_status IN (published,
+ * low_confidence) AND start_date >= today AND geocoded).
+ *
+ * Vorher zeigte LandingStats `regions_sum × 0.70` (Dedup-Schätzung) —
+ * das war ~36k während Map ~76k zeigte. User-Verwirrung. Jetzt eine
+ * Source of Truth.
  */
-const FALLBACK = 43000;
-const DEDUP_RATIO = 0.70;
+const FALLBACK = 75000;
 
 export function LandingStats() {
   const [total, setTotal] = useState<number>(FALLBACK);
 
   useEffect(() => {
     let cancelled = false;
-    fetch('/api/stats/counts', { cache: 'no-store' })
+    fetch('/api/stats/counts')
       .then(res => res.ok ? res.json() : null)
-      .then((data: { regions?: Record<string, number> } | null) => {
-        if (cancelled || !data?.regions) return;
-        const sum = Object.values(data.regions).reduce((a, b) => a + b, 0);
-        if (sum > 0) setTotal(Math.round(sum * DEDUP_RATIO));
+      .then((data: { total?: number } | null) => {
+        if (cancelled || !data?.total) return;
+        if (data.total > 0) setTotal(data.total);
       })
       .catch(() => { /* keep fallback */ });
     return () => { cancelled = true; };
