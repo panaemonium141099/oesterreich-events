@@ -1,30 +1,39 @@
-import { createClient } from '@supabase/supabase-js';
+'use client';
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
+import { useEffect, useState } from 'react';
 
-export async function LandingStats() {
-  let total = 42000; // fallback
-  try {
-    const today = new Date().toISOString().slice(0, 10);
-    // Count unique events (deduplicated by title + date)
-    // Supabase can't do DISTINCT count, so we use a raw count and apply
-    // the known dedup ratio (~70% of raw events are unique)
-    // count='estimated' — landing-page total ist eh "circa", exact count
-    // braucht zweite Vollscan-Query auf 175k events.
-    // visibility ist NOT NULL DEFAULT 'public' seit 2026-04-29.
-    const { count } = await supabase
-      .from('events')
-      .select('*', { count: 'estimated', head: true })
-      .eq('visibility', 'public')
-      .gte('start_date', today);
-    if (count) {
-      // Apply dedup ratio: ~30% of events are title+date duplicates from multiple scrapers
-      total = Math.round(count * 0.70);
-    }
-  } catch {}
+/**
+ * Client-Component, NICHT mehr server-render-blocking.
+ *
+ * Pre-Refactor: war ein async Server-Component der per Render einen
+ * supabase count('estimated') gegen events feuerte. Das blockierte den
+ * Streaming-Render der Landing-Page um ~18-26 s (selbst nach
+ * count=estimated, weil Vercel-Cold-Start + DB-Round-Trip + Planner-
+ * Lookup pro Render passiert).
+ *
+ * Jetzt: Render initialer fallback (43000+) instant. Der echte Count
+ * kommt async über /api/stats/counts (das aggregiert eh schon Region+
+ * Category — ein Total ist ableitbar). Falls der Fetch fehlschlägt
+ * bleibt der Fallback stehen.
+ */
+const FALLBACK = 43000;
+const DEDUP_RATIO = 0.70;
+
+export function LandingStats() {
+  const [total, setTotal] = useState<number>(FALLBACK);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch('/api/stats/counts', { cache: 'no-store' })
+      .then(res => res.ok ? res.json() : null)
+      .then((data: { regions?: Record<string, number> } | null) => {
+        if (cancelled || !data?.regions) return;
+        const sum = Object.values(data.regions).reduce((a, b) => a + b, 0);
+        if (sum > 0) setTotal(Math.round(sum * DEDUP_RATIO));
+      })
+      .catch(() => { /* keep fallback */ });
+    return () => { cancelled = true; };
+  }, []);
 
   const formatted = total.toLocaleString('de-AT');
 
