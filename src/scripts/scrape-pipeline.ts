@@ -60,6 +60,7 @@ function parseArgs(): PipelineOptions {
     skipScrapers: has('--skip-scrapers'),
     skipVenues: has('--skip-venues'),
     skipGeocoding: has('--skip-geocoding'),
+    skipMasterCoords: has('--skip-master-coords'),
     skipScore: has('--skip-score'),
     skipCategorization: has('--skip-categorization'),
     skipCategorizationBackfill: has('--skip-categorization-backfill'),
@@ -155,6 +156,20 @@ async function main() {
       steps.geocoding = await runStep('geocoding', async () => {
         execStep('Fix geocoding', `npx tsx ${envFlag}src/scripts/fix-geocoding.ts`);
         execStep('OpenAI geocode NULLs', `npx tsx ${envFlag}src/scripts/openai-geocode.ts --null`);
+      }, steps);
+    }
+
+    // Master-Coords: pro (location_name, postal_code) eine verifizierte Koord
+    // ermitteln und auf alle Events anwenden. Trigger trg_apply_master_coords
+    // hält künftige Inserts/Updates dort fest. Im Pipeline-Mode überspringt das
+    // Skript bereits aufgelöste Cluster (idempotent + schnell). Hängt nach
+    // geocoding, weil wir frisch geocodete Events ebenfalls vereinheitlichen wollen.
+    if (!opts.skipMasterCoords) {
+      steps.master_coords = await runStep('master_coords', async () => {
+        execStep(
+          'Apply master coords (resolve duplicates, sync events)',
+          `npx tsx ${envFlag}src/scripts/fix-duplicate-coords.ts --pipeline-mode`,
+        );
       }, steps);
     }
 

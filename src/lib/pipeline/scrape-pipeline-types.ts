@@ -52,6 +52,14 @@ export interface PipelineOptions {
   skipScrapers?: boolean;
   skipVenues?: boolean;
   skipGeocoding?: boolean;
+  /**
+   * Skip the master-coords resolution step (fix-duplicate-coords.ts --pipeline-mode).
+   * That step pins all events with the same (location_name, postal_code) to one
+   * verified coord and persists via DB trigger. Idempotent — only new clusters
+   * get external lookups (Nominatim/OpenAI). Skip if you've just touched the
+   * step manually.
+   */
+  skipMasterCoords?: boolean;
   skipScore?: boolean;
   /** Skip both categorization sub-steps (backfill + AI residue). */
   skipCategorization?: boolean;
