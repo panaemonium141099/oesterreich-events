@@ -23,7 +23,11 @@
  *   are kept because they're unambiguous discriminators.
  */
 
-export const ENRICHMENT_VERSION = 'enrich-v2-prompt1';
+// v3-structural (2026-05-01): Prompt erweitert um structural fields
+// (suggested_end_date_iso, suggested_address). Re-runt alle existing events
+// damit fehlende Stamm-Daten gefüllt werden — fixt GSC Rich-Result-Warnings
+// (endDate fehlt in 1.396 events, address in 1.061, description in 851).
+export const ENRICHMENT_VERSION = 'enrich-v3-structural';
 
 // ─────────────────────────────────────────────────────────────────────────
 // TAGS — content / genre / subgenre / activity (0..5 per event)

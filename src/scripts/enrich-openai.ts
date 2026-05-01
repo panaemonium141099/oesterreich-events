@@ -291,13 +291,28 @@ is_family_friendly = TRUE nur bei:
 IM ZWEIFEL bei beiden Flags: FALSE. False-Positives zerstören den Wizard-Filter.
 
 ══════════════════════════════════════════════════════════════
-SUGGESTED fields
+SUGGESTED fields — strukturelle Stamm-Daten füllen
 ══════════════════════════════════════════════════════════════
 SUGGESTED_DESCRIPTION: wenn QUELLTEXT vorliegt UND BESCHREIBUNG leer/sehr kurz/
   HTML-verpackt, schreibe eine saubere 150-400 Zeichen Beschreibung in natürlichem
   Deutsch. Ohne HTML-Tags, ohne Marketing-Geschwurbel. Sonst null.
+
 SUGGESTED_PRICE_TEXT: wenn QUELLTEXT einen Preis nennt UND PREIS-Feld leer ist,
-  extrahiere ihn ("ab 25€", "Eintritt frei", "Erwachsene 15€"). Sonst null.`;
+  extrahiere ihn ("ab 25€", "Eintritt frei", "Erwachsene 15€"). Sonst null.
+
+SUGGESTED_END_DATE_ISO: wenn QUELLTEXT eindeutig ein Ende-Datum oder eine
+  Endzeit nennt (z. B. "von 18:00 bis 22:00", "20.-22. Mai 2026", "ganzes
+  Wochenende"), gib das Ende als ISO-8601 String zurück
+  ("2026-05-22T22:00:00+02:00"). Bei eintägigem Event mit nur Start-Zeit ist
+  END identisch zur Start-Zeit + 2-3h Default — gib es trotzdem als ISO an,
+  damit Schema.org endDate gefüllt werden kann. Wenn KEINE Hinweise im Text:
+  null.
+
+SUGGESTED_ADDRESS: wenn QUELLTEXT eine konkrete Hausadresse enthält (Straße +
+  Hausnummer, mit oder ohne PLZ/Ort), extrahiere sie als plain text
+  ("Eisenstädter Straße 27", "Kreuzäckerweg 14, 2485 Wimpassing an der
+  Leitha"). KEINE Telefonnummern, KEINE Bushaltestellen-Beschreibungen.
+  Wenn nur ein Ortsname vorhanden ist (ohne Straße): null.`;
 
 const OUTPUT_JSON_SCHEMA = {
   name: 'event_enrichment',
@@ -319,6 +334,8 @@ const OUTPUT_JSON_SCHEMA = {
       is_family_friendly: { type: 'boolean' },
       suggested_description: { type: ['string', 'null'] },
       suggested_price_text: { type: ['string', 'null'] },
+      suggested_end_date_iso: { type: ['string', 'null'] },
+      suggested_address: { type: ['string', 'null'] },
     },
     required: [
       'primary_category',
@@ -326,6 +343,7 @@ const OUTPUT_JSON_SCHEMA = {
       'language', 'price_tier', 'price_flags', 'duration_type',
       'is_student_friendly', 'is_family_friendly',
       'suggested_description', 'suggested_price_text',
+      'suggested_end_date_iso', 'suggested_address',
     ],
     additionalProperties: false,
   },
@@ -488,6 +506,8 @@ interface Stats {
   fetchFailed: number;
   descFilled: number;
   priceFilled: number;
+  endDateFilled: number;
+  addressFilled: number;
   rateLimited: number;
   studentTrue: number;
   familyTrue: number;
@@ -500,7 +520,7 @@ function newStats(): Stats {
   return {
     processed: 0, enriched: 0, failed: 0,
     fetchOk: 0, fetchSkipped: 0, fetchFailed: 0,
-    descFilled: 0, priceFilled: 0, rateLimited: 0,
+    descFilled: 0, priceFilled: 0, endDateFilled: 0, addressFilled: 0, rateLimited: 0,
     studentTrue: 0, familyTrue: 0,
     tokensIn: 0, tokensOut: 0,
     startedAt: Date.now(),
@@ -542,7 +562,7 @@ function reportLine(s: Stats, total: number | undefined, model: string): string 
   const costUsd = estimateCostUsd(model, s.tokensIn, s.tokensOut);
   return `p=${s.processed}${total ? '/' + total : ''} ✓=${s.enriched} ✗=${s.failed} ` +
     `fetch(ok=${s.fetchOk} fail=${s.fetchFailed}) ` +
-    `filled(d=${s.descFilled} p=${s.priceFilled}) ` +
+    `filled(d=${s.descFilled} p=${s.priceFilled} end=${s.endDateFilled} adr=${s.addressFilled}) ` +
     `flags(stu=${s.studentTrue} fam=${s.familyTrue}) ` +
     `429=${s.rateLimited} $=${costUsd.toFixed(2)} rate=${rate.toFixed(1)}/s ${etaStr}`;
 }
@@ -685,6 +705,8 @@ async function processOne(
   const pRec = (parsed ?? {}) as Record<string, unknown>;
   const suggestedDesc = cleanSuggested(pRec.suggested_description);
   const suggestedPrice = cleanSuggested(pRec.suggested_price_text);
+  const suggestedEndDate = cleanSuggested(pRec.suggested_end_date_iso);
+  const suggestedAddress = cleanSuggested(pRec.suggested_address);
 
   stats.enriched += 1;
   if (validated.is_student_friendly) stats.studentTrue += 1;
@@ -774,6 +796,34 @@ async function processOne(
   if (priceEmpty && suggestedPrice) {
     update.price_text = scrubNulls(suggestedPrice);
     stats.priceFilled += 1;
+  }
+
+  // v3-structural (2026-05-01): fülle end_date + address wenn der Scraper
+  // sie nicht erfasst hat. Fixt GSC Rich-Result-Warnings systemweit.
+  const rowEndDate = (row as { end_date?: string | null }).end_date;
+  const endDateEmpty = !rowEndDate || rowEndDate.trim().length === 0;
+  if (endDateEmpty && suggestedEndDate) {
+    // Sanity-check: ISO-8601 parsbar UND Datum innerhalb ±2 Tage zum start_date
+    // (sonst hat das LLM was Halluziniertes geliefert).
+    const parsedEnd = new Date(suggestedEndDate);
+    const start = row.start_date ? new Date(row.start_date) : null;
+    if (!isNaN(parsedEnd.getTime()) && start && !isNaN(start.getTime())) {
+      const dayDiff = (parsedEnd.getTime() - start.getTime()) / 86_400_000;
+      if (dayDiff >= -0.1 && dayDiff <= 14) {
+        update.end_date = parsedEnd.toISOString();
+        stats.endDateFilled = (stats.endDateFilled ?? 0) + 1;
+      }
+    }
+  }
+
+  const rowAddress = (row as { address?: string | null }).address;
+  const addressEmpty = !rowAddress || rowAddress.trim().length === 0;
+  if (addressEmpty && suggestedAddress) {
+    // Mindestens ein Buchstabe + eine Ziffer (Straße + Hausnummer typisch)
+    if (/[A-Za-zÄÖÜäöüß].*\d|\d.*[A-Za-zÄÖÜäöüß]/.test(suggestedAddress)) {
+      update.address = scrubNulls(suggestedAddress);
+      stats.addressFilled = (stats.addressFilled ?? 0) + 1;
+    }
   }
 
   if (!opts.dryRun) {
@@ -931,7 +981,7 @@ async function main() {
   while (stats.processed < opts.limit) {
     let q = supabase
       .from('events')
-      .select('id, title, description, category, category_locked, tags, source_tags_raw, location_name, organizer, start_date, end_date, price_text, price_min, price_max, source_url')
+      .select('id, title, description, category, category_locked, tags, source_tags_raw, location_name, address, organizer, start_date, end_date, price_text, price_min, price_max, source_url')
       .eq('publish_status', 'published')
       .gte('start_date', today)
       .gte('quality_score', 40)
