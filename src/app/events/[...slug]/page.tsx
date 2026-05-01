@@ -152,38 +152,21 @@ function parsePriceText(priceText: string | null | undefined): string | null {
 
 function buildJsonLd(event: Event): string {
   const canonicalUrl = `https://lasstreffen.at${buildEventUrlV2(event)}`;
-
-  // GSC Rich-Result-Warnings systematisch fixen: alle empfohlenen Felder
-  // ALWAYS setzen, mit safe Fallbacks wenn Scraper-Daten fehlen.
-  // Vor diesem Fix fehlten in GSC: endDate (1.396), description (851),
-  // address (1.061). Werte aus DB werden bevorzugt — Fallbacks sind nur
-  // für die ~50-94 % der Events ohne diese Stamm-Daten.
-
   const jsonLd: Record<string, unknown> = {
     '@context': 'https://schema.org',
     '@type': 'Event',
     name: event.title,
     startDate: event.start_date,
-    // endDate IMMER setzen — wenn unbekannt, gleich Startdate (Single-Day-Event,
-    // bei Schema.org gültig). Better than "Feld fehlt" Warning.
-    endDate: event.end_date || event.start_date,
     eventStatus: 'https://schema.org/EventScheduled',
     eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
   };
 
-  // description IMMER setzen. Wenn vom Scraper/Enrichment leer, generiere
-  // einen safe per-Event-einzigartigen Fallback aus Title + Ort + Datum.
-  // Google straft kurze Descriptions nicht ab, nur Duplicate Content —
-  // unser Fallback ist je Event einzigartig.
-  if (event.description && event.description.trim().length > 0) {
+  if (event.end_date) {
+    jsonLd.endDate = event.end_date;
+  }
+
+  if (event.description) {
     jsonLd.description = event.description.slice(0, 500);
-  } else {
-    const startDate = event.start_date ? new Date(event.start_date).toLocaleDateString('de-AT', {
-      day: 'numeric', month: 'long', year: 'numeric',
-    }) : '';
-    const ort = event.location_name || event.bundesland || 'Österreich';
-    const cat = event.category ? ` (${event.category})` : '';
-    jsonLd.description = `${event.title}${cat} findet am ${startDate} in ${ort} statt. Alle Details, Karte, Termine und ähnliche Veranstaltungen auf LassTreffen.at.`.slice(0, 500);
   }
 
   // Use resolver so JSON-LD always has an image (category fallback if needed)
@@ -195,27 +178,14 @@ function buildJsonLd(event: Event): string {
     name: locationName,
   };
 
-  // address IMMER als PostalAddress setzen. Wenn keine Hausadresse vorhanden,
-  // mindestens addressLocality aus location_name + addressCountry — das
-  // erfüllt Google's Event-Rich-Result Mindestanforderung an "address".
-  const postalAddress: Record<string, unknown> = {
-    '@type': 'PostalAddress',
-    addressCountry: 'AT',
-  };
   if (event.address) {
-    postalAddress.streetAddress = event.address;
+    location.address = {
+      '@type': 'PostalAddress',
+      streetAddress: event.address,
+      ...(event.postal_code ? { postalCode: event.postal_code } : {}),
+      addressCountry: 'AT',
+    };
   }
-  if (event.postal_code) {
-    postalAddress.postalCode = event.postal_code;
-  }
-  // addressLocality immer setzen — ist nötig wenn streetAddress fehlt
-  if (event.location_name) {
-    postalAddress.addressLocality = event.location_name;
-  }
-  if (event.bundesland) {
-    postalAddress.addressRegion = event.bundesland;
-  }
-  location.address = postalAddress;
 
   if (event.latitude != null && event.longitude != null) {
     location.geo = {
