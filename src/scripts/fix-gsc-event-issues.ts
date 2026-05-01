@@ -118,11 +118,13 @@ interface EventRow {
   address: string | null;
   location_name: string | null;
   source_url: string | null;
+  price_text: string | null;
+  price_min: number | null;
 }
 
 // ─── OpenAI ──────────────────────────────────────────────────────────
 
-const FOCUSED_PROMPT = `Du extrahierst aus dem Quelltext einer österreichischen Event-Seite GENAU drei strukturelle Felder. Gib EIN JSON-Objekt zurück (kein Markdown, keine Code-Fences). Wenn du ein Feld nicht eindeutig aus dem Text ableiten kannst → null.
+const FOCUSED_PROMPT = `Du extrahierst aus dem Quelltext einer österreichischen Event-Seite GENAU vier strukturelle Felder. Gib EIN JSON-Objekt zurück (kein Markdown, keine Code-Fences). Wenn du ein Feld nicht eindeutig aus dem Text ableiten kannst → null.
 
 FIELDS:
 
@@ -142,8 +144,21 @@ FIELDS:
    Ohne HTML-Tags, ohne Marketing-Geschwurbel ("einmaliges Event!"), ohne Links.
    Falls kein Quelltext oder unbrauchbar (Cookie-Banner, 404, leer): null.
 
+4. price_text — Preisangabe als Plain-text wie sie auf der Seite steht.
+   Beispiele:
+     • "Eintritt frei" / "Kostenlos" / "Gratis" → "Eintritt frei"
+     • "Erwachsene 15€, Kinder 8€" → "Erwachsene 15 €, Kinder 8 €"
+     • "ab 25 EUR" / "Tickets ab 25€" → "ab 25 €"
+     • "Spende erbeten" / "Freie Spende" → "Spende erbeten"
+     • Klassischer Pfarrfest/Frühschoppen/Kirtag-Hinweis ohne Preis-Erwähnung → "Eintritt frei"
+       (österreichische Convention: Gemeinde-/Pfarr-/Feuerwehr-Veranstaltungen sind
+       fast immer kostenlos, das wird oft NICHT explizit erwähnt)
+   Wenn der Quelltext IRGENDEINE Preis-Information enthält → extrahiere sie.
+   Wenn KEIN Preis-Hinweis UND kein Indiz auf ein Frei-Event: null.
+   Erfinde KEINEN Preis. Lieber null als geraten.
+
 Output-Schema:
-  { "end_date_iso": string|null, "address": string|null, "description": string|null }`;
+  { "end_date_iso": string|null, "address": string|null, "description": string|null, "price_text": string|null }`;
 
 const OPENAI_SCHEMA = {
   name: 'gsc_structural_fix',
@@ -154,8 +169,9 @@ const OPENAI_SCHEMA = {
       end_date_iso: { type: ['string', 'null'] },
       address: { type: ['string', 'null'] },
       description: { type: ['string', 'null'] },
+      price_text: { type: ['string', 'null'] },
     },
-    required: ['end_date_iso', 'address', 'description'],
+    required: ['end_date_iso', 'address', 'description', 'price_text'],
     additionalProperties: false,
   },
 } as const;
@@ -170,6 +186,7 @@ interface ExtractResult {
   end_date_iso: string | null;
   address: string | null;
   description: string | null;
+  price_text: string | null;
   tokens_in: number;
   tokens_out: number;
 }
@@ -202,6 +219,7 @@ async function callOpenAI(model: string, userMsg: string): Promise<ExtractResult
       end_date_iso: typeof parsed.end_date_iso === 'string' ? parsed.end_date_iso : null,
       address: typeof parsed.address === 'string' ? parsed.address : null,
       description: typeof parsed.description === 'string' ? parsed.description : null,
+      price_text: typeof parsed.price_text === 'string' ? parsed.price_text : null,
       tokens_in: resp.usage?.prompt_tokens ?? 0,
       tokens_out: resp.usage?.completion_tokens ?? 0,
     };
@@ -227,7 +245,7 @@ function validateEndDate(iso: string | null, startDate: string | null): string |
 
 function validateAddress(s: string | null): string | null {
   if (!s) return null;
-  const trimmed = s.replace(/ /g, '').replace(/\\u0000/g, '').trim();
+  const trimmed = s.replace(/\u0000/g, '').replace(/\\u0000/g, '').trim();
   if (trimmed.length < 5 || trimmed.length > 200) return null;
   // Must contain at least one letter and one digit (street + house number)
   if (!/[A-Za-zÄÖÜäöüß]/.test(trimmed) || !/\d/.test(trimmed)) return null;
@@ -236,9 +254,25 @@ function validateAddress(s: string | null): string | null {
 
 function validateDescription(s: string | null): string | null {
   if (!s) return null;
-  const cleaned = s.replace(/ /g, '').replace(/\\u0000/g, '').replace(/<[^>]+>/g, '').trim();
+  const cleaned = s.replace(/\u0000/g, '').replace(/\\u0000/g, '').replace(/<[^>]+>/g, '').trim();
   if (cleaned.length < 40 || cleaned.length > 600) return null;
   return cleaned.slice(0, 500);
+}
+
+/**
+ * Akzeptiert Preisangaben als plain-text. Damit price_text auch ohne Zahl
+ * (Eintritt frei / Spende erbeten / Gratis) durchgeht prüfen wir entweder
+ * "Frei-Wort" ODER "enthält Ziffer". Sonst ist der String unbrauchbar.
+ */
+function validatePrice(s: string | null): string | null {
+  if (!s) return null;
+  const cleaned = s.replace(/\\u0000/g, '').trim();
+  if (cleaned.length < 3 || cleaned.length > 200) return null;
+  const lower = cleaned.toLowerCase();
+  const isFreeText = /\b(frei|gratis|kostenlos|free|spende)\b/.test(lower);
+  const hasNumber = /\d/.test(cleaned);
+  if (!isFreeText && !hasNumber) return null;
+  return cleaned;
 }
 
 // ─── Main ────────────────────────────────────────────────────────────
@@ -256,6 +290,7 @@ interface Stats {
   filled_end_date: number;
   filled_address: number;
   filled_description: number;
+  filled_price: number;
   filled_nothing: number;
   tokens_in: number;
   tokens_out: number;
@@ -268,7 +303,7 @@ function newStats(): Stats {
     events_matched: 0, events_complete_skipped: 0, events_no_source_url: 0,
     fetch_ok: 0, fetch_failed: 0,
     ai_called: 0, ai_failed: 0,
-    filled_end_date: 0, filled_address: 0, filled_description: 0, filled_nothing: 0,
+    filled_end_date: 0, filled_address: 0, filled_description: 0, filled_price: 0, filled_nothing: 0,
     tokens_in: 0, tokens_out: 0,
     started_at: Date.now(),
   };
@@ -304,11 +339,13 @@ async function processOne(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   updater: any,
 ): Promise<void> {
-  // Skip if all 3 fields already populated
+  // Skip if all 4 fields already populated
   const needEnd = !ev.end_date;
   const needAddr = !ev.address || ev.address.trim().length === 0;
   const needDesc = !ev.description || ev.description.trim().length < 40;
-  if (!needEnd && !needAddr && !needDesc) {
+  const needPrice = (ev.price_text == null || ev.price_text.trim().length === 0)
+    && ev.price_min == null;
+  if (!needEnd && !needAddr && !needDesc && !needPrice) {
     stats.events_complete_skipped++;
     return;
   }
@@ -396,6 +433,14 @@ async function processOne(
       anyFilled = true;
     }
   }
+  if (needPrice) {
+    const validPrice = validatePrice(result.price_text);
+    if (validPrice) {
+      payload.price_text = validPrice;
+      stats.filled_price++;
+      anyFilled = true;
+    }
+  }
 
   if (!anyFilled) {
     stats.filled_nothing++;
@@ -433,7 +478,7 @@ async function worker(
       const cost = estimateCostUsd(opts.model, stats.tokens_in, stats.tokens_out);
       process.stdout.write(
         `  fetched=${stats.fetch_ok}/${stats.fetch_ok + stats.fetch_failed} ` +
-        `ai=${stats.ai_called} filled(end=${stats.filled_end_date} adr=${stats.filled_address} desc=${stats.filled_description}) ` +
+        `ai=${stats.ai_called} filled(end=${stats.filled_end_date} adr=${stats.filled_address} desc=${stats.filled_description} prc=${stats.filled_price}) ` +
         `$${cost.toFixed(2)} ${elapsed.toFixed(0)}s\r`,
       );
     }
@@ -499,7 +544,7 @@ async function main() {
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { data, error } = await (supabase.from('events') as any)
-      .select('id, title, description, start_date, end_date, address, location_name, source_url, postal_code, slug')
+      .select('id, title, description, start_date, end_date, address, location_name, source_url, price_text, price_min, postal_code, slug')
       .in('slug', slugs)
       .in('postal_code', plzs);
     if (error) {
@@ -552,6 +597,7 @@ async function main() {
   console.log(`  Filled — end_date:    ${stats.filled_end_date}`);
   console.log(`  Filled — address:     ${stats.filled_address}`);
   console.log(`  Filled — description: ${stats.filled_description}`);
+  console.log(`  Filled — price_text:  ${stats.filled_price}`);
   console.log(`  Filled — nothing:     ${stats.filled_nothing}`);
   console.log(`  Tokens in / out:      ${stats.tokens_in.toLocaleString('de-AT')} / ${stats.tokens_out.toLocaleString('de-AT')}`);
   console.log(`  Cost (estimate):      $${cost.toFixed(2)}`);
