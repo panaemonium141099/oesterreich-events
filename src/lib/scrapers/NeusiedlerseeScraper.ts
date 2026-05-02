@@ -171,8 +171,13 @@ export class NeusiedlerseeScraper extends BaseScraper {
         start_date: eventData.startDate || '',
         end_date: eventData.endDate || undefined,
         location_name: location?.name || undefined,
-        address: this.formatAddress(organizer?.address || location?.address),
-        postal_code: organizer?.address?.postalCode || location?.address?.postalCode || undefined,
+        // Schema.org: location.address is the VENUE, organizer.address is
+        // the contact office. We want the venue. Earlier code had these
+        // swapped, which mis-routed half the neusiedlersee.com rows to
+        // tourism-office PLZs (7142 Illmitz, 7100 Neusiedl, …). See
+        // BurgenlandInfoScraper for the same fix and audit numbers.
+        address: this.formatAddress(location?.address || organizer?.address),
+        postal_code: location?.address?.postalCode || organizer?.address?.postalCode || undefined,
         district: getDistrictByLocation(location?.name || '')
           || (lat ? getDistrictByCoordinates(lat, lng!) : null)
           || undefined,

@@ -207,8 +207,16 @@ export class BurgenlandInfoScraper extends BaseScraper {
       // Handle image as array or object
       const image = Array.isArray(eventData.image) ? eventData.image[0] : eventData.image;
 
-      const postalCode = organizer?.address?.postalCode
-        || location?.address?.postalCode
+      // Schema.org Event has TWO address objects: location.address (the
+      // venue) and organizer.address (the contact/organizer's office).
+      // For an event detail row we want the venue, NOT the organizer
+      // headquarters. Bug history: prior versions used organizer first,
+      // which routed all Burgenland-Tourismus-organized events to the
+      // tourism office addresses (7000 Eisenstadt, 7361 Lutzmannsburg,
+      // 7142 Illmitz, …) — see audit query in commit message. ~228 of
+      // 455 burgenland.info rows ended up at tourism HQs.
+      const postalCode = location?.address?.postalCode
+        || organizer?.address?.postalCode
         || '';
 
       const tags = this.extractTags($, eventData);
@@ -233,7 +241,7 @@ export class BurgenlandInfoScraper extends BaseScraper {
         start_date: eventData.startDate || '',
         end_date: eventData.endDate || undefined,
         location_name: location?.name || undefined,
-        address: this.formatAddress(organizer?.address || location?.address),
+        address: this.formatAddress(location?.address || organizer?.address),
         postal_code: postalCode || undefined,
         district: getDistrictByLocation(location?.name || '')
           || (location?.geo?.latitude ? getDistrictByCoordinates(location.geo.latitude, location.geo.longitude) : null)
