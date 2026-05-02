@@ -25,6 +25,35 @@ export function HeroSection() {
 
   useEffect(() => { trackEvent('page_view', { path: '/' }); }, []);
 
+  // Pre-warm the /map route + Mapbox bundle while the user reads the hero,
+  // so when they hit "Entdecken" the list shows immediately and the map
+  // tiles are already in the browser cache. Idle-callback so we don't
+  // compete with critical above-the-fold rendering on slow phones.
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const prefetch = () => {
+      router.prefetch('/map?view=list');
+      router.prefetch('/map');
+      // Also nudge the Mapbox dynamic chunk into cache. Wrapped in a try
+      // so this never throws if the chunk path moves between releases.
+      try {
+        import('@/components/Map/EventMap').catch(() => {});
+      } catch {
+        /* swallow */
+      }
+    };
+    const ric =
+      (window as Window & { requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => number })
+        .requestIdleCallback ?? ((cb: () => void) => setTimeout(cb, 800));
+    const id = ric(prefetch, { timeout: 3000 });
+    return () => {
+      const cic =
+        (window as Window & { cancelIdleCallback?: (id: number) => void }).cancelIdleCallback ??
+        ((h: number) => clearTimeout(h));
+      cic(id as number);
+    };
+  }, [router]);
+
   // Lazy load gemeinden data on first keystroke
   const loadGemeinden = useCallback(async () => {
     if (gemeinden.length > 0) return;
@@ -81,13 +110,22 @@ export function HeroSection() {
   const handleSelectGemeinde = (g: Gemeinde) => {
     setSearch(g.n);
     setShowSuggestions(false);
-    navigateWithCurtain(`/map?bundesland=${g.i}&lat=${g.lat}&lng=${g.lng}&zoom=13&search=${encodeURIComponent(g.n)}`);
+    // Picking a Gemeinde is "show me this place" intent — open the map view
+    // directly with the fly-to coords, since the user wants the spatial
+    // context they just confirmed.
+    navigateWithCurtain(
+      `/map?bundesland=${g.i}&lat=${g.lat}&lng=${g.lng}&zoom=13&search=${encodeURIComponent(g.n)}`,
+    );
   };
 
   const handleDiscover = () => {
     setShowSuggestions(false);
-    const params = search.trim() ? `?search=${encodeURIComponent(search.trim())}` : '';
-    navigateWithCurtain(`/map${params}`);
+    // The "Entdecken" CTA is a generic browse intent — show the list first
+    // (instant, scroll-friendly), with the map markers warmed in the
+    // background by the prefetch effect above. URL `?view=list` persists
+    // the choice across reloads + back/forward.
+    const sParam = search.trim() ? `&search=${encodeURIComponent(search.trim())}` : '';
+    navigateWithCurtain(`/map?view=list${sParam}`);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {

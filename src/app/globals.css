@@ -1114,3 +1114,16 @@ button:active, a:active, [role="button"]:active {
 @media (prefers-reduced-motion: reduce) {
   .rising-type, .step-active-dot { animation: none; }
 }
+
+
+/* MapV3 (Variante A · Airbnb-clean) — view-switch fade.
+   Plain CSS animations because framer-motion AnimatePresence kept
+   exited views in DOM with opacity:0 (verified bug). */
+@keyframes mv3-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.mv3-fade-in { animation: mv3-fade-in 0.18s ease-out; }
+@media (prefers-reduced-motion: reduce) {
+  .mv3-fade-in { animation: none; }
+}
