@@ -208,17 +208,22 @@ export default async function BlogPostPage({
       }))
     : [{ '@type': 'PerformingGroup', name: post.jsonLdEvent.name }];
 
-  const offers: Record<string, unknown> = {
-    '@type': 'Offer',
-    url: post.keyFacts.website || post.jsonLdEvent.url,
-    priceCurrency: 'EUR',
-    availability: 'https://schema.org/InStock',
-    validFrom: post.publishDate,
-  };
-  if (parsedPrice != null) offers.price = parsedPrice;
-  if (post.keyFacts.price) offers.name = post.keyFacts.price;
+  // Offers nur emitten wenn parseable Preis vorhanden — Google verlangt bei
+  // `offers` zwingend `price`. Sonst löst das die GSC-Warning "Feld 'price'
+  // fehlt" aus. Wenn kein Preis bekannt ist, einfach offers weglassen.
+  const offers: Record<string, unknown> | null = parsedPrice != null
+    ? {
+        '@type': 'Offer',
+        url: post.keyFacts.website || post.jsonLdEvent.url,
+        priceCurrency: 'EUR',
+        price: parsedPrice,
+        availability: 'https://schema.org/InStock',
+        validFrom: post.publishDate,
+        ...(post.keyFacts.price ? { name: post.keyFacts.price } : {}),
+      }
+    : null;
 
-  const eventJsonLd = {
+  const eventJsonLd: Record<string, unknown> = {
     '@context': 'https://schema.org',
     '@type': 'Event',
     name: post.jsonLdEvent.name,
@@ -241,7 +246,7 @@ export default async function BlogPostPage({
     isAccessibleForFree: isFree,
     organizer: { '@type': 'Organization', name: 'LassTreffen.at', url: 'https://lasstreffen.at' },
     performer: performers,
-    offers,
+    ...(offers ? { offers } : {}),
   };
 
   // FAQPage schema — enables FAQ rich results in Google

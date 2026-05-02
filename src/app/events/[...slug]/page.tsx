@@ -216,30 +216,31 @@ function buildJsonLd(event: Event): string {
     name: event.organizer || event.title,
   };
 
-  // Offers — ALWAYS present. We build it from whatever price info the scraper
-  // captured: explicit min price, parsed free-text, or a safe default. The
-  // offer URL points to the ticket shop when known, otherwise to our canonical
-  // event page so the reader can still act on the rich result.
+  // Offers — nur emitten wenn ein Preis bekannt ist. Google's Event-Schema
+  // verlangt bei `offers` zwingend ein `price` (oder lowPrice/highPrice).
+  // Vorher hatten wir den Offer-Block immer ausgegeben und `price` nur
+  // bedingt — das produzierte ~2.280 GSC-Fehler "Feld 'price' fehlt".
+  // Lieber kein Offer-Block (Google ignoriert ihn dann) als ein invalider.
   const parsed = parsePriceText(event.price_text);
   const price =
     event.price_min != null ? String(event.price_min) :
     parsed != null ? parsed :
     null;
 
-  const offers: Record<string, unknown> = {
-    '@type': 'Offer',
-    url: event.ticket_url || canonicalUrl,
-    priceCurrency: 'EUR',
-    availability: 'https://schema.org/InStock',
-    validFrom: event.created_at || event.start_date,
-  };
   if (price != null) {
-    offers.price = price;
+    const offers: Record<string, unknown> = {
+      '@type': 'Offer',
+      url: event.ticket_url || canonicalUrl,
+      priceCurrency: 'EUR',
+      price,
+      availability: 'https://schema.org/InStock',
+      validFrom: event.created_at || event.start_date,
+    };
+    if (event.price_text) {
+      offers.name = event.price_text;
+    }
+    jsonLd.offers = offers;
   }
-  if (event.price_text) {
-    offers.name = event.price_text;
-  }
-  jsonLd.offers = offers;
 
   return JSON.stringify(jsonLd).replace(/<\/script>/gi, '<\\/script>');
 }
