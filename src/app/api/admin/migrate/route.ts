@@ -1,13 +1,17 @@
 /**
  * One-time migration endpoint — adds event_score column to events table.
  *
- * Authentication: requires Authorization: Bearer <SUPABASE_SERVICE_ROLE_KEY>
+ * Authentication: requireAdmin() (admin/god rolle, konsistent mit allen
+ * anderen /api/admin/* routes). Vorher wurde ein Bearer-Token mit dem
+ * SUPABASE_SERVICE_ROLE_KEY geprüft — das war die einzige inkonsistente
+ * Auth-Methode, weshalb der Pentest sie als "M2: inkonsistent" flaggte.
  *
  * POST /api/admin/migrate
  * Body: { "migration": "add_event_score" }
  */
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { requireAdmin } from '@/lib/supabase/require-admin';
 
 if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
   throw new Error('SUPABASE_SERVICE_ROLE_KEY is required');
@@ -19,12 +23,8 @@ const supabase = createClient(
 );
 
 export async function POST(request: NextRequest) {
-  // Auth check
-  const authHeader = request.headers.get('Authorization');
-  const expectedToken = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  if (!authHeader || authHeader !== `Bearer ${expectedToken}`) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
+  const authError = await requireAdmin();
+  if (authError) return authError;
 
   const body = await request.json().catch(() => ({}));
   const migration = body.migration as string;

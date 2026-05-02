@@ -160,7 +160,6 @@ TWILIO_PHONE_NUMBER       # Twilio sender phone number (E.164)
 ## Bekannte Issues
 - 4 API-Tests schlagen fehl (events.test.ts) — Pagination- und Evening-Filter-Tests sind nach Cursor-Pagination-Einführung veraltet; Code ist korrekt, Tests müssen aktualisiert werden
 - Eventim/oeticket-Scraper noch nicht implementiert (brauchen Puppeteer)
-- Admin-Scraper-Routes haben keine Rollen-Prüfung (auth key reicht, kein admin/god required)
 - Business-Profile-Onboarding nicht vollständig implementiert
 
 <!-- BEGIN FLOW-NEXT -->

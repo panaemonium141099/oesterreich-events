@@ -1,5 +1,6 @@
 import { createServerClient } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
+import { checkRateLimit, getClientIp } from '@/lib/rate-limit';
 
 /**
  * Supabase session refresh middleware — with a critical SEO bypass.
@@ -39,6 +40,38 @@ function hasSupabaseAuthCookie(request: NextRequest): boolean {
 }
 
 export async function middleware(request: NextRequest) {
+  // ─── Rate-Limiting für /api/* ────────────────────────────────────
+  // Schutz gegen einfache Scraper-Bots + bug-induzierte Loops + Bill-Spike.
+  // Per-Function-Instance (Map<ip, bucket>) — gut genug als erstes Level,
+  // bei Bedarf später Upstash Redis dranhängen (gleiches Interface).
+  // GET sind großzügiger (Lesen ist normal), Mutations strenger.
+  if (request.nextUrl.pathname.startsWith('/api/')) {
+    // Cron + Webhooks bekommen ihre eigene Auth-Kontrolle, nicht ratelimiten
+    const skipPaths = ['/api/cron/', '/api/webhooks/'];
+    const skip = skipPaths.some(p => request.nextUrl.pathname.startsWith(p));
+    if (!skip) {
+      const ip = getClientIp(request.headers);
+      const isWrite = ['POST', 'PUT', 'DELETE', 'PATCH'].includes(request.method);
+      const limit = isWrite ? 30 : 120; // 30 writes/min, 120 reads/min pro IP
+      const result = checkRateLimit(`${ip}:${request.method}:${request.nextUrl.pathname}`, limit, 60_000);
+      if (!result.ok) {
+        return new NextResponse(
+          JSON.stringify({ error: 'Too Many Requests', retry_after_s: Math.ceil((result.resetAt - Date.now()) / 1000) }),
+          {
+            status: 429,
+            headers: {
+              'Content-Type': 'application/json',
+              'Retry-After': String(Math.ceil((result.resetAt - Date.now()) / 1000)),
+              'X-RateLimit-Limit': String(limit),
+              'X-RateLimit-Remaining': '0',
+              'X-RateLimit-Reset': String(Math.floor(result.resetAt / 1000)),
+            },
+          },
+        );
+      }
+    }
+  }
+
   // Anonymous request? Skip the session refresh entirely so Next.js can
   // prerender + ISR-cache the response. This is what unblocks Google
   // indexing for the ~42 000 public event pages.

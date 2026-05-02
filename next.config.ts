@@ -78,14 +78,40 @@ const nextConfig: NextConfig = {
       { protocol: 'https', hostname: '**.art' },
     ],
   },
+  // Reduziert Info-Disclosure: kein "X-Powered-By: Next.js" Header.
+  poweredByHeader: false,
   // Security + cache headers
   async headers() {
+    // Content-Security-Policy — Defense-in-Depth gegen XSS + 3rd-party-Inject.
+    // Wir erlauben explizit:
+    //   - Mapbox (api.mapbox.com / events.mapbox.com) für die Karte
+    //   - Supabase (auth, REST, Realtime via wss)
+    //   - Google AdSense + GTM + Analytics
+    //   - Spotify API für Artist-Search
+    //   - 'unsafe-inline' für Scripts (Next.js RSC hydration) + Styles (Tailwind)
+    //   - 'unsafe-eval' für Mapbox GL JS (WebGL-Compiler)
+    const csp = [
+      "default-src 'self'",
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://api.mapbox.com https://events.mapbox.com https://www.googletagmanager.com https://www.google-analytics.com https://pagead2.googlesyndication.com https://www.googleadservices.com https://googleads.g.doubleclick.net https://tpc.googlesyndication.com",
+      "style-src 'self' 'unsafe-inline' https://api.mapbox.com",
+      "img-src 'self' data: blob: https:",
+      "font-src 'self' data:",
+      "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.mapbox.com https://events.mapbox.com https://api.spotify.com https://accounts.spotify.com https://www.google-analytics.com https://stats.g.doubleclick.net https://pagead2.googlesyndication.com https://googleads.g.doubleclick.net",
+      "worker-src 'self' blob:",
+      "frame-src 'self' https://accounts.google.com https://googleads.g.doubleclick.net https://tpc.googlesyndication.com",
+      "form-action 'self'",
+      "base-uri 'self'",
+      "object-src 'none'",
+      "upgrade-insecure-requests",
+    ].join('; ');
+
     const securityHeaders = [
       { key: 'X-Frame-Options', value: 'DENY' },
       { key: 'X-Content-Type-Options', value: 'nosniff' },
       { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
       { key: 'X-DNS-Prefetch-Control', value: 'on' },
       { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=(self)' },
+      { key: 'Content-Security-Policy', value: csp },
     ];
     return [
       {
