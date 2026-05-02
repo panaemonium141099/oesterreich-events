@@ -1127,3 +1127,26 @@ button:active, a:active, [role="button"]:active {
 @media (prefers-reduced-motion: reduce) {
   .mv3-fade-in { animation: none; }
 }
+
+/* MapV3 list-card hover — subtle lift + tighter shadow. */
+.mv3-list-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 36px rgba(17,17,20,0.14), 0 4px 12px rgba(17,17,20,0.06);
+  border-color: #d4d6dc !important;
+}
+.mv3-list-card:focus-visible {
+  outline: 2px solid #111114;
+  outline-offset: 2px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .mv3-list-card:hover { transform: none; }
+}
+
+/* MapV3 filter-drawer chip groups — equal-width grid so chips line up
+   in clean columns instead of left-flushing across rows of varying
+   density. The minmax(min(160px, 100%), 1fr) trick keeps it responsive. */
+.mv3-chip-group {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(140px, 100%), 1fr));
+  gap: 8px;
+}

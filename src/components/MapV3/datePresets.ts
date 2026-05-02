@@ -44,6 +44,10 @@ export function applyDatePreset(id: DatePresetId): { dateFrom?: string; dateTo?:
   switch (id) {
     case 'jetzt':
     case 'heute':
+      // Both presets show today's events. They look semantically different
+      // ("Jetzt" feels more immediate) but the API has no concept of
+      // "happening right now" so we map them to the same range. The
+      // FilterDrawer tracks which chip the user picked separately.
       return { dateFrom: today, dateTo: today };
 
     case 'morgen': {
@@ -66,12 +70,16 @@ export function applyDatePreset(id: DatePresetId): { dateFrom?: string; dateTo?:
     }
 
     case 'woche': {
-      // Today through end of week (next Sunday).
-      const day = now.getDay();
-      const sun = new Date(now);
-      const daysToSun = day === 0 ? 0 : 7 - day;
-      sun.setDate(sun.getDate() + daysToSun);
-      return { dateFrom: today, dateTo: toLocalIso(sun) };
+      // Mon–Sun of the current ISO week. Distinct from "wochenende" so the
+      // two chips can be told apart on a Saturday (where today→Sun would
+      // otherwise collide with Sat→Sun and the visual would jump).
+      const day = now.getDay(); // 0 Sun, 1 Mon, ..., 6 Sat
+      const mon = new Date(now);
+      const daysToMon = day === 0 ? -6 : 1 - day;
+      mon.setDate(mon.getDate() + daysToMon);
+      const sun = new Date(mon);
+      sun.setDate(mon.getDate() + 6);
+      return { dateFrom: toLocalIso(mon), dateTo: toLocalIso(sun) };
     }
 
     case 'custom':

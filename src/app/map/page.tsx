@@ -32,6 +32,7 @@ import { FilterDrawer } from '@/components/MapV3/FilterDrawer';
 import { EventListView } from '@/components/MapV3/EventListView';
 import { defaultDateTo } from '@/components/MapV3/datePresets';
 import { T } from '@/components/MapV3/tokens';
+import { readCache, writeCache } from '@/components/MapV3/eventsCache';
 import { EventDetail } from '@/components/Events/EventDetail';
 import { MapLoadingOverlay } from '@/components/Map/MapLoadingOverlay';
 import { LocationBanner } from '@/components/Map/LocationBanner';
@@ -170,11 +171,29 @@ function MapPageInner() {
     const controller = new AbortController();
     abortRef.current = controller;
 
-    setLoading(true);
-    setAllEvents([]);
-    setApiTotalCount(null);
+    // ── Phase 0: Hydrate from session cache (instant) ─────────────────
+    // Renders the previously-loaded list immediately so toggling Karte/
+    // Liste, navigating away and back, or hitting "Entdecken" from the
+    // landing all skip the 6+ second batch-fetch when fresh data is in
+    // the cache. We still kick off a background refetch below to keep
+    // the data fresh — stale-while-revalidate.
+    const cached = readCache(filters);
+    if (cached) {
+      // CachedEvent is a strict subset of Event — missing fields (description,
+      // enrichment, etc.) are read by the detail modal which lazy-fetches via
+      // /api/events/[id]. List + map markers only need the slim fields.
+      setAllEvents(cached.events as unknown as Event[]);
+      setApiTotalCount(cached.total);
+      setLoading(false);
+    } else {
+      setLoading(true);
+      setAllEvents([]);
+      setApiTotalCount(null);
+    }
 
     const BATCH_SIZE = 10000;
+    let acc: Event[] = [];
+    let finalTotal: number | null = null;
 
     try {
       const firstParams = buildParams();
@@ -188,15 +207,26 @@ function MapPageInner() {
       const firstEvents: Event[] = firstData.events || [];
 
       setAllEvents(firstEvents);
-      if (typeof firstData.total === 'number') setApiTotalCount(firstData.total);
+      if (typeof firstData.total === 'number') {
+        setApiTotalCount(firstData.total);
+        finalTotal = firstData.total;
+      }
       setLoading(false);
 
-      if (!firstData.hasMore && firstEvents.length < BATCH_SIZE) return;
+      // Write cache after the very first batch too — that way a quick
+      // navigate-away-and-back hits the cache for the first 10k events
+      // instead of restarting the 30s+ batch loop. The background loop
+      // below will overwrite with the full set when it completes.
+      writeCache(filters, firstEvents, finalTotal);
+
+      if (!firstData.hasMore && firstEvents.length < BATCH_SIZE) {
+        return;
+      }
 
       setBackgroundLoading(true);
 
       const seen = new Set(firstEvents.map((e) => e.id));
-      let acc = [...firstEvents];
+      acc = [...firstEvents];
       let cursor: string | null = firstData.nextCursor || null;
 
       while (cursor) {
@@ -224,6 +254,10 @@ function MapPageInner() {
         cursor = data.nextCursor || null;
         if (batch.length < BATCH_SIZE) break;
       }
+
+      // Persist the full freshly-loaded set so the next navigation hits
+      // the cache instead of waiting on the network.
+      writeCache(filters, acc, finalTotal);
     } catch (err) {
       if ((err as Error).name !== 'AbortError') {
         if (process.env.NODE_ENV === 'development') console.error('Fehler beim Laden der Events:', err);
@@ -232,7 +266,7 @@ function MapPageInner() {
       setLoading(false);
       setBackgroundLoading(false);
     }
-  }, [buildParams]);
+  }, [buildParams, filters]);
 
   useEffect(() => {
     fetchEventsProgressive();

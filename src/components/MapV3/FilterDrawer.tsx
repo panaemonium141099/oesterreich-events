@@ -22,7 +22,7 @@
  *     so they can no longer overwrite each other.
  */
 import { useEffect, useMemo, useState } from 'react';
-import { T, DATE_PRESETS, PRICE_TIERS, countActiveFilters as countActive } from './tokens';
+import { T, DATE_PRESETS, PRICE_TIERS, countActiveFilters as countActive, type DatePresetId } from './tokens';
 import { applyDatePreset, defaultDateTo, detectActivePreset } from './datePresets';
 import { CATEGORIES } from '@/lib/categories';
 import { BUNDESLAENDER, type Bundesland } from '@/lib/bundeslaender';
@@ -57,6 +57,12 @@ export function FilterDrawer({
   // CTA click; Reset wipes the draft.
   const [draft, setDraft] = useState<EventFilters>(filters);
   const [draftBl, setDraftBl] = useState<Bundesland>(bundesland);
+  // Track the explicitly-chosen date preset id. We can't reliably reverse-
+  // derive it from dateFrom/dateTo because two presets can map to the same
+  // range (e.g. "Jetzt" and "Heute" both = today→today; on a Saturday
+  // "Wochenende" and "Diese Woche" overlap). Tracking the choice means the
+  // chip the user picks stays highlighted instead of jumping to a sibling.
+  const [activePresetId, setActivePresetId] = useState<DatePresetId | null>(null);
   const [showCustomDate, setShowCustomDate] = useState(false);
 
   // Re-seed draft whenever the drawer opens — picks up external changes
@@ -65,7 +71,9 @@ export function FilterDrawer({
     if (open) {
       setDraft(filters);
       setDraftBl(bundesland);
-      setShowCustomDate(detectActivePreset(filters.dateFrom, filters.dateTo) === null && (!!filters.dateFrom || !!filters.dateTo));
+      const detected = detectActivePreset(filters.dateFrom, filters.dateTo);
+      setActivePresetId(detected);
+      setShowCustomDate(detected === null && (!!filters.dateFrom || !!filters.dateTo));
     }
   }, [open, filters, bundesland]);
 
@@ -78,11 +86,6 @@ export function FilterDrawer({
     document.addEventListener('keydown', onKey);
     return () => document.removeEventListener('keydown', onKey);
   }, [open, onClose]);
-
-  const activePreset = useMemo(
-    () => detectActivePreset(draft.dateFrom, draft.dateTo),
-    [draft.dateFrom, draft.dateTo],
-  );
 
   const dDefault = defaultDateTo();
 
@@ -106,6 +109,7 @@ export function FilterDrawer({
     const cleared: EventFilters = { dateTo: dDefault };
     setDraft(cleared);
     setDraftBl(BUNDESLAENDER[0]);
+    setActivePresetId(null);
     setShowCustomDate(false);
     onBundeslandChange(BUNDESLAENDER[0]);
     onFiltersChange(cleared);
@@ -114,11 +118,13 @@ export function FilterDrawer({
 
   const setPreset = (id: typeof DATE_PRESETS[number]['id']) => {
     if (id === 'custom') {
+      setActivePresetId('custom');
       setShowCustomDate(true);
       return;
     }
     const r = applyDatePreset(id);
     if (r) {
+      setActivePresetId(id);
       setShowCustomDate(false);
       setDraft((d) => ({ ...d, dateFrom: r.dateFrom, dateTo: r.dateTo ?? dDefault }));
     }
@@ -185,7 +191,7 @@ export function FilterDrawer({
             draftBl={draftBl}
             setDraftBl={setDraftBl}
             districts={districts}
-            activePreset={activePreset}
+            activePresetId={activePresetId}
             setPreset={setPreset}
             showCustomDate={showCustomDate}
             setShowCustomDate={setShowCustomDate}
@@ -225,7 +231,7 @@ export function FilterDrawer({
             draftBl={draftBl}
             setDraftBl={setDraftBl}
             districts={districts}
-            activePreset={activePreset}
+            activePresetId={activePresetId}
             setPreset={setPreset}
             showCustomDate={showCustomDate}
             setShowCustomDate={setShowCustomDate}
@@ -253,8 +259,8 @@ interface BodyProps {
   draftBl: Bundesland;
   setDraftBl: (bl: Bundesland) => void;
   districts: { name: string }[];
-  activePreset: ReturnType<typeof detectActivePreset>;
-  setPreset: (id: typeof DATE_PRESETS[number]['id']) => void;
+  activePresetId: DatePresetId | null;
+  setPreset: (id: DatePresetId) => void;
   showCustomDate: boolean;
   setShowCustomDate: (v: boolean) => void;
   setCategory: (cat: string | undefined) => void;
@@ -267,7 +273,7 @@ function Body({
   draftBl,
   setDraftBl,
   districts,
-  activePreset,
+  activePresetId,
   setPreset,
   showCustomDate,
   setShowCustomDate,
@@ -279,7 +285,11 @@ function Body({
       <FilterBlock label="Wann">
         <ChipGroup>
           {DATE_PRESETS.map((p) => {
-            const active = (p.id === 'custom' && showCustomDate) || activePreset === p.id;
+            // Highlight whichever chip the user actually clicked. Earlier we
+            // derived this from dateFrom/dateTo via detectActivePreset, but
+            // multiple chips can map to the same range (Jetzt≡Heute,
+            // Wochenende≡Diese Woche on a Saturday) so the visual jumped.
+            const active = activePresetId === p.id || (p.id === 'custom' && showCustomDate);
             return (
               <Chip key={p.id} active={active} onClick={() => setPreset(p.id)}>
                 {p.label}
@@ -516,7 +526,10 @@ function FilterBlock({ label, children }: { label: string; children: React.React
 }
 
 function ChipGroup({ children }: { children: React.ReactNode }) {
-  return <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>{children}</div>;
+  // CSS Grid auto-fill — every chip gets the same column width so the
+  // group reads as a tidy block instead of left-flushed flex chips of
+  // varying length. Class lives in globals.css.
+  return <div className="mv3-chip-group">{children}</div>;
 }
 
 function Chip({
@@ -534,8 +547,12 @@ function Chip({
       aria-pressed={active}
       className="press-haptic"
       style={{
-        display: 'inline-flex',
+        // display:flex (not inline-flex) so the chip fills its grid cell
+        // and the whole row reads as a clean block.
+        display: 'flex',
         alignItems: 'center',
+        justifyContent: 'center',
+        gap: 6,
         padding: '8px 14px',
         borderRadius: 9999,
         background: active ? T.ink : '#fff',
@@ -547,6 +564,8 @@ function Chip({
         fontFamily: 'inherit',
         letterSpacing: '-0.005em',
         minHeight: 36,
+        whiteSpace: 'nowrap',
+        transition: 'background 0.15s, border-color 0.15s',
       }}
     >
       {children}

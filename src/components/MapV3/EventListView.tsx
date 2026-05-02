@@ -17,6 +17,46 @@ import type { Event } from '@/types/events';
 import { formatTime } from '@/lib/utils/date';
 import { distanceKm } from '@/lib/geolocation';
 
+/**
+ * Decode the handful of HTML entities scrapers leave in event titles
+ * ("PSYCH &#8211; LUXUSGOLD"). Cheap inline pass — covers numeric
+ * entities + the most common named ones, no DOM round-trip.
+ */
+function decodeEntities(s: string): string {
+  if (!s.includes('&')) return s;
+  return s
+    .replace(/&#(\d+);/g, (_, n) => String.fromCharCode(Number(n)))
+    .replace(/&#x([0-9a-f]+);/gi, (_, n) => String.fromCharCode(parseInt(n, 16)))
+    .replace(/&amp;/g, '&')
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;|&apos;/g, "'")
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&nbsp;/g, ' ');
+}
+
+/**
+ * Category → tinted gradient pair for placeholders. Uses the same hue
+ * family as the CatChip so a missing image still feels "on-brand" for
+ * the event type instead of being a generic gray block.
+ */
+const CAT_GRADIENT: Record<string, [string, string]> = {
+  Musik: ['#a855f7', '#7e22ce'],
+  'Kultur & Bühne': ['#3b82f6', '#1d4ed8'],
+  'Nightlife & Party': ['#ec4899', '#9d174d'],
+  'Essen & Trinken': ['#f59e0b', '#b45309'],
+  'Märkte & Feste': ['#10b981', '#047857'],
+  'Sport & Bewegung': ['#ef4444', '#b91c1c'],
+  'Natur & Abenteuer': ['#22c55e', '#15803d'],
+  'Wissen & Karriere': ['#0ea5e9', '#0369a1'],
+  'Familie & Kinder': ['#f472b6', '#be185d'],
+  'Community & Freizeit': ['#8b5cf6', '#5b21b6'],
+  'Wellness & Spiritualität': ['#06b6d4', '#0e7490'],
+};
+function gradientFor(cat?: string | null): [string, string] {
+  return (cat && CAT_GRADIENT[cat]) || ['#94a3b8', '#475569'];
+}
+
 export type ListSortMode = 'date' | 'distance' | 'score';
 
 interface EventListViewProps {
@@ -267,18 +307,28 @@ function BigRow({
   userLocation?: { lat: number; lng: number } | null;
   onClick: () => void;
 }) {
+  // Track image errors locally so a 404'd scraper image swaps to the
+  // category-gradient placeholder instead of leaving an empty box. The
+  // map markers don't surface this because Mapbox just falls back to a
+  // generic dot — but in the list the photo is half the visual weight,
+  // so a graceful fallback matters.
+  const [imgFailed, setImgFailed] = useState(false);
+
   const time = formatTime(ev.start_date);
   const cat = ev.category || 'Sonstiges';
+  const title = decodeEntities(ev.title || '');
   const km =
     userLocation && ev.latitude != null && ev.longitude != null
       ? Math.round(distanceKm(userLocation.lat, userLocation.lng, ev.latitude, ev.longitude) * 10) / 10
       : null;
   const dateLabel = formatDateLabel(ev.start_date);
+  const showImage = !!ev.image_url && !imgFailed;
+  const [g1, g2] = gradientFor(cat);
 
   return (
     <button
       onClick={onClick}
-      className="press-haptic"
+      className="press-haptic mv3-list-card"
       style={{
         display: 'flex',
         gap: 14,
@@ -291,6 +341,8 @@ function BigRow({
         textAlign: 'left',
         width: '100%',
         fontFamily: 'inherit',
+        // Hover/focus animation defined in globals.css → .mv3-list-card:hover
+        transition: 'transform 0.18s ease-out, box-shadow 0.18s ease-out, border-color 0.18s ease-out',
       }}
     >
       <div
@@ -301,21 +353,39 @@ function BigRow({
           flexShrink: 0,
           position: 'relative',
           overflow: 'hidden',
-          background: T.panel,
+          background: showImage ? T.panel : `linear-gradient(135deg, ${g1}, ${g2})`,
         }}
       >
-        {ev.image_url ? (
+        {showImage ? (
           <Image
-            src={ev.image_url}
+            src={ev.image_url!}
             alt=""
             fill
             sizes="132px"
             unoptimized
+            onError={() => setImgFailed(true)}
             style={{ objectFit: 'cover' }}
           />
         ) : (
-          <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', color: T.ink40, fontSize: 11, fontWeight: 600 }}>
-            {cat.toUpperCase()}
+          <div
+            style={{
+              position: 'absolute',
+              inset: 0,
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: 'rgba(255,255,255,0.95)',
+              fontSize: 11,
+              fontWeight: 700,
+              letterSpacing: '0.08em',
+              textTransform: 'uppercase',
+              padding: 8,
+              textAlign: 'center',
+              lineHeight: 1.2,
+            }}
+          >
+            {cat}
           </div>
         )}
         <span
@@ -379,7 +449,7 @@ function BigRow({
               overflow: 'hidden',
             }}
           >
-            {ev.title}
+            {title}
           </div>
           {km != null && (
             <div style={{ fontSize: 12, color: T.ink60, fontWeight: 500 }}>
