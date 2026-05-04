@@ -13,6 +13,7 @@ import { FalterScraper } from './FalterScraper';
 import { MeinBezirkScraper } from './MeinBezirkScraper';
 import { EventsAtScraper } from './EventsAtScraper';
 import { EventfinderAtScraper } from './EventfinderAtScraper';
+import { EventfrogScraper } from './EventfrogScraper';
 import { FeverUpScraper } from './FeverUpScraper';
 import { StadthalleScraper } from './StadthalleScraper';
 import { PraterWienScraper } from './PraterWienScraper';
@@ -174,6 +175,7 @@ export const scrapers: BaseScraper[] = [
   // Übergreifend (Wien + AT)
   new EventsAtScraper(),
   new EventfinderAtScraper(),
+  new EventfrogScraper(),
   new FeverUpScraper(),
   // Ganz Österreich
   new MeinBezirkScraper(),
