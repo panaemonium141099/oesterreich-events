@@ -162,6 +162,8 @@ function MapPageInner() {
     if (filters.priceMax !== undefined) params.set('priceMax', String(filters.priceMax));
     if (filters.search) params.set('search', filters.search);
     if (filters.bbox) params.set('bbox', filters.bbox.join(','));
+    if (filters.placeName) params.set('placeName', filters.placeName);
+    if (filters.placePostalCode) params.set('placePostalCode', filters.placePostalCode);
     if (filters.eveningOnly) params.set('eveningOnly', 'true');
     if (filters.sourceName) params.set('sourceName', filters.sourceName);
     if (filters.studentFriendly) params.set('studentFriendly', 'true');
@@ -324,33 +326,25 @@ function MapPageInner() {
   const totalMatchCount =
     bundesland.id === 'all' && !filters.district ? apiTotalCount : null;
 
-  const handleGemeindeSelect = (g: { name: string; bundeslandId: string; lat: number; lng: number }) => {
+  const handleGemeindeSelect = (g: { name: string; bundeslandId: string; lat: number; lng: number; postalCode?: string }) => {
     const bl = BUNDESLAENDER.find((b) => b.id === g.bundeslandId);
     if (bl) setBundesland(bl);
 
-    // Wien is the only Gemeinde that maps 1:1 to a Bundesland — picking
-    // it should behave exactly like the filter's "Bundesland: Wien"
-    // option (every Wien event, no geo trimming). Every other Gemeinde
-    // is a sub-area of its BL, so we add a bbox so the result stays
-    // about that place instead of bleeding to the whole BL.
+    // Wien is the only Gemeinde that maps 1:1 to a Bundesland → just
+    // bundesland=wien gives all 2351 events without any extra filtering.
+    // For every other Gemeinde we use the server-side place-scope filter
+    // (postal_code OR location_name ILIKE OR address ILIKE) — that
+    // matches events that actually belong to that place, no geo
+    // approximation needed.
     const isCapitalEqualsBundesland = g.bundeslandId === 'wien';
-
-    let bbox: [number, number, number, number] | undefined;
-    if (!isCapitalEqualsBundesland) {
-      // Larger radius for the 8 remaining Bundesland-capitals (sprawl
-      // past the city core), tighter for ordinary villages.
-      const CAPITALS = /^(graz|linz|salzburg|innsbruck|klagenfurt|bregenz|eisenstadt|st\.?\s*p[oö]lten)$/i;
-      const radiusKm = CAPITALS.test(g.name) ? 10 : 5;
-      const dLat = radiusKm / 111;
-      const dLng = radiusKm / (111 * Math.cos((g.lat * Math.PI) / 180));
-      bbox = [g.lat - dLat, g.lng - dLng, g.lat + dLat, g.lng + dLng];
-    }
 
     setFilters((prev) => ({
       ...prev,
       district: undefined,
       search: undefined,
-      bbox,
+      bbox: undefined,
+      placeName: isCapitalEqualsBundesland ? undefined : g.name,
+      placePostalCode: isCapitalEqualsBundesland ? undefined : g.postalCode,
     }));
 
     if (view === 'map') {

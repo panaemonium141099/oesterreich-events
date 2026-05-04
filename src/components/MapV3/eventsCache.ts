@@ -101,6 +101,8 @@ function filterKey(filters: EventFilters): string {
     pmax: filters.priceMax ?? null,
     s: filters.search ?? null,
     bb: filters.bbox?.map((n) => n.toFixed(3)).join(',') ?? null,
+    pn: filters.placeName ?? null,
+    pp: filters.placePostalCode ?? null,
     en: filters.eveningOnly ?? null,
     src: filters.sourceName ?? null,
     sf: filters.studentFriendly ?? null,

@@ -160,6 +160,12 @@ export interface EventFilters {
   sort?: 'date' | 'score' | 'relevance';
   /** Bounding box filter: [south_lat, west_lng, north_lat, east_lng] */
   bbox?: [number, number, number, number];
+  /** Compound place-scope filter from gemeinde click. Matches events
+   *  where postal_code = placePostalCode OR location_name/address ILIKE
+   *  %placeName%. Combined with bundesland to give "all events for THIS
+   *  city/village", not just substring search. */
+  placeName?: string;
+  placePostalCode?: string;
   /** Filter by scraper source_name (god-role only) */
   sourceName?: string;
   /** Filter events by venue ID */

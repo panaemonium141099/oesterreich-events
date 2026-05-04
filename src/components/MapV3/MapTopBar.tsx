@@ -47,7 +47,7 @@ interface MapTopBarProps {
   onFiltersChange: (f: EventFilters) => void;
   bundesland: Bundesland;
   onOpenFilter: () => void;
-  onGemeindeSelect?: (g: { name: string; bundeslandId: string; lat: number; lng: number }) => void;
+  onGemeindeSelect?: (g: { name: string; bundeslandId: string; lat: number; lng: number; postalCode?: string }) => void;
   /** Slot for the centered ViewToggle (Karte | Liste) — rendered by parent
    *  so we can position it absolutely inside the map area below the bar. */
   rightSlot?: React.ReactNode;
@@ -155,7 +155,7 @@ export function MapTopBar({
     // as the geo filter. ILIKE-substring on a city name would silently
     // drop ~half of that city's events (e.g. "Konzert im Stadtsaal"
     // doesn't contain "Wien" but is in Wien).
-    onGemeindeSelect?.({ name: g.n, bundeslandId: g.i, lat: g.lat, lng: g.lng });
+    onGemeindeSelect?.({ name: g.n, bundeslandId: g.i, lat: g.lat, lng: g.lng, postalCode: g.p });
     trackEvent('search', { query: g.n, kind: 'gemeinde' });
   };
 

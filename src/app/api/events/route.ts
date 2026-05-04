@@ -131,6 +131,13 @@ export async function GET(request: NextRequest) {
   const search = searchParams.get('search');
   if (search) filters.search = search;
 
+  // Place-scope filter — set by gemeinde-suggestion clicks. Behaves like
+  // "all events for THIS city/village" instead of substring search.
+  const placeName = searchParams.get('placeName');
+  if (placeName) filters.placeName = placeName;
+  const placePostalCode = searchParams.get('placePostalCode');
+  if (placePostalCode) filters.placePostalCode = placePostalCode;
+
   const eveningOnly = searchParams.get('eveningOnly');
   if (eveningOnly === 'true') filters.eveningOnly = true;
 
@@ -472,6 +479,28 @@ export async function GET(request: NextRequest) {
         .lte('latitude', northLat)
         .gte('longitude', westLng)
         .lte('longitude', eastLng);
+    }
+
+    // Place-scope filter — set by clicking a Gemeinde in the search
+    // dropdown. Match events that "belong to" that place via any of:
+    //   - postal_code = placePostalCode
+    //   - location_name ILIKE %placeName%
+    //   - address ILIKE %placeName%
+    // Combined with bundesland (when set) via AND so we don't pull in
+    // unrelated events that happen to share a name fragment.
+    if (filters.placeName) {
+      const sanitized = filters.placeName.replace(/[,.*()%_\\]/g, '').trim();
+      if (sanitized) {
+        const orParts: string[] = [
+          `location_name.ilike.%${sanitized}%`,
+          `address.ilike.%${sanitized}%`,
+        ];
+        if (filters.placePostalCode) {
+          // Exact PLZ match — caught from gemeinden.json
+          orParts.push(`postal_code.eq.${filters.placePostalCode}`);
+        }
+        query = query.or(orParts.join(','));
+      }
     }
 
     if (filters.sort === 'relevance') {
