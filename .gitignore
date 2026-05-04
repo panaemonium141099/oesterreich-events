@@ -91,5 +91,8 @@ data/category-classifier-needsreview-checkpoint.json
 data/classifier-audit/
 data/tourism-fix-backup-*.jsonl
 data/coord-backup-*-2026-*.json
+
+# Audit exports — generated locally for gegenkontrolle, not source
+data/exports/
 .cache/
 .claude/sessions/

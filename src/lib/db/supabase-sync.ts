@@ -32,6 +32,7 @@ import {
   type ExistingCategoryRow,
 } from '@/lib/category-classifier';
 import { normalizeEventLocation } from '@/lib/location-normalizer';
+import { normalizeDistrict } from '@/lib/district-normalizer';
 import { generateFingerprint } from '@/lib/dedup/fingerprint';
 import { generateEventSlug } from '@/lib/utils/slugify';
 import { scoreEvent } from '@/lib/quality/score-event';
@@ -406,7 +407,15 @@ function toSupabaseRow(
     // Writing `null` explicitly here would clobber that value.
     ...(resolved.postalCode !== null ? { postal_code: resolved.postalCode } : {}),
     bundesland: event.bundesland ?? null,
-    district: event.district ?? null,
+    // Normalise district at scrape-time so the FilterDrawer chip can
+    // match by exact string. Without this, every new scrape pumps
+    // freshly-spelled aliases (e.g. "bruck/leitha", "suedoststeiermark")
+    // back into the DB and undoes the canonical-rewrite migration.
+    district: normalizeDistrict(
+      event.district,
+      event.bundesland,
+      resolved.postalCode ?? event.postal_code,
+    ),
     latitude: finalLat,
     longitude: finalLng,
     category: canonical.category,
