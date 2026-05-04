@@ -333,7 +333,13 @@ function MapPageInner() {
   }, [bundeslandEvents]);
 
   const finalEvents = useMemo(() => {
-    return filters.district ? dedupedEvents.filter((e) => e.district === filters.district) : dedupedEvents;
+    if (!filters.district) return dedupedEvents;
+    // DB stores districts lowercased ("graz (stadt)", 207 events) but
+    // the filter chip sends Title Case from districtsAT.ts ("Graz (Stadt)").
+    // Direct === produced 0 hits — compare both sides lowercased so the
+    // 207 Graz Stadt events actually surface in the list.
+    const target = filters.district.toLowerCase();
+    return dedupedEvents.filter((e) => (e.district ?? '').toLowerCase() === target);
   }, [dedupedEvents, filters.district]);
 
   // Category counts for the FilterDrawer — fed off the post-deduplication,

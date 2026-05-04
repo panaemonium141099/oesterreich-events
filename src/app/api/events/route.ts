@@ -309,7 +309,11 @@ export async function GET(request: NextRequest) {
     }
 
     if (filters.district) {
-      query = query.eq('district', filters.district);
+      // DB stores districts lowercased — UI sends Title Case from
+      // districtsAT.ts ("Graz (Stadt)"). ilike without wildcards is an
+      // exact case-insensitive match, so 207 Graz events are returned
+      // instead of 0.
+      query = query.ilike('district', filters.district);
     }
 
     if (sourceName) {
