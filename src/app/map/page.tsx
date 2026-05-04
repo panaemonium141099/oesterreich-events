@@ -158,6 +158,10 @@ function MapPageInner() {
     // find the 6553 Steiermark events. Falls back to 'all' so the API
     // bypasses its built-in bundesland CHECK and returns everything.
     params.set('bundesland', bundesland.id === 'all' ? 'all' : bundesland.id);
+    // Slim payload — list + markers only need ~17 fields. The detail
+    // modal lazy-fetches the full row via /api/events/[id]. Cuts a
+    // Steiermark-scope response from ~10 MB to ~1 MB.
+    params.set('slim', 'true');
     if (filters.tags && filters.tags.length > 0) params.set('tags', filters.tags.join(','));
     else if (filters.category) params.set('category', filters.category);
     if (filters.dateFrom) params.set('dateFrom', filters.dateFrom);

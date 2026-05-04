@@ -235,6 +235,13 @@ export async function GET(request: NextRequest) {
   // Include unmapped events (NULL coordinates) in a separate array
   const includeUnmapped = searchParams.get('includeUnmapped') === 'true';
 
+  // Slim mode for the map/list view: returns only the fields the list +
+  // markers actually render, drops description (often 500-2000 chars per
+  // event) and enrichment arrays. Cuts payload from ~10 MB to ~1 MB on
+  // a Steiermark-wide query, which is the dominant chunk of the 3-5 s
+  // total response time on warm cache.
+  const slimMode = searchParams.get('slim') === 'true';
+
   try {
     // Build the query — use untyped Supabase client (no Database generic),
     // so the chained filter methods return Record<string, unknown> rows
@@ -244,8 +251,18 @@ export async function GET(request: NextRequest) {
     // Only count when: no cursor, limit small, AND a bundesland filter is set (not 'all')
     const hasBundeslandFilter = filters.bundesland && filters.bundesland !== 'all';
     const needsCount = !filters.cursor && (filters.limit <= 10000) && (hasBundeslandFilter || !!filters.search || !!filters.category);
+    // Slim select for the map/list view — every field the cached
+     // CachedEvent type lists, plus slug for routing. NO description, no
+     // enrichment arrays (audience/vibe/etc.) — those are fetched on
+     // demand by the detail modal via /api/events/[id].
+    const slimSelect =
+      'id, title, slug, start_date, end_date, location_name, address, ' +
+      'postal_code, district, bundesland, latitude, longitude, category, ' +
+      'tags, image_url, price_text, event_score';
     let query = suggestMode
       ? baseQuery.select('id, title, category, location_name')
+      : slimMode
+      ? baseQuery.select(slimSelect, needsCount ? { count: 'exact' } : undefined)
       : baseQuery.select(
           // NOTE: `suggested_description` / `suggested_price_text` were removed
           // in the v3 enrichment rework — the v2 pipeline writes directly to
