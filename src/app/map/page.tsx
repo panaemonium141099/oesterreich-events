@@ -212,8 +212,14 @@ function MapPageInner() {
         signal: controller.signal,
         cache: 'no-store',
       });
+      // Generation guard: if the user changed filters during the await,
+      // abortRef now points at a NEW controller. This response is stale
+      // — bail before touching state so we don't overwrite the new
+      // fetch's results with old-bundesland events.
+      if (controller.signal.aborted || abortRef.current !== controller) return;
       if (!firstRes.ok) throw new Error(`HTTP ${firstRes.status}`);
       const firstData = await firstRes.json();
+      if (controller.signal.aborted || abortRef.current !== controller) return;
       const firstEvents: Event[] = firstData.events || [];
 
       setAllEvents(firstEvents);
@@ -240,7 +246,7 @@ function MapPageInner() {
       let cursor: string | null = firstData.nextCursor || null;
 
       while (cursor) {
-        if (controller.signal.aborted) break;
+        if (controller.signal.aborted || abortRef.current !== controller) break;
 
         const params = buildParams();
         params.set('limit', String(BATCH_SIZE));
@@ -250,8 +256,10 @@ function MapPageInner() {
           signal: controller.signal,
           cache: 'no-store',
         });
+        if (controller.signal.aborted || abortRef.current !== controller) break;
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
+        if (controller.signal.aborted || abortRef.current !== controller) break;
 
         const batch: Event[] = data.events || [];
         if (batch.length === 0) break;
