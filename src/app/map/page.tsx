@@ -111,8 +111,11 @@ function MapPageInner() {
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   const [hoveredEventId, setHoveredEventId] = useState<string | null>(null);
   const [bundesland, setBundesland] = useState<Bundesland>(initialBundesland);
+  // No default dateTo — load EVERYTHING. The progressive batch loader
+  // pages through cursor-based pagination so a few extra months of
+  // events won't slow the first paint, and users were missing winter
+  // events that fell outside the old 6-month horizon.
   const [filters, setFilters] = useState<EventFilters>({
-    dateTo: defaultDateTo(),
     ...(initialSearch ? { search: initialSearch } : {}),
     ...(initialCategory ? { category: initialCategory } : {}),
   });

@@ -106,7 +106,11 @@ export function FilterDrawer({
   const handleReset = () => {
     // Single canonical reset — wipes draft + applies immediately so the user
     // sees the map repopulate before the drawer closes.
-    const cleared: EventFilters = { dateTo: dDefault };
+    // Reset removes ALL filters including the date upper bound — load
+    // every event we have. The progressive batch loader handles the
+    // size, and users were missing winter events that fell past the
+    // old 6-month default horizon.
+    const cleared: EventFilters = {};
     setDraft(cleared);
     setDraftBl(BUNDESLAENDER[0]);
     setActivePresetId(null);
