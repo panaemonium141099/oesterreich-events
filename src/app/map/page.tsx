@@ -189,9 +189,13 @@ function MapPageInner() {
       setApiTotalCount(cached.total);
       setLoading(false);
     } else {
+      // Stale-while-revalidate: when transitioning between filter sets
+      // (e.g. clear search after 0 hits), keep the previous list visible
+      // until the new fetch returns instead of flashing an empty skeleton.
+      // Only blank on truly first-load (allEvents already empty).
       setLoading(true);
-      setAllEvents([]);
-      setApiTotalCount(null);
+      setAllEvents((prev) => prev);          // no-op: keep stale list
+      setApiTotalCount((prev) => prev);      // no-op: keep stale count
     }
 
     const BATCH_SIZE = 10000;

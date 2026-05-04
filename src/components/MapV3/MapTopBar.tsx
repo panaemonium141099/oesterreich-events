@@ -112,7 +112,7 @@ export function MapTopBar({
         if (aStarts !== bStarts) return aStarts - bStarts;
         return a.n.localeCompare(b.n);
       })
-      .slice(0, 4);
+      .slice(0, 8);
     setSuggestions(matches);
 
     // Remote event-title match — debounced
