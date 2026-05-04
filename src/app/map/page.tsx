@@ -187,7 +187,10 @@ function MapPageInner() {
 
     // Sync the parent-state Bundesland into filters for cache+API parity.
     const filtersWithBl = { ...filters, bundesland: bundesland.id };
-    const cached = readCache(filtersWithBl);
+    const cachedRaw = readCache(filtersWithBl);
+    // Don't hydrate from a stale 0-event cache entry — that flashes
+    // "Keine Events gefunden" while the real fetch is still in flight.
+    const cached = cachedRaw && cachedRaw.events.length > 0 ? cachedRaw : null;
     if (cached) {
       setAllEvents(cached.events as unknown as Event[]);
       setApiTotalCount(cached.total);
