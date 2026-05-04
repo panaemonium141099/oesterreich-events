@@ -234,13 +234,28 @@ function EventMap({ events, selectedEvent, hoveredEventId, onSelectEvent, evenin
     });
     map.current.addControl(geolocate, 'top-left');
 
-    map.current.on('load', () => {
+    // Mapbox `load` event = style + initial tiles loaded. In some
+    // environments (CSP-restricted, slow tile CDN, or HMR after style
+    // changes) the tile-load half stalls and `load` never fires — even
+    // though the style itself (148 layers) is fully mounted. Without
+    // mapReady=true the source-creation effect early-returns forever
+    // and the map shows zero markers no matter how many events arrive
+    // as props. Listen for `style.load` (fires earlier, only requires
+    // the style spec) and fall back to a 3-second timer as a safety net.
+    let readyFiredRef = false;
+    const fireReady = () => {
+      if (readyFiredRef) return;
+      readyFiredRef = true;
       if (!map.current) return;
       addBaseOverlays(map.current, !!eveningMode);
       updateBundeslandOverlay(map.current, bundesland, !!eveningMode);
       setMapReady(true);
-
-    });
+    };
+    map.current.on('load', fireReady);
+    map.current.on('style.load', fireReady);
+    // Belt-and-suspenders: if neither event fires within 3s, kick the
+    // ready flag manually. Worst case the overlays paint a hair early.
+    setTimeout(fireReady, 3000);
 
     return () => { map.current?.remove(); map.current = null; };
   // eslint-disable-next-line react-hooks/exhaustive-deps
