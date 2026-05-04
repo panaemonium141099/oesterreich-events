@@ -78,3 +78,18 @@ Bericht*.txt
 
 # Vercel CLI local link
 .vercel
+
+# Overpass venue dump (regeneratable, 100MB+)
+data/overpass-venues.json
+data/overpass-cache/
+
+# Other generated data dumps
+data/events-dump*.json
+data/events-dump*.jsonl
+data/enrich*.jsonl
+data/category-classifier-needsreview-checkpoint.json
+data/classifier-audit/
+data/tourism-fix-backup-*.jsonl
+data/coord-backup-*-2026-*.json
+.cache/
+.claude/sessions/

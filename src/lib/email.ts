@@ -1,13 +1,16 @@
 /**
- * Email notification service using Resend API.
+ * Email notification service.
  *
- * Uses fetch() directly (no npm package) for compatibility with both
- * Node.js and Deno (Supabase Edge Functions).
+ * Provider: Brevo (formerly Sendinblue) — EU-hosted, GDPR-native,
+ * 300 mails/day free tier. Uses the v3 transactional API via fetch()
+ * for cross-runtime compatibility (Node.js + Supabase Edge Functions).
  *
- * Env: RESEND_API_KEY
- * From: alerts@osterreich.events
+ * Env:
+ *   BREVO_API_KEY   — required, format `xkeysib-...`
+ *   EMAIL_FROM      — sender email (default: noreply@lasstreffen.at)
+ *   EMAIL_FROM_NAME — sender display name (default: LassTreffen!)
  *
- * Task: fn-10-spotify-artist-alerts-follow-artists.8
+ * Falls back to RESEND_API_KEY for legacy compat if no Brevo key set.
  */
 
 import { renderArtistAlertEmail } from '@/emails/artist-alert';
@@ -15,10 +18,19 @@ import { renderArtistReminderEmail } from '@/emails/artist-reminder';
 
 // ── Constants ───────────────────────────────────────────────────────────────
 
+const BREVO_API_URL = 'https://api.brevo.com/v3/smtp/email';
 const RESEND_API_URL = 'https://api.resend.com/emails';
-const FROM_ADDRESS = 'alerts@osterreich.events';
+const DEFAULT_FROM_EMAIL = 'noreply@lasstreffen.at';
+const DEFAULT_FROM_NAME = 'LassTreffen!';
 const MAX_RETRIES = 3;
 const BASE_DELAY_MS = 500; // 500ms, 1s, 2s
+
+function getFromAddress(): { email: string; name: string } {
+  return {
+    email: process.env.EMAIL_FROM || DEFAULT_FROM_EMAIL,
+    name: process.env.EMAIL_FROM_NAME || DEFAULT_FROM_NAME,
+  };
+}
 
 // ── Types ───────────────────────────────────────────────────────────────────
 
@@ -40,15 +52,24 @@ export interface ArtistReminderEmailData extends ArtistAlertEmailData {
   daysUntil: 7 | 1;
 }
 
-interface ResendEmailPayload {
-  from: string;
+/** Provider-agnostic email payload — same shape regardless of provider. */
+interface EmailPayload {
   to: string;
   subject: string;
   html: string;
 }
 
+interface BrevoSuccessResponse {
+  messageId: string;
+}
+
 interface ResendSuccessResponse {
   id: string;
+}
+
+interface BrevoErrorResponse {
+  code: string;
+  message: string;
 }
 
 interface ResendErrorResponse {
@@ -98,24 +119,83 @@ export async function verifyUnsubscribeToken(
   return token === expected;
 }
 
-// ── Resend API client ───────────────────────────────────────────────────────
+// ── Provider clients (Brevo primary, Resend legacy fallback) ────────────────
 
 /**
- * Send an email via Resend API with retry logic.
- * Retries up to 3 times with exponential backoff on failure.
+ * Send an email via Brevo Transactional API with retry logic.
+ * Retries up to 3 times with exponential backoff on 5xx/429.
  */
-async function sendViaResend(
-  payload: ResendEmailPayload,
-  apiKey: string
+async function sendViaBrevo(
+  payload: EmailPayload,
+  apiKey: string,
 ): Promise<{ success: boolean; id?: string; error?: string }> {
-  let lastError = '';
+  const { email: fromEmail, name: fromName } = getFromAddress();
+  const body = {
+    sender: { name: fromName, email: fromEmail },
+    to: [{ email: payload.to }],
+    subject: payload.subject,
+    htmlContent: payload.html,
+  };
 
+  let lastError = '';
   for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
     if (attempt > 0) {
       const delay = BASE_DELAY_MS * Math.pow(2, attempt - 1);
       await new Promise((resolve) => setTimeout(resolve, delay));
     }
+    try {
+      const response = await fetch(BREVO_API_URL, {
+        method: 'POST',
+        headers: {
+          'api-key': apiKey,
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: JSON.stringify(body),
+      });
 
+      if (response.ok) {
+        const data = (await response.json()) as BrevoSuccessResponse;
+        return { success: true, id: data.messageId };
+      }
+
+      // 4xx (except 429): permanent failure, don't retry
+      if (response.status >= 400 && response.status < 500 && response.status !== 429) {
+        const errorData = (await response.json().catch(() => null)) as BrevoErrorResponse | null;
+        lastError = errorData?.message ?? `HTTP ${response.status}`;
+        break;
+      }
+      // 5xx / 429: retry
+      const errorData = (await response.json().catch(() => null)) as BrevoErrorResponse | null;
+      lastError = errorData?.message ?? `HTTP ${response.status}`;
+    } catch (err) {
+      lastError = err instanceof Error ? err.message : String(err);
+    }
+  }
+  return { success: false, error: lastError };
+}
+
+/**
+ * Send an email via Resend API (legacy fallback).
+ */
+async function sendViaResend(
+  payload: EmailPayload,
+  apiKey: string,
+): Promise<{ success: boolean; id?: string; error?: string }> {
+  const { email: fromEmail, name: fromName } = getFromAddress();
+  const body = {
+    from: `${fromName} <${fromEmail}>`,
+    to: payload.to,
+    subject: payload.subject,
+    html: payload.html,
+  };
+
+  let lastError = '';
+  for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
+    if (attempt > 0) {
+      const delay = BASE_DELAY_MS * Math.pow(2, attempt - 1);
+      await new Promise((resolve) => setTimeout(resolve, delay));
+    }
     try {
       const response = await fetch(RESEND_API_URL, {
         method: 'POST',
@@ -123,30 +203,42 @@ async function sendViaResend(
           Authorization: `Bearer ${apiKey}`,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(payload),
+        body: JSON.stringify(body),
       });
 
       if (response.ok) {
         const data = (await response.json()) as ResendSuccessResponse;
         return { success: true, id: data.id };
       }
-
-      // Don't retry 4xx client errors (except 429 rate limit)
       if (response.status >= 400 && response.status < 500 && response.status !== 429) {
         const errorData = (await response.json().catch(() => null)) as ResendErrorResponse | null;
         lastError = errorData?.message ?? `HTTP ${response.status}`;
         break;
       }
-
-      // 5xx or 429 -- retry
       const errorData = (await response.json().catch(() => null)) as ResendErrorResponse | null;
       lastError = errorData?.message ?? `HTTP ${response.status}`;
     } catch (err) {
       lastError = err instanceof Error ? err.message : String(err);
     }
   }
-
   return { success: false, error: lastError };
+}
+
+/**
+ * Provider-router: prefers Brevo if BREVO_API_KEY is set, else falls back
+ * to Resend. This keeps existing artist-alert / cron paths working during
+ * the migration.
+ */
+async function sendEmail(
+  payload: EmailPayload,
+): Promise<{ success: boolean; id?: string; error?: string }> {
+  const brevoKey = process.env.BREVO_API_KEY;
+  if (brevoKey) return sendViaBrevo(payload, brevoKey);
+
+  const resendKey = process.env.RESEND_API_KEY;
+  if (resendKey) return sendViaResend(payload, resendKey);
+
+  return { success: false, error: 'No email provider configured (set BREVO_API_KEY or RESEND_API_KEY)' };
 }
 
 // ── Public API ──────────────────────────────────────────────────────────────
@@ -160,25 +252,14 @@ export async function sendArtistAlertEmail(
   to: string,
   data: ArtistAlertEmailData
 ): Promise<'sent' | 'failed'> {
-  const apiKey = process.env.RESEND_API_KEY;
-  if (!apiKey) {
-    console.error('[email] RESEND_API_KEY not configured');
-    return 'failed';
-  }
-
   const subject = `${data.artistName} tritt in ${data.location} auf!`;
   const html = renderArtistAlertEmail(data);
-
-  const result = await sendViaResend(
-    { from: FROM_ADDRESS, to, subject, html },
-    apiKey
-  );
+  const result = await sendEmail({ to, subject, html });
 
   if (!result.success) {
     console.error(`[email] Failed to send artist alert to ${to}:`, result.error);
     return 'failed';
   }
-
   return 'sent';
 }
 
@@ -192,28 +273,17 @@ export async function sendArtistReminderEmail(
   to: string,
   data: ArtistReminderEmailData
 ): Promise<'sent' | 'failed'> {
-  const apiKey = process.env.RESEND_API_KEY;
-  if (!apiKey) {
-    console.error('[email] RESEND_API_KEY not configured');
-    return 'failed';
-  }
-
   const subject =
     data.daysUntil === 1
       ? `Morgen: ${data.artistName} live!`
       : `In ${data.daysUntil} Tagen: ${data.artistName} live!`;
   const html = renderArtistReminderEmail(data);
-
-  const result = await sendViaResend(
-    { from: FROM_ADDRESS, to, subject, html },
-    apiKey
-  );
+  const result = await sendEmail({ to, subject, html });
 
   if (!result.success) {
     console.error(`[email] Failed to send reminder to ${to}:`, result.error);
     return 'failed';
   }
-
   return 'sent';
 }
 
@@ -229,9 +299,5 @@ export async function sendGenericEmail(
   subject: string,
   html: string,
 ): Promise<{ success: boolean; id?: string; error?: string }> {
-  const apiKey = process.env.RESEND_API_KEY;
-  if (!apiKey) {
-    return { success: false, error: 'RESEND_API_KEY not configured' };
-  }
-  return sendViaResend({ from: FROM_ADDRESS, to, subject, html }, apiKey);
+  return sendEmail({ to, subject, html });
 }

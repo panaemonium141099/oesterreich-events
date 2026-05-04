@@ -127,6 +127,14 @@ export default function CompleteProfilePage() {
 
     await refreshProfile();
     trackEvent('profile_completed', { method: 'complete-profile' });
+
+    // Fire-and-forget welcome email. Idempotent on the server side
+    // (checks profiles.welcome_email_sent_at). We don't await — the user
+    // shouldn't wait on Brevo's API for the redirect.
+    fetch('/api/auth/send-welcome', { method: 'POST' }).catch((err) => {
+      console.warn('[welcome] fire-and-forget failed:', err);
+    });
+
     router.replace(redirectTarget);
   };
 
