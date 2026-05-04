@@ -181,29 +181,17 @@ function MapPageInner() {
     const controller = new AbortController();
     abortRef.current = controller;
 
-    // ── Phase 0: Hydrate from session cache (instant) ─────────────────
-    // Renders the previously-loaded list immediately so toggling Karte/
-    // Liste, navigating away and back, or hitting "Entdecken" from the
-    // landing all skip the 6+ second batch-fetch when fresh data is in
-    // the cache. We still kick off a background refetch below to keep
-    // the data fresh — stale-while-revalidate.
     // Sync the parent-state Bundesland into filters for cache+API parity.
-    // Without this, switching from 'Steiermark' → 'all' would re-use the
-    // Steiermark-cached events.
     const filtersWithBl = { ...filters, bundesland: bundesland.id };
-    const cached = readCache(filtersWithBl);
+    // BYPASS cache temporarily — the empty-cache problem is causing 0
+    // event renders even after server returns valid data. Skip cache,
+    // always go to API. Re-enable once root cause is found.
+    const cached = null as null | { events: Event[]; total: number | null };
     if (cached) {
-      // CachedEvent is a strict subset of Event — missing fields (description,
-      // enrichment, etc.) are read by the detail modal which lazy-fetches via
-      // /api/events/[id]. List + map markers only need the slim fields.
       setAllEvents(cached.events as unknown as Event[]);
       setApiTotalCount(cached.total);
       setLoading(false);
     } else {
-      // Stale-while-revalidate: when transitioning between filter sets
-      // (e.g. clear search after 0 hits), keep the previous list visible
-      // until the new fetch returns instead of flashing an empty skeleton.
-      // Only blank on truly first-load (allEvents already empty).
       setLoading(true);
       setAllEvents((prev) => prev);          // no-op: keep stale list
       setApiTotalCount((prev) => prev);      // no-op: keep stale count
