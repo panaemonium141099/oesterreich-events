@@ -183,10 +183,7 @@ function MapPageInner() {
 
     // Sync the parent-state Bundesland into filters for cache+API parity.
     const filtersWithBl = { ...filters, bundesland: bundesland.id };
-    // BYPASS cache temporarily — the empty-cache problem is causing 0
-    // event renders even after server returns valid data. Skip cache,
-    // always go to API. Re-enable once root cause is found.
-    const cached = null as null | { events: Event[]; total: number | null };
+    const cached = readCache(filtersWithBl);
     if (cached) {
       setAllEvents(cached.events as unknown as Event[]);
       setApiTotalCount(cached.total);

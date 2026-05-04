@@ -284,14 +284,11 @@ export async function GET(request: NextRequest) {
 
     // Apply filters
     if (filters.bundesland && filters.bundesland !== 'all') {
-      // Bundesland values come in 4 spellings in the DB (legacy from
-      // different scrapers): "steiermark" / "Steiermark" / "stmk" / etc.
-      // bundeslandToId() in code normalises these client-side, but for
-      // the server query we use ilike to catch all variants without
-      // forcing a data-cleanup migration. Still hits the bundesland
-      // index because PostgREST's ilike compiles to LIKE with no leading
-      // wildcard.
-      query = query.ilike('bundesland', filters.bundesland);
+      // After the bundesland normalisation migration the DB only stores
+      // 9 canonical lowercase ids (no umlauts). Direct .eq match hits
+      // idx_events_bundesland_start_date directly: ~565ms vs 5.7s with
+      // ilike (which forced a heap re-filter on 67k rows).
+      query = query.eq('bundesland', filters.bundesland);
     }
 
     if (filters.district) {
@@ -726,7 +723,7 @@ export async function GET(request: NextRequest) {
 
       // Apply same content filters (bundesland, category, search) but NOT bbox
       if (filters.bundesland && filters.bundesland !== 'all') {
-        unmappedQuery = unmappedQuery.ilike('bundesland', filters.bundesland);
+        unmappedQuery = unmappedQuery.eq('bundesland', filters.bundesland);
       }
       if (filters.category) {
         unmappedQuery = unmappedQuery.eq('category', filters.category);
