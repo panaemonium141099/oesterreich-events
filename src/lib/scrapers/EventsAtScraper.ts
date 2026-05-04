@@ -1,216 +1,110 @@
+/**
+ * EventsAtScraper — events.at sitemap-driven Schema.org Event ingest.
+ *
+ * Replaces the previous Wien-only month-page scraper (capped at ~72 events)
+ * with a national sitemap walker. Source: `https://events.at/sitemaps_event.xml`
+ * — declared in events.at's robots.txt as the canonical event index. Each
+ * URL is a static event detail page with Schema.org `Event` JSON-LD which
+ * we parse via the existing connector.
+ *
+ * Coverage: previously 72 events Wien. With this scraper we expect 5k events
+ * per run (capped by MAX_EVENTS_PER_RUN), national coverage. The scrape job
+ * runs multiple times per day so unstable URLs (some events drop out of the
+ * sitemap when they pass) get refreshed continuously.
+ *
+ * Bot-protection note: events.at fronts Cloudflare and rejects the default
+ * Node fetch User-Agent with HTTP 403. We send a recent Chrome UA + the
+ * `de-AT` Accept-Language inherited from BaseScraper.
+ *
+ * Rate limit: events.at does NOT publish a crawl-delay; we default to 1.5s
+ * to be polite. BaseScraper's exponential retry handles transient 429/5xx.
+ */
 import * as cheerio from 'cheerio';
 import { BaseScraper } from './BaseScraper';
-import { categorizeEvent } from '../categorize';
-import { geocodeLocation } from '../geocoding';
+import { extractEventsFromHtml } from '../connectors/json-ld-connector';
 import type { ScrapedEvent } from '@/types/events';
-import { isEventType } from '../connectors/json-ld-connector';
 
-const MONTHS: Record<string, string> = {
-  'jan': '01', 'feb': '02', 'mar': '03', 'mär': '03', 'apr': '04',
-  'may': '05', 'mai': '05', 'jun': '06', 'jul': '07',
-  'aug': '08', 'sep': '09', 'oct': '10', 'okt': '10',
-  'nov': '11', 'dec': '12', 'dez': '12',
-};
+const EVENT_SITEMAP = 'https://events.at/sitemaps_event.xml';
+const CRAWL_DELAY_MS = 1500;
+const MAX_EVENTS_PER_RUN = 5000;
 
-/**
- * events.at Scraper
- * Scrapes Wien events from events.at — uses JSON-LD (Events Calendar plugin)
- * with HTML fallback. Covers multiple month pages.
- */
 export class EventsAtScraper extends BaseScraper {
   readonly name = 'events.at';
-  private readonly BASE = 'https://events.at';
-  private readonly MAX_MONTHS = 6;
+  protected userAgent =
+    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36';
+  protected delayMs = CRAWL_DELAY_MS;
 
   async scrape(): Promise<ScrapedEvent[]> {
-    this.log('Starte events.at Wien Scraping...');
-    const allEvents = new Map<string, ScrapedEvent>();
+    this.log('Starte events.at Sitemap-Scrape…');
 
-    // Scrape current month + next N months
-    const today = new Date();
-    for (let i = 0; i < this.MAX_MONTHS; i++) {
-      const d = new Date(today.getFullYear(), today.getMonth() + i, 1);
-      const monthStr = `${d.getFullYear()}-${(d.getMonth() + 1).toString().padStart(2, '0')}`;
-      const url = `${this.BASE}/fortgehen-wien?monat/${monthStr}/`;
+    // 1. Fetch the event sitemap. Either a sitemap-index (URLs end in .xml)
+    //    or a flat urlset of detail pages.
+    const xml = await this.fetchPage(EVENT_SITEMAP);
+    const urls = this.parseSitemapXml(xml);
 
+    let detailUrls: string[];
+    const isIndex = urls.length > 0 && urls.every((u) => u.endsWith('.xml'));
+    if (isIndex) {
+      this.log(`Sitemap-Index: ${urls.length} Sub-Sitemaps`);
+      detailUrls = [];
+      for (const sub of urls) {
+        try {
+          const subXml = await this.fetchPage(sub);
+          detailUrls.push(...this.parseSitemapXml(subXml));
+        } catch (err) {
+          this.log(`  Sub-Sitemap-Fehler ${sub}: ${err instanceof Error ? err.message : err}`);
+        }
+        await this.rateLimit();
+        if (detailUrls.length >= MAX_EVENTS_PER_RUN * 2) break;
+      }
+    } else {
+      detailUrls = urls;
+    }
+    this.log(`${detailUrls.length} Event-URLs zum Crawling`);
+
+    // 2. Iterate detail pages, extract JSON-LD per event
+    const events: ScrapedEvent[] = [];
+    const cap = Math.min(detailUrls.length, MAX_EVENTS_PER_RUN);
+    let fetchErrors = 0;
+    let parseEmpty = 0;
+
+    for (let i = 0; i < cap; i++) {
+      const url = detailUrls[i];
       try {
         const html = await this.fetchPage(url);
-
-        // Try JSON-LD first (best data quality)
-        const jsonLdEvents = this.parseJsonLd(html);
-        if (jsonLdEvents.length > 0) {
-          for (const ev of jsonLdEvents) allEvents.set(ev.source_id, ev);
-          this.log(`${monthStr}: ${jsonLdEvents.length} Events via JSON-LD`);
+        const result = extractEventsFromHtml(html, url, null);
+        if (result.events.length === 0) {
+          parseEmpty++;
         } else {
-          // Fallback to HTML parsing
-          const htmlEvents = this.parseHtml(html);
-          for (const ev of htmlEvents) allEvents.set(ev.source_id, ev);
-          this.log(`${monthStr}: ${htmlEvents.length} Events via HTML`);
-        }
-
-        await this.rateLimit();
-      } catch (err) {
-        this.log(`${monthStr} fehlgeschlagen: ${err instanceof Error ? err.message : err}`);
-      }
-    }
-
-    // Geocode unique venues
-    const venueCache = new Map<string, { lat: number; lon: number } | null>();
-    const events = Array.from(allEvents.values());
-
-    for (const ev of events) {
-      if (ev.latitude && ev.latitude !== 48.2082) continue;
-      const key = ev.location_name || '';
-      if (!key || key === 'Wien') continue;
-
-      if (!venueCache.has(key)) {
-        const coords = await geocodeLocation(`${key}, Wien`, 'Wien, Austria');
-        venueCache.set(key, coords ? { lat: coords.latitude, lon: coords.longitude } : null);
-        await this.sleep(1100);
-      }
-      const c = venueCache.get(key);
-      if (c) {
-        ev.latitude = c.lat;
-        ev.longitude = c.lon;
-      }
-    }
-
-    this.log(`${events.length} Events gescrapt, ${venueCache.size} Venues geocodiert`);
-    return events;
-  }
-
-  private parseJsonLd(html: string): ScrapedEvent[] {
-    const $ = cheerio.load(html);
-    const events: ScrapedEvent[] = [];
-
-    $('script[type="application/ld+json"]').each((_, el) => {
-      try {
-        const json = JSON.parse($(el).html() || '');
-        const items = Array.isArray(json) ? json : json['@graph'] || [json];
-
-        for (const item of items) {
-          if (!isEventType(item['@type'])) continue;
-
-          const name = String(item.name || '').trim();
-          if (!name) continue;
-
-          const startDate = String(item.startDate || '').slice(0, 19);
-          if (!startDate) continue;
-
-          const slug = name.toLowerCase().replace(/\W+/g, '-').slice(0, 60);
-
-          // Location from JSON-LD
-          const location = item.location;
-          let venueName: string | undefined;
-          let address: string | undefined;
-          if (location) {
-            venueName = location.name || undefined;
-            if (location.address) {
-              address = typeof location.address === 'string'
-                ? location.address
-                : location.address.streetAddress || undefined;
-            }
+          for (const e of result.events) {
+            e.source_name = this.name;
+            if (!e.source_url) e.source_url = url;
+            events.push(e);
           }
-
-          events.push({
-            source_id: `events-at-${slug}`,
-            source_name: this.name,
-            source_url: String(item.url || `${this.BASE}/event/${slug}`),
-            title: name,
-            description: item.description ? String(item.description).slice(0, 500) : undefined,
-            start_date: startDate,
-            end_date: item.endDate ? String(item.endDate).slice(0, 19) : undefined,
-            location_name: venueName || 'Wien',
-            address,
-            latitude: 48.2082,
-            longitude: 16.3738,
-            bundesland: 'wien',
-            category: categorizeEvent(name, item.description),
-            image_url: item.image ? (typeof item.image === 'string' ? item.image : String((item.image as Record<string, unknown>).url || '')) : undefined,
-          });
         }
-      } catch { /* skip invalid JSON-LD */ }
-    });
+      } catch (err) {
+        fetchErrors++;
+        if (fetchErrors <= 5 || (i + 1) % 100 === 0) {
+          this.log(`  [${i + 1}/${cap}] FEHLER ${url}: ${err instanceof Error ? err.message : err}`);
+        }
+      }
+      if ((i + 1) % 50 === 0) {
+        this.log(`  Fortschritt: ${i + 1}/${cap} (${events.length} Events)`);
+      }
+      await this.rateLimit();
+    }
 
+    this.log(`Fertig: ${events.length} Events von ${cap} URLs (${parseEmpty} ohne JSON-LD, ${fetchErrors} Fetch-Fehler)`);
     return events;
   }
 
-  private parseHtml(html: string): ScrapedEvent[] {
-    const $ = cheerio.load(html);
-    const events: ScrapedEvent[] = [];
-
-    $('a[href*="/event/"]').each((_, el) => {
-      try {
-        const $link = $(el);
-        const href = $link.attr('href') || '';
-
-        if (!href.match(/\/event\/[a-z0-9-]+\/?$/i)) return;
-        if (href.includes('/event/list') || href.includes('/event/search')) return;
-
-        const title = $link.text().trim();
-        if (!title || title.length < 3) return;
-
-        const slugMatch = href.match(/\/event\/([a-z0-9-]+)\/?$/i);
-        if (!slugMatch) return;
-        const slug = slugMatch[1];
-
-        const $parent = $link.parent();
-        const $grandparent = $parent.parent();
-        const contextText = $grandparent.text();
-
-        const startDate = this.parseDate(contextText);
-        if (!startDate) return;
-
-        let venue: string | undefined;
-        $grandparent.find('a[href*="/venue/"]').each((_, v) => {
-          if (!venue) venue = $(v).text().trim();
-        });
-
-        let imageUrl: string | undefined;
-        const $img = $grandparent.find('img').first();
-        const imgSrc = $img.attr('src') || $img.attr('data-src') || '';
-        if (imgSrc && imgSrc.startsWith('http')) imageUrl = imgSrc;
-
-        const sourceUrl = href.startsWith('http') ? href : `${this.BASE}${href}`;
-
-        events.push({
-          source_id: `events-at-${slug}`,
-          source_name: this.name,
-          source_url: sourceUrl,
-          title,
-          start_date: startDate,
-          location_name: venue || 'Wien',
-          latitude: 48.2082,
-          longitude: 16.3738,
-          category: categorizeEvent(title),
-          image_url: imageUrl,
-          bundesland: 'wien',
-        });
-      } catch { /* skip */ }
+  private parseSitemapXml(xml: string): string[] {
+    const $ = cheerio.load(xml, { xmlMode: true });
+    const urls: string[] = [];
+    $('loc').each((_, el) => {
+      const url = $(el).text().trim();
+      if (url) urls.push(url);
     });
-
-    return events;
-  }
-
-  private parseDate(text: string): string | null {
-    if (!text) return null;
-
-    // "27 Mar 2026" or "27 Mar - 28 Mar 2026"
-    const m = text.match(/(\d{1,2})\s+([A-Za-zä]+)\s+(\d{4})/);
-    if (m) {
-      const [, day, month, year] = m;
-      const mo = MONTHS[month.toLowerCase().slice(0, 3)];
-      if (!mo) return null;
-      return `${year}-${mo}-${day.padStart(2, '0')}`;
-    }
-
-    // "27.03.2026"
-    const n = text.match(/(\d{1,2})\.(\d{1,2})\.(\d{4})/);
-    if (n) {
-      const [, day, mo, year] = n;
-      return `${year}-${mo.padStart(2, '0')}-${day.padStart(2, '0')}`;
-    }
-
-    return null;
+    return urls;
   }
 }

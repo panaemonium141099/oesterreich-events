@@ -12,6 +12,7 @@ import { WienVADBScraper } from './WienVADBScraper';
 import { FalterScraper } from './FalterScraper';
 import { MeinBezirkScraper } from './MeinBezirkScraper';
 import { EventsAtScraper } from './EventsAtScraper';
+import { EventfinderAtScraper } from './EventfinderAtScraper';
 import { FeverUpScraper } from './FeverUpScraper';
 import { StadthalleScraper } from './StadthalleScraper';
 import { PraterWienScraper } from './PraterWienScraper';
@@ -172,6 +173,7 @@ export const scrapers: BaseScraper[] = [
   new VeranstaltungskalenderNetScraper(),
   // Übergreifend (Wien + AT)
   new EventsAtScraper(),
+  new EventfinderAtScraper(),
   new FeverUpScraper(),
   // Ganz Österreich
   new MeinBezirkScraper(),
