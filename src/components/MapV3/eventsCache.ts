@@ -21,7 +21,10 @@
  */
 import type { Event, EventFilters } from '@/types/events';
 
-const CACHE_VERSION = 'v2';
+// v3: bumped after the bundesland normalisation migration + server-side
+// BL filter rollout. Old v2 entries have wrong/stale events for
+// bundesland=steiermark etc. and would render "0 Events" on hydrate.
+const CACHE_VERSION = 'v3';
 const TTL_MS = 10 * 60 * 1000; // 10 minutes
 // 8000 slimmed events ≈ 3-4MB JSON. Stays well under the 5MB sessionStorage
 // quota Safari enforces, with headroom for the parser overhead. The list
