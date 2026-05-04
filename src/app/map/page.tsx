@@ -326,30 +326,29 @@ function MapPageInner() {
 
   const handleGemeindeSelect = (g: { name: string; bundeslandId: string; lat: number; lng: number }) => {
     const bl = BUNDESLAENDER.find((b) => b.id === g.bundeslandId);
-
-    // Geo-radius around the picked place. Bigger for the 9 capitals
-    // (multi-district cities sprawl past the city center) and smaller for
-    // ordinary gemeinden where 5 km already overshoots the village edge.
-    const CAPITAL_IDS = new Set(['wien', 'graz', 'linz', 'salzburg', 'innsbruck', 'klagenfurt', 'bregenz', 'eisenstadt', 'st-poelten']);
-    const radiusKm = CAPITAL_IDS.has(g.bundeslandId) && /^(wien|graz|linz|salzburg|innsbruck|klagenfurt|bregenz|eisenstadt|st\.?\s*p[oö]lten)$/i.test(g.name) ? 12 : 6;
-
-    // Convert km → degrees. 1° lat ≈ 111 km. 1° lng shrinks with cos(lat).
-    const dLat = radiusKm / 111;
-    const dLng = radiusKm / (111 * Math.cos((g.lat * Math.PI) / 180));
-    const bbox: [number, number, number, number] = [
-      g.lat - dLat,  // south
-      g.lng - dLng,  // west
-      g.lat + dLat,  // north
-      g.lng + dLng,  // east
-    ];
-
     if (bl) setBundesland(bl);
+
+    // Wien is the only Gemeinde that maps 1:1 to a Bundesland — picking
+    // it should behave exactly like the filter's "Bundesland: Wien"
+    // option (every Wien event, no geo trimming). Every other Gemeinde
+    // is a sub-area of its BL, so we add a bbox so the result stays
+    // about that place instead of bleeding to the whole BL.
+    const isCapitalEqualsBundesland = g.bundeslandId === 'wien';
+
+    let bbox: [number, number, number, number] | undefined;
+    if (!isCapitalEqualsBundesland) {
+      // Larger radius for the 8 remaining Bundesland-capitals (sprawl
+      // past the city core), tighter for ordinary villages.
+      const CAPITALS = /^(graz|linz|salzburg|innsbruck|klagenfurt|bregenz|eisenstadt|st\.?\s*p[oö]lten)$/i;
+      const radiusKm = CAPITALS.test(g.name) ? 10 : 5;
+      const dLat = radiusKm / 111;
+      const dLng = radiusKm / (111 * Math.cos((g.lat * Math.PI) / 180));
+      bbox = [g.lat - dLat, g.lng - dLng, g.lat + dLat, g.lng + dLng];
+    }
+
     setFilters((prev) => ({
       ...prev,
       district: undefined,
-      // Geo wins over free-text — clicking a Gemeinde is a location intent,
-      // not a substring search. Reset `search` so we don't accidentally
-      // ILIKE-filter Wien events that don't have "Wien" in their title.
       search: undefined,
       bbox,
     }));
