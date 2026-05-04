@@ -189,17 +189,21 @@ export function MapTopBar({
     }
   };
 
-  // Outside-click closes the dropdown without losing the typed query
+  // Outside-click closes the dropdown without losing the typed query.
+  // The dropdown lives in a React portal (outside inputWrapRef) so we
+  // additionally allow clicks on the portal itself; otherwise mousedown
+  // on a suggestion would close the dropdown before its click handler
+  // fires and onSelectGemeinde would never run.
   useEffect(() => {
     const onDoc = (e: MouseEvent) => {
-      if (
-        inputWrapRef.current &&
-        !inputWrapRef.current.contains(e.target as Node)
-      ) {
+      const target = e.target as HTMLElement;
+      const insideInput = inputWrapRef.current?.contains(target);
+      const insideDropdown = !!target.closest?.('[data-mv3-suggestions]');
+      if (!insideInput && !insideDropdown) {
         closeSuggestions();
         setSearchFocused(false);
       }
-      if (userMenuRef.current && !userMenuRef.current.contains(e.target as Node)) {
+      if (userMenuRef.current && !userMenuRef.current.contains(target)) {
         setUserMenuOpen(false);
       }
     };
@@ -550,6 +554,7 @@ function SuggestionsDropdown({
 
   return createPortal(
     <div
+      data-mv3-suggestions
       style={{
         position: 'fixed',
         top: pos.top,
