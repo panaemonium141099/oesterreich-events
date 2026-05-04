@@ -876,6 +876,16 @@ export class GemeindeRegistryScraper extends BaseScraper {
   // ── Strategy: Generic date pattern extraction ───────────────────
 
   private parseGenericDates(html: string, entry: GemeindeRegistryEntry): ScrapedEvent[] {
+    // OPPORTUNISTIC JSON-LD CHECK: 626 Gemeinden are flagged `generic-dates`
+    // because they were hand-classified before anyone noticed the page also
+    // ships Schema.org Event markup. Schema.org gives us clean
+    // (start_date, location, image, organizer) — much higher quality than
+    // grepping date-strings out of <article> blocks. Try it first; if the
+    // page emits nothing parseable, fall through to the existing date-
+    // pattern extractor.
+    const jsonLdEvents = this.parseJsonLd(html, entry);
+    if (jsonLdEvents.length > 0) return jsonLdEvents;
+
     const $ = cheerio.load(html);
     const events: ScrapedEvent[] = [];
     const seen = new Set<string>();
