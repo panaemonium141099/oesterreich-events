@@ -153,7 +153,11 @@ function MapPageInner() {
   // ── Data fetch (progressive batches, same shape as the old page) ─────
   const buildParams = useCallback(() => {
     const params = new URLSearchParams();
-    params.set('bundesland', 'all'); // client-side BL filter; comment in old code applied here
+    // Server-side bundesland filter when one is picked, so we don't have
+    // to scroll through the entire 100k+ event set client-side just to
+    // find the 6553 Steiermark events. Falls back to 'all' so the API
+    // bypasses its built-in bundesland CHECK and returns everything.
+    params.set('bundesland', bundesland.id === 'all' ? 'all' : bundesland.id);
     if (filters.tags && filters.tags.length > 0) params.set('tags', filters.tags.join(','));
     else if (filters.category) params.set('category', filters.category);
     if (filters.dateFrom) params.set('dateFrom', filters.dateFrom);
@@ -170,7 +174,7 @@ function MapPageInner() {
     if (filters.familyFriendly) params.set('familyFriendly', 'true');
     if (filters.priceTier) params.set('priceTier', filters.priceTier);
     return params;
-  }, [filters]);
+  }, [filters, bundesland.id]);
 
   const fetchEventsProgressive = useCallback(async () => {
     if (abortRef.current) abortRef.current.abort();
@@ -183,7 +187,11 @@ function MapPageInner() {
     // landing all skip the 6+ second batch-fetch when fresh data is in
     // the cache. We still kick off a background refetch below to keep
     // the data fresh — stale-while-revalidate.
-    const cached = readCache(filters);
+    // Sync the parent-state Bundesland into filters for cache+API parity.
+    // Without this, switching from 'Steiermark' → 'all' would re-use the
+    // Steiermark-cached events.
+    const filtersWithBl = { ...filters, bundesland: bundesland.id };
+    const cached = readCache(filtersWithBl);
     if (cached) {
       // CachedEvent is a strict subset of Event — missing fields (description,
       // enrichment, etc.) are read by the detail modal which lazy-fetches via
@@ -227,7 +235,7 @@ function MapPageInner() {
       // navigate-away-and-back hits the cache for the first 10k events
       // instead of restarting the 30s+ batch loop. The background loop
       // below will overwrite with the full set when it completes.
-      writeCache(filters, firstEvents, finalTotal);
+      writeCache(filtersWithBl, firstEvents, finalTotal);
 
       if (!firstData.hasMore && firstEvents.length < BATCH_SIZE) {
         return;
@@ -267,7 +275,7 @@ function MapPageInner() {
 
       // Persist the full freshly-loaded set so the next navigation hits
       // the cache instead of waiting on the network.
-      writeCache(filters, acc, finalTotal);
+      writeCache(filtersWithBl, acc, finalTotal);
     } catch (err) {
       if ((err as Error).name !== 'AbortError') {
         if (process.env.NODE_ENV === 'development') console.error('Fehler beim Laden der Events:', err);
@@ -330,21 +338,30 @@ function MapPageInner() {
     const bl = BUNDESLAENDER.find((b) => b.id === g.bundeslandId);
     if (bl) setBundesland(bl);
 
-    // Wien is the only Gemeinde that maps 1:1 to a Bundesland → just
-    // bundesland=wien gives all 2351 events without any extra filtering.
-    // For every other Gemeinde we use the server-side place-scope filter
-    // (postal_code OR location_name ILIKE OR address ILIKE) — that
-    // matches events that actually belong to that place, no geo
-    // approximation needed.
-    const isCapitalEqualsBundesland = g.bundeslandId === 'wien';
+    // Wien stays a special case: city = Bundesland 1:1, so bundesland=wien
+    // alone gives every Wien event (2351). No bbox/place filter needed.
+    const isWien = g.bundeslandId === 'wien';
+
+    let bbox: [number, number, number, number] | undefined;
+    if (!isWien) {
+      // Geo-bbox is the most reliable scope signal — every event has lat/lng,
+      // while location_name/postal_code/district are inconsistent (events
+      // tagged with district="Graz-Umgebung" but location="ppc" still belong
+      // to Graz). Radius matches what the user sees on the map clusters.
+      const CAPITALS = /^(graz|linz|salzburg|innsbruck|klagenfurt|bregenz|eisenstadt|st\.?\s*p[oö]lten)$/i;
+      const radiusKm = CAPITALS.test(g.name) ? 12 : 6;
+      const dLat = radiusKm / 111;
+      const dLng = radiusKm / (111 * Math.cos((g.lat * Math.PI) / 180));
+      bbox = [g.lat - dLat, g.lng - dLng, g.lat + dLat, g.lng + dLng];
+    }
 
     setFilters((prev) => ({
       ...prev,
       district: undefined,
       search: undefined,
-      bbox: undefined,
-      placeName: isCapitalEqualsBundesland ? undefined : g.name,
-      placePostalCode: isCapitalEqualsBundesland ? undefined : g.postalCode,
+      bbox,
+      placeName: undefined,        // pure geo for non-Wien gemeinden
+      placePostalCode: undefined,
     }));
 
     if (view === 'map') {

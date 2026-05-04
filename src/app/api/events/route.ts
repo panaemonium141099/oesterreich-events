@@ -284,7 +284,14 @@ export async function GET(request: NextRequest) {
 
     // Apply filters
     if (filters.bundesland && filters.bundesland !== 'all') {
-      query = query.eq('bundesland', filters.bundesland);
+      // Bundesland values come in 4 spellings in the DB (legacy from
+      // different scrapers): "steiermark" / "Steiermark" / "stmk" / etc.
+      // bundeslandToId() in code normalises these client-side, but for
+      // the server query we use ilike to catch all variants without
+      // forcing a data-cleanup migration. Still hits the bundesland
+      // index because PostgREST's ilike compiles to LIKE with no leading
+      // wildcard.
+      query = query.ilike('bundesland', filters.bundesland);
     }
 
     if (filters.district) {
@@ -719,7 +726,7 @@ export async function GET(request: NextRequest) {
 
       // Apply same content filters (bundesland, category, search) but NOT bbox
       if (filters.bundesland && filters.bundesland !== 'all') {
-        unmappedQuery = unmappedQuery.eq('bundesland', filters.bundesland);
+        unmappedQuery = unmappedQuery.ilike('bundesland', filters.bundesland);
       }
       if (filters.category) {
         unmappedQuery = unmappedQuery.eq('category', filters.category);

@@ -103,6 +103,7 @@ function filterKey(filters: EventFilters): string {
     bb: filters.bbox?.map((n) => n.toFixed(3)).join(',') ?? null,
     pn: filters.placeName ?? null,
     pp: filters.placePostalCode ?? null,
+    bl: filters.bundesland ?? null,
     en: filters.eveningOnly ?? null,
     src: filters.sourceName ?? null,
     sf: filters.studentFriendly ?? null,
