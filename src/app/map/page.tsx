@@ -188,17 +188,33 @@ function MapPageInner() {
     // Sync the parent-state Bundesland into filters for cache+API parity.
     const filtersWithBl = { ...filters, bundesland: bundesland.id };
     const cachedRaw = readCache(filtersWithBl);
-    // Don't hydrate from a stale 0-event cache entry — that flashes
-    // "Keine Events gefunden" while the real fetch is still in flight.
     const cached = cachedRaw && cachedRaw.events.length > 0 ? cachedRaw : null;
+
+    // Hard reset on cache miss — the previous "stale-while-revalidate"
+    // approach left allEvents from the OLD bundesland in state, which
+    // when combined with an aborted-mid-flight new fetch could leave
+    // the page on "Keine Events gefunden" indefinitely. Clear instead
+    // so the skeleton renders cleanly until the new fetch resolves.
     if (cached) {
       setAllEvents(cached.events as unknown as Event[]);
       setApiTotalCount(cached.total);
       setLoading(false);
     } else {
       setLoading(true);
-      setAllEvents((prev) => prev);          // no-op: keep stale list
-      setApiTotalCount((prev) => prev);      // no-op: keep stale count
+      setAllEvents([]);
+      setApiTotalCount(null);
+    }
+
+    // Expose state to the console for live debugging when "0 Events"
+    // shows up unexpectedly. Type window.__lasstreffenDebug in console.
+    if (typeof window !== 'undefined') {
+      (window as unknown as { __lasstreffenDebug?: unknown }).__lasstreffenDebug = {
+        bundesland: bundesland.id,
+        filters,
+        filtersWithBl,
+        cacheHit: !!cached,
+        controllerId: controller,
+      };
     }
 
     const BATCH_SIZE = 10000;
