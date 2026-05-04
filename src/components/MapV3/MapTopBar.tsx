@@ -149,8 +149,12 @@ export function MapTopBar({
 
   const handleSelectGemeinde = (g: Gemeinde) => {
     closeSuggestions();
-    setSearchValue(g.n);
-    onFiltersChange({ ...filters, search: g.n });
+    setSearchValue(g.n); // visual indicator only — actual filter is geo
+    // Note: we DO NOT set filters.search here. The parent's
+    // onGemeindeSelect computes a bbox around (lat,lng) and applies it
+    // as the geo filter. ILIKE-substring on a city name would silently
+    // drop ~half of that city's events (e.g. "Konzert im Stadtsaal"
+    // doesn't contain "Wien" but is in Wien).
     onGemeindeSelect?.({ name: g.n, bundeslandId: g.i, lat: g.lat, lng: g.lng });
     trackEvent('search', { query: g.n, kind: 'gemeinde' });
   };
@@ -289,7 +293,10 @@ export function MapTopBar({
               <button
                 onClick={() => {
                   setSearchValue('');
-                  onFiltersChange({ ...filters, search: undefined });
+                  // Clear free-text search AND any geo-radius set by a
+                  // previous gemeinde-suggestion click — both are
+                  // "location-scope" filters that should reset together.
+                  onFiltersChange({ ...filters, search: undefined, bbox: undefined });
                   inputRef.current?.focus();
                 }}
                 aria-label="Suche löschen"

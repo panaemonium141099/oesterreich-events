@@ -161,6 +161,7 @@ function MapPageInner() {
     if (filters.priceMin !== undefined) params.set('priceMin', String(filters.priceMin));
     if (filters.priceMax !== undefined) params.set('priceMax', String(filters.priceMax));
     if (filters.search) params.set('search', filters.search);
+    if (filters.bbox) params.set('bbox', filters.bbox.join(','));
     if (filters.eveningOnly) params.set('eveningOnly', 'true');
     if (filters.sourceName) params.set('sourceName', filters.sourceName);
     if (filters.studentFriendly) params.set('studentFriendly', 'true');
@@ -325,10 +326,34 @@ function MapPageInner() {
 
   const handleGemeindeSelect = (g: { name: string; bundeslandId: string; lat: number; lng: number }) => {
     const bl = BUNDESLAENDER.find((b) => b.id === g.bundeslandId);
-    if (bl) {
-      setBundesland(bl);
-      setFilters((prev) => ({ ...prev, district: undefined, search: g.name }));
-    }
+
+    // Geo-radius around the picked place. Bigger for the 9 capitals
+    // (multi-district cities sprawl past the city center) and smaller for
+    // ordinary gemeinden where 5 km already overshoots the village edge.
+    const CAPITAL_IDS = new Set(['wien', 'graz', 'linz', 'salzburg', 'innsbruck', 'klagenfurt', 'bregenz', 'eisenstadt', 'st-poelten']);
+    const radiusKm = CAPITAL_IDS.has(g.bundeslandId) && /^(wien|graz|linz|salzburg|innsbruck|klagenfurt|bregenz|eisenstadt|st\.?\s*p[oö]lten)$/i.test(g.name) ? 12 : 6;
+
+    // Convert km → degrees. 1° lat ≈ 111 km. 1° lng shrinks with cos(lat).
+    const dLat = radiusKm / 111;
+    const dLng = radiusKm / (111 * Math.cos((g.lat * Math.PI) / 180));
+    const bbox: [number, number, number, number] = [
+      g.lat - dLat,  // south
+      g.lng - dLng,  // west
+      g.lat + dLat,  // north
+      g.lng + dLng,  // east
+    ];
+
+    if (bl) setBundesland(bl);
+    setFilters((prev) => ({
+      ...prev,
+      district: undefined,
+      // Geo wins over free-text — clicking a Gemeinde is a location intent,
+      // not a substring search. Reset `search` so we don't accidentally
+      // ILIKE-filter Wien events that don't have "Wien" in their title.
+      search: undefined,
+      bbox,
+    }));
+
     if (view === 'map') {
       setTimeout(() => setDynamicFlyTo({ lat: g.lat, lng: g.lng, zoom: 13 }), 300);
     }
