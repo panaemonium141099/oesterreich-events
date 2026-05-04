@@ -200,6 +200,12 @@ async function main() {
   const targetPlzList = plzFilter ? [plzFilter] : Array.from(TOURISM_OFFICE_PLZS);
   filter.in('postal_code', targetPlzList);
 
+  // Skip rows already verified-as-venue from a prior run. Without this
+  // filter, chunked re-runs waste time re-fetching JSON-LD for rows the
+  // previous chunk already wrote `geocoding_source = 'json-ld-venue'` on
+  // (they'd come back as "unchanged" but still spend the network round-trip).
+  filter.or('geocoding_source.is.null,geocoding_source.neq.json-ld-venue');
+
   if (limit) filter.limit(limit);
 
   const { data: rows, error } = await filter;

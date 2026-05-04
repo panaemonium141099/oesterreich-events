@@ -460,6 +460,26 @@ export function MapTopBar({
                       {it.label}
                     </Link>
                   ))}
+                  {/* Admin/God-only entry — restored from the legacy Header
+                      so privileged accounts can still reach the admin panel
+                      from the topbar menu. Hidden from regular users. */}
+                  {(profile?.role === 'god' || profile?.role === 'admin') && (
+                    <Link
+                      href="/admin"
+                      onClick={() => setUserMenuOpen(false)}
+                      style={{
+                        display: 'block',
+                        padding: '10px 14px',
+                        fontSize: 13,
+                        color: T.ink,
+                        borderTop: `1px solid ${T.border}`,
+                        fontWeight: 600,
+                      }}
+                      className="hover:bg-[#f7f7f8]"
+                    >
+                      Admin Panel
+                    </Link>
+                  )}
                   <button
                     onClick={() => {
                       signOut();

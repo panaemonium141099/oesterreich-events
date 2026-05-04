@@ -36,7 +36,7 @@ import { readCache, writeCache } from '@/components/MapV3/eventsCache';
 import { EventDetail } from '@/components/Events/EventDetail';
 import { MapLoadingOverlay } from '@/components/Map/MapLoadingOverlay';
 import { LocationBanner } from '@/components/Map/LocationBanner';
-import { BUNDESLAENDER, type Bundesland } from '@/lib/bundeslaender';
+import { BUNDESLAENDER, bundeslandToId, type Bundesland } from '@/lib/bundeslaender';
 import { trackEvent } from '@/lib/analytics';
 import { useAuth } from '@/lib/supabase/auth-context';
 import { getStoredLocation, storeLocation } from '@/lib/geolocation';
@@ -278,11 +278,14 @@ function MapPageInner() {
   // ── Client-side filtering pipeline ───────────────────────────────────
   const bundeslandEvents = useMemo(() => {
     if (bundesland.id === 'all') return allEvents;
-    const target = bundesland.id.toLowerCase();
-    return allEvents.filter((e) => {
-      const bl = (e.bundesland || '').toLowerCase();
-      return bl === target || bl.includes(target) || target.includes(bl);
-    });
+    // The DB has the same Bundesland written 4+ ways ("Niederösterreich" /
+    // "niederoesterreich" / "Niederoesterreich" / "noe"). The previous
+    // lowercase-includes filter missed every umlaut-vs-oe variant — half
+    // the events disappeared when the user picked NÖ. Route everything
+    // through bundeslandToId() which collapses all spellings to the
+    // canonical id used by BUNDESLAENDER.
+    const target = bundesland.id;
+    return allEvents.filter((e) => bundeslandToId(e.bundesland) === target);
   }, [allEvents, bundesland]);
 
   const dedupedEvents = useMemo(() => {

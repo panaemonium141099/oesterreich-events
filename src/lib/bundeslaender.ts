@@ -148,3 +148,61 @@ export const BUNDESLAENDER: Bundesland[] = [
 export function getBundeslandById(id: string): Bundesland | undefined {
   return BUNDESLAENDER.find(b => b.id === id);
 }
+
+/**
+ * Map any bundesland string (any case, with or without umlauts/abbreviations)
+ * to the canonical id used in `BUNDESLAENDER` (`'niederoesterreich'`,
+ * `'wien'`, …) or `null` if it can't be resolved.
+ *
+ * Why this exists: scrapers write `bundesland` in many shapes — see
+ * `events.bundesland` distribution where the same Bundesland appears as
+ * "Niederösterreich" (23k), "niederoesterreich" (18k), "Niederoesterreich"
+ * (3) and "ooe" (52). Without a normalizer, the client-side map filter
+ * compared lowercase strings with `===` / `includes`, so "niederösterreich"
+ * vs "niederoesterreich" never matched and ~half the events disappeared
+ * when the user picked NÖ. Same for Kärnten ("kärnten" vs "kaernten").
+ *
+ * Resolution order matches slugify.ts's `normalizeBundesland`:
+ *   1. Shortcodes (bgld, ktn, noe, ooe, sbg, stmk, t, vbg, w)
+ *   2. Strip diacritics + collapse `ae|oe|ue` → `a|o|u`, drop non-letters,
+ *      then look up the canonical key.
+ */
+export function bundeslandToId(raw: string | null | undefined): Bundesland['id'] | null {
+  if (!raw) return null;
+  const lc = raw.trim().toLowerCase();
+  if (!lc) return null;
+
+  const shortcodes: Record<string, Bundesland['id']> = {
+    bgld: 'burgenland',
+    ktn: 'kaernten',
+    noe: 'niederoesterreich',
+    ooe: 'oberoesterreich',
+    sbg: 'salzburg',
+    stmk: 'steiermark',
+    t: 'tirol',
+    vbg: 'vorarlberg',
+    w: 'wien',
+  };
+  if (shortcodes[lc]) return shortcodes[lc];
+
+  const key = lc
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '')
+    .replace(/ae/g, 'a')
+    .replace(/oe/g, 'o')
+    .replace(/ue/g, 'u')
+    .replace(/[^a-z]/g, '');
+
+  const map: Record<string, Bundesland['id']> = {
+    burgenland: 'burgenland',
+    karnten: 'kaernten',
+    niederosterreich: 'niederoesterreich',
+    oberosterreich: 'oberoesterreich',
+    salzburg: 'salzburg',
+    steiermark: 'steiermark',
+    tirol: 'tirol',
+    vorarlberg: 'vorarlberg',
+    wien: 'wien',
+  };
+  return map[key] ?? null;
+}
