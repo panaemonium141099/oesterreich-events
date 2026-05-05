@@ -181,8 +181,14 @@ export function EventListView({
               }}
               className="md:!text-[26px]"
             >
-              {totalCount != null && totalCount > visible.length
-                ? `${totalCount.toLocaleString('de-AT')} Events`
+              {loading && events.length === 0
+                ? 'Suche läuft …'
+                : totalCount != null && totalCount > events.length
+                // API knows of more matches than the client has after
+                // dedup or progressive loading — show both so the user
+                // sees that 14 duplicates were collapsed (or that a few
+                // batches are still streaming in the background).
+                ? `${events.length.toLocaleString('de-AT')} von ${totalCount.toLocaleString('de-AT')} Events`
                 : `${events.length.toLocaleString('de-AT')} Events`}
               {scopeLabel ? ` · ${scopeLabel}` : ''}
             </h1>
