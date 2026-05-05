@@ -103,6 +103,11 @@ function MapPageInner() {
   const initialDistricts = initialDistrictsParam
     ? initialDistrictsParam.split(',').map((s) => s.trim()).filter(Boolean)
     : null;
+  const initialSortParam = searchParams.get('sort');
+  const initialSort: 'date' | 'score' | 'relevance' | undefined =
+    initialSortParam === 'score' || initialSortParam === 'relevance' || initialSortParam === 'date'
+      ? initialSortParam
+      : undefined;
   const initialLat = searchParams.get('lat') ? parseFloat(searchParams.get('lat')!) : null;
   const initialLng = searchParams.get('lng') ? parseFloat(searchParams.get('lng')!) : null;
   const initialZoom = searchParams.get('zoom') ? parseFloat(searchParams.get('zoom')!) : null;
@@ -154,6 +159,7 @@ function MapPageInner() {
     ...(initialCategory ? { category: initialCategory } : {}),
     ...(initialCategories ? { categories: initialCategories } : {}),
     ...(initialDistricts ? { districts: initialDistricts } : {}),
+    ...(initialSort ? { sort: initialSort } : {}),
   });
 
   const [allEvents, setAllEvents] = useState<Event[]>([]);
@@ -174,12 +180,27 @@ function MapPageInner() {
     trackEvent('page_view', { path: '/map', view });
   }, [view]);
 
-  // Persist `?view=` to URL on toggle so reloads / back-button restore it
+  // Toggle Karte ↔ Liste — reset all filters on every switch so a
+  // sticky narrow scope from the previous view doesn't carry over.
+  // The URL is also rewritten to just `?view=…` (no stale params).
+  // skipFirstViewToggle prevents this from clobbering the URL-hydrated
+  // initial state on mount.
+  const skipFirstViewToggle = useRef(true);
   useEffect(() => {
-    const params = new URLSearchParams(Array.from(searchParams.entries()));
-    if (view === 'list') params.set('view', 'list');
-    else params.delete('view');
-    const next = `/map${params.toString() ? `?${params.toString()}` : ''}`;
+    if (skipFirstViewToggle.current) {
+      skipFirstViewToggle.current = false;
+      // Still write the view param so the URL reflects mount-time choice.
+      const params = new URLSearchParams(Array.from(searchParams.entries()));
+      if (view === 'list') params.set('view', 'list');
+      else params.delete('view');
+      const next = `/map${params.toString() ? `?${params.toString()}` : ''}`;
+      router.replace(next, { scroll: false });
+      return;
+    }
+    setBundeslandIds(['all']);
+    setFilters({});
+    setDynamicFlyTo(null);
+    const next = view === 'list' ? '/map?view=list' : '/map';
     router.replace(next, { scroll: false });
   // searchParams excluded — we read it once on mount; further URL changes
   // shouldn't re-run this effect or we'd thrash the history stack.
@@ -216,6 +237,9 @@ function MapPageInner() {
     if (filters.familyFriendly) params.set('familyFriendly', 'true');
     if (filters.priceTiers && filters.priceTiers.length > 0) params.set('priceTiers', filters.priceTiers.join(','));
     else if (filters.priceTier) params.set('priceTier', filters.priceTier);
+    // Sort signal — keyword search benefits from sort=relevance so the
+    // best title/location matches surface first instead of by date.
+    if (filters.sort) params.set('sort', filters.sort);
     return params;
   }, [filters, bundeslandIds]);
 
@@ -572,7 +596,7 @@ function MapPageInner() {
         {view === 'map' && (
           <div className="absolute inset-0 mv3-fade-in">
               <EventMap
-                events={bundeslandEvents}
+                events={finalEvents}
                 selectedEvent={selectedEvent}
                 hoveredEventId={hoveredEventId}
                 onSelectEvent={setSelectedEvent}
