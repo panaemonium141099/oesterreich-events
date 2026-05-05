@@ -39,6 +39,23 @@ export type ResolvedIntent =
 
 const STRIP_SUFFIX = /\s*\((stadt|land)\)\s*$/i;
 
+/**
+ * Collapse the equivalent spellings of "Sankt" / "St." / "St" so the
+ * user can type any of them and still hit the canonical name. Matches
+ * apply to both the user query and the district name before comparison.
+ *
+ * "St. Pölten" / "Sankt Pölten" / "st pölten" / "st.pölten" → "st polten"
+ * "Sankt Johann im Pongau" / "st johann im pongau" → "st johann im pongau"
+ */
+function normalizeNameSpelling(s: string): string {
+  return s
+    .toLowerCase()
+    .replace(/\bsankt\b/g, 'st')
+    .replace(/\bst\.\s*/g, 'st ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
 export function resolveSearchIntent(
   raw: string,
   gemeinden: ReadonlyArray<GemeindeMin>,
@@ -61,13 +78,18 @@ export function resolveSearchIntent(
   const blByAlias = !blByExact ? bundeslandToId(q) : null;
   const blMatch = blByExact ?? (blByAlias ? BUNDESLAENDER.find((b) => b.id === blByAlias) : undefined);
 
-  // District match — suffix-stripped equality, Stadt preferred.
+  // District match — case-insensitive, suffix-stripped, with St./Sankt
+  // spelling normalisation so "st pölten", "St. Pölten", "Sankt Pölten"
+  // all hit the canonical "St. Pölten (Stadt)" district. Stadt preferred.
+  const qNorm = normalizeNameSpelling(q);
   let bestDistrict: { name: string; bl: BundeslandId; isStadt: boolean } | null = null;
   for (const [bl, ds] of Object.entries(DISTRICTS_BY_BUNDESLAND)) {
     for (const d of ds) {
       const lc = d.name.toLowerCase();
       const bare = lc.replace(STRIP_SUFFIX, '').trim();
-      if (lc === q || bare === q) {
+      const lcNorm = normalizeNameSpelling(lc);
+      const bareNorm = normalizeNameSpelling(bare);
+      if (lc === q || bare === q || lcNorm === qNorm || bareNorm === qNorm) {
         const isStadt = /\(stadt\)$/i.test(d.name);
         if (!bestDistrict || (isStadt && !bestDistrict.isStadt)) {
           bestDistrict = { name: d.name, bl: bl as BundeslandId, isStadt };

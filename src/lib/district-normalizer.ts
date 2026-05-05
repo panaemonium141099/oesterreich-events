@@ -131,17 +131,39 @@ const ALIAS_MAP: Record<BundeslandId, Record<string, string>> = {
  * without the "(stadt)" / "-land" suffix and the PLZ falls outside the
  * Stadt-PLZ block, we route it to the surrounding Land-Bezirk instead of
  * letting the alias map promote it to "(stadt)".
+ *
+ * Each entry now also lists the canonical Stadt-district name so the
+ * reverse rule (LAND_TO_STADT) can use the same source of truth.
  */
-const STADT_PLZ: Record<string, { stadtPLZ: ReadonlySet<string>; landDistrict: string; bl: BundeslandId }> = {
-  'graz': { stadtPLZ: new Set(['8010','8011','8013','8020','8021','8036','8041','8042','8043','8044','8045','8046','8047','8051','8052','8053','8054','8055','8063','8070','8071','8072','8073','8074','8075','8076','8077']), landDistrict: 'graz-umgebung', bl: 'steiermark' },
-  'linz': { stadtPLZ: new Set(['4010','4020','4030','4040','4050']), landDistrict: 'linz-land', bl: 'oberoesterreich' },
-  'statutarstadt': { stadtPLZ: new Set(['4010','4020','4030','4040','4050']), landDistrict: 'linz-land', bl: 'oberoesterreich' },
-  'klagenfurt': { stadtPLZ: new Set(['9010','9020','9061','9062','9063']), landDistrict: 'klagenfurt-land', bl: 'kaernten' },
-  'villach': { stadtPLZ: new Set(['9500','9504','9505','9506','9507','9508']), landDistrict: 'villach-land', bl: 'kaernten' },
-  'innsbruck': { stadtPLZ: new Set(['6010','6015','6020']), landDistrict: 'innsbruck-land', bl: 'tirol' },
-  'wiener-neustadt': { stadtPLZ: new Set(['2700']), landDistrict: 'wiener neustadt (land)', bl: 'niederoesterreich' },
-  'st-poelten': { stadtPLZ: new Set(['3100']), landDistrict: 'st. pölten (land)', bl: 'niederoesterreich' },
+const STADT_PLZ: Record<string, { stadtPLZ: ReadonlySet<string>; stadtDistrict: string; landDistrict: string; bl: BundeslandId }> = {
+  'graz':            { stadtPLZ: new Set(['8010','8011','8013','8020','8021','8036','8041','8042','8043','8044','8045','8046','8047','8051','8052','8053','8054','8055','8063','8070','8071','8072','8073','8074','8075','8076','8077']), stadtDistrict: 'graz (stadt)', landDistrict: 'graz-umgebung', bl: 'steiermark' },
+  'linz':            { stadtPLZ: new Set(['4010','4020','4030','4040','4050']), stadtDistrict: 'linz (stadt)', landDistrict: 'linz-land', bl: 'oberoesterreich' },
+  'statutarstadt':   { stadtPLZ: new Set(['4010','4020','4030','4040','4050']), stadtDistrict: 'linz (stadt)', landDistrict: 'linz-land', bl: 'oberoesterreich' },
+  'steyr':           { stadtPLZ: new Set(['4400','4402']), stadtDistrict: 'steyr (stadt)', landDistrict: 'steyr-land', bl: 'oberoesterreich' },
+  'wels':            { stadtPLZ: new Set(['4600']), stadtDistrict: 'wels (stadt)', landDistrict: 'wels-land', bl: 'oberoesterreich' },
+  'salzburg':        { stadtPLZ: new Set(['5020','5023','5026']), stadtDistrict: 'salzburg (stadt)', landDistrict: 'salzburg-umgebung', bl: 'salzburg' },
+  'klagenfurt':      { stadtPLZ: new Set(['9010','9020','9061','9062','9063']), stadtDistrict: 'klagenfurt (stadt)', landDistrict: 'klagenfurt-land', bl: 'kaernten' },
+  'villach':         { stadtPLZ: new Set(['9500','9504','9505','9506','9507','9508']), stadtDistrict: 'villach (stadt)', landDistrict: 'villach-land', bl: 'kaernten' },
+  'innsbruck':       { stadtPLZ: new Set(['6010','6015','6020']), stadtDistrict: 'innsbruck (stadt)', landDistrict: 'innsbruck-land', bl: 'tirol' },
+  'wiener-neustadt': { stadtPLZ: new Set(['2700']), stadtDistrict: 'wiener neustadt (stadt)', landDistrict: 'wiener neustadt (land)', bl: 'niederoesterreich' },
+  'st-poelten':      { stadtPLZ: new Set(['3100','3104','3107','3109']), stadtDistrict: 'st. pölten (stadt)', landDistrict: 'st. pölten (land)', bl: 'niederoesterreich' },
+  'krems':           { stadtPLZ: new Set(['3500']), stadtDistrict: 'krems (stadt)', landDistrict: 'krems (land)', bl: 'niederoesterreich' },
 };
+
+/**
+ * Reverse lookup — when the scraper tags an event as the surrounding
+ * Land-Bezirk but the postal code falls inside the Statutarstadt block,
+ * promote it to the Stadt-Bezirk instead. Without this, scrapes from
+ * tourism feeds that lump everything under "graz-umgebung" leak ~1.4k
+ * Graz-city events into the Umgebung filter (and out of Graz-Stadt).
+ */
+const LAND_TO_STADT: Record<string, { stadtPLZ: ReadonlySet<string>; stadtDistrict: string; bl: BundeslandId }> = (() => {
+  const out: Record<string, { stadtPLZ: ReadonlySet<string>; stadtDistrict: string; bl: BundeslandId }> = {};
+  for (const rule of Object.values(STADT_PLZ)) {
+    out[rule.landDistrict] = { stadtPLZ: rule.stadtPLZ, stadtDistrict: rule.stadtDistrict, bl: rule.bl };
+  }
+  return out;
+})();
 
 /**
  * Normalise a raw district string. Returns the canonical lowercase name
@@ -161,16 +183,36 @@ export function normalizeDistrict(
   const raw = district.trim().toLowerCase();
   const blId = (bundesland ?? '').trim().toLowerCase() as BundeslandId;
 
-  // Stadt/Land disambiguation runs first — overrides the alias map.
+  const trimmedPLZ = postalCode?.trim();
+
+  // (1) Stadt-name + Land-PLZ → Land. Catches scrapes that tag
+  // bare "graz" but the event lives in the surrounding district.
   const stadtRule = STADT_PLZ[raw];
-  if (stadtRule && stadtRule.bl === blId && postalCode && !stadtRule.stadtPLZ.has(postalCode.trim())) {
+  if (stadtRule && stadtRule.bl === blId && trimmedPLZ && !stadtRule.stadtPLZ.has(trimmedPLZ)) {
     return stadtRule.landDistrict;
+  }
+
+  // (2) Land-name + Stadt-PLZ → Stadt. Catches scrapes that lump
+  // everything under "graz-umgebung" but the event PLZ is in the
+  // city block — without this, ~1.4k Graz-city events disappear
+  // into the Umgebung filter on every fresh scrape.
+  const landRule = LAND_TO_STADT[raw];
+  if (landRule && landRule.bl === blId && trimmedPLZ && landRule.stadtPLZ.has(trimmedPLZ)) {
+    return landRule.stadtDistrict;
   }
 
   // Bundesland-scoped alias map.
   const aliases = blId in ALIAS_MAP ? ALIAS_MAP[blId] : undefined;
   if (aliases && raw in aliases) {
-    return aliases[raw];
+    // Alias resolved — but if the resolved value is a Stadt with a
+    // PLZ that doesn't fit, kick it to the corresponding Land instead.
+    const resolved = aliases[raw];
+    for (const rule of Object.values(STADT_PLZ)) {
+      if (rule.stadtDistrict === resolved && rule.bl === blId && trimmedPLZ && !rule.stadtPLZ.has(trimmedPLZ)) {
+        return rule.landDistrict;
+      }
+    }
+    return resolved;
   }
 
   // Already canonical → keep.
