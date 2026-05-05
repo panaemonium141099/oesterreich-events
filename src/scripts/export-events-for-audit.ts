@@ -118,6 +118,49 @@ async function main() {
   void summary;
 
   console.log(`\nTotal events exported: ${total}`);
+
+  // ── Bonus: events_clean.csv — exactly the rows the /map view shows.
+  // Mirrors the API filter chain in src/app/api/events/route.ts:
+  //   visibility='public', publish_status published|published_low_confidence,
+  //   start_date >= today, lat 46.3–49.1, lng 9.5–17.2, lat/lng NOT NULL.
+  // Chunked per-bundesland because the combined geo+publish_status scan
+  // hits Supabase's statement timeout when the cursor walks past ~50k rows.
+  console.log('\nFetching map-clean event set (per bundesland)…');
+  const today = new Date().toISOString().slice(0, 10);
+  const cleanLines = [COLS.join(',')];
+  let cleanTotal = 0;
+  const BL_IDS = ['burgenland','kaernten','niederoesterreich','oberoesterreich','salzburg','steiermark','tirol','vorarlberg','wien'];
+  for (const bl of BL_IDS) {
+    let last: string | null = null;
+    let blN = 0;
+    while (true) {
+      let q = sb
+        .from('events')
+        .select(COLS.join(','))
+        .eq('visibility', 'public').eq('bundesland', bl)
+        .in('publish_status', ['published', 'published_low_confidence'])
+        .gte('start_date', today)
+        .gte('latitude', 46.3).lte('latitude', 49.1)
+        .gte('longitude', 9.5).lte('longitude', 17.2)
+        .order('id', { ascending: true })
+        .limit(PAGE);
+      if (last) q = q.gt('id', last);
+      const { data, error } = await q;
+      if (error) { console.error(`  ${bl} error:`, error.message); break; }
+      if (!data || data.length === 0) break;
+      for (const ev of data as unknown as Record<string, unknown>[]) {
+        cleanLines.push(COLS.map((c) => csvEscape(ev[c])).join(','));
+      }
+      blN += data.length;
+      last = String((data[data.length - 1] as unknown as Record<string, unknown>).id);
+      if (data.length < PAGE) break;
+    }
+    cleanTotal += blN;
+    console.log(`  ${bl}: ${blN}`);
+  }
+  const cleanFile = join(outDir, 'events_clean.csv');
+  writeFileSync(cleanFile, cleanLines.join('\n') + '\n', 'utf8');
+  console.log(`✓ ${cleanFile} (${cleanTotal} rows — what the map renders)`);
 }
 
 main().catch((e) => { console.error(e); process.exit(1); });

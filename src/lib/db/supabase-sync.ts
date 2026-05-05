@@ -33,6 +33,7 @@ import {
 } from '@/lib/category-classifier';
 import { normalizeEventLocation } from '@/lib/location-normalizer';
 import { normalizeDistrict } from '@/lib/district-normalizer';
+import { bundeslandToId } from '@/lib/bundeslaender';
 import { generateFingerprint } from '@/lib/dedup/fingerprint';
 import { generateEventSlug } from '@/lib/utils/slugify';
 import { scoreEvent } from '@/lib/quality/score-event';
@@ -406,14 +407,21 @@ function toSupabaseRow(
     // a value written earlier by the backfill-plz-from-coords script).
     // Writing `null` explicitly here would clobber that value.
     ...(resolved.postalCode !== null ? { postal_code: resolved.postalCode } : {}),
-    bundesland: event.bundesland ?? null,
+    // Canonicalise bundesland to one of the 9 lowercase IDs that
+    // bundeslandToId() recognises. The Feratel/TourData scrapers
+    // emit "Salzburg" / "Kärnten" / "Tirol" Title-Case; without this
+    // 9k+ events end up under a bundesland the client filter doesn't
+    // know about, leaving them invisible on the map.
+    bundesland: bundeslandToId(event.bundesland) ?? null,
     // Normalise district at scrape-time so the FilterDrawer chip can
     // match by exact string. Without this, every new scrape pumps
     // freshly-spelled aliases (e.g. "bruck/leitha", "suedoststeiermark")
     // back into the DB and undoes the canonical-rewrite migration.
+    // Note: pass the canonicalised bundesland id so the alias map's
+    // bundesland-scoped lookup actually hits.
     district: normalizeDistrict(
       event.district,
-      event.bundesland,
+      bundeslandToId(event.bundesland) ?? null,
       resolved.postalCode ?? event.postal_code,
     ),
     latitude: finalLat,
