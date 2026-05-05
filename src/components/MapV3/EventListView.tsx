@@ -81,7 +81,10 @@ export function EventListView({
   totalCount,
   scopeLabel,
 }: EventListViewProps) {
-  const [sort, setSort] = useState<ListSortMode>(userLocation ? 'distance' : 'date');
+  // Default to "Top" so the list opens with the highest-scored events
+  // visible regardless of where the user came from. Datum/Distanz remain
+  // one click away.
+  const [sort, setSort] = useState<ListSortMode>('score');
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   const loaderRef = useRef<HTMLDivElement>(null);
 
