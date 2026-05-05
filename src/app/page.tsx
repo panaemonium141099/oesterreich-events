@@ -68,6 +68,22 @@ export default async function LandingPage({
       {/* Top-right auth button */}
       <LandingAuth />
 
+      {/* Beta-Hinweis — die Seite ist live aber noch im Aufbau, technische
+          Fehler sind möglich. Mailto-Link macht Feedback ein-Klick. */}
+      <div
+        role="status"
+        className="z-30 mx-auto mt-3 max-w-[95%] md:max-w-2xl rounded-full border border-amber-300/30 bg-amber-500/10 px-4 py-2 text-center text-[12.5px] leading-tight text-amber-100 backdrop-blur-sm"
+      >
+        Diese Seite ist noch in Entwicklung — technische Fehler sind möglich. Feedback bitte an{' '}
+        <a
+          href="mailto:dev@glatzdev.com?subject=lasstreffen.at%20Feedback"
+          className="font-semibold underline decoration-amber-300/60 underline-offset-2 hover:text-amber-50"
+        >
+          dev@glatzdev.com
+        </a>
+        .
+      </div>
+
       <main className="flex-1 min-h-screen flex flex-col items-center justify-center gap-8 md:gap-12 px-6 text-center max-w-3xl w-full">
         {/* Headline + Stats + Tagline — tightly grouped */}
         <div className="flex flex-col items-center gap-3 md:gap-4">

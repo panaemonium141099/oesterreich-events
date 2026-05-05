@@ -24,7 +24,8 @@ const ALIAS_MAP: Record<BundeslandId, Record<string, string>> = {
   burgenland: {
     'guessing': 'güssing',
     'neusiedl-am-see': 'neusiedl am see',
-    'eisenstadt': 'eisenstadt (stadt)',
+    'eisenstadt (stadt)': 'eisenstadt',
+    'eisenstadt-umgebung': 'eisenstadt',
     'hartberg-fuerstenfeld': 'hartberg-fürstenfeld',
   },
   niederoesterreich: {
@@ -83,8 +84,8 @@ const ALIAS_MAP: Record<BundeslandId, Record<string, string>> = {
     'klagenfurt': 'klagenfurt (stadt)', // PLZ check
     'villach': 'villach (stadt)',       // PLZ check
     'spittal': 'spittal an der drau',
-    'sankt veit an der glan': 'st. veit an der glan',
-    'st-veit': 'st. veit an der glan',
+    'st. veit an der glan': 'sankt veit an der glan',
+    'st-veit': 'sankt veit an der glan',
     'gailtal': 'hermagor',
     'lavanttal': 'wolfsberg',
   },

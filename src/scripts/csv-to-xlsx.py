@@ -17,8 +17,13 @@ def clean(v):
         return ILLEGAL.sub('', v)
     return v
 
+from datetime import datetime
 EXPORTS = Path(__file__).resolve().parents[2] / 'data' / 'exports'
+# Stable filename so the user can re-open the same path. If Windows holds
+# an exclusive lock (workbook open in Excel), fall back to a timestamped
+# copy so the run still produces output.
 OUT = EXPORTS / 'events_audit.xlsx'
+OUT_FALLBACK = EXPORTS / f'events_audit_{datetime.now():%Y%m%d_%H%M%S}.xlsx'
 
 ORDER = [
     'districts_summary',
@@ -83,6 +88,12 @@ for stem in ORDER:
     ws.auto_filter.ref = ws.dimensions
     print(f'  added {sheet_name}: {ws.max_row - 1} rows, {ws.max_column} cols')
 
-wb.save(OUT)
-print(f'\nWrote {OUT}')
-print(f'Size: {OUT.stat().st_size / 1024 / 1024:.1f} MB')
+try:
+    wb.save(OUT)
+    target = OUT
+except PermissionError:
+    print(f'  {OUT.name} is locked (open in Excel?), using fallback')
+    wb.save(OUT_FALLBACK)
+    target = OUT_FALLBACK
+print(f'\nWrote {target}')
+print(f'Size: {target.stat().st_size / 1024 / 1024:.1f} MB')
