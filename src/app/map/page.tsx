@@ -699,7 +699,6 @@ function MapPageInner() {
             <EventListView
               events={finalEvents}
               loading={loading}
-              onSelectEvent={setSelectedEvent}
               userLocation={userLocation}
               totalCount={totalMatchCount}
               scopeLabel={

@@ -12,11 +12,13 @@
  */
 import { useMemo, useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 import { T } from './tokens';
 import type { Event } from '@/types/events';
 import { formatTime } from '@/lib/utils/date';
 import { distanceKm } from '@/lib/geolocation';
 import { displayDistrictName } from '@/lib/districtsAT';
+import { buildEventUrlV2 } from '@/lib/utils/slugify';
 
 /**
  * Decode the handful of HTML entities scrapers leave in event titles
@@ -63,7 +65,6 @@ export type ListSortMode = 'date' | 'distance' | 'score';
 interface EventListViewProps {
   events: Event[];
   loading: boolean;
-  onSelectEvent: (e: Event) => void;
   /** User location for distance sort + km display. Null when not granted. */
   userLocation?: { lat: number; lng: number } | null;
   /** Total count from the API (may exceed loaded). Shown in the headline. */
@@ -77,7 +78,6 @@ const PAGE_SIZE = 30;
 export function EventListView({
   events,
   loading,
-  onSelectEvent,
   userLocation,
   totalCount,
   scopeLabel,
@@ -288,7 +288,6 @@ export function EventListView({
                     key={ev.id}
                     ev={ev}
                     userLocation={userLocation}
-                    onClick={() => onSelectEvent(ev)}
                   />
                 ))}
               </div>
@@ -311,11 +310,9 @@ export function EventListView({
 function BigRow({
   ev,
   userLocation,
-  onClick,
 }: {
   ev: Event;
   userLocation?: { lat: number; lng: number } | null;
-  onClick: () => void;
 }) {
   // Track image errors locally so a 404'd scraper image swaps to the
   // category-gradient placeholder instead of leaving an empty box. The
@@ -336,8 +333,8 @@ function BigRow({
   const [g1, g2] = gradientFor(cat);
 
   return (
-    <button
-      onClick={onClick}
+    <Link
+      href={buildEventUrlV2(ev)}
       className="press-haptic mv3-list-card"
       style={{
         display: 'flex',
@@ -351,6 +348,8 @@ function BigRow({
         textAlign: 'left',
         width: '100%',
         fontFamily: 'inherit',
+        textDecoration: 'none',
+        color: 'inherit',
         // Hover/focus animation defined in globals.css → .mv3-list-card:hover
         transition: 'transform 0.18s ease-out, box-shadow 0.18s ease-out, border-color 0.18s ease-out',
       }}
@@ -487,7 +486,7 @@ function BigRow({
           </span>
         </div>
       </div>
-    </button>
+    </Link>
   );
 }
 
