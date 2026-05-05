@@ -26,7 +26,7 @@ import { T, DATE_PRESETS, PRICE_TIERS, countActiveFilters as countActive, type D
 import { applyDatePreset, defaultDateTo, detectActivePreset } from './datePresets';
 import { CATEGORIES } from '@/lib/categories';
 import { BUNDESLAENDER } from '@/lib/bundeslaender';
-import { getDistrictsByBundesland } from '@/lib/districtsAT';
+import { getDistrictsByBundesland, displayDistrictName } from '@/lib/districtsAT';
 import type { EventFilters } from '@/types/events';
 import { trackEvent } from '@/lib/analytics';
 
@@ -425,7 +425,7 @@ function Body({
                   active={selectedDistricts.has(d.name)}
                   onClick={() => toggleDistrict(d.name)}
                 >
-                  {d.name}
+                  {displayDistrictName(d.name)}
                 </Chip>
               ))}
             </ChipGroup>

@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import type { Event } from '@/types/events';
+import { displayDistrictName } from '@/lib/districtsAT';
 import { EventImage } from './EventImage';
 import { useAuth } from '@/lib/supabase/auth-context';
 import { createClient } from '@/lib/supabase/client';
@@ -430,7 +431,7 @@ export function EventDetail({ event, onClose, eveningMode, onTagClick }: EventDe
                     <p className={`text-xs ${eveningMode ? 'text-gray-400' : 'text-slate-500'}`}>{event.address}</p>
                   )}
                   {event.district && (
-                    <p className={`text-xs ${eveningMode ? 'text-gray-500' : 'text-slate-400'}`}>Bezirk {event.district}</p>
+                    <p className={`text-xs ${eveningMode ? 'text-gray-500' : 'text-slate-400'}`}>Bezirk {displayDistrictName(event.district)}</p>
                   )}
                 </div>
               </div>

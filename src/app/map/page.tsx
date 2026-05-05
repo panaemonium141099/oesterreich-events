@@ -37,6 +37,7 @@ import { EventDetail } from '@/components/Events/EventDetail';
 import { MapLoadingOverlay } from '@/components/Map/MapLoadingOverlay';
 import { LocationBanner } from '@/components/Map/LocationBanner';
 import { BUNDESLAENDER, bundeslandToId, type Bundesland } from '@/lib/bundeslaender';
+import { displayDistrictName } from '@/lib/districtsAT';
 import { trackEvent } from '@/lib/analytics';
 import { useAuth } from '@/lib/supabase/auth-context';
 import { getStoredLocation, storeLocation } from '@/lib/geolocation';
@@ -470,7 +471,7 @@ function MapPageInner() {
     const districtList = filters.districts && filters.districts.length > 0
       ? filters.districts
       : filters.district ? [filters.district] : [];
-    if (districtList.length === 1) return districtList[0];
+    if (districtList.length === 1) return displayDistrictName(districtList[0]);
     if (districtList.length > 1) return `${districtList.length} Bezirke`;
     const concrete = bundeslandIds.filter((b) => b !== 'all');
     if (concrete.length === 0) return 'Österreich';

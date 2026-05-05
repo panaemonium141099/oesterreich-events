@@ -3,6 +3,21 @@
  * Extends the Burgenland-only districts.ts with all 9 Bundesländer.
  */
 
+/**
+ * Strip the trailing "(Stadt)" suffix for UI display. Statutarstadt-
+ * districts ship with their canonical name like "Graz (Stadt)" so the
+ * filter chain can disambiguate from the surrounding Land-Bezirk
+ * ("Graz-Umgebung"). The "(Stadt)" reads as redundant decoration to
+ * users — they typed "Graz", they expect "Graz". The "(Land)" suffix
+ * stays because it carries actual disambiguation ("Krems (Land)" ≠
+ * "Krems"). Only the trailing tag is stripped — Wien's "1. Innere
+ * Stadt" is unaffected because that's not a suffix.
+ */
+export function displayDistrictName(name: string | null | undefined): string {
+  if (!name) return '';
+  return name.replace(/\s*\(stadt\)\s*$/i, '').trim();
+}
+
 export interface DistrictInfoAT {
   name: string;
   center: [number, number]; // [lat, lng]

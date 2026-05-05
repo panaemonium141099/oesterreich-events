@@ -16,6 +16,7 @@ import { T } from './tokens';
 import type { Event } from '@/types/events';
 import { formatTime } from '@/lib/utils/date';
 import { distanceKm } from '@/lib/geolocation';
+import { displayDistrictName } from '@/lib/districtsAT';
 
 /**
  * Decode the handful of HTML entities scrapers leave in event titles
@@ -469,7 +470,7 @@ function BigRow({
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <span style={{ fontSize: 12, color: T.ink50, fontWeight: 500 }}>
             {ev.bundesland || ''}
-            {ev.district ? ` · ${ev.district}` : ''}
+            {ev.district ? ` · ${displayDistrictName(ev.district)}` : ''}
           </span>
           <span
             style={{
