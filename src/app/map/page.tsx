@@ -110,7 +110,22 @@ function MapPageInner() {
   const [filterOpen, setFilterOpen] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   const [hoveredEventId, setHoveredEventId] = useState<string | null>(null);
-  const [bundesland, setBundesland] = useState<Bundesland>(initialBundesland);
+  // Multi-bundesland selection. Source of truth — `primaryBundesland` is
+  // the derived single value used for map bbox / flyTo / scope label.
+  // ['all'] = no filter; ['wien','steiermark'] = both; etc.
+  const [bundeslandIds, setBundeslandIds] = useState<string[]>(
+    initialBundeslandId === 'all' ? ['all'] : [initialBundeslandId],
+  );
+  const primaryBundesland = useMemo(
+    () => BUNDESLAENDER.find((b) => b.id === bundeslandIds[0]) ?? BUNDESLAENDER[0],
+    [bundeslandIds],
+  );
+  // Old single-state shim so the rest of the file (and child components
+  // that still take a `Bundesland` prop) keep working unchanged.
+  const bundesland = primaryBundesland;
+  const setBundesland = useCallback((bl: Bundesland) => {
+    setBundeslandIds(bl.id === 'all' ? ['all'] : [bl.id]);
+  }, []);
   // No default dateTo — load EVERYTHING. The progressive batch loader
   // pages through cursor-based pagination so a few extra months of
   // events won't slow the first paint, and users were missing winter
@@ -153,17 +168,19 @@ function MapPageInner() {
   // ── Data fetch (progressive batches, same shape as the old page) ─────
   const buildParams = useCallback(() => {
     const params = new URLSearchParams();
-    // Server-side bundesland filter when one is picked, so we don't have
-    // to scroll through the entire 100k+ event set client-side just to
-    // find the 6553 Steiermark events. Falls back to 'all' so the API
-    // bypasses its built-in bundesland CHECK and returns everything.
-    params.set('bundesland', bundesland.id === 'all' ? 'all' : bundesland.id);
-    // Slim payload — list + markers only need ~17 fields. The detail
-    // modal lazy-fetches the full row via /api/events/[id]. Cuts a
-    // Steiermark-scope response from ~10 MB to ~1 MB.
+    // Multi-bundesland: send `bundeslands` (comma-separated) when the user
+    // picked >1 region; otherwise the single `bundesland` param so the
+    // server can short-circuit and use its idx_events_bundesland_start_date
+    // single-eq path.
+    const concrete = bundeslandIds.filter((b) => b !== 'all');
+    if (concrete.length > 1) params.set('bundeslands', concrete.join(','));
+    else params.set('bundesland', concrete[0] ?? 'all');
+    // Slim payload — list + markers only need ~17 fields.
     params.set('slim', 'true');
     if (filters.tags && filters.tags.length > 0) params.set('tags', filters.tags.join(','));
+    else if (filters.categories && filters.categories.length > 0) params.set('categories', filters.categories.join(','));
     else if (filters.category) params.set('category', filters.category);
+    if (filters.districts && filters.districts.length > 0) params.set('districts', filters.districts.join(','));
     if (filters.dateFrom) params.set('dateFrom', filters.dateFrom);
     if (filters.dateTo) params.set('dateTo', filters.dateTo);
     if (filters.priceMin !== undefined) params.set('priceMin', String(filters.priceMin));
@@ -176,17 +193,25 @@ function MapPageInner() {
     if (filters.sourceName) params.set('sourceName', filters.sourceName);
     if (filters.studentFriendly) params.set('studentFriendly', 'true');
     if (filters.familyFriendly) params.set('familyFriendly', 'true');
-    if (filters.priceTier) params.set('priceTier', filters.priceTier);
+    if (filters.priceTiers && filters.priceTiers.length > 0) params.set('priceTiers', filters.priceTiers.join(','));
+    else if (filters.priceTier) params.set('priceTier', filters.priceTier);
     return params;
-  }, [filters, bundesland.id]);
+  }, [filters, bundeslandIds]);
 
   const fetchEventsProgressive = useCallback(async () => {
     if (abortRef.current) abortRef.current.abort();
     const controller = new AbortController();
     abortRef.current = controller;
 
-    // Sync the parent-state Bundesland into filters for cache+API parity.
-    const filtersWithBl = { ...filters, bundesland: bundesland.id };
+    // Sync the parent-state bundesland selection into filters for cache+API
+    // parity. Single concrete pick → use legacy `bundesland`; multi → use
+    // `bundeslands`. Empty / 'all' → no filter (the cache key handles both).
+    const concrete = bundeslandIds.filter((b) => b !== 'all');
+    const filtersWithBl: EventFilters = {
+      ...filters,
+      ...(concrete.length === 1 ? { bundesland: concrete[0] } : {}),
+      ...(concrete.length > 1 ? { bundeslands: concrete } : {}),
+    };
     const cachedRaw = readCache(filtersWithBl);
     const cached = cachedRaw && cachedRaw.events.length > 0 ? cachedRaw : null;
 
@@ -209,7 +234,8 @@ function MapPageInner() {
     // shows up unexpectedly. Type window.__lasstreffenDebug in console.
     if (typeof window !== 'undefined') {
       (window as unknown as { __lasstreffenDebug?: unknown }).__lasstreffenDebug = {
-        bundesland: bundesland.id,
+        bundeslandIds,
+        primaryBundesland: bundesland.id,
         filters,
         filtersWithBl,
         cacheHit: !!cached,
@@ -311,16 +337,14 @@ function MapPageInner() {
 
   // ── Client-side filtering pipeline ───────────────────────────────────
   const bundeslandEvents = useMemo(() => {
-    if (bundesland.id === 'all') return allEvents;
-    // The DB has the same Bundesland written 4+ ways ("Niederösterreich" /
-    // "niederoesterreich" / "Niederoesterreich" / "noe"). The previous
-    // lowercase-includes filter missed every umlaut-vs-oe variant — half
-    // the events disappeared when the user picked NÖ. Route everything
-    // through bundeslandToId() which collapses all spellings to the
-    // canonical id used by BUNDESLAENDER.
-    const target = bundesland.id;
-    return allEvents.filter((e) => bundeslandToId(e.bundesland) === target);
-  }, [allEvents, bundesland]);
+    const concrete = bundeslandIds.filter((b) => b !== 'all');
+    if (concrete.length === 0) return allEvents;
+    const targets = new Set(concrete);
+    return allEvents.filter((e) => {
+      const id = bundeslandToId(e.bundesland);
+      return id != null && targets.has(id);
+    });
+  }, [allEvents, bundeslandIds]);
 
   const dedupedEvents = useMemo(() => {
     const seen = new Set<string>();
@@ -333,14 +357,40 @@ function MapPageInner() {
   }, [bundeslandEvents]);
 
   const finalEvents = useMemo(() => {
-    if (!filters.district) return dedupedEvents;
-    // DB stores districts lowercased ("graz (stadt)", 207 events) but
-    // the filter chip sends Title Case from districtsAT.ts ("Graz (Stadt)").
-    // Direct === produced 0 hits — compare both sides lowercased so the
-    // 207 Graz Stadt events actually surface in the list.
-    const target = filters.district.toLowerCase();
-    return dedupedEvents.filter((e) => (e.district ?? '').toLowerCase() === target);
-  }, [dedupedEvents, filters.district]);
+    let out = dedupedEvents;
+    // Multi-district takes precedence; fall back to legacy single field.
+    const districtList = filters.districts && filters.districts.length > 0
+      ? filters.districts
+      : filters.district ? [filters.district] : null;
+    if (districtList) {
+      const targets = new Set(districtList.map((d) => d.toLowerCase()));
+      out = out.filter((e) => targets.has((e.district ?? '').toLowerCase()));
+    }
+    // Multi-category client-side filter (server already filtered, but
+    // belt-and-suspenders for cache hits where the request shape differs).
+    const catList = filters.categories && filters.categories.length > 0
+      ? filters.categories
+      : filters.category ? [filters.category] : null;
+    if (catList) {
+      const targets = new Set(catList);
+      out = out.filter((e) => e.category != null && targets.has(e.category));
+    }
+    // Multi-priceTier client-side
+    const ptList = filters.priceTiers && filters.priceTiers.length > 0
+      ? filters.priceTiers
+      : filters.priceTier ? [filters.priceTier] : null;
+    if (ptList) {
+      const targets = new Set<string>(ptList);
+      out = out.filter((e) => {
+        // Slim payload (CachedEvent) doesn't include price_tier — keep
+        // the row when missing instead of dropping. Server-side filter
+        // is the authoritative one for this field.
+        const pt = (e as { price_tier?: string }).price_tier;
+        return pt == null || targets.has(pt);
+      });
+    }
+    return out;
+  }, [dedupedEvents, filters.district, filters.districts, filters.category, filters.categories, filters.priceTier, filters.priceTiers]);
 
   // Category counts for the FilterDrawer — fed off the post-deduplication,
   // pre-category-filter set so each chip shows its own contribution.
@@ -353,8 +403,25 @@ function MapPageInner() {
     return m;
   }, [dedupedEvents]);
 
+  // Trust the API count only when neither client-side narrower (district
+  // multi or single, category multi) is active.
+  const hasClientNarrower =
+    !!filters.district ||
+    (filters.districts && filters.districts.length > 0) ||
+    (filters.categories && filters.categories.length > 0);
   const totalMatchCount =
-    bundesland.id === 'all' && !filters.district ? apiTotalCount : null;
+    bundeslandIds.includes('all') && !hasClientNarrower ? apiTotalCount : null;
+
+  // Scope label — single → bundesland name; multi → "X Regionen";
+  // 'all' → "Österreich".
+  const scopeLabel = useMemo(() => {
+    const concrete = bundeslandIds.filter((b) => b !== 'all');
+    if (concrete.length === 0) return 'Österreich';
+    if (concrete.length === 1) {
+      return BUNDESLAENDER.find((b) => b.id === concrete[0])?.name ?? concrete[0];
+    }
+    return `${concrete.length} Regionen`;
+  }, [bundeslandIds]);
 
   const handleGemeindeSelect = (g: { name: string; bundeslandId: string; lat: number; lng: number; postalCode?: string }) => {
     const bl = BUNDESLAENDER.find((b) => b.id === g.bundeslandId);
@@ -506,7 +573,7 @@ function MapPageInner() {
                     }}
                   />
                   {(totalMatchCount ?? finalEvents.length).toLocaleString('de-AT')} Events
-                  {bundesland.id !== 'all' ? ` · ${bundesland.name}` : ' · Österreich'}
+                  {scopeLabel ? ` · ${scopeLabel}` : ''}
                 </div>
               )}
 
@@ -531,7 +598,7 @@ function MapPageInner() {
               userLocation={userLocation}
               totalCount={totalMatchCount}
               scopeLabel={
-                bundesland.id !== 'all' ? bundesland.name : filters.search ? filters.search : 'Österreich'
+                scopeLabel !== 'Österreich' ? scopeLabel : filters.search ? filters.search : 'Österreich'
               }
             />
           </div>
@@ -561,13 +628,15 @@ function MapPageInner() {
           onFiltersChange={(f) => {
             setFilters(f);
           }}
-          bundesland={bundesland}
-          onBundeslandChange={(bl) => {
-            setBundesland(bl);
-            // Switching BL invalidates any district selection — match the old
-            // page's behavior so the user doesn't get a "no events" mystery
-            // when bezirk and bundesland disagree.
-            setFilters((prev) => (prev.district ? { ...prev, district: undefined } : prev));
+          bundeslandIds={bundeslandIds}
+          onBundeslandIdsChange={(ids) => {
+            setBundeslandIds(ids);
+            // Switching the bundesland set invalidates any district pick —
+            // a "Graz (Stadt)" chip while jumping to "Wien only" would just
+            // produce zero hits.
+            setFilters((prev) => (prev.district || prev.districts
+              ? { ...prev, district: undefined, districts: undefined }
+              : prev));
             setDynamicFlyTo(null);
           }}
           resultCount={finalEvents.length}

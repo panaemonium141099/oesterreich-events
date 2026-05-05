@@ -141,9 +141,18 @@ export interface ScrapedEvent {
 }
 
 export interface EventFilters {
+  /** @deprecated single-value, kept for legacy callers — use bundeslands */
   bundesland?: string;
+  /** Multi-bundesland filter: events whose bundesland is ANY of these */
+  bundeslands?: string[];
+  /** @deprecated single-value, kept for legacy callers — use districts */
   district?: string;
+  /** Multi-district filter: events whose district is ANY of these */
+  districts?: string[];
+  /** @deprecated single-value, kept for legacy callers — use categories */
   category?: string;
+  /** Multi-category filter: events whose category is ANY of these */
+  categories?: string[];
   /** Multi-tag filter: events matching ANY of the provided tags */
   tags?: string[];
   dateFrom?: string;
@@ -179,8 +188,10 @@ export interface EventFilters {
   studentFriendly?: boolean;
   /** Only events where Claude flagged is_family_friendly=true. */
   familyFriendly?: boolean;
-  /** Price tier filter: gratis | günstig | mittel | premium | unbekannt */
+  /** @deprecated single-value, kept for legacy callers — use priceTiers */
   priceTier?: 'gratis' | 'günstig' | 'mittel' | 'premium' | 'unbekannt';
+  /** Multi price-tier filter: events whose price_tier is ANY of these */
+  priceTiers?: ('gratis' | 'günstig' | 'mittel' | 'premium' | 'unbekannt')[];
   /** Audience filter: studenten | familien-mit-kindern | senioren | paare | ... */
   audience?: string[];
   /** Vibe filter: rave | gemütlich | kulturell | romantisch | ... */

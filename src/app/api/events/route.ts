@@ -104,14 +104,22 @@ export async function GET(request: NextRequest) {
 
   const filters: EventFilters = {};
 
+  // Single + multi parsers — multi takes precedence when both are sent.
+  // Comma-separated values are the URL convention (matches tags, audience, …).
   const bundesland = searchParams.get('bundesland');
   if (bundesland) filters.bundesland = bundesland;
+  const bundeslands = searchParams.get('bundeslands');
+  if (bundeslands) filters.bundeslands = bundeslands.split(',').map(s => s.trim()).filter(Boolean);
 
   const district = searchParams.get('district');
   if (district) filters.district = district;
+  const districts = searchParams.get('districts');
+  if (districts) filters.districts = districts.split(',').map(s => s.trim()).filter(Boolean);
 
   const category = searchParams.get('category');
   if (category) filters.category = category;
+  const categories = searchParams.get('categories');
+  if (categories) filters.categories = categories.split(',').map(s => s.trim()).filter(Boolean);
 
   const tags = searchParams.get('tags');
   if (tags) filters.tags = tags.split(',').map(t => t.trim()).filter(Boolean);
@@ -151,6 +159,12 @@ export async function GET(request: NextRequest) {
   const priceTier = searchParams.get('priceTier');
   if (priceTier && ['gratis', 'günstig', 'mittel', 'premium', 'unbekannt'].includes(priceTier)) {
     filters.priceTier = priceTier as NonNullable<typeof filters.priceTier>;
+  }
+  const priceTiers = searchParams.get('priceTiers');
+  if (priceTiers) {
+    const parsed = priceTiers.split(',').map(s => s.trim()).filter(Boolean)
+      .filter(s => ['gratis', 'günstig', 'mittel', 'premium', 'unbekannt'].includes(s));
+    if (parsed.length > 0) filters.priceTiers = parsed as NonNullable<typeof filters.priceTiers>;
   }
 
   const audience = searchParams.get('audience');
@@ -249,8 +263,11 @@ export async function GET(request: NextRequest) {
     const baseQuery = (supabase.from('events') as any);
     // Skip exact count for large queries — causes Supabase timeout on 77k+ events
     // Only count when: no cursor, limit small, AND a bundesland filter is set (not 'all')
-    const hasBundeslandFilter = filters.bundesland && filters.bundesland !== 'all';
-    const needsCount = !filters.cursor && (filters.limit <= 10000) && (hasBundeslandFilter || !!filters.search || !!filters.category);
+    const hasBundeslandFilter =
+      (filters.bundeslands && filters.bundeslands.some(b => b !== 'all')) ||
+      (filters.bundesland && filters.bundesland !== 'all');
+    const hasCategoryFilter = !!filters.category || (filters.categories && filters.categories.length > 0);
+    const needsCount = !filters.cursor && (filters.limit <= 10000) && (hasBundeslandFilter || !!filters.search || hasCategoryFilter);
     // Slim select for the map/list view — every field the cached
      // CachedEvent type lists, plus slug for routing. NO description, no
      // enrichment arrays (audience/vibe/etc.) — those are fetched on
@@ -299,20 +316,21 @@ export async function GET(request: NextRequest) {
     // Also exclude 0,0 coordinates (not geocoded)
     query = query.gte('latitude', 46.3).lte('latitude', 49.1).gte('longitude', 9.5).lte('longitude', 17.2);
 
-    // Apply filters
-    if (filters.bundesland && filters.bundesland !== 'all') {
-      // After the bundesland normalisation migration the DB only stores
-      // 9 canonical lowercase ids (no umlauts). Direct .eq match hits
-      // idx_events_bundesland_start_date directly: ~565ms vs 5.7s with
-      // ilike (which forced a heap re-filter on 67k rows).
+    // Apply filters. Multi (.in) takes precedence over single (.eq) when both
+    // are present so a callsite that migrated to multi can't be accidentally
+    // narrowed by a stale single-value param.
+    if (filters.bundeslands && filters.bundeslands.length > 0) {
+      const ids = filters.bundeslands.filter(b => b !== 'all');
+      if (ids.length > 0) query = query.in('bundesland', ids);
+    } else if (filters.bundesland && filters.bundesland !== 'all') {
       query = query.eq('bundesland', filters.bundesland);
     }
 
-    if (filters.district) {
-      // DB stores districts lowercased — UI sends Title Case from
-      // districtsAT.ts ("Graz (Stadt)"). ilike without wildcards is an
-      // exact case-insensitive match, so 207 Graz events are returned
-      // instead of 0.
+    if (filters.districts && filters.districts.length > 0) {
+      // Lowercase here because the DB column is canonical lowercase but the
+      // FilterDrawer chip still sends Title Case from districtsAT.ts.
+      query = query.in('district', filters.districts.map(d => d.toLowerCase()));
+    } else if (filters.district) {
       query = query.ilike('district', filters.district);
     }
 
@@ -396,6 +414,8 @@ export async function GET(request: NextRequest) {
         res.headers.set('X-Total-Count', '0');
         return res;
       }
+    } else if (filters.categories && filters.categories.length > 0) {
+      query = query.in('category', filters.categories);
     } else if (filters.category) {
       // Backwards compatible: single category filter on the events table
       query = query.eq('category', filters.category);
@@ -471,7 +491,9 @@ export async function GET(request: NextRequest) {
     if (filters.familyFriendly) {
       query = query.eq('is_family_friendly', true);
     }
-    if (filters.priceTier) {
+    if (filters.priceTiers && filters.priceTiers.length > 0) {
+      query = query.in('price_tier', filters.priceTiers);
+    } else if (filters.priceTier) {
       query = query.eq('price_tier', filters.priceTier);
     }
     if (filters.language) {
@@ -743,10 +765,15 @@ export async function GET(request: NextRequest) {
       unmappedQuery = unmappedQuery.or('latitude.is.null,longitude.is.null');
 
       // Apply same content filters (bundesland, category, search) but NOT bbox
-      if (filters.bundesland && filters.bundesland !== 'all') {
+      if (filters.bundeslands && filters.bundeslands.length > 0) {
+        const ids = filters.bundeslands.filter(b => b !== 'all');
+        if (ids.length > 0) unmappedQuery = unmappedQuery.in('bundesland', ids);
+      } else if (filters.bundesland && filters.bundesland !== 'all') {
         unmappedQuery = unmappedQuery.eq('bundesland', filters.bundesland);
       }
-      if (filters.category) {
+      if (filters.categories && filters.categories.length > 0) {
+        unmappedQuery = unmappedQuery.in('category', filters.categories);
+      } else if (filters.category) {
         unmappedQuery = unmappedQuery.eq('category', filters.category);
       }
       if (filters.search) {

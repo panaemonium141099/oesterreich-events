@@ -25,7 +25,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { T, DATE_PRESETS, PRICE_TIERS, countActiveFilters as countActive, type DatePresetId } from './tokens';
 import { applyDatePreset, defaultDateTo, detectActivePreset } from './datePresets';
 import { CATEGORIES } from '@/lib/categories';
-import { BUNDESLAENDER, type Bundesland } from '@/lib/bundeslaender';
+import { BUNDESLAENDER } from '@/lib/bundeslaender';
 import { getDistrictsByBundesland } from '@/lib/districtsAT';
 import type { EventFilters } from '@/types/events';
 import { trackEvent } from '@/lib/analytics';
@@ -35,8 +35,10 @@ interface FilterDrawerProps {
   onClose: () => void;
   filters: EventFilters;
   onFiltersChange: (f: EventFilters) => void;
-  bundesland: Bundesland;
-  onBundeslandChange: (bl: Bundesland) => void;
+  /** Multi-select source of truth. ['all'] = no filter; ['steiermark'] =
+   *  one; ['steiermark','wien'] = many. */
+  bundeslandIds: string[];
+  onBundeslandIdsChange: (ids: string[]) => void;
   /** Live result count for the "X Events anzeigen" CTA. */
   resultCount: number;
   /** Optional category counts so chips can show "Musik · 18". Skip if unknown. */
@@ -48,15 +50,15 @@ export function FilterDrawer({
   onClose,
   filters,
   onFiltersChange,
-  bundesland,
-  onBundeslandChange,
+  bundeslandIds,
+  onBundeslandIdsChange,
   resultCount,
   categoryCounts,
 }: FilterDrawerProps) {
   // Local draft so the user can fiddle without thrashing the map. Apply on
   // CTA click; Reset wipes the draft.
   const [draft, setDraft] = useState<EventFilters>(filters);
-  const [draftBl, setDraftBl] = useState<Bundesland>(bundesland);
+  const [draftBlIds, setDraftBlIds] = useState<string[]>(bundeslandIds);
   // Track the explicitly-chosen date preset id. We can't reliably reverse-
   // derive it from dateFrom/dateTo because two presets can map to the same
   // range (e.g. "Jetzt" and "Heute" both = today→today; on a Saturday
@@ -70,12 +72,12 @@ export function FilterDrawer({
   useEffect(() => {
     if (open) {
       setDraft(filters);
-      setDraftBl(bundesland);
+      setDraftBlIds(bundeslandIds);
       const detected = detectActivePreset(filters.dateFrom, filters.dateTo);
       setActivePresetId(detected);
       setShowCustomDate(detected === null && (!!filters.dateFrom || !!filters.dateTo));
     }
-  }, [open, filters, bundesland]);
+  }, [open, filters, bundeslandIds]);
 
   // ESC closes
   useEffect(() => {
@@ -89,35 +91,59 @@ export function FilterDrawer({
 
   const dDefault = defaultDateTo();
 
-  const districts = useMemo(
-    () => (draftBl.id !== 'all' ? getDistrictsByBundesland(draftBl.id) : []),
-    [draftBl.id],
-  );
+  // District chips: union of every district available in any selected
+  // bundesland. With ['all'] = no list (user picks bundeslands first).
+  const districts = useMemo(() => {
+    const concrete = draftBlIds.filter((b) => b !== 'all');
+    if (concrete.length === 0) return [] as { name: string }[];
+    const seen = new Set<string>();
+    const out: { name: string }[] = [];
+    for (const blId of concrete) {
+      for (const d of getDistrictsByBundesland(blId)) {
+        if (!seen.has(d.name)) {
+          seen.add(d.name);
+          out.push(d);
+        }
+      }
+    }
+    return out;
+  }, [draftBlIds]);
 
   const handleApply = () => {
-    onBundeslandChange(draftBl);
+    onBundeslandIdsChange(draftBlIds);
     onFiltersChange(draft);
+    const concrete = draftBlIds.filter((b) => b !== 'all');
     trackEvent('filter_apply', {
-      count_active: countActive(draft, dDefault) + (draftBl.id !== 'all' ? 1 : 0),
+      count_active: countActive(draft, dDefault) + (concrete.length > 0 ? concrete.length : 0),
     });
     onClose();
   };
 
   const handleReset = () => {
-    // Single canonical reset — wipes draft + applies immediately so the user
-    // sees the map repopulate before the drawer closes.
-    // Reset removes ALL filters including the date upper bound — load
-    // every event we have. The progressive batch loader handles the
-    // size, and users were missing winter events that fell past the
-    // old 6-month default horizon.
     const cleared: EventFilters = {};
     setDraft(cleared);
-    setDraftBl(BUNDESLAENDER[0]);
+    setDraftBlIds(['all']);
     setActivePresetId(null);
     setShowCustomDate(false);
-    onBundeslandChange(BUNDESLAENDER[0]);
+    onBundeslandIdsChange(['all']);
     onFiltersChange(cleared);
     trackEvent('filter_reset', {});
+  };
+
+  // Multi-select helper — toggle id in array. 'all' is the "clear" sentinel.
+  const toggleBl = (id: string) => {
+    setDraftBlIds((prev) => {
+      if (id === 'all') return ['all'];
+      const without = prev.filter((b) => b !== 'all');
+      const next = without.includes(id)
+        ? without.filter((b) => b !== id)
+        : [...without, id];
+      return next.length === 0 ? ['all'] : next;
+    });
+    // Clear district selection when bundesland set changes — avoids a
+    // "no events" mystery if the user kept e.g. "Graz (Stadt)" while
+    // switching to Wien-only.
+    setDraft((d) => (d.districts || d.district ? { ...d, district: undefined, districts: undefined } : d));
   };
 
   const setPreset = (id: typeof DATE_PRESETS[number]['id']) => {
@@ -134,11 +160,43 @@ export function FilterDrawer({
     }
   };
 
-  const setCategory = (cat: string | undefined) => {
-    // Category and tags are mutually exclusive — picking a category wipes any
-    // tag selection so "category: Musik" + "tags: ['rock']" can't coexist
-    // (Bug #3 the user confirmed).
-    setDraft((d) => ({ ...d, category: cat, tags: undefined }));
+  // Multi-select toggle for category. Click to add, click again to remove.
+  // Picking ANY category wipes the tag filter — they're mutually exclusive
+  // because the API sends one or the other (event_tags subquery vs
+  // category eq), never both.
+  const toggleCategory = (cat: string) => {
+    setDraft((d) => {
+      const list = d.categories ?? (d.category ? [d.category] : []);
+      const next = list.includes(cat) ? list.filter((c) => c !== cat) : [...list, cat];
+      return {
+        ...d,
+        categories: next.length > 0 ? next : undefined,
+        category: undefined,
+        tags: undefined,
+      };
+    });
+  };
+  const togglePriceTier = (id: NonNullable<EventFilters['priceTier']>) => {
+    setDraft((d) => {
+      const list = d.priceTiers ?? (d.priceTier ? [d.priceTier] : []);
+      const next = list.includes(id) ? list.filter((p) => p !== id) : [...list, id];
+      return {
+        ...d,
+        priceTiers: next.length > 0 ? (next as NonNullable<EventFilters['priceTiers']>) : undefined,
+        priceTier: undefined,
+      };
+    });
+  };
+  const toggleDistrict = (name: string) => {
+    setDraft((d) => {
+      const list = d.districts ?? (d.district ? [d.district] : []);
+      const next = list.includes(name) ? list.filter((x) => x !== name) : [...list, name];
+      return {
+        ...d,
+        districts: next.length > 0 ? next : undefined,
+        district: undefined,
+      };
+    });
   };
 
   // Plain conditional render with CSS transitions instead of AnimatePresence.
@@ -192,14 +250,16 @@ export function FilterDrawer({
           <Body
             draft={draft}
             setDraft={setDraft}
-            draftBl={draftBl}
-            setDraftBl={setDraftBl}
+            draftBlIds={draftBlIds}
+            toggleBl={toggleBl}
+            toggleCategory={toggleCategory}
+            togglePriceTier={togglePriceTier}
+            toggleDistrict={toggleDistrict}
             districts={districts}
             activePresetId={activePresetId}
             setPreset={setPreset}
             showCustomDate={showCustomDate}
             setShowCustomDate={setShowCustomDate}
-            setCategory={setCategory}
             categoryCounts={categoryCounts}
           />
         </div>
@@ -232,14 +292,16 @@ export function FilterDrawer({
           <Body
             draft={draft}
             setDraft={setDraft}
-            draftBl={draftBl}
-            setDraftBl={setDraftBl}
+            draftBlIds={draftBlIds}
+            toggleBl={toggleBl}
+            toggleCategory={toggleCategory}
+            togglePriceTier={togglePriceTier}
+            toggleDistrict={toggleDistrict}
             districts={districts}
             activePresetId={activePresetId}
             setPreset={setPreset}
             showCustomDate={showCustomDate}
             setShowCustomDate={setShowCustomDate}
-            setCategory={setCategory}
             categoryCounts={categoryCounts}
           />
         </div>
@@ -260,30 +322,45 @@ export function FilterDrawer({
 interface BodyProps {
   draft: EventFilters;
   setDraft: React.Dispatch<React.SetStateAction<EventFilters>>;
-  draftBl: Bundesland;
-  setDraftBl: (bl: Bundesland) => void;
+  draftBlIds: string[];
+  toggleBl: (id: string) => void;
+  toggleCategory: (cat: string) => void;
+  togglePriceTier: (id: NonNullable<EventFilters['priceTier']>) => void;
+  toggleDistrict: (name: string) => void;
   districts: { name: string }[];
   activePresetId: DatePresetId | null;
   setPreset: (id: DatePresetId) => void;
   showCustomDate: boolean;
   setShowCustomDate: (v: boolean) => void;
-  setCategory: (cat: string | undefined) => void;
   categoryCounts?: Record<string, number>;
 }
 
 function Body({
   draft,
   setDraft,
-  draftBl,
-  setDraftBl,
+  draftBlIds,
+  toggleBl,
+  toggleCategory,
+  togglePriceTier,
+  toggleDistrict,
   districts,
   activePresetId,
   setPreset,
   showCustomDate,
   setShowCustomDate,
-  setCategory,
   categoryCounts,
 }: BodyProps) {
+  // Selected sets — single-source-of-truth derives from filters.X (multi)
+  // with legacy single-X as a one-element fallback.
+  const selectedCats = new Set(
+    draft.categories ?? (draft.category ? [draft.category] : []),
+  );
+  const selectedDistricts = new Set(
+    draft.districts ?? (draft.district ? [draft.district] : []),
+  );
+  const selectedPriceTiers = new Set<string>(
+    draft.priceTiers ?? (draft.priceTier ? [draft.priceTier] : []),
+  );
   return (
     <>
       <FilterBlock label="Wann">
@@ -322,34 +399,31 @@ function Body({
 
       <FilterBlock label="Region">
         <ChipGroup>
-          {BUNDESLAENDER.map((bl) => (
-            <Chip
-              key={bl.id}
-              active={draftBl.id === bl.id}
-              onClick={() => {
-                setDraftBl(bl);
-                // Switching BL invalidates any district selection
-                setDraft((d) => (d.district ? { ...d, district: undefined } : d));
-              }}
-            >
-              {bl.name === 'Ganz Österreich' ? 'Österreich' : bl.name}
-            </Chip>
-          ))}
+          {BUNDESLAENDER.map((bl) => {
+            const active = bl.id === 'all'
+              ? draftBlIds.length === 0 || draftBlIds.includes('all')
+              : draftBlIds.includes(bl.id);
+            return (
+              <Chip key={bl.id} active={active} onClick={() => toggleBl(bl.id)}>
+                {bl.name === 'Ganz Österreich' ? 'Österreich' : bl.name}
+              </Chip>
+            );
+          })}
         </ChipGroup>
         {districts.length > 0 && (
           <div style={{ marginTop: 12 }}>
             <ChipGroup>
               <Chip
-                active={!draft.district}
-                onClick={() => setDraft((d) => ({ ...d, district: undefined }))}
+                active={selectedDistricts.size === 0}
+                onClick={() => setDraft((d) => ({ ...d, district: undefined, districts: undefined }))}
               >
                 Alle Bezirke
               </Chip>
               {districts.map((d) => (
                 <Chip
                   key={d.name}
-                  active={draft.district === d.name}
-                  onClick={() => setDraft((prev) => ({ ...prev, district: d.name }))}
+                  active={selectedDistricts.has(d.name)}
+                  onClick={() => toggleDistrict(d.name)}
                 >
                   {d.name}
                 </Chip>
@@ -361,14 +435,16 @@ function Body({
 
       <FilterBlock label="Kategorie">
         <ChipGroup>
-          <Chip active={!draft.category} onClick={() => setCategory(undefined)}>
+          <Chip
+            active={selectedCats.size === 0}
+            onClick={() => setDraft((d) => ({ ...d, category: undefined, categories: undefined }))}
+          >
             Alle
           </Chip>
           {CATEGORIES.map((cat) => {
             const n = categoryCounts?.[cat];
-            const active = draft.category === cat;
             return (
-              <Chip key={cat} active={active} onClick={() => setCategory(active ? undefined : cat)}>
+              <Chip key={cat} active={selectedCats.has(cat)} onClick={() => toggleCategory(cat)}>
                 {cat}
                 {typeof n === 'number' && (
                   <span style={{ fontSize: 10.5, fontWeight: 700, opacity: 0.6, marginLeft: 6 }}>{n}</span>
@@ -398,18 +474,15 @@ function Body({
 
       <FilterBlock label="Preis">
         <ChipGroup>
-          {PRICE_TIERS.map((t) => {
-            const active = draft.priceTier === t.id;
-            return (
-              <Chip
-                key={t.id}
-                active={active}
-                onClick={() => setDraft((d) => ({ ...d, priceTier: active ? undefined : t.id }))}
-              >
-                {t.label}
-              </Chip>
-            );
-          })}
+          {PRICE_TIERS.map((t) => (
+            <Chip
+              key={t.id}
+              active={selectedPriceTiers.has(t.id)}
+              onClick={() => togglePriceTier(t.id)}
+            >
+              {t.label}
+            </Chip>
+          ))}
         </ChipGroup>
       </FilterBlock>
     </>

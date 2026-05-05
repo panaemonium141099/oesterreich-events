@@ -21,13 +21,12 @@
  */
 import type { Event, EventFilters } from '@/types/events';
 
-// v5: bumped after the DB district normalisation pass. v4 entries still
-// hold pre-normalisation district names ("Graz", "suedoststeiermark",
-// "bruck-an-der-mur") — the new client-side district filter compares
-// to canonical lowercase ("graz (stadt)", "südoststeiermark",
-// "bruck-mürzzuschlag") so old cached arrays would render zero hits
-// for any Bezirk pick. v4: switched to slim payload. v3: full events.
-const CACHE_VERSION = 'v5';
+// v6: bumped when the filter contract switched from single-value
+// bundesland/district/category/priceTier to multi-select arrays. The
+// filterKey now stringifies sorted arrays so a cached "Steiermark only"
+// hit can't poison a "Steiermark + Wien" lookup. v5: post-district
+// normalisation. v4: slim payload. v3: full events.
+const CACHE_VERSION = 'v6';
 const TTL_MS = 10 * 60 * 1000; // 10 minutes
 // 8000 slimmed events ≈ 3-4MB JSON. Stays well under the 5MB sessionStorage
 // quota Safari enforces, with headroom for the parser overhead. The list
@@ -98,9 +97,11 @@ interface CacheEntry {
  * must change too, otherwise we'd serve cached results that don't match.
  */
 function filterKey(filters: EventFilters): string {
+  const sortJoin = (a?: string[]) => (a && a.length ? a.slice().sort().join(',') : null);
   const k = {
     cat: filters.category ?? null,
-    tags: filters.tags?.slice().sort().join(',') ?? null,
+    cats: sortJoin(filters.categories),
+    tags: sortJoin(filters.tags),
     df: filters.dateFrom ?? null,
     dt: filters.dateTo ?? null,
     pmin: filters.priceMin ?? null,
@@ -110,11 +111,15 @@ function filterKey(filters: EventFilters): string {
     pn: filters.placeName ?? null,
     pp: filters.placePostalCode ?? null,
     bl: filters.bundesland ?? null,
+    bls: sortJoin(filters.bundeslands),
+    dist: filters.district ?? null,
+    dists: sortJoin(filters.districts),
     en: filters.eveningOnly ?? null,
     src: filters.sourceName ?? null,
     sf: filters.studentFriendly ?? null,
     ff: filters.familyFriendly ?? null,
     pt: filters.priceTier ?? null,
+    pts: sortJoin(filters.priceTiers),
   };
   return KEY_PREFIX + JSON.stringify(k);
 }
