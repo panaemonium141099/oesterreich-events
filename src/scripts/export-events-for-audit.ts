@@ -82,7 +82,7 @@ async function main() {
       buckets[bl].push(COLS.map((c) => csvEscape(ev[c])).join(','));
     }
     total += data.length;
-    lastId = String((data[data.length - 1] as Record<string, unknown>).id);
+    lastId = String((data[data.length - 1] as unknown as Record<string, unknown>).id);
     if (data.length < PAGE) break;
     if (total % 10000 === 0) console.log(`  fetched ${total}…`);
   }
