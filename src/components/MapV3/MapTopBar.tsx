@@ -130,17 +130,44 @@ export function MapTopBar({
       .slice(0, 8);
     setSuggestions(matches);
 
-    // Remote event-title match — debounced
+    // Remote event-title match — debounced. Pass through the active
+    // bundesland scope so suggestions are filtered to events the user
+    // would actually see after clicking. Without this, a Wien-scoped
+    // user could see a suggestion for a Steiermark event ("Seniorenkirtag"),
+    // click it, and land on "0 Events" because the bundesland filter
+    // blocks it. Date range too — past events shouldn't be suggested,
+    // but the API already handles start_date >= today by default.
     if (eventFetchRef.current) clearTimeout(eventFetchRef.current);
     eventFetchRef.current = setTimeout(async () => {
       abortRef.current?.abort();
       const ctrl = new AbortController();
       abortRef.current = ctrl;
       try {
-        const res = await fetch(
-          `/api/events?search=${encodeURIComponent(q)}&limit=5&sort=score&suggest=true`,
-          { signal: ctrl.signal, cache: 'no-store' },
-        );
+        const params = new URLSearchParams({
+          search: q,
+          limit: '5',
+          sort: 'score',
+          suggest: 'true',
+        });
+        if (bundesland && bundesland.id !== 'all') {
+          params.set('bundesland', bundesland.id);
+        }
+        if (filters.districts && filters.districts.length > 0) {
+          params.set('districts', filters.districts.join(','));
+        } else if (filters.district) {
+          params.set('district', filters.district);
+        }
+        if (filters.categories && filters.categories.length > 0) {
+          params.set('categories', filters.categories.join(','));
+        } else if (filters.category) {
+          params.set('category', filters.category);
+        }
+        if (filters.dateFrom) params.set('dateFrom', filters.dateFrom);
+        if (filters.dateTo) params.set('dateTo', filters.dateTo);
+        const res = await fetch(`/api/events?${params.toString()}`, {
+          signal: ctrl.signal,
+          cache: 'no-store',
+        });
         if (!res.ok) return;
         const data = await res.json();
         setEventSuggestions((data.events ?? []).slice(0, 5));
@@ -152,7 +179,8 @@ export function MapTopBar({
     return () => {
       if (eventFetchRef.current) clearTimeout(eventFetchRef.current);
     };
-  }, [searchValue, gemeinden]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchValue, gemeinden, bundesland.id, filters.district, filters.districts, filters.category, filters.categories, filters.dateFrom, filters.dateTo]);
 
   const totalSuggestions = suggestions.length + eventSuggestions.length;
 
