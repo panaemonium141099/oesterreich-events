@@ -21,10 +21,13 @@
  */
 import type { Event, EventFilters } from '@/types/events';
 
-// v4: bumped when the API switched to slim payload (no description /
-// enrichment arrays). v3 entries still contain the full event objects
-// which would balloon sessionStorage.
-const CACHE_VERSION = 'v4';
+// v5: bumped after the DB district normalisation pass. v4 entries still
+// hold pre-normalisation district names ("Graz", "suedoststeiermark",
+// "bruck-an-der-mur") — the new client-side district filter compares
+// to canonical lowercase ("graz (stadt)", "südoststeiermark",
+// "bruck-mürzzuschlag") so old cached arrays would render zero hits
+// for any Bezirk pick. v4: switched to slim payload. v3: full events.
+const CACHE_VERSION = 'v5';
 const TTL_MS = 10 * 60 * 1000; // 10 minutes
 // 8000 slimmed events ≈ 3-4MB JSON. Stays well under the 5MB sessionStorage
 // quota Safari enforces, with headroom for the parser overhead. The list
