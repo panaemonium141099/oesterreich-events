@@ -433,16 +433,28 @@ function MapPageInner() {
   const totalMatchCount =
     bundeslandIds.includes('all') && !hasClientNarrower ? apiTotalCount : null;
 
-  // Scope label — single → bundesland name; multi → "X Regionen";
-  // 'all' → "Österreich".
+  // Scope label priority — show the most specific dimension the user
+  // narrowed by, falling back outward:
+  //   1. Free-text search → quote the term ("kirtag")
+  //   2. District(s) selection → "Graz (Stadt)" / "2 Bezirke"
+  //   3. Bundesland(s) selection → "Wien" / "2 Regionen"
+  //   4. default → "Österreich"
+  // Without (1) the headline of a kirtag-search read "Niederösterreich"
+  // because of a stale scope — confusing.
   const scopeLabel = useMemo(() => {
+    if (filters.search && filters.search.trim()) return `„${filters.search.trim()}"`;
+    const districtList = filters.districts && filters.districts.length > 0
+      ? filters.districts
+      : filters.district ? [filters.district] : [];
+    if (districtList.length === 1) return districtList[0];
+    if (districtList.length > 1) return `${districtList.length} Bezirke`;
     const concrete = bundeslandIds.filter((b) => b !== 'all');
     if (concrete.length === 0) return 'Österreich';
     if (concrete.length === 1) {
       return BUNDESLAENDER.find((b) => b.id === concrete[0])?.name ?? concrete[0];
     }
     return `${concrete.length} Regionen`;
-  }, [bundeslandIds]);
+  }, [bundeslandIds, filters.search, filters.districts, filters.district]);
 
   const handleGemeindeSelect = (g: { name: string; bundeslandId: string; lat: number; lng: number; postalCode?: string }) => {
     const bl = BUNDESLAENDER.find((b) => b.id === g.bundeslandId);
@@ -509,6 +521,25 @@ function MapPageInner() {
             districts: [district],
             district: undefined,
             bbox: undefined,
+          }));
+          setDynamicFlyTo(null);
+        }}
+        onKeywordSearch={(q) => {
+          // Reset the active scope so the keyword runs against all of
+          // Austria, then apply the search. Without the reset a leftover
+          // Wien-scope from a previous query would silently narrow the
+          // new keyword (e.g. "kirtag" → only Wien kirtage).
+          setBundeslandIds(['all']);
+          setFilters((prev) => ({
+            ...prev,
+            search: q,
+            districts: undefined,
+            district: undefined,
+            categories: undefined,
+            category: undefined,
+            bbox: undefined,
+            placeName: undefined,
+            placePostalCode: undefined,
           }));
           setDynamicFlyTo(null);
         }}

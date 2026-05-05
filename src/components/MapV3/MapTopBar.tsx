@@ -56,6 +56,10 @@ interface MapTopBarProps {
    *  search update via onFiltersChange. */
   onBundeslandFilter?: (bundeslandId: string) => void;
   onDistrictFilter?: (bundeslandId: string, district: string) => void;
+  /** Keyword search — clears the active scope (bundesland/district/bbox)
+   *  and sets filters.search. Without this, a previous Wien-scope would
+   *  silently narrow the new "kirtag" query to Wien-only kirtage. */
+  onKeywordSearch?: (q: string) => void;
   /** Slot for the centered ViewToggle (Karte | Liste) — rendered by parent
    *  so we can position it absolutely inside the map area below the bar. */
   rightSlot?: React.ReactNode;
@@ -69,6 +73,7 @@ export function MapTopBar({
   onGemeindeSelect,
   onBundeslandFilter,
   onDistrictFilter,
+  onKeywordSearch,
 }: MapTopBarProps) {
   const { user, profile, signOut, loading: authLoading } = useAuth();
   const [searchValue, setSearchValue] = useState(filters.search || '');
@@ -225,8 +230,15 @@ export function MapTopBar({
       default:
         break;
     }
-    // No match → ILIKE keyword fallback.
-    onFiltersChange({ ...filters, search: q });
+    // No match → ILIKE keyword fallback. Hand off to the parent so the
+    // active bundesland/district/bbox scope can be reset — searching
+    // "kirtag" while a stale Wien scope sits in state would otherwise
+    // narrow to Wien-only kirtage instead of all-of-Austria.
+    if (onKeywordSearch) {
+      onKeywordSearch(q);
+    } else {
+      onFiltersChange({ ...filters, search: q });
+    }
     trackEvent('search', { query: q, kind: 'free' });
   };
 
