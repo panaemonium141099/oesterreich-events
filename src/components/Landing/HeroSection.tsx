@@ -3,8 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { trackEvent } from '@/lib/analytics';
-import { BUNDESLAENDER, bundeslandToId } from '@/lib/bundeslaender';
-import { DISTRICTS_BY_BUNDESLAND, type BundeslandId } from '@/lib/districtsAT';
+import { resolveSearchIntent } from '@/lib/search-intent';
 
 interface Gemeinde {
   n: string;   // name
@@ -120,89 +119,42 @@ export function HeroSection() {
     );
   };
 
-  // Try to resolve the raw text into a structured filter (bundesland /
-  // district / gemeinde) before falling back to a fuzzy string search.
-  // The point: typing "wien" + Enter should behave like clicking the
-  // Wien suggestion, not like an ILIKE on title/location/description.
-  // Strict equality (case-insensitive, trim) — no fuzzy matching here
-  // because false positives ("Steiermark"-typo matches "Salzburg") are
-  // worse than a fallback to ILIKE.
-  const resolveIntent = useCallback((raw: string): string => {
-    const q = raw.trim().toLowerCase();
-    if (!q) return '/map?view=list';
-
-    // 1. Bundesland exact match — by name, short name, or canonical id.
-    const blMatch = BUNDESLAENDER.find(
-      (b) => b.id !== 'all' && (
-        b.name.toLowerCase() === q ||
-        b.shortName.toLowerCase() === q ||
-        b.id === q ||
-        b.name.toLowerCase().replace(/österreich/g, 'oesterreich') === q
-      ),
-    ) ?? (bundeslandToId(q) ? BUNDESLAENDER.find((b) => b.id === bundeslandToId(q)) : undefined);
-    if (blMatch && blMatch.id !== 'all') {
-      return `/map?bundeslands=${blMatch.id}&view=list`;
-    }
-
-    // 2. District exact match — strip "(stadt)"/"(land)" suffix so "graz"
-    // matches "graz (stadt)" without forcing the user to type the suffix.
-    // When the bare name is ambiguous between Stadt and Land (Graz, Linz,
-    // Klagenfurt, …) we prefer the Stadt variant — that's almost always
-    // the user's intent for a single-word city query.
-    const stripSuffix = (s: string) => s.replace(/\s*\((stadt|land)\)\s*$/i, '').trim();
-    let bestDistrict: { name: string; bl: BundeslandId; isStadt: boolean } | null = null;
-    for (const [bl, ds] of Object.entries(DISTRICTS_BY_BUNDESLAND)) {
-      for (const d of ds) {
-        const lc = d.name.toLowerCase();
-        const bare = stripSuffix(lc);
-        if (lc === q || bare === q) {
-          const isStadt = /\(stadt\)$/i.test(d.name);
-          // Prefer Stadt; otherwise first match wins.
-          if (!bestDistrict || (isStadt && !bestDistrict.isStadt)) {
-            bestDistrict = { name: d.name, bl: bl as BundeslandId, isStadt };
-          }
-        }
-      }
-    }
-    if (bestDistrict) {
-      const params = new URLSearchParams({
-        bundeslands: bestDistrict.bl,
-        districts: bestDistrict.name,
-        view: 'list',
-      });
-      return `/map?${params.toString()}`;
-    }
-
-    // 3. Gemeinde exact match — exact name (case-insensitive). When more
-    // than one Gemeinde shares the name we still pick the first; the
-    // suggestion dropdown is the right tool when disambiguation matters.
-    const gemMatch = gemeinden.find((g) => g.n.toLowerCase() === q);
-    if (gemMatch) {
-      const params = new URLSearchParams({
-        bundesland: gemMatch.i,
-        lat: String(gemMatch.lat),
-        lng: String(gemMatch.lng),
-        zoom: '13',
-        search: gemMatch.n,
-        view: 'list',
-      });
-      return `/map?${params.toString()}`;
-    }
-
-    // 4. Fallback — fuzzy keyword. Server-side ILIKE on title/location/
-    // description/category, ranked by quality+recency relevance so
-    // higher-signal events bubble up.
-    const params = new URLSearchParams({
-      view: 'list',
-      search: raw.trim(),
-      sort: 'relevance',
-    });
-    return `/map?${params.toString()}`;
-  }, [gemeinden]);
-
   const handleDiscover = () => {
     setShowSuggestions(false);
-    navigateWithCurtain(resolveIntent(search));
+    const intent = resolveSearchIntent(search, gemeinden);
+    let url: string;
+    switch (intent.kind) {
+      case 'bundesland':
+        url = `/map?bundeslands=${intent.bundeslandId}&view=list`;
+        break;
+      case 'district': {
+        const p = new URLSearchParams({
+          bundeslands: intent.bundeslandId,
+          districts: intent.district,
+          view: 'list',
+        });
+        url = `/map?${p.toString()}`;
+        break;
+      }
+      case 'gemeinde': {
+        const p = new URLSearchParams({
+          bundesland: intent.bundeslandId,
+          lat: String(intent.lat),
+          lng: String(intent.lng),
+          zoom: '13',
+          search: intent.name,
+          view: 'list',
+        });
+        url = `/map?${p.toString()}`;
+        break;
+      }
+      case 'fallback':
+      default:
+        url = intent.search
+          ? `/map?view=list&search=${encodeURIComponent(intent.search)}&sort=relevance`
+          : '/map?view=list';
+    }
+    navigateWithCurtain(url);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {

@@ -22,6 +22,7 @@ import { T, countActiveFilters } from './tokens';
 import { defaultDateTo } from './datePresets';
 import type { EventFilters } from '@/types/events';
 import type { Bundesland } from '@/lib/bundeslaender';
+import { resolveSearchIntent } from '@/lib/search-intent';
 import { useAuth } from '@/lib/supabase/auth-context';
 import { NotificationBell } from '@/components/Notifications/NotificationBell';
 import { trackEvent } from '@/lib/analytics';
@@ -48,6 +49,13 @@ interface MapTopBarProps {
   bundesland: Bundesland;
   onOpenFilter: () => void;
   onGemeindeSelect?: (g: { name: string; bundeslandId: string; lat: number; lng: number; postalCode?: string }) => void;
+  /** Apply a structured filter intent — Enter without a suggestion click
+   *  routes through here when the typed text matches a Bundesland/Bezirk
+   *  (so "wien" + Enter behaves like clicking the Wien chip, not like an
+   *  ILIKE on title/location). Optional; if absent, falls back to a plain
+   *  search update via onFiltersChange. */
+  onBundeslandFilter?: (bundeslandId: string) => void;
+  onDistrictFilter?: (bundeslandId: string, district: string) => void;
   /** Slot for the centered ViewToggle (Karte | Liste) — rendered by parent
    *  so we can position it absolutely inside the map area below the bar. */
   rightSlot?: React.ReactNode;
@@ -59,6 +67,8 @@ export function MapTopBar({
   bundesland,
   onOpenFilter,
   onGemeindeSelect,
+  onBundeslandFilter,
+  onDistrictFilter,
 }: MapTopBarProps) {
   const { user, profile, signOut, loading: authLoading } = useAuth();
   const [searchValue, setSearchValue] = useState(filters.search || '');
@@ -169,8 +179,55 @@ export function MapTopBar({
   const handleSubmitSearch = () => {
     closeSuggestions();
     const q = searchValue.trim();
-    onFiltersChange({ ...filters, search: q || undefined });
-    if (q) trackEvent('search', { query: q, kind: 'free' });
+    if (!q) {
+      onFiltersChange({ ...filters, search: undefined });
+      return;
+    }
+    // Structured-intent resolution mirrors the landing-page Hero: typing
+    // "wien" + Enter sets bundeslands=wien instead of ILIKE'ing on the
+    // string "wien" (which misses every event whose title isn't "Wien").
+    const intent = resolveSearchIntent(q, gemeinden);
+    switch (intent.kind) {
+      case 'bundesland':
+        if (onBundeslandFilter) {
+          onBundeslandFilter(intent.bundeslandId);
+          // Drop the typed string from `search` — the bundesland filter
+          // is the real signal; leaving search='wien' would needlessly
+          // ILIKE-narrow on top.
+          onFiltersChange({ ...filters, search: undefined });
+          trackEvent('search', { query: q, kind: 'bundesland' });
+          return;
+        }
+        break;
+      case 'district':
+        if (onDistrictFilter) {
+          onDistrictFilter(intent.bundeslandId, intent.district);
+          onFiltersChange({ ...filters, search: undefined });
+          trackEvent('search', { query: q, kind: 'district' });
+          return;
+        }
+        break;
+      case 'gemeinde':
+        if (onGemeindeSelect) {
+          setSearchValue(intent.name);
+          onGemeindeSelect({
+            name: intent.name,
+            bundeslandId: intent.bundeslandId,
+            lat: intent.lat,
+            lng: intent.lng,
+            postalCode: intent.postalCode,
+          });
+          trackEvent('search', { query: q, kind: 'gemeinde' });
+          return;
+        }
+        break;
+      case 'fallback':
+      default:
+        break;
+    }
+    // No match → ILIKE keyword fallback.
+    onFiltersChange({ ...filters, search: q });
+    trackEvent('search', { query: q, kind: 'free' });
   };
 
   const handleKey = (e: React.KeyboardEvent) => {

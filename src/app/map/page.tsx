@@ -466,6 +466,31 @@ function MapPageInner() {
         bundesland={bundesland}
         onOpenFilter={() => setFilterOpen(true)}
         onGemeindeSelect={handleGemeindeSelect}
+        onBundeslandFilter={(id) => {
+          // Replace the active bundesland selection — same UX as picking
+          // the chip in the FilterDrawer. Clear any district filter so a
+          // stale Bezirk doesn't shadow the new bundesland scope.
+          setBundeslandIds([id]);
+          setFilters((prev) =>
+            prev.district || prev.districts
+              ? { ...prev, district: undefined, districts: undefined, bbox: undefined }
+              : { ...prev, bbox: undefined },
+          );
+          setDynamicFlyTo(null);
+        }}
+        onDistrictFilter={(blId, district) => {
+          // Wire up multi-select-friendly: the user typed exactly one
+          // district name, so set bundesland to its parent and the
+          // districts array to that one entry.
+          setBundeslandIds([blId]);
+          setFilters((prev) => ({
+            ...prev,
+            districts: [district],
+            district: undefined,
+            bbox: undefined,
+          }));
+          setDynamicFlyTo(null);
+        }}
       />
 
       <div className="flex-1 relative min-h-0">
