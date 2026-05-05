@@ -82,15 +82,36 @@ function MapPageInner() {
   // Hydrate state from URL on mount
   const initialView: MapViewMode = (searchParams.get('view') as MapViewMode) === 'list' ? 'list' : 'map';
   const initialSearch = searchParams.get('search') || '';
-  const initialBundeslandId = searchParams.get('bundesland') || 'all';
+  // Multi takes precedence over single, mirrors the API contract.
+  // Without this, "?bundeslands=wien" silently fell back to the default
+  // 'all' because the init reader only knew the legacy singular param,
+  // so the map rendered every Austria event instead of just Wien.
+  const initialBundeslandsParam = searchParams.get('bundeslands');
+  const initialBundeslandIds = initialBundeslandsParam
+    ? initialBundeslandsParam.split(',').map((s) => s.trim()).filter(Boolean)
+    : (() => {
+        const single = searchParams.get('bundesland');
+        return single && single !== 'all' ? [single] : ['all'];
+      })();
+  const initialBundeslandId = initialBundeslandIds[0] ?? 'all';
   const initialCategory = searchParams.get('category') || '';
+  const initialCategoriesParam = searchParams.get('categories');
+  const initialCategories = initialCategoriesParam
+    ? initialCategoriesParam.split(',').map((s) => s.trim()).filter(Boolean)
+    : null;
+  const initialDistrictsParam = searchParams.get('districts');
+  const initialDistricts = initialDistrictsParam
+    ? initialDistrictsParam.split(',').map((s) => s.trim()).filter(Boolean)
+    : null;
   const initialLat = searchParams.get('lat') ? parseFloat(searchParams.get('lat')!) : null;
   const initialLng = searchParams.get('lng') ? parseFloat(searchParams.get('lng')!) : null;
   const initialZoom = searchParams.get('zoom') ? parseFloat(searchParams.get('zoom')!) : null;
 
   const hasUrlContext =
-    initialBundeslandId !== 'all' ||
+    !initialBundeslandIds.includes('all') ||
     initialCategory !== '' ||
+    !!initialCategories ||
+    !!initialDistricts ||
     initialSearch !== '' ||
     (initialLat !== null && initialLng !== null);
 
@@ -113,9 +134,7 @@ function MapPageInner() {
   // Multi-bundesland selection. Source of truth — `primaryBundesland` is
   // the derived single value used for map bbox / flyTo / scope label.
   // ['all'] = no filter; ['wien','steiermark'] = both; etc.
-  const [bundeslandIds, setBundeslandIds] = useState<string[]>(
-    initialBundeslandId === 'all' ? ['all'] : [initialBundeslandId],
-  );
+  const [bundeslandIds, setBundeslandIds] = useState<string[]>(initialBundeslandIds);
   const primaryBundesland = useMemo(
     () => BUNDESLAENDER.find((b) => b.id === bundeslandIds[0]) ?? BUNDESLAENDER[0],
     [bundeslandIds],
@@ -133,6 +152,8 @@ function MapPageInner() {
   const [filters, setFilters] = useState<EventFilters>({
     ...(initialSearch ? { search: initialSearch } : {}),
     ...(initialCategory ? { category: initialCategory } : {}),
+    ...(initialCategories ? { categories: initialCategories } : {}),
+    ...(initialDistricts ? { districts: initialDistricts } : {}),
   });
 
   const [allEvents, setAllEvents] = useState<Event[]>([]);
