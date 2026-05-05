@@ -46,7 +46,10 @@ export function resolveSearchIntent(
   const q = raw.trim().toLowerCase();
   if (!q) return { kind: 'fallback', search: '' };
 
-  // 1. Bundesland — name, short name, id, or ASCII-alias via bundeslandToId.
+  // Compute BOTH the Bundesland and District matches first. We need both
+  // before deciding because some queries hit both (e.g. "Salzburg" is the
+  // bundesland AND a Statutarstadt). Intent for one-word city queries is
+  // almost always the city — let the Stadt-district win in that case.
   const blByExact = BUNDESLAENDER.find(
     (b) =>
       b.id !== 'all' &&
@@ -57,27 +60,34 @@ export function resolveSearchIntent(
   );
   const blByAlias = !blByExact ? bundeslandToId(q) : null;
   const blMatch = blByExact ?? (blByAlias ? BUNDESLAENDER.find((b) => b.id === blByAlias) : undefined);
-  if (blMatch && blMatch.id !== 'all') {
-    return { kind: 'bundesland', bundeslandId: blMatch.id };
-  }
 
-  // 2. District — suffix-stripped equality. Stadt beats Land for one-word
-  // city queries ("graz" → Graz Stadt, not Graz-Umgebung).
-  let best: { name: string; bl: BundeslandId; isStadt: boolean } | null = null;
+  // District match — suffix-stripped equality, Stadt preferred.
+  let bestDistrict: { name: string; bl: BundeslandId; isStadt: boolean } | null = null;
   for (const [bl, ds] of Object.entries(DISTRICTS_BY_BUNDESLAND)) {
     for (const d of ds) {
       const lc = d.name.toLowerCase();
       const bare = lc.replace(STRIP_SUFFIX, '').trim();
       if (lc === q || bare === q) {
         const isStadt = /\(stadt\)$/i.test(d.name);
-        if (!best || (isStadt && !best.isStadt)) {
-          best = { name: d.name, bl: bl as BundeslandId, isStadt };
+        if (!bestDistrict || (isStadt && !bestDistrict.isStadt)) {
+          bestDistrict = { name: d.name, bl: bl as BundeslandId, isStadt };
         }
       }
     }
   }
-  if (best) {
-    return { kind: 'district', bundeslandId: best.bl, district: best.name };
+
+  // Tie-breaker: when a query matches both a Bundesland AND a Stadt-district
+  // (Salzburg is the only such case in AT), prefer the city. Nobody types
+  // "Salzburg" wanting all of Bundesland Salzburg's events — they want the
+  // Mozart-city. Same logic protects future ambiguous names.
+  if (bestDistrict && bestDistrict.isStadt) {
+    return { kind: 'district', bundeslandId: bestDistrict.bl, district: bestDistrict.name };
+  }
+  if (blMatch && blMatch.id !== 'all') {
+    return { kind: 'bundesland', bundeslandId: blMatch.id };
+  }
+  if (bestDistrict) {
+    return { kind: 'district', bundeslandId: bestDistrict.bl, district: bestDistrict.name };
   }
 
   // 3. Gemeinde exact match. When multiple Gemeinden share the name (rare)
