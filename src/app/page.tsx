@@ -9,6 +9,7 @@ import { Onboarding } from '@/components/Landing/Onboarding';
 import { LiveActivity } from '@/components/Landing/LiveActivity';
 import { Footer } from '@/components/Legal/Footer';
 import { LandingSections } from '@/components/Landing/LandingSections';
+import { ScrollHint } from '@/components/Landing/ScrollHint';
 
 // WebSite + Organization JSON-LD live now in the root layout so every page
 // emits them, not just the landing. No page-local JSON-LD here anymore.
@@ -84,11 +85,19 @@ export default async function LandingPage({
         .
       </div>
 
-      <main className="flex-1 min-h-screen flex flex-col items-center justify-center gap-8 md:gap-12 px-6 text-center max-w-3xl w-full">
+      {/*
+       * Hero block was previously `min-h-screen flex justify-center` so the
+       * search bar landed dead-center of the viewport — pushing the Top-
+       * Events carousel completely out of sight. Removed the screen
+       * height + dropped vertical gaps so the hero takes ~50vh on
+       * desktop, ~60vh on mobile, and the carousel is visible (or just
+       * a scroll-hint nudge away) without scrolling.
+       */}
+      <main className="flex flex-col items-center gap-5 md:gap-7 px-6 text-center max-w-3xl w-full pt-10 md:pt-14">
         {/* Headline + Stats + Tagline — tightly grouped */}
-        <div className="flex flex-col items-center gap-3 md:gap-4">
+        <div className="flex flex-col items-center gap-2 md:gap-3">
           <h1
-            className="text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-bold tracking-tight animate-fade-in-up opacity-0 leading-[1.1]"
+            className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight animate-fade-in-up opacity-0 leading-[1.1]"
             style={{ animationDelay: '0.3s', animationFillMode: 'forwards' }}
           >
             Entdecke was
@@ -101,7 +110,7 @@ export default async function LandingPage({
 
           {/* Tagline */}
           <p
-            className="text-white/30 text-sm tracking-[0.12em] animate-fade-in opacity-0"
+            className="text-white/30 text-xs sm:text-sm tracking-[0.12em] animate-fade-in opacity-0"
             style={{ animationDelay: '0.75s', animationFillMode: 'forwards' }}
           >
             Die größte Eventdatenbank Österreichs
@@ -111,6 +120,9 @@ export default async function LandingPage({
         {/* Search + CTA */}
         <HeroSection />
       </main>
+
+      {/* Scroll-down hint — fades out once the user has scrolled past 80 px */}
+      <ScrollHint />
 
       {/* Landing sections below the hero */}
       <LandingSections />

@@ -163,7 +163,11 @@ export function WeeklyHighlights() {
       </div>
 
       <div
-        className="flex gap-4 overflow-x-auto pb-3 -mx-1 px-1"
+        // Visible scrollbar — laptop/desktop users without a touchpad
+        // had no way to swipe right; the scrollbar gives them a draggable
+        // handle. CSS lives in globals.css under .mv3-h-scroll so the
+        // bar is thin and on-brand instead of native-OS chunky.
+        className="flex gap-4 overflow-x-auto pb-3 -mx-1 px-1 mv3-h-scroll"
         style={{ scrollSnapType: 'x proximity', WebkitOverflowScrolling: 'touch' }}
       >
         {loading

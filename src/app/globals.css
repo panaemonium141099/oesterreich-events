@@ -778,6 +778,31 @@ button:active, a:active, [role="button"]:active {
 }
 
 /* ═══════════════════════════════════════════════
+   Visible horizontal scrollbar — for carousels on the dark landing
+   page where the global ultra-thin variant is invisible against the
+   black background. Used by WeeklyHighlights so non-touchpad users
+   can drag a handle right.
+   ═══════════════════════════════════════════════ */
+.mv3-h-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.25) rgba(255, 255, 255, 0.04);
+}
+.mv3-h-scroll::-webkit-scrollbar {
+  height: 8px;
+}
+.mv3-h-scroll::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 4px;
+}
+.mv3-h-scroll::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.25);
+  border-radius: 4px;
+}
+.mv3-h-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.45);
+}
+
+/* ═══════════════════════════════════════════════
    Global Scrollbar — ultra-thin, almost invisible
    ═══════════════════════════════════════════════ */
 * {
