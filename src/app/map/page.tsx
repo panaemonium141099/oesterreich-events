@@ -526,25 +526,28 @@ function MapPageInner() {
         onGemeindeSelect={handleGemeindeSelect}
         onBundeslandFilter={(id) => {
           // Replace the active bundesland selection — same UX as picking
-          // the chip in the FilterDrawer. Clear any district filter so a
-          // stale Bezirk doesn't shadow the new bundesland scope.
+          // the chip in the FilterDrawer. Clear district + search + bbox
+          // so a stale narrow scope doesn't shadow the new bundesland.
+          // Single setFilters so MapTopBar doesn't have to do a second
+          // call (and reintroduce stale state via the spread).
           setBundeslandIds([id]);
-          setFilters((prev) =>
-            prev.district || prev.districts
-              ? { ...prev, district: undefined, districts: undefined, bbox: undefined }
-              : { ...prev, bbox: undefined },
-          );
+          setFilters((prev) => ({
+            ...prev,
+            district: undefined,
+            districts: undefined,
+            search: undefined,
+            bbox: undefined,
+          }));
           setDynamicFlyTo(null);
         }}
         onDistrictFilter={(blId, district) => {
-          // Wire up multi-select-friendly: the user typed exactly one
-          // district name, so set bundesland to its parent and the
-          // districts array to that one entry.
+          // Same as above — replace bundesland + districts, clear search/bbox.
           setBundeslandIds([blId]);
           setFilters((prev) => ({
             ...prev,
             districts: [district],
             district: undefined,
+            search: undefined,
             bbox: undefined,
           }));
           setDynamicFlyTo(null);

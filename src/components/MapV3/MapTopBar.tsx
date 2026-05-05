@@ -223,19 +223,22 @@ export function MapTopBar({
     switch (intent.kind) {
       case 'bundesland':
         if (onBundeslandFilter) {
+          // Single source of truth — the parent handler clears search,
+          // districts, bbox in one go. A second onFiltersChange here
+          // would re-introduce the stale `filters` snapshot (districts
+          // from a previous query) because spread reads the prop value
+          // not the just-set state. That's how "wien" + Enter ended up
+          // headline=Graz on a previously narrowed view.
+          setSearchValue('');
           onBundeslandFilter(intent.bundeslandId);
-          // Drop the typed string from `search` — the bundesland filter
-          // is the real signal; leaving search='wien' would needlessly
-          // ILIKE-narrow on top.
-          onFiltersChange({ ...filters, search: undefined });
           trackEvent('search', { query: q, kind: 'bundesland' });
           return;
         }
         break;
       case 'district':
         if (onDistrictFilter) {
+          setSearchValue('');
           onDistrictFilter(intent.bundeslandId, intent.district);
-          onFiltersChange({ ...filters, search: undefined });
           trackEvent('search', { query: q, kind: 'district' });
           return;
         }
