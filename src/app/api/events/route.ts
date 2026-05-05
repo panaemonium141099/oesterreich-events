@@ -429,34 +429,25 @@ export async function GET(request: NextRequest) {
       query = query.lte('start_date', filters.dateTo + 'T23:59:59');
     }
 
+    // Search prefilter via the search_event_ids RPC (uses the partial
+    // gin_trgm functional index over the concatenated search columns).
+    // RPC returns all matching ids; we then narrow with id-IN. Cap on
+    // the IN-list because PostgREST URL has a 16 KB header cap — UUIDs
+    // are 37 chars so 250 ids ≈ 9 KB plus the rest of the filter URL.
+    // For broader queries we'll need a comprehensive RPC that takes
+    // all filters and returns events directly (no id round-trip).
     if (filters.search) {
-      // Sanitize search input: strip PostgREST special characters and SQL wildcards
       const sanitizedSearch = filters.search.replace(/[,.*()%_\\]/g, '').trim();
       if (sanitizedSearch) {
         const normalized = sanitizedSearch.toLowerCase();
         const synonymCategories = SEARCH_SYNONYMS[normalized] ?? [];
-
-        // Pre-filter via the search_event_ids RPC — uses the partial
-        // gin_trgm functional index over (title || location_name || …).
-        // Cuts keyword search from ~25s (multi-column OR ILIKE seq scan)
-        // to <100ms. We then narrow further with id-IN + the synonym
-        // category eq via a second .or() against the same id list.
-        // Cap the prefilter at 300 ids — each UUID is 37 chars in the
-        // PostgREST `id.in.(...)` URL plus the base URL + select=... +
-        // other filter clauses; 300 keeps the total request URL safely
-        // under the 16KB HTTP header limit (400 was right at the edge
-        // and overflowed on queries with synonym OR-clauses or wide
-        // selects). Broader queries should be narrowed with bundesland
-        // / date / category filters anyway.
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const { data: matchedRows, error: rpcErr } = await (supabase.rpc as any)(
           'search_event_ids',
-          { q: sanitizedSearch, max_ids: 300 },
+          { q: sanitizedSearch, max_ids: 250 },
         );
         if (rpcErr) {
-          console.error('search_event_ids RPC failed:', rpcErr);
-          // Fall back to the slow OR-ilike so search still returns
-          // SOMETHING if the RPC is missing (e.g. forgot the migration).
+          console.error('search_event_ids RPC failed, falling back to ILIKE OR-clause:', rpcErr);
           let orClause = `title.ilike.%${sanitizedSearch}%,location_name.ilike.%${sanitizedSearch}%,address.ilike.%${sanitizedSearch}%,category.ilike.%${sanitizedSearch}%`;
           for (const cat of synonymCategories) {
             orClause += `,category.eq.${cat.replace(/,/g, '')}`;
@@ -472,14 +463,10 @@ export async function GET(request: NextRequest) {
             }
             query = query.in('id', matchedIds);
           } else {
-            // Synonym path: matched ids OR any event in a synonym category.
-            // PostgREST OR with an in-list — bracketed format.
-            const idClause = matchedIds.length > 0 ? `id.in.(${matchedIds.join(',')})` : '';
-            const synClause = synonymCategories
-              .map((c) => `category.eq.${c.replace(/,/g, '')}`)
-              .join(',');
-            const combined = [idClause, synClause].filter(Boolean).join(',');
-            if (combined) query = query.or(combined);
+            // Synonym path — use category eq alone. The trigram matches
+            // are already mostly contained in the synonym category and
+            // adding both via OR-clause overflows the URL.
+            query = query.in('category', synonymCategories);
           }
         }
       }
@@ -709,6 +696,7 @@ export async function GET(request: NextRequest) {
     // causing the progressive loader to stop after ~6k of 77k events).
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let allFetched: any[] = events || [];
+
 
     // Relevance re-ranking: combine quality_score and recency in memory
     if (filters.sort === 'relevance' && allFetched.length > 0) {
