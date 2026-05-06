@@ -22,13 +22,15 @@ import { NextRequest, NextResponse } from 'next/server';
  */
 export const dynamic = 'force-dynamic';
 
+// Bundesland-IDs müssen EXAKT mit src/lib/bundeslaender.ts matchen
+// (das ist was der Map-Client und die Filter-Drawer als ?bundesland=… senden).
 const PATHS = [
   // Map-Default + Region-Hubs (slim, 10 000er Batch — exakt was die Map fetcht)
   '/api/events?bundesland=all&limit=10000&slim=true',
   '/api/events?bundesland=wien&limit=10000&slim=true',
+  '/api/events?bundesland=niederoesterreich&limit=10000&slim=true',
+  '/api/events?bundesland=oberoesterreich&limit=10000&slim=true',
   '/api/events?bundesland=steiermark&limit=10000&slim=true',
-  '/api/events?bundesland=noe&limit=10000&slim=true',
-  '/api/events?bundesland=ooe&limit=10000&slim=true',
   '/api/events?bundesland=tirol&limit=10000&slim=true',
   '/api/events?bundesland=salzburg&limit=10000&slim=true',
   '/api/events?bundesland=kaernten&limit=10000&slim=true',
