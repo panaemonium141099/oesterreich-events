@@ -86,9 +86,8 @@ function getTrustedTicketBonus(ticketUrl: string | null | undefined): number {
 - [ ] CLAUDE.md "Build & Test" Sektion aktualisiert
 
 ## Done summary
-TBD
-
+Decoupled scrape:pipeline from enrichment (opt-in --with-enrichment) and replaced the unconditional ticket_url score bonus with a host-based bonus (TRUSTED_TICKET_HOSTS) in both ingest (score-event.ts) and backfill (utils/scoring.ts) scoring paths; added enrich:claude/enrich:openai npm scripts and 15 new tests covering the host-based logic.
 ## Evidence
-- Commits:
-- Tests:
+- Commits: e2c6f8ddf5bd0e454ac1b8e9501864b17ee037cd
+- Tests: npx vitest run src/__tests__/calculate-scores.test.ts src/__tests__/quality/, npx tsc --noEmit (no new errors vs baseline)
 - PRs:
