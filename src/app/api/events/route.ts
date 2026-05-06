@@ -759,12 +759,12 @@ export async function GET(request: NextRequest) {
       };
 
       const response = NextResponse.json(responseBody);
-      // Student-Score-Mode wird zur Query-Zeit gerechnet → kürzere TTL
-      // damit eine frische Score-Klassifikation nicht stundenlang stehen
-      // bleibt. 30 s reicht — Datenbank ändert sich nur durch Scraper-Lauf.
+      // Student-Score wird zur Query-Zeit aus den existing events gerechnet,
+      // die Underlying-Daten ändern sich nur 1×/Tag (manueller Scrape) →
+      // 1 h TTL + 24 h SWR ist sicher.
       response.headers.set(
         'Cache-Control',
-        'public, s-maxage=30, stale-while-revalidate=300'
+        'public, s-maxage=3600, stale-while-revalidate=86400'
       );
       response.headers.set('X-Total-Count', String(studentTotal));
       return response;
@@ -839,14 +839,14 @@ export async function GET(request: NextRequest) {
 
     const response = NextResponse.json(responseBody);
 
-    // Edge-Cache: 60 s frisch + 5 min SWR. Cache-Key = volle URL inkl. aller
-    // Query-Params, also wird jede Filter-Kombination (Bundesland, Kategorie,
-    // bbox, …) separat im Vercel CDN gehalten. Erste Anfrage pro Kombi: 3-5 s
-    // (Function-Spawn + Supabase). Alle weiteren Geräte: <50 ms.
-    // Daten ändern sich nur durch Scraper-Lauf (1×/Tag) → 60 s ist konservativ.
+    // Edge-Cache: 1 h frisch + 24 h SWR. Cache-Key = volle URL inkl. aller
+    // Query-Params, also wird jede Filter-Kombination separat im Vercel CDN
+    // gehalten. Daten ändern sich nur durch manuellen Scrape (1×/Tag) →
+    // 1 h TTL ist sicher; SWR-24h fängt jede Lücke zwischen Cron-Hits ab.
+    // Pre-Warm via /api/cron/warm-cache hält die Top-Kombis permanent warm.
     response.headers.set(
       'Cache-Control',
-      'public, s-maxage=60, stale-while-revalidate=300'
+      'public, s-maxage=3600, stale-while-revalidate=86400'
     );
 
     // Pagination metadata headers

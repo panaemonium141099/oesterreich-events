@@ -139,11 +139,10 @@ export async function GET(
     totalEvents: totalEvents ?? 0,
     similarVenues,
   });
-  // Venue-Detail (Spielplan + ähnliche Venues) ändert sich nur durch
-  // neu-gescrapete Events — 5 min Edge + 10 min SWR.
+  // Venue-Detail (Spielplan + ähnliche Venues) — 1 h Edge + 24 h SWR.
   res.headers.set(
     'Cache-Control',
-    'public, s-maxage=300, stale-while-revalidate=600'
+    'public, s-maxage=3600, stale-while-revalidate=86400'
   );
   return res;
 }

@@ -32,12 +32,11 @@ export async function GET(
     }
 
     const res = NextResponse.json(event);
-    // Event-Detail ändert sich nach dem Scrape quasi nie. 5 min Edge + 10 min
-    // SWR — pro Event-ID separater Cache-Key. Detail-Modal + SEO-Page treffen
-    // beide diesen Endpoint und profitieren so vom CDN.
+    // Event-Detail ändert sich nach dem Scrape quasi nie — 1 h Edge + 24 h SWR.
+    // Detail-Modal + SEO-Page treffen beide diesen Endpoint pro ID.
     res.headers.set(
       'Cache-Control',
-      'public, s-maxage=300, stale-while-revalidate=600'
+      'public, s-maxage=3600, stale-while-revalidate=86400'
     );
     return res;
   } catch (err) {

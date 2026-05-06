@@ -50,11 +50,10 @@ export async function GET(request: NextRequest) {
     }
 
     const res = NextResponse.json({ events: data || [] });
-    // Pro Suchquery ein Cache-Eintrag (Key = ?q=…). Tippt jemand „kirtag",
-    // wird dasselbe Resultat für die nächsten 60 s vom Edge ausgeliefert.
+    // Pro Suchquery ein Cache-Eintrag (Key = ?q=…). 1 h TTL + 24 h SWR.
     res.headers.set(
       'Cache-Control',
-      'public, s-maxage=60, stale-while-revalidate=300'
+      'public, s-maxage=3600, stale-while-revalidate=86400'
     );
     return res;
   } catch (err) {

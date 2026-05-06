@@ -1,5 +1,4 @@
-import { redirect } from 'next/navigation';
-import { createServerSupabaseClient } from '@/lib/supabase/server';
+import { Suspense } from 'react';
 import { HeroSection } from '@/components/Landing/HeroSection';
 import { LandingStats } from '@/components/Landing/LandingStats';
 import { LandingAuth } from '@/components/Landing/LandingAuth';
@@ -10,17 +9,17 @@ import { LiveActivity } from '@/components/Landing/LiveActivity';
 import { Footer } from '@/components/Legal/Footer';
 import { LandingSections } from '@/components/Landing/LandingSections';
 import { ScrollHint } from '@/components/Landing/ScrollHint';
+import { AuthRedirectGate } from '@/components/Landing/AuthRedirectGate';
 
 // WebSite + Organization JSON-LD live now in the root layout so every page
 // emits them, not just the landing. No page-local JSON-LD here anymore.
 
-// ISR-Hint: Sobald der Auth-Check (`supabase.auth.getUser`) in eine
-// Suspense-Boundary ausgelagert wird (Phase 2), greift `revalidate`
-// und die Landing-Hülle wird zur statischen HTML aus dem Edge-Cache.
-// Aktuell wird die Anweisung von Next.js ignoriert weil cookies() im
-// Promise.race oben die Page in dynamic mode zwingt — das ist OK, der
-// Cache-Win kommt sowieso aus den darunter liegenden APIs (Featured,
-// Stats, RegionExplorer haben jetzt alle s-maxage gesetzt).
+// ISR: Landing-Hülle wird statisch zur Build-Zeit gerendert + alle 1 h
+// regeneriert. Funktioniert weil der Auth-Check (Cookies + getUser) in
+// die <AuthRedirectGate>-Komponente unter Suspense ausgelagert wurde,
+// damit die Hülle keinen runtime-only-Zugriff mehr hat. Anonyme Visitors
+// (Googlebot + 95 % der Erstbesucher) sehen die Landing instant aus dem
+// Edge-Cache; logged-in Users werden via Streaming-Redirect zu /feed.
 export const revalidate = 3600;
 
 export default async function LandingPage({
@@ -32,40 +31,20 @@ export default async function LandingPage({
   // Allow ?home to bypass redirect and show landing page
   const forceHome = 'home' in params;
 
-  if (!forceHome) {
-    // Auth check with hard timeout — Supabase outages were causing the
-    // landing page to hang at 50% loading on mobile (verified 2026-04-28
-    // when Supabase had a connection-timeout incident; auth.getUser()
-    // never returned, the server render blocked indefinitely, the user
-    // saw an unfinished progress bar).
-    //
-    // Wrap the call in Promise.race against a 2s timer. If Supabase
-    // doesn't answer in time we render the landing page anonymously
-    // (no redirect to /feed). A logged-in user might briefly see the
-    // landing page during a Supabase blip — they can click "Map" /
-    // "Feed" and re-auth via client-side flows that recover quickly.
-    // Trade-off: degraded auth-aware UX during outages, vs. site
-    // staying alive for everyone (anonymous traffic, Googlebot,
-    // first-time visitors).
-    try {
-      const supabase = await createServerSupabaseClient();
-      const userResult = await Promise.race<{ data: { user: unknown | null } } | null>([
-        supabase.auth.getUser(),
-        new Promise<null>((resolve) => setTimeout(() => resolve(null), 2000)),
-      ]);
-      if (userResult?.data?.user) {
-        redirect('/feed');
-      }
-    } catch {
-      // Server-side Supabase fetch threw — render anonymously.
-    }
-  }
-
   return (
     <div
       id="landing-curtain"
       className="min-h-screen text-white flex flex-col items-center relative overflow-hidden gradient-mesh"
     >
+      {/* Auth-Redirect läuft async unter Suspense — blockiert die statische
+          Landing-Hülle nicht. Logged-in User kriegen einen Streaming-Redirect
+          zu /feed; anonyme Visitor (inkl. Googlebot) sehen die Landing instant
+          aus dem Edge-Cache. ?home in der URL überspringt den Auth-Check. */}
+      {!forceHome && (
+        <Suspense fallback={null}>
+          <AuthRedirectGate />
+        </Suspense>
+      )}
       {/* Particle effect behind content */}
       <ParticleBackground />
 

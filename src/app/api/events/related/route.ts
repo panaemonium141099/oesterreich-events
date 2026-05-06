@@ -156,13 +156,11 @@ export async function GET(request: NextRequest) {
   // Strip internal scoring field
   const events = ranked.map(({ _rankScore, ...rest }) => rest);
 
-  // Related-Events sind deterministisch pro eventId — 5 min Edge + 10 min SWR.
-  // Wenn das Quell-Event verschwindet ist der Cache-Eintrag eh stale, der
-  // nächste Request liefert dann einen 404.
+  // Related-Events sind deterministisch pro eventId — 1 h Edge + 24 h SWR.
   const res = NextResponse.json({ events });
   res.headers.set(
     'Cache-Control',
-    'public, s-maxage=300, stale-while-revalidate=600'
+    'public, s-maxage=3600, stale-while-revalidate=86400'
   );
   return res;
 }

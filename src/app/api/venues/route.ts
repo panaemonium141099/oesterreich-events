@@ -163,10 +163,10 @@ export async function GET(request: NextRequest) {
       hasMore,
     });
 
-    // Venues ändern sich quasi nie (Stammdaten). 5 min Edge + 10 min SWR.
+    // Venues sind Stammdaten — 1 h Edge + 24 h SWR.
     response.headers.set(
       'Cache-Control',
-      'public, s-maxage=300, stale-while-revalidate=600'
+      'public, s-maxage=3600, stale-while-revalidate=86400'
     );
     response.headers.set('X-Total-Count', String(totalCount));
     if (nextCursor) {
