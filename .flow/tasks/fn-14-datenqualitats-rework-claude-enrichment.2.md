@@ -137,9 +137,8 @@ ON CONFLICT DO NOTHING;
 - [ ] Migration ist idempotent (zweiter Apply ist no-op)
 
 ## Done summary
-TBD
-
+DB-Migration angewendet (Project booljdtrktpotsenbnut): events bekommt 8 neue Spalten (image_width/height, last_seen_at korrekt aus updated_at backfilled, enrichment_failed/_count, 3 facet booleans), Partial Index events_stale_idx, neue sources- und source_runs-Tabellen mit source_metrics-View, sources mit 137 Bootstrap-Rows. bulk_update_event_enrichment RPC erweitert um alle 6 v2-Felder + latente Cast-Bugs gefixt; RPC-Round-Trip-Test gruen.
 ## Evidence
-- Commits:
-- Migration files:
-- DB verify (SQL):
+- Commits: ad5dc26b51d50d7e2b91f64fdab3b0a4dee1e64c, 74c163b7f9e7d7e2c09143fb725714326b7aaf71
+- Tests: supabase apply_migration: image_dims_and_lifecycle (success), supabase apply_migration: sources_and_runs (success), supabase apply_migration: bulk_enrichment_extend_v2_fix_casts (success), RPC round-trip test: bulk_update_event_enrichment writes enrichment_failed=true, enrichment_failure_count=1, price_min=12.50, is_dog_friendly/wheelchair/outdoor=true; reads back identical (rows_affected=1), Idempotency check: re-applying Migration A backfill returns 0 rows; re-applying Migration B bootstrap returns 0 rows, Live verification: events table has all 8 new columns with correct defaults, events_stale_idx partial index present with WHERE clause, sources has 10 cols + sources_trust_idx, source_runs has 8 cols + source_runs_source_time_idx + status CHECK, source_metrics view executes, last_seen_at backfill verified post-repair: 186017 rows, 0 NULLs, min_seen=2026-04-29 (matches oldest pre-existing updated_at)
+- PRs:
