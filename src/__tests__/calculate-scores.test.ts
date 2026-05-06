@@ -59,9 +59,39 @@ describe('calculateScore', () => {
     expect(calculateScore(event)).toBe(15);
   });
 
-  it('awards +15 for ticket_url', () => {
+  it('awards +2 for ticket_url with untrusted host', () => {
+    // fn-14.1: ticket_url bonus is host-based. tickets.com is NOT in
+    // TRUSTED_TICKET_HOSTS, so we get the small "structured purchase link"
+    // signal (+1 in the source-of-truth helper, doubled to +2 here).
     const event = makeEvent({ ticket_url: 'https://tickets.com', start_date: FAR_FUTURE });
-    expect(calculateScore(event)).toBe(15);
+    expect(calculateScore(event)).toBe(2);
+  });
+
+  it('awards +10 for ticket_url with trusted host (oeticket)', () => {
+    const event = makeEvent({
+      ticket_url: 'https://www.oeticket.com/event/123',
+      start_date: FAR_FUTURE,
+    });
+    expect(calculateScore(event)).toBe(10);
+  });
+
+  it('awards +10 for ticket_url with trusted host (eventim.at)', () => {
+    const event = makeEvent({
+      ticket_url: 'https://www.eventim.at/de/foo',
+      start_date: FAR_FUTURE,
+    });
+    expect(calculateScore(event)).toBe(10);
+  });
+
+  it('awards 0 for missing ticket_url', () => {
+    const event = makeEvent({ ticket_url: null, start_date: FAR_FUTURE });
+    expect(calculateScore(event)).toBe(0);
+  });
+
+  it('awards 0 for malformed ticket_url', () => {
+    // Defensive: bad URL should not throw, just earn 0.
+    const event = makeEvent({ ticket_url: 'not a url', start_date: FAR_FUTURE });
+    expect(calculateScore(event)).toBe(0);
   });
 
   it('awards +10 time bonus for events within 7 days', () => {
@@ -163,19 +193,19 @@ describe('calculateScore', () => {
 
   it('clamps score to 100 max', () => {
     const event = makeEvent({
-      image_url: 'https://example.com/img.jpg',     // +15
-      description: 'A'.repeat(201),                  // +15
-      ticket_url: 'https://tickets.com',             // +15
-      price_min: 25,                                 // +10
-      tags: ['music'],                               // +5
-      organizer: 'Some Org',                         // +5
-      source_url: 'https://source.com',              // +5
-      view_count: 100,                               // +20 (capped)
-      start_date: new Date(Date.now() + 2 * 86400000).toISOString(), // +10
-      event_series_id: 'series-1',                   // +5
+      image_url: 'https://example.com/img.jpg',                       // +15
+      description: 'A'.repeat(201),                                    // +15
+      ticket_url: 'https://www.oeticket.com/event/123',                // +10 (trusted host)
+      price_min: 25,                                                   // +10
+      tags: ['music'],                                                 // +5
+      organizer: 'Some Org',                                           // +5
+      source_url: 'https://source.com',                                // +5
+      view_count: 100,                                                 // +20 (capped)
+      start_date: new Date(Date.now() + 2 * 86400000).toISOString(),   // +10
+      event_series_id: 'series-1',                                     // +5
     });
     const venue = makeVenue({ type: 'bar', is_student_relevant: true, registry_source: 'oeh' });
-    // Base: 15+15+15+10+5+5+5+20+10 = 100, plus venue: +10+5+5+10 = 30 => 130, clamped to 100
+    // Base: 15+15+10+10+5+5+5+20+10 = 95, plus venue: +10+5+5+10 = 30 => 125, clamped to 100
     expect(calculateScore(event, venue)).toBe(100);
   });
 });

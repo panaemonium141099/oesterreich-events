@@ -1,0 +1,13 @@
+{
+  "branch_name": "fn-14-datenqualitats-rework-claude-enrichment",
+  "created_at": "2026-05-06T19:03:03.499562Z",
+  "depends_on_epics": [],
+  "id": "fn-14-datenqualitats-rework-claude-enrichment",
+  "next_task": 1,
+  "plan_review_status": "unknown",
+  "plan_reviewed_at": null,
+  "spec_path": ".flow/specs/fn-14-datenqualitats-rework-claude-enrichment.md",
+  "status": "open",
+  "title": "Datenqualit\u00e4ts-Rework: Claude-Enrichment + Pipeline-Aufspaltung + Bildqualit\u00e4t",
+  "updated_at": "2026-05-06T19:03:56.759830Z"
+}

@@ -68,13 +68,20 @@ export interface PipelineOptions {
   /** Skip the cross-source dedup pass (not recommended — duplicates bleed through). */
   skipDedup?: boolean;
   /**
-   * Skip the Claude-based enrichment step. Enrichment tags new events with
-   * audience/vibe/setting/language/price_tier/duration_type/student+family
-   * flags. Expensive (Claude API) but resume-safe — only processes events
-   * without an up-to-date enrichment_version. Safe to skip during dev if
-   * you want a fast pipeline run.
+   * Skip the OpenAI-based enrichment step. Default is to skip — Enrichment is
+   * now decoupled from the pipeline (run `npm run enrich:claude` /
+   * `npm run enrich:openai` standalone). Kept as a backwards-compatible knob
+   * for the rare case where someone explicitly opts in via `--with-enrichment`
+   * but still wants to disable it again from a wrapper script.
    */
   skipEnrichment?: boolean;
+  /**
+   * Opt-in flag to run the legacy OpenAI enrichment step inline with the
+   * pipeline. Default behaviour (fn-14.1) is to NOT run any enrichment as
+   * part of `scrape:pipeline`; pass `--with-enrichment` to restore the
+   * pre-fn-14 behaviour.
+   */
+  withEnrichment?: boolean;
   /**
    * Skip building pgvector embeddings for /entdecken (semantic search).
    * Resume-safe + hash-gated — only new or content-changed rows are

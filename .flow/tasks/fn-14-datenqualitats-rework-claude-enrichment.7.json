@@ -1,0 +1,16 @@
+{
+  "assignee": null,
+  "claim_note": "",
+  "claimed_at": null,
+  "created_at": "2026-05-06T19:25:06.250243Z",
+  "depends_on": [
+    "fn-14-datenqualitats-rework-claude-enrichment.1"
+  ],
+  "epic": "fn-14-datenqualitats-rework-claude-enrichment",
+  "id": "fn-14-datenqualitats-rework-claude-enrichment.7",
+  "priority": null,
+  "spec_path": ".flow/tasks/fn-14-datenqualitats-rework-claude-enrichment.7.md",
+  "status": "todo",
+  "title": "5-7 neue Sport/Outdoor-Scraper (bergwelten, alpenverein-sektionen, MTB, Klettern, Yoga, Paragliding)",
+  "updated_at": "2026-05-06T19:25:06.250261Z"
+}

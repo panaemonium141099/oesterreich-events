@@ -7,7 +7,10 @@
  *  - Image present (non-empty):               +15
  *  - Description > 50 chars:                  +10
  *  - Description > 200 chars (extra):          +5
- *  - ticket_url present:                      +15
+ *  - ticket_url host-based bonus:        +0 / +2 / +10
+ *      0 = no ticket_url
+ *      2 = ticket_url present but unknown host
+ *     10 = ticket_url host in TRUSTED_TICKET_HOSTS
  *  - price_min > 0 OR price_text non-empty:    +5
  *  - price_min > 20 (extra):                   +5
  *  - tags array non-empty:                     +5
@@ -57,6 +60,38 @@ export const LOCAL_VENUE_TYPES = new Set(['bar', 'pub', 'nightclub', 'biergarten
 export const STUDENT_ORG_SOURCES = new Set(['oeh', 'esn', 'iaeste', 'aiesec', 'aegee']);
 
 /**
+ * Trusted Austrian ticketing hosts. Identical copy lives in
+ * `src/lib/quality/score-event.ts` (ingest scorer) — keep both in sync.
+ */
+export const TRUSTED_TICKET_HOSTS = new Set<string>([
+  'oeticket.com', 'oeticket.at',
+  'eventim.de', 'eventim.at',
+  'ticketmaster.at', 'ticketmaster.com',
+  'wien-ticket.at',
+  'ntry.at',
+  'feverup.com',
+]);
+
+/**
+ * Host-based ticket bonus. Returns:
+ *   0 — no ticket_url
+ *   1 — ticket_url present but host not in TRUSTED_TICKET_HOSTS
+ *   5 — ticket_url host is in TRUSTED_TICKET_HOSTS
+ *
+ * The backfill scorer scales this by ×2 to fit its 0-100 scale.
+ * Defensive: returns 0 if `new URL(...)` throws on a malformed value.
+ */
+export function getTrustedTicketBonus(ticketUrl: string | null | undefined): number {
+  if (!ticketUrl) return 0;
+  try {
+    const host = new URL(ticketUrl).hostname.toLowerCase().replace(/^www\./, '');
+    return TRUSTED_TICKET_HOSTS.has(host) ? 5 : 1;
+  } catch {
+    return 0;
+  }
+}
+
+/**
  * Calculate event score with optional venue/series bonuses.
  */
 export function calculateScore(event: ScoringEventRow, venue?: ScoringVenueRow | null): number {
@@ -72,10 +107,13 @@ export function calculateScore(event: ScoringEventRow, venue?: ScoringVenueRow |
   if (descLen > 50) score += 10;
   if (descLen > 200) score += 5;
 
-  // Ticket URL
-  if (event.ticket_url && event.ticket_url.trim().length > 0) {
-    score += 15;
-  }
+  // Ticket URL — host-based bonus (fn-14.1).
+  //   no ticket_url       -> +0
+  //   untrusted host      -> +2
+  //   trusted ticket host -> +10
+  // Replaces the previous unconditional +15 which over-rewarded any random
+  // ticket-shaped URL.
+  score += getTrustedTicketBonus(event.ticket_url) * 2;
 
   // Price signals
   const hasPriceMin = event.price_min !== null && event.price_min > 0;

@@ -96,6 +96,42 @@ const AT_LAT_MAX = 49.1;
 const AT_LNG_MIN = 9.5;
 const AT_LNG_MAX = 17.2;
 
+/**
+ * Trusted Austrian ticketing hosts. ticket_url whose hostname matches one
+ * of these gets the full bonus; an unknown host still gets a small bonus
+ * (better than nothing — it's at least a structured purchase link), and
+ * a missing ticket_url gets nothing.
+ *
+ * Identical copy lives in `src/lib/utils/scoring.ts` (backfill scorer) — keep
+ * both lists in sync.
+ */
+export const TRUSTED_TICKET_HOSTS = new Set<string>([
+  'oeticket.com', 'oeticket.at',
+  'eventim.de', 'eventim.at',
+  'ticketmaster.at', 'ticketmaster.com',
+  'wien-ticket.at',
+  'ntry.at',
+  'feverup.com',
+]);
+
+/**
+ * Host-based ticket bonus. Returns:
+ *   0 — no ticket_url
+ *   1 — ticket_url present but host not in TRUSTED_TICKET_HOSTS
+ *   5 — ticket_url host is in TRUSTED_TICKET_HOSTS
+ *
+ * Defensive: returns 0 if `new URL(...)` throws on a malformed value.
+ */
+export function getTrustedTicketBonus(ticketUrl: string | null | undefined): number {
+  if (!ticketUrl) return 0;
+  try {
+    const host = new URL(ticketUrl).hostname.toLowerCase().replace(/^www\./, '');
+    return TRUSTED_TICKET_HOSTS.has(host) ? 5 : 1;
+  } catch {
+    return 0;
+  }
+}
+
 export function isOutsideAustria(
   lat: number | null | undefined,
   lng: number | null | undefined,
@@ -159,9 +195,12 @@ export function computeImageScore(e: ScoreableEvent): number {
 export function computeLinkScore(e: ScoreableEvent): number {
   let s = 0;
   if (e.source_url) s += 3;
-  if (e.ticket_url) s += 3;
+  // Host-based bonus on ticket_url (fn-14.1): 0 / 1 / 5 depending on whether
+  // the host is in TRUSTED_TICKET_HOSTS. Replaces the previous unconditional
+  // +3 — that was rewarding any random ticket-shaped URL, including spam.
+  s += getTrustedTicketBonus(e.ticket_url);
   if (e.source_url || e.ticket_url) s += 4;
-  return s;
+  return Math.min(10, s);
 }
 
 /**

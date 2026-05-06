@@ -122,6 +122,10 @@ npm run dev              # Dev-Server starten
 npm run build            # Produktions-Build (strict TypeScript)
 npm run scrape           # Alle Scraper ausfuhren
 npm run scrape:burgenland  # Nur burgenland.info scrapen
+npm run scrape:pipeline                       # Default: scrape + score, KEIN enrichment (fn-14.1)
+npm run scrape:pipeline -- --with-enrichment  # Opt-in: pipeline + legacy OpenAI enrichment inline
+npm run enrich:claude    # Standalone Claude enrichment (claude -p, MAX-Plan oder ANTHROPIC_API_KEY)
+npm run enrich:openai    # Standalone OpenAI enrichment (Fallback, GPT-5-mini default)
 npm run score            # Event-Scores berechnen und nach Supabase schreiben
 npm run scrape:venues    # Registry-based venue feed ingestion
 npm test                 # Vitest test suite (547 tests, all passing)

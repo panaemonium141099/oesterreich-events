@@ -7,6 +7,7 @@ import {
   computeLocationScore,
   computeImageScore,
   computeLinkScore,
+  getTrustedTicketBonus,
   scoreEvent,
 } from '@/lib/quality/score-event';
 
@@ -147,18 +148,91 @@ describe('computeImageScore', () => {
   });
 });
 
+// ─── Host-based ticket bonus (fn-14.1) ────────────────────────────
+
+describe('getTrustedTicketBonus', () => {
+  it('returns 0 for missing ticket_url', () => {
+    expect(getTrustedTicketBonus(null)).toBe(0);
+    expect(getTrustedTicketBonus(undefined)).toBe(0);
+    expect(getTrustedTicketBonus('')).toBe(0);
+  });
+  it('returns 5 for trusted hosts', () => {
+    expect(getTrustedTicketBonus('https://www.oeticket.com/event/123')).toBe(5);
+    expect(getTrustedTicketBonus('https://oeticket.at/event/123')).toBe(5);
+    expect(getTrustedTicketBonus('https://www.eventim.de/foo')).toBe(5);
+    expect(getTrustedTicketBonus('https://eventim.at/foo')).toBe(5);
+    expect(getTrustedTicketBonus('https://ticketmaster.at/foo')).toBe(5);
+    expect(getTrustedTicketBonus('https://www.wien-ticket.at/foo')).toBe(5);
+    expect(getTrustedTicketBonus('https://ntry.at/foo')).toBe(5);
+    expect(getTrustedTicketBonus('https://feverup.com/foo')).toBe(5);
+  });
+  it('strips www. prefix when matching', () => {
+    expect(getTrustedTicketBonus('https://www.oeticket.com/foo')).toBe(5);
+    expect(getTrustedTicketBonus('https://oeticket.com/foo')).toBe(5);
+  });
+  it('is case-insensitive on host', () => {
+    expect(getTrustedTicketBonus('https://OETICKET.COM/foo')).toBe(5);
+  });
+  it('returns 1 for any other valid URL', () => {
+    expect(getTrustedTicketBonus('https://tickets.example.at/foo')).toBe(1);
+    expect(getTrustedTicketBonus('https://random.shop/buy')).toBe(1);
+  });
+  it('returns 0 for malformed URLs', () => {
+    expect(getTrustedTicketBonus('not a url')).toBe(0);
+    expect(getTrustedTicketBonus('javascript:alert(1)')).toBe(1); // valid URL parse, untrusted host
+    expect(getTrustedTicketBonus('   ')).toBe(0);
+  });
+});
+
+describe('host-based bonus is independent of source_name (fn-14.1)', () => {
+  // Critical regression guard: even if the event came from a "trusted source"
+  // (e.g. oeticket scraper), missing ticket_url means +0 link bonus from the
+  // ticket-bonus path. The bonus is purely a function of ticket_url's host.
+  it('grants no ticket bonus when ticket_url is null, regardless of provenance', () => {
+    expect(computeLinkScore({ source_url: 'https://www.oeticket.com', ticket_url: null })).toBe(7);
+    // 7 = source_url +3 + has-any-link +4 + ticket bonus +0
+  });
+});
+
 describe('computeLinkScore', () => {
-  it('returns 10 for both URLs present', () => {
+  it('caps at 10 with source_url + trusted ticket host', () => {
+    // source +3, trusted ticket host +5, has-any-link +4 = 12, capped at 10
+    expect(
+      computeLinkScore({
+        source_url: 'https://example.at/event',
+        ticket_url: 'https://www.oeticket.com/event/foo',
+      }),
+    ).toBe(10);
+  });
+  it('returns 8 for source_url + untrusted ticket host', () => {
+    // source +3, untrusted ticket host +1, has-any-link +4 = 8
     expect(
       computeLinkScore({
         source_url: 'https://example.at/event',
         ticket_url: 'https://tickets.example.at',
       }),
-    ).toBe(10);
+    ).toBe(8);
   });
   it('returns 7 for source_url only', () => {
     // source +3, has-any-link +4
     expect(computeLinkScore({ source_url: 'https://example.at' })).toBe(7);
+  });
+  it('returns 9 for trusted ticket host only', () => {
+    // trusted ticket host +5, has-any-link +4 = 9
+    expect(
+      computeLinkScore({ ticket_url: 'https://www.eventim.at/de/foo' }),
+    ).toBe(9);
+  });
+  it('returns 5 for untrusted ticket host only', () => {
+    // untrusted ticket host +1, has-any-link +4 = 5
+    expect(
+      computeLinkScore({ ticket_url: 'https://tickets.example.at' }),
+    ).toBe(5);
+  });
+  it('returns 4 for malformed ticket_url with no source_url', () => {
+    // Malformed URL → host-bonus 0 from helper, but ticket_url is truthy
+    // so the "any-link" +4 bonus still fires. Total = 0 + 4 = 4.
+    expect(computeLinkScore({ ticket_url: 'not a url' })).toBe(4);
   });
   it('returns 0 with no URLs', () => {
     expect(computeLinkScore({})).toBe(0);

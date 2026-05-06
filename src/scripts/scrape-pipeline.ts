@@ -66,6 +66,7 @@ function parseArgs(): PipelineOptions {
     skipCategorizationBackfill: has('--skip-categorization-backfill'),
     skipDedup: has('--skip-dedup'),
     skipEnrichment: has('--skip-enrichment'),
+    withEnrichment: has('--with-enrichment'),
     skipEmbeddings: has('--skip-embeddings'),
     skipIndexing: has('--skip-indexing'),
     dryRun: has('--dry-run'),
@@ -192,16 +193,14 @@ async function main() {
       await triggerMatchArtists();
     }, steps);
 
-    // OpenAI enrichment of NEW events only. Writes the authoritative
-    // primary_category (v3: 11 Hauptkategorien) + tags/audience/vibe/
-    // occasion/setting/price_tier/price_flags/duration_type/flags in one
-    // pass. Source-of-truth prompt: docs/TAXONOMY.md.
+    // OpenAI enrichment is now opt-in only. fn-14 decouples enrichment from
+    // the scrape pipeline so it can be driven by `npm run enrich:claude` /
+    // `npm run enrich:openai` (or the daily-refresh GitHub Action) instead.
     //
-    // Resume-safe via enrichment_version filter — a pipeline run only
-    // processes the delta (newly scraped/updated events), so running
-    // this every time is idempotent and cheap (~$0.001/event with
-    // gpt-5-mini). Default model: gpt-5-mini via ENRICH_ARGS fallback.
-    if (!opts.skipEnrichment) {
+    // Pass `--with-enrichment` to restore the pre-fn-14 behaviour and run
+    // OpenAI enrichment inline as part of the pipeline. `--skip-enrichment`
+    // remains as an explicit override that always wins.
+    if (opts.withEnrichment && !opts.skipEnrichment) {
       steps.enrichment = await runStep('enrichment', async () => {
         // Override with ENRICH_ARGS env var if you need a bigger model
         // or higher concurrency: ENRICH_ARGS="--model gpt-5 --concurrency 12"
