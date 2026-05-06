@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
-export const dynamic = 'force-dynamic';
-
 if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
   throw new Error('SUPABASE_SERVICE_ROLE_KEY is required — refusing to fall back to anon key which bypasses RLS');
 }
@@ -34,7 +32,13 @@ export async function GET(
     }
 
     const res = NextResponse.json(event);
-    res.headers.set('Cache-Control', 'no-store, max-age=0');
+    // Event-Detail ändert sich nach dem Scrape quasi nie. 5 min Edge + 10 min
+    // SWR — pro Event-ID separater Cache-Key. Detail-Modal + SEO-Page treffen
+    // beide diesen Endpoint und profitieren so vom CDN.
+    res.headers.set(
+      'Cache-Control',
+      'public, s-maxage=300, stale-while-revalidate=600'
+    );
     return res;
   } catch (err) {
     console.error('API Error:', err);

@@ -30,7 +30,9 @@ export function EventSearchInline({ onSelectEvent, onClose }: EventSearchInlineP
     }
     setSearching(true);
     try {
-      const res = await fetch(`/api/events/search?q=${encodeURIComponent(q)}`, { cache: 'no-store' });
+      // Default cache → respektiert s-maxage=60 vom Server. Identische Suche
+      // innerhalb 60 s kommt instant aus dem Vercel-Edge.
+      const res = await fetch(`/api/events/search?q=${encodeURIComponent(q)}`);
       const data = await res.json();
       setResults(data.events || []);
     } catch {

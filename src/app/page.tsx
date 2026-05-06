@@ -14,6 +14,15 @@ import { ScrollHint } from '@/components/Landing/ScrollHint';
 // WebSite + Organization JSON-LD live now in the root layout so every page
 // emits them, not just the landing. No page-local JSON-LD here anymore.
 
+// ISR-Hint: Sobald der Auth-Check (`supabase.auth.getUser`) in eine
+// Suspense-Boundary ausgelagert wird (Phase 2), greift `revalidate`
+// und die Landing-Hülle wird zur statischen HTML aus dem Edge-Cache.
+// Aktuell wird die Anweisung von Next.js ignoriert weil cookies() im
+// Promise.race oben die Page in dynamic mode zwingt — das ist OK, der
+// Cache-Win kommt sowieso aus den darunter liegenden APIs (Featured,
+// Stats, RegionExplorer haben jetzt alle s-maxage gesetzt).
+export const revalidate = 3600;
+
 export default async function LandingPage({
   searchParams,
 }: {

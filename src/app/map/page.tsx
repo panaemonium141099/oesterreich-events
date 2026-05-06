@@ -296,9 +296,12 @@ function MapPageInner() {
     try {
       const firstParams = buildParams();
       firstParams.set('limit', String(BATCH_SIZE));
+      // Default cache mode → Browser/CDN dürfen die Server-Edge-Cache-Header
+      // (s-maxage=60, stale-while-revalidate=300) respektieren. AbortController
+      // + Generation-Guard unten verhindern stale-state-overwrites; der Cache
+      // ist nur eine Liefer-Optimierung, kein Konsistenz-Mechanismus.
       const firstRes = await fetch(`/api/events?${firstParams.toString()}`, {
         signal: controller.signal,
-        cache: 'no-store',
       });
       // Generation guard: if the user changed filters during the await,
       // abortRef now points at a NEW controller. This response is stale
@@ -342,7 +345,6 @@ function MapPageInner() {
 
         const res = await fetch(`/api/events?${params.toString()}`, {
           signal: controller.signal,
-          cache: 'no-store',
         });
         if (controller.signal.aborted || abortRef.current !== controller) break;
         if (!res.ok) throw new Error(`HTTP ${res.status}`);

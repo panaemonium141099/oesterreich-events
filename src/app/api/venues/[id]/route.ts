@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
-export const dynamic = 'force-dynamic';
-
 const MIN_QUALITY = 40;
 const EVENTS_LIMIT = 20;
 const SIMILAR_LIMIT = 6;
@@ -135,10 +133,17 @@ export async function GET(
     }
   }
 
-  return NextResponse.json({
+  const res = NextResponse.json({
     venue,
     events: events ?? [],
     totalEvents: totalEvents ?? 0,
     similarVenues,
   });
+  // Venue-Detail (Spielplan + ähnliche Venues) ändert sich nur durch
+  // neu-gescrapete Events — 5 min Edge + 10 min SWR.
+  res.headers.set(
+    'Cache-Control',
+    'public, s-maxage=300, stale-while-revalidate=600'
+  );
+  return res;
 }

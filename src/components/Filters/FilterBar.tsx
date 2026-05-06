@@ -93,9 +93,12 @@ export function FilterBar({ filters, onFiltersChange, eveningMode, bundeslandId,
       abortControllerRef.current = controller;
       try {
         // suggest=true → lightweight path: only id/title/category/location_name, no exact count
+        // Default cache → trifft den Vercel-Edge-Cache (s-maxage=60). Beim
+        // Tippen identischer Queries innerhalb 60 s kommt die Antwort aus
+        // dem CDN. AbortController unten regelt Race-Conditions.
         const res = await fetch(
           `/api/events?search=${encodeURIComponent(searchValue.trim())}&limit=5&sort=score&suggest=true`,
-          { signal: controller.signal, cache: 'no-store' }
+          { signal: controller.signal }
         );
         if (!res.ok) { setEventSuggestions([]); return; }
         const data = await res.json();

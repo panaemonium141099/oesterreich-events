@@ -3,8 +3,9 @@ import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import type { EventFilters } from '@/types/events';
 import { computeStudentScore, isFreeEvent, MIN_STUDENT_SCORE } from '@/lib/utils/student-score';
 
-// Force dynamic — never cache event data server-side
-export const dynamic = 'force-dynamic';
+// Edge-cached: s-maxage in der Response bestimmt die TTL pro URL.
+// Route bleibt automatisch dynamic wegen request.nextUrl.searchParams.
+// Pro Filter-Kombi (bundesland=wien, etc.) ein separater Cache-Key.
 
 /** Lazy Supabase client — validates env vars at call time, not module load time */
 function getSupabaseClient(): SupabaseClient | null {
@@ -758,7 +759,13 @@ export async function GET(request: NextRequest) {
       };
 
       const response = NextResponse.json(responseBody);
-      response.headers.set('Cache-Control', 'no-store, max-age=0');
+      // Student-Score-Mode wird zur Query-Zeit gerechnet → kürzere TTL
+      // damit eine frische Score-Klassifikation nicht stundenlang stehen
+      // bleibt. 30 s reicht — Datenbank ändert sich nur durch Scraper-Lauf.
+      response.headers.set(
+        'Cache-Control',
+        'public, s-maxage=30, stale-while-revalidate=300'
+      );
       response.headers.set('X-Total-Count', String(studentTotal));
       return response;
     }
@@ -832,8 +839,15 @@ export async function GET(request: NextRequest) {
 
     const response = NextResponse.json(responseBody);
 
-    // Prevent stale browser cache — events change frequently (scraper runs, coord fixes)
-    response.headers.set('Cache-Control', 'no-store, max-age=0');
+    // Edge-Cache: 60 s frisch + 5 min SWR. Cache-Key = volle URL inkl. aller
+    // Query-Params, also wird jede Filter-Kombination (Bundesland, Kategorie,
+    // bbox, …) separat im Vercel CDN gehalten. Erste Anfrage pro Kombi: 3-5 s
+    // (Function-Spawn + Supabase). Alle weiteren Geräte: <50 ms.
+    // Daten ändern sich nur durch Scraper-Lauf (1×/Tag) → 60 s ist konservativ.
+    response.headers.set(
+      'Cache-Control',
+      'public, s-maxage=60, stale-while-revalidate=300'
+    );
 
     // Pagination metadata headers
     response.headers.set('X-Total-Count', String(totalCount));

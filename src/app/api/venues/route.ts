@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
-// Force dynamic -- never cache venue data server-side
-export const dynamic = 'force-dynamic';
+// Edge-cached: s-maxage in der Response bestimmt die TTL pro URL.
+// Route bleibt automatisch dynamic wegen request.nextUrl.searchParams.
 
 /** Lazy Supabase client -- validates env vars at call time, not module load time */
 function getSupabaseClient(): SupabaseClient | null {
@@ -163,7 +163,11 @@ export async function GET(request: NextRequest) {
       hasMore,
     });
 
-    response.headers.set('Cache-Control', 'no-store, max-age=0');
+    // Venues ändern sich quasi nie (Stammdaten). 5 min Edge + 10 min SWR.
+    response.headers.set(
+      'Cache-Control',
+      'public, s-maxage=300, stale-while-revalidate=600'
+    );
     response.headers.set('X-Total-Count', String(totalCount));
     if (nextCursor) {
       response.headers.set('X-Next-Cursor', nextCursor);

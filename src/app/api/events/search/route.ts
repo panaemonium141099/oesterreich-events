@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
-export const dynamic = 'force-dynamic';
-
 if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
   throw new Error('SUPABASE_SERVICE_ROLE_KEY is required');
 }
@@ -52,7 +50,12 @@ export async function GET(request: NextRequest) {
     }
 
     const res = NextResponse.json({ events: data || [] });
-    res.headers.set('Cache-Control', 'no-store, max-age=0');
+    // Pro Suchquery ein Cache-Eintrag (Key = ?q=…). Tippt jemand „kirtag",
+    // wird dasselbe Resultat für die nächsten 60 s vom Edge ausgeliefert.
+    res.headers.set(
+      'Cache-Control',
+      'public, s-maxage=60, stale-while-revalidate=300'
+    );
     return res;
   } catch (err) {
     console.error('Event search API error:', err);

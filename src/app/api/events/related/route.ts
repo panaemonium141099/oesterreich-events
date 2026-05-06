@@ -2,8 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { extractCity } from '@/lib/utils/city';
 
-export const dynamic = 'force-dynamic';
-
 const MIN_QUALITY_SCORE = 50;
 const DEFAULT_LIMIT = 4;
 const MAX_LIMIT = 8;
@@ -158,5 +156,13 @@ export async function GET(request: NextRequest) {
   // Strip internal scoring field
   const events = ranked.map(({ _rankScore, ...rest }) => rest);
 
-  return NextResponse.json({ events });
+  // Related-Events sind deterministisch pro eventId — 5 min Edge + 10 min SWR.
+  // Wenn das Quell-Event verschwindet ist der Cache-Eintrag eh stale, der
+  // nächste Request liefert dann einen 404.
+  const res = NextResponse.json({ events });
+  res.headers.set(
+    'Cache-Control',
+    'public, s-maxage=300, stale-while-revalidate=600'
+  );
+  return res;
 }

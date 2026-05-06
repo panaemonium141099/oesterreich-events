@@ -164,9 +164,10 @@ export function MapTopBar({
         }
         if (filters.dateFrom) params.set('dateFrom', filters.dateFrom);
         if (filters.dateTo) params.set('dateTo', filters.dateTo);
+        // Default cache → Edge-Cache greift (s-maxage=60). AbortController
+        // oben canceled stale Requests.
         const res = await fetch(`/api/events?${params.toString()}`, {
           signal: ctrl.signal,
-          cache: 'no-store',
         });
         if (!res.ok) return;
         const data = await res.json();
