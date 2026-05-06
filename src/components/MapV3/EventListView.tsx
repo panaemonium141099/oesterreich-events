@@ -93,8 +93,17 @@ export function EventListView({
     setVisibleCount(PAGE_SIZE);
   }, [events.length, sort]);
 
-  // Intersection-observer based infinite scroll — no fixed pagination,
-  // matches the existing EventList's behavior.
+  // Intersection-observer based infinite scroll.
+  // **Wichtig — `visibleCount` MUSS in den deps stehen.** Sonst bleibt der
+  // Observer am alten Loader-DOM-Knoten kleben und feuert nach dem ersten
+  // Increment nur dann wieder, wenn der User den Loader explizit raus- und
+  // wieder reinscrollt. User-Symptom: „manchmal lädt's instant, manchmal
+  // hängt es ewig". Mit visibleCount in den deps wird der Observer nach
+  // jedem Increment neu attached und prüft direkt nochmal — wenn der
+  // Loader immer noch in der Viewport ist (Page hat sich nur unten
+  // verlängert), feuert er sofort weiter und lädt die nächsten PAGE_SIZE.
+  // rootMargin: '200px' triggert leicht früher → kein „hängenbleiben am
+  // letzten Pixel" wenn der User schnell scrollt.
   useEffect(() => {
     const loader = loaderRef.current;
     if (!loader) return;
@@ -104,11 +113,11 @@ export function EventListView({
           setVisibleCount((c) => Math.min(c + PAGE_SIZE, events.length));
         }
       },
-      { threshold: 0.1 },
+      { threshold: 0, rootMargin: '200px' },
     );
     obs.observe(loader);
     return () => obs.disconnect();
-  }, [events.length]);
+  }, [events.length, visibleCount]);
 
   const sorted = useMemo(() => {
     const list = [...events];
