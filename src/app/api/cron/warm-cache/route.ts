@@ -36,7 +36,11 @@ const PATHS = [
   '/api/events?bundesland=kaernten&limit=10000&slim=true',
   '/api/events?bundesland=vorarlberg&limit=10000&slim=true',
   '/api/events?bundesland=burgenland&limit=10000&slim=true',
-  // Landing-Page-APIs
+  // Landing-Page-APIs.
+  // limit=10 ist EXAKT was WeeklyHighlights.tsx fetcht — Cache-Key muss
+  // identisch matchen sonst trifft der User trotz Cron immer den Cold-Path.
+  // limit=8 als Fallback drinlassen falls eine andere Surface das nutzt.
+  '/api/events/featured?limit=10',
   '/api/events/featured?limit=8',
   '/api/stats/counts',
 ];
