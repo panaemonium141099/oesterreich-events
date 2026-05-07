@@ -197,10 +197,41 @@ export function getArg(args: string[], flag: string, alt?: string): string | und
   return undefined;
 }
 
+/**
+ * Parse a numeric flag with bounds enforcement. Exits non-zero on
+ * NaN / out-of-range — silently accepting --batch-size 0 was an
+ * infinite-loop trap (the for-loop incrementing by zero never
+ * terminates), reported by codex review iteration #7.
+ *
+ * `requireFinite=true` rejects `Infinity` (used for batch-size,
+ * concurrency, cap). `requireFinite=false` allows the sentinel
+ * `Infinity` value used by --limit when the operator omits it.
+ */
+function parseIntArg(
+  raw: string | undefined,
+  fallback: number,
+  fieldName: string,
+  opts: { min: number; max: number; requireFinite: boolean },
+): number {
+  if (raw === undefined) return fallback;
+  const n = parseInt(raw, 10);
+  if (!Number.isFinite(n)) {
+    if (opts.requireFinite || raw.toLowerCase() !== 'infinity') {
+      console.error(`Error: ${fieldName}="${raw}" is not a valid integer.`);
+      process.exit(1);
+    }
+    return Infinity as unknown as number;
+  }
+  if (n < opts.min || n > opts.max) {
+    console.error(`Error: ${fieldName}=${n} out of range [${opts.min}, ${opts.max}].`);
+    process.exit(1);
+  }
+  return n;
+}
+
 function parseArgs(): CliOpts {
   const args = process.argv.slice(2);
   const get = (flag: string, alt?: string) => getArg(args, flag, alt);
-  const p = (v: string | undefined, d: number) => (v ? parseInt(v, 10) : d);
 
   // ENV override for model (fn-14.3 spec — `ENRICH_MODEL=opus npm run enrich:claude`)
   const envModel = process.env.ENRICH_MODEL?.toLowerCase();
@@ -213,10 +244,19 @@ function parseArgs(): CliOpts {
 
   return {
     // fn-14.3 Interview: conservative defaults (User-Wahl)
-    batchSize: p(get('--batch-size'), 20),
-    concurrency: p(get('--concurrency'), 4),
-    // --limit and --max-events are aliases (Codex-Finding from fn-14.8 ↔ fn-14.3)
-    limit: p(get('--limit', '--max-events'), Infinity as unknown as number),
+    // batchSize/concurrency MUST be positive finite — parseIntArg
+    // exits 1 on 0/negative/NaN to avoid the infinite-loop trap codex
+    // flagged in iteration #7.
+    batchSize: parseIntArg(get('--batch-size'), 20, '--batch-size',
+      { min: 1, max: 1000, requireFinite: true }),
+    concurrency: parseIntArg(get('--concurrency'), 4, '--concurrency',
+      { min: 1, max: 64, requireFinite: true }),
+    // --limit and --max-events are aliases (Codex-Finding from fn-14.8 ↔ fn-14.3).
+    // --limit accepts 0+; "no limit" path uses the JS Infinity sentinel
+    // when operator omits the flag.
+    limit: parseIntArg(get('--limit', '--max-events'),
+      Infinity as unknown as number, '--limit',
+      { min: 0, max: Number.MAX_SAFE_INTEGER, requireFinite: false }),
     force: args.includes('--force'),
     retryFailed: args.includes('--retry-failed'),
     dryRun: args.includes('--dry-run'),
@@ -241,7 +281,8 @@ function parseArgs(): CliOpts {
       }
       return raw;
     })(),
-    weeklyTokenCap: p(get('--weekly-token-cap'), DEFAULT_WEEKLY_TOKEN_CAP),
+    weeklyTokenCap: parseIntArg(get('--weekly-token-cap'), DEFAULT_WEEKLY_TOKEN_CAP,
+      '--weekly-token-cap', { min: 1, max: Number.MAX_SAFE_INTEGER, requireFinite: true }),
     alertEmail: get('--alert-email') ?? process.env.ENRICH_ALERT_EMAIL ?? null,
   };
 }

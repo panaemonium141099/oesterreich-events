@@ -1,11 +1,21 @@
 # burgenland-events-v5
 
 > **⚠️ Wichtig — vor jedem Task zur Event-Klassifikation / Tags / Kategorien lesen:**
-> **`docs/TAXONOMY.md`** ist die Single-Source-of-Truth für Hauptkategorien, Tags,
-> Audience-/Vibe-/Occasion-/Price-Achsen und den Enrichment-Prompt. Wenn Code davon
-> abweicht, hat der Code Unrecht. NICHT auf `taxonomy.ts` oder `enrichment-taxonomy.ts`
-> allein verlassen — die werden bei jedem Rework angepasst, das Spec-File ist die
-> Referenz.
+> Seit fn-14.3 (2026-05-07) ist die Source-of-Truth folgendermaßen aufgeteilt:
+>
+> - **§3 Tags-Vokabular** (Audiences, Vibes, Occasions, Settings, Price-Flags, Tags,
+>   Languages, Duration-Types, Primary-Categories): `src/lib/category-classifier/enrichment-taxonomy.ts`
+>   ist runtime-SoT. `docs/TAXONOMY.md` §3 wird daraus per
+>   `npm run regen:taxonomy` regeneriert (idempotent, `--check` für CI-Drift-Detection).
+>   Wenn Code und Doc auseinander laufen, ist die Doc veraltet — Code-Werte gelten.
+> - **§1, §2, §4-§10 (Philosophie, Hauptkategorien-Beschreibungen, Datenmodell,
+>   Migration, Phasen, Prompt-Richtlinien, Discovery-Module, Semantic-Search):**
+>   `docs/TAXONOMY.md` ist Single-Source-of-Truth. Diese Sektionen sind handgeschrieben
+>   und werden NICHT regeneriert.
+>
+> Wenn Code in den vom Validator (`validateEnrichment`, `validateClaudeBatch`) verwendeten
+> Vokabularen abweicht, ist es ein Code-Bug; aber die Liste der erlaubten Strings selbst
+> stammt immer aus `enrichment-taxonomy.ts`.
 
 ## Beschreibung
 Osterreich Events — Austrian event discovery platform. Aggregates events from ~141 scrapers across Austria, displays them on an interactive Mapbox GL JS map, and provides social features (DM, group chat, friends, feed, memories).
