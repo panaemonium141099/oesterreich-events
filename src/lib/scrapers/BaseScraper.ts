@@ -317,28 +317,65 @@ export abstract class BaseScraper {
       }
     });
 
-    // 3. <img> tags in body content
+    // 3. <img> tags in body content. Per element, pick the best
+    //    variant FIRST (srcset > src), then apply content/alt bonuses
+    //    once. This way an `<img src="small" srcset="large 1600w">`
+    //    inside <article> scores the LARGE URL plus the article
+    //    bonus, instead of the small src winning the article bonus
+    //    and the large srcset losing it.
     $('img').each((_, el) => {
       const $img = $(el);
-      const src = $img.attr('src') || $img.attr('data-src') || $img.attr('data-lazy-src');
-      if (!src) return;
+      const directSrc = $img.attr('src') || $img.attr('data-src') || $img.attr('data-lazy-src');
+      const srcset = $img.attr('srcset');
 
-      const resolved = this.resolveImageUrl(src, baseUrl);
+      // Element-level dims from HTML attrs (the rendered-box hint).
+      // Only meaningful when the variant we picked IS the `src` URL —
+      // for srcset variants the rendered-box dims are wrong (they
+      // describe the layout box, not the picked variant).
+      const elementWidth = parseInt($img.attr('width') || '0', 10) || undefined;
+      const elementHeight = parseInt($img.attr('height') || '0', 10) || undefined;
+
+      // Pick the best variant: srcset largest wins over plain src.
+      let chosenUrl: string | undefined;
+      let chosenWidth: number | undefined;
+      let chosenHeight: number | undefined;
+      let baseScore = 0;
+      if (srcset) {
+        const picked = pickLargestFromSrcset(srcset);
+        if (picked) {
+          chosenUrl = picked.url;
+          chosenWidth = picked.width;
+          // No reliable height for srcset picks — leave undefined so
+          // the supabase-sync layer doesn't persist a stale value
+          // from the layout box.
+          baseScore = 5;
+        }
+      }
+      if (!chosenUrl && directSrc) {
+        chosenUrl = directSrc;
+        chosenWidth = elementWidth;
+        chosenHeight = elementHeight;
+        // Direct-src base scoring depends on the rendered-box width.
+        if ((elementWidth ?? 0) >= 800) baseScore = 5;
+        else if ((elementWidth ?? 0) >= 300 || (elementHeight ?? 0) >= 200) baseScore = 3;
+      }
+      if (!chosenUrl) return;
+
+      const resolved = this.resolveImageUrl(chosenUrl, baseUrl);
       const cleaned = this.cleanImageUrl(resolved);
       if (!cleaned) return;
 
-      const width = parseInt($img.attr('width') || '0', 10) || undefined;
-      const height = parseInt($img.attr('height') || '0', 10) || undefined;
+      // Skip tiny images (likely icons/spacers). Width is the
+      // strongest signal; height alone can be small for letterbox
+      // banners. Use elementWidth/Height for the gate so srcset picks
+      // (without per-variant dims) aren't filtered out unnecessarily.
+      if ((elementWidth !== undefined && elementWidth < 50) ||
+          (elementHeight !== undefined && elementHeight < 50)) return;
 
-      // Skip tiny images (likely icons/spacers)
-      if ((width !== undefined && width < 50) || (height !== undefined && height < 50)) return;
-
-      // Base score: bigger image → higher base.
-      let score = 0;
-      if ((width ?? 0) >= 800) score = 5;
-      else if ((width ?? 0) >= 300 || (height ?? 0) >= 200) score = 3;
-
-      if ((width ?? 0) >= 600 || (height ?? 0) >= 400) score += 2;
+      let score = baseScore;
+      // Bigger-image bonus on the rendered-box dims (best proxy for
+      // "this element is a hero" regardless of variant).
+      if ((elementWidth ?? 0) >= 600 || (elementHeight ?? 0) >= 400) score += 2;
 
       // Content-area bonus
       const parent = $img.closest('article, main, .content, .event, [class*="event"], [class*="detail"]');
@@ -352,15 +389,16 @@ export abstract class BaseScraper {
       const inHeader = $img.closest('header, nav, footer, .header, .footer, .nav').length > 0;
       if (inHeader) score -= 3;
 
-      candidates.push({ url: cleaned, width, height, score });
+      candidates.push({ url: cleaned, width: chosenWidth, height: chosenHeight, score });
     });
 
-    // 4. srcset — pick the largest variant. Supports both `Nw` width
-    //    descriptors and `Nx` density descriptors. Width descriptors
-    //    win over density when both are present (real pixels > DPR).
-    $('img[srcset], source[srcset]').each((_, el) => {
-      const $img = $(el);
-      const srcset = $img.attr('srcset');
+    // 4. <picture><source srcset>...</picture>: same density-vs-width
+    //    parser as the <img> path, but we don't have the surrounding
+    //    layout context to compute content/alt bonuses against the
+    //    picked variant directly. Score with the flat srcset base.
+    $('source[srcset]').each((_, el) => {
+      const $source = $(el);
+      const srcset = $source.attr('srcset');
       if (!srcset) return;
 
       const picked = pickLargestFromSrcset(srcset);
@@ -373,6 +411,8 @@ export abstract class BaseScraper {
       candidates.push({
         url: cleaned,
         width: picked.width,
+        // Height intentionally undefined — same reasoning as the <img>
+        // srcset branch: layout box dims don't describe the variant.
         score: 5,
       });
     });
@@ -405,17 +445,30 @@ export abstract class BaseScraper {
   ): { url: string; image_width?: number; image_height?: number } | null {
     if (!$img) return null;
     const direct = $img.attr('src') || $img.attr('data-src') || $img.attr('data-lazy-src');
-    let urlGuess: string | undefined = direct ? direct : undefined;
-    let widthGuess = parseInt($img.attr('width') || '0', 10) || undefined;
-    let heightGuess = parseInt($img.attr('height') || '0', 10) || undefined;
+    const elementWidth = parseInt($img.attr('width') || '0', 10) || undefined;
+    const elementHeight = parseInt($img.attr('height') || '0', 10) || undefined;
 
-    // srcset wins when present (real pixels). Fall back to plain src.
+    let urlGuess: string | undefined = direct ? direct : undefined;
+    let widthGuess: number | undefined = elementWidth;
+    let heightGuess: number | undefined = elementHeight;
+    let pickedFromSrcset = false;
+
+    // srcset wins when present (real pixels). When it does, we MUST
+    // discard the element-level height attr — it describes the
+    // rendered layout box, not the variant we picked, so persisting
+    // it produces (1600 × 300) impossible metadata for a markup
+    // whose <img> attrs were 400×300. Width comes from the srcset
+    // descriptor itself; height stays undefined (a downstream
+    // aspect-ratio derivation in validateAndUpgradeImageUrl can
+    // fill it back in from the original ratio if needed).
     const srcset = $img.attr('srcset');
     if (srcset) {
       const picked = pickLargestFromSrcset(srcset);
       if (picked && picked.url) {
         urlGuess = picked.url;
-        if (picked.width) widthGuess = picked.width;
+        widthGuess = picked.width ?? undefined;
+        heightGuess = undefined;
+        pickedFromSrcset = true;
       }
     }
 
@@ -424,6 +477,10 @@ export abstract class BaseScraper {
     const resolved = this.resolveImageUrl(urlGuess, baseUrl);
     const cleaned = this.cleanImageUrl(resolved);
     if (!cleaned) return null;
+    // Defensive: linter may flag pickedFromSrcset as unused once the
+    // branch above is the only writer; the reference here keeps the
+    // rationale visible to future readers.
+    void pickedFromSrcset;
     return {
       url: cleaned,
       ...(widthGuess ? { image_width: widthGuess } : {}),

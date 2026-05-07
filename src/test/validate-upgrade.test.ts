@@ -123,4 +123,21 @@ describe('validateAndUpgradeImageUrl (fn-14.5)', () => {
     expect(result.width).toBe(2000);
     expect(result.height).toBeUndefined();
   });
+
+  it('uses caller-supplied original height to derive new aspect ratio when URL lacks it', async () => {
+    fetchSpy.mockResolvedValueOnce(new Response(null, {
+      status: 200,
+      headers: { 'content-type': 'image/jpeg' },
+    }));
+    // URL pattern only has w_400 — caller provides the original
+    // height (300) so the validator has the full ratio (4:3) to
+    // scale from for the upgraded width (2000).
+    const result = await validateAndUpgradeImageUrl(
+      'https://res.cloudinary.com/demo/image/upload/w_400/foo.jpg',
+      400,
+      300,
+    );
+    expect(result.width).toBe(2000);
+    expect(result.height).toBe(1500);
+  });
 });

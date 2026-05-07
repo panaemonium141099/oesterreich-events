@@ -407,18 +407,34 @@ function toSupabaseRow(
 
   // ─── fn-14.5 Image guard ─────────────────────────────────────────
   // imageMap has the validated/upgraded URL + extracted dims (when
-  // possible). Compute against (a) the validated URL and (b) any HTML
-  // dims the scraper attached, falling back to URL-pattern dims.
+  // possible). Dim-resolution rule:
+  //   - If the validator UPGRADED the URL (new URL ≠ scraper URL),
+  //     we trust ONLY the validator's dims. The scraper's dims
+  //     described the pre-upgrade variant — re-using them on a
+  //     wider URL persists impossible metadata (e.g. w_2000 with
+  //     scraper-supplied h_300 from the original w_400 variant).
+  //   - If the validator kept the original URL (unknown CDN, HEAD
+  //     failed, already at-target), fall back to the scraper's dims
+  //     so HTML-attribute extraction still flows through.
   const validated = imageMap.get(key);
+  const scraperImageUrl = event.image_url ?? null;
   const scraperImageWidth =
     typeof event.image_width === 'number' && event.image_width > 0 ? event.image_width : null;
   const scraperImageHeight =
     typeof event.image_height === 'number' && event.image_height > 0 ? event.image_height : null;
-  const newImageUrl = validated?.url || event.image_url || null;
-  const newImageWidth =
-    (validated?.width && validated.width > 0 ? validated.width : null) ?? scraperImageWidth;
-  const newImageHeight =
-    (validated?.height && validated.height > 0 ? validated.height : null) ?? scraperImageHeight;
+  const newImageUrl = validated?.url || scraperImageUrl;
+  const urlWasUpgraded =
+    !!validated?.url && !!scraperImageUrl && validated.url !== scraperImageUrl;
+  const validatorWidth =
+    validated?.width && validated.width > 0 ? validated.width : null;
+  const validatorHeight =
+    validated?.height && validated.height > 0 ? validated.height : null;
+  const newImageWidth = urlWasUpgraded
+    ? validatorWidth
+    : (validatorWidth ?? scraperImageWidth);
+  const newImageHeight = urlWasUpgraded
+    ? validatorHeight
+    : (validatorHeight ?? scraperImageHeight);
   const upgradeImage = shouldUpgradeImage(
     newImageUrl,
     newImageWidth,

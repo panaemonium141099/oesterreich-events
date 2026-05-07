@@ -366,6 +366,30 @@ describe('BaseScraper', () => {
       const candidate = scraper.testExtractImageCandidate($, 'https://example.com');
       expect(candidate?.url).toBe('https://example.com/event.jpg');
     });
+
+    it('picks srcset variant over src when both are on the same element (Codex regression test)', () => {
+      // <img src="small" srcset="large 1600w"> inside <article> must
+      // pick `large` AND get the article bonus — the small src
+      // candidate must not steal the score.
+      const html = `
+        <html><body>
+          <article>
+            <img src="https://example.com/small.jpg"
+                 srcset="https://example.com/large.jpg 1600w"
+                 width="400" height="300"
+                 alt="Concert hall">
+          </article>
+        </body></html>
+      `;
+      const $ = cheerio.load(html);
+      const candidate = scraper.testExtractImageCandidate($, 'https://example.com');
+      expect(candidate?.url).toBe('https://example.com/large.jpg');
+      expect(candidate?.width).toBe(1600);
+      // Height NOT carried from the rendered-box attr — the variant
+      // we picked has its own intrinsic ratio, the layout box dim
+      // would be misleading.
+      expect(candidate?.height).toBeUndefined();
+    });
   });
 });
 
