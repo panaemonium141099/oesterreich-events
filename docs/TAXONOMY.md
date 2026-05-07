@@ -60,39 +60,52 @@ Jedes Event hat **genau eine** `primary_category`. Keine Multi-Assignment auf di
 
 ## 3. Tags (Ebene B) — 6 Achsen
 
+<!-- AUTO-GENERATED from src/lib/category-classifier/enrichment-taxonomy.ts. Do not edit by hand — run `tsx src/scripts/regen-taxonomy-doc.ts` to regenerate. -->
+
 Jedes Event bekommt:
 
-- 1 `primary_category`
-- 0–5 `secondary_tags` (Aktivitäts-Tags, Genre-Tags)
-- 0–3 `vibe_tags`
-- 0–3 `audience_tags`
-- 0–3 `occasion_tags` (Anlass)
-- beliebig viele `format_tags` + `price_flags` (boolean-artig, deterministisch ableitbar)
+- 1 `primary_category` aus der Liste in §2 (eine von 11 + Fallback `Sonstiges`)
+- 0–5 `secondary_tags` (Aktivitäts-Tags, Genre-Tags) aus §3.6
+- 0–3 `vibe_tags` aus §3.2
+- 0–3 `audience_tags` aus §3.1
+- 0–3 `occasion_tags` aus §3.3
+- beliebig viele `setting`-Tags (§3.5) und `price_flags` (§3.4)
+- 1 `price_tier` aus §3.4 + 1 `duration_type` aus §3.5 + 1 `language` aus §3.7
+
+Jeder Wert in den unten stehenden Listen ist gleichzeitig ein erlaubter
+Output-Wert für den AI-Validator (`validateEnrichment` in
+`src/lib/category-classifier/enrichment-taxonomy.ts`). Werte außerhalb
+dieser Listen werden silent gedroppt.
 
 ### 3.1 Audience-Tags (Zielgruppe)
 
-Wer fühlt sich angesprochen?
+Wer fühlt sich angesprochen? (`audience` array, 0–3 Werte)
 
 ```
 studenten
-erasmus-freundlich         # English-friendly, international-student-welcoming
-fuer-familien
-fuer-paare
+junge-erwachsene
+erasmus-freundlich
+familien-mit-kleinkindern
+familien-mit-kindern
+familien-mit-teens
+kinder-allein
+erwachsene-allgemein
+senioren
+singles
+paare
 fuer-gruppen
-fuer-singles
-fuer-senioren
+alleine-geeignet
 queer-friendly
-kinderfreundlich
-anfaengerfreundlich
+english-speaking
+anfängerfreundlich
 touristenfreundlich
-lokal-insider              # Einheimischer-Spot, touristenfrei
-english-speaking           # Event läuft auf Englisch
-alleine-geeignet           # Solo-Gänger ohne Awkward-Faktor
+lokal-insider
+traditionell
 ```
 
 ### 3.2 Vibe-Tags (Stimmung)
 
-Wie fühlt's sich an?
+Wie fühlt sich das Event an? (`vibe` array, 0–3 Werte)
 
 ```
 entspannt
@@ -101,23 +114,35 @@ elegant
 kreativ
 abenteuerlich
 romantisch
-gemuetlich
+gemütlich
 wild
 exklusiv
 alternativ
 mainstream
 lokal
 kultig
-trashig                    # billig, rough, Low-Budget-Charme
-underground                # nicht-poliert, rough-edge, insider
-fancy                      # nobel, chic, polish
-authentisch                # ur-oesterreichisch, nicht designed
-zum-kennenlernen           # meet-new-people-Signal
+trashig
+underground
+fancy
+authentisch
+zum-kennenlernen
+touristen-frei
+kulturell
+spirituell
+intellektuell
+festlich
+edgy
+kindergerecht
+euphoric
+psychedelic
+dark
+industrial
+hypnotic
 ```
 
 ### 3.3 Occasion-Tags (Anlass)
 
-Wofür ist das Event "gut"?
+Wofür ist das Event "gut"? (`occasion_tags` array, 0–3 Werte)
 
 ```
 ausgehen
@@ -127,161 +152,462 @@ erstes-date
 wochenendplan
 feierabend
 tagesausflug
-regentag                   # Indoor-Aktivität, bei schlechtem Wetter gut
+regentag
 geburtstagsidee
 teamevent
-spontan                    # kurzfristig / last-minute-tauglich
+spontan
 kurzfristig-heute
 fuer-den-abend
-saufen-gehen               # ja, mit Bindestrich, zum Matching von Queries wie "billig saufen"
-kennenlernen               # generic new-people
+saufen-gehen
+kennenlernen
 networking-anlass
 ```
 
-### 3.4 Price-Flags
+### 3.4 Price-Tier + Price-Flags
 
-Preisniveau und Zugangsbarriere:
+Genau **ein** `price_tier`:
 
 ```
-# Hauptkategorien (exakt 1)
 gratis
-guenstig                   # < 20 €
-mittel                     # 20–50 €
-premium                    # > 50 €
-unbekannt                  # Fallback wenn nicht ableitbar
+günstig
+mittel
+premium
+unbekannt
+```
 
-# Zusatzflags (beliebig viele)
-unter-20-euro              # redundant mit günstig, aber query-freundlich
-happy-hour                 # wenn im Event spezielles Drink-Angebot erwähnt
-getraenke-special          # "2 für 1", "3€ Spritzer" etc.
+Bedeutung: `gratis`=0€ · `günstig`=bis 15€ · `mittel`=15–50€ ·
+`premium`=über 50€ · `unbekannt`=nicht ableitbar (selten — siehe Default-Regel im Prompt).
+
+Beliebig viele `price_flags`:
+
+```
+freier-eintritt
+happy-hour
+getraenke-special
 studentenrabatt
-damenrabatt                # Ladies Night Free Entry
-freier-eintritt            # Eintritt frei, Konsum bezahlt
+damenrabatt
 mit-anmeldung
 ohne-anmeldung
 barrierefrei
 kinderwagengeeignet
+fuer-anfaenger
+unter-20-euro
+spende-erbeten
 ```
 
-### 3.5 Format-/Zeit-Tags
+### 3.5 Setting / Format / Zeit-Tags
 
-Wie ist das Event formatiert?
+Format und Ort des Events. (`setting` array, 0–3 Werte)
 
 ```
-open-air
 indoor
+outdoor
 hybrid
 online
+am-see
+in-den-bergen
+städtisch
+dörflich
+kirche
+festival-gelände
+bar-club
+konzertsaal
+arena
+park
+spielplatz
+museum
+schloss
+warehouse
+underground-location
+industrial-venue
+open-air-location
+forest
+strand
+rave-cave
+techno-club
+nightclub
+open-air
 tagesevent
 abendevent
-ganztaegig
-kurzformat                 # < 2h
-late-night                 # startet nach 22h, geht spät
-mehrtaegig
-saisonal                   # nur zu bestimmten Jahreszeiten (Adventmarkt, Sommerfest)
-wiederkehrend              # weekly, monthly, stamm-event
+ganztägig
+kurzformat
+late-night
+mehrtägig
+saisonal
+wiederkehrend
 ```
 
-**Hinweis zu `Heute` / `Dieses Wochenende`:** das sind **Query-Filter auf `start_date`**, keine Event-Tags. Nicht in der Taxonomie führen.
-
-### 3.6 Activity-Tags (secondary_tags)
-
-Konkrete Aktivitäts-/Genre-Labels, feinkörniger als Hauptkategorie. Wichtigste Achse für AI-Query-Matching.
-
-#### Musik & Performance
+Genau **ein** `duration_type`:
 
 ```
-live-konzert rock-konzert jazz-konzert klassik-konzert
-chor orchester big-band
-dj-set live-band acoustic-session jam-session karaoke
-open-mic poetry-slam
+kurz
+abend
+ganztag
+mehrtägig
+dauerausstellung
+nacht-bis-morgen
+24-stunden
+48-stunden
 ```
 
-#### Party/Bar (Nightlife-Subkategorien)
+Bedeutung: `kurz`<2h · `abend`=2–5h · `ganztag` · `mehrtägig` ·
+`dauerausstellung` · `nacht-bis-morgen`=22h–6h · `24-stunden` · `48-stunden`.
+
+### 3.6 Activity-Tags (`tags` Array, 0–5 Werte)
+
+Konkrete Aktivitäts-/Genre-Labels. Wichtigste Achse für Embedding-Matching.
 
 ```
-club-night rave afterparty pub-crawl cocktail-night
-bar-night happy-hour shot-night student-night ladies-night
-open-bar aftershow-party
-motto-party 80s-party 90s-party latino-night afro-night
-erasmus-night halloween-party fasching-party silvester-party
-schlager-party techno-night house-night psytrance-rave dnb-night
-```
-
-#### Kulinarisch
-
-```
-weinverkostung bier-verkostung cocktail-tasting
-brunch dinner fine-dining street-food food-truck
-kochkurs barbecue grillen
-heuriger buschenschank
-```
-
-#### Markt/Fest-Formate
-
-```
-christkindlmarkt ostermarkt adventmarkt
-flohmarkt bauernmarkt wochenmarkt designmarkt
-stadtfest dorffest kirtag pfarrfest schuetzenfest
-maibaumfest sonnwendfeier erntedank
-perchtenlauf krampuslauf fasching
-```
-
-#### Sport
-
-```
-lauf marathon halbmarathon fahrradtour wanderung trailrun
-yoga pilates fitness crossfit hiit
-tennis fussball eishockey schwimmen klettern bouldern
-ski langlauf snowboard
-tanzkurs salsa-night zumba
-```
-
-#### Natur/Abenteuer
-
-```
-wanderung geschichtstour stadtfuehrung sightseeing-tour
-rafting kanutour kajak segel-tour
-klettertour bergtour alpen-tour
-naturfuehrung vogelbeobachtung astronomie
+klassik
+oper
+operette
+ballett
+kammermusik
+chor
+orgel
+jazz
+bigband
+swing
+pop
+rock
+indie
+alternative
+metal
+punk
+grunge
+ska
+reggae
+hip-hop
+rap
+r-n-b
+soul
+funk
+disco
+schlager
+country
+folk
+singer-songwriter
+latin
+balkan
+weltmusik
+volksmusik
+blasmusik
+heurigenmusik
+alpine-musik
+austro-pop
+dialekt-rap
+tamburica
+techno
+house
+trance
+dnb
+dubstep
+hardstyle
+hardcore
+breakbeat
+bass-music
+ambient-chill
+electro
+disco-electronic
+minimal-techno
+melodic-techno
+hardtechno
+schranz
+industrial-techno
+detroit-techno
+deep-techno
+acid-techno
+dub-techno
+deep-house
+tech-house
+progressive-house
+afro-house
+melodic-house
+acid-house
+disco-house
+future-house
+afro-tech
+chicago-house
+uk-house
+minimal-house
+psytrance
+goa
+progressive-trance
+uplifting-trance
+hard-trance
+vocal-trance
+dark-psytrance
+forest-psytrance
+full-on
+drum-and-bass
+liquid-dnb
+neurofunk
+jungle
+jump-up
+dnb-rollers
+dancefloor-dnb
+deep-dnb
+minimal-dnb
+riddim
+brostep
+future-bass
+trap-edm
+uk-garage
+2-step
+speed-garage
+bassline
+grime
+rawstyle
+gabber
+uk-hardcore
+uptempo
+frenchcore
+terror
+speedcore
+happy-hardcore
+nu-disco
+italo-disco
+synthwave
+vaporwave
+electroclash
+electroswing
+idm
+leftfield
+live-konzert
+dj-set
+live-band
+acoustic-session
+jam-session
+karaoke
+open-mic
+poetry-slam
+outdoor-festival
+indoor-festival
+multi-stage-festival
+club-night
+rave
+open-air-rave
+afterhour
+warehouse-party
+free-party
+tekno-party
+boiler-room
+silent-disco
+boat-party
+rooftop-party
+daytime-rave
+24h-rave
+underground-party
+afterparty
+bar-night
+happy-hour
+cocktail-night
+shot-night
+student-night
+ladies-night
+open-bar
+pub-crawl
+tanznacht
+motto-party
+80s-party
+90s-party
+2000er-party
+latino-night
+afro-night
+erasmus-night
+halloween-party
+fasching-party
+silvester-party
+schlager-party
+retro-party
+theater
+kabarett
+lesung
+musical
+ausstellung
+vortrag
+film
+kino
+performance-art
+improtheater
+comedy
+stand-up
+stadtführung
+burgführung
+museumstour
+wandern
+laufen
+radfahren
+mountainbike
+ski
+langlauf
+snowboard
+schwimmen
+klettern
+bouldern
+yoga
+pilates
+fitness
+crossfit
+hiit
+turnier
+fussball
+eishockey
+tennis
+reiten
+wassersport
+marathon
+halbmarathon
+tanzkurs
+salsa-night
+zumba
+naturführung
+vogelbeobachtung
+geführte-wanderung
+astronomie
+ökologie-event
+kräuterwanderung
+pilzwanderung
+rafting
+kanutour
+kajak
+segel-tour
+klettertour
+bergtour
+alpen-tour
 escape-room
-```
-
-#### Wissen/Karriere
-
-```
-workshop kurs seminar lecture vortrag
-networking startup-pitch tech-meetup
-career-fair messe konferenz
+christkindlmarkt
+ostermarkt
+adventmarkt
+flohmarkt
+bauernmarkt
+wochenmarkt
+kunsthandwerk
+designmarkt
+antikmarkt
+dorffest
+stadtfest
+kirtag
+pfarrfest
+schützenfest
+feuerwehrfest
+heurigenfest
+maibaumfest
+sonnwendfeier
+dämmerschoppen
+frühschoppen
+tracht
+perchten
+perchtenlauf
+krampuslauf
+erntedank
+fasching
+ball
+almabtrieb
+weinverkostung
+bier-verkostung
+cocktail-tasting
+gin-tasting
+whiskey-tasting
+heuriger
+buschenschank
+weinfest
+biermesse
+kulinarik-tour
+genussmesse
+street-food
+food-truck
+brunch
+dinner
+fine-dining
+kochkurs
+barbecue
+grillen
+seminar
+workshop
+kurs
 sprachkurs
+lecture
+messe
+konferenz
+networking
+startup-pitch
+tech-meetup
+branchentreff
+career-fair
+gründer-event
+campus-info
+pub-quiz
+brettspielabend
+game-night
+lan-party
+speed-dating
+single-night
+stammtisch
+vereinstreffen
+community-meetup
+hobby-gruppe
+nachbarschaftsevent
+comedy-abend
+kinder-workshop
+puppentheater
+familien-picknick
+kinderkino
+spielfest
+ferienprogramm
+geburtstag
+kindertheater
+kinderfest
+meditation
+breathwork
+achtsamkeit
+sound-healing
+retreat
+wellness-day
+sauna-special
+thermen-special
+yoga-retreat
+gottesdienst
+wallfahrt
+prozession
+andacht
+pilgern
+gesundheitsmesse
+selbsthilfegruppe
 ```
 
-#### Community/Sozial
+### 3.7 Language
+
+Genau **ein** `language`:
 
 ```
-pub-quiz brettspielabend game-night lan-party
-speed-dating single-night
-stammtisch vereinstreffen community-meetup
-stand-up comedy-abend
+deutsch
+dialekt
+englisch
+mehrsprachig
+ohne-sprache
 ```
 
-#### Familie
+### 3.8 Primary Category (referenz, siehe §2 für Beschreibung)
+
+Genau **eine** `primary_category` (case-sensitive):
 
 ```
-kinder-workshop puppentheater kinderkino kindertheater
-familien-picknick spielfest ferienprogramm
-```
-
-#### Wellness/Spirit
-
-```
-meditation breathwork achtsamkeit sound-healing
-retreat wellness-day sauna-special thermenspecial
-yoga-retreat gottesdienst wallfahrt prozession
+Musik
+Kultur & Bühne
+Nightlife & Party
+Essen & Trinken
+Märkte & Feste
+Sport & Bewegung
+Natur & Abenteuer
+Wissen & Karriere
+Familie & Kinder
+Community & Freizeit
+Wellness & Spiritualität
+Sonstiges
 ```
 
 ---
-
 ## 4. Technisches Datenmodell
 
 ### 4.1 DB-Schema (bestehende Spalten erweitern)

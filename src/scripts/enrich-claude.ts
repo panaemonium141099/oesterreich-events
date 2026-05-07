@@ -1,0 +1,1519 @@
+/**
+ * Batch-enrich events using Claude Code headless (`claude -p`) — v2.
+ *
+ * NEW DESIGN (fn-14.3) — replaces the per-event `enrich-claude-cli.ts`
+ * subprocess + single-row UPDATE pipeline. Key differences:
+ *   - Multiple events per `claude -p` invocation (default 20).
+ *   - Output is a JSON array; per-event Zod-style validation runs against
+ *     the same closed vocabulary (`enrichment-taxonomy.ts`) the OpenAI
+ *     pipeline uses, so results are schema-compatible.
+ *   - DB writes go through `bulk_update_event_enrichment` RPC via the
+ *     `BulkUpdater` helper — same path as `enrich-openai.ts`.
+ *   - Per-event 3-strikes counter (`enrichment_failure_count`) →
+ *     poison-pill (`enrichment_failed=TRUE`) so persistently bad rows
+ *     stop burning quota.
+ *   - Selection contract is explicit: published / published_low_confidence /
+ *     needs_review only, no start_date/quality_score filter.
+ *
+ * ────────────────────────────────────────────────────────────────────
+ * Spike result (fn-14.3 Step 1, 2026-05-07)
+ * ────────────────────────────────────────────────────────────────────
+ * `claude -p --output-format json --no-session-persistence --max-turns 1`
+ * produces a JSON envelope with these load-bearing fields:
+ *
+ *   {
+ *     "type": "result",
+ *     "subtype": "success",          // or "error"
+ *     "is_error": false,             // critical: success-without-content
+ *                                    // (e.g. "Not logged in") still has
+ *                                    // is_error:true even when subtype=success
+ *     "result": "{...escaped JSON...}",   // the model's actual response
+ *     "stop_reason": "end_turn",
+ *     "total_cost_usd": 0.268718...,      // verified present
+ *     "usage": {
+ *       "input_tokens": 5,
+ *       "cache_creation_input_tokens": 42927,
+ *       "cache_read_input_tokens": 0,
+ *       "output_tokens": 16,
+ *       ...
+ *     },
+ *     "modelUsage": { "<model-id>": { "costUSD": ..., ... } }
+ *   }
+ *
+ * Both `total_cost_usd` and the `usage.*` token counts are first-class
+ * fields, so we can use both as primary signals for quota tracking.
+ *
+ * `--bare` only works when ANTHROPIC_API_KEY is set. Without an API key
+ * it produces is_error:true / result:"Not logged in · Please run /login"
+ * and `usage.*` all zero. So `--bare` is conditional below.
+ */
+
+import { readFileSync, appendFileSync, mkdirSync, existsSync } from 'fs';
+import { join, dirname, isAbsolute, delimiter as pathDelimiter } from 'path';
+import { spawn } from 'child_process';
+import { tmpdir } from 'os';
+
+// ─────────────────────────────────────────────────────────────────────
+// Resolve `claude` binary on disk. Prefer .exe direct-spawn on Windows
+// to dodge the cmd.exe wrapper window flash.
+// ─────────────────────────────────────────────────────────────────────
+function resolveClaudeBinary(prefBin: string): { path: string; useShell: boolean } {
+  if (isAbsolute(prefBin) && existsSync(prefBin)) {
+    return { path: prefBin, useShell: false };
+  }
+  const pathDirs = (process.env.PATH ?? '').split(pathDelimiter).filter(Boolean);
+  const extensions = process.platform === 'win32'
+    ? ['.exe', '.cmd', '.bat', '']
+    : [''];
+  for (const dir of pathDirs) {
+    for (const ext of extensions) {
+      const candidate = join(dir, prefBin + ext);
+      if (existsSync(candidate)) {
+        const useShell = process.platform === 'win32' && ext !== '.exe';
+        return { path: candidate, useShell };
+      }
+    }
+  }
+  return { path: prefBin, useShell: process.platform === 'win32' };
+}
+
+// Load .env.local manually so we don't depend on tsx's --env-file flag
+// for run-from-script invocations.
+try {
+  const envPath = join(process.cwd(), '.env.local');
+  const env = readFileSync(envPath, 'utf8');
+  for (const line of env.split('\n')) {
+    const t = line.trim();
+    if (!t || t.startsWith('#')) continue;
+    const i = t.indexOf('=');
+    if (i === -1) continue;
+    const k = t.substring(0, i).trim();
+    const v = t.substring(i + 1).trim();
+    if (!process.env[k]) process.env[k] = v;
+  }
+} catch { /* .env.local absent — fine if env is provided externally */ }
+
+import { createClient, type SupabaseClient } from '@supabase/supabase-js';
+import { fetchEventPage, closeSharedBrowser } from '../lib/category-classifier/fetch-page';
+import { makeBulkUpdater } from '../lib/db/bulk-update';
+import {
+  TAGS, AUDIENCES, VIBES, SETTINGS, OCCASIONS, PRICE_FLAGS,
+  LANGUAGES, PRICE_TIERS, DURATION_TYPES, PRIMARY_CATEGORIES,
+} from '../lib/category-classifier/enrichment-taxonomy';
+import {
+  validateClaudeBatch,
+  type ClaudeEnrichmentResult,
+  DESC_MIN, DESC_MAX,
+} from '../lib/category-classifier/enrichment-validate';
+
+// ─────────────────────────────────────────────────────────────────────
+// Constants
+// ─────────────────────────────────────────────────────────────────────
+
+/**
+ * Bumped per fn-14 epic — re-running this script after a successful
+ * earlier run is a no-op for rows already at this version. Re-runs
+ * after `--retry-failed` reset the poison-pill flag and pick up.
+ */
+export const ENRICHMENT_VERSION_CLAUDE_V1 = 'claude-v1';
+
+/**
+ * Kill subprocess after this many ms. Per fn-14.3 spec — the upstream
+ * claude-code#28482 hang issue means we MUST own a hard timeout, not
+ * trust the CLI to terminate cleanly.
+ */
+const CLAUDE_TIMEOUT_MS = 180_000;
+
+/**
+ * Hard cap on raw page-text fed to the prompt (per-event slice).
+ * fn-14.3 Interview: 8000 chars max, tail-truncate marker if exceeded.
+ * Note: `fetchEventPage` already caps internally at 4000, so this is a
+ * belt-and-suspenders safety on top.
+ */
+const MAX_PAGE_CHARS = 8000;
+
+const MODEL_MAP: Record<string, string> = {
+  // fn-14.3 spec — Sonnet 4.6 default, Opus 4.7 fallback, Haiku for cheap.
+  // ENRICH_MODEL env var can override the CLI flag.
+  sonnet: 'claude-sonnet-4-6',
+  opus: 'claude-opus-4-7',
+  haiku: 'claude-haiku-4-5-20251001',
+};
+
+/**
+ * Quota threshold for the weekly token budget. Tunable via
+ * --weekly-token-cap CLI flag. Default is conservative — Anthropic's
+ * MAX-plan weekly cap is undocumented so we set a defensive ~40M
+ * tokens/week as the default and expect operators to override after
+ * one full bulk run gives us real numbers.
+ */
+const DEFAULT_WEEKLY_TOKEN_CAP = 40_000_000;
+
+// ─────────────────────────────────────────────────────────────────────
+// CLI arg parsing
+// ─────────────────────────────────────────────────────────────────────
+
+interface CliOpts {
+  batchSize: number;
+  concurrency: number;
+  limit: number;
+  force: boolean;
+  retryFailed: boolean;
+  dryRun: boolean;
+  verbose: boolean;
+  noFetch: boolean;
+  model: 'sonnet' | 'opus' | 'haiku';
+  claudeBin: string;
+  bareMode: boolean;
+  logFile: string | null;
+  /** RFC-3339 duration filter on `updated_at` (e.g. "24h", "7d"). null = no filter. */
+  since: string | null;
+  weeklyTokenCap: number;
+  alertEmail: string | null;
+}
+
+function parseArgs(): CliOpts {
+  const args = process.argv.slice(2);
+  const get = (flag: string, alt?: string) => {
+    let i = args.indexOf(flag);
+    if (i === -1 && alt) i = args.indexOf(alt);
+    return i !== -1 && args[i + 1] ? args[i + 1] : undefined;
+  };
+  const p = (v: string | undefined, d: number) => (v ? parseInt(v, 10) : d);
+
+  // ENV override for model (fn-14.3 spec — `ENRICH_MODEL=opus npm run enrich:claude`)
+  const envModel = process.env.ENRICH_MODEL?.toLowerCase();
+  const cliModel = (get('--model') ?? envModel ?? 'sonnet').toLowerCase();
+  const model: 'sonnet' | 'opus' | 'haiku' =
+    cliModel === 'opus' ? 'opus' : cliModel === 'haiku' ? 'haiku' : 'sonnet';
+
+  const wantsBare = args.includes('--bare');
+  const hasApiKey = !!process.env.ANTHROPIC_API_KEY;
+
+  return {
+    // fn-14.3 Interview: conservative defaults (User-Wahl)
+    batchSize: p(get('--batch-size'), 20),
+    concurrency: p(get('--concurrency'), 4),
+    // --limit and --max-events are aliases (Codex-Finding from fn-14.8 ↔ fn-14.3)
+    limit: p(get('--limit', '--max-events'), Infinity as unknown as number),
+    force: args.includes('--force'),
+    retryFailed: args.includes('--retry-failed'),
+    dryRun: args.includes('--dry-run'),
+    verbose: args.includes('--verbose') || args.includes('--dry-run'),
+    noFetch: args.includes('--no-fetch'),
+    model,
+    claudeBin: get('--claude-bin') ?? 'claude',
+    // --bare is conditional on API key (Codex-Finding) — MAX-OAuth doesn't
+    // survive --bare. wantsBare without API key produces a warning & no flag.
+    bareMode: wantsBare && hasApiKey,
+    logFile: get('--log-file') ?? null,
+    since: get('--since') ?? null,
+    weeklyTokenCap: p(get('--weekly-token-cap'), DEFAULT_WEEKLY_TOKEN_CAP),
+    alertEmail: get('--alert-email') ?? process.env.ENRICH_ALERT_EMAIL ?? null,
+  };
+}
+
+/** Parse "24h" / "7d" / "30m" → milliseconds. Returns null on bad input. */
+function parseSince(s: string | null): number | null {
+  if (!s) return null;
+  const m = /^(\d+)\s*([smhd])$/i.exec(s.trim());
+  if (!m) return null;
+  const n = parseInt(m[1], 10);
+  const unit = m[2].toLowerCase();
+  if (!Number.isFinite(n) || n < 0) return null;
+  switch (unit) {
+    case 's': return n * 1_000;
+    case 'm': return n * 60_000;
+    case 'h': return n * 3_600_000;
+    case 'd': return n * 86_400_000;
+    default: return null;
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────
+// Prompt builder — generated from code constants, no hardcoded duplicate
+// ─────────────────────────────────────────────────────────────────────
+
+/**
+ * Build the system-prompt body. Generated from `enrichment-taxonomy.ts`
+ * exports so a vocabulary change in code does NOT require a code-side
+ * prompt edit (and thereby NEVER produces silent-drop drift).
+ *
+ * Per fn-14.3 Interview decisions:
+ *   - Description: 400-1000 Zeichen, erzählend, Hintergrund erlaubt für
+ *     Venues/Gebäude/Städte (verifizierbare Fakten), NICHT für
+ *     Personen/Bands/Künstler (only what's in the source text).
+ *   - Anti-Bleed: kein "Kategorie X / Tag Y" in der Beschreibung.
+ *   - Price-Edge-Cases: "ab 25€" → 25; Spende erbeten → 0 + flag; Mehrfach → Erwachsenen-Preis.
+ *   - 3 neue Boolean-Flags: dog_friendly, wheelchair_accessible, outdoor.
+ */
+function buildSystemPrompt(): string {
+  return `Du bist der Event-Klassifikator für LassTreffen.at, eine österreichische Event-Discovery-Plattform.
+
+Du bekommst eine BATCH von Events als JSON-Array. Du gibst GENAU EIN JSON-Objekt zurück mit dem Feld "results", einem Array gleicher Länge wie der Input. Keine Markdown-Fences, kein Erklärungstext, kein Prefix wie "hier ist die Antwort". NUR das JSON-Objekt. Jeder Eintrag in "results" entspricht dem Event mit demselben Index im Input.
+
+Jedes Result-Objekt hat EXAKT diese Felder:
+  primary_category   string, EINER aus der Liste
+  tags               string[], 0..5
+  audience           string[], 0..3
+  vibe               string[], 0..3
+  occasion           string[], 0..3
+  setting            string[], 0..3
+  language           string
+  price_tier         string
+  price_flags        string[], 0..6
+  duration_type      string
+  is_student_friendly       boolean
+  is_family_friendly        boolean
+  is_dog_friendly           boolean    NEU
+  is_wheelchair_accessible  boolean    NEU
+  is_outdoor                boolean    NEU
+  suggested_description     string|null
+  suggested_price_text      string|null
+  suggested_price_min       number|null
+
+══════════════════════════════════════════════════════════════
+PRIMARY_CATEGORY (genau 1) — die 11 Hauptkategorien
+══════════════════════════════════════════════════════════════
+Wähle EINE aus diesen exakten Strings (case-sensitive!):
+  ${PRIMARY_CATEGORIES.join(' | ')}
+
+Kurz-Entscheidungen:
+  Konzert / Live-Musik / Chor / Tamburica → Musik
+  DJ-Set / Rave / Club / Motto-Party → Nightlife & Party
+  Theater / Kabarett / Oper / Comedy / Lesung → Kultur & Bühne
+  Adventmarkt / Kirtag / Pfarrfest / Brauchtum → Märkte & Feste
+  Yoga-Retreat / Meditation / Wallfahrt / Sauna → Wellness & Spiritualität
+  Yoga-Kurs / Marathon / Fitness / Tanzkurs → Sport & Bewegung
+  Wanderung / Naturführung / Klettern / Bergtour → Natur & Abenteuer
+  Vortrag / Workshop / Networking / Tech-Meetup → Wissen & Karriere
+  Kindertheater / Spielfest / Ferienprogramm → Familie & Kinder
+  Pub Quiz / Brettspiel / Stammtisch / Game-Night → Community & Freizeit
+  Weinverkostung / Tasting / Heuriger / Kochkurs → Essen & Trinken
+
+Wenn ein Event zu zwei Kategorien passt → die PRIMÄRE Absicht (was würde groß auf dem Flyer stehen?). "Sonstiges" NUR wenn wirklich nichts passt.
+
+Beispiele zum Einprägen:
+- "Tamburicaabend am Sportplatz Trausdorf" → Musik (Sportplatz ist nur der Ort)
+- "Pub Quiz im Studentenclub" → Community & Freizeit
+- "Weinwanderung mit Verkostung" → Natur & Abenteuer (Wandern dominiert)
+- "Adventmarkt mit Live-Band" → Märkte & Feste (Markt dominiert)
+- "Rave im Wald" → Nightlife & Party
+- "Yoga-Retreat am Wochenende" → Wellness & Spiritualität (NICHT Sport)
+
+══════════════════════════════════════════════════════════════
+TAGS (0..5) — Aktivitäts-/Genre-Tags. ERLAUBT NUR aus dieser Liste:
+══════════════════════════════════════════════════════════════
+${TAGS.join(', ')}
+
+══════════════════════════════════════════════════════════════
+AUDIENCE (0..3) — ERLAUBT NUR aus dieser Liste:
+══════════════════════════════════════════════════════════════
+${AUDIENCES.join(', ')}
+
+══════════════════════════════════════════════════════════════
+VIBE (0..3) — emotionaler Ton. ERLAUBT NUR:
+══════════════════════════════════════════════════════════════
+${VIBES.join(', ')}
+
+══════════════════════════════════════════════════════════════
+OCCASION (0..3) — Anlass-Tags ("wofür ist das gut?"). ERLAUBT NUR:
+══════════════════════════════════════════════════════════════
+${OCCASIONS.join(', ')}
+
+Hinweise:
+- "saufen-gehen" → Bar-Events, Club-Nights mit Drink-Fokus, Heurigen-Abende, Weinverkostung mit Party
+- "date-night" → romantisch, Dinner, Weinverkostung für Paare, Konzerte mit intimer Stimmung
+- "afterwork" → ab 17-19h, Wochentag, relaxed
+- "tagesausflug" → ganztägig, außerhalb des Wohnorts, Natur/Sightseeing
+- "regentag" → Indoor-Event, gut bei schlechtem Wetter
+
+══════════════════════════════════════════════════════════════
+SETTING (0..3) — Ort + Format + Zeit. ERLAUBT NUR:
+══════════════════════════════════════════════════════════════
+${SETTINGS.join(', ')}
+
+══════════════════════════════════════════════════════════════
+PRICE_TIER (genau 1): ${PRICE_TIERS.join(' | ')}
+══════════════════════════════════════════════════════════════
+gratis=0€ · günstig=bis 15€ · mittel=15-50€ · premium=über 50€
+
+DEFAULT-REGEL: Wenn weder Metadaten noch Quelltext einen Preis zeigen → "gratis". Viele AT-Events sind frei (Frühschoppen, Kirtag, Pfarrfest, Gottesdienst, Dorffest, Gemeindeveranstaltung). "unbekannt" NUR bei klarer Ambiguität.
+
+══════════════════════════════════════════════════════════════
+PRICE_FLAGS (0..6) — ERLAUBT NUR:
+══════════════════════════════════════════════════════════════
+${PRICE_FLAGS.join(', ')}
+
+══════════════════════════════════════════════════════════════
+DURATION_TYPE (genau 1): ${DURATION_TYPES.join(' | ')}
+══════════════════════════════════════════════════════════════
+kurz=<2h · abend=2-5h · ganztag · mehrtägig · dauerausstellung · nacht-bis-morgen=22h-6h · 24-stunden · 48-stunden
+
+══════════════════════════════════════════════════════════════
+LANGUAGE (genau 1): ${LANGUAGES.join(' | ')}
+══════════════════════════════════════════════════════════════
+
+══════════════════════════════════════════════════════════════
+BOOLEAN FLAGS (KRITISCH — TRUE nur bei EXPLIZITER Evidenz)
+══════════════════════════════════════════════════════════════
+
+is_student_friendly = TRUE nur wenn:
+  (a) Titel/Text nennt "Studenten", "Studierende", "Uni-Party", "Semester-Opening"
+  (b) Ort ist Uni/FH (TU, WU, Uni Wien/Graz/Linz/Salzburg/Innsbruck, FH Burgenland)
+  (c) Veranstalter ist Studentenvereinigung (ÖH, ESN, AIESEC, IAESTE, AEGEE)
+  (d) Explizite Studenten-Ermäßigung
+  Sonst → FALSE.
+
+is_family_friendly = TRUE nur wenn:
+  (a) Titel/Text nennt "Familie", "Kinder", "ab 3/6 Jahren", "Kinderprogramm"
+  (b) Inhärent kinderorientiert: Kindertheater, Puppentheater, Kinderkino, Familien-Picknick, Spielfest, Kirtag, Adventmarkt tagsüber, Erntedank, Maibaumfest, Ferienprogramm
+  (c) Ort/Veranstalter familienorientiert (Familienzentrum, Zoo, Kindermuseum)
+  Sonst → FALSE.
+
+is_dog_friendly = TRUE nur wenn:
+  Quelltext explizit "Hunde willkommen", "hundefreundlich", "Hund OK" o.ä. nennt, oder Outdoor-Event mit eindeutigem Hunde-Bezug (Hundewanderung, Gassi-Treff). Outdoor-Wanderungen alleine reichen NICHT.
+  Im Zweifel → FALSE.
+
+is_wheelchair_accessible = TRUE nur wenn:
+  Quelltext "barrierefrei", "rollstuhlgerecht", "wheelchair accessible" o.ä. nennt. Im Zweifel → FALSE.
+
+is_outdoor = TRUE wenn:
+  Event hauptsächlich draußen stattfindet (Open-Air, Park, Wald, Berg, Stadtfest am Platz). NICHT für Indoor-Veranstaltungen mit Garten-Aufenthalt. Im Zweifel → FALSE.
+
+══════════════════════════════════════════════════════════════
+SUGGESTED_DESCRIPTION (string oder null — KRITISCH)
+══════════════════════════════════════════════════════════════
+LÄNGE: 400 bis 1000 Zeichen. Wenn du eine Beschreibung lieferst, MUSS sie in diesem Bereich liegen.
+
+WANN NULL ZURÜCKGEBEN: Wenn die existierende BESCHREIBUNG ≥ 400 Zeichen UND keine HTML-Tags hat UND inhaltlich solide ist, gib **null** zurück (= "alte Beschreibung gut, in Ruhe lassen"). Bei kürzer als 40 Zeichen oder fast leer: schreib eine neue. Bei 40..400 Zeichen: ergänze und poliere auf 400+ Zeichen.
+
+STIL: ERZÄHLEND, in fließendem Deutsch (nicht Bullet-Liste). Kein Marketing-Geschwurbel. Kein HTML.
+
+HINTERGRUND-WISSEN: Du DARFST verifizierbare Fakten über VENUES, historische Gebäude, Städte und Regionen einbauen (z.B. "die Pfarrkirche stammt aus dem 18. Jahrhundert", "das Schloss Schlaining ist ein Friedensburg-Standort"). Du DARFST KEINE Hintergrund-Behauptungen über PERSONEN, BANDS oder KÜNSTLER machen — dort schreibst du nur das, was im Quelltext steht. Erfinde KEINE Diskografien, Tour-Stationen, Mitglieder.
+
+ANTI-BLEED-REGEL (wichtig!): Erwähne in der Beschreibung NIE die Kategorie ("Dies ist ein Musik-Event", "ein Sport & Bewegung-Event") und KEINE Tag-Namen ("psytrance-Vibe", "audience: studenten"). Das sind interne Klassifikations-Felder, kein Marketing-Text.
+
+══════════════════════════════════════════════════════════════
+SUGGESTED_PRICE_TEXT + SUGGESTED_PRICE_MIN
+══════════════════════════════════════════════════════════════
+suggested_price_text: kurzer Originaltext aus dem Quelltext, wenn ein Preis genannt wird ("ab 25€", "Eintritt frei", "Erwachsene 15€ / Kinder frei", "Spende erbeten"). Wenn das PREIS-Feld bereits gefüllt ist, gib null zurück. Maximal 200 Zeichen.
+
+suggested_price_min: NUMERISCHER Preis in EUR (Untergrenze).
+  - "ab 25€"                            → 25
+  - "Eintritt frei" / "kostenlos"       → 0
+  - "Spende erbeten" / "Auf Spendenbasis" → 0  (UND price_flags enthält 'spende-erbeten')
+  - "Erwachsene 15€ / Kinder 8€"        → 15  (Erwachsenen-Preis ist Standard, NICHT Kinder-Discount)
+  - "20€ - 35€"                         → 20  (Untergrenze)
+  - "65€"                               → 65
+  - kein Preis ableitbar                → null
+
+KEIN Preis im Text → suggested_price_min = null.
+
+══════════════════════════════════════════════════════════════
+OUTPUT-FORMAT (genau dieses und kein anderes):
+══════════════════════════════════════════════════════════════
+{
+  "results": [
+    { ...result for input[0]... },
+    { ...result for input[1]... },
+    ...
+  ]
+}
+
+KEIN Markdown, KEINE Code-Fences, KEIN Erklärungstext davor oder danach.`;
+}
+
+// ─────────────────────────────────────────────────────────────────────
+// Per-event input row + user-message builder
+// ─────────────────────────────────────────────────────────────────────
+
+interface EventRow {
+  id: string;
+  title: string;
+  description: string | null;
+  category: string | null;
+  category_locked: boolean | null;
+  tags: string[] | null;
+  source_tags_raw: string[] | null;
+  location_name: string | null;
+  organizer: string | null;
+  start_date: string | null;
+  end_date: string | null;
+  price_text: string | null;
+  price_min: number | null;
+  price_max: number | null;
+  source_url: string | null;
+  enrichment_failure_count: number | null;
+}
+
+interface BatchInputItem {
+  index: number;
+  TITEL: string;
+  BESCHREIBUNG: string;
+  BISHERIGE_KATEGORIE?: string;
+  ROH_TAGS?: string[];
+  ORT?: string;
+  VERANSTALTER?: string;
+  ZEIT?: string;
+  PREIS?: string;
+  PREIS_MIN_EUR?: number;
+  QUELLTEXT?: string;
+}
+
+function buildBatchInput(events: EventRow[], pages: Array<string | null>): BatchInputItem[] {
+  return events.map((ev, i) => {
+    const item: BatchInputItem = {
+      index: i,
+      TITEL: ev.title,
+      BESCHREIBUNG: ev.description ? ev.description.slice(0, 600) : '(leer)',
+    };
+    if (ev.category) item.BISHERIGE_KATEGORIE = ev.category;
+    const rawTags = ev.source_tags_raw ?? ev.tags;
+    if (rawTags && rawTags.length > 0) item.ROH_TAGS = rawTags.slice(0, 10);
+    if (ev.location_name) item.ORT = ev.location_name;
+    if (ev.organizer) item.VERANSTALTER = ev.organizer;
+    if (ev.start_date) {
+      const d = new Date(ev.start_date);
+      if (!isNaN(d.getTime())) {
+        const hour = d.getHours();
+        const weekday = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'][d.getDay()];
+        item.ZEIT = `${weekday} ${hour}:${String(d.getMinutes()).padStart(2, '0')}`;
+      }
+    }
+    if (ev.price_text) item.PREIS = ev.price_text;
+    if (ev.price_min != null) item.PREIS_MIN_EUR = ev.price_min;
+
+    const page = pages[i];
+    if (page) {
+      // Tail-truncate at MAX_PAGE_CHARS; keep last bytes since page-end
+      // is usually closer to event details (date, price, dress code).
+      // fn-14.3 Interview: 8000-char cap with tail-truncate marker.
+      const trimmed = page.length > MAX_PAGE_CHARS
+        ? page.slice(0, MAX_PAGE_CHARS) + '\n... [truncated]'
+        : page;
+      item.QUELLTEXT = trimmed;
+    }
+    return item;
+  });
+}
+
+// ─────────────────────────────────────────────────────────────────────
+// Spawn `claude -p` subprocess with hard timeout + SIGKILL
+// ─────────────────────────────────────────────────────────────────────
+
+interface ClaudeCallResult {
+  parsed: unknown;
+  tokensIn: number;
+  tokensOut: number;
+  cacheReadIn: number;
+  cacheCreateIn: number;
+  costUsd: number;
+  /** stop_reason or "error_<api status>" */
+  stopReason: string;
+  isError: boolean;
+  errorMessage?: string;
+  /** Raw envelope for debugging. */
+  envelope: unknown;
+}
+
+let cachedResolvedClaude: { path: string; useShell: boolean } | null = null;
+
+async function callClaudeBatch(
+  systemPrompt: string,
+  batchInput: BatchInputItem[],
+  opts: CliOpts,
+): Promise<ClaudeCallResult> {
+  const model = MODEL_MAP[opts.model];
+  if (!cachedResolvedClaude) {
+    cachedResolvedClaude = resolveClaudeBinary(opts.claudeBin);
+  }
+  const resolved = cachedResolvedClaude;
+
+  // Build args. fn-14.3 spec: --output-format json (parsed envelope),
+  // --no-session-persistence (no transcript files), --max-turns 1
+  // (single round-trip, no agent loop), --append-system-prompt (system
+  // role for the prompt body — separate from the user's batch input).
+  const args = [
+    '-p',
+    '--model', model,
+    '--max-turns', '1',
+    '--output-format', 'json',
+    '--no-session-persistence',
+    '--append-system-prompt', systemPrompt,
+  ];
+  if (opts.bareMode) args.push('--bare');
+
+  const userMessage = JSON.stringify({ events: batchInput });
+
+  return new Promise<ClaudeCallResult>((resolve, reject) => {
+    const child = spawn(resolved.path, args, {
+      cwd: tmpdir(),
+      env: {
+        ...process.env,
+        NO_COLOR: '1',
+        CLAUDE_CODE_SUPPRESS_UPDATE_CHECK: '1',
+        DISABLE_AUTOUPDATER: '1',
+      },
+      stdio: ['pipe', 'pipe', 'pipe'],
+      shell: resolved.useShell,
+      windowsHide: true,
+    });
+
+    let stdout = '';
+    let stderr = '';
+
+    // Hard timeout — see fn-14.3 spec on claude-code#28482.
+    // Use unref() so a leaked timer won't keep Node alive after the
+    // child exits early.
+    const timer = setTimeout(() => {
+      child.kill('SIGKILL');
+      reject(new Error(`claude CLI timeout after ${CLAUDE_TIMEOUT_MS}ms (SIGKILL sent)`));
+    }, CLAUDE_TIMEOUT_MS);
+
+    child.stdout.on('data', (d: Buffer) => { stdout += d.toString('utf8'); });
+    child.stderr.on('data', (d: Buffer) => { stderr += d.toString('utf8'); });
+
+    child.on('error', (err) => {
+      clearTimeout(timer);
+      reject(new Error(`claude spawn failed: ${err.message} (binary='${opts.claudeBin}')`));
+    });
+
+    child.on('close', (code) => {
+      clearTimeout(timer);
+      if (code !== 0) {
+        reject(new Error(`claude exited ${code}: ${stderr.slice(0, 400)}`));
+        return;
+      }
+      if (!stdout.trim()) {
+        reject(new Error(`claude empty stdout | exit=0 | stderr=${stderr.slice(0, 400) || '(empty)'}`));
+        return;
+      }
+
+      // Envelope is the JSON we parsed in the spike. Some tools dump
+      // additional newline-delimited prefix on Windows; tolerate that
+      // by finding the first `{`.
+      let envelope: unknown;
+      try {
+        const start = stdout.indexOf('{');
+        if (start === -1) throw new Error('no JSON envelope');
+        envelope = JSON.parse(stdout.slice(start));
+      } catch (err) {
+        reject(new Error(
+          `claude envelope parse failed: ${err instanceof Error ? err.message : err} | ` +
+          `stdout=${stdout.slice(0, 300)}`,
+        ));
+        return;
+      }
+
+      const e = envelope as Record<string, unknown>;
+      const usage = (e.usage ?? {}) as Record<string, unknown>;
+      const tokensIn = typeof usage.input_tokens === 'number' ? usage.input_tokens : 0;
+      const tokensOut = typeof usage.output_tokens === 'number' ? usage.output_tokens : 0;
+      const cacheReadIn = typeof usage.cache_read_input_tokens === 'number' ? usage.cache_read_input_tokens : 0;
+      const cacheCreateIn = typeof usage.cache_creation_input_tokens === 'number' ? usage.cache_creation_input_tokens : 0;
+      const costUsd = typeof e.total_cost_usd === 'number' ? e.total_cost_usd : 0;
+      const stopReason = typeof e.stop_reason === 'string' ? e.stop_reason : 'unknown';
+      const isError = e.is_error === true;
+      const apiErrStatus = typeof e.api_error_status === 'string' ? e.api_error_status : null;
+      const resultStr = typeof e.result === 'string' ? e.result : '';
+
+      // The actual model output is `result` as a string. Inner-parse it.
+      // Tolerate code-fence wrapping which some models add despite
+      // explicit instructions to the contrary.
+      const inner = extractJson(resultStr);
+
+      if (isError) {
+        // Surface the inner result as the error message for diagnosis.
+        // The most common case: "Not logged in · Please run /login" when
+        // --bare is used without ANTHROPIC_API_KEY.
+        resolve({
+          parsed: inner,
+          tokensIn, tokensOut, cacheReadIn, cacheCreateIn, costUsd,
+          stopReason, isError: true,
+          errorMessage: resultStr.slice(0, 300) || apiErrStatus || 'unknown error',
+          envelope,
+        });
+        return;
+      }
+
+      resolve({
+        parsed: inner,
+        tokensIn, tokensOut, cacheReadIn, cacheCreateIn, costUsd,
+        stopReason, isError: false,
+        envelope,
+      });
+    });
+
+    // Stdin contract: claude -p reads the user-prompt body from stdin
+    // when -p is given without an inline string argument. Cap stdin at
+    // 10MB per CLI docs — at batch=20 × ~5KB each + 8KB page = ~280KB
+    // per call, well under the cap.
+    child.stdin.write(userMessage);
+    child.stdin.end();
+  });
+}
+
+/**
+ * Extract the first top-level JSON object/array from a string.
+ * Reused from enrich-claude-cli.ts (helper-only reuse per fn-14.3 spec).
+ */
+function extractJson(raw: string): unknown {
+  const trimmed = raw.trim();
+  if (!trimmed) throw new Error('empty');
+  // Fast path: bare object / array
+  const first = trimmed[0];
+  if ((first === '{' || first === '[') &&
+      (trimmed.endsWith('}') || trimmed.endsWith(']'))) {
+    try { return JSON.parse(trimmed); } catch { /* fall through */ }
+  }
+  // Strip fences
+  const fence = trimmed.match(/^```(?:json)?\s*([\s\S]*?)\s*```$/);
+  const body = fence ? fence[1] : trimmed;
+  // Brace/bracket-counting scan for first complete JSON value
+  let start = -1, openCh = '{', closeCh = '}';
+  for (let i = 0; i < body.length; i++) {
+    const c = body[i];
+    if (c === '{' || c === '[') {
+      start = i;
+      openCh = c;
+      closeCh = c === '{' ? '}' : ']';
+      break;
+    }
+  }
+  if (start === -1) throw new Error(`no JSON found in: ${body.slice(0, 120)}`);
+  let depth = 0;
+  let inString = false;
+  let escape = false;
+  for (let i = start; i < body.length; i++) {
+    const c = body[i];
+    if (escape) { escape = false; continue; }
+    if (c === '\\') { escape = true; continue; }
+    if (c === '"') inString = !inString;
+    if (inString) continue;
+    if (c === openCh) depth += 1;
+    else if (c === closeCh) {
+      depth -= 1;
+      if (depth === 0) return JSON.parse(body.slice(start, i + 1));
+    }
+  }
+  throw new Error('unterminated JSON');
+}
+
+// ─────────────────────────────────────────────────────────────────────
+// Stats + telemetry + alerting
+// ─────────────────────────────────────────────────────────────────────
+
+interface Stats {
+  processed: number;
+  enriched: number;
+  failed: number;
+  poisonPilled: number;
+  fetchOk: number;
+  fetchFailed: number;
+  fetchSkipped: number;
+  descFilled: number;
+  descPolished: number;
+  priceTextFilled: number;
+  priceMinFilled: number;
+  studentTrue: number;
+  familyTrue: number;
+  dogTrue: number;
+  wheelchairTrue: number;
+  outdoorTrue: number;
+  tokensIn: number;
+  tokensOut: number;
+  cacheReadIn: number;
+  cacheCreateIn: number;
+  costUsd: number;
+  rateLimited: number;
+  validationErrors: number;
+  startedAt: number;
+}
+
+function newStats(): Stats {
+  return {
+    processed: 0, enriched: 0, failed: 0, poisonPilled: 0,
+    fetchOk: 0, fetchFailed: 0, fetchSkipped: 0,
+    descFilled: 0, descPolished: 0, priceTextFilled: 0, priceMinFilled: 0,
+    studentTrue: 0, familyTrue: 0, dogTrue: 0, wheelchairTrue: 0, outdoorTrue: 0,
+    tokensIn: 0, tokensOut: 0, cacheReadIn: 0, cacheCreateIn: 0, costUsd: 0,
+    rateLimited: 0, validationErrors: 0,
+    startedAt: Date.now(),
+  };
+}
+
+function reportLine(s: Stats, total: number | undefined, opts: CliOpts): string {
+  const elapsed = (Date.now() - s.startedAt) / 1000;
+  const rate = s.processed / Math.max(elapsed, 0.001);
+  const etaStr = total && rate > 0
+    ? `eta=${(((total - s.processed) / rate) / 60).toFixed(0)}min`
+    : '';
+  const tokenPct = ((s.tokensIn + s.tokensOut) / opts.weeklyTokenCap * 100).toFixed(1);
+  return `p=${s.processed}${total ? '/' + total : ''} ✓=${s.enriched} ✗=${s.failed}` +
+    ` poison=${s.poisonPilled} fetch(ok=${s.fetchOk} fail=${s.fetchFailed})` +
+    ` filled(d=${s.descFilled}+${s.descPolished} p=${s.priceTextFilled}/${s.priceMinFilled})` +
+    ` flags(stu=${s.studentTrue} fam=${s.familyTrue} dog=${s.dogTrue} wc=${s.wheelchairTrue} out=${s.outdoorTrue})` +
+    ` tok=${(s.tokensIn + s.tokensOut).toLocaleString()}(${tokenPct}%) $=${s.costUsd.toFixed(2)}` +
+    ` rate=${rate.toFixed(1)}/s ${etaStr}`;
+}
+
+function appendLog(logFile: string | null, entry: Record<string, unknown>): void {
+  if (!logFile) return;
+  try {
+    const dir = dirname(logFile);
+    if (dir && dir !== '.' && !existsSync(dir)) mkdirSync(dir, { recursive: true });
+    appendFileSync(logFile, JSON.stringify({ ts: new Date().toISOString(), ...entry }) + '\n');
+  } catch (err) {
+    console.error(`\n[log] append failed: ${err instanceof Error ? err.message : err}`);
+  }
+}
+
+let alert80Sent = false;
+async function maybeSendQuotaAlert(stats: Stats, opts: CliOpts): Promise<void> {
+  if (!opts.alertEmail || alert80Sent) return;
+  const used = stats.tokensIn + stats.tokensOut;
+  if (used / opts.weeklyTokenCap >= 0.80) {
+    alert80Sent = true;
+    try {
+      // Lazy-import so this script doesn't drag in the email lib unless needed.
+      const { sendGenericEmail } = await import('../lib/email');
+      const subject = `[enrich:claude] 80% weekly token cap reached`;
+      const html = `
+        <h2>Token Quota Alert</h2>
+        <p>Bulk enrichment has reached <b>${(used / opts.weeklyTokenCap * 100).toFixed(1)}%</b>
+        of the configured weekly token cap (<b>${opts.weeklyTokenCap.toLocaleString()}</b>).</p>
+        <ul>
+          <li>Tokens in:  ${stats.tokensIn.toLocaleString()}</li>
+          <li>Tokens out: ${stats.tokensOut.toLocaleString()}</li>
+          <li>Cost:       $${stats.costUsd.toFixed(2)}</li>
+          <li>Processed:  ${stats.processed} events</li>
+        </ul>
+        <p>The script will halt cleanly at 95% so you can resume tomorrow without
+        burning the cap. Re-run the same command to pick up where this run left off.</p>
+      `;
+      await sendGenericEmail(opts.alertEmail, subject, html);
+      console.log(`\n[alert] 80% quota mail sent to ${opts.alertEmail}`);
+    } catch (err) {
+      console.error(`\n[alert] failed to send: ${err instanceof Error ? err.message : err}`);
+    }
+  }
+}
+
+function shouldHalt(stats: Stats, opts: CliOpts): boolean {
+  return (stats.tokensIn + stats.tokensOut) / opts.weeklyTokenCap >= 0.95;
+}
+
+// ─────────────────────────────────────────────────────────────────────
+// Per-batch processing — fetch, classify, validate, queue updates
+// ─────────────────────────────────────────────────────────────────────
+
+interface BatchOutcome {
+  /** Per-event success indices (relative to the input batch). */
+  ok: number[];
+  /** Per-event validation/AI failures with raw error messages. */
+  fail: Array<{ index: number; error: string }>;
+}
+
+class SchemaMismatchError extends Error {
+  constructor(message: string) { super(message); this.name = 'SchemaMismatchError'; }
+}
+
+/**
+ * Scrub Postgres-unsafe \u0000 sequences from a string. Matches the
+ * scrub helper in enrich-openai.ts so the two pipelines produce
+ * identical-shaped writes.
+ */
+function scrubNulls(s: string | null | undefined): string | null {
+  if (!s) return null;
+  return s.replace(/\u0000/g, '').replace(/\\u0000/g, '');
+}
+function scrubArray(arr: string[]): string[] {
+  return arr.map(s => s.replace(/\u0000/g, '').replace(/\\u0000/g, ''));
+}
+
+export interface DescOverride {
+  policy: 'fill' | 'polish' | 'leave';
+  reason: string;
+}
+
+/**
+ * fn-14.3 Interview override-logic, encoded:
+ *   - len < 40         → 'fill' (write whatever the AI gave us, even short)
+ *   - 40 ≤ len < 400   → 'polish' (AI rewrites at 400-1000)
+ *   - len ≥ 400 AND no HTML → 'leave' (skip; AI returns null in this case)
+ *   - len ≥ 400 BUT has HTML → 'polish' (re-write to strip HTML)
+ *
+ * Exported for unit-test coverage. Used internally by `buildUpdatePayload`.
+ */
+export function descOverridePolicy(existing: string | null): DescOverride {
+  const t = (existing ?? '').trim();
+  if (t.length < 40) return { policy: 'fill', reason: 'empty/very short' };
+  const hasHtml = /<[a-z][^>]*>/i.test(t);
+  if (t.length < 400) return { policy: 'polish', reason: 'short non-empty' };
+  if (hasHtml) return { policy: 'polish', reason: 'has HTML' };
+  return { policy: 'leave', reason: 'long & clean' };
+}
+
+async function fetchPagesForBatch(
+  events: EventRow[],
+  opts: CliOpts,
+  stats: Stats,
+): Promise<Array<string | null>> {
+  if (opts.noFetch) {
+    stats.fetchSkipped += events.length;
+    return events.map(() => null);
+  }
+  // Fetch in parallel inside the batch — fetchEventPage is rate-limited
+  // per-host internally so we don't have to throttle here.
+  const results = await Promise.all(events.map(async (ev) => {
+    if (!ev.source_url) {
+      stats.fetchSkipped += 1;
+      return null;
+    }
+    try {
+      const page = await fetchEventPage(ev.source_url);
+      if (page.ok && page.text) {
+        stats.fetchOk += 1;
+        return page.text;
+      }
+      stats.fetchFailed += 1;
+      return null;
+    } catch {
+      stats.fetchFailed += 1;
+      return null;
+    }
+  }));
+  return results;
+}
+
+/**
+ * Build the DB update payload for one event. Mirrors enrich-openai.ts
+ * write logic so both pipelines produce structurally identical updates.
+ *
+ * `category_locked` semantics (fn-14.3): only `category` is protected.
+ * Other fields (description, tags, audience, vibe, occasion_tags,
+ * setting, language, price_*, flags) are ALWAYS updated — locking the
+ * category should not freeze 6-month-old metadata across all axes.
+ */
+function buildUpdatePayload(
+  row: EventRow,
+  validated: ClaudeEnrichmentResult,
+  stats: Stats,
+): Record<string, unknown> {
+  const update: Record<string, unknown> = {
+    audience: validated.audience.length > 0 ? scrubArray(validated.audience) : null,
+    vibe: validated.vibe.length > 0 ? scrubArray(validated.vibe) : null,
+    occasion_tags: validated.occasion.length > 0 ? scrubArray(validated.occasion) : [],
+    setting: validated.setting.length > 0 ? scrubArray(validated.setting) : null,
+    price_flags: validated.price_flags.length > 0 ? scrubArray(validated.price_flags) : [],
+    language: validated.language,
+    price_tier: validated.price_tier,
+    duration_type: validated.duration_type,
+    is_student_friendly: validated.is_student_friendly,
+    is_family_friendly: validated.is_family_friendly,
+    is_dog_friendly: validated.is_dog_friendly,
+    is_wheelchair_accessible: validated.is_wheelchair_accessible,
+    is_outdoor: validated.is_outdoor,
+    enrichment_version: ENRICHMENT_VERSION_CLAUDE_V1,
+    // enrichment_at is bumped via column default in the RPC layer? — no,
+    // the RPC currently doesn't set it. We set it explicitly here so the
+    // client clock drives the timestamp (matches enrich-openai.ts).
+    enrichment_at: new Date().toISOString(),
+    // Successful validation → reset the failure counter so a row that
+    // recovered from a previous AI hiccup doesn't drift toward the
+    // poison-pill threshold.
+    enrichment_failure_count: 0,
+    enrichment_failed: false,
+  };
+
+  // Category-lock semantics: only protect `category`. Other axes
+  // (audience, vibe, …) are ALWAYS updated. fn-14.3 Interview decision.
+  const notLocked = !row.category_locked;
+  if (validated.primary_category && notLocked) {
+    update.category = validated.primary_category;
+    update.category_source = 'enrichment';
+  }
+
+  // Tags merge: union with existing source-side tags, capped at 8.
+  // This matches the existing pattern in enrich-openai.ts.
+  if (validated.tags.length > 0) {
+    const existing = Array.isArray(row.tags) ? row.tags : [];
+    update.tags = scrubArray(
+      Array.from(new Set([...existing, ...validated.tags])).slice(0, 8),
+    );
+  }
+
+  // Description override per fn-14.3 logic.
+  const policy = descOverridePolicy(row.description);
+  if (validated.suggested_description) {
+    if (policy.policy === 'fill') {
+      update.description = scrubNulls(validated.suggested_description);
+      stats.descFilled += 1;
+    } else if (policy.policy === 'polish') {
+      update.description = scrubNulls(validated.suggested_description);
+      stats.descPolished += 1;
+    }
+    // 'leave' → don't touch description even if AI gave one back.
+  }
+
+  // Price text fill: only if old empty.
+  if (validated.suggested_price_text) {
+    const priceEmpty = !row.price_text || row.price_text.trim().length === 0;
+    if (priceEmpty) {
+      update.price_text = scrubNulls(validated.suggested_price_text);
+      stats.priceTextFilled += 1;
+    }
+  }
+
+  // Price min fill: only if old NULL AND new non-null. Manual user
+  // values must never be clobbered by AI extraction.
+  if (validated.suggested_price_min != null && row.price_min == null) {
+    update.price_min = validated.suggested_price_min;
+    stats.priceMinFilled += 1;
+  }
+
+  if (validated.is_student_friendly) stats.studentTrue += 1;
+  if (validated.is_family_friendly) stats.familyTrue += 1;
+  if (validated.is_dog_friendly) stats.dogTrue += 1;
+  if (validated.is_wheelchair_accessible) stats.wheelchairTrue += 1;
+  if (validated.is_outdoor) stats.outdoorTrue += 1;
+
+  return update;
+}
+
+async function processBatch(
+  events: EventRow[],
+  opts: CliOpts,
+  stats: Stats,
+  systemPrompt: string,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  updater: any,
+): Promise<BatchOutcome> {
+  const outcome: BatchOutcome = { ok: [], fail: [] };
+
+  // 1. Fetch source pages (parallel within batch).
+  const pages = await fetchPagesForBatch(events, opts, stats);
+
+  // 2. Build batch input + call claude.
+  const batchInput = buildBatchInput(events, pages);
+
+  // 3. Call claude with retry loop. 5 attempts:
+  //    - rate-limit: 15s → 30s → 60s → 120s → 240s
+  //    - hang/network/empty:  3s → 6s → 12s → 24s → 48s
+  //    - auth: bail immediately
+  const MAX_ATTEMPTS = 5;
+  let parsed: unknown = null;
+  let callRes: ClaudeCallResult | null = null;
+  let lastErr: string | undefined;
+  for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
+    try {
+      callRes = await callClaudeBatch(systemPrompt, batchInput, opts);
+      // Even on is_error:true, accumulate token usage so quota is
+      // tracked accurately. Re-prompt if errored.
+      stats.tokensIn += callRes.tokensIn;
+      stats.tokensOut += callRes.tokensOut;
+      stats.cacheReadIn += callRes.cacheReadIn;
+      stats.cacheCreateIn += callRes.cacheCreateIn;
+      stats.costUsd += callRes.costUsd;
+
+      if (callRes.isError) {
+        const msg = callRes.errorMessage ?? 'is_error true';
+        lastErr = msg;
+        const isAuth = /\b(401|403|unauthorized|not logged in|please run \/login|invalid api key)\b/i.test(msg);
+        if (isAuth) {
+          // Drain attempts immediately — auth won't recover within this run.
+          throw new Error(`auth: ${msg}`);
+        }
+        const isRate = /429|rate.limit|rate_limit|too.many.request|usage.limit|quota/i.test(msg);
+        if (isRate) stats.rateLimited += 1;
+        if (attempt === MAX_ATTEMPTS - 1) break;
+        const backoff = isRate ? 15_000 * Math.pow(2, attempt) : 3_000 * Math.pow(2, attempt);
+        console.error(`\n[batch] is_error attempt ${attempt + 1}/${MAX_ATTEMPTS}: backoff ${(backoff / 1000).toFixed(0)}s | ${msg.slice(0, 120)}`);
+        await new Promise(r => setTimeout(r, backoff));
+        continue;
+      }
+      parsed = callRes.parsed;
+      break;
+    } catch (err) {
+      lastErr = err instanceof Error ? err.message : String(err);
+      if (lastErr.startsWith('auth:')) break; // bail on auth
+      if (attempt === MAX_ATTEMPTS - 1) break;
+
+      const isRate = /429|rate.limit|rate_limit|too.many.request|usage.limit|quota/i.test(lastErr);
+      const isHang = /timeout|SIGKILL|empty stdout/i.test(lastErr);
+      if (isRate) stats.rateLimited += 1;
+      const backoff = isRate ? 15_000 * Math.pow(2, attempt)
+                    : isHang ? 5_000 * Math.pow(2, attempt)
+                    : 2_000 * Math.pow(2, attempt);
+      console.error(`\n[batch] attempt ${attempt + 1}/${MAX_ATTEMPTS}: backoff ${(backoff / 1000).toFixed(0)}s | ${lastErr.slice(0, 120)}`);
+      await new Promise(r => setTimeout(r, backoff));
+    }
+  }
+
+  if (!parsed) {
+    // Whole-batch hang/error: every event in this batch gets +1 to
+    // failure_count. After 3 strikes, poison-pill kicks in.
+    for (let i = 0; i < events.length; i++) {
+      const ev = events[i];
+      const newCount = (ev.enrichment_failure_count ?? 0) + 1;
+      const failedNow = newCount >= 3;
+      if (!opts.dryRun) {
+        await updater.add({
+          id: ev.id,
+          enrichment_failure_count: newCount,
+          ...(failedNow ? { enrichment_failed: true } : {}),
+        });
+      }
+      if (failedNow) stats.poisonPilled += 1;
+      stats.failed += 1;
+      stats.processed += 1;
+      outcome.fail.push({ index: i, error: lastErr ?? 'no parsed result' });
+      appendLog(opts.logFile, {
+        event_id: ev.id, title: ev.title,
+        status: failedNow ? 'poison_pill' : 'batch_failed',
+        error: lastErr, failure_count: newCount,
+      });
+    }
+    return outcome;
+  }
+
+  // 4. Validate batch — top-level array + per-item.
+  const batchVal = validateClaudeBatch(parsed);
+  if (!batchVal.ok) {
+    // Whole batch structurally bad. Same as a hang outcome.
+    console.error(`\n[batch] top-level invalid: ${batchVal.fatalError}`);
+    for (let i = 0; i < events.length; i++) {
+      const ev = events[i];
+      const newCount = (ev.enrichment_failure_count ?? 0) + 1;
+      const failedNow = newCount >= 3;
+      if (!opts.dryRun) {
+        await updater.add({
+          id: ev.id,
+          enrichment_failure_count: newCount,
+          ...(failedNow ? { enrichment_failed: true } : {}),
+        });
+      }
+      if (failedNow) stats.poisonPilled += 1;
+      stats.failed += 1;
+      stats.processed += 1;
+      outcome.fail.push({ index: i, error: batchVal.fatalError ?? 'invalid' });
+      appendLog(opts.logFile, {
+        event_id: ev.id, title: ev.title,
+        status: 'batch_invalid',
+        error: batchVal.fatalError, failure_count: newCount,
+      });
+    }
+    return outcome;
+  }
+
+  // 5. Per-event commit.
+  for (let i = 0; i < events.length; i++) {
+    const ev = events[i];
+    const item = batchVal.items.find(it => it.index === i);
+    if (!item) {
+      // AI returned fewer items than requested — count as fail.
+      const newCount = (ev.enrichment_failure_count ?? 0) + 1;
+      const failedNow = newCount >= 3;
+      if (!opts.dryRun) {
+        await updater.add({
+          id: ev.id,
+          enrichment_failure_count: newCount,
+          ...(failedNow ? { enrichment_failed: true } : {}),
+        });
+      }
+      if (failedNow) stats.poisonPilled += 1;
+      stats.failed += 1;
+      stats.processed += 1;
+      outcome.fail.push({ index: i, error: 'missing item in batch response' });
+      continue;
+    }
+
+    const validated = item.result.ok ? item.result.value : item.result.partial;
+
+    // Per-item validation errors are recoverable iff there's a usable
+    // primary_category AND no top-level structural issue. We log them
+    // but commit the partial-but-valid payload.
+    if (!item.result.ok) {
+      stats.validationErrors += 1;
+      // If the AI didn't return a usable primary_category AND the item
+      // is otherwise mostly-empty, treat as fail. Otherwise commit
+      // partial.
+      const isMostlyEmpty = !validated.primary_category &&
+        validated.tags.length === 0 &&
+        validated.audience.length === 0 &&
+        validated.vibe.length === 0;
+      if (isMostlyEmpty) {
+        const newCount = (ev.enrichment_failure_count ?? 0) + 1;
+        const failedNow = newCount >= 3;
+        if (!opts.dryRun) {
+          await updater.add({
+            id: ev.id,
+            enrichment_failure_count: newCount,
+            ...(failedNow ? { enrichment_failed: true } : {}),
+          });
+        }
+        if (failedNow) stats.poisonPilled += 1;
+        stats.failed += 1;
+        stats.processed += 1;
+        outcome.fail.push({
+          index: i,
+          error: `validation: ${item.result.errors.slice(0, 3).join('; ')}`,
+        });
+        appendLog(opts.logFile, {
+          event_id: ev.id, title: ev.title, status: 'validation_failed',
+          errors: item.result.errors, failure_count: newCount,
+        });
+        continue;
+      }
+      // Soft fail — log but still commit.
+      appendLog(opts.logFile, {
+        event_id: ev.id, title: ev.title, status: 'validation_soft_fail',
+        errors: item.result.errors,
+      });
+    }
+
+    const update = buildUpdatePayload(ev, validated, stats);
+
+    if (!opts.dryRun) {
+      try {
+        await updater.add({ id: ev.id, ...update });
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : String(err);
+        if (/Could not find.+column/i.test(msg) || /schema cache/i.test(msg) || /does not exist/i.test(msg)) {
+          throw new SchemaMismatchError(msg);
+        }
+        console.error(`\n[${ev.id.slice(0, 8)}] queued update failed: ${msg}`);
+        stats.failed += 1;
+        stats.processed += 1;
+        outcome.fail.push({ index: i, error: `db: ${msg}` });
+        continue;
+      }
+    }
+    stats.enriched += 1;
+    stats.processed += 1;
+    outcome.ok.push(i);
+
+    if (opts.verbose) {
+      const titleCut = ev.title.length > 65 ? ev.title.slice(0, 65) + '…' : ev.title;
+      const lines: string[] = [];
+      lines.push('');
+      lines.push(`━━ [${ev.id.slice(0, 8)}] ${titleCut}`);
+      lines.push(`   primary:        ${validated.primary_category ?? '-'}`);
+      lines.push(`   tags:           ${validated.tags.join(', ') || '(none)'}`);
+      lines.push(`   audience:       ${validated.audience.join(', ') || '(none)'}`);
+      lines.push(`   vibe:           ${validated.vibe.join(', ') || '(none)'}`);
+      lines.push(`   occasion:       ${validated.occasion.join(', ') || '(none)'}`);
+      lines.push(`   setting:        ${validated.setting.join(', ') || '(none)'}`);
+      lines.push(`   price:          tier=${validated.price_tier ?? '-'} min=${validated.suggested_price_min ?? '-'} flags=${validated.price_flags.join(',')}`);
+      lines.push(`   flags:          stu=${validated.is_student_friendly} fam=${validated.is_family_friendly} dog=${validated.is_dog_friendly} wc=${validated.is_wheelchair_accessible} out=${validated.is_outdoor}`);
+      if (validated.suggested_description) {
+        const s = validated.suggested_description.length > 120
+          ? validated.suggested_description.slice(0, 120) + '…'
+          : validated.suggested_description;
+        lines.push(`   → desc:         ${s}  (${validated.suggested_description.length} chars)`);
+      }
+      if (validated.suggested_price_text) lines.push(`   → price text:   ${validated.suggested_price_text}`);
+      process.stdout.write(lines.join('\n') + '\n');
+    }
+  }
+
+  return outcome;
+}
+
+// ─────────────────────────────────────────────────────────────────────
+// Selection contract
+// ─────────────────────────────────────────────────────────────────────
+
+const SELECT_COLUMNS = [
+  'id', 'title', 'description', 'category', 'category_locked',
+  'tags', 'source_tags_raw', 'location_name', 'organizer',
+  'start_date', 'end_date',
+  'price_text', 'price_min', 'price_max',
+  'source_url', 'enrichment_failure_count',
+].join(', ');
+
+const SELECTION_PUBLISH_STATUSES = [
+  'published', 'published_low_confidence', 'needs_review',
+];
+
+async function fetchNextPage(
+  supabase: SupabaseClient,
+  opts: CliOpts,
+  cursorId: string | null,
+  pageSize: number,
+): Promise<EventRow[]> {
+  let q = supabase
+    .from('events')
+    .select(SELECT_COLUMNS)
+    .in('publish_status', SELECTION_PUBLISH_STATUSES)
+    .order('id', { ascending: true })
+    .limit(pageSize);
+
+  if (!opts.force) {
+    q = q.or(
+      `enrichment_version.is.null,enrichment_version.neq.${ENRICHMENT_VERSION_CLAUDE_V1}`,
+    );
+  }
+  // Skip poison-pills unless --retry-failed is set (which clears the
+  // flag in main() before this runs anyway).
+  q = q.or('enrichment_failed.is.null,enrichment_failed.eq.false');
+
+  if (opts.since) {
+    const ms = parseSince(opts.since);
+    if (ms != null) {
+      const cutoff = new Date(Date.now() - ms).toISOString();
+      q = q.gte('updated_at', cutoff);
+    }
+  }
+  if (cursorId) q = q.gt('id', cursorId);
+
+  const { data, error } = await q;
+  if (error) {
+    console.error(`\n[query] ${error.message}`);
+    return [];
+  }
+  return (data ?? []) as unknown as EventRow[];
+}
+
+// ─────────────────────────────────────────────────────────────────────
+// Main
+// ─────────────────────────────────────────────────────────────────────
+
+async function main() {
+  const opts = parseArgs();
+
+  // Best-effort version check + binary resolution. Logs which path will
+  // be used by the worker pool.
+  try {
+    cachedResolvedClaude = resolveClaudeBinary(opts.claudeBin);
+    const resolved = cachedResolvedClaude;
+    const version = await new Promise<string>((resolve, reject) => {
+      const c = spawn(resolved.path, ['--version'], {
+        shell: resolved.useShell,
+        stdio: ['ignore', 'pipe', 'pipe'],
+        windowsHide: true,
+      });
+      let out = '';
+      c.stdout.on('data', (d: Buffer) => { out += d.toString('utf8'); });
+      c.on('close', (code) => code === 0 ? resolve(out.trim()) : reject(new Error(`exited ${code}`)));
+      c.on('error', reject);
+    });
+    console.log(`  claude CLI:      ${version}`);
+    console.log(`  claude bin:      ${resolved.path}${resolved.useShell ? '  (via shell)' : '  (direct, no window)'}`);
+  } catch (err) {
+    console.warn(`  ⚠ claude --version check failed: ${err instanceof Error ? err.message : err}`);
+  }
+
+  const supaUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supaKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!supaUrl || !supaKey) {
+    console.error('Missing NEXT_PUBLIC_SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY');
+    process.exit(1);
+  }
+  const supabase = createClient(supaUrl, supaKey);
+  const enrichmentUpdater = makeBulkUpdater(supabase, 'bulk_update_event_enrichment');
+
+  if (opts.retryFailed) {
+    console.log('  --retry-failed: clearing enrichment_failed=TRUE flags before run');
+    if (!opts.dryRun) {
+      const { error } = await supabase
+        .from('events')
+        .update({ enrichment_failed: false, enrichment_failure_count: 0 })
+        .eq('enrichment_failed', true);
+      if (error) console.error(`\nretry-failed clear: ${error.message}`);
+    }
+  }
+
+  // Counts up front so the operator sees how big the run is.
+  const { count: alreadyDone } = await supabase
+    .from('events')
+    .select('id', { count: 'exact', head: true })
+    .in('publish_status', SELECTION_PUBLISH_STATUSES)
+    .eq('enrichment_version', ENRICHMENT_VERSION_CLAUDE_V1);
+
+  let pendingQuery = supabase
+    .from('events')
+    .select('id', { count: 'exact', head: true })
+    .in('publish_status', SELECTION_PUBLISH_STATUSES)
+    .or('enrichment_failed.is.null,enrichment_failed.eq.false');
+  if (!opts.force) {
+    pendingQuery = pendingQuery.or(
+      `enrichment_version.is.null,enrichment_version.neq.${ENRICHMENT_VERSION_CLAUDE_V1}`,
+    );
+  }
+  if (opts.since) {
+    const ms = parseSince(opts.since);
+    if (ms != null) {
+      const cutoff = new Date(Date.now() - ms).toISOString();
+      pendingQuery = pendingQuery.gte('updated_at', cutoff);
+    }
+  }
+  const { count: totalPending } = await pendingQuery;
+
+  console.log('\nEvent Enrichment — Claude Code (batch v2)');
+  console.log(`  Model:            ${opts.model} (${MODEL_MAP[opts.model]})`);
+  console.log(`  Batch size:       ${opts.batchSize} events / call`);
+  console.log(`  Concurrency:      ${opts.concurrency} parallel subprocesses`);
+  console.log(`  Limit:            ${opts.limit === Infinity ? 'none' : opts.limit}`);
+  console.log(`  Since:            ${opts.since ?? '(no time filter)'}`);
+  console.log(`  Force:            ${opts.force}`);
+  console.log(`  Retry-failed:     ${opts.retryFailed}`);
+  console.log(`  Bare mode:        ${opts.bareMode ? 'YES (API-key auth)' : 'no (MAX-OAuth ok, no --bare)'}`);
+  console.log(`  Dry-run:          ${opts.dryRun}`);
+  console.log(`  Fetch URLs:       ${!opts.noFetch}`);
+  console.log(`  Log file:         ${opts.logFile ?? '(none)'}`);
+  console.log(`  Weekly token cap: ${opts.weeklyTokenCap.toLocaleString()}`);
+  console.log(`  Alert email:      ${opts.alertEmail ?? '(none)'}`);
+  console.log(`  Target version:   ${ENRICHMENT_VERSION_CLAUDE_V1}`);
+  console.log(`  Already done:     ${alreadyDone ?? '?'}   (resume-safe — skipped)`);
+  console.log(`  Still pending:    ${totalPending ?? '?'}`);
+  console.log('─'.repeat(70));
+
+  const stats = newStats();
+  const systemPrompt = buildSystemPrompt();
+
+  appendLog(opts.logFile, {
+    status: 'run_start',
+    model: opts.model,
+    batch_size: opts.batchSize,
+    concurrency: opts.concurrency,
+    bare_mode: opts.bareMode,
+    pending: totalPending,
+    already_done: alreadyDone,
+  });
+
+  // Page through the eligible set with a forward-only cursor on `id`.
+  // Same idea as enrich-openai.ts — a cursor avoids the offset-blow-up
+  // problem where progressive enrichment_version writes push later
+  // pages into multi-second sequential scans.
+  const PAGE_SIZE = Math.max(opts.batchSize * opts.concurrency * 4, 100);
+  let cursorId: string | null = null;
+  let halted = false;
+
+  while (stats.processed < opts.limit && !halted) {
+    const page = await fetchNextPage(supabase, opts, cursorId, PAGE_SIZE);
+    if (page.length === 0) break;
+    cursorId = page[page.length - 1].id;
+
+    // Slice into batch-sized chunks and run `concurrency` of them in parallel.
+    const batches: EventRow[][] = [];
+    for (let i = 0; i < page.length; i += opts.batchSize) {
+      batches.push(page.slice(i, i + opts.batchSize));
+      const sliceTotal = batches.reduce((s, b) => s + b.length, 0);
+      if (stats.processed + sliceTotal >= opts.limit) {
+        // Trim the last batch so we honor --limit exactly.
+        const overshoot = stats.processed + sliceTotal - opts.limit;
+        if (overshoot > 0) {
+          batches[batches.length - 1] = batches[batches.length - 1].slice(0, batches[batches.length - 1].length - overshoot);
+        }
+        break;
+      }
+    }
+
+    for (let i = 0; i < batches.length; i += opts.concurrency) {
+      if (shouldHalt(stats, opts)) {
+        console.log('\n[quota] 95% weekly token cap — clean halt. Re-run to resume.');
+        halted = true;
+        break;
+      }
+      await maybeSendQuotaAlert(stats, opts);
+
+      const slice = batches.slice(i, i + opts.concurrency);
+      try {
+        await Promise.all(slice.map(b => processBatch(b, opts, stats, systemPrompt, enrichmentUpdater)));
+      } catch (err) {
+        if (err instanceof SchemaMismatchError) {
+          console.error('\n⛔ Schema mismatch — DB migration likely missing. Bailing.');
+          console.error(err.message.slice(0, 300));
+          process.exitCode = 1;
+          halted = true;
+          break;
+        }
+        throw err;
+      }
+
+      // One progress line per concurrency-cohort.
+      process.stdout.write('  ' + reportLine(stats, totalPending ?? undefined, opts) + '\r');
+    }
+
+    if (opts.dryRun || opts.force) break;
+    if (page.length < PAGE_SIZE) break;
+  }
+
+  // Final flush.
+  if (!opts.dryRun) {
+    try {
+      await enrichmentUpdater.flush();
+    } catch (err) {
+      console.error(`\nFinal bulk flush failed: ${err instanceof Error ? err.message : err}`);
+    }
+    console.log(
+      `\nBulk-RPC summary: ${enrichmentUpdater.stats.flushes} calls, ` +
+      `${enrichmentUpdater.stats.affected} rows, ` +
+      `${enrichmentUpdater.stats.retries} retries, ` +
+      `${enrichmentUpdater.stats.errors} errors`,
+    );
+  }
+
+  process.stdout.write('\n' + '─'.repeat(70) + '\n');
+  console.log(reportLine(stats, totalPending ?? undefined, opts));
+  const elapsedMin = (Date.now() - stats.startedAt) / 60000;
+  console.log(`Elapsed: ${elapsedMin.toFixed(1)}min`);
+  appendLog(opts.logFile, {
+    status: 'run_end',
+    processed: stats.processed,
+    enriched: stats.enriched,
+    failed: stats.failed,
+    poisonPilled: stats.poisonPilled,
+    elapsed_min: elapsedMin,
+    tokens_in: stats.tokensIn,
+    tokens_out: stats.tokensOut,
+    cache_read_in: stats.cacheReadIn,
+    cache_create_in: stats.cacheCreateIn,
+    cost_usd: stats.costUsd,
+  });
+
+  await closeSharedBrowser();
+}
+
+// Re-export validation length envelope + helpers so callers/tests can assert.
+export { DESC_MIN, DESC_MAX };
+export { buildSystemPrompt, parseSince, MODEL_MAP };
+
+/**
+ * Run main() only when invoked as a script, not when imported by a test.
+ * tsx sets `process.argv[1]` to the absolute path of the entry script;
+ * a require/import from another file would set it to that other file.
+ *
+ * import.meta.url is more reliable across CommonJS and ESM but tsx
+ * sometimes runs as CJS. The fallback compares argv[1] to __filename-ish.
+ */
+const isMain = (() => {
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const meta = (import.meta as any);
+    if (meta && typeof meta.url === 'string') {
+      // ESM context: compare module URL to argv[1] resolved
+      const argv1 = process.argv[1] ?? '';
+      // Either exact match or (Windows) case-insensitive trailing match
+      return meta.url.includes('enrich-claude.ts') &&
+             (argv1.endsWith('enrich-claude.ts') || argv1.toLowerCase().endsWith('enrich-claude.ts'));
+    }
+  } catch { /* not ESM */ }
+  return (process.argv[1] ?? '').toLowerCase().endsWith('enrich-claude.ts');
+})();
+
+if (isMain) {
+  // Graceful shutdown — log resume hint and close shared browser.
+  process.on('SIGINT', () => {
+    console.log('\n\n⚠ SIGINT received. In-flight events may roll back to enrichment_version=NULL —');
+    console.log('  re-run the same command to pick up where you were (idempotent).');
+    closeSharedBrowser().finally(() => process.exit(130));
+  });
+
+  main().catch((err) => {
+    console.error('enrich-claude failed:', err);
+    closeSharedBrowser().finally(() => process.exit(1));
+  });
+}

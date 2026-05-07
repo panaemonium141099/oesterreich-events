@@ -37,6 +37,10 @@ node / next.js
 - `src/app/sitemap.ts` — XML sitemap mit generateSitemaps() (chunked bei 5000 Events)
 - `src/app/robots.ts` — robots.txt (disallows /api/, /admin/, /auth/)
 - `src/scripts/calculate-scores.ts` — Event-Scoring-Algorithmus (schreibt event_score nach Supabase)
+- `src/scripts/enrich-claude.ts` — fn-14.3 batch enrichment via `claude -p` (v2 schema, BulkUpdater, 3-strikes poison-pill, --since for daily refresh)
+- `src/scripts/enrich-claude-cli.ts` — Legacy per-event enrichment (kept as historical reference; new code uses enrich-claude.ts)
+- `src/scripts/regen-taxonomy-doc.ts` — Regenerates `docs/TAXONOMY.md` §3 from `enrichment-taxonomy.ts` (code is SoT)
+- `src/lib/category-classifier/enrichment-validate.ts` — v2 validator (per-item + batch) for the Claude enrichment payload
 - `Dockerfile` — Multi-stage Docker-Build (node:20-slim + sharp)
 - `src/lib/scrapers/` — ~141 Scraper-Module (registered instances in index.ts)
 - `src/lib/scrapers/uni/` — 56 University/FH/PH scrapers
@@ -124,8 +128,14 @@ npm run scrape           # Alle Scraper ausfuhren
 npm run scrape:burgenland  # Nur burgenland.info scrapen
 npm run scrape:pipeline                       # Default: scrape + score, KEIN enrichment (fn-14.1)
 npm run scrape:pipeline -- --with-enrichment  # Opt-in: pipeline + legacy OpenAI enrichment inline
-npm run enrich:claude    # Standalone Claude enrichment (claude -p, MAX-Plan oder ANTHROPIC_API_KEY)
+npm run enrich:claude    # Batch Claude enrichment v2 (fn-14.3) — claude -p, ~20 events/call, 3-strikes poison-pill, BulkUpdater
+npm run enrich:claude -- --limit 100 --dry-run --verbose   # Smoke test on 100 events, no DB writes
+npm run enrich:claude -- --since=24h                       # Daily-refresh mode: only events updated in last 24h
+npm run enrich:claude -- --retry-failed                    # Reset poison-pill flags (enrichment_failed=FALSE) before run
+npm run enrich:claude:legacy   # Legacy per-event enrichment (kept as fallback / reference)
 npm run enrich:openai    # Standalone OpenAI enrichment (Fallback, GPT-5-mini default)
+npm run regen:taxonomy   # Regenerate docs/TAXONOMY.md §3 from enrichment-taxonomy.ts (code is SoT)
+npm run regen:taxonomy -- --check   # CI: exit 1 if doc has drifted from code
 npm run score            # Event-Scores berechnen und nach Supabase schreiben
 npm run scrape:venues    # Registry-based venue feed ingestion
 npm test                 # Vitest test suite (547 tests, all passing)

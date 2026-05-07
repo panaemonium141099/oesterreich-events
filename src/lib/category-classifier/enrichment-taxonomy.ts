@@ -304,6 +304,7 @@ export const PRICE_FLAGS = [
   'kinderwagengeeignet',
   'fuer-anfaenger',                // low-barrier participation
   'unter-20-euro',
+  'spende-erbeten',                // NEU v2 (fn-14.3): "Spende erbeten" / "Auf Spendenbasis" — price_min=0
 ] as const;
 
 export type PriceFlag = typeof PRICE_FLAGS[number];
