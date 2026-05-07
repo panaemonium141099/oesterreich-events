@@ -13,31 +13,78 @@
  */
 
 /**
- * Image upgrade rule:
+ * Image upgrade rule (URL only):
  *   - existing has no URL                       → write new
  *   - same URL                                  → write new only when
- *                                                 we now know dims and
- *                                                 existing didn't
+ *                                                 we now know any dim
+ *                                                 the existing row
+ *                                                 didn't (width OR
+ *                                                 height)
  *   - existing width unknown                    → write new
  *   - new width >= existing width               → write new
  *   - otherwise                                 → keep existing
+ *
+ * Width and height are evaluated INDEPENDENTLY for the persisted
+ * value (see `pickFinalImageWidth` / `pickFinalImageHeight` below) so
+ * a wider new image with unknown height never clobbers a known
+ * height, and the same URL can backfill a missing height when only
+ * width was previously known.
  */
 export function shouldUpgradeImage(
   newUrl: string | null,
   newWidth: number | null,
+  newHeight: number | null,
   oldUrl: string | null,
   oldWidth: number | null,
+  oldHeight: number | null,
 ): boolean {
   if (!newUrl) return false;
   if (!oldUrl) return true;
   if (newUrl === oldUrl) {
-    // Same URL — only worth re-writing when we now have dims and
-    // existing didn't (the dims piggy-back on the URL field).
-    return oldWidth == null && newWidth != null;
+    // Same URL — write back when we've discovered any dim that was
+    // missing before (covers both "width was known, now we know height
+    // too" and the symmetric height-first case).
+    if (oldWidth == null && newWidth != null) return true;
+    if (oldHeight == null && newHeight != null) return true;
+    return false;
   }
   if (oldWidth == null) return true;
   if (newWidth != null && newWidth >= oldWidth) return true;
   return false;
+}
+
+/**
+ * Pick which width to persist. Independent of the URL-upgrade decision:
+ * even when we keep the existing URL, a freshly-discovered width from
+ * the same URL backfills the column. When the URL is being replaced,
+ * the new width wins iff it's known; otherwise we preserve the old
+ * value to avoid NULL-clobber.
+ */
+export function pickFinalImageWidth(
+  upgradingUrl: boolean,
+  newWidth: number | null,
+  oldWidth: number | null,
+): number | null {
+  if (upgradingUrl) {
+    return newWidth ?? oldWidth ?? null;
+  }
+  // URL unchanged or rejected — backfill missing existing width when
+  // new width is known; otherwise leave the existing value alone.
+  if (oldWidth == null && newWidth != null) return newWidth;
+  return oldWidth ?? null;
+}
+
+/** Symmetric helper for height — see `pickFinalImageWidth`. */
+export function pickFinalImageHeight(
+  upgradingUrl: boolean,
+  newHeight: number | null,
+  oldHeight: number | null,
+): number | null {
+  if (upgradingUrl) {
+    return newHeight ?? oldHeight ?? null;
+  }
+  if (oldHeight == null && newHeight != null) return newHeight;
+  return oldHeight ?? null;
 }
 
 /**

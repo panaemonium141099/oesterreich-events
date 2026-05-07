@@ -44,6 +44,8 @@ import {
 } from '@/lib/event-images/validate-upgrade';
 import {
   shouldUpgradeImage,
+  pickFinalImageWidth,
+  pickFinalImageHeight,
   shouldOverwriteDescription,
   shouldOverwritePrice,
 } from '@/lib/db/upsert-guards';
@@ -418,8 +420,10 @@ function toSupabaseRow(
   const upgradeImage = shouldUpgradeImage(
     newImageUrl,
     newImageWidth,
+    newImageHeight,
     existing?.image_url ?? null,
     existing?.image_width ?? null,
+    existing?.image_height ?? null,
   );
 
   // ─── fn-14.5 Description guard ───────────────────────────────────
@@ -483,9 +487,23 @@ function toSupabaseRow(
   // normalisation can clobber preserved columns with NULL — see
   // Codex-review note above the imports). When the guard says "keep
   // old", we explicitly write back the existing value verbatim.
+  //
+  // Width and height are picked INDEPENDENTLY of the URL-upgrade
+  // decision: even when we keep the existing URL, a freshly-known
+  // dim from the same URL still backfills its column. And when we
+  // adopt a wider new URL with unknown height, the existing height
+  // is preserved instead of NULL-clobbered.
   const finalImageUrl = upgradeImage ? newImageUrl : (existing?.image_url ?? null);
-  const finalImageWidth = upgradeImage ? newImageWidth : (existing?.image_width ?? null);
-  const finalImageHeight = upgradeImage ? newImageHeight : (existing?.image_height ?? null);
+  const finalImageWidth = pickFinalImageWidth(
+    upgradeImage,
+    newImageWidth,
+    existing?.image_width ?? null,
+  );
+  const finalImageHeight = pickFinalImageHeight(
+    upgradeImage,
+    newImageHeight,
+    existing?.image_height ?? null,
+  );
   const finalDescription = overwriteDescription
     ? newDescription
     : (existing?.description ?? null);

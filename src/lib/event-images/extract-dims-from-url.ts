@@ -30,21 +30,15 @@ export interface UrlDims {
 export function extractDimsFromUrl(url: string | null | undefined): UrlDims {
   if (!url || typeof url !== 'string') return {};
 
-  // Cloudinary `/w_1200,h_800/` (both) — match first, beats single-param
-  // pattern below.
-  const cloudinaryBoth = /\/w_(\d+),h_(\d+)\//i.exec(url);
-  if (cloudinaryBoth) {
-    return { width: parseInt(cloudinaryBoth[1], 10), height: parseInt(cloudinaryBoth[2], 10) };
-  }
-  // Cloudinary `/h_800,w_1200/` (reversed order)
-  const cloudinaryReversed = /\/h_(\d+),w_(\d+)\//i.exec(url);
-  if (cloudinaryReversed) {
-    return { width: parseInt(cloudinaryReversed[2], 10), height: parseInt(cloudinaryReversed[1], 10) };
-  }
-  // Cloudinary `/w_1200/` only
-  const cloudinaryW = /\/w_(\d+)\//i.exec(url);
-  // Cloudinary `/h_800/` only (rare but possible)
-  const cloudinaryH = /\/h_(\d+)\//i.exec(url);
+  // Cloudinary URLs encode dims as `w_<n>` / `h_<n>` tokens inside a
+  // slash-delimited, comma-separated transform list. The tokens may
+  // appear anywhere in the list (e.g. `c_fill,w_800,h_600,q_auto`),
+  // so we scan for `w_<n>` and `h_<n>` independently rather than
+  // expecting a fixed pair pattern. Word-boundaries prevent matching
+  // unrelated `*_w_…` or `…_w_…` substrings; the leading delimiter
+  // can be `/` or `,`.
+  const cloudinaryW = /[/,]w_(\d+)\b/i.exec(url);
+  const cloudinaryH = /[/,]h_(\d+)\b/i.exec(url);
   if (cloudinaryW || cloudinaryH) {
     return {
       ...(cloudinaryW ? { width: parseInt(cloudinaryW[1], 10) } : {}),

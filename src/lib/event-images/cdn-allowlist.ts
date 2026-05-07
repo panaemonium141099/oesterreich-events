@@ -36,26 +36,40 @@ const TARGET_WIDTH = 2000;
 /**
  * Cloudinary: URLs look like
  *   https://res.cloudinary.com/<cloud>/image/upload/<transforms>/<public_id>.<ext>
- * Transforms include `w_400`, `w_400,h_300`, `c_fill,w_800,h_600,q_auto`,
- * etc. We rewrite the width transform (or insert one if absent) to
- * request a larger image.
+ * Transforms are slash-separated; each transform is a comma-separated
+ * list of `<key>_<value>` pairs, e.g.:
+ *   `/w_400/`
+ *   `/w_400,h_300/`
+ *   `/c_fill,w_800,h_600,q_auto/`
+ *   `/c_fill,w_800,h_600/v1234/`
+ * We rewrite `w_<n>` wherever it appears in the comma-separated list,
+ * leaving sibling transforms (c_fill, q_auto, …) intact, and drop
+ * `h_<n>` from that same transform so the aspect ratio scales freely.
  */
 const cloudinary: CdnHandler = {
   name: 'cloudinary',
   match: (_url, hostname) => /(?:^|\.)cloudinary\.com$/i.test(hostname),
   upgrade(url, targetWidth) {
     try {
-      // Pattern: replace existing `w_<num>` (with optional `,h_<num>`) with
-      // a larger width. We only rewrite when the existing width is below
-      // the target; otherwise the URL is already large enough.
-      return url.replace(/\/w_(\d+)(,h_(\d+))?\//, (full, w) => {
-        const current = parseInt(w, 10);
-        if (current >= targetWidth) return full;
-        // Preserve the rest of the transform string by re-emitting only
-        // `w_<target>` and dropping the `h_<...>` constraint so the
-        // aspect ratio scales naturally.
-        return `/w_${targetWidth}/`;
-      });
+      // Match a full slash-segment that contains `w_<n>` somewhere in
+      // the comma-list. The replacement runs once per such segment
+      // (most URLs only have one transform segment but Cloudinary
+      // supports chains via multiple slashes).
+      return url.replace(
+        /\/([^/]*\bw_(\d+)[^/]*)\//g,
+        (_full, segment: string, w: string) => {
+          const current = parseInt(w, 10);
+          if (current >= targetWidth) return `/${segment}/`;
+          // Bump w_<n> in place; drop sibling h_<n> if present so the
+          // aspect ratio is recomputed by the CDN.
+          const bumped = segment
+            .replace(/\bw_\d+\b/, `w_${targetWidth}`)
+            .replace(/(^|,)h_\d+(?=,|$)/, '$1')
+            .replace(/^,|,$/g, '')        // tidy stray leading/trailing commas
+            .replace(/,,/g, ',');         // tidy double commas
+          return `/${bumped}/`;
+        },
+      );
     } catch {
       return url;
     }

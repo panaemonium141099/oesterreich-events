@@ -54,6 +54,27 @@ describe('cdn-allowlist (fn-14.5)', () => {
     )).toBeNull();
   });
 
+  it('upgrades Cloudinary transform chains and preserves sibling transforms', () => {
+    const upgraded = tryUpgradeImageUrl(
+      'https://res.cloudinary.com/demo/image/upload/c_fill,w_800,h_600,q_auto/foo.jpg',
+      2000,
+    );
+    expect(upgraded).toContain('w_2000');
+    expect(upgraded).toContain('c_fill');
+    expect(upgraded).toContain('q_auto');
+    expect(upgraded).not.toContain('h_600');
+    expect(upgraded).not.toContain('w_800');
+  });
+
+  it('upgrades Cloudinary chains with version segments', () => {
+    const upgraded = tryUpgradeImageUrl(
+      'https://res.cloudinary.com/demo/image/upload/c_fill,w_400,h_300/v1234/foo.jpg',
+      2000,
+    );
+    expect(upgraded).toContain('w_2000');
+    expect(upgraded).toContain('v1234');
+  });
+
   it('upgrades Imgix URLs by setting w=2000 and dropping h', () => {
     const upgraded = tryUpgradeImageUrl(
       'https://example.imgix.net/photo.jpg?w=400&h=300&q=80',
@@ -111,6 +132,18 @@ describe('extractDimsFromUrl (fn-14.5)', () => {
     expect(extractDimsFromUrl(
       'https://res.cloudinary.com/demo/image/upload/h_800,w_1200/foo.jpg',
     )).toEqual({ width: 1200, height: 800 });
+  });
+
+  it('extracts dims from Cloudinary transform chains (c_fill,w_NNN,h_NNN,q_auto)', () => {
+    expect(extractDimsFromUrl(
+      'https://res.cloudinary.com/demo/image/upload/c_fill,w_800,h_600,q_auto/foo.jpg',
+    )).toEqual({ width: 800, height: 600 });
+  });
+
+  it('extracts dims even when w_/h_ are not adjacent in the chain', () => {
+    expect(extractDimsFromUrl(
+      'https://res.cloudinary.com/demo/image/upload/c_fill,w_800,q_auto,h_600/foo.jpg',
+    )).toEqual({ width: 800, height: 600 });
   });
 
   it('extracts width-only from Cloudinary /w_NNN/', () => {
