@@ -197,4 +197,24 @@ describe('validateAndUpgradeImageUrl (fn-14.5)', () => {
     expect(result.upgraded).toBeUndefined();
     expect(fetchSpy).not.toHaveBeenCalled();
   });
+
+  it('blocks SSRF: rejects redirect targets pointing at private IPs (Codex regression test)', async () => {
+    // Public-looking host passes the initial guard, but the HEAD
+    // probe returns a 302 to a private IP. Without manual-redirect
+    // handling + per-hop SSRF re-validation, the redirected request
+    // would still be issued by the underlying http stack.
+    fetchSpy.mockResolvedValueOnce(new Response(null, {
+      status: 302,
+      headers: { location: 'http://127.0.0.1/secret.jpg' },
+    }));
+    const result = await validateAndUpgradeImageUrl(
+      'https://example.com/wp-content/uploads/photo-400x300.jpg',
+    );
+    // Upgrade rejected → fall back to original.
+    expect(result.url).toBe('https://example.com/wp-content/uploads/photo-400x300.jpg');
+    expect(result.upgraded).toBeUndefined();
+    // Fetch was called exactly once (the initial HEAD); the redirect
+    // was rejected without a follow-up call.
+    expect(fetchSpy).toHaveBeenCalledTimes(1);
+  });
 });

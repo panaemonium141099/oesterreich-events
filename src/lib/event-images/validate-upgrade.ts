@@ -20,11 +20,13 @@
  * returned `{ url, width?, height? }` into the upsert payload.
  */
 
+import * as dns from 'node:dns/promises';
 import { tryUpgradeImageUrl } from './cdn-allowlist';
 import { extractDimsFromUrl } from './extract-dims-from-url';
 
 const HEAD_TIMEOUT_MS = 5000;
 const USER_AGENT = 'BurgenlandEvents-ImageValidator/1.0 (educational project)';
+const MAX_REDIRECTS = 3;
 
 export interface ValidatedImage {
   url: string;
@@ -42,47 +44,24 @@ export interface ValidatedImage {
 }
 
 /**
- * SSRF guard: reject URLs that point at private / loopback /
- * link-local / unspecified addresses, or use non-http(s) schemes.
- *
- * The CDN allowlist's WordPress handler matches by path
- * (`/wp-content/uploads/`), not hostname, so a scraped page can
- * embed an upgrade-eligible URL that resolves to internal
- * infrastructure (127.0.0.1, 169.254.169.254 — AWS metadata, etc.).
- * Without this guard, `validateAndUpgradeImageUrl()` would happily
- * issue HEAD probes to those hosts and leak whatever they expose.
- *
- * We only catch the literal-IP cases here. Hostname → private-IP
- * resolution is intentionally out of scope: it would require DNS
- * lookups in the sync path, and the operational risk we're guarding
- * against (attacker-supplied scrape URLs pointing at infrastructure)
- * is dominated by literal-IP forms.
+ * Returns true when the literal IP / hostname looks unsafe to probe.
+ * Used as the first sync-only filter; DNS-resolution SSRF is handled
+ * separately by `assertSafeIpAddresses()` via Node's resolver.
  */
-function isUnsafeUpgradeTarget(url: string): boolean {
-  let parsed: URL;
-  try {
-    parsed = new URL(url);
-  } catch {
-    return true;
-  }
-  // Reject non-public schemes.
-  if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') return true;
-  const host = parsed.hostname.toLowerCase();
+function isUnsafeIpLiteral(host: string): boolean {
   if (!host) return true;
+  const lc = host.toLowerCase();
 
-  // Loopback / unspecified literals.
-  if (host === 'localhost' || host === '127.0.0.1' || host === '::1' || host === '0.0.0.0') {
-    return true;
-  }
+  if (lc === 'localhost') return true;
 
   // IPv4 literal — check private / link-local / loopback / multicast / reserved ranges.
-  const v4Match = /^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/.exec(host);
+  const v4Match = /^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/.exec(lc);
   if (v4Match) {
     const a = parseInt(v4Match[1], 10);
     const b = parseInt(v4Match[2], 10);
     if (a === 10) return true;                      // 10.0.0.0/8 — private
     if (a === 127) return true;                     // 127.0.0.0/8 — loopback
-    if (a === 169 && b === 254) return true;        // 169.254.0.0/16 — link-local (incl. AWS metadata)
+    if (a === 169 && b === 254) return true;        // 169.254.0.0/16 — link-local (AWS metadata)
     if (a === 172 && b >= 16 && b <= 31) return true; // 172.16.0.0/12 — private
     if (a === 192 && b === 168) return true;        // 192.168.0.0/16 — private
     if (a === 100 && b >= 64 && b <= 127) return true; // 100.64.0.0/10 — CGNAT
@@ -91,39 +70,131 @@ function isUnsafeUpgradeTarget(url: string): boolean {
     return false;
   }
 
-  // IPv6 literal (bracketed in URL hostname) — basic checks for
-  // common danger ranges. URL strips the brackets so we get the
-  // address text directly.
-  if (host.includes(':')) {
-    if (host.startsWith('fc') || host.startsWith('fd')) return true; // fc00::/7 — ULA
-    if (host.startsWith('fe80')) return true;                         // fe80::/10 — link-local
-    if (host === '::' || host === '::1') return true;
+  // IPv6 literal — URL.hostname strips brackets.
+  if (lc.includes(':')) {
+    if (lc.startsWith('fc') || lc.startsWith('fd')) return true; // fc00::/7 — ULA
+    if (lc.startsWith('fe80')) return true;                       // fe80::/10 — link-local
+    if (lc === '::' || lc === '::1') return true;
+    if (lc === '0:0:0:0:0:0:0:0' || lc === '0:0:0:0:0:0:0:1') return true;
   }
 
   return false;
 }
 
-/** HEAD-check used by the upgrade path. Mirrors `BaseScraper.validateImageUrl()`. */
+/**
+ * Sync-only structural validation: scheme + literal-IP / localhost
+ * checks. Catches the obvious SSRF attempts without touching DNS.
+ */
+function isUnsafeUpgradeTarget(url: string): boolean {
+  let parsed: URL;
+  try {
+    parsed = new URL(url);
+  } catch {
+    return true;
+  }
+  if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') return true;
+  return isUnsafeIpLiteral(parsed.hostname);
+}
+
+/**
+ * Async DNS-based SSRF guard: resolve every A/AAAA record for the
+ * URL's hostname and reject if ANY resolves to a private/loopback/
+ * link-local/multicast/reserved address. Defends against
+ * `attacker.example → 127.0.0.1` redirects that pass the literal-IP
+ * check but still target internal infrastructure.
+ *
+ * Returns true when the hostname is safe to fetch.
+ *
+ * `dns.lookup` with `all: true` follows the system resolver (which
+ * respects /etc/hosts), is fast in the typical "already cached" case,
+ * and never throws — DNS failures return false (treat as unsafe).
+ */
+async function isSafeToFetch(url: string): Promise<boolean> {
+  let parsed: URL;
+  try {
+    parsed = new URL(url);
+  } catch {
+    return false;
+  }
+  if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') return false;
+  const host = parsed.hostname;
+
+  // Literal IPs / localhost are caught by the sync check first; this
+  // call covers the DNS resolution path.
+  if (isUnsafeIpLiteral(host)) return false;
+
+  // If the host is already a literal IP, dns.lookup just echoes it
+  // back — we already validated that above. Otherwise resolve.
+  try {
+    const addresses = await dns.lookup(host, { all: true });
+    if (addresses.length === 0) return false;
+    for (const addr of addresses) {
+      if (isUnsafeIpLiteral(addr.address)) return false;
+    }
+    return true;
+  } catch {
+    // Resolution failure → treat as unsafe.
+    return false;
+  }
+}
+
+/**
+ * HEAD-check with manual redirect handling so each hop is re-checked
+ * by the SSRF guard. Mirrors `BaseScraper.validateImageUrl()` but
+ * never trusts auto-redirects to a possibly-private target.
+ */
 async function headCheckIsImage(url: string, timeoutMs = HEAD_TIMEOUT_MS): Promise<boolean> {
   if (!url) return false;
   if (isUnsafeUpgradeTarget(url)) return false;
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), timeoutMs);
-  try {
-    const response = await fetch(url, {
-      method: 'HEAD',
-      headers: { 'User-Agent': USER_AGENT },
-      signal: controller.signal,
-      redirect: 'follow',
-    });
-    if (!response.ok) return false;
-    const contentType = response.headers.get('content-type') || '';
-    return contentType.startsWith('image/');
-  } catch {
-    return false;
-  } finally {
+  if (!(await isSafeToFetch(url))) return false;
+
+  let currentUrl = url;
+  for (let hop = 0; hop <= MAX_REDIRECTS; hop++) {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), timeoutMs);
+    let response: Response;
+    try {
+      response = await fetch(currentUrl, {
+        method: 'HEAD',
+        headers: { 'User-Agent': USER_AGENT },
+        signal: controller.signal,
+        // CRITICAL: manual redirects so we can SSRF-validate every Location.
+        redirect: 'manual',
+      });
+    } catch {
+      clearTimeout(timer);
+      return false;
+    }
     clearTimeout(timer);
+
+    // Direct 2xx with image content-type → success.
+    if (response.status >= 200 && response.status < 300) {
+      const contentType = response.headers.get('content-type') || '';
+      return contentType.startsWith('image/');
+    }
+
+    // Redirect — extract Location and re-check.
+    if (response.status >= 300 && response.status < 400) {
+      const location = response.headers.get('location');
+      if (!location) return false;
+      let nextUrl: string;
+      try {
+        nextUrl = new URL(location, currentUrl).toString();
+      } catch {
+        return false;
+      }
+      if (isUnsafeUpgradeTarget(nextUrl)) return false;
+      if (!(await isSafeToFetch(nextUrl))) return false;
+      currentUrl = nextUrl;
+      continue;
+    }
+
+    // 4xx / 5xx etc. → not an image.
+    return false;
   }
+
+  // Exhausted redirect budget.
+  return false;
 }
 
 /**
