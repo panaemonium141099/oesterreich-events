@@ -348,14 +348,21 @@ export interface BatchValidation {
 /**
  * Validate the top-level batch envelope.
  *
+ * Every result item MUST echo back a non-negative integer `index`
+ * field — this is part of the validator contract regardless of whether
+ * `expectedSize` is supplied. Missing / non-integer / negative indices
+ * are top-level fatalErrors.
+ *
  * @param raw          The parsed inner JSON from the `claude -p` envelope.
- * @param expectedSize If set, the validator enforces:
+ * @param expectedSize If set, the validator additionally enforces:
  *                       - exactly `expectedSize` items
  *                       - every echoed `index` in [0, expectedSize)
  *                       - no duplicate indices
+ *                       - no gaps
  *                     This is the only safe way to remap results onto
  *                     events — array position is NOT trustworthy because
  *                     the AI can reorder/drop/duplicate without notice.
+ *                     `processBatch()` always passes `events.length`.
  */
 export function validateClaudeBatch(raw: unknown, expectedSize?: number): BatchValidation {
   let arr: unknown[];
@@ -372,19 +379,34 @@ export function validateClaudeBatch(raw: unknown, expectedSize?: number): BatchV
   }
 
   // Per-item: extract echoed index, then validate the rest.
-  const items: BatchItem[] = arr.map((item) => {
+  // Track which items had a missing/invalid index so we can fail loudly
+  // even when expectedSize isn't passed by the caller.
+  const items: BatchItem[] = [];
+  const indexErrors: string[] = [];
+  arr.forEach((item, position) => {
     let echoedIndex = -1;
     if (item && typeof item === 'object' && !Array.isArray(item)) {
       const v = (item as Record<string, unknown>).index;
       if (typeof v === 'number' && Number.isFinite(v) && Number.isInteger(v) && v >= 0) {
         echoedIndex = v;
+      } else if (v === undefined) {
+        indexErrors.push(`result at position ${position}: missing required "index" field`);
+      } else {
+        indexErrors.push(`result at position ${position}: "index" must be a non-negative integer (got ${JSON.stringify(v)})`);
       }
+    } else {
+      indexErrors.push(`result at position ${position}: not an object`);
     }
-    return {
-      index: echoedIndex,
-      result: validateClaudeEnrichment(item),
-    };
+    items.push({ index: echoedIndex, result: validateClaudeEnrichment(item) });
   });
+
+  if (indexErrors.length > 0) {
+    return {
+      ok: false,
+      fatalError: `top-level: ${indexErrors.slice(0, 3).join('; ')}${indexErrors.length > 3 ? `; +${indexErrors.length - 3} more` : ''}`,
+      items,
+    };
+  }
 
   // Cross-item structural checks if we know the expected size.
   if (expectedSize !== undefined) {

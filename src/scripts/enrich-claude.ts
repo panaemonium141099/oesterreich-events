@@ -48,10 +48,11 @@
  * and `usage.*` all zero. So `--bare` is conditional below.
  */
 
-import { readFileSync, appendFileSync, mkdirSync, existsSync } from 'fs';
+import { readFileSync, appendFileSync, mkdirSync, existsSync, writeFileSync, unlinkSync } from 'fs';
 import { join, dirname, isAbsolute, delimiter as pathDelimiter } from 'path';
 import { spawn } from 'child_process';
 import { tmpdir } from 'os';
+import { randomBytes } from 'crypto';
 
 // ─────────────────────────────────────────────────────────────────────
 // Resolve `claude` binary on disk. Prefer .exe direct-spawn on Windows
@@ -526,6 +527,41 @@ interface ClaudeCallResult {
 
 let cachedResolvedClaude: { path: string; useShell: boolean } | null = null;
 
+/**
+ * Cache the path to a temp file containing the system prompt, written
+ * once at the start of the run and reused across every batch call.
+ *
+ * Why a file instead of inline `--append-system-prompt <text>`?
+ *   The full system prompt embeds the v2 taxonomy: PRIMARY_CATEGORIES
+ *   + ~316 TAGS + AUDIENCES + VIBES + SETTINGS + PRICE_FLAGS + decision
+ *   rules. That's 8-12 KB depending on locale. On Windows, command-line
+ *   length is capped at 32k chars per arg — close, but combined with
+ *   PowerShell escape multipliers it's a fragile path. Using
+ *   `--append-system-prompt-file <path>` skips the issue entirely.
+ *
+ * Lifecycle: written by `getOrCreateSystemPromptFile()` on first call,
+ * deleted by `cleanupSystemPromptFile()` in the finally-path of main()
+ * + on SIGINT.
+ */
+let systemPromptFilePath: string | null = null;
+
+function getOrCreateSystemPromptFile(systemPrompt: string): string {
+  if (systemPromptFilePath && existsSync(systemPromptFilePath)) {
+    return systemPromptFilePath;
+  }
+  const fname = `enrich-claude-sysprompt-${process.pid}-${randomBytes(4).toString('hex')}.txt`;
+  const fpath = join(tmpdir(), fname);
+  writeFileSync(fpath, systemPrompt, { encoding: 'utf8' });
+  systemPromptFilePath = fpath;
+  return fpath;
+}
+
+function cleanupSystemPromptFile(): void {
+  if (!systemPromptFilePath) return;
+  try { unlinkSync(systemPromptFilePath); } catch { /* already gone */ }
+  systemPromptFilePath = null;
+}
+
 async function callClaudeBatch(
   systemPrompt: string,
   batchInput: BatchInputItem[],
@@ -539,15 +575,18 @@ async function callClaudeBatch(
 
   // Build args. fn-14.3 spec: --output-format json (parsed envelope),
   // --no-session-persistence (no transcript files), --max-turns 1
-  // (single round-trip, no agent loop), --append-system-prompt (system
-  // role for the prompt body — separate from the user's batch input).
+  // (single round-trip, no agent loop), --append-system-prompt-file
+  // (system-role prompt loaded from disk — Codex review finding:
+  // passing the 8-12KB taxonomy inline as a CLI arg is fragile on
+  // Windows. The file is written once per run and reused.)
+  const sysPromptFile = getOrCreateSystemPromptFile(systemPrompt);
   const args = [
     '-p',
     '--model', model,
     '--max-turns', '1',
     '--output-format', 'json',
     '--no-session-persistence',
-    '--append-system-prompt', systemPrompt,
+    '--append-system-prompt-file', sysPromptFile,
   ];
   if (opts.bareMode) args.push('--bare');
 
@@ -625,22 +664,36 @@ async function callClaudeBatch(
       const apiErrStatus = typeof e.api_error_status === 'string' ? e.api_error_status : null;
       const resultStr = typeof e.result === 'string' ? e.result : '';
 
-      // The actual model output is `result` as a string. Inner-parse it.
-      // Tolerate code-fence wrapping which some models add despite
-      // explicit instructions to the contrary.
-      const inner = extractJson(resultStr);
-
       if (isError) {
-        // Surface the inner result as the error message for diagnosis.
-        // The most common case: "Not logged in · Please run /login" when
-        // --bare is used without ANTHROPIC_API_KEY.
+        // Error envelopes don't need a parsed result — the caller routes
+        // them to the retry path based on isError + errorMessage.
+        // Most common case: "Not logged in · Please run /login" when
+        // --bare is set without ANTHROPIC_API_KEY. resultStr is plain
+        // text in that case, so attempting extractJson() on it would
+        // throw and (before this fix) crash the whole worker.
         resolve({
-          parsed: inner,
+          parsed: null,
           tokensIn, tokensOut, cacheReadIn, cacheCreateIn, costUsd,
           stopReason, isError: true,
           errorMessage: resultStr.slice(0, 300) || apiErrStatus || 'unknown error',
           envelope,
         });
+        return;
+      }
+
+      // Success path: inner-parse the model output. extractJson can
+      // throw on malformed JSON; we MUST wrap it so the failure routes
+      // to the promise's reject path (→ batch retry → 3-strikes counter)
+      // instead of bubbling out as an uncaught exception that would
+      // crash the entire enrichment run.
+      let inner: unknown;
+      try {
+        inner = extractJson(resultStr);
+      } catch (err) {
+        reject(new Error(
+          `claude inner-result parse failed: ${err instanceof Error ? err.message : err} | ` +
+          `result=${resultStr.slice(0, 300)}`,
+        ));
         return;
       }
 
@@ -1493,6 +1546,7 @@ async function main() {
   });
 
   await closeSharedBrowser();
+  cleanupSystemPromptFile();
 }
 
 // Re-export validation length envelope + helpers so callers/tests can assert.
@@ -1523,15 +1577,18 @@ const isMain = (() => {
 })();
 
 if (isMain) {
-  // Graceful shutdown — log resume hint and close shared browser.
+  // Graceful shutdown — log resume hint, close shared browser, clean
+  // up the temp system-prompt file.
   process.on('SIGINT', () => {
     console.log('\n\n⚠ SIGINT received. In-flight events may roll back to enrichment_version=NULL —');
     console.log('  re-run the same command to pick up where you were (idempotent).');
+    cleanupSystemPromptFile();
     closeSharedBrowser().finally(() => process.exit(130));
   });
 
   main().catch((err) => {
     console.error('enrich-claude failed:', err);
+    cleanupSystemPromptFile();
     closeSharedBrowser().finally(() => process.exit(1));
   });
 }

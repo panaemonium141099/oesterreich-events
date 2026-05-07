@@ -270,9 +270,28 @@ describe('validateClaudeBatch', () => {
     expect(b.items.map(i => i.index)).toEqual([0, 1, 2]);
   });
 
-  it('returns -1 for items missing the echoed index', () => {
+  it('rejects items missing the echoed index field (always — even without expectedSize)', () => {
     const b = validateClaudeBatch([validRow]); // no index field
-    expect(b.items[0].index).toBe(-1);
+    expect(b.ok).toBe(false);
+    expect(b.fatalError).toMatch(/missing required "index" field/);
+  });
+
+  it('rejects items where index is not a non-negative integer', () => {
+    const b = validateClaudeBatch([{ ...validRow, index: -1 }]);
+    expect(b.ok).toBe(false);
+    expect(b.fatalError).toMatch(/non-negative integer/);
+  });
+
+  it('rejects items where index is a string', () => {
+    const b = validateClaudeBatch([{ ...validRow, index: '0' }]);
+    expect(b.ok).toBe(false);
+    expect(b.fatalError).toMatch(/non-negative integer/);
+  });
+
+  it('rejects items where index is fractional', () => {
+    const b = validateClaudeBatch([{ ...validRow, index: 1.5 }]);
+    expect(b.ok).toBe(false);
+    expect(b.fatalError).toMatch(/non-negative integer/);
   });
 
   it('returns per-item ok/fail mix when partial validation', () => {
@@ -322,11 +341,11 @@ describe('validateClaudeBatch', () => {
       expect(b.fatalError).toMatch(/duplicate result index 0/);
     });
 
-    it('rejects missing index (e.g. result has no echoed index)', () => {
+    it('rejects missing index (caught by per-item index check before expectedSize)', () => {
       const b = validateClaudeBatch([validRow, withIndex(validRow, 1)], 2);
       expect(b.ok).toBe(false);
-      // First item has -1 echoed index → out of range.
-      expect(b.fatalError).toMatch(/-1 out of range|missing result/);
+      // Per-item index check fires first (always-on contract).
+      expect(b.fatalError).toMatch(/missing required "index" field/);
     });
 
     it('rejects out-of-range index', () => {
