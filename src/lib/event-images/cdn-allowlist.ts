@@ -132,8 +132,14 @@ const cloudflareImages: CdnHandler = {
  */
 const wordpress: CdnHandler = {
   name: 'wordpress',
-  // wp-content path is canonical, .wp.com is jetpack/photon.
-  match: (url) => /\/wp-content\/uploads\//i.test(url) || /\.wp\.com\//i.test(url),
+  // Hostname-restricted to mitigate DNS-rebind SSRF: an arbitrary
+  // host with `/wp-content/uploads/` in the path could be the
+  // attacker's domain pointing at internal infrastructure.
+  // `*.wp.com` (Jetpack/Photon) is unambiguously a public CDN —
+  // restrict upgrades to that suffix. Arbitrary self-hosted
+  // WordPress URLs still pass through unchanged (no upgrade); they
+  // were already being persisted as-is before fn-14.5.
+  match: (_url, hostname) => /(?:^|\.)wp\.com$/i.test(hostname),
   upgrade(url) {
     try {
       // Strip a trailing `-WxH` size suffix immediately before the file

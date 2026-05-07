@@ -21,6 +21,7 @@
  */
 
 import * as dns from 'node:dns/promises';
+import * as net from 'node:net';
 import { tryUpgradeImageUrl } from './cdn-allowlist';
 import { extractDimsFromUrl } from './extract-dims-from-url';
 
@@ -44,40 +45,80 @@ export interface ValidatedImage {
 }
 
 /**
+ * Reject an IPv4 literal in a private / loopback / link-local /
+ * multicast / reserved range.
+ */
+function isUnsafeIpv4(host: string): boolean {
+  const v4Match = /^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/.exec(host);
+  if (!v4Match) return false;
+  const a = parseInt(v4Match[1], 10);
+  const b = parseInt(v4Match[2], 10);
+  if (a === 10) return true;                           // 10.0.0.0/8 — private
+  if (a === 127) return true;                          // 127.0.0.0/8 — loopback
+  if (a === 169 && b === 254) return true;             // 169.254.0.0/16 — link-local (AWS metadata)
+  if (a === 172 && b >= 16 && b <= 31) return true;    // 172.16.0.0/12 — private
+  if (a === 192 && b === 168) return true;             // 192.168.0.0/16 — private
+  if (a === 100 && b >= 64 && b <= 127) return true;   // 100.64.0.0/10 — CGNAT
+  if (a >= 224) return true;                           // 224.0.0.0/4 multicast + 240+ reserved
+  if (a === 0) return true;                            // 0.0.0.0/8 — "this network"
+  return false;
+}
+
+/**
+ * Reject an IPv6 literal that points at loopback / link-local / ULA /
+ * unspecified / multicast / IPv4-mapped private ranges. Accepts both
+ * compact (`::1`) and exploded (`0:0:0:0:0:0:0:1`) forms.
+ *
+ * IPv4-mapped IPv6 (`::ffff:127.0.0.1`) is delegated to the IPv4
+ * checker so loopback / private targets can't sneak through via
+ * dual-stack syntax.
+ */
+function isUnsafeIpv6(host: string): boolean {
+  // Strip brackets if URL kept them (rare with URL.hostname but
+  // belt-and-suspenders for callers that use raw inputs).
+  const stripped = host.replace(/^\[|\]$/g, '').toLowerCase();
+  if (!stripped) return true;
+
+  // IPv4-mapped: `::ffff:127.0.0.1`. Pull the trailing dotted-quad
+  // and reuse the IPv4 checker.
+  const v4Mapped = /^::ffff:(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})$/i.exec(stripped);
+  if (v4Mapped) return isUnsafeIpv4(v4Mapped[1]);
+
+  // Unspecified / loopback in any form.
+  // Normalise `::` shorthand by counting hex groups: any all-zero
+  // address is unspecified, and a hex form ending in `::1` (or
+  // exploded `0:0:0:0:0:0:0:1`) is loopback.
+  if (stripped === '::' || /^0(:0){0,7}$/.test(stripped)) return true;
+  if (stripped === '::1' || /^0(:0){0,6}:1$/.test(stripped)) return true;
+
+  // ULA (fc00::/7 — high bits 1111 110x → leading hex `fc` or `fd`).
+  if (/^fc[0-9a-f]{2}:/.test(stripped) || /^fd[0-9a-f]{2}:/.test(stripped)) return true;
+
+  // Link-local: fe80::/10 — leading 10 bits are `1111 1110 10`. In
+  // practice all link-local addresses literally start with `fe80:`,
+  // `fe9*:`, `fea*:`, or `feb*:` (covering the /10 range).
+  if (/^fe[89ab][0-9a-f]:/i.test(stripped)) return true;
+
+  // Multicast: ff00::/8 — leading byte ff.
+  if (/^ff[0-9a-f]{2}:/.test(stripped)) return true;
+
+  return false;
+}
+
+/**
  * Returns true when the literal IP / hostname looks unsafe to probe.
  * Used as the first sync-only filter; DNS-resolution SSRF is handled
- * separately by `assertSafeIpAddresses()` via Node's resolver.
+ * separately by `isSafeToFetch()` via Node's resolver.
  */
 function isUnsafeIpLiteral(host: string): boolean {
   if (!host) return true;
-  const lc = host.toLowerCase();
-
+  const stripped = host.replace(/^\[|\]$/g, '');
+  const lc = stripped.toLowerCase();
   if (lc === 'localhost') return true;
 
-  // IPv4 literal — check private / link-local / loopback / multicast / reserved ranges.
-  const v4Match = /^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/.exec(lc);
-  if (v4Match) {
-    const a = parseInt(v4Match[1], 10);
-    const b = parseInt(v4Match[2], 10);
-    if (a === 10) return true;                      // 10.0.0.0/8 — private
-    if (a === 127) return true;                     // 127.0.0.0/8 — loopback
-    if (a === 169 && b === 254) return true;        // 169.254.0.0/16 — link-local (AWS metadata)
-    if (a === 172 && b >= 16 && b <= 31) return true; // 172.16.0.0/12 — private
-    if (a === 192 && b === 168) return true;        // 192.168.0.0/16 — private
-    if (a === 100 && b >= 64 && b <= 127) return true; // 100.64.0.0/10 — CGNAT
-    if (a >= 224) return true;                      // 224.0.0.0/4 multicast + 240+ reserved
-    if (a === 0) return true;                       // 0.0.0.0/8 — "this network"
-    return false;
-  }
-
-  // IPv6 literal — URL.hostname strips brackets.
-  if (lc.includes(':')) {
-    if (lc.startsWith('fc') || lc.startsWith('fd')) return true; // fc00::/7 — ULA
-    if (lc.startsWith('fe80')) return true;                       // fe80::/10 — link-local
-    if (lc === '::' || lc === '::1') return true;
-    if (lc === '0:0:0:0:0:0:0:0' || lc === '0:0:0:0:0:0:0:1') return true;
-  }
-
+  const family = net.isIP(lc);
+  if (family === 4) return isUnsafeIpv4(lc);
+  if (family === 6) return isUnsafeIpv6(lc);
   return false;
 }
 

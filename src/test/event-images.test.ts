@@ -101,16 +101,24 @@ describe('cdn-allowlist (fn-14.5)', () => {
     expect(upgraded).toContain('w=2000');
   });
 
-  it('strips WordPress -WxH size suffix', () => {
+  it('strips WordPress -WxH size suffix on *.wp.com URLs', () => {
     const upgraded = tryUpgradeImageUrl(
-      'https://example.com/wp-content/uploads/2024/01/photo-400x300.jpg',
+      'https://i0.wp.com/example.com/wp-content/uploads/2024/01/photo-400x300.jpg',
     );
-    expect(upgraded).toBe('https://example.com/wp-content/uploads/2024/01/photo.jpg');
+    expect(upgraded).toBe('https://i0.wp.com/example.com/wp-content/uploads/2024/01/photo.jpg');
   });
 
   it('returns null when WordPress URL has no size suffix', () => {
     expect(tryUpgradeImageUrl(
-      'https://example.com/wp-content/uploads/2024/01/photo.jpg',
+      'https://i0.wp.com/example.com/wp-content/uploads/2024/01/photo.jpg',
+    )).toBeNull();
+  });
+
+  it('returns null for self-hosted WordPress URLs (DNS-rebind mitigation)', () => {
+    // Arbitrary host with /wp-content/uploads/ in path — no longer
+    // matches the wp handler. The original URL is returned as-is.
+    expect(tryUpgradeImageUrl(
+      'https://attacker.example/wp-content/uploads/photo-400x300.jpg',
     )).toBeNull();
   });
 });
