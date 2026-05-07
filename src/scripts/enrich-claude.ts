@@ -1144,6 +1144,14 @@ async function processBatch(
   // 1. Fetch source pages (parallel within batch).
   const pages = await fetchPagesForBatch(events, opts, stats);
 
+  // Re-check abort after fetch — a sibling may have raised AuthError
+  // while we were waiting for HTTP. Better to skip the AI call (saves
+  // tokens AND avoids triggering our own AuthError on the same auth
+  // problem) than to continue.
+  if (abort.aborted) {
+    return outcome;
+  }
+
   // 2. Build batch input + call claude.
   const batchInput = buildBatchInput(events, pages);
 
@@ -1636,39 +1644,52 @@ async function main() {
       await maybeSendQuotaAlert(stats, opts);
 
       const slice = batches.slice(i, i + opts.concurrency);
-      // Promise.allSettled: every sibling batch runs to completion (or
-      // its own rejection) instead of being abandoned mid-flight when
-      // one peer throws. Combined with the shared `abort` signal, this
-      // guarantees no further updater.add() fires after a fatal error
-      // is detected — siblings hit the abort check and bail cleanly.
-      // (Codex review iteration #5.)
+
+      // Wrap each worker promise so that a fatal rejection latches the
+      // shared abort signal IMMEDIATELY, not after Promise.allSettled
+      // has waited for every sibling. Without this early-latch, a fast
+      // sibling that hits AuthError can be rejected ms before a slow
+      // sibling does its next `updater.add()` — giving the slow worker
+      // a window to commit partial writes (especially via the 500-row
+      // BulkUpdater auto-flush). With the early-latch, slow siblings
+      // see `abort.aborted=true` on their next write-site check and
+      // skip cleanly.
+      // (Codex review iteration #6.)
+      const wrap = (p: Promise<BatchOutcome>): Promise<BatchOutcome> =>
+        p.catch((err: unknown) => {
+          if (err instanceof AuthError || err instanceof SchemaMismatchError) {
+            abort.aborted = true;
+          }
+          // Re-throw so allSettled reports it as rejected for the
+          // post-settle classification below.
+          throw err;
+        });
+
       const settled = await Promise.allSettled(
-        slice.map(b => processBatch(b, opts, stats, systemPrompt, enrichmentUpdater, abort)),
+        slice.map(b => wrap(processBatch(b, opts, stats, systemPrompt, enrichmentUpdater, abort))),
       );
 
-      // Inspect rejections AFTER all settled. Promote the first fatal
-      // class to the run-level abort. Other (non-fatal) rejections are
-      // surfaced but don't abort the run — those are usually
-      // out-of-band exceptions from a single batch and the failure_count
-      // path inside processBatch already handled them; here we just log.
-      let firstFatal: Error | null = null;
-      let firstOther: Error | null = null;
-      for (const s of settled) {
-        if (s.status !== 'rejected') continue;
+      // Inspect rejections AFTER all settled.
+      // Use a typed tuple instead of two `let` variables so TS can
+      // follow the type through the forEach closure (let-assignments
+      // inside closures defeat narrowing and cause TS2358 on later
+      // `instanceof` checks).
+      const fatals: Array<SchemaMismatchError | AuthError> = [];
+      const others: Array<{ idx: number; err: Error }> = [];
+      settled.forEach((s, idx) => {
+        if (s.status !== 'rejected') return;
         const err = s.reason instanceof Error ? s.reason : new Error(String(s.reason));
         if (err instanceof SchemaMismatchError || err instanceof AuthError) {
-          if (!firstFatal) firstFatal = err;
-        } else if (!firstOther) {
-          firstOther = err;
+          fatals.push(err);
+        } else {
+          others.push({ idx, err });
         }
-      }
+      });
+
+      const firstFatal = fatals[0];
       if (firstFatal) {
-        // Latch the abort signal IMMEDIATELY so any further awaits
-        // inside this main loop (or future cohorts) see it. We've
-        // already settled this cohort, so the latch only matters for
-        // the `if (page.length < PAGE_SIZE)` re-entry — which we skip
-        // anyway by setting halted=true.
-        abort.aborted = true;
+        // abort.aborted was already latched by `wrap`; this block just
+        // surfaces the user-facing message and finalises the halt.
         if (firstFatal instanceof SchemaMismatchError) {
           console.error('\n⛔ Schema mismatch — DB migration likely missing. Bailing.');
         } else {
@@ -1680,12 +1701,30 @@ async function main() {
         fatalAbort = true;
         break;
       }
-      if (firstOther) {
-        // Unexpected non-fatal error: log and continue. This preserves
-        // the previous "throw err" semantics for genuine bugs but
-        // doesn't kill the whole run on a transient hiccup that
-        // processBatch's own failure path already counted.
-        console.error(`\n[batch] non-fatal worker error: ${firstOther.message.slice(0, 200)}`);
+
+      if (others.length > 0) {
+        // Codex review iteration #6: a non-fatal rejection from
+        // processBatch indicates a code bug or an unexpected runtime
+        // failure that bypassed the in-batch failure_count path. The
+        // events in those batches were NOT counted as failed and the
+        // cursor would otherwise advance past them silently.
+        //
+        // Treat these as fatal for the run: stop iteration, do NOT
+        // commit pending writes, exit non-zero. Operator can inspect
+        // the log and re-run. The previous "log and continue" behavior
+        // masked real bugs and risked enrichment gaps.
+        abort.aborted = true;
+        const firstOther = others[0].err;
+        console.error(`\n⛔ Unexpected worker error in ${others.length}/${slice.length} batch(es) — bailing run.`);
+        console.error(`   ${firstOther.message.slice(0, 300)}`);
+        for (const { idx } of others) {
+          const failedBatch = slice[idx];
+          console.error(`   - batch with ${failedBatch.length} events starting at ${failedBatch[0].id.slice(0, 8)}`);
+        }
+        process.exitCode = 1;
+        halted = true;
+        fatalAbort = true;
+        break;
       }
 
       // One progress line per concurrency-cohort.
