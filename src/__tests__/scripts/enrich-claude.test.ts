@@ -23,6 +23,7 @@ import {
   AuthError,
   SchemaMismatchError,
   totalQuotaTokens,
+  getArg,
 } from '@/scripts/enrich-claude';
 import {
   PRIMARY_CATEGORIES,
@@ -165,6 +166,43 @@ describe('MODEL_MAP — fn-14.3 model IDs', () => {
 describe('ENRICHMENT_VERSION_CLAUDE_V1', () => {
   it('is "claude-v1"', () => {
     expect(ENRICHMENT_VERSION_CLAUDE_V1).toBe('claude-v1');
+  });
+});
+
+describe('getArg — supports both --flag value and --flag=value forms', () => {
+  it('parses split form: --flag value', () => {
+    expect(getArg(['--since', '24h'], '--since')).toBe('24h');
+  });
+
+  it('parses joined form: --flag=value', () => {
+    expect(getArg(['--since=24h'], '--since')).toBe('24h');
+  });
+
+  it('parses joined form even when value contains "="', () => {
+    expect(getArg(['--alert-email=foo=bar@example.com'], '--alert-email')).toBe('foo=bar@example.com');
+  });
+
+  it('does NOT consume next arg if it starts with --', () => {
+    // --since followed by --dry-run: the latter is its own flag.
+    expect(getArg(['--since', '--dry-run'], '--since')).toBeUndefined();
+  });
+
+  it('returns undefined for missing flag', () => {
+    expect(getArg(['--limit', '10'], '--since')).toBeUndefined();
+  });
+
+  it('supports alias (alt) flag', () => {
+    expect(getArg(['--max-events', '50'], '--limit', '--max-events')).toBe('50');
+    expect(getArg(['--max-events=50'], '--limit', '--max-events')).toBe('50');
+  });
+
+  it('prefers primary flag over alt', () => {
+    expect(getArg(['--max-events', '99', '--limit', '10'], '--limit', '--max-events')).toBe('10');
+  });
+
+  it('ignores --flagsuffix that aren\'t the requested flag', () => {
+    // --batch-sizer must NOT match --batch-size
+    expect(getArg(['--batch-sizer=99'], '--batch-size')).toBeUndefined();
   });
 });
 

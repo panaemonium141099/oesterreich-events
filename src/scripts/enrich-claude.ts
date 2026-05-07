@@ -173,13 +173,33 @@ interface CliOpts {
   alertEmail: string | null;
 }
 
+/**
+ * Look up the value of a flag in argv, supporting BOTH common shapes:
+ *   --flag value       (split form)
+ *   --flag=value       (joined form, common with `--since=24h`)
+ * Returns undefined if the flag is missing.
+ *
+ * Exported for unit-test coverage of the argv parser.
+ */
+export function getArg(args: string[], flag: string, alt?: string): string | undefined {
+  for (const f of [flag, alt].filter((x): x is string => !!x)) {
+    // Joined form: --flag=value
+    const prefix = f + '=';
+    for (const a of args) {
+      if (a.startsWith(prefix)) return a.slice(prefix.length);
+    }
+    // Split form: --flag value
+    const i = args.indexOf(f);
+    if (i !== -1 && args[i + 1] !== undefined && !args[i + 1].startsWith('--')) {
+      return args[i + 1];
+    }
+  }
+  return undefined;
+}
+
 function parseArgs(): CliOpts {
   const args = process.argv.slice(2);
-  const get = (flag: string, alt?: string) => {
-    let i = args.indexOf(flag);
-    if (i === -1 && alt) i = args.indexOf(alt);
-    return i !== -1 && args[i + 1] ? args[i + 1] : undefined;
-  };
+  const get = (flag: string, alt?: string) => getArg(args, flag, alt);
   const p = (v: string | undefined, d: number) => (v ? parseInt(v, 10) : d);
 
   // ENV override for model (fn-14.3 spec — `ENRICH_MODEL=opus npm run enrich:claude`)
@@ -208,7 +228,19 @@ function parseArgs(): CliOpts {
     // survive --bare. wantsBare without API key produces a warning & no flag.
     bareMode: wantsBare && hasApiKey,
     logFile: get('--log-file') ?? null,
-    since: get('--since') ?? null,
+    // Validate --since up-front: a typo would silently process the
+    // entire pending set instead of the 24h delta the operator wanted.
+    // parseSince returns null for bad input; we require a parseable value
+    // when --since was supplied at all.
+    since: (() => {
+      const raw = get('--since');
+      if (raw == null) return null;
+      if (parseSince(raw) === null) {
+        console.error(`Error: --since "${raw}" is not a valid duration (use e.g. 24h, 7d, 30m).`);
+        process.exit(1);
+      }
+      return raw;
+    })(),
     weeklyTokenCap: p(get('--weekly-token-cap'), DEFAULT_WEEKLY_TOKEN_CAP),
     alertEmail: get('--alert-email') ?? process.env.ENRICH_ALERT_EMAIL ?? null,
   };
@@ -1076,6 +1108,21 @@ function buildUpdatePayload(
   return update;
 }
 
+/**
+ * Mutable abort signal for the worker pool. When `aborted` flips to
+ * true (because some sibling batch threw AuthError/SchemaMismatchError),
+ * every other in-flight processBatch checks it before queuing DB
+ * writes and bails out cleanly without persisting anything.
+ *
+ * This is needed because Promise.allSettled lets all siblings finish
+ * naturally — without an abort signal, a slow sibling could continue
+ * running for several seconds after the fatal error and queue dozens
+ * of partial writes via updater.add().
+ */
+interface AbortSignal {
+  aborted: boolean;
+}
+
 async function processBatch(
   events: EventRow[],
   opts: CliOpts,
@@ -1083,8 +1130,16 @@ async function processBatch(
   systemPrompt: string,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   updater: any,
+  abort: AbortSignal,
 ): Promise<BatchOutcome> {
   const outcome: BatchOutcome = { ok: [], fail: [] };
+
+  // Early bail: if a sibling batch has already raised the abort flag,
+  // skip everything (no fetch, no AI call, no DB writes). The caller
+  // sees an empty outcome and counts the events under "skipped".
+  if (abort.aborted) {
+    return outcome;
+  }
 
   // 1. Fetch source pages (parallel within batch).
   const pages = await fetchPagesForBatch(events, opts, stats);
@@ -1166,7 +1221,7 @@ async function processBatch(
       const ev = events[i];
       const newCount = (ev.enrichment_failure_count ?? 0) + 1;
       const failedNow = newCount >= 3;
-      if (!opts.dryRun) {
+      if (!opts.dryRun && !abort.aborted) {
         await updater.add({
           id: ev.id,
           enrichment_failure_count: newCount,
@@ -1200,7 +1255,7 @@ async function processBatch(
       const ev = events[i];
       const newCount = (ev.enrichment_failure_count ?? 0) + 1;
       const failedNow = newCount >= 3;
-      if (!opts.dryRun) {
+      if (!opts.dryRun && !abort.aborted) {
         await updater.add({
           id: ev.id,
           enrichment_failure_count: newCount,
@@ -1233,7 +1288,7 @@ async function processBatch(
       // checks completeness above), but defend in depth.
       const newCount = (ev.enrichment_failure_count ?? 0) + 1;
       const failedNow = newCount >= 3;
-      if (!opts.dryRun) {
+      if (!opts.dryRun && !abort.aborted) {
         await updater.add({
           id: ev.id,
           enrichment_failure_count: newCount,
@@ -1261,7 +1316,7 @@ async function processBatch(
       stats.validationErrors += 1;
       const newCount = (ev.enrichment_failure_count ?? 0) + 1;
       const failedNow = newCount >= 3;
-      if (!opts.dryRun) {
+      if (!opts.dryRun && !abort.aborted) {
         await updater.add({
           id: ev.id,
           enrichment_failure_count: newCount,
@@ -1297,7 +1352,7 @@ async function processBatch(
       stats.validationErrors += 1;
       const newCount = (ev.enrichment_failure_count ?? 0) + 1;
       const failedNow = newCount >= 3;
-      if (!opts.dryRun) {
+      if (!opts.dryRun && !abort.aborted) {
         await updater.add({
           id: ev.id,
           enrichment_failure_count: newCount,
@@ -1321,7 +1376,7 @@ async function processBatch(
 
     const update = buildUpdatePayload(ev, validated, stats);
 
-    if (!opts.dryRun) {
+    if (!opts.dryRun && !abort.aborted) {
       try {
         await updater.add({ id: ev.id, ...update });
       } catch (err) {
@@ -1546,6 +1601,12 @@ async function main() {
   // BulkUpdater's pending queue is dropped instead of committed.
   let fatalAbort = false;
 
+  // Shared abort signal handed to every processBatch in a cohort. When
+  // a sibling raises a fatal error, we flip this flag and Promise.allSettled
+  // lets in-flight batches notice it before they queue further DB writes.
+  // Codex review iteration #5.
+  const abort: AbortSignal = { aborted: false };
+
   while (stats.processed < opts.limit && !halted) {
     const page = await fetchNextPage(supabase, opts, cursorId, PAGE_SIZE);
     if (page.length === 0) break;
@@ -1575,29 +1636,56 @@ async function main() {
       await maybeSendQuotaAlert(stats, opts);
 
       const slice = batches.slice(i, i + opts.concurrency);
-      try {
-        await Promise.all(slice.map(b => processBatch(b, opts, stats, systemPrompt, enrichmentUpdater)));
-      } catch (err) {
-        if (err instanceof SchemaMismatchError) {
+      // Promise.allSettled: every sibling batch runs to completion (or
+      // its own rejection) instead of being abandoned mid-flight when
+      // one peer throws. Combined with the shared `abort` signal, this
+      // guarantees no further updater.add() fires after a fatal error
+      // is detected — siblings hit the abort check and bail cleanly.
+      // (Codex review iteration #5.)
+      const settled = await Promise.allSettled(
+        slice.map(b => processBatch(b, opts, stats, systemPrompt, enrichmentUpdater, abort)),
+      );
+
+      // Inspect rejections AFTER all settled. Promote the first fatal
+      // class to the run-level abort. Other (non-fatal) rejections are
+      // surfaced but don't abort the run — those are usually
+      // out-of-band exceptions from a single batch and the failure_count
+      // path inside processBatch already handled them; here we just log.
+      let firstFatal: Error | null = null;
+      let firstOther: Error | null = null;
+      for (const s of settled) {
+        if (s.status !== 'rejected') continue;
+        const err = s.reason instanceof Error ? s.reason : new Error(String(s.reason));
+        if (err instanceof SchemaMismatchError || err instanceof AuthError) {
+          if (!firstFatal) firstFatal = err;
+        } else if (!firstOther) {
+          firstOther = err;
+        }
+      }
+      if (firstFatal) {
+        // Latch the abort signal IMMEDIATELY so any further awaits
+        // inside this main loop (or future cohorts) see it. We've
+        // already settled this cohort, so the latch only matters for
+        // the `if (page.length < PAGE_SIZE)` re-entry — which we skip
+        // anyway by setting halted=true.
+        abort.aborted = true;
+        if (firstFatal instanceof SchemaMismatchError) {
           console.error('\n⛔ Schema mismatch — DB migration likely missing. Bailing.');
-          console.error(err.message.slice(0, 300));
-          process.exitCode = 1;
-          halted = true;
-          fatalAbort = true;
-          break;
-        }
-        if (err instanceof AuthError) {
-          // Process-wide auth failure — abort the run without any
-          // event writes. Codex review #3: poisoning innocent rows
-          // because the operator forgot to /login is unacceptable.
+        } else {
           console.error('\n⛔ Auth failure — `claude /login` or set ANTHROPIC_API_KEY.');
-          console.error(`   ${err.message.slice(0, 300)}`);
-          process.exitCode = 1;
-          halted = true;
-          fatalAbort = true;
-          break;
         }
-        throw err;
+        console.error(`   ${firstFatal.message.slice(0, 300)}`);
+        process.exitCode = 1;
+        halted = true;
+        fatalAbort = true;
+        break;
+      }
+      if (firstOther) {
+        // Unexpected non-fatal error: log and continue. This preserves
+        // the previous "throw err" semantics for genuine bugs but
+        // doesn't kill the whole run on a transient hiccup that
+        // processBatch's own failure path already counted.
+        console.error(`\n[batch] non-fatal worker error: ${firstOther.message.slice(0, 200)}`);
       }
 
       // One progress line per concurrency-cohort.
