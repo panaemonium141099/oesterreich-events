@@ -145,7 +145,7 @@ const wordpress: CdnHandler = {
   // our HEAD probe — we never include cookies/auth), and disabling
   // self-hosted WP would leave the bulk of our image-quality
   // problem unfixed. `.wp.com` (Jetpack/Photon) also matches.
-  match: (url) => /\/wp-content\/uploads\//i.test(url) || /\.wp\.com\//i.test(url),
+  match: (url, hostname) => /\/wp-content\/uploads\//i.test(url) || /(?:^|\.)wp\.com$/i.test(hostname),
   upgrade(url) {
     try {
       // Strip a trailing `-WxH` size suffix immediately before the file
