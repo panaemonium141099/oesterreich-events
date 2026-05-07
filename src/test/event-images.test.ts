@@ -101,7 +101,18 @@ describe('cdn-allowlist (fn-14.5)', () => {
     expect(upgraded).toContain('w=2000');
   });
 
-  it('strips WordPress -WxH size suffix on *.wp.com URLs', () => {
+  it('strips WordPress -WxH size suffix on self-hosted /wp-content/uploads/', () => {
+    // Self-hosted WordPress is the dominant case (municipality sites,
+    // BurgenlandWPEventsScraper). Path-based matching is needed. SSRF
+    // protection is downstream in validate-upgrade (literal-IP, DNS,
+    // redirect guards).
+    const upgraded = tryUpgradeImageUrl(
+      'https://example.com/wp-content/uploads/2024/01/photo-400x300.jpg',
+    );
+    expect(upgraded).toBe('https://example.com/wp-content/uploads/2024/01/photo.jpg');
+  });
+
+  it('strips WordPress -WxH suffix on *.wp.com (Jetpack/Photon)', () => {
     const upgraded = tryUpgradeImageUrl(
       'https://i0.wp.com/example.com/wp-content/uploads/2024/01/photo-400x300.jpg',
     );
@@ -110,15 +121,7 @@ describe('cdn-allowlist (fn-14.5)', () => {
 
   it('returns null when WordPress URL has no size suffix', () => {
     expect(tryUpgradeImageUrl(
-      'https://i0.wp.com/example.com/wp-content/uploads/2024/01/photo.jpg',
-    )).toBeNull();
-  });
-
-  it('returns null for self-hosted WordPress URLs (DNS-rebind mitigation)', () => {
-    // Arbitrary host with /wp-content/uploads/ in path — no longer
-    // matches the wp handler. The original URL is returned as-is.
-    expect(tryUpgradeImageUrl(
-      'https://attacker.example/wp-content/uploads/photo-400x300.jpg',
+      'https://example.com/wp-content/uploads/2024/01/photo.jpg',
     )).toBeNull();
   });
 });
@@ -231,5 +234,41 @@ describe('pickLargestFromSrcset (fn-14.5)', () => {
   it('treats missing descriptor as 1x (lowest density)', () => {
     expect(pickLargestFromSrcset('a.jpg, b.jpg 2x'))
       .toEqual({ url: 'b.jpg', density: 2 });
+  });
+
+  it('handles Cloudinary URLs with embedded commas (Codex regression test)', () => {
+    // Cloudinary's `c_fill,w_800,h_600/...` paths embed commas in
+    // the URL itself. A naïve split(',') chops the URL apart and
+    // emits garbage. The tokeniser must re-glue fragments until a
+    // valid trailing descriptor is seen.
+    const srcset = [
+      'https://res.cloudinary.com/demo/image/upload/c_fill,w_400,h_300/photo.jpg 400w',
+      'https://res.cloudinary.com/demo/image/upload/c_fill,w_800,h_600/photo.jpg 800w',
+      'https://res.cloudinary.com/demo/image/upload/c_fill,w_1600,h_1200/photo.jpg 1600w',
+    ].join(', ');
+    expect(pickLargestFromSrcset(srcset)).toEqual({
+      url: 'https://res.cloudinary.com/demo/image/upload/c_fill,w_1600,h_1200/photo.jpg',
+      width: 1600,
+    });
+  });
+
+  it('handles a single Cloudinary URL with commas and no descriptor', () => {
+    expect(pickLargestFromSrcset(
+      'https://res.cloudinary.com/demo/image/upload/c_fill,w_800/photo.jpg',
+    )).toEqual({
+      url: 'https://res.cloudinary.com/demo/image/upload/c_fill,w_800/photo.jpg',
+      density: 1,
+    });
+  });
+
+  it('handles mixed comma-bearing URLs and density descriptors', () => {
+    const srcset = [
+      'https://res.cloudinary.com/demo/image/upload/c_fill,w_400/photo.jpg 1x',
+      'https://res.cloudinary.com/demo/image/upload/c_fill,w_800/photo.jpg 2x',
+    ].join(', ');
+    expect(pickLargestFromSrcset(srcset)).toEqual({
+      url: 'https://res.cloudinary.com/demo/image/upload/c_fill,w_800/photo.jpg',
+      density: 2,
+    });
   });
 });

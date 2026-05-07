@@ -132,14 +132,20 @@ const cloudflareImages: CdnHandler = {
  */
 const wordpress: CdnHandler = {
   name: 'wordpress',
-  // Hostname-restricted to mitigate DNS-rebind SSRF: an arbitrary
-  // host with `/wp-content/uploads/` in the path could be the
-  // attacker's domain pointing at internal infrastructure.
-  // `*.wp.com` (Jetpack/Photon) is unambiguously a public CDN —
-  // restrict upgrades to that suffix. Arbitrary self-hosted
-  // WordPress URLs still pass through unchanged (no upgrade); they
-  // were already being persisted as-is before fn-14.5.
-  match: (_url, hostname) => /(?:^|\.)wp\.com$/i.test(hostname),
+  // Self-hosted WordPress is the dominant case in our scraper
+  // inventory (BurgenlandWPEventsScraper, gemeinde sites). Path-based
+  // matching is needed to cover them. SSRF protection lives downstream
+  // in `validate-upgrade.ts`: scheme guard, literal-IP guard,
+  // dns.lookup-based resolved-IP check, and per-redirect re-validation
+  // — all of which fire BEFORE any actual probe. The remaining
+  // residual risk is DNS rebinding (race between dns.lookup and
+  // fetch's own resolution); we accept that residual because it
+  // requires attacker-controlled DNS infrastructure, the upgrade
+  // failure mode is "fall back to original URL" (no data exfil from
+  // our HEAD probe — we never include cookies/auth), and disabling
+  // self-hosted WP would leave the bulk of our image-quality
+  // problem unfixed. `.wp.com` (Jetpack/Photon) also matches.
+  match: (url) => /\/wp-content\/uploads\//i.test(url) || /\.wp\.com\//i.test(url),
   upgrade(url) {
     try {
       // Strip a trailing `-WxH` size suffix immediately before the file

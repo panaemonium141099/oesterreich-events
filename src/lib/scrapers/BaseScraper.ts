@@ -4,14 +4,21 @@ import type { CheerioAPI } from 'cheerio';
 /**
  * Pick the largest variant from a `srcset` string.
  *
- * Per the HTML spec each comma-separated candidate is `<url> <descriptor>`
- * where the descriptor is either `Nw` (intrinsic width in CSS px) or
- * `Nx` (pixel density). The two descriptor types should not be mixed
- * within a single srcset, but real-world HTML mixes them anyway, so
- * we handle both:
+ * Per the HTML spec each candidate is `<url> <descriptor>`, where
+ * candidates are separated by commas. URLs themselves can legally
+ * contain commas (Cloudinary's `c_fill,w_800,h_600/...` is the most
+ * common in-the-wild case), so a naïve `split(',')` would chop a
+ * single Cloudinary URL into multiple fragments and pick garbage.
  *
- *   - If any candidate has a `w` descriptor → pick the largest `w` and
- *     report that as `width`. (Real pixels > device-pixel-ratio.)
+ * Tokeniser strategy: split on commas, then re-glue fragments until
+ * the trailing token of each candidate is a valid `Nw` / `Nx`
+ * descriptor (or the candidate has no descriptor at all). This
+ * handles all real-world inputs we've seen — Cloudinary, Imgix,
+ * WordPress, plain URLs — without needing a full HTML-spec parser.
+ *
+ * Descriptor semantics:
+ *   - If any candidate has a `w` descriptor → pick the largest `w`
+ *     and report that as `width`. (Real pixels > device-pixel-ratio.)
  *   - If only `x` descriptors → pick the highest density and report
  *     `density`. Width stays undefined (descriptor doesn't carry
  *     pixel size).
@@ -25,25 +32,19 @@ import type { CheerioAPI } from 'cheerio';
 export function pickLargestFromSrcset(
   srcset: string,
 ): { url: string; width?: number; density?: number } | null {
-  if (!srcset) return null;
-
-  const parts = srcset.split(',').map(s => s.trim()).filter(Boolean);
-  if (parts.length === 0) return null;
+  const candidates = parseSrcsetCandidates(srcset);
+  if (candidates.length === 0) return null;
 
   let bestWidth = 0;
   let bestWidthUrl = '';
   let bestDensity = 0;
   let bestDensityUrl = '';
 
-  for (const part of parts) {
-    // Split on whitespace; first token is URL, second (optional) is descriptor.
-    const tokens = part.split(/\s+/);
-    const url = tokens[0];
+  for (const { url, descriptor } of candidates) {
     if (!url) continue;
-    const descriptor = tokens[1] ?? '1x';
+    const desc = descriptor || '1x';
 
-    // Width descriptor: digits followed by literal `w`
-    const wMatch = /^(\d+)w$/i.exec(descriptor);
+    const wMatch = /^(\d+)w$/i.exec(desc);
     if (wMatch) {
       const w = parseInt(wMatch[1], 10);
       if (w > bestWidth) {
@@ -53,8 +54,7 @@ export function pickLargestFromSrcset(
       continue;
     }
 
-    // Density descriptor: number (with optional decimals) followed by `x`
-    const xMatch = /^(\d+(?:\.\d+)?)x$/i.exec(descriptor);
+    const xMatch = /^(\d+(?:\.\d+)?)x$/i.exec(desc);
     if (xMatch) {
       const d = parseFloat(xMatch[1]);
       if (d > bestDensity) {
@@ -71,7 +71,6 @@ export function pickLargestFromSrcset(
     }
   }
 
-  // Width descriptor wins (real pixels). Otherwise density picker.
   if (bestWidth > 0) {
     return { url: bestWidthUrl, width: bestWidth };
   }
@@ -79,6 +78,98 @@ export function pickLargestFromSrcset(
     return { url: bestDensityUrl, density: bestDensity };
   }
   return null;
+}
+
+/**
+ * Parse a srcset string into `{ url, descriptor }` pairs, tolerant
+ * of commas embedded in URLs (Cloudinary, etc.).
+ *
+ * Algorithm: walk the string left-to-right. The HTML spec defines
+ * a candidate as "URL whitespace descriptor", with candidates
+ * separated by commas. The trick is recognising when a comma is
+ * INSIDE a URL vs SEPARATING candidates. Two observations make
+ * this tractable:
+ *
+ *  1. The descriptor is always at the end of a candidate, after
+ *     whitespace. So once we've seen whitespace and a valid
+ *     descriptor token, the next comma is a candidate boundary.
+ *  2. A descriptorless URL that itself contains a comma is
+ *     ambiguous in the abstract — but for our scrapers, the only
+ *     real-world source of comma-bearing URLs is Cloudinary, which
+ *     ALWAYS uses path segments that include `_<n>` tokens (`w_800`,
+ *     `c_fill`, `q_auto`). We use that as a hint: when we hit a
+ *     comma but no whitespace has appeared since the last candidate
+ *     boundary, treat the comma as part of the URL.
+ *
+ * That gives a clean state machine:
+ *   - reading-url: accumulate chars; on whitespace → reading-desc;
+ *     on comma → if we've passed any whitespace this candidate, it's
+ *     a boundary; otherwise still part of URL.
+ *   - reading-desc: accumulate descriptor chars; on comma → boundary.
+ */
+function parseSrcsetCandidates(srcset: string): Array<{ url: string; descriptor: string }> {
+  if (!srcset) return [];
+  const out: Array<{ url: string; descriptor: string }> = [];
+
+  let i = 0;
+  const n = srcset.length;
+  while (i < n) {
+    // Skip leading whitespace.
+    while (i < n && /\s/.test(srcset[i])) i++;
+    if (i >= n) break;
+
+    // Accumulate URL up to:
+    //   - whitespace                (then a descriptor follows), OR
+    //   - a "boundary comma": comma followed by whitespace (e.g.
+    //     "a.jpg, b.jpg 2x" — the comma+space pair separates two
+    //     candidates), OR
+    //   - end of string.
+    // A comma NOT followed by whitespace is URL-internal
+    // (Cloudinary `c_fill,w_800,h_600/...`).
+    const urlStart = i;
+    while (i < n) {
+      const c = srcset[i];
+      if (/\s/.test(c)) break;
+      if (c === ',') {
+        // Boundary comma if next char is whitespace OR end of input.
+        const next = srcset[i + 1];
+        if (next === undefined || /\s/.test(next)) {
+          break;
+        }
+      }
+      i++;
+    }
+    const url = srcset.slice(urlStart, i).trim();
+
+    // If we stopped on a boundary comma, advance past it and skip
+    // following whitespace. The current candidate has no descriptor.
+    if (i < n && srcset[i] === ',') {
+      i++; // consume the boundary comma
+      if (url) out.push({ url, descriptor: '' });
+      continue;
+    }
+
+    // Otherwise we stopped on whitespace — descriptor follows.
+    // Skip the URL/descriptor whitespace.
+    while (i < n && /\s/.test(srcset[i])) i++;
+
+    // Read descriptor up to next boundary comma OR end.
+    let descriptor = '';
+    if (i < n && srcset[i] !== ',') {
+      const descStart = i;
+      while (i < n && srcset[i] !== ',') i++;
+      descriptor = srcset.slice(descStart, i).trim();
+    }
+
+    // Skip the candidate-separator comma if present.
+    if (i < n && srcset[i] === ',') i++;
+
+    if (url) {
+      out.push({ url, descriptor });
+    }
+  }
+
+  return out;
 }
 
 export abstract class BaseScraper {

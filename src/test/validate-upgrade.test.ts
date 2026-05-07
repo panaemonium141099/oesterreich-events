@@ -170,30 +170,18 @@ describe('validateAndUpgradeImageUrl (fn-14.5)', () => {
       status: 200,
       headers: { 'content-type': 'image/jpeg' },
     }));
-    // Hostname narrowed to `*.wp.com` (Jetpack/Photon) to mitigate
-    // DNS-rebind SSRF — arbitrary self-hosted WordPress URLs no
-    // longer trigger an upgrade.
+    // Self-hosted WordPress upgrade — path-based matching with
+    // SSRF protection upstream in validate-upgrade (literal-IP,
+    // DNS, redirect guards).
     const result = await validateAndUpgradeImageUrl(
-      'https://i0.wp.com/example.com/wp-content/uploads/2024/01/photo-400x300.jpg',
+      'https://example.com/wp-content/uploads/2024/01/photo-400x300.jpg',
       400,  // caller-supplied dims (e.g. listing-page thumbnail attrs)
       300,
     );
-    expect(result.url).toBe('https://i0.wp.com/example.com/wp-content/uploads/2024/01/photo.jpg');
+    expect(result.url).toBe('https://example.com/wp-content/uploads/2024/01/photo.jpg');
     expect(result.width).toBeUndefined();
     expect(result.height).toBeUndefined();
     expect(result.upgraded).toBe(true);
-  });
-
-  it('does NOT upgrade self-hosted WordPress URLs (DNS-rebind mitigation)', async () => {
-    // Arbitrary `attacker.example/wp-content/uploads/...` no longer
-    // matches the wp handler — it falls through to the unknown-CDN
-    // path and returns the original URL untouched.
-    const result = await validateAndUpgradeImageUrl(
-      'https://attacker.example/wp-content/uploads/photo-400x300.jpg',
-    );
-    expect(result.url).toBe('https://attacker.example/wp-content/uploads/photo-400x300.jpg');
-    expect(result.upgraded).toBeUndefined();
-    expect(fetchSpy).not.toHaveBeenCalled();
   });
 
   it('blocks SSRF: never HEAD-probes loopback IPv4 addresses (Codex regression test)', async () => {
