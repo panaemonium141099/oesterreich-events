@@ -415,6 +415,27 @@ describe('BaseScraper', () => {
       expect(candidate?.url).toBe('https://example.com/desktop-1600.jpg');
       expect(candidate?.width).toBe(1600);
     });
+
+    it('ranks <picture><source> by density when no source has w descriptor (Codex regression test)', () => {
+      // Density-only sources: each <source> uses 1x/2x/3x. Without
+      // density-aware comparison the first source would win by
+      // default; we want the highest-density variant.
+      const html = `
+        <html><body>
+          <article>
+            <picture>
+              <source srcset="https://example.com/dpr1.jpg 1x">
+              <source srcset="https://example.com/dpr2.jpg 2x">
+              <source srcset="https://example.com/dpr3.jpg 3x">
+              <img src="https://example.com/fallback.jpg" alt="Hero">
+            </picture>
+          </article>
+        </body></html>
+      `;
+      const $ = cheerio.load(html);
+      const candidate = scraper.testExtractImageCandidate($, 'https://example.com');
+      expect(candidate?.url).toBe('https://example.com/dpr3.jpg');
+    });
   });
 });
 

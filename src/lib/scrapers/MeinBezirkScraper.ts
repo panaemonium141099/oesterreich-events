@@ -226,18 +226,29 @@ export class MeinBezirkScraper extends BaseScraper {
         if (detail.description) event.description = detail.description;
         if (detail.address) event.address = detail.address;
         if (detail.postalCode) event.postal_code = detail.postalCode;
-        // Image: when the detail page provides a better URL, swap
+        // Image: when the detail page provides a DIFFERENT URL, swap
         // image_url AND its dims atomically. Keeping the listing-page
-        // thumbnail dims on the new hero URL would emit impossible
+        // thumbnail dims on a new hero URL would emit impossible
         // metadata (e.g. 400x300 thumbnail dims on a 1200×630 og URL).
-        // detail.imageWidth/Height may be undefined — that's fine,
-        // the supabase-sync `pickFinalImageWidth/Height` helpers
-        // and pattern-extraction in extractDimsFromUrl pick up the
-        // slack.
+        //
+        // When the URL is identical to the listing page's, we only
+        // BACKFILL missing dims — never erase a real listing-page
+        // dim with `undefined`. This keeps the dim columns sticky
+        // even when the detail page doesn't expose explicit width/
+        // height meta.
         if (detail.imageUrl) {
-          event.image_url = detail.imageUrl;
-          event.image_width = detail.imageWidth;
-          event.image_height = detail.imageHeight;
+          if (detail.imageUrl !== event.image_url) {
+            event.image_url = detail.imageUrl;
+            event.image_width = detail.imageWidth;
+            event.image_height = detail.imageHeight;
+          } else {
+            if (detail.imageWidth !== undefined && event.image_width === undefined) {
+              event.image_width = detail.imageWidth;
+            }
+            if (detail.imageHeight !== undefined && event.image_height === undefined) {
+              event.image_height = detail.imageHeight;
+            }
+          }
         }
         if (detail.locationName && !event.location_name) {
           event.location_name = detail.locationName;
@@ -319,32 +330,17 @@ export class MeinBezirkScraper extends BaseScraper {
       if (venueName) result.locationName = venueName;
     }
 
-    // Better image: look for larger event images. Prefer og:image
-    // (with og:image:width/height meta when emitted), otherwise pull
-    // from the detail page's hero img (using imageFromElement so
-    // width/height attrs are picked up).
-    const ogImage = $('meta[property="og:image"]').attr('content');
-    if (ogImage && !ogImage.startsWith('data:')) {
-      result.imageUrl = ogImage;
-      // og:image:width / og:image:height are commonly set on
-      // article pages — pick them up so the upsert doesn't carry
-      // stale listing-page thumbnail dims.
-      const ogW = parseInt($('meta[property="og:image:width"]').attr('content') || '0', 10);
-      const ogH = parseInt($('meta[property="og:image:height"]').attr('content') || '0', 10);
-      if (ogW > 0) result.imageWidth = ogW;
-      if (ogH > 0) result.imageHeight = ogH;
-    } else {
-      // Fallback: large image in event detail. Use imageFromElement
-      // so srcset and width/height attrs are honoured.
-      const detailInfo = this.imageFromElement(
-        $('.event-detail__image img, .article-image img, [itemprop="image"]').first(),
-        'https://www.meinbezirk.at',
-      );
-      if (detailInfo?.url) {
-        result.imageUrl = detailInfo.url;
-        result.imageWidth = detailInfo.image_width;
-        result.imageHeight = detailInfo.image_height;
-      }
+    // Better image: defer to extractImageCandidate so the same
+    // best-of-source scoring (og:image vs in-page hero, with content
+    // /alt bonuses, header penalties, srcset density support) applies
+    // here as it does in the listing-page path. og-only social-share
+    // crops are exactly what the new scoring is designed to beat
+    // with sharper in-article photos.
+    const candidate = this.extractImageCandidate($, 'https://www.meinbezirk.at');
+    if (candidate?.url) {
+      result.imageUrl = candidate.url;
+      result.imageWidth = candidate.width;
+      result.imageHeight = candidate.height;
     }
 
     return result;

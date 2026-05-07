@@ -195,12 +195,12 @@ describe('pickLargestFromSrcset (fn-14.5)', () => {
 
   it('picks highest density when only x descriptors are present', () => {
     expect(pickLargestFromSrcset('a.jpg 1x, b.jpg 2x, c.jpg 3x'))
-      .toEqual({ url: 'c.jpg' });
+      .toEqual({ url: 'c.jpg', density: 3 });
   });
 
   it('handles fractional density descriptors (1.5x)', () => {
     expect(pickLargestFromSrcset('a.jpg 1x, b.jpg 1.5x, c.jpg 2x'))
-      .toEqual({ url: 'c.jpg' });
+      .toEqual({ url: 'c.jpg', density: 2 });
   });
 
   it('prefers width over density when both are mixed', () => {
@@ -210,6 +210,6 @@ describe('pickLargestFromSrcset (fn-14.5)', () => {
 
   it('treats missing descriptor as 1x (lowest density)', () => {
     expect(pickLargestFromSrcset('a.jpg, b.jpg 2x'))
-      .toEqual({ url: 'b.jpg' });
+      .toEqual({ url: 'b.jpg', density: 2 });
   });
 });

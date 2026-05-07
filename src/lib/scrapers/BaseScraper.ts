@@ -12,15 +12,19 @@ import type { CheerioAPI } from 'cheerio';
  *
  *   - If any candidate has a `w` descriptor → pick the largest `w` and
  *     report that as `width`. (Real pixels > device-pixel-ratio.)
- *   - If only `x` descriptors → pick the highest density and leave
- *     `width` undefined (descriptor doesn't carry pixel size).
+ *   - If only `x` descriptors → pick the highest density and report
+ *     `density`. Width stays undefined (descriptor doesn't carry
+ *     pixel size).
  *   - If a candidate has no descriptor it implicitly means `1x`.
+ *
+ * `density` is exposed so callers (e.g. the <picture><source>
+ * comparator) can rank density-only siblings against each other.
  *
  * Exported so tests can target it directly.
  */
 export function pickLargestFromSrcset(
   srcset: string,
-): { url: string; width?: number } | null {
+): { url: string; width?: number; density?: number } | null {
   if (!srcset) return null;
 
   const parts = srcset.split(',').map(s => s.trim()).filter(Boolean);
@@ -72,7 +76,7 @@ export function pickLargestFromSrcset(
     return { url: bestWidthUrl, width: bestWidth };
   }
   if (bestDensityUrl) {
-    return { url: bestDensityUrl };
+    return { url: bestDensityUrl, density: bestDensity };
   }
   return null;
 }
@@ -346,19 +350,36 @@ export abstract class BaseScraper {
       // Step 1: surrounding <picture><source srcset>...</picture>.
       // We pick the largest variant across ALL sibling sources so a
       // <picture> with multiple media-query branches still resolves
-      // to its widest available URL.
+      // to its widest available URL. When sources use only density
+      // descriptors (1x/2x/3x), we rank them by density rather than
+      // letting the first source win by default.
       const $picture = $img.closest('picture');
       if ($picture.length > 0) {
         let bestSourceUrl: string | undefined;
         let bestSourceWidth = 0;
+        let bestSourceDensity = 0;
         $picture.find('source[srcset]').each((__, src) => {
           const sourceSrcset = $(src).attr('srcset');
           if (!sourceSrcset) return;
           const picked = pickLargestFromSrcset(sourceSrcset);
           if (!picked) return;
           const w = picked.width ?? 0;
-          if (w > bestSourceWidth || (!bestSourceUrl && picked.url)) {
-            bestSourceWidth = w;
+          const d = picked.density ?? 0;
+          if (w > 0) {
+            if (w > bestSourceWidth) {
+              bestSourceWidth = w;
+              bestSourceUrl = picked.url;
+              // Width-bearing source wins — drop any density tracking.
+              bestSourceDensity = 0;
+            }
+          } else if (bestSourceWidth === 0 && d > bestSourceDensity) {
+            // Only consider density when no width-bearing source has
+            // been found yet (real pixels > DPR).
+            bestSourceDensity = d;
+            bestSourceUrl = picked.url;
+          } else if (!bestSourceUrl) {
+            // First viable candidate when neither width nor density
+            // is available — better than nothing.
             bestSourceUrl = picked.url;
           }
         });

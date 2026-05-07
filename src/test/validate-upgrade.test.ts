@@ -159,4 +159,42 @@ describe('validateAndUpgradeImageUrl (fn-14.5)', () => {
     expect(result.height).toBeUndefined();
     expect(result.upgraded).toBe(true);
   });
+
+  it('blocks SSRF: never HEAD-probes loopback addresses (Codex regression test)', async () => {
+    // Scraped page could embed http://127.0.0.1/wp-content/uploads/..
+    // The WordPress handler matches by path, so without an SSRF guard
+    // we'd happily probe localhost. The guard must reject before
+    // touching fetch.
+    const result = await validateAndUpgradeImageUrl(
+      'http://127.0.0.1/wp-content/uploads/photo-400x300.jpg',
+    );
+    // HEAD-check must have failed → fall back to original URL.
+    expect(result.url).toBe('http://127.0.0.1/wp-content/uploads/photo-400x300.jpg');
+    expect(result.upgraded).toBeUndefined();
+    expect(fetchSpy).not.toHaveBeenCalled();
+  });
+
+  it('blocks SSRF: rejects link-local addresses (AWS metadata 169.254.169.254)', async () => {
+    const result = await validateAndUpgradeImageUrl(
+      'http://169.254.169.254/wp-content/uploads/photo-400x300.jpg',
+    );
+    expect(result.upgraded).toBeUndefined();
+    expect(fetchSpy).not.toHaveBeenCalled();
+  });
+
+  it('blocks SSRF: rejects RFC1918 private addresses', async () => {
+    const result = await validateAndUpgradeImageUrl(
+      'http://10.0.0.1/wp-content/uploads/photo-400x300.jpg',
+    );
+    expect(result.upgraded).toBeUndefined();
+    expect(fetchSpy).not.toHaveBeenCalled();
+  });
+
+  it('blocks SSRF: rejects "localhost" hostname', async () => {
+    const result = await validateAndUpgradeImageUrl(
+      'http://localhost/wp-content/uploads/photo-400x300.jpg',
+    );
+    expect(result.upgraded).toBeUndefined();
+    expect(fetchSpy).not.toHaveBeenCalled();
+  });
 });

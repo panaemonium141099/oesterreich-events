@@ -41,9 +41,72 @@ export interface ValidatedImage {
   upgraded?: boolean;
 }
 
+/**
+ * SSRF guard: reject URLs that point at private / loopback /
+ * link-local / unspecified addresses, or use non-http(s) schemes.
+ *
+ * The CDN allowlist's WordPress handler matches by path
+ * (`/wp-content/uploads/`), not hostname, so a scraped page can
+ * embed an upgrade-eligible URL that resolves to internal
+ * infrastructure (127.0.0.1, 169.254.169.254 — AWS metadata, etc.).
+ * Without this guard, `validateAndUpgradeImageUrl()` would happily
+ * issue HEAD probes to those hosts and leak whatever they expose.
+ *
+ * We only catch the literal-IP cases here. Hostname → private-IP
+ * resolution is intentionally out of scope: it would require DNS
+ * lookups in the sync path, and the operational risk we're guarding
+ * against (attacker-supplied scrape URLs pointing at infrastructure)
+ * is dominated by literal-IP forms.
+ */
+function isUnsafeUpgradeTarget(url: string): boolean {
+  let parsed: URL;
+  try {
+    parsed = new URL(url);
+  } catch {
+    return true;
+  }
+  // Reject non-public schemes.
+  if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') return true;
+  const host = parsed.hostname.toLowerCase();
+  if (!host) return true;
+
+  // Loopback / unspecified literals.
+  if (host === 'localhost' || host === '127.0.0.1' || host === '::1' || host === '0.0.0.0') {
+    return true;
+  }
+
+  // IPv4 literal — check private / link-local / loopback / multicast / reserved ranges.
+  const v4Match = /^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/.exec(host);
+  if (v4Match) {
+    const a = parseInt(v4Match[1], 10);
+    const b = parseInt(v4Match[2], 10);
+    if (a === 10) return true;                      // 10.0.0.0/8 — private
+    if (a === 127) return true;                     // 127.0.0.0/8 — loopback
+    if (a === 169 && b === 254) return true;        // 169.254.0.0/16 — link-local (incl. AWS metadata)
+    if (a === 172 && b >= 16 && b <= 31) return true; // 172.16.0.0/12 — private
+    if (a === 192 && b === 168) return true;        // 192.168.0.0/16 — private
+    if (a === 100 && b >= 64 && b <= 127) return true; // 100.64.0.0/10 — CGNAT
+    if (a >= 224) return true;                      // 224.0.0.0/4 multicast + 240+ reserved
+    if (a === 0) return true;                       // 0.0.0.0/8 — "this network"
+    return false;
+  }
+
+  // IPv6 literal (bracketed in URL hostname) — basic checks for
+  // common danger ranges. URL strips the brackets so we get the
+  // address text directly.
+  if (host.includes(':')) {
+    if (host.startsWith('fc') || host.startsWith('fd')) return true; // fc00::/7 — ULA
+    if (host.startsWith('fe80')) return true;                         // fe80::/10 — link-local
+    if (host === '::' || host === '::1') return true;
+  }
+
+  return false;
+}
+
 /** HEAD-check used by the upgrade path. Mirrors `BaseScraper.validateImageUrl()`. */
 async function headCheckIsImage(url: string, timeoutMs = HEAD_TIMEOUT_MS): Promise<boolean> {
   if (!url) return false;
+  if (isUnsafeUpgradeTarget(url)) return false;
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
   try {
