@@ -803,19 +803,34 @@ function newStats(): Stats {
   };
 }
 
+/**
+ * Total tokens charged against the weekly cap.
+ *
+ * This taxonomy-heavy prompt creates large `cache_creation_input_tokens`
+ * spikes on the FIRST call and `cache_read_input_tokens` on subsequent
+ * calls. Anthropic counts both against the underlying TPM/RPM budget,
+ * even though they're at different price tiers. So the quota guard MUST
+ * include all four counters; using only `input + output` understates by
+ * an order of magnitude on first-call cache-creation. (Codex review #4.)
+ */
+export function totalQuotaTokens(s: Pick<Stats, 'tokensIn' | 'tokensOut' | 'cacheReadIn' | 'cacheCreateIn'>): number {
+  return s.tokensIn + s.tokensOut + s.cacheReadIn + s.cacheCreateIn;
+}
+
 function reportLine(s: Stats, total: number | undefined, opts: CliOpts): string {
   const elapsed = (Date.now() - s.startedAt) / 1000;
   const rate = s.processed / Math.max(elapsed, 0.001);
   const etaStr = total && rate > 0
     ? `eta=${(((total - s.processed) / rate) / 60).toFixed(0)}min`
     : '';
-  const tokenPct = ((s.tokensIn + s.tokensOut) / opts.weeklyTokenCap * 100).toFixed(1);
+  const totalToks = totalQuotaTokens(s);
+  const tokenPct = (totalToks / opts.weeklyTokenCap * 100).toFixed(1);
   return `p=${s.processed}${total ? '/' + total : ''} ✓=${s.enriched} ✗=${s.failed}` +
     ` poison=${s.poisonPilled} fetch(ok=${s.fetchOk} fail=${s.fetchFailed})` +
     ` filled(d=${s.descFilled}+${s.descPolished} p=${s.priceTextFilled}/${s.priceMinFilled})` +
     ` flags(stu=${s.studentTrue} fam=${s.familyTrue} dog=${s.dogTrue} wc=${s.wheelchairTrue} out=${s.outdoorTrue})` +
-    ` tok=${(s.tokensIn + s.tokensOut).toLocaleString()}(${tokenPct}%) $=${s.costUsd.toFixed(2)}` +
-    ` rate=${rate.toFixed(1)}/s ${etaStr}`;
+    ` tok=${totalToks.toLocaleString()}(${tokenPct}%) [in=${s.tokensIn.toLocaleString()}/out=${s.tokensOut.toLocaleString()}/cache-cr=${s.cacheCreateIn.toLocaleString()}/cache-rd=${s.cacheReadIn.toLocaleString()}]` +
+    ` $=${s.costUsd.toFixed(2)} rate=${rate.toFixed(1)}/s ${etaStr}`;
 }
 
 function appendLog(logFile: string | null, entry: Record<string, unknown>): void {
@@ -832,7 +847,7 @@ function appendLog(logFile: string | null, entry: Record<string, unknown>): void
 let alert80Sent = false;
 async function maybeSendQuotaAlert(stats: Stats, opts: CliOpts): Promise<void> {
   if (!opts.alertEmail || alert80Sent) return;
-  const used = stats.tokensIn + stats.tokensOut;
+  const used = totalQuotaTokens(stats);
   if (used / opts.weeklyTokenCap >= 0.80) {
     alert80Sent = true;
     try {
@@ -844,10 +859,13 @@ async function maybeSendQuotaAlert(stats: Stats, opts: CliOpts): Promise<void> {
         <p>Bulk enrichment has reached <b>${(used / opts.weeklyTokenCap * 100).toFixed(1)}%</b>
         of the configured weekly token cap (<b>${opts.weeklyTokenCap.toLocaleString()}</b>).</p>
         <ul>
-          <li>Tokens in:  ${stats.tokensIn.toLocaleString()}</li>
-          <li>Tokens out: ${stats.tokensOut.toLocaleString()}</li>
-          <li>Cost:       $${stats.costUsd.toFixed(2)}</li>
-          <li>Processed:  ${stats.processed} events</li>
+          <li>Tokens in:           ${stats.tokensIn.toLocaleString()}</li>
+          <li>Tokens out:          ${stats.tokensOut.toLocaleString()}</li>
+          <li>Cache-creation in:   ${stats.cacheCreateIn.toLocaleString()}</li>
+          <li>Cache-read in:       ${stats.cacheReadIn.toLocaleString()}</li>
+          <li>Total counted:       ${used.toLocaleString()}</li>
+          <li>Cost:                $${stats.costUsd.toFixed(2)}</li>
+          <li>Processed:           ${stats.processed} events</li>
         </ul>
         <p>The script will halt cleanly at 95% so you can resume tomorrow without
         burning the cap. Re-run the same command to pick up where this run left off.</p>
@@ -861,7 +879,7 @@ async function maybeSendQuotaAlert(stats: Stats, opts: CliOpts): Promise<void> {
 }
 
 function shouldHalt(stats: Stats, opts: CliOpts): boolean {
-  return (stats.tokensIn + stats.tokensOut) / opts.weeklyTokenCap >= 0.95;
+  return totalQuotaTokens(stats) / opts.weeklyTokenCap >= 0.95;
 }
 
 // ─────────────────────────────────────────────────────────────────────
@@ -1264,8 +1282,43 @@ async function processBatch(
       continue;
     }
 
-    // Item validates pristinely → commit the full payload.
+    // Item validates pristinely against the closed vocabulary, but we
+    // also need a ROW-AWARE check: if the existing description is empty
+    // / too short / HTML-tainted, the AI MUST have returned a usable
+    // suggested_description. A null suggested_description on a row whose
+    // policy is "fill" or "polish" is silently insufficient — without
+    // this check, marking the row enriched would lock in the bad
+    // description and remove it from the retry queue forever.
+    // (Codex review iteration #4 finding.)
     const validated = item.result.value;
+    const policy = descOverridePolicy(ev.description);
+    if ((policy.policy === 'fill' || policy.policy === 'polish') &&
+        validated.suggested_description == null) {
+      stats.validationErrors += 1;
+      const newCount = (ev.enrichment_failure_count ?? 0) + 1;
+      const failedNow = newCount >= 3;
+      if (!opts.dryRun) {
+        await updater.add({
+          id: ev.id,
+          enrichment_failure_count: newCount,
+          ...(failedNow ? { enrichment_failed: true } : {}),
+        });
+      }
+      if (failedNow) stats.poisonPilled += 1;
+      stats.failed += 1;
+      stats.processed += 1;
+      outcome.fail.push({
+        index: i,
+        error: `desc-policy: existing description is "${policy.reason}" but AI returned null suggested_description`,
+      });
+      appendLog(opts.logFile, {
+        event_id: ev.id, title: ev.title, status: 'desc_policy_failed',
+        policy: policy.policy, reason: policy.reason,
+        failure_count: newCount,
+      });
+      continue;
+    }
+
     const update = buildUpdatePayload(ev, validated, stats);
 
     if (!opts.dryRun) {
@@ -1487,6 +1540,11 @@ async function main() {
   const PAGE_SIZE = Math.max(opts.batchSize * opts.concurrency * 4, 100);
   let cursorId: string | null = null;
   let halted = false;
+  // Distinguish a clean stop (--limit reached, no more pages, --dry-run
+  // break, 95% quota halt) from a fatal abort (AuthError /
+  // SchemaMismatchError). On fatalAbort we skip the final flush so the
+  // BulkUpdater's pending queue is dropped instead of committed.
+  let fatalAbort = false;
 
   while (stats.processed < opts.limit && !halted) {
     const page = await fetchNextPage(supabase, opts, cursorId, PAGE_SIZE);
@@ -1525,6 +1583,7 @@ async function main() {
           console.error(err.message.slice(0, 300));
           process.exitCode = 1;
           halted = true;
+          fatalAbort = true;
           break;
         }
         if (err instanceof AuthError) {
@@ -1535,6 +1594,7 @@ async function main() {
           console.error(`   ${err.message.slice(0, 300)}`);
           process.exitCode = 1;
           halted = true;
+          fatalAbort = true;
           break;
         }
         throw err;
@@ -1552,8 +1612,14 @@ async function main() {
     if (page.length < PAGE_SIZE) break;
   }
 
-  // Final flush.
-  if (!opts.dryRun) {
+  // Final flush — but ONLY on a clean stop. On fatalAbort (AuthError /
+  // SchemaMismatchError) we deliberately drop the pending queue:
+  // committing partial work after a process-wide auth failure can
+  // poison-pill innocent rows by writing enrichment_failure_count++
+  // updates that other parallel workers had queued. Codex review
+  // iteration #4. Sibling auto-flushes that already fired before the
+  // abort can't be rolled back; we accept that as the lesser harm.
+  if (!opts.dryRun && !fatalAbort) {
     try {
       await enrichmentUpdater.flush();
     } catch (err) {
@@ -1564,6 +1630,12 @@ async function main() {
       `${enrichmentUpdater.stats.affected} rows, ` +
       `${enrichmentUpdater.stats.retries} retries, ` +
       `${enrichmentUpdater.stats.errors} errors`,
+    );
+  } else if (fatalAbort) {
+    console.error(
+      `\n[fatal-abort] skipping final flush; ${enrichmentUpdater.pending} pending update(s) dropped.\n` +
+      `[fatal-abort] auto-flushed batches before abort (${enrichmentUpdater.stats.flushes} calls, ` +
+      `${enrichmentUpdater.stats.affected} rows) cannot be rolled back.`,
     );
   }
 

@@ -22,6 +22,7 @@ import {
   ENRICHMENT_VERSION_CLAUDE_V1,
   AuthError,
   SchemaMismatchError,
+  totalQuotaTokens,
 } from '@/scripts/enrich-claude';
 import {
   PRIMARY_CATEGORIES,
@@ -164,6 +165,31 @@ describe('MODEL_MAP — fn-14.3 model IDs', () => {
 describe('ENRICHMENT_VERSION_CLAUDE_V1', () => {
   it('is "claude-v1"', () => {
     expect(ENRICHMENT_VERSION_CLAUDE_V1).toBe('claude-v1');
+  });
+});
+
+describe('totalQuotaTokens — quota counts include cache tokens', () => {
+  it('sums all four token counters', () => {
+    expect(totalQuotaTokens({
+      tokensIn: 1000,
+      tokensOut: 200,
+      cacheReadIn: 5000,
+      cacheCreateIn: 40000,
+    })).toBe(46200);
+  });
+
+  it('returns 0 for an all-zero stats snapshot', () => {
+    expect(totalQuotaTokens({
+      tokensIn: 0, tokensOut: 0, cacheReadIn: 0, cacheCreateIn: 0,
+    })).toBe(0);
+  });
+
+  it('does NOT undercount when cache_creation dominates (taxonomy-heavy first call)', () => {
+    // First call typically has tokensIn ~ small + cacheCreate ~ huge.
+    // Old behavior (in+out only) reported 800 of 800,000 budget = 0.1%.
+    // New behavior reports 800 + 800 + 0 + 800,000 = 801,600 of 800,000 = 100%.
+    const s = { tokensIn: 800, tokensOut: 800, cacheReadIn: 0, cacheCreateIn: 800_000 };
+    expect(totalQuotaTokens(s)).toBeGreaterThanOrEqual(800_000);
   });
 });
 
