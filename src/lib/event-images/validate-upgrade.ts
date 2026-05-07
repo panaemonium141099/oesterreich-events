@@ -30,6 +30,15 @@ export interface ValidatedImage {
   url: string;
   width?: number;
   height?: number;
+  /**
+   * True iff `url` is a HEAD-validated CDN-allowlist upgrade of the
+   * caller's `originalUrl` (i.e. the URL was changed). Lets the
+   * downstream UPSERT-guard accept the new URL even when its width
+   * cannot be extracted (e.g. WordPress `-400x300` suffix strip
+   * where the original size suffix is gone but the underlying file
+   * is the higher-res master).
+   */
+  upgraded?: boolean;
 }
 
 /** HEAD-check used by the upgrade path. Mirrors `BaseScraper.validateImageUrl()`. */
@@ -115,6 +124,7 @@ export async function validateAndUpgradeImageUrl(
   const upgradedDims = extractDimsFromUrl(upgraded);
   const result: ValidatedImage = {
     url: upgraded,
+    upgraded: true,
     ...(upgradedDims.width !== undefined ? { width: upgradedDims.width } : {}),
     ...(upgradedDims.height !== undefined ? { height: upgradedDims.height } : {}),
   };

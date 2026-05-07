@@ -318,11 +318,13 @@ export abstract class BaseScraper {
     });
 
     // 3. <img> tags in body content. Per element, pick the best
-    //    variant FIRST (srcset > src), then apply content/alt bonuses
-    //    once. This way an `<img src="small" srcset="large 1600w">`
-    //    inside <article> scores the LARGE URL plus the article
-    //    bonus, instead of the small src winning the article bonus
-    //    and the large srcset losing it.
+    //    variant FIRST, then apply content/alt bonuses once. Variant
+    //    priority: largest <source srcset> in surrounding <picture>
+    //    > <img srcset> largest > <img src>. This way the surrounding
+    //    layout context (article/header/alt) bonuses attach to the
+    //    actually-picked variant instead of being split between the
+    //    fallback <img src> candidate and a flat-scored <source>
+    //    sibling.
     $('img').each((_, el) => {
       const $img = $(el);
       const directSrc = $img.attr('src') || $img.attr('data-src') || $img.attr('data-lazy-src');
@@ -335,12 +337,40 @@ export abstract class BaseScraper {
       const elementWidth = parseInt($img.attr('width') || '0', 10) || undefined;
       const elementHeight = parseInt($img.attr('height') || '0', 10) || undefined;
 
-      // Pick the best variant: srcset largest wins over plain src.
+      // Pick the best variant.
       let chosenUrl: string | undefined;
       let chosenWidth: number | undefined;
       let chosenHeight: number | undefined;
       let baseScore = 0;
-      if (srcset) {
+
+      // Step 1: surrounding <picture><source srcset>...</picture>.
+      // We pick the largest variant across ALL sibling sources so a
+      // <picture> with multiple media-query branches still resolves
+      // to its widest available URL.
+      const $picture = $img.closest('picture');
+      if ($picture.length > 0) {
+        let bestSourceUrl: string | undefined;
+        let bestSourceWidth = 0;
+        $picture.find('source[srcset]').each((__, src) => {
+          const sourceSrcset = $(src).attr('srcset');
+          if (!sourceSrcset) return;
+          const picked = pickLargestFromSrcset(sourceSrcset);
+          if (!picked) return;
+          const w = picked.width ?? 0;
+          if (w > bestSourceWidth || (!bestSourceUrl && picked.url)) {
+            bestSourceWidth = w;
+            bestSourceUrl = picked.url;
+          }
+        });
+        if (bestSourceUrl) {
+          chosenUrl = bestSourceUrl;
+          chosenWidth = bestSourceWidth > 0 ? bestSourceWidth : undefined;
+          baseScore = 5;
+        }
+      }
+
+      // Step 2: <img srcset>.
+      if (!chosenUrl && srcset) {
         const picked = pickLargestFromSrcset(srcset);
         if (picked) {
           chosenUrl = picked.url;
@@ -351,6 +381,8 @@ export abstract class BaseScraper {
           baseScore = 5;
         }
       }
+
+      // Step 3: plain <img src>.
       if (!chosenUrl && directSrc) {
         chosenUrl = directSrc;
         chosenWidth = elementWidth;
@@ -392,12 +424,18 @@ export abstract class BaseScraper {
       candidates.push({ url: cleaned, width: chosenWidth, height: chosenHeight, score });
     });
 
-    // 4. <picture><source srcset>...</picture>: same density-vs-width
-    //    parser as the <img> path, but we don't have the surrounding
-    //    layout context to compute content/alt bonuses against the
-    //    picked variant directly. Score with the flat srcset base.
+    // 4. Standalone <source srcset> NOT inside a <picture> with an
+    //    <img> (rare — usually authors wrap with <img> as fallback).
+    //    Without surrounding context for content/alt scoring, fall
+    //    back to the flat srcset base. Filter out the ones we
+    //    already covered via the <img>+<picture> step above.
     $('source[srcset]').each((_, el) => {
       const $source = $(el);
+      // Skip when this <source> belongs to a <picture> that also has
+      // an <img> (already handled in step 3).
+      const $picture = $source.closest('picture');
+      if ($picture.length > 0 && $picture.find('img').length > 0) return;
+
       const srcset = $source.attr('srcset');
       if (!srcset) return;
 

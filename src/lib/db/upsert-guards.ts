@@ -20,6 +20,17 @@
  *                                                 the existing row
  *                                                 didn't (width OR
  *                                                 height)
+ *   - validatedUpgrade=true (HEAD-validated CDN
+ *     allowlist upgrade)                        → write new even when
+ *                                                 new dims unknown,
+ *                                                 because the URL was
+ *                                                 verified to deliver
+ *                                                 a higher-res variant
+ *                                                 of the same asset
+ *                                                 (e.g. WordPress
+ *                                                 strip-suffix where
+ *                                                 the original lacks
+ *                                                 dim hints in URL)
  *   - existing width unknown                    → write new
  *   - new width >= existing width               → write new
  *   - otherwise                                 → keep existing
@@ -37,6 +48,7 @@ export function shouldUpgradeImage(
   oldUrl: string | null,
   oldWidth: number | null,
   oldHeight: number | null,
+  validatedUpgrade: boolean = false,
 ): boolean {
   if (!newUrl) return false;
   if (!oldUrl) return true;
@@ -48,17 +60,28 @@ export function shouldUpgradeImage(
     if (oldHeight == null && newHeight != null) return true;
     return false;
   }
+  // Validated CDN upgrades win even with unknown new dims — the URL
+  // was HEAD-checked and the allowlist guarantees a higher-res asset
+  // (e.g. WordPress `photo-400x300.jpg` → `photo.jpg`, where the
+  // original loses its size suffix).
+  if (validatedUpgrade) return true;
   if (oldWidth == null) return true;
   if (newWidth != null && newWidth >= oldWidth) return true;
   return false;
 }
 
 /**
- * Pick which width to persist. Independent of the URL-upgrade decision:
- * even when we keep the existing URL, a freshly-discovered width from
- * the same URL backfills the column. When the URL is being replaced,
- * the new width wins iff it's known; otherwise we preserve the old
- * value to avoid NULL-clobber.
+ * Pick which width to persist.
+ *
+ * - **URL changing** (we're writing a new image_url): use the new
+ *   width if known, otherwise NULL. Never fall back to the old
+ *   width — it described the previous image, and stamping it on
+ *   a different URL produces impossible metadata like
+ *   `large.jpg + width=400` when the old was `small.jpg, 400×300`.
+ *   The downstream renderer can either re-measure or fall back to
+ *   intrinsic sizing.
+ * - **URL unchanged**: a freshly-discovered width backfills a
+ *   missing column. Otherwise the existing value is preserved.
  */
 export function pickFinalImageWidth(
   upgradingUrl: boolean,
@@ -66,7 +89,7 @@ export function pickFinalImageWidth(
   oldWidth: number | null,
 ): number | null {
   if (upgradingUrl) {
-    return newWidth ?? oldWidth ?? null;
+    return newWidth ?? null;
   }
   // URL unchanged or rejected — backfill missing existing width when
   // new width is known; otherwise leave the existing value alone.
@@ -81,7 +104,7 @@ export function pickFinalImageHeight(
   oldHeight: number | null,
 ): number | null {
   if (upgradingUrl) {
-    return newHeight ?? oldHeight ?? null;
+    return newHeight ?? null;
   }
   if (oldHeight == null && newHeight != null) return newHeight;
   return oldHeight ?? null;

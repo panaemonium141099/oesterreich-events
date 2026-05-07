@@ -442,6 +442,10 @@ function toSupabaseRow(
     existing?.image_url ?? null,
     existing?.image_width ?? null,
     existing?.image_height ?? null,
+    // HEAD-validated CDN allowlist upgrade — accepts the new URL
+    // even when extracted dims are absent (e.g. WordPress strip
+    // pattern). Validator only sets this flag on actual URL change.
+    validated?.upgraded === true,
   );
 
   // ─── fn-14.5 Description guard ───────────────────────────────────

@@ -390,6 +390,31 @@ describe('BaseScraper', () => {
       // would be misleading.
       expect(candidate?.height).toBeUndefined();
     });
+
+    it('picks <picture><source srcset> over fallback <img src> with content bonuses (Codex regression test)', () => {
+      // <picture> with multiple <source> media-queries plus an <img>
+      // fallback. The largest source URL must win AND inherit the
+      // surrounding <article> content bonus — without this fix, a
+      // small fallback <img> in the article scored higher than the
+      // flat-scored <source> variant.
+      const html = `
+        <html><body>
+          <article>
+            <picture>
+              <source srcset="https://example.com/desktop-1600.jpg 1600w" media="(min-width: 800px)">
+              <source srcset="https://example.com/tablet-1024.jpg 1024w" media="(min-width: 500px)">
+              <img src="https://example.com/mobile-fallback.jpg"
+                   width="400" height="300"
+                   alt="Concert poster">
+            </picture>
+          </article>
+        </body></html>
+      `;
+      const $ = cheerio.load(html);
+      const candidate = scraper.testExtractImageCandidate($, 'https://example.com');
+      expect(candidate?.url).toBe('https://example.com/desktop-1600.jpg');
+      expect(candidate?.width).toBe(1600);
+    });
   });
 });
 

@@ -53,13 +53,37 @@ describe('shouldUpgradeImage (fn-14.5 UPSERT-Guard)', () => {
   it('skips when new URL has unknown width but existing was wide', () => {
     expect(shouldUpgradeImage('unknown.jpg', null, null, 'big.jpg', 1600, 1200)).toBe(false);
   });
+
+  it('writes a HEAD-validated CDN upgrade even with unknown new dims (Codex WordPress regression)', () => {
+    // WordPress strip-suffix: photo-400x300.jpg → photo.jpg. The
+    // original loses its size suffix, so newWidth is null, but we
+    // KNOW the URL was HEAD-validated to deliver a higher-res asset.
+    // Without the validatedUpgrade signal the guard would reject this.
+    expect(shouldUpgradeImage(
+      'photo.jpg', null, null,
+      'photo-400x300.jpg', 400, 300,
+      true, // validatedUpgrade
+    )).toBe(true);
+  });
+
+  it('still rejects a non-validated narrower-or-unknown replacement', () => {
+    expect(shouldUpgradeImage(
+      'tiny.jpg', null, null,
+      'big.jpg', 1600, 1200,
+      false, // not a validated upgrade
+    )).toBe(false);
+  });
 });
 
 describe('pickFinalImageWidth / pickFinalImageHeight (fn-14.5)', () => {
-  it('on URL upgrade: prefers new dim, falls back to existing if new is null', () => {
-    expect(pickFinalImageWidth(true, 1600, 800)).toBe(1600);
-    expect(pickFinalImageWidth(true, null, 800)).toBe(800);
-    expect(pickFinalImageHeight(true, null, 600)).toBe(600); // Codex regression: don't NULL-clobber
+  it('on URL upgrade: takes new dim verbatim, never falls back to old', () => {
+    // The old dim described the previous image — it's meaningless on
+    // the new URL. Codex regression: a srcset upgrade that replaces
+    // (small=400x300) with (large=1600w, no height) must NOT stamp
+    // the new URL with the old 300 height.
+    expect(pickFinalImageWidth(true, 1600, 400)).toBe(1600);
+    expect(pickFinalImageWidth(true, null, 400)).toBeNull();
+    expect(pickFinalImageHeight(true, null, 300)).toBeNull(); // never carry old over
     expect(pickFinalImageHeight(true, 1200, 600)).toBe(1200);
   });
 
