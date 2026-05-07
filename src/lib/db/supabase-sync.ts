@@ -466,55 +466,22 @@ function toSupabaseRow(
     existing?.price_text ?? null,
   );
 
-  // ─── Quality scoring at ingest ───────────────────────────────────
-  // Compute against the FINAL resolved values (post-geocoding,
-  // post-canonical-category) so the score reflects what we'll actually
-  // persist, not the raw scraper input. Identical scoring function as
-  // backfill-quality.ts — they share src/lib/quality/score-event.ts.
-  //
-  // publish_status: only overwrite when the existing value is one of
-  // the computed statuses (or absent). Preserves dedup's 'duplicate'
-  // marking and any future admin overrides.
-  //
-  // Use the post-guard image_url so the score reflects the row that
-  // will actually be persisted (existing wins → score against it).
-  const effectiveImageForScore = upgradeImage ? newImageUrl : (existing?.image_url ?? newImageUrl);
-  const effectiveDescriptionForScore = overwriteDescription
-    ? newDescription
-    : (existing?.description ?? newDescription);
-  const score = scoreEvent({
-    title: event.title,
-    description: effectiveDescriptionForScore ?? null,
-    start_date: event.start_date,
-    end_date: event.end_date ?? null,
-    location_name: resolved.locationName,
-    address: event.address ?? null,
-    postal_code: resolved.postalCode,
-    bundesland: event.bundesland ?? null,
-    category: canonical.category,
-    latitude: finalLat,
-    longitude: finalLng,
-    image_url: effectiveImageForScore ?? null,
-    source_url: event.source_url,
-    ticket_url: event.ticket_url ?? null,
-  });
-
-  const finalPublishStatus =
-    existing?.publish_status && !COMPUTED_PUBLISH_STATUSES.has(existing.publish_status)
-      ? existing.publish_status
-      : score.publish_status;
-
-  // Resolve guarded values upfront so every row in the batch carries
-  // the SAME key set (otherwise PostgREST's bulk-upsert key-shape
-  // normalisation can clobber preserved columns with NULL — see
-  // Codex-review note above the imports). When the guard says "keep
-  // old", we explicitly write back the existing value verbatim.
+  // Resolve final guarded values FIRST so every row in the batch
+  // carries the SAME key set (otherwise PostgREST's bulk-upsert
+  // key-shape normalisation can clobber preserved columns with NULL —
+  // see Codex-review note above the imports). When the guard says
+  // "keep old", we explicitly write back the existing value verbatim.
   //
   // Width and height are picked INDEPENDENTLY of the URL-upgrade
   // decision: even when we keep the existing URL, a freshly-known
   // dim from the same URL still backfills its column. And when we
   // adopt a wider new URL with unknown height, the existing height
   // is preserved instead of NULL-clobbered.
+  //
+  // CRITICAL: build these BEFORE scoring so quality_score reflects
+  // the row that will actually be persisted (e.g. whitespace-only
+  // description rejected by the guard → row stores NULL → score
+  // must also evaluate against NULL, not the rejected raw input).
   const finalImageUrl = upgradeImage ? newImageUrl : (existing?.image_url ?? null);
   const finalImageWidth = pickFinalImageWidth(
     upgradeImage,
@@ -532,6 +499,38 @@ function toSupabaseRow(
   const finalPriceText = overwritePrice
     ? (event.price_text ?? null)
     : (existing?.price_text ?? null);
+
+  // ─── Quality scoring at ingest ───────────────────────────────────
+  // Compute against the FINAL resolved values (post-geocoding,
+  // post-canonical-category, post-UPSERT-guard) so the score reflects
+  // what we'll actually persist, not the raw scraper input. Identical
+  // scoring function as backfill-quality.ts — they share
+  // src/lib/quality/score-event.ts.
+  //
+  // publish_status: only overwrite when the existing value is one of
+  // the computed statuses (or absent). Preserves dedup's 'duplicate'
+  // marking and any future admin overrides.
+  const score = scoreEvent({
+    title: event.title,
+    description: finalDescription,
+    start_date: event.start_date,
+    end_date: event.end_date ?? null,
+    location_name: resolved.locationName,
+    address: event.address ?? null,
+    postal_code: resolved.postalCode,
+    bundesland: event.bundesland ?? null,
+    category: canonical.category,
+    latitude: finalLat,
+    longitude: finalLng,
+    image_url: finalImageUrl,
+    source_url: event.source_url,
+    ticket_url: event.ticket_url ?? null,
+  });
+
+  const finalPublishStatus =
+    existing?.publish_status && !COMPUTED_PUBLISH_STATUSES.has(existing.publish_status)
+      ? existing.publish_status
+      : score.publish_status;
 
   return {
     source_type: 'scraped' as const,

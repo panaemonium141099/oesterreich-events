@@ -62,6 +62,22 @@ export function extractDimsFromUrl(url: string | null | undefined): UrlDims {
     // Not a parseable URL — fall through to other patterns.
   }
 
+  // Cloudflare Images flexible-variant: `/w=2000` or `/w=2000,h=1500`
+  // appended at the end of the path. Distinct from the Cloudinary
+  // `w_NNN` underscore syntax — Cloudflare uses `=`.
+  const cfMatch = /\/w=(\d+)(?:,h=(\d+))?(?:[/?#]|$)/i.exec(url);
+  if (cfMatch) {
+    return {
+      width: parseInt(cfMatch[1], 10),
+      ...(cfMatch[2] ? { height: parseInt(cfMatch[2], 10) } : {}),
+    };
+  }
+  // Cloudflare Images flexible-variant: just `/h=NNN` (rare).
+  const cfHMatch = /\/h=(\d+)(?:[/?#]|$)/i.exec(url);
+  if (cfHMatch) {
+    return { height: parseInt(cfHMatch[1], 10) };
+  }
+
   // WordPress `-1200x800.jpg` size suffix immediately before the
   // extension. Allow common image extensions case-insensitively.
   const wp = /-(\d+)x(\d+)\.(?:jpe?g|png|webp|gif|avif)(?:\?.*)?$/i.exec(url);

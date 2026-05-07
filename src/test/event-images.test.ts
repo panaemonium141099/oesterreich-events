@@ -170,6 +170,18 @@ describe('extractDimsFromUrl (fn-14.5)', () => {
     )).toEqual({ width: 1200, height: 800 });
   });
 
+  it('extracts Cloudflare Images flexible-variant /w=NNN (Codex regression test)', () => {
+    expect(extractDimsFromUrl(
+      'https://imagedelivery.net/account/image-id/w=2000',
+    )).toEqual({ width: 2000 });
+  });
+
+  it('extracts Cloudflare Images /w=NNN,h=NNN combo', () => {
+    expect(extractDimsFromUrl(
+      'https://imagedelivery.net/account/image-id/w=2000,h=1500',
+    )).toEqual({ width: 2000, height: 1500 });
+  });
+
   it('handles WebP and AVIF extensions in WordPress pattern', () => {
     expect(extractDimsFromUrl(
       'https://example.com/wp-content/uploads/photo-1024x768.webp',

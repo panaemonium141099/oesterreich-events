@@ -496,38 +496,101 @@ export abstract class BaseScraper {
    * full-page extractor uses).
    */
   protected imageFromElement(
-    // We accept an unknown cheerio element wrapper; the caller passes
-    // either `$el` or a typed `Cheerio<Element>` — both expose the
-    // attribute API we need.
-    $img: { attr(name: string): string | undefined },
+    // We accept any cheerio wrapper that supports the standard
+    // selector / attribute API. Most callers pass a `Cheerio<Element>`;
+    // the structural type below is the minimum surface area we need.
+    $img: {
+      attr(name: string): string | undefined;
+      closest?: (selector: string) => unknown;
+      get?: (index: number) => unknown;
+    },
     baseUrl: string,
   ): { url: string; image_width?: number; image_height?: number } | null {
     if (!$img) return null;
-    const direct = $img.attr('src') || $img.attr('data-src') || $img.attr('data-lazy-src');
     const elementWidth = parseInt($img.attr('width') || '0', 10) || undefined;
     const elementHeight = parseInt($img.attr('height') || '0', 10) || undefined;
 
-    let urlGuess: string | undefined = direct ? direct : undefined;
-    let widthGuess: number | undefined = elementWidth;
-    let heightGuess: number | undefined = elementHeight;
-    let pickedFromSrcset = false;
+    // Variant priority (matches extractImageCandidate):
+    //   1. surrounding <picture><source srcset> (largest variant)
+    //   2. <img srcset> largest
+    //   3. <img src> / data-src / data-lazy-src
+    let urlGuess: string | undefined;
+    let widthGuess: number | undefined;
+    let heightGuess: number | undefined;
 
-    // srcset wins when present (real pixels). When it does, we MUST
-    // discard the element-level height attr — it describes the
-    // rendered layout box, not the variant we picked, so persisting
-    // it produces (1600 × 300) impossible metadata for a markup
-    // whose <img> attrs were 400×300. Width comes from the srcset
-    // descriptor itself; height stays undefined (a downstream
-    // aspect-ratio derivation in validateAndUpgradeImageUrl can
-    // fill it back in from the original ratio if needed).
-    const srcset = $img.attr('srcset');
-    if (srcset) {
-      const picked = pickLargestFromSrcset(srcset);
-      if (picked && picked.url) {
-        urlGuess = picked.url;
-        widthGuess = picked.width ?? undefined;
-        heightGuess = undefined;
-        pickedFromSrcset = true;
+    // Step 1: <picture><source>. cheerio's `.closest()` and `.find()`
+    // are only available on Cheerio<T> wrappers; we feature-detect to
+    // stay compatible with the structural shape callers can pass.
+    type CheerioLike = {
+      attr(name: string): string | undefined;
+      length?: number;
+      find?: (selector: string) => CheerioLike;
+      each?: (cb: (i: number, el: unknown) => void) => unknown;
+    };
+    const closest = (
+      $img as { closest?: (selector: string) => CheerioLike }
+    ).closest;
+    if (typeof closest === 'function') {
+      const $picture = closest.call($img, 'picture') as CheerioLike;
+      if ($picture && (($picture.length ?? 0) > 0) && typeof $picture.find === 'function') {
+        const $sources = $picture.find('source[srcset]');
+        let bestUrl: string | undefined;
+        let bestW = 0;
+        let bestD = 0;
+        if ($sources && typeof $sources.each === 'function') {
+          $sources.each((_: number, src: unknown) => {
+            const sourceWrapper = src as { attribs?: Record<string, string> };
+            const sourceSrcset = sourceWrapper.attribs?.srcset;
+            if (!sourceSrcset) return;
+            const picked = pickLargestFromSrcset(sourceSrcset);
+            if (!picked) return;
+            const w = picked.width ?? 0;
+            const d = picked.density ?? 0;
+            if (w > 0) {
+              if (w > bestW) {
+                bestW = w;
+                bestUrl = picked.url;
+                bestD = 0;
+              }
+            } else if (bestW === 0 && d > bestD) {
+              bestD = d;
+              bestUrl = picked.url;
+            } else if (!bestUrl) {
+              bestUrl = picked.url;
+            }
+          });
+        }
+        if (bestUrl) {
+          urlGuess = bestUrl;
+          widthGuess = bestW > 0 ? bestW : undefined;
+          // No reliable height from <source srcset> — the descriptor
+          // doesn't carry pixel dims, and the layout-box attrs on the
+          // <img> describe a different variant.
+          heightGuess = undefined;
+        }
+      }
+    }
+
+    // Step 2: <img srcset>. Same height-omission rule as above.
+    if (!urlGuess) {
+      const srcset = $img.attr('srcset');
+      if (srcset) {
+        const picked = pickLargestFromSrcset(srcset);
+        if (picked?.url) {
+          urlGuess = picked.url;
+          widthGuess = picked.width ?? undefined;
+          heightGuess = undefined;
+        }
+      }
+    }
+
+    // Step 3: plain <img src>. Element-level dim attrs apply HERE.
+    if (!urlGuess) {
+      const direct = $img.attr('src') || $img.attr('data-src') || $img.attr('data-lazy-src');
+      if (direct) {
+        urlGuess = direct;
+        widthGuess = elementWidth;
+        heightGuess = elementHeight;
       }
     }
 
@@ -536,10 +599,6 @@ export abstract class BaseScraper {
     const resolved = this.resolveImageUrl(urlGuess, baseUrl);
     const cleaned = this.cleanImageUrl(resolved);
     if (!cleaned) return null;
-    // Defensive: linter may flag pickedFromSrcset as unused once the
-    // branch above is the only writer; the reference here keeps the
-    // rationale visible to future readers.
-    void pickedFromSrcset;
     return {
       url: cleaned,
       ...(widthGuess ? { image_width: widthGuess } : {}),

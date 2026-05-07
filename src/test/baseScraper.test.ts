@@ -33,6 +33,13 @@ class TestableBaseScraper extends BaseScraper {
     return this.extractImageCandidate($, baseUrl);
   }
 
+  public testImageFromElement(
+    $img: { attr(name: string): string | undefined },
+    baseUrl: string,
+  ): { url: string; image_width?: number; image_height?: number } | null {
+    return this.imageFromElement($img, baseUrl);
+  }
+
   public testResolveImageUrl(src: string, baseUrl: string): string {
     return this.resolveImageUrl(src, baseUrl);
   }
@@ -435,6 +442,59 @@ describe('BaseScraper', () => {
       const $ = cheerio.load(html);
       const candidate = scraper.testExtractImageCandidate($, 'https://example.com');
       expect(candidate?.url).toBe('https://example.com/dpr3.jpg');
+    });
+  });
+
+  describe('imageFromElement (fn-14.5)', () => {
+    it('picks <picture><source srcset> over the <img> fallback (Codex regression test)', () => {
+      // Migrated scrapers call imageFromElement on <img> nodes that
+      // may live inside <picture> trees. Without surrounding-source
+      // inspection the helper would return the small mobile fallback
+      // image instead of the wide desktop variant.
+      const html = `
+        <html><body>
+          <picture>
+            <source srcset="https://example.com/desktop-1600.jpg 1600w">
+            <img src="https://example.com/mobile.jpg" width="400" height="300">
+          </picture>
+        </body></html>
+      `;
+      const $ = cheerio.load(html);
+      const $img = $('img').first();
+      const result = scraper.testImageFromElement($img, 'https://example.com');
+      expect(result?.url).toBe('https://example.com/desktop-1600.jpg');
+      expect(result?.image_width).toBe(1600);
+      // Layout-box height (300) belongs to the <img>, not the variant.
+      expect(result?.image_height).toBeUndefined();
+    });
+
+    it('falls back to <img srcset> when no surrounding <picture>', () => {
+      const html = `
+        <html><body>
+          <img src="https://example.com/small.jpg"
+               srcset="https://example.com/large.jpg 1200w"
+               alt="x">
+        </body></html>
+      `;
+      const $ = cheerio.load(html);
+      const $img = $('img').first();
+      const result = scraper.testImageFromElement($img, 'https://example.com');
+      expect(result?.url).toBe('https://example.com/large.jpg');
+      expect(result?.image_width).toBe(1200);
+    });
+
+    it('falls back to plain <img src> with element-level dim attrs', () => {
+      const html = `
+        <html><body>
+          <img src="https://example.com/photo.jpg" width="800" height="600">
+        </body></html>
+      `;
+      const $ = cheerio.load(html);
+      const $img = $('img').first();
+      const result = scraper.testImageFromElement($img, 'https://example.com');
+      expect(result?.url).toBe('https://example.com/photo.jpg');
+      expect(result?.image_width).toBe(800);
+      expect(result?.image_height).toBe(600);
     });
   });
 });
