@@ -20,6 +20,8 @@ import {
   buildSystemPrompt,
   MODEL_MAP,
   ENRICHMENT_VERSION_CLAUDE_V1,
+  AuthError,
+  SchemaMismatchError,
 } from '@/scripts/enrich-claude';
 import {
   PRIMARY_CATEGORIES,
@@ -162,5 +164,23 @@ describe('MODEL_MAP — fn-14.3 model IDs', () => {
 describe('ENRICHMENT_VERSION_CLAUDE_V1', () => {
   it('is "claude-v1"', () => {
     expect(ENRICHMENT_VERSION_CLAUDE_V1).toBe('claude-v1');
+  });
+});
+
+describe('error classes — distinct types for distinct bail-out paths', () => {
+  it('AuthError is exported and instanceof Error', () => {
+    const e = new AuthError('not logged in');
+    expect(e).toBeInstanceOf(Error);
+    expect(e).toBeInstanceOf(AuthError);
+    expect(e.name).toBe('AuthError');
+    expect(e.message).toBe('not logged in');
+  });
+
+  it('SchemaMismatchError is exported and distinct from AuthError', () => {
+    const e = new SchemaMismatchError('column does not exist');
+    expect(e).toBeInstanceOf(Error);
+    expect(e).toBeInstanceOf(SchemaMismatchError);
+    expect(e).not.toBeInstanceOf(AuthError);
+    expect(e.name).toBe('SchemaMismatchError');
   });
 });

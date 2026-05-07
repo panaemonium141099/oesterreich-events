@@ -875,8 +875,24 @@ interface BatchOutcome {
   fail: Array<{ index: number; error: string }>;
 }
 
-class SchemaMismatchError extends Error {
+export class SchemaMismatchError extends Error {
   constructor(message: string) { super(message); this.name = 'SchemaMismatchError'; }
+}
+
+/**
+ * Auth failure (401/403, "not logged in", invalid API key, etc.).
+ *
+ * Auth is a process-wide problem, not a per-event problem — every
+ * subsequent call will fail the same way until the operator fixes
+ * credentials. Treating each event as a 1-of-3 strike on
+ * enrichment_failure_count would poison-pill thousands of innocent
+ * rows on a single misconfigured run.
+ *
+ * Caller behavior: throw out of `processBatch()`, abort `main()` with
+ * a non-zero exit code, do NOT write anything to the events table.
+ */
+export class AuthError extends Error {
+  constructor(message: string) { super(message); this.name = 'AuthError'; }
 }
 
 /**
@@ -1061,7 +1077,11 @@ async function processBatch(
   // 3. Call claude with retry loop. 5 attempts:
   //    - rate-limit: 15s → 30s → 60s → 120s → 240s
   //    - hang/network/empty:  3s → 6s → 12s → 24s → 48s
-  //    - auth: bail immediately
+  //    - auth: throw AuthError → propagates out of processBatch and
+  //            aborts the whole run. Auth is process-wide; punishing
+  //            individual events with failure_count++ would poison
+  //            the dataset on a single misconfigured run.
+  const AUTH_RE = /\b(401|403|unauthorized|not logged in|please run \/login|invalid api key)\b/i;
   const MAX_ATTEMPTS = 5;
   let parsed: unknown = null;
   let callRes: ClaudeCallResult | null = null;
@@ -1080,10 +1100,11 @@ async function processBatch(
       if (callRes.isError) {
         const msg = callRes.errorMessage ?? 'is_error true';
         lastErr = msg;
-        const isAuth = /\b(401|403|unauthorized|not logged in|please run \/login|invalid api key)\b/i.test(msg);
-        if (isAuth) {
-          // Drain attempts immediately — auth won't recover within this run.
-          throw new Error(`auth: ${msg}`);
+        if (AUTH_RE.test(msg)) {
+          // Bail the whole RUN, not just the batch. AuthError is
+          // caught at the worker-pool level in main() which then
+          // exits non-zero without any DB writes.
+          throw new AuthError(msg);
         }
         const isRate = /429|rate.limit|rate_limit|too.many.request|usage.limit|quota/i.test(msg);
         if (isRate) stats.rateLimited += 1;
@@ -1096,8 +1117,17 @@ async function processBatch(
       parsed = callRes.parsed;
       break;
     } catch (err) {
+      // AuthError MUST propagate — never absorbed into the per-batch
+      // failure_count path. main() catches and exits the run.
+      if (err instanceof AuthError) throw err;
+
       lastErr = err instanceof Error ? err.message : String(err);
-      if (lastErr.startsWith('auth:')) break; // bail on auth
+      // Defense in depth: if some other code path throws an Error whose
+      // message looks like an auth failure (e.g. claude binary stderr),
+      // promote it to AuthError before deciding whether to retry.
+      if (AUTH_RE.test(lastErr)) {
+        throw new AuthError(lastErr);
+      }
       if (attempt === MAX_ATTEMPTS - 1) break;
 
       const isRate = /429|rate.limit|rate_limit|too.many.request|usage.limit|quota/i.test(lastErr);
@@ -1493,6 +1523,16 @@ async function main() {
         if (err instanceof SchemaMismatchError) {
           console.error('\n⛔ Schema mismatch — DB migration likely missing. Bailing.');
           console.error(err.message.slice(0, 300));
+          process.exitCode = 1;
+          halted = true;
+          break;
+        }
+        if (err instanceof AuthError) {
+          // Process-wide auth failure — abort the run without any
+          // event writes. Codex review #3: poisoning innocent rows
+          // because the operator forgot to /login is unacceptable.
+          console.error('\n⛔ Auth failure — `claude /login` or set ANTHROPIC_API_KEY.');
+          console.error(`   ${err.message.slice(0, 300)}`);
           process.exitCode = 1;
           halted = true;
           break;
