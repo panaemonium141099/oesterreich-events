@@ -1,0 +1,4 @@
+{"ts":"2026-05-07T20:58:08.499Z","status":"run_start","model":"sonnet","batch_size":3,"concurrency":12,"bare_mode":false,"pending":68398,"already_done":0}
+{"ts":"2026-05-07T20:59:18.363Z","event_id":"00041862-8a8a-415c-888c-29b5424ce40e","title":"Nach oben scrollen","status":"desc_policy_failed","policy":"fill","reason":"empty/very short","failure_count":1}
+{"ts":"2026-05-07T20:59:21.239Z","event_id":"0004bf53-0b5a-4279-96d2-3790b4d47f29","title":"Fest in der Schindergasse","status":"validation_failed","errors":["tags: \"sommerfest\" not in vocabulary (dropped)"],"failure_count":1}
+{"ts":"2026-05-07T21:02:12.145Z","event_id":"0044d3c8-4c75-42a8-aba4-93debe4557c0","title":"Papier 1","status":"desc_policy_failed","policy":"fill","reason":"empty/very short","failure_count":1}

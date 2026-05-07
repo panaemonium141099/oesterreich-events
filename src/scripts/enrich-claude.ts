@@ -49,6 +49,7 @@
  */
 
 import { readFileSync, appendFileSync, mkdirSync, existsSync, writeFileSync, unlinkSync } from 'fs';
+import { jsonrepair } from 'jsonrepair';
 import { join, dirname, isAbsolute, delimiter as pathDelimiter } from 'path';
 import { spawn } from 'child_process';
 import { tmpdir } from 'os';
@@ -163,6 +164,8 @@ interface CliOpts {
   dryRun: boolean;
   verbose: boolean;
   noFetch: boolean;
+  /** When true, only enrich events with `start_date >= NOW()` (skip past events). */
+  futureOnly: boolean;
   model: 'sonnet' | 'opus' | 'haiku';
   claudeBin: string;
   bareMode: boolean;
@@ -262,10 +265,14 @@ function parseArgs(): CliOpts {
     dryRun: args.includes('--dry-run'),
     verbose: args.includes('--verbose') || args.includes('--dry-run'),
     noFetch: args.includes('--no-fetch'),
+    futureOnly: args.includes('--future-only'),
     model,
     claudeBin: get('--claude-bin') ?? 'claude',
     // --bare is conditional on API key (Codex-Finding) — MAX-OAuth doesn't
-    // survive --bare. wantsBare without API key produces a warning & no flag.
+    // survive --bare. Empirically verified again on claude-cli 2.1.116 (2026-05-07):
+    // `--bare` with MAX-OAuth produces immediate `claude exited 1` (empty stderr).
+    // Until Anthropic fixes this, MAX-OAuth users pay the 3-5s startup overhead
+    // for skills/MCP/CLAUDE.md loading per call.
     bareMode: wantsBare && hasApiKey,
     logFile: get('--log-file') ?? null,
     // Validate --since up-front: a typo would silently process the
@@ -471,6 +478,13 @@ HINTERGRUND-WISSEN: Du DARFST verifizierbare Fakten über VENUES, historische Ge
 
 ANTI-BLEED-REGEL (wichtig!): Erwähne in der Beschreibung NIE die Kategorie ("Dies ist ein Musik-Event", "ein Sport & Bewegung-Event") und KEINE Tag-Namen ("psytrance-Vibe", "audience: studenten"). Das sind interne Klassifikations-Felder, kein Marketing-Text.
 
+JSON-VALIDITÄT (KRITISCH): Verwende KEINE doppelten Anführungszeichen (") und KEINE typografischen Anführungszeichen („ "" » «) INNERHALB des description-Texts. Das macht die JSON-Antwort ungültig.
+  - FALSCH: "Die Band „Die Mayrhofner" tritt auf"
+  - FALSCH: "Die Band \"Die Mayrhofner\" tritt auf" (nicht escapen — komplett vermeiden)
+  - RICHTIG: "Die Band Die Mayrhofner tritt auf"
+  - RICHTIG: "Auf der Bühne stehen die Bands Die Mayrhofner, Johannes Niggl und das Kreuzberger Trio"
+Bandnamen, Zitate, Buchtitel etc. einfach OHNE Quotation-Marks formulieren. Wenn unbedingt Hervorhebung nötig: nutze Doppelpunkt oder Umschreibung. KEINE Anführungszeichen aller Art im suggested_description String.
+
 ══════════════════════════════════════════════════════════════
 SUGGESTED_PRICE_TEXT + SUGGESTED_PRICE_MIN
 ══════════════════════════════════════════════════════════════
@@ -599,6 +613,11 @@ interface ClaudeCallResult {
 }
 
 let cachedResolvedClaude: { path: string; useShell: boolean } | null = null;
+// Module-scoped so the SIGINT handler can flush pending updates before exit.
+// fn-14.4 Codex finding: previously the SIGINT handler closed the browser but
+// left BulkUpdater's queue in-memory → all unflushed events lost. Now we
+// explicitly flush on graceful shutdown.
+let activeBulkUpdater: { flush: () => Promise<number> } | null = null;
 
 /**
  * Cache the path to a temp file containing the system prompt, written
@@ -653,11 +672,17 @@ async function callClaudeBatch(
   // passing the 8-12KB taxonomy inline as a CLI arg is fragile on
   // Windows. The file is written once per run and reused.)
   const sysPromptFile = getOrCreateSystemPromptFile(systemPrompt);
+  // fn-14.3 (2026-05-07): claude CLI 2.1.116 hat einen bug bei
+  // --output-format json wo lange `result` strings im envelope
+  // truncated werden (~80% loss bei 2k+ token outputs, env-Tests
+  // zeigen tok_out=2340 vs result_len=1400). Default: text.
+  // Json-mode bleibt verfügbar via ENRICH_OUTPUT_FORMAT=json env.
+  const outputFormat = process.env.ENRICH_OUTPUT_FORMAT === 'json' ? 'json' : 'text';
   const args = [
     '-p',
     '--model', model,
     '--max-turns', '1',
-    '--output-format', 'json',
+    '--output-format', outputFormat,
     '--no-session-persistence',
     '--append-system-prompt-file', sysPromptFile,
   ];
@@ -709,33 +734,56 @@ async function callClaudeBatch(
         return;
       }
 
-      // Envelope is the JSON we parsed in the spike. Some tools dump
-      // additional newline-delimited prefix on Windows; tolerate that
-      // by finding the first `{`.
-      let envelope: unknown;
-      try {
-        const start = stdout.indexOf('{');
-        if (start === -1) throw new Error('no JSON envelope');
-        envelope = JSON.parse(stdout.slice(start));
-      } catch (err) {
-        reject(new Error(
-          `claude envelope parse failed: ${err instanceof Error ? err.message : err} | ` +
-          `stdout=${stdout.slice(0, 300)}`,
-        ));
-        return;
-      }
+      // Output handling depends on chosen format.
+      // - 'text': stdout is the raw model output (may have ```json fences).
+      //   Estimate tokens from char count (Claude tokenizer ≈ 3-4 chars/token DE).
+      // - 'json': parse envelope wrapper (has usage stats but suffers from CLI
+      //   bug where long `result` strings are truncated mid-write — see fn-14.3).
+      let envelope: unknown = null;
+      let tokensIn = 0;
+      let tokensOut = 0;
+      let cacheReadIn = 0;
+      let cacheCreateIn = 0;
+      let costUsd = 0;
+      let stopReason = 'end_turn';
+      let isError = false;
+      let apiErrStatus: string | null = null;
+      let resultStr = '';
 
-      const e = envelope as Record<string, unknown>;
-      const usage = (e.usage ?? {}) as Record<string, unknown>;
-      const tokensIn = typeof usage.input_tokens === 'number' ? usage.input_tokens : 0;
-      const tokensOut = typeof usage.output_tokens === 'number' ? usage.output_tokens : 0;
-      const cacheReadIn = typeof usage.cache_read_input_tokens === 'number' ? usage.cache_read_input_tokens : 0;
-      const cacheCreateIn = typeof usage.cache_creation_input_tokens === 'number' ? usage.cache_creation_input_tokens : 0;
-      const costUsd = typeof e.total_cost_usd === 'number' ? e.total_cost_usd : 0;
-      const stopReason = typeof e.stop_reason === 'string' ? e.stop_reason : 'unknown';
-      const isError = e.is_error === true;
-      const apiErrStatus = typeof e.api_error_status === 'string' ? e.api_error_status : null;
-      const resultStr = typeof e.result === 'string' ? e.result : '';
+      if (outputFormat === 'text') {
+        // Raw text mode — stdout IS the model output.
+        resultStr = stdout;
+        // Best-effort token estimation (German is ~3.5 chars/token).
+        tokensOut = Math.ceil(stdout.length / 3.5);
+        // We don't know input tokens without envelope — estimate from prompt.
+        tokensIn = Math.ceil((systemPrompt.length + userMessage.length) / 3.5);
+        envelope = { result: stdout, _format: 'text-estimated' };
+      } else {
+        // Envelope-mode (json). Some tools prepend text on Windows; find first `{`.
+        try {
+          const start = stdout.indexOf('{');
+          if (start === -1) throw new Error('no JSON envelope');
+          envelope = JSON.parse(stdout.slice(start));
+        } catch (err) {
+          reject(new Error(
+            `claude envelope parse failed: ${err instanceof Error ? err.message : err} | ` +
+            `stdout=${stdout.slice(0, 300)}`,
+          ));
+          return;
+        }
+
+        const e = envelope as Record<string, unknown>;
+        const usage = (e.usage ?? {}) as Record<string, unknown>;
+        tokensIn = typeof usage.input_tokens === 'number' ? usage.input_tokens : 0;
+        tokensOut = typeof usage.output_tokens === 'number' ? usage.output_tokens : 0;
+        cacheReadIn = typeof usage.cache_read_input_tokens === 'number' ? usage.cache_read_input_tokens : 0;
+        cacheCreateIn = typeof usage.cache_creation_input_tokens === 'number' ? usage.cache_creation_input_tokens : 0;
+        costUsd = typeof e.total_cost_usd === 'number' ? e.total_cost_usd : 0;
+        stopReason = typeof e.stop_reason === 'string' ? e.stop_reason : 'unknown';
+        isError = e.is_error === true;
+        apiErrStatus = typeof e.api_error_status === 'string' ? e.api_error_status : null;
+        resultStr = typeof e.result === 'string' ? e.result : '';
+      }
 
       if (isError) {
         // Error envelopes don't need a parsed result — the caller routes
@@ -763,9 +811,24 @@ async function callClaudeBatch(
       try {
         inner = extractJson(resultStr);
       } catch (err) {
+        // Dump full result to a debug file so we can inspect where claude
+        // actually stops mid-stream. Helps diagnose CLI bugs vs prompt issues.
+        try {
+          const debugDir = join(process.cwd(), 'logs', 'parse-fails');
+          mkdirSync(debugDir, { recursive: true });
+          const ts = new Date().toISOString().replace(/[:.]/g, '-');
+          const dumpPath = join(debugDir, `${ts}.txt`);
+          writeFileSync(dumpPath,
+            `STOP=${stopReason}\nTOK_OUT=${tokensOut}\nRESULT_LEN=${resultStr.length}\n` +
+            `ERR=${err instanceof Error ? err.message : err}\n\n` +
+            `=== FULL RESULT ===\n${resultStr}\n\n=== STDERR ===\n${stderr}`);
+        } catch { /* swallow — debug-only */ }
+        const head = resultStr.slice(0, 200);
+        const tail = resultStr.slice(-200);
         reject(new Error(
           `claude inner-result parse failed: ${err instanceof Error ? err.message : err} | ` +
-          `result=${resultStr.slice(0, 300)}`,
+          `stop=${stopReason} | tok_out=${tokensOut} | result_len=${resultStr.length} | ` +
+          `head=${head.replace(/\n/g, '\\n')} | tail=${tail.replace(/\n/g, '\\n')}`,
         ));
         return;
       }
@@ -791,19 +854,98 @@ async function callClaudeBatch(
  * Extract the first top-level JSON object/array from a string.
  * Reused from enrich-claude-cli.ts (helper-only reuse per fn-14.3 spec).
  */
+/**
+ * Pre-sanitize claude output to defang typographic quotes that break
+ * JSON parsing when claude embeds them in description strings.
+ *
+ * Claude CLI 2.1.116 will (despite explicit prompt instructions) sometimes
+ * write `„Die Mayrhofner"` or `"Die Band"` directly inside a string value,
+ * which makes the surrounding JSON syntactically invalid. This pass strips
+ * those typographic quotes before we attempt to parse — a regular ASCII
+ * `"` inside a JSON string is the actual landmine, but we also remove
+ * `„ " » «` because they're cosmetic and not worth a parse-fail.
+ */
+function sanitizeTypographicQuotes(raw: string): string {
+  return raw
+    // German low/high double-quotes
+    .replace(/[„“”»«]/g, '')
+    // Curly single quotes → straight apostrophe
+    .replace(/[‘’‚‛]/g, "'");
+}
+
+/**
+ * Last-resort repair: when JSON.parse fails, find each `"key":"value"` segment
+ * and escape any unescaped `"` chars inside the value. We do this with a
+ * forward scan that tracks string boundaries — any `"` after the value-start
+ * but before what looks like the value-end (followed by `,` `}` `\n` and a
+ * key-start `"` or `}`) is escaped.
+ *
+ * Heuristic, not a full JSON parser, but catches the common claude failure
+ * mode of bare quotes in description text.
+ */
+function escapeBareQuotesInStringValues(raw: string): string {
+  // Replace any `"` that's NOT preceded by `\`, NOT followed by `,`, `}`, `]`,
+  // `:`, `\n`, or end-of-string. That heuristic catches bare quotes inside
+  // string values where the next char is alphabetic or whitespace.
+  // We work on a char-by-char state machine instead of regex for correctness.
+  const out: string[] = [];
+  let inString = false;
+  let escape = false;
+  for (let i = 0; i < raw.length; i++) {
+    const c = raw[i];
+    if (escape) { out.push(c); escape = false; continue; }
+    if (c === '\\') { out.push(c); escape = true; continue; }
+    if (c === '"') {
+      if (!inString) { out.push(c); inString = true; continue; }
+      // We're inside a string and hit a `"`. Is it a real string-end?
+      // Look at the next non-whitespace char — if it's `,` `}` `]` `:` it's
+      // an end. Otherwise, it's a bare quote that must be escaped.
+      let j = i + 1;
+      while (j < raw.length && (raw[j] === ' ' || raw[j] === '\n' || raw[j] === '\r' || raw[j] === '\t')) j++;
+      const next = j < raw.length ? raw[j] : '';
+      if (next === ',' || next === '}' || next === ']' || next === ':' || next === '') {
+        out.push(c);
+        inString = false;
+      } else {
+        // Bare quote inside string — escape it
+        out.push('\\', '"');
+      }
+      continue;
+    }
+    out.push(c);
+  }
+  return out.join('');
+}
+
+/**
+ * Extract the first top-level JSON object/array from a string.
+ *
+ * 4-tier defense against claude CLI quirks:
+ *   1. Sanitize typographic quotes (pre-pass)
+ *   2. Fast-path JSON.parse if shape looks bare object/array
+ *   3. Strip ```json``` fences + brace-count scan
+ *   4. jsonrepair lib (handles trailing commas, unquoted keys, single quotes)
+ *   5. Custom bare-quote escape heuristic for our specific claude bug
+ *
+ * Reused from enrich-claude-cli.ts (helper-only reuse per fn-14.3 spec),
+ * extended for claude-cli 2.1.116 compat (typographic quotes + jsonrepair).
+ */
 function extractJson(raw: string): unknown {
-  const trimmed = raw.trim();
+  // Tier 1: pre-sanitize
+  const sanitized = sanitizeTypographicQuotes(raw);
+  const trimmed = sanitized.trim();
   if (!trimmed) throw new Error('empty');
-  // Fast path: bare object / array
+
+  // Tier 2: fast path for bare object/array
   const first = trimmed[0];
   if ((first === '{' || first === '[') &&
       (trimmed.endsWith('}') || trimmed.endsWith(']'))) {
     try { return JSON.parse(trimmed); } catch { /* fall through */ }
   }
-  // Strip fences
+
+  // Tier 3: strip fences + brace-count scan
   const fence = trimmed.match(/^```(?:json)?\s*([\s\S]*?)\s*```$/);
   const body = fence ? fence[1] : trimmed;
-  // Brace/bracket-counting scan for first complete JSON value
   let start = -1, openCh = '{', closeCh = '}';
   for (let i = 0; i < body.length; i++) {
     const c = body[i];
@@ -815,6 +957,10 @@ function extractJson(raw: string): unknown {
     }
   }
   if (start === -1) throw new Error(`no JSON found in: ${body.slice(0, 120)}`);
+
+  // Walk the body looking for the matching close-bracket. If we find it,
+  // try JSON.parse; if that fails (bare quotes inside value), escalate.
+  let candidate: string | null = null;
   let depth = 0;
   let inString = false;
   let escape = false;
@@ -827,10 +973,41 @@ function extractJson(raw: string): unknown {
     if (c === openCh) depth += 1;
     else if (c === closeCh) {
       depth -= 1;
-      if (depth === 0) return JSON.parse(body.slice(start, i + 1));
+      if (depth === 0) {
+        candidate = body.slice(start, i + 1);
+        break;
+      }
     }
   }
-  throw new Error('unterminated JSON');
+  // The brace-counter walks through bare quotes inside string values
+  // (they flip `inString` incorrectly), so candidate may be partial.
+  // Try parsing it; on failure, fall through to repair tiers.
+  if (candidate) {
+    try { return JSON.parse(candidate); } catch { /* try repair tiers */ }
+  } else {
+    candidate = body.slice(start);
+  }
+
+  // Tier 4: jsonrepair library
+  try {
+    const repaired = jsonrepair(candidate);
+    return JSON.parse(repaired);
+  } catch { /* try tier 5 */ }
+
+  // Tier 5: bare-quote escape heuristic + jsonrepair again
+  try {
+    const escaped = escapeBareQuotesInStringValues(candidate);
+    return JSON.parse(escaped);
+  } catch { /* fall through */ }
+
+  // Tier 5b: combine — escape + jsonrepair
+  try {
+    const escaped = escapeBareQuotesInStringValues(candidate);
+    const repaired = jsonrepair(escaped);
+    return JSON.parse(repaired);
+  } catch { /* give up */ }
+
+  throw new Error('unterminated JSON (after sanitize + jsonrepair + bare-quote escape)');
 }
 
 // ─────────────────────────────────────────────────────────────────────
@@ -1068,12 +1245,18 @@ function buildUpdatePayload(
   validated: ClaudeEnrichmentResult,
   stats: Stats,
 ): Record<string, unknown> {
+  // Array-field rule (fn-14.4 hard-learned 2026-05-07):
+  //   - If the AI returned a non-empty array → send it (overwrites existing).
+  //   - If empty → OMIT the key entirely. The RPC's `payload ? 'k'` guard
+  //     keeps the column's existing value untouched.
+  // Why we can't send `[]` or `null`:
+  //   - `null` → Postgres `jsonb_array_elements_text(null)` raises
+  //     "cannot extract elements from a scalar" → whole batch flush fails.
+  //   - `[]` → `jsonb_array_elements_text([])` returns 0 rows →
+  //     `array_agg(value)` returns NULL → NOT NULL constraint violation
+  //     on price_flags / occasion_tags / etc.
+  // Both modes cascade-fail an entire 50-event batch, so we MUST skip.
   const update: Record<string, unknown> = {
-    audience: validated.audience.length > 0 ? scrubArray(validated.audience) : null,
-    vibe: validated.vibe.length > 0 ? scrubArray(validated.vibe) : null,
-    occasion_tags: validated.occasion.length > 0 ? scrubArray(validated.occasion) : [],
-    setting: validated.setting.length > 0 ? scrubArray(validated.setting) : null,
-    price_flags: validated.price_flags.length > 0 ? scrubArray(validated.price_flags) : [],
     language: validated.language,
     price_tier: validated.price_tier,
     duration_type: validated.duration_type,
@@ -1093,6 +1276,13 @@ function buildUpdatePayload(
     enrichment_failure_count: 0,
     enrichment_failed: false,
   };
+
+  // Sparse array-field merge: only include the key if non-empty.
+  if (validated.audience.length > 0) update.audience = scrubArray(validated.audience);
+  if (validated.vibe.length > 0) update.vibe = scrubArray(validated.vibe);
+  if (validated.occasion.length > 0) update.occasion_tags = scrubArray(validated.occasion);
+  if (validated.setting.length > 0) update.setting = scrubArray(validated.setting);
+  if (validated.price_flags.length > 0) update.price_flags = scrubArray(validated.price_flags);
 
   // Category-lock semantics: only protect `category`. Other axes
   // (audience, vibe, …) are ALWAYS updated. fn-14.3 Interview decision.
@@ -1429,7 +1619,24 @@ async function processBatch(
       try {
         await updater.add({ id: ev.id, ...update });
       } catch (err) {
-        const msg = err instanceof Error ? err.message : String(err);
+        // Supabase errors are plain objects with `message` / `details` /
+        // `code` / `hint` — String(err) yields useless "[object Object]".
+        // Extract structured fields explicitly.
+        let msg: string;
+        if (err instanceof Error) {
+          msg = err.message;
+        } else if (err && typeof err === 'object') {
+          const e = err as Record<string, unknown>;
+          const parts = [
+            e.message && `msg=${e.message}`,
+            e.code && `code=${e.code}`,
+            e.details && `details=${e.details}`,
+            e.hint && `hint=${e.hint}`,
+          ].filter(Boolean);
+          msg = parts.length > 0 ? parts.join(' | ') : JSON.stringify(err);
+        } else {
+          msg = String(err);
+        }
         if (/Could not find.+column/i.test(msg) || /schema cache/i.test(msg) || /does not exist/i.test(msg)) {
           throw new SchemaMismatchError(msg);
         }
@@ -1517,6 +1724,9 @@ async function fetchNextPage(
       q = q.gte('updated_at', cutoff);
     }
   }
+  if (opts.futureOnly) {
+    q = q.gte('start_date', new Date().toISOString());
+  }
   if (cursorId) q = q.gt('id', cursorId);
 
   const { data, error } = await q;
@@ -1563,7 +1773,15 @@ async function main() {
     process.exit(1);
   }
   const supabase = createClient(supaUrl, supaKey);
-  const enrichmentUpdater = makeBulkUpdater(supabase, 'bulk_update_event_enrichment');
+  // fn-14.4: aggressive flush (50 statt default 500) damit bei Strg+C
+  // max ~49 in-flight events verloren gehen, nicht ~499. Trade-off: mehr
+  // RPC-roundtrips, aber bei concurrency 8 immer noch nur ein flush
+  // pro ~16-17 batches. Resume-safe via enrichment_version filter.
+  const enrichmentUpdater = makeBulkUpdater(supabase, 'bulk_update_event_enrichment', {
+    flushSize: 50,
+  });
+  // Register for SIGINT flush so Strg+C persists in-flight rows.
+  activeBulkUpdater = enrichmentUpdater;
 
   if (opts.retryFailed) {
     console.log('  --retry-failed: clearing enrichment_failed=TRUE flags before run');
@@ -1603,6 +1821,9 @@ async function main() {
       pendingQuery = pendingQuery.gte('updated_at', cutoff);
     }
   }
+  if (opts.futureOnly) {
+    pendingQuery = pendingQuery.gte('start_date', new Date().toISOString());
+  }
   const { count: totalPending } = await pendingQuery;
 
   console.log('\nEvent Enrichment — Claude Code (batch v2)');
@@ -1616,6 +1837,8 @@ async function main() {
   console.log(`  Bare mode:        ${opts.bareMode ? 'YES (API-key auth)' : 'no (MAX-OAuth ok, no --bare)'}`);
   console.log(`  Dry-run:          ${opts.dryRun}`);
   console.log(`  Fetch URLs:       ${!opts.noFetch}`);
+  console.log(`  Future only:      ${opts.futureOnly}`);
+  console.log(`  Output format:    ${process.env.ENRICH_OUTPUT_FORMAT === 'json' ? 'json (envelope, may truncate)' : 'text (default, bypass CLI 2.1 truncation bug)'}`);
   console.log(`  Log file:         ${opts.logFile ?? '(none)'}`);
   console.log(`  Weekly token cap: ${opts.weeklyTokenCap.toLocaleString()}`);
   console.log(`  Alert email:      ${opts.alertEmail ?? '(none)'}`);
@@ -1859,9 +2082,18 @@ const isMain = (() => {
 if (isMain) {
   // Graceful shutdown — log resume hint, close shared browser, clean
   // up the temp system-prompt file.
-  process.on('SIGINT', () => {
-    console.log('\n\n⚠ SIGINT received. In-flight events may roll back to enrichment_version=NULL —');
-    console.log('  re-run the same command to pick up where you were (idempotent).');
+  process.on('SIGINT', async () => {
+    console.log('\n\n⚠ SIGINT received. Flushing in-flight enrichment rows…');
+    try {
+      if (activeBulkUpdater) {
+        const flushed = await activeBulkUpdater.flush();
+        console.log(`  ✓ flushed ${flushed} pending events to DB`);
+      }
+    } catch (err) {
+      console.error(`  ✗ flush failed: ${err instanceof Error ? err.message : err}`);
+      console.log('  Up to ~49 events may roll back to enrichment_version=NULL');
+    }
+    console.log('  Re-run the same command to pick up where you were (idempotent).');
     cleanupSystemPromptFile();
     closeSharedBrowser().finally(() => process.exit(130));
   });

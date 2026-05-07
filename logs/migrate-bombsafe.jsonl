@@ -1,0 +1,3 @@
+{"ts":"2026-05-07T20:34:57.117Z","status":"run_start","model":"sonnet","batch_size":3,"concurrency":8,"bare_mode":false,"pending":68399,"already_done":0}
+{"ts":"2026-05-07T20:35:55.392Z","event_id":"00041862-8a8a-415c-888c-29b5424ce40e","title":"Nach oben scrollen","status":"desc_policy_failed","policy":"fill","reason":"empty/very short","failure_count":1}
+{"ts":"2026-05-07T20:50:20.795Z","event_id":"00767380-6186-4fc3-9194-570c993e5daa","title":"Von wegen magisches Tier","status":"validation_failed","errors":["suggested_description: too long (1011 > 1000)"],"failure_count":1}
