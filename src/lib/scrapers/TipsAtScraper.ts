@@ -178,7 +178,7 @@ export class TipsAtScraper extends BaseScraper {
 
     const description = $('meta[name="description"]').attr('content')
       || $('[class*="description"], .content, article p').first().text().trim().slice(0, 500);
-    const imageUrl = this.extractImageUrl($, detailUrl);
+    const imageCandidate = this.extractImageCandidate($, detailUrl);
 
     const slug = title.toLowerCase().replace(/\W+/g, '-').slice(0, 60);
     events.push({
@@ -190,7 +190,9 @@ export class TipsAtScraper extends BaseScraper {
       start_date: startDate,
       bundesland: this.detectBundesland(detailUrl, ''),
       category: categorizeEvent(title),
-      image_url: imageUrl,
+      image_url: imageCandidate?.url,
+      image_width: imageCandidate?.width,
+      image_height: imageCandidate?.height,
       tags: ['Veranstaltung'],
     });
 

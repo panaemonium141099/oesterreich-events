@@ -407,7 +407,27 @@ export class GemeindeRegistryScraper extends BaseScraper {
 
           const endDate = item.endDate ? this.parseIsoDate(item.endDate) ?? undefined : undefined;
           const description = this.stripHtml(item.description || '');
-          const imageUrl = typeof item.image === 'string' ? item.image : item.image?.url;
+          // JSON-LD image can be a string, an object {url, width, height},
+          // or an array of either. Extract URL + dims when present.
+          let imageUrl: string | undefined;
+          let imageWidth: number | undefined;
+          let imageHeight: number | undefined;
+          const rawImage = item.image;
+          if (typeof rawImage === 'string') {
+            imageUrl = rawImage;
+          } else if (Array.isArray(rawImage) && rawImage.length > 0) {
+            const first = rawImage[0];
+            if (typeof first === 'string') imageUrl = first;
+            else if (first) {
+              imageUrl = first.url || first.contentUrl;
+              if (typeof first.width === 'number') imageWidth = first.width;
+              if (typeof first.height === 'number') imageHeight = first.height;
+            }
+          } else if (rawImage && typeof rawImage === 'object') {
+            imageUrl = rawImage.url || rawImage.contentUrl;
+            if (typeof rawImage.width === 'number') imageWidth = rawImage.width;
+            if (typeof rawImage.height === 'number') imageHeight = rawImage.height;
+          }
 
           events.push({
             source_id: `registry-jsonld-${Buffer.from(item.name + startDate).toString('base64').substring(0, 24)}`,
@@ -425,6 +445,8 @@ export class GemeindeRegistryScraper extends BaseScraper {
             longitude: entry.lng,
             category: categorizeEvent(item.name, description),
             image_url: imageUrl,
+            image_width: imageWidth,
+            image_height: imageHeight,
             organizer: item.organizer?.name,
           });
         }
@@ -484,8 +506,7 @@ export class GemeindeRegistryScraper extends BaseScraper {
         if (seen.has(dedupeKey)) return;
         seen.add(dedupeKey);
 
-        let imageUrl = $el.find('img').first().attr('src') || $el.find('img').first().attr('data-src');
-        if (imageUrl && !imageUrl.startsWith('http')) imageUrl = new URL(imageUrl, entry.eventUrl!).href;
+        const imageInfo = this.imageFromElement($el.find('img').first(), entry.eventUrl!);
 
         const locationText = $el.find('.mec-event-loc-place, .mec-event-location').text().trim();
 
@@ -502,7 +523,9 @@ export class GemeindeRegistryScraper extends BaseScraper {
           latitude: entry.lat,
           longitude: entry.lng,
           category: categorizeEvent(title, ''),
-          image_url: this.cleanImageUrl(imageUrl),
+          image_url: imageInfo?.url,
+          image_width: imageInfo?.image_width,
+          image_height: imageInfo?.image_height,
         });
       } catch { /* skip */ }
     });
@@ -566,8 +589,10 @@ export class GemeindeRegistryScraper extends BaseScraper {
         if (seen.has(dedupeKey)) return;
         seen.add(dedupeKey);
 
-        let imageUrl = $el.find('.tribe-events-event-image img').attr('src');
-        if (imageUrl && !imageUrl.startsWith('http')) imageUrl = new URL(imageUrl, entry.eventUrl!).href;
+        const imageInfo = this.imageFromElement(
+          $el.find('.tribe-events-event-image img').first(),
+          entry.eventUrl!,
+        );
 
         events.push({
           source_id: `registry-tribe-${Buffer.from(title + startDate).toString('base64').substring(0, 24)}`,
@@ -582,7 +607,9 @@ export class GemeindeRegistryScraper extends BaseScraper {
           latitude: entry.lat,
           longitude: entry.lng,
           category: categorizeEvent(title, ''),
-          image_url: this.cleanImageUrl(imageUrl),
+          image_url: imageInfo?.url,
+          image_width: imageInfo?.image_width,
+          image_height: imageInfo?.image_height,
         });
       } catch { /* skip */ }
     });
@@ -619,8 +646,10 @@ export class GemeindeRegistryScraper extends BaseScraper {
         const link = $el.find('a.bemLink-detail, a.bemLink').first().attr('href');
         const sourceUrl = link ? (link.startsWith('http') ? link : new URL(link, entry.eventUrl!).href) : entry.eventUrl!;
 
-        let imageUrl = $el.find('.bemContainer--image img, picture img').first().attr('src');
-        if (imageUrl && !imageUrl.startsWith('http')) imageUrl = new URL(imageUrl, entry.eventUrl!).href;
+        const imageInfo = this.imageFromElement(
+          $el.find('.bemContainer--image img, picture img').first(),
+          entry.eventUrl!,
+        );
 
         const addressLi = $el.find('.fa-map-marker-alt').closest('li').text().replace(/Adresse/i, '').trim();
         const category = $el.find('.bemHeaderContainer small.text-muted').text().trim();
@@ -639,7 +668,9 @@ export class GemeindeRegistryScraper extends BaseScraper {
           latitude: entry.lat,
           longitude: entry.lng,
           category: category ? categorizeEvent(category, '') : categorizeEvent(title, ''),
-          image_url: this.cleanImageUrl(imageUrl),
+          image_url: imageInfo?.url,
+          image_width: imageInfo?.image_width,
+          image_height: imageInfo?.image_height,
         });
       } catch { /* skip */ }
     });
@@ -662,8 +693,7 @@ export class GemeindeRegistryScraper extends BaseScraper {
         const link = $el.find('a[href*="veranstaltung"]').attr('href');
         const sourceUrl = link ? (link.startsWith('http') ? link : new URL(link, entry.eventUrl!).href) : entry.eventUrl!;
 
-        let imageUrl = $el.find('img').first().attr('src');
-        if (imageUrl && !imageUrl.startsWith('http')) imageUrl = new URL(imageUrl, entry.eventUrl!).href;
+        const imageInfo = this.imageFromElement($el.find('img').first(), entry.eventUrl!);
 
         // Extract location from address li
         const addressLi = $el.find('li:contains("Adresse")').text().replace('Adresse', '').trim();
@@ -682,7 +712,9 @@ export class GemeindeRegistryScraper extends BaseScraper {
           latitude: entry.lat,
           longitude: entry.lng,
           category: categorizeEvent(title, ''),
-          image_url: this.cleanImageUrl(imageUrl),
+          image_url: imageInfo?.url,
+          image_width: imageInfo?.image_width,
+          image_height: imageInfo?.image_height,
         });
       } catch { /* skip */ }
     });
@@ -705,8 +737,10 @@ export class GemeindeRegistryScraper extends BaseScraper {
         const link = $el.find('a').attr('href');
         const sourceUrl = link && link.startsWith('http') ? link : link ? new URL(link, entry.eventUrl!).href : entry.eventUrl!;
 
-        let imageUrl = $el.find('.va_picture img, img').first().attr('src');
-        if (imageUrl && !imageUrl.startsWith('http')) imageUrl = new URL(imageUrl, entry.eventUrl!).href;
+        const imageInfo = this.imageFromElement(
+          $el.find('.va_picture img, img').first(),
+          entry.eventUrl!,
+        );
 
         events.push({
           source_id: `registry-gem2go-${Buffer.from(titleCell + startDate).toString('base64').substring(0, 24)}`,
@@ -721,7 +755,9 @@ export class GemeindeRegistryScraper extends BaseScraper {
           latitude: entry.lat,
           longitude: entry.lng,
           category: categorizeEvent(titleCell, ''),
-          image_url: this.cleanImageUrl(imageUrl),
+          image_url: imageInfo?.url,
+          image_width: imageInfo?.image_width,
+          image_height: imageInfo?.image_height,
         });
       } catch { /* skip */ }
     });
@@ -753,8 +789,10 @@ export class GemeindeRegistryScraper extends BaseScraper {
           const link = $li.find('a').first().attr('href');
           const sourceUrl = link ? (link.startsWith('http') ? link : new URL(link, entry.eventUrl!).href) : entry.eventUrl!;
 
-          let imageUrl = $li.find('img[src*="GetImage"], img[src*="GetRemoteImage"], img').first().attr('src');
-          if (imageUrl && !imageUrl.startsWith('http')) imageUrl = new URL(imageUrl, entry.eventUrl!).href;
+          const imageInfo = this.imageFromElement(
+            $li.find('img[src*="GetImage"], img[src*="GetRemoteImage"], img').first(),
+            entry.eventUrl!,
+          );
 
           const categorySpan = spans.length >= 3 ? $(spans[2]).text().trim() : '';
 
@@ -771,7 +809,9 @@ export class GemeindeRegistryScraper extends BaseScraper {
             latitude: entry.lat,
             longitude: entry.lng,
             category: categorySpan ? categorizeEvent(categorySpan, '') : categorizeEvent(title, ''),
-            image_url: this.cleanImageUrl(imageUrl),
+            image_url: imageInfo?.url,
+            image_width: imageInfo?.image_width,
+            image_height: imageInfo?.image_height,
           });
         } catch { /* skip */ }
       });
@@ -793,8 +833,7 @@ export class GemeindeRegistryScraper extends BaseScraper {
           if (seen.has(dedupeKey)) return;
           seen.add(dedupeKey);
 
-          let imageUrl = $el.find('img').first().attr('src');
-          if (imageUrl && !imageUrl.startsWith('http')) imageUrl = new URL(imageUrl, entry.eventUrl!).href;
+          const imageInfo = this.imageFromElement($el.find('img').first(), entry.eventUrl!);
 
           events.push({
             source_id: `registry-gem2go-${Buffer.from(title + startDate).toString('base64').substring(0, 24)}`,
@@ -809,7 +848,9 @@ export class GemeindeRegistryScraper extends BaseScraper {
             latitude: entry.lat,
             longitude: entry.lng,
             category: categorizeEvent(title, ''),
-            image_url: this.cleanImageUrl(imageUrl),
+            image_url: imageInfo?.url,
+            image_width: imageInfo?.image_width,
+            image_height: imageInfo?.image_height,
           });
         } catch { /* skip */ }
       });
@@ -848,8 +889,7 @@ export class GemeindeRegistryScraper extends BaseScraper {
         const link = $el.find('a').first().attr('href');
         const sourceUrl = link && link.startsWith('http') ? link : link ? new URL(link, entry.eventUrl!).href : entry.eventUrl!;
 
-        let imageUrl = $el.find('img').first().attr('src') || $el.find('img').first().attr('data-src');
-        if (imageUrl && !imageUrl.startsWith('http')) imageUrl = new URL(imageUrl, entry.eventUrl!).href;
+        const imageInfo = this.imageFromElement($el.find('img').first(), entry.eventUrl!);
 
         events.push({
           source_id: `registry-g24-${Buffer.from(title + startDate).toString('base64').substring(0, 24)}`,
@@ -864,7 +904,9 @@ export class GemeindeRegistryScraper extends BaseScraper {
           latitude: entry.lat,
           longitude: entry.lng,
           category: categorizeEvent(title, ''),
-          image_url: this.cleanImageUrl(imageUrl),
+          image_url: imageInfo?.url,
+          image_width: imageInfo?.image_width,
+          image_height: imageInfo?.image_height,
         });
       } catch { /* skip */ }
     });
@@ -916,8 +958,7 @@ export class GemeindeRegistryScraper extends BaseScraper {
         const link = $el.is('a') ? $el.attr('href') : $el.find('a').first().attr('href');
         const sourceUrl = link && link.startsWith('http') ? link : link ? new URL(link, entry.eventUrl!).href : entry.eventUrl!;
 
-        let imageUrl = $el.find('img').first().attr('src') || $el.find('img').first().attr('data-src');
-        if (imageUrl && !imageUrl.startsWith('http')) imageUrl = new URL(imageUrl, entry.eventUrl!).href;
+        const imageInfo = this.imageFromElement($el.find('img').first(), entry.eventUrl!);
 
         events.push({
           source_id: `registry-gen-${Buffer.from(title + startDate).toString('base64').substring(0, 24)}`,
@@ -932,7 +973,9 @@ export class GemeindeRegistryScraper extends BaseScraper {
           latitude: entry.lat,
           longitude: entry.lng,
           category: categorizeEvent(title, ''),
-          image_url: this.cleanImageUrl(imageUrl),
+          image_url: imageInfo?.url,
+          image_width: imageInfo?.image_width,
+          image_height: imageInfo?.image_height,
         });
       } catch { /* skip */ }
     });

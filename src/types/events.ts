@@ -21,6 +21,8 @@ export interface Event {
   price_min: number | null;
   price_max: number | null;
   image_url: string | null;
+  image_width?: number | null;
+  image_height?: number | null;
   organizer: string | null;
   tags: string[] | null;
   ticket_url?: string | null;
@@ -129,6 +131,15 @@ export interface ScrapedEvent {
   price_min?: number;
   price_max?: number;
   image_url?: string;
+  /**
+   * Image dimensions, when known. Populated by scrapers that pull HTML
+   * width/height attrs (via `extractImageCandidate()`) or by the sync
+   * helper that extracts them from CDN URL patterns. Optional — many
+   * scrapers and most og:image-only sources won't have them.
+   * Additive; never required.
+   */
+  image_width?: number;
+  image_height?: number;
   organizer?: string;
   tags?: string[];
   ticket_url?: string;

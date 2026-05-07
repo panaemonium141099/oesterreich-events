@@ -37,6 +37,11 @@ import { bundeslandToId } from '@/lib/bundeslaender';
 import { generateFingerprint } from '@/lib/dedup/fingerprint';
 import { generateEventSlug } from '@/lib/utils/slugify';
 import { scoreEvent } from '@/lib/quality/score-event';
+import { extractDimsFromUrl } from '@/lib/event-images/extract-dims-from-url';
+import {
+  validateAndUpgradeImageUrl,
+  type ValidatedImage,
+} from '@/lib/event-images/validate-upgrade';
 
 /**
  * Confidence precedence order (highest first).
@@ -123,6 +128,17 @@ interface ExistingRow {
    *  (e.g. 'duplicate' set by dedup, or any future manual admin status)
    *  on re-upsert. See COMPUTED_PUBLISH_STATUSES below. */
   publish_status: string | null;
+  // ─── UPSERT-Guard fields (fn-14.5) ─────────────────────────────────
+  // These are read so toSupabaseRow() can decide whether to upgrade or
+  // preserve the existing value. Fields that lose the guard are OMITTED
+  // from the upsert payload (rather than re-written with an identical
+  // value) so Postgres treats them as untouched.
+  image_url: string | null;
+  image_width: number | null;
+  image_height: number | null;
+  description: string | null;
+  enrichment_version: string | null;
+  price_text: string | null;
 }
 
 /** Statuses that the scoring pipeline owns. Everything else (e.g.
@@ -170,7 +186,9 @@ async function prefetchExistingRows(
         'source_name, source_id, latitude, longitude, geocoding_confidence, geocoding_source, ' +
           'category, tags, category_confidence, category_source, category_version, ' +
           'category_locked, category_needs_review, category_reason, category_candidates, slug, ' +
-          'publish_status',
+          'publish_status, ' +
+          // fn-14.5 UPSERT-Guard fields:
+          'image_url, image_width, image_height, description, enrichment_version, price_text',
       )
       .in('source_name', uniqueSourceNames)
       .in('source_id', idSlice);
@@ -302,6 +320,82 @@ function shouldOverwriteCoords(
   return true;
 }
 
+// ─── fn-14.5 UPSERT-Guards ───────────────────────────────────────────
+// Decide whether incoming scrape values should overwrite the existing
+// row. When the guard says "keep old", the field is OMITTED from the
+// upsert payload (not re-written with an identical value), so Postgres
+// treats the column as untouched and `last_seen_at` is the only ping
+// that signals the row is still alive.
+
+/**
+ * Image upgrade rule:
+ *   - existing has no URL              → write new
+ *   - same URL                         → no-op
+ *   - existing width unknown           → write new (we now know dims)
+ *   - new width >= existing width      → write new
+ *   - otherwise                        → keep existing
+ */
+function shouldUpgradeImage(
+  newUrl: string | null,
+  newWidth: number | null,
+  oldUrl: string | null,
+  oldWidth: number | null,
+): boolean {
+  if (!newUrl) return false;
+  if (!oldUrl) return true;
+  if (newUrl === oldUrl) {
+    // Same URL — only worth re-writing when we now have dims and
+    // existing didn't (the dims piggy-back on the URL field).
+    return oldWidth == null && newWidth != null;
+  }
+  if (oldWidth == null) return true;
+  if (newWidth != null && newWidth >= oldWidth) return true;
+  return false;
+}
+
+/**
+ * Description upgrade rule:
+ *   - existing empty                                          → write new
+ *   - new is meaningfully longer (>20%)                       → write new
+ *   - existing not 'claude-v1' AND new comes from claude-v1   → write new (upgrade path)
+ *   - otherwise                                               → keep existing
+ *
+ * `newVersion` is the enrichment_version we're about to attach. For raw
+ * scraper writes we pass null/undefined — the function falls through to
+ * the length comparison only.
+ */
+function shouldOverwriteDescription(
+  newDesc: string | null,
+  oldDesc: string | null,
+  newVersion: string | null | undefined,
+  oldVersion: string | null,
+): boolean {
+  if (!newDesc) return false;
+  if (!oldDesc || !oldDesc.trim()) return true;
+  if (newDesc.length > oldDesc.length * 1.2) return true;
+  if (
+    newVersion === 'claude-v1' &&
+    oldVersion !== 'claude-v1'
+  ) {
+    return true;
+  }
+  return false;
+}
+
+/**
+ * Price-text upgrade rule: only fill when existing is empty. Once a
+ * price is on the row we never clobber it from raw scrape data; the
+ * enrichment script owns price refinements via its own bulk RPC.
+ */
+function shouldOverwritePrice(
+  newPrice: string | null,
+  oldPrice: string | null,
+): boolean {
+  if (!newPrice) return false;
+  if (!oldPrice || !oldPrice.trim()) return true;
+  return false;
+}
+
 /**
  * Build the category-reconciliation input shape from an existing row.
  * Returns null when there is no pre-existing event (fresh insert path).
@@ -324,7 +418,8 @@ function toExistingCategoryRow(row: ExistingRow | undefined): ExistingCategoryRo
 /** Maps a ScrapedEvent to the Supabase events row shape. */
 function toSupabaseRow(
   event: ScrapedEvent,
-  existingMap: Map<string, ExistingRow>
+  existingMap: Map<string, ExistingRow>,
+  imageMap: Map<string, ValidatedImage>,
 ) {
   const resolved = resolveCoordinates(event);
 
@@ -359,6 +454,45 @@ function toSupabaseRow(
     toExistingCategoryRow(existing),
   );
 
+  // ─── fn-14.5 Image guard ─────────────────────────────────────────
+  // imageMap has the validated/upgraded URL + extracted dims (when
+  // possible). Compute against (a) the validated URL and (b) any HTML
+  // dims the scraper attached, falling back to URL-pattern dims.
+  const validated = imageMap.get(key);
+  const scraperImageWidth =
+    typeof event.image_width === 'number' && event.image_width > 0 ? event.image_width : null;
+  const scraperImageHeight =
+    typeof event.image_height === 'number' && event.image_height > 0 ? event.image_height : null;
+  const newImageUrl = validated?.url || event.image_url || null;
+  const newImageWidth =
+    (validated?.width && validated.width > 0 ? validated.width : null) ?? scraperImageWidth;
+  const newImageHeight =
+    (validated?.height && validated.height > 0 ? validated.height : null) ?? scraperImageHeight;
+  const upgradeImage = shouldUpgradeImage(
+    newImageUrl,
+    newImageWidth,
+    existing?.image_url ?? null,
+    existing?.image_width ?? null,
+  );
+
+  // ─── fn-14.5 Description guard ───────────────────────────────────
+  // For raw scraper writes the new enrichment_version is unknown
+  // (null) — we never set it from this function. Pass null so the
+  // length comparison runs but the version-upgrade branch is skipped.
+  const newDescription = event.description ?? null;
+  const overwriteDescription = shouldOverwriteDescription(
+    newDescription,
+    existing?.description ?? null,
+    null,
+    existing?.enrichment_version ?? null,
+  );
+
+  // ─── fn-14.5 Price-text guard ────────────────────────────────────
+  const overwritePrice = shouldOverwritePrice(
+    event.price_text ?? null,
+    existing?.price_text ?? null,
+  );
+
   // ─── Quality scoring at ingest ───────────────────────────────────
   // Compute against the FINAL resolved values (post-geocoding,
   // post-canonical-category) so the score reflects what we'll actually
@@ -368,9 +502,16 @@ function toSupabaseRow(
   // publish_status: only overwrite when the existing value is one of
   // the computed statuses (or absent). Preserves dedup's 'duplicate'
   // marking and any future admin overrides.
+  //
+  // Use the post-guard image_url so the score reflects the row that
+  // will actually be persisted (existing wins → score against it).
+  const effectiveImageForScore = upgradeImage ? newImageUrl : (existing?.image_url ?? newImageUrl);
+  const effectiveDescriptionForScore = overwriteDescription
+    ? newDescription
+    : (existing?.description ?? newDescription);
   const score = scoreEvent({
     title: event.title,
-    description: event.description ?? null,
+    description: effectiveDescriptionForScore ?? null,
     start_date: event.start_date,
     end_date: event.end_date ?? null,
     location_name: resolved.locationName,
@@ -380,7 +521,7 @@ function toSupabaseRow(
     category: canonical.category,
     latitude: finalLat,
     longitude: finalLng,
-    image_url: event.image_url ?? null,
+    image_url: effectiveImageForScore ?? null,
     source_url: event.source_url,
     ticket_url: event.ticket_url ?? null,
   });
@@ -390,13 +531,18 @@ function toSupabaseRow(
       ? existing.publish_status
       : score.publish_status;
 
+  // Build the upsert payload. Guarded fields (image_url, image_width,
+  // image_height, description, price_text) are spread in conditionally
+  // — when the guard says "keep old", the field is OMITTED so Supabase
+  // leaves the existing value untouched. last_seen_at is ALWAYS set.
   return {
     source_type: 'scraped' as const,
     source_name: event.source_name,
     source_id: event.source_id,
     source_url: event.source_url,
     title: event.title,
-    description: event.description ?? null,
+    // Description: guard-protected (see shouldOverwriteDescription).
+    ...(overwriteDescription ? { description: newDescription } : {}),
     start_date: event.start_date,
     end_date: event.end_date ?? null,
     location_name: resolved.locationName,
@@ -437,10 +583,21 @@ function toSupabaseRow(
     category_needs_review: canonical.category_needs_review,
     category_reason: canonical.category_reason,
     category_candidates: canonical.category_candidates,
-    price_text: event.price_text ?? null,
+    // Price-text: guard-protected (only fill when existing empty).
+    ...(overwritePrice ? { price_text: event.price_text ?? null } : {}),
     price_min: event.price_min ?? null,
     price_max: event.price_max ?? null,
-    image_url: event.image_url ?? null,
+    // Image fields: guard-protected. When upgrade allowed, write the
+    // validated URL + dims (dims are nulled out only when we have no
+    // hint at all, so a successful upgrade can still clear stale dims
+    // intentionally — but only as part of the same write).
+    ...(upgradeImage
+      ? {
+          image_url: newImageUrl,
+          image_width: newImageWidth,
+          image_height: newImageHeight,
+        }
+      : {}),
     organizer: event.organizer ?? null,
     ticket_url: event.ticket_url ?? null,
     visibility: 'public' as const,
@@ -468,6 +625,9 @@ function toSupabaseRow(
     slug: existing?.slug ?? generateEventSlug(event.title, resolved.locationName ?? event.location_name),
     // venue_id from registry-based scraper (null for regular scrapers)
     ...(event.venue_id ? { venue_id: event.venue_id } : {}),
+    // fn-14.5: ALWAYS bump last_seen_at — anchor for the soft-delete
+    // job in fn-14.6. INSERT or UPDATE, doesn't matter.
+    last_seen_at: new Date().toISOString(),
   };
 }
 
@@ -565,14 +725,20 @@ export async function syncEventsToSupabase(
   for (let i = 0; i < dedupedEvents.length; i += BATCH_SIZE) {
     const batchEvents = dedupedEvents.slice(i, i + BATCH_SIZE);
 
-    // Batch-prefetch existing rows for confidence comparison
+    // Batch-prefetch existing rows for confidence comparison + UPSERT-Guards
     const keys = batchEvents.map(e => ({
       source_name: e.source_name,
       source_id: e.source_id,
     }));
     const existingMap = await prefetchExistingRows(supabase, keys);
 
-    const batch = batchEvents.map(e => toSupabaseRow(e, existingMap));
+    // fn-14.5: validate + (when applicable) upgrade image URLs in
+    // parallel with bounded concurrency. Pure no-op for events without
+    // image_url. The map is keyed by `source_name::source_id` so
+    // toSupabaseRow can look up the validated URL + extracted dims.
+    const imageMap = await validateImagesForBatch(batchEvents);
+
+    const batch = batchEvents.map(e => toSupabaseRow(e, existingMap, imageMap));
     const { error, count } = await supabase
       .from('events')
       .upsert(batch, {
@@ -589,4 +755,56 @@ export async function syncEventsToSupabase(
   }
 
   return { upserted, errors, filtered };
+}
+
+// ─── fn-14.5 image validate-and-upgrade pool ─────────────────────────
+// Runs `validateAndUpgradeImageUrl()` per event with bounded
+// concurrency (default 5). Events without an image_url short-circuit
+// and never enter the pool. The result map is keyed by
+// `source_name::source_id` to match toSupabaseRow's lookup.
+
+const IMAGE_VALIDATE_CONCURRENCY = 5;
+
+async function validateImagesForBatch(
+  events: ScrapedEvent[],
+): Promise<Map<string, ValidatedImage>> {
+  const result = new Map<string, ValidatedImage>();
+
+  const tasks: Array<{ key: string; event: ScrapedEvent }> = events
+    .filter(e => !!e.image_url)
+    .map(e => ({ key: `${e.source_name}::${e.source_id}`, event: e }));
+
+  if (tasks.length === 0) return result;
+
+  let cursor = 0;
+  async function worker() {
+    while (cursor < tasks.length) {
+      const idx = cursor++;
+      const { key, event } = tasks[idx];
+      try {
+        const validated = await validateAndUpgradeImageUrl(
+          event.image_url!,
+          event.image_width ?? null,
+          event.image_height ?? null,
+        );
+        result.set(key, validated);
+      } catch {
+        // Never let a single bad URL halt the batch — fall back to
+        // pattern-extracted dims off the original URL.
+        const dims = extractDimsFromUrl(event.image_url || null);
+        result.set(key, {
+          url: event.image_url || '',
+          width: dims.width ?? event.image_width ?? undefined,
+          height: dims.height ?? event.image_height ?? undefined,
+        });
+      }
+    }
+  }
+
+  const workers = Array.from(
+    { length: Math.min(IMAGE_VALIDATE_CONCURRENCY, tasks.length) },
+    () => worker(),
+  );
+  await Promise.all(workers);
+  return result;
 }

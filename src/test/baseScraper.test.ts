@@ -26,6 +26,13 @@ class TestableBaseScraper extends BaseScraper {
     return this.extractImageUrl($, baseUrl);
   }
 
+  public testExtractImageCandidate(
+    $: ReturnType<typeof cheerio.load>,
+    baseUrl: string,
+  ): { url: string; width?: number; height?: number; score: number } | undefined {
+    return this.extractImageCandidate($, baseUrl);
+  }
+
   public testResolveImageUrl(src: string, baseUrl: string): string {
     return this.resolveImageUrl(src, baseUrl);
   }
@@ -169,7 +176,11 @@ describe('BaseScraper', () => {
       expect(scraper.testExtractImageUrl($, 'https://example.com')).toBe('https://example.com/event-photo.jpg');
     });
 
-    it('prefers og:image over img tags', () => {
+    it('prefers a large content <img> in an article over og:image (best-of-source scoring)', () => {
+      // fn-14.5: extractImageUrl is no longer og-first. og:image scores 4
+      // (sharing-oriented), while a >=800w content image inside <article>
+      // scores 5 + 4 (content-area) = 9, so it wins. The Detail-Hero gets
+      // a real photograph instead of the typically-cropped 1200x630 og.
       const html = `
         <html>
           <head><meta property="og:image" content="https://example.com/og-photo.jpg"></head>
@@ -177,6 +188,19 @@ describe('BaseScraper', () => {
             <article>
               <img src="https://example.com/body-photo.jpg" width="800" height="600">
             </article>
+          </body>
+        </html>
+      `;
+      const $ = cheerio.load(html);
+      expect(scraper.testExtractImageUrl($, 'https://example.com')).toBe('https://example.com/body-photo.jpg');
+    });
+
+    it('falls back to og:image when no large content <img> exists', () => {
+      const html = `
+        <html>
+          <head><meta property="og:image" content="https://example.com/og-photo.jpg"></head>
+          <body>
+            <p>Some text, no image candidates.</p>
           </body>
         </html>
       `;
@@ -240,6 +264,107 @@ describe('BaseScraper', () => {
     // We test the timeout and error handling paths
     it('returns false for unreachable URLs', async () => {
       expect(await scraper.testValidateImageUrl('https://thisdomaindoesnotexist12345.com/img.jpg', 1000)).toBe(false);
+    });
+  });
+
+  describe('extractImageCandidate (fn-14.5)', () => {
+    it('returns width/height from og:image:width / og:image:height meta', () => {
+      const html = `
+        <html><head>
+          <meta property="og:image" content="https://example.com/og.jpg">
+          <meta property="og:image:width" content="1200">
+          <meta property="og:image:height" content="630">
+        </head><body><p>x</p></body></html>
+      `;
+      const $ = cheerio.load(html);
+      const candidate = scraper.testExtractImageCandidate($, 'https://example.com');
+      expect(candidate?.url).toBe('https://example.com/og.jpg');
+      expect(candidate?.width).toBe(1200);
+      expect(candidate?.height).toBe(630);
+    });
+
+    it('extracts width/height from <img> tags', () => {
+      const html = `
+        <html><body>
+          <article>
+            <img src="https://example.com/photo.jpg" width="1024" height="768" alt="Concert">
+          </article>
+        </body></html>
+      `;
+      const $ = cheerio.load(html);
+      const candidate = scraper.testExtractImageCandidate($, 'https://example.com');
+      expect(candidate?.url).toBe('https://example.com/photo.jpg');
+      expect(candidate?.width).toBe(1024);
+      expect(candidate?.height).toBe(768);
+    });
+
+    it('parses srcset with width descriptors and picks the largest', () => {
+      const html = `
+        <html><body>
+          <article>
+            <img srcset="small.jpg 400w, medium.jpg 800w, large.jpg 1600w" alt="event">
+          </article>
+        </body></html>
+      `;
+      const $ = cheerio.load(html);
+      const candidate = scraper.testExtractImageCandidate($, 'https://example.com');
+      expect(candidate?.url).toBe('https://example.com/large.jpg');
+      expect(candidate?.width).toBe(1600);
+    });
+
+    it('parses srcset with density descriptors when no widths are present', () => {
+      const html = `
+        <html><body>
+          <article>
+            <img src="base.jpg" srcset="base.jpg 1x, retina.jpg 2x, hires.jpg 3x" alt="event">
+          </article>
+        </body></html>
+      `;
+      const $ = cheerio.load(html);
+      const candidate = scraper.testExtractImageCandidate($, 'https://example.com');
+      expect(candidate?.url).toBe('https://example.com/hires.jpg');
+      expect(candidate?.width).toBeUndefined();
+    });
+
+    it('prefers w over x when srcset mixes them', () => {
+      const html = `
+        <html><body>
+          <article>
+            <img srcset="dpr.jpg 2x, real.jpg 1200w" alt="event">
+          </article>
+        </body></html>
+      `;
+      const $ = cheerio.load(html);
+      const candidate = scraper.testExtractImageCandidate($, 'https://example.com');
+      expect(candidate?.url).toBe('https://example.com/real.jpg');
+      expect(candidate?.width).toBe(1200);
+    });
+
+    it('skips tiny images (icons / spacers)', () => {
+      const html = `
+        <html><body>
+          <img src="https://example.com/icon.png" width="20" height="20">
+        </body></html>
+      `;
+      const $ = cheerio.load(html);
+      const candidate = scraper.testExtractImageCandidate($, 'https://example.com');
+      expect(candidate).toBeUndefined();
+    });
+
+    it('penalises images in headers/footers', () => {
+      const html = `
+        <html><body>
+          <header>
+            <img src="https://example.com/logo.jpg" width="800" height="200" alt="site logo">
+          </header>
+          <article>
+            <img src="https://example.com/event.jpg" width="800" height="600" alt="event">
+          </article>
+        </body></html>
+      `;
+      const $ = cheerio.load(html);
+      const candidate = scraper.testExtractImageCandidate($, 'https://example.com');
+      expect(candidate?.url).toBe('https://example.com/event.jpg');
     });
   });
 });

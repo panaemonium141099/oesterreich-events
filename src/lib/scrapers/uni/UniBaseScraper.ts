@@ -36,6 +36,9 @@ export abstract class UniBaseScraper extends BaseScraper {
     locationName?: string;
     sourceUrl: string;
     imageUrl?: string;
+    /** Optional image dims, when extractable from JSON-LD or HTML attrs. */
+    imageWidth?: number;
+    imageHeight?: number;
     lat?: number;
     lng?: number;
   }): ScrapedEvent {
@@ -61,6 +64,8 @@ export abstract class UniBaseScraper extends BaseScraper {
       category: tags[0],
       tags,
       image_url: opts.imageUrl,
+      image_width: opts.imageWidth,
+      image_height: opts.imageHeight,
       organizer: this.shortName,
     };
   }
@@ -94,11 +99,28 @@ export abstract class UniBaseScraper extends BaseScraper {
           const location = item.location as Record<string, unknown> | undefined;
           const geo = location?.geo as Record<string, unknown> | undefined;
 
+          // JSON-LD image: string | { url, width?, height? } | array
           let imageUrl: string | undefined;
+          let imageWidth: number | undefined;
+          let imageHeight: number | undefined;
           if (item.image) {
-            imageUrl = typeof item.image === 'string'
-              ? item.image
-              : (item.image as Record<string, unknown>).url as string || undefined;
+            const raw = item.image as unknown;
+            if (typeof raw === 'string') {
+              imageUrl = raw;
+            } else if (Array.isArray(raw) && raw.length > 0) {
+              const first = raw[0] as Record<string, unknown> | string;
+              if (typeof first === 'string') imageUrl = first;
+              else if (first) {
+                imageUrl = (first.url || first.contentUrl) as string | undefined;
+                if (typeof first.width === 'number') imageWidth = first.width;
+                if (typeof first.height === 'number') imageHeight = first.height;
+              }
+            } else if (raw && typeof raw === 'object') {
+              const obj = raw as Record<string, unknown>;
+              imageUrl = (obj.url || obj.contentUrl) as string | undefined;
+              if (typeof obj.width === 'number') imageWidth = obj.width;
+              if (typeof obj.height === 'number') imageHeight = obj.height;
+            }
           }
           if (imageUrl) {
             imageUrl = this.resolveImageUrl(imageUrl, this.baseUrl);
@@ -114,6 +136,8 @@ export abstract class UniBaseScraper extends BaseScraper {
             locationName: location?.name ? String(location.name) : undefined,
             sourceUrl: item.url ? String(item.url) : pageUrl,
             imageUrl,
+            imageWidth,
+            imageHeight,
             lat: geo?.latitude ? Number(geo.latitude) : undefined,
             lng: geo?.longitude ? Number(geo.longitude) : undefined,
           }));

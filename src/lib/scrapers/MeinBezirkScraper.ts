@@ -370,13 +370,8 @@ export class MeinBezirkScraper extends BaseScraper {
           }
         }
 
-        // Extract image URL (data-src or src, skip placeholders)
-        let imageUrl: string | undefined;
-        const $img = $container.find('img').first();
-        const imgSrc = $img.attr('data-src') || $img.attr('data-original') || $img.attr('src') || '';
-        if (imgSrc && !imgSrc.startsWith('data:')) {
-          imageUrl = imgSrc.startsWith('http') ? imgSrc : `${this.BASE}${imgSrc}`;
-        }
+        // Extract image (carries width/height from HTML attrs into the upsert)
+        const imageInfo = this.imageFromElement($container.find('img').first(), this.BASE);
 
         // Extract venue from list items
         let locationName: string | undefined;
@@ -401,7 +396,9 @@ export class MeinBezirkScraper extends BaseScraper {
           district,
           bundesland,
           category,
-          image_url: imageUrl,
+          image_url: imageInfo?.url,
+          image_width: imageInfo?.image_width,
+          image_height: imageInfo?.image_height,
         });
       } catch { /* skip individual event errors */ }
     });

@@ -261,13 +261,11 @@ export class Gem2GoScraper extends BaseScraper {
           ? locationRaw.replace(/^Veranstaltungsort\s*/i, '').trim()
           : undefined;
 
-        // Extract image
-        const $img = $row.find('img.va_list_foto, td img').first();
-        let imageUrl: string | undefined;
-        const imgSrc = $img.attr('src');
-        if (imgSrc) {
-          imageUrl = this.resolveUrl(imgSrc, baseOrigin);
-        }
+        // Extract image (carries width/height from HTML attrs into the upsert)
+        const imageInfo = this.imageFromElement(
+          $row.find('img.va_list_foto, td img').first(),
+          baseOrigin,
+        );
 
         // Extract event detail URL
         const href = $titleLink.attr('href');
@@ -289,7 +287,9 @@ export class Gem2GoScraper extends BaseScraper {
           postal_code: gemeinde.plz,
           bundesland: gemeinde.bundesland,
           district: gemeinde.bezirk,
-          image_url: this.cleanImageUrl(imageUrl),
+          image_url: imageInfo?.url,
+          image_width: imageInfo?.image_width,
+          image_height: imageInfo?.image_height,
           category: categorizeEvent(title, description),
         });
       } catch {
@@ -343,13 +343,11 @@ export class Gem2GoScraper extends BaseScraper {
         const venue = $entry.find('.rasterListOrtContainerStaette').first().text().trim() || undefined;
         const address = $entry.find('.rasterListOrtContainerAdresse').first().text().trim() || undefined;
 
-        // Extract image
-        const $img = $entry.find('.rasterListImageContainer img').first();
-        let imageUrl: string | undefined;
-        const imgSrc = $img.attr('src');
-        if (imgSrc) {
-          imageUrl = this.resolveUrl(imgSrc, baseOrigin);
-        }
+        // Extract image (carries width/height from HTML attrs into the upsert)
+        const imageInfo = this.imageFromElement(
+          $entry.find('.rasterListImageContainer img').first(),
+          baseOrigin,
+        );
 
         // Extract event detail URL
         const $link = $entry.find('a').first();
@@ -375,7 +373,9 @@ export class Gem2GoScraper extends BaseScraper {
           postal_code: gemeinde.plz,
           bundesland: gemeinde.bundesland,
           district: gemeinde.bezirk,
-          image_url: this.cleanImageUrl(imageUrl),
+          image_url: imageInfo?.url,
+          image_width: imageInfo?.image_width,
+          image_height: imageInfo?.image_height,
           category: categorizeEvent(title),
         });
       } catch {
@@ -427,13 +427,11 @@ export class Gem2GoScraper extends BaseScraper {
         const startDate = this.parseDateTimeText(cardText);
         if (!startDate) return;
 
-        // Extract image
-        let imageUrl: string | undefined;
-        const $img = $card.find('img').first();
-        const imgSrc = $img.attr('src') || $img.attr('data-src') || '';
-        if (imgSrc && !imgSrc.startsWith('data:')) {
-          imageUrl = imgSrc.startsWith('http') ? imgSrc : `${gemeinde.website}${imgSrc.startsWith('/') ? '' : '/'}${imgSrc}`;
-        }
+        // Extract image (carries width/height from HTML attrs into the upsert)
+        const imageInfo = this.imageFromElement(
+          $card.find('img').first(),
+          gemeinde.website,
+        );
 
         events.push({
           source_id: `gem2go-${gemeinde.plz}-${eventId}`,
@@ -448,7 +446,9 @@ export class Gem2GoScraper extends BaseScraper {
           latitude: gemeinde.lat,
           longitude: gemeinde.lng,
           category: categorizeEvent(title),
-          image_url: this.cleanImageUrl(imageUrl),
+          image_url: imageInfo?.url,
+          image_width: imageInfo?.image_width,
+          image_height: imageInfo?.image_height,
         });
       } catch { /* skip */ }
     });

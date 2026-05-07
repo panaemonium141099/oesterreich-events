@@ -138,7 +138,26 @@ export class BurgenlandWPEventsScraper extends BaseScraper {
 
           const endDate = item.endDate ? this.parseJsonLdDate(item.endDate) ?? undefined : undefined;
           const description = this.stripHtml(item.description || '');
-          const imageUrl = typeof item.image === 'string' ? item.image : item.image?.url;
+          // JSON-LD image: string | { url, width?, height? } | array
+          let imageUrl: string | undefined;
+          let imageWidth: number | undefined;
+          let imageHeight: number | undefined;
+          const rawImage = item.image;
+          if (typeof rawImage === 'string') {
+            imageUrl = rawImage;
+          } else if (Array.isArray(rawImage) && rawImage.length > 0) {
+            const first = rawImage[0];
+            if (typeof first === 'string') imageUrl = first;
+            else if (first) {
+              imageUrl = first.url || first.contentUrl;
+              if (typeof first.width === 'number') imageWidth = first.width;
+              if (typeof first.height === 'number') imageHeight = first.height;
+            }
+          } else if (rawImage && typeof rawImage === 'object') {
+            imageUrl = rawImage.url || rawImage.contentUrl;
+            if (typeof rawImage.width === 'number') imageWidth = rawImage.width;
+            if (typeof rawImage.height === 'number') imageHeight = rawImage.height;
+          }
           const locationName = item.location?.name || m.name;
           const organizer = item.organizer?.name;
           const url = item.url || m.eventUrl;
@@ -159,6 +178,8 @@ export class BurgenlandWPEventsScraper extends BaseScraper {
             longitude: m.lng,
             category: categorizeEvent(item.name, description),
             image_url: imageUrl,
+            image_width: imageWidth,
+            image_height: imageHeight,
             organizer,
           });
         }
@@ -224,12 +245,8 @@ export class BurgenlandWPEventsScraper extends BaseScraper {
         if (seen.has(dedupeKey)) return;
         seen.add(dedupeKey);
 
-        // Image
-        const img = $el.find('img').first();
-        let imageUrl = img.attr('src') || img.attr('data-src');
-        if (imageUrl && !imageUrl.startsWith('http')) {
-          imageUrl = new URL(imageUrl, m.eventUrl).href;
-        }
+        // Image (carries width/height from HTML attrs into the upsert)
+        const imageInfo = this.imageFromElement($el.find('img').first(), m.eventUrl);
 
         // Location
         const locationEl = $el.find('.mec-event-loc-place, .mec-event-location');
@@ -248,7 +265,9 @@ export class BurgenlandWPEventsScraper extends BaseScraper {
           latitude: m.lat,
           longitude: m.lng,
           category: categorizeEvent(title, ''),
-          image_url: imageUrl,
+          image_url: imageInfo?.url,
+          image_width: imageInfo?.image_width,
+          image_height: imageInfo?.image_height,
         });
       } catch { /* skip */ }
     });
@@ -370,11 +389,7 @@ export class BurgenlandWPEventsScraper extends BaseScraper {
         const link = $el.is('a') ? $el.attr('href') : $el.find('a').first().attr('href');
         const sourceUrl = link && link.startsWith('http') ? link : link ? new URL(link, m.eventUrl).href : m.eventUrl;
 
-        const img = $el.find('img').first();
-        let imageUrl = img.attr('src') || img.attr('data-src');
-        if (imageUrl && !imageUrl.startsWith('http')) {
-          imageUrl = new URL(imageUrl, m.eventUrl).href;
-        }
+        const imageInfo = this.imageFromElement($el.find('img').first(), m.eventUrl);
 
         events.push({
           source_id: `wp-bgld-gen-${Buffer.from(title + startDate).toString('base64').substring(0, 24)}`,
@@ -389,7 +404,9 @@ export class BurgenlandWPEventsScraper extends BaseScraper {
           latitude: m.lat,
           longitude: m.lng,
           category: categorizeEvent(title, ''),
-          image_url: imageUrl,
+          image_url: imageInfo?.url,
+          image_width: imageInfo?.image_width,
+          image_height: imageInfo?.image_height,
         });
       } catch { /* skip */ }
     });

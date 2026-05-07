@@ -1,6 +1,82 @@
 import type { ScrapedEvent } from '@/types/events';
 import type { CheerioAPI } from 'cheerio';
 
+/**
+ * Pick the largest variant from a `srcset` string.
+ *
+ * Per the HTML spec each comma-separated candidate is `<url> <descriptor>`
+ * where the descriptor is either `Nw` (intrinsic width in CSS px) or
+ * `Nx` (pixel density). The two descriptor types should not be mixed
+ * within a single srcset, but real-world HTML mixes them anyway, so
+ * we handle both:
+ *
+ *   - If any candidate has a `w` descriptor → pick the largest `w` and
+ *     report that as `width`. (Real pixels > device-pixel-ratio.)
+ *   - If only `x` descriptors → pick the highest density and leave
+ *     `width` undefined (descriptor doesn't carry pixel size).
+ *   - If a candidate has no descriptor it implicitly means `1x`.
+ *
+ * Exported so tests can target it directly.
+ */
+export function pickLargestFromSrcset(
+  srcset: string,
+): { url: string; width?: number } | null {
+  if (!srcset) return null;
+
+  const parts = srcset.split(',').map(s => s.trim()).filter(Boolean);
+  if (parts.length === 0) return null;
+
+  let bestWidth = 0;
+  let bestWidthUrl = '';
+  let bestDensity = 0;
+  let bestDensityUrl = '';
+
+  for (const part of parts) {
+    // Split on whitespace; first token is URL, second (optional) is descriptor.
+    const tokens = part.split(/\s+/);
+    const url = tokens[0];
+    if (!url) continue;
+    const descriptor = tokens[1] ?? '1x';
+
+    // Width descriptor: digits followed by literal `w`
+    const wMatch = /^(\d+)w$/i.exec(descriptor);
+    if (wMatch) {
+      const w = parseInt(wMatch[1], 10);
+      if (w > bestWidth) {
+        bestWidth = w;
+        bestWidthUrl = url;
+      }
+      continue;
+    }
+
+    // Density descriptor: number (with optional decimals) followed by `x`
+    const xMatch = /^(\d+(?:\.\d+)?)x$/i.exec(descriptor);
+    if (xMatch) {
+      const d = parseFloat(xMatch[1]);
+      if (d > bestDensity) {
+        bestDensity = d;
+        bestDensityUrl = url;
+      }
+      continue;
+    }
+
+    // Unknown descriptor — treat as 1x density candidate (lowest priority).
+    if (bestDensity < 1) {
+      bestDensity = 1;
+      bestDensityUrl = url;
+    }
+  }
+
+  // Width descriptor wins (real pixels). Otherwise density picker.
+  if (bestWidth > 0) {
+    return { url: bestWidthUrl, width: bestWidth };
+  }
+  if (bestDensityUrl) {
+    return { url: bestDensityUrl };
+  }
+  return null;
+}
+
 export abstract class BaseScraper {
   abstract readonly name: string;
   protected delayMs: number = 1000;
@@ -140,33 +216,66 @@ export abstract class BaseScraper {
    * 3. Largest content image (img tags with reasonable dimensions)
    *
    * Returns cleaned, absolute URL or undefined.
+   *
+   * **Sync boundary:** kept sync + return type unchanged so the ~300
+   * existing scrapers don't need updating. New scrapers that want
+   * width/height should call `extractImageCandidate()` instead — both
+   * methods walk the same DOM but the candidate variant carries
+   * dimensions through.
    */
   protected extractImageUrl($: CheerioAPI, baseUrl: string): string | undefined {
-    // 1. Try og:image meta tag (most reliable for event pages)
+    return this.extractImageCandidate($, baseUrl)?.url;
+  }
+
+  /**
+   * Like `extractImageUrl()` but returns the full candidate record
+   * including width / height (when extractable from HTML attributes
+   * or srcset descriptors) and the internal score.
+   *
+   * Score breakdown:
+   *   og:image / twitter:image  → base 4
+   *   JSON-LD image             → base 3
+   *   srcset largest            → base 5
+   *   <img> in content area     → base 5 if width ≥ 800, else 3
+   *   + content-area bonus      → +4
+   *   + alt-text bonus          → +1
+   *   − header/footer penalty   → −3
+   *
+   * Returns the highest-scoring candidate, or `undefined` when none
+   * could be extracted.
+   */
+  protected extractImageCandidate(
+    $: CheerioAPI,
+    baseUrl: string,
+  ): { url: string; width?: number; height?: number; score: number } | undefined {
+    const candidates: Array<{ url: string; width?: number; height?: number; score: number }> = [];
+
+    // 1. og:image (most reliable for event pages)
     const ogImage = $('meta[property="og:image"]').attr('content')
       || $('meta[name="og:image"]').attr('content');
     if (ogImage) {
       const resolved = this.resolveImageUrl(ogImage, baseUrl);
       const cleaned = this.cleanImageUrl(resolved);
-      if (cleaned) return cleaned;
+      if (cleaned) {
+        const w = parseInt($('meta[property="og:image:width"]').attr('content') || '0', 10) || undefined;
+        const h = parseInt($('meta[property="og:image:height"]').attr('content') || '0', 10) || undefined;
+        candidates.push({ url: cleaned, width: w, height: h, score: 4 });
+      }
     }
 
-    // Also try twitter:image
+    // twitter:image
     const twitterImage = $('meta[name="twitter:image"]').attr('content')
       || $('meta[property="twitter:image"]').attr('content');
     if (twitterImage) {
       const resolved = this.resolveImageUrl(twitterImage, baseUrl);
       const cleaned = this.cleanImageUrl(resolved);
-      if (cleaned) return cleaned;
+      if (cleaned) {
+        candidates.push({ url: cleaned, score: 4 });
+      }
     }
 
-    // 2. Try JSON-LD structured data
+    // 2. JSON-LD structured data
     $('script[type="application/ld+json"]').each((_, el) => {
-      // Early return not possible in .each, handled via found variable
-    });
-    let jsonLdImage: string | undefined;
-    $('script[type="application/ld+json"]').each((_, el) => {
-      if (jsonLdImage) return; // already found
       try {
         const text = $(el).html();
         if (!text) return;
@@ -177,20 +286,29 @@ export abstract class BaseScraper {
           const img = item.image;
           if (!img) continue;
           let url: string | undefined;
+          let width: number | undefined;
+          let height: number | undefined;
           if (typeof img === 'string') {
             url = img;
           } else if (Array.isArray(img) && img.length > 0) {
             const first = img[0];
-            url = typeof first === 'string' ? first : first?.url || first?.contentUrl;
+            if (typeof first === 'string') {
+              url = first;
+            } else if (first) {
+              url = first.url || first.contentUrl;
+              width = typeof first.width === 'number' ? first.width : undefined;
+              height = typeof first.height === 'number' ? first.height : undefined;
+            }
           } else if (typeof img === 'object') {
             url = img.url || img.contentUrl;
+            width = typeof img.width === 'number' ? img.width : undefined;
+            height = typeof img.height === 'number' ? img.height : undefined;
           }
           if (url) {
             const resolved = this.resolveImageUrl(url, baseUrl);
             const cleaned = this.cleanImageUrl(resolved);
             if (cleaned) {
-              jsonLdImage = cleaned;
-              return;
+              candidates.push({ url: cleaned, width, height, score: 3 });
             }
           }
         }
@@ -198,10 +316,8 @@ export abstract class BaseScraper {
         // Invalid JSON-LD, skip
       }
     });
-    if (jsonLdImage) return jsonLdImage;
 
-    // 3. Try large content images (skip icons, logos, tiny images)
-    const candidates: Array<{ url: string; score: number }> = [];
+    // 3. <img> tags in body content
     $('img').each((_, el) => {
       const $img = $(el);
       const src = $img.attr('src') || $img.attr('data-src') || $img.attr('data-lazy-src');
@@ -211,68 +327,108 @@ export abstract class BaseScraper {
       const cleaned = this.cleanImageUrl(resolved);
       if (!cleaned) return;
 
-      // Score images by likely relevance
-      let score = 0;
-      const width = parseInt($img.attr('width') || '0', 10);
-      const height = parseInt($img.attr('height') || '0', 10);
+      const width = parseInt($img.attr('width') || '0', 10) || undefined;
+      const height = parseInt($img.attr('height') || '0', 10) || undefined;
 
       // Skip tiny images (likely icons/spacers)
-      if ((width > 0 && width < 50) || (height > 0 && height < 50)) return;
+      if ((width !== undefined && width < 50) || (height !== undefined && height < 50)) return;
 
-      // Prefer larger images
-      if (width >= 300 || height >= 200) score += 3;
-      if (width >= 600 || height >= 400) score += 2;
+      // Base score: bigger image → higher base.
+      let score = 0;
+      if ((width ?? 0) >= 800) score = 5;
+      else if ((width ?? 0) >= 300 || (height ?? 0) >= 200) score = 3;
 
-      // Prefer images in article/main content areas
+      if ((width ?? 0) >= 600 || (height ?? 0) >= 400) score += 2;
+
+      // Content-area bonus
       const parent = $img.closest('article, main, .content, .event, [class*="event"], [class*="detail"]');
       if (parent.length > 0) score += 4;
 
-      // Prefer images with alt text containing event-related words
+      // Alt-text bonus
       const alt = ($img.attr('alt') || '').toLowerCase();
       if (alt && alt.length > 5) score += 1;
 
-      // Downgrade header/footer images
+      // Header/footer penalty
       const inHeader = $img.closest('header, nav, footer, .header, .footer, .nav').length > 0;
       if (inHeader) score -= 3;
 
-      candidates.push({ url: cleaned, score });
+      candidates.push({ url: cleaned, width, height, score });
     });
 
-    // Also check srcset for higher-res versions
-    $('img[srcset]').each((_, el) => {
+    // 4. srcset — pick the largest variant. Supports both `Nw` width
+    //    descriptors and `Nx` density descriptors. Width descriptors
+    //    win over density when both are present (real pixels > DPR).
+    $('img[srcset], source[srcset]').each((_, el) => {
       const $img = $(el);
       const srcset = $img.attr('srcset');
       if (!srcset) return;
 
-      // Parse srcset and pick the largest
-      const parts = srcset.split(',').map(s => s.trim());
-      let bestUrl = '';
-      let bestWidth = 0;
-      for (const part of parts) {
-        const [url, descriptor] = part.split(/\s+/);
-        if (!url) continue;
-        const w = parseInt(descriptor || '0', 10);
-        if (w > bestWidth) {
-          bestWidth = w;
-          bestUrl = url;
-        }
-      }
-      if (bestUrl && bestWidth >= 300) {
-        const resolved = this.resolveImageUrl(bestUrl, baseUrl);
-        const cleaned = this.cleanImageUrl(resolved);
-        if (cleaned) {
-          candidates.push({ url: cleaned, score: 5 });
-        }
-      }
+      const picked = pickLargestFromSrcset(srcset);
+      if (!picked) return;
+
+      const resolved = this.resolveImageUrl(picked.url, baseUrl);
+      const cleaned = this.cleanImageUrl(resolved);
+      if (!cleaned) return;
+
+      candidates.push({
+        url: cleaned,
+        width: picked.width,
+        score: 5,
+      });
     });
 
-    // Return highest-scoring candidate
-    if (candidates.length > 0) {
-      candidates.sort((a, b) => b.score - a.score);
-      return candidates[0].url;
+    if (candidates.length === 0) return undefined;
+
+    candidates.sort((a, b) => b.score - a.score);
+    return candidates[0];
+  }
+
+  /**
+   * Convenience helper: given a cheerio `<img>` element, return its
+   * cleaned URL plus any width/height attributes the markup carried.
+   *
+   * Used by scrapers that already locate the image via their own
+   * selectors (rather than calling `extractImageCandidate()` on the
+   * whole page) but still want HTML-attribute dims to flow into the
+   * upsert. Returns `null` when the element has no usable URL.
+   *
+   * Pure / sync. Reads `src`, `data-src`, `data-lazy-src` (in that
+   * order) plus `srcset` (largest variant wins via the same parser the
+   * full-page extractor uses).
+   */
+  protected imageFromElement(
+    // We accept an unknown cheerio element wrapper; the caller passes
+    // either `$el` or a typed `Cheerio<Element>` — both expose the
+    // attribute API we need.
+    $img: { attr(name: string): string | undefined },
+    baseUrl: string,
+  ): { url: string; image_width?: number; image_height?: number } | null {
+    if (!$img) return null;
+    const direct = $img.attr('src') || $img.attr('data-src') || $img.attr('data-lazy-src');
+    let urlGuess: string | undefined = direct ? direct : undefined;
+    let widthGuess = parseInt($img.attr('width') || '0', 10) || undefined;
+    let heightGuess = parseInt($img.attr('height') || '0', 10) || undefined;
+
+    // srcset wins when present (real pixels). Fall back to plain src.
+    const srcset = $img.attr('srcset');
+    if (srcset) {
+      const picked = pickLargestFromSrcset(srcset);
+      if (picked && picked.url) {
+        urlGuess = picked.url;
+        if (picked.width) widthGuess = picked.width;
+      }
     }
 
-    return undefined;
+    if (!urlGuess) return null;
+
+    const resolved = this.resolveImageUrl(urlGuess, baseUrl);
+    const cleaned = this.cleanImageUrl(resolved);
+    if (!cleaned) return null;
+    return {
+      url: cleaned,
+      ...(widthGuess ? { image_width: widthGuess } : {}),
+      ...(heightGuess ? { image_height: heightGuess } : {}),
+    };
   }
 
   /**
