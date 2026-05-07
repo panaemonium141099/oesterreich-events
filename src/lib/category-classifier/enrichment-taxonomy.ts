@@ -1,18 +1,33 @@
 /**
- * Closed vocabulary for the OpenAI-based enrichment pipeline.
+ * Closed vocabulary for the OpenAI- AND Claude-based enrichment pipelines.
  *
- * Single source of truth: docs/TAXONOMY.md §3. Every value in these lists
- * is a tag the AI is *allowed* to output. Anything else gets dropped
- * during validation. This is the contract that makes Wizard filters
- * deterministic: the user picks "studentenleben" once and gets matching
+ * Source of truth split (since fn-14.3, 2026-05-07):
+ *   - This file is the RUNTIME SoT for §3 of the taxonomy: the closed
+ *     vocabularies that `validateEnrichment` (legacy/coercing) and
+ *     `validateClaudeBatch` (v2/strict) compare against. Every value
+ *     in these lists is a tag the AI is *allowed* to output; anything
+ *     else gets dropped (legacy) or recorded as a validation error
+ *     and routed to the 3-strikes counter (v2).
+ *   - `docs/TAXONOMY.md` §3 is auto-regenerated FROM this file by
+ *     `npm run regen:taxonomy` (idempotent; `--check` for CI drift
+ *     detection). If code and doc disagree, the doc is stale.
+ *   - `docs/TAXONOMY.md` §1, §2, §4-§10 (philosophy, hauptkategorien
+ *     descriptions, datenmodell, migration, prompt guidelines, etc.)
+ *     remain hand-written and authoritative for those concerns.
+ *
+ * Wizard contract: the user picks "studentenleben" once and gets matching
  * rows regardless of how the event was phrased.
  *
  * Rework note (2026-04-23): v2 of the taxonomy. Added occasion_tags and
- * price_flags as their own axes (per docs/TAXONOMY.md). Extended audience
- * with erasmus-freundlich, alleine-geeignet. Extended vibe with trashig,
+ * price_flags as their own axes. Extended audience with
+ * erasmus-freundlich, alleine-geeignet. Extended vibe with trashig,
  * underground, fancy, authentisch, zum-kennenlernen. Added new music and
  * nightlife activity tags (bar-night, shot-night, student-night,
  * motto-party variants, etc.).
+ *
+ * Rework note (2026-05-07, fn-14.3): added 'spende-erbeten' to PRICE_FLAGS
+ * for the "Spende erbeten" / donation-based price path. Documented the
+ * SoT split above.
  *
  * Philosophy:
  * - Prefer fewer, broader tags over long-tail specifics. Every tag is a
