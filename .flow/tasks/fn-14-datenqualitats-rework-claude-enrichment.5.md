@@ -174,9 +174,8 @@ In `syncEventsToSupabase()` (nach prefetch, vor toSupabaseRow):
 - [ ] Pipeline-Run: image_width/height bei Events mit URL-Pattern (Cloudinary/Imgix/WordPress) ODER HTML width/height attributes befüllt; og-only Quellen regressionfrei (kein false-NULL für ihre Bestandsdaten)
 
 ## Done summary
-TBD
-
+Image-quality rework for the scrape→supabase-sync pipeline: extractImageUrl stays sync (no breaking change for ~300 scrapers), additive extractImageCandidate exposes width/height/score, srcset parser handles both Nw widths and Nx density descriptors with a state-machine tokeniser tolerant of comma-bearing Cloudinary URLs, CDN-allowlist provides sync URL upgrades for Cloudinary/Imgix/Cloudflare Images/WordPress with full SSRF protection (literal-IP guard + DNS resolution check + manual-redirect re-validation, IPv6 incl. IPv4-mapped covered) in the async validate-and-upgrade path, supabase-sync prefetch and toSupabaseRow apply UPSERT-Guards for image_url/image_width/image_height/description/price_text (write existing value back when guard says "keep old" so PostgREST batch shape stays uniform), last_seen_at always set, top scrapers (Gem2Go x3, GemeindeRegistry x8 incl. JSON-LD width/height, MeinBezirk, TipsAt, BurgenlandWPEvents x3, UniBaseScraper used by 56 uni scrapers) migrated to populate image_width/image_height. 14 commits, 12 review rounds, SHIP verdict.
 ## Evidence
-- Commits:
-- Visual QA screenshots:
-- Test scrape logs:
+- Commits: cd19beac608569f0633ff7a5c0876269b62fa674, 427afd8a75a890f06ebd643747d19a7014abef0e, 6f38f34ef2c89d8ae47eee494c0081de0dc38b30, b9c0ec667faceac89c4342b23982542d2983c09f, 69833daa327e3590cb26f095c6d0cb9287062aec, 2866c3f33555b293c8666d5e8e0a4e5e3c02d002, ab7116adb1cbcd8aedf56544fbaecdbf96121118, 9b24d160cc209f4f0548251e31ff74f63b92aa1a, 240a3e3969fcc60ab6c0d61d65a5488b5fe284b4, 6158d0a5720f5eaaa6376bee2672a1b37ddfe533, 8d241ce9ecf746fd1a7b36ea8f310a94accf70e6, 405ffd2dca4981c373f25e607f50cdb2cf8552f9, 2f6b19a19d6c8f63f6c7140cfc1ae046bcdacb06, 6baf4ee221385e55f8f0e095c0324f5c2f60ad0e
+- Tests: npx vitest run src/test/baseScraper.test.ts src/test/event-images.test.ts src/test/validate-upgrade.test.ts src/__tests__/lib/supabase-sync-guards.test.ts (126 task-specific tests passing), npx vitest run (1120 passing tests overall; baseline 12 failing test files / 61 failing tests preserved unchanged), npx tsc --noEmit (4 pre-existing baseline errors; no new errors from fn-14.5 changes)
+- PRs:
