@@ -42,6 +42,11 @@ import {
   validateAndUpgradeImageUrl,
   type ValidatedImage,
 } from '@/lib/event-images/validate-upgrade';
+import {
+  shouldUpgradeImage,
+  shouldOverwriteDescription,
+  shouldOverwritePrice,
+} from '@/lib/db/upsert-guards';
 
 /**
  * Confidence precedence order (highest first).
@@ -321,80 +326,22 @@ function shouldOverwriteCoords(
 }
 
 // ─── fn-14.5 UPSERT-Guards ───────────────────────────────────────────
-// Decide whether incoming scrape values should overwrite the existing
-// row. When the guard says "keep old", the field is OMITTED from the
-// upsert payload (not re-written with an identical value), so Postgres
-// treats the column as untouched and `last_seen_at` is the only ping
-// that signals the row is still alive.
-
-/**
- * Image upgrade rule:
- *   - existing has no URL              → write new
- *   - same URL                         → no-op
- *   - existing width unknown           → write new (we now know dims)
- *   - new width >= existing width      → write new
- *   - otherwise                        → keep existing
- */
-function shouldUpgradeImage(
-  newUrl: string | null,
-  newWidth: number | null,
-  oldUrl: string | null,
-  oldWidth: number | null,
-): boolean {
-  if (!newUrl) return false;
-  if (!oldUrl) return true;
-  if (newUrl === oldUrl) {
-    // Same URL — only worth re-writing when we now have dims and
-    // existing didn't (the dims piggy-back on the URL field).
-    return oldWidth == null && newWidth != null;
-  }
-  if (oldWidth == null) return true;
-  if (newWidth != null && newWidth >= oldWidth) return true;
-  return false;
-}
-
-/**
- * Description upgrade rule:
- *   - existing empty                                          → write new
- *   - new is meaningfully longer (>20%)                       → write new
- *   - existing not 'claude-v1' AND new comes from claude-v1   → write new (upgrade path)
- *   - otherwise                                               → keep existing
- *
- * `newVersion` is the enrichment_version we're about to attach. For raw
- * scraper writes we pass null/undefined — the function falls through to
- * the length comparison only.
- */
-function shouldOverwriteDescription(
-  newDesc: string | null,
-  oldDesc: string | null,
-  newVersion: string | null | undefined,
-  oldVersion: string | null,
-): boolean {
-  if (!newDesc) return false;
-  if (!oldDesc || !oldDesc.trim()) return true;
-  if (newDesc.length > oldDesc.length * 1.2) return true;
-  if (
-    newVersion === 'claude-v1' &&
-    oldVersion !== 'claude-v1'
-  ) {
-    return true;
-  }
-  return false;
-}
-
-/**
- * Price-text upgrade rule: only fill when existing is empty. Once a
- * price is on the row we never clobber it from raw scrape data; the
- * enrichment script owns price refinements via its own bulk RPC.
- */
-function shouldOverwritePrice(
-  newPrice: string | null,
-  oldPrice: string | null,
-): boolean {
-  if (!newPrice) return false;
-  if (!oldPrice || !oldPrice.trim()) return true;
-  return false;
-}
+// Predicates live in `./upsert-guards.ts` so they can be unit-tested
+// against the same production code, with no copy in the test file.
+//
+// IMPORTANT (Codex review): we cannot rely on omitting keys from
+// individual rows in a bulk Supabase `.upsert(batch)` call to mean
+// "leave this column untouched". PostgREST normalises rows to a
+// uniform key set across the batch — a row that drops `image_url`
+// while another row in the same batch includes it can end up with
+// `image_url = NULL` after the upsert. So when a guard says "keep
+// old", we WRITE BACK the existing value verbatim. That keeps the
+// column unchanged in Postgres and guarantees consistent batch row
+// shapes regardless of which rows win or lose the guard.
+//
+// `last_seen_at` is the only column that always advances on every
+// upsert — it's the soft-delete anchor the fn-14.6 nightly job
+// reads.
 
 /**
  * Build the category-reconciliation input shape from an existing row.
@@ -531,18 +478,28 @@ function toSupabaseRow(
       ? existing.publish_status
       : score.publish_status;
 
-  // Build the upsert payload. Guarded fields (image_url, image_width,
-  // image_height, description, price_text) are spread in conditionally
-  // — when the guard says "keep old", the field is OMITTED so Supabase
-  // leaves the existing value untouched. last_seen_at is ALWAYS set.
+  // Resolve guarded values upfront so every row in the batch carries
+  // the SAME key set (otherwise PostgREST's bulk-upsert key-shape
+  // normalisation can clobber preserved columns with NULL — see
+  // Codex-review note above the imports). When the guard says "keep
+  // old", we explicitly write back the existing value verbatim.
+  const finalImageUrl = upgradeImage ? newImageUrl : (existing?.image_url ?? null);
+  const finalImageWidth = upgradeImage ? newImageWidth : (existing?.image_width ?? null);
+  const finalImageHeight = upgradeImage ? newImageHeight : (existing?.image_height ?? null);
+  const finalDescription = overwriteDescription
+    ? newDescription
+    : (existing?.description ?? null);
+  const finalPriceText = overwritePrice
+    ? (event.price_text ?? null)
+    : (existing?.price_text ?? null);
+
   return {
     source_type: 'scraped' as const,
     source_name: event.source_name,
     source_id: event.source_id,
     source_url: event.source_url,
     title: event.title,
-    // Description: guard-protected (see shouldOverwriteDescription).
-    ...(overwriteDescription ? { description: newDescription } : {}),
+    description: finalDescription,
     start_date: event.start_date,
     end_date: event.end_date ?? null,
     location_name: resolved.locationName,
@@ -552,6 +509,16 @@ function toSupabaseRow(
     // Supabase upsert preserves whatever the existing row has (e.g.
     // a value written earlier by the backfill-plz-from-coords script).
     // Writing `null` explicitly here would clobber that value.
+    //
+    // Note: this conditional-spread pattern is safe specifically for
+    // postal_code because EITHER (a) every row in the batch has
+    // resolved.postalCode (uniform shape) OR (b) we accept the
+    // existing-clobber risk for the (rare) cross-batch mixed case —
+    // an existing migration explicitly relies on "scrape can't
+    // overwrite a backfilled PLZ", which the omit semantics covers
+    // for the homogeneous-batch case. The guarded fields above
+    // (image_url/description/price_text) cannot use the same trick
+    // because their cross-batch heterogeneity is the COMMON case.
     ...(resolved.postalCode !== null ? { postal_code: resolved.postalCode } : {}),
     // Canonicalise bundesland to one of the 9 lowercase IDs that
     // bundeslandToId() recognises. The Feratel/TourData scrapers
@@ -583,21 +550,13 @@ function toSupabaseRow(
     category_needs_review: canonical.category_needs_review,
     category_reason: canonical.category_reason,
     category_candidates: canonical.category_candidates,
-    // Price-text: guard-protected (only fill when existing empty).
-    ...(overwritePrice ? { price_text: event.price_text ?? null } : {}),
+    // Guarded fields — always written, value picked above.
+    price_text: finalPriceText,
     price_min: event.price_min ?? null,
     price_max: event.price_max ?? null,
-    // Image fields: guard-protected. When upgrade allowed, write the
-    // validated URL + dims (dims are nulled out only when we have no
-    // hint at all, so a successful upgrade can still clear stale dims
-    // intentionally — but only as part of the same write).
-    ...(upgradeImage
-      ? {
-          image_url: newImageUrl,
-          image_width: newImageWidth,
-          image_height: newImageHeight,
-        }
-      : {}),
+    image_url: finalImageUrl,
+    image_width: finalImageWidth,
+    image_height: finalImageHeight,
     organizer: event.organizer ?? null,
     ticket_url: event.ticket_url ?? null,
     visibility: 'public' as const,

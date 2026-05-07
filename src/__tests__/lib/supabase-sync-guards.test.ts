@@ -1,54 +1,16 @@
 /**
- * Tests for fn-14.5 UPSERT-Guard helpers in supabase-sync.
+ * Tests for fn-14.5 UPSERT-Guard predicates in supabase-sync.
  *
- * The functions are not exported (intentionally — they're glue inside
- * toSupabaseRow). We test them by re-implementing the same predicates
- * here so the contract is documented + locked. If the production
- * predicates ever drift, this duplicate flags it.
- *
- * (When the helper file grows we'll consider exporting them and
- * deleting these copies.)
+ * Imports the production predicates directly from
+ * `src/lib/db/upsert-guards.ts` so any drift in the production code
+ * fails this test instead of silently passing.
  */
 import { describe, it, expect } from 'vitest';
-
-// Local copies of the predicates from src/lib/db/supabase-sync.ts
-function shouldUpgradeImage(
-  newUrl: string | null,
-  newWidth: number | null,
-  oldUrl: string | null,
-  oldWidth: number | null,
-): boolean {
-  if (!newUrl) return false;
-  if (!oldUrl) return true;
-  if (newUrl === oldUrl) {
-    return oldWidth == null && newWidth != null;
-  }
-  if (oldWidth == null) return true;
-  if (newWidth != null && newWidth >= oldWidth) return true;
-  return false;
-}
-
-function shouldOverwriteDescription(
-  newDesc: string | null,
-  oldDesc: string | null,
-  newVersion: string | null | undefined,
-  oldVersion: string | null,
-): boolean {
-  if (!newDesc) return false;
-  if (!oldDesc || !oldDesc.trim()) return true;
-  if (newDesc.length > oldDesc.length * 1.2) return true;
-  if (newVersion === 'claude-v1' && oldVersion !== 'claude-v1') return true;
-  return false;
-}
-
-function shouldOverwritePrice(
-  newPrice: string | null,
-  oldPrice: string | null,
-): boolean {
-  if (!newPrice) return false;
-  if (!oldPrice || !oldPrice.trim()) return true;
-  return false;
-}
+import {
+  shouldUpgradeImage,
+  shouldOverwriteDescription,
+  shouldOverwritePrice,
+} from '@/lib/db/upsert-guards';
 
 describe('shouldUpgradeImage (fn-14.5 UPSERT-Guard)', () => {
   it('writes when there is no existing URL', () => {
