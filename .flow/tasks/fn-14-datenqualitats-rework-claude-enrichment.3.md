@@ -246,10 +246,8 @@ Acceptance ist "token telemetry from verified CLI output mode" — der Spike ent
 - [ ] 100-Events Test-Run erfolgreich (`--limit 100 --dry-run`), Stichprobe-QA grün
 
 ## Done summary
-TBD
-
+Implemented fn-14.3 batch claude enrichment v2: new src/scripts/enrich-claude.ts (batch architecture, BulkUpdater, 3-strikes poison-pill, --since for daily refresh, OS-timeout+SIGKILL, weekly token quota with 80%/95% Resend alerts), src/scripts/regen-taxonomy-doc.ts (docs/TAXONOMY.md §3 regenerator with --check), src/lib/category-classifier/enrichment-validate.ts (per-item + batch validator with required-singleton enforcement and echoed-index uniqueness checks), 'spende-erbeten' added to PRICE_FLAGS, plus 77 new vitest tests. Codex review SHIP after 8 iterations addressing required singletons, echoed-index validation, --force semantics, extractJson try/catch, --append-system-prompt-file, AuthError abort path, cache-token quota counting, --flag=value parsing, allSettled with early-latch abort, numeric arg bounds, and SoT documentation alignment.
 ## Evidence
-- Commits:
-- Spike-Output:
-- Test runs:
-- Sample outputs:
+- Commits: 4e74855, feceedf, c556192, f2a88e8, ee1fc82, 3a5d237, f7175c0, 237f29f, 1df1065
+- Tests: npx vitest run src/__tests__/lib/category-classifier/enrichment-validate.test.ts src/__tests__/scripts/enrich-claude.test.ts (77 passing), npx tsc --noEmit (7 errors, all pre-existing baseline in unrelated test files), npm run regen:taxonomy -- --check (idempotent, no drift), Live spike: claude -p --output-format json envelope captured + documented in enrich-claude.ts header, Smoke test: npx tsx enrich-claude.ts --batch-size=0 exits 1 with bounds error
+- PRs:

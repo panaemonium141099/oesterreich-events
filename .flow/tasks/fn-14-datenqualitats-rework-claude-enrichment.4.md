@@ -22,11 +22,12 @@ WHERE category_source = 'enrichment'  -- MISSED locked rows with stale other fie
 ```
 
 **NEU (richtig):**
+<!-- Updated by plan-sync: fn-14.3 enrich-claude.ts uses allowlist `publish_status IN ('published','published_low_confidence','needs_review')` (SELECTION_PUBLISH_STATUSES), not denylist `NOT IN (...)`. Reset must match selection contract or rows will be reset but never re-enriched. -->
 ```sql
 UPDATE events
 SET enrichment_version = NULL
 WHERE (enrichment_version IS NULL OR enrichment_version != 'claude-v1')
-  AND publish_status NOT IN ('expired','duplicate','suppressed','draft');
+  AND publish_status IN ('published','published_low_confidence','needs_review');
 ```
 
 Alternativ nur die OpenAI-vergifteten:
@@ -34,7 +35,7 @@ Alternativ nur die OpenAI-vergifteten:
 UPDATE events
 SET enrichment_version = NULL
 WHERE enrichment_version = 'enrich-v2-prompt1'
-  AND publish_status NOT IN ('expired','duplicate','suppressed','draft');
+  AND publish_status IN ('published','published_low_confidence','needs_review');
 ```
 
 Erwarteter Hit: ~80k Rows.
@@ -56,10 +57,11 @@ npm run enrich:claude -- --limit 25000 --batch-size 20 --concurrency 4 \
 
 ### Stichprobe-QA (vor + nach Migration)
 **Vor Migration:**
+<!-- Updated by plan-sync: filter aligned with fn-14.3 SELECTION_PUBLISH_STATUSES allowlist so QA samples match what enrich-claude.ts actually processes. -->
 ```sql
 SELECT id, title, description, category, price_text, enrichment_version, category_locked
 FROM events
-WHERE publish_status NOT IN ('expired','duplicate','suppressed','draft')
+WHERE publish_status IN ('published','published_low_confidence','needs_review')
 ORDER BY RANDOM()
 LIMIT 50;
 ```
