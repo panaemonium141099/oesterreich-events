@@ -74,14 +74,25 @@ export interface ValidationFail {
 }
 export type ValidationResult = ValidationOk | ValidationFail;
 
+/**
+ * Pick the primary category. Spec defines this as "genau 1" — null is
+ * NEVER an acceptable answer. We treat null/missing as a hard error so
+ * the caller can route the item to the retry / poison-pill path.
+ */
 function pickCategory(value: unknown, errors: string[]): PrimaryCategory | null {
-  if (value === null || value === undefined) return null;
+  if (value === null || value === undefined) {
+    errors.push('primary_category: missing (required, "genau 1" per spec)');
+    return null;
+  }
   if (typeof value !== 'string') {
     errors.push('primary_category: not a string');
     return null;
   }
   const trimmed = value.trim();
-  if (!trimmed) return null;
+  if (!trimmed) {
+    errors.push('primary_category: empty string (required)');
+    return null;
+  }
   if (!PRIMARY_CATEGORY_SET.has(trimmed)) {
     errors.push(`primary_category: "${trimmed}" not in vocabulary`);
     return null;
@@ -89,19 +100,32 @@ function pickCategory(value: unknown, errors: string[]): PrimaryCategory | null 
   return trimmed as PrimaryCategory;
 }
 
+/**
+ * Pick an enum value. The `required` flag (true for `price_tier`,
+ * `duration_type`, `language` — all spec'd as "genau 1") promotes
+ * null/missing into a validation error. Optional enums (none right now,
+ * but keep the flag for extensibility) tolerate null.
+ */
 function pickEnum<T extends string>(
   value: unknown,
   set: Set<string>,
   fieldName: string,
   errors: string[],
+  required: boolean,
 ): T | null {
-  if (value === null || value === undefined) return null;
+  if (value === null || value === undefined) {
+    if (required) errors.push(`${fieldName}: missing (required, "genau 1" per spec)`);
+    return null;
+  }
   if (typeof value !== 'string') {
     errors.push(`${fieldName}: not a string`);
     return null;
   }
   const norm = value.trim().toLowerCase();
-  if (!norm) return null;
+  if (!norm) {
+    if (required) errors.push(`${fieldName}: empty string (required)`);
+    return null;
+  }
   if (!set.has(norm)) {
     errors.push(`${fieldName}: "${norm}" not in vocabulary`);
     return null;
@@ -241,10 +265,13 @@ export function validateClaudeEnrichment(raw: unknown): ValidationResult {
     vibe: pickArray(r.vibe, VIBE_SET, 3, 'vibe', errors),
     occasion: pickArray(r.occasion, OCCASION_SET, 3, 'occasion', errors),
     setting: pickArray(r.setting, SETTING_SET, 3, 'setting', errors),
-    price_tier: pickEnum<PriceTier>(r.price_tier, PRICE_TIER_SET, 'price_tier', errors),
+    // Required singletons — null/missing → validation error so the
+    // caller routes the row to the retry / 3-strikes path instead of
+    // silently writing a partial record.
+    price_tier: pickEnum<PriceTier>(r.price_tier, PRICE_TIER_SET, 'price_tier', errors, true),
     price_flags: pickArray(r.price_flags, PRICE_FLAG_SET, 6, 'price_flags', errors),
-    duration_type: pickEnum<DurationType>(r.duration_type, DURATION_TYPE_SET, 'duration_type', errors),
-    language: pickEnum<Language>(r.language, LANGUAGE_SET, 'language', errors),
+    duration_type: pickEnum<DurationType>(r.duration_type, DURATION_TYPE_SET, 'duration_type', errors, true),
+    language: pickEnum<Language>(r.language, LANGUAGE_SET, 'language', errors, true),
     is_student_friendly: pickBool(r.is_student_friendly, 'is_student_friendly', errors),
     is_family_friendly: pickBool(r.is_family_friendly, 'is_family_friendly', errors),
     is_dog_friendly: pickBool(r.is_dog_friendly, 'is_dog_friendly', errors),
@@ -294,7 +321,12 @@ export function emptyResult(): ClaudeEnrichmentResult {
  * commit (errors.length === 0 → ok) vs. which to re-queue.
  */
 export interface BatchItem {
-  /** 0-based index into the request batch this item came from. */
+  /**
+   * 0-based index the AI ECHOED BACK from the request. Used to remap
+   * the result onto the corresponding input event without trusting
+   * array position. The validator demands this field on every item;
+   * a missing/duplicate/out-of-range index is a top-level fatalError.
+   */
   index: number;
   result: ValidationResult;
 }
@@ -302,15 +334,30 @@ export interface BatchItem {
 export interface BatchValidation {
   /** Top-level structural outcome. */
   ok: boolean;
-  /** Why the batch as a whole failed (e.g. not an array). */
+  /** Why the batch as a whole failed (e.g. not an array, missing/duplicate index). */
   fatalError?: string;
-  /** One per item, in submission order. May be shorter than the request
-   *  batch if the AI returned fewer items. Caller treats missing items
-   *  as failures. */
+  /**
+   * One per RESULT in the AI response (NOT one per request item). If
+   * `expectedSize` is provided to `validateClaudeBatch`, the validator
+   * additionally enforces that every index in `[0, expectedSize)` is
+   * present exactly once — gaps + duplicates are fatal.
+   */
   items: BatchItem[];
 }
 
-export function validateClaudeBatch(raw: unknown): BatchValidation {
+/**
+ * Validate the top-level batch envelope.
+ *
+ * @param raw          The parsed inner JSON from the `claude -p` envelope.
+ * @param expectedSize If set, the validator enforces:
+ *                       - exactly `expectedSize` items
+ *                       - every echoed `index` in [0, expectedSize)
+ *                       - no duplicate indices
+ *                     This is the only safe way to remap results onto
+ *                     events — array position is NOT trustworthy because
+ *                     the AI can reorder/drop/duplicate without notice.
+ */
+export function validateClaudeBatch(raw: unknown, expectedSize?: number): BatchValidation {
   let arr: unknown[];
   if (Array.isArray(raw)) {
     arr = raw;
@@ -323,11 +370,60 @@ export function validateClaudeBatch(raw: unknown): BatchValidation {
       items: [],
     };
   }
-  const items: BatchItem[] = arr.map((item, idx) => ({
-    index: idx,
-    result: validateClaudeEnrichment(item),
-  }));
-  // Top-level "ok" = the structure itself parsed. Per-item ok/fail is
-  // tracked separately so we can still commit the good ones.
+
+  // Per-item: extract echoed index, then validate the rest.
+  const items: BatchItem[] = arr.map((item) => {
+    let echoedIndex = -1;
+    if (item && typeof item === 'object' && !Array.isArray(item)) {
+      const v = (item as Record<string, unknown>).index;
+      if (typeof v === 'number' && Number.isFinite(v) && Number.isInteger(v) && v >= 0) {
+        echoedIndex = v;
+      }
+    }
+    return {
+      index: echoedIndex,
+      result: validateClaudeEnrichment(item),
+    };
+  });
+
+  // Cross-item structural checks if we know the expected size.
+  if (expectedSize !== undefined) {
+    if (items.length !== expectedSize) {
+      return {
+        ok: false,
+        fatalError: `top-level: expected ${expectedSize} results, got ${items.length}`,
+        items,
+      };
+    }
+    const seen = new Set<number>();
+    for (const it of items) {
+      if (it.index < 0 || it.index >= expectedSize) {
+        return {
+          ok: false,
+          fatalError: `top-level: result index ${it.index} out of range [0, ${expectedSize})`,
+          items,
+        };
+      }
+      if (seen.has(it.index)) {
+        return {
+          ok: false,
+          fatalError: `top-level: duplicate result index ${it.index}`,
+          items,
+        };
+      }
+      seen.add(it.index);
+    }
+    // Ensure every requested index is represented (no gaps).
+    for (let i = 0; i < expectedSize; i++) {
+      if (!seen.has(i)) {
+        return {
+          ok: false,
+          fatalError: `top-level: missing result for input index ${i}`,
+          items,
+        };
+      }
+    }
+  }
+
   return { ok: true, items };
 }

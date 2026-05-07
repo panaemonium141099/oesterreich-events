@@ -250,19 +250,22 @@ function parseSince(s: string | null): number | null {
 function buildSystemPrompt(): string {
   return `Du bist der Event-Klassifikator für LassTreffen.at, eine österreichische Event-Discovery-Plattform.
 
-Du bekommst eine BATCH von Events als JSON-Array. Du gibst GENAU EIN JSON-Objekt zurück mit dem Feld "results", einem Array gleicher Länge wie der Input. Keine Markdown-Fences, kein Erklärungstext, kein Prefix wie "hier ist die Antwort". NUR das JSON-Objekt. Jeder Eintrag in "results" entspricht dem Event mit demselben Index im Input.
+Du bekommst eine BATCH von Events als JSON-Array (Feld "events" im Input). Du gibst GENAU EIN JSON-Objekt zurück mit dem Feld "results", einem Array gleicher Länge wie der Input. Keine Markdown-Fences, kein Erklärungstext, kein Prefix wie "hier ist die Antwort". NUR das JSON-Objekt.
+
+PFLICHT — INDEX-RÜCKGABE: Jedes Result-Objekt MUSS das Feld "index" enthalten, das exakt dem "index"-Feld des entsprechenden Input-Events entspricht. Reihenfolge im "results"-Array darf abweichen, aber jedes Input-Event MUSS genau einmal in "results" auftauchen. Wenn du einen Index doppelt oder gar nicht zurückgibst, wird der gesamte Batch als fehlerhaft verworfen.
 
 Jedes Result-Objekt hat EXAKT diese Felder:
-  primary_category   string, EINER aus der Liste
-  tags               string[], 0..5
-  audience           string[], 0..3
-  vibe               string[], 0..3
-  occasion           string[], 0..3
-  setting            string[], 0..3
-  language           string
-  price_tier         string
-  price_flags        string[], 0..6
-  duration_type      string
+  index              number   PFLICHT, identisch mit Input.index
+  primary_category   string   PFLICHT, EINER aus der Liste (kein null!)
+  tags               string[] 0..5
+  audience           string[] 0..3
+  vibe               string[] 0..3
+  occasion           string[] 0..3
+  setting            string[] 0..3
+  language           string   PFLICHT, EINER aus der Liste
+  price_tier         string   PFLICHT, EINER aus der Liste
+  price_flags        string[] 0..6
+  duration_type      string   PFLICHT, EINER aus der Liste
   is_student_friendly       boolean
   is_family_friendly        boolean
   is_dog_friendly           boolean    NEU
@@ -486,9 +489,13 @@ function buildBatchInput(events: EventRow[], pages: Array<string | null>): Batch
 
     const page = pages[i];
     if (page) {
-      // Tail-truncate at MAX_PAGE_CHARS; keep last bytes since page-end
-      // is usually closer to event details (date, price, dress code).
-      // fn-14.3 Interview: 8000-char cap with tail-truncate marker.
+      // fn-14.3 Interview: cap at MAX_PAGE_CHARS, tail-truncate marker.
+      // "Tail-truncate" here means "drop the tail" → keep the HEAD of
+      // the page text (where headline/description/lineup typically
+      // sit on Austrian event pages), append marker. Codex review
+      // pointed out the previous comment claimed the opposite of what
+      // the code did — keeping head is the correct behavior, comment
+      // is now precise.
       const trimmed = page.length > MAX_PAGE_CHARS
         ? page.slice(0, MAX_PAGE_CHARS) + '\n... [truncated]'
         : page;
@@ -1078,10 +1085,15 @@ async function processBatch(
     return outcome;
   }
 
-  // 4. Validate batch — top-level array + per-item.
-  const batchVal = validateClaudeBatch(parsed);
+  // 4. Validate batch — top-level + cross-item index uniqueness/completeness.
+  // Pass `events.length` as the expected size so the validator enforces
+  // that every input index in [0, N) is echoed back exactly once. Without
+  // this check, a Claude reorder/drop/duplicate would silently apply
+  // result[K] to event[K] (i.e. the wrong row).
+  const batchVal = validateClaudeBatch(parsed, events.length);
   if (!batchVal.ok) {
-    // Whole batch structurally bad. Same as a hang outcome.
+    // Whole batch structurally bad — could be wrong size, missing index,
+    // duplicate index, or out-of-range. Same as a hang outcome.
     console.error(`\n[batch] top-level invalid: ${batchVal.fatalError}`);
     for (let i = 0; i < events.length; i++) {
       const ev = events[i];
@@ -1107,12 +1119,17 @@ async function processBatch(
     return outcome;
   }
 
-  // 5. Per-event commit.
+  // 5. Per-event commit. Look up by ECHOED index, never by array position
+  // — Codex review finding: AI can reorder/drop/duplicate without notice.
+  const itemByIndex = new Map<number, typeof batchVal.items[number]>();
+  for (const it of batchVal.items) itemByIndex.set(it.index, it);
+
   for (let i = 0; i < events.length; i++) {
     const ev = events[i];
-    const item = batchVal.items.find(it => it.index === i);
+    const item = itemByIndex.get(i);
     if (!item) {
-      // AI returned fewer items than requested — count as fail.
+      // Should be unreachable when expectedSize is passed (validator
+      // checks completeness above), but defend in depth.
       const newCount = (ev.enrichment_failure_count ?? 0) + 1;
       const failedNow = newCount >= 3;
       if (!opts.dryRun) {
@@ -1129,50 +1146,43 @@ async function processBatch(
       continue;
     }
 
-    const validated = item.result.ok ? item.result.value : item.result.partial;
-
-    // Per-item validation errors are recoverable iff there's a usable
-    // primary_category AND no top-level structural issue. We log them
-    // but commit the partial-but-valid payload.
+    // Per-item validation failure is ALWAYS treated as a row-level
+    // failure now (Codex review finding). The previous "commit partial
+    // if not mostly-empty" path masked bad data: one missing required
+    // field would null out existing data, set enrichment_version to
+    // 'claude-v1', and zero the failure_count — preventing the row
+    // from ever reaching the 3-strikes poison-pill threshold.
+    //
+    // New rule: any validation error → bump enrichment_failure_count
+    // and DO NOT write the AI payload. Existing data is preserved
+    // verbatim, and the row remains eligible for the next pass.
     if (!item.result.ok) {
       stats.validationErrors += 1;
-      // If the AI didn't return a usable primary_category AND the item
-      // is otherwise mostly-empty, treat as fail. Otherwise commit
-      // partial.
-      const isMostlyEmpty = !validated.primary_category &&
-        validated.tags.length === 0 &&
-        validated.audience.length === 0 &&
-        validated.vibe.length === 0;
-      if (isMostlyEmpty) {
-        const newCount = (ev.enrichment_failure_count ?? 0) + 1;
-        const failedNow = newCount >= 3;
-        if (!opts.dryRun) {
-          await updater.add({
-            id: ev.id,
-            enrichment_failure_count: newCount,
-            ...(failedNow ? { enrichment_failed: true } : {}),
-          });
-        }
-        if (failedNow) stats.poisonPilled += 1;
-        stats.failed += 1;
-        stats.processed += 1;
-        outcome.fail.push({
-          index: i,
-          error: `validation: ${item.result.errors.slice(0, 3).join('; ')}`,
+      const newCount = (ev.enrichment_failure_count ?? 0) + 1;
+      const failedNow = newCount >= 3;
+      if (!opts.dryRun) {
+        await updater.add({
+          id: ev.id,
+          enrichment_failure_count: newCount,
+          ...(failedNow ? { enrichment_failed: true } : {}),
         });
-        appendLog(opts.logFile, {
-          event_id: ev.id, title: ev.title, status: 'validation_failed',
-          errors: item.result.errors, failure_count: newCount,
-        });
-        continue;
       }
-      // Soft fail — log but still commit.
-      appendLog(opts.logFile, {
-        event_id: ev.id, title: ev.title, status: 'validation_soft_fail',
-        errors: item.result.errors,
+      if (failedNow) stats.poisonPilled += 1;
+      stats.failed += 1;
+      stats.processed += 1;
+      outcome.fail.push({
+        index: i,
+        error: `validation: ${item.result.errors.slice(0, 3).join('; ')}`,
       });
+      appendLog(opts.logFile, {
+        event_id: ev.id, title: ev.title, status: 'validation_failed',
+        errors: item.result.errors, failure_count: newCount,
+      });
+      continue;
     }
 
+    // Item validates pristinely → commit the full payload.
+    const validated = item.result.value;
     const update = buildUpdatePayload(ev, validated, stats);
 
     if (!opts.dryRun) {
@@ -1254,10 +1264,11 @@ async function fetchNextPage(
     q = q.or(
       `enrichment_version.is.null,enrichment_version.neq.${ENRICHMENT_VERSION_CLAUDE_V1}`,
     );
+    // Skip poison-pills unless --retry-failed is set (which clears the
+    // flag in main() before this runs anyway). --force ALSO bypasses
+    // this filter — operator says "redo everything", we redo everything.
+    q = q.or('enrichment_failed.is.null,enrichment_failed.eq.false');
   }
-  // Skip poison-pills unless --retry-failed is set (which clears the
-  // flag in main() before this runs anyway).
-  q = q.or('enrichment_failed.is.null,enrichment_failed.eq.false');
 
   if (opts.since) {
     const ms = parseSince(opts.since);
@@ -1335,12 +1346,15 @@ async function main() {
   let pendingQuery = supabase
     .from('events')
     .select('id', { count: 'exact', head: true })
-    .in('publish_status', SELECTION_PUBLISH_STATUSES)
-    .or('enrichment_failed.is.null,enrichment_failed.eq.false');
+    .in('publish_status', SELECTION_PUBLISH_STATUSES);
   if (!opts.force) {
+    // Mirror the per-page selection contract: --force bypasses BOTH
+    // version and poison-pill filters so the operator sees a count that
+    // matches what the script will actually process.
     pendingQuery = pendingQuery.or(
       `enrichment_version.is.null,enrichment_version.neq.${ENRICHMENT_VERSION_CLAUDE_V1}`,
     );
+    pendingQuery = pendingQuery.or('enrichment_failed.is.null,enrichment_failed.eq.false');
   }
   if (opts.since) {
     const ms = parseSince(opts.since);
@@ -1437,7 +1451,11 @@ async function main() {
       process.stdout.write('  ' + reportLine(stats, totalPending ?? undefined, opts) + '\r');
     }
 
-    if (opts.dryRun || opts.force) break;
+    // --dry-run breaks after one page so we don't burn tokens iterating.
+    // --force does NOT break: spec says "ignore filters and redo all";
+    // breaking after page 1 would only ever process PAGE_SIZE rows, which
+    // contradicts the documented behavior (Codex review finding).
+    if (opts.dryRun) break;
     if (page.length < PAGE_SIZE) break;
   }
 

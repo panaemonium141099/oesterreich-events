@@ -70,6 +70,54 @@ describe('validateClaudeEnrichment — happy path', () => {
   });
 });
 
+describe('validateClaudeEnrichment — required singletons (fn-14.3 spec "genau 1")', () => {
+  it('rejects missing primary_category', () => {
+    const r = validateClaudeEnrichment({ ...validRow, primary_category: null });
+    expect(r.ok).toBe(false);
+    if (!r.ok) expect(r.errors.some(e => /primary_category.*missing|required/i.test(e))).toBe(true);
+  });
+
+  it('rejects empty-string primary_category', () => {
+    const r = validateClaudeEnrichment({ ...validRow, primary_category: '   ' });
+    expect(r.ok).toBe(false);
+  });
+
+  it('rejects missing price_tier', () => {
+    const r = validateClaudeEnrichment({ ...validRow, price_tier: null });
+    expect(r.ok).toBe(false);
+    if (!r.ok) expect(r.errors.some(e => /price_tier.*missing|required/i.test(e))).toBe(true);
+  });
+
+  it('rejects missing duration_type', () => {
+    const r = validateClaudeEnrichment({ ...validRow, duration_type: null });
+    expect(r.ok).toBe(false);
+    if (!r.ok) expect(r.errors.some(e => /duration_type.*missing|required/i.test(e))).toBe(true);
+  });
+
+  it('rejects missing language', () => {
+    const r = validateClaudeEnrichment({ ...validRow, language: null });
+    expect(r.ok).toBe(false);
+    if (!r.ok) expect(r.errors.some(e => /language.*missing|required/i.test(e))).toBe(true);
+  });
+
+  it('reports ALL missing-required-singleton errors at once (no early exit)', () => {
+    const r = validateClaudeEnrichment({
+      ...validRow,
+      primary_category: null,
+      price_tier: null,
+      duration_type: null,
+      language: null,
+    });
+    expect(r.ok).toBe(false);
+    if (!r.ok) {
+      const fields = ['primary_category', 'price_tier', 'duration_type', 'language'];
+      for (const f of fields) {
+        expect(r.errors.some(e => e.includes(f))).toBe(true);
+      }
+    }
+  });
+});
+
 describe('validateClaudeEnrichment — failure modes', () => {
   it('rejects non-object payload', () => {
     const r = validateClaudeEnrichment('not an object');
@@ -191,15 +239,18 @@ describe('validateClaudeEnrichment — spende-erbeten flag', () => {
 });
 
 describe('validateClaudeBatch', () => {
-  it('accepts {results: [...]} envelope', () => {
-    const b = validateClaudeBatch({ results: [validRow, validRow] });
+  // Helper: results must echo their `index` per the new contract.
+  const withIndex = (row: typeof validRow, idx: number) => ({ ...row, index: idx });
+
+  it('accepts {results: [...]} envelope with echoed indices', () => {
+    const b = validateClaudeBatch({ results: [withIndex(validRow, 0), withIndex(validRow, 1)] });
     expect(b.ok).toBe(true);
     expect(b.items.length).toBe(2);
     expect(b.items[0].result.ok).toBe(true);
   });
 
-  it('accepts bare array', () => {
-    const b = validateClaudeBatch([validRow]);
+  it('accepts bare array with echoed indices', () => {
+    const b = validateClaudeBatch([withIndex(validRow, 0)]);
     expect(b.ok).toBe(true);
     expect(b.items.length).toBe(1);
   });
@@ -210,21 +261,91 @@ describe('validateClaudeBatch', () => {
     expect(b.fatalError).toMatch(/expected array/);
   });
 
-  it('preserves item indices through the batch', () => {
-    const b = validateClaudeBatch([validRow, { primary_category: 'Sonstiges' }, validRow]);
+  it('captures echoed indices on each item', () => {
+    const b = validateClaudeBatch([
+      withIndex(validRow, 0),
+      withIndex({ ...validRow, primary_category: 'Sonstiges' }, 1),
+      withIndex(validRow, 2),
+    ]);
     expect(b.items.map(i => i.index)).toEqual([0, 1, 2]);
+  });
+
+  it('returns -1 for items missing the echoed index', () => {
+    const b = validateClaudeBatch([validRow]); // no index field
+    expect(b.items[0].index).toBe(-1);
   });
 
   it('returns per-item ok/fail mix when partial validation', () => {
     const b = validateClaudeBatch([
-      validRow,
-      { ...validRow, suggested_price_min: -5 },
-      validRow,
+      withIndex(validRow, 0),
+      withIndex({ ...validRow, suggested_price_min: -5 }, 1),
+      withIndex(validRow, 2),
     ]);
     expect(b.ok).toBe(true);
     expect(b.items[0].result.ok).toBe(true);
     expect(b.items[1].result.ok).toBe(false);
     expect(b.items[2].result.ok).toBe(true);
+  });
+
+  describe('expectedSize cross-item enforcement', () => {
+    it('passes when every index is present exactly once', () => {
+      const b = validateClaudeBatch(
+        [withIndex(validRow, 0), withIndex(validRow, 1), withIndex(validRow, 2)],
+        3,
+      );
+      expect(b.ok).toBe(true);
+      expect(b.fatalError).toBeUndefined();
+    });
+
+    it('passes when results are reordered (matches by echoed index, not position)', () => {
+      const b = validateClaudeBatch(
+        [withIndex(validRow, 2), withIndex(validRow, 0), withIndex(validRow, 1)],
+        3,
+      );
+      expect(b.ok).toBe(true);
+      // Items kept in submission order; consumer remaps by echoed index.
+      expect(b.items.map(i => i.index)).toEqual([2, 0, 1]);
+    });
+
+    it('rejects wrong total count', () => {
+      const b = validateClaudeBatch([withIndex(validRow, 0), withIndex(validRow, 1)], 3);
+      expect(b.ok).toBe(false);
+      expect(b.fatalError).toMatch(/expected 3.*got 2/);
+    });
+
+    it('rejects duplicate index', () => {
+      const b = validateClaudeBatch(
+        [withIndex(validRow, 0), withIndex(validRow, 0)],
+        2,
+      );
+      expect(b.ok).toBe(false);
+      expect(b.fatalError).toMatch(/duplicate result index 0/);
+    });
+
+    it('rejects missing index (e.g. result has no echoed index)', () => {
+      const b = validateClaudeBatch([validRow, withIndex(validRow, 1)], 2);
+      expect(b.ok).toBe(false);
+      // First item has -1 echoed index → out of range.
+      expect(b.fatalError).toMatch(/-1 out of range|missing result/);
+    });
+
+    it('rejects out-of-range index', () => {
+      const b = validateClaudeBatch(
+        [withIndex(validRow, 0), withIndex(validRow, 5)],
+        2,
+      );
+      expect(b.ok).toBe(false);
+      expect(b.fatalError).toMatch(/index 5 out of range/);
+    });
+
+    it('rejects gap in echoed indices', () => {
+      const b = validateClaudeBatch(
+        [withIndex(validRow, 0), withIndex(validRow, 2)],
+        3,
+      );
+      expect(b.ok).toBe(false);
+      expect(b.fatalError).toMatch(/expected 3.*got 2|missing result for input index 1/);
+    });
   });
 });
 
