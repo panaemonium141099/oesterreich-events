@@ -382,7 +382,15 @@ export class GemeindeRegistryScraper extends BaseScraper {
 
   // ── Strategy: JSON-LD ───────────────────────────────────────────
 
-  private parseJsonLd(html: string, entry: GemeindeRegistryEntry): ScrapedEvent[] {
+  /**
+   * Parse JSON-LD events ONLY, without any fallback. Used both by the
+   * dispatcher (via `parseJsonLd`) and by the opportunistic-check in
+   * `parseGenericDates` — the latter must not chain into other
+   * fallback parsers, otherwise parseGenericDates → parseJsonLd →
+   * parseMEC → parseGenericDates can recurse to stack overflow on
+   * pages without parseable events.
+   */
+  private parseJsonLdOnly(html: string, entry: GemeindeRegistryEntry): ScrapedEvent[] {
     const $ = cheerio.load(html);
     const events: ScrapedEvent[] = [];
     const seen = new Set<string>();
@@ -453,8 +461,18 @@ export class GemeindeRegistryScraper extends BaseScraper {
       } catch { /* skip malformed JSON-LD */ }
     });
 
-    // Fallback: also try MEC or generic if JSON-LD yields nothing
-    if (events.length === 0) return this.parseMEC(html, entry);
+    return events;
+  }
+
+  /**
+   * Strategy entry point for `jsonld`: parse JSON-LD; if empty, fall
+   * back to MEC. The opportunistic-check inside parseGenericDates
+   * MUST NOT use this method (it would re-introduce the recursion);
+   * use parseJsonLdOnly instead.
+   */
+  private parseJsonLd(html: string, entry: GemeindeRegistryEntry): ScrapedEvent[] {
+    const events = this.parseJsonLdOnly(html, entry);
+    if (events.length === 0) return this.parseMECOnly(html, entry);
     return events;
   }
 
@@ -484,7 +502,14 @@ export class GemeindeRegistryScraper extends BaseScraper {
 
   // ── Strategy: MEC HTML ──────────────────────────────────────────
 
-  private parseMEC(html: string, entry: GemeindeRegistryEntry): ScrapedEvent[] {
+  /**
+   * Parse MEC events ONLY, without any fallback. Used both by the
+   * dispatcher (via `parseMEC`) and by the parseJsonLd fallback chain
+   * — the latter must not chain into parseGenericDates, otherwise
+   * parseGenericDates → parseJsonLd → parseMEC → parseGenericDates
+   * can recurse to stack overflow on pages without parseable events.
+   */
+  private parseMECOnly(html: string, entry: GemeindeRegistryEntry): ScrapedEvent[] {
     const $ = cheerio.load(html);
     const events: ScrapedEvent[] = [];
     const seen = new Set<string>();
@@ -530,7 +555,16 @@ export class GemeindeRegistryScraper extends BaseScraper {
       } catch { /* skip */ }
     });
 
-    // Fallback to generic if MEC found nothing
+    return events;
+  }
+
+  /**
+   * Strategy entry point for `mec-html`: parse MEC; if empty, fall
+   * back to generic-dates. The parseJsonLd fallback chain MUST use
+   * parseMECOnly instead, to avoid the recursion described above.
+   */
+  private parseMEC(html: string, entry: GemeindeRegistryEntry): ScrapedEvent[] {
+    const events = this.parseMECOnly(html, entry);
     if (events.length === 0) return this.parseGenericDates(html, entry);
     return events;
   }
@@ -925,7 +959,12 @@ export class GemeindeRegistryScraper extends BaseScraper {
     // grepping date-strings out of <article> blocks. Try it first; if the
     // page emits nothing parseable, fall through to the existing date-
     // pattern extractor.
-    const jsonLdEvents = this.parseJsonLd(html, entry);
+    //
+    // CRITICAL: use `parseJsonLdOnly`, NOT `parseJsonLd`. The latter
+    // falls back to parseMEC → parseGenericDates and would re-enter
+    // this function, recursing to stack overflow on any page with no
+    // parseable events anywhere.
+    const jsonLdEvents = this.parseJsonLdOnly(html, entry);
     if (jsonLdEvents.length > 0) return jsonLdEvents;
 
     const $ = cheerio.load(html);

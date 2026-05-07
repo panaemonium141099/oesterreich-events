@@ -137,9 +137,11 @@ interface ExistingRow {
   publish_status: string | null;
   // ─── UPSERT-Guard fields (fn-14.5) ─────────────────────────────────
   // These are read so toSupabaseRow() can decide whether to upgrade or
-  // preserve the existing value. Fields that lose the guard are OMITTED
-  // from the upsert payload (rather than re-written with an identical
-  // value) so Postgres treats them as untouched.
+  // preserve the existing value. When a guard says "keep old", the
+  // existing value is written back VERBATIM into the upsert payload
+  // (see the longer note above the guard imports for why omitting the
+  // key would be unsafe with PostgREST bulk upsert). last_seen_at is
+  // the only column that always advances on every upsert.
   image_url: string | null;
   image_width: number | null;
   image_height: number | null;

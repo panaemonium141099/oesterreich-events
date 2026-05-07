@@ -90,4 +90,37 @@ describe('validateAndUpgradeImageUrl (fn-14.5)', () => {
     expect(result.width).toBe(1024);
     expect(result.height).toBe(768);
   });
+
+  it('does NOT carry stale pre-upgrade height onto the wider URL (Codex regression test)', async () => {
+    // Cloudinary drops `h_300` when bumping to w_2000 — we must not
+    // persist (2000 × 300) impossible metadata. With the old aspect
+    // ratio (400 × 300 = 4:3), height should scale to 1500.
+    fetchSpy.mockResolvedValueOnce(new Response(null, {
+      status: 200,
+      headers: { 'content-type': 'image/jpeg' },
+    }));
+    const result = await validateAndUpgradeImageUrl(
+      'https://res.cloudinary.com/demo/image/upload/w_400,h_300/foo.jpg',
+    );
+    expect(result.url).toContain('w_2000');
+    expect(result.width).toBe(2000);
+    // Height scaled from 4:3 ratio (300 * 2000 / 400 = 1500), NOT
+    // the stale 300 from the pre-upgrade URL.
+    expect(result.height).toBe(1500);
+  });
+
+  it('omits height entirely when aspect ratio cannot be derived', async () => {
+    fetchSpy.mockResolvedValueOnce(new Response(null, {
+      status: 200,
+      headers: { 'content-type': 'image/jpeg' },
+    }));
+    // Pre-upgrade URL has only width (no height) — nothing to scale
+    // from, so the upgraded image has width but undefined height.
+    const result = await validateAndUpgradeImageUrl(
+      'https://res.cloudinary.com/demo/image/upload/w_400/foo.jpg',
+    );
+    expect(result.url).toContain('w_2000');
+    expect(result.width).toBe(2000);
+    expect(result.height).toBeUndefined();
+  });
 });

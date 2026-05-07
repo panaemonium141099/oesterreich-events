@@ -100,10 +100,44 @@ export async function validateAndUpgradeImageUrl(
     return baseline;
   }
 
+  // Compute upgraded dims. CRITICAL: do NOT fall back to the
+  // baseline (pre-upgrade) height when the upgraded URL has only a
+  // width. Cloudinary/Imgix intentionally drop the `h` constraint so
+  // the CDN re-derives the height from the original aspect ratio —
+  // reusing the old `h_300` for a `w_2000` URL would persist
+  // impossible metadata like (2000 × 300) and break aspect-ratio
+  // rendering downstream.
+  //
+  // If we know the original aspect ratio (both old width and old
+  // height), we scale the height proportionally. Otherwise we leave
+  // height undefined and let the supabase-sync guard preserve any
+  // pre-existing height column value (it won't NULL-clobber).
   const upgradedDims = extractDimsFromUrl(upgraded);
-  return {
+  const result: ValidatedImage = {
     url: upgraded,
-    width: upgradedDims.width ?? baselineDims.width ?? cleanWidth,
-    height: upgradedDims.height ?? baselineDims.height ?? cleanHeight,
+    ...(upgradedDims.width !== undefined ? { width: upgradedDims.width } : {}),
+    ...(upgradedDims.height !== undefined ? { height: upgradedDims.height } : {}),
   };
+
+  // Width fallback chain: explicit upgraded width → caller hint
+  // (cleanWidth). Skip baselineDims.width because the URL change
+  // means baseline width is now stale.
+  if (result.width === undefined) {
+    if (upgradedDims.width === undefined && cleanWidth !== undefined) {
+      result.width = cleanWidth;
+    }
+  }
+
+  // Height: scale from original aspect ratio when available. Both
+  // baselineDims.width and baselineDims.height must be present for
+  // the ratio to be meaningful.
+  if (result.height === undefined && result.width !== undefined) {
+    const oldW = baselineDims.width ?? cleanWidth;
+    const oldH = baselineDims.height ?? cleanHeight;
+    if (oldW && oldW > 0 && oldH && oldH > 0) {
+      result.height = Math.round((oldH * result.width) / oldW);
+    }
+  }
+
+  return result;
 }
