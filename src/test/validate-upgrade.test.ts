@@ -91,10 +91,13 @@ describe('validateAndUpgradeImageUrl (fn-14.5)', () => {
     expect(result.height).toBe(768);
   });
 
-  it('does NOT carry stale pre-upgrade height onto the wider URL (Codex regression test)', async () => {
+  it('persists ONLY upgraded-URL dims; never carries pre-upgrade height (Codex regression test)', async () => {
     // Cloudinary drops `h_300` when bumping to w_2000 — we must not
-    // persist (2000 × 300) impossible metadata. With the old aspect
-    // ratio (400 × 300 = 4:3), height should scale to 1500.
+    // persist (2000 × 300) impossible metadata, AND we must not
+    // synthesise a "scaled" height because Cloudinary's `c_fill`
+    // semantics mean the upgrade renders at the source's native
+    // ratio, not the derivative crop's. The only safe answer is
+    // width=2000, height=undefined.
     fetchSpy.mockResolvedValueOnce(new Response(null, {
       status: 200,
       headers: { 'content-type': 'image/jpeg' },
@@ -104,18 +107,14 @@ describe('validateAndUpgradeImageUrl (fn-14.5)', () => {
     );
     expect(result.url).toContain('w_2000');
     expect(result.width).toBe(2000);
-    // Height scaled from 4:3 ratio (300 * 2000 / 400 = 1500), NOT
-    // the stale 300 from the pre-upgrade URL.
-    expect(result.height).toBe(1500);
+    expect(result.height).toBeUndefined();
   });
 
-  it('omits height entirely when aspect ratio cannot be derived', async () => {
+  it('omits height entirely when the upgraded URL has only a width', async () => {
     fetchSpy.mockResolvedValueOnce(new Response(null, {
       status: 200,
       headers: { 'content-type': 'image/jpeg' },
     }));
-    // Pre-upgrade URL has only width (no height) — nothing to scale
-    // from, so the upgraded image has width but undefined height.
     const result = await validateAndUpgradeImageUrl(
       'https://res.cloudinary.com/demo/image/upload/w_400/foo.jpg',
     );
@@ -124,21 +123,21 @@ describe('validateAndUpgradeImageUrl (fn-14.5)', () => {
     expect(result.height).toBeUndefined();
   });
 
-  it('uses caller-supplied original height to derive new aspect ratio when URL lacks it', async () => {
+  it('ignores caller-supplied original dims for upgraded URLs (no synthesis)', async () => {
     fetchSpy.mockResolvedValueOnce(new Response(null, {
       status: 200,
       headers: { 'content-type': 'image/jpeg' },
     }));
-    // URL pattern only has w_400 — caller provides the original
-    // height (300) so the validator has the full ratio (4:3) to
-    // scale from for the upgraded width (2000).
+    // Even when caller supplies the full original ratio, we do NOT
+    // synthesise an upgraded height — Cloudinary's c_fill makes the
+    // ratio of the original derivative meaningless on the new URL.
     const result = await validateAndUpgradeImageUrl(
       'https://res.cloudinary.com/demo/image/upload/w_400/foo.jpg',
       400,
       300,
     );
     expect(result.width).toBe(2000);
-    expect(result.height).toBe(1500);
+    expect(result.height).toBeUndefined();
   });
 
   it('does NOT scale dims for WordPress strip-suffix (master crop may differ)', async () => {
