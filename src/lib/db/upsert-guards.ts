@@ -112,14 +112,18 @@ export function pickFinalImageHeight(
 
 /**
  * Description upgrade rule:
- *   - existing empty                                          → write new
- *   - new is meaningfully longer (>20%)                       → write new
+ *   - existing empty/whitespace                               → write new
+ *   - new is meaningfully longer (>20% by trimmed length)     → write new
  *   - existing not 'claude-v1' AND new comes from claude-v1   → write new (upgrade path)
  *   - otherwise                                               → keep existing
  *
  * `newVersion` is the enrichment_version we're about to attach. For raw
  * scraper writes we pass null/undefined — the function falls through to
  * the length comparison only.
+ *
+ * Whitespace handling: both inputs are evaluated by trimmed length so
+ * a scraper emitting `'   '` cannot win the 20%-longer rule against
+ * an existing real description, and cannot overwrite an empty column.
  */
 export function shouldOverwriteDescription(
   newDesc: string | null,
@@ -127,9 +131,11 @@ export function shouldOverwriteDescription(
   newVersion: string | null | undefined,
   oldVersion: string | null,
 ): boolean {
-  if (!newDesc) return false;
-  if (!oldDesc || !oldDesc.trim()) return true;
-  if (newDesc.length > oldDesc.length * 1.2) return true;
+  const trimmedNew = newDesc?.trim() ?? '';
+  if (!trimmedNew) return false;
+  const trimmedOld = oldDesc?.trim() ?? '';
+  if (!trimmedOld) return true;
+  if (trimmedNew.length > trimmedOld.length * 1.2) return true;
   if (newVersion === 'claude-v1' && oldVersion !== 'claude-v1') {
     return true;
   }
@@ -140,12 +146,19 @@ export function shouldOverwriteDescription(
  * Price-text upgrade rule: only fill when existing is empty. Once a
  * price is on the row we never clobber it from raw scrape data; the
  * enrichment script owns price refinements via its own bulk RPC.
+ *
+ * Whitespace handling: a scraper emitting `'   '` is treated as
+ * absent and cannot displace either an existing price or an empty
+ * column — the latter would persist whitespace and confuse later
+ * "is this column empty?" checks.
  */
 export function shouldOverwritePrice(
   newPrice: string | null,
   oldPrice: string | null,
 ): boolean {
-  if (!newPrice) return false;
-  if (!oldPrice || !oldPrice.trim()) return true;
+  const trimmedNew = newPrice?.trim() ?? '';
+  if (!trimmedNew) return false;
+  const trimmedOld = oldPrice?.trim() ?? '';
+  if (!trimmedOld) return true;
   return false;
 }

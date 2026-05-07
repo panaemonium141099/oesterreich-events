@@ -140,4 +140,24 @@ describe('validateAndUpgradeImageUrl (fn-14.5)', () => {
     expect(result.width).toBe(2000);
     expect(result.height).toBe(1500);
   });
+
+  it('does NOT scale dims for WordPress strip-suffix (master crop may differ)', async () => {
+    // Codex regression: wp `-400x300` derivative may be a crop of a
+    // master with a completely different aspect ratio. Stamping the
+    // master URL with the thumbnail dims (400×300) or scaling them
+    // would both be wrong. Width and height must come out undefined.
+    fetchSpy.mockResolvedValueOnce(new Response(null, {
+      status: 200,
+      headers: { 'content-type': 'image/jpeg' },
+    }));
+    const result = await validateAndUpgradeImageUrl(
+      'https://example.com/wp-content/uploads/2024/01/photo-400x300.jpg',
+      400,  // caller-supplied dims (e.g. listing-page thumbnail attrs)
+      300,
+    );
+    expect(result.url).toBe('https://example.com/wp-content/uploads/2024/01/photo.jpg');
+    expect(result.width).toBeUndefined();
+    expect(result.height).toBeUndefined();
+    expect(result.upgraded).toBe(true);
+  });
 });

@@ -29,6 +29,16 @@ interface CdnHandler {
    * `targetWidth` is a hint; handlers may pick the closest variant.
    */
   upgrade(url: string, targetWidth: number): string;
+  /**
+   * Whether the upgrade is guaranteed to preserve the original
+   * image's aspect ratio. True for "scale" CDNs like Cloudinary
+   * and Imgix that re-render the same source at a different size;
+   * FALSE for WordPress strip-suffix where the upgraded URL points
+   * to a different (master) asset that may have a different crop
+   * altogether. Used by `validateAndUpgradeImageUrl` to decide
+   * whether it's safe to scale the original height to the new width.
+   */
+  preservesAspectRatio: boolean;
 }
 
 const TARGET_WIDTH = 2000;
@@ -48,6 +58,7 @@ const TARGET_WIDTH = 2000;
  */
 const cloudinary: CdnHandler = {
   name: 'cloudinary',
+  preservesAspectRatio: true,
   match: (_url, hostname) => /(?:^|\.)cloudinary\.com$/i.test(hostname),
   upgrade(url, targetWidth) {
     try {
@@ -84,6 +95,7 @@ const cloudinary: CdnHandler = {
  */
 const imgix: CdnHandler = {
   name: 'imgix',
+  preservesAspectRatio: true,
   match: (_url, hostname) => /\.imgix\.net$/i.test(hostname),
   upgrade(url, targetWidth) {
     try {
@@ -111,6 +123,7 @@ const imgix: CdnHandler = {
  */
 const cloudflareImages: CdnHandler = {
   name: 'cloudflare-images',
+  preservesAspectRatio: true,
   match: (_url, hostname) => /^imagedelivery\.net$/i.test(hostname),
   upgrade(url, targetWidth) {
     try {
@@ -132,6 +145,10 @@ const cloudflareImages: CdnHandler = {
  */
 const wordpress: CdnHandler = {
   name: 'wordpress',
+  // WordPress strip-suffix points to the master asset, which can be
+  // a different crop than the `-WxH` derivative (Stretch/Crop/Fit
+  // are all options in WP). Treat dims as unrelated.
+  preservesAspectRatio: false,
   // wp-content path is canonical, .wp.com is jetpack/photon.
   match: (url) => /\/wp-content\/uploads\//i.test(url) || /\.wp\.com\//i.test(url),
   upgrade(url) {
@@ -153,6 +170,15 @@ const HANDLERS: readonly CdnHandler[] = [
   wordpress,
 ];
 
+export interface UpgradeResult {
+  /** The upgraded URL (always different from the original). */
+  url: string;
+  /** Identifier of the handler that produced the upgrade. */
+  handlerName: string;
+  /** True iff the upgrade is guaranteed to preserve aspect ratio. */
+  preservesAspectRatio: boolean;
+}
+
 /**
  * Returns an upgraded image URL if the host matches a known CDN AND the
  * upgrade actually changes the URL. Returns `null` for unknown CDNs or
@@ -162,6 +188,20 @@ const HANDLERS: readonly CdnHandler[] = [
  * Pure / sync. Never throws.
  */
 export function tryUpgradeImageUrl(url: string, targetWidth: number = TARGET_WIDTH): string | null {
+  const result = tryUpgradeImageUrlWithMeta(url, targetWidth);
+  return result?.url ?? null;
+}
+
+/**
+ * Same as `tryUpgradeImageUrl` but also returns the matched handler's
+ * metadata. Lets callers decide whether scaling derived dimensions
+ * across the upgrade is safe — for example, WordPress strip-suffix
+ * does NOT preserve aspect ratio (the master can be a different crop).
+ */
+export function tryUpgradeImageUrlWithMeta(
+  url: string,
+  targetWidth: number = TARGET_WIDTH,
+): UpgradeResult | null {
   if (!url || typeof url !== 'string') return null;
 
   let hostname = '';
@@ -174,10 +214,12 @@ export function tryUpgradeImageUrl(url: string, targetWidth: number = TARGET_WID
   for (const h of HANDLERS) {
     if (!h.match(url, hostname)) continue;
     const upgraded = h.upgrade(url, targetWidth);
-    // Only return when the upgrade actually changed something — otherwise
-    // there's nothing to validate.
     if (upgraded && upgraded !== url) {
-      return upgraded;
+      return {
+        url: upgraded,
+        handlerName: h.name,
+        preservesAspectRatio: h.preservesAspectRatio,
+      };
     }
     return null;
   }

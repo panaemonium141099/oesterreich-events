@@ -140,6 +140,19 @@ describe('shouldOverwriteDescription (fn-14.5 UPSERT-Guard)', () => {
   it('skips claude-v1 → claude-v1 same-version write', () => {
     expect(shouldOverwriteDescription('newish', 'oldish', 'claude-v1', 'claude-v1')).toBe(false);
   });
+
+  it('treats whitespace-only new description as absent (Codex regression test)', () => {
+    expect(shouldOverwriteDescription('   ', null, null, null)).toBe(false);
+    expect(shouldOverwriteDescription('   ', 'real description', null, null)).toBe(false);
+  });
+
+  it('compares against trimmed lengths (no winning the 20% rule with whitespace)', () => {
+    // Old has 100 real chars; new has 50 real chars + 200 spaces.
+    // Trimmed-new < trimmed-old, so guard rejects.
+    const oldDesc = 'a'.repeat(100);
+    const newDesc = 'a'.repeat(50) + ' '.repeat(200);
+    expect(shouldOverwriteDescription(newDesc, oldDesc, null, null)).toBe(false);
+  });
 });
 
 describe('shouldOverwritePrice (fn-14.5 UPSERT-Guard)', () => {
@@ -157,5 +170,12 @@ describe('shouldOverwritePrice (fn-14.5 UPSERT-Guard)', () => {
   it('skips when existing already has a price', () => {
     expect(shouldOverwritePrice('25 EUR', '15 EUR')).toBe(false);
     expect(shouldOverwritePrice('Eintritt frei', 'Spende erbeten')).toBe(false);
+  });
+
+  it('treats whitespace-only new price as absent (Codex regression test)', () => {
+    expect(shouldOverwritePrice('   ', null)).toBe(false);
+    expect(shouldOverwritePrice('   ', '15 EUR')).toBe(false);
+    // Even into an empty column, whitespace must not displace.
+    expect(shouldOverwritePrice('   ', '')).toBe(false);
   });
 });

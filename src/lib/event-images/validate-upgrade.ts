@@ -20,7 +20,7 @@
  * returned `{ url, width?, height? }` into the upsert payload.
  */
 
-import { tryUpgradeImageUrl } from './cdn-allowlist';
+import { tryUpgradeImageUrlWithMeta } from './cdn-allowlist';
 import { extractDimsFromUrl } from './extract-dims-from-url';
 
 const HEAD_TIMEOUT_MS = 5000;
@@ -97,51 +97,58 @@ export async function validateAndUpgradeImageUrl(
     height: baselineDims.height ?? cleanHeight,
   };
 
-  const upgraded = tryUpgradeImageUrl(originalUrl);
-  if (!upgraded) {
+  const upgrade = tryUpgradeImageUrlWithMeta(originalUrl);
+  if (!upgrade) {
     // Unknown CDN or already-at-target — nothing to validate, return baseline.
     return baseline;
   }
 
   // The upgrade rewrote the URL; HEAD-check before adopting it.
-  const isValid = await headCheckIsImage(upgraded);
+  const isValid = await headCheckIsImage(upgrade.url);
   if (!isValid) {
     return baseline;
   }
 
   // Compute upgraded dims. CRITICAL: do NOT fall back to the
-  // baseline (pre-upgrade) height when the upgraded URL has only a
-  // width. Cloudinary/Imgix intentionally drop the `h` constraint so
-  // the CDN re-derives the height from the original aspect ratio —
-  // reusing the old `h_300` for a `w_2000` URL would persist
-  // impossible metadata like (2000 × 300) and break aspect-ratio
-  // rendering downstream.
+  // baseline (pre-upgrade) dims when the upgraded URL has only a
+  // width — those dims described the previous variant.
   //
-  // If we know the original aspect ratio (both old width and old
-  // height), we scale the height proportionally. Otherwise we leave
-  // height undefined and let the supabase-sync guard preserve any
-  // pre-existing height column value (it won't NULL-clobber).
-  const upgradedDims = extractDimsFromUrl(upgraded);
+  // For aspect-ratio-preserving handlers (Cloudinary, Imgix,
+  // Cloudflare Images) we MAY scale the original height to the new
+  // width, because the CDN guarantees the upgrade is just a resize
+  // of the same source pixels.
+  //
+  // For handlers that do NOT preserve aspect ratio (WordPress
+  // strip-suffix → master image, which can be an entirely different
+  // crop), we leave height undefined. Persisting a scaled height
+  // would be wrong; persisting the original height would be even
+  // wronger.
+  const upgradedDims = extractDimsFromUrl(upgrade.url);
   const result: ValidatedImage = {
-    url: upgraded,
+    url: upgrade.url,
     upgraded: true,
     ...(upgradedDims.width !== undefined ? { width: upgradedDims.width } : {}),
     ...(upgradedDims.height !== undefined ? { height: upgradedDims.height } : {}),
   };
 
-  // Width fallback chain: explicit upgraded width → caller hint
-  // (cleanWidth). Skip baselineDims.width because the URL change
-  // means baseline width is now stale.
-  if (result.width === undefined) {
-    if (upgradedDims.width === undefined && cleanWidth !== undefined) {
+  // Width fallback chain only for aspect-ratio-preserving handlers
+  // when no width could be extracted from the upgraded URL itself.
+  // For non-AR-preserving handlers (WordPress) we deliberately leave
+  // width undefined — the master is a different crop, the old
+  // 400×300 thumbnail width has no relation to it.
+  if (result.width === undefined && upgrade.preservesAspectRatio) {
+    if (cleanWidth !== undefined) {
       result.width = cleanWidth;
     }
   }
 
-  // Height: scale from original aspect ratio when available. Both
-  // baselineDims.width and baselineDims.height must be present for
-  // the ratio to be meaningful.
-  if (result.height === undefined && result.width !== undefined) {
+  // Height scaling — only when handler preserves aspect ratio AND we
+  // have the full original ratio.
+  if (
+    result.height === undefined &&
+    result.width !== undefined &&
+    upgrade.preservesAspectRatio
+  ) {
     const oldW = baselineDims.width ?? cleanWidth;
     const oldH = baselineDims.height ?? cleanHeight;
     if (oldW && oldW > 0 && oldH && oldH > 0) {

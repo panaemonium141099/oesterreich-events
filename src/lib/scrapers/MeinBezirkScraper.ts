@@ -226,7 +226,19 @@ export class MeinBezirkScraper extends BaseScraper {
         if (detail.description) event.description = detail.description;
         if (detail.address) event.address = detail.address;
         if (detail.postalCode) event.postal_code = detail.postalCode;
-        if (detail.imageUrl) event.image_url = detail.imageUrl;
+        // Image: when the detail page provides a better URL, swap
+        // image_url AND its dims atomically. Keeping the listing-page
+        // thumbnail dims on the new hero URL would emit impossible
+        // metadata (e.g. 400x300 thumbnail dims on a 1200×630 og URL).
+        // detail.imageWidth/Height may be undefined — that's fine,
+        // the supabase-sync `pickFinalImageWidth/Height` helpers
+        // and pattern-extraction in extractDimsFromUrl pick up the
+        // slack.
+        if (detail.imageUrl) {
+          event.image_url = detail.imageUrl;
+          event.image_width = detail.imageWidth;
+          event.image_height = detail.imageHeight;
+        }
         if (detail.locationName && !event.location_name) {
           event.location_name = detail.locationName;
         }
@@ -251,6 +263,8 @@ export class MeinBezirkScraper extends BaseScraper {
     address?: string;
     postalCode?: string;
     imageUrl?: string;
+    imageWidth?: number;
+    imageHeight?: number;
     locationName?: string;
   } {
     const $ = cheerio.load(html);
@@ -259,6 +273,8 @@ export class MeinBezirkScraper extends BaseScraper {
       address?: string;
       postalCode?: string;
       imageUrl?: string;
+      imageWidth?: number;
+      imageHeight?: number;
       locationName?: string;
     } = {};
 
@@ -303,17 +319,31 @@ export class MeinBezirkScraper extends BaseScraper {
       if (venueName) result.locationName = venueName;
     }
 
-    // Better image: look for larger event images
-    const $img = $('meta[property="og:image"]').first();
-    const ogImage = $img.attr('content');
+    // Better image: look for larger event images. Prefer og:image
+    // (with og:image:width/height meta when emitted), otherwise pull
+    // from the detail page's hero img (using imageFromElement so
+    // width/height attrs are picked up).
+    const ogImage = $('meta[property="og:image"]').attr('content');
     if (ogImage && !ogImage.startsWith('data:')) {
       result.imageUrl = ogImage;
+      // og:image:width / og:image:height are commonly set on
+      // article pages — pick them up so the upsert doesn't carry
+      // stale listing-page thumbnail dims.
+      const ogW = parseInt($('meta[property="og:image:width"]').attr('content') || '0', 10);
+      const ogH = parseInt($('meta[property="og:image:height"]').attr('content') || '0', 10);
+      if (ogW > 0) result.imageWidth = ogW;
+      if (ogH > 0) result.imageHeight = ogH;
     } else {
-      // Fallback: large image in event detail
-      const $detailImg = $('.event-detail__image img, .article-image img, [itemprop="image"]').first();
-      const imgSrc = $detailImg.attr('data-src') || $detailImg.attr('src') || '';
-      if (imgSrc && !imgSrc.startsWith('data:')) {
-        result.imageUrl = imgSrc.startsWith('http') ? imgSrc : `https://www.meinbezirk.at${imgSrc}`;
+      // Fallback: large image in event detail. Use imageFromElement
+      // so srcset and width/height attrs are honoured.
+      const detailInfo = this.imageFromElement(
+        $('.event-detail__image img, .article-image img, [itemprop="image"]').first(),
+        'https://www.meinbezirk.at',
+      );
+      if (detailInfo?.url) {
+        result.imageUrl = detailInfo.url;
+        result.imageWidth = detailInfo.image_width;
+        result.imageHeight = detailInfo.image_height;
       }
     }
 
