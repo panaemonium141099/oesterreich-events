@@ -1,0 +1,2 @@
+{"ts":"2026-05-10T14:39:27.767Z","status":"run_start","model":"sonnet","batch_size":3,"concurrency":8,"bare_mode":false,"pending":59290,"already_done":4200}
+{"ts":"2026-05-10T14:48:18.062Z","status":"run_start","model":"sonnet","batch_size":3,"concurrency":8,"bare_mode":false,"pending":59289,"already_done":4200}

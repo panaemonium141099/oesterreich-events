@@ -654,6 +654,69 @@ function cleanupSystemPromptFile(): void {
   systemPromptFilePath = null;
 }
 
+/**
+ * HOME-isolation pool: at high concurrency (>=4) parallel claude-CLI
+ * subprocesses race on the global ~/.claude.json (telemetry, oauth-refresh,
+ * plugin-sync writes). Race-corruption manifests as "Configuration file
+ * corrupted: JSON Parse error: Unexpected EOF" → claude exit 1 → 90% fail
+ * rate (observed in fn-14.4 production run, ~58k events lost).
+ *
+ * Fix: per-concurrency-slot isolated HOME directory, each with its own
+ * `.claude.json` copy. Subprocesses round-robin through the pool — at most
+ * one subprocess writes to any given config file, so no race.
+ *
+ * Pool size = concurrency. OAuth token is preserved across copies (no
+ * re-auth needed). Cleanup on graceful shutdown.
+ */
+let isolatedHomePool: string[] = [];
+let isolatedHomeCounter = 0;
+
+function setupIsolatedHomePool(concurrency: number): void {
+  if (isolatedHomePool.length > 0) return;
+  const userHome = process.env.USERPROFILE || process.env.HOME || tmpdir();
+  const sourceConfig = join(userHome, '.claude.json');
+  const sourceClaudeDir = join(userHome, '.claude');
+  if (!existsSync(sourceConfig)) {
+    console.warn(`  ⚠ ${sourceConfig} not found — skipping HOME-pool isolation (race-condition risk at concurrency >=4)`);
+    return;
+  }
+  for (let i = 0; i < concurrency; i++) {
+    const isoDir = join(tmpdir(), `enrich-claude-home-${process.pid}-${i}`);
+    mkdirSync(isoDir, { recursive: true });
+    // Copy .claude.json (the file that races)
+    try {
+      const cfg = readFileSync(sourceConfig, 'utf8');
+      writeFileSync(join(isoDir, '.claude.json'), cfg);
+    } catch (err) {
+      console.warn(`  ⚠ failed to seed iso-home ${i}: ${err instanceof Error ? err.message : err}`);
+    }
+    // .claude/ subdir contains plugins, skills, agents — symlink would be
+    // ideal but mklink needs admin on Windows. Just point HOME there;
+    // claude re-discovers plugins from $HOME/.claude/. Without the symlink,
+    // claude sees an empty .claude/ dir → no plugins → no SessionEnd hook
+    // → no race. THAT'S WHAT WE WANT for our headless batch.
+    isolatedHomePool.push(isoDir);
+  }
+  console.log(`  HOME-pool:        ${concurrency} isolated dirs in ${tmpdir()} (no global-config race)`);
+}
+
+function pickIsolatedHome(): string | null {
+  if (isolatedHomePool.length === 0) return null;
+  const dir = isolatedHomePool[isolatedHomeCounter % isolatedHomePool.length];
+  isolatedHomeCounter++;
+  return dir;
+}
+
+function cleanupIsolatedHomePool(): void {
+  for (const dir of isolatedHomePool) {
+    try {
+      // Remove the .claude.json + the dir; ignore if claude wrote other files
+      try { unlinkSync(join(dir, '.claude.json')); } catch { /* gone */ }
+    } catch { /* swallow — temp cleanup */ }
+  }
+  isolatedHomePool = [];
+}
+
 async function callClaudeBatch(
   systemPrompt: string,
   batchInput: BatchInputItem[],
@@ -690,6 +753,11 @@ async function callClaudeBatch(
 
   const userMessage = JSON.stringify({ events: batchInput });
 
+  // Pick an isolated HOME from the pool to avoid global-config race.
+  // pickIsolatedHome() returns null if the pool wasn't initialized
+  // (concurrency 1, or seeding failed) — fall back to inherited HOME.
+  const isoHome = pickIsolatedHome();
+
   return new Promise<ClaudeCallResult>((resolve, reject) => {
     const child = spawn(resolved.path, args, {
       cwd: tmpdir(),
@@ -698,6 +766,10 @@ async function callClaudeBatch(
         NO_COLOR: '1',
         CLAUDE_CODE_SUPPRESS_UPDATE_CHECK: '1',
         DISABLE_AUTOUPDATER: '1',
+        // HOME-isolation override. Both Unix HOME and Windows USERPROFILE
+        // are set so claude finds the right .claude.json regardless of
+        // platform check inside the binary.
+        ...(isoHome ? { HOME: isoHome, USERPROFILE: isoHome } : {}),
       },
       stdio: ['pipe', 'pipe', 'pipe'],
       shell: resolved.useShell,
@@ -1783,6 +1855,11 @@ async function main() {
   // Register for SIGINT flush so Strg+C persists in-flight rows.
   activeBulkUpdater = enrichmentUpdater;
 
+  // Set up isolated HOME pool for concurrent claude subprocesses.
+  // At concurrency >=4 the global ~/.claude.json races and claude exits 1
+  // with "Configuration file corrupted". Per-slot isolated HOME avoids it.
+  setupIsolatedHomePool(opts.concurrency);
+
   if (opts.retryFailed) {
     console.log('  --retry-failed: clearing enrichment_failed=TRUE flags before run');
     if (!opts.dryRun) {
@@ -2095,12 +2172,14 @@ if (isMain) {
     }
     console.log('  Re-run the same command to pick up where you were (idempotent).');
     cleanupSystemPromptFile();
+    cleanupIsolatedHomePool();
     closeSharedBrowser().finally(() => process.exit(130));
   });
 
   main().catch((err) => {
     console.error('enrich-claude failed:', err);
     cleanupSystemPromptFile();
+    cleanupIsolatedHomePool();
     closeSharedBrowser().finally(() => process.exit(1));
   });
 }

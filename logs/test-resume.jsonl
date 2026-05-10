@@ -1,0 +1,3 @@
+{"ts":"2026-05-07T21:12:17.290Z","status":"run_start","model":"sonnet","batch_size":3,"concurrency":12,"bare_mode":false,"pending":68388,"already_done":0}
+{"ts":"2026-05-07T21:14:16.661Z","event_id":"00041862-8a8a-415c-888c-29b5424ce40e","title":"Nach oben scrollen","status":"desc_policy_failed","policy":"fill","reason":"empty/very short","failure_count":1}
+{"ts":"2026-05-07T21:17:17.046Z","status":"run_end","processed":50,"enriched":49,"failed":1,"poisonPilled":0,"elapsed_min":4.99595,"tokens_in":82058,"tokens_out":18982,"cache_read_in":0,"cache_create_in":0,"cost_usd":0}
