@@ -1,0 +1,12 @@
+{"ts":"2026-05-10T15:37:37.778Z","status":"run_start","model":"haiku","batch_size":3,"concurrency":1,"bare_mode":false,"pending":null,"already_done":4200}
+{"ts":"2026-05-10T15:38:19.144Z","event_id":"003dec52-e3cc-4a4c-88eb-8a98af883a0e","title":"Blasmusik 2026 im Neuen Rathaus","status":"poison_pill","error":"claude exited 1: ","failure_count":3}
+{"ts":"2026-05-10T15:38:19.146Z","event_id":"00500038-6b0d-4a89-8686-45db9d02a415","title":"Cybertribe &#038; Misguided pres. TARKNO , GRACE DAHL  &#038; DLV","status":"poison_pill","error":"claude exited 1: ","failure_count":3}
+{"ts":"2026-05-10T15:38:19.147Z","event_id":"00c00fbd-18d3-4052-8817-241bc842d55b","title":"Schachabend in Obervellach","status":"poison_pill","error":"claude exited 1: ","failure_count":3}
+{"ts":"2026-05-10T15:38:57.321Z","event_id":"00d211bb-919b-4613-8d61-24e7e91062c0","title":"Kulinarische Buchpräsentation mit Katharina Seiser - \"Gut bei Hitze\"","status":"poison_pill","error":"claude exited 1: ","failure_count":3}
+{"ts":"2026-05-10T15:38:57.327Z","event_id":"00d82214-f71f-48e3-8830-5de811a9dbf4","title":"Linz Blick: Die Stadt im Fokus","status":"poison_pill","error":"claude exited 1: ","failure_count":3}
+{"ts":"2026-05-10T15:38:57.329Z","event_id":"00e975f7-e923-42c6-8627-4f30a51f3ce2","title":"Maipfeifen Schnitzen","status":"poison_pill","error":"claude exited 1: ","failure_count":3}
+{"ts":"2026-05-10T15:39:37.188Z","event_id":"0109e625-35ec-4d42-a99c-367cae94e3f1","title":"Gesangsabend - Studierende von Renwart-Kahry Magdalena","status":"poison_pill","error":"claude exited 1: ","failure_count":3}
+{"ts":"2026-05-10T15:39:37.190Z","event_id":"0109ff06-226c-4b42-98b4-d370433c8ba3","title":"Volksmusikabend Herbstzeit is","status":"poison_pill","error":"claude exited 1: ","failure_count":3}
+{"ts":"2026-05-10T15:39:37.192Z","event_id":"010a2ae5-50d9-445f-b72c-9f73a36c4f14","title":"Feuerwehrtreff","status":"poison_pill","error":"claude exited 1: ","failure_count":3}
+{"ts":"2026-05-10T15:40:18.018Z","event_id":"010b58f5-c6f2-4a74-bf0b-83a34104917c","title":"Regionaler Bauernmarkt in Brixlegg 2026","status":"poison_pill","error":"claude exited 1: ","failure_count":3}
+{"ts":"2026-05-10T15:40:19.440Z","status":"run_end","processed":10,"enriched":0,"failed":10,"poisonPilled":10,"elapsed_min":2.694383333333333,"tokens_in":0,"tokens_out":0,"cache_read_in":0,"cache_create_in":0,"cost_usd":0}

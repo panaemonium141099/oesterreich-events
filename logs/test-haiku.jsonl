@@ -1,0 +1,52 @@
+{"ts":"2026-05-10T15:13:00.287Z","status":"run_start","model":"haiku","batch_size":3,"concurrency":8,"bare_mode":false,"pending":null,"already_done":4200}
+{"ts":"2026-05-10T15:13:43.550Z","event_id":"00d1ccc9-cb93-4ae7-909a-7d94c6aa639d","title":"Frauscherecker Festtage","status":"poison_pill","error":"claude exited 1: ","failure_count":3}
+{"ts":"2026-05-10T15:13:43.552Z","event_id":"00d211bb-919b-4613-8d61-24e7e91062c0","title":"Kulinarische Buchpräsentation mit Katharina Seiser - \"Gut bei Hitze\"","status":"batch_failed","error":"claude exited 1: ","failure_count":2}
+{"ts":"2026-05-10T15:13:43.553Z","event_id":"00d82214-f71f-48e3-8830-5de811a9dbf4","title":"Linz Blick: Die Stadt im Fokus","status":"batch_failed","error":"claude exited 1: ","failure_count":2}
+{"ts":"2026-05-10T15:13:45.069Z","event_id":"01019ea5-96f2-44fd-a206-58c11e6efc68","title":"Ferienakademie 2026","status":"poison_pill","error":"claude exited 1: ","failure_count":3}
+{"ts":"2026-05-10T15:13:45.130Z","event_id":"010273f3-9181-436d-bef3-8c0292323b6c","title":"Mutter-Eltern-Beratung","status":"poison_pill","error":"claude exited 1: ","failure_count":3}
+{"ts":"2026-05-10T15:13:45.132Z","event_id":"01028a11-7fdf-41d9-8771-e4cd4ca1ca17","title":"VOCALENSEMBLE LALÁ","status":"poison_pill","error":"claude exited 1: ","failure_count":3}
+{"ts":"2026-05-10T15:13:45.604Z","event_id":"00fcfa2e-6ef7-4491-b57d-95a85cc8eb6b","title":"Veranstaltungs-HighlightJohann Pölz - Halle Amstetten | 12.05.2026Musikschul-Gala\n        Mehr dazu","status":"poison_pill","error":"claude exited 1: ","failure_count":3}
+{"ts":"2026-05-10T15:13:45.605Z","event_id":"00fde814-cbd3-42a9-84e1-4d12992aac98","title":"5. Country & Westernfest","status":"poison_pill","error":"claude exited 1: ","failure_count":3}
+{"ts":"2026-05-10T15:13:45.629Z","event_id":"00fe5459-6602-48dd-aa8f-019075fce5f9","title":"Anastacia","status":"poison_pill","error":"claude exited 1: ","failure_count":3}
+{"ts":"2026-05-10T15:13:45.688Z","event_id":"003dec52-e3cc-4a4c-88eb-8a98af883a0e","title":"Blasmusik 2026 im Neuen Rathaus","status":"batch_failed","error":"claude exited 1: ","failure_count":2}
+{"ts":"2026-05-10T15:13:45.690Z","event_id":"0044d3c8-4c75-42a8-aba4-93debe4557c0","title":"Papier 1","status":"poison_pill","error":"claude exited 1: ","failure_count":3}
+{"ts":"2026-05-10T15:13:45.695Z","event_id":"00500038-6b0d-4a89-8686-45db9d02a415","title":"Cybertribe &#038; Misguided pres. TARKNO , GRACE DAHL  &#038; DLV","status":"batch_failed","error":"claude exited 1: ","failure_count":2}
+{"ts":"2026-05-10T15:13:46.060Z","event_id":"008e6dd3-d757-4698-a9d4-0de34d7a90d3","title":"Silvesterfeuerwerk","status":"poison_pill","error":"claude exited 1: ","failure_count":3}
+{"ts":"2026-05-10T15:13:46.062Z","event_id":"0099432a-d4d5-4e1e-8b89-49a5a4dd3210","title":"\"Was schwimmt denn da?\" - Kinder entdecken die faszinierende Wasserwelt","status":"poison_pill","error":"claude exited 1: ","failure_count":3}
+{"ts":"2026-05-10T15:13:46.064Z","event_id":"00c00fbd-18d3-4052-8817-241bc842d55b","title":"Schachabend in Obervellach","status":"batch_failed","error":"claude exited 1: ","failure_count":2}
+{"ts":"2026-05-10T15:13:46.250Z","event_id":"010417dc-0054-415c-aa13-519d8a05c2bb","title":"Vorweihnachtsfeier Seniorenbund","status":"poison_pill","error":"claude exited 1: ","failure_count":3}
+{"ts":"2026-05-10T15:13:46.252Z","event_id":"01052b9a-ecf8-4298-8cd4-1e8ebad87939","title":"CHRYSTN HUNT AKRON - Plasticphonia","status":"poison_pill","error":"claude exited 1: ","failure_count":3}
+{"ts":"2026-05-10T15:13:46.253Z","event_id":"0105cd97-684b-49b4-8a7c-a5dde89132e6","title":"Seniorennachmittag - gemeinsam statt einsamFest, Brauchtum","status":"poison_pill","error":"claude exited 1: ","failure_count":3}
+{"ts":"2026-05-10T15:13:46.856Z","event_id":"00e975f7-e923-42c6-8627-4f30a51f3ce2","title":"Maipfeifen Schnitzen","status":"batch_failed","error":"claude exited 1: ","failure_count":2}
+{"ts":"2026-05-10T15:13:46.857Z","event_id":"00f0ca53-11f3-42e2-b276-cdffb88b7801","title":"Holiday on Ice CINEMA OF DREAMS","status":"poison_pill","error":"claude exited 1: ","failure_count":3}
+{"ts":"2026-05-10T15:13:46.869Z","event_id":"00f4ba9d-a434-4735-be64-08276ecaf421","title":"Vatertags-BBQ","status":"poison_pill","error":"claude exited 1: ","failure_count":3}
+{"ts":"2026-05-10T15:13:46.874Z","event_id":"01070664-5ee1-4ba4-9126-b83598801ed4","title":"Science Café - Mütter und der Gender-Pay-Gap ihrer Kinder","status":"poison_pill","error":"claude exited 1: ","failure_count":3}
+{"ts":"2026-05-10T15:13:46.875Z","event_id":"01071941-b367-41ab-aeda-fc21a0b4a724","title":"Datum der VeranstaltungSo","status":"poison_pill","error":"claude exited 1: ","failure_count":3}
+{"ts":"2026-05-10T15:13:46.876Z","event_id":"01087d87-7337-47e9-b4db-9ce4974e1dd6","title":"Weinlesefest","status":"poison_pill","error":"claude exited 1: ","failure_count":3}
+{"ts":"2026-05-10T15:14:26.215Z","event_id":"0109e625-35ec-4d42-a99c-367cae94e3f1","title":"Gesangsabend - Studierende von Renwart-Kahry Magdalena","status":"batch_failed","error":"claude exited 1: ","failure_count":2}
+{"ts":"2026-05-10T15:14:26.217Z","event_id":"0109ff06-226c-4b42-98b4-d370433c8ba3","title":"Volksmusikabend Herbstzeit is","status":"batch_failed","error":"claude exited 1: ","failure_count":2}
+{"ts":"2026-05-10T15:14:26.218Z","event_id":"010a2ae5-50d9-445f-b72c-9f73a36c4f14","title":"Feuerwehrtreff","status":"batch_failed","error":"claude exited 1: ","failure_count":2}
+{"ts":"2026-05-10T15:14:27.478Z","event_id":"010b58f5-c6f2-4a74-bf0b-83a34104917c","title":"Regionaler Bauernmarkt in Brixlegg 2026","status":"batch_failed","error":"claude exited 1: ","failure_count":2}
+{"ts":"2026-05-10T15:14:27.480Z","event_id":"010da5be-2ac2-44df-9663-675cc25ab8b9","title":"Ausflugsfahrt der Pensionisten nach Berg im Drautal","status":"batch_failed","error":"claude exited 1: ","failure_count":2}
+{"ts":"2026-05-10T15:14:27.498Z","event_id":"010e464d-a0d2-4a94-86ab-aff53632d720","title":"140 Jahre FF Wetzelsdorf","status":"batch_failed","error":"claude exited 1: ","failure_count":2}
+{"ts":"2026-05-10T15:14:27.567Z","event_id":"0112cd0c-4285-4e85-9c5a-9b53b1872af5","title":"Christkönig","status":"batch_failed","error":"claude exited 1: ","failure_count":2}
+{"ts":"2026-05-10T15:14:27.569Z","event_id":"011330cb-ea87-4852-b85c-9df330c04c49","title":"Sprechtag Pflegekoordsination","status":"batch_failed","error":"claude exited 1: ","failure_count":2}
+{"ts":"2026-05-10T15:14:27.570Z","event_id":"0114600e-cd50-45a6-bb9c-5d2ecc551335","title":"Hauptplatz","status":"batch_failed","error":"claude exited 1: ","failure_count":2}
+{"ts":"2026-05-10T15:14:27.572Z","event_id":"01110472-dc4a-4b5b-b270-2b82983935ff","title":"Grillabend","status":"batch_failed","error":"claude exited 1: ","failure_count":2}
+{"ts":"2026-05-10T15:14:27.573Z","event_id":"0111083c-a0b6-4d96-955c-c32fc4cb4177","title":"Beachvolley oder Tischtennis Turnier | fit & fun light 2026","status":"batch_failed","error":"claude exited 1: ","failure_count":2}
+{"ts":"2026-05-10T15:14:27.575Z","event_id":"01118584-373e-42db-a2b0-f68f4b8fea85","title":"\"Kärntnermilch\" Musi - Wanderwoche 2026","status":"batch_failed","error":"claude exited 1: ","failure_count":2}
+{"ts":"2026-05-10T15:14:27.962Z","event_id":"0118fa25-ce78-4d6c-8d7e-e5f6800207ce","title":"EV Stammtisch-Cup 3. Runde 2025","status":"batch_failed","error":"claude exited 1: ","failure_count":2}
+{"ts":"2026-05-10T15:14:27.964Z","event_id":"011b1797-02a4-482e-8acc-5ff986ff9eb1","title":"nnenaufgangstour Wilder Mann","status":"batch_failed","error":"claude exited 1: ","failure_count":2}
+{"ts":"2026-05-10T15:14:27.965Z","event_id":"011bf063-37fb-4eeb-a0a8-ceffc419328d","title":"Nino aus Wien","status":"batch_failed","error":"claude exited 1: ","failure_count":2}
+{"ts":"2026-05-10T15:14:29.212Z","event_id":"01180a74-be8a-4169-8426-4d220feec06e","title":"Seefest","status":"batch_failed","error":"claude exited 1: ","failure_count":2}
+{"ts":"2026-05-10T15:14:29.213Z","event_id":"011882cb-0d91-42b4-959d-aa1507c5651d","title":"Vintage Wonderland Gablitz in 3003 Gablitz","status":"batch_failed","error":"claude exited 1: ","failure_count":1}
+{"ts":"2026-05-10T15:14:29.214Z","event_id":"0118e141-ae32-4ba3-aee1-2ac8ea9f6299","title":"Warm Up-Party der Schürzenjäger","status":"batch_failed","error":"claude exited 1: ","failure_count":2}
+{"ts":"2026-05-10T15:14:29.235Z","event_id":"010eed38-9405-410a-9849-b8f23f608927","title":"Anton Bruckner Universität Veranstaltungen unter www.bruckneruni.at","status":"batch_failed","error":"claude exited 1: ","failure_count":2}
+{"ts":"2026-05-10T15:14:29.236Z","event_id":"01105a8e-3e9c-469c-a1fc-0e784802ffa4","title":"Gotthard","status":"batch_failed","error":"claude exited 1: ","failure_count":2}
+{"ts":"2026-05-10T15:14:29.238Z","event_id":"0110de28-7123-4c1e-98d9-6ef9015db5dd","title":"Frühjahrsausstellung Schwarzmayr Landtechnik","status":"batch_failed","error":"claude exited 1: ","failure_count":2}
+{"ts":"2026-05-10T15:14:29.423Z","event_id":"011464ce-99a4-4407-bf17-e054c2300a23","title":"Seezeit am Wienerwaldsee – Bewegung in der Natur","status":"batch_failed","error":"claude exited 1: ","failure_count":2}
+{"ts":"2026-05-10T15:14:29.424Z","event_id":"0116bf59-7635-4e72-96c9-b848041eaaed","title":"Vortrag- \"Unsere Berge, Steine und Fossilien\"","status":"batch_failed","error":"claude exited 1: ","failure_count":2}
+{"ts":"2026-05-10T15:14:29.426Z","event_id":"0116d648-0c0c-42f8-8b38-5a1d45016f54","title":"Online-Schreibabend","status":"batch_failed","error":"claude exited 1: ","failure_count":2}
+{"ts":"2026-05-10T15:15:09.961Z","event_id":"011c3acf-6456-45e7-9a02-e12531921bd5","title":"Wilder Kaiser Classic","status":"batch_failed","error":"claude exited 1: ","failure_count":2}
+{"ts":"2026-05-10T15:15:10.738Z","event_id":"011cc59e-5013-49b1-bd44-ba9cada541ad","title":"Gesangverein \"Geselligkeit\" - CHORPROBE","status":"batch_failed","error":"claude exited 1: ","failure_count":2}
+{"ts":"2026-05-10T15:15:10.740Z","status":"run_end","processed":50,"enriched":0,"failed":50,"poisonPilled":18,"elapsed_min":2.17425,"tokens_in":0,"tokens_out":0,"cache_read_in":0,"cache_create_in":0,"cost_usd":0}

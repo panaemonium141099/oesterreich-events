@@ -675,29 +675,39 @@ function setupIsolatedHomePool(concurrency: number): void {
   if (isolatedHomePool.length > 0) return;
   const userHome = process.env.USERPROFILE || process.env.HOME || tmpdir();
   const sourceConfig = join(userHome, '.claude.json');
-  const sourceClaudeDir = join(userHome, '.claude');
+  const sourceCredentials = join(userHome, '.claude', '.credentials.json');
   if (!existsSync(sourceConfig)) {
     console.warn(`  ⚠ ${sourceConfig} not found — skipping HOME-pool isolation (race-condition risk at concurrency >=4)`);
     return;
   }
+  if (!existsSync(sourceCredentials)) {
+    console.warn(`  ⚠ ${sourceCredentials} not found — claude not logged in? Skipping HOME-pool.`);
+    return;
+  }
+  const cfgContent = readFileSync(sourceConfig, 'utf8');
+  const credContent = readFileSync(sourceCredentials, 'utf8');
   for (let i = 0; i < concurrency; i++) {
     const isoDir = join(tmpdir(), `enrich-claude-home-${process.pid}-${i}`);
-    mkdirSync(isoDir, { recursive: true });
-    // Copy .claude.json (the file that races)
+    const isoClaudeDir = join(isoDir, '.claude');
     try {
-      const cfg = readFileSync(sourceConfig, 'utf8');
-      writeFileSync(join(isoDir, '.claude.json'), cfg);
+      mkdirSync(isoDir, { recursive: true });
+      mkdirSync(isoClaudeDir, { recursive: true });
+      // .claude.json — root-level config (the file that races on writes)
+      writeFileSync(join(isoDir, '.claude.json'), cfgContent);
+      // .claude/.credentials.json — OAuth tokens. Without this claude exits
+      // with "Not logged in · Please run /login" (was discovered fn-14.4
+      // 2026-05-10 after several hours of head-scratching: empty .claude/
+      // dir was the silent kill, not the race we initially diagnosed).
+      writeFileSync(join(isoClaudeDir, '.credentials.json'), credContent);
+      // Other .claude/ subdirs (plugins, projects, cache, etc) intentionally
+      // missing — claude lazy-loads them or skips, no plugin SessionEnd hook
+      // → no further race surfaces. That's exactly what we want for batch.
     } catch (err) {
       console.warn(`  ⚠ failed to seed iso-home ${i}: ${err instanceof Error ? err.message : err}`);
     }
-    // .claude/ subdir contains plugins, skills, agents — symlink would be
-    // ideal but mklink needs admin on Windows. Just point HOME there;
-    // claude re-discovers plugins from $HOME/.claude/. Without the symlink,
-    // claude sees an empty .claude/ dir → no plugins → no SessionEnd hook
-    // → no race. THAT'S WHAT WE WANT for our headless batch.
     isolatedHomePool.push(isoDir);
   }
-  console.log(`  HOME-pool:        ${concurrency} isolated dirs in ${tmpdir()} (no global-config race)`);
+  console.log(`  HOME-pool:        ${concurrency} isolated dirs in ${tmpdir()} (cfg + credentials seeded, no plugin race)`);
 }
 
 function pickIsolatedHome(): string | null {
