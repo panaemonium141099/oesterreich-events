@@ -283,15 +283,22 @@ export function validateClaudeEnrichment(raw: unknown): ValidationResult {
   };
 
   // Out-of-vocab tags inside arrays already produced errors but are
-  // recoverable. The only fatal validation failures here are:
-  //   - primary_category set but not in PRIMARY_CATEGORY_SET (already
-  //     reported, caller should re-queue)
+  // recoverable — they get filtered out, the rest of the payload is
+  // still usable. The only FATAL validation failures here are:
+  //   - primary_category set but not in PRIMARY_CATEGORY_SET
   //   - structural type errors (not array, not boolean, not string)
-  // We surface both classes of errors in the same list and let the
-  // caller decide. ok=true means "no errors at all" (pristine match).
-  if (errors.length > 0) {
+  //   - missing required fields
+  // Differentiate so the caller can commit partial-good rows instead
+  // of poison-pilling the entire event over a stray "traditionell"
+  // hallucinated as a vibe instead of an audience.
+  // Hard-learned fn-14.4 (2026-05-10): haiku-mode produced 20%
+  // "(dropped)" warnings → 20% events lost to false poison-pill.
+  const fatalErrors = errors.filter(e => !e.endsWith('(dropped)'));
+  if (fatalErrors.length > 0) {
     return { ok: false, errors, partial: value };
   }
+  // No fatals — return the cleaned value. errors[] (dropped warnings)
+  // is intentionally not surfaced; the value already reflects the drops.
   return { ok: true, value };
 }
 
