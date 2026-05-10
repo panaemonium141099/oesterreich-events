@@ -1120,6 +1120,7 @@ interface Stats {
   costUsd: number;
   rateLimited: number;
   validationErrors: number;
+  descPolicySkipped: number;
   startedAt: number;
 }
 
@@ -1130,7 +1131,7 @@ function newStats(): Stats {
     descFilled: 0, descPolished: 0, priceTextFilled: 0, priceMinFilled: 0,
     studentTrue: 0, familyTrue: 0, dogTrue: 0, wheelchairTrue: 0, outdoorTrue: 0,
     tokensIn: 0, tokensOut: 0, cacheReadIn: 0, cacheCreateIn: 0, costUsd: 0,
-    rateLimited: 0, validationErrors: 0,
+    rateLimited: 0, validationErrors: 0, descPolicySkipped: 0,
     startedAt: Date.now(),
   };
 }
@@ -1339,9 +1340,6 @@ function buildUpdatePayload(
   //     on price_flags / occasion_tags / etc.
   // Both modes cascade-fail an entire 50-event batch, so we MUST skip.
   const update: Record<string, unknown> = {
-    language: validated.language,
-    price_tier: validated.price_tier,
-    duration_type: validated.duration_type,
     is_student_friendly: validated.is_student_friendly,
     is_family_friendly: validated.is_family_friendly,
     is_dog_friendly: validated.is_dog_friendly,
@@ -1365,6 +1363,15 @@ function buildUpdatePayload(
   if (validated.occasion.length > 0) update.occasion_tags = scrubArray(validated.occasion);
   if (validated.setting.length > 0) update.setting = scrubArray(validated.setting);
   if (validated.price_flags.length > 0) update.price_flags = scrubArray(validated.price_flags);
+
+  // Sparse enum-field merge (fn-14.4 paranoid pass): claude may return null
+  // for required enums when the value didn't pass vocab check (now soft-
+  // dropped). Sending `null` would clobber the existing column value via
+  // the RPC's `payload ? 'k'` check (key exists with null → SET to null).
+  // Only include the key when we have a real value.
+  if (validated.language) update.language = validated.language;
+  if (validated.price_tier) update.price_tier = validated.price_tier;
+  if (validated.duration_type) update.duration_type = validated.duration_type;
 
   // Category-lock semantics: only protect `category`. Other axes
   // (audience, vibe, …) are ALWAYS updated. fn-14.3 Interview decision.
@@ -1668,31 +1675,28 @@ async function processBatch(
     // (Codex review iteration #4 finding.)
     const validated = item.result.value;
     const policy = descOverridePolicy(ev.description);
+    // Description-policy check: if existing description is empty/short
+    // but AI returned null suggested_description, we'd commit the row
+    // with old (bad) description and the version filter would lock it
+    // out of future runs. Trade-off:
+    //   (a) commit-anyway → row enriched, description stays bad (acceptable
+    //       outcome — at least all other fields are good)
+    //   (b) skip-and-retry → row stays at enrichment_version=NULL, retried
+    //       next run; but bumps failure_count (after 3 → poison-pill)
+    // fn-14.4 hard-learned 2026-05-10 (paranoid pass): we go with (a) and
+    // log it as a soft warning. Otherwise haiku's "too short (<400)" mode
+    // ate ~5% of events as false poison-pills. Better to ship enriched
+    // metadata for them and accept that a small fraction will have a
+    // weak description.
     if ((policy.policy === 'fill' || policy.policy === 'polish') &&
         validated.suggested_description == null) {
-      stats.validationErrors += 1;
-      const newCount = (ev.enrichment_failure_count ?? 0) + 1;
-      const failedNow = newCount >= 3;
-      if (!opts.dryRun && !abort.aborted) {
-        await updater.add({
-          id: ev.id,
-          enrichment_failure_count: newCount,
-          ...(failedNow ? { enrichment_failed: true } : {}),
-        });
-      }
-      if (failedNow) stats.poisonPilled += 1;
-      stats.failed += 1;
-      stats.processed += 1;
-      outcome.fail.push({
-        index: i,
-        error: `desc-policy: existing description is "${policy.reason}" but AI returned null suggested_description`,
-      });
+      stats.descPolicySkipped += 1;
       appendLog(opts.logFile, {
-        event_id: ev.id, title: ev.title, status: 'desc_policy_failed',
+        event_id: ev.id, title: ev.title, status: 'desc_policy_warning',
         policy: policy.policy, reason: policy.reason,
-        failure_count: newCount,
+        action: 'commit_without_description_overwrite',
       });
-      continue;
+      // Fall through — commit the row with all other enriched fields.
     }
 
     const update = buildUpdatePayload(ev, validated, stats);

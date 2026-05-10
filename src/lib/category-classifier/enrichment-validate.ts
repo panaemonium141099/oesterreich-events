@@ -81,20 +81,23 @@ export type ValidationResult = ValidationOk | ValidationFail;
  */
 function pickCategory(value: unknown, errors: string[]): PrimaryCategory | null {
   if (value === null || value === undefined) {
-    errors.push('primary_category: missing (required, "genau 1" per spec)');
+    // Soft drop — caller commits other fields, category stays as old/null.
+    // Better than poison-pilling entire event over a missing category.
+    errors.push('primary_category: missing (dropped)');
     return null;
   }
   if (typeof value !== 'string') {
-    errors.push('primary_category: not a string');
+    errors.push('primary_category: not a string (dropped)');
     return null;
   }
   const trimmed = value.trim();
   if (!trimmed) {
-    errors.push('primary_category: empty string (required)');
+    errors.push('primary_category: empty string (dropped)');
     return null;
   }
   if (!PRIMARY_CATEGORY_SET.has(trimmed)) {
-    errors.push(`primary_category: "${trimmed}" not in vocabulary`);
+    // Soft drop — old rule-based category stays, all other fields commit.
+    errors.push(`primary_category: "${trimmed}" not in vocabulary (dropped)`);
     return null;
   }
   return trimmed as PrimaryCategory;
@@ -114,20 +117,21 @@ function pickEnum<T extends string>(
   required: boolean,
 ): T | null {
   if (value === null || value === undefined) {
-    if (required) errors.push(`${fieldName}: missing (required, "genau 1" per spec)`);
+    if (required) errors.push(`${fieldName}: missing (dropped)`);
     return null;
   }
   if (typeof value !== 'string') {
-    errors.push(`${fieldName}: not a string`);
+    errors.push(`${fieldName}: not a string (dropped)`);
     return null;
   }
   const norm = value.trim().toLowerCase();
   if (!norm) {
-    if (required) errors.push(`${fieldName}: empty string (required)`);
+    if (required) errors.push(`${fieldName}: empty string (dropped)`);
     return null;
   }
   if (!set.has(norm)) {
-    errors.push(`${fieldName}: "${norm}" not in vocabulary`);
+    // Soft drop — caller skips writing this field, existing value stays.
+    errors.push(`${fieldName}: "${norm}" not in vocabulary (dropped)`);
     return null;
   }
   return norm as T;
@@ -142,8 +146,20 @@ function pickArray(
 ): string[] {
   if (value === null || value === undefined) return [];
   if (!Array.isArray(value)) {
-    errors.push(`${fieldName}: not an array`);
-    return [];
+    // Coerce common variants: comma-separated string, single-string value.
+    if (typeof value === 'string') {
+      const parts = value.split(',').map(s => s.trim()).filter(Boolean);
+      if (parts.length > 0) {
+        errors.push(`${fieldName}: not an array (coerced from comma-string) (dropped)`);
+        value = parts;
+      } else {
+        errors.push(`${fieldName}: not an array (got string, no values) (dropped)`);
+        return [];
+      }
+    } else {
+      errors.push(`${fieldName}: not an array (got ${typeof value}) (dropped)`);
+      return [];
+    }
   }
   const seen = new Set<string>();
   const out: string[] = [];
@@ -169,7 +185,16 @@ function pickArray(
 function pickBool(value: unknown, fieldName: string, errors: string[]): boolean {
   if (typeof value === 'boolean') return value;
   if (value === null || value === undefined) return false;
-  errors.push(`${fieldName}: not a boolean (got ${typeof value})`);
+  // Coerce common claude variants: "true"/"false" strings, 0/1 numbers.
+  // Anything else: soft drop with default false. Per spec "im Zweifel FALSE".
+  if (typeof value === 'string') {
+    const norm = value.trim().toLowerCase();
+    if (norm === 'true') return true;
+    if (norm === 'false' || norm === '') return false;
+  }
+  if (value === 1) return true;
+  if (value === 0) return false;
+  errors.push(`${fieldName}: not a boolean (got ${typeof value}, defaulted to false) (dropped)`);
   return false;
 }
 
@@ -193,22 +218,28 @@ function pickPriceMin(value: unknown, errors: string[]): number | null {
 function pickSuggestedDescription(value: unknown, errors: string[]): string | null {
   if (value === null || value === undefined) return null;
   if (typeof value !== 'string') {
-    errors.push('suggested_description: not a string or null');
+    // Soft drop — claude returned wrong type but rest of payload may
+    // still be usable. Caller treats `(dropped)` as recoverable.
+    errors.push('suggested_description: not a string or null (dropped)');
     return null;
   }
   const t = value.trim();
   if (!t || /^null$/i.test(t)) return null;
-  // Reject anything with HTML — the prompt says "no HTML".
+  // Reject anything with HTML — the prompt says "no HTML". Soft drop.
   if (/<[a-z][^>]*>/i.test(t)) {
-    errors.push('suggested_description: contains HTML');
+    errors.push('suggested_description: contains HTML (dropped)');
     return null;
   }
   if (t.length < DESC_MIN) {
-    errors.push(`suggested_description: too short (${t.length} < ${DESC_MIN})`);
+    // Soft drop — null'd description means "leave existing alone";
+    // the row commits with all OTHER enrichment fields. Hard-learned
+    // fn-14.4: poison-pilling 11 events for a 380-char description
+    // (vs 400 minimum) is a worse outcome than committing partial.
+    errors.push(`suggested_description: too short (${t.length} < ${DESC_MIN}) (dropped)`);
     return null;
   }
   if (t.length > DESC_MAX) {
-    errors.push(`suggested_description: too long (${t.length} > ${DESC_MAX})`);
+    errors.push(`suggested_description: too long (${t.length} > ${DESC_MAX}) (dropped)`);
     // Tail-truncate is *not* applied — we'd rather drop and re-prompt
     // than ship a description that ends mid-sentence.
     return null;
