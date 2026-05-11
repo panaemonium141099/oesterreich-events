@@ -2,6 +2,47 @@ import { BaseScraper } from './BaseScraper';
 import type { ScrapedEvent } from '@/types/events';
 
 /**
+ * Manual overrides for Boudicca's OSM venue disambiguation bugs.
+ *
+ * Key format: `${collectorName}::${location.name}`
+ *
+ * Why this exists:
+ *   Some upstream collectors (notably kupfticket) only emit a venue
+ *   name without an address. Boudicca then resolves the venue via OSM
+ *   and picks the first building with that name — which can be in the
+ *   wrong city. Real-world example: "Halle B" exists in Innsbruck
+ *   (OSM way 51754144, Wikidata Q1924074) and in Baden bei Wien — and
+ *   Boudicca routes the Baden Beyond-Bühne shows to the Innsbruck pin.
+ *
+ *   When the override matches, we replace address/coords/PLZ/district/
+ *   bundesland in the scraped event. The downstream supabase-sync layer
+ *   then writes the corrected values without needing further hand-holding.
+ */
+const COLLECTOR_VENUE_OVERRIDES: Record<
+  string,
+  {
+    address: string;
+    postal_code: string;
+    district: string;
+    bundesland: string;
+    latitude: number;
+    longitude: number;
+  }
+> = {
+  // Halle B Baden bei Wien — youth theatre run by BeyondBühne / Stadt
+  // Baden. Boudicca's OSM lookup resolves the same name to the Halle B
+  // in Innsbruck (Falkstraße, 6020), so we pin it explicitly.
+  'kupfticket::Halle B': {
+    address: 'Waltersdorfer Straße 40, 2500 Baden',
+    postal_code: '2500',
+    district: 'Baden',
+    bundesland: 'Niederösterreich',
+    latitude: 47.9987406,
+    longitude: 16.2552624,
+  },
+};
+
+/**
  * boudicca.events scraper — pulls events via their public Search API
  * (https://github.com/boudicca-events/boudicca.events, GPL-3.0).
  *
@@ -214,8 +255,21 @@ export class BoudiccaEventsScraper extends BaseScraper {
     // supabase-sync.ts automatically from `event.category` and
     // `event.tags`, so the scraper only sets the primary fields.
     const locationName = readField('location.name')?.trim();
-    const address = readField('location.address')?.trim();
+    const rawAddress = readField('location.address')?.trim();
     const organizer = readField('organizer')?.trim();
+
+    // Boudicca's OSM-based venue disambiguation occasionally picks the
+    // wrong building when multiple venues share a generic name (e.g.
+    // "Halle B" exists in both Innsbruck and Baden bei Wien). The
+    // collectorName alone is not enough to disambiguate — kupfticket
+    // ticketing reaches across all of Austria. When we know upstream
+    // is wrong for a specific (collector, venue-name) pair, override
+    // here so address/PLZ/coords reflect the real venue.
+    const overrideKey = `${collector}::${locationName ?? ''}`;
+    const override = COLLECTOR_VENUE_OVERRIDES[overrideKey];
+    const address = override?.address ?? rawAddress;
+    const finalLat = override?.latitude ?? latitude;
+    const finalLng = override?.longitude ?? longitude;
 
     const event: ScrapedEvent = {
       source_id: boudiccaId,
@@ -227,8 +281,11 @@ export class BoudiccaEventsScraper extends BaseScraper {
       ...(end ? { end_date: end } : {}),
       ...(locationName ? { location_name: locationName } : {}),
       ...(address ? { address: address } : {}),
-      ...(latitude != null ? { latitude } : {}),
-      ...(longitude != null ? { longitude } : {}),
+      ...(override?.postal_code ? { postal_code: override.postal_code } : {}),
+      ...(override?.district ? { district: override.district } : {}),
+      ...(override?.bundesland ? { bundesland: override.bundesland } : {}),
+      ...(finalLat != null ? { latitude: finalLat } : {}),
+      ...(finalLng != null ? { longitude: finalLng } : {}),
       ...(v3Category ? { category: v3Category } : {}),
       ...(tags.length > 0 ? { tags } : {}),
       ...(priceText ? { price_text: priceText } : {}),
