@@ -82,6 +82,14 @@ export function CreateEventPageClient() {
           : endDate
       : null;
 
+    // Public user-submitted events go through admin review before they
+    // appear on the map (publish_status = 'needs_review'). Private events
+    // are visible only to the creator + invited friends, so they skip the
+    // queue. Scraped/derived events default to 'published' via the column
+    // default — this override only fires for the user-submission path.
+    // The admin review queue surfaces 'needs_review' rows in /admin/events.
+    const publishStatus = visibility === 'public' ? 'needs_review' : 'published';
+
     const { error: err } = await supabase.from('events').insert({
       title,
       description: description || null,
@@ -96,6 +104,7 @@ export function CreateEventPageClient() {
       price_text: priceText || null,
       ticket_url: ticketUrl || null,
       visibility,
+      publish_status: publishStatus,
       source_type: profile?.role === 'business' ? 'business' : 'user',
       created_by: user.id,
       business_id: profile?.role === 'business' ? user.id : null,
