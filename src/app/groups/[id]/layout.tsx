@@ -1,21 +1,25 @@
+'use client';
+
 /**
  * /groups/[id] — authenticated plan detail.
  *
- * fn-15.5 fix (round 2 — codex review): the parent `/groups/layout.tsx`
- * already mounts <AppShell>, and the App Router composes layouts top-
- * down, so wrapping again here would create a double provider tree
- * (two AuthContext/Notifications/SavedEvents listeners + two
- * NotificationToast portals fighting for the same realtime channel).
- *
- * The detail page does want the bottom social-nav hidden — its
- * planer-style chrome has its own bottom CTA — so we set
- * `body.has-modal-open` via CSS via the planer-scope (see globals.css
- * line `body.has-modal-open [data-social-nav] { display: none }`)?
- *
- * Simpler approach used here: hide the bottom-nav via CSS only on this
- * route. The parent layout's <SocialNav> stays mounted (so chat/feed
- * counters keep ticking) but is hidden via the route-scoped class.
+ * fn-15.5 (round-2 codex fix): the parent `/groups/layout.tsx` already
+ * mounts <AppShell>, so this layout MUST NOT wrap in another AppShell
+ * (would create a double provider tree). Instead, it toggles a
+ * `data-hide-social-nav` attribute on the document body for the
+ * duration of the route — the global CSS rule
+ * `body[data-hide-social-nav] [data-social-nav] { display: none }`
+ * (in globals.css) hides the bottom-nav that the parent AppShell
+ * renders as a sibling of `children`. A pure-CSS class on `children`
+ * couldn't reach a sibling/ancestor; the body-attribute approach can.
  */
+
+import { useEffect } from 'react';
+
 export default function GroupDetailLayout({ children }: { children: React.ReactNode }) {
-  return <div className="hide-social-nav">{children}</div>;
+  useEffect(() => {
+    document.body.setAttribute('data-hide-social-nav', 'true');
+    return () => { document.body.removeAttribute('data-hide-social-nav'); };
+  }, []);
+  return <>{children}</>;
 }

@@ -8,6 +8,7 @@ import {
   useMemo,
   useRef,
   useState,
+  useSyncExternalStore,
 } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { useAuth } from '@/lib/supabase/auth-context';
@@ -23,6 +24,40 @@ interface SavedEventsContextValue {
   markSaved: (eventId: string, saved: boolean) => void;
 }
 
+/**
+ * fn-15.5 (round-2 codex fix): the parallel `@modal` slot can't
+ * share React context with `children`, but both subtrees still need
+ * to observe the SAME saved-events state — otherwise saving an event
+ * in the modal sheet leaves the underlying map / feed / saved-list
+ * showing stale UI until that subtree remounts.
+ *
+ * Solution: an external store at the module level. Every provider
+ * instance writes through it and reads from it via
+ * `useSyncExternalStore`, so two `<SavedEventsProvider>` siblings
+ * (one in `AppShell` around `children`, one in `ModalShell` around
+ * `modal`) see the exact same Set object and re-render in lockstep
+ * when it changes. No actual data duplication.
+ */
+type SavedStore = {
+  ids: Set<string>;
+  userId: string | null;
+};
+const savedStore: SavedStore = { ids: new Set(), userId: null };
+const savedListeners = new Set<() => void>();
+
+function subscribeSavedStore(cb: () => void): () => void {
+  savedListeners.add(cb);
+  return () => { savedListeners.delete(cb); };
+}
+function getSavedSnapshot(): Set<string> {
+  return savedStore.ids;
+}
+function setSavedStore(next: Set<string>, userId: string | null): void {
+  savedStore.ids = next;
+  savedStore.userId = userId;
+  for (const cb of savedListeners) cb();
+}
+
 const NOOP_CONTEXT: SavedEventsContextValue = {
   savedIds: new Set(),
   isSaved: () => false,
@@ -36,12 +71,19 @@ const SavedEventsContext = createContext<SavedEventsContextValue>(NOOP_CONTEXT);
 export function SavedEventsProvider({ children }: { children: React.ReactNode }) {
   const { user } = useAuth();
   const supabase = useMemo(() => createClient(), []);
-  const [savedIds, setSavedIds] = useState<Set<string>>(new Set());
+  // Subscribe to the module store; useSyncExternalStore guarantees
+  // every provider instance re-renders when the store changes,
+  // regardless of which React tree the update originated in.
+  const savedIds = useSyncExternalStore(
+    subscribeSavedStore,
+    getSavedSnapshot,
+    getSavedSnapshot,
+  );
   const userIdRef = useRef<string | null>(null);
 
   const refresh = useCallback(async () => {
     if (!user) {
-      setSavedIds(new Set());
+      setSavedStore(new Set(), null);
       userIdRef.current = null;
       return;
     }
@@ -53,10 +95,15 @@ export function SavedEventsProvider({ children }: { children: React.ReactNode })
     const next = new Set<string>(
       (data ?? []).map((r: { event_id: string }) => r.event_id)
     );
-    setSavedIds(next);
+    setSavedStore(next, user.id);
     userIdRef.current = user.id;
   }, [user, supabase]);
 
+  // Two provider instances (e.g. AppShell + ModalShell) both call
+  // refresh on mount. The store collapses them — second call sees the
+  // cached set and either re-fetches (intended on auth change) or
+  // confirms (cheap idempotent read). Throttling is left to Supabase
+  // — saving an event is a low-frequency action.
   useEffect(() => {
     refresh();
   }, [refresh]);
@@ -64,21 +111,21 @@ export function SavedEventsProvider({ children }: { children: React.ReactNode })
   const isSaved = useCallback((eventId: string) => savedIds.has(eventId), [savedIds]);
 
   const markSaved = useCallback((eventId: string, saved: boolean) => {
-    setSavedIds(prev => {
-      if (saved && prev.has(eventId)) return prev;
-      if (!saved && !prev.has(eventId)) return prev;
-      const next = new Set(prev);
-      if (saved) next.add(eventId);
-      else next.delete(eventId);
-      return next;
-    });
+    const prev = savedStore.ids;
+    if (saved && prev.has(eventId)) return;
+    if (!saved && !prev.has(eventId)) return;
+    const next = new Set(prev);
+    if (saved) next.add(eventId);
+    else next.delete(eventId);
+    setSavedStore(next, savedStore.userId);
   }, []);
 
   const toggleSaved = useCallback(
     async (eventId: string): Promise<'saved' | 'removed' | 'noop'> => {
       if (!user) return 'noop';
-      const currentlySaved = savedIds.has(eventId);
-      // Optimistic update
+      const currentlySaved = savedStore.ids.has(eventId);
+      // Optimistic update — flips the shared store, so both subtrees
+      // re-render.
       markSaved(eventId, !currentlySaved);
       try {
         if (currentlySaved) {
@@ -101,7 +148,7 @@ export function SavedEventsProvider({ children }: { children: React.ReactNode })
         return 'noop';
       }
     },
-    [user, supabase, savedIds, markSaved],
+    [user, supabase, markSaved],
   );
 
   const value = useMemo<SavedEventsContextValue>(

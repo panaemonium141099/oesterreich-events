@@ -90,12 +90,14 @@ body.has-modal-open [data-social-nav] {
   display: none !important;
 }
 
-/* fn-15.5: route-scoped hide of the bottom social-nav. Used by the
-   plan-detail route (`/groups/[id]/layout.tsx`) whose chrome has its
-   own bottom CTA. Nesting an extra <AppShell> there would create a
-   double provider tree (codex fn-15.5 round-2 finding), so we leave
-   the parent shell intact and just style the nav away on this route. */
-.hide-social-nav [data-social-nav] {
+/* fn-15.5 round-2: route-scoped hide of the bottom social-nav. Used by
+   the plan-detail route (`/groups/[id]/layout.tsx`) whose chrome has
+   its own bottom CTA. Nesting an extra <AppShell> there would create a
+   double provider tree, so we leave the parent shell intact and toggle
+   a body-level attribute on mount/unmount. body-level so the selector
+   can reach the bottom-nav even though it lives in a sibling React
+   subtree relative to the page content. */
+body[data-hide-social-nav='true'] [data-social-nav] {
   display: none !important;
 }
 

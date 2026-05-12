@@ -19,6 +19,7 @@ import Script from 'next/script';
 //     and the AfterSavePanel / share-sheet show toasts on landing too.
 // AdSense was removed in fn-15.4; CookieBanner is also unused.
 import { Toaster } from 'sonner';
+import { RouteTransitions } from '@/components/Layout/RouteTransitions';
 import { fraunces, geist, caveat } from '@/lib/fonts';
 import './globals.css';
 
@@ -203,14 +204,15 @@ export default function RootLayout({
       </head>
       <body className="antialiased">
         {/*
-          fn-15.5: page-transition wrapper now uses the CSS
-          `view-transition-name` API instead of motion-lib's
-          AnimatePresence. Browsers that don't implement the spec
-          (Firefox as of 2026-05) skip the transition entirely and
-          jump-cut between routes — that's the documented graceful
-          fallback. No JS feature-detect or polyfill needed; the
-          `view-transition-name` style is simply ignored.
+          fn-15.5 round-2: page-transitions now use the CSS View
+          Transition API. <RouteTransitions /> (client component) calls
+          `document.startViewTransition()` on internal link clicks —
+          that's the trigger that the CSS `::view-transition-*` pseudo-
+          elements need to animate same-document navigations. Browsers
+          without `startViewTransition` (Firefox) fall back to instant
+          cuts, which the spec explicitly allows.
         */}
+        <RouteTransitions />
         <main className="route-root" style={{ viewTransitionName: 'route-root' }}>
           {children}
         </main>
