@@ -94,10 +94,11 @@ export default function DatenschutzPage() {
             <p>Unsere Website verwendet folgende Arten von Cookies:</p>
             <ul className="list-disc list-inside mt-3 space-y-1.5">
               <li><span className="text-white/90">Notwendige Cookies:</span> Erforderlich für die Grundfunktionalität der Website (Session-Verwaltung, Authentifizierung). Diese Cookies können nicht deaktiviert werden.</li>
-              <li><span className="text-white/90">Analyse-Cookies:</span> Helfen uns zu verstehen, wie Besucher mit der Website interagieren. Diese Cookies werden nur mit Ihrer Zustimmung gesetzt.</li>
             </ul>
             <p className="mt-3">
-              Derzeit setzen wir keine Werbenetzwerk-Cookies ein. Sollten zukünftig
+              Derzeit setzen wir <strong>keine Analyse- und keine Werbenetzwerk-Cookies</strong>
+              ein. Die Reichweitenmessung erfolgt ausschließlich über das cookielose
+              Vercel-Analytics (siehe Abschnitt 6). Sollten zukünftig Analyse- oder
               Marketing-Cookies eingeführt werden, werden diese ausschließlich nach
               ausdrücklicher Einwilligung gesetzt und an dieser Stelle dokumentiert.
             </p>
