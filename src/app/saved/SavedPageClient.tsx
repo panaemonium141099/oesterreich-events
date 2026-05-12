@@ -182,7 +182,6 @@ export function SavedPageClient() {
                       title={event.title}
                       sizes="64px"
                       wrapperClassName="w-full h-full"
-                      showSkeleton={false}
                       loading="lazy"
                     />
                   </div>

@@ -15,7 +15,17 @@ export function Footer() {
     // landing page. The pill is ~60px tall + 16px bottom margin + breathing
     // room; 128px of padding guarantees the last row stays clearly above it
     // on both mobile and desktop.
-    <footer className="w-full border-t border-white/[0.06] mt-auto pb-32">
+    //
+    // fn-15.2 — Footer-Fix:
+    // Removed `mt-auto`. Previously the parent flex container used mt-auto
+    // to push the footer to the viewport bottom on short pages. When the
+    // four async landing sections mounted client-side, the container grew
+    // and mt-auto's available-space allotment changed → footer translated
+    // down by hundreds of pixels (CLS 0.535 root cause per PSI audit).
+    // Now the footer just follows document flow. The landing-page wrapper
+    // reserves the section boxes via Suspense fallbacks (see
+    // SectionSkeletons.tsx) so the layout is stable at first paint.
+    <footer className="w-full border-t border-white/[0.06] pb-32">
       <div className="max-w-5xl mx-auto px-6 py-8 flex flex-col gap-6">
         {/* Main footer row */}
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4">

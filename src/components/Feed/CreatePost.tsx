@@ -200,7 +200,6 @@ export function CreatePost({ userId, userAvatar, userInitial, onPostCreated }: C
                               title={ev.title}
                               sizes="32px"
                               wrapperClassName="w-8 h-8 rounded-lg shrink-0 bg-white/[0.06]"
-                              showSkeleton={false}
                               loading="lazy"
                             />
                             <div className="flex-1 min-w-0">

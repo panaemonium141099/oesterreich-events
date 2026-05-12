@@ -768,7 +768,6 @@ function StepEssenz({
                 title={draft.selectedEvent.title}
                 sizes="64px"
                 wrapperClassName="w-16 h-16 rounded-xl shrink-0"
-                showSkeleton={false}
                 loading="lazy"
               />
               <div className="flex-1 min-w-0">
@@ -828,7 +827,6 @@ function StepEssenz({
                             title={ev.title}
                             sizes="44px"
                             wrapperClassName="w-11 h-11 rounded-lg shrink-0"
-                            showSkeleton={false}
                             loading="lazy"
                           />
                           <div className="flex-1 min-w-0">

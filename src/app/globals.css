@@ -888,22 +888,89 @@ button:active, a:active, [role="button"]:active {
 
 /* ═══════════════════════════════════════════════
    Gradient Mesh — animated landing background
+   ───────────────────────────────────────────────
+   fn-15.2: pre-fn-15.2 this animated `background-position-x/y` on the
+   container itself, which paints on every frame (PSI: "non-composited
+   animation"). Now we lift the 3-radial mesh onto an absolutely-
+   positioned ::before pseudo-element and translate it via
+   `transform: translate3d(...)`. transform-only animations stay on the
+   compositor thread → no layout / no paint, no CLS contribution, and
+   verifiable in DevTools "Layer borders" as a single GPU layer.
+   The host element keeps the solid-black backdrop so the page never
+   shows white during the transition.
    ═══════════════════════════════════════════════ */
 .gradient-mesh {
+  position: relative;
   background: #000;
+  isolation: isolate; /* keep the ::before painted below children */
+}
+.gradient-mesh::before {
+  content: '';
+  position: absolute;
+  /* Oversize so a small translate doesn't expose the edges. The mesh
+     extends 25% past every edge; max translate is ±20%, leaving 5%
+     of safety. */
+  inset: -25%;
+  z-index: -1;
+  pointer-events: none;
   background-image:
     radial-gradient(at 20% 80%, rgba(99, 102, 241, 0.08) 0px, transparent 50%),
     radial-gradient(at 80% 20%, rgba(168, 85, 247, 0.06) 0px, transparent 50%),
     radial-gradient(at 50% 50%, rgba(59, 130, 246, 0.04) 0px, transparent 50%);
-  background-size: 200% 200%, 200% 200%, 200% 200%;
+  /* will-change hints the browser to put this on its own compositor
+     layer up-front; combined with translate3d below it stays GPU-resident. */
+  will-change: transform;
+  transform: translate3d(0, 0, 0);
   animation: meshShift 15s ease-in-out infinite alternate;
 }
 @keyframes meshShift {
-  0%   { background-position: 0% 0%, 100% 100%, 50% 50%; }
-  100% { background-position: 100% 100%, 0% 0%, 50% 0%; }
+  /* compositor-only: only `transform` changes between keyframes. */
+  0%   { transform: translate3d(0%, 0%, 0); }
+  100% { transform: translate3d(-12%, -10%, 0); }
 }
 @media (prefers-reduced-motion: reduce) {
-  .gradient-mesh { animation: none; }
+  .gradient-mesh::before { animation: none; transform: translate3d(0, 0, 0); }
+}
+
+/* ═══════════════════════════════════════════════
+   CLS-Stable Skeleton Shimmer (fn-15.2)
+   ───────────────────────────────────────────────
+   CSS-only diagonal shimmer for landing-section Suspense fallbacks.
+   Translates a low-contrast highlight band across a dark base via
+   `transform: translateX(...)` so it runs entirely on the compositor —
+   no JS, no `background-position` paint-cost.
+   ═══════════════════════════════════════════════ */
+.cls-skel {
+  position: relative;
+  overflow: hidden;
+  background-color: rgba(255, 255, 255, 0.04);
+  border-radius: inherit;
+}
+.cls-skel::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    100deg,
+    transparent 0%,
+    transparent 35%,
+    rgba(255, 255, 255, 0.05) 50%,
+    transparent 65%,
+    transparent 100%
+  );
+  /* 200% width so the translate has somewhere to travel without seams. */
+  width: 200%;
+  transform: translate3d(-50%, 0, 0);
+  animation: clsSkelShimmer 1.6s linear infinite;
+  pointer-events: none;
+  will-change: transform;
+}
+@keyframes clsSkelShimmer {
+  0%   { transform: translate3d(-50%, 0, 0); }
+  100% { transform: translate3d(50%, 0, 0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cls-skel::after { animation: none; }
 }
 
 /* ═══════════════════════════════════════════════

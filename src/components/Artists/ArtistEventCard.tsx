@@ -116,7 +116,6 @@ export function ArtistEventCard({
             sizes="80px"
             className="transition-all duration-200 group-hover:scale-110 motion-reduce:group-hover:scale-100"
             wrapperClassName="w-full h-full"
-            showSkeleton={true}
             showGradientOverlay={true}
             loading="lazy"
           />

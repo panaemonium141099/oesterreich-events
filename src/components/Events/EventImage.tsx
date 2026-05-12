@@ -24,9 +24,16 @@
 //
 // Caller compatibility:
 // Old callers passed `src`, `category`, `title`, `bundesland`,
-// `wrapperClassName`, `className`, `showSkeleton`, `showGradientOverlay`,
+// `wrapperClassName`, `className`, `showGradientOverlay`,
 // `objectPosition`, `objectFit`, `loading`, `fetchPriority`. We keep
 // all of those working. New spec-mandated props are added on top.
+//
+// fn-15.2 removed the deprecated `showSkeleton` prop entirely. It was
+// a no-op since fn-15.1 (RSC cannot dismiss a shimmer via onLoad). CLS
+// stability is now owned by container-level Suspense skeletons in
+// src/components/Landing/SectionSkeletons.tsx + next/image's built-in
+// `placeholder="blur"` for the in-flight remote-image window. All 20
+// call-sites were updated in the same commit.
 
 import Image, { type ImageProps } from 'next/image';
 import { resolvePrimaryEventImage } from '@/lib/event-images';
@@ -152,19 +159,6 @@ type SharedProps = {
   preload?: boolean;
   /** Optional gradient overlay (kept for callers like EventCard). */
   showGradientOverlay?: boolean;
-  /**
-   * @deprecated No-op in the RSC EventImage. The skeleton overlay used to
-   * be dismissed by `onLoad`/`useState` in the old client-component
-   * version. Without that state we cannot tell when the image has
-   * finished loading, so painting a permanent shimmer on top of every
-   * card would hide the image. The built-in `placeholder="blur"` on
-   * next/image already covers the loading window for remote URLs and
-   * does dismiss automatically.
-   *
-   * Kept in the type to avoid a sweeping caller-update PR. Removing it
-   * is fn-15.2 territory (CLS-Stabilität pixel-perfect skeletons).
-   */
-  showSkeleton?: boolean;
   /** object-position for cropping. Forwarded as style. */
   objectPosition?: string;
   /** object-fit. Forwarded as style. Default: 'cover'. */
@@ -227,9 +221,6 @@ export function EventImage(props: EventImageProps) {
     fetchPriority,
     preload = false,
     showGradientOverlay = false,
-    // showSkeleton is a deprecated no-op — see prop docs. Pull it out of
-    // props so we don't try to render the permanent shimmer overlay.
-    showSkeleton: _showSkeleton = false,
     objectPosition,
     objectFit = 'cover',
     sizes,

@@ -32,6 +32,15 @@ export default async function LandingPage({
   const forceHome = 'home' in params;
 
   return (
+    // fn-15.2 — CLS-Stabilität:
+    // `min-h-screen` keeps the container at least one viewport tall on
+    // empty/short-content states. The footer dropped `mt-auto` (see
+    // Footer.tsx comment) because mt-auto's auto-margin was the primary
+    // PSI-flagged CLS source (0.535) — async section growth changed the
+    // available space mt-auto could expand into, translating the footer
+    // by hundreds of pixels mid-load. Now the layout is pure document
+    // flow with Suspense skeletons reserving each section's full final
+    // height at SSR — no dynamic pushing.
     <div
       id="landing-curtain"
       className="min-h-screen text-white flex flex-col items-center relative overflow-hidden gradient-mesh"

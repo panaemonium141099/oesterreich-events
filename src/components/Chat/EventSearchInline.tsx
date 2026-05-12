@@ -100,7 +100,6 @@ export function EventSearchInline({ onSelectEvent, onClose }: EventSearchInlineP
                   title={evt.title}
                   sizes="40px"
                   wrapperClassName="w-10 h-10 rounded-lg shrink-0 bg-white/[0.06]"
-                  showSkeleton={false}
                   loading="lazy"
                 />
                 <div className="flex-1 min-w-0">

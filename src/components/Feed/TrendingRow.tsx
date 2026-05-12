@@ -201,7 +201,6 @@ export function TrendingRow() {
                         sizes="62px"
                         className="group-hover:scale-110 transition-transform duration-300"
                         wrapperClassName="w-full h-full"
-                        showSkeleton={false}
                         loading="lazy"
                       />
                     </div>

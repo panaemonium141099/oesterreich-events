@@ -30,7 +30,6 @@ export function EventListCard({ event }: EventListCardProps) {
         sizes="(max-width: 640px) 96px, 112px"
         className="group-hover:scale-105 transition-transform duration-300"
         wrapperClassName="w-24 h-24 sm:w-28 sm:h-28 rounded-lg shrink-0"
-        showSkeleton={false}
         loading="lazy"
       />
 

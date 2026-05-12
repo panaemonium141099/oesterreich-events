@@ -176,7 +176,6 @@ export function SpotifyMatchesPageClient() {
                       title={m.event?.title}
                       sizes="80px"
                       wrapperClassName="w-full h-full"
-                      showSkeleton={false}
                       loading="lazy"
                     />
                   </div>

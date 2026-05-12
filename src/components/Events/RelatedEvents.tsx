@@ -86,7 +86,6 @@ export function RelatedEvents({ eventId }: { eventId: string }) {
                     sizes="(max-width: 640px) 50vw, 33vw"
                     className="group-hover:scale-105 transition-transform duration-300"
                     wrapperClassName="h-32"
-                    showSkeleton={false}
                     loading="lazy"
                   />
 

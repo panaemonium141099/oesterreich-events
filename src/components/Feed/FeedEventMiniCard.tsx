@@ -36,7 +36,6 @@ export function FeedEventMiniCard({ event, compact, fullWidth, onClick }: FeedEv
             alt={event.title}
             sizes="(max-width: 640px) 100vw, 480px"
             wrapperClassName="w-full h-full"
-            showSkeleton={false}
             loading="lazy"
           />
           {/* Category badge overlay */}
@@ -84,7 +83,6 @@ export function FeedEventMiniCard({ event, compact, fullWidth, onClick }: FeedEv
             title={event.title}
             sizes="36px"
             wrapperClassName="w-full h-full"
-            showSkeleton={false}
             loading="lazy"
           />
         </div>
@@ -112,7 +110,6 @@ export function FeedEventMiniCard({ event, compact, fullWidth, onClick }: FeedEv
           sizes="(max-width: 640px) 100vw, 320px"
           className="group-hover:scale-105 transition-transform duration-300"
           wrapperClassName="w-full h-full"
-          showSkeleton={false}
           loading="lazy"
           showGradientOverlay={true}
         />

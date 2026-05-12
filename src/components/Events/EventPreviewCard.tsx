@@ -88,7 +88,6 @@ export function EventPreviewCard({ eventId, isMe, onViewDetail }: EventPreviewCa
         title={event.title}
         sizes="256px"
         wrapperClassName="w-full h-28"
-        showSkeleton={false}
         loading="lazy"
       />
 

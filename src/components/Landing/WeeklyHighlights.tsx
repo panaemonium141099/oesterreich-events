@@ -31,14 +31,24 @@ function IconLoc({ className }: { className?: string }) {
   );
 }
 
+// fn-15.2 — Aligned to HighlightCard's h-[100px] content height (was
+// h-[90px]) so the skeleton-row is pixel-identical to the loaded row.
+// The cls-skel class provides a compositor-only diagonal shimmer
+// (defined in globals.css), replacing the heavier animate-pulse which
+// repainted background-color every frame.
 function SkeletonCard() {
   return (
-    <div className="flex-none w-60 snap-start bg-white/4 rounded-2xl overflow-hidden border border-white/8 animate-pulse">
-      <div className="w-full h-40 bg-white/8" />
-      <div className="p-4 h-[90px] space-y-2.5">
-        <div className="h-4 bg-white/8 rounded w-4/5" />
-        <div className="h-3 bg-white/8 rounded w-2/5" />
-        <div className="h-3 bg-white/8 rounded w-3/5" />
+    <div className="flex-none w-60 snap-start rounded-2xl overflow-hidden border border-white/8 bg-[#111]">
+      <div className="cls-skel w-full h-40" />
+      <div className="p-3.5 h-[100px] flex flex-col justify-between overflow-hidden">
+        <div className="space-y-1.5">
+          <div className="cls-skel h-3.5 w-[85%] rounded" />
+          <div className="cls-skel h-3.5 w-[60%] rounded" />
+        </div>
+        <div className="space-y-1.5">
+          <div className="cls-skel h-2.5 w-[40%] rounded" />
+          <div className="cls-skel h-2.5 w-[55%] rounded" />
+        </div>
       </div>
     </div>
   );
@@ -74,7 +84,6 @@ function HighlightCard({ event, index }: { event: Event; index: number }) {
             preload={isLcpCandidate}
             fetchPriority={isLcpCandidate || isAboveFoldExtra ? 'high' : 'auto'}
             loading={isLcpCandidate ? 'eager' : 'lazy'}
-            showSkeleton={false}
           />
           {/* Category pill — top-left overlay on image */}
           {event.category && (

@@ -158,7 +158,6 @@ export function StoriesViewer({ events, initialIndex, onClose }: StoriesViewerPr
               sizes="100vw"
               className="blur-2xl scale-110 brightness-50"
               wrapperClassName="w-full h-full"
-              showSkeleton={false}
               loading="eager"
             />
           </div>
@@ -172,7 +171,6 @@ export function StoriesViewer({ events, initialIndex, onClose }: StoriesViewerPr
               sizes="100vw"
               wrapperClassName="w-full h-full"
               objectFit="contain"
-              showSkeleton={false}
               loading="eager"
               fetchPriority="high"
             />

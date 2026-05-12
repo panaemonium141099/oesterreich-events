@@ -343,7 +343,6 @@ export function MemoryDetailPageClient() {
                 title={memory.event.title}
                 sizes="48px"
                 wrapperClassName="w-12 h-12 rounded-lg shrink-0"
-                showSkeleton={false}
                 loading="lazy"
               />
               <div>

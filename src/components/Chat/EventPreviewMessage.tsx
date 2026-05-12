@@ -81,7 +81,6 @@ export function EventPreviewMessage({ eventId, isMe }: EventPreviewMessageProps)
         title={event.title}
         sizes="256px"
         wrapperClassName="w-full h-28"
-        showSkeleton={false}
         loading="lazy"
       />
 

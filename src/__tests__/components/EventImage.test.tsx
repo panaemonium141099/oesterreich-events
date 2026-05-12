@@ -295,15 +295,10 @@ describe('EventImage (Server Component)', () => {
     expect(overlay).not.toBeNull();
   });
 
-  it('treats showSkeleton as a no-op (RSC has no loaded-state to dismiss)', () => {
-    // The legacy `showSkeleton` prop used to render a shimmer overlay that
-    // was hidden by an `onLoad` handler. The RSC EventImage has no client
-    // state to drive that dismissal, so we deliberately render NO skeleton
-    // — even if a caller still passes the prop. The blur placeholder on
-    // next/image already covers the loading window for remote URLs.
-    const { container } = render(
-      <EventImage src="https://example.com/photo.jpg" sizes="240px" showSkeleton />,
-    );
-    expect(container.querySelector('.skeleton')).toBeNull();
-  });
+  // fn-15.2: the legacy `showSkeleton` prop is removed entirely. The
+  // deprecation existed in fn-15.1 as a no-op kept for caller compat;
+  // fn-15.2 dropped it after sweeping all 20 call-sites in the same
+  // commit. There is no replacement prop — CLS-stable loading is owned
+  // by container-level Suspense skeletons (Landing/SectionSkeletons.tsx)
+  // plus next/image's `placeholder="blur"` for the in-flight window.
 });
