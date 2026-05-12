@@ -295,9 +295,8 @@ field hinzufügen falls Query-Strings tatsächlich nötig sind.
   Production-Deploy. Kein DB-Schritt nötig."
 
 ## Done summary
-TBD
-
+Rewrote EventImage as a pure Server Component wrapping next/image with a generic SVG blur placeholder; migrated all Landing-card components (WeeklyHighlights, RegionExplorer, PopularCategories, FestivalBlogSection) plus 14 out-of-scope EventImage callers to the new required `sizes` API, marked WeeklyHighlights[0] as the LCP candidate (preload + fetchPriority=high), and added Lighthouse CI infrastructure (`.lighthouserc.json` + `.github/workflows/lhci.yml`). 23/23 EventImage tests passing, build green, codex impl-review SHIP after 2 fix rounds.
 ## Evidence
-- Commits:
-- Tests:
+- Commits: 449346c, 5d5baea, 7b3c754
+- Tests: npx vitest run src/__tests__/components/EventImage.test.tsx (23/23 passing), npx tsc --noEmit (clean for fn-15.1 code), npm run build (production build green)
 - PRs:

@@ -18,11 +18,23 @@ sichtbar nach unten. Plus: meshShift-Background-Animation animiert
   `PopularCategories.tsx`, `FestivalBlogSection.tsx` — pixel-perfect Skeletons
 - `src/components/Layout/Footer.tsx` — mt-auto raus, container min-h-screen
 - `src/app/globals.css` — meshShift-Animation auf transform: translate3d
+- `src/components/Events/EventImage.tsx` — `showSkeleton` Prop ist seit fn-15.1
+  als deprecated no-op markiert (RSC kann onLoad nicht observen).
+  fn-15.2 sollte den Prop ganz entfernen und durch container-level Suspense-
+  Skeletons ersetzen (siehe Acceptance unten). next/image's built-in
+  `placeholder="blur"` mit `GENERIC_BLUR_DATA_URL` deckt das Loading-Fenster
+  für die Remote-URLs bereits ab.
+  <!-- Updated by plan-sync: fn-15.1 ließ showSkeleton als deprecated no-op in EventImage stehen, mit Hinweis "Removing it is fn-15.2 territory" -->
 
 ## Acceptance
 
 - [ ] Alle 4 async-Sections haben `<Suspense fallback={<SectionSkeleton/>}>`
       mit Skeleton der **exakten Höhe** wie die geladene Section
+      <!-- Updated by plan-sync: fn-15.1 setzte WeeklyHighlights[0] als LCP-Kandidat
+           mit preload + fetchPriority="high" + loading="eager". Suspense-Skeleton
+           für WeeklyHighlights darf das LCP-Image NICHT verzögern — Skeleton-Höhe
+           muss exakt der Card-Höhe entsprechen, damit kein CLS-Shift beim
+           Render-Switch passiert. -->
 - [ ] Skeletons haben animated Shimmer-Effekt (CSS-only, kein JS)
 - [ ] Footer ist NICHT mehr via `mt-auto` positioniert. Container hat
       explizites `min-h-screen` oder Grid-Layout das den Footer am Ende hält
