@@ -183,10 +183,16 @@ export default function RootLayout({
         {GA_MEASUREMENT_ID && (
           <>
             {/*
-              GA4: gtag.js is loaded via next/script "afterInteractive" so it
-              never blocks first paint. The init block below is inline so we
-              can hash it under a future hash-based CSP (fn-15.6). Two events
-              are sent on load: `js` (timestamp) and `config` (measurement id).
+              GA4 + Consent Mode v2 (Codex CLS-review fn-15.4 round 2):
+              gtag.js is loaded via next/script "afterInteractive" so it
+              never blocks first paint. Consent is defaulted to DENIED so
+              no analytics/ads storage gets used until the user provides
+              explicit opt-in via a future consent UI (or explicit
+              gtag('consent', 'update', {...}) call). Datenschutz page
+              describes this exactly.
+
+              The init block stays inline so fn-15.6 can hash it under a
+              hash-based CSP (no 'unsafe-inline' once that lands).
             */}
             <Script
               id="ga4-loader"
@@ -199,8 +205,17 @@ export default function RootLayout({
               dangerouslySetInnerHTML={{
                 __html: `window.dataLayer = window.dataLayer || [];
 function gtag(){dataLayer.push(arguments);}
+gtag('consent', 'default', {
+  'ad_storage': 'denied',
+  'ad_user_data': 'denied',
+  'ad_personalization': 'denied',
+  'analytics_storage': 'denied',
+  'functionality_storage': 'denied',
+  'personalization_storage': 'denied',
+  'security_storage': 'granted'
+});
 gtag('js', new Date());
-gtag('config', '${GA_MEASUREMENT_ID}');`,
+gtag('config', '${GA_MEASUREMENT_ID}', { 'anonymize_ip': true });`,
               }}
             />
           </>

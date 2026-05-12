@@ -181,8 +181,16 @@ const nextConfig: NextConfig = {
     // Both headers are scoped to the EXACT path '/' so that Mapbox web-
     // workers (/entdecken), OAuth popups (/auth/*), third-party embeds
     // (/feed, /admin) and individual event/blog pages remain unaffected.
+    // COOP `same-origin-allow-popups` (Codex fn-15.4 round 2): the stricter
+    // `same-origin` would sever the cross-origin opener relationship for any
+    // OAuth popup launched from this route, even if `/` itself doesn't open
+    // popups today (a future button click that uses popup-based auth would
+    // silently break). `same-origin-allow-popups` keeps the cross-origin
+    // isolation benefit (protects against Spectre-style attacks, enables
+    // SharedArrayBuffer) while leaving `window.open(...)` semantically intact
+    // for Google/Apple OAuth flows.
     const landingIsolationHeaders = [
-      { key: 'Cross-Origin-Opener-Policy', value: 'same-origin' },
+      { key: 'Cross-Origin-Opener-Policy', value: 'same-origin-allow-popups' },
       { key: 'Cross-Origin-Embedder-Policy', value: 'credentialless' },
     ];
 
