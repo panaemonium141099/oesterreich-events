@@ -1,4 +1,5 @@
 import { Suspense } from 'react';
+import Link from 'next/link';
 import { HeroSection } from '@/components/Landing/HeroSection';
 import { LandingStats } from '@/components/Landing/LandingStats';
 import { LandingAuth } from '@/components/Landing/LandingAuth';
@@ -135,15 +136,22 @@ export default async function LandingPage({
         markers works for logged-in users.
       */}
       <div className="mt-10 mb-10 flex flex-col items-center gap-3">
-        <a
+        {/* fn-15.5 round-12 (codex): <Link prefetch={false}> instead of
+            a plain <a>. The prefetch={false} keeps the Mapbox-heavy
+            /map route OFF the landing prefetch chain (the whole point
+            of fn-15.5 was to keep mapbox-gl out of /), while Next.js's
+            soft-nav still triggers the view-transition on click and
+            avoids the full document reload a bare <a> would cause. */}
+        <Link
           href="/map"
+          prefetch={false}
           className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full border border-white/15 bg-white/[0.04] text-sm text-white/70 hover:text-white hover:border-white/30 hover:bg-white/[0.08] transition-all duration-200 active:scale-[0.97] motion-reduce:transform-none"
         >
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
           </svg>
           Karte zeigen
-        </a>
+        </Link>
         <p className="text-[11px] text-white/30 max-w-xs text-center leading-relaxed">
           Volle Karte mit allen Events lädt auf der nächsten Seite — schneller
           Start hier, Geo-Suche dort.

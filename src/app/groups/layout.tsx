@@ -1,11 +1,14 @@
-import { AppShell } from '@/components/Layout/AppShell';
-
 /**
- * /groups (list) — Planer group list (auth-gated server-side at the
- * page level). Detail route /groups/[id] has its own layout that
- * hides the bottom-nav since the plan detail has its own chrome.
- * fn-15.5 (Bundle-Architektur).
+ * /groups parent layout — passthrough.
+ *
+ * fn-15.5 round-12 (codex): NO AppShell here. Parent layouts in the
+ * App Router wrap every child segment, so mounting AppShell at this
+ * level forced /groups/[id] (plan detail, which has its own minimal
+ * provider needs) to also pay for the full social shell. The list
+ * route /groups/page.tsx now mounts AppShell directly, and
+ * /groups/[id]/layout.tsx mounts its own ModalShell. This layout
+ * stays as a pass-through so Next.js can still build the route tree.
  */
 export default function GroupsLayout({ children }: { children: React.ReactNode }) {
-  return <AppShell>{children}</AppShell>;
+  return <>{children}</>;
 }
