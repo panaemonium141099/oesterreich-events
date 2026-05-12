@@ -903,6 +903,11 @@ button:active, a:active, [role="button"]:active {
   position: relative;
   background: #000;
   isolation: isolate; /* keep the ::before painted below children */
+  /* Clip the oversized ::before (inset:-25%) so non-landing pages that
+     reuse this class (CalendarPageClient, SpotifyMatchesPageClient) do
+     not get horizontal/vertical viewport jitter from the pseudo-element
+     extending past the container. Codex CLS-review (fn-15.2 round 3). */
+  overflow: clip;
 }
 .gradient-mesh::before {
   content: '';

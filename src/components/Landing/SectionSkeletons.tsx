@@ -25,6 +25,16 @@
  *
  * NOTE: all skeletons are pure server-component-friendly — no hooks,
  * no client-only deps, no `'use client'` directive.
+ *
+ * A11y — Codex CLS-review (round 3):
+ * The `<section>` wrappers are NOT marked `aria-hidden="true"`. Because the
+ * underlying sections load via `dynamic({ ssr: false })`, these skeletons
+ * are the ONLY server-rendered markup for landing sections. Hiding them
+ * from assistive tech would leave SR users (or anyone with JS disabled)
+ * with zero section context. The literal section headings ("Empfohlen für
+ * dich", "Österreichs Events entdecken", "Beliebte Kategorien", "Regionen")
+ * remain in the a11y tree. The decorative `cls-skel` rectangles have no
+ * text content, so they don't trigger screen readers regardless.
  */
 
 import { CATEGORIES } from '@/lib/categories';
@@ -78,7 +88,7 @@ function HighlightSkeletonCard() {
 
 export function WeeklyHighlightsSkeleton() {
   return (
-    <section className="w-full py-8" aria-hidden="true">
+    <section className="w-full py-8">
       {/* Same header layout as the loaded WeeklyHighlights so the
           subtitle + h2 paint in the exact same spot. The h2 has the
           identical min-h-* values so the geolocation-driven label
@@ -142,7 +152,7 @@ function BlogSecondarySkeleton() {
 
 export function FestivalBlogSectionSkeleton() {
   return (
-    <section className="w-full py-14" aria-hidden="true">
+    <section className="w-full py-14">
       {/* Section header — literal text, same classes as loaded version */}
       <div className="mb-8">
         <HeaderEyebrow eyebrow="Event-Guide 2026" className="mb-4" />
@@ -192,7 +202,7 @@ function CategoryTileSkeleton() {
 
 export function PopularCategoriesSkeleton() {
   return (
-    <section className="w-full py-10" aria-hidden="true">
+    <section className="w-full py-10">
       <div className="mb-6">
         <HeaderEyebrow eyebrow="Kategorien" />
         <h2 className="text-white font-extrabold text-2xl md:text-3xl tracking-tight">
@@ -227,7 +237,7 @@ function RegionTileSkeleton() {
 
 export function RegionExplorerSkeleton() {
   return (
-    <section className="w-full py-10" aria-hidden="true">
+    <section className="w-full py-10">
       <div className="mb-6">
         <HeaderEyebrow eyebrow="Bundesländer" />
         <h2 className="text-white font-extrabold text-2xl md:text-3xl tracking-tight">

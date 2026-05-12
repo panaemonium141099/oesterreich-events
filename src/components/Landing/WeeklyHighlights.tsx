@@ -210,13 +210,14 @@ export function WeeklyHighlights() {
           ? Array.from({ length: 5 }).map((_, i) => <SkeletonCard key={i} />)
           : events.length === 0
           ? (
-            // Reserve the same vertical footprint as the loaded carousel
-            // so the empty/error path doesn't collapse the section and
-            // re-introduce CLS (the original PSI-flagged shift driver).
-            // Height matches SkeletonCard: 100px image-aspect-ish + 100px
-            // content footer + ~12px paddings ≈ 232px. Use the actual
-            // skeleton-card width so the empty-state spans the carousel.
-            <div className="flex-none w-44 sm:w-48 h-[232px] flex items-center justify-center px-3 text-center">
+            // Reserve the EXACT same outer-box dimensions as the loaded
+            // carousel cards so the empty/error path doesn't collapse the
+            // section either vertically OR horizontally (the original
+            // PSI-flagged shift driver). w-60 matches SkeletonCard +
+            // HighlightCard; h-[232px] matches the card footprint
+            // (image area + 100px content footer + paddings).
+            // Codex CLS-review (fn-15.2 round 3).
+            <div className="flex-none w-60 h-[232px] flex items-center justify-center px-3 text-center">
               <p className="text-white/35 text-sm">Keine Highlights verfügbar</p>
             </div>
           )
