@@ -141,21 +141,20 @@ export default function DatenschutzPage() {
               Anbieter: Spotify AB, Schweden.
             </p>
 
-            <h3 className="text-base font-medium text-white/90 mt-4 mb-2">Google Analytics 4 (Reichweitenmessung)</h3>
+            <h3 className="text-base font-medium text-white/90 mt-4 mb-2">Reichweitenmessung (Vercel Analytics)</h3>
             <p>
-              Wir setzen Google Analytics 4 zur pseudonymen Messung der Reichweite und Nutzung
-              unserer Website ein. Anbieter: Google Ireland Limited, Gordon House, Barrow Street,
-              Dublin 4, Irland. Dabei werden IP-Adressen vor der Speicherung gekürzt und gerätebezogene
-              Daten in aggregierter Form ausgewertet. Eine Verknüpfung mit anderen Google-Diensten
-              findet nicht statt. Das Analytics-Skript wird ausschließlich nach ausdrücklicher
-              Einwilligung geladen. Weitere Informationen in der{' '}
+              Wir nutzen Vercel Analytics zur cookielosen, anonymen Messung der Reichweite und
+              Nutzung unserer Website. Anbieter: Vercel Inc., 340 S Lemon Ave #4133, Walnut,
+              CA 91789, USA. Es werden keine Cookies gesetzt, keine personenbezogenen Daten
+              gespeichert und kein Tracking-Profil erstellt — gemessen werden ausschließlich
+              aggregierte Seitenaufrufe und Geräte-/Browser-Klassen. Weitere Informationen in der{' '}
               <a
-                href="https://policies.google.com/privacy"
+                href="https://vercel.com/legal/privacy-policy"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-white/90 underline underline-offset-2 hover:text-white transition-colors"
               >
-                Datenschutzerklärung von Google
+                Datenschutzerklärung von Vercel
               </a>
               .
             </p>

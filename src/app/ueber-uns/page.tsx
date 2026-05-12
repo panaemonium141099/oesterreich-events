@@ -177,7 +177,7 @@ export default function UeberUnsPage() {
                 Daten, nicht die höhere Provision.
               </li>
               <li>Wir leiten keine persönlichen Daten an Werbenetzwerke weiter.
-                Aktive Drittanbieter (Supabase, Mapbox, Google OAuth, Google
+                Aktive Drittanbieter (Supabase, Mapbox, Google OAuth, Vercel
                 Analytics, Spotify) sind im&nbsp;
                 <Link href="/datenschutz" className="underline underline-offset-2 text-white/90 hover:text-white">Datenschutz</Link>
                 {' '}einzeln aufgelistet.
