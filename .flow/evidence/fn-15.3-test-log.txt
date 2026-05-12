@@ -1,0 +1,1448 @@
+
+> burgenland-events-v5@1.0.0 test
+> vitest run
+
+
+ RUN  v4.1.2 C:/Users/jonag/Documents/Portfolio/burgenland-events-v5-fresh/.claude/worktrees/eloquent-varahamihira-8f7861
+
+ ❯ src/__tests__/lib/event-images.test.ts (31 tests | 9 failed) 41ms
+     × falls back to category image when imageUrl is empty 6ms
+     × falls back to category image when imageUrl is null 1ms
+     × falls back to default for unknown category 1ms
+     × returns category-specific paths 1ms
+     × handles Märkte alias from Maerkte 1ms
+     × returns default for null category 1ms
+     × getEventImage falls back to category image 2ms
+     × getEventImage falls back to default for unknown category 1ms
+     × getEventImage falls back to default for null category 1ms
+ ❯ src/__tests__/lib/category-classifier/pipeline-wiring.test.ts (10 tests | 1 failed) 15ms
+     × scrape-pipeline.ts invokes categorization_backfill BEFORE categorization 5ms
+ ❯ src/__tests__/lib/category-classifier/enrichment-validate.test.ts (38 tests | 12 failed) 30ms
+     × rejects missing primary_category 8ms
+     × rejects empty-string primary_category 1ms
+     × rejects missing price_tier 1ms
+     × rejects missing duration_type 1ms
+     × rejects missing language 1ms
+     × reports ALL missing-required-singleton errors at once (no early exit) 1ms
+     × drops out-of-vocab tags but keeps the rest 1ms
+     × rejects suggested_description below DESC_MIN 1ms
+     × rejects suggested_description above DESC_MAX 1ms
+     × rejects suggested_description with HTML tags 1ms
+     × drops unknown primary_category 1ms
+     × coerces booleans to false on non-boolean input 0ms
+Error: getaddrinfo ENOTFOUND thisdomaindoesnotexist12345.com
+    at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:122:26) {
+  errno: -3008,
+  code: 'ENOTFOUND',
+  syscall: 'getaddrinfo',
+  hostname: 'thisdomaindoesnotexist12345.com'
+}
+ ❯ src/test/baseScraper.test.ts (44 tests | 4 failed) 228ms
+     × getEventImage falls back to category image 9ms
+     × getEventImage falls back to default for unknown category 2ms
+     × getEventImage falls back to default for null category 1ms
+     × getCategoryFallbackImage handles Maerkte alias 1ms
+ ❯ src/__tests__/lib/artist-matching.test.ts (56 tests | 2 failed) 140ms
+       × rejects artist after " – " separator 10ms
+     × should group matches by user+event 5ms
+stderr | src/__tests__/api/events.test.ts > GET /api/events > sanitizes search input by stripping special characters
+API Error: TypeError: supabase.rpc is not a function
+    at GET (C:/Users/jonag/Documents/Portfolio/burgenland-events-v5-fresh/.claude/worktrees/eloquent-varahamihira-8f7861/src/app/api/events/route.ts:446:70)
+    at C:/Users/jonag/Documents/Portfolio/burgenland-events-v5-fresh/.claude/worktrees/eloquent-varahamihira-8f7861/src/__tests__/api/events.test.ts:135:11
+    at file:///C:/Users/jonag/Documents/Portfolio/burgenland-events-v5-fresh/.claude/worktrees/eloquent-varahamihira-8f7861/node_modules/@vitest/runner/dist/chunk-artifact.js:302:11
+    at file:///C:/Users/jonag/Documents/Portfolio/burgenland-events-v5-fresh/.claude/worktrees/eloquent-varahamihira-8f7861/node_modules/@vitest/runner/dist/chunk-artifact.js:1893:26
+    at file:///C:/Users/jonag/Documents/Portfolio/burgenland-events-v5-fresh/.claude/worktrees/eloquent-varahamihira-8f7861/node_modules/@vitest/runner/dist/chunk-artifact.js:2316:20
+    at new Promise (<anonymous>)
+    at runWithCancel (file:///C:/Users/jonag/Documents/Portfolio/burgenland-events-v5-fresh/.claude/worktrees/eloquent-varahamihira-8f7861/node_modules/@vitest/runner/dist/chunk-artifact.js:2313:10)
+    at file:///C:/Users/jonag/Documents/Portfolio/burgenland-events-v5-fresh/.claude/worktrees/eloquent-varahamihira-8f7861/node_modules/@vitest/runner/dist/chunk-artifact.js:2295:20
+    at new Promise (<anonymous>)
+    at runWithTimeout (file:///C:/Users/jonag/Documents/Portfolio/burgenland-events-v5-fresh/.claude/worktrees/eloquent-varahamihira-8f7861/node_modules/@vitest/runner/dist/chunk-artifact.js:2262:10)
+
+stderr | src/__tests__/api/events.test.ts > GET /api/events > applies multiple filters simultaneously
+API Error: TypeError: supabase.rpc is not a function
+    at GET (C:/Users/jonag/Documents/Portfolio/burgenland-events-v5-fresh/.claude/worktrees/eloquent-varahamihira-8f7861/src/app/api/events/route.ts:446:70)
+    at C:/Users/jonag/Documents/Portfolio/burgenland-events-v5-fresh/.claude/worktrees/eloquent-varahamihira-8f7861/src/__tests__/api/events.test.ts:326:11
+    at file:///C:/Users/jonag/Documents/Portfolio/burgenland-events-v5-fresh/.claude/worktrees/eloquent-varahamihira-8f7861/node_modules/@vitest/runner/dist/chunk-artifact.js:302:11
+    at file:///C:/Users/jonag/Documents/Portfolio/burgenland-events-v5-fresh/.claude/worktrees/eloquent-varahamihira-8f7861/node_modules/@vitest/runner/dist/chunk-artifact.js:1893:26
+    at file:///C:/Users/jonag/Documents/Portfolio/burgenland-events-v5-fresh/.claude/worktrees/eloquent-varahamihira-8f7861/node_modules/@vitest/runner/dist/chunk-artifact.js:2316:20
+    at new Promise (<anonymous>)
+    at runWithCancel (file:///C:/Users/jonag/Documents/Portfolio/burgenland-events-v5-fresh/.claude/worktrees/eloquent-varahamihira-8f7861/node_modules/@vitest/runner/dist/chunk-artifact.js:2313:10)
+    at file:///C:/Users/jonag/Documents/Portfolio/burgenland-events-v5-fresh/.claude/worktrees/eloquent-varahamihira-8f7861/node_modules/@vitest/runner/dist/chunk-artifact.js:2295:20
+    at new Promise (<anonymous>)
+    at runWithTimeout (file:///C:/Users/jonag/Documents/Portfolio/burgenland-events-v5-fresh/.claude/worktrees/eloquent-varahamihira-8f7861/node_modules/@vitest/runner/dist/chunk-artifact.js:2262:10)
+
+ ❯ src/__tests__/api/events.test.ts (21 tests | 4 failed) 197ms
+     × applies district filter 15ms
+     × sanitizes search input by stripping special characters 8ms
+     × filters for public or null visibility events 2ms
+     × applies multiple filters simultaneously 104ms
+ ❯ src/__tests__/lib/category-classifier/precision-classes.test.ts (6 tests | 1 failed) 420ms
+     × compound `weihnachtsmarkt` DOES match Märkte via pattern 406ms
+ ❯ src/__tests__/lib/category-classifier/cache-behavior.test.ts (3 tests | 2 failed) 448ms
+     × writes to cache after a successful AI call 439ms
+     × second call hits the cache and does not invoke AI again 5ms
+ ❯ src/__tests__/lib/category-classifier/primary-vs-tags.test.ts (4 tests | 1 failed) 518ms
+     × Adventmarkt mit Live-Musik → category=Märkte, tags include Musik 510ms
+ ❯ src/__tests__/lib/category-classifier/ai-fallback.test.ts (5 tests | 1 failed) 563ms
+     × invokes AI for genuinely hard cases and accepts high-confidence result 29ms
+ ❯ src/__tests__/lib/categories.test.ts (32 tests | 24 failed) 591ms
+       × maps "Kulinarium" tag to Wein & Kulinarik 12ms
+       × maps "Kinder- & Familienveranstaltungen" tag to Familie 3ms
+       × maps "Brauchtum & Feste" tag to Feste & Brauchtum 2ms
+       × maps "AKTIV" tag to Sport 2ms
+       × maps "Almsommer" tag to Natur 2ms
+       × Feratel tag takes priority over title keywords 513ms
+       × categorizes techno events as Nightlife 2ms
+       × categorizes rave events as Nightlife 1ms
+       × categorizes theater as Kultur 5ms
+       × categorizes Wanderung as Sport when no higher-priority keywords match 2ms
+       × categorizes Weihnachtsmarkt as Märkte 2ms
+       × categorizes Weinverkostung as Wein & Kulinarik 2ms
+       × categorizes Kinderfest as Familie 1ms
+       × categorizes Naturführung as Natur 1ms
+       × categorizes Dorffest as Feste & Brauchtum 1ms
+       × categorizes Gottesdienst as Religion 1ms
+       × categorizes Gesundheitsvortrag as Gesundheit 2ms
+       × categorizes Vortrag as Bildung when no higher-priority keywords match 1ms
+       × Nightlife wins over Musik when both match title 2ms
+       × Religion wins over Kultur for church events 2ms
+       × Familie wins over Kultur for children theater 1ms
+       × title match wins over description match 2ms
+       × contains all 14 categories 13ms
+       × includes all main categories 1ms
+ ❯ src/__tests__/lib/category-classifier/decide.test.ts (15 tests | 9 failed) 542ms
+       × trusted raw tag wins over a conflicting title token 513ms
+       × trusted source_name → rules_exact 2ms
+       × Dorffest → Feste rules_high (compound pattern, Märkte false-positive avoided) 1ms
+       × Vortrag → Bildung rules_high 2ms
+       × Weihnachtsmarkt → Märkte rules_high (pattern hits) 1ms
+       × two evidence families (title + description) produces rules_medium when gap is wide 2ms
+       × single high-precision title token accepts as rules_high or rules_low 1ms
+       × WKO context blocks Religion for "Messe" match 1ms
+       × includes evidence strings for auditing 1ms
+  Wien... DOMException [AbortError]: The operation was aborted.
+    at Fetch.onAsyncTaskManagerAbort (file:///C:/Users/jonag/Documents/Portfolio/burgenland-events-v5-fresh/.claude/worktrees/eloquent-varahamihira-8f7861/node_modules/happy-dom/lib/fetch/Fetch.js:546:23)
+    at Object.<anonymous> (file:///C:/Users/jonag/Documents/Portfolio/burgenland-events-v5-fresh/.claude/worktrees/eloquent-varahamihira-8f7861/node_modules/happy-dom/lib/fetch/Fetch.js:416:101)
+    at AsyncTaskManager.abortAll (file:///C:/Users/jonag/Documents/Portfolio/burgenland-events-v5-fresh/.claude/worktrees/eloquent-varahamihira-8f7861/node_modules/happy-dom/lib/async-task-manager/AsyncTaskManager.js:292:30)
+    at AsyncTaskManager.abort (file:///C:/Users/jonag/Documents/Portfolio/burgenland-events-v5-fresh/.claude/worktrees/eloquent-varahamihira-8f7861/node_modules/happy-dom/lib/async-task-manager/AsyncTaskManager.js:52:21)
+    at DetachedBrowserFrame.abort (file:///C:/Users/jonag/Documents/Portfolio/burgenland-events-v5-fresh/.claude/worktrees/eloquent-varahamihira-8f7861/node_modules/happy-dom/lib/browser/detached-browser/DetachedBrowserFrame.js:112:58)
+    at DetachedWindowAPI.abort (file:///C:/Users/jonag/Documents/Portfolio/burgenland-events-v5-fresh/.claude/worktrees/eloquent-varahamihira-8f7861/node_modules/happy-dom/lib/window/DetachedWindowAPI.js:51:35)
+    at teardownWindow (file:///C:/Users/jonag/Documents/Portfolio/burgenland-events-v5-fresh/.claude/worktrees/eloquent-varahamihira-8f7861/node_modules/vitest/dist/chunks/index.DC7d2Pf8.js:331:22)
+    at Object.teardown (file:///C:/Users/jonag/Documents/Portfolio/burgenland-events-v5-fresh/.claude/worktrees/eloquent-varahamihira-8f7861/node_modules/vitest/dist/chunks/index.DC7d2Pf8.js:392:10)
+    at file:///C:/Users/jonag/Documents/Portfolio/burgenland-events-v5-fresh/.claude/worktrees/eloquent-varahamihira-8f7861/node_modules/vitest/dist/chunks/base.BPik1OqN.js:168:65
+    at Traces.$ (file:///C:/Users/jonag/Documents/Portfolio/burgenland-events-v5-fresh/.claude/worktrees/eloquent-varahamihira-8f7861/node_modules/vitest/dist/chunks/traces.DT5aQ62U.js:142:27)
+DOMException [AbortError]: The operation was aborted.
+    at Fetch.onAsyncTaskManagerAbort (file:///C:/Users/jonag/Documents/Portfolio/burgenland-events-v5-fresh/.claude/worktrees/eloquent-varahamihira-8f7861/node_modules/happy-dom/lib/fetch/Fetch.js:546:23)
+    at Object.<anonymous> (file:///C:/Users/jonag/Documents/Portfolio/burgenland-events-v5-fresh/.claude/worktrees/eloquent-varahamihira-8f7861/node_modules/happy-dom/lib/fetch/Fetch.js:416:101)
+    at AsyncTaskManager.abortAll (file:///C:/Users/jonag/Documents/Portfolio/burgenland-events-v5-fresh/.claude/worktrees/eloquent-varahamihira-8f7861/node_modules/happy-dom/lib/async-task-manager/AsyncTaskManager.js:292:30)
+    at AsyncTaskManager.abort (file:///C:/Users/jonag/Documents/Portfolio/burgenland-events-v5-fresh/.claude/worktrees/eloquent-varahamihira-8f7861/node_modules/happy-dom/lib/async-task-manager/AsyncTaskManager.js:52:21)
+    at DetachedBrowserFrame.abort (file:///C:/Users/jonag/Documents/Portfolio/burgenland-events-v5-fresh/.claude/worktrees/eloquent-varahamihira-8f7861/node_modules/happy-dom/lib/browser/detached-browser/DetachedBrowserFrame.js:112:58)
+    at DetachedWindowAPI.abort (file:///C:/Users/jonag/Documents/Portfolio/burgenland-events-v5-fresh/.claude/worktrees/eloquent-varahamihira-8f7861/node_modules/happy-dom/lib/window/DetachedWindowAPI.js:51:35)
+    at teardownWindow (file:///C:/Users/jonag/Documents/Portfolio/burgenland-events-v5-fresh/.claude/worktrees/eloquent-varahamihira-8f7861/node_modules/vitest/dist/chunks/index.DC7d2Pf8.js:331:22)
+    at Object.teardown (file:///C:/Users/jonag/Documents/Portfolio/burgenland-events-v5-fresh/.claude/worktrees/eloquent-varahamihira-8f7861/node_modules/vitest/dist/chunks/index.DC7d2Pf8.js:392:10)
+    at file:///C:/Users/jonag/Documents/Portfolio/burgenland-events-v5-fresh/.claude/worktrees/eloquent-varahamihira-8f7861/node_modules/vitest/dist/chunks/base.BPik1OqN.js:168:65
+    at Traces.$ (file:///C:/Users/jonag/Documents/Portfolio/burgenland-events-v5-fresh/.claude/worktrees/eloquent-varahamihira-8f7861/node_modules/vitest/dist/chunks/traces.DT5aQ62U.js:142:27)
+
+⎯⎯⎯⎯⎯⎯ Failed Tests 70 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/test/baseScraper.test.ts > categoryImages > getEventImage falls back to category image
+AssertionError: expected '/images/categories/musik-29.jpg' to match /\/images\/categories\/musik-\d…/images\
+
+- Expected:
+/\/images\/categories\/musik-\d\.jpg/
+
++ Received:
+"/images/categories/musik-29.jpg"
+
+ ❯ src/test/baseScraper.test.ts:511:20
+    509|     const { getEventImage } = await import('@/lib/categoryImages');
+    510|     const result = getEventImage(undefined, 'Musik', 'test');
+    511|     expect(result).toMatch(/\/images\/categories\/musik-\d\.jpg/);
+       |                    ^
+    512|   });
+    513|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/70]⎯
+
+ FAIL  src/test/baseScraper.test.ts > categoryImages > getEventImage falls back to default for unknown category
+AssertionError: expected '/images/categories/default-29.jpg' to match /\/images\/categories\/default-…/images\
+
+- Expected:
+/\/images\/categories\/default-\d\.jpg/
+
++ Received:
+"/images/categories/default-29.jpg"
+
+ ❯ src/test/baseScraper.test.ts:517:20
+    515|     const { getEventImage } = await import('@/lib/categoryImages');
+    516|     const result = getEventImage(undefined, 'UnknownCategory', 'test');
+    517|     expect(result).toMatch(/\/images\/categories\/default-\d\.jpg/);
+       |                    ^
+    518|   });
+    519|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/70]⎯
+
+ FAIL  src/test/baseScraper.test.ts > categoryImages > getEventImage falls back to default for null category
+AssertionError: expected '/images/categories/default-29.jpg' to match /\/images\/categories\/default-…/images\
+
+- Expected:
+/\/images\/categories\/default-\d\.jpg/
+
++ Received:
+"/images/categories/default-29.jpg"
+
+ ❯ src/test/baseScraper.test.ts:523:20
+    521|     const { getEventImage } = await import('@/lib/categoryImages');
+    522|     const result = getEventImage(null, null, 'test');
+    523|     expect(result).toMatch(/\/images\/categories\/default-\d\.jpg/);
+       |                    ^
+    524|   });
+    525|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/70]⎯
+
+ FAIL  src/test/baseScraper.test.ts > categoryImages > getCategoryFallbackImage handles Maerkte alias
+AssertionError: expected '/images/categories/maerkte-29.jpg' to match /\/images\/categories\/maerkte-…/images\
+
+- Expected:
+/\/images\/categories\/maerkte-\d\.jpg/
+
++ Received:
+"/images/categories/maerkte-29.jpg"
+
+ ❯ src/test/baseScraper.test.ts:529:20
+    527|     const { getCategoryFallbackImage } = await import('@/lib/categoryI…
+    528|     const result = getCategoryFallbackImage('Märkte', 'test');
+    529|     expect(result).toMatch(/\/images\/categories\/maerkte-\d\.jpg/);
+       |                    ^
+    530|     const defaultResult = getCategoryFallbackImage(null, 'test');
+    531|     expect(result).not.toBe(defaultResult);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/70]⎯
+
+ FAIL  src/__tests__/api/events.test.ts > GET /api/events > applies district filter
+AssertionError: expected "vi.fn()" to be called with arguments: [ 'district', 'Eisenstadt' ]
+
+Received:
+
+  1st vi.fn() call:
+
+  [
+-   "district",
+-   "Eisenstadt",
++   "visibility",
++   "public",
+  ]
+
+
+Number of calls: 1
+
+ ❯ src/__tests__/api/events.test.ts:98:22
+     96|     await GET(makeRequest({ district: 'Eisenstadt' }));
+     97|
+     98|     expect(query.eq).toHaveBeenCalledWith('district', 'Eisenstadt');
+       |                      ^
+     99|   });
+    100|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/70]⎯
+
+ FAIL  src/__tests__/api/events.test.ts > GET /api/events > sanitizes search input by stripping special characters
+AssertionError: expected undefined to be defined
+ ❯ src/__tests__/api/events.test.ts:143:24
+    141|       typeof call[0] === 'string' && call[0].includes('ilike')
+    142|     );
+    143|     expect(searchCall).toBeDefined();
+       |                        ^
+    144|     // Should not contain the injected special characters (but % is us…
+    145|     expect(searchCall![0]).not.toContain('.*');
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/70]⎯
+
+ FAIL  src/__tests__/api/events.test.ts > GET /api/events > filters for public or null visibility events
+AssertionError: expected undefined to be defined
+ ❯ src/__tests__/api/events.test.ts:308:28
+    306|       typeof call[0] === 'string' && call[0].includes('visibility')
+    307|     );
+    308|     expect(visibilityCall).toBeDefined();
+       |                            ^
+    309|     expect(visibilityCall![0]).toContain('visibility.eq.public');
+    310|     expect(visibilityCall![0]).toContain('visibility.is.null');
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/70]⎯
+
+ FAIL  src/__tests__/api/events.test.ts > GET /api/events > applies multiple filters simultaneously
+AssertionError: expected "vi.fn()" to be called with arguments: [ 'district', 'Eisenstadt' ]
+
+Received:
+
+  1st vi.fn() call:
+
+  [
+-   "district",
+-   "Eisenstadt",
++   "visibility",
++   "public",
+  ]
+
+  2nd vi.fn() call:
+
+  [
+-   "district",
+-   "Eisenstadt",
++   "bundesland",
++   "Burgenland",
+  ]
+
+  3rd vi.fn() call:
+
+  [
+-   "district",
+-   "Eisenstadt",
++   "category",
++   "Musik",
+  ]
+
+
+Number of calls: 3
+
+ ❯ src/__tests__/api/events.test.ts:336:22
+    334|
+    335|     expect(query.eq).toHaveBeenCalledWith('bundesland', 'Burgenland');
+    336|     expect(query.eq).toHaveBeenCalledWith('district', 'Eisenstadt');
+       |                      ^
+    337|     expect(query.eq).toHaveBeenCalledWith('category', 'Musik');
+    338|     expect(query.lte).toHaveBeenCalledWith('start_date', '2026-06-30T2…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/70]⎯
+
+ FAIL  src/__tests__/lib/artist-matching.test.ts > isFalsePositiveMatch > headliner-position check > rejects artist after " – " separator
+AssertionError: expected false to be true // Object.is equality
+
+- Expected
++ Received
+
+- true
++ false
+
+ ❯ src/__tests__/lib/artist-matching.test.ts:203:86
+    201|
+    202|     it('rejects artist after " – " separator', () => {
+    203|       expect(isFalsePositiveMatch('Rain', 'Volksmusik Abend – Purple R…
+       |                                                                                      ^
+    204|     });
+    205|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/70]⎯
+
+ FAIL  src/__tests__/lib/artist-matching.test.ts > createGroupedNotifications > should group matches by user+event
+TypeError: supabase.from(...).select(...).in is not a function
+ ❯ createGroupedNotifications src/lib/artist-matching.ts:723:8
+    721|       .from('events')
+    722|       .select('id, slug, postal_code, address, bundesland, start_date,…
+    723|       .in('id', eventIds);
+       |        ^
+    724|     for (const row of (eventRows ?? []) as Array<Record<string, string…
+    725|       urlFieldsByEventId.set(row.id as string, {
+ ❯ src/__tests__/lib/artist-matching.test.ts:406:11
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[10/70]⎯
+
+ FAIL  src/__tests__/lib/categories.test.ts > categorizeEvent > Feratel tag mapping (highest priority) > maps "Kulinarium" tag to Wein & Kulinarik
+AssertionError: expected 'Sonstiges' to be 'Wein & Kulinarik' // Object.is equality
+
+Expected: "Wein & Kulinarik"
+Received: "Sonstiges"
+
+ ❯ src/__tests__/lib/categories.test.ts:12:65
+     10|
+     11|     it('maps "Kulinarium" tag to Wein & Kulinarik', () => {
+     12|       expect(categorizeEvent('Some Event', '', ['Kulinarium'])).toBe('…
+       |                                                                 ^
+     13|     });
+     14|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[11/70]⎯
+
+ FAIL  src/__tests__/lib/categories.test.ts > categorizeEvent > Feratel tag mapping (highest priority) > maps "Kinder- & Familienveranstaltungen" tag to Familie
+AssertionError: expected 'Sonstiges' to be 'Familie' // Object.is equality
+
+Expected: "Familie"
+Received: "Sonstiges"
+
+ ❯ src/__tests__/lib/categories.test.ts:16:88
+     14|
+     15|     it('maps "Kinder- & Familienveranstaltungen" tag to Familie', () =…
+     16|       expect(categorizeEvent('Some Event', '', ['Kinder- & Familienver…
+       |                                                                                        ^
+     17|     });
+     18|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[12/70]⎯
+
+ FAIL  src/__tests__/lib/categories.test.ts > categorizeEvent > Feratel tag mapping (highest priority) > maps "Brauchtum & Feste" tag to Feste & Brauchtum
+AssertionError: expected 'Sonstiges' to be 'Feste & Brauchtum' // Object.is equality
+
+Expected: "Feste & Brauchtum"
+Received: "Sonstiges"
+
+ ❯ src/__tests__/lib/categories.test.ts:20:72
+     18|
+     19|     it('maps "Brauchtum & Feste" tag to Feste & Brauchtum', () => {
+     20|       expect(categorizeEvent('Some Event', '', ['Brauchtum & Feste']))…
+       |                                                                        ^
+     21|     });
+     22|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[13/70]⎯
+
+ FAIL  src/__tests__/lib/categories.test.ts > categorizeEvent > Feratel tag mapping (highest priority) > maps "AKTIV" tag to Sport
+AssertionError: expected 'Sonstiges' to be 'Sport' // Object.is equality
+
+Expected: "Sport"
+Received: "Sonstiges"
+
+ ❯ src/__tests__/lib/categories.test.ts:24:60
+     22|
+     23|     it('maps "AKTIV" tag to Sport', () => {
+     24|       expect(categorizeEvent('Some Event', '', ['AKTIV'])).toBe('Sport…
+       |                                                            ^
+     25|     });
+     26|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[14/70]⎯
+
+ FAIL  src/__tests__/lib/categories.test.ts > categorizeEvent > Feratel tag mapping (highest priority) > maps "Almsommer" tag to Natur
+AssertionError: expected 'Sonstiges' to be 'Natur' // Object.is equality
+
+Expected: "Natur"
+Received: "Sonstiges"
+
+ ❯ src/__tests__/lib/categories.test.ts:28:64
+     26|
+     27|     it('maps "Almsommer" tag to Natur', () => {
+     28|       expect(categorizeEvent('Some Event', '', ['Almsommer'])).toBe('N…
+       |                                                                ^
+     29|     });
+     30|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[15/70]⎯
+
+ FAIL  src/__tests__/lib/categories.test.ts > categorizeEvent > Feratel tag mapping (highest priority) > Feratel tag takes priority over title keywords
+AssertionError: expected 'Musik' to be 'Sport' // Object.is equality
+
+Expected: "Sport"
+Received: "Musik"
+
+ ❯ src/__tests__/lib/categories.test.ts:33:68
+     31|     it('Feratel tag takes priority over title keywords', () => {
+     32|       // Title says "Konzert" (Musik), but Feratel tag says "Sport"
+     33|       expect(categorizeEvent('Konzert im Stadion', '', ['Sport'])).toB…
+       |                                                                    ^
+     34|     });
+     35|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[16/70]⎯
+
+ FAIL  src/__tests__/lib/categories.test.ts > categorizeEvent > title keyword matching (second priority) > categorizes techno events as Nightlife
+AssertionError: expected 'Sonstiges' to be 'Nightlife' // Object.is equality
+
+Expected: "Nightlife"
+Received: "Sonstiges"
+
+ ❯ src/__tests__/lib/categories.test.ts:39:64
+     37|   describe('title keyword matching (second priority)', () => {
+     38|     it('categorizes techno events as Nightlife', () => {
+     39|       expect(categorizeEvent('Techno Night at the Warehouse')).toBe('N…
+       |                                                                ^
+     40|     });
+     41|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[17/70]⎯
+
+ FAIL  src/__tests__/lib/categories.test.ts > categorizeEvent > title keyword matching (second priority) > categorizes rave events as Nightlife
+AssertionError: expected 'Sonstiges' to be 'Nightlife' // Object.is equality
+
+Expected: "Nightlife"
+Received: "Sonstiges"
+
+ ❯ src/__tests__/lib/categories.test.ts:43:51
+     41|
+     42|     it('categorizes rave events as Nightlife', () => {
+     43|       expect(categorizeEvent('Forest Rave 2026')).toBe('Nightlife');
+       |                                                   ^
+     44|     });
+     45|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[18/70]⎯
+
+ FAIL  src/__tests__/lib/categories.test.ts > categorizeEvent > title keyword matching (second priority) > categorizes theater as Kultur
+AssertionError: expected 'Sonstiges' to be 'Kultur' // Object.is equality
+
+Expected: "Kultur"
+Received: "Sonstiges"
+
+ ❯ src/__tests__/lib/categories.test.ts:51:60
+     49|
+     50|     it('categorizes theater as Kultur', () => {
+     51|       expect(categorizeEvent('Theaterstück: Der Richter')).toBe('Kultu…
+       |                                                            ^
+     52|     });
+     53|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[19/70]⎯
+
+ FAIL  src/__tests__/lib/categories.test.ts > categorizeEvent > title keyword matching (second priority) > categorizes Wanderung as Sport when no higher-priority keywords match
+AssertionError: expected 'Sonstiges' to be 'Sport' // Object.is equality
+
+Expected: "Sport"
+Received: "Sonstiges"
+
+ ❯ src/__tests__/lib/categories.test.ts:56:61
+     54|     it('categorizes Wanderung as Sport when no higher-priority keyword…
+     55|       // Note: "nationalpark" triggers Natur which has higher priority…
+     56|       expect(categorizeEvent('Geführte Wanderung im Wald')).toBe('Spor…
+       |                                                             ^
+     57|     });
+     58|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[20/70]⎯
+
+ FAIL  src/__tests__/lib/categories.test.ts > categorizeEvent > title keyword matching (second priority) > categorizes Weihnachtsmarkt as Märkte
+AssertionError: expected 'Sonstiges' to be 'Märkte' // Object.is equality
+
+Expected: "Märkte"
+Received: "Sonstiges"
+
+ ❯ src/__tests__/lib/categories.test.ts:60:64
+     58|
+     59|     it('categorizes Weihnachtsmarkt as Märkte', () => {
+     60|       expect(categorizeEvent('Weihnachtsmarkt in Eisenstadt')).toBe('M…
+       |                                                                ^
+     61|     });
+     62|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[21/70]⎯
+
+ FAIL  src/__tests__/lib/categories.test.ts > categorizeEvent > title keyword matching (second priority) > categorizes Weinverkostung as Wein & Kulinarik
+AssertionError: expected 'Sonstiges' to be 'Wein & Kulinarik' // Object.is equality
+
+Expected: "Wein & Kulinarik"
+Received: "Sonstiges"
+
+ ❯ src/__tests__/lib/categories.test.ts:64:67
+     62|
+     63|     it('categorizes Weinverkostung as Wein & Kulinarik', () => {
+     64|       expect(categorizeEvent('Weinverkostung am Neusiedler See')).toBe…
+       |                                                                   ^
+     65|     });
+     66|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[22/70]⎯
+
+ FAIL  src/__tests__/lib/categories.test.ts > categorizeEvent > title keyword matching (second priority) > categorizes Kinderfest as Familie
+AssertionError: expected 'Sonstiges' to be 'Familie' // Object.is equality
+
+Expected: "Familie"
+Received: "Sonstiges"
+
+ ❯ src/__tests__/lib/categories.test.ts:68:53
+     66|
+     67|     it('categorizes Kinderfest as Familie', () => {
+     68|       expect(categorizeEvent('Kinderfest im Park')).toBe('Familie');
+       |                                                     ^
+     69|     });
+     70|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[23/70]⎯
+
+ FAIL  src/__tests__/lib/categories.test.ts > categorizeEvent > title keyword matching (second priority) > categorizes Naturführung as Natur
+AssertionError: expected 'Sonstiges' to be 'Natur' // Object.is equality
+
+Expected: "Natur"
+Received: "Sonstiges"
+
+ ❯ src/__tests__/lib/categories.test.ts:72:63
+     70|
+     71|     it('categorizes Naturführung as Natur', () => {
+     72|       expect(categorizeEvent('Naturführung im Nationalpark')).toBe('Na…
+       |                                                               ^
+     73|     });
+     74|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[24/70]⎯
+
+ FAIL  src/__tests__/lib/categories.test.ts > categorizeEvent > title keyword matching (second priority) > categorizes Dorffest as Feste & Brauchtum
+AssertionError: expected 'Sonstiges' to be 'Feste & Brauchtum' // Object.is equality
+
+Expected: "Feste & Brauchtum"
+Received: "Sonstiges"
+
+ ❯ src/__tests__/lib/categories.test.ts:76:58
+     74|
+     75|     it('categorizes Dorffest as Feste & Brauchtum', () => {
+     76|       expect(categorizeEvent('Dorffest in Neckenmarkt')).toBe('Feste &…
+       |                                                          ^
+     77|     });
+     78|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[25/70]⎯
+
+ FAIL  src/__tests__/lib/categories.test.ts > categorizeEvent > title keyword matching (second priority) > categorizes Gottesdienst as Religion
+AssertionError: expected 'Sonstiges' to be 'Religion' // Object.is equality
+
+Expected: "Religion"
+Received: "Sonstiges"
+
+ ❯ src/__tests__/lib/categories.test.ts:80:70
+     78|
+     79|     it('categorizes Gottesdienst as Religion', () => {
+     80|       expect(categorizeEvent('Festgottesdienst in der Pfarrkirche')).t…
+       |                                                                      ^
+     81|     });
+     82|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[26/70]⎯
+
+ FAIL  src/__tests__/lib/categories.test.ts > categorizeEvent > title keyword matching (second priority) > categorizes Gesundheitsvortrag as Gesundheit
+AssertionError: expected 'Sonstiges' to be 'Gesundheit' // Object.is equality
+
+Expected: "Gesundheit"
+Received: "Sonstiges"
+
+ ❯ src/__tests__/lib/categories.test.ts:84:73
+     82|
+     83|     it('categorizes Gesundheitsvortrag as Gesundheit', () => {
+     84|       expect(categorizeEvent('Gesundheitsvortrag: Burnout-Prävention')…
+       |                                                                         ^
+     85|     });
+     86|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[27/70]⎯
+
+ FAIL  src/__tests__/lib/categories.test.ts > categorizeEvent > title keyword matching (second priority) > categorizes Vortrag as Bildung when no higher-priority keywords match
+AssertionError: expected 'Sonstiges' to be 'Bildung' // Object.is equality
+
+Expected: "Bildung"
+Received: "Sonstiges"
+
+ ❯ src/__tests__/lib/categories.test.ts:89:58
+     87|     it('categorizes Vortrag as Bildung when no higher-priority keyword…
+     88|       // Note: "klimaschutz" triggers Natur which has higher priority …
+     89|       expect(categorizeEvent('Vortrag über Geschichte')).toBe('Bildung…
+       |                                                          ^
+     90|     });
+     91|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[28/70]⎯
+
+ FAIL  src/__tests__/lib/categories.test.ts > categorizeEvent > priority ordering > Nightlife wins over Musik when both match title
+AssertionError: expected 'Musik' to be 'Nightlife' // Object.is equality
+
+Expected: "Nightlife"
+Received: "Musik"
+
+ ❯ src/__tests__/lib/categories.test.ts:96:64
+     94|     it('Nightlife wins over Musik when both match title', () => {
+     95|       // "clubbing" = Nightlife, "musik" = Musik; Nightlife has higher…
+     96|       expect(categorizeEvent('Clubbing Nacht mit Live Musik')).toBe('N…
+       |                                                                ^
+     97|     });
+     98|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[29/70]⎯
+
+ FAIL  src/__tests__/lib/categories.test.ts > categorizeEvent > priority ordering > Religion wins over Kultur for church events
+AssertionError: expected 'Sonstiges' to be 'Religion' // Object.is equality
+
+Expected: "Religion"
+Received: "Sonstiges"
+
+ ❯ src/__tests__/lib/categories.test.ts:101:79
+     99|     it('Religion wins over Kultur for church events', () => {
+    100|       // "gottesdienst" = Religion, "kultur" present in desc
+    101|       expect(categorizeEvent('Festgottesdienst', 'kulturelle Veranstal…
+       |                                                                               ^
+    102|     });
+    103|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[30/70]⎯
+
+ FAIL  src/__tests__/lib/categories.test.ts > categorizeEvent > priority ordering > Familie wins over Kultur for children theater
+AssertionError: expected 'Sonstiges' to be 'Familie' // Object.is equality
+
+Expected: "Familie"
+Received: "Sonstiges"
+
+ ❯ src/__tests__/lib/categories.test.ts:106:66
+    104|     it('Familie wins over Kultur for children theater', () => {
+    105|       // "kindertheater" = Familie keyword
+    106|       expect(categorizeEvent('Kindertheater: Der kleine Prinz')).toBe(…
+       |                                                                  ^
+    107|     });
+    108|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[31/70]⎯
+
+ FAIL  src/__tests__/lib/categories.test.ts > categorizeEvent > description keyword matching (lowest priority) > title match wins over description match
+AssertionError: expected 'Musik' to be 'Sport' // Object.is equality
+
+Expected: "Sport"
+Received: "Musik"
+
+ ❯ src/__tests__/lib/categories.test.ts:125:83
+    123|       // Title: "Wanderung" = Sport, Description: "Konzert" = Musik
+    124|       // Sport should win because title is checked first
+    125|       expect(categorizeEvent('Wanderung durch den Wald', 'mit Konzert …
+       |                                                                                   ^
+    126|     });
+    127|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[32/70]⎯
+
+ FAIL  src/__tests__/lib/categories.test.ts > categorizeEvent > CATEGORIES constant > contains all 14 categories
+AssertionError: expected [ 'Musik', 'Kultur & Bühne', …(10) ] to have a length of 14 but got 12
+
+- Expected
++ Received
+
+- 14
++ 12
+
+ ❯ src/__tests__/lib/categories.test.ts:145:26
+    143|   describe('CATEGORIES constant', () => {
+    144|     it('contains all 14 categories', () => {
+    145|       expect(CATEGORIES).toHaveLength(14);
+       |                          ^
+    146|     });
+    147|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[33/70]⎯
+
+ FAIL  src/__tests__/lib/categories.test.ts > categorizeEvent > CATEGORIES constant > includes all main categories
+AssertionError: expected [ 'Musik', 'Kultur & Bühne', …(10) ] to include 'Kultur'
+ ❯ src/__tests__/lib/categories.test.ts:159:28
+    157|       ];
+    158|       for (const cat of expected) {
+    159|         expect(CATEGORIES).toContain(cat);
+       |                            ^
+    160|       }
+    161|     });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[34/70]⎯
+
+ FAIL  src/__tests__/lib/event-images.test.ts > resolvePrimaryEventImage > falls back to category image when imageUrl is empty
+AssertionError: expected '/images/categories/musik-17.jpg' to match /^\/images\/categories\/musik-\…/images\
+
+- Expected:
+/^\/images\/categories\/musik-\d\.jpg$/
+
++ Received:
+"/images/categories/musik-17.jpg"
+
+ ❯ src/__tests__/lib/event-images.test.ts:137:20
+    135|       title: 'Test Event',
+    136|     });
+    137|     expect(result).toMatch(/^\/images\/categories\/musik-\d\.jpg$/);
+       |                    ^
+    138|   });
+    139|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[35/70]⎯
+
+ FAIL  src/__tests__/lib/event-images.test.ts > resolvePrimaryEventImage > falls back to category image when imageUrl is null
+AssertionError: expected '/images/categories/sport-27.jpg' to match /^\/images\/categories\/sport-\…/images\
+
+- Expected:
+/^\/images\/categories\/sport-\d\.jpg$/
+
++ Received:
+"/images/categories/sport-27.jpg"
+
+ ❯ src/__tests__/lib/event-images.test.ts:146:20
+    144|       title: 'Test',
+    145|     });
+    146|     expect(result).toMatch(/^\/images\/categories\/sport-\d\.jpg$/);
+       |                    ^
+    147|   });
+    148|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[36/70]⎯
+
+ FAIL  src/__tests__/lib/event-images.test.ts > resolvePrimaryEventImage > falls back to default for unknown category
+AssertionError: expected '/images/categories/default-27.jpg' to match /^\/images\/categories\/default…/images\
+
+- Expected:
+/^\/images\/categories\/default-\d\.jpg$/
+
++ Received:
+"/images/categories/default-27.jpg"
+
+ ❯ src/__tests__/lib/event-images.test.ts:155:20
+    153|       title: 'Test',
+    154|     });
+    155|     expect(result).toMatch(/^\/images\/categories\/default-\d\.jpg$/);
+       |                    ^
+    156|   });
+    157| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[37/70]⎯
+
+ FAIL  src/__tests__/lib/event-images.test.ts > resolveCategoryFallbackImage > returns category-specific paths
+AssertionError: expected '/images/categories/musik-28.jpg' to match /\/musik-\d\.jpg$/musik-\d\.jpg$
+
+- Expected:
+/\/musik-\d\.jpg$/
+
++ Received:
+"/images/categories/musik-28.jpg"
+
+ ❯ src/__tests__/lib/event-images.test.ts:163:59
+    161| describe('resolveCategoryFallbackImage', () => {
+    162|   it('returns category-specific paths', () => {
+    163|     expect(resolveCategoryFallbackImage('Musik', 'seed')).toMatch(/\/m…
+       |                                                           ^
+    164|     expect(resolveCategoryFallbackImage('Sport', 'seed')).toMatch(/\/s…
+    165|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[38/70]⎯
+
+ FAIL  src/__tests__/lib/event-images.test.ts > resolveCategoryFallbackImage > handles Märkte alias from Maerkte
+AssertionError: expected '/images/categories/maerkte-29.jpg' to match /\/maerkte-\d\.jpg$/maerkte-\d\.jpg$
+
+- Expected:
+/\/maerkte-\d\.jpg$/
+
++ Received:
+"/images/categories/maerkte-29.jpg"
+
+ ❯ src/__tests__/lib/event-images.test.ts:171:15
+    169|     const b = resolveCategoryFallbackImage('Maerkte', 'test');
+    170|     expect(a).toBe(b);
+    171|     expect(a).toMatch(/\/maerkte-\d\.jpg$/);
+       |               ^
+    172|   });
+    173|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[39/70]⎯
+
+ FAIL  src/__tests__/lib/event-images.test.ts > resolveCategoryFallbackImage > returns default for null category
+AssertionError: expected '/images/categories/default-29.jpg' to match /\/default-\d\.jpg$/default-\d\.jpg$
+
+- Expected:
+/\/default-\d\.jpg$/
+
++ Received:
+"/images/categories/default-29.jpg"
+
+ ❯ src/__tests__/lib/event-images.test.ts:183:56
+    181|
+    182|   it('returns default for null category', () => {
+    183|     expect(resolveCategoryFallbackImage(null, 'test')).toMatch(/\/defa…
+       |                                                        ^
+    184|   });
+    185| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[40/70]⎯
+
+ FAIL  src/__tests__/lib/event-images.test.ts > categoryImages compat wrapper > getEventImage falls back to category image
+AssertionError: expected '/images/categories/musik-29.jpg' to match /\/images\/categories\/musik-\d…/images\
+
+- Expected:
+/\/images\/categories\/musik-\d\.jpg/
+
++ Received:
+"/images/categories/musik-29.jpg"
+
+ ❯ src/__tests__/lib/event-images.test.ts:206:20
+    204|     const { getEventImage } = await import('@/lib/categoryImages');
+    205|     const result = getEventImage(undefined, 'Musik', 'test');
+    206|     expect(result).toMatch(/\/images\/categories\/musik-\d\.jpg/);
+       |                    ^
+    207|   });
+    208|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[41/70]⎯
+
+ FAIL  src/__tests__/lib/event-images.test.ts > categoryImages compat wrapper > getEventImage falls back to default for unknown category
+AssertionError: expected '/images/categories/default-29.jpg' to match /\/images\/categories\/default-…/images\
+
+- Expected:
+/\/images\/categories\/default-\d\.jpg/
+
++ Received:
+"/images/categories/default-29.jpg"
+
+ ❯ src/__tests__/lib/event-images.test.ts:212:20
+    210|     const { getEventImage } = await import('@/lib/categoryImages');
+    211|     const result = getEventImage(undefined, 'UnknownCategory', 'test');
+    212|     expect(result).toMatch(/\/images\/categories\/default-\d\.jpg/);
+       |                    ^
+    213|   });
+    214|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[42/70]⎯
+
+ FAIL  src/__tests__/lib/event-images.test.ts > categoryImages compat wrapper > getEventImage falls back to default for null category
+AssertionError: expected '/images/categories/default-29.jpg' to match /\/images\/categories\/default-…/images\
+
+- Expected:
+/\/images\/categories\/default-\d\.jpg/
+
++ Received:
+"/images/categories/default-29.jpg"
+
+ ❯ src/__tests__/lib/event-images.test.ts:218:20
+    216|     const { getEventImage } = await import('@/lib/categoryImages');
+    217|     const result = getEventImage(null, null, 'test');
+    218|     expect(result).toMatch(/\/images\/categories\/default-\d\.jpg/);
+       |                    ^
+    219|   });
+    220|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[43/70]⎯
+
+ FAIL  src/__tests__/lib/category-classifier/ai-fallback.test.ts > classifyWithAiFallback (cat-v2) > invokes AI for genuinely hard cases and accepts high-confidence result
+AssertionError: expected 'Sonstiges' to be 'Nightlife' // Object.is equality
+
+Expected: "Nightlife"
+Received: "Sonstiges"
+
+ ❯ src/__tests__/lib/category-classifier/ai-fallback.test.ts:64:32
+     62|     );
+     63|     if (outcome.usedAi) {
+     64|       expect(outcome.category).toBe('Nightlife');
+       |                                ^
+     65|       expect(outcome.confidence).toBe('ai');
+     66|       expect(outcome.source).toBe('ai');
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[44/70]⎯
+
+ FAIL  src/__tests__/lib/category-classifier/cache-behavior.test.ts > AI cache behavior > writes to cache after a successful AI call
+AssertionError: expected "vi.fn()" to be called once, but got 0 times
+ ❯ src/__tests__/lib/category-classifier/cache-behavior.test.ts:72:35
+     70|     await classifyWithAiFallback({ title: 'Veranstaltung im Zeitalter'…
+     71|
+     72|     expect(cacheModule.setCached).toHaveBeenCalledOnce();
+       |                                   ^
+     73|     const store = (cacheModule as unknown as { __store: Map<string, un…
+     74|     expect(store.size).toBe(1);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[45/70]⎯
+
+ FAIL  src/__tests__/lib/category-classifier/cache-behavior.test.ts > AI cache behavior > second call hits the cache and does not invoke AI again
+AssertionError: expected "vi.fn()" to not be called at all, but actually been called 1 times
+
+Received:
+
+  1st vi.fn() call:
+
+    Array [
+      Object {
+        "messages": Array [
+          Object {
+            "content": "You classify Austrian events into one primary category and up to 3 secondary tags.
+    
+    Canonical categories (use these exact strings — do not invent):
+    - Musik: Konzert, Live-Musik, Orchester, Chor, Band, Singer-Songwriter, Jazz, Klassik, Open-Air-Konzert, volkstümliche/traditionelle Musik (Tamburica, Blasmusik, Chor). Hauptfokus: Musik hören.
+       Notes: Musik vs Nightlife & Party: Wenn der Draw ein benannter Künstler / Band / Ensemble ist, ist es Musik. DJ-Lineup / Club-Night / Electronic-Dance-Party mit Tanzen als Fokus → Nightlife & Party. | Musik vs Kultur & Bühne: Oper, Operette, Musical, Ballett sind Kultur & Bühne (inszeniert). Reines Konzert = Musik. | Musik vs Wellness & Spiritualität: Kirchenkonzert / Orgelkonzert (Performance) = Musik. Gottesdienst mit Musik = Wellness & Spiritualität. | Musik vs Märkte & Feste: Adventmarkt mit Live-Band = Märkte & Feste. Reines Konzert in einer Kirche = Musik.
+    - Kultur & Bühne: Theater, Kabarett, Comedy, Stand-up, Lesung, Musical, Oper, Ausstellung, Museum, Kino, Performance-Art, Improtheater, Burg-/Schloss-/Stadtführung.
+       Notes: Kultur & Bühne vs Musik: Inszenierte Performances (Theater/Oper/Musical/Ballett) sind Kultur & Bühne auch wenn Musik dabei ist. | Kultur & Bühne vs Familie & Kinder: Kindertheater, Puppentheater, Kinderkino → Familie & Kinder wenn Zielgruppe explizit Kinder. | Kultur & Bühne vs Wissen & Karriere: Stadtführung / Burgführung = Kultur & Bühne, auch wenn edukativ. Vortrag mit Lernfokus = Wissen & Karriere. | Kultur & Bühne vs Märkte & Feste: Ein kuratiertes Theaterfestival = Kultur & Bühne. Dorffest mit Puppentheater-Ecke = Märkte & Feste.
+    - Nightlife & Party: Clubbing, Rave, Afterparty, Club-Night, Cocktail-Night, Tanznacht, Pub-Crawl, DJ-Set, Motto-Party (80s/90s/Latino/Erasmus), Bar-Events mit Party-Charakter, Ladies/Student Nights, Warehouse-Parties.
+       Notes: Nightlife & Party vs Musik: Band/Ensemble headlined = Musik. DJ headlined / Electronic-Music-Focus / Tanzen = Nightlife & Party. | Nightlife & Party vs Essen & Trinken: Bar mit Trink-/Heurigen-Fokus ohne Tanz = Essen & Trinken. Bar mit DJ/Party-Charakter = Nightlife & Party. | Nightlife & Party vs Märkte & Feste: Faschings-Ball / Feuerwehr-Ball = Märkte & Feste (Brauchtum). Club-Party im selben Venue = Nightlife & Party.
+    - Essen & Trinken: Weinverkostung, Tasting, Street Food, Brunch, Dinner Event, Kulinarik-Tour, Heuriger, Buschenschank, Food Festival, Bierverkostung, Kochkurs, Gourmet-Dinner.
+       Notes: Essen & Trinken vs Märkte & Feste: Food-Markt / Bauernmarkt = Märkte & Feste. Kuratiertes Tasting / Food-Festival mit Verkostungs-Fokus = Essen & Trinken. | Essen & Trinken vs Märkte & Feste: Heurigenfest mit Brauchtum-Dominanz = Märkte & Feste. Heuriger als Lokal-Abend = Essen & Trinken. | Essen & Trinken vs Nightlife & Party: Weinfest mit Musik/Tanz-Fokus (DJ, spät) = Nightlife & Party. Mit Wein/Verkostungs-Fokus = Essen & Trinken.
+    - Märkte & Feste: Christkindlmarkt, Adventmarkt, Ostermarkt, Flohmarkt, Bauernmarkt, Wochenmarkt, Designmarkt, Kunsthandwerkermarkt, Dorffest, Stadtfest, Kirtag, Pfarrfest, Feuerwehrfest, Maibaumfest, Sonnwendfeier, Erntedank, Fasching, Perchtenlauf, Krampuslauf.
+       Notes: Märkte & Feste vs Essen & Trinken: Weinmarkt/Bauernmarkt mit mehreren Ständen = Märkte & Feste. Weinverkostung/Kochkurs/Tasting = Essen & Trinken. | Märkte & Feste vs Wellness & Spiritualität: Pfarrfest/Kirtag = Märkte & Feste (Brauchtum). Gottesdienst/Wallfahrt/Prozession = Wellness & Spiritualität. | Märkte & Feste vs Wissen & Karriere: Gewerbemesse / B2B-Messe = Wissen & Karriere. Verkaufsmesse für Konsumenten mit Marktcharakter = Märkte & Feste.
+    - Sport & Bewegung: Lauf, Marathon, Radfahren, Yoga (Fitness-Fokus), Turnier, Fitness, Fußball, Eishockey, Tennis, Schwimmen, Klettern, Tanzkurs (sportlich), Vereinsaktivitäten.
+       Notes: Sport & Bewegung vs Natur & Abenteuer: Reiner Stadtlauf / Fitness-Wanderung / Turnier = Sport & Bewegung. Geführte Wanderung mit Natur-Fokus / Rafting / Klettertour = Natur & Abenteuer. | Sport & Bewegung vs Wellness & Spiritualität: Yoga-Kurs / Fitness-Yoga = Sport & Bewegung. Yoga-Retreat / Meditation / Breathwork = Wellness & Spiritualität. | Sport & Bewegung vs Familie & Kinder: Kinderturnen / Familienwandertag skewed zu Familie & Kinder wenn Publikum explizit Kinder.
+    - Natur & Abenteuer: Wanderung, Outdoor-Tour, Klettern, Rafting, Kanutour, Naturführung, Vogelbeobachtung, Kräuterwanderung, Astronomie, Pilzwanderung, Expedition, Trekking, Erlebnistour, Escape Room (Abenteuer-Fokus).
+       Notes: Natur & Abenteuer vs Sport & Bewegung: Geführte Wanderung mit Natur-Guide / Nationalpark / Botanik = Natur & Abenteuer. Stadtlauf / Marathon / reine Fitness = Sport & Bewegung. | Natur & Abenteuer vs Wissen & Karriere: Vortrag über Natur = Wissen & Karriere. Draußen erlebte Naturführung = Natur & Abenteuer.
+    - Wissen & Karriere: Vortrag, Workshop, Kurs, Seminar, Fortbildung, Sprachkurs, Networking, Startup-Pitch, Tech-Meetup, Gründer-Event, Karrieremesse, Messe, Konferenz, Gewerbemesse, WKO-Event, Campus-Info, B2B-Networking.
+       Notes: Wissen & Karriere vs Community & Freizeit: Pub-Quiz / Stammtisch / Hobbygruppe = Community & Freizeit. Lern-Workshop / Seminar mit Fach-Fokus = Wissen & Karriere. | Wissen & Karriere vs Kultur & Bühne: Ticketed Lesung als Performance = Kultur & Bühne. Autoren-Q&A / Sachbuch-Lesung mit Diskussion = Wissen & Karriere. | Wissen & Karriere vs Märkte & Feste: Gewerbe-/B2B-/Fachmesse = Wissen & Karriere. Verkaufsmesse für Konsumgüter = Märkte & Feste.
+    - Familie & Kinder: Kinderprogramm, Familiennachmittag, Basteln, Kindertheater, Puppentheater, Kinderkino, Familien-Picknick, Spielfest, Ferienprogramm, Kinder-Workshop, Osterhasenfest.
+       Notes: Familie & Kinder vs Kultur & Bühne: Kindertheater / Puppentheater bleibt Familie & Kinder wenn Zielgruppe explizit Kinder. | Familie & Kinder vs Märkte & Feste: Adventmarkt mit Familienprogramm = Märkte & Feste (Adventmarkt dominiert). Reines Kinderfest = Familie & Kinder.
+    - Community & Freizeit: Stammtisch, Pub Quiz, Brettspielabend, Game Night, LAN-Party, Speed Dating, Single-Night, Vereinstreffen, Community Meetup, Hobbygruppen, Nachbarschaftsevents, Stand-up-Abend.
+       Notes: Community & Freizeit vs Nightlife & Party: Pub Quiz im Studentenclub = Community & Freizeit (Pub Quiz primär). Reine Club-Night im selben Venue = Nightlife & Party. | Community & Freizeit vs Wissen & Karriere: Stammtisch zum Austausch = Community & Freizeit. Networking-Event mit Business-Fokus = Wissen & Karriere.
+    - Wellness & Spiritualität: Meditation, Achtsamkeit, Breathwork, Wellness, Retreat, Sound Healing, Sauna-Special, Therme-Special, Yoga-Retreat, Gottesdienst, Hochamt, Wallfahrt, Prozession, Pilgern, Selbsthilfegruppe, Gesundheitsvortrag, spirituelle Veranstaltungen.
+       Notes: Wellness & Spiritualität vs Sport & Bewegung: Yoga-Retreat / Meditation / Achtsamkeit = Wellness & Spiritualität. Yoga-Fitness-Kurs = Sport & Bewegung. | Wellness & Spiritualität vs Musik: Orgelkonzert als Performance = Musik. Gottesdienst mit Orgel = Wellness & Spiritualität. | Wellness & Spiritualität vs Märkte & Feste: Wallfahrt/Prozession = Wellness & Spiritualität. Pfarrfest = Märkte & Feste.
+    - Sonstiges: Fallback only — pick this ONLY when no other category fits the event at all. In Discovery-UI nicht anzeigen.
+       Notes: Never pick Sonstiges to avoid having to decide.
+    
+    Rules:
+    - Pick the best primary category for the event.
+    - Up to 3 secondary tags (may be empty). Do not repeat the primary category in secondaries.
+    - "confidence": "high" when you are certain from title and/or tags; "medium" when reasoning from description or source prior; "low" when genuinely unsure.
+    - "shouldReview": true only when you are at low confidence OR when Sonstiges was the only sane answer.
+    - Never invent categories. Sonstiges is an explicit fallback, never the first pick.
+    - For opera / operetta / musical / ballet pick Kultur (staged theatre).
+    - For DJ-centric / club-night events pick Nightlife even when "Konzert" appears.
+    - For Kindertheater / Puppentheater pick Familie.
+    - For Heurigenfest/Weinfest with multiple vendors pick Märkte only if it's primarily a market; tasting-focus is Wein & Kulinarik.",
+            "role": "system",
+          },
+          Object {
+            "content": "Title: Veranstaltung im Zeitalter
+    Why AI was invoked: needs_ai: no evidence from rules",
+            "role": "user",
+          },
+        ],
+        "model": "gpt-4o-mini",
+        "response_format": Object {
+          "json_schema": Object {
+            "name": "category_classification",
+            "schema": Object {
+              "additionalProperties": false,
+              "properties": [Object],
+              "required": [Array],
+              "type": "object",
+            },
+            "strict": true,
+          },
+          "type": "json_schema",
+        },
+        "temperature": 0,
+      },
+    ]
+
+
+Number of calls: 1
+
+ ❯ src/__tests__/lib/category-classifier/cache-behavior.test.ts:100:50
+     98|     );
+     99|
+    100|     expect(secondAi.chat.completions.create).not.toHaveBeenCalled();
+       |                                                  ^
+    101|     // Cache hit returns the category stored under the earlier call
+    102|     expect(outcome.category).toBe('Nightlife');
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[46/70]⎯
+
+ FAIL  src/__tests__/lib/category-classifier/decide.test.ts > decideDeterministic (cat-v2) > Gate 1 — trusted exact > trusted raw tag wins over a conflicting title token
+AssertionError: expected 'Musik' to be 'Sport' // Object.is equality
+
+Expected: "Sport"
+Received: "Musik"
+
+ ❯ src/__tests__/lib/category-classifier/decide.test.ts:27:32
+     25|         source_tags_raw: ['Sport'],
+     26|       });
+     27|       expect(outcome.category).toBe('Sport');
+       |                                ^
+     28|       expect(outcome.confidence).toBe('rules_exact');
+     29|     });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[47/70]⎯
+
+ FAIL  src/__tests__/lib/category-classifier/decide.test.ts > decideDeterministic (cat-v2) > Gate 1 — trusted exact > trusted source_name → rules_exact
+AssertionError: expected 'Sonstiges' to be 'Nightlife' // Object.is equality
+
+Expected: "Nightlife"
+Received: "Sonstiges"
+
+ ❯ src/__tests__/lib/category-classifier/decide.test.ts:36:32
+     34|         source_name: 'wien-clubs',
+     35|       });
+     36|       expect(outcome.category).toBe('Nightlife');
+       |                                ^
+     37|       expect(outcome.confidence).toBe('rules_exact');
+     38|     });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[48/70]⎯
+
+ FAIL  src/__tests__/lib/category-classifier/decide.test.ts > decideDeterministic (cat-v2) > Gate 2 — single precise winner > Dorffest → Feste rules_high (compound pattern, Märkte false-positive avoided)
+AssertionError: expected 'Sonstiges' to be 'Feste & Brauchtum' // Object.is equality
+
+Expected: "Feste & Brauchtum"
+Received: "Sonstiges"
+
+ ❯ src/__tests__/lib/category-classifier/decide.test.ts:54:32
+     52|         title: 'Dorffest in Neckenmarkt',
+     53|       });
+     54|       expect(outcome.category).toBe('Feste & Brauchtum');
+       |                                ^
+     55|       // markt inside Neckenmarkt must NOT have produced a Märkte sign…
+     56|       const maerkte = outcome.candidates.find(c => c.category === 'Mär…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[49/70]⎯
+
+ FAIL  src/__tests__/lib/category-classifier/decide.test.ts > decideDeterministic (cat-v2) > Gate 2 — single precise winner > Vortrag → Bildung rules_high
+AssertionError: expected 'Sonstiges' to be 'Bildung' // Object.is equality
+
+Expected: "Bildung"
+Received: "Sonstiges"
+
+ ❯ src/__tests__/lib/category-classifier/decide.test.ts:63:32
+     61|     it('Vortrag → Bildung rules_high', () => {
+     62|       const outcome = classifyDeterministic({ title: 'Vortrag über Ges…
+     63|       expect(outcome.category).toBe('Bildung');
+       |                                ^
+     64|       expect(outcome.confidence).toBe('rules_high');
+     65|     });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[50/70]⎯
+
+ FAIL  src/__tests__/lib/category-classifier/decide.test.ts > decideDeterministic (cat-v2) > Gate 2 — single precise winner > Weihnachtsmarkt → Märkte rules_high (pattern hits)
+AssertionError: expected 'Sonstiges' to be 'Märkte' // Object.is equality
+
+Expected: "Märkte"
+Received: "Sonstiges"
+
+ ❯ src/__tests__/lib/category-classifier/decide.test.ts:69:32
+     67|     it('Weihnachtsmarkt → Märkte rules_high (pattern hits)', () => {
+     68|       const outcome = classifyDeterministic({ title: 'Weihnachtsmarkt …
+     69|       expect(outcome.category).toBe('Märkte');
+       |                                ^
+     70|       expect(['rules_exact', 'rules_high']).toContain(outcome.confiden…
+     71|     });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[51/70]⎯
+
+ FAIL  src/__tests__/lib/category-classifier/decide.test.ts > decideDeterministic (cat-v2) > Gate 3 — corroborated medium > two evidence families (title + description) produces rules_medium when gap is wide
+AssertionError: expected 'Sonstiges' to be 'Wirtschaft' // Object.is equality
+
+Expected: "Wirtschaft"
+Received: "Sonstiges"
+
+ ❯ src/__tests__/lib/category-classifier/decide.test.ts:80:32
+     78|         description: 'Networking Event für Gründer und Unternehmer',
+     79|       });
+     80|       expect(outcome.category).toBe('Wirtschaft');
+       |                                ^
+     81|       expect(['rules_medium', 'rules_high']).toContain(outcome.confide…
+     82|     });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[52/70]⎯
+
+ FAIL  src/__tests__/lib/category-classifier/decide.test.ts > decideDeterministic (cat-v2) > Gate 4 — weak deterministic > single high-precision title token accepts as rules_high or rules_low
+AssertionError: expected 'Sonstiges' to be 'Nightlife' // Object.is equality
+
+Expected: "Nightlife"
+Received: "Sonstiges"
+
+ ❯ src/__tests__/lib/category-classifier/decide.test.ts:88:32
+     86|     it('single high-precision title token accepts as rules_high or rul…
+     87|       const outcome = classifyDeterministic({ title: 'Rave Night' });
+     88|       expect(outcome.category).toBe('Nightlife');
+       |                                ^
+     89|       expect(['rules_high', 'rules_low', 'rules_medium']).toContain(ou…
+     90|     });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[53/70]⎯
+
+ FAIL  src/__tests__/lib/category-classifier/decide.test.ts > decideDeterministic (cat-v2) > blockers > WKO context blocks Religion for "Messe" match
+AssertionError: expected 'Sonstiges' to be 'Wirtschaft' // Object.is equality
+
+Expected: "Wirtschaft"
+Received: "Sonstiges"
+
+ ❯ src/__tests__/lib/category-classifier/decide.test.ts:130:32
+    128|         source_name: 'wko.at',
+    129|       });
+    130|       expect(outcome.category).toBe('Wirtschaft');
+       |                                ^
+    131|     });
+    132|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[54/70]⎯
+
+ FAIL  src/__tests__/lib/category-classifier/decide.test.ts > decideDeterministic (cat-v2) > candidate output > includes evidence strings for auditing
+AssertionError: expected 0 to be greater than 0
+ ❯ src/__tests__/lib/category-classifier/decide.test.ts:137:41
+    135|     it('includes evidence strings for auditing', () => {
+    136|       const outcome = classifyDeterministic({ title: 'Weihnachtsmarkt …
+    137|       expect(outcome.candidates.length).toBeGreaterThan(0);
+       |                                         ^
+    138|       expect(outcome.candidates[0].category).toBe('Märkte');
+    139|       const hasTitleEvidence = outcome.candidates[0].evidence?.some(e …
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[55/70]⎯
+
+ FAIL  src/__tests__/lib/category-classifier/enrichment-validate.test.ts > validateClaudeEnrichment — required singletons (fn-14.3 spec "genau 1") > rejects missing primary_category
+AssertionError: expected true to be false // Object.is equality
+
+- Expected
++ Received
+
+- false
++ true
+
+ ❯ src/__tests__/lib/category-classifier/enrichment-validate.test.ts:76:18
+     74|   it('rejects missing primary_category', () => {
+     75|     const r = validateClaudeEnrichment({ ...validRow, primary_category…
+     76|     expect(r.ok).toBe(false);
+       |                  ^
+     77|     if (!r.ok) expect(r.errors.some(e => /primary_category.*missing|re…
+     78|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[56/70]⎯
+
+ FAIL  src/__tests__/lib/category-classifier/enrichment-validate.test.ts > validateClaudeEnrichment — required singletons (fn-14.3 spec "genau 1") > rejects empty-string primary_category
+AssertionError: expected true to be false // Object.is equality
+
+- Expected
++ Received
+
+- false
++ true
+
+ ❯ src/__tests__/lib/category-classifier/enrichment-validate.test.ts:82:18
+     80|   it('rejects empty-string primary_category', () => {
+     81|     const r = validateClaudeEnrichment({ ...validRow, primary_category…
+     82|     expect(r.ok).toBe(false);
+       |                  ^
+     83|   });
+     84|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[57/70]⎯
+
+ FAIL  src/__tests__/lib/category-classifier/enrichment-validate.test.ts > validateClaudeEnrichment — required singletons (fn-14.3 spec "genau 1") > rejects missing price_tier
+AssertionError: expected true to be false // Object.is equality
+
+- Expected
++ Received
+
+- false
++ true
+
+ ❯ src/__tests__/lib/category-classifier/enrichment-validate.test.ts:87:18
+     85|   it('rejects missing price_tier', () => {
+     86|     const r = validateClaudeEnrichment({ ...validRow, price_tier: null…
+     87|     expect(r.ok).toBe(false);
+       |                  ^
+     88|     if (!r.ok) expect(r.errors.some(e => /price_tier.*missing|required…
+     89|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[58/70]⎯
+
+ FAIL  src/__tests__/lib/category-classifier/enrichment-validate.test.ts > validateClaudeEnrichment — required singletons (fn-14.3 spec "genau 1") > rejects missing duration_type
+AssertionError: expected true to be false // Object.is equality
+
+- Expected
++ Received
+
+- false
++ true
+
+ ❯ src/__tests__/lib/category-classifier/enrichment-validate.test.ts:93:18
+     91|   it('rejects missing duration_type', () => {
+     92|     const r = validateClaudeEnrichment({ ...validRow, duration_type: n…
+     93|     expect(r.ok).toBe(false);
+       |                  ^
+     94|     if (!r.ok) expect(r.errors.some(e => /duration_type.*missing|requi…
+     95|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[59/70]⎯
+
+ FAIL  src/__tests__/lib/category-classifier/enrichment-validate.test.ts > validateClaudeEnrichment — required singletons (fn-14.3 spec "genau 1") > rejects missing language
+AssertionError: expected true to be false // Object.is equality
+
+- Expected
++ Received
+
+- false
++ true
+
+ ❯ src/__tests__/lib/category-classifier/enrichment-validate.test.ts:99:18
+     97|   it('rejects missing language', () => {
+     98|     const r = validateClaudeEnrichment({ ...validRow, language: null }…
+     99|     expect(r.ok).toBe(false);
+       |                  ^
+    100|     if (!r.ok) expect(r.errors.some(e => /language.*missing|required/i…
+    101|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[60/70]⎯
+
+ FAIL  src/__tests__/lib/category-classifier/enrichment-validate.test.ts > validateClaudeEnrichment — required singletons (fn-14.3 spec "genau 1") > reports ALL missing-required-singleton errors at once (no early exit)
+AssertionError: expected true to be false // Object.is equality
+
+- Expected
++ Received
+
+- false
++ true
+
+ ❯ src/__tests__/lib/category-classifier/enrichment-validate.test.ts:111:18
+    109|       language: null,
+    110|     });
+    111|     expect(r.ok).toBe(false);
+       |                  ^
+    112|     if (!r.ok) {
+    113|       const fields = ['primary_category', 'price_tier', 'duration_type…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[61/70]⎯
+
+ FAIL  src/__tests__/lib/category-classifier/enrichment-validate.test.ts > validateClaudeEnrichment — failure modes > drops out-of-vocab tags but keeps the rest
+AssertionError: expected true to be false // Object.is equality
+
+- Expected
++ Received
+
+- false
++ true
+
+ ❯ src/__tests__/lib/category-classifier/enrichment-validate.test.ts:133:18
+    131|       tags: ['pop', 'NOT_A_REAL_TAG'],
+    132|     });
+    133|     expect(r.ok).toBe(false);
+       |                  ^
+    134|     if (!r.ok) {
+    135|       expect(r.partial.tags).toEqual(['pop']);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[62/70]⎯
+
+ FAIL  src/__tests__/lib/category-classifier/enrichment-validate.test.ts > validateClaudeEnrichment — failure modes > rejects suggested_description below DESC_MIN
+AssertionError: expected true to be false // Object.is equality
+
+- Expected
++ Received
+
+- false
++ true
+
+ ❯ src/__tests__/lib/category-classifier/enrichment-validate.test.ts:142:18
+    140|   it('rejects suggested_description below DESC_MIN', () => {
+    141|     const r = validateClaudeEnrichment({ ...validRow, suggested_descri…
+    142|     expect(r.ok).toBe(false);
+       |                  ^
+    143|     if (!r.ok) {
+    144|       expect(r.errors.some(e => e.includes('suggested_description'))).…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[63/70]⎯
+
+ FAIL  src/__tests__/lib/category-classifier/enrichment-validate.test.ts > validateClaudeEnrichment — failure modes > rejects suggested_description above DESC_MAX
+AssertionError: expected true to be false // Object.is equality
+
+- Expected
++ Received
+
+- false
++ true
+
+ ❯ src/__tests__/lib/category-classifier/enrichment-validate.test.ts:151:18
+    149|   it('rejects suggested_description above DESC_MAX', () => {
+    150|     const r = validateClaudeEnrichment({ ...validRow, suggested_descri…
+    151|     expect(r.ok).toBe(false);
+       |                  ^
+    152|     if (!r.ok) expect(r.partial.suggested_description).toBeNull();
+    153|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[64/70]⎯
+
+ FAIL  src/__tests__/lib/category-classifier/enrichment-validate.test.ts > validateClaudeEnrichment — failure modes > rejects suggested_description with HTML tags
+AssertionError: expected true to be false // Object.is equality
+
+- Expected
++ Received
+
+- false
++ true
+
+ ❯ src/__tests__/lib/category-classifier/enrichment-validate.test.ts:158:18
+    156|     const desc = '<p>' + 'a'.repeat(DESC_MIN) + '</p>';
+    157|     const r = validateClaudeEnrichment({ ...validRow, suggested_descri…
+    158|     expect(r.ok).toBe(false);
+       |                  ^
+    159|     if (!r.ok) expect(r.partial.suggested_description).toBeNull();
+    160|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[65/70]⎯
+
+ FAIL  src/__tests__/lib/category-classifier/enrichment-validate.test.ts > validateClaudeEnrichment — failure modes > drops unknown primary_category
+AssertionError: expected true to be false // Object.is equality
+
+- Expected
++ Received
+
+- false
++ true
+
+ ❯ src/__tests__/lib/category-classifier/enrichment-validate.test.ts:183:18
+    181|   it('drops unknown primary_category', () => {
+    182|     const r = validateClaudeEnrichment({ ...validRow, primary_category…
+    183|     expect(r.ok).toBe(false);
+       |                  ^
+    184|     if (!r.ok) expect(r.partial.primary_category).toBeNull();
+    185|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[66/70]⎯
+
+ FAIL  src/__tests__/lib/category-classifier/enrichment-validate.test.ts > validateClaudeEnrichment — failure modes > coerces booleans to false on non-boolean input
+AssertionError: expected true to be false // Object.is equality
+
+- Expected
++ Received
+
+- false
++ true
+
+ ❯ src/__tests__/lib/category-classifier/enrichment-validate.test.ts:189:18
+    187|   it('coerces booleans to false on non-boolean input', () => {
+    188|     const r = validateClaudeEnrichment({ ...validRow, is_dog_friendly:…
+    189|     expect(r.ok).toBe(false);
+       |                  ^
+    190|     if (!r.ok) expect(r.partial.is_dog_friendly).toBe(false);
+    191|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[67/70]⎯
+
+ FAIL  src/__tests__/lib/category-classifier/pipeline-wiring.test.ts > scrape-pipeline wiring (cat-v2) > scrape-pipeline.ts invokes categorization_backfill BEFORE categorization
+AssertionError: expected -1 to be greater than -1
+ ❯ src/__tests__/lib/category-classifier/pipeline-wiring.test.ts:20:18
+     18|     const cIdx = file.indexOf("runStep('categorization'");
+     19|     expect(bIdx).toBeGreaterThan(-1);
+     20|     expect(cIdx).toBeGreaterThan(-1);
+       |                  ^
+     21|     expect(bIdx).toBeLessThan(cIdx);
+     22|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[68/70]⎯
+
+ FAIL  src/__tests__/lib/category-classifier/precision-classes.test.ts > precision-classed matching (cat-v2) > compound `weihnachtsmarkt` DOES match Märkte via pattern
+AssertionError: expected 0 to be greater than 0
+ ❯ src/__tests__/lib/category-classifier/precision-classes.test.ts:16:35
+     14|     const scores = aggregate(extractSignals(norm));
+     15|     const maerkte = scores.find(s => s.category === 'Märkte');
+     16|     expect((maerkte?.score ?? 0)).toBeGreaterThan(0);
+       |                                   ^
+     17|   });
+     18|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[69/70]⎯
+
+ FAIL  src/__tests__/lib/category-classifier/primary-vs-tags.test.ts > primary vs secondary tags (R1) > Adventmarkt mit Live-Musik → category=Märkte, tags include Musik
+AssertionError: expected 'Musik' to be 'Märkte' // Object.is equality
+
+Expected: "Märkte"
+Received: "Musik"
+
+ ❯ src/__tests__/lib/category-classifier/primary-vs-tags.test.ts:7:30
+      5|   it('Adventmarkt mit Live-Musik → category=Märkte, tags include Musik…
+      6|     const outcome = classifyDeterministic({ title: 'Adventmarkt mit Li…
+      7|     expect(outcome.category).toBe('Märkte');
+       |                              ^
+      8|     expect(outcome.tags).toContain('Märkte');
+      9|     // Musik may or may not appear — depends on whether 'konzert'/'mus…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[70/70]⎯
+
+
+ Test Files  12 failed | 53 passed (65)
+      Tests  70 failed | 1198 passed (1268)
+   Start at  22:47:56
+   Duration  9.61s (transform 14.25s, setup 40.81s, import 30.71s, tests 10.87s, environment 127.99s)
+
+[vitest-pool]: Timeout terminating forks worker for test files C:/Users/jonag/Documents/Portfolio/burgenland-events-v5-fresh/.claude/worktrees/eloquent-varahamihira-8f7861/src/__tests__/scripts/import-osm-venues.test.ts.
+[vitest-pool]: Timeout terminating forks worker for test files C:/Users/jonag/Documents/Portfolio/burgenland-events-v5-fresh/.claude/worktrees/eloquent-varahamihira-8f7861/src/__tests__/scripts/backfill-venue-ids.test.ts.
+  Niederoesterreich... [vitest-pool]: Failed to terminate forks worker for test files C:/Users/jonag/Documents/Portfolio/burgenland-events-v5-fresh/.claude/worktrees/eloquent-varahamihira-8f7861/src/__tests__/scripts/import-osm-venues.test.ts. Error: [vitest-pool-runner]: Timeout waiting for worker to respond
+    at Timeout.<anonymous> (file:///C:/Users/jonag/Documents/Portfolio/burgenland-events-v5-fresh/.claude/worktrees/eloquent-varahamihira-8f7861/node_modules/vitest/dist/chunks/cli-api.Bxr1Nn49.js:3030:58)
+    at listOnTimeout (node:internal/timers:605:17)
+    at processTimers (node:internal/timers:541:7)
+[vitest-pool]: Failed to terminate forks worker for test files C:/Users/jonag/Documents/Portfolio/burgenland-events-v5-fresh/.claude/worktrees/eloquent-varahamihira-8f7861/src/__tests__/scripts/backfill-venue-ids.test.ts. Error: [vitest-pool-runner]: Timeout waiting for worker to respond
+    at Timeout.<anonymous> (file:///C:/Users/jonag/Documents/Portfolio/burgenland-events-v5-fresh/.claude/worktrees/eloquent-varahamihira-8f7861/node_modules/vitest/dist/chunks/cli-api.Bxr1Nn49.js:3030:58)
+    at listOnTimeout (node:internal/timers:605:17)
+    at processTimers (node:internal/timers:541:7)
+  Burgenland... close timed out after 10000ms
+Tests closed successfully but something prevents Vite server from exiting
+You can try to identify the cause by enabling "hanging-process" reporter. See https://vitest.dev/guide/reporters.html#hanging-process-reporter

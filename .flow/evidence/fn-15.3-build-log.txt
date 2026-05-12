@@ -1,0 +1,205 @@
+﻿
+> burgenland-events-v5@1.0.0 build
+> next build
+
+node.exe : The Next Bundle Analyzer is not compatible with Turbopack builds, no report will be generated.
+In Zeile:1 Zeichen:1
++ & "C:\Program Files\nodejs/node.exe" "C:\Program Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (The Next Bundle...l be generated.:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+
+Consider trying the new Turbopack analyzer via `next experimental-analyze`.
+
+See https://nextjs.org/docs/app/guides/package-bundling for more information
+
+To run this analysis pass the `--webpack` flag to `next build`
+⚠ Warning: Next.js inferred your workspace root, but it may not be correct.
+ We detected multiple lockfiles and selected the directory of 
+C:\Users\jonag\Documents\Portfolio\burgenland-events-v5-fresh\package-lock.json as the root directory.
+ To silence this warning, set `turbopack.root` in your Next.js config, or consider removing one of the lockfiles if 
+it's not needed.
+   See https://nextjs.org/docs/app/api-reference/config/next-config-js/turbopack#root-directory for more information.
+ Detected additional lockfiles: 
+   * C:\Users\jonag\Documents\Portfolio\burgenland-events-v5-fresh\.claude\worktrees\eloquent-varahamihira-8f7861\packa
+ge-lock.json
+
+▲ Next.js 16.2.1 (Turbopack)
+- Environments: .env.local
+
+⚠ The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: 
+https://nextjs.org/docs/messages/middleware-to-proxy
+  Creating an optimized production build ...
+The Next Bundle Analyzer is not compatible with Turbopack builds, no report will be generated.
+
+Consider trying the new Turbopack analyzer via `next experimental-analyze`.
+
+See https://nextjs.org/docs/app/guides/package-bundling for more information
+
+To run this analysis pass the `--webpack` flag to `next build`
+✓ Compiled successfully in 8.4s
+  Running TypeScript ...
+  Finished TypeScript in 16.9s ...
+  Collecting page data using 31 workers ...
+  Generating static pages using 31 workers (0/143) ...
+  Generating static pages using 31 workers (35/143) 
+  Generating static pages using 31 workers (71/143) 
+  Generating static pages using 31 workers (107/143) 
+✓ Generating static pages using 31 workers (143/143) in 9.8s
+  Finalizing page optimization ...
+
+Route (app)                                Revalidate  Expire
+┌ ƒ /
+├ ○ /_not-found
+├ ƒ /(.)events/[...slug]
+├ ● /[bundesland]
+├ ● /[bundesland]/[filter]
+├ ● /[bundesland]/[filter]/[subfilter]
+├ ○ /admin
+├ ○ /admin/analytics
+├ ○ /admin/dedup
+├ ○ /admin/events
+├ ○ /admin/moderation
+├ ○ /admin/overview
+├ ○ /admin/quality
+├ ○ /admin/quality-stats
+├ ○ /admin/review
+├ ○ /admin/scraper-runs
+├ ○ /admin/seo
+├ ○ /admin/seo/experiments
+├ ○ /admin/source-trust
+├ ○ /admin/sources
+├ ○ /admin/users
+├ ○ /agb                                           1d      1y
+├ ƒ /api/admin/analytics
+├ ƒ /api/admin/dedup/[id]/resolve
+├ ƒ /api/admin/dedup/stats
+├ ƒ /api/admin/dedup/uncertain
+├ ƒ /api/admin/events/[id]/publish-status
+├ ƒ /api/admin/migrate
+├ ƒ /api/admin/quality-flags
+├ ƒ /api/admin/quality-flags/[id]/resolve
+├ ƒ /api/admin/quality-stats
+├ ƒ /api/admin/review-queue
+├ ƒ /api/admin/review-queue/[id]/resolve
+├ ƒ /api/admin/scrape-runs
+├ ƒ /api/admin/scrape-runs/[id]
+├ ƒ /api/admin/scraper-health
+├ ƒ /api/admin/scrapers
+├ ƒ /api/admin/scrapers/[name]/progress
+├ ƒ /api/admin/seo/experiments
+├ ƒ /api/admin/seo/experiments/[id]
+├ ƒ /api/admin/seo/history
+├ ƒ /api/admin/seo/keywords
+├ ƒ /api/admin/seo/overview
+├ ƒ /api/admin/seo/pages
+├ ƒ /api/admin/seo/snapshot
+├ ƒ /api/admin/seo/vitals
+├ ƒ /api/admin/source-trust
+├ ƒ /api/admin/sources
+├ ƒ /api/admin/users/[id]
+├ ƒ /api/analytics
+├ ƒ /api/artists/by-url
+├ ƒ /api/artists/events
+├ ƒ /api/artists/follow
+├ ƒ /api/artists/following
+├ ƒ /api/artists/popular
+├ ƒ /api/artists/search
+├ ƒ /api/artists/similar
+├ ƒ /api/auth/send-welcome
+├ ƒ /api/cities/following
+├ ƒ /api/comments/[id]
+├ ƒ /api/comments/[id]/report
+├ ƒ /api/cron/send-reminders
+├ ƒ /api/cron/seo-content-refresh
+├ ƒ /api/cron/seo-daily-snapshot
+├ ƒ /api/cron/seo-traffic-alert
+├ ƒ /api/cron/seo-weekly-report
+├ ƒ /api/cron/warm-cache
+├ ƒ /api/events
+├ ƒ /api/events/[id]
+├ ƒ /api/events/[id]/interact
+├ ƒ /api/events/featured
+├ ƒ /api/events/related
+├ ƒ /api/events/search
+├ ƒ /api/events/sources
+├ ƒ /api/health
+├ ƒ /api/notifications/dispatch
+├ ƒ /api/notifications/preferences
+├ ƒ /api/notifications/unsubscribe
+├ ƒ /api/og/event/[shortId]
+├ ƒ /api/push/subscribe
+├ ƒ /api/push/unsubscribe
+├ ƒ /api/scrape
+├ ƒ /api/search/semantic
+├ ƒ /api/seo/experiment-impression
+├ ƒ /api/spotify/status
+├ ƒ /api/stats/counts
+├ ƒ /api/venues
+├ ƒ /api/venues/[id]
+├ ƒ /api/venues/following
+├ ○ /apple-icon
+├ ƒ /artists
+├ ƒ /auth/callback
+├ ○ /auth/complete-profile
+├ ○ /auth/forgot-password
+├ ○ /auth/login
+├ ○ /auth/register
+├ ○ /auth/reset-password
+├ ƒ /auth/spotify/callback
+├ ƒ /blog
+├ ● /blog/[slug]
+│ ├ /blog/electric-love-festival-2026
+│ ├ /blog/poolbar-festival-2026
+│ ├ /blog/impulstanz-2026
+│ └ [+61 more paths]
+├ ƒ /blog/-/opengraph-image
+├ ○ /blog/opengraph-image
+├ ƒ /calendar
+├ ○ /datenschutz                                   1d      1y
+├ ○ /entdecken
+├ ● /events/[...slug]
+├ ƒ /events/create
+├ ƒ /feed
+├ ƒ /feed/[activityId]
+├ ƒ /friends
+├ ● /gemeinde/[slug]
+├ ƒ /groups
+├ ƒ /groups/[id]
+├ ○ /icon
+├ ○ /impressum                                     1d      1y
+├ ƒ /join/[code]
+├ ○ /llms-full.txt                                 1d      1y
+├ ○ /manifest.webmanifest
+├ ○ /map
+├ ƒ /memories
+├ ƒ /memories/[id]
+├ ƒ /messages
+├ ƒ /messages/[userId]
+├ ƒ /notifications
+├ ○ /opengraph-image
+├ ƒ /profile
+├ ○ /quellen                                       1d      1y
+├ ○ /robots.txt
+├ ƒ /saved
+├ ƒ /settings/notifications
+├ ƒ /sitemap.xml
+├ ƒ /spotify-matches
+├ ● /stadt/[city]
+├ ● /stadt/[city]/[filter]
+├ ● /stadt/[city]/[filter]/[subfilter]
+├ ○ /studenten                                     1h      1y
+├ ● /studenten/[city]
+├ ● /studenten/[city]/[filter]
+├ ● /thema/[slug]
+├ ○ /ueber-uns                                     1d      1y
+└ ƒ /venues/[id]
+
+
+ƒ Proxy (Middleware)
+
+○  (Static)   prerendered as static content
+●  (SSG)      prerendered as static HTML (uses generateStaticParams)
+ƒ  (Dynamic)  server-rendered on demand
+

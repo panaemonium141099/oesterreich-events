@@ -1,0 +1,19 @@
+﻿node.exe : ⚠ Warning: Next.js inferred your workspace root, but it may not be correct.
+In Zeile:1 Zeichen:1
++ & "C:\Program Files\nodejs/node.exe" "C:\Program Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (⚠ Warning: Next...not be correct.:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+ We detected multiple lockfiles and selected the directory of 
+C:\Users\jonag\Documents\Portfolio\burgenland-events-v5-fresh\package-lock.json as the root directory.
+ To silence this warning, set `outputFileTracingRoot` in your Next.js config, or consider removing one of the 
+lockfiles if it's not needed.
+   See https://nextjs.org/docs/app/api-reference/config/next-config-js/output#caveats for more information.
+ Detected additional lockfiles: 
+   * C:\Users\jonag\Documents\Portfolio\burgenland-events-v5-fresh\.claude\worktrees\eloquent-varahamihira-8f7861\packa
+ge-lock.json
+
+  Analyzing a production build...
+✓ Analyze completed in 8.8s. Results written to C:\Users\jonag\Documents\Portfolio\burgenland-events-v5-fresh\.claude\worktrees\eloquent-varahamihira-8f7861\.next\diagnostics\analyze.
+To explore the analyze results interactively, run `next experimental-analyze` without `--output`.
