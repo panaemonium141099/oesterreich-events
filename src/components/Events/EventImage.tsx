@@ -6,6 +6,14 @@
 //   2. next/image's automatic <link rel="preload"> emission for LCP
 //      candidates works without a client-component boundary.
 //
+// Even though there's no 'use client' here, EventImage gets transparently
+// pulled into client bundles by callers like EventCard, CalendarPageClient,
+// StoriesViewer (all `'use client'`). The bundle splitter inlines this
+// file into those chunks, so anything that touches a Node-only global
+// (Buffer, fs, process.env.SECRETS, …) at module scope WILL break the
+// browser at runtime. Keep this file isomorphic — pure constants and
+// React+next/image only.
+//
 // Consequence: no useState, no useEffect, no onError. If a remote URL
 // breaks at runtime, next/image shows nothing / the alt-text. Image
 // health-check is out-of-scope (see fn-15.11/12). What we DO handle
@@ -21,26 +29,28 @@
 // all of those working. New spec-mandated props are added on top.
 
 import Image, { type ImageProps } from 'next/image';
-import { resolvePrimaryEventImage, normalizeEventCategory } from '@/lib/event-images';
+import { resolvePrimaryEventImage } from '@/lib/event-images';
 
 /**
  * Single, generic blur placeholder used for ALL remote images.
- * 10x10 dark gradient SVG as data:URI — ~280 bytes.
+ * 10×10 dark gradient SVG as data:URI — pre-encoded so this file stays
+ * isomorphic (no Buffer / TextEncoder needed in client bundles).
+ *
+ * Original SVG payload (decoded):
+ *   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10"
+ *        preserveAspectRatio="none">
+ *     <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+ *       <stop offset="0" stop-color="#1a1a1a"/>
+ *       <stop offset="1" stop-color="#0d0d0d"/>
+ *     </linearGradient></defs>
+ *     <rect width="10" height="10" fill="url(#g)"/>
+ *   </svg>
  *
  * Per fn-15.1 (Codex-Round-2 Decision): one strategy, not pro-image
  * plaiceholder generation. Per-image LQIP belongs in fn-15.11.
  */
 export const GENERIC_BLUR_DATA_URL =
-  'data:image/svg+xml;base64,' +
-  Buffer.from(
-    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10" preserveAspectRatio="none">' +
-      '<defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1">' +
-      '<stop offset="0" stop-color="#1a1a1a"/>' +
-      '<stop offset="1" stop-color="#0d0d0d"/>' +
-      '</linearGradient></defs>' +
-      '<rect width="10" height="10" fill="url(#g)"/>' +
-    '</svg>',
-  ).toString('base64');
+  'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMCAxMCIgcHJlc2VydmVBc3BlY3RSYXRpbz0ibm9uZSI+PGRlZnM+PGxpbmVhckdyYWRpZW50IGlkPSJnIiB4MT0iMCIgeTE9IjAiIHgyPSIxIiB5Mj0iMSI+PHN0b3Agb2Zmc2V0PSIwIiBzdG9wLWNvbG9yPSIjMWExYTFhIi8+PHN0b3Agb2Zmc2V0PSIxIiBzdG9wLWNvbG9yPSIjMGQwZDBkIi8+PC9saW5lYXJHcmFkaWVudD48L2RlZnM+PHJlY3Qgd2lkdGg9IjEwIiBoZWlnaHQ9IjEwIiBmaWxsPSJ1cmwoI2cpIi8+PC9zdmc+';
 
 /**
  * Slug-normalization per epic spec — Latin transliteration for German
@@ -59,7 +69,7 @@ export const GENERIC_BLUR_DATA_URL =
  */
 export function normalizeCategoryToSlug(input: string | null | undefined): string {
   if (!input) return 'sonstiges';
-  return input
+  const slug = input
     .toLowerCase()
     .replace(/ä/g, 'ae')
     .replace(/ö/g, 'oe')
@@ -74,6 +84,10 @@ export function normalizeCategoryToSlug(input: string | null | undefined): strin
     // collapse repeated dashes, trim ends
     .replace(/-+/g, '-')
     .replace(/^-|-$/g, '');
+  // If sanitization stripped everything (e.g. input was '!!!' or ' & '),
+  // fall back to 'sonstiges' so the resolver always has a valid pool
+  // slug to look up.
+  return slug.length > 0 ? slug : 'sonstiges';
 }
 
 // ─── Props ───────────────────────────────────────────────────────────
@@ -115,8 +129,18 @@ type SharedProps = {
   preload?: boolean;
   /** Optional gradient overlay (kept for callers like EventCard). */
   showGradientOverlay?: boolean;
-  /** Optional skeleton shimmer placeholder. Default: false (next/image's
-   *  built-in `placeholder="blur"` already handles the fade-in). */
+  /**
+   * @deprecated No-op in the RSC EventImage. The skeleton overlay used to
+   * be dismissed by `onLoad`/`useState` in the old client-component
+   * version. Without that state we cannot tell when the image has
+   * finished loading, so painting a permanent shimmer on top of every
+   * card would hide the image. The built-in `placeholder="blur"` on
+   * next/image already covers the loading window for remote URLs and
+   * does dismiss automatically.
+   *
+   * Kept in the type to avoid a sweeping caller-update PR. Removing it
+   * is fn-15.2 territory (CLS-Stabilität pixel-perfect skeletons).
+   */
   showSkeleton?: boolean;
   /** object-position for cropping. Forwarded as style. */
   objectPosition?: string;
@@ -180,7 +204,9 @@ export function EventImage(props: EventImageProps) {
     fetchPriority,
     preload = false,
     showGradientOverlay = false,
-    showSkeleton = false,
+    // showSkeleton is a deprecated no-op — see prop docs. Pull it out of
+    // props so we don't try to render the permanent shimmer overlay.
+    showSkeleton: _showSkeleton = false,
     objectPosition,
     objectFit = 'cover',
     sizes,
@@ -220,10 +246,13 @@ export function EventImage(props: EventImageProps) {
     },
   };
 
-  // Loading vs preload — next.js maps `priority`/preload to the LCP
-  // preload link. We use the modern prop name where supported.
+  // Next.js 16 exposes both `preload` (new, recommended) and `priority`
+  // (deprecated alias). We forward `preload` directly so the modern
+  // contract is what reaches next/image — the framework still maps it to
+  // the LCP `<link rel="preload" as="image">` emission. The deprecated
+  // `priority` is intentionally never touched here.
   if (preload) {
-    imageProps.priority = true;
+    imageProps.preload = true;
   } else if (loading) {
     imageProps.loading = loading;
   }
@@ -242,9 +271,6 @@ export function EventImage(props: EventImageProps) {
     imageProps.fill = true;
     return (
       <div className={`relative overflow-hidden ${wrapperClassName}`}>
-        {showSkeleton && (
-          <div className="absolute inset-0 skeleton pointer-events-none" aria-hidden="true" />
-        )}
         <Image {...(imageProps as ImageProps)} />
         {showGradientOverlay && (
           <div
@@ -263,12 +289,9 @@ export function EventImage(props: EventImageProps) {
   imageProps.width = fixed.width;
   imageProps.height = fixed.height;
 
-  if (wrapperClassName || showGradientOverlay || showSkeleton) {
+  if (wrapperClassName || showGradientOverlay) {
     return (
       <div className={`relative overflow-hidden ${wrapperClassName}`}>
-        {showSkeleton && (
-          <div className="absolute inset-0 skeleton pointer-events-none" aria-hidden="true" />
-        )}
         <Image {...(imageProps as ImageProps)} />
         {showGradientOverlay && (
           <div
@@ -283,6 +306,3 @@ export function EventImage(props: EventImageProps) {
   return <Image {...(imageProps as ImageProps)} />;
 }
 
-// Re-export normalization helper for completeness — some callers may
-// want to compute the slug directly (e.g. tests).
-export { normalizeEventCategory };

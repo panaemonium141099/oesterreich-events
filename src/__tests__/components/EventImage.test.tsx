@@ -20,6 +20,7 @@ vi.mock('next/image', () => ({
       width,
       height,
       priority,
+      preload,
       loading,
       fetchPriority,
       ...rest
@@ -33,6 +34,7 @@ vi.mock('next/image', () => ({
         data-blurdataurl={blurDataURL ? 'present' : undefined}
         data-fill={fill ? 'true' : undefined}
         data-priority={priority ? 'true' : undefined}
+        data-preload={preload ? 'true' : undefined}
         width={typeof width === 'number' ? width : undefined}
         height={typeof height === 'number' ? height : undefined}
         loading={typeof loading === 'string' ? (loading as 'lazy' | 'eager') : undefined}
@@ -77,6 +79,15 @@ describe('normalizeCategoryToSlug', () => {
 
   it('strips characters outside [a-z0-9-]', () => {
     expect(normalizeCategoryToSlug('Hello?!@#World')).toBe('helloworld');
+  });
+
+  it('falls back to sonstiges when sanitization strips everything', () => {
+    // Inputs that are nothing but characters the regex strips out must
+    // still produce a valid pool slug — otherwise resolveCategoryFallback
+    // gets an empty key and points at /images/categories/-1.jpg (404).
+    expect(normalizeCategoryToSlug('!!!')).toBe('sonstiges');
+    expect(normalizeCategoryToSlug(' & ')).toBe('sonstiges');
+    expect(normalizeCategoryToSlug('???')).toBe('sonstiges');
   });
 });
 
@@ -148,7 +159,7 @@ describe('EventImage (Server Component)', () => {
     expect(img!.getAttribute('data-placeholder')).toBe('empty');
   });
 
-  it('applies preload=true via priority prop on next/image (LCP candidate)', () => {
+  it('forwards preload directly to next/image (Next 16 prop, not deprecated priority)', () => {
     const { container } = render(
       <EventImage
         src="https://example.com/photo.jpg"
@@ -157,7 +168,10 @@ describe('EventImage (Server Component)', () => {
       />,
     );
     const img = getImg(container);
-    expect(img!.getAttribute('data-priority')).toBe('true');
+    // Modern contract: preload reaches next/image as-is. The deprecated
+    // `priority` alias is intentionally NEVER set by the wrapper.
+    expect(img!.getAttribute('data-preload')).toBe('true');
+    expect(img!.getAttribute('data-priority')).toBeNull();
   });
 
   it('passes fetchPriority through to next/image', () => {
@@ -228,11 +242,15 @@ describe('EventImage (Server Component)', () => {
     expect(overlay).not.toBeNull();
   });
 
-  it('emits skeleton shimmer when showSkeleton=true', () => {
+  it('treats showSkeleton as a no-op (RSC has no loaded-state to dismiss)', () => {
+    // The legacy `showSkeleton` prop used to render a shimmer overlay that
+    // was hidden by an `onLoad` handler. The RSC EventImage has no client
+    // state to drive that dismissal, so we deliberately render NO skeleton
+    // — even if a caller still passes the prop. The blur placeholder on
+    // next/image already covers the loading window for remote URLs.
     const { container } = render(
       <EventImage src="https://example.com/photo.jpg" sizes="240px" showSkeleton />,
     );
-    const skeleton = container.querySelector('.skeleton');
-    expect(skeleton).not.toBeNull();
+    expect(container.querySelector('.skeleton')).toBeNull();
   });
 });
