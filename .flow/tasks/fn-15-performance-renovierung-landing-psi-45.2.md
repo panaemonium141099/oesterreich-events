@@ -50,15 +50,29 @@ sichtbar nach unten. Plus: meshShift-Background-Animation animiert
 - [ ] PSI Mobile LCP <= 2.0s
 - [ ] PSI Mobile Performance Score >= 65
 
-## Evidence
+## Evidence-Notes
 
 - Commits, Skeleton-Component-Inventory, PSI-Delta für Gruppe (1+2)
 - Rollback: Vercel-instant
 
 ## Done summary
-TBD
+fn-15.2 CLS-Stabilität SHIP after 4 codex impl-review rounds.
 
+Implemented: pixel-perfect Suspense skeletons mirroring all 4 landing
+sections 1:1 (SectionSkeletons.tsx, 241 LOC), gradient-mesh split into
+shared-static + landing-animated classes (fixes modal stack-context
+trap), Footer mt-auto removed (now pure document flow), meshShift
+animation rewritten to compositor-only transform: translate3d,
+WeeklyHighlights empty-state matches w-60 h-260 card footprint,
+EventImage showSkeleton prop fully removed and 20 call-sites swept,
+CLS-skel diagonal shimmer via CSS-only pseudo-element respecting
+prefers-reduced-motion.
+
+PSI verification: pending (group 1+2 PR will measure LCP <= 2.0s,
+CLS <= 0.05).
+
+Codex round-3 SHIP. 22/22 tests green. TypeScript clean.
 ## Evidence
-- Commits:
-- Tests:
+- Commits: c904cad — fix(perf): CLS-Stabilität — Suspense skeletons, footer fix, mesh GPU (fn-15.2), a891362 — fix(perf): CLS empty-state + heading-wrap shifts (fn-15.2 round 2), 422d3a3 — fix(perf): gradient-mesh clip, empty-state width, skeleton a11y (fn-15.2 round 3), 945d64e — fix(perf): split gradient-mesh (landing only animates), empty h-260 (fn-15.2 r4)
+- Tests: 22/22 passing in src/__tests__/components/EventImage.test.tsx (showSkeleton-related tests removed since prop is gone)
 - PRs:
