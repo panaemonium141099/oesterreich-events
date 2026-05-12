@@ -1,9 +1,23 @@
 'use client';
 
 import Link from 'next/link';
+import { AuthProvider } from '@/lib/supabase/auth-context';
 
+/**
+ * fn-15.5 round-5 (codex): the root layout no longer mounts
+ * AuthProvider, but /auth/login, /auth/register, and
+ * /auth/complete-profile all call useAuth() directly (signInWithGoogle,
+ * signInWithEmail, signUpWithEmail). Without a provider in the route
+ * tree they hit the ANON_AUTH_CONTEXT fallback that returns
+ * "auth provider not mounted" / throws — login and signup are broken.
+ *
+ * We don't mount the full AppShell here because the auth pages don't
+ * want SocialNav / NotificationsProvider / SavedEvents (anonymous
+ * users by definition). Just AuthProvider is enough.
+ */
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
   return (
+    <AuthProvider>
     <div
       className="min-h-screen text-white flex flex-col items-center justify-center relative overflow-hidden px-4"
       style={{
@@ -55,5 +69,6 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
       {/* Bottom gradient */}
       <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-black/50 to-transparent pointer-events-none" />
     </div>
+    </AuthProvider>
   );
 }

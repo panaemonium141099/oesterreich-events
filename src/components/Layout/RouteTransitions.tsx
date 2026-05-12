@@ -1,46 +1,45 @@
 'use client';
 
 /**
- * RouteTransitions — fn-15.5 round-2 (codex fix):
+ * RouteTransitions — fn-15.5 round-5 (codex fix):
  *
- * The codex reviewer correctly pointed out that
- * `view-transition-name` + `@keyframes ::view-transition-*` CSS alone
- * does NOT animate same-document soft navigations. Browsers run a
- * view-transition only when the page calls `document.startViewTransition`
- * (or for the cross-document case which Next App Router doesn't use).
+ * Page-transition trigger for the CSS View Transition API. Replaces
+ * the old framer-motion AnimatedLayout. Browsers without
+ * `document.startViewTransition` (Firefox as of mid-2026) bail out
+ * via feature-detect and route changes happen instantly — the
+ * documented "instant cut" fallback.
  *
- * Strategy here: a tiny client component placed in the root layout
- * that watches `usePathname()` and intercepts the link clicks +
- * popstate via the Navigation API's pending-document hook. The
- * minimal pattern that works without monkey-patching `router.push`:
+ * Correct interaction with the View Transition API: the navigation
+ * MUST happen INSIDE the `startViewTransition()` callback (round-2
+ * attempted an empty callback and let Next.js commit afterwards,
+ * which only snapshots the old page twice — round-4 codex finding).
  *
- *   1. Listen for a same-origin link click (capture phase) BEFORE
- *      Next.js handles it.
- *   2. If the target href is an internal route, call
- *      `document.startViewTransition()` whose callback synchronously
- *      sets a `data-route-transitioning` body attribute and returns;
- *      the actual route change is then completed by Next's own
- *      anchor handler in the same tick.
- *   3. On unmount of the transition, remove the body attribute so the
- *      `::view-transition-*` keyframes have run and the next paint is
- *      stable.
- *
- * Browser support: Chromium-family and Safari 17+ expose
- * `document.startViewTransition`. Firefox / older browsers don't —
- * the feature-detect bails out and route changes happen instantly,
- * which is the documented Firefox-fallback ("instant cut").
+ * Working flow:
+ *   1. Capture-phase click handler intercepts a same-origin link
+ *      click before Next.js handles it.
+ *   2. `e.preventDefault()` stops the default + Next's handler.
+ *   3. `startViewTransition(callback)` records the OLD snapshot, then
+ *      runs `callback` which calls `router.push(href)`. The promise
+ *      returned by startViewTransition resolves once the DOM is
+ *      updated, at which point the NEW snapshot is captured and the
+ *      `::view-transition-*` keyframes animate the cross-fade.
+ *   4. router.push is synchronous (re-renders happen in microtasks).
+ *      We resolve the callback right after the push call so the
+ *      transition lifecycle doesn't stall.
  *
  * Reduced-motion is honored via the @media query in globals.css that
- * zeroes out the route-fade-in/out keyframes.
+ * zeroes out the route-fade-in/out keyframes — startViewTransition
+ * still runs but the animation duration becomes 0.
  *
- * Why not patch `router.push`?
- * Router events are unstable API in App Router; intercepting link
- * clicks + popstate covers ~all user-initiated navigations and
- * leaves programmatic pushes alone (which is fine — they often want
- * to be instant for redirects, login bounces, etc.).
+ * Why not patch router.push directly?
+ * App Router router events are unstable API. Intercepting link
+ * clicks (+ popstate as a future addition) covers ~all user-
+ * initiated navigations and leaves programmatic pushes alone (which
+ * often want to be instant for redirects, auth bounces, etc.).
  */
 
 import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 
 // `Document.startViewTransition` lives on TypeScript's lib.dom.d.ts in
 // newer versions but isn't necessarily present in this project's
@@ -62,6 +61,8 @@ function getStartViewTransition(): StartViewTransition | null {
 }
 
 export function RouteTransitions() {
+  const router = useRouter();
+
   useEffect(() => {
     // Feature-detect once; bail on browsers without view-transition
     // support (Firefox as of mid-2026). Saves the click-handler
@@ -72,52 +73,61 @@ export function RouteTransitions() {
     // inside the closures below.
     const start: StartViewTransition = startViewTransition;
 
-    function shouldHandle(target: HTMLAnchorElement | null): boolean {
-      if (!target) return false;
-      // Same-origin internal navigation only — external links get the
-      // browser default (a hard load anyway).
-      const href = target.getAttribute('href');
-      if (!href) return false;
-      // Skip hash-only, mailto, tel, etc.
-      if (href.startsWith('#') || href.includes(':')) return false;
-      // Skip if the link explicitly opts out via target / rel / download.
-      if (target.target && target.target !== '_self') return false;
-      if (target.hasAttribute('download')) return false;
-      // Skip respect-modifier clicks.
-      return true;
+    function getInternalHref(el: HTMLAnchorElement | null): string | null {
+      if (!el) return null;
+      const href = el.getAttribute('href');
+      if (!href) return null;
+      // Skip hash-only and non-http schemes (mailto, tel, etc.).
+      if (href.startsWith('#') || href.includes(':')) return null;
+      // Skip target=_blank / download / explicit opt-outs.
+      if (el.target && el.target !== '_self') return null;
+      if (el.hasAttribute('download')) return null;
+      // External absolute URLs (different origin) — let the browser
+      // handle them as hard nav. Note: relative paths starting with
+      // `/` pass through here unchanged.
+      try {
+        const url = new URL(href, window.location.href);
+        if (url.origin !== window.location.origin) return null;
+        return url.pathname + url.search + url.hash;
+      } catch {
+        return null;
+      }
     }
 
     function onClick(e: MouseEvent) {
       if (e.defaultPrevented) return;
       if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
       if (e.button !== 0) return;
-      const target = (e.target as HTMLElement | null)?.closest?.('a');
-      if (!shouldHandle(target as HTMLAnchorElement | null)) return;
+      const target = (e.target as HTMLElement | null)?.closest?.('a') as HTMLAnchorElement | null;
+      const href = getInternalHref(target);
+      if (!href) return;
 
-      // Mark the body so CSS / observers can react if needed. The
-      // `::view-transition-*` keyframes themselves are global, but
-      // the attribute lets us scope effects per-route if we ever
-      // want to (e.g. opt out on a specific route group).
+      // Take over the navigation. preventDefault stops both the
+      // browser default AND Next.js's own click handler.
+      e.preventDefault();
+      e.stopPropagation();
+
+      // Mark the body so consumers (CSS overrides, observers) can
+      // react during the transition. Cleared on `finished`.
       document.body.setAttribute('data-route-transitioning', 'true');
 
-      // Start the view transition. The callback runs synchronously
-      // and we don't need to do anything inside — Next.js will
-      // complete the navigation in this same tick.
       try {
         const transition = start(() => {
-          // Empty callback: Next.js handles the actual DOM swap
-          // synchronously after our event handler returns. The
-          // browser captures the "old" snapshot before this returns,
-          // then captures "new" after Next's commit.
+          // CRITICAL: this is where the DOM update must happen for the
+          // View Transition API to capture old/new snapshots correctly.
+          // router.push triggers Next's commit synchronously; the
+          // re-render happens in the next microtask, which is still
+          // inside the transition's "update" phase.
+          router.push(href);
         });
         transition.finished.finally(() => {
           document.body.removeAttribute('data-route-transitioning');
         });
       } catch {
-        // startViewTransition can throw if another transition is
-        // mid-flight. Best to bail silently — the user still gets
-        // the navigation, just without the fade.
+        // startViewTransition can throw if another transition is mid-
+        // flight. Fall back to a plain push so the user still navigates.
         document.body.removeAttribute('data-route-transitioning');
+        router.push(href);
       }
     }
 
@@ -127,7 +137,7 @@ export function RouteTransitions() {
       document.removeEventListener('click', onClick, true);
       document.body.removeAttribute('data-route-transitioning');
     };
-  }, []);
+  }, [router]);
 
   return null;
 }
