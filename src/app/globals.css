@@ -289,9 +289,20 @@ body {
   pointer-events: none;
 }
 @media (prefers-reduced-motion: reduce) {
-  [data-sheet-state='open'],
+  /* fn-15.5 round-11 (codex): zeroing the animation alone leaves the
+     element in its mounted-but-not-yet-animated state for the entire
+     keep-alive timeout, so reduced-motion users would see a sheet that
+     stays fully visible instead of dismissing instantly. Apply the
+     end-state directly. Same pattern repeats for every data-state
+     pair below. */
+  [data-sheet-state='open'] {
+    animation: none;
+    transform: translate3d(0, 0, 0);
+  }
   [data-sheet-state='closed'] {
     animation: none;
+    transform: translate3d(0, 100%, 0);
+    pointer-events: none;
   }
 }
 
@@ -313,9 +324,14 @@ body {
   pointer-events: none;
 }
 @media (prefers-reduced-motion: reduce) {
-  [data-overlay-state='open'],
+  [data-overlay-state='open'] {
+    animation: none;
+    opacity: 1;
+  }
   [data-overlay-state='closed'] {
     animation: none;
+    opacity: 0;
+    pointer-events: none;
   }
 }
 
@@ -346,9 +362,16 @@ body {
   pointer-events: none;
 }
 @media (prefers-reduced-motion: reduce) {
-  [data-after-save-state='open'],
+  [data-after-save-state='open'] {
+    animation: none;
+    opacity: 1;
+    grid-template-rows: 1fr;
+  }
   [data-after-save-state='closed'] {
     animation: none;
+    opacity: 0;
+    grid-template-rows: 0fr;
+    pointer-events: none;
   }
 }
 
@@ -372,9 +395,15 @@ body {
   animation: scale-pop-out 0.25s cubic-bezier(0.7, 0, 0.84, 0) both;
 }
 @media (prefers-reduced-motion: reduce) {
-  [data-scale-pop='open'],
+  [data-scale-pop='open'] {
+    animation: none;
+    transform: scale(1);
+    opacity: 1;
+  }
   [data-scale-pop='closed'] {
     animation: none;
+    transform: scale(1);
+    opacity: 0;
   }
 }
 
@@ -396,9 +425,14 @@ body {
   pointer-events: none;
 }
 @media (prefers-reduced-motion: reduce) {
-  [data-drawer-state='open'],
+  [data-drawer-state='open'] {
+    animation: none;
+    transform: translate3d(0, 0, 0);
+  }
   [data-drawer-state='closed'] {
     animation: none;
+    transform: translate3d(100%, 0, 0);
+    pointer-events: none;
   }
 }
 
@@ -419,9 +453,16 @@ body {
   pointer-events: none;
 }
 @media (prefers-reduced-motion: reduce) {
-  [data-toast-state='open'],
+  [data-toast-state='open'] {
+    animation: none;
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
   [data-toast-state='closed'] {
     animation: none;
+    opacity: 0;
+    transform: translate3d(100%, 0, 0) scale(0.95);
+    pointer-events: none;
   }
 }
 

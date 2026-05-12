@@ -125,21 +125,22 @@ export default async function LandingPage({
       <LandingSections />
 
       {/*
-        fn-15.5: explicit "Karte zeigen" link separated from the
-        HeroSection's primary CTA. Points at /entdecken (the semantic
-        text-search route) by design — the spec moved the embedded
-        Mapbox map off `/` to keep mapbox-gl (~480 KB) out of the
-        landing bundle. Users who want the visual map click here and
-        the /map route handles the Mapbox load (its own layout wraps
-        AppShell so save-state and bottom-nav are available there).
+        fn-15.5 (round-10 codex): explicit "Karte zeigen" link
+        separated from the HeroSection's primary CTA. Points at /map
+        (the actual Mapbox surface), not /entdecken (semantic text
+        search). The spec moved the embedded Mapbox map off `/` to
+        keep mapbox-gl (~480 KB) out of the landing bundle; clicking
+        this link is the explicit opt-in to that cost. /map's layout
+        wraps ModalShell (Auth + SavedEvents) so save-state on the
+        markers works for logged-in users.
       */}
       <div className="mt-10 mb-10 flex flex-col items-center gap-3">
         <a
-          href="/entdecken"
+          href="/map"
           className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full border border-white/15 bg-white/[0.04] text-sm text-white/70 hover:text-white hover:border-white/30 hover:bg-white/[0.08] transition-all duration-200 active:scale-[0.97] motion-reduce:transform-none"
         >
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
           </svg>
           Karte zeigen
         </a>
