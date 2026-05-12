@@ -97,6 +97,7 @@ try {
 
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import { fetchEventPage, closeSharedBrowser } from '../lib/category-classifier/fetch-page';
+import Anthropic from '@anthropic-ai/sdk';
 import { makeBulkUpdater } from '../lib/db/bulk-update';
 import {
   TAGS, AUDIENCES, VIBES, SETTINGS, OCCASIONS, PRICE_FLAGS,
@@ -142,6 +143,41 @@ const MODEL_MAP: Record<string, string> = {
   haiku: 'claude-haiku-4-5-20251001',
 };
 
+// Anthropic API requires fully-qualified model IDs (with date suffix). The CLI
+// accepts aliases like 'claude-sonnet-4-6' but the API does not. Use the same
+// concrete model name we already pass to --model, then fall back to the alias
+// for unknown shortcuts.
+const MODEL_API_MAP: Record<string, string> = {
+  sonnet: 'claude-sonnet-4-6-20260201',
+  opus: 'claude-opus-4-7-20260201',
+  haiku: 'claude-haiku-4-5-20251001',
+};
+
+/**
+ * Per-million-token pricing in USD for the Anthropic API path. Verified
+ * against console.anthropic.com pricing as of 2026-05. If Anthropic changes
+ * rates, update this table — costs are read in `calculateApiCost()` and
+ * surfaced via `stats.costUsd` + the `--cost-cap` halt.
+ *
+ * `cache_create` and `cache_read` differ from `input` by Anthropic's published
+ * surcharge/discount factors. We log them separately so an operator can
+ * verify spend against the dashboard.
+ */
+const API_PRICING_PER_MTOK: Record<'sonnet' | 'opus' | 'haiku', {
+  input: number; cache_create: number; cache_read: number; output: number;
+}> = {
+  haiku:  { input: 1.00, cache_create: 1.25, cache_read: 0.10, output: 5.00 },
+  sonnet: { input: 3.00, cache_create: 3.75, cache_read: 0.30, output: 15.00 },
+  opus:   { input: 15.00, cache_create: 18.75, cache_read: 1.50, output: 75.00 },
+};
+
+/**
+ * Hard USD cost cap default. €185 ≈ $200 budget; default to $150 so the script
+ * stops with 25% buffer before draining the credit balance. Override with
+ * --cost-cap. Set to 0 for unlimited (NOT recommended).
+ */
+const DEFAULT_COST_CAP_USD = 150;
+
 /**
  * Quota threshold for the weekly token budget. Tunable via
  * --weekly-token-cap CLI flag. Default is conservative — Anthropic's
@@ -174,6 +210,20 @@ interface CliOpts {
   since: string | null;
   weeklyTokenCap: number;
   alertEmail: string | null;
+  /**
+   * When true, route batches via the Anthropic SDK (tool_use mode, strict
+   * JSON schema, pay-per-token from credit balance) instead of spawning the
+   * `claude -p` subprocess. Default: true if ANTHROPIC_API_KEY is set and
+   * neither --cli nor --no-api was passed. The API path bypasses the
+   * Max-subscription weekly cap and avoids HOME-isolation races.
+   */
+  useApi: boolean;
+  /**
+   * Hard USD cost cap for the API path. Halts the run cleanly when reached.
+   * 0 = unlimited (not recommended). Default: $150 (≈€140) which leaves
+   * a buffer below a typical €185 Anthropic credit balance.
+   */
+  costCapUsd: number;
 }
 
 /**
@@ -291,6 +341,31 @@ function parseArgs(): CliOpts {
     weeklyTokenCap: parseIntArg(get('--weekly-token-cap'), DEFAULT_WEEKLY_TOKEN_CAP,
       '--weekly-token-cap', { min: 1, max: Number.MAX_SAFE_INTEGER, requireFinite: true }),
     alertEmail: get('--alert-email') ?? process.env.ENRICH_ALERT_EMAIL ?? null,
+    // API-mode routing (fn-14.4 — bypasses Max-Subscription weekly cap):
+    //   --api     → force API (errors if no key)
+    //   --cli / --no-api → force subprocess (legacy path)
+    //   default   → API when ANTHROPIC_API_KEY is set, CLI otherwise
+    useApi: (() => {
+      if (args.includes('--api')) {
+        if (!process.env.ANTHROPIC_API_KEY) {
+          console.error('Error: --api requires ANTHROPIC_API_KEY in env (.env.local).');
+          process.exit(1);
+        }
+        return true;
+      }
+      if (args.includes('--cli') || args.includes('--no-api')) return false;
+      return !!process.env.ANTHROPIC_API_KEY;
+    })(),
+    costCapUsd: (() => {
+      const raw = get('--cost-cap');
+      if (raw === undefined) return DEFAULT_COST_CAP_USD;
+      const n = parseFloat(raw);
+      if (!Number.isFinite(n) || n < 0) {
+        console.error(`Error: --cost-cap="${raw}" is not a non-negative number.`);
+        process.exit(1);
+      }
+      return n;
+    })(),
   };
 }
 
@@ -727,11 +802,379 @@ function cleanupIsolatedHomePool(): void {
   isolatedHomePool = [];
 }
 
+// ─────────────────────────────────────────────────────────────────────
+// Anthropic API path (fn-14.4) — paranoid replacement for the CLI subprocess.
+//
+// Why this exists: the `claude -p` CLI subprocess path has three hard
+// limitations that hurt at bulk-migration scale:
+//   1) Max-subscription weekly cap (undocumented, ~200-500M tok/week).
+//      When exhausted, the CLI exits 1 with empty stderr — opaque failure.
+//   2) HOME-isolation race when concurrency > 1 (claude writes to
+//      ~/.claude.json mid-run, racing parallel subprocesses).
+//   3) 3-5s startup overhead per call (skills/MCP/CLAUDE.md loading).
+//
+// The API path solves all three:
+//   - Pay-per-token from credit balance, no weekly cap.
+//   - No global config file → no race surface; supports any concurrency.
+//   - <100ms cold start, just HTTPS round-trip + model inference.
+//
+// PARANOIA: we use `tool_use` mode with a fully-typed JSON schema. The API
+// physically cannot return an enum value outside our taxonomy (e.g. `48-stunden`
+// when the DB only allows `24-stunden`) — Anthropic enforces the schema before
+// returning the tool block. Our validator still runs as defense-in-depth for
+// free-text fields like `suggested_description`.
+// ─────────────────────────────────────────────────────────────────────
+
+let cachedAnthropicClient: Anthropic | null = null;
+function getAnthropicClient(): Anthropic {
+  if (cachedAnthropicClient) return cachedAnthropicClient;
+  const apiKey = process.env.ANTHROPIC_API_KEY;
+  if (!apiKey) {
+    throw new AuthError('ANTHROPIC_API_KEY missing — add to .env.local or set in environment.');
+  }
+  cachedAnthropicClient = new Anthropic({
+    apiKey,
+    // We own retry/backoff at the batch level; disable the SDK's built-in
+    // retries to avoid double-counting and to surface RateLimitError quickly.
+    maxRetries: 0,
+    // Per-call timeout: the model can stream tool_use outputs for up to ~60s
+    // on a large batch. Set 180s to match CLAUDE_TIMEOUT_MS so failure mode
+    // is consistent across paths.
+    timeout: CLAUDE_TIMEOUT_MS,
+  });
+  return cachedAnthropicClient;
+}
+
+/**
+ * Build the `tool_use` schema for the enrichment tool. Every enum is
+ * spread from `enrichment-taxonomy.ts` so the schema and the validator stay
+ * in lockstep — if a vocab list changes, both update from the same source.
+ *
+ * The API rejects tool inputs that violate the schema: enum mismatches, missing
+ * required fields, wrong types. So invalid enum values (the `48-stunden`-style
+ * bug that killed the CLI run) cannot reach our validator.
+ *
+ * `suggested_description`, `suggested_price_text`, `suggested_price_min` are
+ * the only free-form fields — those go through `validateClaudeBatch` for
+ * length/HTML/numeric sanity.
+ */
+function buildEnrichmentToolSchema(): Record<string, unknown> {
+  const stringEnum = (vals: readonly string[], maxItems?: number) =>
+    maxItems !== undefined
+      ? { type: 'array', items: { type: 'string', enum: [...vals] }, maxItems, default: [] }
+      : { type: 'string', enum: [...vals] };
+
+  return {
+    type: 'object',
+    properties: {
+      results: {
+        type: 'array',
+        description:
+          'One entry per input event. Every input index MUST appear exactly once. ' +
+          'Order may differ from input — the `index` field is what matters.',
+        items: {
+          type: 'object',
+          properties: {
+            index: {
+              type: 'integer',
+              minimum: 0,
+              description: 'Matches the `index` field of the corresponding input event exactly.',
+            },
+            primary_category: stringEnum(PRIMARY_CATEGORIES),
+            tags: stringEnum(TAGS, 5),
+            audience: stringEnum(AUDIENCES, 3),
+            vibe: stringEnum(VIBES, 3),
+            occasion: stringEnum(OCCASIONS, 3),
+            setting: stringEnum(SETTINGS, 3),
+            language: stringEnum(LANGUAGES),
+            price_tier: stringEnum(PRICE_TIERS),
+            price_flags: stringEnum(PRICE_FLAGS, 6),
+            duration_type: stringEnum(DURATION_TYPES),
+            is_student_friendly: { type: 'boolean' },
+            is_family_friendly: { type: 'boolean' },
+            is_dog_friendly: { type: 'boolean' },
+            is_wheelchair_accessible: { type: 'boolean' },
+            is_outdoor: { type: 'boolean' },
+            suggested_description: {
+              type: ['string', 'null'],
+              description:
+                'Erzählender Fließtext, 400-1000 Zeichen. KEINE Anführungszeichen aller Art im Text. ' +
+                'Null = bestehende Beschreibung in Ruhe lassen (≥400 Zeichen, kein HTML, inhaltlich solide).',
+            },
+            suggested_price_text: {
+              type: ['string', 'null'],
+              maxLength: 200,
+              description: 'Kurz-Original-Text wenn Preis genannt wird (z.B. "ab 25€", "Eintritt frei").',
+            },
+            suggested_price_min: {
+              type: ['number', 'null'],
+              minimum: 0,
+              description: 'Numerischer Preis-Untergrenzwert in EUR. null wenn kein Preis ableitbar.',
+            },
+          },
+          required: [
+            'index', 'primary_category', 'tags', 'audience', 'vibe', 'occasion',
+            'setting', 'language', 'price_tier', 'price_flags', 'duration_type',
+            'is_student_friendly', 'is_family_friendly', 'is_dog_friendly',
+            'is_wheelchair_accessible', 'is_outdoor',
+            'suggested_description', 'suggested_price_text', 'suggested_price_min',
+          ],
+        },
+      },
+    },
+    required: ['results'],
+  };
+}
+
+/**
+ * Compute USD cost for one API call using cached per-model rates.
+ * Mirrors what console.anthropic.com bills, so `stats.costUsd` should
+ * track the dashboard to ~$0.01 precision over a run.
+ */
+function calculateApiCost(
+  model: 'sonnet' | 'opus' | 'haiku',
+  usage: { input_tokens: number; output_tokens: number; cache_creation_input_tokens?: number | null; cache_read_input_tokens?: number | null },
+): number {
+  const r = API_PRICING_PER_MTOK[model];
+  return (
+    (usage.input_tokens * r.input) +
+    (usage.output_tokens * r.output) +
+    ((usage.cache_creation_input_tokens ?? 0) * r.cache_create) +
+    ((usage.cache_read_input_tokens ?? 0) * r.cache_read)
+  ) / 1_000_000;
+}
+
+/**
+ * Cached singleton schema. We build once at first use because constructing
+ * the object every call is wasted work — the enums never change at runtime.
+ */
+let cachedToolSchema: Record<string, unknown> | null = null;
+function getToolSchema(): Record<string, unknown> {
+  if (!cachedToolSchema) cachedToolSchema = buildEnrichmentToolSchema();
+  return cachedToolSchema;
+}
+
+/**
+ * Anthropic-API replacement for `callClaudeBatch`. Returns the same
+ * `ClaudeCallResult` shape so all downstream code (validator, BulkUpdater,
+ * stats) works unchanged.
+ *
+ * Error taxonomy mapped to our retry/abort policy:
+ *   - AuthenticationError, PermissionDeniedError → throw AuthError (fatal,
+ *     bails the run with clean message).
+ *   - RateLimitError → return isError=true, errorMessage contains retry hint.
+ *     The batch retry loop in callClaudeBatch handles backoff.
+ *   - APIConnectionError, InternalServerError → return isError=true (retryable).
+ *   - BadRequestError → throw immediately (likely a schema/prompt bug; not
+ *     worth retrying, and we want loud failure for diagnosis).
+ *   - Anything unexpected → propagate.
+ */
+async function callClaudeApi(
+  systemPrompt: string,
+  batchInput: BatchInputItem[],
+  opts: CliOpts,
+): Promise<ClaudeCallResult> {
+  const client = getAnthropicClient();
+  const model = MODEL_API_MAP[opts.model] ?? MODEL_MAP[opts.model];
+
+  // Output-token budget: each event produces ~600 tokens (description 400-1000
+  // chars ≈ 250 tok + tags/enums ≈ 200 tok + tool wrapper ≈ 150 tok). Reserve
+  // 1200 tok/event for headroom on Sonnet/Opus which write longer descriptions.
+  // Hard cap at 32k — that's well below Haiku 4.5's 64k output ceiling.
+  const maxTokens = Math.min(32000, Math.max(4096, batchInput.length * 1200));
+
+  const userMessage = JSON.stringify({ events: batchInput });
+
+  let response;
+  try {
+    response = await client.messages.create({
+      model,
+      max_tokens: maxTokens,
+      // Prompt-caching (ephemeral, 5-min TTL): system prompt + tool schema are
+      // identical across every batch in a run. Marking them cacheable means
+      // subsequent calls pay $0.10/Mtok (Haiku) instead of $1/Mtok for those
+      // ~4000 prefix tokens — saves ~10% on a full bulk-migration run. Each
+      // cache_control marker adds a 25% surcharge on the FIRST creation, then
+      // 90% discount on every read within 5min. Anthropic caps marker count
+      // at 4 per request; we use 2 (system + tool).
+      system: [{
+        type: 'text',
+        text: systemPrompt,
+        cache_control: { type: 'ephemeral' },
+      }],
+      messages: [{ role: 'user', content: userMessage }],
+      tools: [{
+        name: 'submit_enrichments',
+        description:
+          'Submit enriched event metadata for the entire input batch. MUST be called EXACTLY ONCE with all input events in the `results` array. Do not call any other tool, do not produce free text.',
+        input_schema: getToolSchema() as unknown as Anthropic.Tool.InputSchema,
+        cache_control: { type: 'ephemeral' },
+      }],
+      tool_choice: { type: 'tool', name: 'submit_enrichments' },
+    });
+  } catch (err) {
+    // ── Typed error routing (paranoid: cover every documented SDK error). ──
+    if (err instanceof Anthropic.AuthenticationError) {
+      throw new AuthError(`API auth failed: ${err.message}`);
+    }
+    if (err instanceof Anthropic.PermissionDeniedError) {
+      throw new AuthError(`API permission denied: ${err.message}`);
+    }
+    if (err instanceof Anthropic.RateLimitError) {
+      // The SDK wraps the `retry-after` header on the response. Parse it
+      // (seconds) so the batch retry loop can honor it instead of using its
+      // exponential default. headers may be missing on synthetic errors.
+      const retryAfterSec = parseRetryAfterFromError(err);
+      return {
+        parsed: null,
+        tokensIn: 0, tokensOut: 0, cacheReadIn: 0, cacheCreateIn: 0, costUsd: 0,
+        stopReason: 'rate_limited',
+        isError: true,
+        errorMessage: `429 rate_limited${retryAfterSec ? ` retry_after=${retryAfterSec}s` : ''}: ${err.message.slice(0, 200)}`,
+        envelope: { error: 'RateLimitError', retryAfterSec },
+      };
+    }
+    if (err instanceof Anthropic.APIConnectionTimeoutError) {
+      return {
+        parsed: null,
+        tokensIn: 0, tokensOut: 0, cacheReadIn: 0, cacheCreateIn: 0, costUsd: 0,
+        stopReason: 'timeout',
+        isError: true,
+        errorMessage: `connection timeout after ${CLAUDE_TIMEOUT_MS}ms: ${err.message.slice(0, 200)}`,
+        envelope: { error: 'APIConnectionTimeoutError' },
+      };
+    }
+    if (err instanceof Anthropic.APIConnectionError) {
+      return {
+        parsed: null,
+        tokensIn: 0, tokensOut: 0, cacheReadIn: 0, cacheCreateIn: 0, costUsd: 0,
+        stopReason: 'connection_error',
+        isError: true,
+        errorMessage: `connection error: ${err.message.slice(0, 200)}`,
+        envelope: { error: 'APIConnectionError' },
+      };
+    }
+    if (err instanceof Anthropic.InternalServerError) {
+      return {
+        parsed: null,
+        tokensIn: 0, tokensOut: 0, cacheReadIn: 0, cacheCreateIn: 0, costUsd: 0,
+        stopReason: '5xx',
+        isError: true,
+        errorMessage: `5xx server error: ${err.message.slice(0, 200)}`,
+        envelope: { error: 'InternalServerError' },
+      };
+    }
+    if (err instanceof Anthropic.BadRequestError) {
+      // 400 — almost always a schema/prompt code bug. Fail loudly so we
+      // see it on first batch instead of poison-pilling thousands of events.
+      throw new Error(`API 400 bad_request (likely schema/prompt bug, not retryable): ${err.message}`);
+    }
+    if (err instanceof Anthropic.NotFoundError) {
+      // 404 on /messages usually means the model ID is invalid.
+      throw new Error(`API 404 not_found (likely invalid model "${model}"): ${err.message}`);
+    }
+    if (err instanceof Anthropic.UnprocessableEntityError) {
+      throw new Error(`API 422 unprocessable: ${err.message}`);
+    }
+    if (err instanceof Anthropic.APIError) {
+      // Catch-all for other typed API errors we haven't enumerated.
+      return {
+        parsed: null,
+        tokensIn: 0, tokensOut: 0, cacheReadIn: 0, cacheCreateIn: 0, costUsd: 0,
+        stopReason: `api_${err.status ?? 'unknown'}`,
+        isError: true,
+        errorMessage: `API ${err.status ?? '?'}: ${err.message.slice(0, 200)}`,
+        envelope: { error: 'APIError', status: err.status },
+      };
+    }
+    // Unknown error type — re-throw so it surfaces (not silently dropped).
+    throw err;
+  }
+
+  const usage = response.usage;
+  const tokensIn = usage.input_tokens ?? 0;
+  const tokensOut = usage.output_tokens ?? 0;
+  const cacheCreateIn = usage.cache_creation_input_tokens ?? 0;
+  const cacheReadIn = usage.cache_read_input_tokens ?? 0;
+  const costUsd = calculateApiCost(opts.model, {
+    input_tokens: tokensIn,
+    output_tokens: tokensOut,
+    cache_creation_input_tokens: cacheCreateIn,
+    cache_read_input_tokens: cacheReadIn,
+  });
+
+  // The model MUST call our tool. If `tool_choice` forced it, the response
+  // should contain exactly one tool_use block. We still defensively check
+  // because Anthropic's API has historically allowed `stop_reason='max_tokens'`
+  // before the tool block completed, leaving us with truncated output.
+  const toolBlock = response.content.find(
+    (b): b is Anthropic.ToolUseBlock => b.type === 'tool_use' && b.name === 'submit_enrichments',
+  );
+
+  if (!toolBlock) {
+    // No tool block — could be max_tokens truncation, stop_reason='refusal', or
+    // model produced text instead of the tool call. All are recoverable: surface
+    // as isError so the batch retry loop runs.
+    const textBlock = response.content.find(
+      (b): b is Anthropic.TextBlock => b.type === 'text',
+    );
+    return {
+      parsed: null,
+      tokensIn, tokensOut, cacheReadIn, cacheCreateIn, costUsd,
+      stopReason: response.stop_reason ?? 'unknown',
+      isError: true,
+      errorMessage:
+        `no tool_use block | stop_reason=${response.stop_reason} | ` +
+        `text_head=${(textBlock?.text ?? '').slice(0, 200)}`,
+      envelope: response,
+    };
+  }
+
+  // `toolBlock.input` is `unknown` per SDK types but is the API's JSON-
+  // schema-validated JSON object. The validator downstream still runs as
+  // defense-in-depth for free-text fields. Past this point everything is
+  // identical to the CLI path — caller can't distinguish API vs CLI results.
+  return {
+    parsed: toolBlock.input,
+    tokensIn, tokensOut, cacheReadIn, cacheCreateIn, costUsd,
+    stopReason: response.stop_reason ?? 'end_turn',
+    isError: false,
+    envelope: response,
+  };
+}
+
+/**
+ * Extract retry-after seconds from a RateLimitError. The SDK exposes
+ * `headers` on the error object; the header is named lowercase per HTTP/2.
+ * Returns 0 if header is absent or unparseable — caller falls back to its
+ * exponential backoff.
+ */
+function parseRetryAfterFromError(err: unknown): number {
+  if (!err || typeof err !== 'object') return 0;
+  const headers = (err as { headers?: Record<string, string | string[] | undefined> }).headers;
+  if (!headers) return 0;
+  const raw = headers['retry-after'] ?? headers['Retry-After'];
+  const val = Array.isArray(raw) ? raw[0] : raw;
+  if (!val) return 0;
+  const n = parseInt(val, 10);
+  return Number.isFinite(n) && n > 0 ? Math.min(n, 120) : 0;
+}
+
 async function callClaudeBatch(
   systemPrompt: string,
   batchInput: BatchInputItem[],
   opts: CliOpts,
 ): Promise<ClaudeCallResult> {
+  // ──── API path (fn-14.4 paranoid replacement) ────
+  // When opts.useApi is set, route through the Anthropic SDK using tool_use
+  // mode. The downstream contract (ClaudeCallResult shape) is identical so
+  // processBatch/validator/BulkUpdater don't care which path produced the
+  // result. This branch is reached BEFORE we touch isolatedHomePool or the
+  // CLI binary resolver so an API run has zero CLI-mode side effects.
+  if (opts.useApi) {
+    return callClaudeApi(systemPrompt, batchInput, opts);
+  }
+
   const model = MODEL_MAP[opts.model];
   if (!cachedResolvedClaude) {
     cachedResolvedClaude = resolveClaudeBinary(opts.claudeBin);
@@ -808,7 +1251,16 @@ async function callClaudeBatch(
     child.on('close', (code) => {
       clearTimeout(timer);
       if (code !== 0) {
-        reject(new Error(`claude exited ${code}: ${stderr.slice(0, 400)}`));
+        // Claude CLI writes quota / auth / API errors to stdout, not stderr.
+        // Include stdout so the operator can distinguish quota-exhaustion
+        // ("Approaching usage limit", "5-hour reset"), auth issues ("Not
+        // logged in"), and real model errors. Without this the run shows
+        // empty `claude exited 1:` lines and you can't tell what's wrong.
+        const errParts = [
+          stderr.trim() && `stderr=${stderr.slice(0, 400)}`,
+          stdout.trim() && `stdout=${stdout.slice(0, 400)}`,
+        ].filter(Boolean).join(' | ');
+        reject(new Error(`claude exited ${code}: ${errParts || '(both stdout/stderr empty)'}`));
         return;
       }
       if (!stdout.trim()) {
@@ -1212,7 +1664,20 @@ async function maybeSendQuotaAlert(stats: Stats, opts: CliOpts): Promise<void> {
 }
 
 function shouldHalt(stats: Stats, opts: CliOpts): boolean {
-  return totalQuotaTokens(stats) / opts.weeklyTokenCap >= 0.95;
+  // CLI-mode signal: weekly Max-Subscription token cap (defensive estimate).
+  if (totalQuotaTokens(stats) / opts.weeklyTokenCap >= 0.95) return true;
+  // API-mode signal: USD cost cap. 0 = disabled. Set DEFAULT_COST_CAP_USD
+  // conservatively below the typical credit balance so we halt with buffer.
+  if (opts.useApi && opts.costCapUsd > 0 && stats.costUsd >= opts.costCapUsd) return true;
+  return false;
+}
+
+/** Distinguish WHY we halted for the operator-facing message. */
+function haltReason(stats: Stats, opts: CliOpts): string {
+  if (opts.useApi && opts.costCapUsd > 0 && stats.costUsd >= opts.costCapUsd) {
+    return `cost cap $${opts.costCapUsd.toFixed(2)} reached ($${stats.costUsd.toFixed(2)} spent)`;
+  }
+  return `95% weekly token cap (${totalQuotaTokens(stats).toLocaleString()}/${opts.weeklyTokenCap.toLocaleString()} tok)`;
 }
 
 // ─────────────────────────────────────────────────────────────────────
@@ -1510,8 +1975,18 @@ async function processBatch(
         const isRate = /429|rate.limit|rate_limit|too.many.request|usage.limit|quota/i.test(msg);
         if (isRate) stats.rateLimited += 1;
         if (attempt === MAX_ATTEMPTS - 1) break;
-        const backoff = isRate ? 15_000 * Math.pow(2, attempt) : 3_000 * Math.pow(2, attempt);
-        console.error(`\n[batch] is_error attempt ${attempt + 1}/${MAX_ATTEMPTS}: backoff ${(backoff / 1000).toFixed(0)}s | ${msg.slice(0, 120)}`);
+        // Honor server-provided retry-after when the SDK exposed it via
+        // RateLimitError.headers — only available in the API path. Falls
+        // through to exponential default when missing.
+        const apiRetryAfter = (() => {
+          const env = callRes.envelope as { retryAfterSec?: number } | null | undefined;
+          return env?.retryAfterSec && env.retryAfterSec > 0 ? env.retryAfterSec * 1000 : 0;
+        })();
+        const backoff = apiRetryAfter > 0
+          ? apiRetryAfter
+          : isRate ? 15_000 * Math.pow(2, attempt) : 3_000 * Math.pow(2, attempt);
+        const tag = apiRetryAfter > 0 ? 'retry-after' : 'backoff';
+        console.error(`\n[batch] is_error attempt ${attempt + 1}/${MAX_ATTEMPTS}: ${tag} ${(backoff / 1000).toFixed(0)}s | ${msg.slice(0, 120)}`);
         await new Promise(r => setTimeout(r, backoff));
         continue;
       }
@@ -1723,7 +2198,13 @@ async function processBatch(
         } else {
           msg = String(err);
         }
-        if (/Could not find.+column/i.test(msg) || /schema cache/i.test(msg) || /does not exist/i.test(msg)) {
+        if (
+          /Could not find.+column/i.test(msg) ||
+          /schema cache/i.test(msg) ||
+          /does not exist/i.test(msg) ||
+          /violates check constraint/i.test(msg) ||
+          /violates not-null/i.test(msg)
+        ) {
           throw new SchemaMismatchError(msg);
         }
         console.error(`\n[${ev.id.slice(0, 8)}] queued update failed: ${msg}`);
@@ -1872,7 +2353,23 @@ async function main() {
   // Set up isolated HOME pool for concurrent claude subprocesses.
   // At concurrency >=4 the global ~/.claude.json races and claude exits 1
   // with "Configuration file corrupted". Per-slot isolated HOME avoids it.
-  setupIsolatedHomePool(opts.concurrency);
+  // Skipped in API mode — the SDK doesn't touch ~/.claude.json so the race
+  // surface doesn't exist; setup would just waste tmp directories.
+  if (!opts.useApi) {
+    setupIsolatedHomePool(opts.concurrency);
+  } else {
+    // Validate the API key once at startup so we fail loudly on missing/
+    // malformed keys instead of poison-pilling the first batch.
+    try {
+      getAnthropicClient();
+      console.log(`  API mode:         enabled (model=${MODEL_API_MAP[opts.model] ?? MODEL_MAP[opts.model]}, cost-cap=$${opts.costCapUsd.toFixed(2)})`);
+    } catch (err) {
+      console.error(`  ✗ API mode fatal: ${err instanceof Error ? err.message : err}`);
+      console.error(`    Fix: add ANTHROPIC_API_KEY=sk-ant-... to .env.local`);
+      console.error(`    Or use --cli to fall back to the subprocess path.`);
+      process.exit(1);
+    }
+  }
 
   if (opts.retryFailed) {
     console.log('  --retry-failed: clearing enrichment_failed=TRUE flags before run');
@@ -1918,9 +2415,13 @@ async function main() {
   const { count: totalPending } = await pendingQuery;
 
   console.log('\nEvent Enrichment — Claude Code (batch v2)');
-  console.log(`  Model:            ${opts.model} (${MODEL_MAP[opts.model]})`);
+  console.log(`  Path:             ${opts.useApi ? 'Anthropic API (tool_use, paranoid schema)' : 'CLI subprocess (claude -p)'}`);
+  console.log(`  Model:            ${opts.model} (${opts.useApi ? (MODEL_API_MAP[opts.model] ?? MODEL_MAP[opts.model]) : MODEL_MAP[opts.model]})`);
   console.log(`  Batch size:       ${opts.batchSize} events / call`);
-  console.log(`  Concurrency:      ${opts.concurrency} parallel subprocesses`);
+  console.log(`  Concurrency:      ${opts.concurrency} parallel ${opts.useApi ? 'API requests' : 'subprocesses'}`);
+  if (opts.useApi) {
+    console.log(`  Cost cap:         $${opts.costCapUsd.toFixed(2)} ${opts.costCapUsd === 0 ? '(UNLIMITED — careful!)' : '(halts cleanly at this point)'}`);
+  }
   console.log(`  Limit:            ${opts.limit === Infinity ? 'none' : opts.limit}`);
   console.log(`  Since:            ${opts.since ?? '(no time filter)'}`);
   console.log(`  Force:            ${opts.force}`);
@@ -1992,7 +2493,7 @@ async function main() {
 
     for (let i = 0; i < batches.length; i += opts.concurrency) {
       if (shouldHalt(stats, opts)) {
-        console.log('\n[quota] 95% weekly token cap — clean halt. Re-run to resume.');
+        console.log(`\n[halt] ${haltReason(stats, opts)} — clean halt. Re-run to resume.`);
         halted = true;
         break;
       }

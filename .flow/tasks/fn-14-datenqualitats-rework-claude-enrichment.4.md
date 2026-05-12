@@ -108,6 +108,62 @@ Beschreibungen ändern sich massiv -> pgvector embeddings teilweise stale.
 - [ ] Sitemap regeneriert
 - [ ] Embeddings-Refresh als Folge-Task in flowctl angelegt (separater Epic oder fn-14 Folgetask)
 
+## Pause-Status (2026-05-11)
+
+**Status**: pausiert, NICHT abgebrochen. Re-Run nimmt automatisch weiter — `enrich-claude.ts` filtert
+auf `enrichment_version != 'claude-v1'`, der DB-State ist die einzige Resume-Cursor-Quelle.
+
+**Stand:**
+- ✅ **8.695 future Events bereits enriched** (`enrichment_version='claude-v1'`)
+  - davon 748 via Haiku (2026-04-27/28), Rest via Sonnet (frühere Runs)
+  - 29 poison-pilled (`enrichment_failed=TRUE`)
+- ⏳ **54.896 future Events pending** (von ~63k future events total)
+- ⏳ Score-Recalc, Sitemap-Regen, Stichprobe-QA: noch offen, machen wir nach Abschluss
+
+**Blocker:**
+1. **Anthropic Max-Subscription Wochen-Cap 91%/100%** (Stand 2026-05-11). "Nur Sonnet" ist bei
+   100%, was anscheinend alle Modelle blockt (auch Haiku) trotz 9% Headroom im Combined-Pool.
+   CLI exited 1 mit "Credit balance is too low".
+2. **Anthropic API direkt**: $0 Credit-Balance auf console.anthropic.com (separates Billing!).
+   API-Zugang wurde deshalb deaktiviert (Email 2026-05-11).
+3. **"Zusatznutzung" Toggle aktiviert** in claude.ai → Settings → Billing, aber das aktiviert
+   nur "Automatisches Aufladen", nicht den Overflow-Mechanismus. Die €185 in "Aktuelles Guthaben"
+   sind für Subscription-Overflow gedacht aber scheinen ohne weiteren Schritt nicht zu greifen.
+
+**Resume-Pfade nach Blocker-Ende:**
+- **A (kostenlos)**: Donnerstag 2026-05-14 10:59 → Wochen-Cap resettet → CLI-Pfad läuft wieder.
+  Command: `npm run enrich:claude -- --future-only --concurrency 2 --model haiku --cli`
+- **B (paid)**: $20-50 API-Credits auf console.anthropic.com kaufen → API-Pfad fertig & getestet,
+  Command: `npm run enrich:claude -- --future-only --concurrency 8 --batch-size 50 --model haiku`
+  (--api ist Default wenn ANTHROPIC_API_KEY gesetzt). Cost-Cap default $150 als Sicherheit.
+  Ohne Page-Fetch (`--no-fetch`) ~$80 für komplett alle 80k.
+
+**Bombsafe-Status des Scripts (alles validiert):**
+- ✅ DB-Migration `'48-stunden'` zu duration_type-Constraint added (20260511000000)
+- ✅ Constraint-Violations werden als SchemaMismatchError klassifiziert → clean bail mit Migration-Hinweis
+- ✅ Stdout bei exit≠0 mitgeloggt (deshalb sehen wir jetzt "Credit balance is too low" statt leerem stderr)
+- ✅ API-Pfad mit Tool-Use Mode implementiert: strikte Enum-Schema-Validierung, ungültige
+  Enum-Werte wie `48-stunden` können physisch nicht von der API zurückkommen.
+- ✅ Per-call Cost-Cap halt + prompt caching (Anthropic ephemeral, 5min TTL)
+- ✅ Typed error handling (AuthenticationError, RateLimitError, retry-after Header etc.)
+
+**Bekannte Quality-Issues für Cleanup (in Stichprobe der 748 Haiku-Events):**
+1. **Tag-Leaks aus alten Scraper-Kategorien**: Töpfermarkt bekam tag `wochenmarkt` (falsch),
+   Rechtsberatung bekam tag `Gesundheit` (komplett falsch). Prompt-Tweak nötig: "ignoriere
+   bestehende source_tags_raw als Klassifikations-Hint, nur als Kontext".
+2. **Bool-Inkonsistenz**: `audience: ['familien-mit-kindern']` aber `is_family_friendly=false`.
+   Prompt-Tweak: "is_*_friendly muss konsistent zu audience sein".
+3. **Scraper-Boilerplate im description**: claude strippt nicht "Programm\nAlles Neu Musik
+   Tanz Theater..." oder "Wichtige Information zur Ticketkategorie...". Prompt-Tweak: "strippe
+   typische Scraper-Header-Phrasen vor der Erzählung".
+
+Diese sind NICHT blocking für fn-14.4 done, aber als Polish-Sub-Tasks nach Abschluss in fn-14
+zu erledigen — oder direkt im Prompt vor dem Resume-Run einarbeiten (eine Code-Änderung in
+`buildSystemPrompt()` bevor wir Donnerstag weiterlaufen lassen).
+
+**Resume-Reminder**: re-anchor (re-read spec + status) + Stichprobe-Check der zwischenzeitlich
+neuen Haiku-Events sobald Migration weiterläuft.
+
 ## Done summary
 TBD
 
