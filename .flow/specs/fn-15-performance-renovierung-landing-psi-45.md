@@ -6,6 +6,99 @@
 8.695/63k future events done, Resume Do 2026-05-14 10:59) — Performance-Renovierung
 läuft parallel als Frontend-Arbeit ohne Claude-Abhängigkeit.
 
+## Interview Decisions (2026-05-12)
+
+30 Entscheidungen aus Deep-Interview gesammelt. Diese überschreiben/präzisieren wo
+sie mit den Pillars unten kollidieren.
+
+### Strategy & Process
+
+- **Score-Ziel**: Hart 95+, aber Logic-Erhalt überrangt Score (kein Feature-Breaking
+  für Performance). AdSense fliegt komplett raus (User nicht zugelassen).
+- **Rollout**: Gruppen-PRs: **(1+2)** Image+CLS, **(3+4)** Browsertargets+ThirdParty,
+  **(5+6)** Bundle+CriticalCSS, **(7+9)** Auth-Middleware+RSC, **(8+10)** Fonts+SW.
+- **Risk-Tolerance**: Sehr niedrig — jeder PR muss prod-ready sein.
+- **Measurement**: PSI-Re-Run **nach jeder PR-Gruppe** (5×) + 1× finaler Bench.
+- **Rollback**: Vercel-native Instant-Rollback via Dashboard (kein Feature-Flag-Setup).
+
+### Performance Budget (HARD = blocks merge, SOFT = warning)
+
+**HARD (Lighthouse CI fails Build):**
+- PSI Performance Score >= 90
+- LCP <= 2.5s (Core Web Vitals "good")
+- CLS <= 0.1 (Core Web Vitals "good")
+
+**SOFT (warning, ziel aber nicht blocking):**
+- PSI Performance Score >= 95
+- LCP <= 2.0s, CLS <= 0.05
+- FCP <= 1.5s, TBT <= 100ms, INP <= 100ms
+- Initial JS Bundle <= 150KB gzipped
+
+### Pillar-Anpassungen aus Interview
+
+**Pillar 1 (Image Optimization):** Scope verkleinert auf next/image für eigene Assets +
+Card-Component-Refactor. Die schwergewichtige Architektur-Migration (Cloudflare R2 +
+Workers + Pre-Download bei Scrape-Zeit für Top-1000 Events nach event_score) wird
+zum **eigenen Folge-Task fn-15.1a** ausgelagert damit Pillar 1 nicht zum Monster wird.
+- Image Placeholder: blur via blurDataURL (10px LQIP)
+- Storage-Strategy bei R2: Top 1000 Events pre-download, Rest on-demand via Worker
+- Bei externen 4xx/5xx: graceful auf Placeholder-Bild fallen
+
+**Pillar 2 (CLS):** meshShift-Animation auf `transform: translate3d` umschreiben
+(compositor-only) statt entfernen. Pixel-perfect Skeletons mit animiertem Shimmer für
+WeeklyHighlights, RegionExplorer, PopularCategories, FestivalBlog.
+
+**Pillar 3 (Browser Targets):** Direkt aggressiv: `chrome>=90, edge>=90, firefox>=88,
+safari>=14`. Kein GA4-Check vorab (Stand 2026 sind alle >5 Jahre alt).
+
+**Pillar 4 (Third-Party Audit + Security Headers):** AdSense-Removal IST der Hauptteil.
+Plus: GA4 + Vercel-Analytics auditieren (GA4 lazy-load via gtag-pattern, Vercel-
+Analytics bleibt). CSP-Nonce via **Edge-Middleware** (Next.js 16 native), nicht
+headers()-Function.
+
+**Pillar 5 (Bundle-Architektur):**
+- **framer-motion KOMPLETT raus**, alles auf CSS migrieren (heart-pop, confetti,
+  scale-press → CSS animations + Tailwind utilities). View-transition mit
+  feature-detect Fallback (Firefox bekommt instant cuts, akzeptabel).
+- **Mapbox geht ganz raus aus Landing** → Link/Button zu /entdecken. Kein Mini-Map,
+  kein progressive-enhancement, kein Mapbox-JS auf `/`.
+- **AuthProvider scope**: NUR auf `/feed`, `/profile`, `/saved`, `/freunde`,
+  `/messages`, `/admin/*`, `/groups/[id]/*` (private). Landing, Blog, Event-Detail
+  bleiben ohne AuthProvider.
+
+**Pillar 6 (Critical CSS):** Manuell — above-fold CSS als `<style>` im layout.tsx
+inline-en (~3KB). Kein Build-Tool, volle Kontrolle, Wartungs-Tax akzeptiert.
+
+**Pillar 7 (ISR + Auth-Middleware):** `revalidate=3600s` wie im Spec. Stats-Counter
+sind shared/global (kein Per-User-Caching, kein Geolocation).
+
+**Pillar 8 (Fonts):**
+- `next/font/local` mit Geist + Fraunces als woff2 in /public (self-hosted, kein
+  Google-Roundtrip, `font-display: optional` eliminiert Layout-Shift)
+- Geist Variable (Body) → Latin-1 Subset, ~30KB, **preloaded**
+- Fraunces → lazy auf /planer-Route, nicht auf Landing
+- **Caveat komplett raus aus root-layout** (vermutlich kaum genutzt, audit nötig)
+
+**Pillar 9 (RSC above-fold):** Hero + Stats + Tagline + Beta-Hinweis als pure RSC.
+Search-Input als isoliertes Client-Island (~2KB JS). Auth-Logic vollständig raus aus
+page.tsx (siehe Pillar 7).
+
+**Pillar 10 (Service Worker):** Workbox stale-while-revalidate, **30 Tage TTL** für
+`/_next/image/*`. Update-Strategie: **Hybrid Banner** ("Update verfügbar — neu laden")
+statt skipWaiting. User behält Kontrolle.
+
+### Performance-Budget-CI Setup
+
+Lighthouse CI auf jeder PR gegen Vercel-Preview-URL. Hard-Fail bei PSI<90, Soft-Warn
+bei PSI<95. Bundle-Size-Check als zusätzlicher Gate.
+
+### Open Questions resolved → markiert als Decided
+
+1. ~~Browser-Analytics-Check~~: → direkt aggressiv (Decision oben)
+2. ~~AdSense-Revenue-Impact~~: → AdSense kommt komplett weg (Decision)
+3. ~~Service Worker Update-Strategy~~: → Hybrid Banner (Decision)
+4. ~~CSP Nonce in Edge Middleware~~: → Edge-Middleware Next.js 16 (Decision)
+
 ## Goal & Context
 
 PageSpeed Insights misst Mobile Performance Score **45/100** (Stand 10.05.2026). Echte User-Erfahrung ist ebenfalls schlecht (FCP p75 = 2.6s, nur 48% gut). Lab-CLS = 0.535 (katastrophal, Schwellwert <0.1). LCP 4.2s im Lab.
@@ -277,10 +370,13 @@ interface EventImageProps {
 
 ## Open Questions
 
-1. **Browser-Analytics-Check**: welche Browser-Versionen nutzen aktuelle Visitors? GA4 zeigen → entscheidet ob browserslist `chrome >= 90` zu aggressiv ist
-2. **AdSense-Revenue-Impact**: lazy-load könnte impressions reduzieren — A/B-Test sinnvoll oder direkter Switch?
-3. **Service Worker Update-Strategy**: skipWaiting+clientsClaim oder traditioneller Update-Flow?
-4. **CSP Nonce in Edge Middleware**: Next.js 16 native support oder via headers-Function?
+ALLE 4 Open Questions sind in der ## Interview Decisions (2026-05-12) Section oben
+beantwortet. Hier nur historisch belassen für Audit-Trail.
+
+1. ~~Browser-Analytics-Check~~ → **Decided: direkt aggressiv chrome>=90 etc.**
+2. ~~AdSense-Revenue-Impact~~ → **Decided: AdSense komplett raus (User nicht zugelassen)**
+3. ~~Service Worker Update-Strategy~~ → **Decided: Hybrid Banner mit "Update verfügbar"**
+4. ~~CSP Nonce in Edge Middleware~~ → **Decided: Edge-Middleware (Next.js 16 native)**
 
 ## References
 
