@@ -202,6 +202,59 @@ describe('EventImage (Server Component)', () => {
     expect(img!.getAttribute('data-fill')).toBe('true');
   });
 
+  it('does NOT inject `relative` when caller passes `absolute inset-0`', () => {
+    // Tailwind v4 resolves conflicting position utilities by generated-CSS
+    // order, not by className-string order. Landing callers like
+    // FestivalBlogSection / PopularCategories / RegionExplorer rely on
+    // `absolute inset-0` to fill an aspect-ratio container. If EventImage
+    // unconditionally prepended `relative`, the resulting
+    // `"relative overflow-hidden absolute inset-0"` could collapse the
+    // wrapper to `position: relative` and break the next/image fill.
+    const { container } = render(
+      <EventImage
+        src="https://example.com/photo.jpg"
+        sizes="240px"
+        wrapperClassName="absolute inset-0"
+      />,
+    );
+    const wrapper = container.firstElementChild as HTMLElement;
+    expect(wrapper.classList.contains('absolute')).toBe(true);
+    expect(wrapper.classList.contains('relative')).toBe(false);
+    expect(wrapper.classList.contains('overflow-hidden')).toBe(true);
+  });
+
+  it('still emits `relative` when caller passes only sizing utilities', () => {
+    // The defensive helper must NOT strip `relative` for the typical
+    // "w-full h-full" case — without it the next/image fill has no
+    // positioned ancestor and the image would collapse.
+    const { container } = render(
+      <EventImage
+        src="https://example.com/photo.jpg"
+        sizes="240px"
+        wrapperClassName="w-full h-40"
+      />,
+    );
+    const wrapper = container.firstElementChild as HTMLElement;
+    expect(wrapper.classList.contains('relative')).toBe(true);
+    expect(wrapper.classList.contains('overflow-hidden')).toBe(true);
+  });
+
+  it('handles fixed and sticky positioning passed by the caller', () => {
+    for (const pos of ['fixed', 'sticky'] as const) {
+      const { container, unmount } = render(
+        <EventImage
+          src="https://example.com/photo.jpg"
+          sizes="240px"
+          wrapperClassName={`${pos} top-0`}
+        />,
+      );
+      const wrapper = container.firstElementChild as HTMLElement;
+      expect(wrapper.classList.contains(pos)).toBe(true);
+      expect(wrapper.classList.contains('relative')).toBe(false);
+      unmount();
+    }
+  });
+
   it('supports fixed width/height via discriminated-union prop', () => {
     const { container } = render(
       <EventImage

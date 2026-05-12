@@ -67,6 +67,29 @@ export const GENERIC_BLUR_DATA_URL =
  * uses the bundesland-aware pool. This helper is exported for tests
  * and for callers that need a deterministic slug.
  */
+/**
+ * Returns a class string that augments the caller-supplied wrapper with
+ * the defaults EventImage needs (`relative overflow-hidden`), but DROPS
+ * the `relative` default if the caller already specified a positioning
+ * utility (`absolute`, `fixed`, `sticky`, `static`, or explicit `relative`).
+ *
+ * Why this exists (Codex review round 2 fix):
+ * Several landing callers pass `wrapperClassName="absolute inset-0"`
+ * because their wrapper sits inside an aspect-ratio container. With
+ * Tailwind v4, the WINNER between `.relative` and `.absolute` in a
+ * conflicting class set is decided by generated-CSS order, NOT by
+ * className string order. So `"relative overflow-hidden absolute inset-0"`
+ * can resolve to `position: relative;` and break the next/image fill
+ * layout. We avoid the collision by not emitting `relative` when the
+ * caller already chose a positioning class.
+ */
+function buildWrapperClassName(callerClass: string): string {
+  const POSITION_RE = /(^|\s)(static|fixed|absolute|relative|sticky)(\s|$)/;
+  const hasOwnPosition = POSITION_RE.test(callerClass);
+  const base = hasOwnPosition ? 'overflow-hidden' : 'relative overflow-hidden';
+  return callerClass ? `${base} ${callerClass}` : base;
+}
+
 export function normalizeCategoryToSlug(input: string | null | undefined): string {
   if (!input) return 'sonstiges';
   const slug = input
@@ -270,7 +293,7 @@ export function EventImage(props: EventImageProps) {
     // explicit dimensions or aspect-ratio.
     imageProps.fill = true;
     return (
-      <div className={`relative overflow-hidden ${wrapperClassName}`}>
+      <div className={buildWrapperClassName(wrapperClassName)}>
         <Image {...(imageProps as ImageProps)} />
         {showGradientOverlay && (
           <div
@@ -291,7 +314,7 @@ export function EventImage(props: EventImageProps) {
 
   if (wrapperClassName || showGradientOverlay) {
     return (
-      <div className={`relative overflow-hidden ${wrapperClassName}`}>
+      <div className={buildWrapperClassName(wrapperClassName)}>
         <Image {...(imageProps as ImageProps)} />
         {showGradientOverlay && (
           <div
