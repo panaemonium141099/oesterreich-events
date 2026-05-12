@@ -6,6 +6,7 @@ import { FilterBar } from '../Filters/FilterBar';
 import { useAuth } from '@/lib/supabase/auth-context';
 import { createClient } from '@/lib/supabase/client';
 import { UserIcon, HeartIcon, UsersIcon, ChatBubbleIcon, GroupIcon, NewspaperIcon, BoltIcon, LogoutIcon } from '../UI/Icons';
+import { LogoCompact } from '../Brand/Logo';
 import type { EventFilters } from '@/types/events';
 import type { Bundesland } from '@/lib/bundeslaender';
 import { BUNDESLAENDER } from '@/lib/bundeslaender';
@@ -116,13 +117,18 @@ export function Header({ filters, onFiltersChange, totalEvents, onToggleSidebar,
             eveningMode ? 'hover:bg-gray-700/50' : 'hover:bg-slate-50'
           }`}
           title="Zurück zur Startseite"
-          aria-label="Zurück zur Startseite"
+          aria-label="Zurück zur Startseite — lasstreffen.at"
         >
-          <div className={`text-[10px] uppercase tracking-[0.12em] leading-tight font-medium ${
-            eveningMode ? 'text-amber-400/60 group-hover:text-amber-400' : 'text-slate-400 group-hover:text-slate-600'
-          } transition-colors`}>
-            ÖE
-          </div>
+          {/* Pin-Dot brand wordmark — replaces the legacy "ÖE" text-mark.
+              Compact variant sized for the header row; pin auto-scales to
+              40% of font size so the "lasstreffen[pin]at" lockup stays
+              single-line on 390px mobile viewports.
+              Design source: design-system/logos/pindot-refinements.jsx PdA */}
+          <LogoCompact
+            size={16}
+            variant={eveningMode ? 'dark' : 'light'}
+            ariaLabel="lasstreffen.at — Startseite"
+          />
         </button>
 
         <div className={`w-px h-6 ${eveningMode ? 'bg-gray-700' : 'bg-slate-200'}`} />

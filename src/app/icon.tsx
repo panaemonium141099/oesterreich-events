@@ -1,20 +1,21 @@
 import { ImageResponse } from 'next/og';
-import { loadGoogleFont } from '@/lib/og-fonts';
 
 export const size = { width: 64, height: 64 };
 export const contentType = 'image/png';
 
 /**
- * Browser / SERP favicon. One Fraunces serif "L" on a warm-black rounded
- * square — matches the Planer hero's editorial direction.
+ * Browser / SERP favicon — Pin-Dot brand glyph.
  *
- * Downscales cleanly to 16/32 px because the L is the whole silhouette:
- * a bold stem + serif terminals read as a distinct shape even at tiny
- * sizes, unlike a complex illustration that would muddy.
+ * Design source: design-system logos/pindot-refinements.jsx (favicon spec in
+ * each Pd* variant). The pin glyph alone is the brand mark — at 16×16 favicon
+ * scale a wordmark would be illegible, but the pin silhouette (teardrop with
+ * center dot) reads cleanly even at the smallest sizes.
+ *
+ * Colors: rust-red body (#c8553d) with cream center dot (#f3ecdb) on a
+ * warm-black rounded-square (#0a0a0c). The cream-on-rust matches the
+ * design-system favicon swatch in PdA / PdC / PdH etc.
  */
-export default async function Icon() {
-  const fraunces = await loadGoogleFont({ family: 'Fraunces', weight: 600, text: 'L' });
-
+export default function Icon() {
   return new ImageResponse(
     (
       <div
@@ -24,24 +25,27 @@ export default async function Icon() {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          background: '#07060a',
+          background: '#0a0a0c',
           borderRadius: '12px',
-          color: '#f5efe2',
-          fontFamily: 'Fraunces',
-          fontSize: 52,
-          fontWeight: 600,
-          letterSpacing: '-0.03em',
-          // Pull the L slightly up-left so it sits optically centered
-          // inside a square (typography renders with ascender room).
-          paddingBottom: 6,
         }}
       >
-        L
+        {/* The pin SVG is inlined to avoid runtime font/asset loading.
+            ImageResponse renders this as the PNG, so it ships as a static
+            image — no CSP issues with inline SVG at runtime. */}
+        <svg
+          width="42"
+          height="52.5"
+          viewBox="0 0 24 30"
+          style={{ display: 'block' }}
+        >
+          <path
+            d="M12 1 C 18.5 1 23 5.5 23 11.5 C 23 19 12 29 12 29 C 12 29 1 19 1 11.5 C 1 5.5 5.5 1 12 1 Z"
+            fill="#c8553d"
+          />
+          <circle cx="12" cy="11.5" r="4" fill="#f3ecdb" />
+        </svg>
       </div>
     ),
-    {
-      ...size,
-      fonts: [{ name: 'Fraunces', data: fraunces, style: 'normal', weight: 600 }],
-    },
+    { ...size },
   );
 }
