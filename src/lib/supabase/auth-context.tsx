@@ -270,10 +270,54 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   );
 }
 
+/**
+ * Default fallback context used when `useAuth` is called outside an
+ * `<AuthProvider>` boundary. After fn-15.5 the root layout no longer
+ * mounts AuthProvider — only authenticated route layouts do — so any
+ * client component that lives on a public route (landing, blog,
+ * impressum, datenschutz, gemeinde/stadt SEO pages …) is "anonymous"
+ * by definition: there is no logged-in user, profile, or session.
+ *
+ * Returning a safe, no-op shape instead of throwing means:
+ *  - Public routes don't crash when they happen to mount a client
+ *    component that touches `useAuth` for UI-flavoring (e.g. the
+ *    landing's profile pill that switches between "Anmelden" and
+ *    user avatar). The component just sees `user: null` and renders
+ *    the anonymous variant.
+ *  - Authenticated routes continue to get the real provider value
+ *    because they wrap their tree in `<AuthProvider>`.
+ *  - Tests can mount components without a provider scaffold.
+ */
+const ANON_AUTH_CONTEXT: AuthContextType = {
+  user: null,
+  profile: null,
+  session: null,
+  loading: false,
+  profileComplete: false,
+  signInWithGoogle: async () => {
+    throw new Error('signInWithGoogle requires <AuthProvider> in the route tree');
+  },
+  signInWithApple: async () => {
+    throw new Error('signInWithApple requires <AuthProvider> in the route tree');
+  },
+  signInWithEmail: async () => ({ error: 'auth provider not mounted' }),
+  signUpWithEmail: async () => ({ error: 'auth provider not mounted' }),
+  signOut: async () => {
+    if (typeof window !== 'undefined') window.location.href = '/';
+  },
+  refreshProfile: async () => {},
+  isGod: false,
+  isAdmin: false,
+  isBusiness: false,
+};
+
 export function useAuth() {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    // Public/anonymous route — no provider mounted. Return a safe
+    // anonymous shape so consumers can render their unauthenticated
+    // branch without try/catch boilerplate.
+    return ANON_AUTH_CONTEXT;
   }
   return context;
 }

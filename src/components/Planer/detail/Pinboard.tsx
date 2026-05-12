@@ -16,12 +16,15 @@
  */
 
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import type { SupabaseClient, User } from '@supabase/supabase-js';
 import { toast } from 'sonner';
 import { PostitNote, type PostitData, type PostitColor } from './PostitNote';
 import { PlanerButton, EditorialCaption } from '../primitives';
-import { springy } from '../motion';
+
+// fn-15.5: motion-lib overlay + spring scale-in replaced with CSS
+// `animate-fade-in` + `animate-scale-pop`. The exit animation is
+// dropped because the compose overlay closes on submit / cancel,
+// when the page has already moved on perceptually.
 
 // Palette that matches the app's accent system, used by the color picker
 // swatches. Same gradients as the rendered note paper for visual consistency.
@@ -299,21 +302,13 @@ export function Pinboard({ supabase, user, groupId, canCreate, isOwner }: Pinboa
         )}
 
         {/* Add-note compose overlay */}
-        <AnimatePresence>
-          {adding && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="absolute inset-0 flex items-center justify-center bg-[color:var(--color-planer-void)]/70 backdrop-blur-sm z-[200]"
-              onClick={resetCompose}
-            >
-              <motion.div
-                initial={{ scale: 0.9, y: 12 }}
-                animate={{ scale: 1, y: 0 }}
-                exit={{ scale: 0.95, y: 6 }}
-                transition={springy}
-                className="w-[340px] max-w-[calc(100vw-2rem)] p-6 rounded-sm"
+        {adding && (
+          <div
+            className="absolute inset-0 flex items-center justify-center bg-[color:var(--color-planer-void)]/70 backdrop-blur-sm z-[200] animate-fade-in motion-reduce:animate-none"
+            onClick={resetCompose}
+          >
+            <div
+              className="w-[340px] max-w-[calc(100vw-2rem)] p-6 rounded-sm animate-scale-pop motion-reduce:animate-none"
                 style={{
                   // Match the creme paper exactly (so compose view previews the note)
                   background: newColor === 'creme' ? 'linear-gradient(135deg, #dcc990 0%, #c4ae70 100%)'
@@ -465,10 +460,9 @@ export function Pinboard({ supabase, user, groupId, canCreate, isOwner }: Pinboa
                     )}
                   </button>
                 </div>
-              </motion.div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+              </div>
+          </div>
+        )}
       </div>
 
       {/* Ownership hint */}

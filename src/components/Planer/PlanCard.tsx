@@ -1,9 +1,11 @@
 'use client';
 
 import Link from 'next/link';
-import { motion } from 'framer-motion';
-import { riseItem, EASE_OUT_EXPO } from './motion';
 import { AvatarStack } from './primitives';
+
+// fn-15.5: motion-lib `motion.div + variants={riseItem}` replaced by
+// the global `animate-fade-in-up` CSS class. The arrow hover-shift is
+// handled by Tailwind's `group-hover:translate-x-1` utility.
 
 export interface PlanCardData {
   id: string;
@@ -60,11 +62,14 @@ export function PlanCard({ plan, isNext = false, index = 0 }: PlanCardProps) {
   const totalConfirmed = plan.rsvp_counts.accepted;
   const totalMaybe = plan.rsvp_counts.maybe;
 
+  // Mirrors riseItem's stagger — first card no delay, each subsequent
+  // card adds 80ms up to a 800ms cap so a large list doesn't drag on.
+  const delayMs = Math.min(index * 80, 800);
+
   return (
-    <motion.div
-      variants={riseItem}
-      custom={index}
-      layoutId={`plan-card-${plan.id}`}
+    <div
+      className="animate-fade-in-up opacity-0 motion-reduce:animate-none motion-reduce:opacity-100"
+      style={{ animationDelay: `${delayMs}ms`, animationFillMode: 'forwards' }}
     >
       <Link
         href={`/groups/${plan.id}`}
@@ -218,16 +223,16 @@ export function PlanCard({ plan, isNext = false, index = 0 }: PlanCardProps) {
                 </div>
               </div>
 
-              {/* Subtle arrow that magnetically shifts on hover */}
-              <motion.span
-                className="shrink-0 text-[color:var(--color-planer-accent)]/40 group-hover:text-[color:var(--color-planer-accent)] transition-colors"
-                whileHover={{ x: 4 }}
-                transition={{ duration: 0.3, ease: EASE_OUT_EXPO }}
+              {/* Subtle arrow that magnetically shifts on hover. fn-15.5:
+                  framer whileHover {x:4} replaced by tailwind
+                  group-hover:translate-x-1. */}
+              <span
+                className="shrink-0 text-[color:var(--color-planer-accent)]/40 group-hover:text-[color:var(--color-planer-accent)] group-hover:translate-x-1 transition-[transform,color] duration-300 ease-out motion-reduce:transition-none motion-reduce:group-hover:translate-x-0"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 8l4 4m0 0l-4 4m4-4H3" />
                 </svg>
-              </motion.span>
+              </span>
             </div>
 
             {/* Last message whisper */}
@@ -251,6 +256,6 @@ export function PlanCard({ plan, isNext = false, index = 0 }: PlanCardProps) {
           />
         </div>
       </Link>
-    </motion.div>
+    </div>
   );
 }

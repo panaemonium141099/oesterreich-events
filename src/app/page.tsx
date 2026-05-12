@@ -124,6 +124,31 @@ export default async function LandingPage({
       {/* Landing sections below the hero */}
       <LandingSections />
 
+      {/*
+        fn-15.5: explicit "Karte zeigen" link separated from the
+        HeroSection's primary CTA. Points at /entdecken (the semantic
+        text-search route) by design — the spec moved the embedded
+        Mapbox map off `/` to keep mapbox-gl (~480 KB) out of the
+        landing bundle. Users who want the visual map click here and
+        the /map route handles the Mapbox load (its own layout wraps
+        AppShell so save-state and bottom-nav are available there).
+      */}
+      <div className="mt-10 mb-10 flex flex-col items-center gap-3">
+        <a
+          href="/entdecken"
+          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full border border-white/15 bg-white/[0.04] text-sm text-white/70 hover:text-white hover:border-white/30 hover:bg-white/[0.08] transition-all duration-200 active:scale-[0.97] motion-reduce:transform-none"
+        >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+          Karte zeigen
+        </a>
+        <p className="text-[11px] text-white/30 max-w-xs text-center leading-relaxed">
+          Volle Karte mit allen Events lädt auf der nächsten Seite — schneller
+          Start hier, Geo-Suche dort.
+        </p>
+      </div>
+
       {/* Footer */}
       <Footer />
 

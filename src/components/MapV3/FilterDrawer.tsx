@@ -200,7 +200,7 @@ export function FilterDrawer({
   };
 
   // Plain conditional render with CSS transitions instead of AnimatePresence.
-  // Earlier attempts with framer-motion's AnimatePresence kept the dialog in
+  // Earlier attempts with motion-lib's AnimatePresence kept the dialog in
   // the DOM after `open` flipped to false (opacity:0 leftover blocked clicks
   // on the filter button below). CSS transitions are good enough for this
   // pattern and don't need exit-animation orchestration.

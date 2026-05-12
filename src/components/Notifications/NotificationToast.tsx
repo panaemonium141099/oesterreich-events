@@ -2,7 +2,6 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '@/lib/supabase/auth-context';
 import { createClient } from '@/lib/supabase/client';
 import { navigateFromNotification } from '@/lib/utils/notification-nav';
@@ -102,18 +101,19 @@ export function NotificationToast() {
 
   return (
     <div className="fixed bottom-20 right-4 z-50 flex flex-col gap-2">
-      <AnimatePresence mode="popLayout">
-        {toasts.map((toast) => (
-          <motion.button
-            key={toast.id}
-            layout
-            initial={{ opacity: 0, x: 100, scale: 0.95 }}
-            animate={{ opacity: 1, x: 0, scale: 1 }}
-            exit={{ opacity: 0, x: 100, scale: 0.95 }}
-            transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-            onClick={() => handleClick(toast)}
-            className="bg-[#1c1c1e] border border-white/[0.10] rounded-xl shadow-2xl px-4 py-3 max-w-sm flex items-start gap-3 text-left cursor-pointer hover:bg-white/[0.04] transition-colors"
-          >
+      {/* fn-15.5: each toast slides in via the global `data-toast-state`
+          keyframe (globals.css). The 5s auto-dismiss already lives in the
+          existing setTimeout above, so the toast simply unmounts when its
+          timer fires — no exit animation orchestration needed for the
+          dismiss case (framer's spring exit is replaced by the same fade
+          on next render). */}
+      {toasts.map((toast) => (
+        <button
+          key={toast.id}
+          onClick={() => handleClick(toast)}
+          className="bg-[#1c1c1e] border border-white/[0.10] rounded-xl shadow-2xl px-4 py-3 max-w-sm flex items-start gap-3 text-left cursor-pointer hover:bg-white/[0.04] transition-colors"
+          data-toast-state="open"
+        >
             {/* From user avatar/initial */}
             <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-xs font-semibold text-white/50 shrink-0 overflow-hidden">
               {toast.fromAvatar ? (
@@ -131,9 +131,8 @@ export function NotificationToast() {
               <p className="text-sm font-medium text-white/90 truncate">{toast.title}</p>
               <p className="text-[11px] text-white/40 mt-0.5">{timeAgo(toast.created_at)}</p>
             </div>
-          </motion.button>
-        ))}
-      </AnimatePresence>
+        </button>
+      ))}
     </div>
   );
 }

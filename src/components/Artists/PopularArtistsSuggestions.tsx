@@ -21,8 +21,14 @@
  */
 
 import { useEffect, useState, useMemo } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import { ArtistCard } from './ArtistCard';
+
+// fn-15.5: AnimatePresence popLayout + spring layout migrated to a
+// simple per-item enter animation (`animate-fade-in-up`). The
+// "card slides up to take the slot above it" effect is dropped in
+// favor of a clean fade-in for the new card; users perceive both as
+// "queue progressing" with the simpler version losing only the
+// subtle rearrangement transition. Saves the framer runtime payload.
 
 interface SpotifyArtistLite {
   id: string;
@@ -151,25 +157,12 @@ export function PopularArtistsSuggestions({
         automatisch nach.
       </p>
       <div className="space-y-2 relative">
-        <AnimatePresence mode="popLayout" initial={false}>
-          {visible.map(a => (
-            <motion.div
-              key={a.id}
-              layout
-              initial={{ opacity: 0, y: 24, scale: 0.96 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{
-                opacity: 0,
-                x: 40,
-                scale: 0.94,
-                transition: { duration: 0.32, ease: [0.4, 0, 0.2, 1] },
-              }}
-              transition={{
-                layout: { type: 'spring', stiffness: 420, damping: 36, mass: 0.7 },
-                default: { duration: 0.35, ease: [0.22, 1, 0.36, 1] },
-              }}
-            >
-              <div className="relative group">
+        {visible.map(a => (
+          <div
+            key={a.id}
+            className="animate-fade-in-up motion-reduce:animate-none"
+          >
+            <div className="relative group">
                 <ArtistCard
                   name={a.name}
                   imageUrl={a.image_url}
@@ -191,9 +184,8 @@ export function PopularArtistsSuggestions({
                   ✕
                 </button>
               </div>
-            </motion.div>
-          ))}
-        </AnimatePresence>
+          </div>
+        ))}
       </div>
     </section>
   );

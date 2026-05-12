@@ -26,22 +26,23 @@ export function HeroSection() {
 
   useEffect(() => { trackEvent('page_view', { path: '/' }); }, []);
 
-  // Pre-warm the /map route + Mapbox bundle while the user reads the hero,
-  // so when they hit "Entdecken" the list shows immediately and the map
-  // tiles are already in the browser cache. Idle-callback so we don't
-  // compete with critical above-the-fold rendering on slow phones.
+  // fn-15.5: removed the previous idle-time `import('@/components/Map/EventMap')`
+  // prefetch. That import dragged the entire Mapbox dynamic chunk (~480 KB)
+  // into the landing bundle even before the user expressed map intent — the
+  // exact regression the bundle-analyzer flagged. The /map route now owns
+  // its own Mapbox load on navigation; users either land there via the
+  // "Karte zeigen" button or via a Gemeinde pick below. Vercel's prefetch
+  // of the /map HTML still warms the cache for the route's static shell
+  // (sub-1 KB), so the click-to-first-paint stays snappy without pulling
+  // mapbox-gl into `/`.
+  //
+  // Route prefetches stay — they only fetch the .rsc payload, not the JS
+  // chunks.
   useEffect(() => {
     if (typeof window === 'undefined') return;
     const prefetch = () => {
       router.prefetch('/map?view=list');
       router.prefetch('/map');
-      // Also nudge the Mapbox dynamic chunk into cache. Wrapped in a try
-      // so this never throws if the chunk path moves between releases.
-      try {
-        import('@/components/Map/EventMap').catch(() => {});
-      } catch {
-        /* swallow */
-      }
     };
     const ric =
       (window as Window & { requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => number })

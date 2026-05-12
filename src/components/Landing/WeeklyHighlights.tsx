@@ -2,7 +2,6 @@
 
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
-import { motion } from 'framer-motion';
 import type { Event } from '@/types/events';
 import { formatDate } from '@/lib/utils/date';
 import { EventImage } from '@/components/Events/EventImage';
@@ -163,12 +162,13 @@ export function WeeklyHighlights() {
   }, []);
 
   return (
-    <motion.section
-      className="w-full py-8"
-      initial={{ opacity: 0, y: 24 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
-      transition={{ duration: 0.5, ease: 'easeOut' }}
+    // fn-15.5: motion-lib whileInView replaced by CSS `animate-section-in`
+    // class. Runs once on mount because the landing always streams these
+    // sections inside a Suspense boundary that flushes them just past the
+    // fold — the previous IntersectionObserver-triggered animation was
+    // effectively "on mount" anyway. globals.css :: .animate-section-in.
+    <section
+      className="w-full py-8 animate-section-in"
     >
       <div className="flex items-center justify-between mb-5 px-1">
         <div>
@@ -243,6 +243,6 @@ export function WeeklyHighlights() {
           </div>
         )}
       </div>
-    </motion.section>
+    </section>
   );
 }

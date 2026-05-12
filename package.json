@@ -95,7 +95,6 @@
     "@types/uuid": "^10.0.0",
     "canvas-confetti": "^1.9.4",
     "cheerio": "^1.2.0",
-    "framer-motion": "^12.38.0",
     "jose": "^6.2.2",
     "jsonrepair": "^3.14.0",
     "lucide-react": "^1.7.0",

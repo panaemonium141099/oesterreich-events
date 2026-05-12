@@ -19,7 +19,6 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { motion } from 'framer-motion';
 import { useAuth } from '@/lib/supabase/auth-context';
 import { createClient } from '@/lib/supabase/client';
 import { ProfileDropdown } from '@/components/Layout/ProfileDropdown';
@@ -31,7 +30,9 @@ import {
 } from '@/components/Planer/primitives';
 import { PlanCard, type PlanCardData } from '@/components/Planer/PlanCard';
 import { CreatePlanFlow } from '@/components/Planer/CreatePlanFlow';
-import { staggerContainer, riseItem } from '@/components/Planer/motion';
+
+// fn-15.5: motion + staggerContainer + riseItem replaced with the
+// global `.stagger-children` CSS helper and plain divs.
 
 interface PlannedEvent extends PlanCardData {
   // extra fields only used on this page (none right now)
@@ -211,13 +212,8 @@ export function GroupsPageClient() {
         </div>
 
         {/* HERO */}
-        <motion.section
-          variants={staggerContainer}
-          initial="hidden"
-          animate="visible"
-          className="mb-12 sm:mb-16"
-        >
-          <motion.div variants={riseItem} className="mb-5">
+        <section className="mb-12 sm:mb-16 stagger-children">
+          <div className="mb-5">
             <EditorialCaption>
               <span className="editorial-num mr-2">{String(events.length).padStart(2, '0')}</span>
               / {events.length === 1 ? 'aktiver Plan' : 'aktive Pläne'}
@@ -228,15 +224,15 @@ export function GroupsPageClient() {
                 </>
               )}
             </EditorialCaption>
-          </motion.div>
+          </div>
 
-          <motion.div variants={riseItem} className="max-w-3xl">
+          <div className="max-w-3xl">
             <EditorialHeading size="hero" className="mb-4">
               Lass <em className="italic kinetic-underline text-[color:var(--color-planer-accent)]">Treffen</em>.
             </EditorialHeading>
-          </motion.div>
+          </div>
 
-          <motion.div variants={riseItem} className="mt-6 flex flex-wrap items-center gap-4 max-w-2xl">
+          <div className="mt-6 flex flex-wrap items-center gap-4 max-w-2xl">
             <p className="text-[15px] text-[color:var(--color-planer-dim)] leading-relaxed flex-1 min-w-[16rem]">
               Hier werden aus vagen Ideen geteilte Abende. Plane, lade ein, chattet euch warm —
               und findet euch dann wirklich.
@@ -252,11 +248,11 @@ export function GroupsPageClient() {
               </svg>
               Neuen Plan anlegen
             </PlanerButton>
-          </motion.div>
+          </div>
 
           {/* Decorative hairline */}
-          <motion.div variants={riseItem} className="hairline-accent mt-10" />
-        </motion.section>
+          <div className="hairline-accent mt-10" />
+        </section>
 
         {/* LOADING */}
         {loadingEvents ? (
@@ -268,29 +264,26 @@ export function GroupsPageClient() {
         ) : events.length === 0 ? (
           <EmptyState onCreate={() => setShowCreate(true)} />
         ) : (
-          <motion.div variants={staggerContainer} initial="hidden" animate="visible" className="space-y-8">
+          <div className="space-y-8 stagger-children">
             {/* Upcoming — all cards uniform, first one gets a subtle marker */}
             {upcoming.length > 0 && (
-              <section>
-                <motion.div variants={riseItem} className="mb-4 flex items-baseline justify-between">
+              <section className="stagger-children">
+                <div className="mb-4 flex items-baseline justify-between">
                   <EditorialCaption>In Kürze</EditorialCaption>
                   <span className="text-[10px] uppercase tracking-[0.22em] text-[color:var(--color-planer-whisper)]">
                     <span className="tabular">{String(upcoming.length).padStart(2, '0')}</span>
                   </span>
-                </motion.div>
+                </div>
 
                 {/* "↓ Als nächstes" caption sits above the first card —
                     marks hierarchy via position + accent, never via size. */}
                 {upcoming.length > 0 && (
-                  <motion.div
-                    variants={riseItem}
-                    className="flex items-center gap-2 mb-3 ml-1"
-                  >
+                  <div className="flex items-center gap-2 mb-3 ml-1">
                     <span className="text-[color:var(--color-planer-accent)] text-sm leading-none">↓</span>
                     <span className="text-[10px] uppercase tracking-[0.24em] text-[color:var(--color-planer-accent)] font-medium">
                       Als nächstes
                     </span>
-                  </motion.div>
+                  </div>
                 )}
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -303,7 +296,7 @@ export function GroupsPageClient() {
 
             {/* Past — more muted */}
             {past.length > 0 && (
-              <motion.section variants={riseItem} className="mt-12">
+              <section className="mt-12">
                 <div className="mb-4 flex items-baseline justify-between">
                   <EditorialCaption>Erinnerungen</EditorialCaption>
                   <span className="text-[10px] uppercase tracking-[0.22em] text-[color:var(--color-planer-whisper)]">
@@ -315,9 +308,9 @@ export function GroupsPageClient() {
                     <PlanCard key={ev.id} plan={ev} index={i} />
                   ))}
                 </div>
-              </motion.section>
+              </section>
             )}
-          </motion.div>
+          </div>
         )}
       </main>
 
@@ -339,11 +332,9 @@ export function GroupsPageClient() {
 
 function EmptyState({ onCreate }: { onCreate: () => void }) {
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 30 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.9, ease: [0.19, 1, 0.22, 1], delay: 0.2 }}
-      className="py-10 sm:py-20 text-center max-w-xl mx-auto"
+    <div
+      className="py-10 sm:py-20 text-center max-w-xl mx-auto animate-fade-in-up motion-reduce:animate-none"
+      style={{ animationDelay: '200ms', animationFillMode: 'both', animationDuration: '900ms' }}
     >
       <svg
         className="w-16 h-16 mx-auto mb-8 text-[color:var(--color-planer-accent)]/60"
@@ -368,6 +359,6 @@ function EmptyState({ onCreate }: { onCreate: () => void }) {
         </svg>
         Ersten Plan anlegen
       </PlanerButton>
-    </motion.div>
+    </div>
   );
 }

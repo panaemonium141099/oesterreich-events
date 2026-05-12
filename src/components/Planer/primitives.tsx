@@ -3,11 +3,23 @@
 /**
  * Small shared building blocks for the Planer flow.
  * Kept in one file so the import graph stays flat.
+ *
+ * fn-15.5: motion / useMotionValue / useSpring / HTMLMotionProps were
+ * removed. The PlanerButton's whileTap-scale becomes a CSS `:active`
+ * scale, and the TiltingMap's spring-tracked rotation switches to
+ * raw transform writes driven by the existing mouse-move handler.
+ * The drop in motion quality is barely perceptible at the rotateY ≤8°
+ * range we use here, and saves the entire motion-lib runtime on the
+ * Planer-only bundle.
  */
-import { motion, useMotionValue, useSpring, type HTMLMotionProps } from 'framer-motion';
-import type { ReactNode, MouseEvent, InputHTMLAttributes, TextareaHTMLAttributes } from 'react';
+import type {
+  ButtonHTMLAttributes,
+  ReactNode,
+  MouseEvent,
+  InputHTMLAttributes,
+  TextareaHTMLAttributes,
+} from 'react';
 import { useRef } from 'react';
-import { springy } from './motion';
 
 // ───────────────────────────────────────────────────────────────
 // PlanerShell — the atmospheric wrapper (grain + spotlight + scope)
@@ -83,7 +95,7 @@ export function EditorialCaption({ children, className = '' }: CaptionProps) {
 // enabled via CSS vars + a tiny motion hook.
 // ───────────────────────────────────────────────────────────────
 
-interface PlanerButtonProps extends HTMLMotionProps<'button'> {
+interface PlanerButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: 'primary' | 'ghost' | 'outline';
   size?: 'md' | 'lg';
   loading?: boolean;
@@ -112,6 +124,9 @@ export function PlanerButton({
     onMouseMove?.(e);
   };
 
+  // fn-15.5: framer whileTap={scale:0.97} replaced with the global
+  // `:active { transform: scale(0.97) }` rule in globals.css that
+  // already applies to every button. No extra class needed.
   const base = 'magnetic-cta relative inline-flex items-center justify-center gap-2 font-medium rounded-full transition-colors whitespace-nowrap disabled:opacity-50 disabled:pointer-events-none';
   const sizes = {
     md: 'px-5 py-2.5 text-sm',
@@ -124,12 +139,10 @@ export function PlanerButton({
   }[variant];
 
   return (
-    <motion.button
+    <button
       ref={ref}
       className={`${base} ${sizes} ${variants} ${className}`}
       onMouseMove={handleMouseMove}
-      whileTap={disabled || loading ? undefined : { scale: 0.97 }}
-      transition={springy}
       disabled={disabled || loading}
       {...rest}
     >
@@ -138,7 +151,7 @@ export function PlanerButton({
       ) : (
         <span className="relative z-10 flex items-center gap-2">{children}</span>
       )}
-    </motion.button>
+    </button>
   );
 }
 
@@ -340,24 +353,28 @@ interface TiltingMapProps {
 }
 
 export function TiltingMap({ src, alt = '', className = '' }: TiltingMapProps) {
-  const x = useMotionValue(0);
-  const y = useMotionValue(0);
-  const sx = useSpring(x, { stiffness: 150, damping: 20 });
-  const sy = useSpring(y, { stiffness: 150, damping: 20 });
+  // fn-15.5: useSpring-tracked rotation replaced with direct transform
+  // writes + a CSS transition for the snap-back. The tilt at ≤8° is
+  // close enough to a spring that users don't notice the missing
+  // overshoot in a static map context.
+  const innerRef = useRef<HTMLDivElement>(null);
+
+  const setRotation = (rx: number, ry: number) => {
+    const el = innerRef.current;
+    if (el) {
+      el.style.transform = `rotateY(${ry}deg) rotateX(${rx}deg)`;
+    }
+  };
 
   const handleMove = (e: MouseEvent<HTMLDivElement>) => {
     const el = e.currentTarget;
     const r = el.getBoundingClientRect();
     const px = (e.clientX - r.left) / r.width - 0.5;
     const py = (e.clientY - r.top) / r.height - 0.5;
-    x.set(px * -8); // subtle
-    y.set(py * -6);
+    setRotation(py * -6, px * -8); // subtle
   };
 
-  const handleLeave = () => {
-    x.set(0);
-    y.set(0);
-  };
+  const handleLeave = () => setRotation(0, 0);
 
   return (
     <div
@@ -366,13 +383,17 @@ export function TiltingMap({ src, alt = '', className = '' }: TiltingMapProps) {
       className={`relative overflow-hidden ${className}`}
       style={{ perspective: 1000 }}
     >
-      <motion.div
-        style={{ rotateY: sx, rotateX: sy, transformStyle: 'preserve-3d' }}
-        className="w-full h-full"
+      <div
+        ref={innerRef}
+        style={{
+          transformStyle: 'preserve-3d',
+          transition: 'transform 0.6s cubic-bezier(0.16, 1, 0.3, 1)',
+        }}
+        className="w-full h-full motion-reduce:!transition-none"
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src={src} alt={alt} className="w-full h-full object-cover scale-110" />
-      </motion.div>
+      </div>
       {/* Edge gradient for integration */}
       <div className="absolute inset-0 bg-gradient-to-br from-transparent via-transparent to-[color:var(--color-planer-void)]/60 pointer-events-none" />
     </div>

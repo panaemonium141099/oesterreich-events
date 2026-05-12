@@ -2,7 +2,6 @@
 
 import Link from 'next/link';
 import { useMemo } from 'react';
-import { motion } from 'framer-motion';
 import { ALL_POSTS } from '@/content/blog';
 import type { FestivalPost } from '@/content/blog/types';
 import { EventImage } from '@/components/Events/EventImage';
@@ -13,15 +12,9 @@ import { EventImage } from '@/components/Events/EventImage';
 const FEATURED_SIZES = '(max-width: 768px) 100vw, 60vw';
 const SECONDARY_SIZES = '(max-width: 768px) 100vw, 30vw';
 
-const containerVariants = {
-  hidden: {},
-  visible: { transition: { staggerChildren: 0.1 } },
-};
-
-const itemVariants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.55, ease: 'easeOut' as const } },
-};
+// fn-15.5: motion-lib stagger replaced with the global
+// `.stagger-children` CSS helper. Cards animate-in on mount with a
+// 60ms-step cascade.
 
 function ArrowRight({ className }: { className?: string }) {
   return (
@@ -87,7 +80,7 @@ function selectRandomPosts(posts: FestivalPost[]): { featured: FestivalPost; res
 /** Large featured card — left column */
 function FeaturedCard({ post }: { post: FestivalPost }) {
   return (
-    <motion.article variants={itemVariants} className="group relative h-full">
+    <article className="group relative h-full">
       <Link href={`/blog/${post.slug}`} className="block h-full">
         <div className="relative overflow-hidden rounded-2xl h-full min-h-[440px]">
           {/* fn-15.1 Priority-Strategie: FestivalBlogSection sits below
@@ -133,14 +126,14 @@ function FeaturedCard({ post }: { post: FestivalPost }) {
           </div>
         </div>
       </Link>
-    </motion.article>
+    </article>
   );
 }
 
 /** Smaller card — right column & bottom row */
 function SecondaryCard({ post }: { post: FestivalPost }) {
   return (
-    <motion.article variants={itemVariants} className="group flex-1">
+    <article className="group flex-1">
       <Link href={`/blog/${post.slug}`} className="block h-full">
         <div className="relative overflow-hidden rounded-2xl h-full min-h-[180px]">
           <EventImage
@@ -172,7 +165,7 @@ function SecondaryCard({ post }: { post: FestivalPost }) {
           </div>
         </div>
       </Link>
-    </motion.article>
+    </article>
   );
 }
 
@@ -181,17 +174,13 @@ export function FestivalBlogSection() {
   const { featured, rest } = useMemo(() => selectRandomPosts(ALL_POSTS), []);
 
   return (
-    <motion.section
+    <section
       id="event-guide"
-      className="w-full py-14"
-      initial="hidden"
-      whileInView="visible"
-      viewport={{ once: true, margin: '-60px' }}
-      variants={containerVariants}
+      className="w-full py-14 animate-section-in"
       aria-labelledby="event-guide-heading"
     >
       {/* Section header */}
-      <motion.div variants={itemVariants} className="mb-8">
+      <div className="mb-8">
         <div className="flex items-center gap-4 mb-4">
           <div className="h-px w-8 bg-white/20" />
           <span className="text-[10px] font-bold uppercase tracking-[0.25em] text-white/35">
@@ -216,10 +205,11 @@ export function FestivalBlogSection() {
             <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
           </Link>
         </div>
-      </motion.div>
+      </div>
 
-      {/* Layout: 1 large card left + 2 stacked cards right */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+      {/* Layout: 1 large card left + 2 stacked cards right. The
+          stagger-children helper cascades them in. */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-5 stagger-children">
         <div className="md:col-span-2">
           <FeaturedCard post={featured} />
         </div>
@@ -233,7 +223,7 @@ export function FestivalBlogSection() {
 
       {/* Additional posts row */}
       {rest.length > 2 && (
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 mt-5">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 mt-5 stagger-children">
           {rest.slice(2, 5).map(post => (
             <SecondaryCard key={post.slug} post={post} />
           ))}
@@ -241,7 +231,7 @@ export function FestivalBlogSection() {
       )}
 
       {/* Mobile link */}
-      <motion.div variants={itemVariants} className="mt-6 text-center sm:hidden">
+      <div className="mt-6 text-center sm:hidden">
         <Link
           href="/blog"
           className="inline-flex items-center gap-1.5 text-white/40 hover:text-white text-sm font-medium transition-colors group"
@@ -249,7 +239,7 @@ export function FestivalBlogSection() {
           Alle Event-Guides
           <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
         </Link>
-      </motion.div>
-    </motion.section>
+      </div>
+    </section>
   );
 }

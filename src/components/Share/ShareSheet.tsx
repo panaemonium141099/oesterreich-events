@@ -1,9 +1,13 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '@/lib/supabase/auth-context';
 import { createClient } from '@/lib/supabase/client';
+
+// fn-15.5: AnimatePresence + spring slide-in replaced with CSS
+// `data-sheet-state` + `data-overlay-state` swap (see globals.css).
+// Keeps the DOM mounted for the exit keyframe duration before unmount.
+const EXIT_DURATION_MS = 280;
 
 export interface ShareSheetProps {
   isOpen: boolean;
@@ -33,6 +37,18 @@ export function ShareSheet({ isOpen, onClose, shareData }: ShareSheetProps) {
   const [friendSearch, setFriendSearch] = useState('');
   const [loadingFriends, setLoadingFriends] = useState(false);
   const [sentTo, setSentTo] = useState<string | null>(null);
+  // Keeps the sheet mounted long enough to run the slide-out CSS animation
+  // before unmount. Mirrors the old AnimatePresence behavior.
+  const [mounted, setMounted] = useState(isOpen);
+  useEffect(() => {
+    if (isOpen) {
+      setMounted(true);
+      return;
+    }
+    if (!mounted) return;
+    const t = window.setTimeout(() => setMounted(false), EXIT_DURATION_MS);
+    return () => window.clearTimeout(t);
+  }, [isOpen, mounted]);
 
   const fullUrl = typeof window !== 'undefined'
     ? window.location.origin + shareData.url
@@ -141,28 +157,24 @@ export function ShareSheet({ isOpen, onClose, shareData }: ShareSheetProps) {
     return name.includes(friendSearch.toLowerCase());
   });
 
-  return (
-    <AnimatePresence>
-      {isOpen && (
-        <>
-          {/* Overlay */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            className="fixed inset-0 z-50 bg-black/50"
-            onClick={onClose}
-          />
+  if (!mounted) return null;
 
-          {/* Sheet */}
-          <motion.div
-            initial={{ y: '100%' }}
-            animate={{ y: 0 }}
-            exit={{ y: '100%' }}
-            transition={{ type: 'spring', damping: 28, stiffness: 300 }}
-            className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-slate-200 rounded-t-2xl px-4 pb-8 pt-4"
-          >
+  const state = isOpen ? 'open' : 'closed';
+
+  return (
+    <>
+      {/* Overlay */}
+      <div
+        className="fixed inset-0 z-50 bg-black/50"
+        onClick={onClose}
+        data-overlay-state={state}
+      />
+
+      {/* Sheet */}
+      <div
+        className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-slate-200 rounded-t-2xl px-4 pb-8 pt-4"
+        data-sheet-state={state}
+      >
             {/* Drag handle */}
             <div className="flex justify-center mb-4">
               <div className="w-10 h-1 rounded-full bg-slate-300" />
@@ -318,9 +330,7 @@ export function ShareSheet({ isOpen, onClose, shareData }: ShareSheetProps) {
                 </div>
               </div>
             )}
-          </motion.div>
-        </>
-      )}
-    </AnimatePresence>
+      </div>
+    </>
   );
 }

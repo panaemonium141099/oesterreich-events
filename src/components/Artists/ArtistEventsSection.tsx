@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { ArtistEventCard } from './ArtistEventCard';
 import type { ArtistEvent } from './ArtistEventCard';
 import { SkeletonList } from '@/components/UI/Skeleton';
@@ -52,7 +51,6 @@ export function ArtistEventsSection({
 }: ArtistEventsSectionProps) {
   const { user } = useAuth();
   const supabase = createClient();
-  const shouldReduceMotion = useReducedMotion();
 
   const [events, setEvents] = useState<ArtistEvent[]>([]);
   const [loading, setLoading] = useState(true);
@@ -196,13 +194,8 @@ export function ArtistEventsSection({
 
   return (
     <div>
-      <AnimatePresence mode="wait">
-        <motion.div
-          key="artist-events"
-          initial={shouldReduceMotion ? undefined : { opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.25 }}
-        >
+      <div className="animate-fade-in motion-reduce:animate-none">
+
           {sortedGroups.map((groupName) => {
             const groupEvents = grouped.get(groupName) || [];
             const isCollapsed = collapsedGroups.has(groupName);
@@ -260,8 +253,7 @@ export function ArtistEventsSection({
               </div>
             );
           })}
-        </motion.div>
-      </AnimatePresence>
+      </div>
 
       {visibleCount < events.length && (
         <div ref={loaderRef} className="py-4 text-center">

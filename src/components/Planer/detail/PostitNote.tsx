@@ -6,13 +6,14 @@
  * - Absolutely positioned within the board via position_x / position_y
  *   (percentages of board dimensions — responsive for free).
  * - Small random rotation for "stuck on" feel.
- * - Drag to reposition (Framer Motion drag) — persisted on drop.
+ * - Drag to reposition — fn-15.5: now driven by pointer events + CSS
+ *   transform instead of motion-lib's drag system. Same UX: grab,
+ *   drag, drop snaps to nearest %.
  * - Click to edit (owner only).
  * - Soft paper color + subtle shadow; intentionally NOT neon, NOT candy.
  */
 
-import { motion, useMotionValue, type PanInfo } from 'framer-motion';
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import type { RefObject } from 'react';
 import { toast } from 'sonner';
 
@@ -91,12 +92,12 @@ const COLOR_STYLE: Record<PostitColor, { bg: string; shadow: string; ink: string
 
 export function PostitNote({ note, boardRef, isMine, isAdmin, onMove, onEdit, onDelete }: PostitNoteProps) {
   const canDelete = isMine || isAdmin;
-  // Framer Motion drag transforms the element via x/y motion values. We own
-  // these so we can reset them to 0 after dragEnd — otherwise the element
-  // keeps the drag translate AND gets re-positioned via the new left/top %,
-  // making the note "fly out" on the next frame (doubled movement).
-  const x = useMotionValue(0);
-  const y = useMotionValue(0);
+  // fn-15.5: instead of framer's useMotionValue, the drag translate is a
+  // local state pair that we reset to 0 after dragend (same effect as
+  // before — the new left/top % is the only source of truth).
+  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
+  const [dragging, setDragging] = useState(false);
+  const dragStartRef = useRef<{ clientX: number; clientY: number } | null>(null);
   // Track whether a real drag just happened, so the `click` event that
   // browsers fire on mouseup doesn't also trigger edit-mode. Without this,
   // a fast drag ends → click bubbles → textarea mounts + auto-selects →
@@ -107,34 +108,64 @@ export function PostitNote({ note, boardRef, isMine, isAdmin, onMove, onEdit, on
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const style = COLOR_STYLE[note.color];
 
-  const handleDragStart = () => {
-    wasDraggedRef.current = true;
-  };
-
-  // Commit position after drag ends, THEN reset the drag transform.
+  // Commit position after drag ends, then reset the drag translate.
   // Order matters: first update parent state so the note's left/top % pulls
-  // it to the new position on re-render, then wipe x/y so the transform
-  // doesn't double-apply on top of the new anchor.
-  const handleDragEnd = (_: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
-    const board = boardRef.current;
-    if (board) {
-      const rect = board.getBoundingClientRect();
-      const newX = ((note.position_x / 100) * rect.width + info.offset.x) / rect.width * 100;
-      const newY = ((note.position_y / 100) * rect.height + info.offset.y) / rect.height * 100;
-      const clampedX = Math.max(0, Math.min(95, newX));
-      const clampedY = Math.max(0, Math.min(95, newY));
-      onMove(note.id, clampedX, clampedY);
+  // it to the new position on re-render, then wipe the translate so the
+  // transform doesn't double-apply on top of the new anchor.
+  const commitDrag = useCallback(
+    (offsetX: number, offsetY: number) => {
+      const board = boardRef.current;
+      if (board) {
+        const rect = board.getBoundingClientRect();
+        const newX = ((note.position_x / 100) * rect.width + offsetX) / rect.width * 100;
+        const newY = ((note.position_y / 100) * rect.height + offsetY) / rect.height * 100;
+        const clampedX = Math.max(0, Math.min(95, newX));
+        const clampedY = Math.max(0, Math.min(95, newY));
+        onMove(note.id, clampedX, clampedY);
+      }
+      setDragOffset({ x: 0, y: 0 });
+      // Nuke any accidental browser-level text selection the drag motion
+      // may have triggered in WebKit.
+      window.getSelection()?.removeAllRanges();
+      // Keep the drag flag up for a tick so the synthetic click event that
+      // fires on mouseup doesn't sneak through and open edit mode.
+      setTimeout(() => { wasDraggedRef.current = false; }, 50);
+    },
+    [boardRef, note.id, note.position_x, note.position_y, onMove],
+  );
+
+  const onPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (!isMine) return;
+    // Skip drags initiated on action buttons / textarea — only the paper
+    // itself should be grabbable.
+    if (
+      e.target instanceof HTMLElement &&
+      (e.target.tagName === 'BUTTON' ||
+        e.target.tagName === 'TEXTAREA' ||
+        e.target.closest('button') ||
+        e.target.closest('textarea'))
+    ) {
+      return;
     }
-    // Reset the drag-transform so the new left/top % is the only source of
-    // truth. Must happen AFTER onMove so React has the new position_x/y.
-    x.set(0);
-    y.set(0);
-    // Nuke any accidental browser-level text selection the drag motion
-    // may have triggered in WebKit.
-    window.getSelection()?.removeAllRanges();
-    // Keep the drag flag up for a tick so the synthetic click event that
-    // fires on mouseup doesn't sneak through and open edit mode.
-    setTimeout(() => { wasDraggedRef.current = false; }, 50);
+    e.currentTarget.setPointerCapture(e.pointerId);
+    setDragging(true);
+    wasDraggedRef.current = true;
+    dragStartRef.current = { clientX: e.clientX, clientY: e.clientY };
+
+    const startX = e.clientX;
+    const startY = e.clientY;
+
+    const onMove = (ev: PointerEvent) => {
+      setDragOffset({ x: ev.clientX - startX, y: ev.clientY - startY });
+    };
+    const onUp = (ev: PointerEvent) => {
+      setDragging(false);
+      commitDrag(ev.clientX - startX, ev.clientY - startY);
+      window.removeEventListener('pointermove', onMove);
+      window.removeEventListener('pointerup', onUp);
+    };
+    window.addEventListener('pointermove', onMove);
+    window.addEventListener('pointerup', onUp);
   };
 
   const handleTextClick = () => {
@@ -158,34 +189,20 @@ export function PostitNote({ note, boardRef, isMine, isAdmin, onMove, onEdit, on
     setEditing(false);
   };
 
+  const rotationDeg = (note.rotation * 180) / Math.PI;
+  const hoverScale = dragging ? 1.06 : 1;
+
   return (
-    <motion.div
-      drag={isMine}
-      dragMomentum={false}
-      dragElastic={0}
-      onDragStart={handleDragStart}
-      onDragEnd={handleDragEnd}
-      initial={{ opacity: 0, scale: 0.85, rotate: 0 }}
-      animate={{
-        opacity: 1,
-        scale: 1,
-        rotate: `${(note.rotation * 180) / Math.PI}deg`,
-      }}
-      whileHover={isMine ? { scale: 1.03, zIndex: 50 } : { scale: 1.01 }}
-      whileDrag={{ scale: 1.06, zIndex: 100, cursor: 'grabbing' }}
-      transition={{ type: 'spring', stiffness: 260, damping: 22 }}
+    <div
+      onPointerDown={onPointerDown}
       className={[
         'absolute rounded-[3px] select-none overflow-hidden',
-        'flex flex-col',
-        isMine ? 'cursor-grab active:cursor-grabbing' : 'cursor-pointer',
+        'flex flex-col motion-reduce:!transition-none',
+        // CSS scale-on-hover for the gentle 1.01/1.03 lift the framer
+        // whileHover provided. Skipped during drag (handled inline below).
+        isMine ? 'cursor-grab active:cursor-grabbing hover:scale-[1.03]' : 'cursor-pointer hover:scale-[1.01]',
       ].join(' ')}
       style={{
-        // x/y are our own motion values so we can reset them after dragEnd.
-        // Framer drives the drag through them and we clear them back to 0
-        // on release so the next render's new left/top % isn't doubled by
-        // a leftover translate.
-        x,
-        y,
         left: `${note.position_x}%`,
         top: `${note.position_y}%`,
         width: '168px',
@@ -193,6 +210,15 @@ export function PostitNote({ note, boardRef, isMine, isAdmin, onMove, onEdit, on
         background: style.bg,
         boxShadow: style.shadow,
         color: style.ink,
+        // Compose the drag translate, rotation, and hover scale into a
+        // single transform so they don't fight each other.
+        transform: `translate3d(${dragOffset.x}px, ${dragOffset.y}px, 0) rotate(${rotationDeg}deg) scale(${hoverScale})`,
+        transition: dragging
+          ? 'none'
+          : 'transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.22s ease',
+        zIndex: dragging ? 100 : undefined,
+        // Initial mount: tiny scale-pop from 0.85 → 1. Pure CSS, runs once.
+        animation: 'postit-mount 0.32s cubic-bezier(0.34, 1.56, 0.64, 1) both',
       }}
     >
       {/* Paper grain overlay */}
@@ -296,6 +322,6 @@ export function PostitNote({ note, boardRef, isMine, isAdmin, onMove, onEdit, on
           </div>
         )}
       </div>
-    </motion.div>
+    </div>
   );
 }

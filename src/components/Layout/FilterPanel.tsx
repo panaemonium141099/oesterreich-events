@@ -1,7 +1,6 @@
 'use client';
 
 import { useMemo } from 'react';
-import { motion, useReducedMotion } from 'framer-motion';
 import type { Event, EventFilters } from '@/types/events';
 import { CategoryFilter } from '../Filters/CategoryFilter';
 import { DistrictFilter } from '../Filters/DistrictFilter';
@@ -29,11 +28,10 @@ export function FilterPanel({
   eveningMode,
   expanded = false,
 }: FilterPanelProps) {
-  const reduceMotion = useReducedMotion();
-  const enter = reduceMotion
-    ? { duration: 0 }
-    : { duration: 0.28, ease: [0.22, 1, 0.36, 1] as const };
-
+  // fn-15.5: motion-lib mount/exit slide migrated to a CSS
+  // `animate-fade-in` (globals.css). The previous AnimatePresence exit
+  // is handled by the parent's width-collapse, which itself is now a
+  // pure CSS transition on the wrapping aside.
   const topTags = useMemo(() => {
     const counts = new Map<string, number>();
     for (const e of events) {
@@ -91,12 +89,8 @@ export function FilterPanel({
   ].filter(Boolean).length;
 
   return (
-    <motion.div
-      initial={reduceMotion ? undefined : { opacity: 0, x: -12 }}
-      animate={{ opacity: 1, x: 0 }}
-      exit={reduceMotion ? undefined : { opacity: 0, x: -12 }}
-      transition={enter}
-      className={`flex flex-col h-full overflow-y-auto custom-scrollbar border-r ${
+    <div
+      className={`flex flex-col h-full overflow-y-auto custom-scrollbar border-r animate-fade-in motion-reduce:animate-none ${
         eveningMode
           ? 'bg-gray-900/40 border-gray-700/40'
           : 'bg-slate-50/60 border-slate-200/70'
@@ -288,7 +282,7 @@ export function FilterPanel({
           </Section>
         )}
       </div>
-    </motion.div>
+    </div>
   );
 }
 

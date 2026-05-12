@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { motion } from 'framer-motion';
 import { EventImage } from '@/components/Events/EventImage';
 
 // Region tiles are 2-col on mobile (≈50vw) / 3-col on sm+ (≈33vw). The
@@ -63,15 +62,10 @@ const REGIONS: Region[] = [
   },
 ];
 
-const containerVariants = {
-  hidden: {},
-  visible: { transition: { staggerChildren: 0.07 } },
-};
-
-const tileVariants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.45, ease: 'easeOut' as const } },
-};
+// fn-15.5: motion-lib stagger replaced by CSS `.stagger-children`
+// helper (globals.css) — paints each direct child with a stepped
+// animation-delay. Container kicks off the cascade on mount via
+// `.animate-section-in`.
 
 export function RegionExplorer() {
   const router = useRouter();
@@ -91,15 +85,9 @@ export function RegionExplorer() {
   }, []);
 
   return (
-    <motion.section
-      className="w-full py-10"
-      initial="hidden"
-      whileInView="visible"
-      viewport={{ once: true, margin: '-60px' }}
-      variants={containerVariants}
-    >
+    <section className="w-full py-10 animate-section-in">
       {/* Header */}
-      <motion.div variants={tileVariants} className="mb-6">
+      <div className="mb-6">
         <div className="flex items-center gap-4 mb-3">
           <div className="h-px w-6 bg-white/20" />
           <span className="text-[10px] font-bold uppercase tracking-[0.25em] text-white/30">
@@ -109,26 +97,25 @@ export function RegionExplorer() {
         <h2 className="text-white font-extrabold text-2xl md:text-3xl tracking-tight">
           Events nach Region
         </h2>
-      </motion.div>
+      </div>
 
-      {/* Grid — 3 cols desktop, 2 col mobile */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+      {/* Grid — 3 cols desktop, 2 col mobile. `stagger-children` cascades the
+          tiles in with a 60ms step (fn-15.5: replaced motion variants
+          stagger). region-tile-hover scales the image 1.07 on :hover via
+          pure CSS. */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 stagger-children">
         {REGIONS.map(region => {
           const count = counts[region.name];
 
           return (
-            <motion.button
+            <button
               key={region.name}
-              variants={tileVariants}
               onClick={() => router.push(`/${region.slug}`)}
               className="group relative overflow-hidden rounded-2xl aspect-[4/3] focus:outline-none focus:ring-2 focus:ring-white/30"
-              whileHover="hover"
             >
-              {/* Background image */}
-              <motion.div
-                className="absolute inset-0"
-                variants={{ hover: { scale: 1.07 } }}
-                transition={{ duration: 0.5, ease: 'easeOut' }}
+              {/* Background image — scale up 1.07 on group:hover via CSS. */}
+              <div
+                className="absolute inset-0 transition-transform duration-500 ease-out group-hover:scale-[1.07] motion-reduce:transition-none motion-reduce:group-hover:scale-100"
               >
                 {/* RegionExplorer sits below the WeeklyHighlights fold,
                     so all 9 tiles are lazy by default. No preload, no
@@ -141,7 +128,7 @@ export function RegionExplorer() {
                   wrapperClassName="absolute inset-0"
                   loading="lazy"
                 />
-              </motion.div>
+              </div>
 
               {/* Gradient overlay */}
               <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/20 to-black/5 group-hover:from-black/80 transition-all duration-300" />
@@ -161,10 +148,10 @@ export function RegionExplorer() {
                   )}
                 </p>
               </div>
-            </motion.button>
+            </button>
           );
         })}
       </div>
-    </motion.section>
+    </section>
   );
 }

@@ -596,7 +596,7 @@ function MapPageInner() {
           <ViewToggle view={view} onViewChange={setView} size="sm" />
         </div>
 
-        {/* MAP view — plain conditional render. Earlier we used framer-motion's
+        {/* MAP view — plain conditional render. Earlier we used motion-lib's
             AnimatePresence here, but it left the hidden view in DOM with
             opacity:0 (same bug as in FilterDrawer), wasting Mapbox memory. */}
         {view === 'map' && (

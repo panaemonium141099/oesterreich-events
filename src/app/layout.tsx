@@ -1,16 +1,23 @@
 import type { Metadata } from 'next';
 import Script from 'next/script';
-import { AuthProvider } from '@/lib/supabase/auth-context';
-// AdSense removed in fn-15.4 (Third-Party Cleanup): the property is not
-// approved for AdSense and Funding-Choices banner is no longer needed.
-// The legacy custom CookieBanner at src/components/Legal/CookieBanner.tsx
-// is also unused. Re-introducing either would require a fresh consent /
-// CMP review.
-import { AnimatedLayout } from '@/components/UI/AnimatedLayout';
-import { NotificationToast } from '@/components/Notifications/NotificationToast';
-import { NotificationsProvider } from '@/components/Notifications/NotificationsProvider';
-import { SocialNav } from '@/components/Layout/SocialNav';
-import { SavedEventsProvider } from '@/lib/saved-events-context';
+// fn-15.5 (Bundle-Architektur):
+//   - AuthProvider moved out of root → now per-route in authenticated
+//     layouts (feed, profile, saved, friends, messages, admin, groups/[id])
+//     via the shared <AppShell> wrapper. Anonymous routes (landing, blog,
+//     gemeinde …) no longer pull @supabase/supabase-js into their bundle.
+//   - NotificationsProvider, NotificationToast and SocialNav follow the
+//     same pattern — they are authenticated-only social-app chrome.
+//   - SavedEventsProvider moves into <AppShell> alongside AuthProvider
+//     since it depends on useAuth(). Saved-events UI on anonymous routes
+//     (landing carousel, blog) reads the no-op fallback context, which
+//     short-circuits to a noop on save-attempt (current behavior was
+//     "do nothing if !user" anyway).
+//   - AnimatedLayout removed entirely. Page transitions migrate to the
+//     CSS View Transition API with a Firefox-instant-cut fallback,
+//     orchestrated globally in this layout.
+//   - <Toaster /> stays in root: sonner is ~5 KB, has no auth dependency,
+//     and the AfterSavePanel / share-sheet show toasts on landing too.
+// AdSense was removed in fn-15.4; CookieBanner is also unused.
 import { Toaster } from 'sonner';
 import { fraunces, geist, caveat } from '@/lib/fonts';
 import './globals.css';
@@ -195,30 +202,31 @@ export default function RootLayout({
         */}
       </head>
       <body className="antialiased">
-        <AuthProvider>
-          <NotificationsProvider>
-            <SavedEventsProvider>
-              <AnimatedLayout>
-                {children}
-              </AnimatedLayout>
-              {modal}
-              <Toaster
-                theme="dark"
-                position="bottom-center"
-                toastOptions={{
-                  style: {
-                    background: '#141416',
-                    border: '1px solid rgba(255, 255, 255, 0.06)',
-                    color: '#f1f5f9',
-                  },
-                }}
-              />
-              <SocialNav />
-              <NotificationToast />
-              {/* <CookieBanner /> — see import comment above */}
-            </SavedEventsProvider>
-          </NotificationsProvider>
-        </AuthProvider>
+        {/*
+          fn-15.5: page-transition wrapper now uses the CSS
+          `view-transition-name` API instead of motion-lib's
+          AnimatePresence. Browsers that don't implement the spec
+          (Firefox as of 2026-05) skip the transition entirely and
+          jump-cut between routes — that's the documented graceful
+          fallback. No JS feature-detect or polyfill needed; the
+          `view-transition-name` style is simply ignored.
+        */}
+        <main className="route-root" style={{ viewTransitionName: 'route-root' }}>
+          {children}
+        </main>
+        {modal}
+        <Toaster
+          theme="dark"
+          position="bottom-center"
+          toastOptions={{
+            style: {
+              background: '#141416',
+              border: '1px solid rgba(255, 255, 255, 0.06)',
+              color: '#f1f5f9',
+            },
+          }}
+        />
+        {/* <CookieBanner /> — see import comment above */}
       </body>
     </html>
   );

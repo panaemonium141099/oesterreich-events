@@ -3,9 +3,15 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState, useEffect, useCallback } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '@/lib/supabase/auth-context';
 import { createClient } from '@/lib/supabase/client';
+
+// fn-15.5: motion-lib AnimatePresence + spring slide-in replaced
+// with CSS `data-sheet-state` + `data-overlay-state` swap (globals.css).
+// EXIT_DURATION_MS keeps the DOM mounted long enough for the slide-out
+// to play before unmount, mirroring AnimatePresence's keep-alive
+// behavior.
+const MORE_SHEET_EXIT_MS = 320;
 
 /** Main bottom-nav items. `unreadKey` routes the badge to the right
  *  live-count state (chat vs. notifications). Without it the notification
@@ -56,6 +62,17 @@ export function SocialNav() {
   const pathname = usePathname();
   const [tooltip, setTooltip] = useState<string | null>(null);
   const [moreOpen, setMoreOpen] = useState(false);
+  // Keeps the More-sheet DOM node mounted through its exit animation.
+  const [sheetMounted, setSheetMounted] = useState(false);
+  useEffect(() => {
+    if (moreOpen) {
+      setSheetMounted(true);
+      return;
+    }
+    if (!sheetMounted) return;
+    const t = window.setTimeout(() => setSheetMounted(false), MORE_SHEET_EXIT_MS);
+    return () => window.clearTimeout(t);
+  }, [moreOpen, sheetMounted]);
   const { user } = useAuth();
   const supabase = createClient();
   const [unreadMessages, setUnreadMessages] = useState(0);
@@ -143,36 +160,27 @@ export function SocialNav() {
   // Only render for logged-in users
   if (!user) return null;
 
+  const moreState = moreOpen ? 'open' : 'closed';
+
   return (
     <>
       {/* Overlay */}
-      <AnimatePresence>
-        {moreOpen && (
-          <motion.div
-            key="more-overlay"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            className="fixed inset-0 z-40 bg-black/40"
-            onClick={() => setMoreOpen(false)}
-            data-social-nav
-          />
-        )}
-      </AnimatePresence>
+      {sheetMounted && (
+        <div
+          className="fixed inset-0 z-40 bg-black/40"
+          onClick={() => setMoreOpen(false)}
+          data-social-nav
+          data-overlay-state={moreState}
+        />
+      )}
 
       {/* More bottom sheet */}
-      <AnimatePresence>
-        {moreOpen && (
-          <motion.div
-            key="more-sheet"
-            initial={{ y: '100%' }}
-            animate={{ y: 0 }}
-            exit={{ y: '100%' }}
-            transition={{ type: 'spring', damping: 28, stiffness: 300 }}
-            className="fixed bottom-0 left-0 right-0 z-50 bg-[#1c1c1e]/95 backdrop-blur-xl border border-white/[0.06] rounded-t-2xl px-4 pt-4 pb-24"
-            data-social-nav
-          >
+      {sheetMounted && (
+        <div
+          className="fixed bottom-0 left-0 right-0 z-50 bg-[#1c1c1e]/95 backdrop-blur-xl border border-white/[0.06] rounded-t-2xl px-4 pt-4 pb-24"
+          data-social-nav
+          data-sheet-state={moreState}
+        >
             {/* Drag handle */}
             <div className="flex justify-center mb-4">
               <div className="w-10 h-1 rounded-full bg-white/20" />
@@ -201,9 +209,8 @@ export function SocialNav() {
                 );
               })}
             </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+        </div>
+      )}
 
       {/* Bottom nav bar */}
       <nav

@@ -1,6 +1,16 @@
 'use client';
 
-import { motion, useReducedMotion } from 'framer-motion';
+/**
+ * fn-15.5: motion-lib `layoutId="sort-indicator"` provided a sliding
+ * active-pill effect. CSS has no FLIP-style automatic layout animation,
+ * so the indicator now just toggles between chips without animation —
+ * the chip itself transitions colors / background via Tailwind's
+ * existing `transition-colors`. The UX feels essentially identical
+ * because the chips are tiny and adjacent; the absence of the slide is
+ * not noticeable in normal use. If we ever want the slide back, the
+ * cleanest path is a single absolutely-positioned `<span>` whose `left`
+ * + `width` get computed via useLayoutEffect against the chip refs.
+ */
 
 export type SortMode =
   | 'distance'
@@ -17,11 +27,6 @@ interface SortBarProps {
 }
 
 export function SortBar({ value, onChange, hasLocation, eveningMode }: SortBarProps) {
-  const reduceMotion = useReducedMotion();
-  const layoutTransition = reduceMotion
-    ? { duration: 0 }
-    : { type: 'spring' as const, stiffness: 500, damping: 38 };
-
   const alphaActive = value === 'alpha-asc' || value === 'alpha-desc';
   const dateActive = value === 'date-asc' || value === 'date-desc';
 
@@ -40,8 +45,6 @@ export function SortBar({ value, onChange, hasLocation, eveningMode }: SortBarPr
         disabled={!hasLocation}
         onClick={() => hasLocation && onChange('distance')}
         eveningMode={eveningMode}
-        layoutId="sort-indicator"
-        layoutTransition={layoutTransition}
         title={hasLocation ? 'Nach Entfernung sortieren' : 'Standort nicht freigegeben'}
       >
         <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
@@ -55,8 +58,6 @@ export function SortBar({ value, onChange, hasLocation, eveningMode }: SortBarPr
         active={alphaActive}
         onClick={() => onChange(value === 'alpha-asc' ? 'alpha-desc' : 'alpha-asc')}
         eveningMode={eveningMode}
-        layoutId="sort-indicator"
-        layoutTransition={layoutTransition}
         title={
           !alphaActive
             ? 'Alphabetisch sortieren (A-Z)'
@@ -80,8 +81,6 @@ export function SortBar({ value, onChange, hasLocation, eveningMode }: SortBarPr
         active={dateActive}
         onClick={() => onChange(value === 'date-asc' ? 'date-desc' : 'date-asc')}
         eveningMode={eveningMode}
-        layoutId="sort-indicator"
-        layoutTransition={layoutTransition}
         title={
           !dateActive
             ? 'Nach Datum sortieren (bald zuerst)'
@@ -107,8 +106,6 @@ interface SortChipProps {
   children: React.ReactNode;
   title?: string;
   'aria-label'?: string;
-  layoutId?: string;
-  layoutTransition?: { duration?: number } | { type: 'spring'; stiffness: number; damping: number };
 }
 
 function SortChip({
@@ -119,8 +116,6 @@ function SortChip({
   children,
   title,
   'aria-label': ariaLabel,
-  layoutId,
-  layoutTransition,
 }: SortChipProps) {
   const baseText = eveningMode ? 'text-gray-400' : 'text-slate-600';
   const activeText = eveningMode ? 'text-white' : 'text-slate-900';
@@ -141,10 +136,8 @@ function SortChip({
       }`}
     >
       {active && (
-        <motion.span
-          layoutId={layoutId}
-          transition={layoutTransition}
-          className={`absolute inset-0 rounded-md ${
+        <span
+          className={`absolute inset-0 rounded-md transition-opacity duration-150 ${
             eveningMode ? 'bg-white/10 shadow-[0_1px_0_rgba(255,255,255,0.05)_inset]' : 'bg-white shadow-sm ring-1 ring-slate-200/60'
           }`}
           aria-hidden="true"

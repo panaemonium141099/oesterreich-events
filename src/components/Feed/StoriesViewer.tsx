@@ -2,8 +2,12 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { motion, AnimatePresence } from 'framer-motion';
 import type { TrendingEvent } from './feed-types';
+
+// fn-15.5: AnimatePresence direction-aware slide between stories swapped
+// for a per-key CSS `animate-fade-in` re-mount. The 60px slide added
+// almost nothing to perceived navigation since stories are full-screen
+// blurred backdrops — the cross-fade reads as a clean "next story".
 import { formatEventDate } from './feed-types';
 import { getCategoryBadgeClass } from '@/lib/event-images';
 import { EventImage } from '@/components/Events/EventImage';
@@ -21,7 +25,6 @@ export function StoriesViewer({ events, initialIndex, onClose }: StoriesViewerPr
   const [index, setIndex] = useState(initialIndex);
   const [progress, setProgress] = useState(0);
   const [paused, setPaused] = useState(false);
-  const [direction, setDirection] = useState(0);
   const timerRef = useRef<ReturnType<typeof setInterval>>(undefined);
   const touchStartRef = useRef<{ x: number; y: number } | null>(null);
   const router = useRouter();
@@ -32,7 +35,6 @@ export function StoriesViewer({ events, initialIndex, onClose }: StoriesViewerPr
     if (index >= events.length - 1) {
       onClose();
     } else {
-      setDirection(1);
       setIndex(prev => prev + 1);
       setProgress(0);
     }
@@ -40,7 +42,6 @@ export function StoriesViewer({ events, initialIndex, onClose }: StoriesViewerPr
 
   const goPrev = useCallback(() => {
     if (index > 0) {
-      setDirection(-1);
       setIndex(prev => prev - 1);
       setProgress(0);
     } else {
@@ -133,21 +134,17 @@ export function StoriesViewer({ events, initialIndex, onClose }: StoriesViewerPr
         </svg>
       </button>
 
-      {/* Story content */}
-      <AnimatePresence mode="wait" initial={false}>
-        <motion.div
-          key={event.id}
-          initial={{ opacity: 0, x: direction > 0 ? 60 : -60 }}
-          animate={{ opacity: 1, x: 0 }}
-          exit={{ opacity: 0, x: direction > 0 ? -60 : 60 }}
-          transition={{ duration: 0.2, ease: 'easeOut' }}
-          className="absolute inset-0"
-          onClick={handleTap}
-          onTouchStart={handleTouchStart}
-          onTouchEnd={handleTouchEnd}
-          onMouseDown={() => setPaused(true)}
-          onMouseUp={() => setPaused(false)}
-        >
+      {/* Story content — keyed on event.id so the new story remounts with
+          the `animate-fade-in` keyframe replacing the framer slide. */}
+      <div
+        key={event.id}
+        className="absolute inset-0 animate-fade-in motion-reduce:animate-none"
+        onClick={handleTap}
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
+        onMouseDown={() => setPaused(true)}
+        onMouseUp={() => setPaused(false)}
+      >
           {/* Blurred background layer */}
           <div className="absolute inset-0">
             <EventImage
@@ -227,8 +224,7 @@ export function StoriesViewer({ events, initialIndex, onClose }: StoriesViewerPr
               </svg>
             </button>
           </div>
-        </motion.div>
-      </AnimatePresence>
+      </div>
     </div>
   );
 }

@@ -1,7 +1,6 @@
 'use client';
 
-import { useState, useCallback } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { useState, useCallback, useEffect } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { useAuth } from '@/lib/supabase/auth-context';
 import { FollowCityButton } from '@/components/Follow/FollowCityButton';
@@ -37,6 +36,22 @@ export function AfterSavePanel({
   const [reminderSet, setReminderSet] = useState(false);
   const [reminderLoading, setReminderLoading] = useState(false);
   const [showShareSheet, setShowShareSheet] = useState(false);
+  // fn-15.5: motion-lib `<AnimatePresence>` + `exit` is replaced with a
+  // CSS-driven `data-state` swap. `mounted` keeps the DOM node alive
+  // through the exit keyframe (220ms), then unmounts once the closing
+  // animation has played. While `visible` is true the panel auto-mounts;
+  // when `visible` flips false we keep `mounted` true and let the
+  // exit keyframe run before unmount.
+  const [mounted, setMounted] = useState(visible);
+  useEffect(() => {
+    if (visible) {
+      setMounted(true);
+      return;
+    }
+    if (!mounted) return;
+    const t = window.setTimeout(() => setMounted(false), 220);
+    return () => window.clearTimeout(t);
+  }, [visible, mounted]);
 
   const handleSetReminder = useCallback(async () => {
     if (!user) return;
@@ -82,15 +97,11 @@ export function AfterSavePanel({
         url: `/events/${eventId}`,
       }}
     />
-    <AnimatePresence>
-      {visible && (
-        <motion.div
-          initial={{ opacity: 0, height: 0 }}
-          animate={{ opacity: 1, height: 'auto' }}
-          exit={{ opacity: 0, height: 0 }}
-          transition={{ duration: 0.2, ease: 'easeOut' }}
-          className="overflow-hidden"
-        >
+    {mounted && (
+      <div
+        className="overflow-hidden after-save-panel"
+        data-after-save-state={visible ? 'open' : 'closed'}
+      >
           {/* Solid dark surface — the panel can render on top of a
               full-bleed hero image (event detail page or sheet), so a
               5%-white tint was barely legible against bright photos.
@@ -188,9 +199,8 @@ export function AfterSavePanel({
               </button>
             </div>
           </div>
-        </motion.div>
+        </div>
       )}
-    </AnimatePresence>
     </>
   );
 }

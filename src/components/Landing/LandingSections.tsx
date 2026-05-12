@@ -9,9 +9,13 @@ import {
   RegionExplorerSkeleton,
 } from '@/components/Landing/SectionSkeletons';
 
-// fn-15.2 — CLS-Stabilität:
+// fn-15.2 — CLS-Stabilität (updated in fn-15.5):
 // Each async section is `dynamic({ ssr: false })` because the sections
-// use framer-motion + browser-only data fetching (geolocation, fetch).
+// use browser-only data fetching (geolocation, fetch). The previous
+// motion-lib dependency was the second reason; after fn-15.5 those
+// animations run on pure CSS (`.animate-section-in` + `.stagger-children`
+// in globals.css), but the dynamic split is kept so the carousel /
+// blog-grid / category-grid / region-grid still stream independently.
 // Two layered fallback mechanisms guarantee a zero-CLS first paint:
 //
 //   1. `loading: () => <Skeleton/>`

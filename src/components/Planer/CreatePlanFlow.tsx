@@ -23,7 +23,6 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { useRouter } from 'next/navigation';
-import { motion, AnimatePresence } from 'framer-motion';
 import type { User } from '@supabase/supabase-js';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { LocationAutocomplete } from '@/components/UI/LocationAutocomplete';
@@ -38,14 +37,14 @@ import {
   EditorialCaption,
   AvatarStack,
 } from './primitives';
-import {
-  curtainEnter,
-  stepSlide,
-  staggerContainer,
-  riseItem,
-  springy,
-  EASE_OUT_EXPO,
-} from './motion';
+
+// fn-15.5: every motion-lib construct in this file is replaced with
+// CSS. curtainEnter → `animate-fade-in` on the overlay root. stepSlide
+// → keyed remount with `animate-fade-in` (the 60px horizontal slide
+// barely registered in step transitions and saves the motion runtime).
+// staggerContainer/riseItem → `.stagger-children` helper. springy/
+// EASE_OUT_EXPO → CSS cubic-bezier on the rare places that needed
+// per-element transitions.
 
 // ───────────────────────────────────────────────────────────────
 // Types
@@ -360,30 +359,28 @@ export function CreatePlanFlow({ open, onClose, supabase, user, friends }: Creat
       })
     : friends;
 
-  // Render into document.body via portal — escapes the AnimatedLayout's
-  // transform-wrapped parent (`position: fixed` would otherwise be
-  // relative to the ancestor motion.div, not the viewport, making the
-  // overlay render in an unreachable coordinate space).
+  // Render into document.body via portal — escapes the (previously
+  // motion-wrapped) parent so `position: fixed` resolves against the
+  // viewport. fn-15.5: AnimatePresence wrapper replaced with simple
+  // `if (open) render` — the entrance animation lives in
+  // `animate-fade-in`. The 250ms exit is dropped because clicking
+  // X / pressing ESC already feels instant.
   if (typeof document === 'undefined') return null;
 
+  if (!open) return null;
+
   return createPortal(
-    <AnimatePresence>
-      {open && (
-        <motion.div
-          key="create-curtain"
-          // Outer stays pure `fixed inset-0` — no `.planer-scope` here.
-          // That scope class sets `position: relative`, which (because it
-          // lives in unlayered CSS and Tailwind utilities live in @layer
-          // utilities) wins the cascade and neuters the `fixed`. Would
-          // make the overlay render inline at 0-size: invisible, but body
-          // scroll still locked via has-modal-open class → page frozen.
-          // Move the scope to an inner wrapper below.
-          className="fixed inset-0 z-[100] overflow-y-auto"
-          variants={curtainEnter}
-          initial="hidden"
-          animate="visible"
-          exit="exit"
-        >
+    <div
+      key="create-curtain"
+      // Outer stays pure `fixed inset-0` — no `.planer-scope` here.
+      // That scope class sets `position: relative`, which (because it
+      // lives in unlayered CSS and Tailwind utilities live in @layer
+      // utilities) wins the cascade and neuters the `fixed`. Would
+      // make the overlay render inline at 0-size: invisible, but body
+      // scroll still locked via has-modal-open class → page frozen.
+      // Move the scope to an inner wrapper below.
+      className="fixed inset-0 z-[100] overflow-y-auto animate-fade-in motion-reduce:animate-none"
+    >
         <div className="planer-scope planer-grain min-h-full w-full" style={{ backgroundColor: 'var(--color-planer-void)' }}>
           {/* Ambient light wash at top */}
           <div
@@ -416,41 +413,38 @@ export function CreatePlanFlow({ open, onClose, supabase, user, friends }: Creat
             </div>
           </header>
 
-          {/* Step content */}
+          {/* Step content. fn-15.5: AnimatePresence's slide-transition is
+              replaced by a CSS keyed-remount fade. `direction` is no longer
+              consumed for an animation but is preserved as state for any
+              future re-introduction. */}
           <main className="max-w-3xl mx-auto px-5 sm:px-8 py-10 sm:py-14 pb-32 min-h-[calc(100vh-80px)]">
-            <AnimatePresence mode="wait" custom={direction}>
-              <motion.div
-                key={step}
-                custom={direction}
-                variants={stepSlide(direction)}
-                initial="hidden"
-                animate="visible"
-                exit="exit"
-              >
-                {step === 0 && <StepAnlass draft={draft} onSelect={(m) => { patch({ mode: m }); setDirection(1); setTimeout(() => setStep(1), 260); }} />}
-                {step === 1 && (
-                  <StepEssenz
-                    draft={draft}
-                    patch={patch}
-                    eventSearch={eventSearch}
-                    setEventSearch={setEventSearch}
-                    eventResults={eventResults}
-                    setEventResults={setEventResults}
-                  />
-                )}
-                {step === 2 && (
-                  <StepGäste
-                    draft={draft}
-                    toggleFriend={toggleFriend}
-                    friends={friends}
-                    filteredFriends={filteredFriends}
-                    friendSearch={friendSearch}
-                    setFriendSearch={setFriendSearch}
-                  />
-                )}
-                {step === 3 && <StepFeinschliff draft={draft} patch={patch} friends={friends} />}
-              </motion.div>
-            </AnimatePresence>
+            <div
+              key={step}
+              className="animate-fade-in motion-reduce:animate-none"
+            >
+              {step === 0 && <StepAnlass draft={draft} onSelect={(m) => { patch({ mode: m }); setDirection(1); setTimeout(() => setStep(1), 260); }} />}
+              {step === 1 && (
+                <StepEssenz
+                  draft={draft}
+                  patch={patch}
+                  eventSearch={eventSearch}
+                  setEventSearch={setEventSearch}
+                  eventResults={eventResults}
+                  setEventResults={setEventResults}
+                />
+              )}
+              {step === 2 && (
+                <StepGäste
+                  draft={draft}
+                  toggleFriend={toggleFriend}
+                  friends={friends}
+                  filteredFriends={filteredFriends}
+                  friendSearch={friendSearch}
+                  setFriendSearch={setFriendSearch}
+                />
+              )}
+              {step === 3 && <StepFeinschliff draft={draft} patch={patch} friends={friends} />}
+            </div>
 
             {submitError && (
               <div className="mt-6 px-4 py-3 rounded-xl bg-[color:var(--color-planer-rose)]/10 border border-[color:var(--color-planer-rose)]/30 text-[color:var(--color-planer-rose)] text-sm">
@@ -509,9 +503,7 @@ export function CreatePlanFlow({ open, onClose, supabase, user, friends }: Creat
             </div>
           </footer>
         </div>
-        </motion.div>
-      )}
-    </AnimatePresence>,
+    </div>,
     document.body,
   );
 }
@@ -528,23 +520,23 @@ function StepAnlass({
   onSelect: (mode: CreateMode) => void;
 }) {
   return (
-    <motion.div variants={staggerContainer} initial="hidden" animate="visible">
-      <motion.div variants={riseItem}>
+    <div className="stagger-children">
+      <div>
         <EditorialCaption className="mb-4">
           <span className="editorial-num mr-2">00</span>/ Anlass
         </EditorialCaption>
-      </motion.div>
-      <motion.div variants={riseItem}>
+      </div>
+      <div>
         <EditorialHeading size="hero" className="mb-3">
           Was schwebt euch <em className="italic text-[color:var(--color-planer-accent)]">vor</em>?
         </EditorialHeading>
-      </motion.div>
-      <motion.p variants={riseItem} className="text-[color:var(--color-planer-dim)] text-[15px] mb-10 max-w-[32rem] leading-relaxed">
+      </div>
+      <p className="text-[color:var(--color-planer-dim)] text-[15px] mb-10 max-w-[32rem] leading-relaxed">
         Ein stiller Grillabend im eigenen Garten oder ein Konzert, zu dem ihr gemeinsam geht —
         beide Wege starten hier.
-      </motion.p>
+      </p>
 
-      <motion.div variants={riseItem} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <ChoiceCard
           active={draft.mode === 'custom'}
           onClick={() => onSelect('custom')}
@@ -563,8 +555,8 @@ function StepAnlass({
           hint="Treffpunkt vor Ort, Zeit steht fest."
           tone="plum"
         />
-      </motion.div>
-    </motion.div>
+      </div>
+    </div>
   );
 }
 
@@ -579,15 +571,13 @@ function ChoiceCard({
     ? 'var(--color-planer-accent)'
     : 'var(--color-planer-maybe)';
   return (
-    <motion.button
+    <button
       type="button"
       onClick={onClick}
-      whileHover={{ y: -3 }}
-      whileTap={{ scale: 0.98 }}
-      transition={springy}
       className={[
         'group relative text-left overflow-hidden rounded-2xl border transition-all duration-500',
         'p-6 sm:p-8 min-h-[220px] flex flex-col',
+        'hover:-translate-y-1 motion-reduce:hover:translate-y-0',
         active
           ? 'border-[color:var(--color-planer-accent)]/60 bg-[color:var(--color-planer-surface)]'
           : 'border-white/[0.06] bg-[color:var(--color-planer-surface)]/60 hover:border-white/15',
@@ -631,7 +621,7 @@ function ChoiceCard({
           background: toneColor,
         }}
       />
-    </motion.button>
+    </button>
   );
 }
 
@@ -653,28 +643,28 @@ function StepEssenz({
   };
 
   return (
-    <motion.div variants={staggerContainer} initial="hidden" animate="visible">
-      <motion.div variants={riseItem}>
+    <div className="stagger-children">
+      <div>
         <EditorialCaption className="mb-4">
           <span className="editorial-num mr-2">01</span>/ Essenz
         </EditorialCaption>
-      </motion.div>
-      <motion.div variants={riseItem}>
+      </div>
+      <div>
         <EditorialHeading size="hero" className="mb-3">
           {draft.mode === 'custom'
             ? <>Der <em className="italic text-[color:var(--color-planer-accent)]">Kern</em> deines Plans.</>
             : <>Zu welchem <em className="italic text-[color:var(--color-planer-accent)]">Event</em> zieht's euch?</>
           }
         </EditorialHeading>
-      </motion.div>
-      <motion.p variants={riseItem} className="text-[color:var(--color-planer-dim)] mb-10 max-w-[32rem]">
+      </div>
+      <p className="text-[color:var(--color-planer-dim)] mb-10 max-w-[32rem]">
         {draft.mode === 'custom'
           ? 'Name, Zeit, Ort — mehr braucht\'s jetzt nicht. Der Rest kommt später.'
           : 'Gib einen Teil des Titels ein — wir finden das Event aus unserer Datenbank.'}
-      </motion.p>
+      </p>
 
       {draft.mode === 'custom' && (
-        <motion.div variants={riseItem} className="space-y-6 max-w-xl">
+        <div className="space-y-6 max-w-xl">
           <FormField label="Titel" required>
             <PlanerInput
               type="text"
@@ -717,35 +707,27 @@ function StepEssenz({
             />
           </FormField>
 
-          <AnimatePresence>
-            {draft.locationAddress && (
-              <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: 'auto' }}
-                exit={{ opacity: 0, height: 0 }}
-                transition={{ duration: 0.35, ease: EASE_OUT_EXPO }}
-                className="overflow-hidden"
-              >
-                <div className="pl-4 border-l-2 border-[color:var(--color-planer-accent)]/30 space-y-2">
-                  <FormField label="Adresse">
-                    <PlanerInput
-                      type="text"
-                      value={draft.locationAddress}
-                      onChange={e => patch({ locationAddress: e.target.value })}
-                    />
-                  </FormField>
-                  {draft.locationLat && draft.locationLng && (
-                    <p className="text-[11px] italic text-[color:var(--color-planer-accent)]/70 flex items-center gap-1.5">
-                      <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                      </svg>
-                      Ort auf der Karte gefunden
-                    </p>
-                  )}
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
+          {draft.locationAddress && (
+            <div className="overflow-hidden animate-fade-in motion-reduce:animate-none">
+              <div className="pl-4 border-l-2 border-[color:var(--color-planer-accent)]/30 space-y-2">
+                <FormField label="Adresse">
+                  <PlanerInput
+                    type="text"
+                    value={draft.locationAddress}
+                    onChange={e => patch({ locationAddress: e.target.value })}
+                  />
+                </FormField>
+                {draft.locationLat && draft.locationLng && (
+                  <p className="text-[11px] italic text-[color:var(--color-planer-accent)]/70 flex items-center gap-1.5">
+                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                    Ort auf der Karte gefunden
+                  </p>
+                )}
+              </div>
+            </div>
+          )}
 
           <FormField label="Kurzbeschreibung" hint="optional">
             <PlanerTextarea
@@ -755,11 +737,11 @@ function StepEssenz({
               placeholder="Was ist das — in einem Satz?"
             />
           </FormField>
-        </motion.div>
+        </div>
       )}
 
       {draft.mode === 'existing' && (
-        <motion.div variants={riseItem} className="space-y-6 max-w-xl">
+        <div className="space-y-6 max-w-xl">
           {draft.selectedEvent ? (
             <div className="rounded-2xl border border-[color:var(--color-planer-accent)]/30 bg-[color:var(--color-planer-surface)] p-4 flex items-center gap-4">
               <EventImage
@@ -804,43 +786,37 @@ function StepEssenz({
                     </svg>
                   }
                 />
-                <AnimatePresence>
-                  {eventResults.length > 0 && (
-                    <motion.div
-                      initial={{ opacity: 0, y: -4 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -4 }}
-                      transition={{ duration: 0.2 }}
-                      className="absolute z-10 w-full mt-2 rounded-2xl overflow-hidden bg-[color:var(--color-planer-raised)] border border-white/[0.08] shadow-2xl max-h-80 overflow-y-auto"
-                    >
-                      {eventResults.map((ev, i) => (
-                        <button
-                          key={ev.id}
-                          type="button"
-                          onClick={() => { patch({ selectedEvent: ev }); setEventSearch(''); setEventResults([]); }}
-                          className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-[color:var(--color-planer-accent)]/5 transition-colors border-b border-white/[0.04] last:border-b-0"
-                          style={{ animationDelay: `${i * 30}ms` }}
-                        >
-                          <EventImage
-                            src={ev.image_url}
-                            category={ev.category}
-                            title={ev.title}
-                            sizes="44px"
-                            wrapperClassName="w-11 h-11 rounded-lg shrink-0"
-                            loading="lazy"
-                          />
-                          <div className="flex-1 min-w-0">
-                            <p className="text-sm text-[color:var(--color-planer-ink)] truncate">{ev.title}</p>
-                            <p className="text-xs text-[color:var(--color-planer-dim)]">
-                              {formatDate(ev.start_date)}
-                              {ev.location_name && ` · ${ev.location_name}`}
-                            </p>
-                          </div>
-                        </button>
-                      ))}
-                    </motion.div>
-                  )}
-                </AnimatePresence>
+                {eventResults.length > 0 && (
+                  <div
+                    className="absolute z-10 w-full mt-2 rounded-2xl overflow-hidden bg-[color:var(--color-planer-raised)] border border-white/[0.08] shadow-2xl max-h-80 overflow-y-auto animate-fade-in motion-reduce:animate-none"
+                  >
+                    {eventResults.map((ev, i) => (
+                      <button
+                        key={ev.id}
+                        type="button"
+                        onClick={() => { patch({ selectedEvent: ev }); setEventSearch(''); setEventResults([]); }}
+                        className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-[color:var(--color-planer-accent)]/5 transition-colors border-b border-white/[0.04] last:border-b-0"
+                        style={{ animationDelay: `${i * 30}ms` }}
+                      >
+                        <EventImage
+                          src={ev.image_url}
+                          category={ev.category}
+                          title={ev.title}
+                          sizes="44px"
+                          wrapperClassName="w-11 h-11 rounded-lg shrink-0"
+                          loading="lazy"
+                        />
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm text-[color:var(--color-planer-ink)] truncate">{ev.title}</p>
+                          <p className="text-xs text-[color:var(--color-planer-dim)]">
+                            {formatDate(ev.start_date)}
+                            {ev.location_name && ` · ${ev.location_name}`}
+                          </p>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
             </FormField>
           )}
@@ -853,9 +829,9 @@ function StepEssenz({
               placeholder="Wir treffen uns 18:00 am Eingang West …"
             />
           </FormField>
-        </motion.div>
+        </div>
       )}
-    </motion.div>
+    </div>
   );
 }
 
@@ -879,46 +855,41 @@ function StepGäste({
     .map(f => ({ url: f.avatar_url, name: f.first_name }));
 
   return (
-    <motion.div variants={staggerContainer} initial="hidden" animate="visible">
-      <motion.div variants={riseItem}>
+    <div className="stagger-children">
+      <div>
         <EditorialCaption className="mb-4">
           <span className="editorial-num mr-2">02</span>/ Gäste
         </EditorialCaption>
-      </motion.div>
-      <motion.div variants={riseItem}>
+      </div>
+      <div>
         <EditorialHeading size="hero" className="mb-3">
           Wer kommt <em className="italic text-[color:var(--color-planer-accent)]">mit</em>?
         </EditorialHeading>
-      </motion.div>
-      <motion.p variants={riseItem} className="text-[color:var(--color-planer-dim)] mb-6 max-w-[32rem]">
+      </div>
+      <p className="text-[color:var(--color-planer-dim)] mb-6 max-w-[32rem]">
         {friends.length === 0
           ? 'Du hast noch keine Freunde hinzugefügt — das geht auch später über den Einladungslink.'
           : 'Wähle aus. Einladungs-Benachrichtigungen gehen automatisch raus.'}
-      </motion.p>
+      </p>
 
       {friends.length > 0 && (
-        <motion.div variants={riseItem}>
+        <div>
           {/* Selection status bar */}
-          <AnimatePresence>
-            {selectedCount > 0 && (
-              <motion.div
-                initial={{ opacity: 0, y: -8 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -8 }}
-                className="mb-6 flex items-center gap-4 p-4 rounded-2xl border border-[color:var(--color-planer-accent)]/20 bg-[color:var(--color-planer-accent)]/[0.04]"
-              >
-                <AvatarStack avatars={selectedAvatars} size={34} max={6} />
-                <div className="flex-1">
-                  <p className="serif-display text-[20px] font-light text-[color:var(--color-planer-ink)]">
-                    <span className="tabular text-[color:var(--color-planer-accent)]">{selectedCount}</span> eingeladen
-                  </p>
-                  <p className="text-xs text-[color:var(--color-planer-dim)] italic">
-                    {selectedCount === 1 ? 'Es könnte der Beginn von etwas Schönem sein.' : 'Genug für einen richtig guten Abend.'}
-                  </p>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
+          {selectedCount > 0 && (
+            <div
+              className="mb-6 flex items-center gap-4 p-4 rounded-2xl border border-[color:var(--color-planer-accent)]/20 bg-[color:var(--color-planer-accent)]/[0.04] animate-fade-in motion-reduce:animate-none"
+            >
+              <AvatarStack avatars={selectedAvatars} size={34} max={6} />
+              <div className="flex-1">
+                <p className="serif-display text-[20px] font-light text-[color:var(--color-planer-ink)]">
+                  <span className="tabular text-[color:var(--color-planer-accent)]">{selectedCount}</span> eingeladen
+                </p>
+                <p className="text-xs text-[color:var(--color-planer-dim)] italic">
+                  {selectedCount === 1 ? 'Es könnte der Beginn von etwas Schönem sein.' : 'Genug für einen richtig guten Abend.'}
+                </p>
+              </div>
+            </div>
+          )}
 
           {friends.length > 6 && (
             <div className="mb-4">
@@ -936,11 +907,11 @@ function StepGäste({
             </div>
           )}
 
-          <motion.ul variants={staggerContainer} className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
-            {filteredFriends.map((f, i) => {
+          <ul className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 stagger-children">
+            {filteredFriends.map((f) => {
               const selected = draft.selectedFriends.includes(f.id);
               return (
-                <motion.li key={f.id} variants={riseItem} custom={i}>
+                <li key={f.id}>
                   <button
                     type="button"
                     onClick={() => toggleFriend(f.id)}
@@ -960,29 +931,27 @@ function StepGäste({
                         }
                       </div>
                       {selected && (
-                        <motion.span
-                          initial={{ scale: 0 }}
-                          animate={{ scale: 1 }}
-                          transition={springy}
-                          className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-[color:var(--color-planer-accent)] flex items-center justify-center text-[color:var(--color-planer-void)]"
+                        <span
+                          className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-[color:var(--color-planer-accent)] flex items-center justify-center text-[color:var(--color-planer-void)] animate-scale-pop motion-reduce:animate-none"
+                          style={{ animationDuration: '300ms', animationFillMode: 'both' }}
                         >
                           <svg className="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                           </svg>
-                        </motion.span>
+                        </span>
                       )}
                     </div>
                     <span className="text-sm text-[color:var(--color-planer-ink)] truncate text-left">
                       {f.first_name}
                     </span>
                   </button>
-                </motion.li>
+                </li>
               );
             })}
-          </motion.ul>
-        </motion.div>
+          </ul>
+        </div>
       )}
-    </motion.div>
+    </div>
   );
 }
 
@@ -1022,23 +991,23 @@ function StepFeinschliff({
   const previewName = draft.selectedEvent?.title || draft.name || '—';
 
   return (
-    <motion.div variants={staggerContainer} initial="hidden" animate="visible">
-      <motion.div variants={riseItem}>
+    <div className="stagger-children">
+      <div>
         <EditorialCaption className="mb-4">
           <span className="editorial-num mr-2">03</span>/ Feinschliff
         </EditorialCaption>
-      </motion.div>
-      <motion.div variants={riseItem}>
+      </div>
+      <div>
         <EditorialHeading size="hero" className="mb-3">
           Fast <em className="italic text-[color:var(--color-planer-accent)]">fertig</em>.
         </EditorialHeading>
-      </motion.div>
-      <motion.p variants={riseItem} className="text-[color:var(--color-planer-dim)] mb-10 max-w-[32rem]">
+      </div>
+      <p className="text-[color:var(--color-planer-dim)] mb-10 max-w-[32rem]">
         Ein Bild, ein paar Notizen zum Anfahrts-Weg — alles optional, alles später editierbar.
-      </motion.p>
+      </p>
 
       {/* Preview card */}
-      <motion.div variants={riseItem} className="mb-10">
+      <div className="mb-10">
         <div className="rounded-3xl border border-[color:var(--color-planer-accent)]/15 overflow-hidden bg-gradient-to-br from-[color:var(--color-planer-surface)] to-[color:var(--color-planer-raised)]">
           <div className="p-6 sm:p-8">
             <EditorialCaption className="mb-3">Vorschau</EditorialCaption>
@@ -1067,9 +1036,9 @@ function StepFeinschliff({
             </div>
           </div>
         </div>
-      </motion.div>
+      </div>
 
-      <motion.div variants={riseItem} className="space-y-6 max-w-xl">
+      <div className="space-y-6 max-w-xl">
         {/* Image upload */}
         <FormField label="Titelbild" hint="optional">
           {draft.imagePreview ? (
@@ -1151,15 +1120,8 @@ function StepFeinschliff({
         </FormField>
 
         {/* Friend-picker — only when 'specific_users' is selected */}
-        <AnimatePresence>
-          {draft.pinboardPermission === 'specific_users' && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              exit={{ opacity: 0, height: 0 }}
-              transition={{ duration: 0.3, ease: EASE_OUT_EXPO }}
-              className="overflow-hidden"
-            >
+        {draft.pinboardPermission === 'specific_users' && (
+          <div className="overflow-hidden animate-fade-in motion-reduce:animate-none">
               <FormField label="Wer darf pinnen" hint="tap zum aus-/abwählen — nur aus den Eingeladenen">
                 {invitedFriends.length === 0 ? (
                   <p className="text-xs italic text-[color:var(--color-planer-whisper)]">
@@ -1199,10 +1161,9 @@ function StepFeinschliff({
               <p className="text-[10px] text-[color:var(--color-planer-whisper)] italic mt-2">
                 Du als Ersteller darfst sowieso immer pinnen.
               </p>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </motion.div>
-    </motion.div>
+          </div>
+        )}
+      </div>
+    </div>
   );
 }

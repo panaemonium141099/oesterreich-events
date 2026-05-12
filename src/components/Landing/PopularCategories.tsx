@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { CATEGORIES } from '@/lib/categories';
 import { getCategorySlug } from '@/lib/landing-slugs';
@@ -49,15 +48,9 @@ const CATEGORY_IMAGES: Record<string, string> = {
 const FALLBACK_IMAGE =
   'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=600&q=75&auto=format&fit=crop';
 
-const containerVariants = {
-  hidden: {},
-  visible: { transition: { staggerChildren: 0.05 } },
-};
-
-const tileVariants = {
-  hidden: { opacity: 0, y: 16 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: 'easeOut' as const } },
-};
+// fn-15.5: stagger cascade migrated to CSS `.stagger-children` helper
+// (globals.css). Each tile picks up a 60ms-stepped fade-up via the
+// :nth-child rules.
 
 export function PopularCategories() {
   const [counts, setCounts] = useState<Record<string, number>>({});
@@ -76,15 +69,9 @@ export function PopularCategories() {
   }, []);
 
   return (
-    <motion.section
-      className="w-full py-10"
-      initial="hidden"
-      whileInView="visible"
-      viewport={{ once: true, margin: '-80px' }}
-      variants={containerVariants}
-    >
+    <section className="w-full py-10 animate-section-in">
       {/* Header */}
-      <motion.div variants={tileVariants} className="mb-6">
+      <div className="mb-6">
         <div className="flex items-center gap-4 mb-3">
           <div className="h-px w-6 bg-white/20" />
           <span className="text-[10px] font-bold uppercase tracking-[0.25em] text-white/30">
@@ -94,10 +81,10 @@ export function PopularCategories() {
         <h2 className="text-white font-extrabold text-2xl md:text-3xl tracking-tight">
           Was interessiert dich?
         </h2>
-      </motion.div>
+      </div>
 
-      {/* Grid — 2 col mobile / 3 col tablet / 4 col desktop */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+      {/* Grid — 2 col mobile / 3 col tablet / 4 col desktop, staggered. */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 stagger-children">
         {CATEGORIES.map(category => {
           const count = counts[category];
           const image = CATEGORY_IMAGES[category] ?? FALLBACK_IMAGE;
@@ -109,7 +96,7 @@ export function PopularCategories() {
             : `/map?category=${encodeURIComponent(category)}`;
 
           return (
-            <motion.div key={category} variants={tileVariants}>
+            <div key={category}>
               <Link
                 href={href}
                 className="group relative block overflow-hidden rounded-xl aspect-[3/2] focus:outline-none focus:ring-2 focus:ring-white/30"
@@ -149,10 +136,10 @@ export function PopularCategories() {
                   </p>
                 </div>
               </Link>
-            </motion.div>
+            </div>
           );
         })}
       </div>
-    </motion.section>
+    </section>
   );
 }

@@ -24,7 +24,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { motion } from 'framer-motion';
 import { toast } from 'sonner';
 import { useAuth } from '@/lib/supabase/auth-context';
 import { createClient } from '@/lib/supabase/client';
@@ -35,7 +34,10 @@ import {
   EditorialCaption,
   EditorialHeading,
 } from '@/components/Planer/primitives';
-import { riseItem, staggerContainer } from '@/components/Planer/motion';
+
+// fn-15.5: motion-lib staggerContainer + riseItem replaced by the
+// global `.stagger-children` CSS helper. Direct children of the
+// container animate in with a 60ms-stepped fade-up cascade.
 
 type State =
   | { kind: 'loading' }
@@ -239,13 +241,8 @@ export default function JoinPage() {
 
   return (
     <PlanerShell>
-      <motion.main
-        variants={staggerContainer}
-        initial="hidden"
-        animate="visible"
-        className="max-w-xl mx-auto px-6 py-16"
-      >
-        <motion.div variants={riseItem}>
+      <main className="max-w-xl mx-auto px-6 py-16 stagger-children">
+        <div>
           <EditorialCaption className="mb-3">Einladung</EditorialCaption>
           <EditorialHeading size="section" className="mb-3">
             Du wurdest eingeladen.
@@ -254,11 +251,10 @@ export default function JoinPage() {
             Der Einladungs-Code <span className="font-mono bg-white/5 px-2 py-0.5 rounded">{rawCode}</span> führt
             zu diesem Plan. Ein Klick und du bist dabei.
           </p>
-        </motion.div>
+        </div>
 
         {/* Preview card — same design language as PlanCard on the hub */}
-        <motion.div
-          variants={riseItem}
+        <div
           className="rounded-[22px] overflow-hidden border border-white/[0.06] bg-[color:var(--color-planer-surface)] mb-6"
           style={{ boxShadow: '0 14px 40px -20px rgba(0,0,0,0.5)' }}
         >
@@ -315,17 +311,17 @@ export default function JoinPage() {
               </div>
             )}
           </div>
-        </motion.div>
+        </div>
 
-        <motion.div variants={riseItem} className="flex items-center justify-between gap-3">
+        <div className="flex items-center justify-between gap-3">
           <Link href="/groups" className="text-sm text-[color:var(--color-planer-dim)] hover:text-[color:var(--color-planer-ink)] transition-colors">
             Zurück
           </Link>
           <PlanerButton onClick={handleJoin} variant="primary" size="lg" loading={busy}>
             Plan beitreten
           </PlanerButton>
-        </motion.div>
-      </motion.main>
+        </div>
+      </main>
     </PlanerShell>
   );
 }

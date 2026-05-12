@@ -1,27 +1,41 @@
 'use client';
 
-import { motion, AnimatePresence } from 'framer-motion';
+import { useEffect, useState } from 'react';
 
 interface DoubleTapHeartProps {
   show: boolean;
 }
 
+/**
+ * DoubleTapHeart — fn-15.5: the motion-lib AnimatePresence pop was
+ * replaced with the global `data-scale-pop` CSS keyframe (globals.css).
+ * `mounted` keeps the heart in the DOM long enough for the close
+ * keyframe to play before unmount.
+ */
+const EXIT_MS = 260;
+
 export function DoubleTapHeart({ show }: DoubleTapHeartProps) {
+  const [mounted, setMounted] = useState(show);
+  useEffect(() => {
+    if (show) {
+      setMounted(true);
+      return;
+    }
+    if (!mounted) return;
+    const t = window.setTimeout(() => setMounted(false), EXIT_MS);
+    return () => window.clearTimeout(t);
+  }, [show, mounted]);
+
+  if (!mounted) return null;
+
   return (
-    <AnimatePresence>
-      {show && (
-        <motion.div
-          className="absolute inset-0 flex items-center justify-center pointer-events-none z-10"
-          initial={{ opacity: 0, scale: 0 }}
-          animate={{ opacity: 1, scale: 1 }}
-          exit={{ opacity: 0, scale: 1.3 }}
-          transition={{ duration: 0.3, ease: [0.17, 0.67, 0.21, 0.99] }}
-        >
-          <svg className="w-20 h-20 text-white drop-shadow-lg" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z" />
-          </svg>
-        </motion.div>
-      )}
-    </AnimatePresence>
+    <div
+      className="absolute inset-0 flex items-center justify-center pointer-events-none z-10"
+      data-scale-pop={show ? 'open' : 'closed'}
+    >
+      <svg className="w-20 h-20 text-white drop-shadow-lg" fill="currentColor" viewBox="0 0 24 24">
+        <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z" />
+      </svg>
+    </div>
   );
 }

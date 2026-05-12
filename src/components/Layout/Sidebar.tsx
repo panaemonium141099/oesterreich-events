@@ -1,14 +1,6 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
-import {
-  AnimatePresence,
-  motion,
-  useMotionValue,
-  animate,
-  useReducedMotion,
-  type PanInfo,
-} from 'framer-motion';
+import { useEffect, useRef, useState } from 'react';
 import { EventList } from '../Events/EventList';
 import { ArtistEventsSection } from '../Artists/ArtistEventsSection';
 import { SkeletonList } from '../UI/Skeleton';
@@ -167,10 +159,16 @@ function DesktopSidebar({
   totalMatchCount,
   backgroundLoading,
 }: SidebarProps) {
-  const reduceMotion = useReducedMotion();
   const isArtistTab = activeTab === 'artists' && showArtistTab;
-  const widthMV = useMotionValue(COMPACT_WIDTH);
-  const dragging = useRef(false);
+
+  // fn-15.5: motion-lib `useMotionValue` + `animate()` for the
+  // sidebar width is replaced with a plain React state value driven
+  // by CSS `transition: width`. While the user drags, we disable the
+  // transition so the width tracks the pointer 1:1, then re-enable it
+  // for the snap-to-target animation at the end of the gesture.
+  //
+  // FilterPanel column width: same trick — the `--filter-panel-width`
+  // CSS variable transitions when filters open/close.
 
   const getTargetWidth = (s: SidebarSize): number => {
     if (typeof window === 'undefined') return s === 'compact' ? COMPACT_WIDTH : WIDE_WIDTH;
@@ -179,52 +177,64 @@ function DesktopSidebar({
     return window.innerWidth; // full-screen overlay, no peek
   };
 
-  // Sync external size changes → animate the width
-  useEffect(() => {
-    if (dragging.current) return;
-    const target = getTargetWidth(size);
-    const controls = animate(widthMV, target, {
-      duration: reduceMotion ? 0 : 0.42,
-      ease: [0.32, 0.72, 0, 1],
-    });
-    return () => controls.stop();
-  }, [size, widthMV, reduceMotion]);
+  const [width, setWidth] = useState<number>(() => getTargetWidth(size));
+  const [dragging, setDragging] = useState(false);
+  const draggingRef = useRef(false);
+  const widthRef = useRef(width);
+  // Keep widthRef in sync so pointer-move handlers can read the latest
+  // without re-attaching listeners each render.
+  useEffect(() => { widthRef.current = width; }, [width]);
 
-  // Keep full-mode width correct on window resize
+  // Sync external size changes → CSS transitions the width.
+  useEffect(() => {
+    if (draggingRef.current) return;
+    setWidth(getTargetWidth(size));
+  }, [size]);
+
+  // Keep full-mode width correct on window resize.
   useEffect(() => {
     if (size !== 'full') return;
-    const onResize = () => widthMV.set(window.innerWidth);
+    const onResize = () => setWidth(window.innerWidth);
     window.addEventListener('resize', onResize);
     return () => window.removeEventListener('resize', onResize);
-  }, [size, widthMV]);
+  }, [size]);
 
-  const handleDrag = (_: PointerEvent | MouseEvent | TouchEvent, info: PanInfo) => {
-    dragging.current = true;
-    const maxW = typeof window !== 'undefined' ? window.innerWidth : 1400;
-    const next = Math.min(maxW, Math.max(MIN_WIDTH, widthMV.get() + info.delta.x));
-    widthMV.set(next);
-  };
+  const onHandlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    e.currentTarget.setPointerCapture(e.pointerId);
+    setDragging(true);
+    draggingRef.current = true;
+    let lastClientX = e.clientX;
 
-  const handleDragEnd = () => {
-    dragging.current = false;
-    const w = widthMV.get();
-    const maxW = typeof window !== 'undefined' ? window.innerWidth : 1400;
-    const midCompactWide = (COMPACT_WIDTH + WIDE_WIDTH) / 2;
-    const midWideFull = (WIDE_WIDTH + maxW) / 2;
+    const onMove = (ev: PointerEvent) => {
+      if (!draggingRef.current) return;
+      const delta = ev.clientX - lastClientX;
+      lastClientX = ev.clientX;
+      const maxW = typeof window !== 'undefined' ? window.innerWidth : 1400;
+      const next = Math.min(maxW, Math.max(MIN_WIDTH, widthRef.current + delta));
+      widthRef.current = next;
+      setWidth(next);
+    };
 
-    const nextSize: SidebarSize =
-      w < midCompactWide ? 'compact' : w < midWideFull ? 'wide' : 'full';
+    const onUp = () => {
+      draggingRef.current = false;
+      setDragging(false);
+      const w = widthRef.current;
+      const maxW = typeof window !== 'undefined' ? window.innerWidth : 1400;
+      const midCompactWide = (COMPACT_WIDTH + WIDE_WIDTH) / 2;
+      const midWideFull = (WIDE_WIDTH + maxW) / 2;
+      const nextSize: SidebarSize =
+        w < midCompactWide ? 'compact' : w < midWideFull ? 'wide' : 'full';
+      onSizeChange?.(nextSize);
+      // Snap to the target — useEffect above runs on size change, but
+      // if size is unchanged we set manually so the transition plays.
+      const target = getTargetWidth(nextSize);
+      if (Math.abs(w - target) > 0.5) setWidth(target);
+      window.removeEventListener('pointermove', onMove);
+      window.removeEventListener('pointerup', onUp);
+    };
 
-    onSizeChange?.(nextSize);
-    // Re-snap exactly to the target (onSizeChange effect handles animation when state updates)
-    // But if the size is unchanged the effect won't fire — snap manually
-    const target = getTargetWidth(nextSize);
-    if (Math.abs(w - target) > 0.5) {
-      animate(widthMV, target, {
-        duration: reduceMotion ? 0 : 0.35,
-        ease: [0.32, 0.72, 0, 1],
-      });
-    }
+    window.addEventListener('pointermove', onMove);
+    window.addEventListener('pointerup', onUp);
   };
 
   const cycleSize = () => {
@@ -245,39 +255,34 @@ function DesktopSidebar({
   const cardVariant: 'compact' | 'expanded' = size === 'full' ? 'expanded' : 'compact';
 
   return (
-    <motion.aside
-      style={{ width: widthMV }}
-      className={`h-full flex overflow-hidden relative shadow-[8px_0_32px_-12px_rgba(15,23,42,0.18)] ${
+    <aside
+      style={{
+        width,
+        // Disable the width transition while the user is dragging so the
+        // pointer tracks 1:1; cubic-bezier mirrors the previous framer ease.
+        transition: dragging ? 'none' : 'width 0.42s cubic-bezier(0.32, 0.72, 0, 1)',
+      }}
+      className={`h-full flex overflow-hidden relative shadow-[8px_0_32px_-12px_rgba(15,23,42,0.18)] motion-reduce:!transition-none ${
         eveningMode
           ? 'bg-slate-900/80 backdrop-blur-xl border-r border-slate-700/40'
           : 'bg-white/85 backdrop-blur-xl border-r border-slate-200/60'
       }`}
     >
-      {/* Left: FilterPanel (only in wide/full) */}
-      <AnimatePresence initial={false}>
-        {showFilterPanel && (
-          <motion.div
-            key="filter-panel"
-            initial={reduceMotion ? undefined : { width: 0, opacity: 0 }}
-            animate={{ width: filterPanelWidth, opacity: 1 }}
-            exit={reduceMotion ? undefined : { width: 0, opacity: 0 }}
-            transition={{ duration: reduceMotion ? 0 : 0.32, ease: [0.32, 0.72, 0, 1] }}
-            className="shrink-0 overflow-hidden"
-          >
-            <div style={{ width: filterPanelWidth }} className="h-full">
-              <FilterPanel
-                filters={filters!}
-                onFiltersChange={onFiltersChange!}
-                bundesland={bundesland!}
-                onBundeslandChange={onBundeslandChange!}
-                events={allEventsForFilters ?? events}
-                eveningMode={eveningMode}
-                expanded={size === 'full'}
-              />
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {/* Left: FilterPanel column. Width + opacity transition replaces the
+          motion-lib AnimatePresence — when showFilterPanel flips to false
+          the column collapses to width 0 (CSS transition) and unmounts after
+          the same duration. */}
+      <FilterPanelColumn
+        show={!!showFilterPanel}
+        targetWidth={filterPanelWidth}
+        eveningMode={eveningMode}
+        filters={filters}
+        onFiltersChange={onFiltersChange}
+        bundesland={bundesland}
+        onBundeslandChange={onBundeslandChange}
+        events={allEventsForFilters ?? events}
+        expanded={size === 'full'}
+      />
 
       {/* Right: list column */}
       <div className="flex-1 min-w-0 flex flex-col">
@@ -313,7 +318,7 @@ function DesktopSidebar({
       </div>
 
       {/* Drag handle on right edge */}
-      <motion.div
+      <div
         role="separator"
         aria-orientation="vertical"
         aria-label="Seitenleiste vergrößern"
@@ -322,9 +327,8 @@ function DesktopSidebar({
           if (e.key === 'ArrowRight') { e.preventDefault(); cycleSize(); }
           else if (e.key === 'ArrowLeft') { e.preventDefault(); collapse(); }
         }}
-        onPan={handleDrag}
-        onPanEnd={handleDragEnd}
-        className={`absolute top-0 right-0 bottom-0 w-1.5 cursor-ew-resize group touch-none select-none focus-visible:outline-none`}
+        onPointerDown={onHandlePointerDown}
+        className="absolute top-0 right-0 bottom-0 w-1.5 cursor-ew-resize group touch-none select-none focus-visible:outline-none"
       >
         <div className={`absolute inset-y-0 right-0 w-px transition-colors ${
           eveningMode
@@ -334,8 +338,72 @@ function DesktopSidebar({
         <div className={`absolute top-1/2 right-0 -translate-y-1/2 h-10 w-1 rounded-l opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100 transition-opacity ${
           eveningMode ? 'bg-amber-400/80' : 'bg-blue-500/80'
         }`} />
-      </motion.div>
-    </motion.aside>
+      </div>
+    </aside>
+  );
+}
+
+/**
+ * FilterPanelColumn — wraps the FilterPanel in a width-animated div so
+ * it can collapse to 0 with a CSS transition when filters are hidden.
+ * Keeps the FilterPanel itself mounted briefly during the collapse so
+ * the inner content doesn't reflow on the way out.
+ */
+function FilterPanelColumn({
+  show,
+  targetWidth,
+  eveningMode,
+  filters,
+  onFiltersChange,
+  bundesland,
+  onBundeslandChange,
+  events,
+  expanded,
+}: {
+  show: boolean;
+  targetWidth: number;
+  eveningMode?: boolean;
+  filters?: EventFilters;
+  onFiltersChange?: (f: EventFilters) => void;
+  bundesland?: Bundesland;
+  onBundeslandChange?: (bl: Bundesland) => void;
+  events: Event[];
+  expanded: boolean;
+}) {
+  const [mounted, setMounted] = useState(show);
+  useEffect(() => {
+    if (show) {
+      setMounted(true);
+      return;
+    }
+    if (!mounted) return;
+    const t = window.setTimeout(() => setMounted(false), 320);
+    return () => window.clearTimeout(t);
+  }, [show, mounted]);
+  if (!mounted) return null;
+  const width = show ? targetWidth : 0;
+  return (
+    <div
+      style={{
+        width,
+        opacity: show ? 1 : 0,
+        transition:
+          'width 0.32s cubic-bezier(0.32, 0.72, 0, 1), opacity 0.32s cubic-bezier(0.32, 0.72, 0, 1)',
+      }}
+      className="shrink-0 overflow-hidden motion-reduce:!transition-none"
+    >
+      <div style={{ width: targetWidth }} className="h-full">
+        <FilterPanel
+          filters={filters!}
+          onFiltersChange={onFiltersChange!}
+          bundesland={bundesland!}
+          onBundeslandChange={onBundeslandChange!}
+          events={events}
+          eveningMode={eveningMode}
+          expanded={expanded}
+        />
+      </div>
+    </div>
   );
 }
 

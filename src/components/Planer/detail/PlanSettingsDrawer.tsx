@@ -3,7 +3,7 @@
 /**
  * Owner-only drawer for editing or deleting a plan.
  *
- * Opens from the right edge of the viewport via a framer-motion slide.
+ * Opens from the right edge of the viewport via a motion-lib slide.
  * Rendered through a portal to document.body so it escapes any ancestor
  * with a transform (same reason CreatePlanFlow uses a portal).
  *
@@ -20,7 +20,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { useRouter } from 'next/navigation';
-import { motion, AnimatePresence } from 'framer-motion';
 import type { User, SupabaseClient } from '@supabase/supabase-js';
 import { toast } from 'sonner';
 import { LocationAutocomplete } from '@/components/UI/LocationAutocomplete';
@@ -32,7 +31,10 @@ import {
   EditorialCaption,
   EditorialHeading,
 } from '../primitives';
-import { EASE_OUT_EXPO, springSheet } from '../motion';
+
+// fn-15.5: motion-lib AnimatePresence + spring slide replaced by
+// CSS `data-drawer-state` + `data-overlay-state` swap (globals.css).
+const EXIT_MS = 320;
 
 // ───────────────────────────────────────────────────────────────
 // Types
@@ -164,6 +166,18 @@ export function PlanSettingsDrawer({
   const [deleting, setDeleting] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [deleteConfirmText, setDeleteConfirmText] = useState('');
+  // fn-15.5: keep the drawer mounted long enough for its CSS slide-out
+  // keyframe to play before unmount, mirroring AnimatePresence.
+  const [mounted, setMounted] = useState(open);
+  useEffect(() => {
+    if (open) {
+      setMounted(true);
+      return;
+    }
+    if (!mounted) return;
+    const t = window.setTimeout(() => setMounted(false), EXIT_MS);
+    return () => window.clearTimeout(t);
+  }, [open, mounted]);
 
   // Reset the draft whenever we reopen, or when the backing plan object changes
   useEffect(() => {
@@ -306,30 +320,23 @@ export function PlanSettingsDrawer({
   };
 
   if (typeof document === 'undefined') return null;
+  if (!mounted) return null;
+
+  const state = open ? 'open' : 'closed';
 
   return createPortal(
-    <AnimatePresence>
-      {open && (
-        <>
-          {/* Backdrop */}
-          <motion.div
-            key="backdrop"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            className="fixed inset-0 z-[95] bg-black/60 backdrop-blur-sm"
-            onClick={onClose}
-          />
-          {/* Drawer panel — slides in from the right */}
-          <motion.aside
-            key="drawer"
-            initial={{ x: '100%' }}
-            animate={{ x: 0 }}
-            exit={{ x: '100%' }}
-            transition={springSheet}
-            className="fixed inset-y-0 right-0 z-[100] w-full sm:w-[460px] overflow-y-auto"
-          >
+    <>
+      {/* Backdrop */}
+      <div
+        className="fixed inset-0 z-[95] bg-black/60 backdrop-blur-sm"
+        onClick={onClose}
+        data-overlay-state={state}
+      />
+      {/* Drawer panel — slides in from the right */}
+      <aside
+        className="fixed inset-y-0 right-0 z-[100] w-full sm:w-[460px] overflow-y-auto"
+        data-drawer-state={state}
+      >
             <div className="planer-scope min-h-full" style={{ backgroundColor: 'var(--color-planer-surface)' }}>
               {/* Header */}
               <header className="sticky top-0 z-10 backdrop-blur-xl bg-[color:var(--color-planer-surface)]/90 border-b border-white/[0.05] px-6 py-5 flex items-start justify-between gap-3">
@@ -508,15 +515,8 @@ export function PlanSettingsDrawer({
                 </FormField>
 
                 {/* Friend picker for specific_users */}
-                <AnimatePresence>
-                  {draft.pinboardPermission === 'specific_users' && (
-                    <motion.div
-                      initial={{ opacity: 0, height: 0 }}
-                      animate={{ opacity: 1, height: 'auto' }}
-                      exit={{ opacity: 0, height: 0 }}
-                      transition={{ duration: 0.3, ease: EASE_OUT_EXPO }}
-                      className="overflow-hidden"
-                    >
+                {draft.pinboardPermission === 'specific_users' && (
+                  <div className="overflow-hidden animate-fade-in motion-reduce:animate-none">
                       <FormField label="Wer darf pinnen" hint="tap zum aus-/abwählen">
                         {invitedFriends.length === 0 ? (
                           <p className="text-xs italic text-[color:var(--color-planer-whisper)]">
@@ -556,9 +556,8 @@ export function PlanSettingsDrawer({
                       <p className="text-[10px] text-[color:var(--color-planer-whisper)] italic mt-2">
                         Du als Ersteller darfst sowieso immer.
                       </p>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
+                  </div>
+                )}
 
                 {/* Save actions */}
                 <div className="pt-4 flex items-center justify-end gap-3 border-t border-white/[0.05]">
@@ -698,10 +697,8 @@ export function PlanSettingsDrawer({
                 )}
               </div>
             </div>
-          </motion.aside>
-        </>
-      )}
-    </AnimatePresence>,
+          </aside>
+    </>,
     document.body,
   );
 }

@@ -21,32 +21,50 @@
  * map underneath becomes visible again instantly.
  */
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { motion, AnimatePresence } from 'framer-motion';
 
 interface EventSheetProps {
   children: React.ReactNode;
 }
 
+/**
+ * fn-15.5: motion-lib AnimatePresence replaced with a CSS-driven
+ * mount/unmount. The overlay enters with `animate-fade-in-up` and
+ * receives a `data-sheet-state="closed"` swap right before
+ * `router.back()` so it runs the matching slide-out keyframe before
+ * Next.js dismisses the parallel route.
+ *
+ * Background: framer's <AnimatePresence> here kept the modal alive for
+ * its exit transition; without it Next.js would dismiss instantly. To
+ * keep that polish, we manually orchestrate a 220ms exit + back() pair
+ * — same duration as the previous transition prop.
+ */
+const EXIT_DURATION_MS = 220;
+
 export function EventSheet({ children }: EventSheetProps) {
   const router = useRouter();
   const overlayRef = useRef<HTMLDivElement>(null);
   const closingRef = useRef(false);
+  // Tracks whether the exit-animation should be playing. Set to true on
+  // close() so the data-state attribute switches and the CSS keyframe
+  // runs the slide-out before back().
+  const [exiting, setExiting] = useState(false);
 
   const close = () => {
     if (closingRef.current) return;
     closingRef.current = true;
-    // router.back() is the only reliable way to dismiss an intercepting
-    // route. router.push('/map') changes the URL bar but Next.js doesn't
-    // always re-resolve the parallel `modal` slot to default.tsx — the
-    // modal stays visible. back() pops the URL off history, which the
-    // router treats as a proper modal-close event.
-    if (window.history.length > 1) {
-      router.back();
-    } else {
-      router.push('/map');
-    }
+    setExiting(true);
+    // Wait one paint for the CSS slide-out, then pop the URL. router.back()
+    // is the only reliable way to dismiss an intercepting route; push('/map')
+    // sometimes leaves the modal slot stuck on the intercepted URL.
+    window.setTimeout(() => {
+      if (window.history.length > 1) {
+        router.back();
+      } else {
+        router.push('/map');
+      }
+    }, EXIT_DURATION_MS);
   };
 
   // Escape to close
@@ -105,36 +123,31 @@ export function EventSheet({ children }: EventSheetProps) {
   }, []);
 
   return (
-    <AnimatePresence>
-      <motion.div
-        ref={overlayRef}
-        key="event-overlay"
-        role="dialog"
-        aria-modal="true"
-        aria-label="Event Details"
-        // z-[1100] sits above the mobile bottom-sheet sidebar (z-[1000]
-        // in src/app/map/page.tsx). Without this the sidebar list would
-        // stay rendered ON TOP of the event detail on mobile because
-        // map page's parallel `children` slot keeps mounting it. The
-        // user reported "anzeige der verschiedenen events bleibt im
-        // vordergrund" exactly because of this z-index inversion.
-        className="fixed inset-0 z-[1100] overflow-y-auto overscroll-contain"
-        style={{ background: '#0a0a0c' }}
-        initial={{ opacity: 0, y: 12 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: 12 }}
-        transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
-      >
-        {/* No floating close button — it would collide with the
-            EventDetailActions panel (save/share/AfterSavePanel) that
-            already lives top-right on the hero. The user has three
-            unambiguous ways to dismiss the overlay:
-              1. Breadcrumb back-arrow / "Karte" link top-left
-              2. Escape key
-              3. Browser back button (incl. mobile gesture)
-            All three end up in close() → router.back(). */}
-        {children}
-      </motion.div>
-    </AnimatePresence>
+    <div
+      ref={overlayRef}
+      key="event-overlay"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Event Details"
+      // z-[1100] sits above the mobile bottom-sheet sidebar (z-[1000]
+      // in src/app/map/page.tsx). Without this the sidebar list would
+      // stay rendered ON TOP of the event detail on mobile because
+      // map page's parallel `children` slot keeps mounting it. The
+      // user reported "anzeige der verschiedenen events bleibt im
+      // vordergrund" exactly because of this z-index inversion.
+      className="fixed inset-0 z-[1100] overflow-y-auto overscroll-contain"
+      style={{ background: '#0a0a0c' }}
+      data-sheet-state={exiting ? 'closed' : 'open'}
+    >
+      {/* No floating close button — it would collide with the
+          EventDetailActions panel (save/share/AfterSavePanel) that
+          already lives top-right on the hero. The user has three
+          unambiguous ways to dismiss the overlay:
+            1. Breadcrumb back-arrow / "Karte" link top-left
+            2. Escape key
+            3. Browser back button (incl. mobile gesture)
+          All three end up in close() → router.back(). */}
+      {children}
+    </div>
   );
 }

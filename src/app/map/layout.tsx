@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { AppShell } from '@/components/Layout/AppShell';
 
 export const metadata: Metadata = {
   title: 'Event-Karte Österreich — Alle Veranstaltungen auf einer Karte',
@@ -20,6 +21,16 @@ export const metadata: Metadata = {
   },
 };
 
+/**
+ * /map is the legacy map page; like /entdecken it has auth-aware UI
+ * (save-events, profile-pill) even though anonymous browsing is
+ * supported. Wraps in AppShell so logged-in users get the same
+ * AuthProvider + SavedEvents + bottom-nav experience as elsewhere.
+ * The bundle hit lives here (Mapbox + AuthProvider) not on `/`. The
+ * landing's "Karte zeigen" button now points at /entdecken instead
+ * of /map to keep Mapbox out of the landing prefetch chain.
+ * fn-15.5 (Bundle-Architektur).
+ */
 export default function MapLayout({ children }: { children: React.ReactNode }) {
-  return children;
+  return <AppShell hideSocialNav>{children}</AppShell>;
 }

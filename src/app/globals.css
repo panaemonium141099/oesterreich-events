@@ -1,6 +1,44 @@
 @import "tailwindcss";
 
 /* ═══════════════════════════════════════════════
+   View Transitions — fn-15.5 page-transition replacement
+   ───────────────────────────────────────────────
+   Replaces the motion-lib AnimatedLayout (~10 KB of motion + the
+   80 KB motion-lib runtime it dragged into every route). Same
+   0.25s opacity-and-rise fade as before, now CSS-only.
+
+   Browser support: Chromium-family (Edge, Chrome, Opera) and Safari
+   17+ honor view-transition-name; Firefox doesn't yet (tracked under
+   bug 1823896) and will simply jump-cut, which is the explicit
+   "Firefox: instant cut" fallback called out in the spec.
+
+   Reduced-motion: the @media (prefers-reduced-motion: reduce) block
+   zeros out the keyframes so users who opt out get instant cuts on
+   every browser.
+   ═══════════════════════════════════════════════ */
+::view-transition-old(route-root) {
+  animation: route-fade-out 200ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+::view-transition-new(route-root) {
+  animation: route-fade-in 250ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+@keyframes route-fade-out {
+  from { opacity: 1; transform: translateY(0); }
+  to   { opacity: 0; transform: translateY(-8px); }
+}
+@keyframes route-fade-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(route-root),
+  ::view-transition-new(route-root) {
+    animation: none;
+  }
+}
+
+
+/* ═══════════════════════════════════════════════
    Dark Theme Tokens — social pages canonical palette
    Tailwind v4 @theme generates bg-surface, bg-surface-elevated,
    bg-surface-inset utilities automatically.
@@ -183,6 +221,231 @@ body {
 /* ═══════════════════════════════════════════════
    Animation Utility Classes
    ═══════════════════════════════════════════════ */
+/* fn-15.5: hero-zoom-out — replaces the motion-lib 1.08 → 1 hero
+   image scale-in used on the plan-detail hero. Pure CSS. */
+@keyframes hero-zoom-out {
+  from { transform: scale(1.08); }
+  to   { transform: scale(1); }
+}
+
+/* fn-15.5: postit-mount — replaces the framer initial={{opacity:0,scale:0.85}}
+   on PostitNote. The note element composes this animation with its own
+   inline transform (drag offset + rotation + hover-scale), so we keep
+   the keyframe scale-only and let the inline transform handle position. */
+@keyframes postit-mount {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  [style*='hero-zoom-out'] { animation: none !important; transform: none; }
+}
+
+/* fn-15.5: section-entry helper — used by Landing sections that previously
+   relied on motion-lib's whileInView. Mounts the section in its final
+   position and runs a short opacity+rise on first paint. Pure CSS so it
+   ships zero JS to the client. */
+.animate-section-in {
+  animation: fadeInUp 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* fn-15.5: card-hover lift — replaces motion.div `whileHover={{ y: -4 }}`.
+   Pairs with the existing button:active scale via the global `:active`
+   rule on every interactive element. */
+.lift-on-hover {
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.lift-on-hover:hover {
+  transform: translateY(-4px);
+}
+@media (prefers-reduced-motion: reduce) {
+  .lift-on-hover { transition: none; }
+  .lift-on-hover:hover { transform: none; }
+}
+
+/* fn-15.5: bottom-sheet slide-in — replaces motion.div initial={{y:'100%'}}.
+   data-state="open"/"closed" attribute swap drives the keyframe selection.
+   Closed sheets keep `pointer-events: none` to stop them eating taps as
+   they exit. */
+@keyframes sheet-slide-in {
+  from { transform: translate3d(0, 100%, 0); }
+  to   { transform: translate3d(0, 0, 0); }
+}
+@keyframes sheet-slide-out {
+  from { transform: translate3d(0, 0, 0); }
+  to   { transform: translate3d(0, 100%, 0); }
+}
+[data-sheet-state='open'] {
+  animation: sheet-slide-in 0.32s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+[data-sheet-state='closed'] {
+  animation: sheet-slide-out 0.22s cubic-bezier(0.7, 0, 0.84, 0) both;
+  pointer-events: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-sheet-state='open'],
+  [data-sheet-state='closed'] {
+    animation: none;
+  }
+}
+
+/* fn-15.5: overlay-fade — companion of [data-sheet-state] for the dark
+   backdrop behind a bottom sheet. */
+@keyframes overlay-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes overlay-fade-out {
+  from { opacity: 1; }
+  to   { opacity: 0; }
+}
+[data-overlay-state='open'] {
+  animation: overlay-fade-in 0.22s ease-out both;
+}
+[data-overlay-state='closed'] {
+  animation: overlay-fade-out 0.18s ease-in both;
+  pointer-events: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-overlay-state='open'],
+  [data-overlay-state='closed'] {
+    animation: none;
+  }
+}
+
+/* fn-15.5: after-save-panel — fade + opacity transition replacing the
+   motion-lib height-collapse. The grid-rows trick animates from
+   0fr → 1fr so the panel's natural height drives the collapse without
+   knowing it in advance. */
+@keyframes after-save-open {
+  from { opacity: 0; grid-template-rows: 0fr; }
+  to   { opacity: 1; grid-template-rows: 1fr; }
+}
+@keyframes after-save-close {
+  from { opacity: 1; grid-template-rows: 1fr; }
+  to   { opacity: 0; grid-template-rows: 0fr; }
+}
+[data-after-save-state] {
+  display: grid;
+  grid-template-rows: 1fr;
+}
+[data-after-save-state] > * {
+  min-height: 0;
+}
+[data-after-save-state='open'] {
+  animation: after-save-open 0.2s ease-out both;
+}
+[data-after-save-state='closed'] {
+  animation: after-save-close 0.2s ease-in both;
+  pointer-events: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-after-save-state='open'],
+  [data-after-save-state='closed'] {
+    animation: none;
+  }
+}
+
+/* fn-15.5: scale-pop — heart-tap / double-tap-heart, share-ripple,
+   modal-confirmation. data-state="open" mounts the element with the
+   scale-in keyframe; data-state="closed" runs the scale-out before
+   unmount (component sets a setTimeout matching the duration). */
+@keyframes scale-pop-in {
+  0%   { transform: scale(0); opacity: 0; }
+  60%  { transform: scale(1.18); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+@keyframes scale-pop-out {
+  from { transform: scale(1); opacity: 1; }
+  to   { transform: scale(1.3); opacity: 0; }
+}
+[data-scale-pop='open'] {
+  animation: scale-pop-in 0.3s cubic-bezier(0.17, 0.67, 0.21, 0.99) both;
+}
+[data-scale-pop='closed'] {
+  animation: scale-pop-out 0.25s cubic-bezier(0.7, 0, 0.84, 0) both;
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-scale-pop='open'],
+  [data-scale-pop='closed'] {
+    animation: none;
+  }
+}
+
+/* fn-15.5: slide-from-right drawer — replaces motion-lib drawer for
+   plan-settings, mobile filter drawer. */
+@keyframes drawer-slide-in-right {
+  from { transform: translate3d(100%, 0, 0); }
+  to   { transform: translate3d(0, 0, 0); }
+}
+@keyframes drawer-slide-out-right {
+  from { transform: translate3d(0, 0, 0); }
+  to   { transform: translate3d(100%, 0, 0); }
+}
+[data-drawer-state='open'] {
+  animation: drawer-slide-in-right 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+[data-drawer-state='closed'] {
+  animation: drawer-slide-out-right 0.22s cubic-bezier(0.7, 0, 0.84, 0) both;
+  pointer-events: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-drawer-state='open'],
+  [data-drawer-state='closed'] {
+    animation: none;
+  }
+}
+
+/* fn-15.5: toast slide-in-right — NotificationToast / share-toasts. */
+@keyframes toast-slide-in {
+  from { opacity: 0; transform: translate3d(100%, 0, 0) scale(0.95); }
+  to   { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
+}
+@keyframes toast-slide-out {
+  from { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
+  to   { opacity: 0; transform: translate3d(100%, 0, 0) scale(0.95); }
+}
+[data-toast-state='open'] {
+  animation: toast-slide-in 0.28s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+[data-toast-state='closed'] {
+  animation: toast-slide-out 0.2s cubic-bezier(0.7, 0, 0.84, 0) both;
+  pointer-events: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-toast-state='open'],
+  [data-toast-state='closed'] {
+    animation: none;
+  }
+}
+
+/* fn-15.5: stagger-children helper — paint each direct child of a
+   `.stagger-children` container with a 60ms delay step. Used on
+   landing carousel rows so they cascade in like the motion-lib
+   stagger did. */
+.stagger-children > * {
+  opacity: 0;
+  animation: fadeInUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+.stagger-children > *:nth-child(1)  { animation-delay: 0ms;   }
+.stagger-children > *:nth-child(2)  { animation-delay: 60ms;  }
+.stagger-children > *:nth-child(3)  { animation-delay: 120ms; }
+.stagger-children > *:nth-child(4)  { animation-delay: 180ms; }
+.stagger-children > *:nth-child(5)  { animation-delay: 240ms; }
+.stagger-children > *:nth-child(6)  { animation-delay: 300ms; }
+.stagger-children > *:nth-child(7)  { animation-delay: 360ms; }
+.stagger-children > *:nth-child(8)  { animation-delay: 420ms; }
+.stagger-children > *:nth-child(9)  { animation-delay: 480ms; }
+.stagger-children > *:nth-child(10) { animation-delay: 540ms; }
+.stagger-children > *:nth-child(11) { animation-delay: 600ms; }
+.stagger-children > *:nth-child(12) { animation-delay: 660ms; }
+@media (prefers-reduced-motion: reduce) {
+  .stagger-children > * {
+    opacity: 1;
+    animation: none;
+  }
+}
+
 .animate-fade-in-up {
   animation: fadeInUp 0.4s ease-out both;
 }
@@ -310,6 +573,12 @@ body {
 
 .animate-heart-pop {
   animation: heartPop 0.25s ease-out both;
+}
+
+/* fn-15.5: small scale-pop utility — used when a check-mark / chip /
+   selected-state needs a friendly 0→1 bounce. */
+.animate-scale-pop {
+  animation: heartPop 0.3s cubic-bezier(0.17, 0.67, 0.21, 0.99);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -1238,7 +1507,7 @@ button:active, a:active, [role="button"]:active {
 
 
 /* MapV3 (Variante A · Airbnb-clean) — view-switch fade.
-   Plain CSS animations because framer-motion AnimatePresence kept
+   Plain CSS animations because motion-lib AnimatePresence kept
    exited views in DOM with opacity:0 (verified bug). */
 @keyframes mv3-fade-in {
   from { opacity: 0; }

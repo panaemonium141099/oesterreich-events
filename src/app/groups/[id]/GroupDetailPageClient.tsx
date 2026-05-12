@@ -24,7 +24,6 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
-import { motion } from 'framer-motion';
 import { useAuth } from '@/lib/supabase/auth-context';
 import { createClient } from '@/lib/supabase/client';
 import { EventPreviewMessage } from '@/components/Chat/EventPreviewMessage';
@@ -41,7 +40,12 @@ import {
 } from '@/components/Planer/primitives';
 import { Pinboard } from '@/components/Planer/detail/Pinboard';
 import { PlanSettingsDrawer } from '@/components/Planer/detail/PlanSettingsDrawer';
-import { staggerContainer, riseItem, EASE_OUT_EXPO } from '@/components/Planer/motion';
+
+// fn-15.5: motion-lib staggerContainer/riseItem/EASE_OUT_EXPO replaced
+// with the global `.stagger-children` CSS helper and plain divs. The
+// EASE_OUT_EXPO that drove individual transitions migrates to inline
+// `animationDelay` / `transitionTimingFunction` values; the rough shape
+// of each entrance is preserved (~600-800ms fade-up).
 
 // ──────────────────────────────────────────────────
 // Types — unchanged from previous
@@ -671,24 +675,21 @@ export function GroupDetailPageClient() {
   return (
     <PlanerShell spotlight={false} grain={false}>
       {/* ══════════ HERO BANNER ══════════ */}
-      <motion.section
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.8, ease: EASE_OUT_EXPO }}
-        className="relative overflow-hidden"
-        style={{ minHeight: '360px' }}
+      <section
+        className="relative overflow-hidden animate-fade-in motion-reduce:animate-none"
+        style={{ minHeight: '360px', animationDuration: '800ms' }}
       >
         {/* Background image or map */}
         {heroImage ? (
-          <motion.div
-            initial={{ scale: 1.08 }}
-            animate={{ scale: 1 }}
-            transition={{ duration: 2, ease: EASE_OUT_EXPO }}
-            className="absolute inset-0"
+          <div
+            className="absolute inset-0 motion-reduce:!animate-none"
+            style={{
+              animation: 'hero-zoom-out 2s cubic-bezier(0.19, 1, 0.22, 1) both',
+            }}
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={heroImage} alt="" className="w-full h-full object-cover" />
-          </motion.div>
+          </div>
         ) : (
           <div
             className="absolute inset-0"
@@ -780,26 +781,22 @@ export function GroupDetailPageClient() {
           </div>
         </div>
 
-        {/* Hero content — bottom-left anchored */}
-        <div className="relative z-10 max-w-6xl mx-auto px-5 sm:px-8 pt-16 pb-10 sm:pt-24 sm:pb-14 flex flex-col gap-4">
+        {/* Hero content — bottom-left anchored. fn-15.5 stagger via CSS. */}
+        <div className="relative z-10 max-w-6xl mx-auto px-5 sm:px-8 pt-16 pb-10 sm:pt-24 sm:pb-14 flex flex-col gap-4 stagger-children">
           {/* Type badge */}
-          <motion.div variants={riseItem} initial="hidden" animate="visible">
+          <div>
             <EditorialCaption>
               {group.event_type === 'existing_event' ? 'Öffentliches Event' : 'Privater Plan'}
             </EditorialCaption>
-          </motion.div>
+          </div>
 
-          <motion.div variants={riseItem} initial="hidden" animate="visible" transition={{ delay: 0.1 }}>
+          <div>
             <EditorialHeading size="hero" className="drop-shadow-lg max-w-3xl">
               {group.name}
             </EditorialHeading>
-          </motion.div>
+          </div>
 
-          <motion.div
-            variants={riseItem}
-            initial="hidden"
-            animate="visible"
-            transition={{ delay: 0.2 }}
+          <div
             className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-[color:var(--color-planer-ink)]/85"
           >
             {group.event_date && (
@@ -821,15 +818,11 @@ export function GroupDetailPageClient() {
                 {group.location_name}
               </button>
             )}
-          </motion.div>
+          </div>
 
           {/* RSVP buttons — only for invitees, not the owner */}
           {myMembership && !isOwner && (
-            <motion.div
-              variants={riseItem}
-              initial="hidden"
-              animate="visible"
-              transition={{ delay: 0.3 }}
+            <div
               className="mt-4 flex flex-wrap gap-2"
             >
               {(
@@ -855,10 +848,10 @@ export function GroupDetailPageClient() {
                   </button>
                 );
               })}
-            </motion.div>
+            </div>
           )}
         </div>
-      </motion.section>
+      </section>
 
       {/* ══════════ MAIN ══════════ */}
       <main className="relative max-w-6xl mx-auto px-5 sm:px-8 py-10 pb-32">
@@ -875,14 +868,11 @@ export function GroupDetailPageClient() {
           formatRelative={formatRelativeTime}
         />
 
-        <motion.div
-          variants={staggerContainer}
-          initial="hidden"
-          animate="visible"
-          className="grid grid-cols-1 md:grid-cols-[1fr_1.6fr_1fr] gap-5 mt-8"
+        <div
+          className="grid grid-cols-1 md:grid-cols-[1fr_1.6fr_1fr] gap-5 mt-8 stagger-children"
         >
           {/* ─── LEFT — Participants panel ─── */}
-          <motion.div variants={riseItem} className="rounded-2xl bg-[color:var(--color-planer-surface)] border border-white/[0.05] p-5 flex flex-col min-h-[420px]">
+          <div className="rounded-2xl bg-[color:var(--color-planer-surface)] border border-white/[0.05] p-5 flex flex-col min-h-[420px]">
             <div className="flex items-center justify-between mb-4">
               <EditorialCaption>Wer dabei ist</EditorialCaption>
               <span className="text-[10px] tabular text-[color:var(--color-planer-whisper)]">{String(members.length).padStart(2, '0')}</span>
@@ -931,10 +921,10 @@ export function GroupDetailPageClient() {
                 </div>
               )}
             </div>
-          </motion.div>
+          </div>
 
           {/* ─── CENTER — Chat ─── */}
-          <motion.div variants={riseItem} className="rounded-2xl bg-[color:var(--color-planer-surface)] border border-white/[0.05] flex flex-col min-h-[520px] max-h-[620px]">
+          <div className="rounded-2xl bg-[color:var(--color-planer-surface)] border border-white/[0.05] flex flex-col min-h-[520px] max-h-[620px]">
             <div className="flex items-center justify-between px-5 py-3.5 border-b border-white/[0.05]">
               <EditorialCaption>Gruppen-Chat</EditorialCaption>
               <button
@@ -1017,10 +1007,10 @@ export function GroupDetailPageClient() {
                 </svg>
               </button>
             </div>
-          </motion.div>
+          </div>
 
           {/* ─── RIGHT — Contributions ─── */}
-          <motion.div variants={riseItem} className="rounded-2xl bg-[color:var(--color-planer-surface)] border border-white/[0.05] p-5 flex flex-col min-h-[420px]">
+          <div className="rounded-2xl bg-[color:var(--color-planer-surface)] border border-white/[0.05] p-5 flex flex-col min-h-[420px]">
             <div className="flex items-center justify-between mb-4">
               <EditorialCaption>Wer bringt was</EditorialCaption>
               <span className="text-[10px] tabular text-[color:var(--color-planer-whisper)]">{String(contributions.length).padStart(2, '0')}</span>
@@ -1078,8 +1068,8 @@ export function GroupDetailPageClient() {
                 </svg>
               </button>
             </div>
-          </motion.div>
-        </motion.div>
+          </div>
+        </div>
 
         {/* ══════════ PINBOARD ══════════ */}
         {/* ══════════ CHRONIK ══════════ */}
@@ -1261,11 +1251,8 @@ function MemoriesSection({
       </div>
 
       {creatingMemory && (
-        <motion.div
-          initial={{ opacity: 0, y: -8 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -8 }}
-          className="mb-3 p-3 rounded-2xl bg-[color:var(--color-planer-surface)] border border-white/[0.06] flex items-center gap-3"
+        <div
+          className="mb-3 p-3 rounded-2xl bg-[color:var(--color-planer-surface)] border border-white/[0.06] flex items-center gap-3 animate-fade-in-up motion-reduce:animate-none"
         >
           <input
             type="text"
@@ -1293,7 +1280,7 @@ function MemoriesSection({
           >
             Anlegen
           </PlanerButton>
-        </motion.div>
+        </div>
       )}
 
       {/* Horizontal strip — always renders so the "Kein Album"-Tile is a
