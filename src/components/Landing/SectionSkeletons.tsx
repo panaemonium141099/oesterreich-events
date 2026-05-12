@@ -80,13 +80,17 @@ export function WeeklyHighlightsSkeleton() {
   return (
     <section className="w-full py-8" aria-hidden="true">
       {/* Same header layout as the loaded WeeklyHighlights so the
-          subtitle + h2 paint in the exact same spot. */}
+          subtitle + h2 paint in the exact same spot. The h2 has the
+          identical min-h-* values so the geolocation-driven label
+          swap ("diese Woche" → "in deiner Nähe") cannot wrap the
+          heading and shift the carousel down on narrow viewports.
+          Codex CLS-review (fn-15.2 round 2). */}
       <div className="flex items-center justify-between mb-5 px-1">
         <div>
           <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-white/30 mb-1">
             Empfohlen für dich
           </p>
-          <h2 className="text-white font-bold text-xl md:text-2xl">
+          <h2 className="text-white font-bold text-xl md:text-2xl min-h-[2rem] md:min-h-[2.25rem]">
             Top Events diese Woche
           </h2>
         </div>

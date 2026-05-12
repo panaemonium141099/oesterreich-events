@@ -175,7 +175,17 @@ export function WeeklyHighlights() {
           <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-white/30 mb-1">
             Empfohlen für dich
           </p>
-          <h2 className="text-white font-bold text-xl md:text-2xl">{label}</h2>
+          {/*
+            Reserve a fixed visual line for the heading so the
+            "Top Events diese Woche" → "Top Events in deiner Nähe" label
+            swap (after async geolocation, see useEffect above) cannot
+            re-wrap the heading and push the carousel down on narrow
+            viewports. min-h-[2rem] on mobile (text-xl line-height) and
+            min-h-[2.25rem] on md+ (text-2xl line-height) covers both
+            label widths within a single line at typical mobile widths.
+            Codex CLS-review (fn-15.2 round 2).
+          */}
+          <h2 className="text-white font-bold text-xl md:text-2xl min-h-[2rem] md:min-h-[2.25rem]">{label}</h2>
         </div>
         <Link
           href="/map"
@@ -199,7 +209,17 @@ export function WeeklyHighlights() {
         {loading
           ? Array.from({ length: 5 }).map((_, i) => <SkeletonCard key={i} />)
           : events.length === 0
-          ? <p className="text-white/35 text-sm py-8 px-1">Keine Highlights verfügbar</p>
+          ? (
+            // Reserve the same vertical footprint as the loaded carousel
+            // so the empty/error path doesn't collapse the section and
+            // re-introduce CLS (the original PSI-flagged shift driver).
+            // Height matches SkeletonCard: 100px image-aspect-ish + 100px
+            // content footer + ~12px paddings ≈ 232px. Use the actual
+            // skeleton-card width so the empty-state spans the carousel.
+            <div className="flex-none w-44 sm:w-48 h-[232px] flex items-center justify-center px-3 text-center">
+              <p className="text-white/35 text-sm">Keine Highlights verfügbar</p>
+            </div>
+          )
           : events.map((event, i) => <HighlightCard key={event.id} event={event} index={i} />)}
 
         {!loading && events.length > 0 && (
