@@ -213,11 +213,13 @@ export function WeeklyHighlights() {
             // Reserve the EXACT same outer-box dimensions as the loaded
             // carousel cards so the empty/error path doesn't collapse the
             // section either vertically OR horizontally (the original
-            // PSI-flagged shift driver). w-60 matches SkeletonCard +
-            // HighlightCard; h-[232px] matches the card footprint
-            // (image area + 100px content footer + paddings).
-            // Codex CLS-review (fn-15.2 round 3).
-            <div className="flex-none w-60 h-[232px] flex items-center justify-center px-3 text-center">
+            // PSI-flagged shift driver). Dimensions match HighlightCard +
+            // SkeletonCard precisely:
+            //   - w-60 (240px) — card width
+            //   - h-[260px] = h-40 image (160px) + h-[100px] content
+            // Codex CLS-review (fn-15.2 round 3, second pass — earlier
+            // h-[232px] was off by 28px which still re-introduced CLS).
+            <div className="flex-none w-60 h-[260px] flex items-center justify-center px-3 text-center rounded-2xl border border-white/8">
               <p className="text-white/35 text-sm">Keine Highlights verfügbar</p>
             </div>
           )

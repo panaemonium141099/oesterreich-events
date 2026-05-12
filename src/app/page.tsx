@@ -43,7 +43,7 @@ export default async function LandingPage({
     // height at SSR — no dynamic pushing.
     <div
       id="landing-curtain"
-      className="min-h-screen text-white flex flex-col items-center relative overflow-hidden gradient-mesh"
+      className="min-h-screen text-white flex flex-col items-center relative overflow-hidden gradient-mesh gradient-mesh-animated"
     >
       {/* Auth-Redirect läuft async unter Suspense — blockiert die statische
           Landing-Hülle nicht. Logged-in User kriegen einen Streaming-Redirect

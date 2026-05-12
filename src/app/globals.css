@@ -899,17 +899,34 @@ button:active, a:active, [role="button"]:active {
    The host element keeps the solid-black backdrop so the page never
    shows white during the transition.
    ═══════════════════════════════════════════════ */
+/* Shared mesh utility — static gradient painted directly as
+   background-image. No pseudo-element, no stacking-context-creating
+   `isolation: isolate`, so fixed-position children on consumer pages
+   (e.g. CalendarPageClient's selectedEvent modal `fixed inset-0 z-50`)
+   can still out-stack global app chrome via portal-or-z-index escapes.
+   Codex CLS-review (fn-15.2 round 3). */
 .gradient-mesh {
   position: relative;
-  background: #000;
+  background-color: #000;
+  background-image:
+    radial-gradient(at 20% 80%, rgba(99, 102, 241, 0.08) 0px, transparent 50%),
+    radial-gradient(at 80% 20%, rgba(168, 85, 247, 0.06) 0px, transparent 50%),
+    radial-gradient(at 50% 50%, rgba(59, 130, 246, 0.04) 0px, transparent 50%);
+}
+
+/* Landing-specific mesh — adds the animated translate3d pseudo-element.
+   Stack the class onto `<div class="gradient-mesh gradient-mesh-animated">`
+   on `/` (src/app/page.tsx) only. The ::before lives in a clipped
+   stacking context, so the animation doesn't affect layout outside the
+   landing wrapper. */
+.gradient-mesh-animated {
   isolation: isolate; /* keep the ::before painted below children */
-  /* Clip the oversized ::before (inset:-25%) so non-landing pages that
-     reuse this class (CalendarPageClient, SpotifyMatchesPageClient) do
-     not get horizontal/vertical viewport jitter from the pseudo-element
-     extending past the container. Codex CLS-review (fn-15.2 round 3). */
+  /* Clip the oversized ::before (inset:-25%) so the pseudo-element
+     can't cause horizontal/vertical viewport jitter even on transient
+     reflows. */
   overflow: clip;
 }
-.gradient-mesh::before {
+.gradient-mesh-animated::before {
   content: '';
   position: absolute;
   /* Oversize so a small translate doesn't expose the edges. The mesh
@@ -928,13 +945,20 @@ button:active, a:active, [role="button"]:active {
   transform: translate3d(0, 0, 0);
   animation: meshShift 15s ease-in-out infinite alternate;
 }
+/* When .gradient-mesh-animated is used, replace the static background
+   gradient on .gradient-mesh with just the black fill — the animated
+   ::before provides the gradient layers. Prevents double-painting. */
+.gradient-mesh-animated.gradient-mesh,
+.gradient-mesh.gradient-mesh-animated {
+  background-image: none;
+}
 @keyframes meshShift {
   /* compositor-only: only `transform` changes between keyframes. */
   0%   { transform: translate3d(0%, 0%, 0); }
   100% { transform: translate3d(-12%, -10%, 0); }
 }
 @media (prefers-reduced-motion: reduce) {
-  .gradient-mesh::before { animation: none; transform: translate3d(0, 0, 0); }
+  .gradient-mesh-animated::before { animation: none; transform: translate3d(0, 0, 0); }
 }
 
 /* ═══════════════════════════════════════════════
