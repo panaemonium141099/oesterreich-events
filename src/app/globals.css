@@ -90,16 +90,11 @@ body.has-modal-open [data-social-nav] {
   display: none !important;
 }
 
-/* fn-15.5 round-2: route-scoped hide of the bottom social-nav. Used by
-   the plan-detail route (`/groups/[id]/layout.tsx`) whose chrome has
-   its own bottom CTA. Nesting an extra <AppShell> there would create a
-   double provider tree, so we leave the parent shell intact and toggle
-   a body-level attribute on mount/unmount. body-level so the selector
-   can reach the bottom-nav even though it lives in a sibling React
-   subtree relative to the page content. */
-body[data-hide-social-nav='true'] [data-social-nav] {
-  display: none !important;
-}
+/* fn-15.5 round-3 (codex): the `[data-hide-social-nav]` body-attribute
+   approach (round 2) was client-only — slow devices flashed the nav
+   for a few frames after SSR. The selective hide lives inline now in
+   /groups/[id]/layout.tsx via a server-rendered <style> tag, so no
+   global rule is needed and there is no hydration flash. */
 
 /* ═══════════════════════════════════════════════
    Remove browser default focus outlines — use custom

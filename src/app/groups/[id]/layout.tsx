@@ -1,25 +1,32 @@
-'use client';
-
 /**
  * /groups/[id] — authenticated plan detail.
  *
- * fn-15.5 (round-2 codex fix): the parent `/groups/layout.tsx` already
- * mounts <AppShell>, so this layout MUST NOT wrap in another AppShell
- * (would create a double provider tree). Instead, it toggles a
- * `data-hide-social-nav` attribute on the document body for the
- * duration of the route — the global CSS rule
- * `body[data-hide-social-nav] [data-social-nav] { display: none }`
- * (in globals.css) hides the bottom-nav that the parent AppShell
- * renders as a sibling of `children`. A pure-CSS class on `children`
- * couldn't reach a sibling/ancestor; the body-attribute approach can.
+ * fn-15.5 (round-3 codex fix): hides the bottom social-nav rendered by
+ * the parent `/groups/layout.tsx`'s <AppShell>. We can't nest a second
+ * <AppShell> (codex round-1 finding: double provider tree), and a
+ * client-only useEffect (round-2 attempt) hid the nav only after
+ * hydration — slow devices flashed the wrong UI and the fixed nav
+ * could intercept taps before JS arrived.
+ *
+ * This layout is a server component now: it ships a tiny inline
+ * `<style>` tag in the SSR HTML that hides any `[data-social-nav]`
+ * sibling. When the user navigates away, this segment unmounts and the
+ * style tag goes with it — no body-attribute cleanup, no hydration
+ * flash, no double provider tree.
  */
 
-import { useEffect } from 'react';
-
 export default function GroupDetailLayout({ children }: { children: React.ReactNode }) {
-  useEffect(() => {
-    document.body.setAttribute('data-hide-social-nav', 'true');
-    return () => { document.body.removeAttribute('data-hide-social-nav'); };
-  }, []);
-  return <>{children}</>;
+  return (
+    <>
+      <style
+        // The selector targets ANY [data-social-nav] in the document,
+        // not just descendants of this layout — the parent's <SocialNav>
+        // lives in a sibling slot.
+        dangerouslySetInnerHTML={{
+          __html: '[data-social-nav]{display:none!important}',
+        }}
+      />
+      {children}
+    </>
+  );
 }

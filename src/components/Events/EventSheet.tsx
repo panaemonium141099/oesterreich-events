@@ -95,11 +95,13 @@ export function EventSheet({ children }: EventSheetProps) {
   // intercepted page (parallel-route quirk in Next.js — see
   // github.com/vercel/next.js/issues/53037 and friends).
   //
-  // Fix: catch all map-bound link clicks on the overlay's capture phase
-  // and route them through close() → router.back(). Browser-back is the
-  // navigation gesture Next.js handles cleanly for parallel-route
-  // dismissal. Other links (/thema/, /events/other, etc.) bubble
-  // through unchanged.
+  // fn-15.5 round-3 (codex): the previous "always router.back()" treated
+  // the bundesland chip (/map?bundesland=...) the same as the bare
+  // breadcrumb (/map). That's wrong — the chip is a deep-link, not a
+  // dismissal. Fix: discriminate by exact href. Bare `/map` is the
+  // breadcrumb → close (back()). Anything with a query/hash is a real
+  // deep link → close FIRST so the modal exit animation plays, then
+  // push to that URL.
   useEffect(() => {
     const node = overlayRef.current;
     if (!node) return;
@@ -109,12 +111,25 @@ export function EventSheet({ children }: EventSheetProps) {
       const link = (e.target as HTMLElement | null)?.closest?.('a');
       if (!link) return;
       const href = link.getAttribute('href') ?? '';
-      // Strict prefix check — must be the literal /map path so a future
-      // /map-something route doesn't get accidentally swallowed.
-      if (href === '/map' || href.startsWith('/map?') || href.startsWith('/map#')) {
-        e.preventDefault();
-        e.stopPropagation();
+      // Only handle /map links — other routes (/thema/, /events/...) bubble
+      // through unchanged so Next.js handles them normally.
+      const isMapLink =
+        href === '/map' || href.startsWith('/map?') || href.startsWith('/map#');
+      if (!isMapLink) return;
+      e.preventDefault();
+      e.stopPropagation();
+      if (href === '/map') {
+        // Bare breadcrumb — dismiss the sheet via back().
         close();
+      } else {
+        // Deep link (bundesland chip etc.) — navigate to the target so
+        // the user lands on the filtered map. router.push leaves the
+        // sheet showing for one frame; that's acceptable for a forward
+        // navigation, and the parallel-route slot resolves to null on
+        // the new URL because /map matches no intercepting segment.
+        closingRef.current = true;
+        setExiting(true);
+        window.setTimeout(() => router.push(href), EXIT_DURATION_MS);
       }
     };
     node.addEventListener('click', onClick, true); // capture phase
