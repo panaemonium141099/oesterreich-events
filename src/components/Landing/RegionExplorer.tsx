@@ -3,7 +3,11 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
-import Image from 'next/image';
+import { EventImage } from '@/components/Events/EventImage';
+
+// Region tiles are 2-col on mobile (≈50vw) / 3-col on sm+ (≈33vw). The
+// tile aspect is 4:3 so width drives the actual fetched size.
+const REGION_TILE_SIZES = '(max-width: 640px) 50vw, 33vw';
 
 interface Region {
   name: string;
@@ -126,12 +130,16 @@ export function RegionExplorer() {
                 variants={{ hover: { scale: 1.07 } }}
                 transition={{ duration: 0.5, ease: 'easeOut' }}
               >
-                <Image
+                {/* RegionExplorer sits below the WeeklyHighlights fold,
+                    so all 9 tiles are lazy by default. No preload, no
+                    fetchPriority="high". */}
+                <EventImage
                   src={region.image}
                   alt={region.name}
+                  sizes={REGION_TILE_SIZES}
                   fill
-                  className="object-cover"
-                  sizes="(max-width: 640px) 50vw, 33vw"
+                  wrapperClassName="absolute inset-0"
+                  loading="lazy"
                 />
               </motion.div>
 

@@ -98,7 +98,7 @@ export function EventSearchInline({ onSelectEvent, onClose }: EventSearchInlineP
                   src={evt.image_url}
                   category={evt.category}
                   title={evt.title}
-                  className="w-full h-full"
+                  sizes="40px"
                   wrapperClassName="w-10 h-10 rounded-lg shrink-0 bg-white/[0.06]"
                   showSkeleton={false}
                   loading="lazy"

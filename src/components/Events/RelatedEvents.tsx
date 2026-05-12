@@ -83,7 +83,8 @@ export function RelatedEvents({ eventId }: { eventId: string }) {
                     src={event.image_url}
                     category={event.category}
                     title={event.title}
-                    className="w-full h-full group-hover:scale-105 transition-transform duration-300"
+                    sizes="(max-width: 640px) 50vw, 33vw"
+                    className="group-hover:scale-105 transition-transform duration-300"
                     wrapperClassName="h-32"
                     showSkeleton={false}
                     loading="lazy"

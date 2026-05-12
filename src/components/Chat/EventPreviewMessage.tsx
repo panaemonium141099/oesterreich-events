@@ -79,7 +79,7 @@ export function EventPreviewMessage({ eventId, isMe }: EventPreviewMessageProps)
         src={event.image_url}
         category={event.category}
         title={event.title}
-        className="w-full h-full"
+        sizes="256px"
         wrapperClassName="w-full h-28"
         showSkeleton={false}
         loading="lazy"

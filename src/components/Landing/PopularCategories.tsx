@@ -2,10 +2,14 @@
 
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import Image from 'next/image';
 import Link from 'next/link';
 import { CATEGORIES } from '@/lib/categories';
 import { getCategorySlug } from '@/lib/landing-slugs';
+import { EventImage } from '@/components/Events/EventImage';
+
+// Category tiles render 2-col on mobile, 3-col on sm+, 4-col on lg+.
+// Match those breakpoints so next/image picks tile-sized srcset entries.
+const CATEGORY_TILE_SIZES = '(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw';
 
 // Unsplash images per category — keys MUST match the canonical taxonomy
 // in src/lib/category-classifier/taxonomy.ts exactly (same & signs, umlauts,
@@ -115,12 +119,16 @@ export function PopularCategories() {
                     `motion.button` with `onClick={router.push}`, which
                     Google couldn't see as a link. */}
                 <div className="absolute inset-0 transition-transform duration-500 ease-out group-hover:scale-[1.08]">
-                  <Image
+                  {/* PopularCategories is below WeeklyHighlights AND
+                      FestivalBlogSection — definitively below-fold. No
+                      LCP/priority hints. */}
+                  <EventImage
                     src={image}
                     alt={category}
+                    sizes={CATEGORY_TILE_SIZES}
                     fill
-                    className="object-cover"
-                    sizes="(max-width: 640px) 50vw, 25vw"
+                    wrapperClassName="absolute inset-0"
+                    loading="lazy"
                   />
                 </div>
 

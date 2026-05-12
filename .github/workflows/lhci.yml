@@ -1,0 +1,58 @@
+name: Lighthouse CI
+
+# Runs Lighthouse against the Vercel preview URL of every PR. Hard-fails
+# the build if Performance < 90, LCP > 2.5s, or CLS > 0.1 (thresholds
+# pinned in .lighthouserc.json). Soft-warns on FCP/TBT.
+#
+# Wiring (manual step):
+#   1. In Vercel project Settings → Git → "Comments" → "Deployment URL"
+#      ensure the preview URL is posted to the PR.
+#   2. This workflow waits for `vercel deployment` status check then
+#      runs `lhci autorun` against the URL exposed via that status.
+#
+# Activates: fn-15.1 onwards (every Performance-Renovierung PR).
+
+on:
+  pull_request:
+    branches: [master, main]
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+  pull-requests: write
+  statuses: read
+
+jobs:
+  lhci:
+    name: Run Lighthouse against Vercel preview
+    runs-on: ubuntu-latest
+    # Skip on draft PRs to save CI minutes
+    if: ${{ github.event.pull_request.draft == false }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install LHCI
+        run: npm install -g @lhci/cli@0.14
+
+      - name: Wait for Vercel preview deployment
+        id: vercel-preview
+        uses: patrickedqvist/wait-for-vercel-preview@v1.3.2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          max_timeout: 600
+          check_interval: 15
+
+      - name: Run Lighthouse CI
+        env:
+          LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
+        run: |
+          lhci autorun \
+            --collect.url="${{ steps.vercel-preview.outputs.url }}" \
+            --upload.target=temporary-public-storage

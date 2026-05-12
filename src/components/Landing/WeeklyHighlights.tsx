@@ -5,9 +5,13 @@ import Link from 'next/link';
 import { motion } from 'framer-motion';
 import type { Event } from '@/types/events';
 import { formatDate } from '@/lib/utils/date';
-import { getCategoryBadgeClass } from '@/lib/event-images';
 import { EventImage } from '@/components/Events/EventImage';
 import { buildEventUrlV2 } from '@/lib/utils/slugify';
+
+// sizes attribute for the 240px-wide weekly-highlight thumbnails. They
+// stay 240px regardless of viewport, so we explicitly pin sizes to
+// 240px — keeps next/image from over-fetching at high DPR.
+const HIGHLIGHT_CARD_SIZES = '240px';
 
 function IconCal({ className }: { className?: string }) {
   return (
@@ -40,8 +44,17 @@ function SkeletonCard() {
   );
 }
 
-function HighlightCard({ event }: { event: Event }) {
+function HighlightCard({ event, index }: { event: Event; index: number }) {
   const locationText = event.location_name || event.bundesland || null;
+
+  // LCP-Strategie aus fn-15.1 Phase 3 ("Priority-Strategie nach Layout-Rule"):
+  //   • erste Card der obersten sichtbaren Section  → preload + fetchPriority="high"
+  //   • nächste 2 Cards                              → fetchPriority="high", kein preload
+  //   • alle weiteren                                → default lazy
+  // WeeklyHighlights ist die oberste sichtbare Section auf dem Mobile-Viewport
+  // (Hero ist text-only oben drüber); index === 0 ist daher der LCP-Candidate.
+  const isLcpCandidate = index === 0;
+  const isAboveFoldExtra = index > 0 && index < 3;
 
   return (
     <Link href={buildEventUrlV2(event)} className="flex-none w-60 snap-start group block">
@@ -53,11 +66,15 @@ function HighlightCard({ event }: { event: Event }) {
             src={event.image_url}
             category={event.category}
             title={event.title}
+            bundesland={event.bundesland}
             alt={event.title}
-            className="w-full h-full group-hover:scale-105 transition-transform duration-500"
+            sizes={HIGHLIGHT_CARD_SIZES}
+            className="group-hover:scale-105 transition-transform duration-500"
             wrapperClassName="w-full h-full"
+            preload={isLcpCandidate}
+            fetchPriority={isLcpCandidate || isAboveFoldExtra ? 'high' : 'auto'}
+            loading={isLcpCandidate ? 'eager' : 'lazy'}
             showSkeleton={false}
-            loading="lazy"
           />
           {/* Category pill — top-left overlay on image */}
           {event.category && (
@@ -174,7 +191,7 @@ export function WeeklyHighlights() {
           ? Array.from({ length: 5 }).map((_, i) => <SkeletonCard key={i} />)
           : events.length === 0
           ? <p className="text-white/35 text-sm py-8 px-1">Keine Highlights verfügbar</p>
-          : events.map(event => <HighlightCard key={event.id} event={event} />)}
+          : events.map((event, i) => <HighlightCard key={event.id} event={event} index={i} />)}
 
         {!loading && events.length > 0 && (
           <div className="flex-none w-44 snap-start flex items-center justify-center">

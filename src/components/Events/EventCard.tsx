@@ -50,7 +50,8 @@ export function EventCard({ event, isSelected, onSelect, onHover, eveningMode, i
             category={event.category}
             title={event.title}
             bundesland={event.bundesland}
-            className="w-full h-full transition-transform duration-500 group-hover:scale-105 motion-reduce:group-hover:scale-100"
+            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+            className="transition-transform duration-500 group-hover:scale-105 motion-reduce:group-hover:scale-100"
             wrapperClassName="w-full h-full"
             showSkeleton={true}
             showGradientOverlay={false}
@@ -155,7 +156,8 @@ export function EventCard({ event, isSelected, onSelect, onHover, eveningMode, i
           category={event.category}
           title={event.title}
           bundesland={event.bundesland}
-          className="w-full h-full transition-all duration-200 group-hover:scale-110 motion-reduce:group-hover:scale-100"
+          sizes="80px"
+          className="transition-all duration-200 group-hover:scale-110 motion-reduce:group-hover:scale-100"
           wrapperClassName="w-full h-full"
           showSkeleton={true}
           showGradientOverlay={true}

@@ -766,7 +766,7 @@ function StepEssenz({
                 src={draft.selectedEvent.image_url}
                 category={draft.selectedEvent.category}
                 title={draft.selectedEvent.title}
-                className="w-full h-full"
+                sizes="64px"
                 wrapperClassName="w-16 h-16 rounded-xl shrink-0"
                 showSkeleton={false}
                 loading="lazy"
@@ -826,7 +826,7 @@ function StepEssenz({
                             src={ev.image_url}
                             category={ev.category}
                             title={ev.title}
-                            className="w-full h-full"
+                            sizes="44px"
                             wrapperClassName="w-11 h-11 rounded-lg shrink-0"
                             showSkeleton={false}
                             loading="lazy"

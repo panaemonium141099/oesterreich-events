@@ -198,7 +198,8 @@ export function TrendingRow() {
                         category={event.category}
                         title={event.id}
                         alt={event.title}
-                        className="w-full h-full group-hover:scale-110 transition-transform duration-300"
+                        sizes="62px"
+                        className="group-hover:scale-110 transition-transform duration-300"
                         wrapperClassName="w-full h-full"
                         showSkeleton={false}
                         loading="lazy"

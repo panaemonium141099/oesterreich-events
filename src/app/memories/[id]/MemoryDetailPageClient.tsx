@@ -341,7 +341,7 @@ export function MemoryDetailPageClient() {
                 src={memory.event.image_url}
                 category={memory.event.category}
                 title={memory.event.title}
-                className="w-full h-full"
+                sizes="48px"
                 wrapperClassName="w-12 h-12 rounded-lg shrink-0"
                 showSkeleton={false}
                 loading="lazy"

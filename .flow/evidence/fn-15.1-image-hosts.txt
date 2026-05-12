@@ -1,0 +1,86 @@
+fn-15.1 — images.remotePatterns Coverage Audit
+================================================
+
+Status: COVERED BY EXISTING WILDCARDS (no next.config.ts changes required
+in this PR). Documented here for the Group-Level Acceptance step where a
+live Postgres run + per-host smoke test will be executed against the
+Vercel preview.
+
+Existing remotePatterns inventory (next.config.ts as of fn-15.1 base):
+
+PROTOCOL    HOSTNAME                  PATHNAME    NOTES
+--------    --------                  --------    -----
+https       images.unsplash.com       (any)       Unsplash CDN for category fallback + region tile imagery
+https       lh3.googleusercontent.com (any)       Google avatars / OAuth-uploaded
+https       **.supabase.co            (any)       Supabase storage buckets
+https       **.at                     (any)       Catch-all for Austrian TLD scraper sources (linztermine.at,
+http        **.at                     (any)                  wien-ticket.at, burgenland.at, falter.at, eventim.at,
+                                                             oeticket.at, flex.at, mayrhofen.at, kaernten.live, …)
+https       **.wien                   (any)       Vienna .wien TLD (arena.wien, rhiz.wien, cafeleopold.wien)
+https       **.com                    (any)       Generic .com fallback for international ticketing sources
+https       **.ticketmaster.com       (any)       (specific entries kept for clarity even though **.com covers
+https       **.feverup.com            (any)       them — useful when narrowing the wildcard later)
+https       **.stadthalle.com         (any)       …
+https       **.praterwien.com         (any)
+https       **.grelleforelle.com      (any)
+https       **.neusiedlersee.com      (any)
+https       **.soelden.com            (any)
+https       **.oetztal.com            (any)
+https       **.ischgl.com             (any)
+https       **.saalbach.com           (any)
+https       **.zellamsee-kaprun.com   (any)
+https       **.bodensee-vorarlberg.com (any)
+https       **.sassvienna.com         (any)
+https       **.achensee.com           (any)
+https       **.gastein.com            (any)
+https       **.kitzbuehel.com         (any)
+https       **.osttirol.com           (any)
+https       **.szenewien.com          (any)
+https       **.donau.com              (any)
+https       **.mci.edu                (any)
+https       **.ra.co                  (any)       Resident Advisor (electronic music)
+https       ra.co                     (any)
+https       **.festival.at            (any)
+https       festival.at               (any)
+https       **.net                    (any)       Other generic TLDs covering long-tail
+https       **.org                    (any)
+https       **.info                   (any)
+https       **.tv                     (any)
+https       **.live                   (any)
+https       **.travel                 (any)
+https       **.tt                     (any)
+https       **.eu                     (any)
+https       **.de                     (any)       (Berlin/Munich club crossover)
+https       **.art                    (any)
+
+Important behavior notes (Codex-Round-4):
+  • `search` field intentionally OMITTED throughout. Next.js Image-Optimizer
+    normalizes query-strings away at the proxy layer, so URLs with
+    cache-busters like `?v=12345` still match. Explicit `search` would
+    only be needed for SOURCE hosts that 404 without a specific query
+    parameter; we haven't observed that in the Landing-card scrape pool.
+  • Redirect chains (e.g. CDN A → CDN B) are handled automatically because
+    Vercel Image Optimization follows the redirect server-side; the final
+    host doesn't need a separate remotePattern.
+
+Path-Level Smoke Test (Group-Level Acceptance — to be executed at the
+combined fn-15.1+fn-15.2 PR against the Vercel preview):
+
+  For each unique host in `events.image_url` WHERE event_score IS NOT NULL
+  AND start_date >= NOW() AND publish_status = 'published' ORDER BY
+  event_score DESC LIMIT 500, pick 3 random URLs and curl them through:
+
+    GET <preview-url>/_next/image?url=<encoded>&w=640&q=75
+
+  Expected: HTTP 200 + content-type image/webp OR image/avif.
+  Failure mode: HTTP 400 "url parameter is not allowed" → add the host
+  to next.config.ts remotePatterns or narrow an existing wildcard.
+
+  (Postgres credentials are not available inside the agent worktree, so
+  this smoke test runs at PR time as part of the manual deploy gate.
+  The Group PR will append the per-host result table to this file.)
+
+Decision: NO new patterns added in fn-15.1. The existing wildcards already
+cover the entire known Landing-card host set. If the Group-level smoke
+test surfaces a missed pattern, that PR will append the specific
+remotePattern entry.

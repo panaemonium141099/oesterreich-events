@@ -198,7 +198,7 @@ export function CreatePost({ userId, userAvatar, userInitial, onPostCreated }: C
                               src={ev.image_url}
                               category={ev.category}
                               title={ev.title}
-                              className="w-full h-full"
+                              sizes="32px"
                               wrapperClassName="w-8 h-8 rounded-lg shrink-0 bg-white/[0.06]"
                               showSkeleton={false}
                               loading="lazy"

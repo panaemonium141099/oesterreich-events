@@ -34,7 +34,7 @@ export function FeedEventMiniCard({ event, compact, fullWidth, onClick }: FeedEv
             category={event.category}
             title={event.title}
             alt={event.title}
-            className="w-full h-full"
+            sizes="(max-width: 640px) 100vw, 480px"
             wrapperClassName="w-full h-full"
             showSkeleton={false}
             loading="lazy"
@@ -82,7 +82,7 @@ export function FeedEventMiniCard({ event, compact, fullWidth, onClick }: FeedEv
             src={event.image_url}
             category={event.category}
             title={event.title}
-            className="w-full h-full"
+            sizes="36px"
             wrapperClassName="w-full h-full"
             showSkeleton={false}
             loading="lazy"
@@ -109,7 +109,8 @@ export function FeedEventMiniCard({ event, compact, fullWidth, onClick }: FeedEv
           src={event.image_url}
           category={event.category}
           title={event.title}
-          className="w-full h-full group-hover:scale-105 transition-transform duration-300"
+          sizes="(max-width: 640px) 100vw, 320px"
+          className="group-hover:scale-105 transition-transform duration-300"
           wrapperClassName="w-full h-full"
           showSkeleton={false}
           loading="lazy"

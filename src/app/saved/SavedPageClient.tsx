@@ -180,7 +180,7 @@ export function SavedPageClient() {
                       src={event.image_url}
                       category={event.category}
                       title={event.title}
-                      className="w-full h-full"
+                      sizes="64px"
                       wrapperClassName="w-full h-full"
                       showSkeleton={false}
                       loading="lazy"

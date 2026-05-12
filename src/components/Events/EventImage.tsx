@@ -1,165 +1,288 @@
-'use client';
+// NOTE: NO 'use client' — EventImage is a pure Server Component.
+//
+// Why: per fn-15.1 (Performance-Renovierung Landing) we need this to
+// stay an RSC so:
+//   1. Above-fold cards stay server-rendered (Pillar 9 — RSC above-fold).
+//   2. next/image's automatic <link rel="preload"> emission for LCP
+//      candidates works without a client-component boundary.
+//
+// Consequence: no useState, no useEffect, no onError. If a remote URL
+// breaks at runtime, next/image shows nothing / the alt-text. Image
+// health-check is out-of-scope (see fn-15.11/12). What we DO handle
+// server-side:
+//   - empty / null / garbage src → fall back to local category image
+//     resolved by resolvePrimaryEventImage()
+//   - generic blur placeholder data: URL while loading
+//
+// Caller compatibility:
+// Old callers passed `src`, `category`, `title`, `bundesland`,
+// `wrapperClassName`, `className`, `showSkeleton`, `showGradientOverlay`,
+// `objectPosition`, `objectFit`, `loading`, `fetchPriority`. We keep
+// all of those working. New spec-mandated props are added on top.
 
-import { useState, useEffect, useCallback, useRef } from 'react';
-import {
-  resolvePrimaryEventImage,
-  resolveCategoryFallbackImage,
-  resolveGenericFallbackImage,
-} from '@/lib/event-images';
-
-type FallbackStage = 'primary' | 'category' | 'generic' | 'placeholder';
-
-interface EventImageProps {
-  /** External image URL from the event (event.image_url). */
-  src?: string | null;
-  /** Event category for fallback image selection. */
-  category?: string | null;
-  /** Event title — used as seed for deterministic fallback variant. */
-  title?: string | null;
-  /** Event bundesland — picks region-specific fallback pool (Burgenland ->
-   *  pannonian, Wien -> urban, else alpine). */
-  bundesland?: string | null;
-  alt?: string;
-  className?: string;
-  wrapperClassName?: string;
-  loading?: 'lazy' | 'eager';
-  fetchPriority?: 'high' | 'low' | 'auto';
-  /** Show a skeleton shimmer while loading. Default: true */
-  showSkeleton?: boolean;
-  /** Show a gradient overlay at the bottom of the image. Default: false */
-  showGradientOverlay?: boolean;
-  objectPosition?: string;
-  /** CSS object-fit value. Default: 'cover' */
-  objectFit?: 'cover' | 'contain' | 'fill' | 'none' | 'scale-down';
-}
+import Image, { type ImageProps } from 'next/image';
+import { resolvePrimaryEventImage, normalizeEventCategory } from '@/lib/event-images';
 
 /**
- * Central event image component. Handles the full fallback chain:
- * 1. Primary event image (external URL)
- * 2. Category-specific local fallback
- * 3. Generic local fallback
- * 4. Neutral placeholder block (never shows a broken browser icon)
+ * Single, generic blur placeholder used for ALL remote images.
+ * 10x10 dark gradient SVG as data:URI — ~280 bytes.
  *
- * Must be used as a Client Component ('use client').
+ * Per fn-15.1 (Codex-Round-2 Decision): one strategy, not pro-image
+ * plaiceholder generation. Per-image LQIP belongs in fn-15.11.
  */
-export function EventImage({
-  src,
-  category,
-  title,
-  bundesland,
-  alt = '',
-  className = '',
-  wrapperClassName = '',
-  loading = 'lazy',
-  fetchPriority = 'auto',
-  showSkeleton = true,
-  showGradientOverlay = false,
-  objectPosition,
-  objectFit = 'cover',
-}: EventImageProps) {
-  const computePrimary = useCallback(
-    () => resolvePrimaryEventImage({ imageUrl: src, category, title, bundesland }),
-    [src, category, title, bundesland],
-  );
+export const GENERIC_BLUR_DATA_URL =
+  'data:image/svg+xml;base64,' +
+  Buffer.from(
+    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10" preserveAspectRatio="none">' +
+      '<defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1">' +
+      '<stop offset="0" stop-color="#1a1a1a"/>' +
+      '<stop offset="1" stop-color="#0d0d0d"/>' +
+      '</linearGradient></defs>' +
+      '<rect width="10" height="10" fill="url(#g)"/>' +
+    '</svg>',
+  ).toString('base64');
 
-  const [currentSrc, setCurrentSrc] = useState(computePrimary);
-  const [stage, setStage] = useState<FallbackStage>('primary');
-  const [loaded, setLoaded] = useState(false);
-  const imgRef = useRef<HTMLImageElement>(null);
+/**
+ * Slug-normalization per epic spec — Latin transliteration for German
+ * compound category names so they map to /images/categories/<slug>-N.jpg.
+ *
+ * Examples:
+ *   'Märkte & Feste'   → 'maerkte-feste'
+ *   'Kultur & Bühne'   → 'kultur-buehne'
+ *   'Wein & Kulinarik' → 'wein-kulinarik'
+ *
+ * NOTE: this is the new normalization helper required by the fn-15.1 spec
+ * (`normalizeCategory()` in the API contract). For the actual fallback-image
+ * resolution we still delegate to resolveCategoryFallbackImage() which
+ * uses the bundesland-aware pool. This helper is exported for tests
+ * and for callers that need a deterministic slug.
+ */
+export function normalizeCategoryToSlug(input: string | null | undefined): string {
+  if (!input) return 'sonstiges';
+  return input
+    .toLowerCase()
+    .replace(/ä/g, 'ae')
+    .replace(/ö/g, 'oe')
+    .replace(/ü/g, 'ue')
+    .replace(/ß/g, 'ss')
+    // collapse ampersands and surrounding whitespace to a single dash
+    .replace(/\s*&\s*/g, '-')
+    // remaining whitespace becomes a dash
+    .replace(/\s+/g, '-')
+    // strip any other non-slug characters
+    .replace(/[^a-z0-9-]/g, '')
+    // collapse repeated dashes, trim ends
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '');
+}
 
-  // Reset when props change
-  useEffect(() => {
-    const next = computePrimary();
-    setCurrentSrc(next);
-    setStage('primary');
-    setLoaded(false);
-  }, [computePrimary]);
+// ─── Props ───────────────────────────────────────────────────────────
+//
+// Per fn-15.1 acceptance criterion: discriminated union — caller passes
+// EITHER `fill: true` OR `width + height`. TypeScript compiler enforces
+// this; we never have to runtime-check.
 
-  // Handle cached-image race: if the browser served <img> from cache synchronously,
-  // onLoad may have fired before React attached the handler. Check img.complete
-  // after each src change and flip loaded manually.
-  useEffect(() => {
-    const img = imgRef.current;
-    if (!img) return;
-    if (img.complete && img.naturalWidth > 0) {
-      setLoaded(true);
-    } else if (img.complete && img.naturalWidth === 0) {
-      // Cached as broken — trigger error flow
-      handleError();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentSrc]);
+type SharedProps = {
+  /** External image URL from the event (event.image_url) or null. */
+  src?: string | null;
+  /** Event category — used to pick a local fallback image. */
+  category?: string | null;
+  /** Alias for `category` — preferred new name per spec. If both are
+   *  given, `category` wins for backwards compat with existing callers. */
+  fallbackCategory?: string | null;
+  /** Event title — seed for deterministic fallback variant. */
+  title?: string | null;
+  /** Event bundesland — picks region-specific fallback pool. */
+  bundesland?: string | null;
+  /** REQUIRED. CSS sizes attribute. Must reflect actual rendered size
+   *  in the layout so next/image picks the right srcset entry. */
+  sizes: string;
+  /** Accessible name for the image. Default: empty string. */
+  alt?: string;
+  /** Class for the <img> element itself. */
+  className?: string;
+  /** Class for the wrapping <div> (only used in fill mode). */
+  wrapperClassName?: string;
+  /** Loading strategy. Default: 'lazy'. */
+  loading?: 'eager' | 'lazy';
+  /** fetchpriority hint. Set 'high' for above-fold non-LCP cards. */
+  fetchPriority?: 'high' | 'auto' | 'low';
+  /**
+   * Emit `<link rel="preload" as="image">` for THIS image. Use for the
+   * single LCP-candidate image per page (Next.js 16 replaces deprecated
+   * `priority` with this). Only one image per landing should have it.
+   */
+  preload?: boolean;
+  /** Optional gradient overlay (kept for callers like EventCard). */
+  showGradientOverlay?: boolean;
+  /** Optional skeleton shimmer placeholder. Default: false (next/image's
+   *  built-in `placeholder="blur"` already handles the fade-in). */
+  showSkeleton?: boolean;
+  /** object-position for cropping. Forwarded as style. */
+  objectPosition?: string;
+  /** object-fit. Forwarded as style. Default: 'cover'. */
+  objectFit?: 'cover' | 'contain' | 'fill' | 'none' | 'scale-down';
+  /** Override the auto-blur placeholder. Pass `false` to disable blur. */
+  placeholder?: 'blur' | 'empty';
+};
 
-  const handleError = useCallback(() => {
-    switch (stage) {
-      case 'primary': {
-        const fallback = resolveCategoryFallbackImage(category, title ?? undefined, bundesland);
-        setCurrentSrc(fallback);
-        setStage('category');
-        break;
-      }
-      case 'category': {
-        setCurrentSrc(resolveGenericFallbackImage());
-        setStage('generic');
-        break;
-      }
-      case 'generic':
-        // Even the generic local image failed — show placeholder
-        setStage('placeholder');
-        break;
-      default:
-        break;
-    }
-  }, [stage, category, title, bundesland]);
+// Fill mode is the default — callers who pass neither `fill` nor explicit
+// width+height get fill behavior. Explicit `fill: true` is also accepted
+// (and recommended for clarity in landing-card components).
+type FillProps = SharedProps & {
+  fill?: true;
+  width?: never;
+  height?: never;
+};
 
-  if (stage === 'placeholder') {
+// Fixed-pixel-size mode — caller MUST pass `fill: false` AND both
+// width and height. The TypeScript compiler enforces both being supplied
+// together (you can't pass width without height or vice versa).
+type FixedSizeProps = SharedProps & {
+  fill: false;
+  width: number;
+  height: number;
+};
+
+export type EventImageProps = FillProps | FixedSizeProps;
+
+/**
+ * Central event image component (Server Component).
+ *
+ * Resolves the best available image URL server-side: caller's `src` if
+ * usable, otherwise a category-specific local fallback. Wraps next/image
+ * with a generic SVG blur placeholder.
+ *
+ * Sizing:
+ *   • Default fill={true} — image fills wrapperClassName container.
+ *     Caller is responsible for giving the wrapper a defined
+ *     aspect-ratio or explicit width+height (Tailwind classes work).
+ *   • fill={false} + width+height — fixed pixel dimensions, no wrapper
+ *     div needed.
+ *
+ * LCP guidance:
+ *   • Pass `preload={true}` on exactly ONE image per page (the LCP
+ *     candidate above the fold).
+ *   • Pass `fetchPriority="high"` on at most ~2 additional above-fold
+ *     images. Below-fold cards: leave both at defaults (lazy + auto).
+ */
+export function EventImage(props: EventImageProps) {
+  const {
+    src,
+    category,
+    fallbackCategory,
+    title,
+    bundesland,
+    alt = '',
+    className = '',
+    wrapperClassName = '',
+    loading,
+    fetchPriority,
+    preload = false,
+    showGradientOverlay = false,
+    showSkeleton = false,
+    objectPosition,
+    objectFit = 'cover',
+    sizes,
+    placeholder,
+  } = props;
+
+  // Resolve to a usable URL server-side. If src is a valid http(s) URL
+  // or local /-path it passes through; otherwise we fall back to the
+  // category-pool image. resolveCategoryFallbackImage() is bundesland-
+  // aware and seeds variant selection by title.
+  const resolvedSrc = resolvePrimaryEventImage({
+    imageUrl: src,
+    // category takes precedence; fallbackCategory is the new spec name.
+    category: category ?? fallbackCategory ?? null,
+    title,
+    bundesland,
+  });
+
+  // Local /images/... paths don't need blur — they're already optimized
+  // by next/image's static pipeline and the placeholder adds bytes for
+  // no perceived win. We only blur remote URLs.
+  const isRemote = resolvedSrc.startsWith('http://') || resolvedSrc.startsWith('https://');
+  const effectivePlaceholder: 'blur' | 'empty' =
+    placeholder ?? (isRemote ? 'blur' : 'empty');
+
+  // Build the next/image props payload.
+  const imageProps: Partial<ImageProps> = {
+    src: resolvedSrc,
+    alt,
+    sizes,
+    className,
+    placeholder: effectivePlaceholder,
+    ...(effectivePlaceholder === 'blur' ? { blurDataURL: GENERIC_BLUR_DATA_URL } : {}),
+    style: {
+      objectFit,
+      ...(objectPosition ? { objectPosition } : {}),
+    },
+  };
+
+  // Loading vs preload — next.js maps `priority`/preload to the LCP
+  // preload link. We use the modern prop name where supported.
+  if (preload) {
+    imageProps.priority = true;
+  } else if (loading) {
+    imageProps.loading = loading;
+  }
+
+  if (fetchPriority) {
+    imageProps.fetchPriority = fetchPriority;
+  }
+
+  // Discriminated-union branch. Default (no `fill` prop OR `fill: true`)
+  // is fill mode. Only `fill: false` selects fixed-pixel-size mode.
+  const isFillMode = props.fill !== false;
+
+  if (isFillMode) {
+    // Default branch — fill mode. Caller MUST set wrapperClassName with
+    // explicit dimensions or aspect-ratio.
+    imageProps.fill = true;
     return (
-      <div
-        className={`flex items-center justify-center bg-white/5 ${wrapperClassName}`}
-        role="img"
-        aria-label={alt || 'Event-Bild'}
-      >
-        <svg
-          className="w-10 h-10 text-white/10"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={1}
-            d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+      <div className={`relative overflow-hidden ${wrapperClassName}`}>
+        {showSkeleton && (
+          <div className="absolute inset-0 skeleton pointer-events-none" aria-hidden="true" />
+        )}
+        <Image {...(imageProps as ImageProps)} />
+        {showGradientOverlay && (
+          <div
+            className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent pointer-events-none"
+            aria-hidden="true"
           />
-        </svg>
+        )}
       </div>
     );
   }
 
-  return (
-    <div className={`relative overflow-hidden ${wrapperClassName}`}>
-      {showSkeleton && !loaded && (
-        <div className="absolute inset-0 skeleton" />
-      )}
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
-        ref={imgRef}
-        src={currentSrc}
-        alt={alt}
-        className={`${loaded ? 'opacity-100' : 'opacity-0'} transition-opacity duration-200 ${className}`}
-        style={{
-          objectFit,
-          ...(objectPosition ? { objectPosition } : {}),
-        }}
-        loading={loading}
-        fetchPriority={fetchPriority}
-        referrerPolicy="no-referrer"
-        onLoad={() => setLoaded(true)}
-        onError={handleError}
-      />
-      {showGradientOverlay && (
-        <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent pointer-events-none" />
-      )}
-    </div>
-  );
+  // Fixed-size branch — no wrapper required, but caller can still pass
+  // wrapperClassName to wrap for layout reasons. Cast is safe because
+  // the discriminated union guarantees width+height when fill is false.
+  const fixed = props as FixedSizeProps;
+  imageProps.width = fixed.width;
+  imageProps.height = fixed.height;
+
+  if (wrapperClassName || showGradientOverlay || showSkeleton) {
+    return (
+      <div className={`relative overflow-hidden ${wrapperClassName}`}>
+        {showSkeleton && (
+          <div className="absolute inset-0 skeleton pointer-events-none" aria-hidden="true" />
+        )}
+        <Image {...(imageProps as ImageProps)} />
+        {showGradientOverlay && (
+          <div
+            className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent pointer-events-none"
+            aria-hidden="true"
+          />
+        )}
+      </div>
+    );
+  }
+
+  return <Image {...(imageProps as ImageProps)} />;
 }
+
+// Re-export normalization helper for completeness — some callers may
+// want to compute the slug directly (e.g. tests).
+export { normalizeEventCategory };

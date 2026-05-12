@@ -155,7 +155,8 @@ export function StoriesViewer({ events, initialIndex, onClose }: StoriesViewerPr
               category={event.category}
               title={event.id}
               alt=""
-              className="w-full h-full blur-2xl scale-110 brightness-50"
+              sizes="100vw"
+              className="blur-2xl scale-110 brightness-50"
               wrapperClassName="w-full h-full"
               showSkeleton={false}
               loading="eager"
@@ -168,7 +169,7 @@ export function StoriesViewer({ events, initialIndex, onClose }: StoriesViewerPr
               category={event.category}
               title={event.id}
               alt={event.title}
-              className="w-full h-full"
+              sizes="100vw"
               wrapperClassName="w-full h-full"
               objectFit="contain"
               showSkeleton={false}

@@ -174,7 +174,7 @@ export function SpotifyMatchesPageClient() {
                     <EventImage
                       src={m.event?.image_url}
                       title={m.event?.title}
-                      className="w-full h-full"
+                      sizes="80px"
                       wrapperClassName="w-full h-full"
                       showSkeleton={false}
                       loading="lazy"

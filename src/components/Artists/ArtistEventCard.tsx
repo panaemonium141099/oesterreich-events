@@ -113,7 +113,8 @@ export function ArtistEventCard({
             src={event.image_url}
             category={event.category}
             title={event.title}
-            className="w-full h-full transition-all duration-200 group-hover:scale-110 motion-reduce:group-hover:scale-100"
+            sizes="80px"
+            className="transition-all duration-200 group-hover:scale-110 motion-reduce:group-hover:scale-100"
             wrapperClassName="w-full h-full"
             showSkeleton={true}
             showGradientOverlay={true}

@@ -1,11 +1,17 @@
 'use client';
 
-import Image from 'next/image';
 import Link from 'next/link';
 import { useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { ALL_POSTS } from '@/content/blog';
 import type { FestivalPost } from '@/content/blog/types';
+import { EventImage } from '@/components/Events/EventImage';
+
+// Featured card spans md:col-span-2 in a 3-col grid → ~60vw on desktop;
+// full-width on mobile. SecondaryCards are 1 of 3 on desktop, full-width
+// on mobile. These sizes mirror the previous explicit `sizes` props.
+const FEATURED_SIZES = '(max-width: 768px) 100vw, 60vw';
+const SECONDARY_SIZES = '(max-width: 768px) 100vw, 30vw';
 
 const containerVariants = {
   hidden: {},
@@ -84,13 +90,18 @@ function FeaturedCard({ post }: { post: FestivalPost }) {
     <motion.article variants={itemVariants} className="group relative h-full">
       <Link href={`/blog/${post.slug}`} className="block h-full">
         <div className="relative overflow-hidden rounded-2xl h-full min-h-[440px]">
-          <Image
+          {/* fn-15.1 Priority-Strategie: FestivalBlogSection sits below
+              WeeklyHighlights, so the featured-card is NOT the LCP. We
+              drop the previous `priority` and let it lazy-load like the
+              rest. Only WeeklyHighlights[0] gets the preload. */}
+          <EventImage
             src={post.heroImage}
             alt={post.title}
+            sizes={FEATURED_SIZES}
             fill
-            className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
-            sizes="(max-width: 768px) 100vw, 60vw"
-            priority
+            wrapperClassName="absolute inset-0"
+            className="transition-transform duration-700 ease-out group-hover:scale-105"
+            loading="lazy"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-black/10" />
 
@@ -132,12 +143,14 @@ function SecondaryCard({ post }: { post: FestivalPost }) {
     <motion.article variants={itemVariants} className="group flex-1">
       <Link href={`/blog/${post.slug}`} className="block h-full">
         <div className="relative overflow-hidden rounded-2xl h-full min-h-[180px]">
-          <Image
+          <EventImage
             src={post.heroImage}
             alt={post.title}
+            sizes={SECONDARY_SIZES}
             fill
-            className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
-            sizes="(max-width: 768px) 100vw, 30vw"
+            wrapperClassName="absolute inset-0"
+            className="transition-transform duration-700 ease-out group-hover:scale-105"
+            loading="lazy"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/25 to-black/5" />
 

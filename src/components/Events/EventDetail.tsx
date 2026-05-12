@@ -355,7 +355,8 @@ export function EventDetail({ event, onClose, eveningMode, onTagClick }: EventDe
             category={event.category}
             title={event.title}
             alt={event.title || ''}
-            className="animate-ken-burns w-full h-full absolute inset-0"
+            sizes="100vw"
+            className="animate-ken-burns"
             wrapperClassName="w-full h-full"
             loading="eager"
             fetchPriority="high"

@@ -902,7 +902,7 @@ export function CalendarPageClient() {
                         src={evt.image_url}
                         category={evt.category}
                         title={evt.title}
-                        className="w-full h-full"
+                        sizes="48px"
                         wrapperClassName="w-12 h-12 rounded-lg shrink-0 bg-white/10"
                         showSkeleton={false}
                         loading="lazy"
@@ -956,7 +956,7 @@ export function CalendarPageClient() {
               src={selectedEvent.image_url}
               category={selectedEvent.category}
               title={selectedEvent.title}
-              className="w-full h-full"
+              sizes="(max-width: 768px) 100vw, 448px"
               wrapperClassName="w-full h-48"
               showSkeleton={false}
               loading="eager"
