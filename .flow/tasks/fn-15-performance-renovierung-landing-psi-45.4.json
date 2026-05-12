@@ -9,6 +9,6 @@
   "priority": 4,
   "spec_path": ".flow/tasks/fn-15-performance-renovierung-landing-psi-45.4.md",
   "status": "todo",
-  "title": "AdSense Lazy + Security Headers (HSTS preload, COOP, COEP, CSP nonce)",
+  "title": "Third-Party Cleanup: AdSense komplett raus, GA4 lazy, Vercel-Analytics + non-CSP Security Headers (HSTS, COOP, COEP, X-* — CSP wird in fn-15.6 final)",
   "updated_at": "2026-05-12T14:05:14.174679Z"
 }

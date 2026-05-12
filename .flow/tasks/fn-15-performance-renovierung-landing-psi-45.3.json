@@ -9,6 +9,6 @@
   "priority": 3,
   "spec_path": ".flow/tasks/fn-15-performance-renovierung-landing-psi-45.3.md",
   "status": "todo",
-  "title": "Modern Browser-Targets: chrome>=90, Polyfills weg (-14KB JS)",
+  "title": "Browser-Targets Audit: Polyfill-Quelle identifizieren, targets nur ändern wenn Next.js-Default nicht ausreichend",
   "updated_at": "2026-05-12T14:04:51.373876Z"
 }
