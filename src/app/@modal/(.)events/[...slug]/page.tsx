@@ -34,6 +34,7 @@ import { notFound } from 'next/navigation';
 import { extractCity } from '@/lib/utils/city';
 import { EventDetailV2 } from '@/components/Events/EventDetailV2';
 import { EventSheet } from '@/components/Events/EventSheet';
+import { ModalShell } from '@/components/Layout/ModalShell';
 import {
   parseSlugArray,
   resolveEvent,
@@ -79,17 +80,27 @@ export default async function InterceptedEventPage({
   );
   const bundeslandHref = buildBundeslandHref(event.bundesland);
 
+  // fn-15.5 fix (round 2): the parallel `@modal` slot lives at root-
+  // layout level alongside `children`, so it does NOT inherit the
+  // authenticated route's AppShell (AuthProvider, SavedEvents, etc.).
+  // Without this wrapper, opening an event sheet from /feed, /map, /saved,
+  // etc. would render the modal with anon-fallback auth — break Save,
+  // RSVP, share-to-friend, and the rest of the auth-aware actions.
+  // <ModalShell> mounts only the providers the modal actually needs
+  // (auth + saved-events), not the full social chrome.
   return (
-    <EventSheet>
-      <EventDetailV2
-        event={event}
-        venue={venue}
-        derivedCity={derivedCity}
-        bundeslandHref={bundeslandHref}
-        friends={friendsData.friends}
-        rsvpTotals={friendsData.rsvpTotals}
-        lineup={lineup}
-      />
-    </EventSheet>
+    <ModalShell>
+      <EventSheet>
+        <EventDetailV2
+          event={event}
+          venue={venue}
+          derivedCity={derivedCity}
+          bundeslandHref={bundeslandHref}
+          friends={friendsData.friends}
+          rsvpTotals={friendsData.rsvpTotals}
+          lineup={lineup}
+        />
+      </EventSheet>
+    </ModalShell>
   );
 }
