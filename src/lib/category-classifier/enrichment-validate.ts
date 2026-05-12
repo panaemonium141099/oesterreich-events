@@ -145,25 +145,28 @@ function pickArray(
   errors: string[],
 ): string[] {
   if (value === null || value === undefined) return [];
-  if (!Array.isArray(value)) {
-    // Coerce common variants: comma-separated string, single-string value.
-    if (typeof value === 'string') {
-      const parts = value.split(',').map(s => s.trim()).filter(Boolean);
-      if (parts.length > 0) {
-        errors.push(`${fieldName}: not an array (coerced from comma-string) (dropped)`);
-        value = parts;
-      } else {
-        errors.push(`${fieldName}: not an array (got string, no values) (dropped)`);
-        return [];
-      }
-    } else {
-      errors.push(`${fieldName}: not an array (got ${typeof value}) (dropped)`);
+  // Narrow into a typed local. Re-assigning the `unknown` parameter doesn't
+  // preserve narrowing across the branches in TS 5.x, so we use `arr: unknown[]`
+  // as the load-bearing variable for the iteration below.
+  let arr: unknown[];
+  if (Array.isArray(value)) {
+    arr = value;
+  } else if (typeof value === 'string') {
+    // Coerce common variant: comma-separated string.
+    const parts = value.split(',').map(s => s.trim()).filter(Boolean);
+    if (parts.length === 0) {
+      errors.push(`${fieldName}: not an array (got string, no values) (dropped)`);
       return [];
     }
+    errors.push(`${fieldName}: not an array (coerced from comma-string) (dropped)`);
+    arr = parts;
+  } else {
+    errors.push(`${fieldName}: not an array (got ${typeof value}) (dropped)`);
+    return [];
   }
   const seen = new Set<string>();
   const out: string[] = [];
-  for (const v of value) {
+  for (const v of arr) {
     if (typeof v !== 'string') continue;
     const norm = v.trim().toLowerCase();
     if (!norm) continue;
