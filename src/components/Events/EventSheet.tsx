@@ -185,6 +185,12 @@ export function EventSheet({ children }: EventSheetProps) {
       className="fixed inset-0 z-[1100] overflow-y-auto overscroll-contain"
       style={{ background: '#0a0a0c' }}
       data-sheet-state={exiting ? 'closed' : 'open'}
+      // fn-15.5 round-9 (codex): tell RouteTransitions to ignore link
+      // clicks inside this overlay. Our own capture-phase handler
+      // below special-cases /map navigation (modal-safe dismissal),
+      // and we don't want the global view-transition handler to win
+      // the race against it.
+      data-route-transition-skip="true"
     >
       {/* No floating close button — it would collide with the
           EventDetailActions panel (save/share/AfterSavePanel) that

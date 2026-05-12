@@ -101,6 +101,13 @@ export function RouteTransitions() {
       const target = (e.target as HTMLElement | null)?.closest?.('a') as HTMLAnchorElement | null;
       const href = getInternalHref(target);
       if (!href) return;
+      // fn-15.5 round-9 (codex): defer to any ancestor that explicitly
+      // opts out of the global view-transition. EventSheet uses
+      // `data-route-transition-skip` on its overlay so its capture-
+      // phase handler for /map links runs without us racing it. Any
+      // element marked with that attribute (or its descendants) is
+      // ignored here and Next.js's own link handler takes over.
+      if (target?.closest('[data-route-transition-skip]')) return;
 
       // Take over the navigation. preventDefault stops both the
       // browser default AND Next.js's own click handler.
