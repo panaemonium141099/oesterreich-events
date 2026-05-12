@@ -1,0 +1,16 @@
+{
+  "assignee": null,
+  "claim_note": "",
+  "claimed_at": null,
+  "created_at": "2026-05-12T14:05:20.753747Z",
+  "depends_on": [
+    "fn-15-performance-renovierung-landing-psi-45.1"
+  ],
+  "epic": "fn-15-performance-renovierung-landing-psi-45",
+  "id": "fn-15-performance-renovierung-landing-psi-45.10",
+  "priority": 10,
+  "spec_path": ".flow/tasks/fn-15-performance-renovierung-landing-psi-45.10.md",
+  "status": "todo",
+  "title": "Service Worker mit Workbox: stale-while-revalidate f\u00fcr /_next/image/* (Repeat-LCP <500ms)",
+  "updated_at": "2026-05-12T14:05:20.753779Z"
+}

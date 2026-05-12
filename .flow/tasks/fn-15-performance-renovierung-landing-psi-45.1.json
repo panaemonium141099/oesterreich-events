@@ -1,0 +1,14 @@
+{
+  "assignee": null,
+  "claim_note": "",
+  "claimed_at": null,
+  "created_at": "2026-05-12T14:04:48.257995Z",
+  "depends_on": [],
+  "epic": "fn-15-performance-renovierung-landing-psi-45",
+  "id": "fn-15-performance-renovierung-landing-psi-45.1",
+  "priority": 1,
+  "spec_path": ".flow/tasks/fn-15-performance-renovierung-landing-psi-45.1.md",
+  "status": "todo",
+  "title": "Image Optimization: next/image f\u00fcr ALLE Event-Cards (LCP 4.2s -> 1.5s)",
+  "updated_at": "2026-05-12T14:04:48.258381Z"
+}

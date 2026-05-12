@@ -1,0 +1,14 @@
+{
+  "assignee": null,
+  "claim_note": "",
+  "claimed_at": null,
+  "created_at": "2026-05-12T14:05:14.174644Z",
+  "depends_on": [],
+  "epic": "fn-15-performance-renovierung-landing-psi-45",
+  "id": "fn-15-performance-renovierung-landing-psi-45.4",
+  "priority": 4,
+  "spec_path": ".flow/tasks/fn-15-performance-renovierung-landing-psi-45.4.md",
+  "status": "todo",
+  "title": "AdSense Lazy + Security Headers (HSTS preload, COOP, COEP, CSP nonce)",
+  "updated_at": "2026-05-12T14:05:14.174679Z"
+}

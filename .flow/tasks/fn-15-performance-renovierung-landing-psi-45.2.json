@@ -1,0 +1,14 @@
+{
+  "assignee": null,
+  "claim_note": "",
+  "claimed_at": null,
+  "created_at": "2026-05-12T14:04:50.353098Z",
+  "depends_on": [],
+  "epic": "fn-15-performance-renovierung-landing-psi-45",
+  "id": "fn-15-performance-renovierung-landing-psi-45.2",
+  "priority": 2,
+  "spec_path": ".flow/tasks/fn-15-performance-renovierung-landing-psi-45.2.md",
+  "status": "todo",
+  "title": "CLS-Stabilitaet: 0.535 -> <0.05 (Skeletons + aspect-ratios + Footer-Fix)",
+  "updated_at": "2026-05-12T14:04:50.353132Z"
+}

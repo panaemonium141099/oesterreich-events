@@ -1,0 +1,16 @@
+{
+  "assignee": null,
+  "claim_note": "",
+  "claimed_at": null,
+  "created_at": "2026-05-12T14:05:16.848530Z",
+  "depends_on": [
+    "fn-15-performance-renovierung-landing-psi-45.5"
+  ],
+  "epic": "fn-15-performance-renovierung-landing-psi-45",
+  "id": "fn-15-performance-renovierung-landing-psi-45.6",
+  "priority": 6,
+  "spec_path": ".flow/tasks/fn-15-performance-renovierung-landing-psi-45.6.md",
+  "status": "todo",
+  "title": "Critical CSS Inline + Tailwind Bundle abspecken (FCP -200ms)",
+  "updated_at": "2026-05-12T14:05:16.848563Z"
+}

@@ -2,7 +2,9 @@
 
 ## Status
 
-**WAITS for fn-14 completion.** Don't start until fn-14 Bulk-Migration ist durch.
+**Started 2026-05-12.** fn-14.4 Bulk-Migration ist pausiert (Anthropic-Wochen-Cap voll,
+8.695/63k future events done, Resume Do 2026-05-14 10:59) — Performance-Renovierung
+läuft parallel als Frontend-Arbeit ohne Claude-Abhängigkeit.
 
 ## Goal & Context
 

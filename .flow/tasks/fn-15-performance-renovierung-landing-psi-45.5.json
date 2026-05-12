@@ -1,0 +1,17 @@
+{
+  "assignee": null,
+  "claim_note": "",
+  "claimed_at": null,
+  "created_at": "2026-05-12T14:05:15.675959Z",
+  "depends_on": [
+    "fn-15-performance-renovierung-landing-psi-45.1",
+    "fn-15-performance-renovierung-landing-psi-45.2"
+  ],
+  "epic": "fn-15-performance-renovierung-landing-psi-45",
+  "id": "fn-15-performance-renovierung-landing-psi-45.5",
+  "priority": 5,
+  "spec_path": ".flow/tasks/fn-15-performance-renovierung-landing-psi-45.5.md",
+  "status": "todo",
+  "title": "Bundle-Architektur: AnimatedLayout raus, AuthProvider scope, Mapbox split (459KB -> 150KB)",
+  "updated_at": "2026-05-12T14:05:15.675995Z"
+}

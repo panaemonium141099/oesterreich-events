@@ -1,0 +1,17 @@
+{
+  "assignee": null,
+  "claim_note": "",
+  "claimed_at": null,
+  "created_at": "2026-05-12T14:05:19.724740Z",
+  "depends_on": [
+    "fn-15-performance-renovierung-landing-psi-45.5",
+    "fn-15-performance-renovierung-landing-psi-45.7"
+  ],
+  "epic": "fn-15-performance-renovierung-landing-psi-45",
+  "id": "fn-15-performance-renovierung-landing-psi-45.9",
+  "priority": 9,
+  "spec_path": ".flow/tasks/fn-15-performance-renovierung-landing-psi-45.9.md",
+  "status": "todo",
+  "title": "Above-fold als pure RSC: HeroSection/LandingStats kein 'use client' (TBT -150ms)",
+  "updated_at": "2026-05-12T14:05:19.724773Z"
+}
