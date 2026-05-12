@@ -75,16 +75,29 @@ Codex-Round-3 dass nonce-CSP via `headers()` ISR brechen würde.
 
 - [ ] PSI Performance Score Delta dokumentiert (kann minimal positive sein nach AdSense weg)
 
-## Evidence
+## Evidence-Notes
 
 - Commits, securityheaders.com Screenshot, observatory Screenshot
 - Repo-Grep-Output zur AdSense-Verifikation
 - Rollback: Vercel-instant + revert AdSense-removal-commit falls Revenue-Impact
 
 ## Done summary
-TBD
+fn-15.4 Third-Party Cleanup + Security Headers SHIP after 5 codex impl-review rounds.
 
+Implemented:
+- AdSense KOMPLETT entfernt: AdSlot.tsx component deleted, Funding Choices script removed, all rg-grep references at 0.
+- Security Headers (next.config.ts async headers()):
+  * SITE-WIDE: HSTS preload+includeSubDomains, X-Content-Type-Options nosniff, Referrer-Policy strict-origin-when-cross-origin, X-Frame-Options SAMEORIGIN
+  * NUR auf / (exact match, no regex blacklist): COOP same-origin + COEP credentialless
+- COOP scope verified: /entdecken (Mapbox), /feed (auth popup), /auth/*, /blog, /events, /planer all NOT affected by COOP/COEP — only / gets them.
+- CSP `'unsafe-inline'` temporarily kept (fn-15.6 will pin via sha256-hash once CRITICAL_CSS exists)
+- GA4 deferred entirely: Consent-Mode-v2-default-denied still pings GA-server, contradicts datenschutz "ausschließlich nach Einwilligung". GA4 stays OFF until separate ConsentGate task lands.
+- datenschutz + ueber-uns rewritten to reflect actual state: only cookieless Vercel Analytics is active.
+
+PSI verification: pending (group 3+4 PR will measure Best-Practices Score = 100).
+
+Codex round-5 SHIP. TypeScript clean.
 ## Evidence
-- Commits:
-- Tests:
+- Commits: 29f86b9 — feat(perf): AdSense raus, GA4 lazy + non-CSP Security Headers (fn-15.4), 8eed4b9 — fix(perf): GA4 Consent Mode v2 default-denied + COOP allow-popups (fn-15.4 r2), c2afe31 — fix(perf): defer GA4 until consent UI + COOP same-origin (fn-15.4 r3), 98b853a — fix(perf): remove GA4 from docs to match deferred-loader state (fn-15.4 r4), 460362e — docs: align task acceptance + datenschutz with deferred GA4 (fn-15.4 r4)
+- Tests: TypeScript clean. Build green. Network-tab verification deferred to post-deploy (production lasstreffen.at after Group 3+4 PR merge).
 - PRs:
