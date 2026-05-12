@@ -87,21 +87,28 @@ export function EventSheet({ children }: EventSheetProps) {
     return () => { document.body.style.overflow = original; };
   }, []);
 
-  // Intercept clicks on internal "back to map" links. EventDetailV2's
-  // hero has a `<Link href="/map">` breadcrumb arrow + "Karte" label,
-  // and the bundesland chip is `<Link href="/map?bundesland=...">`.
-  // When clicked inside the intercepted-route overlay, those Links do a
-  // soft nav that updates the URL but leaves the modal slot stuck on the
-  // intercepted page (parallel-route quirk in Next.js — see
-  // github.com/vercel/next.js/issues/53037 and friends).
+  // Intercept clicks on internal /map links inside the sheet. The
+  // chrome inside EventDetailV2 (breadcrumb arrow, "Karte" label,
+  // bundesland chip with query string) is rendered by a generic
+  // component that doesn't know it's currently inside a parallel
+  // `@modal` slot. Without this interception, a soft nav to /map
+  // updates the URL but leaves the modal slot stuck on the
+  // intercepted page (parallel-route quirk:
+  // github.com/vercel/next.js/issues/53037).
   //
-  // fn-15.5 round-3 (codex): the previous "always router.back()" treated
-  // the bundesland chip (/map?bundesland=...) the same as the bare
-  // breadcrumb (/map). That's wrong — the chip is a deep-link, not a
-  // dismissal. Fix: discriminate by exact href. Bare `/map` is the
-  // breadcrumb → close (back()). Anything with a query/hash is a real
-  // deep link → close FIRST so the modal exit animation plays, then
-  // push to that URL.
+  // fn-15.5 round-4 (codex): semantically every "Karte" link means
+  // "take me to /map", regardless of the underlying route. Sheet
+  // opened from /map → land on /map. Sheet opened from /feed → also
+  // land on /map. router.back() is wrong when the underlying route
+  // isn't /map. The reliable cross-origin pattern: run the exit
+  // keyframe first, then `router.push(href)`. The push triggers a
+  // fresh URL resolution which clears the intercepted slot.
+  //
+  // Using push (not back) drops one nice property — when the user
+  // came from /map, the carousel state on the map page isn't
+  // preserved through a fresh push. That's the documented trade-off:
+  // correct destination beats preserved scroll for a non-trivial
+  // minority of users.
   useEffect(() => {
     const node = overlayRef.current;
     if (!node) return;
@@ -118,19 +125,11 @@ export function EventSheet({ children }: EventSheetProps) {
       if (!isMapLink) return;
       e.preventDefault();
       e.stopPropagation();
-      if (href === '/map') {
-        // Bare breadcrumb — dismiss the sheet via back().
-        close();
-      } else {
-        // Deep link (bundesland chip etc.) — navigate to the target so
-        // the user lands on the filtered map. router.push leaves the
-        // sheet showing for one frame; that's acceptable for a forward
-        // navigation, and the parallel-route slot resolves to null on
-        // the new URL because /map matches no intercepting segment.
-        closingRef.current = true;
-        setExiting(true);
-        window.setTimeout(() => router.push(href), EXIT_DURATION_MS);
-      }
+      // Always run the exit keyframe then push to the requested href.
+      // Same code path for bare '/map' and deep-link '/map?...'.
+      closingRef.current = true;
+      setExiting(true);
+      window.setTimeout(() => router.push(href), EXIT_DURATION_MS);
     };
     node.addEventListener('click', onClick, true); // capture phase
     return () => node.removeEventListener('click', onClick, true);

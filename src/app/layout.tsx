@@ -213,9 +213,17 @@ export default function RootLayout({
           cuts, which the spec explicitly allows.
         */}
         <RouteTransitions />
-        <main className="route-root" style={{ viewTransitionName: 'route-root' }}>
+        {/* fn-15.5 round-4 (codex): wrapper is a <div>, not <main>,
+            because several child pages already render their own
+            <main> landmark (src/app/page.tsx, src/app/join/[code]/
+            page.tsx, src/app/groups/GroupsPageClient.tsx, …). Nested
+            <main> elements are invalid HTML and break assistive-tech
+            landmark navigation. The view-transition needs a stable
+            DOM node for `view-transition-name`, but the tag doesn't
+            matter — <div> works just as well. */}
+        <div className="route-root" style={{ viewTransitionName: 'route-root' }}>
           {children}
-        </main>
+        </div>
         {modal}
         <Toaster
           theme="dark"
