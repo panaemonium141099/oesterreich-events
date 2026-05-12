@@ -25,9 +25,10 @@ interface LandingPageShellProps {
   /** API params for LoadMoreEvents pagination parity */
   paginationParams: Record<string, string>;
   /**
-   * Optional editorial intro shown ABOVE the event list — required by
-   * AdSense "thin content" policy on aggregator landing pages. Comes from
-   * src/content/landing-intros.ts (curated, not auto-generated).
+   * Optional editorial intro shown ABOVE the event list. Boosts SEO ranking
+   * for aggregator landing pages by adding original editorial content above
+   * the filter listings (Search-Engine "thin content" mitigation). Source
+   * lives in src/content/landing-intros.ts (curated, not auto-generated).
    */
   intro?: {
     lead: string;

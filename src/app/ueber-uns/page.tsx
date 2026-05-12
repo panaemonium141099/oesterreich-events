@@ -141,25 +141,23 @@ export default function UeberUnsPage() {
               Wie wir uns finanzieren
             </h2>
             <p className="mb-4">
-              Die Plattform ist kostenlos für Nutzer und soll das auch bleiben. Damit
-              der Betrieb und die Weiterentwicklung sich tragen, nutzen wir aktuell:
+              Die Plattform ist kostenlos für Nutzer und soll das auch bleiben. Aktuell
+              läuft der Betrieb ohne Display-Werbung. Geprüfte Monetarisierungs-Optionen:
             </p>
             <ul className="space-y-3 list-disc list-inside pl-1 mb-4">
               <li>
-                <span className="text-white">Display-Werbung</span> (Google AdSense):
-                standardisierte Werbeanzeigen, klar als Werbung gekennzeichnet und
-                optisch vom redaktionellen Inhalt getrennt. Welche Anzeigen wer sieht,
-                entscheidet Google — wir haben keinen Einfluss darauf und bekommen auch
-                keine personenbezogenen Daten dazu.
+                <span className="text-white">Affiliate-Kooperationen</span> mit
+                Ticket-Vendorn (in Prüfung): sobald eine solche Kooperation live geht,
+                wird sie hier klar ausgewiesen — inklusive Vendor-Name, Art der
+                Zusammenarbeit und den Auswirkungen für euch (Preis bleibt für den
+                Nutzer identisch, da die Provision vom Vendor getragen wird).
+              </li>
+              <li>
+                <span className="text-white">Direkte Veranstalter-Pakete</span>:
+                bezahlte Sichtbarkeits-Slots werden — falls eingeführt — immer
+                sichtbar als „Gesponsert" gekennzeichnet.
               </li>
             </ul>
-            <p>
-              Weitere Monetarisierungsoptionen über Affiliate-Kooperationen mit
-              Ticket-Vendorn sind in Prüfung. Sobald eine solche Kooperation live geht,
-              wird sie hier klar ausgewiesen — inklusive Vendor-Name, Art der
-              Zusammenarbeit und den Auswirkungen für euch (Preis bleibt für den
-              Nutzer identisch, da die Provision vom Vendor getragen wird).
-            </p>
           </section>
 
           {/* Was wir nicht tun */}
@@ -178,10 +176,11 @@ export default function UeberUnsPage() {
                 Dorffest im Burgenland — wer höher platziert ist, hat die besseren
                 Daten, nicht die höhere Provision.
               </li>
-              <li>Wir leiten keine persönlichen Daten an Dritte weiter (über das
-                hinaus, was Google AdSense zur reinen Anzeigen-Auslieferung braucht).
-                Details und Opt-out-Möglichkeiten siehe&nbsp;
-                <Link href="/datenschutz" className="underline underline-offset-2 text-white/90 hover:text-white">Datenschutz</Link>.
+              <li>Wir leiten keine persönlichen Daten an Werbenetzwerke weiter.
+                Aktive Drittanbieter (Supabase, Mapbox, Google OAuth, Google
+                Analytics, Spotify) sind im&nbsp;
+                <Link href="/datenschutz" className="underline underline-offset-2 text-white/90 hover:text-white">Datenschutz</Link>
+                {' '}einzeln aufgelistet.
               </li>
               <li>Wir akzeptieren keine gesponserten oder bezahlten Event-Einträge
                 ohne sichtbare Kennzeichnung. Falls ein Veranstalter jemals zahlt,

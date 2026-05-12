@@ -95,23 +95,14 @@ export default function DatenschutzPage() {
             <ul className="list-disc list-inside mt-3 space-y-1.5">
               <li><span className="text-white/90">Notwendige Cookies:</span> Erforderlich für die Grundfunktionalität der Website (Session-Verwaltung, Authentifizierung). Diese Cookies können nicht deaktiviert werden.</li>
               <li><span className="text-white/90">Analyse-Cookies:</span> Helfen uns zu verstehen, wie Besucher mit der Website interagieren. Diese Cookies werden nur mit Ihrer Zustimmung gesetzt.</li>
-              <li><span className="text-white/90">Marketing- und Werbe-Cookies:</span> Werden von Werbenetzwerken (insbesondere Google AdSense) gesetzt, um personalisierte oder nicht-personalisierte Werbeanzeigen auszuliefern und die Häufigkeit der Anzeige zu begrenzen. Diese Cookies werden nur mit Ihrer Zustimmung gesetzt.</li>
             </ul>
             <p className="mt-3">
-              Sie können Ihre Cookie-Einstellungen jederzeit über den Cookie-Banner am unteren Bildschirmrand ändern.
-              Darüber hinaus können Sie Cookies in Ihren Browsereinstellungen verwalten oder löschen.
+              Derzeit setzen wir keine Werbenetzwerk-Cookies ein. Sollten zukünftig
+              Marketing-Cookies eingeführt werden, werden diese ausschließlich nach
+              ausdrücklicher Einwilligung gesetzt und an dieser Stelle dokumentiert.
             </p>
             <p className="mt-3">
-              Speziell für personalisierte Werbung von Google können Sie zusätzlich unter{' '}
-              <a
-                href="https://adssettings.google.com/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-white/90 underline underline-offset-2 hover:text-white transition-colors"
-              >
-                adssettings.google.com
-              </a>
-              {' '}Ihre Präferenzen verwalten oder die Personalisierung deaktivieren.
+              Sie können Cookies jederzeit in Ihren Browsereinstellungen verwalten oder löschen.
             </p>
           </section>
 
@@ -150,30 +141,14 @@ export default function DatenschutzPage() {
               Anbieter: Spotify AB, Schweden.
             </p>
 
-            <h3 className="text-base font-medium text-white/90 mt-4 mb-2">Google AdSense (Werbeanzeigen)</h3>
+            <h3 className="text-base font-medium text-white/90 mt-4 mb-2">Google Analytics 4 (Reichweitenmessung)</h3>
             <p>
-              Zur Finanzierung der Plattform setzen wir Google AdSense ein, einen Dienst der Google
-              Ireland Limited (Gordon House, Barrow Street, Dublin 4, Irland; „Google"). AdSense
-              verwendet Cookies und vergleichbare Technologien, um Werbeanzeigen auszuliefern und
-              deren Wirksamkeit zu messen.
-            </p>
-            <p className="mt-2">
-              Dabei können folgende Daten verarbeitet werden: IP-Adresse (in der Regel gekürzt),
-              Informationen zum verwendeten Browser und Gerät, aufgerufene Seiten, Klicks auf
-              Anzeigen, sowie — sofern Sie personalisierte Werbung zugelassen haben — aggregierte
-              Interessensprofile.
-            </p>
-            <p className="mt-2">
-              <span className="text-white/90">Rechtsgrundlage:</span> Einwilligung gemäß § 165
-              Abs. 3 TKG 2021 bzw. Art. 6 Abs. 1 lit. a DSGVO (für das Setzen von Marketing-Cookies
-              und personalisierter Werbung). Ohne Einwilligung werden nur nicht-personalisierte
-              Anzeigen ausgeliefert; hierfür besteht berechtigtes Interesse an der Finanzierung
-              des kostenlosen Angebots gemäß Art. 6 Abs. 1 lit. f DSGVO.
-            </p>
-            <p className="mt-2">
-              Die Datenübertragung an Google kann in Drittländer außerhalb der EU/EWR erfolgen;
-              Google ist unter dem EU-US Data Privacy Framework zertifiziert. Weitere Informationen
-              finden Sie in der{' '}
+              Wir setzen Google Analytics 4 zur pseudonymen Messung der Reichweite und Nutzung
+              unserer Website ein. Anbieter: Google Ireland Limited, Gordon House, Barrow Street,
+              Dublin 4, Irland. Dabei werden IP-Adressen vor der Speicherung gekürzt und gerätebezogene
+              Daten in aggregierter Form ausgewertet. Eine Verknüpfung mit anderen Google-Diensten
+              findet nicht statt. Das Analytics-Skript wird ausschließlich nach ausdrücklicher
+              Einwilligung geladen. Weitere Informationen in der{' '}
               <a
                 href="https://policies.google.com/privacy"
                 target="_blank"
@@ -182,16 +157,7 @@ export default function DatenschutzPage() {
               >
                 Datenschutzerklärung von Google
               </a>
-              . Personalisierung können Sie jederzeit unter{' '}
-              <a
-                href="https://adssettings.google.com/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-white/90 underline underline-offset-2 hover:text-white transition-colors"
-              >
-                adssettings.google.com
-              </a>
-              {' '}deaktivieren.
+              .
             </p>
 
             <h3 className="text-base font-medium text-white/90 mt-4 mb-2">Affiliate-Kooperationen (in Prüfung)</h3>

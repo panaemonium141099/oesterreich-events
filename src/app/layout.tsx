@@ -1,14 +1,11 @@
 import type { Metadata } from 'next';
 import Script from 'next/script';
 import { AuthProvider } from '@/lib/supabase/auth-context';
-// Custom CookieBanner removed — Google AdSense Privacy & messaging (Funding
-// Choices) is active on this property and delivers a TCF 2.2-certified,
-// Consent-Mode-v2-integrated banner automatically via the adsbygoogle.js
-// script loaded below. The old custom banner only wrote localStorage and
-// did not send Consent-Mode signals to Google, which would have blocked
-// EU-traffic monetization. Keeping both would show two banners to EU
-// users and create conflicting consent state.
-// File kept at src/components/Legal/CookieBanner.tsx for reference/rollback.
+// AdSense removed in fn-15.4 (Third-Party Cleanup): the property is not
+// approved for AdSense and Funding-Choices banner is no longer needed.
+// The legacy custom CookieBanner at src/components/Legal/CookieBanner.tsx
+// is also unused. Re-introducing either would require a fresh consent /
+// CMP review.
 import { AnimatedLayout } from '@/components/UI/AnimatedLayout';
 import { NotificationToast } from '@/components/Notifications/NotificationToast';
 import { NotificationsProvider } from '@/components/Notifications/NotificationsProvider';
@@ -18,7 +15,13 @@ import { Toaster } from 'sonner';
 import { fraunces, geist, caveat } from '@/lib/fonts';
 import './globals.css';
 
-const ADSENSE_CLIENT_ID = process.env.NEXT_PUBLIC_ADSENSE_CLIENT_ID;
+// GA4 Measurement-ID. Env-gated: when unset (dev / preview without env)
+// no Google-Analytics scripts are emitted. fn-15.4 introduced the lazy
+// next/script loading pattern; fn-15.6 will pin the inline `gtag('config')`
+// init block under a hash-based CSP (no 'unsafe-inline'). The Script tag's
+// `strategy="afterInteractive"` defers gtag.js loading until the page is
+// interactive so it never blocks LCP/FCP.
+const GA_MEASUREMENT_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
 
 const SITE_DESCRIPTION =
   'Finde Events in Wien, Graz, Linz, Salzburg & ganz Österreich — 40.000+ Konzerte, Festivals, Märkte, Partys auf interaktiver Karte. Mit Freunden planen, Lieblings-Artists folgen. Kostenlos.';
@@ -177,13 +180,30 @@ export default function RootLayout({
           strategy="beforeInteractive"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }}
         />
-        {ADSENSE_CLIENT_ID && (
-          <Script
-            async
-            src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${ADSENSE_CLIENT_ID}`}
-            crossOrigin="anonymous"
-            strategy="afterInteractive"
-          />
+        {GA_MEASUREMENT_ID && (
+          <>
+            {/*
+              GA4: gtag.js is loaded via next/script "afterInteractive" so it
+              never blocks first paint. The init block below is inline so we
+              can hash it under a future hash-based CSP (fn-15.6). Two events
+              are sent on load: `js` (timestamp) and `config` (measurement id).
+            */}
+            <Script
+              id="ga4-loader"
+              src={`https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`}
+              strategy="afterInteractive"
+            />
+            <Script
+              id="ga4-init"
+              strategy="afterInteractive"
+              dangerouslySetInnerHTML={{
+                __html: `window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', '${GA_MEASUREMENT_ID}');`,
+              }}
+            />
+          </>
         )}
       </head>
       <body className="antialiased">

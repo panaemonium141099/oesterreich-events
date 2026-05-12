@@ -1,8 +1,9 @@
 /**
  * Redaktionelle Intro-Texte für Landing-Pages.
  *
- * AdSense-Rationale: reine Filter-Listings ohne Einführungstext gelten
- * als "thin content". Jeder hier gepflegte Absatz ist:
+ * Rationale: reine Filter-Listings ohne Einführungstext werden von Search-
+ * Engines als "thin content" eingestuft und schlechter geranked. Jeder hier
+ * gepflegte Absatz ist:
  *   - originell (nicht von anderen Seiten kopiert)
  *   - spezifisch für die Region (keine austauschbaren Platzhalter)
  *   - fokussiert auf Nutzer-Mehrwert (Insider-Tipps, Saison-Kontext)
