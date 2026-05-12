@@ -15,13 +15,10 @@ import { Toaster } from 'sonner';
 import { fraunces, geist, caveat } from '@/lib/fonts';
 import './globals.css';
 
-// GA4 Measurement-ID. Env-gated: when unset (dev / preview without env)
-// no Google-Analytics scripts are emitted. fn-15.4 introduced the lazy
-// next/script loading pattern; fn-15.6 will pin the inline `gtag('config')`
-// init block under a hash-based CSP (no 'unsafe-inline'). The Script tag's
-// `strategy="afterInteractive"` defers gtag.js loading until the page is
-// interactive so it never blocks LCP/FCP.
-const GA_MEASUREMENT_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
+// GA4 deferred until a real consent banner exists (Codex fn-15.4 round 3).
+// `NEXT_PUBLIC_GA_MEASUREMENT_ID` is still defined in .env.example so the
+// future consent-gated wrapper can pick it up, but no Script tag mounts
+// here. See the comment block below the JSON-LD scripts for context.
 
 const SITE_DESCRIPTION =
   'Finde Events in Wien, Graz, Linz, Salzburg & ganz Österreich — 40.000+ Konzerte, Festivals, Märkte, Partys auf interaktiver Karte. Mit Freunden planen, Lieblings-Artists folgen. Kostenlos.';
@@ -180,46 +177,22 @@ export default function RootLayout({
           strategy="beforeInteractive"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }}
         />
-        {GA_MEASUREMENT_ID && (
-          <>
-            {/*
-              GA4 + Consent Mode v2 (Codex CLS-review fn-15.4 round 2):
-              gtag.js is loaded via next/script "afterInteractive" so it
-              never blocks first paint. Consent is defaulted to DENIED so
-              no analytics/ads storage gets used until the user provides
-              explicit opt-in via a future consent UI (or explicit
-              gtag('consent', 'update', {...}) call). Datenschutz page
-              describes this exactly.
+        {/*
+          GA4 deferred (Codex CLS-review fn-15.4 round 3):
+          The datenschutz page says GA4 is loaded "ausschließlich nach
+          ausdrücklicher Einwilligung". Even GA4 Consent Mode v2 with
+          default-denied still loads gtag.js and pings GA-server with
+          cookieless data — that's "advanced consent mode" and contradicts
+          the legal copy. Until a real consent banner exists that gates
+          the Script tags themselves, GA4 stays OFF.
 
-              The init block stays inline so fn-15.6 can hash it under a
-              hash-based CSP (no 'unsafe-inline' once that lands).
-            */}
-            <Script
-              id="ga4-loader"
-              src={`https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`}
-              strategy="afterInteractive"
-            />
-            <Script
-              id="ga4-init"
-              strategy="afterInteractive"
-              dangerouslySetInnerHTML={{
-                __html: `window.dataLayer = window.dataLayer || [];
-function gtag(){dataLayer.push(arguments);}
-gtag('consent', 'default', {
-  'ad_storage': 'denied',
-  'ad_user_data': 'denied',
-  'ad_personalization': 'denied',
-  'analytics_storage': 'denied',
-  'functionality_storage': 'denied',
-  'personalization_storage': 'denied',
-  'security_storage': 'granted'
-});
-gtag('js', new Date());
-gtag('config', '${GA_MEASUREMENT_ID}', { 'anonymize_ip': true });`,
-              }}
-            />
-          </>
-        )}
+          Vercel Analytics (cookieless by design, no consent required)
+          continues to provide pageview metrics in the meantime.
+
+          When a consent UI lands: add the Script tags inside a
+          ConsentGate component that mounts only after user opt-in. Track
+          re-enabling GA4 as a follow-up task.
+        */}
       </head>
       <body className="antialiased">
         <AuthProvider>

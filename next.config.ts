@@ -181,16 +181,19 @@ const nextConfig: NextConfig = {
     // Both headers are scoped to the EXACT path '/' so that Mapbox web-
     // workers (/entdecken), OAuth popups (/auth/*), third-party embeds
     // (/feed, /admin) and individual event/blog pages remain unaffected.
-    // COOP `same-origin-allow-popups` (Codex fn-15.4 round 2): the stricter
-    // `same-origin` would sever the cross-origin opener relationship for any
-    // OAuth popup launched from this route, even if `/` itself doesn't open
-    // popups today (a future button click that uses popup-based auth would
-    // silently break). `same-origin-allow-popups` keeps the cross-origin
-    // isolation benefit (protects against Spectre-style attacks, enables
-    // SharedArrayBuffer) while leaving `window.open(...)` semantically intact
-    // for Google/Apple OAuth flows.
+    // COOP `same-origin` (Codex fn-15.4 round 3 — reverted from earlier
+    // `allow-popups` attempt). `same-origin-allow-popups` is technically
+    // not cross-origin-isolated, so it would NOT satisfy the
+    // `crossOriginIsolated`-flag requirements and weaken the protection
+    // story. Per Landing audit: `/` has only `<Link>` navigations to
+    // /auth/login (no inline popup launchers, no Google One Tap), so
+    // `same-origin` is safe here. If a future change adds popup-based
+    // auth UI directly on `/`, that's the moment to either:
+    //   (a) scope a looser policy to just that sub-surface, or
+    //   (b) switch to redirect-mode OAuth instead of popup.
+    // Today: safe + meets the +Best-Practices score target.
     const landingIsolationHeaders = [
-      { key: 'Cross-Origin-Opener-Policy', value: 'same-origin-allow-popups' },
+      { key: 'Cross-Origin-Opener-Policy', value: 'same-origin' },
       { key: 'Cross-Origin-Embedder-Policy', value: 'credentialless' },
     ];
 
