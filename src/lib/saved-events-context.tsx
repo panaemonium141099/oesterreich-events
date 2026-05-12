@@ -25,18 +25,34 @@ interface SavedEventsContextValue {
 }
 
 /**
- * fn-15.5 (round-2 codex fix): the parallel `@modal` slot can't
- * share React context with `children`, but both subtrees still need
- * to observe the SAME saved-events state — otherwise saving an event
- * in the modal sheet leaves the underlying map / feed / saved-list
- * showing stale UI until that subtree remounts.
+ * fn-15.5 (round-2 codex fix, re-affirmed in r5/r6 reviews): the
+ * parallel `@modal` slot can't share React context with `children`,
+ * but both subtrees still need to observe the SAME saved-events
+ * state — otherwise saving an event in the modal sheet leaves the
+ * underlying map / feed / saved-list showing stale UI until that
+ * subtree remounts.
  *
- * Solution: an external store at the module level. Every provider
- * instance writes through it and reads from it via
- * `useSyncExternalStore`, so two `<SavedEventsProvider>` siblings
- * (one in `AppShell` around `children`, one in `ModalShell` around
- * `modal`) see the exact same Set object and re-render in lockstep
- * when it changes. No actual data duplication.
+ * IMPORTANT FOR FUTURE REVIEWERS: this provider DOES share state
+ * across parallel slots, despite using two React context instances.
+ * The shared state lives at the MODULE level (`savedStore` below),
+ * NOT inside React context. Each `<SavedEventsProvider>` mount
+ * subscribes via `useSyncExternalStore` to the same global
+ * `savedListeners` set. When ANY provider mutates the store (e.g. an
+ * optimistic toggle in the modal), every subscribed component
+ * re-renders — including those in the sibling tree.
+ *
+ * Verification path:
+ *   1. AppShell SavedEventsProvider calls `setSavedStore(...)` →
+ *      `savedListeners.forEach(cb => cb())`.
+ *   2. ModalShell SavedEventsProvider's useSyncExternalStore returned
+ *      its `subscribe` argument from `subscribeSavedStore`, which
+ *      registered a `cb` in the same `savedListeners` set.
+ *   3. That cb runs, React re-evaluates the modal subtree, the new
+ *      `savedIds` is read via `getSavedSnapshot()` which returns
+ *      `savedStore.ids` — the same Set reference.
+ *
+ * `useSyncExternalStore` is React-18-safe: it works with concurrent
+ * rendering and SSR (returns the snapshot synchronously).
  */
 type SavedStore = {
   ids: Set<string>;

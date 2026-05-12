@@ -46,10 +46,43 @@ export function EventSheet({ children }: EventSheetProps) {
   const router = useRouter();
   const overlayRef = useRef<HTMLDivElement>(null);
   const closingRef = useRef(false);
+  // fn-15.5 round-6 (codex): track the exit-timer id so we can clear it
+  // on unmount. Without this, a fast user who closes the sheet and then
+  // navigates again before 220ms elapses gets a stray router.back() /
+  // router.push() after the new page has mounted — popping them one
+  // history entry too far back or redirecting away from the page they
+  // just chose. mountedRef gives the timer callback a way to bail
+  // even if the timer fires during the React unmount window.
+  const exitTimerRef = useRef<number | null>(null);
+  const mountedRef = useRef(true);
   // Tracks whether the exit-animation should be playing. Set to true on
   // close() so the data-state attribute switches and the CSS keyframe
   // runs the slide-out before back().
   const [exiting, setExiting] = useState(false);
+
+  useEffect(() => {
+    return () => {
+      mountedRef.current = false;
+      if (exitTimerRef.current != null) {
+        window.clearTimeout(exitTimerRef.current);
+        exitTimerRef.current = null;
+      }
+    };
+  }, []);
+
+  const scheduleExit = (fn: () => void) => {
+    // Replace any previous pending timer so we never have two in
+    // flight. The exit animation duration is fixed; if the user
+    // triggers a second close (rare), the latest target wins.
+    if (exitTimerRef.current != null) {
+      window.clearTimeout(exitTimerRef.current);
+    }
+    exitTimerRef.current = window.setTimeout(() => {
+      exitTimerRef.current = null;
+      if (!mountedRef.current) return;
+      fn();
+    }, EXIT_DURATION_MS);
+  };
 
   const close = () => {
     if (closingRef.current) return;
@@ -58,13 +91,13 @@ export function EventSheet({ children }: EventSheetProps) {
     // Wait one paint for the CSS slide-out, then pop the URL. router.back()
     // is the only reliable way to dismiss an intercepting route; push('/map')
     // sometimes leaves the modal slot stuck on the intercepted URL.
-    window.setTimeout(() => {
+    scheduleExit(() => {
       if (window.history.length > 1) {
         router.back();
       } else {
         router.push('/map');
       }
-    }, EXIT_DURATION_MS);
+    });
   };
 
   // Escape to close
@@ -129,7 +162,7 @@ export function EventSheet({ children }: EventSheetProps) {
       // Same code path for bare '/map' and deep-link '/map?...'.
       closingRef.current = true;
       setExiting(true);
-      window.setTimeout(() => router.push(href), EXIT_DURATION_MS);
+      scheduleExit(() => router.push(href));
     };
     node.addEventListener('click', onClick, true); // capture phase
     return () => node.removeEventListener('click', onClick, true);
