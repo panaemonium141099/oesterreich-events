@@ -42,15 +42,12 @@ dann gezielt reagieren.
       16 Default (`Chrome/Edge/Firefox 111+, Safari 16.4+`)
 
 ## Evidence
-
-- Bundle-analyzer-diff vor/nach
-- Browserslist-Begründung wenn geändert
-- Rollback: Vercel-instant
-
+- Commits: dc9a79f302cae07d30365b5300d0c46ee613edb8
+- Tests: npm run build (clean rebuild, exit 0), npm test (70 pre-existing failures, none related to browserslist/polyfill change), grep audit across .next/static/chunks/ for polyfill DEFINE patterns + core-js/regenerator/babel-runtime
+- PRs:
 ## Done summary
-TBD
-
-## Evidence
+Audit-first task: identified the 14KB PSI legacy-JS as Next.js's own framework-bundled polyfill-module.js + the noModule polyfill-nomodule.js (modern browsers never download the latter); no third-party polyfill source exists. Pinned browserslist to Next.js 16's MODERN_BROWSERSLIST_TARGET (chrome/edge/firefox 111+, safari 16.4+) as a defensive guardrail — byte-identical bundle output verified by clean rebuild, but locks targets against silent shifts on future Next.js upgrades.
+## Done evidence
 - Commits:
 - Tests:
 - PRs:
