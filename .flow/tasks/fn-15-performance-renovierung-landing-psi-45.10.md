@@ -29,7 +29,7 @@ mit stale-while-revalidate für `/_next/image/*` (30d TTL), Cache-First für
 - [ ] Offline-Fallback-Page wird ausgeliefert wenn Network down ist
 - [ ] PSI Repeat-Visit-LCP <= 500ms (manueller WebPageTest mit "repeat view")
 
-## Evidence
+## Evidence-Notes
 
 - DevTools-Screenshots: Service Worker registered, Cache populated
 - Network-Tab vor/nach (2. Page-Load mit "ServiceWorker"-Source)
@@ -39,9 +39,8 @@ mit stale-while-revalidate für `/_next/image/*` (30d TTL), Cache-First für
   + Vercel-instant für Code-Changes
 
 ## Done summary
-TBD
-
+Merged Workbox 7 (CDN-loaded) into /public/sw.js for stale-while-revalidate caching of /_next/image/* (30-day TTL) and cache-first for /_next/static, /fonts, /category-images; the existing Web-Push handlers are preserved verbatim. <ServiceWorkerProvider /> mounts in the root layout, registers /sw.js on production, and surfaces an "Update verfügbar — neu laden" hybrid banner via <UpdateBanner /> that postMessages {type:'SKIP_WAITING'} to the waiting worker so the user keeps control of the upgrade. CSP gains storage.googleapis.com on script-src + connect-src, /sw.js is served Cache-Control: max-age=0 + must-revalidate, and a styled /offline.html falls in when network is down.
 ## Evidence
-- Commits:
-- Tests:
+- Commits: d8bcfdbdcee2c67111e02fe5ddd26252ab8eee79
+- Tests: npm run build (prebuild + next build + postbuild CSP verifier OK across 94 HTML files / 95 routes), npx tsc --noEmit (4 pre-existing baseline errors in test files, no new errors from fn-15.10), npx vitest run src/__tests__/lib/service-worker.test.ts (7 passed, 0 failed — Workbox 7 import, SWR + 30d TTL, /_next/static CacheFirst, hybrid-banner SKIP_WAITING, /offline.html fallback, push handlers preserved), npx vitest run src/__tests__/components/ (27 passed, 0 failed — no regression in component tests), npx vitest run src/__tests__/lib/ (525 passed / 62 failed — same pre-existing baseline as fn-15.9, none of the failures touch SW code)
 - PRs:

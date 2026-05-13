@@ -1,5 +1,44 @@
 import type { NextConfig } from 'next';
 import bundleAnalyzer from '@next/bundle-analyzer';
+import { readFileSync, existsSync } from 'node:fs';
+import path from 'node:path';
+
+/**
+ * fn-15.6 round 2 — load CRITICAL_CSS sha256 hash from the prebuild JSON
+ * artifact. Synchronous read at config-load time guarantees the value is
+ * present when headers() runs. Codex flagged the previous env-var handoff
+ * as non-deterministic: `.env.production` loading order was not reliable
+ * relative to when next.config.ts is evaluated.
+ *
+ * Fallback to the env var (.env.production) is kept ONLY for the
+ * historic-compat case where the JSON artifact is missing AND the env var
+ * is somehow populated externally (Vercel-dashboard etc.). On production
+ * builds with neither, we throw — same loud-failure behavior the original
+ * comment promised but actually enforced now.
+ */
+function loadCriticalCssHash(): string {
+  const jsonPath = path.join(__dirname, '.csp-hash.json');
+  if (existsSync(jsonPath)) {
+    try {
+      const parsed = JSON.parse(readFileSync(jsonPath, 'utf8')) as { hash?: string };
+      if (parsed.hash) return parsed.hash;
+    } catch {
+      /* fall through to env var */
+    }
+  }
+  const fromEnv = process.env.NEXT_PUBLIC_CRITICAL_CSS_HASH;
+  if (fromEnv) return fromEnv;
+  if (process.env.NODE_ENV === 'production') {
+    throw new Error(
+      '[next.config.ts] CRITICAL_CSS hash missing. Run `node scripts/compute-csp-hash.mjs` ' +
+        'before `next build`. The prebuild npm script does this automatically — if you see ' +
+        'this error it means the prebuild step was skipped (e.g. `next build` invoked directly).',
+    );
+  }
+  return '';
+}
+
+const CRITICAL_CSS_HASH = loadCriticalCssHash();
 
 /**
  * Remote image patterns for Next.js Image component.
@@ -142,33 +181,29 @@ const nextConfig: NextConfig = {
     // and commit for the full removal — repo-grep stays clean of ad-network
     // string fragments to make the audit reproducible.
 
-    // fn-15.6: CRITICAL_CSS_HASH falls through to `''` only during a
-    // misconfigured local dev run where prebuild was skipped. In that
-    // case the CSP would carry just `style-src 'self'`, which blocks
-    // the inline <style> — that's actually the desired loud-failure
-    // behavior: dev gets a glaring CSP violation message instead of
-    // silently shipping `'unsafe-inline'`. Production builds always
-    // run prebuild + postbuild and a missing hash fails the build.
-    const cssHash = process.env.NEXT_PUBLIC_CRITICAL_CSS_HASH ?? '';
+    // fn-15.6: CRITICAL_CSS_HASH is loaded synchronously at module-load
+    // time via loadCriticalCssHash() (see top of file). On production
+    // builds with prebuild skipped, that helper throws — so by the time
+    // headers() runs, cssHash is guaranteed to be the correct sha256
+    // matching the rendered inline <style data-critical-css> block.
+    const cssHash = CRITICAL_CSS_HASH;
     const styleSrcSources = ['style-src', "'self'", 'https://api.mapbox.com'];
     if (cssHash) styleSrcSources.push(`'sha256-${cssHash}'`);
 
-    // fn-15.10: the Service Worker (/sw.js) loads Workbox 7 from the
-    // official Google-hosted CDN via `importScripts`. CSP's script-src
-    // governs `importScripts` in workers — per CSP3 — so the CDN origin
-    // is whitelisted here. `connect-src` is also extended for the same
-    // origin because Workbox-sw's importScripts loads sub-modules via
-    // additional internal fetches at SW boot. No other code on the page
-    // is allowed to talk to the CDN — script-src + connect-src are the
-    // tightest allowlist that lets the SW boot without 'unsafe-inline'
-    // creep on script-src.
+    // fn-15.10 round 2 (codex fix): Workbox is now SELF-HOSTED under
+    // /public/workbox/, so the SW boots from the same origin as the app
+    // — no third-party CDN dependency, no CSP allowlist creep, and the
+    // SW remains evaluable even when network conditions or geoblocking
+    // would otherwise prevent loading from storage.googleapis.com.
+    // The previous storage.googleapis.com entries on script-src +
+    // connect-src have been removed.
     const csp = [
       "default-src 'self'",
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://api.mapbox.com https://events.mapbox.com https://www.googletagmanager.com https://www.google-analytics.com https://storage.googleapis.com",
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://api.mapbox.com https://events.mapbox.com https://www.googletagmanager.com https://www.google-analytics.com",
       styleSrcSources.join(' '),
       "img-src 'self' data: blob: https:",
       "font-src 'self' data:",
-      "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.mapbox.com https://*.tiles.mapbox.com https://events.mapbox.com https://api.spotify.com https://accounts.spotify.com https://www.google-analytics.com https://www.googletagmanager.com https://stats.g.doubleclick.net https://storage.googleapis.com",
+      "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.mapbox.com https://*.tiles.mapbox.com https://events.mapbox.com https://api.spotify.com https://accounts.spotify.com https://www.google-analytics.com https://www.googletagmanager.com https://stats.g.doubleclick.net",
       "worker-src 'self' blob:",
       "child-src 'self' blob:",
       "frame-src 'self' https://accounts.google.com",

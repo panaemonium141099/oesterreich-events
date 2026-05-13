@@ -47,6 +47,13 @@ const __dirname = path.dirname(__filename);
 const REPO_ROOT = path.resolve(__dirname, '..');
 
 const CRITICAL_CSS_PATH = path.join(REPO_ROOT, 'src', 'lib', 'critical-css.ts');
+// fn-15.6 round 2 (codex re-review): switched from .env.production handoff
+// to a JSON build artifact so next.config.ts can synchronously require()
+// the hash at config-load time. Codex flagged that .env.production env
+// loading order was non-deterministic — next build did not always pick
+// up the prebuild write before headers() executed, leaving cssHash='' and
+// silently blocking the inline <style> via CSP.
+const CSP_HASH_JSON_PATH = path.join(REPO_ROOT, '.csp-hash.json');
 const ENV_PROD_PATH = path.join(REPO_ROOT, '.env.production');
 const ENV_KEY = 'NEXT_PUBLIC_CRITICAL_CSS_HASH';
 
@@ -115,10 +122,26 @@ async function main() {
   const cssBytes = Buffer.from(css, 'utf8');
   const hash = sha256Base64(cssBytes);
 
+  // Write 1: JSON build artifact — authoritative handoff to next.config.ts.
+  // next.config.ts uses createRequire+require() to read this synchronously
+  // at config-load time, so the value is guaranteed to be present in the
+  // process headers() runs in (no env-loading-order ambiguity).
+  const jsonBody = JSON.stringify({
+    hash,
+    algorithm: 'sha256',
+    encoding: 'base64',
+    cssBytes: cssBytes.byteLength,
+    generatedAt: new Date().toISOString(),
+    generatedBy: 'scripts/compute-csp-hash.mjs',
+  }, null, 2) + '\n';
+  await writeFile(CSP_HASH_JSON_PATH, jsonBody, 'utf8');
+
+  // Write 2: .env.production for backwards-compat (Vercel dashboards and
+  // any code that still reads NEXT_PUBLIC_CRITICAL_CSS_HASH directly).
   await upsertEnvKey(ENV_PROD_PATH, ENV_KEY, hash);
 
   console.log(
-    `[csp-hash] OK — wrote ${ENV_KEY}=${hash} to .env.production ` +
+    `[csp-hash] OK — sha256=${hash} written to .csp-hash.json + .env.production ` +
       `(critical CSS ${cssBytes.byteLength} bytes raw).`,
   );
 }

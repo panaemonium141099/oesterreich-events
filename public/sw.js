@@ -8,10 +8,19 @@
  *   2. Web-Push delivery (pre-existing) — push + notificationclick handlers
  *      for desktop notifications.
  *
- * Workbox is loaded via importScripts from the official Google CDN. The CSP
- * on the page does not apply to importScripts — SW has its own fetch
- * boundary. We pin the major version (7) to lock the API surface; minor
- * upgrades are picked up automatically from the CDN.
+ * Workbox is SELF-HOSTED under /workbox/ (fn-15.10 round-2 codex fix). The
+ * earlier `https://storage.googleapis.com/workbox-cdn/…` import made the
+ * Service Worker a hard dependency on a single CDN — if that origin was
+ * blocked (corporate networks, CN, etc.) or temporarily unavailable, the
+ * SW would fail to evaluate ENTIRELY, taking down the pre-existing
+ * Web-Push handlers with it. The local copy (Workbox 7.3.0 from
+ * `npm install -D workbox-sw` shipped via /public/workbox/) lives at
+ * `/workbox/workbox-sw.js` and lets the SW boot from the same origin as
+ * the app — same SLA as the rest of the site.
+ *
+ * If Workbox loading fails (corruption, malformed file), the catch-block
+ * below downgrades the SW to push-only mode so Web-Push notifications
+ * still work even when runtime image caching is broken.
  *
  * Update strategy (Pillar 10 — Hybrid Banner, NOT skipWaiting):
  *   - install() does NOT call self.skipWaiting() unconditionally any more.
@@ -31,18 +40,38 @@
 // fn-15.10 — bump on every cache-shape change so old caches expire on update.
 const SW_VERSION = 'v1';
 
-importScripts('https://storage.googleapis.com/workbox-cdn/releases/7.3.0/workbox-sw.js');
+// fn-15.10 round 2 (codex): self-hosted Workbox; same-origin guarantees
+// the SW can evaluate regardless of upstream CDN reachability.
+let wb = null;
+let workboxLoaded = false;
+try {
+  importScripts('/workbox/workbox-sw.js');
+  // `workbox` is now a global, courtesy of workbox-sw.js.
+  // eslint-disable-next-line no-undef
+  wb = workbox;
+  // Tell Workbox where to find its sub-modules (we ship them under /workbox/).
+  wb.setConfig({
+    modulePathPrefix: '/workbox/',
+    debug: false,
+  });
+  workboxLoaded = true;
+} catch (err) {
+  // Workbox is broken/missing — log and continue. The runtime-caching
+  // event listeners below check `workboxLoaded` and short-circuit if false,
+  // so the Web-Push push/notificationclick handlers (further down) still
+  // register and notifications continue working.
+  // eslint-disable-next-line no-console
+  console.error('[sw] Workbox failed to load — runtime caching disabled, push handlers still active:', err);
+}
 
-// `workbox` is now a global, courtesy of workbox-sw.js.
-// eslint-disable-next-line no-undef
-const wb = workbox;
-
-wb.core.setCacheNameDetails({
-  prefix: 'lasstreffen',
-  suffix: SW_VERSION,
-  precache: 'precache',
-  runtime: 'runtime',
-});
+if (workboxLoaded) {
+  wb.core.setCacheNameDetails({
+    prefix: 'lasstreffen',
+    suffix: SW_VERSION,
+    precache: 'precache',
+    runtime: 'runtime',
+  });
+}
 
 // Skip waiting only on FIRST install (no previous controller).
 // On subsequent updates we wait for an explicit user-driven SKIP_WAITING
@@ -102,7 +131,12 @@ self.addEventListener('message', (event) => {
 
 // ----------------------------------------------------------------------
 // Workbox routing — fn-15.10 acceptance.
+// All runtime caching is wrapped in `if (workboxLoaded)` so the Web-Push
+// handlers below register and work even if Workbox itself failed to load
+// (fn-15.10 round-2 codex fallback).
 // ----------------------------------------------------------------------
+
+if (workboxLoaded) {
 
 // /_next/image/* — stale-while-revalidate, 30-day TTL.
 // This is the headline win: Vercel's image-optimisation pipeline serves
@@ -199,8 +233,12 @@ wb.routing.registerRoute(
   },
 );
 
+} // end if (workboxLoaded) — runtime caching block
+
 // ----------------------------------------------------------------------
 // Web-Push handlers (preserved verbatim from pre-fn-15.10 SW).
+// These register UNCONDITIONALLY so Web-Push notifications keep working
+// even when Workbox failed to load (fn-15.10 round-2 codex fallback).
 // ----------------------------------------------------------------------
 
 // Next.js app/icon.tsx generates these routes at build time. No PNG file in /public needed.
