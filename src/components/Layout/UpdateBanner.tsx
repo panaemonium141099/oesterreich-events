@@ -66,27 +66,34 @@ export function UpdateBanner() {
       return;
     }
 
-    // Multi-tab edge case (codex round 5): tab A clicked "Update" first;
-    // SW already activated and called clients.claim(). When tab B later
-    // clicks the still-visible banner, the worker held in workerRef is
-    // no longer in 'waiting' state (it's already the controller), so
-    // posting SKIP_WAITING is a no-op and no controllerchange fires.
-    // Without an immediate reload here, tab B's banner click would do
-    // nothing.
+    // Multi-tab edge case (codex round 5-9): tab A clicked "Update" first;
+    // SW activated + called clients.claim(). Tab B later sees its still-
+    // visible banner from the earlier updateavailable event and clicks
+    // "Neu laden".
     //
-    // Logic:
-    //   - If the worker is still 'waiting' or 'installing' → normal path
-    //     (signal upgrade intent, postMessage, wait for controllerchange).
-    //   - Otherwise (already active or redundant) → reload right now.
-    const alreadyActivated =
-      worker.state === 'activated' ||
-      worker.state === 'redundant' ||
-      (navigator.serviceWorker.controller != null &&
-        navigator.serviceWorker.controller === worker);
+    // We need to reload immediately ONLY when this tab is provably under
+    // the new controller already (no future controllerchange will fire).
+    // worker.state === 'activated' alone is NOT sufficient: clients.claim()
+    // has a small async window where the worker is activated but THIS tab
+    // is still under the old controller. Reloading there would re-serve
+    // the old controller AND skip the upgrade-intent signal, leaving the
+    // tab on stale bytes when the later controllerchange suppresses
+    // itself.
+    //
+    // The narrow safe condition: navigator.serviceWorker.controller IS
+    // the same worker as our updateavailable target. That can only be
+    // true after clients.claim() has finished propagating to this tab —
+    // i.e. there really is nothing left to wait for.
+    //
+    // worker.state === 'redundant' is a separate "give up" branch — the
+    // banner's worker reference is dead, so the only way out is a plain
+    // reload so the SW lifecycle can re-evaluate from scratch.
+    const newWorkerIsAlreadyController =
+      navigator.serviceWorker.controller != null &&
+      navigator.serviceWorker.controller === worker;
+    const workerIsRedundant = worker.state === 'redundant';
 
-    if (alreadyActivated) {
-      // No future controllerchange will fire — reload directly so the
-      // tab actually picks up the new bytes the user asked for.
+    if (newWorkerIsAlreadyController || workerIsRedundant) {
       window.location.reload();
       return;
     }
