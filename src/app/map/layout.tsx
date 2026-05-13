@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { ModalShell } from '@/components/Layout/ModalShell';
+import { AppShell } from '@/components/Layout/AppShell';
 
 export const metadata: Metadata = {
   title: 'Event-Karte Österreich — Alle Veranstaltungen auf einer Karte',
@@ -23,18 +23,17 @@ export const metadata: Metadata = {
 
 /**
  * /map — anonymously browsable map of all events with auth-aware
- * marker actions (save, RSVP from popup).
+ * marker actions (save, RSVP from popup) plus a top-bar notification
+ * bell.
  *
- * fn-15.5 round-10 (codex): previously wrapped in <AppShell hideSocialNav>,
- * which mounted NotificationsProvider (full Supabase realtime channel
- * subscription) on a public route that doesn't render any
- * notifications UI. The map's authenticated affordances need only
- * AuthProvider (profile pill, save buttons read user state) and
- * SavedEventsProvider (the saved-event ring on markers + popup save
- * button). <ModalShell> mounts exactly those two; no Notifications,
- * no SocialNav. Mapbox stays on /map (~480 KB chunk) by intent;
- * fn-15.5's bundle goal was to keep Mapbox out of /, not out of /map.
+ * fn-15.5 round-13 (codex): the top-bar bell uses NotificationBell
+ * which calls useNotifications() — so /map DOES need
+ * NotificationsProvider after all. Reverted to <AppShell hideSocialNav>:
+ * full provider stack + bell unread badge work, just no floating
+ * bottom-nav (the map's own UI is bottom-heavy already). Mapbox
+ * stays on /map (~480 KB chunk) by intent; fn-15.5's bundle goal was
+ * to keep Mapbox out of `/`, not out of /map.
  */
 export default function MapLayout({ children }: { children: React.ReactNode }) {
-  return <ModalShell>{children}</ModalShell>;
+  return <AppShell hideSocialNav>{children}</AppShell>;
 }
