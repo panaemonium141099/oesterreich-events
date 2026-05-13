@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { ProfileDropdown } from '@/components/Layout/ProfileDropdown';
 import { NotificationBell } from '@/components/Notifications/NotificationBell';
 import { DesktopPushToggle } from '@/components/Notifications/DesktopPushToggle';
+import { ArtistMatchBundles } from '@/components/Notifications/ArtistMatchBundles';
 import { useAuth } from '@/lib/supabase/auth-context';
 import { trackEvent } from '@/lib/analytics';
 import { navigateFromNotification } from '@/lib/utils/notification-nav';
@@ -110,8 +111,13 @@ export function NotificationsPageClient() {
     );
   }
 
+  // Hide raw `spotify_match` rows from the date-grouped list — they are
+  // rendered as the bundled ArtistMatchBundles section instead. The bell
+  // unread count + markAllRead still operate on the full list so an
+  // expanded bundle tap clears them.
+  const standardNotifications = notifications.filter((n) => n.type !== 'spotify_match');
   const hasUnread = notifications.some((n) => !n.read);
-  const groups = groupByDate(notifications);
+  const groups = groupByDate(standardNotifications);
 
   return (
     <div className="bg-surface-elevated min-h-screen text-white pb-24">
@@ -142,6 +148,11 @@ export function NotificationsPageClient() {
           </button>
         )}
 
+        {/* Artist-match bundles — one card per followed artist, expandable
+            to show the events they're playing at. Replaces the per-event
+            notification spam for `type='spotify_match'` rows. */}
+        <ArtistMatchBundles />
+
         {/* Loading state */}
         {loadingData && (
           <div className="space-y-3">
@@ -157,7 +168,11 @@ export function NotificationsPageClient() {
           </div>
         )}
 
-        {/* Empty state */}
+        {/* Empty state — only when there are no bundles AND no standard
+            notifications. (ArtistMatchBundles renders nothing when empty,
+            so checking standardNotifications + total here is safe: if any
+            bundle exists, `notifications` will hold at least the
+            `spotify_match` rows that drive it.) */}
         {!loadingData && notifications.length === 0 && (
           <div className="flex flex-col items-center justify-center py-20 text-center">
             <svg className="w-12 h-12 text-white/20 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
