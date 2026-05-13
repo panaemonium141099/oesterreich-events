@@ -51,16 +51,20 @@ Caveat komplett raus.
       Component-lokaler font-import
 - [ ] Total Font-Bytes auf Landing: <= 50KB (von 266KB)
 
-## Evidence
+## Evidence-Notes
 
 - Network-Tab-Screenshot vor/nach
 - Bundle-Size-diff (Fonts-Chunk)
 - Rollback: Vercel-instant + revert fonts.ts
 
 ## Done summary
-TBD
-
+fn-15.8: migrated Geist + Fraunces + Caveat from `next/font/google` to
+self-hosted `next/font/local` with Latin-1 subsets in /public/fonts/.
+Geist (28 KB, display:optional, preload:true) stays at the root for the
+brand wordmark; Fraunces + Caveat split into `src/lib/fonts-planer.ts`
+and import only from /groups, /groups/[id], /join layouts. Landing font
+weight dropped from ~266 KB to ~28 KB (well under the 50 KB target).
 ## Evidence
-- Commits:
-- Tests:
+- Commits: ed30a7437f9b44e9971a7067d06ac0f5095faa0c
+- Tests: npm run build (green: 90+ routes built, no errors), baseline npm test compared pre/post: identical 70/1268 pre-existing failures (none introduced by fn-15.8), rg "caveat|Caveat" src/lib/fonts.ts src/app/layout.tsx -> 0 matches, ls -la public/fonts/geist/Geist-Variable.woff2 -> 28,400 B (< 35 KB target)
 - PRs:
