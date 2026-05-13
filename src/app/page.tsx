@@ -1,3 +1,4 @@
+import { Suspense } from 'react';
 import Link from 'next/link';
 import { HeroSection } from '@/components/Landing/HeroSection';
 import { LandingStats } from '@/components/Landing/LandingStats';
@@ -8,6 +9,37 @@ import { Onboarding } from '@/components/Landing/Onboarding';
 import { Footer } from '@/components/Legal/Footer';
 import { LandingSections } from '@/components/Landing/LandingSections';
 import { ScrollHint } from '@/components/Landing/ScrollHint';
+
+/**
+ * Pixel-perfect fallback for `LandingStats` while the ISR-build's RPC
+ * round-trips. Matches the loaded badge's vertical rhythm (text-lg gap
+ * + uppercase tracking-line) so the prerendered HTML and the eventual
+ * hydrated content have identical bounding boxes — zero CLS.
+ *
+ * Why we need a fallback at all if the page is ISR-prerendered: at
+ * build time the await resolves and the number is baked into the HTML,
+ * so visitors NEVER see this fallback in production. But on the very
+ * first Edge regeneration after a 1 h cache miss (or in dev), Next will
+ * stream and Suspense kicks in for those ~80–400 ms. The fallback
+ * reserves the row's height so the badge below the title doesn't push
+ * the search box down when the real number lands.
+ */
+function StatsBadgeFallback() {
+  return (
+    <div
+      className="flex flex-col items-center gap-2 animate-fade-in opacity-0"
+      style={{ animationDelay: '0.6s', animationFillMode: 'forwards' }}
+      aria-hidden="true"
+    >
+      <p className="text-white/40 text-lg md:text-xl invisible">
+        Events in ganz Österreich
+      </p>
+      <span className="inline-flex items-center gap-1.5 text-[10px] font-medium uppercase tracking-[0.18em] text-white/25 invisible">
+        Täglich aktualisiert
+      </span>
+    </div>
+  );
+}
 
 // WebSite + Organization JSON-LD live now in the root layout so every page
 // emits them, not just the landing. No page-local JSON-LD here anymore.
@@ -92,8 +124,15 @@ export default function LandingPage() {
             los ist.
           </h1>
 
-          {/* Stats */}
-          <LandingStats />
+          {/* Stats — async RSC (fn-15.9): awaits Supabase RPC at render
+              time so the number is baked into the prerendered HTML. The
+              Suspense fallback only ever paints during the brief Edge-
+              regeneration window after a 1h ISR cache miss; it reserves
+              the row's height so there's no CLS when the real badge
+              streams in. */}
+          <Suspense fallback={<StatsBadgeFallback />}>
+            <LandingStats />
+          </Suspense>
 
           {/* Tagline */}
           <p
