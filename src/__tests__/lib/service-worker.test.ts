@@ -24,9 +24,46 @@ import path from 'node:path';
 const SW_PATH = path.resolve(process.cwd(), 'public', 'sw.js');
 
 describe('fn-15.10 service worker', () => {
-  it('imports Workbox 7 from the official CDN', async () => {
+  it('imports SELF-HOSTED Workbox from /workbox/workbox-sw.js (codex round-3: no third-party CDN dependency)', async () => {
     const src = await readFile(SW_PATH, 'utf8');
-    expect(src).toMatch(/importScripts\(\s*['"]https:\/\/storage\.googleapis\.com\/workbox-cdn\/releases\/7\./);
+    expect(src).toMatch(/importScripts\(\s*['"]\/workbox\/workbox-sw\.js['"]/);
+    // CDN importScripts call MUST be gone — having it back would re-
+    // introduce the third-party-SLA dependency codex flagged in round-2
+    // review. We allow the string in comments (historical context).
+    expect(src).not.toMatch(/importScripts\([^)]*storage\.googleapis\.com[^)]*\)/);
+  });
+
+  it('wraps Workbox bootstrap in try/catch so Web-Push survives Workbox load failure', async () => {
+    const src = await readFile(SW_PATH, 'utf8');
+    expect(src).toMatch(/try\s*\{[\s\S]*importScripts\(\s*['"]\/workbox\/workbox-sw\.js['"]/);
+    // workboxLoaded boolean gate is what protects push handlers from
+    // crashing if Workbox itself failed to evaluate.
+    expect(src).toMatch(/workboxLoaded\s*=\s*true/);
+    expect(src).toMatch(/if\s*\(\s*workboxLoaded\s*\)/);
+  });
+
+  it('vendors every Workbox module the SW actually uses (no lazy-CDN fallback)', async () => {
+    const { existsSync } = await import('node:fs');
+    const workboxDir = path.resolve(process.cwd(), 'public', 'workbox');
+    // Modules referenced in public/sw.js — every one MUST be self-hosted
+    // because Workbox lazy-loads them on first wb.<module> access. A
+    // missing module = SW evaluation throws = Web-Push handlers die too.
+    const required = [
+      'workbox-sw.js',
+      'workbox-core.prod.js',
+      'workbox-routing.prod.js',
+      'workbox-strategies.prod.js',
+      'workbox-expiration.prod.js',
+      'workbox-cacheable-response.prod.js',
+    ];
+    for (const file of required) {
+      expect(existsSync(path.join(workboxDir, file)), `missing ${file}`).toBe(true);
+    }
+  });
+
+  it('configures Workbox modulePathPrefix to /workbox/ so lazy-loaded modules resolve same-origin', async () => {
+    const src = await readFile(SW_PATH, 'utf8');
+    expect(src).toMatch(/modulePathPrefix:\s*['"]\/workbox\/['"]/);
   });
 
   it('caches /_next/image with stale-while-revalidate and 30-day TTL', async () => {
