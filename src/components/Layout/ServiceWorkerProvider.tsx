@@ -58,21 +58,24 @@ export function ServiceWorkerProvider() {
     if (registrationSucceeded || registrationInFlight) return;
     registrationInFlight = true;
 
-    // Snapshot whether a controller was already present at registration
-    // time. If yes → any future controllerchange is an UPDATE we care
-    // about. If no → the first controller assignment is the first install
-    // and we MUST NOT reload (codex round-3 fix: previously every
-    // controllerchange reloaded, double-firing landing analytics on the
-    // very first visit).
-    const hadControllerAtRegistration = !!navigator.serviceWorker.controller;
-
+    // Reload-on-controllerchange policy (codex round 3 + 4 final):
+    //   - First install (no previous controller anywhere) → SW does
+    //     skipWaiting + clients.claim, fires controllerchange. DON'T reload.
+    //   - Multi-tab update: tab A clicks "Update", SW calls skipWaiting +
+    //     clients.claim. Other already-open tabs (B, C, …) get a
+    //     controllerchange they did NOT initiate. DON'T reload them
+    //     either — they might be mid-form-input and we'd discard the
+    //     user's work. They pick up new bytes on next user navigation.
+    //   - THIS tab clicked "Neu laden": userTriggeredUpgrade is true,
+    //     reload happens.
+    //
+    // Net: reload requires explicit per-tab user intent. Anything else
+    // is silently ignored — codex round-4 ruled out `hadControllerAt
+    // Registration` because it punishes passive tabs in multi-tab sessions.
     let reloading = false;
     const onControllerChange = () => {
       if (reloading) return;
-      // Only reload when the upgrade was user-initiated (banner click) OR
-      // there was already a controller before registration. Both signals
-      // distinguish "real update" from "first install of the SW".
-      if (!userTriggeredUpgrade && !hadControllerAtRegistration) return;
+      if (!userTriggeredUpgrade) return;
       reloading = true;
       window.location.reload();
     };
