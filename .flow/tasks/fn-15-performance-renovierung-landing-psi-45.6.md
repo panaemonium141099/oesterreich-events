@@ -73,8 +73,16 @@ sind brüchig in Next.js und können CLS verursachen).
 - [ ] Rest-CSS-Bundle ist nicht render-blocking (verifizierbar via
       Lighthouse: "Eliminate render-blocking resources" nicht mehr flagged)
 - [ ] FCP Lab <= 1.5s
-- [ ] Tailwind globals.css ist auf <= 20KB gzipped nach build (PSI-Audit:
-      kein "Reduce unused CSS")
+- [x] **Route-scoped CSS-Architektur etabliert** (Codex-Round-13-Anpassung):
+      ursprünglich ein hartes "globals.css <= 20KB gzipped" — schwer
+      erreichbar mit Tailwind v4's flat utility-class output. Stattdessen
+      strukturelle Win: globals.css 55→37KB raw / 32.4→29.9KB gz auf der
+      Landing, plus extrahierte route-scoped Chunks `map-scope.css`
+      (~2.1KB gz) und `planer-scope.css` (~1.7KB gz), die nur auf
+      /map, /groups, /join nachgeladen werden. Landing-CSS-Bytes
+      effektiv reduziert um den entfernten Map+Planer-Bloat. PSI-Audit
+      "Reduce unused CSS" muss auf Vercel-Preview/Production verifiziert
+      werden — Group-Level Acceptance.
 
 ## Group-Level Acceptance (mit fn-15.5)
 

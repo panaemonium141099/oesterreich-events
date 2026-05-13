@@ -80,17 +80,26 @@ export function UpdateBanner() {
     // tab on stale bytes when the later controllerchange suppresses
     // itself.
     //
-    // The narrow safe condition: navigator.serviceWorker.controller IS
-    // the same worker as our updateavailable target. That can only be
-    // true after clients.claim() has finished propagating to this tab —
-    // i.e. there really is nothing left to wait for.
+    // The narrow safe condition: this tab is provably already controlled
+    // by a worker matching the same scriptURL as our updateavailable
+    // target. That can only be true after clients.claim() has finished
+    // propagating to this tab — there really is nothing left to wait for.
+    //
+    // Codex round-13: use scriptURL equality instead of object reference
+    // equality. Browsers may expose different ServiceWorker wrapper
+    // objects for the same underlying worker across API surfaces
+    // (registration.waiting vs navigator.serviceWorker.controller), so
+    // === would falsely report "still waiting" in passive tabs and
+    // never reload.
     //
     // worker.state === 'redundant' is a separate "give up" branch — the
     // banner's worker reference is dead, so the only way out is a plain
     // reload so the SW lifecycle can re-evaluate from scratch.
+    const controller = navigator.serviceWorker.controller;
     const newWorkerIsAlreadyController =
-      navigator.serviceWorker.controller != null &&
-      navigator.serviceWorker.controller === worker;
+      controller != null &&
+      controller.scriptURL === worker.scriptURL &&
+      controller.state === 'activated';
     const workerIsRedundant = worker.state === 'redundant';
 
     if (newWorkerIsAlreadyController || workerIsRedundant) {
