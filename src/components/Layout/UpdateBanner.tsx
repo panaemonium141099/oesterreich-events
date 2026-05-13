@@ -62,22 +62,47 @@ export function UpdateBanner() {
   const onReload = () => {
     const worker = workerRef.current;
     if (!worker) {
-      // Defensive fallback — shouldn't happen because we only render
-      // the banner once `workerRef` is populated. If it does, just
-      // reload (the new SW will take over on the next request).
       window.location.reload();
       return;
     }
-    // Tell ServiceWorkerProvider that the upcoming controllerchange is
-    // user-initiated (codex round-3 fix: distinguishes "user accepted
-    // update" from "first install of the SW" so first-time visitors
-    // don't get an unsolicited reload).
+
+    // Multi-tab edge case (codex round 5): tab A clicked "Update" first;
+    // SW already activated and called clients.claim(). When tab B later
+    // clicks the still-visible banner, the worker held in workerRef is
+    // no longer in 'waiting' state (it's already the controller), so
+    // posting SKIP_WAITING is a no-op and no controllerchange fires.
+    // Without an immediate reload here, tab B's banner click would do
+    // nothing.
+    //
+    // Logic:
+    //   - If the worker is still 'waiting' or 'installing' → normal path
+    //     (signal upgrade intent, postMessage, wait for controllerchange).
+    //   - Otherwise (already active or redundant) → reload right now.
+    const alreadyActivated =
+      worker.state === 'activated' ||
+      worker.state === 'redundant' ||
+      (navigator.serviceWorker.controller != null &&
+        navigator.serviceWorker.controller === worker);
+
+    if (alreadyActivated) {
+      // No future controllerchange will fire — reload directly so the
+      // tab actually picks up the new bytes the user asked for.
+      window.location.reload();
+      return;
+    }
+
+    // Normal hybrid-banner path: signal intent, then skipWaiting.
     window.dispatchEvent(new CustomEvent('lt-sw-skip-waiting'));
-    // Tell the waiting worker to call self.skipWaiting().
-    // ServiceWorkerProvider's `controllerchange` handler will reload the
-    // page once the new SW takes control. We don't reload ourselves
-    // because doing both can race and double-reload.
     worker.postMessage({ type: 'SKIP_WAITING' });
+
+    // Belt-and-suspenders: if controllerchange doesn't fire within 2s
+    // (e.g. SW state transition issues, browser quirks), reload anyway.
+    // The flag set above means ServiceWorkerProvider's handler will also
+    // try to reload, but its `reloading` guard handles the race.
+    window.setTimeout(() => {
+      if (!document.hidden) window.location.reload();
+    }, 2000);
+
     // Optimistically dismiss the banner — if controllerchange takes a
     // few hundred ms, the user shouldn't see the button bounce around.
     setVisible(false);
