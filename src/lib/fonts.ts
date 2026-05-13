@@ -1,50 +1,57 @@
 /**
- * Planer-Flow typography stack.
+ * Site typography stack — fn-15.8 (Self-host Fonts + Latin-1 Subsetting).
  *
- * We keep the site default (Inter via globals.css `body{}`) untouched so the
- * rest of the app doesn't re-paint. Two CSS variables get mounted at the
- * <html> level and are applied only where a component opts-in via the
- * `.planer-scope` / `.serif-display` utilities (defined in globals.css).
+ * Before fn-15.8: all three families were loaded from `next/font/google`
+ * at the ROOT layout. That meant the landing page (anonymous, no Planer
+ * scope) downloaded ~266 KB of fonts up-front, even though only Geist
+ * has a non-system fallback there.
  *
- *   Fraunces — variable serif, used for large editorial moments only.
- *              SOFT axis adds a subtle terminal-rounding for a less brittle
- *              feel; opsz auto-adjusts letterform for size.
- *   Geist    — variable sans, replaces Inter inside the planer scope for
- *              slightly sharper letterforms.
+ * After fn-15.8:
+ *  - Geist Variable is self-hosted in /public/fonts/geist/, Latin-1
+ *    subset (~28 KB woff2), and mounted at the root with
+ *    `display: 'optional'` + `preload: true`. This means it never
+ *    blocks first paint (FCP) — if the woff2 isn't in the cache and
+ *    network is slow, the system fallback renders and Geist is used
+ *    silently on the NEXT navigation.
+ *  - The editorial serif (Fraunces) and the handwriting face for
+ *    pinboard post-its move to `fonts-planer.ts`, which is imported
+ *    ONLY by the layouts that actually need them (`/groups`,
+ *    `/groups/[id]`, `/join`). Landing, blog, /map and other routes
+ *    never pull those bytes.
  *
- * Both fonts are self-hosted by next/font → no layout shift, no CLS, no
- * Google Fonts network call at runtime.
+ * Why Geist still loads on every route:
+ *  - <Logo> on the landing page hard-codes `font-family: 'Geist', …`
+ *    (see src/components/Brand/Logo.tsx). Without the font preloaded,
+ *    the wordmark would FOIT to system-ui until the user hits a
+ *    secondary route that imports Geist. Mounting it at the root
+ *    keeps the brand consistent and is cheap (~28 KB optional).
+ *
+ * Why `display: 'optional'`:
+ *  - `swap` would still cause a CLS hit when Geist arrives and the
+ *    fallback width shifts. `optional` tells the browser: if the font
+ *    isn't ready in <=100 ms, just keep the fallback. Zero layout
+ *    shift, no font-flash on cold cache. The font then warms the
+ *    cache for the next navigation.
+ *
+ * Why `preload: true`:
+ *  - Geist is used above-the-fold (logo, hero text via .planer-scope
+ *    fallback). Next.js emits a <link rel="preload"> for it which
+ *    pairs with `display: optional` to maximize the chance the font
+ *    is ready before paint.
  */
-import { Fraunces } from 'next/font/google';
-import { Geist } from 'next/font/google';
-import { Caveat } from 'next/font/google';
+import localFont from 'next/font/local';
 
-export const fraunces = Fraunces({
-  subsets: ['latin'],
-  // `variable` unlocks the full weight-range (100-900) AND lets us touch the
-  // custom axes below. If we used discrete weights, Next rejects axes.
-  weight: 'variable',
-  style: ['normal', 'italic'],
-  variable: '--font-fraunces',
-  display: 'swap',
-  // Variable axes we want to style via font-variation-settings later:
-  //   SOFT (0-100) → slight terminal softness for a less brittle look
-  //   opsz         → optical sizing auto-tuned per size
-  axes: ['SOFT', 'opsz'],
-});
-
-export const geist = Geist({
-  subsets: ['latin'],
-  weight: 'variable',
+export const geist = localFont({
+  src: [
+    {
+      path: '../../public/fonts/geist/Geist-Variable.woff2',
+      weight: '100 900',
+      style: 'normal',
+    },
+  ],
   variable: '--font-geist',
-  display: 'swap',
-});
-
-// Handwritten font for pinboard post-its. Keeps things "analogue" on the
-// stickies against the editorial serif + clean sans elsewhere.
-export const caveat = Caveat({
-  subsets: ['latin'],
-  weight: 'variable',
-  variable: '--font-caveat',
-  display: 'swap',
+  display: 'optional', // never block FCP; warm cache for next paint
+  preload: true, // emit <link rel="preload"> in <head>
+  fallback: ['ui-sans-serif', 'system-ui', 'sans-serif'],
+  // Geist's x-height is very close to system-ui — no adjust needed.
 });

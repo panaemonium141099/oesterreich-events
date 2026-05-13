@@ -20,7 +20,13 @@ import Script from 'next/script';
 // AdSense was removed in fn-15.4; CookieBanner is also unused.
 import { Toaster } from 'sonner';
 import { RouteTransitions } from '@/components/Layout/RouteTransitions';
-import { fraunces, geist, caveat } from '@/lib/fonts';
+// fn-15.8: only Geist mounts at the root. The editorial serif and the
+// handwriting face moved to `@/lib/fonts-planer` and are imported by
+// per-route layouts that actually render the .planer-scope chrome
+// (/groups, /groups/[id], /join). The landing now downloads ~28 KB of
+// fonts instead of ~266 KB. All three faces are self-hosted from
+// /public/fonts/, Latin-1 subset.
+import { geist } from '@/lib/fonts';
 import './globals.css';
 
 // GA4 deferred until a real consent banner exists (Codex fn-15.4 round 3).
@@ -171,7 +177,7 @@ export default function RootLayout({
   modal: React.ReactNode;
 }) {
   return (
-    <html lang="de" className={`${fraunces.variable} ${geist.variable} ${caveat.variable}`}>
+    <html lang="de" className={geist.variable}>
       <head>
         <Script
           id="ld-website"
