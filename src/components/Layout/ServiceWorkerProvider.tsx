@@ -146,9 +146,31 @@ export function ServiceWorkerProvider() {
         registrationInFlight = false;
       });
 
+    // Codex round-13 (Minor): root-layout in App Router stays mounted
+    // for the entire SPA session — without a retry path, a transient
+    // first-load failure (offline blip, 5xx on /sw.js, flaky connection)
+    // would lock out runtime caching for the whole session. Listen for
+    // the next `online` event and try again once.
+    const onOnline = () => {
+      if (registrationSucceeded || registrationInFlight) return;
+      // Re-enter the registration flow. We don't need the lifecycle
+      // listeners again — those were attached above and stay active.
+      registrationInFlight = true;
+      void navigator.serviceWorker
+        .register('/sw.js', { scope: '/' })
+        .then(() => { registrationSucceeded = true; })
+        .catch((err) => {
+          // eslint-disable-next-line no-console
+          console.warn('[sw] retry registration after online failed', err);
+        })
+        .finally(() => { registrationInFlight = false; });
+    };
+    window.addEventListener('online', onOnline);
+
     return () => {
       navigator.serviceWorker.removeEventListener('controllerchange', onControllerChange);
       window.removeEventListener('lt-sw-skip-waiting', onUserUpgrade);
+      window.removeEventListener('online', onOnline);
     };
   }, []);
 

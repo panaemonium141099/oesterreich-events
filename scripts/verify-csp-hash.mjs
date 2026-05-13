@@ -224,13 +224,22 @@ async function main() {
         );
         process.exit(1);
       }
+      // Codex round-14: the hash now lives on `style-src-elem` (the CSP3
+      // <style>-block-specific directive), not the bare `style-src`. We
+      // verify the hash appears inside the style-src-elem segment so a
+      // regression that drops the directive doesn't slip through.
       const expected = `sha256-${expectedHash}`;
-      const missingHash = cspHeaders.filter((h) => !h.value.includes(expected));
+      const missingHash = cspHeaders.filter((h) => {
+        // Extract style-src-elem clause from the CSP value
+        const elemMatch = h.value.match(/style-src-elem[^;]*/);
+        if (!elemMatch) return true; // missing directive entirely
+        return !elemMatch[0].includes(expected);
+      });
       if (missingHash.length > 0) {
         console.error(
           `[csp-verify] FATAL: ${missingHash.length}/${cspHeaders.length} CSP header(s) ` +
             `in routes-manifest.json do NOT contain the expected ` +
-            `style-src 'sha256-${expectedHash}'.`,
+            `style-src-elem 'sha256-${expectedHash}'.`,
         );
         for (const h of missingHash) {
           console.error(`  - source="${h.source}"`);
@@ -245,7 +254,7 @@ async function main() {
       }
       console.log(
         `[csp-verify] OK — routes-manifest.json: ${cspHeaders.length} CSP header(s) ` +
-          `all contain style-src 'sha256-${expectedHash}'.`,
+          `all contain style-src-elem 'sha256-${expectedHash}'.`,
       );
     } catch (err) {
       console.warn(
