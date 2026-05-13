@@ -56,7 +56,11 @@ export function ServiceWorkerProvider() {
     if (typeof window === 'undefined') return;
     if (!('serviceWorker' in navigator)) return;
     if (registrationSucceeded || registrationInFlight) return;
-    registrationInFlight = true;
+    // Codex round-15 FIX: do NOT set registrationInFlight here. The
+    // attemptRegistration() helper below owns that transition. Setting
+    // it early caused attemptRegistration to self-block on its own
+    // entry guard, leaving SW unregistered for the whole production
+    // session. Bug introduced when the helper was extracted in round-14.
 
     // Reload-on-controllerchange policy (codex round 3 + 4 final):
     //   - First install (no previous controller anywhere) → SW does

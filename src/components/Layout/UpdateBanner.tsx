@@ -59,36 +59,16 @@ export function UpdateBanner() {
 
   if (!visible) return null;
 
-  const onReload = () => {
+  const onReload = async () => {
     const worker = workerRef.current;
     if (!worker) {
       window.location.reload();
       return;
     }
 
-    // Multi-tab edge case (codex round 5-9): tab A clicked "Update" first;
-    // SW activated + called clients.claim(). Tab B later sees its still-
-    // visible banner from the earlier updateavailable event and clicks
-    // "Neu laden".
-    //
-    // We need to reload immediately ONLY when this tab is provably under
-    // the new controller already (no future controllerchange will fire).
-    // worker.state === 'activated' alone is NOT sufficient: clients.claim()
-    // has a small async window where the worker is activated but THIS tab
-    // is still under the old controller. Reloading there would re-serve
-    // the old controller AND skip the upgrade-intent signal, leaving the
-    // tab on stale bytes when the later controllerchange suppresses
-    // itself.
-    //
-    // Codex round-14: dropped the scriptURL-equality fast-reload branch.
-    // BOTH old and new workers share the same scriptURL (/sw.js), so
-    // controller.scriptURL === worker.scriptURL was true even during a
-    // normal update — incorrectly forcing an immediate reload under the
-    // OLD controller and looping with the banner perpetually visible.
-    //
-    // Now the only fast-reload condition is "worker reference is dead"
-    // (redundant). In every other case we go through the postMessage
-    // path and trust controllerchange to fire after activation.
+    // Codex round-14: dropped scriptURL-equality fast-reload (both old
+    // controller and new waiting worker share /sw.js so === always true).
+    // Only redundant-worker is now a static fast-reload condition.
     const workerIsRedundant = worker.state === 'redundant';
 
     if (workerIsRedundant) {
@@ -97,6 +77,27 @@ export function UpdateBanner() {
       // forward — SW lifecycle will re-evaluate from scratch.
       window.location.reload();
       return;
+    }
+
+    // Codex round-15: multi-tab edge case — another tab may have
+    // already activated the new worker before this tab's user clicked.
+    // In that case `registration.waiting` is null, a controller IS
+    // active, and posting SKIP_WAITING to the (already-activated)
+    // worker is a no-op (no future controllerchange will fire).
+    // Re-query the live registration since workerRef can be stale.
+    try {
+      const reg = await navigator.serviceWorker.getRegistration();
+      if (reg && reg.waiting == null && navigator.serviceWorker.controller != null) {
+        // No worker is waiting → the upgrade already happened
+        // elsewhere; this tab is being served by the new controller
+        // (or about to be). Reload directly to actually pick up the
+        // new bytes — without this, the click would be a no-op.
+        window.location.reload();
+        return;
+      }
+    } catch {
+      // getRegistration() failure is non-fatal — fall through to the
+      // normal postMessage path.
     }
 
     // Normal hybrid-banner path: signal intent, then skipWaiting.
