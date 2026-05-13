@@ -44,21 +44,15 @@ function StatsBadgeFallback() {
 // WebSite + Organization JSON-LD live now in the root layout so every page
 // emits them, not just the landing. No page-local JSON-LD here anymore.
 
-// fn-15.7: ISR-revalidate every hour. The landing is now a fully static
-// shell at the route level — no `cookies()`, no `headers()`, no
-// `useAuth()`, no uncached `fetch()`. Auth-aware redirect for logged-in
-// users moved to src/middleware.ts (Edge cookie-sniff → 307 to /feed),
-// so the page render itself never has to ask "is this visitor signed
-// in?". Build-output for `/` flips from `ƒ (Dynamic)` to `●` (ISR)
-// and Vercel emits `Cache-Control: public, max-age=0, must-revalidate`
-// (or `s-maxage=3600, stale-while-revalidate=…` depending on hosting
-// edition) instead of `no-store`.
-//
-// Trade-off: the `?home` query param no longer renders a public copy
-// of the landing _for a signed-in user_, because the redirect now
-// happens at the Edge before the page renders. The Edge gate honours
-// the same `?home` escape hatch (see src/middleware.ts) — a logged-in
-// tester can still inspect the public landing by appending `?home`.
+// ISR-revalidate every hour. The landing is a fully static shell at the
+// route level — no `cookies()`, no `headers()`, no `useAuth()`, no
+// uncached `fetch()`. Both anonymous and logged-in users reach `/`; the
+// only auth-aware piece is the top-right `LandingAuth` Client Component
+// that self-hydrates its session and swaps Anmelden/Registrieren for the
+// "Mein Feed" pill. That swap happens after hydration, so the prerendered
+// HTML is identical for everyone and the CDN can serve a single cache
+// entry. Build-output for `/` is `●` (ISR) with `Cache-Control:
+// s-maxage=3600, stale-while-revalidate=…`.
 export const revalidate = 3600;
 
 export default function LandingPage() {
