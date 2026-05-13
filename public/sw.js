@@ -42,24 +42,45 @@ const SW_VERSION = 'v1';
 
 // fn-15.10 round 2 (codex): self-hosted Workbox; same-origin guarantees
 // the SW can evaluate regardless of upstream CDN reachability.
+// fn-15.10 round 4 (codex): eagerly importScripts ALL required sub-modules
+// inside the try/catch, not just workbox-sw.js. Workbox normally lazy-loads
+// sub-modules on first `wb.<module>` access — if any of those lazy fetches
+// fail at runtime (corrupt file, ad-blocker shenanigans), the SW would
+// crash AFTER `workboxLoaded = true`, defeating the push-only fallback.
+// Importing every module upfront moves all failure modes inside the catch.
 let wb = null;
 let workboxLoaded = false;
 try {
-  importScripts('/workbox/workbox-sw.js');
+  importScripts(
+    '/workbox/workbox-sw.js',
+    '/workbox/workbox-core.prod.js',
+    '/workbox/workbox-routing.prod.js',
+    '/workbox/workbox-strategies.prod.js',
+    '/workbox/workbox-expiration.prod.js',
+    '/workbox/workbox-cacheable-response.prod.js',
+  );
   // `workbox` is now a global, courtesy of workbox-sw.js.
   // eslint-disable-next-line no-undef
   wb = workbox;
-  // Tell Workbox where to find its sub-modules (we ship them under /workbox/).
+  // Tell Workbox where the (already-loaded) sub-modules live. This is
+  // belt-and-suspenders: importScripts pre-loaded them, so any later
+  // accidental lazy-load would resolve same-origin too.
   wb.setConfig({
     modulePathPrefix: '/workbox/',
     debug: false,
   });
+  // Probe that the eagerly-loaded modules registered their globals
+  // correctly. If a future Workbox version changes the namespace shape,
+  // we want to fall through to push-only mode rather than crash later.
+  if (!wb.core || !wb.routing || !wb.strategies || !wb.expiration || !wb.cacheableResponse) {
+    throw new Error('Workbox module namespace incomplete after eager importScripts');
+  }
   workboxLoaded = true;
 } catch (err) {
-  // Workbox is broken/missing — log and continue. The runtime-caching
-  // event listeners below check `workboxLoaded` and short-circuit if false,
-  // so the Web-Push push/notificationclick handlers (further down) still
-  // register and notifications continue working.
+  // Workbox is broken/missing/corrupt — log and continue. Runtime-caching
+  // block below is gated on `workboxLoaded` so it short-circuits, and the
+  // Web-Push push/notificationclick handlers (further down) still register
+  // unconditionally so notifications keep working.
   // eslint-disable-next-line no-console
   console.error('[sw] Workbox failed to load — runtime caching disabled, push handlers still active:', err);
 }

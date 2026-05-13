@@ -1,38 +1,89 @@
 import type { NextConfig } from 'next';
 import bundleAnalyzer from '@next/bundle-analyzer';
 import { readFileSync, existsSync } from 'node:fs';
+import { createHash } from 'node:crypto';
 import path from 'node:path';
 
 /**
- * fn-15.6 round 2 — load CRITICAL_CSS sha256 hash from the prebuild JSON
- * artifact. Synchronous read at config-load time guarantees the value is
- * present when headers() runs. Codex flagged the previous env-var handoff
- * as non-deterministic: `.env.production` loading order was not reliable
- * relative to when next.config.ts is evaluated.
+ * fn-15.6 round 4 (codex) — load + RE-VERIFY CRITICAL_CSS sha256 hash.
  *
- * Fallback to the env var (.env.production) is kept ONLY for the
- * historic-compat case where the JSON artifact is missing AND the env var
- * is somehow populated externally (Vercel-dashboard etc.). On production
- * builds with neither, we throw — same loud-failure behavior the original
- * comment promised but actually enforced now.
+ * Why re-verify: codex flagged that a committed `.csp-hash.json` would
+ * defeat the prebuild safeguard if someone invokes `next build` directly
+ * (skipping the prebuild + postbuild hooks). A stale hash would silently
+ * ship and CSP-block the actual rendered <style> in production.
+ *
+ * Behaviour:
+ *   1. Read .csp-hash.json (the prebuild artifact, NOT committed — see
+ *      .gitignore entry).
+ *   2. Re-compute the hash from the CURRENT src/lib/critical-css.ts bytes
+ *      (same algorithm as scripts/compute-csp-hash.mjs).
+ *   3. If both exist AND match → trust and return.
+ *      If both exist AND differ → recompute, warn loudly. The JSON is
+ *      stale; we use the freshly-computed value so headers() ships a
+ *      hash that matches what React will actually render.
+ *      If JSON missing but we can read the source → recompute on the fly.
+ *      If neither → fall back to env var, else throw in production.
+ *
+ * Production builds that skip prebuild are still loud-failures here — we
+ * either compute the hash from source or throw. We never trust a stale
+ * committed hash silently.
  */
+function extractCriticalCssFromSource(): string | null {
+  const srcPath = path.join(__dirname, 'src', 'lib', 'critical-css.ts');
+  if (!existsSync(srcPath)) return null;
+  const src = readFileSync(srcPath, 'utf8');
+  const m = src.match(/export\s+const\s+CRITICAL_CSS\s*=\s*`([\s\S]*?)`\s*;/m);
+  return m ? m[1] : null;
+}
+
+function sha256Base64(text: string): string {
+  return createHash('sha256').update(text, 'utf8').digest('base64');
+}
+
 function loadCriticalCssHash(): string {
+  // Step 1: try to compute the canonical hash from the live source. This
+  // is the ground truth — whatever React serialises into <style> at runtime
+  // must match this exact byte sequence.
+  const liveCss = extractCriticalCssFromSource();
+  const liveHash = liveCss !== null ? sha256Base64(liveCss) : null;
+
+  // Step 2: read the artifact (if present) and compare.
   const jsonPath = path.join(__dirname, '.csp-hash.json');
+  let artifactHash: string | null = null;
   if (existsSync(jsonPath)) {
     try {
       const parsed = JSON.parse(readFileSync(jsonPath, 'utf8')) as { hash?: string };
-      if (parsed.hash) return parsed.hash;
+      if (parsed.hash) artifactHash = parsed.hash;
     } catch {
-      /* fall through to env var */
+      /* artifact unparseable — ignore, fall through */
     }
+  }
+
+  // Decision: live wins. The artifact is only used when we can't read source.
+  if (liveHash) {
+    if (artifactHash && artifactHash !== liveHash) {
+      console.warn(
+        '[next.config.ts] .csp-hash.json is stale ' +
+          `(artifact=${artifactHash}, live=${liveHash}). Using LIVE hash — ` +
+          'run `node scripts/compute-csp-hash.mjs` to refresh the artifact.',
+      );
+    }
+    return liveHash;
+  }
+  if (artifactHash) {
+    console.warn(
+      '[next.config.ts] critical-css.ts unreadable; falling back to ' +
+        '.csp-hash.json artifact (cannot verify freshness).',
+    );
+    return artifactHash;
   }
   const fromEnv = process.env.NEXT_PUBLIC_CRITICAL_CSS_HASH;
   if (fromEnv) return fromEnv;
   if (process.env.NODE_ENV === 'production') {
     throw new Error(
-      '[next.config.ts] CRITICAL_CSS hash missing. Run `node scripts/compute-csp-hash.mjs` ' +
-        'before `next build`. The prebuild npm script does this automatically — if you see ' +
-        'this error it means the prebuild step was skipped (e.g. `next build` invoked directly).',
+      '[next.config.ts] CRITICAL_CSS hash unavailable: critical-css.ts not readable, ' +
+        '.csp-hash.json missing, NEXT_PUBLIC_CRITICAL_CSS_HASH unset. ' +
+        'Run `node scripts/compute-csp-hash.mjs` before `next build`.',
     );
   }
   return '';

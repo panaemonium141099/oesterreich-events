@@ -32,6 +32,12 @@ yarn-error.log*
 .env
 .env*.local
 
+# fn-15.6 — prebuild artifact (sha256 of CRITICAL_CSS for CSP header).
+# Must NOT be committed: a stale checked-in hash would defeat the
+# prebuild safeguard. next.config.ts re-computes from src/lib/critical-css.ts
+# anyway and only falls back to this JSON if source is unreadable.
+.csp-hash.json
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts
