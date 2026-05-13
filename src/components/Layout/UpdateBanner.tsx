@@ -92,16 +92,15 @@ export function UpdateBanner() {
     }
 
     // Normal hybrid-banner path: signal intent, then skipWaiting.
+    // ServiceWorkerProvider's controllerchange handler reloads ONCE the
+    // new worker has actually taken control. We deliberately do NOT add
+    // a setTimeout fallback (codex round-8 ruled it out): a blind reload
+    // before the new worker controls the page would re-serve the old
+    // controller, reset userTriggeredUpgrade=false on the fresh load,
+    // and then suppress the LEGITIMATE later controllerchange — leaving
+    // the user on stale assets exactly when they asked to update.
     window.dispatchEvent(new CustomEvent('lt-sw-skip-waiting'));
     worker.postMessage({ type: 'SKIP_WAITING' });
-
-    // Belt-and-suspenders: if controllerchange doesn't fire within 2s
-    // (e.g. SW state transition issues, browser quirks), reload anyway.
-    // The flag set above means ServiceWorkerProvider's handler will also
-    // try to reload, but its `reloading` guard handles the race.
-    window.setTimeout(() => {
-      if (!document.hidden) window.location.reload();
-    }, 2000);
 
     // Optimistically dismiss the banner — if controllerchange takes a
     // few hundred ms, the user shouldn't see the button bounce around.
