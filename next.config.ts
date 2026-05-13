@@ -153,13 +153,22 @@ const nextConfig: NextConfig = {
     const styleSrcSources = ['style-src', "'self'", 'https://api.mapbox.com'];
     if (cssHash) styleSrcSources.push(`'sha256-${cssHash}'`);
 
+    // fn-15.10: the Service Worker (/sw.js) loads Workbox 7 from the
+    // official Google-hosted CDN via `importScripts`. CSP's script-src
+    // governs `importScripts` in workers — per CSP3 — so the CDN origin
+    // is whitelisted here. `connect-src` is also extended for the same
+    // origin because Workbox-sw's importScripts loads sub-modules via
+    // additional internal fetches at SW boot. No other code on the page
+    // is allowed to talk to the CDN — script-src + connect-src are the
+    // tightest allowlist that lets the SW boot without 'unsafe-inline'
+    // creep on script-src.
     const csp = [
       "default-src 'self'",
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://api.mapbox.com https://events.mapbox.com https://www.googletagmanager.com https://www.google-analytics.com",
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://api.mapbox.com https://events.mapbox.com https://www.googletagmanager.com https://www.google-analytics.com https://storage.googleapis.com",
       styleSrcSources.join(' '),
       "img-src 'self' data: blob: https:",
       "font-src 'self' data:",
-      "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.mapbox.com https://*.tiles.mapbox.com https://events.mapbox.com https://api.spotify.com https://accounts.spotify.com https://www.google-analytics.com https://www.googletagmanager.com https://stats.g.doubleclick.net",
+      "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.mapbox.com https://*.tiles.mapbox.com https://events.mapbox.com https://api.spotify.com https://accounts.spotify.com https://www.google-analytics.com https://www.googletagmanager.com https://stats.g.doubleclick.net https://storage.googleapis.com",
       "worker-src 'self' blob:",
       "child-src 'self' blob:",
       "frame-src 'self' https://accounts.google.com",
@@ -246,6 +255,28 @@ const nextConfig: NextConfig = {
             key: 'Cache-Control',
             value: 'public, max-age=86400, stale-while-revalidate=604800',
           },
+        ],
+      },
+      // fn-15.10: Service Worker registration script.
+      //
+      // The browser is the ONLY path through which updated SW bytes
+      // reach the user (no CDN purge, no manual reload picks up a stale
+      // /sw.js if it's been served with a long max-age). Browsers
+      // already revalidate /sw.js on every navigation, but they still
+      // honour the `max-age` directive — so a cached /sw.js with
+      // `max-age=31536000` would shadow new deploys for a full year.
+      //
+      // We set `Cache-Control: public, max-age=0, must-revalidate` so
+      // every navigation triggers a conditional GET (cheap, 304 most of
+      // the time) and a real deploy is picked up on the next page-load.
+      // Service-Worker-Allowed isn't strictly needed at scope '/' (it
+      // defaults to the script's own path) but we include it explicitly
+      // so future moves of /sw.js are obvious.
+      {
+        source: '/sw.js',
+        headers: [
+          { key: 'Cache-Control', value: 'public, max-age=0, must-revalidate' },
+          { key: 'Service-Worker-Allowed', value: '/' },
         ],
       },
     ];

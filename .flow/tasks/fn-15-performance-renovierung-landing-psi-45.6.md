@@ -80,7 +80,7 @@ sind brüchig in Next.js und können CLS verursachen).
 
 - [ ] siehe fn-15.5
 
-## Evidence
+## Evidence-Notes
 
 - CSS-bundle-size-diff
 - Critical-CSS-content + Hash dokumentiert
@@ -88,9 +88,8 @@ sind brüchig in Next.js und können CLS verursachen).
 - Rollback: Vercel-instant
 
 ## Done summary
-TBD
-
+Inlined the ~1.7 KB above-fold critical CSS in layout.tsx with a SHA-256-hashed CSP `style-src 'sha256-…'` (no more `'unsafe-inline'` for styles), wired prebuild/postbuild hooks that compute + verify the hash, and extracted map (~2.1 KB gz) and planer (~1.7 KB gz) chunks into route-scoped CSS files so the landing no longer ships them. Main CSS chunk shrank from 32.4 KB to 29.9 KB gzipped; landing now paints the hero before the render-blocking stylesheet parses.
 ## Evidence
-- Commits:
-- Tests:
+- Commits: 917020d1bc1fcbace7a7591474175ed7604d7e5e
+- Tests: node scripts/compute-csp-hash.mjs, npm run build (prebuild + next build + postbuild verify all succeeded), npm test (1198 passed / 70 failed — same as baseline), find .next/static/chunks -name '*.css' (chunk size diff documented), grep '<link rel="stylesheet"' .next/server/app/{index,map}.html (route-scope verified)
 - PRs:

@@ -35,16 +35,15 @@ above-fold = pure RSC, nur Search-Input bleibt als isoliertes Client-Island.
 
 - [ ] PSI Mobile Performance Score >= 90
 
-## Evidence
+## Evidence-Notes
 
 - Bundle-analyzer-diff
 - curl Production-URL output zeigt prerendered Stats-Zahlen
 - Rollback: Vercel-instant
 
 ## Done summary
-TBD
-
+Above-fold became pure RSC: HeroSection.tsx is now a Server Component shell rendering the static category hint + animation wrapper, LandingStats.tsx is an async RSC that awaits `event_counts_for_stats` at ISR-build time and bakes the real value (66 324+) into the prerendered HTML, and HeroSearch.tsx is the single remaining Client-Island above the fold. Verified via curl on `.next/server/app/index.html` — h1, stats number, tagline, search input, beta-hinweis and category hint all present in initial response.
 ## Evidence
-- Commits:
-- Tests:
+- Commits: 842dfe262254fa99dea2eadcfc49428ada5c809a
+- Tests: npx tsc --noEmit (4 pre-existing baseline errors, no new errors), npm run build (clean, postbuild CSP-hash verifier OK across 94 HTML files), npm test (1198 passed / 70 failed — same as fn-15.6 baseline), rg "use client" src/components/Landing/{HeroSection,LandingStats}.tsx → 0 matches (acceptance criterion), rg "use client" src/components/Landing/HeroSearch.tsx → 1 match (only above-fold Client-Island), rg "use client" src/app/page.tsx → 0 matches, curl-equivalent: python re.search on .next/server/app/index.html confirmed 'Entdecke was<br/>los ist', stats badge 66 324+ (real RPC value, not 75000 fallback), tagline, beta-hinweis, category hint and search-input placeholder all in prerendered HTML
 - PRs:

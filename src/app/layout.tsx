@@ -20,6 +20,13 @@ import Script from 'next/script';
 // AdSense was removed in fn-15.4; CookieBanner is also unused.
 import { Toaster } from 'sonner';
 import { RouteTransitions } from '@/components/Layout/RouteTransitions';
+// fn-15.10 (Service Worker): mount a client-side registrar in the root
+// layout so /sw.js is registered once per session on every route. The
+// registrar also renders <UpdateBanner /> which surfaces the "Update
+// verfügbar" hybrid-banner UX when a new SW is installed and waiting.
+// Registration is no-op in dev (NODE_ENV !== 'production') so HMR isn't
+// shadowed by stale runtime caches.
+import { ServiceWorkerProvider } from '@/components/Layout/ServiceWorkerProvider';
 // fn-15.8: only Geist mounts at the root. The editorial serif and the
 // handwriting face moved to `@/lib/fonts-planer` and are imported by
 // per-route layouts that actually render the .planer-scope chrome
@@ -255,6 +262,14 @@ export default function RootLayout({
           {children}
         </div>
         {modal}
+        {/*
+          fn-15.10: Service Worker registration + update banner. The
+          provider is a Client Component so mounting it here costs ~0
+          on RSC routes (only its 'use client' boundary ships JS). It
+          renders <UpdateBanner /> as a child — null on first load, a
+          toast when the SW has a new version waiting.
+        */}
+        <ServiceWorkerProvider />
         <Toaster
           theme="dark"
           position="bottom-center"
