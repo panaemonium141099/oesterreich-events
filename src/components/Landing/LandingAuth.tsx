@@ -2,7 +2,15 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import type { Session } from '@supabase/supabase-js';
 import { createClient } from '@/lib/supabase/client';
+
+function initialFromSession(session: Session): string {
+  const meta = session.user.user_metadata as Record<string, unknown> | undefined;
+  const firstName = typeof meta?.first_name === 'string' ? meta.first_name : null;
+  const email = session.user.email ?? null;
+  return (firstName?.[0] ?? email?.[0] ?? '?').toUpperCase();
+}
 
 /**
  * LandingAuth — top-right auth pill on the landing.
@@ -27,30 +35,25 @@ export function LandingAuth() {
     const supabase = createClient();
     let mounted = true;
 
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then((res: { data: { session: Session | null } }) => {
+      const session = res.data.session;
       if (!mounted || !session?.user) return;
       setAuthed(true);
-      const meta = session.user.user_metadata as Record<string, unknown> | undefined;
-      const firstName = typeof meta?.first_name === 'string' ? meta.first_name : null;
-      const email = session.user.email ?? null;
-      const ch = (firstName?.[0] ?? email?.[0] ?? '?').toUpperCase();
-      setInitial(ch);
+      setInitial(initialFromSession(session));
     });
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (!mounted) return;
-      if (session?.user) {
-        setAuthed(true);
-        const meta = session.user.user_metadata as Record<string, unknown> | undefined;
-        const firstName = typeof meta?.first_name === 'string' ? meta.first_name : null;
-        const email = session.user.email ?? null;
-        const ch = (firstName?.[0] ?? email?.[0] ?? '?').toUpperCase();
-        setInitial(ch);
-      } else {
-        setAuthed(false);
-        setInitial(null);
-      }
-    });
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (_event: string, session: Session | null) => {
+        if (!mounted) return;
+        if (session?.user) {
+          setAuthed(true);
+          setInitial(initialFromSession(session));
+        } else {
+          setAuthed(false);
+          setInitial(null);
+        }
+      },
+    );
 
     return () => {
       mounted = false;
