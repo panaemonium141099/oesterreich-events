@@ -103,13 +103,17 @@ self.addEventListener('install', (event) => {
     // very first page-load can be intercepted by the SW.
     event.waitUntil(self.skipWaiting());
   }
-  // Precache the offline fallback (also see registerRoute below).
+  // Precache the offline fallback. Both the HTML and its sister stylesheet
+  // /offline.css need to be cached together — codex round-12 caught the
+  // CSS-only-on-network bug where offline.html would render unstyled
+  // because the browser would try to fetch the linked /offline.css and
+  // fail (we're offline by definition when this asset is served).
   event.waitUntil(
     caches.open(`lasstreffen-offline-${SW_VERSION}`).then((cache) =>
-      cache.addAll(['/offline.html']).catch(() => {
-        // Offline page may not exist yet on the very first deploy that
+      cache.addAll(['/offline.html', '/offline.css']).catch(() => {
+        // Either asset may not exist yet on the very first deploy that
         // lands the SW — degrade gracefully. The fallback handler below
-        // simply returns a synthetic Response if /offline.html is absent.
+        // returns a synthetic Response if /offline.html is absent.
       }),
     ),
   );
@@ -223,6 +227,34 @@ wb.routing.registerRoute(
       }),
     ],
   }),
+);
+
+// /offline.* — codex round-12: the offline.html fallback now depends on
+// the sister stylesheet /offline.css; both were precached on install. This
+// route serves them from the offline cache with a network-first fallthrough
+// so the styled offline page survives a real outage.
+wb.routing.registerRoute(
+  ({ url }) => url.pathname === '/offline.html' || url.pathname === '/offline.css',
+  async ({ event }) => {
+    try {
+      // Try network first so a fresh deploy can update the offline assets.
+      const networkResponse = await fetch(event.request);
+      if (networkResponse.ok) {
+        // Refresh the precache opportunistically.
+        const cache = await caches.open(`lasstreffen-offline-${SW_VERSION}`);
+        await cache.put(event.request, networkResponse.clone());
+        return networkResponse;
+      }
+      throw new Error(`offline-fallback fetch returned ${networkResponse.status}`);
+    } catch {
+      const cache = await caches.open(`lasstreffen-offline-${SW_VERSION}`);
+      const cached = await cache.match(event.request);
+      if (cached) return cached;
+      // Last-ditch: 503 so the browser doesn't show a "page not found"
+      // dialog over the offline page that's already painting.
+      return new Response('', { status: 503, statusText: 'Offline' });
+    }
+  },
 );
 
 // Top-level navigations — network-first with offline fallback. Lets users
