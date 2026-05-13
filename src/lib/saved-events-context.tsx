@@ -85,7 +85,7 @@ const NOOP_CONTEXT: SavedEventsContextValue = {
 const SavedEventsContext = createContext<SavedEventsContextValue>(NOOP_CONTEXT);
 
 export function SavedEventsProvider({ children }: { children: React.ReactNode }) {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
   const supabase = useMemo(() => createClient(), []);
   // Subscribe to the module store; useSyncExternalStore guarantees
   // every provider instance re-renders when the store changes,
@@ -98,9 +98,39 @@ export function SavedEventsProvider({ children }: { children: React.ReactNode })
   const userIdRef = useRef<string | null>(null);
 
   const refresh = useCallback(async () => {
+    // fn-15.5 round-14 (codex): when a second provider instance
+    // mounts (ModalShell over an AppShell-wrapped page), its own
+    // AuthProvider's auth-bootstrap runs in parallel. During the
+    // few hundred ms before getSession() resolves, `user` is null
+    // here even though another provider may already have an
+    // authenticated session loaded into the shared module store.
+    // Guard 1: don't touch the store while auth is still loading.
+    if (loading) return;
     if (!user) {
-      setSavedStore(new Set(), null);
-      userIdRef.current = null;
+      // Guard 2: another instance may have already populated the
+      // store for an authenticated session; only clear the store
+      // if there is genuinely no user there (either from a fresh
+      // mount or after a real sign-out). This prevents the
+      // "modal opens → underlying saved-state flickers blank"
+      // regression.
+      if (savedStore.userId == null) {
+        // Already empty — nothing to do.
+        return;
+      }
+      // The shared store has a user id, but THIS provider sees no
+      // user. This happens only when the auth provider feeding this
+      // instance reports anonymous. To stay safe, do NOT clobber
+      // the store; leave the authenticated instance in charge.
+      // Real sign-out flows trigger via the AuthContext onAuthStateChange
+      // listener which the dominant provider observes — that path will
+      // call refresh() with `user === null` AND `loading === false`
+      // AND the store already showing the same userId, at which point
+      // we DO want to clear. Detect that explicit path by comparing
+      // the previously-tracked user-id ref to the current store state.
+      if (userIdRef.current != null && userIdRef.current === savedStore.userId) {
+        setSavedStore(new Set(), null);
+        userIdRef.current = null;
+      }
       return;
     }
     const { data, error } = await supabase
@@ -113,13 +143,12 @@ export function SavedEventsProvider({ children }: { children: React.ReactNode })
     );
     setSavedStore(next, user.id);
     userIdRef.current = user.id;
-  }, [user, supabase]);
+  }, [user, loading, supabase]);
 
   // Two provider instances (e.g. AppShell + ModalShell) both call
-  // refresh on mount. The store collapses them — second call sees the
-  // cached set and either re-fetches (intended on auth change) or
-  // confirms (cheap idempotent read). Throttling is left to Supabase
-  // — saving an event is a low-frequency action.
+  // refresh on mount. The guards above collapse them — only the
+  // instance whose useAuth() actually resolved a user (or the
+  // canonical sign-out path) writes to the store.
   useEffect(() => {
     refresh();
   }, [refresh]);
