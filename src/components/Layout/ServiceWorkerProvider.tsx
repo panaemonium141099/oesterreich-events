@@ -86,16 +86,16 @@ export function ServiceWorkerProvider() {
     const onUserUpgrade = () => { userTriggeredUpgrade = true; };
     window.addEventListener('lt-sw-skip-waiting', onUserUpgrade);
 
-    // Fire-and-forget registration. We don't `await` it on a Promise the
-    // page is blocked on — SW install must not slow the first paint.
-    void navigator.serviceWorker
-      .register('/sw.js', { scope: '/' })
-      .then((registration) => {
-        // Mark success only AFTER the register Promise resolves so a
-        // transient registration failure can retry on the next mount
-        // (codex round-3: previously `registered = true` ran before
-        // the Promise, locking out retries permanently).
-        registrationSucceeded = true;
+    /**
+     * Codex round-14 (Minor): extract setupRegistration so both the
+     * initial register call AND the online-retry path run the same
+     * post-success setup (waiting-worker dispatch + updatefound listener).
+     * Previously the online-retry only called register() and skipped the
+     * lifecycle wiring, so a transient first-load failure → online retry
+     * would install the SW but never surface update banners again.
+     */
+    const setupRegistration = (registration: ServiceWorkerRegistration) => {
+      registrationSucceeded = true;
         // If a waiting worker is already present at registration time
         // (e.g. the user opened a fresh tab while a previous tab still
         // had the old SW active), surface it to the banner right away.
@@ -132,39 +132,37 @@ export function ServiceWorkerProvider() {
             }
           });
         });
-      })
-      .catch((err) => {
-        // SW registration failures are non-fatal — the page works
-        // without a SW. Log so it's diagnosable in DevTools.
-        // eslint-disable-next-line no-console
-        console.warn('[sw] registration failed', err);
-      })
-      .finally(() => {
-        // Always clear the in-flight flag so a later remount/route-change
-        // can retry. registrationSucceeded stays whatever .then or .catch
-        // set it to (true on success, unchanged false on failure).
-        registrationInFlight = false;
-      });
+    };
+
+    const attemptRegistration = () => {
+      if (registrationSucceeded || registrationInFlight) return;
+      registrationInFlight = true;
+      navigator.serviceWorker
+        .register('/sw.js', { scope: '/' })
+        .then(setupRegistration)
+        .catch((err) => {
+          // SW registration failures are non-fatal — the page works
+          // without a SW. Log so it's diagnosable in DevTools.
+          // eslint-disable-next-line no-console
+          console.warn('[sw] registration failed', err);
+        })
+        .finally(() => {
+          registrationInFlight = false;
+        });
+    };
+
+    // Initial fire-and-forget registration. We don't `await` it on a
+    // Promise the page is blocked on — SW install must not slow first paint.
+    attemptRegistration();
 
     // Codex round-13 (Minor): root-layout in App Router stays mounted
     // for the entire SPA session — without a retry path, a transient
     // first-load failure (offline blip, 5xx on /sw.js, flaky connection)
     // would lock out runtime caching for the whole session. Listen for
-    // the next `online` event and try again once.
-    const onOnline = () => {
-      if (registrationSucceeded || registrationInFlight) return;
-      // Re-enter the registration flow. We don't need the lifecycle
-      // listeners again — those were attached above and stay active.
-      registrationInFlight = true;
-      void navigator.serviceWorker
-        .register('/sw.js', { scope: '/' })
-        .then(() => { registrationSucceeded = true; })
-        .catch((err) => {
-          // eslint-disable-next-line no-console
-          console.warn('[sw] retry registration after online failed', err);
-        })
-        .finally(() => { registrationInFlight = false; });
-    };
+    // the next `online` event and retry, going through the SAME
+    // setupRegistration() path so updatefound/waiting handlers wire up
+    // (codex round-14 fix).
+    const onOnline = () => attemptRegistration();
     window.addEventListener('online', onOnline);
 
     return () => {

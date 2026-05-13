@@ -80,29 +80,21 @@ export function UpdateBanner() {
     // tab on stale bytes when the later controllerchange suppresses
     // itself.
     //
-    // The narrow safe condition: this tab is provably already controlled
-    // by a worker matching the same scriptURL as our updateavailable
-    // target. That can only be true after clients.claim() has finished
-    // propagating to this tab — there really is nothing left to wait for.
+    // Codex round-14: dropped the scriptURL-equality fast-reload branch.
+    // BOTH old and new workers share the same scriptURL (/sw.js), so
+    // controller.scriptURL === worker.scriptURL was true even during a
+    // normal update — incorrectly forcing an immediate reload under the
+    // OLD controller and looping with the banner perpetually visible.
     //
-    // Codex round-13: use scriptURL equality instead of object reference
-    // equality. Browsers may expose different ServiceWorker wrapper
-    // objects for the same underlying worker across API surfaces
-    // (registration.waiting vs navigator.serviceWorker.controller), so
-    // === would falsely report "still waiting" in passive tabs and
-    // never reload.
-    //
-    // worker.state === 'redundant' is a separate "give up" branch — the
-    // banner's worker reference is dead, so the only way out is a plain
-    // reload so the SW lifecycle can re-evaluate from scratch.
-    const controller = navigator.serviceWorker.controller;
-    const newWorkerIsAlreadyController =
-      controller != null &&
-      controller.scriptURL === worker.scriptURL &&
-      controller.state === 'activated';
+    // Now the only fast-reload condition is "worker reference is dead"
+    // (redundant). In every other case we go through the postMessage
+    // path and trust controllerchange to fire after activation.
     const workerIsRedundant = worker.state === 'redundant';
 
-    if (newWorkerIsAlreadyController || workerIsRedundant) {
+    if (workerIsRedundant) {
+      // The waiting worker reference died (replaced by yet another
+      // waiting worker, or evicted). A plain reload is the only way
+      // forward — SW lifecycle will re-evaluate from scratch.
       window.location.reload();
       return;
     }

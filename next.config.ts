@@ -239,31 +239,27 @@ const nextConfig: NextConfig = {
     // matching the rendered inline <style data-critical-css> block.
     const cssHash = CRITICAL_CSS_HASH;
 
-    // fn-15.6 round 4 (codex re-review): canonical CSP3 layering.
+    // fn-15.6 round 5 (codex re-review): hash + 'unsafe-inline' on BOTH
+    // style-src (fallback) and style-src-elem (modern). 'unsafe-inline'
+    // is required to keep inline style="..." attributes working
+    // (React renders many of these — modal backdrops, animation delays,
+    // Mapbox markers). 'unsafe-hashes' is too narrow for the dynamic
+    // attribute values we ship.
     //
-    // Goal: hash-protect the inline critical-CSS <style> block (primary
-    // XSS protection) WHILE keeping inline style="..." attributes work-
-    // ing in all browsers our browserslist supports.
+    // The hash on style-src is NOT redundant: modern browsers prefer the
+    // hash over 'unsafe-inline' when both are present per CSP3 spec
+    // (the SRI/nonce rule), so the actual <style data-critical-css>
+    // block is hash-validated. The 'unsafe-inline' fallback only
+    // applies to elements/attributes NOT covered by hashes.
     //
-    // Strategy: split style-src into the more specific style-src-elem
-    // and style-src-attr directives. Modern browsers (Chrome 105+,
-    // Firefox 128+, Safari 15.4+ — all within our chrome>=111/safari>=
-    // 16.4 browserslist target) honor the split. Browsers without CSP3
-    // support fall back to style-src, which we keep at 'self'
-    // 'unsafe-inline' so older browsers (visiting outside our support
-    // matrix) still render correctly without enforcement loss for
-    // supported browsers.
-    //
-    //   style-src-elem 'self' 'sha256-<critical>' https://api.mapbox.com
-    //     → governs <style> blocks; hash-protected.
-    //   style-src-attr 'unsafe-inline'
-    //     → governs style="..." attributes; can't load resources or
-    //       execute JS so XSS surface is materially smaller.
-    //   style-src 'self' 'unsafe-inline' https://api.mapbox.com
-    //     → fallback for browsers that don't support the split.
-    const styleSrcElemSources = ["style-src-elem", "'self'", 'https://api.mapbox.com'];
-    if (cssHash) styleSrcElemSources.push(`'sha256-${cssHash}'`);
-    const styleSrcSources = ["style-src", "'self'", "'unsafe-inline'", 'https://api.mapbox.com'];
+    // This is the trade-off Codex round-14 ultimately steered toward:
+    // we don't get pure-hash strictness, but we get the meaningful
+    // primary-XSS-vector protection (the <style> block) AND avoid the
+    // huge refactor of moving every inline style attribute to classes.
+    const styleSrcCommon = ["'self'", "'unsafe-inline'", 'https://api.mapbox.com'];
+    if (cssHash) styleSrcCommon.push(`'sha256-${cssHash}'`);
+    const styleSrcSources = ['style-src', ...styleSrcCommon];
+    const styleSrcElemSources = ['style-src-elem', ...styleSrcCommon];
 
     // fn-15.10 round 2 (codex fix): Workbox is now SELF-HOSTED under
     // /public/workbox/, so the SW boots from the same origin as the app

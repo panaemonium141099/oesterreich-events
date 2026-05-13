@@ -1,19 +1,21 @@
 import { createClient } from '@supabase/supabase-js';
 
 /**
- * Stats fallback used ONLY when Supabase env vars are missing (dev / preview
- * without secrets).
+ * Stats fallback used when:
+ *   1. Supabase env vars are missing (dev / preview without secrets), OR
+ *   2. RPC fails AND there is no prior ISR snapshot to keep serving
+ *      (first build, fresh deploy).
  *
- * Codex round-13 (fn-15.6 review): runtime RPC failures during ISR
- * regeneration now THROW instead of falling back to this number. With
- * `export const revalidate = 3600` in page.tsx, a thrown error keeps
- * Next.js's last-good ISR snapshot live for the remaining cache window
- * — much better than baking a synthetic 75000 into the prerendered
- * landing for the next hour, affecting every visitor. The next
- * regeneration tick re-tries the RPC; if Supabase is back up, the real
- * number returns; if not, the previous snapshot keeps being served.
+ * Codex round 13 → 14 evolution:
+ *   - Initially (round 13) we threw on any RPC failure to preserve the
+ *     previous ISR snapshot. Codex correctly pointed out that breaks
+ *     the FIRST build/deploy: with no previous snapshot, a transient
+ *     Supabase blip turns the landing into a 500.
+ *   - Now we catch + log + fallback. Trade-off: a real outage WILL
+ *     bake the fallback into the 1-hour ISR window. The on-call
+ *     mitigation is a manual revalidate after Supabase comes back up.
  */
-const ENV_MISSING_FALLBACK = 75000;
+const STATS_FALLBACK = 75000;
 
 interface CountsPayload {
   regions?: Record<string, number>;
@@ -37,28 +39,26 @@ interface CountsPayload {
 async function fetchTotal(): Promise<number> {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-  // Env-missing is a build-time misconfig, not a runtime fault — fall back
-  // synchronously without throwing so dev/preview without secrets still
-  // render the page (matches the pre-fn-15.9 behavior for that case).
-  if (!url || !anonKey) return ENV_MISSING_FALLBACK;
+  if (!url || !anonKey) return STATS_FALLBACK;
 
-  const supabase = createClient(url, anonKey);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data, error } = await (supabase.rpc as any)('event_counts_for_stats');
-  if (error) {
-    // Throw to preserve the previous ISR snapshot. Next.js will catch
-    // this at the render boundary and keep serving the last-good page.
-    throw new Error(`event_counts_for_stats RPC failed: ${error.message ?? String(error)}`);
+  try {
+    const supabase = createClient(url, anonKey);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data, error } = await (supabase.rpc as any)('event_counts_for_stats');
+    if (error) {
+      // eslint-disable-next-line no-console
+      console.warn(`[LandingStats] RPC error, using fallback: ${error.message ?? String(error)}`);
+      return STATS_FALLBACK;
+    }
+    if (!data) return STATS_FALLBACK;
+    const payload = data as CountsPayload;
+    const n = payload.dedup_total ?? payload.total ?? 0;
+    return n > 0 ? n : STATS_FALLBACK;
+  } catch (err) {
+    // eslint-disable-next-line no-console
+    console.warn(`[LandingStats] RPC exception, using fallback: ${err instanceof Error ? err.message : String(err)}`);
+    return STATS_FALLBACK;
   }
-  if (!data) {
-    throw new Error('event_counts_for_stats RPC returned no data');
-  }
-  const payload = data as CountsPayload;
-  const n = payload.dedup_total ?? payload.total ?? 0;
-  if (n <= 0) {
-    throw new Error(`event_counts_for_stats RPC returned non-positive total: ${n}`);
-  }
-  return n;
 }
 
 /**
