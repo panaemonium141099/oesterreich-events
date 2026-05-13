@@ -1,28 +1,28 @@
 import Link from 'next/link';
 
 /**
- * LandingAuth — fn-15.5 round-8 (codex):
+ * LandingAuth — fn-15.5 round-8 (codex), fn-15.7 (Edge-Middleware):
  *
- * Pre-refactor this was a client component that called `useAuth()` to
- * swap between an "Anmelden / Registrieren" pair and a logged-in user
- * dropdown (avatar + profile menu). That import-graph dragged
- * auth-context.tsx → @supabase/ssr into the landing-page bundle even
- * though anonymous visitors (95% of traffic + Googlebot) gained
+ * Pre-refactor this was a client component that called the old auth
+ * context to swap between an "Anmelden / Registrieren" pair and a
+ * logged-in user dropdown (avatar + profile menu). That import-graph
+ * dragged auth-context.tsx -> @supabase/ssr into the landing-page bundle
+ * even though anonymous visitors (95% of traffic + Googlebot) gained
  * nothing from it.
  *
- * The landing page's `AuthRedirectGate` (async server component under
- * Suspense, runs in parallel with the rest of the static shell)
- * already redirects every logged-in user to /feed before they can
- * see this UI. The only people who reach LandingAuth are:
+ * As of fn-15.7 the per-page `AuthRedirectGate` async Server Component
+ * is gone — the redirect for logged-in visitors happens at the Edge in
+ * `src/middleware.ts` (cookie-sniff -> 307 to /feed). The people who
+ * ever reach LandingAuth are therefore:
  *   - Anonymous visitors → want the auth CTA.
- *   - The rare logged-in user who appends `?home` to bypass the gate.
- *     They miss the profile-dropdown UI but the SocialNav (mounted on
- *     authenticated routes) covers profile / signout from anywhere
- *     else.
+ *   - The rare logged-in user who appends `?home` to bypass the Edge
+ *     gate. They miss the profile-dropdown UI but the SocialNav
+ *     (mounted on authenticated routes) covers profile / signout from
+ *     anywhere else.
  *
- * So this component is now a pure server component with two
- * `<Link>` tags. Zero auth-context imports → auth code stays out of
- * the landing chunk.
+ * So this component is now a pure server component with two `<Link>`
+ * tags. Zero auth-context imports → auth code stays out of the landing
+ * chunk, and the landing route stays a fully static ISR shell.
  */
 export function LandingAuth() {
   return (

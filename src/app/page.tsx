@@ -1,4 +1,3 @@
-import { Suspense } from 'react';
 import Link from 'next/link';
 import { HeroSection } from '@/components/Landing/HeroSection';
 import { LandingStats } from '@/components/Landing/LandingStats';
@@ -6,32 +5,31 @@ import { LandingAuth } from '@/components/Landing/LandingAuth';
 import { AuthErrorToast } from '@/components/Landing/AuthErrorToast';
 import { ParticleBackground } from '@/components/Landing/ParticleBackground';
 import { Onboarding } from '@/components/Landing/Onboarding';
-import { LiveActivity } from '@/components/Landing/LiveActivity';
 import { Footer } from '@/components/Legal/Footer';
 import { LandingSections } from '@/components/Landing/LandingSections';
 import { ScrollHint } from '@/components/Landing/ScrollHint';
-import { AuthRedirectGate } from '@/components/Landing/AuthRedirectGate';
 
 // WebSite + Organization JSON-LD live now in the root layout so every page
 // emits them, not just the landing. No page-local JSON-LD here anymore.
 
-// ISR: Landing-Hülle wird statisch zur Build-Zeit gerendert + alle 1 h
-// regeneriert. Funktioniert weil der Auth-Check (Cookies + getUser) in
-// die <AuthRedirectGate>-Komponente unter Suspense ausgelagert wurde,
-// damit die Hülle keinen runtime-only-Zugriff mehr hat. Anonyme Visitors
-// (Googlebot + 95 % der Erstbesucher) sehen die Landing instant aus dem
-// Edge-Cache; logged-in Users werden via Streaming-Redirect zu /feed.
+// fn-15.7: ISR-revalidate every hour. The landing is now a fully static
+// shell at the route level — no `cookies()`, no `headers()`, no
+// `useAuth()`, no uncached `fetch()`. Auth-aware redirect for logged-in
+// users moved to src/middleware.ts (Edge cookie-sniff → 307 to /feed),
+// so the page render itself never has to ask "is this visitor signed
+// in?". Build-output for `/` flips from `ƒ (Dynamic)` to `●` (ISR)
+// and Vercel emits `Cache-Control: public, max-age=0, must-revalidate`
+// (or `s-maxage=3600, stale-while-revalidate=…` depending on hosting
+// edition) instead of `no-store`.
+//
+// Trade-off: the `?home` query param no longer renders a public copy
+// of the landing _for a signed-in user_, because the redirect now
+// happens at the Edge before the page renders. The Edge gate honours
+// the same `?home` escape hatch (see src/middleware.ts) — a logged-in
+// tester can still inspect the public landing by appending `?home`.
 export const revalidate = 3600;
 
-export default async function LandingPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
-}) {
-  const params = await searchParams;
-  // Allow ?home to bypass redirect and show landing page
-  const forceHome = 'home' in params;
-
+export default function LandingPage() {
   return (
     // fn-15.2 — CLS-Stabilität:
     // `min-h-screen` keeps the container at least one viewport tall on
@@ -46,15 +44,6 @@ export default async function LandingPage({
       id="landing-curtain"
       className="min-h-screen text-white flex flex-col items-center relative overflow-hidden gradient-mesh gradient-mesh-animated"
     >
-      {/* Auth-Redirect läuft async unter Suspense — blockiert die statische
-          Landing-Hülle nicht. Logged-in User kriegen einen Streaming-Redirect
-          zu /feed; anonyme Visitor (inkl. Googlebot) sehen die Landing instant
-          aus dem Edge-Cache. ?home in der URL überspringt den Auth-Check. */}
-      {!forceHome && (
-        <Suspense fallback={null}>
-          <AuthRedirectGate />
-        </Suspense>
-      )}
       {/* Particle effect behind content */}
       <ParticleBackground />
 

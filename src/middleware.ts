@@ -72,6 +72,48 @@ export async function middleware(request: NextRequest) {
     }
   }
 
+  // ─── fn-15.7: Landing edge-redirect for logged-in users ───────────
+  //
+  // Previously `src/app/page.tsx` rendered `<AuthRedirectGate />` (an async
+  // Server Component) under Suspense, which streamed a `<script>`-based
+  // redirect to /feed for logged-in visitors. That worked, but it had two
+  // costs:
+  //
+  //   1. AuthRedirectGate called `supabase.auth.getUser()` on every cold
+  //      hit to `/` — a 100-500 ms blocking Network round-trip on the
+  //      function side.
+  //   2. The `cookies()` read inside `createServerSupabaseClient()` made
+  //      `/` opt out of static rendering and ISR, so Vercel served
+  //      `Cache-Control: no-store` to anonymous traffic too — even though
+  //      anonymous renders never need the auth answer. The CDN edge cache
+  //      was effectively turned off for the landing.
+  //
+  // The Edge here can do the same job purely from the request cookies
+  // (see Phase 1 audit in .flow/evidence/fn-15.7-auth-cookies.md): if a
+  // `sb-<projectRef>-auth-token` cookie is present, the visitor already
+  // holds session material, and we redirect at the Edge with a 307.
+  // The redirect itself isn't cacheable, but it never invokes the
+  // function or reads from the ISR cache — it just sends the browser
+  // straight to /feed. Anonymous visitors fall through to
+  // `NextResponse.next()` below and get the prerendered ISR landing
+  // straight from the CDN.
+  //
+  // Cookie presence != valid session. If the cookie is stale, /feed's
+  // own getUser() call will discover that and bounce to /auth/login —
+  // identical behaviour to the old gate.
+  //
+  // `?home` query escape hatch preserved from the old gate, so a
+  // logged-in tester can still inspect the public landing without
+  // logging out.
+  if (
+    request.nextUrl.pathname === '/' &&
+    !request.nextUrl.searchParams.has('home') &&
+    hasSupabaseAuthCookie(request)
+  ) {
+    const feedUrl = new URL('/feed', request.url);
+    return NextResponse.redirect(feedUrl, 307);
+  }
+
   // Anonymous request? Skip the session refresh entirely so Next.js can
   // prerender + ISR-cache the response. This is what unblocks Google
   // indexing for the ~42 000 public event pages.
