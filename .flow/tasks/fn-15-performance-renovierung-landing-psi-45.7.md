@@ -84,7 +84,7 @@ Authoritative Pattern erst nach Audit fix.
 
 - [ ] PSI Mobile Performance Score >= 90 nach Group (7+9)
 
-## Evidence
+## Evidence-Notes
 
 - curl -I Output auf Production zeigt korrekte Cache-Header
 - Manueller Test: Login + Aufruf von `/` → Redirect zu /feed am Edge
@@ -92,9 +92,13 @@ Authoritative Pattern erst nach Audit fix.
 - Rollback: Vercel-instant; Notfall: middleware.ts entfernen
 
 ## Done summary
-TBD
+## fn-15.7 — ISR + Auth-Middleware
 
+Moved the logged-in redirect for the landing out of the Server Component
+into Edge middleware: `/` flips from `ƒ (Dynamic)` to `○` with
+`Revalidate: 1h`, anonymous traffic now hits the CDN edge cache instead of
+the function, and logged-in visitors get a 307 to `/feed` at the Edge.
 ## Evidence
-- Commits:
-- Tests:
+- Commits: ab3bb0490ac1fed88d1aca476696ceddc7e3cdec
+- Tests: npm run build (build-time proof: / = Static + Revalidate 1h, captured in .flow/evidence/fn-15.7-build-route-table.txt), curl smoke matrix against next start :4567 (anonymous=200+s-maxage=3600+x-nextjs-cache=HIT; logged-in unchunked=307->/feed; logged-in chunked=307->/feed; PKCE-only=200+HIT; ?home escape preserved), Phase 1 cookie audit grounded in @supabase/supabase-js@2.100.1 SupabaseClient.ts:294 source (see .flow/evidence/fn-15.7-auth-cookies.md)
 - PRs:
