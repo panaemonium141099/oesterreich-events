@@ -241,6 +241,20 @@ const nextConfig: NextConfig = {
     const styleSrcSources = ['style-src', "'self'", 'https://api.mapbox.com'];
     if (cssHash) styleSrcSources.push(`'sha256-${cssHash}'`);
 
+    // fn-15.6 round 3 (codex re-review): React server-renders inline
+    // `style={{...}}` attributes on many components (Mapbox markers, modal
+    // backdrops, animation delays etc.). CSP3's `style-src` directive
+    // governs BOTH inline `<style>` blocks AND `style=""` attributes; hashing
+    // every possible attribute permutation is impractical. CSP3 adds
+    // `style-src-attr` as a separate directive for attributes only —
+    // when set, it takes precedence over `style-src` for attributes.
+    //
+    // Trade-off: `'unsafe-inline'` on style-src-attr allows inline style
+    // attribute values, which can't load external resources or execute
+    // JS (style-only CSS), so the XSS surface is materially smaller than
+    // unsafe-inline on script-src. The hashed `<style>` block is still
+    // the primary XSS protection.
+
     // fn-15.10 round 2 (codex fix): Workbox is now SELF-HOSTED under
     // /public/workbox/, so the SW boots from the same origin as the app
     // — no third-party CDN dependency, no CSP allowlist creep, and the
@@ -252,6 +266,7 @@ const nextConfig: NextConfig = {
       "default-src 'self'",
       "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://api.mapbox.com https://events.mapbox.com https://www.googletagmanager.com https://www.google-analytics.com",
       styleSrcSources.join(' '),
+      "style-src-attr 'unsafe-inline'",
       "img-src 'self' data: blob: https:",
       "font-src 'self' data:",
       "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.mapbox.com https://*.tiles.mapbox.com https://events.mapbox.com https://api.spotify.com https://accounts.spotify.com https://www.google-analytics.com https://www.googletagmanager.com https://stats.g.doubleclick.net",
