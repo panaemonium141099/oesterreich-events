@@ -1,4 +1,11 @@
 import { fraunces, caveat } from '@/lib/fonts-planer';
+// fn-15.6: planer-scope CSS (cinematic editorial chrome — .planer-scope,
+// magnetic-cta, kinetic-underline, hairline-accent, rising-type, etc.)
+// was extracted from globals.css and lives in src/app/planer-scope.css.
+// Importing it here means it only ships under /groups (and child
+// segments like /groups/[id]) — the landing/blog/event pages no
+// longer carry ~6 KB of editorial chrome in their critical CSS chunk.
+import '../planer-scope.css';
 
 /**
  * /groups parent layout — mounts the Planer-scope fonts.

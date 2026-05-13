@@ -1,5 +1,10 @@
 import { ModalShell } from '@/components/Layout/ModalShell';
 import { fraunces, caveat } from '@/lib/fonts-planer';
+// fn-15.6: planer-scope CSS extracted to src/app/planer-scope.css and
+// imported here (and in /groups/layout.tsx) so /join renders the same
+// editorial chrome without forcing the rest of the site to ship those
+// rules in the global stylesheet.
+import '../planer-scope.css';
 
 /**
  * /join/[code] — invite-redemption flow.

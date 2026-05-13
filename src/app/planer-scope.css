@@ -1,0 +1,193 @@
+/* ═══════════════════════════════════════════════
+   Planer-scope CSS — fn-15.6
+   ───────────────────────────────────────────────
+   Editorial chrome for /groups, /groups/[id], /join (Planer scope).
+   Extracted from globals.css so the landing page never pulls these
+   styles into its critical CSS chunk. Imported by `app/groups/layout.tsx`
+   and `app/join/layout.tsx`.
+
+   All selectors are scoped under `.planer-scope` or unique class names
+   (`magnetic-cta`, `kinetic-underline`, `hairline-accent`, `rising-type`,
+   `step-active-dot`, `editorial-num`, `tabular`, `planer-grain`,
+   `planer-spotlight`) that only appear inside planer routes.
+
+   Token vars themselves (--color-planer-*, --font-display, --font-body)
+   stay in globals.css `@theme` because Tailwind compiles them into
+   utility classes that may be referenced outside planer.
+   ═══════════════════════════════════════════════ */
+
+.planer-scope {
+  font-family: var(--font-body);
+  color: var(--color-planer-ink);
+  background-color: var(--color-planer-void);
+  position: relative;
+  isolation: isolate;
+  /* Sharper letterforms for Geist */
+  font-feature-settings: 'ss01', 'cv11';
+  letter-spacing: -0.005em;
+}
+
+.planer-scope .font-display,
+.planer-scope .serif-display {
+  font-family: var(--font-display);
+  font-feature-settings: 'ss01', 'ss02';
+  letter-spacing: -0.025em;
+}
+
+/* Subtle grain overlay — SVG turbulence baked into a data-URI so no extra HTTP
+   request. Sits at z=1 above the page background but under content. */
+.planer-grain::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.08;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.95 0 0 0 0 0.85 0 0 0 0 0.7 0 0 0 0.5 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+}
+
+/* Warm radial vignette anchored top-center — creates a "spotlight" feel */
+.planer-spotlight::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 70% 50% at 50% 0%, rgba(245, 239, 226, 0.06) 0%, transparent 60%),
+    radial-gradient(ellipse 100% 60% at 50% 100%, rgba(120, 112, 98, 0.04) 0%, transparent 70%);
+}
+
+/* All children of a spotlit/grainy section need z>0 to sit above the layers */
+.planer-spotlight > *,
+.planer-grain > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* Editorial numeric label — "03 / 04" step indicator, film credit style */
+.editorial-num {
+  font-family: var(--font-display);
+  font-variation-settings: 'opsz' 14, 'SOFT' 50;
+  font-feature-settings: 'tnum', 'lnum';
+  letter-spacing: 0.08em;
+}
+
+/* Magnetic CTA — neutral warm-white glow on hover, slight lift */
+.magnetic-cta {
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.4s cubic-bezier(0.19, 1, 0.22, 1),
+              box-shadow 0.4s cubic-bezier(0.19, 1, 0.22, 1);
+}
+.magnetic-cta::before {
+  content: '';
+  position: absolute;
+  inset: -40%;
+  background: radial-gradient(circle at var(--mx, 50%) var(--my, 50%),
+    rgba(245, 239, 226, 0.08) 0%, transparent 55%);
+  opacity: 0;
+  transition: opacity 0.4s ease-out;
+  pointer-events: none;
+}
+.magnetic-cta:hover {
+  transform: translateY(-1px);
+  box-shadow:
+    0 6px 20px -10px rgba(255, 255, 255, 0.06),
+    0 2px 8px -2px rgba(0, 0, 0, 0.4);
+}
+.magnetic-cta:hover::before {
+  opacity: 1;
+}
+@media (prefers-reduced-motion: reduce) {
+  .magnetic-cta { transition: none; }
+  .magnetic-cta:hover { transform: none; }
+}
+
+/* Hairline divider variant — warm off-white, used as editorial accent */
+.hairline-accent {
+  height: 1px;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    rgba(245, 239, 226, 0.15) 30%,
+    rgba(245, 239, 226, 0.35) 50%,
+    rgba(245, 239, 226, 0.15) 70%,
+    transparent 100%);
+}
+
+/* Kinetic underline — draws itself on load, used beneath display headings */
+@keyframes underlineDraw {
+  from { transform: scaleX(0); }
+  to   { transform: scaleX(1); }
+}
+.kinetic-underline {
+  position: relative;
+  display: inline-block;
+}
+.kinetic-underline::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -0.15em;
+  height: 2px;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    var(--color-planer-accent) 15%,
+    var(--color-planer-accent) 85%,
+    transparent 100%);
+  transform-origin: left;
+  animation: underlineDraw 1.4s cubic-bezier(0.77, 0, 0.175, 1) 0.2s both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .kinetic-underline::after { animation: none; transform: none; }
+}
+
+/* Staggered reveal keyframe — handy for server-rendered lists */
+@keyframes risingType {
+  from { opacity: 0; transform: translateY(22px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.rising-type {
+  animation: risingType 0.8s cubic-bezier(0.19, 1, 0.22, 1) both;
+}
+
+/* Step-rail dot — pulses when active */
+@keyframes stepPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(245, 239, 226, 0.45); }
+  50%      { box-shadow: 0 0 0 6px rgba(245, 239, 226, 0); }
+}
+.step-active-dot {
+  animation: stepPulse 2s ease-out infinite;
+}
+
+/* Planer form-field resets — darker, cooler than site default */
+.planer-scope input[type="text"],
+.planer-scope input[type="date"],
+.planer-scope input[type="time"],
+.planer-scope textarea {
+  background-color: rgba(235, 230, 238, 0.02);
+  border-color: rgba(235, 230, 238, 0.08);
+  color: var(--color-planer-ink);
+  transition: border-color 0.25s ease, background-color 0.25s ease;
+}
+.planer-scope input:focus,
+.planer-scope textarea:focus {
+  border-color: rgba(245, 239, 226, 0.3) !important;
+  background-color: rgba(245, 239, 226, 0.03) !important;
+}
+.planer-scope input::placeholder,
+.planer-scope textarea::placeholder {
+  color: rgba(154, 147, 162, 0.5);
+}
+
+/* Prevent date/time inputs showing the native picker icon in bright mode */
+.planer-scope input[type="date"],
+.planer-scope input[type="time"] {
+  color-scheme: dark;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rising-type, .step-active-dot { animation: none; }
+}

@@ -5,7 +5,9 @@
   "main": "index.js",
   "scripts": {
     "dev": "next dev",
+    "prebuild": "node scripts/compute-csp-hash.mjs",
     "build": "next build",
+    "postbuild": "node scripts/verify-csp-hash.mjs",
     "analyze": "ANALYZE=true next build",
     "start": "next start",
     "scrape": "tsx src/scripts/scrape.ts",

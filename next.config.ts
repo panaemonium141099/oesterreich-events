@@ -100,11 +100,27 @@ const nextConfig: NextConfig = {
   //      and /planer all stay COOP/COEP-free.
   //   3. **Blog cache** (unchanged).
   //
-  // CSP is unchanged in fn-15.4 — AdSense sources were stripped, but
-  // `'unsafe-inline'` for scripts and styles still exists. fn-15.6
-  // (Critical-CSS-Inline) will replace `'unsafe-inline'` with sha256-hashes
-  // for the inline GA4-init block plus the inlined critical CSS. See
-  // .flow/specs/fn-15... §Pillar 6 for the hash-CSP design.
+  // fn-15.6 — finalized CSP. `'unsafe-inline'` removed from style-src and
+  // replaced with `'sha256-<CRITICAL_CSS_HASH>'`. The hash itself is
+  // computed at prebuild time by `scripts/compute-csp-hash.mjs` from
+  // `src/lib/critical-css.ts` (the SINGLE source of truth for the inline
+  // <style> block) and written to `.env.production` as
+  // `NEXT_PUBLIC_CRITICAL_CSS_HASH`. The postbuild verifier
+  // (`scripts/verify-csp-hash.mjs`) refuses to ship if the rendered HTML
+  // <style data-critical-css> body doesn't hash to that same value.
+  //
+  // Why a fixed env var and not a runtime hash: a runtime hash would
+  // force the headers() handler to read the file system on every request
+  // (slow) AND would diverge if the build emits a different inline body
+  // than what we hashed (broken page paint). The env var is baked at
+  // build time and read once at module load.
+  //
+  // `'unsafe-inline'` STAYS in script-src for now. Next.js still emits
+  // hydration data scripts inline, and the two `<script type="application/
+  // ld+json">` blocks (WebSite + Organization schema) live in the layout
+  // head. Stripping `'unsafe-inline'` from script-src is its own task
+  // (fn-15.10 picks up the Service Worker register-script and may revisit
+  // this) — fn-15.6's scope is the inlined `<style>` block.
   async headers() {
     // Content-Security-Policy — Defense-in-Depth gegen XSS + 3rd-party-Inject.
     // Wir erlauben explizit:
@@ -112,7 +128,8 @@ const nextConfig: NextConfig = {
     //   - Supabase (auth, REST, Realtime via wss)
     //   - Google Analytics 4 (gtag.js + collect endpoints)
     //   - Spotify API für Artist-Search
-    //   - 'unsafe-inline' für Scripts (Next.js RSC hydration + GA4-init) + Styles (Tailwind)
+    //   - 'unsafe-inline' für Scripts (Next.js RSC hydration + JSON-LD)
+    //   - sha256-hash für Styles (inlined critical CSS only; Tailwind chunk loads via <link>)
     //   - 'unsafe-eval' für Mapbox GL JS (WebGL-Compiler)
     //
     // BUG-FIX 02.05.: ohne *.tiles.mapbox.com werden Vector-Tiles vom Worker
@@ -124,10 +141,22 @@ const nextConfig: NextConfig = {
     // removed from CSP (publisher account not approved). See fn-15.4 task spec
     // and commit for the full removal — repo-grep stays clean of ad-network
     // string fragments to make the audit reproducible.
+
+    // fn-15.6: CRITICAL_CSS_HASH falls through to `''` only during a
+    // misconfigured local dev run where prebuild was skipped. In that
+    // case the CSP would carry just `style-src 'self'`, which blocks
+    // the inline <style> — that's actually the desired loud-failure
+    // behavior: dev gets a glaring CSP violation message instead of
+    // silently shipping `'unsafe-inline'`. Production builds always
+    // run prebuild + postbuild and a missing hash fails the build.
+    const cssHash = process.env.NEXT_PUBLIC_CRITICAL_CSS_HASH ?? '';
+    const styleSrcSources = ['style-src', "'self'", 'https://api.mapbox.com'];
+    if (cssHash) styleSrcSources.push(`'sha256-${cssHash}'`);
+
     const csp = [
       "default-src 'self'",
       "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://api.mapbox.com https://events.mapbox.com https://www.googletagmanager.com https://www.google-analytics.com",
-      "style-src 'self' 'unsafe-inline' https://api.mapbox.com",
+      styleSrcSources.join(' '),
       "img-src 'self' data: blob: https:",
       "font-src 'self' data:",
       "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.mapbox.com https://*.tiles.mapbox.com https://events.mapbox.com https://api.spotify.com https://accounts.spotify.com https://www.google-analytics.com https://www.googletagmanager.com https://stats.g.doubleclick.net",

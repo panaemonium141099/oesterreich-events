@@ -1,5 +1,11 @@
 import type { Metadata } from 'next';
 import { AppShell } from '@/components/Layout/AppShell';
+// fn-15.6: map-only CSS (mapbox/leaflet markers, popups, MapV3 chrome,
+// map-loading overlay) was extracted from globals.css and lives in
+// src/app/map-scope.css. Importing it here means it only ships on
+// `/map` (and child segments) — the landing/blog/event pages no
+// longer carry ~10 KB of map styles in their critical CSS chunk.
+import '../map-scope.css';
 
 export const metadata: Metadata = {
   title: 'Event-Karte Österreich — Alle Veranstaltungen auf einer Karte',

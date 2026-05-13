@@ -28,6 +28,14 @@ import { RouteTransitions } from '@/components/Layout/RouteTransitions';
 // /public/fonts/, Latin-1 subset.
 import { geist } from '@/lib/fonts';
 import './globals.css';
+// fn-15.6: inline above-the-fold critical CSS in the layout `<head>`
+// so the landing-hero paints before the render-blocking globals.css
+// chunk parses. The `<style data-critical-css>` marker is what the
+// postbuild verify hook (`scripts/verify-csp-hash.mjs`) looks for to
+// confirm the inline bytes match the SHA-256 hash baked into the CSP.
+// CRITICAL_CSS is the SINGLE source of truth — never inline a CSS
+// string directly into this file; the hash would drift.
+import { CRITICAL_CSS } from '@/lib/critical-css';
 
 // GA4 deferred until a real consent banner exists (Codex fn-15.4 round 3).
 // `NEXT_PUBLIC_GA_MEASUREMENT_ID` is still defined in .env.example so the
@@ -179,6 +187,22 @@ export default function RootLayout({
   return (
     <html lang="de" className={geist.variable}>
       <head>
+        {/*
+          fn-15.6: critical CSS inlined first so the browser can paint
+          the above-the-fold hero (gradient mesh background, body
+          reset, headline fade-in, search-bar focus reset) before the
+          render-blocking globals.css chunk parses. ~3 KB raw, hashed
+          into the CSP `style-src 'sha256-…'` directive via
+          scripts/compute-csp-hash.mjs (prebuild) and verified against
+          the rendered HTML in scripts/verify-csp-hash.mjs (postbuild).
+          The `data-critical-css` attribute is the marker the verify
+          script scans for — DO NOT change it without updating that
+          script too.
+        */}
+        <style
+          data-critical-css
+          dangerouslySetInnerHTML={{ __html: CRITICAL_CSS }}
+        />
         <Script
           id="ld-website"
           type="application/ld+json"
