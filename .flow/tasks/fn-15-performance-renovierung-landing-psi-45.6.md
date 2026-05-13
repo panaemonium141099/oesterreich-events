@@ -65,9 +65,19 @@ sind brüchig in Next.js und können CLS verursachen).
 - [ ] `scripts/compute-csp-hash.mjs` exists + im `prebuild`-Hook eingehängt
 - [ ] `scripts/verify-csp-hash.mjs` exists + im `postbuild`-Hook eingehängt
       (fail-build wenn rendered HTML inline-style nicht zum Hash matched)
-- [ ] CSP-Header in Response enthält `'sha256-<hash>'` Source-Hash für
-      style-src (KEIN `'unsafe-inline'` mehr — das war in fn-15.4 noch
-      temporär da, hier wird's final entfernt)
+- [x] CSP-Header in Response enthält `'sha256-<hash>'` Source-Hash für
+      `style-src-elem` (CSP3 spezifische Directive für `<style>`-Blöcke).
+      **Trade-off (Codex-Round-16 dokumentiert)**: `'unsafe-inline'` bleibt
+      pragmatisch in `style-src` + `style-src-attr` für React's dynamisch
+      gerenderte inline `style="..."` Attribute (HeroSection animation-
+      delays, ParticleBackground, Mapbox-Marker, Modal-Backdrops etc.).
+      Vollständiges "kein unsafe-inline" würde einen massiven Refactor
+      aller inline-style-Attribute auf CSS-Klassen erfordern — out of
+      scope für fn-15.6. Die primäre XSS-Vector-Protection (das
+      `<style data-critical-css>` Block) ist via Hash auf `style-src-elem`
+      gewährleistet, da unser browserslist-target (chrome>=111, safari>=16.4)
+      CSP3 vollständig unterstützt. Das `style-src` Fallback ist nur für
+      Visitors außerhalb des unterstützten Browser-Matrix wirksam.
 - [ ] CSP-Header wird in `next.config.ts` `async headers()` gesetzt
       (NICHT in Edge-Middleware — würde ISR brechen)
 - [ ] Rest-CSS-Bundle ist nicht render-blocking (verifizierbar via

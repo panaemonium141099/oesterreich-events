@@ -169,10 +169,33 @@ export function ServiceWorkerProvider() {
     const onOnline = () => attemptRegistration();
     window.addEventListener('online', onOnline);
 
+    // Codex round-16 (Minor): long-lived SPA tabs don't trigger top-level
+    // navigations, so the browser never re-fetches /sw.js to discover
+    // updates. Call registration.update() on visibilitychange (tab
+    // re-focus after a deploy) — that polls the server for a new SW
+    // version. The browser de-dupes if /sw.js hasn't changed, so this
+    // is cheap.
+    let lastUpdateCheck = Date.now();
+    const onVisibilityChange = async () => {
+      if (document.hidden) return;
+      // Throttle to 1× per 5 minutes so rapid tab-switching doesn't hammer.
+      const now = Date.now();
+      if (now - lastUpdateCheck < 5 * 60 * 1000) return;
+      lastUpdateCheck = now;
+      try {
+        const reg = await navigator.serviceWorker.getRegistration();
+        if (reg) await reg.update();
+      } catch {
+        /* update poll failure is non-fatal */
+      }
+    };
+    document.addEventListener('visibilitychange', onVisibilityChange);
+
     return () => {
       navigator.serviceWorker.removeEventListener('controllerchange', onControllerChange);
       window.removeEventListener('lt-sw-skip-waiting', onUserUpgrade);
       window.removeEventListener('online', onOnline);
+      document.removeEventListener('visibilitychange', onVisibilityChange);
     };
   }, []);
 
