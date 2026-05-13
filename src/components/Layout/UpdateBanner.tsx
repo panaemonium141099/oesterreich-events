@@ -68,6 +68,11 @@ export function UpdateBanner() {
       window.location.reload();
       return;
     }
+    // Tell ServiceWorkerProvider that the upcoming controllerchange is
+    // user-initiated (codex round-3 fix: distinguishes "user accepted
+    // update" from "first install of the SW" so first-time visitors
+    // don't get an unsolicited reload).
+    window.dispatchEvent(new CustomEvent('lt-sw-skip-waiting'));
     // Tell the waiting worker to call self.skipWaiting().
     // ServiceWorkerProvider's `controllerchange` handler will reload the
     // page once the new SW takes control. We don't reload ourselves
