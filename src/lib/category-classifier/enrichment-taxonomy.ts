@@ -320,6 +320,7 @@ export const PRICE_FLAGS = [
   'fuer-anfaenger',                // low-barrier participation
   'unter-20-euro',
   'spende-erbeten',                // NEU v2 (fn-14.3): "Spende erbeten" / "Auf Spendenbasis" — price_min=0
+  'abendkasse',                    // NEU v4-redesign: Tickets/Eintritt nur vor Ort, kein Online-Vorverkauf
 ] as const;
 
 export type PriceFlag = typeof PRICE_FLAGS[number];
