@@ -1020,3 +1020,32 @@ button:active, a:active, [role="button"]:active {
    /groups, /groups/[id], /join layouts so the landing/blog/event
    pages never pull those ~6 KB of styles.
    ═══════════════════════════════════════════════ */
+
+/* ═══════════════════════════════════════════════════════════════════
+   v4 Redesign — Foundation Tokens (Phase 1)
+   Additiv zu bestehenden --color-* und --planer-* Tokens.
+   Verwendung: ab Phase 1 Nav, ab Phase 2 in neuen Card-Komponenten.
+   Spec: docs/superpowers/specs/2026-05-14-v4-phase-1-foundation-nav-design.md
+   ═══════════════════════════════════════════════════════════════════ */
+:root {
+  --v4-ink:              #ffffff;
+  --v4-ink-70:           rgba(255, 255, 255, 0.70);
+  --v4-ink-50:           rgba(255, 255, 255, 0.50);
+  --v4-ink-30:           rgba(255, 255, 255, 0.30);
+
+  --v4-hairline-1:       rgba(255, 255, 255, 0.04);
+  --v4-hairline-2:       rgba(255, 255, 255, 0.06);
+  --v4-hairline-3:       rgba(255, 255, 255, 0.10);
+  --v4-hairline-4:       rgba(255, 255, 255, 0.15);
+
+  --v4-surface:          #0a0a0c;
+  --v4-surface-elevated: #141416;
+  --v4-surface-inset:    #050506;
+
+  /* Semantic accents — bereits hier definiert damit Phase 1 Bell-Dot
+     --v4-match nutzen kann. Vollständige Verwendung ab Phase 2. */
+  --v4-ticket:           #d4b896;
+  --v4-match:            #f5b942;
+  --v4-go:               #7bb794;
+  --v4-alert:            #c67079;
+}
