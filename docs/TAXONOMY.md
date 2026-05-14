@@ -193,6 +193,7 @@ kinderwagengeeignet
 fuer-anfaenger
 unter-20-euro
 spende-erbeten
+abendkasse
 ```
 
 ### 3.5 Setting / Format / Zeit-Tags

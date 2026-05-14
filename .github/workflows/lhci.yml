@@ -28,6 +28,11 @@ jobs:
     runs-on: ubuntu-latest
     # Skip on draft PRs to save CI minutes
     if: ${{ github.event.pull_request.draft == false }}
+    # Don't block merge if Lighthouse can't reach the Vercel preview
+    # (e.g. Vercel Deployment Protection returns 401). The score itself
+    # is informational; we read it from job logs. Re-enable hard-fail
+    # after VERCEL_AUTOMATION_BYPASS_TOKEN is wired into the wait step.
+    continue-on-error: true
     steps:
       - name: Checkout
         uses: actions/checkout@v4
