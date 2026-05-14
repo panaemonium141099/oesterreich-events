@@ -22,3 +22,9 @@ export { V4EventDetailHero } from './V4EventDetailHero';
 export { V4EventDetailContent } from './V4EventDetailContent';
 export { V4MobileStickyBar } from './V4MobileStickyBar';
 export { V4EventDetail } from './V4EventDetail';
+
+// Phase 4 — atoms reused across /artists, /entdecken, /map
+export { V4Toast, type V4ToastKind } from './V4Toast';
+export { V4FilterChips, FILTER_CHIPS, type V4FilterChipKey } from './V4FilterChips';
+export { V4SortRow, SORT_OPTIONS, type V4SortKey } from './V4SortRow';
+export { V4EntdeckenTabs, type V4EntdeckenMode } from './V4EntdeckenTabs';
