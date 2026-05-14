@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import type { Session } from '@supabase/supabase-js';
 import { createClient } from '@/lib/supabase/client';
 
 /**
@@ -109,12 +110,12 @@ export function V4TabBar() {
     const supabase = createClient();
     let mounted = true;
 
-    supabase.auth.getSession().then(res => {
+    supabase.auth.getSession().then((res: { data: { session: Session | null } }) => {
       if (mounted && res.data.session?.user) setAuthed(true);
     });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
+      (_event: string, session: Session | null) => {
         if (!mounted) return;
         setAuthed(!!session?.user);
       },
