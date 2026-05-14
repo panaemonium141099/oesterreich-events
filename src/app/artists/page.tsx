@@ -1,5 +1,5 @@
 import { requireUserOrRedirect } from '@/lib/supabase/require-user';
-import { ArtistsPageClient } from './ArtistsPageClient';
+import { V4ArtistsPageClient } from './V4ArtistsPageClient';
 
 /**
  * /artists — Spotify-connected artist management.
@@ -14,5 +14,5 @@ import { ArtistsPageClient } from './ArtistsPageClient';
  */
 export default async function ArtistsPage() {
   await requireUserOrRedirect('/artists');
-  return <ArtistsPageClient />;
+  return <V4ArtistsPageClient />;
 }
