@@ -1,23 +1,55 @@
 import Link from 'next/link';
 
-const CITY_DOTS = [
-  { x: 180, y: 200, l: 'BREGENZ' },
-  { x: 360, y: 200, l: 'SALZBURG' },
-  { x: 520, y: 200, l: 'LINZ' },
-  { x: 720, y: 215, l: 'WIEN' },
-  { x: 800, y: 245, l: 'EISENSTADT' },
-  { x: 600, y: 255, l: 'GRAZ' },
+/**
+ * MapPreview — server-rendered preview of the real /map experience.
+ *
+ * Uses Mapbox Static Images API (HTTP-only, no mapbox-gl client bundle) so
+ * the visual fidelity matches /map without adding ~480 KB of JS to the
+ * landing — fn-15 bundle discipline stays intact. The PNG is a fixed-URL
+ * GET which lets the browser + CDN cache it aggressively.
+ *
+ * Pin colors map to v4 card states:
+ *   sand   (#d4b896) — Tickets verfügbar
+ *   gold   (#f5b942) — Künstler im Line-up
+ *   green  (#7bb794) — In deinem Plan
+ *
+ * NEXT_PUBLIC_MAPBOX_TOKEN is the same token the real /map uses; the URL
+ * is constructed at render time. Marker coords are real Austrian cities
+ * — same 5 dots the SVG had before, just placed on an actual map image.
+ */
+
+// Lon, Lat (Mapbox order)
+const MARKERS = [
+  // Wien — sand (Tickets verfügbar)
+  { lon: 16.37, lat: 48.21, color: 'd4b896' },
+  // Eisenstadt — gold (Künstler im Line-up)
+  { lon: 16.51, lat: 47.85, color: 'f5b942' },
+  // Salzburg — sand
+  { lon: 13.04, lat: 47.81, color: 'd4b896' },
+  // Linz — sand
+  { lon: 14.30, lat: 48.30, color: 'd4b896' },
+  // Graz — green (In deinem Plan)
+  { lon: 15.43, lat: 47.07, color: '7bb794' },
+  // Innsbruck — sand
+  { lon: 11.40, lat: 47.27, color: 'd4b896' },
 ];
 
-const EVENT_DOTS = [
-  { x: 720, y: 215, r: 8, fill: 'var(--v4-ticket)' },
-  { x: 800, y: 245, r: 6, fill: 'var(--v4-match)' },
-  { x: 360, y: 200, r: 5, fill: 'var(--v4-ink-70)' },
-  { x: 520, y: 200, r: 7, fill: 'var(--v4-ticket)' },
-  { x: 600, y: 255, r: 6, fill: 'var(--v4-go)' },
-];
+function buildMapboxUrl(): string {
+  const token = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
+  // Without a token the API returns 401. Return an empty string and let the
+  // <img> tag handle the broken-image case gracefully (fallback shows the
+  // dark backdrop + legend, still readable).
+  if (!token) return '';
+  const pins = MARKERS.map(m => `pin-s+${m.color}(${m.lon},${m.lat})`).join(',');
+  // Austria roughly: center 13.55,47.6, zoom 5.4 covers Bregenz→Wien.
+  const camera = '13.55,47.55,5.4,0';
+  const size = '1280x320@2x';
+  return `https://api.mapbox.com/styles/v1/mapbox/dark-v11/static/${pins}/${camera}/${size}?access_token=${token}&logo=false&attribution=false`;
+}
 
 export function MapPreview() {
+  const mapUrl = buildMapboxUrl();
+
   return (
     <section className="max-w-[1180px] mx-auto px-4 md:px-14 py-6 md:py-10">
       <div className="flex items-end justify-between gap-6 mb-4">
@@ -38,28 +70,27 @@ export function MapPreview() {
         </Link>
       </div>
 
-      <div className="relative h-[220px] md:h-[320px] rounded-[18px] overflow-hidden border border-[var(--v4-hairline-1)] bg-[var(--v4-surface-elevated)]">
-        <svg width="100%" height="100%" viewBox="0 0 1100 320" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
-          {Array.from({ length: 7 }).map((_, i) => (
-            <path key={i}
-              d={`M -20 ${60 + i * 38} Q 320 ${48 + i * 38 + (i % 2 ? 14 : -10)} 700 ${66 + i * 38} T 1120 ${56 + i * 38}`}
-              fill="none" stroke="var(--v4-hairline-1)" strokeWidth="0.7"/>
-          ))}
-          <path d="M 80 220 Q 200 160 320 180 Q 460 175 560 195 Q 700 215 820 180 Q 940 160 1020 200 L 1020 270 Q 880 295 740 280 Q 540 260 380 290 Q 220 305 100 290 Z"
-            fill="none" stroke="var(--v4-hairline-2)" strokeWidth="1"/>
-          {CITY_DOTS.map(c => (
-            <g key={c.l}>
-              <circle cx={c.x} cy={c.y} r="2" fill="var(--v4-ink-50)"/>
-              <text x={c.x + 8} y={c.y + 3} fill="var(--v4-ink-50)" fontSize="9" letterSpacing="2.2" fontWeight={600}>{c.l}</text>
-            </g>
-          ))}
-          {EVENT_DOTS.map((p, i) => (
-            <g key={i}>
-              <circle cx={p.x} cy={p.y} r={p.r + 6} fill="none" stroke={p.fill} strokeWidth="0.6" opacity="0.4"/>
-              <circle cx={p.x} cy={p.y} r={p.r} fill={p.fill}/>
-            </g>
-          ))}
-        </svg>
+      <Link
+        href="/map"
+        className="press-haptic relative block h-[220px] md:h-[320px] rounded-[18px] overflow-hidden border border-[var(--v4-hairline-1)] bg-[var(--v4-surface-elevated)]"
+        aria-label="Karte öffnen"
+      >
+        {mapUrl ? (
+          /* eslint-disable-next-line @next/next/no-img-element */
+          <img
+            src={mapUrl}
+            alt="Karte von Österreich mit Event-Markern in Wien, Eisenstadt, Salzburg, Linz, Graz und Innsbruck"
+            loading="lazy"
+            className="absolute inset-0 w-full h-full object-cover"
+          />
+        ) : (
+          <div aria-hidden="true" className="absolute inset-0 flex items-center justify-center text-[var(--v4-ink-50)] text-sm">
+            Karte wird geladen …
+          </div>
+        )}
+
+        {/* Soft top-fade so the legend + CTA stay legible regardless of map content */}
+        <div className="absolute inset-0 pointer-events-none bg-gradient-to-b from-transparent via-transparent to-[rgba(10,10,12,0.45)]" aria-hidden="true"/>
 
         <div className="absolute bottom-4 left-4 flex gap-3.5 flex-wrap px-3.5 py-2.5 rounded-xl bg-[rgba(10,10,12,0.85)] backdrop-blur border border-[var(--v4-hairline-2)] text-[11px] text-[var(--v4-ink-70)]">
           <span className="inline-flex items-center gap-1.5">
@@ -76,14 +107,13 @@ export function MapPreview() {
           </span>
         </div>
 
-        <Link
-          href="/map"
+        <span
           className="press-haptic absolute top-4 right-4 inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[var(--v4-ink)] text-[#0a0a0c] text-[12.5px] font-semibold"
         >
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"/><line x1="9" y1="3" x2="9" y2="18"/><line x1="15" y1="6" x2="15" y2="21"/></svg>
           Karte öffnen
-        </Link>
-      </div>
+        </span>
+      </Link>
     </section>
   );
 }

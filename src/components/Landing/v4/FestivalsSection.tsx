@@ -1,9 +1,9 @@
-import type { Festival } from '@/types/festivals';
+import type { LandingFestival } from '@/lib/v4/get-landing-data';
 import { V4FestivalCard } from '@/components/Events/v4';
 import Link from 'next/link';
 
 interface FestivalsSectionProps {
-  festivals: Array<Festival & { lineupMatch: boolean }>;
+  festivals: LandingFestival[];
 }
 
 export function FestivalsSection({ festivals }: FestivalsSectionProps) {
