@@ -4,7 +4,9 @@ import type { Event } from '@/types/events';
 import { extractCity } from '@/lib/utils/city';
 import { buildEventUrlV2 } from '@/lib/utils/slugify';
 import { resolvePrimaryEventImage } from '@/lib/event-images';
-import { EventDetailV2 } from '@/components/Events/EventDetailV2';
+import { V4EventDetail } from '@/components/Events/v4';
+import { deriveEventState } from '@/lib/v4/derive-event-state';
+import { deriveDetailContext } from '@/lib/v4/derive-detail-context';
 import {
   parseSlugArray,
   resolveEvent,
@@ -296,22 +298,29 @@ export default async function EventDetailPage({
     permanentRedirect(canonicalPath);
   }
 
-  // Load venue + friends + lineup in parallel — they're independent.
-  const [venue, friendsData, lineup] = await Promise.all([
+  // Phase 3 (v4 redesign): we no longer load friendsData here — Friends
+  // were intentionally removed from the event detail per chat2 brief
+  // (Friends belong to Plan context, Phase 5). Venue + lineup still load
+  // in parallel because Phase 3.1 will surface them; for now they're
+  // unused but the queries are cheap.
+  const [, , detailCtx] = await Promise.all([
     event.venue_id ? getVenue(event.venue_id) : Promise.resolve(null),
-    getFriendsForEvent(event.id),
     getLineupForEvent(event.id),
+    deriveDetailContext(event.id),
   ]);
 
-  // Derive city for breadcrumb / map / stats
-  const derivedCity = extractCity(
-    { address: event.address, bundesland: event.bundesland },
-    venue?.city,
-  );
+  const state = deriveEventState(event, detailCtx);
+
+  // Best-effort ticket meta inferred from event row. The fields are loose
+  // strings; V4SideBox falls back to UnknownBox if any are missing.
+  const provider = event.source_name ?? undefined;
+  const priceFrom =
+    event.price_min != null ? `€ ${event.price_min}` :
+    event.price_text ?? undefined;
+  const priceAtDoor = event.price_text ?? undefined;
 
   // Only emit JSON-LD for fully published events (skip low confidence)
   const jsonLd = event.publish_status !== 'published_low_confidence' ? buildJsonLd(event) : null;
-  const bundeslandHref = buildBundeslandHref(event.bundesland);
 
   return (
     <>
@@ -321,14 +330,13 @@ export default async function EventDetailPage({
           dangerouslySetInnerHTML={{ __html: jsonLd }}
         />
       )}
-      <EventDetailV2
+      <V4EventDetail
         event={event}
-        venue={venue}
-        derivedCity={derivedCity}
-        bundeslandHref={bundeslandHref}
-        friends={friendsData.friends}
-        rsvpTotals={friendsData.rsvpTotals}
-        lineup={lineup}
+        state={state}
+        provider={provider}
+        priceFrom={priceFrom}
+        priceAtDoor={priceAtDoor}
+        artistName={detailCtx.matchedArtistName}
       />
     </>
   );
