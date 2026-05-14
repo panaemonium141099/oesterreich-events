@@ -313,15 +313,7 @@ Vor Merge zurück nach master:
 
 ---
 
-## 11. Open Questions
-
-- **`AppShell.hideSocialNav` Prop**: Soll diese Prop in Phase 1 (a) als No-Op erhalten bleiben damit Aufrufer nicht touchiert werden müssen (Empfehlung), oder (b) gleich entfernt werden inkl. der Aufrufer (`/map/layout.tsx` etc.)? Antwort beeinflusst LOC-Delta minimal.
-- **Bell-Klick-Ziel**: `/notifications` (Bestand) oder Drop-Down-Sheet im Header (Phase-2-Material)? Empfehlung: `/notifications` für Phase 1, Sheet kommt später.
-- **⌘K-Hotkey**: Phase 1 = nur visuelles Pill, Click → `/entdecken`. Echter Cmd+K-Listener kommt mit Search-Modal in Phase 2 oder 3? Empfehlung: nur Pill, kein Listener.
-
----
-
-## 12. Decision Log
+## 11. Decision Log
 
 | Decision | Rationale |
 |---|---|
@@ -332,3 +324,6 @@ Vor Merge zurück nach master:
 | Mobile-Tab-Bar erst ab v4 mit Profil als 5. Tab | Brief-konform; SocialNav hatte Profil im "Mehr"-Sheet, was Friction war. |
 | Spacer innerhalb von V4TabBar | Vermeidet globalen `<body>`-Padding, der Desktop unnötig fragmentiert; lokaler `md:hidden` Spacer ist self-contained. |
 | Phase 1 fasst Landing-Content nicht an | Trennt Nav-Migration von Content-Redesign; Landing-Section-Redesign passiert sauber in Phase 2. |
+| `AppShell.hideSocialNav` Prop bleibt als No-Op | Minimal-scope-Regel: Aufrufer (`/map/layout.tsx`, `/groups/[id]/layout.tsx`) nicht anfassen. Prop akzeptiert aber ignoriert. Cleanup in späterer Aufräum-Phase. |
+| Bell-Klick → bestehende `/notifications` Route | Kein neues Modal/Sheet in Phase 1. Realtime-Bell-Sheet kommt in Phase 4/5, wenn Notifications-Layer eh angefasst wird. |
+| ⌘K-Pill = nur visuelles Affordance + Click → `/entdecken` | Echter Cmd+K-Listener + Modal mit Künstler/Events-Tabs ist eigenes Feature, kommt mit Phase 2 (Landing/Card-System) wo Search-Modal benötigt wird. Phase 1 hält das Pill nur als visuellen Anker. |
