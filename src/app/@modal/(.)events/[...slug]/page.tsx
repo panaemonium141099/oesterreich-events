@@ -31,17 +31,16 @@
  */
 
 import { notFound } from 'next/navigation';
-import { extractCity } from '@/lib/utils/city';
-import { EventDetailV2 } from '@/components/Events/EventDetailV2';
+import { V4EventDetail } from '@/components/Events/v4';
+import { deriveEventState } from '@/lib/v4/derive-event-state';
+import { deriveDetailContext } from '@/lib/v4/derive-detail-context';
 import { EventSheet } from '@/components/Events/EventSheet';
 import { ModalShell } from '@/components/Layout/ModalShell';
 import {
   parseSlugArray,
   resolveEvent,
   getVenue,
-  getFriendsForEvent,
   getLineupForEvent,
-  buildBundeslandHref,
 } from '@/lib/events/event-detail-loaders';
 
 export const revalidate = 3600;
@@ -68,37 +67,34 @@ export default async function InterceptedEventPage({
     notFound();
   }
 
-  const [venue, friendsData, lineup] = await Promise.all([
+  const [, , detailCtx] = await Promise.all([
     event.venue_id ? getVenue(event.venue_id) : Promise.resolve(null),
-    getFriendsForEvent(event.id),
     getLineupForEvent(event.id),
+    deriveDetailContext(event.id),
   ]);
 
-  const derivedCity = extractCity(
-    { address: event.address, bundesland: event.bundesland },
-    venue?.city,
-  );
-  const bundeslandHref = buildBundeslandHref(event.bundesland);
+  const state = deriveEventState(event, detailCtx);
+  const provider = event.source_name ?? undefined;
+  const priceFrom =
+    event.price_min != null ? `€ ${event.price_min}` :
+    event.price_text ?? undefined;
+  const priceAtDoor = event.price_text ?? undefined;
 
   // fn-15.5 fix (round 2): the parallel `@modal` slot lives at root-
   // layout level alongside `children`, so it does NOT inherit the
   // authenticated route's AppShell (AuthProvider, SavedEvents, etc.).
-  // Without this wrapper, opening an event sheet from /feed, /map, /saved,
-  // etc. would render the modal with anon-fallback auth — break Save,
-  // RSVP, share-to-friend, and the rest of the auth-aware actions.
-  // <ModalShell> mounts only the providers the modal actually needs
-  // (auth + saved-events), not the full social chrome.
+  // Without ModalShell, opening an event sheet from /feed, /map, /saved,
+  // etc. would render the modal with anon-fallback auth.
   return (
     <ModalShell>
       <EventSheet>
-        <EventDetailV2
+        <V4EventDetail
           event={event}
-          venue={venue}
-          derivedCity={derivedCity}
-          bundeslandHref={bundeslandHref}
-          friends={friendsData.friends}
-          rsvpTotals={friendsData.rsvpTotals}
-          lineup={lineup}
+          state={state}
+          provider={provider}
+          priceFrom={priceFrom}
+          priceAtDoor={priceAtDoor}
+          artistName={detailCtx.matchedArtistName}
         />
       </EventSheet>
     </ModalShell>
