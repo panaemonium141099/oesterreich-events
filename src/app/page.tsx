@@ -2,7 +2,6 @@ import { Suspense } from 'react';
 import Link from 'next/link';
 import { HeroSection } from '@/components/Landing/HeroSection';
 import { LandingStats } from '@/components/Landing/LandingStats';
-import { LandingAuth } from '@/components/Landing/LandingAuth';
 import { AuthErrorToast } from '@/components/Landing/AuthErrorToast';
 import { ParticleBackground } from '@/components/Landing/ParticleBackground';
 import { Onboarding } from '@/components/Landing/Onboarding';
@@ -78,9 +77,6 @@ export default function LandingPage() {
 
       {/* Auth error toast */}
       <AuthErrorToast />
-
-      {/* Top-right auth button */}
-      <LandingAuth />
 
       {/* Beta-Hinweis — die Seite ist live aber noch im Aufbau, technische
           Fehler sind möglich. Mailto-Link macht Feedback ein-Klick. */}

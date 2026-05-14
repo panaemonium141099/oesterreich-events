@@ -43,6 +43,7 @@ import './globals.css';
 // CRITICAL_CSS is the SINGLE source of truth — never inline a CSS
 // string directly into this file; the hash would drift.
 import { CRITICAL_CSS } from '@/lib/critical-css';
+import { V4TopNav, V4TabBar } from '@/components/Layout/v4';
 
 // GA4 deferred until a real consent banner exists (Codex fn-15.4 round 3).
 // `NEXT_PUBLIC_GA_MEASUREMENT_ID` is still defined in .env.example so the
@@ -250,6 +251,7 @@ export default function RootLayout({
           cuts, which the spec explicitly allows.
         */}
         <RouteTransitions />
+        <V4TopNav />
         {/* fn-15.5 round-4 (codex): wrapper is a <div>, not <main>,
             because several child pages already render their own
             <main> landmark (src/app/page.tsx, src/app/join/[code]/
@@ -261,6 +263,7 @@ export default function RootLayout({
         <div className="route-root" style={{ viewTransitionName: 'route-root' }}>
           {children}
         </div>
+        <V4TabBar />
         {modal}
         {/*
           fn-15.10: Service Worker registration + update banner. The
