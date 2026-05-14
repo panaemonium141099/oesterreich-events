@@ -6,9 +6,13 @@
  */
 
 import Link from 'next/link';
-import Image from 'next/image';
 import type { Festival } from '@/types/festivals';
 import { V4Badge } from './V4Badge';
+
+/* Festival type currently has no image_url field — `website_url` is the
+   festival homepage, not an image. Until festivals get a dedicated image
+   column (or we join the parent_event_id row server-side), the card uses
+   a neutral inline-SVG placeholder instead. Keeps the layout stable. */
 
 interface V4FestivalCardProps {
   festival: Festival;
@@ -44,19 +48,9 @@ export function V4FestivalCard({ festival, lineupMatch = false }: V4FestivalCard
       data-v4-card="festival"
     >
       <div className="relative aspect-[4/3] bg-[var(--v4-surface)]">
-        {festival.website_url ? (
-          <Image
-            src={festival.website_url}
-            alt={displayName}
-            fill
-            sizes="(max-width: 768px) 50vw, 25vw"
-            style={{ objectFit: 'cover' }}
-          />
-        ) : (
-          <div aria-hidden="true" className="absolute inset-0 flex items-center justify-center text-[var(--v4-ink-30)]">
-            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
-          </div>
-        )}
+        <div aria-hidden="true" className="absolute inset-0 flex items-center justify-center text-[var(--v4-ink-30)]">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+        </div>
         {lineupMatch && (
           <div className="absolute top-2 right-2">
             <V4Badge kind="lineup">Line-up</V4Badge>
