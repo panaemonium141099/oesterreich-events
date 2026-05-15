@@ -156,9 +156,14 @@ export async function POST(req: NextRequest) {
 
   // 3. Call the RPC
   const supabase = createClient(supabaseUrl, supabaseKey, { auth: { persistSession: false } });
-  // Default to "after today" if no date signal — most users don't want
-  // yesterday's events returned even if semantically close.
-  const afterDate = (filters.afterDate ?? new Date(Date.now() - 24 * 60 * 60 * 1000)).toISOString();
+  // Future-only: nie past events durchsuchen (auch nicht gestern).
+  // Default = heute 00:00:00 lokal so dass ganztägige Events (start_date
+  // ist tag-genau) noch reinkommen wenn sie heute laufen. Past events
+  // belasten den HNSW-Index unnötig — siehe Memory-Note
+  // reference_semantic_search_future_only.md.
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const afterDate = (filters.afterDate ?? today).toISOString();
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: matches, error: rpcErr } = await (supabase.rpc as any)('search_events_semantic', {
