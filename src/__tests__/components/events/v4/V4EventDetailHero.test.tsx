@@ -10,6 +10,12 @@ vi.mock('next/image', () => ({
   },
 }));
 
+// V4BackButton (Phase 4.12) calls useRouter — mock next/navigation
+// damit der Hero in Tests rendert.
+vi.mock('next/navigation', () => ({
+  useRouter: () => ({ push: vi.fn(), replace: vi.fn(), back: vi.fn() }),
+}));
+
 describe('V4EventDetailHero', () => {
   const baseProps = {
     title: 'Bilderbuch in der Stadthalle',
