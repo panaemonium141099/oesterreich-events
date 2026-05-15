@@ -1,18 +1,25 @@
+'use client';
+
 /**
  * V4EventDetail — top-level v4 event detail composition.
  *
- * RSC. Caller (the route page.tsx) provides a pre-derived V4EventState
- * plus optional ticket fields. We compose hero + content + side-box + mobile
- * sticky-bar. Layout is two-col on desktop, single column on mobile with
- * the sticky-bar fixed at bottom.
+ * Client component (Phase 5): owns planSheetOpen state to mount the
+ * V4PlanWizard sheet overlay when the user clicks any "Abend planen"
+ * or "Plan öffnen" CTA. The wizard is prefilled with the current event.
+ *
+ * Caller (the route page.tsx) provides a pre-derived V4EventState
+ * plus optional ticket fields. Layout is two-col on desktop, single
+ * column on mobile with the sticky-bar fixed at bottom.
  */
 
+import { useState } from 'react';
 import type { Event } from '@/types/events';
 import type { V4EventState } from '@/lib/v4/derive-event-state';
 import { V4EventDetailHero } from './V4EventDetailHero';
 import { V4EventDetailContent } from './V4EventDetailContent';
 import { V4SideBox } from './V4SideBox';
 import { V4MobileStickyBar } from './V4MobileStickyBar';
+import { V4PlanWizard } from '@/components/Plans/v4';
 
 interface V4EventDetailProps {
   event: Event;
@@ -31,6 +38,7 @@ export function V4EventDetail({
   similar,
 }: V4EventDetailProps) {
   const ticketUrl = event.ticket_url ?? undefined;
+  const [planSheetOpen, setPlanSheetOpen] = useState(false);
 
   return (
     <div className="bg-[var(--v4-surface)] min-h-screen">
@@ -58,6 +66,7 @@ export function V4EventDetail({
             ticketUrl={ticketUrl}
             priceAtDoor={priceAtDoor}
             artistName={artistName}
+            onPlanClick={() => setPlanSheetOpen(true)}
           />
         </aside>
       </div>
@@ -68,7 +77,16 @@ export function V4EventDetail({
         priceFrom={priceFrom}
         ticketUrl={ticketUrl}
         priceAtDoor={priceAtDoor}
+        onPlanClick={() => setPlanSheetOpen(true)}
       />
+
+      {planSheetOpen && (
+        <V4PlanWizard
+          mode="sheet"
+          initialEvent={event}
+          onClose={() => setPlanSheetOpen(false)}
+        />
+      )}
     </div>
   );
 }

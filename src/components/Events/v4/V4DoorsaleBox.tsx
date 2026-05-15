@@ -9,9 +9,10 @@ import { V4Badge } from './V4Badge';
 
 interface V4DoorsaleBoxProps {
   priceAtDoor?: string;
+  onPlanClick?: () => void;
 }
 
-export function V4DoorsaleBox({ priceAtDoor }: V4DoorsaleBoxProps) {
+export function V4DoorsaleBox({ priceAtDoor, onPlanClick }: V4DoorsaleBoxProps) {
   return (
     <div
       data-v4-side-box="doorsale"
@@ -38,14 +39,26 @@ export function V4DoorsaleBox({ priceAtDoor }: V4DoorsaleBoxProps) {
           Plane Anreise und Reminder — wir erinnern dich rechtzeitig.
         </p>
 
-        <a
-          href="/saved"
-          data-track="plan_started"
-          className="press-haptic mt-[18px] flex items-center justify-center gap-2 w-full px-5 py-3 rounded-full bg-[var(--v4-ink)] text-[#0a0a0c] text-sm font-semibold"
-        >
-          Abend planen
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
-        </a>
+        {onPlanClick ? (
+          <button
+            type="button"
+            onClick={onPlanClick}
+            data-track="plan_started"
+            className="press-haptic mt-[18px] flex items-center justify-center gap-2 w-full px-5 py-3 rounded-full bg-[var(--v4-ink)] text-[#0a0a0c] text-sm font-semibold"
+          >
+            Abend planen
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
+          </button>
+        ) : (
+          <a
+            href="/saved"
+            data-track="plan_started"
+            className="press-haptic mt-[18px] flex items-center justify-center gap-2 w-full px-5 py-3 rounded-full bg-[var(--v4-ink)] text-[#0a0a0c] text-sm font-semibold"
+          >
+            Abend planen
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
+          </a>
+        )}
 
         <div className="mt-2.5 flex gap-2">
           <a href="#route" data-track="route_opened" className="press-haptic flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-full border border-[var(--v4-hairline-3)] text-[12.5px] font-semibold text-[var(--v4-ink)]">

@@ -5,8 +5,9 @@
  * primary CTA + a short status tag. Rendered above V4TabBar (Phase 1)
  * by being lower in z-order; offset by 76px so the tab bar stays visible.
  *
- * Pure server-rendered <a> elements; no client JS. The 'md:hidden'
- * Tailwind class keeps it out of the desktop layout entirely.
+ * The 'md:hidden' Tailwind class keeps it out of the desktop layout entirely.
+ * When onPlanClick is provided, plan/open CTAs fire the callback instead of
+ * navigating to /saved.
  */
 
 import type { V4EventState } from '@/lib/v4/derive-event-state';
@@ -18,9 +19,10 @@ interface V4MobileStickyBarProps {
   priceFrom?: string;
   ticketUrl?: string;
   priceAtDoor?: string;
+  onPlanClick?: () => void;
 }
 
-export function V4MobileStickyBar({ state, provider, priceFrom, ticketUrl, priceAtDoor }: V4MobileStickyBarProps) {
+export function V4MobileStickyBar({ state, provider, priceFrom, ticketUrl, priceAtDoor, onPlanClick }: V4MobileStickyBarProps) {
   return (
     <div
       data-v4-event-sticky={state}
@@ -56,19 +58,31 @@ export function V4MobileStickyBar({ state, provider, priceFrom, ticketUrl, price
         <>
           <V4Badge kind="free">Eintritt frei</V4Badge>
           <div className="flex-1"/>
-          <a href="/saved" data-track="plan_started_mobile" className="press-haptic px-5 py-3 rounded-full bg-[var(--v4-go)] text-[#062417] text-sm font-semibold">Abend planen</a>
+          {onPlanClick ? (
+            <button type="button" onClick={onPlanClick} data-track="plan_started_mobile" className="press-haptic px-5 py-3 rounded-full bg-[var(--v4-go)] text-[#062417] text-sm font-semibold">Abend planen</button>
+          ) : (
+            <a href="/saved" data-track="plan_started_mobile" className="press-haptic px-5 py-3 rounded-full bg-[var(--v4-go)] text-[#062417] text-sm font-semibold">Abend planen</a>
+          )}
         </>
       ) : state === 'doorsale' ? (
         <>
           <V4Badge kind="doorsale">{priceAtDoor ? `Abendkasse · ${priceAtDoor}` : 'Abendkasse'}</V4Badge>
           <div className="flex-1"/>
-          <a href="/saved" data-track="plan_started_mobile" className="press-haptic px-5 py-3 rounded-full bg-[var(--v4-ink)] text-[#0a0a0c] text-sm font-semibold">Abend planen</a>
+          {onPlanClick ? (
+            <button type="button" onClick={onPlanClick} data-track="plan_started_mobile" className="press-haptic px-5 py-3 rounded-full bg-[var(--v4-ink)] text-[#0a0a0c] text-sm font-semibold">Abend planen</button>
+          ) : (
+            <a href="/saved" data-track="plan_started_mobile" className="press-haptic px-5 py-3 rounded-full bg-[var(--v4-ink)] text-[#0a0a0c] text-sm font-semibold">Abend planen</a>
+          )}
         </>
       ) : state === 'inplan' ? (
         <>
           <V4Badge kind="inplan">In deinem Plan</V4Badge>
           <div className="flex-1"/>
-          <a href="/saved" data-track="plan_opened_mobile" className="press-haptic px-5 py-3 rounded-full bg-[var(--v4-go)] text-[#062417] text-sm font-semibold">Plan öffnen</a>
+          {onPlanClick ? (
+            <button type="button" onClick={onPlanClick} data-track="plan_opened_mobile" className="press-haptic px-5 py-3 rounded-full bg-[var(--v4-go)] text-[#062417] text-sm font-semibold">Plan öffnen</button>
+          ) : (
+            <a href="/saved" data-track="plan_opened_mobile" className="press-haptic px-5 py-3 rounded-full bg-[var(--v4-go)] text-[#062417] text-sm font-semibold">Plan öffnen</a>
+          )}
         </>
       ) : state === 'soldout' ? (
         <>

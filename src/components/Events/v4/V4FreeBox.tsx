@@ -2,13 +2,16 @@
  * V4FreeBox — side-box when state === 'free'.
  *
  * No ticket purchase path; pivots to planning. Green accent stripe +
- * "Abend planen" CTA (links to /saved as Phase-3 stub for the future
- * Plan Wizard in Phase 5).
+ * "Abend planen" CTA — calls onPlanClick to open the V4PlanWizard sheet.
  */
 
 import { V4Badge } from './V4Badge';
 
-export function V4FreeBox() {
+interface V4FreeBoxProps {
+  onPlanClick?: () => void;
+}
+
+export function V4FreeBox({ onPlanClick }: V4FreeBoxProps) {
   return (
     <div
       data-v4-side-box="free"
@@ -25,14 +28,26 @@ export function V4FreeBox() {
           Kein Ticket nötig. Wir merken Anreise und Reminder in deinem Plan.
         </p>
 
-        <a
-          href="/saved"
-          data-track="plan_started"
-          className="press-haptic mt-[18px] flex items-center justify-center gap-2 w-full px-5 py-3 rounded-full bg-[var(--v4-go)] text-[#062417] text-sm font-semibold"
-        >
-          Abend planen
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
-        </a>
+        {onPlanClick ? (
+          <button
+            type="button"
+            onClick={onPlanClick}
+            data-track="plan_started"
+            className="press-haptic mt-[18px] flex items-center justify-center gap-2 w-full px-5 py-3 rounded-full bg-[var(--v4-go)] text-[#062417] text-sm font-semibold"
+          >
+            Abend planen
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
+          </button>
+        ) : (
+          <a
+            href="/saved"
+            data-track="plan_started"
+            className="press-haptic mt-[18px] flex items-center justify-center gap-2 w-full px-5 py-3 rounded-full bg-[var(--v4-go)] text-[#062417] text-sm font-semibold"
+          >
+            Abend planen
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
+          </a>
+        )}
 
         <div className="mt-2.5 flex gap-2">
           <a href="/saved" className="press-haptic flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-full border border-[var(--v4-hairline-3)] text-[12.5px] font-semibold text-[var(--v4-ink)]">
