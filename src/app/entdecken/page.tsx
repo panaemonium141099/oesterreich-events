@@ -1,66 +1,80 @@
 'use client';
 
 /**
- * /entdecken — Dual-mode discovery page (Phase 4).
+ * /entdecken — Dual-mode discovery page (Phase 4.1).
  *
- * Mode is persisted in the URL via ?mode=filter|smart. First visit
- * default = filter. Filter mode owns chips (?chip=) and sort (?sort=).
- * Smart mode owns the query (?q=).
+ * Mode is persisted in the URL via ?mode=list|smart. First visit
+ * default = list. Legacy ?mode=filter (Phase-4) silently maps to list.
+ *
+ * List-Tab: <V4EntdeckenListMode> — wraps the existing EventListView +
+ * FilterDrawer aus /map (Verhalten 1:1 identisch via useFilteredEvents).
+ * Smart-Tab: <V4EntdeckenSmartMode> — NLP semantic search (Phase-4).
  */
 
 import { useState, useCallback, useEffect, Suspense } from 'react';
 import { useSearchParams, useRouter, usePathname } from 'next/navigation';
 import {
   V4EntdeckenHero,
-  V4EntdeckenFilterMode,
+  V4EntdeckenListMode,
   V4EntdeckenSmartMode,
 } from '@/components/Discover/v4';
-import { type V4EntdeckenMode, type V4SortKey } from '@/components/Events/v4';
+import { type V4EntdeckenMode } from '@/components/Events/v4';
+import type { EventFilters } from '@/types/events';
+
+function resolveMode(raw: string | null): V4EntdeckenMode {
+  if (raw === 'smart') return 'smart';
+  // 'filter' (Phase 4 legacy) und alles andere → 'list'.
+  return 'list';
+}
+
+function deriveInitialFilters(search: URLSearchParams): Partial<EventFilters> | undefined {
+  // Pick up the common URL filter params if present. This is best-effort:
+  // most users will land on /entdecken with no params. Deep-links from
+  // landing-page links (e.g. /entdecken?district=eisenstadt) work too.
+  const out: Partial<EventFilters> = {};
+  const district = search.get('district');
+  if (district) out.district = district;
+  const search_ = search.get('search');
+  if (search_) out.search = search_;
+  const category = search.get('category');
+  if (category) out.category = category;
+  return Object.keys(out).length > 0 ? out : undefined;
+}
 
 function EntdeckenInner() {
   const search = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
 
-  const [mode, setMode] = useState<V4EntdeckenMode>(
-    (search.get('mode') === 'smart' ? 'smart' : 'filter')
-  );
-  const [chips, setChips] = useState<Set<string>>(
-    new Set(((search.get('chip') ?? '').split(',').filter(Boolean)))
-  );
-  const [sort, setSort] = useState<V4SortKey>(
-    (search.get('sort') as V4SortKey) ?? 'score'
-  );
+  const [mode, setMode] = useState<V4EntdeckenMode>(resolveMode(search.get('mode')));
   const initialQuery = search.get('q') ?? '';
+  const initialBlParam = search.get('bl');
+  const initialBundeslandIds = initialBlParam ? [initialBlParam] : undefined;
+  const initialFilters = deriveInitialFilters(search);
 
-  // Mirror state back into URL for deep-link / share-link parity.
+  // Mirror mode back into URL — list-Modus default unparametrisiert
+  // damit /entdecken eine saubere URL hat. Smart-Modus persistiert
+  // ?mode=smart und optional ?q=<query>.
   useEffect(() => {
     const next = new URLSearchParams();
-    next.set('mode', mode);
-    if (mode === 'filter') {
-      if (chips.size > 0) next.set('chip', Array.from(chips).join(','));
-      if (sort !== 'score') next.set('sort', sort);
-    } else if (initialQuery) {
-      next.set('q', initialQuery);
+    if (mode === 'smart') {
+      next.set('mode', 'smart');
+      if (initialQuery) next.set('q', initialQuery);
     }
     const qs = next.toString();
     router.replace(`${pathname}${qs ? '?' + qs : ''}`, { scroll: false });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mode, chips, sort]);
+  }, [mode]);
 
-  const onChipsChange = useCallback((next: Set<string>) => { setChips(next); }, []);
-  const onSortChange = useCallback((next: V4SortKey) => { setSort(next); }, []);
   const onModeChange = useCallback((next: V4EntdeckenMode) => { setMode(next); }, []);
 
   return (
     <div className="min-h-screen bg-[var(--v4-surface)] text-[var(--v4-ink)]">
       <V4EntdeckenHero mode={mode} onModeChange={onModeChange}/>
-      {mode === 'filter' ? (
-        <V4EntdeckenFilterMode
-          activeChips={chips}
-          sort={sort}
-          onChipsChange={onChipsChange}
-          onSortChange={onSortChange}
+      {mode === 'list' ? (
+        <V4EntdeckenListMode
+          initialBundeslandIds={initialBundeslandIds}
+          initialFilters={initialFilters}
         />
       ) : (
         <V4EntdeckenSmartMode initialQuery={initialQuery}/>
