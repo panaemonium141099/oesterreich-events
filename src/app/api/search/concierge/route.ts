@@ -175,14 +175,20 @@ export async function POST(req: NextRequest) {
           config: {
             systemInstruction: SYSTEM_PROMPT,
             tools: [{ googleSearch: {} }],
-            // Knappe Antworten — die Multi-Tip Liste ist 2-4 Zeilen,
-            // keine langen Erklärungen. 600 tokens als sanftes Limit.
-            maxOutputTokens: 600,
+            // Wir wollen kurze direkte Antworten — kein Reasoning nötig.
+            // Default hat Gemini 2.5 Flash thinking-Tokens AN, die vom
+            // maxOutputTokens-Budget abgezogen werden BEVOR sichtbarer
+            // Text gestreamt wird. Bei 600 token und ~500 thinking-token
+            // verbrauchen war der Output mid-sentence abgewürgt.
+            // thinkingBudget=0 schaltet's komplett ab.
+            thinkingConfig: { thinkingBudget: 0 },
+            maxOutputTokens: 1500,
             temperature: 0.4,
           },
         });
 
         let groundingChunks: Array<{ web?: { uri?: string; title?: string } }> | undefined;
+        let finishReason: string | undefined;
 
         for await (const chunk of response) {
           // Gemini-streaming chunks tragen entweder text-deltas, function-calls
@@ -198,6 +204,15 @@ export async function POST(req: NextRequest) {
             // typischerweise im finalen Chunk.
             groundingChunks = meta.groundingChunks as typeof groundingChunks;
           }
+          if (candidate?.finishReason) {
+            finishReason = candidate.finishReason as string;
+          }
+        }
+
+        // Wenn das Modell wegen MAX_TOKENS abgewürgt wurde, in Dev loggen.
+        // SAFETY/RECITATION-Reasons ebenfalls hilfreich für Debugging.
+        if (process.env.NODE_ENV === 'development' && finishReason && finishReason !== 'STOP') {
+          console.warn('[concierge/gemini] unusual finishReason:', finishReason);
         }
 
         const citations: Array<{ url: string; title: string | null }> = [];
