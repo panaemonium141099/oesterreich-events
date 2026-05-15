@@ -8,9 +8,10 @@
  * just wrap it in v4 tokens and switch result cards.
  */
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import Link from 'next/link';
 import { buildEventUrlV2 } from '@/lib/utils/slugify';
+import { V4ConciergeCard, type ConciergePayload } from './V4ConciergeCard';
 
 /**
  * Category → tinted gradient pair for image-less placeholder cards.
@@ -126,6 +127,27 @@ export function V4EntdeckenSmartMode({ initialQuery = '' }: V4EntdeckenSmartMode
     return d.toLocaleDateString('de-AT', { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
   };
 
+  // Concierge-Payload bauen wann immer wir ein Result haben. Memoized per
+  // result-Referenz damit V4ConciergeCard nur EIN neuer Call macht wenn
+  // tatsächlich ein neues Result reinkommt (nicht bei jedem Render).
+  const conciergePayload: ConciergePayload | null = useMemo(() => {
+    if (!result) return null;
+    return {
+      query: result.query,
+      parsed: result.parsed,
+      count: result.count,
+      matches: result.matches.slice(0, 5).map(m => ({
+        title: m.title,
+        location_name: m.location_name,
+        category: m.category,
+        start_date: m.start_date,
+        bundesland: m.bundesland ?? null,
+        price_text: m.price_text,
+        _similarity: m._similarity,
+      })),
+    };
+  }, [result]);
+
   return (
     <div className="max-w-[1180px] mx-auto px-4 md:px-14 pb-20">
       <form
@@ -176,6 +198,11 @@ export function V4EntdeckenSmartMode({ initialQuery = '' }: V4EntdeckenSmartMode
       )}
 
       {loading && <div className="text-[var(--v4-ink-50)] text-sm animate-pulse">Suche läuft …</div>}
+
+      {/* Concierge tip card — rendered above the results (or above the
+          empty-state) whenever we have ANY result back. Self-aborts when
+          payload changes. */}
+      <V4ConciergeCard payload={conciergePayload}/>
 
       {result && !loading && result.count === 0 && (
         <div className="rounded-2xl border border-dashed border-[var(--v4-hairline-3)] p-8 text-center text-[var(--v4-ink-70)]">
