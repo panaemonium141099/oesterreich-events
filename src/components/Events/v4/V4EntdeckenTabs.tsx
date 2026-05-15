@@ -1,12 +1,12 @@
 'use client';
 
 /**
- * V4EntdeckenTabs — segmented control switching between Filter and
+ * V4EntdeckenTabs — segmented control switching between Liste and
  * Smart-Suche modes on /entdecken. Parent owns the current mode +
  * URL persistence; this atom is pure render.
  */
 
-export type V4EntdeckenMode = 'filter' | 'smart';
+export type V4EntdeckenMode = 'list' | 'smart';
 
 interface V4EntdeckenTabsProps {
   current: V4EntdeckenMode;
@@ -14,8 +14,8 @@ interface V4EntdeckenTabsProps {
 }
 
 const TABS: { key: V4EntdeckenMode; label: string }[] = [
-  { key: 'filter', label: 'Filter' },
-  { key: 'smart',  label: 'Smart-Suche' },
+  { key: 'list',  label: 'Liste' },
+  { key: 'smart', label: 'Smart-Suche' },
 ];
 
 export function V4EntdeckenTabs({ current, onChange }: V4EntdeckenTabsProps) {
