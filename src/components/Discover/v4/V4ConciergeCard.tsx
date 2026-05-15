@@ -44,6 +44,52 @@ interface V4ConciergeCardProps {
 
 interface Citation { url: string; title: string | null }
 
+/**
+ * Wandelt plain-text URLs in klickbare Links + strippt Markdown-Müll
+ * (Headers, [text](url)-Syntax, Aufzählungssternchen) für saubere
+ * Darstellung. Der System-Prompt verbietet Markdown explizit, aber
+ * gelegentlich liefert das LLM trotzdem welche zurück — wir parsen
+ * defensiv damit der User es nie als Rohtext sieht.
+ */
+function renderConciergeText(text: string): React.ReactNode[] {
+  // Strip leading ##/###-Header und Aufzählungs-Sternchen am Zeilenanfang.
+  const cleaned = text
+    .replace(/^#{1,6}\s+/gm, '')
+    .replace(/^\s*[*-]\s+/gm, '• ');
+
+  // 1. Markdown-Links: [label](url) → wir behalten label und schmeißen url in URL-Pool
+  // 2. Bare URLs: https://... → werden klickbar
+  const segments: React.ReactNode[] = [];
+  const regex = /\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)|https?:\/\/[^\s)>\]]+/g;
+  let lastIdx = 0;
+  let m: RegExpExecArray | null;
+  let key = 0;
+
+  while ((m = regex.exec(cleaned)) !== null) {
+    if (m.index > lastIdx) {
+      segments.push(cleaned.slice(lastIdx, m.index));
+    }
+    const label = m[1];
+    const url = m[2] || m[0];
+    segments.push(
+      <a
+        key={`l${key++}`}
+        href={url}
+        target="_blank"
+        rel="noopener noreferrer nofollow"
+        className="text-[var(--v4-match)] underline decoration-dotted underline-offset-2 hover:text-[var(--v4-ink)]"
+      >
+        {label ?? url}
+      </a>,
+    );
+    lastIdx = regex.lastIndex;
+  }
+  if (lastIdx < cleaned.length) {
+    segments.push(cleaned.slice(lastIdx));
+  }
+  return segments;
+}
+
 export function V4ConciergeCard({ payload }: V4ConciergeCardProps) {
   const [text, setText] = useState('');
   const [citations, setCitations] = useState<Citation[]>([]);
@@ -160,7 +206,7 @@ export function V4ConciergeCard({ payload }: V4ConciergeCardProps) {
             <p className="text-[13px] text-[var(--v4-ink-70)]">{error}</p>
           ) : (
             <p className="text-[14px] leading-[1.55] text-[var(--v4-ink)] whitespace-pre-wrap">
-              {text}
+              {renderConciergeText(text)}
               {streaming && <span className="inline-block w-[7px] h-[15px] ml-0.5 align-middle bg-[var(--v4-match)] animate-pulse"/>}
             </p>
           )}
