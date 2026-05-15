@@ -42,6 +42,52 @@ interface ParsedFilters {
   beforeDate: Date | null;     // exclusive upper bound (e.g. tomorrow 23:59)
   maxPriceTier: 'gratis' | 'günstig' | 'mittel' | null;
   keywordSignals: string[];    // hints we detected (for response debugging)
+  /** Bundesland the user mentioned (for soft re-ranking only). */
+  locationBundesland: string | null;
+}
+
+/**
+ * Stadt/Region → Bundesland-Mapping für Soft-Re-Ranking. Wenn der User
+ * "Konzert in Wien" sucht, sollen Wien-Events zuerst kommen, der Rest
+ * danach (kein hard-filter — semantic similarity bleibt führend).
+ */
+const CITY_TO_BUNDESLAND: Record<string, string> = {
+  // Wien
+  wien: 'Wien',
+  vienna: 'Wien',
+  // Niederösterreich
+  'st pölten': 'Niederösterreich', 'sankt pölten': 'Niederösterreich',
+  krems: 'Niederösterreich', wienerneustadt: 'Niederösterreich',
+  baden: 'Niederösterreich', amstetten: 'Niederösterreich',
+  // Oberösterreich
+  linz: 'Oberösterreich', wels: 'Oberösterreich', steyr: 'Oberösterreich',
+  // Steiermark
+  graz: 'Steiermark', leoben: 'Steiermark', kapfenberg: 'Steiermark',
+  // Salzburg
+  salzburg: 'Salzburg',
+  // Tirol
+  innsbruck: 'Tirol', kufstein: 'Tirol',
+  // Vorarlberg
+  bregenz: 'Vorarlberg', dornbirn: 'Vorarlberg',
+  // Kärnten
+  klagenfurt: 'Kärnten', villach: 'Kärnten',
+  // Burgenland
+  eisenstadt: 'Burgenland', mattersburg: 'Burgenland',
+  // Direct Bundesland-Erwähnungen
+  burgenland: 'Burgenland', niederösterreich: 'Niederösterreich',
+  oberösterreich: 'Oberösterreich', steiermark: 'Steiermark',
+  tirol: 'Tirol', vorarlberg: 'Vorarlberg', kärnten: 'Kärnten',
+};
+
+function detectBundesland(q: string): string | null {
+  const lower = q.toLowerCase();
+  for (const [key, bl] of Object.entries(CITY_TO_BUNDESLAND)) {
+    // Wort-Boundary-Check damit "St. Pölten" nicht in "Pölten" matched aber
+    // auch nicht in "Wien" wenn nur "Wiens" steht.
+    const re = new RegExp(`\\b${key.replace(/\s+/g, '\\s+')}\\b`, 'i');
+    if (re.test(lower)) return bl;
+  }
+  return null;
 }
 
 function parseQuery(raw: string): { text: string; filters: ParsedFilters } {
@@ -52,7 +98,11 @@ function parseQuery(raw: string): { text: string; filters: ParsedFilters } {
     beforeDate: null,
     maxPriceTier: null,
     keywordSignals: signals,
+    locationBundesland: detectBundesland(raw),
   };
+  if (filters.locationBundesland) {
+    signals.push(`location:${filters.locationBundesland}`);
+  }
 
   // ─── Date signals ───
   const now = new Date();
@@ -204,12 +254,25 @@ export async function POST(req: NextRequest) {
   // Preserve similarity order
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const eventMap = new Map<string, any>((events ?? []).map((e: any) => [e.id, e]));
-  const hydrated = matchList
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let hydrated: any[] = matchList
     .map(m => {
       const ev = eventMap.get(m.id);
       return ev ? { ...ev, _similarity: m.similarity } : null;
     })
     .filter(Boolean);
+
+  // ─── Location Re-Ranking (Phase 4.9) ─────────────────────────────
+  // Wenn der User explizit eine Stadt/Bundesland erwähnt, sollen Events
+  // dort ZUERST kommen, der Rest danach. Innerhalb jeder Gruppe bleibt
+  // die ursprüngliche Similarity-Reihenfolge erhalten — kein
+  // hard-filter, sondern soft re-rank (stable partition).
+  if (filters.locationBundesland) {
+    const target = filters.locationBundesland;
+    const inLocation = hydrated.filter(e => e.bundesland === target);
+    const elsewhere = hydrated.filter(e => e.bundesland !== target);
+    hydrated = [...inLocation, ...elsewhere];
+  }
 
   return NextResponse.json({
     query: rawQuery,
@@ -219,6 +282,7 @@ export async function POST(req: NextRequest) {
       before_date: filters.beforeDate?.toISOString() ?? null,
       max_price_tier: filters.maxPriceTier,
       signals: filters.keywordSignals,
+      location_bundesland: filters.locationBundesland,
     },
     matches: hydrated,
     count: hydrated.length,
