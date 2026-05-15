@@ -19,7 +19,7 @@ export function V4EntdeckenHero({ mode, onModeChange }: V4EntdeckenHeroProps) {
           </span>
         </h1>
         <p className="text-[14px] md:text-[15px] text-[var(--v4-ink-70)] leading-[1.55] mt-3 mb-6 max-w-[620px]">
-          Filter nach Tickets, Künstlern, Wochenende oder Genre — oder beschreib in Smart-Suche frei was du willst.
+          Filter nach Datum, Region und Kategorie — oder beschreib in Smart-Suche frei was du willst.
         </p>
         <V4EntdeckenTabs current={mode} onChange={onModeChange}/>
       </div>
