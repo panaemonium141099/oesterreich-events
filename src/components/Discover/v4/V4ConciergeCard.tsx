@@ -71,15 +71,25 @@ function renderConciergeText(text: string): React.ReactNode[] {
     }
     const label = m[1];
     const url = m[2] || m[0];
+    // Defensive: wenn das LLM doch mal eine URL inline liefert, zeigen
+    // wir nur den Host als Text — sonst sprengt eine 300-Zeichen-Grounding-
+    // URL die Card. Volle URL bleibt im href.
+    let displayText: string;
+    if (label) {
+      displayText = label;
+    } else {
+      try { displayText = new URL(url).host; }
+      catch { displayText = url; }
+    }
     segments.push(
       <a
         key={`l${key++}`}
         href={url}
         target="_blank"
         rel="noopener noreferrer nofollow"
-        className="text-[var(--v4-match)] underline decoration-dotted underline-offset-2 hover:text-[var(--v4-ink)]"
+        className="text-[var(--v4-match)] underline decoration-dotted underline-offset-2 hover:text-[var(--v4-ink)] break-words"
       >
-        {label ?? url}
+        {displayText}
       </a>,
     );
     lastIdx = regex.lastIndex;
@@ -205,7 +215,7 @@ export function V4ConciergeCard({ payload }: V4ConciergeCardProps) {
           {error ? (
             <p className="text-[13px] text-[var(--v4-ink-70)]">{error}</p>
           ) : (
-            <p className="text-[14px] leading-[1.55] text-[var(--v4-ink)] whitespace-pre-wrap">
+            <p className="text-[14px] leading-[1.55] text-[var(--v4-ink)] whitespace-pre-wrap break-words">
               {renderConciergeText(text)}
               {streaming && <span className="inline-block w-[7px] h-[15px] ml-0.5 align-middle bg-[var(--v4-match)] animate-pulse"/>}
             </p>
