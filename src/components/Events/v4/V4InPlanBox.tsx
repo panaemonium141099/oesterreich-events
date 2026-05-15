@@ -6,7 +6,11 @@
 
 import { V4Badge } from './V4Badge';
 
-export function V4InPlanBox() {
+interface V4InPlanBoxProps {
+  onPlanClick?: () => void;
+}
+
+export function V4InPlanBox({ onPlanClick }: V4InPlanBoxProps) {
   return (
     <div
       data-v4-side-box="inplan"
@@ -20,14 +24,26 @@ export function V4InPlanBox() {
           Du gehst hin. Wir kümmern uns um Reminder &amp; Anreise.
         </p>
 
-        <a
-          href="/saved"
-          data-track="plan_opened"
-          className="press-haptic mt-[18px] flex items-center justify-center gap-2 w-full px-5 py-3 rounded-full bg-[var(--v4-go)] text-[#062417] text-sm font-semibold"
-        >
-          Plan öffnen
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
-        </a>
+        {onPlanClick ? (
+          <button
+            type="button"
+            onClick={onPlanClick}
+            data-track="plan_opened"
+            className="press-haptic mt-[18px] flex items-center justify-center gap-2 w-full px-5 py-3 rounded-full bg-[var(--v4-go)] text-[#062417] text-sm font-semibold"
+          >
+            Plan öffnen
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
+          </button>
+        ) : (
+          <a
+            href="/saved"
+            data-track="plan_opened"
+            className="press-haptic mt-[18px] flex items-center justify-center gap-2 w-full px-5 py-3 rounded-full bg-[var(--v4-go)] text-[#062417] text-sm font-semibold"
+          >
+            Plan öffnen
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
+          </a>
+        )}
 
         <a
           href="/saved"

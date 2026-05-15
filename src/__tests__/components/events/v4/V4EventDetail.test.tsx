@@ -11,6 +11,12 @@ vi.mock('next/image', () => ({
   },
 }));
 
+vi.mock('next/navigation', () => ({
+  useRouter: () => ({ push: vi.fn(), replace: vi.fn(), prefetch: vi.fn() }),
+  usePathname: () => '/',
+  useSearchParams: () => new URLSearchParams(),
+}));
+
 function ev(over: Partial<Event> = {}): Event {
   return {
     id: 'e1', source_id: null, source_name: null, source_url: null,
