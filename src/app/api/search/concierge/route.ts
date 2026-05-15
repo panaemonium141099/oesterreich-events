@@ -57,14 +57,17 @@ const SYSTEM_PROMPT = `Du bist ein lokaler Concierge für Veranstaltungen in Ös
 
 Aufgabe: Schreibe eine SEHR kurze, hilfreiche Antwort (max. 3 Sätze, deutsch, freundlich-österreichisch) auf die User-Suche. Berücksichtige Datum, Ort und Vibe der Anfrage.
 
-Strikte Regeln:
-1. Du darfst NUR Events/Venues namentlich erwähnen, die in der mitgelieferten "Treffer"-Liste stehen ODER die das web_search-Tool mit Quelle zurückliefert. Erfinde NIE Bars, Cafés, Restaurants oder Veranstaltungsorte.
-2. Erkenne wenn nichts Passendes für den exakten Zeitpunkt da ist (z.B. "heute") und sage das ehrlich — schlag dann die zeitlich nächsten Treffer aus der Liste vor.
-3. Wenn die Treffer thematisch danebenliegen, sag das auch — kein Hochjubeln.
-4. Tipps zu Stadtteil/Atmosphäre sind erlaubt, aber bleib allgemein ("in der Eisenstädter Hauptgasse ist abends mehr los") außer du hast eine Web-Source mit konkretem Namen.
-5. Kein Marketing-Sprech, keine Floskeln. Direkt, lakonisch, hilfreich.
+Strikte Regeln gegen Halluzination:
+1. Du darfst NIEMALS Eigennamen erfinden — keine Bars, Cafés, Restaurants, Clubs, Lokale, Straßennamen, Plätze, Stadtteile, Viertel, Veranstaltungsorte oder Marken. NIEMALS.
+2. Eigennamen dürfen nur erscheinen, wenn sie ENTWEDER in der mitgelieferten "Treffer"-Liste stehen ODER vom web_search-Tool mit URL-Quelle geliefert wurden.
+3. Wenn dir konkrete Eigennamen fehlen und das Tool keine geliefert hat: bleib generisch ("frag deine Studi-Kollegen welche Bar gerade gut ist", "die Innenstadt hat ein paar Lokale"). KEIN erfundener Straßenname, KEINE erfundene Bar.
 
-Web-Suche: Nutze das web_search-Tool höchstens 1× pro Antwort, und NUR wenn die Treffer aus unserer Datenbank thematisch oder örtlich nicht passen UND die User-Anfrage nach lokalen Tipps verlangt (z.B. "wo kann ich heute günstig fortgehen in X").`;
+Weitere Regeln:
+4. Erkenne wenn nichts Passendes für den exakten Zeitpunkt da ist (z.B. "heute") und sage das ehrlich — schlag dann die zeitlich nächsten Treffer aus der Liste vor.
+5. Wenn die Treffer thematisch danebenliegen, sag das auch — kein Hochjubeln.
+6. Kein Marketing-Sprech, keine Floskeln. Direkt, lakonisch, hilfreich.
+
+Web-Suche (PFLICHT wenn verfügbar): Falls das web_search-Tool angeboten wird, nutze es 1× — speziell wenn die User-Anfrage einen Stadtnamen enthält und nach Lokalitäten/Atmosphäre fragt. Such mit konkreten Begriffen wie "günstige Studentenbar [Stadt]" oder "Happy Hour [Stadt]". Verwende die gefundenen Lokal-Namen mit Quelle in deiner Antwort.`;
 
 function buildUserPrompt(body: ConciergeBody): string {
   const parts: string[] = [];
@@ -100,21 +103,25 @@ function buildUserPrompt(body: ConciergeBody): string {
 }
 
 /**
- * Web-Search NUR ausführen wenn:
- *  - Treffer ≤ 5 (Liste ist sparse), UND
- *  - User-Query hat lokale/temporale Spezifik (Ort/Zeit) — heuristisch über
- *    parsed.signals oder Substring-Matching auf typische Ort-Wörter.
+ * Web-Search ausführen wenn die Query einen Stadt-/Bundesland-Hint
+ * oder Lokalitäts-Wunsch enthält.
  *
- * Damit vermeiden wir teure Tool-Calls für „Konzerte" o.ä. wo wir
- * eh genug Treffer haben.
+ * Vorher hatte ich `count <= 5` als Cap — aber bei „billig saufen in
+ * eisenstadt" liefert semantic search >5 generelle Treffer (Konzerte,
+ * Märkte) ohne dass irgendeiner thematisch passt. Folge: Web-Tool nicht
+ * getriggert → LLM halluziniert Straßennamen.
+ *
+ * Neue Logik: sobald eine Stadt/Bundesland erwähnt wird ODER der User
+ * nach Bars/Atmosphäre fragt, kriegt der LLM das Tool und entscheidet
+ * selbst (System-Prompt verlangt aktive Nutzung). Ohne beides (z.B.
+ * „Techno-Party") sparen wir den Call.
  */
 function shouldUseWebSearch(body: ConciergeBody): boolean {
-  const count = body.count ?? 0;
-  if (count > 5) return false;
   const q = body.query.toLowerCase();
   const hasLocationHint = /\b(in|bei|nähe|nahe|um)\s+\w/.test(q) ||
     /\b(wien|graz|linz|salzburg|innsbruck|klagenfurt|eisenstadt|st\.?\s*pölten|bregenz|villach|wels|leoben|kapfenberg|baden|krems|amstetten|burgenland|kärnten|tirol|steiermark|niederösterreich|oberösterreich|vorarlberg)\b/.test(q);
-  return hasLocationHint;
+  const wantsLocalTip = /\b(bar|club|lokal|kneipe|disco|caf[eé]|pub|happy hour|fortgehen|saufen|trinken|date|romantisch|gemütlich)\b/.test(q);
+  return hasLocationHint || wantsLocalTip;
 }
 
 export async function POST(req: NextRequest) {
