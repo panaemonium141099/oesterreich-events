@@ -8,9 +8,33 @@
  * just wrap it in v4 tokens and switch result cards.
  */
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import Link from 'next/link';
 import { buildEventUrlV2 } from '@/lib/utils/slugify';
+import { V4ConciergeCard, type ConciergePayload } from './V4ConciergeCard';
+
+/**
+ * Category → tinted gradient pair for image-less placeholder cards.
+ * Mirrors the palette in EventListView so the look is consistent across
+ * the two list surfaces. Falls back to a neutral slate-grey gradient when
+ * the category is unknown.
+ */
+const CAT_GRADIENT: Record<string, [string, string]> = {
+  Musik: ['#a855f7', '#7e22ce'],
+  'Kultur & Bühne': ['#3b82f6', '#1d4ed8'],
+  'Nightlife & Party': ['#ec4899', '#9d174d'],
+  'Essen & Trinken': ['#f59e0b', '#b45309'],
+  'Märkte & Feste': ['#10b981', '#047857'],
+  'Sport & Bewegung': ['#ef4444', '#b91c1c'],
+  'Natur & Abenteuer': ['#22c55e', '#15803d'],
+  'Wissen & Karriere': ['#0ea5e9', '#0369a1'],
+  'Familie & Kinder': ['#f472b6', '#be185d'],
+  'Community & Freizeit': ['#8b5cf6', '#5b21b6'],
+  'Wellness & Spiritualität': ['#06b6d4', '#0e7490'],
+};
+function gradientFor(cat?: string | null): [string, string] {
+  return (cat && CAT_GRADIENT[cat]) || ['#475569', '#1e293b'];
+}
 
 interface SearchMatch {
   id: string;
@@ -103,6 +127,27 @@ export function V4EntdeckenSmartMode({ initialQuery = '' }: V4EntdeckenSmartMode
     return d.toLocaleDateString('de-AT', { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
   };
 
+  // Concierge-Payload bauen wann immer wir ein Result haben. Memoized per
+  // result-Referenz damit V4ConciergeCard nur EIN neuer Call macht wenn
+  // tatsächlich ein neues Result reinkommt (nicht bei jedem Render).
+  const conciergePayload: ConciergePayload | null = useMemo(() => {
+    if (!result) return null;
+    return {
+      query: result.query,
+      parsed: result.parsed,
+      count: result.count,
+      matches: result.matches.slice(0, 5).map(m => ({
+        title: m.title,
+        location_name: m.location_name,
+        category: m.category,
+        start_date: m.start_date,
+        bundesland: m.bundesland ?? null,
+        price_text: m.price_text,
+        _similarity: m._similarity,
+      })),
+    };
+  }, [result]);
+
   return (
     <div className="max-w-[1180px] mx-auto px-4 md:px-14 pb-20">
       <form
@@ -154,6 +199,11 @@ export function V4EntdeckenSmartMode({ initialQuery = '' }: V4EntdeckenSmartMode
 
       {loading && <div className="text-[var(--v4-ink-50)] text-sm animate-pulse">Suche läuft …</div>}
 
+      {/* Concierge tip card — rendered above the results (or above the
+          empty-state) whenever we have ANY result back. Self-aborts when
+          payload changes. */}
+      <V4ConciergeCard payload={conciergePayload}/>
+
       {result && !loading && result.count === 0 && (
         <div className="rounded-2xl border border-dashed border-[var(--v4-hairline-3)] p-8 text-center text-[var(--v4-ink-70)]">
           <p className="text-[14px]">Keine Treffer für diese Suche.</p>
@@ -165,24 +215,38 @@ export function V4EntdeckenSmartMode({ initialQuery = '' }: V4EntdeckenSmartMode
         <>
           <p className="text-[12px] text-[var(--v4-ink-50)] mb-4">{result.count} Treffer — sortiert nach Relevanz</p>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {result.matches.map(ev => (
-              <Link
-                key={ev.id}
-                href={buildEventUrlV2(ev)}
-                className="press-haptic flex flex-col rounded-2xl overflow-hidden border border-[var(--v4-hairline-2)] bg-[var(--v4-surface-elevated)] hover:border-[var(--v4-hairline-3)] transition-colors"
-              >
-                {ev.image_url && (
-                  /* eslint-disable-next-line @next/next/no-img-element */
-                  <img src={ev.image_url} alt="" className="w-full aspect-[16/9] object-cover" loading="lazy"/>
-                )}
-                <div className="p-4 flex flex-col gap-2">
-                  <p className="text-[10.5px] uppercase tracking-[0.18em] font-semibold text-[var(--v4-ink-50)]">{formatDate(ev.start_date)}</p>
-                  <h3 className="text-[15px] font-semibold leading-tight text-[var(--v4-ink)] line-clamp-2">{ev.title}</h3>
-                  {ev.location_name && <p className="text-[12.5px] text-[var(--v4-ink-70)] line-clamp-1">{ev.location_name}</p>}
-                  <p className="text-[10.5px] text-[var(--v4-ink-30)] mt-auto">Relevanz {(ev._similarity * 100).toFixed(0)}%</p>
-                </div>
-              </Link>
-            ))}
+            {result.matches.map(ev => {
+              const [g1, g2] = gradientFor(ev.category);
+              return (
+                <Link
+                  key={ev.id}
+                  href={buildEventUrlV2(ev)}
+                  className="press-haptic flex flex-col rounded-2xl overflow-hidden border border-[var(--v4-hairline-2)] bg-[var(--v4-surface-elevated)] hover:border-[var(--v4-hairline-3)] transition-colors"
+                >
+                  {/* Always render image area for uniform card height. Falls back
+                      to category-tinted gradient when no image_url exists. */}
+                  <div
+                    className="w-full aspect-[16/9] relative overflow-hidden"
+                    style={ev.image_url ? undefined : { background: `linear-gradient(135deg, ${g1}, ${g2})` }}
+                  >
+                    {ev.image_url ? (
+                      /* eslint-disable-next-line @next/next/no-img-element */
+                      <img src={ev.image_url} alt="" className="absolute inset-0 w-full h-full object-cover" loading="lazy"/>
+                    ) : (
+                      <span className="absolute inset-0 flex items-center justify-center text-[11px] uppercase tracking-[0.12em] font-bold text-white/90 text-center px-3 leading-tight">
+                        {ev.category || 'Event'}
+                      </span>
+                    )}
+                  </div>
+                  <div className="p-4 flex flex-col gap-2">
+                    <p className="text-[10.5px] uppercase tracking-[0.18em] font-semibold text-[var(--v4-ink-50)]">{formatDate(ev.start_date)}</p>
+                    <h3 className="text-[15px] font-semibold leading-tight text-[var(--v4-ink)] line-clamp-2">{ev.title}</h3>
+                    {ev.location_name && <p className="text-[12.5px] text-[var(--v4-ink-70)] line-clamp-1">{ev.location_name}</p>}
+                    <p className="text-[10.5px] text-[var(--v4-ink-30)] mt-auto">Relevanz {(ev._similarity * 100).toFixed(0)}%</p>
+                  </div>
+                </Link>
+              );
+            })}
           </div>
         </>
       )}
