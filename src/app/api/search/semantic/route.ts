@@ -28,6 +28,7 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import OpenAI from 'openai';
 import { createClient } from '@supabase/supabase-js';
+import { bundeslandToId } from '@/lib/bundeslaender';
 
 const EMBEDDING_MODEL = 'text-embedding-3-small';
 
@@ -47,43 +48,47 @@ interface ParsedFilters {
 }
 
 /**
- * Stadt/Region → Bundesland-Mapping für Soft-Re-Ranking. Wenn der User
- * "Konzert in Wien" sucht, sollen Wien-Events zuerst kommen, der Rest
- * danach (kein hard-filter — semantic similarity bleibt führend).
+ * Stadt/Region → canonical Bundesland-ID Mapping für Soft-Re-Ranking.
+ *
+ * Wir geben hier nur Roh-Strings — die werden alle durch
+ * `bundeslandToId()` aus `src/lib/bundeslaender.ts` durchgejagt, das
+ * dieselbe Normalisierung macht die auch die Listen-View nutzt
+ * (Umlaute, Shortcodes, etc.). Dadurch garantiert das Re-Ranking-Filter
+ * gegen `event.bundesland` (DB-Format) konsistent matched.
  */
-const CITY_TO_BUNDESLAND: Record<string, string> = {
+const CITY_TO_BUNDESLAND_RAW: Record<string, string> = {
   // Wien
-  wien: 'Wien',
-  vienna: 'Wien',
+  wien: 'wien', vienna: 'wien',
   // Niederösterreich
-  'st pölten': 'Niederösterreich', 'sankt pölten': 'Niederösterreich',
-  krems: 'Niederösterreich', wienerneustadt: 'Niederösterreich',
-  baden: 'Niederösterreich', amstetten: 'Niederösterreich',
+  'st pölten': 'niederoesterreich', 'sankt pölten': 'niederoesterreich',
+  krems: 'niederoesterreich', wienerneustadt: 'niederoesterreich',
+  baden: 'niederoesterreich', amstetten: 'niederoesterreich',
   // Oberösterreich
-  linz: 'Oberösterreich', wels: 'Oberösterreich', steyr: 'Oberösterreich',
+  linz: 'oberoesterreich', wels: 'oberoesterreich', steyr: 'oberoesterreich',
   // Steiermark
-  graz: 'Steiermark', leoben: 'Steiermark', kapfenberg: 'Steiermark',
+  graz: 'steiermark', leoben: 'steiermark', kapfenberg: 'steiermark',
   // Salzburg
-  salzburg: 'Salzburg',
+  salzburg: 'salzburg',
   // Tirol
-  innsbruck: 'Tirol', kufstein: 'Tirol',
+  innsbruck: 'tirol', kufstein: 'tirol',
   // Vorarlberg
-  bregenz: 'Vorarlberg', dornbirn: 'Vorarlberg',
+  bregenz: 'vorarlberg', dornbirn: 'vorarlberg',
   // Kärnten
-  klagenfurt: 'Kärnten', villach: 'Kärnten',
+  klagenfurt: 'kaernten', villach: 'kaernten',
   // Burgenland
-  eisenstadt: 'Burgenland', mattersburg: 'Burgenland',
-  // Direct Bundesland-Erwähnungen
-  burgenland: 'Burgenland', niederösterreich: 'Niederösterreich',
-  oberösterreich: 'Oberösterreich', steiermark: 'Steiermark',
-  tirol: 'Tirol', vorarlberg: 'Vorarlberg', kärnten: 'Kärnten',
+  eisenstadt: 'burgenland', mattersburg: 'burgenland',
+  // Direct Bundesland-Erwähnungen — sowohl mit als auch ohne Umlauten
+  burgenland: 'burgenland',
+  niederösterreich: 'niederoesterreich', niederoesterreich: 'niederoesterreich',
+  oberösterreich: 'oberoesterreich', oberoesterreich: 'oberoesterreich',
+  steiermark: 'steiermark',
+  tirol: 'tirol', vorarlberg: 'vorarlberg',
+  kärnten: 'kaernten', kaernten: 'kaernten',
 };
 
 function detectBundesland(q: string): string | null {
   const lower = q.toLowerCase();
-  for (const [key, bl] of Object.entries(CITY_TO_BUNDESLAND)) {
-    // Wort-Boundary-Check damit "St. Pölten" nicht in "Pölten" matched aber
-    // auch nicht in "Wien" wenn nur "Wiens" steht.
+  for (const [key, bl] of Object.entries(CITY_TO_BUNDESLAND_RAW)) {
     const re = new RegExp(`\\b${key.replace(/\s+/g, '\\s+')}\\b`, 'i');
     if (re.test(lower)) return bl;
   }
@@ -268,9 +273,13 @@ export async function POST(req: NextRequest) {
   // die ursprüngliche Similarity-Reihenfolge erhalten — kein
   // hard-filter, sondern soft re-rank (stable partition).
   if (filters.locationBundesland) {
+    // Beide Seiten durch bundeslandToId normalisieren — handles
+    // "Niederösterreich" vs "niederoesterreich" vs "NÖ" / "ktn" etc.
+    // Same Logik die auch die FilterDrawer-Pipeline nutzt.
     const target = filters.locationBundesland;
-    const inLocation = hydrated.filter(e => e.bundesland === target);
-    const elsewhere = hydrated.filter(e => e.bundesland !== target);
+    const matches = (bl: string | null | undefined) => bundeslandToId(bl) === target;
+    const inLocation = hydrated.filter(e => matches(e.bundesland));
+    const elsewhere = hydrated.filter(e => !matches(e.bundesland));
     hydrated = [...inLocation, ...elsewhere];
   }
 
