@@ -27,14 +27,12 @@
  * userLocation, flyto, view, filterOpen, mapChips, hoveredEventId)
  * bleibt page-lokal.
  */
-import { useState, useEffect, useCallback, useRef, Suspense } from 'react';
+import { useState, useEffect, useCallback, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import type { Event, EventFilters } from '@/types/events';
 import { MapTopBar } from '@/components/MapV3/MapTopBar';
-import { ViewToggle, type MapViewMode } from '@/components/MapV3/ViewToggle';
 import { FilterDrawer } from '@/components/MapV3/FilterDrawer';
-import { EventListView } from '@/components/MapV3/EventListView';
 import { T } from '@/components/MapV3/tokens';
 import { EventDetail } from '@/components/Events/EventDetail';
 import { MapLoadingOverlay } from '@/components/Map/MapLoadingOverlay';
@@ -85,7 +83,6 @@ function MapPageInner() {
   const { refresh: refreshSaved } = useSavedEvents();
 
   // Hydrate state from URL on mount
-  const initialView: MapViewMode = (searchParams.get('view') as MapViewMode) === 'list' ? 'list' : 'map';
   const initialSearch = searchParams.get('search') || '';
   // Multi takes precedence over single, mirrors the API contract.
   // Without this, "?bundeslands=wien" silently fell back to the default
@@ -138,7 +135,6 @@ function MapPageInner() {
   }, [authLoading, user, profile, profileComplete, router]);
 
   // ── Page-local state ───────────────────────────────────────────────────
-  const [view, setView] = useState<MapViewMode>(initialView);
   const [filterOpen, setFilterOpen] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   const [hoveredEventId, setHoveredEventId] = useState<string | null>(null);
@@ -178,35 +174,17 @@ function MapPageInner() {
   }, []);
 
   useEffect(() => {
-    trackEvent('page_view', { path: '/map', view });
-  }, [view]);
+    trackEvent('page_view', { path: '/map' });
+  }, []);
 
-  // Toggle Karte ↔ Liste — reset all filters on every switch so a
-  // sticky narrow scope from the previous view doesn't carry over.
-  // The URL is also rewritten to just `?view=…` (no stale params).
-  // skipFirstViewToggle prevents this from clobbering the URL-hydrated
-  // initial state on mount.
-  const skipFirstViewToggle = useRef(true);
+  // Phase 4.1: legacy /map?view=list redirects to /entdecken?mode=list.
+  // The EventListView lives on /entdecken now.
   useEffect(() => {
-    if (skipFirstViewToggle.current) {
-      skipFirstViewToggle.current = false;
-      // Still write the view param so the URL reflects mount-time choice.
-      const params = new URLSearchParams(Array.from(searchParams.entries()));
-      if (view === 'list') params.set('view', 'list');
-      else params.delete('view');
-      const next = `/map${params.toString() ? `?${params.toString()}` : ''}`;
-      router.replace(next, { scroll: false });
-      return;
+    if (searchParams.get('view') === 'list') {
+      router.replace('/entdecken?mode=list');
     }
-    setBundeslandIds(['all']);
-    setFilters({});
-    setDynamicFlyTo(null);
-    const next = view === 'list' ? '/map?view=list' : '/map';
-    router.replace(next, { scroll: false });
-  // searchParams excluded — we read it once on mount; further URL changes
-  // shouldn't re-run this effect or we'd thrash the history stack.
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [view]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const toggleMapChip = (key: string) => {
     setMapChips(prev => {
@@ -246,9 +224,7 @@ function MapPageInner() {
       placePostalCode: undefined,
     }));
 
-    if (view === 'map') {
-      setTimeout(() => setDynamicFlyTo({ lat: g.lat, lng: g.lng, zoom: 13 }), 300);
-    }
+    setTimeout(() => setDynamicFlyTo({ lat: g.lat, lng: g.lng, zoom: 13 }), 300);
   };
 
   return (
@@ -311,31 +287,9 @@ function MapPageInner() {
 
       <div className="flex-1 relative min-h-0">
         <V4MapFilterChipsOverlay active={mapChips} onToggle={toggleMapChip}/>
-        {/* Floating ViewToggle — top-center on desktop, bottom-center on mobile */}
-        <div
-          className="hidden md:block"
-          style={{ position: 'absolute', top: 18, left: '50%', transform: 'translateX(-50%)', zIndex: 30 }}
-        >
-          <ViewToggle view={view} onViewChange={setView} />
-        </div>
-        <div
-          className="md:hidden"
-          style={{
-            position: 'absolute',
-            left: '50%',
-            transform: 'translateX(-50%)',
-            bottom: 'calc(env(safe-area-inset-bottom, 0px) + 20px)',
-            zIndex: 30,
-          }}
-        >
-          <ViewToggle view={view} onViewChange={setView} size="sm" />
-        </div>
 
-        {/* MAP view — plain conditional render. Earlier we used motion-lib's
-            AnimatePresence here, but it left the hidden view in DOM with
-            opacity:0 (same bug as in FilterDrawer), wasting Mapbox memory. */}
-        {view === 'map' && (
-          <div className="absolute inset-0 mv3-fade-in">
+        {/* MAP view — always rendered; EventListView lives on /entdecken (Phase 4.1) */}
+        <div className="absolute inset-0 mv3-fade-in">
               <EventMap
                 events={finalEvents}
                 selectedEvent={selectedEvent}
@@ -429,22 +383,7 @@ function MapPageInner() {
                 suppressAutoFly={hasUrlContext}
               />
               <V4MarkerLegend/>
-          </div>
-        )}
-
-        {view === 'list' && (
-          <div className="absolute inset-0 mv3-fade-in">
-            <EventListView
-              events={finalEvents}
-              loading={loading}
-              userLocation={userLocation}
-              totalCount={totalMatchCount}
-              scopeLabel={
-                scopeLabel !== 'Österreich' ? scopeLabel : filters.search ? filters.search : 'Österreich'
-              }
-            />
-          </div>
-        )}
+        </div>
 
         {/* Event detail modal */}
         {selectedEvent && (
