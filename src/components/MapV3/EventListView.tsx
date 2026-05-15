@@ -13,8 +13,24 @@
 import { useMemo, useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { T } from './tokens';
 import type { Event } from '@/types/events';
+
+/**
+ * v4 dark-theme tokens — used since Phase 4.2 (after EventListView wandered
+ * von /map nach /entdecken). EventListView wird nur noch auf /entdecken
+ * gerendert, daher konnten die hellen MapV3-Tokens lokal auf v4 dark
+ * umgemappt werden ohne andere MapV3-Konsumenten zu treffen.
+ */
+const T = {
+  bg: 'transparent',                                  // page bg already var(--v4-surface)
+  panel: 'var(--v4-surface-inset)',
+  border: 'var(--v4-hairline-2)',
+  ink: 'var(--v4-ink)',
+  ink70: 'var(--v4-ink-70)',
+  ink60: 'var(--v4-ink-50)',
+  ink50: 'var(--v4-ink-30)',
+  shadow: 'none',
+} as const;
 import { formatTime } from '@/lib/utils/date';
 import { distanceKm } from '@/lib/geolocation';
 import { displayDistrictName } from '@/lib/districtsAT';
@@ -143,19 +159,13 @@ export function EventListView({
   const visible = sorted.slice(0, visibleCount);
   const grouped = useMemo(() => groupEvents(visible), [visible]);
 
+  // Phase 4.2: kein eigenes `position: absolute, inset: 0` mehr — EventListView
+  // wird in /entdecken im normalen Flow-Layout unterhalb des V4EntdeckenHero
+  // gemountet. Höhe ergibt sich aus dem Content (infinite-scroll im Page-Scroll
+  // statt im Container-Scroll).
   return (
-    <div
-      style={{
-        position: 'absolute',
-        inset: 0,
-        background: T.bg,
-        overflowY: 'auto',
-        // Reserve room above the floating ViewToggle (mobile bottom-center)
-        paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 80px)',
-      }}
-      className="thin-scroll"
-    >
-      <div style={{ maxWidth: 1200, margin: '0 auto', padding: '24px 16px 16px' }}>
+    <div className="thin-scroll" style={{ background: T.bg }}>
+      <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 0 32px' }}>
         {/* Headline + sort tabs */}
         <div
           style={{
@@ -169,27 +179,14 @@ export function EventListView({
           }}
         >
           <div>
-            <div
+            <h2
               style={{
-                fontSize: 11,
-                fontWeight: 600,
-                textTransform: 'uppercase',
-                letterSpacing: '0.16em',
-                color: T.ink60,
-                marginBottom: 4,
-              }}
-            >
-              Listenansicht
-            </div>
-            <h1
-              style={{
-                fontSize: 22,
+                fontSize: 18,
                 fontWeight: 700,
-                letterSpacing: '-0.025em',
+                letterSpacing: '-0.02em',
                 color: T.ink,
                 margin: 0,
               }}
-              className="md:!text-[26px]"
             >
               {loading && events.length === 0
                 ? 'Suche läuft …'
@@ -201,7 +198,7 @@ export function EventListView({
                 ? `${events.length.toLocaleString('de-AT')} von ${totalCount.toLocaleString('de-AT')} Events`
                 : `${events.length.toLocaleString('de-AT')} Events`}
               {scopeLabel ? ` · ${scopeLabel}` : ''}
-            </h1>
+            </h2>
           </div>
 
           <div style={{ display: 'flex', gap: 6 }}>
@@ -219,14 +216,13 @@ export function EventListView({
                   style={{
                     padding: '7px 14px',
                     borderRadius: 9999,
-                    background: active ? T.ink : '#fff',
-                    color: active ? '#fff' : T.ink70,
+                    background: active ? 'var(--v4-ink)' : 'transparent',
+                    color: active ? '#0a0a0c' : 'var(--v4-ink-70)',
                     border: active ? '1px solid transparent' : `1px solid ${T.border}`,
                     fontSize: 12.5,
                     fontWeight: 600,
                     cursor: 'pointer',
                     fontFamily: 'inherit',
-                    boxShadow: active ? 'none' : T.shadow,
                   }}
                 >
                   {o.l}
@@ -349,10 +345,9 @@ function BigRow({
         display: 'flex',
         gap: 14,
         padding: 12,
-        background: '#fff',
+        background: 'var(--v4-surface-elevated)',
         borderRadius: 14,
         border: `1px solid ${T.border}`,
-        boxShadow: T.shadow,
         cursor: 'pointer',
         textAlign: 'left',
         width: '100%',
@@ -360,7 +355,7 @@ function BigRow({
         textDecoration: 'none',
         color: 'inherit',
         // Hover/focus animation defined in globals.css → .mv3-list-card:hover
-        transition: 'transform 0.18s ease-out, box-shadow 0.18s ease-out, border-color 0.18s ease-out',
+        transition: 'transform 0.18s ease-out, border-color 0.18s ease-out',
       }}
     >
       <div
@@ -484,8 +479,8 @@ function BigRow({
             style={{
               padding: '6px 12px',
               borderRadius: 8,
-              background: T.ink,
-              color: '#fff',
+              background: 'var(--v4-ink)',
+              color: '#0a0a0c',
               fontSize: 12,
               fontWeight: 600,
               letterSpacing: '-0.005em',
@@ -525,7 +520,7 @@ function SkeletonRow() {
         display: 'flex',
         gap: 14,
         padding: 12,
-        background: '#fff',
+        background: 'var(--v4-surface-elevated)',
         borderRadius: 14,
         border: `1px solid ${T.border}`,
         marginBottom: 14,
