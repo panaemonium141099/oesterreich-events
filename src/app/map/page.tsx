@@ -42,6 +42,7 @@ import { trackEvent } from '@/lib/analytics';
 import { useAuth } from '@/lib/supabase/auth-context';
 import { getStoredLocation, storeLocation } from '@/lib/geolocation';
 import { useSavedEvents } from '@/lib/saved-events-context';
+import { V4MapHeader, V4MarkerLegend, V4MapFilterChipsOverlay } from '@/components/Map/v4';
 
 const EventMap = dynamic(() => import('@/components/Map/EventMap'), {
   ssr: false,
@@ -171,6 +172,7 @@ function MapPageInner() {
 
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [dynamicFlyTo, setDynamicFlyTo] = useState<{ lat: number; lng: number; zoom: number } | null>(null);
+  const [mapChips, setMapChips] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     const stored = getStoredLocation();
@@ -483,6 +485,14 @@ function MapPageInner() {
     return `${concrete.length} Regionen`;
   }, [bundeslandIds, filters.search, filters.districts, filters.district]);
 
+  const toggleMapChip = (key: string) => {
+    setMapChips(prev => {
+      const next = new Set(prev);
+      if (next.has(key)) next.delete(key); else next.add(key);
+      return next;
+    });
+  };
+
   const handleGemeindeSelect = (g: { name: string; bundeslandId: string; lat: number; lng: number; postalCode?: string }) => {
     const bl = BUNDESLAENDER.find((b) => b.id === g.bundeslandId);
     if (bl) setBundesland(bl);
@@ -520,6 +530,7 @@ function MapPageInner() {
 
   return (
     <div className="h-screen flex flex-col" style={{ background: T.bg }}>
+      <V4MapHeader/>
       <MapTopBar
         filters={filters}
         onFiltersChange={setFilters}
@@ -576,6 +587,7 @@ function MapPageInner() {
       />
 
       <div className="flex-1 relative min-h-0">
+        <V4MapFilterChipsOverlay active={mapChips} onToggle={toggleMapChip}/>
         {/* Floating ViewToggle — top-center on desktop, bottom-center on mobile */}
         <div
           className="hidden md:block"
@@ -693,6 +705,7 @@ function MapPageInner() {
                 eveningMode={false}
                 suppressAutoFly={hasUrlContext}
               />
+              <V4MarkerLegend/>
           </div>
         )}
 
