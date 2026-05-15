@@ -7,6 +7,7 @@
  */
 
 import Image from 'next/image';
+import { V4BackButton } from './V4BackButton';
 
 interface V4EventDetailHeroProps {
   title: string;
@@ -29,6 +30,7 @@ export function V4EventDetailHero({ title, startDate, locationName, city, imageU
 
   return (
     <section className="relative h-[320px] md:h-[480px] overflow-hidden">
+      <V4BackButton className="top-4 left-4 md:top-5 md:left-5"/>
       {imageUrl ? (
         <Image
           src={imageUrl}
