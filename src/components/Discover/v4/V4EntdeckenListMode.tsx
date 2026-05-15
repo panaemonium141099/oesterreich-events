@@ -46,14 +46,8 @@ export function V4EntdeckenListMode({
 
   return (
     <div className="max-w-[1180px] mx-auto px-4 md:px-14 pb-20">
-      {/* Action-Bar: Result-Count + Filter-Button */}
-      <div className="flex items-center justify-between gap-3 mb-5">
-        <div className="text-[13px] text-[var(--v4-ink-70)]">
-          <b className="text-[var(--v4-ink)] font-bold">{resultCount}</b> Events
-          {scopeLabel !== 'Österreich' && (
-            <span className="text-[var(--v4-ink-50)]"> · {scopeLabel}</span>
-          )}
-        </div>
+      {/* Toolbar: Filter-Button rechts; Count + Sort sitzt in EventListView. */}
+      <div className="flex items-center justify-end gap-3 mb-4">
         <button
           type="button"
           onClick={() => setFilterOpen(true)}
