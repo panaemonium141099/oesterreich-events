@@ -1,31 +1,39 @@
 /**
- * /api/search/concierge — AI-Concierge für Smart-Suche.
+ * /api/search/concierge — AI-Concierge für Smart-Suche (Phase 4.7).
  *
- * Nimmt die User-Anfrage + Top-Matches aus /api/search/semantic und
- * generiert eine 2-3-sätzige Concierge-Antwort. Optional mit Web-Suche
- * (über OpenAI Responses API `web_search_preview` Tool) wenn die Anfrage
- * lokale Tipps verlangt und unsere Treffer eher mau sind.
+ * Wechsel von OpenAI Responses + Bing-backed web_search auf
+ * **Google Gemini 2.5 Flash + Grounding with Google Search**.
+ *
+ * Warum: OpenAI's web_search_preview Tool nutzt Microsoft Bing als
+ * Such-Backend. Für österreichische Lokal-Coverage (Bars in Eisenstadt,
+ * Heurigen im Burgenland, etc.) ist Bing deutlich schwächer als Google.
+ * Gemini Grounding ist die gleiche Engine die auch Google's AI Overviews
+ * antreibt — selbe Suchindex-Qualität, sauber per API.
  *
  * Halluzinations-Guards:
  *  - LLM darf nur Events/Venues namentlich nennen, die wir mitgeben
- *    oder die das web_search-Tool mit Zitat zurückliefert.
- *  - System-Prompt ist explizit: keine erfundenen Bars/Restaurants.
- *  - Citations werden mit zurückgegeben → Frontend zeigt sie sichtbar
- *    als „Quellen".
+ *    oder die das Grounding-Tool mit Quelle zurückliefert.
+ *  - System-Prompt verbietet erfundene Namen jeder Art (auch Straßen,
+ *    Stadtteile, Viertel).
+ *  - Citations aus `groundingMetadata.groundingChunks` werden mit
+ *    gestreamt → Frontend zeigt sie als „Quellen".
  *
- * Cost:
- *  - LLM (gpt-4o-mini) ~ 500 in + 200 out tokens = ~$0.0002
- *  - Web-Search (wenn ausgelöst) ~$0.025 pro Aufruf
- *  - Wir triggern Web-Search NUR wenn count <= 5 (sparse results)
- *    UND die parsed query lokale Signale enthält (location/date).
+ * Cost (Gemini 2.5 Flash mit Dynamic Retrieval):
+ *  - Input: $0.075 / 1M tokens
+ *  - Output: $0.30 / 1M tokens
+ *  - Grounded calls: $7 / 1000 Anfragen (nur wenn Tool feuert)
+ *  - Per Concierge-Call mit Grounding: ~$0.007 + token cost ~$0.0002 = $0.0072
+ *  - Without grounding: nur $0.0002
+ *  - Bei 10k Suchen/Monat mit ~50% grounding rate: ~$35/Monat
  *
- * Schemata:
+ * Schemata bleiben unverändert (SSE-Format wie vorher):
  *  - POST body: { query, parsed?, matches?, count?, scopeLabel? }
- *  - Antwort: Server-Sent-Events-Stream mit deltas: "text", "citations", "done"
+ *  - Antwort: SSE-Stream mit deltas: "text", "done" (mit citations[]),
+ *    "error"
  */
 
 import { NextResponse, type NextRequest } from 'next/server';
-import OpenAI from 'openai';
+import { GoogleGenAI } from '@google/genai';
 
 // Match-Subset der /api/search/semantic SearchMatch-Type — wir brauchen
 // nur title/location/category/start_date/_similarity für den Prompt.
@@ -62,17 +70,17 @@ Format (STRIKT):
 
 Strikte Regeln gegen Halluzination:
 1. Du darfst NIEMALS Eigennamen erfinden — keine Bars, Cafés, Restaurants, Clubs, Lokale, Straßennamen, Plätze, Stadtteile, Viertel, Veranstaltungsorte oder Marken. NIEMALS.
-2. Eigennamen dürfen nur erscheinen, wenn sie ENTWEDER in der mitgelieferten "Treffer"-Liste stehen ODER vom web_search-Tool mit URL-Quelle geliefert wurden.
-3. URLs musst du EXAKT so übernehmen wie das Tool sie liefert — keine UTM-Parameter selbst dranhängen, keine Maps-URLs erfinden.
-4. Wenn dir konkrete Eigennamen fehlen und das Tool keine geliefert hat: bleib generisch ("frag deine Studi-Kollegen welche Bar gerade gut ist"). KEIN erfundener Name.
+2. Eigennamen dürfen nur erscheinen, wenn sie ENTWEDER in der mitgelieferten "Treffer"-Liste stehen ODER aus der Google-Suche (Grounding) mit Quelle kommen.
+3. URLs musst du EXAKT so übernehmen wie die Google-Suche sie liefert — nichts dranhängen, nichts erfinden.
+4. Wenn dir konkrete Eigennamen fehlen: bleib generisch ("frag deine Studi-Kollegen welche Bar gerade gut ist"). KEIN erfundener Name.
 
 Inhalt:
-5. Wenn das Tool mehrere Lokale findet, gib 2-4 davon (nicht nur einen) mit kurzer Begründung warum jeder passt.
+5. Wenn die Google-Suche mehrere Lokale findet, gib 2-4 davon (nicht nur einen) mit kurzer Begründung warum jeder passt.
 6. Erkenne wenn nichts Passendes für den exakten Zeitpunkt da ist (z.B. "heute") und sage das ehrlich — schlag dann die zeitlich nächsten Treffer aus der Liste vor.
 7. Wenn die Treffer thematisch danebenliegen, sag das auch — kein Hochjubeln.
 8. Kein Marketing-Sprech, keine Floskeln. Direkt, lakonisch, hilfreich.
 
-Web-Suche (PFLICHT wenn verfügbar): Falls das web_search-Tool angeboten wird, nutze es 1× — speziell wenn die User-Anfrage einen Stadtnamen enthält und nach Lokalitäten/Atmosphäre fragt. Such mit konkreten Begriffen wie "günstige Studentenbar [Stadt]" oder "Happy Hour [Stadt]". Verwende die gefundenen Lokal-Namen mit Quelle in deiner Antwort.`;
+Google-Suche (PFLICHT wenn die User-Anfrage einen Stadtnamen enthält ODER nach Bars/Lokalen/Atmosphäre fragt): Such mit konkreten Begriffen wie "günstige Studentenbar [Stadt]" oder "Happy Hour [Stadt]". Verwende die gefundenen Lokal-Namen mit Quelle.`;
 
 function buildUserPrompt(body: ConciergeBody): string {
   const parts: string[] = [];
@@ -108,20 +116,15 @@ function buildUserPrompt(body: ConciergeBody): string {
 }
 
 /**
- * Web-Search ausführen wenn die Query einen Stadt-/Bundesland-Hint
- * oder Lokalitäts-Wunsch enthält.
+ * Google-Search-Tool wird grundsätzlich aktiviert. Gemini's Dynamic
+ * Retrieval entscheidet selbst pro Anfrage ob es tatsächlich sucht —
+ * Cost-Optimierung ohne harte Trigger-Heuristik clientseitig.
  *
- * Vorher hatte ich `count <= 5` als Cap — aber bei „billig saufen in
- * eisenstadt" liefert semantic search >5 generelle Treffer (Konzerte,
- * Märkte) ohne dass irgendeiner thematisch passt. Folge: Web-Tool nicht
- * getriggert → LLM halluziniert Straßennamen.
- *
- * Neue Logik: sobald eine Stadt/Bundesland erwähnt wird ODER der User
- * nach Bars/Atmosphäre fragt, kriegt der LLM das Tool und entscheidet
- * selbst (System-Prompt verlangt aktive Nutzung). Ohne beides (z.B.
- * „Techno-Party") sparen wir den Call.
+ * Heuristisch geben wir dem Modell zusätzlich einen Hinweis im
+ * User-Prompt, wenn die Anfrage stark nach lokalen Tipps verlangt
+ * (Bar/Club/Stadt-Erwähnung), damit es nicht aus Geiz das Tool skippt.
  */
-function shouldUseWebSearch(body: ConciergeBody): boolean {
+function hasStrongLocalSignal(body: ConciergeBody): boolean {
   const q = body.query.toLowerCase();
   const hasLocationHint = /\b(in|bei|nähe|nahe|um)\s+\w/.test(q) ||
     /\b(wien|graz|linz|salzburg|innsbruck|klagenfurt|eisenstadt|st\.?\s*pölten|bregenz|villach|wels|leoben|kapfenberg|baden|krems|amstetten|burgenland|kärnten|tirol|steiermark|niederösterreich|oberösterreich|vorarlberg)\b/.test(q);
@@ -130,9 +133,9 @@ function shouldUseWebSearch(body: ConciergeBody): boolean {
 }
 
 export async function POST(req: NextRequest) {
-  const openaiKey = process.env.OPENAI_API_KEY;
-  if (!openaiKey) {
-    return NextResponse.json({ error: 'Server misconfigured (no OPENAI_API_KEY)' }, { status: 503 });
+  const geminiKey = process.env.GEMINI_API_KEY;
+  if (!geminiKey) {
+    return NextResponse.json({ error: 'Server misconfigured (no GEMINI_API_KEY)' }, { status: 503 });
   }
 
   let body: ConciergeBody;
@@ -148,13 +151,16 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'query too long (max 500 chars)' }, { status: 400 });
   }
 
-  const client = new OpenAI({ apiKey: openaiKey });
-  const useWebSearch = shouldUseWebSearch(body);
+  const ai = new GoogleGenAI({ apiKey: geminiKey });
   const userPrompt = buildUserPrompt(body);
+  const localHint = hasStrongLocalSignal(body)
+    ? '\n\n[Hinweis: Diese Anfrage verlangt vermutlich nach lokalen Lokal-Tipps. Bitte aktiv Google-Suche nutzen.]'
+    : '';
 
-  // Streaming via Server-Sent-Events. Wir wrappen den OpenAI-Stream in
-  // ein einfaches eigenes SSE-Format damit das Frontend nur deltas +
-  // citations + done-Event verarbeiten muss.
+  // Streaming via Server-Sent-Events. Wir wandeln den Gemini-Stream in
+  // unser eigenes SSE-Format (text deltas + done event mit citations).
+  // Frontend (V4ConciergeCard) konsumiert das gleiche Format wie vorher
+  // mit OpenAI — keine Frontend-Änderung nötig.
   const stream = new ReadableStream({
     async start(controller) {
       const enc = new TextEncoder();
@@ -163,43 +169,43 @@ export async function POST(req: NextRequest) {
       };
 
       try {
-        const response = await client.responses.create({
-          model: 'gpt-4o-mini',
-          input: [
-            { role: 'system', content: SYSTEM_PROMPT },
-            { role: 'user', content: userPrompt },
-          ],
-          ...(useWebSearch
-            ? { tools: [{ type: 'web_search_preview' as const }] }
-            : {}),
-          stream: true,
+        const response = await ai.models.generateContentStream({
+          model: 'gemini-2.5-flash',
+          contents: userPrompt + localHint,
+          config: {
+            systemInstruction: SYSTEM_PROMPT,
+            tools: [{ googleSearch: {} }],
+            // Knappe Antworten — die Multi-Tip Liste ist 2-4 Zeilen,
+            // keine langen Erklärungen. 600 tokens als sanftes Limit.
+            maxOutputTokens: 600,
+            temperature: 0.4,
+          },
         });
 
+        let groundingChunks: Array<{ web?: { uri?: string; title?: string } }> | undefined;
+
+        for await (const chunk of response) {
+          // Gemini-streaming chunks tragen entweder text-deltas, function-calls
+          // oder grounding-Metadata. Wir greppen defensiv.
+          const text = chunk.text;
+          if (text) {
+            send('text', { delta: text });
+          }
+          const candidate = chunk.candidates?.[0];
+          const meta = candidate?.groundingMetadata;
+          if (meta?.groundingChunks) {
+            // Letzter Chunk gewinnt — Gemini liefert die Grounding-Liste
+            // typischerweise im finalen Chunk.
+            groundingChunks = meta.groundingChunks as typeof groundingChunks;
+          }
+        }
+
         const citations: Array<{ url: string; title: string | null }> = [];
-
-        for await (const event of response) {
-          // OpenAI Responses streaming events:
-          //  - response.output_text.delta  → token streaming
-          //  - response.output_item.added  → tool calls, citations
-          //  - response.completed          → final wrap
-          // Schema variiert leicht nach SDK-Version — wir robust-greppen
-          // nach den relevanten Feldern.
-          const eventAny = event as unknown as Record<string, unknown>;
-          const type = eventAny.type as string | undefined;
-
-          if (type === 'response.output_text.delta') {
-            const delta = eventAny.delta as string | undefined;
-            if (delta) send('text', { delta });
-          } else if (type === 'response.output_item.added' || type === 'response.output_item.done') {
-            // Citation-extraction — wenn das Output-Item Annotations mit
-            // URL-Citations enthält, sammeln wir sie für den done-Event.
-            const item = eventAny.item as Record<string, unknown> | undefined;
-            if (item && Array.isArray(item.annotations)) {
-              for (const a of item.annotations as Array<Record<string, unknown>>) {
-                if (a.type === 'url_citation' && typeof a.url === 'string') {
-                  citations.push({ url: a.url, title: (a.title as string | null) ?? null });
-                }
-              }
+        if (groundingChunks) {
+          for (const gc of groundingChunks) {
+            const url = gc.web?.uri;
+            if (typeof url === 'string') {
+              citations.push({ url, title: gc.web?.title ?? null });
             }
           }
         }
@@ -209,7 +215,7 @@ export async function POST(req: NextRequest) {
       } catch (err) {
         const msg = err instanceof Error ? err.message : String(err);
         if (process.env.NODE_ENV === 'development') {
-          console.error('[concierge] error:', err);
+          console.error('[concierge/gemini] error:', err);
         }
         send('error', { message: msg });
         controller.close();
