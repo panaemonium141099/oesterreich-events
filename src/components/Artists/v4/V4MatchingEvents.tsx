@@ -6,6 +6,7 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
+import { buildEventUrlV2 } from '@/lib/utils/slugify';
 
 export interface ArtistMatchEvent {
   id: string;
@@ -43,12 +44,12 @@ export function V4MatchingEvents({ events }: V4MatchingEventsProps) {
   return (
     <div className="flex flex-col gap-2.5">
       {events.map(ev => {
-        const slug = ev.slug ?? ev.id;
+        const href = buildEventUrlV2(ev);
         const isFestival = ev.match_kind === 'lineup';
         return (
           <Link
             key={ev.id}
-            href={`/events/${slug}`}
+            href={href}
             className="press-haptic relative flex gap-3.5 rounded-2xl border border-[rgba(245,185,66,0.34)] bg-[var(--v4-surface-elevated)] p-4 overflow-hidden hover:border-[rgba(245,185,66,0.5)] transition-colors"
           >
             <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-[var(--v4-match)]"/>

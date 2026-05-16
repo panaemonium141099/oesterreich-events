@@ -46,10 +46,12 @@ describe('V4CardV', () => {
     expect(screen.getByText('Arena Wien')).toBeInTheDocument();
   });
 
-  it('links to /events/<slug>', () => {
+  it('links to canonical V2 event URL ending in the slug', () => {
     render(<V4CardV event={ev()}/>);
     const link = screen.getByRole('link', { name: /bilderbuch/i });
-    expect(link.getAttribute('href')).toBe('/events/bilderbuch-arena');
+    const href = link.getAttribute('href') || '';
+    // Canonical V2: /events/{plz-ort}/{yyyy-mm-dd}/{slug}
+    expect(href).toMatch(/^\/events\/.+\/2026-06-15\/bilderbuch-arena$/);
   });
 
   it('renders the badge that matches event.state', () => {

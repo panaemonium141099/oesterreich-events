@@ -14,6 +14,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import type { Event } from '@/types/events';
 import type { V4EventState } from '@/lib/v4/derive-event-state';
+import { buildEventUrlV2 } from '@/lib/utils/slugify';
 import { V4Badge } from './V4Badge';
 
 interface V4CardVProps {
@@ -41,12 +42,12 @@ function formatDateEyebrow(iso: string): string {
 }
 
 export function V4CardV({ event, priority = false }: V4CardVProps) {
-  const slug = event.slug ?? event.id;
+  const href = buildEventUrlV2(event);
   const badgeLabel = STATE_LABELS[event.state];
 
   return (
     <Link
-      href={`/events/${slug}`}
+      href={href}
       className="press-haptic flex flex-col rounded-2xl overflow-hidden border border-[var(--v4-hairline-2)] bg-[var(--v4-surface-elevated)] hover:border-[var(--v4-hairline-3)] transition-colors"
       data-v4-card="vertical"
     >

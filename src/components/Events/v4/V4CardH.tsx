@@ -9,6 +9,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import type { Event } from '@/types/events';
 import type { V4EventState } from '@/lib/v4/derive-event-state';
+import { buildEventUrlV2 } from '@/lib/utils/slugify';
 import { V4Badge } from './V4Badge';
 
 interface V4CardHProps {
@@ -27,12 +28,12 @@ function shortDate(iso: string): string {
 }
 
 export function V4CardH({ event }: V4CardHProps) {
-  const slug = event.slug ?? event.id;
+  const href = buildEventUrlV2(event);
   const badgeLabel = STATE_LABELS[event.state];
 
   return (
     <Link
-      href={`/events/${slug}`}
+      href={href}
       className="press-haptic flex items-center gap-4 rounded-2xl border border-[var(--v4-hairline-2)] bg-[var(--v4-surface-elevated)] p-3 hover:border-[var(--v4-hairline-3)] transition-colors"
       data-v4-card="horizontal"
     >
