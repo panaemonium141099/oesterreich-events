@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { V4PlansList } from '@/components/Plans/v4';
+import { V4PlansList, V4SavedStats } from '@/components/Plans/v4';
 import type { Plan } from '@/types/plans';
 
 export function V4SavedPageClient() {
@@ -33,11 +33,14 @@ export function V4SavedPageClient() {
           </h1>
         </div>
       </section>
-      <div className="max-w-[1180px] mx-auto px-4 md:px-14 py-8 md:py-12">
+      <div className="max-w-[1180px] mx-auto px-4 md:px-14 py-8 md:py-12 flex flex-col gap-7">
         {loading ? (
           <div className="text-[var(--v4-ink-50)] text-sm animate-pulse">Lade Pläne …</div>
         ) : (
-          <V4PlansList plans={plans}/>
+          <>
+            {plans.length > 0 && <V4SavedStats plans={plans}/>}
+            <V4PlansList plans={plans}/>
+          </>
         )}
       </div>
     </div>

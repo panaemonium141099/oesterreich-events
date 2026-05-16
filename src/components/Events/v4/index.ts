@@ -32,3 +32,6 @@ export { V4EntdeckenTabs, type V4EntdeckenMode } from './V4EntdeckenTabs';
 // Phase 5 — Plan-Wizard atoms
 export { V4Stepper } from './V4Stepper';
 export { V4DatePicker } from './V4DatePicker';
+
+// Phase 6 — Plan-Wizard / Plan-Card status badge
+export { V4Status, type V4StatusKind } from './V4Status';

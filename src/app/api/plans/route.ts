@@ -1,11 +1,37 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
 
+type PlanItemStatus = 'open' | 'done' | 'skip' | 'later';
+type ArrivalMode = 'auto' | 'oeffis' | 'fuss' | 'fahrrad';
+
+const PLAN_ITEM_STATUSES: PlanItemStatus[] = ['open', 'done', 'skip', 'later'];
+const ARRIVAL_MODES: ArrivalMode[] = ['auto', 'oeffis', 'fuss', 'fahrrad'];
+
 interface CreatePlanBody {
   name?: string;
-  plan_date?: string;     // ISO date YYYY-MM-DD
+  plan_date?: string;
   note?: string | null;
   event_ids?: string[];
+  tickets_status?: PlanItemStatus;
+  arrival_status?: PlanItemStatus;
+  arrival_mode?: ArrivalMode | null;
+  arrival_from?: string | null;
+  accommodation_status?: PlanItemStatus;
+  accommodation_city?: string | null;
+  reminder_7d?: boolean;
+  reminder_1d?: boolean;
+  reminder_3h?: boolean;
+}
+
+function pickStatus(v: unknown, fallback: PlanItemStatus = 'open'): PlanItemStatus {
+  return typeof v === 'string' && PLAN_ITEM_STATUSES.includes(v as PlanItemStatus)
+    ? (v as PlanItemStatus) : fallback;
+}
+
+function pickArrivalMode(v: unknown): ArrivalMode | null {
+  if (v === null) return null;
+  return typeof v === 'string' && ARRIVAL_MODES.includes(v as ArrivalMode)
+    ? (v as ArrivalMode) : null;
 }
 
 export async function POST(req: NextRequest) {
@@ -26,7 +52,21 @@ export async function POST(req: NextRequest) {
 
   const { data: plan, error: planErr } = await supabase
     .from('plans')
-    .insert({ user_id: user.id, name, plan_date: planDate, note: body.note ?? null })
+    .insert({
+      user_id: user.id,
+      name,
+      plan_date: planDate,
+      note: body.note ?? null,
+      tickets_status: pickStatus(body.tickets_status),
+      arrival_status: pickStatus(body.arrival_status),
+      arrival_mode: pickArrivalMode(body.arrival_mode),
+      arrival_from: body.arrival_from ?? null,
+      accommodation_status: pickStatus(body.accommodation_status),
+      accommodation_city: body.accommodation_city ?? null,
+      reminder_7d: body.reminder_7d ?? true,
+      reminder_1d: body.reminder_1d ?? true,
+      reminder_3h: body.reminder_3h ?? true,
+    })
     .select()
     .single();
   if (planErr || !plan) {

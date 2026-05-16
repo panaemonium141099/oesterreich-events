@@ -12,6 +12,15 @@ describe('V4PlanCard', () => {
   const plan = {
     id: 'p1', user_id: 'u1', name: 'Wochenend-Plan',
     plan_date: '2026-06-15', note: null, visibility: 'private' as const,
+    tickets_status: 'open' as const,
+    arrival_status: 'open' as const,
+    arrival_mode: null,
+    arrival_from: null,
+    accommodation_status: 'open' as const,
+    accommodation_city: null,
+    reminder_7d: true,
+    reminder_1d: true,
+    reminder_3h: true,
     created_at: '2026-05-15', updated_at: '2026-05-15',
   };
 
