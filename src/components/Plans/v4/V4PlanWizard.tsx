@@ -207,21 +207,26 @@ export function V4PlanWizard({ mode, initialEvent, initialPlan, onClose }: V4Pla
               Du findest ihn jederzeit unter „Meine Pläne“. Reminder feuern automatisch — keine Notification-Wand.
             </p>
             <div className="flex items-center justify-center gap-3 mt-7 flex-wrap">
-              <button
-                type="button"
-                onClick={() => {
-                  if (mode === 'sheet' && onClose) onClose();
-                  router.push(`/plan/${savedPlanId}`);
-                }}
-                className="press-haptic px-5 py-2.5 rounded-full bg-[var(--v4-ink)] text-[#0a0a0c] text-[13.5px] font-semibold"
+              {/*
+                Hard-Navigation via window.location: wenn der Wizard als Sheet
+                über der Event-Detail-Page läuft, würde router.push() in der
+                gleichen Render-Phase als der onClose-State-Update einen
+                Race-Condition triggern (URL ändert sich, aber Next.js
+                schafft kein soft-render mehr weil der Wizard schon
+                unmounted ist). Full-Page-Load ist hier ohnehin gewünscht —
+                der Plan ist frisch und braucht keinen Client-State.
+              */}
+              <a
+                href={`/plan/${savedPlanId}`}
+                className="press-haptic px-5 py-2.5 rounded-full bg-[var(--v4-ink)] text-[#0a0a0c] text-[13.5px] font-semibold no-underline"
               >
                 Plan ansehen
-              </button>
+              </a>
               <button
                 type="button"
                 onClick={() => {
                   if (mode === 'sheet' && onClose) onClose();
-                  else router.push('/saved');
+                  else window.location.assign('/saved');
                 }}
                 className="press-haptic px-4 py-2.5 rounded-full border border-[var(--v4-hairline-2)] text-[13.5px] font-semibold text-[var(--v4-ink-70)] hover:text-[var(--v4-ink)] hover:border-[var(--v4-hairline-3)]"
               >
