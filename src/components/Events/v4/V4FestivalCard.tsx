@@ -8,6 +8,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import type { Festival } from '@/types/festivals';
+import { buildEventUrlV2 } from '@/lib/utils/slugify';
 import { V4Badge } from './V4Badge';
 
 /* The Festival table itself has no image column — getLandingData JOINs the
@@ -39,12 +40,21 @@ function dateRange(startIso: string | null, endIso?: string | null): string {
 }
 
 export function V4FestivalCard({ festival, lineupMatch = false }: V4FestivalCardProps) {
-  const slug = festival.slug ?? festival.id;
+  // Festival-Fields auf EventForUrl-Shape mappen damit buildEventUrlV2
+  // die canonical /events/{plz-ort}/{date}/{slug} URL bauen kann.
+  // Festival.starts_at → start_date, .city → location_name, .state → bundesland.
+  const href = buildEventUrlV2({
+    id: festival.id,
+    slug: festival.slug,
+    start_date: festival.starts_at,
+    location_name: festival.city,
+    bundesland: festival.state,
+  });
   const displayName = festival.canonical_name;
 
   return (
     <Link
-      href={`/events/${slug}`}
+      href={href}
       className="press-haptic flex flex-col rounded-2xl overflow-hidden border border-[var(--v4-hairline-2)] bg-[var(--v4-surface-elevated)] hover:border-[var(--v4-hairline-3)] transition-colors"
       data-v4-card="festival"
     >
