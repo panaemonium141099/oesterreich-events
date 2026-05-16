@@ -37,10 +37,11 @@ function ev(over: Partial<Event & { state: V4EventState }> = {}): Event & { stat
 }
 
 describe('V4CardHero', () => {
-  it('renders title and link', () => {
+  it('renders title and link (canonical V2 URL)', () => {
     render(<V4CardHero event={ev()}/>);
     expect(screen.getByText('FM4 Frequency 2026')).toBeInTheDocument();
-    expect(screen.getByRole('link').getAttribute('href')).toBe('/events/fm4-frequency-2026');
+    const href = screen.getByRole('link').getAttribute('href') || '';
+    expect(href).toMatch(/^\/events\/.+\/2026-08-13\/fm4-frequency-2026$/);
   });
 
   it('respects priority prop for next/image LCP', () => {

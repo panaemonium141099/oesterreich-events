@@ -42,9 +42,10 @@ describe('V4CardH', () => {
     expect(screen.getByText('Volksgarten Pavillon')).toBeInTheDocument();
   });
 
-  it('links to event slug', () => {
+  it('links to canonical V2 event URL ending in the slug', () => {
     render(<V4CardH event={ev()}/>);
-    expect(screen.getByRole('link').getAttribute('href')).toBe('/events/wanda-volksgarten');
+    const href = screen.getByRole('link').getAttribute('href') || '';
+    expect(href).toMatch(/^\/events\/.+\/2026-06-20\/wanda-volksgarten$/);
   });
 
   it('renders badge for match state', () => {

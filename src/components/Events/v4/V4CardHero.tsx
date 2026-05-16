@@ -13,6 +13,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import type { Event } from '@/types/events';
 import type { V4EventState } from '@/lib/v4/derive-event-state';
+import { buildEventUrlV2 } from '@/lib/utils/slugify';
 import { V4Badge } from './V4Badge';
 
 interface V4CardHeroProps {
@@ -37,13 +38,13 @@ function formatHeroEyebrow(iso: string): string {
 }
 
 export function V4CardHero({ event, height, priority = false }: V4CardHeroProps) {
-  const slug = event.slug ?? event.id;
+  const href = buildEventUrlV2(event);
   const badgeLabel = STATE_LABELS[event.state];
   const heightClass = height ? '' : 'h-[320px] md:h-[380px]';
 
   return (
     <Link
-      href={`/events/${slug}`}
+      href={href}
       className={`press-haptic relative block rounded-3xl overflow-hidden border border-[var(--v4-hairline-2)] bg-[var(--v4-surface-elevated)] ${heightClass}`}
       style={height ? { height } : undefined}
       data-v4-card="hero"
