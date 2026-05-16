@@ -115,6 +115,13 @@ export const metadata: Metadata = {
     },
   },
   category: 'Events',
+  verification: {
+    // Impact (Affiliate-Netzwerk, u.a. für booking.com Partner-Programm).
+    // Verification per Meta-Tag im <head> — Impact crawlt die Homepage.
+    other: {
+      'impact-site-verification': '9e250221-1b52-4d60-8442-a2e68cfd1fcb',
+    },
+  },
 };
 
 /**
