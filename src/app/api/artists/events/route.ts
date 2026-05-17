@@ -60,6 +60,7 @@ export async function GET(request: NextRequest) {
         event_id,
         events!inner (
           id,
+          slug,
           title,
           description,
           start_date,

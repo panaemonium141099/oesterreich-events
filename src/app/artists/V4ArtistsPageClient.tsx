@@ -4,8 +4,10 @@
  * V4ArtistsPageClient — v4 redesign of /artists.
  *
  * Loads followed-artists + matched-events client-side via existing
- * /api/artists/following and /api/artists/events endpoints. Pre-existing
- * AddArtistsPanel + PopularArtistsSuggestions render below, restyled.
+ * /api/artists/following and /api/artists/events endpoints. Follow-Search
+ * is now in V4ArtistSearchResult only (oben im Hero) — die alte
+ * AddArtistsPanel-Sektion am Seitenende ist Phase-6 entfernt, weil sie
+ * doppelt war und die Seite künstlich verlängert hat.
  *
  * Auth: anon users still see the hero + search input. Follow click
  * redirects them to /auth/login?next=. Followed-grid + matches show
@@ -22,51 +24,25 @@ import {
   type FollowedArtistWithMatches,
   type ArtistMatchEvent,
 } from '@/components/Artists/v4';
-import { AddArtistsPanel, type FollowPayload } from '@/components/Artists/AddArtistsPanel';
 
 export function V4ArtistsPageClient() {
   const { user, loading } = useAuth();
   const [followed, setFollowed] = useState<FollowedArtistWithMatches[]>([]);
   const [matches, setMatches] = useState<ArtistMatchEvent[]>([]);
-
-  const followedNames = new Set(followed.map(a => a.artist_name.toLowerCase()));
-  const followedArtistNames = followed.map(a => a.artist_name);
-
-  const handleFollow = async (artist: FollowPayload) => {
-    await fetch('/api/artists/follow', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(artist),
-    });
-    setFollowed(prev => [
-      ...prev,
-      {
-        id: '',
-        artist_name: artist.name,
-        artist_name_normalized: artist.name.toLowerCase(),
-        spotify_image_url: artist.spotify_image_url ?? null,
-        upcoming_matches: 0,
-      },
-    ]);
-  };
-
-  const handleUnfollow = async (artistName: string) => {
-    await fetch('/api/artists/follow', {
-      method: 'DELETE',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name: artistName }),
-    });
-    setFollowed(prev => prev.filter(a => a.artist_name.toLowerCase() !== artistName.toLowerCase()));
-  };
+  const [matchesLoading, setMatchesLoading] = useState(true);
 
   useEffect(() => {
-    if (loading || !user) return;
+    if (loading || !user) {
+      setMatchesLoading(false);
+      return;
+    }
     let alive = true;
+    setMatchesLoading(true);
 
     (async () => {
       const [followingRes, eventsRes] = await Promise.all([
-        fetch('/api/artists/following?limit=50'),
-        fetch('/api/artists/events?limit=20'),
+        fetch('/api/artists/following?limit=100'),
+        fetch('/api/artists/events?limit=50'),
       ]);
 
       if (!alive) return;
@@ -117,6 +93,7 @@ export function V4ArtistsPageClient() {
         });
         setMatches(mapped);
       }
+      setMatchesLoading(false);
     })();
 
     return () => { alive = false; };
@@ -134,31 +111,35 @@ export function V4ArtistsPageClient() {
         {user && (
           <div className="grid grid-cols-1 lg:grid-cols-[1.2fr_1fr] gap-8 md:gap-12">
             <section>
-              <h2 className="text-[18px] font-bold tracking-[-0.02em] text-[var(--v4-ink)] mb-4">
-                Gefundene Auftritte in Österreich
-              </h2>
-              <V4MatchingEvents events={matches}/>
+              <div className="flex items-baseline justify-between gap-3 mb-4">
+                <h2 className="text-[18px] font-bold tracking-[-0.02em] text-[var(--v4-ink)]">
+                  Gefundene Auftritte in Österreich
+                </h2>
+                {matches.length > 0 && (
+                  <span className="text-[11.5px] text-[var(--v4-ink-50)] uppercase tracking-[0.16em] font-bold">
+                    {matches.length}
+                  </span>
+                )}
+              </div>
+              {matchesLoading ? (
+                <div className="rounded-2xl border border-dashed border-[var(--v4-hairline-2)] p-6 text-center text-[var(--v4-ink-50)] text-[13px] animate-pulse">
+                  Treffer werden geladen …
+                </div>
+              ) : (
+                <V4MatchingEvents events={matches}/>
+              )}
             </section>
             <section>
-              <h2 className="text-[18px] font-bold tracking-[-0.02em] text-[var(--v4-ink)] mb-4">
-                Deine Lieblingskünstler · {followed.length}
-              </h2>
+              <div className="flex items-baseline justify-between gap-3 mb-4">
+                <h2 className="text-[18px] font-bold tracking-[-0.02em] text-[var(--v4-ink)]">
+                  Deine Lieblingskünstler
+                </h2>
+                <span className="text-[11.5px] text-[var(--v4-ink-50)] uppercase tracking-[0.16em] font-bold">
+                  {followed.length}
+                </span>
+              </div>
               <V4FollowedArtistsGrid artists={followed}/>
             </section>
-          </div>
-        )}
-
-        {user && (
-          <div className="mt-12 pt-8 border-t border-[var(--v4-hairline-1)]">
-            <h2 className="text-[18px] font-bold tracking-[-0.02em] text-[var(--v4-ink)] mb-4">
-              Künstler hinzufügen
-            </h2>
-            <AddArtistsPanel
-              followedNames={followedNames}
-              followedArtistNames={followedArtistNames}
-              onFollow={handleFollow}
-              onUnfollow={handleUnfollow}
-            />
           </div>
         )}
       </div>
