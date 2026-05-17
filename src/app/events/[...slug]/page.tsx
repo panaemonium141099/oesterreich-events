@@ -292,9 +292,22 @@ export default async function EventDetailPage({
   // isn't canonical. Covers legacy 1-segment, full-UUID, and V2-old URLs.
   // Using 308 (not 307) because Next.js 16 ISR serialises 307 redirects to
   // a `<meta refresh>` rather than a real HTTP status.
+  //
+  // Past events: skip the redirect chain entirely. If a Google-indexed
+  // legacy URL points to a past event whose canonical now differs (e.g.
+  // postal_code or start_date got re-scraped), redirecting can land us
+  // in a route whose ISR cache holds a stale 500 from the deploy
+  // boundary. For events that already happened we just notFound() —
+  // Google drops the URL from the index cleanly and we don't keep a
+  // 500 alive forever in the edge cache.
   const canonicalPath = buildEventUrlV2(event);
   const currentPath = `/events/${slugArr.join('/')}`;
+  const eventEnd = event.end_date || event.start_date;
+  const isPast = eventEnd ? new Date(eventEnd).getTime() < Date.now() - 24 * 60 * 60 * 1000 : false;
   if (currentPath !== canonicalPath) {
+    if (isPast) {
+      notFound();
+    }
     permanentRedirect(canonicalPath);
   }
 
