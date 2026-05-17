@@ -40,40 +40,25 @@ export function V4ArtistsPageClient() {
     setMatchesLoading(true);
 
     (async () => {
-      const [followingRes, eventsRes] = await Promise.all([
-        fetch('/api/artists/following?limit=100'),
-        fetch('/api/artists/events?limit=50'),
-      ]);
+      try {
+        const [followingRes, eventsRes] = await Promise.all([
+          fetch('/api/artists/following?limit=100'),
+          fetch('/api/artists/events?limit=50'),
+        ]);
 
-      if (!alive) return;
+        if (!alive) return;
 
-      if (followingRes.ok) {
-        const data = await followingRes.json();
-        const artists = (data.artists ?? []) as Array<{
-          id: string;
-          artist_name: string;
-          artist_name_normalized: string;
-          spotify_image_url: string | null;
-        }>;
-        const countByArtist = new Map<string, number>();
-        if (eventsRes.ok) {
-          const evData = await eventsRes.json();
-          for (const ev of (evData.events ?? [])) {
-            for (const ma of (ev.matched_artists ?? [])) {
-              const k = (ma.name as string).toLowerCase();
-              countByArtist.set(k, (countByArtist.get(k) ?? 0) + 1);
-            }
-          }
-        }
-        setFollowed(artists.map(a => ({
-          ...a,
-          upcoming_matches: countByArtist.get(a.artist_name.toLowerCase()) ?? 0,
-        })));
-      }
+        // Response-Body kann nur einmal konsumiert werden — wir lesen
+        // beide Responses GENAU einmal und nutzen die parsed-Daten in
+        // beiden setState-Pfaden.
+        const followingData = followingRes.ok ? await followingRes.json() : null;
+        const eventsData = eventsRes.ok ? await eventsRes.json() : null;
 
-      if (eventsRes.ok) {
-        const evData = await eventsRes.json();
-        const mapped: ArtistMatchEvent[] = (evData.events ?? []).map((ev: Record<string, unknown>) => {
+        if (!alive) return;
+
+        // ─── Matches ─────────────────────────────────────────
+        const rawEvents = (eventsData?.events ?? []) as Array<Record<string, unknown>>;
+        const mapped: ArtistMatchEvent[] = rawEvents.map(ev => {
           const matched = (ev.matched_artists ?? []) as Array<{ name: string; match_source: string }>;
           const lineupHit = matched.find(m => m.match_source === 'lineup');
           const first = matched[0];
@@ -92,8 +77,32 @@ export function V4ArtistsPageClient() {
           };
         });
         setMatches(mapped);
+
+        // ─── Followed-Liste mit Upcoming-Counts ─────────────
+        const artists = (followingData?.artists ?? []) as Array<{
+          id: string;
+          artist_name: string;
+          artist_name_normalized: string;
+          spotify_image_url: string | null;
+        }>;
+        const countByArtist = new Map<string, number>();
+        for (const ev of rawEvents) {
+          for (const ma of ((ev.matched_artists ?? []) as Array<{ name: string }>)) {
+            const k = ma.name.toLowerCase();
+            countByArtist.set(k, (countByArtist.get(k) ?? 0) + 1);
+          }
+        }
+        setFollowed(artists.map(a => ({
+          ...a,
+          upcoming_matches: countByArtist.get(a.artist_name.toLowerCase()) ?? 0,
+        })));
+      } catch (err) {
+        if (process.env.NODE_ENV === 'development') {
+          console.error('[/artists] fetch failed:', err);
+        }
+      } finally {
+        if (alive) setMatchesLoading(false);
       }
-      setMatchesLoading(false);
     })();
 
     return () => { alive = false; };
