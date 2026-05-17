@@ -50,6 +50,13 @@ export async function generateMetadata({
   params: Promise<{ slug: string[] }>;
 }): Promise<Metadata> {
   const { slug: slugArr } = await params;
+
+  // Mirror the page-handler guard: malformed bot URLs return generic
+  // metadata so we never feed garbage segments into resolveEvent().
+  if (!slugArr || slugArr.length === 0 || slugArr.some(s => !s || s.includes('/'))) {
+    return { title: 'Event nicht gefunden', robots: { index: false, follow: false } };
+  }
+
   const event = await resolveEvent(parseSlugArray(slugArr));
 
   if (!event) {
@@ -253,6 +260,15 @@ export default async function EventDetailPage({
   params: Promise<{ slug: string[] }>;
 }) {
   const { slug: slugArr } = await params;
+
+  // Defensive: Bots/Crawler treffen uns mit URLs deren `/` als `%2F`
+  // encoded sind (alle drei V3-Segmente in einem zusammengeschmolzen).
+  // Next.js liefert das als slug.length === 1 mit eingebetteten Slashes.
+  // Diese URLs gibt es nicht in der DB — 404 statt 500.
+  if (!slugArr || slugArr.length === 0 || slugArr.some(s => !s || s.includes('/'))) {
+    notFound();
+  }
+
   const event = await resolveEvent(parseSlugArray(slugArr));
 
   if (!event) {

@@ -3,21 +3,24 @@
  *
  * Layout: small image header, festival name, date range, optional
  * lineup-match indicator. Used in FestivalsSection.
+ *
+ * URL-Handling (Bug-Fix nach 404-Welle):
+ *   Festivals ohne `parent_event_id` haben keine Detail-Page in /events/.
+ *   Wir akzeptieren `festival.href` als optionalen Pre-Built-URL aus dem
+ *   landing-loader. Wenn null/undefined → Card rendert als `<div>`,
+ *   nicht als `<Link>`. So landen User nicht auf 404 wie z.B.
+ *   /events/8010-graz/2026-02-09/murszene-graz (Festival-Slug existiert
+ *   nicht in der events-Table).
  */
 
 import Link from 'next/link';
 import Image from 'next/image';
 import type { Festival } from '@/types/festivals';
-import { buildEventUrlV2 } from '@/lib/utils/slugify';
 import { V4Badge } from './V4Badge';
 
-/* The Festival table itself has no image column — getLandingData JOINs the
-   parent_event row to surface its image_url here. When no parent event
-   exists (or it has no image), we fall back to a neutral SVG placeholder
-   so the grid height stays stable. */
-
 interface V4FestivalCardProps {
-  festival: Festival & { image_url?: string | null };
+  /** Festival-Row plus pre-built `href` (siehe LandingFestival type). */
+  festival: Festival & { image_url?: string | null; href?: string | null };
   /** If true, shows a "Artist im Line-up" gold badge. Phase 2 always derives this on the server. */
   lineupMatch?: boolean;
 }
@@ -40,24 +43,14 @@ function dateRange(startIso: string | null, endIso?: string | null): string {
 }
 
 export function V4FestivalCard({ festival, lineupMatch = false }: V4FestivalCardProps) {
-  // Festival-Fields auf EventForUrl-Shape mappen damit buildEventUrlV2
-  // die canonical /events/{plz-ort}/{date}/{slug} URL bauen kann.
-  // Festival.starts_at → start_date, .city → location_name, .state → bundesland.
-  const href = buildEventUrlV2({
-    id: festival.id,
-    slug: festival.slug,
-    start_date: festival.starts_at,
-    location_name: festival.city,
-    bundesland: festival.state,
-  });
+  const href = festival.href ?? null;
   const displayName = festival.canonical_name;
 
-  return (
-    <Link
-      href={href}
-      className="press-haptic flex flex-col rounded-2xl overflow-hidden border border-[var(--v4-hairline-2)] bg-[var(--v4-surface-elevated)] hover:border-[var(--v4-hairline-3)] transition-colors"
-      data-v4-card="festival"
-    >
+  const cardClass = 'press-haptic flex flex-col rounded-2xl overflow-hidden border border-[var(--v4-hairline-2)] bg-[var(--v4-surface-elevated)] ' +
+    (href ? 'hover:border-[var(--v4-hairline-3)] transition-colors' : 'cursor-default');
+
+  const body = (
+    <>
       <div className="relative aspect-[4/3] bg-[var(--v4-surface)]">
         {festival.image_url ? (
           <Image
@@ -86,6 +79,24 @@ export function V4FestivalCard({ festival, lineupMatch = false }: V4FestivalCard
           {dateRange(festival.starts_at, festival.ends_at)}
         </p>
       </div>
-    </Link>
+    </>
+  );
+
+  if (href) {
+    return (
+      <Link
+        href={href}
+        className={cardClass}
+        data-v4-card="festival"
+      >
+        {body}
+      </Link>
+    );
+  }
+
+  return (
+    <div className={cardClass} data-v4-card="festival">
+      {body}
+    </div>
   );
 }

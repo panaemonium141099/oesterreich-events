@@ -50,6 +50,18 @@ export const getEventByShortId = unstable_cache(
       if (!error && data) return data as Event;
     }
     const shortId = slugParam.slice(0, 8);
+
+    // Defensive: only run the UUID-range query if shortId is exactly
+    // 8 hex chars. Bot/Crawler-Traffic with mangled URLs (z.B. die
+    // %2F-encoded fully-collapsed paths von ChatGPT/Amazonbot Logs)
+    // produzieren sonst kaputte WHERE-Clauses wie
+    //   gte('id', '9220-kla-0000-0000-0000-000000000000')
+    // die Postgres mit `invalid input syntax for type uuid` ablehnt
+    // und unsere Page zum 500 wird → Vercel cacht den 500 stundenlang.
+    if (!/^[0-9a-f]{8}$/i.test(shortId)) {
+      return null;
+    }
+
     const rangeStart = `${shortId}-0000-0000-0000-000000000000`;
     const rangeEnd = `${shortId}-ffff-ffff-ffff-ffffffffffff`;
     const { data, error } = await supabase

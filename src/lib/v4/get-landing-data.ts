@@ -3,6 +3,7 @@ import type { Event } from '@/types/events';
 import type { Festival } from '@/types/festivals';
 import { deriveEventState, type V4EventState } from './derive-event-state';
 import type { LandingContext } from './get-landing-context';
+import { buildEventUrlV2 } from '@/lib/utils/slugify';
 
 export interface LandingArtist {
   name: string;
@@ -17,10 +18,15 @@ export interface LandingArtist {
  *   - `image_url`: pulled from the JOINed parent event so the card has a
  *     real photo instead of the SVG placeholder. Falls back to null when
  *     a festival has no parent event or its parent has no image.
+ *   - `href`: pre-built canonical V2 URL der parent-event row. NULL wenn
+ *     das Festival kein parent_event hat (kein Detail-Page → Card darf
+ *     nicht klickbar sein, sonst 404). Wir bauen das hier zentral statt
+ *     im Card weil nur hier die Parent-Event-Felder verfügbar sind.
  */
 export type LandingFestival = Festival & {
   lineupMatch: boolean;
   image_url: string | null;
+  href: string | null;
 };
 
 export interface LandingData {
@@ -110,11 +116,14 @@ export async function getLandingData(ctx: LandingContext): Promise<LandingData> 
       .or('category.eq.music,category.eq.konzerte')
       .order('event_score', { ascending: false })
       .limit(3),
-    // festivals: upcoming. JOIN parent event to grab its image_url so the
-    // card has a real photo (festivals table has no image column of its own).
+    // festivals: upcoming. JOIN parent event to grab its image_url AND
+    // all url-building fields. Ohne parent_event hat das Festival keine
+    // Detail-Page in /events/ → wir signalisieren via href=null an die
+    // Card dass sie nicht klickbar sein darf (sonst landet der User auf
+    // einem 404 wie /events/8010-graz/2026-02-09/murszene-graz).
     supabase
       .from('festivals')
-      .select('*, parent_event:events!parent_event_id(image_url)')
+      .select('*, parent_event:events!parent_event_id(id, slug, start_date, postal_code, address, bundesland, location_name, image_url)')
       .gte('ends_at', today.split('T')[0])
       .order('starts_at', { ascending: true })
       .limit(4),
@@ -125,17 +134,44 @@ export async function getLandingData(ctx: LandingContext): Promise<LandingData> 
   const concerts = enrichEvents((concertsRes.data ?? []) as unknown as Event[], ctx);
   const matches = enrichEvents((matchesRes.data ?? []) as unknown as Event[], ctx);
 
+  type ParentEventRow = {
+    id: string;
+    slug: string | null;
+    start_date: string | null;
+    postal_code: string | null;
+    address: string | null;
+    bundesland: string | null;
+    location_name: string | null;
+    image_url: string | null;
+  };
   type FestivalRow = Festival & {
-    parent_event: { image_url: string | null } | Array<{ image_url: string | null }> | null;
+    parent_event: ParentEventRow | ParentEventRow[] | null;
   };
   const festivals: LandingFestival[] = ((festivalsRes.data ?? []) as unknown as FestivalRow[]).map(f => {
     const parentEvent = Array.isArray(f.parent_event) ? f.parent_event[0] : f.parent_event;
     const { parent_event: _omit, ...rest } = f;
     void _omit;
+
+    // Detail-URL nur wenn parent_event existiert UND mindestens id + slug
+    // + start_date hat. buildEventUrlV2 fällt sonst auf einen kaputten
+    // Pfad zurück der in /events/[...slug] in einen 404 mündet.
+    const href = parentEvent && parentEvent.slug && parentEvent.start_date
+      ? buildEventUrlV2({
+          id: parentEvent.id,
+          slug: parentEvent.slug,
+          start_date: parentEvent.start_date,
+          postal_code: parentEvent.postal_code,
+          address: parentEvent.address,
+          bundesland: parentEvent.bundesland,
+          location_name: parentEvent.location_name,
+        })
+      : null;
+
     return {
       ...(rest as Festival),
       lineupMatch: false, // Phase 2 best-effort — see fn-docstring above
       image_url: parentEvent?.image_url ?? festivalCategoryFallback(f.id),
+      href,
     };
   });
 
