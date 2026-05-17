@@ -18,9 +18,6 @@ export interface DetailContext extends DeriveCtx {
 }
 
 export async function deriveDetailContext(eventId: string): Promise<DetailContext> {
-  const supabase = await createServerSupabaseClient();
-  const { data: { user } } = await supabase.auth.getUser();
-
   const empty: DetailContext = {
     signedIn: false,
     savedEventIds: new Set(),
@@ -28,6 +25,30 @@ export async function deriveDetailContext(eventId: string): Promise<DetailContex
     artistMatchEventIds: new Set(),
     lineupMatchEventIds: new Set(),
   };
+
+  // ISR-Page (/events/[...slug] hat `revalidate=3600`) prerendert
+  // ohne Request-Cookies. createServerSupabaseClient() ruft cookies()
+  // → Next.js wirft DYNAMIC_SERVER_USAGE. Das brachte den ganzen
+  // Server-Component-Tree zum Throw und die Page zum 500
+  // (siehe Vercel-Logs, digest=DYNAMIC_SERVER_USAGE seit 16. Mai).
+  //
+  // Für anon prerendered Visits ist eh kein User-Context da → leerer
+  // ctx ist die richtige Antwort. Personal-Overlay (saved/match) kann
+  // später per Client-Fetch nachgeladen werden ohne ISR zu brechen.
+  let supabase;
+  try {
+    supabase = await createServerSupabaseClient();
+  } catch {
+    return empty;
+  }
+
+  let user;
+  try {
+    const { data } = await supabase.auth.getUser();
+    user = data.user;
+  } catch {
+    return empty;
+  }
 
   if (!user) return empty;
 
