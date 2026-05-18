@@ -33,7 +33,7 @@ const T = {
 } as const;
 import { formatTime } from '@/lib/utils/date';
 import { distanceKm } from '@/lib/geolocation';
-import { displayDistrictName } from '@/lib/districtsAT';
+import { displayDistrictName, BUNDESLAND_NAMES, type BundeslandId } from '@/lib/districtsAT';
 import { buildEventUrlV2 } from '@/lib/utils/slugify';
 
 /**
@@ -427,11 +427,14 @@ function BigRow({
             padding: '4px 8px',
             borderRadius: 6,
             background: 'rgba(255,255,255,0.95)',
+            backdropFilter: 'blur(6px)',
+            WebkitBackdropFilter: 'blur(6px)',
             fontSize: 10,
             fontWeight: 700,
-            color: T.ink,
+            color: '#0a0a0c',
             letterSpacing: '0.04em',
-            boxShadow: '0 2px 6px rgba(0,0,0,0.10)',
+            border: '1px solid rgba(0,0,0,0.18)',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.35)',
           }}
         >
           {dateLabel.toUpperCase()}
@@ -490,8 +493,11 @@ function BigRow({
         </div>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <span style={{ fontSize: 12, color: T.ink50, fontWeight: 500 }}>
-            {ev.bundesland || ''}
-            {ev.district ? ` · ${displayDistrictName(ev.district)}` : ''}
+            {ev.district
+              ? `Bezirk: ${displayDistrictName(ev.district)}`
+              : ev.bundesland
+                ? `Bundesland: ${BUNDESLAND_NAMES[ev.bundesland as BundeslandId] ?? ev.bundesland}`
+                : ''}
           </span>
           <span
             style={{
