@@ -1,0 +1,1248 @@
+{
+  "on-the-couch": {
+    "headliner": [
+      "Samuel Toro Pérez",
+      "Manuel Alcaraz Clemente",
+      "Wolfgang Mitterer",
+      "Duo TWiST",
+      "Trio Affogato",
+      "Karl Ratzer Trio",
+      "Trio Stopkontakt",
+      "Isabella Forciniti",
+      "Duo Ölspur"
+    ],
+    "support": [
+      "Igor Gross",
+      "Alexander J. Eberhard",
+      "Volkmar Klien"
+    ]
+  },
+  "murszene-graz": {
+    "headliner": [
+      "Berndt Luef & Jazztett",
+      "Patricia Moreno Quintett",
+      "Brot & Sterne",
+      "Schneeberger & Bakanic Quartett",
+      "Heinrich von Kalnein",
+      "Horst Michael Schaffer & JBBG Smål",
+      "Candlelight Ficus",
+      "JMO",
+      "Handmade",
+      "Ismael Barrios Salsa Explosion"
+    ]
+  },
+  "internationaler-musiksommer-bad-schallerbach": {
+    "headliner": [
+      "Die Udo Jürgens Story",
+      "Uusikuu",
+      "Science Busters",
+      "Chanticleer",
+      "Gismo Graf Trio",
+      "Stochelo Rosenberg",
+      "Mnozil Brass",
+      "Robert Menasse",
+      "Max Goldt",
+      "Kroke",
+      "Sandra Kreisler & Band",
+      "Roman Grinberg",
+      "Lungau Big Band",
+      "Simone Kopmajer"
+    ]
+  },
+  "festwochen-gmunden": {
+    "headliner": [
+      "Manfred Spitzer",
+      "Johanna Dumfart",
+      "Lidia Baich",
+      "Münchner Philharmoniker",
+      "Jacqueline Kornmüller",
+      "Bruckner Orchester Linz",
+      "Markus Poschner"
+    ],
+    "support": [
+      "Michael Dangl",
+      "David Bergmüller"
+    ]
+  },
+  "interpenetration": {
+    "headliner": [
+      "KARM",
+      "BEAM SPLITTER",
+      "CORRIDOR",
+      "Volcano trio",
+      "HALA",
+      "Canna/Voutchkova",
+      "The Magic I.D.",
+      "OWG Trio",
+      "XENOFOX",
+      "HEDDA"
+    ],
+    "support": [
+      "Harald Hofmeister",
+      "Georg Wissa"
+    ]
+  },
+  "philharmonische-klänge-hörgenuss": {
+    "headliner": [
+      "Mitglieder der Wiener Philharmoniker"
+    ]
+  },
+  "steirische-stifts-und-schlosskonzerte": {
+    "headliner": [
+      "Rafael Fingerlos",
+      "Alexander Swete",
+      "Tina Zerdin",
+      "Freddy Staudigl"
+    ],
+    "support": [
+      "ENS Soloists"
+    ]
+  },
+  "viertelfestival-niederösterreich": {
+    "headliner": [
+      "Mathias Lefèvre",
+      "Katharina Cibulka",
+      "Anna Khodorkovskaya"
+    ],
+    "support": [
+      "Jimmy Schlager",
+      "Roman Gregory",
+      "Mitzi Barelli",
+      "Hannes Schwarzenberger",
+      "Barbara Wittmann",
+      "Veronika Goller",
+      "Elisabeth Jegel",
+      "Daria Tchapanova"
+    ]
+  },
+  "internationale-barocktage-stift-melk": {
+    "headliner": [
+      "Michael Schade",
+      "Heinz Ferlesch",
+      "Concentus Musicus Wien",
+      "Oslo Circles",
+      "Accademia del Piacere",
+      "Marianne Beate Kielland",
+      "Ensemble BachWerkVokal",
+      "Patricia Nolz",
+      "Martin Haselböck",
+      "Giovanni Antonini"
+    ],
+    "support": [
+      "Company of Music"
+    ]
+  },
+  "springfestival-graz": {
+    "headliner": [
+      "The Streets",
+      "Mike Skinner",
+      "VTSS",
+      "Acid Pauli",
+      "Dominik Eulberg",
+      "Andhim",
+      "Koven"
+    ],
+    "support": [
+      "Leblanc",
+      "JPattersson",
+      "Kaufmann",
+      "Mollono.bass",
+      "DJ Haus",
+      "Iorie",
+      "Camion Bazar",
+      "Magdalena May",
+      "Hermetica"
+    ]
+  },
+  "klassik-im-burghof": {
+    "headliner": [
+      "Elena Stikhina",
+      "ensemble minui",
+      "AlFa Duo Percussion & Friends",
+      "Maria Radutu",
+      "Klangfarben-Ensemble",
+      "Druml-Druml-Ziervogel Trio",
+      "Michael Schade & Friends",
+      "Klezmer-Ensemble Kolsimcha",
+      "Eight Cellists of the Vienna Philharmonic"
+    ],
+    "support": [
+      "Alexandra Goloubitskaia",
+      "Christina Scherrer"
+    ]
+  },
+  "dynamo-festival": {
+    "headliner": [
+      "My Ugly Clementine",
+      "SALÒ",
+      "Oskar Haag & Band",
+      "Soft Loft",
+      "Ankathie Koi"
+    ],
+    "support": [
+      "EFEU",
+      "Jo The Man The Music",
+      "Baits",
+      "CAVA",
+      "Tight Ships",
+      "Hyperdog"
+    ]
+  },
+  "arkadenkultur": {
+    "headliner": [
+      "Sophie Hassfurther & Kaleidoscope"
+    ]
+  },
+  "festival-stummer-schrei": {
+    "headliner": [
+      "Britta Ströher",
+      "Alpentales",
+      "Marie Spaemann",
+      "Viktoria Hirschhuber",
+      "Florian Scheuba",
+      "Malarina",
+      "Martin Leutgeb"
+    ],
+    "support": [
+      "Robert Sölkner",
+      "Christian Bakanic",
+      "Pilot Fridolin",
+      "Herbert & Mimi"
+    ]
+  },
+  "festival-des-politischen-liedes": {
+    "headliner": [
+      "Snessia",
+      "Nuju"
+    ],
+    "support": [
+      "Niklas Freitag",
+      "Johannes Girmindl",
+      "Philipp Hoffmann",
+      "Juran Brothers",
+      "Unrat",
+      "DJ Beatrice"
+    ]
+  },
+  "sommerszene-festival": {
+    "headliner": [
+      "Sasha Waltz",
+      "Jan Martens",
+      "Leïla Ka",
+      "Marco da Silva Ferreira"
+    ],
+    "support": [
+      "Solène Weinachter",
+      "Doris Uhlich",
+      "Ann Van den Broek",
+      "Rosana Ribeiro",
+      "Cornelia Böhnisch",
+      "Katharina Schrott"
+    ]
+  },
+  "wörthersee-classics": {
+    "headliner": [
+      "Capella Mahleriana",
+      "Toshiyuki Shimada",
+      "Alexei Kornienko",
+      "Elena Denisova",
+      "Keller Quartet"
+    ],
+    "support": [
+      "Darko Brlek",
+      "Eva Zalenga",
+      "Tobias Lusser",
+      "Maximilian Kromer",
+      "Alexander Sladkovsky"
+    ]
+  },
+  "clam-konzerte": {
+    "headliner": [
+      "Lenny Kravitz",
+      "Nick Cave & The Bad Seeds",
+      "Electric Callboy",
+      "Unheilig",
+      "OneRepublic",
+      "Van Morrison",
+      "Seiler und Speer"
+    ]
+  },
+  "kunst-musik-forum-golling": {
+    "headliner": [
+      "Philipp Hochmair",
+      "Günther Groissböck",
+      "Cornelius Obonya",
+      "Fritz Karl",
+      "Elena Uhlig",
+      "Michael Köhlmeier",
+      "Ernst Molden"
+    ],
+    "support": [
+      "Maria Hofstätter",
+      "Federspiel",
+      "Christoph Moschberger",
+      "Italian Swing Quartet",
+      "Aldo Caputo",
+      "Iva Schell",
+      "MoZuluArt",
+      "Joji Hattori",
+      "Hyung-ki Joo",
+      "Julia Stemberger"
+    ]
+  },
+  "tonspuren": {
+    "headliner": [
+      "Tommy Hojsa",
+      "Anna Buchegger & Band",
+      "Hawaiian Project",
+      "Hanke Brothers",
+      "Katrin Unterlercher",
+      "Werner Unterlercher"
+    ],
+    "support": [
+      "Rudi Koschelu",
+      "Constanze Hojsa",
+      "Anthony Pfluke",
+      "Varga Quartet"
+    ]
+  },
+  "styriarte": {
+    "headliner": [
+      "Jordi Savall",
+      "Miriam Kutrowatz",
+      "Voces8",
+      "Styriarte Festspiel-Orchester"
+    ],
+    "support": [
+      "Daniel Johannsen",
+      "Ragna Schirmer",
+      "Zefiro"
+    ]
+  },
+  "kultursommer-im-rosengarten": {
+    "headliner": [
+      "Thomas Mraz",
+      "Tom Gaebel & His Orchestra",
+      "Herbert Steinböck"
+    ],
+    "support": [
+      "Die 3 Baritöne"
+    ]
+  },
+  "oö-stiftskonzerte": {
+    "headliner": [
+      "Patricia Kopatchinskaja",
+      "Hayato Sumino",
+      "Il Giardino Armonico",
+      "Giovanni Antonini",
+      "Bruckner Orchester Linz"
+    ],
+    "support": [
+      "Markus Poschner",
+      "Philippe Jordan",
+      "Fauré Quartett",
+      "Vokalensemble APOLLO5"
+    ]
+  },
+  "kultursommer-wien": {
+    "headliner": [
+      "Tom Neuwirth",
+      "Martin Zerza"
+    ],
+    "support": [
+      "Skofi",
+      "Teschek",
+      "Meo",
+      "KVSAL",
+      "Kuare Salsa Band",
+      "Abdominal Marmalade Agency"
+    ]
+  },
+  "carinthischer-sommer-ossiach-villach": {
+    "headliner": [
+      "Hilary Hahn",
+      "Omer Meir Wellber",
+      "Deutsche Kammerphilharmonie Bremen",
+      "Marin Alsop",
+      "ORF Radio-Symphonieorchester Wien"
+    ],
+    "support": [
+      "Wu Wei",
+      "Yi-Chen Lin",
+      "Anna Anderluh",
+      "Trio SR9",
+      "Senny Camara & Band"
+    ]
+  },
+  "kultursommer-semmering": {
+    "headliner": [
+      "Senta Berger",
+      "Caroline Peters",
+      "Friedrich von Thun",
+      "Sky du Mont",
+      "Francisco Araiza"
+    ],
+    "support": [
+      "Gery Seidl",
+      "Elena Uhlig",
+      "Fritz Karl"
+    ]
+  },
+  "summa-cum-laude-international-youth-music-festival": [],
+  "donauinselfest": {
+    "support": [
+      "Thorsteinn Einarsson"
+    ]
+  },
+  "musikfest-waidhofen": {
+    "headliner": [
+      "Wallis Bird",
+      "Bombino",
+      "FRIGG",
+      "Wiener Tschuschenkapelle",
+      "David Helbock's Random/Control feat. Fola Dada",
+      "Chanda Rule & Roland Guggenbichler"
+    ],
+    "support": [
+      "Oliver Mally Blues Explosion",
+      "Peter Kern Blues Band",
+      "Lasse Matthiessen",
+      "Wiener Blond",
+      "Spilif",
+      "GOT'YA",
+      "Gina Schwarz & Multiphonics 8",
+      "Brein, Schmid & Gansch",
+      "Hot Pants Road Club feat. Chanda Rule",
+      "The Shalman-Shevchenko Oy Vey Klezmer Society",
+      "Majid Bekkas / Nguyên Lê / Hamid Drake",
+      "Los Justicieros",
+      "3 Amigas Tuyas"
+    ]
+  },
+  "cantus": [],
+  "kammermusikfest-lockenhaus": {
+    "headliner": [
+      "Nicolas Altstaedt",
+      "Sir András Schiff",
+      "Ian Bostridge",
+      "Heinz Holliger",
+      "Olli Mustonen"
+    ],
+    "support": [
+      "Alexander Lonquich",
+      "Chaos String Quartet",
+      "Trio Gaspard",
+      "Anna-Lena Elbert",
+      "Jonian Ilias Kadesha",
+      "Vashti Mimosa Hunter",
+      "Nicholas Rimmer",
+      "Cristina Galietto",
+      "Frederic Belli",
+      "Itamar Carmeli",
+      "Marley Erickson",
+      "Avery Gagliano",
+      "Anna Pismak",
+      "Inmo Yang",
+      "Korossy Quartet"
+    ]
+  },
+  "impulstanz": {
+    "headliner": [
+      "Christos Papadopoulos",
+      "Eun-Me Ahn",
+      "Anne Teresa De Keersmaeker",
+      "Radouan Mriziga",
+      "Louise Lecavalier",
+      "TAO Dance Theater",
+      "Trisha Brown Dance Company",
+      "Wim Vandekeybus",
+      "Maguy Marin"
+    ],
+    "support": [
+      "Amala Dianor",
+      "Leïla Ka",
+      "Needcompany"
+    ]
+  },
+  "woodstockenboi": [
+    "DŸSE",
+    "Mau Mau"
+  ],
+  "schrammelklang-festival": {
+    "headliner": [
+      "Ernst Molden & Sigrid Horn",
+      "Kollegium Kalksburg",
+      "Joschi Schneeberger Quintett"
+    ],
+    "support": [
+      "Pam Pam Ida & das Silberfischorchester",
+      "Fräulein Blauboad",
+      "Maria Ma PUR",
+      "Felix Kramer"
+    ]
+  },
+  "goldegger-blues-folktage": {
+    "support": [
+      "GeJo",
+      "Gruppe EinzigArt",
+      "Christoph Steinbach",
+      "The Insta Mentals",
+      "Pongabeat",
+      "Ballycotton",
+      "The Wango Tangos",
+      "VRV Cultists of Rock"
+    ]
+  },
+  "klassik-am-dom": {
+    "headliner": [
+      "Tom Jones",
+      "Rainhard Fendrich",
+      "Diana Damrau",
+      "Erwin Schrott",
+      "MEUTE"
+    ],
+    "support": [
+      "Roy Bianco & Die Abbrunzati Boys"
+    ]
+  },
+  "glatt-verkehrt": {
+    "headliner": [
+      "Ríoghnach Connolly & Honeyfeet",
+      "Die Strottern & Blech",
+      "Leyla McCalla",
+      "Omniversal Earkestra",
+      "Puuluup"
+    ],
+    "support": [
+      "Tęgie Chłopy",
+      "This is How we Fly",
+      "Júlia Kozáková",
+      "Valentin Lichtenberger & Valerie Costa",
+      "Die Göttweiger Sieben"
+    ]
+  },
+  "wellenklänge": {
+    "headliner": [
+      "Die Strottern & JazzWerkstatt Wien",
+      "Teresa Präauer",
+      "Ernst Reijseger, Harmen Fraanje & Mola Sylla",
+      "Yasmo & die Klangkantine"
+    ],
+    "support": [
+      "David Helbock & Julia Hofer",
+      "Mahan Mirarab",
+      "EsRAP",
+      "Marino Formenti",
+      "Yvonne Moriel",
+      "Asja Valcic",
+      "Judith Fliedl",
+      "Elena Arbonies Jauregui"
+    ]
+  },
+  "neuberger-kulturtage": {
+    "headliner": [
+      "Filharmonie Brno",
+      "Stefan Vladar",
+      "Bo Skovhus",
+      "Herbert Lippert"
+    ],
+    "support": [
+      "Philharmonia Schrammeln Wien",
+      "Gerald Preinfalk Quartett",
+      "Simply Quartet",
+      "BartolomeyBittmann",
+      "Motus Quartett",
+      "Harriet Krijgh & Magda Amara",
+      "Maighréad McCrann",
+      "Julian Arp",
+      "Dominik Hellsberg & Bernhard Hirzberger",
+      "Gottfried Holzer-Graf"
+    ]
+  },
+  "lehar-festival-bad-ischl": {
+    "headliner": [
+      "Boccaccio (Franz von Suppè)",
+      "Gräfin Mariza (Emmerich Kálmán)",
+      "Der Göttergatte (Franz Lehár)",
+      "Thomas Enzinger"
+    ]
+  },
+  "altenburger-musikademie": {
+    "headliner": [
+      "Robert Lehrbaumer",
+      "Min Kwon"
+    ],
+    "support": [
+      "Stephan Matthias Lademann",
+      "Irina Gavrilovici",
+      "Margit Fussi",
+      "Judith Velisek",
+      "Balázs Szabó",
+      "Mirjam Schröder",
+      "Taner Türker",
+      "Elisabeth Möst"
+    ]
+  },
+  "güssinger-kultur-sommer": {
+    "headliner": [
+      "Thomas Stipsits",
+      "Josef Hader",
+      "Alfred Dorfer",
+      "Andreas Vitásek",
+      "Dirk Stermann"
+    ],
+    "support": [
+      "Da Blechhauf'n",
+      "Malarina",
+      "Christoph Spörk",
+      "Isabell Pannagl",
+      "Sebastian Humi",
+      "Barbara Eichberger",
+      "Christina Kiesler",
+      "Benedikt Mitmannsgruber",
+      "Kernölamazonen",
+      "Michael Schottenberg",
+      "Martina Parker",
+      "Tarek Leitner"
+    ]
+  },
+  "musical-sommer-amstetten": {
+    "headliner": [
+      "The Band - Das Musical mit der Musik von Take That"
+    ]
+  },
+  "seefestspiele-mörbisch": {
+    "headliner": [
+      "Alfons Haider",
+      "Drew Sarich",
+      "Howard Carpendale",
+      "Tom Jones",
+      "Andrea Berg",
+      "David Garrett"
+    ],
+    "support": [
+      "Mark Seibert",
+      "Anna Rosa Döller",
+      "Timotheus Hollweg"
+    ]
+  },
+  "salzburger-festspiele": {
+    "headliner": [
+      "Philipp Hochmair (Jedermann)",
+      "Barrie Kosky (Regie)",
+      "Romeo Castellucci (Regie)",
+      "Krzysztof Warlikowski (Regie)"
+    ],
+    "support": [
+      "Nicolas Stemann (Regie)"
+    ]
+  },
+  "ottensheim-open-air": {
+    "headliner": [
+      "Acht Eimer Hühnerherzen",
+      "Elektro Guzzi",
+      "Monobrother"
+    ],
+    "support": [
+      "Anda Morts",
+      "Franz Fuexe",
+      "Sirius.sue",
+      "Lazer",
+      "Glut",
+      "TonArt Chor Ottensheim",
+      "Oaschkrapferl b2b Eyja",
+      "Holli",
+      "Ozymandias",
+      "Pencil & Cherries",
+      "Amore AG"
+    ]
+  },
+  "internationales-gitarrenfestival-seckau": {
+    "headliner": [
+      "Rubén Parejo",
+      "Shih-yu Liu",
+      "Hugo Gonzalez"
+    ],
+    "support": [
+      "Florian Palier",
+      "Johann Palier",
+      "Anna Lesjak"
+    ]
+  },
+  "nordkette-wetterleuchten": {
+    "headliner": [
+      "DJ Seren",
+      "PULVERIN",
+      "KLMT",
+      "Oriom"
+    ],
+    "support": [
+      "10er Sprung",
+      "Davidecks & Drums",
+      "Loner Tennis Club",
+      "gru.naso",
+      "filly",
+      "fantacid",
+      "gauna",
+      "Carl Heenz",
+      "Klebstoff",
+      "imkreis",
+      "Palle Grandi"
+    ]
+  },
+  "jazz-im-donaupark": {
+    "headliner": [
+      "Helmuth Thalbauer's Finest Blend",
+      "Bernhard Osanna Quintett feat. Ilse Riedler",
+      "Frank Folgmann & The Backing Crew feat. Chris Kronreif",
+      "Andi Weiß Quintett"
+    ]
+  },
+  "metastadt-open-air": {
+    "headliner": [
+      "Marilyn Manson",
+      "Deftones",
+      "Haftbefehl",
+      "Michael Patrick Kelly",
+      "Wincent Weiss",
+      "BIBIZA",
+      "JOSH.",
+      "BERQ"
+    ],
+    "support": [
+      "VOWWS",
+      "RIAN",
+      "CARO FUX",
+      "LINA",
+      "Emma Rose",
+      "Show Me the Body"
+    ]
+  },
+  "bregenzer-festspiele": {
+    "headliner": [
+      "Damiano Michieletto (Regie La traviata)",
+      "Kirill Karabits (Dirigent)",
+      "Pietro Rizzo (Dirigent)",
+      "Wiener Symphoniker"
+    ],
+    "support": [
+      "Symphonieorchester Vorarlberg"
+    ]
+  },
+  "popfest-wien": {
+    "headliner": [
+      "Sofie Royer (Kuratorin)",
+      "Wolfgang Lehmann (Kurator)"
+    ]
+  },
+  "musikfestival-steyr": {
+    "headliner": [
+      "Christian Funk",
+      "James Park",
+      "Jill Clesse",
+      "Sarah Kornfeld"
+    ],
+    "support": [
+      "Kilian Berger",
+      "Jana Stöckler",
+      "Emil Kurz",
+      "Gabriel Büsser",
+      "Heidrun Lysaght",
+      "Stefanie Rieger",
+      "Janina Raidt",
+      "Antonia Tröstl"
+    ]
+  },
+  "festwochen-der-alten-musik": {
+    "headliner": [
+      "Ottavio Dantone",
+      "Accademia Bizantina",
+      "Alessandro De Marchi",
+      "René Jacobs",
+      "Il pomo d'oro"
+    ],
+    "support": [
+      "Lauren Lodge-Campbell",
+      "Nicolò Balducci",
+      "Jonathan Eyers"
+    ]
+  },
+  "kunstmue-festival": [],
+  "rollin-dudes": {
+    "headliner": [
+      "Shake Rattle and Soul (The Ridin' Dudes)"
+    ]
+  },
+  "outreach-festival": {
+    "headliner": [
+      "The Earth Synth",
+      "Outreach Orchestra",
+      "Nils Kugelmann Trio",
+      "Kenji Herbert Trio"
+    ],
+    "support": [
+      "Sweetlife",
+      "Steinlechner/Peranovic/Zink feat. Tobi Schmid",
+      "FÖN3",
+      "Meat Cheese Acoustic",
+      "Raphael Huber and Matthias Legner Duo",
+      "Antobia",
+      "Raupe"
+    ]
+  },
+  "la-strada-kunst-findet-stadt": {
+    "headliner": [
+      "Collectif XY - Möbius"
+    ],
+    "support": [
+      "Marcos Krivocapich"
+    ]
+  },
+  "acoustic-campfire-festival": {
+    "headliner": [
+      "Patrice",
+      "AVEC",
+      "Fiva"
+    ],
+    "support": [
+      "Tim Vantol",
+      "Three for Silver",
+      "Son of the Velvet Rat",
+      "Velvet Wasted",
+      "Yunger",
+      "VZI",
+      "Christian"
+    ]
+  },
+  "la-guitarra-essencial": {
+    "headliner": [
+      "Hirundo Maris (Arianna Savall & Petter U. Johansen)",
+      "Daniel Casares Flamenco Sextett",
+      "Julia Malischnig MOVING STRINGS",
+      "Guo Gan Swordmen Trio"
+    ],
+    "support": [
+      "Duo Laetus & Nadja Kayali",
+      "La Familia Rosenberg",
+      "Ensemble Kreativ"
+    ]
+  },
+  "jopera-jennersdorf-kultursommer": {
+    "headliner": [
+      "Wiener Blut (Johann Strauss) – Festspielproduktion"
+    ],
+    "support": [
+      "Alfons Haider (Intendant)"
+    ]
+  },
+  "musiksommer-korneuburg": {
+    "headliner": [
+      "Missy May",
+      "Mark Seibert",
+      "Lukas Perman",
+      "Simone Kopmajer & Band"
+    ],
+    "support": [
+      "L.A. Funk Collective",
+      "The Bad Powells"
+    ]
+  },
+  "bezau-beatz": {
+    "headliner": [
+      "Valentin Gerhardus Solo",
+      "Teis Semey Quintet"
+    ],
+    "support": [
+      "Hilde",
+      "Edward Perraud's Sauvages Paradis",
+      "Kalle Kalima DETOURS"
+    ]
+  },
+  "montafoner-resonanzen": {
+    "headliner": [
+      "Brass-Programm",
+      "Kammermusik-Programm",
+      "Jazz-Programm"
+    ],
+    "support": [
+      "Volksmusik-Programm",
+      "Cross-Over-Programm",
+      "Orgelkonzerte"
+    ]
+  },
+  "sunny-days": [],
+  "allegro-vivo": {
+    "headliner": [
+      "Vahid Khadem-Missagh (Künstlerischer Leiter)",
+      "Internationale Sommerakademie (500+ junge Musiker:innen)"
+    ]
+  },
+  "hiesige-dosige": {
+    "headliner": [
+      "Die Tschechen",
+      "Mokoomba",
+      "Elektro Deluxe",
+      "Count Basic"
+    ],
+    "support": [
+      "Ukulele Death Squad",
+      "The Magic Mumble Jumble"
+    ]
+  },
+  "picture-on-festival": {
+    "headliner": [
+      "Inner Circle",
+      "H-Blockx",
+      "Stereo MCs",
+      "2raumwohnung",
+      "Clawfinger"
+    ],
+    "support": [
+      "Cari Cari",
+      "5/8erl in Ehrn",
+      "Itchy"
+    ]
+  },
+  "hotelpupik-festival": {
+    "headliner": [
+      "Heimo Wallner"
+    ],
+    "support": [
+      "Ingrid Schmoliner",
+      "Radian"
+    ]
+  },
+  "brucknertage": {
+    "headliner": [
+      "Katharina Wincor (Dirigentin)",
+      "Eggner-Trio",
+      "Altomonte-Orchester (III. Symphonie)"
+    ],
+    "support": [
+      "Alois Mühlbacher"
+    ]
+  },
+  "afrika-tage-wien": {
+    "headliner": [
+      "Valerie Ekoume",
+      "Sona Jobarteh"
+    ],
+    "support": [
+      "Leo Aberer",
+      "TRANCITIV",
+      "Kasiva Mutua",
+      "Jeys Marabini",
+      "Adama Dicko & Seno Blues"
+    ]
+  },
+  "grafenegg-festival": {
+    "headliner": [
+      "Rudolf Buchbinder",
+      "Martha Argerich",
+      "Joyce DiDonato",
+      "Daniil Trifonov",
+      "Gautier Capuçon",
+      "Alexandre Kantorow",
+      "Piotr Beczała",
+      "Philharmonia Orchestra London"
+    ],
+    "support": [
+      "Sergei Dogadin",
+      "Martin Fröst",
+      "Julia Hagen",
+      "Tonkünstler-Orchester",
+      "Bayreuther Festspielorchester",
+      "Cristian Măcelaru",
+      "Yutaka Sado",
+      "Fabien Gabel",
+      "Pablo Heras-Casado"
+    ]
+  },
+  "walser-herbst": {
+    "headliner": [
+      "Orivesi All Stars",
+      "Zéphyr Combo",
+      "Janusz Prusinowski Kompania"
+    ],
+    "support": [
+      "Himmelfahrtschor",
+      "Duo Campanula",
+      "Sarah Siren",
+      "Gian Rupf",
+      "Nicole Knuth",
+      "Radix Musikwerkstatt"
+    ]
+  },
+  "kaltenbach-open-air": {
+    "headliner": [
+      "Firespawn",
+      "1349",
+      "Finntroll",
+      "Sacred Reich"
+    ],
+    "support": [
+      "Gutalax",
+      "Centinex",
+      "Varathron",
+      "Einherjer",
+      "Tortharry"
+    ]
+  },
+  "jazzfest-saalfelden": {
+    "headliner": [
+      "Yvonne Moriel",
+      "Chicago Underground Duo",
+      "Yeah NO"
+    ],
+    "support": [
+      "Rob Mazurek",
+      "Chad Taylor",
+      "Chris Speed",
+      "Jim Black",
+      "Skúli Sverrisson",
+      "Cuong Vu"
+    ]
+  },
+  "ausseer-barocktage": {
+    "headliner": [
+      "Fahmi Alquai",
+      "Alba Camarona",
+      "Concerto die Margherita"
+    ],
+    "support": [
+      "Renate Linortner",
+      "Aniela Frey",
+      "Toni Burger",
+      "Sebastian Rastl",
+      "Robert Schröter"
+    ]
+  },
+  "kammermusikfest-hopfgarten": {
+    "headliner": [
+      "Ramón Jaffé"
+    ]
+  },
+  "volksstimmefest": {
+    "headliner": [
+      "Robert Stadlober",
+      "Pauls Jets",
+      "Isabel Frey & Benjy Fox-Rosen"
+    ],
+    "support": [
+      "Edna Million",
+      "La Washa",
+      "POPSCH",
+      "Bex",
+      "The Willow Three",
+      "The Swivels",
+      "Halil Gürsu & Vienna Orient Project",
+      "Magdalena Spinka",
+      "Kitty Cat & the Ugly Heads",
+      "Wiener Beschwerdechor",
+      "Latin Melasa",
+      "GeriaTrio Plus"
+    ]
+  },
+  "festival-ars-electronica": {
+    "headliner": [
+      "Gerfried Stocker"
+    ]
+  },
+  "herbstlärm": {
+    "headliner": [
+      "Tobias Pötzelsberger & Band",
+      "DRiP Quartet",
+      "pauT & Band"
+    ],
+    "support": [
+      "Sinowatz",
+      "CJUW",
+      "Endless Wellness"
+    ]
+  },
+  "wanderbare-gipfelklaenge": {
+    "headliner": [
+      "Anna Buchegger",
+      "Vivi Vassileva"
+    ],
+    "support": [
+      "inwendig woarm Chor Reinsberg",
+      "Lucas Campara Diniz",
+      "Musikverein Reinsberg",
+      "Luomuduo"
+    ]
+  },
+  "most-jazz": {
+    "headliner": [
+      "Danzermania",
+      "Ina Regen",
+      "Cordoba78",
+      "Nenda",
+      "Purple Is The Color",
+      "Salo"
+    ],
+    "support": [
+      "Soko Dixie",
+      "Big Band Bad Gleichenberg",
+      "Wiener Tschuschenkapelle"
+    ]
+  },
+  "herbstgold": {
+    "headliner": [
+      "Julian Rachlin",
+      "Rolando Villazón",
+      "Gabriela Montero",
+      "Ian Bostridge",
+      "Pablo Ferrández",
+      "Alexander Malofeev",
+      "Chamber Orchestra of Europe",
+      "Bamberger Symphoniker",
+      "Jerusalem Symphony Orchestra"
+    ],
+    "support": [
+      "Janoska Ensemble"
+    ]
+  },
+  "musiktheatertage-wien": {
+    "headliner": [
+      "Thomas Desi",
+      "Georg Steker"
+    ]
+  },
+  "aufsteirern": {
+    "headliner": [
+      "Edmund",
+      "Oimara",
+      "Marianne Mendt",
+      "Fäaschtbänkler",
+      "Flying Pickets"
+    ],
+    "support": [
+      "Elementisch Steirisch",
+      "Matakustix",
+      "Chor der Kärntner in Graz"
+    ]
+  },
+  "steirischer-herbst": [],
+  "stp-metalweekend": {
+    "headliner": [
+      "Commander",
+      "Aeons of Ashes"
+    ],
+    "support": [
+      "Anderwelt",
+      "Endonomos",
+      "Darkfall",
+      "Richthammer",
+      "Silius",
+      "Raging Void",
+      "Trembling Earth",
+      "VxPxOxAxAxWxAxMxCx"
+    ]
+  },
+  "waves-vienna-festival": {
+    "headliner": [
+      "Christina Stürmer",
+      "Josh."
+    ],
+    "support": [
+      "Baby Berserk",
+      "Lucia & The Best Boys",
+      "Kumbia Queers",
+      "Beaks",
+      "The Bug Club",
+      "Anoraak",
+      "Flora Hibberd",
+      "Indoor Foxes",
+      "Ziferblat",
+      "Tamara Flores"
+    ]
+  },
+  "jazz-the-city": {
+    "headliner": [
+      "Yemen Blues",
+      "Ernst Molden & Neue Wiener Concert Schrammeln",
+      "Bab L'Bluz",
+      "Uri Caine",
+      "Andy Sheppard",
+      "Myra Melford"
+    ],
+    "support": [
+      "Noura Mint Seymali",
+      "Radio String Quartet",
+      "Pixvae",
+      "Les Frères Smith",
+      "Lylit",
+      "Marina & the Kats",
+      "Martin Klein",
+      "Ian Fisher"
+    ]
+  },
+  "folk-art-festival": {
+    "headliner": [
+      "RHAYN",
+      "Moritz Weiß Klezmer Trio",
+      "Réalta",
+      "Nenad Vasilic Trio",
+      "Wladigeroff Brothers"
+    ],
+    "support": [
+      "Broadlahn",
+      "Charlie & die Kaischlabuam",
+      "Lara Löwin",
+      "Martin Moro",
+      "Saïd Tichiti Trio",
+      "Moneka Group",
+      "Simon Reithofer Quartett",
+      "Bandouba",
+      "Luís Oliveira"
+    ]
+  },
+  "viennale": {
+    "headliner": [
+      "Alexandra Makarová",
+      "Arash T. Riahi",
+      "Verena Soltiz"
+    ],
+    "support": [
+      "Kent Jones",
+      "Kahlil Joseph",
+      "Digna Sinke"
+    ]
+  },
+  "winterfest": {
+    "headliner": [
+      "Cirque Le Roux",
+      "Akoreacro",
+      "Cirque Éloize",
+      "La Faux Populaire"
+    ],
+    "support": [
+      "Michael Zandl"
+    ]
+  },
+  "impuls-impuls-festival": {
+    "headliner": [
+      "Klangforum Wien",
+      "Cantando Admont",
+      "Beat Furrer",
+      "Pierluigi Billone",
+      "Chaya Czernowin",
+      "Elena Mendoza"
+    ],
+    "support": [
+      "Bernhard Lang",
+      "Simon Steen-Andersen",
+      "Marco Stroppa",
+      "Clara Iannotta",
+      "Pierre Jodlowski",
+      "Peter Ablinger",
+      "Ernst Kovacic",
+      "Franck Bedrossian",
+      "Carola Bauckholt",
+      "Stefan Prins",
+      "Lucia Ronchetti",
+      "Anna Sun"
+    ]
+  }
+}

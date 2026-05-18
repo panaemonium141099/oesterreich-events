@@ -1,0 +1,179 @@
+{
+  "musical-sommer-amstetten": {
+    "lineup": [
+      {"name": "The Band - Das Musical mit der Musik von Take That", "billing": "headliner"}
+    ],
+    "imageUrl": "https://www.avb.am/wp-content/uploads/2025/10/the-band-musical-amstetten-2026.jpg",
+    "description": "Der AVB Musical Sommer 2026 bringt mit \"The Band\" das Feel-Good-Musical mit den Hits von Take That in die Pölz-Halle Amstetten. Die berührende und humorvolle Geschichte von fünf Freundinnen wird zwischen 14. Juli und 16. August 2026 aufgeführt.",
+    "priceText": "Preis auf Anfrage"
+  },
+  "seefestspiele-mörbisch": {
+    "lineup": [
+      {"name": "Alfons Haider", "billing": "headliner"},
+      {"name": "Drew Sarich", "billing": "headliner"},
+      {"name": "Mark Seibert", "billing": "support"},
+      {"name": "Anna Rosa Döller", "billing": "support"},
+      {"name": "Timotheus Hollweg", "billing": "support"},
+      {"name": "Howard Carpendale", "billing": "headliner"},
+      {"name": "Tom Jones", "billing": "headliner"},
+      {"name": "Andrea Berg", "billing": "headliner"},
+      {"name": "David Garrett", "billing": "headliner"}
+    ],
+    "imageUrl": "https://www.seefestspiele-moerbisch.at/fileadmin-seefestspiele/ein-kaefig-voller-narren-2026/ekvn-website-header.jpg",
+    "description": "Die Seefestspiele Mörbisch zeigen im Sommer 2026 das Musical \"Ein Käfig voller Narren\" (La Cage aux Folles) auf der Seebühne am Neusiedler See. Zusätzlich finden Gastkonzerte mit internationalen Stars wie Tom Jones, Andrea Berg und David Garrett statt.",
+    "priceText": "ab € 107"
+  },
+  "salzburger-festspiele": {
+    "lineup": [
+      {"name": "Philipp Hochmair (Jedermann)", "billing": "headliner"},
+      {"name": "Barrie Kosky (Regie)", "billing": "headliner"},
+      {"name": "Romeo Castellucci (Regie)", "billing": "headliner"},
+      {"name": "Krzysztof Warlikowski (Regie)", "billing": "headliner"},
+      {"name": "Nicolas Stemann (Regie)", "billing": "support"}
+    ],
+    "imageUrl": "https://www.salzburgerfestspiele.at/fileadmin/_processed_/sf-2026-warhol-stopwatch.jpg",
+    "description": "Die Salzburger Festspiele 2026 finden vom 17. Juli bis 30. August statt und bieten 171 Aufführungen mit Opern wie Mozarts \"Così fan tutte\", Bizets \"Carmen\" und Strauss' \"Ariadne auf Naxos\". Die Plakatkunst stammt 2026 von Andy Warhol (\"Hand Holding Stop Watch\").",
+    "priceText": "Preis auf Anfrage"
+  },
+  "ottensheim-open-air": {
+    "lineup": [
+      {"name": "Acht Eimer Hühnerherzen", "billing": "headliner"},
+      {"name": "Elektro Guzzi", "billing": "headliner"},
+      {"name": "Monobrother", "billing": "headliner"},
+      {"name": "Anda Morts", "billing": "support"},
+      {"name": "Franz Fuexe", "billing": "support"},
+      {"name": "Sirius.sue", "billing": "support"},
+      {"name": "Lazer", "billing": "support"},
+      {"name": "Glut", "billing": "support"},
+      {"name": "TonArt Chor Ottensheim", "billing": "support"},
+      {"name": "Oaschkrapferl b2b Eyja", "billing": "support"},
+      {"name": "Holli", "billing": "support"},
+      {"name": "Ozymandias", "billing": "support"},
+      {"name": "Pencil & Cherries", "billing": "support"},
+      {"name": "Amore AG", "billing": "support"}
+    ],
+    "imageUrl": "https://ottensheimopenair.cargo.site/_site/img/oao-2026-logo.jpg",
+    "description": "Das Open Air Ottensheim ist ein magisches Festival am Rodlgelände abseits des Mainstreams. An zwei Sommerabenden im Juli verwandelt sich das baumbestandene Areal in eine atmosphärische Naturarena mit bunt beleuchteten Bäumen und vielfältigen Sounds.",
+    "priceText": "ab € 40 (Tagesticket), Festivalpass € 65"
+  },
+  "internationales-gitarrenfestival-seckau": {
+    "lineup": [
+      {"name": "Rubén Parejo", "billing": "headliner"},
+      {"name": "Shih-yu Liu", "billing": "headliner"},
+      {"name": "Hugo Gonzalez", "billing": "headliner"},
+      {"name": "Florian Palier", "billing": "support"},
+      {"name": "Johann Palier", "billing": "support"},
+      {"name": "Anna Lesjak", "billing": "support"}
+    ],
+    "imageUrl": null,
+    "description": "Das Internationale Gitarrenfestival Seckau findet von 18. bis 25. Juli 2026 in der Benediktinerabtei Seckau auf 843 Metern Seehöhe statt. Es verbindet täglichen Einzelunterricht, Meisterklassen und Abendkonzerte rund um die Gitarre.",
+    "priceText": "Preis auf Anfrage"
+  },
+  "nordkette-wetterleuchten": {
+    "lineup": [],
+    "imageUrl": "https://www.wetterleuchten.at/images/2026_Startseite_Termin.jpg",
+    "description": "Das Nordkette Wetterleuchten ist das höchstgelegene Electronic-Music-Festival Europas und findet auf 2.000 Metern Seehöhe auf der Innsbrucker Seegrube statt. Zwei Tage lang sorgen nationale und internationale DJs für alpines Clubbing über den Wolken.",
+    "priceText": "Preis auf Anfrage"
+  },
+  "jazz-im-donaupark": {
+    "lineup": [
+      {"name": "Helmuth Thalbauer's Finest Blend", "billing": "headliner"},
+      {"name": "Bernhard Osanna Quintett feat. Ilse Riedler", "billing": "headliner"},
+      {"name": "Frank Folgmann & The Backing Crew feat. Chris Kronreif", "billing": "headliner"},
+      {"name": "Andi Weiß Quintett", "billing": "headliner"}
+    ],
+    "imageUrl": "https://www.jazzpoint.at/donaupark/images/donaupark.jpg",
+    "description": "Jazz im Donaupark ist eine seit 1991 etablierte Konzertreihe am Musikpavillon im Linzer Donaupark mit unkonventionellen, humorvollen und anspruchsvollen Jazz-Performances. Konzerte finden sonntags um 20:00 Uhr bei freiem Eintritt und jedem Wetter statt.",
+    "priceText": "Eintritt frei"
+  },
+  "metastadt-open-air": {
+    "lineup": [
+      {"name": "Marilyn Manson", "billing": "headliner"},
+      {"name": "Deftones", "billing": "headliner"},
+      {"name": "Haftbefehl", "billing": "headliner"},
+      {"name": "Michael Patrick Kelly", "billing": "headliner"},
+      {"name": "Wincent Weiss", "billing": "headliner"},
+      {"name": "BIBIZA", "billing": "headliner"},
+      {"name": "JOSH.", "billing": "headliner"},
+      {"name": "BERQ", "billing": "headliner"},
+      {"name": "VOWWS", "billing": "support"},
+      {"name": "RIAN", "billing": "support"},
+      {"name": "CARO FUX", "billing": "support"},
+      {"name": "LINA", "billing": "support"},
+      {"name": "Emma Rose", "billing": "support"},
+      {"name": "Show Me the Body", "billing": "support"}
+    ],
+    "imageUrl": "https://www.metastadtopenairs.com/fileadmin/_processed_/6/f/csm_240723_AIR__c_-Diana-Horst_00014_74c5af1d6d.jpg",
+    "description": "Das Metastadt Open Air bringt im Sommer 2026 internationale Rock-, Pop- und Hip-Hop-Acts wie Marilyn Manson, Deftones und Haftbefehl auf die Bühne im 22. Wiener Gemeindebezirk. An acht Festivaltagen zwischen 21. Juli und 16. August spielen Stars und Newcomer.",
+    "priceText": "Preis auf Anfrage"
+  },
+  "bregenzer-festspiele": {
+    "lineup": [
+      {"name": "Damiano Michieletto (Regie La traviata)", "billing": "headliner"},
+      {"name": "Kirill Karabits (Dirigent)", "billing": "headliner"},
+      {"name": "Pietro Rizzo (Dirigent)", "billing": "headliner"},
+      {"name": "Wiener Symphoniker", "billing": "headliner"},
+      {"name": "Symphonieorchester Vorarlberg", "billing": "support"}
+    ],
+    "imageUrl": "https://bregenzerfestspiele.com/fileadmin/_processed_/la-traviata-2026-seebuehne.jpg",
+    "description": "Die Bregenzer Festspiele 2026 feiern ihr 80-jähriges Jubiläum mit Verdis \"La traviata\" als neue Spiel-auf-dem-See-Produktion in der Regie von Damiano Michieletto. Vom 22. Juli bis 23. August stehen außerdem Janáčeks \"Die Ausflüge des Herrn Brouček\" und zahlreiche Konzerte am Programm.",
+    "priceText": "Preis auf Anfrage"
+  },
+  "popfest-wien": {
+    "lineup": [
+      {"name": "Sofie Royer (Kuratorin)", "billing": "headliner"},
+      {"name": "Wolfgang Lehmann (Kurator)", "billing": "headliner"}
+    ],
+    "imageUrl": "https://popfest.at/wp-content/themes/videozoom/images/popfest-logo-2022.png",
+    "description": "Das Popfest Wien findet 2026 zum 17. Mal vom 23. bis 26. Juli am Karlsplatz und in umliegenden Indoor-Spielstätten wie Wien Museum, TU Wien und Karlskirche statt. Bei freiem Eintritt feiert das Festival österreichische Popmusik in all ihren Facetten.",
+    "priceText": "Eintritt frei"
+  },
+  "musikfestival-steyr": {
+    "lineup": [
+      {"name": "Christian Funk", "billing": "headliner"},
+      {"name": "James Park", "billing": "headliner"},
+      {"name": "Jill Clesse", "billing": "headliner"},
+      {"name": "Sarah Kornfeld", "billing": "headliner"},
+      {"name": "Kilian Berger", "billing": "support"},
+      {"name": "Jana Stöckler", "billing": "support"},
+      {"name": "Emil Kurz", "billing": "support"},
+      {"name": "Gabriel Büsser", "billing": "support"},
+      {"name": "Heidrun Lysaght", "billing": "support"},
+      {"name": "Stefanie Rieger", "billing": "support"},
+      {"name": "Janina Raidt", "billing": "support"},
+      {"name": "Antonia Tröstl", "billing": "support"}
+    ],
+    "imageUrl": "https://www.musikfestivalsteyr.at/wp-content/uploads/musikfestival-steyr-hair-2026-02.jpg",
+    "description": "Das Musikfestival Steyr 2026 präsentiert vom 23. Juli bis 8. August das Rockmusical \"HAIR\" im Schlossgraben von Schloss Lamberg unter dem Motto \"Let the Sunshine In\". Eine internationale Ensemble-Besetzung mit Live-Band bringt den Geist von Aufbruch, Freiheit und sozialem Wandel auf die Bühne.",
+    "priceText": "Preis auf Anfrage"
+  },
+  "festwochen-der-alten-musik": {
+    "lineup": [
+      {"name": "Ottavio Dantone", "billing": "headliner"},
+      {"name": "Accademia Bizantina", "billing": "headliner"},
+      {"name": "Alessandro De Marchi", "billing": "headliner"},
+      {"name": "René Jacobs", "billing": "headliner"},
+      {"name": "Il pomo d'oro", "billing": "headliner"},
+      {"name": "Lauren Lodge-Campbell", "billing": "support"},
+      {"name": "Nicolò Balducci", "billing": "support"},
+      {"name": "Jonathan Eyers", "billing": "support"}
+    ],
+    "imageUrl": "https://www.altemusik.at/AlteMusik/Fotos%20Sujet/2026/sujet-2026.jpg",
+    "description": "Die Innsbrucker Festwochen der Alten Musik feiern 2026 ihr 50-jähriges Jubiläum mit einer siebenstündigen Großoper unter dem Motto \"Was feiern wir?\". Von 24. Juli bis 30. August zeigen Stars der Alten Musik wie René Jacobs und Ottavio Dantone Opern, Konzerte und freie Open-Air-Formate.",
+    "priceText": "Preis auf Anfrage"
+  },
+  "kunstmue-festival": {
+    "lineup": [],
+    "imageUrl": "https://www.kunstmue.at/wp-content/themes/kunstmue/images/logo.svg",
+    "description": "Das Kunstmue Festival feiert 2026 sein 23-jähriges Bestehen in Bad Goisern am Hallstättersee und ist ein Treffpunkt für Musikliebhaber, Kulturschaffende und Freigeister. An zwei Tagen spielen 11 Bands verschiedener Genres bei freiem Eintritt und Gratis-Camping.",
+    "priceText": "Eintritt frei"
+  },
+  "rollin-dudes": {
+    "lineup": [
+      {"name": "Shake Rattle and Soul (The Ridin' Dudes)", "billing": "headliner"}
+    ],
+    "imageUrl": "https://www.rollindudes.com/images/rollin-dudes-festival-logo.png",
+    "description": "Das Rollin Dudes Festival ist ein Rock'n'Roll-Weekender mit US-Cars, Bikes, Live-Musik und Community-Feeling am Naturpark- und Besucherzentrum Grottenhof in Leibnitz. An drei Tagen (24.-26. Juli 2026) treten 8 Live-Bands und 5 DJs auf, dazu gibt es Hotrods, Pin-Ups, Barber Shop und Food Trucks.",
+    "priceText": "Eintritt frei für US-Car-Fahrer und Oldtimer (vor 1960); reguläre Tickets ab Vorverkauf 15.1.2026"
+  }
+}

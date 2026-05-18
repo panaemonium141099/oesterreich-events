@@ -1,0 +1,245 @@
+{
+  "viertelfestival-niederösterreich": {
+    "lineup": [
+      {"name": "Mathias Lefèvre", "billing": "headliner"},
+      {"name": "Katharina Cibulka", "billing": "headliner"},
+      {"name": "Anna Khodorkovskaya", "billing": "headliner"},
+      {"name": "Jimmy Schlager", "billing": "support"},
+      {"name": "Roman Gregory", "billing": "support"},
+      {"name": "Mitzi Barelli", "billing": "support"},
+      {"name": "Hannes Schwarzenberger", "billing": "support"},
+      {"name": "Barbara Wittmann", "billing": "support"},
+      {"name": "Veronika Goller", "billing": "support"},
+      {"name": "Elisabeth Jegel", "billing": "support"},
+      {"name": "Daria Tchapanova", "billing": "support"}
+    ]
+  },
+  "springfestival-graz": {
+    "lineup": [
+      {"name": "The Streets", "billing": "headliner"},
+      {"name": "Mike Skinner", "billing": "headliner"},
+      {"name": "VTSS", "billing": "headliner"},
+      {"name": "Acid Pauli", "billing": "headliner"},
+      {"name": "Dominik Eulberg", "billing": "headliner"},
+      {"name": "Andhim", "billing": "headliner"},
+      {"name": "Koven", "billing": "headliner"},
+      {"name": "Leblanc", "billing": "support"},
+      {"name": "JPattersson", "billing": "support"},
+      {"name": "Kaufmann", "billing": "support"},
+      {"name": "Mollono.bass", "billing": "support"},
+      {"name": "DJ Haus", "billing": "support"},
+      {"name": "Iorie", "billing": "support"},
+      {"name": "Camion Bazar", "billing": "support"},
+      {"name": "Magdalena May", "billing": "support"},
+      {"name": "Hermetica", "billing": "support"}
+    ]
+  },
+  "festival-des-politischen-liedes": {
+    "lineup": [
+      {"name": "Snessia", "billing": "headliner"},
+      {"name": "Nuju", "billing": "headliner"},
+      {"name": "Niklas Freitag", "billing": "support"},
+      {"name": "Johannes Girmindl", "billing": "support"},
+      {"name": "Philipp Hoffmann", "billing": "support"},
+      {"name": "Juran Brothers", "billing": "support"},
+      {"name": "Unrat", "billing": "support"},
+      {"name": "DJ Beatrice", "billing": "support"}
+    ]
+  },
+  "kultursommer-wien": {
+    "lineup": [
+      {"name": "Tom Neuwirth", "billing": "headliner"},
+      {"name": "Martin Zerza", "billing": "headliner"},
+      {"name": "Skofi", "billing": "support"},
+      {"name": "Teschek", "billing": "support"},
+      {"name": "Meo", "billing": "support"},
+      {"name": "KVSAL", "billing": "support"},
+      {"name": "Kuare Salsa Band", "billing": "support"},
+      {"name": "Abdominal Marmalade Agency", "billing": "support"}
+    ]
+  },
+  "musikfest-waidhofen": {
+    "lineup": [
+      {"name": "Wallis Bird", "billing": "headliner"},
+      {"name": "Bombino", "billing": "headliner"},
+      {"name": "FRIGG", "billing": "headliner"},
+      {"name": "Wiener Tschuschenkapelle", "billing": "headliner"},
+      {"name": "David Helbock's Random/Control feat. Fola Dada", "billing": "headliner"},
+      {"name": "Chanda Rule & Roland Guggenbichler", "billing": "headliner"},
+      {"name": "Oliver Mally Blues Explosion", "billing": "support"},
+      {"name": "Peter Kern Blues Band", "billing": "support"},
+      {"name": "Lasse Matthiessen", "billing": "support"},
+      {"name": "Wiener Blond", "billing": "support"},
+      {"name": "Spilif", "billing": "support"},
+      {"name": "GOT'YA", "billing": "support"},
+      {"name": "Gina Schwarz & Multiphonics 8", "billing": "support"},
+      {"name": "Brein, Schmid & Gansch", "billing": "support"},
+      {"name": "Hot Pants Road Club feat. Chanda Rule", "billing": "support"},
+      {"name": "The Shalman-Shevchenko Oy Vey Klezmer Society", "billing": "support"},
+      {"name": "Majid Bekkas / Nguyên Lê / Hamid Drake", "billing": "support"},
+      {"name": "Los Justicieros", "billing": "support"},
+      {"name": "3 Amigas Tuyas", "billing": "support"}
+    ]
+  },
+  "glatt-verkehrt": {
+    "lineup": [
+      {"name": "Ríoghnach Connolly & Honeyfeet", "billing": "headliner"},
+      {"name": "Die Strottern & Blech", "billing": "headliner"},
+      {"name": "Leyla McCalla", "billing": "headliner"},
+      {"name": "Omniversal Earkestra", "billing": "headliner"},
+      {"name": "Puuluup", "billing": "headliner"},
+      {"name": "Tęgie Chłopy", "billing": "support"},
+      {"name": "This is How we Fly", "billing": "support"},
+      {"name": "Júlia Kozáková", "billing": "support"},
+      {"name": "Valentin Lichtenberger & Valerie Costa", "billing": "support"},
+      {"name": "Die Göttweiger Sieben", "billing": "support"}
+    ]
+  },
+  "nordkette-wetterleuchten": {
+    "lineup": [
+      {"name": "DJ Seren", "billing": "headliner"},
+      {"name": "PULVERIN", "billing": "headliner"},
+      {"name": "KLMT", "billing": "headliner"},
+      {"name": "Oriom", "billing": "headliner"},
+      {"name": "10er Sprung", "billing": "support"},
+      {"name": "Davidecks & Drums", "billing": "support"},
+      {"name": "Loner Tennis Club", "billing": "support"},
+      {"name": "gru.naso", "billing": "support"},
+      {"name": "filly", "billing": "support"},
+      {"name": "fantacid", "billing": "support"},
+      {"name": "gauna", "billing": "support"},
+      {"name": "Carl Heenz", "billing": "support"},
+      {"name": "Klebstoff", "billing": "support"},
+      {"name": "imkreis", "billing": "support"},
+      {"name": "Palle Grandi", "billing": "support"}
+    ]
+  },
+  "hotelpupik-festival": {
+    "lineup": [
+      {"name": "Heimo Wallner", "billing": "headliner"},
+      {"name": "Ingrid Schmoliner", "billing": "support"},
+      {"name": "Radian", "billing": "support"}
+    ]
+  },
+  "walser-herbst": {
+    "lineup": [
+      {"name": "Orivesi All Stars", "billing": "headliner"},
+      {"name": "Zéphyr Combo", "billing": "headliner"},
+      {"name": "Janusz Prusinowski Kompania", "billing": "headliner"},
+      {"name": "Himmelfahrtschor", "billing": "support"},
+      {"name": "Duo Campanula", "billing": "support"},
+      {"name": "Sarah Siren", "billing": "support"},
+      {"name": "Gian Rupf", "billing": "support"},
+      {"name": "Nicole Knuth", "billing": "support"},
+      {"name": "Radix Musikwerkstatt", "billing": "support"}
+    ]
+  },
+  "volksstimmefest": {
+    "lineup": [
+      {"name": "Robert Stadlober", "billing": "headliner"},
+      {"name": "Pauls Jets", "billing": "headliner"},
+      {"name": "Isabel Frey & Benjy Fox-Rosen", "billing": "headliner"},
+      {"name": "Edna Million", "billing": "support"},
+      {"name": "La Washa", "billing": "support"},
+      {"name": "POPSCH", "billing": "support"},
+      {"name": "Bex", "billing": "support"},
+      {"name": "The Willow Three", "billing": "support"},
+      {"name": "The Swivels", "billing": "support"},
+      {"name": "Halil Gürsu & Vienna Orient Project", "billing": "support"},
+      {"name": "Magdalena Spinka", "billing": "support"},
+      {"name": "Kitty Cat & the Ugly Heads", "billing": "support"},
+      {"name": "Wiener Beschwerdechor", "billing": "support"},
+      {"name": "Latin Melasa", "billing": "support"},
+      {"name": "GeriaTrio Plus", "billing": "support"}
+    ]
+  },
+  "herbstlärm": {
+    "lineup": [
+      {"name": "Tobias Pötzelsberger & Band", "billing": "headliner"},
+      {"name": "DRiP Quartet", "billing": "headliner"},
+      {"name": "pauT & Band", "billing": "headliner"},
+      {"name": "Sinowatz", "billing": "support"},
+      {"name": "CJUW", "billing": "support"},
+      {"name": "Endless Wellness", "billing": "support"}
+    ]
+  },
+  "musiktheatertage-wien": {
+    "lineup": [
+      {"name": "Thomas Desi", "billing": "headliner"},
+      {"name": "Georg Steker", "billing": "headliner"}
+    ]
+  },
+  "stp-metalweekend": {
+    "lineup": [
+      {"name": "Commander", "billing": "headliner"},
+      {"name": "Aeons of Ashes", "billing": "headliner"},
+      {"name": "Anderwelt", "billing": "support"},
+      {"name": "Endonomos", "billing": "support"},
+      {"name": "Darkfall", "billing": "support"},
+      {"name": "Richthammer", "billing": "support"},
+      {"name": "Silius", "billing": "support"},
+      {"name": "Raging Void", "billing": "support"},
+      {"name": "Trembling Earth", "billing": "support"},
+      {"name": "VxPxOxAxAxWxAxMxCx", "billing": "support"}
+    ]
+  },
+  "folk-art-festival": {
+    "lineup": [
+      {"name": "RHAYN", "billing": "headliner"},
+      {"name": "Moritz Weiß Klezmer Trio", "billing": "headliner"},
+      {"name": "Réalta", "billing": "headliner"},
+      {"name": "Nenad Vasilic Trio", "billing": "headliner"},
+      {"name": "Wladigeroff Brothers", "billing": "headliner"},
+      {"name": "Broadlahn", "billing": "support"},
+      {"name": "Charlie & die Kaischlabuam", "billing": "support"},
+      {"name": "Lara Löwin", "billing": "support"},
+      {"name": "Martin Moro", "billing": "support"},
+      {"name": "Saïd Tichiti Trio", "billing": "support"},
+      {"name": "Moneka Group", "billing": "support"},
+      {"name": "Simon Reithofer Quartett", "billing": "support"},
+      {"name": "Bandouba", "billing": "support"},
+      {"name": "Luís Oliveira", "billing": "support"}
+    ]
+  },
+  "viennale": {
+    "lineup": [
+      {"name": "Alexandra Makarová", "billing": "headliner"},
+      {"name": "Arash T. Riahi", "billing": "headliner"},
+      {"name": "Verena Soltiz", "billing": "headliner"},
+      {"name": "Kent Jones", "billing": "support"},
+      {"name": "Kahlil Joseph", "billing": "support"},
+      {"name": "Digna Sinke", "billing": "support"}
+    ]
+  },
+  "winterfest": {
+    "lineup": [
+      {"name": "Cirque Le Roux", "billing": "headliner"},
+      {"name": "Akoreacro", "billing": "headliner"},
+      {"name": "Cirque Éloize", "billing": "headliner"},
+      {"name": "La Faux Populaire", "billing": "headliner"},
+      {"name": "Michael Zandl", "billing": "support"}
+    ]
+  },
+  "impuls-impuls-festival": {
+    "lineup": [
+      {"name": "Klangforum Wien", "billing": "headliner"},
+      {"name": "Cantando Admont", "billing": "headliner"},
+      {"name": "Beat Furrer", "billing": "headliner"},
+      {"name": "Pierluigi Billone", "billing": "headliner"},
+      {"name": "Chaya Czernowin", "billing": "headliner"},
+      {"name": "Elena Mendoza", "billing": "headliner"},
+      {"name": "Bernhard Lang", "billing": "support"},
+      {"name": "Simon Steen-Andersen", "billing": "support"},
+      {"name": "Marco Stroppa", "billing": "support"},
+      {"name": "Clara Iannotta", "billing": "support"},
+      {"name": "Pierre Jodlowski", "billing": "support"},
+      {"name": "Peter Ablinger", "billing": "support"},
+      {"name": "Ernst Kovacic", "billing": "support"},
+      {"name": "Franck Bedrossian", "billing": "support"},
+      {"name": "Carola Bauckholt", "billing": "support"},
+      {"name": "Stefan Prins", "billing": "support"},
+      {"name": "Lucia Ronchetti", "billing": "support"},
+      {"name": "Anna Sun", "billing": "support"}
+    ]
+  }
+}

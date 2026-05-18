@@ -1,0 +1,447 @@
+{
+  "_comment": "Manual overrides for festival image/description/price. Loaded by src/lib/festivals/enrich.ts and merged on top of runtime og:image/JSON-LD enrichment. Keys must match festivals.slug exactly. Any field may be omitted — runtime values fill the gap. See data/festivals-missing-lineup.md for the list of 93 festivals without lineup data and (often) without enrichable websites.",
+  "on-the-couch": {
+    "imageUrl": "https://eberhard.klingt.org/wp-content/uploads/2024/11/On-The-Clouch-Sujet-horizontal-1024x656.jpg",
+    "description": "On the Couch ist eine monatliche Studiokonzert-Reihe im Studio Eberhard in Wien, die seit 2012 zeitgenössische Musik, Klangkunst und gelegentliche Ausflüge in Jazz, Klassik und Literatur präsentiert.",
+    "priceText": "Preis auf Anfrage"
+  },
+  "murszene-graz": {
+    "imageUrl": "http://www.murszene-graz.at/images/2026_Murszene/20260723_Luef_Peter_Purgar.jpg",
+    "description": "Die Murszene Graz ist ein Open-Air-Festival am Mariahilferplatz mit Jazz, Weltmusik und lateinamerikanischen Klängen an Donnerstag-, Freitag- und Samstagabenden im Sommer.",
+    "priceText": "Eintritt frei"
+  },
+  "internationaler-musiksommer-bad-schallerbach": {
+    "imageUrl": "https://www.musiksommerbadschallerbach.at/wp-content/uploads/2022/10/peter.jpg",
+    "description": "Der Internationale Musiksommer Bad Schallerbach ist ein vielseitiges Kulturfestival im Atrium Bad Schallerbach mit Klassik, Jazz, Weltmusik, Brass, Satire und literarischen Lesungen.",
+    "priceText": "Einzeltickets ab € 28 | Halbpreis-Pass € 35"
+  },
+  "festwochen-gmunden": {
+    "description": "Die Salzkammergut Festwochen Gmunden sind ein Kulturfestival, das 2026 das 100. Geburtstagsjubiläum von Ingeborg Bachmann und Thomas Bernhard mit klassischer Musik, Literatur, Theater und Volksmusik feiert.",
+    "priceText": "Preis auf Anfrage",
+    "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/1/10/Stadttheater_Gmunden.jpg"
+  },
+  "interpenetration": {
+    "description": "Interpenetration ist ein experimentelles Musikfestival in Graz mit dem Motto „Music With A RISK = FUN Attitude\", das in den Spielstätten ARTist's und Club Wakuum stattfindet.",
+    "priceText": "Eintritt frei"
+  },
+  "philharmonische-klänge-hörgenuss": {
+    "description": "Philharmonische Klänge HÖRgenuss ist ein Kammermusikfestival in der Südoststeiermark, bei dem Ensembles der Wiener Philharmoniker an sechs Konzertabenden Werke von Haydn, Mozart, Beethoven, Schubert, Brahms und Strauss aufführen.",
+    "priceText": "Preis auf Anfrage",
+    "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/90/Bild_fehring_kirche.jpg/500px-Bild_fehring_kirche.jpg"
+  },
+  "steirische-stifts-und-schlosskonzerte": {
+    "description": "Die Steirischen Stifts- und Schlosskonzerte sind eine 33. Konzertreihe, die historische Stifte und Schlösser in der Steiermark mit einem Programm von Barock bis Swing, Klezmer und Crossover zum Klingen bringt.",
+    "priceText": "Wahlabo € 80 (4 aus 7 Konzerten)"
+  },
+  "viertelfestival-niederösterreich": {
+    "description": "Das WEIN/4-Festival 2026 verwandelt das gesamte Weinviertel in eine Bühne mit 53 Projekten und über 180 Einzelveranstaltungen – von Konzerten über Theater bis Tanz, Film und Literatur.",
+    "priceText": "Preis auf Anfrage"
+  },
+  "internationale-barocktage-stift-melk": {
+    "imageUrl": "https://www.wachaukulturmelk.at/public/images/logo.svg",
+    "description": "Die Internationalen Barocktage Stift Melk präsentieren zu Pfingsten unter dem Motto „Geheime Botschaften\" Barockmusik mit großen Orchesterwerken, Chorkonzerten und nächtlichen Orgelklängen in den Räumen des Stifts Melk.",
+    "priceText": "Preis auf Anfrage"
+  },
+  "springfestival-graz": {
+    "description": "Das Springfestival Graz ist ein Festival für elektronische Musik, Kunst, Design und Technologie, das jährlich über 100 internationale Acts und mehr als 10.000 Besucher anzieht.",
+    "priceText": "Tagestickets € 30-50 | 5-Tagespass € 120-150 | VIP € 200-250"
+  },
+  "klassik-im-burghof": {
+    "description": "Klassik im Burghof ist ein klassisches Musikfestival in Klagenfurt mit Kammermusik, Orchesterauftritten und Solo-Recitals von hochkarätigen Künstlern wie der Wiener Philharmoniker im Sommer 2026.",
+    "priceText": "Einzeltickets € 20-39 | Jahresabo ab € 279"
+  },
+  "dynamo-festival": {
+    "imageUrl": "https://image.jimcdn.com/app/cms/image/transf/none/path/s042bcf73c514c7c8/backgroundarea/i97d5250658ffdd38/version/1760519484/image.png",
+    "description": "Das Dynamo Festival in Dornbirn präsentiert am Spielboden über zwei Tage österreichische und internationale Indie-, Pop- und Alternative-Acts wie My Ugly Clementine, SALÒ und Oskar Haag.",
+    "priceText": "Preis auf Anfrage"
+  },
+  "arkadenkultur": {
+    "description": "Arkadenkultur ist ein Sommer-Forum für Musik und Literatur live in Salzburg, das seit 2020 mit 14 Konzertabenden im Living Room in Salzburg-Schallmoos für faire Bezahlung von Kunstschaffenden eintritt.",
+    "priceText": "Preis auf Anfrage"
+  },
+  "festival-stummer-schrei": {
+    "description": "Das Kulturfestival Stummer Schrei in Stumm im Zillertal bietet vom 5. Juni bis 1. August 2026 rund 24 Sommerabende mit Theater, Kabarett, Konzerten, Lesungen und Filmvorführungen abseits des Mainstreams.",
+    "priceText": "Preis auf Anfrage",
+    "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/38/Antoniuskapelle%2C_Stumm_01.jpg/3840px-Antoniuskapelle%2C_Stumm_01.jpg"
+  },
+  "festival-des-politischen-liedes": {
+    "description": "Das Festival des politischen Liedes ist ein vom Kulturverein Willy veranstaltetes Festival mit politisch engagiertem Liedgut. Es findet vom 5. bis 7. Juni 2026 in Linz statt und bietet drei Tage Konzerte, Lesungen und Diskussionen rund um politische und gesellschaftskritische Musik.",
+    "priceText": "Preis auf Anfrage",
+    "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/2/24/Bundesarchiv_Bild_183-1989-0217-028%2C_Berlin%2C_Festival_des_politischen_Liedes.jpg"
+  },
+  "sommerszene-festival": {
+    "imageUrl": "https://www.szene-salzburg.net/assets/uploads/e05bfe851f1d56230050f7/640.jpg",
+    "description": "Die Sommerszene ist das internationale Festival für zeitgenössischen Tanz und Performance in Salzburg. Vom 8. bis 23. Juni 2026 zeigt es 14 Produktionen mit österreichischen und Welt-Premieren an verschiedenen Spielorten.",
+    "priceText": "Pay what you can: € 10–40"
+  },
+  "wörthersee-classics": {
+    "imageUrl": "https://static.tildacdn.com/tild3233-6535-4864-a432-303431323866/Banner_Header_new_no.png",
+    "description": "Die Wörthersee Classics feiern 2026 ihr 25-jähriges Jubiläum unter dem Motto „zum WOHLKlang“. Vom 18. bis 21. Juni 2026 finden im Konzerthaus Klagenfurt klassische Konzerte mit internationalen Solist:innen und Ensembles statt.",
+    "priceText": "Preis auf Anfrage"
+  },
+  "clam-konzerte": {
+    "imageUrl": "https://clamlive.at/wp-content/uploads/2026/04/CL26-SMW-09-webheader-DESKTOP.jpg",
+    "description": "Die Clam Konzerte sind eine seit über 30 Jahren bestehende Konzertreihe auf der oberösterreichischen Burg Clam. Mit zwei Bühnen und bis zu 9.000 Plätzen ist die Burg eine der spektakulärsten Open-Air-Locations Österreichs.",
+    "priceText": "Preis auf Anfrage (Ticketverkauf über öTicket)"
+  },
+  "kunst-musik-forum-golling": {
+    "imageUrl": "https://festspielegolling.at/wp-content/uploads/2022/02/Logo_Festspiele-Golling-Kunst-Kulinarik_klein-1.png",
+    "description": "Die Festspiele Golling verbinden Konzerte, Lesungen und kulinarische Erlebnisse im Hof der mittelalterlichen Burg Golling. 2026 erweitern die Festspiele ihr Programm auf drei Aufführungen pro Woche von Ende Juni bis Ende August.",
+    "priceText": "Preis auf Anfrage (Karten über Kartenbüro Döllerer)"
+  },
+  "tonspuren": {
+    "imageUrl": "https://www.tonspurenamasitz.com/_default_upload_bucket/header-bild-2.jpg",
+    "description": "Die TONspuren am Asitz sind eine alpine Konzertreihe am Speicherteich auf 1.870 Metern in Leogang. Von 25. Juni bis 6. August 2026 finden fünf Konzerte aus Volksmusik, Pop, Klassik und Weltmusik in spektakulärer Bergkulisse statt.",
+    "priceText": "TONspur-Pass € 148 für alle fünf Konzerte"
+  },
+  "styriarte": {
+    "imageUrl": "https://styriarte.imgix.net/images/festivals/styriarte/2026/sty26-allgemein/hero-sty26.jpg",
+    "description": "Die Styriarte ist das steirische Festival für klassische Musik und feiert 2026 unter dem Motto „Licht Spiele“ ihre 42. Ausgabe. Vom 26. Juni bis 26. Juli finden Konzerte an traditionellen Spielstätten in Graz und der Steiermark statt.",
+    "priceText": "ab € 39 (U27: 50% Ermäßigung)"
+  },
+  "kultursommer-im-rosengarten": {
+    "imageUrl": "https://www.rosengarten.cc/wp-content/uploads/ROSENGARTEN-LOGO-RZ.png",
+    "description": "Der Kultursommer im Rosengarten am Pöstlingberg bietet Kabarett, Musik und Show in einem weißen Sommerzelt mit Blick auf Linz. Veranstaltet von Weiler Shows, präsentiert die Reihe im Juli 2026 Künstler:innen wie Thomas Mraz und Tom Gaebel.",
+    "priceText": "Preis auf Anfrage (Buchung über bestellung.rosengarten.cc)"
+  },
+  "oö-stiftskonzerte": {
+    "imageUrl": "https://www.stiftskonzerte.at/wp-content/uploads/2026/02/Hayato-Sumino-c-Johanna-Berghorn.jpeg",
+    "description": "Die OÖ. Stiftskonzerte 2026 feiern ihre 53. Saison unter dem Motto „O Mensch! Gib Acht!“ und bringen vom 30. Mai bis 26. Juli 22 Konzerte in sieben oberösterreichische Stifte. Schauplätze sind unter anderem St. Florian, Kremsmünster und Lambach.",
+    "priceText": "Teeniepass € 20 (unter 20 Jahre, gültig für alle 21 Konzerte)"
+  },
+  "kultursommer-wien": {
+    "imageUrl": "https://kultursommer.wien/jart/prj3/festival/resources/images/logo_ohne_sonne.png",
+    "description": "Der Kultursommer Wien bringt von 2. Juli bis 16. August 2026 ein kostenloses Open-Air-Kulturprogramm auf Pop-up-Bühnen in alle Wiener Bezirke. Geboten werden Musik, Kabarett, Theater, Tanz, Literatur und zeitgenössischer Zirkus.",
+    "priceText": "Eintritt frei"
+  },
+  "carinthischer-sommer-ossiach-villach": {
+    "imageUrl": "https://carinthischersommer.at/wp-content/uploads/2025/09/carinthischer-sommer-logo-2025.jpg",
+    "description": "Der Carinthische Sommer ist Kärntens internationales Festival für Musik und Literatur und findet vom 2. Juli bis 2. August 2026 in Ossiach, Villach und Klagenfurt statt. Unter der künstlerischen Leitung von Nadja Kayali steht die Ausgabe 2026 unter dem Motto „fern & nah“.",
+    "priceText": "10% Frühbucherrabatt; konkrete Preise auf carinthischersommer.jetticket.net"
+  },
+  "kultursommer-semmering": {
+    "imageUrl": "https://www.kultursommer-semmering.at/wp-content/uploads/logo-kss.svg",
+    "description": "Der Kultur.Sommer.Semmering bringt von 2. Juli bis 6. September 2026 unter der künstlerischen Leitung von Florian Krumpöck Lesungen, Kabarett, Jazz, Klassik und Wienerlied in den Kurort. Spielorte sind unter anderem der Kulturpavillon und das Grandhotel Panhans.",
+    "priceText": "10% Ermäßigung für Mitglieder; konkrete Preise auf Anfrage"
+  },
+  "summa-cum-laude-international-youth-music-festival": {
+    "imageUrl": "https://www.sclfestival.org/images/logos/Logo_SCL_Festival.png",
+    "description": "Das Summa Cum Laude International Youth Music Festival ist Europas führendes Jugendmusikfestival für Chöre, Bands und Orchester. Vom 3. bis 8. Juli 2026 musizieren junge Ensembles aus aller Welt im Goldenen Saal des Musikvereins, im Wiener Konzerthaus und im MuTh.",
+    "priceText": "Anmeldegebühr € 250 pro Gruppe; Konzertkarten auf Anfrage"
+  },
+  "donauinselfest": {
+    "imageUrl": "https://donauinselfest.at/wp-content/themes/dif2023/img/DIF-LOGO_weiss.png",
+    "description": "Das Donauinselfest ist das größte Open-Air-Musikfestival der Welt mit rund 3 Millionen Besucher:innen jährlich. Vom 3. bis 5. Juli 2026 stehen 14 Bühnen auf der Wiener Donauinsel mit Pop, Rock, Schlager, Austropop und Kabarett bei freiem Eintritt.",
+    "priceText": "Eintritt frei"
+  },
+  "musikfest-waidhofen": {
+    "imageUrl": "https://folkclub.at/wp-content/uploads/2025/12/Musikfest-2026_Inserat-mini.jpg",
+    "description": "Das 45. Internationale Musikfest Waidhofen an der Thaya findet vom 3. bis 5. Juli 2026 statt und präsentiert ein breites musikalisches Spektrum von Blues, Roots, Jazz und Funk bis zu globaler Folk- und Weltmusik. Künstler aus Marokko, Niger, Spanien, Dänemark, Finnland und weiteren Ländern bereichern das Programm.",
+    "priceText": "Preis auf Anfrage"
+  },
+  "cantus": {
+    "imageUrl": "https://webomat.s3.eu-central-1.amazonaws.com/acc/278/2021/07/30/o/logo.png",
+    "description": "Das Cantus MM International Music & Culture Festival in Salzburg bringt seit über 20 Jahren Chöre, Musiker und Tänzer aus aller Welt zusammen. Aufgeführt wird in prestigeträchtigen Sälen wie dem Mozarteum, im Salzburger Dom und in den Mirabellgärten – im Mittelpunkt steht der kulturelle Austausch durch Musik.",
+    "priceText": "Preis auf Anfrage"
+  },
+  "kammermusikfest-lockenhaus": {
+    "imageUrl": "https://images.squarespace-cdn.com/content/v1/59dbaaa9edaed80a4b1d1692/bf94a70a-58c1-409e-8007-bca2ae365fb4/BURG1+-+Niklas_Schnaubelt.jpg",
+    "description": "Das Kammermusikfest Lockenhaus findet 2026 in seiner 45. Auflage vom 8. bis 18. Juli unter der künstlerischen Leitung von Nicolas Altstaedt auf Burg Lockenhaus statt. Die New York Times zählt es zu den \"verfeinertsten Musikfestivals\" weltweit und vereint hochkarätige Kammermusik mit Charakterstärke.",
+    "priceText": "Preis auf Anfrage"
+  },
+  "impulstanz": {
+    "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/0/0c/MQ_Vienna_20100716_-_ImPulsTanz_opening_performance_098ff.jpg",
+    "description": "ImPulsTanz ist Europas größtes Festival für zeitgenössischen Tanz und Performance und findet 2026 vom 9. Juli bis 9. August in Wien statt. Seit 1984 bringt das Vienna International Dance Festival Workshops, Performances und Stars der internationalen Tanzszene zusammen.",
+    "priceText": "Preis auf Anfrage"
+  },
+  "woodstockenboi": {
+    "description": "Das Woodstockenboi Musik- und Kulturfestival findet vom 9. bis 11. Juli 2026 in der Naturarena Stockenboi in Kärnten statt. Das vom Kulturverein pastART organisierte Festival bietet ein vielfältiges Programm aus Musik und Kultur.",
+    "priceText": "Preis auf Anfrage"
+  },
+  "schrammelklang-festival": {
+    "imageUrl": "https://schrammelklang.at/wp-content/uploads/2022/11/schrammel-klang-festival-2022-copyright-stephan-mussil-cd.jpg",
+    "description": "Das Schrammel.Klang.Festival in Litschau am Herrensee findet 2026 an zwei Wochenenden (10.–12. und 17.–19. Juli) unter dem Motto \"WÖOD\" statt. Junge wie etablierte Musikgruppen bereichern die österreichische Weltmusik und Schrammelmusik in teils neuen Konstellationen.",
+    "priceText": "Preis auf Anfrage"
+  },
+  "goldegger-blues-folktage": {
+    "imageUrl": "https://www.argebluesfolk.com/wp-content/uploads/2024/08/cropped-logo500x500-transparenter-Hintergrund.png",
+    "description": "Die Goldegger Blues & Folktage 2026 finden am 10. und 11. Juli als Benefiz-Open-Air im Schlosshof Goldegg statt. Der Erlös des bei jedem Wetter stattfindenden Festivals kommt der Lebenshilfe Schwarzach zugute.",
+    "priceText": "Preis auf Anfrage"
+  },
+  "klassik-am-dom": {
+    "imageUrl": "https://www.klassikamdom.at/wp-content/uploads/Klassik-am-dom_Logo.svg",
+    "description": "Klassik am Dom bringt unter dem Motto \"Weltstars zu Gast in Linz\" 2026 wieder hochkarätige Konzerte an den Linzer Mariendom. Das Open-Air-Festival mit klassischem Fokus reicht bis Jazz, Soul, Chanson und Crossover und ist seit 2018 nach den Kriterien des Österreichischen Umweltzeichens als Green Event zertifiziert.",
+    "priceText": "Preis auf Anfrage"
+  },
+  "glatt-verkehrt": {
+    "imageUrl": "https://noeku.on.damlivery.com/s/5ba216518d07741cead1e825156a8310/noeku/869017/rm:fit/h:500/w:600/q:90/rs:originalSizePng/f:webp/g:fp:0.5:0.5",
+    "description": "Glatt&Verkehrt feiert 2026 seine 30. Ausgabe und präsentiert vom 22. bis 26. Juli in Krems 17 Konzerte aus 13 Ländern und 4 Kontinenten. Das Weltmusikfestival bietet Österreich-Debüts internationaler Acts und besondere Programme heimischer Bands.",
+    "priceText": "ab € 10"
+  },
+  "wellenklänge": {
+    "description": "Die Wellenklänge in Lunz am See stehen 2026 vom 10. bis 25. Juli unter dem Motto \"Empathie & Widerstand\". Das Festival auf der Seebühne kombiniert Konzerte, Workshops und kulturelle Diskussionen.",
+    "priceText": "Preis auf Anfrage",
+    "imageUrl": "https://wellenklaenge.at/wp-content/uploads/2022/02/Wkl-wellen-weiss.svg"
+  },
+  "neuberger-kulturtage": {
+    "imageUrl": "https://www.neuberger-kulturtage.org/v4/wp-content/uploads/2025/07/Filharmonie-Brno.jpg",
+    "description": "Die Neuberger Kulturtage finden 2026 vom 11. bis 26. Juli unter der künstlerischen Leitung von Stefan Vladar in Neuberg an der Mürz statt. Das Festival vereint Klassik, Kammermusik, Lied und Jazz in der ehemaligen Stiftskirche und an weiteren Spielstätten.",
+    "priceText": "ab € 10"
+  },
+  "lehar-festival-bad-ischl": {
+    "imageUrl": "https://www.leharfestival.at/wp-content/uploads/2023/06/logo_lehar_festival.svg",
+    "description": "Das Lehár Festival Bad Ischl ist das größte Operettenfestival Europas und in seiner Vielfalt und Qualität weltweit einzigartig. 2026 läuft das Festival vom 11. Juli bis 30. August mit drei Hauptproduktionen: Boccaccio, Gräfin Mariza und Der Göttergatte.",
+    "priceText": "Preis auf Anfrage"
+  },
+  "altenburger-musikademie": {
+    "imageUrl": "https://altenburger-musikakademie.at/fileadmin/user_upload/startseite/teaser-top.jpg",
+    "description": "Die Altenburger Musikakademie (AMA) findet 2026 vom 12. bis 26. Juli im Stift Altenburg statt. Internationale Dozentinnen und Dozenten gestalten Meisterkurse und Konzerte in den Bereichen Gesang, Klavier, Orgel, Harfe, Cello und Flöte.",
+    "priceText": "Preis auf Anfrage"
+  },
+  "güssinger-kultur-sommer": {
+    "imageUrl": "https://www.kultursommer.net/fileadmin-kultur/_processed_/4/9/csm_All_Stars_Gala_28062024__VA_KSG_2cda18b215.png",
+    "description": "Der Güssinger Kultursommer 2026 läuft vom 11. Juli bis 19. September am Fuße des historischen Güssinger Schlossbergs. Das Festival präsentiert Kabarett, Konzerte, Musicals und Theater mit zahlreichen Stars der österreichischen Kleinkunst- und Musikszene.",
+    "priceText": "Preis auf Anfrage"
+  },
+  "musical-sommer-amstetten": {
+    "imageUrl": "https://www.avb.am/wp2023/wp-content/uploads/2026/04/header_band.jpg",
+    "description": "Der AVB Musical Sommer 2026 bringt mit \"The Band\" das Feel-Good-Musical mit den Hits von Take That in die Pölz-Halle Amstetten. Die berührende und humorvolle Geschichte von fünf Freundinnen wird zwischen 14. Juli und 16. August 2026 aufgeführt.",
+    "priceText": "Preis auf Anfrage"
+  },
+  "seefestspiele-mörbisch": {
+    "imageUrl": "https://www.seefestspiele-moerbisch.at/fileadmin-seefestspiele/ein-kaefig-voller-narren-2026/ekvn-website-header.jpg",
+    "description": "Die Seefestspiele Mörbisch zeigen im Sommer 2026 das Musical \"Ein Käfig voller Narren\" (La Cage aux Folles) auf der Seebühne am Neusiedler See. Zusätzlich finden Gastkonzerte mit internationalen Stars wie Tom Jones, Andrea Berg und David Garrett statt.",
+    "priceText": "ab € 107"
+  },
+  "salzburger-festspiele": {
+    "imageUrl": "https://www.salzburgerfestspiele.at/wp-content/uploads/2019/03/salzburger-festspiele-salzburg-panorama-mit-logo.jpg",
+    "description": "Die Salzburger Festspiele 2026 finden vom 17. Juli bis 30. August statt und bieten 171 Aufführungen mit Opern wie Mozarts \"Così fan tutte\", Bizets \"Carmen\" und Strauss' \"Ariadne auf Naxos\". Die Plakatkunst stammt 2026 von Andy Warhol (\"Hand Holding Stop Watch\").",
+    "priceText": "Preis auf Anfrage"
+  },
+  "ottensheim-open-air": {
+    "description": "Das Open Air Ottensheim ist ein magisches Festival am Rodlgelände abseits des Mainstreams. An zwei Sommerabenden im Juli verwandelt sich das baumbestandene Areal in eine atmosphärische Naturarena mit bunt beleuchteten Bäumen und vielfältigen Sounds.",
+    "priceText": "ab € 40 (Tagesticket), Festivalpass € 65"
+  },
+  "internationales-gitarrenfestival-seckau": {
+    "description": "Das Internationale Gitarrenfestival Seckau findet von 18. bis 25. Juli 2026 in der Benediktinerabtei Seckau auf 843 Metern Seehöhe statt. Es verbindet täglichen Einzelunterricht, Meisterklassen und Abendkonzerte rund um die Gitarre.",
+    "priceText": "Preis auf Anfrage"
+  },
+  "nordkette-wetterleuchten": {
+    "imageUrl": "https://www.wetterleuchten.at/images/2026_Startseite_Termin.jpg",
+    "description": "Das Nordkette Wetterleuchten ist das höchstgelegene Electronic-Music-Festival Europas und findet auf 2.000 Metern Seehöhe auf der Innsbrucker Seegrube statt. Zwei Tage lang sorgen nationale und internationale DJs für alpines Clubbing über den Wolken.",
+    "priceText": "Preis auf Anfrage"
+  },
+  "jazz-im-donaupark": {
+    "imageUrl": "https://www.jazzpoint.at/donaupark/images/donaupark.jpg",
+    "description": "Jazz im Donaupark ist eine seit 1991 etablierte Konzertreihe am Musikpavillon im Linzer Donaupark mit unkonventionellen, humorvollen und anspruchsvollen Jazz-Performances. Konzerte finden sonntags um 20:00 Uhr bei freiem Eintritt und jedem Wetter statt.",
+    "priceText": "Eintritt frei"
+  },
+  "metastadt-open-air": {
+    "imageUrl": "https://www.metastadtopenairs.com/fileadmin/_processed_/6/f/csm_240723_AIR__c_-Diana-Horst_00014_74c5af1d6d.jpg",
+    "description": "Das Metastadt Open Air bringt im Sommer 2026 internationale Rock-, Pop- und Hip-Hop-Acts wie Marilyn Manson, Deftones und Haftbefehl auf die Bühne im 22. Wiener Gemeindebezirk. An acht Festivaltagen zwischen 21. Juli und 16. August spielen Stars und Newcomer.",
+    "priceText": "Preis auf Anfrage"
+  },
+  "bregenzer-festspiele": {
+    "description": "Die Bregenzer Festspiele 2026 feiern ihr 80-jähriges Jubiläum mit Verdis \"La traviata\" als neue Spiel-auf-dem-See-Produktion in der Regie von Damiano Michieletto. Vom 22. Juli bis 23. August stehen außerdem Janáčeks \"Die Ausflüge des Herrn Brouček\" und zahlreiche Konzerte am Programm.",
+    "priceText": "Preis auf Anfrage",
+    "imageUrl": "https://upload.wikimedia.org/wikipedia/de/a/ac/Bregenzer_Festspiele_Logo.svg"
+  },
+  "popfest-wien": {
+    "imageUrl": "https://popfest.at/wp-content/themes/videozoom/images/popfest-logo-2022.png",
+    "description": "Das Popfest Wien findet 2026 zum 17. Mal vom 23. bis 26. Juli am Karlsplatz und in umliegenden Indoor-Spielstätten wie Wien Museum, TU Wien und Karlskirche statt. Bei freiem Eintritt feiert das Festival österreichische Popmusik in all ihren Facetten.",
+    "priceText": "Eintritt frei"
+  },
+  "musikfestival-steyr": {
+    "imageUrl": "https://www.musikfestivalsteyr.at/wp-content/uploads/musikfestival-steyr-hair-2026-02.jpg",
+    "description": "Das Musikfestival Steyr 2026 präsentiert vom 23. Juli bis 8. August das Rockmusical \"HAIR\" im Schlossgraben von Schloss Lamberg unter dem Motto \"Let the Sunshine In\". Eine internationale Ensemble-Besetzung mit Live-Band bringt den Geist von Aufbruch, Freiheit und sozialem Wandel auf die Bühne.",
+    "priceText": "Preis auf Anfrage"
+  },
+  "festwochen-der-alten-musik": {
+    "description": "Die Innsbrucker Festwochen der Alten Musik feiern 2026 ihr 50-jähriges Jubiläum mit einer siebenstündigen Großoper unter dem Motto \"Was feiern wir?\". Von 24. Juli bis 30. August zeigen Stars der Alten Musik wie René Jacobs und Ottavio Dantone Opern, Konzerte und freie Open-Air-Formate.",
+    "priceText": "Preis auf Anfrage",
+    "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4b/%28c%29_Veronika_Lercher.jpg/3840px-%28c%29_Veronika_Lercher.jpg"
+  },
+  "kunstmue-festival": {
+    "imageUrl": "https://www.kunstmue.at/wp-content/themes/kunstmue/images/logo.svg",
+    "description": "Das Kunstmue Festival feiert 2026 sein 23-jähriges Bestehen in Bad Goisern am Hallstättersee und ist ein Treffpunkt für Musikliebhaber, Kulturschaffende und Freigeister. An zwei Tagen spielen 11 Bands verschiedener Genres bei freiem Eintritt und Gratis-Camping.",
+    "priceText": "Eintritt frei"
+  },
+  "rollin-dudes": {
+    "description": "Das Rollin Dudes Festival ist ein Rock'n'Roll-Weekender mit US-Cars, Bikes, Live-Musik und Community-Feeling am Naturpark- und Besucherzentrum Grottenhof in Leibnitz. An drei Tagen (24.-26. Juli 2026) treten 8 Live-Bands und 5 DJs auf, dazu gibt es Hotrods, Pin-Ups, Barber Shop und Food Trucks.",
+    "priceText": "Eintritt frei für US-Car-Fahrer und Oldtimer (vor 1960); reguläre Tickets ab Vorverkauf 15.1.2026"
+  },
+  "outreach-festival": {
+    "imageUrl": "https://outreachmusic.org/media/383/pagebuilder/OR26%20Banner%281536%20x%201024%20px%29.png",
+    "description": "Das Outreach Festival in Schwaz ist eines der renommiertesten Jazz-Festivals Europas und besteht aus Festival und Academy. Auf drei Bühnen treffen internationale Musiker auf junge Talente aus aller Welt.",
+    "priceText": "ab € 33 (Tagesticket), € 59 (Festivalpass)"
+  },
+  "la-strada-kunst-findet-stadt": {
+    "description": "La Strada Graz ist ein internationales Festival für Straßenkunst, Figurentheater, neuen Zirkus und Community-Kunst. Vom 31. Juli bis 8. August 2026 verwandelt sich Graz in eine Bühne für Poesie des Alltags und kulturelle Vielfalt.",
+    "priceText": "Preis auf Anfrage"
+  },
+  "acoustic-campfire-festival": {
+    "description": "Das Acoustic Campfire Festival ist ein intimes Akustik-Festival in Österreich, bei dem internationale Singer-Songwriter und Indie-Acts auftreten. Die Ausgabe 2026 findet am 31. Juli und 1. August statt.",
+    "priceText": "Preis auf Anfrage"
+  },
+  "la-guitarra-essencial": {
+    "description": "Das 19. Internationale Gitarrenfestival La Guitarra Esencial in Millstatt am See bringt vom 4. bis 9. August 2026 internationale Gitarrenvirtuosen unter dem Motto „Sonidos de Corazón – Klänge des Herzens“ zusammen. Spielstätten sind unter anderem die Stiftskirche Millstatt und das Kongresshaus.",
+    "priceText": "Preis auf Anfrage"
+  },
+  "jopera-jennersdorf-kultursommer": {
+    "description": "Die jOPERA Jennersdorf (Festspiele Schloss Tabor) bringt vom 5. bis 16. August 2026 die Operette „Wiener Blut“ von Johann Strauss auf die Open-Air-Bühne auf Schloss Tabor in Neuhaus am Klausenbach. Das Festival gilt als eines der führenden Operetten-Festivals Europas.",
+    "priceText": "Preis auf Anfrage"
+  },
+  "musiksommer-korneuburg": {
+    "imageUrl": "https://korneuburgermusiksommer.at/wp-content/uploads/2020/11/KMS-Header.png",
+    "description": "Der Korneuburger Musiksommer in der Werfthalle bietet 2026 ein vielseitiges Programm von Musicals über Jazz-Pop bis Funk. Highlights sind Auftritte am 6., 8. und 14. August.",
+    "priceText": "Preis auf Anfrage"
+  },
+  "bezau-beatz": {
+    "imageUrl": "https://www.bezaubeatz.at/assets/elm/bb_wordmark.svg",
+    "description": "Bezau Beatz feiert 2026 seine 19. Ausgabe und bringt vom 6. bis 9. August kreative, improvisierte Musik in den Bregenzerwald. Internationale Künstler treten in der Remise, im Hotel Post und an weiteren Spielorten in Bezau auf.",
+    "priceText": "Preis auf Anfrage"
+  },
+  "montafoner-resonanzen": {
+    "description": "Die Montafoner Resonanzen sind ein klassisches Musikfestival vom 6. August bis 5. September 2026 in den Vorarlberger Alpen. An ungewöhnlichen Spielorten erklingen Blechbläser, Kammermusik, Jazz, Volksmusik, Cross-Over und Orgelmusik.",
+    "priceText": "ab € 22 (VVK), € 27 (Abendkasse); Festivalpass € 60",
+    "imageUrl": "https://www.montafon.at/montafon/grafiken_icons/events/montafoner-resonanzen/54693/image-thumb__54693__ogImage/MoRe_Website_1800x900px.53c2f2e6.jpg"
+  },
+  "sunny-days": {
+    "imageUrl": "https://wakmusic.at/wp-content/uploads/2025/02/Sunny-days-1_by-hannah-dornan-scaled.jpg",
+    "description": "Sunny Days ist ein community-orientiertes Open-Air-Festival am 7. und 8. August 2026 in Dietersdorf bei Wundschuh. Es feiert steirische Musiker:innen aus Pop, Rock, Indie und Singer-Songwriter abseits des Mainstreams.",
+    "priceText": "Eintritt frei"
+  },
+  "allegro-vivo": {
+    "description": "Das Kammermusikfestival Allegro Vivo lädt vom 7. August bis 20. September 2026 unter dem Motto „On Stage“ ins nördliche Niederösterreich. Im Zentrum steht ein Zyklus der Begegnungen mit Musiktraditionen aus Italien, dem Balkan und Österreich.",
+    "priceText": "Preis auf Anfrage",
+    "imageUrl": "https://www.allegro-vivo.at/wp-content/uploads/2017/02/allegro_vivo_logo_web.png"
+  },
+  "hiesige-dosige": {
+    "imageUrl": "https://cdn.prod.website-files.com/6243f34cb2747b2015795bde/62642240d219af82912282f8_hiesiege-dosige-logo.svg",
+    "description": "„Hiesige & Dosige – Die Nächte der Kulturen“ ist ein zweitägiges Weltmusik-Festival am 7. und 8. August 2026 in der Halle 3 am Messegelände Wieselburg. Der Eintritt ist frei, freiwillige Spenden tragen das ehrenamtlich organisierte Festival.",
+    "priceText": "Eintritt frei (Spendenbasis)"
+  },
+  "picture-on-festival": {
+    "imageUrl": "https://www.pictureon.at/_/img/po-logo2026.png",
+    "description": "Das Picture On Festival in Bildein im Südburgenland findet am 7. und 8. August 2026 statt und bietet ein buntes Genre-Spektrum von Reggae über Electronic, Folk bis Metal. Die Bühnen liegen mitten im 350-Seelen-Dorf rund um Kirche und Platane.",
+    "priceText": "Preis auf Anfrage"
+  },
+  "hotelpupik-festival": {
+    "description": "Das Hotel Pupik ist ein internationales Artists-in-Residence-Programm in der Schwarzenberg'schen Meierei in Schrattenberg (Scheifling, Steiermark). Beim Festival am 7. und 8. August 2026 präsentieren bis zu 30 Gastkünstler:innen ihre Sommerresidenz-Projekte.",
+    "priceText": "Preis auf Anfrage",
+    "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/d/d2/StLorenzenSonnenb%C3%BChl.JPG"
+  },
+  "brucknertage": {
+    "imageUrl": "https://brucknertage.at/wp-content/uploads/2025/12/StFBt_Festival-2026_Instagram-square_1080x779px.jpg",
+    "description": "Die St. Florianer Brucknertage 2026 widmen sich vom 13. bis 22. August unter dem Motto „Die Magie der Fassung 1877“ Anton Bruckners III. Symphonie. Schauplatz ist das Augustiner Chorherrenstift St. Florian, Bruckners geistige Heimat.",
+    "priceText": "Preis auf Anfrage"
+  },
+  "afrika-tage-wien": {
+    "description": "Das Afrika Tage Wien Festival verwandelt die Donauinsel elf Tage lang in einen Schauplatz afrikanischer Musik, Kultur und Kulinarik. Geboten werden Konzerte, Workshops sowie ein Bazar mit Kunsthandwerk und exotischen Speisen.",
+    "priceText": "Tagestickets, Montags Eintritt frei"
+  },
+  "grafenegg-festival": {
+    "imageUrl": "https://noeku.on.damlivery.com/s/55fe08fd3d3b95d362b3550869025df4/noeku/767885/rm:fill/h:627/w:1200/q:90/rs:originalSizePng/f:webp/g:fp:0.5:0.5",
+    "description": "Das Grafenegg Festival feiert 2026 sein 20-jähriges Jubiläum mit einem hochkarätigen Programm aus Orchester- und Kammermusik im malerischen Schlosspark. Künstlerischer Leiter Rudolf Buchbinder versammelt internationale Stars und neu den Rudolf Buchbinder Saal als zusätzliche Bühne.",
+    "priceText": "Preis auf Anfrage"
+  },
+  "walser-herbst": {
+    "imageUrl": "https://walserherbst.at/wp-content/uploads/brizy/imgs/walserherbst-logo-252x23x0x0x252x23x1619621794.png",
+    "description": "Der Walserherbst ist ein biennales Kulturfestival für zeitgenössische Kunst und Kultur im Biosphärenpark Großes Walsertal in Vorarlberg. Über drei Wochen verbindet das Programm Tradition mit zeitgenössischer Kunst an Schauplätzen im gesamten Tal.",
+    "priceText": "Preis auf Anfrage"
+  },
+  "kaltenbach-open-air": {
+    "imageUrl": "https://kaltenbach-openair.at/wp-content/uploads/cropped-website-header-2026.jpg",
+    "description": "Das Kaltenbach Open Air gilt als Österreichs führendes Extreme-Metal-Open-Air und findet seit 2003 jährlich statt. An drei Tagen treten 36 Bands aus Death Metal, Black Metal, Grindcore und Viking Metal auf.",
+    "priceText": "Preis auf Anfrage"
+  },
+  "jazzfest-saalfelden": {
+    "description": "Das Jazzfestival Saalfelden zählt zu Europas renommiertesten Jazzevents und bringt jährlich über 60 Konzerte in die alpine Kulisse des Steinernen Meers. Spontane Sessions an außergewöhnlichen Orten und Wanderungen mit improvisierter Musik prägen das viertägige Programm.",
+    "priceText": "Preis auf Anfrage"
+  },
+  "ausseer-barocktage": {
+    "description": "Die Ausseer Barocktage präsentieren seit 2016 international renommierte Barockmusiker im Ausseerland. Drei Konzerte vereinen historisch informierte Aufführungspraxis mit ungewöhnlichen Programmen zwischen Alter Musik und Flamenco.",
+    "priceText": "Preis auf Anfrage"
+  },
+  "kammermusikfest-hopfgarten": {
+    "description": "Das Kammermusikfest Hopfgarten bringt seit 1995 unter der künstlerischen Leitung von Ramón Jaffé Kammermusik aus vier Jahrhunderten nach Tirol. Die 32. Edition 2026 bildet erneut eigens zusammengestellte Ensembles für jedes Programm.",
+    "priceText": "Preis auf Anfrage"
+  },
+  "volksstimmefest": {
+    "imageUrl": "https://www.volksstimmefest.at/wp-content/uploads/2025/03/2024-09-volksstimmefest-preview-086-1-scaled.jpg",
+    "description": "Das Volksstimmefest ist ein zweitägiges Open-Air-Festival auf der Jesuitenwiese im Wiener Prater mit drei Bühnen für Musik und Kulturprogramm. Die 79. Edition kombiniert Konzerte mit Ständen von NGOs, politischen Organisationen und internationaler Kulinarik.",
+    "priceText": "Eintritt frei"
+  },
+  "festival-ars-electronica": {
+    "imageUrl": "https://ars.electronica.art/news/files/2018/10/facade.jpg",
+    "description": "Das Ars Electronica Festival ist das weltweit größte Festival für Kunst, Technologie und Gesellschaft und steht 2026 unter dem Motto „Future Begins – Negotiating Humanity“. Fünf Tage lang verwandeln drei Hubs (OK Quarter, Med Campus, Donauspitz) Linz in eine Bühne für Ausstellungen, Performances, Konferenzen und Workshops.",
+    "priceText": "Preis auf Anfrage"
+  },
+  "herbstlärm": {
+    "description": "Das Herbstlärm-Festival ist ein dreitägiges Kulturfestival der kultur:plattform im Haus der Musik in St. Johann im Pongau. Unter dem Motto „Tage der musikalischen Vielfalt“ präsentiert es ein breites Spektrum musikalischer Stile.",
+    "priceText": "Preis auf Anfrage"
+  },
+  "wanderbare-gipfelklaenge": {
+    "description": "Die Wanderbaren Gipfelklänge sind das Mostviertler Wander-Festival, das Bergspitzen rund um Reinsberg in Open-Air-Bühnen verwandelt. Hunderte Wanderer erleben drei Tage lang ein Wechselspiel aus klassischer und volksmusikalischer Performance in alpiner Kulisse.",
+    "priceText": "Eintritt frei für Kinder und Jugendliche unter 18, sonst Preis auf Anfrage"
+  },
+  "most-jazz": {
+    "description": "Most + Jazz ist mit 25 Jahren Geschichte einer der größten Open-Air-Jazzclubs Österreichs und findet jährlich in Fehring im steirischen Thermen- & Vulkanland statt. Das Festival verbindet lokale Musiker mit internationalen Gästen und regionaler Kulinarik.",
+    "priceText": "ab € 67,50"
+  },
+  "herbstgold": {
+    "imageUrl": "https://www.herbstgold.at//imager/images/29361/HERBSTGOLD-COEcJuliaWesely-4_516c7187cb6fd957833153cf71fa6fef.jpg",
+    "description": "Das Herbstgold-Festival lädt im Schloss Esterházy in Eisenstadt zu einer musikalischen Reise unter dem Motto „Musik – Pulsschlag der Zeit“. Unter Intendant Julian Rachlin spannt sich das Programm von Haydn und Brahms bis zu Mozarts Requiem.",
+    "priceText": "Preis auf Anfrage"
+  },
+  "musiktheatertage-wien": {
+    "description": "Die Musiktheatertage Wien präsentieren an verschiedenen Wiener Spielstätten aktuelle Produktionen des zeitgenössischen Musiktheaters. Das Festival fokussiert auf experimentelle Bühnenformen zwischen Oper, Performance und neuer Musik.",
+    "priceText": "Preis auf Anfrage",
+    "imageUrl": "https://mttw.at/wp-content/uploads/MTTW-2025-OG_1200.jpg"
+  },
+  "aufsteirern": {
+    "imageUrl": "https://aufsteirern.at/wp-content/uploads/2025/09/Titelbild-2026.png",
+    "description": "Das Aufsteirern ist Österreichs größtes Volkskulturfest und verwandelt die Grazer Innenstadt in eine Bühne für Volksmusik, Tanz, Brauchtum, Handwerk und steirische Kulinarik. Auf 8 Bühnen und 7 Tanzböden treten über 3.500 Akteure auf.",
+    "priceText": "Eintritt frei"
+  },
+  "steirischer-herbst": {
+    "description": "Der steirische herbst ist eines der ältesten und renommiertesten Festivals für zeitgenössische Kunst in Europa. Die 59. Ausgabe 2026 widmet sich Performance, Bildender Kunst, Theater, Musik und Diskurs in Graz.",
+    "priceText": "Preis auf Anfrage",
+    "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/9/9f/Steirischer_Herbst_Logo_2020_%28240920%29.svg"
+  },
+  "stp-metalweekend": {
+    "imageUrl": "https://www.freiraum-stp.at/wp-content/uploads/event_api/212021-4532418-plakatlineupkomplettklein-detail-284x400.jpg",
+    "description": "Das STP Metalweekend ist Niederösterreichs Heavy-Metal-Treffpunkt im Freiraum St. Pölten und bringt zwei Tage lang internationale und österreichische Metal-Bands auf die Bühne. Erwartet werden Death-, Black-, Power- und Thrash-Acts samt Late-Night-Party.",
+    "priceText": "ab € 30"
+  },
+  "waves-vienna-festival": {
+    "imageUrl": "https://cdn.prod.website-files.com/6401d501879d24baff254b06/67d03b0d1b51fb6c98ee8a86_Waves%20Vienna%202025%20Logo%20Background.png",
+    "description": "Waves Vienna ist Österreichs führendes Showcase-Festival und verbindet drei Tage Musikkonferenz mit über 100 Acts an verschiedenen Wiener Clubs. Der Schwerpunkt 2026 liegt auf Großbritannien als Ehrengastland sowie auf KI, Sync und Copyright im Musikbusiness.",
+    "priceText": "ab € 22"
+  },
+  "jazz-the-city": {
+    "imageUrl": "https://www.salzburg-altstadt.at/gastro-mai-2020/jazz_and_the_city/logo/logo_jazz.png",
+    "description": "Jazz & The City verwandelt die Salzburger Altstadt vier Tage lang in eine offene Bühne für Jazz, Global Groove und elektronische Musik. Über 50 internationale Acts spielen bei freiem Eintritt an Originalschauplätzen, Plätzen und Kirchen.",
+    "priceText": "Eintritt frei"
+  },
+  "folk-art-festival": {
+    "imageUrl": "https://www.folkart.at/wp-content/uploads/2026/05/folkart26_Logo-1.png",
+    "description": "Das folk.art Festival Graz feiert die kulturelle Vielfalt der Weltmusik. Unter dem Motto 'Fest des Lebens' spielen über 19 Tage internationale und österreichische Acts in Konzertsälen, Cafés und auf Plätzen der Grazer Innenstadt.",
+    "priceText": "Preis auf Anfrage"
+  },
+  "viennale": {
+    "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/b/bf/Viennale_logo.svg",
+    "description": "Die Viennale ist Österreichs wichtigstes internationales Filmfestival und zeigt jährlich rund 300 ausgewählte Spiel-, Dokumentar- und Kurzfilme. Sie zählt zu den ältesten und renommiertesten Festivals im deutschsprachigen Raum mit etwa 92.000 Besucher:innen jährlich.",
+    "priceText": "Preis auf Anfrage"
+  },
+  "winterfest": {
+    "imageUrl": "https://www.winterfest.at/wp-content/uploads/2025/05/7-Carre-%C2%A9-Le-Bon-Marche-Rive-Gauche-scaled.jpg",
+    "description": "Das Winterfest Salzburg ist das größte Festival für zeitgenössischen Circus im deutschsprachigen Raum. Von Ende November bis Anfang Januar verwandelt sich der Salzburger Volksgarten in eine zauberhafte Zirkuslandschaft mit international renommierten Circus-Companies.",
+    "priceText": "Preis auf Anfrage"
+  },
+  "impuls-impuls-festival": {
+    "imageUrl": "https://www.impuls.cc/fileadmin/user_upload/0421_website_headerbild_2026_gedreht.gif",
+    "description": "Impuls ist die Internationale Ensemble- und Komponist:innen-Akademie für zeitgenössische Musik in Graz, gegründet von Beat Furrer und Ernst Kovacic. 2026 finden MinuteConcerts und das Format 'Text im Klang' statt; das nächste vollständige Festival folgt im Februar 2027.",
+    "priceText": "Eintritt frei"
+  }
+}

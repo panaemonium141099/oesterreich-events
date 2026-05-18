@@ -1,0 +1,167 @@
+{
+  "outreach-festival": {
+    "lineup": [
+      {"name": "The Earth Synth", "billing": "headliner"},
+      {"name": "Outreach Orchestra", "billing": "headliner"},
+      {"name": "Nils Kugelmann Trio", "billing": "headliner"},
+      {"name": "Kenji Herbert Trio", "billing": "headliner"},
+      {"name": "Sweetlife", "billing": "support"},
+      {"name": "Steinlechner/Peranovic/Zink feat. Tobi Schmid", "billing": "support"},
+      {"name": "FÖN3", "billing": "support"},
+      {"name": "Meat Cheese Acoustic", "billing": "support"},
+      {"name": "Raphael Huber and Matthias Legner Duo", "billing": "support"},
+      {"name": "Antobia", "billing": "support"},
+      {"name": "Raupe", "billing": "support"}
+    ],
+    "imageUrl": "https://outreachmusic.org/media/383/pagebuilder/OR26%20Banner%281536%20x%201024%20px%29.png",
+    "description": "Das Outreach Festival in Schwaz ist eines der renommiertesten Jazz-Festivals Europas und besteht aus Festival und Academy. Auf drei Bühnen treffen internationale Musiker auf junge Talente aus aller Welt.",
+    "priceText": "ab € 33 (Tagesticket), € 59 (Festivalpass)"
+  },
+  "la-strada-kunst-findet-stadt": {
+    "lineup": [
+      {"name": "Collectif XY - Möbius", "billing": "headliner"},
+      {"name": "Marcos Krivocapich", "billing": "support"}
+    ],
+    "imageUrl": "https://www.lastrada.at/wp-content/uploads/2024/06/lastrada-logo.svg",
+    "description": "La Strada Graz ist ein internationales Festival für Straßenkunst, Figurentheater, neuen Zirkus und Community-Kunst. Vom 31. Juli bis 8. August 2026 verwandelt sich Graz in eine Bühne für Poesie des Alltags und kulturelle Vielfalt.",
+    "priceText": "Preis auf Anfrage"
+  },
+  "acoustic-campfire-festival": {
+    "lineup": [
+      {"name": "Patrice", "billing": "headliner"},
+      {"name": "AVEC", "billing": "headliner"},
+      {"name": "Fiva", "billing": "headliner"},
+      {"name": "Tim Vantol", "billing": "support"},
+      {"name": "Three for Silver", "billing": "support"},
+      {"name": "Son of the Velvet Rat", "billing": "support"},
+      {"name": "Velvet Wasted", "billing": "support"},
+      {"name": "Yunger", "billing": "support"},
+      {"name": "VZI", "billing": "support"},
+      {"name": "Christian", "billing": "support"}
+    ],
+    "imageUrl": null,
+    "description": "Das Acoustic Campfire Festival ist ein intimes Akustik-Festival in Österreich, bei dem internationale Singer-Songwriter und Indie-Acts auftreten. Die Ausgabe 2026 findet am 31. Juli und 1. August statt.",
+    "priceText": "Preis auf Anfrage"
+  },
+  "la-guitarra-essencial": {
+    "lineup": [
+      {"name": "Hirundo Maris (Arianna Savall & Petter U. Johansen)", "billing": "headliner"},
+      {"name": "Daniel Casares Flamenco Sextett", "billing": "headliner"},
+      {"name": "Julia Malischnig MOVING STRINGS", "billing": "headliner"},
+      {"name": "Guo Gan Swordmen Trio", "billing": "headliner"},
+      {"name": "Duo Laetus & Nadja Kayali", "billing": "support"},
+      {"name": "La Familia Rosenberg", "billing": "support"},
+      {"name": "Ensemble Kreativ", "billing": "support"}
+    ],
+    "imageUrl": null,
+    "description": "Das 19. Internationale Gitarrenfestival La Guitarra Esencial in Millstatt am See bringt vom 4. bis 9. August 2026 internationale Gitarrenvirtuosen unter dem Motto „Sonidos de Corazón – Klänge des Herzens“ zusammen. Spielstätten sind unter anderem die Stiftskirche Millstatt und das Kongresshaus.",
+    "priceText": "Preis auf Anfrage"
+  },
+  "jopera-jennersdorf-kultursommer": {
+    "lineup": [
+      {"name": "Wiener Blut (Johann Strauss) – Festspielproduktion", "billing": "headliner"},
+      {"name": "Alfons Haider (Intendant)", "billing": "support"}
+    ],
+    "imageUrl": null,
+    "description": "Die jOPERA Jennersdorf (Festspiele Schloss Tabor) bringt vom 5. bis 16. August 2026 die Operette „Wiener Blut“ von Johann Strauss auf die Open-Air-Bühne auf Schloss Tabor in Neuhaus am Klausenbach. Das Festival gilt als eines der führenden Operetten-Festivals Europas.",
+    "priceText": "Preis auf Anfrage"
+  },
+  "musiksommer-korneuburg": {
+    "lineup": [
+      {"name": "Missy May", "billing": "headliner"},
+      {"name": "Mark Seibert", "billing": "headliner"},
+      {"name": "Lukas Perman", "billing": "headliner"},
+      {"name": "Simone Kopmajer & Band", "billing": "headliner"},
+      {"name": "L.A. Funk Collective", "billing": "support"},
+      {"name": "The Bad Powells", "billing": "support"}
+    ],
+    "imageUrl": "https://korneuburgermusiksommer.at/wp-content/uploads/2020/11/KMS-Header.png",
+    "description": "Der Korneuburger Musiksommer in der Werfthalle bietet 2026 ein vielseitiges Programm von Musicals über Jazz-Pop bis Funk. Highlights sind Auftritte am 6., 8. und 14. August.",
+    "priceText": "Preis auf Anfrage"
+  },
+  "bezau-beatz": {
+    "lineup": [
+      {"name": "Valentin Gerhardus Solo", "billing": "headliner"},
+      {"name": "Teis Semey Quintet", "billing": "headliner"},
+      {"name": "Hilde", "billing": "support"},
+      {"name": "Edward Perraud's Sauvages Paradis", "billing": "support"},
+      {"name": "Kalle Kalima DETOURS", "billing": "support"}
+    ],
+    "imageUrl": "https://www.bezaubeatz.at/assets/elm/bb_wordmark.svg",
+    "description": "Bezau Beatz feiert 2026 seine 19. Ausgabe und bringt vom 6. bis 9. August kreative, improvisierte Musik in den Bregenzerwald. Internationale Künstler treten in der Remise, im Hotel Post und an weiteren Spielorten in Bezau auf.",
+    "priceText": "Preis auf Anfrage"
+  },
+  "montafoner-resonanzen": {
+    "lineup": [
+      {"name": "Brass-Programm", "billing": "headliner"},
+      {"name": "Kammermusik-Programm", "billing": "headliner"},
+      {"name": "Jazz-Programm", "billing": "headliner"},
+      {"name": "Volksmusik-Programm", "billing": "support"},
+      {"name": "Cross-Over-Programm", "billing": "support"},
+      {"name": "Orgelkonzerte", "billing": "support"}
+    ],
+    "imageUrl": null,
+    "description": "Die Montafoner Resonanzen sind ein klassisches Musikfestival vom 6. August bis 5. September 2026 in den Vorarlberger Alpen. An ungewöhnlichen Spielorten erklingen Blechbläser, Kammermusik, Jazz, Volksmusik, Cross-Over und Orgelmusik.",
+    "priceText": "ab € 22 (VVK), € 27 (Abendkasse); Festivalpass € 60"
+  },
+  "sunny-days": {
+    "lineup": [],
+    "imageUrl": "https://wakmusic.at/wp-content/uploads/2025/02/Sunny-days-1_by-hannah-dornan-scaled.jpg",
+    "description": "Sunny Days ist ein community-orientiertes Open-Air-Festival am 7. und 8. August 2026 in Dietersdorf bei Wundschuh. Es feiert steirische Musiker:innen aus Pop, Rock, Indie und Singer-Songwriter abseits des Mainstreams.",
+    "priceText": "Eintritt frei"
+  },
+  "allegro-vivo": {
+    "lineup": [
+      {"name": "Vahid Khadem-Missagh (Künstlerischer Leiter)", "billing": "headliner"},
+      {"name": "Internationale Sommerakademie (500+ junge Musiker:innen)", "billing": "headliner"}
+    ],
+    "imageUrl": null,
+    "description": "Das Kammermusikfestival Allegro Vivo lädt vom 7. August bis 20. September 2026 unter dem Motto „On Stage“ ins nördliche Niederösterreich. Im Zentrum steht ein Zyklus der Begegnungen mit Musiktraditionen aus Italien, dem Balkan und Österreich.",
+    "priceText": "Preis auf Anfrage"
+  },
+  "hiesige-dosige": {
+    "lineup": [
+      {"name": "Die Tschechen", "billing": "headliner"},
+      {"name": "Mokoomba", "billing": "headliner"},
+      {"name": "Elektro Deluxe", "billing": "headliner"},
+      {"name": "Ukulele Death Squad", "billing": "support"},
+      {"name": "The Magic Mumble Jumble", "billing": "support"},
+      {"name": "Count Basic", "billing": "headliner"}
+    ],
+    "imageUrl": "https://cdn.prod.website-files.com/6243f34cb2747b2015795bde/62642240d219af82912282f8_hiesiege-dosige-logo.svg",
+    "description": "„Hiesige & Dosige – Die Nächte der Kulturen“ ist ein zweitägiges Weltmusik-Festival am 7. und 8. August 2026 in der Halle 3 am Messegelände Wieselburg. Der Eintritt ist frei, freiwillige Spenden tragen das ehrenamtlich organisierte Festival.",
+    "priceText": "Eintritt frei (Spendenbasis)"
+  },
+  "picture-on-festival": {
+    "lineup": [
+      {"name": "Inner Circle", "billing": "headliner"},
+      {"name": "H-Blockx", "billing": "headliner"},
+      {"name": "Stereo MCs", "billing": "headliner"},
+      {"name": "2raumwohnung", "billing": "headliner"},
+      {"name": "Clawfinger", "billing": "headliner"},
+      {"name": "Cari Cari", "billing": "support"},
+      {"name": "5/8erl in Ehrn", "billing": "support"},
+      {"name": "Itchy", "billing": "support"}
+    ],
+    "imageUrl": "https://www.pictureon.at/_/img/po-logo2026.png",
+    "description": "Das Picture On Festival in Bildein im Südburgenland findet am 7. und 8. August 2026 statt und bietet ein buntes Genre-Spektrum von Reggae über Electronic, Folk bis Metal. Die Bühnen liegen mitten im 350-Seelen-Dorf rund um Kirche und Platane.",
+    "priceText": "Preis auf Anfrage"
+  },
+  "hotelpupik-festival": {
+    "lineup": [],
+    "imageUrl": null,
+    "description": "Das Hotel Pupik ist ein internationales Artists-in-Residence-Programm in der Schwarzenberg'schen Meierei in Schrattenberg (Scheifling, Steiermark). Beim Festival am 7. und 8. August 2026 präsentieren bis zu 30 Gastkünstler:innen ihre Sommerresidenz-Projekte.",
+    "priceText": "Preis auf Anfrage"
+  },
+  "brucknertage": {
+    "lineup": [
+      {"name": "Katharina Wincor (Dirigentin)", "billing": "headliner"},
+      {"name": "Eggner-Trio", "billing": "headliner"},
+      {"name": "Alois Mühlbacher", "billing": "support"},
+      {"name": "Altomonte-Orchester (III. Symphonie)", "billing": "headliner"}
+    ],
+    "imageUrl": "https://brucknertage.at/wp-content/uploads/2025/12/StFBt_Festival-2026_Instagram-square_1080x779px.jpg",
+    "description": "Die St. Florianer Brucknertage 2026 widmen sich vom 13. bis 22. August unter dem Motto „Die Magie der Fassung 1877“ Anton Bruckners III. Symphonie. Schauplatz ist das Augustiner Chorherrenstift St. Florian, Bruckners geistige Heimat.",
+    "priceText": "Preis auf Anfrage"
+  }
+}

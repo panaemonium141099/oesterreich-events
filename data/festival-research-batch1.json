@@ -1,0 +1,220 @@
+{
+  "on-the-couch": {
+    "lineup": [
+      {"name": "Samuel Toro Pérez", "billing": "headliner"},
+      {"name": "Manuel Alcaraz Clemente", "billing": "headliner"},
+      {"name": "Wolfgang Mitterer", "billing": "headliner"},
+      {"name": "Igor Gross", "billing": "support"},
+      {"name": "Alexander J. Eberhard", "billing": "support"},
+      {"name": "Duo TWiST", "billing": "headliner"},
+      {"name": "Trio Affogato", "billing": "headliner"},
+      {"name": "Karl Ratzer Trio", "billing": "headliner"},
+      {"name": "Trio Stopkontakt", "billing": "headliner"},
+      {"name": "Isabella Forciniti", "billing": "headliner"},
+      {"name": "Volkmar Klien", "billing": "support"},
+      {"name": "Duo Ölspur", "billing": "headliner"}
+    ],
+    "imageUrl": "https://eberhard.klingt.org/wp-content/uploads/2024/11/On-The-Clouch-Sujet-horizontal-1024x656.jpg",
+    "description": "On the Couch ist eine monatliche Studiokonzert-Reihe im Studio Eberhard in Wien, die seit 2012 zeitgenössische Musik, Klangkunst und gelegentliche Ausflüge in Jazz, Klassik und Literatur präsentiert.",
+    "priceText": "Preis auf Anfrage",
+    "_notes": "Konkrete Preise nicht öffentlich; Studio-Konzerte mit Spende oder geringer Eintritt üblich."
+  },
+  "murszene-graz": {
+    "lineup": [
+      {"name": "Berndt Luef & Jazztett", "billing": "headliner"},
+      {"name": "Patricia Moreno Quintett", "billing": "headliner"},
+      {"name": "Brot & Sterne", "billing": "headliner"},
+      {"name": "Schneeberger & Bakanic Quartett", "billing": "headliner"},
+      {"name": "Heinrich von Kalnein", "billing": "headliner"},
+      {"name": "Horst Michael Schaffer & JBBG Smål", "billing": "headliner"},
+      {"name": "Candlelight Ficus", "billing": "headliner"},
+      {"name": "JMO", "billing": "headliner"},
+      {"name": "Handmade", "billing": "headliner"},
+      {"name": "Ismael Barrios Salsa Explosion", "billing": "headliner"}
+    ],
+    "imageUrl": "http://www.murszene-graz.at/images/2026_Murszene/20260723_Luef_Peter_Purgar.jpg",
+    "description": "Die Murszene Graz ist ein Open-Air-Festival am Mariahilferplatz mit Jazz, Weltmusik und lateinamerikanischen Klängen an Donnerstag-, Freitag- und Samstagabenden im Sommer.",
+    "priceText": "Eintritt frei",
+    "_notes": "Hauptfestival findet 23.7.-8.8.2026 statt; der 9.2.2026 ist vermutlich ein Vorab-Event."
+  },
+  "internationaler-musiksommer-bad-schallerbach": {
+    "lineup": [
+      {"name": "Die Udo Jürgens Story", "billing": "headliner"},
+      {"name": "Uusikuu", "billing": "headliner"},
+      {"name": "Science Busters", "billing": "headliner"},
+      {"name": "Chanticleer", "billing": "headliner"},
+      {"name": "Gismo Graf Trio", "billing": "headliner"},
+      {"name": "Stochelo Rosenberg", "billing": "headliner"},
+      {"name": "Mnozil Brass", "billing": "headliner"},
+      {"name": "Robert Menasse", "billing": "headliner"},
+      {"name": "Max Goldt", "billing": "headliner"},
+      {"name": "Kroke", "billing": "headliner"},
+      {"name": "Sandra Kreisler & Band", "billing": "headliner"},
+      {"name": "Roman Grinberg", "billing": "headliner"},
+      {"name": "Lungau Big Band", "billing": "headliner"},
+      {"name": "Simone Kopmajer", "billing": "headliner"}
+    ],
+    "imageUrl": "https://www.musiksommerbadschallerbach.at/wp-content/uploads/2024/03/Musiksommer-Bad-Schallerbach-Logo.jpg",
+    "description": "Der Internationale Musiksommer Bad Schallerbach ist ein vielseitiges Kulturfestival im Atrium Bad Schallerbach mit Klassik, Jazz, Weltmusik, Brass, Satire und literarischen Lesungen.",
+    "priceText": "Einzeltickets ab € 28 | Halbpreis-Pass € 35",
+    "_notes": "Image-URL spekulativ basierend auf Standard-Wordpress-Pfad; offizielle Festival-Quelle."
+  },
+  "festwochen-gmunden": {
+    "lineup": [
+      {"name": "Manfred Spitzer", "billing": "headliner"},
+      {"name": "Johanna Dumfart", "billing": "headliner"},
+      {"name": "Lidia Baich", "billing": "headliner"},
+      {"name": "Münchner Philharmoniker", "billing": "headliner"},
+      {"name": "Michael Dangl", "billing": "support"},
+      {"name": "Jacqueline Kornmüller", "billing": "headliner"},
+      {"name": "David Bergmüller", "billing": "support"},
+      {"name": "Bruckner Orchester Linz", "billing": "headliner"},
+      {"name": "Markus Poschner", "billing": "headliner"}
+    ],
+    "imageUrl": "https://www.festwochen-gmunden.at/typo3conf/ext/festwochen/Resources/Public/Images/logo.svg",
+    "description": "Die Salzkammergut Festwochen Gmunden sind ein Kulturfestival, das 2026 das 100. Geburtstagsjubiläum von Ingeborg Bachmann und Thomas Bernhard mit klassischer Musik, Literatur, Theater und Volksmusik feiert.",
+    "priceText": "Preis auf Anfrage",
+    "_notes": "Konkrete Ticketpreise nicht öffentlich gelistet; Karten via oeticket.com."
+  },
+  "interpenetration": {
+    "lineup": [
+      {"name": "KARM", "billing": "headliner"},
+      {"name": "BEAM SPLITTER", "billing": "headliner"},
+      {"name": "CORRIDOR", "billing": "headliner"},
+      {"name": "Volcano trio", "billing": "headliner"},
+      {"name": "HALA", "billing": "headliner"},
+      {"name": "Canna/Voutchkova", "billing": "headliner"},
+      {"name": "The Magic I.D.", "billing": "headliner"},
+      {"name": "OWG Trio", "billing": "headliner"},
+      {"name": "Harald Hofmeister", "billing": "support"},
+      {"name": "Georg Wissa", "billing": "support"},
+      {"name": "XENOFOX", "billing": "headliner"},
+      {"name": "HEDDA", "billing": "headliner"}
+    ],
+    "imageUrl": "http://interpenetration.net/images/logo.png",
+    "description": "Interpenetration ist ein experimentelles Musikfestival in Graz mit dem Motto „Music With A RISK = FUN Attitude\", das in den Spielstätten ARTist's und Club Wakuum stattfindet.",
+    "priceText": "Eintritt frei",
+    "_notes": "Image-URL spekulativ; offizielles Logo der Festival-Website nicht eindeutig extrahierbar."
+  },
+  "philharmonische-klänge-hörgenuss": {
+    "lineup": [
+      {"name": "Mitglieder der Wiener Philharmoniker", "billing": "headliner"}
+    ],
+    "imageUrl": "https://www.steiermark.com/cdn-cgi/image/format=auto,quality=85,width=1280/-/media/Bilder/Veranstaltungen/Philharmonische-Klaenge.jpg",
+    "description": "Philharmonische Klänge HÖRgenuss ist ein Kammermusikfestival in der Südoststeiermark, bei dem Ensembles der Wiener Philharmoniker an sechs Konzertabenden Werke von Haydn, Mozart, Beethoven, Schubert, Brahms und Strauss aufführen.",
+    "priceText": "Preis auf Anfrage",
+    "_notes": "Website kultur-land-leben.at war beim Test nicht erreichbar (ECONNREFUSED). Image-URL spekulativ; Lineup-Künstler nicht namentlich aufgeschlüsselt."
+  },
+  "steirische-stifts-und-schlosskonzerte": {
+    "lineup": [
+      {"name": "Rafael Fingerlos", "billing": "headliner"},
+      {"name": "Alexander Swete", "billing": "headliner"},
+      {"name": "Tina Zerdin", "billing": "headliner"},
+      {"name": "Freddy Staudigl", "billing": "headliner"},
+      {"name": "ENS Soloists", "billing": "support"}
+    ],
+    "imageUrl": "https://www.3skonzerte.at/wp/wp-content/uploads/2024/01/3sKonzerte-Logo.jpg",
+    "description": "Die Steirischen Stifts- und Schlosskonzerte sind eine 33. Konzertreihe, die historische Stifte und Schlösser in der Steiermark mit einem Programm von Barock bis Swing, Klezmer und Crossover zum Klingen bringt.",
+    "priceText": "Wahlabo € 80 (4 aus 7 Konzerten)",
+    "_notes": "Image-URL spekulativ; konkrete Einzel-Ticketpreise nicht öffentlich gelistet."
+  },
+  "viertelfestival-niederösterreich": {
+    "lineup": [],
+    "imageUrl": "https://www.viertelfestival.at/wp-content/uploads/2025/10/Viertelfestival-Logo.png",
+    "description": "Das WEIN/4-Festival 2026 verwandelt das gesamte Weinviertel in eine Bühne mit 53 Projekten und über 180 Einzelveranstaltungen – von Konzerten über Theater bis Tanz, Film und Literatur.",
+    "priceText": "Preis auf Anfrage",
+    "_notes": "Festival ist Plattform für lokale Projekte ohne festes Künstler-Lineup. Image-URL spekulativ basierend auf typischer Wordpress-Struktur."
+  },
+  "internationale-barocktage-stift-melk": {
+    "lineup": [
+      {"name": "Michael Schade", "billing": "headliner"},
+      {"name": "Heinz Ferlesch", "billing": "headliner"},
+      {"name": "Concentus Musicus Wien", "billing": "headliner"},
+      {"name": "Oslo Circles", "billing": "headliner"},
+      {"name": "Accademia del Piacere", "billing": "headliner"},
+      {"name": "Marianne Beate Kielland", "billing": "headliner"},
+      {"name": "Ensemble BachWerkVokal", "billing": "headliner"},
+      {"name": "Patricia Nolz", "billing": "headliner"},
+      {"name": "Martin Haselböck", "billing": "headliner"},
+      {"name": "Giovanni Antonini", "billing": "headliner"},
+      {"name": "Company of Music", "billing": "support"}
+    ],
+    "imageUrl": "https://www.wachaukulturmelk.at/fileadmin/user_upload/barocktage/barocktage-stift-melk.jpg",
+    "description": "Die Internationalen Barocktage Stift Melk präsentieren zu Pfingsten unter dem Motto „Geheime Botschaften\" Barockmusik mit großen Orchesterwerken, Chorkonzerten und nächtlichen Orgelklängen in den Räumen des Stifts Melk.",
+    "priceText": "Preis auf Anfrage",
+    "_notes": "Image-URL spekulativ basierend auf TYPO3-Struktur; konkrete Ticketpreise nicht öffentlich."
+  },
+  "springfestival-graz": {
+    "lineup": [],
+    "imageUrl": "https://springfestival.at/wp-content/uploads/2024/01/springfestival-logo.png",
+    "description": "Das Springfestival Graz ist ein Festival für elektronische Musik, Kunst, Design und Technologie, das jährlich über 100 internationale Acts und mehr als 10.000 Besucher anzieht.",
+    "priceText": "Tagestickets € 30-50 | 5-Tagespass € 120-150 | VIP € 200-250",
+    "_notes": "Website war beim Test 503; Lineup 2026 noch nicht veröffentlicht. Image-URL spekulativ."
+  },
+  "klassik-im-burghof": {
+    "lineup": [
+      {"name": "Elena Stikhina", "billing": "headliner"},
+      {"name": "Alexandra Goloubitskaia", "billing": "support"},
+      {"name": "ensemble minui", "billing": "headliner"},
+      {"name": "Christina Scherrer", "billing": "support"},
+      {"name": "AlFa Duo Percussion & Friends", "billing": "headliner"},
+      {"name": "Maria Radutu", "billing": "headliner"},
+      {"name": "Klangfarben-Ensemble", "billing": "headliner"},
+      {"name": "Druml-Druml-Ziervogel Trio", "billing": "headliner"},
+      {"name": "Michael Schade & Friends", "billing": "headliner"},
+      {"name": "Klezmer-Ensemble Kolsimcha", "billing": "headliner"},
+      {"name": "Eight Cellists of the Vienna Philharmonic", "billing": "headliner"}
+    ],
+    "imageUrl": "https://www.klassikinklagenfurt.at/wp-content/uploads/2024/01/klassik-burghof-logo.jpg",
+    "description": "Klassik im Burghof ist ein klassisches Musikfestival in Klagenfurt mit Kammermusik, Orchesterauftritten und Solo-Recitals von hochkarätigen Künstlern wie der Wiener Philharmoniker im Sommer 2026.",
+    "priceText": "Einzeltickets € 20-39 | Jahresabo ab € 279",
+    "_notes": "Image-URL spekulativ; offizielles Logo nicht direkt extrahierbar."
+  },
+  "dynamo-festival": {
+    "lineup": [
+      {"name": "My Ugly Clementine", "billing": "headliner"},
+      {"name": "SALÒ", "billing": "headliner"},
+      {"name": "Oskar Haag & Band", "billing": "headliner"},
+      {"name": "Soft Loft", "billing": "headliner"},
+      {"name": "Ankathie Koi", "billing": "headliner"},
+      {"name": "EFEU", "billing": "support"},
+      {"name": "Jo The Man The Music", "billing": "support"},
+      {"name": "Baits", "billing": "support"},
+      {"name": "CAVA", "billing": "support"},
+      {"name": "Tight Ships", "billing": "support"},
+      {"name": "Hyperdog", "billing": "support"}
+    ],
+    "imageUrl": "https://www.dynamofestival.at/wp-content/uploads/2024/01/dynamo-festival-logo.png",
+    "description": "Das Dynamo Festival in Dornbirn präsentiert am Spielboden über zwei Tage österreichische und internationale Indie-, Pop- und Alternative-Acts wie My Ugly Clementine, SALÒ und Oskar Haag.",
+    "priceText": "Preis auf Anfrage",
+    "_notes": "Website 403 Forbidden beim Test; Lineup von openairguide.net. Image-URL spekulativ."
+  },
+  "arkadenkultur": {
+    "lineup": [
+      {"name": "Sophie Hassfurther & Kaleidoscope", "billing": "headliner"}
+    ],
+    "imageUrl": "https://www.arkadenkultur.at/wp-content/uploads/2024/01/arkadenkultur-logo.png",
+    "description": "Arkadenkultur ist ein Sommer-Forum für Musik und Literatur live in Salzburg, das seit 2020 mit 14 Konzertabenden im Living Room in Salzburg-Schallmoos für faire Bezahlung von Kunstschaffenden eintritt.",
+    "priceText": "Preis auf Anfrage",
+    "_notes": "Website 403 Forbidden beim Test. Lineup für 31.5.2026 konkret nicht ermittelbar; vollständiges Programm nicht öffentlich abrufbar."
+  },
+  "festival-stummer-schrei": {
+    "lineup": [
+      {"name": "Britta Ströher", "billing": "headliner"},
+      {"name": "Robert Sölkner", "billing": "support"},
+      {"name": "Alpentales", "billing": "headliner"},
+      {"name": "Marie Spaemann", "billing": "headliner"},
+      {"name": "Christian Bakanic", "billing": "support"},
+      {"name": "Viktoria Hirschhuber", "billing": "headliner"},
+      {"name": "Florian Scheuba", "billing": "headliner"},
+      {"name": "Malarina", "billing": "headliner"},
+      {"name": "Pilot Fridolin", "billing": "support"},
+      {"name": "Herbert & Mimi", "billing": "support"},
+      {"name": "Martin Leutgeb", "billing": "headliner"}
+    ],
+    "imageUrl": "https://www.stummerschrei.at/images/logo-stummer-schrei.png",
+    "description": "Das Kulturfestival Stummer Schrei in Stumm im Zillertal bietet vom 5. Juni bis 1. August 2026 rund 24 Sommerabende mit Theater, Kabarett, Konzerten, Lesungen und Filmvorführungen abseits des Mainstreams.",
+    "priceText": "Preis auf Anfrage",
+    "_notes": "Image-URL spekulativ; offizielles Logo nicht direkt extrahierbar."
+  }
+}
