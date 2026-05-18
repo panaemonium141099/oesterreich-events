@@ -3,6 +3,9 @@ import { createServerSupabaseClient } from '@/lib/supabase/server';
 import type { Festival } from '@/types/festivals';
 import { V4FestivalCard } from '@/components/Events/v4';
 import { buildEventUrlV2 } from '@/lib/utils/slugify';
+import overridesJson from '../../../data/festival-overrides.json';
+
+const OVERRIDES = overridesJson as Record<string, { imageUrl?: string | null }>;
 
 export const metadata: Metadata = {
   title: 'Festivals in Österreich — lasstreffen.at',
@@ -56,9 +59,13 @@ export default async function FestivalsPage() {
           location_name: parentEvent.location_name,
         })
       : `/festivals/${f.slug}`;
+    const override = OVERRIDES[f.slug];
     return {
       ...(rest as Festival),
-      image_url: parentEvent?.image_url ?? festivalCategoryFallback(f.id),
+      image_url:
+        parentEvent?.image_url
+        ?? (override?.imageUrl ?? null)
+        ?? festivalCategoryFallback(f.id),
       href,
     };
   });

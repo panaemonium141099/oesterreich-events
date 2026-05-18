@@ -1,0 +1,173 @@
+{
+  "afrika-tage-wien": {
+    "lineup": [
+      {"name": "Valerie Ekoume", "billing": "headliner"},
+      {"name": "Sona Jobarteh", "billing": "headliner"},
+      {"name": "Leo Aberer", "billing": "support"},
+      {"name": "TRANCITIV", "billing": "support"},
+      {"name": "Kasiva Mutua", "billing": "support"},
+      {"name": "Jeys Marabini", "billing": "support"},
+      {"name": "Adama Dicko & Seno Blues", "billing": "support"}
+    ],
+    "imageUrl": "https://afrika-tage.at/wp-content/uploads/2024/05/Afrika-Tage-Logo.png",
+    "description": "Das Afrika Tage Wien Festival verwandelt die Donauinsel elf Tage lang in einen Schauplatz afrikanischer Musik, Kultur und Kulinarik. Geboten werden Konzerte, Workshops sowie ein Bazar mit Kunsthandwerk und exotischen Speisen.",
+    "priceText": "Tagestickets, Montags Eintritt frei"
+  },
+  "grafenegg-festival": {
+    "lineup": [
+      {"name": "Rudolf Buchbinder", "billing": "headliner"},
+      {"name": "Martha Argerich", "billing": "headliner"},
+      {"name": "Joyce DiDonato", "billing": "headliner"},
+      {"name": "Daniil Trifonov", "billing": "headliner"},
+      {"name": "Gautier Capuçon", "billing": "headliner"},
+      {"name": "Alexandre Kantorow", "billing": "headliner"},
+      {"name": "Piotr Beczała", "billing": "headliner"},
+      {"name": "Sergei Dogadin", "billing": "support"},
+      {"name": "Martin Fröst", "billing": "support"},
+      {"name": "Julia Hagen", "billing": "support"},
+      {"name": "Philharmonia Orchestra London", "billing": "headliner"},
+      {"name": "Tonkünstler-Orchester", "billing": "support"},
+      {"name": "Bayreuther Festspielorchester", "billing": "support"},
+      {"name": "Cristian Măcelaru", "billing": "support"},
+      {"name": "Yutaka Sado", "billing": "support"},
+      {"name": "Fabien Gabel", "billing": "support"},
+      {"name": "Pablo Heras-Casado", "billing": "support"}
+    ],
+    "imageUrl": "https://www.grafenegg.com/typo3conf/ext/template_grafenegg/Resources/Public/Images/logo.svg",
+    "description": "Das Grafenegg Festival feiert 2026 sein 20-jähriges Jubiläum mit einem hochkarätigen Programm aus Orchester- und Kammermusik im malerischen Schlosspark. Künstlerischer Leiter Rudolf Buchbinder versammelt internationale Stars und neu den Rudolf Buchbinder Saal als zusätzliche Bühne.",
+    "priceText": "Preis auf Anfrage"
+  },
+  "walser-herbst": {
+    "lineup": [],
+    "imageUrl": "https://walserherbst.at/wp-content/uploads/brizy/imgs/walserherbst-logo-252x23x0x0x252x23x1619621794.png",
+    "description": "Der Walserherbst ist ein biennales Kulturfestival für zeitgenössische Kunst und Kultur im Biosphärenpark Großes Walsertal in Vorarlberg. Über drei Wochen verbindet das Programm Tradition mit zeitgenössischer Kunst an Schauplätzen im gesamten Tal.",
+    "priceText": "Preis auf Anfrage"
+  },
+  "kaltenbach-open-air": {
+    "lineup": [
+      {"name": "Firespawn", "billing": "headliner"},
+      {"name": "1349", "billing": "headliner"},
+      {"name": "Finntroll", "billing": "headliner"},
+      {"name": "Sacred Reich", "billing": "headliner"},
+      {"name": "Gutalax", "billing": "support"},
+      {"name": "Centinex", "billing": "support"},
+      {"name": "Varathron", "billing": "support"},
+      {"name": "Einherjer", "billing": "support"},
+      {"name": "Tortharry", "billing": "support"}
+    ],
+    "imageUrl": "https://kaltenbach-openair.at/wp-content/uploads/cropped-website-header-2026.jpg",
+    "description": "Das Kaltenbach Open Air gilt als Österreichs führendes Extreme-Metal-Open-Air und findet seit 2003 jährlich statt. An drei Tagen treten 36 Bands aus Death Metal, Black Metal, Grindcore und Viking Metal auf.",
+    "priceText": "Preis auf Anfrage"
+  },
+  "jazzfest-saalfelden": {
+    "lineup": [
+      {"name": "Yvonne Moriel", "billing": "headliner"},
+      {"name": "Chicago Underground Duo", "billing": "headliner"},
+      {"name": "Yeah NO", "billing": "headliner"},
+      {"name": "Rob Mazurek", "billing": "support"},
+      {"name": "Chad Taylor", "billing": "support"},
+      {"name": "Chris Speed", "billing": "support"},
+      {"name": "Jim Black", "billing": "support"},
+      {"name": "Skúli Sverrisson", "billing": "support"},
+      {"name": "Cuong Vu", "billing": "support"}
+    ],
+    "imageUrl": "https://www.jazzsaalfelden.com/assets/Uploads/LogoJazzSaalfelden2022_small.png",
+    "description": "Das Jazzfestival Saalfelden zählt zu Europas renommiertesten Jazzevents und bringt jährlich über 60 Konzerte in die alpine Kulisse des Steinernen Meers. Spontane Sessions an außergewöhnlichen Orten und Wanderungen mit improvisierter Musik prägen das viertägige Programm.",
+    "priceText": "Preis auf Anfrage"
+  },
+  "ausseer-barocktage": {
+    "lineup": [
+      {"name": "Fahmi Alquai", "billing": "headliner"},
+      {"name": "Alba Camarona", "billing": "headliner"},
+      {"name": "Renate Linortner", "billing": "support"},
+      {"name": "Aniela Frey", "billing": "support"},
+      {"name": "Toni Burger", "billing": "support"},
+      {"name": "Sebastian Rastl", "billing": "support"},
+      {"name": "Robert Schröter", "billing": "support"},
+      {"name": "Concerto die Margherita", "billing": "headliner"}
+    ],
+    "imageUrl": null,
+    "description": "Die Ausseer Barocktage präsentieren seit 2016 international renommierte Barockmusiker im Ausseerland. Drei Konzerte vereinen historisch informierte Aufführungspraxis mit ungewöhnlichen Programmen zwischen Alter Musik und Flamenco.",
+    "priceText": "Preis auf Anfrage"
+  },
+  "kammermusikfest-hopfgarten": {
+    "lineup": [
+      {"name": "Ramón Jaffé", "billing": "headliner"}
+    ],
+    "imageUrl": null,
+    "description": "Das Kammermusikfest Hopfgarten bringt seit 1995 unter der künstlerischen Leitung von Ramón Jaffé Kammermusik aus vier Jahrhunderten nach Tirol. Die 32. Edition 2026 bildet erneut eigens zusammengestellte Ensembles für jedes Programm.",
+    "priceText": "Preis auf Anfrage"
+  },
+  "volksstimmefest": {
+    "lineup": [],
+    "imageUrl": "https://www.volksstimmefest.at/wp-content/uploads/2024/01/volksstimmefest-logo.png",
+    "description": "Das Volksstimmefest ist ein zweitägiges Open-Air-Festival auf der Jesuitenwiese im Wiener Prater mit drei Bühnen für Musik und Kulturprogramm. Die 79. Edition kombiniert Konzerte mit Ständen von NGOs, politischen Organisationen und internationaler Kulinarik.",
+    "priceText": "Eintritt frei"
+  },
+  "festival-ars-electronica": {
+    "lineup": [
+      {"name": "Gerfried Stocker", "billing": "headliner"}
+    ],
+    "imageUrl": "https://ars.electronica.art/futurebegins/files/2026/03/AE26-Future-Begins-Header.jpg",
+    "description": "Das Ars Electronica Festival ist das weltweit größte Festival für Kunst, Technologie und Gesellschaft und steht 2026 unter dem Motto „Future Begins – Negotiating Humanity“. Fünf Tage lang verwandeln drei Hubs (OK Quarter, Med Campus, Donauspitz) Linz in eine Bühne für Ausstellungen, Performances, Konferenzen und Workshops.",
+    "priceText": "Preis auf Anfrage"
+  },
+  "herbstlärm": {
+    "lineup": [],
+    "imageUrl": null,
+    "description": "Das Herbstlärm-Festival ist ein dreitägiges Kulturfestival der kultur:plattform im Haus der Musik in St. Johann im Pongau. Unter dem Motto „Tage der musikalischen Vielfalt“ präsentiert es ein breites Spektrum musikalischer Stile.",
+    "priceText": "Preis auf Anfrage"
+  },
+  "wanderbare-gipfelklaenge": {
+    "lineup": [
+      {"name": "Anna Buchegger", "billing": "headliner"},
+      {"name": "inwendig woarm Chor Reinsberg", "billing": "support"},
+      {"name": "Vivi Vassileva", "billing": "headliner"},
+      {"name": "Lucas Campara Diniz", "billing": "support"},
+      {"name": "Musikverein Reinsberg", "billing": "support"},
+      {"name": "Luomuduo", "billing": "support"}
+    ],
+    "imageUrl": "https://www.mostviertel.at/data/image/thumpnail/image.php?image=222/mostviertel_tourismus_article_4769_0.jpg&width=1200",
+    "description": "Die Wanderbaren Gipfelklänge sind das Mostviertler Wander-Festival, das Bergspitzen rund um Reinsberg in Open-Air-Bühnen verwandelt. Hunderte Wanderer erleben drei Tage lang ein Wechselspiel aus klassischer und volksmusikalischer Performance in alpiner Kulisse.",
+    "priceText": "Eintritt frei für Kinder und Jugendliche unter 18, sonst Preis auf Anfrage"
+  },
+  "most-jazz": {
+    "lineup": [
+      {"name": "Danzermania", "billing": "headliner"},
+      {"name": "Ina Regen", "billing": "headliner"},
+      {"name": "Cordoba78", "billing": "headliner"},
+      {"name": "Nenda", "billing": "headliner"},
+      {"name": "Purple Is The Color", "billing": "headliner"},
+      {"name": "Salo", "billing": "headliner"},
+      {"name": "Soko Dixie", "billing": "support"},
+      {"name": "Big Band Bad Gleichenberg", "billing": "support"},
+      {"name": "Wiener Tschuschenkapelle", "billing": "support"}
+    ],
+    "imageUrl": null,
+    "description": "Most + Jazz ist mit 25 Jahren Geschichte einer der größten Open-Air-Jazzclubs Österreichs und findet jährlich in Fehring im steirischen Thermen- & Vulkanland statt. Das Festival verbindet lokale Musiker mit internationalen Gästen und regionaler Kulinarik.",
+    "priceText": "ab € 67,50"
+  },
+  "herbstgold": {
+    "lineup": [
+      {"name": "Julian Rachlin", "billing": "headliner"},
+      {"name": "Rolando Villazón", "billing": "headliner"},
+      {"name": "Gabriela Montero", "billing": "headliner"},
+      {"name": "Ian Bostridge", "billing": "headliner"},
+      {"name": "Pablo Ferrández", "billing": "headliner"},
+      {"name": "Alexander Malofeev", "billing": "headliner"},
+      {"name": "Chamber Orchestra of Europe", "billing": "headliner"},
+      {"name": "Bamberger Symphoniker", "billing": "headliner"},
+      {"name": "Jerusalem Symphony Orchestra", "billing": "headliner"},
+      {"name": "Janoska Ensemble", "billing": "support"}
+    ],
+    "imageUrl": "https://www.herbstgold.at/sites/default/files/2024-11/herbstgold-logo.svg",
+    "description": "Das Herbstgold-Festival lädt im Schloss Esterházy in Eisenstadt zu einer musikalischen Reise unter dem Motto „Musik – Pulsschlag der Zeit“. Unter Intendant Julian Rachlin spannt sich das Programm von Haydn und Brahms bis zu Mozarts Requiem.",
+    "priceText": "Preis auf Anfrage"
+  },
+  "musiktheatertage-wien": {
+    "lineup": [],
+    "imageUrl": null,
+    "description": "Die Musiktheatertage Wien präsentieren an verschiedenen Wiener Spielstätten aktuelle Produktionen des zeitgenössischen Musiktheaters. Das Festival fokussiert auf experimentelle Bühnenformen zwischen Oper, Performance und neuer Musik.",
+    "priceText": "Preis auf Anfrage"
+  }
+}

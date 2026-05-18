@@ -1,0 +1,563 @@
+[
+  {
+    "slug": "afrika-tage-wien",
+    "url": "https://afrika-tage.at/wp-content/uploads/2024/05/Afrika-Tage-Logo.png",
+    "status": 404,
+    "contentType": "text/html",
+    "ok": false
+  },
+  {
+    "slug": "altenburger-musikademie",
+    "url": "https://altenburger-musikakademie.at/fileadmin/user_upload/startseite/teaser-top.jpg",
+    "status": 206,
+    "contentType": "image/jpeg",
+    "ok": true
+  },
+  {
+    "slug": "arkadenkultur",
+    "url": "https://www.arkadenkultur.at/wp-content/uploads/2024/01/arkadenkultur-logo.png",
+    "status": 403,
+    "contentType": "text/html; charset=UTF-8",
+    "ok": false
+  },
+  {
+    "slug": "aufsteirern",
+    "url": "https://aufsteirern.at/wp-content/uploads/2025/09/Titelbild-2026.png",
+    "status": 206,
+    "contentType": "image/png",
+    "ok": true
+  },
+  {
+    "slug": "bezau-beatz",
+    "url": "https://www.bezaubeatz.at/assets/elm/bb_wordmark.svg",
+    "status": 206,
+    "contentType": "image/svg+xml",
+    "ok": true
+  },
+  {
+    "slug": "bregenzer-festspiele",
+    "url": "https://bregenzerfestspiele.com/fileadmin/_processed_/la-traviata-2026-seebuehne.jpg",
+    "status": 404,
+    "contentType": "text/html; charset=utf-8",
+    "ok": false
+  },
+  {
+    "slug": "brucknertage",
+    "url": "https://brucknertage.at/wp-content/uploads/2025/12/StFBt_Festival-2026_Instagram-square_1080x779px.jpg",
+    "status": 206,
+    "contentType": "image/jpeg",
+    "ok": true
+  },
+  {
+    "slug": "cantus",
+    "url": "https://webomat.s3.eu-central-1.amazonaws.com/acc/278/2021/07/30/o/logo.png",
+    "status": 206,
+    "contentType": "image/png",
+    "ok": true
+  },
+  {
+    "slug": "carinthischer-sommer-ossiach-villach",
+    "url": "https://carinthischersommer.at/wp-content/uploads/2025/09/carinthischer-sommer-logo-2025.jpg",
+    "status": 206,
+    "contentType": "image/jpeg",
+    "ok": true
+  },
+  {
+    "slug": "clam-konzerte",
+    "url": "https://clamlive.at/wp-content/uploads/2026/04/CL26-SMW-09-webheader-DESKTOP.jpg",
+    "status": 206,
+    "contentType": "image/jpeg",
+    "ok": true
+  },
+  {
+    "slug": "donauinselfest",
+    "url": "https://donauinselfest.at/wp-content/themes/dif2023/img/DIF-LOGO_weiss.png",
+    "status": 206,
+    "contentType": "image/png",
+    "ok": true
+  },
+  {
+    "slug": "dynamo-festival",
+    "url": "https://www.dynamofestival.at/wp-content/uploads/2024/01/dynamo-festival-logo.png",
+    "status": 403,
+    "contentType": "text/html; charset=UTF-8",
+    "ok": false
+  },
+  {
+    "slug": "festival-ars-electronica",
+    "url": "https://ars.electronica.art/futurebegins/files/2026/03/AE26-Future-Begins-Header.jpg",
+    "status": 404,
+    "contentType": "text/html",
+    "ok": false
+  },
+  {
+    "slug": "festival-des-politischen-liedes",
+    "url": "https://kv-willy.at/wp-content/uploads/2018/05/Logo-Kulturverein-Willy.png",
+    "status": 0,
+    "contentType": null,
+    "ok": false,
+    "error": "fetch failed"
+  },
+  {
+    "slug": "festival-stummer-schrei",
+    "url": "https://www.stummerschrei.at/images/logo-stummer-schrei.png",
+    "status": 404,
+    "contentType": "text/html; charset=UTF-8",
+    "ok": false
+  },
+  {
+    "slug": "festwochen-der-alten-musik",
+    "url": "https://www.altemusik.at/AlteMusik/Fotos%20Sujet/2026/sujet-2026.jpg",
+    "status": 404,
+    "contentType": "text/html; charset=utf-8",
+    "ok": false
+  },
+  {
+    "slug": "festwochen-gmunden",
+    "url": "https://www.festwochen-gmunden.at/typo3conf/ext/festwochen/Resources/Public/Images/logo.svg",
+    "status": 404,
+    "contentType": null,
+    "ok": false
+  },
+  {
+    "slug": "folk-art-festival",
+    "url": "https://www.folkart.at/wp-content/uploads/2026/05/folkart26_Logo-1.png",
+    "status": 206,
+    "contentType": "image/png",
+    "ok": true
+  },
+  {
+    "slug": "glatt-verkehrt",
+    "url": "https://noeku.on.damlivery.com/s/5ba216518d07741cead1e825156a8310/noeku/869017/rm:fit/h:500/w:600/q:90/rs:originalSizePng/f:webp/g:fp:0.5:0.5",
+    "status": 200,
+    "contentType": "image/webp",
+    "ok": true
+  },
+  {
+    "slug": "goldegger-blues-folktage",
+    "url": "https://www.argebluesfolk.com/wp-content/uploads/2024/08/cropped-logo500x500-transparenter-Hintergrund.png",
+    "status": 206,
+    "contentType": "image/png",
+    "ok": true
+  },
+  {
+    "slug": "grafenegg-festival",
+    "url": "https://www.grafenegg.com/typo3conf/ext/template_grafenegg/Resources/Public/Images/logo.svg",
+    "status": 404,
+    "contentType": "image/gif",
+    "ok": false
+  },
+  {
+    "slug": "güssinger-kultur-sommer",
+    "url": "https://www.kultursommer.net/_processed_/e/d/csm_Tafelrunde-aktuell_c6e12f499b.jpg",
+    "status": 404,
+    "contentType": "text/html; charset=utf-8",
+    "ok": false
+  },
+  {
+    "slug": "herbstgold",
+    "url": "https://www.herbstgold.at/sites/default/files/2024-11/herbstgold-logo.svg",
+    "status": 404,
+    "contentType": "text/html; charset=UTF-8",
+    "ok": false
+  },
+  {
+    "slug": "hiesige-dosige",
+    "url": "https://cdn.prod.website-files.com/6243f34cb2747b2015795bde/62642240d219af82912282f8_hiesiege-dosige-logo.svg",
+    "status": 206,
+    "contentType": "image/svg+xml",
+    "ok": true
+  },
+  {
+    "slug": "impuls-impuls-festival",
+    "url": "https://www.impuls.cc/fileadmin/user_upload/0421_website_headerbild_2026_gedreht.gif",
+    "status": 206,
+    "contentType": "image/gif",
+    "ok": true
+  },
+  {
+    "slug": "impulstanz",
+    "url": "https://upload.wikimedia.org/wikipedia/commons/0/0c/MQ_Vienna_20100716_-_ImPulsTanz_opening_performance_098ff.jpg",
+    "status": 206,
+    "contentType": "image/jpeg",
+    "ok": true
+  },
+  {
+    "slug": "internationale-barocktage-stift-melk",
+    "url": "https://www.wachaukulturmelk.at/fileadmin/user_upload/barocktage/barocktage-stift-melk.jpg",
+    "status": 404,
+    "contentType": "image/gif",
+    "ok": false
+  },
+  {
+    "slug": "internationaler-musiksommer-bad-schallerbach",
+    "url": "https://www.musiksommerbadschallerbach.at/wp-content/uploads/2024/03/Musiksommer-Bad-Schallerbach-Logo.jpg",
+    "status": 200,
+    "contentType": "text/html; charset=UTF-8",
+    "ok": false
+  },
+  {
+    "slug": "interpenetration",
+    "url": "http://interpenetration.net/images/logo.png",
+    "status": 404,
+    "contentType": "text/html; charset=UTF-8",
+    "ok": false
+  },
+  {
+    "slug": "jazz-im-donaupark",
+    "url": "https://www.jazzpoint.at/donaupark/images/donaupark.jpg",
+    "status": 206,
+    "contentType": "image/jpeg",
+    "ok": true
+  },
+  {
+    "slug": "jazz-the-city",
+    "url": "https://www.salzburg-altstadt.at/gastro-mai-2020/jazz_and_the_city/logo/logo_jazz.png",
+    "status": 206,
+    "contentType": "image/png",
+    "ok": true
+  },
+  {
+    "slug": "jazzfest-saalfelden",
+    "url": "https://www.jazzsaalfelden.com/assets/Uploads/LogoJazzSaalfelden2022_small.png",
+    "status": 404,
+    "contentType": "text/html; charset=UTF-8",
+    "ok": false
+  },
+  {
+    "slug": "kaltenbach-open-air",
+    "url": "https://kaltenbach-openair.at/wp-content/uploads/cropped-website-header-2026.jpg",
+    "status": 206,
+    "contentType": "image/jpeg",
+    "ok": true
+  },
+  {
+    "slug": "kammermusikfest-lockenhaus",
+    "url": "https://images.squarespace-cdn.com/content/v1/59dbaaa9edaed80a4b1d1692/bf94a70a-58c1-409e-8007-bca2ae365fb4/BURG1+-+Niklas_Schnaubelt.jpg",
+    "status": 206,
+    "contentType": "image/jpeg",
+    "ok": true
+  },
+  {
+    "slug": "klassik-am-dom",
+    "url": "https://www.klassikamdom.at/wp-content/uploads/Klassik-am-dom_Logo.svg",
+    "status": 206,
+    "contentType": "image/svg+xml",
+    "ok": true
+  },
+  {
+    "slug": "klassik-im-burghof",
+    "url": "https://www.klassikinklagenfurt.at/wp-content/uploads/2024/01/klassik-burghof-logo.jpg",
+    "status": 404,
+    "contentType": "text/html;charset=utf-8",
+    "ok": false
+  },
+  {
+    "slug": "kultursommer-im-rosengarten",
+    "url": "https://www.rosengarten.cc/wp-content/uploads/ROSENGARTEN-LOGO-RZ.png",
+    "status": 206,
+    "contentType": "image/png",
+    "ok": true
+  },
+  {
+    "slug": "kultursommer-semmering",
+    "url": "https://www.kultursommer-semmering.at/wp-content/uploads/logo-kss.svg",
+    "status": 206,
+    "contentType": "image/svg+xml",
+    "ok": true
+  },
+  {
+    "slug": "kultursommer-wien",
+    "url": "https://kultursommer.wien/jart/prj3/festival/resources/images/logo_ohne_sonne.png",
+    "status": 206,
+    "contentType": "image/png",
+    "ok": true
+  },
+  {
+    "slug": "kunst-musik-forum-golling",
+    "url": "https://festspielegolling.at/wp-content/uploads/2022/02/Logo_Festspiele-Golling-Kunst-Kulinarik_klein-1.png",
+    "status": 206,
+    "contentType": "image/png",
+    "ok": true
+  },
+  {
+    "slug": "kunstmue-festival",
+    "url": "https://www.kunstmue.at/wp-content/themes/kunstmue/images/logo.svg",
+    "status": 206,
+    "contentType": "image/svg+xml",
+    "ok": true
+  },
+  {
+    "slug": "la-strada-kunst-findet-stadt",
+    "url": "https://www.lastrada.at/wp-content/uploads/2024/06/lastrada-logo.svg",
+    "status": 404,
+    "contentType": "text/html; charset=UTF-8",
+    "ok": false
+  },
+  {
+    "slug": "lehar-festival-bad-ischl",
+    "url": "https://www.leharfestival.at/wp-content/uploads/2023/06/logo_lehar_festival.svg",
+    "status": 206,
+    "contentType": "image/svg+xml",
+    "ok": true
+  },
+  {
+    "slug": "metastadt-open-air",
+    "url": "https://www.metastadtopenairs.com/fileadmin/_processed_/6/f/csm_240723_AIR__c_-Diana-Horst_00014_74c5af1d6d.jpg",
+    "status": 206,
+    "contentType": "image/jpeg",
+    "ok": true
+  },
+  {
+    "slug": "murszene-graz",
+    "url": "http://www.murszene-graz.at/images/2026_Murszene/20260723_Luef_Peter_Purgar.jpg",
+    "status": 206,
+    "contentType": "image/jpeg",
+    "ok": true
+  },
+  {
+    "slug": "musical-sommer-amstetten",
+    "url": "https://www.avb.am/wp-content/uploads/2025/10/the-band-musical-amstetten-2026.jpg",
+    "status": 404,
+    "contentType": "text/html; charset=iso-8859-1",
+    "ok": false
+  },
+  {
+    "slug": "musikfest-waidhofen",
+    "url": "https://folkclub.at/wp-content/uploads/2025/12/Musikfest-2026_Inserat-mini.jpg",
+    "status": 206,
+    "contentType": "image/jpeg",
+    "ok": true
+  },
+  {
+    "slug": "musikfestival-steyr",
+    "url": "https://www.musikfestivalsteyr.at/wp-content/uploads/musikfestival-steyr-hair-2026-02.jpg",
+    "status": 206,
+    "contentType": "image/jpeg",
+    "ok": true
+  },
+  {
+    "slug": "musiksommer-korneuburg",
+    "url": "https://korneuburgermusiksommer.at/wp-content/uploads/2020/11/KMS-Header.png",
+    "status": 206,
+    "contentType": "image/png",
+    "ok": true
+  },
+  {
+    "slug": "neuberger-kulturtage",
+    "url": "https://www.neuberger-kulturtage.org/v4/wp-content/uploads/2025/07/Filharmonie-Brno.jpg",
+    "status": 206,
+    "contentType": "image/jpeg",
+    "ok": true
+  },
+  {
+    "slug": "nordkette-wetterleuchten",
+    "url": "https://www.wetterleuchten.at/images/2026_Startseite_Termin.jpg",
+    "status": 206,
+    "contentType": "image/jpeg",
+    "ok": true
+  },
+  {
+    "slug": "on-the-couch",
+    "url": "https://eberhard.klingt.org/wp-content/uploads/2024/11/On-The-Clouch-Sujet-horizontal-1024x656.jpg",
+    "status": 206,
+    "contentType": "image/jpeg",
+    "ok": true
+  },
+  {
+    "slug": "oö-stiftskonzerte",
+    "url": "https://www.stiftskonzerte.at/wp-content/uploads/2026/02/Hayato-Sumino-c-Johanna-Berghorn.jpeg",
+    "status": 206,
+    "contentType": "image/jpeg",
+    "ok": true
+  },
+  {
+    "slug": "ottensheim-open-air",
+    "url": "https://ottensheimopenair.cargo.site/_site/img/oao-2026-logo.jpg",
+    "status": 404,
+    "contentType": "text/html; charset=UTF-8",
+    "ok": false
+  },
+  {
+    "slug": "outreach-festival",
+    "url": "https://outreachmusic.org/media/383/pagebuilder/OR26%20Banner%281536%20x%201024%20px%29.png",
+    "status": 206,
+    "contentType": "image/png",
+    "ok": true
+  },
+  {
+    "slug": "philharmonische-klänge-hörgenuss",
+    "url": "https://www.steiermark.com/cdn-cgi/image/format=auto,quality=85,width=1280/-/media/Bilder/Veranstaltungen/Philharmonische-Klaenge.jpg",
+    "status": 404,
+    "contentType": "text/html; charset=UTF-8",
+    "ok": false
+  },
+  {
+    "slug": "picture-on-festival",
+    "url": "https://www.pictureon.at/_/img/po-logo2026.png",
+    "status": 206,
+    "contentType": "image/png",
+    "ok": true
+  },
+  {
+    "slug": "popfest-wien",
+    "url": "https://popfest.at/wp-content/themes/videozoom/images/popfest-logo-2022.png",
+    "status": 206,
+    "contentType": "image/png",
+    "ok": true
+  },
+  {
+    "slug": "rollin-dudes",
+    "url": "https://www.rollindudes.com/images/rollin-dudes-festival-logo.png",
+    "status": 206,
+    "contentType": "text/html",
+    "ok": false
+  },
+  {
+    "slug": "salzburger-festspiele",
+    "url": "https://www.salzburgerfestspiele.at/fileadmin/_processed_/sf-2026-warhol-stopwatch.jpg",
+    "status": 404,
+    "contentType": "text/html; charset=UTF-8",
+    "ok": false
+  },
+  {
+    "slug": "schrammelklang-festival",
+    "url": "https://schrammelklang.at/wp-content/uploads/2022/11/schrammel-klang-festival-2022-copyright-stephan-mussil-cd.jpg",
+    "status": 206,
+    "contentType": "image/jpeg",
+    "ok": true
+  },
+  {
+    "slug": "seefestspiele-mörbisch",
+    "url": "https://www.seefestspiele-moerbisch.at/fileadmin-seefestspiele/ein-kaefig-voller-narren-2026/ekvn-website-header.jpg",
+    "status": 206,
+    "contentType": "image/jpeg",
+    "ok": true
+  },
+  {
+    "slug": "sommerszene-festival",
+    "url": "https://www.szene-salzburg.net/assets/uploads/e05bfe851f1d56230050f7/640.jpg",
+    "status": 206,
+    "contentType": "image/jpeg",
+    "ok": true
+  },
+  {
+    "slug": "springfestival-graz",
+    "url": "https://springfestival.at/wp-content/uploads/2024/01/springfestival-logo.png",
+    "status": 503,
+    "contentType": "text/html; charset=UTF-8",
+    "ok": false
+  },
+  {
+    "slug": "steirische-stifts-und-schlosskonzerte",
+    "url": "https://www.3skonzerte.at/wp/wp-content/uploads/2024/01/3sKonzerte-Logo.jpg",
+    "status": 404,
+    "contentType": "text/html; charset=UTF-8",
+    "ok": false
+  },
+  {
+    "slug": "steirischer-herbst",
+    "url": "https://www.steirischerherbst.at/images/sh26_FrancescaGrilli_01.jpg",
+    "status": 404,
+    "contentType": "text/html; charset=utf-8",
+    "ok": false
+  },
+  {
+    "slug": "stp-metalweekend",
+    "url": "https://www.freiraum-stp.at/wp-content/uploads/event_api/212021-4532418-plakatlineupkomplettklein-detail-284x400.jpg",
+    "status": 206,
+    "contentType": "image/jpeg",
+    "ok": true
+  },
+  {
+    "slug": "styriarte",
+    "url": "https://styriarte.com/wp-content/uploads/2024/01/styriarte-logo.png",
+    "status": 404,
+    "contentType": "text/html; charset=UTF-8",
+    "ok": false
+  },
+  {
+    "slug": "summa-cum-laude-international-youth-music-festival",
+    "url": "https://www.sclfestival.org/images/logos/Logo_SCL_Festival.png",
+    "status": 206,
+    "contentType": "image/png",
+    "ok": true
+  },
+  {
+    "slug": "sunny-days",
+    "url": "https://wakmusic.at/wp-content/uploads/2025/02/Sunny-days-1_by-hannah-dornan-scaled.jpg",
+    "status": 206,
+    "contentType": "image/jpeg",
+    "ok": true
+  },
+  {
+    "slug": "tonspuren",
+    "url": "https://www.tonspurenamasitz.com/_default_upload_bucket/header-bild-2.jpg",
+    "status": 206,
+    "contentType": "image/jpeg",
+    "ok": true
+  },
+  {
+    "slug": "viennale",
+    "url": "https://upload.wikimedia.org/wikipedia/commons/b/bf/Viennale_logo.svg",
+    "status": 206,
+    "contentType": "image/svg+xml",
+    "ok": true
+  },
+  {
+    "slug": "viertelfestival-niederösterreich",
+    "url": "https://www.viertelfestival.at/wp-content/uploads/2025/10/Viertelfestival-Logo.png",
+    "status": 404,
+    "contentType": "text/html; charset=UTF-8",
+    "ok": false
+  },
+  {
+    "slug": "volksstimmefest",
+    "url": "https://www.volksstimmefest.at/wp-content/uploads/2024/01/volksstimmefest-logo.png",
+    "status": 404,
+    "contentType": "text/html; charset=UTF-8",
+    "ok": false
+  },
+  {
+    "slug": "walser-herbst",
+    "url": "https://walserherbst.at/wp-content/uploads/brizy/imgs/walserherbst-logo-252x23x0x0x252x23x1619621794.png",
+    "status": 206,
+    "contentType": "image/png",
+    "ok": true
+  },
+  {
+    "slug": "wanderbare-gipfelklaenge",
+    "url": "https://www.mostviertel.at/data/image/thumpnail/image.php?image=222/mostviertel_tourismus_article_4769_0.jpg&width=1200",
+    "status": 404,
+    "contentType": "text/html; charset=utf-8",
+    "ok": false
+  },
+  {
+    "slug": "waves-vienna-festival",
+    "url": "https://www.wavesvienna.com/wp-content/uploads/2024/12/waves-vienna-logo.png",
+    "status": 404,
+    "contentType": "text/html; charset=utf-8",
+    "ok": false
+  },
+  {
+    "slug": "winterfest",
+    "url": "https://www.winterfest.at/wp-content/uploads/2025/05/7-Carre-%C2%A9-Le-Bon-Marche-Rive-Gauche-scaled.jpg",
+    "status": 206,
+    "contentType": "image/jpeg",
+    "ok": true
+  },
+  {
+    "slug": "woodstockenboi",
+    "url": "https://www.woodstockenboi.org/wood_pic/header_plain2026.png",
+    "status": 404,
+    "contentType": "text/html; charset=iso-8859-1",
+    "ok": false
+  },
+  {
+    "slug": "wörthersee-classics",
+    "url": "https://static.tildacdn.com/tild3233-6535-4864-a432-303431323866/Banner_Header_new_no.png",
+    "status": 206,
+    "contentType": "image/png",
+    "ok": true
+  }
+]

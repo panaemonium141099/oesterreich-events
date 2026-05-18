@@ -1,0 +1,93 @@
+{
+  "aufsteirern": {
+    "lineup": [
+      {"name": "Edmund", "billing": "headliner"},
+      {"name": "Oimara", "billing": "headliner"},
+      {"name": "Marianne Mendt", "billing": "headliner"},
+      {"name": "Fäaschtbänkler", "billing": "headliner"},
+      {"name": "Flying Pickets", "billing": "headliner"},
+      {"name": "Elementisch Steirisch", "billing": "support"},
+      {"name": "Matakustix", "billing": "support"},
+      {"name": "Chor der Kärntner in Graz", "billing": "support"}
+    ],
+    "imageUrl": "https://aufsteirern.at/wp-content/uploads/2025/09/Titelbild-2026.png",
+    "description": "Das Aufsteirern ist Österreichs größtes Volkskulturfest und verwandelt die Grazer Innenstadt in eine Bühne für Volksmusik, Tanz, Brauchtum, Handwerk und steirische Kulinarik. Auf 8 Bühnen und 7 Tanzböden treten über 3.500 Akteure auf.",
+    "priceText": "Eintritt frei"
+  },
+  "steirischer-herbst": {
+    "lineup": [],
+    "imageUrl": "https://www.steirischerherbst.at/images/sh26_FrancescaGrilli_01.jpg",
+    "description": "Der steirische herbst ist eines der ältesten und renommiertesten Festivals für zeitgenössische Kunst in Europa. Die 59. Ausgabe 2026 widmet sich Performance, Bildender Kunst, Theater, Musik und Diskurs in Graz.",
+    "priceText": "Preis auf Anfrage"
+  },
+  "stp-metalweekend": {
+    "lineup": [],
+    "imageUrl": "https://www.freiraum-stp.at/wp-content/uploads/event_api/212021-4532418-plakatlineupkomplettklein-detail-284x400.jpg",
+    "description": "Das STP Metalweekend ist Niederösterreichs Heavy-Metal-Treffpunkt im Freiraum St. Pölten und bringt zwei Tage lang internationale und österreichische Metal-Bands auf die Bühne. Erwartet werden Death-, Black-, Power- und Thrash-Acts samt Late-Night-Party.",
+    "priceText": "ab € 30"
+  },
+  "waves-vienna-festival": {
+    "lineup": [
+      {"name": "Christina Stürmer", "billing": "headliner"},
+      {"name": "Josh.", "billing": "headliner"},
+      {"name": "Baby Berserk", "billing": "support"},
+      {"name": "Lucia & The Best Boys", "billing": "support"},
+      {"name": "Kumbia Queers", "billing": "support"},
+      {"name": "Beaks", "billing": "support"},
+      {"name": "The Bug Club", "billing": "support"},
+      {"name": "Anoraak", "billing": "support"},
+      {"name": "Flora Hibberd", "billing": "support"},
+      {"name": "Indoor Foxes", "billing": "support"},
+      {"name": "Ziferblat", "billing": "support"},
+      {"name": "Tamara Flores", "billing": "support"}
+    ],
+    "imageUrl": "https://www.wavesvienna.com/wp-content/uploads/2024/12/waves-vienna-logo.png",
+    "description": "Waves Vienna ist Österreichs führendes Showcase-Festival und verbindet drei Tage Musikkonferenz mit über 100 Acts an verschiedenen Wiener Clubs. Der Schwerpunkt 2026 liegt auf Großbritannien als Ehrengastland sowie auf KI, Sync und Copyright im Musikbusiness.",
+    "priceText": "ab € 22"
+  },
+  "jazz-the-city": {
+    "lineup": [
+      {"name": "Yemen Blues", "billing": "headliner"},
+      {"name": "Ernst Molden & Neue Wiener Concert Schrammeln", "billing": "headliner"},
+      {"name": "Bab L'Bluz", "billing": "headliner"},
+      {"name": "Uri Caine", "billing": "headliner"},
+      {"name": "Andy Sheppard", "billing": "headliner"},
+      {"name": "Myra Melford", "billing": "headliner"},
+      {"name": "Noura Mint Seymali", "billing": "support"},
+      {"name": "Radio String Quartet", "billing": "support"},
+      {"name": "Pixvae", "billing": "support"},
+      {"name": "Les Frères Smith", "billing": "support"},
+      {"name": "Lylit", "billing": "support"},
+      {"name": "Marina & the Kats", "billing": "support"},
+      {"name": "Martin Klein", "billing": "support"},
+      {"name": "Ian Fisher", "billing": "support"}
+    ],
+    "imageUrl": "https://www.salzburg-altstadt.at/gastro-mai-2020/jazz_and_the_city/logo/logo_jazz.png",
+    "description": "Jazz & The City verwandelt die Salzburger Altstadt vier Tage lang in eine offene Bühne für Jazz, Global Groove und elektronische Musik. Über 50 internationale Acts spielen bei freiem Eintritt an Originalschauplätzen, Plätzen und Kirchen.",
+    "priceText": "Eintritt frei"
+  },
+  "folk-art-festival": {
+    "lineup": [],
+    "imageUrl": "https://www.folkart.at/wp-content/uploads/2026/05/folkart26_Logo-1.png",
+    "description": "Das folk.art Festival Graz feiert die kulturelle Vielfalt der Weltmusik. Unter dem Motto 'Fest des Lebens' spielen über 19 Tage internationale und österreichische Acts in Konzertsälen, Cafés und auf Plätzen der Grazer Innenstadt.",
+    "priceText": "Preis auf Anfrage"
+  },
+  "viennale": {
+    "lineup": [],
+    "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/b/bf/Viennale_logo.svg",
+    "description": "Die Viennale ist Österreichs wichtigstes internationales Filmfestival und zeigt jährlich rund 300 ausgewählte Spiel-, Dokumentar- und Kurzfilme. Sie zählt zu den ältesten und renommiertesten Festivals im deutschsprachigen Raum mit etwa 92.000 Besucher:innen jährlich.",
+    "priceText": "Preis auf Anfrage"
+  },
+  "winterfest": {
+    "lineup": [],
+    "imageUrl": "https://www.winterfest.at/wp-content/uploads/2025/05/7-Carre-%C2%A9-Le-Bon-Marche-Rive-Gauche-scaled.jpg",
+    "description": "Das Winterfest Salzburg ist das größte Festival für zeitgenössischen Circus im deutschsprachigen Raum. Von Ende November bis Anfang Januar verwandelt sich der Salzburger Volksgarten in eine zauberhafte Zirkuslandschaft mit international renommierten Circus-Companies.",
+    "priceText": "Preis auf Anfrage"
+  },
+  "impuls-impuls-festival": {
+    "lineup": [],
+    "imageUrl": "https://www.impuls.cc/fileadmin/user_upload/0421_website_headerbild_2026_gedreht.gif",
+    "description": "Impuls ist die Internationale Ensemble- und Komponist:innen-Akademie für zeitgenössische Musik in Graz, gegründet von Beat Furrer und Ernst Kovacic. 2026 finden MinuteConcerts und das Format 'Text im Klang' statt; das nächste vollständige Festival folgt im Februar 2027.",
+    "priceText": "Eintritt frei"
+  }
+}

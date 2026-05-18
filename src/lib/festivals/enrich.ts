@@ -17,6 +17,7 @@
  */
 import * as cheerio from 'cheerio';
 import { unstable_cache } from 'next/cache';
+import overridesJson from '../../../data/festival-overrides.json';
 
 export interface FestivalEnrichment {
   imageUrl: string | null;
@@ -26,6 +27,24 @@ export interface FestivalEnrichment {
   fetchedFromUrl: string | null;
   fetchedAt: string;           // ISO timestamp — useful for debugging
 }
+
+/**
+ * Hand-curated overrides for festivals whose websites can't be reached or
+ * don't expose og:image / JSON-LD. Loaded from data/festival-overrides.json
+ * at build time and merged on top of runtime enrichment (override wins).
+ *
+ * Keys are festival slugs (must match festivals.slug exactly).
+ */
+interface FestivalOverride {
+  imageUrl?: string | null;
+  description?: string | null;
+  priceText?: string | null;
+}
+const OVERRIDES: Record<string, FestivalOverride> = Object.fromEntries(
+  Object.entries(overridesJson as Record<string, unknown>).filter(
+    ([k, v]) => !k.startsWith('_') && v && typeof v === 'object',
+  ),
+) as Record<string, FestivalOverride>;
 
 const EMPTY: FestivalEnrichment = {
   imageUrl: null,
@@ -317,12 +336,24 @@ async function buildEnrichment(websiteUrl: string): Promise<FestivalEnrichment> 
 // waiting out the 24h TTL.
 const CACHE_VERSION = 'v4-noise-filter';
 
-export function getFestivalEnrichment(websiteUrl: string | null, slug: string): Promise<FestivalEnrichment> {
-  if (!websiteUrl) return Promise.resolve(EMPTY);
+function applyOverride(enrichment: FestivalEnrichment, slug: string): FestivalEnrichment {
+  const ov = OVERRIDES[slug];
+  if (!ov) return enrichment;
+  return {
+    ...enrichment,
+    imageUrl: ov.imageUrl ?? enrichment.imageUrl,
+    description: ov.description ?? enrichment.description,
+    priceText: ov.priceText ?? enrichment.priceText,
+  };
+}
+
+export async function getFestivalEnrichment(websiteUrl: string | null, slug: string): Promise<FestivalEnrichment> {
+  if (!websiteUrl) return applyOverride(EMPTY, slug);
   const cached = unstable_cache(
     async (url: string) => buildEnrichment(url),
     ['festival-enrichment', CACHE_VERSION, slug],
     { revalidate: 60 * 60 * 24, tags: [`festival-enrichment:${slug}`] },
   );
-  return cached(websiteUrl);
+  const runtime = await cached(websiteUrl);
+  return applyOverride(runtime, slug);
 }

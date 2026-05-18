@@ -1,0 +1,209 @@
+{
+  "musikfest-waidhofen": {
+    "lineup": [],
+    "imageUrl": "https://folkclub.at/wp-content/uploads/2025/12/Musikfest-2026_Inserat-mini.jpg",
+    "description": "Das 45. Internationale Musikfest Waidhofen an der Thaya findet vom 3. bis 5. Juli 2026 statt und präsentiert ein breites musikalisches Spektrum von Blues, Roots, Jazz und Funk bis zu globaler Folk- und Weltmusik. Künstler aus Marokko, Niger, Spanien, Dänemark, Finnland und weiteren Ländern bereichern das Programm.",
+    "priceText": "Preis auf Anfrage"
+  },
+  "cantus": {
+    "lineup": [],
+    "imageUrl": "https://webomat.s3.eu-central-1.amazonaws.com/acc/278/2021/07/30/o/logo.png",
+    "description": "Das Cantus MM International Music & Culture Festival in Salzburg bringt seit über 20 Jahren Chöre, Musiker und Tänzer aus aller Welt zusammen. Aufgeführt wird in prestigeträchtigen Sälen wie dem Mozarteum, im Salzburger Dom und in den Mirabellgärten – im Mittelpunkt steht der kulturelle Austausch durch Musik.",
+    "priceText": "Preis auf Anfrage"
+  },
+  "kammermusikfest-lockenhaus": {
+    "lineup": [
+      {"name": "Nicolas Altstaedt", "billing": "headliner"},
+      {"name": "Sir András Schiff", "billing": "headliner"},
+      {"name": "Ian Bostridge", "billing": "headliner"},
+      {"name": "Heinz Holliger", "billing": "headliner"},
+      {"name": "Olli Mustonen", "billing": "headliner"},
+      {"name": "Alexander Lonquich", "billing": "support"},
+      {"name": "Chaos String Quartet", "billing": "support"},
+      {"name": "Trio Gaspard", "billing": "support"},
+      {"name": "Anna-Lena Elbert", "billing": "support"},
+      {"name": "Jonian Ilias Kadesha", "billing": "support"},
+      {"name": "Vashti Mimosa Hunter", "billing": "support"},
+      {"name": "Nicholas Rimmer", "billing": "support"},
+      {"name": "Cristina Galietto", "billing": "support"},
+      {"name": "Frederic Belli", "billing": "support"},
+      {"name": "Itamar Carmeli", "billing": "support"},
+      {"name": "Marley Erickson", "billing": "support"},
+      {"name": "Avery Gagliano", "billing": "support"},
+      {"name": "Anna Pismak", "billing": "support"},
+      {"name": "Inmo Yang", "billing": "support"},
+      {"name": "Korossy Quartet", "billing": "support"}
+    ],
+    "imageUrl": "https://images.squarespace-cdn.com/content/v1/59dbaaa9edaed80a4b1d1692/bf94a70a-58c1-409e-8007-bca2ae365fb4/BURG1+-+Niklas_Schnaubelt.jpg",
+    "description": "Das Kammermusikfest Lockenhaus findet 2026 in seiner 45. Auflage vom 8. bis 18. Juli unter der künstlerischen Leitung von Nicolas Altstaedt auf Burg Lockenhaus statt. Die New York Times zählt es zu den \"verfeinertsten Musikfestivals\" weltweit und vereint hochkarätige Kammermusik mit Charakterstärke.",
+    "priceText": "Preis auf Anfrage"
+  },
+  "impulstanz": {
+    "lineup": [
+      {"name": "Christos Papadopoulos", "billing": "headliner"},
+      {"name": "Eun-Me Ahn", "billing": "headliner"},
+      {"name": "Anne Teresa De Keersmaeker", "billing": "headliner"},
+      {"name": "Radouan Mriziga", "billing": "headliner"},
+      {"name": "Louise Lecavalier", "billing": "headliner"},
+      {"name": "TAO Dance Theater", "billing": "headliner"},
+      {"name": "Trisha Brown Dance Company", "billing": "headliner"},
+      {"name": "Wim Vandekeybus", "billing": "headliner"},
+      {"name": "Maguy Marin", "billing": "headliner"},
+      {"name": "Amala Dianor", "billing": "support"},
+      {"name": "Leïla Ka", "billing": "support"},
+      {"name": "Needcompany", "billing": "support"}
+    ],
+    "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/0/0c/MQ_Vienna_20100716_-_ImPulsTanz_opening_performance_098ff.jpg",
+    "description": "ImPulsTanz ist Europas größtes Festival für zeitgenössischen Tanz und Performance und findet 2026 vom 9. Juli bis 9. August in Wien statt. Seit 1984 bringt das Vienna International Dance Festival Workshops, Performances und Stars der internationalen Tanzszene zusammen.",
+    "priceText": "Preis auf Anfrage"
+  },
+  "woodstockenboi": {
+    "lineup": [
+      {"name": "DŸSE", "billing": "unknown"},
+      {"name": "Mau Mau", "billing": "unknown"}
+    ],
+    "imageUrl": "https://www.woodstockenboi.org/wood_pic/header_plain2026.png",
+    "description": "Das Woodstockenboi Musik- und Kulturfestival findet vom 9. bis 11. Juli 2026 in der Naturarena Stockenboi in Kärnten statt. Das vom Kulturverein pastART organisierte Festival bietet ein vielfältiges Programm aus Musik und Kultur.",
+    "priceText": "Preis auf Anfrage"
+  },
+  "schrammelklang-festival": {
+    "lineup": [
+      {"name": "Ernst Molden & Sigrid Horn", "billing": "headliner"},
+      {"name": "Kollegium Kalksburg", "billing": "headliner"},
+      {"name": "Joschi Schneeberger Quintett", "billing": "headliner"},
+      {"name": "Pam Pam Ida & das Silberfischorchester", "billing": "support"},
+      {"name": "Fräulein Blauboad", "billing": "support"},
+      {"name": "Maria Ma PUR", "billing": "support"},
+      {"name": "Felix Kramer", "billing": "support"}
+    ],
+    "imageUrl": "https://schrammelklang.at/wp-content/uploads/2022/11/schrammel-klang-festival-2022-copyright-stephan-mussil-cd.jpg",
+    "description": "Das Schrammel.Klang.Festival in Litschau am Herrensee findet 2026 an zwei Wochenenden (10.–12. und 17.–19. Juli) unter dem Motto \"WÖOD\" statt. Junge wie etablierte Musikgruppen bereichern die österreichische Weltmusik und Schrammelmusik in teils neuen Konstellationen.",
+    "priceText": "Preis auf Anfrage"
+  },
+  "goldegger-blues-folktage": {
+    "lineup": [
+      {"name": "GeJo", "billing": "support"},
+      {"name": "Gruppe EinzigArt", "billing": "support"},
+      {"name": "Christoph Steinbach", "billing": "support"},
+      {"name": "The Insta Mentals", "billing": "support"},
+      {"name": "Pongabeat", "billing": "support"},
+      {"name": "Ballycotton", "billing": "support"},
+      {"name": "The Wango Tangos", "billing": "support"},
+      {"name": "VRV Cultists of Rock", "billing": "support"}
+    ],
+    "imageUrl": "https://www.argebluesfolk.com/wp-content/uploads/2024/08/cropped-logo500x500-transparenter-Hintergrund.png",
+    "description": "Die Goldegger Blues & Folktage 2026 finden am 10. und 11. Juli als Benefiz-Open-Air im Schlosshof Goldegg statt. Der Erlös des bei jedem Wetter stattfindenden Festivals kommt der Lebenshilfe Schwarzach zugute.",
+    "priceText": "Preis auf Anfrage"
+  },
+  "klassik-am-dom": {
+    "lineup": [
+      {"name": "Tom Jones", "billing": "headliner"},
+      {"name": "Rainhard Fendrich", "billing": "headliner"},
+      {"name": "Diana Damrau", "billing": "headliner"},
+      {"name": "Erwin Schrott", "billing": "headliner"},
+      {"name": "MEUTE", "billing": "headliner"},
+      {"name": "Roy Bianco & Die Abbrunzati Boys", "billing": "support"}
+    ],
+    "imageUrl": "https://www.klassikamdom.at/wp-content/uploads/Klassik-am-dom_Logo.svg",
+    "description": "Klassik am Dom bringt unter dem Motto \"Weltstars zu Gast in Linz\" 2026 wieder hochkarätige Konzerte an den Linzer Mariendom. Das Open-Air-Festival mit klassischem Fokus reicht bis Jazz, Soul, Chanson und Crossover und ist seit 2018 nach den Kriterien des Österreichischen Umweltzeichens als Green Event zertifiziert.",
+    "priceText": "Preis auf Anfrage"
+  },
+  "glatt-verkehrt": {
+    "lineup": [],
+    "imageUrl": "https://noeku.on.damlivery.com/s/5ba216518d07741cead1e825156a8310/noeku/869017/rm:fit/h:500/w:600/q:90/rs:originalSizePng/f:webp/g:fp:0.5:0.5",
+    "description": "Glatt&Verkehrt feiert 2026 seine 30. Ausgabe und präsentiert vom 22. bis 26. Juli in Krems 17 Konzerte aus 13 Ländern und 4 Kontinenten. Das Weltmusikfestival bietet Österreich-Debüts internationaler Acts und besondere Programme heimischer Bands.",
+    "priceText": "ab € 10"
+  },
+  "wellenklänge": {
+    "lineup": [
+      {"name": "Die Strottern & JazzWerkstatt Wien", "billing": "headliner"},
+      {"name": "Teresa Präauer", "billing": "headliner"},
+      {"name": "Ernst Reijseger, Harmen Fraanje & Mola Sylla", "billing": "headliner"},
+      {"name": "David Helbock & Julia Hofer", "billing": "support"},
+      {"name": "Mahan Mirarab", "billing": "support"},
+      {"name": "Yasmo & die Klangkantine", "billing": "headliner"},
+      {"name": "EsRAP", "billing": "support"},
+      {"name": "Marino Formenti", "billing": "support"},
+      {"name": "Yvonne Moriel", "billing": "support"},
+      {"name": "Asja Valcic", "billing": "support"},
+      {"name": "Judith Fliedl", "billing": "support"},
+      {"name": "Elena Arbonies Jauregui", "billing": "support"}
+    ],
+    "imageUrl": null,
+    "description": "Die Wellenklänge in Lunz am See stehen 2026 vom 10. bis 25. Juli unter dem Motto \"Empathie & Widerstand\". Das Festival auf der Seebühne kombiniert Konzerte, Workshops und kulturelle Diskussionen.",
+    "priceText": "Preis auf Anfrage"
+  },
+  "neuberger-kulturtage": {
+    "lineup": [
+      {"name": "Filharmonie Brno", "billing": "headliner"},
+      {"name": "Stefan Vladar", "billing": "headliner"},
+      {"name": "Bo Skovhus", "billing": "headliner"},
+      {"name": "Herbert Lippert", "billing": "headliner"},
+      {"name": "Philharmonia Schrammeln Wien", "billing": "support"},
+      {"name": "Gerald Preinfalk Quartett", "billing": "support"},
+      {"name": "Simply Quartet", "billing": "support"},
+      {"name": "BartolomeyBittmann", "billing": "support"},
+      {"name": "Motus Quartett", "billing": "support"},
+      {"name": "Harriet Krijgh & Magda Amara", "billing": "support"},
+      {"name": "Maighréad McCrann", "billing": "support"},
+      {"name": "Julian Arp", "billing": "support"},
+      {"name": "Dominik Hellsberg & Bernhard Hirzberger", "billing": "support"},
+      {"name": "Gottfried Holzer-Graf", "billing": "support"}
+    ],
+    "imageUrl": "https://www.neuberger-kulturtage.org/v4/wp-content/uploads/2025/07/Filharmonie-Brno.jpg",
+    "description": "Die Neuberger Kulturtage finden 2026 vom 11. bis 26. Juli unter der künstlerischen Leitung von Stefan Vladar in Neuberg an der Mürz statt. Das Festival vereint Klassik, Kammermusik, Lied und Jazz in der ehemaligen Stiftskirche und an weiteren Spielstätten.",
+    "priceText": "ab € 10"
+  },
+  "lehar-festival-bad-ischl": {
+    "lineup": [
+      {"name": "Boccaccio (Franz von Suppè)", "billing": "headliner"},
+      {"name": "Gräfin Mariza (Emmerich Kálmán)", "billing": "headliner"},
+      {"name": "Der Göttergatte (Franz Lehár)", "billing": "headliner"},
+      {"name": "Thomas Enzinger", "billing": "headliner"}
+    ],
+    "imageUrl": "https://www.leharfestival.at/wp-content/uploads/2023/06/logo_lehar_festival.svg",
+    "description": "Das Lehár Festival Bad Ischl ist das größte Operettenfestival Europas und in seiner Vielfalt und Qualität weltweit einzigartig. 2026 läuft das Festival vom 11. Juli bis 30. August mit drei Hauptproduktionen: Boccaccio, Gräfin Mariza und Der Göttergatte.",
+    "priceText": "Preis auf Anfrage"
+  },
+  "altenburger-musikademie": {
+    "lineup": [
+      {"name": "Robert Lehrbaumer", "billing": "headliner"},
+      {"name": "Min Kwon", "billing": "headliner"},
+      {"name": "Stephan Matthias Lademann", "billing": "support"},
+      {"name": "Irina Gavrilovici", "billing": "support"},
+      {"name": "Margit Fussi", "billing": "support"},
+      {"name": "Judith Velisek", "billing": "support"},
+      {"name": "Balázs Szabó", "billing": "support"},
+      {"name": "Mirjam Schröder", "billing": "support"},
+      {"name": "Taner Türker", "billing": "support"},
+      {"name": "Elisabeth Möst", "billing": "support"}
+    ],
+    "imageUrl": "https://altenburger-musikakademie.at/fileadmin/user_upload/startseite/teaser-top.jpg",
+    "description": "Die Altenburger Musikakademie (AMA) findet 2026 vom 12. bis 26. Juli im Stift Altenburg statt. Internationale Dozentinnen und Dozenten gestalten Meisterkurse und Konzerte in den Bereichen Gesang, Klavier, Orgel, Harfe, Cello und Flöte.",
+    "priceText": "Preis auf Anfrage"
+  },
+  "güssinger-kultur-sommer": {
+    "lineup": [
+      {"name": "Thomas Stipsits", "billing": "headliner"},
+      {"name": "Josef Hader", "billing": "headliner"},
+      {"name": "Alfred Dorfer", "billing": "headliner"},
+      {"name": "Andreas Vitásek", "billing": "headliner"},
+      {"name": "Dirk Stermann", "billing": "headliner"},
+      {"name": "Da Blechhauf'n", "billing": "support"},
+      {"name": "Malarina", "billing": "support"},
+      {"name": "Christoph Spörk", "billing": "support"},
+      {"name": "Isabell Pannagl", "billing": "support"},
+      {"name": "Sebastian Humi", "billing": "support"},
+      {"name": "Barbara Eichberger", "billing": "support"},
+      {"name": "Christina Kiesler", "billing": "support"},
+      {"name": "Benedikt Mitmannsgruber", "billing": "support"},
+      {"name": "Kernölamazonen", "billing": "support"},
+      {"name": "Michael Schottenberg", "billing": "support"},
+      {"name": "Martina Parker", "billing": "support"},
+      {"name": "Tarek Leitner", "billing": "support"}
+    ],
+    "imageUrl": "https://www.kultursommer.net/_processed_/e/d/csm_Tafelrunde-aktuell_c6e12f499b.jpg",
+    "description": "Der Güssinger Kultursommer 2026 läuft vom 11. Juli bis 19. September am Fuße des historischen Güssinger Schlossbergs. Das Festival präsentiert Kabarett, Konzerte, Musicals und Theater mit zahlreichen Stars der österreichischen Kleinkunst- und Musikszene.",
+    "priceText": "Preis auf Anfrage"
+  }
+}

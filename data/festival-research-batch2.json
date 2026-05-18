@@ -1,0 +1,190 @@
+{
+  "festival-des-politischen-liedes": {
+    "lineup": [],
+    "imageUrl": "https://kv-willy.at/wp-content/uploads/2018/05/Logo-Kulturverein-Willy.png",
+    "description": "Das Festival des politischen Liedes ist ein vom Kulturverein Willy veranstaltetes Festival mit politisch engagiertem Liedgut. Es findet vom 5. bis 7. Juni 2026 in Linz statt und bietet drei Tage Konzerte, Lesungen und Diskussionen rund um politische und gesellschaftskritische Musik.",
+    "priceText": "Preis auf Anfrage"
+  },
+  "sommerszene-festival": {
+    "lineup": [
+      {"name": "Sasha Waltz", "billing": "headliner"},
+      {"name": "Jan Martens", "billing": "headliner"},
+      {"name": "Leïla Ka", "billing": "headliner"},
+      {"name": "Marco da Silva Ferreira", "billing": "headliner"},
+      {"name": "Solène Weinachter", "billing": "support"},
+      {"name": "Doris Uhlich", "billing": "support"},
+      {"name": "Ann Van den Broek", "billing": "support"},
+      {"name": "Rosana Ribeiro", "billing": "support"},
+      {"name": "Cornelia Böhnisch", "billing": "support"},
+      {"name": "Katharina Schrott", "billing": "support"}
+    ],
+    "imageUrl": "https://www.szene-salzburg.net/assets/uploads/e05bfe851f1d56230050f7/640.jpg",
+    "description": "Die Sommerszene ist das internationale Festival für zeitgenössischen Tanz und Performance in Salzburg. Vom 8. bis 23. Juni 2026 zeigt es 14 Produktionen mit österreichischen und Welt-Premieren an verschiedenen Spielorten.",
+    "priceText": "Pay what you can: € 10–40"
+  },
+  "wörthersee-classics": {
+    "lineup": [
+      {"name": "Capella Mahleriana", "billing": "headliner"},
+      {"name": "Toshiyuki Shimada", "billing": "headliner"},
+      {"name": "Alexei Kornienko", "billing": "headliner"},
+      {"name": "Elena Denisova", "billing": "headliner"},
+      {"name": "Darko Brlek", "billing": "support"},
+      {"name": "Eva Zalenga", "billing": "support"},
+      {"name": "Tobias Lusser", "billing": "support"},
+      {"name": "Maximilian Kromer", "billing": "support"},
+      {"name": "Keller Quartet", "billing": "headliner"},
+      {"name": "Alexander Sladkovsky", "billing": "support"}
+    ],
+    "imageUrl": "https://static.tildacdn.com/tild3233-6535-4864-a432-303431323866/Banner_Header_new_no.png",
+    "description": "Die Wörthersee Classics feiern 2026 ihr 25-jähriges Jubiläum unter dem Motto „zum WOHLKlang“. Vom 18. bis 21. Juni 2026 finden im Konzerthaus Klagenfurt klassische Konzerte mit internationalen Solist:innen und Ensembles statt.",
+    "priceText": "Preis auf Anfrage"
+  },
+  "clam-konzerte": {
+    "lineup": [
+      {"name": "Lenny Kravitz", "billing": "headliner"},
+      {"name": "Nick Cave & The Bad Seeds", "billing": "headliner"},
+      {"name": "Electric Callboy", "billing": "headliner"},
+      {"name": "Unheilig", "billing": "headliner"},
+      {"name": "OneRepublic", "billing": "headliner"},
+      {"name": "Van Morrison", "billing": "headliner"},
+      {"name": "Seiler und Speer", "billing": "headliner"}
+    ],
+    "imageUrl": "https://clamlive.at/wp-content/uploads/2026/04/CL26-SMW-09-webheader-DESKTOP.jpg",
+    "description": "Die Clam Konzerte sind eine seit über 30 Jahren bestehende Konzertreihe auf der oberösterreichischen Burg Clam. Mit zwei Bühnen und bis zu 9.000 Plätzen ist die Burg eine der spektakulärsten Open-Air-Locations Österreichs.",
+    "priceText": "Preis auf Anfrage (Ticketverkauf über öTicket)"
+  },
+  "kunst-musik-forum-golling": {
+    "lineup": [
+      {"name": "Philipp Hochmair", "billing": "headliner"},
+      {"name": "Günther Groissböck", "billing": "headliner"},
+      {"name": "Cornelius Obonya", "billing": "headliner"},
+      {"name": "Fritz Karl", "billing": "headliner"},
+      {"name": "Elena Uhlig", "billing": "headliner"},
+      {"name": "Michael Köhlmeier", "billing": "headliner"},
+      {"name": "Ernst Molden", "billing": "headliner"},
+      {"name": "Maria Hofstätter", "billing": "support"},
+      {"name": "Federspiel", "billing": "support"},
+      {"name": "Christoph Moschberger", "billing": "support"},
+      {"name": "Italian Swing Quartet", "billing": "support"},
+      {"name": "Aldo Caputo", "billing": "support"},
+      {"name": "Iva Schell", "billing": "support"},
+      {"name": "MoZuluArt", "billing": "support"},
+      {"name": "Joji Hattori", "billing": "support"},
+      {"name": "Hyung-ki Joo", "billing": "support"},
+      {"name": "Julia Stemberger", "billing": "support"}
+    ],
+    "imageUrl": "https://festspielegolling.at/wp-content/uploads/2022/02/Logo_Festspiele-Golling-Kunst-Kulinarik_klein-1.png",
+    "description": "Die Festspiele Golling verbinden Konzerte, Lesungen und kulinarische Erlebnisse im Hof der mittelalterlichen Burg Golling. 2026 erweitern die Festspiele ihr Programm auf drei Aufführungen pro Woche von Ende Juni bis Ende August.",
+    "priceText": "Preis auf Anfrage (Karten über Kartenbüro Döllerer)"
+  },
+  "tonspuren": {
+    "lineup": [
+      {"name": "Tommy Hojsa", "billing": "headliner"},
+      {"name": "Rudi Koschelu", "billing": "support"},
+      {"name": "Constanze Hojsa", "billing": "support"},
+      {"name": "Anna Buchegger & Band", "billing": "headliner"},
+      {"name": "Hawaiian Project", "billing": "headliner"},
+      {"name": "Anthony Pfluke", "billing": "support"},
+      {"name": "Hanke Brothers", "billing": "headliner"},
+      {"name": "Katrin Unterlercher", "billing": "headliner"},
+      {"name": "Werner Unterlercher", "billing": "headliner"},
+      {"name": "Varga Quartet", "billing": "support"}
+    ],
+    "imageUrl": "https://www.tonspurenamasitz.com/_default_upload_bucket/header-bild-2.jpg",
+    "description": "Die TONspuren am Asitz sind eine alpine Konzertreihe am Speicherteich auf 1.870 Metern in Leogang. Von 25. Juni bis 6. August 2026 finden fünf Konzerte aus Volksmusik, Pop, Klassik und Weltmusik in spektakulärer Bergkulisse statt.",
+    "priceText": "TONspur-Pass € 148 für alle fünf Konzerte"
+  },
+  "styriarte": {
+    "lineup": [
+      {"name": "Jordi Savall", "billing": "headliner"},
+      {"name": "Miriam Kutrowatz", "billing": "headliner"},
+      {"name": "Voces8", "billing": "headliner"},
+      {"name": "Styriarte Festspiel-Orchester", "billing": "headliner"},
+      {"name": "Daniel Johannsen", "billing": "support"},
+      {"name": "Ragna Schirmer", "billing": "support"},
+      {"name": "Zefiro", "billing": "support"}
+    ],
+    "imageUrl": "https://styriarte.com/wp-content/uploads/2024/01/styriarte-logo.png",
+    "description": "Die Styriarte ist das steirische Festival für klassische Musik und feiert 2026 unter dem Motto „Licht Spiele“ ihre 42. Ausgabe. Vom 26. Juni bis 26. Juli finden Konzerte an traditionellen Spielstätten in Graz und der Steiermark statt.",
+    "priceText": "ab € 39 (U27: 50% Ermäßigung)"
+  },
+  "kultursommer-im-rosengarten": {
+    "lineup": [
+      {"name": "Thomas Mraz", "billing": "headliner"},
+      {"name": "Tom Gaebel & His Orchestra", "billing": "headliner"},
+      {"name": "Herbert Steinböck", "billing": "headliner"},
+      {"name": "Die 3 Baritöne", "billing": "support"}
+    ],
+    "imageUrl": "https://www.rosengarten.cc/wp-content/uploads/ROSENGARTEN-LOGO-RZ.png",
+    "description": "Der Kultursommer im Rosengarten am Pöstlingberg bietet Kabarett, Musik und Show in einem weißen Sommerzelt mit Blick auf Linz. Veranstaltet von Weiler Shows, präsentiert die Reihe im Juli 2026 Künstler:innen wie Thomas Mraz und Tom Gaebel.",
+    "priceText": "Preis auf Anfrage (Buchung über bestellung.rosengarten.cc)"
+  },
+  "oö-stiftskonzerte": {
+    "lineup": [
+      {"name": "Patricia Kopatchinskaja", "billing": "headliner"},
+      {"name": "Hayato Sumino", "billing": "headliner"},
+      {"name": "Il Giardino Armonico", "billing": "headliner"},
+      {"name": "Giovanni Antonini", "billing": "headliner"},
+      {"name": "Bruckner Orchester Linz", "billing": "headliner"},
+      {"name": "Markus Poschner", "billing": "support"},
+      {"name": "Philippe Jordan", "billing": "support"},
+      {"name": "Fauré Quartett", "billing": "support"},
+      {"name": "Vokalensemble APOLLO5", "billing": "support"}
+    ],
+    "imageUrl": "https://www.stiftskonzerte.at/wp-content/uploads/2026/02/Hayato-Sumino-c-Johanna-Berghorn.jpeg",
+    "description": "Die OÖ. Stiftskonzerte 2026 feiern ihre 53. Saison unter dem Motto „O Mensch! Gib Acht!“ und bringen vom 30. Mai bis 26. Juli 22 Konzerte in sieben oberösterreichische Stifte. Schauplätze sind unter anderem St. Florian, Kremsmünster und Lambach.",
+    "priceText": "Teeniepass € 20 (unter 20 Jahre, gültig für alle 21 Konzerte)"
+  },
+  "kultursommer-wien": {
+    "lineup": [],
+    "imageUrl": "https://kultursommer.wien/jart/prj3/festival/resources/images/logo_ohne_sonne.png",
+    "description": "Der Kultursommer Wien bringt von 2. Juli bis 16. August 2026 ein kostenloses Open-Air-Kulturprogramm auf Pop-up-Bühnen in alle Wiener Bezirke. Geboten werden Musik, Kabarett, Theater, Tanz, Literatur und zeitgenössischer Zirkus.",
+    "priceText": "Eintritt frei"
+  },
+  "carinthischer-sommer-ossiach-villach": {
+    "lineup": [
+      {"name": "Hilary Hahn", "billing": "headliner"},
+      {"name": "Omer Meir Wellber", "billing": "headliner"},
+      {"name": "Deutsche Kammerphilharmonie Bremen", "billing": "headliner"},
+      {"name": "Marin Alsop", "billing": "headliner"},
+      {"name": "ORF Radio-Symphonieorchester Wien", "billing": "headliner"},
+      {"name": "Wu Wei", "billing": "support"},
+      {"name": "Yi-Chen Lin", "billing": "support"},
+      {"name": "Anna Anderluh", "billing": "support"},
+      {"name": "Trio SR9", "billing": "support"},
+      {"name": "Senny Camara & Band", "billing": "support"}
+    ],
+    "imageUrl": "https://carinthischersommer.at/wp-content/uploads/2025/09/carinthischer-sommer-logo-2025.jpg",
+    "description": "Der Carinthische Sommer ist Kärntens internationales Festival für Musik und Literatur und findet vom 2. Juli bis 2. August 2026 in Ossiach, Villach und Klagenfurt statt. Unter der künstlerischen Leitung von Nadja Kayali steht die Ausgabe 2026 unter dem Motto „fern & nah“.",
+    "priceText": "10% Frühbucherrabatt; konkrete Preise auf carinthischersommer.jetticket.net"
+  },
+  "kultursommer-semmering": {
+    "lineup": [
+      {"name": "Senta Berger", "billing": "headliner"},
+      {"name": "Caroline Peters", "billing": "headliner"},
+      {"name": "Friedrich von Thun", "billing": "headliner"},
+      {"name": "Sky du Mont", "billing": "headliner"},
+      {"name": "Francisco Araiza", "billing": "headliner"},
+      {"name": "Gery Seidl", "billing": "support"},
+      {"name": "Elena Uhlig", "billing": "support"},
+      {"name": "Fritz Karl", "billing": "support"}
+    ],
+    "imageUrl": "https://www.kultursommer-semmering.at/wp-content/uploads/logo-kss.svg",
+    "description": "Der Kultur.Sommer.Semmering bringt von 2. Juli bis 6. September 2026 unter der künstlerischen Leitung von Florian Krumpöck Lesungen, Kabarett, Jazz, Klassik und Wienerlied in den Kurort. Spielorte sind unter anderem der Kulturpavillon und das Grandhotel Panhans.",
+    "priceText": "10% Ermäßigung für Mitglieder; konkrete Preise auf Anfrage"
+  },
+  "summa-cum-laude-international-youth-music-festival": {
+    "lineup": [],
+    "imageUrl": "https://www.sclfestival.org/images/logos/Logo_SCL_Festival.png",
+    "description": "Das Summa Cum Laude International Youth Music Festival ist Europas führendes Jugendmusikfestival für Chöre, Bands und Orchester. Vom 3. bis 8. Juli 2026 musizieren junge Ensembles aus aller Welt im Goldenen Saal des Musikvereins, im Wiener Konzerthaus und im MuTh.",
+    "priceText": "Anmeldegebühr € 250 pro Gruppe; Konzertkarten auf Anfrage"
+  },
+  "donauinselfest": {
+    "lineup": [
+      {"name": "Thorsteinn Einarsson", "billing": "support"}
+    ],
+    "imageUrl": "https://donauinselfest.at/wp-content/themes/dif2023/img/DIF-LOGO_weiss.png",
+    "description": "Das Donauinselfest ist das größte Open-Air-Musikfestival der Welt mit rund 3 Millionen Besucher:innen jährlich. Vom 3. bis 5. Juli 2026 stehen 14 Bühnen auf der Wiener Donauinsel mit Pop, Rock, Schlager, Austropop und Kabarett bei freiem Eintritt.",
+    "priceText": "Eintritt frei"
+  }
+}
