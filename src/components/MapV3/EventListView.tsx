@@ -149,15 +149,24 @@ export function EventListView({
       return withD.map((x) => x.e);
     }
     if (sort === 'score') {
-      // Tiered: Events MIT image_url zuerst, innerhalb beider Buckets nach
-      // event_score DESC. Ein bildloses Event mit hohem Score steht so unter
-      // den bebilderten — sonst füllen visuell schwache Rows die obersten
-      // Slots, was sich für den User wie "kein Top-Sort" anfühlt.
+      // "Top"-Sort = zweistufig nach wahrgenommener Qualität:
+      //   Tier 1: Events mit echtem image_url (Scraper-Foto, kein Fallback)
+      //   Tier 2: Events ohne image_url (Kategorie-Fallback im Card)
+      // Innerhalb jedes Tiers nach start_date aufsteigend — das nächste
+      // Datum oben. Vorher (in beiden Branches): rein/primär nach
+      // event_score → textige Fallback-Events poppten zwischen Foto-
+      // Events nur weil sie ein paar Score-Punkte mehr hatten. Hartes
+      // Tier nach Bild + Datum aufsteigend gibt eine konsistent
+      // hochwertige Wahrnehmung in den oberen Slots, und der User
+      // sieht zuerst was demnächst passiert.
+      const hasRealImage = (e: Event) => !!(e.image_url && e.image_url.trim());
+      const byDateAsc = (a: Event, b: Event) =>
+        new Date(a.start_date).getTime() - new Date(b.start_date).getTime();
       list.sort((a, b) => {
-        const aImg = a.image_url ? 1 : 0;
-        const bImg = b.image_url ? 1 : 0;
-        if (aImg !== bImg) return bImg - aImg;
-        return (b.event_score ?? 0) - (a.event_score ?? 0);
+        const aHas = hasRealImage(a);
+        const bHas = hasRealImage(b);
+        if (aHas !== bHas) return aHas ? -1 : 1;
+        return byDateAsc(a, b);
       });
       return list;
     }
