@@ -4,13 +4,14 @@
  * Layout: small image header, festival name, date range, optional
  * lineup-match indicator. Used in FestivalsSection.
  *
- * URL-Handling (Bug-Fix nach 404-Welle):
- *   Festivals ohne `parent_event_id` haben keine Detail-Page in /events/.
- *   Wir akzeptieren `festival.href` als optionalen Pre-Built-URL aus dem
- *   landing-loader. Wenn null/undefined → Card rendert als `<div>`,
- *   nicht als `<Link>`. So landen User nicht auf 404 wie z.B.
- *   /events/8010-graz/2026-02-09/murszene-graz (Festival-Slug existiert
- *   nicht in der events-Table).
+ * URL-Handling:
+ *   `festival.href` kommt pre-built vom landing-loader (siehe
+ *   get-landing-data.ts). Aktuell ist das entweder die canonical
+ *   /events/[...slug]-URL des parent_event, ODER ein Fallback auf
+ *   /festivals/[slug] wenn kein parent_event existiert. Card rendert
+ *   als `<div>` (nicht klickbar) nur noch wenn der Loader explizit
+ *   null/undefined liefert — defensiv, falls je wieder ein Pfad ohne
+ *   Slug auftaucht.
  */
 
 import Link from 'next/link';

@@ -21,7 +21,7 @@ export function FestivalsSection({ festivals }: FestivalsSectionProps) {
           </h2>
         </div>
         <Link
-          href="/entdecken?category=festival"
+          href="/festivals"
           className="hidden md:inline-flex items-center gap-1.5 text-[13px] font-semibold text-[var(--v4-ink-70)]"
         >
           Alle Festivals

@@ -152,9 +152,10 @@ export async function getLandingData(ctx: LandingContext): Promise<LandingData> 
     const { parent_event: _omit, ...rest } = f;
     void _omit;
 
-    // Detail-URL nur wenn parent_event existiert UND mindestens id + slug
-    // + start_date hat. buildEventUrlV2 fällt sonst auf einen kaputten
-    // Pfad zurück der in /events/[...slug] in einen 404 mündet.
+    // Detail-URL: bevorzugt die canonical V2-URL des parent_event (führt
+    // direkt zur reichhaltigen /events/[...slug]-Page); fällt zurück auf
+    // /festivals/[slug] wenn das Festival keinen parent_event hat. So
+    // landet niemand mehr auf einer non-clickable Card.
     const href = parentEvent && parentEvent.slug && parentEvent.start_date
       ? buildEventUrlV2({
           id: parentEvent.id,
@@ -165,7 +166,7 @@ export async function getLandingData(ctx: LandingContext): Promise<LandingData> 
           bundesland: parentEvent.bundesland,
           location_name: parentEvent.location_name,
         })
-      : null;
+      : `/festivals/${f.slug}`;
 
     return {
       ...(rest as Festival),
