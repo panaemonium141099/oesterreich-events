@@ -5,7 +5,14 @@ import { notFound } from 'next/navigation';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
 import { V4BackButton } from '@/components/Events/v4/V4BackButton';
 import { buildEventUrlV2 } from '@/lib/utils/slugify';
+import { getFestivalEnrichment } from '@/lib/festivals/enrich';
 import type { Festival, FestivalArtist } from '@/types/festivals';
+
+// Dynamic — slug params with non-ASCII (umlauts) were getting served
+// stale 404 responses under Next's default revalidation. Forcing the
+// page dynamic lets every request re-run the DB lookup against the
+// freshly decoded slug.
+export const dynamic = 'force-dynamic';
 
 const FESTIVAL_FALLBACK_COUNT = 30;
 function festivalCategoryFallback(festivalId: string): string {
@@ -31,6 +38,26 @@ function formatDateRange(startIso: string | null, endIso: string | null): string
   return `${startShort} – ${endStr}`;
 }
 
+const GENRE_LABELS: Record<string, string> = {
+  K: 'Klassik',
+  J: 'Jazz',
+  P: 'Pop/Rock',
+  E: 'Elektronik',
+  H: 'Hip-Hop',
+  G: 'Global',
+  N: 'Neue Musik',
+  I: 'Interdisziplinär',
+};
+function expandGenres(raw: string | null): string {
+  if (!raw) return '';
+  return raw
+    .split(/[,/]/)
+    .map(g => g.trim())
+    .filter(Boolean)
+    .map(g => GENRE_LABELS[g.toUpperCase()] ?? g)
+    .join(' · ');
+}
+
 type ParentEventRow = {
   id: string;
   slug: string | null;
@@ -42,55 +69,89 @@ type ParentEventRow = {
   image_url: string | null;
 };
 
-type FestivalWithParent = Festival & {
-  parent_event: ParentEventRow | ParentEventRow[] | null;
+const UMLAUT_MAP: Record<string, string> = {
+  'ä': 'ae', 'ö': 'oe', 'ü': 'ue', 'ß': 'ss',
+  'Ä': 'ae', 'Ö': 'oe', 'Ü': 'ue',
 };
+function asciiFoldSlug(slug: string): string {
+  return slug.replace(/[äöüßÄÖÜ]/g, c => UMLAUT_MAP[c] ?? c);
+}
 
-async function fetchFestival(slug: string): Promise<{
-  festival: Festival;
-  parentEvent: ParentEventRow | null;
-  artists: FestivalArtist[];
-} | null> {
+/**
+ * Slug lookup that tolerates Unicode-normalization drift. We try NFC
+ * first (matches what the seed registry stores), then NFD, then a
+ * pure-ASCII fold (`mörbisch` → `moerbisch`) for legacy rows. The first
+ * non-null result wins.
+ *
+ * Returns the matched festival row or null. NEVER throws — Supabase
+ * errors are logged and treated as null so the page can render the 404
+ * shell cleanly instead of crashing into the global error boundary.
+ */
+async function fetchFestivalRow(slug: string): Promise<Festival | null> {
   const supabase = await createServerSupabaseClient();
+  const variants = Array.from(new Set([
+    slug,
+    slug.normalize('NFC'),
+    slug.normalize('NFD'),
+    asciiFoldSlug(slug.normalize('NFC')),
+  ]));
 
-  const { data, error } = await supabase
-    .from('festivals')
-    .select('*, parent_event:events!parent_event_id(id, slug, start_date, postal_code, address, bundesland, location_name, image_url)')
-    .eq('slug', slug)
-    .maybeSingle();
+  for (const candidate of variants) {
+    try {
+      const { data, error } = await supabase
+        .from('festivals')
+        .select('*')
+        .eq('slug', candidate)
+        .maybeSingle();
+      if (!error && data) return data as unknown as Festival;
+    } catch (err) {
+      console.error('[festival-detail] festival lookup threw:', candidate, err);
+    }
+  }
+  return null;
+}
 
-  if (error || !data) return null;
+async function fetchParentEvent(parentEventId: string | null): Promise<ParentEventRow | null> {
+  if (!parentEventId) return null;
+  try {
+    const supabase = await createServerSupabaseClient();
+    const { data } = await supabase
+      .from('events')
+      .select('id, slug, start_date, postal_code, address, bundesland, location_name, image_url')
+      .eq('id', parentEventId)
+      .maybeSingle();
+    return (data ?? null) as ParentEventRow | null;
+  } catch (err) {
+    console.error('[festival-detail] parent event lookup threw:', parentEventId, err);
+    return null;
+  }
+}
 
-  const row = data as unknown as FestivalWithParent;
-  const parentEvent = Array.isArray(row.parent_event) ? row.parent_event[0] : row.parent_event;
-  const { parent_event: _omit, ...rest } = row;
-  void _omit;
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: artistRows } = await (supabase.from('festival_artists') as any)
-    .select('*')
-    .eq('festival_id', row.id)
-    .order('billing', { ascending: true })
-    .order('artist_name_normalized', { ascending: true });
-
-  return {
-    festival: rest as Festival,
-    parentEvent: parentEvent ?? null,
-    artists: (artistRows ?? []) as FestivalArtist[],
-  };
+async function fetchArtists(festivalId: string): Promise<FestivalArtist[]> {
+  try {
+    const supabase = await createServerSupabaseClient();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data } = await (supabase.from('festival_artists') as any)
+      .select('*')
+      .eq('festival_id', festivalId);
+    return (data ?? []) as FestivalArtist[];
+  } catch (err) {
+    console.error('[festival-detail] artists lookup threw:', festivalId, err);
+    return [];
+  }
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
-  const result = await fetchFestival(slug);
-  if (!result) return { title: 'Festival nicht gefunden — lasstreffen.at' };
-  const { festival } = result;
+  const festival = await fetchFestivalRow(slug);
+  if (!festival) return { title: 'Festival nicht gefunden — lasstreffen.at' };
   const dateRange = formatDateRange(festival.starts_at, festival.ends_at);
+  const desc = festival.city
+    ? `${festival.canonical_name} in ${festival.city}: ${dateRange}.`
+    : `${festival.canonical_name}: ${dateRange}.`;
   return {
     title: `${festival.canonical_name} ${dateRange} — lasstreffen.at`,
-    description: festival.city
-      ? `${festival.canonical_name} in ${festival.city}: ${dateRange}.`
-      : `${festival.canonical_name}: ${dateRange}.`,
+    description: desc,
   };
 }
 
@@ -112,13 +173,28 @@ const BILLING_LABEL: Record<string, string> = {
 
 export default async function FestivalDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const result = await fetchFestival(slug);
-  if (!result) notFound();
-  const { festival, parentEvent, artists } = result;
+  const festival = await fetchFestivalRow(slug);
+  if (!festival) notFound();
 
-  const heroImage = parentEvent?.image_url ?? festivalCategoryFallback(festival.id);
+  // Parallel: parent event, artists, runtime enrichment from the
+  // official festival website. All three swallow errors → page never
+  // crashes if any data source is unhappy.
+  const [parentEvent, artists, enrichment] = await Promise.all([
+    fetchParentEvent(festival.parent_event_id),
+    fetchArtists(festival.id),
+    getFestivalEnrichment(festival.website_url, festival.slug),
+  ]);
+
+  const heroImage =
+    parentEvent?.image_url
+    ?? enrichment.imageUrl
+    ?? festivalCategoryFallback(festival.id);
   const dateRange = formatDateRange(festival.starts_at, festival.ends_at);
   const place = [festival.city, festival.state].filter(Boolean).join(' · ');
+  const genreLabel = expandGenres(festival.genres);
+
+  const description = enrichment.description;
+  const enrichmentArtists = artists.length === 0 ? enrichment.artists : [];
 
   const parentEventHref = parentEvent && parentEvent.slug && parentEvent.start_date
     ? buildEventUrlV2({
@@ -132,7 +208,7 @@ export default async function FestivalDetailPage({ params }: { params: Promise<{
       })
     : null;
 
-  // Group artists by billing for visual hierarchy.
+  // Group DB artists by billing for visual hierarchy.
   const grouped = new Map<string, FestivalArtist[]>();
   for (const a of artists) {
     const key = (a.billing as string) ?? 'unknown';
@@ -154,6 +230,7 @@ export default async function FestivalDetailPage({ params }: { params: Promise<{
           fill
           priority
           sizes="100vw"
+          unoptimized
           style={{ objectFit: 'cover' }}
         />
         <div
@@ -191,7 +268,18 @@ export default async function FestivalDetailPage({ params }: { params: Promise<{
       </section>
 
       <div className="max-w-[1180px] mx-auto px-5 md:px-14 py-8 md:py-12 grid grid-cols-1 md:grid-cols-[1fr_400px] gap-8 md:gap-12">
-        <div>
+        <div className="flex flex-col gap-10">
+          {description && (
+            <section>
+              <h2 className="text-[18px] font-bold tracking-[-0.02em] text-[var(--v4-ink)] mb-2">
+                Worum geht&apos;s
+              </h2>
+              <p className="text-[14.5px] leading-[1.6] text-[var(--v4-ink-70)] whitespace-pre-line">
+                {description}
+              </p>
+            </section>
+          )}
+
           {artists.length > 0 ? (
             <section>
               <h2 className="text-[22px] md:text-[26px] font-bold tracking-[-0.025em] text-[var(--v4-ink)] mb-4">
@@ -223,13 +311,32 @@ export default async function FestivalDetailPage({ params }: { params: Promise<{
                 })}
               </div>
             </section>
+          ) : enrichmentArtists.length > 0 ? (
+            <section>
+              <h2 className="text-[22px] md:text-[26px] font-bold tracking-[-0.025em] text-[var(--v4-ink)] mb-3">
+                Line-up
+              </h2>
+              <p className="text-[12px] text-[var(--v4-ink-50)] mb-3">
+                Auszug von der Festival-Seite — vollständige Liste auf der offiziellen Website.
+              </p>
+              <ul className="flex flex-wrap gap-2">
+                {enrichmentArtists.slice(0, 80).map((name, idx) => (
+                  <li
+                    key={`${name}-${idx}`}
+                    className="inline-flex items-center rounded-full px-3 py-1.5 border border-[var(--v4-hairline-2)] bg-[var(--v4-surface-elevated)] text-[13px] text-[var(--v4-ink)]"
+                  >
+                    {name}
+                  </li>
+                ))}
+              </ul>
+            </section>
           ) : (
             <section>
               <h2 className="text-[22px] md:text-[26px] font-bold tracking-[-0.025em] text-[var(--v4-ink)] mb-3">
                 Line-up
               </h2>
               <p className="text-[14px] text-[var(--v4-ink-70)]">
-                Das Line-up wurde noch nicht veröffentlicht oder konnte nicht eingelesen werden.
+                Das Line-up wurde noch nicht eingelesen.
                 {festival.website_url && (
                   <>
                     {' '}Schau auf der{' '}
@@ -266,16 +373,24 @@ export default async function FestivalDetailPage({ params }: { params: Promise<{
                     <dd className="text-[var(--v4-ink)] text-right">{place}</dd>
                   </div>
                 )}
-                {festival.genres && (
+                {genreLabel && (
                   <div className="flex justify-between gap-3">
                     <dt className="text-[var(--v4-ink-50)]">Genre</dt>
-                    <dd className="text-[var(--v4-ink)] text-right">{festival.genres}</dd>
+                    <dd className="text-[var(--v4-ink)] text-right">{genreLabel}</dd>
                   </div>
                 )}
-                {artists.length > 0 && (
+                {(artists.length > 0 || enrichmentArtists.length > 0) && (
                   <div className="flex justify-between gap-3">
                     <dt className="text-[var(--v4-ink-50)]">Acts</dt>
-                    <dd className="text-[var(--v4-ink)] text-right">{artists.length}</dd>
+                    <dd className="text-[var(--v4-ink)] text-right">
+                      {artists.length > 0 ? artists.length : `~${enrichmentArtists.length}`}
+                    </dd>
+                  </div>
+                )}
+                {enrichment.priceText && (
+                  <div className="flex justify-between gap-3">
+                    <dt className="text-[var(--v4-ink-50)]">Preis</dt>
+                    <dd className="text-[var(--v4-ink)] text-right">{enrichment.priceText}</dd>
                   </div>
                 )}
               </dl>
