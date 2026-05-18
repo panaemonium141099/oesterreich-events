@@ -26,10 +26,20 @@ import { NextRequest, NextResponse } from 'next/server';
  * Hit-Budget: ~183 × 24 × 30 = ~132 000 Invocations/Monat. Auf Vercel Pro
  * komfortabel im 1 Mio-Limit. Geschätzte Active-CPU-Kosten: ~1-2 €/Monat.
  *
- * Concurrency: 30 parallel — Vercel verträgt mehr, aber höher gehen führt
- * gelegentlich zu Connection-Resets bei der Custom-Domain. Cron-Run-Dauer
- * mit 30 parallel × ~7 Batches × ~2 s ≈ 15-30 s, locker innerhalb des
- * 300-s-Function-Timeouts.
+ * Concurrency: 6 parallel — vorher 30, das produzierte einen Cron-internen
+ * Storm der den Supabase PgBouncer-Pool exhaustierte und Postgres
+ * statement_timeout (57014) auslöste für 60-80 % der URLs. Production-Logs
+ * zeigten 60-126 s function-Duration weil Funktionen auf
+ * Connection-Slots warteten. EXPLAIN ANALYZE der "langsamen" Query
+ * (bundesland=salzburg + category=Märkte & Feste, 1082 rows) ist isoliert
+ * 270 ms — die Slowness war reine Concurrency, nicht die Query selbst.
+ * Mit 6 parallel bei ~600 ms pro URL endet der Cron in ~20 s.
+ *
+ * Per-URL limit=3000 (ehemals 10000): nirgendwo gibt es eine (bundesland,
+ * category) Kombi mit > 2 600 published-future-events, also fetcht der
+ * Cron jetzt sicher die KOMPLETTE Result-Set aller Listen statt unnötiger
+ * Index-Walks. Das passende UI BATCH_SIZE wurde mitverändert, sonst
+ * stimmen die Edge-Cache-Keys nicht überein.
  *
  * Auth: Vercel setzt automatisch `Authorization: Bearer ${CRON_SECRET}`
  * für eigene Cron-Aufrufe. Direkte Aufrufe ohne Bearer werden mit 401
@@ -130,7 +140,7 @@ function buildPaths(): string[] {
 
   // 1. Bundesland alleine (default Map-View pro Region)
   for (const bl of BUNDESLAENDER) {
-    paths.push(`/api/events?bundesland=${bl}&limit=10000&slim=true`);
+    paths.push(`/api/events?bundesland=${bl}&limit=3000&slim=true`);
   }
 
   // 2. Featured + Stats (Landing-Page)
@@ -142,7 +152,7 @@ function buildPaths(): string[] {
   for (const bl of BUNDESLAENDER) {
     for (const cat of KATEGORIEN) {
       paths.push(
-        `/api/events?bundesland=${bl}&category=${encodeURIComponent(cat)}&limit=10000&slim=true`,
+        `/api/events?bundesland=${bl}&category=${encodeURIComponent(cat)}&limit=3000&slim=true`,
       );
     }
   }
@@ -152,7 +162,7 @@ function buildPaths(): string[] {
   for (const bl of BUNDESLAENDER) {
     for (const p of presets) {
       paths.push(
-        `/api/events?bundesland=${bl}&dateFrom=${p.dateFrom}&dateTo=${p.dateTo}&limit=10000&slim=true`,
+        `/api/events?bundesland=${bl}&dateFrom=${p.dateFrom}&dateTo=${p.dateTo}&limit=3000&slim=true`,
       );
     }
   }
@@ -160,14 +170,14 @@ function buildPaths(): string[] {
   // 5. Bundesland × studentFriendly (10 Kombis)
   for (const bl of BUNDESLAENDER) {
     paths.push(
-      `/api/events?bundesland=${bl}&studentFriendly=true&limit=10000&slim=true`,
+      `/api/events?bundesland=${bl}&studentFriendly=true&limit=3000&slim=true`,
     );
   }
 
   // 6. Bundesland × priceTier=gratis (10 Kombis)
   for (const bl of BUNDESLAENDER) {
     paths.push(
-      `/api/events?bundesland=${bl}&priceTier=gratis&limit=10000&slim=true`,
+      `/api/events?bundesland=${bl}&priceTier=gratis&limit=3000&slim=true`,
     );
   }
 
@@ -233,7 +243,7 @@ export async function GET(request: NextRequest) {
         };
       }
     },
-    30,
+    6,
   );
 
   // Aggregierte Statistik fürs Logging — auf einen Blick sehen ob die

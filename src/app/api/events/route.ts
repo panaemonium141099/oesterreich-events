@@ -764,7 +764,7 @@ export async function GET(request: NextRequest) {
       // 1 h TTL + 24 h SWR ist sicher.
       response.headers.set(
         'Cache-Control',
-        'public, s-maxage=3600, stale-while-revalidate=86400'
+        'public, s-maxage=7200, stale-while-revalidate=86400'
       );
       response.headers.set('X-Total-Count', String(studentTotal));
       return response;
@@ -842,11 +842,14 @@ export async function GET(request: NextRequest) {
     // Edge-Cache: 1 h frisch + 24 h SWR. Cache-Key = volle URL inkl. aller
     // Query-Params, also wird jede Filter-Kombination separat im Vercel CDN
     // gehalten. Daten ändern sich nur durch manuellen Scrape (1×/Tag) →
-    // 1 h TTL ist sicher; SWR-24h fängt jede Lücke zwischen Cron-Hits ab.
-    // Pre-Warm via /api/cron/warm-cache hält die Top-Kombis permanent warm.
+    // 2 h TTL ist sicher; SWR-24h fängt jede Lücke zwischen Cron-Hits ab.
+    // Pre-Warm via /api/cron/warm-cache (stündlich) hält die Top-Kombis
+    // permanent warm — 2 h TTL gibt 1 h Puffer falls ein Cron-Lauf
+    // mal scheitert (war vorher 1 h TTL = jeder fail führte zu Cold-Path
+    // bei Usern und PgBouncer-Storm beim nächsten Cron).
     response.headers.set(
       'Cache-Control',
-      'public, s-maxage=3600, stale-while-revalidate=86400'
+      'public, s-maxage=7200, stale-while-revalidate=86400'
     );
 
     // Pagination metadata headers

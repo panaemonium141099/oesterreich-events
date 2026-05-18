@@ -168,7 +168,12 @@ export function useFilteredEvents(
       };
     }
 
-    const BATCH_SIZE = 10000;
+    // MUSS mit warm-cache cron's limit param matchen — sonst hat das UI
+    // einen anderen Edge-Cache-Key als der gewärmte Cache und jeder
+    // Request triggert eine Cold-Path-DB-Query. 3000 deckt alle aktuell
+    // gemessenen (bundesland × category) Counts ab; größere Kombis
+    // paginieren via cursor in den Background-Batches unten weiter.
+    const BATCH_SIZE = 3000;
     let acc: Event[] = [];
     let finalTotal: number | null = null;
 
