@@ -10,9 +10,12 @@ import { V4Badge } from './V4Badge';
 interface V4DoorsaleBoxProps {
   priceAtDoor?: string;
   onPlanClick?: () => void;
+  /** Google-Maps-Directions-URL für die "Route"-Aktion. Ohne sie wird
+   *  der Route-Button durch ein einzelnes "Merken"-Icon ersetzt. */
+  mapsUrl?: string;
 }
 
-export function V4DoorsaleBox({ priceAtDoor, onPlanClick }: V4DoorsaleBoxProps) {
+export function V4DoorsaleBox({ priceAtDoor, onPlanClick, mapsUrl }: V4DoorsaleBoxProps) {
   return (
     <div
       data-v4-side-box="doorsale"
@@ -61,11 +64,24 @@ export function V4DoorsaleBox({ priceAtDoor, onPlanClick }: V4DoorsaleBoxProps) 
         )}
 
         <div className="mt-2.5 flex gap-2">
-          <a href="#route" data-track="route_opened" className="press-haptic flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-full border border-[var(--v4-hairline-3)] text-[12.5px] font-semibold text-[var(--v4-ink)]">
-            Route
-          </a>
-          <a href="/saved" className="press-haptic inline-flex items-center justify-center px-3 py-2 rounded-full border border-[var(--v4-hairline-3)] text-[var(--v4-ink)]" aria-label="Merken">
+          {mapsUrl && (
+            <a
+              href={mapsUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              data-track="route_opened"
+              className="press-haptic flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-full border border-[var(--v4-hairline-3)] text-[12.5px] font-semibold text-[var(--v4-ink)]"
+            >
+              Route
+            </a>
+          )}
+          <a
+            href="/saved"
+            className={`press-haptic inline-flex items-center justify-center px-3 py-2 rounded-full border border-[var(--v4-hairline-3)] text-[var(--v4-ink)] ${mapsUrl ? '' : 'flex-1 gap-1.5 text-[12.5px] font-semibold'}`}
+            aria-label="Merken"
+          >
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+            {!mapsUrl && <span>Merken</span>}
           </a>
         </div>
       </div>

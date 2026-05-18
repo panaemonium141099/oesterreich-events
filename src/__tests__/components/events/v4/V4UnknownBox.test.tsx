@@ -13,9 +13,19 @@ describe('V4UnknownBox', () => {
     expect(screen.getByText(/kein.*ticketshop/i)).toBeInTheDocument();
   });
 
-  it('offers Merken + Route as primary actions', () => {
+  it('offers Merken as primary action even without coordinates', () => {
     render(<V4UnknownBox/>);
     expect(screen.getByRole('link', { name: /merken/i })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /route/i })).toBeInTheDocument();
+    // Route-Button rendert nicht ohne mapsUrl — ein leerer `#route`-Link
+    // war der Bug, der den User auf der selben Seite festhielt.
+    expect(screen.queryByRole('link', { name: /route/i })).toBeNull();
+  });
+
+  it('renders Route-Link with Google-Maps URL when mapsUrl provided', () => {
+    const url = 'https://www.google.com/maps/dir/?api=1&destination=47.5,15.5';
+    render(<V4UnknownBox mapsUrl={url}/>);
+    const route = screen.getByRole('link', { name: /route/i });
+    expect(route.getAttribute('href')).toBe(url);
+    expect(route.getAttribute('target')).toBe('_blank');
   });
 });

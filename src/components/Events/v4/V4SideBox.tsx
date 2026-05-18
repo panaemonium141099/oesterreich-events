@@ -22,16 +22,17 @@ interface V4SideBoxProps {
   ticketUrl?: string;
   priceAtDoor?: string;
   artistName?: string;
+  mapsUrl?: string;
   onPlanClick?: () => void;
 }
 
 export function V4SideBox(props: V4SideBoxProps) {
-  const { state, provider, priceFrom, ticketUrl, priceAtDoor, artistName, onPlanClick } = props;
+  const { state, provider, priceFrom, ticketUrl, priceAtDoor, artistName, mapsUrl, onPlanClick } = props;
 
   // Variants of TicketBox.
   if (state === 'ticket' || state === 'match' || state === 'lineup') {
     if (!provider || !priceFrom || !ticketUrl) {
-      return <V4UnknownBox/>;
+      return <V4UnknownBox mapsUrl={mapsUrl}/>;
     }
     return (
       <V4TicketBox
@@ -46,8 +47,8 @@ export function V4SideBox(props: V4SideBoxProps) {
   }
 
   if (state === 'free')     return <V4FreeBox onPlanClick={onPlanClick}/>;
-  if (state === 'doorsale') return <V4DoorsaleBox priceAtDoor={priceAtDoor} onPlanClick={onPlanClick}/>;
+  if (state === 'doorsale') return <V4DoorsaleBox priceAtDoor={priceAtDoor} mapsUrl={mapsUrl} onPlanClick={onPlanClick}/>;
   if (state === 'inplan')   return <V4InPlanBox onPlanClick={onPlanClick}/>;
   if (state === 'soldout')  return <V4SoldoutBox/>;
-  return <V4UnknownBox/>;
+  return <V4UnknownBox mapsUrl={mapsUrl}/>;
 }

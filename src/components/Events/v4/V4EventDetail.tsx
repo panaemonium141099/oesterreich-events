@@ -38,6 +38,9 @@ export function V4EventDetail({
   similar,
 }: V4EventDetailProps) {
   const ticketUrl = event.ticket_url ?? undefined;
+  const mapsUrl = event.latitude != null && event.longitude != null
+    ? `https://www.google.com/maps/dir/?api=1&destination=${event.latitude},${event.longitude}`
+    : undefined;
   const [planSheetOpen, setPlanSheetOpen] = useState(false);
 
   return (
@@ -66,6 +69,7 @@ export function V4EventDetail({
             ticketUrl={ticketUrl}
             priceAtDoor={priceAtDoor}
             artistName={artistName}
+            mapsUrl={mapsUrl}
             onPlanClick={() => setPlanSheetOpen(true)}
           />
         </aside>

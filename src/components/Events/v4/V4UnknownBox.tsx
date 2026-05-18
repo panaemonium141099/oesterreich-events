@@ -6,7 +6,13 @@
 
 import { V4Badge } from './V4Badge';
 
-export function V4UnknownBox() {
+interface V4UnknownBoxProps {
+  /** Google-Maps-Directions-URL für die "Route öffnen"-Aktion. Fehlt sie
+   *  (Event ohne Koordinaten), wird der Button gar nicht gerendert. */
+  mapsUrl?: string;
+}
+
+export function V4UnknownBox({ mapsUrl }: V4UnknownBoxProps = {}) {
   return (
     <div
       data-v4-side-box="unknown"
@@ -30,13 +36,17 @@ export function V4UnknownBox() {
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
             Merken
           </a>
-          <a
-            href="#route"
-            data-track="route_opened"
-            className="press-haptic flex items-center justify-center gap-2 w-full px-5 py-3 rounded-full border border-[var(--v4-hairline-3)] text-sm font-semibold text-[var(--v4-ink)]"
-          >
-            Route öffnen
-          </a>
+          {mapsUrl && (
+            <a
+              href={mapsUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              data-track="route_opened"
+              className="press-haptic flex items-center justify-center gap-2 w-full px-5 py-3 rounded-full border border-[var(--v4-hairline-3)] text-sm font-semibold text-[var(--v4-ink)]"
+            >
+              Route öffnen
+            </a>
+          )}
         </div>
       </div>
     </div>
