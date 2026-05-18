@@ -239,12 +239,17 @@ async function buildEnrichment(websiteUrl: string): Promise<FestivalEnrichment> 
  * The slug is included in the cache key so different festivals don't
  * collide — even if two share a website.
  */
+// Cache version — bump when buildEnrichment changes how it derives
+// fields (e.g. new fallback paths). The version is part of the
+// cache key, so a bump invalidates every existing entry instead of
+// waiting out the 24h TTL.
+const CACHE_VERSION = 'v2-p-fallback';
+
 export function getFestivalEnrichment(websiteUrl: string | null, slug: string): Promise<FestivalEnrichment> {
   if (!websiteUrl) return Promise.resolve(EMPTY);
-  // unstable_cache hashes the arg list, so slug+url uniquely keys.
   const cached = unstable_cache(
     async (url: string) => buildEnrichment(url),
-    ['festival-enrichment', slug],
+    ['festival-enrichment', CACHE_VERSION, slug],
     { revalidate: 60 * 60 * 24, tags: [`festival-enrichment:${slug}`] },
   );
   return cached(websiteUrl);
