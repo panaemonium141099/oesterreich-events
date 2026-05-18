@@ -59,7 +59,7 @@ async function findImage(name: string, city: string, state: string): Promise<{ u
 }
 
 async function main() {
-  const results: Record<string, { imageUrl: string | null; via: string }> = {};
+  const results: Record<string, { url: string | null; via: string }> = {};
   let cursor = 0;
   async function worker() {
     while (cursor < missing.length) {
