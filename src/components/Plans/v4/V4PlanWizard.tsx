@@ -58,13 +58,20 @@ export interface WizardState {
 interface V4PlanWizardProps {
   mode: 'sheet' | 'page';
   initialEvent?: Event;
+  /**
+   * Prefill wizard state without binding a DB event. Used when starting
+   * a plan from a festival without parent_event_id — name/date/city are
+   * already filled and the picker step is skipped, but events stays
+   * empty so the save API doesn't hit an FK violation.
+   */
+  initialPrefill?: { name?: string; plan_date?: string; accommodation_city?: string };
   initialPlan?: { id: string; state: WizardState };
   onClose?: () => void;
 }
 
 const DESIGNER_STEPS = ['Tickets', 'Anreise', 'Unterkunft', 'Reminder', 'Übersicht'];
 
-function defaultState(initialEvent?: Event): WizardState {
+function defaultState(initialEvent?: Event, initialPrefill?: V4PlanWizardProps['initialPrefill']): WizardState {
   const today = new Date().toISOString().slice(0, 10);
   const base: WizardState = {
     name: '',
@@ -92,16 +99,26 @@ function defaultState(initialEvent?: Event): WizardState {
       accommodation_city: city,
     };
   }
+  if (initialPrefill) {
+    return {
+      ...base,
+      name: initialPrefill.name ?? base.name,
+      plan_date: initialPrefill.plan_date ?? base.plan_date,
+      accommodation_city: initialPrefill.accommodation_city ?? base.accommodation_city,
+    };
+  }
   return base;
 }
 
-export function V4PlanWizard({ mode, initialEvent, initialPlan, onClose }: V4PlanWizardProps) {
+export function V4PlanWizard({ mode, initialEvent, initialPrefill, initialPlan, onClose }: V4PlanWizardProps) {
   const router = useRouter();
   const [state, setState] = useState<WizardState>(() =>
-    initialPlan?.state ?? defaultState(initialEvent),
+    initialPlan?.state ?? defaultState(initialEvent, initialPrefill),
   );
-  // Step 0 = Event wählen (nur wenn keine Events gesetzt). Step 1-5 = Designer-Steps.
-  const startStep = state.events.length > 0 ? 1 : 0;
+  // Step 0 = Event wählen. Skip it when we have an event already, or when
+  // initialPrefill signals an external entry point (e.g. festival) where
+  // the picker is not needed.
+  const startStep = (state.events.length > 0 || initialPrefill) ? 1 : 0;
   const [step, setStep] = useState(startStep);
   const [saving, setSaving] = useState(false);
   const [savedPlanId, setSavedPlanId] = useState<string | null>(null);

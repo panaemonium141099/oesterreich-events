@@ -20,11 +20,17 @@ import { V4PlanWizard } from '@/components/Plans/v4';
 interface V4FestivalActionsProps {
   /** Optional parent event for prefilling the plan wizard. */
   parentEvent?: Event | null;
+  /**
+   * Prefill values used when the festival has no parent event — the
+   * wizard skips its "Welches Event?" step and lands on Tickets with
+   * the festival's name, date, and city already filled in.
+   */
+  prefill?: { name?: string; plan_date?: string; accommodation_city?: string };
   /** Google-Maps-Directions-URL — omitted means no Route button. */
   mapsUrl?: string | null;
 }
 
-export function V4FestivalActions({ parentEvent, mapsUrl }: V4FestivalActionsProps) {
+export function V4FestivalActions({ parentEvent, prefill, mapsUrl }: V4FestivalActionsProps) {
   const [planSheetOpen, setPlanSheetOpen] = useState(false);
   return (
     <>
@@ -65,6 +71,7 @@ export function V4FestivalActions({ parentEvent, mapsUrl }: V4FestivalActionsPro
         <V4PlanWizard
           mode="sheet"
           initialEvent={parentEvent ?? undefined}
+          initialPrefill={parentEvent ? undefined : prefill}
           onClose={() => setPlanSheetOpen(false)}
         />
       )}

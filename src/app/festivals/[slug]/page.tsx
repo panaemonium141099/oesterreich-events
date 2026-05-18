@@ -424,7 +424,16 @@ export default async function FestivalDetailPage({ params }: { params: Promise<{
                 )}
               </dl>
 
-              <V4FestivalActions mapsUrl={mapsUrl} />
+              <V4FestivalActions
+                mapsUrl={mapsUrl}
+                prefill={{
+                  name: festival.city
+                    ? `${festival.canonical_name} in ${festival.city}`
+                    : festival.canonical_name,
+                  plan_date: festival.starts_at ?? undefined,
+                  accommodation_city: festival.city ?? '',
+                }}
+              />
 
               {festival.website_url && (
                 <a
