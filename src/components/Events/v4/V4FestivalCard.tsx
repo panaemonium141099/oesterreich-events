@@ -59,6 +59,7 @@ export function V4FestivalCard({ festival, lineupMatch = false }: V4FestivalCard
             alt={displayName}
             fill
             sizes="(max-width: 768px) 50vw, 25vw"
+            unoptimized
             style={{ objectFit: 'cover' }}
           />
         ) : (
