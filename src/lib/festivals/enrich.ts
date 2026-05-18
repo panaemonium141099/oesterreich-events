@@ -349,6 +349,16 @@ function applyOverride(enrichment: FestivalEnrichment, slug: string): FestivalEn
 
 export async function getFestivalEnrichment(websiteUrl: string | null, slug: string): Promise<FestivalEnrichment> {
   if (!websiteUrl) return applyOverride(EMPTY, slug);
+  // Short-circuit: if the override has the three user-visible fields
+  // (image, description, price), skip the network fetch entirely. The
+  // runtime extractor only existed to fill those — keeping it adds up
+  // to ~7s navigation latency on the detail page because slow festival
+  // sites stall the 6s timeout and then chase /lineup subpaths each
+  // with their own timeout.
+  const ov = OVERRIDES[slug];
+  if (ov?.imageUrl && ov?.description && ov?.priceText) {
+    return applyOverride(EMPTY, slug);
+  }
   const cached = unstable_cache(
     async (url: string) => buildEnrichment(url),
     ['festival-enrichment', CACHE_VERSION, slug],
