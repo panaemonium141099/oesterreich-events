@@ -60,6 +60,7 @@
     "enrich:claude": "tsx --env-file=.env.local src/scripts/enrich-claude.ts",
     "enrich:claude:legacy": "tsx --env-file=.env.local src/scripts/enrich-claude-cli.ts",
     "enrich:openai": "tsx --env-file=.env.local src/scripts/enrich-openai.ts",
+    "agent:enrich": "tsx --env-file=.env.local src/scripts/agent-enrich.ts",
     "migrate:claude-v1": "tsx --env-file=.env.local src/scripts/migrate-to-claude-v1.ts",
     "regen:taxonomy": "tsx src/scripts/regen-taxonomy-doc.ts",
     "build-embeddings": "tsx --env-file=.env.local src/scripts/build-embeddings.ts",
@@ -90,6 +91,7 @@
     "safari >= 16.4"
   ],
   "dependencies": {
+    "@anthropic-ai/claude-agent-sdk": "^0.3.143",
     "@anthropic-ai/sdk": "^0.95.1",
     "@google/genai": "^1.52.0",
     "@supabase/ssr": "^0.9.0",
