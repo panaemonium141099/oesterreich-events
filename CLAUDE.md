@@ -1,5 +1,14 @@
 # burgenland-events-v5
 
+> **🛑 NIEMALS RATEN.** Wenn der User ein Problem meldet, nenne KEINE Ursache
+> ohne sie zuerst mit Daten belegt zu haben — kein "wahrscheinlich Browser-Cache",
+> kein "vermutlich liegt's an X", kein "könnte sein dass Y". Bevor du eine Ursache
+> ausspricht: ein konkreter Check (curl mit headers, SQL-Query, Log-Read, File-Diff,
+> Network-Tab). Wenn der User sagt "es ist nicht X" → glaube ihm, schau woanders;
+> NIE die gleiche Hypothese ein zweites Mal anbieten. Banale Erklärungen
+> ("Browser-Cache", "noch nicht gepushed", "musst neu laden") hat der User schon
+> selbst geprüft bevor er fragt — überspring sie. Hypothese erst nach Beobachtung.
+
 > **⚠️ Wichtig — vor jedem Task zur Event-Klassifikation / Tags / Kategorien lesen:**
 > Seit fn-14.3 (2026-05-07) ist die Source-of-Truth folgendermaßen aufgeteilt:
 >
