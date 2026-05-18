@@ -166,6 +166,14 @@ const nextConfig: NextConfig = {
       { protocol: 'https', hostname: '**.eu' },
       { protocol: 'https', hostname: '**.de' },
       { protocol: 'https', hostname: '**.art' },
+      // Additional TLDs in use by festival-overrides.json (rosengarten.cc,
+      // impuls.cc, avb.am, ottensheimopenair.cargo.site). next/image
+      // validates hostnames even when `unoptimized` is set; an unrecognized
+      // host throws "Invalid src prop" and the error boundary that catches
+      // it makes client-side navigation hang on the /festivals listing.
+      { protocol: 'https', hostname: '**.cc' },
+      { protocol: 'https', hostname: '**.am' },
+      { protocol: 'https', hostname: '**.site' },
     ],
   },
   // Reduziert Info-Disclosure: kein "X-Powered-By: Next.js" Header.
