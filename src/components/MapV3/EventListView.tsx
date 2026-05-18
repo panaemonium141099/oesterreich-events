@@ -149,7 +149,16 @@ export function EventListView({
       return withD.map((x) => x.e);
     }
     if (sort === 'score') {
-      list.sort((a, b) => (b.event_score ?? 0) - (a.event_score ?? 0));
+      // Tiered: Events MIT image_url zuerst, innerhalb beider Buckets nach
+      // event_score DESC. Ein bildloses Event mit hohem Score steht so unter
+      // den bebilderten — sonst füllen visuell schwache Rows die obersten
+      // Slots, was sich für den User wie "kein Top-Sort" anfühlt.
+      list.sort((a, b) => {
+        const aImg = a.image_url ? 1 : 0;
+        const bImg = b.image_url ? 1 : 0;
+        if (aImg !== bImg) return bImg - aImg;
+        return (b.event_score ?? 0) - (a.event_score ?? 0);
+      });
       return list;
     }
     list.sort((a, b) => new Date(a.start_date).getTime() - new Date(b.start_date).getTime());
