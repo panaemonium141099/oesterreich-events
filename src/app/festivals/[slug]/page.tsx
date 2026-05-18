@@ -87,28 +87,57 @@ function asciiFoldSlug(slug: string): string {
  * errors are logged and treated as null so the page can render the 404
  * shell cleanly instead of crashing into the global error boundary.
  */
-async function fetchFestivalRow(slug: string): Promise<Festival | null> {
+interface LookupAttempt {
+  candidate: string;
+  codepoints: string;
+  matched: boolean;
+  error: string | null;
+}
+
+async function fetchFestivalRow(slug: string): Promise<{ festival: Festival | null; attempts: LookupAttempt[] }> {
   const supabase = await createServerSupabaseClient();
+  let decoded = slug;
+  try {
+    decoded = decodeURIComponent(slug);
+  } catch {
+    /* invalid escape sequence in slug — keep original */
+  }
   const variants = Array.from(new Set([
+    decoded,
     slug,
-    slug.normalize('NFC'),
-    slug.normalize('NFD'),
-    asciiFoldSlug(slug.normalize('NFC')),
+    decoded.normalize('NFC'),
+    decoded.normalize('NFD'),
+    asciiFoldSlug(decoded.normalize('NFC')),
   ]));
 
+  const attempts: LookupAttempt[] = [];
   for (const candidate of variants) {
+    const codepoints = [...candidate].map(c => c.codePointAt(0)!.toString(16)).join(',');
     try {
       const { data, error } = await supabase
         .from('festivals')
         .select('*')
         .eq('slug', candidate)
         .maybeSingle();
-      if (!error && data) return data as unknown as Festival;
+      attempts.push({ candidate, codepoints, matched: !!data, error: error?.message ?? null });
+      if (!error && data) return { festival: data as unknown as Festival, attempts };
     } catch (err) {
-      console.error('[festival-detail] festival lookup threw:', candidate, err);
+      attempts.push({ candidate, codepoints, matched: false, error: (err as Error)?.message ?? 'threw' });
     }
   }
-  return null;
+  // ilike fallback
+  try {
+    const { data, error } = await supabase
+      .from('festivals')
+      .select('*')
+      .ilike('slug', decoded)
+      .limit(1);
+    attempts.push({ candidate: `ilike:${decoded}`, codepoints: '', matched: !!(data && data.length), error: error?.message ?? null });
+    if (data && data.length > 0) return { festival: data[0] as unknown as Festival, attempts };
+  } catch (err) {
+    attempts.push({ candidate: `ilike:${decoded}`, codepoints: '', matched: false, error: (err as Error)?.message ?? 'threw' });
+  }
+  return { festival: null, attempts };
 }
 
 async function fetchParentEvent(parentEventId: string | null): Promise<ParentEventRow | null> {
@@ -143,7 +172,7 @@ async function fetchArtists(festivalId: string): Promise<FestivalArtist[]> {
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
-  const festival = await fetchFestivalRow(slug);
+  const { festival } = await fetchFestivalRow(slug);
   if (!festival) return { title: 'Festival nicht gefunden — lasstreffen.at' };
   const dateRange = formatDateRange(festival.starts_at, festival.ends_at);
   const desc = festival.city
@@ -173,8 +202,26 @@ const BILLING_LABEL: Record<string, string> = {
 
 export default async function FestivalDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const festival = await fetchFestivalRow(slug);
-  if (!festival) notFound();
+  const slugCodepoints = [...slug].map(c => c.codePointAt(0)!.toString(16)).join(',');
+  const { festival, attempts } = await fetchFestivalRow(slug);
+  if (!festival) {
+    // Diagnostic render — temporarily replaces notFound() so we can see
+    // what slug variants reached the page handler vs generateMetadata.
+    // Will be reverted once we know what Vercel routes deliver here.
+    return (
+      <div className="min-h-screen bg-slate-900 p-8 text-slate-200 font-mono text-xs whitespace-pre overflow-auto">
+        <h1 className="text-base font-bold mb-4">festival-detail diagnostic</h1>
+        <div>slug param raw: {JSON.stringify(slug)}</div>
+        <div>slug codepoints: {slugCodepoints}</div>
+        <div className="mt-4">attempts:</div>
+        {attempts.map((a, i) => (
+          <div key={i}>
+            [{i}] candidate={JSON.stringify(a.candidate)} codepoints={a.codepoints} matched={String(a.matched)} error={a.error ?? '-'}
+          </div>
+        ))}
+      </div>
+    );
+  }
 
   // Parallel: parent event, artists, runtime enrichment from the
   // official festival website. All three swallow errors → page never
