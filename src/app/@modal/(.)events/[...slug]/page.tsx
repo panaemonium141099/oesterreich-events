@@ -33,7 +33,6 @@
 import { notFound } from 'next/navigation';
 import { V4EventDetail } from '@/components/Events/v4';
 import { deriveEventState } from '@/lib/v4/derive-event-state';
-import { deriveDetailContext } from '@/lib/v4/derive-detail-context';
 import { EventSheet } from '@/components/Events/EventSheet';
 import { ModalShell } from '@/components/Layout/ModalShell';
 import {
@@ -67,13 +66,24 @@ export default async function InterceptedEventPage({
     notFound();
   }
 
-  const [, , detailCtx] = await Promise.all([
+  // Personal context (saved/match overlay, matchedArtistName) is NOT
+  // loaded server-side — same reason as the full-page handler: this
+  // route uses ISR (`revalidate=3600`) and Next.js 16 throws "Page
+  // changed from static to dynamic at runtime, reason: cookies" if a
+  // dynamic API is touched during the static prerender pass.
+  // V4EventDetail fetches the personal overlay client-side from
+  // /api/events/[id]/personal-context.
+  await Promise.all([
     event.venue_id ? getVenue(event.venue_id) : Promise.resolve(null),
     getLineupForEvent(event.id),
-    deriveDetailContext(event.id),
   ]);
 
-  const state = deriveEventState(event, detailCtx);
+  const state = deriveEventState(event, {
+    savedEventIds: new Set(),
+    followedArtistIds: new Set(),
+    artistMatchEventIds: new Set(),
+    lineupMatchEventIds: new Set(),
+  });
   const provider = event.source_name ?? undefined;
   const priceFrom =
     event.price_min != null ? `€ ${event.price_min}` :
@@ -94,7 +104,6 @@ export default async function InterceptedEventPage({
           provider={provider}
           priceFrom={priceFrom}
           priceAtDoor={priceAtDoor}
-          artistName={detailCtx.matchedArtistName}
         />
       </EventSheet>
     </ModalShell>

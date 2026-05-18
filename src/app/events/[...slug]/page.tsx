@@ -6,15 +6,12 @@ import { buildEventUrlV2 } from '@/lib/utils/slugify';
 import { resolvePrimaryEventImage } from '@/lib/event-images';
 import { V4EventDetail } from '@/components/Events/v4';
 import { deriveEventState } from '@/lib/v4/derive-event-state';
-import { deriveDetailContext } from '@/lib/v4/derive-detail-context';
 import {
   parseSlugArray,
   resolveEvent,
   getEventByShortId,
   getVenue,
-  getFriendsForEvent,
   getLineupForEvent,
-  buildBundeslandHref,
 } from '@/lib/events/event-detail-loaders';
 
 /**
@@ -332,13 +329,26 @@ export default async function EventDetailPage({
   // (Friends belong to Plan context, Phase 5). Venue + lineup still load
   // in parallel because Phase 3.1 will surface them; for now they're
   // unused but the queries are cheap.
-  const [, , detailCtx] = await Promise.all([
+  //
+  // Personal context (saved/match overlay, matchedArtistName) is NOT
+  // loaded here: this page runs as ISR (`revalidate=3600`) so any
+  // cookies()-touching call would trigger
+  //   "Page changed from static to dynamic at runtime, reason: cookies"
+  // and 500 the response (Vercel runtime logs, 17.+18. Mai 2026).
+  // The personal overlay is instead fetched client-side by
+  // V4EventDetail via /api/events/[id]/personal-context. The server-
+  // rendered HTML reflects the anon-view state derivation below.
+  await Promise.all([
     event.venue_id ? getVenue(event.venue_id) : Promise.resolve(null),
     getLineupForEvent(event.id),
-    deriveDetailContext(event.id),
   ]);
 
-  const state = deriveEventState(event, detailCtx);
+  const state = deriveEventState(event, {
+    savedEventIds: new Set(),
+    followedArtistIds: new Set(),
+    artistMatchEventIds: new Set(),
+    lineupMatchEventIds: new Set(),
+  });
 
   // Best-effort ticket meta inferred from event row. The fields are loose
   // strings; V4SideBox falls back to UnknownBox if any are missing.
@@ -365,7 +375,6 @@ export default async function EventDetailPage({
         provider={provider}
         priceFrom={priceFrom}
         priceAtDoor={priceAtDoor}
-        artistName={detailCtx.matchedArtistName}
       />
     </>
   );
