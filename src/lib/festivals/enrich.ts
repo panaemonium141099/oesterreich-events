@@ -168,6 +168,54 @@ function harvestJsonLd($: cheerio.CheerioAPI): {
 }
 
 /**
+ * Try common lineup subpaths (`/lineup`, `/line-up`, `/artists`,
+ * `/programm`) and return the first that yields JSON-LD performers
+ * or h2 artist-name candidates. Returns null on no hit.
+ *
+ * Used as a second pass when the home page yields no lineup signal —
+ * many festival sites put their structured data only on the lineup
+ * subpage.
+ */
+const LINEUP_PATHS = ['/lineup', '/line-up', '/artists', '/kuenstler', '/künstler', '/programm', '/programme'];
+const H2_NOISE = /^(Vote|Tickets?|Newsletter|Login|Anmeld|Travel|Anreise|Sponsoren|Sponsors?|Partners?|FAQ|Kontakt|Contact|Über|About|Hauptpartner|Logo|Datenschutz|Impressum|Cookie|Programm|Line[- ]?up|Aftermovie|Opening|Closing)\b/i;
+
+async function tryLineupSubpaths(baseUrl: string): Promise<{ artists: string[] }> {
+  for (const path of LINEUP_PATHS) {
+    let absUrl: string;
+    try {
+      absUrl = new URL(path, baseUrl).toString();
+    } catch {
+      continue;
+    }
+    const html = await safeFetch(absUrl);
+    if (!html) continue;
+    let $: cheerio.CheerioAPI;
+    try {
+      $ = cheerio.load(html);
+    } catch {
+      continue;
+    }
+    const sub = harvestJsonLd($);
+    if (sub.performers.length > 0) {
+      return { artists: Array.from(new Set(sub.performers.map(s => s.trim()).filter(Boolean))) };
+    }
+    // h2 fallback: only trust the subpath if it gives a plausibly-sized
+    // list (≥5, ≤200) and the entries don't look like nav noise.
+    const h2s: string[] = [];
+    $('h2').each((_, el) => {
+      const t = $(el).text().replace(/\s+/g, ' ').trim();
+      if (!t || t.length < 2 || t.length > 80) return;
+      if (H2_NOISE.test(t)) return;
+      h2s.push(t);
+    });
+    if (h2s.length >= 5 && h2s.length <= 200) {
+      return { artists: Array.from(new Set(h2s)) };
+    }
+  }
+  return { artists: [] };
+}
+
+/**
  * Core enrichment — fetch + parse. Uncached version; the exported
  * `getFestivalEnrichment` wraps this with unstable_cache.
  */
@@ -222,7 +270,15 @@ async function buildEnrichment(websiteUrl: string): Promise<FestivalEnrichment> 
   }
 
   // ── Artists ──
-  const artists = Array.from(new Set(jsonLd.performers.map(s => s.trim()).filter(Boolean)));
+  // Layer 1: JSON-LD performers on the home page (rare but cleanest).
+  let artists = Array.from(new Set(jsonLd.performers.map(s => s.trim()).filter(Boolean)));
+  // Layer 2: try /lineup, /line-up, /programm, /artists subpaths. Common
+  // pattern on Austrian festival sites — the home page is editorial /
+  // marketing while the structured artist list lives one level down.
+  if (artists.length === 0) {
+    const sub = await tryLineupSubpaths(websiteUrl);
+    artists = sub.artists;
+  }
 
   return {
     imageUrl: ogImage ?? jsonLdImage ?? null,
@@ -243,7 +299,7 @@ async function buildEnrichment(websiteUrl: string): Promise<FestivalEnrichment> 
 // fields (e.g. new fallback paths). The version is part of the
 // cache key, so a bump invalidates every existing entry instead of
 // waiting out the 24h TTL.
-const CACHE_VERSION = 'v2-p-fallback';
+const CACHE_VERSION = 'v3-subpath-lineup';
 
 export function getFestivalEnrichment(websiteUrl: string | null, slug: string): Promise<FestivalEnrichment> {
   if (!websiteUrl) return Promise.resolve(EMPTY);
