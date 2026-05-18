@@ -7,6 +7,7 @@ import { V4BackButton } from '@/components/Events/v4/V4BackButton';
 import { buildEventUrlV2 } from '@/lib/utils/slugify';
 import { getFestivalEnrichment } from '@/lib/festivals/enrich';
 import type { Festival, FestivalArtist } from '@/types/festivals';
+import { V4FestivalActions } from '@/components/Festivals/V4FestivalActions';
 
 // Dynamic — slug params with non-ASCII (umlauts) were getting served
 // stale 404 responses under Next's default revalidation. Forcing the
@@ -226,6 +227,16 @@ export default async function FestivalDetailPage({ params }: { params: Promise<{
       })
     : null;
 
+  // Google Maps directions URL. Prefer parent event's address; fall back
+  // to festival city + state so the Route button still has a target on
+  // festivals without a linked event.
+  const mapsDest = parentEvent?.address
+    ? [parentEvent.address, parentEvent.location_name, parentEvent.bundesland].filter(Boolean).join(', ')
+    : [festival.city, festival.state].filter(Boolean).join(', ');
+  const mapsUrl = mapsDest
+    ? `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(mapsDest)}`
+    : null;
+
   // Group DB artists by billing for visual hierarchy.
   const grouped = new Map<string, FestivalArtist[]>();
   for (const a of artists) {
@@ -413,12 +424,14 @@ export default async function FestivalDetailPage({ params }: { params: Promise<{
                 )}
               </dl>
 
+              <V4FestivalActions mapsUrl={mapsUrl} />
+
               {festival.website_url && (
                 <a
                   href={festival.website_url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="press-haptic mt-2 flex items-center justify-center gap-2 w-full px-5 py-3 rounded-full bg-[var(--v4-ink)] text-[#0a0a0c] text-sm font-semibold"
+                  className="press-haptic flex items-center justify-center gap-2 w-full px-5 py-3 rounded-full bg-[var(--v4-ink)] text-[#0a0a0c] text-sm font-semibold"
                 >
                   Offizielle Website
                 </a>
