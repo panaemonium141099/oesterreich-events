@@ -178,6 +178,10 @@ function harvestJsonLd($: cheerio.CheerioAPI): {
  */
 const LINEUP_PATHS = ['/lineup', '/line-up', '/artists', '/kuenstler', '/künstler', '/programm', '/programme'];
 const H2_NOISE = /^(Vote|Tickets?|Newsletter|Login|Anmeld|Travel|Anreise|Sponsoren|Sponsors?|Partners?|FAQ|Kontakt|Contact|Über|About|Hauptpartner|Logo|Datenschutz|Impressum|Cookie|Programm|Line[- ]?up|Aftermovie|Opening|Closing)\b/i;
+// Strip date-like and weekday-like h2 strings — these surface in
+// "lineup grouped by day" listings (Friday 24.07., 21.-23. August
+// 2026, etc.) and pollute the artist list.
+const DATE_NOISE = /^(\d{1,2}[.\-/]\d{1,2}[.\-/]?(\d{2,4})?|\d{1,2}\.\s?(?:Jan|Feb|Mar|Apr|Mai|Jun|Jul|Aug|Sep|Okt|Nov|Dez)|Montag|Dienstag|Mittwoch|Donnerstag|Freitag|Samstag|Sonntag|Mo|Di|Mi|Do|Fr|Sa|So|Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday)[,.\s]/i;
 
 async function tryLineupSubpaths(baseUrl: string): Promise<{ artists: string[] }> {
   for (const path of LINEUP_PATHS) {
@@ -200,15 +204,27 @@ async function tryLineupSubpaths(baseUrl: string): Promise<{ artists: string[] }
       return { artists: Array.from(new Set(sub.performers.map(s => s.trim()).filter(Boolean))) };
     }
     // h2 fallback: only trust the subpath if it gives a plausibly-sized
-    // list (≥5, ≤200) and the entries don't look like nav noise.
+    // list (≥5, ≤200) and the entries don't look like nav noise OR pure
+    // date / weekday strings.
     const h2s: string[] = [];
     $('h2').each((_, el) => {
       const t = $(el).text().replace(/\s+/g, ' ').trim();
       if (!t || t.length < 2 || t.length > 80) return;
       if (H2_NOISE.test(t)) return;
+      if (DATE_NOISE.test(t)) return;
+      // Discard h2s that are JUST a city + state combo (location header).
+      if (/^[A-ZÄÖÜ][\wäöüß]+(\s[A-ZÄÖÜ][\wäöüß]+)?$/.test(t) && t.split(' ').length <= 2 && t.length < 20) {
+        // single short capitalized word/pair — could be an artist OR a city.
+        // Keep it but the calling code is conservative anyway.
+      }
       h2s.push(t);
     });
     if (h2s.length >= 5 && h2s.length <= 200) {
+      // If MORE THAN HALF the captured h2s pattern-match dates after
+      // the initial filter, we're probably reading a calendar page,
+      // not a lineup. Drop the whole result.
+      const dateLike = h2s.filter(t => /\d{1,2}[.\-/]\d{1,2}/.test(t)).length;
+      if (dateLike / h2s.length > 0.5) continue;
       return { artists: Array.from(new Set(h2s)) };
     }
   }
@@ -299,7 +315,7 @@ async function buildEnrichment(websiteUrl: string): Promise<FestivalEnrichment> 
 // fields (e.g. new fallback paths). The version is part of the
 // cache key, so a bump invalidates every existing entry instead of
 // waiting out the 24h TTL.
-const CACHE_VERSION = 'v3-subpath-lineup';
+const CACHE_VERSION = 'v4-noise-filter';
 
 export function getFestivalEnrichment(websiteUrl: string | null, slug: string): Promise<FestivalEnrichment> {
   if (!websiteUrl) return Promise.resolve(EMPTY);
