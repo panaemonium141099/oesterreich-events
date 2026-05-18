@@ -128,7 +128,42 @@ export function V4PlanWizard({ mode, initialEvent, initialPrefill, initialPlan, 
     setState(prev => ({ ...prev, ...patch }));
   }, []);
 
-  const primaryEvent = state.events[0];
+  // When the wizard is opened from a festival without parent_event_id,
+  // state.events is empty (so the save POST doesn't violate the events
+  // FK) but the Designer-Step components still want an Event-shaped
+  // object to render the summary card, derive the ticket provider, etc.
+  // Build a render-only pseudo-event from initialPrefill in that case —
+  // it lives only inside this component and never reaches the API.
+  const pseudoEvent = useMemo<Event | null>(() => {
+    if (!initialPrefill) return null;
+    return {
+      id: '',
+      source_id: null,
+      source_name: null,
+      source_url: null,
+      title: initialPrefill.name ?? '',
+      description: null,
+      start_date: initialPrefill.plan_date ?? '',
+      end_date: null,
+      location_name: initialPrefill.accommodation_city ?? null,
+      address: null,
+      postal_code: null,
+      bundesland: null,
+      district: null,
+      latitude: null,
+      longitude: null,
+      category: null,
+      price_text: null,
+      price_min: null,
+      price_max: null,
+      image_url: null,
+      organizer: null,
+      tags: null,
+      ticket_url: null,
+    } as Event;
+  }, [initialPrefill]);
+
+  const primaryEvent = state.events[0] ?? pseudoEvent ?? undefined;
   const hasEvent = !!primaryEvent;
   const designerStep = step; // 1..5
 
