@@ -190,13 +190,36 @@ async function buildEnrichment(websiteUrl: string): Promise<FestivalEnrichment> 
   const jsonLdImage = jsonLd.images.length > 0 ? absolutize(jsonLd.images[0], websiteUrl) : null;
 
   // ── Description ──
-  const ogDesc = meta($, 'og:description') ?? meta($, 'description');
+  // Layered fallback: og:description → meta description → JSON-LD
+  // → first substantive <p> (>= 80 chars, skip cookie banners /
+  // legal noise). Each layer wins only if the candidate looks like
+  // a real description (>30 chars). The "first <p>" branch is what
+  // covers sites whose CMS doesn't render meta tags — quite common
+  // for festival microsites built on Wordpress + page builders.
+  const ogDesc = meta($, 'og:description');
+  const nameDesc = meta($, 'description');
   const jsonLdDesc = jsonLd.descriptions[0] ?? null;
-  const description = (ogDesc && ogDesc.length > 30 ? ogDesc : null)
-    ?? (jsonLdDesc && jsonLdDesc.length > 30 ? jsonLdDesc : null)
-    ?? ogDesc
-    ?? jsonLdDesc
-    ?? null;
+
+  function pickP(): string | null {
+    const SKIP = /^(cookie|datenschutz|impressum|agb|newsletter|bestuhlung)/i;
+    let best: string | null = null;
+    $('p').each((_, el) => {
+      if (best) return;
+      const text = $(el).text().replace(/\s+/g, ' ').trim();
+      if (text.length < 80) return;
+      if (SKIP.test(text)) return;
+      best = text.slice(0, 600);
+    });
+    return best;
+  }
+
+  let description: string | null = null;
+  for (const cand of [ogDesc, nameDesc, jsonLdDesc, pickP()]) {
+    if (cand && cand.trim().length >= 30) {
+      description = cand.trim();
+      break;
+    }
+  }
 
   // ── Artists ──
   const artists = Array.from(new Set(jsonLd.performers.map(s => s.trim()).filter(Boolean)));
