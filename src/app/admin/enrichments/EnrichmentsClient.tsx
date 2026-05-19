@@ -1,8 +1,9 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Sparkles, Check, X, Loader2, ExternalLink, ImageOff, RefreshCw } from 'lucide-react';
+import { Sparkles, Check, X, Loader2, ExternalLink, ImageOff, RefreshCw, Eye } from 'lucide-react';
 import type { EnrichmentProposal } from '@/app/api/admin/enrichments/route';
+import { buildEventUrlV2 } from '@/lib/utils/slugify';
 
 type StatusFilter = 'pending' | 'approved' | 'declined';
 
@@ -195,7 +196,18 @@ function ProposalCard({ proposal, busy, readOnly, onApprove, onDecline }: Propos
       {/* Header: event meta */}
       <div className="px-5 py-4 border-b border-white/[0.06] flex items-start justify-between gap-4 flex-wrap">
         <div className="min-w-0 flex-1">
-          <h2 className="font-semibold text-white truncate">{e.title}</h2>
+          <h2 className="font-semibold text-white truncate">
+            <a
+              href={buildEventUrlV2(e)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-amber-400 hover:underline inline-flex items-center gap-1.5"
+              title="Event-Seite öffnen"
+            >
+              {e.title}
+              <ExternalLink className="w-3.5 h-3.5 shrink-0 opacity-60" />
+            </a>
+          </h2>
           <div className="text-xs text-white/40 mt-1 flex items-center gap-2 flex-wrap">
             <span>{new Date(e.start_date).toLocaleDateString('de-AT')}</span>
             {e.location_name && <span>· {e.location_name}</span>}
@@ -214,6 +226,16 @@ function ProposalCard({ proposal, busy, readOnly, onApprove, onDecline }: Propos
           </div>
         </div>
         <div className="flex items-center gap-2">
+          <a
+            href={buildEventUrlV2(e)}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-1.5 px-3 py-1.5 text-sm bg-white/[0.05] hover:bg-white/[0.1] border border-white/[0.06] text-white/70 hover:text-white rounded-lg"
+            title="Vollständige Event-Seite öffnen"
+          >
+            <Eye className="w-4 h-4" />
+            Ansehen
+          </a>
           {!readOnly && (
             <>
               <button

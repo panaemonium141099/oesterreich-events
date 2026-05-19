@@ -30,9 +30,12 @@ export interface EnrichmentProposal {
   event: {
     id: string;
     title: string;
+    slug: string | null;
     source_url: string | null;
     source_name: string | null;
     location_name: string | null;
+    address: string | null;
+    postal_code: string | null;
     bundesland: string | null;
     start_date: string;
     category: string | null;
@@ -90,8 +93,9 @@ export async function GET(request: NextRequest) {
     const { data: eventsRaw } = await supabase
       .from('events')
       .select(
-        'id, title, source_url, source_name, location_name, bundesland, start_date, ' +
-          'category, image_url, description, price_text, price_min, price_max, tags',
+        'id, title, slug, source_url, source_name, location_name, address, postal_code, ' +
+          'bundesland, start_date, category, image_url, description, price_text, ' +
+          'price_min, price_max, tags',
       )
       .in('id', eventIds);
 
