@@ -56,12 +56,27 @@ export async function POST(
       if (val !== null && val !== undefined) updates[eventCol] = val;
     };
     setIf('category', 'proposed_category');
+    setIf('location_name', 'proposed_location_name');
+    setIf('address', 'proposed_address');
+    setIf('postal_code', 'proposed_postal_code');
     setIf('image_url', 'proposed_image_url');
     setIf('description', 'proposed_description');
     setIf('price_text', 'proposed_price_text');
     setIf('price_min', 'proposed_price_min');
     setIf('price_max', 'proposed_price_max');
     setIf('tags', 'proposed_tags');
+
+    // When the address changes, the previous lat/lng/geocoding_confidence are
+    // stale — they probably point at a town-center fallback. Clear them so the
+    // existing geocoding pipeline (openai-geocode / location-normalizer) picks
+    // this event up on its next run and computes accurate coords from the new
+    // address text. We never let the LLM guess coords directly.
+    if ('address' in updates) {
+      updates.latitude = null;
+      updates.longitude = null;
+      updates.geocoding_confidence = null;
+      updates.geocoding_source = null;
+    }
 
     if (Object.keys(updates).length === 0) {
       return NextResponse.json(
