@@ -3,15 +3,19 @@
  *
  * No ticket purchase path; pivots to planning. Green accent stripe +
  * "Abend planen" CTA — calls onPlanClick to open the V4PlanWizard sheet.
+ * "Route öffnen" sits in the secondary row whenever mapsUrl is known —
+ * the user wants the routing affordance reachable from every state.
  */
 
 import { V4Badge } from './V4Badge';
 
 interface V4FreeBoxProps {
   onPlanClick?: () => void;
+  /** Google-Maps-Directions-URL. Without it the Route button collapses. */
+  mapsUrl?: string;
 }
 
-export function V4FreeBox({ onPlanClick }: V4FreeBoxProps) {
+export function V4FreeBox({ onPlanClick, mapsUrl }: V4FreeBoxProps) {
   return (
     <div
       data-v4-side-box="free"
@@ -50,7 +54,18 @@ export function V4FreeBox({ onPlanClick }: V4FreeBoxProps) {
         )}
 
         <div className="mt-2.5 flex gap-2">
-          <a href="/saved" className="press-haptic flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-full border border-[var(--v4-hairline-3)] text-[12.5px] font-semibold text-[var(--v4-ink)]">
+          {mapsUrl && (
+            <a
+              href={mapsUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              data-track="route_opened"
+              className="press-haptic flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-full border border-[var(--v4-hairline-3)] text-[12.5px] font-semibold text-[var(--v4-ink)]"
+            >
+              Route öffnen
+            </a>
+          )}
+          <a href="/saved" className={`press-haptic inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-full border border-[var(--v4-hairline-3)] text-[12.5px] font-semibold text-[var(--v4-ink)] ${mapsUrl ? '' : 'flex-1'}`}>
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
             Merken
           </a>
