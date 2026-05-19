@@ -14,6 +14,9 @@ interface V4FreeBoxProps {
   onPlanClick?: () => void;
   /** Google-Maps-Directions-URL. Without it the Route button collapses. */
   mapsUrl?: string;
+  /** True when coords exist but are too approximate to route to. Renders a
+   *  non-clickable "Ortsangabe ungefähr" pill in the Route slot instead. */
+  locationApprox?: boolean;
   /** Raw price text from the event (e.g. "Spende erwünscht"). Free events
    *  with no price text show no price block — the Eintritt-frei badge above
    *  already conveys the price. */
@@ -22,7 +25,8 @@ interface V4FreeBoxProps {
   priceMax?: number | null;
 }
 
-export function V4FreeBox({ onPlanClick, mapsUrl, priceText, priceMin, priceMax }: V4FreeBoxProps) {
+export function V4FreeBox({ onPlanClick, mapsUrl, locationApprox, priceText, priceMin, priceMax }: V4FreeBoxProps) {
+  const showsLocationCell = !!mapsUrl || !!locationApprox;
   return (
     <div
       data-v4-side-box="free"
@@ -63,7 +67,7 @@ export function V4FreeBox({ onPlanClick, mapsUrl, priceText, priceMin, priceMax 
         )}
 
         <div className="mt-2.5 flex gap-2">
-          {mapsUrl && (
+          {mapsUrl ? (
             <a
               href={mapsUrl}
               target="_blank"
@@ -73,8 +77,15 @@ export function V4FreeBox({ onPlanClick, mapsUrl, priceText, priceMin, priceMax 
             >
               Route öffnen
             </a>
-          )}
-          <a href="/saved" className={`press-haptic inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-full border border-[var(--v4-hairline-3)] text-[12.5px] font-semibold text-[var(--v4-ink)] ${mapsUrl ? '' : 'flex-1'}`}>
+          ) : locationApprox ? (
+            <span
+              title="Beim Veranstalter die genaue Adresse pruefen, bevor du losfaehrst."
+              className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-full border border-dashed border-[var(--v4-hairline-3)] text-[11.5px] font-medium text-[var(--v4-ink-50)] cursor-help"
+            >
+              Ortsangabe ungefähr
+            </span>
+          ) : null}
+          <a href="/saved" className={`press-haptic inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-full border border-[var(--v4-hairline-3)] text-[12.5px] font-semibold text-[var(--v4-ink)] ${showsLocationCell ? '' : 'flex-1'}`}>
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
             Merken
           </a>

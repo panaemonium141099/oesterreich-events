@@ -23,6 +23,7 @@ import { useEffect, useState } from 'react';
 import type { Event } from '@/types/events';
 import type { DeriveCtx, V4EventState } from '@/lib/v4/derive-event-state';
 import { deriveEventState } from '@/lib/v4/derive-event-state';
+import { isLocationApproximate, isLocationTrusted } from '@/lib/utils/location-trust';
 import { V4EventDetailHero } from './V4EventDetailHero';
 import { V4EventDetailContent } from './V4EventDetailContent';
 import { V4SideBox } from './V4SideBox';
@@ -54,7 +55,14 @@ export function V4EventDetail({
   similar,
 }: V4EventDetailProps) {
   const ticketUrl = event.ticket_url ?? undefined;
-  const mapsUrl = event.latitude != null && event.longitude != null
+  // Gate the Route affordance: only emit a Maps URL when the coordinates are
+  // trustworthy (specific address OR venue-level geocoding confidence). For the
+  // ~30% of events that sit on a town/gemeinde-center fallback coord, we pass
+  // `locationApprox=true` instead so the side-box renders an "Ortsangabe
+  // ungefähr" pill — never a routing link that would send users into the void.
+  const coordsTrusted = isLocationTrusted(event);
+  const coordsApproximate = isLocationApproximate(event);
+  const mapsUrl = coordsTrusted
     ? `https://www.google.com/maps/dir/?api=1&destination=${event.latitude},${event.longitude}`
     : undefined;
   const [planSheetOpen, setPlanSheetOpen] = useState(false);
@@ -112,6 +120,7 @@ export function V4EventDetail({
             priceAtDoor={priceAtDoor}
             artistName={artistName}
             mapsUrl={mapsUrl}
+            locationApprox={coordsApproximate}
             onPlanClick={() => setPlanSheetOpen(true)}
             priceText={event.price_text}
             priceMin={event.price_min}
