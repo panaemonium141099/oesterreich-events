@@ -26,7 +26,9 @@ interface V4PriceBlockProps {
 }
 
 const FREE_RE = /^(eintritt\s+frei|freier?\s+eintritt|frei|free|kostenlos|gratis)\.?$/i;
-const SEPARATOR_RE = /[,;\n]|\s+\/\s+|\s+\|\s+|\s+·\s+|\s+—\s+/u;
+// Comma is a separator ONLY when followed by whitespace; "7,50€" must stay
+// glued together as the German decimal notation, not split into "7" + "50".
+const SEPARATOR_RE = /[;\n]|,\s+|\s+\/\s+|\s+\|\s+|\s+·\s+|\s+—\s+/u;
 const PRICE_RE = /^(.*?)\s*(?:€\s*(\d+(?:[.,]\d+)?)|(\d+(?:[.,]\d+)?)\s*€|(\d+(?:[.,]\d+)?)\s*Euro)\s*$/iu;
 
 function parsePriceText(raw: string): PriceItem[] {
