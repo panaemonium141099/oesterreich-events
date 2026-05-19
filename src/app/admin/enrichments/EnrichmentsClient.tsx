@@ -219,8 +219,15 @@ interface ProposalCardProps {
 function ProposalCard({ proposal, busy, readOnly, onApprove, onDecline }: ProposalCardProps) {
   const e = proposal.event;
   const changedFields = useMemo(() => {
-    const f: Array<'category' | 'image_url' | 'description' | 'price_text' | 'tags'> = [];
+    const f: Array<'category' | 'location' | 'image_url' | 'description' | 'price_text' | 'tags'> = [];
     if (proposal.proposed_category !== null) f.push('category');
+    if (
+      proposal.proposed_location_name !== null ||
+      proposal.proposed_address !== null ||
+      proposal.proposed_postal_code !== null
+    ) {
+      f.push('location');
+    }
     if (proposal.proposed_image_url !== null) f.push('image_url');
     if (proposal.proposed_description !== null) f.push('description');
     if (proposal.proposed_price_text !== null) f.push('price_text');
@@ -316,6 +323,33 @@ function ProposalCard({ proposal, busy, readOnly, onApprove, onDecline }: Propos
             before={e.category}
             after={proposal.proposed_category}
           />
+        )}
+
+        {changedFields.includes('location') && (
+          <div className="space-y-2">
+            <FieldDiff
+              label="Veranstaltungsort"
+              before={e.location_name}
+              after={proposal.proposed_location_name}
+            />
+            {proposal.proposed_address !== null && (
+              <FieldDiff
+                label="Adresse"
+                before={(e as { address: string | null }).address ?? null}
+                after={proposal.proposed_address}
+              />
+            )}
+            {proposal.proposed_postal_code !== null && (
+              <FieldDiff
+                label="PLZ"
+                before={(e as { postal_code: string | null }).postal_code ?? null}
+                after={proposal.proposed_postal_code}
+              />
+            )}
+            <div className="text-[11px] text-amber-400/60 italic">
+              Auf Approve werden die Koordinaten neu berechnet (Geocoding-Pipeline läuft beim nächsten Durchlauf).
+            </div>
+          </div>
         )}
 
         {changedFields.includes('image_url') && (

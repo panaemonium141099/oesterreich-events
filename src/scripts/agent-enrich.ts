@@ -62,8 +62,9 @@ const FIELD = arg("field") as
   | "price_text"
   | "tags"
   | "category"
+  | "address"
   | undefined;
-const VALID_FIELDS = ["image_url", "description", "price_text", "tags", "category"] as const;
+const VALID_FIELDS = ["image_url", "description", "price_text", "tags", "category", "address"] as const;
 if (FIELD && !VALID_FIELDS.includes(FIELD)) {
   console.error(`--field must be one of: ${VALID_FIELDS.join(", ")}`);
   process.exit(1);
@@ -80,6 +81,7 @@ interface EventRow {
   source_name: string | null;
   location_name: string | null;
   address: string | null;
+  postal_code: string | null;
   bundesland: string | null;
   start_date: string;
   category: string | null;
@@ -94,6 +96,9 @@ interface EventRow {
 
 interface AgentProposal {
   category?: string;
+  location_name?: string;
+  address?: string;
+  postal_code?: string;
   image_url?: string;
   image_source?: string;
   description?: string;
@@ -127,6 +132,17 @@ function missingFields(e: EventRow): Array<keyof AgentProposal> {
   // category='Sonstiges' counts as missing — we want the agent to re-classify
   // these into one of the 11 real categories where it can find a good fit.
   if (!e.category || e.category === "Sonstiges") missing.push("category");
+  // Address-missing is the primary location signal. When address is null the
+  // event almost certainly sits on a town-center fallback coord (post-PR #46
+  // these events show "Ortsangabe ungefähr" instead of a Route link). The
+  // agent gets all three location fields to fill — venue name, street,
+  // postal code — and the approve route then nulls lat/lng so the existing
+  // geocoding pipeline rebuilds accurate coords.
+  if (!e.address) {
+    missing.push("address");
+    missing.push("location_name");
+    missing.push("postal_code");
+  }
   if (!e.image_url) missing.push("image_url");
   if (!e.description || e.description.length < DESCRIPTION_MIN_LENGTH) missing.push("description");
   if (!e.price_text) missing.push("price_text");
@@ -184,6 +200,15 @@ WIE VORGEHEN:
 ${PRIMARY_CATEGORIES.map((c) => `   - ${c}`).join("\n")}
    "Sonstiges" NIE vorschlagen — der ganze Zweck ist diese Events aus "Sonstiges" raus zu
    bekommen. Wenn du keine der 11 Kategorien sicher passt: category einfach weglassen.
+6. location_name + address + postal_code (falls gefragt): Suche den konkreten Veranstaltungsort.
+   - location_name: spezifischer Venue-Name (z.B. "Theater Phönix", "Brucknerhaus / Mittlerer Saal",
+     "Restaurant zum Goldenen Hirschen"). NIE nur die Stadt ("Eisenstadt" allein ist KEIN
+     location_name — das hatten wir vorher schon).
+   - address: Straße + Hausnummer (z.B. "Wiener Straße 25", "Untere Donaulände 7"). NIE raten —
+     nur wenn wörtlich auf der Quellseite oder Veranstalter-Website angegeben.
+   - postal_code: 4-stellige österreichische PLZ.
+   WICHTIG: KEINE lat/lng erfinden — die Koordinaten werden später aus address+postal_code
+   automatisch berechnet (Geocoding-Pipeline). Du lieferst nur den Text.
 
 ANTWORT-FORMAT — am ENDE deiner Antwort, exakt so (Felder die du nicht sicher belegen kannst:
 einfach weglassen, nicht null setzen):
@@ -192,6 +217,9 @@ ENRICHMENT_RESULT:
 \`\`\`json
 {
   "category": "Musik",
+  "location_name": "Theater Phönix",
+  "address": "Wiener Straße 25",
+  "postal_code": "4020",
   "image_url": "https://...",
   "image_source": "source-og",
   "description": "...",
@@ -282,6 +310,7 @@ async function fetchCandidateEvents(supabase: SupabaseClient): Promise<EventRow[
         "source_name",
         "location_name",
         "address",
+        "postal_code",
         "bundesland",
         "start_date",
         "category",
@@ -303,7 +332,7 @@ async function fetchCandidateEvents(supabase: SupabaseClient): Promise<EventRow[
     qb = qb.is(FIELD, null);
   } else {
     qb = qb.or(
-      "image_url.is.null,description.is.null,price_text.is.null,tags.is.null,category.eq.Sonstiges",
+      "image_url.is.null,description.is.null,price_text.is.null,tags.is.null,address.is.null,category.eq.Sonstiges",
     );
   }
 
@@ -340,6 +369,9 @@ async function upsertProposal(
     event_id: event.id,
     status: "pending" as const,
     proposed_category: proposedCategory,
+    proposed_location_name: proposal.location_name ?? null,
+    proposed_address: proposal.address ?? null,
+    proposed_postal_code: proposal.postal_code ?? null,
     proposed_image_url: proposal.image_url ?? null,
     proposed_description: proposal.description ?? null,
     proposed_price_text: proposal.price_text ?? null,
@@ -422,6 +454,11 @@ async function main(): Promise<void> {
         log(`    category:`);
         log(`      vorher:  ${event.category ?? "(leer)"}`);
         log(`      nachher: ${proposal.category}`);
+      }
+      if (proposal.location_name !== undefined || proposal.address !== undefined || proposal.postal_code !== undefined) {
+        log(`    location:`);
+        log(`      vorher:  ${event.location_name ?? "(leer)"} | ${event.address ?? "(keine Adresse)"} | PLZ ${event.postal_code ?? "?"}`);
+        log(`      nachher: ${proposal.location_name ?? event.location_name ?? "—"} | ${proposal.address ?? "—"} | PLZ ${proposal.postal_code ?? "—"}`);
       }
       if (proposal.image_url !== undefined) {
         log(`    image_url:`);

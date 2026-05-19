@@ -23,7 +23,8 @@ export async function POST(_request: NextRequest) {
     const { data: proposals, error: fetchErr } = await supabase
       .from('event_enrichment_proposals')
       .select(
-        'id, event_id, proposed_category, proposed_image_url, proposed_description, ' +
+        'id, event_id, proposed_category, proposed_location_name, proposed_address, ' +
+          'proposed_postal_code, proposed_image_url, proposed_description, ' +
           'proposed_price_text, proposed_price_min, proposed_price_max, proposed_tags',
       )
       .eq('status', 'pending');
@@ -45,6 +46,9 @@ export async function POST(_request: NextRequest) {
       id: string;
       event_id: string;
       proposed_category: string | null;
+      proposed_location_name: string | null;
+      proposed_address: string | null;
+      proposed_postal_code: string | null;
       proposed_image_url: string | null;
       proposed_description: string | null;
       proposed_price_text: string | null;
@@ -54,12 +58,24 @@ export async function POST(_request: NextRequest) {
     }>) {
       const updates: Record<string, unknown> = {};
       if (p.proposed_category !== null) updates.category = p.proposed_category;
+      if (p.proposed_location_name !== null) updates.location_name = p.proposed_location_name;
+      if (p.proposed_address !== null) updates.address = p.proposed_address;
+      if (p.proposed_postal_code !== null) updates.postal_code = p.proposed_postal_code;
       if (p.proposed_image_url !== null) updates.image_url = p.proposed_image_url;
       if (p.proposed_description !== null) updates.description = p.proposed_description;
       if (p.proposed_price_text !== null) updates.price_text = p.proposed_price_text;
       if (p.proposed_price_min !== null) updates.price_min = p.proposed_price_min;
       if (p.proposed_price_max !== null) updates.price_max = p.proposed_price_max;
       if (p.proposed_tags !== null) updates.tags = p.proposed_tags;
+
+      // Address change invalidates old town-center coords — the geocoding
+      // pipeline reruns on these on its next pass.
+      if ('address' in updates) {
+        updates.latitude = null;
+        updates.longitude = null;
+        updates.geocoding_confidence = null;
+        updates.geocoding_source = null;
+      }
 
       if (Object.keys(updates).length === 0) {
         // Nothing to apply — auto-decline with reason so it disappears from queue.

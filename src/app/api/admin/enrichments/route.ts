@@ -18,6 +18,9 @@ export interface EnrichmentProposal {
   reviewed_at: string | null;
   decline_reason: string | null;
   proposed_category: string | null;
+  proposed_location_name: string | null;
+  proposed_address: string | null;
+  proposed_postal_code: string | null;
   proposed_image_url: string | null;
   proposed_description: string | null;
   proposed_price_text: string | null;
@@ -66,7 +69,8 @@ export async function GET(request: NextRequest) {
       .from('event_enrichment_proposals')
       .select(
         'id, event_id, status, created_at, reviewed_at, decline_reason, ' +
-          'proposed_category, proposed_image_url, proposed_description, proposed_price_text, ' +
+          'proposed_category, proposed_location_name, proposed_address, proposed_postal_code, ' +
+          'proposed_image_url, proposed_description, proposed_price_text, ' +
           'proposed_price_min, proposed_price_max, proposed_tags, ' +
           'image_source, agent_model, agent_reasoning',
       )
