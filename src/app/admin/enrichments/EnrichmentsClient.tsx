@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Sparkles, Check, X, Loader2, ExternalLink, ImageOff, RefreshCw, Eye } from 'lucide-react';
+import { Sparkles, Check, CheckCheck, X, Loader2, ExternalLink, ImageOff, RefreshCw, Eye } from 'lucide-react';
 import type { EnrichmentProposal } from '@/app/api/admin/enrichments/route';
 import { buildEventUrlV2 } from '@/lib/utils/slugify';
 
@@ -18,6 +18,7 @@ export default function EnrichmentsPage() {
   const [status, setStatus] = useState<StatusFilter>('pending');
   const [loading, setLoading] = useState(true);
   const [busyId, setBusyId] = useState<string | null>(null);
+  const [bulkBusy, setBulkBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const load = useCallback(async () => {
@@ -62,6 +63,33 @@ export default function EnrichmentsPage() {
     [],
   );
 
+  const handleApproveAll = useCallback(async () => {
+    if (items.length === 0) return;
+    if (!confirm(`Alle ${items.length} offenen Vorschläge ANNEHMEN und auf Events übernehmen?`)) {
+      return;
+    }
+    setBulkBusy(true);
+    try {
+      const r = await fetch(`/api/admin/enrichments/approve-all`, { method: 'POST' });
+      const data = (await r.json().catch(() => ({}))) as {
+        approved?: number;
+        failed?: number;
+        errors?: Array<{ id: string; message: string }>;
+        error?: string;
+      };
+      if (!r.ok) {
+        alert(`Fehler: ${data.error ?? r.status}`);
+        return;
+      }
+      const summary = `${data.approved ?? 0} angenommen` +
+        (data.failed && data.failed > 0 ? `, ${data.failed} fehlgeschlagen` : '');
+      alert(summary);
+      await load();
+    } finally {
+      setBulkBusy(false);
+    }
+  }, [items.length, load]);
+
   const handleDecline = useCallback(async (id: string) => {
     const reason = prompt('Grund (optional)?') ?? '';
     setBusyId(id);
@@ -96,14 +124,31 @@ export default function EnrichmentsPage() {
             Felder, Decline lässt das Event unverändert.
           </p>
         </div>
-        <button
-          onClick={load}
-          disabled={loading}
-          className="flex items-center gap-2 px-3 py-2 text-sm bg-white/[0.05] hover:bg-white/[0.08] border border-white/[0.06] rounded-lg disabled:opacity-50"
-        >
-          <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-          Refresh
-        </button>
+        <div className="flex items-center gap-2">
+          {status === 'pending' && items.length > 0 && (
+            <button
+              onClick={handleApproveAll}
+              disabled={loading || bulkBusy}
+              className="flex items-center gap-2 px-3 py-2 text-sm bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 text-emerald-400 rounded-lg disabled:opacity-50"
+              title={`Alle ${items.length} offenen Vorschläge annehmen`}
+            >
+              {bulkBusy ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <CheckCheck className="w-4 h-4" />
+              )}
+              Approve all ({items.length})
+            </button>
+          )}
+          <button
+            onClick={load}
+            disabled={loading || bulkBusy}
+            className="flex items-center gap-2 px-3 py-2 text-sm bg-white/[0.05] hover:bg-white/[0.08] border border-white/[0.06] rounded-lg disabled:opacity-50"
+          >
+            <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+            Refresh
+          </button>
+        </div>
       </header>
 
       <div className="flex gap-2 flex-wrap">
