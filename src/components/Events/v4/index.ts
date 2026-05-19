@@ -18,6 +18,7 @@ export { V4InPlanBox } from './V4InPlanBox';
 export { V4UnknownBox } from './V4UnknownBox';
 export { V4SoldoutBox } from './V4SoldoutBox';
 export { V4SideBox } from './V4SideBox';
+export { V4PriceBlock } from './V4PriceBlock';
 export { V4EventDetailHero } from './V4EventDetailHero';
 export { V4EventDetailContent } from './V4EventDetailContent';
 export { V4MobileStickyBar } from './V4MobileStickyBar';

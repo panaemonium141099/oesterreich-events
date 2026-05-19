@@ -24,15 +24,24 @@ interface V4SideBoxProps {
   artistName?: string;
   mapsUrl?: string;
   onPlanClick?: () => void;
+  /** Raw `event.price_text` + numeric range from the row — used by the
+   *  planning-state side-boxes (Free, Unknown) to render a labelled
+   *  PriceBlock. The ticket-state boxes consume `priceFrom`/`priceAtDoor`
+   *  instead and don't need this fanout. */
+  priceText?: string | null;
+  priceMin?: number | null;
+  priceMax?: number | null;
+  priceTier?: 'gratis' | 'günstig' | 'mittel' | 'premium' | 'unbekannt' | null;
 }
 
 export function V4SideBox(props: V4SideBoxProps) {
-  const { state, provider, priceFrom, ticketUrl, priceAtDoor, artistName, mapsUrl, onPlanClick } = props;
+  const { state, provider, priceFrom, ticketUrl, priceAtDoor, artistName, mapsUrl, onPlanClick,
+    priceText, priceMin, priceMax, priceTier } = props;
 
   // Variants of TicketBox.
   if (state === 'ticket' || state === 'match' || state === 'lineup') {
     if (!provider || !priceFrom || !ticketUrl) {
-      return <V4UnknownBox mapsUrl={mapsUrl} onPlanClick={onPlanClick}/>;
+      return <V4UnknownBox mapsUrl={mapsUrl} onPlanClick={onPlanClick} priceText={priceText} priceMin={priceMin} priceMax={priceMax} priceTier={priceTier}/>;
     }
     return (
       <V4TicketBox
@@ -46,9 +55,9 @@ export function V4SideBox(props: V4SideBoxProps) {
     );
   }
 
-  if (state === 'free')     return <V4FreeBox onPlanClick={onPlanClick} mapsUrl={mapsUrl}/>;
+  if (state === 'free')     return <V4FreeBox onPlanClick={onPlanClick} mapsUrl={mapsUrl} priceText={priceText} priceMin={priceMin} priceMax={priceMax}/>;
   if (state === 'doorsale') return <V4DoorsaleBox priceAtDoor={priceAtDoor} mapsUrl={mapsUrl} onPlanClick={onPlanClick}/>;
   if (state === 'inplan')   return <V4InPlanBox onPlanClick={onPlanClick}/>;
   if (state === 'soldout')  return <V4SoldoutBox/>;
-  return <V4UnknownBox mapsUrl={mapsUrl} onPlanClick={onPlanClick}/>;
+  return <V4UnknownBox mapsUrl={mapsUrl} onPlanClick={onPlanClick} priceText={priceText} priceMin={priceMin} priceMax={priceMax} priceTier={priceTier}/>;
 }

@@ -8,14 +8,21 @@
  */
 
 import { V4Badge } from './V4Badge';
+import { V4PriceBlock } from './V4PriceBlock';
 
 interface V4FreeBoxProps {
   onPlanClick?: () => void;
   /** Google-Maps-Directions-URL. Without it the Route button collapses. */
   mapsUrl?: string;
+  /** Raw price text from the event (e.g. "Spende erwünscht"). Free events
+   *  with no price text show no price block — the Eintritt-frei badge above
+   *  already conveys the price. */
+  priceText?: string | null;
+  priceMin?: number | null;
+  priceMax?: number | null;
 }
 
-export function V4FreeBox({ onPlanClick, mapsUrl }: V4FreeBoxProps) {
+export function V4FreeBox({ onPlanClick, mapsUrl, priceText, priceMin, priceMax }: V4FreeBoxProps) {
   return (
     <div
       data-v4-side-box="free"
@@ -31,6 +38,8 @@ export function V4FreeBox({ onPlanClick, mapsUrl }: V4FreeBoxProps) {
         <p className="mt-2 text-[12.5px] text-[var(--v4-ink-50)] leading-[1.5]">
           Kein Ticket nötig. Wir merken Anreise und Reminder in deinem Plan.
         </p>
+
+        <V4PriceBlock priceText={priceText} priceMin={priceMin} priceMax={priceMax} priceTier="gratis"/>
 
         {onPlanClick ? (
           <button
