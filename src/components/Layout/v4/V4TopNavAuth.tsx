@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import type { Session } from '@supabase/supabase-js';
 import { createClient } from '@/lib/supabase/client';
@@ -13,16 +13,26 @@ import { createClient } from '@/lib/supabase/client';
  *    pill). That's what ISR caches and what >95 % of traffic (incl. crawlers)
  *    sees. NO AuthProvider in Root Layout — fn-15.5 Bundle-Win bleibt intakt.
  *  - On Client, asks the supabase browser client whether a session exists
- *    locally. If yes, swaps the pill for Bell + Avatar-Initial.
+ *    locally. If yes, swaps the pill for Bell + Avatar.
  *
  * The brief 50–200 ms anon → logged-in flash on first paint is acceptable
  * because these are tiny corner-pixel elements, not content.
  *
- * Phase 1 scope: Bell linkt 1:1 zu /notifications (Bestandsroute), Avatar
- * linkt zu /profile. Realtime-Dropdown-Sheet kommt in einer späteren Phase.
+ * Avatar opens a dropdown menu (Profil / Gespeichert / Feed / Gruppen /
+ * Admin if role / Abmelden) — same UX as MapTopBar so the user has one
+ * canonical place to reach all account surfaces. Profile (first_name,
+ * avatar_url, role) is fetched once after session resolves; first paint
+ * shows the email-initial fallback until that resolves.
  */
 
-function initialFromSession(session: Session): string {
+interface MiniProfile {
+  first_name: string | null;
+  avatar_url: string | null;
+  role: string | null;
+}
+
+function initialFromSession(session: Session, profile: MiniProfile | null): string {
+  if (profile?.first_name) return profile.first_name[0]!.toUpperCase();
   const meta = session.user.user_metadata as Record<string, unknown> | undefined;
   const firstName = typeof meta?.first_name === 'string' ? meta.first_name : null;
   const email = session.user.email ?? null;
@@ -30,29 +40,44 @@ function initialFromSession(session: Session): string {
 }
 
 export function V4TopNavAuth() {
-  const [authed, setAuthed] = useState(false);
-  const [initial, setInitial] = useState<string | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
+  const [profile, setProfile] = useState<MiniProfile | null>(null);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const supabase = createClient();
     let mounted = true;
 
+    const loadProfile = async (userId: string) => {
+      try {
+        const { data } = await supabase
+          .from('profiles')
+          .select('first_name, avatar_url, role')
+          .eq('id', userId)
+          .maybeSingle();
+        if (mounted) setProfile((data as MiniProfile | null) ?? null);
+      } catch {
+        /* swallow — UI falls back to session-metadata initial */
+      }
+    };
+
     supabase.auth.getSession().then((res: { data: { session: Session | null } }) => {
-      const session = res.data.session;
-      if (!mounted || !session?.user) return;
-      setAuthed(true);
-      setInitial(initialFromSession(session));
+      const s = res.data.session;
+      if (!mounted || !s?.user) return;
+      setSession(s);
+      loadProfile(s.user.id);
     });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (_event: string, session: Session | null) => {
+      (_event: string, s: Session | null) => {
         if (!mounted) return;
-        if (session?.user) {
-          setAuthed(true);
-          setInitial(initialFromSession(session));
+        if (s?.user) {
+          setSession(s);
+          loadProfile(s.user.id);
         } else {
-          setAuthed(false);
-          setInitial(null);
+          setSession(null);
+          setProfile(null);
         }
       },
     );
@@ -63,7 +88,19 @@ export function V4TopNavAuth() {
     };
   }, []);
 
-  if (!authed) {
+  // Click-outside closes the dropdown without trapping focus.
+  useEffect(() => {
+    if (!menuOpen) return;
+    const onDoc = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setMenuOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', onDoc);
+    return () => document.removeEventListener('mousedown', onDoc);
+  }, [menuOpen]);
+
+  if (!session) {
     return (
       <Link
         href="/auth/login"
@@ -73,6 +110,16 @@ export function V4TopNavAuth() {
       </Link>
     );
   }
+
+  const email = session.user.email ?? '';
+  const initial = initialFromSession(session, profile);
+  const isAdmin = profile?.role === 'god' || profile?.role === 'admin';
+
+  const handleSignOut = async () => {
+    const supabase = createClient();
+    await supabase.auth.signOut();
+    setMenuOpen(false);
+  };
 
   return (
     <div className="flex items-center gap-2">
@@ -92,13 +139,76 @@ export function V4TopNavAuth() {
         />
       </Link>
 
-      <Link
-        href="/profile"
-        aria-label="Profil"
-        className="press-haptic inline-flex items-center justify-center w-8 h-8 rounded-full bg-[var(--v4-ink)]/[0.06] text-[11px] font-semibold text-[var(--v4-ink-70)] hover:text-[var(--v4-ink)]"
-      >
-        {initial ?? '·'}
-      </Link>
+      <div className="relative" ref={menuRef}>
+        <button
+          type="button"
+          onClick={() => setMenuOpen((o) => !o)}
+          aria-label="Profilmenü"
+          aria-haspopup="menu"
+          aria-expanded={menuOpen}
+          className="press-haptic inline-flex items-center justify-center w-8 h-8 rounded-full bg-[var(--v4-ink)]/[0.06] text-[11px] font-semibold text-[var(--v4-ink-70)] hover:text-[var(--v4-ink)] overflow-hidden"
+        >
+          {profile?.avatar_url ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={profile.avatar_url}
+              alt=""
+              referrerPolicy="no-referrer"
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            initial
+          )}
+        </button>
+
+        {menuOpen && (
+          <div
+            role="menu"
+            className="absolute right-0 top-full mt-2 min-w-[220px] rounded-xl border border-[var(--v4-hairline-2)] bg-[var(--v4-surface)] shadow-lg overflow-hidden z-50"
+          >
+            <div className="px-3.5 py-3 border-b border-[var(--v4-hairline-1)]">
+              <div className="text-[13px] font-semibold text-[var(--v4-ink)] truncate">
+                {profile?.first_name || email.split('@')[0]}
+              </div>
+              <div className="text-[11px] text-[var(--v4-ink-50)] truncate">{email}</div>
+            </div>
+            {[
+              { href: '/profile', label: 'Mein Profil' },
+              { href: '/saved', label: 'Gespeichert' },
+              { href: '/feed', label: 'Feed' },
+              { href: '/groups', label: 'Meine Gruppen' },
+            ].map((it) => (
+              <Link
+                key={it.href}
+                href={it.href}
+                role="menuitem"
+                onClick={() => setMenuOpen(false)}
+                className="block px-3.5 py-2.5 text-[13px] text-[var(--v4-ink)] hover:bg-[var(--v4-ink)]/[0.04]"
+              >
+                {it.label}
+              </Link>
+            ))}
+            {isAdmin && (
+              <Link
+                href="/admin"
+                role="menuitem"
+                onClick={() => setMenuOpen(false)}
+                className="block px-3.5 py-2.5 text-[13px] font-semibold text-[var(--v4-ink)] border-t border-[var(--v4-hairline-1)] hover:bg-[var(--v4-ink)]/[0.04]"
+              >
+                Admin Panel
+              </Link>
+            )}
+            <button
+              type="button"
+              role="menuitem"
+              onClick={handleSignOut}
+              className="block w-full text-left px-3.5 py-2.5 text-[13px] text-[#c0392b] border-t border-[var(--v4-hairline-1)] hover:bg-[#c0392b]/[0.06]"
+            >
+              Abmelden
+            </button>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

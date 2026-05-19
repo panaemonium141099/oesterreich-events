@@ -42,7 +42,7 @@ import { trackEvent } from '@/lib/analytics';
 import { useAuth } from '@/lib/supabase/auth-context';
 import { getStoredLocation, storeLocation } from '@/lib/geolocation';
 import { useSavedEvents } from '@/lib/saved-events-context';
-import { V4MapHeader, V4MarkerLegend, V4MapFilterChipsOverlay } from '@/components/Map/v4';
+import { V4MarkerLegend, V4MapFilterChipsOverlay } from '@/components/Map/v4';
 import { useFilteredEvents } from '@/lib/v4/use-filtered-events';
 
 const EventMap = dynamic(() => import('@/components/Map/EventMap'), {
@@ -229,7 +229,6 @@ function MapPageInner() {
 
   return (
     <div className="h-screen flex flex-col" style={{ background: T.bg }}>
-      <V4MapHeader/>
       <MapTopBar
         filters={filters}
         onFiltersChange={setFilters}
