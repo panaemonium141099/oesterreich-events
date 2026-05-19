@@ -24,7 +24,6 @@ import type { EventFilters } from '@/types/events';
 import type { Bundesland } from '@/lib/bundeslaender';
 import { resolveSearchIntent } from '@/lib/search-intent';
 import { useAuth } from '@/lib/supabase/auth-context';
-import { NotificationBell } from '@/components/Notifications/NotificationBell';
 import { trackEvent } from '@/lib/analytics';
 
 interface Gemeinde {
@@ -477,10 +476,8 @@ export function MapTopBar({
           )}
         </button>
 
-        {/* Bell + Avatar */}
+        {/* Avatar — bell lives in the global V4TopNav, not duplicated here */}
         <div className="flex items-center gap-3 shrink-0">
-          {user && <NotificationBell className="w-9 h-9 rounded-full hover:bg-[var(--mv3-panel)]" />}
-
           {!authLoading && (
             <div className="relative" ref={userMenuRef}>
               {user ? (
