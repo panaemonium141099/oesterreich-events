@@ -50,7 +50,8 @@ function arg(name: string): string | undefined {
   if (next === undefined || next.startsWith("--")) return "true";
   return next;
 }
-const LIMIT = parseInt(arg("limit") ?? "5", 10);
+const ALL = !!arg("all");
+const LIMIT = ALL ? 100000 : parseInt(arg("limit") ?? "5", 10);
 const DRY_RUN = !!arg("dry-run");
 const VERBOSE = !!arg("verbose");
 // Optional: restrict candidate selection to events missing this specific field.
@@ -298,6 +299,20 @@ function makeSupabase(): SupabaseClient {
 async function fetchCandidateEvents(supabase: SupabaseClient): Promise<EventRow[]> {
   const today = new Date().toISOString();
 
+  // Resume-after-crash: skip events that already have a pending proposal so a
+  // re-run of the script picks up where the previous run died. Without this,
+  // a crash mid-run would re-enrich the same N events on next start (the agent
+  // call is the expensive part — Supabase upsert is cheap, but redoing 100
+  // events costs 100 × ~30s of Claude usage).
+  const { data: pendingProposalRows, error: pendingErr } = await supabase
+    .from("event_enrichment_proposals")
+    .select("event_id")
+    .eq("status", "pending");
+  if (pendingErr) {
+    throw new Error(`fetchCandidateEvents pending lookup: ${pendingErr.message}`);
+  }
+  const skipEventIds = new Set<string>((pendingProposalRows ?? []).map((r) => r.event_id as string));
+
   // SQL OR cannot express "description shorter than N chars" or "tags array
   // smaller than N" cleanly, so overfetch on NULL-checks and filter client-side.
   let qb = supabase
@@ -336,14 +351,20 @@ async function fetchCandidateEvents(supabase: SupabaseClient): Promise<EventRow[
     );
   }
 
+  // Overfetch ratio: for small batches we overfetch 4x to leave room for the
+  // client-side length/cardinality filter. For --all (LIMIT=100000) the 4x
+  // would balloon the query, so cap the multiplier at LIMIT itself.
+  const overfetchRatio = LIMIT > 1000 ? 1 : 4;
+
   const { data, error } = await qb
     .order("event_score", { ascending: false, nullsFirst: false })
-    .limit(LIMIT * 4);
+    .limit(LIMIT * overfetchRatio);
 
   if (error) throw new Error(`fetchCandidateEvents: ${error.message}`);
   if (!data) return [];
 
   const filtered = (data as unknown as EventRow[])
+    .filter((e) => !skipEventIds.has(e.id))
     .filter((e) => missingFields(e).length > 0)
     .slice(0, LIMIT);
 
