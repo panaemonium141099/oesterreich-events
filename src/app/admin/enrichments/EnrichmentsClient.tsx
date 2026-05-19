@@ -173,7 +173,8 @@ interface ProposalCardProps {
 function ProposalCard({ proposal, busy, readOnly, onApprove, onDecline }: ProposalCardProps) {
   const e = proposal.event;
   const changedFields = useMemo(() => {
-    const f: Array<'image_url' | 'description' | 'price_text' | 'tags'> = [];
+    const f: Array<'category' | 'image_url' | 'description' | 'price_text' | 'tags'> = [];
+    if (proposal.proposed_category !== null) f.push('category');
     if (proposal.proposed_image_url !== null) f.push('image_url');
     if (proposal.proposed_description !== null) f.push('description');
     if (proposal.proposed_price_text !== null) f.push('price_text');
@@ -242,6 +243,14 @@ function ProposalCard({ proposal, busy, readOnly, onApprove, onDecline }: Propos
 
       {/* Diff body */}
       <div className="p-5 space-y-5">
+        {changedFields.includes('category') && (
+          <FieldDiff
+            label="Kategorie"
+            before={e.category}
+            after={proposal.proposed_category}
+          />
+        )}
+
         {changedFields.includes('image_url') && (
           <ImageDiff
             before={e.image_url}
