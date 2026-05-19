@@ -2,6 +2,7 @@ import * as cheerio from 'cheerio';
 import { BaseScraper } from './BaseScraper';
 import { categorizeEvent } from '../categorize';
 import { GEM2GO_GEMEINDEN, type Gem2GoGemeinde } from './gemeinden/gem2goGemeinden';
+import { extractGem2goDetail } from './gem2go-detail';
 import type { ScrapedEvent } from '@/types/events';
 
 /**
@@ -28,6 +29,19 @@ export class Gem2GoScraper extends BaseScraper {
 
   /** Maximale Seiten pro Gemeinde */
   private readonly maxPages = 6;
+
+  /** Detail-Page enrichment toggle. When true, after listing parse we fetch
+   *  each event's source_url and pull description, address, organizer, etc.
+   *  out of the detail HTML (~10x more requests but materially better data).
+   *  Default ON because the listing-only data is too sparse (most events
+   *  end up with only title+date+town). */
+  private readonly enrichFromDetail = true;
+
+  /** Delay between detail-page fetches within the same gemeinde (ms). */
+  private readonly detailDelayMs = 250;
+
+  /** Per-detail-page fetch timeout. Generous because gemeinde sites are slow. */
+  private readonly detailTimeoutMs = 10000;
 
   /** Deutsche Monatsnamen -> Monatsnummer */
   private readonly MONTHS: Record<string, string> = {
@@ -92,6 +106,9 @@ export class Gem2GoScraper extends BaseScraper {
         }
 
         if (events.length > 0) {
+          if (this.enrichFromDetail) {
+            await this.enrichEventsFromDetailPages(events);
+          }
           allEvents.push(...events);
           gemeindenScraped++;
           if ((i + 1) % 50 === 0 || events.length >= 5) {
@@ -114,6 +131,60 @@ export class Gem2GoScraper extends BaseScraper {
     this.log(`Fertig: ${allEvents.length} Events von ${gemeindenScraped} Gemeinden`);
     this.log(`  ${gemeindenFailed} fehlgeschlagen, ${gemeindenNoEvents} ohne Events, ${gemeindenNotGem2Go} kein GEM2GO`);
     return allEvents;
+  }
+
+  // ─── DETAIL-PAGE ENRICHMENT ────────────────────────────────────────────────
+
+  /**
+   * For each event with a detail URL, fetch the detail page and merge any
+   * extra fields (description, address, organizer, price) the listing didn't
+   * carry. Listing values take precedence — we only fill what's missing.
+   *
+   * Errors per-event are swallowed: a broken detail page must not block the
+   * rest of the gemeinde batch. The event keeps its listing-level data.
+   */
+  private async enrichEventsFromDetailPages(events: ScrapedEvent[]): Promise<void> {
+    for (const e of events) {
+      const detailUrl = e.source_url;
+      if (!detailUrl) continue;
+      // Skip if URL is just the listing page (no detail URL was extracted)
+      if (/veranstaltung\.aspx\?sprache=1$/.test(detailUrl)) continue;
+
+      try {
+        const html = await this.fetchWithTimeout(detailUrl, this.detailTimeoutMs);
+        if (!html) continue;
+        const enrichment = extractGem2goDetail(html);
+
+        // Only fill fields the listing left blank. The listing already knows
+        // the gemeinde lat/lng/PLZ/Bundesland which are good defaults.
+        if (!e.description && enrichment.description) e.description = enrichment.description;
+        if (!e.address && enrichment.address) e.address = enrichment.address;
+        if ((!e.postal_code || e.postal_code.length === 0) && enrichment.postal_code) {
+          e.postal_code = enrichment.postal_code;
+        }
+        if (enrichment.location_name && (
+          !e.location_name ||
+          e.location_name === enrichment.location_name ||
+          // Listing often defaults to gemeinde-name; detail venue is more specific.
+          e.location_name.length < enrichment.location_name.length
+        )) {
+          e.location_name = enrichment.location_name;
+        }
+        if (!e.image_url && enrichment.image_url) e.image_url = enrichment.image_url;
+        if (!e.price_text && enrichment.price_text) e.price_text = enrichment.price_text;
+        if (e.price_min === undefined && enrichment.price_min !== undefined) {
+          e.price_min = enrichment.price_min;
+        }
+        if (e.price_max === undefined && enrichment.price_max !== undefined) {
+          e.price_max = enrichment.price_max;
+        }
+        if (!e.organizer && enrichment.organizer) e.organizer = enrichment.organizer;
+      } catch {
+        // Silent per-event failure — keep the listing data we already have.
+      }
+
+      await this.sleep(this.detailDelayMs);
+    }
   }
 
   // ─── URL-BUILDING ──────────────────────────────────────────────────────────
