@@ -27,7 +27,7 @@
  * userLocation, flyto, view, filterOpen, mapChips, hoveredEventId)
  * bleibt page-lokal.
  */
-import { useState, useEffect, useCallback, useMemo, Suspense } from 'react';
+import { useState, useEffect, useCallback, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import type { Event, EventFilters } from '@/types/events';
@@ -42,7 +42,7 @@ import { trackEvent } from '@/lib/analytics';
 import { useAuth } from '@/lib/supabase/auth-context';
 import { getStoredLocation, storeLocation } from '@/lib/geolocation';
 import { useSavedEvents } from '@/lib/saved-events-context';
-import { V4MarkerLegend, V4MapFilterChipsOverlay } from '@/components/Map/v4';
+import { V4MarkerLegend } from '@/components/Map/v4';
 import { useFilteredEvents } from '@/lib/v4/use-filtered-events';
 
 const EventMap = dynamic(() => import('@/components/Map/EventMap'), {
@@ -140,9 +140,6 @@ function MapPageInner() {
   const [hoveredEventId, setHoveredEventId] = useState<string | null>(null);
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [dynamicFlyTo, setDynamicFlyTo] = useState<{ lat: number; lng: number; zoom: number } | null>(null);
-  // mapChips is derived from filters — single source of truth so the
-  // chip-active-state always reflects the actual filter set (incl. when
-  // the user opens the FilterDrawer and sets things directly).
 
   // ── Phase 4.1: Data-pipeline lebt jetzt in einem geteilten Hook (auch
   // von /entdecken konsumiert). Map-spezifischer State (selectedEvent,
@@ -187,40 +184,6 @@ function MapPageInner() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  // Today as ISO date (YYYY-MM-DD) — used by the "Heute" chip.
-  const todayISO = useMemo(() => new Date().toISOString().slice(0, 10), []);
-
-  const mapChips = useMemo<Set<string>>(() => {
-    const set = new Set<string>();
-    if (filters.hasTicket) set.add('tickets');
-    if (filters.priceTiers?.includes('gratis')) set.add('free');
-    if (filters.dateFrom === todayISO && filters.dateTo === todayISO) set.add('today');
-    if (filters.categories?.includes('Musik')) set.add('concerts');
-    return set;
-  }, [filters.hasTicket, filters.priceTiers, filters.dateFrom, filters.dateTo, filters.categories, todayISO]);
-
-  const toggleMapChip = (key: string) => {
-    setFilters(prev => {
-      const next = { ...prev };
-      if (key === 'tickets') {
-        next.hasTicket = prev.hasTicket ? undefined : true;
-      } else if (key === 'free') {
-        const has = prev.priceTiers?.includes('gratis');
-        const others = prev.priceTiers?.filter(t => t !== 'gratis') ?? [];
-        next.priceTiers = has ? (others.length ? others : undefined) : ['gratis'];
-      } else if (key === 'today') {
-        const isOn = prev.dateFrom === todayISO && prev.dateTo === todayISO;
-        next.dateFrom = isOn ? undefined : todayISO;
-        next.dateTo = isOn ? undefined : todayISO;
-      } else if (key === 'concerts') {
-        const has = prev.categories?.includes('Musik');
-        const others = prev.categories?.filter(c => c !== 'Musik') ?? [];
-        next.categories = has ? (others.length ? others : undefined) : ['Musik'];
-      }
-      return next;
-    });
-  };
 
   const handleGemeindeSelect = (g: { name: string; bundeslandId: string; lat: number; lng: number; postalCode?: string }) => {
     const bl = BUNDESLAENDER.find((b) => b.id === g.bundeslandId);
@@ -313,8 +276,6 @@ function MapPageInner() {
       />
 
       <div className="flex-1 relative min-h-0">
-        <V4MapFilterChipsOverlay active={mapChips} onToggle={toggleMapChip}/>
-
         {/* MAP view — always rendered; EventListView lives on /entdecken (Phase 4.1) */}
         <div className="absolute inset-0 mv3-fade-in">
               <EventMap

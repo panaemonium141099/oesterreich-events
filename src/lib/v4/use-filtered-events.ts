@@ -114,7 +114,6 @@ export function useFilteredEvents(
     if (filters.eveningOnly) params.set('eveningOnly', 'true');
     if (filters.sourceName) params.set('sourceName', filters.sourceName);
     if (filters.studentFriendly) params.set('studentFriendly', 'true');
-    if (filters.hasTicket) params.set('hasTicket', 'true');
     if (filters.familyFriendly) params.set('familyFriendly', 'true');
     if (filters.priceTiers && filters.priceTiers.length > 0) params.set('priceTiers', filters.priceTiers.join(','));
     else if (filters.priceTier) params.set('priceTier', filters.priceTier);
