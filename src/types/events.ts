@@ -199,6 +199,8 @@ export interface EventFilters {
   studentFriendly?: boolean;
   /** Only events where Claude flagged is_family_friendly=true. */
   familyFriendly?: boolean;
+  /** Only events that have a ticket_url (V4 chip "Tickets verfügbar"). */
+  hasTicket?: boolean;
   /** @deprecated single-value, kept for legacy callers — use priceTiers */
   priceTier?: 'gratis' | 'günstig' | 'mittel' | 'premium' | 'unbekannt';
   /** Multi price-tier filter: events whose price_tier is ANY of these */
