@@ -21,6 +21,9 @@ interface V4UnknownBoxProps {
   /** Google-Maps-Directions-URL für die "Route öffnen"-Aktion. Fehlt sie
    *  (Event ohne Koordinaten), wird der Button gar nicht gerendert. */
   mapsUrl?: string;
+  /** True when coords exist but are too approximate to route to. Renders a
+   *  non-clickable "Ortsangabe ungefähr" pill in the Route slot instead. */
+  locationApprox?: boolean;
   /** Raw price text from the event row. The PriceBlock parses it into
    *  labelled rows when separators are present. */
   priceText?: string | null;
@@ -31,7 +34,8 @@ interface V4UnknownBoxProps {
   priceTier?: 'gratis' | 'günstig' | 'mittel' | 'premium' | 'unbekannt' | null;
 }
 
-export function V4UnknownBox({ onPlanClick, mapsUrl, priceText, priceMin, priceMax, priceTier }: V4UnknownBoxProps = {}) {
+export function V4UnknownBox({ onPlanClick, mapsUrl, locationApprox, priceText, priceMin, priceMax, priceTier }: V4UnknownBoxProps = {}) {
+  const showsLocationCell = !!mapsUrl || !!locationApprox;
   return (
     <div
       data-v4-side-box="unknown"
@@ -72,7 +76,7 @@ export function V4UnknownBox({ onPlanClick, mapsUrl, priceText, priceMin, priceM
         )}
 
         <div className="mt-2.5 flex gap-2">
-          {mapsUrl && (
+          {mapsUrl ? (
             <a
               href={mapsUrl}
               target="_blank"
@@ -82,11 +86,18 @@ export function V4UnknownBox({ onPlanClick, mapsUrl, priceText, priceMin, priceM
             >
               Route öffnen
             </a>
-          )}
+          ) : locationApprox ? (
+            <span
+              title="Beim Veranstalter die genaue Adresse pruefen, bevor du losfaehrst."
+              className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-full border border-dashed border-[var(--v4-hairline-3)] text-[11.5px] font-medium text-[var(--v4-ink-50)] cursor-help"
+            >
+              Ortsangabe ungefähr
+            </span>
+          ) : null}
           <a
             href="/saved"
             data-track="event_saved"
-            className={`press-haptic inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-full border border-[var(--v4-hairline-3)] text-[12.5px] font-semibold text-[var(--v4-ink)] ${mapsUrl ? '' : 'flex-1'}`}
+            className={`press-haptic inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-full border border-[var(--v4-hairline-3)] text-[12.5px] font-semibold text-[var(--v4-ink)] ${showsLocationCell ? '' : 'flex-1'}`}
           >
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
             Merken
