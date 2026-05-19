@@ -19,10 +19,27 @@ interface V4EventDetailContentProps {
   tags?: string[] | null;
   hasSimilar?: boolean;
   similarChildren?: ReactNode;
+  /** Scraper provider name (e.g. "burgenland.info") — required by law as
+   *  attribution. Renders as plain text if sourceUrl is missing. */
+  sourceName?: string | null;
+  /** Public-facing URL of the original event page. Some scrapers (e.g.
+   *  Feratel-Deskline via the TOSC5 API) have no human-visitable URL —
+   *  in that case the source block falls back to the name-only line. */
+  sourceUrl?: string | null;
 }
 
-export function V4EventDetailContent({ description, tags, hasSimilar, similarChildren }: V4EventDetailContentProps) {
+function hostnameOf(url: string): string {
+  try {
+    return new URL(url).hostname.replace(/^www\./, '');
+  } catch {
+    return url;
+  }
+}
+
+export function V4EventDetailContent({ description, tags, hasSimilar, similarChildren, sourceName, sourceUrl }: V4EventDetailContentProps) {
   const tagList = (tags ?? []).filter(Boolean);
+  const sourceLabel = sourceName?.trim() || (sourceUrl ? hostnameOf(sourceUrl) : null);
+  const showSource = Boolean(sourceLabel);
 
   return (
     <div className="max-w-[700px]">
@@ -47,6 +64,31 @@ export function V4EventDetailContent({ description, tags, hasSimilar, similarChi
               {t}
             </span>
           ))}
+        </section>
+      )}
+
+      {showSource && (
+        <section className="mt-8 pt-5 border-t border-[var(--v4-hairline-1)]">
+          <p className="m-0 text-[12px] text-[var(--v4-ink-50)] leading-[1.5]">
+            Quelle:{' '}
+            {sourceUrl ? (
+              <a
+                href={sourceUrl}
+                target="_blank"
+                rel="noopener noreferrer nofollow"
+                className="text-[var(--v4-ink-70)] hover:text-[var(--v4-ink)] underline decoration-[var(--v4-hairline-3)] underline-offset-2 inline-flex items-center gap-1"
+              >
+                {sourceLabel}
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+                  <polyline points="15 3 21 3 21 9"/>
+                  <line x1="10" y1="14" x2="21" y2="3"/>
+                </svg>
+              </a>
+            ) : (
+              <span className="text-[var(--v4-ink-70)]">{sourceLabel}</span>
+            )}
+          </p>
         </section>
       )}
 
