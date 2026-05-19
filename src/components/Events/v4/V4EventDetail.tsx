@@ -111,6 +111,10 @@ export function V4EventDetail({
             artistName={artistName}
             mapsUrl={mapsUrl}
             onPlanClick={() => setPlanSheetOpen(true)}
+            priceText={event.price_text}
+            priceMin={event.price_min}
+            priceMax={event.price_max}
+            priceTier={event.price_tier}
           />
         </aside>
       </div>

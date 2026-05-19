@@ -12,6 +12,7 @@
  */
 
 import { V4Badge } from './V4Badge';
+import { V4PriceBlock } from './V4PriceBlock';
 
 interface V4UnknownBoxProps {
   /** Open the V4PlanWizard sheet. When omitted, the planning CTA links
@@ -20,9 +21,17 @@ interface V4UnknownBoxProps {
   /** Google-Maps-Directions-URL für die "Route öffnen"-Aktion. Fehlt sie
    *  (Event ohne Koordinaten), wird der Button gar nicht gerendert. */
   mapsUrl?: string;
+  /** Raw price text from the event row. The PriceBlock parses it into
+   *  labelled rows when separators are present. */
+  priceText?: string | null;
+  priceMin?: number | null;
+  priceMax?: number | null;
+  /** Event price tier — used to suppress the block for explicitly
+   *  free events (badge already conveys it). */
+  priceTier?: 'gratis' | 'günstig' | 'mittel' | 'premium' | 'unbekannt' | null;
 }
 
-export function V4UnknownBox({ onPlanClick, mapsUrl }: V4UnknownBoxProps = {}) {
+export function V4UnknownBox({ onPlanClick, mapsUrl, priceText, priceMin, priceMax, priceTier }: V4UnknownBoxProps = {}) {
   return (
     <div
       data-v4-side-box="unknown"
@@ -38,6 +47,8 @@ export function V4UnknownBox({ onPlanClick, mapsUrl }: V4UnknownBoxProps = {}) {
         <p className="mt-2 text-[12.5px] text-[var(--v4-ink-50)] leading-[1.5]">
           Kein Ticketshop bekannt — wir merken Anreise &amp; Reminder in deinem Plan.
         </p>
+
+        <V4PriceBlock priceText={priceText} priceMin={priceMin} priceMax={priceMax} priceTier={priceTier}/>
 
         {onPlanClick ? (
           <button
