@@ -99,6 +99,8 @@ export function V4EventDetail({
           tags={event.tags}
           hasSimilar={Boolean(similar)}
           similarChildren={similar}
+          sourceName={event.source_name}
+          sourceUrl={event.source_url}
         />
 
         <aside className="order-first md:order-last md:sticky md:top-[88px] md:self-start">
