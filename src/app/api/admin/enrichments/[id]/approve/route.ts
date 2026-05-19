@@ -55,6 +55,7 @@ export async function POST(
         proposedCol in override ? override[proposedCol] : proposal[proposedCol];
       if (val !== null && val !== undefined) updates[eventCol] = val;
     };
+    setIf('category', 'proposed_category');
     setIf('image_url', 'proposed_image_url');
     setIf('description', 'proposed_description');
     setIf('price_text', 'proposed_price_text');

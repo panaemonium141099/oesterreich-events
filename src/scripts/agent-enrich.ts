@@ -54,9 +54,16 @@ const LIMIT = parseInt(arg("limit") ?? "5", 10);
 const DRY_RUN = !!arg("dry-run");
 const VERBOSE = !!arg("verbose");
 // Optional: restrict candidate selection to events missing this specific field.
-// Without --field we keep the broad OR filter (any of the 4 fields missing).
-const FIELD = arg("field") as "image_url" | "description" | "price_text" | "tags" | undefined;
-const VALID_FIELDS = ["image_url", "description", "price_text", "tags"] as const;
+// Without --field we keep the broad OR filter (any of the 5 fields missing).
+// "category" is special: it selects events where category='Sonstiges' (not NULL).
+const FIELD = arg("field") as
+  | "image_url"
+  | "description"
+  | "price_text"
+  | "tags"
+  | "category"
+  | undefined;
+const VALID_FIELDS = ["image_url", "description", "price_text", "tags", "category"] as const;
 if (FIELD && !VALID_FIELDS.includes(FIELD)) {
   console.error(`--field must be one of: ${VALID_FIELDS.join(", ")}`);
   process.exit(1);
@@ -86,6 +93,7 @@ interface EventRow {
 }
 
 interface AgentProposal {
+  category?: string;
   image_url?: string;
   image_source?: string;
   description?: string;
@@ -96,9 +104,29 @@ interface AgentProposal {
   reasoning?: string;
 }
 
+// Allowed primary categories. Must match enrichment-taxonomy.ts PRIMARY_CATEGORIES
+// exactly so the frontend filter buttons keep working. "Sonstiges" is in the
+// taxonomy but we never *propose* it — the whole point is to move events out.
+const PRIMARY_CATEGORIES = [
+  "Musik",
+  "Kultur & Bühne",
+  "Nightlife & Party",
+  "Essen & Trinken",
+  "Märkte & Feste",
+  "Sport & Bewegung",
+  "Natur & Abenteuer",
+  "Wissen & Karriere",
+  "Familie & Kinder",
+  "Community & Freizeit",
+  "Wellness & Spiritualität",
+] as const;
+
 // ── Field deficiency detection ───────────────────────────────────────────────
 function missingFields(e: EventRow): Array<keyof AgentProposal> {
   const missing: Array<keyof AgentProposal> = [];
+  // category='Sonstiges' counts as missing — we want the agent to re-classify
+  // these into one of the 11 real categories where it can find a good fit.
+  if (!e.category || e.category === "Sonstiges") missing.push("category");
   if (!e.image_url) missing.push("image_url");
   if (!e.description || e.description.length < DESCRIPTION_MIN_LENGTH) missing.push("description");
   if (!e.price_text) missing.push("price_text");
@@ -151,6 +179,11 @@ WIE VORGEHEN:
    - price_text: nur bei klarer Quellen-Angabe.
 4. tags (falls gefragt): NUR aus diesem Vokabular wählen, max. 4 Tags:
    ${TAG_VOCABULARY.join(", ")}
+5. category (falls gefragt — aktueller Wert ist "Sonstiges" oder leer): Wähle EXAKT EINE
+   aus dieser Liste, mit IDENTISCHER Schreibweise inkl. & und Umlauten:
+${PRIMARY_CATEGORIES.map((c) => `   - ${c}`).join("\n")}
+   "Sonstiges" NIE vorschlagen — der ganze Zweck ist diese Events aus "Sonstiges" raus zu
+   bekommen. Wenn du keine der 11 Kategorien sicher passt: category einfach weglassen.
 
 ANTWORT-FORMAT — am ENDE deiner Antwort, exakt so (Felder die du nicht sicher belegen kannst:
 einfach weglassen, nicht null setzen):
@@ -158,6 +191,7 @@ einfach weglassen, nicht null setzen):
 ENRICHMENT_RESULT:
 \`\`\`json
 {
+  "category": "Musik",
   "image_url": "https://...",
   "image_source": "source-og",
   "description": "...",
@@ -263,10 +297,14 @@ async function fetchCandidateEvents(supabase: SupabaseClient): Promise<EventRow[
     .gte("start_date", today)
     .in("publish_status", ["published", "published_low_confidence", "draft"]);
 
-  if (FIELD) {
+  if (FIELD === "category") {
+    qb = qb.eq("category", "Sonstiges");
+  } else if (FIELD) {
     qb = qb.is(FIELD, null);
   } else {
-    qb = qb.or("image_url.is.null,description.is.null,price_text.is.null,tags.is.null");
+    qb = qb.or(
+      "image_url.is.null,description.is.null,price_text.is.null,tags.is.null,category.eq.Sonstiges",
+    );
   }
 
   const { data, error } = await qb
@@ -289,9 +327,19 @@ async function upsertProposal(
   proposal: AgentProposal,
   runId: string,
 ): Promise<void> {
+  // Guard: reject category proposals not in the allowed list. Belt-and-braces
+  // alongside the prompt instruction so a hallucinated value can never persist.
+  let proposedCategory: string | null = null;
+  if (proposal.category && proposal.category !== "Sonstiges") {
+    if ((PRIMARY_CATEGORIES as readonly string[]).includes(proposal.category)) {
+      proposedCategory = proposal.category;
+    }
+  }
+
   const row = {
     event_id: event.id,
     status: "pending" as const,
+    proposed_category: proposedCategory,
     proposed_image_url: proposal.image_url ?? null,
     proposed_description: proposal.description ?? null,
     proposed_price_text: proposal.price_text ?? null,
@@ -370,6 +418,11 @@ async function main(): Promise<void> {
       const tagStr = (t: string[] | null) =>
         t && t.length > 0 ? t.join(", ") : "(leer)";
 
+      if (proposal.category !== undefined) {
+        log(`    category:`);
+        log(`      vorher:  ${event.category ?? "(leer)"}`);
+        log(`      nachher: ${proposal.category}`);
+      }
       if (proposal.image_url !== undefined) {
         log(`    image_url:`);
         log(`      vorher:  ${event.image_url ?? "(leer)"}`);
