@@ -155,22 +155,27 @@ export class Gem2GoScraper extends BaseScraper {
         if (!html) continue;
         const enrichment = extractGem2goDetail(html);
 
-        // Only fill fields the listing left blank. The listing already knows
-        // the gemeinde lat/lng/PLZ/Bundesland which are good defaults.
-        if (!e.description && enrichment.description) e.description = enrichment.description;
-        if (!e.address && enrichment.address) e.address = enrichment.address;
-        if ((!e.postal_code || e.postal_code.length === 0) && enrichment.postal_code) {
-          e.postal_code = enrichment.postal_code;
+        // Detail-page values (especially via JSON-LD) are CLEAN structured data.
+        // Listing values come from DOM scraping where sub-spans get concatenated
+        // without separators — e.g. raster-layout's .rasterListOrtContainerAdresse
+        // produces "Platz 1806881 Mellau" (strasse+hnr+plz+ort smushed). Detail
+        // wins for these structural fields whenever it provides a value.
+        if (enrichment.address) e.address = enrichment.address;
+        if (enrichment.postal_code) e.postal_code = enrichment.postal_code;
+        if (enrichment.location_name) {
+          // Prefer detail venue unless listing already has something more specific
+          if (!e.location_name || e.location_name.length < enrichment.location_name.length) {
+            e.location_name = enrichment.location_name;
+          }
         }
-        if (enrichment.location_name && (
-          !e.location_name ||
-          e.location_name === enrichment.location_name ||
-          // Listing often defaults to gemeinde-name; detail venue is more specific.
-          e.location_name.length < enrichment.location_name.length
-        )) {
-          e.location_name = enrichment.location_name;
+        if (enrichment.image_url) e.image_url = enrichment.image_url;
+
+        // Description: keep listing if it's already substantial, else use detail
+        if (!e.description || e.description.length < (enrichment.description?.length ?? 0)) {
+          if (enrichment.description) e.description = enrichment.description;
         }
-        if (!e.image_url && enrichment.image_url) e.image_url = enrichment.image_url;
+
+        // Price / organizer: take detail when listing didn't have it
         if (!e.price_text && enrichment.price_text) e.price_text = enrichment.price_text;
         if (e.price_min === undefined && enrichment.price_min !== undefined) {
           e.price_min = enrichment.price_min;
