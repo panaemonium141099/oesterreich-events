@@ -16,14 +16,12 @@
  * here on purpose — Variante A is light by design.
  */
 import { useState, useEffect, useRef, useCallback } from 'react';
-import Link from 'next/link';
 import { createPortal } from 'react-dom';
 import { T, countActiveFilters } from './tokens';
 import { defaultDateTo } from './datePresets';
 import type { EventFilters } from '@/types/events';
 import type { Bundesland } from '@/lib/bundeslaender';
 import { resolveSearchIntent } from '@/lib/search-intent';
-import { useAuth } from '@/lib/supabase/auth-context';
 import { trackEvent } from '@/lib/analytics';
 
 interface Gemeinde {
@@ -74,7 +72,6 @@ export function MapTopBar({
   onDistrictFilter,
   onKeywordSearch,
 }: MapTopBarProps) {
-  const { user, profile, signOut, loading: authLoading } = useAuth();
   const [searchValue, setSearchValue] = useState(filters.search || '');
   const [searchFocused, setSearchFocused] = useState(false);
   const [gemeinden, setGemeinden] = useState<Gemeinde[]>([]);
@@ -82,10 +79,8 @@ export function MapTopBar({
   const [eventSuggestions, setEventSuggestions] = useState<EventSuggestion[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(-1);
-  const [userMenuOpen, setUserMenuOpen] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const inputWrapRef = useRef<HTMLDivElement>(null);
-  const userMenuRef = useRef<HTMLDivElement>(null);
   const eventFetchRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const abortRef = useRef<AbortController | null>(null);
   const isUserTypingRef = useRef(false);
@@ -307,9 +302,6 @@ export function MapTopBar({
         closeSuggestions();
         setSearchFocused(false);
       }
-      if (userMenuRef.current && !userMenuRef.current.contains(target)) {
-        setUserMenuOpen(false);
-      }
     };
     document.addEventListener('mousedown', onDoc);
     return () => document.removeEventListener('mousedown', onDoc);
@@ -324,24 +316,11 @@ export function MapTopBar({
 
   return (
     <header
-      style={{
-        background: '#fff',
-        borderBottom: `1px solid ${T.border}`,
-      }}
-      className="z-50 sticky top-0"
+      style={{ background: 'transparent' }}
+      className="z-50 sticky top-0 pointer-events-none"
     >
-      <div className="flex items-center gap-3 lg:gap-4 px-4 lg:px-6 py-3">
-        {/* Logo — clicks back to /?home with the brand curtain */}
-        <Link
-          href="/?home"
-          aria-label="Zur Startseite"
-          style={{ color: T.ink, fontWeight: 700, fontSize: 17, letterSpacing: '-0.025em' }}
-          className="press-haptic shrink-0"
-        >
-          lasstreffen<span style={{ color: T.ink50, fontWeight: 500 }}>.at</span>
-        </Link>
-
-        {/* Search pill */}
+      <div className="flex items-center gap-3 lg:gap-4 px-4 lg:px-6 py-3 pointer-events-auto">
+        {/* Search pill — logo + profile already in the global V4TopNav */}
         <div ref={inputWrapRef} className="flex-1 min-w-0 relative max-w-[760px] mx-auto">
           <div
             style={{
@@ -476,144 +455,6 @@ export function MapTopBar({
           )}
         </button>
 
-        {/* Avatar — bell lives in the global V4TopNav, not duplicated here */}
-        <div className="flex items-center gap-3 shrink-0">
-          {!authLoading && (
-            <div className="relative" ref={userMenuRef}>
-              {user ? (
-                <button
-                  onClick={() => setUserMenuOpen((o) => !o)}
-                  aria-label="Mein Profil"
-                  className="press-haptic"
-                  style={{
-                    width: 32,
-                    height: 32,
-                    borderRadius: '50%',
-                    border: `1px solid ${T.border}`,
-                    background: T.panel,
-                    overflow: 'hidden',
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    color: T.ink,
-                    fontSize: 13,
-                    fontWeight: 700,
-                    cursor: 'pointer',
-                  }}
-                >
-                  {profile?.avatar_url ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      src={profile.avatar_url}
-                      alt=""
-                      referrerPolicy="no-referrer"
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    (profile?.first_name?.[0] || user.email?.[0] || '?').toUpperCase()
-                  )}
-                </button>
-              ) : (
-                <Link
-                  href="/auth/login"
-                  className="press-haptic"
-                  style={{
-                    padding: '8px 14px',
-                    borderRadius: 9999,
-                    background: T.ink,
-                    color: '#fff',
-                    fontSize: 13,
-                    fontWeight: 600,
-                    fontFamily: 'inherit',
-                  }}
-                >
-                  Anmelden
-                </Link>
-              )}
-
-              {userMenuOpen && user && (
-                <div
-                  style={{
-                    position: 'absolute',
-                    top: '100%',
-                    right: 0,
-                    marginTop: 8,
-                    minWidth: 220,
-                    background: '#fff',
-                    border: `1px solid ${T.border}`,
-                    borderRadius: 12,
-                    boxShadow: T.shadowL,
-                    overflow: 'hidden',
-                    zIndex: 70,
-                  }}
-                >
-                  <div style={{ padding: '12px 14px', borderBottom: `1px solid ${T.border}` }}>
-                    <div style={{ fontSize: 13, fontWeight: 600, color: T.ink }}>
-                      {profile?.first_name || user.email?.split('@')[0]}
-                    </div>
-                    <div style={{ fontSize: 11, color: T.ink60 }}>{user.email}</div>
-                  </div>
-                  {[
-                    { href: '/profile', label: 'Mein Profil' },
-                    { href: '/saved', label: 'Gespeichert' },
-                    { href: '/feed', label: 'Feed' },
-                    { href: '/groups', label: 'Meine Gruppen' },
-                  ].map((it) => (
-                    <Link
-                      key={it.href}
-                      href={it.href}
-                      onClick={() => setUserMenuOpen(false)}
-                      style={{ display: 'block', padding: '10px 14px', fontSize: 13, color: T.ink }}
-                      className="hover:bg-[#f7f7f8]"
-                    >
-                      {it.label}
-                    </Link>
-                  ))}
-                  {/* Admin/God-only entry — restored from the legacy Header
-                      so privileged accounts can still reach the admin panel
-                      from the topbar menu. Hidden from regular users. */}
-                  {(profile?.role === 'god' || profile?.role === 'admin') && (
-                    <Link
-                      href="/admin"
-                      onClick={() => setUserMenuOpen(false)}
-                      style={{
-                        display: 'block',
-                        padding: '10px 14px',
-                        fontSize: 13,
-                        color: T.ink,
-                        borderTop: `1px solid ${T.border}`,
-                        fontWeight: 600,
-                      }}
-                      className="hover:bg-[#f7f7f8]"
-                    >
-                      Admin Panel
-                    </Link>
-                  )}
-                  <button
-                    onClick={() => {
-                      signOut();
-                      setUserMenuOpen(false);
-                    }}
-                    style={{
-                      display: 'block',
-                      width: '100%',
-                      textAlign: 'left',
-                      padding: '10px 14px',
-                      fontSize: 13,
-                      color: '#c0392b',
-                      borderTop: `1px solid ${T.border}`,
-                      background: 'transparent',
-                      border: 'none',
-                      cursor: 'pointer',
-                    }}
-                  >
-                    Abmelden
-                  </button>
-                </div>
-              )}
-            </div>
-          )}
-        </div>
       </div>
     </header>
   );
