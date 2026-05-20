@@ -1,10 +1,12 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 
 // Mock next/navigation usePathname — vary per test via mockReturnValue.
 const mockPathname = vi.fn(() => '/');
+const mockPush = vi.fn();
 vi.mock('next/navigation', () => ({
   usePathname: () => mockPathname(),
+  useRouter: () => ({ push: mockPush, replace: vi.fn(), back: vi.fn(), forward: vi.fn(), refresh: vi.fn(), prefetch: vi.fn() }),
 }));
 
 // Mock supabase client (used by V4TopNavAuth island)
@@ -65,10 +67,25 @@ describe('V4TopNav', () => {
     expect(screen.getByRole('link', { name: 'Meine Pläne' }).getAttribute('data-active')).toBe('true');
   });
 
-  it('renders the search affordance linking to /entdecken', () => {
+  it('renders a functional search form that pushes /entdecken?search=<q>', () => {
+    mockPush.mockReset();
     render(<V4TopNav />);
-    const search = screen.getByRole('link', { name: /suchen/i });
-    expect(search.getAttribute('href')).toBe('/entdecken');
+    const form = screen.getByRole('search', { name: /suchen/i });
+    const input = form.querySelector('input[type="search"]') as HTMLInputElement;
+    expect(input).toBeTruthy();
+    fireEvent.change(input, { target: { value: 'Bilderbuch' } });
+    fireEvent.submit(form);
+    expect(mockPush).toHaveBeenCalledWith('/entdecken?search=Bilderbuch');
+  });
+
+  it('does not push on empty / whitespace-only submit', () => {
+    mockPush.mockReset();
+    render(<V4TopNav />);
+    const form = screen.getByRole('search', { name: /suchen/i });
+    const input = form.querySelector('input[type="search"]') as HTMLInputElement;
+    fireEvent.change(input, { target: { value: '   ' } });
+    fireEvent.submit(form);
+    expect(mockPush).not.toHaveBeenCalled();
   });
 
   it('renders the auth island (Anmelden pill for anon)', () => {

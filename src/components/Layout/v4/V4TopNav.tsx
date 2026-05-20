@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { V4Logo } from './V4Logo';
 import { V4TopNavAuth } from './V4TopNavAuth';
+import { V4SearchInput } from './V4SearchInput';
 
 /**
  * V4TopNav — global sticky top navigation introduced in v4 redesign Phase 1.
@@ -80,22 +81,7 @@ export function V4TopNav() {
 
         <div className="flex-1" />
 
-        {/* Search affordance — Phase 1: linkt direkt zu /entdecken. Echtes
-            ⌘K-Modal mit Künstler/Events-Tabs kommt in einer späteren Phase. */}
-        <Link
-          href="/entdecken"
-          aria-label="Künstler, Event oder Ort suchen"
-          className="press-haptic hidden lg:inline-flex items-center gap-2 min-w-[260px] px-3 py-2 rounded-full border border-[var(--v4-hairline-2)] text-[13px] text-[var(--v4-ink-50)] hover:text-[var(--v4-ink-70)] hover:border-[var(--v4-hairline-3)]"
-        >
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-            <circle cx="11" cy="11" r="8" />
-            <path d="m21 21-4.3-4.3" />
-          </svg>
-          <span className="flex-1 text-left">Künstler, Event oder Ort suchen</span>
-          <kbd className="px-1.5 py-px text-[10px] rounded border border-[var(--v4-hairline-2)] text-[var(--v4-ink-30)]">
-            ⌘ K
-          </kbd>
-        </Link>
+        <V4SearchInput variant="nav"/>
 
         <V4TopNavAuth />
       </div>

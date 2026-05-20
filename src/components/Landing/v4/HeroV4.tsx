@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { V4FunnelCard } from '@/components/Events/v4';
+import { V4SearchInput } from '@/components/Layout/v4/V4SearchInput';
 
 const TRENDS = ['Bilderbuch', 'FM4 Frequency', 'Wanda', 'Seefestspiele Mörbisch'];
 
@@ -46,21 +47,14 @@ export function HeroV4() {
             </Link>
           </div>
 
-          <Link
-            href="/entdecken"
-            className="press-haptic inline-flex items-center gap-3 px-5 py-3.5 rounded-full border border-[var(--v4-hairline-2)] bg-[var(--v4-surface-elevated)] text-[var(--v4-ink-50)] text-sm w-full md:w-auto md:min-w-[420px]"
-            aria-label="Künstler, Event oder Ort suchen"
-          >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-            <span className="flex-1 text-left">Künstler, Event oder Ort suchen …</span>
-          </Link>
+          <V4SearchInput variant="hero"/>
 
           <div className="flex gap-2 mt-3.5 flex-wrap items-center text-[11.5px] text-[var(--v4-ink-50)]">
             <span className="font-semibold text-[var(--v4-ink-70)]">Trend:</span>
             {TRENDS.map(t => (
               <Link
                 key={t}
-                href={`/entdecken?q=${encodeURIComponent(t)}`}
+                href={`/entdecken?search=${encodeURIComponent(t)}`}
                 className="press-haptic px-2.5 py-1 rounded-full border border-[var(--v4-hairline-2)] text-[var(--v4-ink-70)]"
               >
                 {t}
