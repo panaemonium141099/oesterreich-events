@@ -45,22 +45,30 @@ interface V4ConciergeCardProps {
 interface Citation { url: string; title: string | null }
 
 /**
- * Wandelt plain-text URLs in klickbare Links + strippt Markdown-Müll
- * (Headers, [text](url)-Syntax, Aufzählungssternchen) für saubere
- * Darstellung. Der System-Prompt verbietet Markdown explizit, aber
- * gelegentlich liefert das LLM trotzdem welche zurück — wir parsen
- * defensiv damit der User es nie als Rohtext sieht.
+ * Wandelt plain-text URLs in klickbare Links, **bold**-Markdown in
+ * echte <strong>-Elemente, und strippt sonstigen Markdown-Müll (Headers,
+ * [text](url)-Syntax als Label-Text, Aufzählungssternchen) für saubere
+ * Darstellung. Der System-Prompt verbietet Markdown explizit, aber das
+ * LLM liefert trotzdem regelmäßig welches zurück — wir parsen defensiv
+ * damit der User nie `**City-Grill**` als Rohtext sieht.
  */
 function renderConciergeText(text: string): React.ReactNode[] {
   // Strip leading ##/###-Header und Aufzählungs-Sternchen am Zeilenanfang.
+  // Wichtig: Bullet-Sternchen am Zeilenanfang braucht ein Leerzeichen
+  // dahinter (`* foo`) — `**bold**` matched hier NICHT (kein Space).
   const cleaned = text
     .replace(/^#{1,6}\s+/gm, '')
     .replace(/^\s*[*-]\s+/gm, '• ');
 
-  // 1. Markdown-Links: [label](url) → wir behalten label und schmeißen url in URL-Pool
-  // 2. Bare URLs: https://... → werden klickbar
+  // Eine kombinierte Regex die in Reihenfolge versucht:
+  //   1. **fett** → <strong>
+  //   2. [label](url)-Markdown-Link → <a>
+  //   3. bare https-URL → <a>
+  // Erste alternative trifft zuerst (regex tries left-to-right at each
+  // position) — so isst die Bold-Variante nicht versehentlich Link-URLs
+  // die zufällig `**` enthalten.
   const segments: React.ReactNode[] = [];
-  const regex = /\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)|https?:\/\/[^\s)>\]]+/g;
+  const regex = /\*\*([^*\n]+?)\*\*|\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)|https?:\/\/[^\s)>\]]+/g;
   let lastIdx = 0;
   let m: RegExpExecArray | null;
   let key = 0;
@@ -69,29 +77,39 @@ function renderConciergeText(text: string): React.ReactNode[] {
     if (m.index > lastIdx) {
       segments.push(cleaned.slice(lastIdx, m.index));
     }
-    const label = m[1];
-    const url = m[2] || m[0];
-    // Defensive: wenn das LLM doch mal eine URL inline liefert, zeigen
-    // wir nur den Host als Text — sonst sprengt eine 300-Zeichen-Grounding-
-    // URL die Card. Volle URL bleibt im href.
-    let displayText: string;
-    if (label) {
-      displayText = label;
+    if (m[1] !== undefined) {
+      // Bold
+      segments.push(
+        <strong key={`b${key++}`} className="font-semibold text-[var(--v4-ink)]">
+          {m[1]}
+        </strong>,
+      );
     } else {
-      try { displayText = new URL(url).host; }
-      catch { displayText = url; }
+      // Markdown-Link (m[2]=label, m[3]=url) oder bare URL (m[0])
+      const label = m[2];
+      const url = m[3] || m[0];
+      // Defensive: wenn das LLM doch mal eine URL inline liefert, zeigen
+      // wir nur den Host als Text — sonst sprengt eine 300-Zeichen-Grounding-
+      // URL die Card. Volle URL bleibt im href.
+      let displayText: string;
+      if (label) {
+        displayText = label;
+      } else {
+        try { displayText = new URL(url).host; }
+        catch { displayText = url; }
+      }
+      segments.push(
+        <a
+          key={`l${key++}`}
+          href={url}
+          target="_blank"
+          rel="noopener noreferrer nofollow"
+          className="text-[var(--v4-match)] underline decoration-dotted underline-offset-2 hover:text-[var(--v4-ink)] break-words"
+        >
+          {displayText}
+        </a>,
+      );
     }
-    segments.push(
-      <a
-        key={`l${key++}`}
-        href={url}
-        target="_blank"
-        rel="noopener noreferrer nofollow"
-        className="text-[var(--v4-match)] underline decoration-dotted underline-offset-2 hover:text-[var(--v4-ink)] break-words"
-      >
-        {displayText}
-      </a>,
-    );
     lastIdx = regex.lastIndex;
   }
   if (lastIdx < cleaned.length) {
