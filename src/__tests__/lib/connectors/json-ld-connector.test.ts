@@ -283,6 +283,25 @@ describe('JSON-LD Connector', () => {
       expect(result.events[0].price_max).toBe(25);
     });
 
+    it('decodes HTML-entity priceCurrency (Eventfrog quirk)', () => {
+      // Eventfrog ships JSON-LD with priceCurrency="&#8364;" instead of "EUR".
+      // JSON parsing keeps the literal entity, so without normalisation
+      // price_text would render as "45.00 &#8364;" in the UI.
+      const html = wrapHtml({
+        '@type': 'Event',
+        name: 'Entity Currency Event',
+        startDate: '2026-04-20T20:00:00+02:00',
+        offers: { '@type': 'Offer', price: 45, priceCurrency: '&#8364;' },
+      });
+
+      const result = extractEventsFromHtml(html, PAGE_URL, null, {
+        minDate: '2026-04-01',
+        maxDate: '2026-12-31',
+      });
+
+      expect(result.events[0].price_text).toBe('45.00 EUR');
+    });
+
     it('should handle free events (price=0)', () => {
       const html = wrapHtml({
         '@type': 'Event',

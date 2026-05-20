@@ -495,6 +495,26 @@ function extractOrganizer(eventObj: Record<string, unknown>): string | null {
 }
 
 /**
+ * Normalise a Schema.org `priceCurrency` value to an ISO 4217 code.
+ *
+ * Eventfrog (and other sources) sometimes emit the currency as an HTML
+ * entity inside JSON-LD — `"priceCurrency": "&#8364;"` instead of `"EUR"`.
+ * JSON parsing does not decode HTML entities, so the literal entity ends
+ * up in `price_text` and renders as `45.00 &#8364;` in the UI.
+ */
+function normalizePriceCurrency(raw: string): string {
+  const decoded = raw
+    .replace(/&#0*8364;?/g, '€')
+    .replace(/&#x0*20a[c];?/gi, '€')
+    .replace(/&euro;?/gi, '€')
+    .trim();
+  if (decoded === '€') return 'EUR';
+  if (decoded === '$') return 'USD';
+  if (decoded === '£') return 'GBP';
+  return decoded;
+}
+
+/**
  * Extract price information from a Schema.org Event (offers).
  */
 function extractPrice(eventObj: Record<string, unknown>): {
@@ -537,7 +557,7 @@ function extractPrice(eventObj: Record<string, unknown>): {
     }
 
     if (!currency && typeof o.priceCurrency === 'string') {
-      currency = o.priceCurrency;
+      currency = normalizePriceCurrency(o.priceCurrency);
     }
   }
 
