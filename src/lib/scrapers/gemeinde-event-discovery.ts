@@ -130,6 +130,21 @@ function scoreUrl(href: string, anchorText: string): number {
   return score;
 }
 
+// Pull event URLs out of /sitemap.xml when present. Many WordPress / TYPO3
+// installations expose every event URL in the sitemap even when the human-
+// navigable menu doesn't link to a clean collection page.
+async function urlsFromSitemap(baseUrl: string): Promise<string[]> {
+  const res = await fetchHtml(`${baseUrl}/sitemap.xml`, 6000);
+  if (!res.ok || !res.html) return [];
+  const matches = res.html.match(/<loc>([^<]+)<\/loc>/g);
+  if (!matches) return [];
+  const urls = matches
+    .map((m) => m.replace(/<\/?loc>/g, ''))
+    .filter((u) => /veranstalt|event|termin|kalender/i.test(u));
+  // Prefer collection-like URLs (shorter paths, end with veranstaltungen/events)
+  return urls.sort((a, b) => a.length - b.length).slice(0, 5);
+}
+
 export async function discoverEventListUrl(homepageUrl: string): Promise<{ url: string; eventCount: number } | null> {
   const baseUrl = homepageUrl.replace(/\/+$/, '');
 
@@ -206,6 +221,14 @@ export async function discoverEventListUrl(homepageUrl: string): Promise<{ url: 
   // Merge probe hits as high-priority candidates (they already responded 200)
   for (const p of probeHits) {
     candidates.push({ url: p.url, score: scoreUrl(p.url, ''), anchorText: '[probe]' });
+  }
+
+  // Strategy D: sitemap.xml — last-ditch source for event URLs the menu hides.
+  if (candidates.filter((c) => c.score >= 80).length === 0) {
+    const sitemapUrls = await urlsFromSitemap(baseUrl);
+    for (const u of sitemapUrls) {
+      candidates.push({ url: u, score: scoreUrl(u, '') || 50, anchorText: '[sitemap]' });
+    }
   }
 
   if (candidates.length === 0) return null;
@@ -331,6 +354,36 @@ export function parseEventList(html: string, listingUrl: string): ParsedEvent[] 
   });
   if (events.length > 0) return dedupeEvents(events);
 
+  // Layer 4.5: scan ALL <script> bodies for embedded Event JSON. Catches
+  // Squarespace (Bocksdorf), Wix, custom React/Vue apps that embed initial
+  // state. We look for shapes that contain both a date-ish field AND a
+  // title-ish field. Skipped scripts: > 200kb (full bundle dumps).
+  $('script').each((_, s) => {
+    const raw = $(s).text();
+    if (!raw || raw.length > 200_000) return;
+    // Fast prefilter — only attempt parse if string mentions a date field
+    if (!/"startDate"|"start_date"|"date"\s*:\s*"\d/.test(raw)) return;
+    // Try direct JSON parse first
+    let parsed: unknown = null;
+    try {
+      parsed = JSON.parse(raw);
+    } catch {
+      // Some scripts wrap JSON inside assignments. Pull the first {...} or [...]
+      const m = raw.match(/[{[][\s\S]*[}\]]/);
+      if (m) {
+        try {
+          parsed = JSON.parse(m[0]);
+        } catch {
+          // ignore
+        }
+      }
+    }
+    if (!parsed) return;
+    const found = recursivelyFindEvents(parsed, listingUrl);
+    for (const f of found) events.push(f);
+  });
+  if (events.length > 0) return dedupeEvents(events);
+
   // Layer 4: generic — repeating articles or list items with date+title
   $('article, li.event, .event, .veranstaltung').each((_, el) => {
     const $el = $(el);
@@ -352,6 +405,86 @@ export function parseEventList(html: string, listingUrl: string): ParsedEvent[] 
     });
   });
   return dedupeEvents(events);
+}
+
+// Recursively walk a parsed JSON tree, collecting any object that looks like
+// an event (has startDate + title/name/summary). Caps recursion depth + count.
+function recursivelyFindEvents(
+  node: unknown,
+  baseUrl: string,
+  depth = 0,
+  out: ParsedEvent[] = [],
+): ParsedEvent[] {
+  if (depth > 8 || out.length > 200) return out;
+  if (Array.isArray(node)) {
+    for (const x of node) recursivelyFindEvents(x, baseUrl, depth + 1, out);
+    return out;
+  }
+  if (node && typeof node === 'object') {
+    const obj = node as Record<string, unknown>;
+    const title =
+      (typeof obj.title === 'string' && obj.title) ||
+      (typeof obj.name === 'string' && obj.name) ||
+      (typeof obj.summary === 'string' && obj.summary) ||
+      null;
+    const startRaw =
+      (typeof obj.startDate === 'string' && obj.startDate) ||
+      (typeof obj.start_date === 'string' && obj.start_date) ||
+      (typeof obj.date === 'string' && obj.date) ||
+      (typeof obj.startDateLocal === 'string' && obj.startDateLocal) ||
+      // Squarespace events store unix-ms timestamps
+      (typeof obj.startDate === 'number' && new Date(obj.startDate).toISOString()) ||
+      null;
+    if (title && startRaw && typeof title === 'string') {
+      const start = normalizeDate(String(startRaw));
+      if (start) {
+        const desc =
+          typeof obj.description === 'string'
+            ? stripHtml(obj.description)
+            : typeof obj.body === 'string'
+              ? stripHtml(obj.body)
+              : undefined;
+        // Image fields vary wildly; try common ones
+        let image: string | undefined;
+        const imgCands = [obj.image, obj.imageUrl, obj.assetUrl, obj.thumbnail];
+        for (const c of imgCands) {
+          if (typeof c === 'string') { image = c; break; }
+          if (Array.isArray(c) && typeof c[0] === 'string') { image = c[0]; break; }
+        }
+        let url: string | undefined;
+        const urlCands = [obj.fullUrl, obj.url, obj.permalink, obj.link];
+        for (const c of urlCands) {
+          if (typeof c === 'string') {
+            try {
+              url = new URL(c, baseUrl).href;
+              break;
+            } catch {
+              // ignore
+            }
+          }
+        }
+        const loc = obj.location;
+        let venue: string | undefined;
+        if (loc && typeof loc === 'object') {
+          const l = loc as Record<string, unknown>;
+          if (typeof l.name === 'string') venue = l.name;
+          else if (typeof l.addressTitle === 'string') venue = l.addressTitle;
+        }
+        out.push({
+          title: title.trim(),
+          start_date: start,
+          description: desc,
+          image_url: image,
+          source_url: url,
+          location_name: venue,
+        });
+      }
+    }
+    for (const v of Object.values(obj)) {
+      recursivelyFindEvents(v, baseUrl, depth + 1, out);
+    }
+  }
+  return out;
 }
 
 function unwrapJsonLd(parsed: unknown): Array<Record<string, unknown>> {
