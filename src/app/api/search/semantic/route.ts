@@ -336,21 +336,29 @@ export async function POST(req: NextRequest) {
   today.setHours(0, 0, 0, 0);
   const afterDate = (filters.afterDate ?? today).toISOString();
 
-  // Wenn ein Ort-Filter aktiv ist, brauchen wir einen größeren Kandidaten-
-  // Pool aus dem RPC bevor wir clientseitig hart filtern — sonst kann es
-  // passieren dass die Top-20 nach Similarity alle ausserhalb der Region
-  // liegen und die Liste leer wird obwohl matchende Events existieren.
-  // 500 ist konservativ für Stadt-Filter (Eisenstadt hat ~460 Events
-  // total in der nächsten 90-Tage-Range).
-  const rpcLimit = filters.location ? Math.max(limit * 25, 500) : limit;
+  // RPC filtert jetzt direkt nach district/bundesland (siehe Migration
+  // 20260520_*_extend_search_events_semantic_with_location_filters).
+  // Damit braucht es keinen Kandidaten-Pool-Overshoot mehr — die RPC
+  // gibt die top-N Eisenstadt-Events nach Similarity zurück, nicht
+  // global top-N und dann post-filter (das verlor Eisenstadt-Events
+  // sobald rural Burgenland-Heurigen höhere Similarity hatten).
+  //
+  // district hat Vorrang vor bundesland (wenn beide gesetzt). Wenn der
+  // User die Stadt nennt, respektieren wir das hart — bundesland-Fallback
+  // wäre irreführend ("23 Treffer in Eisenstadt" wo eigentlich Kukmirn,
+  // Rudersdorf etc. drinstanden).
+  const filterDistrict = filters.location?.district ?? null;
+  const filterBundesland = filterDistrict ? null : (filters.location?.bundesland ?? null);
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: matches, error: rpcErr } = await (supabase.rpc as any)('search_events_semantic', {
     query_embedding: `[${queryEmbedding.join(',')}]`,
-    match_limit: rpcLimit,
+    match_limit: limit,
     min_similarity: 0.2,    // filter out very loose matches
     filter_after_date: afterDate,
     filter_max_price_tier: filters.maxPriceTier,
+    filter_bundesland: filterBundesland,
+    filter_district: filterDistrict,
   });
 
   if (rpcErr) {
@@ -392,40 +400,17 @@ export async function POST(req: NextRequest) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const eventMap = new Map<string, any>((events ?? []).map((e: any) => [e.id, e]));
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let hydrated: any[] = matchList
+  const hydrated: any[] = matchList
     .map(m => {
       const ev = eventMap.get(m.id);
       return ev ? { ...ev, _similarity: m.similarity } : null;
     })
     .filter(Boolean);
 
-  // ─── Location-Hard-Filter ────────────────────────────────────────
-  // Identische Semantik wie `useFilteredEvents.finalEvents` in der
-  // List-Mode (case-insensitive equality auf events.district bzw.
-  // events.bundesland). Vorher war das ein soft re-rank — was nichts
-  // brachte sobald die Top-N nach Similarity keine in-location Events
-  // enthielten. Jetzt: HARD filter, mit district→bundesland Fallback
-  // damit der User nicht auf einer leeren Liste landet wenn die
-  // Stadt-Granularität zu eng ist.
-  if (filters.location?.district) {
-    const target = filters.location.district.toLowerCase();
-    const byDistrict = hydrated.filter(e => (e.district ?? '').toLowerCase() === target);
-    if (byDistrict.length > 0) {
-      hydrated = byDistrict;
-    } else if (filters.location.bundesland) {
-      const blTarget = filters.location.bundesland.toLowerCase();
-      hydrated = hydrated.filter(e => (e.bundesland ?? '').toLowerCase() === blTarget);
-    } else {
-      hydrated = [];
-    }
-  } else if (filters.location?.bundesland) {
-    const blTarget = filters.location.bundesland.toLowerCase();
-    hydrated = hydrated.filter(e => (e.bundesland ?? '').toLowerCase() === blTarget);
-  }
-
-  // Auf das vom User angefragte Limit zuschneiden (RPC liefert mehr
-  // Kandidaten wenn Location aktiv, damit der Filter genug zu arbeiten hat).
-  hydrated = hydrated.slice(0, limit);
+  // Kein TS-Post-Filter mehr nötig — die RPC filtert jetzt direkt
+  // nach district/bundesland (siehe oben). Falls 0 Eisenstadt-Events
+  // semantisch passen, kriegt der User ehrlich eine leere Liste statt
+  // 23 falscher Heurigen aus dem Rest von Burgenland.
 
   return NextResponse.json({
     query: rawQuery,
