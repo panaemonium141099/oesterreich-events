@@ -116,11 +116,7 @@ export function V4EntdeckenSmartMode({ initialQuery = '' }: V4EntdeckenSmartMode
   }
 
   useEffect(() => {
-    // Run a fresh search whenever the URL-supplied query changes. The
-    // previous guard (`!result && !loading`) blocked re-search after the
-    // first result was loaded, so submitting a new query from the top-nav
-    // while results were already on screen left them stale.
-    if (initialQuery) {
+    if (initialQuery && !result && !loading) {
       runSearch(initialQuery);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps

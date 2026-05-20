@@ -68,26 +68,11 @@ function EntdeckenInner() {
 
   const onModeChange = useCallback((next: V4EntdeckenMode) => { setMode(next); }, []);
 
-  // V4EntdeckenListMode reads initialFilters/initialBundeslandIds only on
-  // mount (useFilteredEvents seeds useState from them). Subsequent URL
-  // changes — e.g. the user submits a new search from the top-nav while
-  // already on /entdecken?search=eisenstadt — therefore would not retrigger
-  // the fetch and stale results would stay on screen. The key forces a
-  // remount whenever the URL-driven inputs change, which is the cleanest
-  // way to re-seed state from the new URL.
-  const listModeKey = [
-    initialBlParam ?? '',
-    initialFilters?.search ?? '',
-    initialFilters?.district ?? '',
-    initialFilters?.category ?? '',
-  ].join('|');
-
   return (
     <div className="min-h-screen bg-[var(--v4-surface)] text-[var(--v4-ink)]">
       <V4EntdeckenHero mode={mode} onModeChange={onModeChange}/>
       {mode === 'list' ? (
         <V4EntdeckenListMode
-          key={listModeKey}
           initialBundeslandIds={initialBundeslandIds}
           initialFilters={initialFilters}
         />
