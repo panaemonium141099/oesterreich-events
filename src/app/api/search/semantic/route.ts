@@ -27,10 +27,11 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import OpenAI from 'openai';
+import { GoogleGenAI, Type } from '@google/genai';
 import { createClient } from '@supabase/supabase-js';
-import { bundeslandToId } from '@/lib/bundeslaender';
 
 const EMBEDDING_MODEL = 'text-embedding-3-small';
+const LOCATION_MODEL = 'gemini-2.5-flash';
 
 // ────────────────────────────────────────────────────────────────────
 // Query parser — pulls structured filters out of the natural-language
@@ -38,76 +39,173 @@ const EMBEDDING_MODEL = 'text-embedding-3-small';
 // what gets embedded; the filters are passed as SQL constraints.
 // ────────────────────────────────────────────────────────────────────
 
+/**
+ * DetectedLocation — was wir aus der Query extrahieren um das Result-Set
+ * hart zu filtern (NICHT mehr nur soft re-rank wie früher).
+ *
+ *   `district`    — Stadt-Slug der `events.district` matched (z.B.
+ *                   `eisenstadt`). Wenn nur Bundesland erwähnt wurde,
+ *                   bleibt das `null`.
+ *   `bundesland`  — Bundesland-ID der `events.bundesland` matched
+ *                   (z.B. `burgenland`). Sicherheitsnetz: wenn der
+ *                   district-Filter leer läuft, fallen wir auf die
+ *                   gröbere Bundesland-Ebene zurück.
+ */
+interface DetectedLocation {
+  district: string | null;
+  bundesland: string | null;
+}
+
 interface ParsedFilters {
   afterDate: Date | null;      // exclusive lower bound (e.g. today 00:00)
   beforeDate: Date | null;     // exclusive upper bound (e.g. tomorrow 23:59)
   maxPriceTier: 'gratis' | 'günstig' | 'mittel' | null;
   keywordSignals: string[];    // hints we detected (for response debugging)
-  /** Bundesland the user mentioned (for soft re-ranking only). */
-  locationBundesland: string | null;
+  location: DetectedLocation | null;
 }
 
 /**
- * Stadt/Region → canonical Bundesland-ID Mapping für Soft-Re-Ranking.
+ * Stadt-Keyword → canonical {district, bundesland} aus der DB.
  *
- * Wir geben hier nur Roh-Strings — die werden alle durch
- * `bundeslandToId()` aus `src/lib/bundeslaender.ts` durchgejagt, das
- * dieselbe Normalisierung macht die auch die Listen-View nutzt
- * (Umlaute, Shortcodes, etc.). Dadurch garantiert das Re-Ranking-Filter
- * gegen `event.bundesland` (DB-Format) konsistent matched.
+ * Werte gemessen am `events.district` / `events.bundesland`-Format
+ * (alles lowercase, ohne Umlaute, slugified). district-Slugs sind die
+ * Bezirks-Namen wie sie in der existierenden List-View gefiltert
+ * werden — gleicher Match-Mechanismus wie `useFilteredEvents` (case-
+ * insensitive equality auf `e.district`).
+ *
+ * Wien ist Sonderfall: Stadt und Bundesland identisch, Bezirke sind
+ * 1-23 (zu granular für Stichwort-Suche) — deshalb `district: null`,
+ * Filter greift nur auf Bundesland-Ebene.
  */
-const CITY_TO_BUNDESLAND_RAW: Record<string, string> = {
-  // Wien
-  wien: 'wien', vienna: 'wien',
-  // Niederösterreich
-  'st pölten': 'niederoesterreich', 'sankt pölten': 'niederoesterreich',
-  krems: 'niederoesterreich', wienerneustadt: 'niederoesterreich',
-  baden: 'niederoesterreich', amstetten: 'niederoesterreich',
-  // Oberösterreich
-  linz: 'oberoesterreich', wels: 'oberoesterreich', steyr: 'oberoesterreich',
-  // Steiermark
-  graz: 'steiermark', leoben: 'steiermark', kapfenberg: 'steiermark',
-  // Salzburg
-  salzburg: 'salzburg',
-  // Tirol
-  innsbruck: 'tirol', kufstein: 'tirol',
-  // Vorarlberg
-  bregenz: 'vorarlberg', dornbirn: 'vorarlberg',
-  // Kärnten
-  klagenfurt: 'kaernten', villach: 'kaernten',
-  // Burgenland
-  eisenstadt: 'burgenland', mattersburg: 'burgenland',
-  // Direct Bundesland-Erwähnungen — sowohl mit als auch ohne Umlauten
+const CITIES: Record<string, DetectedLocation> = {
+  eisenstadt:        { district: 'eisenstadt',      bundesland: 'burgenland' },
+  mattersburg:       { district: 'mattersburg',     bundesland: 'burgenland' },
+  graz:              { district: 'graz',            bundesland: 'steiermark' },
+  leoben:            { district: 'leoben',          bundesland: 'steiermark' },
+  kapfenberg:        { district: 'kapfenberg',      bundesland: 'steiermark' },
+  linz:              { district: 'linz',            bundesland: 'oberoesterreich' },
+  wels:              { district: 'wels',            bundesland: 'oberoesterreich' },
+  steyr:             { district: 'steyr',           bundesland: 'oberoesterreich' },
+  innsbruck:         { district: 'innsbruck',       bundesland: 'tirol' },
+  kufstein:          { district: 'kufstein',        bundesland: 'tirol' },
+  bregenz:           { district: 'bregenz',         bundesland: 'vorarlberg' },
+  dornbirn:          { district: 'dornbirn',        bundesland: 'vorarlberg' },
+  klagenfurt:        { district: 'klagenfurt',      bundesland: 'kaernten' },
+  villach:           { district: 'villach',         bundesland: 'kaernten' },
+  salzburg:          { district: 'salzburg',        bundesland: 'salzburg' },
+  krems:             { district: 'krems',           bundesland: 'niederoesterreich' },
+  wienerneustadt:    { district: 'wienerneustadt',  bundesland: 'niederoesterreich' },
+  baden:             { district: 'baden',           bundesland: 'niederoesterreich' },
+  amstetten:         { district: 'amstetten',       bundesland: 'niederoesterreich' },
+  'st pölten':       { district: 'sankt-poelten',   bundesland: 'niederoesterreich' },
+  'sankt pölten':    { district: 'sankt-poelten',   bundesland: 'niederoesterreich' },
+  wien:              { district: null,              bundesland: 'wien' },
+  vienna:            { district: null,              bundesland: 'wien' },
+};
+
+/** Bundesland-Keyword → canonical Bundesland-ID. Akzeptiert Umlaut- und
+ *  Nicht-Umlaut-Schreibweisen, da die User das durcheinander tippen. */
+const BUNDESLAENDER_KEYS: Record<string, string> = {
   burgenland: 'burgenland',
   niederösterreich: 'niederoesterreich', niederoesterreich: 'niederoesterreich',
   oberösterreich: 'oberoesterreich', oberoesterreich: 'oberoesterreich',
   steiermark: 'steiermark',
-  tirol: 'tirol', vorarlberg: 'vorarlberg',
+  tirol: 'tirol',
+  vorarlberg: 'vorarlberg',
   kärnten: 'kaernten', kaernten: 'kaernten',
 };
 
-function detectBundesland(q: string): string | null {
+function detectLocationRegex(q: string): DetectedLocation | null {
   const lower = q.toLowerCase();
-  for (const [key, bl] of Object.entries(CITY_TO_BUNDESLAND_RAW)) {
+  // Stadt zuerst (spezifischer) — dadurch matched "eisenstadt" auf
+  // {district:'eisenstadt', bundesland:'burgenland'} statt nur auf
+  // burgenland (würde sonst auch Mattersburg-Events einschließen).
+  for (const [key, loc] of Object.entries(CITIES)) {
     const re = new RegExp(`\\b${key.replace(/\s+/g, '\\s+')}\\b`, 'i');
-    if (re.test(lower)) return bl;
+    if (re.test(lower)) return loc;
+  }
+  for (const [key, bl] of Object.entries(BUNDESLAENDER_KEYS)) {
+    const re = new RegExp(`\\b${key.replace(/\s+/g, '\\s+')}\\b`, 'i');
+    if (re.test(lower)) return { district: null, bundesland: bl };
   }
   return null;
+}
+
+/**
+ * Tippfehler-tolerante Ort-Extraktion via Gemini.
+ *
+ * Wird NUR aufgerufen wenn der Regex-Pass nichts gefunden hat — der
+ * deckt die korrekt geschriebenen Häufig-Fälle ab und spart pro Call
+ * den AI-Roundtrip. Für "eisenstad" / "Eisenstatt" / "burgnland" etc.
+ * (alle Regex-Misser) springt der AI-Pass ein.
+ *
+ * Whitelist-Guard: das Model darf nur Strings aus unseren Maps
+ * zurückgeben, alles andere wird zu `null` gemapped. Verhindert
+ * Halluzinationen die durchsickern.
+ */
+async function normalizeLocationViaAI(query: string, geminiKey: string): Promise<DetectedLocation | null> {
+  const ai = new GoogleGenAI({ apiKey: geminiKey });
+  const cityList = Object.keys(CITIES).join(', ');
+  const blList = Object.keys(BUNDESLAENDER_KEYS).join(', ');
+  const systemInstruction =
+`Du extrahierst aus einer österreichischen Event-Suchanfrage den erwähnten Ort und gibst ihn als canonical Name zurück.
+
+Erlaubte Städte/Bezirke: ${cityList}
+Erlaubte Bundesländer: ${blList}
+
+Regeln:
+- Tippfehler/Umlaut-Varianten korrigieren ("eisenstad" → eisenstadt, "Eisenstatt" → eisenstadt, "burgnland" → burgenland, "Niederöstereich" → niederösterreich)
+- "in [X]" / "im [X]" / "rund um [X]" / "bei [X]" / einzelnes Ortswort → X extrahieren
+- Stadt > Bundesland (wenn Stadt klar erkannt, gib Stadt zurück)
+- Nicht-österreichische Orte, unbekannte Orte oder keine Erwähnung → null
+- Antworte STRIKT mit einem Eintrag aus den Listen oben (lowercase) ODER null. Niemals eine andere Schreibweise.`;
+
+  try {
+    const resp = await ai.models.generateContent({
+      model: LOCATION_MODEL,
+      contents: query,
+      config: {
+        systemInstruction,
+        responseMimeType: 'application/json',
+        responseSchema: {
+          type: Type.OBJECT,
+          properties: {
+            match: { type: Type.STRING, nullable: true },
+          },
+        },
+        thinkingConfig: { thinkingBudget: 0 },
+        maxOutputTokens: 50,
+        temperature: 0,
+      },
+    });
+
+    const text = resp.text;
+    if (!text) return null;
+    const parsed = JSON.parse(text) as { match?: string | null };
+    const match = typeof parsed.match === 'string' ? parsed.match.toLowerCase().trim() : null;
+    if (!match) return null;
+    if (CITIES[match]) return CITIES[match];
+    if (BUNDESLAENDER_KEYS[match]) return { district: null, bundesland: BUNDESLAENDER_KEYS[match] };
+    return null;
+  } catch (e) {
+    if (process.env.NODE_ENV === 'development') console.error('[location-ai]', e);
+    return null;
+  }
 }
 
 function parseQuery(raw: string): { text: string; filters: ParsedFilters } {
   const q = raw.toLowerCase();
   const signals: string[] = [];
+  const location = detectLocationRegex(raw);
   const filters: ParsedFilters = {
     afterDate: null,
     beforeDate: null,
     maxPriceTier: null,
     keywordSignals: signals,
-    locationBundesland: detectBundesland(raw),
+    location,
   };
-  if (filters.locationBundesland) {
-    signals.push(`location:${filters.locationBundesland}`);
-  }
+  if (location?.district) signals.push(`location:district:${location.district}`);
+  if (location?.bundesland) signals.push(`location:bundesland:${location.bundesland}`);
 
   // ─── Date signals ───
   const now = new Date();
@@ -189,24 +287,42 @@ export async function POST(req: NextRequest) {
   }
   const limit = Math.min(Math.max(1, body.limit ?? 20), 50);
 
-  // 1. Parse
+  // 1. Parse — regex-Pass für Ort (deckt korrekt geschriebene Fälle ab)
   const { text: embedText, filters } = parseQuery(rawQuery);
 
-  // 2. Embed
+  // 2. Parallel: embedding + AI-Location-Normalisierung (nur wenn regex
+  //    nichts gefunden hat, sonst sparen wir den AI-Call). AI ist
+  //    ausschließlich für Tippfehler/Varianten zuständig — der Regex
+  //    bleibt der schnelle Pfad für die Häufig-Fälle.
   const openai = new OpenAI({ apiKey: openaiKey });
+  const geminiKey = process.env.GEMINI_API_KEY;
+  const aiLocationPromise: Promise<DetectedLocation | null> =
+    (!filters.location && geminiKey)
+      ? normalizeLocationViaAI(rawQuery, geminiKey)
+      : Promise.resolve(null);
+
   let queryEmbedding: number[];
+  let aiLocation: DetectedLocation | null = null;
   try {
-    const resp = await openai.embeddings.create({
-      model: EMBEDDING_MODEL,
-      input: embedText,
-    });
-    queryEmbedding = resp.data[0]?.embedding ?? [];
+    const [embedResp, aiLoc] = await Promise.all([
+      openai.embeddings.create({ model: EMBEDDING_MODEL, input: embedText }),
+      aiLocationPromise,
+    ]);
+    queryEmbedding = embedResp.data[0]?.embedding ?? [];
+    aiLocation = aiLoc;
     if (queryEmbedding.length !== 1536) {
       return NextResponse.json({ error: 'embedding failed' }, { status: 500 });
     }
   } catch (e) {
     console.error('[semantic-search] embed failed:', e);
     return NextResponse.json({ error: 'embedding service unavailable' }, { status: 502 });
+  }
+
+  // AI ergänzt regex — regex gewinnt wenn beide hits haben (deterministisch).
+  if (!filters.location && aiLocation) {
+    filters.location = aiLocation;
+    if (aiLocation.district) filters.keywordSignals.push(`location:district:${aiLocation.district}:ai`);
+    if (aiLocation.bundesland) filters.keywordSignals.push(`location:bundesland:${aiLocation.bundesland}:ai`);
   }
 
   // 3. Call the RPC
@@ -220,10 +336,18 @@ export async function POST(req: NextRequest) {
   today.setHours(0, 0, 0, 0);
   const afterDate = (filters.afterDate ?? today).toISOString();
 
+  // Wenn ein Ort-Filter aktiv ist, brauchen wir einen größeren Kandidaten-
+  // Pool aus dem RPC bevor wir clientseitig hart filtern — sonst kann es
+  // passieren dass die Top-20 nach Similarity alle ausserhalb der Region
+  // liegen und die Liste leer wird obwohl matchende Events existieren.
+  // 500 ist konservativ für Stadt-Filter (Eisenstadt hat ~460 Events
+  // total in der nächsten 90-Tage-Range).
+  const rpcLimit = filters.location ? Math.max(limit * 25, 500) : limit;
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: matches, error: rpcErr } = await (supabase.rpc as any)('search_events_semantic', {
     query_embedding: `[${queryEmbedding.join(',')}]`,
-    match_limit: limit,
+    match_limit: rpcLimit,
     min_similarity: 0.2,    // filter out very loose matches
     filter_after_date: afterDate,
     filter_max_price_tier: filters.maxPriceTier,
@@ -243,7 +367,15 @@ export async function POST(req: NextRequest) {
   if (matchList.length === 0) {
     return NextResponse.json({
       query: rawQuery,
-      parsed: { embedded_text: embedText, ...filters },
+      parsed: {
+        embedded_text: embedText,
+        after_date: filters.afterDate?.toISOString() ?? null,
+        before_date: filters.beforeDate?.toISOString() ?? null,
+        max_price_tier: filters.maxPriceTier,
+        signals: filters.keywordSignals,
+        location_district: filters.location?.district ?? null,
+        location_bundesland: filters.location?.bundesland ?? null,
+      },
       matches: [],
       count: 0,
     });
@@ -267,21 +399,33 @@ export async function POST(req: NextRequest) {
     })
     .filter(Boolean);
 
-  // ─── Location Re-Ranking (Phase 4.9) ─────────────────────────────
-  // Wenn der User explizit eine Stadt/Bundesland erwähnt, sollen Events
-  // dort ZUERST kommen, der Rest danach. Innerhalb jeder Gruppe bleibt
-  // die ursprüngliche Similarity-Reihenfolge erhalten — kein
-  // hard-filter, sondern soft re-rank (stable partition).
-  if (filters.locationBundesland) {
-    // Beide Seiten durch bundeslandToId normalisieren — handles
-    // "Niederösterreich" vs "niederoesterreich" vs "NÖ" / "ktn" etc.
-    // Same Logik die auch die FilterDrawer-Pipeline nutzt.
-    const target = filters.locationBundesland;
-    const matches = (bl: string | null | undefined) => bundeslandToId(bl) === target;
-    const inLocation = hydrated.filter(e => matches(e.bundesland));
-    const elsewhere = hydrated.filter(e => !matches(e.bundesland));
-    hydrated = [...inLocation, ...elsewhere];
+  // ─── Location-Hard-Filter ────────────────────────────────────────
+  // Identische Semantik wie `useFilteredEvents.finalEvents` in der
+  // List-Mode (case-insensitive equality auf events.district bzw.
+  // events.bundesland). Vorher war das ein soft re-rank — was nichts
+  // brachte sobald die Top-N nach Similarity keine in-location Events
+  // enthielten. Jetzt: HARD filter, mit district→bundesland Fallback
+  // damit der User nicht auf einer leeren Liste landet wenn die
+  // Stadt-Granularität zu eng ist.
+  if (filters.location?.district) {
+    const target = filters.location.district.toLowerCase();
+    const byDistrict = hydrated.filter(e => (e.district ?? '').toLowerCase() === target);
+    if (byDistrict.length > 0) {
+      hydrated = byDistrict;
+    } else if (filters.location.bundesland) {
+      const blTarget = filters.location.bundesland.toLowerCase();
+      hydrated = hydrated.filter(e => (e.bundesland ?? '').toLowerCase() === blTarget);
+    } else {
+      hydrated = [];
+    }
+  } else if (filters.location?.bundesland) {
+    const blTarget = filters.location.bundesland.toLowerCase();
+    hydrated = hydrated.filter(e => (e.bundesland ?? '').toLowerCase() === blTarget);
   }
+
+  // Auf das vom User angefragte Limit zuschneiden (RPC liefert mehr
+  // Kandidaten wenn Location aktiv, damit der Filter genug zu arbeiten hat).
+  hydrated = hydrated.slice(0, limit);
 
   return NextResponse.json({
     query: rawQuery,
@@ -291,7 +435,8 @@ export async function POST(req: NextRequest) {
       before_date: filters.beforeDate?.toISOString() ?? null,
       max_price_tier: filters.maxPriceTier,
       signals: filters.keywordSignals,
-      location_bundesland: filters.locationBundesland,
+      location_district: filters.location?.district ?? null,
+      location_bundesland: filters.location?.bundesland ?? null,
     },
     matches: hydrated,
     count: hydrated.length,
