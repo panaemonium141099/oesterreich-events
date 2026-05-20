@@ -67,12 +67,14 @@ export class Gem2GoScraper extends BaseScraper {
 
         if (!html) {
           gemeindenFailed++;
+          this.log(`[${i + 1}/${GEM2GO_GEMEINDEN.length}] ${gemeinde.name}: FETCH-FAIL`);
           continue;
         }
 
         // Check if this is actually a GEM2GO site
         if (!this.isGem2GoPage(html)) {
           gemeindenNotGem2Go++;
+          this.log(`[${i + 1}/${GEM2GO_GEMEINDEN.length}] ${gemeinde.name}: KEIN GEM2GO Layout`);
           continue;
         }
 
@@ -111,19 +113,19 @@ export class Gem2GoScraper extends BaseScraper {
           }
           allEvents.push(...events);
           gemeindenScraped++;
-          if ((i + 1) % 50 === 0 || events.length >= 5) {
-            this.log(`[${i + 1}/${GEM2GO_GEMEINDEN.length}] ${gemeinde.name}: ${events.length} Events (gesamt: ${allEvents.length})`);
-          }
+          this.log(`[${i + 1}/${GEM2GO_GEMEINDEN.length}] ${gemeinde.name}: ${events.length} Events (gesamt: ${allEvents.length})`);
         } else {
           gemeindenNoEvents++;
+          this.log(`[${i + 1}/${GEM2GO_GEMEINDEN.length}] ${gemeinde.name}: 0 Events`);
         }
-      } catch {
+      } catch (err) {
         gemeindenFailed++;
+        this.log(`[${i + 1}/${GEM2GO_GEMEINDEN.length}] ${gemeinde.name}: FEHLER (${(err as Error).message?.slice(0, 60)})`);
       }
 
-      // Rate-Limiting: Be nice to servers
+      // Per-100 milestone summary stays as before
       if ((i + 1) % 100 === 0) {
-        this.log(`Fortschritt: ${i + 1}/${GEM2GO_GEMEINDEN.length} Gemeinden, ${allEvents.length} Events, ${gemeindenFailed} Fehler, ${gemeindenNotGem2Go} kein GEM2GO`);
+        this.log(`── Milestone: ${i + 1}/${GEM2GO_GEMEINDEN.length} Gemeinden, ${allEvents.length} Events, ${gemeindenFailed} Fehler, ${gemeindenNotGem2Go} kein GEM2GO`);
       }
       await this.sleep(this.gemeindeDelayMs);
     }

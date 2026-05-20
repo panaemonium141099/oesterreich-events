@@ -89,6 +89,21 @@ async function main() {
     const pct = events.length > 0 ? ((counts[f] / events.length) * 100).toFixed(0) : '0';
     console.log(`  ${f.padEnd(20)} ${counts[f]}/${events.length}  (${pct}%)`);
   }
+
+  // Dump URLs of events without price — so the user can manually verify
+  // whether the page actually has price info we missed, or the page truly
+  // lacks it.
+  const noPrice = events.filter((e) => !e.price_text);
+  console.log(`\n─────── ${noPrice.length} events WITHOUT price_text ───────`);
+  // Dedupe by source_url (recurring events repeat the same URL across dates)
+  const seen = new Set<string>();
+  for (const e of noPrice) {
+    if (!e.source_url || seen.has(e.source_url)) continue;
+    seen.add(e.source_url);
+    console.log(`${e.source_url}`);
+    console.log(`  title: ${e.title}`);
+  }
+  console.log(`(${seen.size} unique URLs)`);
 }
 
 main().catch((err) => {
