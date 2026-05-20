@@ -33,7 +33,7 @@ interface NavItem {
 }
 
 const NAV_ITEMS: ReadonlyArray<NavItem> = [
-  { href: '/',        label: 'Entdecken',   matches: ['/', '/entdecken'] },
+  { href: '/entdecken', label: 'Entdecken',   matches: ['/', '/entdecken'] },
   { href: '/artists', label: 'Künstler',    matches: ['/artists'] },
   { href: '/map',     label: 'Karte',       matches: ['/map'] },
   { href: '/plans',   label: 'Meine Pläne', matches: ['/plans', '/saved'] },
