@@ -29,7 +29,18 @@ const FREE_RE = /^(eintritt\s+frei|freier?\s+eintritt|frei|free|kostenlos|gratis
 // Comma is a separator ONLY when followed by whitespace; "7,50€" must stay
 // glued together as the German decimal notation, not split into "7" + "50".
 const SEPARATOR_RE = /[;\n]|,\s+|\s+\/\s+|\s+\|\s+|\s+·\s+|\s+—\s+/u;
-const PRICE_RE = /^(.*?)\s*(?:€\s*(\d+(?:[.,]\d+)?)|(\d+(?:[.,]\d+)?)\s*€|(\d+(?:[.,]\d+)?)\s*Euro)\s*$/iu;
+// Currency tokens we accept anywhere in the price text. Output is always
+// the € symbol — scrapers that emit "EUR" / "Euro" get normalised on render
+// so the side-box stays consistent across sources.
+const CURRENCY_TOKEN = '(?:€|EUR|Euro)';
+const RANGE_RE = new RegExp(
+  String.raw`^(.*?)\s*(\d+(?:[.,]\d+)?)\s*[-–—]\s*(\d+(?:[.,]\d+)?)\s*` + CURRENCY_TOKEN + String.raw`\s*$`,
+  'iu',
+);
+const PRICE_RE = new RegExp(
+  String.raw`^(.*?)\s*(?:` + CURRENCY_TOKEN + String.raw`\s*(\d+(?:[.,]\d+)?)|(\d+(?:[.,]\d+)?)\s*` + CURRENCY_TOKEN + String.raw`)\s*$`,
+  'iu',
+);
 
 function parsePriceText(raw: string): PriceItem[] {
   const t = raw.trim();
@@ -41,9 +52,16 @@ function parsePriceText(raw: string): PriceItem[] {
   const items: PriceItem[] = [];
 
   for (const chunk of chunks) {
+    const range = chunk.match(RANGE_RE);
+    if (range) {
+      const label = (range[1] || '').replace(/[:\-–]\s*$/, '').trim() || 'Eintritt';
+      items.push({ label, value: `€ ${range[2]} – € ${range[3]}` });
+      continue;
+    }
+
     const m = chunk.match(PRICE_RE);
     if (m) {
-      const num = m[2] ?? m[3] ?? m[4];
+      const num = m[2] ?? m[3];
       const label = (m[1] || '').replace(/[:\-–]\s*$/, '').trim() || 'Eintritt';
       items.push({ label, value: `€ ${num}` });
     } else {
