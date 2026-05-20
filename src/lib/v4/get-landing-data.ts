@@ -4,6 +4,9 @@ import type { Festival } from '@/types/festivals';
 import { deriveEventState, type V4EventState } from './derive-event-state';
 import type { LandingContext } from './get-landing-context';
 import { buildEventUrlV2 } from '@/lib/utils/slugify';
+import overridesJson from '../../../data/festival-overrides.json';
+
+const FESTIVAL_OVERRIDES = overridesJson as Record<string, { imageUrl?: string | null }>;
 
 export interface LandingArtist {
   name: string;
@@ -171,7 +174,10 @@ export async function getLandingData(ctx: LandingContext): Promise<LandingData> 
     return {
       ...(rest as Festival),
       lineupMatch: false, // Phase 2 best-effort — see fn-docstring above
-      image_url: parentEvent?.image_url ?? festivalCategoryFallback(f.id),
+      image_url:
+        parentEvent?.image_url
+        ?? FESTIVAL_OVERRIDES[f.slug]?.imageUrl
+        ?? festivalCategoryFallback(f.id),
       href,
     };
   });
