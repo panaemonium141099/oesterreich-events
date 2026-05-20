@@ -3,6 +3,7 @@ import { BaseScraper } from './BaseScraper';
 import { categorizeEvent } from '../categorize';
 import { GEM2GO_GEMEINDEN, type Gem2GoGemeinde } from './gemeinden/gem2goGemeinden';
 import { extractGem2goDetail } from './gem2go-detail';
+import { discoverAndParseGemeindeEvents, asScrapedEvent } from './gemeinde-event-discovery';
 import type { ScrapedEvent } from '@/types/events';
 
 /**
@@ -66,15 +67,29 @@ export class Gem2GoScraper extends BaseScraper {
         const html = await this.fetchWithTimeout(baseUrl, this.timeoutMs);
 
         if (!html) {
-          gemeindenFailed++;
-          this.log(`[${i + 1}/${GEM2GO_GEMEINDEN.length}] ${gemeinde.name}: FETCH-FAIL`);
+          // gem2go URL didn't respond — site may have migrated to WordPress/TYPO3.
+          // Fall back to homepage-based event discovery + universal parser.
+          const fb = await this.tryFallbackDiscovery(gemeinde, i);
+          if (fb.length > 0) {
+            allEvents.push(...fb);
+            gemeindenScraped++;
+          } else {
+            gemeindenFailed++;
+          }
           continue;
         }
 
         // Check if this is actually a GEM2GO site
         if (!this.isGem2GoPage(html)) {
-          gemeindenNotGem2Go++;
-          this.log(`[${i + 1}/${GEM2GO_GEMEINDEN.length}] ${gemeinde.name}: KEIN GEM2GO Layout`);
+          // Site exists but isn't gem2go — likely migrated. Try fallback.
+          const fb = await this.tryFallbackDiscovery(gemeinde, i);
+          if (fb.length > 0) {
+            allEvents.push(...fb);
+            gemeindenScraped++;
+          } else {
+            gemeindenNotGem2Go++;
+            this.log(`[${i + 1}/${GEM2GO_GEMEINDEN.length}] ${gemeinde.name}: KEIN GEM2GO Layout + Fallback ohne Events`);
+          }
           continue;
         }
 
@@ -133,6 +148,37 @@ export class Gem2GoScraper extends BaseScraper {
     this.log(`Fertig: ${allEvents.length} Events von ${gemeindenScraped} Gemeinden`);
     this.log(`  ${gemeindenFailed} fehlgeschlagen, ${gemeindenNoEvents} ohne Events, ${gemeindenNotGem2Go} kein GEM2GO`);
     return allEvents;
+  }
+
+  // ─── FALLBACK DISCOVERY (non-gem2go gemeinden) ─────────────────────────────
+
+  /**
+   * When the gem2go URL fails or the page isn't gem2go, try to discover the
+   * actual event page on the gemeinde homepage and parse it with the universal
+   * extractor. Returns events with source_name='gemeinde-fallback' so they
+   * can be distinguished in DB / dedup logic. Errors swallowed.
+   */
+  private async tryFallbackDiscovery(
+    gemeinde: Gem2GoGemeinde,
+    i: number,
+  ): Promise<ScrapedEvent[]> {
+    try {
+      const { events: parsed, eventListUrl } = await discoverAndParseGemeindeEvents(gemeinde.website);
+      if (!eventListUrl) {
+        this.log(`[${i + 1}/${GEM2GO_GEMEINDEN.length}] ${gemeinde.name}: FETCH-FAIL (kein event-URL discoverable)`);
+        return [];
+      }
+      if (parsed.length === 0) {
+        this.log(`[${i + 1}/${GEM2GO_GEMEINDEN.length}] ${gemeinde.name}: Fallback URL gefunden (${eventListUrl}) aber 0 events parsed`);
+        return [];
+      }
+      const scraped = parsed.map((p) => asScrapedEvent(p, gemeinde));
+      this.log(`[${i + 1}/${GEM2GO_GEMEINDEN.length}] ${gemeinde.name}: ${scraped.length} Events via FALLBACK (${eventListUrl})`);
+      return scraped;
+    } catch (err) {
+      this.log(`[${i + 1}/${GEM2GO_GEMEINDEN.length}] ${gemeinde.name}: Fallback-Exception (${(err as Error).message?.slice(0, 60)})`);
+      return [];
+    }
   }
 
   // ─── DETAIL-PAGE ENRICHMENT ────────────────────────────────────────────────
