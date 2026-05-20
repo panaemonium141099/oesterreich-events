@@ -55,24 +55,52 @@ function EntdeckenInner() {
   // Mirror mode back into URL — list-Modus default unparametrisiert
   // damit /entdecken eine saubere URL hat. Smart-Modus persistiert
   // ?mode=smart und optional ?q=<query>.
+  //
+  // CRITICAL: must START from the current URL (search.toString()) and
+  // only TOGGLE mode/q. Earlier this effect built `next` from scratch,
+  // which on mount stripped search/district/category/bl from the URL
+  // every time — invisible bug as long as filters were only seeded on
+  // mount, but it kills any URL→state sync we layer on top.
   useEffect(() => {
-    const next = new URLSearchParams();
+    const next = new URLSearchParams(search.toString());
     if (mode === 'smart') {
       next.set('mode', 'smart');
       if (initialQuery) next.set('q', initialQuery);
+      else next.delete('q');
+    } else {
+      next.delete('mode');
+      next.delete('q');
     }
     const qs = next.toString();
+    // No-op guard — avoids a router.replace when nothing actually
+    // changed (which would be a useless re-render on every mount).
+    if (qs === search.toString()) return;
     router.replace(`${pathname}${qs ? '?' + qs : ''}`, { scroll: false });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mode]);
 
   const onModeChange = useCallback((next: V4EntdeckenMode) => { setMode(next); }, []);
 
+  // V4EntdeckenListMode seeds its filter state from initialFilters via
+  // useState — only on mount. Subsequent URL changes (e.g. the user
+  // submits a new search from the top-nav while already on /entdecken)
+  // would otherwise leave the result list pinned to the previous query.
+  // Keying the component on the URL-driven inputs forces React to remount
+  // it whenever any of them changes, which re-runs the useState initialiser
+  // with fresh values and re-triggers the fetch effect downstream.
+  const listModeKey = [
+    initialBlParam ?? '',
+    initialFilters?.search ?? '',
+    initialFilters?.district ?? '',
+    initialFilters?.category ?? '',
+  ].join('|');
+
   return (
     <div className="min-h-screen bg-[var(--v4-surface)] text-[var(--v4-ink)]">
       <V4EntdeckenHero mode={mode} onModeChange={onModeChange}/>
       {mode === 'list' ? (
         <V4EntdeckenListMode
+          key={listModeKey}
           initialBundeslandIds={initialBundeslandIds}
           initialFilters={initialFilters}
         />

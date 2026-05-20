@@ -116,7 +116,10 @@ export function V4EntdeckenSmartMode({ initialQuery = '' }: V4EntdeckenSmartMode
   }
 
   useEffect(() => {
-    if (initialQuery && !result && !loading) {
+    // Re-run on every initialQuery change. The previous `!result && !loading`
+    // guard blocked re-search after the first result loaded, so a second
+    // submit from the top-nav left the list pinned to the first query.
+    if (initialQuery) {
       runSearch(initialQuery);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps

@@ -65,4 +65,31 @@ describe('V4EntdeckenSmartMode', () => {
     const body = JSON.parse(String(fetchMock.mock.calls[0][1]?.body ?? '{}'));
     expect(body.query).toBe('preset');
   });
+
+  it('reruns search when initialQuery changes (URL-driven re-search)', async () => {
+    // Generic impl so strict-mode double-invocation doesn't break the assertion.
+    fetchMock.mockImplementation(async (_url: string, init: RequestInit) => {
+      const body = JSON.parse(String(init?.body ?? '{}'));
+      return {
+        ok: true,
+        json: async () => ({
+          query: body.query,
+          parsed: { embedded_text: body.query, after_date: null, before_date: null, max_price_tier: null, signals: [] },
+          matches: [],
+          count: 0,
+        }),
+      };
+    });
+
+    const { rerender } = render(<V4EntdeckenSmartMode initialQuery="eisenstadt"/>);
+    await waitFor(() => expect(fetchMock).toHaveBeenCalled());
+    const callsBeforeRerender = fetchMock.mock.calls.length;
+
+    rerender(<V4EntdeckenSmartMode initialQuery="wiesmath"/>);
+    await waitFor(() => {
+      expect(fetchMock.mock.calls.length).toBeGreaterThan(callsBeforeRerender);
+      const lastBody = JSON.parse(String(fetchMock.mock.calls.at(-1)?.[1]?.body ?? '{}'));
+      expect(lastBody.query).toBe('wiesmath');
+    });
+  });
 });
