@@ -318,12 +318,15 @@ export function applyRegexFallbacks(out: DetailEnrichment, $?: CheerioAPI): void
   normalizePriceText(out);
 
   let text = out.description ?? '';
-  if (text.length < 80 && $ && !out.address && !out.postal_code) {
-    const $main = $('main, article, .main-content, #content, .event-detail, .entry-content').first();
-    if ($main.length) {
-      const body = $main.text().replace(/\s+/g, ' ').trim();
-      if (body.length > 30 && body.length < 5000) {
-        text = (text + ' ' + body).slice(0, 5000);
+  // When the description already exists (e.g. via og:description) but no
+  // address was found, still scan the visible body/footer — many gem2go
+  // and gemeinde sites put the venue address in a footer "Anschrift" block.
+  if ($ && !out.address) {
+    const $bodyParts = $('main, article, .main-content, #content, .event-detail, .entry-content, footer, .g_anschrift, .anschrift');
+    if ($bodyParts.length) {
+      const body = $bodyParts.map((_, el) => $(el).text()).get().join(' ').replace(/\s+/g, ' ').trim();
+      if (body.length > 30 && body.length < 10000) {
+        text = (text + ' ' + body).slice(0, 10000);
       }
     }
   }
@@ -337,6 +340,18 @@ export function applyRegexFallbacks(out: DetailEnrichment, $?: CheerioAPI): void
     const m = text.match(LABELED_ADDRESS_REGEX);
     if (m) {
       const value = m[1].trim();
+      // Try compact pattern first: "Street Nr 1234 City" or "Word Nr 1234 City"
+      // — common when source HTML used <br> separators that collapsed.
+      // Single-word street (anchor on uppercase-word + suffix, no internal spaces)
+      // to avoid greedy multi-word matches like "Gemeinde Doren Kirchdorf".
+      const compact = value.match(/\b([A-ZÄÖÜ][A-Za-zäöüß\-]+(?:straße|strasse|gasse|platz|weg|allee|ring|markt|hof|berg|dorf|park))\s+(\d+[a-zA-Z]?)\s+(\d{4})\s+([A-ZÄÖÜ][A-Za-zäöüß\-]+)/u)
+        ?? value.match(/(?:^|[^A-Za-zäöüß])([A-ZÄÖÜ][A-Za-zäöüß\-]{2,})\s+(\d+[a-zA-Z]?)\s+(\d{4})\s+([A-ZÄÖÜ][A-Za-zäöüß\-]+)/u);
+      if (compact) {
+        out.address = `${compact[1].trim()} ${compact[2]}`;
+        if (!out.postal_code) out.postal_code = compact[3];
+        if (!out.address_locality) out.address_locality = compact[4].trim();
+        return; // done — best match
+      }
       const parts = value.split(',').map((s) => s.trim()).filter(Boolean);
       if (parts.length === 1 && /\d/.test(parts[0]) && parts[0].length >= 4 && parts[0].length <= 80) {
         out.address = parts[0];
