@@ -68,6 +68,14 @@ export class FalterScraper extends BaseScraper {
     }
 
     this.log(`${events.length} Events gescrapt, ${venueCache.size} Venues geocodiert`);
+
+    // Detail-page enrichment via the shared extractor. Falter pages carry
+    // Schema.org microdata with streetAddress — universal-only achieves
+    // ~100% address coverage. See spec §7.
+    if (events.length > 0) {
+      const summary = await this.enrichFromDetail(events);
+      this.log(`detail-enrich: ${JSON.stringify(summary)}`);
+    }
     return events;
   }
 
