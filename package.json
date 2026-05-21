@@ -47,6 +47,8 @@
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "openai-geocode": "tsx --env-file=.env.local src/scripts/openai-geocode.ts",
+    "probe:adapter": "tsx --env-file=.env.local src/scripts/probe-adapter.ts",
+    "backfill:detail": "tsx --env-file=.env.local src/scripts/backfill-detail-enrich.ts",
     "categorize-events": "tsx --env-file=.env.local src/scripts/categorize-events.ts",
     "classifier-audit": "tsx --env-file=.env.local src/scripts/classifier-audit.ts",
     "submit-indexing": "tsx --env-file=.env.local src/scripts/submit-to-indexing.ts",
