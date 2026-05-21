@@ -2,9 +2,11 @@
 // Source-name → Adapter lookup. See spec §3.
 
 import type { Adapter } from './types';
+import { gem2goAdapter } from './adapters/gem2go';
 
-const ADAPTERS: Adapter[] = [];
+const ADAPTERS: Adapter[] = [gem2goAdapter];
 const BY_NAME = new Map<string, Adapter>();
+for (const a of ADAPTERS) for (const n of a.sourceNames) BY_NAME.set(n, a);
 
 export function getAdapter(sourceName: string): Adapter | null {
   return BY_NAME.get(sourceName) ?? null;
