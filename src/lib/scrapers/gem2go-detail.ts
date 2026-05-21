@@ -93,6 +93,73 @@ function applyJsonLd($: cheerio.CheerioAPI, out: DetailEnrichment): void {
     const orgName = stripHtml(event.organizer.name);
     if (orgName) out.organizer = orgName;
   }
+
+  // offers.price — many Schema.org Event pages publish ticket pricing here.
+  // Shape can be: object, array of offers, or AggregateOffer with lowPrice/highPrice.
+  const offers = event.offers;
+  if (offers) {
+    applyOffers(offers, out);
+  }
+}
+
+function applyOffers(offers: JsonLdOffer | JsonLdOffer[], out: DetailEnrichment): void {
+  const list = Array.isArray(offers) ? offers : [offers];
+  let min: number | undefined;
+  let max: number | undefined;
+  const labels: string[] = [];
+  for (const o of list) {
+    // AggregateOffer
+    if (typeof o.lowPrice !== 'undefined') {
+      const n = toNumber(o.lowPrice);
+      if (n !== null) min = min === undefined ? n : Math.min(min, n);
+    }
+    if (typeof o.highPrice !== 'undefined') {
+      const n = toNumber(o.highPrice);
+      if (n !== null) max = max === undefined ? n : Math.max(max, n);
+    }
+    // Single Offer
+    if (typeof o.price !== 'undefined') {
+      const n = toNumber(o.price);
+      if (n !== null) {
+        min = min === undefined ? n : Math.min(min, n);
+        max = max === undefined ? n : Math.max(max, n);
+        const cat = typeof o.name === 'string' ? o.name.trim() : '';
+        labels.push(cat ? `${cat} €${n}` : `€${n}`);
+      }
+    }
+  }
+  if (min !== undefined && !out.price_min) out.price_min = min;
+  if (max !== undefined && !out.price_max) out.price_max = max;
+  if (!out.price_text) {
+    if (labels.length > 0) {
+      out.price_text = labels.join(' / ');
+    } else if (min !== undefined && max !== undefined) {
+      out.price_text = min === max ? formatEuro(min) : `${formatEuro(min)} – ${formatEuro(max)}`;
+    } else if (min !== undefined) {
+      out.price_text = `ab ${formatEuro(min)}`;
+    }
+  }
+}
+
+function toNumber(v: unknown): number | null {
+  if (typeof v === 'number') return isFinite(v) && v >= 0 && v <= 10000 ? v : null;
+  if (typeof v === 'string') {
+    const m = v.replace(',', '.').match(/(\d+(?:\.\d+)?)/);
+    if (m) {
+      const n = parseFloat(m[1]);
+      if (!isNaN(n) && n >= 0 && n <= 10000) return n;
+    }
+  }
+  return null;
+}
+
+interface JsonLdOffer {
+  '@type'?: string;
+  price?: string | number;
+  lowPrice?: string | number;
+  highPrice?: string | number;
+  priceCurrency?: string;
+  name?: string;
 }
 
 interface JsonLdEvent {
@@ -101,6 +168,7 @@ interface JsonLdEvent {
   image?: string | string[];
   location?: JsonLdPlace | JsonLdPlace[];
   organizer?: { name?: string };
+  offers?: JsonLdOffer | JsonLdOffer[];
 }
 
 interface JsonLdPlace {
@@ -296,6 +364,14 @@ function applyOgMeta($: cheerio.CheerioAPI, out: DetailEnrichment): void {
 // street number exists. We'd rather miss a few than emit garbage addresses that
 // users would try to route to.
 const ADDRESS_REGEX = /([A-ZÄÖÜ][A-Za-zäöüß.\- ]+?(?:straße|strasse|gasse|platz|weg|allee|ring|markt))\s+(\d+[a-zA-Z]?)(?=[,\s\n])/u;
+
+// Rural Austrian addresses: many villages don't have street names — the address
+// is just "Dorf 22" or the village name + house number. To avoid false positives
+// (the regex would match "Mai 2026" otherwise), only match when label-prefixed.
+const LABELED_ADDRESS_REGEX = /(?:Adresse|Anschrift|Wo|Treffpunkt|Veranstaltungsort)\s*[:\-]\s*([^\n,;]{4,80})/iu;
+
+// Labeled price patterns — covers most German/Austrian event-page conventions.
+const LABELED_PRICE_REGEX = /(?:Eintritt|Kosten|Preis|Gebühr|Teilnahmegebühr|Kursgebühr|Kosten?beitrag|Tickets?)\s*[:\-]\s*((?:€\s*)?\d+(?:[.,]\d{1,2})?(?:\s*€)?(?:\s*[-–]\s*\d+(?:[.,]\d{1,2})?\s*€?)?|frei|kostenlos|gratis|kostenfrei|Spende[^\n;]*)/iu;
 // PLZ + Stadt: only allow a SECOND word if the first is a known multi-word city
 // prefix (Bad, Sankt, St., Wiener, Klein, Groß, Ober, Unter, Nieder). Otherwise
 // match a single word — prevents "3040 Neulengbach Begleitung" greed.
@@ -319,6 +395,20 @@ function applyRegexFallbacks(out: DetailEnrichment): void {
       out.address = `${m[1].trim()} ${m[2]}`;
     }
   }
+  // Label-prefixed address — catches "Adresse: ...", "Wo: ...", "Treffpunkt: ..."
+  // Works for rural addresses that don't fit the street-suffix regex
+  // ("Dorf 22, Hauptplatz 1, Markt 14").
+  if (!out.address && text) {
+    const m = text.match(LABELED_ADDRESS_REGEX);
+    if (m) {
+      const candidate = m[1].trim();
+      // Must contain at least one digit (a house number, PLZ, or door number)
+      // — otherwise it's just a venue name we already have as location_name
+      if (/\d/.test(candidate) && candidate.length >= 4 && candidate.length <= 80) {
+        out.address = candidate;
+      }
+    }
+  }
 
   if ((!out.postal_code || !out.address_locality) && text) {
     const m = text.match(PLZ_CITY_REGEX);
@@ -328,7 +418,34 @@ function applyRegexFallbacks(out: DetailEnrichment): void {
     }
   }
 
-  // Price patterns
+  // Price patterns — labeled first (most reliable), then free/donation, then
+  // generic euro mentions inside the description.
+  if (!out.price_text && text) {
+    const labeled = text.match(LABELED_PRICE_REGEX);
+    if (labeled) {
+      const valRaw = labeled[1].trim();
+      if (/^(frei|kostenlos|gratis|kostenfrei)$/i.test(valRaw)) {
+        out.price_text = 'Eintritt frei';
+        out.price_min = 0;
+        out.price_max = 0;
+      } else if (/spende/i.test(valRaw)) {
+        out.price_text = valRaw.slice(0, 60);
+        out.price_min = 0;
+      } else {
+        // Numeric — could be "10", "10,50", "10-15", "€10", "10€"
+        const nums = valRaw.match(/(\d+(?:[.,]\d{1,2})?)/g);
+        if (nums && nums.length > 0) {
+          const min = parseFloat(nums[0].replace(',', '.'));
+          const max = nums[1] ? parseFloat(nums[1].replace(',', '.')) : min;
+          if (!isNaN(min) && min >= 0 && min <= 500 && !isNaN(max)) {
+            out.price_min = min;
+            out.price_max = max;
+            out.price_text = min === max ? formatEuro(min) : `${formatEuro(min)} – ${formatEuro(max)}`;
+          }
+        }
+      }
+    }
+  }
   if (!out.price_text && text) {
     if (FREE_PATTERNS.test(text)) {
       out.price_text = 'Eintritt frei';
