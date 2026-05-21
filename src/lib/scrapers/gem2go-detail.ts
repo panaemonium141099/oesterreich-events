@@ -296,28 +296,72 @@ function applyVerticalTable($: cheerio.CheerioAPI, out: DetailEnrichment): void 
     const $row = $(row);
     const label = $row.find('th').first().text().trim();
     if (!label) return;
-    const value = $row.find('td').first().text().trim().replace(/\s+/g, ' ');
-    if (!value) return;
+
+    // Read cell as discrete segments — block-level tags become newline
+    // separators so we can distinguish "Sportplatz Mönchdorf" from
+    // "Greinerwaldstraße 7" from "4281 Mönchdorf" instead of getting one
+    // smushed string.
+    const rawHtml = $row.find('td').first().html() ?? '';
+    const segments = rawHtml
+      .replace(/<br\s*\/?>/gi, '\n')
+      .replace(/<\/(p|div|span|li|h[1-6])>/gi, '\n')
+      .replace(/<[^>]+>/g, '')
+      .replace(/&nbsp;/g, ' ')
+      .replace(/&amp;/g, '&')
+      .split('\n')
+      .map((s) => s.trim())
+      .filter(Boolean);
+    if (segments.length === 0) return;
+    const joinedValue = segments.join(' | ');
 
     for (const { labels, field } of LABEL_FIELD_MAP) {
       if (!labels.test(label)) continue;
-      // Only fill if currently empty — JSON-LD / va-adr already took precedence
-      if (out[field] === undefined) {
-        (out as Record<string, unknown>)[field] = value;
+
+      // Ort/Veranstaltungsort/Adresse cells often pack venue + street + PLZ+city
+      // into one block. Parse each segment.
+      if (field === 'location_name' || field === 'address') {
+        parseLocationSegments(segments, out);
       }
-      // Also try to derive postal_code + locality from an address row that
-      // contains "1234 Stadt"
-      if (field === 'address') {
-        const m = value.match(PLZ_CITY_REGEX);
-        if (m) {
-          if (!out.postal_code) out.postal_code = m[1];
-          if (!out.address_locality) out.address_locality = m[2];
+
+      if (out[field] === undefined) {
+        if (field === 'location_name') {
+          // First segment is venue name
+          if (segments[0]) (out as Record<string, unknown>)[field] = segments[0];
+        } else if (field === 'address') {
+          // For an explicit Adresse cell, prefer the segment that looks like
+          // a street ("Word Nr"); fall back to first segment.
+          const streetSeg = segments.find((s) => /\d/.test(s) && !/^\d{4}\s/.test(s));
+          if (streetSeg) (out as Record<string, unknown>)[field] = streetSeg;
+          else (out as Record<string, unknown>)[field] = joinedValue;
+        } else {
+          (out as Record<string, unknown>)[field] = joinedValue;
         }
       }
       break;
     }
   });
 }
+
+function parseLocationSegments(segments: string[], out: DetailEnrichment): void {
+  for (const p of segments) {
+    const pm = p.match(/^(\d{4})\s+([A-ZÄÖÜ][A-Za-zäöüß\-\s]+)$/u);
+    if (pm) {
+      if (!out.postal_code) out.postal_code = pm[1];
+      if (!out.address_locality) out.address_locality = pm[2].trim();
+      continue;
+    }
+    const sm = p.match(/^([A-ZÄÖÜ][A-Za-zäöüß.\- ]+?(?:straße|strasse|gasse|platz|weg|allee|ring|markt))\s+(\d+[a-zA-Z]?)$/u);
+    if (sm) {
+      if (!out.address) out.address = `${sm[1]} ${sm[2]}`;
+      continue;
+    }
+    const fm = p.match(/^([A-ZÄÖÜ][A-Za-zäöüß\-]{2,})\s+(\d+[a-zA-Z]?)$/u);
+    if (fm && !out.address) {
+      out.address = `${fm[1]} ${fm[2]}`;
+    }
+  }
+}
+
 
 // Free-text price normalization: "Eintritt frei" / numeric → price_min/max
 function normalizePriceText(out: DetailEnrichment): void {
