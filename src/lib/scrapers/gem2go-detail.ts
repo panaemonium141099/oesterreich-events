@@ -44,7 +44,7 @@ export function extractGem2goDetail(html: string): DetailEnrichment {
   applyCssSelectors($, out);
   applyVerticalTable($, out);
   applyOgMeta($, out);
-  applyRegexFallbacks(out);
+  applyRegexFallbacks(out, $);
 
   // Normalize: empty strings → undefined
   for (const k of Object.keys(out) as Array<keyof DetailEnrichment>) {
@@ -412,7 +412,10 @@ const ADDRESS_REGEX = /([A-ZÄÖÜ][A-Za-zäöüß.\- ]+?(?:straße|strasse|gass
 // Rural Austrian addresses: many villages don't have street names — the address
 // is just "Dorf 22" or the village name + house number. To avoid false positives
 // (the regex would match "Mai 2026" otherwise), only match when label-prefixed.
-const LABELED_ADDRESS_REGEX = /(?:Adresse|Anschrift|Wo|Treffpunkt|Veranstaltungsort)\s*[:\-]\s*([^\n,;]{4,80})/iu;
+// "Ort:" added (catches Joomla event-list pages like gemeinde-telfes.at) but
+// allow longer match-string and commas since some sites format as
+// "Ort: Venue, Street Nr, PLZ City" — we'll parse the comma-separated parts.
+const LABELED_ADDRESS_REGEX = /(?:Adresse|Anschrift|Wo|Treffpunkt|Veranstaltungsort|Ort)\s*[:\-]\s*([^\n;]{4,160})/iu;
 
 // Labeled price patterns — covers most German/Austrian event-page conventions.
 const LABELED_PRICE_REGEX = /(?:Eintritt|Kosten|Preis|Gebühr|Teilnahmegebühr|Kursgebühr|Kosten?beitrag|Tickets?)\s*[:\-]\s*((?:€\s*)?\d+(?:[.,]\d{1,2})?(?:\s*€)?(?:\s*[-–]\s*\d+(?:[.,]\d{1,2})?\s*€?)?|frei|kostenlos|gratis|kostenfrei|Spende[^\n;]*)/iu;
@@ -425,11 +428,25 @@ const FREE_PATTERNS = /eintritt\s+frei|frei(?:er)?\s+eintritt|gratis|kostenlos|k
 const DONATION_PATTERNS = /spende\s*(?:nbasis|n\s+erbeten|n\s+willkommen)?|freiwillige[sn]?\s+(?:beitrag|spende|eintritt)/i;
 const EURO_REGEX = /(?:eintritt|kosten|preis|gebühr|teilnahmegebühr|kursgebühr|kurskosten)\s*[:\-]?\s*€?\s*(\d{1,3}(?:[.,]\d{1,2})?)/i;
 
-function applyRegexFallbacks(out: DetailEnrichment): void {
+function applyRegexFallbacks(out: DetailEnrichment, $?: cheerio.CheerioAPI): void {
   // Normalize a price that came from the verticaltable layer
   normalizePriceText(out);
 
-  const text = out.description ?? '';
+  // Primary text: extracted description. Optional fallback: scan a tight
+  // event-content area for labeled patterns when description is empty AND
+  // no address was found by structured extractors. We intentionally avoid
+  // scanning the full body — sites like obernberg.at have menu / footer
+  // text that produces garbage address matches.
+  let text = out.description ?? '';
+  if (text.length < 80 && $ && !out.address && !out.postal_code) {
+    const $main = $('main, article, .main-content, #content, .event-detail, .entry-content').first();
+    if ($main.length) {
+      const body = $main.text().replace(/\s+/g, ' ').trim();
+      if (body.length > 30 && body.length < 5000) {
+        text = (text + ' ' + body).slice(0, 5000);
+      }
+    }
+  }
 
   // Address from description text — only as last resort. Regex requires a
   // house number so we never emit street-name-only matches.
@@ -440,25 +457,73 @@ function applyRegexFallbacks(out: DetailEnrichment): void {
     }
   }
   // Label-prefixed address — catches "Adresse: ...", "Wo: ...", "Treffpunkt: ..."
-  // Works for rural addresses that don't fit the street-suffix regex
-  // ("Dorf 22, Hauptplatz 1, Markt 14").
+  // "Ort: Venue, Street Nr, PLZ City" gets split by commas and classified.
   if (!out.address && text) {
     const m = text.match(LABELED_ADDRESS_REGEX);
     if (m) {
-      const candidate = m[1].trim();
-      // Must contain at least one digit (a house number, PLZ, or door number)
-      // — otherwise it's just a venue name we already have as location_name
-      if (/\d/.test(candidate) && candidate.length >= 4 && candidate.length <= 80) {
-        out.address = candidate;
+      const value = m[1].trim();
+      const parts = value.split(',').map((s) => s.trim()).filter(Boolean);
+      if (parts.length === 1 && /\d/.test(parts[0]) && parts[0].length >= 4 && parts[0].length <= 80) {
+        out.address = parts[0];
+      } else if (parts.length >= 2) {
+        // Classify each part like the verticaltable Ort parser
+        for (const p of parts) {
+          const pm = p.match(/^(\d{4})\s+([A-ZÄÖÜ][A-Za-zäöüß\-\s]+)$/u);
+          if (pm) {
+            if (!out.postal_code) out.postal_code = pm[1];
+            if (!out.address_locality) out.address_locality = pm[2].trim();
+            continue;
+          }
+          // PLZ alone (no city) — e.g. "6165"
+          if (/^\d{4}$/.test(p)) {
+            if (!out.postal_code) out.postal_code = p;
+            continue;
+          }
+          // Street with number
+          const sm = p.match(/^([A-ZÄÖÜ][A-Za-zäöüß.\- ]+?(?:straße|strasse|gasse|platz|weg|allee|ring|markt))\s+(\d+[a-zA-Z]?)$/u);
+          if (sm) {
+            if (!out.address) out.address = `${sm[1]} ${sm[2]}`;
+            continue;
+          }
+          // Rural "Word Nr"
+          const fm = p.match(/^([A-ZÄÖÜ][A-Za-zäöüß\-]{2,})\s+(\d+[a-zA-Z]?)$/u);
+          if (fm && !out.address) {
+            out.address = `${fm[1]} ${fm[2]}`;
+            continue;
+          }
+          // First part might be just venue — use as location_name fallback
+          if (!out.location_name && p.length > 3 && !/^\d/.test(p)) {
+            out.location_name = p;
+          }
+        }
+        // If we found PLZ + Locality but no street, still set address to
+        // the first non-PLZ non-city part with digits
+        if (!out.address) {
+          const candidate = parts.find((p) => /\d/.test(p) && !/^\d{4}\b/.test(p));
+          if (candidate) out.address = candidate;
+        }
       }
     }
   }
 
   if ((!out.postal_code || !out.address_locality) && text) {
-    const m = text.match(PLZ_CITY_REGEX);
-    if (m) {
-      if (!out.postal_code) out.postal_code = m[1];
-      if (!out.address_locality) out.address_locality = m[2];
+    // Walk all matches and pick the first that's NOT a year+label false-positive
+    // ("2026 Ort", "2025 Datum", "2027 Wann" etc.). Year filter: 2020-2030 are
+    // mostly years in event-page context — Austrian PLZ in that range are rare
+    // and the false-positive rate is too high to keep them.
+    const re = new RegExp(PLZ_CITY_REGEX.source, 'gu');
+    const labelWords = /^(Ort|Termin|Datum|Wann|Wo|Zeit|Uhr|Adresse|Kontakt|Veranstalter|Beitrag|Gebühr|Eintritt|Preis|Kosten)$/i;
+    let mm: RegExpExecArray | null;
+    while ((mm = re.exec(text)) !== null) {
+      const plz = mm[1];
+      const city = mm[2].trim();
+      // Reject year-like PLZ in the year range that almost always = date
+      if (parseInt(plz, 10) >= 2024 && parseInt(plz, 10) <= 2030) continue;
+      // Reject label-words as city
+      if (labelWords.test(city)) continue;
+      if (!out.postal_code) out.postal_code = plz;
+      if (!out.address_locality) out.address_locality = city;
+      break;
     }
   }
 
