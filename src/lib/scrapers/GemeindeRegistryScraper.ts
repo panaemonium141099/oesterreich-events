@@ -7,6 +7,7 @@ import { categorizeEvent } from '../categorize';
 import { detectNextPage, detectMonthNavigation, MAX_PAGES_PER_SITE } from './pagination';
 import type { ScrapedEvent } from '@/types/events';
 import { isEventType } from '../connectors/json-ld-connector';
+import { extractGem2goDetail } from './gem2go-detail';
 
 export interface PaginationLogEntry {
   gemeinde: string;
@@ -203,7 +204,45 @@ export class GemeindeRegistryScraper extends BaseScraper {
       eventsTotal: events.length,
     });
 
+    // Detail-fetch enrichment — same pattern as Gem2GoScraper. Universal
+    // extractor handles JSON-LD/og-meta/regex layers regardless of CMS.
+    if (this.enrichFromDetail && events.length > 0) {
+      await this.enrichEventsFromDetailPages(events, entry.eventUrl);
+    }
+
     return events;
+  }
+
+  /** Detail-fetch toggle. ON by default. */
+  private readonly enrichFromDetail = true;
+  private readonly detailDelayMs = 250;
+
+  private async enrichEventsFromDetailPages(events: ScrapedEvent[], listingUrl: string): Promise<void> {
+    for (const e of events) {
+      const url = e.source_url;
+      if (!url || url === listingUrl) continue;
+      try {
+        const { html } = await this.fetchWithTimeout(url);
+        if (!html) continue;
+        const det = extractGem2goDetail(html);
+        if (det.address) e.address = det.address;
+        if (det.postal_code) e.postal_code = det.postal_code;
+        if (det.location_name && (!e.location_name || e.location_name.length < det.location_name.length)) {
+          e.location_name = det.location_name;
+        }
+        if (det.image_url) e.image_url = det.image_url;
+        if (!e.description || (det.description && e.description.length < det.description.length)) {
+          if (det.description) e.description = det.description;
+        }
+        if (!e.price_text && det.price_text) e.price_text = det.price_text;
+        if (e.price_min === undefined && det.price_min !== undefined) e.price_min = det.price_min;
+        if (e.price_max === undefined && det.price_max !== undefined) e.price_max = det.price_max;
+        if (!e.organizer && det.organizer) e.organizer = det.organizer;
+      } catch {
+        // per-event errors swallowed
+      }
+      await this.sleep(this.detailDelayMs);
+    }
   }
 
   private parsePage(html: string, entry: GemeindeRegistryEntry): ScrapedEvent[] {

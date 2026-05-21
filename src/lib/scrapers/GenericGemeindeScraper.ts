@@ -18,6 +18,7 @@ import * as cheerio from 'cheerio';
 import { readFileSync, existsSync } from 'fs';
 import { join } from 'path';
 import { detectNextPage, detectMonthNavigation, MAX_PAGES_PER_SITE } from './pagination';
+import { extractGem2goDetail } from './gem2go-detail';
 
 interface GemeindeEventPage {
   gemeinde: {
@@ -145,6 +146,14 @@ export class GenericGemeindeScraper extends BaseScraper {
       }
     }
 
+    // Detail-page enrichment: fetch each event's source_url and pull
+    // description/address/image/price out via the universal extractor.
+    // Listing parsers above tend to capture only title + date + small teaser;
+    // the detail page usually has the full event. Same approach as Gem2GoScraper.
+    if (this.enrichFromDetail) {
+      await this.enrichEventsFromDetailPages(allEvents, page.eventPageUrl);
+    }
+
     // Enrich with gemeinde metadata
     return allEvents.map(e => ({
       ...e,
@@ -154,6 +163,49 @@ export class GenericGemeindeScraper extends BaseScraper {
       postal_code: e.postal_code || g.plz,
       district: e.district || g.bezirk,
     }));
+  }
+
+  /** Detail-fetch toggle. ON by default — listing-level data is usually too thin. */
+  private readonly enrichFromDetail = true;
+  /** Delay between detail-page fetches within the same gemeinde (ms). */
+  private readonly detailDelayMs = 250;
+  /** Per-detail-page fetch timeout. */
+  private readonly detailTimeoutMs = 8000;
+
+  /**
+   * For each event with a distinct source_url, fetch the detail page and
+   * merge the universal extractor's findings. Detail values win for structural
+   * fields (address, postal_code, location_name, image_url) — listing parsers
+   * often concatenate sub-spans without separators. Description merges by
+   * "longer wins". Errors swallowed per-event.
+   */
+  private async enrichEventsFromDetailPages(events: ScrapedEvent[], listingUrl: string): Promise<void> {
+    for (const e of events) {
+      const url = e.source_url;
+      if (!url || url === listingUrl) continue;
+      try {
+        const html = await this.fetchPageSafe(url);
+        if (!html) continue;
+        const det = extractGem2goDetail(html);
+
+        if (det.address) e.address = det.address;
+        if (det.postal_code) e.postal_code = det.postal_code;
+        if (det.location_name && (!e.location_name || e.location_name.length < det.location_name.length)) {
+          e.location_name = det.location_name;
+        }
+        if (det.image_url) e.image_url = det.image_url;
+        if (!e.description || (det.description && e.description.length < det.description.length)) {
+          if (det.description) e.description = det.description;
+        }
+        if (!e.price_text && det.price_text) e.price_text = det.price_text;
+        if (e.price_min === undefined && det.price_min !== undefined) e.price_min = det.price_min;
+        if (e.price_max === undefined && det.price_max !== undefined) e.price_max = det.price_max;
+        if (!e.organizer && det.organizer) e.organizer = det.organizer;
+      } catch {
+        // swallow per-event errors
+      }
+      await new Promise(r => setTimeout(r, this.detailDelayMs));
+    }
   }
 
   /** Parse a single page with all strategies */
