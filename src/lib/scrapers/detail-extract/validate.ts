@@ -34,6 +34,11 @@ export function isValidHtml(_html: string, $: CheerioAPI): boolean {
   const title = $('title').first().text();
   if (BAD_TITLE_TOKENS.test(title)) return false;
 
+  // Strong structural signal: if the page has a JSON-LD Event block, it's
+  // unambiguously an event detail page — even if our body-text fallback
+  // selectors miss the main content (e.g. SPA-rendered sidebars dominate).
+  if (hasEventJsonLd($)) return true;
+
   const $main = $('main, article, [role="main"], .main-content, #content').first();
   const body = ($main.length ? $main : $('body'))
     .text()
@@ -48,4 +53,24 @@ export function isValidHtml(_html: string, $: CheerioAPI): boolean {
     if (matches && matches.length / words.length > 0.5) return false;
   }
   return true;
+}
+
+function hasEventJsonLd($: CheerioAPI): boolean {
+  const scripts = $('script[type="application/ld+json"]').toArray();
+  for (const s of scripts) {
+    const txt = $(s).text();
+    if (!txt) continue;
+    // Cheap string check first to avoid parsing every JSON block.
+    if (!txt.includes('"Event"')) continue;
+    try {
+      const parsed = JSON.parse(txt);
+      const items = Array.isArray(parsed) ? parsed : (parsed?.['@graph'] ?? [parsed]);
+      for (const item of items) {
+        if (!item) continue;
+        const t = item['@type'];
+        if (t === 'Event' || (Array.isArray(t) && t.includes('Event'))) return true;
+      }
+    } catch { /* skip malformed */ }
+  }
+  return false;
 }
