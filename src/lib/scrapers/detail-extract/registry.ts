@@ -3,8 +3,9 @@
 
 import type { Adapter } from './types';
 import { gem2goAdapter } from './adapters/gem2go';
+import { eventfrogAdapter } from './adapters/eventfrog';
 
-const ADAPTERS: Adapter[] = [gem2goAdapter];
+const ADAPTERS: Adapter[] = [gem2goAdapter, eventfrogAdapter];
 const BY_NAME = new Map<string, Adapter>();
 for (const a of ADAPTERS) for (const n of a.sourceNames) BY_NAME.set(n, a);
 

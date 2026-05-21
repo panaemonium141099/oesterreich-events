@@ -39,6 +39,10 @@ export function isValidHtml(_html: string, $: CheerioAPI): boolean {
   // selectors miss the main content (e.g. SPA-rendered sidebars dominate).
   if (hasEventJsonLd($)) return true;
 
+  // Microdata signal (Schema.org itemprop="streetAddress" or itemprop="location")
+  // also unambiguously marks an event page.
+  if ($('[itemprop="streetAddress"], [itemprop="location"]').length > 0) return true;
+
   const $main = $('main, article, [role="main"], .main-content, #content').first();
   const body = ($main.length ? $main : $('body'))
     .text()

@@ -153,6 +153,44 @@ function unwrapJsonLd(parsed: unknown): JsonLdEvent[] {
   return [];
 }
 
+// ─── Layer 3a: Schema.org Microdata (itemprop) ────────────────────────────────
+// Many sites that don't have JSON-LD use HTML microdata. Falter, treibhaus,
+// and others mark up address fields with itemprop="streetAddress" etc.
+
+export function applyMicrodata($: CheerioAPI, out: DetailEnrichment): void {
+  // streetAddress — accept both first-content-bearing element AND `<meta itemprop>` tags.
+  if (!out.address) {
+    const v = readMicrodataValue($, 'streetAddress');
+    if (v) out.address = v.trim();
+  }
+  if (!out.postal_code) {
+    const v = readMicrodataValue($, 'postalCode');
+    if (v) out.postal_code = v.trim();
+  }
+  if (!out.address_locality) {
+    const v = readMicrodataValue($, 'addressLocality');
+    if (v) out.address_locality = v.trim();
+  }
+  if (!out.location_name) {
+    // location.name — pick the first itemprop="name" that lives inside an
+    // itemprop="location" scope. Falls back to "" so it never picks an
+    // unrelated name elsewhere on the page.
+    const $loc = $('[itemprop="location"]').first();
+    if ($loc.length) {
+      const v = $loc.find('[itemprop="name"]').first().attr('content')
+        ?? $loc.find('[itemprop="name"]').first().text().trim();
+      if (v) out.location_name = v;
+    }
+  }
+}
+
+function readMicrodataValue($: CheerioAPI, prop: string): string | undefined {
+  const $el = $(`[itemprop="${prop}"]`).first();
+  if (!$el.length) return undefined;
+  // <meta itemprop="..." content="..."> is the standard pattern; otherwise text.
+  return $el.attr('content') ?? $el.text();
+}
+
 // ─── Layer 3: OpenGraph meta ──────────────────────────────────────────────────
 
 export function applyOgMeta($: CheerioAPI, out: DetailEnrichment): void {

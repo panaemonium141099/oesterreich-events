@@ -7,6 +7,7 @@ import type { EnrichmentResult, DetailEnrichment, AddressConfidence } from './ty
 import { isValidHtml } from './validate';
 import {
   applyJsonLd,
+  applyMicrodata,
   applyOgMeta,
   applyVerticalTable,
   applyRegexFallbacks,
@@ -61,6 +62,11 @@ export function enrichFromDetailHtml(
     if (changed(snapA, result)) result.layersHit.push('adapter');
   }
 
+  // Layer 3a: Schema.org Microdata (itemprop)
+  const snapM = snapshot(result);
+  applyMicrodata($, result);
+  if (changed(snapM, result)) result.layersHit.push('microdata');
+
   // Layer 3: OpenGraph
   const snap3 = snapshot(result);
   applyOgMeta($, result);
@@ -104,6 +110,7 @@ function changed(before: Record<string, unknown>, after: EnrichmentResult): bool
 function computeAddressConfidence(layers: string[], hasAddress: boolean): AddressConfidence | undefined {
   if (!hasAddress) return undefined;
   if (layers.includes('jsonld') || layers.includes('adapter')) return 'high';
+  if (layers.includes('microdata')) return 'high';
   if (layers.includes('vtable')) return 'medium';
   if (layers.includes('regex')) return 'low';
   return undefined;
