@@ -1,6 +1,7 @@
 // src/lib/pipeline/quality-scorer.ts
 
 import { isVenueName } from '@/lib/location-normalizer';
+import { isValidAddressText } from '@/lib/scrapers/detail-extract/validate';
 import { haversineDistance } from './normalize-venue';
 import type { NormalizedCandidate, QualityFlag, FlagType } from './types';
 
@@ -127,6 +128,19 @@ export function generateQualityFlags(candidate: NormalizedCandidate): QualityFla
   }
   if (!candidate.normalized_location_name && !candidate.normalized_address) {
     flags.push({ type: 'missing_location', severity: 'warning' });
+  }
+
+  // Soft-gate: warn when no parseable street address is present. Used by the
+  // admin panel as a filter and by the publish pipeline to downgrade to
+  // published_low_confidence. See spec §8.
+  if (!isValidAddressText(candidate.normalized_address ?? undefined)) {
+    flags.push({
+      type: 'missing_address_street',
+      severity: 'warning',
+      detail: candidate.normalized_location_name
+        ? `only location_name="${candidate.normalized_location_name}"`
+        : 'no street address',
+    });
   }
 
   // Outside Austria check

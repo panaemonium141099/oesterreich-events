@@ -56,7 +56,7 @@ export function enrichFromDetailHtml(
       const v = partial[k];
       if (v === undefined) continue;
       if (result[k] !== undefined && !adapter.overridesJsonLd) continue;
-      (result as Record<string, unknown>)[k] = v;
+      (result as unknown as Record<string, unknown>)[k] = v;
     }
     if (changed(snapA, result)) result.layersHit.push('adapter');
   }
@@ -83,7 +83,7 @@ export function enrichFromDetailHtml(
   for (const k of TRACKED_KEYS) {
     const v = result[k];
     if (typeof v === 'string' && v.trim().length === 0) {
-      delete (result as Record<string, unknown>)[k];
+      delete (result as unknown as Record<string, unknown>)[k];
     }
   }
 

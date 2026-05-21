@@ -21,6 +21,7 @@ export type FlagType =
   | 'missing_date'
   | 'missing_title'
   | 'missing_location'
+  | 'missing_address_street'
   | 'outside_austria'
   | 'short_title'
   | 'duplicate_uncertain'
