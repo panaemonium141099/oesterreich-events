@@ -1,5 +1,26 @@
 import type { ScrapedEvent } from '@/types/events';
 import type { CheerioAPI } from 'cheerio';
+import { enrichFromDetailHtml } from './detail-extract/extract';
+import { mergeEnrichment } from './detail-extract/merge';
+
+export interface DetailEnrichSummary {
+  fetched: number;
+  success: number;
+  no_change: number;
+  http_error: number;
+  timeout: number;
+  invalid_html: number;
+  parse_empty: number;
+}
+
+function defaultSkipIfComplete(e: ScrapedEvent): boolean {
+  // Skip if all three priority fields are populated.
+  return Boolean(e.address && e.description && e.description.length > 80 && e.price_text);
+}
+
+function safeHostname(url: string): string {
+  try { return new URL(url).hostname; } catch { return ''; }
+}
 
 /**
  * Pick the largest variant from a `srcset` string.
@@ -722,6 +743,103 @@ export abstract class BaseScraper {
       }
     } catch {
       return false;
+    }
+  }
+
+  // ─── DETAIL-PAGE ENRICHMENT HOOK ─────────────────────────────────────────
+  // Opt-in: scrapers call this at the end of scrape() if their events carry
+  // source_url. Filling missing address/description/price from detail pages
+  // via the shared detail-extract library.
+  //
+  // See docs/superpowers/specs/2026-05-21-detail-fetch-system-design.md §7.
+
+  protected async enrichFromDetail(
+    events: ScrapedEvent[],
+    opts?: {
+      concurrency?: number;
+      perHostMaxConcurrent?: number;
+      skipIfComplete?: (e: ScrapedEvent) => boolean;
+      detailTimeoutMs?: number;
+    },
+  ): Promise<DetailEnrichSummary> {
+    const concurrency = opts?.concurrency ?? 4;
+    const perHostMax = opts?.perHostMaxConcurrent ?? 2;
+    const detailTimeoutMs = opts?.detailTimeoutMs ?? 10000;
+    const skipIfComplete = opts?.skipIfComplete ?? defaultSkipIfComplete;
+
+    const work = events.filter((e) => e.source_url && !skipIfComplete(e));
+    const summary: DetailEnrichSummary = {
+      fetched: 0, success: 0, no_change: 0,
+      http_error: 0, timeout: 0, invalid_html: 0, parse_empty: 0,
+    };
+    if (work.length === 0) return summary;
+
+    const hostCounts = new Map<string, number>();
+    const queue = work.slice();
+    let active = 0;
+
+    const startOne = async (e: ScrapedEvent): Promise<void> => {
+      const host = safeHostname(e.source_url!);
+      hostCounts.set(host, (hostCounts.get(host) ?? 0) + 1);
+      summary.fetched++;
+      try {
+        const html = await this.fetchDetailHtml(e.source_url!, detailTimeoutMs);
+        if (!html) { summary.parse_empty++; return; }
+        const before = JSON.stringify({ a: e.address, d: e.description, p: e.price_text, l: e.location_name });
+        const enrichment = enrichFromDetailHtml(this.name, e.source_url!, html);
+        if (enrichment.layersHit.length === 0) { summary.invalid_html++; return; }
+        mergeEnrichment(e, enrichment);
+        const after = JSON.stringify({ a: e.address, d: e.description, p: e.price_text, l: e.location_name });
+        if (before === after) summary.no_change++;
+        else summary.success++;
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : String(err);
+        if (/timeout|abort/i.test(msg)) summary.timeout++;
+        else summary.http_error++;
+      } finally {
+        hostCounts.set(host, (hostCounts.get(host) ?? 1) - 1);
+      }
+    };
+
+    return new Promise<DetailEnrichSummary>((resolve) => {
+      const tick = (): void => {
+        while (active < concurrency && queue.length) {
+          const idx = queue.findIndex(
+            (e) => (hostCounts.get(safeHostname(e.source_url!)) ?? 0) < perHostMax,
+          );
+          if (idx === -1) break;
+          const [next] = queue.splice(idx, 1);
+          active++;
+          void startOne(next).finally(() => {
+            active--;
+            if (active === 0 && queue.length === 0) resolve(summary);
+            else tick();
+          });
+        }
+        if (active === 0 && queue.length === 0) resolve(summary);
+      };
+      tick();
+    });
+  }
+
+  /** Lightweight fetch used by enrichFromDetail. No retries — failures are
+   *  recorded in the summary, not raised. Override in tests via a subclass. */
+  protected async fetchDetailHtml(url: string, timeoutMs: number): Promise<string | null> {
+    try {
+      const response = await fetch(url, {
+        headers: {
+          'User-Agent': this.userAgent,
+          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+          'Accept-Language': 'de-AT,de;q=0.9,en;q=0.5',
+        },
+        signal: AbortSignal.timeout(timeoutMs),
+        redirect: 'follow',
+      });
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      return await response.text();
+    } catch (err) {
+      // Bubble timeouts/aborts so the summary can classify them.
+      throw err;
     }
   }
 }
