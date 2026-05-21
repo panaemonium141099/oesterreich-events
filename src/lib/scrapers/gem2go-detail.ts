@@ -412,10 +412,10 @@ const ADDRESS_REGEX = /([A-ZÄÖÜ][A-Za-zäöüß.\- ]+?(?:straße|strasse|gass
 // Rural Austrian addresses: many villages don't have street names — the address
 // is just "Dorf 22" or the village name + house number. To avoid false positives
 // (the regex would match "Mai 2026" otherwise), only match when label-prefixed.
-// "Ort:" added (catches Joomla event-list pages like gemeinde-telfes.at) but
-// allow longer match-string and commas since some sites format as
-// "Ort: Venue, Street Nr, PLZ City" — we'll parse the comma-separated parts.
-const LABELED_ADDRESS_REGEX = /(?:Adresse|Anschrift|Wo|Treffpunkt|Veranstaltungsort|Ort)\s*[:\-]\s*([^\n;]{4,160})/iu;
+// Colon/dash optional — some descriptions read "Adresse Kirchgasse 7" without
+// punctuation. Whitespace after label still required to avoid matching
+// "Adressentest" or similar.
+const LABELED_ADDRESS_REGEX = /(?:Adresse|Anschrift|Wo|Treffpunkt|Veranstaltungsort|Ort)\s*[:\-]?\s+([^\n;]{4,160})/iu;
 
 // Labeled price patterns — covers most German/Austrian event-page conventions.
 const LABELED_PRICE_REGEX = /(?:Eintritt|Kosten|Preis|Gebühr|Teilnahmegebühr|Kursgebühr|Kosten?beitrag|Tickets?)\s*[:\-]\s*((?:€\s*)?\d+(?:[.,]\d{1,2})?(?:\s*€)?(?:\s*[-–]\s*\d+(?:[.,]\d{1,2})?\s*€?)?|frei|kostenlos|gratis|kostenfrei|Spende[^\n;]*)/iu;
@@ -426,7 +426,11 @@ const PLZ_CITY_REGEX = /\b(\d{4})\s+((?:Bad|Sankt|St\.?|Wiener|Klein|Groß|Ober|
 
 const FREE_PATTERNS = /eintritt\s+frei|frei(?:er)?\s+eintritt|gratis|kostenlos|kostenfrei|teilnahme\s+(?:ist\s+)?kostenlos|eintritt\s*[:\-]?\s*frei|keine\s+(?:eintritts)?gebühr/i;
 const DONATION_PATTERNS = /spende\s*(?:nbasis|n\s+erbeten|n\s+willkommen)?|freiwillige[sn]?\s+(?:beitrag|spende|eintritt)/i;
-const EURO_REGEX = /(?:eintritt|kosten|preis|gebühr|teilnahmegebühr|kursgebühr|kurskosten)\s*[:\-]?\s*€?\s*(\d{1,3}(?:[.,]\d{1,2})?)/i;
+const EURO_REGEX = /(?:eintritt|kosten|preis|gebühr|teilnahmegebühr|kursgebühr|kurskosten|tickets?|karte[ns]?|erwachsene|ermäßigt|ermaessigt|vvk|ak|abendkasse|kostet)\s*[:\-]?\s*(?:ab\s+)?€?\s*(\d{1,3}(?:[.,]\d{1,2})?)/i;
+// Generic euro pattern — used as last-resort when labeled patterns missed.
+// Stricter range (€2-€500) to reject very-low or very-high numbers that look
+// like years, dates, or product IDs.
+const GENERIC_EURO_REGEX = /(?:€\s*(\d{1,3}(?:[.,]\d{1,2})?)|(\d{1,3}(?:[.,]\d{1,2})?)\s*(?:€|EUR|Euro))(?!\s*\d)/i;
 
 function applyRegexFallbacks(out: DetailEnrichment, $?: cheerio.CheerioAPI): void {
   // Normalize a price that came from the verticaltable layer
@@ -572,6 +576,20 @@ function applyRegexFallbacks(out: DetailEnrichment, $?: cheerio.CheerioAPI): voi
           out.price_min = v;
           out.price_max = v;
         }
+      }
+    }
+  }
+  // Generic euro fallback — only when labeled patterns missed entirely.
+  // Reject very low values (<2€, likely page numbers) and >500€ (likely IDs).
+  if (!out.price_text && text) {
+    const m = text.match(GENERIC_EURO_REGEX);
+    if (m) {
+      const raw = m[1] ?? m[2];
+      const v = parseFloat(raw.replace(',', '.'));
+      if (!isNaN(v) && v >= 2 && v <= 500) {
+        out.price_text = formatEuro(v);
+        out.price_min = v;
+        out.price_max = v;
       }
     }
   }
