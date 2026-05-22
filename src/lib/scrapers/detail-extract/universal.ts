@@ -281,8 +281,21 @@ function parseLocationSegments(segments: string[], out: DetailEnrichment): void 
 
 // ─── Layer 5: Regex fallbacks ─────────────────────────────────────────────────
 
+// Strict street-with-suffix matcher. Constraints:
+//  - The street name is at most ONE word (with optional internal dashes) glued
+//    to a suffix (Hauptstraße, Roland-Rainer-Platz, Badgasse), OR a two-word
+//    name where the second word IS the suffix on its own (Mariahilfer Straße).
+//  - Anchored at \b to prevent capturing the tail of "...Uhr Marktgemeinde
+//    Gresten Badgasse" by walking through whitespace + multiple unrelated words.
+//  - House number must be ≤ 4 digits + optional letter to reject phone numbers.
+// Strict street-with-suffix matcher.
+// Optional leading-modifier is restricted to common Austrian street prefixes
+// (adjective "-er" forms like "Mariahilfer", or named modifiers Alte/Neue/
+// Obere/Untere/Kleine/Große/Bad/Sankt/St.). Without this restriction the
+// non-greedy match walks across arbitrary words ("Uhr Marktgemeinde Gresten
+// Badgasse") because every word starts uppercase in German title case.
 const ADDRESS_REGEX =
-  /([A-ZÄÖÜ][A-Za-zäöüß.\- ]+?(?:straße|strasse|gasse|platz|weg|allee|ring|markt))\s+(\d+[a-zA-Z]?)(?=[,\s\n])/u;
+  /\b((?:[A-ZÄÖÜ][a-zäöüß]*er\s+|Alte\s+|Neue\s+|Obere\s+|Untere\s+|Kleine\s+|Große\s+|Grosse\s+|Bad\s+|Sankt\s+|St\.?\s+)?[A-ZÄÖÜ][A-Za-zäöüß\-]{1,40}(?:straße|strasse|gasse|platz|weg|allee|ring|markt))\s+(\d{1,4}[a-zA-Z]?)(?=[,\s\n])/u;
 
 const LABELED_ADDRESS_REGEX =
   /(?:Adresse|Anschrift|Wo|Treffpunkt|Veranstaltungsort|Ort)\s*[:\-]?\s+([^\n;]{4,160})/iu;
@@ -318,11 +331,14 @@ export function applyRegexFallbacks(out: DetailEnrichment, $?: CheerioAPI): void
   normalizePriceText(out);
 
   let text = out.description ?? '';
-  // When the description already exists (e.g. via og:description) but no
-  // address was found, still scan the visible body/footer — many gem2go
-  // and gemeinde sites put the venue address in a footer "Anschrift" block.
+  // Scan event-detail body for an event-specific address. We intentionally
+  // DO NOT include <footer> or .g_anschrift — those typically carry the
+  // municipality's administrative address (Gemeindeamt), which is almost
+  // never the actual event location. Writing that as the event address
+  // produces systematic false positives ("Freibad" event → Gemeinde-
+  // Verwaltung address). Better to leave address NULL.
   if ($ && !out.address) {
-    const $bodyParts = $('main, article, .main-content, #content, .event-detail, .entry-content, footer, .g_anschrift, .anschrift');
+    const $bodyParts = $('main, article, .main-content, #content, .event-detail, .entry-content');
     if ($bodyParts.length) {
       const body = $bodyParts.map((_, el) => $(el).text()).get().join(' ').replace(/\s+/g, ' ').trim();
       if (body.length > 30 && body.length < 10000) {

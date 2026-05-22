@@ -191,12 +191,16 @@ async function main() {
       const before = JSON.stringify({ a: evt.address, d: evt.description, p: evt.price_text });
       mergeEnrichment(evt, enrichment);
       const after = JSON.stringify({ a: evt.address, d: evt.description, p: evt.price_text });
+      // Only claim confidence when the post-merge event actually carries
+      // the extracted address. Otherwise the merge rejected it (invalid
+      // street text) and we shouldn't persist a stale "high" confidence.
+      const persistedConfidence = evt.address ? enrichment.address_confidence : undefined;
       if (before === after) {
         stats.no_change++;
-        queueUpdate(e.id, 'no_change', enrichment.address_confidence);
+        queueUpdate(e.id, 'no_change', persistedConfidence);
       } else {
         stats.success++;
-        queueUpdate(e.id, 'success', enrichment.address_confidence, {
+        queueUpdate(e.id, 'success', persistedConfidence, {
           address: evt.address,
           postal_code: evt.postal_code,
           location_name: evt.location_name,
