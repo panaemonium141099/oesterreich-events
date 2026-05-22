@@ -55,6 +55,18 @@ export function isValidHtml(_html: string, $: CheerioAPI): boolean {
   // also unambiguously marks an event page.
   if ($('[itemprop="streetAddress"], [itemprop="location"]').length > 0) return true;
 
+  // Plain HTML page (no structured event data): still valid as long as it has
+  // a reasonable body AND isn't dominated by cookie/consent boilerplate. The
+  // proximity-scan layer can still find an address in the unstructured
+  // footer/kontakt block.
+  const fullBody = $('body').text().replace(/\s+/g, ' ').trim();
+  const words = fullBody.toLowerCase().split(/\s+/);
+  if (fullBody.length >= 400 && words.length > 20) {
+    const cookieMatches = fullBody.match(COOKIE_TOKENS);
+    if (cookieMatches && cookieMatches.length / words.length > 0.5) return false;
+    return true;
+  }
+
   const $main = $('main, article, [role="main"], .main-content, #content').first();
   const body = ($main.length ? $main : $('body'))
     .text()
@@ -63,10 +75,10 @@ export function isValidHtml(_html: string, $: CheerioAPI): boolean {
   if (body.length < 200) return false;
 
   // Cookie wall heuristic: >50% of words match cookie/consent tokens
-  const words = body.toLowerCase().split(/\s+/);
-  if (words.length > 20) {
+  const mainWords = body.toLowerCase().split(/\s+/);
+  if (mainWords.length > 20) {
     const matches = body.match(COOKIE_TOKENS);
-    if (matches && matches.length / words.length > 0.5) return false;
+    if (matches && matches.length / mainWords.length > 0.5) return false;
   }
   return true;
 }

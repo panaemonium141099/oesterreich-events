@@ -11,6 +11,7 @@ import {
   applyOgMeta,
   applyVerticalTable,
   applyRegexFallbacks,
+  applyProximityScan,
 } from './universal';
 import { getAdapter } from './registry';
 
@@ -82,6 +83,11 @@ export function enrichFromDetailHtml(
   applyRegexFallbacks(result, $);
   if (changed(snap5, result)) result.layersHit.push('regex');
 
+  // Layer 6: Body-proximity scan (last-resort for unstructured pages)
+  const snap6 = snapshot(result);
+  applyProximityScan($, result);
+  if (changed(snap6, result)) result.layersHit.push('proximity');
+
   // Address confidence from highest-priority layer that produced an address
   result.address_confidence = computeAddressConfidence(result.layersHit, !!result.address);
 
@@ -113,5 +119,6 @@ function computeAddressConfidence(layers: string[], hasAddress: boolean): Addres
   if (layers.includes('microdata')) return 'high';
   if (layers.includes('vtable')) return 'medium';
   if (layers.includes('regex')) return 'low';
+  if (layers.includes('proximity')) return 'low';
   return undefined;
 }

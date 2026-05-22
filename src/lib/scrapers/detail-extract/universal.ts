@@ -153,6 +153,74 @@ function unwrapJsonLd(parsed: unknown): JsonLdEvent[] {
   return [];
 }
 
+// ─── Layer 6: Body-Proximity Scan (last-resort) ──────────────────────────────
+// For pages without structured Event data, look in the full body text for an
+// address-shaped substring that's CLOSE to a 4-digit PLZ + city pair. Catches
+// the typical Austrian municipality "Kontakt" / Impressum footer block.
+//
+// Strict guards:
+//   - PLZ in [1000..9999] but NOT in [2020..2030] (those are years, not PLZ)
+//   - Match must be within 80 chars of the PLZ to avoid coincidence
+//   - Reject CamelCase / pipes / sentence boundaries (isValidAddressText)
+
+export function applyProximityScan($: CheerioAPI, out: DetailEnrichment): void {
+  if (out.address && out.postal_code) return;
+  const text = $('body').text().replace(/\s+/g, ' ').trim();
+  if (text.length < 50) return;
+
+  // Collect PLZ+City candidates (skip year-like PLZ)
+  const plzs: Array<{ plz: string; city: string; pos: number }> = [];
+  const plzRe = /\b(\d{4})\s+([A-ZÄÖÜ][A-Za-zäöüß\-]+(?:\s+(?:am|an|im|ob|bei|in)\s+[A-ZÄÖÜ][A-Za-zäöüß\-]+)?(?:\s+[A-ZÄÖÜ][A-Za-zäöüß\-]+)?)/gu;
+  const STOP_WORDS = /^(Tel|TEL|Telefon|Fax|FAX|Mail|MAIL|Email|EMAIL|Kontakt|KONTAKT|Uhr|Uhrzeit|Zeit|Datum|Adresse|Anschrift|Web|WEB|Homepage|Veranstalter|Bundesland)\b/u;
+  let pm: RegExpExecArray | null;
+  while ((pm = plzRe.exec(text)) !== null) {
+    const n = parseInt(pm[1], 10);
+    if (n < 1000 || n > 9999) continue;
+    if (n >= 2020 && n <= 2030) continue; // years
+    // Reject when "city" is a likely label word
+    if (STOP_WORDS.test(pm[2])) continue;
+    // Trim trailing stop-words from the captured city
+    const cityWords = pm[2].split(/\s+/);
+    const cleanedCity: string[] = [];
+    for (const w of cityWords) {
+      if (STOP_WORDS.test(w)) break;
+      cleanedCity.push(w);
+    }
+    if (cleanedCity.length === 0) continue;
+    plzs.push({ plz: pm[1], city: cleanedCity.join(' '), pos: pm.index });
+  }
+  if (plzs.length === 0) return;
+
+  // Find addresses with street-suffix anywhere in text
+  const addrRe = new RegExp(ADDRESS_REGEX.source, 'gu');
+  const addrs: Array<{ s: string; pos: number }> = [];
+  let am: RegExpExecArray | null;
+  while ((am = addrRe.exec(text)) !== null) {
+    const candidate = `${am[1].trim()} ${am[2]}`;
+    if (isValidAddressText(candidate)) addrs.push({ s: candidate, pos: am.index });
+  }
+
+  // Pick the closest (address, plz) pair within 80 chars
+  let best: { addr: string; plz: string; city: string; dist: number } | null = null;
+  for (const a of addrs) {
+    for (const p of plzs) {
+      const dist = Math.abs(p.pos - a.pos);
+      if (dist > 80) continue;
+      if (!best || dist < best.dist) {
+        best = { addr: a.s, plz: p.plz, city: p.city, dist };
+      }
+    }
+  }
+
+  if (best) {
+    // Proximity only fills fields that earlier layers (JSON-LD, adapter,
+    // microdata) did NOT set. Never overwrites.
+    if (!out.address) out.address = best.addr;
+    if (!out.postal_code) out.postal_code = best.plz;
+    if (!out.address_locality) out.address_locality = best.city;
+  }
+}
+
 // ─── Layer 3a: Schema.org Microdata (itemprop) ────────────────────────────────
 // Many sites that don't have JSON-LD use HTML microdata. Falter, treibhaus,
 // and others mark up address fields with itemprop="streetAddress" etc.
@@ -295,7 +363,13 @@ function parseLocationSegments(segments: string[], out: DetailEnrichment): void 
 // non-greedy match walks across arbitrary words ("Uhr Marktgemeinde Gresten
 // Badgasse") because every word starts uppercase in German title case.
 const ADDRESS_REGEX =
-  /\b((?:[A-ZÄÖÜ][a-zäöüß]*er\s+|Alte\s+|Neue\s+|Obere\s+|Untere\s+|Kleine\s+|Große\s+|Grosse\s+|Bad\s+|Sankt\s+|St\.?\s+)?[A-ZÄÖÜ][A-Za-zäöüß\-]{1,40}(?:straße|strasse|gasse|platz|weg|allee|ring|markt))\s+(\d{1,4}[a-zA-Z]?)(?=[,\s\n])/u;
+  /\b((?:[A-ZÄÖÜ][a-zäöüß]*er\s+|Alte\s+|Neue\s+|Obere\s+|Untere\s+|Kleine\s+|Große\s+|Grosse\s+|Bad\s+|Sankt\s+|St\.?\s+)?[A-ZÄÖÜ][A-Za-zäöüß\-]{1,40}(?:straße|strasse|gasse|platz|weg|allee|ring|markt))\s+(\d{1,4}[a-zA-Z]?(?:\/\d+[a-zA-Z]?)?)(?=[,\s\n])/u;
+
+// Rural address pattern (no street suffix): just "Word Nr" — much riskier
+// so we only fire this inside an explicit body-proximity scan that requires
+// a 4-digit PLZ nearby. Examples: "Mehrnbach 22", "Stadl 5".
+const RURAL_ADDRESS_REGEX =
+  /\b([A-ZÄÖÜ][A-Za-zäöüß\-]{2,40})\s+(\d{1,4}[a-zA-Z]?(?:\/\d+[a-zA-Z]?)?)(?=[,\s\n])/u;
 
 const LABELED_ADDRESS_REGEX =
   /(?:Adresse|Anschrift|Wo|Treffpunkt|Veranstaltungsort|Ort)\s*[:\-]?\s+([^\n;]{4,160})/iu;
