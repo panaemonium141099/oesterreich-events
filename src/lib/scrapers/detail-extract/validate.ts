@@ -5,7 +5,9 @@
 import type { CheerioAPI } from 'cheerio';
 
 const NON_ADDRESS_PREFIX =
-  /^(saal|tisch|raum|reihe|sitz|bezirk|stock|etage|ab|von|bis|tor|halle)\s+\d/i;
+  /^(saal|tisch|raum|reihe|sitz|bezirk|stock|etage|ab|von|bis|tor|halle|seit|um|gegen|nach|vor)\s+\d/i;
+// Date/time fragments that look like "Word Number" but aren't addresses.
+const DATE_LIKE_PREFIX = /^(montag|dienstag|mittwoch|donnerstag|freitag|samstag|sonntag|mo|di|mi|do|fr|sa|so|jan|feb|mar|mär|apr|mai|jun|jul|aug|sep|okt|nov|dez|januar|februar|märz|april|juni|juli|august|september|oktober|november|dezember)\s+\d/i;
 const NUMBER_PREFIX_BEZIRK = /^\d+\.\s*bezirk/i;
 const STREET_WITH_NUMBER = /[A-ZÄÖÜ][A-Za-zäöüß.\- ]{2,}\s+\d+[a-zA-Z]?\b/u;
 
@@ -20,6 +22,7 @@ export function isValidAddressText(s: string | undefined): boolean {
   if (t.length > 80) return false; // real addresses don't exceed 80 chars
   if (NUMBER_PREFIX_BEZIRK.test(t)) return false;
   if (NON_ADDRESS_PREFIX.test(t)) return false;
+  if (DATE_LIKE_PREFIX.test(t)) return false;
   // Reject obvious junk: pipes, multiple punctuation, sentence patterns
   if (/[|]/.test(t)) return false;
   if (/[.!?]\s+\w/.test(t)) return false; // sentence boundary inside
