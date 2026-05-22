@@ -17,9 +17,21 @@ export function isValidAddressText(s: string | undefined): boolean {
   if (!s) return false;
   const t = s.trim();
   if (t.length < 4) return false;
+  if (t.length > 80) return false; // real addresses don't exceed 80 chars
   if (NUMBER_PREFIX_BEZIRK.test(t)) return false;
   if (NON_ADDRESS_PREFIX.test(t)) return false;
-  return STREET_WITH_NUMBER.test(t);
+  // Reject obvious junk: pipes, multiple punctuation, sentence patterns
+  if (/[|]/.test(t)) return false;
+  if (/[.!?]\s+\w/.test(t)) return false; // sentence boundary inside
+  if ((t.match(/\s/g) ?? []).length > 4) return false; // address has at most 4 spaces
+  // Reject collapsed concatenations like "WiesmathSchulstraße" or
+  // "AdresseTeichweg" — those come from <br>/tag boundaries that got
+  // squashed into one token. Real street names don't have lowercase+UPPER
+  // mid-word (Bindestrich-Kompositionen use dashes, not CamelCase).
+  if (/[a-zäöüß][A-ZÄÖÜ]/.test(t)) return false;
+  if (!STREET_WITH_NUMBER.test(t)) return false;
+  // Strip common prefix-noise that the body scan can leak in
+  return true;
 }
 
 const BAD_TITLE_TOKENS = /(404|not\s*found|fehler|wartung|maintenance|access\s*denied|forbidden)/i;

@@ -271,7 +271,7 @@ async function main() {
 async function fetchHtml(url: string, timeoutMs: number): Promise<string | null> {
   const r = await fetch(url, {
     headers: {
-      'User-Agent': 'osterreich-events-backfill/1.0',
+      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
       'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
       'Accept-Language': 'de-AT,de;q=0.9,en;q=0.5',
     },
