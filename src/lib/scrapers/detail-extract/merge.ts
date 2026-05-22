@@ -6,9 +6,9 @@ import type { DetailEnrichment } from './types';
 import { isValidAddressText } from './validate';
 
 export function mergeEnrichment(e: ScrapedEvent, d: Partial<DetailEnrichment>): void {
-  // address — detail wins when valid
+  // address — detail wins when valid. Strip trailing punctuation noise.
   if (d.address && isValidAddressText(d.address)) {
-    e.address = d.address;
+    e.address = d.address.replace(/[\s,;]+$/, '');
   }
 
   // postal_code — detail wins when exactly 4 digits
