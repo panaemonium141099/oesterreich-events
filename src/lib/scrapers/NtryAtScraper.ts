@@ -96,8 +96,14 @@ export class NtryAtScraper extends BaseScraper {
     // Deduplicate
     const seen = new Map<string, ScrapedEvent>();
     for (const ev of events) seen.set(ev.source_id, ev);
+    const deduped = Array.from(seen.values());
     this.log(`Gesamt: ${seen.size} ntry.at Events`);
-    return Array.from(seen.values());
+
+    if (deduped.length > 0) {
+      const summary = await this.enrichFromDetail(deduped);
+      this.log(`detail-enrich: ${JSON.stringify(summary)}`);
+    }
+    return deduped;
   }
 
   private parsePage($: ReturnType<typeof cheerio.load>, pageUrl: string): ScrapedEvent[] {

@@ -45,6 +45,11 @@ export class KulturGrazScraper extends BaseScraper {
 
     const events = Array.from(allEvents.values());
     this.log(`${events.length} Events gescrapt`);
+
+    if (events.length > 0) {
+      const summary = await this.enrichFromDetail(events);
+      this.log(`detail-enrich: ${JSON.stringify(summary)}`);
+    }
     return events;
   }
 

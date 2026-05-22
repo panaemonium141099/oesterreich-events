@@ -86,6 +86,12 @@ export class InnsbruckClubsScraper extends BaseScraper {
     }
 
     this.log(`${allEvents.length} Events von ${CLUBS.length} Innsbruck Clubs gescrapt`);
+
+    // Treibhaus + co. expose Schema.org microdata on detail pages.
+    if (allEvents.length > 0) {
+      const summary = await this.enrichFromDetail(allEvents);
+      this.log(`detail-enrich: ${JSON.stringify(summary)}`);
+    }
     return allEvents;
   }
 
