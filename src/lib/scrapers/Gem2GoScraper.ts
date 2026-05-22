@@ -36,7 +36,7 @@ export class Gem2GoScraper extends BaseScraper {
    *  out of the detail HTML (~10x more requests but materially better data).
    *  Default ON because the listing-only data is too sparse (most events
    *  end up with only title+date+town). */
-  private readonly enrichFromDetail = true;
+  private readonly enableDetailEnrichment = true;
 
   /** Delay between detail-page fetches within the same gemeinde (ms). */
   private readonly detailDelayMs = 250;
@@ -123,7 +123,7 @@ export class Gem2GoScraper extends BaseScraper {
         }
 
         if (events.length > 0) {
-          if (this.enrichFromDetail) {
+          if (this.enableDetailEnrichment) {
             await this.enrichEventsFromDetailPages(events);
           }
           allEvents.push(...events);
@@ -393,7 +393,9 @@ export class Gem2GoScraper extends BaseScraper {
 
         // Extract event detail URL
         const href = $titleLink.attr('href');
-        const eventUrl = href ? this.resolveUrl(href, baseOrigin) : pageUrl;
+        // Listing-URL would be a lie ('detail' is the listing itself).
+        // Leave source_url=null when no real detail href exists.
+        const eventUrl = href ? this.resolveUrl(href, baseOrigin) : null;
 
         const sourceId = this.buildSourceId(gemeinde, title, startDate);
 
@@ -476,7 +478,9 @@ export class Gem2GoScraper extends BaseScraper {
         // Extract event detail URL
         const $link = $entry.find('a').first();
         const href = $link.attr('href');
-        const eventUrl = href ? this.resolveUrl(href, baseOrigin) : pageUrl;
+        // Listing-URL would be a lie ('detail' is the listing itself).
+        // Leave source_url=null when no real detail href exists.
+        const eventUrl = href ? this.resolveUrl(href, baseOrigin) : null;
 
         // Extract time info for description
         const description = timeText ? `${timeText}` : undefined;
@@ -608,7 +612,9 @@ export class Gem2GoScraper extends BaseScraper {
         if (!dateStr) return;
 
         const href = $el.find('a').first().attr('href');
-        const eventUrl = href ? this.resolveUrl(href, baseOrigin) : pageUrl;
+        // Listing-URL would be a lie ('detail' is the listing itself).
+        // Leave source_url=null when no real detail href exists.
+        const eventUrl = href ? this.resolveUrl(href, baseOrigin) : null;
 
         const sourceId = this.buildSourceId(gemeinde, title, dateStr);
 

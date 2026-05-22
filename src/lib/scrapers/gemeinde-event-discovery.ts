@@ -94,6 +94,34 @@ interface Candidate {
   anchorText: string;
 }
 
+/**
+ * Detail-page link picker: rejects mailto:/tel:/javascript:/share/print/fragment-only
+ * hrefs that often dominate as the "first <a>" inside event tiles.
+ */
+function isUsableDetailHref(href: string | undefined): href is string {
+  if (!href) return false;
+  const lower = href.trim().toLowerCase();
+  if (lower.startsWith('mailto:')) return false;
+  if (lower.startsWith('tel:')) return false;
+  if (lower.startsWith('javascript:')) return false;
+  if (lower.startsWith('#')) return false;
+  if (/[?&](share|print|mail)=/i.test(href)) return false;
+  return true;
+}
+
+function pickDetailHref($container: cheerio.Cheerio<any>): string | undefined {
+  // Prefer hrefs that look like event detail URLs (contain keywords)
+  // before falling back to "first usable href".
+  const candidates: string[] = [];
+  $container.find('a[href]').each((_, a) => {
+    const href = (a as any).attribs?.href ?? '';
+    if (isUsableDetailHref(href)) candidates.push(href);
+  });
+  if (candidates.length === 0) return undefined;
+  const preferred = candidates.find((h) => /event|veranstalt|termin|detail/i.test(h));
+  return preferred ?? candidates[0];
+}
+
 function scoreUrl(href: string, anchorText: string): number {
   const hrefLower = href.toLowerCase();
   const textLower = anchorText.toLowerCase();
@@ -317,7 +345,7 @@ export function parseEventList(html: string, listingUrl: string): ParsedEvent[] 
     if (!title || !startRaw) return;
     const start = normalizeDate(startRaw);
     if (!start) return;
-    const link = $el.find('a[href]').first().attr('href');
+    const link = pickDetailHref($el);
     const detailUrl = link ? new URL(link, listingUrl).href : undefined;
     const location = $el.find('[itemprop="location"] [itemprop="name"]').first().text().trim() || undefined;
     const street = $el.find('[itemprop="streetAddress"]').first().text().trim() || undefined;
@@ -345,7 +373,8 @@ export function parseEventList(html: string, listingUrl: string): ParsedEvent[] 
     if (!title || !dt) return;
     const start = normalizeDate(dt);
     if (!start) return;
-    const link = $el.find('a.tribe-event-url, .tribe-events-calendar-list__event-title a').first().attr('href');
+    const linkRaw = $el.find('a.tribe-event-url, .tribe-events-calendar-list__event-title a').first().attr('href');
+    const link = isUsableDetailHref(linkRaw) ? linkRaw : undefined;
     const detailUrl = link ? new URL(link, listingUrl).href : undefined;
     const venue = $el.find('.tribe-events-venue-details, .tribe-events-calendar-list__event-venue').first().text().trim() || undefined;
     const desc = $el.find('.tribe-events-calendar-list__event-description').first().text().trim() || undefined;
@@ -393,7 +422,7 @@ export function parseEventList(html: string, listingUrl: string): ParsedEvent[] 
     const text = $el.text();
     const start = extractGermanDate(text);
     if (!start) return;
-    const link = $el.find('a').first().attr('href');
+    const link = pickDetailHref($el);
     const detailUrl = link ? new URL(link, listingUrl).href : undefined;
     const image = $el.find('img').first().attr('src');
     const fullImg = image ? new URL(image, listingUrl).href : undefined;
