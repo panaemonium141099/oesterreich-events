@@ -60,7 +60,11 @@ async function main() {
     let html: string;
     try {
       const r = await fetch(e.source_url!, {
-        headers: { 'User-Agent': 'osterreich-events-probe/1.0' },
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (compatible; osterreich-events-probe/1.0)',
+          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+          'Accept-Language': 'de-AT,de;q=0.9,en;q=0.5',
+        },
         signal: AbortSignal.timeout(15000),
       });
       if (!r.ok) {
