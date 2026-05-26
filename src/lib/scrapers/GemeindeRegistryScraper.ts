@@ -206,15 +206,17 @@ export class GemeindeRegistryScraper extends BaseScraper {
 
     // Detail-fetch enrichment — same pattern as Gem2GoScraper. Universal
     // extractor handles JSON-LD/og-meta/regex layers regardless of CMS.
-    if (this.enrichFromDetail && events.length > 0) {
+    if (this.enableDetailEnrichment && events.length > 0) {
       await this.enrichEventsFromDetailPages(events, entry.eventUrl);
     }
 
     return events;
   }
 
-  /** Detail-fetch toggle. ON by default. */
-  private readonly enrichFromDetail = true;
+  /** Detail-fetch toggle. ON by default. Renamed from `enrichFromDetail`
+   *  to avoid collision with the protected BaseScraper.enrichFromDetail()
+   *  method added 2026-05-21. */
+  private readonly enableDetailEnrichment = true;
   private readonly detailDelayMs = 250;
 
   private async enrichEventsFromDetailPages(events: ScrapedEvent[], listingUrl: string): Promise<void> {

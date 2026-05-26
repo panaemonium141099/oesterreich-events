@@ -150,7 +150,7 @@ export class GenericGemeindeScraper extends BaseScraper {
     // description/address/image/price out via the universal extractor.
     // Listing parsers above tend to capture only title + date + small teaser;
     // the detail page usually has the full event. Same approach as Gem2GoScraper.
-    if (this.enrichFromDetail) {
+    if (this.enableDetailEnrichment) {
       await this.enrichEventsFromDetailPages(allEvents, page.eventPageUrl);
     }
 
@@ -165,8 +165,10 @@ export class GenericGemeindeScraper extends BaseScraper {
     }));
   }
 
-  /** Detail-fetch toggle. ON by default — listing-level data is usually too thin. */
-  private readonly enrichFromDetail = true;
+  /** Detail-fetch toggle. ON by default — listing-level data is usually too thin.
+   *  Renamed from `enrichFromDetail` to avoid collision with the protected
+   *  BaseScraper.enrichFromDetail() method added 2026-05-21. */
+  private readonly enableDetailEnrichment = true;
   /** Delay between detail-page fetches within the same gemeinde (ms). */
   private readonly detailDelayMs = 250;
   /** Per-detail-page fetch timeout. */
