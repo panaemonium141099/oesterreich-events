@@ -16,8 +16,13 @@ async function main() {
   if (probeErr) { console.error('PROBE FAILED:', JSON.stringify(probeErr)); process.exit(1); }
   console.log(`Events table total rows: ${probe}`);
 
-  // Future, published-ish events
-  const baseFilter = (q: ReturnType<typeof sb.from>) =>
+  // Future, published-ish events.
+  // Type is `any` because the chained Supabase builder types (Postgrest
+  // FilterBuilder vs QueryBuilder vs TransformBuilder) vary across call
+  // sites here and pinning the generic signature would bloat this dev
+  // script without runtime value.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const baseFilter = (q: any) =>
     q.gte('start_date', today).in('publish_status', ['published', 'published_low_confidence', 'draft', 'needs_review']);
 
   // 1) Overview
