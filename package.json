@@ -48,6 +48,7 @@
     "test:coverage": "vitest run --coverage",
     "openai-geocode": "tsx --env-file=.env.local src/scripts/openai-geocode.ts",
     "probe:adapter": "tsx --env-file=.env.local src/scripts/probe-adapter.ts",
+    "probe:feratel": "tsx src/scripts/probe-feratel.ts",
     "backfill:detail": "tsx --env-file=.env.local src/scripts/backfill-detail-enrich.ts",
     "categorize-events": "tsx --env-file=.env.local src/scripts/categorize-events.ts",
     "classifier-audit": "tsx --env-file=.env.local src/scripts/classifier-audit.ts",

@@ -121,6 +121,33 @@ const REGIONS: FeratelRegionConfig[] = [
   { code: 'kaiserwinkl', name: 'Kaiserwinkl', bundesland: 'Tirol', fallbackLat: 47.625, fallbackLng: 12.300 },
   { code: 'hochpustertal', name: 'Hochpustertal', bundesland: 'Tirol', fallbackLat: 46.740, fallbackLng: 12.420 },
   { code: 'ramsau', name: 'Ramsau am Dachstein', bundesland: 'Steiermark', fallbackLat: 47.421, fallbackLng: 13.643 },
+
+  // ── 2026-05-22: Burgenland TVB-Discovery (probe-feratel.ts) ──
+  { code: 'eisenstadt', name: 'Eisenstadt', bundesland: 'Burgenland', fallbackLat: 47.846, fallbackLng: 16.526 },
+  { code: 'rust', name: 'Rust', bundesland: 'Burgenland', fallbackLat: 47.798, fallbackLng: 16.679 },
+  { code: 'podersdorf', name: 'Podersdorf am See', bundesland: 'Burgenland', fallbackLat: 47.852, fallbackLng: 16.847 },
+  { code: 'jois', name: 'Jois', bundesland: 'Burgenland', fallbackLat: 47.969, fallbackLng: 16.788 },
+  { code: 'illmitz', name: 'Illmitz', bundesland: 'Burgenland', fallbackLat: 47.770, fallbackLng: 16.802 },
+  { code: 'lutzmannsburg', name: 'Lutzmannsburg', bundesland: 'Burgenland', fallbackLat: 47.452, fallbackLng: 16.560 },
+  { code: 'oberwart', name: 'Oberwart', bundesland: 'Burgenland', fallbackLat: 47.286, fallbackLng: 16.211 },
+
+  // ── 2026-05-22: Tirol TVB-Discovery ──
+  { code: 'alpbach', name: 'Alpbachtal', bundesland: 'Tirol', fallbackLat: 47.395, fallbackLng: 11.945 },
+  { code: 'hochfuegen', name: 'Hochfügen', bundesland: 'Tirol', fallbackLat: 47.255, fallbackLng: 11.842 },
+  { code: 'galtuer', name: 'Galtür', bundesland: 'Tirol', fallbackLat: 46.969, fallbackLng: 10.184 },
+  { code: 'kaltenbach', name: 'Kaltenbach (Zillertal)', bundesland: 'Tirol', fallbackLat: 47.295, fallbackLng: 11.873 },
+  { code: 'kappl', name: 'Kappl (Paznaun)', bundesland: 'Tirol', fallbackLat: 47.073, fallbackLng: 10.382 },
+  { code: 'kitzski', name: 'KitzSki / Kitzbühel-Kirchberg', bundesland: 'Tirol', fallbackLat: 47.446, fallbackLng: 12.391 },
+
+  // ── 2026-05-22: Kärnten Discovery ──
+  { code: 'heiligenblut', name: 'Heiligenblut am Großglockner', bundesland: 'Kärnten', fallbackLat: 47.034, fallbackLng: 12.846 },
+
+  // ── 2026-05-22: Steiermark Discovery ──
+  { code: 'tauplitz', name: 'Tauplitz / Tauplitzalm', bundesland: 'Steiermark', fallbackLat: 47.566, fallbackLng: 14.011 },
+
+  // ── 2026-05-22: Discovery via probe-feratel.ts seed sweep ──
+  { code: 'bludenz', name: 'Bludenz', bundesland: 'Vorarlberg', fallbackLat: 47.155, fallbackLng: 9.823 },
+  { code: 'rauris', name: 'Rauris', bundesland: 'Salzburg', fallbackLat: 47.224, fallbackLng: 12.991 },
 ];
 
 // ─────────────────── API configuration ───────────────────
