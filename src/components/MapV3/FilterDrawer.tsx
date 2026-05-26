@@ -484,17 +484,23 @@ interface PriceRangeSliderProps {
 }
 function PriceRangeSlider({ min, max, onChange }: PriceRangeSliderProps) {
   const RANGE_MIN = 0;
-  const RANGE_MAX = 100;
+  const RANGE_MAX = 1000;
   const lo = min ?? RANGE_MIN;
   const hi = max ?? RANGE_MAX;
   const active = min !== undefined || max !== undefined;
 
+  // Step: 1€ below 100, 10€ between 100-1000 — keeps cheap-range precise
+  // (a 1€ jump matters for student-budget filtering) while still letting
+  // the user reach 1000 in a single drag at the expensive end.
+  const snap = (v: number): number => (v >= 100 ? Math.round(v / 10) * 10 : v);
   const handleLo = (v: number) => {
-    const newLo = Math.min(v, hi);
+    const snapped = snap(v);
+    const newLo = Math.min(snapped, hi);
     onChange(newLo === RANGE_MIN ? undefined : newLo, hi === RANGE_MAX ? undefined : hi);
   };
   const handleHi = (v: number) => {
-    const newHi = Math.max(v, lo);
+    const snapped = snap(v);
+    const newHi = Math.max(snapped, lo);
     onChange(lo === RANGE_MIN ? undefined : lo, newHi === RANGE_MAX ? undefined : newHi);
   };
   const reset = () => onChange(undefined, undefined);
