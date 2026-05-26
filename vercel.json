@@ -11,6 +11,10 @@
     {
       "path": "/api/cron/warm-cache",
       "schedule": "0 * * * *"
+    },
+    {
+      "path": "/api/cron/sync-feratel",
+      "schedule": "15 * * * *"
     }
   ]
 }
