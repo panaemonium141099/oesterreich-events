@@ -112,7 +112,12 @@ export function pickFinalImageHeight(
 
 /**
  * Description upgrade rule:
+ *   - new empty/whitespace                                    → keep existing
  *   - existing empty/whitespace                               → write new
+ *   - existing is unenriched (oldVersion null) AND new differs → write new
+ *     (re-sync from the same scraper source IS the source of truth — when
+ *     a TVB corrects/shortens the text in their CMS the next hourly Feratel
+ *     pull must propagate the change, even if it's shorter than the old text.)
  *   - new is meaningfully longer (>20% by trimmed length)     → write new
  *   - existing not 'claude-v1' AND new comes from claude-v1   → write new (upgrade path)
  *   - otherwise                                               → keep existing
@@ -135,6 +140,10 @@ export function shouldOverwriteDescription(
   if (!trimmedNew) return false;
   const trimmedOld = oldDesc?.trim() ?? '';
   if (!trimmedOld) return true;
+  // Re-sync from the same scraper source: when the old text was never
+  // enriched (oldVersion null), the scraper IS authoritative — any change
+  // from the source must propagate, regardless of length direction.
+  if (!oldVersion && trimmedNew !== trimmedOld) return true;
   if (trimmedNew.length > trimmedOld.length * 1.2) return true;
   if (newVersion === 'claude-v1' && oldVersion !== 'claude-v1') {
     return true;

@@ -15,6 +15,25 @@ import {
   shouldOverwriteAddress,
 } from '@/lib/db/upsert-guards';
 
+describe('shouldOverwriteDescription re-sync path (2026-05-26)', () => {
+  it('overwrites shorter text when old was unenriched (TVB correction)', () => {
+    // Sanja Russegger case: TVB corrects "Frühschoppen wurde gestrichen".
+    // New text may be shorter — must still propagate.
+    const oldText = 'Die Trachtenmusikkapelle feiert. Danach gibt es einen Frühschoppen am Marktplatz.';
+    const newText = 'Die Trachtenmusikkapelle feiert. Danach Hl. Messe.';
+    expect(shouldOverwriteDescription(newText, oldText, null, null)).toBe(true);
+  });
+  it('keeps existing when new is identical', () => {
+    const t = 'Identischer Text bleibt erhalten.';
+    expect(shouldOverwriteDescription(t, t, null, null)).toBe(false);
+  });
+  it('still does NOT overwrite enriched description with shorter raw scrape', () => {
+    const oldEnriched = 'Längerer, von Claude generierter, schöner Beschreibungstext mit Details.';
+    const newScrape = 'Kurzer Listing-Text.';
+    expect(shouldOverwriteDescription(newScrape, oldEnriched, null, 'claude-v1')).toBe(false);
+  });
+});
+
 describe('shouldOverwriteAddress (don\'t-NULL-on-missing)', () => {
   it('keeps existing when new address is null', () => {
     expect(shouldOverwriteAddress(null, 'Hauptstraße 5')).toBe(false);
@@ -144,10 +163,17 @@ describe('shouldOverwriteDescription (fn-14.5 UPSERT-Guard)', () => {
     expect(shouldOverwriteDescription(newer, old, null, null)).toBe(true);
   });
 
-  it('skips when new is only marginally longer (<= 20%)', () => {
+  it('skips when new is only marginally longer AND old was enriched (protects claude-v1)', () => {
     const old = 'a'.repeat(100);
     const newer = 'a'.repeat(115);
-    expect(shouldOverwriteDescription(newer, old, null, null)).toBe(false);
+    expect(shouldOverwriteDescription(newer, old, null, 'claude-v1')).toBe(false);
+  });
+  it('writes when both unenriched and texts differ (re-sync source-of-truth)', () => {
+    // 2026-05-26 behaviour: when the existing description is unenriched, the
+    // scraper IS the source of truth — any difference propagates.
+    const old = 'a'.repeat(100);
+    const newer = 'a'.repeat(115);
+    expect(shouldOverwriteDescription(newer, old, null, null)).toBe(true);
   });
 
   it('writes when new comes from claude-v1 and old did not', () => {
@@ -164,12 +190,12 @@ describe('shouldOverwriteDescription (fn-14.5 UPSERT-Guard)', () => {
     expect(shouldOverwriteDescription('   ', 'real description', null, null)).toBe(false);
   });
 
-  it('compares against trimmed lengths (no winning the 20% rule with whitespace)', () => {
-    // Old has 100 real chars; new has 50 real chars + 200 spaces.
-    // Trimmed-new < trimmed-old, so guard rejects.
+  it('compares against trimmed lengths when old is enriched (whitespace cannot win 20% rule)', () => {
+    // Old has 100 real chars (enriched); new has 50 real chars + 200 spaces.
+    // Trimmed-new < trimmed-old AND enriched → guard rejects.
     const oldDesc = 'a'.repeat(100);
     const newDesc = 'a'.repeat(50) + ' '.repeat(200);
-    expect(shouldOverwriteDescription(newDesc, oldDesc, null, null)).toBe(false);
+    expect(shouldOverwriteDescription(newDesc, oldDesc, null, 'claude-v1')).toBe(false);
   });
 });
 
