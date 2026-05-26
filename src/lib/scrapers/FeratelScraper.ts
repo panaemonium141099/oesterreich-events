@@ -163,7 +163,18 @@ const EVENT_FIELDS = [
   'hasMoreDates',
   'location{place,town,regions,country,coordinate{name,long,lat}}',
   'descriptions(types:[32]){description,type}',
-  'images(count:1,sizes:[54]){urls}',
+  // Feratel image size IDs (probed 2026-05-26):
+  //   1   = 1 KB (tiny thumb)
+  //   2   = 13 KB (small)
+  //   5   = 7 KB (small-ish)
+  //   10  = 69 KB (large — sharp on hero, ~1200px wide)  ← we pick this
+  //   40  = 24 KB (medium)
+  //   50  = 60 KB (large alt)
+  //   54  = 302 redirect / empty — was our previous default and produced
+  //         pixelated hero images because the listing scraper got nothing
+  //         usable back. Replaced 2026-05-26.
+  //   100 = 69 KB (large, identical to 10)
+  'images(count:1,sizes:[10]){urls}',
   'urlFriendlyName',
   'mainCriteria{id,name,value}',
   'eventGroups{id,name}',
