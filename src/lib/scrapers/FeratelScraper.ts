@@ -395,7 +395,18 @@ export class FeratelScraper extends BaseScraper {
     t = t.replace(/^\d{1,2}\.\d{1,2}\.\d{4}/g, '');
 
     // Strip leading day abbreviations: "Mo." "Di." "Mi." "Do." "Fr." "Sa." "So."
-    t = t.replace(/^(Mo|Di|Mi|Do|Fr|Sa|So)\.?\s*/i, '');
+    // The trailing period is MANDATORY — without it the pattern would chop the
+    // start off any word that begins with a day abbreviation:
+    //   "Fronleichnam" → "onleichnam"  (Fr. of "Fronleichnam")
+    //   "Frühschoppen" → "ühschoppen"
+    //   "Salzburg"     → "lzburg"      (Sa. of "Salzburg")
+    //   "Sommerfest"   → "mmerfest"    (So. of "Sommer")
+    //   "Mittwochsmesse" → "ttwochsmesse"
+    //   "Dorffest"     → "rffest"
+    //   "Mondlauf"     → "ndlauf"
+    // The Feratel raw titles that actually use this prefix always include the
+    // period ("Mi.19:00-Uhr…", "Fr. 19:30 Konzert"), so requiring `\.` is safe.
+    t = t.replace(/^(Mo|Di|Mi|Do|Fr|Sa|So)\.\s*/i, '');
 
     // Strip time ranges: "16:00-18:00Uhr" or "19:00-Uhr" or "14:00Uhr"
     t = t.replace(/\d{1,2}:\d{2}(-\d{1,2}:\d{2})?-?\s*Uhr/gi, '');
