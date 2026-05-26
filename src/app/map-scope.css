@@ -384,3 +384,39 @@
   grid-template-columns: repeat(auto-fill, minmax(min(140px, 100%), 1fr));
   gap: 8px;
 }
+
+/* MapV3 price-range dual-thumb slider thumbs.
+   `<input type=range>` thumbs need vendor-prefixed pseudo-elements to be
+   styleable; the parent input also needs pointer-events:none on its body
+   so the bottom (visible) thumb is clickable through the top thumb's
+   transparent track. */
+.mv3-chip-group input[type='range'],
+.mv3-price-slider input[type='range'] {
+  pointer-events: none;
+}
+.mv3-price-slider input[type='range']::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #fff;
+  border: 2px solid #111;
+  cursor: grab;
+  pointer-events: auto;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.18);
+}
+.mv3-price-slider input[type='range']::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #fff;
+  border: 2px solid #111;
+  cursor: grab;
+  pointer-events: auto;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.18);
+}
+.mv3-price-slider input[type='range']::-webkit-slider-thumb:active {
+  cursor: grabbing;
+  transform: scale(1.05);
+}

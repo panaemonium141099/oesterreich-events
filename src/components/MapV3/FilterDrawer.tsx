@@ -22,7 +22,7 @@
  *     so they can no longer overwrite each other.
  */
 import { useEffect, useMemo, useState } from 'react';
-import { T, DATE_PRESETS, PRICE_TIERS, countActiveFilters as countActive, type DatePresetId } from './tokens';
+import { T, DATE_PRESETS, countActiveFilters as countActive, type DatePresetId } from './tokens';
 import { applyDatePreset, defaultDateTo, detectActivePreset } from './datePresets';
 import { CATEGORIES } from '@/lib/categories';
 import { BUNDESLAENDER } from '@/lib/bundeslaender';
@@ -176,17 +176,6 @@ export function FilterDrawer({
       };
     });
   };
-  const togglePriceTier = (id: NonNullable<EventFilters['priceTier']>) => {
-    setDraft((d) => {
-      const list = d.priceTiers ?? (d.priceTier ? [d.priceTier] : []);
-      const next = list.includes(id) ? list.filter((p) => p !== id) : [...list, id];
-      return {
-        ...d,
-        priceTiers: next.length > 0 ? (next as NonNullable<EventFilters['priceTiers']>) : undefined,
-        priceTier: undefined,
-      };
-    });
-  };
   const toggleDistrict = (name: string) => {
     setDraft((d) => {
       const list = d.districts ?? (d.district ? [d.district] : []);
@@ -253,7 +242,6 @@ export function FilterDrawer({
             draftBlIds={draftBlIds}
             toggleBl={toggleBl}
             toggleCategory={toggleCategory}
-            togglePriceTier={togglePriceTier}
             toggleDistrict={toggleDistrict}
             districts={districts}
             activePresetId={activePresetId}
@@ -295,7 +283,6 @@ export function FilterDrawer({
             draftBlIds={draftBlIds}
             toggleBl={toggleBl}
             toggleCategory={toggleCategory}
-            togglePriceTier={togglePriceTier}
             toggleDistrict={toggleDistrict}
             districts={districts}
             activePresetId={activePresetId}
@@ -325,7 +312,6 @@ interface BodyProps {
   draftBlIds: string[];
   toggleBl: (id: string) => void;
   toggleCategory: (cat: string) => void;
-  togglePriceTier: (id: NonNullable<EventFilters['priceTier']>) => void;
   toggleDistrict: (name: string) => void;
   districts: { name: string }[];
   activePresetId: DatePresetId | null;
@@ -341,7 +327,6 @@ function Body({
   draftBlIds,
   toggleBl,
   toggleCategory,
-  togglePriceTier,
   toggleDistrict,
   districts,
   activePresetId,
@@ -357,9 +342,6 @@ function Body({
   );
   const selectedDistricts = new Set(
     draft.districts ?? (draft.district ? [draft.district] : []),
-  );
-  const selectedPriceTiers = new Set<string>(
-    draft.priceTiers ?? (draft.priceTier ? [draft.priceTier] : []),
   );
   return (
     <>
@@ -473,20 +455,123 @@ function Body({
       </FilterBlock>
 
       <FilterBlock label="Preis">
-        <ChipGroup>
-          {PRICE_TIERS.map((t) => (
-            <Chip
-              key={t.id}
-              active={selectedPriceTiers.has(t.id)}
-              onClick={() => togglePriceTier(t.id)}
-            >
-              {t.label}
-            </Chip>
-          ))}
-        </ChipGroup>
+        <PriceRangeSlider
+          min={draft.priceMin}
+          max={draft.priceMax}
+          onChange={(min, max) => setDraft((d) => ({ ...d, priceMin: min, priceMax: max, priceTier: undefined, priceTiers: undefined }))}
+        />
       </FilterBlock>
     </>
   );
+}
+
+/**
+ * Dual-thumb price range slider (0–100€).
+ * 99% of priced events fall in this range — the rare 100€+ tail collapses
+ * into the right edge ("ab 100€"). Events with price_min IS NULL are kept
+ * by the API (`price_min.gte.X or price_min.is.null`); we surface that as
+ * "Events ohne Preisangabe immer enthalten" hint so the user isn't
+ * surprised when the count doesn't collapse to a tiny number.
+ *
+ * Implementation: two overlapping <input type="range"> with z-index swap
+ * based on which thumb is closer to mid — needed because the right thumb
+ * can't be grabbed once both thumbs sit at the same value otherwise.
+ */
+interface PriceRangeSliderProps {
+  min: number | undefined;
+  max: number | undefined;
+  onChange: (min: number | undefined, max: number | undefined) => void;
+}
+function PriceRangeSlider({ min, max, onChange }: PriceRangeSliderProps) {
+  const RANGE_MIN = 0;
+  const RANGE_MAX = 100;
+  const lo = min ?? RANGE_MIN;
+  const hi = max ?? RANGE_MAX;
+  const active = min !== undefined || max !== undefined;
+
+  const handleLo = (v: number) => {
+    const newLo = Math.min(v, hi);
+    onChange(newLo === RANGE_MIN ? undefined : newLo, hi === RANGE_MAX ? undefined : hi);
+  };
+  const handleHi = (v: number) => {
+    const newHi = Math.max(v, lo);
+    onChange(lo === RANGE_MIN ? undefined : lo, newHi === RANGE_MAX ? undefined : newHi);
+  };
+  const reset = () => onChange(undefined, undefined);
+
+  const fmtLabel = () => {
+    if (!active) return 'Alle Preise';
+    if (lo === 0 && hi === 0) return 'Eintritt frei';
+    if (lo === 0) return `bis ${hi} €`;
+    if (hi === RANGE_MAX) return `ab ${lo} €`;
+    return `${lo} € – ${hi} €`;
+  };
+
+  const loPct = (lo / RANGE_MAX) * 100;
+  const hiPct = (hi / RANGE_MAX) * 100;
+
+  return (
+    <div className="mv3-price-slider">
+      <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 14 }}>
+        <span style={{ fontSize: 14, fontWeight: 600, color: T.ink }}>{fmtLabel()}</span>
+        {active && (
+          <button
+            type="button"
+            onClick={reset}
+            style={{ fontSize: 12, color: T.ink50, background: 'transparent', border: 'none', cursor: 'pointer', textDecoration: 'underline', padding: 0, fontFamily: 'inherit' }}
+          >
+            zurücksetzen
+          </button>
+        )}
+      </div>
+      <div style={{ position: 'relative', height: 28 }}>
+        {/* Track */}
+        <div style={{ position: 'absolute', top: 12, left: 0, right: 0, height: 4, background: T.border, borderRadius: 9999 }} />
+        {/* Active fill */}
+        <div style={{ position: 'absolute', top: 12, left: `${loPct}%`, right: `${100 - hiPct}%`, height: 4, background: T.ink, borderRadius: 9999 }} />
+        {/* Lo thumb */}
+        <input
+          type="range"
+          min={RANGE_MIN}
+          max={RANGE_MAX}
+          step={1}
+          value={lo}
+          onChange={(e) => handleLo(parseInt(e.target.value, 10))}
+          aria-label="Preis von"
+          style={priceSliderStyle({ zIndex: lo > RANGE_MAX - 10 ? 3 : 2 })}
+        />
+        {/* Hi thumb */}
+        <input
+          type="range"
+          min={RANGE_MIN}
+          max={RANGE_MAX}
+          step={1}
+          value={hi}
+          onChange={(e) => handleHi(parseInt(e.target.value, 10))}
+          aria-label="Preis bis"
+          style={priceSliderStyle({ zIndex: lo > RANGE_MAX - 10 ? 2 : 3 })}
+        />
+      </div>
+      <div style={{ marginTop: 10, fontSize: 11.5, color: T.ink50 }}>
+        Events ohne Preisangabe werden immer mit angezeigt.
+      </div>
+    </div>
+  );
+}
+
+function priceSliderStyle(opts: { zIndex: number }): React.CSSProperties {
+  return {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    width: '100%',
+    height: 28,
+    background: 'transparent',
+    appearance: 'none',
+    WebkitAppearance: 'none',
+    pointerEvents: 'none',
+    zIndex: opts.zIndex,
+  };
 }
 
 /* ─── Sub-components ───────────────────────────────────────────────────── */
