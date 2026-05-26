@@ -46,6 +46,7 @@ import {
   shouldUpgradeImage,
   pickFinalImageWidth,
   pickFinalImageHeight,
+  shouldOverwriteAddress,
   shouldOverwriteDescription,
   shouldOverwritePrice,
 } from '@/lib/db/upsert-guards';
@@ -148,6 +149,7 @@ interface ExistingRow {
   description: string | null;
   enrichment_version: string | null;
   price_text: string | null;
+  address: string | null;
 }
 
 /** Statuses that the scoring pipeline owns. Everything else (e.g.
@@ -197,7 +199,7 @@ async function prefetchExistingRows(
           'category_locked, category_needs_review, category_reason, category_candidates, slug, ' +
           'publish_status, ' +
           // fn-14.5 UPSERT-Guard fields:
-          'image_url, image_width, image_height, description, enrichment_version, price_text',
+          'image_url, image_width, image_height, description, enrichment_version, price_text, address',
       )
       .in('source_name', uniqueSourceNames)
       .in('source_id', idSlice);
@@ -466,6 +468,17 @@ function toSupabaseRow(
     existing?.price_text ?? null,
   );
 
+  // ─── Address guard (hourly-sync safe) ────────────────────────────
+  // Don't let a re-scrape that no longer carries a street erase an
+  // address that detail-fetch / enrichment populated earlier.
+  const overwriteAddress = shouldOverwriteAddress(
+    event.address ?? null,
+    existing?.address ?? null,
+  );
+  const finalAddress = overwriteAddress
+    ? (event.address ?? null)
+    : (existing?.address ?? null);
+
   // Resolve final guarded values FIRST so every row in the batch
   // carries the SAME key set (otherwise PostgREST's bulk-upsert
   // key-shape normalisation can clobber preserved columns with NULL —
@@ -516,7 +529,7 @@ function toSupabaseRow(
     start_date: event.start_date,
     end_date: event.end_date ?? null,
     location_name: resolved.locationName,
-    address: event.address ?? null,
+    address: finalAddress,
     postal_code: resolved.postalCode,
     bundesland: event.bundesland ?? null,
     category: canonical.category,
@@ -542,7 +555,7 @@ function toSupabaseRow(
     start_date: event.start_date,
     end_date: event.end_date ?? null,
     location_name: resolved.locationName,
-    address: event.address ?? null,
+    address: finalAddress,
     // postal_code is handled below via conditional spread — when
     // resolved.postalCode is null we OMIT the field entirely so the
     // Supabase upsert preserves whatever the existing row has (e.g.

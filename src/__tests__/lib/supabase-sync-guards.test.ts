@@ -12,7 +12,25 @@ import {
   pickFinalImageHeight,
   shouldOverwriteDescription,
   shouldOverwritePrice,
+  shouldOverwriteAddress,
 } from '@/lib/db/upsert-guards';
+
+describe('shouldOverwriteAddress (don\'t-NULL-on-missing)', () => {
+  it('keeps existing when new address is null', () => {
+    expect(shouldOverwriteAddress(null, 'Hauptstraße 5')).toBe(false);
+    expect(shouldOverwriteAddress(undefined, 'Hauptstraße 5')).toBe(false);
+  });
+  it('keeps existing when new address is whitespace', () => {
+    expect(shouldOverwriteAddress('   ', 'Hauptstraße 5')).toBe(false);
+  });
+  it('writes new when existing is empty', () => {
+    expect(shouldOverwriteAddress('Hauptstraße 5', null)).toBe(true);
+    expect(shouldOverwriteAddress('Hauptstraße 5', '')).toBe(true);
+  });
+  it('writes new when both present (re-sync wins for listing field)', () => {
+    expect(shouldOverwriteAddress('Hauptstraße 7', 'Hauptstraße 5')).toBe(true);
+  });
+});
 
 describe('shouldUpgradeImage (fn-14.5 UPSERT-Guard)', () => {
   it('writes when there is no existing URL', () => {

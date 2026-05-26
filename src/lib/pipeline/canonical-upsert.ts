@@ -40,7 +40,7 @@ export async function matchAndUpsert(
       // to let this scraper run clobber already-refined coords.
       const { data: existing } = await supabase
         .from('events')
-        .select('id, venue_id, venue_match_confidence, latitude, longitude, location_name, geocoding_source, slug')
+        .select('id, venue_id, venue_match_confidence, latitude, longitude, location_name, geocoding_source, slug, address, description, image_url, postal_code, city, bundesland, ticket_url')
         .eq('source_id', candidate.source_id)
         .eq('scraper_name', candidate.scraper_name)
         .maybeSingle();
@@ -111,6 +111,38 @@ export async function matchAndUpsert(
           // The refined location_name is usually the canonical venue string
           // the geocoder resolved — keep it in sync with the preserved coords.
           delete payload.location_name;
+        }
+
+        // ─── Don't-NULL-on-missing protection ────────────────────────────
+        // A re-scrape that simply doesn't carry a field anymore (e.g. a
+        // listing-only Feratel pull whose detail page is gone) must NOT
+        // erase data that an earlier run / detail-fetch / enrichment had
+        // populated. For each "soft" field: if the new payload would write
+        // null/empty but the existing row already has a value, drop the
+        // key from the payload so the existing value is preserved.
+        const SOFT_FIELDS: ReadonlyArray<keyof typeof payload & string> = [
+          'address',
+          'description',
+          'image_url',
+          'postal_code',
+          'city',
+          'bundesland',
+          'ticket_url',
+          'location_name',
+        ];
+        for (const f of SOFT_FIELDS) {
+          if (!(f in payload)) continue;
+          const newValRaw = payload[f];
+          const newVal = typeof newValRaw === 'string' ? newValRaw.trim() : newValRaw;
+          const isEmpty = newVal == null || newVal === '';
+          const existingVal = (existing as Record<string, unknown>)[f];
+          const existingHasValue =
+            typeof existingVal === 'string'
+              ? existingVal.trim().length > 0
+              : existingVal != null;
+          if (isEmpty && existingHasValue) {
+            delete payload[f];
+          }
         }
       }
 

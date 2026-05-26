@@ -143,6 +143,28 @@ export function shouldOverwriteDescription(
 }
 
 /**
+ * Address upgrade rule:
+ *   - new is null/whitespace                        → keep existing (don't NULL it out)
+ *   - existing empty/whitespace                     → write new
+ *   - both present                                  → write new
+ *     (a hourly Feratel re-sync MAY update street; if the detail-extract
+ *      enrichment has refined it earlier, the next detail-fetch run
+ *      will re-apply within an hour anyway)
+ *
+ * This is the "don't NULL on missing" rule for `address` — a listing-only
+ * re-scrape that doesn't carry a street anymore must NOT erase an address
+ * that an earlier detail-fetch / enrichment had populated.
+ */
+export function shouldOverwriteAddress(
+  newAddr: string | null | undefined,
+  oldAddr: string | null | undefined,
+): boolean {
+  const trimmedNew = newAddr?.trim() ?? '';
+  if (!trimmedNew) return false;
+  return true;
+}
+
+/**
  * Price-text upgrade rule: only fill when existing is empty. Once a
  * price is on the row we never clobber it from raw scrape data; the
  * enrichment script owns price refinements via its own bulk RPC.
