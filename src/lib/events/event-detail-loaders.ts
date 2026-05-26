@@ -102,7 +102,12 @@ export const getEventBySlugAndDate = unstable_cache(
     return data[0] as Event;
   },
   ['event-by-slug-date'],
-  { revalidate: 3600, tags: ['event'] },
+  // 300s aligns with the page-level ISR stale-time. Was 3600 but that meant
+  // a TVB correction synced into Supabase needed up to an hour to appear
+  // even after ISR revalidated, because the page got the stale row from
+  // this cache instead of refetching. 2026-05-26: dropped to 5min to keep
+  // the "hourly sync" promise honest.
+  { revalidate: 300, tags: ['event'] },
 );
 
 /**
@@ -124,7 +129,8 @@ export const getEventBySlugOnly = unstable_cache(
     return data[0] as Event;
   },
   ['event-by-slug-only'],
-  { revalidate: 3600, tags: ['event'] },
+  // 300s — same reason as event-by-slug-date above.
+  { revalidate: 300, tags: ['event'] },
 );
 
 // ─────────────────────────────────────────────────────────────────────
