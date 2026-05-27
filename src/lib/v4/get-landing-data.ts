@@ -50,6 +50,36 @@ function enrichEvents(rows: Event[], ctx: LandingContext): Array<Event & { state
   return rows.map(e => ({ ...e, state: deriveEventState(e, ctx) }));
 }
 
+/**
+ * Collapse landing-section rows that share the SAME title AND image_url.
+ * Use case: recurring events (Tandemspringen Fromberg jeden Tag, Heuriger
+ * an mehreren Tagen) sonst beanspruchen 2-3 Slots im Hero-Grid und
+ * langweilen visuell. Wir behalten den höchstgescorten (= ersten, da die
+ * Query nach event_score desc sortiert) und kicken die Wiederholungen.
+ *
+ * Dedupe ist konservativ: NUR wenn Titel UND Bild übereinstimmen. Wenn
+ * derselbe Titel mit unterschiedlichen Fotos auftaucht, bleibt beides
+ * drin (zwei verschiedene Ausgaben eines Festivals z.B.).
+ */
+function uniqueByTitleAndImage<T extends { title: string | null; image_url?: string | null }>(events: T[]): T[] {
+  const seen = new Set<string>();
+  const out: T[] = [];
+  for (const e of events) {
+    const titleKey = (e.title ?? '').trim().toLowerCase();
+    if (!titleKey) {
+      // Kein Titel → kein verlässlicher Dedupe-Key. Drin lassen.
+      out.push(e);
+      continue;
+    }
+    const imageKey = (e.image_url ?? '').trim();
+    const key = `${titleKey}::${imageKey}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    out.push(e);
+  }
+  return out;
+}
+
 /* Deterministic category-image fallback for festivals whose parent_event
    has no image_url (90 %+ of the registry data right now). Picks one of
    30 musik-N.jpg from /public/images/categories/ based on a stable hash
@@ -99,6 +129,14 @@ export async function getLandingData(ctx: LandingContext): Promise<LandingData> 
         .limit(6)
     : Promise.resolve({ data: [] as Event[], error: null });
 
+  // WeekendSection rendert 1 Hero + 2× 3 Cards = 7 Slots. Wir ziehen
+  // ~4× soviel als Reserve, dann dedupliziert die uniqueByTitleAndImage-
+  // Pass die Recurring-Events (Tandemspringen Fromberg, Heuriger an N
+  // Tagen, etc.) raus bevor wir auf 7 schneiden — sonst beanspruchen
+  // identische Fotos mehrere Slots im Hero-Grid.
+  const TODAYWEEKEND_LIMIT = 7;
+  const TODAYWEEKEND_POOL = 30;
+
   const [weekendRes, concertsRes, festivalsRes, matchesRes] = await Promise.all([
     // todayWeekend: top events in next 7 days
     supabase
@@ -108,7 +146,7 @@ export async function getLandingData(ctx: LandingContext): Promise<LandingData> 
       .lte('start_date', weekendEnd)
       .eq('publish_status', 'published')
       .order('event_score', { ascending: false })
-      .limit(7),
+      .limit(TODAYWEEKEND_POOL),
     // concerts: music in next 7 days
     supabase
       .from('events')
@@ -133,7 +171,9 @@ export async function getLandingData(ctx: LandingContext): Promise<LandingData> 
     matchQuery,
   ]);
 
-  const todayWeekend = enrichEvents((weekendRes.data ?? []) as unknown as Event[], ctx);
+  const todayWeekend = uniqueByTitleAndImage(
+    enrichEvents((weekendRes.data ?? []) as unknown as Event[], ctx),
+  ).slice(0, TODAYWEEKEND_LIMIT);
   const concerts = enrichEvents((concertsRes.data ?? []) as unknown as Event[], ctx);
   const matches = enrichEvents((matchesRes.data ?? []) as unknown as Event[], ctx);
 
