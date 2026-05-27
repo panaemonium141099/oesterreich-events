@@ -13,11 +13,7 @@ export function V4ArtistsHero() {
             Lieblingskünstler · Such &amp; Folge
           </p>
           <h1 className="m-0 text-[30px] md:text-[44px] font-bold tracking-[-0.035em] text-[var(--v4-ink)] leading-[1.06]" style={{ textWrap: 'balance' }}>
-            Such einen Künstler.{' '}
-            <span style={{ fontFamily: 'var(--font-display, ui-serif), Georgia, serif', fontStyle: 'italic', fontWeight: 300 }}>
-              Wir sagen Bescheid,
-            </span>{' '}
-            wenn er in Österreich spielt.
+            Such einen Künstler. Wir sagen Bescheid, wenn er in Österreich spielt.
           </h1>
           <p className="text-[14px] md:text-[15.5px] text-[var(--v4-ink-70)] mt-3.5 md:mt-5 max-w-[600px] leading-[1.55]">
             Konzerte, Open Airs und Festival-Slots — alles drin.

@@ -13,10 +13,7 @@ export function ArtistTeaserV4({ artists }: ArtistTeaserV4Props) {
         <div>
           <V4Badge kind="match">Lieblingskünstler · nur eingeloggt</V4Badge>
           <h2 className="text-[26px] md:text-[36px] font-bold leading-tight tracking-[-0.025em] mt-3.5 mb-2.5 text-[var(--v4-ink)]">
-            Verpasse keinen Auftritt deiner{' '}
-            <span style={{ fontFamily: 'var(--font-display, ui-serif), Georgia, serif', fontStyle: 'italic', fontWeight: 300 }}>
-              Lieblingskünstler.
-            </span>
+            Verpasse keinen Auftritt deiner Lieblingskünstler.
           </h2>
           <p className="text-[14px] md:text-[15px] text-[var(--v4-ink-70)] leading-snug max-w-[60ch] mb-5">
             Such einen Künstler, folge ihm und wir zeigen dir Konzerte und Festival-Slots in Österreich.

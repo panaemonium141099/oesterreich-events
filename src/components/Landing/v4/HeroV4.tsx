@@ -19,10 +19,7 @@ export function HeroV4() {
           </div>
 
           <h1 className="text-[38px] md:text-[60px] font-bold leading-[1.02] tracking-[-0.035em] text-[var(--v4-ink)] max-w-[20ch]">
-            Finde Events, die{' '}
-            <span style={{ fontFamily: 'var(--font-display, ui-serif), Georgia, serif', fontStyle: 'italic', fontWeight: 300 }}>
-              wirklich zu dir passen.
-            </span>
+            Finde Events, die wirklich zu dir passen.
           </h1>
 
           <p className="text-[14.5px] md:text-[16.5px] leading-snug text-[var(--v4-ink-70)] mt-4 md:mt-6 mb-5 md:mb-8 max-w-[60ch]">

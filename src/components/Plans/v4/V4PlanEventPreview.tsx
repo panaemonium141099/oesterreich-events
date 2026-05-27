@@ -95,10 +95,7 @@ function EventCard({ ev }: { ev: Event }) {
               {ev.category}{ev.tags && ev.tags[0] ? ` · ${ev.tags[0]}` : ''}
             </p>
           )}
-          <h3
-            className="text-[22px] md:text-[28px] leading-tight tracking-[-0.025em] text-[var(--v4-ink)] mt-2"
-            style={{ fontFamily: 'var(--font-display, ui-serif), Georgia, serif', fontStyle: 'italic', fontWeight: 300 }}
-          >
+          <h3 className="text-[22px] md:text-[28px] font-bold leading-tight tracking-[-0.025em] text-[var(--v4-ink)] mt-2">
             {ev.title}
           </h3>
           {ev.description && (

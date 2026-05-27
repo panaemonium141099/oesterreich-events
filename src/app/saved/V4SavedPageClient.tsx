@@ -28,8 +28,7 @@ export function V4SavedPageClient() {
         <div className="max-w-[1180px] mx-auto px-4 md:px-14">
           <p className="text-[10.5px] uppercase tracking-[0.22em] font-semibold text-[var(--v4-ink-50)] mb-3">Meine Pläne</p>
           <h1 className="m-0 text-[30px] md:text-[44px] font-bold tracking-[-0.035em] text-[var(--v4-ink)] leading-[1.06]" style={{ textWrap: 'balance' }}>
-            Was hast du dir{' '}
-            <span style={{ fontFamily: 'var(--font-display, ui-serif), Georgia, serif', fontStyle: 'italic', fontWeight: 300 }}>vorgenommen?</span>
+            Was hast du dir vorgenommen?
           </h1>
         </div>
       </section>

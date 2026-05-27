@@ -132,8 +132,7 @@ export function V4PlanHero({ plan }: Props) {
           </p>
 
           <h1 className="m-0 text-[36px] md:text-[60px] font-bold tracking-[-0.035em] text-[var(--v4-ink)] leading-[1.02] mb-3 max-w-[920px]" style={{ textShadow: '0 2px 12px rgba(0,0,0,0.4)' }}>
-            {lead}
-            <span style={{ fontFamily: 'var(--font-display, ui-serif), Georgia, serif', fontStyle: 'italic', fontWeight: 300 }}>{italic}</span>
+            {lead}{italic}
           </h1>
 
           <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-[13px] md:text-[15px] text-[var(--v4-ink-70)]">
