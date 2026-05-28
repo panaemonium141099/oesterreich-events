@@ -212,6 +212,14 @@ const EVENT_FIELDS = [
 
 const PAGE_SIZE = 50;
 
+/**
+ * Concurrency for region scraping. 131 regions sequentially × ~3s API + 500ms
+ * delay = 450s — blew past Vercel's 300s function timeout. Parallel pool of 6
+ * brings worst case to ~80s while staying well under Feratel's 3500 calls/h IP
+ * limit (≤6 concurrent × ≤10 pages = ≤60 in-flight requests).
+ */
+const SCRAPE_CONCURRENCY = 6;
+
 // ─────────────────── Helper functions ───────────────────
 
 /** Generate a session ID in the format the widget uses */
@@ -324,21 +332,30 @@ export class FeratelScraper extends BaseScraper {
     const allEvents: ScrapedEvent[] = [];
     const sessionId = generateSessionId();
 
-    this.log(`Starting Feratel Deskline scrape across ${REGIONS.length} regions`);
+    this.log(`Starting Feratel Deskline scrape across ${REGIONS.length} regions (parallel, concurrency=${SCRAPE_CONCURRENCY})`);
 
-    for (const region of REGIONS) {
-      try {
-        const events = await this.scrapeRegion(region, sessionId);
-        allEvents.push(...events);
-        this.log(`${region.name}: ${events.length} events (${this.seenEventIds.size} unique total)`);
-      } catch (err) {
-        const msg = err instanceof Error ? err.message : String(err);
-        this.log(`${region.name}: FEHLER - ${msg}`);
+    // Parallel pool. 128 regions × sequential = >300s timeout on Vercel.
+    // Concurrency 6 stays well under Feratel's 3500 calls/h IP limit
+    // (worst case ~6 concurrent × 10 pages = 60 in-flight req — fine).
+    // seenEventIds Set is safe under Node's single-threaded event loop —
+    // any race produces a few extra dupes the DB upsert (PK) handles cleanly.
+    let cursor = 0;
+    const worker = async (): Promise<void> => {
+      while (cursor < REGIONS.length) {
+        const idx = cursor++;
+        const region = REGIONS[idx];
+        try {
+          const events = await this.scrapeRegion(region, sessionId);
+          allEvents.push(...events);
+          this.log(`${region.name}: ${events.length} events (${this.seenEventIds.size} unique total)`);
+        } catch (err) {
+          const msg = err instanceof Error ? err.message : String(err);
+          this.log(`${region.name}: FEHLER - ${msg}`);
+        }
       }
+    };
 
-      // Rate limit between regions
-      await this.rateLimit();
-    }
+    await Promise.all(Array.from({ length: SCRAPE_CONCURRENCY }, () => worker()));
 
     this.log(`Feratel scrape complete: ${allEvents.length} events from ${REGIONS.length} regions`);
     return allEvents;
