@@ -1,0 +1,311 @@
+# Feratel / Deskline TOSC5 — Active Region Endpoints
+#
+# Generated: 2026-05-28T15:00:12.839Z
+# Method:    4-phase slug bruteforce gegen webapi.deskline.net
+#            Phase 1:    88 known codes — alle 88 verifiziert
+#            Phase 2:   785 candidates (regions/Bezirke) — 9 neue
+#            Phase 3: 1.780 expanded sweep (Tourismusregionen) — 7 neue
+#            Phase 4:10.000 GeoNames-AT sweep (Gemeinden) — 27 neue
+#            Total probed: 12.653 unique slugs
+#
+# Required headers (sonst 403/400):
+#   Accept: application/json
+#   DW-Source: desklineweb
+#   DW-SessionId: L<unix-ms>
+#   User-Agent: <browser-UA>
+#
+# URL pattern:  https://webapi.deskline.net/<slug>/de/events
+# Pagination:   ?fields=<csv>&sortingFields=date&pageNo=<n>&pageSize=<n>
+# Rate limit:   3.500 calls/h per IP (HTTP 429: "API calls quota exceeded!")
+#
+# Verification: ALLE Einträge doppelt-verifiziert (initial probe + final-verify
+#               run) mit HTTP 200 + paging.totalRecordCount >= 1.
+#
+# Total active: 131 regions
+# Total events: 29 876
+#
+# Mirror-Slugs (gleicher Datenbestand, ggf. dedupen):
+#   - kaernten / kaerntencard / kaerntenevents → alle 2403 events Kärnten
+
+
+# ─────────────────── Burgenland ───────────────────
+https://webapi.deskline.net/burgenland/de/events   # burgenland               958 events  — Burgenland
+https://webapi.deskline.net/oberwart/de/events   # oberwart                 168 events  — Oberwart
+https://webapi.deskline.net/lutzmannsburg/de/events   # lutzmannsburg            128 events  — Lutzmannsburg
+https://webapi.deskline.net/eisenstadt/de/events   # eisenstadt               110 events  — Eisenstadt
+https://webapi.deskline.net/illmitz/de/events   # illmitz                   62 events  — Illmitz
+https://webapi.deskline.net/eisenberg/de/events   # eisenberg                 44 events  — Eisenberg an der Pinka
+https://webapi.deskline.net/podersdorf/de/events   # podersdorf                42 events  — Podersdorf am See
+https://webapi.deskline.net/gols/de/events   # gols                      34 events  — Gols
+https://webapi.deskline.net/rust/de/events   # rust                      33 events  — Rust
+https://webapi.deskline.net/jois/de/events   # jois                      27 events  — Jois
+
+# ─────────────────── Niederösterreich ───────────────────
+https://webapi.deskline.net/neustadt/de/events   # neustadt                  72 events  — Neustadt (vermutl. Wiener Neustadt)
+https://webapi.deskline.net/gmuend/de/events   # gmuend                    61 events  — Gmuend
+
+# ─────────────────── Oberösterreich ───────────────────
+https://webapi.deskline.net/salzkammergut/de/events   # salzkammergut            804 events  — Salzkammergut
+https://webapi.deskline.net/donauooe/de/events   # donauooe                 465 events  — Donau Oberösterreich
+https://webapi.deskline.net/pyhrn/de/events   # pyhrn                    414 events  — Pyhrn-Priel
+https://webapi.deskline.net/traunseealmtal/de/events   # traunseealmtal           366 events  — Traunsee-Almtal
+https://webapi.deskline.net/wels/de/events   # wels                     205 events  — Wels
+https://webapi.deskline.net/linz/de/events   # linz                      19 events  — Linz
+https://webapi.deskline.net/reichenau/de/events   # reichenau                 11 events  — Reichenau im Mühlkreis
+https://webapi.deskline.net/waldburg/de/events   # waldburg                   3 events  — Waldburg (Mühlviertel)
+
+# ─────────────────── Salzburg ───────────────────
+https://webapi.deskline.net/blsalzb/de/events   # blsalzb                 4127 events  — SalzburgerLand
+https://webapi.deskline.net/lungau/de/events   # lungau                   452 events  — Lungau
+https://webapi.deskline.net/tennengau/de/events   # tennengau                440 events  — Tennengau
+https://webapi.deskline.net/sportwelt/de/events   # sportwelt                392 events  — Salzburger Sportwelt (Ski Amadé)
+https://webapi.deskline.net/seenland/de/events   # seenland                 329 events  — Salzburger Seenland
+https://webapi.deskline.net/gastein/de/events   # gastein                  265 events  — Gastein
+https://webapi.deskline.net/snowspace/de/events   # snowspace                222 events  — Snow Space Salzburg
+https://webapi.deskline.net/fuschlsee/de/events   # fuschlsee                194 events  — Fuschlseeregion
+https://webapi.deskline.net/werfenweng/de/events   # werfenweng               154 events  — Werfenweng
+https://webapi.deskline.net/wagrain/de/events   # wagrain                   98 events  — Wagrain-Kleinarl
+https://webapi.deskline.net/abtenau/de/events   # abtenau                   93 events  — Abtenau
+https://webapi.deskline.net/schmitten/de/events   # schmitten                 91 events  — Schmittenhöhe (Zell am See)
+https://webapi.deskline.net/zellkaprun/de/events   # zellkaprun                89 events  — Zell am See-Kaprun
+https://webapi.deskline.net/rauris/de/events   # rauris                    83 events  — Rauris
+https://webapi.deskline.net/hochkoenig/de/events   # hochkoenig                77 events  — Hochkoenig
+https://webapi.deskline.net/badvigaun/de/events   # badvigaun                 76 events  — Bad Vigaun (Tennengau)
+https://webapi.deskline.net/grossarl/de/events   # grossarl                  72 events  — Grossarltal
+https://webapi.deskline.net/filzmoos/de/events   # filzmoos                  66 events  — Filzmoos
+https://webapi.deskline.net/flachau/de/events   # flachau                   66 events  — Flachau
+https://webapi.deskline.net/golling/de/events   # golling                   59 events  — Golling
+https://webapi.deskline.net/altenmarkt/de/events   # altenmarkt                55 events  — Altenmarkt-Zauchensee
+https://webapi.deskline.net/hallein/de/events   # hallein                   51 events  — Hallein
+https://webapi.deskline.net/radstadt/de/events   # radstadt                  49 events  — Radstadt
+https://webapi.deskline.net/werfen/de/events   # werfen                    46 events  — Werfen
+https://webapi.deskline.net/krimml/de/events   # krimml                    39 events  — Krimml
+https://webapi.deskline.net/kuchl/de/events   # kuchl                     37 events  — Kuchl (Tennengau)
+https://webapi.deskline.net/uttendorf/de/events   # uttendorf                 33 events  — Uttendorf
+https://webapi.deskline.net/annaberg/de/events   # annaberg                  23 events  — Annaberg-Lungoetz
+https://webapi.deskline.net/russbach/de/events   # russbach                  19 events  — Russbach am Pass Gschütt
+https://webapi.deskline.net/embach/de/events   # embach                    18 events  — Embach (Pinzgau)
+https://webapi.deskline.net/elsbethen/de/events   # elsbethen                 17 events  — Elsbethen (Salzburg-Umgebung)
+https://webapi.deskline.net/viehhofen/de/events   # viehhofen                 15 events  — Viehhofen
+https://webapi.deskline.net/eben/de/events   # eben                      15 events  — Eben im Pongau
+https://webapi.deskline.net/stkoloman/de/events   # stkoloman                 12 events  — St. Koloman (Tennengau)
+https://webapi.deskline.net/groedig/de/events   # groedig                    9 events  — Grödig (Salzburg-Umgebung)
+https://webapi.deskline.net/eugendorf/de/events   # eugendorf                  8 events  — Eugendorf
+https://webapi.deskline.net/anthering/de/events   # anthering                  1 events  — Anthering (Flachgau)
+
+# ─────────────────── Steiermark ───────────────────
+https://webapi.deskline.net/oststeiermark/de/events   # oststeiermark            634 events  — Oststeiermark
+https://webapi.deskline.net/thermenland/de/events   # thermenland              348 events  — Thermenland Steiermark
+https://webapi.deskline.net/dachstein/de/events   # dachstein                319 events  — Dachstein-Salzkammergut
+https://webapi.deskline.net/ausseerland/de/events   # ausseerland              244 events  — Ausseerland-Salzkammergut
+https://webapi.deskline.net/tauplitz/de/events   # tauplitz                 244 events  — Tauplitz / Tauplitzalm
+https://webapi.deskline.net/spielberg/de/events   # spielberg                119 events  — Spielberg (Red Bull Ring, Murtal)
+https://webapi.deskline.net/erzberg/de/events   # erzberg                   95 events  — Erzberg / Eisenerz
+https://webapi.deskline.net/gesaeuse/de/events   # gesaeuse                  83 events  — Gesaeuse
+https://webapi.deskline.net/frein/de/events   # frein                     83 events  — Frein an der Mürz
+https://webapi.deskline.net/ramsau/de/events   # ramsau                    39 events  — Ramsau am Dachstein
+
+# ─────────────────── Tirol ───────────────────
+https://webapi.deskline.net/innsbruck/de/events   # innsbruck                331 events  — Innsbruck
+https://webapi.deskline.net/zillertal/de/events   # zillertal                294 events  — Zillertal
+https://webapi.deskline.net/osttirol/de/events   # osttirol                 266 events  — Osttirol
+https://webapi.deskline.net/seefeld/de/events   # seefeld                  232 events  — Seefeld
+https://webapi.deskline.net/alpbach/de/events   # alpbach                  221 events  — Alpbachtal
+https://webapi.deskline.net/kufstein/de/events   # kufstein                 209 events  — Kufstein
+https://webapi.deskline.net/stubaital/de/events   # stubaital                180 events  — Stubaital
+https://webapi.deskline.net/innsbruckcard/de/events   # innsbruckcard            175 events  — Innsbruck Card
+https://webapi.deskline.net/pillerseetal/de/events   # pillerseetal             168 events  — Pillerseetal
+https://webapi.deskline.net/oetztal/de/events   # oetztal                  164 events  — Oetztal
+https://webapi.deskline.net/zillertalarena/de/events   # zillertalarena           148 events  — Zillertal Arena
+https://webapi.deskline.net/halltirol/de/events   # halltirol                141 events  — Hall in Tirol
+https://webapi.deskline.net/imst/de/events   # imst                     140 events  — Imst-Gurgltal
+https://webapi.deskline.net/tvbpitztal/de/events   # tvbpitztal               136 events  — Pitztal
+https://webapi.deskline.net/kitzski/de/events   # kitzski                  126 events  — KitzSki / Kitzbühel-Kirchberg
+https://webapi.deskline.net/lech/de/events   # lech                     119 events  — Lech-Zuers
+https://webapi.deskline.net/reutte/de/events   # reutte                   119 events  — Reutte-Naturparkregion
+https://webapi.deskline.net/hochfuegen/de/events   # hochfuegen               118 events  — Hochfügen
+https://webapi.deskline.net/wipptal/de/events   # wipptal                   89 events  — Wipptal
+https://webapi.deskline.net/kaiserwinkl/de/events   # kaiserwinkl               87 events  — Kaiserwinkl
+https://webapi.deskline.net/fischen/de/events   # fischen                   78 events  — Fischen / Tannheimer Tal
+https://webapi.deskline.net/hochpustertal/de/events   # hochpustertal             74 events  — Hochpustertal
+https://webapi.deskline.net/lechtal/de/events   # lechtal                   56 events  — Lechtal
+https://webapi.deskline.net/serfaus/de/events   # serfaus                   50 events  — Serfaus-Fiss-Ladis
+https://webapi.deskline.net/arlberg/de/events   # arlberg                   41 events  — Arlberg
+https://webapi.deskline.net/stanton/de/events   # stanton                   41 events  — St. Anton am Arlberg
+https://webapi.deskline.net/galtuer/de/events   # galtuer                   39 events  — Galtür
+https://webapi.deskline.net/ischgl/de/events   # ischgl                    39 events  — Ischgl-Paznaun
+https://webapi.deskline.net/kappl/de/events   # kappl                     39 events  — Kappl (Paznaun)
+https://webapi.deskline.net/kirchberg/de/events   # kirchberg                 33 events  — Kirchberg in Tirol
+https://webapi.deskline.net/mayrhofen/de/events   # mayrhofen                 27 events  — Mayrhofen
+https://webapi.deskline.net/defereggen/de/events   # defereggen                17 events  — Defereggental
+https://webapi.deskline.net/kaltenbach/de/events   # kaltenbach                14 events  — Kaltenbach (Zillertal)
+
+# ─────────────────── Vorarlberg ───────────────────
+https://webapi.deskline.net/bludenz/de/events   # bludenz                  235 events  — Bludenz
+https://webapi.deskline.net/klostertal/de/events   # klostertal                68 events  — Klostertal
+https://webapi.deskline.net/rieden/de/events   # rieden                    36 events  — Rieden
+https://webapi.deskline.net/bezau/de/events   # bezau                      1 events  — Bezau (Bregenzerwald)
+https://webapi.deskline.net/reuthe/de/events   # reuthe                     1 events  — Reuthe (Bregenzerwald)
+https://webapi.deskline.net/bizau/de/events   # bizau                      1 events  — Bizau (Bregenzerwald)
+
+# ─────────────────── Kärnten ───────────────────
+https://webapi.deskline.net/kaernten/de/events   # kaernten                2403 events  — Kaernten
+https://webapi.deskline.net/kaerntencard/de/events   # kaerntencard            2403 events  — Kärnten Card (mirror)
+https://webapi.deskline.net/kaerntenevents/de/events   # kaerntenevents          2403 events  — Kärnten Events (mirror)
+https://webapi.deskline.net/hohetauern/de/events   # hohetauern               721 events  — Hohe Tauern
+https://webapi.deskline.net/badkleinkirchheim/de/events   # badkleinkirchheim        683 events  — Bad Kleinkirchheim
+https://webapi.deskline.net/woerthersee/de/events   # woerthersee              637 events  — Woerthersee
+https://webapi.deskline.net/klagenfurt/de/events   # klagenfurt               462 events  — Klagenfurt
+https://webapi.deskline.net/klopeinersee/de/events   # klopeinersee             255 events  — Klopeiner See / Südkärnten
+https://webapi.deskline.net/feldamsee/de/events   # feldamsee                218 events  — Feld am See
+https://webapi.deskline.net/nationalpark/de/events   # nationalpark             169 events  — Nationalpark Region
+https://webapi.deskline.net/weissensee/de/events   # weissensee               166 events  — Weissensee
+https://webapi.deskline.net/nassfeld/de/events   # nassfeld                 152 events  — Nassfeld-Pressegger See
+https://webapi.deskline.net/villach/de/events   # villach                  119 events  — Villach
+https://webapi.deskline.net/rosental/de/events   # rosental                  98 events  — Rosental
+https://webapi.deskline.net/lesachtal/de/events   # lesachtal                 90 events  — Lesachtal
+https://webapi.deskline.net/kirchbach/de/events   # kirchbach                 55 events  — Kirchbach im Gailtal
+https://webapi.deskline.net/rennweg/de/events   # rennweg                   23 events  — Rennweg am Katschberg
+https://webapi.deskline.net/heiligenblut/de/events   # heiligenblut              21 events  — Heiligenblut am Großglockner
+https://webapi.deskline.net/hochrindl/de/events   # hochrindl                 21 events  — Hochrindl (Nockberge)
+https://webapi.deskline.net/malta/de/events   # malta                      9 events  — Malta (Maltatal Hohe Tauern)
+https://webapi.deskline.net/falkert/de/events   # falkert                    8 events  — Falkert / Nockberge
+
+# ─────────────────── Unknown ───────────────────
+https://webapi.deskline.net/oberbuch/de/events   # oberbuch                 140 events  — Oberbuch
+https://webapi.deskline.net/lahnstein/de/events   # lahnstein                 65 events  — Lahnstein
+https://webapi.deskline.net/kohlgrub/de/events   # kohlgrub                  42 events  — Kohlgrub
+https://webapi.deskline.net/hochwald/de/events   # hochwald                  34 events  — Hochwald
+
+# === Plain slug list ===
+# burgenland
+# oberwart
+# lutzmannsburg
+# eisenstadt
+# illmitz
+# eisenberg
+# podersdorf
+# gols
+# rust
+# jois
+# neustadt
+# gmuend
+# salzkammergut
+# donauooe
+# pyhrn
+# traunseealmtal
+# wels
+# linz
+# reichenau
+# waldburg
+# blsalzb
+# lungau
+# tennengau
+# sportwelt
+# seenland
+# gastein
+# snowspace
+# fuschlsee
+# werfenweng
+# wagrain
+# abtenau
+# schmitten
+# zellkaprun
+# rauris
+# hochkoenig
+# badvigaun
+# grossarl
+# filzmoos
+# flachau
+# golling
+# altenmarkt
+# hallein
+# radstadt
+# werfen
+# krimml
+# kuchl
+# uttendorf
+# annaberg
+# russbach
+# embach
+# elsbethen
+# viehhofen
+# eben
+# stkoloman
+# groedig
+# eugendorf
+# anthering
+# oststeiermark
+# thermenland
+# dachstein
+# ausseerland
+# tauplitz
+# spielberg
+# erzberg
+# gesaeuse
+# frein
+# ramsau
+# innsbruck
+# zillertal
+# osttirol
+# seefeld
+# alpbach
+# kufstein
+# stubaital
+# innsbruckcard
+# pillerseetal
+# oetztal
+# zillertalarena
+# halltirol
+# imst
+# tvbpitztal
+# kitzski
+# lech
+# reutte
+# hochfuegen
+# wipptal
+# kaiserwinkl
+# fischen
+# hochpustertal
+# lechtal
+# serfaus
+# arlberg
+# stanton
+# galtuer
+# ischgl
+# kappl
+# kirchberg
+# mayrhofen
+# defereggen
+# kaltenbach
+# bludenz
+# klostertal
+# rieden
+# bezau
+# reuthe
+# bizau
+# kaernten
+# kaerntencard
+# kaerntenevents
+# hohetauern
+# badkleinkirchheim
+# woerthersee
+# klagenfurt
+# klopeinersee
+# feldamsee
+# nationalpark
+# weissensee
+# nassfeld
+# villach
+# rosental
+# lesachtal
+# kirchbach
+# rennweg
+# heiligenblut
+# hochrindl
+# malta
+# falkert
+# oberbuch
+# lahnstein
+# kohlgrub
+# hochwald

@@ -26,128 +26,158 @@ interface FeratelRegionConfig {
 // Each returns 200 OK with event data.
 
 const REGIONS: FeratelRegionConfig[] = [
+  // Generated from feratel-active-urls.txt (2026-05-28 4-phase bruteforce: 12.653 slugs
+  // probed, 131 active, 3 mirrors skipped — kaerntencard/kaerntenevents/innsbruckcard
+  // are duplicate views of canonical regions and would double-count events).
+
   // ── Burgenland ──
-  { code: 'burgenland', name: 'Burgenland', bundesland: 'Burgenland', fallbackLat: 47.845, fallbackLng: 16.525 },
-
-  // ── Salzburg ──
-  { code: 'blsalzb', name: 'SalzburgerLand', bundesland: 'Salzburg', fallbackLat: 47.349, fallbackLng: 13.060 },
-  { code: 'gastein', name: 'Gastein', bundesland: 'Salzburg', fallbackLat: 47.114, fallbackLng: 13.133 },
-  { code: 'lungau', name: 'Lungau', bundesland: 'Salzburg', fallbackLat: 47.075, fallbackLng: 13.685 },
-  { code: 'tennengau', name: 'Tennengau', bundesland: 'Salzburg', fallbackLat: 47.568, fallbackLng: 13.190 },
-  { code: 'hochkoenig', name: 'Hochkoenig', bundesland: 'Salzburg', fallbackLat: 47.420, fallbackLng: 13.075 },
-  { code: 'fuschlsee', name: 'Fuschlseeregion', bundesland: 'Salzburg', fallbackLat: 47.786, fallbackLng: 13.310 },
-  { code: 'grossarl', name: 'Grossarltal', bundesland: 'Salzburg', fallbackLat: 47.238, fallbackLng: 13.193 },
-  { code: 'radstadt', name: 'Radstadt', bundesland: 'Salzburg', fallbackLat: 47.382, fallbackLng: 13.461 },
-  { code: 'flachau', name: 'Flachau', bundesland: 'Salzburg', fallbackLat: 47.340, fallbackLng: 13.392 },
-  { code: 'wagrain', name: 'Wagrain-Kleinarl', bundesland: 'Salzburg', fallbackLat: 47.333, fallbackLng: 13.300 },
-  { code: 'altenmarkt', name: 'Altenmarkt-Zauchensee', bundesland: 'Salzburg', fallbackLat: 47.381, fallbackLng: 13.425 },
-  { code: 'hallein', name: 'Hallein', bundesland: 'Salzburg', fallbackLat: 47.687, fallbackLng: 13.098 },
-  { code: 'werfen', name: 'Werfen', bundesland: 'Salzburg', fallbackLat: 47.479, fallbackLng: 13.189 },
-  { code: 'abtenau', name: 'Abtenau', bundesland: 'Salzburg', fallbackLat: 47.564, fallbackLng: 13.349 },
-  { code: 'golling', name: 'Golling', bundesland: 'Salzburg', fallbackLat: 47.592, fallbackLng: 13.167 },
-  { code: 'annaberg', name: 'Annaberg-Lungoetz', bundesland: 'Salzburg', fallbackLat: 47.536, fallbackLng: 13.410 },
-  { code: 'uttendorf', name: 'Uttendorf', bundesland: 'Salzburg', fallbackLat: 47.277, fallbackLng: 12.566 },
-  { code: 'krimml', name: 'Krimml', bundesland: 'Salzburg', fallbackLat: 47.222, fallbackLng: 12.172 },
-
-  // ── Kärnten ──
-  { code: 'kaernten', name: 'Kaernten', bundesland: 'Kärnten', fallbackLat: 46.724, fallbackLng: 14.091 },
-  { code: 'woerthersee', name: 'Woerthersee', bundesland: 'Kärnten', fallbackLat: 46.627, fallbackLng: 14.138 },
-  { code: 'nassfeld', name: 'Nassfeld-Pressegger See', bundesland: 'Kärnten', fallbackLat: 46.559, fallbackLng: 13.280 },
-  { code: 'badkleinkirchheim', name: 'Bad Kleinkirchheim', bundesland: 'Kärnten', fallbackLat: 46.813, fallbackLng: 13.793 },
-  { code: 'villach', name: 'Villach', bundesland: 'Kärnten', fallbackLat: 46.611, fallbackLng: 13.851 },
-
-  // ── Tirol ──
-  { code: 'innsbruck', name: 'Innsbruck', bundesland: 'Tirol', fallbackLat: 47.260, fallbackLng: 11.395 },
-  { code: 'zillertal', name: 'Zillertal', bundesland: 'Tirol', fallbackLat: 47.169, fallbackLng: 11.875 },
-  { code: 'oetztal', name: 'Oetztal', bundesland: 'Tirol', fallbackLat: 47.014, fallbackLng: 10.860 },
-  { code: 'stubaital', name: 'Stubaital', bundesland: 'Tirol', fallbackLat: 47.085, fallbackLng: 11.310 },
-  { code: 'seefeld', name: 'Seefeld', bundesland: 'Tirol', fallbackLat: 47.330, fallbackLng: 11.188 },
-  { code: 'kufstein', name: 'Kufstein', bundesland: 'Tirol', fallbackLat: 47.583, fallbackLng: 12.166 },
-  { code: 'serfaus', name: 'Serfaus-Fiss-Ladis', bundesland: 'Tirol', fallbackLat: 47.039, fallbackLng: 10.602 },
-  { code: 'ischgl', name: 'Ischgl-Paznaun', bundesland: 'Tirol', fallbackLat: 47.010, fallbackLng: 10.293 },
-  { code: 'lech', name: 'Lech-Zuers', bundesland: 'Tirol', fallbackLat: 47.211, fallbackLng: 10.142 },
-  { code: 'wipptal', name: 'Wipptal', bundesland: 'Tirol', fallbackLat: 47.085, fallbackLng: 11.460 },
-  { code: 'mayrhofen', name: 'Mayrhofen', bundesland: 'Tirol', fallbackLat: 47.160, fallbackLng: 11.862 },
-  { code: 'osttirol', name: 'Osttirol', bundesland: 'Tirol', fallbackLat: 46.828, fallbackLng: 12.770 },
-  { code: 'tvbpitztal', name: 'Pitztal', bundesland: 'Tirol', fallbackLat: 47.014, fallbackLng: 10.764 },
-  { code: 'pillerseetal', name: 'Pillerseetal', bundesland: 'Tirol', fallbackLat: 47.449, fallbackLng: 12.582 },
-  { code: 'lechtal', name: 'Lechtal', bundesland: 'Tirol', fallbackLat: 47.261, fallbackLng: 10.555 },
-  { code: 'reutte', name: 'Reutte-Naturparkregion', bundesland: 'Tirol', fallbackLat: 47.485, fallbackLng: 10.718 },
-  { code: 'imst', name: 'Imst-Gurgltal', bundesland: 'Tirol', fallbackLat: 47.245, fallbackLng: 10.740 },
-  { code: 'kirchberg', name: 'Kirchberg in Tirol', bundesland: 'Tirol', fallbackLat: 47.449, fallbackLng: 12.320 },
-  { code: 'stanton', name: 'St. Anton am Arlberg', bundesland: 'Tirol', fallbackLat: 47.128, fallbackLng: 10.268 },
-  { code: 'arlberg', name: 'Arlberg', bundesland: 'Tirol', fallbackLat: 47.130, fallbackLng: 10.212 },
-
-  // ── Steiermark ──
-  { code: 'thermenland', name: 'Thermenland Steiermark', bundesland: 'Steiermark', fallbackLat: 46.878, fallbackLng: 16.020 },
-  { code: 'oststeiermark', name: 'Oststeiermark', bundesland: 'Steiermark', fallbackLat: 47.180, fallbackLng: 15.900 },
-  { code: 'dachstein', name: 'Dachstein-Salzkammergut', bundesland: 'Steiermark', fallbackLat: 47.530, fallbackLng: 13.627 },
-  { code: 'ausseerland', name: 'Ausseerland-Salzkammergut', bundesland: 'Steiermark', fallbackLat: 47.608, fallbackLng: 13.783 },
-  { code: 'gesaeuse', name: 'Gesaeuse', bundesland: 'Steiermark', fallbackLat: 47.577, fallbackLng: 14.627 },
-
-  // ── Oberösterreich ──
-  { code: 'salzkammergut', name: 'Salzkammergut', bundesland: 'Oberösterreich', fallbackLat: 47.714, fallbackLng: 13.621 },
-  { code: 'wels', name: 'Wels', bundesland: 'Oberösterreich', fallbackLat: 48.160, fallbackLng: 14.025 },
-  { code: 'linz', name: 'Linz', bundesland: 'Oberösterreich', fallbackLat: 48.306, fallbackLng: 14.286 },
+  { code: 'burgenland', name: 'Burgenland', bundesland: 'Burgenland', fallbackLat: 47.845, fallbackLng: 16.525 },  // 958 events
+  { code: 'oberwart', name: 'Oberwart', bundesland: 'Burgenland', fallbackLat: 47.286, fallbackLng: 16.211 },  // 168 events
+  { code: 'lutzmannsburg', name: 'Lutzmannsburg', bundesland: 'Burgenland', fallbackLat: 47.452, fallbackLng: 16.56 },  // 128 events
+  { code: 'eisenstadt', name: 'Eisenstadt', bundesland: 'Burgenland', fallbackLat: 47.846, fallbackLng: 16.526 },  // 110 events
+  { code: 'illmitz', name: 'Illmitz', bundesland: 'Burgenland', fallbackLat: 47.77, fallbackLng: 16.802 },  // 62 events
+  { code: 'eisenberg', name: 'Eisenberg an der Pinka', bundesland: 'Burgenland', fallbackLat: 47.689, fallbackLng: 16.531 },  // 44 events
+  { code: 'podersdorf', name: 'Podersdorf am See', bundesland: 'Burgenland', fallbackLat: 47.852, fallbackLng: 16.847 },  // 42 events
+  { code: 'gols', name: 'Gols', bundesland: 'Burgenland', fallbackLat: 47.689, fallbackLng: 16.531 },  // 34 events
+  { code: 'rust', name: 'Rust', bundesland: 'Burgenland', fallbackLat: 47.798, fallbackLng: 16.679 },  // 33 events
+  { code: 'jois', name: 'Jois', bundesland: 'Burgenland', fallbackLat: 47.969, fallbackLng: 16.788 },  // 27 events
 
   // ── Niederösterreich ──
-  { code: 'gmuend', name: 'Gmuend', bundesland: 'Niederösterreich', fallbackLat: 48.770, fallbackLng: 14.978 },
+  { code: 'neustadt', name: 'Neustadt (vermutl. Wiener Neustadt)', bundesland: 'Niederösterreich', fallbackLat: 48.108, fallbackLng: 15.805 },  // 72 events
+  { code: 'gmuend', name: 'Gmuend', bundesland: 'Niederösterreich', fallbackLat: 48.77, fallbackLng: 14.978 },  // 61 events
+
+  // ── Oberösterreich ──
+  { code: 'salzkammergut', name: 'Salzkammergut', bundesland: 'Oberösterreich', fallbackLat: 47.714, fallbackLng: 13.621 },  // 804 events
+  { code: 'donauooe', name: 'Donau Oberösterreich', bundesland: 'Oberösterreich', fallbackLat: 48.305, fallbackLng: 14.3 },  // 465 events
+  { code: 'pyhrn', name: 'Pyhrn-Priel', bundesland: 'Oberösterreich', fallbackLat: 47.715, fallbackLng: 14.116 },  // 414 events
+  { code: 'traunseealmtal', name: 'Traunsee-Almtal', bundesland: 'Oberösterreich', fallbackLat: 47.862, fallbackLng: 13.789 },  // 366 events
+  { code: 'wels', name: 'Wels', bundesland: 'Oberösterreich', fallbackLat: 48.16, fallbackLng: 14.025 },  // 205 events
+  { code: 'linz', name: 'Linz', bundesland: 'Oberösterreich', fallbackLat: 48.306, fallbackLng: 14.286 },  // 19 events
+  { code: 'reichenau', name: 'Reichenau im Mühlkreis', bundesland: 'Oberösterreich', fallbackLat: 48.025, fallbackLng: 14.105 },  // 11 events
+  { code: 'waldburg', name: 'Waldburg (Mühlviertel)', bundesland: 'Oberösterreich', fallbackLat: 48.025, fallbackLng: 14.105 },  // 3 events
+
+  // ── Salzburg ──
+  { code: 'blsalzb', name: 'SalzburgerLand', bundesland: 'Salzburg', fallbackLat: 47.349, fallbackLng: 13.06 },  // 4127 events
+  { code: 'lungau', name: 'Lungau', bundesland: 'Salzburg', fallbackLat: 47.075, fallbackLng: 13.685 },  // 452 events
+  { code: 'tennengau', name: 'Tennengau', bundesland: 'Salzburg', fallbackLat: 47.568, fallbackLng: 13.19 },  // 440 events
+  { code: 'sportwelt', name: 'Salzburger Sportwelt (Ski Amadé)', bundesland: 'Salzburg', fallbackLat: 47.349, fallbackLng: 13.06 },  // 392 events
+  { code: 'seenland', name: 'Salzburger Seenland', bundesland: 'Salzburg', fallbackLat: 47.349, fallbackLng: 13.06 },  // 329 events
+  { code: 'gastein', name: 'Gastein', bundesland: 'Salzburg', fallbackLat: 47.114, fallbackLng: 13.133 },  // 265 events
+  { code: 'snowspace', name: 'Snow Space Salzburg', bundesland: 'Salzburg', fallbackLat: 47.349, fallbackLng: 13.06 },  // 222 events
+  { code: 'fuschlsee', name: 'Fuschlseeregion', bundesland: 'Salzburg', fallbackLat: 47.786, fallbackLng: 13.31 },  // 194 events
+  { code: 'werfenweng', name: 'Werfenweng', bundesland: 'Salzburg', fallbackLat: 47.349, fallbackLng: 13.06 },  // 154 events
+  { code: 'wagrain', name: 'Wagrain-Kleinarl', bundesland: 'Salzburg', fallbackLat: 47.333, fallbackLng: 13.3 },  // 98 events
+  { code: 'abtenau', name: 'Abtenau', bundesland: 'Salzburg', fallbackLat: 47.564, fallbackLng: 13.349 },  // 93 events
+  { code: 'schmitten', name: 'Schmittenhöhe (Zell am See)', bundesland: 'Salzburg', fallbackLat: 47.349, fallbackLng: 13.06 },  // 91 events
+  { code: 'zellkaprun', name: 'Zell am See-Kaprun', bundesland: 'Salzburg', fallbackLat: 47.323, fallbackLng: 12.796 },  // 89 events
+  { code: 'rauris', name: 'Rauris', bundesland: 'Salzburg', fallbackLat: 47.224, fallbackLng: 12.991 },  // 83 events
+  { code: 'hochkoenig', name: 'Hochkoenig', bundesland: 'Salzburg', fallbackLat: 47.42, fallbackLng: 13.075 },  // 77 events
+  { code: 'badvigaun', name: 'Bad Vigaun (Tennengau)', bundesland: 'Salzburg', fallbackLat: 47.349, fallbackLng: 13.06 },  // 76 events
+  { code: 'grossarl', name: 'Grossarltal', bundesland: 'Salzburg', fallbackLat: 47.238, fallbackLng: 13.193 },  // 72 events
+  { code: 'filzmoos', name: 'Filzmoos', bundesland: 'Salzburg', fallbackLat: 47.435, fallbackLng: 13.522 },  // 66 events
+  { code: 'flachau', name: 'Flachau', bundesland: 'Salzburg', fallbackLat: 47.34, fallbackLng: 13.392 },  // 66 events
+  { code: 'golling', name: 'Golling', bundesland: 'Salzburg', fallbackLat: 47.592, fallbackLng: 13.167 },  // 59 events
+  { code: 'altenmarkt', name: 'Altenmarkt-Zauchensee', bundesland: 'Salzburg', fallbackLat: 47.381, fallbackLng: 13.425 },  // 55 events
+  { code: 'hallein', name: 'Hallein', bundesland: 'Salzburg', fallbackLat: 47.687, fallbackLng: 13.098 },  // 51 events
+  { code: 'radstadt', name: 'Radstadt', bundesland: 'Salzburg', fallbackLat: 47.382, fallbackLng: 13.461 },  // 49 events
+  { code: 'werfen', name: 'Werfen', bundesland: 'Salzburg', fallbackLat: 47.479, fallbackLng: 13.189 },  // 46 events
+  { code: 'krimml', name: 'Krimml', bundesland: 'Salzburg', fallbackLat: 47.222, fallbackLng: 12.172 },  // 39 events
+  { code: 'kuchl', name: 'Kuchl (Tennengau)', bundesland: 'Salzburg', fallbackLat: 47.349, fallbackLng: 13.06 },  // 37 events
+  { code: 'uttendorf', name: 'Uttendorf', bundesland: 'Salzburg', fallbackLat: 47.277, fallbackLng: 12.566 },  // 33 events
+  { code: 'annaberg', name: 'Annaberg-Lungoetz', bundesland: 'Salzburg', fallbackLat: 47.536, fallbackLng: 13.41 },  // 23 events
+  { code: 'russbach', name: 'Russbach am Pass Gschütt', bundesland: 'Salzburg', fallbackLat: 47.349, fallbackLng: 13.06 },  // 19 events
+  { code: 'embach', name: 'Embach (Pinzgau)', bundesland: 'Salzburg', fallbackLat: 47.349, fallbackLng: 13.06 },  // 18 events
+  { code: 'elsbethen', name: 'Elsbethen (Salzburg-Umgebung)', bundesland: 'Salzburg', fallbackLat: 47.349, fallbackLng: 13.06 },  // 17 events
+  { code: 'viehhofen', name: 'Viehhofen', bundesland: 'Salzburg', fallbackLat: 47.349, fallbackLng: 13.06 },  // 15 events
+  { code: 'eben', name: 'Eben im Pongau', bundesland: 'Salzburg', fallbackLat: 47.349, fallbackLng: 13.06 },  // 15 events
+  { code: 'stkoloman', name: 'St. Koloman (Tennengau)', bundesland: 'Salzburg', fallbackLat: 47.349, fallbackLng: 13.06 },  // 12 events
+  { code: 'groedig', name: 'Grödig (Salzburg-Umgebung)', bundesland: 'Salzburg', fallbackLat: 47.349, fallbackLng: 13.06 },  // 9 events
+  { code: 'eugendorf', name: 'Eugendorf', bundesland: 'Salzburg', fallbackLat: 47.867, fallbackLng: 13.13 },  // 8 events
+  { code: 'anthering', name: 'Anthering (Flachgau)', bundesland: 'Salzburg', fallbackLat: 47.349, fallbackLng: 13.06 },  // 1 events
+
+  // ── Steiermark ──
+  { code: 'oststeiermark', name: 'Oststeiermark', bundesland: 'Steiermark', fallbackLat: 47.18, fallbackLng: 15.9 },  // 634 events
+  { code: 'thermenland', name: 'Thermenland Steiermark', bundesland: 'Steiermark', fallbackLat: 46.878, fallbackLng: 16.02 },  // 348 events
+  { code: 'dachstein', name: 'Dachstein-Salzkammergut', bundesland: 'Steiermark', fallbackLat: 47.53, fallbackLng: 13.627 },  // 319 events
+  { code: 'ausseerland', name: 'Ausseerland-Salzkammergut', bundesland: 'Steiermark', fallbackLat: 47.608, fallbackLng: 13.783 },  // 244 events
+  { code: 'tauplitz', name: 'Tauplitz / Tauplitzalm', bundesland: 'Steiermark', fallbackLat: 47.566, fallbackLng: 14.011 },  // 244 events
+  { code: 'spielberg', name: 'Spielberg (Red Bull Ring, Murtal)', bundesland: 'Steiermark', fallbackLat: 47.359, fallbackLng: 14.886 },  // 119 events
+  { code: 'erzberg', name: 'Erzberg / Eisenerz', bundesland: 'Steiermark', fallbackLat: 47.359, fallbackLng: 14.886 },  // 95 events
+  { code: 'gesaeuse', name: 'Gesaeuse', bundesland: 'Steiermark', fallbackLat: 47.577, fallbackLng: 14.627 },  // 83 events
+  { code: 'frein', name: 'Frein an der Mürz', bundesland: 'Steiermark', fallbackLat: 47.359, fallbackLng: 14.886 },  // 83 events
+  { code: 'ramsau', name: 'Ramsau am Dachstein', bundesland: 'Steiermark', fallbackLat: 47.421, fallbackLng: 13.643 },  // 39 events
+
+  // ── Tirol ──
+  { code: 'innsbruck', name: 'Innsbruck', bundesland: 'Tirol', fallbackLat: 47.26, fallbackLng: 11.395 },  // 331 events
+  { code: 'zillertal', name: 'Zillertal', bundesland: 'Tirol', fallbackLat: 47.169, fallbackLng: 11.875 },  // 294 events
+  { code: 'osttirol', name: 'Osttirol', bundesland: 'Tirol', fallbackLat: 46.828, fallbackLng: 12.77 },  // 266 events
+  { code: 'seefeld', name: 'Seefeld', bundesland: 'Tirol', fallbackLat: 47.33, fallbackLng: 11.188 },  // 232 events
+  { code: 'alpbach', name: 'Alpbachtal', bundesland: 'Tirol', fallbackLat: 47.395, fallbackLng: 11.945 },  // 221 events
+  { code: 'kufstein', name: 'Kufstein', bundesland: 'Tirol', fallbackLat: 47.583, fallbackLng: 12.166 },  // 209 events
+  { code: 'stubaital', name: 'Stubaital', bundesland: 'Tirol', fallbackLat: 47.085, fallbackLng: 11.31 },  // 180 events
+  // skip mirror: innsbruckcard (175 events) — duplicate of canonical region
+  { code: 'pillerseetal', name: 'Pillerseetal', bundesland: 'Tirol', fallbackLat: 47.449, fallbackLng: 12.582 },  // 168 events
+  { code: 'oetztal', name: 'Oetztal', bundesland: 'Tirol', fallbackLat: 47.014, fallbackLng: 10.86 },  // 164 events
+  { code: 'zillertalarena', name: 'Zillertal Arena', bundesland: 'Tirol', fallbackLat: 47.26, fallbackLng: 11.395 },  // 148 events
+  { code: 'halltirol', name: 'Hall in Tirol', bundesland: 'Tirol', fallbackLat: 47.289, fallbackLng: 11.508 },  // 141 events
+  { code: 'imst', name: 'Imst-Gurgltal', bundesland: 'Tirol', fallbackLat: 47.245, fallbackLng: 10.74 },  // 140 events
+  { code: 'tvbpitztal', name: 'Pitztal', bundesland: 'Tirol', fallbackLat: 47.014, fallbackLng: 10.764 },  // 136 events
+  { code: 'kitzski', name: 'KitzSki / Kitzbühel-Kirchberg', bundesland: 'Tirol', fallbackLat: 47.446, fallbackLng: 12.391 },  // 126 events
+  { code: 'lech', name: 'Lech-Zuers', bundesland: 'Tirol', fallbackLat: 47.211, fallbackLng: 10.142 },  // 119 events
+  { code: 'reutte', name: 'Reutte-Naturparkregion', bundesland: 'Tirol', fallbackLat: 47.485, fallbackLng: 10.718 },  // 119 events
+  { code: 'hochfuegen', name: 'Hochfügen', bundesland: 'Tirol', fallbackLat: 47.255, fallbackLng: 11.842 },  // 118 events
+  { code: 'wipptal', name: 'Wipptal', bundesland: 'Tirol', fallbackLat: 47.085, fallbackLng: 11.46 },  // 89 events
+  { code: 'kaiserwinkl', name: 'Kaiserwinkl', bundesland: 'Tirol', fallbackLat: 47.625, fallbackLng: 12.3 },  // 87 events
+  { code: 'fischen', name: 'Fischen / Tannheimer Tal', bundesland: 'Tirol', fallbackLat: 47.26, fallbackLng: 11.395 },  // 78 events
+  { code: 'hochpustertal', name: 'Hochpustertal', bundesland: 'Tirol', fallbackLat: 46.74, fallbackLng: 12.42 },  // 74 events
+  { code: 'lechtal', name: 'Lechtal', bundesland: 'Tirol', fallbackLat: 47.261, fallbackLng: 10.555 },  // 56 events
+  { code: 'serfaus', name: 'Serfaus-Fiss-Ladis', bundesland: 'Tirol', fallbackLat: 47.039, fallbackLng: 10.602 },  // 50 events
+  { code: 'arlberg', name: 'Arlberg', bundesland: 'Tirol', fallbackLat: 47.13, fallbackLng: 10.212 },  // 41 events
+  { code: 'stanton', name: 'St. Anton am Arlberg', bundesland: 'Tirol', fallbackLat: 47.128, fallbackLng: 10.268 },  // 41 events
+  { code: 'galtuer', name: 'Galtür', bundesland: 'Tirol', fallbackLat: 46.969, fallbackLng: 10.184 },  // 39 events
+  { code: 'ischgl', name: 'Ischgl-Paznaun', bundesland: 'Tirol', fallbackLat: 47.01, fallbackLng: 10.293 },  // 39 events
+  { code: 'kappl', name: 'Kappl (Paznaun)', bundesland: 'Tirol', fallbackLat: 47.073, fallbackLng: 10.382 },  // 39 events
+  { code: 'kirchberg', name: 'Kirchberg in Tirol', bundesland: 'Tirol', fallbackLat: 47.449, fallbackLng: 12.32 },  // 33 events
+  { code: 'mayrhofen', name: 'Mayrhofen', bundesland: 'Tirol', fallbackLat: 47.16, fallbackLng: 11.862 },  // 27 events
+  { code: 'defereggen', name: 'Defereggental', bundesland: 'Tirol', fallbackLat: 47.26, fallbackLng: 11.395 },  // 17 events
+  { code: 'kaltenbach', name: 'Kaltenbach (Zillertal)', bundesland: 'Tirol', fallbackLat: 47.295, fallbackLng: 11.873 },  // 14 events
 
   // ── Vorarlberg ──
-  // (lech and arlberg listed above under Tirol — they span both)
-  { code: 'klostertal', name: 'Klostertal', bundesland: 'Vorarlberg', fallbackLat: 47.130, fallbackLng: 10.080 },
+  { code: 'bludenz', name: 'Bludenz', bundesland: 'Vorarlberg', fallbackLat: 47.155, fallbackLng: 9.823 },  // 235 events
+  { code: 'klostertal', name: 'Klostertal', bundesland: 'Vorarlberg', fallbackLat: 47.13, fallbackLng: 10.08 },  // 68 events
+  { code: 'rieden', name: 'Rieden', bundesland: 'Vorarlberg', fallbackLat: 47.25, fallbackLng: 9.879 },  // 36 events
+  { code: 'bezau', name: 'Bezau (Bregenzerwald)', bundesland: 'Vorarlberg', fallbackLat: 47.25, fallbackLng: 9.879 },  // 1 events
+  { code: 'reuthe', name: 'Reuthe (Bregenzerwald)', bundesland: 'Vorarlberg', fallbackLat: 47.25, fallbackLng: 9.879 },  // 1 events
+  { code: 'bizau', name: 'Bizau (Bregenzerwald)', bundesland: 'Vorarlberg', fallbackLat: 47.25, fallbackLng: 9.879 },  // 1 events
 
-  // ── Kärnten extras ──
-  { code: 'hohetauern', name: 'Hohe Tauern', bundesland: 'Kärnten', fallbackLat: 46.910, fallbackLng: 13.150 },
-  { code: 'nationalpark', name: 'Nationalpark Region', bundesland: 'Kärnten', fallbackLat: 46.928, fallbackLng: 13.200 },
-  { code: 'klagenfurt', name: 'Klagenfurt', bundesland: 'Kärnten', fallbackLat: 46.624, fallbackLng: 14.308 },
-  { code: 'lesachtal', name: 'Lesachtal', bundesland: 'Kärnten', fallbackLat: 46.700, fallbackLng: 12.840 },
-  { code: 'feldamsee', name: 'Feld am See', bundesland: 'Kärnten', fallbackLat: 46.775, fallbackLng: 13.748 },
-  { code: 'weissensee', name: 'Weissensee', bundesland: 'Kärnten', fallbackLat: 46.713, fallbackLng: 13.300 },
-  { code: 'rosental', name: 'Rosental', bundesland: 'Kärnten', fallbackLat: 46.540, fallbackLng: 14.180 },
+  // ── Kärnten ──
+  { code: 'kaernten', name: 'Kaernten', bundesland: 'Kärnten', fallbackLat: 46.724, fallbackLng: 14.091 },  // 2403 events
+  // skip mirror: kaerntencard (2403 events) — duplicate of canonical region
+  // skip mirror: kaerntenevents (2403 events) — duplicate of canonical region
+  { code: 'hohetauern', name: 'Hohe Tauern', bundesland: 'Kärnten', fallbackLat: 46.91, fallbackLng: 13.15 },  // 721 events
+  { code: 'badkleinkirchheim', name: 'Bad Kleinkirchheim', bundesland: 'Kärnten', fallbackLat: 46.813, fallbackLng: 13.793 },  // 683 events
+  { code: 'woerthersee', name: 'Woerthersee', bundesland: 'Kärnten', fallbackLat: 46.627, fallbackLng: 14.138 },  // 637 events
+  { code: 'klagenfurt', name: 'Klagenfurt', bundesland: 'Kärnten', fallbackLat: 46.624, fallbackLng: 14.308 },  // 462 events
+  { code: 'klopeinersee', name: 'Klopeiner See / Südkärnten', bundesland: 'Kärnten', fallbackLat: 46.724, fallbackLng: 14.091 },  // 255 events
+  { code: 'feldamsee', name: 'Feld am See', bundesland: 'Kärnten', fallbackLat: 46.775, fallbackLng: 13.748 },  // 218 events
+  { code: 'nationalpark', name: 'Nationalpark Region', bundesland: 'Kärnten', fallbackLat: 46.928, fallbackLng: 13.2 },  // 169 events
+  { code: 'weissensee', name: 'Weissensee', bundesland: 'Kärnten', fallbackLat: 46.713, fallbackLng: 13.3 },  // 166 events
+  { code: 'nassfeld', name: 'Nassfeld-Pressegger See', bundesland: 'Kärnten', fallbackLat: 46.559, fallbackLng: 13.28 },  // 152 events
+  { code: 'villach', name: 'Villach', bundesland: 'Kärnten', fallbackLat: 46.611, fallbackLng: 13.851 },  // 119 events
+  { code: 'rosental', name: 'Rosental', bundesland: 'Kärnten', fallbackLat: 46.54, fallbackLng: 14.18 },  // 98 events
+  { code: 'lesachtal', name: 'Lesachtal', bundesland: 'Kärnten', fallbackLat: 46.7, fallbackLng: 12.84 },  // 90 events
+  { code: 'kirchbach', name: 'Kirchbach im Gailtal', bundesland: 'Kärnten', fallbackLat: 46.724, fallbackLng: 14.091 },  // 55 events
+  { code: 'rennweg', name: 'Rennweg am Katschberg', bundesland: 'Kärnten', fallbackLat: 46.724, fallbackLng: 14.091 },  // 23 events
+  { code: 'heiligenblut', name: 'Heiligenblut am Großglockner', bundesland: 'Kärnten', fallbackLat: 47.034, fallbackLng: 12.846 },  // 21 events
+  { code: 'hochrindl', name: 'Hochrindl (Nockberge)', bundesland: 'Kärnten', fallbackLat: 46.724, fallbackLng: 14.091 },  // 21 events
+  { code: 'malta', name: 'Malta (Maltatal Hohe Tauern)', bundesland: 'Kärnten', fallbackLat: 46.724, fallbackLng: 14.091 },  // 9 events
+  { code: 'falkert', name: 'Falkert / Nockberge', bundesland: 'Kärnten', fallbackLat: 46.724, fallbackLng: 14.091 },  // 8 events
 
-  // ── Salzburg extras ──
-  { code: 'zellkaprun', name: 'Zell am See-Kaprun', bundesland: 'Salzburg', fallbackLat: 47.323, fallbackLng: 12.796 },
-  { code: 'filzmoos', name: 'Filzmoos', bundesland: 'Salzburg', fallbackLat: 47.435, fallbackLng: 13.522 },
-  { code: 'eugendorf', name: 'Eugendorf', bundesland: 'Salzburg', fallbackLat: 47.867, fallbackLng: 13.130 },
-
-  // ── Oberösterreich extras ──
-  { code: 'pyhrn', name: 'Pyhrn-Priel', bundesland: 'Oberösterreich', fallbackLat: 47.715, fallbackLng: 14.116 },
-  { code: 'traunseealmtal', name: 'Traunsee-Almtal', bundesland: 'Oberösterreich', fallbackLat: 47.862, fallbackLng: 13.789 },
-  { code: 'donauooe', name: 'Donau Oberösterreich', bundesland: 'Oberösterreich', fallbackLat: 48.305, fallbackLng: 14.300 },
-
-  // ── Tirol extras ──
-  { code: 'halltirol', name: 'Hall in Tirol', bundesland: 'Tirol', fallbackLat: 47.289, fallbackLng: 11.508 },
-  { code: 'kaiserwinkl', name: 'Kaiserwinkl', bundesland: 'Tirol', fallbackLat: 47.625, fallbackLng: 12.300 },
-  { code: 'hochpustertal', name: 'Hochpustertal', bundesland: 'Tirol', fallbackLat: 46.740, fallbackLng: 12.420 },
-  { code: 'ramsau', name: 'Ramsau am Dachstein', bundesland: 'Steiermark', fallbackLat: 47.421, fallbackLng: 13.643 },
-
-  // ── 2026-05-22: Burgenland TVB-Discovery (probe-feratel.ts) ──
-  { code: 'eisenstadt', name: 'Eisenstadt', bundesland: 'Burgenland', fallbackLat: 47.846, fallbackLng: 16.526 },
-  { code: 'rust', name: 'Rust', bundesland: 'Burgenland', fallbackLat: 47.798, fallbackLng: 16.679 },
-  { code: 'podersdorf', name: 'Podersdorf am See', bundesland: 'Burgenland', fallbackLat: 47.852, fallbackLng: 16.847 },
-  { code: 'jois', name: 'Jois', bundesland: 'Burgenland', fallbackLat: 47.969, fallbackLng: 16.788 },
-  { code: 'illmitz', name: 'Illmitz', bundesland: 'Burgenland', fallbackLat: 47.770, fallbackLng: 16.802 },
-  { code: 'lutzmannsburg', name: 'Lutzmannsburg', bundesland: 'Burgenland', fallbackLat: 47.452, fallbackLng: 16.560 },
-  { code: 'oberwart', name: 'Oberwart', bundesland: 'Burgenland', fallbackLat: 47.286, fallbackLng: 16.211 },
-
-  // ── 2026-05-22: Tirol TVB-Discovery ──
-  { code: 'alpbach', name: 'Alpbachtal', bundesland: 'Tirol', fallbackLat: 47.395, fallbackLng: 11.945 },
-  { code: 'hochfuegen', name: 'Hochfügen', bundesland: 'Tirol', fallbackLat: 47.255, fallbackLng: 11.842 },
-  { code: 'galtuer', name: 'Galtür', bundesland: 'Tirol', fallbackLat: 46.969, fallbackLng: 10.184 },
-  { code: 'kaltenbach', name: 'Kaltenbach (Zillertal)', bundesland: 'Tirol', fallbackLat: 47.295, fallbackLng: 11.873 },
-  { code: 'kappl', name: 'Kappl (Paznaun)', bundesland: 'Tirol', fallbackLat: 47.073, fallbackLng: 10.382 },
-  { code: 'kitzski', name: 'KitzSki / Kitzbühel-Kirchberg', bundesland: 'Tirol', fallbackLat: 47.446, fallbackLng: 12.391 },
-
-  // ── 2026-05-22: Kärnten Discovery ──
-  { code: 'heiligenblut', name: 'Heiligenblut am Großglockner', bundesland: 'Kärnten', fallbackLat: 47.034, fallbackLng: 12.846 },
-
-  // ── 2026-05-22: Steiermark Discovery ──
-  { code: 'tauplitz', name: 'Tauplitz / Tauplitzalm', bundesland: 'Steiermark', fallbackLat: 47.566, fallbackLng: 14.011 },
-
-  // ── 2026-05-22: Discovery via probe-feratel.ts seed sweep ──
-  { code: 'bludenz', name: 'Bludenz', bundesland: 'Vorarlberg', fallbackLat: 47.155, fallbackLng: 9.823 },
-  { code: 'rauris', name: 'Rauris', bundesland: 'Salzburg', fallbackLat: 47.224, fallbackLng: 12.991 },
+  // ── Österreich ──
+  { code: 'oberbuch', name: 'Oberbuch', bundesland: 'Österreich', fallbackLat: 47.5, fallbackLng: 14.5 },  // 140 events
+  { code: 'lahnstein', name: 'Lahnstein', bundesland: 'Österreich', fallbackLat: 47.5, fallbackLng: 14.5 },  // 65 events
+  { code: 'kohlgrub', name: 'Kohlgrub', bundesland: 'Österreich', fallbackLat: 47.5, fallbackLng: 14.5 },  // 42 events
+  { code: 'hochwald', name: 'Hochwald', bundesland: 'Österreich', fallbackLat: 47.5, fallbackLng: 14.5 },  // 34 events
 ];
 
 // ─────────────────── API configuration ───────────────────
