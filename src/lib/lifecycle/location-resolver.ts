@@ -19,6 +19,12 @@ export interface ResolvedLocation {
   radius_km: number;
   /** Human-readable city/region name for the email subject + body. */
   display: string;
+  /**
+   * Canonical bundesland name when we can derive it — used to build the
+   * email CTA's ?bl=… filter. Null when we only have IP coords and no
+   * gemeinde match to back-resolve from.
+   */
+  bundesland: string | null;
   /** Which tier won — for debugging / cron logs. */
   source: 'plz' | 'bundesland' | 'detected' | 'fallback';
 }
@@ -59,7 +65,7 @@ const BUNDESLAND_CENTERS: Record<string, { lat: number; lng: number; display: st
 export function resolveUserLocation(profile: ProfileLocationFields | null): ResolvedLocation | null {
   if (!profile) return null;
 
-  // Tier 1: PLZ match (most precise — exact gemeinde lat/lng)
+  // Tier 1: PLZ match (most precise — exact gemeinde lat/lng + bundesland)
   if (profile.postal_code) {
     const plz = profile.postal_code.trim();
     const hit = GEMEINDEN.find((g) => g.p === plz);
@@ -69,6 +75,7 @@ export function resolveUserLocation(profile: ProfileLocationFields | null): Reso
         lng: hit.lng,
         radius_km: 15,
         display: profile.city?.trim() || hit.n,
+        bundesland: hit.b,
         source: 'plz',
       };
     }
@@ -83,12 +90,15 @@ export function resolveUserLocation(profile: ProfileLocationFields | null): Reso
         lng: center.lng,
         radius_km: 50,
         display: center.display,
+        bundesland: profile.preferred_bundesland,
         source: 'bundesland',
       };
     }
   }
 
-  // Tier 3: passive IP-detected city + coords
+  // Tier 3: passive IP-detected city + coords. We don't know the bundesland
+  // from Vercel geo, but we can reverse-lookup via the closest gemeinde —
+  // cheap O(n) scan over the 2.1k entries beats running a real GIS query.
   if (
     profile.detected_lat !== null &&
     profile.detected_lat !== undefined &&
@@ -97,17 +107,40 @@ export function resolveUserLocation(profile: ProfileLocationFields | null): Reso
     Number.isFinite(profile.detected_lat) &&
     Number.isFinite(profile.detected_lng)
   ) {
+    const nearest = nearestGemeinde(profile.detected_lat, profile.detected_lng);
     return {
       lat: profile.detected_lat,
       lng: profile.detected_lng,
       radius_km: 25, // wider — IP geo is coarse
-      display: profile.detected_city?.trim() || 'deiner Nähe',
+      display: profile.detected_city?.trim() || nearest?.n || 'deiner Nähe',
+      bundesland: nearest?.b ?? null,
       source: 'detected',
     };
   }
 
   // Tier 4: nothing — caller decides whether to send a nation-wide email or skip.
   return null;
+}
+
+/**
+ * Find the gemeinde whose lat/lng is closest to the input point. Used to
+ * back-resolve a bundesland from IP-derived coordinates. Squared euclidean
+ * distance is fine for ranking (AT bbox is small enough that the cosine
+ * latitude correction doesn't affect ordering).
+ */
+function nearestGemeinde(lat: number, lng: number): Gemeinde | null {
+  let best: Gemeinde | null = null;
+  let bestDist = Infinity;
+  for (const g of GEMEINDEN) {
+    const dLat = g.lat - lat;
+    const dLng = g.lng - lng;
+    const d = dLat * dLat + dLng * dLng;
+    if (d < bestDist) {
+      bestDist = d;
+      best = g;
+    }
+  }
+  return best;
 }
 
 /**

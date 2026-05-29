@@ -20,8 +20,17 @@ export type CohortDecision = LifecycleCohort | 'skip';
 export interface CohortInputs {
   /** profiles.created_at — timestamp the user registered. */
   createdAt: Date | string;
-  /** profiles.last_active_at — last time the user pinged detect-location. Null = never seen. */
+  /**
+   * profiles.last_active_at — bumped by /api/auth/detect-location on every
+   * login. Null for users who haven't signed in since the column was added.
+   */
   lastActiveAt: Date | string | null;
+  /**
+   * auth.users.last_sign_in_at — Supabase's own login timestamp. Used as a
+   * fallback for last_active_at when our app-level column is null, so we
+   * don't misclassify recently-logged-in users as "inactive for 21 days".
+   */
+  authLastSignInAt: Date | string | null;
   /** notification_preferences.lifecycle_emails_enabled — opt-out flag. */
   enabled: boolean;
   /** notification_preferences.lifecycle_email_sent_at — last lifecycle send. Null = never. */
@@ -41,39 +50,47 @@ export function detectCohort(input: CohortInputs): CohortDecision {
 
   const now = input.now.getTime();
   const created = toDate(input.createdAt).getTime();
-  const lastActive = input.lastActiveAt ? toDate(input.lastActiveAt).getTime() : null;
+  // Prefer our own column (bumped on every detect-location call); fall back
+  // to Supabase's auth.users.last_sign_in_at when ours hasn't fired yet
+  // (typical for any user who signed in before the column existed).
+  const lastActiveSrc = input.lastActiveAt ?? input.authLastSignInAt;
+  const lastActive = lastActiveSrc ? toDate(lastActiveSrc).getTime() : null;
   const lastSent = input.lastLifecycleSentAt ? toDate(input.lastLifecycleSentAt).getTime() : null;
   const sinceLastSent = lastSent === null ? Infinity : now - lastSent;
 
-  // Global spacing: ≥7d between any two lifecycle mails. Welcome is a one-off
-  // gift (skip if already sent regardless of days).
-  if (input.lastCohort === 'welcome') {
-    // Welcome was already sent — never resend, treat as "no welcome eligible";
-    // user can still get reactivation/weekend, subject to spacing.
-  }
-
   // ── Tier 1: Welcome ─────────────────────────────────────────────────
+  // Brand-new users with zero engagement. No activity signal needed —
+  // we explicitly want to greet them in their first week.
   const ageDays = (now - created) / DAY;
   const welcomeAlreadySent = input.lastCohort === 'welcome';
   if (!welcomeAlreadySent && ageDays <= 7 && input.savedEventsCount === 0) {
-    // ≥7d spacing only enforced if a previous lifecycle mail exists. For a
-    // brand-new user who got nothing yet, send welcome immediately.
     return 'welcome';
   }
 
+  // ── Tier 2 + 3 need a positive activity signal ──────────────────────
+  // If we have ZERO knowledge of when the user last logged in (both our
+  // column AND auth.users are null) we skip rather than guess from
+  // account-age — otherwise a user who signed up 3 months ago and was
+  // active yesterday looks identical to one who registered once and
+  // vanished. Account age is a registration signal, not an activity one.
+  if (lastActive === null) {
+    return 'skip';
+  }
+
+  const daysSinceActive = (now - lastActive) / DAY;
+
   // ── Tier 2: Reactivation ────────────────────────────────────────────
-  // User considered "active" only if last_active_at exists AND is recent.
-  // If we never saw them (lastActive=null) but they're > 21d old, treat as
-  // inactive and fire reactivation.
-  const daysSinceActive = lastActive ? (now - lastActive) / DAY : ageDays;
-  const reactivationGap = input.lastCohort === 'reactivation' ? 60 : 0; // ≥60d between reactivations
-  const sinceLastReactivation = (sinceLastSent / DAY) >= reactivationGap;
-  if (daysSinceActive >= 21 && sinceLastReactivation && sinceLastSent >= 7 * DAY) {
+  // ≥21d since last login. ≥60d between two reactivation sends to avoid
+  // pestering people who genuinely don't want to come back. Plus the
+  // global ≥7d spacing.
+  const reactivationGap = input.lastCohort === 'reactivation' ? 60 : 0;
+  const sinceLastReactivationOk = (sinceLastSent / DAY) >= reactivationGap;
+  if (daysSinceActive >= 21 && sinceLastReactivationOk && sinceLastSent >= 7 * DAY) {
     return 'reactivation';
   }
 
   // ── Tier 3: Weekend picks ───────────────────────────────────────────
-  // For active users only. ≥7d since last lifecycle send.
+  // Active in the last 21 days. ≥7d since last lifecycle send.
   if (daysSinceActive < 21 && sinceLastSent >= 7 * DAY) {
     return 'weekend';
   }

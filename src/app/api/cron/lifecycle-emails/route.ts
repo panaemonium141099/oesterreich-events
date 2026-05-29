@@ -108,6 +108,22 @@ export async function GET(request: NextRequest) {
       offset += rows.length;
       stats.scanned += rows.length;
 
+      // Batch-prefetch auth.users.last_sign_in_at for this page so the
+      // cohort detector can fall back to it when profiles.last_active_at
+      // is null (which it is for ~every user the first weeks after rollout).
+      // Service role can read auth schema via supabase.auth.admin.listUsers,
+      // but that's pageable per-100 — for a 1k batch we fire a single SQL
+      // through the postgres-rest service role token.
+      const userIds = rows.map((row) => (row as { id: string }).id);
+      const { data: authRows } = await supabase
+        .schema('auth')
+        .from('users')
+        .select('id, last_sign_in_at')
+        .in('id', userIds);
+      const lastSignInById = new Map<string, string | null>(
+        (authRows ?? []).map((u: { id: string; last_sign_in_at: string | null }) => [u.id, u.last_sign_in_at]),
+      );
+
       // ── 2. Per-user processing ─────────────────────────────────────────
       for (const row of rows) {
         if (processedThisRun >= DAILY_CAP) {
@@ -134,6 +150,7 @@ export async function GET(request: NextRequest) {
         const cohort: ReturnType<typeof detectCohort> = detectCohort({
           createdAt: r.created_at,
           lastActiveAt: r.last_active_at,
+          authLastSignInAt: lastSignInById.get(r.id) ?? null,
           enabled,
           lastLifecycleSentAt: prefs?.lifecycle_email_sent_at ?? null,
           lastCohort: (prefs?.lifecycle_cohort_last as LifecycleCohort) ?? null,
@@ -160,8 +177,14 @@ export async function GET(request: NextRequest) {
         }
 
         const cityForSubject = location?.display ?? 'Österreich';
-        const exploreUrl = location
-          ? `https://lasstreffen.at/entdecken?lat=${location.lat.toFixed(4)}&lng=${location.lng.toFixed(4)}`
+        // /entdecken supports ?bl=… (bundesland) but not lat/lng filtering.
+        // When we have the bundesland — directly from preferred_bundesland,
+        // back-resolved from PLZ, or nearest-gemeinde from IP — link to that
+        // filtered view so the CTA actually narrows the list. Without
+        // bundesland (rare: no PLZ, no IP geo) we link to the unfiltered
+        // discover page.
+        const exploreUrl = location?.bundesland
+          ? `https://lasstreffen.at/entdecken?bl=${encodeURIComponent(location.bundesland)}`
           : 'https://lasstreffen.at/entdecken';
         const unsubToken = await generateUnsubscribeToken(r.id, unsubSecret);
 
