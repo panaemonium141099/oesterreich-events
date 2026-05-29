@@ -15,21 +15,27 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 import { bboxFromCenter, type ResolvedLocation } from './location-resolver';
 import type { LifecycleCohort } from './cohort-detector';
 import type { LifecycleEmailEvent } from '@/emails/lifecycle-weekend';
+import { buildEventUrlV2 } from '@/lib/utils/slugify';
 
+// Real `events` table columns. There is NO `venue`, NO `start_time`, NO `slug`,
+// NO `city`. The location string the email shows is `location_name` (the venue
+// or place text), the city comes from joining `venues` or — for the email's
+// purposes — from formatting postal_code + bundesland. URLs are built with
+// buildEventUrlV2() which derives the slug from title at render time.
 interface DbEventRow {
   id: string;
   title: string;
   start_date: string;
-  start_time: string | null;
-  venue: string | null;
-  city: string | null;
-  postal_code: string | null;
+  location_name: string | null;
   address: string | null;
+  postal_code: string | null;
+  district: string | null;
   bundesland: string | null;
+  latitude: number | null;
+  longitude: number | null;
   image_url: string | null;
   ticket_url: string | null;
   category: string | null;
-  slug: string | null;
 }
 
 interface PickEventsArgs {
@@ -52,7 +58,7 @@ export async function pickLifecycleEvents(args: PickEventsArgs): Promise<Lifecyc
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let query: any = supabase
     .from('events')
-    .select('id,title,start_date,start_time,venue,city,postal_code,address,bundesland,image_url,ticket_url,category,slug')
+    .select('id,title,start_date,location_name,address,postal_code,district,bundesland,latitude,longitude,image_url,ticket_url,category')
     .gte('start_date', start.toISOString().slice(0, 10))
     .lte('start_date', end.toISOString().slice(0, 10))
     .not('image_url', 'is', null)
@@ -69,16 +75,26 @@ export async function pickLifecycleEvents(args: PickEventsArgs): Promise<Lifecyc
   }
 
   const { data, error } = await query;
-  if (error || !data) return [];
+  if (error) {
+    console.error('[pickLifecycleEvents] query failed', {
+      message: error.message,
+      cohort,
+      start: start.toISOString().slice(0, 10),
+      end: end.toISOString().slice(0, 10),
+      hasLocation: !!location,
+    });
+    return [];
+  }
+  if (!data) return [];
 
   const rows = data as DbEventRow[];
 
-  // Dedupe by venue (keep first = highest score)
+  // Dedupe by location_name (keep first = highest score)
   const seenVenues = new Set<string>();
   const picked: DbEventRow[] = [];
   for (const r of rows) {
     if (picked.length >= limit) break;
-    const venueKey = (r.venue || r.city || '').toLowerCase();
+    const venueKey = (r.location_name || r.district || '').toLowerCase();
     if (venueKey && seenVenues.has(venueKey)) continue;
     if (venueKey) seenVenues.add(venueKey);
     picked.push(r);
@@ -132,30 +148,20 @@ function toEmailEvent(r: DbEventRow): LifecycleEmailEvent {
     title: r.title,
     date: formatDateDE(r.start_date),
     dayChip: dayChipFromIso(r.start_date),
-    time: r.start_time ? r.start_time.slice(0, 5) : undefined,
-    venueName: r.venue ?? undefined,
-    city: r.city ?? undefined,
+    // No start_time column in events — emails just show the date.
+    venueName: r.location_name ?? undefined,
+    city: r.district ?? undefined,
     imageUrl: r.image_url ?? undefined,
-    eventPageUrl: buildEventUrl(r),
+    eventPageUrl: `https://lasstreffen.at${buildEventUrlV2({
+      id: r.id,
+      start_date: r.start_date,
+      postal_code: r.postal_code,
+      bundesland: r.bundesland,
+      location_name: r.location_name,
+      address: r.address,
+    })}`,
     category: r.category ?? undefined,
   };
-}
-
-function buildEventUrl(r: DbEventRow): string {
-  // Prefer the SEO-friendly URL when we have the parts; fall back to /events/{id}.
-  if (r.slug && r.postal_code && r.city && r.start_date) {
-    const city = slugify(r.city);
-    return `https://lasstreffen.at/events/${r.postal_code}-${city}/${r.start_date}/${r.slug}`;
-  }
-  return `https://lasstreffen.at/events/${r.id}`;
-}
-
-function slugify(s: string): string {
-  return s
-    .toLowerCase()
-    .replace(/ä/g, 'ae').replace(/ö/g, 'oe').replace(/ü/g, 'ue').replace(/ß/g, 'ss')
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-|-$/g, '');
 }
 
 function formatDateDE(iso: string): string {
