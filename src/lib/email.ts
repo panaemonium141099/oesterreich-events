@@ -15,6 +15,7 @@
 
 import { renderArtistAlertEmail } from '@/emails/artist-alert';
 import { renderArtistReminderEmail } from '@/emails/artist-reminder';
+import { renderLifecycleEmail, type LifecycleEmailData } from '@/emails/lifecycle-weekend';
 
 // ── Constants ───────────────────────────────────────────────────────────────
 
@@ -300,4 +301,22 @@ export async function sendGenericEmail(
   html: string,
 ): Promise<{ success: boolean; id?: string; error?: string }> {
   return sendEmail({ to, subject, html });
+}
+
+/**
+ * Send a lifecycle email (welcome / reactivation / weekend) — single entry
+ * point used by the /api/cron/lifecycle-emails route. Subject is generated
+ * inside the template per cohort + city.
+ */
+export async function sendLifecycleEmail(
+  to: string,
+  data: LifecycleEmailData,
+): Promise<'sent' | 'failed'> {
+  const { subject, html } = renderLifecycleEmail(data);
+  const result = await sendEmail({ to, subject, html });
+  if (!result.success) {
+    console.error(`[email] Lifecycle (${data.cohort}) to ${to} failed:`, result.error);
+    return 'failed';
+  }
+  return 'sent';
 }

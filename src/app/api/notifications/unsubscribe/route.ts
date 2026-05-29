@@ -16,9 +16,13 @@ export async function GET(request: NextRequest) {
   const { searchParams } = request.nextUrl;
   const userId = searchParams.get('user_id');
   const token = searchParams.get('token');
+  // Granular opt-out kind. Lifecycle / artist / venue toggles let the user
+  // unsubscribe from one mail type without blocking the others. Missing
+  // = legacy behaviour (disable all email).
+  const kind = searchParams.get('kind');
 
   if (!userId || !token) {
-    return new NextResponse(renderPage('Fehler', 'Ungueltiger Abmelde-Link.'), {
+    return new NextResponse(renderPage('Fehler', 'Ungültiger Abmelde-Link.'), {
       status: 400,
       headers: { 'Content-Type': 'text/html; charset=utf-8' },
     });
@@ -58,10 +62,36 @@ export async function GET(request: NextRequest) {
 
   const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
+  // Per-kind opt-out so a user can stop "Wochenend-Picks" without losing
+  // their artist-show alerts. Defaults to the legacy global toggle for
+  // backwards compatibility with old unsubscribe URLs still in inboxes.
+  let patch: Record<string, unknown>;
+  let humanLabel: string;
+  switch (kind) {
+    case 'lifecycle':
+      patch = { lifecycle_emails_enabled: false };
+      humanLabel = 'Du erhältst keine Lifecycle-Mails (Welcome / Wochenend-Picks) mehr. Artist-Alerts und andere Benachrichtigungen bleiben aktiv.';
+      break;
+    case 'artist':
+      patch = { artist_alerts_enabled: false };
+      humanLabel = 'Du erhältst keine Artist-Alerts mehr. Andere E-Mails bleiben aktiv.';
+      break;
+    case 'venue':
+      patch = { venue_alerts_enabled: false };
+      humanLabel = 'Du erhältst keine Venue-Alerts mehr. Andere E-Mails bleiben aktiv.';
+      break;
+    default:
+      // Legacy / unknown kind → full opt-out
+      patch = { channel_email: false };
+      humanLabel = 'Du erhältst keine E-Mail-Benachrichtigungen mehr. Du kannst dies jederzeit in deinen Benachrichtigungseinstellungen ändern.';
+  }
+
   const { error } = await supabase
     .from('notification_preferences')
-    .update({ channel_email: false, updated_at: new Date().toISOString() })
-    .eq('user_id', userId);
+    .upsert(
+      { user_id: userId, ...patch, updated_at: new Date().toISOString() },
+      { onConflict: 'user_id' },
+    );
 
   if (error) {
     console.error('[unsubscribe] Failed to update preferences:', error);
@@ -72,10 +102,7 @@ export async function GET(request: NextRequest) {
   }
 
   return new NextResponse(
-    renderPage(
-      'Erfolgreich abgemeldet',
-      'Du erhaeltst keine E-Mail-Benachrichtigungen mehr. Du kannst dies jederzeit in deinen Benachrichtigungseinstellungen aendern.'
-    ),
+    renderPage('Erfolgreich abgemeldet', humanLabel),
     { status: 200, headers: { 'Content-Type': 'text/html; charset=utf-8' } }
   );
 }

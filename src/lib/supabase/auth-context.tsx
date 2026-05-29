@@ -35,6 +35,26 @@ export interface Profile {
 import { isProfileComplete } from '@/lib/utils/profile';
 export { isProfileComplete };
 
+/**
+ * Pings /api/auth/detect-location at most once per 7 days per browser so
+ * the server can persist Vercel-Edge IP geo headers as profiles.detected_*.
+ * Fire-and-forget — failure is silent (geo is a nice-to-have, not critical).
+ */
+const DETECT_LOCATION_KEY = 'lt:lastGeoDetect';
+const DETECT_LOCATION_INTERVAL_MS = 7 * 24 * 60 * 60 * 1000;
+function maybeDetectLocation(): void {
+  if (typeof window === 'undefined') return;
+  try {
+    const lastStr = localStorage.getItem(DETECT_LOCATION_KEY);
+    const last = lastStr ? Number(lastStr) : 0;
+    if (Date.now() - last < DETECT_LOCATION_INTERVAL_MS) return;
+    localStorage.setItem(DETECT_LOCATION_KEY, String(Date.now()));
+    void fetch('/api/auth/detect-location', { method: 'POST', credentials: 'same-origin' });
+  } catch {
+    // localStorage may throw in some embed contexts; ignore.
+  }
+}
+
 interface AuthContextType {
   user: User | null;
   profile: Profile | null;
@@ -177,6 +197,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setUser(session?.user ?? null);
         if (session?.user) {
           fetchProfile(session.user.id); // non-blocking
+          // Passive IP-geo detection: lets the server persist Vercel-Edge
+          // geo headers for users who never filled in postal_code/city
+          // manually. Debounced to once-per-7-days via localStorage so we
+          // don't hammer the endpoint on every tab focus / token refresh.
+          if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+            maybeDetectLocation();
+          }
         } else {
           setProfile(null);
         }
