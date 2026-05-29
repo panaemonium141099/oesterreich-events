@@ -288,17 +288,13 @@ function renderHero(ev: LifecycleEmailEvent): string {
 
   return `
   <table cellpadding="0" cellspacing="0" border="0" width="100%" style="background:#ffffff;border-radius:14px;overflow:hidden;border:1px solid ${BRAND.divider};">
-    ${
-      ev.imageUrl
-        ? `<tr>
-            <td style="padding:0;">
-              <a href="${escapeHtml(ev.eventPageUrl)}" style="text-decoration:none;display:block;">
-                <img src="${escapeHtml(ev.imageUrl)}" alt="" width="568" height="280" style="display:block;border:0;width:100%;max-width:568px;height:auto;object-fit:cover;" />
-              </a>
-            </td>
-          </tr>`
-        : ''
-    }
+    <tr>
+      <td style="padding:0;">
+        <a href="${escapeHtml(ev.eventPageUrl)}" style="text-decoration:none;display:block;">
+          <img src="${escapeHtml(withSize(ev.imageUrl, 640, 320))}" alt="" width="568" height="280" style="display:block;border:0;width:100%;max-width:568px;height:auto;object-fit:cover;" />
+        </a>
+      </td>
+    </tr>
     <tr>
       <td style="padding:20px 22px 22px;">
         <table cellpadding="0" cellspacing="0" border="0" width="100%">
@@ -362,15 +358,11 @@ function renderCompactList(events: LifecycleEmailEvent[]): string {
                 </td>`
               : ''
           }
-          ${
-            ev.imageUrl
-              ? `<td width="72" style="vertical-align:middle;padding:10px 0 10px 12px;">
-                  <a href="${escapeHtml(ev.eventPageUrl)}" style="display:block;">
-                    <img src="${escapeHtml(ev.imageUrl)}" alt="" width="72" height="72" style="display:block;border:0;border-radius:8px;object-fit:cover;width:72px;height:72px;" />
-                  </a>
-                </td>`
-              : ''
-          }
+          <td width="72" style="vertical-align:middle;padding:10px 0 10px 12px;">
+            <a href="${escapeHtml(ev.eventPageUrl)}" style="display:block;">
+              <img src="${escapeHtml(withSize(ev.imageUrl, 144, 144))}" alt="" width="72" height="72" style="display:block;border:0;border-radius:8px;object-fit:cover;width:72px;height:72px;" />
+            </a>
+          </td>
           <td style="vertical-align:middle;padding:14px 16px;">
             ${
               ev.category
@@ -421,4 +413,18 @@ function escapeHtml(str: string): string {
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;');
+}
+
+/**
+ * Append `?w=…&h=…` to the image proxy URL so the renderer asks for the
+ * right slot size (hero 640×320, compact 144×144 — 2× DPI for retina).
+ *
+ * Defensive: also handles legacy non-proxy URLs (just returns them) so the
+ * template stays renderable when called from the local preview script.
+ */
+function withSize(url: string | undefined, w: number, h: number): string {
+  if (!url) return `https://lasstreffen.at/api/img/missing?w=${w}&h=${h}`;
+  if (!url.startsWith('https://lasstreffen.at/api/img/')) return url;
+  const sep = url.includes('?') ? '&' : '?';
+  return `${url}${sep}w=${w}&h=${h}`;
 }

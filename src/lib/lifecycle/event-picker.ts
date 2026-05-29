@@ -89,18 +89,72 @@ export async function pickLifecycleEvents(args: PickEventsArgs): Promise<Lifecyc
 
   const rows = data as DbEventRow[];
 
-  // Dedupe by location_name (keep first = highest score)
+  // Dedupe by location_name (keep first = highest score). We overfetch
+  // intentionally so the HEAD-validation step below has fall-backs when
+  // some image URLs turn out to be broken / too heavy.
   const seenVenues = new Set<string>();
-  const picked: DbEventRow[] = [];
+  const candidates: DbEventRow[] = [];
   for (const r of rows) {
-    if (picked.length >= limit) break;
+    if (candidates.length >= limit * 2) break;
     const venueKey = (r.location_name || r.district || '').toLowerCase();
     if (venueKey && seenVenues.has(venueKey)) continue;
     if (venueKey) seenVenues.add(venueKey);
-    picked.push(r);
+    candidates.push(r);
   }
 
-  return picked.map(toEmailEvent);
+  // HEAD-validate every candidate image URL in parallel. The lifecycle
+  // template references our /api/img proxy (which itself has a placeholder
+  // fallback), but we still want to actively prefer events whose source
+  // image is reachable — that way we don't fill the "compact picks" list
+  // with 5 placeholder cards in the rare case of a regional upstream outage.
+  // Timeout per HEAD: 2.5s. Total bounded by Promise.all to one round-trip
+  // worth of latency per cron user.
+  const validated = await Promise.all(
+    candidates.map(async (r) => {
+      const ok = await isImageHealthy(r.image_url);
+      return ok ? r : { ...r, image_url: null };
+    }),
+  );
+
+  // Prefer images-OK ones first, then fall back to placeholder events.
+  validated.sort((a, b) => Number(!!b.image_url) - Number(!!a.image_url));
+  return validated.slice(0, limit).map(toEmailEvent);
+}
+
+/**
+ * Probe an image URL with a HEAD request. Considered healthy when:
+ *   - HTTP 2xx
+ *   - Content-Type starts with image/
+ *   - Content-Length is missing OR ≤ MAX_IMAGE_BYTES
+ *
+ * Anything larger than 800 KB gets dropped because Gmail's image-proxy
+ * sometimes fails to fetch heavy upstream images during a mass mailing,
+ * which produces broken-img icons in the recipient's inbox. Our resizer
+ * (/api/img) will reduce it anyway, but we'd still rather pick an event
+ * whose source isn't borderline.
+ */
+const MAX_IMAGE_BYTES = 800_000;
+const HEAD_TIMEOUT_MS = 2500;
+
+async function isImageHealthy(url: string | null | undefined): Promise<boolean> {
+  if (!url) return false;
+  try {
+    const ctrl = new AbortController();
+    const t = setTimeout(() => ctrl.abort(), HEAD_TIMEOUT_MS);
+    const res = await fetch(url, { method: 'HEAD', signal: ctrl.signal });
+    clearTimeout(t);
+    if (!res.ok) return false;
+    const ct = res.headers.get('content-type') ?? '';
+    if (!ct.startsWith('image/')) return false;
+    const lenStr = res.headers.get('content-length');
+    if (lenStr) {
+      const len = Number(lenStr);
+      if (Number.isFinite(len) && len > MAX_IMAGE_BYTES) return false;
+    }
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 // ── Helpers ─────────────────────────────────────────────────────────────
@@ -144,6 +198,18 @@ function nextFriday(from: Date): Date {
 }
 
 function toEmailEvent(r: DbEventRow): LifecycleEmailEvent {
+  // Always route images through /api/img/[eventId]:
+  //   - upstream sizes get capped to (640×320 hero / 160×160 compact)
+  //   - upstream failures fall back to a category-tinted placeholder so the
+  //     email never shows a broken-img icon
+  //   - all images now come from lasstreffen.at → cleaner sender alignment,
+  //     better deliverability (no cross-domain hotlinking in the HTML)
+  //
+  // The lifecycle template doesn't know whether a row is going to be the
+  // hero or in the compact list, so it appends its own ?w=&h= per slot
+  // (see lifecycle-weekend.tsx). Here we just emit the base URL.
+  const proxyBase = `https://lasstreffen.at/api/img/${r.id}`;
+
   return {
     title: r.title,
     date: formatDateDE(r.start_date),
@@ -151,7 +217,7 @@ function toEmailEvent(r: DbEventRow): LifecycleEmailEvent {
     // No start_time column in events — emails just show the date.
     venueName: r.location_name ?? undefined,
     city: r.district ?? undefined,
-    imageUrl: r.image_url ?? undefined,
+    imageUrl: proxyBase,
     eventPageUrl: `https://lasstreffen.at${buildEventUrlV2({
       id: r.id,
       start_date: r.start_date,
