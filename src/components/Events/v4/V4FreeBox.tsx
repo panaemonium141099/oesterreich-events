@@ -9,8 +9,11 @@
 
 import { V4Badge } from './V4Badge';
 import { V4PriceBlock } from './V4PriceBlock';
+import { V4SaveButton } from './V4SaveButton';
 
 interface V4FreeBoxProps {
+  /** Required for the Merken-toggle to write into saved_events. */
+  eventId: string;
   onPlanClick?: () => void;
   /** Google-Maps-Directions-URL. Without it the Route button collapses. */
   mapsUrl?: string;
@@ -25,7 +28,7 @@ interface V4FreeBoxProps {
   priceMax?: number | null;
 }
 
-export function V4FreeBox({ onPlanClick, mapsUrl, locationApprox, priceText, priceMin, priceMax }: V4FreeBoxProps) {
+export function V4FreeBox({ eventId, onPlanClick, mapsUrl, locationApprox, priceText, priceMin, priceMax }: V4FreeBoxProps) {
   const showsLocationCell = !!mapsUrl || !!locationApprox;
   return (
     <div
@@ -85,10 +88,7 @@ export function V4FreeBox({ onPlanClick, mapsUrl, locationApprox, priceText, pri
               Ortsangabe ungefähr
             </span>
           ) : null}
-          <a href="/saved" className={`press-haptic inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-full border border-[var(--v4-hairline-3)] text-[12.5px] font-semibold text-[var(--v4-ink)] ${showsLocationCell ? '' : 'flex-1'}`}>
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
-            Merken
-          </a>
+          <V4SaveButton eventId={eventId} fillRow={!showsLocationCell} />
           <a href="#share" className="press-haptic inline-flex items-center justify-center px-3 py-2 rounded-full border border-[var(--v4-hairline-3)] text-[var(--v4-ink)]" aria-label="Teilen">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
           </a>

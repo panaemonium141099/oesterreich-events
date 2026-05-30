@@ -13,8 +13,11 @@
 
 import { V4Badge } from './V4Badge';
 import { V4PriceBlock } from './V4PriceBlock';
+import { V4SaveButton } from './V4SaveButton';
 
 interface V4UnknownBoxProps {
+  /** Required for the Merken-toggle to write into saved_events. */
+  eventId: string;
   /** Open the V4PlanWizard sheet. When omitted, the planning CTA links
    *  to /saved as a fallback (server-rendered anonymous view). */
   onPlanClick?: () => void;
@@ -34,7 +37,7 @@ interface V4UnknownBoxProps {
   priceTier?: 'gratis' | 'günstig' | 'mittel' | 'premium' | 'unbekannt' | null;
 }
 
-export function V4UnknownBox({ onPlanClick, mapsUrl, locationApprox, priceText, priceMin, priceMax, priceTier }: V4UnknownBoxProps = {}) {
+export function V4UnknownBox({ eventId, onPlanClick, mapsUrl, locationApprox, priceText, priceMin, priceMax, priceTier }: V4UnknownBoxProps) {
   const showsLocationCell = !!mapsUrl || !!locationApprox;
   return (
     <div
@@ -94,14 +97,7 @@ export function V4UnknownBox({ onPlanClick, mapsUrl, locationApprox, priceText, 
               Ortsangabe ungefähr
             </span>
           ) : null}
-          <a
-            href="/saved"
-            data-track="event_saved"
-            className={`press-haptic inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-full border border-[var(--v4-hairline-3)] text-[12.5px] font-semibold text-[var(--v4-ink)] ${showsLocationCell ? '' : 'flex-1'}`}
-          >
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
-            Merken
-          </a>
+          <V4SaveButton eventId={eventId} fillRow={!showsLocationCell} />
         </div>
       </div>
     </div>

@@ -113,6 +113,7 @@ export function V4EventDetail({
 
         <aside className="order-first md:order-last md:sticky md:top-[88px] md:self-start">
           <V4SideBox
+            eventId={event.id}
             state={state}
             provider={provider}
             priceFrom={priceFrom}

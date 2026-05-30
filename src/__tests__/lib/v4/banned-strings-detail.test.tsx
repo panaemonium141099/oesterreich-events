@@ -10,6 +10,7 @@ describe('banned-strings — event detail surfaces', () => {
     it(`no banned strings appear in V4SideBox state=${state}`, () => {
       const { container } = render(
         <V4SideBox
+          eventId="test-id"
           state={state}
           provider="Eventim"
           priceFrom="€ 10"

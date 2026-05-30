@@ -16,6 +16,10 @@ import { V4UnknownBox } from './V4UnknownBox';
 import { V4SoldoutBox } from './V4SoldoutBox';
 
 interface V4SideBoxProps {
+  /** UUID of the event — propagated to every variant so the "Merken"
+   *  button can toggle saved_events. Without this every save link is a
+   *  no-op `<a href="/saved">` placeholder, which is what shipped originally. */
+  eventId: string;
   state: V4EventState;
   provider?: string;
   priceFrom?: string;
@@ -39,16 +43,17 @@ interface V4SideBoxProps {
 }
 
 export function V4SideBox(props: V4SideBoxProps) {
-  const { state, provider, priceFrom, ticketUrl, priceAtDoor, artistName, mapsUrl, locationApprox, onPlanClick,
+  const { eventId, state, provider, priceFrom, ticketUrl, priceAtDoor, artistName, mapsUrl, locationApprox, onPlanClick,
     priceText, priceMin, priceMax, priceTier } = props;
 
   // Variants of TicketBox.
   if (state === 'ticket' || state === 'match' || state === 'lineup') {
     if (!provider || !priceFrom || !ticketUrl) {
-      return <V4UnknownBox mapsUrl={mapsUrl} locationApprox={locationApprox} onPlanClick={onPlanClick} priceText={priceText} priceMin={priceMin} priceMax={priceMax} priceTier={priceTier}/>;
+      return <V4UnknownBox eventId={eventId} mapsUrl={mapsUrl} locationApprox={locationApprox} onPlanClick={onPlanClick} priceText={priceText} priceMin={priceMin} priceMax={priceMax} priceTier={priceTier}/>;
     }
     return (
       <V4TicketBox
+        eventId={eventId}
         provider={provider}
         priceFrom={priceFrom}
         ticketUrl={ticketUrl}
@@ -59,9 +64,9 @@ export function V4SideBox(props: V4SideBoxProps) {
     );
   }
 
-  if (state === 'free')     return <V4FreeBox onPlanClick={onPlanClick} mapsUrl={mapsUrl} locationApprox={locationApprox} priceText={priceText} priceMin={priceMin} priceMax={priceMax}/>;
-  if (state === 'doorsale') return <V4DoorsaleBox priceAtDoor={priceAtDoor} mapsUrl={mapsUrl} locationApprox={locationApprox} onPlanClick={onPlanClick}/>;
+  if (state === 'free')     return <V4FreeBox eventId={eventId} onPlanClick={onPlanClick} mapsUrl={mapsUrl} locationApprox={locationApprox} priceText={priceText} priceMin={priceMin} priceMax={priceMax}/>;
+  if (state === 'doorsale') return <V4DoorsaleBox eventId={eventId} priceAtDoor={priceAtDoor} mapsUrl={mapsUrl} locationApprox={locationApprox} onPlanClick={onPlanClick}/>;
   if (state === 'inplan')   return <V4InPlanBox onPlanClick={onPlanClick}/>;
   if (state === 'soldout')  return <V4SoldoutBox/>;
-  return <V4UnknownBox mapsUrl={mapsUrl} locationApprox={locationApprox} onPlanClick={onPlanClick} priceText={priceText} priceMin={priceMin} priceMax={priceMax} priceTier={priceTier}/>;
+  return <V4UnknownBox eventId={eventId} mapsUrl={mapsUrl} locationApprox={locationApprox} onPlanClick={onPlanClick} priceText={priceText} priceMin={priceMin} priceMax={priceMax} priceTier={priceTier}/>;
 }

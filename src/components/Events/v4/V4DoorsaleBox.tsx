@@ -6,8 +6,11 @@
  */
 
 import { V4Badge } from './V4Badge';
+import { V4SaveButton } from './V4SaveButton';
 
 interface V4DoorsaleBoxProps {
+  /** Required for the Merken-toggle to write into saved_events. */
+  eventId: string;
   priceAtDoor?: string;
   onPlanClick?: () => void;
   /** Google-Maps-Directions-URL für die "Route"-Aktion. Ohne sie wird
@@ -18,7 +21,7 @@ interface V4DoorsaleBoxProps {
   locationApprox?: boolean;
 }
 
-export function V4DoorsaleBox({ priceAtDoor, onPlanClick, mapsUrl, locationApprox }: V4DoorsaleBoxProps) {
+export function V4DoorsaleBox({ eventId, priceAtDoor, onPlanClick, mapsUrl, locationApprox }: V4DoorsaleBoxProps) {
   const showsLocationCell = !!mapsUrl || !!locationApprox;
   return (
     <div
@@ -86,14 +89,7 @@ export function V4DoorsaleBox({ priceAtDoor, onPlanClick, mapsUrl, locationAppro
               Ortsangabe ungefähr
             </span>
           ) : null}
-          <a
-            href="/saved"
-            className={`press-haptic inline-flex items-center justify-center px-3 py-2 rounded-full border border-[var(--v4-hairline-3)] text-[var(--v4-ink)] ${showsLocationCell ? '' : 'flex-1 gap-1.5 text-[12.5px] font-semibold'}`}
-            aria-label="Merken"
-          >
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
-            {!showsLocationCell && <span>Merken</span>}
-          </a>
+          <V4SaveButton eventId={eventId} fillRow={!showsLocationCell} withLabel={!showsLocationCell} />
         </div>
       </div>
     </div>
