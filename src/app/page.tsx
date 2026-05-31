@@ -33,6 +33,7 @@ import { AuthErrorToast } from '@/components/Landing/AuthErrorToast';
 import { Footer } from '@/components/Legal/Footer';
 import { getLandingContext } from '@/lib/v4/get-landing-context';
 import { getLandingData } from '@/lib/v4/get-landing-data';
+import { RegionHubsSection } from '@/components/Landing/v4/RegionHubsSection';
 
 export const revalidate = 3600;
 
@@ -70,6 +71,7 @@ export default async function LandingPage() {
         <FestivalsSection festivals={data.festivals}/>
         <MapPreview/>
         <HowItWorks/>
+        <RegionHubsSection/>
       </main>
 
       <Footer/>
