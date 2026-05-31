@@ -1,9 +1,10 @@
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 import { BUNDESLAENDER } from '@/lib/bundeslaender';
-import { isValidBundesland } from '@/lib/landing-slugs';
+import { isValidBundesland, getBundeslandName } from '@/lib/landing-slugs';
 import { loadBundeslandPage } from '@/lib/landing-data';
 import { LandingPageShell } from '@/components/Landing/LandingPageShell';
+import { HubSearchCTA } from '@/components/Hub/HubSearchCTA';
 
 export const revalidate = 3600;
 
@@ -50,5 +51,16 @@ export default async function BundeslandPage({
   const data = await loadBundeslandPage(bundesland, null, null);
   if (!data) notFound();
 
-  return <LandingPageShell {...data} />;
+  const blName = getBundeslandName(bundesland) ?? bundesland;
+  return (
+    <LandingPageShell
+      {...data}
+      searchCta={
+        <HubSearchCTA
+          scope={{ bundesland }}
+          label={`Alle Veranstaltungen in ${blName} durchsuchen`}
+        />
+      }
+    />
+  );
 }

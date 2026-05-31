@@ -22,6 +22,7 @@ import type { FilterChip } from '@/components/Landing/FilterChips';
 import type { LinkGroup } from '@/components/Landing/InternalLinks';
 import { BUNDESLAND_INTROS, STADT_INTROS } from '@/content/landing-intros';
 import { buildFAQPageSchema, faqForBundesland } from './seo/faq';
+import { STADT_TO_GEMEINDE } from './hubs/city-hubs';
 
 const BASE_URL = 'https://lasstreffen.at';
 
@@ -419,12 +420,14 @@ function buildBundeslandLinks(
   }));
   groups.push({ title: `Mehr in ${blName}`, links: categoryLinks });
 
-  // Cities
+  // Cities — link to the canonical /gemeinde city hubs. The old /stadt URLs
+  // now 301-redirect there; linking direct avoids the redirect hop and keeps
+  // internal link equity flowing straight to the canonical page.
   const cityLinks = LANDING_CITIES.filter(
     (c) => c.filterMode === 'city',
   ).map((c) => ({
     label: c.name,
-    href: `/stadt/${c.slug}`,
+    href: `/gemeinde/${STADT_TO_GEMEINDE[c.slug] ?? c.slug}`,
   }));
   if (cityLinks.length > 0) {
     groups.push({ title: 'Stadte', links: cityLinks });
