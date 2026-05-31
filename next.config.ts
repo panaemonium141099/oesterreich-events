@@ -436,6 +436,27 @@ const nextConfig: NextConfig = {
         destination: '/admin/overview',
         permanent: false, // 307 — may add a real /admin dashboard later
       },
+      // Retired /stadt/{city} hubs → canonical /gemeinde system.
+      //
+      // The old /stadt pages ran the pre-refactor LandingPageShell and
+      // cannibalized the new city-aware /gemeinde hubs (GSC: Google ranked
+      // /gemeinde/4020-linz for "veranstaltungen linz" while /stadt/linz
+      // sat unindexed). 301 consolidates the duplicate's signals onto the
+      // canonical gemeinde URL. Slug map mirrors STADT_TO_GEMEINDE in
+      // src/lib/hubs/city-hubs.ts (Wien is a Bundesland → /wien).
+      ...(
+        [
+          ['linz', '/gemeinde/4020-linz'],
+          ['graz', '/gemeinde/8010-graz'],
+          ['innsbruck', '/gemeinde/6020-innsbruck'],
+          ['salzburg-stadt', '/gemeinde/5020-salzburg'],
+          ['klagenfurt', '/gemeinde/9020-klagenfurt-am-woerthersee'],
+          ['wien', '/wien'],
+        ] as const
+      ).flatMap(([city, destination]) => [
+        { source: `/stadt/${city}`, destination, permanent: true },
+        { source: `/stadt/${city}/:path*`, destination, permanent: true },
+      ]),
     ];
   },
   // better-sqlite3 only used by scraper scripts, not by API routes

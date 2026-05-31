@@ -22,7 +22,6 @@ import { ALL_POSTS } from '@/content/blog';
 import { BUNDESLAENDER } from '@/lib/bundeslaender';
 import {
   CATEGORY_SLUGS,
-  LANDING_CITIES,
   STUDENT_CITIES,
   STUDENT_FILTERS,
 } from '@/lib/landing-slugs';
@@ -112,20 +111,10 @@ export async function GET(): Promise<NextResponse> {
     }
   }
 
-  // ─── 4. Stadt pages ─────────────────────────────────────────────────────
-  const stadtCities = LANDING_CITIES.filter((c) => c.filterMode === 'city');
-  for (const city of stadtCities) {
-    entries.push({ loc: `${BASE_URL}/stadt/${city.slug}`, lastmod: toISO(now), changefreq: 'daily', priority: 0.8 });
-    for (const tf of timeFilters) {
-      entries.push({ loc: `${BASE_URL}/stadt/${city.slug}/${tf}`, lastmod: toISO(now), changefreq: 'daily', priority: 0.7 });
-    }
-    for (const cs of categorySlugs) {
-      entries.push({ loc: `${BASE_URL}/stadt/${city.slug}/${cs}`, lastmod: toISO(now), changefreq: 'daily', priority: 0.7 });
-      for (const tf of timeFilters) {
-        entries.push({ loc: `${BASE_URL}/stadt/${city.slug}/${cs}/${tf}`, lastmod: toISO(now), changefreq: 'daily', priority: 0.6 });
-      }
-    }
-  }
+  // ─── 4. Stadt pages — RETIRED ───────────────────────────────────────────
+  // The old /stadt/{city} hubs now 301-redirect into the /gemeinde system
+  // (see next.config.ts). The 5 city hubs live as /gemeinde/{plz}-{city} and
+  // are emitted in section 5b below, elevated to priority 0.8.
 
   // ─── 5. Student pages ───────────────────────────────────────────────────
   entries.push({ loc: `${BASE_URL}/studenten`, lastmod: toISO(now), changefreq: 'daily', priority: 0.8 });
@@ -163,12 +152,15 @@ export async function GET(): Promise<NextResponse> {
   // page has ≥3 events; thin ones are noindex'd at the page level.
   try {
     const { ALL_GEMEINDEN } = await import('@/lib/gemeinden/data');
+    const { isCityHub } = await import('@/lib/hubs/city-hubs');
     for (const g of ALL_GEMEINDEN) {
+      // The 5 major-city hubs (Linz/Graz/Salzburg/Innsbruck/Klagenfurt) carry
+      // the retired /stadt URLs' priority (0.8); villages stay at 0.5.
       entries.push({
         loc: `${BASE_URL}/gemeinde/${g.slug}`,
         lastmod: toISO(now),
         changefreq: 'daily',
-        priority: 0.5,
+        priority: isCityHub(g.slug) ? 0.8 : 0.5,
       });
     }
   } catch (err) {
