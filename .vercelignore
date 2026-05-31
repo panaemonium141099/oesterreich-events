@@ -7,13 +7,18 @@
 # file `vercel deploy` hits the 100 MB per-file limit on data/events.db
 # and the 250 MB total-deploy limit.
 #
-# Runtime reads from /data only hit gemeinden-registry JSON files — we
-# keep those included so the gemeinde-hub pages build.
+# Build-time reads from /data:
+#   - data/gemeinden-registry/  (gemeinde-hub pages)
+#   - data/festival-overrides.json  (imported by FestivalHubClient,
+#     festival-image-scraper, get-landing-festivals — three source modules
+#     `import overridesJson from '../../../data/festival-overrides.json'`).
+#     Without the whitelist, Vercel builds fail with "Module not found".
 
-# Entire data dir except the gemeinden registry required at build time
+# Entire data dir except the few files we need at build time
 data/*
 !data/gemeinden-registry
 !data/gemeinden-registry/**
+!data/festival-overrides.json
 
 # Local Mapbox / Nominatim geocode caches — dev-only
 .cache/
