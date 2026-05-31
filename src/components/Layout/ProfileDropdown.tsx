@@ -90,7 +90,7 @@ export function ProfileDropdown() {
             <Link href="/profile" onClick={() => setOpen(false)} className={itemClass}>
               <UserIcon size={16} className="inline-block mr-1.5 -mt-0.5" /> Mein Profil
             </Link>
-            <Link href="/saved" onClick={() => setOpen(false)} className={itemClass}>
+            <Link href="/gemerkt" onClick={() => setOpen(false)} className={itemClass}>
               <HeartIcon size={16} className="inline-block mr-1.5 -mt-0.5" /> Gespeicherte Events
             </Link>
             <Link href="/friends" onClick={() => setOpen(false)} className={itemClass}>

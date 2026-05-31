@@ -89,7 +89,7 @@ export function V4SaveButton({ eventId, fillRow = false, withLabel = true }: V4S
         await supabase
           .from('saved_events')
           .insert({ user_id: user.id, event_id: eventId });
-        toast.success('Event gemerkt — findest du unter „Gespeichert"');
+        toast.success('Event gemerkt — findest du unter „Gespeicherte Events"');
         // Pulse animation only on the positive action.
         setPulse(true);
         setTimeout(() => setPulse(false), 600);
