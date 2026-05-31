@@ -39,6 +39,7 @@ import { buildFAQPageSchema, faqForGemeinde } from '@/lib/seo/faq';
 import { resolveExperimentForScope } from '@/lib/seo/experiments-server';
 import { ExperimentImpressionLogger } from '@/components/SEO/ExperimentImpressionLogger';
 import { getHubIntro } from '@/lib/seo/hub-refresh';
+import { getCityHub } from '@/lib/hubs/city-hubs';
 
 export const revalidate = 3600;
 export const dynamicParams = true;
@@ -114,7 +115,10 @@ const loadNearbyEventsCached = unstable_cache(
 );
 
 async function loadNearbyEvents(g: AustrianGemeinde): Promise<NearbyEvent[]> {
-  return loadNearbyEventsCached(g.lat, g.lng, 10);
+  // Cities sprawl wider than villages — widen the radius for city hubs so a
+  // Linz/Graz page actually covers the metro area, not just the centre.
+  const radiusKm = getCityHub(g.slug)?.radiusKm ?? 10;
+  return loadNearbyEventsCached(g.lat, g.lng, radiusKm);
 }
 
 // ───────────────────────────────────────────────────────────────────────
@@ -151,7 +155,13 @@ export async function generateMetadata({
     plz: g.plz,
     bundesland: g.bundesland,
   });
-  const defaultTitle = `Events in ${g.name} ${g.plz} — ${count > 0 ? `${count} Veranstaltungen` : 'Veranstaltungskalender'}`;
+  // City hubs get a search-intent-matched title ("Veranstaltungen in Linz
+  // 2026 — N Events"): no PLZ (nobody searches "events linz 4020") and the
+  // year baked in (the GSC data shows "<event> 2026" is how people search).
+  const cityHub = getCityHub(g.slug);
+  const defaultTitle = cityHub
+    ? `Veranstaltungen in ${g.name} ${new Date().getFullYear()}${count > 0 ? ` — ${count} Events` : ''}`
+    : `Events in ${g.name} ${g.plz} — ${count > 0 ? `${count} Veranstaltungen` : 'Veranstaltungskalender'}`;
   const title = experiment?.payload.title ?? defaultTitle;
   const canonicalUrl = `https://lasstreffen.at/gemeinde/${g.slug}`;
 
@@ -282,9 +292,12 @@ export default async function GemeindeHubPage({
     bundesland: g.bundesland,
   });
 
+  const cityHub = getCityHub(g.slug);
   const h1Text = experiment?.payload.heading_prefix
     ? `${experiment.payload.heading_prefix} ${g.name}`
-    : `Events in ${g.name}`;
+    : cityHub
+      ? `Veranstaltungen in ${g.name}`
+      : `Events in ${g.name}`;
 
   // fn-13 phase 10 — rotating intro paragraph. The monthly content-
   // refresh cron picks top-traffic hubs and increments their
@@ -331,17 +344,28 @@ export default async function GemeindeHubPage({
               {g.bezirk ? ` · Bezirk ${g.bezirk}` : ''}
               {' · '}{g.bundesland}
             </p>
-            <p className="mt-3 text-white/80 leading-relaxed max-w-2xl">
-              {events.length > 0 ? (
-                introParagraph
-              ) : (
-                <>
-                  Aktuell keine Events im Umkreis von 10 km um {g.name} gefunden.
-                  Schau in einer Nachbar-Gemeinde nach — eine Liste findest du unten
-                  auf der Seite.
-                </>
-              )}
-            </p>
+            {cityHub ? (
+              <>
+                <p className="mt-3 text-white/80 leading-relaxed max-w-2xl">
+                  {cityHub.intro.lead}
+                </p>
+                <p className="mt-2 text-sm text-white/60 leading-relaxed max-w-2xl">
+                  {cityHub.intro.body}
+                </p>
+              </>
+            ) : (
+              <p className="mt-3 text-white/80 leading-relaxed max-w-2xl">
+                {events.length > 0 ? (
+                  introParagraph
+                ) : (
+                  <>
+                    Aktuell keine Events im Umkreis um {g.name} gefunden.
+                    Schau in einer Nachbar-Gemeinde nach — eine Liste findest du unten
+                    auf der Seite.
+                  </>
+                )}
+              </p>
+            )}
           </header>
 
           {/* Event grid */}
