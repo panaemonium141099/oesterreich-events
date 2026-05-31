@@ -174,7 +174,9 @@ export function V4TopNavAuth() {
             </div>
             {[
               { href: '/profile', label: 'Mein Profil' },
-              { href: '/saved', label: 'Gespeichert' },
+              // /gemerkt = pure bookmark list; /saved is the Pläne workspace
+              // (reachable via the "Meine Pläne" link in the top nav row).
+              { href: '/gemerkt', label: 'Gespeichert' },
               { href: '/feed', label: 'Feed' },
               { href: '/groups', label: 'Meine Gruppen' },
             ].map((it) => (
