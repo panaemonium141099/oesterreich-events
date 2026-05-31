@@ -40,6 +40,7 @@ import { resolveExperimentForScope } from '@/lib/seo/experiments-server';
 import { ExperimentImpressionLogger } from '@/components/SEO/ExperimentImpressionLogger';
 import { getHubIntro } from '@/lib/seo/hub-refresh';
 import { getCityHub } from '@/lib/hubs/city-hubs';
+import { HubSearchCTA } from '@/components/Hub/HubSearchCTA';
 
 export const revalidate = 3600;
 export const dynamicParams = true;
@@ -367,6 +368,20 @@ export default async function GemeindeHubPage({
               </p>
             )}
           </header>
+
+          {/* Hybrid bridge → open the full /entdecken explorer scoped to this
+              place. From there the user can widen the filter and browse all of
+              Austria, so a Google visitor isn't trapped on a single list. */}
+          <div className="mb-10">
+            <HubSearchCTA
+              scope={{
+                bundesland: slugifyBundesland(g.bundesland),
+                placeName: g.name,
+                placePostalCode: g.plz,
+              }}
+              label={`Alle Veranstaltungen in ${g.name} durchsuchen`}
+            />
+          </div>
 
           {/* Event grid */}
           {events.length > 0 && (
