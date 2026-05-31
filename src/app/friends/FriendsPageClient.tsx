@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/lib/supabase/auth-context';
 import { createClient } from '@/lib/supabase/client';
-import { ProfileDropdown } from '@/components/Layout/ProfileDropdown';
 import { trackEvent } from '@/lib/analytics';
 import { toast } from 'sonner';
 
@@ -252,7 +251,6 @@ export function FriendsPageClient() {
         {/* Page header */}
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-2xl font-bold">Freunde</h1>
-          <ProfileDropdown />
         </div>
 
         {/* Search */}

@@ -6,7 +6,6 @@ import Link from 'next/link';
 import { useAuth } from '@/lib/supabase/auth-context';
 import { createClient } from '@/lib/supabase/client';
 import { CalendarIcon, MapPinIcon } from '@/components/UI/Icons';
-import { ProfileDropdown } from '@/components/Layout/ProfileDropdown';
 import { toast } from 'sonner';
 import { buildEventUrlV2 } from '@/lib/utils/slugify';
 import { EventImage } from '@/components/Events/EventImage';
@@ -129,7 +128,6 @@ export function SavedPageClient() {
             </svg>
             Gespeicherte Events
           </h1>
-          <ProfileDropdown />
         </div>
         <p className="text-white/40 text-sm mb-8">
           {savedEvents.length} {savedEvents.length === 1 ? 'Event' : 'Events'} gespeichert

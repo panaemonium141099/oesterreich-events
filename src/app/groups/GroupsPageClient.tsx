@@ -21,7 +21,6 @@ import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/supabase/auth-context';
 import { createClient } from '@/lib/supabase/client';
-import { ProfileDropdown } from '@/components/Layout/ProfileDropdown';
 import {
   PlanerShell,
   EditorialHeading,
@@ -208,7 +207,6 @@ export function GroupsPageClient() {
       <main className="relative max-w-5xl mx-auto px-5 sm:px-8 pt-8 sm:pt-12 pb-32">
         {/* Top row — profile */}
         <div className="flex justify-end mb-6 sm:mb-8">
-          <ProfileDropdown />
         </div>
 
         {/* HERO */}

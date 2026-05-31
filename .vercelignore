@@ -1,0 +1,28 @@
+# .vercelignore — files Vercel CLI shouldn't upload on `vercel deploy`.
+# Complements .gitignore; anything in .gitignore is already excluded.
+#
+# This repo has ~1 GB of dev-only data in /data (SQLite DB, event dumps,
+# coord backups, enrichment log) and /.cache (Mapbox geocoding cache)
+# that's useful locally but not needed by the runtime. Without this
+# file `vercel deploy` hits the 100 MB per-file limit on data/events.db
+# and the 250 MB total-deploy limit.
+#
+# Runtime reads from /data only hit gemeinden-registry JSON files — we
+# keep those included so the gemeinde-hub pages build.
+
+# Entire data dir except the gemeinden registry required at build time
+data/*
+!data/gemeinden-registry
+!data/gemeinden-registry/**
+
+# Local Mapbox / Nominatim geocode caches — dev-only
+.cache/
+
+# Claude Code working directory
+.claude/
+
+# Flow-next task tracker
+.flow/
+
+# Local reports + archives
+Bericht*.txt

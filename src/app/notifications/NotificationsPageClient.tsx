@@ -2,7 +2,6 @@
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { ProfileDropdown } from '@/components/Layout/ProfileDropdown';
 import { NotificationBell } from '@/components/Notifications/NotificationBell';
 import { DesktopPushToggle } from '@/components/Notifications/DesktopPushToggle';
 import { ArtistMatchBundles } from '@/components/Notifications/ArtistMatchBundles';
@@ -127,7 +126,6 @@ export function NotificationsPageClient() {
           <h1 className="text-lg font-bold">Benachrichtigungen</h1>
           <div className="flex items-center gap-3">
             <NotificationBell className="w-9 h-9 rounded-lg hover:bg-white/[0.06]" />
-            <ProfileDropdown />
           </div>
         </div>
       </header>

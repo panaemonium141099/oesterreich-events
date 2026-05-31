@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/lib/supabase/auth-context';
 import { createClient } from '@/lib/supabase/client';
-import { ProfileDropdown } from '@/components/Layout/ProfileDropdown';
 
 interface Conversation {
   friendId: string;
@@ -246,7 +245,6 @@ export function MessagesPageClient() {
             </svg>
             Neue Nachricht
           </button>
-          <ProfileDropdown />
           </div>
         </div>
 

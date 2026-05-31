@@ -3,7 +3,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ProfileDropdown } from '@/components/Layout/ProfileDropdown';
 import { NotificationBell } from '@/components/Notifications/NotificationBell';
 import { useAuth } from '@/lib/supabase/auth-context';
 import { createClient } from '@/lib/supabase/client';
@@ -213,7 +212,6 @@ export function ArtistsPageClient() {
           <h1 className="text-lg font-bold">Kuenstler</h1>
           <div className="flex items-center gap-3">
             <NotificationBell className="w-9 h-9 rounded-lg hover:bg-white/[0.06]" />
-            <ProfileDropdown />
           </div>
         </div>
       </header>
