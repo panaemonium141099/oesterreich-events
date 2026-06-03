@@ -33,7 +33,7 @@ interface TabItem {
 }
 
 const TABS: ReadonlyArray<TabItem> = [
-  { href: '/',         label: 'Entdecken', matches: ['/', '/entdecken'], icon: 'home' },
+  { href: '/entdecken', label: 'Entdecken', matches: ['/', '/entdecken'], icon: 'home' },
   { href: '/artists',  label: 'Künstler',  matches: ['/artists'],         icon: 'music' },
   { href: '/map',      label: 'Karte',     matches: ['/map'],             icon: 'map' },
   { href: '/plans',    label: 'Pläne',     matches: ['/plans', '/saved'], icon: 'ticket' },
