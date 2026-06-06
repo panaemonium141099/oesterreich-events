@@ -18,6 +18,7 @@ import { useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
 import { BUNDESLAND_HUBS, type BundeslandHubEntry } from '@/lib/hubs/bundesland-regions';
 import { buildEntdeckenHref } from '@/lib/hubs/hub-links';
+import { blImg, regionImg } from '@/lib/hubs/region-slug';
 
 // ── tokens (mapped to globals.css v4 vars) ──────────────────────────────────
 const INK = 'var(--v4-ink)';
@@ -27,8 +28,6 @@ const HL2 = 'var(--v4-hairline-2)';
 const HL3 = 'var(--v4-hairline-3)';
 const ELEV = 'var(--v4-surface-elevated)';
 const TICKET = 'var(--v4-ticket)';
-const TICKET_SOFT = 'rgba(212,184,150,0.12)';
-const TICKET_BORDER = 'rgba(212,184,150,0.32)';
 
 const TILE_BG =
   'radial-gradient(120% 85% at 100% 0%, rgba(212,184,150,0.10), transparent 56%), linear-gradient(165deg, #17171b 0%, #0c0c0e 72%)';
@@ -65,22 +64,19 @@ function BLTile({
       style={{
         border: `1px solid ${HL2}`,
         borderRadius: feature ? 20 : 16,
-        background: bl.img ? ELEV : TILE_BG,
+        background: TILE_BG,
         color: INK,
         padding: 0,
         cursor: 'pointer',
       }}
     >
-      {bl.img && (
-        <>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={bl.img} alt="" className="absolute inset-0 h-full w-full object-cover"
-            style={{ filter: 'saturate(0.92) brightness(0.82)' }} />
-          <div className="absolute inset-0" style={{
-            background: 'linear-gradient(to top, rgba(5,5,6,0.94) 0%, rgba(5,5,6,0.5) 40%, rgba(5,5,6,0.12) 74%)',
-          }} />
-        </>
-      )}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src={bl.img ?? blImg(bl.id)} alt="" loading="lazy"
+        className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"
+        style={{ filter: 'saturate(0.95) brightness(0.8)' }} />
+      <div className="absolute inset-0" style={{
+        background: 'linear-gradient(to top, rgba(5,5,6,0.94) 0%, rgba(5,5,6,0.5) 40%, rgba(5,5,6,0.12) 74%)',
+      }} />
 
       {/* count pill */}
       <span className="absolute inline-flex items-center gap-1.5"
@@ -140,16 +136,12 @@ function BundeslandSheet({
       >
         {/* banner */}
         <div className="relative shrink-0" style={{ height: 152, background: TILE_BG }}>
-          {bl.img && (
-            <>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={bl.img} alt="" className="absolute inset-0 h-full w-full object-cover"
-                style={{ filter: 'saturate(0.92) brightness(0.8)' }} />
-              <div className="absolute inset-0" style={{
-                background: 'linear-gradient(to top, rgba(20,20,22,0.98) 0%, rgba(20,20,22,0.45) 55%, rgba(20,20,22,0.2) 100%)',
-              }} />
-            </>
-          )}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={bl.img ?? blImg(bl.id)} alt="" className="absolute inset-0 h-full w-full object-cover"
+            style={{ filter: 'saturate(0.95) brightness(0.78)' }} />
+          <div className="absolute inset-0" style={{
+            background: 'linear-gradient(to top, rgba(20,20,22,0.98) 0%, rgba(20,20,22,0.45) 55%, rgba(20,20,22,0.2) 100%)',
+          }} />
           <button type="button" onClick={onClose} aria-label="Schließen"
             className="absolute flex items-center justify-center"
             style={{
@@ -207,10 +199,10 @@ function BundeslandSheet({
                   padding: '11px 12px', borderRadius: 12, background: 'var(--v4-surface-inset)',
                   border: `1px solid ${HL2}`, color: INK,
                 }}>
-                <span className="flex shrink-0 items-center justify-center"
-                  style={{ width: 30, height: 30, borderRadius: 8, background: TICKET_SOFT, color: TICKET, border: `1px solid ${TICKET_BORDER}` }}>
-                  <Ic d={PIN} size={13} />
-                </span>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={regionImg(bl.id, r.name)} alt="" loading="lazy"
+                  className="shrink-0 object-cover"
+                  style={{ width: 44, height: 44, borderRadius: 9, border: `1px solid ${HL3}` }} />
                 <span className="min-w-0 flex-1">
                   <span className="block truncate" style={{ fontSize: 13.5, fontWeight: 600, letterSpacing: '-0.01em' }}>{r.name}</span>
                 </span>
@@ -264,6 +256,13 @@ export function RegionHubsSection() {
           <BLTile key={bl.id} bl={bl} onPick={setPicked} />
         ))}
       </div>
+
+      <p style={{ fontSize: 11, color: INK50, marginTop: 14, lineHeight: 1.5 }}>
+        Vorschaubilder: Wikimedia Commons · CC BY/BY-SA ·{' '}
+        <Link href="/bildnachweis" style={{ color: INK70, textDecoration: 'underline' }}>
+          Bildnachweis
+        </Link>
+      </p>
 
       {picked && <BundeslandSheet bl={picked} onClose={close} />}
     </section>
