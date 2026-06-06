@@ -45,6 +45,10 @@ function deriveInitialFilters(search: URLSearchParams): Partial<EventFilters> | 
   if (plz) out.placePostalCode = plz;
   const ort = search.get('ort');
   if (ort) out.placeName = ort;
+  // Tourism region (section 02b) → soft search-narrower within the bundesland.
+  // True region→district filtering is a follow-up; this at least scopes results.
+  const region = search.get('region');
+  if (region && !out.search) out.search = region;
   return Object.keys(out).length > 0 ? out : undefined;
 }
 

@@ -69,9 +69,9 @@ export default async function LandingPage() {
         <WeekendSection events={data.todayWeekend}/>
         <ConcertsSection events={data.concerts}/>
         <FestivalsSection festivals={data.festivals}/>
+        <RegionHubsSection/>
         <MapPreview/>
         <HowItWorks/>
-        <RegionHubsSection/>
       </main>
 
       <Footer/>
