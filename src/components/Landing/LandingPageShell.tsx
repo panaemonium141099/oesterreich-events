@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import Link from 'next/link';
 import type { Event } from '@/types/events';
 import { EventListCard } from '@/components/Events/EventListCard';
@@ -35,6 +36,9 @@ interface LandingPageShellProps {
     body: string;
     tips?: string;
   };
+  /** Optional hybrid-bridge CTA (e.g. <HubSearchCTA/>) rendered under the
+   *  intro — links into /entdecken scoped to this region. */
+  searchCta?: ReactNode;
 }
 
 /**
@@ -52,6 +56,7 @@ export function LandingPageShell({
   jsonLd,
   paginationParams,
   intro,
+  searchCta,
 }: LandingPageShellProps) {
   // Cursor for pagination: last event's ID from server batch
   const lastEvent = events[events.length - 1];
@@ -114,6 +119,9 @@ export function LandingPageShell({
               )}
             </section>
           )}
+
+          {/* Hybrid bridge → /entdecken scoped to this region (optional). */}
+          {searchCta && <div className="mb-8">{searchCta}</div>}
 
           {/* Filter Chips */}
           <div className="mb-6">

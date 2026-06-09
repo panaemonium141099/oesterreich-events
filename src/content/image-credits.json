@@ -1,0 +1,101 @@
+[
+  {
+    "slug": "wien",
+    "kind": "bl",
+    "bl": null,
+    "name": null,
+    "title": "Wien - Schloss Schönbrunn",
+    "creator": "C.Stadler/Bwag",
+    "license": "by-sa 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+    "source": "https://commons.wikimedia.org/w/index.php?curid=120083081"
+  },
+  {
+    "slug": "niederoesterreich",
+    "kind": "bl",
+    "bl": null,
+    "name": null,
+    "title": "Kellerschlössel Domäne Wachau Dürnstein",
+    "creator": "Domäne Wachau",
+    "license": "by-sa 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+    "source": "https://commons.wikimedia.org/w/index.php?curid=145558563"
+  },
+  {
+    "slug": "burgenland",
+    "kind": "bl",
+    "bl": null,
+    "name": null,
+    "title": "Podersdorf am See - Kulturlandschaft Fertő-Neusiedler See - Rastplatz mit Ziehbrunnen",
+    "creator": "Haeferl",
+    "license": "by-sa 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+    "source": "https://commons.wikimedia.org/w/index.php?curid=107410340"
+  },
+  {
+    "slug": "oberoesterreich",
+    "kind": "bl",
+    "bl": null,
+    "name": null,
+    "title": "File:1 hallstatt austria.jpg",
+    "creator": "chensiyuan",
+    "license": "by-sa 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+    "source": "https://commons.wikimedia.org/w/index.php?curid=20069520"
+  },
+  {
+    "slug": "steiermark",
+    "kind": "bl",
+    "bl": null,
+    "name": null,
+    "title": "Graz - Uhrturm (c)",
+    "creator": "C.Stadler/Bwag",
+    "license": "by-sa 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+    "source": "https://commons.wikimedia.org/w/index.php?curid=119457105"
+  },
+  {
+    "slug": "salzburg",
+    "kind": "bl",
+    "bl": null,
+    "name": null,
+    "title": "Salzburg - Festung Hohensalzburg",
+    "creator": "C.Stadler/Bwag",
+    "license": "by-sa 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+    "source": "https://commons.wikimedia.org/w/index.php?curid=125633314"
+  },
+  {
+    "slug": "tirol",
+    "kind": "bl",
+    "bl": null,
+    "name": null,
+    "title": "AUT Innsbruck, Nordkette 057",
+    "creator": "-wuppertaler",
+    "license": "by 4.0",
+    "license_url": "https://creativecommons.org/licenses/by/4.0/",
+    "source": "https://commons.wikimedia.org/w/index.php?curid=143923368"
+  },
+  {
+    "slug": "kaernten",
+    "kind": "bl",
+    "bl": null,
+    "name": null,
+    "title": "Panorama-Wörthersee",
+    "creator": "Florian Fuchs",
+    "license": "by 3.0",
+    "license_url": "https://creativecommons.org/licenses/by/3.0/",
+    "source": "https://commons.wikimedia.org/w/index.php?curid=16326193"
+  },
+  {
+    "slug": "vorarlberg",
+    "kind": "bl",
+    "bl": null,
+    "name": null,
+    "title": "Mündungsdelta der Bregenzer Ache",
+    "creator": "böhringer friedrich",
+    "license": "by-sa 3.0",
+    "license_url": "https://creativecommons.org/licenses/by-sa/3.0/at/deed.en/",
+    "source": "https://commons.wikimedia.org/w/index.php?curid=34720499"
+  }
+]

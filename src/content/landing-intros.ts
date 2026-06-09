@@ -105,4 +105,8 @@ export const STADT_INTROS: Record<string, LandingIntro> = {
     lead: 'Innsbruck ist Tirols urbaner Mittelpunkt und die Basis für alles, was in den umliegenden Alpen passiert.',
     body: 'Das Treibhaus, der Weekender-Club, die Bäckerei und das Kulturzentrum P.M.K. sind die etablierten Venues für Konzerte, DJ-Nights und Kunstausstellungen. Die Universität Innsbruck bringt eine studentische Nachtszene, vor allem im Viertel um die Templstraße. In der Weihnachtszeit werden die Christkindlmärkte in der Altstadt und in der Maria-Theresien-Straße europaweit beworben.',
   },
+  'klagenfurt': {
+    lead: 'Klagenfurt ist Kärntens Event-Zentrum am Wörthersee — die Saison kippt im Frühsommer in den Open-Air-Modus und läuft den ganzen Seesommer durch.',
+    body: 'Rund um den Wörthersee und das Strandbad konzentrieren sich die großen Sommer-Events, Beach-Partys und die Stadion-Konzerte im Wörthersee-Stadion. In der Stadt bespielen das Stadttheater Klagenfurt, das Konzerthaus und die Szene-Locations die Kultur- und Club-Nächte. Wiederkehrende Fixpunkte sind der Altstadtzauber und die Lange Nacht der Chöre, dazu Kirchtage und Kufenstechen im Umland. Klagenfurt ist außerdem Uni-Stadt — die Alpen-Adria-Universität bringt eine studentische Szene mit entsprechendem Nightlife.',
+  },
 };

@@ -15,6 +15,7 @@ import { useState } from 'react';
 import { EventListView } from '@/components/MapV3/EventListView';
 import { FilterDrawer } from '@/components/MapV3/FilterDrawer';
 import { EventDetail } from '@/components/Events/EventDetail';
+import { V4RegionRail } from '@/components/Discover/v4/V4RegionRail';
 import { useFilteredEvents } from '@/lib/v4/use-filtered-events';
 import type { Event, EventFilters } from '@/types/events';
 
@@ -46,6 +47,9 @@ export function V4EntdeckenListMode({
 
   return (
     <div className="max-w-[1180px] mx-auto px-4 md:px-14 pb-20">
+      {/* Region rail → entry into the city/bundesland SEO hubs (hybrid loop). */}
+      <V4RegionRail />
+
       {/* Toolbar: Filter-Button rechts; Count + Sort sitzt in EventListView. */}
       <div className="flex items-center justify-end gap-3 mb-4">
         <button

@@ -38,6 +38,17 @@ function deriveInitialFilters(search: URLSearchParams): Partial<EventFilters> | 
   if (search_) out.search = search_;
   const category = search.get('category');
   if (category) out.category = category;
+  // Place-scope deep-link from a hub page (gemeinde / city / bundesland):
+  // ?plz + ?ort scope the list to one place via the compound place filter;
+  // the user can widen it via the FilterDrawer to browse all events.
+  const plz = search.get('plz');
+  if (plz) out.placePostalCode = plz;
+  const ort = search.get('ort');
+  if (ort) out.placeName = ort;
+  // Tourism region (section 02b) → soft search-narrower within the bundesland.
+  // True region→district filtering is a follow-up; this at least scopes results.
+  const region = search.get('region');
+  if (region && !out.search) out.search = region;
   return Object.keys(out).length > 0 ? out : undefined;
 }
 
@@ -49,7 +60,11 @@ function EntdeckenInner() {
   const [mode, setMode] = useState<V4EntdeckenMode>(resolveMode(search.get('mode')));
   const initialQuery = search.get('q') ?? '';
   const initialBlParam = search.get('bl');
-  const initialBundeslandIds = initialBlParam ? [initialBlParam] : undefined;
+  // Comma-separated bl supported so a bundesland hub can deep-link a single
+  // region and a future multi-region link still works.
+  const initialBundeslandIds = initialBlParam
+    ? initialBlParam.split(',').map((s) => s.trim()).filter(Boolean)
+    : undefined;
   const initialFilters = deriveInitialFilters(search);
 
   // Mirror mode back into URL — list-Modus default unparametrisiert
@@ -93,6 +108,8 @@ function EntdeckenInner() {
     initialFilters?.search ?? '',
     initialFilters?.district ?? '',
     initialFilters?.category ?? '',
+    initialFilters?.placeName ?? '',
+    initialFilters?.placePostalCode ?? '',
   ].join('|');
 
   return (
