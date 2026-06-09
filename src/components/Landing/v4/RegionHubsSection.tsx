@@ -3,22 +3,27 @@
 /**
  * "Events nach Bundesland" — v4 landing section (design section 02b).
  *
- * Each Bundesland is a clickable tile. Tapping opens a HYBRID sheet offering
- * both routes at once:
+ * Each Bundesland is a clickable photo tile. Tapping opens a HYBRID sheet:
  *   • primary "Alle Events in <BL>" CTA  → /entdecken?bl=<id>
- *   • a region picker                     → /entdecken?bl=<id>&region=<r>
- * Both land on the existing /entdecken list, pre-scoped. Anonymous-friendly.
+ *   • a Bezirk picker                     → /entdecken?bl=<id>&district=<bezirk>
+ * Both land on the existing /entdecken list, pre-scoped. The Bezirk value is
+ * the exact `district` field the events carry, so the picker filters for real.
  *
- * Faithful to the mockup (v4-bundesland.jsx) with this codebase's v4 tokens.
- * No bundesland photos exist yet → tiles use an on-brand dark gradient with a
- * warm accent wash; a real photo drops in via BundeslandHubEntry.img later.
+ * Bundesland tiles use real CC photos (public/images/regions/{id}.jpg). The
+ * Bezirk rows use an accent marker — there are ~113 Bezirke, so per-Bezirk
+ * photos aren't practical (and faking it would look worse than a clean marker).
  */
 
 import { useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
 import { BUNDESLAND_HUBS, type BundeslandHubEntry } from '@/lib/hubs/bundesland-regions';
 import { buildEntdeckenHref } from '@/lib/hubs/hub-links';
-import { blImg, regionImg } from '@/lib/hubs/region-slug';
+import { blImg } from '@/lib/hubs/region-slug';
+import {
+  DISTRICTS_BY_BUNDESLAND,
+  displayDistrictName,
+  type BundeslandId,
+} from '@/lib/districtsAT';
 
 // ── tokens (mapped to globals.css v4 vars) ──────────────────────────────────
 const INK = 'var(--v4-ink)';
@@ -28,9 +33,15 @@ const HL2 = 'var(--v4-hairline-2)';
 const HL3 = 'var(--v4-hairline-3)';
 const ELEV = 'var(--v4-surface-elevated)';
 const TICKET = 'var(--v4-ticket)';
+const TICKET_SOFT = 'rgba(212,184,150,0.12)';
+const TICKET_BORDER = 'rgba(212,184,150,0.32)';
 
 const TILE_BG =
   'radial-gradient(120% 85% at 100% 0%, rgba(212,184,150,0.10), transparent 56%), linear-gradient(165deg, #17171b 0%, #0c0c0e 72%)';
+
+function bezirke(blId: string) {
+  return DISTRICTS_BY_BUNDESLAND[blId as BundeslandId] ?? [];
+}
 
 // ── inline icons ────────────────────────────────────────────────────────────
 function Ic({ d, size = 14, sw = 2 }: { d: string; size?: number; sw?: number }) {
@@ -55,11 +66,12 @@ function BLTile({
   feature?: boolean;
   onPick: (bl: BundeslandHubEntry) => void;
 }) {
+  const count = bezirke(bl.id).length;
   return (
     <button
       type="button"
       onClick={() => onPick(bl)}
-      aria-label={`${bl.name} — Region wählen oder alle Events`}
+      aria-label={`${bl.name} — Bezirk wählen oder alle Events`}
       className={`group relative block h-full w-full overflow-hidden text-left transition-colors ${feature ? 'col-span-2 md:row-span-2' : ''}`}
       style={{
         border: `1px solid ${HL2}`,
@@ -87,7 +99,7 @@ function BLTile({
           border: `1px solid ${HL3}`, color: INK, fontSize: 11.5, fontWeight: 600,
         }}>
         <span style={{ color: TICKET }}><Ic d={PIN} size={11} /></span>
-        {bl.regions.length} Regionen
+        {count} Bezirke
       </span>
 
       {/* name block */}
@@ -98,7 +110,7 @@ function BLTile({
         }}>{bl.name}</div>
         <div className="flex items-center gap-1.5"
           style={{ marginTop: feature ? 6 : 4, fontSize: feature ? 12.5 : 11.5, fontWeight: 600, color: 'rgba(255,255,255,0.82)' }}>
-          <span>{bl.regions.length} Regionen</span>
+          <span>{count} Bezirke</span>
           <span style={{ opacity: 0.5 }}>·</span>
           <span style={{ color: TICKET }}>Auswählen</span>
           <span className="transition-transform group-hover:translate-x-0.5"><Ic d={ARROW_R} size={12} sw={2.4} /></span>
@@ -115,6 +127,7 @@ function BundeslandSheet({
   bl: BundeslandHubEntry;
   onClose: () => void;
 }) {
+  const districts = bezirke(bl.id);
   return (
     <div
       onClick={onClose}
@@ -183,28 +196,30 @@ function BundeslandSheet({
           <div className="flex items-center gap-3" style={{ margin: '20px 0 14px' }}>
             <div style={{ flex: 1, height: 1, background: HL2 }} />
             <span style={{ fontSize: 10.5, color: INK50, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.18em', whiteSpace: 'nowrap' }}>
-              oder nach Region eingrenzen
+              oder nach Bezirk eingrenzen
             </span>
             <div style={{ flex: 1, height: 1, background: HL2 }} />
           </div>
 
-          {/* Route B — region picker */}
+          {/* Route B — Bezirk picker (real ?district= filter) */}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-            {bl.regions.map((r) => (
+            {districts.map((d) => (
               <Link
-                key={r.name}
-                href={buildEntdeckenHref({ bundesland: bl.id, region: r.name })}
+                key={d.name}
+                href={buildEntdeckenHref({ bundesland: bl.id, district: d.name })}
                 className="flex items-center gap-2.5 transition-colors hover:border-white/20"
                 style={{
-                  padding: '11px 12px', borderRadius: 12, background: 'var(--v4-surface-inset)',
+                  padding: '10px 12px', borderRadius: 12, background: 'var(--v4-surface-inset)',
                   border: `1px solid ${HL2}`, color: INK,
                 }}>
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={regionImg(bl.id, r.name)} alt="" loading="lazy"
-                  className="shrink-0 object-cover"
-                  style={{ width: 44, height: 44, borderRadius: 9, border: `1px solid ${HL3}` }} />
+                <span className="flex shrink-0 items-center justify-center"
+                  style={{ width: 32, height: 32, borderRadius: 8, background: TICKET_SOFT, color: TICKET, border: `1px solid ${TICKET_BORDER}` }}>
+                  <Ic d={PIN} size={13} />
+                </span>
                 <span className="min-w-0 flex-1">
-                  <span className="block truncate" style={{ fontSize: 13.5, fontWeight: 600, letterSpacing: '-0.01em' }}>{r.name}</span>
+                  <span className="block truncate" style={{ fontSize: 13, fontWeight: 600, letterSpacing: '-0.01em' }}>
+                    {displayDistrictName(d.name)}
+                  </span>
                 </span>
                 <span style={{ color: INK50 }} className="shrink-0"><Ic d={CHEV_R} size={15} /></span>
               </Link>
@@ -236,17 +251,17 @@ export function RegionHubsSection() {
 
   return (
     <section className="mx-auto w-full" style={{ maxWidth: 1180, padding: '8px 16px 56px' }} aria-label="Events nach Bundesland">
-      <div style={{ padding: '0 0 0', marginBottom: 4 }}>
+      <div style={{ marginBottom: 4 }}>
         <div style={{ fontSize: 11.5, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.18em', color: TICKET, marginBottom: 10 }}>
-          Nach Region · ganz Österreich
+          Nach Bezirk · ganz Österreich
         </div>
         <h2 style={{ margin: 0, fontSize: 28, fontWeight: 700, letterSpacing: '-0.03em', color: INK, lineHeight: 1.05 }}>
           Events in deinem Bundesland
         </h2>
         <p style={{ fontSize: 14.5, color: INK70, lineHeight: 1.55, margin: '8px 0 18px', maxWidth: 600 }}>
           Wähle dein Bundesland — dann zeigen wir dir{' '}
-          <b style={{ color: INK, fontWeight: 600 }}>alle Events</b> dort, oder du grenzt direkt auf eine{' '}
-          <b style={{ color: INK, fontWeight: 600 }}>Region</b> ein.
+          <b style={{ color: INK, fontWeight: 600 }}>alle Events</b> dort, oder du grenzt direkt auf einen{' '}
+          <b style={{ color: INK, fontWeight: 600 }}>Bezirk</b> ein.
         </p>
       </div>
 
@@ -258,7 +273,7 @@ export function RegionHubsSection() {
       </div>
 
       <p style={{ fontSize: 11, color: INK50, marginTop: 14, lineHeight: 1.5 }}>
-        Vorschaubilder: Wikimedia Commons · CC BY/BY-SA ·{' '}
+        Bundesland-Bilder: Wikimedia Commons · CC BY/BY-SA ·{' '}
         <Link href="/bildnachweis" style={{ color: INK70, textDecoration: 'underline' }}>
           Bildnachweis
         </Link>

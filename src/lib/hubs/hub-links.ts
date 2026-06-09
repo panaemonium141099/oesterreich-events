@@ -17,8 +17,10 @@ export interface EntdeckenScope {
   placeName?: string;
   /** 4-digit PLZ for the compound place-scope filter, e.g. '4020'. */
   placePostalCode?: string;
-  /** Tourism region within the bundesland, e.g. 'Wachau & Donau' (section 02b). */
+  /** Tourism region within the bundesland (legacy; soft search-narrower). */
   region?: string;
+  /** Bezirk name — exact value of the events' `district` field (real filter). */
+  district?: string;
 }
 
 export function buildEntdeckenHref(scope: EntdeckenScope): string {
@@ -27,6 +29,7 @@ export function buildEntdeckenHref(scope: EntdeckenScope): string {
   if (scope.placePostalCode) p.set('plz', scope.placePostalCode);
   if (scope.placeName) p.set('ort', scope.placeName);
   if (scope.region) p.set('region', scope.region);
+  if (scope.district) p.set('district', scope.district);
   const qs = p.toString();
   return qs ? `/entdecken?${qs}` : '/entdecken';
 }
