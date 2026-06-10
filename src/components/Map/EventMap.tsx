@@ -71,6 +71,8 @@ interface EventMapProps {
   flyToCoords?: { lat: number; lng: number; zoom: number } | null;
   /** Set of event IDs that matched followed artists — displayed as special markers */
   artistEventIds?: Set<string>;
+  /** Set of event IDs that are paid-boosted — rendered unclustered + highlighted */
+  boostedEventIds?: Set<string>;
 }
 
 function addBaseOverlays(m: mapboxgl.Map, dark: boolean) {
@@ -159,12 +161,16 @@ function updateBundeslandOverlay(m: mapboxgl.Map, bl: Bundesland, dark: boolean)
   }).catch(() => {});
 }
 
-function EventMap({ events, selectedEvent, hoveredEventId, onSelectEvent, eveningMode, bundesland, flyToCoords, artistEventIds }: EventMapProps) {
+function EventMap({ events, selectedEvent, hoveredEventId, onSelectEvent, eveningMode, bundesland, flyToCoords, artistEventIds, boostedEventIds }: EventMapProps) {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
   const markersOnScreen = useRef<Map<string, mapboxgl.Marker>>(new Map());
   const eventLookup = useRef<Map<string, Event>>(new Map());
   const artistIdsRef = useRef<Set<string>>(new Set());
+  const boostedIdsRef = useRef<Set<string>>(new Set());
+  /** Union of artist + boosted IDs — every event that must render UNCLUSTERED
+   *  as a DOM marker rather than being folded into a Mapbox cluster. */
+  const unclusteredIdsRef = useRef<Set<string>>(new Set());
   /** Currently-open hover popup across all markers. Closing the previous
       popup before opening a new one prevents two popups from fighting
       each other when markers overlap. */
@@ -202,10 +208,15 @@ function EventMap({ events, selectedEvent, hoveredEventId, onSelectEvent, evenin
   const routerRef = useRef(router);
   useEffect(() => { routerRef.current = router; }, [router]);
 
-  // Keep artist IDs ref in sync
+  // Keep artist / boosted / union ID refs in sync
   useEffect(() => {
     artistIdsRef.current = artistEventIds ?? new Set();
-  }, [artistEventIds]);
+    boostedIdsRef.current = boostedEventIds ?? new Set();
+    unclusteredIdsRef.current = new Set([
+      ...artistIdsRef.current,
+      ...boostedIdsRef.current,
+    ]);
+  }, [artistEventIds, boostedEventIds]);
 
   // Build event lookup
   useEffect(() => {
@@ -467,8 +478,9 @@ function EventMap({ events, selectedEvent, hoveredEventId, onSelectEvent, evenin
 
     const geojson = buildGeoJSON(events);
 
-    // Build separate GeoJSON for artist-match events (no clustering)
-    const artistIds = artistIdsRef.current;
+    // Build separate GeoJSON for events that must NOT cluster: artist matches
+    // AND paid-boosted events both live in the dedicated unclustered source.
+    const artistIds = unclusteredIdsRef.current;
     const artistGeojson: GeoJSON.FeatureCollection = {
       type: 'FeatureCollection',
       features: artistIds.size > 0
@@ -612,7 +624,7 @@ function EventMap({ events, selectedEvent, hoveredEventId, onSelectEvent, evenin
       // exact same pixel and the cursor randomly hits one or the other →
       // popup content flips between the overlapping events.
       const artistCoordCounts = new Map<string, number>();
-      const artistFeatures = Array.from(artistIdsRef.current)
+      const artistFeatures = Array.from(unclusteredIdsRef.current)
         .map((id) => {
           const ev = eventLookup.current.get(id);
           if (!ev || ev.latitude == null || ev.longitude == null) return null;
@@ -669,9 +681,11 @@ function EventMap({ events, selectedEvent, hoveredEventId, onSelectEvent, evenin
         const todayStr = new Date().toISOString().slice(0, 10);
         const eventDateStr = event.start_date?.slice(0, 10) || '';
         const isToday = eventDateStr === todayStr;
-        const isArtistMatch = artistIdsRef.current.has(id);
+        const isBoosted = boostedIdsRef.current.has(id);
+        // Boosted wins the visual treatment over artist if an event is both.
+        const isArtistMatch = !isBoosted && artistIdsRef.current.has(id);
         const isSavedEvent = savedIdsRef.current.has(id);
-        body.className = `mapbox-event-marker${isToday ? ' marker-today' : ''}${isArtistMatch ? ' marker-artist' : ''}${isSavedEvent ? ' marker-saved' : ''}`;
+        body.className = `mapbox-event-marker${isToday ? ' marker-today' : ''}${isBoosted ? ' marker-boosted' : ''}${isArtistMatch ? ' marker-artist' : ''}${isSavedEvent ? ' marker-saved' : ''}`;
         const imgUrl = getEventImage(event.image_url, event.category, event.title, event.bundesland);
         const fallbackUrl = getCategoryFallbackImage(event.category, event.title, event.bundesland);
         const img = document.createElement('img');
@@ -691,7 +705,7 @@ function EventMap({ events, selectedEvent, hoveredEventId, onSelectEvent, evenin
         // needs a bigger offset to stay clear of the marker hitbox; otherwise
         // the popup overlaps the marker and mouseenter/leave fires rapidly.
         let popup: mapboxgl.Popup | null = null;
-        const popupOffset = isArtistMatch ? 44 : 25;
+        const popupOffset = (isArtistMatch || isBoosted) ? 44 : 25;
         let popupIsOpen = false;
         let closeTimer: ReturnType<typeof setTimeout> | null = null;
 

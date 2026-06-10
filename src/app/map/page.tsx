@@ -27,7 +27,7 @@
  * userLocation, flyto, view, filterOpen, mapChips, hoveredEventId)
  * bleibt page-lokal.
  */
-import { useState, useEffect, useCallback, Suspense } from 'react';
+import { useState, useEffect, useCallback, useMemo, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import type { Event, EventFilters } from '@/types/events';
@@ -161,6 +161,14 @@ function MapPageInner() {
     bundesland,
   } = useFilteredEvents(initialBundeslandIds, initialFilters);
 
+  // Paid-boosted events → rendered unclustered + highlighted on the map.
+  // Derived locally from the already-fetched events (is_boosted is in the
+  // slim /api/events payload), so no extra request is needed.
+  const boostedIds = useMemo(
+    () => new Set(finalEvents.filter((e) => e.is_boosted).map((e) => e.id)),
+    [finalEvents]
+  );
+
   // Old single-state shim so child components that still take a `Bundesland`
   // prop keep working unchanged.
   const setBundesland = useCallback((bl: Bundesland) => {
@@ -287,6 +295,7 @@ function MapPageInner() {
                 flyToCoords={dynamicFlyTo || flyToCoords}
                 bundesland={bundesland}
                 artistEventIds={new Set<string>()}
+                boostedEventIds={boostedIds}
               />
               <MapLoadingOverlay loading={loading} eventCount={allEvents.length} />
 

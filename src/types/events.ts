@@ -37,6 +37,11 @@ export interface Event {
   dedup_cluster_id?: string | null;
   event_score?: number;
   score_updated_at?: string;
+  /** Paid boosting (fn-Firmen Phase 2): rendered unclustered + highlighted on
+   *  the map, ranked first in featured/score lists. Set via admin boost API. */
+  is_boosted?: boolean;
+  boost_until?: string | null;
+  boost_tier?: 'boost' | 'abo' | 'scraper' | null;
   slug?: string | null;
   venue_id?: string | null;
   venue_match_confidence?: number | null;
