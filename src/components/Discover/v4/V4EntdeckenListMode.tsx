@@ -17,6 +17,7 @@ import { FilterDrawer } from '@/components/MapV3/FilterDrawer';
 import { EventDetail } from '@/components/Events/EventDetail';
 import { V4RegionRail } from '@/components/Discover/v4/V4RegionRail';
 import { useFilteredEvents } from '@/lib/v4/use-filtered-events';
+import { useBoostedIds } from '@/lib/hooks/useBoostedIds';
 import type { Event, EventFilters } from '@/types/events';
 
 interface V4EntdeckenListModeProps {
@@ -39,6 +40,7 @@ export function V4EntdeckenListMode({
 
   const [filterOpen, setFilterOpen] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
+  const boostedIds = useBoostedIds();
 
   // FilterDrawer.resultCount is typed `number` (not nullable).
   // totalMatchCount is null when a client narrower is active — fall back
@@ -72,6 +74,7 @@ export function V4EntdeckenListMode({
         loading={loading}
         totalCount={totalMatchCount}
         scopeLabel={scopeLabel}
+        boostedIds={boostedIds}
       />
 
       {/* Filter-Drawer — same component as /map */}

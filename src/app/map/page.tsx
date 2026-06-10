@@ -44,6 +44,7 @@ import { getStoredLocation, storeLocation } from '@/lib/geolocation';
 import { useSavedEvents } from '@/lib/saved-events-context';
 import { V4MarkerLegend } from '@/components/Map/v4';
 import { useFilteredEvents } from '@/lib/v4/use-filtered-events';
+import { useBoostedIds } from '@/lib/hooks/useBoostedIds';
 
 const EventMap = dynamic(() => import('@/components/Map/EventMap'), {
   ssr: false,
@@ -162,23 +163,10 @@ function MapPageInner() {
   } = useFilteredEvents(initialBundeslandIds, initialFilters);
 
   // Paid-boosted events → rendered unclustered + highlighted on the map.
-  // Bezogen aus dem separaten, nur wenige Sekunden gecachten
-  // /api/events/boosted (NICHT aus dem 2 h edge-gecachten /api/events-Payload).
-  // So verschwindet ein beendeter Boost quasi sofort von der Karte statt erst
-  // nach Cache-Ablauf.
-  const [boostedIds, setBoostedIds] = useState<Set<string>>(new Set());
-  useEffect(() => {
-    let cancelled = false;
-    fetch('/api/events/boosted')
-      .then((r) => r.json())
-      .then((d) => {
-        if (!cancelled && Array.isArray(d?.ids)) setBoostedIds(new Set<string>(d.ids));
-      })
-      .catch(() => {});
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+  // Aus dem frischen /api/events/boosted (siehe useBoostedIds), NICHT aus dem
+  // 2 h edge-gecachten /api/events-Payload — so verschwindet ein beendeter
+  // Boost quasi sofort von der Karte.
+  const boostedIds = useBoostedIds();
 
   // Old single-state shim so child components that still take a `Bundesland`
   // prop keep working unchanged.
