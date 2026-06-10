@@ -105,7 +105,7 @@ const PLANS: Plan[] = [
     highlight: true,
     features: [
       'Verifiziertes Firmenprofil mit Logo & Galerie',
-      'ALLE deine Events automatisch hervorgehoben',
+      'Bis zu 3 Events pro Monat gratis boosten',
       'Eigene Landingpage unter /firma/dein-name',
       'Bild-Galerie & Beschreibung deines Unternehmens',
       'Priorität im Support',
