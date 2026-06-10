@@ -1,14 +1,19 @@
+'use client';
+
 /**
  * Vergleich Clusterung vs. geboostetes Event.
  *
- * Zeigt zwei Karten-Ausschnitte nebeneinander: links die normale Clusterung,
- * rechts dasselbe mit einem hervorgehobenen Event, das NICHT geclustert wird.
- *
- * Die Marker sind dem echten Map-Stil nachgebildet (EventMap.tsx:
- * Cluster = heller Kreis mit Zähler + blauem Ring). Sobald echte Live-
- * Screenshots vorliegen, können die beiden <MapPanel>-Inhalte durch
- * <img src="/images/business/…"> ersetzt werden.
+ * Wenn ein echter Karten-Screenshot unter
+ *   public/images/business/boost-map.png
+ * liegt, wird dieser angezeigt (das ist das eigentliche Beweisbild). Fehlt die
+ * Datei, fällt die Komponente automatisch auf die schematische Zwei-Panel-
+ * Nachbildung zurück (heller Cluster-Kreis mit Zähler + violetter Boost-Pin,
+ * dem echten Map-Stil aus EventMap.tsx nachempfunden).
  */
+
+import { useState } from 'react';
+
+const REAL_SCREENSHOT = '/images/business/boost-map.png';
 
 /** Heller Cluster-Kreis mit Event-Anzahl — exakt der Stil aus EventMap. */
 function Cluster({ count, className = '' }: { count: number; className?: string }) {
@@ -49,6 +54,29 @@ function MapPanel({ children }: { children: React.ReactNode }) {
 }
 
 export function MapComparison() {
+  const [hasReal, setHasReal] = useState(true);
+
+  // Echtes Beweisbild — wird gezeigt, sobald die Datei existiert. Schlägt das
+  // Laden fehl (Datei fehlt noch), wird auf die schematische Nachbildung
+  // umgeschaltet.
+  if (hasReal) {
+    return (
+      <figure className="rounded-2xl border border-white/[0.08] overflow-hidden bg-[#0e1626]">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={REAL_SCREENSHOT}
+          alt="Geboostetes Event mit violettem Marker bleibt einzeln sichtbar, während alle anderen Events geclustert sind"
+          className="w-full h-auto block"
+          onError={() => setHasReal(false)}
+        />
+        <figcaption className="text-xs text-white/40 px-4 py-3">
+          Echte Karte: das geboostete Event (violetter Marker) bleibt einzeln &
+          hervorgehoben, während alle anderen Events zu Clustern zusammengefasst sind.
+        </figcaption>
+      </figure>
+    );
+  }
+
   return (
     <div className="grid sm:grid-cols-2 gap-4">
       {/* Ohne Boost */}
