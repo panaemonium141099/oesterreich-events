@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import type { Metadata } from 'next';
 import { BusinessLeadForm } from '@/components/Business/BusinessLeadForm';
+import { MapComparison } from '@/components/Business/MapComparison';
 
 export const revalidate = 86400;
 
@@ -12,6 +13,55 @@ export const metadata: Metadata = {
 };
 
 /* ------------------------------------------------------------------ */
+/*  SVG-Icons (Lucide-Stil, stroke 1.75, currentColor) — keine Emojis  */
+/* ------------------------------------------------------------------ */
+
+type IconProps = { className?: string };
+
+function MegaphoneIcon({ className }: IconProps) {
+  return (
+    <svg className={className} width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="m3 11 18-5v12L3 14v-3z" />
+      <path d="M11.6 16.8a3 3 0 1 1-5.8-1.6" />
+    </svg>
+  );
+}
+
+function BadgeCheckIcon({ className }: IconProps) {
+  return (
+    <svg className={className} width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z" />
+      <path d="m9 12 2 2 4-4" />
+    </svg>
+  );
+}
+
+function RefreshIcon({ className }: IconProps) {
+  return (
+    <svg className={className} width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" />
+      <path d="M21 3v5h-5" />
+      <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" />
+      <path d="M3 21v-5h5" />
+    </svg>
+  );
+}
+
+function CheckIcon({ className }: IconProps) {
+  return (
+    <svg className={className} viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+      <path fillRule="evenodd" d="M16.7 5.3a1 1 0 010 1.4l-8 8a1 1 0 01-1.4 0l-4-4a1 1 0 011.4-1.4L8 12.6l7.3-7.3a1 1 0 011.4 0z" clipRule="evenodd" />
+    </svg>
+  );
+}
+
+const PLAN_ICONS = {
+  boost: MegaphoneIcon,
+  abo: BadgeCheckIcon,
+  scraper: RefreshIcon,
+} as const;
+
+/* ------------------------------------------------------------------ */
 /*  Paket-Definitionen — Preise sind Platzhalter, frei editierbar       */
 /* ------------------------------------------------------------------ */
 
@@ -21,8 +71,8 @@ interface Plan {
   tagline: string;
   price: string;
   priceNote: string;
-  gradient: string;
-  emoji: string;
+  accent: string; // tailwind text color for icon
+  iconBg: string; // gradient for icon tile
   features: string[];
   highlight?: boolean;
 }
@@ -34,8 +84,8 @@ const PLANS: Plan[] = [
     tagline: 'Ein Event, maximale Sichtbarkeit',
     price: '29 €',
     priceNote: 'einmalig pro Event',
-    gradient: 'from-amber-500/20 to-orange-500/5',
-    emoji: '🚀',
+    accent: 'text-amber-300',
+    iconBg: 'from-amber-500/20 to-orange-500/5 border-amber-400/20',
     features: [
       'Dein Event wird auf der Karte hervorgehoben',
       'Niemals in Clustern versteckt — immer einzeln sichtbar',
@@ -50,8 +100,8 @@ const PLANS: Plan[] = [
     tagline: 'Für Veranstalter mit vielen Events',
     price: '49 €',
     priceNote: 'pro Monat',
-    gradient: 'from-violet-500/25 to-blue-500/5',
-    emoji: '⭐',
+    accent: 'text-violet-300',
+    iconBg: 'from-violet-500/25 to-blue-500/5 border-violet-400/25',
     highlight: true,
     features: [
       'Verifiziertes Firmenprofil mit Logo & Galerie',
@@ -67,8 +117,8 @@ const PLANS: Plan[] = [
     tagline: 'Eure Events, immer aktuell — automatisch',
     price: 'ab 199 €',
     priceNote: 'Setup, dann im Abo enthalten',
-    gradient: 'from-emerald-500/20 to-teal-500/5',
-    emoji: '🔗',
+    accent: 'text-emerald-300',
+    iconBg: 'from-emerald-500/20 to-teal-500/5 border-emerald-400/20',
     features: [
       'Wir bauen einen Connector für eure Homepage',
       'Eure Events erscheinen automatisch auf der Karte',
@@ -86,21 +136,9 @@ const STATS = [
 ];
 
 const STEPS = [
-  {
-    n: '1',
-    title: 'Anfrage stellen',
-    text: 'Füll das Formular aus und sag uns, welches Paket dich interessiert. Unverbindlich.',
-  },
-  {
-    n: '2',
-    title: 'Wir richten alles ein',
-    text: 'Wir melden uns, klären die Details und schalten dein Event oder Profil frei.',
-  },
-  {
-    n: '3',
-    title: 'Sichtbar werden',
-    text: 'Deine Events erscheinen hervorgehoben auf Karte & Listen — vor tausenden Nutzer:innen.',
-  },
+  { n: '1', title: 'Anfrage stellen', text: 'Füll das Formular aus und sag uns, welches Paket dich interessiert. Unverbindlich.' },
+  { n: '2', title: 'Wir richten alles ein', text: 'Wir melden uns, klären die Details und schalten dein Event oder Profil frei.' },
+  { n: '3', title: 'Sichtbar werden', text: 'Deine Events erscheinen hervorgehoben auf Karte & Listen — vor tausenden Nutzer:innen.' },
 ];
 
 /* ------------------------------------------------------------------ */
@@ -116,7 +154,7 @@ export default function FuerFirmenPage() {
           href="/"
           className="inline-flex items-center gap-2 text-white/40 hover:text-white/70 transition-colors text-sm mb-12"
         >
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
             <path d="M19 12H5" />
             <path d="m12 19-7-7 7-7" />
           </svg>
@@ -160,34 +198,11 @@ export default function FuerFirmenPage() {
           <h2 className="text-2xl md:text-3xl font-bold mb-3">So sticht dein Event heraus</h2>
           <p className="text-white/50 mb-8 max-w-2xl">
             Normale Events werden bei vielen Veranstaltungen zu Clustern zusammengefasst.
-            Ein geboostetes Event bleibt <strong className="text-white/80">immer einzeln sichtbar</strong> — mit
+            Ein geboostetes Event bleibt{' '}
+            <strong className="text-white/80">immer einzeln sichtbar</strong> — mit
             auffälligem Marker, der ins Auge fällt.
           </p>
-          <div className="grid sm:grid-cols-2 gap-4">
-            {/* Ohne Boost */}
-            <div className="rounded-2xl border border-white/[0.06] bg-white/[0.02] p-6">
-              <p className="text-xs uppercase tracking-wider text-white/30 mb-6">Ohne Boost</p>
-              <div className="flex items-center justify-center gap-3 py-8">
-                <div className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center text-sm font-semibold text-white/50">
-                  24
-                </div>
-                <span className="text-white/30 text-sm">in einem Cluster versteckt</span>
-              </div>
-            </div>
-            {/* Mit Boost */}
-            <div className="rounded-2xl border border-amber-400/30 bg-gradient-to-br from-amber-500/10 to-transparent p-6">
-              <p className="text-xs uppercase tracking-wider text-amber-400/80 mb-6">Mit Boost 🚀</p>
-              <div className="flex items-center justify-center gap-3 py-8">
-                <div className="relative">
-                  <div className="absolute -inset-2 rounded-full bg-amber-400/20 blur-md" />
-                  <div className="relative w-14 h-14 rounded-2xl bg-amber-400 flex items-center justify-center shadow-lg shadow-amber-500/30">
-                    <span className="text-2xl">🎉</span>
-                  </div>
-                </div>
-                <span className="text-white/80 text-sm font-medium">einzeln & hervorgehoben</span>
-              </div>
-            </div>
-          </div>
+          <MapComparison />
         </section>
 
         {/* Pakete */}
@@ -197,56 +212,58 @@ export default function FuerFirmenPage() {
             Vom einzelnen Event bis zur vollautomatischen Anbindung — wähle, was zu euch passt.
           </p>
           <div className="grid md:grid-cols-3 gap-5">
-            {PLANS.map((plan) => (
-              <div
-                key={plan.id}
-                className={`relative flex flex-col rounded-2xl border p-6 ${
-                  plan.highlight
-                    ? 'border-violet-400/40 bg-gradient-to-b from-violet-500/[0.08] to-transparent'
-                    : 'border-white/[0.08] bg-white/[0.02]'
-                }`}
-              >
-                {plan.highlight && (
-                  <span className="absolute -top-3 left-6 text-[10px] font-semibold uppercase tracking-wider px-3 py-1 rounded-full bg-violet-400 text-black">
-                    Beliebt
-                  </span>
-                )}
-                {/* Bild-Header (Gradient-Illustration) */}
-                <div className={`-mx-6 -mt-6 mb-5 h-28 rounded-t-2xl bg-gradient-to-br ${plan.gradient} flex items-center justify-center`}>
-                  <span className="text-5xl">{plan.emoji}</span>
-                </div>
-
-                <h3 className="text-xl font-bold">{plan.name}</h3>
-                <p className="text-sm text-white/40 mb-4">{plan.tagline}</p>
-
-                <div className="mb-5">
-                  <span className="text-3xl font-bold">{plan.price}</span>
-                  <span className="text-white/40 text-sm ml-2">{plan.priceNote}</span>
-                </div>
-
-                <ul className="space-y-2.5 mb-6 flex-1">
-                  {plan.features.map((f) => (
-                    <li key={f} className="flex items-start gap-2.5 text-sm text-white/60">
-                      <svg className="w-4 h-4 mt-0.5 flex-shrink-0 text-green-400" viewBox="0 0 20 20" fill="currentColor">
-                        <path fillRule="evenodd" d="M16.7 5.3a1 1 0 010 1.4l-8 8a1 1 0 01-1.4 0l-4-4a1 1 0 011.4-1.4L8 12.6l7.3-7.3a1 1 0 011.4 0z" clipRule="evenodd" />
-                      </svg>
-                      {f}
-                    </li>
-                  ))}
-                </ul>
-
-                <a
-                  href={`#kontakt`}
-                  className={`block text-center py-3 rounded-xl font-semibold text-sm transition-colors ${
+            {PLANS.map((plan) => {
+              const Icon = PLAN_ICONS[plan.id];
+              return (
+                <div
+                  key={plan.id}
+                  className={`relative flex flex-col rounded-2xl border p-6 ${
                     plan.highlight
-                      ? 'bg-violet-400 text-black hover:bg-violet-300'
-                      : 'bg-white/10 text-white hover:bg-white/20'
+                      ? 'border-violet-400/40 bg-gradient-to-b from-violet-500/[0.08] to-transparent'
+                      : 'border-white/[0.08] bg-white/[0.02]'
                   }`}
                 >
-                  Anfragen
-                </a>
-              </div>
-            ))}
+                  {plan.highlight && (
+                    <span className="absolute -top-3 left-6 text-[10px] font-semibold uppercase tracking-wider px-3 py-1 rounded-full bg-violet-400 text-black">
+                      Beliebt
+                    </span>
+                  )}
+
+                  {/* Icon-Tile */}
+                  <div className={`mb-5 w-14 h-14 rounded-xl bg-gradient-to-br border flex items-center justify-center ${plan.iconBg} ${plan.accent}`}>
+                    <Icon className="" />
+                  </div>
+
+                  <h3 className="text-xl font-bold">{plan.name}</h3>
+                  <p className="text-sm text-white/40 mb-4">{plan.tagline}</p>
+
+                  <div className="mb-5">
+                    <span className="text-3xl font-bold tabular-nums">{plan.price}</span>
+                    <span className="text-white/40 text-sm ml-2">{plan.priceNote}</span>
+                  </div>
+
+                  <ul className="space-y-2.5 mb-6 flex-1">
+                    {plan.features.map((f) => (
+                      <li key={f} className="flex items-start gap-2.5 text-sm text-white/60">
+                        <CheckIcon className="w-4 h-4 mt-0.5 flex-shrink-0 text-green-400" />
+                        {f}
+                      </li>
+                    ))}
+                  </ul>
+
+                  <a
+                    href="#kontakt"
+                    className={`block text-center py-3 rounded-xl font-semibold text-sm transition-colors ${
+                      plan.highlight
+                        ? 'bg-violet-400 text-black hover:bg-violet-300'
+                        : 'bg-white/10 text-white hover:bg-white/20'
+                    }`}
+                  >
+                    Anfragen
+                  </a>
+                </div>
+              );
+            })}
           </div>
           <p className="text-xs text-white/30 mt-4">
             Alle Preise zzgl. USt. Individuelle Pakete für größere Veranstalter auf Anfrage.
@@ -255,11 +272,11 @@ export default function FuerFirmenPage() {
 
         {/* So funktioniert's */}
         <section className="mt-20">
-          <h2 className="text-2xl md:text-3xl font-bold mb-8">So einfach geht's</h2>
+          <h2 className="text-2xl md:text-3xl font-bold mb-8">So einfach geht&apos;s</h2>
           <div className="grid sm:grid-cols-3 gap-5">
             {STEPS.map((step) => (
               <div key={step.n} className="rounded-2xl border border-white/[0.06] bg-white/[0.02] p-6">
-                <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center font-bold mb-4">
+                <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center font-bold mb-4 tabular-nums">
                   {step.n}
                 </div>
                 <h3 className="font-semibold mb-2">{step.title}</h3>
@@ -270,12 +287,10 @@ export default function FuerFirmenPage() {
         </section>
 
         {/* Kontakt / Lead-Formular */}
-        <section className="mt-20 scroll-mt-8" id="kontakt-section">
+        <section className="mt-20 scroll-mt-8">
           <div className="rounded-3xl border border-white/[0.08] bg-white/[0.02] p-6 md:p-10">
             <div className="max-w-xl mx-auto">
-              <h2 className="text-2xl md:text-3xl font-bold mb-3 text-center">
-                Lass uns reden
-              </h2>
+              <h2 className="text-2xl md:text-3xl font-bold mb-3 text-center">Lass uns reden</h2>
               <p className="text-white/50 mb-8 text-center">
                 Erzähl uns von euren Events — wir finden gemeinsam das passende Paket.
                 Unverbindlich und kostenlos.
