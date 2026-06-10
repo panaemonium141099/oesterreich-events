@@ -57,22 +57,53 @@ export default function BoostAdminPage() {
   }, [loadActive]);
 
   // ── Suche ────────────────────────────────────────────────────────────
+  // Nutzt die robuste Volltext-RPC search_event_ids (dieselbe Engine wie die
+  // App-Hauptsuche: case-insensitiv, mehrwortig, Trigram-tolerant). Eine
+  // hand-gestrickte .or()-ILIKE-Suche scheiterte an Leerzeichen im Titel.
+  // Es werden nur KOMMENDE Events gezeigt (start_date >= heute) — geboostet
+  // wird in die Zukunft, nicht in die Vergangenheit.
   const runSearch = async (e?: React.FormEvent) => {
     e?.preventDefault();
-    const q = query.trim();
-    if (!q) return;
+    const raw = query.trim();
+    if (!raw) return;
     setSearching(true);
     setSearched(true);
-    // PostgREST or()-Filter: Kommas/Klammern/Sterne im User-Input würden die
-    // Filter-Syntax zerschießen — daher neutralisieren.
-    const safe = q.replace(/[,()*]/g, ' ').trim();
-    const { data } = await supabase
-      .from('events')
-      .select(SELECT)
-      .or(`title.ilike.%${safe}%,location_name.ilike.%${safe}%`)
-      .order('start_date', { ascending: true })
-      .limit(40);
-    setResults((data as EventRow[]) || []);
+
+    const today = new Date().toISOString().slice(0, 10);
+    // Sonderzeichen entfernen (mirror der Haupt-Suche in /api/events).
+    const q = raw.replace(/[,.*()%_\\]/g, ' ').replace(/\s+/g, ' ').trim();
+
+    let rows: EventRow[] = [];
+    const { data: matched, error } = await supabase.rpc('search_event_ids', {
+      q,
+      max_ids: 150,
+    });
+
+    if (!error && matched) {
+      const ids = (matched as { id: string }[]).map((r) => r.id);
+      if (ids.length > 0) {
+        const { data } = await supabase
+          .from('events')
+          .select(SELECT)
+          .in('id', ids)
+          .gte('start_date', today)
+          .order('start_date', { ascending: true })
+          .limit(60);
+        rows = (data as EventRow[]) || [];
+      }
+    } else {
+      // Fallback (RPC nicht verfügbar): einfache Titel-Suche, robust mit Leerzeichen.
+      const { data } = await supabase
+        .from('events')
+        .select(SELECT)
+        .ilike('title', `%${q}%`)
+        .gte('start_date', today)
+        .order('start_date', { ascending: true })
+        .limit(60);
+      rows = (data as EventRow[]) || [];
+    }
+
+    setResults(rows);
     setSearching(false);
   };
 
