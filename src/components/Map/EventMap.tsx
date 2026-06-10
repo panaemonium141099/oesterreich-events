@@ -372,6 +372,7 @@ function EventMap({ events, selectedEvent, hoveredEventId, onSelectEvent, evenin
     const time = formatTime(event.start_date);
     const showTime = time !== null;
     const saved = savedIdsRef.current.has(event.id);
+    const isAd = boostedIdsRef.current.has(event.id);
     const canonicalUrl = buildEventUrlV2(event);
     const imgUrl = getEventImage(event.image_url, event.category, event.title, event.bundesland);
     const fallbackUrl = getCategoryFallbackImage(event.category, event.title, event.bundesland);
@@ -404,7 +405,10 @@ function EventMap({ events, selectedEvent, hoveredEventId, onSelectEvent, evenin
         <img src="${imgUrl}" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;" onerror="this.src='${fallbackUrl}'" />
         <div style="position:absolute;inset:0;background:linear-gradient(180deg, transparent 40%, rgba(20,20,22,0.7) 100%);pointer-events:none;"></div>
         <div style="position:absolute;top:10px;left:12px;right:12px;display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
-          <span style="display:inline-flex;align-items:center;gap:6px;padding:4px 9px;font-size:11px;font-weight:600;border-radius:9999px;color:${chip.fg};background:${chip.bg};border:1px solid ${chip.bd};">${escapeHtml(chipLabel)}</span>
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+            ${isAd ? `<span style="display:inline-flex;align-items:center;padding:4px 9px;font-size:10px;font-weight:700;border-radius:9999px;background:rgba(139,92,246,0.92);color:#fff;text-transform:uppercase;letter-spacing:0.06em;box-shadow:0 1px 4px rgba(0,0,0,0.35);">Anzeige</span>` : ''}
+            <span style="display:inline-flex;align-items:center;gap:6px;padding:4px 9px;font-size:11px;font-weight:600;border-radius:9999px;color:${chip.fg};background:${chip.bg};border:1px solid ${chip.bd};">${escapeHtml(chipLabel)}</span>
+          </div>
           ${priceBadge}
         </div>
       </div>
@@ -820,12 +824,12 @@ function EventMap({ events, selectedEvent, hoveredEventId, onSelectEvent, evenin
       // render-frame recreated them at the default (0,0) of the map container
       // for one paint → ghost bubble over the sidebar. Artist markers are
       // torn down only when the artist-id set itself changes (handled below).
-      const currentArtistIds = artistIdsRef.current;
+      const currentUnclusteredIds = unclusteredIdsRef.current;
       markersOnScreen.current.forEach((marker, markerId) => {
         if (newMarkerIds.has(markerId)) return;
         // Extract event id from `marker-${eventId}`
         const eventId = markerId.slice('marker-'.length);
-        if (currentArtistIds.has(eventId)) return; // still a valid artist marker → keep
+        if (currentUnclusteredIds.has(eventId)) return; // still a valid artist/boosted marker → keep
         marker.remove();
         markersOnScreen.current.delete(markerId);
       });
@@ -855,7 +859,7 @@ function EventMap({ events, selectedEvent, hoveredEventId, onSelectEvent, evenin
   // Note: bundesland NOT in deps — events are already filtered client-side.
   // Bundesland switch only triggers flyTo + overlay (separate useEffect).
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [events, mapReady, buildGeoJSON, createPopupHTML, onSelectEvent, eveningMode]);
+  }, [events, mapReady, buildGeoJSON, createPopupHTML, onSelectEvent, eveningMode, boostedEventIds, artistEventIds]);
 
   // Fly to selected
   useEffect(() => {

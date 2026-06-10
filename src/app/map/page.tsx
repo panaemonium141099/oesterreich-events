@@ -27,7 +27,7 @@
  * userLocation, flyto, view, filterOpen, mapChips, hoveredEventId)
  * bleibt page-lokal.
  */
-import { useState, useEffect, useCallback, useMemo, Suspense } from 'react';
+import { useState, useEffect, useCallback, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import type { Event, EventFilters } from '@/types/events';
@@ -162,12 +162,23 @@ function MapPageInner() {
   } = useFilteredEvents(initialBundeslandIds, initialFilters);
 
   // Paid-boosted events → rendered unclustered + highlighted on the map.
-  // Derived locally from the already-fetched events (is_boosted is in the
-  // slim /api/events payload), so no extra request is needed.
-  const boostedIds = useMemo(
-    () => new Set(finalEvents.filter((e) => e.is_boosted).map((e) => e.id)),
-    [finalEvents]
-  );
+  // Bezogen aus dem separaten, nur wenige Sekunden gecachten
+  // /api/events/boosted (NICHT aus dem 2 h edge-gecachten /api/events-Payload).
+  // So verschwindet ein beendeter Boost quasi sofort von der Karte statt erst
+  // nach Cache-Ablauf.
+  const [boostedIds, setBoostedIds] = useState<Set<string>>(new Set());
+  useEffect(() => {
+    let cancelled = false;
+    fetch('/api/events/boosted')
+      .then((r) => r.json())
+      .then((d) => {
+        if (!cancelled && Array.isArray(d?.ids)) setBoostedIds(new Set<string>(d.ids));
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   // Old single-state shim so child components that still take a `Bundesland`
   // prop keep working unchanged.
