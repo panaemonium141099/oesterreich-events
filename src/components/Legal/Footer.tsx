@@ -39,6 +39,9 @@ export function Footer() {
             <Link href="/blog" className="text-xs text-white/30 hover:text-white/60 transition-colors">
               Blog
             </Link>
+            <Link href="/fuer-firmen" className="text-xs text-white/30 hover:text-white/60 transition-colors">
+              Für Firmen
+            </Link>
             <Link href="/impressum" className="text-xs text-white/30 hover:text-white/60 transition-colors">
               Impressum
             </Link>
