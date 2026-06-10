@@ -68,24 +68,24 @@ export function MapComparison() {
       </figure>
 
       {/* Mit Boost */}
-      <figure className="rounded-2xl border border-amber-400/30 bg-gradient-to-br from-amber-500/[0.08] to-transparent p-4">
-        <figcaption className="text-xs uppercase tracking-wider text-amber-400/80 mb-3 px-1">
+      <figure className="rounded-2xl border border-violet-400/30 bg-gradient-to-br from-violet-500/[0.08] to-transparent p-4">
+        <figcaption className="text-xs uppercase tracking-wider text-violet-300/90 mb-3 px-1">
           Mit Boost
         </figcaption>
         <MapPanel>
           <Cluster count={24} className="left-[18%] top-[30%]" />
           <Cluster count={41} className="left-[64%] top-[60%]" />
 
-          {/* Hervorgehobenes Event — eigener Marker, nicht geclustert */}
+          {/* Hervorgehobenes Event — eigener Marker, nicht geclustert.
+              Violett = identisch zur echten .marker-boosted-Optik auf der Karte. */}
           <div className="absolute left-[44%] top-[40%]">
             <div className="relative">
-              <div className="absolute -inset-3 rounded-full bg-amber-400/25 blur-lg" aria-hidden="true" />
-              <div className="relative flex items-center gap-1.5 rounded-full bg-amber-400 pl-2 pr-3 py-1.5 shadow-lg shadow-amber-500/30">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1a1205" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                  <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
-                  <circle cx="12" cy="10" r="3" />
+              <div className="absolute -inset-3 rounded-full bg-violet-500/30 blur-lg" aria-hidden="true" />
+              <div className="relative flex items-center gap-1.5 rounded-full bg-violet-500 pl-2 pr-3 py-1.5 shadow-lg shadow-violet-500/40">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="white" aria-hidden="true">
+                  <path d="M12 2l2.9 6.9 7.1.6-5.4 4.7 1.6 7L12 17.5 5.8 21.2l1.6-7L2 9.5l7.1-.6z" />
                 </svg>
-                <span className="text-[11px] font-bold text-[#1a1205] whitespace-nowrap">Dein Event</span>
+                <span className="text-[11px] font-bold text-white whitespace-nowrap">Dein Event</span>
               </div>
             </div>
           </div>

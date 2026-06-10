@@ -276,7 +276,7 @@ export async function GET(request: NextRequest) {
     const slimSelect =
       'id, title, slug, start_date, end_date, location_name, address, ' +
       'postal_code, district, bundesland, latitude, longitude, category, ' +
-      'tags, image_url, price_text, event_score';
+      'tags, image_url, price_text, event_score, is_boosted';
     let query = suggestMode
       ? baseQuery.select('id, title, category, location_name')
       : slimMode
@@ -287,7 +287,7 @@ export async function GET(request: NextRequest) {
           // `description`/`price_text`. Frontend falls back cleanly when these
           // props are undefined. Keeping them in the SELECT broke the entire
           // API call because PostgREST 400s on missing columns.
-          'id, title, description, start_date, end_date, location_name, address, postal_code, district, bundesland, latitude, longitude, category, tags, image_url, price_text, price_min, price_max, ticket_url, source_name, source_url, organizer, visibility, event_score, slug, ' +
+          'id, title, description, start_date, end_date, location_name, address, postal_code, district, bundesland, latitude, longitude, category, tags, image_url, price_text, price_min, price_max, ticket_url, source_name, source_url, organizer, visibility, event_score, is_boosted, slug, ' +
           'audience, vibe, setting, language, price_tier, duration_type, is_student_friendly, is_family_friendly, ' +
           'occasion_tags, price_flags',
           needsCount ? { count: 'exact' } : undefined

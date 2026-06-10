@@ -79,6 +79,9 @@ export type Database = {
           share_count: number
           event_score: number | null
           score_updated_at: string | null
+          is_boosted: boolean
+          boost_until: string | null
+          boost_tier: 'boost' | 'abo' | 'scraper' | null
           venue_id: string | null
           event_series_id: string | null
           content_fingerprint: string | null

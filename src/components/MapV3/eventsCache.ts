@@ -57,6 +57,7 @@ type CachedEvent = Pick<
   | 'image_url'
   | 'tags'
   | 'event_score'
+  | 'is_boosted'
   | 'created_at'
   | 'updated_at'
 >;
@@ -79,6 +80,7 @@ function slim(e: Event): CachedEvent {
     image_url: e.image_url,
     tags: e.tags,
     event_score: e.event_score,
+    is_boosted: e.is_boosted,
     created_at: e.created_at,
     updated_at: e.updated_at,
   };

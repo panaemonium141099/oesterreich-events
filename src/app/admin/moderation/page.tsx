@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { Shield, Trash2, CheckCircle, AlertTriangle } from 'lucide-react';
+import { Shield, Trash2, CheckCircle, AlertTriangle, Sparkles } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 
 interface EventRow {
@@ -13,6 +13,7 @@ interface EventRow {
   source_name: string | null;
   source_type: string;
   bundesland: string | null;
+  is_boosted: boolean;
 }
 
 export default function ModerationPage() {
@@ -25,7 +26,7 @@ export default function ModerationPage() {
     const { data } = await supabase
       .from('events')
       .select(
-        'id, title, start_date, location_name, category, source_name, source_type, bundesland'
+        'id, title, start_date, location_name, category, source_name, source_type, bundesland, is_boosted'
       )
       .in('source_type', ['user', 'business'])
       .order('created_at', { ascending: false })
@@ -43,6 +44,29 @@ export default function ModerationPage() {
     if (!confirm('Event wirklich loschen?')) return;
     await supabase.from('events').delete().eq('id', eventId);
     setUserEvents((prev) => prev.filter((e) => e.id !== eventId));
+  };
+
+  const [boostingId, setBoostingId] = useState<string | null>(null);
+
+  const toggleBoost = async (eventId: string, next: boolean) => {
+    setBoostingId(eventId);
+    try {
+      const res = await fetch('/api/admin/boost', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ eventId, boosted: next }),
+      });
+      if (res.ok) {
+        setUserEvents((prev) =>
+          prev.map((e) => (e.id === eventId ? { ...e, is_boosted: next } : e))
+        );
+      } else {
+        const data = await res.json().catch(() => ({}));
+        alert(data.error || 'Boost fehlgeschlagen');
+      }
+    } finally {
+      setBoostingId(null);
+    }
   };
 
   const formatDate = (dateStr: string) =>
@@ -91,6 +115,12 @@ export default function ModerationPage() {
                   >
                     {e.source_type}
                   </span>
+                  {e.is_boosted && (
+                    <span className="text-[10px] px-2 py-0.5 rounded-full shrink-0 bg-violet-500/20 text-violet-300 flex items-center gap-1">
+                      <Sparkles className="w-2.5 h-2.5" />
+                      geboostet
+                    </span>
+                  )}
                 </div>
                 <div className="flex items-center gap-2 mt-0.5">
                   <span className="text-xs text-white/30">{formatDate(e.start_date)}</span>
@@ -99,6 +129,19 @@ export default function ModerationPage() {
                   )}
                 </div>
               </div>
+              <button
+                onClick={() => toggleBoost(e.id, !e.is_boosted)}
+                disabled={boostingId === e.id}
+                className={`flex items-center gap-1 text-xs px-3 py-1.5 rounded-lg transition-colors disabled:opacity-50 ${
+                  e.is_boosted
+                    ? 'text-violet-300 bg-violet-500/15 hover:bg-violet-500/25'
+                    : 'text-white/50 hover:bg-violet-500/10 hover:text-violet-300'
+                }`}
+                title={e.is_boosted ? 'Boost entfernen' : 'Event boosten'}
+              >
+                <Sparkles className="w-3.5 h-3.5" />
+                {e.is_boosted ? 'Geboostet' : 'Boost'}
+              </button>
               <button
                 onClick={() => deleteEvent(e.id)}
                 className="flex items-center gap-1 text-xs px-3 py-1.5 rounded-lg text-red-400/60 hover:bg-red-400/10 hover:text-red-400 transition-colors"
