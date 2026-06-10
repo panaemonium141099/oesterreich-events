@@ -203,6 +203,33 @@ export default function FuerFirmenPage() {
             auffälligem Marker, der ins Auge fällt.
           </p>
           <MapComparison />
+
+          {/* Echte Vorschau-Karte mit Anzeige-Kennzeichnung */}
+          <div className="mt-8 grid md:grid-cols-2 gap-8 items-center rounded-2xl border border-white/[0.06] bg-white/[0.02] p-6 md:p-8">
+            <div className="flex justify-center">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/images/business/boost-card.png"
+                alt="Vorschau eines geboosteten Events auf der Karte mit Anzeige-Kennzeichnung"
+                className="w-full max-w-[340px] h-auto rounded-2xl shadow-2xl shadow-black/50 border border-white/10"
+              />
+            </div>
+            <div>
+              <h3 className="text-xl font-bold mb-3">Hochwertige Vorschau, klar gekennzeichnet</h3>
+              <p className="text-white/50 leading-relaxed mb-4">
+                Tippt jemand auf dein Event, erscheint eine große Vorschau mit Bild,
+                Datum, Ort und Direktlink — viel auffälliger als ein normaler
+                Listeneintrag.
+              </p>
+              <p className="text-white/50 leading-relaxed">
+                Bezahlte Platzierungen werden transparent mit einem{' '}
+                <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-violet-500 text-white text-[11px] font-bold align-middle">
+                  Anzeige
+                </span>{' '}
+                -Badge gekennzeichnet — fair für die Nutzer:innen und rechtlich sauber.
+              </p>
+            </div>
+          </div>
         </section>
 
         {/* Pakete */}
