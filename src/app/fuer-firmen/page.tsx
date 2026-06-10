@@ -230,6 +230,30 @@ export default function FuerFirmenPage() {
               </p>
             </div>
           </div>
+
+          {/* Liste — geboostet ganz oben */}
+          <div className="mt-8 grid md:grid-cols-2 gap-8 items-center rounded-2xl border border-white/[0.06] bg-white/[0.02] p-6 md:p-8">
+            <div className="order-2 md:order-1">
+              <h3 className="text-xl font-bold mb-3">Ganz oben in der Event-Liste</h3>
+              <p className="text-white/50 leading-relaxed">
+                Auch in der Listenansicht erscheint dein Event in einer eigenen
+                Sektion <strong className="text-white/80">über allen anderen</strong> —
+                noch vor den regulären Events des Tages. Klar als{' '}
+                <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-violet-500 text-white text-[11px] font-bold align-middle">
+                  Anzeige
+                </span>{' '}
+                gekennzeichnet.
+              </p>
+            </div>
+            <div className="order-1 md:order-2 flex justify-center">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/images/business/boost-list.png"
+                alt="Geboostetes Event ganz oben in der Event-Liste, gekennzeichnet als Anzeige"
+                className="w-full max-w-[460px] h-auto rounded-2xl shadow-2xl shadow-black/50 border border-white/10"
+              />
+            </div>
+          </div>
         </section>
 
         {/* Pakete */}
