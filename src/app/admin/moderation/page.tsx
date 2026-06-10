@@ -14,7 +14,16 @@ interface EventRow {
   source_type: string;
   bundesland: string | null;
   is_boosted: boolean;
+  boost_until: string | null;
 }
+
+/** Boost-Dauer-Optionen. days=0 => unbegrenzt (kein Enddatum). */
+const BOOST_DURATIONS: { days: number; label: string }[] = [
+  { days: 14, label: '2 Wochen' },
+  { days: 28, label: '4 Wochen' },
+  { days: 90, label: '3 Monate' },
+  { days: 0, label: 'Unbegrenzt' },
+];
 
 export default function ModerationPage() {
   const supabase = createClient();
@@ -26,7 +35,7 @@ export default function ModerationPage() {
     const { data } = await supabase
       .from('events')
       .select(
-        'id, title, start_date, location_name, category, source_name, source_type, bundesland, is_boosted'
+        'id, title, start_date, location_name, category, source_name, source_type, bundesland, is_boosted, boost_until'
       )
       .in('source_type', ['user', 'business'])
       .order('created_at', { ascending: false })
@@ -48,17 +57,28 @@ export default function ModerationPage() {
 
   const [boostingId, setBoostingId] = useState<string | null>(null);
 
-  const toggleBoost = async (eventId: string, next: boolean) => {
+  /** Boost setzen/beenden. Beim Setzen wird aus `days` ein Enddatum berechnet
+   *  (days=0 => unbegrenzt). Der Cron /api/cron/expire-boosts beendet später
+   *  automatisch alle Boosts, deren boost_until abgelaufen ist. */
+  const setBoost = async (eventId: string, boosted: boolean, days = 0) => {
     setBoostingId(eventId);
+    const until =
+      boosted && days > 0
+        ? new Date(Date.now() + days * 86_400_000).toISOString()
+        : null;
     try {
       const res = await fetch('/api/admin/boost', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ eventId, boosted: next }),
+        body: JSON.stringify({ eventId, boosted, until, tier: 'boost' }),
       });
       if (res.ok) {
         setUserEvents((prev) =>
-          prev.map((e) => (e.id === eventId ? { ...e, is_boosted: next } : e))
+          prev.map((e) =>
+            e.id === eventId
+              ? { ...e, is_boosted: boosted, boost_until: until }
+              : e
+          )
         );
       } else {
         const data = await res.json().catch(() => ({}));
@@ -118,7 +138,7 @@ export default function ModerationPage() {
                   {e.is_boosted && (
                     <span className="text-[10px] px-2 py-0.5 rounded-full shrink-0 bg-violet-500/20 text-violet-300 flex items-center gap-1">
                       <Sparkles className="w-2.5 h-2.5" />
-                      geboostet
+                      {e.boost_until ? `geboostet bis ${formatDate(e.boost_until)}` : 'geboostet'}
                     </span>
                   )}
                 </div>
@@ -129,19 +149,12 @@ export default function ModerationPage() {
                   )}
                 </div>
               </div>
-              <button
-                onClick={() => toggleBoost(e.id, !e.is_boosted)}
-                disabled={boostingId === e.id}
-                className={`flex items-center gap-1 text-xs px-3 py-1.5 rounded-lg transition-colors disabled:opacity-50 ${
-                  e.is_boosted
-                    ? 'text-violet-300 bg-violet-500/15 hover:bg-violet-500/25'
-                    : 'text-white/50 hover:bg-violet-500/10 hover:text-violet-300'
-                }`}
-                title={e.is_boosted ? 'Boost entfernen' : 'Event boosten'}
-              >
-                <Sparkles className="w-3.5 h-3.5" />
-                {e.is_boosted ? 'Geboostet' : 'Boost'}
-              </button>
+              <BoostControl
+                boosted={e.is_boosted}
+                busy={boostingId === e.id}
+                onStart={(days) => setBoost(e.id, true, days)}
+                onEnd={() => setBoost(e.id, false)}
+              />
               <button
                 onClick={() => deleteEvent(e.id)}
                 className="flex items-center gap-1 text-xs px-3 py-1.5 rounded-lg text-red-400/60 hover:bg-red-400/10 hover:text-red-400 transition-colors"
@@ -164,6 +177,62 @@ export default function ModerationPage() {
           <p className="text-xs text-white/20">No reported content</p>
         </div>
       </div>
+    </div>
+  );
+}
+
+/** Boost-Steuerung pro Event: Dauer wählen + boosten, oder laufenden Boost beenden. */
+function BoostControl({
+  boosted,
+  busy,
+  onStart,
+  onEnd,
+}: {
+  boosted: boolean;
+  busy: boolean;
+  onStart: (days: number) => void;
+  onEnd: () => void;
+}) {
+  const [days, setDays] = useState<number>(28);
+
+  if (boosted) {
+    return (
+      <button
+        onClick={onEnd}
+        disabled={busy}
+        className="flex items-center gap-1 text-xs px-3 py-1.5 rounded-lg text-violet-300 bg-violet-500/15 hover:bg-violet-500/25 transition-colors disabled:opacity-50"
+        title="Boost sofort beenden"
+      >
+        <Sparkles className="w-3.5 h-3.5" />
+        Beenden
+      </button>
+    );
+  }
+
+  return (
+    <div className="flex items-center gap-1.5 shrink-0">
+      <select
+        value={days}
+        onChange={(ev) => setDays(Number(ev.target.value))}
+        disabled={busy}
+        className="text-xs px-2 py-1.5 rounded-lg bg-white/5 border border-white/10 text-white/70 [color-scheme:dark] disabled:opacity-50"
+        title="Boost-Dauer"
+      >
+        {BOOST_DURATIONS.map((d) => (
+          <option key={d.days} value={d.days} className="bg-gray-900">
+            {d.label}
+          </option>
+        ))}
+      </select>
+      <button
+        onClick={() => onStart(days)}
+        disabled={busy}
+        className="flex items-center gap-1 text-xs px-3 py-1.5 rounded-lg text-white/50 hover:bg-violet-500/10 hover:text-violet-300 transition-colors disabled:opacity-50"
+        title="Event boosten"
+      >
+        <Sparkles className="w-3.5 h-3.5" />
+        Boost
+      </button>
     </div>
   );
 }
