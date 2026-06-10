@@ -3,6 +3,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Shield, Trash2, CheckCircle, AlertTriangle, Sparkles } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
+import { BoostControl } from '@/components/Admin/BoostControl';
+import { setEventBoost } from '@/lib/admin/boost';
 
 interface EventRow {
   id: string;
@@ -16,14 +18,6 @@ interface EventRow {
   is_boosted: boolean;
   boost_until: string | null;
 }
-
-/** Boost-Dauer-Optionen. days=0 => unbegrenzt (kein Enddatum). */
-const BOOST_DURATIONS: { days: number; label: string }[] = [
-  { days: 14, label: '2 Wochen' },
-  { days: 28, label: '4 Wochen' },
-  { days: 90, label: '3 Monate' },
-  { days: 0, label: 'Unbegrenzt' },
-];
 
 export default function ModerationPage() {
   const supabase = createClient();
@@ -57,33 +51,19 @@ export default function ModerationPage() {
 
   const [boostingId, setBoostingId] = useState<string | null>(null);
 
-  /** Boost setzen/beenden. Beim Setzen wird aus `days` ein Enddatum berechnet
-   *  (days=0 => unbegrenzt). Der Cron /api/cron/expire-boosts beendet später
+  /** Boost setzen/beenden. Der Cron /api/cron/expire-boosts beendet später
    *  automatisch alle Boosts, deren boost_until abgelaufen ist. */
   const setBoost = async (eventId: string, boosted: boolean, days = 0) => {
     setBoostingId(eventId);
-    const until =
-      boosted && days > 0
-        ? new Date(Date.now() + days * 86_400_000).toISOString()
-        : null;
     try {
-      const res = await fetch('/api/admin/boost', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ eventId, boosted, until, tier: 'boost' }),
-      });
-      if (res.ok) {
-        setUserEvents((prev) =>
-          prev.map((e) =>
-            e.id === eventId
-              ? { ...e, is_boosted: boosted, boost_until: until }
-              : e
-          )
-        );
-      } else {
-        const data = await res.json().catch(() => ({}));
-        alert(data.error || 'Boost fehlgeschlagen');
-      }
+      const { boost_until } = await setEventBoost(eventId, boosted, days);
+      setUserEvents((prev) =>
+        prev.map((e) =>
+          e.id === eventId ? { ...e, is_boosted: boosted, boost_until } : e
+        )
+      );
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Boost fehlgeschlagen');
     } finally {
       setBoostingId(null);
     }
@@ -177,62 +157,6 @@ export default function ModerationPage() {
           <p className="text-xs text-white/20">No reported content</p>
         </div>
       </div>
-    </div>
-  );
-}
-
-/** Boost-Steuerung pro Event: Dauer wählen + boosten, oder laufenden Boost beenden. */
-function BoostControl({
-  boosted,
-  busy,
-  onStart,
-  onEnd,
-}: {
-  boosted: boolean;
-  busy: boolean;
-  onStart: (days: number) => void;
-  onEnd: () => void;
-}) {
-  const [days, setDays] = useState<number>(28);
-
-  if (boosted) {
-    return (
-      <button
-        onClick={onEnd}
-        disabled={busy}
-        className="flex items-center gap-1 text-xs px-3 py-1.5 rounded-lg text-violet-300 bg-violet-500/15 hover:bg-violet-500/25 transition-colors disabled:opacity-50"
-        title="Boost sofort beenden"
-      >
-        <Sparkles className="w-3.5 h-3.5" />
-        Beenden
-      </button>
-    );
-  }
-
-  return (
-    <div className="flex items-center gap-1.5 shrink-0">
-      <select
-        value={days}
-        onChange={(ev) => setDays(Number(ev.target.value))}
-        disabled={busy}
-        className="text-xs px-2 py-1.5 rounded-lg bg-white/5 border border-white/10 text-white/70 [color-scheme:dark] disabled:opacity-50"
-        title="Boost-Dauer"
-      >
-        {BOOST_DURATIONS.map((d) => (
-          <option key={d.days} value={d.days} className="bg-gray-900">
-            {d.label}
-          </option>
-        ))}
-      </select>
-      <button
-        onClick={() => onStart(days)}
-        disabled={busy}
-        className="flex items-center gap-1 text-xs px-3 py-1.5 rounded-lg text-white/50 hover:bg-violet-500/10 hover:text-violet-300 transition-colors disabled:opacity-50"
-        title="Event boosten"
-      >
-        <Sparkles className="w-3.5 h-3.5" />
-        Boost
-      </button>
     </div>
   );
 }
