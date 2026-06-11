@@ -21,6 +21,7 @@ interface AnalyticsRow {
   event_type: string;
   event_data: AnalyticsEventData;
   page: string | null;
+  referrer: string | null;
   session_id: string | null;
   user_id: string | null;
   created_at: string;
@@ -78,7 +79,7 @@ export async function GET(request: NextRequest) {
     // Fetch all analytics events in period
     const { data: events, error } = await supabase
       .from('analytics_events')
-      .select('event_type, event_data, page, session_id, user_id, created_at')
+      .select('event_type, event_data, page, referrer, session_id, user_id, created_at')
       .gte('created_at', sinceISO)
       .order('created_at', { ascending: true });
 
@@ -356,6 +357,49 @@ export async function GET(request: NextRequest) {
       }))
       .sort((a, b) => b.total - a.total);
 
+    // === Anonyme Besucher (nicht eingeloggt, je session_id) ===
+    interface AnonAgg {
+      total: number;
+      pageViews: number;
+      searches: number;
+      clicks: number;
+      firstSeen: string;
+      lastActive: string;
+      entryPage: string | null;
+      referrer: string | null;
+    }
+    const anonAgg: Record<string, AnonAgg> = {};
+    for (const e of allEvents) {
+      if (e.user_id) continue; // nur anonyme Events
+      const sid = e.session_id || 'unknown';
+      let a = anonAgg[sid];
+      if (!a) {
+        // allEvents ist aufsteigend sortiert → erste Begegnung = Einstieg.
+        a = anonAgg[sid] = {
+          total: 0, pageViews: 0, searches: 0, clicks: 0,
+          firstSeen: e.created_at, lastActive: e.created_at,
+          entryPage: e.page, referrer: e.referrer || null,
+        };
+      }
+      a.total++;
+      if (e.event_type === 'page_view') a.pageViews++;
+      else if (e.event_type === 'search') a.searches++;
+      else if (e.event_type === 'event_click') a.clicks++;
+      if (e.created_at > a.lastActive) a.lastActive = e.created_at;
+      if (!a.referrer && e.referrer) a.referrer = e.referrer;
+    }
+    const anonIds = Object.keys(anonAgg);
+    const anonTotals = {
+      sessions: anonIds.length,
+      pageViews: anonIds.reduce((s, id) => s + anonAgg[id].pageViews, 0),
+      searches: anonIds.reduce((s, id) => s + anonAgg[id].searches, 0),
+      clicks: anonIds.reduce((s, id) => s + anonAgg[id].clicks, 0),
+    };
+    const anonSessions = anonIds
+      .map((id) => ({ id, ...anonAgg[id] }))
+      .sort((a, b) => b.total - a.total)
+      .slice(0, 80);
+
     return NextResponse.json({
       overview: {
         pageViews: pageViews.length,
@@ -385,6 +429,8 @@ export async function GET(request: NextRequest) {
       },
       bundeslandHeatmap,
       users,
+      anonSessions,
+      anonTotals,
     });
   } catch (err) {
     console.error('Admin analytics error:', err);

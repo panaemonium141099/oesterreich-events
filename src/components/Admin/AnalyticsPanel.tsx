@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, Fragment } from 'react';
 import {
   EyeIcon,
   UsersIcon,
@@ -48,6 +48,20 @@ interface AnalyticsData {
   };
   bundeslandHeatmap: { name: string; count: number }[];
   users: UserActivity[];
+  anonSessions: AnonSession[];
+  anonTotals: { sessions: number; pageViews: number; searches: number; clicks: number };
+}
+
+interface AnonSession {
+  id: string;
+  total: number;
+  pageViews: number;
+  searches: number;
+  clicks: number;
+  firstSeen: string;
+  lastActive: string;
+  entryPage: string | null;
+  referrer: string | null;
 }
 
 interface UserActivity {
@@ -558,6 +572,11 @@ export default function AnalyticsPanel() {
       <AnimatedSection index={8}>
         <UserActivitySection users={data.users} />
       </AnimatedSection>
+
+      {/* Section 10: Anonyme Besucher */}
+      <AnimatedSection index={9}>
+        <AnonSessionsSection sessions={data.anonSessions} totals={data.anonTotals} />
+      </AnimatedSection>
     </div>
   );
 }
@@ -718,6 +737,146 @@ function FragmentRow({
 function drillDetail(d: Record<string, unknown>): string {
   const pick = (k: string) => (typeof d[k] === 'string' ? (d[k] as string) : '');
   return pick('query') || pick('event_title') || pick('value') || pick('to') || pick('path') || '';
+}
+
+/* ─── Anonyme Besucher ────────────────────────────── */
+
+function refLabel(referrer: string | null): string {
+  if (!referrer) return 'Direkt';
+  try {
+    const h = new URL(referrer).hostname.replace(/^www\./, '');
+    return h.includes('lasstreffen') ? 'intern' : h;
+  } catch {
+    return referrer.slice(0, 30);
+  }
+}
+
+function AnonSessionsSection({
+  sessions,
+  totals,
+}: {
+  sessions: AnonSession[];
+  totals: { sessions: number; pageViews: number; searches: number; clicks: number };
+}) {
+  const [openId, setOpenId] = useState<string | null>(null);
+  const [drill, setDrill] = useState<Record<string, UserDrilldownEvent[] | 'loading'>>({});
+
+  const toggle = async (id: string) => {
+    if (openId === id) { setOpenId(null); return; }
+    setOpenId(id);
+    if (!drill[id]) {
+      setDrill((p) => ({ ...p, [id]: 'loading' }));
+      try {
+        const res = await fetch(`/api/admin/analytics/session/${encodeURIComponent(id)}?limit=60`);
+        const json = await res.json();
+        setDrill((p) => ({ ...p, [id]: (json.events ?? []) as UserDrilldownEvent[] }));
+      } catch {
+        setDrill((p) => ({ ...p, [id]: [] }));
+      }
+    }
+  };
+
+  return (
+    <GlassCard>
+      <h3 className="text-sm uppercase tracking-[0.15em] text-white/40 font-medium mb-1 flex items-center gap-2">
+        <GlobeIcon size={16} className="text-white/20" />
+        Anonyme Besucher
+        <span className="text-[10px] text-white/25 normal-case tracking-normal">(nicht eingeloggt)</span>
+      </h3>
+      {/* Summary */}
+      <div className="flex flex-wrap gap-x-6 gap-y-1 mb-4 text-[11px] text-white/40">
+        <span><span className="text-white/70 font-semibold tabular-nums">{fmt(totals.sessions)}</span> Sitzungen</span>
+        <span><span className="text-white/70 font-semibold tabular-nums">{fmt(totals.pageViews)}</span> Aufrufe</span>
+        <span><span className="text-white/70 font-semibold tabular-nums">{fmt(totals.searches)}</span> Suchen</span>
+        <span><span className="text-white/70 font-semibold tabular-nums">{fmt(totals.clicks)}</span> Klicks</span>
+      </div>
+
+      {sessions.length === 0 ? (
+        <EmptyState text="Keine anonymen Sitzungen im Zeitraum" />
+      ) : (
+        <div className="overflow-x-auto">
+          <table className="w-full text-xs">
+            <thead>
+              <tr className="text-white/30 text-left border-b border-white/[0.06]">
+                <th className="font-medium py-2 pr-3">Sitzung</th>
+                <th className="font-medium py-2 px-2 text-right tabular-nums">Aufrufe</th>
+                <th className="font-medium py-2 px-2 text-right tabular-nums">Suchen</th>
+                <th className="font-medium py-2 px-2 text-right tabular-nums">Klicks</th>
+                <th className="font-medium py-2 px-2">Kommt von</th>
+                <th className="font-medium py-2 pl-2 text-right">Zuletzt</th>
+              </tr>
+            </thead>
+            <tbody>
+              {sessions.map((s) => {
+                const isUnknown = s.id === 'unknown';
+                const open = openId === s.id;
+                const d = drill[s.id];
+                return (
+                  <Fragment key={s.id}>
+                    <tr
+                      onClick={() => !isUnknown && toggle(s.id)}
+                      className={`border-b border-white/[0.04] transition-colors ${
+                        isUnknown ? '' : open ? 'bg-white/[0.04] cursor-pointer' : 'hover:bg-white/[0.02] cursor-pointer'
+                      }`}
+                    >
+                      <td className="py-2 pr-3">
+                        <div className="flex items-center gap-2 min-w-0">
+                          {!isUnknown && <span className={`text-white/30 transition-transform ${open ? 'rotate-90' : ''}`}>›</span>}
+                          <div className="min-w-0">
+                            {isUnknown ? (
+                              <span className="text-white/35 italic">vor Session-Fix (nicht aufschlüsselbar)</span>
+                            ) : (
+                              <>
+                                <span className="text-white/70 font-mono">#{s.id.slice(0, 8)}</span>
+                                {s.entryPage && (
+                                  <span className="text-[10px] text-white/25 truncate block">Einstieg: {s.entryPage}</span>
+                                )}
+                              </>
+                            )}
+                          </div>
+                        </div>
+                      </td>
+                      <td className="py-2 px-2 text-right tabular-nums text-white/60">{fmt(s.pageViews)}</td>
+                      <td className="py-2 px-2 text-right tabular-nums text-white/60">{fmt(s.searches)}</td>
+                      <td className="py-2 px-2 text-right tabular-nums text-blue-400/70">{fmt(s.clicks)}</td>
+                      <td className="py-2 px-2 text-white/40 truncate max-w-[160px]">{isUnknown ? '—' : refLabel(s.referrer)}</td>
+                      <td className="py-2 pl-2 text-right text-white/40 whitespace-nowrap">{formatLastActive(s.lastActive)}</td>
+                    </tr>
+                    {open && !isUnknown && (
+                      <tr>
+                        <td colSpan={6} className="bg-black/20 px-4 py-3">
+                          {d === 'loading' || d === undefined ? (
+                            <p className="text-[11px] text-white/30">Lade Aktivität…</p>
+                          ) : d.length === 0 ? (
+                            <p className="text-[11px] text-white/30">Keine Einzel-Events.</p>
+                          ) : (
+                            <div className="space-y-1 max-h-64 overflow-y-auto">
+                              {d.map((ev, i) => (
+                                <div key={i} className="flex items-center gap-3 text-[11px]">
+                                  <span className="text-white/30 w-28 shrink-0 tabular-nums">
+                                    {new Date(ev.created_at).toLocaleString('de-AT', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}
+                                  </span>
+                                  <span className="px-1.5 py-0.5 rounded bg-white/[0.06] text-white/60 shrink-0">{ev.event_type}</span>
+                                  <span className="text-white/40 truncate">
+                                    {ev.page ?? ''}
+                                    {ev.event_data && drillDetail(ev.event_data) ? ` · ${drillDetail(ev.event_data)}` : ''}
+                                  </span>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </td>
+                      </tr>
+                    )}
+                  </Fragment>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </GlassCard>
+  );
 }
 
 /* ─── Sub-components ──────────────────────────────── */
