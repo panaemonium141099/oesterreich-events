@@ -30,7 +30,6 @@ import type { Event } from '@/types/events';
 import { formatDateLong, formatTime } from '@/lib/utils/date';
 import { buildCitableIntro } from '@/lib/seo/event-intro';
 import { resolvePrimaryEventImage } from '@/lib/event-images';
-import { EventHeroSlideshow } from '@/components/Events/EventHeroSlideshow';
 import { EventDetailActions } from './EventDetailActions';
 import { RelatedEvents } from './RelatedEvents';
 
@@ -350,11 +349,6 @@ export function EventDetailV2({
   const heroImage = resolvePrimaryEventImage({
     imageUrl: event.image_url, category: event.category, title: event.title,
   });
-  // Mehrere Bilder → Hero-Diashow (event.images). image_url ist images[0],
-  // daher kein Flash zwischen statischem Hintergrund und erster Slide.
-  const heroImages = (event.images ?? []).filter(
-    (s): s is string => typeof s === 'string' && s.trim().length > 0,
-  );
   const startTime = formatTime(event.start_date);
   const endTime = event.end_date ? formatTime(event.end_date) : null;
   const dateLong = formatDateLong(event.start_date);
@@ -381,10 +375,6 @@ export function EventDetailV2({
           backgroundPosition: 'center 40%',
         }}
       >
-        {/* Hero-Diashow — deckt das statische backgroundImage ab, wenn das
-            Event mehrere Bilder hat. Liegt unter Scrim/Titel/Controls. */}
-        {heroImages.length > 1 && <EventHeroSlideshow images={heroImages} />}
-
         {/* breadcrumb top-left */}
         <div className="absolute top-5 left-5 sm:top-6 sm:left-7 flex items-center gap-2.5 text-xs text-white/85 z-10">
           <Link

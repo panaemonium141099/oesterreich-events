@@ -3,19 +3,21 @@
 import { useEffect, useState } from 'react';
 
 /**
- * Hero-Diashow für die Event-Detailseite. Crossfade durch mehrere Bilder
- * (event.images), Auto-Wechsel + Pfeile + Dots. Respektiert
- * prefers-reduced-motion (kein Auto-Wechsel, manuell weiter klickbar).
+ * Diashow-Variante des V4EventDetailHero-Bildbereichs: blättert mit Crossfade
+ * durch mehrere Bilder. Jede Slide repliziert den Hero-Stil (blurred Backdrop
+ * + scharfes object-contain-Inset). Auto-Wechsel + Pfeile + Dots, respektiert
+ * prefers-reduced-motion.
  *
- * Wird als absolute Ebene in den bestehenden Hero gelegt (deckt das statische
- * backgroundImage ab). Nur sinnvoll ab 2 Bildern — der Aufrufer rendert sie
- * sonst nicht.
+ * Wird nur ab 2 Bildern gerendert (Aufrufer prüft). Liegt als absolute Ebene
+ * im Hero unter Scrim/Titel; die Controls (z-20) liegen darüber.
  */
-export function EventHeroSlideshow({
+export function V4HeroSlideshow({
   images,
+  title,
   intervalMs = 5000,
 }: {
   images: string[];
+  title: string;
   intervalMs?: number;
 }) {
   const [idx, setIdx] = useState(0);
@@ -48,15 +50,33 @@ export function EventHeroSlideshow({
   return (
     <div className="absolute inset-0 overflow-hidden">
       {images.map((src, i) => (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
+        <div
           key={src}
-          src={src}
-          alt=""
-          loading={i === 0 ? 'eager' : 'lazy'}
-          className="absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ease-out"
-          style={{ objectPosition: 'center 40%', opacity: i === idx ? 1 : 0 }}
-        />
+          aria-hidden={i !== idx}
+          className="absolute inset-0 transition-opacity duration-700 ease-out"
+          style={{ opacity: i === idx ? 1 : 0 }}
+        >
+          {/* blurred backdrop sampled from the image itself */}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={src}
+            alt=""
+            aria-hidden="true"
+            loading={i === 0 ? 'eager' : 'lazy'}
+            className="absolute inset-0 w-full h-full object-cover"
+            style={{ filter: 'blur(40px) saturate(1.4) brightness(0.85)', transform: 'scale(1.2)' }}
+          />
+          {/* sharp inset — native aspect ratio, never upscaled */}
+          <div className="absolute inset-0 flex items-center justify-center px-4 py-4 md:px-10 md:py-8">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={src}
+              alt={i === idx ? title : ''}
+              loading={i === 0 ? 'eager' : 'lazy'}
+              className="max-w-full max-h-full w-auto h-auto object-contain"
+            />
+          </div>
+        </div>
       ))}
 
       {n > 1 && (
@@ -84,7 +104,7 @@ export function EventHeroSlideshow({
             </svg>
           </button>
 
-          {/* Dots — top-center, zwischen Breadcrumb (links) und Actions (rechts) */}
+          {/* Dots — top-center, neben dem Back-Button (oben links) */}
           <div
             className="absolute left-1/2 -translate-x-1/2 flex items-center gap-1.5"
             style={{ top: 16, zIndex: 20 }}
