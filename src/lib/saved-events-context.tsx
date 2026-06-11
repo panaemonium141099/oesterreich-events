@@ -12,6 +12,7 @@ import {
 } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { useAuth } from '@/lib/supabase/auth-context';
+import { trackEvent } from '@/lib/analytics';
 
 interface SavedEventsContextValue {
   savedIds: Set<string>;
@@ -186,6 +187,9 @@ export function SavedEventsProvider({ children }: { children: React.ReactNode })
           .from('saved_events')
           .insert({ user_id: user.id, event_id: eventId });
         if (error) throw error;
+        // Zentrales Save-Tracking — erfasst JEDEN Speicher-Weg (Karten-Marker,
+        // Detailansicht, Liste). Vorher nur in EventDetail → halbe Saves fehlten.
+        trackEvent('event_save', { event_id: eventId });
         return 'saved';
       } catch {
         // Rollback optimistic update
