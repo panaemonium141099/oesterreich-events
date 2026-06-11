@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
+import { createClient } from '@supabase/supabase-js';
 
 /** Shape of event_data JSON stored in analytics_events rows */
 interface AnalyticsEventData {
@@ -275,6 +276,75 @@ export async function GET(request: NextRequest) {
       .map(([name, count]) => ({ name, count }))
       .sort((a, b) => b.count - a.count);
 
+    // === Per-user activity (eingeloggte Nutzer) ===
+    interface UserAgg {
+      total: number;
+      pageViews: number;
+      searches: number;
+      clicks: number;
+      saves: number;
+      lastActive: string;
+    }
+    const userAgg: Record<string, UserAgg> = {};
+    for (const e of allEvents) {
+      if (!e.user_id) continue;
+      const u =
+        userAgg[e.user_id] ??
+        (userAgg[e.user_id] = {
+          total: 0, pageViews: 0, searches: 0, clicks: 0, saves: 0, lastActive: e.created_at,
+        });
+      u.total++;
+      if (e.event_type === 'page_view') u.pageViews++;
+      else if (e.event_type === 'search') u.searches++;
+      else if (e.event_type === 'event_click') u.clicks++;
+      else if (e.event_type === 'event_save') u.saves++;
+      if (e.created_at > u.lastActive) u.lastActive = e.created_at;
+    }
+    const userIds = Object.keys(userAgg);
+
+    // Identitäten (Name + E-Mail) via Service-Role — der Caller ist bereits
+    // als admin/god verifiziert. E-Mail liegt in auth.users, daher Service-Role.
+    const identities: Record<string, { name: string; email: string | null }> = {};
+    if (userIds.length > 0 && process.env.SUPABASE_SERVICE_ROLE_KEY) {
+      const svc = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_ROLE_KEY,
+      );
+      const { data: profs } = await svc
+        .from('profiles')
+        .select('id, first_name, last_name')
+        .in('id', userIds);
+      for (const p of profs ?? []) {
+        const name = [p.first_name, p.last_name].filter(Boolean).join(' ').trim();
+        identities[p.id] = { name: name || 'Unbenannt', email: null };
+      }
+      // E-Mails aus auth.users nachladen — nur für die aktivsten Nutzer, damit
+      // der Endpoint bei vielen Nutzern nicht durch N Einzelabfragen ausbremst.
+      const topByActivity = [...userIds]
+        .sort((a, b) => userAgg[b].total - userAgg[a].total)
+        .slice(0, 50);
+      await Promise.all(
+        topByActivity.map(async (id) => {
+          const { data } = await svc.auth.admin.getUserById(id);
+          if (data?.user?.email) {
+            identities[id] = {
+              name: identities[id]?.name ?? 'Unbenannt',
+              email: data.user.email,
+            };
+          }
+        }),
+      );
+    }
+
+    const users = userIds
+      .map((id) => ({
+        id,
+        name: identities[id]?.name ?? 'Unbenannt',
+        email: identities[id]?.email ?? null,
+        ...userAgg[id],
+      }))
+      .sort((a, b) => b.total - a.total);
+
     return NextResponse.json({
       overview: {
         pageViews: pageViews.length,
@@ -303,6 +373,7 @@ export async function GET(request: NextRequest) {
         ticketClicks: funnelLinks,
       },
       bundeslandHeatmap,
+      users,
     });
   } catch (err) {
     console.error('Admin analytics error:', err);
