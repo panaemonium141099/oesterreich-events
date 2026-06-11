@@ -305,6 +305,9 @@ export async function GET(request: NextRequest) {
     // Identitäten (Name + E-Mail) via Service-Role — der Caller ist bereits
     // als admin/god verifiziert. E-Mail liegt in auth.users, daher Service-Role.
     const identities: Record<string, { name: string; email: string | null }> = {};
+    // Echte Anzahl aktuell gemerkter Events pro Nutzer (Status, all-time) —
+    // nicht der lückenhafte/zeitraum-gebundene event_save-Aktions-Log.
+    const savedCounts: Record<string, number> = {};
     if (userIds.length > 0 && process.env.SUPABASE_SERVICE_ROLE_KEY) {
       const svc = createClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -317,6 +320,13 @@ export async function GET(request: NextRequest) {
       for (const p of profs ?? []) {
         const name = [p.first_name, p.last_name].filter(Boolean).join(' ').trim();
         identities[p.id] = { name: name || 'Unbenannt', email: null };
+      }
+      const { data: savedRows } = await svc
+        .from('saved_events')
+        .select('user_id')
+        .in('user_id', userIds);
+      for (const r of (savedRows ?? []) as { user_id: string }[]) {
+        savedCounts[r.user_id] = (savedCounts[r.user_id] ?? 0) + 1;
       }
       // E-Mails aus auth.users nachladen — nur für die aktivsten Nutzer, damit
       // der Endpoint bei vielen Nutzern nicht durch N Einzelabfragen ausbremst.
@@ -342,6 +352,7 @@ export async function GET(request: NextRequest) {
         name: identities[id]?.name ?? 'Unbenannt',
         email: identities[id]?.email ?? null,
         ...userAgg[id],
+        savedTotal: savedCounts[id] ?? 0,
       }))
       .sort((a, b) => b.total - a.total);
 

@@ -59,6 +59,9 @@ interface UserActivity {
   searches: number;
   clicks: number;
   saves: number;
+  /** Tatsächlich aktuell gemerkte Events (saved_events, all-time) — nicht der
+   *  zeitraum-/tracking-abhängige event_save-Aktions-Log. */
+  savedTotal: number;
   lastActive: string;
 }
 
@@ -625,7 +628,7 @@ function UserActivitySection({ users }: { users: UserActivity[] }) {
                 <th className="font-medium py-2 px-2 text-right tabular-nums">Aufrufe</th>
                 <th className="font-medium py-2 px-2 text-right tabular-nums">Suchen</th>
                 <th className="font-medium py-2 px-2 text-right tabular-nums">Klicks</th>
-                <th className="font-medium py-2 px-2 text-right tabular-nums">Saves</th>
+                <th className="font-medium py-2 px-2 text-right tabular-nums">Gespeichert</th>
                 <th className="font-medium py-2 px-2 text-right tabular-nums">Aktiv</th>
                 <th className="font-medium py-2 pl-2 text-right">Zuletzt</th>
               </tr>
@@ -677,7 +680,7 @@ function FragmentRow({
         <td className="py-2 px-2 text-right tabular-nums text-white/60">{fmt(u.pageViews)}</td>
         <td className="py-2 px-2 text-right tabular-nums text-white/60">{fmt(u.searches)}</td>
         <td className="py-2 px-2 text-right tabular-nums text-blue-400/70">{fmt(u.clicks)}</td>
-        <td className="py-2 px-2 text-right tabular-nums text-amber-400/60">{fmt(u.saves)}</td>
+        <td className="py-2 px-2 text-right tabular-nums text-amber-400/60">{fmt(u.savedTotal)}</td>
         <td className="py-2 px-2 text-right tabular-nums text-white/80 font-semibold">{fmt(u.total)}</td>
         <td className="py-2 pl-2 text-right text-white/40 whitespace-nowrap">{formatLastActive(u.lastActive)}</td>
       </tr>
