@@ -21,6 +21,9 @@ export interface Event {
   price_min: number | null;
   price_max: number | null;
   image_url: string | null;
+  /** Zusätzliche Bilder (z.B. von Veranstaltern) — speist die Hero-Diashow
+   *  auf der Detailseite. image_url ist üblicherweise images[0]. */
+  images?: string[] | null;
   image_width?: number | null;
   image_height?: number | null;
   organizer: string | null;
