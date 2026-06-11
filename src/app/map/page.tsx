@@ -38,7 +38,6 @@ import { EventDetail } from '@/components/Events/EventDetail';
 import { MapLoadingOverlay } from '@/components/Map/MapLoadingOverlay';
 import { LocationBanner } from '@/components/Map/LocationBanner';
 import { BUNDESLAENDER, type Bundesland } from '@/lib/bundeslaender';
-import { trackEvent } from '@/lib/analytics';
 import { useAuth } from '@/lib/supabase/auth-context';
 import { getStoredLocation, storeLocation } from '@/lib/geolocation';
 import { useSavedEvents } from '@/lib/saved-events-context';
@@ -179,9 +178,7 @@ function MapPageInner() {
     if (stored) setUserLocation(stored);
   }, []);
 
-  useEffect(() => {
-    trackEvent('page_view', { path: '/map' });
-  }, []);
+  // page_view wird jetzt global vom PageviewTracker (Root-Layout) erfasst.
 
   // Phase 4.1: legacy /map?view=list redirects to /entdecken?mode=list.
   // The EventListView lives on /entdecken now.

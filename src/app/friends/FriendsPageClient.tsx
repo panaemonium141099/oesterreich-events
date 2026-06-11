@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/lib/supabase/auth-context';
 import { createClient } from '@/lib/supabase/client';
-import { trackEvent } from '@/lib/analytics';
 import { toast } from 'sonner';
 
 interface ProfileResult {
@@ -43,7 +42,6 @@ export function FriendsPageClient() {
   const [loadingData, setLoadingData] = useState(true);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
 
-  useEffect(() => { trackEvent('page_view', { path: '/friends' }); }, []);
 
   useEffect(() => {
     if (!loading && !user) {
