@@ -16,6 +16,7 @@ import {
   ClipboardCheck,
   LineChart,
   Sparkles,
+  Send,
   ArrowLeft,
   Menu,
   X,
@@ -36,6 +37,7 @@ const NAV_ITEMS = [
   { label: 'Analytics', icon: BarChart3, href: '/admin/analytics' },
   // SEO KPI dashboard — fn-13 phase 10. Pulls GSC + CrUX + internal.
   { label: 'SEO', icon: LineChart, href: '/admin/seo' },
+  { label: 'Outreach', icon: Send, href: '/admin/outreach' },
   { label: 'Moderation', icon: Shield, href: '/admin/moderation' },
 ] as const;
 
