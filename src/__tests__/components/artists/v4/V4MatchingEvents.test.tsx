@@ -1,6 +1,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { V4MatchingEvents } from '@/components/Artists/v4/V4MatchingEvents';
+import type { ArtistAppearance } from '@/lib/artists/appearances';
 
 vi.mock('next/image', () => ({
   __esModule: true,
@@ -17,26 +18,30 @@ vi.mock('next/link', () => ({
 }));
 
 describe('V4MatchingEvents', () => {
-  const matches = [
+  const appearances: ArtistAppearance[] = [
     {
-      id: 'e1', slug: 'bilderbuch-arena', title: 'Arena Wien',
-      start_date: '2026-09-15T20:00:00Z', location_name: 'Arena',
-      image_url: 'https://x/a.jpg', ticket_url: 'https://eventim/x',
-      bundesland: 'Wien', price_text: '€ 48,00',
-      matched_artist: 'Bilderbuch', match_kind: 'match' as const,
+      artist_name: 'Bilderbuch',
+      artist_image: 'https://x/a.jpg',
+      kind: 'festival',
+      context: 'Nova Rock',
+      event_id: 'e1',
+      event_slug: 'bilderbuch-at-nova-rock',
+      start_date: '2026-09-15T20:00:00Z',
+      location_name: 'Nickelsdorf',
+      postal_code: null,
+      bundesland: 'Burgenland',
     },
   ];
 
-  it('renders matched event with personalized copy', () => {
-    render(<V4MatchingEvents events={matches}/>);
-    // Component renders "{matched_artist} spielt bei {title}"
+  it('renders artist-forward copy "<Artist> spielt bei <Festival>"', () => {
+    render(<V4MatchingEvents appearances={appearances}/>);
     expect(screen.getByText('Bilderbuch')).toBeInTheDocument();
     expect(screen.getByText(/spielt bei/i)).toBeInTheDocument();
-    expect(screen.getByText('Arena Wien')).toBeInTheDocument();
+    expect(screen.getByText('Nova Rock')).toBeInTheDocument();
   });
 
-  it('empty-state when no matches', () => {
-    render(<V4MatchingEvents events={[]}/>);
+  it('empty-state when no appearances', () => {
+    render(<V4MatchingEvents appearances={[]}/>);
     expect(screen.getByText(/wir warten auf erste auftritte/i)).toBeInTheDocument();
   });
 });
