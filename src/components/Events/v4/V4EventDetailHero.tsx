@@ -19,6 +19,7 @@
 
 import Image from 'next/image';
 import { V4BackButton } from './V4BackButton';
+import { V4HeroSlideshow } from './V4HeroSlideshow';
 
 interface V4EventDetailHeroProps {
   title: string;
@@ -26,6 +27,8 @@ interface V4EventDetailHeroProps {
   locationName: string | null;
   city: string | null;
   imageUrl?: string | null;
+  /** Mehrere Bilder → Hero wird zur Diashow. */
+  images?: string[] | null;
 }
 
 function formatDate(iso: string): string {
@@ -35,14 +38,19 @@ function formatDate(iso: string): string {
   return `${date} · ${time}`;
 }
 
-export function V4EventDetailHero({ title, startDate, locationName, city, imageUrl }: V4EventDetailHeroProps) {
+export function V4EventDetailHero({ title, startDate, locationName, city, imageUrl, images }: V4EventDetailHeroProps) {
   const dateLabel = formatDate(startDate);
   const placeLabel = [locationName, city].filter(Boolean).join(' · ');
+  const slides = (images ?? []).filter(
+    (s): s is string => typeof s === 'string' && s.trim().length > 0,
+  );
 
   return (
     <section className="relative h-[320px] md:h-[480px] overflow-hidden">
       <V4BackButton className="top-4 left-4 md:top-5 md:left-5"/>
-      {imageUrl ? (
+      {slides.length > 1 ? (
+        <V4HeroSlideshow images={slides} title={title} />
+      ) : imageUrl ? (
         <>
           {/* Layer 1: blurred backdrop sampled from the image itself.
               `scale(1.2)` hides the soft edges that `blur()` produces

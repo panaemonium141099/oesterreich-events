@@ -27,6 +27,7 @@ import { RouteTransitions } from '@/components/Layout/RouteTransitions';
 // Registration is no-op in dev (NODE_ENV !== 'production') so HMR isn't
 // shadowed by stale runtime caches.
 import { ServiceWorkerProvider } from '@/components/Layout/ServiceWorkerProvider';
+import { PageviewTracker } from '@/components/Analytics/PageviewTracker';
 // fn-15.8: only Geist mounts at the root. The editorial serif and the
 // handwriting face moved to `@/lib/fonts-planer` and are imported by
 // per-route layouts that actually render the .planer-scope chrome
@@ -280,6 +281,10 @@ export default function RootLayout({
           toast when the SW has a new version waiting.
         */}
         <ServiceWorkerProvider />
+        {/* Globaler Page-View-Tracker — erfasst JEDEN Pfadwechsel (auch die
+            SEO-Seiten: /entdecken, /gemeinde, /thema, /blog, Event-Details).
+            Ersetzt die früheren Einzelaufrufe auf nur 5 Seiten. */}
+        <PageviewTracker />
         <Toaster
           theme="dark"
           position="bottom-center"

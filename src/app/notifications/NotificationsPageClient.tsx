@@ -6,7 +6,6 @@ import { NotificationBell } from '@/components/Notifications/NotificationBell';
 import { DesktopPushToggle } from '@/components/Notifications/DesktopPushToggle';
 import { ArtistMatchBundles } from '@/components/Notifications/ArtistMatchBundles';
 import { useAuth } from '@/lib/supabase/auth-context';
-import { trackEvent } from '@/lib/analytics';
 import { navigateFromNotification } from '@/lib/utils/notification-nav';
 import {
   useNotifications,
@@ -74,7 +73,6 @@ export function NotificationsPageClient() {
     }
   }, [loading, user, router]);
 
-  useEffect(() => { trackEvent('page_view', { path: '/notifications' }); }, []);
 
   const markOneRead = async (notification: NotificationRow) => {
     await providerMarkOneRead(notification);

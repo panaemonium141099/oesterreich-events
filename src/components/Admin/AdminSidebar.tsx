@@ -17,6 +17,7 @@ import {
   LineChart,
   Sparkles,
   Send,
+  Rocket,
   ArrowLeft,
   Menu,
   X,
@@ -39,6 +40,7 @@ const NAV_ITEMS = [
   { label: 'SEO', icon: LineChart, href: '/admin/seo' },
   { label: 'Outreach', icon: Send, href: '/admin/outreach' },
   { label: 'Moderation', icon: Shield, href: '/admin/moderation' },
+  { label: 'Boosten', icon: Rocket, href: '/admin/boost' },
 ] as const;
 
 export function AdminSidebar() {

@@ -64,7 +64,7 @@ export default async function LandingPage() {
         <HeroV4/>
         <ArtistTeaserV4 artists={data.popularArtists}/>
         {ctx.signedIn
-          ? <MatchesSection events={data.matches}/>
+          ? <MatchesSection appearances={data.matches}/>
           : <AnonFollowTeaser/>}
         <WeekendSection events={data.todayWeekend}/>
         <ConcertsSection events={data.concerts}/>

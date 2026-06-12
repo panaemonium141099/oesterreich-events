@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
+import { createClient } from '@supabase/supabase-js';
 
 /** Shape of event_data JSON stored in analytics_events rows */
 interface AnalyticsEventData {
@@ -20,6 +21,7 @@ interface AnalyticsRow {
   event_type: string;
   event_data: AnalyticsEventData;
   page: string | null;
+  referrer: string | null;
   session_id: string | null;
   user_id: string | null;
   created_at: string;
@@ -77,7 +79,7 @@ export async function GET(request: NextRequest) {
     // Fetch all analytics events in period
     const { data: events, error } = await supabase
       .from('analytics_events')
-      .select('event_type, event_data, page, session_id, user_id, created_at')
+      .select('event_type, event_data, page, referrer, session_id, user_id, created_at')
       .gte('created_at', sinceISO)
       .order('created_at', { ascending: true });
 
@@ -275,6 +277,129 @@ export async function GET(request: NextRequest) {
       .map(([name, count]) => ({ name, count }))
       .sort((a, b) => b.count - a.count);
 
+    // === Per-user activity (eingeloggte Nutzer) ===
+    interface UserAgg {
+      total: number;
+      pageViews: number;
+      searches: number;
+      clicks: number;
+      saves: number;
+      lastActive: string;
+    }
+    const userAgg: Record<string, UserAgg> = {};
+    for (const e of allEvents) {
+      if (!e.user_id) continue;
+      const u =
+        userAgg[e.user_id] ??
+        (userAgg[e.user_id] = {
+          total: 0, pageViews: 0, searches: 0, clicks: 0, saves: 0, lastActive: e.created_at,
+        });
+      u.total++;
+      if (e.event_type === 'page_view') u.pageViews++;
+      else if (e.event_type === 'search') u.searches++;
+      else if (e.event_type === 'event_click') u.clicks++;
+      else if (e.event_type === 'event_save') u.saves++;
+      if (e.created_at > u.lastActive) u.lastActive = e.created_at;
+    }
+    const userIds = Object.keys(userAgg);
+
+    // Identitäten (Name + E-Mail) via Service-Role — der Caller ist bereits
+    // als admin/god verifiziert. E-Mail liegt in auth.users, daher Service-Role.
+    const identities: Record<string, { name: string; email: string | null }> = {};
+    // Echte Anzahl aktuell gemerkter Events pro Nutzer (Status, all-time) —
+    // nicht der lückenhafte/zeitraum-gebundene event_save-Aktions-Log.
+    const savedCounts: Record<string, number> = {};
+    if (userIds.length > 0 && process.env.SUPABASE_SERVICE_ROLE_KEY) {
+      const svc = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_ROLE_KEY,
+      );
+      const { data: profs } = await svc
+        .from('profiles')
+        .select('id, first_name, last_name')
+        .in('id', userIds);
+      for (const p of profs ?? []) {
+        const name = [p.first_name, p.last_name].filter(Boolean).join(' ').trim();
+        identities[p.id] = { name: name || 'Unbenannt', email: null };
+      }
+      const { data: savedRows } = await svc
+        .from('saved_events')
+        .select('user_id')
+        .in('user_id', userIds);
+      for (const r of (savedRows ?? []) as { user_id: string }[]) {
+        savedCounts[r.user_id] = (savedCounts[r.user_id] ?? 0) + 1;
+      }
+      // E-Mails aus auth.users nachladen — nur für die aktivsten Nutzer, damit
+      // der Endpoint bei vielen Nutzern nicht durch N Einzelabfragen ausbremst.
+      const topByActivity = [...userIds]
+        .sort((a, b) => userAgg[b].total - userAgg[a].total)
+        .slice(0, 50);
+      await Promise.all(
+        topByActivity.map(async (id) => {
+          const { data } = await svc.auth.admin.getUserById(id);
+          if (data?.user?.email) {
+            identities[id] = {
+              name: identities[id]?.name ?? 'Unbenannt',
+              email: data.user.email,
+            };
+          }
+        }),
+      );
+    }
+
+    const users = userIds
+      .map((id) => ({
+        id,
+        name: identities[id]?.name ?? 'Unbenannt',
+        email: identities[id]?.email ?? null,
+        ...userAgg[id],
+        savedTotal: savedCounts[id] ?? 0,
+      }))
+      .sort((a, b) => b.total - a.total);
+
+    // === Anonyme Besucher (nicht eingeloggt, je session_id) ===
+    interface AnonAgg {
+      total: number;
+      pageViews: number;
+      searches: number;
+      clicks: number;
+      firstSeen: string;
+      lastActive: string;
+      entryPage: string | null;
+      referrer: string | null;
+    }
+    const anonAgg: Record<string, AnonAgg> = {};
+    for (const e of allEvents) {
+      if (e.user_id) continue; // nur anonyme Events
+      const sid = e.session_id || 'unknown';
+      let a = anonAgg[sid];
+      if (!a) {
+        // allEvents ist aufsteigend sortiert → erste Begegnung = Einstieg.
+        a = anonAgg[sid] = {
+          total: 0, pageViews: 0, searches: 0, clicks: 0,
+          firstSeen: e.created_at, lastActive: e.created_at,
+          entryPage: e.page, referrer: e.referrer || null,
+        };
+      }
+      a.total++;
+      if (e.event_type === 'page_view') a.pageViews++;
+      else if (e.event_type === 'search') a.searches++;
+      else if (e.event_type === 'event_click') a.clicks++;
+      if (e.created_at > a.lastActive) a.lastActive = e.created_at;
+      if (!a.referrer && e.referrer) a.referrer = e.referrer;
+    }
+    const anonIds = Object.keys(anonAgg);
+    const anonTotals = {
+      sessions: anonIds.length,
+      pageViews: anonIds.reduce((s, id) => s + anonAgg[id].pageViews, 0),
+      searches: anonIds.reduce((s, id) => s + anonAgg[id].searches, 0),
+      clicks: anonIds.reduce((s, id) => s + anonAgg[id].clicks, 0),
+    };
+    const anonSessions = anonIds
+      .map((id) => ({ id, ...anonAgg[id] }))
+      .sort((a, b) => b.total - a.total)
+      .slice(0, 80);
+
     return NextResponse.json({
       overview: {
         pageViews: pageViews.length,
@@ -303,6 +428,9 @@ export async function GET(request: NextRequest) {
         ticketClicks: funnelLinks,
       },
       bundeslandHeatmap,
+      users,
+      anonSessions,
+      anonTotals,
     });
   } catch (err) {
     console.error('Admin analytics error:', err);

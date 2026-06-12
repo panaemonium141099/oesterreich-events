@@ -23,6 +23,10 @@
     {
       "path": "/api/cron/outreach-discover",
       "schedule": "30 4 * * *"
+    },
+    {
+      "path": "/api/cron/expire-boosts",
+      "schedule": "0 1 * * *"
     }
   ]
 }

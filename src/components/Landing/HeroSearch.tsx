@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { trackEvent } from '@/lib/analytics';
 import { resolveSearchIntent } from '@/lib/search-intent';
 
 interface Gemeinde {
@@ -55,7 +54,7 @@ export function HeroSearch() {
   const suggestionsRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
 
-  useEffect(() => { trackEvent('page_view', { path: '/' }); }, []);
+  // page_view wird jetzt global vom PageviewTracker (Root-Layout) erfasst.
 
   // fn-15.5: removed the previous idle-time `import('@/components/Map/EventMap')`
   // prefetch. That import dragged the entire Mapbox dynamic chunk (~480 KB)

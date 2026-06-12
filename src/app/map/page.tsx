@@ -38,12 +38,12 @@ import { EventDetail } from '@/components/Events/EventDetail';
 import { MapLoadingOverlay } from '@/components/Map/MapLoadingOverlay';
 import { LocationBanner } from '@/components/Map/LocationBanner';
 import { BUNDESLAENDER, type Bundesland } from '@/lib/bundeslaender';
-import { trackEvent } from '@/lib/analytics';
 import { useAuth } from '@/lib/supabase/auth-context';
 import { getStoredLocation, storeLocation } from '@/lib/geolocation';
 import { useSavedEvents } from '@/lib/saved-events-context';
 import { V4MarkerLegend } from '@/components/Map/v4';
 import { useFilteredEvents } from '@/lib/v4/use-filtered-events';
+import { useBoostedIds } from '@/lib/hooks/useBoostedIds';
 
 const EventMap = dynamic(() => import('@/components/Map/EventMap'), {
   ssr: false,
@@ -161,6 +161,12 @@ function MapPageInner() {
     bundesland,
   } = useFilteredEvents(initialBundeslandIds, initialFilters);
 
+  // Paid-boosted events → rendered unclustered + highlighted on the map.
+  // Aus dem frischen /api/events/boosted (siehe useBoostedIds), NICHT aus dem
+  // 2 h edge-gecachten /api/events-Payload — so verschwindet ein beendeter
+  // Boost quasi sofort von der Karte.
+  const boostedIds = useBoostedIds();
+
   // Old single-state shim so child components that still take a `Bundesland`
   // prop keep working unchanged.
   const setBundesland = useCallback((bl: Bundesland) => {
@@ -172,9 +178,7 @@ function MapPageInner() {
     if (stored) setUserLocation(stored);
   }, []);
 
-  useEffect(() => {
-    trackEvent('page_view', { path: '/map' });
-  }, []);
+  // page_view wird jetzt global vom PageviewTracker (Root-Layout) erfasst.
 
   // Phase 4.1: legacy /map?view=list redirects to /entdecken?mode=list.
   // The EventListView lives on /entdecken now.
@@ -287,6 +291,7 @@ function MapPageInner() {
                 flyToCoords={dynamicFlyTo || flyToCoords}
                 bundesland={bundesland}
                 artistEventIds={new Set<string>()}
+                boostedEventIds={boostedIds}
               />
               <MapLoadingOverlay loading={loading} eventCount={allEvents.length} />
 

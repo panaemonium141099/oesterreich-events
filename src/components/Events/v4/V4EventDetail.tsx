@@ -99,6 +99,7 @@ export function V4EventDetail({
         locationName={event.location_name}
         city={event.bundesland}
         imageUrl={event.image_url}
+        images={event.images}
       />
 
       <div className="max-w-[1180px] mx-auto px-5 md:px-14 py-8 md:py-12 grid grid-cols-1 md:grid-cols-[1fr_400px] gap-8 md:gap-12 pb-[120px] md:pb-12">

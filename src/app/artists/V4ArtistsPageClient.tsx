@@ -22,13 +22,13 @@ import {
   V4FollowedArtistsGrid,
   V4MatchingEvents,
   type FollowedArtistWithMatches,
-  type ArtistMatchEvent,
 } from '@/components/Artists/v4';
+import type { ArtistAppearance } from '@/lib/artists/appearances';
 
 export function V4ArtistsPageClient() {
   const { user, loading } = useAuth();
   const [followed, setFollowed] = useState<FollowedArtistWithMatches[]>([]);
-  const [matches, setMatches] = useState<ArtistMatchEvent[]>([]);
+  const [appearances, setAppearances] = useState<ArtistAppearance[]>([]);
   const [matchesLoading, setMatchesLoading] = useState(true);
 
   useEffect(() => {
@@ -56,27 +56,9 @@ export function V4ArtistsPageClient() {
 
         if (!alive) return;
 
-        // ─── Matches ─────────────────────────────────────────
-        const rawEvents = (eventsData?.events ?? []) as Array<Record<string, unknown>>;
-        const mapped: ArtistMatchEvent[] = rawEvents.map(ev => {
-          const matched = (ev.matched_artists ?? []) as Array<{ name: string; match_source: string }>;
-          const lineupHit = matched.find(m => m.match_source === 'lineup');
-          const first = matched[0];
-          return {
-            id: ev.id as string,
-            slug: (ev.slug as string | null) ?? null,
-            title: ev.title as string,
-            start_date: ev.start_date as string,
-            location_name: (ev.location_name as string | null) ?? null,
-            bundesland: (ev.bundesland as string | null) ?? null,
-            image_url: (ev.image_url as string | null) ?? null,
-            ticket_url: (ev.ticket_url as string | null) ?? null,
-            price_text: (ev.price_text as string | null) ?? null,
-            matched_artist: (lineupHit?.name ?? first?.name ?? '') as string,
-            match_kind: (lineupHit ? 'lineup' : 'match'),
-          };
-        });
-        setMatches(mapped);
+        // ─── Auftritte ───────────────────────────────────────
+        const apps = (eventsData?.appearances ?? []) as ArtistAppearance[];
+        setAppearances(apps);
 
         // ─── Followed-Liste mit Upcoming-Counts ─────────────
         const artists = (followingData?.artists ?? []) as Array<{
@@ -86,11 +68,9 @@ export function V4ArtistsPageClient() {
           spotify_image_url: string | null;
         }>;
         const countByArtist = new Map<string, number>();
-        for (const ev of rawEvents) {
-          for (const ma of ((ev.matched_artists ?? []) as Array<{ name: string }>)) {
-            const k = ma.name.toLowerCase();
-            countByArtist.set(k, (countByArtist.get(k) ?? 0) + 1);
-          }
+        for (const a of apps) {
+          const k = a.artist_name.toLowerCase();
+          countByArtist.set(k, (countByArtist.get(k) ?? 0) + 1);
         }
         setFollowed(artists.map(a => ({
           ...a,
@@ -124,9 +104,9 @@ export function V4ArtistsPageClient() {
                 <h2 className="text-[18px] font-bold tracking-[-0.02em] text-[var(--v4-ink)]">
                   Gefundene Auftritte in Österreich
                 </h2>
-                {matches.length > 0 && (
+                {appearances.length > 0 && (
                   <span className="text-[11.5px] text-[var(--v4-ink-50)] uppercase tracking-[0.16em] font-bold">
-                    {matches.length}
+                    {appearances.length}
                   </span>
                 )}
               </div>
@@ -135,7 +115,7 @@ export function V4ArtistsPageClient() {
                   Treffer werden geladen …
                 </div>
               ) : (
-                <V4MatchingEvents events={matches}/>
+                <V4MatchingEvents appearances={appearances}/>
               )}
             </section>
             <section>

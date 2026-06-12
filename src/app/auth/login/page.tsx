@@ -26,10 +26,13 @@ export default function LoginPage() {
   // Preserve redirect when bouncing to complete-profile / register.
   const passthrough = redirectTarget === '/map' ? '' : `?redirect=${encodeURIComponent(redirectTarget)}`;
 
-  // Redirect if already logged in — check profile completeness
+  // Redirect if already logged in — check profile completeness.
+  // WICHTIG: hier NICHT trackEvent('login') — dieser Effect läuft bei jeder
+  // user/profile/loading-Änderung erneut (6–9× pro Login) und feuert auch,
+  // wenn ein bereits eingeloggter Nutzer /auth/login nur aufruft. Das Login
+  // wird stattdessen beim tatsächlichen Anmelde-Vorgang getrackt (siehe unten).
   useEffect(() => {
     if (!loading && user) {
-      trackEvent('login', { method: 'email' });
       if (profile && !isProfileComplete(profile)) {
         router.replace(`/auth/complete-profile${passthrough}`);
       } else if (profile) {
@@ -48,6 +51,9 @@ export default function LoginPage() {
     if (authError) {
       setError(authError);
       setSubmitting(false);
+    } else {
+      // Genau ein Event pro erfolgreichem Login.
+      trackEvent('login', { method: 'email' });
     }
     // Redirect is handled by the useEffect that watches `user` state
   };
@@ -69,7 +75,7 @@ export default function LoginPage() {
       <div className="space-y-3">
         <button
           type="button"
-          onClick={() => signInWithGoogle(redirectTarget)}
+          onClick={() => { trackEvent('login', { method: 'google' }); signInWithGoogle(redirectTarget); }}
           className="w-full flex items-center justify-center gap-3 rounded-xl bg-white text-gray-900 font-medium py-3 px-4 hover:bg-gray-100 transition-colors cursor-pointer"
         >
           <GoogleIcon />

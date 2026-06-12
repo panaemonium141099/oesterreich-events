@@ -16,6 +16,10 @@ export function trackEvent(type: string, data?: Record<string, unknown>) {
       data,
       page: window.location.pathname,
       referrer: document.referrer || undefined,
+      // WICHTIG: ohne sessionId speichert die API session_id='unknown' für
+      // ALLE Events → "Besucher" steht fix auf 1 und die Session-Dauer ist
+      // Unsinn. Das war der Grund, warum die Analytics "leer/kaputt" aussah.
+      sessionId,
     }),
     keepalive: true, // survives page navigation
   }).catch(() => {

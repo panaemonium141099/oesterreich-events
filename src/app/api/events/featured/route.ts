@@ -34,7 +34,7 @@ export async function GET(request: NextRequest) {
     let query = supabase
       .from('events')
       .select(
-        'id, slug, title, description, start_date, end_date, location_name, address, postal_code, district, bundesland, latitude, longitude, category, image_url, price_text, price_min, price_max, ticket_url, source_name, source_url, organizer, visibility, event_score, quality_score',
+        'id, slug, title, description, start_date, end_date, location_name, address, postal_code, district, bundesland, latitude, longitude, category, image_url, price_text, price_min, price_max, ticket_url, source_name, source_url, organizer, visibility, event_score, quality_score, is_boosted',
         { count: 'estimated' }
       )
       .eq('visibility', 'public')
@@ -44,6 +44,8 @@ export async function GET(request: NextRequest) {
       .gte('quality_score', 50)
       .not('image_url', 'is', null)
       .not('description', 'is', null)
+      // Boosted events first (bezahlte Hervorhebung), dann nach Score.
+      .order('is_boosted', { ascending: false })
       .order('event_score', { ascending: false })
       .limit(limit);
 

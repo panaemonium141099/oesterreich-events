@@ -10,7 +10,6 @@ import { FeedItem } from '@/components/Feed/FeedItem';
 import { TrendingRow } from '@/components/Feed/TrendingRow';
 import { FeedSkeletonList } from '@/components/Feed/FeedSkeleton';
 import type { FeedActivity } from '@/components/Feed/feed-types';
-import { trackEvent } from '@/lib/analytics';
 
 /**
  * Feed UI as a named-export client component. Mounted by the thin
@@ -39,7 +38,6 @@ export function FeedPageClient() {
     }
   }, [loading, user, router]);
 
-  useEffect(() => { trackEvent('page_view', { path: '/feed' }); }, []);
 
   const fetchActivities = useCallback(async (offset = 0, append = false) => {
     if (!user) return;

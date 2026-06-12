@@ -1,8 +1,10 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { Shield, Trash2, CheckCircle, AlertTriangle } from 'lucide-react';
+import { Shield, Trash2, CheckCircle, AlertTriangle, Sparkles } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
+import { BoostControl } from '@/components/Admin/BoostControl';
+import { setEventBoost } from '@/lib/admin/boost';
 
 interface EventRow {
   id: string;
@@ -13,6 +15,8 @@ interface EventRow {
   source_name: string | null;
   source_type: string;
   bundesland: string | null;
+  is_boosted: boolean;
+  boost_until: string | null;
 }
 
 export default function ModerationPage() {
@@ -25,7 +29,7 @@ export default function ModerationPage() {
     const { data } = await supabase
       .from('events')
       .select(
-        'id, title, start_date, location_name, category, source_name, source_type, bundesland'
+        'id, title, start_date, location_name, category, source_name, source_type, bundesland, is_boosted, boost_until'
       )
       .in('source_type', ['user', 'business'])
       .order('created_at', { ascending: false })
@@ -43,6 +47,26 @@ export default function ModerationPage() {
     if (!confirm('Event wirklich loschen?')) return;
     await supabase.from('events').delete().eq('id', eventId);
     setUserEvents((prev) => prev.filter((e) => e.id !== eventId));
+  };
+
+  const [boostingId, setBoostingId] = useState<string | null>(null);
+
+  /** Boost setzen/beenden. Der Cron /api/cron/expire-boosts beendet später
+   *  automatisch alle Boosts, deren boost_until abgelaufen ist. */
+  const setBoost = async (eventId: string, boosted: boolean, days = 0) => {
+    setBoostingId(eventId);
+    try {
+      const { boost_until } = await setEventBoost(eventId, boosted, days);
+      setUserEvents((prev) =>
+        prev.map((e) =>
+          e.id === eventId ? { ...e, is_boosted: boosted, boost_until } : e
+        )
+      );
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Boost fehlgeschlagen');
+    } finally {
+      setBoostingId(null);
+    }
   };
 
   const formatDate = (dateStr: string) =>
@@ -91,6 +115,12 @@ export default function ModerationPage() {
                   >
                     {e.source_type}
                   </span>
+                  {e.is_boosted && (
+                    <span className="text-[10px] px-2 py-0.5 rounded-full shrink-0 bg-violet-500/20 text-violet-300 flex items-center gap-1">
+                      <Sparkles className="w-2.5 h-2.5" />
+                      {e.boost_until ? `geboostet bis ${formatDate(e.boost_until)}` : 'geboostet'}
+                    </span>
+                  )}
                 </div>
                 <div className="flex items-center gap-2 mt-0.5">
                   <span className="text-xs text-white/30">{formatDate(e.start_date)}</span>
@@ -99,6 +129,12 @@ export default function ModerationPage() {
                   )}
                 </div>
               </div>
+              <BoostControl
+                boosted={e.is_boosted}
+                busy={boostingId === e.id}
+                onStart={(days) => setBoost(e.id, true, days)}
+                onEnd={() => setBoost(e.id, false)}
+              />
               <button
                 onClick={() => deleteEvent(e.id)}
                 className="flex items-center gap-1 text-xs px-3 py-1.5 rounded-lg text-red-400/60 hover:bg-red-400/10 hover:text-red-400 transition-colors"

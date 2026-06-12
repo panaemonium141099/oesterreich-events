@@ -92,11 +92,15 @@ function HighlightCard({ event, index }: { event: Event; index: number }) {
               </span>
             </div>
           )}
-          {event.event_score && event.event_score >= 55 && (
+          {event.is_boosted ? (
+            <div className="absolute top-2.5 right-2.5 z-10 bg-violet-500 text-white text-[9px] font-bold px-2 py-0.5 rounded-sm uppercase tracking-wide">
+              Anzeige
+            </div>
+          ) : event.event_score && event.event_score >= 55 ? (
             <div className="absolute top-2.5 right-2.5 z-10 bg-white/90 text-gray-900 text-[9px] font-bold px-2 py-0.5 rounded-sm uppercase tracking-wide">
               Top
             </div>
-          )}
+          ) : null}
         </div>
 
         {/* Content — fixed height, title can wrap to 3 lines */}

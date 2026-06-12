@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, Fragment } from 'react';
 import {
   EyeIcon,
   UsersIcon,
@@ -47,6 +47,43 @@ interface AnalyticsData {
     ticketClicks: number;
   };
   bundeslandHeatmap: { name: string; count: number }[];
+  users: UserActivity[];
+  anonSessions: AnonSession[];
+  anonTotals: { sessions: number; pageViews: number; searches: number; clicks: number };
+}
+
+interface AnonSession {
+  id: string;
+  total: number;
+  pageViews: number;
+  searches: number;
+  clicks: number;
+  firstSeen: string;
+  lastActive: string;
+  entryPage: string | null;
+  referrer: string | null;
+}
+
+interface UserActivity {
+  id: string;
+  name: string;
+  email: string | null;
+  total: number;
+  pageViews: number;
+  searches: number;
+  clicks: number;
+  saves: number;
+  /** Tatsächlich aktuell gemerkte Events (saved_events, all-time) — nicht der
+   *  zeitraum-/tracking-abhängige event_save-Aktions-Log. */
+  savedTotal: number;
+  lastActive: string;
+}
+
+interface UserDrilldownEvent {
+  event_type: string;
+  event_data: Record<string, unknown> | null;
+  page: string | null;
+  created_at: string;
 }
 
 /* ─── Helpers ─────────────────────────────────────── */
@@ -530,7 +567,315 @@ export default function AnalyticsPanel() {
           )}
         </GlassCard>
       </AnimatedSection>
+
+      {/* Section 9: Nutzer-Aktivität */}
+      <AnimatedSection index={8}>
+        <UserActivitySection users={data.users} />
+      </AnimatedSection>
+
+      {/* Section 10: Anonyme Besucher */}
+      <AnimatedSection index={9}>
+        <AnonSessionsSection sessions={data.anonSessions} totals={data.anonTotals} />
+      </AnimatedSection>
     </div>
+  );
+}
+
+/* ─── Nutzer-Aktivität ────────────────────────────── */
+
+function formatLastActive(iso: string): string {
+  const d = new Date(iso);
+  const diffMs = Date.now() - d.getTime();
+  const mins = Math.floor(diffMs / 60000);
+  if (mins < 1) return 'gerade eben';
+  if (mins < 60) return `vor ${mins} Min`;
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return `vor ${hrs} Std`;
+  return d.toLocaleDateString('de-AT', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
+}
+
+function UserActivitySection({ users }: { users: UserActivity[] }) {
+  const [query, setQuery] = useState('');
+  const [openId, setOpenId] = useState<string | null>(null);
+  const [drill, setDrill] = useState<Record<string, UserDrilldownEvent[] | 'loading'>>({});
+
+  const filtered = users.filter((u) => {
+    if (!query.trim()) return true;
+    const q = query.toLowerCase();
+    return u.name.toLowerCase().includes(q) || (u.email ?? '').toLowerCase().includes(q);
+  });
+
+  const toggle = async (id: string) => {
+    if (openId === id) { setOpenId(null); return; }
+    setOpenId(id);
+    if (!drill[id]) {
+      setDrill((p) => ({ ...p, [id]: 'loading' }));
+      try {
+        const res = await fetch(`/api/admin/analytics/user/${id}?limit=60`);
+        const json = await res.json();
+        setDrill((p) => ({ ...p, [id]: (json.events ?? []) as UserDrilldownEvent[] }));
+      } catch {
+        setDrill((p) => ({ ...p, [id]: [] }));
+      }
+    }
+  };
+
+  return (
+    <GlassCard>
+      <div className="flex items-center justify-between gap-3 mb-3 flex-wrap">
+        <h3 className="text-sm uppercase tracking-[0.15em] text-white/40 font-medium flex items-center gap-2">
+          <UsersIcon size={16} className="text-white/20" />
+          Nutzer-Aktivität
+          <span className="text-[10px] text-white/25 normal-case tracking-normal">({users.length} eingeloggte im Zeitraum)</span>
+        </h3>
+        <input
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="Nutzer suchen…"
+          className="text-xs px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 text-white placeholder-white/20 focus:outline-none focus:border-white/30"
+        />
+      </div>
+
+      {users.length === 0 ? (
+        <EmptyState text="Keine eingeloggten Nutzer im Zeitraum" />
+      ) : (
+        <div className="overflow-x-auto">
+          <table className="w-full text-xs">
+            <thead>
+              <tr className="text-white/30 text-left border-b border-white/[0.06]">
+                <th className="font-medium py-2 pr-3">Nutzer</th>
+                <th className="font-medium py-2 px-2 text-right tabular-nums">Aufrufe</th>
+                <th className="font-medium py-2 px-2 text-right tabular-nums">Suchen</th>
+                <th className="font-medium py-2 px-2 text-right tabular-nums">Klicks</th>
+                <th className="font-medium py-2 px-2 text-right tabular-nums">Gespeichert</th>
+                <th className="font-medium py-2 px-2 text-right tabular-nums">Aktiv</th>
+                <th className="font-medium py-2 pl-2 text-right">Zuletzt</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filtered.map((u) => (
+                <FragmentRow
+                  key={u.id}
+                  u={u}
+                  open={openId === u.id}
+                  onToggle={() => toggle(u.id)}
+                  drill={drill[u.id]}
+                />
+              ))}
+            </tbody>
+          </table>
+          {filtered.length === 0 && (
+            <p className="text-center text-xs text-white/20 py-6">Kein Treffer für &ldquo;{query}&rdquo;</p>
+          )}
+        </div>
+      )}
+    </GlassCard>
+  );
+}
+
+function FragmentRow({
+  u, open, onToggle, drill,
+}: {
+  u: UserActivity;
+  open: boolean;
+  onToggle: () => void;
+  drill: UserDrilldownEvent[] | 'loading' | undefined;
+}) {
+  return (
+    <>
+      <tr
+        onClick={onToggle}
+        className={`border-b border-white/[0.04] cursor-pointer transition-colors ${open ? 'bg-white/[0.04]' : 'hover:bg-white/[0.02]'}`}
+      >
+        <td className="py-2 pr-3">
+          <div className="flex items-center gap-2">
+            <span className={`text-white/30 transition-transform ${open ? 'rotate-90' : ''}`}>›</span>
+            <div className="min-w-0">
+              <p className="text-white/80 truncate">{u.name}</p>
+              {u.email && <p className="text-[10px] text-white/25 truncate">{u.email}</p>}
+            </div>
+          </div>
+        </td>
+        <td className="py-2 px-2 text-right tabular-nums text-white/60">{fmt(u.pageViews)}</td>
+        <td className="py-2 px-2 text-right tabular-nums text-white/60">{fmt(u.searches)}</td>
+        <td className="py-2 px-2 text-right tabular-nums text-blue-400/70">{fmt(u.clicks)}</td>
+        <td className="py-2 px-2 text-right tabular-nums text-amber-400/60">{fmt(u.savedTotal)}</td>
+        <td className="py-2 px-2 text-right tabular-nums text-white/80 font-semibold">{fmt(u.total)}</td>
+        <td className="py-2 pl-2 text-right text-white/40 whitespace-nowrap">{formatLastActive(u.lastActive)}</td>
+      </tr>
+      {open && (
+        <tr>
+          <td colSpan={7} className="bg-black/20 px-4 py-3">
+            {drill === 'loading' || drill === undefined ? (
+              <p className="text-[11px] text-white/30">Lade Aktivität…</p>
+            ) : drill.length === 0 ? (
+              <p className="text-[11px] text-white/30">Keine Einzel-Events.</p>
+            ) : (
+              <div className="space-y-1 max-h-64 overflow-y-auto">
+                {drill.map((ev, i) => (
+                  <div key={i} className="flex items-center gap-3 text-[11px]">
+                    <span className="text-white/30 w-28 shrink-0 tabular-nums">
+                      {new Date(ev.created_at).toLocaleString('de-AT', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}
+                    </span>
+                    <span className="px-1.5 py-0.5 rounded bg-white/[0.06] text-white/60 shrink-0">{ev.event_type}</span>
+                    <span className="text-white/40 truncate">
+                      {ev.page ?? ''}
+                      {ev.event_data && drillDetail(ev.event_data) ? ` · ${drillDetail(ev.event_data)}` : ''}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </td>
+        </tr>
+      )}
+    </>
+  );
+}
+
+/** Kurz-Detail aus event_data für die Drilldown-Zeile (Suchbegriff, Event-Titel…). */
+function drillDetail(d: Record<string, unknown>): string {
+  const pick = (k: string) => (typeof d[k] === 'string' ? (d[k] as string) : '');
+  return pick('query') || pick('event_title') || pick('value') || pick('to') || pick('path') || '';
+}
+
+/* ─── Anonyme Besucher ────────────────────────────── */
+
+function refLabel(referrer: string | null): string {
+  if (!referrer) return 'Direkt';
+  try {
+    const h = new URL(referrer).hostname.replace(/^www\./, '');
+    return h.includes('lasstreffen') ? 'intern' : h;
+  } catch {
+    return referrer.slice(0, 30);
+  }
+}
+
+function AnonSessionsSection({
+  sessions,
+  totals,
+}: {
+  sessions: AnonSession[];
+  totals: { sessions: number; pageViews: number; searches: number; clicks: number };
+}) {
+  const [openId, setOpenId] = useState<string | null>(null);
+  const [drill, setDrill] = useState<Record<string, UserDrilldownEvent[] | 'loading'>>({});
+
+  const toggle = async (id: string) => {
+    if (openId === id) { setOpenId(null); return; }
+    setOpenId(id);
+    if (!drill[id]) {
+      setDrill((p) => ({ ...p, [id]: 'loading' }));
+      try {
+        const res = await fetch(`/api/admin/analytics/session/${encodeURIComponent(id)}?limit=60`);
+        const json = await res.json();
+        setDrill((p) => ({ ...p, [id]: (json.events ?? []) as UserDrilldownEvent[] }));
+      } catch {
+        setDrill((p) => ({ ...p, [id]: [] }));
+      }
+    }
+  };
+
+  return (
+    <GlassCard>
+      <h3 className="text-sm uppercase tracking-[0.15em] text-white/40 font-medium mb-1 flex items-center gap-2">
+        <GlobeIcon size={16} className="text-white/20" />
+        Anonyme Besucher
+        <span className="text-[10px] text-white/25 normal-case tracking-normal">(nicht eingeloggt)</span>
+      </h3>
+      {/* Summary */}
+      <div className="flex flex-wrap gap-x-6 gap-y-1 mb-4 text-[11px] text-white/40">
+        <span><span className="text-white/70 font-semibold tabular-nums">{fmt(totals.sessions)}</span> Sitzungen</span>
+        <span><span className="text-white/70 font-semibold tabular-nums">{fmt(totals.pageViews)}</span> Aufrufe</span>
+        <span><span className="text-white/70 font-semibold tabular-nums">{fmt(totals.searches)}</span> Suchen</span>
+        <span><span className="text-white/70 font-semibold tabular-nums">{fmt(totals.clicks)}</span> Klicks</span>
+      </div>
+
+      {sessions.length === 0 ? (
+        <EmptyState text="Keine anonymen Sitzungen im Zeitraum" />
+      ) : (
+        <div className="overflow-x-auto">
+          <table className="w-full text-xs">
+            <thead>
+              <tr className="text-white/30 text-left border-b border-white/[0.06]">
+                <th className="font-medium py-2 pr-3">Sitzung</th>
+                <th className="font-medium py-2 px-2 text-right tabular-nums">Aufrufe</th>
+                <th className="font-medium py-2 px-2 text-right tabular-nums">Suchen</th>
+                <th className="font-medium py-2 px-2 text-right tabular-nums">Klicks</th>
+                <th className="font-medium py-2 px-2">Kommt von</th>
+                <th className="font-medium py-2 pl-2 text-right">Zuletzt</th>
+              </tr>
+            </thead>
+            <tbody>
+              {sessions.map((s) => {
+                const isUnknown = s.id === 'unknown';
+                const open = openId === s.id;
+                const d = drill[s.id];
+                return (
+                  <Fragment key={s.id}>
+                    <tr
+                      onClick={() => !isUnknown && toggle(s.id)}
+                      className={`border-b border-white/[0.04] transition-colors ${
+                        isUnknown ? '' : open ? 'bg-white/[0.04] cursor-pointer' : 'hover:bg-white/[0.02] cursor-pointer'
+                      }`}
+                    >
+                      <td className="py-2 pr-3">
+                        <div className="flex items-center gap-2 min-w-0">
+                          {!isUnknown && <span className={`text-white/30 transition-transform ${open ? 'rotate-90' : ''}`}>›</span>}
+                          <div className="min-w-0">
+                            {isUnknown ? (
+                              <span className="text-white/35 italic">vor Session-Fix (nicht aufschlüsselbar)</span>
+                            ) : (
+                              <>
+                                <span className="text-white/70 font-mono">#{s.id.slice(0, 8)}</span>
+                                {s.entryPage && (
+                                  <span className="text-[10px] text-white/25 truncate block">Einstieg: {s.entryPage}</span>
+                                )}
+                              </>
+                            )}
+                          </div>
+                        </div>
+                      </td>
+                      <td className="py-2 px-2 text-right tabular-nums text-white/60">{fmt(s.pageViews)}</td>
+                      <td className="py-2 px-2 text-right tabular-nums text-white/60">{fmt(s.searches)}</td>
+                      <td className="py-2 px-2 text-right tabular-nums text-blue-400/70">{fmt(s.clicks)}</td>
+                      <td className="py-2 px-2 text-white/40 truncate max-w-[160px]">{isUnknown ? '—' : refLabel(s.referrer)}</td>
+                      <td className="py-2 pl-2 text-right text-white/40 whitespace-nowrap">{formatLastActive(s.lastActive)}</td>
+                    </tr>
+                    {open && !isUnknown && (
+                      <tr>
+                        <td colSpan={6} className="bg-black/20 px-4 py-3">
+                          {d === 'loading' || d === undefined ? (
+                            <p className="text-[11px] text-white/30">Lade Aktivität…</p>
+                          ) : d.length === 0 ? (
+                            <p className="text-[11px] text-white/30">Keine Einzel-Events.</p>
+                          ) : (
+                            <div className="space-y-1 max-h-64 overflow-y-auto">
+                              {d.map((ev, i) => (
+                                <div key={i} className="flex items-center gap-3 text-[11px]">
+                                  <span className="text-white/30 w-28 shrink-0 tabular-nums">
+                                    {new Date(ev.created_at).toLocaleString('de-AT', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}
+                                  </span>
+                                  <span className="px-1.5 py-0.5 rounded bg-white/[0.06] text-white/60 shrink-0">{ev.event_type}</span>
+                                  <span className="text-white/40 truncate">
+                                    {ev.page ?? ''}
+                                    {ev.event_data && drillDetail(ev.event_data) ? ` · ${drillDetail(ev.event_data)}` : ''}
+                                  </span>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </td>
+                      </tr>
+                    )}
+                  </Fragment>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </GlassCard>
   );
 }
 

@@ -4,6 +4,8 @@ import type { Festival } from '@/types/festivals';
 import { deriveEventState, type V4EventState } from './derive-event-state';
 import type { LandingContext } from './get-landing-context';
 import { buildEventUrlV2 } from '@/lib/utils/slugify';
+import { createClient } from '@supabase/supabase-js';
+import { fetchArtistAppearances, type ArtistAppearance } from '@/lib/artists/appearances';
 import overridesJson from '../../../data/festival-overrides.json';
 
 const FESTIVAL_OVERRIDES = overridesJson as Record<string, { imageUrl?: string | null }>;
@@ -36,7 +38,7 @@ export interface LandingData {
   todayWeekend: Array<Event & { state: V4EventState }>;
   concerts: Array<Event & { state: V4EventState }>;
   festivals: LandingFestival[];
-  matches: Array<Event & { state: V4EventState }>;
+  matches: ArtistAppearance[];
   popularArtists: LandingArtist[];
 }
 
@@ -114,20 +116,19 @@ export async function getLandingData(ctx: LandingContext): Promise<LandingData> 
   // Base column list — kept tight to what the cards consume.
   const eventCols = 'id,slug,title,description,start_date,end_date,location_name,bundesland,district,category,image_url,ticket_url,price_text,price_min,price_max,price_tier,price_flags,publish_status,event_score,tags,created_at,updated_at,source_id,source_name,source_url';
 
-  // Match query needs candidate event IDs from the pre-computed context.
-  const matchEventIds = Array.from(ctx.artistMatchEventIds)
-    .concat(Array.from(ctx.lineupMatchEventIds));
-
-  const matchQuery = ctx.signedIn && matchEventIds.length > 0
-    ? supabase
-        .from('events')
-        .select(eventCols)
-        .in('id', matchEventIds)
-        .gte('start_date', today)
-        .eq('publish_status', 'published')
-        .order('start_date', { ascending: true })
-        .limit(6)
-    : Promise.resolve({ data: [] as Event[], error: null });
+  // Künstler-Auftritte: saubere Liste aus der RPC get_artist_appearances
+  // (Festival-Line-up = Wahrheit + präzise Konzert-Titel-Matches, dedupliziert,
+  // keine Falsch-Treffer). Service-Role nötig (RPC nur an service_role granted).
+  const appearancesPromise: Promise<ArtistAppearance[]> =
+    ctx.signedIn && ctx.userId && process.env.SUPABASE_SERVICE_ROLE_KEY
+      ? fetchArtistAppearances(
+          createClient(
+            process.env.NEXT_PUBLIC_SUPABASE_URL!,
+            process.env.SUPABASE_SERVICE_ROLE_KEY,
+          ),
+          ctx.userId,
+        )
+      : Promise.resolve([]);
 
   // WeekendSection rendert 1 Hero + 2× 3 Cards = 7 Slots. Wir ziehen
   // ~4× soviel als Reserve, dann dedupliziert die uniqueByTitleAndImage-
@@ -137,7 +138,7 @@ export async function getLandingData(ctx: LandingContext): Promise<LandingData> 
   const TODAYWEEKEND_LIMIT = 7;
   const TODAYWEEKEND_POOL = 30;
 
-  const [weekendRes, concertsRes, festivalsRes, matchesRes] = await Promise.all([
+  const [weekendRes, concertsRes, festivalsRes, appearances] = await Promise.all([
     // todayWeekend: top events in next 7 days
     supabase
       .from('events')
@@ -168,14 +169,15 @@ export async function getLandingData(ctx: LandingContext): Promise<LandingData> 
       .gte('ends_at', today.split('T')[0])
       .order('starts_at', { ascending: true })
       .limit(4),
-    matchQuery,
+    appearancesPromise,
   ]);
 
   const todayWeekend = uniqueByTitleAndImage(
     enrichEvents((weekendRes.data ?? []) as unknown as Event[], ctx),
   ).slice(0, TODAYWEEKEND_LIMIT);
   const concerts = enrichEvents((concertsRes.data ?? []) as unknown as Event[], ctx);
-  const matches = enrichEvents((matchesRes.data ?? []) as unknown as Event[], ctx);
+  // Landing zeigt eine Vorschau der nächsten Auftritte; "Alle Auftritte" -> /artists.
+  const matches = appearances.slice(0, 8);
 
   type ParentEventRow = {
     id: string;

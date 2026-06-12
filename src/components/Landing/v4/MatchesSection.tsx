@@ -1,13 +1,12 @@
-import type { Event } from '@/types/events';
-import type { V4EventState } from '@/lib/v4/derive-event-state';
-import { V4CardH } from '@/components/Events/v4';
+import { ArtistAppearanceCard } from '@/components/Artists/ArtistAppearanceCard';
+import type { ArtistAppearance } from '@/lib/artists/appearances';
 import Link from 'next/link';
 
 interface MatchesSectionProps {
-  events: Array<Event & { state: V4EventState }>;
+  appearances: ArtistAppearance[];
 }
 
-export function MatchesSection({ events }: MatchesSectionProps) {
+export function MatchesSection({ appearances }: MatchesSectionProps) {
   return (
     <section className="max-w-[1180px] mx-auto px-4 md:px-14 py-6 md:py-10">
       <div className="flex items-end justify-between gap-6 mb-4">
@@ -28,7 +27,7 @@ export function MatchesSection({ events }: MatchesSectionProps) {
         </Link>
       </div>
 
-      {events.length === 0 ? (
+      {appearances.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-[var(--v4-hairline-3)] p-6 text-center text-[var(--v4-ink-70)]">
           <p className="text-[14px]">Noch keine Auftritte gefunden — folge weiteren Künstlern.</p>
           <Link href="/artists" className="press-haptic inline-block mt-3 text-[13px] font-semibold text-[var(--v4-ink)] underline underline-offset-2">
@@ -37,7 +36,9 @@ export function MatchesSection({ events }: MatchesSectionProps) {
         </div>
       ) : (
         <div className="flex flex-col gap-2.5">
-          {events.map(ev => <V4CardH key={ev.id} event={ev}/>)}
+          {appearances.map((a, i) => (
+            <ArtistAppearanceCard key={`${a.artist_name}-${a.event_id ?? a.context}-${i}`} a={a} />
+          ))}
         </div>
       )}
     </section>

@@ -87,6 +87,9 @@ interface EventListViewProps {
   totalCount?: number | null;
   /** Subtitle shown next to "Liste" — e.g. "Heute · Burgenland". */
   scopeLabel?: string;
+  /** Effektiv geboostete Event-IDs (frisch via useBoostedIds). Diese Events
+   *  werden als "Anzeige"-Sektion ganz oben gepinnt. */
+  boostedIds?: Set<string>;
 }
 
 const PAGE_SIZE = 30;
@@ -97,6 +100,7 @@ export function EventListView({
   userLocation,
   totalCount,
   scopeLabel,
+  boostedIds,
 }: EventListViewProps) {
   // Default to "Top" so the list opens with the highest-scored events
   // visible regardless of where the user came from. Datum/Distanz remain
@@ -174,7 +178,21 @@ export function EventListView({
     return list;
   }, [events, sort, userLocation]);
 
-  const visible = sorted.slice(0, visibleCount);
+  // Geboostete Events ("Anzeige") werden als eigene Sektion GANZ OBEN gepinnt
+  // und aus den Datumsgruppen entfernt (kein Duplikat). Nur kommende Events
+  // (Datum >= heute) — eine Anzeige für ein vergangenes Event macht keinen Sinn.
+  const { ads, rest } = useMemo(() => {
+    const isAd = (e: Event) => (boostedIds ? boostedIds.has(e.id) : !!e.is_boosted);
+    const startToday = startOfDay(new Date()).getTime();
+    const ads = sorted.filter(
+      (e) => isAd(e) && startOfDay(new Date(e.start_date)).getTime() >= startToday,
+    );
+    const adIds = new Set(ads.map((e) => e.id));
+    const rest = adIds.size ? sorted.filter((e) => !adIds.has(e.id)) : sorted;
+    return { ads, rest };
+  }, [sorted, boostedIds]);
+
+  const visible = rest.slice(0, visibleCount);
   const grouped = useMemo(() => groupEvents(visible), [visible]);
 
   // Phase 4.2: kein eigenes `position: absolute, inset: 0` mehr — EventListView
@@ -271,6 +289,32 @@ export function EventListView({
 
         {/* Groups */}
         <div style={{ paddingTop: 22 }}>
+          {/* Anzeige — geboostete Events, ganz oben gepinnt + klar gekennzeichnet */}
+          {ads.length > 0 && (
+            <section style={{ marginBottom: 28 }}>
+              <header style={{ display: 'flex', alignItems: 'baseline', gap: 10, marginBottom: 12 }}>
+                <h2 style={{ fontSize: 17, fontWeight: 700, letterSpacing: '-0.02em', color: T.ink, margin: 0 }}>
+                  Anzeige
+                </h2>
+                <span style={{ fontSize: 12.5, color: T.ink60, fontWeight: 500 }}>· hervorgehobene Events</span>
+                <span style={{ marginLeft: 'auto', fontSize: 12, color: T.ink50 }}>
+                  {ads.length} Event{ads.length === 1 ? '' : 's'}
+                </span>
+              </header>
+              <div
+                style={{
+                  display: 'grid',
+                  gap: 14,
+                  gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 360px), 1fr))',
+                }}
+              >
+                {ads.map((ev) => (
+                  <BigRow key={ev.id} ev={ev} userLocation={userLocation} isAd />
+                ))}
+              </div>
+            </section>
+          )}
+
           {grouped.map((g) => (
             <section key={g.label} style={{ marginBottom: 28 }}>
               <header
@@ -317,9 +361,9 @@ export function EventListView({
             </section>
           ))}
 
-          {visibleCount < sorted.length && (
+          {visibleCount < rest.length && (
             <div ref={loaderRef} style={{ padding: '16px 0', textAlign: 'center', fontSize: 12, color: T.ink50 }}>
-              {visible.length} von {sorted.length} angezeigt — scrolle für mehr
+              {visible.length} von {rest.length} angezeigt — scrolle für mehr
             </div>
           )}
         </div>
@@ -333,9 +377,11 @@ export function EventListView({
 function BigRow({
   ev,
   userLocation,
+  isAd,
 }: {
   ev: Event;
   userLocation?: { lat: number; lng: number } | null;
+  isAd?: boolean;
 }) {
   // Track image errors locally so a 404'd scraper image swaps to the
   // category-gradient placeholder instead of leaving an empty box. The
@@ -455,6 +501,24 @@ function BigRow({
             }}
           >
             {time}
+          </span>
+        )}
+        {isAd && (
+          <span
+            style={{
+              position: 'absolute',
+              top: 8,
+              right: 8,
+              padding: '4px 8px',
+              borderRadius: 6,
+              background: '#7c3aed',
+              color: '#fff',
+              fontSize: 10,
+              fontWeight: 700,
+              letterSpacing: '0.04em',
+            }}
+          >
+            Anzeige
           </span>
         )}
       </div>
