@@ -10,15 +10,19 @@ describe('buildDraftPrompt', () => {
     expect(p).toContain('schilchertage.at');
     expect(p.toLowerCase()).toContain('json');
   });
-  it('uses the warm "zurückverlinken" angle when events are linked', () => {
-    const p = buildDraftPrompt({ ...base, events: [{ id: '1', title: 'Schilcherfest', url: 'https://lasstreffen.at/events/x', startDate: '2026-07-01' }] });
-    expect(p).toContain('Schilcherfest');
-    expect(p).toContain('https://lasstreffen.at/events/x');
-    expect(p.toLowerCase()).toContain('zurückverlink');
+  it('frames it as a REACH cooperation (Flyer / Link / Erwähnung)', () => {
+    const p = buildDraftPrompt(base).toLowerCase();
+    expect(p).toContain('kooperation');
+    expect(p).toContain('reichweite');
+    expect(p).toMatch(/flyer|aushang|link|erwähnung/);
   });
-  it('uses the softer "listen lassen" angle when no events', () => {
-    const p = buildDraftPrompt(base);
-    expect(p.toLowerCase()).toContain('listen');
+  it('explicitly forbids asking them to post/list their own events', () => {
+    expect(buildDraftPrompt(base).toLowerCase()).toMatch(/nicht.*(posten|listen)/s);
+  });
+  it('uses linked events only as a trust opener (not as the ask)', () => {
+    const p = buildDraftPrompt({ ...base, events: [{ id: '1', title: 'Schilcherfest', url: 'https://lasstreffen.at/x', startDate: '2026-07-01' }] });
+    expect(p).toContain('Schilcherfest');
+    expect(p.toLowerCase()).toContain('vertrauens-einstieg');
   });
 });
 
