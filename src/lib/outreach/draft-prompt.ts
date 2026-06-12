@@ -14,22 +14,28 @@ export const COMPLIANCE_FOOTER =
   'Falls kein Interesse besteht, genügt eine kurze Antwort — dann melde ich mich nicht wieder.\n' +
   'lasstreffen.at — Veranstaltungen in ganz Österreich · Impressum: https://lasstreffen.at/impressum';
 
+/**
+ * Builds the prompt for a REACH-/COOPERATION outreach mail. Ziel ist NICHT,
+ * dass der Empfänger seine Events bei uns postet (machen wir selbst), sondern
+ * eine Kooperation, die lasstreffen.at Reichweite bringt und dem Empfänger
+ * einen kostenlosen Nutzen für sein Publikum liefert.
+ */
 export function buildDraftPrompt(input: DraftInput): string {
   const recipient = input.orgName ?? input.domain;
   const hasEvents = input.events.length > 0;
-  const eventLines = input.events.map((e) => `- ${e.title} (${e.url})`).join('\n');
-
-  const angle = hasEvents
-    ? `Aufhänger: Wir listen bereits diese Veranstaltung(en) von euch auf lasstreffen.at:\n${eventLines}\n` +
-      'Bitte freundlich fragen, ob ihr von eurer Website auf eure Event-Seite bei uns zurückverlinken möchtet (gegenseitiger Nutzen: mehr Reichweite, mehr Besucher).'
-    : 'Aufhänger: lasstreffen.at ist eine kostenlose, regionale Event-Plattform für ganz Österreich, eure Veranstaltungen passen perfekt. ' +
-      'Bitte freundlich fragen, ob ihr eure Termine bei uns listen lassen und/oder verlinken möchtet.';
+  const eventLine = hasEvents
+    ? `Vertrauens-Einstieg (NICHT als Bitte): Wir featuren bereits Veranstaltungen aus eurem Umfeld auf lasstreffen.at, z.B. ${input.events.map((e) => e.title).slice(0, 2).join(', ')}.`
+    : '';
 
   return [
-    'Du schreibst eine kurze, persönliche Outreach-E-Mail auf Deutsch (Du/Ihr-Form, österreichischer Ton, freundlich, NICHT werblich oder spammy) im Namen von lasstreffen.at.',
+    'Du schreibst eine kurze, persönliche KOOPERATIONS-Mail auf Deutsch (Du/Ihr-Form, österreichischer Ton, freundlich, nicht werblich) im Namen von lasstreffen.at — einer kostenlosen Plattform, die ALLE Veranstaltungen einer Region auf einer Karte bündelt.',
     `Empfänger: ${recipient} (${input.domain})${input.bundesland ? `, ${input.bundesland}` : ''}.`,
-    angle,
-    'Anforderungen: höchstens ~90 Wörter, EIN klarer Call-to-action, ehrlich, keine Floskeln, keine erfundenen Fakten, kein Druck. Schreibe KEINE Signatur und KEIN Impressum (wird separat angehängt).',
+    'ZIEL: eine Kooperation, die lasstreffen.at REICHWEITE bringt und dem Empfänger einen echten Nutzen für seine Gäste/Besucher/Community gibt. Schlage EINEN konkreten, für genau diesen Empfänger plausiblen Weg vor (wähle selbst anhand von Name/Art des Empfängers):',
+    '- Flyer / Aushang / QR-Code bei ihnen vor Ort (z.B. Tourismusbüro, Hotel-Rezeption, Eingang, Gemeindeamt)\n- ein Link zu lasstreffen.at auf ihrer Website (z.B. unter „Was ist los?" / Freizeit-Tipps)\n- eine Erwähnung im Newsletter / in ihren Kanälen / eine gegenseitige Empfehlung',
+    'NUTZEN FÜR DEN EMPFÄNGER (klar machen): seine Gäste/Besucher finden mit einem Klick ALLE Events der Region — das macht den Empfänger hilfreicher und kostet ihn nichts.',
+    'WICHTIG: Bitte NICHT darum, dass sie ihre eigenen Veranstaltungen bei uns posten oder listen — das machen wir bereits selbst. Es geht ausschließlich um Sichtbarkeit/Reichweite für lasstreffen.at im Tausch gegen einen kostenlosen Service für ihr Publikum.',
+    eventLine,
+    'Anforderungen: höchstens ~90 Wörter, EIN klarer Vorschlag/Call-to-action, ehrlich, kein Druck, keine Floskeln, keine erfundenen Fakten. Schreibe KEINE Signatur und KEIN Impressum (wird separat angehängt).',
     'Antworte ausschließlich als JSON: {"subject": "...", "body": "..."}.',
-  ].join('\n\n');
+  ].filter(Boolean).join('\n\n');
 }
