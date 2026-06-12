@@ -19,6 +19,10 @@
     {
       "path": "/api/cron/lifecycle-emails",
       "schedule": "0 15 * * 4"
+    },
+    {
+      "path": "/api/cron/outreach-discover",
+      "schedule": "30 4 * * *"
     }
   ]
 }
