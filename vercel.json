@@ -25,6 +25,10 @@
       "schedule": "30 4 * * *"
     },
     {
+      "path": "/api/cron/outreach-enrich",
+      "schedule": "0 5 * * *"
+    },
+    {
       "path": "/api/cron/expire-boosts",
       "schedule": "0 1 * * *"
     }
