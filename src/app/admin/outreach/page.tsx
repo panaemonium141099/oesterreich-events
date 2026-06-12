@@ -35,6 +35,8 @@ export default function OutreachPage() {
       <h1 className="text-2xl font-bold mb-1">Outreach</h1>
       <p className="text-white/50 mb-4 text-sm">{rows.length} Prospects</p>
 
+      <MentionsPanel />
+
       <div className="flex flex-wrap gap-2 mb-6">
         {FILTERS.map((f) => (
           <button
@@ -124,6 +126,34 @@ function ProspectCard({ p, onChanged }: { p: Prospect; onChanged: () => void }) 
             className="px-3 py-1.5 rounded-lg bg-white/[0.06] text-white/50 text-sm">Überspringen</button>
         </div>
       )}
+    </div>
+  );
+}
+
+interface Mention { id: string; url: string; domain: string; kind: string; source: string; is_new: boolean }
+
+function MentionsPanel() {
+  const [mentions, setMentions] = useState<Mention[]>([]);
+  useEffect(() => {
+    fetch('/api/admin/outreach/mentions').then((r) => r.json())
+      .then((d) => setMentions(d.mentions ?? [])).catch(() => {});
+  }, []);
+  if (mentions.length === 0) return null;
+  const newCount = mentions.filter((m) => m.is_new).length;
+  return (
+    <div className="rounded-xl border border-white/10 bg-white/[0.02] p-4 mb-6">
+      <div className="text-sm font-semibold mb-2">
+        Erwähnungen &amp; Backlinks <span className="text-white/40">({mentions.length}{newCount ? `, ${newCount} neu` : ''})</span>
+      </div>
+      <div className="space-y-1.5 max-h-56 overflow-y-auto">
+        {mentions.map((m) => (
+          <div key={m.id} className="flex items-center gap-2 text-sm">
+            {m.is_new && <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-400 text-black font-semibold shrink-0">NEU</span>}
+            <a href={m.url} target="_blank" rel="noopener noreferrer nofollow" className="text-amber-400 hover:underline truncate">{m.domain}</a>
+            <span className="text-white/30 text-xs shrink-0">{m.kind} · {m.source}</span>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

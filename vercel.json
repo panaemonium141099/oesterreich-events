@@ -33,6 +33,14 @@
       "schedule": "30 5 * * *"
     },
     {
+      "path": "/api/cron/outreach-cold",
+      "schedule": "0 4 * * *"
+    },
+    {
+      "path": "/api/cron/outreach-monitor",
+      "schedule": "0 6 * * 1"
+    },
+    {
       "path": "/api/cron/expire-boosts",
       "schedule": "0 1 * * *"
     }
