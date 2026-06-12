@@ -9,6 +9,7 @@ interface Prospect {
   website: string | null;
   bundesland: string | null;
   status: string;
+  email: string | null;
   source_event_ids: string[];
   discovered_via: string | null;
 }
@@ -36,6 +37,7 @@ export default function OutreachPage() {
             <tr>
               <th className="py-2 font-medium">Domain</th>
               <th className="font-medium">Name</th>
+              <th className="font-medium">E-Mail</th>
               <th className="font-medium">Typ</th>
               <th className="font-medium">Status</th>
               <th className="font-medium">Events</th>
@@ -56,6 +58,11 @@ export default function OutreachPage() {
                   </a>
                 </td>
                 <td>{p.org_name ?? '—'}</td>
+                <td>
+                  {p.email
+                    ? <a href={`mailto:${p.email}`} className="text-amber-400 hover:underline">{p.email}</a>
+                    : <span className="text-white/30">—</span>}
+                </td>
                 <td>{p.kind}</td>
                 <td>{p.status}</td>
                 <td>{p.source_event_ids?.length ?? 0}</td>
