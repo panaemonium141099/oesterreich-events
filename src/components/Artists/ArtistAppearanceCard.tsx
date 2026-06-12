@@ -1,5 +1,4 @@
 import Link from 'next/link';
-import Image from 'next/image';
 import { buildEventUrlV2 } from '@/lib/utils/slugify';
 import type { ArtistAppearance } from '@/lib/artists/appearances';
 
@@ -41,10 +40,13 @@ export function ArtistAppearanceCard({ a }: { a: ArtistAppearance }) {
   const inner = (
     <>
       <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-[var(--v4-match)]" />
-      {/* Künstler-Bild (rund) */}
-      <div className="w-16 h-16 rounded-full overflow-hidden bg-[var(--v4-surface)] border border-[var(--v4-hairline-1)] flex-shrink-0 relative flex items-center justify-center">
+      {/* Künstler-Bild (rund). Plain <img> wie im Lieblingskünstler-Grid —
+          Spotify-Bilder liegen auf i.scdn.co, das nicht in den next/image-
+          remotePatterns steht (würde next/image blocken). */}
+      <div className="w-16 h-16 rounded-full overflow-hidden bg-[var(--v4-surface)] border border-[var(--v4-hairline-1)] flex-shrink-0 flex items-center justify-center">
         {a.artist_image ? (
-          <Image src={a.artist_image} alt={a.artist_name} fill sizes="64px" style={{ objectFit: 'cover' }} />
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={a.artist_image} alt={a.artist_name} className="w-full h-full object-cover" />
         ) : (
           <span className="text-[20px] font-bold text-[var(--v4-ink-30)]">{initial(a.artist_name)}</span>
         )}
@@ -59,7 +61,7 @@ export function ArtistAppearanceCard({ a }: { a: ArtistAppearance }) {
               {a.context}
             </>
           ) : (
-            <span className="text-[var(--v4-ink-70)] font-medium"> live</span>
+            <span className="text-[var(--v4-ink-70)] font-medium"> tritt auf</span>
           )}
         </p>
         <p className="text-[12px] text-[var(--v4-ink-50)] mt-1 truncate">
