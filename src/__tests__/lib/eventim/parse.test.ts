@@ -41,7 +41,7 @@ describe('parseEventimFeed', () => {
     expect(a1.source_name).toBe('Eventim');
     expect(a1.ticket_url).toBe('https://www.oeticket.com/e/E?affiliate=J70');
     expect(a1.category).toBe('Musik');
-    expect(a1.tags).toEqual(['rock-pop']);
+    expect(a1.tags).toEqual(['rock', 'pop']);
     expect(a1.category_locked).toBe(true);
     expect(a1.country).toBe('AT');
     expect(a1.latitude).toBe(48.2);

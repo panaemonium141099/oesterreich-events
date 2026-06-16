@@ -1,80 +1,86 @@
 import type { PrimaryCategory } from '@/lib/category-classifier/enrichment-taxonomy';
+import { TAGS } from '@/lib/category-classifier/enrichment-taxonomy';
 
 /**
- * Eventim/oeticket category code → our primary category (+ optional genre tag).
+ * Eventim/oeticket category code → our primary category (+ optional genre/content tags).
  *
  * The FIRST code on a series determines the primary category; ALL codes
- * contribute genre tags. Source: `categories_data feed_en.xlsx` mapped onto
- * the 12 PRIMARY_CATEGORIES per docs/TAXONOMY.md §2 definitions
- * (e.g. Klassik=concert→Musik, but Oper is explicitly listed under Kultur & Bühne;
- *  Messe with business focus→Wissen & Karriere). Unknown codes → Sonstiges.
+ * contribute tags. Source: `categories_data feed_en.xlsx` mapped onto the
+ * 12 PRIMARY_CATEGORIES per docs/TAXONOMY.md §2 (e.g. Klassik=concert→Musik,
+ * but Oper is listed under Kultur & Bühne; Messe w/ business focus→Wissen).
+ *
+ * Tags are ONLY emitted when they exist in the canonical `TAGS` vocabulary
+ * (so the existing tag filter can use them) — emitted tags are filtered
+ * through TAG_SET as a safety net. Codes with no vocab match carry no tag.
  */
 interface CatEntry {
   category: PrimaryCategory;
-  tag?: string;
+  tags?: string[];
 }
 
 const MAP: Record<string, CatEntry> = {
   // ── 1x Konzerte ──
-  '1A': { category: 'Musik', tag: 'rock-pop' },
-  '1B': { category: 'Musik', tag: 'schlager' },
-  '1C': { category: 'Musik', tag: 'festival' },
-  '1D': { category: 'Nightlife & Party', tag: 'electronic' },
-  '1E': { category: 'Musik', tag: 'jazz' },
+  '1A': { category: 'Musik', tags: ['rock', 'pop'] },
+  '1B': { category: 'Musik', tags: ['schlager'] },
+  '1C': { category: 'Musik' },                 // "Festival" — no single vocab genre
+  '1D': { category: 'Nightlife & Party', tags: ['electro'] },
+  '1E': { category: 'Musik', tags: ['jazz'] },
   '1F': { category: 'Nightlife & Party' },
-  '1G': { category: 'Musik', tag: 'metal' },
-  '1H': { category: 'Musik', tag: 'hip-hop' },
-  '1I': { category: 'Musik', tag: 'gospel' },
+  '1G': { category: 'Musik', tags: ['metal'] },
+  '1H': { category: 'Musik', tags: ['hip-hop'] },
+  '1I': { category: 'Musik' },                 // Gospel — no vocab tag
   '1K': { category: 'Musik' },
   // ── 2x Bühne / Klassik / Film ──
-  '2A': { category: 'Musik', tag: 'klassik' },
-  '2B': { category: 'Kultur & Bühne', tag: 'oper' },
-  '2C': { category: 'Kultur & Bühne', tag: 'ballett' },
-  '2D': { category: 'Kultur & Bühne', tag: 'theater' },
-  '2E': { category: 'Familie & Kinder', tag: 'theater' },
-  '2F': { category: 'Kultur & Bühne', tag: 'theater' },
-  '2G': { category: 'Kultur & Bühne', tag: 'ausstellung' },
-  '2H': { category: 'Kultur & Bühne', tag: 'lesung' },
-  '2I': { category: 'Kultur & Bühne', tag: 'kino' },
+  '2A': { category: 'Musik', tags: ['klassik'] },
+  '2B': { category: 'Kultur & Bühne', tags: ['oper'] },
+  '2C': { category: 'Kultur & Bühne', tags: ['ballett'] },
+  '2D': { category: 'Kultur & Bühne', tags: ['theater'] },
+  '2E': { category: 'Familie & Kinder', tags: ['kindertheater'] },
+  '2F': { category: 'Kultur & Bühne', tags: ['theater'] },
+  '2G': { category: 'Kultur & Bühne', tags: ['ausstellung'] },
+  '2H': { category: 'Kultur & Bühne', tags: ['lesung'] },
+  '2I': { category: 'Kultur & Bühne', tags: ['kino'] },
   // ── 3x Sport ──
-  '3A': { category: 'Sport & Bewegung', tag: 'fussball' },
-  '3B': { category: 'Sport & Bewegung', tag: 'motorsport' },
-  '3C': { category: 'Sport & Bewegung', tag: 'wintersport' },
-  '3D': { category: 'Sport & Bewegung', tag: 'eishockey' },
-  '3E': { category: 'Sport & Bewegung', tag: 'tennis' },
-  '3I': { category: 'Sport & Bewegung', tag: 'handball' },
-  '3K': { category: 'Sport & Bewegung', tag: 'basketball' },
-  '3L': { category: 'Sport & Bewegung', tag: 'reitsport' },
-  '3M': { category: 'Sport & Bewegung', tag: 'golf' },
-  '3N': { category: 'Sport & Bewegung', tag: 'kampfsport' },
+  '3A': { category: 'Sport & Bewegung', tags: ['fussball'] },
+  '3B': { category: 'Sport & Bewegung' },      // Motorsport — no vocab tag
+  '3C': { category: 'Sport & Bewegung' },      // Wintersport (generic)
+  '3D': { category: 'Sport & Bewegung', tags: ['eishockey'] },
+  '3E': { category: 'Sport & Bewegung', tags: ['tennis'] },
+  '3I': { category: 'Sport & Bewegung' },      // Handball
+  '3K': { category: 'Sport & Bewegung' },      // Basketball
+  '3L': { category: 'Sport & Bewegung', tags: ['reiten'] },
+  '3M': { category: 'Sport & Bewegung' },      // Golf
+  '3N': { category: 'Sport & Bewegung' },      // Kampfsport
   '3O': { category: 'Sport & Bewegung' },
   // ── 4x Show / Musical ──
-  '4A': { category: 'Kultur & Bühne', tag: 'musical' },
-  '4B': { category: 'Kultur & Bühne', tag: 'show' },
-  '4C': { category: 'Familie & Kinder', tag: 'zirkus' },
+  '4A': { category: 'Kultur & Bühne', tags: ['musical'] },
+  '4B': { category: 'Kultur & Bühne' },        // Show (generic)
+  '4C': { category: 'Familie & Kinder' },      // Zirkus
   // ── 5x Kabarett / Comedy ──
-  '5A': { category: 'Kultur & Bühne', tag: 'kabarett' },
-  '5B': { category: 'Kultur & Bühne', tag: 'comedy' },
+  '5A': { category: 'Kultur & Bühne', tags: ['kabarett'] },
+  '5B': { category: 'Kultur & Bühne', tags: ['comedy'] },
   // ── 6x Lifestyle ──
-  '6A': { category: 'Community & Freizeit' },
-  '6B': { category: 'Wellness & Spiritualität' },
-  '6C': { category: 'Essen & Trinken' },
-  '6D': { category: 'Märkte & Feste', tag: 'shopping' },
-  '6E': { category: 'Natur & Abenteuer' },
+  '6A': { category: 'Community & Freizeit' },  // Weekender
+  '6B': { category: 'Wellness & Spiritualität', tags: ['wellness-day'] },
+  '6C': { category: 'Essen & Trinken' },       // Kulinarik (generic)
+  '6D': { category: 'Märkte & Feste' },        // Shopping
+  '6E': { category: 'Natur & Abenteuer' },     // Abenteuer (generic)
   // ── 7x Sonstiges / Wissen ──
-  '7A': { category: 'Community & Freizeit' },
-  '7B': { category: 'Sonstiges' },
-  '7C': { category: 'Wissen & Karriere', tag: 'vortrag' },
+  '7A': { category: 'Community & Freizeit' },  // Tourismus
+  '7B': { category: 'Sonstiges' },             // Eventreisen
+  '7C': { category: 'Wissen & Karriere', tags: ['lecture'] },
   '7D': { category: 'Sonstiges' },
-  '7E': { category: 'Wissen & Karriere', tag: 'messe' },
+  '7E': { category: 'Wissen & Karriere', tags: ['messe'] },
   // ── Text codes seen in live data ──
-  Ball: { category: 'Kultur & Bühne', tag: 'ball' },
-  Podcast: { category: 'Kultur & Bühne', tag: 'podcast' },
+  Ball: { category: 'Kultur & Bühne', tags: ['ball'] },
+  Podcast: { category: 'Kultur & Bühne' },
   // 8A–8J ticketPLUS / regional packages: filtered out upstream (eventType != 1).
 };
 
+const TAG_SET = new Set<string>(TAGS);
+
 export function mapEventimCategory(codes: string[]): { category: PrimaryCategory; tags: string[] } {
   const primary = codes.map((c) => MAP[c]?.category).find((c): c is PrimaryCategory => !!c) ?? 'Sonstiges';
-  const tags = [...new Set(codes.map((c) => MAP[c]?.tag).filter((t): t is string => !!t))];
+  const tags = [...new Set(codes.flatMap((c) => MAP[c]?.tags ?? []))].filter((t) => TAG_SET.has(t));
   return { category: primary, tags };
 }
