@@ -157,6 +157,14 @@ export interface ScrapedEvent {
   parent_event_id?: string;
   /** Source type override (e.g. 'derived' for lineup-generated events). */
   source_type?: string;
+  /** ISO country code (AT/DE/CH). Defaults to 'AT' at the DB level when absent. */
+  country?: string;
+  /**
+   * When true (and `category` is set), the source provides an authoritative
+   * category (e.g. the Eventim feed code map) and the text classifier in the
+   * write-path must NOT override it.
+   */
+  category_locked?: boolean;
 }
 
 export interface EventFilters {
@@ -164,6 +172,12 @@ export interface EventFilters {
   bundesland?: string;
   /** Multi-bundesland filter: events whose bundesland is ANY of these */
   bundeslands?: string[];
+  /**
+   * Country scope for the /map "nur Österreich" toggle. Undefined or true =
+   * Austria only (default). false = include DE/CH: sends countries=AT,DE,CH to
+   * the API and expands the map mask to AT+DE+CH.
+   */
+  atOnly?: boolean;
   /** @deprecated single-value, kept for legacy callers — use districts */
   district?: string;
   /** Multi-district filter: events whose district is ANY of these */

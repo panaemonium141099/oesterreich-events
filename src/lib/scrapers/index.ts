@@ -4,7 +4,6 @@ import { LandesregierungScraper } from './LandesregierungScraper';
 import { EsterházyScraper } from './EsterházyScraper';
 import { OhoScraper } from './OhoScraper';
 import { NeusiedlerseeScraper } from './NeusiedlerseeScraper';
-import { OeticketScraper } from './OeticketScraper';
 import { TicketmasterScraper } from './TicketmasterScraper';
 import { BoudiccaEventsScraper } from './BoudiccaEventsScraper';
 import { WienGvScraper } from './WienGvScraper';
@@ -179,7 +178,6 @@ export const scrapers: BaseScraper[] = [
   new FeverUpScraper(),
   // Ganz Österreich
   new MeinBezirkScraper(),
-  new OeticketScraper(),
   new TicketmasterScraper(),
   // Austria-wide open-source aggregator (JKU Linz, GPL-3.0).
   // Adds Vienna + OÖ dense coverage — see BoudiccaEventsScraper.ts notes.

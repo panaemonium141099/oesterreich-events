@@ -1,0 +1,97 @@
+import type { ScrapedEvent } from '@/types/events';
+import type { EventimSeries, EventimEvent } from './types';
+import { mapEventimCategory } from './category-map';
+import { isBookable, isCancelled, priceText } from './availability';
+import { getCoordinatesForPLZ, getBundeslandFromPLZ } from '@/lib/plzCoordinates';
+import { bundeslandFromPolygon } from './bundesland-from-geo';
+
+const ALLOWED_COUNTRIES = new Set(['AT', 'DE', 'CH']);
+
+const stripHtml = (s?: string): string | undefined =>
+  s ? s.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim() || undefined : undefined;
+
+/**
+ * Turn raw Eventim series into ScrapedEvents.
+ * Filters: ticket events only (eventType "1"), not cancelled, future-dated,
+ * AT/DE/CH only. `nowIso` is injected for deterministic "future" comparison.
+ */
+export function parseEventimFeed(series: EventimSeries[], nowIso: string): ScrapedEvent[] {
+  const out: ScrapedEvent[] = [];
+  for (const s of series) {
+    const { category, tags } = mapEventimCategory((s.esCategories ?? []).map((c) => c.category));
+    const description = stripHtml(s.esText);
+    for (const e of s.events ?? []) {
+      if (String(e.eventType) !== '1') continue; // ticket events only
+      if (isCancelled(e)) continue;
+      if (!e.eventDateIso8601 || e.eventDateIso8601 < nowIso) continue; // future only
+      if (!ALLOWED_COUNTRIES.has(e.eventCountry)) continue;
+      out.push(mapEvent(s, e, category, tags, description));
+    }
+  }
+  return out;
+}
+
+function mapEvent(
+  s: EventimSeries,
+  e: EventimEvent,
+  category: string,
+  tags: string[],
+  description?: string,
+): ScrapedEvent {
+  let latitude = e.venueLatitude && e.venueLatitude !== 0 ? e.venueLatitude : undefined;
+  let longitude = e.venueLongitude && e.venueLongitude !== 0 ? e.venueLongitude : undefined;
+  // A few feed rows have swapped lat/lng (lat holds a longitude value etc.).
+  // Central-European lat is ~46–55, lng ~6–17, so a "latitude < 18, longitude > 40"
+  // pair is unambiguously swapped.
+  if (latitude !== undefined && longitude !== undefined && latitude < 18 && longitude > 40) {
+    [latitude, longitude] = [longitude, latitude];
+  }
+  // Drop still-implausible coordinates (genuinely broken feed rows) so the PLZ
+  // centroid is used instead of plotting an event in the ocean.
+  if (latitude !== undefined && longitude !== undefined &&
+      !(latitude >= 45.5 && latitude <= 55.5 && longitude >= 5 && longitude <= 18)) {
+    latitude = undefined;
+    longitude = undefined;
+  }
+  // Coordless AT events → PLZ centroid (Austria-only PLZ DB) for a map position.
+  if ((latitude === undefined || longitude === undefined) && e.eventCountry === 'AT' && e.eventZip) {
+    const plz = getCoordinatesForPLZ(e.eventZip);
+    if (plz) { latitude = plz[0]; longitude = plz[1]; }
+  }
+  // Bundesland (AT only): exact via point-in-polygon on the coordinates; if none
+  // resolve, the platform's PLZ→Bundesland range map (administrative ranges,
+  // deterministic — not a first-digit guess).
+  let bundesland: string | undefined;
+  if (e.eventCountry === 'AT') {
+    if (latitude !== undefined && longitude !== undefined) {
+      bundesland = bundeslandFromPolygon(latitude, longitude) ?? undefined;
+    }
+    if (!bundesland && e.eventZip) {
+      bundesland = getBundeslandFromPLZ(e.eventZip) ?? undefined;
+    }
+  }
+  return {
+    source_name: 'Eventim',
+    source_id: e.eventId,
+    source_url: e.evoLink,
+    ticket_url: isBookable(e) ? e.evoLink : undefined,
+    title: e.eventName || s.esName,
+    description,
+    start_date: e.eventDateIso8601,
+    location_name: e.eventVenue || undefined,
+    address: e.eventStreet ?? undefined,
+    postal_code: e.eventZip ?? undefined,
+    latitude,
+    longitude,
+    country: e.eventCountry,
+    bundesland,
+    category,
+    category_locked: true,
+    tags,
+    price_min: e.minPrice,
+    price_max: e.maxPrice,
+    price_text: priceText(e.minPrice, e.maxPrice),
+    image_url: s.esPictureBig || undefined,
+    source_type: 'scraped',
+  };
+}

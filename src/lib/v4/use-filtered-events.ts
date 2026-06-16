@@ -71,15 +71,22 @@ export function useFilteredEvents(
     () => BUNDESLAENDER.find((b) => b.id === bundeslandIds[0]) ?? BUNDESLAENDER[0],
     [bundeslandIds],
   );
-  // Old single-state shim so child components that still take a `Bundesland`
-  // prop keep working unchanged.
-  const bundesland = primaryBundesland;
 
   // No default dateTo — load EVERYTHING. The progressive batch loader
   // pages through cursor-based pagination so a few extra months of
   // events won't slow the first paint, and users were missing winter
   // events that fell outside the old 6-month horizon.
   const [filters, setFilters] = useState<EventFilters>({ ...initialFilters });
+
+  // Single-state shim for child components taking a `Bundesland` prop. When the
+  // "nur Österreich" toggle is OFF and no specific state is picked, use the
+  // AT+DE+CH pseudo-region so the map mask + view expand to all three countries.
+  const bundesland = useMemo(() => {
+    if (filters.atOnly === false && (bundeslandIds[0] ?? 'all') === 'all') {
+      return BUNDESLAENDER.find((b) => b.id === 'at-de-ch') ?? primaryBundesland;
+    }
+    return primaryBundesland;
+  }, [filters.atOnly, bundeslandIds, primaryBundesland]);
 
   const [allEvents, setAllEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
@@ -97,6 +104,8 @@ export function useFilteredEvents(
     const concrete = bundeslandIds.filter((b) => b !== 'all');
     if (concrete.length > 1) params.set('bundeslands', concrete.join(','));
     else params.set('bundesland', concrete[0] ?? 'all');
+    // Country scope — default Austria; toggle off includes DE/CH (all sources).
+    if (filters.atOnly === false) params.set('countries', 'AT,DE,CH');
     // Slim payload — list + markers only need ~17 fields.
     params.set('slim', 'true');
     if (filters.tags && filters.tags.length > 0) params.set('tags', filters.tags.join(','));

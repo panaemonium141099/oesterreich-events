@@ -27,6 +27,21 @@ export const BUNDESLAENDER: Bundesland[] = [
     districts: [],
   },
   {
+    // Pseudo-region for the "nur Österreich" toggle (off) — expands the map mask
+    // + view to Austria + Germany + Switzerland. Not user-selectable as a normal
+    // Bundesland; only used as the EventMap overlay when the toggle is off.
+    id: 'at-de-ch',
+    name: 'Österreich, Deutschland, Schweiz',
+    shortName: 'AT+DE+CH',
+    center: [11.5, 48.5],
+    zoom: 5.2,
+    pitch: 0,
+    bearing: 0,
+    geojsonFile: '/at-de-ch.geojson',
+    borderColor: '#6366f1',
+    districts: [],
+  },
+  {
     id: 'burgenland',
     name: 'Burgenland',
     shortName: 'Bgld',

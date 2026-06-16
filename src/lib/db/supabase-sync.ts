@@ -394,18 +394,35 @@ function toSupabaseRow(
     }
   }
 
-  const canonical = resolveCanonicalCategory(
-    {
-      title: event.title,
-      description: event.description ?? null,
-      source_tags_raw: event.tags ?? null,
-      source_category_raw: event.category ?? null,
-      source_name: event.source_name,
-      organizer: event.organizer ?? null,
-      location_name: event.location_name ?? null,
-    },
-    toExistingCategoryRow(existing),
-  );
+  // Feed sources (e.g. Eventim) provide an authoritative category via an
+  // explicit code map — `category_locked` short-circuits the text classifier
+  // so the mapped category is never overwritten by title/description guessing.
+  const canonical = event.category_locked && event.category
+    ? ({
+        category: event.category,
+        tags: event.tags ?? null,
+        category_confidence: 'manual',
+        category_source: 'manual',
+        category_version: 'eventim-feed',
+        category_locked: true,
+        category_needs_review: false,
+        category_reason: 'eventim feed category code map',
+        category_candidates: null,
+        changed: true,
+        reconcileReason: 'locked',
+      } as unknown as ReturnType<typeof resolveCanonicalCategory>)
+    : resolveCanonicalCategory(
+        {
+          title: event.title,
+          description: event.description ?? null,
+          source_tags_raw: event.tags ?? null,
+          source_category_raw: event.category ?? null,
+          source_name: event.source_name,
+          organizer: event.organizer ?? null,
+          location_name: event.location_name ?? null,
+        },
+        toExistingCategoryRow(existing),
+      );
 
   // ─── fn-14.5 Image guard ─────────────────────────────────────────
   // imageMap has the validated/upgraded URL + extracted dims (when
@@ -591,6 +608,7 @@ function toSupabaseRow(
     ),
     latitude: finalLat,
     longitude: finalLng,
+    country: event.country ?? 'AT',
     category: canonical.category,
     tags: canonical.tags && canonical.tags.length > 0 ? canonical.tags : null,
     source_category_raw: event.category ?? null,

@@ -257,6 +257,14 @@ export async function GET(request: NextRequest) {
   // total response time on warm cache.
   const slimMode = searchParams.get('slim') === 'true';
 
+  // Country filter (default Austria-only). The /map "nur Österreich" toggle off
+  // sends countries=AT,DE,CH to include Eventim's German/Swiss events (all sources).
+  const countriesParam = searchParams.get('countries');
+  const parsedCountries = countriesParam
+    ? countriesParam.split(',').map(s => s.trim().toUpperCase()).filter(c => ['AT', 'DE', 'CH'].includes(c))
+    : [];
+  const countryFilter = parsedCountries.length > 0 ? parsedCountries : ['AT'];
+
   try {
     // Build the query — use untyped Supabase client (no Database generic),
     // so the chained filter methods return Record<string, unknown> rows
@@ -312,10 +320,14 @@ export async function GET(request: NextRequest) {
     const today = new Date().toISOString().slice(0, 10);
     query = query.gte('start_date', today);
 
-    // Only show events within Austria (exclude German/Swiss events from Feratel etc.)
-    // Austria bounding box: lat 46.3-49.1, lng 9.5-17.2
-    // Also exclude 0,0 coordinates (not geocoded)
-    query = query.gte('latitude', 46.3).lte('latitude', 49.1).gte('longitude', 9.5).lte('longitude', 17.2);
+    // Country filter (default Austria-only). The /map "nur Österreich" toggle
+    // sends countries=AT,DE,CH to include Eventim's DE/CH events (all sources).
+    // Replaces the old hardcoded AT bbox — `country` is exact + indexed.
+    query = query.in('country', countryFilter);
+    // Map-centric: only geocoded events (the old bbox also dropped NULL/0 coords;
+    // verified 0 non-null AT events fell outside the old bbox). The viewport bbox,
+    // when present, narrows further below.
+    query = query.not('latitude', 'is', null).not('longitude', 'is', null);
 
     // Apply filters. Multi (.in) takes precedence over single (.eq) when both
     // are present so a callsite that migrated to multi can't be accidentally
