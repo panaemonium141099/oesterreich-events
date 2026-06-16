@@ -11,7 +11,7 @@ import type { Event } from '@/types/events';
  *   3. inplan       → user already saved
  *   4. match        → user follows a single artist tied to this event
  *   5. lineup       → user follows an artist on this event's festival
- *   6. ticket       → ticket_url present + priced
+ *   6. ticket       → Eventim source + ticket_url (feed = authoritative availability)
  *   7. free         → price_tier=gratis OR freier-eintritt/spende-erbeten flag
  *   8. doorsale     → abendkasse flag
  *   9. unknown      → fallback
@@ -37,8 +37,6 @@ export interface DeriveCtx {
   lineupMatchEventIds: Set<string>;
 }
 
-const PRICED_TIERS = new Set(['günstig', 'mittel', 'premium']);
-
 export function deriveEventState(event: Event, ctx: DeriveCtx): V4EventState {
   // Safety: expired events never show promotional badges.
   if (event.publish_status === 'expired') return 'unknown';
@@ -51,7 +49,12 @@ export function deriveEventState(event: Event, ctx: DeriveCtx): V4EventState {
   if (ctx.artistMatchEventIds.has(event.id))   return 'match';
   if (ctx.lineupMatchEventIds.has(event.id))   return 'lineup';
 
-  if (event.ticket_url && event.price_tier && PRICED_TIERS.has(event.price_tier)) {
+  // Buy button is exclusive to the Eventim feed (authoritative ticket truth).
+  // The importer sets ticket_url ONLY when the event is actually bookable
+  // (status AVAILABLE + a "buchbar" price category), so ticket_url presence on
+  // an Eventim event is itself the live-availability signal. Other sources
+  // never show a buy button, even if they carry a ticket_url.
+  if (event.source_name === 'Eventim' && event.ticket_url) {
     return 'ticket';
   }
 

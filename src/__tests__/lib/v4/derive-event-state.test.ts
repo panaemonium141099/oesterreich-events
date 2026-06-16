@@ -49,19 +49,19 @@ describe('deriveEventState', () => {
   });
 
   it('inplan wins when event is in savedEventIds', () => {
-    const ev = baseEvent({ id: 'e1', ticket_url: 'x', price_tier: 'mittel' });
+    const ev = baseEvent({ id: 'e1', source_name: 'Eventim', ticket_url: 'x', price_tier: 'mittel' });
     const ctx = emptyCtx(); ctx.savedEventIds.add('e1');
     expect(deriveEventState(ev, ctx)).toBe('inplan');
   });
 
   it('match wins over ticket when event is in artistMatchEventIds', () => {
-    const ev = baseEvent({ id: 'e1', ticket_url: 'x', price_tier: 'mittel' });
+    const ev = baseEvent({ id: 'e1', source_name: 'Eventim', ticket_url: 'x', price_tier: 'mittel' });
     const ctx = emptyCtx(); ctx.artistMatchEventIds.add('e1');
     expect(deriveEventState(ev, ctx)).toBe('match');
   });
 
   it('lineup wins over ticket when event is in lineupMatchEventIds (but loses to match)', () => {
-    const ev = baseEvent({ id: 'e1', ticket_url: 'x', price_tier: 'mittel' });
+    const ev = baseEvent({ id: 'e1', source_name: 'Eventim', ticket_url: 'x', price_tier: 'mittel' });
     const ctx = emptyCtx(); ctx.lineupMatchEventIds.add('e1');
     expect(deriveEventState(ev, ctx)).toBe('lineup');
   });
@@ -74,14 +74,19 @@ describe('deriveEventState', () => {
     expect(deriveEventState(ev, ctx)).toBe('match');
   });
 
-  it('ticket — ticket_url present + price_tier ∈ {günstig,mittel,premium}', () => {
-    expect(deriveEventState(baseEvent({ ticket_url: 'x', price_tier: 'günstig' }), emptyCtx())).toBe('ticket');
-    expect(deriveEventState(baseEvent({ ticket_url: 'x', price_tier: 'mittel' }), emptyCtx())).toBe('ticket');
-    expect(deriveEventState(baseEvent({ ticket_url: 'x', price_tier: 'premium' }), emptyCtx())).toBe('ticket');
+  it('ticket — Eventim source + ticket_url (availability is encoded in the feed link)', () => {
+    expect(deriveEventState(baseEvent({ source_name: 'Eventim', ticket_url: 'x' }), emptyCtx())).toBe('ticket');
+    // price_tier is irrelevant for Eventim — bookability is the ticket_url presence
+    expect(deriveEventState(baseEvent({ source_name: 'Eventim', ticket_url: 'x', price_tier: 'unbekannt' }), emptyCtx())).toBe('ticket');
   });
 
-  it('NOT ticket when ticket_url missing even if priced', () => {
-    expect(deriveEventState(baseEvent({ ticket_url: null, price_tier: 'mittel' }), emptyCtx())).toBe('unknown');
+  it('NOT ticket for non-Eventim sources, even with ticket_url + priced (buy button is Eventim-only)', () => {
+    expect(deriveEventState(baseEvent({ source_name: 'ntry.at', ticket_url: 'x', price_tier: 'mittel' }), emptyCtx())).toBe('unknown');
+    expect(deriveEventState(baseEvent({ source_name: null, ticket_url: 'x', price_tier: 'premium' }), emptyCtx())).toBe('unknown');
+  });
+
+  it('NOT ticket for Eventim without ticket_url (sold out / not bookable)', () => {
+    expect(deriveEventState(baseEvent({ source_name: 'Eventim', ticket_url: null }), emptyCtx())).toBe('unknown');
   });
 
   it('free via price_tier=gratis', () => {
