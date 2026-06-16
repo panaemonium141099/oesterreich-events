@@ -7,8 +7,25 @@
  * Env: EVENTIM_FEED_URL (optional), EVENTIM_FEED_USER, EVENTIM_FEED_PASS,
  *      plus Supabase env for the non-dry-run write path.
  */
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { downloadEventimFeed } from '@/lib/eventim/feed-client';
 import { parseEventimFeed } from '@/lib/eventim/parse';
+
+// Load .env.local (Next.js does this automatically, but tsx does not) — needed
+// for the Supabase service-role key used by the write path, and optionally the
+// EVENTIM_FEED_* credentials if stored there.
+try {
+  const envContent = readFileSync(join(process.cwd(), '.env.local'), 'utf8');
+  for (const line of envContent.split('\n')) {
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith('#')) continue;
+    const eqIdx = trimmed.indexOf('=');
+    if (eqIdx === -1) continue;
+    const key = trimmed.substring(0, eqIdx).trim();
+    if (!process.env[key]) process.env[key] = trimmed.substring(eqIdx + 1).trim();
+  }
+} catch { /* rely on the real environment */ }
 
 function arg(name: string): string | undefined {
   const i = process.argv.indexOf(name);
