@@ -39,6 +39,7 @@ export async function GET(request: NextRequest) {
       )
       .eq('visibility', 'public')
       .eq('publish_status', 'published')
+      .eq('country', 'AT') // landing/featured stays Austria-only (the toggle is map-page-only)
       .gte('start_date', today)
       .gt('event_score', 30)
       .gte('quality_score', 50)
