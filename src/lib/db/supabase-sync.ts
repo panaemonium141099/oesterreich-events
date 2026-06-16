@@ -549,6 +549,7 @@ function toSupabaseRow(
     address: finalAddress,
     postal_code: resolved.postalCode,
     bundesland: event.bundesland ?? null,
+    country: event.country ?? null,
     category: canonical.category,
     latitude: finalLat,
     longitude: finalLng,

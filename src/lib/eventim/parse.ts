@@ -10,6 +10,10 @@ const ALLOWED_COUNTRIES = new Set(['AT', 'DE', 'CH']);
 const stripHtml = (s?: string): string | undefined =>
   s ? s.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim() || undefined : undefined;
 
+// Eventim serves a blank placeholder image for series without a real picture
+// (…/teaser/blank.gif). Treat it as "no image" so the UI falls back cleanly.
+const PLACEHOLDER_IMAGE = /blank\.(gif|png|jpe?g)$/i;
+
 /**
  * Turn raw Eventim series into ScrapedEvents.
  * Filters: ticket events only (eventType "1"), not cancelled, future-dated,
@@ -70,6 +74,7 @@ function mapEvent(
       bundesland = getBundeslandFromPLZ(e.eventZip) ?? undefined;
     }
   }
+  const imageUrl = s.esPictureBig && !PLACEHOLDER_IMAGE.test(s.esPictureBig) ? s.esPictureBig : undefined;
   return {
     source_name: 'Eventim',
     source_id: e.eventId,
@@ -91,7 +96,7 @@ function mapEvent(
     price_min: e.minPrice,
     price_max: e.maxPrice,
     price_text: priceText(e.minPrice, e.maxPrice),
-    image_url: s.esPictureBig || undefined,
+    image_url: imageUrl,
     source_type: 'scraped',
   };
 }
