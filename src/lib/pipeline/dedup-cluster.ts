@@ -170,6 +170,12 @@ export function buildClusters(
  */
 export function selectPrimary(events: EventRow[]): EventRow {
   return events.sort((a, b) => {
+    // 0. Eventim always wins — it's the official ticket source with the
+    //    affiliate buy link, so it must be the canonical event in any cluster.
+    const eventimA = a.source_name === 'Eventim' ? 1 : 0;
+    const eventimB = b.source_name === 'Eventim' ? 1 : 0;
+    if (eventimA !== eventimB) return eventimB - eventimA;
+
     // 1. quality_score DESC
     const scoreA = a.quality_score ?? 0;
     const scoreB = b.quality_score ?? 0;

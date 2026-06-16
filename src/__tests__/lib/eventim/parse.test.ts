@@ -48,6 +48,7 @@ describe('parseEventimFeed', () => {
     expect(a1.latitude).toBe(48.2);
     expect(a1.price_text).toBe('20,00 € – 40,00 €');
     expect(a1.source_type).toBe('scraped');
+    expect(a1.image_url).toBe('https://img/x.jpg');
   });
 
   it('strips HTML from the description', () => {
@@ -65,5 +66,12 @@ describe('parseEventimFeed', () => {
     const de = out.find((e) => e.source_id === 'DE1')!;
     expect(de.country).toBe('DE');
     expect(de.bundesland).toBeUndefined();
+  });
+
+  it('drops Eventim blank.gif placeholder images', () => {
+    const s: EventimSeries[] = [{ esId: 'S', esName: 'X', esCategories: [{ category: '1A' }],
+      esPictureBig: 'https://www.oeticket.com/obj/media/AT-eventim/teaser/blank.gif',
+      events: [baseEvent({ eventId: 'P' })] }];
+    expect(parseEventimFeed(s, NOW)[0].image_url).toBeUndefined();
   });
 });

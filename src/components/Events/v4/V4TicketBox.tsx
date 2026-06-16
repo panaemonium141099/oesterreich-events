@@ -7,7 +7,7 @@
  *   • lineup               — gold stripe, "<artist> im Line-up" badge
  *
  * All three share the same body: provider line, price block, primary CTA
- * ("Zu {provider}"), three secondary actions (Zum Plan / Merken / Teilen),
+ * ("Tickets sichern"), three secondary actions (Zum Plan / Merken / Teilen),
  * and the two brief-approved trust-copy strings at the bottom.
  *
  * Pure RSC. Ticket links open in a new tab with `rel="noopener noreferrer"`
@@ -86,7 +86,7 @@ export function V4TicketBox({
           data-track="ticket_click"
           className="press-haptic flex items-center justify-center gap-2 w-full px-5 py-3 rounded-full bg-[var(--v4-ticket)] text-[#1a1208] text-sm font-semibold"
         >
-          Zu {provider}
+          Tickets sichern
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
         </a>
 
