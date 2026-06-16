@@ -250,18 +250,18 @@ export function RegionHubsSection() {
   const rest = BUNDESLAND_HUBS.filter((b) => !b.feature);
 
   return (
-    <section className="mx-auto w-full" style={{ maxWidth: 1180, padding: '8px 16px 56px' }} aria-label="Events nach Bundesland">
-      <div style={{ marginBottom: 4 }}>
-        <div style={{ fontSize: 11.5, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.18em', color: TICKET, marginBottom: 10 }}>
+    <section className="max-w-[1180px] mx-auto px-4 md:px-14 py-6 md:py-10" aria-label="Events nach Bundesland">
+      <div className="mb-1">
+        <p className="text-[10.5px] font-semibold uppercase tracking-[0.22em] text-[var(--v4-ink-50)] mb-2">
           Nach Bezirk · ganz Österreich
-        </div>
-        <h2 style={{ margin: 0, fontSize: 28, fontWeight: 700, letterSpacing: '-0.03em', color: INK, lineHeight: 1.05 }}>
+        </p>
+        <h2 className="text-[26px] font-bold leading-tight tracking-[-0.025em] text-[var(--v4-ink)]">
           Events in deinem Bundesland
         </h2>
-        <p style={{ fontSize: 14.5, color: INK70, lineHeight: 1.55, margin: '8px 0 18px', maxWidth: 600 }}>
+        <p className="text-[14.5px] leading-[1.55] text-[var(--v4-ink-70)] mt-2 mb-[18px] max-w-[600px]">
           Wähle dein Bundesland — dann zeigen wir dir{' '}
-          <b style={{ color: INK, fontWeight: 600 }}>alle Events</b> dort, oder du grenzt direkt auf einen{' '}
-          <b style={{ color: INK, fontWeight: 600 }}>Bezirk</b> ein.
+          <b className="font-semibold text-[var(--v4-ink)]">alle Events</b> dort, oder du grenzt direkt auf einen{' '}
+          <b className="font-semibold text-[var(--v4-ink)]">Bezirk</b> ein.
         </p>
       </div>
 
