@@ -37,6 +37,10 @@ export interface ScoreableEvent {
   address?: string | null;
   postal_code?: string | null;
   bundesland?: string | null;
+  /** ISO country (AT/DE/CH). DE/CH events are deliberately imported (country
+   *  toggle) and legitimately lie outside Austria — they must not be suppressed
+   *  by the outside-Austria guard. */
+  country?: string | null;
   category?: string | null;
   latitude?: number | null;
   longitude?: number | null;
@@ -216,8 +220,12 @@ export function scoreEvent(
   options: ScoreOptions = {},
 ): ScoreResult {
   const outside = isOutsideAustria(event.latitude, event.longitude);
+  // DE/CH events are deliberately imported (country toggle) and legitimately lie
+  // outside Austria — only suppress events that are meant to be in Austria
+  // (country AT or unset = mis-geocoded).
+  const isForeign = event.country === 'DE' || event.country === 'CH';
 
-  if (outside) {
+  if (outside && !isForeign) {
     return {
       quality_score: 0,
       publish_status: 'suppressed',
