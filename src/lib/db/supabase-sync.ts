@@ -238,9 +238,6 @@ function resolveCoordinates(event: ScrapedEvent): {
    *  inferred guess. Populated whether or not we use the normalizer's
    *  coords, because PLZ is orthogonal to coord confidence. */
   postalCode: string | null;
-  /** Bundesland from the normalizer's Gemeinde lookup (GeoNames admin1).
-   *  Falls back to the scraper value; null when neither resolves. */
-  bundesland: string | null;
 } {
   // Start with scraper-provided values
   let latitude = event.latitude ?? null;
@@ -249,7 +246,6 @@ function resolveCoordinates(event: ScrapedEvent): {
   let confidence: string | null = null;
   let source: string | null = null;
   let postalCode: string | null = event.postal_code ?? null;
-  let resolvedBundesland: string | null = event.bundesland ?? null;
 
   // If scraper provides coords, mark as scraper confidence
   if (latitude != null && longitude != null) {
@@ -295,18 +291,12 @@ function resolveCoordinates(event: ScrapedEvent): {
       if (!postalCode && normalized.postal_code) {
         postalCode = normalized.postal_code;
       }
-
-      // Back-fill Bundesland from the normalizer's Gemeinde lookup when the
-      // scraper didn't supply one (clean GeoNames admin1, not a PLZ guess).
-      if (!resolvedBundesland && normalized.bundesland) {
-        resolvedBundesland = normalized.bundesland;
-      }
     }
   } catch {
     /* normalization failure should not block sync */
   }
 
-  return { latitude, longitude, locationName, confidence, source, postalCode, bundesland: resolvedBundesland };
+  return { latitude, longitude, locationName, confidence, source, postalCode };
 }
 
 /**
@@ -604,7 +594,7 @@ function toSupabaseRow(
     // emit "Salzburg" / "Kärnten" / "Tirol" Title-Case; without this
     // 9k+ events end up under a bundesland the client filter doesn't
     // know about, leaving them invisible on the map.
-    bundesland: bundeslandToId(resolved.bundesland) ?? null,
+    bundesland: bundeslandToId(event.bundesland) ?? null,
     // Normalise district at scrape-time so the FilterDrawer chip can
     // match by exact string. Without this, every new scrape pumps
     // freshly-spelled aliases (e.g. "bruck/leitha", "suedoststeiermark")

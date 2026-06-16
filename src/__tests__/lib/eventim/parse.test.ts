@@ -44,6 +44,7 @@ describe('parseEventimFeed', () => {
     expect(a1.tags).toEqual(['rock', 'pop']);
     expect(a1.category_locked).toBe(true);
     expect(a1.country).toBe('AT');
+    expect(a1.bundesland).toBe('wien');
     expect(a1.latitude).toBe(48.2);
     expect(a1.price_text).toBe('20,00 € – 40,00 €');
     expect(a1.source_type).toBe('scraped');
@@ -60,7 +61,9 @@ describe('parseEventimFeed', () => {
     expect(so.country).toBe('AT');
   });
 
-  it('carries country for DE events', () => {
-    expect(out.find((e) => e.source_id === 'DE1')!.country).toBe('DE');
+  it('carries country for DE events (no Bundesland for non-AT)', () => {
+    const de = out.find((e) => e.source_id === 'DE1')!;
+    expect(de.country).toBe('DE');
+    expect(de.bundesland).toBeUndefined();
   });
 });

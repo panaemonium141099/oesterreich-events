@@ -55,14 +55,17 @@ async function main() {
   const byCountry: Record<string, number> = {};
   const byCategory: Record<string, number> = {};
   let bookable = 0;
+  let atNoBundesland = 0;
   for (const e of events) {
     byCountry[e.country ?? '?'] = (byCountry[e.country ?? '?'] ?? 0) + 1;
     byCategory[e.category ?? '?'] = (byCategory[e.category ?? '?'] ?? 0) + 1;
     if (e.ticket_url) bookable++;
+    if (e.country === 'AT' && !e.bundesland) atNoBundesland++;
   }
   console.log('[eventim] by country:', byCountry);
   console.log('[eventim] by category:', byCategory);
   console.log(`[eventim] bookable (ticket_url set): ${bookable}/${events.length}`);
+  console.log(`[eventim] AT events without bundesland: ${atNoBundesland}`);
 
   if (verbose || dryRun) {
     console.log('\n[eventim] sample events:');
