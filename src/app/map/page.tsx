@@ -295,6 +295,67 @@ function MapPageInner() {
               />
               <MapLoadingOverlay loading={loading} eventCount={allEvents.length} />
 
+              {/* Country scope toggle — default "nur Österreich" ON. OFF also shows
+                  Germany + Switzerland and expands the grey map mask to AT+DE+CH. */}
+              <button
+                type="button"
+                onClick={() => {
+                  if (filters.atOnly !== false) {
+                    setFilters((prev) => ({ ...prev, atOnly: false }));
+                    setBundeslandIds(['all']); // clear single-state scope so DE/CH show + mask expands
+                  } else {
+                    setFilters((prev) => ({ ...prev, atOnly: true }));
+                  }
+                }}
+                aria-pressed={filters.atOnly !== false}
+                title="Nur Österreich anzeigen — aus: auch Deutschland & Schweiz"
+                style={{
+                  position: 'absolute',
+                  top: 'calc(env(safe-area-inset-top, 0px) + 12px)',
+                  left: 12,
+                  zIndex: 20,
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 8,
+                  padding: '7px 12px',
+                  borderRadius: 9999,
+                  background: '#fff',
+                  border: `1px solid ${T.border}`,
+                  boxShadow: T.shadow,
+                  fontSize: 12.5,
+                  fontWeight: 600,
+                  color: T.ink,
+                  cursor: 'pointer',
+                }}
+              >
+                <span
+                  aria-hidden
+                  style={{
+                    width: 32,
+                    height: 18,
+                    borderRadius: 9999,
+                    position: 'relative',
+                    flexShrink: 0,
+                    background: filters.atOnly !== false ? '#6366f1' : '#cbd5e1',
+                    transition: 'background .15s',
+                  }}
+                >
+                  <span
+                    style={{
+                      position: 'absolute',
+                      top: 2,
+                      left: filters.atOnly !== false ? 16 : 2,
+                      width: 14,
+                      height: 14,
+                      borderRadius: '50%',
+                      background: '#fff',
+                      transition: 'left .15s',
+                    }}
+                  />
+                </span>
+                nur Österreich
+              </button>
+
               {backgroundLoading && (
                 <div
                   style={{

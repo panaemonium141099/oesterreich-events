@@ -172,6 +172,12 @@ export interface EventFilters {
   bundesland?: string;
   /** Multi-bundesland filter: events whose bundesland is ANY of these */
   bundeslands?: string[];
+  /**
+   * Country scope for the /map "nur Österreich" toggle. Undefined or true =
+   * Austria only (default). false = include DE/CH: sends countries=AT,DE,CH to
+   * the API and expands the map mask to AT+DE+CH.
+   */
+  atOnly?: boolean;
   /** @deprecated single-value, kept for legacy callers — use districts */
   district?: string;
   /** Multi-district filter: events whose district is ANY of these */
