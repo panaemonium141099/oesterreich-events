@@ -37,6 +37,9 @@ function mapEvent(
   description?: string,
 ): ScrapedEvent {
   const hasCoords = !!e.venueLatitude && !!e.venueLongitude && e.venueLatitude !== 0;
+  // Bundesland is NOT set here: the write-path normalizer derives it cleanly
+  // from PLZ/venue via the GeoNames Gemeinde lookup (and also geocodes the
+  // ~12% of AT events that arrive without coordinates).
   return {
     source_name: 'Eventim',
     source_id: e.eventId,

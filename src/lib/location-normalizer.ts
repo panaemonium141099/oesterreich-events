@@ -780,6 +780,8 @@ export function normalizeEventLocation(event: {
    *  against our hand-verified registry. Null when the lookup finds no
    *  Gemeinde within ~8 km. */
   postal_code: string | null;
+  /** Bundesland (GeoNames admin1, German name) when resolved; omitted otherwise. */
+  bundesland?: string;
 } | null {
   const hint = getHint(event.postal_code, event.bundesland);
 
@@ -798,6 +800,7 @@ export function normalizeEventLocation(event: {
         location_name: result.canonicalName,
         confidence: result.confidence,
         postal_code: pickPlz(event.postal_code, result.latitude, result.longitude),
+        bundesland: result.bundesland,
       };
     }
   }
@@ -815,6 +818,7 @@ export function normalizeEventLocation(event: {
           longitude: result.longitude,
           confidence: isVenue ? 'normalized' : result.confidence,
           postal_code: pickPlz(event.postal_code, result.latitude, result.longitude),
+          bundesland: result.bundesland,
         };
       }
     }
@@ -833,6 +837,7 @@ export function normalizeEventLocation(event: {
         longitude: venueCity.longitude,
         confidence: 'normalized',
         postal_code: pickPlz(event.postal_code, venueCity.latitude, venueCity.longitude),
+        bundesland: venueCity.bundesland,
       };
     }
   }
@@ -846,6 +851,7 @@ export function normalizeEventLocation(event: {
         longitude: result.longitude,
         confidence: isVenue ? 'normalized' : 'from_title',
         postal_code: pickPlz(event.postal_code, result.latitude, result.longitude),
+        bundesland: result.bundesland,
       };
     }
   }
@@ -860,6 +866,7 @@ export function normalizeEventLocation(event: {
         longitude: result.longitude,
         confidence: isVenue ? 'normalized' : 'from_description',
         postal_code: pickPlz(event.postal_code, result.latitude, result.longitude),
+        bundesland: result.bundesland,
       };
     }
   }
