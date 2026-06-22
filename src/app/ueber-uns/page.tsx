@@ -168,14 +168,6 @@ export default function UeberUnsPage() {
             <ul className="space-y-2 list-disc list-inside pl-1">
               <li>Wir verkaufen keine Tickets selbst. Kauf und Abwicklung laufen
                 immer über den jeweiligen Original-Vendor.</li>
-              <li>
-                <span className="text-white">Event-Ranking ist nicht käuflich.</span>
-                Die Reihenfolge der angezeigten Events richtet sich ausschließlich nach
-                unserem Quality-Score (Vollständigkeit der Daten, Qualität der Quelle,
-                Aktualität). Ein großer Ticket-Vendor wird gleich bewertet wie ein
-                Dorffest im Burgenland — wer höher platziert ist, hat die besseren
-                Daten, nicht die höhere Provision.
-              </li>
               <li>Wir leiten keine persönlichen Daten an Werbenetzwerke weiter.
                 Aktive Drittanbieter (Supabase, Mapbox, Google OAuth, Vercel
                 Analytics, Spotify) sind im&nbsp;
