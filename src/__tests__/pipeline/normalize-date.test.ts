@@ -9,6 +9,23 @@ describe('normalizeDate', () => {
     expect(result.startAt!.toISOString()).toContain('2026-06-14');
   });
 
+  it('treats a naive ISO datetime as Europe/Vienna (20:00 CEST -> 18:00 UTC)', () => {
+    const result = normalizeDate('2026-06-14T20:00:00');
+    expect(result.startAt!.toISOString()).toBe('2026-06-14T18:00:00.000Z');
+  });
+
+  it('treats a Z-qualified ISO datetime as an absolute instant (no Vienna shift)', () => {
+    // FeratelScraper now emits UTC like this; it must NOT be re-shifted.
+    const result = normalizeDate('2026-06-14T18:00:00.000Z');
+    expect(result.startPrecision).toBe('exact');
+    expect(result.startAt!.toISOString()).toBe('2026-06-14T18:00:00.000Z');
+  });
+
+  it('honours an explicit +02:00 offset', () => {
+    const result = normalizeDate('2026-06-14T20:00:00+02:00');
+    expect(result.startAt!.toISOString()).toBe('2026-06-14T18:00:00.000Z');
+  });
+
   it('parses ISO date-only as day_only', () => {
     const result = normalizeDate('2026-06-14');
     expect(result.startAt).not.toBeNull();
