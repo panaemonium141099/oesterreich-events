@@ -9,8 +9,7 @@
  */
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { downloadEventimFeed } from '@/lib/eventim/feed-client';
-import { parseEventimFeed } from '@/lib/eventim/parse';
+import { fetchAndParseEventim, upsertEventimEvents } from '@/lib/eventim/import';
 
 // Load .env.local (Next.js does this automatically, but tsx does not) — needed
 // for the Supabase service-role key used by the write path, and optionally the
@@ -39,11 +38,8 @@ async function main() {
   const limitStr = arg('--limit');
   const limit = limitStr ? parseInt(limitStr, 10) : undefined;
 
-  console.log('[eventim] downloading feed…');
-  const series = await downloadEventimFeed();
-  console.log(`[eventim] ${series.length} series downloaded`);
-
-  let events = parseEventimFeed(series, new Date().toISOString());
+  console.log('[eventim] downloading + parsing feed…');
+  let events = await fetchAndParseEventim(new Date().toISOString());
   console.log(`[eventim] ${events.length} events after filtering (future, ticket, non-cancelled, AT/DE/CH)`);
 
   if (limit && events.length > limit) {
@@ -82,16 +78,8 @@ async function main() {
     return;
   }
 
-  const { syncEventsToSupabase } = await import('@/lib/db/supabase-sync');
-  const BATCH = 500;
-  let upserted = 0, errors = 0, filtered = 0;
-  for (let i = 0; i < events.length; i += BATCH) {
-    const batch = events.slice(i, i + BATCH);
-    const r = await syncEventsToSupabase(batch);
-    upserted += r.upserted; errors += r.errors; filtered += r.filtered;
-    console.log(`[eventim] batch ${i / BATCH + 1}: +${r.upserted} (${r.errors} err, ${r.filtered} filtered)`);
-  }
-  console.log(`[eventim] DONE — ${upserted} upserted, ${errors} errors, ${filtered} filtered`);
+  const r = await upsertEventimEvents(events, (m) => console.log(`[eventim] ${m}`));
+  console.log(`[eventim] DONE — ${r.upserted} upserted, ${r.errors} errors, ${r.filtered} filtered`);
 }
 
 main().catch((e) => { console.error(e); process.exit(1); });
