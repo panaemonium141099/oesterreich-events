@@ -4,24 +4,31 @@
  * in public/). This is the clean, deterministic source — no bounding-box
  * approximation, no name matching, no PLZ guessing.
  *
- * Script/Node only (reads public/*.geojson via readFileSync). Used by the
- * Eventim importer; not bundled into the Next app.
+ * Läuft in Node (reads public/*.geojson via readFileSync) — sowohl im
+ * CLI-Import-Script als auch in der Cron-Route /api/cron/eventim, wird also
+ * von Vercels output-file-tracing erfasst (siehe REGION_READERS unten).
  */
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
 // Wien MUST be checked before Niederösterreich — Wien lies within NÖ's extent
 // and NÖ's polygon has no Wien hole, so a Wien point matches both.
-const REGION_FILES: { id: string; file: string }[] = [
-  { id: 'wien', file: 'wien.geojson' },
-  { id: 'burgenland', file: 'burgenland.geojson' },
-  { id: 'niederoesterreich', file: 'niederoesterreich.geojson' },
-  { id: 'oberoesterreich', file: 'oberoesterreich.geojson' },
-  { id: 'steiermark', file: 'steiermark.geojson' },
-  { id: 'kaernten', file: 'kaernten.geojson' },
-  { id: 'salzburg', file: 'salzburg.geojson' },
-  { id: 'tirol', file: 'tirol.geojson' },
-  { id: 'vorarlberg', file: 'vorarlberg.geojson' },
+//
+// Jeder Eintrag liest seine Datei mit einem voll-literalen Pfad: Vercels
+// output-file-tracing (@vercel/nft) kann nur Literal-Argumente auflösen.
+// Mit `join(process.cwd(), 'public', file)` (file = Variable) landete das
+// GESAMTE public/-Verzeichnis (597 MB Bilder) im Bundle der Cron-Route
+// /api/cron/eventim und sprengte Vercels 250-MB-Function-Limit.
+const REGION_READERS: { id: string; read: () => string }[] = [
+  { id: 'wien', read: () => readFileSync(join(process.cwd(), 'public', 'wien.geojson'), 'utf8') },
+  { id: 'burgenland', read: () => readFileSync(join(process.cwd(), 'public', 'burgenland.geojson'), 'utf8') },
+  { id: 'niederoesterreich', read: () => readFileSync(join(process.cwd(), 'public', 'niederoesterreich.geojson'), 'utf8') },
+  { id: 'oberoesterreich', read: () => readFileSync(join(process.cwd(), 'public', 'oberoesterreich.geojson'), 'utf8') },
+  { id: 'steiermark', read: () => readFileSync(join(process.cwd(), 'public', 'steiermark.geojson'), 'utf8') },
+  { id: 'kaernten', read: () => readFileSync(join(process.cwd(), 'public', 'kaernten.geojson'), 'utf8') },
+  { id: 'salzburg', read: () => readFileSync(join(process.cwd(), 'public', 'salzburg.geojson'), 'utf8') },
+  { id: 'tirol', read: () => readFileSync(join(process.cwd(), 'public', 'tirol.geojson'), 'utf8') },
+  { id: 'vorarlberg', read: () => readFileSync(join(process.cwd(), 'public', 'vorarlberg.geojson'), 'utf8') },
 ];
 
 interface Poly {
@@ -38,9 +45,9 @@ let regions: Region[] | null = null;
 function loadRegions(): Region[] {
   if (regions) return regions;
   regions = [];
-  for (const { id, file } of REGION_FILES) {
+  for (const { id, read } of REGION_READERS) {
     try {
-      const geo = JSON.parse(readFileSync(join(process.cwd(), 'public', file), 'utf8'));
+      const geo = JSON.parse(read());
       const g = geo.geometry;
       const polygons: number[][][][] = g.type === 'MultiPolygon' ? g.coordinates : [g.coordinates];
       const polys: Poly[] = polygons.map((rings) => {
