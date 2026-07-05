@@ -143,9 +143,10 @@ function buildPaths(): string[] {
     paths.push(`/api/events?bundesland=${bl}&limit=3000&slim=true`);
   }
 
-  // 2. Featured (Landing-Page)
+  // 2. Featured (Landing-Page) + Map-Points-Snapshot (fn-16)
   paths.push('/api/events/featured?limit=10');
   paths.push('/api/events/featured?limit=8');
+  paths.push('/api/events/map-points');
 
   // 3. Bundesland × Kategorie (110 Kombis)
   for (const bl of BUNDESLAENDER) {

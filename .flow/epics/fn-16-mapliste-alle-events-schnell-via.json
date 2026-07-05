@@ -1,0 +1,13 @@
+{
+  "branch_name": "fn-16-mapliste-alle-events-schnell-via",
+  "created_at": "2026-07-05T17:27:37.286243Z",
+  "depends_on_epics": [],
+  "id": "fn-16-mapliste-alle-events-schnell-via",
+  "next_task": 1,
+  "plan_review_status": "unknown",
+  "plan_reviewed_at": null,
+  "spec_path": ".flow/specs/fn-16-mapliste-alle-events-schnell-via.md",
+  "status": "open",
+  "title": "Map/Liste: alle Events schnell via kompaktem Points-Snapshot",
+  "updated_at": "2026-07-05T17:28:23.428443Z"
+}
