@@ -180,11 +180,18 @@ inkrementell · alarmiert bei Fehlschlag · ein Job = eine Verantwortung.
 `enrich-claude.ts`, `enrich-claude-cli.ts`, `enrich-openai.ts`, `enrich-batch.ts`,
 `agent-enrich.ts`, `backfill-detail-enrich.ts`, der `enrichment`-Step der Pipeline,
 der Admin-Enrichment-Review (`/admin/enrichments`) sobald keine neuen Vorschläge mehr
-entstehen. **Embeddings/semantische Suche: Empfehlung = mitentsorgen.** Die Messung
-(§3.5) zeigt: Der Embedding-Index ist 1,22 GB groß (größer als alle Event-Daten
-zusammen), wurde insgesamt 50× benutzt und ist Hauptverursacher der DB-Überlastung.
-Entfernen von Spalte + Index + `/api/search/semantic` + `build-embeddings` schlägt
-drei Fliegen: KI-Kosten weg, ~2,5 GB DB-Ballast weg, Inserts & Queries schneller.
+entstehen. **Smart-Suche: bleibt als Feature, Architektur getauscht (revidiert
+2026-07-07).** Die alte Implementierung (OpenAI-Embedding pro Event, 1,22-GB-
+pgvector-Index bei 50 Nutzungen, Datenbasis seit April stale) ist entsorgt —
+Spalte + Index + RPC sind gedroppt. Die neue Architektur ist **KI pro Query
+statt KI pro Event**: ein Gemini-2.5-Flash-Call pro Suche (~0,02 Cent)
+übersetzt die Anfrage in die Taxonomie (Whitelist-validiert), gematcht wird
+live über normale indexierte Queries + trgm-Volltext (`search_event_ids`),
+deterministisch gerankt. Nie stale, kein DB-Ballast, Kosten skalieren mit
+Suchvolumen statt Datenbestand. Code: `src/lib/search/smart-query.ts` +
+`/api/search/semantic`; Concierge (Gemini + Google-Grounding) unverändert.
+Das ist vereinbar mit dem Enrichment-Ausstieg: dessen Problem waren Tokens
+für 300k Events, nicht KI im Request-Pfad.
 
 **Was die Qualität stattdessen sichert:**
 
@@ -408,8 +415,9 @@ kleinen APIs treffen lassen.
    Quellen, Footer, Auth-Layout, Blog-JSON-LD, /fuer-firmen, package.json.
 6. ⏳ `seo-daily-snapshot`-Leiche in Vercel-Logs diagnostizieren (tot seit
    29.04.) — braucht Zugriff auf Vercel-Dashboard/-Logs.
-7. Zudem erledigt: semantische Suche komplett stillgelegt (§6) — Route,
-   Concierge-Route, Smart-Tab auf /entdecken, `build-embeddings` entfernt.
+7. Smart-Suche: Embedding-Architektur entsorgt, Feature **neu gebaut** als
+   Query-Zeit-Intent (§6, revidiert nach User-Feedback) — Smart-Tab +
+   Concierge sind wieder live; nur `build-embeddings` + pgvector sind weg.
 
 ### P1 — Monetarisierung, Retention & Instant-Loading (Monat 1)
 

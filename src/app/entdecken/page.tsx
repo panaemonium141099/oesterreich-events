@@ -1,22 +1,31 @@
 'use client';
 
 /**
- * /entdecken — Discovery page (Liste + FilterDrawer).
+ * /entdecken — Dual-mode discovery page (Phase 4.1).
  *
- * Wraps the existing EventListView + FilterDrawer aus /map (Verhalten 1:1
- * identisch via useFilteredEvents). Der frühere Smart-Tab (NLP semantic
- * search) wurde 2026-07 mit dem KI-Ausstieg entfernt (MASTERPLAN §6/§10);
- * alte ?mode=smart-Links landen hier in der Liste, ?q= wird als
- * Suchbegriff übernommen.
+ * Mode is persisted in the URL via ?mode=list|smart. First visit
+ * default = list. Legacy ?mode=filter (Phase-4) silently maps to list.
+ *
+ * List-Tab: <V4EntdeckenListMode> — wraps the existing EventListView +
+ * FilterDrawer aus /map (Verhalten 1:1 identisch via useFilteredEvents).
+ * Smart-Tab: <V4EntdeckenSmartMode> — NLP semantic search (Phase-4).
  */
 
-import { Suspense } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useState, useCallback, useEffect, Suspense } from 'react';
+import { useSearchParams, useRouter, usePathname } from 'next/navigation';
 import {
   V4EntdeckenHero,
   V4EntdeckenListMode,
+  V4EntdeckenSmartMode,
 } from '@/components/Discover/v4';
+import { type V4EntdeckenMode } from '@/components/Events/v4';
 import type { EventFilters } from '@/types/events';
+
+function resolveMode(raw: string | null): V4EntdeckenMode {
+  if (raw === 'smart') return 'smart';
+  // 'filter' (Phase 4 legacy) und alles andere → 'list'.
+  return 'list';
+}
 
 function deriveInitialFilters(search: URLSearchParams): Partial<EventFilters> | undefined {
   // Pick up the common URL filter params if present. This is best-effort:
@@ -40,15 +49,16 @@ function deriveInitialFilters(search: URLSearchParams): Partial<EventFilters> | 
   // True region→district filtering is a follow-up; this at least scopes results.
   const region = search.get('region');
   if (region && !out.search) out.search = region;
-  // Legacy Smart-Mode deep-link (?mode=smart&q=…) → q wird zur Textsuche.
-  const q = search.get('q');
-  if (q && !out.search) out.search = q;
   return Object.keys(out).length > 0 ? out : undefined;
 }
 
 function EntdeckenInner() {
   const search = useSearchParams();
+  const router = useRouter();
+  const pathname = usePathname();
 
+  const [mode, setMode] = useState<V4EntdeckenMode>(resolveMode(search.get('mode')));
+  const initialQuery = search.get('q') ?? '';
   const initialBlParam = search.get('bl');
   // Comma-separated bl supported so a bundesland hub can deep-link a single
   // region and a future multi-region link still works.
@@ -56,6 +66,35 @@ function EntdeckenInner() {
     ? initialBlParam.split(',').map((s) => s.trim()).filter(Boolean)
     : undefined;
   const initialFilters = deriveInitialFilters(search);
+
+  // Mirror mode back into URL — list-Modus default unparametrisiert
+  // damit /entdecken eine saubere URL hat. Smart-Modus persistiert
+  // ?mode=smart und optional ?q=<query>.
+  //
+  // CRITICAL: must START from the current URL (search.toString()) and
+  // only TOGGLE mode/q. Earlier this effect built `next` from scratch,
+  // which on mount stripped search/district/category/bl from the URL
+  // every time — invisible bug as long as filters were only seeded on
+  // mount, but it kills any URL→state sync we layer on top.
+  useEffect(() => {
+    const next = new URLSearchParams(search.toString());
+    if (mode === 'smart') {
+      next.set('mode', 'smart');
+      if (initialQuery) next.set('q', initialQuery);
+      else next.delete('q');
+    } else {
+      next.delete('mode');
+      next.delete('q');
+    }
+    const qs = next.toString();
+    // No-op guard — avoids a router.replace when nothing actually
+    // changed (which would be a useless re-render on every mount).
+    if (qs === search.toString()) return;
+    router.replace(`${pathname}${qs ? '?' + qs : ''}`, { scroll: false });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mode]);
+
+  const onModeChange = useCallback((next: V4EntdeckenMode) => { setMode(next); }, []);
 
   // V4EntdeckenListMode seeds its filter state from initialFilters via
   // useState — only on mount. Subsequent URL changes (e.g. the user
@@ -75,12 +114,16 @@ function EntdeckenInner() {
 
   return (
     <div className="min-h-screen bg-[var(--v4-surface)] text-[var(--v4-ink)]">
-      <V4EntdeckenHero/>
-      <V4EntdeckenListMode
-        key={listModeKey}
-        initialBundeslandIds={initialBundeslandIds}
-        initialFilters={initialFilters}
-      />
+      <V4EntdeckenHero mode={mode} onModeChange={onModeChange}/>
+      {mode === 'list' ? (
+        <V4EntdeckenListMode
+          key={listModeKey}
+          initialBundeslandIds={initialBundeslandIds}
+          initialFilters={initialFilters}
+        />
+      ) : (
+        <V4EntdeckenSmartMode initialQuery={initialQuery}/>
+      )}
     </div>
   );
 }
