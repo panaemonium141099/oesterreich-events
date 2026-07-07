@@ -1,5 +1,14 @@
 # burgenland-events-v5
 
+> **📋 Strategischer Kontext:** `docs/MASTERPLAN.md` (Stand 2026-07-07) ist die
+> gemeinsame Kontext-Basis über alle Sessions: Ist-Zahlen (Traffic, User, Umsatzstand),
+> Grundsatz-Entscheidungen (kein KI-Enrichment mehr; Affiliate-ID J70 bestätigt;
+> Scraping/Feed-Imports weg von Vercel), kritische Betriebsbefunde (Scrape-Pipeline
+> stirbt seit 28.04. täglich am GitHub-Actions-6h-Limit; Eventim-Import nicht
+> automatisiert) und die priorisierte Roadmap. **Vor Strategie-, Monetarisierungs-,
+> Pipeline- oder Priorisierungs-Fragen zuerst dort nachlesen** und das Dokument bei
+> relevanten Änderungen mitpflegen.
+
 > **🛑 NIEMALS RATEN.** Wenn der User ein Problem meldet, nenne KEINE Ursache
 > ohne sie zuerst mit Daten belegt zu haben — kein "wahrscheinlich Browser-Cache",
 > kein "vermutlich liegt's an X", kein "könnte sein dass Y". Bevor du eine Ursache

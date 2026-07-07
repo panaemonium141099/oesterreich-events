@@ -53,7 +53,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
         style={{ animationDelay: '0.05s', animationFillMode: 'forwards' }}
       >
         <p className="text-xs tracking-[0.3em] uppercase text-white/40 font-medium">
-          Österreich Events
+          LassTreffen.at
         </p>
         <div className="w-8 h-px bg-white/20 mx-auto mt-3" />
       </div>

@@ -30,7 +30,7 @@ export function Footer() {
         {/* Main footer row */}
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="text-xs text-white/30">
-            &copy; {new Date().getFullYear()} Österreich Events. Alle Rechte vorbehalten.
+            &copy; {new Date().getFullYear()} LassTreffen.at. Alle Rechte vorbehalten.
           </p>
           <nav className="flex items-center gap-6">
             <Link href="/ueber-uns" className="text-xs text-white/30 hover:text-white/60 transition-colors">

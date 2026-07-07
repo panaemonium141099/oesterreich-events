@@ -6,8 +6,8 @@ import type { Metadata } from 'next';
 export const revalidate = 86400; // ISR: revalidate every 24 hours
 
 export const metadata: Metadata = {
-  title: 'Allgemeine Geschäftsbedingungen — Österreich Events',
-  description: 'Allgemeine Geschäftsbedingungen für die Nutzung von Österreich Events.',
+  title: 'Allgemeine Geschäftsbedingungen — LassTreffen.at',
+  description: 'Allgemeine Geschäftsbedingungen für die Nutzung von LassTreffen.at.',
 };
 
 export default function AGBPage() {
@@ -34,7 +34,7 @@ export default function AGBPage() {
             <h2 className="text-lg font-semibold text-white mb-3">1. Geltungsbereich</h2>
             <p>
               Diese Allgemeinen Geschäftsbedingungen (AGB) gelten für die Nutzung der Plattform
-              &quot;Österreich Events&quot; (erreichbar unter oesterreich-events.at), betrieben von Jonathan Glatz,
+              &quot;LassTreffen.at&quot; (erreichbar unter lasstreffen.at), betrieben von Jonathan Glatz,
               Kreuzgasse 7, 7061 Trausdorf an der Wulka, Österreich (nachfolgend &quot;Betreiber&quot;).
             </p>
             <p className="mt-2">
@@ -66,7 +66,7 @@ export default function AGBPage() {
           <section>
             <h2 className="text-lg font-semibold text-white mb-3">3. Nutzung der Plattform</h2>
             <p>
-              Österreich Events ist eine kostenlose Plattform zur Entdeckung von Veranstaltungen in Österreich.
+              LassTreffen.at ist eine kostenlose Plattform zur Entdeckung von Veranstaltungen in Österreich.
               Die Plattform bietet unter anderem folgende Funktionen:
             </p>
             <ul className="list-disc list-inside mt-3 space-y-1.5">

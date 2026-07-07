@@ -1,5 +1,5 @@
 {
-  "name": "burgenland-events-v5",
+  "name": "lasstreffen-at",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -66,7 +66,6 @@
     "agent:enrich": "tsx --env-file=.env.local src/scripts/agent-enrich.ts",
     "migrate:claude-v1": "tsx --env-file=.env.local src/scripts/migrate-to-claude-v1.ts",
     "regen:taxonomy": "tsx src/scripts/regen-taxonomy-doc.ts",
-    "build-embeddings": "tsx --env-file=.env.local src/scripts/build-embeddings.ts",
     "install-google-sa": "tsx src/scripts/install-google-sa.ts",
     "download-category-images": "tsx --env-file=.env.local src/scripts/download-category-images.ts",
     "import-osm-venues": "tsx --env-file=.env.local src/scripts/import-osm-venues.ts",

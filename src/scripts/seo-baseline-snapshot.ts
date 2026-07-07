@@ -166,7 +166,8 @@ async function captureDatabaseStats(): Promise<Snapshot['database']> {
   const futurePublished           = await countFromQuery(() => ev().gte('start_date', today).eq('publish_status', 'published') as any);
   const withCoords                = await countFromQuery(() => ev().not('latitude', 'is', null).not('longitude', 'is', null) as any);
   const withNullCoords            = await countFromQuery(() => ev().is('latitude', null) as any);
-  const withEmbeddings            = await countFromQuery(() => ev().not('embedding', 'is', null) as any);
+  // events.embedding wurde 2026-07 gedroppt (KI-Ausstieg, MASTERPLAN §6)
+  const withEmbeddings            = null;
   const enrichedV2                = await countFromQuery(() => ev().eq('enrichment_version', 'enrich-v2-prompt1') as any);
 
   // Histograms via SELECT + in-memory bucketing

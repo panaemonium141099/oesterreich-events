@@ -16,12 +16,19 @@ try {
   }
 } catch { /* .env.local not found, rely on environment */ }
 
-import { runAllScrapers, getScraperByName, runScraper, getAvailableScrapers } from '../lib/scrapers';
+import {
+  runAllScrapers,
+  getScraperByName,
+  runScraper,
+  getAvailableScrapers,
+  getScrapersForShard,
+} from '../lib/scrapers';
 import { triggerLineupPipeline, triggerMatchArtists } from '../lib/post-scrape-hook';
 
 async function main() {
   const args = process.argv.slice(2);
   const sourceIndex = args.indexOf('--source');
+  const shardIndex = args.indexOf('--shard');
 
   if (sourceIndex !== -1 && args[sourceIndex + 1]) {
     const sourceName = args[sourceIndex + 1];
@@ -34,6 +41,20 @@ async function main() {
     }
 
     await runScraper(scraper);
+  } else if (shardIndex !== -1 && args[shardIndex + 1]) {
+    // --shard i/N: deterministische Teilmenge für parallele CI-Jobs
+    // (MASTERPLAN §5 — der 6h-Monolith wird in Shards zerlegt). Die
+    // Post-Scrape-Hooks (Lineups + Artist-Matching) laufen bewusst NICHT
+    // pro Shard, sondern einmal im Post-Processing-Job des Workflows.
+    const m = /^(\d+)\/(\d+)$/.exec(args[shardIndex + 1]);
+    if (!m) {
+      console.error(`Ungültiges --shard Format (erwartet i/N): ${args[shardIndex + 1]}`);
+      process.exit(1);
+    }
+    const subset = getScrapersForShard(parseInt(m[1], 10), parseInt(m[2], 10));
+    console.log(`Shard ${m[1]}/${m[2]}: ${subset.map(s => s.name).join(', ')}`);
+    await runAllScrapers(subset);
+    return; // keine Hooks im Shard-Modus
   } else {
     await runAllScrapers();
   }

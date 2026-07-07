@@ -137,7 +137,7 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
   const itemListJsonLd = {
     '@context': 'https://schema.org',
     '@type': 'CollectionPage',
-    name: 'Österreich Events Blog',
+    name: 'LassTreffen.at Blog',
     description: 'Event-Guides und Tipps zu den größten Festivals und Veranstaltungen in Österreich.',
     url: 'https://lasstreffen.at/blog',
     mainEntity: {
@@ -339,7 +339,7 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
         {/* FOOTER */}
         <div className="mt-16 pt-8 border-t border-gray-200 flex flex-wrap items-center justify-between gap-4">
           <p className="text-gray-400 text-xs uppercase tracking-wider">
-            LassTreffen.at — Österreich Events
+            LassTreffen.at — Events in ganz Österreich
           </p>
           <Link
             href="/map"
