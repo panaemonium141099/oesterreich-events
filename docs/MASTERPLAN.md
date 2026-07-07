@@ -369,7 +369,8 @@ kleinen APIs treffen lassen.
    vorgerechnete GeoJSON-/Punkt-Snapshots (pro Bundesland bzw. Kategorie) in
    Storage/CDN legen — die `event_map_points`-MV existiert schon als Quelle. Die
    Karte lädt dann Dateien vom CDN (instant, DB-unabhängig); nur Detail-Popups
-   treffen die API.
+   treffen die API. *(In Arbeit: fn-16 Slice 1 — `/api/events/map-points`
+   liefert seit PR #75 alle Punkte als columnar Snapshot aus der MV.)*
 2. **Filter-Zählungen/Listen aus `event_stats_cache`** bzw. vorgerechneten
    JSON-Snapshots bedienen statt Live-Aggregaten.
 3. `/api/events` bleibt für Listen — aber mit kleinen Limits, kurzem Timeout und
@@ -400,9 +401,14 @@ kleinen APIs treffen lassen.
    `perf_drop_semantic_search_embeddings`; Indizes 1.707→408 MB, Tabelle
    3,75→2,45 GB). pg_cron: stats-Cache 5→30 min, map-points 15→60 min,
    match-artists 5→60 min, `send-reminders-hourly` (Duplikat) abgeschaltet.
-2. ✅ **Eventim-Import-Workflow** *(erledigt 2026-07-07)*:
-   `.github/workflows/import-eventim.yml`, alle 6 h. ⚠️ Benötigt die
-   Repo-Secrets `EVENTIM_FEED_USER` + `EVENTIM_FEED_PASS` (in GitHub anlegen!).
+2. ✅ **Eventim-Import automatisiert** *(erledigt 2026-07-07, zweigleisig)*:
+   Parallel entstanden ein **Vercel-Cron** `/api/cron/eventim` (täglich 03:00,
+   PR #72 — läuft sofort) und der **GitHub-Workflow**
+   `.github/workflows/import-eventim.yml` (alle 6 h — Zielarchitektur gemäß
+   §4.3 „Feeds nicht auf Vercel"). ⚠️ Übergabe: Repo-Secrets
+   `EVENTIM_FEED_USER` + `EVENTIM_FEED_PASS` in GitHub anlegen; nach dem
+   ersten erfolgreichen Workflow-Lauf den eventim-Eintrag aus vercel.json
+   entfernen (sonst doppelter Import — idempotent, aber unnötige Last).
 3. ✅ **Pipeline zerlegt** *(erledigt 2026-07-07)*: `scrape-events.yml` → 6
    parallele Shards (`scrape.ts --shard i/6`, deterministisch alphabetisch) +
    Venues-Job + ein Post-Processing-Job (`--skip-scrapers --skip-venues`) mit
