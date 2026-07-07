@@ -263,6 +263,47 @@ function mapBundesland(regions: string[] | null, configBundesland: string): stri
   return configBundesland;
 }
 
+/**
+ * UTC offset (ms) for Europe/Vienna on a given calendar day — resolved via Intl
+ * so DST (CET +01:00 / CEST +02:00) is handled correctly without a tz library.
+ * `local = UTC + offset`.
+ */
+function viennaOffsetMs(year: number, month: number, day: number): number {
+  const utcNoon = new Date(Date.UTC(year, month, day, 12, 0, 0));
+  const parts = new Intl.DateTimeFormat('en-US', {
+    timeZone: 'Europe/Vienna',
+    hour12: false,
+    year: 'numeric',
+    month: 'numeric',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: 'numeric',
+    second: 'numeric',
+  }).formatToParts(utcNoon);
+  const get = (t: string) => parseInt(parts.find((p) => p.type === t)?.value || '0', 10);
+  const hour = get('hour') === 24 ? 0 : get('hour');
+  const viennaAsUtc = Date.UTC(get('year'), get('month') - 1, get('day'), hour, get('minute'), get('second'));
+  return viennaAsUtc - utcNoon.getTime();
+}
+
+/**
+ * The Deskline API returns naive Europe/Vienna wall-clock times with NO offset
+ * (e.g. "2026-06-25T19:00:00"). Written straight to a `timestamptz` column,
+ * Postgres read them as UTC — shifting every Feratel event +1h (winter) /
+ * +2h (summer), so a 19:00 concert showed as 21:00. We resolve the real Vienna
+ * offset for that day and emit a proper UTC ISO string ("…T17:00:00.000Z").
+ *
+ * Returns null when the input already carries a timezone (`Z` / `±HH:MM`) or
+ * isn't a parseable naive datetime — the caller then keeps the original string.
+ */
+export function feratelLocalToUtcIso(raw: string): string | null {
+  const m = raw.match(/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})(?::(\d{2}))?$/);
+  if (!m) return null;
+  const [, y, mo, d, h, mi, s] = m.map(Number);
+  const utcMs = Date.UTC(y, mo - 1, d, h, mi, s || 0) - viennaOffsetMs(y, mo - 1, d);
+  return new Date(utcMs).toISOString();
+}
+
 // ─────────────────── API response types ───────────────────
 
 interface DesklineEvent {
@@ -493,8 +534,10 @@ export class FeratelScraper extends BaseScraper {
     const title = this.cleanTitle(event.name);
     if (title.length < 3) return null;
 
-    // Parse date — API returns ISO format "2026-03-29T16:00:00"
-    const startDate = event.date;
+    // Parse date — API returns naive Europe/Vienna local time "2026-03-29T16:00:00"
+    // (no offset). Convert to a real UTC instant; writing the naive string to the
+    // timestamptz column made Postgres misread it as UTC (+1h/+2h shift).
+    const startDate = feratelLocalToUtcIso(event.date) ?? event.date;
 
     // Location
     const loc = event.location;

@@ -80,11 +80,19 @@ export function normalizeDate(input: string, context?: { dateContext?: string })
 
   const trimmed = input.trim();
 
-  // --- ISO 8601 with time: 2026-06-14T20:00:00 ---
-  const isoDateTimeMatch = trimmed.match(/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})(?::(\d{2}))?$/);
+  // --- ISO 8601 with time: 2026-06-14T20:00:00, optionally with millis and a
+  //     `Z` / `±HH:MM` timezone. A naive value (no tz) is Europe/Vienna
+  //     wall-clock; a tz-qualified value is already an absolute instant
+  //     (e.g. FeratelScraper now emits "…T18:00:00.000Z"). ---
+  const isoDateTimeMatch = trimmed.match(
+    /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})(?::(\d{2}))?(?:\.\d+)?(Z|[+-]\d{2}:?\d{2})?$/,
+  );
   if (isoDateTimeMatch) {
-    const [, y, m, d, h, min] = isoDateTimeMatch.map(Number);
-    const date = viennaToUtc(y, m - 1, d, h, min);
+    const y = +isoDateTimeMatch[1], m = +isoDateTimeMatch[2], d = +isoDateTimeMatch[3];
+    const h = +isoDateTimeMatch[4], min = +isoDateTimeMatch[5];
+    const tz = isoDateTimeMatch[7];
+    const date = tz ? new Date(trimmed) : viennaToUtc(y, m - 1, d, h, min);
+    if (isNaN(date.getTime())) return nullResult();
     return {
       startAt: date,
       endAt: null,
