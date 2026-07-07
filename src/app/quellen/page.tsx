@@ -4,9 +4,9 @@ import type { Metadata } from 'next';
 export const revalidate = 86400;
 
 export const metadata: Metadata = {
-  title: 'Datenquellen & Lizenzen — Österreich Events',
+  title: 'Datenquellen & Lizenzen — LassTreffen.at',
   description:
-    'Transparente Übersicht aller Datenquellen, Lizenzen und Attributionen der Österreich Events Plattform.',
+    'Transparente Übersicht aller Datenquellen, Lizenzen und Attributionen der LassTreffen.at-Plattform.',
 };
 
 /* ------------------------------------------------------------------ */
@@ -360,7 +360,7 @@ export default function QuellenPage() {
           Datenquellen & Lizenzen
         </h1>
         <p className="text-white/50 leading-relaxed mb-12 max-w-2xl">
-          Österreich Events aggregiert öffentlich zugängliche Veranstaltungsdaten
+          LassTreffen.at aggregiert öffentlich zugängliche Veranstaltungsdaten
           aus über 140 Quellen in ganz Österreich. Wir legen Wert auf Transparenz
           und die Einhaltung aller Lizenzbedingungen. Nachfolgend eine Übersicht
           aller genutzten Datenquellen.

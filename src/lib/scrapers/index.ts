@@ -302,14 +302,29 @@ export const scrapers: BaseScraper[] = [
 
 const SCRAPER_CONCURRENCY = 10;
 
-export async function runAllScrapers(): Promise<void> {
+/**
+ * Deterministische Shard-Aufteilung für parallele CI-Jobs (MASTERPLAN §5):
+ * alphabetisch sortiert (stabil gegenüber Registrierungs-Reihenfolge),
+ * dann round-robin auf shardCount Buckets. Jeder Scraper landet in genau
+ * einem Shard.
+ */
+export function getScrapersForShard(shardIndex: number, shardCount: number): BaseScraper[] {
+  if (shardCount < 1 || shardIndex < 0 || shardIndex >= shardCount) {
+    throw new Error(`Ungültiger Shard: ${shardIndex}/${shardCount}`);
+  }
+  const sorted = [...scrapers].sort((a, b) => a.name.localeCompare(b.name));
+  return sorted.filter((_, i) => i % shardCount === shardIndex);
+}
+
+export async function runAllScrapers(subset?: BaseScraper[]): Promise<void> {
+  const list = subset ?? scrapers;
   console.log(`\n${'='.repeat(60)}`);
   console.log(`Scraping gestartet: ${new Date().toISOString()}`);
-  console.log(`${scrapers.length} Scraper registriert (${SCRAPER_CONCURRENCY} parallel)`);
+  console.log(`${list.length}/${scrapers.length} Scraper (${SCRAPER_CONCURRENCY} parallel)`);
   console.log(`${'='.repeat(60)}\n`);
 
   // Run up to SCRAPER_CONCURRENCY scrapers in parallel using a queue
-  const queue = [...scrapers];
+  const queue = [...list];
   const workers = Array.from({ length: SCRAPER_CONCURRENCY }, async () => {
     while (queue.length > 0) {
       const scraper = queue.shift();

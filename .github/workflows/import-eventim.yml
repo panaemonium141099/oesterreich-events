@@ -1,0 +1,45 @@
+name: Import Eventim Feed
+
+on:
+  schedule:
+    # Alle 6 h — der PFT-Feed regeneriert alle 1–6 h; Affiliate-Links
+    # (?affiliate=J70) bleiben damit durchgehend aktuell (MASTERPLAN §7.1).
+    - cron: '40 */6 * * *'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Dry-run (kein DB-Write)'
+        required: false
+        default: 'false'
+        type: boolean
+
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    env:
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      EVENTIM_FEED_USER: ${{ secrets.EVENTIM_FEED_USER }}
+      EVENTIM_FEED_PASS: ${{ secrets.EVENTIM_FEED_PASS }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - run: npm ci
+
+      - name: Import Eventim PFT feed
+        run: |
+          ARGS=""
+          if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then
+            ARGS="--dry-run --verbose"
+          fi
+          npx tsx src/scripts/import-eventim.ts $ARGS

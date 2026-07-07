@@ -28,6 +28,7 @@ import { RouteTransitions } from '@/components/Layout/RouteTransitions';
 // shadowed by stale runtime caches.
 import { ServiceWorkerProvider } from '@/components/Layout/ServiceWorkerProvider';
 import { PageviewTracker } from '@/components/Analytics/PageviewTracker';
+import { ClickTracker } from '@/components/Analytics/ClickTracker';
 // fn-15.8: only Geist mounts at the root. The editorial serif and the
 // handwriting face moved to `@/lib/fonts-planer` and are imported by
 // per-route layouts that actually render the .planer-scope chrome
@@ -285,6 +286,9 @@ export default function RootLayout({
             SEO-Seiten: /entdecken, /gemeinde, /thema, /blog, Event-Details).
             Ersetzt die früheren Einzelaufrufe auf nur 5 Seiten. */}
         <PageviewTracker />
+        {/* Globaler Klick-Tracker — macht alle data-track-Marker scharf
+            (ticket_click, cta_*, plan_* …); Basis fürs Affiliate-Reporting. */}
+        <ClickTracker />
         <Toaster
           theme="dark"
           position="bottom-center"

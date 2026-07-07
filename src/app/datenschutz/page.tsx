@@ -6,7 +6,7 @@ import type { Metadata } from 'next';
 export const revalidate = 86400; // ISR: revalidate every 24 hours
 
 export const metadata: Metadata = {
-  title: 'Datenschutzerklärung — Österreich Events',
+  title: 'Datenschutzerklärung — LassTreffen.at',
   description: 'Datenschutzerklärung und Informationen zur Verarbeitung personenbezogener Daten.',
 };
 
@@ -136,7 +136,7 @@ export default function DatenschutzPage() {
 
             <h3 className="text-base font-medium text-white/90 mt-4 mb-2">Spotify (optionale Verknüpfung)</h3>
             <p>
-              Sie haben die Möglichkeit, Ihr Spotify-Konto mit Österreich Events zu verknüpfen, um
+              Sie haben die Möglichkeit, Ihr Spotify-Konto mit LassTreffen.at zu verknüpfen, um
               musikbezogene Empfehlungen zu erhalten. Diese Verknüpfung ist freiwillig und kann jederzeit
               in den Kontoeinstellungen widerrufen werden.
               Anbieter: Spotify AB, Schweden.

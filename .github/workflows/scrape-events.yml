@@ -1,5 +1,14 @@
 name: Scrape Events Pipeline
 
+# MASTERPLAN §5 Phase A: Der frühere Single-Job lief seriell alle Scraper +
+# Post-Processing und starb ab 2026-04-29 täglich am 6h-Job-Limit — dadurch
+# liefen Geocoding/Scoring/Dedup/Indexing 10 Wochen lang nie. Jetzt:
+#   1. 6 parallele Scrape-Shards (deterministisch, alphabetisch round-robin)
+#   2. Venue-Ingestion parallel dazu
+#   3. EIN Post-Processing-Job (needs: alle Shards) mit normalize → geocoding
+#      → master_coords → scoring → dedup → artist_matching → indexing → report
+# Das 6h-Limit gilt PRO JOB — jeder Shard hat also reichlich Luft.
+
 on:
   schedule:
     - cron: '17 3 * * *'
@@ -21,10 +30,92 @@ on:
         default: 'false'
         type: boolean
 
+env:
+  SHARD_COUNT: 6
+
 jobs:
   scrape:
+    # Bei workflow_dispatch mit skip_scrapers oder gezieltem Einzel-Scraper
+    # laufen die Shards nicht — das erledigt der post-Job bzw. single-Job.
+    if: ${{ github.event_name == 'schedule' || (github.event.inputs.skip_scrapers != 'true' && github.event.inputs.scraper == '') }}
     runs-on: ubuntu-latest
-    timeout-minutes: 360
+    timeout-minutes: 150
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [0, 1, 2, 3, 4, 5]
+
+    env:
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+      MAPBOX_ACCESS_TOKEN: ${{ secrets.MAPBOX_ACCESS_TOKEN }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - run: npm ci
+
+      - name: Scrape shard ${{ matrix.shard }}/6
+        run: npx tsx src/scripts/scrape.ts --shard ${{ matrix.shard }}/${{ env.SHARD_COUNT }}
+
+  single:
+    # Manueller Lauf eines einzelnen Scrapers (workflow_dispatch mit input).
+    if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.scraper != '' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 150
+
+    env:
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+      MAPBOX_ACCESS_TOKEN: ${{ secrets.MAPBOX_ACCESS_TOKEN }}
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      - run: npm ci
+      - name: Scrape ${{ github.event.inputs.scraper }}
+        run: npx tsx src/scripts/scrape.ts --source ${{ github.event.inputs.scraper }}
+
+  venues:
+    if: ${{ github.event_name == 'schedule' || (github.event.inputs.skip_scrapers != 'true' && github.event.inputs.scraper == '') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+
+    env:
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      - run: npm ci
+      - name: Venue feed ingestion
+        run: npx tsx src/scripts/scrape-venues.ts
+
+  post:
+    # Post-Processing läuft IMMER (auch wenn einzelne Shards failen) — genau
+    # das fehlte 10 Wochen lang. `if: always()` + needs sammelt alle Vorjobs.
+    needs: [scrape, venues]
+    if: ${{ always() && (github.event_name == 'schedule' || github.event.inputs.scraper == '') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
 
     env:
       SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
@@ -46,19 +137,17 @@ jobs:
 
       - run: npm ci
 
-      - name: Run scrape pipeline
+      - name: Festival lineups (Hook-Ersatz, lief früher pro scrape.ts-Lauf)
+        continue-on-error: true
+        run: npx tsx src/scripts/scrape-festival-lineups.ts
+
+      - name: Post-processing pipeline (normalize → geocode → score → dedup → indexing → report)
         run: |
           TRIGGER="cron"
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
             TRIGGER="github_dispatch"
           fi
-          ARGS="--trigger $TRIGGER"
-          if [ -n "${{ github.event.inputs.scraper }}" ]; then
-            ARGS="$ARGS --source ${{ github.event.inputs.scraper }}"
-          fi
-          if [ "${{ github.event.inputs.skip_scrapers }}" = "true" ]; then
-            ARGS="$ARGS --skip-scrapers"
-          fi
+          ARGS="--trigger $TRIGGER --skip-scrapers --skip-venues"
           if [ "${{ github.event.inputs.skip_geocoding }}" = "true" ]; then
             ARGS="$ARGS --skip-geocoding"
           fi

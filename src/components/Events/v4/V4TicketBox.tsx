@@ -84,6 +84,8 @@ export function V4TicketBox({
           target="_blank"
           rel="noopener noreferrer"
           data-track="ticket_click"
+          data-track-id={eventId}
+          data-track-provider={provider}
           className="press-haptic flex items-center justify-center gap-2 w-full px-5 py-3 rounded-full bg-[var(--v4-ticket)] text-[#1a1208] text-sm font-semibold"
         >
           Tickets sichern

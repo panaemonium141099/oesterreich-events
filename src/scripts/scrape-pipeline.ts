@@ -67,7 +67,6 @@ function parseArgs(): PipelineOptions {
     skipDedup: has('--skip-dedup'),
     skipEnrichment: has('--skip-enrichment'),
     withEnrichment: has('--with-enrichment'),
-    skipEmbeddings: has('--skip-embeddings'),
     skipIndexing: has('--skip-indexing'),
     dryRun: has('--dry-run'),
   };
@@ -212,21 +211,8 @@ async function main() {
       }, steps);
     }
 
-    // pgvector embeddings for the /entdecken semantic search. Runs AFTER
-    // enrichment so the embedding input includes the AI-derived tags,
-    // audience, vibe and occasion_tags. Resume-safe:
-    //   - fetch filter: `embedding.is.null OR embedding_hash.is.null`
-    //   - inner loop: skips rows whose content-hash already matches
-    // A clean cycle (nothing new) returns in a few seconds and costs $0.
-    // On fresh events only the delta gets embedded (~$0.02/1M tokens).
-    if (!opts.skipEmbeddings) {
-      steps.embeddings = await runStep('embeddings', async () => {
-        execStep(
-          'Build embeddings (semantic search index)',
-          `npx tsx ${envFlag}src/scripts/build-embeddings.ts`,
-        );
-      }, steps);
-    }
+    // Embeddings-Step entfernt (2026-07, MASTERPLAN §6): semantische Suche
+    // wurde stillgelegt, events.embedding + pgvector-Index sind gedroppt.
 
     if (!opts.skipIndexing) {
       steps.indexing = await runStep('indexing', async () => {

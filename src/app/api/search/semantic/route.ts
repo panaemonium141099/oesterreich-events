@@ -1,276 +1,289 @@
 /**
- * Natural-language semantic event search.
+ * Natural-language smart event search.
  *
  * POST /api/search/semantic
  * Body: { query: string, limit?: number }
  *
- * Pipeline:
- *   1. Parse the query for hard filters (date, price, audience) via
- *      lightweight regex → structured filter set
- *   2. Embed the remaining free-text part with text-embedding-3-small
- *   3. Call pgvector RPC `search_events_semantic` with the embedding
- *      + hard filters applied → top-N by cosine similarity
- *   4. Enrich results with the full event payload and return
+ * 2026-07 Rewrite (MASTERPLAN §6) — KI pro QUERY statt pro Event:
+ *   1. Regex-Parser zieht harte Filter (Datum, Preis, Ort) aus der Anfrage
+ *   2. EIN Gemini-2.5-Flash-Call übersetzt den Rest in unsere Taxonomie
+ *      (Kategorien/Tags/Audiences/Occasions/Vibes + freie Suchbegriffe)
+ *      — hart Whitelist-validiert gegen enrichment-taxonomy.ts
+ *   3. Parallele indexierte DB-Queries (Kategorie / Facetten-Overlap /
+ *      ilike-Textsuche) holen Kandidaten
+ *   4. Deterministisches Ranking (smart-query.ts) → top-N
  *
- * Example queries that work:
- *   "Ich bin Student und will heute abend billig saufen gehen"
- *   → date=today, price≤günstig, audience=studenten+, embedding≈"saufen
- *     gehen student bar night"
+ * Die alte pgvector/Embedding-Variante (OpenAI-Embedding pro Event,
+ * 1,22-GB-Index bei 50 Nutzungen, Datenbasis seit April stale) wurde
+ * entfernt — Spalte + Index + RPC sind gedroppt.
  *
- *   "Romantisches Date für morgen"
- *   → date=tomorrow, occasion=date-night, embedding≈"romantisch dinner date"
+ * Response-Shape ist unverändert zur alten Route (V4EntdeckenSmartMode +
+ * V4ConciergeCard konsumieren sie 1:1): { query, parsed, matches, count }.
  *
- *   "Gratis Wochenende Familie"
- *   → date=weekend, price=gratis, audience=family+, embedding≈"familie kostenlos"
+ * Degradation: ohne GEMINI_API_KEY (oder bei Gemini-Fehler/-Timeout)
+ * läuft die Suche rein deterministisch weiter (Regex-Filter + Volltext
+ * über die Wörter der Query) — schlechter, aber nie kaputt.
  */
 
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import OpenAI from 'openai';
 import { GoogleGenAI, Type } from '@google/genai';
-import { createClient } from '@supabase/supabase-js';
+import { createClient, type SupabaseClient } from '@supabase/supabase-js';
+import {
+  parseQuery,
+  validateIntent,
+  intentIsEmpty,
+  rankCandidates,
+  CITIES,
+  BUNDESLAENDER_KEYS,
+  type DetectedLocation,
+  type SearchIntent,
+  type CandidateEvent,
+} from '@/lib/search/smart-query';
+import {
+  PRIMARY_CATEGORIES,
+  TAGS,
+  AUDIENCES,
+  VIBES,
+  OCCASIONS,
+} from '@/lib/category-classifier/enrichment-taxonomy';
 
-const EMBEDDING_MODEL = 'text-embedding-3-small';
-const LOCATION_MODEL = 'gemini-2.5-flash';
+const INTENT_MODEL = 'gemini-2.5-flash';
+/** Kandidaten pro Retrieval-Pfad — klein genug für die Micro-Instanz,
+ *  groß genug dass das Ranking echte Auswahl hat. */
+const CANDIDATES_PER_PATH = 60;
+
+const EVENT_COLS =
+  'id, title, description, start_date, end_date, location_name, postal_code, address, district, bundesland, latitude, longitude, category, tags, image_url, price_text, price_tier, slug, audience, vibe, occasion_tags, is_student_friendly, is_family_friendly, duration_type, event_score';
 
 // ────────────────────────────────────────────────────────────────────
-// Query parser — pulls structured filters out of the natural-language
-// query and returns (strippedQuery, filters). The stripped version is
-// what gets embedded; the filters are passed as SQL constraints.
+// Intent-Extraktion — ein Gemini-Call pro Suche (~0,02 Cent), ersetzt
+// sowohl das Query-Embedding als auch den separaten Location-AI-Call
+// der alten Route. Whitelist-Guard: validateIntent() verwirft alles,
+// was nicht wörtlich im Taxonomie-Vokabular steht.
 // ────────────────────────────────────────────────────────────────────
 
-/**
- * DetectedLocation — was wir aus der Query extrahieren um das Result-Set
- * hart zu filtern (NICHT mehr nur soft re-rank wie früher).
- *
- *   `district`    — Stadt-Slug der `events.district` matched (z.B.
- *                   `eisenstadt`). Wenn nur Bundesland erwähnt wurde,
- *                   bleibt das `null`.
- *   `bundesland`  — Bundesland-ID der `events.bundesland` matched
- *                   (z.B. `burgenland`). Sicherheitsnetz: wenn der
- *                   district-Filter leer läuft, fallen wir auf die
- *                   gröbere Bundesland-Ebene zurück.
- */
-interface DetectedLocation {
-  district: string | null;
-  bundesland: string | null;
-}
-
-interface ParsedFilters {
-  afterDate: Date | null;      // exclusive lower bound (e.g. today 00:00)
-  beforeDate: Date | null;     // exclusive upper bound (e.g. tomorrow 23:59)
-  maxPriceTier: 'gratis' | 'günstig' | 'mittel' | null;
-  keywordSignals: string[];    // hints we detected (for response debugging)
-  location: DetectedLocation | null;
-}
-
-/**
- * Stadt-Keyword → canonical {district, bundesland} aus der DB.
- *
- * Werte gemessen am `events.district` / `events.bundesland`-Format
- * (alles lowercase, ohne Umlaute, slugified). district-Slugs sind die
- * Bezirks-Namen wie sie in der existierenden List-View gefiltert
- * werden — gleicher Match-Mechanismus wie `useFilteredEvents` (case-
- * insensitive equality auf `e.district`).
- *
- * Wien ist Sonderfall: Stadt und Bundesland identisch, Bezirke sind
- * 1-23 (zu granular für Stichwort-Suche) — deshalb `district: null`,
- * Filter greift nur auf Bundesland-Ebene.
- */
-const CITIES: Record<string, DetectedLocation> = {
-  eisenstadt:        { district: 'eisenstadt',      bundesland: 'burgenland' },
-  mattersburg:       { district: 'mattersburg',     bundesland: 'burgenland' },
-  graz:              { district: 'graz',            bundesland: 'steiermark' },
-  leoben:            { district: 'leoben',          bundesland: 'steiermark' },
-  kapfenberg:        { district: 'kapfenberg',      bundesland: 'steiermark' },
-  linz:              { district: 'linz',            bundesland: 'oberoesterreich' },
-  wels:              { district: 'wels',            bundesland: 'oberoesterreich' },
-  steyr:             { district: 'steyr',           bundesland: 'oberoesterreich' },
-  innsbruck:         { district: 'innsbruck',       bundesland: 'tirol' },
-  kufstein:          { district: 'kufstein',        bundesland: 'tirol' },
-  bregenz:           { district: 'bregenz',         bundesland: 'vorarlberg' },
-  dornbirn:          { district: 'dornbirn',        bundesland: 'vorarlberg' },
-  klagenfurt:        { district: 'klagenfurt',      bundesland: 'kaernten' },
-  villach:           { district: 'villach',         bundesland: 'kaernten' },
-  salzburg:          { district: 'salzburg',        bundesland: 'salzburg' },
-  krems:             { district: 'krems',           bundesland: 'niederoesterreich' },
-  wienerneustadt:    { district: 'wienerneustadt',  bundesland: 'niederoesterreich' },
-  baden:             { district: 'baden',           bundesland: 'niederoesterreich' },
-  amstetten:         { district: 'amstetten',       bundesland: 'niederoesterreich' },
-  'st pölten':       { district: 'sankt-poelten',   bundesland: 'niederoesterreich' },
-  'sankt pölten':    { district: 'sankt-poelten',   bundesland: 'niederoesterreich' },
-  wien:              { district: null,              bundesland: 'wien' },
-  vienna:            { district: null,              bundesland: 'wien' },
-};
-
-/** Bundesland-Keyword → canonical Bundesland-ID. Akzeptiert Umlaut- und
- *  Nicht-Umlaut-Schreibweisen, da die User das durcheinander tippen. */
-const BUNDESLAENDER_KEYS: Record<string, string> = {
-  burgenland: 'burgenland',
-  niederösterreich: 'niederoesterreich', niederoesterreich: 'niederoesterreich',
-  oberösterreich: 'oberoesterreich', oberoesterreich: 'oberoesterreich',
-  steiermark: 'steiermark',
-  tirol: 'tirol',
-  vorarlberg: 'vorarlberg',
-  kärnten: 'kaernten', kaernten: 'kaernten',
-};
-
-function detectLocationRegex(q: string): DetectedLocation | null {
-  const lower = q.toLowerCase();
-  // Stadt zuerst (spezifischer) — dadurch matched "eisenstadt" auf
-  // {district:'eisenstadt', bundesland:'burgenland'} statt nur auf
-  // burgenland (würde sonst auch Mattersburg-Events einschließen).
-  for (const [key, loc] of Object.entries(CITIES)) {
-    const re = new RegExp(`\\b${key.replace(/\s+/g, '\\s+')}\\b`, 'i');
-    if (re.test(lower)) return loc;
-  }
-  for (const [key, bl] of Object.entries(BUNDESLAENDER_KEYS)) {
-    const re = new RegExp(`\\b${key.replace(/\s+/g, '\\s+')}\\b`, 'i');
-    if (re.test(lower)) return { district: null, bundesland: bl };
-  }
-  return null;
-}
-
-/**
- * Tippfehler-tolerante Ort-Extraktion via Gemini.
- *
- * Wird NUR aufgerufen wenn der Regex-Pass nichts gefunden hat — der
- * deckt die korrekt geschriebenen Häufig-Fälle ab und spart pro Call
- * den AI-Roundtrip. Für "eisenstad" / "Eisenstatt" / "burgnland" etc.
- * (alle Regex-Misser) springt der AI-Pass ein.
- *
- * Whitelist-Guard: das Model darf nur Strings aus unseren Maps
- * zurückgeben, alles andere wird zu `null` gemapped. Verhindert
- * Halluzinationen die durchsickern.
- */
-async function normalizeLocationViaAI(query: string, geminiKey: string): Promise<DetectedLocation | null> {
+async function extractIntentViaAI(
+  query: string,
+  intentText: string,
+  geminiKey: string,
+): Promise<SearchIntent | null> {
   const ai = new GoogleGenAI({ apiKey: geminiKey });
-  const cityList = Object.keys(CITIES).join(', ');
-  const blList = Object.keys(BUNDESLAENDER_KEYS).join(', ');
   const systemInstruction =
-`Du extrahierst aus einer österreichischen Event-Suchanfrage den erwähnten Ort und gibst ihn als canonical Name zurück.
+`Du übersetzt eine österreichische Event-Suchanfrage in strukturierte Facetten für eine Event-Datenbank.
 
-Erlaubte Städte/Bezirke: ${cityList}
-Erlaubte Bundesländer: ${blList}
+Erlaubte categories (max 3, exakte Schreibweise): ${PRIMARY_CATEGORIES.join(' | ')}
+Erlaubte tags (max 8): ${TAGS.join(', ')}
+Erlaubte audiences (max 3): ${AUDIENCES.join(', ')}
+Erlaubte occasions (max 3): ${OCCASIONS.join(', ')}
+Erlaubte vibes (max 3): ${VIBES.join(', ')}
+Erlaubte locations (Städte/Bundesländer): ${Object.keys(CITIES).join(', ')}, ${Object.keys(BUNDESLAENDER_KEYS).join(', ')}
 
 Regeln:
-- Tippfehler/Umlaut-Varianten korrigieren ("eisenstad" → eisenstadt, "Eisenstatt" → eisenstadt, "burgnland" → burgenland, "Niederöstereich" → niederösterreich)
-- "in [X]" / "im [X]" / "rund um [X]" / "bei [X]" / einzelnes Ortswort → X extrahieren
-- Stadt > Bundesland (wenn Stadt klar erkannt, gib Stadt zurück)
-- Nicht-österreichische Orte, unbekannte Orte oder keine Erwähnung → null
-- Antworte STRIKT mit einem Eintrag aus den Listen oben (lowercase) ODER null. Niemals eine andere Schreibweise.`;
+- Wähle NUR Werte aus den Listen oben, in exakt dieser Schreibweise. Nichts erfinden.
+- searchTerms: 1-4 konkrete Suchwörter für die Volltextsuche (Künstler, Genre, Eventart) — NUR wenn die Anfrage konkrete Begriffe enthält, die über die Facetten hinausgehen (z.B. Band-Name, "Flohmarkt", "Krampuslauf"). Allgemeine Wörter wie "Event", "etwas", "cool" weglassen.
+- location: erwähnter Ort als EIN Wert aus der Location-Liste (Tippfehler korrigieren: "eisenstad" → eisenstadt, "burgnland" → burgenland). Kein Ort erwähnt oder unbekannt → null.
+- Interpretiere Absichten: "saufen gehen" → Nightlife & Party + ausgehen; "was mit Kindern" → Familie & Kinder + family-Tags; "romantisch" → date-night.
+- Lieber wenige treffende Facetten als viele lose.`;
 
   try {
     const resp = await ai.models.generateContent({
-      model: LOCATION_MODEL,
-      contents: query,
+      model: INTENT_MODEL,
+      contents: `Suchanfrage: "${query}"\nKern-Intent (Datum/Preis-Wörter bereits entfernt): "${intentText}"`,
       config: {
         systemInstruction,
         responseMimeType: 'application/json',
         responseSchema: {
           type: Type.OBJECT,
           properties: {
-            match: { type: Type.STRING, nullable: true },
+            categories: { type: Type.ARRAY, items: { type: Type.STRING } },
+            tags: { type: Type.ARRAY, items: { type: Type.STRING } },
+            audiences: { type: Type.ARRAY, items: { type: Type.STRING } },
+            occasions: { type: Type.ARRAY, items: { type: Type.STRING } },
+            vibes: { type: Type.ARRAY, items: { type: Type.STRING } },
+            searchTerms: { type: Type.ARRAY, items: { type: Type.STRING } },
+            location: { type: Type.STRING, nullable: true },
           },
         },
         thinkingConfig: { thinkingBudget: 0 },
-        maxOutputTokens: 50,
+        maxOutputTokens: 400,
         temperature: 0,
       },
     });
-
     const text = resp.text;
     if (!text) return null;
-    const parsed = JSON.parse(text) as { match?: string | null };
-    const match = typeof parsed.match === 'string' ? parsed.match.toLowerCase().trim() : null;
-    if (!match) return null;
-    if (CITIES[match]) return CITIES[match];
-    if (BUNDESLAENDER_KEYS[match]) return { district: null, bundesland: BUNDESLAENDER_KEYS[match] };
-    return null;
+    return validateIntent(JSON.parse(text));
   } catch (e) {
-    if (process.env.NODE_ENV === 'development') console.error('[location-ai]', e);
+    if (process.env.NODE_ENV === 'development') console.error('[smart-search/intent]', e);
     return null;
   }
 }
 
-function parseQuery(raw: string): { text: string; filters: ParsedFilters } {
-  const q = raw.toLowerCase();
-  const signals: string[] = [];
-  const location = detectLocationRegex(raw);
-  const filters: ParsedFilters = {
-    afterDate: null,
-    beforeDate: null,
-    maxPriceTier: null,
-    keywordSignals: signals,
-    location,
-  };
-  if (location?.district) signals.push(`location:district:${location.district}`);
-  if (location?.bundesland) signals.push(`location:bundesland:${location.bundesland}`);
+/** Intent-Location (String vom LLM) → DetectedLocation via Whitelist. */
+function resolveIntentLocation(loc: string | null): DetectedLocation | null {
+  if (!loc) return null;
+  if (CITIES[loc]) return CITIES[loc];
+  if (BUNDESLAENDER_KEYS[loc]) return { districts: null, bundesland: BUNDESLAENDER_KEYS[loc] };
+  return null;
+}
 
-  // ─── Date signals ───
-  const now = new Date();
-  const startOfToday = new Date(now); startOfToday.setHours(0, 0, 0, 0);
-  const endOfToday = new Date(now); endOfToday.setHours(23, 59, 59, 999);
-  const startOfTomorrow = new Date(startOfToday); startOfTomorrow.setDate(startOfTomorrow.getDate() + 1);
-  const endOfTomorrow = new Date(endOfToday); endOfTomorrow.setDate(endOfTomorrow.getDate() + 1);
+// ────────────────────────────────────────────────────────────────────
+// Kandidaten-Retrieval — normale indexierte Queries statt pgvector
+// ────────────────────────────────────────────────────────────────────
 
-  // "heute" / "heute abend" / "tonight"
-  if (/\b(heute|tonight|today)\b/.test(q)) {
-    filters.afterDate = startOfToday;
-    filters.beforeDate = endOfToday;
-    signals.push('today');
+interface HardFilters {
+  afterIso: string;
+  beforeIso: string | null;
+  districts: string[] | null;
+  bundesland: string | null;
+  priceTiers: string[] | null;
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function baseQuery(supabase: SupabaseClient<any>, hard: HardFilters) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let q = (supabase.from('events') as any)
+    .select(EVENT_COLS)
+    .eq('visibility', 'public')
+    .in('publish_status', ['published', 'published_low_confidence'])
+    .gte('start_date', hard.afterIso);
+  if (hard.beforeIso) q = q.lte('start_date', hard.beforeIso);
+  // bundesland IMMER mitfiltern, auch wenn districts gesetzt sind: auf
+  // district existiert kein Index — ohne den bundesland-Filter walkt der
+  // Planner alle ~90k Zukunfts-Events (gemessen: statement timeout bei
+  // "konzert in graz"). MIT bundesland nutzt er den Composite-Index
+  // idx_events_bundesland_start_date und district wird zum billigen
+  // Restfilter über wenige tausend Zeilen. Trade-off: Events mit
+  // korrektem district aber NULL-bundesland fallen raus (~100/Stadt) —
+  // behoben durch die Bundesland-Normalisierung in MASTERPLAN §10.4.
+  // .in() quotet Werte mit Leerzeichen/Klammern ('graz (stadt)') sicher.
+  if (hard.bundesland) q = q.eq('bundesland', hard.bundesland);
+  if (hard.districts) q = q.in('district', hard.districts);
+  if (hard.priceTiers) q = q.in('price_tier', hard.priceTiers);
+  return q;
+}
+
+/**
+ * Ergebnis eines PostgREST-Aufrufs entpacken: Fehler LOGGEN statt still
+ * zu schlucken (ein fehlgeschlagener Pfad soll die anderen nicht killen,
+ * aber sichtbar sein), dann data oder [].
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function takeData(r: any, label: string): CandidateEvent[] {
+  if (r?.error) console.error(`[smart-search] ${label} failed:`, r.error);
+  return (r?.data ?? []) as CandidateEvent[];
+}
+
+/**
+ * WICHTIG zur Sortierung (empirisch gemessen, 2026-07-07):
+ * `event_score DESC NULLS LAST` — und das `nullsFirst:false` ist hier
+ * KEIN Versehen, sondern der Kern des Plans: es bricht absichtlich die
+ * Sortier-Richtung des Index `idx_events_score_desc` (DESC NULLS FIRST),
+ * damit der Planner ihn NICHT für einen "index-ordered scan with filter"
+ * wählt. Beide index-kompatiblen Varianten (Score-Index-Walk sowie
+ * ORDER BY start_date über den Datums-Index) sind auf der Micro-Instanz
+ * live in den 8s-Statement-Timeout gelaufen (Code 57014), weil der
+ * Planner dabei die ganze Tabelle in Index-Reihenfolge walkt und jede
+ * Zeile gegen die selektiven Filter prüft. Mit gebrochener Richtung
+ * nimmt er stattdessen Bitmap-Scans über die selektiven Filter
+ * (bundesland/district + start_date + ilike) und macht einen billigen
+ * Top-60-Sort über wenige tausend Rest-Zeilen — gemessen: Millisekunden.
+ * NICHT "optimieren", ohne mit EXPLAIN auf Produktionsdaten zu messen.
+ */
+const SCORE_ORDER = { ascending: false, nullsFirst: false } as const;
+
+async function fetchCandidates(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  supabase: SupabaseClient<any>,
+  hard: HardFilters,
+  intent: SearchIntent,
+): Promise<CandidateEvent[]> {
+  const paths: Array<Promise<CandidateEvent[]>> = [];
+
+  // Pfad A: Kategorie-Treffer, zeitlich nächste zuerst
+  if (intent.categories.length > 0) {
+    paths.push(
+      baseQuery(supabase, hard)
+        .in('category', intent.categories)
+        .order('event_score', SCORE_ORDER)
+        .limit(CANDIDATES_PER_PATH)
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        .then((r: any) => takeData(r, 'path-category')),
+    );
   }
-  // "morgen" / "tomorrow"
-  else if (/\b(morgen|tomorrow)\b/.test(q)) {
-    filters.afterDate = startOfTomorrow;
-    filters.beforeDate = endOfTomorrow;
-    signals.push('tomorrow');
-  }
-  // "dieses wochenende" / "am wochenende" / "weekend"
-  else if (/\b(wochenende|weekend)\b/.test(q)) {
-    // Find next Saturday-Sunday window
-    const day = now.getDay(); // 0 = Sun, 6 = Sat
-    const daysToSat = (6 - day + 7) % 7;
-    const sat = new Date(startOfToday);
-    sat.setDate(sat.getDate() + daysToSat);
-    const sun = new Date(sat);
-    sun.setDate(sun.getDate() + 1);
-    sun.setHours(23, 59, 59, 999);
-    filters.afterDate = sat;
-    filters.beforeDate = sun;
-    signals.push('weekend');
-  }
 
-  // ─── Price signals ───
-  if (/\b(gratis|kostenlos|free|umsonst)\b/.test(q)) {
-    filters.maxPriceTier = 'gratis';
-    signals.push('price:gratis');
-  } else if (/\b(billig|günstig|cheap|sparsam|kleines budget|unter 20|unter 10|unter 15)\b/.test(q)) {
-    filters.maxPriceTier = 'günstig';
-    signals.push('price:günstig');
+  // Pfad B: Facetten-Overlap (tags / occasions / audiences / vibes) in
+  // EINER Query via or(...ov...). Alle Facetten-Werte sind kebab-case
+  // aus der Taxonomie-Whitelist — keine Sonderzeichen, kein Injection-
+  // Risiko in der or-Syntax.
+  const ovParts: string[] = [];
+  if (intent.tags.length > 0) ovParts.push(`tags.ov.{${intent.tags.join(',')}}`);
+  if (intent.occasions.length > 0) ovParts.push(`occasion_tags.ov.{${intent.occasions.join(',')}}`);
+  if (intent.audiences.length > 0) ovParts.push(`audience.ov.{${intent.audiences.join(',')}}`);
+  if (intent.vibes.length > 0) ovParts.push(`vibe.ov.{${intent.vibes.join(',')}}`);
+  if (ovParts.length > 0) {
+    paths.push(
+      baseQuery(supabase, hard)
+        .or(ovParts.join(','))
+        .order('event_score', SCORE_ORDER)
+        .limit(CANDIDATES_PER_PATH)
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        .then((r: any) => takeData(r, 'path-facets')),
+    );
   }
 
-  // ─── Strip recognized date/price words from the text that gets
-  // embedded, so the model focuses on the actual activity/vibe intent.
-  let stripped = raw;
-  const stripPatterns = [
-    /\b(heute|tonight|today|morgen|tomorrow|dieses wochenende|am wochenende|weekend)\b/gi,
-    /\b(gratis|kostenlos|free|umsonst|billig|günstig|cheap)\b/gi,
-    /\b(ich bin|ich will|ich möchte|ich suche|suche|will|möchte)\b/gi,
-  ];
-  for (const re of stripPatterns) stripped = stripped.replace(re, ' ');
-  stripped = stripped.replace(/\s+/g, ' ').trim();
+  // Pfad C: Volltext als ilike-Klauseln INNERHALB der gefilterten Query.
+  // Bewusst NICHT die search_event_ids-RPC: die cappt global auf 250 ids
+  // BEVOR Orts-/Datumsfilter greifen — bei "konzert in wien" enthielt der
+  // Cap dann 0 Wien-Events (Kandidaten-Pool-Overshoot; dasselbe Problem
+  // hatte die alte pgvector-Route dokumentiert und in der RPC gelöst).
+  // Hier drehen wir es um: harte Filter zuerst (bundesland+start_date
+  // Indizes), pro Suchbegriff eine AND-verknüpfte or(ilike)-Klausel.
+  // searchTerms sind via validateIntent() zeichensicher (keine %,(),{}
+  // — kein Injection- oder Pattern-Risiko in or-Syntax/ilike).
+  if (intent.searchTerms.length > 0) {
+    let q = baseQuery(supabase, hard);
+    for (const term of intent.searchTerms.slice(0, 4)) {
+      q = q.or(`title.ilike.%${term}%,location_name.ilike.%${term}%,category.ilike.%${term}%`);
+    }
+    paths.push(
+      q
+        .order('event_score', SCORE_ORDER)
+        .limit(CANDIDATES_PER_PATH)
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        .then((r: any) =>
+          takeData(r, 'path-text').map(ev => ({ ...ev, _textHit: true })),
+        ),
+    );
+  }
 
-  return { text: stripped || raw, filters };
+  // Fallback: gar kein Signal → zeitlich nächste Events im Filter-Fenster,
+  // damit der User nie eine leere Seite ohne Grund sieht (der Concierge
+  // ordnet das Ergebnis ein).
+  if (paths.length === 0) {
+    paths.push(
+      baseQuery(supabase, hard)
+        .order('event_score', SCORE_ORDER)
+        .limit(CANDIDATES_PER_PATH)
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        .then((r: any) => takeData(r, 'path-nextup')),
+    );
+  }
+
+  const settled = await Promise.all(paths);
+  return settled.flat();
 }
 
 // ────────────────────────────────────────────────────────────────────
 
 export async function POST(req: NextRequest) {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  const openaiKey = process.env.OPENAI_API_KEY;
-  if (!supabaseUrl || !supabaseKey || !openaiKey) {
+  // Anon-Key-Fallback für lokale Dev-Setups ohne Service-Key: die Route
+  // liest ohnehin nur published+public Events, mit Anon-Key greift
+  // zusätzlich RLS — strikt sicherer, nur ggf. weniger Treffer.
+  const supabaseKey =
+    process.env.SUPABASE_SERVICE_ROLE_KEY ?? process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  if (!supabaseUrl || !supabaseKey) {
     return NextResponse.json({ error: 'Server misconfigured' }, { status: 503 });
   }
 
@@ -287,143 +300,102 @@ export async function POST(req: NextRequest) {
   }
   const limit = Math.min(Math.max(1, body.limit ?? 20), 50);
 
-  // 1. Parse — regex-Pass für Ort (deckt korrekt geschriebene Fälle ab)
-  const { text: embedText, filters } = parseQuery(rawQuery);
+  // 1. Regex-Pass: Datum, Preis, Ort (schneller deterministischer Pfad)
+  const { text: intentText, filters } = parseQuery(rawQuery);
 
-  // 2. Parallel: embedding + AI-Location-Normalisierung (nur wenn regex
-  //    nichts gefunden hat, sonst sparen wir den AI-Call). AI ist
-  //    ausschließlich für Tippfehler/Varianten zuständig — der Regex
-  //    bleibt der schnelle Pfad für die Häufig-Fälle.
-  const openai = new OpenAI({ apiKey: openaiKey });
+  // 2. Intent via Gemini (ersetzt Embedding + separaten Location-Call).
+  //    4s-Timeout: eine hängende Gemini-API darf die Suche nicht bis zum
+  //    Function-Timeout blockieren — nach Ablauf degradiert die Route in
+  //    den deterministischen Volltext-Fallback.
   const geminiKey = process.env.GEMINI_API_KEY;
-  const aiLocationPromise: Promise<DetectedLocation | null> =
-    (!filters.location && geminiKey)
-      ? normalizeLocationViaAI(rawQuery, geminiKey)
-      : Promise.resolve(null);
-
-  let queryEmbedding: number[];
-  let aiLocation: DetectedLocation | null = null;
-  try {
-    const [embedResp, aiLoc] = await Promise.all([
-      openai.embeddings.create({ model: EMBEDDING_MODEL, input: embedText }),
-      aiLocationPromise,
-    ]);
-    queryEmbedding = embedResp.data[0]?.embedding ?? [];
-    aiLocation = aiLoc;
-    if (queryEmbedding.length !== 1536) {
-      return NextResponse.json({ error: 'embedding failed' }, { status: 500 });
+  let intent: SearchIntent | null = geminiKey
+    ? await Promise.race([
+        extractIntentViaAI(rawQuery, intentText, geminiKey),
+        new Promise<null>(resolve => setTimeout(() => resolve(null), 4000)),
+      ])
+    : null;
+  let intentSource: 'ai' | 'fallback' = 'ai';
+  if (!intent || intentIsEmpty(intent)) {
+    intentSource = intent ? 'ai' : 'fallback';
+    intent = intent ?? {
+      categories: [], tags: [], audiences: [], occasions: [], vibes: [],
+      searchTerms: [], location: null,
+    };
+    // Deterministischer Text-Fallback: die Wörter des gestrippten
+    // Intent-Texts gehen als AND-verknüpfte Suchbegriffe in die
+    // ilike-Suche (max 2, je ≥3 Zeichen, ohne Stoppwörter — jedes Wort
+    // ist ein Pflicht-Match, zu viele Wörter würgen das Ergebnis).
+    if (intent.searchTerms.length === 0 && intentText.length >= 3) {
+      const STOPWORDS = new Set([
+        'und', 'oder', 'der', 'die', 'das', 'den', 'dem', 'ein', 'eine', 'einen', 'einem',
+        'mit', 'für', 'auf', 'was', 'wer', 'wie', 'ist', 'gibt', 'geht', 'gehen', 'etwas',
+        'abend', 'abends', 'bin', 'the', 'and',
+      ]);
+      intent.searchTerms = intentText
+        .split(/\s+/)
+        .map(w => w.replace(/[^\p{L}\p{N}'&.-]/gu, ''))
+        .filter(w => w.length >= 3 && !STOPWORDS.has(w.toLowerCase()))
+        .slice(0, 2);
     }
-  } catch (e) {
-    console.error('[semantic-search] embed failed:', e);
-    return NextResponse.json({ error: 'embedding service unavailable' }, { status: 502 });
+  }
+  if (intentSource === 'ai') filters.keywordSignals.push('intent:ai');
+  intent.categories.forEach(c => filters.keywordSignals.push(`category:${c}`));
+  intent.tags.forEach(t => filters.keywordSignals.push(`tag:${t}`));
+  intent.audiences.forEach(a => filters.keywordSignals.push(`audience:${a}`));
+  intent.occasions.forEach(o => filters.keywordSignals.push(`occasion:${o}`));
+
+  // Ort: Regex gewinnt (deterministisch); AI ergänzt nur bei Regex-Miss
+  // (Tippfehler-Fälle) — Whitelist-Guard via resolveIntentLocation.
+  if (!filters.location) {
+    const aiLoc = resolveIntentLocation(intent.location);
+    if (aiLoc) {
+      filters.location = aiLoc;
+      if (aiLoc.districts) filters.keywordSignals.push(`location:district:${aiLoc.districts.join('|')}:ai`);
+      if (aiLoc.bundesland) filters.keywordSignals.push(`location:bundesland:${aiLoc.bundesland}:ai`);
+    }
   }
 
-  // AI ergänzt regex — regex gewinnt wenn beide hits haben (deterministisch).
-  if (!filters.location && aiLocation) {
-    filters.location = aiLocation;
-    if (aiLocation.district) filters.keywordSignals.push(`location:district:${aiLocation.district}:ai`);
-    if (aiLocation.bundesland) filters.keywordSignals.push(`location:bundesland:${aiLocation.bundesland}:ai`);
-  }
-
-  // 3. Call the RPC
+  // 3. Kandidaten holen (parallel, indexierte Queries)
   const supabase = createClient(supabaseUrl, supabaseKey, { auth: { persistSession: false } });
-  // Future-only: nie past events durchsuchen (auch nicht gestern).
-  // Default = heute 00:00:00 lokal so dass ganztägige Events (start_date
-  // ist tag-genau) noch reinkommen wenn sie heute laufen. Past events
-  // belasten den HNSW-Index unnötig — siehe Memory-Note
-  // reference_semantic_search_future_only.md.
+  // Future-only: nie past events durchsuchen. Default = heute 00:00.
   const today = new Date();
   today.setHours(0, 0, 0, 0);
-  const afterDate = (filters.afterDate ?? today).toISOString();
+  const hard: HardFilters = {
+    afterIso: (filters.afterDate ?? today).toISOString(),
+    beforeIso: filters.beforeDate?.toISOString() ?? null,
+    districts: filters.location?.districts ?? null,
+    bundesland: filters.location?.bundesland ?? null,
+    priceTiers:
+      filters.maxPriceTier === 'gratis' ? ['gratis']
+      : filters.maxPriceTier === 'günstig' ? ['gratis', 'günstig']
+      : null,
+  };
 
-  // RPC filtert jetzt direkt nach district/bundesland (siehe Migration
-  // 20260520_*_extend_search_events_semantic_with_location_filters).
-  // Damit braucht es keinen Kandidaten-Pool-Overshoot mehr — die RPC
-  // gibt die top-N Eisenstadt-Events nach Similarity zurück, nicht
-  // global top-N und dann post-filter (das verlor Eisenstadt-Events
-  // sobald rural Burgenland-Heurigen höhere Similarity hatten).
-  //
-  // district hat Vorrang vor bundesland (wenn beide gesetzt). Wenn der
-  // User die Stadt nennt, respektieren wir das hart — bundesland-Fallback
-  // wäre irreführend ("23 Treffer in Eisenstadt" wo eigentlich Kukmirn,
-  // Rudersdorf etc. drinstanden).
-  const filterDistrict = filters.location?.district ?? null;
-  const filterBundesland = filterDistrict ? null : (filters.location?.bundesland ?? null);
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: matches, error: rpcErr } = await (supabase.rpc as any)('search_events_semantic', {
-    query_embedding: `[${queryEmbedding.join(',')}]`,
-    match_limit: limit,
-    min_similarity: 0.2,    // filter out very loose matches
-    filter_after_date: afterDate,
-    filter_max_price_tier: filters.maxPriceTier,
-    filter_bundesland: filterBundesland,
-    filter_district: filterDistrict,
-  });
-
-  if (rpcErr) {
-    console.error('[semantic-search] RPC failed:', rpcErr);
-    // Most common cause: pgvector extension not enabled yet, or the
-    // RPC wasn't created. Surface a useful hint.
-    const hint = rpcErr.message.includes('does not exist') || rpcErr.message.includes('search_events_semantic')
-      ? 'Run the SQL migration 20260423_semantic_search_embeddings.sql in Supabase first.'
-      : rpcErr.message;
-    return NextResponse.json({ error: `semantic search unavailable: ${hint}` }, { status: 503 });
+  let candidates: CandidateEvent[];
+  try {
+    candidates = await fetchCandidates(supabase, hard, intent);
+  } catch (e) {
+    console.error('[smart-search] candidate fetch failed:', e);
+    return NextResponse.json({ error: 'search unavailable' }, { status: 503 });
   }
 
-  const matchList = (matches ?? []) as Array<{ id: string; title: string; similarity: number }>;
-  if (matchList.length === 0) {
-    return NextResponse.json({
-      query: rawQuery,
-      parsed: {
-        embedded_text: embedText,
-        after_date: filters.afterDate?.toISOString() ?? null,
-        before_date: filters.beforeDate?.toISOString() ?? null,
-        max_price_tier: filters.maxPriceTier,
-        signals: filters.keywordSignals,
-        location_district: filters.location?.district ?? null,
-        location_bundesland: filters.location?.bundesland ?? null,
-      },
-      matches: [],
-      count: 0,
-    });
-  }
-
-  // 4. Hydrate full event records for the top matches
-  const ids = matchList.map(m => m.id);
-  const { data: events } = await supabase
-    .from('events')
-    .select('id, title, description, start_date, end_date, location_name, postal_code, address, bundesland, latitude, longitude, category, tags, image_url, price_text, price_tier, slug, audience, vibe, occasion_tags, is_student_friendly, is_family_friendly, duration_type')
-    .in('id', ids);
-
-  // Preserve similarity order
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const eventMap = new Map<string, any>((events ?? []).map((e: any) => [e.id, e]));
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const hydrated: any[] = matchList
-    .map(m => {
-      const ev = eventMap.get(m.id);
-      return ev ? { ...ev, _similarity: m.similarity } : null;
-    })
-    .filter(Boolean);
-
-  // Kein TS-Post-Filter mehr nötig — die RPC filtert jetzt direkt
-  // nach district/bundesland (siehe oben). Falls 0 Eisenstadt-Events
-  // semantisch passen, kriegt der User ehrlich eine leere Liste statt
-  // 23 falscher Heurigen aus dem Rest von Burgenland.
+  // 4. Ranken + Response in der alten Shape (UI-kompatibel)
+  const ranked = rankCandidates(candidates, intent, limit);
 
   return NextResponse.json({
     query: rawQuery,
     parsed: {
-      embedded_text: embedText,
+      // Key heißt aus UI-Kompat-Gründen weiterhin embedded_text —
+      // inhaltlich ist es der extrahierte Kern-Intent-Text.
+      embedded_text: intentText,
       after_date: filters.afterDate?.toISOString() ?? null,
       before_date: filters.beforeDate?.toISOString() ?? null,
       max_price_tier: filters.maxPriceTier,
       signals: filters.keywordSignals,
-      location_district: filters.location?.district ?? null,
+      location_district: filters.location?.districts?.join(',') ?? null,
       location_bundesland: filters.location?.bundesland ?? null,
     },
-    matches: hydrated,
-    count: hydrated.length,
+    matches: ranked,
+    count: ranked.length,
   });
 }

@@ -6,7 +6,7 @@ import { MapComparison } from '@/components/Business/MapComparison';
 export const revalidate = 86400;
 
 export const metadata: Metadata = {
-  title: 'Für Firmen & Veranstalter — Österreich Events',
+  title: 'Für Firmen & Veranstalter — LassTreffen.at',
   description:
     'Bring deine Events vor tausende Österreicher:innen. Hebe deine Veranstaltung auf der Karte hervor, hol dir ein verifiziertes Firmenprofil oder lass deine Events automatisch von eurer Homepage synchronisieren.',
   alternates: { canonical: '/fuer-firmen' },
@@ -170,7 +170,7 @@ export default function FuerFirmenPage() {
             Bring deine Events vor tausende Österreicher:innen.
           </h1>
           <p className="text-lg text-white/50 leading-relaxed mb-8">
-            Österreich Events ist die interaktive Event-Karte für ganz Österreich.
+            LassTreffen.at ist die interaktive Event-Karte für ganz Österreich.
             Hebe deine Veranstaltung hervor, hol dir ein verifiziertes Firmenprofil
             oder lass deine Events automatisch von eurer Homepage synchronisieren —
             so sind sie immer live und aktuell.
