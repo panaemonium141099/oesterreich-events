@@ -147,8 +147,8 @@ export async function buildSnapshot(
   const metrics: SeoSnapshotMetrics = {};
 
   // External data FIRST (highest value: search traffic + web vitals) and
-  // each stage hard-deadlined. Sum of worst-case deadlines (12+12+12+8 =
-  // 44s) stays comfortably under the 60s Vercel function limit so
+  // each stage hard-deadlined. Sum of worst-case deadlines (12+12+12+12 =
+  // 48s) stays comfortably under the 60s Vercel function limit so
   // writeSnapshot() in the caller always runs.
   if (!opts.skipExternal) {
     // ── Search Console (+ derived traffic baseline) ───────────────
@@ -163,7 +163,7 @@ export async function buildSnapshot(
   }
 
   // ── Internal DB counters LAST — cheap planned counts, deadlined ──
-  metrics.internal = await withDeadline(collectInternalMetrics(), 8_000, 'internal', undefined);
+  metrics.internal = await withDeadline(collectInternalMetrics(), 12_000, 'internal', undefined);
 
   return metrics;
 }
@@ -206,32 +206,37 @@ async function collectInternalMetrics(): Promise<SeoSnapshotMetrics['internal']>
   // des 2026-04-29-Ausfalls). Für SEO-Trend-Telemetrie (wächst der
   // Katalog?) ist die Näherung völlig ausreichend; ANALYZE hält sie
   // aktuell.
-  const [{ count: totalPublished }, { count: futurePublished }, { count: enrichedV3 }, { count: sitemapUrlsGenerated }] =
-    await Promise.all([
-      sb.from('events').select('*', { count: 'planned', head: true })
-        .eq('publish_status', 'published'),
-      sb.from('events').select('*', { count: 'planned', head: true })
-        .eq('publish_status', 'published')
-        .gte('start_date', today),
-      sb.from('events').select('*', { count: 'planned', head: true })
-        .eq('enrichment_version', 'v3'),
-      // Sitemap-eligible ≈ future published with quality_score ≥ 40.
-      sb.from('events').select('*', { count: 'planned', head: true })
-        .eq('publish_status', 'published')
-        .gte('start_date', today)
-        .gte('quality_score', 40),
-    ]);
-
-  // Gemeinden with ≥3 upcoming events — matches the noindex threshold in
-  // the gemeinde-hub page builder. This one is a GROUP BY + HAVING (no
-  // planner shortcut), so give it its own short deadline: if it's slow we
-  // default to null rather than letting it eat the internal-metrics budget.
-  const gemCountRow = await withDeadline(
-    (async () => (await sb.rpc('seo_count_indexable_gemeinde_hubs').single<{ count: number }>()).data)(),
-    4_000,
-    'gemeinde-hubs-rpc',
-    null,
-  );
+  // Alle fünf Abfragen PARALLEL (nicht counts-dann-RPC sequentiell — das
+  // stapelte ~5s Counts + 4s RPC = 9s und riss die 8s-Deadline). Die
+  // Gemeinde-RPC ist ein GROUP BY + HAVING ohne Planner-Shortcut, deshalb
+  // eigene 4s-Sub-Deadline: läuft sie länger, defaulten wir auf null statt
+  // die restlichen Metriken mitzureißen.
+  const [
+    { count: totalPublished },
+    { count: futurePublished },
+    { count: enrichedV3 },
+    { count: sitemapUrlsGenerated },
+    gemCountRow,
+  ] = await Promise.all([
+    sb.from('events').select('*', { count: 'planned', head: true })
+      .eq('publish_status', 'published'),
+    sb.from('events').select('*', { count: 'planned', head: true })
+      .eq('publish_status', 'published')
+      .gte('start_date', today),
+    sb.from('events').select('*', { count: 'planned', head: true })
+      .eq('enrichment_version', 'v3'),
+    // Sitemap-eligible ≈ future published with quality_score ≥ 40.
+    sb.from('events').select('*', { count: 'planned', head: true })
+      .eq('publish_status', 'published')
+      .gte('start_date', today)
+      .gte('quality_score', 40),
+    withDeadline(
+      (async () => (await sb.rpc('seo_count_indexable_gemeinde_hubs').single<{ count: number }>()).data)(),
+      4_000,
+      'gemeinde-hubs-rpc',
+      null,
+    ),
+  ]);
 
   return {
     totalPublished: totalPublished ?? 0,
