@@ -126,7 +126,12 @@ export async function GET(request: NextRequest) {
 
   results.durationMs = Date.now() - startedAt;
   console.log('[cron/seo-daily] done:', JSON.stringify(results));
-  return NextResponse.json(results);
+  // Einen fehlgeschlagenen Snapshot als non-200 signalisieren, damit Vercels
+  // Cron-Dashboard den Lauf ROT flaggt statt grün. Das stille 200-bei-Fehler
+  // war exakt der Grund, warum der Bruch am 2026-04-29 zehn Wochen unbemerkt
+  // blieb (seo_snapshots bekam keine Rows, aber der Cron galt als "ok").
+  const snapshotOk = (results.snapshot as { ok?: boolean } | undefined)?.ok === true;
+  return NextResponse.json(results, { status: snapshotOk ? 200 : 500 });
 }
 
 // ─────────────────────────────────────────────────────────────────────

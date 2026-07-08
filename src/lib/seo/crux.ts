@@ -27,6 +27,8 @@
  *   CLS ≤0.1 good, ≤0.25 needs-improvement, >0.25 poor
  */
 
+import { fetchWithTimeout } from './http';
+
 const CRUX_ENDPOINT = 'https://chromeuxreport.googleapis.com/v1/records:queryRecord';
 
 export interface CruxMetricHistogramBin {
@@ -71,7 +73,7 @@ export async function queryCrux(query: CruxQuery): Promise<CruxRecord | null> {
     );
   }
 
-  const res = await fetch(`${CRUX_ENDPOINT}?key=${apiKey}`, {
+  const res = await fetchWithTimeout(`${CRUX_ENDPOINT}?key=${apiKey}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(query),

@@ -36,6 +36,7 @@
 
 import { SignJWT, importPKCS8 } from 'jose';
 import { requireGoogleServiceAccount, type GoogleServiceAccount } from '@/lib/google-auth';
+import { fetchWithTimeout } from './http';
 
 // Search Console API uses TWO different path prefixes that share the
 // same host:
@@ -164,7 +165,7 @@ async function getAccessToken(): Promise<string> {
     .setExpirationTime(now + 3600)
     .sign(key);
 
-  const res = await fetch(OAUTH_TOKEN_URL, {
+  const res = await fetchWithTimeout(OAUTH_TOKEN_URL, {
     method: 'POST',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     body: new URLSearchParams({
@@ -199,7 +200,7 @@ async function gscFetch<T>(
 ): Promise<T> {
   const token = await getAccessToken();
   const base = family === 'inspect' ? GSC_INSPECT_API : GSC_SITES_API;
-  const res = await fetch(`${base}${path}`, {
+  const res = await fetchWithTimeout(`${base}${path}`, {
     ...init,
     headers: {
       ...(init?.headers ?? {}),
