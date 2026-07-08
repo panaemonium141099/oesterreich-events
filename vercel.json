@@ -44,10 +44,6 @@
     {
       "path": "/api/cron/expire-boosts",
       "schedule": "0 1 * * *"
-    },
-    {
-      "path": "/api/cron/eventim",
-      "schedule": "0 3 * * *"
     }
   ]
 }

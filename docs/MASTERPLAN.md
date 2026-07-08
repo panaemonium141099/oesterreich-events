@@ -401,14 +401,15 @@ kleinen APIs treffen lassen.
    `perf_drop_semantic_search_embeddings`; Indizes 1.707→408 MB, Tabelle
    3,75→2,45 GB). pg_cron: stats-Cache 5→30 min, map-points 15→60 min,
    match-artists 5→60 min, `send-reminders-hourly` (Duplikat) abgeschaltet.
-2. ✅ **Eventim-Import automatisiert** *(erledigt 2026-07-07, zweigleisig)*:
-   Parallel entstanden ein **Vercel-Cron** `/api/cron/eventim` (täglich 03:00,
-   PR #72 — läuft sofort) und der **GitHub-Workflow**
-   `.github/workflows/import-eventim.yml` (alle 6 h — Zielarchitektur gemäß
-   §4.3 „Feeds nicht auf Vercel"). ⚠️ Übergabe: Repo-Secrets
-   `EVENTIM_FEED_USER` + `EVENTIM_FEED_PASS` in GitHub anlegen; nach dem
-   ersten erfolgreichen Workflow-Lauf den eventim-Eintrag aus vercel.json
-   entfernen (sonst doppelter Import — idempotent, aber unnötige Last).
+2. ✅ **Eventim-Import automatisiert** *(abgeschlossen 2026-07-08)*:
+   `.github/workflows/import-eventim.yml` läuft alle 6 h (erster grüner Lauf
+   08.07. 06:49 UTC, Secrets in GitHub gesetzt). Der parallel entstandene
+   Vercel-Cron `/api/cron/eventim` (PR #72) wurde aus vercel.json
+   ausgeplant — die Route bleibt als manueller Fallback bestehen
+   (mit CRON_SECRET aufrufbar). Feed-Import damit gemäß §4.3 komplett
+   weg von Vercel. ⚠️ Merker: Feed-Passwort stand bis 08.07. im Klartext
+   in der Repo-History (public!) — bei Eventim rotieren lassen, neuen Wert
+   in Vercel-Env + GitHub-Secrets eintragen.
 3. ✅ **Pipeline zerlegt** *(erledigt 2026-07-07)*: `scrape-events.yml` → 6
    parallele Shards (`scrape.ts --shard i/6`, deterministisch alphabetisch) +
    Venues-Job + ein Post-Processing-Job (`--skip-scrapers --skip-venues`) mit
