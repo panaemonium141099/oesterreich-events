@@ -303,6 +303,44 @@ export const scrapers: BaseScraper[] = [
 const SCRAPER_CONCURRENCY = 10;
 
 /**
+ * Harte Obergrenze pro Scraper (default 25 min, via SCRAPER_TIMEOUT_MIN
+ * überschreibbar). Grund (2026-07-08): `scraper.scrape()` wurde ohne
+ * Deadline awaited — hängt ein Upstream-Request (Socket, der nie
+ * schließt), kehrt scrape() nie zurück, der Worker-Slot bleibt für immer
+ * blockiert und Promise.all(workers) löst nie auf → der ganze Shard
+ * hängt bis zum GitHub-timeout-minutes-Kill (im ersten 6-Shard-Lauf so
+ * passiert: 4 Shards liefen 150 min, obwohl die letzten echten Writes
+ * ~60 min vor dem Kill lagen). Der Timeout reklamiert den Slot: der
+ * hängende Scraper wird als Fehler verbucht, der Worker macht weiter.
+ * Referenzwerte: die schnellsten Shards waren mit 24 Scrapern in 35–85
+ * min fertig, d.h. jeder legitime Scraper lag klar unter 25 min. NB: der
+ * abgebrochene Netzwerk-Call läuft im Hintergrund weiter (kein
+ * AbortSignal durch alle Scraper gefädelt) — für einen CI-Prozess ok,
+ * er stirbt beim Prozess-Ende. */
+const SCRAPER_TIMEOUT_MS =
+  (Number(process.env.SCRAPER_TIMEOUT_MIN) || 25) * 60_000;
+
+class ScraperTimeoutError extends Error {
+  constructor(name: string, ms: number) {
+    super(`Scraper '${name}' timed out nach ${Math.round(ms / 60_000)} min`);
+    this.name = 'ScraperTimeoutError';
+  }
+}
+
+function scrapeWithTimeout(scraper: BaseScraper): Promise<ScrapedEvent[]> {
+  return new Promise<ScrapedEvent[]>((resolve, reject) => {
+    const timer = setTimeout(
+      () => reject(new ScraperTimeoutError(scraper.name, SCRAPER_TIMEOUT_MS)),
+      SCRAPER_TIMEOUT_MS,
+    );
+    scraper.scrape().then(
+      (events) => { clearTimeout(timer); resolve(events); },
+      (err) => { clearTimeout(timer); reject(err); },
+    );
+  });
+}
+
+/**
  * Deterministische Shard-Aufteilung für parallele CI-Jobs (MASTERPLAN §5):
  * alphabetisch sortiert (stabil gegenüber Registrierungs-Reihenfolge),
  * dann round-robin auf shardCount Buckets. Jeder Scraper landet in genau
@@ -358,7 +396,7 @@ export async function runScraper(scraper: BaseScraper): Promise<void> {
   });
 
   try {
-    const events: ScrapedEvent[] = await scraper.scrape();
+    const events: ScrapedEvent[] = await scrapeWithTimeout(scraper);
     eventsFound = events.length;
 
     writeProgress(scraper.name, {
