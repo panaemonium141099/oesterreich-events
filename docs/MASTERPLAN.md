@@ -410,10 +410,20 @@ kleinen APIs treffen lassen.
    weg von Vercel. ⚠️ Merker: Feed-Passwort stand bis 08.07. im Klartext
    in der Repo-History (public!) — bei Eventim rotieren lassen, neuen Wert
    in Vercel-Env + GitHub-Secrets eintragen.
-3. ✅ **Pipeline zerlegt** *(erledigt 2026-07-07)*: `scrape-events.yml` → 6
-   parallele Shards (`scrape.ts --shard i/6`, deterministisch alphabetisch) +
+3. ✅ **Pipeline zerlegt** *(erledigt 2026-07-07)*: `scrape-events.yml` → N
+   parallele Shards (`scrape.ts --shard i/N`, deterministisch alphabetisch) +
    Venues-Job + ein Post-Processing-Job (`--skip-scrapers --skip-venues`) mit
    `if: always()`. Semantic-Search/Embeddings-Step aus der Pipeline entfernt.
+   **Nachjustiert 2026-07-08 nach erstem Lauf** (6 Shards à 150 min: 2 fertig
+   in 35/85 min, 4 am Timeout gekillt): (a) auf 10 Shards à 300 min erhöht
+   (`4f09e4b`); (b) **eigentliche Root-Cause gefixt** (`27b3eaf`) — `scraper.
+   scrape()` lief ohne Deadline, ein hängender Upstream-Request blockierte
+   den Worker-Slot dauerhaft und damit den ganzen Shard bis zum GitHub-Kill
+   (Beleg: letzte DB-Writes ~60 min vor dem Kill). Jetzt Per-Scraper-Timeout
+   25 min (`SCRAPER_TIMEOUT_MIN`). **Offen (P2):** per-Scraper-Laufzeit nach
+   `source_runs` schreiben → lastbalanciertes Sharding statt round-robin
+   (die Mega-Kommunal-Aggregatoren gem2go/gemeinde-registry/gemeinden-generic/
+   boudicca sind die Zeitfresser).
 4. ✅ **Klick-Tracking** *(erledigt 2026-07-07)*: globaler `ClickTracker`
    (delegierter `data-track`-Listener im Root-Layout); Ticket-CTA sendet
    Event-ID + Provider mit.
