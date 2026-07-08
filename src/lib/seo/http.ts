@@ -17,7 +17,7 @@
  * Cron nie wieder still an einem Hang sterben — jeder Lauf hinterlässt
  * mindestens einen Heartbeat-Row.
  */
-export const SEO_FETCH_TIMEOUT_MS = 15_000;
+export const SEO_FETCH_TIMEOUT_MS = 10_000;
 
 export function fetchWithTimeout(
   url: string,

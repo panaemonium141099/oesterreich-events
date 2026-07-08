@@ -431,22 +431,33 @@ kleinen APIs treffen lassen.
    `oesterreich-events.at` → LassTreffen.at in AGB, Impressum, Datenschutz,
    Quellen, Footer, Auth-Layout, Blog-JSON-LD, /fuer-firmen, package.json.
 6. ✅ **`seo-daily-snapshot` Root-Cause gefunden + gefixt** *(2026-07-08)*.
-   Diagnose datenbasiert (kein Vercel-Log nötig): letzter Row am 29.04. ist
-   **vollständig**, dann saubere Kante; Tabellenschema trivial (3 Spalten,
-   kein Trigger), keine Git-Änderung an Route/lib/vercel.json im Bruchfenster,
-   Cron-Eintrag durchgehend präsent (`git log -S`). Ursache: `buildSnapshot`
-   fängt nur *Rejections*, nicht *Hänger* — und GSC/CrUX fetchten **ohne
-   Timeout**. Ein hängender Google-Endpoint ließ die Funktion ins
-   60s-Vercel-Limit laufen → 504 **vor** `writeSnapshot()` → kein Row, aber
-   Route gab still 200 → 10 Wochen unbemerkt. Fix: `fetchWithTimeout`
-   (`src/lib/seo/http.ts`, 15s) in gsc.ts + crux.ts → Hänger wird zur
-   gefangenen Rejection, (Teil-)Row wird trotzdem geschrieben; Route gibt
-   bei Snapshot-Fehler jetzt 500 (im Cron-Dashboard sichtbar).
-   ⚠️ **Verifikation:** nach Deploy den nächsten 06:00-UTC-Lauf prüfen — ein
-   frischer `seo_snapshots`-Row bestätigt den Fix. Falls trotzdem keiner
-   kommt (unwahrscheinlich, aber nicht 100% ausschließbar ohne Vercel-Logs),
-   ist es doch „nicht invoked" → dann im Vercel-Dashboard unter Crons prüfen,
-   ob `seo-daily-snapshot` seit 29.04. überhaupt Invocations zeigt.
+   **Zweistufige Diagnose — erste Hypothese war falsch, per Vercel-Logs
+   korrigiert:** Aus Code+DB allein (letzter Row 29.04. vollständig, saubere
+   Kante, Schema trivial, keine Git-Änderung, Cron-Eintrag durchgehend)
+   schloss ich zunächst auf hängende GSC/CrUX-Fetches ohne Timeout. Die
+   Vercel-Function-Logs (vom User) widerlegten das: der Cron **läuft** täglich,
+   und die 504-Timeouts liegen bei **Supabase**, nicht Google — 4× `HEAD
+   /rest/v1/events` (die `count exact`-Queries) à **10–30s** + die GROUP-BY-RPC
+   `seo_count_indexable_gemeinde_hubs`. `collectInternalMetrics` läuft in
+   buildSnapshot als Erstes und frisst mit Full-Scans auf 304k Zeilen die
+   kompletten 60s auf, **bevor** GSC/CrUX oder `writeSnapshot()` drankommen
+   (daher „No outgoing requests" zu Google). Gleiche Wurzel wie §3.5
+   (count(*) auf events zu langsam). Die Route gab still 200 → 10 Wochen
+   unbemerkt. **Fix (`b789a68` + Folgecommit):**
+   - `collectInternalMetrics`: `count: 'exact'` → **`count: 'planned'`**
+     (Planner-Schätzung statt Scan; per EXPLAIN gegen Prod verifiziert:
+     instant + Schätzung ~69,7k ≈ MV-Wert). Näherung für Trend-Telemetrie ok.
+   - `buildSnapshot`: externe Daten zuerst, jeder Collector **hart
+     deadline-begrenzt** (`withDeadline`: gsc/traffic/cwv 12s, internal 8s,
+     Gemeinde-RPC 4s) → Summe < 60s, `writeSnapshot` läuft garantiert; CrUX
+     parallelisiert.
+   - Route: **500 statt still 200** bei Snapshot-Fehler → künftige Ausfälle
+     im Cron-Dashboard rot sichtbar.
+   - Defensiv beibehalten: `fetchWithTimeout` (10s) auf GSC/CrUX (richtige
+     Härtung, nur nicht die eigentliche Ursache).
+   ⚠️ **Verifikation:** nach Deploy im Vercel-Cron-Dashboard „Run" auf
+   `seo-daily-snapshot` → muss 200 + frischen `seo_snapshots`-Row erzeugen
+   (Trace zeigt dann Supabase-Calls im ms-Bereich statt 26–30s).
 7. Smart-Suche: Embedding-Architektur entsorgt, Feature **neu gebaut** als
    Query-Zeit-Intent (§6, revidiert nach User-Feedback) — Smart-Tab +
    Concierge sind wieder live; nur `build-embeddings` + pgvector sind weg.

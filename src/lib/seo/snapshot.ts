@@ -106,45 +106,83 @@ function daysAgo(days: number, from: Date = new Date()): string {
   return isoDate(d);
 }
 
+/**
+ * Race a collector against a hard deadline. On timeout it resolves to
+ * `fallback` (never rejects) and logs — so a slow/hung sub-step can NEVER
+ * burn the whole 60s Vercel budget before writeSnapshot() runs.
+ *
+ * Root cause 2026-04-29 (seo_snapshots brach still ab): collectInternalMetrics
+ * lief als Erstes mit 4× `count exact` (Full-Scans à 10–30s auf 304k Zeilen)
+ * + einer teuren GROUP-BY-RPC → die Funktion lief ins 60s-Limit BEVOR der
+ * Snapshot geschrieben wurde. Fix hier: harte Deadlines + externe Daten
+ * zuerst + billige `planned`-Counts (siehe collectInternalMetrics).
+ *
+ * NB: Promise.race bricht die zugrundeliegende DB/HTTP-Arbeit nicht ab
+ * (sie läuft im Hintergrund aus) — wir hören nur auf zu warten. Für einen
+ * kurzlebigen Cron-Prozess ist das ok.
+ */
+function withDeadline<T>(p: Promise<T>, ms: number, label: string, fallback: T): Promise<T> {
+  let timer: ReturnType<typeof setTimeout>;
+  const deadline = new Promise<T>((resolve) => {
+    timer = setTimeout(() => {
+      console.error(`[seo/snapshot] ${label} exceeded ${ms}ms deadline — fallback`);
+      resolve(fallback);
+    }, ms);
+  });
+  return Promise.race([
+    p.catch((err) => {
+      console.error(`[seo/snapshot] ${label} failed:`, err);
+      return fallback;
+    }),
+    deadline,
+    // clearTimeout on settle: sonst feuert der Timer später ein falsches
+    // "exceeded deadline"-Log und hält den Prozess unnötig am Leben.
+  ]).finally(() => clearTimeout(timer));
+}
+
 export async function buildSnapshot(
   opts: BuildSnapshotOptions = {},
 ): Promise<SeoSnapshotMetrics> {
   const today = opts.snapshotDate ?? isoDate(new Date());
   const metrics: SeoSnapshotMetrics = {};
 
-  // ── Internal DB counters ────────────────────────────────────────
-  try {
-    metrics.internal = await collectInternalMetrics();
-  } catch (err) {
-    console.error('[seo/snapshot] internal collection failed:', err);
-  }
-
-  if (opts.skipExternal) return metrics;
-
-  // ── Search Console ──────────────────────────────────────────────
-  try {
-    metrics.gsc = await collectGscMetrics(today);
-    if (metrics.gsc) {
-      metrics.traffic = {
-        last24hClicks: metrics.gsc.impressions > 0
-          ? await trailingWindowClicks(today, 1)
-          : 0,
-        rolling7dAvgClicks: (await trailingWindowClicks(today, 7)) / 7,
-        rolling28dAvgClicks: metrics.gsc.clicks / 28,
-      };
+  // External data FIRST (highest value: search traffic + web vitals) and
+  // each stage hard-deadlined. Sum of worst-case deadlines (12+12+12+8 =
+  // 44s) stays comfortably under the 60s Vercel function limit so
+  // writeSnapshot() in the caller always runs.
+  if (!opts.skipExternal) {
+    // ── Search Console (+ derived traffic baseline) ───────────────
+    const gsc = await withDeadline(collectGscMetrics(today), 12_000, 'gsc', undefined);
+    if (gsc) {
+      metrics.gsc = gsc;
+      metrics.traffic = await withDeadline(collectTraffic(today, gsc), 12_000, 'traffic', undefined);
     }
-  } catch (err) {
-    console.error('[seo/snapshot] GSC collection failed:', err);
+
+    // ── Core Web Vitals ───────────────────────────────────────────
+    metrics.cwv = await withDeadline(collectCwvMetrics(), 12_000, 'cwv', undefined);
   }
 
-  // ── Core Web Vitals ─────────────────────────────────────────────
-  try {
-    metrics.cwv = await collectCwvMetrics();
-  } catch (err) {
-    console.error('[seo/snapshot] CrUX collection failed:', err);
-  }
+  // ── Internal DB counters LAST — cheap planned counts, deadlined ──
+  metrics.internal = await withDeadline(collectInternalMetrics(), 8_000, 'internal', undefined);
 
   return metrics;
+}
+
+/** Derived traffic baseline from GSC. The two trailing-window click
+ *  queries run in parallel so the whole step stays inside its deadline. */
+async function collectTraffic(
+  today: string,
+  gsc: NonNullable<SeoSnapshotMetrics['gsc']>,
+): Promise<SeoSnapshotMetrics['traffic']> {
+  const [clicks1d, clicks7d] = await Promise.all([
+    gsc.impressions > 0 ? trailingWindowClicks(today, 1) : Promise.resolve(0),
+    trailingWindowClicks(today, 7),
+  ]);
+  return {
+    last24hClicks: clicks1d,
+    rolling7dAvgClicks: clicks7d / 7,
+    rolling28dAvgClicks: gsc.clicks / 28,
+  };
 }
 
 // ─────────────────────────────────────────────────────────────────
@@ -162,40 +200,45 @@ async function collectInternalMetrics(): Promise<SeoSnapshotMetrics['internal']>
   const sb = serviceClient();
   const today = new Date().toISOString();
 
-  const [{ count: totalPublished }, { count: futurePublished }, { count: enrichedV3 }] =
+  // `count: 'planned'` liest die Planner-Schätzung (pg_class.reltuples +
+  // Selektivität) statt die Zeilen zu scannen — konstant schnell statt
+  // 10–30s Full-Scan pro Query auf 304k Zeilen (das war die Root-Cause
+  // des 2026-04-29-Ausfalls). Für SEO-Trend-Telemetrie (wächst der
+  // Katalog?) ist die Näherung völlig ausreichend; ANALYZE hält sie
+  // aktuell.
+  const [{ count: totalPublished }, { count: futurePublished }, { count: enrichedV3 }, { count: sitemapUrlsGenerated }] =
     await Promise.all([
-      sb.from('events').select('*', { count: 'exact', head: true })
+      sb.from('events').select('*', { count: 'planned', head: true })
         .eq('publish_status', 'published'),
-      sb.from('events').select('*', { count: 'exact', head: true })
+      sb.from('events').select('*', { count: 'planned', head: true })
         .eq('publish_status', 'published')
         .gte('start_date', today),
-      sb.from('events').select('*', { count: 'exact', head: true })
+      sb.from('events').select('*', { count: 'planned', head: true })
         .eq('enrichment_version', 'v3'),
+      // Sitemap-eligible ≈ future published with quality_score ≥ 40.
+      sb.from('events').select('*', { count: 'planned', head: true })
+        .eq('publish_status', 'published')
+        .gte('start_date', today)
+        .gte('quality_score', 40),
     ]);
 
-  // Sitemap-eligible ≈ future published with quality_score ≥ 40.
-  const { count: sitemapUrlsGenerated } = await sb
-    .from('events')
-    .select('*', { count: 'exact', head: true })
-    .eq('publish_status', 'published')
-    .gte('start_date', today)
-    .gte('quality_score', 40);
-
   // Gemeinden with ≥3 upcoming events — matches the noindex threshold in
-  // the gemeinde-hub page builder. We count distinct (postal_code, city)
-  // pairs with at least 3 future rows. Done via a raw SQL call because
-  // PostgREST doesn't support GROUP BY + HAVING in the query builder.
-  const { data: gemCountRow } = await sb
-    .rpc('seo_count_indexable_gemeinde_hubs')
-    .single<{ count: number }>();
-  const gemeindeHubsIndexable = gemCountRow?.count ?? 0;
+  // the gemeinde-hub page builder. This one is a GROUP BY + HAVING (no
+  // planner shortcut), so give it its own short deadline: if it's slow we
+  // default to null rather than letting it eat the internal-metrics budget.
+  const gemCountRow = await withDeadline(
+    (async () => (await sb.rpc('seo_count_indexable_gemeinde_hubs').single<{ count: number }>()).data)(),
+    4_000,
+    'gemeinde-hubs-rpc',
+    null,
+  );
 
   return {
     totalPublished: totalPublished ?? 0,
     futurePublished: futurePublished ?? 0,
     enrichedV3: enrichedV3 ?? 0,
     sitemapUrlsGenerated: sitemapUrlsGenerated ?? 0,
-    gemeindeHubsIndexable,
+    gemeindeHubsIndexable: gemCountRow?.count ?? 0,
   };
 }
 
@@ -297,17 +340,21 @@ const CWV_SAMPLE_URLS: Record<Exclude<HubType, 'other'>, string> = {
 };
 
 async function collectCwvMetrics(): Promise<SeoSnapshotMetrics['cwv']> {
-  const origin = await fetchVitalsSummary({ origin: SITE_URL }).catch(() => null);
+  // All CrUX calls in parallel — origin + the per-hub sample URLs. Sequential
+  // awaits (the old shape) meant 5 round-trips in series, which alone could
+  // blow the cwv deadline; parallel keeps the whole step within one round-trip.
+  const hubEntries = Object.entries(CWV_SAMPLE_URLS)
+    .filter(([hub]) => hub !== 'event_detail'); // event pages have no CrUX data
+
+  const [origin, ...hubResults] = await Promise.all([
+    fetchVitalsSummary({ origin: SITE_URL }).catch(() => null),
+    ...hubEntries.map(([, url]) => fetchVitalsSummary({ url }).catch(() => null)),
+  ]);
 
   const byHubType: Partial<Record<HubType, VitalsSummary | null>> = {};
-  for (const [hub, url] of Object.entries(CWV_SAMPLE_URLS)) {
-    if (hub === 'event_detail') continue; // skip — individual event pages have no CrUX data
-    try {
-      byHubType[hub as HubType] = await fetchVitalsSummary({ url });
-    } catch {
-      byHubType[hub as HubType] = null;
-    }
-  }
+  hubEntries.forEach(([hub], i) => {
+    byHubType[hub as HubType] = hubResults[i];
+  });
   return { origin, byHubType };
 }
 
