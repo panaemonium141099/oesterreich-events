@@ -426,7 +426,7 @@ export async function downloadEventimFeed(opts?: {
 
 - [ ] **Step 2: Dry-run against the live feed**
 
-Run: `EVENTIM_FEED_URL=https://pft.eventim.com/serve/214-hemfto EVENTIM_FEED_USER=J70 EVENTIM_FEED_PASS=pn4ZodhG npx tsx src/scripts/import-eventim.ts --dry-run --verbose`
+Run: `EVENTIM_FEED_URL=<PFT-Feed-URL> EVENTIM_FEED_USER=<user> EVENTIM_FEED_PASS=<pass> npx tsx src/scripts/import-eventim.ts --dry-run --verbose` (Credentials aus den Vercel-Env-Vars / GitHub-Secrets — NIEMALS ins Repo committen, das Repo ist public)
 Expected: ~22k series parsed, a few-thousand future non-cancelled AT/DE/CH events, samples show `source_name:'Eventim'`, affiliate `ticket_url`, mapped `category`, `country`, genre `tags`.
 
 - [ ] **Step 3: Small live write** `... import-eventim.ts --limit 50` → verify in Supabase: `SELECT title, country, category, tags, ticket_url FROM events WHERE source_name='Eventim' LIMIT 10;`
