@@ -30,8 +30,14 @@ on:
         default: 'false'
         type: boolean
 
+# Shard-Kalibrierung 2026-07-08 (erster Lauf): mit 6 Shards à 150 min
+# liefen 2 durch (35/85 min), 4 wurden am Timeout gekillt — die
+# Scraper-Laufzeiten sind extrem ungleich (Feratel 131 Regionen,
+# Gemeinde-Scraper mit hunderten Orten). Deshalb 10 Shards à 300 min.
+# Follow-up (MASTERPLAN §5): per-Scraper-Laufzeit-Telemetrie in
+# source_runs schreiben und danach lastbalanciert sharden.
 env:
-  SHARD_COUNT: 6
+  SHARD_COUNT: 10
 
 jobs:
   scrape:
@@ -39,11 +45,11 @@ jobs:
     # laufen die Shards nicht — das erledigt der post-Job bzw. single-Job.
     if: ${{ github.event_name == 'schedule' || (github.event.inputs.skip_scrapers != 'true' && github.event.inputs.scraper == '') }}
     runs-on: ubuntu-latest
-    timeout-minutes: 150
+    timeout-minutes: 300
     strategy:
       fail-fast: false
       matrix:
-        shard: [0, 1, 2, 3, 4, 5]
+        shard: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
 
     env:
       SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
@@ -62,7 +68,7 @@ jobs:
 
       - run: npm ci
 
-      - name: Scrape shard ${{ matrix.shard }}/6
+      - name: Scrape shard ${{ matrix.shard }}/${{ env.SHARD_COUNT }}
         run: npx tsx src/scripts/scrape.ts --shard ${{ matrix.shard }}/${{ env.SHARD_COUNT }}
 
   single:
