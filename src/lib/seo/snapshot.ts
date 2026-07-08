@@ -54,7 +54,7 @@ export interface SeoSnapshotMetrics {
     futurePublished: number;
     enrichedV3: number;
     sitemapUrlsGenerated: number;   // same count sitemap.xml would emit
-    gemeindeHubsIndexable: number;  // gemeinden with ≥3 events (our noindex threshold)
+    gemeindeHubsIndexable?: number; // gemeinden with ≥3 events (our noindex threshold) — optional, seit 2026-07-08 nicht mehr täglich erhoben (siehe collectInternalMetrics)
   };
 
   // ── Traffic-drop alert baseline ──
@@ -206,17 +206,20 @@ async function collectInternalMetrics(): Promise<SeoSnapshotMetrics['internal']>
   // des 2026-04-29-Ausfalls). Für SEO-Trend-Telemetrie (wächst der
   // Katalog?) ist die Näherung völlig ausreichend; ANALYZE hält sie
   // aktuell.
-  // Alle fünf Abfragen PARALLEL (nicht counts-dann-RPC sequentiell — das
-  // stapelte ~5s Counts + 4s RPC = 9s und riss die 8s-Deadline). Die
-  // Gemeinde-RPC ist ein GROUP BY + HAVING ohne Planner-Shortcut, deshalb
-  // eigene 4s-Sub-Deadline: läuft sie länger, defaulten wir auf null statt
-  // die restlichen Metriken mitzureißen.
+  // Nur die vier planner-schätzbaren Counts, parallel. Die frühere
+  // Gemeinde-RPC (GROUP BY + HAVING über ~90k Zeilen) wurde ENTFERNT:
+  // sie ließ sich nicht planner-schätzen, gab jeden Lauf ihre Deadline auf
+  // — lief aber serverseitig weiter (withDeadline stoppt nur das Warten).
+  // Diese verwaiste Query pinnte auf der Micro-Instanz einen Core + eine
+  // Pooler-Connection und ließ dadurch die planned-Counts verhungern
+  // (gemessen 2026-07-08: internal >12s). gemeindeHubsIndexable bleibt
+  // jetzt weg (Feld ist optional; Admin-Dashboard zeigt null). Bei Bedarf
+  // in der stats-MV vorberechnen — P2.
   const [
     { count: totalPublished },
     { count: futurePublished },
     { count: enrichedV3 },
     { count: sitemapUrlsGenerated },
-    gemCountRow,
   ] = await Promise.all([
     sb.from('events').select('*', { count: 'planned', head: true })
       .eq('publish_status', 'published'),
@@ -230,12 +233,6 @@ async function collectInternalMetrics(): Promise<SeoSnapshotMetrics['internal']>
       .eq('publish_status', 'published')
       .gte('start_date', today)
       .gte('quality_score', 40),
-    withDeadline(
-      (async () => (await sb.rpc('seo_count_indexable_gemeinde_hubs').single<{ count: number }>()).data)(),
-      4_000,
-      'gemeinde-hubs-rpc',
-      null,
-    ),
   ]);
 
   return {
@@ -243,7 +240,6 @@ async function collectInternalMetrics(): Promise<SeoSnapshotMetrics['internal']>
     futurePublished: futurePublished ?? 0,
     enrichedV3: enrichedV3 ?? 0,
     sitemapUrlsGenerated: sitemapUrlsGenerated ?? 0,
-    gemeindeHubsIndexable: gemCountRow?.count ?? 0,
   };
 }
 
