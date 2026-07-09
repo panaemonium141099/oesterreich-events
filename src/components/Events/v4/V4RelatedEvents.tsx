@@ -18,7 +18,29 @@ import { createClient } from '@supabase/supabase-js';
 import { buildEventUrlV2 } from '@/lib/utils/slugify';
 import { ALL_GEMEINDEN } from '@/lib/gemeinden/data';
 import { BUNDESLAND_NAMES, type BundeslandId } from '@/lib/districtsAT';
+import { getBundeslandFromPLZ } from '@/lib/plzCoordinates';
 import type { Event } from '@/types/events';
+
+/**
+ * Effektives Bundesland: DB-Wert, sonst deterministisch aus der PLZ.
+ * 16 % der kommenden Events (gemessen 2026-07-08: 5 506 von 34 163) haben
+ * bundesland NULL, 94 % davon aber eine PLZ — ohne den Fallback bekämen
+ * genau diese Events weder Related-Sektion noch Hub-Links (so entdeckt am
+ * Vivaldi-Karlskirche-Event, PLZ 1040, bundesland NULL).
+ *
+ * Guards: Ableitung NUR für AT-Events (country fehlt oder 'AT') mit
+ * 4-stelliger PLZ. getBundeslandFromPLZ prüft nur Ziffern-Präfixe — eine
+ * deutsche 10115 würde sonst zu 'wien', eine Schweizer 8001 zu
+ * 'steiermark' (im Test gefangen, bevor es live ging).
+ */
+function effectiveBundesland(
+  event: Pick<Event, 'bundesland' | 'postal_code' | 'country'>,
+): string | null {
+  if (event.bundesland) return event.bundesland;
+  if (event.country && event.country !== 'AT') return null;
+  if (!event.postal_code || !/^\d{4}$/.test(event.postal_code.trim())) return null;
+  return getBundeslandFromPLZ(event.postal_code.trim());
+}
 
 const LIMIT_SHOWN = 6;
 const POOL = 12; // Reserve für Titel-Dedupe (Recurring-Events)
@@ -80,7 +102,12 @@ const RELATED_COLS =
   'id, slug, title, start_date, location_name, postal_code, address, bundesland, category, image_url';
 
 async function fetchRelated(event: Event): Promise<RelatedRow[]> {
-  if (!event.bundesland) return [];
+  // Ohne (ableitbares) Bundesland keine Sektion — ein unpräfixter
+  // Datums-Scan wäre auf der Micro-DB zu teuer. Der PLZ-Fallback matcht
+  // dabei gegen die korrekt getaggten Nachbar-Events (84 % haben ihr
+  // bundesland gesetzt).
+  const bl = effectiveBundesland(event);
+  if (!bl) return [];
 
   const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -94,7 +121,7 @@ async function fetchRelated(event: Event): Promise<RelatedRow[]> {
       .select(RELATED_COLS)
       .eq('visibility', 'public')
       .in('publish_status', ['published', 'published_low_confidence'])
-      .eq('bundesland', event.bundesland!)
+      .eq('bundesland', bl)
       .gte('start_date', new Date().toISOString())
       .neq('id', event.id)
       .order('start_date', { ascending: true })
@@ -121,16 +148,21 @@ async function fetchRelated(event: Event): Promise<RelatedRow[]> {
 
 /** Hub-Links: Gemeinde via PLZ-Registry-Lookup (nur wenn der Hub wirklich
  *  existiert — kein toter Link), Bundesland via ID-Whitelist. */
-export function hubLinksFor(event: Pick<Event, 'postal_code' | 'bundesland'>): Array<{ href: string; label: string }> {
+export function hubLinksFor(
+  event: Pick<Event, 'postal_code' | 'bundesland' | 'country'>,
+): Array<{ href: string; label: string }> {
   const links: Array<{ href: string; label: string }> = [];
-  if (event.postal_code) {
+  // Gemeinde-Lookup nur für AT — Schweizer PLZs sind ebenfalls 4-stellig
+  // und könnten mit einer AT-Gemeinde-PLZ kollidieren.
+  if (event.postal_code && (!event.country || event.country === 'AT')) {
     const g = ALL_GEMEINDEN.find(x => x.plz === event.postal_code);
     if (g) links.push({ href: `/gemeinde/${g.slug}`, label: `Events in ${g.name}` });
   }
-  if (event.bundesland && event.bundesland in BUNDESLAND_NAMES) {
+  const bl = effectiveBundesland(event);
+  if (bl && bl in BUNDESLAND_NAMES) {
     links.push({
-      href: `/${event.bundesland}`,
-      label: `Events in ${BUNDESLAND_NAMES[event.bundesland as BundeslandId]}`,
+      href: `/${bl}`,
+      label: `Events in ${BUNDESLAND_NAMES[bl as BundeslandId]}`,
     });
   }
   return links;
@@ -139,6 +171,7 @@ export function hubLinksFor(event: Pick<Event, 'postal_code' | 'bundesland'>): A
 export async function V4RelatedEvents({ event }: { event: Event }) {
   const related = await fetchRelated(event);
   const hubs = hubLinksFor(event);
+  const bl = effectiveBundesland(event);
   if (related.length === 0 && hubs.length === 0) return null;
 
   return (
@@ -150,8 +183,8 @@ export async function V4RelatedEvents({ event }: { event: Event }) {
               Das könnte dich auch interessieren
             </p>
             <h2 className="text-[22px] md:text-[26px] font-bold leading-tight tracking-[-0.025em] mb-6">
-              Ähnliche Events{event.bundesland && event.bundesland in BUNDESLAND_NAMES
-                ? ` in ${BUNDESLAND_NAMES[event.bundesland as BundeslandId]}`
+              Ähnliche Events{bl && bl in BUNDESLAND_NAMES
+                ? ` in ${BUNDESLAND_NAMES[bl as BundeslandId]}`
                 : ''}
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">

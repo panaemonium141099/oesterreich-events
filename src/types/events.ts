@@ -13,6 +13,9 @@ export interface Event {
   address: string | null;
   postal_code: string | null;
   bundesland: string | null;
+  /** ISO-Ländercode (AT/DE/CH) — DB-Spalte seit der Eventim-Integration,
+   *  Default 'AT'. Fehlte bislang am Frontend-Typ. */
+  country?: string | null;
   district: string | null;
   latitude: number | null;
   longitude: number | null;
