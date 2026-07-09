@@ -43,9 +43,9 @@ function effectiveBundesland(
 }
 
 const LIMIT_SHOWN = 6;
-const POOL = 12; // Reserve für Titel-Dedupe (Recurring-Events)
+const POOL = 18; // Reserve für die zweistufige Dedupe (Recurring + Cross-Source)
 
-interface RelatedRow {
+export interface RelatedRow {
   id: string;
   slug: string | null;
   title: string;
@@ -84,15 +84,63 @@ function formatDate(iso: string): string {
   return time === '00:00' ? date : `${date} · ${time}`;
 }
 
-/** Titel-Dedupe wie auf der Landing: Recurring-Events (gleicher Titel +
- *  gleiches Bild an N Tagen) belegen sonst mehrere Slots. */
-function dedupe(rows: RelatedRow[]): RelatedRow[] {
-  const seen = new Set<string>();
+/** Normalisierter Titel als Dedupe-Schlüssel: lowercase, Diakritika
+ *  (NFD-Combining-Marks U+0300–U+036F) und Satzzeichen raus,
+ *  Whitespace kollabiert. */
+function normTitle(t: string | null): string {
+  return (t ?? '')
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '')
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim();
+}
+
+/**
+ * Dedupe in zwei Stufen (beide live beobachtet, 2026-07-08 am
+ * Vivaldi-Karlskirche-Event):
+ *
+ *  a) Recurring-Events: gleicher Titel + gleiches Bild an N Tagen
+ *     belegen sonst mehrere Slots (Landing-Muster).
+ *  b) Cross-Source-Duplikate mit IDENTISCHEM Zeitpunkt: "Nina Chuba" kam
+ *     doppelt (gleiche Zeit, andere Bild-URL — Titel+Bild-Key griff
+ *     nicht), "Eine kleine Nachtmusik" vs. "Eine kleine Nachtmusik -
+ *     Kapuzinerkirche" (Venue-Suffix im Titel). Regel: gleiche
+ *     start_date UND (Titel gleich ODER einer ist Präfix des anderen,
+ *     kürzerer Titel ≥ 6 Zeichen gegen "Fest"-artige False-Positives).
+ *     Beim Merge gewinnt der Datensatz MIT Bild.
+ *
+ * Die DB-Dedup-Pipeline markiert solche Paare eigentlich als
+ * publish_status='duplicate' — sie lief aber 10 Wochen nicht; diese
+ * Anzeige-Dedupe bleibt als Sicherheitsnetz unabhängig davon sinnvoll.
+ */
+export function dedupe(rows: RelatedRow[]): RelatedRow[] {
+  const seenTitleImage = new Set<string>();
   const out: RelatedRow[] = [];
+
   for (const r of rows) {
-    const key = `${(r.title ?? '').trim().toLowerCase()}::${(r.image_url ?? '').trim()}`;
-    if (seen.has(key)) continue;
-    seen.add(key);
+    const nt = normTitle(r.title);
+
+    // a) Recurring über Tage hinweg
+    const tiKey = `${nt}::${(r.image_url ?? '').trim()}`;
+    if (nt && seenTitleImage.has(tiKey)) continue;
+
+    // b) Gleicher Zeitpunkt + Titel-Gleichheit/Präfix
+    const dupIdx = out.findIndex(k => {
+      if (k.start_date !== r.start_date) return false;
+      const kt = normTitle(k.title);
+      if (!kt || !nt) return false;
+      if (kt === nt) return true;
+      const shorter = kt.length <= nt.length ? kt : nt;
+      const longer = kt.length <= nt.length ? nt : kt;
+      return shorter.length >= 6 && longer.startsWith(shorter);
+    });
+    if (dupIdx >= 0) {
+      if (!out[dupIdx].image_url && r.image_url) out[dupIdx] = r;
+      continue;
+    }
+
+    seenTitleImage.add(tiKey);
     out.push(r);
   }
   return out;
