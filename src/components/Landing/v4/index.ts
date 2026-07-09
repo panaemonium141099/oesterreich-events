@@ -5,6 +5,7 @@ export { HeroV4 } from './HeroV4';
 export { ArtistTeaserV4 } from './ArtistTeaserV4';
 export { MatchesSection } from './MatchesSection';
 export { AnonFollowTeaser } from './AnonFollowTeaser';
+export { PersonalizedMatches } from './PersonalizedMatches';
 export { WeekendSection } from './WeekendSection';
 export { ConcertsSection } from './ConcertsSection';
 export { FestivalsSection } from './FestivalsSection';

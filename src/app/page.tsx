@@ -1,27 +1,22 @@
 /**
- * Landing page — v4 redesign (Phase 2).
+ * Landing page — v4 redesign, statische Shell (§10.2, 2026-07-08).
  *
- * Fully RSC. No 'use client', no useEffect, no cookies()/headers() at the
- * route level — but getLandingContext() *does* read auth via the server
- * supabase client. That converts this route from purely ISR to a per-
- * request render for authed users.
+ * WIRKLICH fully static/ISR: kein cookies(), kein auth, keine
+ * personalisierten Queries im RSC-Pfad. getLandingData() nutzt einen
+ * cookie-freien Anon-Client → dieselbe gecachte HTML für ALLE Besucher
+ * (auch eingeloggte — vorher kippte getLandingContext() die Route für
+ * sie in einen Per-Request-Render mit 8 Roundtrips).
  *
- * fn-15.7 used Edge auth-middleware to flip / to ISR. With v4-Phase-2,
- * the auth signal that determines Matches-vs-AnonTeaser is read INSIDE
- * the RSC tree. The cookie-aware redirect from /feed (for logged-in
- * users) lives in middleware (fn-15.7) and continues to apply BEFORE
- * this page renders. So:
- *   - Anon visit → ISR cache served, getLandingContext returns empty
- *                  sets, no DB queries.
- *   - Authed visit → middleware may redirect to /feed (fn-15.7), or
- *                    this page renders dynamically with their match data.
+ * Personalisierung (YouTube-Muster): <PersonalizedMatches/> rendert den
+ * Anon-Teaser im statischen HTML und tauscht client-seitig via
+ * /api/me/landing auf die Künstler-Matches um — nur wenn ein Auth-Cookie
+ * sichtbar ist; anonyme Besucher feuern keinen Request.
  */
 
 import {
   HeroV4,
   ArtistTeaserV4,
-  MatchesSection,
-  AnonFollowTeaser,
+  PersonalizedMatches,
   WeekendSection,
   ConcertsSection,
   FestivalsSection,
@@ -31,15 +26,13 @@ import {
 import { Onboarding } from '@/components/Landing/Onboarding';
 import { AuthErrorToast } from '@/components/Landing/AuthErrorToast';
 import { Footer } from '@/components/Legal/Footer';
-import { getLandingContext } from '@/lib/v4/get-landing-context';
 import { getLandingData } from '@/lib/v4/get-landing-data';
 import { RegionHubsSection } from '@/components/Landing/v4/RegionHubsSection';
 
 export const revalidate = 3600;
 
 export default async function LandingPage() {
-  const ctx = await getLandingContext();
-  const data = await getLandingData(ctx);
+  const data = await getLandingData();
 
   return (
     <div className="min-h-screen text-[var(--v4-ink)] bg-[var(--v4-surface)] flex flex-col">
@@ -63,9 +56,7 @@ export default async function LandingPage() {
       <main className="flex-1">
         <HeroV4/>
         <ArtistTeaserV4 artists={data.popularArtists}/>
-        {ctx.signedIn
-          ? <MatchesSection appearances={data.matches}/>
-          : <AnonFollowTeaser/>}
+        <PersonalizedMatches/>
         <WeekendSection events={data.todayWeekend}/>
         <ConcertsSection events={data.concerts}/>
         <FestivalsSection festivals={data.festivals}/>

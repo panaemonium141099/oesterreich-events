@@ -1,11 +1,8 @@
-import { createServerSupabaseClient } from '@/lib/supabase/server';
 import type { Event } from '@/types/events';
 import type { Festival } from '@/types/festivals';
-import { deriveEventState, type V4EventState } from './derive-event-state';
-import type { LandingContext } from './get-landing-context';
+import { deriveEventState, type V4EventState, type DeriveCtx } from './derive-event-state';
 import { buildEventUrlV2 } from '@/lib/utils/slugify';
 import { createClient } from '@supabase/supabase-js';
-import { fetchArtistAppearances, type ArtistAppearance } from '@/lib/artists/appearances';
 import overridesJson from '../../../data/festival-overrides.json';
 
 const FESTIVAL_OVERRIDES = overridesJson as Record<string, { imageUrl?: string | null }>;
@@ -38,9 +35,21 @@ export interface LandingData {
   todayWeekend: Array<Event & { state: V4EventState }>;
   concerts: Array<Event & { state: V4EventState }>;
   festivals: LandingFestival[];
-  matches: ArtistAppearance[];
   popularArtists: LandingArtist[];
 }
+
+/**
+ * Anonymer Ableitungs-Kontext für die statische Landing (§10.2): keine
+ * Personalisierung im Server-Render. Karten zeigen die event-basierten
+ * States (ticket/free/doorsale); die personalisierten States
+ * (inplan/match/lineup) kommen client-seitig via /api/me/landing.
+ */
+const ANON_CTX: DeriveCtx = {
+  savedEventIds: new Set(),
+  followedArtistIds: new Set(),
+  artistMatchEventIds: new Set(),
+  lineupMatchEventIds: new Set(),
+};
 
 const FALLBACK_ARTISTS: LandingArtist[] = [
   { name: 'Bilderbuch', genre: 'Indie · Austropop' },
@@ -48,8 +57,8 @@ const FALLBACK_ARTISTS: LandingArtist[] = [
   { name: 'Pizzera & Jaus', genre: 'Comedy-Pop' },
 ];
 
-function enrichEvents(rows: Event[], ctx: LandingContext): Array<Event & { state: V4EventState }> {
-  return rows.map(e => ({ ...e, state: deriveEventState(e, ctx) }));
+function enrichEvents(rows: Event[]): Array<Event & { state: V4EventState }> {
+  return rows.map(e => ({ ...e, state: deriveEventState(e, ANON_CTX) }));
 }
 
 /**
@@ -100,35 +109,28 @@ function festivalCategoryFallback(festivalId: string): string {
 
 /**
  * Single entry point for all landing sections. Issues queries in parallel,
- * then enriches with per-event state via deriveEventState. Fires queries
- * for matches only if signedIn AND we have match candidate IDs.
+ * then enriches with per-event state via deriveEventState (anonym — §10.2).
+ *
+ * STATISCH-SICHER: nutzt bewusst einen cookie-freien Anon-Key-Client statt
+ * createServerSupabaseClient (das cookies() liest und die Route aus dem
+ * ISR-Cache kippen würde). Alle Queries lesen nur published/öffentliche
+ * Daten — RLS mit Anon-Key deckt das ab. Personalisierung (Matches,
+ * inplan-Badges) lebt seit dem Umbau client-seitig via /api/me/landing.
  *
  * Festival `lineupMatch` is set to false in Phase 2 — computing per-festival
- * lineup matches requires another join we're not optimizing for here. The
- * MatchesSection handles per-event lineup matches (via lineupMatchEventIds)
- * which is the higher-signal surface anyway.
+ * lineup matches requires another join we're not optimizing for here.
  */
-export async function getLandingData(ctx: LandingContext): Promise<LandingData> {
-  const supabase = await createServerSupabaseClient();
+export async function getLandingData(): Promise<LandingData> {
+  const supabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    { auth: { persistSession: false } },
+  );
   const today = new Date().toISOString();
   const weekendEnd = new Date(Date.now() + 7 * 24 * 3600 * 1000).toISOString();
 
   // Base column list — kept tight to what the cards consume.
   const eventCols = 'id,slug,title,description,start_date,end_date,location_name,bundesland,district,category,image_url,ticket_url,price_text,price_min,price_max,price_tier,price_flags,publish_status,event_score,tags,created_at,updated_at,source_id,source_name,source_url';
-
-  // Künstler-Auftritte: saubere Liste aus der RPC get_artist_appearances
-  // (Festival-Line-up = Wahrheit + präzise Konzert-Titel-Matches, dedupliziert,
-  // keine Falsch-Treffer). Service-Role nötig (RPC nur an service_role granted).
-  const appearancesPromise: Promise<ArtistAppearance[]> =
-    ctx.signedIn && ctx.userId && process.env.SUPABASE_SERVICE_ROLE_KEY
-      ? fetchArtistAppearances(
-          createClient(
-            process.env.NEXT_PUBLIC_SUPABASE_URL!,
-            process.env.SUPABASE_SERVICE_ROLE_KEY,
-          ),
-          ctx.userId,
-        )
-      : Promise.resolve([]);
 
   // WeekendSection rendert 1 Hero + 2× 3 Cards = 7 Slots. Wir ziehen
   // ~4× soviel als Reserve, dann dedupliziert die uniqueByTitleAndImage-
@@ -138,7 +140,7 @@ export async function getLandingData(ctx: LandingContext): Promise<LandingData> 
   const TODAYWEEKEND_LIMIT = 7;
   const TODAYWEEKEND_POOL = 30;
 
-  const [weekendRes, concertsRes, festivalsRes, appearances] = await Promise.all([
+  const [weekendRes, concertsRes, festivalsRes] = await Promise.all([
     // todayWeekend: top events in next 7 days
     supabase
       .from('events')
@@ -169,15 +171,12 @@ export async function getLandingData(ctx: LandingContext): Promise<LandingData> 
       .gte('ends_at', today.split('T')[0])
       .order('starts_at', { ascending: true })
       .limit(4),
-    appearancesPromise,
   ]);
 
   const todayWeekend = uniqueByTitleAndImage(
-    enrichEvents((weekendRes.data ?? []) as unknown as Event[], ctx),
+    enrichEvents((weekendRes.data ?? []) as unknown as Event[]),
   ).slice(0, TODAYWEEKEND_LIMIT);
-  const concerts = enrichEvents((concertsRes.data ?? []) as unknown as Event[], ctx);
-  // Landing zeigt eine Vorschau der nächsten Auftritte; "Alle Auftritte" -> /artists.
-  const matches = appearances.slice(0, 8);
+  const concerts = enrichEvents((concertsRes.data ?? []) as unknown as Event[]);
 
   type ParentEventRow = {
     id: string;
@@ -228,7 +227,6 @@ export async function getLandingData(ctx: LandingContext): Promise<LandingData> 
     todayWeekend,
     concerts,
     festivals,
-    matches,
     popularArtists: FALLBACK_ARTISTS,
   };
 }

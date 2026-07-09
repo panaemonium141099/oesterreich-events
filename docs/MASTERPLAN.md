@@ -353,15 +353,25 @@ kleinen APIs treffen lassen.
 
 ### 10.2 Landing instant (YouTube-Muster: statische Shell + Client-Personalisierung)
 
-1. **Personalisierung raus aus dem Server-Render:** `getLandingContext()` (Auth +
-   saved_events + notifications) nicht mehr im RSC — die Landing rendert für ALLE
-   identisch aus dem ISR-Cache; Gespeichert-Status/Matches lädt der Client nach
-   First Paint über eine kleine API. Damit bekommen auch eingeloggte User Cache-Hits.
-2. **Doppeltes `auth.getUser()` eliminieren** (middleware.ts + get-landing-context.ts
-   — ein Roundtrip statt zwei).
-3. **`artist_event_notifications`-Query `.limit(8)` geben** (angezeigt werden eh nur 8).
+1. ✅ **Personalisierung raus aus dem Server-Render** *(erledigt 2026-07-08)*:
+   `page.tsx` ruft kein `getLandingContext()` mehr; `getLandingData()` nutzt
+   einen cookie-freien Anon-Client → `/` ist wieder echte ISR-Route
+   (verifiziert: `.next/prerender-manifest.json` enthält `/` mit
+   `initialRevalidateSeconds: 3600`). Neue Route `GET /api/me/landing`
+   liefert Matches + Badge-ID-Sets; `<PersonalizedMatches/>` (Client)
+   rendert den Anon-Teaser im statischen HTML und tauscht nur bei
+   sichtbarem `sb-*`-Cookie auf die Matches-Sektion (anonyme Besucher
+   feuern keinen Request). Bewusster Trade-off: personalisierte
+   Karten-Badges (inplan/match/lineup) erscheinen auf der Landing vorerst
+   nicht mehr server-seitig; die ID-Sets liegen in der API für spätere
+   Client-Hydration.
+2. ✅ **Doppeltes `auth.getUser()`** — durch (1) miterledigt: die Landing
+   ruft gar kein getUser mehr; nur die Middleware macht den einen Refresh.
+3. ~~`.limit(8)`~~ — obsolet: die unbegrenzte notifications-Query läuft
+   nicht mehr pro Landing-Render, sondern nur noch im seltenen
+   /api/me/landing-Call (60-Tage-Fenster begrenzt sie inhaltlich).
 4. Middleware-Session-Refresh auf die Routen beschränken, die ihn wirklich brauchen
-   (auth-gated Seiten), statt auf jede Seite.
+   (auth-gated Seiten), statt auf jede Seite. *(offen)*
 
 ### 10.3 Filter & Karte: Queries eliminieren statt beschleunigen
 
