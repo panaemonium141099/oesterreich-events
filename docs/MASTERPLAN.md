@@ -474,11 +474,20 @@ kleinen APIs treffen lassen.
 
 ### P1 — Monetarisierung, Retention & Instant-Loading (Monat 1)
 
-Landing auf statische Shell + Client-Personalisierung umbauen (§10.2) ·
-Karten-Snapshots aufs CDN (§10.3) · Stripe-Checkout für Boost · Wochen-Newsletter pro
-Region (ohne Account abonnierbar) · Affiliate-Boxen in den 64 Blog-Posts ·
-„Ähnliche Events" + Breadcrumbs auf Detailseiten · Enrichment-Codepfade stilllegen (§6) ·
-CLAUDE.md aktualisieren.
+✅ Landing statische Shell + Client-Personalisierung (§10.2, 2026-07-08) ·
+✅ **Affiliate-Boxen im Blog** *(2026-07-08)*: `BlogTicketBox` zieht live
+buchbare Eventim-Termine per Titel-Match (validiert: Frequency 10, Nova Rock 5,
+Electric Love 1 Treffer), Titel verlinkt intern auf die Event-Seite, CTA mit
+`rel="sponsored"` + `ticket_click`-Tracking, „Anzeige"-Label + Disclosure;
+Blog-Detailseiten jetzt ISR (6 h); /ueber-uns-Finanzierungstext auf
+„Eventim-Affiliate aktiv" aktualisiert ·
+✅ Enrichment-Codepfade entfernt (§6, 2026-07-08: enrich-*-Scripts,
+Pipeline-Flags, npm-Einträge, Test; Admin-Review-UI bleibt vorerst) ·
+✅ CLAUDE.md neu geschrieben (beschrieb Phantom-Repo mit SQLite/ohne Eventim) ·
+Offen: Karten-Snapshot-Konsum in der Map (§10.3, fn-16 läuft parallel) ·
+Stripe-Checkout für Boost (braucht Stripe-Account vom User) · Wochen-Newsletter
+pro Region (braucht Double-Opt-in-Entscheidung) · „Ähnliche Events" +
+Breadcrumbs auf Detailseiten · Middleware-Refresh-Scope (§10.2.4).
 
 ### P2 — Fundament (Monat 2–3)
 

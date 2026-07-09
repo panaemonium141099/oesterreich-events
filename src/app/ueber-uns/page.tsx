@@ -146,11 +146,13 @@ export default function UeberUnsPage() {
             </p>
             <ul className="space-y-3 list-disc list-inside pl-1 mb-4">
               <li>
-                <span className="text-white">Affiliate-Kooperationen</span> mit
-                Ticket-Vendorn (in Prüfung): sobald eine solche Kooperation live geht,
-                wird sie hier klar ausgewiesen — inklusive Vendor-Name, Art der
-                Zusammenarbeit und den Auswirkungen für euch (Preis bleibt für den
-                Nutzer identisch, da die Provision vom Vendor getragen wird).
+                <span className="text-white">Affiliate-Kooperation mit Eventim</span> (aktiv):
+                „Tickets sichern"-Links auf Event-Detailseiten und im Blog führen zum
+                offiziellen Eventim-Shop und enthalten unsere Partner-Kennung. Kaufst
+                du darüber ein Ticket, erhält LassTreffen.at eine Provision von
+                Eventim — der Ticketpreis bleibt für dich exakt gleich, da die
+                Provision vom Vendor getragen wird. Solche Flächen sind als
+                „Anzeige" bzw. mit einem Affiliate-Hinweis gekennzeichnet.
               </li>
               <li>
                 <span className="text-white">Direkte Veranstalter-Pakete</span>:

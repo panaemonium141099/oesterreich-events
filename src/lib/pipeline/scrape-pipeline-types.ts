@@ -67,21 +67,6 @@ export interface PipelineOptions {
   skipCategorizationBackfill?: boolean;
   /** Skip the cross-source dedup pass (not recommended — duplicates bleed through). */
   skipDedup?: boolean;
-  /**
-   * Skip the OpenAI-based enrichment step. Default is to skip — Enrichment is
-   * now decoupled from the pipeline (run `npm run enrich:claude` /
-   * `npm run enrich:openai` standalone). Kept as a backwards-compatible knob
-   * for the rare case where someone explicitly opts in via `--with-enrichment`
-   * but still wants to disable it again from a wrapper script.
-   */
-  skipEnrichment?: boolean;
-  /**
-   * Opt-in flag to run the legacy OpenAI enrichment step inline with the
-   * pipeline. Default behaviour (fn-14.1) is to NOT run any enrichment as
-   * part of `scrape:pipeline`; pass `--with-enrichment` to restore the
-   * pre-fn-14 behaviour.
-   */
-  withEnrichment?: boolean;
   /** Skip submitting new URLs to IndexNow + Google Indexing API. */
   skipIndexing?: boolean;
   dryRun?: boolean;

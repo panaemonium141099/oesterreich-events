@@ -65,8 +65,6 @@ function parseArgs(): PipelineOptions {
     skipCategorization: has('--skip-categorization'),
     skipCategorizationBackfill: has('--skip-categorization-backfill'),
     skipDedup: has('--skip-dedup'),
-    skipEnrichment: has('--skip-enrichment'),
-    withEnrichment: has('--with-enrichment'),
     skipIndexing: has('--skip-indexing'),
     dryRun: has('--dry-run'),
   };
@@ -192,27 +190,10 @@ async function main() {
       await triggerMatchArtists();
     }, steps);
 
-    // OpenAI enrichment is now opt-in only. fn-14 decouples enrichment from
-    // the scrape pipeline so it can be driven by `npm run enrich:claude` /
-    // `npm run enrich:openai` (or the daily-refresh GitHub Action) instead.
-    //
-    // Pass `--with-enrichment` to restore the pre-fn-14 behaviour and run
-    // OpenAI enrichment inline as part of the pipeline. `--skip-enrichment`
-    // remains as an explicit override that always wins.
-    if (opts.withEnrichment && !opts.skipEnrichment) {
-      steps.enrichment = await runStep('enrichment', async () => {
-        // Override with ENRICH_ARGS env var if you need a bigger model
-        // or higher concurrency: ENRICH_ARGS="--model gpt-5 --concurrency 12"
-        const extraArgs = process.env.ENRICH_ARGS ?? '--model gpt-5-mini';
-        execStep(
-          'Enrich new events with OpenAI (category + tags + occasion + vibe + flags)',
-          `npx tsx ${envFlag}src/scripts/enrich-openai.ts ${extraArgs}`,
-        );
-      }, steps);
-    }
-
-    // Embeddings-Step entfernt (2026-07, MASTERPLAN §6): semantische Suche
-    // wurde stillgelegt, events.embedding + pgvector-Index sind gedroppt.
+    // KI-Enrichment + Embeddings entfernt (2026-07, MASTERPLAN §6 —
+    // Grundsatz-Entscheidung: kein KI-Enrichment mehr, Datenqualität
+    // deterministisch an der Quelle). Die enrich-*-Scripts wurden gelöscht;
+    // Kategorien kommen aus dem deterministischen Classifier oben.
 
     if (!opts.skipIndexing) {
       steps.indexing = await runStep('indexing', async () => {

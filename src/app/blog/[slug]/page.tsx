@@ -3,6 +3,7 @@ import type { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
 import { getPostBySlug, getPostsByCategory, ALL_POSTS } from '@/content/blog';
+import { BlogTicketBox } from '@/components/Blog/BlogTicketBox';
 // AdSlot removed in fn-15.4 — Google AdSense was pulled completely (property
 // not approved for AdSense). The three former placements (after-lead,
 // mid-content, end-of-article) are now empty spacing only; if monetization
@@ -12,6 +13,11 @@ import { getPostBySlug, getPostsByCategory, ALL_POSTS } from '@/content/blog';
 export function generateStaticParams() {
   return ALL_POSTS.map(p => ({ slug: p.slug }));
 }
+
+// ISR statt reinem Build-Time-Static: die BlogTicketBox zieht live buchbare
+// Eventim-Termine (Affiliate) — alle 6 h auffrischen, damit Verfügbarkeit
+// und Preise nicht bis zum nächsten Deploy einfrieren.
+export const revalidate = 21600;
 
 export async function generateMetadata({
   params,
@@ -384,6 +390,10 @@ export default async function BlogPostPage({
               </a>
             </div>
           </div>
+
+          {/* Affiliate-Ticket-Box — rendert nur, wenn buchbare Eventim-
+              Termine zum Festival existieren (MASTERPLAN §7.1.3) */}
+          <BlogTicketBox postTitle={post.title} />
 
           {/* History */}
           <section className="mb-14">
