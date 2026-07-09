@@ -484,10 +484,14 @@ Blog-Detailseiten jetzt ISR (6 h); /ueber-uns-Finanzierungstext auf
 ✅ Enrichment-Codepfade entfernt (§6, 2026-07-08: enrich-*-Scripts,
 Pipeline-Flags, npm-Einträge, Test; Admin-Review-UI bleibt vorerst) ·
 ✅ CLAUDE.md neu geschrieben (beschrieb Phantom-Repo mit SQLite/ohne Eventim) ·
+✅ **„Ähnliche Events" + Hub-Links + BreadcrumbList** auf Event-Detailseiten
+*(2026-07-08)*: `V4RelatedEvents` (ISR-sicher, Anon-Client, Composite-Index-
+Query 352 ms) + „Mehr entdecken"-Zeile mit existenz-geprüften Gemeinde-/
+Bundesland-Hub-Links + BreadcrumbList-JSON-LD ·
 Offen: Karten-Snapshot-Konsum in der Map (§10.3, fn-16 läuft parallel) ·
 Stripe-Checkout für Boost (braucht Stripe-Account vom User) · Wochen-Newsletter
-pro Region (braucht Double-Opt-in-Entscheidung) · „Ähnliche Events" +
-Breadcrumbs auf Detailseiten · Middleware-Refresh-Scope (§10.2.4).
+pro Region (braucht Double-Opt-in-Entscheidung) · Middleware-Refresh-Scope
+(§10.2.4, bewusst zurückgestellt — Regressionsrisiko auf Auth-Flächen).
 
 ### P2 — Fundament (Monat 2–3)
 
