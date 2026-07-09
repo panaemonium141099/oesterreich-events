@@ -5,6 +5,7 @@ import { extractCity } from '@/lib/utils/city';
 import { buildEventUrlV2 } from '@/lib/utils/slugify';
 import { resolvePrimaryEventImage } from '@/lib/event-images';
 import { V4EventDetail } from '@/components/Events/v4';
+import { V4RelatedEvents, hubLinksFor } from '@/components/Events/v4/V4RelatedEvents';
 import { deriveEventState } from '@/lib/v4/derive-event-state';
 import {
   parseSlugArray,
@@ -361,6 +362,26 @@ export default async function EventDetailPage({
   // Only emit JSON-LD for fully published events (skip low confidence)
   const jsonLd = event.publish_status !== 'published_low_confidence' ? buildJsonLd(event) : null;
 
+  // BreadcrumbList-Schema: Home → Bundesland-Hub → Gemeinde-Hub → Event.
+  // Nutzt dieselben verifizierten Hub-Links wie die sichtbare
+  // "Mehr entdecken"-Zeile in V4RelatedEvents (kein Link auf nicht
+  // existierende Hubs). Interne Verlinkung für Google (MASTERPLAN §8.1).
+  const hubs = hubLinksFor(event);
+  const breadcrumbJsonLd = JSON.stringify({
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://lasstreffen.at' },
+      ...hubs.map((h, i) => ({
+        '@type': 'ListItem',
+        position: i + 2,
+        name: h.label.replace(/^Events in /, ''),
+        item: `https://lasstreffen.at${h.href}`,
+      })),
+      { '@type': 'ListItem', position: hubs.length + 2, name: event.title },
+    ],
+  }).replace(/<\/script>/gi, '<\\/script>');
+
   return (
     <>
       {jsonLd && (
@@ -369,6 +390,10 @@ export default async function EventDetailPage({
           dangerouslySetInnerHTML={{ __html: jsonLd }}
         />
       )}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: breadcrumbJsonLd }}
+      />
       <V4EventDetail
         event={event}
         state={state}
@@ -376,6 +401,7 @@ export default async function EventDetailPage({
         priceFrom={priceFrom}
         priceAtDoor={priceAtDoor}
       />
+      <V4RelatedEvents event={event}/>
     </>
   );
 }
