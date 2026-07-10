@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import type { Metadata } from 'next';
 import { BusinessLeadForm } from '@/components/Business/BusinessLeadForm';
+import { BoostCheckoutForm } from '@/components/Business/BoostCheckoutForm';
 import { MapComparison } from '@/components/Business/MapComparison';
 
 export const revalidate = 86400;
@@ -256,6 +257,22 @@ export default function FuerFirmenPage() {
           </div>
         </section>
 
+        {/* Boost direkt buchen (Stripe-Checkout) */}
+        <section id="boost" className="mt-20 scroll-mt-8">
+          <div className="rounded-3xl border border-amber-400/25 bg-gradient-to-b from-amber-500/[0.07] to-transparent p-6 md:p-10">
+            <p className="text-xs tracking-[0.2em] uppercase text-amber-400/80 mb-3">
+              Ohne Wartezeit
+            </p>
+            <h2 className="text-2xl md:text-3xl font-bold mb-3">Event-Boost direkt buchen</h2>
+            <p className="text-white/50 max-w-2xl">
+              Kein Formular, kein Hin und Her: Event-Link einfügen, mit Karte zahlen,
+              und dein Event ist sofort hervorgehoben — bis einen Tag nach dem Event
+              (max. 28 Tage), klar als „Anzeige" gekennzeichnet.
+            </p>
+            <BoostCheckoutForm />
+          </div>
+        </section>
+
         {/* Pakete */}
         <section className="mt-20">
           <h2 className="text-2xl md:text-3xl font-bold mb-3">Pakete</h2>
@@ -303,14 +320,14 @@ export default function FuerFirmenPage() {
                   </ul>
 
                   <a
-                    href="#kontakt"
+                    href={plan.id === 'boost' ? '#boost' : '#kontakt'}
                     className={`block text-center py-3 rounded-xl font-semibold text-sm transition-colors ${
                       plan.highlight
                         ? 'bg-violet-400 text-black hover:bg-violet-300'
                         : 'bg-white/10 text-white hover:bg-white/20'
                     }`}
                   >
-                    Anfragen
+                    {plan.id === 'boost' ? 'Direkt online buchen' : 'Anfragen'}
                   </a>
                 </div>
               );

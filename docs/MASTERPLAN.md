@@ -488,10 +488,20 @@ Pipeline-Flags, npm-Einträge, Test; Admin-Review-UI bleibt vorerst) ·
 *(2026-07-08)*: `V4RelatedEvents` (ISR-sicher, Anon-Client, Composite-Index-
 Query 352 ms) + „Mehr entdecken"-Zeile mit existenz-geprüften Gemeinde-/
 Bundesland-Hub-Links + BreadcrumbList-JSON-LD ·
+✅ **Stripe-Boost-Checkout** *(2026-07-10, Test-Modus)*: Self-Service auf
+/fuer-firmen (#boost): Event-Link einfügen → `POST /api/checkout/boost`
+(Session 29 €, metadata bindet event_id) → Stripe → `/fuer-firmen/boost/erfolg`
+verifiziert die Zahlung SERVERSEITIG gegen Stripe (kein Webhook nötig,
+nichts fälschbar) und setzt is_boosted/boost_tier/boost_until
+(bis 1 Tag nach Event, Cap 28 Tage; expire-boosts-Cron räumt ab).
+Verifiziert gegen die echte Stripe-Test-API (Session 29,00 €, unbezahlt →
+verweigert). ⚠️ Vor Live-Gang: `STRIPE_SECRET_KEY` in Vercel-Env (aktuell
+Test-Key), USt-Handling klären (Seite sagt „zzgl. USt" — Stripe Tax oder
+Preis brutto), Live-Keys NIE in Chat/Repo ·
 Offen: Karten-Snapshot-Konsum in der Map (§10.3, fn-16 läuft parallel) ·
-Stripe-Checkout für Boost (braucht Stripe-Account vom User) · Wochen-Newsletter
-pro Region (braucht Double-Opt-in-Entscheidung) · Middleware-Refresh-Scope
-(§10.2.4, bewusst zurückgestellt — Regressionsrisiko auf Auth-Flächen).
+Wochen-Newsletter pro Region (braucht Double-Opt-in-Entscheidung) ·
+Middleware-Refresh-Scope (§10.2.4, bewusst zurückgestellt —
+Regressionsrisiko auf Auth-Flächen).
 
 ### P2 — Fundament (Monat 2–3)
 
