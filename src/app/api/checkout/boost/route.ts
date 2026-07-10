@@ -46,12 +46,18 @@ export async function POST(req: NextRequest) {
     { auth: { persistSession: false } },
   );
 
+  // Boostbar = Event ist heute oder in der Zukunft (Scraper speichern
+  // tages-genaue Events auf 00:00 UTC — ein striktes start_date >= now()
+  // schloss ALLE heutigen Events aus, live gefunden am 10.07.) ODER läuft
+  // als mehrtägiges Event noch (end_date in der Zukunft).
+  const now = new Date();
+  const startOfTodayUtc = new Date(now.toISOString().slice(0, 10) + 'T00:00:00Z').toISOString();
   let q = supabase
     .from('events')
     .select('id, title, start_date, is_boosted, boost_until')
     .eq('visibility', 'public')
     .in('publish_status', ['published', 'published_low_confidence'])
-    .gte('start_date', new Date().toISOString())
+    .or(`start_date.gte.${startOfTodayUtc},end_date.gte.${now.toISOString()}`)
     .order('start_date', { ascending: true })
     .limit(1);
   q = ref.id ? q.eq('id', ref.id) : q.eq('slug', ref.slug!);
