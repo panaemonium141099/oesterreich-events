@@ -91,6 +91,7 @@ import {
 } from './uni';
 import { closeSharedBrowser } from './puppeteerBrowser';
 import { syncEventsToSupabase } from '../db/supabase-sync';
+import { createClient } from '@supabase/supabase-js';
 import type { ScrapedEvent } from '@/types/events';
 import fs from 'fs';
 import path from 'path';
@@ -341,17 +342,65 @@ function scrapeWithTimeout(scraper: BaseScraper): Promise<ScrapedEvent[]> {
 }
 
 /**
- * Deterministische Shard-Aufteilung für parallele CI-Jobs (MASTERPLAN §5):
- * alphabetisch sortiert (stabil gegenüber Registrierungs-Reihenfolge),
- * dann round-robin auf shardCount Buckets. Jeder Scraper landet in genau
- * einem Shard.
+ * Laufzeit-Gewichte in Minuten für die Shard-Verteilung. Quelle: gemessene
+ * Shard-Laufzeiten 11.–13.07. (Shard 3 starb mit den Kommunal-Aggregatoren
+ * am 300-min-Limit, während andere Shards in 1–30 min fertig waren) plus
+ * Größenordnung der Quellen. Ab jetzt schreibt runScraper() echte
+ * Laufzeiten nach source_runs — diese Map bei Gelegenheit daraus nachziehen
+ * (SELECT source_name, percentile_disc(0.9) ... FROM source_runs).
+ * Unbekannte Scraper zählen DEFAULT_WEIGHT.
+ */
+const DEFAULT_WEIGHT = 3;
+const SCRAPER_WEIGHTS: Record<string, number> = {
+  'gem2go': 120,
+  'gemeinden-generic': 120,
+  'gemeinde-registry': 100,
+  'feratel-deskline': 80,
+  'boudicca': 60,
+  'tourdata': 60,
+  'meinbezirk': 45,
+  'tips.at': 45,
+  'eventfrog': 30,
+  'events.at': 30,
+  'eventfinder.at': 30,
+  'meetup.com': 30,
+  'falter': 20,
+  'wien-ogd': 20,
+  'veranstaltungskalender.net': 20,
+  'regionews.at': 20,
+};
+
+function weightOf(name: string): number {
+  return SCRAPER_WEIGHTS[name] ?? DEFAULT_WEIGHT;
+}
+
+/**
+ * Deterministische, LASTBALANCIERTE Shard-Aufteilung (MASTERPLAN §5, P2).
+ * Vorher: alphabetisches round-robin — das packte mehrere Kommunal-
+ * Aggregatoren in denselben Shard (Shard 3 → 300-min-Kill), während andere
+ * Shards nach 1 min fertig waren. Jetzt LPT-Scheduling: Scraper nach
+ * Gewicht absteigend (Namens-Tiebreak für Determinismus), jeder in den
+ * aktuell leichtesten Shard. Jeder Scraper landet in genau einem Shard;
+ * alle Jobs eines Laufs berechnen dieselbe Zuteilung.
  */
 export function getScrapersForShard(shardIndex: number, shardCount: number): BaseScraper[] {
   if (shardCount < 1 || shardIndex < 0 || shardIndex >= shardCount) {
     throw new Error(`Ungültiger Shard: ${shardIndex}/${shardCount}`);
   }
-  const sorted = [...scrapers].sort((a, b) => a.name.localeCompare(b.name));
-  return sorted.filter((_, i) => i % shardCount === shardIndex);
+  const sorted = [...scrapers].sort((a, b) =>
+    weightOf(b.name) - weightOf(a.name) || a.name.localeCompare(b.name),
+  );
+  const loads = new Array<number>(shardCount).fill(0);
+  const buckets: BaseScraper[][] = Array.from({ length: shardCount }, () => []);
+  for (const s of sorted) {
+    let lightest = 0;
+    for (let i = 1; i < shardCount; i++) {
+      if (loads[i] < loads[lightest]) lightest = i;
+    }
+    buckets[lightest].push(s);
+    loads[lightest] += weightOf(s.name);
+  }
+  return buckets[shardIndex];
 }
 
 export async function runAllScrapers(subset?: BaseScraper[]): Promise<void> {
@@ -379,12 +428,38 @@ export async function runAllScrapers(subset?: BaseScraper[]): Promise<void> {
   console.log(`${'='.repeat(60)}\n`);
 }
 
+/**
+ * Best-effort-Telemetrie nach source_runs — die Datengrundlage für das
+ * lastbalancierte Sharding (SCRAPER_WEIGHTS oben aus echten Laufzeiten
+ * nachziehen). Fire-and-forget: Telemetrie darf nie einen Scrape killen;
+ * ohne Service-Key (lokale Runs) wird still übersprungen.
+ */
+async function recordSourceRun(row: {
+  source_name: string;
+  events_found: number;
+  events_upserted: number;
+  duration_ms: number;
+  status: 'success' | 'error' | 'timeout';
+  error_message: string | null;
+}): Promise<void> {
+  try {
+    const url = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL;
+    const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    if (!url || !key) return;
+    const sb = createClient(url, key, { auth: { persistSession: false } });
+    await sb.from('source_runs').insert({ ...row, run_at: new Date().toISOString() });
+  } catch (e) {
+    console.warn(`[telemetry] source_runs insert failed (${row.source_name}):`, e instanceof Error ? e.message : e);
+  }
+}
+
 export async function runScraper(scraper: BaseScraper): Promise<void> {
   // Supabase is the single source of truth — no local SQLite dual-write.
   let eventsFound = 0;
   let eventsNew = 0;
   let eventsUpdated = 0;
   const startedAt = new Date().toISOString();
+  const startedMs = Date.now();
 
   writeProgress(scraper.name, {
     status: 'running',
@@ -427,9 +502,25 @@ export async function runScraper(scraper: BaseScraper): Promise<void> {
 
     console.log(`[${scraper.name}] Fertig: ${eventsFound} gefunden, ${eventsNew} neu, ${eventsUpdated} aktualisiert`);
     clearProgress(scraper.name);
+    await recordSourceRun({
+      source_name: scraper.name,
+      events_found: eventsFound,
+      events_upserted: eventsNew,
+      duration_ms: Date.now() - startedMs,
+      status: 'success',
+      error_message: null,
+    });
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
     console.error(`[${scraper.name}] FEHLER: ${message}`);
+    await recordSourceRun({
+      source_name: scraper.name,
+      events_found: eventsFound,
+      events_upserted: 0,
+      duration_ms: Date.now() - startedMs,
+      status: err instanceof ScraperTimeoutError ? 'timeout' : 'error',
+      error_message: message.slice(0, 500),
+    });
     writeProgress(scraper.name, {
       status: 'error',
       current: 0,
