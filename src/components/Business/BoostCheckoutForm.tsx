@@ -69,7 +69,7 @@ export function BoostCheckoutForm() {
         </p>
       )}
       <p className="mt-3 text-xs text-white/30">
-        Sichere Zahlung über Stripe (Karte, Apple Pay, Google Pay). Preis zzgl. USt.
+        Sichere Zahlung über Stripe (Karte, Apple Pay, Google Pay). Preis inkl. USt.
         Dein Event findest du über die Suche — kopiere einfach die Adresszeile.
       </p>
     </form>

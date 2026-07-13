@@ -14,9 +14,9 @@
  *   ergänzt werden, falls „Browser vor Redirect geschlossen" relevant wird
  *   — die Session bleibt bei Stripe abrufbar, der Kauf geht nicht verloren.
  *
- * Env: STRIPE_SECRET_KEY (Vercel + .env.local; TEST-Keys bis zum Go-Live).
- * Steuern: Preis ist aktuell brutto-als-netto ohne Stripe Tax — vor dem
- * Live-Gang USt-Handling klären (Seite sagt „zzgl. USt").
+ * Env: STRIPE_SECRET_KEY (Vercel: Live-Key seit 2026-07-10; lokal Test-Key).
+ * Steuern: 29 € ist ENDPREIS (inkl. USt) — User-Entscheidung 2026-07-10,
+ * Copy auf /fuer-firmen und im Formular entsprechend.
  */
 
 import Stripe from 'stripe';

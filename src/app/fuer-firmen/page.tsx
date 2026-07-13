@@ -334,7 +334,7 @@ export default function FuerFirmenPage() {
             })}
           </div>
           <p className="text-xs text-white/30 mt-4">
-            Alle Preise zzgl. USt. Individuelle Pakete für größere Veranstalter auf Anfrage.
+            Alle Preise inkl. USt. Individuelle Pakete für größere Veranstalter auf Anfrage.
           </p>
         </section>
 
