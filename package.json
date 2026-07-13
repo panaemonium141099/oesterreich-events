@@ -75,6 +75,9 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
+  "engines": {
+    "node": "22.x"
+  },
   "browserslist": [
     "chrome >= 111",
     "edge >= 111",
