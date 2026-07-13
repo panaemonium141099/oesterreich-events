@@ -118,10 +118,14 @@ jobs:
   post:
     # Post-Processing läuft IMMER (auch wenn einzelne Shards failen) — genau
     # das fehlte 10 Wochen lang. `if: always()` + needs sammelt alle Vorjobs.
+    # Timeout 180→300 (2026-07-13): der Backlog aus 10 Wochen ohne
+    # Geocoding/Scoring/Dedup braucht mehr als 180 min pro Lauf — die Jobs
+    # vom 11.+12.07. wurden bei 180 min gekillt, bevor Indexing/Report
+    # drankamen. Nach Abbau des Rückstaus normalisiert sich die Laufzeit.
     needs: [scrape, venues]
     if: ${{ always() && (github.event_name == 'schedule' || github.event.inputs.scraper == '') }}
     runs-on: ubuntu-latest
-    timeout-minutes: 180
+    timeout-minutes: 300
 
     env:
       SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
