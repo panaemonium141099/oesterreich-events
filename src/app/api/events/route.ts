@@ -495,15 +495,21 @@ export async function GET(request: NextRequest) {
       query = query.or(`price_max.lte.${filters.priceMax},price_max.is.null`);
     }
 
-    // Evening filter at database level: events starting at 17:00 or later
-    // Uses start_date::time cast in PostgreSQL via Supabase RPC or filter
-    // Since Supabase PostgREST doesn't support time extraction directly,
-    // we use a workaround: filter where start_date contains 'T17', 'T18', ..., 'T23'
-    // or has no time component (date-only events are included)
+    // Evening-Filter: "Abend" = ab 17:00 LOKALZEIT (Europe/Vienna).
+    // start_date ist timestamptz und wird von PostgREST als UTC-String
+    // gematcht — gemessen 2026-07-13 (Stunden-Histogramm künftiger
+    // Musik/Nightlife-Events): Peak bei UTC 17–18 = 19–20 Uhr Wien, die
+    // Daten liegen also überwiegend als ECHTE UTC vor (seit Feratel-Fix
+    // #71; Alt-Bestand teils naive Vienna-als-UTC gemischt).
+    // Fenster T15–T23 deckt: 17:00-Lokal-Start im Sommer (15 UTC) und
+    // Winter (16 UTC) plus die naive gespeicherten Alt-Events (17–23).
+    // Bewusst leicht über-inklusiv (16-Uhr-Winter-Events rutschen mit
+    // rein) — besser als die vorherige Lücke, die ALLE 17:00–18:59-
+    // Lokal-Starts (~1.700 Events) aus dem Abend-Filter warf.
     if (filters.eveningOnly) {
-      // Events with time >= 17:00 OR no time component (date-only, kept for backwards compat)
-      // PostgREST supports gte on text-cast timestamps
       query = query.or(
+        'start_date.like.*T15:%,' +
+        'start_date.like.*T16:%,' +
         'start_date.like.*T17:%,' +
         'start_date.like.*T18:%,' +
         'start_date.like.*T19:%,' +

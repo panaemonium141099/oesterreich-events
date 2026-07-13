@@ -505,9 +505,32 @@ Regressionsrisiko auf Auth-Flächen).
 
 ### P2 — Fundament (Monat 2–3)
 
-Outreach mit Klickzahlen-Argument hochfahren · Migrationen auf Supabase CLI ·
-`eveningOnly`-Timezone-Fix · Analytics-Rollups + Retention · Dead-Code-Sweep (knip) ·
-ggf. VPS-Umzug (§5 Phase B).
+✅ **Bundesland-Backfill** *(2026-07-13)*: 24.566 Events per PLZ-Mapping
+befüllt (0 Rest-Kandidaten; Rest ohne BL = ohne PLZ bzw. DE/CH) + Trigger
+`trg_bundesland_from_plz` als dauerhafte Selbstheilung ·
+✅ **Pipeline-Telemetrie + LPT-Sharding** *(2026-07-13)*: runScraper schreibt
+Dauer/Status nach `source_runs`; Shards lastbalanciert statt alphabetisch
+(Shard 3 starb 3 Tage in Folge am 300-min-Limit; Heavies wie
+gem2go/gemeinden-generic haben jetzt eigene Shards). Post-Job-Timeout
+180→300 min für den Backlog-Abbau. Gewichte aus source_runs-P90 nachziehen,
+sobald ein paar Läufe Telemetrie geliefert haben ·
+✅ **Analytics-Rollups** *(2026-07-13)*: `analytics_daily` + tägliche
+pg_cron-Aggregation + 90-Tage-Retention der Rohdaten; 35 Tage backfilled ·
+✅ **Outreach-Social-Proof** *(2026-07-13)*: Drafts nennen echte
+Detailseiten-Aufrufe (30 Tage, nur ≥20) — Reichweiten-Kooperations-Winkel
+aus PR #66 bewusst beibehalten ·
+✅ **eveningOnly-Fix** *(2026-07-13, datenbasiert)*: Stunden-Histogramm zeigt
+echte UTC-Speicherung (Peak 17–18 UTC = 19–20 Wien) → Fenster T15–T23
+statt T17–T23; vorher fielen ~1.700 17:00–18:59-Lokal-Starts aus dem Filter ·
+✅ **Dead-Code-Sweep** *(2026-07-13)*: 80 Dateien entfernt (30 Ad-hoc-Scripts
++ 50 V3-Komponenten inkl. totem Cluster Sidebar→EventList→EventCard),
+jede Löschung referenz-geprüft (execSync-False-Positives wie
+normalize-locations/fix-geocoding und Supabase-Edge-Functions verschont) ·
+📌 **venues-Befund**: 312.983 Zeilen, nur **164** je mit Event verknüpft
+(204 MB OSM-Massenimport). NICHT gelöscht — die Tabelle ist Kandidaten-Pool
+fürs Venue-Matching. Entscheidung nötig: Pool auf relevante Venues
+eindampfen (z. B. nur mit Events im Umkreis) oder behalten ·
+Offen: Migrationen-Altbestand konsolidieren · ggf. VPS-Umzug (§5 Phase B).
 
 ### P3 — Skalierung (Quartal)
 

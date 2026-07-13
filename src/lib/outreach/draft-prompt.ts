@@ -23,8 +23,15 @@ export const COMPLIANCE_FOOTER =
 export function buildDraftPrompt(input: DraftInput): string {
   const recipient = input.orgName ?? input.domain;
   const hasEvents = input.events.length > 0;
+  // Social Proof: Aufrufzahlen nur nennen, wenn sie beeindrucken (>= 20 in
+  // 30 Tagen) — "3 Aufrufe" wäre ein Anti-Argument. Der Draft-Winkel bleibt
+  // Reichweiten-Kooperation (PR #66), die Zahl stärkt nur den Einstieg.
+  const fmtEvent = (e: DraftInput['events'][number]) =>
+    e.views != null && e.views >= 20
+      ? `${e.title} (${e.views} Aufrufe bei uns in den letzten 30 Tagen)`
+      : e.title;
   const eventLine = hasEvents
-    ? `Vertrauens-Einstieg (NICHT als Bitte): Wir featuren bereits Veranstaltungen aus eurem Umfeld auf lasstreffen.at, z.B. ${input.events.map((e) => e.title).slice(0, 2).join(', ')}.`
+    ? `Vertrauens-Einstieg (NICHT als Bitte): Wir featuren bereits Veranstaltungen aus eurem Umfeld auf lasstreffen.at, z.B. ${input.events.slice(0, 2).map(fmtEvent).join(', ')}.`
     : '';
 
   return [
