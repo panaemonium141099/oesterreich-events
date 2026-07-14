@@ -174,11 +174,17 @@ export default async function WidgetPage({
                         {e.title}
                       </span>
                       <span className="block text-[12px] text-white/40 truncate">
-                        {[e.location_name, e.bundesland && e.bundesland in BUNDESLAND_NAMES
-                          ? BUNDESLAND_NAMES[e.bundesland as BundeslandId]
-                          : null]
-                          .filter(Boolean)
-                          .join(' · ')}
+                        {(() => {
+                          const bl = e.bundesland && e.bundesland in BUNDESLAND_NAMES
+                            ? BUNDESLAND_NAMES[e.bundesland as BundeslandId]
+                            : null;
+                          // "Wien · Wien" vermeiden, wenn location_name das
+                          // Bundesland selbst ist.
+                          const loc = e.location_name?.trim().toLowerCase() === bl?.toLowerCase()
+                            ? null
+                            : e.location_name;
+                          return [loc, bl].filter(Boolean).join(' · ');
+                        })()}
                       </span>
                     </span>
                   </a>
