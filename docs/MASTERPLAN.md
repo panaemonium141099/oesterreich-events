@@ -555,10 +555,44 @@ pg_cron `archive-old-events` 02:50 (5.000/Nacht); initial 10.500 von
 Datum `0001-01-01` existieren (Datenmüll, wandert mit ins Archiv) ·
 ✅ **llms.txt/LLM-SEO**: war bereits vollständig (public/llms.txt +
 /llms-full.txt-Route, AI-Crawler explizit in robots.ts erlaubt) ·
-Offen: B2B-Widget/Syndication · Hotel-/Anreise-Affiliate im Event-Detail
-(braucht Partnerprogramm-Entscheidung + Affiliate-ID vom Betreiber) ·
-Saison-Kampagnen-Kalender · WhatsApp-/Push-Kanäle pro Region (WhatsApp
-braucht Business-Account; Web-Push erst ab nennenswerter Abonnenten-Basis).
+✅ **B2B-Widget/Syndication (MVP)** *(2026-07-14)*: `/widget/[region]`
+(iframe-embeddbar — einzige Fläche mit `frame-ancestors *`, Rest bleibt
+SAMEORIGIN; ISR 30 min, 10 Regionen, Query per EXPLAIN belegt) +
+Code-Generator auf `/fuer-firmen#widget` mit Backlink-Snippet (der
+`<a>` unter dem iframe ist der SEO-Gegenwert der Gratis-Nutzung) +
+Live-Vorschau. Klicks tracken als `widget_*` via ClickTracker;
+Widget-Pageviews landen als page_group `/widget` in analytics_daily.
+Einsatz: Outreach-Pitch an Gemeinden/Tourismusverbände (Backlinks!) ·
+✅ **Saison-Kampagnen-Kalender** *(2026-07-14, s. u.)* ·
+Offen: Hotel-/Anreise-Affiliate im Event-Detail (braucht
+Partnerprogramm-Entscheidung + Affiliate-ID vom Betreiber; Impact-Site-
+Verification für booking.com liegt schon im Layout-Head) ·
+WhatsApp-/Push-Kanäle pro Region (WhatsApp braucht Business-Account;
+Web-Push erst ab nennenswerter Abonnenten-Basis) · Widget-Ausbau auf
+Gemeinde-Slugs, wenn Outreach es nachfragt (`dynamicParams` wieder öffnen).
+
+#### Saison-Kampagnen-Kalender (Content + Newsletter + Outreach)
+
+Befund 2026-07: alle 64 Blog-Posts sind Einzel-Event-Guides — es gibt
+KEINEN saisonalen Sammel-Guide, obwohl dort die großen Suchvolumina
+liegen („Adventmärkte Österreich", „Silvester Wien"). Faustregel:
+**Publish 6–10 Wochen vor Such-Peak** (Google-Indexierungs-Vorlauf).
+
+| Publish | Such-Peak | Asset (Neu = Sammel-Guide) | Bestand als interne Links |
+|---|---|---|---|
+| **Aug** | Sep–Okt | „Herbstfeste & Erntedank in Ö" (Neu) | kaiser-wiesn, aufsteirern, retz-weinlesefest, martinimarkt |
+| **Sep** | Nov–Dez | „Adventmärkte Österreich — der große Guide" (Neu, Top-Priorität) | 5 Christkindlmarkt-Posts (Wien/Graz/Linz/Innsbruck/Salzburg) |
+| **Okt** | Dez | „Silvester in Österreich" (Neu) | silvesterpfad, neujahrskonzert |
+| **Dez** | Jän–Feb | „Ball- & Faschingssaison" (Neu) | opernball, villacher-fasching |
+| **Feb** | März–Apr | „Ostermärkte & Frühlingsfeste" (Neu) | bregenzer-fruehling, narzissenfest |
+| **Apr** | Mai–Aug | „Festival-Sommer Österreich" (Neu) | ~20 Festival-Posts (stärkster Bestand) |
+| **Mai** | Jun–Aug | „Open-Air-Kinos & Sommernächte" (Neu) | klangwolke, sommernachtskonzert |
+
+Flankierend pro Kampagne: Newsletter-Digest übernimmt das Saison-Thema
+als Aufmacher (newsletter-weekly hat die Events schon) · Outreach-Angle
+für Gemeinden im Saison-Einzug (Widget + Boost) · Saison-Guide verlinkt
+auf thema-/gemeinde-Hubs. KEIN neues Hub-System bauen — Sammel-Guides
+sind normale Blog-Posts (BlogTicketBox = Affiliate-Fläche inklusive).
 
 ---
 
