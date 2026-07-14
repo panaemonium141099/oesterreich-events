@@ -543,8 +543,22 @@ Offen: Migrationen-Altbestand konsolidieren · ggf. VPS-Umzug (§5 Phase B).
 
 ### P3 — Skalierung (Quartal)
 
-B2B-Widget/Syndication · Hotel-/Anreise-Affiliate im Event-Detail · Event-Archivierung +
-DB-Performance · Saison-Kampagnen-Kalender · WhatsApp-/Push-Kanäle pro Region.
+✅ **Event-Archivierung** *(2026-07-14)*: `events_archive` (RLS ohne Policies,
+service-role-only) + `archive_old_events(max_rows, batch_size)` mit
+Schema-Drift-Selbstheilung (neue events-Spalten werden automatisch
+nachgezogen). Archiviert nur Events >90 Tage OHNE Referenzen aus User-/
+Feature-Tabellen (saved/plan_items/reminders/invites/groups/memories/DMs/
+notifications/activities/festivals) und ohne lebende duplicate_of-/
+parent-Verweise — Dupes zuerst, deren Kanonische werden im Folgelauf frei.
+pg_cron `archive-old-events` 02:50 (5.000/Nacht); initial 10.500 von
+~33.300 Backlog-Zeilen manuell abgeräumt. Nebenbefund: Events mit
+Datum `0001-01-01` existieren (Datenmüll, wandert mit ins Archiv) ·
+✅ **llms.txt/LLM-SEO**: war bereits vollständig (public/llms.txt +
+/llms-full.txt-Route, AI-Crawler explizit in robots.ts erlaubt) ·
+Offen: B2B-Widget/Syndication · Hotel-/Anreise-Affiliate im Event-Detail
+(braucht Partnerprogramm-Entscheidung + Affiliate-ID vom Betreiber) ·
+Saison-Kampagnen-Kalender · WhatsApp-/Push-Kanäle pro Region (WhatsApp
+braucht Business-Account; Web-Push erst ab nennenswerter Abonnenten-Basis).
 
 ---
 
