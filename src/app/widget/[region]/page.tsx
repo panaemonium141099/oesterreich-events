@@ -6,14 +6,22 @@
  * generiert und enthält zusätzlich einen echten <a>-Backlink unter dem
  * iframe (SEO-Bedingung der kostenlosen Nutzung).
  *
+ * Scopes (Auflösung in src/lib/widget/scopes.ts): ganz Österreich,
+ * Bundesland, Bezirk ('bezirk-…', filtert events.district) und Gemeinde
+ * ('{plz}-{ort}', 10-km-Umkreis wie die Gemeinde-Hub-Seiten). Unbekannte
+ * Slugs → notFound.
+ *
  * Framing-Erlaubnis: next.config.ts setzt für /widget/:path* eine CSP mit
  * `frame-ancestors *` — die EINZIGE Fläche der Seite, die fremde Origins
  * einbetten dürfen (Rest bleibt X-Frame-Options=SAMEORIGIN).
  *
  * STATISCH-SICHER wie die Landing (§10.2): cookie-freier Anon-Client, kein
- * auth, keine searchParams — Optik ist fix (dunkle Brand-Karte), Varianten
- * leben im Pfad. ISR 30 min × 10 Regionen = vernachlässigbare DB-Last;
- * Query-Form per EXPLAIN belegt (Index-Walk idx_events_start_date, 9–52 ms).
+ * auth, keine searchParams. ISR 30 min; nur tatsächlich angefragte Scopes
+ * werden gerendert/gecacht. Query-Formen per EXPLAIN belegt (2026-07-14):
+ * Bundesland/Bezirk laufen über idx_events_bundesland_start_date — dafür
+ * MÜSSEN visibility='public' + lat/lng NOT NULL mitgefiltert werden
+ * (partieller Index), und event_score bleibt BEWUSST aus dem SQL (der
+ * Score-Index kippt den Plan in ein 500-ms-BitmapAnd; Gate läuft in JS).
  *
  * Chrome: V4TopNav/V4TabBar blenden sich auf /widget-Pfaden selbst aus.
  * PageviewTracker läuft mit → Widget-Reichweite landet als page_group
@@ -24,29 +32,17 @@ import { notFound } from 'next/navigation';
 import { createClient } from '@supabase/supabase-js';
 import { BUNDESLAND_NAMES, type BundeslandId } from '@/lib/districtsAT';
 import { buildEventUrlV2 } from '@/lib/utils/slugify';
+import { bboxAround, haversineKm } from '@/lib/gemeinden/data';
+import { resolveWidgetScope, REGION_LABELS, type WidgetScope } from '@/lib/widget/scopes';
 
 export const revalidate = 1800;
-// Geschlossene Regions-Whitelist (generateStaticParams ist die SoT):
-// unbekannte Slugs → hartes 404 ohne Render. Ohne dieses Flag streamt
-// Next erst die Loading-Shell (Status 200) und rendert das 404 inline.
-// Beim Ausbau auf Gemeinde-Slugs wieder auf dynamisch umstellen.
-export const dynamicParams = false;
 
 export const metadata: Metadata = {
   title: 'Event-Widget — LassTreffen.at',
   robots: { index: false, follow: false },
 };
 
-const REGION_LABELS: Record<string, string> = {
-  oesterreich: 'ganz Österreich',
-  ...BUNDESLAND_NAMES,
-};
-
-/** Hub-Seite, auf die der „Alle Events"-Footer-Link zeigt. */
-function hubPath(region: string): string {
-  return region === 'oesterreich' ? '/entdecken' : `/${region}`;
-}
-
+/** Die 10 Regionen werden beim Build vorgerendert; Bezirke/Gemeinden on demand. */
 export function generateStaticParams() {
   return Object.keys(REGION_LABELS).map((region) => ({ region }));
 }
@@ -62,10 +58,14 @@ interface WidgetEvent {
   address: string | null;
   category: string | null;
   image_url: string | null;
+  event_score: number | null;
+  latitude: number | null;
+  longitude: number | null;
 }
 
 const ROW_LIMIT = 8;
-const POOL = 16; // Reserve für den Recurring-Dedupe (Muster get-landing-data)
+const EVENT_COLS =
+  'id,slug,title,start_date,location_name,bundesland,postal_code,address,category,image_url,event_score,latitude,longitude';
 
 const dayFmt = new Intl.DateTimeFormat('de-AT', {
   weekday: 'short',
@@ -89,15 +89,7 @@ function dedupeRecurring(rows: WidgetEvent[]): WidgetEvent[] {
   return out;
 }
 
-export default async function WidgetPage({
-  params,
-}: {
-  params: Promise<{ region: string }>;
-}) {
-  const { region } = await params;
-  const label = REGION_LABELS[region];
-  if (!label) notFound();
-
+async function loadEvents(scope: WidgetScope): Promise<WidgetEvent[]> {
   const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -106,27 +98,65 @@ export default async function WidgetPage({
 
   let query = supabase
     .from('events')
-    .select('id,slug,title,start_date,location_name,bundesland,postal_code,address,category,image_url')
+    .select(EVENT_COLS)
     .gte('start_date', new Date().toISOString())
     .eq('publish_status', 'published')
-    .gte('event_score', 40)
-    .order('start_date', { ascending: true })
-    .limit(POOL);
-  if (region !== 'oesterreich') {
-    query = query.eq('bundesland', region);
+    .eq('visibility', 'public')
+    .not('latitude', 'is', null)
+    .not('longitude', 'is', null)
+    .order('start_date', { ascending: true });
+
+  if (scope.kind === 'gemeinde') {
+    const { minLat, maxLat, minLng, maxLng } = bboxAround(scope.lat, scope.lng, 10);
+    query = query
+      .gte('latitude', minLat).lte('latitude', maxLat)
+      .gte('longitude', minLng).lte('longitude', maxLng)
+      .limit(48);
+  } else {
+    if (scope.bundesland) query = query.eq('bundesland', scope.bundesland);
+    if (scope.kind === 'bezirk') query = query.eq('district', scope.district);
+    query = query.limit(36);
   }
 
   const { data } = await query;
-  const events = dedupeRecurring((data ?? []) as WidgetEvent[]).slice(0, ROW_LIMIT);
+  let rows = (data ?? []) as WidgetEvent[];
 
-  const utm = `utm_source=widget&utm_medium=embed&utm_campaign=${region}`;
+  if (scope.kind === 'gemeinde') {
+    // bbox ist rechteckig — auf echten 10-km-Kreis nachfiltern (Muster
+    // der Gemeinde-Hub-Seiten).
+    rows = rows.filter(
+      (e) => e.latitude != null && e.longitude != null
+        && haversineKm(scope.lat, scope.lng, e.latitude, e.longitude) <= 10,
+    );
+  }
+
+  // Qualitäts-Gate bewusst in JS statt SQL (s. Kopfkommentar).
+  const scored = rows.filter((e) => (e.event_score ?? 0) >= 40);
+  // Kleine Scopes nicht leerfiltern: lieber ungescorte Events als ein
+  // leeres Widget auf einer Gemeinde-Website.
+  const pool = scored.length >= ROW_LIMIT ? scored : rows;
+
+  return dedupeRecurring(pool).slice(0, ROW_LIMIT);
+}
+
+export default async function WidgetPage({
+  params,
+}: {
+  params: Promise<{ region: string }>;
+}) {
+  const { region } = await params;
+  const scope = resolveWidgetScope(region);
+  if (!scope) notFound();
+
+  const events = await loadEvents(scope);
+  const utm = `utm_source=widget&utm_medium=embed&utm_campaign=${scope.slug}`;
 
   return (
     <div className="min-h-screen bg-[#0a0a0c] text-slate-100 flex flex-col text-[14px]">
       {/* Header */}
       <div className="px-4 pt-3.5 pb-2.5 border-b border-white/[0.07] flex items-baseline justify-between gap-3">
         <h1 className="font-bold text-[15px] tracking-tight truncate">
-          Events in {label}
+          Events in {scope.label}
         </h1>
         <span className="text-[11px] text-white/35 whitespace-nowrap">Nächste Termine</span>
       </div>
@@ -137,7 +167,7 @@ export default async function WidgetPage({
           <p className="px-4 py-8 text-white/40 text-center">
             Gerade keine Events — schau auf{' '}
             <a
-              href={`https://lasstreffen.at${hubPath(region)}?${utm}`}
+              href={`https://lasstreffen.at${scope.hubPath}?${utm}`}
               target="_blank"
               rel="noopener"
               className="underline underline-offset-2 text-white/70"
@@ -207,7 +237,7 @@ export default async function WidgetPage({
           Powered by <span className="font-semibold text-white/60">LassTreffen.at</span>
         </a>
         <a
-          href={`https://lasstreffen.at${hubPath(region)}?${utm}`}
+          href={`https://lasstreffen.at${scope.hubPath}?${utm}`}
           target="_blank"
           rel="noopener"
           data-track="widget_more_click"
