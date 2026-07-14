@@ -127,6 +127,10 @@ export function V4TabBar() {
     };
   }, []);
 
+  // /widget/* wird als iframe in fremde Seiten eingebettet — keine
+  // Site-Chrome dort (nach den Hooks, wegen Rules-of-Hooks).
+  if (pathname === '/widget' || pathname.startsWith('/widget/')) return null;
+
   return (
     <>
       <nav

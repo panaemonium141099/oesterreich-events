@@ -3,6 +3,7 @@ import type { Metadata } from 'next';
 import { BusinessLeadForm } from '@/components/Business/BusinessLeadForm';
 import { BoostCheckoutForm } from '@/components/Business/BoostCheckoutForm';
 import { MapComparison } from '@/components/Business/MapComparison';
+import { WidgetCodeGenerator } from '@/components/Business/WidgetCodeGenerator';
 
 export const revalidate = 86400;
 
@@ -336,6 +337,25 @@ export default function FuerFirmenPage() {
           <p className="text-xs text-white/30 mt-4">
             Alle Preise inkl. USt. Individuelle Pakete für größere Veranstalter auf Anfrage.
           </p>
+        </section>
+
+        {/* Event-Widget zum Einbetten (P3 Syndication — Lead-Magnet) */}
+        <section id="widget" className="mt-20 scroll-mt-8">
+          <div className="rounded-3xl border border-white/[0.08] bg-white/[0.02] p-6 md:p-10">
+            <p className="text-xs tracking-[0.2em] uppercase text-emerald-400/80 mb-3">
+              Kostenlos
+            </p>
+            <h2 className="text-2xl md:text-3xl font-bold mb-3">
+              Event-Widget für eure Website
+            </h2>
+            <p className="text-white/50 max-w-2xl">
+              Zeigt die nächsten Events eurer Region direkt auf eurer eigenen
+              Website — ideal für Gemeinden, Tourismusverbände, Hotels und
+              Medien. Region wählen, Code kopieren, einbetten. Die Events
+              aktualisieren sich automatisch aus unseren 141+ Quellen.
+            </p>
+            <WidgetCodeGenerator />
+          </div>
         </section>
 
         {/* So funktioniert's */}

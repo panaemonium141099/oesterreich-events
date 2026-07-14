@@ -365,6 +365,19 @@ const nextConfig: NextConfig = {
         headers: landingIsolationHeaders,
       },
       {
+        // B2B-Widget (P3 Syndication): /widget/* ist die EINZIGE Fläche,
+        // die fremde Origins einbetten dürfen. Gleicher Header-Key wie in
+        // siteWideHeaders → diese spätere Regel überschreibt die CSP nur
+        // für diesen Pfad und hängt `frame-ancestors *` an. Das inherited
+        // X-Frame-Options=SAMEORIGIN bleibt stehen, wird aber von allen
+        // CSP2-Browsern ignoriert, sobald frame-ancestors präsent ist —
+        // Alt-Browser ohne CSP2 blocken das Embedding schlimmstenfalls.
+        source: '/widget/:path*',
+        headers: [
+          { key: 'Content-Security-Policy', value: `${csp}; frame-ancestors *` },
+        ],
+      },
+      {
         source: '/blog/:path*',
         headers: [
           {

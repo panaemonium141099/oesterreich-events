@@ -48,6 +48,10 @@ function isActive(pathname: string, matches: ReadonlyArray<string>): boolean {
 export function V4TopNav() {
   const pathname = usePathname() ?? '/';
 
+  // /widget/* wird als iframe in fremde Seiten eingebettet — dort darf
+  // keine Site-Chrome erscheinen (V4TabBar macht dasselbe).
+  if (pathname === '/widget' || pathname.startsWith('/widget/')) return null;
+
   return (
     <header
       className="sticky top-0 z-30 h-16 border-b border-[var(--v4-hairline-2)] bg-[var(--v4-surface)]/95 backdrop-blur supports-[backdrop-filter]:bg-[var(--v4-surface)]/80"
