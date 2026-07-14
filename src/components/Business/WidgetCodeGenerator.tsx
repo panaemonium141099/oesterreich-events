@@ -111,6 +111,19 @@ export function WidgetCodeGenerator() {
           style={{ width: '100%', maxWidth: 420, height: 560, border: 0, borderRadius: 16 }}
           loading="lazy"
         />
+        {/* Manche Umgebungen (Firmen-Proxys, strikte Blocker) unterbinden
+            iframes generell — der Direktlink funktioniert immer. */}
+        <p className="text-xs text-white/35 mt-2">
+          Vorschau bleibt leer?{' '}
+          <a
+            href={`/widget/${region}`}
+            target="_blank"
+            rel="noopener"
+            className="underline underline-offset-2 text-white/60 hover:text-white"
+          >
+            Widget im neuen Tab öffnen ↗
+          </a>
+        </p>
       </div>
     </div>
   );
