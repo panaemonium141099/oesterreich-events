@@ -22,6 +22,7 @@ import {
   FestivalsSection,
   MapPreview,
   HowItWorks,
+  NewsletterSignup,
 } from '@/components/Landing/v4';
 import { Onboarding } from '@/components/Landing/Onboarding';
 import { AuthErrorToast } from '@/components/Landing/AuthErrorToast';
@@ -60,6 +61,7 @@ export default async function LandingPage() {
         <WeekendSection events={data.todayWeekend}/>
         <ConcertsSection events={data.concerts}/>
         <FestivalsSection festivals={data.festivals}/>
+        <NewsletterSignup/>
         <RegionHubsSection/>
         <MapPreview/>
         <HowItWorks/>

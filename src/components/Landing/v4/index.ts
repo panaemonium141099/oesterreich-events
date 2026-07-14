@@ -6,6 +6,7 @@ export { ArtistTeaserV4 } from './ArtistTeaserV4';
 export { MatchesSection } from './MatchesSection';
 export { AnonFollowTeaser } from './AnonFollowTeaser';
 export { PersonalizedMatches } from './PersonalizedMatches';
+export { NewsletterSignup } from './NewsletterSignup';
 export { WeekendSection } from './WeekendSection';
 export { ConcertsSection } from './ConcertsSection';
 export { FestivalsSection } from './FestivalsSection';

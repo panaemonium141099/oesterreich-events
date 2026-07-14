@@ -498,8 +498,17 @@ Verifiziert gegen die echte Stripe-Test-API (Session 29,00 €, unbezahlt →
 verweigert). ⚠️ Vor Live-Gang: `STRIPE_SECRET_KEY` in Vercel-Env (aktuell
 Test-Key), USt-Handling klären (Seite sagt „zzgl. USt" — Stripe Tax oder
 Preis brutto), Live-Keys NIE in Chat/Repo ·
+✅ **Wochen-Newsletter pro Region** *(2026-07-14, User-Go für Double-Opt-in)*:
+`newsletter_subscribers` (RLS, service-role-only) · Subscribe/Confirm/
+Unsubscribe-APIs mit HMAC-Tokens (UNSUBSCRIBE_SECRET-Kette wie
+Artist-Alerts, kein Token-Storage) · `NewsletterSignup` auf der Landing
+(ohne Account, Region wählbar inkl. „ganz Österreich") · Vercel-Cron
+freitags 06:00 UTC rendert den city-digest pro Region (Events-Query 1×
+pro Region, Eventim-Affiliate-Links im Digest, Regionen mit <3 Events
+werden übersprungen) · Datenschutz-Sektion (Double-Opt-in, Brevo als
+Auftragsverarbeiter). ⚠️ Brevo-Free = 300 Mails/Tag — bei >250
+Abonnenten Plan upgraden oder Versand splitten (last_sent_at existiert) ·
 Offen: Karten-Snapshot-Konsum in der Map (§10.3, fn-16 läuft parallel) ·
-Wochen-Newsletter pro Region (braucht Double-Opt-in-Entscheidung) ·
 Middleware-Refresh-Scope (§10.2.4, bewusst zurückgestellt —
 Regressionsrisiko auf Auth-Flächen).
 

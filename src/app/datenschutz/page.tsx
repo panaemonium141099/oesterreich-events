@@ -107,10 +107,37 @@ export default function DatenschutzPage() {
             </p>
           </section>
 
+          {/* Newsletter */}
+          <section>
+            <h2 className="text-lg font-semibold text-white mb-3">Event-Newsletter</h2>
+            <p>
+              Sie können unseren wöchentlichen Event-Newsletter abonnieren — auch ohne
+              Benutzerkonto. Dabei speichern wir Ihre E-Mail-Adresse und die gewählte
+              Region. Die Anmeldung erfolgt im Double-Opt-in-Verfahren: Der Versand
+              beginnt erst, nachdem Sie die Anmeldung über den Bestätigungslink in
+              der zugesandten E-Mail bestätigt haben. Rechtsgrundlage ist Ihre
+              Einwilligung (Art. 6 Abs. 1 lit. a DSGVO).
+            </p>
+            <p className="mt-3">
+              Jede Newsletter-E-Mail enthält einen Abmeldelink, über den Sie Ihre
+              Einwilligung jederzeit mit Wirkung für die Zukunft widerrufen können.
+              Für den Versand nutzen wir den Dienstleister Brevo (siehe Abschnitt 6).
+            </p>
+          </section>
+
           {/* 6. Drittanbieter */}
           <section>
             <h2 className="text-lg font-semibold text-white mb-3">6. Drittanbieter und Auftragsverarbeiter</h2>
             <p>Zur Bereitstellung unserer Dienste setzen wir folgende Drittanbieter ein:</p>
+
+            <h3 className="text-base font-medium text-white/90 mt-4 mb-2">Brevo (E-Mail-Versand)</h3>
+            <p>
+              Für den Versand von Newsletter- und Benachrichtigungs-E-Mails verwenden
+              wir Brevo. Dabei werden E-Mail-Adresse und Versanddaten verarbeitet.
+              Anbieter: Sendinblue GmbH (Brevo), Köpenicker Str. 126, 10179 Berlin,
+              Deutschland. Es besteht ein Auftragsverarbeitungsvertrag; die
+              Verarbeitung erfolgt innerhalb der EU.
+            </p>
 
             <h3 className="text-base font-medium text-white/90 mt-4 mb-2">Supabase (Datenbank & Authentifizierung)</h3>
             <p>
