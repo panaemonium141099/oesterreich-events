@@ -62,12 +62,19 @@ node / next.js
   gegen Baseline, nicht absolut)
 
 ## Betrieb / Automatisierung (Stand 2026-07)
-- **GitHub Actions `scrape-events.yml`** (täglich 03:17): 10 parallele
-  Scrape-Shards (`scrape.ts --shard i/10`, deterministisch alphabetisch,
-  Per-Scraper-Timeout 25 min via `SCRAPER_TIMEOUT_MIN`) + Venues-Job + EIN
-  Post-Processing-Job (`scrape-pipeline.ts --skip-scrapers --skip-venues`:
-  normalize → categorize → geocode → master_coords → score → dedup →
-  artist_matching → indexing → report) mit `if: always()`.
+- **GitHub Actions `scrape-events.yml`** (täglich 03:17): 10 lastbalancierte
+  Scrape-Shards (`scrape.ts --shard i/10`, LPT nach `SCRAPER_WEIGHTS` aus
+  source_runs-Messwerten; Gemeinde-Riesen allein in Shards 0/1/2).
+  Per-Scraper-Timeout 25 min (`SCRAPER_TIMEOUT_MIN`), Riesen 280 via
+  Override; die Gemeinde-Aggregatoren brechen per Soft-Budget
+  (`SCRAPER_SOFT_BUDGET_MIN`, 240 min) mit Teilergebnis ab und rotieren
+  ihren Startpunkt täglich (volle Abdeckung über mehrere Läufe).
+  scrape.ts endet mit explizitem `process.exit(0)` — sonst halten
+  verwaiste Sockets getimeouteter Scraper den Job stundenlang am Leben.
+  Dazu Venues-Job + EIN Post-Processing-Job (`scrape-pipeline.ts
+  --skip-scrapers --skip-venues`: normalize → categorize → geocode →
+  master_coords → score → dedup → artist_matching → indexing → report)
+  mit `if: always()`.
 - **GitHub Actions `import-eventim.yml`** (alle 6 h): PFT-Feed-Import mit
   Affiliate-Links. Secrets: `EVENTIM_FEED_USER`/`EVENTIM_FEED_PASS`.
 - **Vercel-Crons** (vercel.json): send-reminders, seo-daily-snapshot

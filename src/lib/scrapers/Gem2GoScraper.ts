@@ -60,8 +60,18 @@ export class Gem2GoScraper extends BaseScraper {
     let gemeindenNoEvents = 0;
     let gemeindenNotGem2Go = 0;
 
-    for (let i = 0; i < GEM2GO_GEMEINDEN.length; i++) {
-      const gemeinde = GEM2GO_GEMEINDEN[i];
+    // 2094 Gemeinden × ~11 s ≈ 388 min — passt in KEIN Job-Limit. Soft-
+    // Budget bricht mit Teilergebnis ab, Tagesrotation deckt den Rest in
+    // den Folgeläufen ab (siehe BaseScraper.softDeadline/rotateDaily).
+    const deadline = this.softDeadline();
+    const gemeindenRotated = this.rotateDaily(GEM2GO_GEMEINDEN);
+
+    for (let i = 0; i < gemeindenRotated.length; i++) {
+      if (Date.now() > deadline) {
+        this.log(`Soft-Budget erreicht nach ${i}/${gemeindenRotated.length} Gemeinden — liefere ${allEvents.length} Events als Teilergebnis (Rotation setzt morgen fort)`);
+        break;
+      }
+      const gemeinde = gemeindenRotated[i];
       try {
         const baseUrl = this.buildEventsUrl(gemeinde);
         const html = await this.fetchWithTimeout(baseUrl, this.timeoutMs);

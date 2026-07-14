@@ -71,7 +71,16 @@ export class GenericGemeindeScraper extends BaseScraper {
     let processed = 0;
     let totalFound = 0;
 
-    for (const page of pages) {
+    // 923 Seiten × ~15 s ≈ 225 min. Soft-Budget + Tagesrotation wie bei
+    // gem2go: bei Abbruch geht das Teilergebnis in den Sync statt (wie
+    // vor 2026-07-14) komplett am harten Timeout zu verfallen.
+    const deadline = this.softDeadline();
+
+    for (const page of this.rotateDaily(pages)) {
+      if (Date.now() > deadline) {
+        console.log(`  Soft-Budget erreicht nach ${processed}/${pages.length} — liefere ${allEvents.length} Events als Teilergebnis`);
+        break;
+      }
       processed++;
       try {
         const events = await this.scrapeGemeinde(page);

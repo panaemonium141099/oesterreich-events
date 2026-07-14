@@ -64,7 +64,17 @@ async function main() {
   await triggerMatchArtists();
 }
 
-main().catch(err => {
-  console.error('Fataler Fehler:', err);
-  process.exit(1);
-});
+// Expliziter Exit statt auf das Leerlaufen des Event-Loops zu warten:
+// getimeoutete Scraper laufen ohne AbortSignal im Hintergrund weiter und
+// halten den Prozess mit offenen Sockets am Leben. Run 29305622984:
+// Shard 1 war um 04:43 fertig ("Scraping abgeschlossen"), der Prozess
+// endete erst 08:06 — 3h23min Zombie; Shards 0/2/8 hingen bis zum
+// GitHub-300-min-Kill. Alle Writes (Sync, Telemetrie) sind vor dem
+// Resolve von main() awaited — exit(0) ist hier verlustfrei.
+main().then(
+  () => process.exit(0),
+  err => {
+    console.error('Fataler Fehler:', err);
+    process.exit(1);
+  },
+);

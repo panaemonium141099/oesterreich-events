@@ -252,6 +252,30 @@ export abstract class BaseScraper {
     await this.sleep(this.delayMs);
   }
 
+  /**
+   * Soft-Zeitbudget für Langläufer (Gemeinde-Aggregatoren): Deadline ab
+   * JETZT, default 240 min (via SCRAPER_SOFT_BUDGET_MIN überschreibbar).
+   * Scraper mit tausenden Quellen prüfen die Deadline in ihrer Schleife
+   * und liefern die bis dahin gesammelten Events als Teilergebnis zurück.
+   * Vorher schluckte der harte Timeout in scrapeWithTimeout das KOMPLETTE
+   * Ergebnis-Array: gem2go stand nach 25 min bei 135/2094 Gemeinden und
+   * lieferte 0 Events (Run 29305622984, Shard 0, 2026-07-14).
+   */
+  protected softDeadline(): number {
+    return Date.now() + (Number(process.env.SCRAPER_SOFT_BUDGET_MIN) || 240) * 60_000;
+  }
+
+  /**
+   * Tagesrotation für Quell-Listen: der Startpunkt wandert täglich, damit
+   * bei Budget-Abbruch über mehrere Läufe ALLE Einträge drankommen statt
+   * immer nur der Listenanfang (systematischer Coverage-Bias).
+   */
+  protected rotateDaily<T>(list: T[]): T[] {
+    if (list.length === 0) return list;
+    const offset = Math.floor(Date.now() / 86_400_000) % list.length;
+    return [...list.slice(offset), ...list.slice(0, offset)];
+  }
+
   protected log(message: string): void {
     const timestamp = new Date().toISOString().slice(11, 19);
     console.log(`[${timestamp}] [${this.name}] ${message}`);

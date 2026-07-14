@@ -517,12 +517,28 @@ Regressionsrisiko auf Auth-Flächen).
 ✅ **Bundesland-Backfill** *(2026-07-13)*: 24.566 Events per PLZ-Mapping
 befüllt (0 Rest-Kandidaten; Rest ohne BL = ohne PLZ bzw. DE/CH) + Trigger
 `trg_bundesland_from_plz` als dauerhafte Selbstheilung ·
-✅ **Pipeline-Telemetrie + LPT-Sharding** *(2026-07-13)*: runScraper schreibt
-Dauer/Status nach `source_runs`; Shards lastbalanciert statt alphabetisch
-(Shard 3 starb 3 Tage in Folge am 300-min-Limit; Heavies wie
-gem2go/gemeinden-generic haben jetzt eigene Shards). Post-Job-Timeout
-180→300 min für den Backlog-Abbau. Gewichte aus source_runs-P90 nachziehen,
-sobald ein paar Läufe Telemetrie geliefert haben ·
+✅ **Pipeline-Telemetrie + LPT-Sharding** *(2026-07-13, große Nachbesserung
+2026-07-14)*: runScraper schreibt Dauer/Status nach `source_runs`; Shards
+lastbalanciert (Gemeinde-Riesen in eigenen Shards). Post-Job-Timeout
+180→300 min. **Befunde aus Run 29305622984 (Log-forensisch belegt):**
+(a) *Zombie-Prozesse* — getimeoutete Scraper liefen ohne AbortSignal
+weiter und hielten Node am Leben: Shard 1 fertig 04:43, Job-Ende 08:06;
+Shards 0/2/8 bis zum 300-min-Kill → Fix: explizites `process.exit(0)` in
+scrape.ts. (b) *Alles-oder-Nichts-Verlust* — gem2go stand nach dem harten
+25-min-Timeout bei 135/2094 Gemeinden und lieferte **0 Events** (Sync
+passiert erst nach scrape()-Return): die drei Gemeinde-Aggregatoren
+lieferten seit Einführung des Timeouts nichts mehr → Fix: Soft-Budget
+(`SCRAPER_SOFT_BUDGET_MIN`, default 240 min) mit Teilergebnis-Rückgabe +
+Tagesrotation des Startpunkts (volle Abdeckung über Folgeläufe; gem2go
+bräuchte ~388 min für alles), harte Timeouts nur noch als Backstop
+(280 min für die Riesen, 45 für meinbezirk mit gemessenen 24,7).
+(c) *Stille Telemetrie-Verluste* — der CHECK-Constraint von source_runs
+kannte 'error'/'timeout' nicht und supabase-js wirft nicht → alle
+Fehler-Zeilen wurden verworfen; zusätzlich FK auf sources →
+Migration 20260714092047 (CHECK erweitert, FK weg) + Insert-Error wird
+geloggt. (d) *Gewichte* aus 81 gemessenen Quellen nachgezogen
+(feratel 80→6, marxhalle 3→20, veranstaltungskalender.net 20→25 …);
+neue Verteilung: Riesen allein in Shards 0/1/2, Rest 18–22 pro Shard ·
 ✅ **Analytics-Rollups** *(2026-07-13)*: `analytics_daily` + tägliche
 pg_cron-Aggregation + 90-Tage-Retention der Rohdaten; 35 Tage backfilled ·
 ✅ **Outreach-Social-Proof** *(2026-07-13)*: Drafts nennen echte

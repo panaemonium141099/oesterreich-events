@@ -93,8 +93,19 @@ export class GemeindeRegistryScraper extends BaseScraper {
     let fetchErrors = 0;
     let noEvents = 0;
 
-    for (let i = 0; i < scrapeable.length; i++) {
-      const entry = scrapeable[i];
+    // ~1900 scrapbare Gemeinden × ~5-8 s (inkl. 1,5 s Delay + Pagination)
+    // ≈ 160-250 min. Soft-Budget + Tagesrotation wie bei gem2go: bei
+    // Abbruch geht das Teilergebnis in den Sync statt am harten Timeout
+    // komplett zu verfallen (siehe BaseScraper.softDeadline/rotateDaily).
+    const deadline = this.softDeadline();
+    const rotated = this.rotateDaily(scrapeable);
+
+    for (let i = 0; i < rotated.length; i++) {
+      if (Date.now() > deadline) {
+        this.log(`Soft-Budget erreicht nach ${i}/${rotated.length} Gemeinden — liefere ${allEvents.length} Events als Teilergebnis`);
+        break;
+      }
+      const entry = rotated[i];
       try {
         const result = await this.scrapeGemeinde(entry, paginationLog);
         if (result === 'fetch-error') {

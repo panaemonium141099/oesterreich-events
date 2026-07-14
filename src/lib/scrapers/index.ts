@@ -318,8 +318,26 @@ const SCRAPER_CONCURRENCY = 10;
  * abgebrochene Netzwerk-Call läuft im Hintergrund weiter (kein
  * AbortSignal durch alle Scraper gefädelt) — für einen CI-Prozess ok,
  * er stirbt beim Prozess-Ende. */
-const SCRAPER_TIMEOUT_MS =
-  (Number(process.env.SCRAPER_TIMEOUT_MIN) || 25) * 60_000;
+const DEFAULT_TIMEOUT_MIN = Number(process.env.SCRAPER_TIMEOUT_MIN) || 25;
+
+/**
+ * Härtere Obergrenzen für Langläufer. Die Gemeinde-Aggregatoren brechen
+ * ihre Schleife selbst per Soft-Budget ab (BaseScraper.softDeadline,
+ * default 240 min) und liefern ein Teilergebnis — der harte Timeout hier
+ * ist nur noch Backstop für echte Hänger und muss über Soft-Budget +
+ * Sync-Phase liegen. meinbezirk lief 24,7 min (Run 2026-07-14) — der
+ * 25er-Default war haarscharf.
+ */
+const SCRAPER_TIMEOUT_OVERRIDES_MIN: Record<string, number> = {
+  'gem2go': 280,
+  'gemeinden-generic': 280,
+  'gemeinde-registry': 280,
+  'meinbezirk': 45,
+};
+
+function timeoutMsFor(name: string): number {
+  return (SCRAPER_TIMEOUT_OVERRIDES_MIN[name] ?? DEFAULT_TIMEOUT_MIN) * 60_000;
+}
 
 class ScraperTimeoutError extends Error {
   constructor(name: string, ms: number) {
@@ -329,10 +347,11 @@ class ScraperTimeoutError extends Error {
 }
 
 function scrapeWithTimeout(scraper: BaseScraper): Promise<ScrapedEvent[]> {
+  const timeoutMs = timeoutMsFor(scraper.name);
   return new Promise<ScrapedEvent[]>((resolve, reject) => {
     const timer = setTimeout(
-      () => reject(new ScraperTimeoutError(scraper.name, SCRAPER_TIMEOUT_MS)),
-      SCRAPER_TIMEOUT_MS,
+      () => reject(new ScraperTimeoutError(scraper.name, timeoutMs)),
+      timeoutMs,
     );
     scraper.scrape().then(
       (events) => { clearTimeout(timer); resolve(events); },
@@ -343,31 +362,40 @@ function scrapeWithTimeout(scraper: BaseScraper): Promise<ScrapedEvent[]> {
 
 /**
  * Laufzeit-Gewichte in Minuten für die Shard-Verteilung. Quelle: gemessene
- * Shard-Laufzeiten 11.–13.07. (Shard 3 starb mit den Kommunal-Aggregatoren
- * am 300-min-Limit, während andere Shards in 1–30 min fertig waren) plus
- * Größenordnung der Quellen. Ab jetzt schreibt runScraper() echte
- * Laufzeiten nach source_runs — diese Map bei Gelegenheit daraus nachziehen
- * (SELECT source_name, percentile_disc(0.9) ... FROM source_runs).
- * Unbekannte Scraper zählen DEFAULT_WEIGHT.
+ * source_runs-Laufzeiten vom 2026-07-14 (81 Quellen; alles Ungelistete lag
+ * ≤2 min → DEFAULT_WEIGHT). Die Gemeinde-Aggregatoren sind Budget-begrenzt
+ * (Soft-Budget 240 min + Sync) — ihr Gewicht ist die Budget-Obergrenze,
+ * nicht die theoretische Volllaufzeit (gem2go bräuchte ~388 min für alle
+ * 2094 Gemeinden; Tagesrotation verteilt die Abdeckung über Läufe).
+ * Bei Änderungen nachziehen via:
+ *   SELECT source_name, percentile_disc(0.9) WITHIN GROUP (ORDER BY duration_ms)
+ *   FROM source_runs GROUP BY 1 ORDER BY 2 DESC;
  */
 const DEFAULT_WEIGHT = 3;
 const SCRAPER_WEIGHTS: Record<string, number> = {
-  'gem2go': 120,
-  'gemeinden-generic': 120,
-  'gemeinde-registry': 100,
-  'feratel-deskline': 80,
+  // Budget-begrenzte Gemeinde-Aggregatoren (Soft-Budget + Rotation):
+  'gem2go': 250,
+  'gemeinden-generic': 240,             // 923 Seiten ≈ 225 min, läuft meist komplett durch
+  'gemeinde-registry': 250,             // ~1900 Gemeinden, oft Budget-begrenzt
+  // Gemessen 2026-07-14 (max_min, mit Headroom aufgerundet):
+  'meinbezirk': 30,                     // 24,7
+  'veranstaltungskalender.net': 25,     // 21,6
+  'marxhalle': 20,                      // 17,6
+  'falter': 14,                         // 11,4
+  'burgenland.info': 12,                // 9,9
+  'neusiedlersee.com': 10,              // 8,0
+  'feratel-deskline': 6,                // 4,8 (Seed 80 war massiv zu hoch)
+  'wien-clubs': 5,                      // 4,0
+  'wien-ticket': 4,                     // 3,3
+  // Noch ungemessen (Fehler-/Timeout-Zeilen wurden bis zum Telemetrie-Fix
+  // 2026-07-14 still verworfen) — konservative Seeds behalten:
   'boudicca': 60,
   'tourdata': 60,
-  'meinbezirk': 45,
   'tips.at': 45,
   'eventfrog': 30,
   'events.at': 30,
   'eventfinder.at': 30,
-  'meetup.com': 30,
-  'falter': 20,
   'wien-ogd': 20,
-  'veranstaltungskalender.net': 20,
-  'regionews.at': 20,
 };
 
 function weightOf(name: string): number {
@@ -447,7 +475,15 @@ async function recordSourceRun(row: {
     const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
     if (!url || !key) return;
     const sb = createClient(url, key, { auth: { persistSession: false } });
-    await sb.from('source_runs').insert({ ...row, run_at: new Date().toISOString() });
+    // supabase-js wirft NICHT — Fehler kommen im Result-Objekt. Genau so
+    // gingen bis 2026-07-14 alle error-/timeout-Zeilen still verloren
+    // (CHECK-Constraint kannte die Status-Werte nicht).
+    const { error } = await sb
+      .from('source_runs')
+      .insert({ ...row, run_at: new Date().toISOString() });
+    if (error) {
+      console.warn(`[telemetry] source_runs insert failed (${row.source_name}): ${error.message}`);
+    }
   } catch (e) {
     console.warn(`[telemetry] source_runs insert failed (${row.source_name}):`, e instanceof Error ? e.message : e);
   }
