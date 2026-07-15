@@ -150,12 +150,13 @@ const RELATED_COLS =
   'id, slug, title, start_date, location_name, postal_code, address, bundesland, category, image_url';
 
 async function fetchRelated(event: Event): Promise<RelatedRow[]> {
-  // Ohne (ableitbares) Bundesland keine Sektion — ein unpräfixter
-  // Datums-Scan wäre auf der Micro-DB zu teuer. Der PLZ-Fallback matcht
-  // dabei gegen die korrekt getaggten Nachbar-Events (84 % haben ihr
-  // bundesland gesetzt).
+  // Die Sektion muss auf JEDER Detailseite erscheinen (User-Vorgabe
+  // 2026-07-15). Ohne ableitbares Bundesland (~900 Events ohne bl+PLZ)
+  // wird direkt österreichweit gefüllt; auch die bl-Pfade fallen bei
+  // dünnem Ergebnis österreichweit zurück. Der unpräfixte Datums-Walk
+  // ist unkritisch: identische Query-Form wie /widget/oesterreich
+  // (dichter idx_events_start_date-Walk, per EXPLAIN belegt).
   const bl = effectiveBundesland(event);
-  if (!bl) return [];
 
   const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -163,30 +164,41 @@ async function fetchRelated(event: Event): Promise<RelatedRow[]> {
     { auth: { persistSession: false } },
   );
 
-  const base = () =>
-    supabase
+  const base = (withBl: boolean) => {
+    let q = supabase
       .from('events')
       .select(RELATED_COLS)
       .eq('visibility', 'public')
       .in('publish_status', ['published', 'published_low_confidence'])
-      .eq('bundesland', bl)
       .gte('start_date', new Date().toISOString())
       .neq('id', event.id)
       .order('start_date', { ascending: true })
       .limit(POOL);
+    if (withBl && bl) q = q.eq('bundesland', bl);
+    return q;
+  };
 
   // 1. Gleiche Kategorie im gleichen Bundesland
   let rows: RelatedRow[] = [];
-  if (event.category) {
-    const { data, error } = await base().eq('category', event.category);
+  if (event.category && bl) {
+    const { data, error } = await base(true).eq('category', event.category);
     if (error) console.error('[related] category query failed:', error);
     rows = dedupe((data ?? []) as RelatedRow[]);
   }
 
   // 2. Fallback: Kategorie offen lassen, wenn zu dünn
-  if (rows.length < 3) {
-    const { data, error } = await base();
+  if (rows.length < 3 && bl) {
+    const { data, error } = await base(true);
     if (error) console.error('[related] fallback query failed:', error);
+    const merged = [...rows, ...((data ?? []) as RelatedRow[]).filter(r => !rows.some(x => x.id === r.id))];
+    rows = dedupe(merged);
+  }
+
+  // 3. Letzte Stufe: österreichweit — garantiert eine gefüllte Sektion
+  //    auch ohne Bundesland/PLZ oder in dünn besiedelten Regionen.
+  if (rows.length < 3) {
+    const { data, error } = await base(false);
+    if (error) console.error('[related] at-wide query failed:', error);
     const merged = [...rows, ...((data ?? []) as RelatedRow[]).filter(r => !rows.some(x => x.id === r.id))];
     rows = dedupe(merged);
   }

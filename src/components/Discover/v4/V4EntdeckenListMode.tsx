@@ -48,6 +48,18 @@ export function V4EntdeckenListMode({
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   const boostedIds = useBoostedIds();
 
+  // Ein Batch Vorsprung: der erste Cursor-Batch (10-13 s Micro-DB, nie im
+  // Edge-Cache) startet direkt nach dem Erst-Paint im Hintergrund, damit
+  // der User beim Durchscrollen der ersten 3000 nicht sichtbar wartet.
+  // Bewusst NUR einer (Ref-Guard) — mehr wäre wieder die alte Vollschleife.
+  const prefetchedRef = useRef(false);
+  useEffect(() => {
+    if (hasMoreBatches && !prefetchedRef.current) {
+      prefetchedRef.current = true;
+      loadMore();
+    }
+  }, [hasMoreBatches, loadMore]);
+
   // Daten nachladen erst am ECHTEN Listenende (rootMargin 0): EventListView
   // expandiert ihr internes Render-Fenster selbst gierig bis Viewport+200px
   // — mit Vorlauf würde dieser Sentinel dauerfeuern und de facto wieder
