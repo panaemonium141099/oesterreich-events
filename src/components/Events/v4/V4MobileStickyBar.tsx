@@ -12,9 +12,13 @@
 
 import type { V4EventState } from '@/lib/v4/derive-event-state';
 import { V4Badge } from './V4Badge';
+import { V4SaveButton } from './V4SaveButton';
 
 interface V4MobileStickyBarProps {
   state: V4EventState;
+  /** Fürs echte Merken (V4SaveButton) — die alten <a href="/saved">-Shortcuts
+   *  speicherten nichts (Mobile-Audit 2026-07-15). */
+  eventId?: string;
   provider?: string;
   priceFrom?: string;
   ticketUrl?: string;
@@ -22,12 +26,12 @@ interface V4MobileStickyBarProps {
   onPlanClick?: () => void;
 }
 
-export function V4MobileStickyBar({ state, provider, priceFrom, ticketUrl, priceAtDoor, onPlanClick }: V4MobileStickyBarProps) {
+export function V4MobileStickyBar({ state, eventId, provider, priceFrom, ticketUrl, priceAtDoor, onPlanClick }: V4MobileStickyBarProps) {
   return (
     <div
       data-v4-event-sticky={state}
       className="md:hidden fixed left-0 right-0 z-[22] flex items-center gap-3 px-4 py-3 border-t border-[var(--v4-hairline-2)] bg-[rgba(10,10,12,0.96)] backdrop-blur"
-      style={{ bottom: 76 }}
+      style={{ bottom: 82 /* V4TabBar ist 81px hoch — 76 überlappte 5px */ }}
     >
       {state === 'ticket' || state === 'match' || state === 'lineup' ? (
         provider && priceFrom && ticketUrl ? (
@@ -51,7 +55,9 @@ export function V4MobileStickyBar({ state, provider, priceFrom, ticketUrl, price
           <>
             <V4Badge kind="unknown">Kein Ticket bekannt</V4Badge>
             <div className="flex-1"/>
-            <a href="/saved" className="press-haptic px-5 py-3 rounded-full border border-[var(--v4-hairline-3)] text-sm font-semibold text-[var(--v4-ink)]">Merken</a>
+            {eventId
+              ? <V4SaveButton eventId={eventId}/>
+              : <a href="/saved" className="press-haptic px-5 py-3 rounded-full border border-[var(--v4-hairline-3)] text-sm font-semibold text-[var(--v4-ink)]">Merken</a>}
           </>
         )
       ) : state === 'free' ? (
@@ -94,7 +100,9 @@ export function V4MobileStickyBar({ state, provider, priceFrom, ticketUrl, price
         <>
           <V4Badge kind="unknown">Kein Ticket bekannt</V4Badge>
           <div className="flex-1"/>
-          <a href="/saved" data-track="event_saved_mobile" className="press-haptic px-5 py-3 rounded-full bg-[var(--v4-ink)] text-[#0a0a0c] text-sm font-semibold">Merken</a>
+          {eventId
+            ? <V4SaveButton eventId={eventId}/>
+            : <a href="/saved" data-track="event_saved_mobile" className="press-haptic px-5 py-3 rounded-full bg-[var(--v4-ink)] text-[#0a0a0c] text-sm font-semibold">Merken</a>}
         </>
       )}
     </div>

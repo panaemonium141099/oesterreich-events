@@ -134,6 +134,7 @@ export function V4EventDetail({
 
       <V4MobileStickyBar
         state={state}
+        eventId={event.id}
         provider={provider}
         priceFrom={priceFrom}
         ticketUrl={ticketUrl}

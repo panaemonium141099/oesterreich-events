@@ -371,7 +371,7 @@ function MapPageInner() {
                 <div
                   style={{
                     position: 'absolute',
-                    bottom: 'calc(env(safe-area-inset-bottom, 0px) + 78px)',
+                    bottom: 'calc(env(safe-area-inset-bottom, 0px) + 96px)',
                     left: '50%',
                     transform: 'translateX(-50%)',
                     padding: '8px 14px',
@@ -406,7 +406,7 @@ function MapPageInner() {
                 <div
                   style={{
                     position: 'absolute',
-                    bottom: 'calc(env(safe-area-inset-bottom, 0px) + 78px)',
+                    bottom: 'calc(env(safe-area-inset-bottom, 0px) + 96px)',
                     left: '50%',
                     transform: 'translateX(-50%)',
                     padding: '8px 14px',

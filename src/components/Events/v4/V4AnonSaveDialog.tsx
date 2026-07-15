@@ -125,7 +125,7 @@ export function V4AnonSaveDialog({ eventId, nextPath, onClose }: V4AnonSaveDialo
                   placeholder="deine@email.at"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="flex-1 min-w-0 rounded-xl bg-white/[0.06] border border-white/10 px-4 py-3 text-sm text-white placeholder-white/35 focus:outline-none focus:border-white/30"
+                  className="flex-1 min-w-0 rounded-xl bg-white/[0.06] border border-white/10 px-4 py-3 text-[16px] sm:text-sm text-white placeholder-white/35 focus:outline-none focus:border-white/30"
                 />
                 <button
                   type="submit"

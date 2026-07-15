@@ -51,7 +51,7 @@ export function BoostCheckoutForm() {
           value={eventRef}
           onChange={(e) => setEventRef(e.target.value)}
           placeholder="https://lasstreffen.at/events/…"
-          className="flex-1 px-4 py-3 rounded-xl bg-white/[0.05] border border-white/[0.1] text-white placeholder-white/30 text-sm focus:outline-none focus:border-amber-400/50"
+          className="flex-1 px-4 py-3 rounded-xl bg-white/[0.05] border border-white/[0.1] text-white placeholder-white/30 text-[16px] md:text-sm focus:outline-none focus:border-amber-400/50"
           required
         />
         <button

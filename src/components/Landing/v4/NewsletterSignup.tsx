@@ -77,7 +77,7 @@ export function NewsletterSignup() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="deine@email.at"
-              className="flex-1 px-4 py-3 rounded-xl bg-[var(--v4-surface)] border border-[var(--v4-hairline-2)] text-[var(--v4-ink)] placeholder-[var(--v4-ink-30)] text-[14px] focus:outline-none focus:border-[var(--v4-hairline-3)]"
+              className="flex-1 px-4 py-3 rounded-xl bg-[var(--v4-surface)] border border-[var(--v4-hairline-2)] text-[var(--v4-ink)] placeholder-[var(--v4-ink-30)] text-[16px] md:text-[14px] focus:outline-none focus:border-[var(--v4-hairline-3)]"
             />
             <select
               value={region}

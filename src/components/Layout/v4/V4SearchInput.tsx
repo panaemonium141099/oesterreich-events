@@ -67,7 +67,7 @@ export function V4SearchInput({
           value={query}
           onChange={e => setQuery(e.target.value)}
           placeholder={placeholder}
-          className="flex-1 bg-transparent border-0 outline-none text-[13px] text-[var(--v4-ink)] placeholder-[var(--v4-ink-50)] min-w-0"
+          className="flex-1 bg-transparent border-0 outline-none text-[16px] md:text-[13px] text-[var(--v4-ink)] placeholder-[var(--v4-ink-50)] min-w-0"
         />
         <kbd className="px-1.5 py-px text-[10px] rounded border border-[var(--v4-hairline-2)] text-[var(--v4-ink-30)] flex-shrink-0">
           ⌘ K
@@ -98,7 +98,7 @@ export function V4SearchInput({
         onChange={e => setQuery(e.target.value)}
         placeholder={placeholder}
         autoFocus={autoFocus}
-        className="flex-1 bg-transparent border-0 outline-none text-sm text-[var(--v4-ink)] placeholder-[var(--v4-ink-50)] min-w-0"
+        className="flex-1 bg-transparent border-0 outline-none text-[16px] md:text-sm text-[var(--v4-ink)] placeholder-[var(--v4-ink-50)] min-w-0"
       />
       <button
         type="submit"

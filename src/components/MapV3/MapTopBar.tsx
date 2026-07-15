@@ -355,13 +355,16 @@ export function MapTopBar({
                 setShowSuggestions(e.target.value.trim().length >= 2);
               }}
               onKeyDown={handleKey}
+              // text-[16px] unter md: iOS zoomt bei Input-Fokus < 16px
+              // automatisch rein und die Seite „springt" (Mobile-Audit
+              // 2026-07-15). Desktop behält die kompakten 14px.
+              className="text-[16px] md:text-[14px]"
               style={{
                 flex: 1,
                 minWidth: 0,
                 border: 'none',
                 outline: 'none',
                 background: 'transparent',
-                fontSize: 14,
                 fontWeight: 500,
                 color: T.ink,
                 fontFamily: 'inherit',
