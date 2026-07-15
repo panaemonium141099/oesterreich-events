@@ -16,10 +16,9 @@ on:
         required: false
         default: ''
       force:
-        description: 'Bestehende Post-Datei überschreiben'
+        description: 'Bestehende Post-Datei überschreiben (true/false)'
         required: false
         default: 'false'
-        type: boolean
 
 permissions:
   contents: write
