@@ -53,3 +53,48 @@ Out of scope: Vector-Tiles/Mapbox-Tilesets, DE/CH-Snapshot, Aenderungen an Event
 
 ## Decision Context
 Alternativen erwogen: (a) bbox-basiertes Nachladen pro Viewport — verworfen weil User explizit ALLE Events auf der Karte will und jeder Pan/Zoom neue DB-Round-Trips kostet; (b) Slim-18-Snapshot als eine Datei — verworfen: ~40 MB raw / >6 MB wire, mobil zu schwer; (c) covering INCLUDE-Index auf events — verworfen: repariert nur die DB-Seite, Client laedt weiterhin 45 MB in 30 Requests. Points-MV + columnar RPC folgt dem in #73 etablierten, verifizierten MV-Muster.
+
+## Revision 2026-07-15 (nach Client-Launch, User-Review angefragt)
+
+Stand: Client-Teil live (ein map-points-Request, 65.435 Punkte, Pill korrekt,
+keine Batch-Schleife — Prod-verifiziert). Kritische Neubewertung:
+
+**Gemessene Payload-Zusammensetzung (Prod-Snapshot, 4,98 MB raw):**
+| Anteil | Feld | Befund |
+|---|---|---|
+| 51,3 % (2,55 MB) | `ids` | UUID-Strings (36 Zeichen) — der dominante Kostenblock |
+| 22,5 % (1,12 MB) | `lat`+`lng` | volle Float-Präzision |
+| 26 % | Rest | start/end/score/Dictionaries — bereits kompakt |
+
+12-Monats-Horizont-Kappung brächte nur 1,3 % (98,7 % der Events liegen
+innerhalb 12 Monaten) — KEIN Hebel.
+
+**Bewertete Alternativen:**
+1. *Vector-Tiles (tippecanoe → PMTiles auf CDN/Storage)*: Industriestandard
+   ab ~Hunderttausenden Punkten; lädt nur Viewport-Tiles (50–200 KB).
+   ABER: vorberechnete Cluster können nicht client-seitig nach Filtern
+   re-clustern (Kategorie/Datum-Filter = Kern-UX der Karte), Gesamt-Count
+   „65.435 Events" unmöglich ohne Volldaten, neue Pipeline-Abhängigkeit
+   (tippecanoe-Build, Storage-Upload) für Solo-Betrieb. → Erst ab ~200k+
+   Punkten oder nachweislich schlechter Mobile-Performance wechseln.
+2. *bbox-Nachladen*: bleibt verworfen (Anforderung „alle Events sichtbar",
+   DB-Roundtrip pro Pan/Zoom auf Micro-Instanz).
+3. *Snapshot behalten, Payload dritteln (EMPFOHLEN — Slice 2)*:
+   a. **Short-IDs** (8 Hex-Zeichen statt UUID, RPC prüft Kollisionen;
+      /api/events/[id] akzeptiert Präfix-Lookup wie die Event-URLs mit
+      extractShortId) → −1,8 MB raw (−36 %).
+   b. lat/lng auf 5 Dezimalen runden (≈1 m Genauigkeit) → kleiner Gewinn,
+      kostenlos im RPC.
+   c. Ziel: ~2,6 MB raw / <1 MB brotli. Binärformat (ArrayBuffer) erst,
+      wenn (a)+(b) nicht reichen — Komplexität vs. ~0,5 MB.
+
+**Slice 3 — Messen statt raten:** RUM-Metrik `map_points_ready_ms`
+(Fetch+Decode+erster Cluster-Paint) als analytics_events-Event.
+Go/No-go-Schwelle: P75 mobil > 4 s ODER Bestand > 200k Punkte → Vector-
+Tiles-Migration einplanen; darunter bleibt der Snapshot die richtige
+Lösung (kein neues Infra-Teil, Filter instant, Gesamt-Count möglich).
+
+**Bekannte Trade-offs des Live-Stands (bewusst akzeptiert):**
+- Hover-Popup lädt Details nach (~100–300 ms, CDN 1 h) statt sofort.
+- Marker zeigen Kategorie-Fallback-Fotos bis zum ersten Hover.
+- Punkte sind tagesgenau (keine Uhrzeit) — eveningOnly bleibt Server-Pfad.
