@@ -55,8 +55,18 @@ export class GemeindeListScraper extends BaseScraper {
     let gemeindenOhneKalender = 0;
     let gemeindenFehler = 0;
 
-    for (let i = 0; i < GEMEINDEN.length; i++) {
-      const gemeinde = GEMEINDEN[i];
+    // Vierter Kommunal-Aggregator mit demselben Alles-oder-Nichts-Problem
+    // wie gem2go & Co (Telemetrie 2026-07-15: Timeout nach 25 min, Daten
+    // verworfen) → Soft-Budget + Tagesrotation, s. BaseScraper.
+    const deadline = this.softDeadline();
+    const rotated = this.rotateDaily([...GEMEINDEN]);
+
+    for (let i = 0; i < rotated.length; i++) {
+      if (Date.now() > deadline) {
+        this.log(`Soft-Budget erreicht nach ${i}/${rotated.length} Gemeinden — liefere ${allEvents.length} Events als Teilergebnis`);
+        break;
+      }
+      const gemeinde = rotated[i];
       try {
         this.log(`[${i + 1}/${GEMEINDEN.length}] ${gemeinde.name} (${gemeinde.bundesland})...`);
 

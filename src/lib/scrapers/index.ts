@@ -332,6 +332,7 @@ const SCRAPER_TIMEOUT_OVERRIDES_MIN: Record<string, number> = {
   'gem2go': 280,
   'gemeinden-generic': 280,
   'gemeinde-registry': 280,
+  'gemeinden': 280, // 4. Kommunal-Aggregator (253 Gemeinden), Befund 2026-07-15
   'meinbezirk': 45,
 };
 
@@ -377,6 +378,7 @@ const SCRAPER_WEIGHTS: Record<string, number> = {
   'gem2go': 250,
   'gemeinden-generic': 240,             // 923 Seiten ≈ 225 min, läuft meist komplett durch
   'gemeinde-registry': 250,             // ~1900 Gemeinden, oft Budget-begrenzt
+  'gemeinden': 130,                     // 253 Gemeinden inkl. Kalender-Discovery (Schätzung, Telemetrie liefert bald Messwert)
   // Gemessen 2026-07-14 (max_min, mit Headroom aufgerundet):
   'meinbezirk': 30,                     // 24,7
   'veranstaltungskalender.net': 25,     // 21,6
