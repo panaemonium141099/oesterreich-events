@@ -61,7 +61,7 @@ export default function MapPage() {
   return (
     <Suspense
       fallback={
-        <div className="h-screen flex items-center justify-center" style={{ background: T.panel }}>
+        <div className="h-[calc(100vh-4rem)] flex items-center justify-center" style={{ background: T.panel }}>
           <div className="animate-spin rounded-full h-10 w-10 border-2 border-neutral-300 border-t-neutral-900" />
         </div>
       }
@@ -227,7 +227,14 @@ function MapPageInner() {
   };
 
   return (
-    <div className="h-screen flex flex-col" style={{ background: T.bg }}>
+    // Höhe = Viewport MINUS globale V4TopNav (h-16): mit h-screen war die
+    // Seite exakt 64 px zu hoch → Suchleiste oder Event-Zähler lagen
+    // immer außerhalb, User musste scrollen. dvh-Variante für mobile
+    // Browser-Chrome (URL-Leiste), vh-Fallback für ältere Browser.
+    <div
+      className="h-[calc(100vh-4rem)] supports-[height:100dvh]:h-[calc(100dvh-4rem)] flex flex-col"
+      style={{ background: T.bg }}
+    >
       <MapTopBar
         filters={filters}
         onFiltersChange={setFilters}
