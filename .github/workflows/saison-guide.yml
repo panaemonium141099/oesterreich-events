@@ -1,0 +1,82 @@
+# Saison-Guide-Autopilot (MASTERPLAN P3, User-Go 2026-07-15):
+# monatlich prüfen, ob laut SAISON_KALENDER ein Sammel-Guide fällig ist,
+# Entwurf aus echten DB-Events + Gemini generieren und als PR öffnen.
+# Publiziert wird NIE automatisch — Merge = bewusste Review-Entscheidung.
+# Secrets: GEMINI_API_KEY (Actions-Secret, NICHT aus Vercel lesbar),
+# SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY (existieren für die Scrape-Jobs).
+name: saison-guide
+
+on:
+  schedule:
+    - cron: '0 5 1 * *'   # Monatserster, 05:00 UTC
+  workflow_dispatch:
+    inputs:
+      slug:
+        description: 'Kalender-Slug erzwingen (leer = Monat entscheidet)'
+        required: false
+        default: ''
+      force:
+        description: 'Bestehende Post-Datei überschreiben'
+        required: false
+        default: 'false'
+        type: boolean
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - run: npm ci
+
+      - name: Guide generieren
+        id: gen
+        run: |
+          set +e
+          ARGS=""
+          [ -n "${{ github.event.inputs.slug }}" ] && ARGS="--slug ${{ github.event.inputs.slug }}"
+          [ "${{ github.event.inputs.force }}" = "true" ] && ARGS="$ARGS --force"
+          npx tsx src/scripts/generate-saison-guide.ts $ARGS
+          code=$?
+          if [ "$code" = "78" ]; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          exit $code
+
+      - name: PR öffnen
+        if: steps.gen.outputs.skip != 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          slug=$(git status --porcelain src/content/blog/posts/ | awk '{print $2}' | head -1 | xargs -r basename | sed 's/\.ts$//')
+          if [ -z "$slug" ]; then echo "Keine neue Post-Datei — nichts zu committen."; exit 0; fi
+          branch="saison/$slug"
+          git config user.name "saison-autopilot"
+          git config user.email "noreply@lasstreffen.at"
+          git checkout -b "$branch"
+          git add src/content/blog/
+          git commit -m "content(saison): $slug — automatischer Guide-Entwurf zum Review"
+          git push -u origin "$branch" --force
+          gh pr create \
+            --title "Saison-Guide: $slug" \
+            --body "Automatisch generierter Saison-Guide (Quelle: echte DB-Events + Gemini, Script generate-saison-guide.ts).
+
+**Vor dem Merge prüfen:** Fakten/Termine/Preise der genannten Events, Tonfall, interne Links. Merge = publiziert beim nächsten Deploy (Blog-Route ISR).
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)" \
+            --base master || echo "PR existiert vermutlich schon."
