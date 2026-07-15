@@ -1,12 +1,14 @@
 'use client';
 
+import { Suspense } from 'react';
+
 import { useState, useEffect, useMemo, type FormEvent } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth, isProfileComplete } from '@/lib/supabase/auth-context';
 import { trackEvent } from '@/lib/analytics';
 
-export default function LoginPage() {
+function LoginPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { user, profile, loading, signInWithGoogle, signInWithEmail } = useAuth();
@@ -234,5 +236,16 @@ function EyeOffIcon() {
       <path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24" />
       <line x1="1" y1="1" x2="23" y2="23" />
     </svg>
+  );
+}
+
+// Ohne Root-loading.tsx (2026-07-15 entfernt — dessen Route-Boundary hatte
+// den Suspense-Reveal-Bug, Inhalte blieben unsichtbar) braucht jede Seite
+// mit useSearchParams ihre eigene Boundary fürs Prerendering.
+export default function LoginPageWithBoundary() {
+  return (
+    <Suspense fallback={null}>
+      <LoginPage />
+    </Suspense>
   );
 }

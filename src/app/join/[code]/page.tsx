@@ -1,5 +1,7 @@
 'use client';
 
+import { Suspense } from 'react';
+
 /**
  * Invite-code redemption flow.
  *
@@ -69,7 +71,7 @@ function formatDate(iso: string | null): string | null {
   return `${date} · ${d.toLocaleTimeString('de-AT', { hour: '2-digit', minute: '2-digit' })}`;
 }
 
-export default function JoinPage() {
+function JoinPage() {
   const params = useParams();
   const rawCode = ((params.code as string) ?? '').toUpperCase().trim();
   const router = useRouter();
@@ -323,5 +325,16 @@ export default function JoinPage() {
         </div>
       </main>
     </PlanerShell>
+  );
+}
+
+// Ohne Root-loading.tsx (2026-07-15 entfernt — dessen Route-Boundary hatte
+// den Suspense-Reveal-Bug, Inhalte blieben unsichtbar) braucht jede Seite
+// mit useSearchParams ihre eigene Boundary fürs Prerendering.
+export default function JoinPageWithBoundary() {
+  return (
+    <Suspense fallback={null}>
+      <JoinPage />
+    </Suspense>
   );
 }
