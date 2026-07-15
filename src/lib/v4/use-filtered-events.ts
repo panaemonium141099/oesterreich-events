@@ -35,6 +35,14 @@ export interface UseFilteredEventsOptions {
    * darf NUR die Karte das aktivieren, nie die Liste (/entdecken).
    */
   mapPoints?: boolean;
+  /**
+   * fn-16 (Liste): Nach dem ersten Batch NICHT im Hintergrund alle
+   * weiteren Cursor-Batches durchladen (die Cursor-URLs sind nie im
+   * Edge-Cache vorgewärmt → je 10–13 s Micro-DB-Zeit), sondern erst
+   * auf loadMore() — der Konsument triggert das per
+   * IntersectionObserver am Listenende.
+   */
+  lazyBatches?: boolean;
 }
 
 // ── Public contract ───────────────────────────────────────────────────────
@@ -57,6 +65,11 @@ export interface UseFilteredEventsReturn {
   totalMatchCount: number | null; // displayed count (null = trust apiTotalCount when no client narrower)
   categoryCounts: Record<string, number>;
 
+  // ── Lazy-Batches (nur mit options.lazyBatches, sonst inert) ─────────
+  loadMore: () => void;
+  hasMoreBatches: boolean;
+  loadingMore: boolean;
+
   // ── Context ──────────────────────────────────────────────────────────
   scopeLabel: string;              // "Heute · Burgenland"
   bundesland: Bundesland;          // current bundesland object (primary)
@@ -76,7 +89,7 @@ export function useFilteredEvents(
   initialFilters: Partial<EventFilters> = {},
   options: UseFilteredEventsOptions = {},
 ): UseFilteredEventsReturn {
-  const { mapPoints = false } = options;
+  const { mapPoints = false, lazyBatches = false } = options;
   // Multi-bundesland selection. Source of truth — `primaryBundesland` is
   // the derived single value used for map bbox / flyTo / scope label.
   // ['all'] = no filter; ['wien','steiermark'] = both; etc.
@@ -107,6 +120,18 @@ export function useFilteredEvents(
   const [backgroundLoading, setBackgroundLoading] = useState(false);
   const [apiTotalCount, setApiTotalCount] = useState<number | null>(null);
   const abortRef = useRef<AbortController | null>(null);
+
+  // Lazy-Batches-Zustand (fn-16 Liste): Cursor + Akkumulator überleben
+  // zwischen loadMore()-Aufrufen; Filterwechsel setzt alles zurück.
+  const [hasMoreBatches, setHasMoreBatches] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const lazyRef = useRef<{
+    cursor: string;
+    seen: Set<string>;
+    acc: Event[];
+    filtersWithBl: EventFilters;
+    controller: AbortController;
+  } | null>(null);
 
   // ── Data fetch (progressive batches, same shape as the old page) ───────
   const buildParams = useCallback(() => {
@@ -150,6 +175,10 @@ export function useFilteredEvents(
     if (abortRef.current) abortRef.current.abort();
     const controller = new AbortController();
     abortRef.current = controller;
+
+    // Filter-/Scope-Wechsel invalidiert eine laufende Lazy-Pagination.
+    lazyRef.current = null;
+    setHasMoreBatches(false);
 
     // Sync the parent-state bundesland selection into filters for cache+API
     // parity. Single concrete pick → use legacy `bundesland`; multi → use
@@ -253,6 +282,25 @@ export function useFilteredEvents(
         return;
       }
 
+      // fn-16 Lazy-Modus (Liste): NICHT alle Batches durchladen — Cursor
+      // merken, loadMore() holt den nächsten erst am Listenende. Die
+      // Hintergrund-Vollschleife unten bleibt der Pfad für Konsumenten
+      // ohne lazyBatches.
+      if (lazyBatches) {
+        const cursor0: string | null = firstData.nextCursor || null;
+        if (cursor0) {
+          lazyRef.current = {
+            cursor: cursor0,
+            seen: new Set(firstEvents.map((e) => e.id)),
+            acc: [...firstEvents],
+            filtersWithBl,
+            controller,
+          };
+          setHasMoreBatches(true);
+        }
+        return;
+      }
+
       setBackgroundLoading(true);
 
       const seen = new Set(firstEvents.map((e) => e.id));
@@ -297,7 +345,7 @@ export function useFilteredEvents(
       setLoading(false);
       setBackgroundLoading(false);
     }
-  }, [buildParams, filters, bundeslandIds, bundesland.id, mapPoints]);
+  }, [buildParams, filters, bundeslandIds, bundesland.id, mapPoints, lazyBatches]);
 
   useEffect(() => {
     fetchEventsProgressive();
@@ -305,6 +353,43 @@ export function useFilteredEvents(
       if (abortRef.current) abortRef.current.abort();
     };
   }, [fetchEventsProgressive]);
+
+  // fn-16 Lazy-Modus: EINEN weiteren Batch holen (IntersectionObserver am
+  // Listenende triggert das). Generation-Guard wie im Haupt-Fetch — nach
+  // Filterwechsel zeigt abortRef auf einen neuen Controller und der
+  // Aufruf verpufft.
+  const loadMore = useCallback(async () => {
+    const ctx = lazyRef.current;
+    if (!ctx || loadingMore) return;
+    if (ctx.controller.signal.aborted || abortRef.current !== ctx.controller) return;
+    setLoadingMore(true);
+    try {
+      const params = buildParams();
+      params.set('limit', '3000'); // = BATCH_SIZE des Erst-Fetches (Edge-Cache-Key-Parität)
+      params.set('cursor', ctx.cursor);
+      const res = await fetch(`/api/events?${params.toString()}`, { signal: ctx.controller.signal });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      if (ctx.controller.signal.aborted || abortRef.current !== ctx.controller) return;
+      const batch: Event[] = data.events || [];
+      const unique = batch.filter((e) => !ctx.seen.has(e.id));
+      for (const e of unique) ctx.seen.add(e.id);
+      ctx.acc = [...ctx.acc, ...unique];
+      setAllEvents(ctx.acc);
+      writeCache(ctx.filtersWithBl, ctx.acc, null);
+      const next: string | null = data.nextCursor || null;
+      if (!next || batch.length === 0) {
+        lazyRef.current = null;
+        setHasMoreBatches(false);
+      } else {
+        ctx.cursor = next;
+      }
+    } catch {
+      // Abbruch/Netzfehler — Sentinel triggert bei Bedarf erneut.
+    } finally {
+      setLoadingMore(false);
+    }
+  }, [buildParams, loadingMore]);
 
   // ── Client-side filtering pipeline ────────────────────────────────────
   const bundeslandEvents = useMemo(() => {
@@ -449,5 +534,8 @@ export function useFilteredEvents(
     categoryCounts,
     scopeLabel,
     bundesland,
+    loadMore,
+    hasMoreBatches,
+    loadingMore,
   };
 }

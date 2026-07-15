@@ -11,7 +11,7 @@
  * Filter-Verhalten ist 1:1 identisch zum heutigen /map?view=list.
  */
 
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { EventListView } from '@/components/MapV3/EventListView';
 import { FilterDrawer } from '@/components/MapV3/FilterDrawer';
 import { EventDetail } from '@/components/Events/EventDetail';
@@ -36,11 +36,35 @@ export function V4EntdeckenListMode({
     bundeslandIds, setBundeslandIds,
     finalEvents, loading,
     totalMatchCount, categoryCounts, scopeLabel,
-  } = useFilteredEvents(initialBundeslandIds, initialFilters);
+    loadMore, hasMoreBatches, loadingMore,
+  } = useFilteredEvents(initialBundeslandIds, initialFilters, {
+    // fn-16: keine Hintergrund-Vollschleife mehr — die Cursor-Batches
+    // (je 10-13 s Micro-DB, nie im Edge-Cache) kommen erst, wenn der
+    // Sentinel unten sichtbar wird.
+    lazyBatches: true,
+  });
 
   const [filterOpen, setFilterOpen] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   const boostedIds = useBoostedIds();
+
+  // Daten nachladen erst am ECHTEN Listenende (rootMargin 0): EventListView
+  // expandiert ihr internes Render-Fenster selbst gierig bis Viewport+200px
+  // — mit Vorlauf würde dieser Sentinel dauerfeuern und de facto wieder
+  // alle Batches durchladen. So schiebt die interne Expansion den Sentinel
+  // beim Scrollen vor sich her; er feuert nur, wenn die GELADENEN Daten
+  // wirklich durchgescrollt sind.
+  const sentinelRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const el = sentinelRef.current;
+    if (!el || !hasMoreBatches) return;
+    const io = new IntersectionObserver(
+      (entries) => { if (entries[0].isIntersecting) loadMore(); },
+      { rootMargin: '0px' },
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, [hasMoreBatches, loadMore]);
 
   // FilterDrawer.resultCount is typed `number` (not nullable).
   // totalMatchCount is null when a client narrower is active — fall back
@@ -76,6 +100,20 @@ export function V4EntdeckenListMode({
         scopeLabel={scopeLabel}
         boostedIds={boostedIds}
       />
+
+      {/* Lazy-Batches-Sentinel (fn-16): triggert loadMore am Listenende. */}
+      {hasMoreBatches && (
+        <div ref={sentinelRef} className="py-8 flex justify-center">
+          {loadingMore ? (
+            <span className="inline-flex items-center gap-2 text-[13px] text-[var(--v4-ink-50)]">
+              <span className="animate-spin rounded-full h-4 w-4 border-2 border-[var(--v4-hairline-3)] border-t-[var(--v4-ink)]" />
+              Weitere Events werden geladen …
+            </span>
+          ) : (
+            <span className="text-[13px] text-[var(--v4-ink-50)]">Scrollen für mehr Events</span>
+          )}
+        </div>
+      )}
 
       {/* Filter-Drawer — same component as /map */}
       <FilterDrawer
