@@ -119,7 +119,10 @@ export async function fetchMapPointEvents(): Promise<PointEvent[] | null> {
       const res = await fetch('/api/events/map-points');
       if (!res.ok) return null;
       const payload = (await res.json()) as MapPointsPayload;
-      if (!payload || payload.v !== 1 || !payload.n || !Array.isArray(payload.ids)) {
+      // v2 = Short-IDs (12 Hex, fn-16 Slice 2). Andere Versionen ablehnen
+      // → Batch-Fallback; deckt auch den Deploy-Überlapp ab (neuer Client
+      // + 15-min-CDN-gecachter v1-Payload und umgekehrt).
+      if (!payload || payload.v !== 2 || !payload.n || !Array.isArray(payload.ids)) {
         return null;
       }
       const events = decode(payload);

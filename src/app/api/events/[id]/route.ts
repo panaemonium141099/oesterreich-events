@@ -21,11 +21,18 @@ export async function GET(
   }
 
   try {
-    const { data: event, error } = await supabase
-      .from('events')
-      .select('*')
-      .eq('id', id)
-      .single();
+    // fn-16 Slice 2: der Karten-Snapshot liefert 12-Hex-Short-IDs — die
+    // lösen wir per UUID-Range-Scan über den PK-Index auf (uuid-Ordnung
+    // = Byte-Ordnung = Hex-Präfix-Ordnung). Volle UUIDs wie gehabt.
+    const shortId = /^[0-9a-f]{12}$/i.test(id) ? id.toLowerCase() : null;
+    const query = supabase.from('events').select('*');
+    const { data: event, error } = shortId
+      ? await query
+          .gte('id', `${shortId.slice(0, 8)}-${shortId.slice(8, 12)}-0000-0000-000000000000`)
+          .lte('id', `${shortId.slice(0, 8)}-${shortId.slice(8, 12)}-ffff-ffff-ffffffffffff`)
+          .limit(1)
+          .maybeSingle()
+      : await query.eq('id', id).single();
 
     if (error || !event) {
       return NextResponse.json({ error: 'Event nicht gefunden' }, { status: 404 });

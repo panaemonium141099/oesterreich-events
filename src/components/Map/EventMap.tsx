@@ -377,7 +377,10 @@ function EventMap({ events, selectedEvent, hoveredEventId, onSelectEvent, evenin
     const time = isPoint ? null : formatTime(event.start_date);
     const showTime = time !== null;
     const saved = savedIdsRef.current.has(event.id);
-    const isAd = boostedIdsRef.current.has(event.id);
+    // Short-IDs (Slice 2) matchen nicht gegen die Voll-UUIDs aus
+    // useBoostedIds — das dekodierte is_boosted-Flag deckt Punkte ab.
+    const isAd = boostedIdsRef.current.has(event.id)
+      || !!(event as { is_boosted?: boolean }).is_boosted;
     const canonicalUrl = isPoint ? '#' : buildEventUrlV2(event);
     const imgUrl = getEventImage(event.image_url, event.category, event.title, event.bundesland);
     const fallbackUrl = getCategoryFallbackImage(event.category, event.title, event.bundesland);
@@ -437,7 +440,7 @@ function EventMap({ events, selectedEvent, hoveredEventId, onSelectEvent, evenin
             Details öffnen
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12,5 19,12 12,19"/></svg>
           </a>
-          <button data-bubble-save="${event.id}" aria-label="${saved ? 'Aus gespeichert entfernen' : 'Speichern'}" aria-pressed="${saved}" style="
+          <button data-bubble-save="${event.id}" ${isPoint ? 'disabled' : ''} aria-label="${saved ? 'Aus gespeichert entfernen' : 'Speichern'}" aria-pressed="${saved}" style="
             width:40px;background:rgba(255,255,255,0.06);
             color:${saved ? '#10b981' : '#fff'};
             border:1px solid rgba(255,255,255,0.10);border-radius:12px;
@@ -690,7 +693,8 @@ function EventMap({ events, selectedEvent, hoveredEventId, onSelectEvent, evenin
         const todayStr = new Date().toISOString().slice(0, 10);
         const eventDateStr = event.start_date?.slice(0, 10) || '';
         const isToday = eventDateStr === todayStr;
-        const isBoosted = boostedIdsRef.current.has(id);
+        const isBoosted = boostedIdsRef.current.has(id)
+          || !!(event as { is_boosted?: boolean }).is_boosted;
         // Boosted wins the visual treatment over artist if an event is both.
         const isArtistMatch = !isBoosted && artistIdsRef.current.has(id);
         const isSavedEvent = savedIdsRef.current.has(id);
