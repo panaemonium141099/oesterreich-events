@@ -24,6 +24,18 @@ import type { Event, EventFilters } from '@/types/events';
 import { readCache, writeCache } from '@/components/MapV3/eventsCache';
 import { BUNDESLAENDER, bundeslandToId, type Bundesland } from '@/lib/bundeslaender';
 import { displayDistrictName } from '@/lib/districtsAT';
+import { fetchMapPointEvents, pointsEligible } from '@/lib/v4/map-points';
+
+export interface UseFilteredEventsOptions {
+  /**
+   * fn-16: Points-Modus für /map — wenn die Filter es erlauben
+   * (pointsEligible), kommt der komplette AT-Bestand als EIN kompakter
+   * Snapshot statt der ~30 limit=3000-Batches. Die Punkte haben KEINE
+   * title/image-Felder (Popup lädt lazy via /api/events/[id]) — deshalb
+   * darf NUR die Karte das aktivieren, nie die Liste (/entdecken).
+   */
+  mapPoints?: boolean;
+}
 
 // ── Public contract ───────────────────────────────────────────────────────
 
@@ -62,7 +74,9 @@ export interface UseFilteredEventsReturn {
 export function useFilteredEvents(
   initialBundeslandIds: string[] = ['all'],
   initialFilters: Partial<EventFilters> = {},
+  options: UseFilteredEventsOptions = {},
 ): UseFilteredEventsReturn {
+  const { mapPoints = false } = options;
   // Multi-bundesland selection. Source of truth — `primaryBundesland` is
   // the derived single value used for map bbox / flyTo / scope label.
   // ['all'] = no filter; ['wien','steiermark'] = both; etc.
@@ -177,6 +191,22 @@ export function useFilteredEvents(
       };
     }
 
+    // fn-16 Points-Modus (nur Karte): ein kompakter Snapshot deckt den
+    // kompletten AT-Bestand ab — Bundesland/District/Kategorie/Datum/
+    // Tier/Flags filtern die Memos unten client-seitig, Filterwechsel
+    // kostet daher KEINEN Netzwerk-Roundtrip (Modul-Cache 15 min).
+    // Fehler/leerer Snapshot → weiter unten regulärer Batch-Pfad.
+    if (mapPoints && pointsEligible(filters)) {
+      const points = await fetchMapPointEvents();
+      if (controller.signal.aborted || abortRef.current !== controller) return;
+      if (points && points.length > 0) {
+        setAllEvents(points);
+        setApiTotalCount(points.length);
+        setLoading(false);
+        return;
+      }
+    }
+
     // MUSS mit warm-cache cron's limit param matchen — sonst hat das UI
     // einen anderen Edge-Cache-Key als der gewärmte Cache und jeder
     // Request triggert eine Cold-Path-DB-Query. 3000 deckt alle aktuell
@@ -267,7 +297,7 @@ export function useFilteredEvents(
       setLoading(false);
       setBackgroundLoading(false);
     }
-  }, [buildParams, filters, bundeslandIds, bundesland.id]);
+  }, [buildParams, filters, bundeslandIds, bundesland.id, mapPoints]);
 
   useEffect(() => {
     fetchEventsProgressive();
@@ -290,7 +320,11 @@ export function useFilteredEvents(
   const dedupedEvents = useMemo(() => {
     const seen = new Set<string>();
     return bundeslandEvents.filter((e) => {
-      const key = `${(e.title || '').trim().toLowerCase()}::${(e.start_date || '').split('T')[0]}`;
+      // Points-Modus: Punkte haben KEINEN Titel — der Key wäre '::datum'
+      // und würde alle Events eines Tages zu einem kollabieren. Punkte
+      // sind serverseitig schon eindeutig (MV, ein Row pro Event).
+      if (!e.title) return true;
+      const key = `${e.title.trim().toLowerCase()}::${(e.start_date || '').split('T')[0]}`;
       if (seen.has(key)) return false;
       seen.add(key);
       return true;
@@ -330,8 +364,33 @@ export function useFilteredEvents(
         return pt == null || targets.has(pt);
       });
     }
+    // fn-16: Datum + Student/Family client-seitig. Im Batch-Modus hat der
+    // Server das schon gefiltert (belt-and-suspenders, gleiche Semantik:
+    // Tagesvergleich auf YYYY-MM-DD); im Points-Modus ist DAS der Filter.
+    // Felder, die der Payload nicht kennt (undefined), lassen die Zeile
+    // durch — Muster wie bei price_tier oben.
+    if (filters.dateFrom) {
+      const from = filters.dateFrom.slice(0, 10);
+      out = out.filter((e) => !e.start_date || e.start_date.slice(0, 10) >= from);
+    }
+    if (filters.dateTo) {
+      const to = filters.dateTo.slice(0, 10);
+      out = out.filter((e) => !e.start_date || e.start_date.slice(0, 10) <= to);
+    }
+    if (filters.studentFriendly) {
+      out = out.filter((e) => {
+        const v = (e as { is_student_friendly?: boolean }).is_student_friendly;
+        return v == null || v === true;
+      });
+    }
+    if (filters.familyFriendly) {
+      out = out.filter((e) => {
+        const v = (e as { is_family_friendly?: boolean }).is_family_friendly;
+        return v == null || v === true;
+      });
+    }
     return out;
-  }, [dedupedEvents, filters.district, filters.districts, filters.category, filters.categories, filters.priceTier, filters.priceTiers]);
+  }, [dedupedEvents, filters.district, filters.districts, filters.category, filters.categories, filters.priceTier, filters.priceTiers, filters.dateFrom, filters.dateTo, filters.studentFriendly, filters.familyFriendly]);
 
   // Category counts for the FilterDrawer — fed off the post-deduplication,
   // pre-category-filter set so each chip shows its own contribution.

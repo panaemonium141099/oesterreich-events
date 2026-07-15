@@ -508,7 +508,16 @@ pro Region, Eventim-Affiliate-Links im Digest, Regionen mit <3 Events
 werden übersprungen) · Datenschutz-Sektion (Double-Opt-in, Brevo als
 Auftragsverarbeiter). ⚠️ Brevo-Free = 300 Mails/Tag — bei >250
 Abonnenten Plan upgraden oder Versand splitten (last_sent_at existiert) ·
-Offen: Karten-Snapshot-Konsum in der Map (§10.3, fn-16 läuft parallel) ·
+✅ **Karten-Snapshot-Konsum** *(2026-07-15, fn-16 Client-Teil)*: /map lädt
+den kompakten Points-Snapshot (EIN Request, ~1,5 MB brotli, 65k Punkte)
+statt ~30 sequenzieller limit=3000-Batches (~45 MB); Filterwechsel
+(Kategorie/Datum/Bundesland/Bezirk/Tier/Flags) laufen client-seitig ohne
+Netzwerk (Modul-Cache 15 min). Punkte haben keinen Titel — Hover-Popup
+lädt das volle Event lazy via /api/events/[id] (CDN 1 h), Marker nutzen
+Kategorie-Fallback-Bilder bis zum Nachladen. Volltext/Tags/bbox/
+eveningOnly/DE-CH bleiben auf dem Server-Batch-Pfad; /entdecken (Liste
+braucht Titel+Bilder) unverändert ·
+Offen:
 Middleware-Refresh-Scope (§10.2.4, bewusst zurückgestellt —
 Regressionsrisiko auf Auth-Flächen).
 

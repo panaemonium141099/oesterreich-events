@@ -368,12 +368,17 @@ function EventMap({ events, selectedEvent, hoveredEventId, onSelectEvent, evenin
   // Returns an HTML string so it can be fed to mapboxgl.Popup.setHTML.
   // Click handlers are attached after `popup.on('open')` further down.
   const createPopupHTML = useCallback((event: Event) => {
+    // fn-16 Points-Modus: Punkte haben keinen Titel/Slug — das Popup
+    // rendert dann einen Lade-Zustand; openPopup lädt das volle Event
+    // via /api/events/[id] nach und ersetzt das HTML. Ohne Slug wäre
+    // buildEventUrlV2 eine kaputte URL → '#' bis zum Nachladen.
+    const isPoint = !event.title;
     const date = formatDateNumeric(event.start_date);
-    const time = formatTime(event.start_date);
+    const time = isPoint ? null : formatTime(event.start_date);
     const showTime = time !== null;
     const saved = savedIdsRef.current.has(event.id);
     const isAd = boostedIdsRef.current.has(event.id);
-    const canonicalUrl = buildEventUrlV2(event);
+    const canonicalUrl = isPoint ? '#' : buildEventUrlV2(event);
     const imgUrl = getEventImage(event.image_url, event.category, event.title, event.bundesland);
     const fallbackUrl = getCategoryFallbackImage(event.category, event.title, event.bundesland);
 
@@ -417,7 +422,7 @@ function EventMap({ events, selectedEvent, hoveredEventId, onSelectEvent, evenin
           <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
           ${date}${showTime ? ` · ${time}` : ''}
         </div>
-        <div style="font-size:16px;font-weight:600;letter-spacing:-0.01em;line-height:1.2;margin-bottom:4px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">${escapeHtml(event.title)}</div>
+        <div style="font-size:16px;font-weight:600;letter-spacing:-0.01em;line-height:1.2;margin-bottom:4px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;${isPoint ? 'color:rgba(255,255,255,0.45);' : ''}">${isPoint ? 'Lädt …' : escapeHtml(event.title)}</div>
         ${event.location_name ? `<div style="font-size:12px;color:rgba(255,255,255,0.6);display:flex;align-items:center;gap:5px;margin-bottom:14px;">
           <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/></svg>
           <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escapeHtml(event.location_name)}</span>
@@ -712,6 +717,56 @@ function EventMap({ events, selectedEvent, hoveredEventId, onSelectEvent, evenin
         const popupOffset = (isArtistMatch || isBoosted) ? 44 : 25;
         let popupIsOpen = false;
         let closeTimer: ReturnType<typeof setTimeout> | null = null;
+        // fn-16: Punkte (title=null) werden beim ersten Hover per
+        // /api/events/[id] (CDN 1 h) zum vollen Event angereichert —
+        // liveEvent zeigt immer auf die beste bekannte Version.
+        let liveEvent = event;
+
+        // Button-Verdrahtung des Bubble-HTML — separat, weil setHTML beim
+        // Lazy-Anreichern den Popup-Inhalt ersetzt und die Listener der
+        // alten DOM-Knoten verwirft (Container-Listener überleben).
+        const wireBubbleButtons = (pe: HTMLElement) => {
+          // "Details öffnen" — navigate via Next.js client-side router
+          // instead of letting the <a> tag trigger a full page load.
+          // preventDefault stops the default navigation; routerRef.push
+          // does a soft transition that preserves the bfcache + the
+          // already-loaded Mapbox tiles & vector source for when the
+          // user navigates back. The href stays in place so middle-
+          // click / right-click "open in new tab" still works.
+          pe.querySelector<HTMLAnchorElement>('a[data-bubble-details]')?.addEventListener('click', (e) => {
+            // Respect modifier-clicks (cmd/ctrl/middle) → let the
+            // browser open in new tab.
+            const me = e as MouseEvent;
+            if (me.metaKey || me.ctrlKey || me.shiftKey || me.button === 1) return;
+            e.preventDefault();
+            const href = (e.currentTarget as HTMLAnchorElement).getAttribute('href') ?? '';
+            closeSelf();
+            if (href && href !== '#') routerRef.current.push(href);
+          });
+          // "Speichern" — toggles supabase saved_events via the
+          // SavedEvents context. Optimistic; the icon state is
+          // re-rendered from `savedIdsRef` afterwards.
+          const saveBtn = pe.querySelector<HTMLButtonElement>('button[data-bubble-save]');
+          saveBtn?.addEventListener('click', async (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            const result = await toggleSavedRef.current(liveEvent.id);
+            if (result === 'noop') return;
+            // Re-render bookmark visual state — icon swaps outline ↔ filled,
+            // color swaps white ↔ emerald. We rebuild the inner SVG so
+            // we don't have to track a separate hover/press state.
+            const isSaved = savedIdsRef.current.has(liveEvent.id);
+            saveBtn.style.color = isSaved ? '#10b981' : '#fff';
+            saveBtn.setAttribute('aria-pressed', String(isSaved));
+            saveBtn.setAttribute(
+              'aria-label',
+              isSaved ? 'Aus gespeichert entfernen' : 'Speichern',
+            );
+            saveBtn.innerHTML = isSaved
+              ? `<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>`
+              : `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>`;
+          });
+        };
 
         const closeSelf = () => {
           if (closeTimer) { clearTimeout(closeTimer); closeTimer = null; }
@@ -736,7 +791,7 @@ function EventMap({ events, selectedEvent, hoveredEventId, onSelectEvent, evenin
               closeOnClick: false,
               maxWidth: '340px',
               className: 'bubble-mini-popup',
-            }).setHTML(createPopupHTML(event));
+            }).setHTML(createPopupHTML(liveEvent));
             popup.on('open', () => {
               const pe = popup?.getElement();
               if (!pe) return;
@@ -746,47 +801,27 @@ function EventMap({ events, selectedEvent, hoveredEventId, onSelectEvent, evenin
               pe.addEventListener('mouseleave', () => {
                 scheduleClose();
               });
-              // "Details öffnen" — navigate via Next.js client-side router
-              // instead of letting the <a> tag trigger a full page load.
-              // preventDefault stops the default navigation; routerRef.push
-              // does a soft transition that preserves the bfcache + the
-              // already-loaded Mapbox tiles & vector source for when the
-              // user navigates back. The href stays in place so middle-
-              // click / right-click "open in new tab" still works.
-              pe.querySelector<HTMLAnchorElement>('a[data-bubble-details]')?.addEventListener('click', (e) => {
-                // Respect modifier-clicks (cmd/ctrl/middle) → let the
-                // browser open in new tab.
-                const me = e as MouseEvent;
-                if (me.metaKey || me.ctrlKey || me.shiftKey || me.button === 1) return;
-                e.preventDefault();
-                const href = (e.currentTarget as HTMLAnchorElement).getAttribute('href') ?? '';
-                closeSelf();
-                if (href) routerRef.current.push(href);
-              });
-              // "Speichern" — toggles supabase saved_events via the
-              // SavedEvents context. Optimistic; the icon state is
-              // re-rendered from `savedIdsRef` afterwards.
-              const saveBtn = pe.querySelector<HTMLButtonElement>('button[data-bubble-save]');
-              saveBtn?.addEventListener('click', async (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                const result = await toggleSavedRef.current(event.id);
-                if (result === 'noop') return;
-                // Re-render bookmark visual state — icon swaps outline ↔ filled,
-                // color swaps white ↔ emerald. We rebuild the inner SVG so
-                // we don't have to track a separate hover/press state.
-                const isSaved = savedIdsRef.current.has(event.id);
-                saveBtn.style.color = isSaved ? '#10b981' : '#fff';
-                saveBtn.setAttribute('aria-pressed', String(isSaved));
-                saveBtn.setAttribute(
-                  'aria-label',
-                  isSaved ? 'Aus gespeichert entfernen' : 'Speichern',
-                );
-                saveBtn.innerHTML = isSaved
-                  ? `<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>`
-                  : `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>`;
-              });
+              wireBubbleButtons(pe);
             });
+            // fn-16 Points-Modus: Punkt ohne Titel → volles Event lazy
+            // nachladen (CDN 1 h), Popup-HTML ersetzen und Buttons neu
+            // verdrahten (die Container-Listener oben überleben setHTML,
+            // die Content-Listener nicht). Marker-Foto bekommt das echte
+            // Bild gleich mit.
+            if (!liveEvent.title) {
+              fetch(`/api/events/${id}`)
+                .then((r) => (r.ok ? r.json() : null))
+                .then((full: Event | null) => {
+                  if (!full || !full.id || !popup) return;
+                  liveEvent = full;
+                  eventLookup.current.set(id, full);
+                  popup.setHTML(createPopupHTML(full));
+                  const pe = popup.getElement();
+                  if (pe) wireBubbleButtons(pe);
+                  img.src = getEventImage(full.image_url, full.category, full.title, full.bundesland);
+                })
+                .catch(() => { /* Popup bleibt im Lade-Zustand — nächster Hover versucht es via 'open' erneut nicht; selten, CDN-gecachter Endpoint */ });
+            }
           }
           popup.setLngLat([coords[0], coords[1]]).addTo(m);
           popupIsOpen = true;

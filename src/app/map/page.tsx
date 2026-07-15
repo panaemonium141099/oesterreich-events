@@ -159,7 +159,11 @@ function MapPageInner() {
     finalEvents, allEvents, loading, backgroundLoading,
     apiTotalCount: _apiTotalCount, totalMatchCount, categoryCounts, scopeLabel,
     bundesland,
-  } = useFilteredEvents(initialBundeslandIds, initialFilters);
+  } = useFilteredEvents(initialBundeslandIds, initialFilters, {
+    // fn-16: Karte konsumiert den kompakten Points-Snapshot (ein Request
+    // statt ~30 Batches); Marker-Popups laden das volle Event lazy nach.
+    mapPoints: true,
+  });
 
   // Paid-boosted events → rendered unclustered + highlighted on the map.
   // Aus dem frischen /api/events/boosted (siehe useBoostedIds), NICHT aus dem
