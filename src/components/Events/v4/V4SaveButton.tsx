@@ -22,10 +22,11 @@
  */
 
 import { useCallback, useEffect, useState } from 'react';
-import { useRouter, usePathname } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { useAuth } from '@/lib/supabase/auth-context';
 import { toast } from 'sonner';
+import { V4AnonSaveDialog } from './V4AnonSaveDialog';
 
 interface V4SaveButtonProps {
   eventId: string;
@@ -39,13 +40,13 @@ interface V4SaveButtonProps {
 
 export function V4SaveButton({ eventId, fillRow = false, withLabel = true }: V4SaveButtonProps) {
   const { user } = useAuth();
-  const router = useRouter();
   const pathname = usePathname();
   const supabase = createClient();
 
   const [saved, setSaved] = useState(false);
   const [loading, setLoading] = useState(false);
   const [pulse, setPulse] = useState(false); // brief visual flash after a successful save
+  const [anonDialog, setAnonDialog] = useState(false);
 
   // Hydrate initial state from DB once we know the user.
   useEffect(() => {
@@ -67,8 +68,9 @@ export function V4SaveButton({ eventId, fillRow = false, withLabel = true }: V4S
   const handleClick = useCallback(async () => {
     if (loading) return;
     if (!user) {
-      const next = pathname ?? '/';
-      router.push(`/auth/login?next=${encodeURIComponent(next)}`);
+      // Kein stiller Login-Redirect mehr (fühlte sich an wie „nichts
+      // passiert") — Dialog bietet Login ODER E-Mail-Erinnerung ohne Konto.
+      setAnonDialog(true);
       return;
     }
 
@@ -102,7 +104,7 @@ export function V4SaveButton({ eventId, fillRow = false, withLabel = true }: V4S
     } finally {
       setLoading(false);
     }
-  }, [user, saved, loading, pathname, router, supabase, eventId]);
+  }, [user, saved, loading, supabase, eventId]);
 
   const baseClasses = [
     'press-haptic',
@@ -130,6 +132,14 @@ export function V4SaveButton({ eventId, fillRow = false, withLabel = true }: V4S
       };
 
   return (
+    <>
+    {anonDialog && (
+      <V4AnonSaveDialog
+        eventId={eventId}
+        nextPath={pathname ?? '/'}
+        onClose={() => setAnonDialog(false)}
+      />
+    )}
     <button
       type="button"
       onClick={handleClick}
@@ -149,5 +159,6 @@ export function V4SaveButton({ eventId, fillRow = false, withLabel = true }: V4S
       </svg>
       {withLabel && (saved ? 'Gemerkt' : 'Merken')}
     </button>
+    </>
   );
 }

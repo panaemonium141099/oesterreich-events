@@ -17,9 +17,11 @@ import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import { buildEventUrlV2 } from '@/lib/utils/slugify';
 import {
   sendArtistReminderEmail,
+  sendGenericEmail,
   generateUnsubscribeToken,
   type ArtistReminderEmailData,
 } from '@/lib/email';
+import { reminderToken, reminderMailHtml } from '@/lib/event-reminder';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
@@ -289,6 +291,86 @@ async function processWindow(
   }
 }
 
+// ── Anonyme E-Mail-Reminder (User-Auftrag 2026-07-15) ─────────────────────
+//
+// event_email_reminders: ohne Konto per Mail eingetragen (Double-Opt-in via
+// /api/event-reminder/*). Zwei Fenster: 2 Tage vor dem Event + Event-Tag.
+// Die reminded_*-Spalten machen den Versand idempotent (Cron darf
+// mehrfach laufen). Budget 100 Mails/Fenster/Tag — Brevo-Free teilt sich
+// 300/Tag mit Newsletter + Artist-Alerts.
+
+interface AnonStats { due: number; sent: number; errors: number }
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+async function processAnonEmailReminders(supabase: SupabaseClient<any>, now: Date, stats: AnonStats): Promise<void> {
+  const dateFmt = new Intl.DateTimeFormat('de-AT', {
+    weekday: 'long', day: 'numeric', month: 'long', timeZone: 'Europe/Vienna',
+  });
+
+  for (const win of [
+    { daysAhead: 2, col: 'reminded_2d_at', isEventDay: false },
+    { daysAhead: 0, col: 'reminded_day_at', isEventDay: true },
+  ] as const) {
+    const from = new Date(now);
+    from.setUTCHours(0, 0, 0, 0);
+    from.setUTCDate(from.getUTCDate() + win.daysAhead);
+    const to = new Date(from);
+    to.setUTCDate(to.getUTCDate() + 1);
+
+    const { data: rows, error } = await supabase
+      .from('event_email_reminders')
+      .select('id,email,event_id,events!inner(id,slug,title,start_date,postal_code,address,bundesland,location_name)')
+      .not('confirmed_at', 'is', null)
+      .is('unsubscribed_at', null)
+      .is(win.col, null)
+      .gte('events.start_date', from.toISOString())
+      .lt('events.start_date', to.toISOString())
+      .limit(100);
+    if (error) {
+      console.error(`[cron/send-reminders] anon ${win.col} query failed:`, error);
+      stats.errors++;
+      continue;
+    }
+
+    for (const row of rows ?? []) {
+      stats.due++;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const ev: any = Array.isArray(row.events) ? row.events[0] : row.events;
+      if (!ev) continue;
+      try {
+        const unsubToken = await reminderToken('unsub', row.email, row.event_id);
+        const unsubscribeUrl = `https://lasstreffen.at/api/event-reminder/unsubscribe?email=${encodeURIComponent(row.email)}&event=${row.event_id}&token=${unsubToken}`;
+        const sent = await sendGenericEmail(
+          row.email,
+          win.isEventDay
+            ? `Heute: ${ev.title}`
+            : `In 2 Tagen: ${ev.title}`,
+          reminderMailHtml({
+            eventTitle: ev.title ?? 'Dein Event',
+            eventDate: dateFmt.format(new Date(ev.start_date)),
+            locationName: ev.location_name,
+            eventUrl: `https://lasstreffen.at${buildEventUrlV2(ev)}`,
+            isEventDay: win.isEventDay,
+            unsubscribeUrl,
+          }),
+        );
+        if (sent.success) {
+          await supabase
+            .from('event_email_reminders')
+            .update({ [win.col]: new Date().toISOString() })
+            .eq('id', row.id);
+          stats.sent++;
+        } else {
+          stats.errors++;
+        }
+      } catch (err) {
+        console.error('[cron/send-reminders] anon send failed:', err);
+        stats.errors++;
+      }
+    }
+  }
+}
+
 // ── HTTP Handler ───────────────────────────────────────────────────────────
 
 export async function GET(request: NextRequest) {
@@ -305,6 +387,7 @@ export async function GET(request: NextRequest) {
   const stats = {
     reminders_7d: { found: 0, in_app: 0, email: 0, skipped: 0 } as WindowStats,
     reminders_1d: { found: 0, in_app: 0, email: 0, skipped: 0 } as WindowStats,
+    anon: { due: 0, sent: 0, errors: 0 } as AnonStats,
     errors: 0,
     duration_ms: 0,
   };
@@ -316,6 +399,9 @@ export async function GET(request: NextRequest) {
 
     // Process 1-day-ahead reminders
     await processWindow(supabase, now, 1, 'saved_event_reminder_1d', stats.reminders_1d);
+
+    // Anonyme E-Mail-Reminder (2 Tage vorher + Event-Tag)
+    await processAnonEmailReminders(supabase, now, stats.anon);
 
     stats.duration_ms = Date.now() - startTime;
 

@@ -125,6 +125,24 @@ export default function DatenschutzPage() {
             </p>
           </section>
 
+          {/* Event-Erinnerungen ohne Konto */}
+          <section>
+            <h2 className="text-lg font-semibold text-white mb-3">Event-Erinnerungen per E-Mail</h2>
+            <p>
+              Sie können sich zu einzelnen Veranstaltungen per E-Mail erinnern
+              lassen — auch ohne Benutzerkonto. Dabei speichern wir Ihre
+              E-Mail-Adresse und die jeweilige Veranstaltung. Die Anmeldung
+              erfolgt im Double-Opt-in-Verfahren; erinnert wird ausschließlich
+              zu der gewählten Veranstaltung (zwei Tage vorher sowie am
+              Veranstaltungstag). Rechtsgrundlage ist Ihre Einwilligung
+              (Art. 6 Abs. 1 lit. a DSGVO).
+            </p>
+            <p className="mt-3">
+              Jede Erinnerungs-E-Mail enthält einen Abmeldelink. Für den Versand
+              nutzen wir den Dienstleister Brevo (siehe Abschnitt 6).
+            </p>
+          </section>
+
           {/* 6. Drittanbieter */}
           <section>
             <h2 className="text-lg font-semibold text-white mb-3">6. Drittanbieter und Auftragsverarbeiter</h2>
