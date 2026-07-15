@@ -589,7 +589,15 @@ Live-Vorschau. Klicks tracken als `widget_*` via ClickTracker;
 Widget-Pageviews landen als page_group `/widget` in analytics_daily.
 Einsatz: Outreach-Pitch an Gemeinden/Tourismusverbände (Backlinks!) ·
 ✅ **Saison-Kampagnen-Kalender** *(2026-07-14, s. u.)* ·
-Offen: Hotel-/Anreise-Affiliate im Event-Detail (braucht
+Offen: **Anonyme Event-Reminder** *(User-Auftrag 2026-07-15)*: Events ohne
+Login merken — auf der Event-Detailseite optional E-Mail eingeben und
+rechtzeitig erinnert werden (Double-Opt-in + HMAC-Kette wie Newsletter,
+Tabelle event_email_reminders, Versand über den bestehenden
+send-reminders-Cron, Datenschutz-Abschnitt ergänzen) ·
+Saison-Autopilot (Go 2026-07-15: monatliche GH-Action → GSC-Daten +
+Event-DB → Gemini-Draft → PR zum Review; wartet auf GEMINI_API_KEY in
+den GitHub-Actions-Secrets — Vercel-Env ist ein getrennter Speicher) ·
+Hotel-/Anreise-Affiliate im Event-Detail (braucht
 Partnerprogramm-Entscheidung + Affiliate-ID vom Betreiber; Impact-Site-
 Verification für booking.com liegt schon im Layout-Head) ·
 WhatsApp-/Push-Kanäle pro Region (WhatsApp braucht Business-Account;
