@@ -32,6 +32,7 @@
 
 import { notFound } from 'next/navigation';
 import { V4EventDetail } from '@/components/Events/v4';
+import { V4RelatedEvents } from '@/components/Events/v4/V4RelatedEvents';
 import { deriveEventState } from '@/lib/v4/derive-event-state';
 import { EventSheet } from '@/components/Events/EventSheet';
 import { ModalShell } from '@/components/Layout/ModalShell';
@@ -105,6 +106,14 @@ export default async function InterceptedEventPage({
           priceFrom={priceFrom}
           priceAtDoor={priceAtDoor}
         />
+        {/* Gleiche Sektion wie auf der Voll-Seite (app/events/[...slug]).
+            Ohne sie sah kein in-App-Navigierender je „Ähnliche Events" —
+            jede Soft-Navigation landet hier im Sheet, nur Hard-Loads
+            (Google, F5) treffen die Voll-Seite. Die Related-Karten
+            (/events/…) re-intercepten in dieses Sheet; die Hub-Links
+            (/gemeinde, /{bundesland}, /entdecken) fängt EventSheet ab
+            (Stuck-Slot-Quirk, siehe dort). */}
+        <V4RelatedEvents event={event}/>
       </EventSheet>
     </ModalShell>
   );

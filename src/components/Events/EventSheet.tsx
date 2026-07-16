@@ -22,7 +22,7 @@
  */
 
 import { useEffect, useRef, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 
 interface EventSheetProps {
   children: React.ReactNode;
@@ -120,22 +120,25 @@ export function EventSheet({ children }: EventSheetProps) {
     return () => { document.body.style.overflow = original; };
   }, []);
 
-  // Intercept clicks on internal /map links inside the sheet. The
-  // chrome inside EventDetailV2 (breadcrumb arrow, "Karte" label,
-  // bundesland chip with query string) is rendered by a generic
-  // component that doesn't know it's currently inside a parallel
-  // `@modal` slot. Without this interception, a soft nav to /map
-  // updates the URL but leaves the modal slot stuck on the
-  // intercepted page (parallel-route quirk:
-  // github.com/vercel/next.js/issues/53037).
+  // Intercept clicks on internal links inside the sheet. Without this
+  // interception, a soft nav to a route that has no page in the
+  // parallel `@modal` slot (alles außer `(.)events/...`) updates the
+  // URL but leaves the modal slot stuck on the intercepted page —
+  // `@modal/default.tsx` greift nur bei Hard-Navigation
+  // (parallel-route quirk: github.com/vercel/next.js/issues/53037).
   //
-  // fn-15.5 round-4 (codex): semantically every "Karte" link means
-  // "take me to /map", regardless of the underlying route. Sheet
-  // opened from /map → land on /map. Sheet opened from /feed → also
-  // land on /map. router.back() is wrong when the underlying route
-  // isn't /map. The reliable cross-origin pattern: run the exit
-  // keyframe first, then `router.push(href)`. The push triggers a
-  // fresh URL resolution which clears the intercepted slot.
+  // fn-15.5 round-4 (codex) handled only /map ("Karte" chrome links);
+  // seit V4RelatedEvents im Sheet rendert, gibt es hier auch Hub-Links
+  // (/gemeinde/…, /{bundesland}, /entdecken) — gleiche Behandlung für
+  // alle internen Nicht-Event-Links. The reliable pattern: run the
+  // exit keyframe first, then `router.push(href)`. The push triggers
+  // a fresh URL resolution which clears the intercepted slot.
+  //
+  // Ausnahmen, die normal durchbubblen:
+  //   - '/events/…' — hat eine (.)-Route im Slot und re-intercepted
+  //     sauber in dieses Sheet (Event → ähnliches Event).
+  //   - '#…'-Hash-Links (share/similar-Anker) und externe URLs.
+  //   - target="_blank" (Quelle, Tickets) und Modifier-Klicks.
   //
   // Using push (not back) drops one nice property — when the user
   // came from /map, the carousel state on the map page isn't
@@ -149,17 +152,12 @@ export function EventSheet({ children }: EventSheetProps) {
       // Respect modifier-clicks → let browser open in new tab/window
       if (e.metaKey || e.ctrlKey || e.shiftKey || e.button === 1) return;
       const link = (e.target as HTMLElement | null)?.closest?.('a');
-      if (!link) return;
+      if (!link || link.target === '_blank') return;
       const href = link.getAttribute('href') ?? '';
-      // Only handle /map links — other routes (/thema/, /events/...) bubble
-      // through unchanged so Next.js handles them normally.
-      const isMapLink =
-        href === '/map' || href.startsWith('/map?') || href.startsWith('/map#');
-      if (!isMapLink) return;
+      if (!href.startsWith('/') || href.startsWith('/events/')) return;
       e.preventDefault();
       e.stopPropagation();
       // Always run the exit keyframe then push to the requested href.
-      // Same code path for bare '/map' and deep-link '/map?...'.
       closingRef.current = true;
       setExiting(true);
       scheduleExit(() => router.push(href));
@@ -168,6 +166,15 @@ export function EventSheet({ children }: EventSheetProps) {
     return () => node.removeEventListener('click', onClick, true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Event → ähnliches Event bleibt im Sheet (Soft-Nav innerhalb des
+  // Slots): die Overlay-Div persistiert dabei samt Scroll-Position —
+  // ohne Reset öffnet das neue Event am unteren Ende (dort, wo die
+  // Related-Karte geklickt wurde) statt oben beim Hero.
+  const pathname = usePathname();
+  useEffect(() => {
+    overlayRef.current?.scrollTo(0, 0);
+  }, [pathname]);
 
   return (
     <div
