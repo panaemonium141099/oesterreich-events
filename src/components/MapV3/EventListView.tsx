@@ -35,6 +35,7 @@ import { formatTime } from '@/lib/utils/date';
 import { distanceKm } from '@/lib/geolocation';
 import { displayDistrictName, BUNDESLAND_NAMES, type BundeslandId } from '@/lib/districtsAT';
 import { buildEventUrlV2 } from '@/lib/utils/slugify';
+import { useDetailHydration } from '@/lib/v4/use-detail-hydration';
 
 /**
  * Decode the handful of HTML entities scrapers leave in event titles
@@ -192,7 +193,11 @@ export function EventListView({
     return { ads, rest };
   }, [sorted, boostedIds]);
 
-  const visible = rest.slice(0, visibleCount);
+  // fn-16 Option A: Punkte (title=null aus dem Snapshot) bekommen ihre
+  // Anzeige-Felder erst hier, NACH Sortierung + Slicing — nur fürs
+  // sichtbare Fenster, ohne die stabile Score-Reihenfolge anzufassen.
+  const visibleRaw = rest.slice(0, visibleCount);
+  const visible = useDetailHydration(visibleRaw);
   const grouped = useMemo(() => groupEvents(visible), [visible]);
 
   // Phase 4.2: kein eigenes `position: absolute, inset: 0` mehr — EventListView

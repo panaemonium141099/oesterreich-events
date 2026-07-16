@@ -38,9 +38,13 @@ export function V4EntdeckenListMode({
     totalMatchCount, categoryCounts, scopeLabel,
     loadMore, hasMoreBatches, loadingMore,
   } = useFilteredEvents(initialBundeslandIds, initialFilters, {
-    // fn-16: keine Hintergrund-Vollschleife mehr — die Cursor-Batches
-    // (je 10-13 s Micro-DB, nie im Edge-Cache) kommen erst, wenn der
-    // Sentinel unten sichtbar wird.
+    // fn-16 Option A (User-Go 2026-07-16): die Liste läuft wie die Karte
+    // über den Points-Snapshot — exakter Zähler, global korrekte
+    // Sortierung, Filter ohne Netzwerk. Anzeige-Details hydratisiert
+    // EventListView fürs sichtbare Fenster (useDetailHydration).
+    mapPoints: true,
+    // Fallback-Pfad für Volltext/Tags (nicht snapshot-fähig): Batches
+    // lazy statt Hintergrund-Vollschleife.
     lazyBatches: true,
   });
 
