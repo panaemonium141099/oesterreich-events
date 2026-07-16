@@ -235,7 +235,12 @@ export async function V4RelatedEvents({ event }: { event: Event }) {
   if (related.length === 0 && hubs.length === 0) return null;
 
   return (
-    <section className="bg-[var(--v4-surface)] text-[var(--v4-ink)]">
+    // id="similar-events": Scroll-Ziel der "Ähnliche Events"-CTAs in
+    // V4SoldoutBox + V4MobileStickyBar (soldout). Der Anker in
+    // V4EventDetailContent rendert nur bei hasSimilar — und der
+    // similar-Prop wird nirgends gesetzt; DIESE Sektion ist auf
+    // Voll-Seite wie Sheet das reale Sprungziel.
+    <section id="similar-events" className="bg-[var(--v4-surface)] text-[var(--v4-ink)]">
       <div className="max-w-[1180px] mx-auto px-4 md:px-14 py-10 md:py-14">
         {related.length > 0 && (
           <>
