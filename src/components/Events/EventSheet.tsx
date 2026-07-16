@@ -44,6 +44,19 @@ const EXIT_DURATION_MS = 220;
 
 export function EventSheet({ children }: EventSheetProps) {
   const router = useRouter();
+  // Pathname-Guard: der @modal-Slot behält bei Soft-Nav zu einer Route
+  // OHNE eigene Slot-Page seinen alten Inhalt (default.tsx greift nur
+  // bei Hard-Navigation, next.js#53037) — und entgegen dem früheren
+  // fn-15.5-Kommentar räumt auch router.push den Slot NICHT (live
+  // beobachtet 2026-07-16: nach Hub-Link-Klick /oberoesterreich stand
+  // die Zielseite im DOM, das Sheet blieb aber full-screen sichtbar
+  // darüber, Scroll-Lock inklusive). Deshalb blendet sich das Sheet
+  // selbst aus, sobald die URL kein Event-Detail mehr ist — egal wie
+  // navigiert wurde. Alle Effekte hängen an onEventRoute, damit sie
+  // beim Wiedereintritt (Slot-Instanz überlebt) neu an die frische
+  // Overlay-Node binden.
+  const pathname = usePathname();
+  const onEventRoute = pathname?.startsWith('/events/') ?? false;
   const overlayRef = useRef<HTMLDivElement>(null);
   const closingRef = useRef(false);
   // fn-15.5 round-6 (codex): track the exit-timer id so we can clear it
@@ -100,8 +113,20 @@ export function EventSheet({ children }: EventSheetProps) {
     });
   };
 
-  // Escape to close
+  // Wiedereintritt: dieselbe Slot-Instanz kann nach einem Ausblenden
+  // (onEventRoute false) später wieder ein Event zeigen — closing/exiting
+  // müssen dann zurückgesetzt sein, sonst ist close() dauerhaft blockiert.
   useEffect(() => {
+    if (onEventRoute) {
+      closingRef.current = false;
+      setExiting(false);
+    }
+  }, [onEventRoute]);
+
+  // Escape to close — nur solange das Sheet wirklich sichtbar ist,
+  // sonst poppt Escape auf der Zielseite eine History zu viel.
+  useEffect(() => {
+    if (!onEventRoute) return;
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         e.stopPropagation();
@@ -111,14 +136,15 @@ export function EventSheet({ children }: EventSheetProps) {
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [onEventRoute]);
 
   // Body scroll-lock while overlay is open
   useEffect(() => {
+    if (!onEventRoute) return;
     const original = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
     return () => { document.body.style.overflow = original; };
-  }, []);
+  }, [onEventRoute]);
 
   // Intercept clicks on internal links inside the sheet. Without this
   // interception, a soft nav to a route that has no page in the
@@ -130,9 +156,11 @@ export function EventSheet({ children }: EventSheetProps) {
   // fn-15.5 round-4 (codex) handled only /map ("Karte" chrome links);
   // seit V4RelatedEvents im Sheet rendert, gibt es hier auch Hub-Links
   // (/gemeinde/…, /{bundesland}, /entdecken) — gleiche Behandlung für
-  // alle internen Nicht-Event-Links. The reliable pattern: run the
-  // exit keyframe first, then `router.push(href)`. The push triggers
-  // a fresh URL resolution which clears the intercepted slot.
+  // alle internen Nicht-Event-Links: Exit-Keyframe abspielen, dann
+  // router.push(href). Das eigentliche Ausblenden übernimmt der
+  // onEventRoute-Guard oben (der Slot selbst bleibt nach push stuck,
+  // siehe dort) — die Interception liefert nur die 220ms-Animation
+  // statt eines harten Sofort-Wegblendens.
   //
   // Ausnahmen, die normal durchbubblen:
   //   - '/events/…' — hat eine (.)-Route im Slot und re-intercepted
@@ -146,6 +174,7 @@ export function EventSheet({ children }: EventSheetProps) {
   // correct destination beats preserved scroll for a non-trivial
   // minority of users.
   useEffect(() => {
+    if (!onEventRoute) return;
     const node = overlayRef.current;
     if (!node) return;
     const onClick = (e: MouseEvent) => {
@@ -165,16 +194,19 @@ export function EventSheet({ children }: EventSheetProps) {
     node.addEventListener('click', onClick, true); // capture phase
     return () => node.removeEventListener('click', onClick, true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [onEventRoute]);
 
   // Event → ähnliches Event bleibt im Sheet (Soft-Nav innerhalb des
   // Slots): die Overlay-Div persistiert dabei samt Scroll-Position —
   // ohne Reset öffnet das neue Event am unteren Ende (dort, wo die
   // Related-Karte geklickt wurde) statt oben beim Hero.
-  const pathname = usePathname();
   useEffect(() => {
     overlayRef.current?.scrollTo(0, 0);
   }, [pathname]);
+
+  // Guard (siehe Kommentar am Komponenten-Kopf): keine Event-URL →
+  // Sheet weg, egal ob der Slot formal noch diese Page rendert.
+  if (!onEventRoute) return null;
 
   return (
     <div

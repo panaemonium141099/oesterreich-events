@@ -63,9 +63,7 @@ function categoryToTone(category: string | null): CatTone {
 
 interface EventMapProps {
   events: Event[];
-  selectedEvent: Event | null;
   hoveredEventId: string | null;
-  onSelectEvent: (event: Event) => void;
   eveningMode?: boolean;
   bundesland: Bundesland;
   flyToCoords?: { lat: number; lng: number; zoom: number } | null;
@@ -161,7 +159,7 @@ function updateBundeslandOverlay(m: mapboxgl.Map, bl: Bundesland, dark: boolean)
   }).catch(() => {});
 }
 
-function EventMap({ events, selectedEvent, hoveredEventId, onSelectEvent, eveningMode, bundesland, flyToCoords, artistEventIds, boostedEventIds }: EventMapProps) {
+function EventMap({ events, hoveredEventId, eveningMode, bundesland, flyToCoords, artistEventIds, boostedEventIds }: EventMapProps) {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
   const markersOnScreen = useRef<Map<string, mapboxgl.Marker>>(new Map());
@@ -898,13 +896,7 @@ function EventMap({ events, selectedEvent, hoveredEventId, onSelectEvent, evenin
   // Note: bundesland NOT in deps — events are already filtered client-side.
   // Bundesland switch only triggers flyTo + overlay (separate useEffect).
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [events, mapReady, buildGeoJSON, createPopupHTML, onSelectEvent, eveningMode, boostedEventIds, artistEventIds]);
-
-  // Fly to selected
-  useEffect(() => {
-    if (!map.current || !selectedEvent?.latitude || !selectedEvent?.longitude) return;
-    map.current.flyTo({ center: [selectedEvent.longitude, selectedEvent.latitude], zoom: 14, pitch: 50, duration: 1500 });
-  }, [selectedEvent]);
+  }, [events, mapReady, buildGeoJSON, createPopupHTML, eveningMode, boostedEventIds, artistEventIds]);
 
   // Fly to coords from landing page search or in-app gemeinde select
   const lastFlyTo = useRef<string | null>(null);

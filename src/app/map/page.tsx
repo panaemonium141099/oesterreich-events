@@ -23,24 +23,26 @@
  *   3. Category and tags are mutually exclusive in the FilterDrawer.
  *
  * Phase 4.1 — Data-pipeline lebt jetzt in useFilteredEvents (auch von
- * /entdecken konsumiert). Map-spezifischer State (selectedEvent,
- * userLocation, flyto, view, filterOpen, mapChips, hoveredEventId)
- * bleibt page-lokal.
+ * /entdecken konsumiert). Map-spezifischer State (userLocation, flyto,
+ * view, filterOpen, mapChips, hoveredEventId) bleibt page-lokal.
+ *
+ * Event-Detail öffnet NICHT mehr als page-lokales Overlay: das
+ * Marker-Popup navigiert per router.push zur Event-URL → Intercepted
+ * Route @modal/(.)events rendert das EventSheet (inkl. Ähnliche
+ * Events), die Karte bleibt darunter gemountet.
  */
 import { useState, useEffect, useCallback, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
-import type { Event, EventFilters } from '@/types/events';
+import type { EventFilters } from '@/types/events';
 import { MapTopBar } from '@/components/MapV3/MapTopBar';
 import { FilterDrawer } from '@/components/MapV3/FilterDrawer';
 import { T } from '@/components/MapV3/tokens';
-import { EventDetail } from '@/components/Events/EventDetail';
 import { MapLoadingOverlay } from '@/components/Map/MapLoadingOverlay';
 import { LocationBanner } from '@/components/Map/LocationBanner';
 import { BUNDESLAENDER, type Bundesland } from '@/lib/bundeslaender';
 import { useAuth } from '@/lib/supabase/auth-context';
 import { getStoredLocation, storeLocation } from '@/lib/geolocation';
-import { useSavedEvents } from '@/lib/saved-events-context';
 import { V4MarkerLegend } from '@/components/Map/v4';
 import { useFilteredEvents } from '@/lib/v4/use-filtered-events';
 import { useBoostedIds } from '@/lib/hooks/useBoostedIds';
@@ -80,7 +82,6 @@ function MapPageInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { user, profile, loading: authLoading, profileComplete } = useAuth();
-  const { refresh: refreshSaved } = useSavedEvents();
 
   // Hydrate state from URL on mount
   const initialSearch = searchParams.get('search') || '';
@@ -136,15 +137,13 @@ function MapPageInner() {
 
   // ── Page-local state ───────────────────────────────────────────────────
   const [filterOpen, setFilterOpen] = useState(false);
-  const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   const [hoveredEventId, setHoveredEventId] = useState<string | null>(null);
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [dynamicFlyTo, setDynamicFlyTo] = useState<{ lat: number; lng: number; zoom: number } | null>(null);
 
   // ── Phase 4.1: Data-pipeline lebt jetzt in einem geteilten Hook (auch
-  // von /entdecken konsumiert). Map-spezifischer State (selectedEvent,
-  // userLocation, flyto, hoveredEventId, view, mapChips, filterOpen)
-  // bleibt in der Page.
+  // von /entdecken konsumiert). Map-spezifischer State (userLocation,
+  // flyto, hoveredEventId, view, mapChips, filterOpen) bleibt in der Page.
   const initialFilters: Partial<EventFilters> = {
     ...(initialSearch ? { search: initialSearch } : {}),
     ...(initialCategory ? { category: initialCategory } : {}),
@@ -295,9 +294,7 @@ function MapPageInner() {
         <div className="absolute inset-0 mv3-fade-in">
               <EventMap
                 events={finalEvents}
-                selectedEvent={selectedEvent}
                 hoveredEventId={hoveredEventId}
-                onSelectEvent={setSelectedEvent}
                 eveningMode={false}
                 flyToCoords={dynamicFlyTo || flyToCoords}
                 bundesland={bundesland}
@@ -449,22 +446,6 @@ function MapPageInner() {
               />
               <V4MarkerLegend/>
         </div>
-
-        {/* Event detail modal */}
-        {selectedEvent && (
-          <EventDetail
-            event={selectedEvent}
-            onClose={() => {
-              setSelectedEvent(null);
-              refreshSaved();
-            }}
-            eveningMode={false}
-            onTagClick={(tag) => {
-              setFilters((prev) => ({ ...prev, tags: [tag], category: undefined }));
-              setSelectedEvent(null);
-            }}
-          />
-        )}
 
         {/* Filter drawer */}
         <FilterDrawer

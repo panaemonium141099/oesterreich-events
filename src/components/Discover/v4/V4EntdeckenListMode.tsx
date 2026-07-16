@@ -14,11 +14,10 @@
 import { useEffect, useRef, useState } from 'react';
 import { EventListView } from '@/components/MapV3/EventListView';
 import { FilterDrawer } from '@/components/MapV3/FilterDrawer';
-import { EventDetail } from '@/components/Events/EventDetail';
 import { V4RegionRail } from '@/components/Discover/v4/V4RegionRail';
 import { useFilteredEvents } from '@/lib/v4/use-filtered-events';
 import { useBoostedIds } from '@/lib/hooks/useBoostedIds';
-import type { Event, EventFilters } from '@/types/events';
+import type { EventFilters } from '@/types/events';
 
 interface V4EntdeckenListModeProps {
   /** Optional starting bundesland id ('burgenland', 'wien', etc.) from URL */
@@ -49,7 +48,6 @@ export function V4EntdeckenListMode({
   });
 
   const [filterOpen, setFilterOpen] = useState(false);
-  const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   const boostedIds = useBoostedIds();
 
   // Ein Batch Vorsprung: der erste Cursor-Batch (10-13 s Micro-DB, nie im
@@ -143,18 +141,6 @@ export function V4EntdeckenListMode({
         categoryCounts={categoryCounts}
       />
 
-      {/* Event-Detail Modal */}
-      {selectedEvent && (
-        <EventDetail
-          event={selectedEvent}
-          onClose={() => setSelectedEvent(null)}
-          eveningMode={false}
-          onTagClick={(tag) => {
-            setFilters((prev) => ({ ...prev, tags: [tag], category: undefined }));
-            setSelectedEvent(null);
-          }}
-        />
-      )}
     </div>
   );
 }
