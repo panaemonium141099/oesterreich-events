@@ -176,6 +176,19 @@ function EventMap({ events, hoveredEventId, eveningMode, bundesland, flyToCoords
   const [mapReady, setMapReady] = useState(false);
   const prevBundeslandRef = useRef(bundesland.id);
 
+  // fn-16 Marker-Hydration: der Points-Snapshot enthält keine Bild-URLs —
+  // Marker starteten deshalb mit dem Kategorie-Fallback und bekamen das
+  // echte Foto erst beim Hover (Popup-Lazy-Load). Sobald entclusterte
+  // Punkt-Marker sichtbar werden, holen wir ihre Anzeige-Felder batchweise
+  // über /api/events/details (gleiches Muster wie useDetailHydration in
+  // der Liste, 15-min-Edge-Cache) und tauschen die Marker-Fotos direkt.
+  // Cache lebt in einem Ref: eventLookup wird bei jedem events-Wechsel
+  // neu aufgebaut, die Hydration-Daten sollen Filter-Wechsel überleben.
+  const detailsCacheRef = useRef<Map<string, Partial<Event>>>(new Map());
+  const hydrateQueueRef = useRef<Set<string>>(new Set());
+  const hydrateInflightRef = useRef<Set<string>>(new Set());
+  const hydrateTimerRef = useRef<number | null>(null);
+
   // Saved-event state — kept in a ref so save/unsave doesn't force markers to
   // rebuild. A dedicated effect toggles the `.marker-saved` class on existing
   // marker DOM nodes whenever the set changes. `toggleSaved` is also held in
@@ -621,6 +634,65 @@ function EventMap({ events, hoveredEventId, eveningMode, bundesland, flyToCoords
     m.on('mouseleave', 'clusters', () => { m.getCanvas().style.cursor = ''; });
     } // end of else (first-time source+layer setup)
 
+    // ── fn-16 Marker-Hydration (siehe Ref-Kommentare oben) ────────────
+    // Debounced (300 ms): updateMarkers feuert pro Render-Frame beim
+    // Pannen/Zoomen — erst wenn die Kamera kurz ruht, wird gefetcht.
+    // IDs sortiert + 48er-Chunks (API-Limit): gleicher Viewport ⇒
+    // identische URLs ⇒ Browser-/Edge-Cache-HITs beim Zurückpannen.
+    const HYDRATE_ID_RE = /^[0-9a-f]{12}$/;
+    const flushHydration = () => {
+      const pending = [...hydrateQueueRef.current]
+        .filter((id) => !detailsCacheRef.current.has(id) && !hydrateInflightRef.current.has(id))
+        .sort();
+      hydrateQueueRef.current.clear();
+      for (let i = 0; i < pending.length; i += 48) {
+        const chunk = pending.slice(i, i + 48);
+        chunk.forEach((id) => hydrateInflightRef.current.add(id));
+        fetch(`/api/events/details?ids=${chunk.join(',')}`)
+          .then((r) => (r.ok ? r.json() : null))
+          .then((data: { events?: Array<Partial<Event> & { id: string }> } | null) => {
+            for (const d of data?.events ?? []) {
+              // Cache-Key = Kurz-ID (Marker/Snapshot-Format); im Payload
+              // bleibt die volle UUID als id — gleiche Semantik wie der
+              // Hover-Fetch (/api/events/[id]): Save-Button (saved_events
+              // erwartet UUIDs) und kanonische Detail-URL funktionieren.
+              const sid = String(d.id).replace(/-/g, '').slice(0, 12).toLowerCase();
+              detailsCacheRef.current.set(sid, d);
+            }
+            for (const id of chunk) {
+              hydrateInflightRef.current.delete(id);
+              // Nicht gefunden (z. B. depubliziert) → leerer Eintrag,
+              // sonst fragt jeder Marker-Rebuild die ID endlos neu an.
+              if (!detailsCacheRef.current.has(id)) detailsCacheRef.current.set(id, {});
+              const det = detailsCacheRef.current.get(id)!;
+              const base = eventLookup.current.get(id);
+              if (!base) continue;
+              const merged = { ...base, ...det } as Event;
+              // Lookup mitziehen: ein späterer Marker-Rebuild (offscreen →
+              // wieder sichtbar) startet dann direkt mit echten Daten.
+              eventLookup.current.set(id, merged);
+              const marker = markersOnScreen.current.get(`marker-${id}`);
+              const imgEl = marker?.getElement()?.querySelector('img');
+              if (imgEl && det.image_url) {
+                const src = getEventImage(merged.image_url, merged.category, merged.title ?? undefined, merged.bundesland);
+                if (imgEl.src !== src) imgEl.src = src;
+              }
+            }
+          })
+          .catch(() => {
+            // Netzfehler: freigeben — der nächste Marker-Rebuild queued erneut.
+            chunk.forEach((id) => hydrateInflightRef.current.delete(id));
+          });
+      }
+    };
+    const scheduleHydration = () => {
+      if (hydrateTimerRef.current != null) return;
+      hydrateTimerRef.current = window.setTimeout(() => {
+        hydrateTimerRef.current = null;
+        flushHydration();
+      }, 300);
+    };
+
     // Function to render DOM markers for unclustered points
     const updateMarkers = () => {
       if (!m.getSource('events')) return;
@@ -673,8 +745,16 @@ function EventMap({ events, hoveredEventId, eveningMode, bundesland, flyToCoords
 
         if (markersOnScreen.current.has(markerId)) continue; // Already rendered
 
-        const event = eventLookup.current.get(id);
+        let event = eventLookup.current.get(id);
         if (!event) continue;
+        // Bereits hydratisierte Punkte (Cache überlebt events-Wechsel):
+        // Marker startet direkt mit echtem Bild + vollem Popup-Inhalt.
+        // Die id wird dabei bewusst zur vollen UUID (aus dem Detail-Row),
+        // wie beim Hover-Fetch — Save-Button braucht UUIDs.
+        if (event.title == null) {
+          const hydrated = detailsCacheRef.current.get(id);
+          if (hydrated) event = { ...event, ...hydrated } as Event;
+        }
 
         const coords = (feature.geometry as GeoJSON.Point).coordinates;
 
@@ -851,6 +931,14 @@ function EventMap({ events, hoveredEventId, eveningMode, bundesland, flyToCoords
         el.addEventListener('mouseleave', scheduleClose);
 
         markersOnScreen.current.set(markerId, marker);
+
+        // Punkt ohne Anzeige-Felder sichtbar geworden → für den nächsten
+        // Hydration-Batch vormerken (nur Snapshot-Kurz-IDs, 12 Hex —
+        // volle Events aus dem Batch-Fallback haben title gesetzt).
+        if (event.title == null && HYDRATE_ID_RE.test(id)) {
+          hydrateQueueRef.current.add(id);
+          scheduleHydration();
+        }
       }
 
       // Remove markers no longer visible.
@@ -892,6 +980,10 @@ function EventMap({ events, hoveredEventId, eveningMode, bundesland, flyToCoords
     return () => {
       m.off('render', throttledUpdate);
       if (renderTimer) cancelAnimationFrame(renderTimer);
+      if (hydrateTimerRef.current != null) {
+        window.clearTimeout(hydrateTimerRef.current);
+        hydrateTimerRef.current = null;
+      }
     };
   // Note: bundesland NOT in deps — events are already filtered client-side.
   // Bundesland switch only triggers flyTo + overlay (separate useEffect).
