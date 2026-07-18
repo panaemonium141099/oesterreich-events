@@ -1,6 +1,8 @@
 import { createServerClient } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
+import createIntlMiddleware from 'next-intl/middleware';
 import { checkRateLimit, getClientIp } from '@/lib/rate-limit';
+import { routing } from '@/i18n/routing';
 
 /**
  * Supabase session refresh middleware — with a critical SEO bypass.
@@ -28,6 +30,36 @@ import { checkRateLimit, getClientIp } from '@/lib/rate-limit';
  * Supabase's auth state changes directly via `onAuthStateChange`, so UI
  * updates within the active tab remain instant.
  */
+/**
+ * fn-17 i18n: Locale-Rewrite via next-intl. `as-needed` + Detection/Cookie
+ * aus (siehe src/i18n/routing.ts): `/map` wird intern zu `/de/map`
+ * rewritten, `/en/map` zu `[locale]=en` — OHNE Set-Cookie und OHNE
+ * Accept-Language-Redirects, damit der SEO-Bypass unten (anonyme
+ * Requests bleiben cache-/ISR-fähig) intakt bleibt.
+ */
+const intlMiddleware = createIntlMiddleware(routing);
+
+/**
+ * Routen, die AUSSERHALB des [locale]-Segments am App-Root leben und
+ * deshalb keinen Locale-Rewrite bekommen dürfen:
+ *  - /api/* (Route Handler)
+ *  - OAuth-Callbacks (extern registrierte Redirect-URIs)
+ *  - Root-Metadata-Routen ohne Dateiendung (og-image, icons)
+ *  - alles mit Punkt: sitemap.xml, robots.txt, sw.js, manifest.webmanifest,
+ *    llms-full.txt, Font-/Asset-Dateien …
+ */
+function isLocaleExempt(pathname: string): boolean {
+  return (
+    pathname.startsWith('/api/') ||
+    pathname.startsWith('/auth/callback') ||
+    pathname.startsWith('/auth/spotify/callback') ||
+    pathname === '/opengraph-image' ||
+    pathname === '/icon' ||
+    pathname === '/apple-icon' ||
+    pathname.includes('.')
+  );
+}
+
 function hasSupabaseAuthCookie(request: NextRequest): boolean {
   for (const cookie of request.cookies.getAll()) {
     // Supabase SSR cookies look like `sb-<projectRef>-auth-token` or
@@ -82,16 +114,24 @@ export async function middleware(request: NextRequest) {
   // Avatar swap is now a tiny Client Component (`LandingAuth`) that
   // self-hydrates its session state without taking the page out of ISR.
 
+  // fn-17: Basis-Response pro Request — für Seiten der intl-Rewrite
+  // (Locale aus URL), für Root-Handler (api, sitemap, callbacks, Assets)
+  // ein unverändertes Pass-Through. Als Factory, weil der Supabase-
+  // Cookie-Adapter unten die Response neu erzeugen muss.
+  const localeExempt = isLocaleExempt(request.nextUrl.pathname);
+  const baseResponse = () =>
+    localeExempt ? NextResponse.next({ request }) : intlMiddleware(request);
+
   // Anonymous request? Skip the session refresh entirely so Next.js can
   // prerender + ISR-cache the response. This is what unblocks Google
   // indexing for the ~42 000 public event pages.
+  // (intlMiddleware setzt kein Cookie — localeCookie: false — die
+  // Response bleibt also weiterhin ISR-/cache-fähig.)
   if (!hasSupabaseAuthCookie(request)) {
-    return NextResponse.next();
+    return baseResponse();
   }
 
-  let supabaseResponse = NextResponse.next({
-    request,
-  });
+  let supabaseResponse = baseResponse();
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -105,9 +145,10 @@ export async function middleware(request: NextRequest) {
           cookiesToSet.forEach(({ name, value }) =>
             request.cookies.set(name, value)
           );
-          supabaseResponse = NextResponse.next({
-            request,
-          });
+          // Neu erzeugen (inkl. intl-Rewrite), damit die aktualisierten
+          // Request-Cookies die RSC-Renderer erreichen — Muster aus der
+          // next-intl-Supabase-Integration.
+          supabaseResponse = baseResponse();
           cookiesToSet.forEach(({ name, value, options }) =>
             supabaseResponse.cookies.set(name, value, options)
           );
@@ -157,7 +198,9 @@ export async function middleware(request: NextRequest) {
   if (!userResult) {
     // Supabase didn't answer in time — bail out without session
     // touch. Browser keeps its cookies; next refresh will retry.
-    return NextResponse.next({ request });
+    // (baseResponse() statt NextResponse.next(): der Locale-Rewrite
+    // muss auch im Degraded-Modus erhalten bleiben, sonst 404t /en/*.)
+    return baseResponse();
   }
   const { data: { user } } = userResult;
 

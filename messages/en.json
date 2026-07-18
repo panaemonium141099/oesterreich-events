@@ -1,0 +1,39 @@
+{
+  "Nav": {
+    "home": "Home",
+    "mainNav": "Main navigation",
+    "discover": "Discover",
+    "artists": "Artists",
+    "map": "Map",
+    "plans": "My plans",
+    "login": "Sign in"
+  },
+  "TabBar": {
+    "mobileNav": "Mobile main navigation",
+    "discover": "Discover",
+    "artists": "Artists",
+    "map": "Map",
+    "plans": "Plans",
+    "profile": "Profile"
+  },
+  "Search": {
+    "placeholder": "Search artists, events or places …",
+    "ariaLabel": "Search artists, events or places",
+    "submit": "Search"
+  },
+  "LocaleSwitcher": {
+    "label": "Choose language",
+    "de": "Deutsch",
+    "en": "English"
+  },
+  "NotFound": {
+    "title": "Page not found",
+    "description": "The page you are looking for does not exist or has been moved.",
+    "backHome": "Back to home"
+  },
+  "Meta": {
+    "title": "LassTreffen.at — Events in Vienna, Graz, Salzburg & all of Austria",
+    "description": "Find events in Vienna, Graz, Linz, Salzburg & all of Austria — 40,000+ concerts, festivals, markets and parties on an interactive map. Plan with friends, follow your favourite artists. Free.",
+    "ogAlt": "LassTreffen.at — Discover what's on in Austria"
+  }
+}

@@ -1,5 +1,9 @@
 import type { Metadata } from 'next';
 import Script from 'next/script';
+import { notFound } from 'next/navigation';
+import { hasLocale, NextIntlClientProvider } from 'next-intl';
+import { getMessages, getTranslations, setRequestLocale } from 'next-intl/server';
+import { routing, type AppLocale } from '@/i18n/routing';
 // fn-15.5 (Bundle-Architektur):
 //   - AuthProvider moved out of root → now per-route in authenticated
 //     layouts (feed, profile, saved, friends, messages, admin, groups/[id])
@@ -52,18 +56,10 @@ import { V4TopNav, V4TabBar } from '@/components/Layout/v4';
 // future consent-gated wrapper can pick it up, but no Script tag mounts
 // here. See the comment block below the JSON-LD scripts for context.
 
-const SITE_DESCRIPTION =
-  'Finde Events in Wien, Graz, Linz, Salzburg & ganz Österreich — 40.000+ Konzerte, Festivals, Märkte, Partys auf interaktiver Karte. Mit Freunden planen, Lieblings-Artists folgen. Kostenlos.';
-
-export const metadata: Metadata = {
-  metadataBase: new URL('https://lasstreffen.at'),
-  title: {
-    default: 'LassTreffen.at — Events in Wien, Graz, Salzburg & ganz Österreich',
-    template: '%s | LassTreffen.at',
-  },
-  description: SITE_DESCRIPTION,
-  applicationName: 'LassTreffen.at',
-  keywords: [
+// Deutsche Keywords bleiben hardcoded — sie zielen auf den DE-Suchmarkt.
+// EN bekommt eigene Keywords; alles andere Textliche kommt aus messages/.
+const KEYWORDS: Record<AppLocale, string[]> = {
+  de: [
     'Events Österreich',
     'Veranstaltungen Wien',
     'Konzerte Graz',
@@ -73,58 +69,101 @@ export const metadata: Metadata = {
     'Events heute',
     'Events Wochenende',
   ],
-  authors: [{ name: 'LassTreffen.at' }],
-  creator: 'LassTreffen.at',
-  publisher: 'LassTreffen.at',
-  openGraph: {
-    type: 'website',
-    locale: 'de_AT',
-    url: 'https://lasstreffen.at',
-    siteName: 'LassTreffen.at',
-    title: 'LassTreffen.at — Events in Wien, Graz, Salzburg & ganz Österreich',
-    description: SITE_DESCRIPTION,
-    images: [
-      {
-        url: 'https://lasstreffen.at/opengraph-image',
-        width: 1200,
-        height: 630,
-        alt: 'LassTreffen.at — Entdecke was los ist in Österreich',
-      },
-    ],
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: 'LassTreffen.at — Events in Wien, Graz, Salzburg & ganz Österreich',
-    description: SITE_DESCRIPTION,
-    images: ['https://lasstreffen.at/opengraph-image'],
-  },
-  alternates: {
-    canonical: 'https://lasstreffen.at',
-    languages: {
-      'de-AT': 'https://lasstreffen.at',
-      'x-default': 'https://lasstreffen.at',
+  en: [
+    'events Austria',
+    'events Vienna',
+    'concerts Graz',
+    'festivals Salzburg',
+    'nightlife Linz',
+    'Christmas market Vienna',
+    'events today',
+    'things to do Austria',
+  ],
+};
+
+export function generateStaticParams() {
+  return routing.locales.map(locale => ({ locale }));
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale: rawLocale } = await params;
+  const locale: AppLocale = hasLocale(routing.locales, rawLocale)
+    ? rawLocale
+    : routing.defaultLocale;
+  const t = await getTranslations({ locale, namespace: 'Meta' });
+
+  const siteTitle = t('title');
+  const siteDescription = t('description');
+  // fn-17: DE bleibt unpräfixiert (Rankings/QR-Links), EN unter /en.
+  const canonical = locale === 'de' ? 'https://lasstreffen.at' : 'https://lasstreffen.at/en';
+
+  return {
+    metadataBase: new URL('https://lasstreffen.at'),
+    title: {
+      default: siteTitle,
+      template: '%s | LassTreffen.at',
     },
-  },
-  robots: {
-    index: true,
-    follow: true,
-    googleBot: {
+    description: siteDescription,
+    applicationName: 'LassTreffen.at',
+    keywords: KEYWORDS[locale],
+    authors: [{ name: 'LassTreffen.at' }],
+    creator: 'LassTreffen.at',
+    publisher: 'LassTreffen.at',
+    openGraph: {
+      type: 'website',
+      locale: locale === 'de' ? 'de_AT' : 'en_US',
+      url: canonical,
+      siteName: 'LassTreffen.at',
+      title: siteTitle,
+      description: siteDescription,
+      images: [
+        {
+          url: 'https://lasstreffen.at/opengraph-image',
+          width: 1200,
+          height: 630,
+          alt: t('ogAlt'),
+        },
+      ],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: siteTitle,
+      description: siteDescription,
+      images: ['https://lasstreffen.at/opengraph-image'],
+    },
+    alternates: {
+      canonical,
+      languages: {
+        'de-AT': 'https://lasstreffen.at',
+        en: 'https://lasstreffen.at/en',
+        'x-default': 'https://lasstreffen.at',
+      },
+    },
+    robots: {
       index: true,
       follow: true,
-      'max-snippet': -1,
-      'max-image-preview': 'large',
-      'max-video-preview': -1,
+      googleBot: {
+        index: true,
+        follow: true,
+        'max-snippet': -1,
+        'max-image-preview': 'large',
+        'max-video-preview': -1,
+      },
     },
-  },
-  category: 'Events',
-  verification: {
-    // Impact (Affiliate-Netzwerk, u.a. für booking.com Partner-Programm).
-    // Verification per Meta-Tag im <head> — Impact crawlt die Homepage.
-    other: {
-      'impact-site-verification': '9e250221-1b52-4d60-8442-a2e68cfd1fcb',
+    category: 'Events',
+    verification: {
+      // Impact (Affiliate-Netzwerk, u.a. für booking.com Partner-Programm).
+      // Verification per Meta-Tag im <head> — Impact crawlt die Homepage.
+      other: {
+        'impact-site-verification': '9e250221-1b52-4d60-8442-a2e68cfd1fcb',
+      },
     },
-  },
-};
+  };
+}
 
 /**
  * Global structured-data: WebSite (with SearchAction for Google Sitelinks
@@ -132,46 +171,51 @@ export const metadata: Metadata = {
  * Knowledge Panel / SERP thumbnail). Specific pages still emit their own
  * additional schemas (Event, BlogPosting, etc.) on top of these.
  */
-const websiteJsonLd = {
-  '@context': 'https://schema.org',
-  '@type': 'WebSite',
-  '@id': 'https://lasstreffen.at/#website',
-  name: 'LassTreffen.at',
-  alternateName: 'Lass Treffen',
-  url: 'https://lasstreffen.at',
-  description: SITE_DESCRIPTION,
-  inLanguage: 'de-AT',
-  publisher: { '@id': 'https://lasstreffen.at/#organization' },
-  potentialAction: {
-    '@type': 'SearchAction',
-    target: {
-      '@type': 'EntryPoint',
-      urlTemplate: 'https://lasstreffen.at/map?search={search_term_string}',
+function buildWebsiteJsonLd(locale: AppLocale, siteDescription: string) {
+  const base = locale === 'de' ? 'https://lasstreffen.at' : 'https://lasstreffen.at/en';
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    '@id': `${base}/#website`,
+    name: 'LassTreffen.at',
+    alternateName: 'Lass Treffen',
+    url: base,
+    description: siteDescription,
+    inLanguage: locale === 'de' ? 'de-AT' : 'en',
+    publisher: { '@id': 'https://lasstreffen.at/#organization' },
+    potentialAction: {
+      '@type': 'SearchAction',
+      target: {
+        '@type': 'EntryPoint',
+        urlTemplate: `${base}/map?search={search_term_string}`,
+      },
+      'query-input': 'required name=search_term_string',
     },
-    'query-input': 'required name=search_term_string',
-  },
-};
+  };
+}
 
-const organizationJsonLd = {
-  '@context': 'https://schema.org',
-  '@type': 'Organization',
-  '@id': 'https://lasstreffen.at/#organization',
-  name: 'LassTreffen.at',
-  alternateName: 'Lass Treffen',
-  url: 'https://lasstreffen.at',
-  logo: {
-    '@type': 'ImageObject',
-    url: 'https://lasstreffen.at/apple-icon',
-    width: 180,
-    height: 180,
-  },
-  image: 'https://lasstreffen.at/opengraph-image',
-  description: SITE_DESCRIPTION,
-  areaServed: {
-    '@type': 'Country',
-    name: 'Österreich',
-  },
-};
+function buildOrganizationJsonLd(siteDescription: string) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'Organization',
+    '@id': 'https://lasstreffen.at/#organization',
+    name: 'LassTreffen.at',
+    alternateName: 'Lass Treffen',
+    url: 'https://lasstreffen.at',
+    logo: {
+      '@type': 'ImageObject',
+      url: 'https://lasstreffen.at/apple-icon',
+      width: 180,
+      height: 180,
+    },
+    image: 'https://lasstreffen.at/opengraph-image',
+    description: siteDescription,
+    areaServed: {
+      '@type': 'Country',
+      name: 'Österreich',
+    },
+  };
+}
 
 /**
  * Root layout with parallel `@modal` slot for intercepting routes.
@@ -194,15 +238,32 @@ const organizationJsonLd = {
  * share the same saved-events state. Saving from inside the sheet
  * updates the marker's saved-class on the underlying map immediately.
  */
-export default function RootLayout({
+export default async function RootLayout({
   children,
   modal,
+  params,
 }: {
   children: React.ReactNode;
   modal: React.ReactNode;
+  params: Promise<{ locale: string }>;
 }) {
+  // fn-17: [locale] matcht als Root-Dynamiksegment JEDEN ersten Pfadteil.
+  // Ungültige Locales können hier nur direkt ankommen, wenn die Middleware
+  // umgangen wird — die rewritet /wien → /de/wien, bevor Routing greift.
+  const { locale: rawLocale } = await params;
+  if (!hasLocale(routing.locales, rawLocale)) {
+    notFound();
+  }
+  const locale: AppLocale = rawLocale;
+  // Statisches Rendering (ISR-Landing!) trotz [locale]-Param ermöglichen
+  setRequestLocale(locale);
+  const t = await getTranslations({ locale, namespace: 'Meta' });
+  const messages = await getMessages({ locale });
+  const websiteJsonLd = buildWebsiteJsonLd(locale, t('description'));
+  const organizationJsonLd = buildOrganizationJsonLd(t('description'));
+
   return (
-    <html lang="de" className={geist.variable}>
+    <html lang={locale === 'de' ? 'de' : 'en'} className={geist.variable}>
       <head>
         {/*
           fn-15.6: critical CSS inlined first so the browser can paint
@@ -250,6 +311,7 @@ export default function RootLayout({
         */}
       </head>
       <body className="antialiased">
+        <NextIntlClientProvider messages={messages}>
         {/*
           fn-15.5 round-2: page-transitions now use the CSS View
           Transition API. <RouteTransitions /> (client component) calls
@@ -301,6 +363,7 @@ export default function RootLayout({
           }}
         />
         {/* <CookieBanner /> — see import comment above */}
+        </NextIntlClientProvider>
       </body>
     </html>
   );

@@ -1,0 +1,39 @@
+{
+  "Nav": {
+    "home": "Startseite",
+    "mainNav": "Hauptnavigation",
+    "discover": "Entdecken",
+    "artists": "Künstler",
+    "map": "Karte",
+    "plans": "Meine Pläne",
+    "login": "Anmelden"
+  },
+  "TabBar": {
+    "mobileNav": "Mobile Hauptnavigation",
+    "discover": "Entdecken",
+    "artists": "Künstler",
+    "map": "Karte",
+    "plans": "Pläne",
+    "profile": "Profil"
+  },
+  "Search": {
+    "placeholder": "Künstler, Event oder Ort suchen …",
+    "ariaLabel": "Künstler, Event oder Ort suchen",
+    "submit": "Suchen"
+  },
+  "LocaleSwitcher": {
+    "label": "Sprache wählen",
+    "de": "Deutsch",
+    "en": "English"
+  },
+  "NotFound": {
+    "title": "Seite nicht gefunden",
+    "description": "Die gesuchte Seite existiert nicht oder wurde verschoben.",
+    "backHome": "Zur Startseite"
+  },
+  "Meta": {
+    "title": "LassTreffen.at — Events in Wien, Graz, Salzburg & ganz Österreich",
+    "description": "Finde Events in Wien, Graz, Linz, Salzburg & ganz Österreich — 40.000+ Konzerte, Festivals, Märkte, Partys auf interaktiver Karte. Mit Freunden planen, Lieblings-Artists folgen. Kostenlos.",
+    "ogAlt": "LassTreffen.at — Entdecke was los ist in Österreich"
+  }
+}

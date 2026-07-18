@@ -13,10 +13,14 @@
  * Two visual variants are baked in: a tall pill ("hero") with a search
  * icon on the left, and a compact pill ("nav") with an extra ⌘K kbd
  * hint on the right. Everything else is shared.
+ *
+ * fn-17: Router kommt aus @/i18n/navigation — auf /en-Seiten landet die
+ * Suche damit auf /en/entdecken; Placeholder/Labels aus messages/.
  */
 
 import { useState, FormEvent } from 'react';
-import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
+import { useRouter } from '@/i18n/navigation';
 
 interface V4SearchInputProps {
   variant: 'hero' | 'nav';
@@ -31,13 +35,15 @@ interface V4SearchInputProps {
 
 export function V4SearchInput({
   variant,
-  placeholder = 'Künstler, Event oder Ort suchen …',
+  placeholder,
   autoFocus = false,
   destination = '/entdecken',
   className,
 }: V4SearchInputProps) {
+  const t = useTranslations('Search');
   const router = useRouter();
   const [query, setQuery] = useState('');
+  const placeholderText = placeholder ?? t('placeholder');
 
   function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -51,7 +57,7 @@ export function V4SearchInput({
       <form
         onSubmit={onSubmit}
         role="search"
-        aria-label="Künstler, Event oder Ort suchen"
+        aria-label={t('ariaLabel')}
         className={
           'hidden lg:inline-flex items-center gap-2 min-w-[260px] px-3 py-2 rounded-full border border-[var(--v4-hairline-2)] focus-within:border-[var(--v4-hairline-3)] transition-colors ' +
           (className ?? '')
@@ -66,7 +72,7 @@ export function V4SearchInput({
           name="search"
           value={query}
           onChange={e => setQuery(e.target.value)}
-          placeholder={placeholder}
+          placeholder={placeholderText}
           className="flex-1 bg-transparent border-0 outline-none text-[16px] md:text-[13px] text-[var(--v4-ink)] placeholder-[var(--v4-ink-50)] min-w-0"
         />
         <kbd className="px-1.5 py-px text-[10px] rounded border border-[var(--v4-hairline-2)] text-[var(--v4-ink-30)] flex-shrink-0">
@@ -81,7 +87,7 @@ export function V4SearchInput({
     <form
       onSubmit={onSubmit}
       role="search"
-      aria-label="Künstler, Event oder Ort suchen"
+      aria-label={t('ariaLabel')}
       className={
         'flex items-center gap-3 px-5 py-3.5 rounded-full border border-[var(--v4-hairline-2)] bg-[var(--v4-surface-elevated)] focus-within:border-[var(--v4-hairline-3)] transition-colors w-full md:w-auto md:min-w-[420px] ' +
         (className ?? '')
@@ -96,17 +102,17 @@ export function V4SearchInput({
         name="search"
         value={query}
         onChange={e => setQuery(e.target.value)}
-        placeholder={placeholder}
+        placeholder={placeholderText}
         autoFocus={autoFocus}
         className="flex-1 bg-transparent border-0 outline-none text-[16px] md:text-sm text-[var(--v4-ink)] placeholder-[var(--v4-ink-50)] min-w-0"
       />
       <button
         type="submit"
         disabled={!query.trim()}
-        aria-label="Suchen"
+        aria-label={t('submit')}
         className="press-haptic flex-shrink-0 inline-flex items-center justify-center px-3 py-1.5 rounded-full bg-[var(--v4-ink)] text-[#0a0a0c] text-xs font-semibold disabled:opacity-40 disabled:cursor-not-allowed"
       >
-        Suchen
+        {t('submit')}
       </button>
     </form>
   );

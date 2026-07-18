@@ -3,7 +3,7 @@ import { createServerSupabaseClient } from '@/lib/supabase/server';
 import type { Festival } from '@/types/festivals';
 import { V4FestivalCard } from '@/components/Events/v4';
 import { buildEventUrlV2 } from '@/lib/utils/slugify';
-import overridesJson from '../../../data/festival-overrides.json';
+import overridesJson from '../../../../data/festival-overrides.json';
 
 const OVERRIDES = overridesJson as Record<string, { imageUrl?: string | null }>;
 
