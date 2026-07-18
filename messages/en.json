@@ -31,6 +31,18 @@
     "description": "The page you are looking for does not exist or has been moved.",
     "backHome": "Back to home"
   },
+  "MetaMap": {
+    "title": "Event Map of Austria — All events on one map",
+    "description": "Interactive map with over 40,000 events across Austria. Find concerts, festivals, markets, sports and culture near you — filter by category, region and date.",
+    "ogTitle": "Event Map of Austria — All events on one map",
+    "ogDescription": "Interactive map with over 40,000 events across Austria. Concerts, festivals, markets and more."
+  },
+  "MetaDiscover": {
+    "title": "Discover events — concerts, festivals & more in Austria",
+    "description": "Browse thousands of events across Austria. Filter by date, region, category and vibe — find your next event.",
+    "ogTitle": "Discover events in Austria",
+    "ogDescription": "Concerts, festivals, markets and more. Filter by region and category."
+  },
   "Meta": {
     "title": "LassTreffen.at — Events in Vienna, Graz, Salzburg & all of Austria",
     "description": "Find events in Vienna, Graz, Linz, Salzburg & all of Austria — 40,000+ concerts, festivals, markets and parties on an interactive map. Plan with friends, follow your favourite artists. Free.",
