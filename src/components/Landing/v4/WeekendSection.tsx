@@ -1,25 +1,29 @@
 import type { Event } from '@/types/events';
 import type { V4EventState } from '@/lib/v4/derive-event-state';
 import { V4CardV, V4CardHero } from '@/components/Events/v4';
-import Link from 'next/link';
+import { useLocale, useTranslations } from 'next-intl';
+import { Link } from '@/i18n/navigation';
 
 interface WeekendSectionProps {
   events: Array<Event & { state: V4EventState }>;
 }
 
-function dateRangeLabel(): string {
+function dateRangeLabel(locale: string): string {
+  const fmt = locale === 'de' ? 'de-AT' : 'en-GB';
   const start = new Date();
   const end = new Date(Date.now() + 7 * 24 * 3600 * 1000);
-  const startStr = start.toLocaleDateString('de-AT', { weekday: 'short', day: 'numeric', month: 'short' });
-  const endStr = end.toLocaleDateString('de-AT', { weekday: 'short', day: 'numeric', month: 'short' });
+  const startStr = start.toLocaleDateString(fmt, { weekday: 'short', day: 'numeric', month: 'short' });
+  const endStr = end.toLocaleDateString(fmt, { weekday: 'short', day: 'numeric', month: 'short' });
   return `${startStr.replace(/\.$/,'')} – ${endStr.replace(/\.$/,'')}`;
 }
 
 export function WeekendSection({ events }: WeekendSectionProps) {
+  const t = useTranslations('Landing.Weekend');
+  const locale = useLocale();
   if (events.length === 0) {
     return (
       <section className="max-w-[1180px] mx-auto px-4 md:px-14 py-6 md:py-10">
-        <p className="text-[var(--v4-ink-70)] text-sm">Aktuell keine Events im 7-Tage-Fenster.</p>
+        <p className="text-[var(--v4-ink-70)] text-sm">{t('empty')}</p>
       </section>
     );
   }
@@ -33,17 +37,17 @@ export function WeekendSection({ events }: WeekendSectionProps) {
       <div className="flex items-end justify-between gap-6 mb-4">
         <div>
           <p className="text-[10.5px] font-semibold uppercase tracking-[0.22em] text-[var(--v4-ink-50)] mb-2">
-            {dateRangeLabel()}
+            {dateRangeLabel(locale)}
           </p>
           <h2 className="text-[26px] font-bold leading-tight tracking-[-0.025em] text-[var(--v4-ink)]">
-            Heute &amp; Wochenende
+            {t('title')}
           </h2>
         </div>
         <Link
           href="/entdecken"
           className="hidden md:inline-flex items-center gap-1.5 text-[13px] font-semibold text-[var(--v4-ink-70)]"
         >
-          Alle Events ansehen
+          {t('viewAll')}
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
         </Link>
       </div>

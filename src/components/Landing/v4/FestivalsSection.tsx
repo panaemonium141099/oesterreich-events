@@ -1,12 +1,14 @@
 import type { LandingFestival } from '@/lib/v4/get-landing-data';
 import { V4FestivalCard } from '@/components/Events/v4';
-import Link from 'next/link';
+import { useTranslations } from 'next-intl';
+import { Link } from '@/i18n/navigation';
 
 interface FestivalsSectionProps {
   festivals: LandingFestival[];
 }
 
 export function FestivalsSection({ festivals }: FestivalsSectionProps) {
+  const t = useTranslations('Landing.Festivals');
   if (festivals.length === 0) return null;
 
   return (
@@ -14,17 +16,17 @@ export function FestivalsSection({ festivals }: FestivalsSectionProps) {
       <div className="flex items-end justify-between gap-6 mb-4">
         <div>
           <p className="text-[10.5px] font-semibold uppercase tracking-[0.22em] text-[var(--v4-ink-50)] mb-2">
-            Sommer · Line-ups verfügbar
+            {t('eyebrow')}
           </p>
           <h2 className="text-[26px] font-bold leading-tight tracking-[-0.025em] text-[var(--v4-ink)]">
-            Festivals mit Line-up
+            {t('title')}
           </h2>
         </div>
         <Link
           href="/festivals"
           className="hidden md:inline-flex items-center gap-1.5 text-[13px] font-semibold text-[var(--v4-ink-70)]"
         >
-          Alle Festivals
+          {t('viewAll')}
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
         </Link>
       </div>

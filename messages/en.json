@@ -31,6 +31,141 @@
     "description": "The page you are looking for does not exist or has been moved.",
     "backHome": "Back to home"
   },
+  "Landing": {
+    "devNotice": "This site is still under development — technical glitches are possible. Please send feedback to",
+    "Hero": {
+      "badge": "Events in Austria",
+      "title": "Find events that truly match you.",
+      "subtitle": "Follow your favourite artists, find concerts, festivals and everything in between — with a ticket, at the box office or just show up. Plan your night in one place.",
+      "ctaArtists": "Search artists",
+      "ctaToday": "Today & weekend",
+      "trendLabel": "Trending:",
+      "funnel1Title": "Follow your favourite artists",
+      "funnel1Sub": "Search and follow your favourite artists. We'll let you know when they play in Austria.",
+      "funnel1Cta": "Search artists",
+      "funnel2Title": "Discover events",
+      "funnel2Sub": "Concerts, festivals, wine taverns, markets — everything happening in Austria right now.",
+      "funnel2Cta": "What's on today?",
+      "funnel3Title": "Plan your night",
+      "funnel3Sub": "Ticket link, directions, reminders — in your pocket, for every event.",
+      "funnel3Cta": "Try the planner"
+    },
+    "ArtistTeaser": {
+      "badge": "Favourite artists · signed-in only",
+      "title": "Never miss a show by your favourite artists.",
+      "text": "Search for an artist, follow them, and we'll show you concerts and festival slots in Austria.",
+      "cta": "Go to your favourite artists",
+      "note": "Opens the artists page. Following requires an account.",
+      "popular": "Popular in Austria"
+    },
+    "Weekend": {
+      "title": "Today & weekend",
+      "viewAll": "View all events",
+      "empty": "No events in the next 7 days right now."
+    },
+    "Concerts": {
+      "eyebrow": "Live in Austria",
+      "title": "Concerts this week",
+      "viewAll": "All concerts"
+    },
+    "Festivals": {
+      "eyebrow": "Summer · line-ups available",
+      "title": "Festivals with line-up",
+      "viewAll": "All festivals"
+    },
+    "MapPreview": {
+      "eyebrow": "Map",
+      "title": "Events near you",
+      "open": "Open map",
+      "alt": "Map of Austria with event markers in Vienna, Eisenstadt, Salzburg, Linz, Graz and Innsbruck",
+      "loading": "Loading map …",
+      "legendTickets": "Tickets available",
+      "legendLineup": "Artist in line-up",
+      "legendPlan": "In your plan"
+    },
+    "HowItWorks": {
+      "eyebrow": "How it works",
+      "title": "Up and running in three steps",
+      "step1Title": "Follow artists",
+      "step1Text": "Search and follow your favourite artists. We scan concerts and festival slots across Austria.",
+      "step2Title": "Get tickets",
+      "step2Text": "When a show pops up, you jump straight to the official ticket shop. The purchase happens with the vendor.",
+      "step3Title": "Plan your night",
+      "step3Text": "Save ticket status, directions and reminders in your plan. Three pings are usually enough."
+    },
+    "Newsletter": {
+      "eyebrow": "Every week · free · unsubscribe anytime",
+      "title": "The best events in your region — in your inbox on Fridays",
+      "text": "No account needed. Once a week we send you a hand-picked selection for the weekend — and nothing else.",
+      "emailPlaceholder": "your@email.com",
+      "regionAria": "Choose region",
+      "regionAll": "All of Austria",
+      "submit": "Subscribe",
+      "submitting": "One moment …",
+      "doneFallback": "Please confirm your subscription in your inbox.",
+      "errorFallback": "Subscription failed — please try again later.",
+      "networkError": "Network error — please try again.",
+      "privacyNote": "Double opt-in: your subscription only becomes active after e-mail confirmation. Unsubscribe anytime with one click in every mail. Details in the",
+      "privacyLink": "privacy policy"
+    },
+    "RegionHubs": {
+      "eyebrow": "By district · all of Austria",
+      "title": "Events in your state",
+      "intro": "Pick your state — we'll show you <b>all events</b> there, or narrow it down to a single <b>district</b>.",
+      "sectionAria": "Events by state",
+      "tileAria": "{name} — pick a district or see all events",
+      "districtCount": "{count} districts",
+      "credit": "State photos: Wikimedia Commons · CC BY/BY-SA ·",
+      "creditLink": "Image credits",
+      "sheetAria": "{name} — events",
+      "close": "Close",
+      "bundesland": "State",
+      "allEventsIn": "View all events in {name}",
+      "opensFiltered": "Opens the discover list, filtered to {name}.",
+      "orDistrict": "or narrow down by district",
+      "choose": "Choose"
+    },
+    "Matches": {
+      "eyebrow": "Your favourite artists · playing soon",
+      "title": "Shows by your favourite artists",
+      "viewAll": "All shows",
+      "empty": "No shows found yet — follow more artists.",
+      "searchArtists": "Search artists"
+    },
+    "AnonTeaser": {
+      "eyebrow": "Personalisation · sign in",
+      "title": "Who are your favourite artists?",
+      "text": "Follow artists — we'll notify you about their dates in Austria.",
+      "sub": "Concerts, open airs, festival slots. No need to keep checking.",
+      "cta": "Search artists"
+    }
+  },
+  "Onboarding": {
+    "slide1Title": "Discover",
+    "slide1Text": "Thousands of events across Austria",
+    "slide2Title": "Save",
+    "slide2Text": "Bookmark your favourites",
+    "slide3Title": "Meet up",
+    "slide3Text": "Plan with friends",
+    "skip": "Skip",
+    "next": "Next",
+    "start": "Let's go"
+  },
+  "Footer": {
+    "rights": "All rights reserved.",
+    "about": "About us",
+    "blog": "Blog",
+    "forCompanies": "For businesses",
+    "imprint": "Legal notice",
+    "privacy": "Privacy",
+    "terms": "Terms",
+    "sources": "Data sources",
+    "contact": "Contact",
+    "attrEvents": "Event data",
+    "attrVenues": "Venues",
+    "attrMap": "Map",
+    "allSources": "All sources"
+  },
   "MetaMap": {
     "title": "Event Map of Austria — All events on one map",
     "description": "Interactive map with over 40,000 events across Austria. Find concerts, festivals, markets, sports and culture near you — filter by category, region and date.",

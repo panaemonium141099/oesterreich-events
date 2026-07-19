@@ -8,7 +8,7 @@
  * Pure RSC. press-haptic class for touch feedback; no JS state.
  */
 
-import Link from 'next/link';
+import { Link } from '@/i18n/navigation';
 import type { SVGProps } from 'react';
 
 interface V4FunnelCardProps {
