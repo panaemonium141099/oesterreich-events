@@ -18,6 +18,7 @@ import {
   Sparkles,
   Send,
   Rocket,
+  QrCode,
   ArrowLeft,
   Menu,
   X,
@@ -41,6 +42,8 @@ const NAV_ITEMS = [
   { label: 'Outreach', icon: Send, href: '/admin/outreach' },
   { label: 'Moderation', icon: Shield, href: '/admin/moderation' },
   { label: 'Boosten', icon: Rocket, href: '/admin/boost' },
+  // QR-Codes für Tourismusbüros (fn-17 Slice 4) — DE/EN-Ziele + utm_source
+  { label: 'QR-Codes', icon: QrCode, href: '/admin/qr' },
 ] as const;
 
 export function AdminSidebar() {
