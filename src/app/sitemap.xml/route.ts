@@ -232,7 +232,7 @@ export async function GET(): Promise<NextResponse> {
       while (eventsAdded < MAX_EVENTS) {
         const { data, error } = await supabase
           .from('events')
-          .select('id, slug, start_date, updated_at, quality_score, postal_code, address, bundesland, location_name')
+          .select('id, slug, start_date, updated_at, quality_score, postal_code, address, bundesland, location_name, title_en')
           .gte('start_date', today)
           .eq('publish_status', 'published')
           .gte('quality_score', 40)
@@ -250,12 +250,22 @@ export async function GET(): Promise<NextResponse> {
           if (eventsAdded >= MAX_EVENTS) break;
           const qs = event.quality_score ?? 0;
           const priority = qs >= 80 ? 0.8 : qs >= 60 ? 0.6 : 0.4;
-          entries.push({
-            loc: `${BASE_URL}${buildEventUrlV2(event)}`,
-            lastmod: event.updated_at ? toISO(event.updated_at) : toISO(now),
-            changefreq: 'daily',
-            priority,
-          });
+          const path = buildEventUrlV2(event);
+          const lastmod = event.updated_at ? toISO(event.updated_at) : toISO(now);
+          // fn-17 Slice 3: Events mit gecachter EN-Übersetzung (title_en)
+          // bekommen die /en-URL als eigenen Eintrag + hreflang-Verknüpfung.
+          // Unübersetzte Events bleiben DE-only (kein Duplicate-Content).
+          if (event.title_en) {
+            const alternates = [
+              { hreflang: 'de-AT', href: `${BASE_URL}${path}` },
+              { hreflang: 'en', href: `${BASE_URL}/en${path}` },
+              { hreflang: 'x-default', href: `${BASE_URL}${path}` },
+            ];
+            entries.push({ loc: `${BASE_URL}${path}`, lastmod, changefreq: 'daily', priority, alternates });
+            entries.push({ loc: `${BASE_URL}/en${path}`, lastmod, changefreq: 'daily', priority: Math.max(0.4, priority - 0.2), alternates });
+          } else {
+            entries.push({ loc: `${BASE_URL}${path}`, lastmod, changefreq: 'daily', priority });
+          }
           eventsAdded += 1;
         }
 

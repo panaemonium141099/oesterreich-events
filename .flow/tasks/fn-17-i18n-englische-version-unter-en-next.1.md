@@ -7,8 +7,7 @@ TBD
 - [ ] TBD
 
 ## Done summary
-TBD
-
+i18n-Foundation live: next-intl, [locale]-Segment, as-needed-Prefix, Chrome, hreflang, Sitemap. PR #76 gemerged.
 ## Evidence
 - Commits:
 - Tests:
