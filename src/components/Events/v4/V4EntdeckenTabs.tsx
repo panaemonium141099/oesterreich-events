@@ -6,6 +6,8 @@
  * URL persistence; this atom is pure render.
  */
 
+import { useTranslations } from 'next-intl';
+
 export type V4EntdeckenMode = 'list' | 'smart';
 
 interface V4EntdeckenTabsProps {
@@ -13,14 +15,16 @@ interface V4EntdeckenTabsProps {
   onChange: (next: V4EntdeckenMode) => void;
 }
 
-const TABS: { key: V4EntdeckenMode; label: string }[] = [
-  { key: 'list',  label: 'Liste' },
-  { key: 'smart', label: 'Smart-Suche' },
+/** Stabile Mode-Keys; Anzeige-Labels kommen aus dem Discover-Namespace. */
+const TABS: { key: V4EntdeckenMode; labelKey: 'tabList' | 'tabSmart' }[] = [
+  { key: 'list',  labelKey: 'tabList' },
+  { key: 'smart', labelKey: 'tabSmart' },
 ];
 
 export function V4EntdeckenTabs({ current, onChange }: V4EntdeckenTabsProps) {
+  const t = useTranslations('Discover');
   return (
-    <div role="tablist" aria-label="Suchmodus" className="inline-flex p-1 rounded-full bg-[var(--v4-surface-elevated)] border border-[var(--v4-hairline-2)]">
+    <div role="tablist" aria-label={t('tabsAria')} className="inline-flex p-1 rounded-full bg-[var(--v4-surface-elevated)] border border-[var(--v4-hairline-2)]">
       {TABS.map(tab => {
         const isActive = tab.key === current;
         return (
@@ -36,7 +40,7 @@ export function V4EntdeckenTabs({ current, onChange }: V4EntdeckenTabsProps) {
                 : 'text-[var(--v4-ink-70)] hover:text-[var(--v4-ink)]')
             }
           >
-            {tab.label}
+            {t(tab.labelKey)}
           </button>
         );
       })}

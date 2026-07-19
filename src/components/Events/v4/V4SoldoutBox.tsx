@@ -6,9 +6,11 @@
  * actual derivation comes later when Eventim availability is wired.
  */
 
+import { useTranslations } from 'next-intl';
 import { V4Badge } from './V4Badge';
 
 export function V4SoldoutBox() {
+  const t = useTranslations('EventDetail');
   return (
     <div
       data-v4-side-box="soldout"
@@ -17,19 +19,19 @@ export function V4SoldoutBox() {
     >
       <div className="h-[3px]" style={{ background: 'var(--v4-alert)' }}/>
       <div className="p-[20px_22px_22px]">
-        <V4Badge kind="soldout">Ausverkauft</V4Badge>
+        <V4Badge kind="soldout">{t('badgeSoldout')}</V4Badge>
         <p className="mt-3.5 text-[15.5px] font-semibold text-[var(--v4-ink)] tracking-[-0.015em] leading-[1.4]">
-          Tickets sind aktuell vergriffen.
+          {t('soldoutHeadline')}
         </p>
         <p className="mt-2 text-[12.5px] text-[var(--v4-ink-50)] leading-[1.5]">
-          Wir zeigen dir ähnliche Events darunter — vielleicht ist was dabei.
+          {t('soldoutSub')}
         </p>
 
         <a
           href="#similar-events"
           className="press-haptic mt-[18px] flex items-center justify-center gap-2 w-full px-5 py-3 rounded-full border border-[var(--v4-hairline-3)] text-sm font-semibold text-[var(--v4-ink)]"
         >
-          Ähnliche Events
+          {t('similarEvents')}
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
         </a>
       </div>

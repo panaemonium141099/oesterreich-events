@@ -7,6 +7,7 @@
  * the user wants the routing affordance reachable from every state.
  */
 
+import { useTranslations } from 'next-intl';
 import { V4Badge } from './V4Badge';
 import { V4PriceBlock } from './V4PriceBlock';
 import { V4SaveButton } from './V4SaveButton';
@@ -29,6 +30,7 @@ interface V4FreeBoxProps {
 }
 
 export function V4FreeBox({ eventId, onPlanClick, mapsUrl, locationApprox, priceText, priceMin, priceMax }: V4FreeBoxProps) {
+  const t = useTranslations('EventDetail');
   const showsLocationCell = !!mapsUrl || !!locationApprox;
   return (
     <div
@@ -38,12 +40,12 @@ export function V4FreeBox({ eventId, onPlanClick, mapsUrl, locationApprox, price
     >
       <div className="h-[3px]" style={{ background: 'var(--v4-go)' }}/>
       <div className="p-[20px_22px_22px]">
-        <V4Badge kind="free">Eintritt frei</V4Badge>
+        <V4Badge kind="free">{t('badgeFree')}</V4Badge>
         <p className="mt-3.5 text-[16px] font-semibold text-[var(--v4-ink)] tracking-[-0.015em] leading-tight">
-          Plane deinen Abend und lass dich rechtzeitig erinnern.
+          {t('freeHeadline')}
         </p>
         <p className="mt-2 text-[12.5px] text-[var(--v4-ink-50)] leading-[1.5]">
-          Kein Ticket nötig. Wir merken Anreise und Reminder in deinem Plan.
+          {t('freeSub')}
         </p>
 
         <V4PriceBlock priceText={priceText} priceMin={priceMin} priceMax={priceMax} priceTier="gratis"/>
@@ -55,7 +57,7 @@ export function V4FreeBox({ eventId, onPlanClick, mapsUrl, locationApprox, price
             data-track="plan_started"
             className="press-haptic mt-[18px] flex items-center justify-center gap-2 w-full px-5 py-3 rounded-full bg-[var(--v4-go)] text-[#062417] text-sm font-semibold"
           >
-            Abend planen
+            {t('planEvening')}
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
           </button>
         ) : (
@@ -64,7 +66,7 @@ export function V4FreeBox({ eventId, onPlanClick, mapsUrl, locationApprox, price
             data-track="plan_started"
             className="press-haptic mt-[18px] flex items-center justify-center gap-2 w-full px-5 py-3 rounded-full bg-[var(--v4-go)] text-[#062417] text-sm font-semibold"
           >
-            Abend planen
+            {t('planEvening')}
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
           </a>
         )}
@@ -78,18 +80,18 @@ export function V4FreeBox({ eventId, onPlanClick, mapsUrl, locationApprox, price
               data-track="route_opened"
               className="press-haptic flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-full border border-[var(--v4-hairline-3)] text-[12.5px] font-semibold text-[var(--v4-ink)]"
             >
-              Route öffnen
+              {t('openRoute')}
             </a>
           ) : locationApprox ? (
             <span
-              title="Beim Veranstalter die genaue Adresse pruefen, bevor du losfaehrst."
+              title={t('locationApproxHint')}
               className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-full border border-dashed border-[var(--v4-hairline-3)] text-[11.5px] font-medium text-[var(--v4-ink-50)] cursor-help"
             >
-              Ortsangabe ungefähr
+              {t('locationApprox')}
             </span>
           ) : null}
           <V4SaveButton eventId={eventId} fillRow={!showsLocationCell} />
-          <a href="#share" className="press-haptic inline-flex items-center justify-center px-3 py-2 rounded-full border border-[var(--v4-hairline-3)] text-[var(--v4-ink)]" aria-label="Teilen">
+          <a href="#share" className="press-haptic inline-flex items-center justify-center px-3 py-2 rounded-full border border-[var(--v4-hairline-3)] text-[var(--v4-ink)]" aria-label={t('share')}>
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
           </a>
         </div>

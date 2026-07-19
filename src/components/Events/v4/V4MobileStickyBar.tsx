@@ -10,6 +10,7 @@
  * navigating to /saved.
  */
 
+import { useTranslations } from 'next-intl';
 import type { V4EventState } from '@/lib/v4/derive-event-state';
 import { V4Badge } from './V4Badge';
 import { V4SaveButton } from './V4SaveButton';
@@ -27,6 +28,7 @@ interface V4MobileStickyBarProps {
 }
 
 export function V4MobileStickyBar({ state, eventId, provider, priceFrom, ticketUrl, priceAtDoor, onPlanClick }: V4MobileStickyBarProps) {
+  const t = useTranslations('EventDetail');
   return (
     <div
       data-v4-event-sticky={state}
@@ -37,7 +39,7 @@ export function V4MobileStickyBar({ state, eventId, provider, priceFrom, ticketU
         provider && priceFrom && ticketUrl ? (
           <>
             <div className="flex flex-col">
-              <span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[var(--v4-ink-50)]">ab</span>
+              <span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[var(--v4-ink-50)]">{t('from')}</span>
               <span className="text-[17px] font-bold tracking-[-0.015em] text-[var(--v4-ink)]">{priceFrom.replace(/^ab\s*/i,'')}</span>
             </div>
             <div className="flex-1"/>
@@ -48,61 +50,61 @@ export function V4MobileStickyBar({ state, eventId, provider, priceFrom, ticketU
               data-track="ticket_click_mobile"
               className="press-haptic inline-flex items-center gap-2 px-5 py-3 rounded-full bg-[var(--v4-ticket)] text-[#1a1208] text-sm font-semibold"
             >
-              Zu {provider}
+              {t('toProvider', { provider })}
             </a>
           </>
         ) : (
           <>
-            <V4Badge kind="unknown">Kein Ticket bekannt</V4Badge>
+            <V4Badge kind="unknown">{t('badgeNoTicket')}</V4Badge>
             <div className="flex-1"/>
             {eventId
               ? <V4SaveButton eventId={eventId}/>
-              : <a href="/saved" className="press-haptic px-5 py-3 rounded-full border border-[var(--v4-hairline-3)] text-sm font-semibold text-[var(--v4-ink)]">Merken</a>}
+              : <a href="/saved" className="press-haptic px-5 py-3 rounded-full border border-[var(--v4-hairline-3)] text-sm font-semibold text-[var(--v4-ink)]">{t('save')}</a>}
           </>
         )
       ) : state === 'free' ? (
         <>
-          <V4Badge kind="free">Eintritt frei</V4Badge>
+          <V4Badge kind="free">{t('badgeFree')}</V4Badge>
           <div className="flex-1"/>
           {onPlanClick ? (
-            <button type="button" onClick={onPlanClick} data-track="plan_started_mobile" className="press-haptic px-5 py-3 rounded-full bg-[var(--v4-go)] text-[#062417] text-sm font-semibold">Abend planen</button>
+            <button type="button" onClick={onPlanClick} data-track="plan_started_mobile" className="press-haptic px-5 py-3 rounded-full bg-[var(--v4-go)] text-[#062417] text-sm font-semibold">{t('planEvening')}</button>
           ) : (
-            <a href="/saved" data-track="plan_started_mobile" className="press-haptic px-5 py-3 rounded-full bg-[var(--v4-go)] text-[#062417] text-sm font-semibold">Abend planen</a>
+            <a href="/saved" data-track="plan_started_mobile" className="press-haptic px-5 py-3 rounded-full bg-[var(--v4-go)] text-[#062417] text-sm font-semibold">{t('planEvening')}</a>
           )}
         </>
       ) : state === 'doorsale' ? (
         <>
-          <V4Badge kind="doorsale">{priceAtDoor ? `Abendkasse · ${priceAtDoor}` : 'Abendkasse'}</V4Badge>
+          <V4Badge kind="doorsale">{priceAtDoor ? t('badgeDoorsaleWithPrice', { price: priceAtDoor }) : t('badgeDoorsale')}</V4Badge>
           <div className="flex-1"/>
           {onPlanClick ? (
-            <button type="button" onClick={onPlanClick} data-track="plan_started_mobile" className="press-haptic px-5 py-3 rounded-full bg-[var(--v4-ink)] text-[#0a0a0c] text-sm font-semibold">Abend planen</button>
+            <button type="button" onClick={onPlanClick} data-track="plan_started_mobile" className="press-haptic px-5 py-3 rounded-full bg-[var(--v4-ink)] text-[#0a0a0c] text-sm font-semibold">{t('planEvening')}</button>
           ) : (
-            <a href="/saved" data-track="plan_started_mobile" className="press-haptic px-5 py-3 rounded-full bg-[var(--v4-ink)] text-[#0a0a0c] text-sm font-semibold">Abend planen</a>
+            <a href="/saved" data-track="plan_started_mobile" className="press-haptic px-5 py-3 rounded-full bg-[var(--v4-ink)] text-[#0a0a0c] text-sm font-semibold">{t('planEvening')}</a>
           )}
         </>
       ) : state === 'inplan' ? (
         <>
-          <V4Badge kind="inplan">In deinem Plan</V4Badge>
+          <V4Badge kind="inplan">{t('badgeInPlan')}</V4Badge>
           <div className="flex-1"/>
           {onPlanClick ? (
-            <button type="button" onClick={onPlanClick} data-track="plan_opened_mobile" className="press-haptic px-5 py-3 rounded-full bg-[var(--v4-go)] text-[#062417] text-sm font-semibold">Plan öffnen</button>
+            <button type="button" onClick={onPlanClick} data-track="plan_opened_mobile" className="press-haptic px-5 py-3 rounded-full bg-[var(--v4-go)] text-[#062417] text-sm font-semibold">{t('openPlan')}</button>
           ) : (
-            <a href="/saved" data-track="plan_opened_mobile" className="press-haptic px-5 py-3 rounded-full bg-[var(--v4-go)] text-[#062417] text-sm font-semibold">Plan öffnen</a>
+            <a href="/saved" data-track="plan_opened_mobile" className="press-haptic px-5 py-3 rounded-full bg-[var(--v4-go)] text-[#062417] text-sm font-semibold">{t('openPlan')}</a>
           )}
         </>
       ) : state === 'soldout' ? (
         <>
-          <V4Badge kind="soldout">Ausverkauft</V4Badge>
+          <V4Badge kind="soldout">{t('badgeSoldout')}</V4Badge>
           <div className="flex-1"/>
-          <a href="#similar-events" className="press-haptic px-5 py-3 rounded-full border border-[var(--v4-hairline-3)] text-sm font-semibold text-[var(--v4-ink)]">Ähnliche Events</a>
+          <a href="#similar-events" className="press-haptic px-5 py-3 rounded-full border border-[var(--v4-hairline-3)] text-sm font-semibold text-[var(--v4-ink)]">{t('similarEvents')}</a>
         </>
       ) : (
         <>
-          <V4Badge kind="unknown">Kein Ticket bekannt</V4Badge>
+          <V4Badge kind="unknown">{t('badgeNoTicket')}</V4Badge>
           <div className="flex-1"/>
           {eventId
             ? <V4SaveButton eventId={eventId}/>
-            : <a href="/saved" data-track="event_saved_mobile" className="press-haptic px-5 py-3 rounded-full bg-[var(--v4-ink)] text-[#0a0a0c] text-sm font-semibold">Merken</a>}
+            : <a href="/saved" data-track="event_saved_mobile" className="press-haptic px-5 py-3 rounded-full bg-[var(--v4-ink)] text-[#0a0a0c] text-sm font-semibold">{t('save')}</a>}
         </>
       )}
     </div>

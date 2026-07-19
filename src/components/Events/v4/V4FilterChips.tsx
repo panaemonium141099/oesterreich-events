@@ -8,6 +8,8 @@
  * The chip keys are stable strings used in URL params (?chip=tickets,free).
  */
 
+import { useTranslations } from 'next-intl';
+
 export const FILTER_CHIPS = [
   { key: 'tickets',   label: 'Tickets verfügbar' },
   { key: 'free',      label: 'Gratis' },
@@ -22,12 +24,27 @@ export const FILTER_CHIPS = [
 
 export type V4FilterChipKey = typeof FILTER_CHIPS[number]['key'];
 
+/** fn-17: Anzeige-Label pro Chip-Key aus dem Discover-Namespace; die
+ *  `label`-Felder oben bleiben als deutscher Referenzwert/Legacy-Export. */
+const CHIP_MESSAGE_KEYS: Record<V4FilterChipKey, string> = {
+  tickets: 'chipTickets',
+  free: 'chipFree',
+  doorsale: 'chipDoorsale',
+  today: 'chipToday',
+  weekend: 'chipWeekend',
+  concerts: 'chipConcerts',
+  festivals: 'chipFestivals',
+  nearby: 'chipNearby',
+  mine: 'chipMine',
+};
+
 interface V4FilterChipsProps {
   active: Set<string>;
   onToggle: (key: V4FilterChipKey) => void;
 }
 
 export function V4FilterChips({ active, onToggle }: V4FilterChipsProps) {
+  const t = useTranslations('Discover');
   return (
     <div className="flex gap-2 flex-wrap" data-v4-filter-chips>
       {FILTER_CHIPS.map(chip => {
@@ -46,7 +63,7 @@ export function V4FilterChips({ active, onToggle }: V4FilterChipsProps) {
                 : 'text-[var(--v4-ink-70)] border-[var(--v4-hairline-2)] hover:border-[var(--v4-hairline-3)]')
             }
           >
-            {chip.label}
+            {t(CHIP_MESSAGE_KEYS[chip.key])}
           </button>
         );
       })}

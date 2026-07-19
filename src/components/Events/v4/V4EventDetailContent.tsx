@@ -13,6 +13,7 @@
  */
 
 import type { ReactNode } from 'react';
+import { useTranslations } from 'next-intl';
 
 interface V4EventDetailContentProps {
   description: string | null;
@@ -37,6 +38,7 @@ function hostnameOf(url: string): string {
 }
 
 export function V4EventDetailContent({ description, tags, hasSimilar, similarChildren, sourceName, sourceUrl }: V4EventDetailContentProps) {
+  const t = useTranslations('EventDetail');
   const tagList = (tags ?? []).filter(Boolean);
   const sourceLabel = sourceName?.trim() || (sourceUrl ? hostnameOf(sourceUrl) : null);
   const showSource = Boolean(sourceLabel);
@@ -46,7 +48,7 @@ export function V4EventDetailContent({ description, tags, hasSimilar, similarChi
       {description && (
         <section className="mt-7">
           <h3 className="m-0 mb-3 text-[16px] font-bold tracking-[-0.02em] text-[var(--v4-ink)]">
-            Worum geht&apos;s?
+            {t('aboutHeading')}
           </h3>
           <p className="m-0 max-w-[640px] text-[14.5px] leading-[1.6] text-[var(--v4-ink-70)]" style={{ textWrap: 'pretty' }}>
             {description}
@@ -70,7 +72,7 @@ export function V4EventDetailContent({ description, tags, hasSimilar, similarChi
       {showSource && (
         <section className="mt-8 pt-5 border-t border-[var(--v4-hairline-1)]">
           <p className="m-0 text-[12px] text-[var(--v4-ink-50)] leading-[1.5]">
-            Quelle:{' '}
+            {t('sourceLabel')}{' '}
             {sourceUrl ? (
               <a
                 href={sourceUrl}
@@ -95,7 +97,7 @@ export function V4EventDetailContent({ description, tags, hasSimilar, similarChi
       {hasSimilar && (
         <section id="similar-events" className="mt-10">
           <h3 className="m-0 mb-4 text-[16px] font-bold tracking-[-0.02em] text-[var(--v4-ink)]">
-            Ähnliche Events
+            {t('similarEvents')}
           </h3>
           {similarChildren}
         </section>

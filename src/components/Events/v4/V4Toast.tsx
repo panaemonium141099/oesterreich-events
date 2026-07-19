@@ -10,6 +10,7 @@
  */
 
 import { useEffect } from 'react';
+import { useTranslations } from 'next-intl';
 
 export type V4ToastKind = 'match' | 'success' | 'info';
 
@@ -28,6 +29,7 @@ const ACCENT: Record<V4ToastKind, { fg: string; bd: string; bg: string }> = {
 };
 
 export function V4Toast({ kind = 'match', children, duration = 6000, onDismiss }: V4ToastProps) {
+  const t = useTranslations('EventDetail');
   useEffect(() => {
     if (duration === 0 || !onDismiss) return;
     const t = setTimeout(onDismiss, duration);
@@ -54,7 +56,7 @@ export function V4Toast({ kind = 'match', children, duration = 6000, onDismiss }
         <button
           type="button"
           onClick={onDismiss}
-          aria-label="Schließen"
+          aria-label={t('close')}
           className="press-haptic flex-shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-[var(--v4-ink-50)] hover:text-[var(--v4-ink)]"
         >
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>

@@ -32,6 +32,7 @@
  * Events), die Karte bleibt darunter gemountet.
  */
 import { useState, useEffect, useCallback, Suspense } from 'react';
+import { useTranslations } from 'next-intl';
 import { useSearchParams, useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import type { EventFilters } from '@/types/events';
@@ -47,19 +48,27 @@ import { V4MarkerLegend } from '@/components/Map/v4';
 import { useFilteredEvents } from '@/lib/v4/use-filtered-events';
 import { useBoostedIds } from '@/lib/hooks/useBoostedIds';
 
-const EventMap = dynamic(() => import('@/components/Map/EventMap'), {
-  ssr: false,
-  loading: () => (
+/** Eigene Komponente statt Inline-JSX im dynamic()-loading-Slot, damit
+ *  useTranslations greift (Hooks brauchen einen Komponenten-Kontext). */
+function MapLoadingFallback() {
+  const t = useTranslations('MapPage');
+  return (
     <div className="absolute inset-0 flex items-center justify-center" style={{ background: T.panel }}>
       <div className="text-center">
         <div className="animate-spin rounded-full h-10 w-10 border-2 border-neutral-300 border-t-neutral-900 mx-auto mb-3" />
-        <p style={{ color: T.ink60, fontSize: 13, fontWeight: 500 }}>Karte wird geladen…</p>
+        <p style={{ color: T.ink60, fontSize: 13, fontWeight: 500 }}>{t('loadingMap')}</p>
       </div>
     </div>
-  ),
+  );
+}
+
+const EventMap = dynamic(() => import('@/components/Map/EventMap'), {
+  ssr: false,
+  loading: () => <MapLoadingFallback />,
 });
 
 export default function MapPage() {
+  const t = useTranslations('MapPage');
   return (
     <Suspense
       fallback={
@@ -71,7 +80,7 @@ export default function MapPage() {
       {/* SR-only H1 — keeps the SEO check green; visible H1 lives in
           EventListView when list-view is active. */}
       <h1 className="sr-only">
-        Event-Karte Österreich — Konzerte, Festivals, Märkte und Veranstaltungen auf Karte
+        {t('srTitle')}
       </h1>
       <MapPageInner />
     </Suspense>
@@ -79,6 +88,7 @@ export default function MapPage() {
 }
 
 function MapPageInner() {
+  const t = useTranslations('MapPage');
   const router = useRouter();
   const searchParams = useSearchParams();
   const { user, profile, loading: authLoading, profileComplete } = useAuth();
@@ -316,7 +326,7 @@ function MapPageInner() {
                   }
                 }}
                 aria-pressed={filters.atOnly !== false}
-                title="Nur Österreich anzeigen — aus: auch Deutschland & Schweiz"
+                title={t('atOnlyTitle')}
                 style={{
                   position: 'absolute',
                   top: 'calc(env(safe-area-inset-top, 0px) + 12px)',
@@ -361,7 +371,7 @@ function MapPageInner() {
                     }}
                   />
                 </span>
-                nur Österreich
+                {t('atOnly')}
               </button>
 
               {backgroundLoading && (
@@ -395,7 +405,7 @@ function MapPageInner() {
                       boxShadow: '0 0 6px rgba(12,122,71,0.6)',
                     }}
                   />
-                  Lade Events… {allEvents.length.toLocaleString('de-AT')}
+                  {t('loadingEvents')} {allEvents.length.toLocaleString('de-AT')}
                 </div>
               )}
 
@@ -430,7 +440,7 @@ function MapPageInner() {
                       boxShadow: '0 0 6px rgba(12,122,71,0.6)',
                     }}
                   />
-                  {(totalMatchCount ?? finalEvents.length).toLocaleString('de-AT')} Events
+                  {t('eventsCount', { count: (totalMatchCount ?? finalEvents.length).toLocaleString('de-AT') })}
                   {scopeLabel ? ` · ${scopeLabel}` : ''}
                 </div>
               )}

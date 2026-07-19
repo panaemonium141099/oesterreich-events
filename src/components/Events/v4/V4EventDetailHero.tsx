@@ -18,6 +18,7 @@
  */
 
 import Image from 'next/image';
+import { useLocale } from 'next-intl';
 import { V4BackButton } from './V4BackButton';
 import { V4HeroSlideshow } from './V4HeroSlideshow';
 
@@ -31,15 +32,16 @@ interface V4EventDetailHeroProps {
   images?: string[] | null;
 }
 
-function formatDate(iso: string): string {
+function formatDate(iso: string, fmt: string): string {
   const d = new Date(iso);
-  const date = d.toLocaleDateString('de-AT', { weekday: 'long', day: 'numeric', month: 'long' });
-  const time = d.toLocaleTimeString('de-AT', { hour: '2-digit', minute: '2-digit' });
+  const date = d.toLocaleDateString(fmt, { weekday: 'long', day: 'numeric', month: 'long' });
+  const time = d.toLocaleTimeString(fmt, { hour: '2-digit', minute: '2-digit' });
   return `${date} · ${time}`;
 }
 
 export function V4EventDetailHero({ title, startDate, locationName, city, imageUrl, images }: V4EventDetailHeroProps) {
-  const dateLabel = formatDate(startDate);
+  const locale = useLocale();
+  const dateLabel = formatDate(startDate, locale === 'de' ? 'de-AT' : 'en-GB');
   const placeLabel = [locationName, city].filter(Boolean).join(' · ');
   const slides = (images ?? []).filter(
     (s): s is string => typeof s === 'string' && s.trim().length > 0,

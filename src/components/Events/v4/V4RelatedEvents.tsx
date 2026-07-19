@@ -13,9 +13,11 @@
  * Sektion — ein unpräfixter Datums-Scan wäre auf der Instanz zu teuer.
  */
 
-import Link from 'next/link';
+import { getLocale, getTranslations } from 'next-intl/server';
+import { Link } from '@/i18n/navigation';
 import { createClient } from '@supabase/supabase-js';
 import { buildEventUrlV2 } from '@/lib/utils/slugify';
+import { categoryLabel } from '@/lib/i18n/category-labels';
 import { ALL_GEMEINDEN } from '@/lib/gemeinden/data';
 import { BUNDESLAND_NAMES, type BundeslandId } from '@/lib/districtsAT';
 import { getBundeslandFromPLZ } from '@/lib/plzCoordinates';
@@ -77,10 +79,10 @@ function gradientFor(cat?: string | null): [string, string] {
   return (cat && CAT_GRADIENT[cat]) || ['#475569', '#1e293b'];
 }
 
-function formatDate(iso: string): string {
+function formatDate(iso: string, fmt: string): string {
   const d = new Date(iso);
-  const date = d.toLocaleDateString('de-AT', { weekday: 'short', day: 'numeric', month: 'short' });
-  const time = d.toLocaleTimeString('de-AT', { hour: '2-digit', minute: '2-digit' });
+  const date = d.toLocaleDateString(fmt, { weekday: 'short', day: 'numeric', month: 'short' });
+  const time = d.toLocaleTimeString(fmt, { hour: '2-digit', minute: '2-digit' });
   return time === '00:00' ? date : `${date} · ${time}`;
 }
 
@@ -229,7 +231,13 @@ export function hubLinksFor(
 }
 
 export async function V4RelatedEvents({ event }: { event: Event }) {
-  const related = await fetchRelated(event);
+  const [related, t, tCat, locale] = await Promise.all([
+    fetchRelated(event),
+    getTranslations('EventDetail'),
+    getTranslations('Categories'),
+    getLocale(),
+  ]);
+  const dateFmt = locale === 'de' ? 'de-AT' : 'en-GB';
   const hubs = hubLinksFor(event);
   const bl = effectiveBundesland(event);
   if (related.length === 0 && hubs.length === 0) return null;
@@ -245,12 +253,12 @@ export async function V4RelatedEvents({ event }: { event: Event }) {
         {related.length > 0 && (
           <>
             <p className="text-[10.5px] font-semibold uppercase tracking-[0.22em] text-[var(--v4-ink-50)] mb-2">
-              Das könnte dich auch interessieren
+              {t('relatedEyebrow')}
             </p>
             <h2 className="text-[22px] md:text-[26px] font-bold leading-tight tracking-[-0.025em] mb-6">
-              Ähnliche Events{bl && bl in BUNDESLAND_NAMES
-                ? ` in ${BUNDESLAND_NAMES[bl as BundeslandId]}`
-                : ''}
+              {bl && bl in BUNDESLAND_NAMES
+                ? t('relatedHeadingIn', { region: BUNDESLAND_NAMES[bl as BundeslandId] })
+                : t('relatedHeading')}
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
               {related.map(ev => {
@@ -270,13 +278,13 @@ export async function V4RelatedEvents({ event }: { event: Event }) {
                         <img src={ev.image_url} alt="" className="absolute inset-0 w-full h-full object-cover" loading="lazy"/>
                       ) : (
                         <span className="absolute inset-0 flex items-center justify-center text-[11px] uppercase tracking-[0.12em] font-bold text-white/90 text-center px-3 leading-tight">
-                          {ev.category || 'Event'}
+                          {ev.category ? categoryLabel(tCat, ev.category) : t('eventFallback')}
                         </span>
                       )}
                     </div>
                     <div className="p-4 flex flex-col gap-1.5">
                       <p className="text-[10.5px] uppercase tracking-[0.18em] font-semibold text-[var(--v4-ink-50)]">
-                        {formatDate(ev.start_date)}
+                        {formatDate(ev.start_date, dateFmt)}
                       </p>
                       <h3 className="text-[15px] font-semibold leading-tight line-clamp-2">{ev.title}</h3>
                       {ev.location_name && (
@@ -293,7 +301,7 @@ export async function V4RelatedEvents({ event }: { event: Event }) {
         {hubs.length > 0 && (
           <div className="flex flex-wrap items-center gap-2.5 pt-2 border-t border-[var(--v4-hairline-1)] mt-2">
             <span className="text-[11px] uppercase tracking-[0.18em] font-semibold text-[var(--v4-ink-50)] mr-1 pt-4">
-              Mehr entdecken:
+              {t('moreDiscover')}
             </span>
             {hubs.map(h => (
               <Link
@@ -301,7 +309,10 @@ export async function V4RelatedEvents({ event }: { event: Event }) {
                 href={h.href}
                 className="press-haptic mt-4 inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full border border-[var(--v4-hairline-3)] text-[12.5px] font-semibold text-[var(--v4-ink)] hover:bg-[var(--v4-surface-elevated)] transition-colors"
               >
-                {h.label}
+                {/* hubLinksFor liefert deutsche "Events in X"-Labels (auch fürs
+                    Breadcrumb-JSON-LD der Detailseite) — hier nur die ANZEIGE
+                    über die Message ziehen, Ortsname bleibt der Datenwert. */}
+                {t('eventsIn', { name: h.label.replace(/^Events in /, '') })}
                 <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
               </Link>
             ))}
@@ -309,7 +320,7 @@ export async function V4RelatedEvents({ event }: { event: Event }) {
               href="/entdecken"
               className="press-haptic mt-4 inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full border border-[var(--v4-hairline-3)] text-[12.5px] font-semibold text-[var(--v4-ink)] hover:bg-[var(--v4-surface-elevated)] transition-colors"
             >
-              Alle Events
+              {t('allEvents')}
               <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
             </Link>
           </div>

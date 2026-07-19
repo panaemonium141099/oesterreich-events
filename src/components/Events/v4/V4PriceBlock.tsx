@@ -13,6 +13,8 @@
  * number and no preceding word.
  */
 
+import { useTranslations } from 'next-intl';
+
 interface PriceItem {
   label: string;
   value: string;
@@ -42,7 +44,7 @@ const PRICE_RE = new RegExp(
   'iu',
 );
 
-function parsePriceText(raw: string): PriceItem[] {
+function parsePriceText(raw: string, defaultLabel: string): PriceItem[] {
   const t = raw.trim();
   if (!t || FREE_RE.test(t)) return [];
 
@@ -54,7 +56,7 @@ function parsePriceText(raw: string): PriceItem[] {
   for (const chunk of chunks) {
     const range = chunk.match(RANGE_RE);
     if (range) {
-      const label = (range[1] || '').replace(/[:\-–]\s*$/, '').trim() || 'Eintritt';
+      const label = (range[1] || '').replace(/[:\-–]\s*$/, '').trim() || defaultLabel;
       items.push({ label, value: `€ ${range[2]} – € ${range[3]}` });
       continue;
     }
@@ -62,7 +64,7 @@ function parsePriceText(raw: string): PriceItem[] {
     const m = chunk.match(PRICE_RE);
     if (m) {
       const num = m[2] ?? m[3];
-      const label = (m[1] || '').replace(/[:\-–]\s*$/, '').trim() || 'Eintritt';
+      const label = (m[1] || '').replace(/[:\-–]\s*$/, '').trim() || defaultLabel;
       items.push({ label, value: `€ ${num}` });
     } else {
       // Unparseable chunk (e.g. "Auf Anfrage") — show raw as the value.
@@ -73,15 +75,16 @@ function parsePriceText(raw: string): PriceItem[] {
 }
 
 export function V4PriceBlock({ priceText, priceMin, priceMax, priceTier }: V4PriceBlockProps) {
+  const t = useTranslations('EventDetail');
   if (priceTier === 'gratis') return null;
 
-  let items: PriceItem[] = priceText ? parsePriceText(priceText) : [];
+  let items: PriceItem[] = priceText ? parsePriceText(priceText, t('admission')) : [];
 
   if (items.length === 0 && priceMin != null) {
     if (priceMax != null && priceMax > priceMin) {
-      items = [{ label: 'Eintritt', value: `€ ${priceMin} – € ${priceMax}` }];
+      items = [{ label: t('admission'), value: `€ ${priceMin} – € ${priceMax}` }];
     } else {
-      items = [{ label: 'ab', value: `€ ${priceMin}` }];
+      items = [{ label: t('from'), value: `€ ${priceMin}` }];
     }
   }
 
@@ -90,7 +93,7 @@ export function V4PriceBlock({ priceText, priceMin, priceMax, priceTier }: V4Pri
   return (
     <div className="mt-3 rounded-[10px] px-3.5 py-2.5 border border-[var(--v4-hairline-2)] bg-[var(--v4-surface)]">
       <div className="text-[11px] uppercase tracking-[0.16em] font-semibold text-[var(--v4-ink-50)] mb-1.5">
-        Preis
+        {t('priceHeading')}
       </div>
       <div className="flex flex-col gap-1">
         {items.map((item, i) => (
