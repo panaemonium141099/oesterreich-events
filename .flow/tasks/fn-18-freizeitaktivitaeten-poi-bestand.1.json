@@ -1,0 +1,14 @@
+{
+  "assignee": null,
+  "claim_note": "",
+  "claimed_at": null,
+  "created_at": "2026-07-19T19:37:52.429570Z",
+  "depends_on": [],
+  "epic": "fn-18-freizeitaktivitaeten-poi-bestand",
+  "id": "fn-18-freizeitaktivitaeten-poi-bestand.1",
+  "priority": null,
+  "spec_path": ".flow/tasks/fn-18-freizeitaktivitaeten-poi-bestand.1.md",
+  "status": "todo",
+  "title": "Fundament: poi_activities-Migration + Activity-Lib (Mapping/Slug/Gemeinde/Preis)",
+  "updated_at": "2026-07-19T19:37:56.582732Z"
+}

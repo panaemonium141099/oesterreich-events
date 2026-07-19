@@ -6,6 +6,10 @@ export interface Event {
   source_url: string | null;
   title: string;
   description: string | null;
+  /** fn-17 Slice 3: gecachte EN-Übersetzung (Lazy via Gemini beim ersten /en-View) */
+  title_en?: string | null;
+  description_en?: string | null;
+  translated_at?: string | null;
   start_date: string;
   end_date: string | null;
   is_all_day?: boolean;
