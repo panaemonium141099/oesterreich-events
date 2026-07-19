@@ -15,7 +15,8 @@
  */
 
 import { useEffect, useState, useCallback } from 'react';
-import Link from 'next/link';
+import { useTranslations } from 'next-intl';
+import { Link } from '@/i18n/navigation';
 import { BUNDESLAND_HUBS, type BundeslandHubEntry } from '@/lib/hubs/bundesland-regions';
 import { buildEntdeckenHref } from '@/lib/hubs/hub-links';
 import { blImg } from '@/lib/hubs/region-slug';
@@ -60,18 +61,19 @@ const LAYERS = 'M12 3 3 8l9 5 9-5-9-5Z M3 13l9 5 9-5';
 
 // ── tile ────────────────────────────────────────────────────────────────────
 function BLTile({
-  bl, feature, onPick,
+  bl, feature, onPick, t,
 }: {
   bl: BundeslandHubEntry;
   feature?: boolean;
   onPick: (bl: BundeslandHubEntry) => void;
+  t: ReturnType<typeof useTranslations<'Landing.RegionHubs'>>;
 }) {
   const count = bezirke(bl.id).length;
   return (
     <button
       type="button"
       onClick={() => onPick(bl)}
-      aria-label={`${bl.name} — Bezirk wählen oder alle Events`}
+      aria-label={t('tileAria', { name: bl.name })}
       className={`group relative block h-full w-full overflow-hidden text-left transition-colors ${feature ? 'col-span-2 md:row-span-2' : ''}`}
       style={{
         border: `1px solid ${HL2}`,
@@ -99,7 +101,7 @@ function BLTile({
           border: `1px solid ${HL3}`, color: INK, fontSize: 11.5, fontWeight: 600,
         }}>
         <span style={{ color: TICKET }}><Ic d={PIN} size={11} /></span>
-        {count} Bezirke
+        {t('districtCount', { count })}
       </span>
 
       {/* name block */}
@@ -110,9 +112,9 @@ function BLTile({
         }}>{bl.name}</div>
         <div className="flex items-center gap-1.5"
           style={{ marginTop: feature ? 6 : 4, fontSize: feature ? 12.5 : 11.5, fontWeight: 600, color: 'rgba(255,255,255,0.82)' }}>
-          <span>{count} Bezirke</span>
+          <span>{t('districtCount', { count })}</span>
           <span style={{ opacity: 0.5 }}>·</span>
-          <span style={{ color: TICKET }}>Auswählen</span>
+          <span style={{ color: TICKET }}>{t('choose')}</span>
           <span className="transition-transform group-hover:translate-x-0.5"><Ic d={ARROW_R} size={12} sw={2.4} /></span>
         </div>
       </div>
@@ -122,10 +124,11 @@ function BLTile({
 
 // ── hybrid sheet ─────────────────────────────────────────────────────────────
 function BundeslandSheet({
-  bl, onClose,
+  bl, onClose, t,
 }: {
   bl: BundeslandHubEntry;
   onClose: () => void;
+  t: ReturnType<typeof useTranslations<'Landing.RegionHubs'>>;
 }) {
   const districts = bezirke(bl.id);
   return (
@@ -136,7 +139,7 @@ function BundeslandSheet({
         background: 'rgba(5,5,6,0.74)', backdropFilter: 'blur(6px)',
         alignItems: 'center', padding: 24,
       }}
-      role="dialog" aria-modal="true" aria-label={`${bl.name} — Events`}
+      role="dialog" aria-modal="true" aria-label={t('sheetAria', { name: bl.name })}
     >
       <div
         onClick={(e) => e.stopPropagation()}
@@ -155,7 +158,7 @@ function BundeslandSheet({
           <div className="absolute inset-0" style={{
             background: 'linear-gradient(to top, rgba(20,20,22,0.98) 0%, rgba(20,20,22,0.45) 55%, rgba(20,20,22,0.2) 100%)',
           }} />
-          <button type="button" onClick={onClose} aria-label="Schließen"
+          <button type="button" onClick={onClose} aria-label={t('close')}
             className="absolute flex items-center justify-center"
             style={{
               top: 12, right: 12, width: 32, height: 32, borderRadius: 9999,
@@ -166,7 +169,7 @@ function BundeslandSheet({
           </button>
           <div className="absolute" style={{ left: 22, bottom: 14 }}>
             <div style={{ fontSize: 10.5, color: 'rgba(255,255,255,0.7)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.2em', marginBottom: 6 }}>
-              Bundesland
+              {t('bundesland')}
             </div>
             <div style={{ fontSize: 30, fontWeight: 700, letterSpacing: '-0.03em', color: '#fff', lineHeight: 1 }}>
               {bl.name}
@@ -184,19 +187,19 @@ function BundeslandSheet({
               padding: '13px 16px', borderRadius: 12, background: TICKET,
               color: '#0a0a0c', fontSize: 14, fontWeight: 700, letterSpacing: '-0.01em',
             }}>
-            Alle Events in {bl.name} ansehen
+            {t('allEventsIn', { name: bl.name })}
             <Ic d={ARROW_R} size={14} sw={2.5} />
           </Link>
           <div className="flex items-center gap-1.5" style={{ fontSize: 11.5, color: INK50, marginTop: 8, paddingLeft: 2 }}>
             <Ic d={LAYERS} size={12} sw={1.9} />
-            Öffnet die Entdecken-Liste, gefiltert auf {bl.name}.
+            {t('opensFiltered', { name: bl.name })}
           </div>
 
           {/* divider */}
           <div className="flex items-center gap-3" style={{ margin: '20px 0 14px' }}>
             <div style={{ flex: 1, height: 1, background: HL2 }} />
             <span style={{ fontSize: 10.5, color: INK50, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.18em', whiteSpace: 'nowrap' }}>
-              oder nach Bezirk eingrenzen
+              {t('orDistrict')}
             </span>
             <div style={{ flex: 1, height: 1, background: HL2 }} />
           </div>
@@ -233,6 +236,7 @@ function BundeslandSheet({
 
 // ── section ──────────────────────────────────────────────────────────────────
 export function RegionHubsSection() {
+  const t = useTranslations('Landing.RegionHubs');
   const [picked, setPicked] = useState<BundeslandHubEntry | null>(null);
 
   // Esc closes the sheet; lock body scroll while open.
@@ -250,36 +254,36 @@ export function RegionHubsSection() {
   const rest = BUNDESLAND_HUBS.filter((b) => !b.feature);
 
   return (
-    <section className="max-w-[1180px] mx-auto px-4 md:px-14 py-6 md:py-10" aria-label="Events nach Bundesland">
+    <section className="max-w-[1180px] mx-auto px-4 md:px-14 py-6 md:py-10" aria-label={t('sectionAria')}>
       <div className="mb-1">
         <p className="text-[10.5px] font-semibold uppercase tracking-[0.22em] text-[var(--v4-ink-50)] mb-2">
-          Nach Bezirk · ganz Österreich
+          {t('eyebrow')}
         </p>
         <h2 className="text-[26px] font-bold leading-tight tracking-[-0.025em] text-[var(--v4-ink)]">
-          Events in deinem Bundesland
+          {t('title')}
         </h2>
         <p className="text-[14.5px] leading-[1.55] text-[var(--v4-ink-70)] mt-2 mb-[18px] max-w-[600px]">
-          Wähle dein Bundesland — dann zeigen wir dir{' '}
-          <b className="font-semibold text-[var(--v4-ink)]">alle Events</b> dort, oder du grenzt direkt auf einen{' '}
-          <b className="font-semibold text-[var(--v4-ink)]">Bezirk</b> ein.
+          {t.rich('intro', {
+            b: chunks => <b className="font-semibold text-[var(--v4-ink)]">{chunks}</b>,
+          })}
         </p>
       </div>
 
       <div className="grid grid-cols-2 gap-3 auto-rows-[138px] md:grid-cols-4 md:auto-rows-[152px]">
-        {feature && <BLTile bl={feature} feature onPick={setPicked} />}
+        {feature && <BLTile bl={feature} feature onPick={setPicked} t={t} />}
         {rest.map((bl) => (
-          <BLTile key={bl.id} bl={bl} onPick={setPicked} />
+          <BLTile key={bl.id} bl={bl} onPick={setPicked} t={t} />
         ))}
       </div>
 
       <p style={{ fontSize: 11, color: INK50, marginTop: 14, lineHeight: 1.5 }}>
-        Bundesland-Bilder: Wikimedia Commons · CC BY/BY-SA ·{' '}
+        {t('credit')}{' '}
         <Link href="/bildnachweis" style={{ color: INK70, textDecoration: 'underline' }}>
-          Bildnachweis
+          {t('creditLink')}
         </Link>
       </p>
 
-      {picked && <BundeslandSheet bl={picked} onClose={close} />}
+      {picked && <BundeslandSheet bl={picked} onClose={close} t={t} />}
     </section>
   );
 }

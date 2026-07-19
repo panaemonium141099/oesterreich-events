@@ -1,0 +1,14 @@
+{
+  "assignee": null,
+  "claim_note": "",
+  "claimed_at": null,
+  "created_at": "2026-07-18T19:49:02.903956Z",
+  "depends_on": [],
+  "epic": "fn-17-i18n-englische-version-unter-en-next",
+  "id": "fn-17-i18n-englische-version-unter-en-next.1",
+  "priority": 1,
+  "spec_path": ".flow/tasks/fn-17-i18n-englische-version-unter-en-next.1.md",
+  "status": "todo",
+  "title": "Slice 1: i18n-Foundation \u2014 next-intl, [locale], Chrome, hreflang, Sitemap (PR #76)",
+  "updated_at": "2026-07-18T19:49:02.903971Z"
+}

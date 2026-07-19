@@ -31,6 +31,141 @@
     "description": "Die gesuchte Seite existiert nicht oder wurde verschoben.",
     "backHome": "Zur Startseite"
   },
+  "Landing": {
+    "devNotice": "Diese Seite ist noch in Entwicklung — technische Fehler sind möglich. Feedback bitte an",
+    "Hero": {
+      "badge": "Events in Österreich",
+      "title": "Finde Events, die wirklich zu dir passen.",
+      "subtitle": "Folge deinen Lieblingskünstlern, finde Konzerte, Festivals und alles dazwischen — mit Ticket, an der Abendkasse oder einfach hingehen. Plane den Abend an einem Ort.",
+      "ctaArtists": "Künstler suchen",
+      "ctaToday": "Heute & Wochenende",
+      "trendLabel": "Trend:",
+      "funnel1Title": "Lieblingskünstler folgen",
+      "funnel1Sub": "Such und folge deine Lieblingskünstler. Wir sagen Bescheid, wenn sie in Österreich spielen.",
+      "funnel1Cta": "Künstler suchen",
+      "funnel2Title": "Events entdecken",
+      "funnel2Sub": "Konzerte, Festivals, Heurige, Märkte — alles, was gerade in Österreich läuft.",
+      "funnel2Cta": "Was läuft heute?",
+      "funnel3Title": "Abend planen",
+      "funnel3Sub": "Ticketlink, Anreise, Reminder — in deiner Tasche, für jedes Event.",
+      "funnel3Cta": "Plan ausprobieren"
+    },
+    "ArtistTeaser": {
+      "badge": "Lieblingskünstler · nur eingeloggt",
+      "title": "Verpasse keinen Auftritt deiner Lieblingskünstler.",
+      "text": "Such einen Künstler, folge ihm und wir zeigen dir Konzerte und Festival-Slots in Österreich.",
+      "cta": "Zu deinen Lieblingskünstlern",
+      "note": "Öffnet die Künstler-Seite. Folgen erfordert eine Anmeldung.",
+      "popular": "Beliebt in Österreich"
+    },
+    "Weekend": {
+      "title": "Heute & Wochenende",
+      "viewAll": "Alle Events ansehen",
+      "empty": "Aktuell keine Events im 7-Tage-Fenster."
+    },
+    "Concerts": {
+      "eyebrow": "Live in Österreich",
+      "title": "Konzerte diese Woche",
+      "viewAll": "Alle Konzerte"
+    },
+    "Festivals": {
+      "eyebrow": "Sommer · Line-ups verfügbar",
+      "title": "Festivals mit Line-up",
+      "viewAll": "Alle Festivals"
+    },
+    "MapPreview": {
+      "eyebrow": "Karte",
+      "title": "Events in deiner Nähe",
+      "open": "Karte öffnen",
+      "alt": "Karte von Österreich mit Event-Markern in Wien, Eisenstadt, Salzburg, Linz, Graz und Innsbruck",
+      "loading": "Karte wird geladen …",
+      "legendTickets": "Tickets verfügbar",
+      "legendLineup": "Künstler im Line-up",
+      "legendPlan": "In deinem Plan"
+    },
+    "HowItWorks": {
+      "eyebrow": "So geht's",
+      "title": "In drei Schritten unterwegs",
+      "step1Title": "Künstler folgen",
+      "step1Text": "Such und folge deine Lieblingskünstler. Wir scannen Konzerte und Festival-Slots in Österreich.",
+      "step2Title": "Tickets sichern",
+      "step2Text": "Wenn ein Auftritt auftaucht, springst du direkt zum offiziellen Ticketshop. Kauf erfolgt beim Anbieter.",
+      "step3Title": "Abend planen",
+      "step3Text": "Speichere Ticketstatus, Anreise und Reminder in deinem Plan. Drei Pings reichen meistens."
+    },
+    "Newsletter": {
+      "eyebrow": "Jede Woche · kostenlos · jederzeit abbestellbar",
+      "title": "Die besten Events deiner Region — freitags im Postfach",
+      "text": "Kein Account nötig. Wir schicken dir einmal pro Woche eine handverlesene Auswahl fürs Wochenende — und sonst nichts.",
+      "emailPlaceholder": "deine@email.at",
+      "regionAria": "Region wählen",
+      "regionAll": "Ganz Österreich",
+      "submit": "Anmelden",
+      "submitting": "Einen Moment …",
+      "doneFallback": "Bitte bestätige die Anmeldung in deinem Postfach.",
+      "errorFallback": "Anmeldung fehlgeschlagen — bitte später erneut versuchen.",
+      "networkError": "Netzwerkfehler — bitte erneut versuchen.",
+      "privacyNote": "Double-Opt-in: Die Anmeldung wird erst nach Bestätigung per E-Mail aktiv. Abmeldung jederzeit mit einem Klick in jeder Mail. Details in der",
+      "privacyLink": "Datenschutzerklärung"
+    },
+    "RegionHubs": {
+      "eyebrow": "Nach Bezirk · ganz Österreich",
+      "title": "Events in deinem Bundesland",
+      "intro": "Wähle dein Bundesland — dann zeigen wir dir <b>alle Events</b> dort, oder du grenzt direkt auf einen <b>Bezirk</b> ein.",
+      "sectionAria": "Events nach Bundesland",
+      "tileAria": "{name} — Bezirk wählen oder alle Events",
+      "districtCount": "{count} Bezirke",
+      "credit": "Bundesland-Bilder: Wikimedia Commons · CC BY/BY-SA ·",
+      "creditLink": "Bildnachweis",
+      "sheetAria": "{name} — Events",
+      "close": "Schließen",
+      "bundesland": "Bundesland",
+      "allEventsIn": "Alle Events in {name} ansehen",
+      "opensFiltered": "Öffnet die Entdecken-Liste, gefiltert auf {name}.",
+      "orDistrict": "oder nach Bezirk eingrenzen",
+      "choose": "Auswählen"
+    },
+    "Matches": {
+      "eyebrow": "Deine Lieblingskünstler · spielen demnächst",
+      "title": "Auftritte deiner Lieblingskünstler",
+      "viewAll": "Alle Auftritte",
+      "empty": "Noch keine Auftritte gefunden — folge weiteren Künstlern.",
+      "searchArtists": "Künstler suchen"
+    },
+    "AnonTeaser": {
+      "eyebrow": "Personalisierung · meld dich an",
+      "title": "Wer sind deine Lieblingskünstler?",
+      "text": "Folge Künstler — wir benachrichtigen dich bei Österreich-Terminen.",
+      "sub": "Konzerte, Open Airs, Festival-Slots. Du brauchst nicht ständig nachschauen.",
+      "cta": "Künstler suchen"
+    }
+  },
+  "Onboarding": {
+    "slide1Title": "Entdecke",
+    "slide1Text": "Tausende Events in ganz Osterreich",
+    "slide2Title": "Merke",
+    "slide2Text": "Speichere deine Favoriten",
+    "slide3Title": "Triff dich",
+    "slide3Text": "Plane mit Freunden",
+    "skip": "Uberspringen",
+    "next": "Weiter",
+    "start": "Los geht's"
+  },
+  "Footer": {
+    "rights": "Alle Rechte vorbehalten.",
+    "about": "Über uns",
+    "blog": "Blog",
+    "forCompanies": "Für Firmen",
+    "imprint": "Impressum",
+    "privacy": "Datenschutz",
+    "terms": "AGB",
+    "sources": "Datenquellen",
+    "contact": "Kontakt",
+    "attrEvents": "Veranstaltungsdaten",
+    "attrVenues": "Venues",
+    "attrMap": "Karte",
+    "allSources": "Alle Quellen"
+  },
   "MetaMap": {
     "title": "Event-Karte Österreich — Alle Veranstaltungen auf einer Karte",
     "description": "Interaktive Karte mit über 40.000 Events in Österreich. Finde Konzerte, Festivals, Märkte, Sport und Kultur in deiner Nähe — filterbar nach Kategorie, Region und Datum.",

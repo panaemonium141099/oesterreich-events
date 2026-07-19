@@ -1,4 +1,5 @@
-import Link from 'next/link';
+import { useTranslations } from 'next-intl';
+import { Link } from '@/i18n/navigation';
 
 /**
  * MapPreview — server-rendered preview of the real /map experience.
@@ -48,6 +49,7 @@ function buildMapboxUrl(): string {
 }
 
 export function MapPreview() {
+  const t = useTranslations('Landing.MapPreview');
   const mapUrl = buildMapboxUrl();
 
   return (
@@ -55,17 +57,17 @@ export function MapPreview() {
       <div className="flex items-end justify-between gap-6 mb-4">
         <div>
           <p className="text-[10.5px] font-semibold uppercase tracking-[0.22em] text-[var(--v4-ink-50)] mb-2">
-            Karte
+            {t('eyebrow')}
           </p>
           <h2 className="text-[26px] font-bold leading-tight tracking-[-0.025em] text-[var(--v4-ink)]">
-            Events in deiner Nähe
+            {t('title')}
           </h2>
         </div>
         <Link
           href="/map"
           className="hidden md:inline-flex items-center gap-1.5 text-[13px] font-semibold text-[var(--v4-ink-70)]"
         >
-          Karte öffnen
+          {t('open')}
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
         </Link>
       </div>
@@ -73,19 +75,19 @@ export function MapPreview() {
       <Link
         href="/map"
         className="press-haptic relative block h-[220px] md:h-[320px] rounded-[18px] overflow-hidden border border-[var(--v4-hairline-1)] bg-[var(--v4-surface-elevated)]"
-        aria-label="Karte öffnen"
+        aria-label={t('open')}
       >
         {mapUrl ? (
           /* eslint-disable-next-line @next/next/no-img-element */
           <img
             src={mapUrl}
-            alt="Karte von Österreich mit Event-Markern in Wien, Eisenstadt, Salzburg, Linz, Graz und Innsbruck"
+            alt={t('alt')}
             loading="lazy"
             className="absolute inset-0 w-full h-full object-cover"
           />
         ) : (
           <div aria-hidden="true" className="absolute inset-0 flex items-center justify-center text-[var(--v4-ink-50)] text-sm">
-            Karte wird geladen …
+            {t('loading')}
           </div>
         )}
 
@@ -95,15 +97,15 @@ export function MapPreview() {
         <div className="absolute bottom-4 left-4 flex gap-3.5 flex-wrap px-3.5 py-2.5 rounded-xl bg-[rgba(10,10,12,0.85)] backdrop-blur border border-[var(--v4-hairline-2)] text-[11px] text-[var(--v4-ink-70)]">
           <span className="inline-flex items-center gap-1.5">
             <span className="w-2 h-2 rounded-full" style={{ background: 'var(--v4-ticket)' }} aria-hidden="true"/>
-            Tickets verfügbar
+            {t('legendTickets')}
           </span>
           <span className="inline-flex items-center gap-1.5">
             <span className="w-2 h-2 rounded-full" style={{ background: 'var(--v4-match)' }} aria-hidden="true"/>
-            Künstler im Line-up
+            {t('legendLineup')}
           </span>
           <span className="inline-flex items-center gap-1.5">
             <span className="w-2 h-2 rounded-full" style={{ background: 'var(--v4-go)' }} aria-hidden="true"/>
-            In deinem Plan
+            {t('legendPlan')}
           </span>
         </div>
 
@@ -111,7 +113,7 @@ export function MapPreview() {
           className="press-haptic absolute top-4 right-4 inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[var(--v4-ink)] text-[#0a0a0c] text-[12.5px] font-semibold"
         >
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"/><line x1="9" y1="3" x2="9" y2="18"/><line x1="15" y1="6" x2="15" y2="21"/></svg>
-          Karte öffnen
+          {t('open')}
         </span>
       </Link>
     </section>

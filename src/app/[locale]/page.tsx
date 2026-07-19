@@ -24,15 +24,30 @@ import {
   HowItWorks,
   NewsletterSignup,
 } from '@/components/Landing/v4';
+import { hasLocale } from 'next-intl';
+import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { Onboarding } from '@/components/Landing/Onboarding';
 import { AuthErrorToast } from '@/components/Landing/AuthErrorToast';
 import { Footer } from '@/components/Legal/Footer';
 import { getLandingData } from '@/lib/v4/get-landing-data';
 import { RegionHubsSection } from '@/components/Landing/v4/RegionHubsSection';
+import { routing } from '@/i18n/routing';
 
 export const revalidate = 3600;
 
-export default async function LandingPage() {
+export default async function LandingPage({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  // fn-17: setRequestLocale MUSS vor jeder Übersetzung stehen, sonst kippt
+  // next-intl die Route in dynamisches Rendering und die ISR-Shell ist weg.
+  const { locale: rawLocale } = await params;
+  const locale = hasLocale(routing.locales, rawLocale)
+    ? rawLocale
+    : routing.defaultLocale;
+  setRequestLocale(locale);
+  const t = await getTranslations({ locale, namespace: 'Landing' });
   const data = await getLandingData();
 
   return (
@@ -44,7 +59,7 @@ export default async function LandingPage() {
         role="status"
         className="z-30 mx-auto mt-6 max-w-[95%] md:max-w-2xl rounded-full border border-amber-300/30 bg-amber-500/10 px-4 py-2 text-center text-[12.5px] leading-tight text-amber-100 backdrop-blur-sm"
       >
-        Diese Seite ist noch in Entwicklung — technische Fehler sind möglich. Feedback bitte an{' '}
+        {t('devNotice')}{' '}
         <a
           href="mailto:dev@glatzdev.com?subject=lasstreffen.at%20Feedback"
           className="font-semibold underline decoration-amber-300/60 underline-offset-2 hover:text-amber-50"

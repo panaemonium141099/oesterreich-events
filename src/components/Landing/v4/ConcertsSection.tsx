@@ -1,13 +1,15 @@
 import type { Event } from '@/types/events';
 import type { V4EventState } from '@/lib/v4/derive-event-state';
 import { V4CardV } from '@/components/Events/v4';
-import Link from 'next/link';
+import { useTranslations } from 'next-intl';
+import { Link } from '@/i18n/navigation';
 
 interface ConcertsSectionProps {
   events: Array<Event & { state: V4EventState }>;
 }
 
 export function ConcertsSection({ events }: ConcertsSectionProps) {
+  const t = useTranslations('Landing.Concerts');
   if (events.length === 0) return null;
 
   return (
@@ -15,17 +17,17 @@ export function ConcertsSection({ events }: ConcertsSectionProps) {
       <div className="flex items-end justify-between gap-6 mb-4">
         <div>
           <p className="text-[10.5px] font-semibold uppercase tracking-[0.22em] text-[var(--v4-ink-50)] mb-2">
-            Live in Österreich
+            {t('eyebrow')}
           </p>
           <h2 className="text-[26px] font-bold leading-tight tracking-[-0.025em] text-[var(--v4-ink)]">
-            Konzerte diese Woche
+            {t('title')}
           </h2>
         </div>
         <Link
           href="/entdecken?category=music"
           className="hidden md:inline-flex items-center gap-1.5 text-[13px] font-semibold text-[var(--v4-ink-70)]"
         >
-          Alle Konzerte
+          {t('viewAll')}
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
         </Link>
       </div>

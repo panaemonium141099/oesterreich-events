@@ -1,4 +1,5 @@
-import Link from 'next/link';
+import { useTranslations } from 'next-intl';
+import { Link } from '@/i18n/navigation';
 
 /**
  * Site footer with navigation links and data attribution.
@@ -8,6 +9,7 @@ import Link from 'next/link';
  * See: https://www.openstreetmap.org/copyright
  */
 export function Footer() {
+  const t = useTranslations('Footer');
   return (
     // pb-32 (= 8rem) prevents the fixed SocialNav pill at `bottom-0 mb-4`
     // from overlapping the footer links (Impressum / Datenschutz / AGB /
@@ -30,32 +32,32 @@ export function Footer() {
         {/* Main footer row */}
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="text-xs text-white/30">
-            &copy; {new Date().getFullYear()} LassTreffen.at. Alle Rechte vorbehalten.
+            &copy; {new Date().getFullYear()} LassTreffen.at. {t('rights')}
           </p>
           <nav className="flex items-center gap-6">
             <Link href="/ueber-uns" className="text-xs text-white/30 hover:text-white/60 transition-colors">
-              Über uns
+              {t('about')}
             </Link>
             <Link href="/blog" className="text-xs text-white/30 hover:text-white/60 transition-colors">
-              Blog
+              {t('blog')}
             </Link>
             <Link href="/fuer-firmen" className="text-xs text-white/30 hover:text-white/60 transition-colors">
-              Für Firmen
+              {t('forCompanies')}
             </Link>
             <Link href="/impressum" className="text-xs text-white/30 hover:text-white/60 transition-colors">
-              Impressum
+              {t('imprint')}
             </Link>
             <Link href="/datenschutz" className="text-xs text-white/30 hover:text-white/60 transition-colors">
-              Datenschutz
+              {t('privacy')}
             </Link>
             <Link href="/agb" className="text-xs text-white/30 hover:text-white/60 transition-colors">
-              AGB
+              {t('terms')}
             </Link>
             <Link href="/quellen" className="text-xs text-white/30 hover:text-white/60 transition-colors">
-              Datenquellen
+              {t('sources')}
             </Link>
             <a href="mailto:dev@glatzdev.com" className="text-xs text-white/30 hover:text-white/60 transition-colors">
-              Kontakt
+              {t('contact')}
             </a>
           </nav>
         </div>
@@ -72,12 +74,13 @@ export function Footer() {
  * for third-party data sources used in the platform.
  */
 function DataAttribution() {
+  const t = useTranslations('Footer');
   return (
     <div
       className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-[10px] text-white/20"
       data-testid="data-attribution"
     >
-      <span>Veranstaltungsdaten: Open Data (</span>
+      <span>{t('attrEvents')}: Open Data (</span>
       <a
         href="https://creativecommons.org/licenses/by/4.0/deed.de"
         target="_blank"
@@ -88,7 +91,7 @@ function DataAttribution() {
       </a>
       <span>), Austria Tourism, Wien OGD, Feratel</span>
       <span className="text-white/10">|</span>
-      <span>Venues: &copy;{' '}
+      <span>{t('attrVenues')}: &copy;{' '}
         <a
           href="https://www.openstreetmap.org/copyright"
           target="_blank"
@@ -107,7 +110,7 @@ function DataAttribution() {
         </a>
       </span>
       <span className="text-white/10">|</span>
-      <span>Karte: &copy;{' '}
+      <span>{t('attrMap')}: &copy;{' '}
         <a
           href="https://www.mapbox.com/about/maps/"
           target="_blank"
@@ -122,7 +125,7 @@ function DataAttribution() {
         href="/quellen"
         className="underline hover:text-white/40 transition-colors"
       >
-        Alle Quellen
+        {t('allSources')}
       </Link>
     </div>
   );
