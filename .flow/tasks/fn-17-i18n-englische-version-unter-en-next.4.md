@@ -7,8 +7,7 @@ TBD
 - [ ] TBD
 
 ## Done summary
-TBD
-
+QR-Generator /admin/qr live: Typeahead-Ziele (Bundesland/Bezirk/Gemeinde), DE/EN-Links, utm_source pro Aufsteller, PNG/SVG-Download lokal via qrcode-Package. PR #78 gemerged (78176b1).
 ## Evidence
 - Commits:
 - Tests:

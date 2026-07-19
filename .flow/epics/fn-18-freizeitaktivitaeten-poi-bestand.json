@@ -1,6 +1,11 @@
 {
   "branch_name": "fn-18-freizeitaktivitaeten-poi-bestand",
+  "completion_review_status": "unknown",
+  "completion_reviewed_at": null,
   "created_at": "2026-07-19T19:16:46.313449Z",
+  "default_impl": null,
+  "default_review": null,
+  "default_sync": null,
   "depends_on_epics": [],
   "id": "fn-18-freizeitaktivitaeten-poi-bestand",
   "next_task": 1,
@@ -9,5 +14,5 @@
   "spec_path": ".flow/specs/fn-18-freizeitaktivitaeten-poi-bestand.md",
   "status": "open",
   "title": "Freizeitaktivitaeten: POI-Bestand, Affiliate & Smart-Suche",
-  "updated_at": "2026-07-19T19:18:13.530685Z"
+  "updated_at": "2026-07-19T19:37:51.926571Z"
 }

@@ -17,6 +17,7 @@ import {
   getVenue,
   getLineupForEvent,
 } from '@/lib/events/event-detail-loaders';
+import { getOrTranslateEventEn } from '@/lib/i18n/translate-event';
 
 /**
  * ISR revalidation interval.
@@ -48,9 +49,9 @@ export async function generateStaticParams() {
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ slug: string[] }>;
+  params: Promise<{ locale: string; slug: string[] }>;
 }): Promise<Metadata> {
-  const { slug: slugArr } = await params;
+  const { locale: rawLocale, slug: slugArr } = await params;
 
   // Mirror the page-handler guard: malformed bot URLs return generic
   // metadata so we never feed garbage segments into resolveEvent().
@@ -72,14 +73,33 @@ export async function generateMetadata({
     };
   }
 
-  const description = event.description
-    ? event.description.slice(0, 160)
-    : `${event.title} — ${event.location_name ?? 'Österreich'}`;
+  // ─── fn-17 Slice 3: EN-Metadata NUR aus dem DB-Cache ────────────────
+  // generateMetadata übersetzt bewusst NICHT selbst (kein doppelter
+  // Gemini-Call pro Request) — beim allerersten /en-Aufruf sind die
+  // Meta-Texte noch deutsch; ab dem nächsten ISR-Zyklus (1h) greift der
+  // Cache und Titel/Description/hreflang sind englisch.
+  const isEn = rawLocale === 'en';
+  const enCached = !!event.title_en;
+  const displayTitle = isEn && enCached ? event.title_en! : event.title;
+  const displayDescriptionSource =
+    isEn && enCached ? event.description_en : event.description;
+
+  const description = displayDescriptionSource
+    ? displayDescriptionSource.slice(0, 160)
+    : `${displayTitle} — ${event.location_name ?? (isEn ? 'Austria' : 'Österreich')}`;
 
   // Canonical URL always uses the V2 schema — Google consolidates signals on
   // this form regardless of which URL the client originally requested.
+  // EN: eigene /en-Canonical NUR wenn die Übersetzung existiert; solange
+  // die EN-Seite deutschen Text zeigt, kanonisiert sie auf die DE-URL
+  // (kein Duplicate-Content-Signal auf 45k URLs).
   const canonicalPath = buildEventUrlV2(event);
-  const canonicalUrl = `https://lasstreffen.at${canonicalPath}`;
+  const deUrl = `https://lasstreffen.at${canonicalPath}`;
+  const enUrl = `https://lasstreffen.at/en${canonicalPath}`;
+  const canonicalUrl = isEn && enCached ? enUrl : deUrl;
+  const languageAlternates = enCached
+    ? { 'de-AT': deUrl, en: enUrl, 'x-default': deUrl }
+    : undefined;
   // OG image moved to an API route because Next.js forbids metadata files
   // (like opengraph-image.tsx) inside catch-all route segments. The image
   // is cacheable by the shortId alone — no need to include the full slug.
@@ -88,9 +108,9 @@ export async function generateMetadata({
   // Truncate overly long event titles so Bing/Google don't flag them as
   // "Title too long". Cut at 57 chars (room for " …") so the rendered
   // absolute title stays ≤ 60.
-  const titleTrimmed = event.title.length > 57
-    ? event.title.slice(0, 57).trimEnd() + '…'
-    : event.title;
+  const titleTrimmed = displayTitle.length > 57
+    ? displayTitle.slice(0, 57).trimEnd() + '…'
+    : displayTitle;
 
   const metadata: Metadata = {
     // `absolute` bypasses the layout template " | LassTreffen.at" suffix.
@@ -99,9 +119,10 @@ export async function generateMetadata({
     description,
     alternates: {
       canonical: canonicalUrl,
+      languages: languageAlternates,
     },
     openGraph: {
-      title: event.title,
+      title: displayTitle,
       description,
       type: 'article',
       url: canonicalUrl,
@@ -110,13 +131,13 @@ export async function generateMetadata({
           url: ogImageUrl,
           width: 1200,
           height: 630,
-          alt: event.title,
+          alt: displayTitle,
         },
       ],
     },
     twitter: {
       card: 'summary_large_image',
-      title: event.title,
+      title: displayTitle,
       description,
       images: [ogImageUrl],
     },
@@ -354,6 +375,20 @@ export default async function EventDetailPage({
     getLineupForEvent(event.id),
   ]);
 
+  // ─── fn-17 Slice 3: Lazy-Übersetzung für die /en-Ansicht ───────────
+  // Cache-Hit aus der DB (title_en/description_en) oder EIN Gemini-Call
+  // mit Write-back; jeder Fehler degradiert still auf Deutsch. Die ISR-
+  // Variante der /en-URL cached das Ergebnis zusätzlich (revalidate=3600).
+  const translation =
+    rawLocale === 'en' ? await getOrTranslateEventEn(event) : null;
+  const displayEvent: typeof event = translation
+    ? {
+        ...event,
+        title: translation.title_en ?? event.title,
+        description: translation.description_en ?? event.description,
+      }
+    : event;
+
   const state = deriveEventState(event, {
     savedEventIds: new Set(),
     followedArtistIds: new Set(),
@@ -369,8 +404,9 @@ export default async function EventDetailPage({
     event.price_text ?? undefined;
   const priceAtDoor = event.price_text ?? undefined;
 
-  // Only emit JSON-LD for fully published events (skip low confidence)
-  const jsonLd = event.publish_status !== 'published_low_confidence' ? buildJsonLd(event) : null;
+  // Only emit JSON-LD for fully published events (skip low confidence).
+  // displayEvent: auf der /en-URL stehen Name/Beschreibung übersetzt im Schema.
+  const jsonLd = event.publish_status !== 'published_low_confidence' ? buildJsonLd(displayEvent) : null;
 
   // BreadcrumbList-Schema: Home → Bundesland-Hub → Gemeinde-Hub → Event.
   // Nutzt dieselben verifizierten Hub-Links wie die sichtbare
@@ -388,7 +424,7 @@ export default async function EventDetailPage({
         name: h.label.replace(/^Events in /, ''),
         item: `https://lasstreffen.at${h.href}`,
       })),
-      { '@type': 'ListItem', position: hubs.length + 2, name: event.title },
+      { '@type': 'ListItem', position: hubs.length + 2, name: displayEvent.title },
     ],
   }).replace(/<\/script>/gi, '<\\/script>');
 
@@ -405,7 +441,7 @@ export default async function EventDetailPage({
         dangerouslySetInnerHTML={{ __html: breadcrumbJsonLd }}
       />
       <V4EventDetail
-        event={event}
+        event={displayEvent}
         state={state}
         provider={provider}
         priceFrom={priceFrom}

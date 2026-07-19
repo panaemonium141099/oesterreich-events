@@ -7,8 +7,7 @@ TBD
 - [ ] TBD
 
 ## Done summary
-TBD
-
+Slice 2 komplett: Landing (PR #77) + Event-Detail/Entdecken/Map-Chrome (PR #80, via Worktree-Agent). 4 Namespaces, ~180 Keys. DE byte-identisch, ISR erhalten, Tests Baseline.
 ## Evidence
 - Commits:
 - Tests:
