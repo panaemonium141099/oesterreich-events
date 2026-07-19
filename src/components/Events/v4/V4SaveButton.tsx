@@ -22,6 +22,7 @@
  */
 
 import { useCallback, useEffect, useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { usePathname } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { useAuth } from '@/lib/supabase/auth-context';
@@ -39,6 +40,7 @@ interface V4SaveButtonProps {
 }
 
 export function V4SaveButton({ eventId, fillRow = false, withLabel = true }: V4SaveButtonProps) {
+  const t = useTranslations('EventDetail');
   const { user } = useAuth();
   const pathname = usePathname();
   const supabase = createClient();
@@ -86,12 +88,12 @@ export function V4SaveButton({ eventId, fillRow = false, withLabel = true }: V4S
           .delete()
           .eq('user_id', user.id)
           .eq('event_id', eventId);
-        toast.success('Aus „Gemerkt" entfernt');
+        toast.success(t('toastUnsaved'));
       } else {
         await supabase
           .from('saved_events')
           .insert({ user_id: user.id, event_id: eventId });
-        toast.success('Event gemerkt — findest du unter „Gespeicherte Events"');
+        toast.success(t('toastSaved'));
         // Pulse animation only on the positive action.
         setPulse(true);
         setTimeout(() => setPulse(false), 600);
@@ -99,12 +101,12 @@ export function V4SaveButton({ eventId, fillRow = false, withLabel = true }: V4S
     } catch (err) {
       // Revert optimistic state.
       setSaved(wasSaved);
-      toast.error('Konnte gerade nicht gespeichert werden');
+      toast.error(t('toastSaveError'));
       console.error('[V4SaveButton] toggle failed', err);
     } finally {
       setLoading(false);
     }
-  }, [user, saved, loading, supabase, eventId]);
+  }, [user, saved, loading, supabase, eventId, t]);
 
   const baseClasses = [
     'press-haptic',
@@ -144,7 +146,7 @@ export function V4SaveButton({ eventId, fillRow = false, withLabel = true }: V4S
       type="button"
       onClick={handleClick}
       aria-pressed={saved}
-      aria-label={saved ? 'Aus Gemerkt entfernen' : 'Event merken'}
+      aria-label={saved ? t('unsaveAria') : t('saveAria')}
       className={baseClasses}
       style={style}
     >
@@ -157,7 +159,7 @@ export function V4SaveButton({ eventId, fillRow = false, withLabel = true }: V4S
       >
         <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
       </svg>
-      {withLabel && (saved ? 'Gemerkt' : 'Merken')}
+      {withLabel && (saved ? t('savedLabel') : t('save'))}
     </button>
     </>
   );

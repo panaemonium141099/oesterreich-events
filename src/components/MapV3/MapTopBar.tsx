@@ -16,6 +16,7 @@
  * here on purpose — Variante A is light by design.
  */
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { useTranslations } from 'next-intl';
 import { createPortal } from 'react-dom';
 import { T, countActiveFilters } from './tokens';
 import { defaultDateTo } from './datePresets';
@@ -72,6 +73,7 @@ export function MapTopBar({
   onDistrictFilter,
   onKeywordSearch,
 }: MapTopBarProps) {
+  const t = useTranslations('MapPage');
   const [searchValue, setSearchValue] = useState(filters.search || '');
   const [searchFocused, setSearchFocused] = useState(false);
   const [gemeinden, setGemeinden] = useState<Gemeinde[]>([]);
@@ -312,7 +314,7 @@ export function MapTopBar({
 
   // Search-pill placeholder: shows current Bundesland scope as a hint.
   const placeholder =
-    bundesland.id === 'all' ? 'Suche · Österreich' : `Suche · ${bundesland.name}`;
+    bundesland.id === 'all' ? t('searchPlaceholderAll') : t('searchPlaceholder', { region: bundesland.name });
 
   return (
     <header
@@ -381,7 +383,7 @@ export function MapTopBar({
                   onFiltersChange({ ...filters, search: undefined, bbox: undefined });
                   inputRef.current?.focus();
                 }}
-                aria-label="Suche löschen"
+                aria-label={t('clearSearch')}
                 className="press-haptic"
                 style={{
                   width: 22,
@@ -417,7 +419,7 @@ export function MapTopBar({
         {/* Filter button with active-count badge */}
         <button
           onClick={onOpenFilter}
-          aria-label={`Filter öffnen${activeCount ? ` (${activeCount} aktiv)` : ''}`}
+          aria-label={activeCount ? t('openFilterActive', { count: activeCount }) : t('openFilter')}
           className="press-haptic shrink-0"
           style={{
             display: 'inline-flex',
@@ -438,7 +440,7 @@ export function MapTopBar({
           }}
         >
           <SlidersIcon size={14} color={T.ink} />
-          <span className="hidden sm:inline">Filter</span>
+          <span className="hidden sm:inline">{t('filter')}</span>
           {activeCount > 0 && (
             <span
               style={{
@@ -484,6 +486,7 @@ function SuggestionsDropdown({
   onHover,
   anchor,
 }: SuggestionsDropdownProps) {
+  const t = useTranslations('MapPage');
   const [pos, setPos] = useState({ top: 0, left: 0, width: 0 });
 
   useEffect(() => {
@@ -530,7 +533,7 @@ function SuggestionsDropdown({
               background: T.panel,
             }}
           >
-            Events
+            {t('suggestEvents')}
           </div>
           {eventSuggestions.map((ev, i) => (
             <button
@@ -578,7 +581,7 @@ function SuggestionsDropdown({
               background: T.panel,
             }}
           >
-            Orte
+            {t('suggestPlaces')}
           </div>
           {gemeindeSuggestions.map((g, i) => {
             const flat = eventSuggestions.length + i;

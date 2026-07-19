@@ -22,13 +22,26 @@
  *     so they can no longer overwrite each other.
  */
 import { useEffect, useMemo, useState } from 'react';
+import { useLocale, useTranslations } from 'next-intl';
 import { T, DATE_PRESETS, countActiveFilters as countActive, type DatePresetId } from './tokens';
+import { categoryLabel } from '@/lib/i18n/category-labels';
 import { applyDatePreset, defaultDateTo, detectActivePreset } from './datePresets';
 import { CATEGORIES } from '@/lib/categories';
 import { BUNDESLAENDER } from '@/lib/bundeslaender';
 import { getDistrictsByBundesland, displayDistrictName } from '@/lib/districtsAT';
 import type { EventFilters } from '@/types/events';
 import { trackEvent } from '@/lib/analytics';
+
+/** fn-17: Anzeige-Label pro Datum-Preset-Id aus dem MapPage-Namespace;
+ *  die `label`-Felder in tokens.ts bleiben deutscher Referenzwert. */
+const PRESET_MESSAGE_KEYS: Record<DatePresetId, string> = {
+  jetzt: 'presetJetzt',
+  heute: 'presetHeute',
+  morgen: 'presetMorgen',
+  wochenende: 'presetWochenende',
+  woche: 'presetWoche',
+  custom: 'presetCustom',
+};
 
 interface FilterDrawerProps {
   open: boolean;
@@ -55,6 +68,7 @@ export function FilterDrawer({
   resultCount,
   categoryCounts,
 }: FilterDrawerProps) {
+  const t = useTranslations('MapPage');
   // Local draft so the user can fiddle without thrashing the map. Apply on
   // CTA click; Reset wipes the draft.
   const [draft, setDraft] = useState<EventFilters>(filters);
@@ -213,7 +227,7 @@ export function FilterDrawer({
       <div
         role="dialog"
         aria-modal="true"
-        aria-label="Filter"
+        aria-label={t('filter')}
         className="hidden md:flex"
         style={{
           position: 'fixed',
@@ -257,7 +271,7 @@ export function FilterDrawer({
       <div
         role="dialog"
         aria-modal="true"
-        aria-label="Filter"
+        aria-label={t('filter')}
         className="flex md:hidden flex-col"
         style={{
           position: 'fixed',
@@ -335,6 +349,8 @@ function Body({
   setShowCustomDate,
   categoryCounts,
 }: BodyProps) {
+  const t = useTranslations('MapPage');
+  const tCat = useTranslations('Categories');
   // Selected sets — single-source-of-truth derives from filters.X (multi)
   // with legacy single-X as a one-element fallback.
   const selectedCats = new Set(
@@ -345,7 +361,7 @@ function Body({
   );
   return (
     <>
-      <FilterBlock label="Wann">
+      <FilterBlock label={t('blockWhen')}>
         <ChipGroup>
           {DATE_PRESETS.map((p) => {
             // Highlight whichever chip the user actually clicked. Earlier we
@@ -355,7 +371,7 @@ function Body({
             const active = activePresetId === p.id || (p.id === 'custom' && showCustomDate);
             return (
               <Chip key={p.id} active={active} onClick={() => setPreset(p.id)}>
-                {p.label}
+                {t(PRESET_MESSAGE_KEYS[p.id])}
               </Chip>
             );
           })}
@@ -379,7 +395,7 @@ function Body({
         )}
       </FilterBlock>
 
-      <FilterBlock label="Region">
+      <FilterBlock label={t('blockRegion')}>
         <ChipGroup>
           {BUNDESLAENDER.map((bl) => {
             const active = bl.id === 'all'
@@ -387,7 +403,7 @@ function Body({
               : draftBlIds.includes(bl.id);
             return (
               <Chip key={bl.id} active={active} onClick={() => toggleBl(bl.id)}>
-                {bl.name === 'Ganz Österreich' ? 'Österreich' : bl.name}
+                {bl.name === 'Ganz Österreich' ? t('austria') : bl.name}
               </Chip>
             );
           })}
@@ -399,7 +415,7 @@ function Body({
                 active={selectedDistricts.size === 0}
                 onClick={() => setDraft((d) => ({ ...d, district: undefined, districts: undefined }))}
               >
-                Alle Bezirke
+                {t('allDistricts')}
               </Chip>
               {districts.map((d) => (
                 <Chip
@@ -415,19 +431,19 @@ function Body({
         )}
       </FilterBlock>
 
-      <FilterBlock label="Kategorie">
+      <FilterBlock label={t('blockCategory')}>
         <ChipGroup>
           <Chip
             active={selectedCats.size === 0}
             onClick={() => setDraft((d) => ({ ...d, category: undefined, categories: undefined }))}
           >
-            Alle
+            {t('all')}
           </Chip>
           {CATEGORIES.map((cat) => {
             const n = categoryCounts?.[cat];
             return (
               <Chip key={cat} active={selectedCats.has(cat)} onClick={() => toggleCategory(cat)}>
-                {cat}
+                {categoryLabel(tCat, cat)}
                 {typeof n === 'number' && (
                   <span style={{ fontSize: 10.5, fontWeight: 700, opacity: 0.6, marginLeft: 6 }}>{n}</span>
                 )}
@@ -437,24 +453,24 @@ function Body({
         </ChipGroup>
       </FilterBlock>
 
-      <FilterBlock label="Mit wem">
+      <FilterBlock label={t('blockWithWhom')}>
         <ChipGroup>
           <Chip
             active={!!draft.familyFriendly}
             onClick={() => setDraft((d) => ({ ...d, familyFriendly: !d.familyFriendly || undefined }))}
           >
-            Familie
+            {t('family')}
           </Chip>
           <Chip
             active={!!draft.studentFriendly}
             onClick={() => setDraft((d) => ({ ...d, studentFriendly: !d.studentFriendly || undefined }))}
           >
-            Studenten
+            {t('students')}
           </Chip>
         </ChipGroup>
       </FilterBlock>
 
-      <FilterBlock label="Preis">
+      <FilterBlock label={t('blockPrice')}>
         <PriceRangeSlider
           min={draft.priceMin}
           max={draft.priceMax}
@@ -483,6 +499,7 @@ interface PriceRangeSliderProps {
   onChange: (min: number | undefined, max: number | undefined) => void;
 }
 function PriceRangeSlider({ min, max, onChange }: PriceRangeSliderProps) {
+  const t = useTranslations('MapPage');
   const RANGE_MIN = 0;
   const RANGE_MAX = 1000;
   const lo = min ?? RANGE_MIN;
@@ -506,11 +523,11 @@ function PriceRangeSlider({ min, max, onChange }: PriceRangeSliderProps) {
   const reset = () => onChange(undefined, undefined);
 
   const fmtLabel = () => {
-    if (!active) return 'Alle Preise';
-    if (lo === 0 && hi === 0) return 'Eintritt frei';
-    if (lo === 0) return `bis ${hi} €`;
-    if (hi === RANGE_MAX) return `ab ${lo} €`;
-    return `${lo} € – ${hi} €`;
+    if (!active) return t('allPrices');
+    if (lo === 0 && hi === 0) return t('freeEntry');
+    if (lo === 0) return t('priceUpTo', { price: hi });
+    if (hi === RANGE_MAX) return t('priceFrom', { price: lo });
+    return t('priceRange', { min: lo, max: hi });
   };
 
   const loPct = (lo / RANGE_MAX) * 100;
@@ -526,7 +543,7 @@ function PriceRangeSlider({ min, max, onChange }: PriceRangeSliderProps) {
             onClick={reset}
             style={{ fontSize: 12, color: T.ink50, background: 'transparent', border: 'none', cursor: 'pointer', textDecoration: 'underline', padding: 0, fontFamily: 'inherit' }}
           >
-            zurücksetzen
+            {t('resetLower')}
           </button>
         )}
       </div>
@@ -543,7 +560,7 @@ function PriceRangeSlider({ min, max, onChange }: PriceRangeSliderProps) {
           step={1}
           value={lo}
           onChange={(e) => handleLo(parseInt(e.target.value, 10))}
-          aria-label="Preis von"
+          aria-label={t('priceFromAria')}
           style={priceSliderStyle({ zIndex: lo > RANGE_MAX - 10 ? 3 : 2 })}
         />
         {/* Hi thumb */}
@@ -554,12 +571,12 @@ function PriceRangeSlider({ min, max, onChange }: PriceRangeSliderProps) {
           step={1}
           value={hi}
           onChange={(e) => handleHi(parseInt(e.target.value, 10))}
-          aria-label="Preis bis"
+          aria-label={t('priceToAria')}
           style={priceSliderStyle({ zIndex: lo > RANGE_MAX - 10 ? 2 : 3 })}
         />
       </div>
       <div style={{ marginTop: 10, fontSize: 11.5, color: T.ink50 }}>
-        Events ohne Preisangabe werden immer mit angezeigt.
+        {t('noPriceHint')}
       </div>
     </div>
   );
@@ -583,6 +600,7 @@ function priceSliderStyle(opts: { zIndex: number }): React.CSSProperties {
 /* ─── Sub-components ───────────────────────────────────────────────────── */
 
 function DrawerHeader({ onClose }: { onClose: () => void }) {
+  const t = useTranslations('MapPage');
   return (
     <div
       style={{
@@ -594,10 +612,10 @@ function DrawerHeader({ onClose }: { onClose: () => void }) {
         flexShrink: 0,
       }}
     >
-      <div style={{ fontSize: 17, fontWeight: 700, letterSpacing: '-0.02em', color: T.ink }}>Filter</div>
+      <div style={{ fontSize: 17, fontWeight: 700, letterSpacing: '-0.02em', color: T.ink }}>{t('filter')}</div>
       <button
         onClick={onClose}
-        aria-label="Filter schließen"
+        aria-label={t('closeFilter')}
         className="press-haptic"
         style={{
           width: 30,
@@ -629,6 +647,8 @@ function DrawerFooter({
   onApply: () => void;
   count: number;
 }) {
+  const t = useTranslations('MapPage');
+  const locale = useLocale();
   return (
     <div
       style={{
@@ -657,7 +677,7 @@ function DrawerFooter({
           fontFamily: 'inherit',
         }}
       >
-        Alle zurücksetzen
+        {t('resetAll')}
       </button>
       <button
         onClick={onApply}
@@ -676,7 +696,7 @@ function DrawerFooter({
           minHeight: 44,
         }}
       >
-        {count.toLocaleString('de-AT')} Events anzeigen
+        {t('showEvents', { count: count.toLocaleString(locale === 'de' ? 'de-AT' : 'en-GB') })}
       </button>
     </div>
   );

@@ -1,5 +1,8 @@
 import { notFound, permanentRedirect } from 'next/navigation';
 import type { Metadata } from 'next';
+import { hasLocale } from 'next-intl';
+import { setRequestLocale } from 'next-intl/server';
+import { routing } from '@/i18n/routing';
 import type { Event } from '@/types/events';
 import { extractCity } from '@/lib/utils/city';
 import { buildEventUrlV2 } from '@/lib/utils/slugify';
@@ -255,9 +258,16 @@ function buildJsonLd(event: Event): string {
 export default async function EventDetailPage({
   params,
 }: {
-  params: Promise<{ slug: string[] }>;
+  params: Promise<{ locale: string; slug: string[] }>;
 }) {
-  const { slug: slugArr } = await params;
+  const { locale: rawLocale, slug: slugArr } = await params;
+
+  // fn-17: setRequestLocale ist Pflicht, damit die next-intl-RSC-Aufrufe
+  // (getTranslations/getLocale in V4RelatedEvents) im statischen ISR-Pass
+  // NICHT auf Request-Header zurückfallen — das würde die Seite von
+  // static auf dynamic kippen (gleicher Mechanismus wie der cookies()-
+  // Kommentar weiter unten; Muster aus src/app/[locale]/layout.tsx).
+  setRequestLocale(hasLocale(routing.locales, rawLocale) ? rawLocale : routing.defaultLocale);
 
   // Defensive: Bots/Crawler treffen uns mit URLs deren `/` als `%2F`
   // encoded sind (alle drei V3-Segmente in einem zusammengeschmolzen).

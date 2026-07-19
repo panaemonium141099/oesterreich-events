@@ -17,12 +17,13 @@
  * oben-links vom Hero (parent muss `relative` sein).
  */
 
+import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 
 interface V4BackButtonProps {
   /** Fallback-URL wenn keine Browser-History existiert. Default: `/`. */
   fallback?: string;
-  /** Optionales Label für Screen-Reader. Default: "Zurück". */
+  /** Optionales Label für Screen-Reader. Default: t('EventDetail.back') = "Zurück". */
   label?: string;
   /** Extra Tailwind-Klassen für Positionierung (z.B. `top-5 left-5`). */
   className?: string;
@@ -30,9 +31,10 @@ interface V4BackButtonProps {
 
 export function V4BackButton({
   fallback = '/',
-  label = 'Zurück',
+  label,
   className = '',
 }: V4BackButtonProps) {
+  const t = useTranslations('EventDetail');
   const router = useRouter();
 
   function handleClick() {
@@ -61,7 +63,7 @@ export function V4BackButton({
     <button
       type="button"
       onClick={handleClick}
-      aria-label={label}
+      aria-label={label ?? t('back')}
       className={
         'press-haptic absolute z-10 w-10 h-10 rounded-full flex items-center justify-center backdrop-blur-md border transition-colors ' +
         'bg-[rgba(10,10,12,0.55)] border-[rgba(255,255,255,0.18)] text-white hover:bg-[rgba(10,10,12,0.75)] hover:border-[rgba(255,255,255,0.3)] ' +

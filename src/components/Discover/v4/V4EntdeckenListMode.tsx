@@ -12,6 +12,7 @@
  */
 
 import { useEffect, useRef, useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { EventListView } from '@/components/MapV3/EventListView';
 import { FilterDrawer } from '@/components/MapV3/FilterDrawer';
 import { V4RegionRail } from '@/components/Discover/v4/V4RegionRail';
@@ -30,6 +31,7 @@ export function V4EntdeckenListMode({
   initialBundeslandIds,
   initialFilters,
 }: V4EntdeckenListModeProps) {
+  const t = useTranslations('Discover');
   const {
     filters, setFilters,
     bundeslandIds, setBundeslandIds,
@@ -102,7 +104,7 @@ export function V4EntdeckenListMode({
             <line x1="7" y1="12" x2="17" y2="12"/>
             <line x1="10" y1="18" x2="14" y2="18"/>
           </svg>
-          Filter
+          {t('filter')}
         </button>
       </div>
 
@@ -121,10 +123,10 @@ export function V4EntdeckenListMode({
           {loadingMore ? (
             <span className="inline-flex items-center gap-2 text-[13px] text-[var(--v4-ink-50)]">
               <span className="animate-spin rounded-full h-4 w-4 border-2 border-[var(--v4-hairline-3)] border-t-[var(--v4-ink)]" />
-              Weitere Events werden geladen …
+              {t('loadingMore')}
             </span>
           ) : (
-            <span className="text-[13px] text-[var(--v4-ink-50)]">Scrollen für mehr Events</span>
+            <span className="text-[13px] text-[var(--v4-ink-50)]">{t('scrollForMore')}</span>
           )}
         </div>
       )}

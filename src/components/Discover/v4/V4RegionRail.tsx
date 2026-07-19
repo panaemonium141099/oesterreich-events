@@ -1,4 +1,5 @@
-import Link from 'next/link';
+import { useTranslations } from 'next-intl';
+import { Link } from '@/i18n/navigation';
 import { CITY_HUB_LINKS, BUNDESLAND_HUB_LINKS } from '@/lib/hubs/hub-directory';
 
 /**
@@ -9,12 +10,13 @@ import { CITY_HUB_LINKS, BUNDESLAND_HUB_LINKS } from '@/lib/hubs/hub-directory';
  * Pure links, so it stays cheap inside the client list-mode tree.
  */
 export function V4RegionRail() {
+  const t = useTranslations('Discover');
   const hubs = [...CITY_HUB_LINKS, ...BUNDESLAND_HUB_LINKS];
   return (
-    <nav aria-label="Nach Region" className="mb-5">
+    <nav aria-label={t('regionRailAria')} className="mb-5">
       <div className="flex items-center gap-2 overflow-x-auto pb-1">
         <span className="shrink-0 pr-1 text-[12px] font-semibold text-[var(--v4-ink)]/50">
-          Nach Region:
+          {t('regionRail')}
         </span>
         {hubs.map((h) => (
           <Link

@@ -12,8 +12,10 @@
  */
 import { useMemo, useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
-import Link from 'next/link';
+import { useLocale, useTranslations } from 'next-intl';
+import { Link } from '@/i18n/navigation';
 import type { Event } from '@/types/events';
+import { categoryLabel } from '@/lib/i18n/category-labels';
 
 /**
  * v4 dark-theme tokens — used since Phase 4.2 (after EventListView wandered
@@ -103,6 +105,10 @@ export function EventListView({
   scopeLabel,
   boostedIds,
 }: EventListViewProps) {
+  const t = useTranslations('MapPage');
+  const locale = useLocale();
+  // de-AT bleibt das Zahlen-/Datumsformat auf Deutsch; EN nutzt en-GB.
+  const fmt = locale === 'de' ? 'de-AT' : 'en-GB';
   // Default to "Top" so the list opens with the highest-scored events
   // visible regardless of where the user came from. Datum/Distanz remain
   // one click away.
@@ -230,23 +236,23 @@ export function EventListView({
               }}
             >
               {loading && events.length === 0
-                ? 'Suche läuft …'
+                ? t('searching')
                 : totalCount != null && totalCount > events.length
                 // API knows of more matches than the client has after
                 // dedup or progressive loading — show both so the user
                 // sees that 14 duplicates were collapsed (or that a few
                 // batches are still streaming in the background).
-                ? `${events.length.toLocaleString('de-AT')} von ${totalCount.toLocaleString('de-AT')} Events`
-                : `${events.length.toLocaleString('de-AT')} Events`}
+                ? t('eventsOf', { shown: events.length.toLocaleString(fmt), total: totalCount.toLocaleString(fmt) })
+                : t('nEventsMany', { count: events.length.toLocaleString(fmt) })}
               {scopeLabel ? ` · ${scopeLabel}` : ''}
             </h2>
           </div>
 
           <div style={{ display: 'flex', gap: 6 }}>
             {([
-              { k: 'date', l: 'Datum' },
-              ...(userLocation ? ([{ k: 'distance', l: 'Distanz' }] as const) : []),
-              { k: 'score', l: 'Top' },
+              { k: 'date', l: t('sortDate') },
+              ...(userLocation ? ([{ k: 'distance', l: t('sortDistance') }] as const) : []),
+              { k: 'score', l: t('sortTop') },
             ] as { k: ListSortMode; l: string }[]).map((o) => {
               const active = sort === o.k;
               return (
@@ -286,9 +292,9 @@ export function EventListView({
         {!loading && events.length === 0 && (
           <div style={{ padding: '60px 0', textAlign: 'center', color: T.ink50 }}>
             <p style={{ fontSize: 16, fontWeight: 600, color: T.ink70, marginBottom: 8 }}>
-              Keine Events gefunden
+              {t('noEventsTitle')}
             </p>
-            <p style={{ fontSize: 13 }}>Versuche, die Filter zu lockern oder einen anderen Zeitraum zu wählen.</p>
+            <p style={{ fontSize: 13 }}>{t('noEventsHint')}</p>
           </div>
         )}
 
@@ -299,11 +305,11 @@ export function EventListView({
             <section style={{ marginBottom: 28 }}>
               <header style={{ display: 'flex', alignItems: 'baseline', gap: 10, marginBottom: 12 }}>
                 <h2 style={{ fontSize: 17, fontWeight: 700, letterSpacing: '-0.02em', color: T.ink, margin: 0 }}>
-                  Anzeige
+                  {t('adSection')}
                 </h2>
-                <span style={{ fontSize: 12.5, color: T.ink60, fontWeight: 500 }}>· hervorgehobene Events</span>
+                <span style={{ fontSize: 12.5, color: T.ink60, fontWeight: 500 }}>· {t('adSectionSub')}</span>
                 <span style={{ marginLeft: 'auto', fontSize: 12, color: T.ink50 }}>
-                  {ads.length} Event{ads.length === 1 ? '' : 's'}
+                  {t(ads.length === 1 ? 'nEventsOne' : 'nEventsMany', { count: ads.length })}
                 </span>
               </header>
               <div
@@ -321,7 +327,7 @@ export function EventListView({
           )}
 
           {grouped.map((g) => (
-            <section key={g.label} style={{ marginBottom: 28 }}>
+            <section key={g.id} style={{ marginBottom: 28 }}>
               <header
                 style={{
                   display: 'flex',
@@ -339,13 +345,13 @@ export function EventListView({
                     margin: 0,
                   }}
                 >
-                  {g.label}
+                  {t(GROUP_MESSAGE_KEYS[g.id])}
                 </h2>
                 {g.sub && (
-                  <span style={{ fontSize: 12.5, color: T.ink60, fontWeight: 500 }}>· {g.sub}</span>
+                  <span style={{ fontSize: 12.5, color: T.ink60, fontWeight: 500 }}>· {g.sub.toLocaleDateString(fmt, { day: 'numeric', month: 'short' })}</span>
                 )}
                 <span style={{ marginLeft: 'auto', fontSize: 12, color: T.ink50 }}>
-                  {g.events.length} Event{g.events.length === 1 ? '' : 's'}
+                  {t(g.events.length === 1 ? 'nEventsOne' : 'nEventsMany', { count: g.events.length })}
                 </span>
               </header>
               <div
@@ -368,7 +374,7 @@ export function EventListView({
 
           {visibleCount < rest.length && (
             <div ref={loaderRef} style={{ padding: '16px 0', textAlign: 'center', fontSize: 12, color: T.ink50 }}>
-              {visible.length} von {rest.length} angezeigt — scrolle für mehr
+              {t('shownOf', { shown: visible.length, total: rest.length })}
             </div>
           )}
         </div>
@@ -394,6 +400,10 @@ function BigRow({
   // generic dot — but in the list the photo is half the visual weight,
   // so a graceful fallback matters.
   const [imgFailed, setImgFailed] = useState(false);
+  const t = useTranslations('MapPage');
+  const tCat = useTranslations('Categories');
+  const locale = useLocale();
+  const fmt = locale === 'de' ? 'de-AT' : 'en-GB';
 
   const time = formatTime(ev.start_date);
   const cat = ev.category || 'Sonstiges';
@@ -402,7 +412,7 @@ function BigRow({
     userLocation && ev.latitude != null && ev.longitude != null
       ? Math.round(distanceKm(userLocation.lat, userLocation.lng, ev.latitude, ev.longitude) * 10) / 10
       : null;
-  const dateLabel = formatDateLabel(ev.start_date);
+  const dateLabel = formatDateLabel(ev.start_date, fmt, t('groupHeute'), t('groupMorgen'));
   const showImage = !!ev.image_url && !imgFailed;
   const [g1, g2] = gradientFor(cat);
 
@@ -467,7 +477,7 @@ function BigRow({
               lineHeight: 1.2,
             }}
           >
-            {cat}
+            {categoryLabel(tCat, cat)}
           </div>
         )}
         <span
@@ -523,7 +533,7 @@ function BigRow({
               letterSpacing: '0.04em',
             }}
           >
-            Anzeige
+            {t('adSection')}
           </span>
         )}
       </div>
@@ -531,7 +541,7 @@ function BigRow({
       <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', padding: '4px 0', gap: 6 }}>
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 7, flexWrap: 'wrap' }}>
-            <CategoryChip cat={cat} />
+            <CategoryChip cat={categoryLabel(tCat, cat)} />
             {ev.location_name && (
               <span style={{ fontSize: 11.5, color: T.ink60, fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                 · {ev.location_name}
@@ -556,16 +566,16 @@ function BigRow({
           </div>
           {km != null && (
             <div style={{ fontSize: 12, color: T.ink60, fontWeight: 500 }}>
-              {km.toLocaleString('de-AT')} km · ca. {Math.round(km * 1.4)} Min
+              {t('kmAway', { km: km.toLocaleString(fmt), min: Math.round(km * 1.4) })}
             </div>
           )}
         </div>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <span style={{ fontSize: 12, color: T.ink50, fontWeight: 500 }}>
             {ev.district
-              ? `Bezirk: ${displayDistrictName(ev.district)}`
+              ? t('districtPrefix', { name: displayDistrictName(ev.district) })
               : ev.bundesland
-                ? `Bundesland: ${BUNDESLAND_NAMES[ev.bundesland as BundeslandId] ?? ev.bundesland}`
+                ? t('bundeslandPrefix', { name: BUNDESLAND_NAMES[ev.bundesland as BundeslandId] ?? ev.bundesland })
                 : ''}
           </span>
           <span
@@ -579,7 +589,7 @@ function BigRow({
               letterSpacing: '-0.005em',
             }}
           >
-            Öffnen
+            {t('open')}
           </span>
         </div>
       </div>
@@ -632,9 +642,23 @@ function SkeletonRow() {
 
 /* ─── Grouping helpers ─────────────────────────────────────────────────── */
 
+type GroupId = 'heute' | 'morgen' | 'wochenende' | 'woche' | 'spaeter';
+
+/** fn-17: Gruppen tragen stabile IDs; die Anzeige-Labels kommen aus dem
+ *  MapPage-Namespace (DE byte-identisch: Heute/Morgen/Wochenende/…). */
+const GROUP_MESSAGE_KEYS: Record<GroupId, string> = {
+  heute: 'groupHeute',
+  morgen: 'groupMorgen',
+  wochenende: 'groupWochenende',
+  woche: 'groupWoche',
+  spaeter: 'groupSpaeter',
+};
+
 interface Group {
-  label: string;
-  sub?: string;
+  id: GroupId;
+  /** Datums-Zusatz (z. B. „19. Juli") — als Date, damit die Komponente
+   *  locale-bewusst formatieren kann. */
+  sub?: Date;
   events: Event[];
 }
 
@@ -677,11 +701,11 @@ function groupEvents(events: Event[]): Group[] {
   }
 
   const groups: Group[] = [];
-  if (buckets.heute.length) groups.push({ label: 'Heute', sub: fmtShortDate(today), events: buckets.heute });
-  if (buckets.morgen.length) groups.push({ label: 'Morgen', sub: fmtShortDate(tomorrow), events: buckets.morgen });
-  if (buckets.wochenende.length) groups.push({ label: 'Wochenende', events: buckets.wochenende });
-  if (buckets.woche.length) groups.push({ label: 'Diese Woche', events: buckets.woche });
-  if (buckets.spaeter.length) groups.push({ label: 'Später', events: buckets.spaeter });
+  if (buckets.heute.length) groups.push({ id: 'heute', sub: today, events: buckets.heute });
+  if (buckets.morgen.length) groups.push({ id: 'morgen', sub: tomorrow, events: buckets.morgen });
+  if (buckets.wochenende.length) groups.push({ id: 'wochenende', events: buckets.wochenende });
+  if (buckets.woche.length) groups.push({ id: 'woche', events: buckets.woche });
+  if (buckets.spaeter.length) groups.push({ id: 'spaeter', events: buckets.spaeter });
   return groups;
 }
 
@@ -701,17 +725,13 @@ function sameDay(a: Date, b: Date): boolean {
   return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
 }
 
-function fmtShortDate(d: Date): string {
-  return d.toLocaleDateString('de-AT', { day: 'numeric', month: 'short' });
-}
-
-function formatDateLabel(dateStr: string): string {
+function formatDateLabel(dateStr: string, fmt: string, todayLabel: string, tomorrowLabel: string): string {
   try {
     const d = new Date(dateStr);
     const today = startOfDay(new Date());
-    if (sameDay(startOfDay(d), today)) return 'Heute';
-    if (sameDay(startOfDay(d), addDays(today, 1))) return 'Morgen';
-    return d.toLocaleDateString('de-AT', { weekday: 'short', day: 'numeric', month: 'short' });
+    if (sameDay(startOfDay(d), today)) return todayLabel;
+    if (sameDay(startOfDay(d), addDays(today, 1))) return tomorrowLabel;
+    return d.toLocaleDateString(fmt, { weekday: 'short', day: 'numeric', month: 'short' });
   } catch {
     return dateStr.slice(0, 10);
   }

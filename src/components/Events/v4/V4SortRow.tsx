@@ -5,6 +5,8 @@
  * the active sort + total via props.
  */
 
+import { useTranslations } from 'next-intl';
+
 export const SORT_OPTIONS = [
   { key: 'score',    label: 'Empfohlen' },
   { key: 'date',     label: 'Datum' },
@@ -14,6 +16,14 @@ export const SORT_OPTIONS = [
 
 export type V4SortKey = typeof SORT_OPTIONS[number]['key'];
 
+/** fn-17: Anzeige-Label pro Sort-Key aus dem Discover-Namespace. */
+const SORT_MESSAGE_KEYS: Record<V4SortKey, string> = {
+  score: 'sortRecommended',
+  date: 'sortDate',
+  tickets: 'sortTickets',
+  distance: 'sortDistance',
+};
+
 interface V4SortRowProps {
   current: V4SortKey;
   total: number;
@@ -21,13 +31,14 @@ interface V4SortRowProps {
 }
 
 export function V4SortRow({ current, total, onChange }: V4SortRowProps) {
+  const t = useTranslations('Discover');
   return (
     <div className="flex items-center gap-3.5 flex-wrap text-[13px] text-[var(--v4-ink-70)]">
       <div>
-        <b className="text-[var(--v4-ink)] font-bold">{total}</b> Events
+        <b className="text-[var(--v4-ink)] font-bold">{total}</b> {t('events')}
       </div>
       <div className="flex-1"/>
-      <span className="text-[11px] uppercase tracking-[0.18em] font-semibold text-[var(--v4-ink-50)]">Sortieren</span>
+      <span className="text-[11px] uppercase tracking-[0.18em] font-semibold text-[var(--v4-ink-50)]">{t('sortLabel')}</span>
       <div className="flex gap-1">
         {SORT_OPTIONS.map(opt => {
           const isActive = opt.key === current;
@@ -44,7 +55,7 @@ export function V4SortRow({ current, total, onChange }: V4SortRowProps) {
                   : 'text-[var(--v4-ink-70)] border-transparent hover:text-[var(--v4-ink)]')
               }
             >
-              {opt.label}
+              {t(SORT_MESSAGE_KEYS[opt.key])}
             </button>
           );
         })}

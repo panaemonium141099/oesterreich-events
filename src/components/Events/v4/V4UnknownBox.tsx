@@ -11,6 +11,7 @@
  * when no ticket flow exists.
  */
 
+import { useTranslations } from 'next-intl';
 import { V4Badge } from './V4Badge';
 import { V4PriceBlock } from './V4PriceBlock';
 import { V4SaveButton } from './V4SaveButton';
@@ -38,6 +39,7 @@ interface V4UnknownBoxProps {
 }
 
 export function V4UnknownBox({ eventId, onPlanClick, mapsUrl, locationApprox, priceText, priceMin, priceMax, priceTier }: V4UnknownBoxProps) {
+  const t = useTranslations('EventDetail');
   const showsLocationCell = !!mapsUrl || !!locationApprox;
   return (
     <div
@@ -47,12 +49,12 @@ export function V4UnknownBox({ eventId, onPlanClick, mapsUrl, locationApprox, pr
     >
       <div className="h-[3px]" style={{ background: 'var(--v4-go)' }}/>
       <div className="p-[20px_22px_22px]">
-        <V4Badge kind="unknown">Kein Online-Verkauf bekannt</V4Badge>
+        <V4Badge kind="unknown">{t('badgeUnknown')}</V4Badge>
         <p className="mt-3.5 text-[15.5px] font-semibold text-[var(--v4-ink)] tracking-[-0.015em] leading-[1.4]">
-          Plane deinen Abend und lass dich rechtzeitig erinnern.
+          {t('unknownHeadline')}
         </p>
         <p className="mt-2 text-[12.5px] text-[var(--v4-ink-50)] leading-[1.5]">
-          Kein Ticketshop bekannt — wir merken Anreise &amp; Reminder in deinem Plan.
+          {t('unknownSub')}
         </p>
 
         <V4PriceBlock priceText={priceText} priceMin={priceMin} priceMax={priceMax} priceTier={priceTier}/>
@@ -64,7 +66,7 @@ export function V4UnknownBox({ eventId, onPlanClick, mapsUrl, locationApprox, pr
             data-track="plan_started"
             className="press-haptic mt-[18px] flex items-center justify-center gap-2 w-full px-5 py-3 rounded-full bg-[var(--v4-go)] text-[#062417] text-sm font-semibold"
           >
-            Abend planen
+            {t('planEvening')}
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
           </button>
         ) : (
@@ -73,7 +75,7 @@ export function V4UnknownBox({ eventId, onPlanClick, mapsUrl, locationApprox, pr
             data-track="plan_started"
             className="press-haptic mt-[18px] flex items-center justify-center gap-2 w-full px-5 py-3 rounded-full bg-[var(--v4-go)] text-[#062417] text-sm font-semibold"
           >
-            Abend planen
+            {t('planEvening')}
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
           </a>
         )}
@@ -87,14 +89,14 @@ export function V4UnknownBox({ eventId, onPlanClick, mapsUrl, locationApprox, pr
               data-track="route_opened"
               className="press-haptic flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-full border border-[var(--v4-hairline-3)] text-[12.5px] font-semibold text-[var(--v4-ink)]"
             >
-              Route öffnen
+              {t('openRoute')}
             </a>
           ) : locationApprox ? (
             <span
-              title="Beim Veranstalter die genaue Adresse pruefen, bevor du losfaehrst."
+              title={t('locationApproxHint')}
               className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-full border border-dashed border-[var(--v4-hairline-3)] text-[11.5px] font-medium text-[var(--v4-ink-50)] cursor-help"
             >
-              Ortsangabe ungefähr
+              {t('locationApprox')}
             </span>
           ) : null}
           <V4SaveButton eventId={eventId} fillRow={!showsLocationCell} />

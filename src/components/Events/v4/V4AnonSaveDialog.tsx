@@ -13,6 +13,7 @@
  */
 
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 
 interface V4AnonSaveDialogProps {
   eventId: string;
@@ -22,6 +23,7 @@ interface V4AnonSaveDialogProps {
 }
 
 export function V4AnonSaveDialog({ eventId, nextPath, onClose }: V4AnonSaveDialogProps) {
+  const t = useTranslations('EventDetail');
   const [email, setEmail] = useState('');
   const [busy, setBusy] = useState(false);
   const [done, setDone] = useState<string | null>(null);
@@ -40,12 +42,12 @@ export function V4AnonSaveDialog({ eventId, nextPath, onClose }: V4AnonSaveDialo
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
-        setError(data.error ?? 'Das hat gerade nicht geklappt — bitte später erneut versuchen.');
+        setError(data.error ?? t('anonErrorFallback'));
         return;
       }
-      setDone(data.message ?? 'Fast geschafft — bitte bestätige die Erinnerung in deinem Postfach.');
+      setDone(data.message ?? t('anonDoneFallback'));
     } catch {
-      setError('Das hat gerade nicht geklappt — bitte später erneut versuchen.');
+      setError(t('anonErrorFallback'));
     } finally {
       setBusy(false);
     }
@@ -56,12 +58,12 @@ export function V4AnonSaveDialog({ eventId, nextPath, onClose }: V4AnonSaveDialo
       className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center"
       role="dialog"
       aria-modal="true"
-      aria-label="Event merken"
+      aria-label={t('anonTitle')}
     >
       {/* Backdrop */}
       <button
         type="button"
-        aria-label="Schließen"
+        aria-label={t('close')}
         onClick={onClose}
         className="absolute inset-0 bg-black/60 backdrop-blur-[2px]"
       />
@@ -70,7 +72,7 @@ export function V4AnonSaveDialog({ eventId, nextPath, onClose }: V4AnonSaveDialo
         <button
           type="button"
           onClick={onClose}
-          aria-label="Schließen"
+          aria-label={t('close')}
           className="absolute top-4 right-4 w-8 h-8 rounded-full bg-white/[0.06] hover:bg-white/[0.12] flex items-center justify-center text-white/70 transition-colors"
         >
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" aria-hidden="true">
@@ -78,7 +80,7 @@ export function V4AnonSaveDialog({ eventId, nextPath, onClose }: V4AnonSaveDialo
           </svg>
         </button>
 
-        <h2 className="text-[18px] font-bold mb-1.5">Event merken</h2>
+        <h2 className="text-[18px] font-bold mb-1.5">{t('anonTitle')}</h2>
 
         {done ? (
           <div className="py-4">
@@ -88,14 +90,13 @@ export function V4AnonSaveDialog({ eventId, nextPath, onClose }: V4AnonSaveDialo
               onClick={onClose}
               className="mt-5 w-full py-3 rounded-xl bg-white text-black font-semibold text-sm hover:bg-white/90 transition-colors"
             >
-              Alles klar
+              {t('anonOk')}
             </button>
           </div>
         ) : (
           <>
             <p className="text-[13.5px] text-white/50 leading-relaxed mb-5">
-              Mit Konto landet das Event in deinen Plänen — oder lass dich
-              einfach per E-Mail erinnern, ganz ohne Anmeldung.
+              {t('anonIntro')}
             </p>
 
             <a
@@ -103,18 +104,18 @@ export function V4AnonSaveDialog({ eventId, nextPath, onClose }: V4AnonSaveDialo
               data-track="anon_save_login"
               className="block w-full text-center py-3 rounded-xl bg-white text-black font-semibold text-sm hover:bg-white/90 transition-colors"
             >
-              Einloggen oder registrieren
+              {t('anonLogin')}
             </a>
 
             <div className="flex items-center gap-3 my-5">
               <span className="flex-1 h-px bg-white/10" />
-              <span className="text-[11px] uppercase tracking-[0.18em] text-white/35">oder ohne Konto</span>
+              <span className="text-[11px] uppercase tracking-[0.18em] text-white/35">{t('anonOr')}</span>
               <span className="flex-1 h-px bg-white/10" />
             </div>
 
             <form onSubmit={submit}>
               <label htmlFor="anon-reminder-email" className="block text-[13px] font-semibold text-white/70 mb-2">
-                Per E-Mail erinnert werden
+                {t('anonEmailLabel')}
               </label>
               <div className="flex gap-2">
                 <input
@@ -122,7 +123,7 @@ export function V4AnonSaveDialog({ eventId, nextPath, onClose }: V4AnonSaveDialo
                   type="email"
                   required
                   autoComplete="email"
-                  placeholder="deine@email.at"
+                  placeholder={t('anonEmailPlaceholder')}
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="flex-1 min-w-0 rounded-xl bg-white/[0.06] border border-white/10 px-4 py-3 text-[16px] sm:text-sm text-white placeholder-white/35 focus:outline-none focus:border-white/30"
@@ -134,15 +135,13 @@ export function V4AnonSaveDialog({ eventId, nextPath, onClose }: V4AnonSaveDialo
                   data-track-id={eventId}
                   className="px-4 py-3 rounded-xl bg-amber-400 text-black font-semibold text-sm hover:bg-amber-300 transition-colors disabled:opacity-60 whitespace-nowrap"
                 >
-                  {busy ? 'Sende …' : 'Erinnern'}
+                  {busy ? t('anonSubmitting') : t('anonSubmit')}
                 </button>
               </div>
               {error && <p className="mt-2 text-[12.5px] text-red-400">{error}</p>}
               <p className="mt-3 text-[11.5px] text-white/35 leading-relaxed">
-                Wir erinnern dich 2 Tage vorher und am Event-Tag — sonst nichts.
-                Bestätigung per Mail nötig (Double-Opt-in), Abmeldung jederzeit
-                mit einem Klick. Details in der{' '}
-                <a href="/datenschutz" className="underline underline-offset-2 text-white/50">Datenschutzerklärung</a>.
+                {t('anonPrivacy')}{' '}
+                <a href="/datenschutz" className="underline underline-offset-2 text-white/50">{t('anonPrivacyLink')}</a>.
               </p>
             </form>
           </>
