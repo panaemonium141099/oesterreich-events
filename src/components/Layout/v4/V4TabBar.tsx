@@ -1,8 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { useTranslations } from 'next-intl';
+import { Link, usePathname } from '@/i18n/navigation';
 import type { Session } from '@supabase/supabase-js';
 import { createClient } from '@/lib/supabase/client';
 
@@ -27,17 +27,18 @@ import { createClient } from '@/lib/supabase/client';
 interface TabItem {
   /** The href shown when authed; for /profile we override to /auth/login when anon. */
   href: string;
-  label: string;
+  /** Message-Key im Namespace `TabBar` (fn-17 i18n) */
+  labelKey: 'discover' | 'artists' | 'map' | 'plans' | 'profile';
   matches: ReadonlyArray<string>;
   icon: 'home' | 'music' | 'map' | 'ticket' | 'user';
 }
 
 const TABS: ReadonlyArray<TabItem> = [
-  { href: '/entdecken', label: 'Entdecken', matches: ['/', '/entdecken'], icon: 'home' },
-  { href: '/artists',  label: 'Künstler',  matches: ['/artists'],         icon: 'music' },
-  { href: '/map',      label: 'Karte',     matches: ['/map'],             icon: 'map' },
-  { href: '/plans',    label: 'Pläne',     matches: ['/plans', '/saved'], icon: 'ticket' },
-  { href: '/profile',  label: 'Profil',    matches: ['/profile', '/auth'], icon: 'user' },
+  { href: '/entdecken', labelKey: 'discover', matches: ['/', '/entdecken'], icon: 'home' },
+  { href: '/artists',  labelKey: 'artists',  matches: ['/artists'],         icon: 'music' },
+  { href: '/map',      labelKey: 'map',      matches: ['/map'],             icon: 'map' },
+  { href: '/plans',    labelKey: 'plans',    matches: ['/plans', '/saved'], icon: 'ticket' },
+  { href: '/profile',  labelKey: 'profile',  matches: ['/profile', '/auth'], icon: 'user' },
 ];
 
 function isActive(pathname: string, matches: ReadonlyArray<string>): boolean {
@@ -103,6 +104,7 @@ function TabIcon({ name, active }: { name: TabItem['icon']; active: boolean }) {
 }
 
 export function V4TabBar() {
+  const t = useTranslations('TabBar');
   const pathname = usePathname() ?? '/';
   const [authed, setAuthed] = useState(false);
 
@@ -134,19 +136,20 @@ export function V4TabBar() {
   return (
     <>
       <nav
-        aria-label="Mobile Hauptnavigation"
+        aria-label={t('mobileNav')}
         className="md:hidden fixed left-0 right-0 bottom-0 z-25 pb-[26px] pt-2 border-t border-[var(--v4-hairline-2)] bg-gradient-to-t from-[rgba(10,10,12,0.96)] to-[rgba(10,10,12,0.78)] backdrop-blur-xl flex justify-around items-center"
       >
         {TABS.map(tab => {
           const active = isActive(pathname, tab.matches);
           const href =
             tab.href === '/profile' && !authed ? '/auth/login' : tab.href;
+          const label = t(tab.labelKey);
           return (
             <Link
-              key={tab.label}
+              key={tab.labelKey}
               href={href}
               data-active={active}
-              aria-label={tab.label}
+              aria-label={label}
               className={
                 'press-haptic flex flex-col items-center gap-0.5 px-1 py-1 flex-1 min-w-0 ' +
                 (active ? 'text-[var(--v4-ink)]' : 'text-[var(--v4-ink-50)]')
@@ -154,7 +157,7 @@ export function V4TabBar() {
             >
               <TabIcon name={tab.icon} active={active} />
               <span className="text-[10px] font-semibold tracking-[0.2px]">
-                {tab.label}
+                {label}
               </span>
             </Link>
           );

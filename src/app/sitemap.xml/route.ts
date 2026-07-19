@@ -40,6 +40,8 @@ interface SitemapEntry {
   lastmod?: string;
   changefreq?: 'always' | 'hourly' | 'daily' | 'weekly' | 'monthly' | 'yearly' | 'never';
   priority?: number;
+  /** fn-17: hreflang-Alternates (nur für Seiten mit echter EN-Version) */
+  alternates?: ReadonlyArray<{ hreflang: string; href: string }>;
 }
 
 /** Minimal XML entity escape for loc URLs (ampersands in query strings, etc.). */
@@ -54,6 +56,13 @@ function xmlEscape(s: string): string {
 
 function renderEntry(e: SitemapEntry): string {
   const parts = [`  <url>`, `    <loc>${xmlEscape(e.loc)}</loc>`];
+  if (e.alternates) {
+    for (const alt of e.alternates) {
+      parts.push(
+        `    <xhtml:link rel="alternate" hreflang="${alt.hreflang}" href="${xmlEscape(alt.href)}"/>`,
+      );
+    }
+  }
   if (e.lastmod) parts.push(`    <lastmod>${e.lastmod}</lastmod>`);
   if (e.changefreq) parts.push(`    <changefreq>${e.changefreq}</changefreq>`);
   if (e.priority != null) parts.push(`    <priority>${e.priority.toFixed(1)}</priority>`);
@@ -72,9 +81,19 @@ export async function GET(): Promise<NextResponse> {
   const now = new Date();
 
   // ─── 1. Static top-level pages ──────────────────────────────────────────
+  // fn-17: Für Seiten mit echter EN-Version (lokalisierte Chrome + Metadata)
+  // werden DE- UND EN-URL gelistet, jeweils mit hreflang-Alternates.
+  // Event-/Landing-URLs bleiben DE-only, bis übersetzter Content existiert.
+  const i18nAlternates = (path: string) => [
+    { hreflang: 'de-AT', href: `${BASE_URL}${path}` },
+    { hreflang: 'en', href: `${BASE_URL}/en${path}` },
+    { hreflang: 'x-default', href: `${BASE_URL}${path}` },
+  ];
   entries.push(
-    { loc: BASE_URL, lastmod: toISO(now), changefreq: 'daily', priority: 1.0 },
-    { loc: `${BASE_URL}/map`, lastmod: toISO(now), changefreq: 'daily', priority: 0.8 },
+    { loc: BASE_URL, lastmod: toISO(now), changefreq: 'daily', priority: 1.0, alternates: i18nAlternates('') },
+    { loc: `${BASE_URL}/en`, lastmod: toISO(now), changefreq: 'daily', priority: 0.9, alternates: i18nAlternates('') },
+    { loc: `${BASE_URL}/map`, lastmod: toISO(now), changefreq: 'daily', priority: 0.8, alternates: i18nAlternates('/map') },
+    { loc: `${BASE_URL}/en/map`, lastmod: toISO(now), changefreq: 'daily', priority: 0.7, alternates: i18nAlternates('/map') },
     { loc: `${BASE_URL}/blog`, lastmod: toISO(now), changefreq: 'weekly', priority: 0.8 },
     { loc: `${BASE_URL}/ueber-uns`, lastmod: toISO(now), changefreq: 'monthly', priority: 0.7 },
     { loc: `${BASE_URL}/quellen`, lastmod: toISO(now), changefreq: 'monthly', priority: 0.4 },
@@ -256,7 +275,7 @@ export async function GET(): Promise<NextResponse> {
   // ─── Render XML ─────────────────────────────────────────────────────────
   const body = [
     '<?xml version="1.0" encoding="UTF-8"?>',
-    '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',
+    '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">',
     ...entries.map(renderEntry),
     '</urlset>',
   ].join('\n');

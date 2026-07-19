@@ -1,10 +1,11 @@
 'use client';
 
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { useTranslations } from 'next-intl';
+import { Link, usePathname } from '@/i18n/navigation';
 import { V4Logo } from './V4Logo';
 import { V4TopNavAuth } from './V4TopNavAuth';
 import { V4SearchInput } from './V4SearchInput';
+import { V4LocaleSwitcher } from './V4LocaleSwitcher';
 
 /**
  * V4TopNav — global sticky top navigation introduced in v4 redesign Phase 1.
@@ -28,15 +29,16 @@ import { V4SearchInput } from './V4SearchInput';
 
 interface NavItem {
   href: string;
-  label: string;
+  /** Message-Key im Namespace `Nav` (fn-17 i18n) */
+  labelKey: 'discover' | 'artists' | 'map' | 'plans';
   matches: ReadonlyArray<string>;
 }
 
 const NAV_ITEMS: ReadonlyArray<NavItem> = [
-  { href: '/entdecken', label: 'Entdecken',   matches: ['/', '/entdecken'] },
-  { href: '/artists', label: 'Künstler',    matches: ['/artists'] },
-  { href: '/map',     label: 'Karte',       matches: ['/map'] },
-  { href: '/plans',   label: 'Meine Pläne', matches: ['/plans', '/saved'] },
+  { href: '/entdecken', labelKey: 'discover', matches: ['/', '/entdecken'] },
+  { href: '/artists', labelKey: 'artists',  matches: ['/artists'] },
+  { href: '/map',     labelKey: 'map',      matches: ['/map'] },
+  { href: '/plans',   labelKey: 'plans',    matches: ['/plans', '/saved'] },
 ];
 
 function isActive(pathname: string, matches: ReadonlyArray<string>): boolean {
@@ -46,6 +48,7 @@ function isActive(pathname: string, matches: ReadonlyArray<string>): boolean {
 }
 
 export function V4TopNav() {
+  const t = useTranslations('Nav');
   const pathname = usePathname() ?? '/';
 
   // /widget/* wird als iframe in fremde Seiten eingebettet — dort darf
@@ -58,11 +61,11 @@ export function V4TopNav() {
       data-v4-topnav
     >
       <div className="h-full max-w-[1180px] mx-auto px-4 md:px-14 flex items-center gap-5">
-        <Link href="/" className="press-haptic flex items-center" aria-label="Startseite">
+        <Link href="/" className="press-haptic flex items-center" aria-label={t('home')}>
           <V4Logo />
         </Link>
 
-        <nav className="hidden md:flex gap-0.5 ml-3.5" aria-label="Hauptnavigation">
+        <nav className="hidden md:flex gap-0.5 ml-3.5" aria-label={t('mainNav')}>
           {NAV_ITEMS.map(item => {
             const active = isActive(pathname, item.matches);
             return (
@@ -77,7 +80,7 @@ export function V4TopNav() {
                     : 'text-[var(--v4-ink-50)] hover:text-[var(--v4-ink-70)]')
                 }
               >
-                {item.label}
+                {t(item.labelKey)}
               </Link>
             );
           })}
@@ -86,6 +89,8 @@ export function V4TopNav() {
         <div className="flex-1" />
 
         <V4SearchInput variant="nav"/>
+
+        <V4LocaleSwitcher />
 
         <V4TopNavAuth />
       </div>

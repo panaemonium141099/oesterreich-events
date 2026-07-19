@@ -1,7 +1,8 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import Link from 'next/link';
+import { useTranslations } from 'next-intl';
+import { Link } from '@/i18n/navigation';
 import type { Session } from '@supabase/supabase-js';
 import { createClient } from '@/lib/supabase/client';
 
@@ -40,6 +41,7 @@ function initialFromSession(session: Session, profile: MiniProfile | null): stri
 }
 
 export function V4TopNavAuth() {
+  const t = useTranslations('Nav');
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<MiniProfile | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -106,7 +108,7 @@ export function V4TopNavAuth() {
         href="/auth/login"
         className="press-haptic inline-flex items-center px-4 py-2 rounded-full text-sm font-semibold text-[var(--v4-ink)] bg-[var(--v4-ink)]/0 border border-[var(--v4-hairline-3)] hover:bg-[var(--v4-ink)]/[0.04] transition-colors"
       >
-        Anmelden
+        {t('login')}
       </Link>
     );
   }

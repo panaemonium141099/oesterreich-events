@@ -1,0 +1,13 @@
+{
+  "branch_name": "fn-17-i18n-englische-version-unter-en-next",
+  "created_at": "2026-07-18T07:31:38.639390Z",
+  "depends_on_epics": [],
+  "id": "fn-17-i18n-englische-version-unter-en-next",
+  "next_task": 1,
+  "plan_review_status": "unknown",
+  "plan_reviewed_at": null,
+  "spec_path": ".flow/specs/fn-17-i18n-englische-version-unter-en-next.md",
+  "status": "open",
+  "title": "i18n: Englische Version unter /en (next-intl, DE-URLs unveraendert)",
+  "updated_at": "2026-07-18T07:32:15.009229Z"
+}

@@ -1,5 +1,9 @@
 import type { Metadata } from 'next';
+import { hasLocale } from 'next-intl';
+import { getTranslations } from 'next-intl/server';
 import { AppShell } from '@/components/Layout/AppShell';
+import { routing, type AppLocale } from '@/i18n/routing';
+import { localeAlternates } from '@/lib/i18n-seo';
 // fn-15.6: map-only CSS (mapbox/leaflet markers, popups, MapV3 chrome,
 // map-loading overlay) was extracted from globals.css and lives in
 // src/app/map-scope.css. Importing it here means it only ships on
@@ -7,25 +11,30 @@ import { AppShell } from '@/components/Layout/AppShell';
 // longer carry ~10 KB of map styles in their critical CSS chunk.
 import '../map-scope.css';
 
-export const metadata: Metadata = {
-  title: 'Event-Karte Österreich — Alle Veranstaltungen auf einer Karte',
-  description:
-    'Interaktive Karte mit über 40.000 Events in Österreich. Finde Konzerte, Festivals, Märkte, Sport und Kultur in deiner Nähe — filterbar nach Kategorie, Region und Datum.',
-  alternates: {
-    canonical: 'https://lasstreffen.at/map',
-    languages: {
-      'de-AT': 'https://lasstreffen.at/map',
-      'x-default': 'https://lasstreffen.at/map',
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale: rawLocale } = await params;
+  const locale: AppLocale = hasLocale(routing.locales, rawLocale)
+    ? rawLocale
+    : routing.defaultLocale;
+  const t = await getTranslations({ locale, namespace: 'MetaMap' });
+  const alternates = localeAlternates('/map', locale);
+
+  return {
+    title: t('title'),
+    description: t('description'),
+    alternates,
+    openGraph: {
+      title: t('ogTitle'),
+      description: t('ogDescription'),
+      type: 'website',
+      url: alternates.canonical,
     },
-  },
-  openGraph: {
-    title: 'Event-Karte Österreich — Alle Veranstaltungen auf einer Karte',
-    description:
-      'Interaktive Karte mit über 40.000 Events in Österreich. Konzerte, Festivals, Märkte und mehr.',
-    type: 'website',
-    url: 'https://lasstreffen.at/map',
-  },
-};
+  };
+}
 
 /**
  * /map — anonymously browsable map of all events with auth-aware

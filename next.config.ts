@@ -1,5 +1,6 @@
 import type { NextConfig } from 'next';
 import bundleAnalyzer from '@next/bundle-analyzer';
+import createNextIntlPlugin from 'next-intl/plugin';
 import { readFileSync, existsSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 import path from 'node:path';
@@ -482,4 +483,7 @@ const withBundleAnalyzer = bundleAnalyzer({
   enabled: process.env.ANALYZE === 'true',
 });
 
-export default withBundleAnalyzer(nextConfig);
+// fn-17: next-intl Plugin verdrahtet src/i18n/request.ts als Request-Config
+const withNextIntl = createNextIntlPlugin();
+
+export default withBundleAnalyzer(withNextIntl(nextConfig));
