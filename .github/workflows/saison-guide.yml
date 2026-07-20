@@ -75,7 +75,7 @@ jobs:
             --title "Saison-Guide: $slug" \
             --body "Automatisch generierter Saison-Guide (Quelle: echte DB-Events + Gemini, Script generate-saison-guide.ts).
 
-**Vor dem Merge prüfen:** Fakten/Termine/Preise der genannten Events, Tonfall, interne Links. Merge = publiziert beim nächsten Deploy (Blog-Route ISR).
+          **Vor dem Merge prüfen:** Fakten/Termine/Preise der genannten Events, Tonfall, interne Links. Merge = publiziert beim nächsten Deploy (Blog-Route ISR).
 
-🤖 Generated with [Claude Code](https://claude.com/claude-code)" \
+          🤖 Generated with [Claude Code](https://claude.com/claude-code)" \
             --base master || echo "PR existiert vermutlich schon."
