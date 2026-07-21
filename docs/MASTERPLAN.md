@@ -1,6 +1,6 @@
 # MASTERPLAN — lasstreffen.at
 
-> **Stand: 2026-07-07.** Dieses Dokument ist die gemeinsame Kontext-Basis für alle Sessions
+> **Stand: 2026-07-20.** Dieses Dokument ist die gemeinsame Kontext-Basis für alle Sessions
 > (lokal, Web, Agents). Es hält fest: Ist-Zustand mit echten Zahlen, getroffene
 > Grundsatz-Entscheidungen, kritische Betriebsbefunde und die priorisierte Roadmap.
 > Bei größeren Änderungen (Entscheidung revidiert, Meilenstein erledigt, neue Baseline
@@ -129,6 +129,30 @@ beschriebene DB. Cache-Miss trifft anonyme User nach Ablauf der Revalidate-Fenst
 
 **Fazit:** instant = Cache-Hit; >60 s = Dynamic-Render (eingeloggt oder Cache kalt)
 × DB-Lastwelle. Deploys/Code werden nicht überschrieben.
+
+### 3.6 Alle GitHub-Actions-Crons tot 19.–20.07. (npm-Versions-Drift) — behoben 2026-07-20
+
+Zwei unabhängige Bugs legten sämtliche geplanten Workflows lahm:
+
+**(a) `npm ci` failte sofort (≈1 s) in import-eventim, scrape-events (alle
+Shards + venues + post).** Ursache: Der fn-17-i18n-Merge (next-intl) am 19.07.
+regenerierte `package-lock.json` mit **npm 11 (Node 24)**; die Runner liefen
+Node 20 = **npm 10**, das den Lock ablehnte (`EUSAGE … Missing:
+@swc/helpers@0.5.23 from lock file`). Lokal + Vercel unauffällig, weil Vercel
+`npm install` (lenient) nutzt, nicht das strikte `npm ci`. Reproduziert mit
+`npx npm@10 ci`. **Fix (`a473b2d`):** Lock mit npm 10 regeneriert; alle
+Workflows Node 20→22 (passt zu `engines.node=22.x`); `.nvmrc=22` gegen den
+Drift über mehrere Dev-Maschinen. ⚠️ **Stehender Merker:** wer auf Node 24
+(npm 11) `npm install` macht und den Lock pusht, bricht CI sofort wieder —
+alle Maschinen müssen Node 22 nutzen (jetzt via `.nvmrc`).
+
+**(b) saison-guide.yml war ein Startup-Failure** (0 Jobs, event=push, seit
+15.07.): der `gh pr create --body`-Text stand auf Spalte 0 und beendete den
+YAML-`run: |`-Block-Scalar → „Invalid workflow file" (`expected ':' … 78:7`).
+**Fix (`bba7e88`):** Body-Zeilen auf Block-Einrückung gezogen; mit
+`npx js-yaml` gegen alle vier Workflows als valide verifiziert. Lehre: neue/
+geänderte Workflow-YAML immer mit einem echten Parser prüfen, nicht nur
+visuell. Details als Auto-Memory `project-ci-npm-lockfile-drift`.
 
 ## 4. Getroffene Grundsatz-Entscheidungen (2026-07-07)
 
