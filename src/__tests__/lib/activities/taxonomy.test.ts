@@ -68,10 +68,11 @@ describe('mapTopics', () => {
       'GasteinCard Broschüre',
       'Kart fahren',
     ]);
+    // Topic-Namenslisten sind dedupliziert + sortiert (reihenfolge-stabil).
     expect(result.matchedTopics).toEqual([
-      'Kartsport/Kartbahn',
       'Bergbahn/Seilbahn',
       'Kart fahren',
+      'Kartsport/Kartbahn',
     ]);
     // Kartbahn (mixed) + Bergbahn (outdoor) -> Konflikt -> mixed
     expect(result.setting).toBe('mixed');
@@ -128,12 +129,14 @@ describe('mapTopics', () => {
     }
   });
 
-  it('Ergebnis ist reihenfolge-unabhaengig (Tags sortiert, Setting mengenbasiert)', () => {
-    const a = mapTopics(['Museum', 'Kino', 'Freibad']);
-    const b = mapTopics(['Freibad', 'Museum', 'Kino']);
-    expect(a.tags).toEqual(b.tags);
-    expect(a.setting).toBe(b.setting);
+  it('Ergebnis ist reihenfolge- und duplikat-unabhaengig (auch die Topic-Listen)', () => {
+    const a = mapTopics(['Museum', 'Kino', 'Freibad', 'Restaurant', 'Hochkönigcam']);
+    const b = mapTopics(['Hochkönigcam', 'Freibad', 'Restaurant', 'Museum', 'Kino', 'Museum', ' museum ']);
+    expect(a).toEqual(b);
     expect(a.tags).toEqual([...a.tags].sort());
+    expect(a.matchedTopics).toEqual(['Freibad', 'Kino', 'Museum']);
+    expect(a.excludedTopics).toEqual(['Restaurant']);
+    expect(a.unmappedTopics).toEqual(['Hochkönigcam']);
   });
 
   it('dedupliziert Tags ueber mehrere Topics', () => {

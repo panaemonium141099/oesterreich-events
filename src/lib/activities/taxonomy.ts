@@ -233,38 +233,46 @@ export interface TopicMapResult {
   tags: Tag[];
   /** Aggregiertes Wetter-Signal (Regel s. Kopfkommentar); null = unbekannt. */
   setting: ActivitySetting | null;
-  /** Original-Namen der Topics, die in der Whitelist gefunden wurden. */
+  /** Whitelist-Treffer: Original-Namen, dedupliziert + sortiert. */
   matchedTopics: string[];
-  /** Original-Namen der Topics auf der Blockliste (Gastro/Shops/...). */
+  /** Blocklisten-Treffer (Gastro/Shops/...): dedupliziert + sortiert. */
   excludedTopics: string[];
-  /** Original-Namen weder gemappter noch geblockter Topics (Skip-Log). */
+  /** Weder gemappt noch geblockt (Skip-Log): dedupliziert + sortiert. */
   unmappedTopics: string[];
+}
+
+/** Dedupliziert per normalisiertem Key (erster Original-Name gewinnt) und
+ *  sortiert codepoint-stabil — Ergebnis unabhaengig von Input-Reihenfolge
+ *  und -Duplikaten (Mirror-Regionen liefern identische Topic-Mengen in
+ *  unterschiedlicher Reihenfolge). */
+function dedupeSorted(rawNames: Map<string, string>): string[] {
+  return [...rawNames.values()].sort();
 }
 
 /**
  * Mappt die Deskline-Topics eines POI auf Tags + Setting.
- * Deterministisch: Ergebnis haengt nur von der Topic-MENGE ab, nicht von
- * der Reihenfolge (Tags sortiert, Setting per Mengen-Aggregation).
+ * Deterministisch: das GESAMTE Ergebnis (inkl. der Topic-Namenslisten)
+ * haengt nur von der Topic-MENGE ab, nicht von Reihenfolge oder Duplikaten.
  */
 export function mapTopics(topicNames: readonly string[]): TopicMapResult {
   const tagSet = new Set<Tag>();
   const settings = new Set<ActivitySetting>();
-  const matchedTopics: string[] = [];
-  const excludedTopics: string[] = [];
-  const unmappedTopics: string[] = [];
+  const matched = new Map<string, string>();
+  const excluded = new Map<string, string>();
+  const unmapped = new Map<string, string>();
 
   for (const raw of topicNames) {
     const key = normalizeTopicName(raw);
     if (!key) continue;
     const mapping = TOPIC_WHITELIST[key];
     if (mapping) {
-      matchedTopics.push(raw);
+      if (!matched.has(key)) matched.set(key, raw);
       for (const t of mapping.tags) tagSet.add(t);
       settings.add(mapping.setting);
     } else if (EXCLUDED_TOPICS.has(key)) {
-      excludedTopics.push(raw);
+      if (!excluded.has(key)) excluded.set(key, raw);
     } else {
-      unmappedTopics.push(raw);
+      if (!unmapped.has(key)) unmapped.set(key, raw);
     }
   }
 
@@ -279,9 +287,9 @@ export function mapTopics(topicNames: readonly string[]): TopicMapResult {
   return {
     tags: [...tagSet].sort(),
     setting,
-    matchedTopics,
-    excludedTopics,
-    unmappedTopics,
+    matchedTopics: dedupeSorted(matched),
+    excludedTopics: dedupeSorted(excluded),
+    unmappedTopics: dedupeSorted(unmapped),
   };
 }
 

@@ -52,8 +52,11 @@ export function slugifyActivityName(name: string): string {
 
   if (slug.length > MAX_NAME_SLUG_LENGTH) {
     slug = slug.slice(0, MAX_NAME_SLUG_LENGTH);
+    // Nie mitten im Wort abschneiden: auf den letzten Hyphen zuruecktrimmen,
+    // egal wo er liegt. Nur wenn das erste Wort selbst >60 Zeichen ist
+    // (kein Hyphen vorhanden), bleibt der harte Schnitt.
     const lastHyphen = slug.lastIndexOf('-');
-    if (lastHyphen > MAX_NAME_SLUG_LENGTH * 0.5) {
+    if (lastHyphen > 0) {
       slug = slug.slice(0, lastHyphen);
     }
   }

@@ -45,14 +45,36 @@ export interface NormalizedOpeningWindow {
   weekdays: number | null;
 }
 
-/** 'YYYY-MM-DD' aus Deskline-Datumsstrings ('2026-05-05T00:00:00'). */
+/**
+ * 'YYYY-MM-DD' aus Deskline-Datumsstrings ('2026-05-05T00:00:00').
+ * Semantisch validiert: nicht existierende Kalenderdaten ('2026-13-40',
+ * '2026-02-30') werden verworfen — dieses Modul speist den EINZIGEN
+ * persistierten opening_times-Lesepfad, kaputte Upstream-Daten duerfen
+ * nicht als valide Fenster durchrutschen.
+ */
 function parseDate(raw: unknown): string | null {
   if (typeof raw !== 'string') return null;
-  const m = /^(\d{4}-\d{2}-\d{2})/.exec(raw.trim());
-  return m ? m[1] : null;
+  const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(raw.trim());
+  if (!m) return null;
+  const year = Number(m[1]);
+  const month = Number(m[2]);
+  const day = Number(m[3]);
+  const d = new Date(Date.UTC(year, month - 1, day));
+  if (
+    d.getUTCFullYear() !== year ||
+    d.getUTCMonth() !== month - 1 ||
+    d.getUTCDate() !== day
+  ) {
+    return null;
+  }
+  return `${m[1]}-${m[2]}-${m[3]}`;
 }
 
-/** 'HH:MM' aus 'HH:MM' oder 'HH:MM:SS'; fehlend/leer -> '00:00'. */
+/**
+ * 'HH:MM' aus 'HH:MM' oder 'HH:MM:SS'; fehlend/leer -> '00:00'.
+ * Nur reale Uhrzeiten 00:00-23:59 — '24:xx' liefert Deskline nicht
+ * (Mitternacht/durchgehend ist im Vertrag '00:00') und wird verworfen.
+ */
 function parseTime(raw: unknown): string | null {
   if (raw == null || raw === '') return '00:00';
   if (typeof raw !== 'string') return null;
@@ -60,7 +82,7 @@ function parseTime(raw: unknown): string | null {
   if (!m) return null;
   const hour = Number(m[1]);
   const minute = Number(m[2]);
-  if (hour > 24 || minute > 59) return null;
+  if (hour > 23 || minute > 59) return null;
   return `${String(hour).padStart(2, '0')}:${m[2]}`;
 }
 

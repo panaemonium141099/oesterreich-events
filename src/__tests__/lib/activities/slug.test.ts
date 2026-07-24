@@ -49,6 +49,18 @@ describe('slugifyActivityName', () => {
     expect(slug).toBe('a'.repeat(40));
   });
 
+  it('kappt auch bei fruehem Trenner nie mitten im Wort', () => {
+    // Erster Trenner in der vorderen Haelfte: Rueckschnitt trotzdem auf den
+    // letzten Hyphen, kein Mid-Word-Cut.
+    const slug = slugifyActivityName('kurz ' + 'x'.repeat(70));
+    expect(slug).toBe('kurz');
+  });
+
+  it('erstes Wort laenger als 60 Zeichen -> harter Schnitt (kein Hyphen vorhanden)', () => {
+    const slug = slugifyActivityName('y'.repeat(80));
+    expect(slug).toBe('y'.repeat(60));
+  });
+
   it('leerer/unbrauchbarer Name -> Fallback', () => {
     expect(slugifyActivityName('')).toBe('aktivitaet');
     expect(slugifyActivityName('---')).toBe('aktivitaet');

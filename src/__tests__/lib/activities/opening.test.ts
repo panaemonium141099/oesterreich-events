@@ -66,6 +66,24 @@ describe('normalizeOpeningTimes (Epic-E8-Vertrag)', () => {
     ]);
   });
 
+  it('nicht existierende Kalenderdaten werden verworfen (2026-13-40, 2026-02-30)', () => {
+    const raw = [
+      { dateFrom: '2026-13-40T00:00:00', dateTo: '2026-12-31T00:00:00', timeFrom: '09:00', timeTo: '17:00', weekdays: 1 },
+      { dateFrom: '2026-02-30T00:00:00', dateTo: '2026-12-31T00:00:00', timeFrom: '09:00', timeTo: '17:00', weekdays: 1 },
+      { dateFrom: '2026-02-28T00:00:00', dateTo: '2026-12-31T00:00:00', timeFrom: '09:00', timeTo: '17:00', weekdays: 1 },
+    ];
+    expect(normalizeOpeningTimes(raw)).toEqual([
+      { from: '2026-02-28', to: '2026-12-31', timeFrom: '09:00', timeTo: '17:00', weekdays: 1 },
+    ]);
+  });
+
+  it('invalide Uhrzeiten werden verworfen (24:30, 09:75)', () => {
+    const base = { dateFrom: '2026-01-01T00:00:00', dateTo: '2026-12-31T00:00:00', weekdays: 1 };
+    expect(normalizeOpeningTimes([{ ...base, timeFrom: '24:30', timeTo: '17:00' }])).toBeNull();
+    expect(normalizeOpeningTimes([{ ...base, timeFrom: '09:00', timeTo: '09:75' }])).toBeNull();
+    expect(normalizeOpeningTimes([{ ...base, timeFrom: '23:59', timeTo: '00:00' }])).not.toBeNull();
+  });
+
   it('dateTo vor dateFrom -> Eintrag verworfen', () => {
     const raw = [
       { dateFrom: '2026-10-01T00:00:00', dateTo: '2026-05-01T00:00:00', timeFrom: '09:00', timeTo: '17:00', weekdays: 1 },
