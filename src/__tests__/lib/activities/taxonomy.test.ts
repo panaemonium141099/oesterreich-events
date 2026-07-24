@@ -149,4 +149,19 @@ describe('mapTopics', () => {
     expect(result.matchedTopics).toHaveLength(2);
     expect(result.setting).toBe('outdoor');
   });
+
+  it('Spelling-Wahl ist reihenfolge-unabhaengig bei Case/Whitespace-Varianten', () => {
+    const a = mapTopics([' museum ', 'Museum']);
+    const b = mapTopics(['Museum', ' museum ']);
+    expect(a).toEqual(b);
+    expect(a.matchedTopics).toEqual(['Museum']); // codepoint-kleinste Anzeigeform
+  });
+
+  it('crasht nicht bei Nicht-String-Topics (Fremddaten-Payload)', () => {
+    const result = mapTopics([null, undefined, 42, {}, ['Freibad'], 'Freibad', '']);
+    expect(result.matchedTopics).toEqual(['Freibad']);
+    expect(result.setting).toBe('outdoor');
+    expect(result.unmappedTopics).toEqual([]);
+    expect(result.excludedTopics).toEqual([]);
+  });
 });

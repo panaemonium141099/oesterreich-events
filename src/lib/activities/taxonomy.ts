@@ -241,10 +241,21 @@ export interface TopicMapResult {
   unmappedTopics: string[];
 }
 
-/** Dedupliziert per normalisiertem Key (erster Original-Name gewinnt) und
- *  sortiert codepoint-stabil — Ergebnis unabhaengig von Input-Reihenfolge
- *  und -Duplikaten (Mirror-Regionen liefern identische Topic-Mengen in
- *  unterschiedlicher Reihenfolge). */
+/** Kanonische Anzeigeform eines Topic-Namens (Original-Case, Whitespace
+ *  kollabiert). Basis fuer die deterministische Spelling-Wahl. */
+function displayTopicName(raw: string): string {
+  return raw.normalize('NFC').replace(/[\s ]+/g, ' ').trim();
+}
+
+/** Merkt sich pro normalisiertem Key die codepoint-kleinste Anzeigeform —
+ *  dadurch ist die Spelling-Wahl unabhaengig von der Input-Reihenfolge
+ *  (Mirror-Regionen liefern Case-/Whitespace-Varianten in beliebiger Folge). */
+function keepSmallestSpelling(store: Map<string, string>, key: string, raw: string): void {
+  const display = displayTopicName(raw);
+  const existing = store.get(key);
+  if (existing === undefined || display < existing) store.set(key, display);
+}
+
 function dedupeSorted(rawNames: Map<string, string>): string[] {
   return [...rawNames.values()].sort();
 }
@@ -252,9 +263,12 @@ function dedupeSorted(rawNames: Map<string, string>): string[] {
 /**
  * Mappt die Deskline-Topics eines POI auf Tags + Setting.
  * Deterministisch: das GESAMTE Ergebnis (inkl. der Topic-Namenslisten)
- * haengt nur von der Topic-MENGE ab, nicht von Reihenfolge oder Duplikaten.
+ * haengt nur von der Topic-MENGE ab, nicht von Reihenfolge, Duplikaten
+ * oder Case-/Whitespace-Varianten. Input ist bewusst `unknown[]` —
+ * Deskline-Payloads sind Fremddaten; Nicht-Strings werden uebersprungen
+ * statt den Import-Lauf zu crashen.
  */
-export function mapTopics(topicNames: readonly string[]): TopicMapResult {
+export function mapTopics(topicNames: readonly unknown[]): TopicMapResult {
   const tagSet = new Set<Tag>();
   const settings = new Set<ActivitySetting>();
   const matched = new Map<string, string>();
@@ -262,17 +276,18 @@ export function mapTopics(topicNames: readonly string[]): TopicMapResult {
   const unmapped = new Map<string, string>();
 
   for (const raw of topicNames) {
+    if (typeof raw !== 'string') continue;
     const key = normalizeTopicName(raw);
     if (!key) continue;
     const mapping = TOPIC_WHITELIST[key];
     if (mapping) {
-      if (!matched.has(key)) matched.set(key, raw);
+      keepSmallestSpelling(matched, key, raw);
       for (const t of mapping.tags) tagSet.add(t);
       settings.add(mapping.setting);
     } else if (EXCLUDED_TOPICS.has(key)) {
-      if (!excluded.has(key)) excluded.set(key, raw);
+      keepSmallestSpelling(excluded, key, raw);
     } else {
-      if (!unmapped.has(key)) unmapped.set(key, raw);
+      keepSmallestSpelling(unmapped, key, raw);
     }
   }
 

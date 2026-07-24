@@ -84,6 +84,18 @@ describe('normalizeOpeningTimes (Epic-E8-Vertrag)', () => {
     expect(normalizeOpeningTimes([{ ...base, timeFrom: '23:59', timeTo: '00:00' }])).not.toBeNull();
   });
 
+  it('fehlende/leere Zeiten werden NIE als durchgehend publiziert (Fenster verworfen)', () => {
+    const base = { dateFrom: '2026-01-01T00:00:00', dateTo: '2026-12-31T00:00:00', weekdays: 1 };
+    expect(normalizeOpeningTimes([{ ...base }])).toBeNull();
+    expect(normalizeOpeningTimes([{ ...base, timeFrom: '', timeTo: '' }])).toBeNull();
+    expect(normalizeOpeningTimes([{ ...base, timeFrom: '09:00' }])).toBeNull();
+    expect(normalizeOpeningTimes([{ ...base, timeFrom: null, timeTo: '17:00' }])).toBeNull();
+    // Nur EXPLIZITES 00:00/00:00 aus der Quelle bedeutet durchgehend.
+    expect(normalizeOpeningTimes([{ ...base, timeFrom: '00:00', timeTo: '00:00' }])).toEqual([
+      { from: '2026-01-01', to: '2026-12-31', timeFrom: '00:00', timeTo: '00:00', weekdays: 1 },
+    ]);
+  });
+
   it('dateTo vor dateFrom -> Eintrag verworfen', () => {
     const raw = [
       { dateFrom: '2026-10-01T00:00:00', dateTo: '2026-05-01T00:00:00', timeFrom: '09:00', timeTo: '17:00', weekdays: 1 },

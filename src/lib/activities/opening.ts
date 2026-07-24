@@ -71,13 +71,15 @@ function parseDate(raw: unknown): string | null {
 }
 
 /**
- * 'HH:MM' aus 'HH:MM' oder 'HH:MM:SS'; fehlend/leer -> '00:00'.
- * Nur reale Uhrzeiten 00:00-23:59 — '24:xx' liefert Deskline nicht
- * (Mitternacht/durchgehend ist im Vertrag '00:00') und wird verworfen.
+ * 'HH:MM' aus 'HH:MM' oder 'HH:MM:SS'. Nur reale Uhrzeiten 00:00-23:59 —
+ * '24:xx' liefert Deskline nicht (Mitternacht/durchgehend ist im Vertrag
+ * '00:00') und wird verworfen. Fehlende/leere Zeiten sind INVALIDE (Fenster
+ * wird uebersprungen): '00:00'/'00:00' bedeutet im Vertrag "durchgehend
+ * geoeffnet" und darf nur entstehen, wenn die Quelle das explizit sendet —
+ * unvollstaendige Upstream-Daten duerfen nie als 24/7 publiziert werden.
  */
 function parseTime(raw: unknown): string | null {
-  if (raw == null || raw === '') return '00:00';
-  if (typeof raw !== 'string') return null;
+  if (typeof raw !== 'string' || raw.trim() === '') return null;
   const m = /^(\d{1,2}):(\d{2})(?::\d{2})?$/.exec(raw.trim());
   if (!m) return null;
   const hour = Number(m[1]);
