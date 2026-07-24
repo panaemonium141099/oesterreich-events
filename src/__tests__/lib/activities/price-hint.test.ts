@@ -72,4 +72,9 @@ describe('extractPriceHint — Anti-Patterns', () => {
   it('Euro als Wortbestandteil matcht nicht (Eurotherme)', () => {
     expect(extractPriceHint('Die Eurotherme 4 Sterne')).toBeNull();
   });
+
+  it('eur-Suffix normaler Woerter ist kein Waehrungsmarker (Friseur, Coiffeur)', () => {
+    expect(extractPriceHint('Friseur 5 Sterne Service')).toBeNull();
+    expect(extractPriceHint('Coiffeur 12 im Zentrum')).toBeNull();
+  });
 });

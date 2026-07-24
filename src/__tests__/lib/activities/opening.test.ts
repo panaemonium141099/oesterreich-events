@@ -47,6 +47,17 @@ describe('normalizeOpeningTimes (Epic-E8-Vertrag)', () => {
     expect(normalizeOpeningTimes(raw)![0].weekdays).toBeNull();
   });
 
+  it('malformte weekdays verwerfen das Fenster (nie stillschweigend "alle Tage")', () => {
+    const base = { dateFrom: '2026-01-01T00:00:00', dateTo: '2026-12-31T00:00:00', timeFrom: '09:00', timeTo: '17:00' };
+    expect(normalizeOpeningTimes([{ ...base }])).toBeNull();                    // fehlend
+    expect(normalizeOpeningTimes([{ ...base, weekdays: '31' }])).toBeNull();    // String
+    expect(normalizeOpeningTimes([{ ...base, weekdays: 255 }])).toBeNull();     // > 127
+    expect(normalizeOpeningTimes([{ ...base, weekdays: -1 }])).toBeNull();      // negativ
+    expect(normalizeOpeningTimes([{ ...base, weekdays: 3.5 }])).toBeNull();     // nicht-ganzzahlig
+    // Explizite 0/127 bleiben valide (alle Tage).
+    expect(normalizeOpeningTimes([{ ...base, weekdays: 0 }])![0].weekdays).toBeNull();
+  });
+
   it('akzeptiert HH:MM:SS und normalisiert auf HH:MM', () => {
     const raw = [
       { dateFrom: '2026-05-01T00:00:00', dateTo: '2026-10-31T00:00:00', timeFrom: '09:00:00', timeTo: '17:30:00', weekdays: 96 },

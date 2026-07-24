@@ -22,14 +22,18 @@ const NUMBER = String.raw`\d{1,4}(?:\.\d{3})*(?:,\d{1,2})?|\d{1,4}(?:\.\d{1,2})?
 const NOT_IN_NUMBER_BEFORE = String.raw`(?<![\d.,])`;
 const NOT_IN_NUMBER_AFTER = String.raw`(?!\d|[.,]\d)`;
 
+// EUR/Euro nur als eigenstaendiges Token (\b beidseitig) — sonst wuerde das
+// 'eur'-Suffix normaler Woerter ("Friseur 5") als Waehrungsmarker zaehlen.
+const EUR_WORD = String.raw`\beur(?:o)?\b`;
+
 // € 12 / EUR 12,50 / Euro 9,90  — Marker vor dem Betrag
 const CURRENCY_BEFORE = new RegExp(
-  String.raw`(?:€|eur(?:o)?\b)\s*(${NUMBER})${NOT_IN_NUMBER_AFTER}`,
+  String.raw`(?:€|${EUR_WORD})\s*(${NUMBER})${NOT_IN_NUMBER_AFTER}`,
   'gi',
 );
 // 12 € / 12,50 EUR / 9 Euro — Marker nach dem Betrag
 const CURRENCY_AFTER = new RegExp(
-  String.raw`${NOT_IN_NUMBER_BEFORE}(${NUMBER})${NOT_IN_NUMBER_AFTER}\s*(?:€|eur(?:o)?\b)`,
+  String.raw`${NOT_IN_NUMBER_BEFORE}(${NUMBER})${NOT_IN_NUMBER_AFTER}\s*(?:€|${EUR_WORD})`,
   'gi',
 );
 // ab/von (ca.) unmittelbar vor dem Match -> "ab €"-Semantik

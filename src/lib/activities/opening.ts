@@ -11,9 +11,11 @@
  *   Array von { from: 'YYYY-MM-DD', to: 'YYYY-MM-DD',
  *               timeFrom: 'HH:MM', timeTo: 'HH:MM',
  *               weekdays: <Bitmaske Mo=1..So=64> | null }
- *   - weekdays null = alle Tage (Deskline 0 und 127 werden dahin normalisiert;
- *     die Deskline-Bitmaske ist ebenfalls Mo=1..So=64, live gegen
- *     Restaurant-Ruhetage verifiziert)
+ *   - weekdays null = alle Tage (NUR explizite Deskline-Werte 0 und 127
+ *     werden dahin normalisiert; fehlende/malformte weekdays verwerfen das
+ *     ganze Fenster — nie stillschweigend verbreitern). Die Deskline-
+ *     Bitmaske ist ebenfalls Mo=1..So=64, live gegen Restaurant-Ruhetage
+ *     verifiziert.
  *   - timeFrom == timeTo == '00:00' = durchgehend geoeffnet
  *   - vergangene Saisonfenster bleiben erhalten (Filterung ist Sache des
  *     Lesers); das Deskline-Original wandert zusaetzlich unveraendert in
@@ -89,11 +91,22 @@ function parseTime(raw: unknown): string | null {
   return `${String(hour).padStart(2, '0')}:${m[2]}`;
 }
 
-/** Bitmaske 1..126 bleibt; 0 / 127 / fehlend / invalide -> null (alle Tage). */
-function parseWeekdays(raw: unknown): number | null {
-  if (typeof raw !== 'number' || !Number.isInteger(raw)) return null;
-  if (raw <= 0 || raw >= ALL_WEEKDAYS) return null;
-  return raw;
+/**
+ * Tri-State-Parse der Wochentags-Bitmaske:
+ *  - 0 / 127 = EXPLIZIT "alle Tage" -> { ok, weekdays: null }
+ *  - 1..126  = echte Einschraenkung  -> { ok, weekdays: Maske }
+ *  - alles andere (fehlend, String, negativ, >127, nicht-ganzzahlig) ist
+ *    INVALIDE -> Fenster wird verworfen. Malformte Upstream-Daten duerfen
+ *    nie als "alle Tage geoeffnet" publiziert werden (gleiche Regel wie
+ *    bei fehlenden Uhrzeiten).
+ */
+function parseWeekdays(raw: unknown):
+  | { ok: true; weekdays: number | null }
+  | { ok: false } {
+  if (typeof raw !== 'number' || !Number.isInteger(raw)) return { ok: false };
+  if (raw < 0 || raw > ALL_WEEKDAYS) return { ok: false };
+  if (raw === 0 || raw === ALL_WEEKDAYS) return { ok: true, weekdays: null };
+  return { ok: true, weekdays: raw };
 }
 
 function windowSortKey(w: NormalizedOpeningWindow): string {
@@ -120,12 +133,15 @@ export function normalizeOpeningTimes(raw: unknown): NormalizedOpeningWindow[] |
     const timeTo = parseTime(e.timeTo);
     if (timeFrom == null || timeTo == null) continue;
 
+    const weekdays = parseWeekdays(e.weekdays);
+    if (!weekdays.ok) continue;
+
     const window: NormalizedOpeningWindow = {
       from,
       to,
       timeFrom,
       timeTo,
-      weekdays: parseWeekdays(e.weekdays),
+      weekdays: weekdays.weekdays,
     };
     byKey.set(windowSortKey(window), window);
   }
