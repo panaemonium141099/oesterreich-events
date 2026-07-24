@@ -56,7 +56,10 @@ export interface NormalizedOpeningWindow {
  */
 function parseDate(raw: unknown): string | null {
   if (typeof raw !== 'string') return null;
-  const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(raw.trim());
+  // Exakt 'YYYY-MM-DD' oder das Deskline-Timestampformat mit VALIDEM
+  // Zeitanteil — Garbage-Suffixe ('2026-02-28xyz') und invalide Zeiten
+  // ('T99:99:99') verwerfen den Eintrag.
+  const m = /^(\d{4})-(\d{2})-(\d{2})(?:T(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d+)?)?$/.exec(raw.trim());
   if (!m) return null;
   const year = Number(m[1]);
   const month = Number(m[2]);

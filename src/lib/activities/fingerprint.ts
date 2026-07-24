@@ -23,8 +23,13 @@ const MOJIBAKE_MAP: ReadonlyArray<readonly [string, string]> = [
   ['â€™', '’'], ['â€˜', '‘'],
   ['Ã¤', 'ä'], ['Ã¶', 'ö'], ['Ã¼', 'ü'], ['ÃŸ', 'ß'],
   ['Ã„', 'Ä'], ['Ã–', 'Ö'], ['Ãœ', 'Ü'],
-  ['Ã©', 'é'], ['Ã¨', 'è'], ['Ã¡', 'á'], ['Ã ', 'à'],
+  ['Ã©', 'é'], ['Ã¨', 'è'], ['Ã¡', 'á'],
+  // 0xE0 ('à') mojibaked ist 'Ã' + U+00A0 (NBSP!), nicht 'Ã' + Space —
+  // Der Key enthaelt ein echtes U+00A0 (Tests sichern die Codepoints ab);
+  // legitimes 'Ã' + normales Leerzeichen bleibt unangetastet.
+  ['Ã ', 'à'],
   ['Ã´', 'ô'], ['Ã®', 'î'], ['Ã§', 'ç'],
+  // 0xA0 (NBSP) mojibaked ist 'Â' + U+00A0 -> normales Leerzeichen.
   ['Â°', '°'], ['Â ', ' '],
 ];
 

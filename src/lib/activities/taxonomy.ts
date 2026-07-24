@@ -264,18 +264,20 @@ function dedupeSorted(rawNames: Map<string, string>): string[] {
  * Mappt die Deskline-Topics eines POI auf Tags + Setting.
  * Deterministisch: das GESAMTE Ergebnis (inkl. der Topic-Namenslisten)
  * haengt nur von der Topic-MENGE ab, nicht von Reihenfolge, Duplikaten
- * oder Case-/Whitespace-Varianten. Input ist bewusst `unknown[]` —
- * Deskline-Payloads sind Fremddaten; Nicht-Strings werden uebersprungen
- * statt den Import-Lauf zu crashen.
+ * oder Case-/Whitespace-Varianten. Input ist bewusst `unknown` —
+ * Deskline-Payloads sind Fremddaten; Nicht-Arrays liefern das leere
+ * Ergebnis und Nicht-String-Elemente werden uebersprungen, statt den
+ * Import-Lauf zu crashen.
  */
-export function mapTopics(topicNames: readonly unknown[]): TopicMapResult {
+export function mapTopics(topicNames: unknown): TopicMapResult {
   const tagSet = new Set<Tag>();
   const settings = new Set<ActivitySetting>();
   const matched = new Map<string, string>();
   const excluded = new Map<string, string>();
   const unmapped = new Map<string, string>();
 
-  for (const raw of topicNames) {
+  const items: readonly unknown[] = Array.isArray(topicNames) ? topicNames : [];
+  for (const raw of items) {
     if (typeof raw !== 'string') continue;
     const key = normalizeTopicName(raw);
     if (!key) continue;

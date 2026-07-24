@@ -36,6 +36,15 @@ describe('fixMojibake', () => {
   it('laesst saubere Strings unveraendert', () => {
     expect(fixMojibake('Hütteneckalm – Café')).toBe('Hütteneckalm – Café');
   });
+
+  it('repariert à/NBSP-Mojibake (Ã+NBSP), ohne Ã+Space zu korrumpieren', () => {
+    // 'à la carte' doppelt-encodet: 'Ã' + U+00A0.
+    expect(fixMojibake('Ã  la carte')).toBe('à la carte');
+    // NBSP-Mojibake ('Â' + U+00A0) wird zu normalem Space.
+    expect(fixMojibake('BadÂ Gastein')).toBe('Bad Gastein');
+    // Legitimes 'Ã' + normales Leerzeichen bleibt unveraendert.
+    expect(fixMojibake('Ã Wien')).toBe('Ã Wien');
+  });
 });
 
 describe('contentFingerprint (Epic-E11-Fixtures)', () => {

@@ -164,4 +164,16 @@ describe('mapTopics', () => {
     expect(result.unmappedTopics).toEqual([]);
     expect(result.excludedTopics).toEqual([]);
   });
+
+  it('crasht nicht bei Nicht-Array-Payloads (null/Objekt/Skalar -> leeres Ergebnis)', () => {
+    for (const bad of [null, undefined, 'Freibad', 42, { topics: ['Freibad'] }]) {
+      const result = mapTopics(bad);
+      expect(result.matchedTopics).toEqual([]);
+      expect(result.excludedTopics).toEqual([]);
+      expect(result.unmappedTopics).toEqual([]);
+      expect(result.tags).toEqual([]);
+      expect(result.setting).toBeNull();
+      expect(isImportableTopicResult(result)).toBe(false);
+    }
+  });
 });
