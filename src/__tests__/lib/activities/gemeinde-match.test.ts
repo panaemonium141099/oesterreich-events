@@ -31,6 +31,21 @@ describe('matchGemeinde (nearest-Haversine gegen ALL_GEMEINDEN)', () => {
     expect(matchGemeinde(47.8, Number.POSITIVE_INFINITY)).toBeNull();
   });
 
+  it('implausible Koordinaten -> null statt falschem Match', () => {
+    // Vertauschte lat/lng (Fulseck): lat 13.1 liegt ausserhalb der AT-BBox.
+    expect(matchGemeinde(13.109825458197, 47.2446301479087)).toBeNull();
+    // 0/0 (fehlende Koordinaten als Zahlen kodiert).
+    expect(matchGemeinde(0, 0)).toBeNull();
+    // Deutlich ausserhalb Oesterreichs.
+    expect(matchGemeinde(52.52, 13.405)).toBeNull(); // Berlin
+  });
+
+  it('Punkt in der BBox, aber zu weit vom naechsten Gemeinde-Zentrum -> null', () => {
+    // Muenchen: Laengengrad liegt im AT-Bereich, aber >25 km von jeder
+    // oesterreichischen Gemeinde entfernt.
+    expect(matchGemeinde(48.137, 11.575)).toBeNull();
+  });
+
   it('ist deterministisch (gleicher Punkt -> gleiche Gemeinde)', () => {
     const a = matchGemeinde(47.2446301479087, 13.109825458197);
     const b = matchGemeinde(47.2446301479087, 13.109825458197);

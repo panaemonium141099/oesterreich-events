@@ -129,13 +129,20 @@ create table if not exists public.poi_activity_runs (
   is_complete     boolean not null default false
 );
 
--- ── RLS ─────────────────────────────────────────────────────────────────────
--- poi_activities: public-read NUR fuer sichtbare, nicht gesperrte Rows.
--- Versteckte Duplikate / geprunte / gesperrte Rows sind client-seitig NICHT
--- lesbar — Slug-/Shortid-/Duplicate-Resolution (Task 3) laeuft deshalb
--- server-seitig ueber den Service-Role-Client (bypasst RLS).
+-- ── RLS & Public-Lesepfad ────────────────────────────────────────────────────
+-- poi_activities: public-read NUR fuer sichtbare, nicht gesperrte Rows UND
+-- NUR ueber die spaltenreduzierte View poi_activities_public (s. u.) —
+-- die Tabelle enthaelt interne Provenienz-/Debug-Spalten (source_id,
+-- source_region, topics_raw, opening_times_raw, open_status,
+-- content_fingerprint, duplicate_of, visible, is_closed, last_seen_*,
+-- seen_regions), die Clients nichts angehen. Direkte Tabellen-Reads sind
+-- anon/authenticated deshalb komplett entzogen.
+-- Slug-/Shortid-/Duplicate-Resolution (Task 3) laeuft server-seitig ueber
+-- den Service-Role-Client (bypasst RLS und sieht alle Spalten/Rows).
 alter table public.poi_activities enable row level security;
 
+-- Defense-in-depth: Row-Policy bleibt bestehen, falls direkte Grants je
+-- zurueckkehren — der aktive Public-Pfad ist aber ausschliesslich die View.
 drop policy if exists poi_activities_public_read on public.poi_activities;
 create policy poi_activities_public_read
   on public.poi_activities
@@ -143,5 +150,31 @@ create policy poi_activities_public_read
   to anon, authenticated
   using (visible = true and is_closed = false);
 
--- poi_activity_runs: NUR service-role (RLS an, keine Policies fuer anon/authenticated).
+revoke select on table public.poi_activities from anon, authenticated;
+
+-- Public-View: nur frontend-sichere Spalten, fest eingebauter Sichtbarkeits-
+-- Filter. BEWUSST ohne security_invoker (Definer-Semantik): anon hat keine
+-- Tabellen-Grants mehr, die View selbst filtert identisch zur RLS-Policy.
+-- Der Supabase-Linter-Hinweis "security definer view" ist hier akzeptiert
+-- und begruendet. Task 3/4/6: /api/activities & Co. lesen ueber diese View
+-- (anon-Client) oder direkt die Tabelle (Service-Role, server-only).
+create or replace view public.poi_activities_public as
+  select
+    id, slug, shortid, name, description, description_short,
+    tags, setting, lat, lng, town, gemeinde_slug, bundesland,
+    opening_times, online_bookable, images, guest_cards, price_hint,
+    affiliate_product, source, created_at, updated_at
+  from public.poi_activities
+  where visible = true and is_closed = false;
+
+comment on view public.poi_activities_public is
+  'Public-Lesepfad fuer poi_activities (fn-18): nur sichtbare, nicht '
+  'gesperrte Rows und nur frontend-sichere Spalten. Interne Provenienz-/'
+  'Dedup-Spalten bleiben service-only.';
+
+grant select on public.poi_activities_public to anon, authenticated;
+
+-- poi_activity_runs: NUR service-role (RLS an, keine Policies, keine Grants
+-- fuer anon/authenticated).
 alter table public.poi_activity_runs enable row level security;
+revoke all on table public.poi_activity_runs from anon, authenticated;
