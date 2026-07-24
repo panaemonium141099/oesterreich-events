@@ -81,6 +81,7 @@ describe('normalizeOpeningTimes (Epic-E8-Vertrag)', () => {
     const base = { dateFrom: '2026-01-01T00:00:00', dateTo: '2026-12-31T00:00:00', weekdays: 1 };
     expect(normalizeOpeningTimes([{ ...base, timeFrom: '24:30', timeTo: '17:00' }])).toBeNull();
     expect(normalizeOpeningTimes([{ ...base, timeFrom: '09:00', timeTo: '09:75' }])).toBeNull();
+    expect(normalizeOpeningTimes([{ ...base, timeFrom: '09:00:99', timeTo: '17:00' }])).toBeNull();
     expect(normalizeOpeningTimes([{ ...base, timeFrom: '23:59', timeTo: '00:00' }])).not.toBeNull();
   });
 

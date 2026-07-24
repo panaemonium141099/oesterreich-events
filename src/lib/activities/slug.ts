@@ -41,7 +41,10 @@ export function activityShortId(source: string, sourceId: string): string {
  * Wort abgeschnitten). Fallback 'aktivitaet' fuer leere Ergebnisse.
  */
 export function slugifyActivityName(name: string): string {
-  let slug = name;
+  // NFC ZUERST: dekomponierte Eingaben ('a' + U+0308) muessen die
+  // Umlaut-Ersetzung genauso treffen wie praekombinierte ('ä') —
+  // sonst hinge der (fixierte!) Slug von der Unicode-Normalform ab.
+  let slug = name.normalize('NFC');
   for (const [char, replacement] of Object.entries(UMLAUT_MAP)) {
     slug = slug.split(char).join(replacement);
   }

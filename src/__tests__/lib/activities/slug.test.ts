@@ -43,6 +43,13 @@ describe('slugifyActivityName', () => {
     expect(slugifyActivityName('Café Erlebnisbad (Neu!)')).toBe('cafe-erlebnisbad-neu');
   });
 
+  it('dekomponierte Umlaute (NFD) ergeben denselben Slug wie praekombinierte', () => {
+    // 'ä' als 'a' + U+0308 (combining diaeresis) — Slug haengt nicht von
+    // der Unicode-Normalform der Quelle ab (E5-Stabilitaet).
+    expect(slugifyActivityName('Kärntner Rodelbahn')).toBe('kaerntner-rodelbahn');
+    expect(slugifyActivityName('Kärntner Rodelbahn')).toBe('kaerntner-rodelbahn');
+  });
+
   it('kappt bei 60 Zeichen ohne Wortmitte', () => {
     const slug = slugifyActivityName('a'.repeat(40) + ' ' + 'b'.repeat(40));
     expect(slug.length).toBeLessThanOrEqual(60);

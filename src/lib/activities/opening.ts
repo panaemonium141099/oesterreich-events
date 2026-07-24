@@ -80,11 +80,12 @@ function parseDate(raw: unknown): string | null {
  */
 function parseTime(raw: unknown): string | null {
   if (typeof raw !== 'string' || raw.trim() === '') return null;
-  const m = /^(\d{1,2}):(\d{2})(?::\d{2})?$/.exec(raw.trim());
+  const m = /^(\d{1,2}):(\d{2})(?::(\d{2}))?$/.exec(raw.trim());
   if (!m) return null;
   const hour = Number(m[1]);
   const minute = Number(m[2]);
-  if (hour > 23 || minute > 59) return null;
+  const second = m[3] === undefined ? 0 : Number(m[3]);
+  if (hour > 23 || minute > 59 || second > 59) return null;
   return `${String(hour).padStart(2, '0')}:${m[2]}`;
 }
 
