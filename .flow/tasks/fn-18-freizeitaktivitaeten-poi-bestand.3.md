@@ -1,38 +1,32 @@
-# fn-18-freizeitaktivitaeten-poi-bestand.3 /api/activities + Detailseite /aktivitaet/[slug] + Sitemap + /quellen
-
 ## Description
 Oeffentliche Ausspielung: Cursor-paginierte API, ISR-Detailseite unter [locale] mit E13-Canonical-Regel, Sitemap-Split (Index + Kind-Sitemaps), Quellen-Attribution.
 
 **Size:** M
-**Files:** src/app/api/activities/route.ts, src/app/[locale]/aktivitaet/[slug]/page.tsx, src/components/Activities/{ActivityHero,ActivityFacts,OpenNowBadge,ActivityMap}.tsx, src/app/sitemap.xml/route.ts (wird Index), src/app/sitemap-core.xml/route.ts, src/app/sitemap-events.xml/route.ts, src/app/sitemap-activities.xml/route.ts, src/app/[locale]/quellen/page.tsx
+**Files:** src/app/api/activities/route.ts, src/app/[locale]/aktivitaet/[slug]/page.tsx, src/components/Activities/{ActivityHero,ActivityFacts,OpenNowBadge,ActivityMap,ActivityExtrasSlot}.tsx, src/app/sitemap.xml/route.ts (wird Index), src/app/sitemap-core.xml/route.ts, src/app/sitemap-events.xml/route.ts, src/app/sitemap-activities.xml/route.ts, src/app/[locale]/quellen/page.tsx, src/lib/activities/indexability.ts + src/lib/activities/resolver.ts (pure, getestete Helper fuer Noindex-Gate + Slug-/Shortid-/Duplicate-Aufloesung — Page bettet nur ein) + src/__tests__/lib/activities/{indexability,resolver}.test.ts, messages/de.json (+ en.json mit DE-Fallback-Werten — i18n-Regel: DE-Strings Pflicht, echte EN-Uebersetzung erst nach fn-17/E13; Merge mit fn-17-Branch koordinieren)
 
 ## Approach
-- API: Cursor-Muster aus src/app/api/events/route.ts:668-691 (Tiebreaker id), Filter bundesland/gemeinde/tag, nur visible=true, count 'planned' — nie exact (Micro!).
-- Detailseite: ISR-Muster src/app/[locale]/events/[...slug]/page.tsx — revalidate=3600, dynamicParams=true + leeres generateStaticParams, setRequestLocale Pflicht, KEIN cookies()/auth im RSC-Pfad; generateMetadata (canonical/OG) + JSON-LD (TouristAttraction bzw. LocalBusiness).
+- API: Cursor-Muster aus src/app/api/events/route.ts:668-691 mit **fixer deterministischer Default-Sortierung `name ASC, id ASC`**; Lookup-Regel `name > $n OR (name = $n AND id > $i)`. **Cursor-Wire-Format (verbindlich):** base64url-kodiertes JSON `{"name":"<raw-DB-Wert>","id":"<uuid>"}` — name unveraendert wie in der DB (keine Re-Normalisierung client-seitig), Round-Trip-Test Pflicht. **Wire-Contract der Filter (eingefroren):** `gemeinde=<kanonischer gemeinde_slug, z.B. 7100-neusiedl-am-see>` (Spalte gemeinde_slug), `bundesland=<kanonische lowercase-ID>`, `tag=<Taxonomie-Tag>`; nur visible=true, count 'planned' — nie exact (Micro!).
+- Detailseite: ISR-Muster src/app/[locale]/events/[...slug]/page.tsx — revalidate=3600, dynamicParams=true + leeres generateStaticParams, setRequestLocale Pflicht, KEIN cookies()/auth im RSC-Pfad; generateMetadata (canonical/OG) + JSON-LD mit **einheitlichem Default-Typ `TouristAttraction`** (keine Typ-Verzweigung in diesem Slice — deterministisch, SEO-diff-arm; Verfeinerung nach Kategorie ist bewusst Follow-up).
 - E13 /en-Regel: solange keine EN-Uebersetzung existiert rendert /en/aktivitaet/* DE-Content mit canonical auf die DE-URL, OHNE hreflang-Paar; Sitemap enthaelt nur DE-URLs (canonical/hreflang-Muster der Event-Detailseite spiegeln).
 - Noindex-Gate (Epic E7): Beschreibung >=200 Zeichen ODER (Bild + Oeffnungszeiten), sonst robots noindex — Muster events page.tsx:44-74. Gate-Funktion in src/lib/activities/ (pur, getestet).
-- OpenNowBadge: Client-Komponente, berechnet aus opening_times jsonb in Europe/Vienna (Epic E8).
-- Slug-Resolver: exakter Match, sonst shortid-Suffix-Lookup -> 301 (Epic E5); duplicate_of-Rows -> 301 auf kanonische Row.
+- OpenNowBadge: Client-Komponente, liest AUSSCHLIESSLICH das normalisierte opening_times-Feld (E8-Vertrag inkl. weekdays-Bitmaske und Durchgehend-Regel), Europe/Vienna; Noindex-Gate zaehlt Oeffnungszeiten nur, wenn das normalisierte Feld nicht leer ist.
+- **Slot-Contract fuer Task 4:** die Seite rendert eine benannte, in diesem Task LEERE Slot-Komponente `<ActivityExtrasSlot activity={...} />` (src/components/Activities/ActivityExtrasSlot.tsx); Task 4 implementiert deren Inhalt (Events in der Naehe) und fasst page.tsx NICHT an.
+- Slug-Resolver: exakter Match, sonst Lookup ueber die dedizierte shortid-Spalte (UNIQUE-Index, Task 1 — keine Suffix-Scans auf slug) -> 301 (Epic E5; shortid = erste 12 Hex-Zeichen von sha1(`${source}:${source_id}`), dieselbe Funktion aus Task-1-slug.ts); duplicate_of-Rows -> 301 auf kanonische Row. **Resolver-Contract (vollstaendig; laeuft server-seitig ueber den Service-Role-Client, da die public-RLS nur visible=true AND NOT is_closed exponiert):** visible=true -> normal rendern; visible=false UND duplicate_of IS NOT NULL -> 301 NUR wenn die Ziel-Row (Canonical) visible=true ist, sonst 404 (kein 301->404-Chaining, keine Wiederbelebung toter Gruppen — Task 2 leert duplicate_of beim Gruppen-Prune, der Resolver prueft trotzdem defensiv); visible=false UND duplicate_of IS NULL (gepruned/stale) -> 404. Der Shortid-Fallback darf geprunte Rows NIEMALS aufloesen.
 - Bilder: Hotlink Deskline-CDN mit onerror-Fallback; Copyright/Author aus images jsonb sichtbar rendern (Attribution-Pflicht, Memory event_source_attribution_legal).
-- Sitemap-Split (Epic E12, verbindlich): /sitemap.xml wird <sitemapindex> und verweist auf sitemap-core.xml (Statisch/Hubs/Themen/Studenten/Venues — bestehende Bloecke dorthin verschieben), sitemap-events.xml (bestehende Event-Logik inkl. MAX_EVENTS-Cap) und sitemap-activities.xml (NUR indexierbare Aktivitaeten, 1000er-Batches). Jede Kind-Datei <50k URLs. Nach Deploy: Sitemap in GSC neu einreichen (im PR-Text vermerken).
+- Sitemap-Split (Epic E12, verbindlich): /sitemap.xml wird <sitemapindex> und verweist auf sitemap-core.xml (Statisch/Hubs/Themen/Studenten/Venues UND Blog: /blog + ALL_POSTS — bestehende Bloecke vollstaendig dorthin verschieben), sitemap-events.xml (bestehende Event-Logik inkl. MAX_EVENTS-Cap) und sitemap-activities.xml (NUR indexierbare Aktivitaeten, 1000er-Batches). **Volle Paritaet umfasst URLs UND Sitemap-Metadaten: die bestehenden xhtml:link-Alternates (DE/EN-hreflang fuer Top-Level-Seiten und uebersetzte Event-Seiten, fn-17) muessen in sitemap-core/-events exakt erhalten bleiben; sitemap-activities bleibt DE-only (E13).** Jede Kind-Datei <50k URLs. Nach Deploy: Sitemap in GSC neu einreichen (im PR-Text vermerken).
 - /quellen: Eintrag "Feratel Deskline Infrastruktur-POIs" (separat vom Events-Eintrag).
-## Approach
-- API: Cursor-Muster aus src/app/api/events/route.ts:668-691 (Tiebreaker id), Filter bundesland/gemeinde/tag, count 'planned' — nie exact (Micro!).
-- Detailseite: ISR-Muster src/app/[locale]/events/[...slug]/page.tsx — revalidate=3600, dynamicParams=true + leeres generateStaticParams, setRequestLocale Pflicht, KEIN cookies()/auth im RSC-Pfad; generateMetadata (canonical/OG) + JSON-LD (TouristAttraction bzw. LocalBusiness).
-- Noindex-Gate (Epic E7): Beschreibung >=200 Zeichen ODER (Bild + Oeffnungszeiten), sonst robots noindex — Muster events page.tsx:44-74. Gate-Funktion in src/lib/activities/ (pur, getestet).
-- OpenNowBadge: Client-Komponente, berechnet aus opening_times jsonb in Europe/Vienna (Epic E8).
-- Slug-Resolver: exakter Match, sonst shortid-Suffix-Lookup -> 301 (Epic E5).
-- Bilder: Hotlink Deskline-CDN mit onerror-Fallback; Copyright/Author aus images jsonb sichtbar rendern (Attribution-Pflicht, Memory event_source_attribution_legal).
-- Sitemap: eigene Aktivitaeten-Sektion in src/app/sitemap.xml/route.ts (Muster Gemeinde-Block :172-187, 1000er-Batches); NUR indexierbare (Gate) URLs; Kapazitaet beachten (MAX_EVENTS=45000 nahe 50k-Limit) -> ggf. separate Route /sitemap-activities.xml.
-- /quellen: Eintrag "Feratel Deskline Infrastruktur-POIs" (separat vom Events-Eintrag).
+- Hinweis: Cross-Link-Bloecke (Aktivitaet->Events + Event->Aktivitaeten) gehoeren zu Task 4, NICHT hierher.
+
 ## Acceptance
 - [ ] /aktivitaet/<slug> rendert das Mountaincart-Fulseck-Beispiel korrekt (Saison-Zeiten, Karte, Topics als Tags, Quelle + Bild-Copyright)
 - [ ] /en/aktivitaet/<slug> liefert canonical auf die DE-URL und kein hreflang-Paar (E13-Test im HTML)
 - [ ] Noindex-Gate: Thin-POI liefert robots noindex, content-reicher POI nicht (Unit-Test + Stichprobe im HTML)
-- [ ] /api/activities paginiert per Cursor, haelt Filter ein, liefert nur visible, kein exact count
-- [ ] /sitemap.xml ist ein gueltiger <sitemapindex> auf sitemap-core/-events/-activities; Event- und Hub-URLs vollstaendig umgezogen (Diff der URL-Menge vorher/nachher dokumentiert); sitemap-activities enthaelt nur indexierbare URLs; jede Kind-Datei <50k
+- [ ] /api/activities paginiert stabil per (name,id)-Cursor im base64url-JSON-Format (Round-Trip-Test; Folgeseite ueberlappungs- und lueckenfrei, auch bei Umlaut-/Sonderzeichen-Namen), haelt Filter ein, liefert nur visible, kein exact count
+- [ ] Resolver-Contract getestet: sichtbare Row rendert; unsichtbare duplicate_of-Row mit LEBENDEM Canonical -> 301; duplicate_of-Row mit totem/unsichtbarem Canonical -> 404; geprunte Row -> 404 auch via Shortid-Fallback
+- [ ] /sitemap.xml ist ein gueltiger <sitemapindex> auf sitemap-core/-events/-activities; **volle Paritaet ueber ALLE bisherigen Sektionen inkl. Blog UND inkl. xhtml:link-Alternates** (Diff der Gesamt-URL-Menge + Alternate-Eintraege vorher/nachher dokumentiert, erwartete Differenz = nur neue DE-only-Aktivitaets-URLs); sitemap-activities enthaelt nur indexierbare URLs; jede Kind-Datei <50k
 - [ ] Slug-Resolver: alter/abweichender Slug mit gueltiger Shortid -> 301; duplicate_of-Row -> 301 auf kanonische URL
 - [ ] /quellen um Deskline-POI-Eintrag ergaenzt
+
 ## Done summary
 TBD
 
