@@ -81,6 +81,8 @@ describe('normalizeOpeningTimes (Epic-E8-Vertrag)', () => {
     const base = { timeFrom: '09:00', timeTo: '17:00', weekdays: 1 };
     expect(normalizeOpeningTimes([{ ...base, dateFrom: '2026-02-28garbage', dateTo: '2026-12-31T00:00:00' }])).toBeNull();
     expect(normalizeOpeningTimes([{ ...base, dateFrom: '2026-02-28T99:99:99', dateTo: '2026-12-31T00:00:00' }])).toBeNull();
+    // Nicht-Mitternachts-Zeitanteil = Format-Drift der Quelle -> verworfen.
+    expect(normalizeOpeningTimes([{ ...base, dateFrom: '2026-04-15T13:37:00', dateTo: '2026-12-31T00:00:00' }])).toBeNull();
     // Exaktes Datum ohne Zeitanteil bleibt valide.
     expect(normalizeOpeningTimes([{ ...base, dateFrom: '2026-02-28', dateTo: '2026-12-31' }])).not.toBeNull();
   });

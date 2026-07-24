@@ -178,3 +178,15 @@ grant select on public.poi_activities_public to anon, authenticated;
 -- fuer anon/authenticated).
 alter table public.poi_activity_runs enable row level security;
 revoke all on table public.poi_activity_runs from anon, authenticated;
+
+-- Explizite service_role-Grants fuer Ingest (Task 2) + Server-Resolver
+-- (Task 3). Auf Standard-Supabase decken die Default-Privileges des
+-- postgres-Owners das bereits ab — die expliziten Grants machen den
+-- Zugriffspfad selbstdokumentierend und robust gegen abweichende
+-- Default-Privilege-Konfigurationen. Die run_seq-Identity-Sequenz braucht
+-- fuer INSERTs formal keine eigene Grant (Identity-Spalten pruefen keine
+-- Sequenz-Privilegien), der USAGE-Grant ist bewusste Absicherung.
+grant all on table public.poi_activities to service_role;
+grant all on table public.poi_activity_runs to service_role;
+grant usage, select on sequence public.poi_activity_runs_run_seq_seq to service_role;
+grant select on public.poi_activities_public to service_role;
