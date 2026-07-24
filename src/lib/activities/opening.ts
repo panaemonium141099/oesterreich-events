@@ -112,8 +112,18 @@ function parseWeekdays(raw: unknown):
   return { ok: true, weekdays: raw };
 }
 
-function windowSortKey(w: NormalizedOpeningWindow): string {
+function windowDedupeKey(w: NormalizedOpeningWindow): string {
   return `${w.from}|${w.to}|${w.timeFrom}|${w.timeTo}|${w.weekdays ?? -1}`;
+}
+
+/** Sortierung (from, to, timeFrom, timeTo, weekdays) — weekdays NUMERISCH
+ *  (null = alle Tage zuerst), die uebrigen Felder als ISO-/HH:MM-Strings. */
+function compareWindows(a: NormalizedOpeningWindow, b: NormalizedOpeningWindow): number {
+  if (a.from !== b.from) return a.from < b.from ? -1 : 1;
+  if (a.to !== b.to) return a.to < b.to ? -1 : 1;
+  if (a.timeFrom !== b.timeFrom) return a.timeFrom < b.timeFrom ? -1 : 1;
+  if (a.timeTo !== b.timeTo) return a.timeTo < b.timeTo ? -1 : 1;
+  return (a.weekdays ?? -1) - (b.weekdays ?? -1);
 }
 
 /**
@@ -146,11 +156,9 @@ export function normalizeOpeningTimes(raw: unknown): NormalizedOpeningWindow[] |
       timeTo,
       weekdays: weekdays.weekdays,
     };
-    byKey.set(windowSortKey(window), window);
+    byKey.set(windowDedupeKey(window), window);
   }
 
   if (byKey.size === 0) return null;
-  return [...byKey.entries()]
-    .sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0))
-    .map(([, w]) => w);
+  return [...byKey.values()].sort(compareWindows);
 }

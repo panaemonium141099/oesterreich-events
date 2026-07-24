@@ -62,11 +62,15 @@ function parseGermanNumber(raw: string): number {
   return Number(s);
 }
 
-function isValidPrice(value: number, textAfter: string): boolean {
+// Jahreszahl-Guard: greift NUR auf dem rohen Token — exakt vier nackte
+// Ziffern 19xx/20xx ohne Tausender-Punkt/Dezimalteil. '€ 1.999' (=1999)
+// ist ein valider formatierter Betrag, '€ 2018' eine Jahreszahl.
+const BARE_YEAR_TOKEN = /^(?:19|20)\d{2}$/;
+
+function isValidPrice(rawToken: string, value: number, textAfter: string): boolean {
   if (!Number.isFinite(value) || value <= 0) return false;
   if (value > MAX_PLAUSIBLE_PRICE) return false;
-  // Jahreszahl-Guard: ganzzahlig 1900-2099.
-  if (Number.isInteger(value) && value >= 1900 && value <= 2099) return false;
+  if (BARE_YEAR_TOKEN.test(rawToken)) return false;
   // Energie-Raten-Guard.
   if (KW_SUFFIX.test(textAfter)) return false;
   return true;
@@ -80,7 +84,7 @@ function collectMatches(text: string): PriceMatch[] {
     while ((m = re.exec(text)) !== null) {
       const value = parseGermanNumber(m[1]);
       const textAfter = text.slice(m.index + m[0].length);
-      if (!isValidPrice(value, textAfter)) continue;
+      if (!isValidPrice(m[1], value, textAfter)) continue;
       const textBefore = text.slice(0, m.index);
       matches.push({ value, hasAbMarker: AB_PREFIX.test(textBefore) });
     }

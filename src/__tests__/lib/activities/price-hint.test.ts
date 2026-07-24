@@ -33,6 +33,13 @@ describe('extractPriceHint — Treffer', () => {
   it('Tausender-Punkt wird deutsch geparst', () => {
     expect(extractPriceHint('Saisonkarte € 1.200')).toBe('€ 1200');
   });
+
+  it('formatierte Betraege im Jahreszahl-Bereich sind valide (€ 1.999 / € 2.000)', () => {
+    // Jahres-Guard greift nur auf nackten vierstelligen Tokens.
+    expect(extractPriceHint('Jahreskarte € 1.999')).toBe('€ 1999');
+    expect(extractPriceHint('Paket € 2.000')).toBe('€ 2000');
+    expect(extractPriceHint('Kurs € 1999,50')).toBe('€ 1999,50');
+  });
 });
 
 describe('extractPriceHint — Anti-Patterns', () => {

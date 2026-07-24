@@ -139,4 +139,14 @@ describe('normalizeOpeningTimes (Epic-E8-Vertrag)', () => {
     expect(result[0].from).toBe('2025-06-01');
     expect(result[1].from).toBe('2026-01-01');
   });
+
+  it('weekdays sortieren numerisch (5 vor 31), null (alle Tage) zuerst', () => {
+    const base = { dateFrom: '2026-01-01T00:00:00', dateTo: '2026-12-31T00:00:00', timeFrom: '09:00', timeTo: '17:00' };
+    const result = normalizeOpeningTimes([
+      { ...base, weekdays: 31 },
+      { ...base, weekdays: 5 },
+      { ...base, weekdays: 127 },
+    ])!;
+    expect(result.map((w) => w.weekdays)).toEqual([null, 5, 31]);
+  });
 });
