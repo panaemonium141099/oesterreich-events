@@ -22,8 +22,19 @@ const MAX_RETRIES = 3;
 const RETRY_BASE_DELAY_MS = 1000;
 const BETWEEN_PAGES_DELAY_MS = 300;
 /** Harte Obergrenze gegen Endlos-Pagination bei kaputtem paging-Block
- *  (groesste Region blsalzb = ~11.600 POIs = 29 Seiten a 400). */
+ *  (groesste Region blsalzb = ~11.600 POIs = 29 Seiten a 400). Wird die
+ *  Grenze erreicht, FAILT die Region (throw) — niemals stilles Truncate,
+ *  sonst saehen valide POIs fuer den Prune wie verschwunden aus. */
 const MAX_PAGES_PER_REGION = 200;
+/** 429-Handling: Throttling verbraucht KEINE regulaeren Retries (der
+ *  Server bittet explizit um spaeteren Retry) — es gilt ein separates,
+ *  grosszuegiges Budget, damit Throttle-Wellen im woechentlichen Batch
+ *  nicht zu vermeidbaren Fehl-Regionen werden. */
+const MAX_THROTTLE_RETRIES = 10;
+/** Kappung einzelner Retry-After-Wartezeiten (Schutz vor absurden
+ *  Header-Werten; 10 x 120 s = max. 20 min Throttle-Wartezeit pro Seite,
+ *  passt in das timeout-minutes-Budget des Workflows). */
+const MAX_RETRY_AFTER_SECONDS = 120;
 
 const USER_AGENT =
   'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36';
@@ -126,14 +137,19 @@ function sleep(ms: number): Promise<void> {
 }
 
 /**
- * Ein API-Call mit 429-Backoff analog FeratelScraper.ts:444-481:
- * 429 -> Retry-After abwarten (Retry zaehlt nicht als Fehlversuch-Delay),
- * sonstige Fehler -> exponentielles Backoff, nach MAX_RETRIES wird geworfen
+ * Ein API-Call mit 429-Backoff analog FeratelScraper.ts:444-481, aber mit
+ * getrennten Budgets: 429 -> Retry-After abwarten und OHNE Verbrauch eines
+ * regulaeren Retries erneut versuchen (separates Throttle-Budget von
+ * MAX_THROTTLE_RETRIES Wartezyklen); echte Fehler (Netzwerk, HTTP != 2xx,
+ * kaputtes JSON) -> exponentielles Backoff, nach MAX_RETRIES wird geworfen
  * (der Aufrufer zaehlt die Region dann als failed — Run-Bookkeeping E6).
  */
 async function fetchDesklinePage(url: string, sessionId: string): Promise<DesklineInfraResponse> {
   let lastError = '';
-  for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+  let attempt = 0; // zaehlt NUR echte Fehlversuche, keine 429-Wartezyklen
+  let throttleRetries = 0;
+
+  while (attempt < MAX_RETRIES) {
     try {
       const response = await fetch(url, {
         headers: {
@@ -145,9 +161,17 @@ async function fetchDesklinePage(url: string, sessionId: string): Promise<Deskli
       });
 
       if (response.status === 429) {
-        const retryAfter = parseInt(response.headers.get('Retry-After') || '60', 10);
-        await sleep(retryAfter * 1000);
-        continue;
+        throttleRetries++;
+        if (throttleRetries > MAX_THROTTLE_RETRIES) {
+          throw new Error(`rate limited: throttle budget exhausted (${MAX_THROTTLE_RETRIES} waits)`);
+        }
+        const retryAfterRaw = parseInt(response.headers.get('Retry-After') || '60', 10);
+        const waitSeconds =
+          Number.isFinite(retryAfterRaw) && retryAfterRaw >= 0
+            ? Math.min(retryAfterRaw, MAX_RETRY_AFTER_SECONDS)
+            : 60;
+        await sleep(waitSeconds * 1000);
+        continue; // verbraucht KEINEN regulaeren Retry
       }
 
       if (!response.ok) {
@@ -158,30 +182,38 @@ async function fetchDesklinePage(url: string, sessionId: string): Promise<Deskli
       return (await response.json()) as DesklineInfraResponse;
     } catch (err) {
       lastError = err instanceof Error ? err.message : String(err);
+      if (lastError.includes('throttle budget exhausted')) break;
+      attempt++;
       if (attempt < MAX_RETRIES) {
         await sleep(RETRY_BASE_DELAY_MS * Math.pow(2, attempt - 1));
       }
     }
   }
-  throw new Error(`Deskline fetch failed after ${MAX_RETRIES} attempts: ${lastError}`);
+  throw new Error(`Deskline fetch failed after ${attempt} attempts: ${lastError}`);
 }
 
 /**
  * Holt ALLE infrastructures einer Region (volle Pagination). Wirft bei
- * endgueltigem Fehlschlag einer Seite — halbe Regionen duerfen nie als
- * "gesehen" gelten, sonst wuerde der Prune fehlende POIs fuer verschwunden
- * halten (Epic E6: Region ganz ok oder ganz failed).
+ * endgueltigem Fehlschlag einer Seite UND wenn der Seiten-Deckel eine
+ * Region abschneiden wuerde — halbe Regionen duerfen nie als "gesehen"
+ * gelten, sonst wuerde der Prune fehlende POIs fuer verschwunden halten
+ * (Epic E6: Region ganz ok oder ganz failed).
+ *
+ * `limits.maxPages` ist nur fuer Tests ueberschreibbar (Default:
+ * MAX_PAGES_PER_REGION).
  */
 export async function fetchRegionInfrastructures(
   regionCode: string,
   sessionId: string,
   log?: (msg: string) => void,
+  limits?: { maxPages?: number },
 ): Promise<DesklineInfrastructure[]> {
+  const maxPages = limits?.maxPages ?? MAX_PAGES_PER_REGION;
   const items: DesklineInfrastructure[] = [];
   let pageNo = 0;
   let pageCount = 1;
 
-  while (pageNo < pageCount && pageNo < MAX_PAGES_PER_REGION) {
+  while (pageNo < pageCount && pageNo < maxPages) {
     const url =
       `${DESKLINE_API_BASE}/${regionCode}/de/infrastructures` +
       `?fields=${INFRASTRUCTURE_FIELDS}&sortingFields=name&pageNo=${pageNo}&pageSize=${DESKLINE_PAGE_SIZE}`;
@@ -195,9 +227,17 @@ export async function fetchRegionInfrastructures(
     items.push(...response.data);
     pageNo++;
 
-    if (pageNo < pageCount) {
+    if (pageNo < pageCount && pageNo < maxPages) {
       await sleep(BETWEEN_PAGES_DELAY_MS);
     }
+  }
+
+  if (pageNo < pageCount) {
+    // Seiten-Deckel erreicht, aber die API meldet weitere Seiten:
+    // Region FAILT statt still einen Praefix zu ingesten.
+    throw new Error(
+      `Deskline ${regionCode}: page cap reached (${pageNo}/${pageCount} pages) — refusing truncated region`,
+    );
   }
 
   log?.(`[deskline] ${regionCode}: ${items.length} infrastructures (${pageNo} pages)`);

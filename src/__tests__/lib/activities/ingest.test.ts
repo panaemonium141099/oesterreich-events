@@ -267,6 +267,9 @@ interface Harness {
   store: InMemoryStore;
   data: Record<string, DesklineInfrastructure[]>;
   failRegions: Set<string>;
+  /** Kuenstliche Fetch-Latenz pro Region (ms) — simuliert, dass Regionen
+   *  im Concurrency-Pool in beliebiger Reihenfolge fertig werden. */
+  delays: Record<string, number>;
   run: (opts?: Partial<IngestOptions>) => ReturnType<typeof runIngest>;
 }
 
@@ -274,9 +277,12 @@ function harness(): Harness {
   const store = new InMemoryStore();
   const data: Record<string, DesklineInfrastructure[]> = { r1: [], r2: [] };
   const failRegions = new Set<string>();
+  const delays: Record<string, number> = {};
   const deps: IngestDeps = {
     store,
     fetchRegion: async (code) => {
+      const delay = delays[code];
+      if (delay) await new Promise((resolve) => setTimeout(resolve, delay));
       if (failRegions.has(code)) throw new Error(`${code} down`);
       return data[code] ?? [];
     },
@@ -288,6 +294,7 @@ function harness(): Harness {
     store,
     data,
     failRegions,
+    delays,
     run: (opts) => runIngest(deps, { mode: 'full', dryRun: false, ...opts }),
   };
 }
@@ -373,6 +380,21 @@ describe('runIngest — full_attempt (complete)', () => {
     for (const payload of h.store.updatePayloads) {
       expect(Object.keys(payload).sort()).toEqual(expectedKeys);
     }
+  });
+
+  it('Mirror-GUID mit konfliktierendem Payload: Gewinner ist deterministisch die frueheste Region der REGIONS-Liste, nicht das Fetch-Timing', async () => {
+    const h = harness();
+    h.data.r1 = [poi('p1', 'Name aus R1')];
+    h.data.r2 = [poi('p1', 'Name aus R2')];
+    // r1 antwortet BEWUSST langsamer — bei timing-abhaengigem first-wins
+    // wuerde r2 gewinnen und source_region (write-once!) waere Zufall.
+    h.delays.r1 = 25;
+
+    await h.run();
+    const p1 = h.store.bySourceId('p1')!;
+    expect(p1.name).toBe('Name aus R1');
+    expect(p1.source_region).toBe('r1');
+    expect(p1.seen_regions).toEqual(['r1', 'r2']);
   });
 
   it('seen_regions verhaelt sich als all-time-Union', async () => {

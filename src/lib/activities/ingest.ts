@@ -179,8 +179,14 @@ const FETCH_CONCURRENCY = 6; // Feratel-IP-Limit ~3500 calls/h (Epic E2)
 const GROUP_FETCH_CHUNK = 150;
 
 interface CollectState {
-  /** Erste Business-Sicht pro source_id (first-wins bei Mirror-GUIDs). */
+  /** Gewinner-Business-Sicht pro source_id. Bei Mirror-GUIDs entscheidet
+   *  DETERMINISTISCH der kleinste Region-Rang (= Position in der REGIONS-
+   *  Liste), nie das Fetch-Timing — sonst wuerden source_region (write-once)
+   *  und ggf. abweichende Mirror-Payloads von der Netz-Reihenfolge des
+   *  Concurrency-Pools abhaengen. */
   bySourceId: Map<string, TransformedActivity>;
+  /** Region-Rang des aktuellen Gewinners pro source_id. */
+  regionRankBySourceId: Map<string, number>;
   /** Alle Regionen, die die source_id in DIESEM Lauf geliefert haben. */
   regionsBySourceId: Map<string, Set<string>>;
   fetched: number;
@@ -193,6 +199,7 @@ interface CollectState {
 function newCollectState(): CollectState {
   return {
     bySourceId: new Map(),
+    regionRankBySourceId: new Map(),
     regionsBySourceId: new Map(),
     fetched: 0,
     skipped: { ...EMPTY_SKIPS },
@@ -206,6 +213,7 @@ function collectRegion(
   state: CollectState,
   regionCode: string,
   regionBundesland: string,
+  regionRank: number,
   items: DesklineInfrastructure[],
   log: (msg: string) => void,
 ): void {
@@ -230,8 +238,14 @@ function collectRegion(
     }
     importable++;
     const sourceId = outcome.activity.source_id;
-    if (!state.bySourceId.has(sourceId)) {
+    // Deterministische Gewinner-Wahl: kleinster Region-Rang gewinnt
+    // (REGIONS-Reihenfolge), unabhaengig davon, welche Region ihr Fetch
+    // zuerst beendet. Innerhalb einer Region gewinnt das erste Vorkommen
+    // (stabile Seitenreihenfolge via sortingFields=name).
+    const prevRank = state.regionRankBySourceId.get(sourceId);
+    if (prevRank === undefined || regionRank < prevRank) {
       state.bySourceId.set(sourceId, outcome.activity);
+      state.regionRankBySourceId.set(sourceId, regionRank);
     }
     let regions = state.regionsBySourceId.get(sourceId);
     if (!regions) {
@@ -471,10 +485,13 @@ export async function runIngest(deps: IngestDeps, opts: IngestOptions): Promise<
   let cursor = 0;
   const worker = async (): Promise<void> => {
     while (cursor < regionConfigs.length) {
-      const region = regionConfigs[cursor++];
+      const idx = cursor++;
+      const region = regionConfigs[idx];
       try {
         const items = await deps.fetchRegion(region.code);
-        collectRegion(state, region.code, region.bundesland, items, log);
+        // idx = Region-Rang (REGIONS-Reihenfolge) fuer die deterministische
+        // Mirror-Gewinner-Wahl — NICHT die Fetch-Abschluss-Reihenfolge.
+        collectRegion(state, region.code, region.bundesland, idx, items, log);
         okCodes.push(region.code);
       } catch (err) {
         const msg = err instanceof Error ? err.message : String(err);
