@@ -1,0 +1,82 @@
+# fn-18 Task 2: woechentlicher Deskline-POI-Ingest (Freizeitaktivitaeten).
+#
+# Secrets (WICHTIG — GitHub-Actions-Secrets und Vercel-Env sind GETRENNTE
+# Speicher, Aenderungen in beiden pflegen; CLAUDE.md "Deployment"):
+#   GitHub (dieser Workflow):  SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY
+#     (beide existieren bereits fuer import-eventim.yml / scrape-events.yml)
+#   Vercel (Task 3+, Web-Reads): NEXT_PUBLIC_SUPABASE_URL,
+#     NEXT_PUBLIC_SUPABASE_ANON_KEY, SUPABASE_SERVICE_ROLE_KEY — bereits
+#     vorhanden, dieser Job braucht dort nichts Neues.
+#   Die Deskline-WebAPI selbst braucht KEINE Credentials (nur DW-Source/
+#   DW-SessionId-Header, wie der bestehende Feratel-Event-Scraper).
+#
+# OPS-SCHRITTE NACH DEM INITIAL-VOLLIMPORT (einmalig, via Supabase-Dashboard —
+# ANALYZE ist bewusst KEIN Script-Schritt, PostgREST/Service-Key kann kein
+# Maintenance-SQL):
+#   1. supabase/migrations/20260724121000_poi_activities_indexes.sql anwenden
+#   2. ANALYZE public.poi_activities;   (danach uebernimmt Autovacuum)
+#
+# Recovery nach abgebrochenem Lauf (Runs-Zeile ohne finished_at):
+#   workflow_dispatch mit reconcile=true (oder lokal
+#   `npx tsx src/scripts/import-activities.ts --reconcile`).
+
+name: Ingest Activities (Deskline POIs)
+
+on:
+  schedule:
+    # Woechentlich Montag 04:23 UTC — bewusst nach dem taeglichen
+    # scrape-events-Fenster (03:17) und versetzt zu import-eventim (*:40).
+    - cron: '23 4 * * 1'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Dry-run (kein DB-Write, auch keine Runs-Zeile)'
+        required: false
+        default: 'false'
+        type: boolean
+      reconcile:
+        description: 'Nur Gruppen-Rekonsolidierung (Recovery nach Abbruch)'
+        required: false
+        default: 'false'
+        type: boolean
+
+# Ueberlappungsschutz Ebene 1 (Task-Spec, Pflicht): nie zwei Imports
+# parallel. Ebene 2 sind die monotonen Sichtungs-Updates im Script
+# (GREATEST-Semantik ueber run_seq) — ein spaeter fertig werdender
+# aelterer Lauf kann Werte nie zuruecksetzen.
+concurrency:
+  group: ingest-activities
+  cancel-in-progress: false
+
+jobs:
+  ingest:
+    runs-on: ubuntu-latest
+    # 131 Regionen, Concurrency 6, pageSize 400 + Batch-Writes: real
+    # ~15-30 min; Puffer fuer 429-Backoff-Wellen.
+    timeout-minutes: 120
+
+    env:
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - run: npm ci
+
+      - name: Import Deskline activities
+        run: |
+          ARGS=""
+          if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then
+            ARGS="--dry-run"
+          fi
+          if [ "${{ github.event.inputs.reconcile }}" = "true" ]; then
+            ARGS="$ARGS --reconcile"
+          fi
+          npx tsx src/scripts/import-activities.ts $ARGS

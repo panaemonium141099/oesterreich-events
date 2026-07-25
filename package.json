@@ -23,6 +23,7 @@
     "scrape:wien-clubs": "tsx src/scripts/scrape.ts --source wien-clubs",
     "scrape:ticketmaster": "tsx src/scripts/scrape.ts --source ticketmaster",
     "import:eventim": "tsx src/scripts/import-eventim.ts",
+    "import:activities": "tsx src/scripts/import-activities.ts",
     "scrape:tirol": "tsx src/scripts/scrape.ts --source tirol.at",
     "scrape:donau-noe": "tsx src/scripts/scrape.ts --source donau-noe",
     "scrape:linztermine": "tsx src/scripts/scrape.ts --source linztermine",

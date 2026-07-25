@@ -7,8 +7,14 @@ import type { ScrapedEvent } from '@/types/events';
  *
  * The `code` is the path prefix used in the webapi.deskline.net REST API,
  * e.g. "blsalzb" for SalzburgerLand, "innsbruck" for Innsbruck region.
+ *
+ * Exported for the fn-18 activities ingest (src/scripts/import-activities.ts),
+ * which reuses the exact same region list against the `infrastructures`
+ * endpoint. NOTE: `bundesland` here is config metadata only — it contains
+ * 'Österreich' placeholder entries and is NOT authoritative (the activities
+ * ingest derives bundesland from the Gemeinde registry instead).
  */
-interface FeratelRegionConfig {
+export interface FeratelRegionConfig {
   /** API path prefix (e.g. "blsalzb", "innsbruck") */
   code: string;
   /** Human-readable region name */
@@ -25,7 +31,7 @@ interface FeratelRegionConfig {
 // Discovered by probing webapi.deskline.net with known tourism organization codes.
 // Each returns 200 OK with event data.
 
-const REGIONS: FeratelRegionConfig[] = [
+export const REGIONS: FeratelRegionConfig[] = [
   // Generated from feratel-active-urls.txt (2026-05-28 4-phase bruteforce: 12.653 slugs
   // probed, 131 active, 3 mirrors skipped — kaerntencard/kaerntenevents/innsbruckcard
   // are duplicate views of canonical regions and would double-count events).
