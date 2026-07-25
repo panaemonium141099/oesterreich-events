@@ -105,24 +105,28 @@ function deterministicPick(members: GroupMember[]): GroupMember {
 
 /**
  * Canonical-Wahl einer Fingerprint-Gruppe nach E11 (inkl. Recovery-Regel):
- *  - Incumbent = die EINE sichtbare Row (konsistente Gruppe). Lebt sie,
- *    bleibt sie Canonical — keine Neuwahl, kein 301-Churn.
- *  - Sonst (Incumbent tot, oder kaputte Gruppe mit mehreren/null sichtbaren
- *    Rows): deterministische Neuwahl unter den LEBENDEN Mitgliedern.
- *  - Leben keine Mitglieder: bleibt ein toter Incumbent Canonical (stabil —
- *    die Gruppe wird ohnehin nur vom Prune versteckt, nicht vom Reconcile);
- *    ohne eindeutigen Incumbent deterministische Wahl unter allen.
+ *  - Incumbent-Regel (Task-Spec woertlich): existiert genau EINE sichtbare
+ *    LEBENDE Row, ist sie Incumbent und bleibt Canonical — keine Neuwahl,
+ *    kein 301-Churn. Das gilt auch in kaputten Gruppen (z. B. eine
+ *    sichtbare tote + eine sichtbare lebende Row nach einem Crash).
+ *  - Sonst (kein eindeutiger lebender Incumbent): deterministische Neuwahl
+ *    unter den LEBENDEN Mitgliedern (aeltestes created_at, dann kleinste
+ *    source_id).
+ *  - Leben keine Mitglieder: bleibt ein eindeutiger sichtbarer (toter)
+ *    Incumbent Canonical (stabil — die Gruppe wird ohnehin nur vom Prune
+ *    versteckt, nicht vom Reconcile); ohne eindeutigen Incumbent
+ *    deterministische Wahl unter allen.
  */
 export function chooseCanonical(members: GroupMember[], ctx: LivenessContext | null): GroupMember {
   if (members.length === 1) return members[0];
 
   const visible = members.filter((m) => m.visible);
-  const incumbent = visible.length === 1 ? visible[0] : null;
-  if (incumbent && isMemberAlive(incumbent, ctx)) return incumbent;
+  const visibleAlive = visible.filter((m) => isMemberAlive(m, ctx));
+  if (visibleAlive.length === 1) return visibleAlive[0];
 
   const alive = members.filter((m) => isMemberAlive(m, ctx));
   if (alive.length > 0) return deterministicPick(alive);
-  if (incumbent) return incumbent;
+  if (visible.length === 1) return visible[0];
   return deterministicPick(members);
 }
 

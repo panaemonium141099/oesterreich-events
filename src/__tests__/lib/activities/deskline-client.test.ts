@@ -102,6 +102,29 @@ describe('fetchRegionInfrastructures — Pagination', () => {
     );
   });
 
+  it('wiederholte/verrutschte Seite (Echo pageNo != angefragte Seite) failt die Region', async () => {
+    mockFetchSequence([
+      { status: 200, body: page([{ id: 'a' }], 0, 2) },
+      // API liefert fuer die angefragte Seite 1 nochmal Seite 0.
+      { status: 200, body: page([{ id: 'a' }], 0, 2) },
+    ]);
+    await expect(fetchRegionInfrastructures('testregion', 'L1')).rejects.toThrow(
+      /malformed\/inconsistent paging block on page 1/,
+    );
+  });
+
+  it('server-seitig geclampte pageSize failt die Region (Echo-Check)', async () => {
+    mockFetchSequence([
+      {
+        status: 200,
+        body: { data: [{ id: 'a' }], paging: { pageNo: 0, pageSize: 200, pageCount: 1, totalRecordCount: 1 } },
+      },
+    ]);
+    await expect(fetchRegionInfrastructures('testregion', 'L1')).rejects.toThrow(
+      /malformed\/inconsistent paging/,
+    );
+  });
+
   it('200 mit inkonsistentem paging (pageCount 0 / non-integer) failt die Region', async () => {
     mockFetchSequence([
       {

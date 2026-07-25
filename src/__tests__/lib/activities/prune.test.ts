@@ -101,6 +101,16 @@ describe('chooseCanonical — E11-Regel (stabil-deterministisch)', () => {
     expect(chooseCanonical([v1, v2], CTX).id).toBe('a');
   });
 
+  it('Recovery-Regel: genau EINE sichtbare LEBENDE Row ist Incumbent — auch in kaputten Gruppen mit weiteren sichtbaren toten Rows', () => {
+    // Kaputte Gruppe nach Crash: sichtbare tote Row + sichtbare lebende Row
+    // + verstecktes aelteres lebendes Duplikat. Die sichtbare lebende Row
+    // bleibt Canonical (kein Redirect-Churn auf das versteckte Mitglied).
+    const visibleDead = member({ id: 'a', source_id: 'a', created_at: '2026-01-01T00:00:00.000Z', visible: true, last_seen_complete_run_seq: 2 });
+    const visibleAlive = member({ id: 'b', source_id: 'b', created_at: '2026-03-01T00:00:00.000Z', visible: true, last_seen_complete_run_seq: 6 });
+    const hiddenAlive = member({ id: 'c', source_id: 'c', created_at: '2026-02-01T00:00:00.000Z', visible: false, duplicate_of: 'a', last_seen_complete_run_seq: 6 });
+    expect(chooseCanonical([visibleDead, visibleAlive, hiddenAlive], CTX).id).toBe('b');
+  });
+
   it('Recovery-Regel: null sichtbare Rows -> deterministische Wahl', () => {
     const m1 = member({ id: 'b', source_id: 'b', created_at: '2026-02-01T00:00:00.000Z', visible: false, last_seen_complete_run_seq: 6 });
     const m2 = member({ id: 'a', source_id: 'a', created_at: '2026-01-01T00:00:00.000Z', visible: false, last_seen_complete_run_seq: 6 });

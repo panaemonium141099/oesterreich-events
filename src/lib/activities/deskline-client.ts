@@ -237,7 +237,13 @@ export async function fetchRegionInfrastructures(
       !Number.isInteger(pc) ||
       !Number.isInteger(pn) ||
       !Number.isInteger(ps) ||
-      (ps as number) < 1 ||
+      // Echo-Check: die Antwort MUSS die angefragte Seite/Seitengroesse
+      // bestaetigen. Wiederholte/verrutschte Seiten (pn != pageNo) oder
+      // server-seitig geclampte pageSizes wuerden sonst mit plausiblem
+      // pageCount als "Region komplett" durchgehen und spaetere Seiten
+      // still verlieren -> POIs saehen fuer den Prune verschwunden aus.
+      pn !== pageNo ||
+      ps !== DESKLINE_PAGE_SIZE ||
       (pc as number) < pageNo + 1
     ) {
       throw new Error(
