@@ -105,16 +105,15 @@ describe('GET /sitemap-activities.xml (Epic E7/E12/E13)', () => {
     expect(body).toContain('<lastmod>2026-07-20</lastmod>');
   });
 
-  it('liefert ein leeres <urlset> bei DB-Fehler statt zu werfen', async () => {
+  it('failt bei DB-Fehler mit 500 statt eine truncierte Sitemap zu liefern', async () => {
     const query = createChainableQuery({ data: null, error: { message: 'timeout' } });
     mockFrom.mockReturnValue(query);
 
     const response = await getActivities();
-    const body = await response.text();
 
-    expect(response.status).toBe(200);
-    expect(body).toContain('<urlset');
-    expect(response.headers.get('X-Sitemap-Entries')).toBe('0');
+    // 5xx -> Google behaelt die letzte bekannte Version; eine kurze
+    // 200-Datei wuerde tausende URLs als "entfernt" signalisieren.
+    expect(response.status).toBe(500);
   });
 });
 
@@ -168,5 +167,58 @@ describe('GET /sitemap-events.xml — URL-Cap zaehlt emittierte URLs', () => {
     expect(body).toContain('xhtml:link rel="alternate" hreflang="de-AT"');
     expect(body).toContain('xhtml:link rel="alternate" hreflang="en"');
     expect(body).toContain('xhtml:link rel="alternate" hreflang="x-default"');
+  });
+
+  it('failt bei DB-Fehler mit 500 statt eine truncierte Sitemap zu liefern', async () => {
+    const query = createChainableQuery({ data: null, error: { message: 'timeout' } });
+    mockFrom.mockReturnValue(query);
+
+    const response = await getEvents();
+    expect(response.status).toBe(500);
+  });
+});
+
+describe('GET /sitemap-core.xml — Paritaet + fail loudly', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('enthaelt alle verschobenen Sektionen inkl. Blog + i18n-Alternates + Venues', async () => {
+    const { GET: getCore } = await import('@/app/sitemap-core.xml/route');
+    const query = createChainableQuery({
+      data: [{ venue_id: 'venue-123' }, { venue_id: 'venue-123' }, { venue_id: null }],
+      error: null,
+    });
+    mockFrom.mockReturnValue(query);
+
+    const response = await getCore();
+    const body = await response.text();
+
+    expect(response.status).toBe(200);
+    // Statisch + fn-17-Alternates
+    expect(body).toContain('<loc>https://lasstreffen.at</loc>');
+    expect(body).toContain('<loc>https://lasstreffen.at/en</loc>');
+    expect(body).toContain('xhtml:link rel="alternate" hreflang="de-AT"');
+    // Blog-Sektion (Index + Posts) lebt jetzt in core
+    expect(body).toContain('<loc>https://lasstreffen.at/blog</loc>');
+    expect(body).toContain('<loc>https://lasstreffen.at/blog/');
+    // Hubs
+    expect(body).toContain('<loc>https://lasstreffen.at/burgenland</loc>');
+    expect(body).toContain('<loc>https://lasstreffen.at/thema/');
+    expect(body).toContain('<loc>https://lasstreffen.at/gemeinde/');
+    expect(body).toContain('<loc>https://lasstreffen.at/studenten</loc>');
+    // Venues (dedupliziert aus der Mock-Query)
+    expect(body).toContain('<loc>https://lasstreffen.at/venues/venue-123</loc>');
+    // Kind-Datei bleibt unter dem Google-Limit
+    expect(Number(response.headers.get('X-Sitemap-Entries'))).toBeLessThanOrEqual(45000);
+  });
+
+  it('failt bei Venue-Query-Fehler mit 500 statt Sitemap ohne Venues', async () => {
+    const { GET: getCore } = await import('@/app/sitemap-core.xml/route');
+    const query = createChainableQuery({ data: null, error: { message: 'timeout' } });
+    mockFrom.mockReturnValue(query);
+
+    const response = await getCore();
+    expect(response.status).toBe(500);
   });
 });

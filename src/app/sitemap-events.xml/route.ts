@@ -38,7 +38,18 @@ export async function GET(): Promise<NextResponse> {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-  if (supabaseUrl && supabaseKey) {
+  // Fail loudly (Review-Finding R3): NIE eine stillschweigend truncierte
+  // Sitemap mit 200 ausliefern — Crawler wuerden fehlende URLs als
+  // entfernt werten. Bei 5xx behaelt Google die letzte bekannte Version.
+  if (!supabaseUrl || !supabaseKey) {
+    console.error(
+      '[sitemap-events] Missing Supabase env vars — refusing to serve empty sitemap. ' +
+      `url_set=${!!supabaseUrl} key_set=${!!supabaseKey}`,
+    );
+    return new NextResponse('sitemap temporarily unavailable', { status: 500 });
+  }
+
+  {
     const supabase = createClient(supabaseUrl, supabaseKey);
 
     // Events — paginate the PostgREST 1000-row default limit manually so we
@@ -61,8 +72,10 @@ export async function GET(): Promise<NextResponse> {
           .range(offset, offset + PAGE - 1);
 
         if (error) {
+          // Kein break: eine mitten in der Pagination abgebrochene Datei
+          // waere eine stillschweigend unvollstaendige Sitemap.
           console.error('[sitemap-events] event query failed:', error.message);
-          break;
+          return new NextResponse('sitemap temporarily unavailable', { status: 500 });
         }
         if (!data || data.length === 0) break;
 
@@ -99,12 +112,8 @@ export async function GET(): Promise<NextResponse> {
       }
     } catch (err) {
       console.error('[sitemap-events] event pagination failed:', err);
+      return new NextResponse('sitemap temporarily unavailable', { status: 500 });
     }
-  } else {
-    console.error(
-      '[sitemap-events] Missing Supabase env vars — event sitemap entries skipped. ' +
-      `url_set=${!!supabaseUrl} key_set=${!!supabaseKey}`,
-    );
   }
 
   return new NextResponse(renderUrlset(entries), {

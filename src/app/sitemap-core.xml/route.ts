@@ -39,6 +39,16 @@ import {
 export const dynamic = 'force-dynamic';
 export const revalidate = 300;
 
+/**
+ * Harter Guard fuer die E12-Invariante "jede Kind-Datei <50k URLs":
+ * der Core-Bestand ist heute ~7k statische/Hub-URLs + Venues (die
+ * Venue-Query liefert via PostgREST-Default ohnehin max. 1000 Rows) —
+ * weit unter dem Limit. Sollte der Bestand je darueber wachsen, wird
+ * laut mit 500 gefailt statt eine >50k-Sitemap auszuliefern (dann:
+ * weitere Kind-Sitemap abspalten).
+ */
+const MAX_CORE_URLS = 45000;
+
 export async function GET(): Promise<NextResponse> {
   const entries: SitemapEntry[] = [];
   const today = new Date().toISOString().split('T')[0];
@@ -123,7 +133,10 @@ export async function GET(): Promise<NextResponse> {
       });
     }
   } catch (err) {
+    // Fail loudly (Review-Finding R3): keine stillschweigend
+    // unvollstaendige Sitemap mit 200 ausliefern.
     console.error('[sitemap-core] theme import failed:', err);
+    return new NextResponse('sitemap temporarily unavailable', { status: 500 });
   }
 
   // ─── 5b. Gemeinde hubs (Phase 2) ────────────────────────────────────────
@@ -148,47 +161,68 @@ export async function GET(): Promise<NextResponse> {
     }
   } catch (err) {
     console.error('[sitemap-core] gemeinde import failed:', err);
+    return new NextResponse('sitemap temporarily unavailable', { status: 500 });
   }
 
   // ─── 6. Venue pages (require Supabase) ──────────────────────────────────
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-  if (supabaseUrl && supabaseKey) {
-    const supabase = createClient(supabaseUrl, supabaseKey);
-
-    // Venue pages — unique venue_ids that have upcoming published events
-    try {
-      const { data: activeVenueIds } = await supabase
-        .from('events')
-        .select('venue_id')
-        .eq('publish_status', 'published')
-        .gte('start_date', today)
-        .gte('quality_score', 40)
-        .not('venue_id', 'is', null);
-
-      const uniqueVenueIds = [...new Set(
-        (activeVenueIds ?? [])
-          .map((e: { venue_id: string | null }) => e.venue_id)
-          .filter((v): v is string => Boolean(v)),
-      )];
-
-      for (const vid of uniqueVenueIds) {
-        entries.push({
-          loc: `${BASE_URL}/venues/${vid}`,
-          lastmod: toISO(now),
-          changefreq: 'daily',
-          priority: 0.6,
-        });
-      }
-    } catch (err) {
-      console.error('[sitemap-core] venue query failed:', err);
-    }
-  } else {
+  // Fail loudly (Review-Finding R3): fehlende Env/DB-Fehler duerfen keine
+  // stillschweigend unvollstaendige Sitemap mit 200 produzieren — bei 5xx
+  // behaelt Google die letzte bekannte Version.
+  if (!supabaseUrl || !supabaseKey) {
     console.error(
-      '[sitemap-core] Missing Supabase env vars — venue sitemap entries skipped. ' +
+      '[sitemap-core] Missing Supabase env vars — refusing to serve partial sitemap. ' +
       `url_set=${!!supabaseUrl} key_set=${!!supabaseKey}`,
     );
+    return new NextResponse('sitemap temporarily unavailable', { status: 500 });
+  }
+
+  const supabase = createClient(supabaseUrl, supabaseKey);
+
+  // Venue pages — unique venue_ids that have upcoming published events
+  try {
+    const { data: activeVenueIds, error: venueError } = await supabase
+      .from('events')
+      .select('venue_id')
+      .eq('publish_status', 'published')
+      .gte('start_date', today)
+      .gte('quality_score', 40)
+      .not('venue_id', 'is', null);
+
+    if (venueError) {
+      console.error('[sitemap-core] venue query failed:', venueError.message);
+      return new NextResponse('sitemap temporarily unavailable', { status: 500 });
+    }
+
+    const uniqueVenueIds = [...new Set(
+      (activeVenueIds ?? [])
+        .map((e: { venue_id: string | null }) => e.venue_id)
+        .filter((v): v is string => Boolean(v)),
+    )];
+
+    for (const vid of uniqueVenueIds) {
+      entries.push({
+        loc: `${BASE_URL}/venues/${vid}`,
+        lastmod: toISO(now),
+        changefreq: 'daily',
+        priority: 0.6,
+      });
+    }
+  } catch (err) {
+    console.error('[sitemap-core] venue query failed:', err);
+    return new NextResponse('sitemap temporarily unavailable', { status: 500 });
+  }
+
+  // E12-Invariante hart durchsetzen: lieber laut failen als eine
+  // >50k-Sitemap ausliefern (dann weitere Kind-Sitemap abspalten).
+  if (entries.length > MAX_CORE_URLS) {
+    console.error(
+      `[sitemap-core] ${entries.length} URLs > MAX_CORE_URLS (${MAX_CORE_URLS}) — ` +
+      'refusing to serve oversized sitemap; split out another child sitemap.',
+    );
+    return new NextResponse('sitemap temporarily unavailable', { status: 500 });
   }
 
   return new NextResponse(renderUrlset(entries), {
