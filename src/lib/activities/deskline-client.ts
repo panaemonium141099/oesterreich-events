@@ -118,12 +118,14 @@ export interface DesklineInfrastructure {
 }
 
 interface DesklineInfraResponse {
-  data: DesklineInfrastructure[];
-  paging: {
-    pageNo: number;
-    pageSize: number;
-    pageCount: number;
-    totalRecordCount: number;
+  data?: DesklineInfrastructure[];
+  /** Fremddaten — Felder bewusst optional; werden pro Seite streng
+   *  validiert (fehlendes/kaputtes paging failt die Region). */
+  paging?: {
+    pageNo?: number;
+    pageSize?: number;
+    pageCount?: number;
+    totalRecordCount?: number;
   };
 }
 
@@ -223,7 +225,28 @@ export async function fetchRegionInfrastructures(
       throw new Error(`Deskline ${regionCode}: malformed response (no data array) on page ${pageNo}`);
     }
 
-    pageCount = response.paging?.pageCount ?? pageNo + 1;
+    // paging ist PFLICHT und wird streng validiert: eine 200er-Antwort mit
+    // fehlendem/kaputtem paging-Block darf NIE als "Region komplett"
+    // durchgehen — das waere exakt das stille Truncate, das Sighting/Prune
+    // (E6) vergiftet. Lieber laut failen (Region -> regions_failed).
+    const paging = response.paging;
+    const pc = paging?.pageCount;
+    const pn = paging?.pageNo;
+    const ps = paging?.pageSize;
+    if (
+      !Number.isInteger(pc) ||
+      !Number.isInteger(pn) ||
+      !Number.isInteger(ps) ||
+      (ps as number) < 1 ||
+      (pc as number) < pageNo + 1
+    ) {
+      throw new Error(
+        `Deskline ${regionCode}: malformed/inconsistent paging block on page ${pageNo}: ` +
+          JSON.stringify(paging ?? null).substring(0, 200),
+      );
+    }
+
+    pageCount = pc as number;
     items.push(...response.data);
     pageNo++;
 

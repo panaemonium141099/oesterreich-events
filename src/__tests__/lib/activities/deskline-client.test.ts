@@ -94,4 +94,33 @@ describe('fetchRegionInfrastructures — Pagination', () => {
       /malformed response/,
     );
   });
+
+  it('200 mit fehlendem paging-Block failt die Region (nie stilles Ein-Seiten-Truncate)', async () => {
+    mockFetchSequence([{ status: 200, body: { data: [{ id: 'a' }] } }]);
+    await expect(fetchRegionInfrastructures('testregion', 'L1')).rejects.toThrow(
+      /malformed\/inconsistent paging/,
+    );
+  });
+
+  it('200 mit inkonsistentem paging (pageCount 0 / non-integer) failt die Region', async () => {
+    mockFetchSequence([
+      {
+        status: 200,
+        body: { data: [{ id: 'a' }], paging: { pageNo: 0, pageSize: 400, pageCount: 0, totalRecordCount: 1 } },
+      },
+    ]);
+    await expect(fetchRegionInfrastructures('testregion', 'L1')).rejects.toThrow(
+      /malformed\/inconsistent paging/,
+    );
+
+    mockFetchSequence([
+      {
+        status: 200,
+        body: { data: [{ id: 'a' }], paging: { pageNo: 0, pageSize: 400, pageCount: '7', totalRecordCount: 1 } },
+      },
+    ]);
+    await expect(fetchRegionInfrastructures('testregion', 'L1')).rejects.toThrow(
+      /malformed\/inconsistent paging/,
+    );
+  });
 });

@@ -30,7 +30,7 @@ on:
   workflow_dispatch:
     inputs:
       dry_run:
-        description: 'Dry-run (kein DB-Write, auch keine Runs-Zeile)'
+        description: 'Dry-run (kein DB-Write, auch keine Runs-Zeile). NICHT mit reconcile kombinierbar — das Script lehnt die Kombination ab.'
         required: false
         default: 'false'
         type: boolean

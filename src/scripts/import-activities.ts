@@ -68,6 +68,11 @@ async function main(): Promise<void> {
   if (reconcile && region !== undefined) {
     throw new Error('--reconcile und --region schliessen sich aus');
   }
+  if (reconcile && dryRun) {
+    // Sonst saehe ein Operator einen gruenen "Recovery"-Lauf, der in
+    // Wahrheit ein Read-only-No-op war.
+    throw new Error('--reconcile ist ein Schreib-Kommando und nicht mit --dry-run kombinierbar');
+  }
   if (region !== undefined && (region === '' || region.startsWith('--'))) {
     // Ohne diesen Guard wuerde ein vergessener Slug ('--region --dry-run')
     // stillschweigend zum Voll-Lauf degradieren.
