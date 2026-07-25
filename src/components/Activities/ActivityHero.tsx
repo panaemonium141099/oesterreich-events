@@ -52,7 +52,14 @@ export function ActivityHero({
 
   const image = firstImage(images);
   const imageUrl = image?.urls.find((u) => typeof u === 'string' && u.trim() !== '') ?? null;
-  const credit = image ? (image.copyright || image.author) : null;
+  // Attribution-Pflicht: copyright UND author anzeigen, wenn beide
+  // vorhanden (dedupliziert — Deskline liefert sie oft identisch).
+  const creditParts = image
+    ? [image.copyright, image.author]
+        .filter((v): v is string => typeof v === 'string' && v.trim() !== '')
+        .map((v) => v.trim())
+    : [];
+  const credit = [...new Set(creditParts)].join(' · ') || null;
   const showImage = imageUrl != null && !imageFailed;
 
   const locationLine = [town, bundeslandLabel].filter(Boolean).join(', ');

@@ -24,8 +24,11 @@ import {
 export const dynamic = 'force-dynamic';
 export const revalidate = 300;
 
-/** Google's hard limit is 50k URLs; we leave headroom (EN-ZweitURLs zaehlen mit). */
-const MAX_EVENTS = 45000;
+/** Google's hard limit is 50k URLs; we leave headroom. Cap zaehlt EMITTIERTE
+ *  URLs (uebersetzte Events liefern DE- UND /en-URL = 2 Eintraege), nicht
+ *  Quell-Rows — sonst koennte die Datei bei vielen title_en-Events die
+ *  50k sprengen (Review-Finding R2). */
+const MAX_URLS = 45000;
 
 export async function GET(): Promise<NextResponse> {
   const entries: SitemapEntry[] = [];
@@ -39,14 +42,14 @@ export async function GET(): Promise<NextResponse> {
     const supabase = createClient(supabaseUrl, supabaseKey);
 
     // Events — paginate the PostgREST 1000-row default limit manually so we
-    // can actually ship up to MAX_EVENTS rows. The old single-query version
+    // can actually ship up to MAX_URLS entries. The old single-query version
     // silently capped at 1000 per chunk.
     try {
       const PAGE = 1000;
       let offset = 0;
-      let eventsAdded = 0;
-      // Hard loop bound: MAX_EVENTS / PAGE at most.
-      while (eventsAdded < MAX_EVENTS) {
+      let capReached = false;
+      // Hard loop bound: MAX_URLS / PAGE at most.
+      while (!capReached && entries.length < MAX_URLS) {
         const { data, error } = await supabase
           .from('events')
           .select('id, slug, start_date, updated_at, quality_score, postal_code, address, bundesland, location_name, title_en')
@@ -64,7 +67,13 @@ export async function GET(): Promise<NextResponse> {
         if (!data || data.length === 0) break;
 
         for (const event of data) {
-          if (eventsAdded >= MAX_EVENTS) break;
+          // Uebersetzte Events emittieren 2 URLs — nur aufnehmen, wenn
+          // BEIDE noch unter den Cap passen (nie ein halbes hreflang-Paar).
+          const urlsForRow = event.title_en ? 2 : 1;
+          if (entries.length + urlsForRow > MAX_URLS) {
+            capReached = true;
+            break;
+          }
           const qs = event.quality_score ?? 0;
           const priority = qs >= 80 ? 0.8 : qs >= 60 ? 0.6 : 0.4;
           const path = buildEventUrlV2(event);
@@ -83,7 +92,6 @@ export async function GET(): Promise<NextResponse> {
           } else {
             entries.push({ loc: `${BASE_URL}${path}`, lastmod, changefreq: 'daily', priority });
           }
-          eventsAdded += 1;
         }
 
         if (data.length < PAGE) break; // last page

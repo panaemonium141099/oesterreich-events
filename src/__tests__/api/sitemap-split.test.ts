@@ -30,6 +30,7 @@ vi.mock('@supabase/supabase-js', () => ({
 
 const { GET: getIndex } = await import('@/app/sitemap.xml/route');
 const { GET: getActivities } = await import('@/app/sitemap-activities.xml/route');
+const { GET: getEvents } = await import('@/app/sitemap-events.xml/route');
 
 describe('GET /sitemap.xml (Sitemap-INDEX, Epic E12)', () => {
   it('ist ein gueltiger <sitemapindex> auf die drei Kind-Sitemaps', async () => {
@@ -114,5 +115,58 @@ describe('GET /sitemap-activities.xml (Epic E7/E12/E13)', () => {
     expect(response.status).toBe(200);
     expect(body).toContain('<urlset');
     expect(response.headers.get('X-Sitemap-Entries')).toBe('0');
+  });
+});
+
+describe('GET /sitemap-events.xml — URL-Cap zaehlt emittierte URLs', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  function makeTranslatedEvents(count: number, pageTag: string) {
+    return Array.from({ length: count }, (_, i) => ({
+      id: `00000000-0000-4000-8000-${String(i).padStart(12, '0')}`,
+      slug: `event-${pageTag}-${i}`,
+      start_date: '2026-09-15',
+      updated_at: '2026-07-01T00:00:00Z',
+      quality_score: 80,
+      postal_code: '7100',
+      address: null,
+      bundesland: 'Burgenland',
+      location_name: 'Neusiedl am See',
+      title_en: `Event ${i} (EN)`,
+    }));
+  }
+
+  it('uebersetzte Events (2 URLs/Row) sprengen den 45k-Cap NICHT (Regression R2)', async () => {
+    // Mock liefert unbegrenzt volle 1000er-Seiten komplett uebersetzter
+    // Events — ohne URL-Cap wuerde die Datei 90k+ URLs enthalten.
+    const query = createChainableQuery({ data: makeTranslatedEvents(1000, 'p'), error: null });
+    mockFrom.mockReturnValue(query);
+
+    const response = await getEvents();
+    const emitted = Number(response.headers.get('X-Sitemap-Entries'));
+
+    // Cap haelt: nie mehr als 45k EMITTIERTE URLs (Google-Limit 50k).
+    expect(emitted).toBeLessThanOrEqual(45000);
+    // Und der Cap wird auch ausgeschoepft (kein Off-by-one weit drunter).
+    expect(emitted).toBeGreaterThanOrEqual(44999);
+    // Paar-Regel: gerade Anzahl -> nie ein halbes DE/EN-hreflang-Paar.
+    expect(emitted % 2).toBe(0);
+  });
+
+  it('emittiert DE- und /en-URL als Paar mit xhtml:link-Alternates (fn-17-Paritaet)', async () => {
+    const query = createChainableQuery({ data: makeTranslatedEvents(2, 'x'), error: null });
+    mockFrom.mockReturnValue(query);
+
+    const body = await (await getEvents()).text();
+
+    // Prefix kommt aus der PLZ-Registry (7100 -> eisenstadt), nicht aus
+    // location_name — hier zaehlt nur: DE- und /en-URL erscheinen als Paar.
+    expect(body).toContain('<loc>https://lasstreffen.at/events/7100-eisenstadt/2026-09-15/event-x-0</loc>');
+    expect(body).toContain('<loc>https://lasstreffen.at/en/events/7100-eisenstadt/2026-09-15/event-x-0</loc>');
+    expect(body).toContain('xhtml:link rel="alternate" hreflang="de-AT"');
+    expect(body).toContain('xhtml:link rel="alternate" hreflang="en"');
+    expect(body).toContain('xhtml:link rel="alternate" hreflang="x-default"');
   });
 });
