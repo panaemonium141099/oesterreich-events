@@ -19,6 +19,7 @@ import {
   type IngestDeps,
   type IngestOptions,
   type RunPatch,
+  type SeenEntry,
 } from '@/lib/activities/ingest';
 import {
   SIGHTING_COLUMNS,
@@ -132,7 +133,6 @@ class InMemoryStore implements ActivityStore {
         source_id: r.source_id,
         slug: r.slug,
         content_fingerprint: r.content_fingerprint,
-        seen_regions: r.seen_regions,
       });
     }
     return map;
@@ -172,15 +172,17 @@ class InMemoryStore implements ActivityStore {
     }
   }
 
-  async markSeen(ids: string[], runSeq: number, seenAtIso: string, seenRegions: string[]): Promise<void> {
+  async markSeen(entries: SeenEntry[], runSeq: number, seenAtIso: string): Promise<void> {
     this.guard('markSeen');
-    for (const r of this.rows) {
-      if (!ids.includes(r.id)) continue;
+    for (const entry of entries) {
+      const r = this.rows.find((row) => row.id === entry.id);
+      if (!r) continue;
       // Monotonie-Filter des echten Stores (last_seen_run_seq < runSeq).
       if (r.last_seen_run_seq !== null && r.last_seen_run_seq >= runSeq) continue;
       r.last_seen_run_seq = runSeq;
       r.last_seen_at = seenAtIso;
-      r.seen_regions = seenRegions;
+      // Live-Union zur Stempel-Zeit (Semantik des echten Stores).
+      r.seen_regions = [...new Set([...r.seen_regions, ...entry.regions])].sort();
     }
   }
 
@@ -596,6 +598,26 @@ describe('runIngest — Crash-Recovery (--reconcile, Task-Spec d)', () => {
     expect(b.duplicate_of).toBe(a.id);
     // Der abgebrochene Lauf bleibt als solcher markiert.
     expect(h.store.runs[1].finished_at).toBeNull();
+  });
+
+  it('Teil-Schreiber (Insert ok, Update crasht) loest den Not-Sweep trotzdem aus', async () => {
+    const h = harness();
+    h.data.r1 = [poi('p1', 'Strandbad Podersdorf')];
+    await h.run(); // sauberer complete_run #1
+
+    // Lauf 2: p1-Update UND p9-Insert (gleicher Fingerprint wie p1).
+    // updateActivities crasht NACH dem erfolgreichen Insert -> ohne den
+    // Vorab-Set von wroteData/touchedFingerprints wuerde der Not-Sweep
+    // uebersprungen und die Gruppe haette 2 sichtbare Rows.
+    h.data.r1 = [poi('p1', 'Strandbad Podersdorf'), poi('p9', 'Strandbad Podersdorf')];
+    h.store.failOn.add('updateActivities');
+    await expect(h.run()).rejects.toThrow(/updateActivities failed/);
+    h.store.failOn.clear();
+
+    expect(h.store.bySourceId('p9')).toBeDefined(); // Insert war durch
+    const fp = h.store.bySourceId('p1')!.content_fingerprint;
+    expect(visibleCountsPerGroup(h.store).get(fp)).toBe(1); // Not-Sweep lief
+    expect(h.store.runs[1].finished_at).toBeNull(); // Lauf gilt als abgebrochen
   });
 
   it('Not-Sweep im Fehlerpfad repariert beruehrte Gruppen, wenn er selbst durchlaeuft', async () => {

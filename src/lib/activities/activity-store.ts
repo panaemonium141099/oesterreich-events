@@ -22,6 +22,7 @@ import type {
   ExistingActivityRow,
   GroupMemberRow,
   RunPatch,
+  SeenEntry,
 } from './ingest';
 import type { ActivityInsertRow, ActivityUpdateRow } from './ingest-transform';
 import type { GroupUpdate } from './prune';
@@ -91,7 +92,7 @@ export class SupabaseActivityStore implements ActivityStore {
     for (const slice of chunk([...new Set(sourceIds)], IN_BATCH)) {
       const { data, error } = await this.supabase
         .from(TABLE)
-        .select('id, source_id, slug, content_fingerprint, seen_regions')
+        .select('id, source_id, slug, content_fingerprint')
         .eq('source', 'deskline')
         .in('source_id', slice);
       if (error) fail('prefetchExisting', error.message);
@@ -126,14 +127,47 @@ export class SupabaseActivityStore implements ActivityStore {
     }
   }
 
-  async markSeen(ids: string[], runSeq: number, seenAtIso: string, seenRegions: string[]): Promise<void> {
-    for (const batch of chunk(ids, WRITE_BATCH)) {
-      const { error } = await this.supabase
+  async markSeen(entries: SeenEntry[], runSeq: number, seenAtIso: string): Promise<void> {
+    for (const batch of chunk(entries, WRITE_BATCH)) {
+      // seen_regions-Union zur STEMPEL-Zeit: aktuelle seen_regions frisch
+      // lesen und row-genau mergen (union-only) — NIE aus einem aelteren
+      // Prefetch-Snapshot, sonst koennte ein Lauf die Regionen eines
+      // parallel dazugekommenen Laufs ueberschreiben. Das Restfenster
+      // zwischen Read und Update deckt der monotone last_seen_run_seq-
+      // Filter plus die GH-concurrency-Group (Ebene 1) ab: ein AELTERER
+      // spaeter schreibender Lauf trifft gestempelte Rows gar nicht mehr.
+      const ids = batch.map((e) => e.id);
+      const { data, error } = await this.supabase
         .from(TABLE)
-        .update({ last_seen_run_seq: runSeq, last_seen_at: seenAtIso, seen_regions: seenRegions })
-        .in('id', batch)
-        .or(`last_seen_run_seq.is.null,last_seen_run_seq.lt.${runSeq}`);
-      if (error) fail('markSeen', error.message);
+        .select('id, seen_regions')
+        .in('id', ids);
+      if (error) fail('markSeen(read)', error.message);
+      const liveRegions = new Map(
+        ((data ?? []) as Array<{ id: string; seen_regions: string[] | null }>).map((r) => [
+          r.id,
+          r.seen_regions ?? [],
+        ]),
+      );
+
+      // Identische Ziel-Unions buendeln (im Regelfall wenige distinkte
+      // Regionen-Sets) -> wenige .in()-Updates statt Row-fuer-Row.
+      const byUnion = new Map<string, { ids: string[]; regions: string[] }>();
+      for (const entry of batch) {
+        const union = [...new Set([...(liveRegions.get(entry.id) ?? []), ...entry.regions])].sort();
+        const key = union.join('|');
+        const group = byUnion.get(key);
+        if (group) group.ids.push(entry.id);
+        else byUnion.set(key, { ids: [entry.id], regions: union });
+      }
+
+      for (const group of byUnion.values()) {
+        const { error: updateError } = await this.supabase
+          .from(TABLE)
+          .update({ last_seen_run_seq: runSeq, last_seen_at: seenAtIso, seen_regions: group.regions })
+          .in('id', group.ids)
+          .or(`last_seen_run_seq.is.null,last_seen_run_seq.lt.${runSeq}`);
+        if (updateError) fail('markSeen', updateError.message);
+      }
     }
   }
 

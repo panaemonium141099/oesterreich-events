@@ -31,8 +31,10 @@
  * last_seen_run_seq < run_seq (GREATEST-Semantik) — ein spaeter fertig
  * werdender AELTERER Lauf trifft nur Rows, die kein neuerer Lauf schon
  * gestempelt hat, und kann daher weder die Seq-Felder noch seen_regions
- * zuruecksetzen. seen_regions wird client-seitig als all-time-Union
- * berechnet (union-only) und im selben monotonen Update geschrieben.
+ * zuruecksetzen. seen_regions wird als all-time-Union IM STORE zur
+ * Stempel-Zeit gemergt (Live-Read der aktuellen seen_regions unmittelbar
+ * vor dem Update, union-only) — der Orchestrator liefert nur die in
+ * DIESEM Lauf gesehenen Regionen pro Row.
  */
 
 import {
@@ -62,7 +64,14 @@ export interface ExistingActivityRow {
   source_id: string;
   slug: string;
   content_fingerprint: string;
-  seen_regions: string[];
+}
+
+/** Sichtung einer Row in DIESEM Lauf: id + die liefernden Regionen.
+ *  Die all-time-Union mit dem Bestand zieht der STORE zur Stempel-Zeit
+ *  (Live-Read + Merge — nie aus einem veralteten Prefetch-Snapshot). */
+export interface SeenEntry {
+  id: string;
+  regions: string[];
 }
 
 export interface GroupMemberRow extends GroupMember {
@@ -92,8 +101,9 @@ export interface ActivityStore {
   insertActivities(rows: ActivityInsertRow[]): Promise<Array<{ id: string; source_id: string }>>;
   /** Update-Pfad via Upsert ON CONFLICT (source, source_id). */
   updateActivities(rows: ActivityUpdateRow[]): Promise<void>;
-  /** Monotones Sichtungs-Update (nur Rows mit last_seen_run_seq < runSeq). */
-  markSeen(ids: string[], runSeq: number, seenAtIso: string, seenRegions: string[]): Promise<void>;
+  /** Monotones Sichtungs-Update (nur Rows mit last_seen_run_seq < runSeq);
+   *  seen_regions = Live-Union aus aktuellem Row-Stand + entry.regions. */
+  markSeen(entries: SeenEntry[], runSeq: number, seenAtIso: string): Promise<void>;
   /** Monotones complete-Stamping (nur last_seen_complete_run_seq < runSeq). */
   markSeenComplete(ids: string[], runSeq: number): Promise<void>;
   fetchGroupMembers(fingerprints: string[]): Promise<GroupMemberRow[]>;
@@ -293,19 +303,22 @@ async function reconcileFingerprints(
 }
 
 /**
- * Schreibphase (Insert-/Update-Trennung nach dem prefetchExistingRows-
- * Muster, supabase-sync.ts:174-224) + Ermittlung der beruehrten
- * Fingerprint-Gruppen (alte UND neue — Fingerprint-Drift, Task-Spec d).
+ * Vorbereitung der Schreibphase (Insert-/Update-Trennung nach dem
+ * prefetchExistingRows-Muster, supabase-sync.ts:174-224) + Ermittlung der
+ * beruehrten Fingerprint-Gruppen (alte UND neue — Fingerprint-Drift,
+ * Task-Spec d). REIN LESEND — die mutierenden Store-Calls macht der
+ * Aufrufer, NACHDEM er touchedFingerprints/wroteData fuer den
+ * Crash-Recovery-Pfad gesichert hat (ein Teil-Schreiber — Insert ok,
+ * Update crasht — muss den Not-Sweep trotzdem ausloesen).
  */
-async function writeActivities(
+async function prepareWrites(
   store: ActivityStore,
   activities: TransformedActivity[],
-  nowIso: string,
+  stampIso: string,
 ): Promise<{
-  inserted: number;
-  updated: number;
+  insertRows: ActivityInsertRow[];
+  updateRows: ActivityUpdateRow[];
   idBySourceId: Map<string, string>;
-  existingBySourceId: Map<string, ExistingActivityRow>;
   touchedFingerprints: Set<string>;
 }> {
   const existing = await store.prefetchExisting(activities.map((a) => a.source_id));
@@ -321,54 +334,38 @@ async function writeActivities(
     if (row) {
       touched.add(row.content_fingerprint); // alte Gruppe (Drift!)
       idBySourceId.set(a.source_id, row.id);
-      updateRows.push(buildUpdateRow(a, nowIso));
+      updateRows.push(buildUpdateRow(a, stampIso));
     } else {
       insertRows.push(buildInsertRow(a));
     }
   }
 
-  const insertedRefs = insertRows.length > 0 ? await store.insertActivities(insertRows) : [];
-  for (const ref of insertedRefs) idBySourceId.set(ref.source_id, ref.id);
-  if (updateRows.length > 0) await store.updateActivities(updateRows);
-
-  return {
-    inserted: insertRows.length,
-    updated: updateRows.length,
-    idBySourceId,
-    existingBySourceId: existing,
-    touchedFingerprints: touched,
-  };
+  return { insertRows, updateRows, idBySourceId, touchedFingerprints: touched };
 }
 
-/** Sichtungs-Updates (NUR Voll-Laeufe): Rows nach resultierender
- *  seen_regions-Union gruppieren (all-time-Union aus Bestand + diesem Lauf)
- *  und monoton stempeln. */
+/** Sichtungs-Updates (NUR Voll-Laeufe): pro Row die in DIESEM Lauf
+ *  liefernden Regionen stempeln — die all-time-Union mit dem Bestand
+ *  zieht der Store zur Stempel-Zeit (Live-Read, union-only). */
 async function markSightings(
   store: ActivityStore,
   state: CollectState,
   idBySourceId: Map<string, string>,
-  existingBySourceId: Map<string, ExistingActivityRow>,
   runSeq: number,
   isComplete: boolean,
   nowIso: string,
 ): Promise<void> {
-  const byUnion = new Map<string, { ids: string[]; regions: string[] }>();
+  const entries: SeenEntry[] = [];
   const allIds: string[] = [];
 
   for (const [sourceId, regionsNow] of state.regionsBySourceId) {
     const id = idBySourceId.get(sourceId);
     if (!id) continue;
     allIds.push(id);
-    const existingRegions = existingBySourceId.get(sourceId)?.seen_regions ?? [];
-    const union = [...new Set([...existingRegions, ...regionsNow])].sort();
-    const key = union.join('|');
-    const group = byUnion.get(key);
-    if (group) group.ids.push(id);
-    else byUnion.set(key, { ids: [id], regions: union });
+    entries.push({ id, regions: [...regionsNow].sort() });
   }
 
-  for (const group of byUnion.values()) {
-    await store.markSeen(group.ids, runSeq, nowIso, group.regions);
+  if (entries.length > 0) {
+    await store.markSeen(entries, runSeq, nowIso);
   }
   if (isComplete && allIds.length > 0) {
     await store.markSeenComplete(allIds, runSeq);
@@ -493,6 +490,8 @@ export async function runIngest(deps: IngestDeps, opts: IngestOptions): Promise<
   // Fatale Transform-Fehler (bundesland-unresolved) sind Lauf-Fehler:
   // die betroffene Region gilt als failed -> der Lauf kann nicht complete
   // sein und stampt keine last_seen_complete_run_seq (prune-sicher).
+  // Sie wird dabei auch aus regions_ok ENTFERNT — eine Region darf im
+  // Run-Bookkeeping nie gleichzeitig ok und failed sein.
   for (const code of state.fatalRegions) {
     if (!failed.some((f) => f.code === code)) {
       failed.push({ code, error: 'bundesland-unresolved (Registry-Fehlwert, Task-2-Spec)' });
@@ -503,7 +502,7 @@ export async function runIngest(deps: IngestDeps, opts: IngestOptions): Promise<
   result.importable = state.bySourceId.size;
   result.skipped = state.skipped;
   result.fatalTransformErrors = state.fatalErrors;
-  result.regionsOk = okCodes.sort();
+  result.regionsOk = okCodes.filter((c) => !state.fatalRegions.has(c)).sort();
   result.regionsFailed = failed;
   result.overlap = overlapReport(state, log);
 
@@ -557,23 +556,27 @@ export async function runIngest(deps: IngestDeps, opts: IngestOptions): Promise<
 
   try {
     if (activities.length > 0) {
-      const writeResult = await writeActivities(store, activities, nowIso());
-      wroteData = true;
-      result.inserted = writeResult.inserted;
-      result.updated = writeResult.updated;
-      touchedFingerprints = writeResult.touchedFingerprints;
-      log(`[ingest] Writes: ${writeResult.inserted} inserts, ${writeResult.updated} updates`);
+      // Read-only-Vorbereitung; danach werden touchedFingerprints/wroteData
+      // VOR dem ersten mutierenden Store-Call gesetzt — nur so laeuft der
+      // Not-Sweep im Fehlerpfad auch bei Teil-Schreibern (z. B. Insert-Batch
+      // ok, Update-Batch crasht).
+      const prepared = await prepareWrites(store, activities, nowIso());
+      touchedFingerprints = prepared.touchedFingerprints;
+      wroteData = true; // konservativ: ab jetzt koennte Daten-State existieren
+
+      if (prepared.insertRows.length > 0) {
+        const insertedRefs = await store.insertActivities(prepared.insertRows);
+        for (const ref of insertedRefs) prepared.idBySourceId.set(ref.source_id, ref.id);
+      }
+      if (prepared.updateRows.length > 0) {
+        await store.updateActivities(prepared.updateRows);
+      }
+      result.inserted = prepared.insertRows.length;
+      result.updated = prepared.updateRows.length;
+      log(`[ingest] Writes: ${result.inserted} inserts, ${result.updated} updates`);
 
       if (opts.mode === 'full' && run) {
-        await markSightings(
-          store,
-          state,
-          writeResult.idBySourceId,
-          writeResult.existingBySourceId,
-          run.run_seq,
-          isComplete === true,
-          nowIso(),
-        );
+        await markSightings(store, state, prepared.idBySourceId, run.run_seq, isComplete === true, nowIso());
         log(`[ingest] Sichtungen gestempelt (complete=${isComplete})`);
       }
     }
