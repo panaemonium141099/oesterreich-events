@@ -18,6 +18,8 @@ Smart-Suche versteht Aktivitaets-Absichten und liefert sie als separates, additi
 - Response: additives Feld activityMatches; bestehende Consumer brechen nicht (Feld wird ignoriert bis UI-Block da ist).
 - **Consumer-Contract (verbindlich):** `count`/`matches` bleiben event-only; hasResults = matches.length > 0 || activityMatches.length > 0. **ALLE Consumer von /api/search/semantic werden in diesem Task auditiert und angepasst** — laut Route-Kommentar mindestens V4EntdeckenSmartMode UND V4ConciergeCard (+ ggf. Concierge-SSE-Pfad); keiner darf eine activity-only-Response (matches=[], count=0, activityMatches>0) als "keine Ergebnisse" rendern.
 - UI: Block "Passende Aktivitaeten" in V4EntdeckenSmartMode mit Typ-Badge, Links auf /aktivitaet/*.
+  <!-- Updated by plan-sync: fn-18.3 exponiert den bewusst client-sicheren Typ PublicActivity (src/lib/activities/public-types.ts — ohne Runtime-Imports, in Client-Komponenten nutzbar; Felder u.a. slug, name, tags, setting, town, bundesland, is_closed). ActivityResultCard UND die activityMatches-Response-Shape sollten diesen Typ (bzw. ein explizites Subset davon) wiederverwenden statt einen neuen Aktivitaets-Typ zu definieren; Detail-Links via `/aktivitaet/${activity.slug}` (absolute-URL-Helper activityCanonicalUrl(slug) liegt in src/lib/activities/indexability.ts). Hinweis: fn-18.3 hat weder smart-query.ts noch src/app/api/search/semantic/route.ts angefasst — die oben referenzierten Zeilennummern (smart-query.ts:216-224/:251-283/:286-291, route.ts:96-107/:177-193/:195-275) bleiben gueltig. -->
+
 
 ## Acceptance
 - [ ] "wo kann ich mountaincart fahren" liefert activityMatches mit dem Fulseck-POI; "konzerte wien heute" liefert unveraenderte Event-Ergebnisse
