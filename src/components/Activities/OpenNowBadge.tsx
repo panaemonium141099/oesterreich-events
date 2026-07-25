@@ -25,6 +25,11 @@ export function OpenNowBadge({ openingTimes, labels }: OpenNowBadgeProps) {
   useEffect(() => {
     if (!openingTimes || openingTimes.length === 0) return;
     setOpen(isOpenNow(openingTimes));
+    // Minuetlich nachrechnen: ein offener Tab soll die Oeffnungs-/
+    // Schliess-Grenze nicht verpassen (Review-Finding R1/Minor) —
+    // Fenster sind minutengranular, 60s-Polling reicht.
+    const timer = setInterval(() => setOpen(isOpenNow(openingTimes)), 60_000);
+    return () => clearInterval(timer);
   }, [openingTimes]);
 
   if (open === null) return null;

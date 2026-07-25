@@ -30,14 +30,29 @@ export interface ActivityIndexabilityInput {
   is_closed?: boolean | null;
 }
 
+/**
+ * Alle renderbaren Bild-URLs aus dem images-jsonb — defensiv gegen
+ * malformte Rows (null-Eintraege, fehlende/nicht-Array-urls, leere
+ * Strings). Gemeinsamer Helper fuer Gate, JSON-LD und Hero: das jsonb
+ * kommt roh aus der DB und ist nur GECASTET, nie validiert.
+ */
+export function renderableImageUrls(images: unknown): string[] {
+  if (!Array.isArray(images)) return [];
+  const result: string[] = [];
+  for (const img of images) {
+    if (img == null || typeof img !== 'object') continue;
+    const urls = (img as { urls?: unknown }).urls;
+    if (!Array.isArray(urls)) continue;
+    for (const url of urls) {
+      if (typeof url === 'string' && url.trim() !== '') result.push(url);
+    }
+  }
+  return result;
+}
+
 /** True, wenn mindestens ein Bild mit nicht-leerer URL vorhanden ist. */
 export function hasRenderableImage(images: unknown): boolean {
-  if (!Array.isArray(images)) return false;
-  return images.some((img) => {
-    if (img == null || typeof img !== 'object') return false;
-    const urls = (img as { urls?: unknown }).urls;
-    return Array.isArray(urls) && urls.some((u) => typeof u === 'string' && u.trim() !== '');
-  });
+  return renderableImageUrls(images).length > 0;
 }
 
 /**

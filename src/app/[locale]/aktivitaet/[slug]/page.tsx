@@ -8,7 +8,11 @@ import {
   activityResolverStore,
   getActivityById,
 } from '@/lib/activities/activity-detail-loaders';
-import { activityCanonicalUrl, isActivityIndexable } from '@/lib/activities/indexability';
+import {
+  activityCanonicalUrl,
+  isActivityIndexable,
+  renderableImageUrls,
+} from '@/lib/activities/indexability';
 import type { PublicActivity } from '@/lib/activities/public-types';
 import { getBundeslandById } from '@/lib/bundeslaender';
 import { getGemeindeBySlug } from '@/lib/gemeinden/data';
@@ -121,9 +125,9 @@ function buildJsonLd(activity: PublicActivity): string {
   const description = activity.description ?? activity.description_short;
   if (description) jsonLd.description = description.slice(0, 500);
 
-  const imageUrls = (activity.images ?? [])
-    .flatMap((img) => img.urls)
-    .filter((u) => typeof u === 'string' && u.trim() !== '');
+  // Defensiv: images kommt roh aus dem jsonb (nur gecastet) — malformte
+  // Eintraege duerfen den ISR-Render nicht crashen (Review-Finding R1).
+  const imageUrls = renderableImageUrls(activity.images);
   if (imageUrls.length > 0) jsonLd.image = imageUrls.slice(0, 3);
 
   return JSON.stringify(jsonLd).replace(/<\/script>/gi, '<\\/script>');

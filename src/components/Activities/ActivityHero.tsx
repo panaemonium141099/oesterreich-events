@@ -24,9 +24,13 @@ interface ActivityHeroProps {
   children?: React.ReactNode;
 }
 
+/** Defensiv: images kommt roh aus dem jsonb — null-Eintraege/fehlende
+ *  urls duerfen den Render nicht crashen (gleiche Regel wie
+ *  renderableImageUrls in indexability.ts). */
 function firstImage(images: PublicActivityImage[] | null): PublicActivityImage | null {
-  if (!images) return null;
+  if (!Array.isArray(images)) return null;
   for (const img of images) {
+    if (img == null || typeof img !== 'object') continue;
     if (Array.isArray(img.urls) && img.urls.some((u) => typeof u === 'string' && u.trim() !== '')) {
       return img;
     }

@@ -5,6 +5,7 @@ import {
   hasOpeningTimes,
   hasRenderableImage,
   isActivityIndexable,
+  renderableImageUrls,
 } from '@/lib/activities/indexability';
 
 const IMAGE = [{ urls: ['https://cdn.deskline.net/x.jpg'], copyright: '© TVB', license: null, author: null }];
@@ -83,6 +84,29 @@ describe('hasRenderableImage', () => {
     expect(hasRenderableImage(null)).toBe(false);
     expect(hasRenderableImage('kaputt')).toBe(false);
     expect(hasRenderableImage([null, { urls: ['https://a/b.jpg'] }])).toBe(true);
+  });
+});
+
+describe('renderableImageUrls (defensiv gegen malformtes jsonb)', () => {
+  it('extrahiert nur nicht-leere String-URLs in Reihenfolge', () => {
+    const images = [
+      { urls: ['https://a/1.jpg', '', '  ', 'https://a/2.jpg'] },
+      { urls: ['https://b/3.jpg'] },
+    ];
+    expect(renderableImageUrls(images)).toEqual([
+      'https://a/1.jpg',
+      'https://a/2.jpg',
+      'https://b/3.jpg',
+    ]);
+  });
+
+  it('crasht nicht bei null-Eintraegen, fehlenden/malformten urls oder Nicht-Arrays', () => {
+    expect(renderableImageUrls([null, { urls: ['https://a/b.jpg'] }])).toEqual(['https://a/b.jpg']);
+    expect(renderableImageUrls([{ copyright: '© x' }, 42, 'str', { urls: 'nope' }])).toEqual([]);
+    expect(renderableImageUrls([{ urls: [null, 7, { u: 'x' }] }])).toEqual([]);
+    expect(renderableImageUrls(null)).toEqual([]);
+    expect(renderableImageUrls(undefined)).toEqual([]);
+    expect(renderableImageUrls({})).toEqual([]);
   });
 });
 
