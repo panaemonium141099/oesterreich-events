@@ -47,8 +47,11 @@ import {
   buildHubMeta,
   HUB_MIN_ACTIVITIES,
   hubActivityHeroLead,
+  hubContentMode,
   hubDefaultH1,
+  hubExperimentAllowed,
   hubIsIndexable,
+  hubMixedHeroLead,
   slugifyBundesland,
 } from '@/lib/hubs/gemeinde-hub-content';
 import { loadNearbyActivitiesCached } from '@/lib/activities/nearby-loaders';
@@ -194,10 +197,10 @@ export async function generateMetadata({
   // title_template — otherwise fall through to the default below. Kept
   // local to generateMetadata so the page component can compute its
   // own variant for the H1 without a second DB call (cache handles it).
-  // fn-18: Overrides gelten NUR für die event-only-Copy (Aktivitäten < 3)
-  // — stale event-only-Varianten dürfen die Mixed-/Aktivitäts-Copy nicht
-  // überschreiben (Contract-Erweiterung der Experimente ist Follow-up).
-  const experiment = activityCount < HUB_MIN_ACTIVITIES
+  // fn-18: Overrides gelten NUR im event-only-Fall (a) — weder Mixed-/
+  // Aktivitäts-Copy (b/c) noch leere noindex-Hubs (d) dürfen von stale
+  // Event-Varianten überschrieben werden (Contract-Erweiterung Follow-up).
+  const experiment = hubExperimentAllowed(count, activityCount)
     ? await resolveExperimentForScope('gemeinde', {
         name: g.name,
         count,
@@ -264,9 +267,9 @@ export default async function GemeindeHubPage({
   // variant's title + heading_prefix and an impression-logger island
   // that fires once on mount. Time-based variant picking keeps ISR
   // deterministic within a period. See src/lib/seo/experiments.ts.
-  // fn-18: wie in generateMetadata NUR bei event-only-Copy (Aktivitäten
-  // < 3) — Mixed-/Aktivitäts-H1s werden nicht von Event-Varianten überlagert.
-  const experiment = activities.length < HUB_MIN_ACTIVITIES
+  // fn-18: wie in generateMetadata NUR im event-only-Fall (a) —
+  // Mixed-/Aktivitäts-H1s und leere Hubs bleiben ohne Event-Varianten.
+  const experiment = hubExperimentAllowed(events.length, activities.length)
     ? await resolveExperimentForScope('gemeinde', {
         name: g.name,
         count: events.length,
@@ -276,6 +279,10 @@ export default async function GemeindeHubPage({
     : null;
 
   const cityHub = getCityHub(g.slug);
+  // Content-Fall der Seite (a/b/c/d) — steuert Hero-Copy + H1 (Review-
+  // Finding: Fall (b) mit 1-2 Rest-Events und Fall (c) dürfen nicht im
+  // alten Event-Intro landen).
+  const mode = hubContentMode(events.length, activities.length);
   const h1Text = experiment?.payload.heading_prefix
     ? `${experiment.payload.heading_prefix} ${g.name}`
     : hubDefaultH1({
@@ -338,16 +345,28 @@ export default async function GemeindeHubPage({
                 <p className="mt-2 text-sm text-white/60 leading-relaxed max-w-2xl">
                   {cityHub.intro.body}
                 </p>
+                {/* fn-18: das kuratierte City-Intro bleibt, Mixed-/
+                    Aktivitäts-Fälle ergänzen die kombinierte Zeile. */}
+                {(mode === 'mixed' || mode === 'activities') && (
+                  <p className="mt-2 text-sm text-white/60 leading-relaxed max-w-2xl">
+                    {mode === 'mixed'
+                      ? hubMixedHeroLead(g.name, events.length, activities.length)
+                      : hubActivityHeroLead(g.name, activities.length)}
+                  </p>
+                )}
               </>
             ) : (
               <p className="mt-3 text-white/80 leading-relaxed max-w-2xl">
-                {events.length > 0 ? (
-                  introParagraph
-                ) : activities.length >= HUB_MIN_ACTIVITIES ? (
-                  // fn-18 Fall (b): Aktivitäts-Copy als Hauptinhalt — der
-                  // "keine Events"-Hinweis wird unten zum kleinen
-                  // Sektionshinweis, nie zum Seiten-Empty-State.
+                {mode === 'activities' ? (
+                  // fn-18 Fall (b) — auch mit 1-2 Rest-Events: Aktivitäts-
+                  // Copy als Hauptinhalt; der "keine Events"-Hinweis wird
+                  // unten zum kleinen Sektionshinweis, nie zum Empty-State.
                   hubActivityHeroLead(g.name, activities.length)
+                ) : mode === 'mixed' ? (
+                  // fn-18 Fall (c): kombinierte Copy (Events + Freizeit).
+                  hubMixedHeroLead(g.name, events.length, activities.length)
+                ) : events.length > 0 ? (
+                  introParagraph
                 ) : (
                   <>
                     Aktuell keine Events im Umkreis um {g.name} gefunden.
