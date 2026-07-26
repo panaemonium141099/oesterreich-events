@@ -468,20 +468,56 @@ export default async function GemeindeHubPage({
             </div>
           </section>
 
-          {/* SEO text block — additional context Google can extract */}
+          {/* SEO text block — additional context Google can extract.
+              fn-18: Copy folgt dem Content-Fall — die Event-Boilerplate
+              wäre auf activity-only-Seiten faktisch falsch (Review-
+              Finding Runde 2); events/empty bleiben wortgleich wie vorher. */}
           <section className="text-sm text-white/50 leading-relaxed border-t border-white/10 pt-6">
             <p className="mb-2">
               <strong className="text-white/70">{g.name}</strong> liegt im Bezirk
-              {g.bezirk ? ` ${g.bezirk}` : ''} in {g.bundesland}, Österreich. Auf
-              LassTreffen.at findest du täglich aktualisierte Veranstaltungen in{' '}
-              {g.name} und Umgebung — von Dorffesten und Märkten bis zu
-              Konzerten, Festivals und Kulturveranstaltungen.
+              {g.bezirk ? ` ${g.bezirk}` : ''} in {g.bundesland}, Österreich.{' '}
+              {mode === 'activities' ? (
+                <>
+                  Auf LassTreffen.at findest du dauerhafte Freizeitaktivitäten
+                  und Ausflugsziele in {g.name} und Umgebung — von Bädern und
+                  Museen bis zu Wander-, Rad- und Familienzielen.
+                </>
+              ) : mode === 'mixed' ? (
+                <>
+                  Auf LassTreffen.at findest du täglich aktualisierte
+                  Veranstaltungen sowie dauerhafte Freizeitaktivitäten in{' '}
+                  {g.name} und Umgebung — von Dorffesten, Märkten und Konzerten
+                  bis zu Bädern, Museen und Ausflugszielen.
+                </>
+              ) : (
+                <>
+                  Auf LassTreffen.at findest du täglich aktualisierte
+                  Veranstaltungen in {g.name} und Umgebung — von Dorffesten und
+                  Märkten bis zu Konzerten, Festivals und Kulturveranstaltungen.
+                </>
+              )}
             </p>
             <p>
-              Die Event-Liste wird automatisch aus offiziellen Gemeinde-Kalendern,
-              Tourismus-Portalen, Ticket-Vendors und Veranstaltungs-Aggregatoren
-              zusammengeführt und dupliziert-gefiltert, damit du keine
-              Ankündigung doppelt liest.
+              {mode === 'activities' ? (
+                <>
+                  Die Aktivitäts-Liste stammt aus den offiziellen
+                  Tourismus-Datenbanken der Regionen; dauerhaft geschlossene
+                  Betriebe werden automatisch erkannt und entfernt.
+                </>
+              ) : (
+                <>
+                  Die Event-Liste wird automatisch aus offiziellen Gemeinde-Kalendern,
+                  Tourismus-Portalen, Ticket-Vendors und Veranstaltungs-Aggregatoren
+                  zusammengeführt und dupliziert-gefiltert, damit du keine
+                  Ankündigung doppelt liest.
+                  {mode === 'mixed' && (
+                    <>
+                      {' '}Die Freizeitaktivitäten stammen zusätzlich aus den
+                      offiziellen Tourismus-Datenbanken der Regionen.
+                    </>
+                  )}
+                </>
+              )}
             </p>
           </section>
         </div>

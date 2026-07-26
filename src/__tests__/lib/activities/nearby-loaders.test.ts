@@ -92,6 +92,9 @@ describe('loadNearbyActivitiesCached', () => {
     const eqCalls = calls.filter((c) => c.method === 'eq').map((c) => c.args);
     expect(eqCalls).toContainEqual(['visible', true]);
     expect(eqCalls).toContainEqual(['is_closed', false]);
+    // Duplikate (E11) defensiv ausgeschlossen (Review-Finding Runde 2).
+    const isCalls = calls.filter((c) => c.method === 'is').map((c) => c.args);
+    expect(isCalls).toContainEqual(['duplicate_of', null]);
   });
 
   it('bbox-Vorfilter auf lat/lng um das Zentrum', async () => {

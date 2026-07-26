@@ -88,6 +88,10 @@ export const loadNearbyActivitiesCached = unstable_cache(
       .select(ACTIVITY_COLUMNS)
       .eq('visible', true)
       .eq('is_closed', false)
+      // Duplikate (E11) sind zwar visible=false, aber defensiv trotzdem
+      // ausschliessen — ein Rekonsolidierungs-Fenster darf keine Dublette
+      // in Hub/Event-Detail spuelen (und keinen Slot im 60er-Cap fressen).
+      .is('duplicate_of', null)
       .gte('lat', minLat).lte('lat', maxLat)
       .gte('lng', minLng).lte('lng', maxLng)
       .order('name', { ascending: true })

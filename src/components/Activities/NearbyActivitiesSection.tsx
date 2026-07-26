@@ -20,7 +20,6 @@
  * Aktivitaets-Detailseite (Snippet-Ausnahme, siehe Projekt-Memory).
  */
 
-import Link from 'next/link';
 import { getTranslations } from 'next-intl/server';
 import { Link as LocaleLink } from '@/i18n/navigation';
 import { renderableImageUrls } from '@/lib/activities/indexability';
@@ -88,7 +87,9 @@ export function GemeindeActivitiesSection({
         {shown.map((a) => {
           const img = firstImageUrl(a.images);
           return (
-            <Link
+            // LocaleLink (Review-Finding Runde 2): erhaelt den aktiven
+            // Locale-Prefix — /en/gemeinde/* verlinkt auf /en/aktivitaet/*.
+            <LocaleLink
               key={a.id}
               href={`/aktivitaet/${a.slug}`}
               className="rounded-xl overflow-hidden bg-white/5 border border-white/10 hover:border-white/25 transition-colors block"
@@ -120,7 +121,7 @@ export function GemeindeActivitiesSection({
                   <div className="text-xs text-white/40 mt-1 line-clamp-1">{a.price_hint}</div>
                 )}
               </div>
-            </Link>
+            </LocaleLink>
           );
         })}
       </div>
