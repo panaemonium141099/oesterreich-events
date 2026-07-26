@@ -131,10 +131,17 @@ const EVENT_COLUMNS =
   'id, title, slug, start_date, location_name, address, postal_code, bundesland, ' +
   'latitude, longitude, category, image_url';
 
+/** bbox-Kandidaten-Pool (Review Runde 4): radius-/Koordinaten-Filter
+ *  laeuft NACH dem Fetch — mit zu kleinem Pool koennte die Sektion in
+ *  dichten Gegenden leer bleiben, obwohl es Treffer <= 10 km gibt. */
+const EVENT_POOL_LIMIT = 60;
+
 /**
  * Kommende Events (NUR future, start_date >= heute) im Radius um
- * (lat, lng). Ranking wie der Hub-Loader: event_score desc, dann
- * start_date asc — der Konsument sliced auf 3.
+ * (lat, lng). Public-Surface-Guard wie ueberall (visibility='public' —
+ * dieser Pfad liest mit SERVICE-ROLE, publish_status allein reicht
+ * nicht; Review Runde 4). Ranking wie der Hub-Loader: event_score desc,
+ * dann start_date asc — der Konsument sliced auf 3.
  */
 export const loadNearbyFutureEventsCached = unstable_cache(
   async (lat: number, lng: number, radiusKm: number): Promise<NearbyFutureEvent[]> => {
@@ -146,11 +153,12 @@ export const loadNearbyFutureEventsCached = unstable_cache(
       .select(EVENT_COLUMNS)
       .gte('start_date', today)
       .eq('publish_status', 'published')
+      .eq('visibility', 'public')
       .gte('latitude', minLat).lte('latitude', maxLat)
       .gte('longitude', minLng).lte('longitude', maxLng)
       .order('event_score', { ascending: false, nullsFirst: false })
       .order('start_date', { ascending: true })
-      .limit(30);
+      .limit(EVENT_POOL_LIMIT);
 
     if (error || !data) return [];
 

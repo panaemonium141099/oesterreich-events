@@ -192,6 +192,13 @@ describe('loadNearbyFutureEventsCached', () => {
 
     const eqCalls = calls.filter((c) => c.method === 'eq').map((c) => c.args);
     expect(eqCalls).toContainEqual(['publish_status', 'published']);
+    // Public-Surface-Guard (Review Runde 4): Service-Role-Pfad darf keine
+    // nicht-oeffentlichen Events in den Cross-Link spuelen.
+    expect(eqCalls).toContainEqual(['visibility', 'public']);
+
+    // Kandidaten-Pool > Anzeige-Limit (Radius-Filter laeuft nach dem Fetch).
+    const limitCall = calls.find((c) => c.method === 'limit');
+    expect(limitCall!.args[0]).toBe(60);
   });
 
   it('filtert Rows ohne Koordinaten und ausserhalb des Radius', async () => {
