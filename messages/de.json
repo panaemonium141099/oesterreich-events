@@ -385,6 +385,10 @@
     "allSources": "Alle Datenquellen",
     "map": "Karte & Anfahrt",
     "route": "Route planen",
-    "imageCredit": "Bild:"
+    "imageCredit": "Bild:",
+    "nearbyEventsTitle": "Events in der Nähe",
+    "nearbyEventsHint": "Kommende Veranstaltungen im Umkreis von 10 km.",
+    "nearbyActivitiesEyebrow": "Freizeit & Ausflüge",
+    "nearbyActivitiesTitle": "In der Nähe erleben"
   }
 }

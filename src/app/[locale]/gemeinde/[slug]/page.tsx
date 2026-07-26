@@ -15,6 +15,13 @@
  *   - Low-content guard: <3 events → `robots: noindex` + prominent
  *     neighbour-gemeinden list so the page still has some utility for
  *     a human visitor but doesn't pollute Google's index as thin content.
+ *
+ * fn-18 Task 4 — Mixed-Content-Modell: die Seite zeigt zusätzlich eine
+ * "Freizeit & Ausflüge"-Sektion (poi_activities, ≥3 Aktivitäten im
+ * Radius). Gate, Copy (4 Fälle) und JSON-LD leben als pure Helper in
+ * src/lib/hubs/gemeinde-hub-content.ts; das Indexierungs-Gate ist jetzt
+ * (Events ≥ 3 ODER Aktivitäten ≥ 3) — in generateMetadata (robots) UND
+ * im Page-Body über dieselbe hubIsIndexable()-Regel.
  */
 
 import { notFound } from 'next/navigation';
@@ -35,7 +42,17 @@ import {
 import { buildEventUrlV2 } from '@/lib/utils/slugify';
 import { formatDateLong, formatTime } from '@/lib/utils/date';
 import { resolvePrimaryEventImage } from '@/lib/event-images';
-import { buildFAQPageSchema, faqForGemeinde } from '@/lib/seo/faq';
+import {
+  buildGemeindeHubJsonLd,
+  buildHubMeta,
+  HUB_MIN_ACTIVITIES,
+  hubActivityHeroLead,
+  hubDefaultH1,
+  hubIsIndexable,
+  slugifyBundesland,
+} from '@/lib/hubs/gemeinde-hub-content';
+import { loadNearbyActivitiesCached } from '@/lib/activities/nearby-loaders';
+import { GemeindeActivitiesSection } from '@/components/Activities/NearbyActivitiesSection';
 import { resolveExperimentForScope } from '@/lib/seo/experiments-server';
 import { ExperimentImpressionLogger } from '@/components/SEO/ExperimentImpressionLogger';
 import { getHubIntro } from '@/lib/seo/hub-refresh';
@@ -122,6 +139,17 @@ async function loadNearbyEvents(g: AustrianGemeinde): Promise<NearbyEvent[]> {
   return loadNearbyEventsCached(g.lat, g.lng, radiusKm);
 }
 
+/**
+ * fn-18 Task 4 — Aktivitäten im selben Radius wie die Events. WICHTIG:
+ * generateMetadata und Page rufen den geteilten unstable_cache-Loader
+ * über DIESEN Wrapper mit identischen Args auf — ein DB-Roundtrip pro
+ * Gemeinde und Revalidate-Fenster (gleiches Muster wie loadNearbyEvents).
+ */
+function loadNearbyActivities(g: AustrianGemeinde) {
+  const radiusKm = getCityHub(g.slug)?.radiusKm ?? 10;
+  return loadNearbyActivitiesCached(g.lat, g.lng, radiusKm);
+}
+
 // ───────────────────────────────────────────────────────────────────────
 // Metadata
 // ───────────────────────────────────────────────────────────────────────
@@ -135,34 +163,48 @@ export async function generateMetadata({
   const g = getGemeindeBySlug(slug);
   if (!g) return { title: 'Gemeinde nicht gefunden' };
 
-  const events = await loadNearbyEvents(g);
+  const [events, activities] = await Promise.all([
+    loadNearbyEvents(g),
+    loadNearbyActivities(g),
+  ]);
   const count = events.length;
+  const activityCount = activities.length;
 
-  // Dynamic description tuned for the SERP snippet:
-  //   "124 Events in Eisenstadt — heute und diese Woche. Konzerte, Feste,
-  //    Kirchenveranstaltungen und mehr auf LassTreffen.at."
-  const description = count > 0
-    ? `${count} Veranstaltungen in ${g.name}${g.bezirk ? ` (${g.bezirk})` : ''} — heute und in den kommenden Wochen. Konzerte, Feste, Kultur und mehr auf LassTreffen.at.`
-    : `Veranstaltungen und Events in ${g.name}${g.bezirk ? ` (${g.bezirk})` : ''}. Aktueller Veranstaltungskalender für ${g.bundesland} auf LassTreffen.at.`;
+  // Mixed-Content-Copy (fn-18 Task 4, 4 Fälle) — für die Fälle
+  // event-only/empty byte-identisch zur bisherigen Copy ("124 Events in
+  // Eisenstadt — heute und diese Woche. …"), sonst Aktivitäts- bzw.
+  // kombinierte Copy. Logik + Tests: src/lib/hubs/gemeinde-hub-content.ts.
+  // City hubs get a search-intent-matched title ("Veranstaltungen in Linz
+  // 2026 — N Events"): no PLZ (nobody searches "events linz 4020") and the
+  // year baked in (the GSC data shows "<event> 2026" is how people search).
+  const cityHub = getCityHub(g.slug);
+  const { title: defaultTitle, description } = buildHubMeta({
+    name: g.name,
+    bezirk: g.bezirk ?? null,
+    plz: g.plz,
+    bundesland: g.bundesland,
+    eventCount: count,
+    activityCount,
+    isCityHub: !!cityHub,
+    year: new Date().getFullYear(),
+  });
 
   // Resolve the A/B experiment (if one is running for 'gemeinde' scope).
   // Override the title ONLY when the variant explicitly provides a
   // title_template — otherwise fall through to the default below. Kept
   // local to generateMetadata so the page component can compute its
   // own variant for the H1 without a second DB call (cache handles it).
-  const experiment = await resolveExperimentForScope('gemeinde', {
-    name: g.name,
-    count,
-    plz: g.plz,
-    bundesland: g.bundesland,
-  });
-  // City hubs get a search-intent-matched title ("Veranstaltungen in Linz
-  // 2026 — N Events"): no PLZ (nobody searches "events linz 4020") and the
-  // year baked in (the GSC data shows "<event> 2026" is how people search).
-  const cityHub = getCityHub(g.slug);
-  const defaultTitle = cityHub
-    ? `Veranstaltungen in ${g.name} ${new Date().getFullYear()}${count > 0 ? ` — ${count} Events` : ''}`
-    : `Events in ${g.name} ${g.plz} — ${count > 0 ? `${count} Veranstaltungen` : 'Veranstaltungskalender'}`;
+  // fn-18: Overrides gelten NUR für die event-only-Copy (Aktivitäten < 3)
+  // — stale event-only-Varianten dürfen die Mixed-/Aktivitäts-Copy nicht
+  // überschreiben (Contract-Erweiterung der Experimente ist Follow-up).
+  const experiment = activityCount < HUB_MIN_ACTIVITIES
+    ? await resolveExperimentForScope('gemeinde', {
+        name: g.name,
+        count,
+        plz: g.plz,
+        bundesland: g.bundesland,
+      })
+    : null;
   const title = experiment?.payload.title ?? defaultTitle;
   const canonicalUrl = `https://lasstreffen.at/gemeinde/${g.slug}`;
 
@@ -179,10 +221,12 @@ export async function generateMetadata({
     twitter: { card: 'summary', title, description },
   };
 
-  // Low-content guard — a silent gemeinde with <3 events shouldn't bloat
-  // the index with thin pages. Keep it crawlable (follow) so Google can
-  // still discover links to neighbour gemeinden, but noindex the page.
-  if (count < 3) {
+  // Low-content guard — a silent gemeinde shouldn't bloat the index with
+  // thin pages. Keep it crawlable (follow) so Google can still discover
+  // links to neighbour gemeinden, but noindex the page. fn-18: kombinierte
+  // Regel (Events ≥ 3 ODER Aktivitäten ≥ 3) ⇒ indexierbar — dieselbe
+  // hubIsIndexable()-Funktion steuert auch den Page-Body.
+  if (!hubIsIndexable(count, activityCount)) {
     metadata.robots = { index: false, follow: true };
   }
 
@@ -193,78 +237,9 @@ export async function generateMetadata({
 // Page
 // ───────────────────────────────────────────────────────────────────────
 
-function buildJsonLd(g: AustrianGemeinde, events: NearbyEvent[]): string {
-  const canonicalUrl = `https://lasstreffen.at/gemeinde/${g.slug}`;
-
-  const place = {
-    '@type': 'Place',
-    '@id': `${canonicalUrl}#place`,
-    name: g.name,
-    address: {
-      '@type': 'PostalAddress',
-      postalCode: g.plz,
-      addressLocality: g.name,
-      addressRegion: g.bundesland,
-      addressCountry: 'AT',
-    },
-    geo: { '@type': 'GeoCoordinates', latitude: g.lat, longitude: g.lng },
-    url: canonicalUrl,
-  };
-
-  const itemList = {
-    '@type': 'ItemList',
-    '@id': `${canonicalUrl}#itemlist`,
-    numberOfItems: events.length,
-    itemListElement: events.slice(0, 10).map((e, idx) => ({
-      '@type': 'ListItem',
-      position: idx + 1,
-      url: `https://lasstreffen.at${buildEventUrlV2(e)}`,
-      name: e.title,
-    })),
-  };
-
-  const breadcrumb = {
-    '@type': 'BreadcrumbList',
-    '@id': `${canonicalUrl}#breadcrumbs`,
-    itemListElement: [
-      { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://lasstreffen.at' },
-      { '@type': 'ListItem', position: 2, name: g.bundesland, item: `https://lasstreffen.at/${slugifyBundesland(g.bundesland)}` },
-      { '@type': 'ListItem', position: 3, name: g.name, item: canonicalUrl },
-    ],
-  };
-
-  // Gemeinde-specific FAQ — only emitted when there are enough events
-  // for the page to not be thin. Skipped otherwise (low-content guard).
-  const faqEntries = faqForGemeinde({
-    gemeinde: g.name,
-    bundesland: g.bundesland,
-    plz: g.plz,
-    eventCount: events.length,
-  });
-  const faqPage = events.length >= 3 ? buildFAQPageSchema(faqEntries) : null;
-
-  const graph = {
-    '@context': 'https://schema.org',
-    '@graph': [place, itemList, breadcrumb, ...(faqPage ? [faqPage] : [])],
-  };
-
-  return JSON.stringify(graph).replace(/<\/script>/gi, '<\\/script>');
-}
-
-function slugifyBundesland(bl: string): string {
-  const map: Record<string, string> = {
-    'Burgenland': 'burgenland',
-    'Kärnten': 'kaernten',
-    'Niederösterreich': 'niederoesterreich',
-    'Oberösterreich': 'oberoesterreich',
-    'Salzburg': 'salzburg',
-    'Steiermark': 'steiermark',
-    'Tirol': 'tirol',
-    'Vorarlberg': 'vorarlberg',
-    'Wien': 'wien',
-  };
-  return map[bl] ?? bl.toLowerCase();
-}
+// JSON-LD + slugifyBundesland leben seit fn-18 Task 4 als pure Helper in
+// src/lib/hubs/gemeinde-hub-content.ts (Mixed-Modell: Event-ItemList nur
+// bei Events, Aktivitäten-ItemList ab ≥3, FAQ nach den 4 Content-Fällen).
 
 export default async function GemeindeHubPage({
   params,
@@ -275,9 +250,12 @@ export default async function GemeindeHubPage({
   const g = getGemeindeBySlug(slug);
   if (!g) notFound();
 
-  const events = await loadNearbyEvents(g);
+  const [events, activities] = await Promise.all([
+    loadNearbyEvents(g),
+    loadNearbyActivities(g),
+  ]);
   const neighbours = findNeighbourGemeinden(g, 8);
-  const jsonLd = buildJsonLd(g, events);
+  const jsonLd = buildGemeindeHubJsonLd(g, events, activities);
 
   // fn-13 phase 10 — A/B title experiment. `resolveExperimentForScope`
   // returns null when no experiment is running for 'gemeinde' scope
@@ -286,19 +264,26 @@ export default async function GemeindeHubPage({
   // variant's title + heading_prefix and an impression-logger island
   // that fires once on mount. Time-based variant picking keeps ISR
   // deterministic within a period. See src/lib/seo/experiments.ts.
-  const experiment = await resolveExperimentForScope('gemeinde', {
-    name: g.name,
-    count: events.length,
-    plz: g.plz,
-    bundesland: g.bundesland,
-  });
+  // fn-18: wie in generateMetadata NUR bei event-only-Copy (Aktivitäten
+  // < 3) — Mixed-/Aktivitäts-H1s werden nicht von Event-Varianten überlagert.
+  const experiment = activities.length < HUB_MIN_ACTIVITIES
+    ? await resolveExperimentForScope('gemeinde', {
+        name: g.name,
+        count: events.length,
+        plz: g.plz,
+        bundesland: g.bundesland,
+      })
+    : null;
 
   const cityHub = getCityHub(g.slug);
   const h1Text = experiment?.payload.heading_prefix
     ? `${experiment.payload.heading_prefix} ${g.name}`
-    : cityHub
-      ? `Veranstaltungen in ${g.name}`
-      : `Events in ${g.name}`;
+    : hubDefaultH1({
+        name: g.name,
+        eventCount: events.length,
+        activityCount: activities.length,
+        isCityHub: !!cityHub,
+      });
 
   // fn-13 phase 10 — rotating intro paragraph. The monthly content-
   // refresh cron picks top-traffic hubs and increments their
@@ -358,6 +343,11 @@ export default async function GemeindeHubPage({
               <p className="mt-3 text-white/80 leading-relaxed max-w-2xl">
                 {events.length > 0 ? (
                   introParagraph
+                ) : activities.length >= HUB_MIN_ACTIVITIES ? (
+                  // fn-18 Fall (b): Aktivitäts-Copy als Hauptinhalt — der
+                  // "keine Events"-Hinweis wird unten zum kleinen
+                  // Sektionshinweis, nie zum Seiten-Empty-State.
+                  hubActivityHeroLead(g.name, activities.length)
                 ) : (
                   <>
                     Aktuell keine Events im Umkreis um {g.name} gefunden.
@@ -422,6 +412,19 @@ export default async function GemeindeHubPage({
               </div>
             </section>
           )}
+
+          {/* fn-18 Fall (b): kleiner Sektionshinweis statt Seiten-Empty-State,
+              wenn zwar keine Events, aber Aktivitäten da sind. */}
+          {events.length === 0 && activities.length >= HUB_MIN_ACTIVITIES && (
+            <p className="mb-12 text-sm text-white/50">
+              Aktuell keine Events im Umkreis um {g.name} — unten findest du
+              dauerhafte Freizeitaktivitäten und Nachbar-Gemeinden mit eigener
+              Event-Übersicht.
+            </p>
+          )}
+
+          {/* Freizeit & Ausflüge (fn-18) — rendert nur ab ≥3 Aktivitäten */}
+          <GemeindeActivitiesSection activities={activities} gemeindeName={g.name} />
 
           {/* Neighbour gemeinden */}
           <section className="mb-12">

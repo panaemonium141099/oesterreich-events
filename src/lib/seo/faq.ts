@@ -135,6 +135,42 @@ export function faqForGemeinde(params: {
 }
 
 /**
+ * FAQ entries for the "Freizeit & Ausflüge" content of a Gemeinde hub
+ * (fn-18 Task 4). Used standalone in the activity-only case (<3 events,
+ * ≥3 activities) — the event-focused `faqForGemeinde` set would make
+ * claims about an event list the page doesn't show. In the combined
+ * case the page appends the first entry of this set to `faqForGemeinde`.
+ */
+export function faqForGemeindeActivities(params: {
+  gemeinde: string;
+  bundesland: string;
+  plz: string;
+  activityCount: number;
+}): FAQEntry[] {
+  const { gemeinde, bundesland, plz, activityCount } = params;
+  const nice = activityCount.toLocaleString('de-AT');
+
+  return [
+    {
+      question: `Welche Freizeitaktivitäten gibt es in ${gemeinde} und Umgebung?`,
+      answer: `LassTreffen.at listet aktuell ${nice} Freizeitaktivitäten und Ausflugsziele im Umkreis um ${gemeinde} (${plz}, ${bundesland}) — von Bädern, Museen und Burgen bis zu Wander-, Rad- und Familienzielen. Jede Aktivität hat eine eigene Seite mit Öffnungszeiten, Karte und Anfahrt.`,
+    },
+    {
+      question: `Woher kommen die Ausflugsziele für ${gemeinde}?`,
+      answer: `Die Einträge stammen aus den offiziellen Tourismus-Datenbanken der Regionen (Feratel Deskline), die auch die örtlichen Tourismusverbände in ${bundesland} pflegen. Dauerhaft geschlossene Betriebe werden automatisch erkannt und aus den Listen entfernt.`,
+    },
+    {
+      question: `Sind die Freizeitaktivitäten rund um ${gemeinde} auch bei Regen geeignet?`,
+      answer: `Viele der gelisteten Ziele sind Indoor-Aktivitäten wie Hallenbäder, Thermen, Museen oder Kletterhallen. Auf der jeweiligen Detailseite ist gekennzeichnet, ob eine Aktivität indoor, outdoor oder gemischt ist — so lässt sich der Ausflug wetterunabhängig planen.`,
+    },
+    {
+      question: `Was kostet der Eintritt bei Ausflugszielen rund um ${gemeinde}?`,
+      answer: `Wo die Betreiber Preise veröffentlichen, zeigt LassTreffen.at einen Preis-Hinweis direkt auf der Aktivitätsseite. Viele Ziele wie Wanderwege, Naturdenkmäler oder Spielplätze sind kostenlos zugänglich; verbindliche Preise nennt immer der Betreiber.`,
+    },
+  ];
+}
+
+/**
  * FAQ entries for a Bundesland or Stadt landing page. `where` is the
  * display name (e.g. "Wien"), `category` is either null (pure
  * Bundesland-Page) or the category display name (combined

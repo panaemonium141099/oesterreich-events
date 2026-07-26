@@ -3,19 +3,18 @@
  *
  * Die Detailseite (src/app/[locale]/aktivitaet/[slug]/page.tsx) rendert
  * diese benannte Komponente an fixer Position unterhalb der Karte.
- * In Task 3 ist sie bewusst LEER; Task 4 implementiert hier den Inhalt
- * ("Events in der Naehe" + Cross-Links) und fasst page.tsx NICHT an —
- * Props duerfen dabei nur ergaenzt werden, wenn page.tsx unveraendert
- * kompiliert (activity traegt bereits alles Noetige: id, lat/lng,
- * gemeinde_slug, bundesland, tags).
+ * Task 4 fuellt den Slot mit "Events in der Naehe" (max 3 kommende
+ * Events, <= 10 km) — page.tsx bleibt unveraendert, die Props sind
+ * identisch zum Task-3-Contract (activity traegt lat/lng).
  */
 
 import type { PublicActivity } from '@/lib/activities/public-types';
+import { NearbyEventsSection } from './NearbyEventsSection';
 
 interface ActivityExtrasSlotProps {
   activity: PublicActivity;
 }
 
-export function ActivityExtrasSlot(_props: ActivityExtrasSlotProps) {
-  return null;
+export function ActivityExtrasSlot({ activity }: ActivityExtrasSlotProps) {
+  return <NearbyEventsSection lat={activity.lat} lng={activity.lng} />;
 }
