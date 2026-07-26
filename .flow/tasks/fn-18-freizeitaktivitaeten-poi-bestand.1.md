@@ -37,9 +37,8 @@ Fundament fuer alle weiteren Slices: DB-Migrationen fuer `poi_activities` + `poi
 - [ ] bundesland-Werte in Tests ausschliesslich kanonische lowercase-IDs
 
 ## Done summary
-TBD
-
+Fundament fuer fn-18: Basis- und Index-Migration fuer poi_activities/poi_activity_runs (RLS + spaltenreduzierte Public-View poi_activities_public, Anwendung via Dashboard dokumentiert) plus pure Activity-Lib (taxonomy mit 95 live verprobten Deskline-Topics + Gastro/Shops-Blockliste, slug mit 12-Hex-sha1-shortid, gemeinde-match mit AT-BBox/25-km-Guard, price-hint-Euro-Regex, fingerprint mit round(x*1000)/1000-Quantisierung, opening mit striktem E8-Vertrag) und 89 Vitest-Tests. Codex-Review: SHIP nach 6 Runden (12 Findings gefixt).
 ## Evidence
-- Commits:
-- Tests:
+- Commits: 2285a0ee29775122e46f34412e272fb9c4a5a1ee, af73730, 6e7174d, b9dd6c0, 7e2b3e6, 968575e, ff90641, db4aa24, 84e419c
+- Tests: npx vitest run src/__tests__/lib/activities (6 Suiten, 89 Tests gruen), npx tsc --noEmit (keine Fehler in neuen Dateien; Restfehler = Baseline)
 - PRs:

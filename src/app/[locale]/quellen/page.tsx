@@ -55,6 +55,13 @@ const SOURCE_CATEGORIES: SourceCategory[] = [
           '71 Tourismusregionen aller Bundesländer über das Deskline-System.',
       },
       {
+        name: 'Feratel Deskline Infrastruktur-POIs',
+        url: 'https://www.feratel.at/',
+        license: 'Tourismus-API',
+        description:
+          'Dauerhafte Freizeitaktivitäten (Bäder, Sommerrodelbahnen, Museen, Klettersteige u. v. m.) aus dem Deskline-Infrastrukturbestand der Tourismusregionen — Datenbasis der /aktivitaet-Seiten. Bild-Copyrights werden pro Aktivität sichtbar ausgewiesen.',
+      },
+      {
         name: 'OpenStreetMap',
         url: 'https://www.openstreetmap.org/',
         license: 'ODbL 1.0',

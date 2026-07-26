@@ -37,9 +37,12 @@ Deskline-`infrastructures`-Ingest als Standalone-Script mit Run-Bookkeeping, Gru
 - [ ] Vitest: Ingest-Transform (Mojibake, GESPERRT, bundesland-Normalisierung), Payload-Spaltengruppen (Business-Upsert enthaelt nie Sichtungs-/Ordnungsspalten; jede Row traegt alle Business-Spalten), Gruppen-Prune-Logik ueber run_seq, Canonical-Regel exakt nach E11 (lebendes Canonical bleibt; sonst aeltestes created_at, dann kleinste source_id)
 
 ## Done summary
-TBD
+Deskline-`infrastructures`-Ingest komplett implementiert: Standalone-Script `src/scripts/import-activities.ts` (Flags --region/--dry-run/--reconcile) mit Run-Bookkeeping nach E6 (full_attempt/complete_run-Matrix, Runs-Zeile vor erstem Fetch, finished_at erst nach Reconcile+Prune), fixen DML-Spaltengruppen (Insert-only slug/shortid/source_region, Sichtungsspalten in keinem Payload), stabil-deterministischer Gruppen-Canonical-Wahl nach E11 inkl. Crash-Recovery (--reconcile + Not-Sweep im Fehlerpfad), Gruppen-Prune ausschliesslich ueber last_seen_complete_run_seq, monotonen Sichtungs-Updates mit Live-Union fuer seen_regions, deterministischer Mirror-Gewinner-Wahl und woechentlicher GH-Action `ingest-activities.yml` (concurrency-Group, dry_run/reconcile-Dispatch, Secrets-/ANALYZE-Ops-Doku). Codex-Review: SHIP nach 5 Runden (10 Findings gefixt).
 
+Dry-run-AC real erfuellt: `npx tsx src/scripts/import-activities.ts --region blsalzb --dry-run` gegen die echte Deskline-API — 11.600 POIs geliefert, 2.059 importierbar post-Whitelist (excluded-topic 6.939, no-importable-topic 2.347, no-coordinates 165; alle importierten mit Koordinaten + Gemeinde-Match), Mirror-Overlap-Report geloggt (16 Fingerprint-Gruppen ueber verschiedene source_ids innerhalb blsalzb -> E11-Fallback greift), 0 Writes.
+
+PENDING (Migration + Secrets vom User): Der Vollimport-AC (>=20.000 sichtbare Zeilen in poi_activities) kann erst erfuellt werden, wenn (1) die Task-1-Migration 20260724120000_poi_activities.sql im Supabase-Dashboard angewendet wurde, (2) der volle Lauf (`npm run import:activities` bzw. workflow_dispatch von ingest-activities.yml, gruen) durchgelaufen ist, (3) danach die Index-Migration 20260724121000 + ANALYZE (dokumentierter Ops-Schritt im Workflow-Header + Migrations-Header, kein Script-Schritt). GitHub-Secrets SUPABASE_URL/SUPABASE_SERVICE_ROLE_KEY existieren bereits fuer import-eventim.yml.
 ## Evidence
-- Commits:
-- Tests:
+- Commits: d95fb84363796937048c4a102106a3af190ad7f5, 554a23a05808ee089256032b173fba84681ce31d, 67bb858efac8f9c3d9b9b27facea7720ead6d279, 73e847954c02ac83920fd48d8d05c95f3f4ef4a7, cbe0b79e317a0c2618490ed207759f24886e2528
+- Tests: npx vitest run src/__tests__/lib/activities/ (10 Dateien, 159 Tests gruen; inkl. neue Suiten ingest-transform/prune/ingest/deskline-client), npx vitest run src/__tests__/lib/scrapers/feratel-cleantitle.test.ts src/__tests__/lib/scrapers/feratel-date.test.ts (Regression REGIONS-Export, 18 Tests gruen), npx tsc --noEmit -p tsconfig.json (keine Fehler in beruehrten Dateien), npx tsx src/scripts/import-activities.ts --region blsalzb --dry-run (Live-API-Smoke: 11600 geliefert, 2059 importierbar, 0 Writes)
 - PRs:

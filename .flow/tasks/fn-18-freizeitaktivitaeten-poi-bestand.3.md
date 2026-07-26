@@ -6,6 +6,9 @@ Oeffentliche Ausspielung: Cursor-paginierte API, ISR-Detailseite unter [locale] 
 
 ## Approach
 - API: Cursor-Muster aus src/app/api/events/route.ts:668-691 mit **fixer deterministischer Default-Sortierung `name ASC, id ASC`**; Lookup-Regel `name > $n OR (name = $n AND id > $i)`. **Cursor-Wire-Format (verbindlich):** base64url-kodiertes JSON `{"name":"<raw-DB-Wert>","id":"<uuid>"}` — name unveraendert wie in der DB (keine Re-Normalisierung client-seitig), Round-Trip-Test Pflicht. **Wire-Contract der Filter (eingefroren):** `gemeinde=<kanonischer gemeinde_slug, z.B. 7100-neusiedl-am-see>` (Spalte gemeinde_slug), `bundesland=<kanonische lowercase-ID>`, `tag=<Taxonomie-Tag>`; nur visible=true, count 'planned' — nie exact (Micro!).
+  <!-- Updated by plan-sync: fn-18.1 lieferte zusaetzlich die spaltenreduzierte View poi_activities_public + revoke des anon/authenticated-SELECT auf poi_activities. Die Server-Route liest wie /api/events/route.ts ueber den SERVICE_ROLE-Client die Basistabelle direkt -> der visible=true-Filter oben bleibt gueltig. Falls stattdessen der anon-Client genutzt wird: poi_activities_public lesen (visible=true AND NOT is_closed sind fest eingebaut, Spalte `visible` ist NICHT exponiert -> kein .eq('visible', true) auf die View). -->
+  <!-- Anmerkung plan-sync: Resolver-Contract (unten) bleibt korrekt — Service-Role bypasst View UND RLS und sieht alle Spalten/Rows. -->
+
 - Detailseite: ISR-Muster src/app/[locale]/events/[...slug]/page.tsx — revalidate=3600, dynamicParams=true + leeres generateStaticParams, setRequestLocale Pflicht, KEIN cookies()/auth im RSC-Pfad; generateMetadata (canonical/OG) + JSON-LD mit **einheitlichem Default-Typ `TouristAttraction`** (keine Typ-Verzweigung in diesem Slice — deterministisch, SEO-diff-arm; Verfeinerung nach Kategorie ist bewusst Follow-up).
 - E13 /en-Regel: solange keine EN-Uebersetzung existiert rendert /en/aktivitaet/* DE-Content mit canonical auf die DE-URL, OHNE hreflang-Paar; Sitemap enthaelt nur DE-URLs (canonical/hreflang-Muster der Event-Detailseite spiegeln).
 - Noindex-Gate (Epic E7): Beschreibung >=200 Zeichen ODER (Bild + Oeffnungszeiten), sonst robots noindex — Muster events page.tsx:44-74. Gate-Funktion in src/lib/activities/ (pur, getestet).
@@ -28,9 +31,8 @@ Oeffentliche Ausspielung: Cursor-paginierte API, ISR-Detailseite unter [locale] 
 - [ ] /quellen um Deskline-POI-Eintrag ergaenzt
 
 ## Done summary
-TBD
-
+Oeffentliche Ausspielung des POI-Bestands: /api/activities mit (name,id)-Cursor (base64url-JSON, PostgREST-sicheres Quoting), ISR-Detailseite /[locale]/aktivitaet/[slug] mit E13-Canonical (immer DE, kein hreflang), Noindex-Gate E7 (inkl. is_closed=immer noindex), purem Slug-/Shortid-/Duplicate-Resolver (301/404-Contract), OpenNow-Badge (Europe/Vienna, minuetlicher Refresh), Bild-/Quellen-Attribution und leerem ActivityExtrasSlot als Task-4-Contract. Sitemap-Split E12: /sitemap.xml ist jetzt <sitemapindex> auf sitemap-core/-events/-activities (Sektionen 1:1 verschoben inkl. xhtml:link-Alternates, URL-genauer Cap, fail-loudly statt truncierter Sitemaps); /quellen um Deskline-Infrastruktur-POIs ergaenzt. Nach Deploy: Sitemap in der GSC neu einreichen.
 ## Evidence
-- Commits:
-- Tests:
+- Commits: 543e79b4118b8675d55f0afcb74b1cb5d242a044, af3c2d6485184a662c11d57c070cead9c2a52d82, ba23a60c831d7972d9024b9b945c990f2d5cf1c0, c85aa1471caa8b0d6e3ad5ac928b77081937c1f7
+- Tests: npx vitest run src/__tests__/lib/activities src/__tests__/components/activities src/__tests__/api/activities.test.ts src/__tests__/api/sitemap-split.test.ts (241 Tests gruen, davon ~90 neu), npx tsc --noEmit (keine neuen Fehler; Baseline-Fehler nur in 3 alten Testdateien), npm run build (gruen inkl. neuer Routen /aktivitaet/[slug], /api/activities, sitemap.xml/-core/-events/-activities + csp-verify OK), Codex impl-review: 3x NEEDS_WORK -> Fixes -> SHIP (Receipt-Kontinuitaet)
 - PRs:

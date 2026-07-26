@@ -366,5 +366,29 @@
     "bundeslandPrefix": "State: {name}",
     "open": "Open",
     "shownOf": "{shown} of {total} shown — scroll for more"
+  },
+  "Activity": {
+    "openNow": "Jetzt geöffnet",
+    "closedNow": "Derzeit geschlossen",
+    "permanentlyClosed": "Dauerhaft geschlossen",
+    "openingTimes": "Öffnungszeiten & Saison",
+    "allDays": "täglich",
+    "openEnd": "durchgehend geöffnet",
+    "price": "Preis",
+    "setting": "Umgebung",
+    "settingIndoor": "Indoor",
+    "settingOutdoor": "Outdoor",
+    "settingMixed": "Indoor & Outdoor",
+    "onlineBookable": "Online buchbar",
+    "region": "Gemeinde",
+    "source": "Quelle",
+    "allSources": "Alle Datenquellen",
+    "map": "Karte & Anfahrt",
+    "route": "Route planen",
+    "imageCredit": "Bild:",
+    "nearbyEventsTitle": "Events in der Nähe",
+    "nearbyEventsHint": "Kommende Veranstaltungen im Umkreis von 10 km.",
+    "nearbyActivitiesEyebrow": "Freizeit & Ausflüge",
+    "nearbyActivitiesTitle": "In der Nähe erleben"
   }
 }

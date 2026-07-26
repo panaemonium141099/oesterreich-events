@@ -11,6 +11,8 @@ OSM-Volumen-Slice in strikt getrennter Tabelle + Abschluss-Doku des Epics.
 - Anzeige NUR in Gemeinde-Hub-Listen (mit OSM-Marker/Badge) — KEINE eigenen Detailseiten (Thin-Content + ODbL-Herausgabe-Umfang klein halten).
 - Attribution: "(c) OpenStreetMap contributors" + ODbL-Link auf /quellen UND an der Hub-Sektion.
 - Abschluss-Doku: CLAUDE.md (Wichtige Pfade: /aktivitaet, /api/activities, import-activities; Betrieb: ingest-activities.yml; Bekannte Issues: Viator-Rate-Limit), MASTERPLAN (Monetarisierung Viator/GYG, Roadmap-Status), CHANGELOG-Eintrag.
+  <!-- Updated by plan-sync: fn-18.3 lieferte die tatsaechliche Public-Surface fuer die Abschluss-Doku: Detailseite src/app/[locale]/aktivitaet/[slug]/page.tsx, API src/app/api/activities/route.ts, /quellen unter src/app/[locale]/quellen/page.tsx (Deskline-Infrastruktur-POI-Eintrag bereits ergaenzt -> Task 7 fuegt nur den OSM-Eintrag hinzu, nicht doppeln) sowie neue Lib-Module in src/lib/activities/ (resolver/indexability/cursor/public-types/activity-detail-loaders) + src/lib/seo/sitemap-xml.ts. WICHTIG fuer CLAUDE.md/Wichtige Pfade: /sitemap.xml ist jetzt ein <sitemapindex> auf sitemap-core.xml/-events.xml/-activities.xml (nicht mehr eine einzelne Sitemap) — im Doku-Update aufnehmen. -->
+
 
 ## Acceptance
 - [ ] >=50.000 AT-POIs in osm_pois (kuratierte Whitelist, mit Koordinaten + Gemeinde-Zuordnung)

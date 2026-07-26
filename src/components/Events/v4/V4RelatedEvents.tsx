@@ -16,6 +16,7 @@
 import { getLocale, getTranslations } from 'next-intl/server';
 import { Link } from '@/i18n/navigation';
 import { createClient } from '@supabase/supabase-js';
+import { EventNearbyActivities } from '@/components/Activities/NearbyActivitiesSection';
 import { buildEventUrlV2 } from '@/lib/utils/slugify';
 import { categoryLabel } from '@/lib/i18n/category-labels';
 import { ALL_GEMEINDEN } from '@/lib/gemeinden/data';
@@ -240,14 +241,25 @@ export async function V4RelatedEvents({ event }: { event: Event }) {
   const dateFmt = locale === 'de' ? 'de-AT' : 'en-GB';
   const hubs = hubLinksFor(event);
   const bl = effectiveBundesland(event);
-  if (related.length === 0 && hubs.length === 0) return null;
+
+  // fn-18 Task 4 — "In der Naehe erleben": Aktivitaeten-Cross-Link unter
+  // dem Event-Detail (max 3, <= 10 km). Andockstelle bewusst hier statt
+  // in page.tsx: die Sektion erscheint damit auch im Sheet/Modal, laedt
+  // selbst ueber den gecachten Loader und rendert null ohne Treffer.
+  const nearbyActivities =
+    event.latitude != null && event.longitude != null ? (
+      <EventNearbyActivities lat={event.latitude} lng={event.longitude} />
+    ) : null;
+
+  if (related.length === 0 && hubs.length === 0) return nearbyActivities;
 
   return (
-    // id="similar-events": Scroll-Ziel der "Ähnliche Events"-CTAs in
-    // V4SoldoutBox + V4MobileStickyBar (soldout). Der Anker in
-    // V4EventDetailContent rendert nur bei hasSimilar — und der
-    // similar-Prop wird nirgends gesetzt; DIESE Sektion ist auf
-    // Voll-Seite wie Sheet das reale Sprungziel.
+    <>
+    {/* id="similar-events": Scroll-Ziel der "Ähnliche Events"-CTAs in
+        V4SoldoutBox + V4MobileStickyBar (soldout). Der Anker in
+        V4EventDetailContent rendert nur bei hasSimilar — und der
+        similar-Prop wird nirgends gesetzt; DIESE Sektion ist auf
+        Voll-Seite wie Sheet das reale Sprungziel. */}
     <section id="similar-events" className="bg-[var(--v4-surface)] text-[var(--v4-ink)]">
       <div className="max-w-[1180px] mx-auto px-4 md:px-14 py-10 md:py-14">
         {related.length > 0 && (
@@ -327,5 +339,7 @@ export async function V4RelatedEvents({ event }: { event: Event }) {
         )}
       </div>
     </section>
+    {nearbyActivities}
+    </>
   );
 }
