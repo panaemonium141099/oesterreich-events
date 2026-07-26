@@ -35,7 +35,8 @@ const T = {
 } as const;
 import { formatTime } from '@/lib/utils/date';
 import { distanceKm } from '@/lib/geolocation';
-import { displayDistrictName, BUNDESLAND_NAMES, type BundeslandId } from '@/lib/districtsAT';
+import { displayDistrictName } from '@/lib/districtsAT';
+import { bundeslandDisplayName } from '@/lib/i18n/bundesland-names';
 import { buildEventUrlV2 } from '@/lib/utils/slugify';
 import { useDetailHydration } from '@/lib/v4/use-detail-hydration';
 
@@ -575,7 +576,7 @@ function BigRow({
             {ev.district
               ? t('districtPrefix', { name: displayDistrictName(ev.district) })
               : ev.bundesland
-                ? t('bundeslandPrefix', { name: BUNDESLAND_NAMES[ev.bundesland as BundeslandId] ?? ev.bundesland })
+                ? t('bundeslandPrefix', { name: bundeslandDisplayName(ev.bundesland, locale) })
                 : ''}
           </span>
           <span

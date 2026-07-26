@@ -25,6 +25,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { T, DATE_PRESETS, countActiveFilters as countActive, type DatePresetId } from './tokens';
 import { categoryLabel } from '@/lib/i18n/category-labels';
+import { bundeslandDisplayName } from '@/lib/i18n/bundesland-names';
 import { applyDatePreset, defaultDateTo, detectActivePreset } from './datePresets';
 import { CATEGORIES } from '@/lib/categories';
 import { BUNDESLAENDER } from '@/lib/bundeslaender';
@@ -350,6 +351,7 @@ function Body({
   categoryCounts,
 }: BodyProps) {
   const t = useTranslations('MapPage');
+  const locale = useLocale();
   const tCat = useTranslations('Categories');
   // Selected sets — single-source-of-truth derives from filters.X (multi)
   // with legacy single-X as a one-element fallback.
@@ -403,7 +405,7 @@ function Body({
               : draftBlIds.includes(bl.id);
             return (
               <Chip key={bl.id} active={active} onClick={() => toggleBl(bl.id)}>
-                {bl.name === 'Ganz Österreich' ? t('austria') : bl.name}
+                {bl.name === 'Ganz Österreich' ? t('austria') : bundeslandDisplayName(bl.id, locale)}
               </Chip>
             );
           })}
