@@ -75,9 +75,22 @@ function getServiceClient(): SupabaseClient {
 const ACTIVITY_COLUMNS = 'id, slug, name, tags, town, lat, lng, price_hint, images';
 
 /**
- * Aktivitaeten im Radius um (lat, lng), nach Distanz aufsteigend.
- * Fehler degradieren zu [] (Sektion faellt weg statt 500 — gleiches
- * Verhalten wie der Events-Loader der Hub-Seite).
+ * bbox-Kandidaten-Pool vs. Rueckgabe-Cap (Review-Finding Runde 3): der
+ * Distanz-Sort + Cap passiert NACH dem haversine-Filter, damit in dichten
+ * Gegenden wirklich die naechsten POIs zurueckkommen — nicht die
+ * alphabetisch ersten der bbox. Der Pool ist trotzdem begrenzt (Micro-
+ * Instanz, kein PostGIS-RPC): erst wenn eine 10-km-bbox mehr als 200
+ * sichtbare POIs enthaelt, wird die Kandidatenmenge (deterministisch nach
+ * Name) beschnitten — alle Rueckgaben bleiben auch dann echte Treffer im
+ * Radius, und das >=3-Gate ist davon unberuehrt.
+ */
+const ACTIVITY_POOL_LIMIT = 200;
+const ACTIVITY_RESULT_CAP = 60;
+
+/**
+ * Aktivitaeten im Radius um (lat, lng), nach Distanz aufsteigend (max
+ * ACTIVITY_RESULT_CAP). Fehler degradieren zu [] (Sektion faellt weg
+ * statt 500 — gleiches Verhalten wie der Events-Loader der Hub-Seite).
  */
 export const loadNearbyActivitiesCached = unstable_cache(
   async (lat: number, lng: number, radiusKm: number): Promise<NearbyActivity[]> => {
@@ -95,7 +108,7 @@ export const loadNearbyActivitiesCached = unstable_cache(
       .gte('lat', minLat).lte('lat', maxLat)
       .gte('lng', minLng).lte('lng', maxLng)
       .order('name', { ascending: true })
-      .limit(60);
+      .limit(ACTIVITY_POOL_LIMIT);
 
     if (error || !data) return [];
 
@@ -107,7 +120,8 @@ export const loadNearbyActivitiesCached = unstable_cache(
         return { ...a, _distance_km: d };
       })
       .filter((x): x is NearbyActivity => x !== null)
-      .sort((a, b) => a._distance_km - b._distance_km);
+      .sort((a, b) => a._distance_km - b._distance_km)
+      .slice(0, ACTIVITY_RESULT_CAP);
   },
   ['nearby-activities'],
   { revalidate: 3600, tags: ['activity'] },

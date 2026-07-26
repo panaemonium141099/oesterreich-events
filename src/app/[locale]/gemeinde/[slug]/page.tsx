@@ -338,23 +338,26 @@ export default async function GemeindeHubPage({
               {' · '}{g.bundesland}
             </p>
             {cityHub ? (
-              <>
+              mode === 'mixed' || mode === 'activities' ? (
+                // fn-18 (Review Runde 3): auch City-Hubs folgen dem
+                // Content-Fall — die Mixed-/Aktivitäts-Copy ERSETZT das
+                // kuratierte Event-Intro als Hauptinhalt (das kuratierte
+                // Intro bleibt den event-only/empty-Fällen vorbehalten).
                 <p className="mt-3 text-white/80 leading-relaxed max-w-2xl">
-                  {cityHub.intro.lead}
+                  {mode === 'mixed'
+                    ? hubMixedHeroLead(g.name, events.length, activities.length)
+                    : hubActivityHeroLead(g.name, activities.length)}
                 </p>
-                <p className="mt-2 text-sm text-white/60 leading-relaxed max-w-2xl">
-                  {cityHub.intro.body}
-                </p>
-                {/* fn-18: das kuratierte City-Intro bleibt, Mixed-/
-                    Aktivitäts-Fälle ergänzen die kombinierte Zeile. */}
-                {(mode === 'mixed' || mode === 'activities') && (
-                  <p className="mt-2 text-sm text-white/60 leading-relaxed max-w-2xl">
-                    {mode === 'mixed'
-                      ? hubMixedHeroLead(g.name, events.length, activities.length)
-                      : hubActivityHeroLead(g.name, activities.length)}
+              ) : (
+                <>
+                  <p className="mt-3 text-white/80 leading-relaxed max-w-2xl">
+                    {cityHub.intro.lead}
                   </p>
-                )}
-              </>
+                  <p className="mt-2 text-sm text-white/60 leading-relaxed max-w-2xl">
+                    {cityHub.intro.body}
+                  </p>
+                </>
+              )
             ) : (
               <p className="mt-3 text-white/80 leading-relaxed max-w-2xl">
                 {mode === 'activities' ? (

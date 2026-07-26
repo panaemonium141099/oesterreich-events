@@ -264,4 +264,23 @@ describe('Gemeinde-Hub: Gate + Mixed-Copy + Query-Dedup', () => {
     const graph = JSON.parse(out.scripts[0])['@graph'] as Array<Record<string, unknown>>;
     expect(graph.some((n) => typeof n['@id'] === 'string' && (n['@id'] as string).endsWith('#itemlist'))).toBe(false);
   });
+
+  it('City-Hub im mixed-Fall: Mixed-Copy ERSETZT das kuratierte Event-Intro', async () => {
+    const city = ALL_GEMEINDEN.find((g) => getCityHub(g.slug))!;
+    const cityHub = getCityHub(city.slug)!;
+    dbRows = { events: makeEventRows(city, 5), activities: makeActivityRows(city, 5) };
+
+    const metadata = await generateMetadata({ params: Promise.resolve({ slug: city.slug }) });
+    expect(metaTitle(metadata)).toContain('Events & Freizeitaktivitäten in');
+
+    const tree = await GemeindeHubPage({ params: Promise.resolve({ slug: city.slug }) });
+    const out: { texts: string[]; scripts: string[] } = { texts: [], scripts: [] };
+    collect(tree, out);
+    const text = out.texts.join(' ');
+
+    // Kombinierte Copy als Hauptinhalt, kuratiertes Event-Intro NICHT mehr.
+    expect(text).toContain('dauerhafte Freizeitaktivitäten');
+    expect(text).not.toContain(cityHub.intro.lead);
+    expect(text).not.toContain(cityHub.intro.body);
+  });
 });

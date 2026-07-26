@@ -128,6 +128,29 @@ describe('loadNearbyActivitiesCached', () => {
     mockFrom.mockReturnValue(createChainableQuery({ data: null, error: { message: 'boom' } }, calls));
     expect(await loadNearbyActivitiesCached(LAT, LNG, RADIUS)).toEqual([]);
   });
+
+  it('Cap greift NACH Distanz-Sort: die 60 naechsten gewinnen, nicht die alphabetisch ersten', async () => {
+    // 65 Rows im Radius, Distanz waechst mit dem Index — Namen absteigend,
+    // damit ein alphabetischer Cap die FALSCHEN (fernsten) behalten wuerde.
+    const rows = Array.from({ length: 65 }, (_, i) =>
+      activityRow({
+        id: `a-${i}`,
+        name: `POI ${String(64 - i).padStart(2, '0')}`,
+        lat: LAT + (i + 1) * 0.001,
+        lng: LNG,
+      }),
+    );
+    mockFrom.mockReturnValue(createChainableQuery({ data: rows, error: null }, calls));
+
+    const result = await loadNearbyActivitiesCached(LAT, LNG, RADIUS);
+
+    expect(result).toHaveLength(60);
+    expect(result[0].id).toBe('a-0'); // naechster
+    expect(result[59].id).toBe('a-59'); // 60.-naechster
+    expect(result.some((a) => a.id === 'a-64')).toBe(false); // fernste raus
+    const limitCall = calls.find((c) => c.method === 'limit');
+    expect(limitCall!.args[0]).toBe(200); // groesserer Kandidaten-Pool
+  });
 });
 
 describe('loadNearbyFutureEventsCached', () => {
