@@ -15,7 +15,8 @@
  */
 
 import { useEffect, useState, useCallback } from 'react';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
+import { bundeslandDisplayName } from '@/lib/i18n/bundesland-names';
 import { Link } from '@/i18n/navigation';
 import { BUNDESLAND_HUBS, type BundeslandHubEntry } from '@/lib/hubs/bundesland-regions';
 import { buildEntdeckenHref } from '@/lib/hubs/hub-links';
@@ -68,12 +69,14 @@ function BLTile({
   onPick: (bl: BundeslandHubEntry) => void;
   t: ReturnType<typeof useTranslations<'Landing.RegionHubs'>>;
 }) {
+  const locale = useLocale();
+  const displayName = bundeslandDisplayName(bl.id, locale);
   const count = bezirke(bl.id).length;
   return (
     <button
       type="button"
       onClick={() => onPick(bl)}
-      aria-label={t('tileAria', { name: bl.name })}
+      aria-label={t('tileAria', { name: displayName })}
       className={`group relative block h-full w-full overflow-hidden text-left transition-colors ${feature ? 'col-span-2 md:row-span-2' : ''}`}
       style={{
         border: `1px solid ${HL2}`,
@@ -109,7 +112,7 @@ function BLTile({
         <div style={{
           fontSize: feature ? 30 : 20, fontWeight: 700, letterSpacing: '-0.03em',
           lineHeight: 1.04, color: '#fff', textShadow: '0 2px 18px rgba(0,0,0,0.5)',
-        }}>{bl.name}</div>
+        }}>{displayName}</div>
         <div className="flex items-center gap-1.5"
           style={{ marginTop: feature ? 6 : 4, fontSize: feature ? 12.5 : 11.5, fontWeight: 600, color: 'rgba(255,255,255,0.82)' }}>
           <span>{t('districtCount', { count })}</span>
@@ -130,6 +133,8 @@ function BundeslandSheet({
   onClose: () => void;
   t: ReturnType<typeof useTranslations<'Landing.RegionHubs'>>;
 }) {
+  const locale = useLocale();
+  const displayName = bundeslandDisplayName(bl.id, locale);
   const districts = bezirke(bl.id);
   return (
     <div
@@ -139,7 +144,7 @@ function BundeslandSheet({
         background: 'rgba(5,5,6,0.74)', backdropFilter: 'blur(6px)',
         alignItems: 'center', padding: 24,
       }}
-      role="dialog" aria-modal="true" aria-label={t('sheetAria', { name: bl.name })}
+      role="dialog" aria-modal="true" aria-label={t('sheetAria', { name: displayName })}
     >
       <div
         onClick={(e) => e.stopPropagation()}
@@ -172,7 +177,7 @@ function BundeslandSheet({
               {t('bundesland')}
             </div>
             <div style={{ fontSize: 30, fontWeight: 700, letterSpacing: '-0.03em', color: '#fff', lineHeight: 1 }}>
-              {bl.name}
+              {displayName}
             </div>
           </div>
         </div>
@@ -187,12 +192,12 @@ function BundeslandSheet({
               padding: '13px 16px', borderRadius: 12, background: TICKET,
               color: '#0a0a0c', fontSize: 14, fontWeight: 700, letterSpacing: '-0.01em',
             }}>
-            {t('allEventsIn', { name: bl.name })}
+            {t('allEventsIn', { name: displayName })}
             <Ic d={ARROW_R} size={14} sw={2.5} />
           </Link>
           <div className="flex items-center gap-1.5" style={{ fontSize: 11.5, color: INK50, marginTop: 8, paddingLeft: 2 }}>
             <Ic d={LAYERS} size={12} sw={1.9} />
-            {t('opensFiltered', { name: bl.name })}
+            {t('opensFiltered', { name: displayName })}
           </div>
 
           {/* divider */}

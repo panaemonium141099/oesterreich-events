@@ -7,7 +7,8 @@
  */
 
 import { useState } from 'react';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
+import { bundeslandDisplayName } from '@/lib/i18n/bundesland-names';
 
 const REGIONS: Array<{ id: string; label: string }> = [
   { id: 'oesterreich', label: '' }, // Label kommt aus t('regionAll') — Bundesländer sind Eigennamen
@@ -24,6 +25,7 @@ const REGIONS: Array<{ id: string; label: string }> = [
 
 export function NewsletterSignup() {
   const t = useTranslations('Landing.Newsletter');
+  const locale = useLocale();
   const [email, setEmail] = useState('');
   const [region, setRegion] = useState('oesterreich');
   const [state, setState] = useState<'idle' | 'loading' | 'done' | 'error'>('idle');
@@ -86,7 +88,7 @@ export function NewsletterSignup() {
               aria-label={t('regionAria')}
               className="px-4 py-3 rounded-xl bg-[var(--v4-surface)] border border-[var(--v4-hairline-2)] text-[var(--v4-ink)] text-[14px] focus:outline-none focus:border-[var(--v4-hairline-3)]"
             >
-              {REGIONS.map(r => <option key={r.id} value={r.id}>{r.id === 'oesterreich' ? t('regionAll') : r.label}</option>)}
+              {REGIONS.map(r => <option key={r.id} value={r.id}>{r.id === 'oesterreich' ? t('regionAll') : bundeslandDisplayName(r.id, locale)}</option>)}
             </select>
             <button
               type="submit"
