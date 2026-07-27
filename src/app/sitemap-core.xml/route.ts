@@ -69,6 +69,10 @@ export async function GET(): Promise<NextResponse> {
     { loc: `${BASE_URL}/map`, lastmod: toISO(now), changefreq: 'daily', priority: 0.8, alternates: i18nAlternates('/map') },
     { loc: `${BASE_URL}/en/map`, lastmod: toISO(now), changefreq: 'daily', priority: 0.7, alternates: i18nAlternates('/map') },
     { loc: `${BASE_URL}/blog`, lastmod: toISO(now), changefreq: 'weekly', priority: 0.8 },
+    // fn-18 Task 8: Uebersichtsseite des Freizeit-Bestands. DE-only ohne
+    // Alternates — /en/aktivitaeten zeigt DE-Content und kanonisiert auf
+    // diese URL (E13).
+    { loc: `${BASE_URL}/aktivitaeten`, lastmod: toISO(now), changefreq: 'weekly', priority: 0.8 },
     { loc: `${BASE_URL}/ueber-uns`, lastmod: toISO(now), changefreq: 'monthly', priority: 0.7 },
     { loc: `${BASE_URL}/quellen`, lastmod: toISO(now), changefreq: 'monthly', priority: 0.4 },
     { loc: `${BASE_URL}/impressum`, lastmod: toISO(now), changefreq: 'yearly', priority: 0.3 },

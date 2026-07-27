@@ -18,6 +18,7 @@ import { V4LocaleSwitcher } from './V4LocaleSwitcher';
  *
  * Active-state derives from usePathname() with startsWith matching:
  *   /, /entdecken*                → Entdecken
+ *   /aktivitaeten, /aktivitaet/*  → Freizeit
  *   /artists*                     → Künstler
  *   /map*                         → Karte
  *   /plans*, /saved*              → Meine Pläne (Phase 1 stub redirects)
@@ -30,12 +31,15 @@ import { V4LocaleSwitcher } from './V4LocaleSwitcher';
 interface NavItem {
   href: string;
   /** Message-Key im Namespace `Nav` (fn-17 i18n) */
-  labelKey: 'discover' | 'artists' | 'map' | 'plans';
+  labelKey: 'discover' | 'activities' | 'artists' | 'map' | 'plans';
   matches: ReadonlyArray<string>;
 }
 
 const NAV_ITEMS: ReadonlyArray<NavItem> = [
   { href: '/entdecken', labelKey: 'discover', matches: ['/', '/entdecken'] },
+  // fn-18 Task 8: Einstieg in den Freizeit-Bestand; aktiv auch auf den
+  // Detailseiten (/aktivitaet/<slug>).
+  { href: '/aktivitaeten', labelKey: 'activities', matches: ['/aktivitaeten', '/aktivitaet'] },
   { href: '/artists', labelKey: 'artists',  matches: ['/artists'] },
   { href: '/map',     labelKey: 'map',      matches: ['/map'] },
   { href: '/plans',   labelKey: 'plans',    matches: ['/plans', '/saved'] },

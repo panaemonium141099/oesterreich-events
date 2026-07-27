@@ -8,7 +8,8 @@
  *    `name > $n OR (name = $n AND id > $i)`.
  *  - Filter: `gemeinde=<kanonischer gemeinde_slug, z.B. 7100-neusiedl-am-see>`
  *    (Spalte gemeinde_slug), `bundesland=<kanonische lowercase-ID>`,
- *    `tag=<Taxonomie-Tag>` (tags-Array-Containment).
+ *    `tag=<Taxonomie-Tag>` (tags-Array-Containment),
+ *    `setting=indoor|outdoor|mixed` (exakter Spaltenwert, Task 8).
  *  - Liest via Service-Role die Basistabelle -> visible=true UND
  *    is_closed=false werden EXPLIZIT gefiltert (Anzeige-Bedingung ist
  *    ueberall `visible AND NOT is_closed`; die Public-View haette den
@@ -78,6 +79,13 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 
   const tag = params.get('tag');
   if (tag) query = query.contains('tags', [tag]);
+
+  // `setting` (Task 8): EXAKTER Spaltenwert — 'mixed' ist ein eigener
+  // Wert und wird von 'indoor'/'outdoor' NICHT mitgefiltert.
+  const setting = params.get('setting');
+  if (setting === 'indoor' || setting === 'outdoor' || setting === 'mixed') {
+    query = query.eq('setting', setting);
+  }
 
   if (cursor) {
     query = query.or(buildActivityCursorFilter(cursor));

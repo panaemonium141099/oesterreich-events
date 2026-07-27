@@ -41,6 +41,10 @@ export function Footer() {
             <Link href="/blog" className="text-xs text-white/30 hover:text-white/60 transition-colors">
               {t('blog')}
             </Link>
+            {/* fn-18 Task 8: zweiter Einstieg in den Freizeit-Bestand. */}
+            <Link href="/aktivitaeten" className="text-xs text-white/30 hover:text-white/60 transition-colors">
+              {t('activities')}
+            </Link>
             <Link href="/fuer-firmen" className="text-xs text-white/30 hover:text-white/60 transition-colors">
               {t('forCompanies')}
             </Link>

@@ -3,6 +3,7 @@
     "home": "Home",
     "mainNav": "Main navigation",
     "discover": "Discover",
+    "activities": "Things to do",
     "artists": "Artists",
     "map": "Map",
     "plans": "My plans",
@@ -155,6 +156,7 @@
     "rights": "All rights reserved.",
     "about": "About us",
     "blog": "Blog",
+    "activities": "Things to do",
     "forCompanies": "For businesses",
     "imprint": "Legal notice",
     "privacy": "Privacy",
@@ -390,5 +392,21 @@
     "nearbyEventsHint": "Kommende Veranstaltungen im Umkreis von 10 km.",
     "nearbyActivitiesEyebrow": "Freizeit & Ausflüge",
     "nearbyActivitiesTitle": "In der Nähe erleben"
+  },
+  "Activities": {
+    "pageTitle": "Freizeitaktivitäten & Ausflugsziele in Österreich",
+    "pageIntro": "Wandern, Baden, Museen, Bergtouren, Thermen: dauerhaft verfügbare Freizeitziele in ganz Österreich — unabhängig vom Event-Kalender, mit Öffnungszeiten, Karte und Infos.",
+    "filterBundesland": "Bundesland",
+    "filterTopic": "Thema",
+    "filterSetting": "Umgebung",
+    "filterAll": "Alle",
+    "settingIndoor": "Indoor",
+    "settingOutdoor": "Outdoor",
+    "loadMore": "Mehr laden",
+    "loading": "Lädt …",
+    "empty": "Für diese Filter gibt es keine Aktivitäten.",
+    "loadError": "Aktivitäten konnten nicht geladen werden. Bitte später erneut versuchen.",
+    "imageCredit": "Bild:",
+    "cardFallback": "Freizeit & Ausflug"
   }
 }
