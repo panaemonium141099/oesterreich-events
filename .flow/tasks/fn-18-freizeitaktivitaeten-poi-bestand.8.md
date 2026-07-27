@@ -20,9 +20,10 @@ UI-Einstieg fuer den Freizeit-Bestand (expliziter User-Wunsch 2026-07-26): Ueber
 - [ ] sitemap-core enthaelt /aktivitaeten; Vitest fuer Filter-Query-Bau + Seite (gegen Baseline)
 
 ## Done summary
-TBD
+Uebersichtsseite /aktivitaeten als statische ISR-Route (24 serverseitig gerenderte Karten, "Mehr laden" per Cursor gegen /api/activities, Bundesland-/Themen-/Indoor-Outdoor-Chips client-seitig) plus Einstiege im globalen V4TopNav ("Freizeit") und im Footer.
 
+Dazu: /api/activities kann nach setting filtern, sitemap-core listet /aktivitaeten, canonical zeigt fuer /de und /en auf die DE-URL ohne hreflang (E13).
 ## Evidence
-- Commits:
-- Tests:
+- Commits: 0925612
+- Tests: npx vitest run src/__tests__/lib/activities/ src/__tests__/components/Footer.test.tsx src/__tests__/components/v4/V4TopNav.test.tsx (18 files, 246 passed), npx vitest run src/__tests__/api/activities.test.ts src/__tests__/api/sitemap-split.test.ts (16 passed), npx tsc --noEmit (keine neuen Fehler in beruehrten Dateien), npm run build (301 static pages; /de/aktivitaeten + /en/aktivitaeten prerendered, revalidate 3600)
 - PRs:
