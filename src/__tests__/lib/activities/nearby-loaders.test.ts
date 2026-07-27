@@ -151,6 +151,40 @@ describe('loadNearbyActivitiesCached', () => {
     const limitCall = calls.find((c) => c.method === 'limit');
     expect(limitCall!.args[0]).toBe(200); // groesserer Kandidaten-Pool
   });
+
+  it('Pool-Ueberlauf (>200 in bbox): Shrink-Refetch findet die NAECHSTEN statt der alphabetisch ersten', async () => {
+    // Fetch 1 (voller Radius): Pool exakt voll (200) — nur ferne Rows mit
+    // alphabetisch fruehen Namen. Ein naiver Cap wuerde DIESE behalten.
+    const farPool = Array.from({ length: 200 }, (_, i) =>
+      activityRow({
+        id: `far-${i}`,
+        name: `AAA ${String(i).padStart(3, '0')}`,
+        lat: LAT + 0.07, // ~7.8 km
+        lng: LNG,
+      }),
+    );
+    // Fetch 2 (halbierter Radius): kompletter Innenkreis (<200) mit 65
+    // nahen Rows -> >= 60 im Innenkreis => nearest-60 beweisbar korrekt.
+    const nearInner = Array.from({ length: 65 }, (_, i) =>
+      activityRow({
+        id: `near-${i}`,
+        name: `ZZZ ${String(i).padStart(3, '0')}`,
+        lat: LAT + (i + 1) * 0.0004, // 0.044 km-Schritte, max ~2.9 km
+        lng: LNG,
+      }),
+    );
+    mockFrom
+      .mockReturnValueOnce(createChainableQuery({ data: farPool, error: null }, calls))
+      .mockReturnValueOnce(createChainableQuery({ data: nearInner, error: null }, calls));
+
+    const result = await loadNearbyActivitiesCached(LAT, LNG, RADIUS);
+
+    expect(mockFrom).toHaveBeenCalledTimes(2);
+    expect(result).toHaveLength(60);
+    expect(result[0].id).toBe('near-0');
+    expect(result.every((a) => a.id.startsWith('near-'))).toBe(true);
+    expect(result.every((a) => a._distance_km <= RADIUS)).toBe(true);
+  });
 });
 
 describe('loadNearbyFutureEventsCached', () => {
@@ -179,16 +213,22 @@ describe('loadNearbyFutureEventsCached', () => {
     };
   }
 
-  it('NUR future: gte(start_date, <heute als YYYY-MM-DD>) + published', async () => {
+  it('NUR future: gte(start_date, <voller Zeitstempel JETZT>) + published', async () => {
     mockFrom.mockReturnValue(createChainableQuery({ data: [], error: null }, calls));
 
+    const before = Date.now();
     await loadNearbyFutureEventsCached(LAT, LNG, RADIUS);
+    const after = Date.now();
 
     expect(mockFrom).toHaveBeenCalledWith('events');
     const startDateGte = calls.find((c) => c.method === 'gte' && c.args[0] === 'start_date');
     expect(startDateGte).toBeDefined();
-    expect(startDateGte!.args[1]).toMatch(/^\d{4}-\d{2}-\d{2}$/);
-    expect(startDateGte!.args[1]).toBe(new Date().toISOString().slice(0, 10));
+    // Voller ISO-Zeitstempel (Review Runde 5): Datums-only wuerde heute
+    // bereits gestartete Events bis Mitternacht als "kommend" durchlassen.
+    expect(startDateGte!.args[1]).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/);
+    const cutoff = Date.parse(startDateGte!.args[1] as string);
+    expect(cutoff).toBeGreaterThanOrEqual(before);
+    expect(cutoff).toBeLessThanOrEqual(after);
 
     const eqCalls = calls.filter((c) => c.method === 'eq').map((c) => c.args);
     expect(eqCalls).toContainEqual(['publish_status', 'published']);

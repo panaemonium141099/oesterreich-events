@@ -75,17 +75,96 @@ function getServiceClient(): SupabaseClient {
 const ACTIVITY_COLUMNS = 'id, slug, name, tags, town, lat, lng, price_hint, images';
 
 /**
- * bbox-Kandidaten-Pool vs. Rueckgabe-Cap (Review-Finding Runde 3): der
- * Distanz-Sort + Cap passiert NACH dem haversine-Filter, damit in dichten
- * Gegenden wirklich die naechsten POIs zurueckkommen — nicht die
- * alphabetisch ersten der bbox. Der Pool ist trotzdem begrenzt (Micro-
- * Instanz, kein PostGIS-RPC): erst wenn eine 10-km-bbox mehr als 200
- * sichtbare POIs enthaelt, wird die Kandidatenmenge (deterministisch nach
- * Name) beschnitten — alle Rueckgaben bleiben auch dann echte Treffer im
- * Radius, und das >=3-Gate ist davon unberuehrt.
+ * bbox-Kandidaten-Pool vs. Rueckgabe-Cap (Review Runden 3+5): der
+ * Distanz-Sort + Cap passiert NACH dem haversine-Filter, damit wirklich
+ * die naechsten POIs zurueckkommen. Weil supabase-js keine DB-seitige
+ * Distanz-Sortierung kann (Micro-Instanz, kein PostGIS-RPC), gilt fuer
+ * ueberlaufende Pools ein Shrink-Verfahren (s. fetchActivityCandidates):
+ * ist die bbox dichter als der Pool, wird der Radius halbiert und neu
+ * geholt — enthaelt der komplette kleinere Kreis >= CAP Treffer, sind
+ * die CAP naechsten BEWEISBAR darin enthalten. Nur wenn selbst das
+ * scheitert (pathologisch dicht UND leerer Innenkreis), bleibt ein
+ * dokumentiertes Best-Effort auf dem Namens-sortierten Pool.
  */
 const ACTIVITY_POOL_LIMIT = 200;
 const ACTIVITY_RESULT_CAP = 60;
+const ACTIVITY_SHRINK_ATTEMPTS = 3;
+
+type ActivityRow = Omit<NearbyActivity, '_distance_km'>;
+
+async function queryActivityBbox(
+  lat: number,
+  lng: number,
+  radiusKm: number,
+): Promise<ActivityRow[] | null> {
+  const { minLat, maxLat, minLng, maxLng } = bboxAround(lat, lng, radiusKm);
+  const { data, error } = await getServiceClient()
+    .from('poi_activities')
+    .select(ACTIVITY_COLUMNS)
+    .eq('visible', true)
+    .eq('is_closed', false)
+    // Duplikate (E11) sind zwar visible=false, aber defensiv trotzdem
+    // ausschliessen — ein Rekonsolidierungs-Fenster darf keine Dublette
+    // in Hub/Event-Detail spuelen (und keinen Slot im 60er-Cap fressen).
+    .is('duplicate_of', null)
+    .gte('lat', minLat).lte('lat', maxLat)
+    .gte('lng', minLng).lte('lng', maxLng)
+    .order('name', { ascending: true })
+    .limit(ACTIVITY_POOL_LIMIT);
+  if (error || !data) return null;
+  return data as ActivityRow[];
+}
+
+function toNearby(rows: ActivityRow[], lat: number, lng: number, maxKm: number): NearbyActivity[] {
+  return rows
+    .map((a) => {
+      if (typeof a.lat !== 'number' || typeof a.lng !== 'number') return null;
+      const d = haversineKm(lat, lng, a.lat, a.lng);
+      if (d > maxKm) return null;
+      return { ...a, _distance_km: d };
+    })
+    .filter((x): x is NearbyActivity => x !== null)
+    .sort((a, b) => a._distance_km - b._distance_km);
+}
+
+async function fetchActivityCandidates(
+  lat: number,
+  lng: number,
+  radiusKm: number,
+): Promise<NearbyActivity[]> {
+  let fallbackPool: ActivityRow[] | null = null;
+  let r = radiusKm;
+
+  for (let attempt = 0; attempt <= ACTIVITY_SHRINK_ATTEMPTS; attempt++) {
+    const rows = await queryActivityBbox(lat, lng, r);
+    if (rows === null) return []; // Fehler degradiert zu [] (wie Events-Loader der Hub-Seite)
+
+    const poolComplete = rows.length < ACTIVITY_POOL_LIMIT;
+    if (poolComplete) {
+      if (r === radiusKm) {
+        // Normalfall: bbox vollstaendig geladen -> exakt.
+        return toNearby(rows, lat, lng, radiusKm).slice(0, ACTIVITY_RESULT_CAP);
+      }
+      // Geschrumpfter, aber KOMPLETTER Innenkreis: >= CAP Punkte mit
+      // Distanz <= r bedeuten, dass die CAP naechsten global alle hier
+      // drin liegen (der CAP-te naechste ist <= r entfernt).
+      const inner = toNearby(rows, lat, lng, r);
+      if (inner.length >= ACTIVITY_RESULT_CAP) {
+        return inner.slice(0, ACTIVITY_RESULT_CAP);
+      }
+      // Innenkreis zu duenn -> Ring fehlt; Best-Effort unten.
+      break;
+    }
+
+    fallbackPool ??= rows;
+    r = r / 2;
+  }
+
+  // Best-Effort (pathologisch dichte bbox): Namens-sortierter Original-
+  // Pool — alle Rueckgaben sind echte Treffer im Radius, nur die
+  // "naechste 60"-Garantie entfaellt hier.
+  return toNearby(fallbackPool ?? [], lat, lng, radiusKm).slice(0, ACTIVITY_RESULT_CAP);
+}
 
 /**
  * Aktivitaeten im Radius um (lat, lng), nach Distanz aufsteigend (max
@@ -93,36 +172,8 @@ const ACTIVITY_RESULT_CAP = 60;
  * statt 500 — gleiches Verhalten wie der Events-Loader der Hub-Seite).
  */
 export const loadNearbyActivitiesCached = unstable_cache(
-  async (lat: number, lng: number, radiusKm: number): Promise<NearbyActivity[]> => {
-    const { minLat, maxLat, minLng, maxLng } = bboxAround(lat, lng, radiusKm);
-
-    const { data, error } = await getServiceClient()
-      .from('poi_activities')
-      .select(ACTIVITY_COLUMNS)
-      .eq('visible', true)
-      .eq('is_closed', false)
-      // Duplikate (E11) sind zwar visible=false, aber defensiv trotzdem
-      // ausschliessen — ein Rekonsolidierungs-Fenster darf keine Dublette
-      // in Hub/Event-Detail spuelen (und keinen Slot im 60er-Cap fressen).
-      .is('duplicate_of', null)
-      .gte('lat', minLat).lte('lat', maxLat)
-      .gte('lng', minLng).lte('lng', maxLng)
-      .order('name', { ascending: true })
-      .limit(ACTIVITY_POOL_LIMIT);
-
-    if (error || !data) return [];
-
-    return (data as Array<Omit<NearbyActivity, '_distance_km'>>)
-      .map((a) => {
-        if (typeof a.lat !== 'number' || typeof a.lng !== 'number') return null;
-        const d = haversineKm(lat, lng, a.lat, a.lng);
-        if (d > radiusKm) return null;
-        return { ...a, _distance_km: d };
-      })
-      .filter((x): x is NearbyActivity => x !== null)
-      .sort((a, b) => a._distance_km - b._distance_km)
-      .slice(0, ACTIVITY_RESULT_CAP);
-  },
+  (lat: number, lng: number, radiusKm: number): Promise<NearbyActivity[]> =>
+    fetchActivityCandidates(lat, lng, radiusKm),
   ['nearby-activities'],
   { revalidate: 3600, tags: ['activity'] },
 );
@@ -137,21 +188,23 @@ const EVENT_COLUMNS =
 const EVENT_POOL_LIMIT = 60;
 
 /**
- * Kommende Events (NUR future, start_date >= heute) im Radius um
- * (lat, lng). Public-Surface-Guard wie ueberall (visibility='public' —
- * dieser Pfad liest mit SERVICE-ROLE, publish_status allein reicht
- * nicht; Review Runde 4). Ranking wie der Hub-Loader: event_score desc,
- * dann start_date asc — der Konsument sliced auf 3.
+ * Kommende Events (NUR future) im Radius um (lat, lng). Cutoff ist der
+ * volle Zeitstempel (Review Runde 5): ein heute um 09:00 gestartetes
+ * Event ist NICHT "kommend" — Datums-only wuerde es bis Mitternacht
+ * durchlassen (gleiches Muster wie V4RelatedEvents). Public-Surface-
+ * Guard wie ueberall (visibility='public' — dieser Pfad liest mit
+ * SERVICE-ROLE, publish_status allein reicht nicht; Review Runde 4).
+ * Ranking wie der Hub-Loader: event_score desc, dann start_date asc —
+ * der Konsument sliced auf 3.
  */
 export const loadNearbyFutureEventsCached = unstable_cache(
   async (lat: number, lng: number, radiusKm: number): Promise<NearbyFutureEvent[]> => {
     const { minLat, maxLat, minLng, maxLng } = bboxAround(lat, lng, radiusKm);
-    const today = new Date().toISOString().slice(0, 10);
 
     const { data, error } = await getServiceClient()
       .from('events')
       .select(EVENT_COLUMNS)
-      .gte('start_date', today)
+      .gte('start_date', new Date().toISOString())
       .eq('publish_status', 'published')
       .eq('visibility', 'public')
       .gte('latitude', minLat).lte('latitude', maxLat)
