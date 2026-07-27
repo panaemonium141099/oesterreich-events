@@ -168,6 +168,17 @@ export const TOPIC_WHITELIST: Readonly<Record<string, TopicMapping>> = {
   'aussichtspunkte/-plattformen':           { tags: [], setting: 'outdoor' },
   'lehrpfad/-e':                            { tags: ['wandern'], setting: 'outdoor' },
 
+  // ── Generische Ausflugs-/Freizeit-Topics (Whitelist-Runde 2, 2026-07-26) ──
+  // Aus dem Skip-Log des ersten Vollimports: zusammen ~15k uebersprungene POIs.
+  // Bewusst leere Tags wo kein TAGS-Wert passt (Muster: aussichtspunkte) —
+  // Noindex-Gate (E7) sichert die Qualitaet der Detailseiten weiterhin ab.
+  'sport-/freizeitanlage':                  { tags: [], setting: 'mixed' },
+  'diverse sehenswürdigkeiten':             { tags: [], setting: 'mixed' },
+  'ausflugsziel für familien/kinder':       { tags: [], setting: 'mixed' },
+  'ausflug':                                { tags: [], setting: 'mixed' },
+  'ausflugstipps':                          { tags: [], setting: 'mixed' },
+  'bauwerke':                               { tags: [], setting: 'mixed' },
+
   // ── Wandern & Rad ────────────────────────────────────────────────────────
   'wandern':                                { tags: ['wandern'], setting: 'outdoor' },
   'wanderweg/-e':                           { tags: ['wandern'], setting: 'outdoor' },

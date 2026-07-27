@@ -64,6 +64,10 @@ export interface ExistingActivityRow {
   source_id: string;
   slug: string;
   content_fingerprint: string;
+  // Write-once-Spalten (E5), NOT NULL in der DB. Werden im Update-Pfad
+  // verbatim zurueckgeschrieben — siehe buildUpdateRow.
+  source_region: string;
+  shortid: string;
 }
 
 /** Sichtung einer Row in DIESEM Lauf: id + die liefernden Regionen.
@@ -348,7 +352,7 @@ async function prepareWrites(
     if (row) {
       touched.add(row.content_fingerprint); // alte Gruppe (Drift!)
       idBySourceId.set(a.source_id, row.id);
-      updateRows.push(buildUpdateRow(a, stampIso));
+      updateRows.push(buildUpdateRow(a, stampIso, row));
     } else {
       insertRows.push(buildInsertRow(a));
     }

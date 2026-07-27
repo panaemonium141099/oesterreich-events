@@ -27,9 +27,8 @@ Sichtbarkeit in bestehenden Flaechen: Gemeinde-Hub-Sektion + Cross-Links in BEID
 - [ ] JSON-LD im activity-only-Fall geprueft (HTML): keine leere/event-only ItemList und kein Event-FAQ; Aktivitaeten-ItemList vorhanden
 
 ## Done summary
-TBD
-
+Gemeinde-Hub-Sektion Freizeit & Ausfluege (Mixed-Content-Modell mit 4 Faellen, kombiniertem Indexierungs-Gate und JSON-LD/FAQ-Regeln) plus Cross-Links in beide Richtungen: Event-Detail zeigt bis zu 3 Aktivitaeten <=10 km (Andockstelle V4RelatedEvents), die Aktivitaets-Detailseite fuellt den Task-3-Slot mit bis zu 3 kommenden Events <=10 km als Bild-Karten. Geteilte unstable_cache-Loader lesen die poi_activities-Basistabelle mit visible/is_closed/duplicate_of-Guards, Shrink-Pool- und Backfill-Logik; 6 Codex-Review-Runden bis SHIP.
 ## Evidence
-- Commits:
-- Tests:
+- Commits: 119c995fa9be6193f74ff8ec73b588db6f3506cc, d439c7642cb57b02bf169d89a886e74ef78bd05f, 0ae05050876be19f82450e0cb0bcb012a573c518, cc754623fcc0441567fc69c0f6a9703d6698a136, 6b8dfe5831cf21a50488eb740027996679303e14, 63d2b056ed66470011c8535c9b568142a258d078, b6af40b448030aab1f1becc6f3afb2781d38f62b, fb0f2184475de14478a68afe1e376ad6265f7733
+- Tests: npx vitest run src/__tests__/hubs src/__tests__/lib/activities src/__tests__/components/activities src/__tests__/api/activities.test.ts src/__tests__/api/sitemap-split.test.ts src/__tests__/components/events/v4/V4RelatedEvents.dedupe.test.ts (308 passed), npx tsc --noEmit (nur Baseline-Fehler), npm run build (gruen inkl. csp-verify)
 - PRs:

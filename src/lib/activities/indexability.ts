@@ -80,3 +80,8 @@ export function isActivityIndexable(input: ActivityIndexabilityInput): boolean {
 export function activityCanonicalUrl(slug: string): string {
   return `${ACTIVITY_BASE_URL}/aktivitaet/${slug}`;
 }
+
+/** Kanonische URL der Uebersichtsseite — ebenfalls immer DE (E13). */
+export function activityListCanonicalUrl(): string {
+  return `${ACTIVITY_BASE_URL}/aktivitaeten`;
+}

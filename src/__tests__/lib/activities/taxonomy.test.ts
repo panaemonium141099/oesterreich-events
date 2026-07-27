@@ -70,6 +70,7 @@ describe('mapTopics', () => {
     ]);
     // Topic-Namenslisten sind dedupliziert + sortiert (reihenfolge-stabil).
     expect(result.matchedTopics).toEqual([
+      'Ausflugsziel für Familien/Kinder',
       'Bergbahn/Seilbahn',
       'Kart fahren',
       'Kartsport/Kartbahn',
@@ -77,7 +78,6 @@ describe('mapTopics', () => {
     // Kartbahn (mixed) + Bergbahn (outdoor) -> Konflikt -> mixed
     expect(result.setting).toBe('mixed');
     expect(result.unmappedTopics).toEqual([
-      'Ausflugsziel für Familien/Kinder',
       'GasteinCard Broschüre',
     ]);
     expect(result.excludedTopics).toEqual([]);
