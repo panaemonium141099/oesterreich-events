@@ -185,6 +185,26 @@ describe('loadNearbyActivitiesCached', () => {
     expect(result.every((a) => a.id.startsWith('near-'))).toBe(true);
     expect(result.every((a) => a._distance_km <= RADIUS)).toBe(true);
   });
+
+  it('Innenkreis komplett aber duenn: Innen-Set bleibt erhalten + Ring-Backfill aus dem Pool (Runde 6)', async () => {
+    const farPool = Array.from({ length: 200 }, (_, i) =>
+      activityRow({ id: `far-${i}`, name: `AAA ${String(i).padStart(3, '0')}`, lat: LAT + 0.07, lng: LNG }),
+    );
+    // Innenkreis (r/2) komplett, aber nur 5 nahe Rows (< CAP 60).
+    const nearInner = Array.from({ length: 5 }, (_, i) =>
+      activityRow({ id: `near-${i}`, name: `ZZZ ${i}`, lat: LAT + (i + 1) * 0.0004, lng: LNG }),
+    );
+    mockFrom
+      .mockReturnValueOnce(createChainableQuery({ data: farPool, error: null }, calls))
+      .mockReturnValueOnce(createChainableQuery({ data: nearInner, error: null }, calls));
+
+    const result = await loadNearbyActivitiesCached(LAT, LNG, RADIUS);
+
+    // Die 5 garantierten nahen zuerst, dann Best-Effort-Ring — nie [].
+    expect(result).toHaveLength(60);
+    expect(result.slice(0, 5).map((a) => a.id)).toEqual(['near-0', 'near-1', 'near-2', 'near-3', 'near-4']);
+    expect(result.slice(5).every((a) => a.id.startsWith('far-'))).toBe(true);
+  });
 });
 
 describe('loadNearbyFutureEventsCached', () => {
@@ -269,5 +289,36 @@ describe('loadNearbyFutureEventsCached', () => {
   it('Fehler degradiert zu []', async () => {
     mockFrom.mockReturnValue(createChainableQuery({ data: null, error: { message: 'boom' } }, calls));
     expect(await loadNearbyFutureEventsCached(LAT, LNG, RADIUS)).toEqual([]);
+  });
+
+  it('Backfill (Runde 6): voller Pool aus Ecken-Events -> Refetch mit einbeschriebener bbox', async () => {
+    // Fetch 1: Pool voll (60), alles High-Score-Events in der bbox-Ecke
+    // (~13.9 km) — nach dem Kreis-Filter bliebe die Sektion leer.
+    const cornerPool = Array.from({ length: 60 }, (_, i) =>
+      eventRow({ id: `corner-${i}`, latitude: LAT + 0.088, longitude: LNG + 0.132, event_score: 90 }),
+    );
+    const innerRows = [
+      eventRow({ id: 'in-1', event_score: 40 }),
+      eventRow({ id: 'in-2', event_score: 80 }),
+    ];
+    mockFrom
+      .mockReturnValueOnce(createChainableQuery({ data: cornerPool, error: null }, calls))
+      .mockReturnValueOnce(createChainableQuery({ data: innerRows, error: null }, calls));
+
+    const result = await loadNearbyFutureEventsCached(LAT, LNG, RADIUS);
+
+    expect(mockFrom).toHaveBeenCalledTimes(2);
+    // Score-Ranking bleibt auch im Merge erhalten.
+    expect(result.map((e) => e.id)).toEqual(['in-2', 'in-1']);
+  });
+
+  it('kein Backfill-Refetch, wenn der Pool nicht voll war', async () => {
+    const rows = [eventRow({ id: 'only' })];
+    mockFrom.mockReturnValueOnce(createChainableQuery({ data: rows, error: null }, calls));
+
+    const result = await loadNearbyFutureEventsCached(LAT, LNG, RADIUS);
+
+    expect(mockFrom).toHaveBeenCalledTimes(1);
+    expect(result.map((e) => e.id)).toEqual(['only']);
   });
 });
