@@ -19,7 +19,9 @@ import {
   hubActivityHeroLead,
   hubContentMode,
   hubDefaultH1,
+  hubExperimentAllowed,
   hubIsIndexable,
+  hubMixedHeroLead,
   slugifyBundesland,
   type HubJsonLdActivity,
   type HubJsonLdEvent,
@@ -78,6 +80,14 @@ describe('hubContentMode + hubIsIndexable', () => {
     expect(hubIsIndexable(0, 3)).toBe(true); // NEU: activity-only ist indexierbar
     expect(hubIsIndexable(2, 2)).toBe(false);
     expect(hubIsIndexable(0, 0)).toBe(false);
+  });
+
+  it('Experiment-Overrides NUR im event-only-Fall (a) — nicht in b/c/d', () => {
+    expect(hubExperimentAllowed(3, 0)).toBe(true); // (a)
+    expect(hubExperimentAllowed(2, 3)).toBe(false); // (b)
+    expect(hubExperimentAllowed(3, 3)).toBe(false); // (c)
+    expect(hubExperimentAllowed(2, 2)).toBe(false); // (d) — auch empty nicht
+    expect(hubExperimentAllowed(0, 0)).toBe(false); // (d)
   });
 });
 
@@ -142,6 +152,12 @@ describe('hubDefaultH1 + hubActivityHeroLead', () => {
     const lead = hubActivityHeroLead('Testdorf', 9);
     expect(lead).toContain('9 Freizeitaktivitäten');
     expect(lead).not.toContain('keine Events');
+  });
+
+  it('Hero-Lead (Fall c) kombiniert beide Zahlen', () => {
+    const lead = hubMixedHeroLead('Testdorf', 7, 4);
+    expect(lead).toContain('7 Veranstaltungen');
+    expect(lead).toContain('4 dauerhafte Freizeitaktivitäten');
   });
 });
 
@@ -225,12 +241,22 @@ describe('buildGemeindeHubJsonLd — Mixed-Modell', () => {
     expect(findById(graph, '#breadcrumbs')).toBeDefined();
   });
 
-  it('1-2 Events (< Schwelle): Event-ItemList ja (nicht leer), FAQ nein', () => {
+  it('1-2 Events (< Schwelle, empty-Modus): Event-ItemList ja (nicht leer), FAQ nein', () => {
     const graph = parseGraph(buildGemeindeHubJsonLd(G, makeEvents(2), []));
     const eventList = findById(graph, '#itemlist');
     expect(eventList).toBeDefined();
     expect(eventList!.numberOfItems).toBe(2);
     expect(graph.some((n) => n['@type'] === 'FAQPage')).toBe(false);
+  });
+
+  it('activity-only MIT 1-2 Rest-Events: trotzdem KEINE Event-ItemList (Review-Finding)', () => {
+    const graph = parseGraph(buildGemeindeHubJsonLd(G, makeEvents(2), makeActivities(4)));
+    expect(findById(graph, '#itemlist')).toBeUndefined();
+    expect(findById(graph, '#activitylist')).toBeDefined();
+    const faq = graph.find((n) => n['@type'] === 'FAQPage');
+    expect(faq).toBeDefined();
+    const questions = (faq!.mainEntity as Array<{ name: string }>).map((q) => q.name);
+    expect(questions.some((q) => q.includes('Events gibt es heute'))).toBe(false);
   });
 
   it('2 Aktivitaeten (< Schwelle): keine Aktivitaeten-ItemList', () => {

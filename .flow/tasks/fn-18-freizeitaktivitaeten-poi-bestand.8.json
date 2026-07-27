@@ -1,0 +1,16 @@
+{
+  "assignee": null,
+  "claim_note": "",
+  "claimed_at": null,
+  "created_at": "2026-07-26T18:59:22.558573Z",
+  "depends_on": [
+    "fn-18-freizeitaktivitaeten-poi-bestand.3"
+  ],
+  "epic": "fn-18-freizeitaktivitaeten-poi-bestand",
+  "id": "fn-18-freizeitaktivitaeten-poi-bestand.8",
+  "priority": null,
+  "spec_path": ".flow/tasks/fn-18-freizeitaktivitaeten-poi-bestand.8.md",
+  "status": "todo",
+  "title": "Uebersichtsseite /aktivitaeten + Navigations-Einstieg",
+  "updated_at": "2026-07-26T19:00:00.451837Z"
+}

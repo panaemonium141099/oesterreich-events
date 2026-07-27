@@ -160,14 +160,20 @@ describe('Gemeinde-Hub: Gate + Mixed-Copy + Query-Dedup', () => {
     expect(resolveExperimentForScope).not.toHaveBeenCalled();
   });
 
-  it('Fall (d): beide <3 -> noindex bleibt (heutiges Verhalten)', async () => {
+  it('Fall (d): beide <3 -> noindex bleibt, Experiment-Override deaktiviert', async () => {
     const g = nonCity[1];
     dbRows = { events: makeEventRows(g, 2), activities: makeActivityRows(g, 2) };
+    resolveExperimentForScope.mockResolvedValue({
+      experimentId: 'exp-1',
+      variant: 'b',
+      payload: { title: 'EXP TITLE' },
+    });
 
     const metadata = await generateMetadata({ params: Promise.resolve({ slug: g.slug }) });
 
     expect(metadata.robots).toEqual({ index: false, follow: true });
     expect(metaTitle(metadata)).toContain('Events in');
+    expect(resolveExperimentForScope).not.toHaveBeenCalled();
   });
 
   it('Fall (a): event-only -> Experiment-Override greift wie bisher', async () => {
@@ -236,5 +242,45 @@ describe('Gemeinde-Hub: Gate + Mixed-Copy + Query-Dedup', () => {
     expect(graph.some((n) => typeof n['@id'] === 'string' && (n['@id'] as string).endsWith('#itemlist'))).toBe(false);
     expect(graph.some((n) => typeof n['@id'] === 'string' && (n['@id'] as string).endsWith('#activitylist'))).toBe(true);
     expect(graph.some((n) => n['@type'] === 'FAQPage')).toBe(true);
+  });
+
+  it('Fall (b) mit 1-2 Rest-Events: Aktivitaets-Hero + KEINE Event-ItemList im JSON-LD', async () => {
+    const g = nonCity[6];
+    dbRows = { events: makeEventRows(g, 2), activities: makeActivityRows(g, 4) };
+
+    const metadata = await generateMetadata({ params: Promise.resolve({ slug: g.slug }) });
+    expect(metadata.robots).toBeUndefined();
+    expect(metaTitle(metadata)).toContain('Freizeitaktivitäten & Ausflugsziele in');
+
+    const tree = await GemeindeHubPage({ params: Promise.resolve({ slug: g.slug }) });
+    const out: { texts: string[]; scripts: string[] } = { texts: [], scripts: [] };
+    collect(tree, out);
+    const text = out.texts.join(' ');
+
+    // Aktivitaets-Hero (hubActivityHeroLead) statt Event-Intro …
+    expect(text).toContain('Rund um');
+    expect(text).not.toContain('Rotierender Intro-Absatz.');
+
+    const graph = JSON.parse(out.scripts[0])['@graph'] as Array<Record<string, unknown>>;
+    expect(graph.some((n) => typeof n['@id'] === 'string' && (n['@id'] as string).endsWith('#itemlist'))).toBe(false);
+  });
+
+  it('City-Hub im mixed-Fall: Mixed-Copy ERSETZT das kuratierte Event-Intro', async () => {
+    const city = ALL_GEMEINDEN.find((g) => getCityHub(g.slug))!;
+    const cityHub = getCityHub(city.slug)!;
+    dbRows = { events: makeEventRows(city, 5), activities: makeActivityRows(city, 5) };
+
+    const metadata = await generateMetadata({ params: Promise.resolve({ slug: city.slug }) });
+    expect(metaTitle(metadata)).toContain('Events & Freizeitaktivitäten in');
+
+    const tree = await GemeindeHubPage({ params: Promise.resolve({ slug: city.slug }) });
+    const out: { texts: string[]; scripts: string[] } = { texts: [], scripts: [] };
+    collect(tree, out);
+    const text = out.texts.join(' ');
+
+    // Kombinierte Copy als Hauptinhalt, kuratiertes Event-Intro NICHT mehr.
+    expect(text).toContain('dauerhafte Freizeitaktivitäten');
+    expect(text).not.toContain(cityHub.intro.lead);
+    expect(text).not.toContain(cityHub.intro.body);
   });
 });

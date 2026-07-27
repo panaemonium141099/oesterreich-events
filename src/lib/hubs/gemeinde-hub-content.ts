@@ -58,6 +58,17 @@ export function hubIsIndexable(eventCount: number, activityCount: number): boole
   return eventCount >= HUB_MIN_EVENTS || activityCount >= HUB_MIN_ACTIVITIES;
 }
 
+/**
+ * Experiment-Overrides (resolveExperimentForScope) sind NUR im
+ * event-only-Fall (a) erlaubt — nicht in (b)/(c) (Mixed-Copy wuerde
+ * ueberschrieben) und auch nicht im empty-Fall (d) (Review-Finding:
+ * stale Event-Title-Experimente sollen leere noindex-Hubs nicht
+ * umschreiben). generateMetadata UND Page nutzen DIESE Funktion.
+ */
+export function hubExperimentAllowed(eventCount: number, activityCount: number): boolean {
+  return hubContentMode(eventCount, activityCount) === 'events';
+}
+
 export function slugifyBundesland(bl: string): string {
   const map: Record<string, string> = {
     'Burgenland': 'burgenland',
@@ -137,6 +148,11 @@ export function hubActivityHeroLead(name: string, activityCount: number): string
   return `Rund um ${name} findest du ${activityCount} Freizeitaktivitäten und Ausflugsziele — von Bädern und Museen bis zu Wander-, Rad- und Familienzielen, dauerhaft und unabhängig vom Event-Kalender.`;
 }
 
+/** Hero-Absatz fuer den mixed-Fall (c): kombinierte Copy (Events + Freizeit). */
+export function hubMixedHeroLead(name: string, eventCount: number, activityCount: number): string {
+  return `In ${name} und Umgebung warten ${eventCount} Veranstaltungen und ${activityCount} dauerhafte Freizeitaktivitäten — von Konzerten und Festen bis zu Bädern, Museen und Ausflugszielen.`;
+}
+
 // ───────────────────────────────────────────────────────────────────────
 // JSON-LD (Mixed-Modell, verbindlich)
 // ───────────────────────────────────────────────────────────────────────
@@ -187,9 +203,10 @@ export function buildHubFaqEntries(input: {
 
 /**
  * @graph der Hub-Seite: Place + Breadcrumb immer; Event-ItemList NUR bei
- * vorhandenen Events (nie eine leere ItemList); Aktivitaeten-ItemList ab
- * >= 3 Aktivitaeten (Links auf /aktivitaet/*); FAQ nach den 4 Faellen.
- * Der activity-only-Fall emittiert damit kein event-bezogenes JSON-LD.
+ * vorhandenen Events (nie eine leere ItemList) UND NIE im activity-only-
+ * Fall — der darf ueberhaupt kein event-bezogenes JSON-LD emittieren,
+ * auch nicht fuer 1-2 Rest-Events (Review-Finding). Aktivitaeten-ItemList
+ * ab >= 3 Aktivitaeten (Links auf /aktivitaet/*); FAQ nach den 4 Faellen.
  */
 export function buildGemeindeHubJsonLd(
   g: AustrianGemeinde,
@@ -197,6 +214,7 @@ export function buildGemeindeHubJsonLd(
   activities: HubJsonLdActivity[],
 ): string {
   const canonicalUrl = `https://lasstreffen.at/gemeinde/${g.slug}`;
+  const mode = hubContentMode(events.length, activities.length);
 
   const place = {
     '@type': 'Place',
@@ -213,7 +231,7 @@ export function buildGemeindeHubJsonLd(
     url: canonicalUrl,
   };
 
-  const eventList = events.length > 0
+  const eventList = events.length > 0 && mode !== 'activities'
     ? {
         '@type': 'ItemList',
         '@id': `${canonicalUrl}#itemlist`,
