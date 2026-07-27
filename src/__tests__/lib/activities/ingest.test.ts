@@ -24,6 +24,7 @@ import {
 import {
   SIGHTING_COLUMNS,
   IDENTITY_COLUMNS,
+  INSERT_ONLY_COLUMNS,
   UPDATE_BUSINESS_COLUMNS,
   type ActivityInsertRow,
   type ActivityUpdateRow,
@@ -132,6 +133,8 @@ class InMemoryStore implements ActivityStore {
         id: r.id,
         source_id: r.source_id,
         slug: r.slug,
+        shortid: r.shortid,
+        source_region: r.source_region,
         content_fingerprint: r.content_fingerprint,
       });
     }
@@ -374,11 +377,20 @@ describe('runIngest — full_attempt (complete)', () => {
     expect(after.id).toBe(before.id);
     expect(h.store.rows).toHaveLength(1);
 
-    // Update-Payloads: exakt das fixe Spaltenset, nie slug/shortid/
-    // source_region, nie Sichtungsspalten.
-    const expectedKeys = [...IDENTITY_COLUMNS, ...UPDATE_BUSINESS_COLUMNS, 'updated_at'].sort();
+    // Update-Payloads: exakt das fixe Spaltenset (inkl. der NOT-NULL-
+    // write-once-Spalten, die verbatim aus dem Bestand zurueckgeschrieben
+    // werden), nie Sichtungsspalten.
+    const expectedKeys = [
+      ...IDENTITY_COLUMNS,
+      ...INSERT_ONLY_COLUMNS,
+      ...UPDATE_BUSINESS_COLUMNS,
+      'updated_at',
+    ].sort();
     for (const payload of h.store.updatePayloads) {
       expect(Object.keys(payload).sort()).toEqual(expectedKeys);
+      // Verbatim aus dem Bestand — nie aus dem neuen Feed-Namen abgeleitet.
+      expect(payload.slug).toBe(before.slug);
+      expect(payload.source_region).toBe(before.source_region);
     }
   });
 

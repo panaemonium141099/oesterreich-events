@@ -375,10 +375,28 @@ export function buildInsertRow(a: TransformedActivity): ActivityInsertRow {
  *  mutable Business-Spalten + updated_at. Jede Row traegt exakt dieses
  *  Spaltenset — fehlende Keys in einzelnen Rows eines PostgREST-Batches
  *  wuerden zu NULL-Clobber fuehren (supabase-sync.ts:334-350). */
-export function buildUpdateRow(a: TransformedActivity, updatedAtIso: string): ActivityUpdateRow {
+/** Bestehende Werte der write-once-Spalten (aus dem Prefetch). */
+export type WriteOnceValues = {
+  [K in (typeof INSERT_ONLY_COLUMNS)[number]]: string;
+};
+
+export function buildUpdateRow(
+  a: TransformedActivity,
+  updatedAtIso: string,
+  existing: WriteOnceValues,
+): ActivityUpdateRow {
   const row: ActivityUpdateRow = {};
   for (const col of IDENTITY_COLUMNS) row[col] = a[col];
   for (const col of UPDATE_BUSINESS_COLUMNS) row[col] = a[col];
+  // Write-once-Spalten (E5) sind NOT NULL. Der Update-Pfad laeuft als
+  // PostgREST-Upsert (INSERT .. ON CONFLICT) — Postgres prueft NOT NULL
+  // auf der vorgeschlagenen Insert-Zeile, BEVOR der Konflikt aufgeloest
+  // wird. Fehlende Spalten scheitern deshalb, auch wenn nur der
+  // UPDATE-Zweig feuert. Wir schreiben daher den BESTEHENDEN Wert
+  // verbatim zurueck (No-Op fuer die Semantik, Muster aus
+  // supabase-sync.ts:334-350) statt ihn neu zu berechnen — so bleibt
+  // write-once gewahrt und der Slug SEO-stabil.
+  for (const col of INSERT_ONLY_COLUMNS) row[col] = existing[col];
   row.updated_at = updatedAtIso;
   return row;
 }

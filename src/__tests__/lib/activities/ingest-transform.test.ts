@@ -220,14 +220,29 @@ describe('Payload-Spaltengruppen (DML-Strategie, Task-Spec)', () => {
     expect(row.source_region).toBe('burgenland');
   });
 
-  it('Update-Row: Identitaet + mutable Business-Spalten + updated_at — NIE slug/shortid/source_region, KEINE Sichtungsspalten', () => {
-    const row = buildUpdateRow(activity, '2026-07-25T00:00:00.000Z');
+  it('Update-Row: Identitaet + mutable Business-Spalten + updated_at + write-once verbatim, KEINE Sichtungsspalten', () => {
+    // Write-once-Spalten sind NOT NULL und muessen im Upsert-Payload stehen
+    // (Postgres prueft NOT NULL auf der vorgeschlagenen Insert-Zeile) —
+    // aber IMMER mit dem BESTEHENDEN Wert, nie neu berechnet.
+    const existing = {
+      source_region: 'alt-region',
+      slug: 'alter-slug-aaaaaaaaaaaa',
+      shortid: 'aaaaaaaaaaaa',
+    };
+    const row = buildUpdateRow(activity, '2026-07-25T00:00:00.000Z', existing);
     const keys = Object.keys(row).sort();
-    const expected = [...IDENTITY_COLUMNS, ...UPDATE_BUSINESS_COLUMNS, 'updated_at'].sort();
+    const expected = [
+      ...IDENTITY_COLUMNS,
+      ...INSERT_ONLY_COLUMNS,
+      ...UPDATE_BUSINESS_COLUMNS,
+      'updated_at',
+    ].sort();
     expect(keys).toEqual(expected);
-    expect(row).not.toHaveProperty('slug');
-    expect(row).not.toHaveProperty('shortid');
-    expect(row).not.toHaveProperty('source_region');
+    // Bestand gewinnt: NICHT die aus dem Feed neu berechneten Werte.
+    expect(row.source_region).toBe('alt-region');
+    expect(row.slug).toBe('alter-slug-aaaaaaaaaaaa');
+    expect(row.shortid).toBe('aaaaaaaaaaaa');
+    expect(row.slug).not.toBe(activity.slug);
     for (const col of SIGHTING_COLUMNS) {
       expect(row).not.toHaveProperty(col);
     }
@@ -245,7 +260,10 @@ describe('Payload-Spaltengruppen (DML-Strategie, Task-Spec)', () => {
       openStatus: undefined,
     });
     expect(Object.keys(buildInsertRow(sparse)).sort()).toEqual(Object.keys(buildInsertRow(activity)).sort());
-    expect(Object.keys(buildUpdateRow(sparse, 'x')).sort()).toEqual(Object.keys(buildUpdateRow(activity, 'x')).sort());
+    const writeOnce = { source_region: 'r', slug: 's', shortid: 'i' };
+    expect(Object.keys(buildUpdateRow(sparse, 'x', writeOnce)).sort()).toEqual(
+      Object.keys(buildUpdateRow(activity, 'x', writeOnce)).sort(),
+    );
     expect(buildInsertRow(sparse).images).toBeNull();
     expect(buildInsertRow(sparse).description).toBeNull();
   });

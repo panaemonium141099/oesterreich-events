@@ -92,7 +92,7 @@ export class SupabaseActivityStore implements ActivityStore {
     for (const slice of chunk([...new Set(sourceIds)], IN_BATCH)) {
       const { data, error } = await this.supabase
         .from(TABLE)
-        .select('id, source_id, slug, content_fingerprint')
+        .select('id, source_id, slug, shortid, source_region, content_fingerprint')
         .eq('source', 'deskline')
         .in('source_id', slice);
       if (error) fail('prefetchExisting', error.message);
