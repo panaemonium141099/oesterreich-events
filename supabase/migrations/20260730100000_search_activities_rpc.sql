@@ -178,7 +178,15 @@ begin
           and (bundesland_filter is null or a.bundesland = bundesland_filter)
           and (not v_geo or (a.lat between v_min_lat and v_max_lat
                          and a.lng between v_min_lng and v_max_lng))
-          and (tag_filter is null or a.tags && tag_filter)
+          -- KEIN harter tag-Filter in diesem Zweig (bewusst): der Namenstreffer
+          -- ist hier das Primaersignal, tags wirken nur ueber tag_hits im
+          -- Ranking. Als Filter waren sie schaedlich — Prod-Befund: Gemini
+          -- liefert zu "mountaincart" die Tags alpen-tour/bergtour, waehrend
+          -- die Mountaincart-POIs tags=[] tragen (generische Whitelist-
+          -- Eintraege vergeben bewusst keine Tags). Der Filter warf damit
+          -- exakt die gesuchten Treffer weg und liess nur "Active Mountains"
+          -- uebrig. Im q=NULL-Zweig bleibt tags Filter — dort ist es das
+          -- einzige inhaltliche Signal.
       )
       select b.id, b.slug, b.name, b.description, b.description_short, b.tags,
              b.setting, b.lat, b.lng, b.town, b.gemeinde_slug, b.bundesland,
