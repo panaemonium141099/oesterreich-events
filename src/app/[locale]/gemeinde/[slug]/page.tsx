@@ -56,6 +56,8 @@ import {
 } from '@/lib/hubs/gemeinde-hub-content';
 import { loadNearbyActivitiesCached } from '@/lib/activities/nearby-loaders';
 import { GemeindeActivitiesSection } from '@/components/Activities/NearbyActivitiesSection';
+import { loadNearbyOsmPoisCached } from '@/lib/osm/nearby-pois';
+import { GemeindeOsmPoisSection } from '@/components/Osm/OsmPoisSection';
 import { resolveExperimentForScope } from '@/lib/seo/experiments-server';
 import { ExperimentImpressionLogger } from '@/components/SEO/ExperimentImpressionLogger';
 import { getHubIntro } from '@/lib/seo/hub-refresh';
@@ -151,6 +153,18 @@ async function loadNearbyEvents(g: AustrianGemeinde): Promise<NearbyEvent[]> {
 function loadNearbyActivities(g: AustrianGemeinde) {
   const radiusKm = getCityHub(g.slug)?.radiusKm ?? 10;
   return loadNearbyActivitiesCached(g.lat, g.lng, radiusKm);
+}
+
+/**
+ * fn-18 Task 7 — OSM-Ausflugsziele im selben Radius, ABER strikt getrennt
+ * geladen und gerendert (eigene Tabelle, eigene Sektion, eigene ODbL-
+ * Attribution; kein Merge/Dedup gegen `activities`). Bewusst NICHT in
+ * generateMetadata: Title/Description/Indexierbarkeit des Hubs haengen am
+ * eigenen Bestand — ODbL-Fremddaten sollen die Seiten-Signale nicht tragen.
+ */
+function loadNearbyOsmPois(g: AustrianGemeinde) {
+  const radiusKm = getCityHub(g.slug)?.radiusKm ?? 10;
+  return loadNearbyOsmPoisCached(g.lat, g.lng, radiusKm);
 }
 
 // ───────────────────────────────────────────────────────────────────────
@@ -253,9 +267,10 @@ export default async function GemeindeHubPage({
   const g = getGemeindeBySlug(slug);
   if (!g) notFound();
 
-  const [events, activities] = await Promise.all([
+  const [events, activities, osmPois] = await Promise.all([
     loadNearbyEvents(g),
     loadNearbyActivities(g),
+    loadNearbyOsmPois(g),
   ]);
   const neighbours = findNeighbourGemeinden(g, 8);
   const jsonLd = buildGemeindeHubJsonLd(g, events, activities);
@@ -447,6 +462,11 @@ export default async function GemeindeHubPage({
 
           {/* Freizeit & Ausflüge (fn-18) — rendert nur ab ≥3 Aktivitäten */}
           <GemeindeActivitiesSection activities={activities} gemeindeName={g.name} />
+
+          {/* Weitere Ausflugsziele aus OpenStreetMap (fn-18.7) — bewusst
+              EIGENE Sektion mit eigener ODbL-Attribution, nie mit dem
+              eigenen Aktivitäten-Bestand verschmolzen. */}
+          <GemeindeOsmPoisSection pois={osmPois} gemeindeName={g.name} />
 
           {/* Neighbour gemeinden */}
           <section className="mb-12">

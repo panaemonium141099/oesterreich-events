@@ -266,6 +266,12 @@ Vertriebskanal; ihr Verkaufsargument sind die Klickzahlen aus 7.1.2
 
 ### 7.3 Weitere Quellen (Reihenfolge nach Realismus)
 
+0. **Aktivitäten-Affiliate (Viator/GetYourGuide, fn-18.5 — offen):** die
+   /aktivitaet-Detailseiten aus dem fn-18-POI-Bestand sind Buchungs-Intent pur
+   (Therme, Sommerrodelbahn, Führung) und haben — anders als Event-Seiten —
+   keine Saison-Klippe. Fehlt noch: Affiliate-Client, Produkt-Matching,
+   BookingBox, Preis-Refresh. Der OSM-Bestand (`osm_pois`) ist davon
+   ausgenommen: ODbL-getrennt, keine Detailseiten, keine Affiliate-Fläche.
 1. **B2B-Daten-Syndication:** einbettbares Event-Widget für Gemeinden/Hotels/
    Tourismusverbände (49–199 €/M) — unser Long-Tail-Datenbestand ist einzigartig,
    jedes Widget ist zugleich ein Backlink.
@@ -541,7 +547,23 @@ lädt das volle Event lazy via /api/events/[id] (CDN 1 h), Marker nutzen
 Kategorie-Fallback-Bilder bis zum Nachladen. Volltext/Tags/bbox/
 eveningOnly/DE-CH bleiben auf dem Server-Batch-Pfad; /entdecken (Liste
 braucht Titel+Bilder) unverändert ·
-Offen:
+✅ **Freizeitaktivitäten-/POI-Bestand (fn-18)** *(2026-07-27)*: zweite
+Inhaltssäule neben Events — dauerhaft verfügbare Ausflugsziele, damit
+Gemeinde-Hubs ohne Event-Kalender nicht leer sind. Quelle 1: Feratel-
+Deskline `infrastructures` → `poi_activities` (eigener Bestand, Detailseiten
+/aktivitaet/[slug], Übersicht /aktivitaeten, API /api/activities, wöchentliche
+GH-Action `ingest-activities.yml`, Smart-Suche-Integration). Quelle 2:
+OpenStreetMap → `osm_pois` (kuratierte Freizeit-Whitelist, ~10⁵ benannte
+AT-Objekte). **ODbL-Regel:** `osm_pois` bleibt strikt getrennt — kein Merge-/
+Dedup-/Join-Schreibpfad gegen poi_activities/venues, keine eigenen
+OSM-Detailseiten, Anzeige nur als separat gekennzeichnete Gemeinde-Hub-Sektion
+mit „© OpenStreetMap contributors"/ODbL-Attribution (auch auf /quellen).
+Damit sind die eigenen Bestände keine abgeleitete Datenbank im Sinne der
+Share-Alike-Klausel ·
+Offen: **fn-18.5 — Viator/GetYourGuide-Monetarisierung** der
+Aktivitäts-Detailseiten (Affiliate-Client, Produkt-Matching, BookingBox,
+Preis-Refresh). Das ist der einzige noch offene Teil von fn-18 und der
+eigentliche Umsatz-Hebel des Bestands (siehe §7.3.1) ·
 Middleware-Refresh-Scope (§10.2.4, bewusst zurückgestellt —
 Regressionsrisiko auf Auth-Flächen).
 

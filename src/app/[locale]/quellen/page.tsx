@@ -67,7 +67,15 @@ const SOURCE_CATEGORIES: SourceCategory[] = [
         license: 'ODbL 1.0',
         licenseUrl: 'https://opendatacommons.org/licenses/odbl/1-0/',
         description:
-          'Venue- und Standortdaten. © OpenStreetMap-Mitwirkende.',
+          'Venue- und Standortdaten. © OpenStreetMap contributors.',
+      },
+      {
+        name: 'OpenStreetMap Freizeit- & Ausflugs-POIs',
+        url: 'https://www.openstreetmap.org/copyright',
+        license: 'ODbL 1.0',
+        licenseUrl: 'https://opendatacommons.org/licenses/odbl/1-0/',
+        description:
+          'Spielplätze, Aussichtspunkte, Badeplätze, Museen, Burgen, Hütten und weitere Ausflugsziele aus OpenStreetMap — sichtbar als eigene Sektion „Weitere Ausflugsziele in der Umgebung“ auf den Gemeinde-Seiten. Kartendaten © OpenStreetMap contributors, lizenziert unter ODbL 1.0. Dieser Bestand wird bewusst getrennt gehalten und nie mit unseren eigenen Aktivitäts- oder Venue-Daten zusammengeführt.',
       },
       {
         name: 'GeoNames',
@@ -451,6 +459,33 @@ export default function QuellenPage() {
                 Bei Open-Data-Quellen (gekennzeichnet mit CC BY 4.0 oder ODbL) werden
                 die jeweiligen Lizenzbedingungen eingehalten, insbesondere die
                 Namensnennung der Datenbereitsteller.
+              </p>
+              <p>
+                <strong className="text-white/70">OpenStreetMap (ODbL 1.0):</strong>{' '}
+                Kartendaten ©{' '}
+                <a
+                  href="https://www.openstreetmap.org/copyright"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-white/70 underline underline-offset-2 hover:text-white transition-colors"
+                >
+                  OpenStreetMap contributors
+                </a>
+                , lizenziert unter{' '}
+                <a
+                  href="https://opendatacommons.org/licenses/odbl/1-0/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-white/70 underline underline-offset-2 hover:text-white transition-colors"
+                >
+                  ODbL 1.0
+                </a>
+                . Die OSM-Ausflugsziele werden in einer eigenständigen Datenbank
+                geführt und ausschließlich als separat gekennzeichnete Liste
+                angezeigt. Es findet keine Zusammenführung, kein Abgleich und
+                keine Anreicherung mit unseren übrigen Datenbeständen statt —
+                unsere eigenen Event-, Aktivitäts- und Venue-Daten sind damit
+                keine abgeleitete Datenbank im Sinne der ODbL-Share-Alike-Klausel.
               </p>
               <p>
                 Bilder werden — sofern nicht anders angegeben — direkt von den

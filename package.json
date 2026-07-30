@@ -61,6 +61,7 @@
     "import-osm-venues": "tsx --env-file=.env.local src/scripts/import-osm-venues.ts",
     "fetch-overpass-all": "tsx src/scripts/fetch-overpass-all-venues.ts",
     "import-overpass-all": "tsx --env-file=.env.local src/scripts/import-overpass-all-venues.ts",
+    "import-osm-pois": "tsx --env-file=.env.local src/scripts/import-osm-pois.ts",
     "import-student-orgs": "tsx --env-file=.env.local src/scripts/import-student-orgs.ts",
     "backfill-venue-ids": "tsx --env-file=.env.local src/scripts/backfill-venue-ids.ts",
     "scrape:venues": "tsx --env-file=.env.local src/scripts/scrape-venues.ts",

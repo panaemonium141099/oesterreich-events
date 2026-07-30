@@ -89,6 +89,9 @@ Bericht*.txt
 data/overpass-venues.json
 data/overpass-cache/
 
+# Overpass Freizeit-POI-Cache (fn-18.7, regenerierbar per npm run import-osm-pois)
+data/osm-pois-cache/
+
 # Other generated data dumps
 data/events-dump*.json
 data/events-dump*.jsonl
