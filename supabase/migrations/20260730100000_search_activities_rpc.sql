@@ -84,7 +84,11 @@ returns table (
 language plpgsql
 stable
 security definer
-set search_path = public
+-- search_path MUSS `extensions` enthalten: Supabase installiert pg_trgm in
+-- das Schema `extensions`, nicht in `public`. Mit `set search_path = public`
+-- allein schlaegt die Funktion zur Laufzeit fehl ("function similarity(text,
+-- text) does not exist") — verifiziert gegen die Prod-DB 2026-07-30.
+set search_path = public, extensions
 as $$
 declare
   v_limit   integer          := least(greatest(coalesce(max_results, 24), 1), 60);
