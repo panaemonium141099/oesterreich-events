@@ -801,10 +801,21 @@ export function extractActivitySearchTerm(
   restText: string,
   llmSearchTerms: string[] = [],
 ): string | null {
+  // LLM-Begriffe nur uebernehmen, wenn sie WOERTLICH in der Nutzer-Anfrage
+  // vorkommen. Gemini paraphrasiert Produktnamen gern ins Oberbegriff-
+  // Vokabular ("mountaincart" -> "Bergtour"/"Mountain"), was die
+  // trgm-Namenssuche auf falsche POIs lenkt (auf Prod verifiziert:
+  // "wo kann ich mountaincart fahren" lieferte "Active Mountains" statt der
+  // Mountaincart-Bahnen). Fuer Namens-Aehnlichkeit ist das Wort des Nutzers
+  // die bessere Quelle; die LLM-Leistung bleibt die AUSWAHL des richtigen
+  // Tokens aus der Anfrage, nicht dessen Erfindung.
+  const restNorm = new Set(tokenize(restText ?? '').normTokens);
   const candidates: string[] = [];
   for (const t of llmSearchTerms) {
     const n = normToken(t.split(/\s+/)[0] ?? '');
-    if (n.length >= 4 && !ACTIVITY_TERM_STOPWORDS.has(n)) candidates.push(t.trim());
+    if (n.length >= 4 && !ACTIVITY_TERM_STOPWORDS.has(n) && restNorm.has(n)) {
+      candidates.push(t.trim());
+    }
   }
   if (candidates.length === 0) {
     const { rawTokens, normTokens } = tokenize(restText ?? '');
