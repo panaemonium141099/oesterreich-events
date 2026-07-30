@@ -345,8 +345,20 @@ describe('extractActivitySearchTerm (fn-18.6)', () => {
     expect(extractActivitySearchTerm('wo kann ich mountaincart fahren')).toBe('mountaincart');
   });
 
-  it('bevorzugt LLM-searchTerms', () => {
-    expect(extractActivitySearchTerm('rutschen', ['Hochseilgarten'])).toBe('Hochseilgarten');
+  it('nutzt LLM-searchTerms, wenn sie im Query vorkommen (Auswahl-Leistung)', () => {
+    expect(
+      extractActivitySearchTerm('wo gibt es einen hochseilgarten', ['Hochseilgarten']),
+    ).toBe('Hochseilgarten');
+  });
+
+  it('ignoriert paraphrasierte LLM-Begriffe, die NICHT im Query stehen', () => {
+    // Regression: Gemini machte aus "mountaincart" das Oberbegriff-Vokabular
+    // "Bergtour"/"Mountain" — die trgm-Namenssuche landete dadurch auf
+    // "Active Mountains" statt auf den Mountaincart-Bahnen (Prod-Befund).
+    expect(
+      extractActivitySearchTerm('wo kann ich mountaincart fahren', ['Bergtour', 'Mountain']),
+    ).toBe('mountaincart');
+    expect(extractActivitySearchTerm('rutschen', ['Hochseilgarten'])).toBe('rutschen');
   });
 
   it('liefert null wenn nur Frage-/Wetterwörter übrig sind (q=NULL-Zweig)', () => {
