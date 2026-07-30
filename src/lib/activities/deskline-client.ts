@@ -18,6 +18,11 @@ export const DESKLINE_API_BASE = 'https://webapi.deskline.net';
 export const DESKLINE_DW_SOURCE = 'desklineweb';
 export const DESKLINE_PAGE_SIZE = 400;
 
+/** Marker fuer "Region hat keinen infrastructures-Endpoint" (Deskline 422
+ *  "Linkkey not configured"). Dauerhafter Zustand — der Ingest zaehlt solche
+ *  Regionen als "unavailable" statt als Lauf-Fehler (siehe ingest.ts). */
+export const REGION_UNAVAILABLE_MARKER = 'REGION_UNAVAILABLE';
+
 const MAX_RETRIES = 3;
 const RETRY_BASE_DELAY_MS = 1000;
 const BETWEEN_PAGES_DELAY_MS = 300;
@@ -178,6 +183,15 @@ async function fetchDesklinePage(url: string, sessionId: string): Promise<Deskli
 
       if (!response.ok) {
         const body = await response.text();
+        // Deskline antwortet mit 422 "Linkkey '<slug>' not configured
+        // correctly!", wenn eine Region zwar existiert (z. B. fuer
+        // /events), aber KEINEN infrastructures-Endpoint hat. Das ist ein
+        // dauerhafter Konfigurationszustand, kein Fehler: Retries sind
+        // sinnlos und der Lauf darf daran nicht scheitern (sonst waere nie
+        // ein complete_run moeglich -> Prune/Liveness blieben tot).
+        if (response.status === 422 && /not configured/i.test(body)) {
+          throw new Error(`${REGION_UNAVAILABLE_MARKER}: ${body.substring(0, 200)}`);
+        }
         throw new Error(`HTTP ${response.status}: ${body.substring(0, 200)}`);
       }
 
@@ -185,6 +199,7 @@ async function fetchDesklinePage(url: string, sessionId: string): Promise<Deskli
     } catch (err) {
       lastError = err instanceof Error ? err.message : String(err);
       if (lastError.includes('throttle budget exhausted')) break;
+      if (lastError.includes(REGION_UNAVAILABLE_MARKER)) break; // dauerhaft, keine Retries
       attempt++;
       if (attempt < MAX_RETRIES) {
         await sleep(RETRY_BASE_DELAY_MS * Math.pow(2, attempt - 1));
