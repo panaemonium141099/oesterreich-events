@@ -30,8 +30,13 @@ import type { GroupUpdate } from './prune';
 const TABLE = 'poi_activities';
 const RUNS_TABLE = 'poi_activity_runs';
 
-const WRITE_BATCH = 500; // Supabase Micro (MASTERPLAN §10)
-const IN_BATCH = 200; // .in()-Slice-Groesse (supabase-sync-Muster)
+const WRITE_BATCH = 500; // Body-Payloads (insert/upsert) — Supabase Micro (MASTERPLAN §10)
+// .in()-Slice-Groesse (supabase-sync-Muster). PostgREST transportiert
+// Filter im QUERY-STRING — auch bei UPDATE/PATCH. 500 UUIDs ergeben ~19 kB
+// URL; die Verbindung bricht dann mit "TypeError: fetch failed" ab (im
+// Vollimport zweimal reproduziert). JEDE .in()-Liste muss deshalb hier
+// entlang gechunkt werden, nie ueber WRITE_BATCH.
+const IN_BATCH = 200;
 const PAGE_SIZE = 1000; // PostgREST-Default-Limit fuer paged Reads
 
 export function createActivityStoreClient(): SupabaseClient {
@@ -128,7 +133,7 @@ export class SupabaseActivityStore implements ActivityStore {
   }
 
   async markSeen(entries: SeenEntry[], runSeq: number, seenAtIso: string): Promise<void> {
-    for (const batch of chunk(entries, WRITE_BATCH)) {
+    for (const batch of chunk(entries, IN_BATCH)) {
       // seen_regions-Union zur STEMPEL-Zeit: aktuelle seen_regions frisch
       // lesen und row-genau mergen (union-only) — NIE aus einem aelteren
       // Prefetch-Snapshot, sonst koennte ein Lauf die Regionen eines
@@ -161,18 +166,20 @@ export class SupabaseActivityStore implements ActivityStore {
       }
 
       for (const group of byUnion.values()) {
-        const { error: updateError } = await this.supabase
-          .from(TABLE)
-          .update({ last_seen_run_seq: runSeq, last_seen_at: seenAtIso, seen_regions: group.regions })
-          .in('id', group.ids)
-          .or(`last_seen_run_seq.is.null,last_seen_run_seq.lt.${runSeq}`);
-        if (updateError) fail('markSeen', updateError.message);
+        for (const idSlice of chunk(group.ids, IN_BATCH)) {
+          const { error: updateError } = await this.supabase
+            .from(TABLE)
+            .update({ last_seen_run_seq: runSeq, last_seen_at: seenAtIso, seen_regions: group.regions })
+            .in('id', idSlice)
+            .or(`last_seen_run_seq.is.null,last_seen_run_seq.lt.${runSeq}`);
+          if (updateError) fail('markSeen', updateError.message);
+        }
       }
     }
   }
 
   async markSeenComplete(ids: string[], runSeq: number): Promise<void> {
-    for (const batch of chunk(ids, WRITE_BATCH)) {
+    for (const batch of chunk(ids, IN_BATCH)) {
       const { error } = await this.supabase
         .from(TABLE)
         .update({ last_seen_complete_run_seq: runSeq })
@@ -217,7 +224,7 @@ export class SupabaseActivityStore implements ActivityStore {
       else byPayload.set(key, { visible: u.visible, duplicate_of: u.duplicate_of, ids: [u.id] });
     }
     for (const group of byPayload.values()) {
-      for (const batch of chunk(group.ids, WRITE_BATCH)) {
+      for (const batch of chunk(group.ids, IN_BATCH)) {
         const { error } = await this.supabase
           .from(TABLE)
           .update({ visible: group.visible, duplicate_of: group.duplicate_of })
