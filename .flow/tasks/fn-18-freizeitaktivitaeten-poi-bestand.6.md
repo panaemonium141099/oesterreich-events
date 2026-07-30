@@ -35,9 +35,8 @@ Smart-Suche versteht Aktivitaets-Absichten und liefert sie als separates, additi
 - [ ] Empty-State erscheint in KEINEM Consumer (V4EntdeckenSmartMode, V4ConciergeCard, Concierge-SSE), wenn nur activityMatches Treffer enthaelt (Consumer-Audit dokumentiert + UI-Test)
 
 ## Done summary
-TBD
-
+Die Smart-Suche versteht jetzt Aktivitaets-Absichten und liefert sie als additives Feld `activityMatches` ueber einen eigenen Retrieval-Pfad (SQL-RPC `search_activities`, trgm auf `name`), waehrend der Event-Pfad inklusive Future-only-Invariante unveraendert bleibt; Activity-only-Queries rufen den Event-Retrieval nachweislich gar nicht mehr auf. Dazu: deterministischer No-AI-Klassifikator + Gemeinde-Extractor, Bundesland-SoT, UI-Block "Passende Aktivitaeten" und ein Consumer-Audit, das den Empty-State bei activity-only-Antworten in allen drei Consumern verhindert.
 ## Evidence
-- Commits:
-- Tests:
+- Commits: 53a185e651f6c96e8f3bc302870d4483fe75b552
+- Tests: npx vitest run src/__tests__/lib/search src/__tests__/lib/activities src/__tests__/api/activities.test.ts src/__tests__/api/search-semantic-activities.test.ts src/__tests__/components/discover src/__tests__/components/activities (24 files / 334 tests passed), npx tsc --noEmit (nur Baseline-Fehler in outreach/draft-prompt + pipeline/normalize-date + pipeline/normalizer)
 - PRs:
