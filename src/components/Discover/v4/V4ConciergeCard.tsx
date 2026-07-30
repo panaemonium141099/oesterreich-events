@@ -33,6 +33,19 @@ export interface ConciergePayload {
     price_text: string | null;
     _similarity: number;
   }>;
+  /**
+   * fn-18.6: Freizeit-POI-Treffer der Smart-Suche. `count`/`matches` sind
+   * event-only — ohne diese Liste bekäme der Concierge bei einer
+   * activity-only-Antwort "(Keine Treffer in unserer Datenbank.)" zu
+   * sehen und würde dem User fälschlich einen Empty-State erzählen.
+   */
+  activityMatches?: Array<{
+    name: string;
+    town: string | null;
+    bundesland: string | null;
+    setting: 'indoor' | 'outdoor' | 'mixed' | null;
+    tags: string[];
+  }>;
   count?: number;
   scopeLabel?: string;
 }

@@ -12,6 +12,8 @@ import { useEffect, useState, useMemo } from 'react';
 import Link from 'next/link';
 import { buildEventUrlV2 } from '@/lib/utils/slugify';
 import { V4ConciergeCard, type ConciergePayload } from './V4ConciergeCard';
+import { V4ActivityResultCard } from './V4ActivityResultCard';
+import type { ActivitySearchMatch } from '@/lib/activities/public-types';
 
 /**
  * Category → tinted gradient pair for image-less placeholder cards.
@@ -70,6 +72,13 @@ interface SearchResponse {
   };
   matches: SearchMatch[];
   count: number;
+  /**
+   * fn-18.6: Freizeit-POIs aus `poi_activities`. ADDITIV und optional —
+   * `count`/`matches` bleiben event-only. Ältere Backends liefern das
+   * Feld nicht; deshalb überall über `activityMatches` (siehe unten)
+   * lesen, nie direkt über `result.activityMatches`.
+   */
+  activityMatches?: ActivitySearchMatch[];
 }
 
 const SAMPLE_QUERIES = [
@@ -130,6 +139,12 @@ export function V4EntdeckenSmartMode({ initialQuery = '' }: V4EntdeckenSmartMode
     return d.toLocaleDateString('de-AT', { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
   };
 
+  // fn-18.6 Consumer-Contract: `count` ist event-only. Eine
+  // activity-only-Antwort (matches=[], count=0, activityMatches>0) darf
+  // NIE als "keine Treffer" gerendert werden.
+  const activityMatches: ActivitySearchMatch[] = result?.activityMatches ?? [];
+  const hasResults = (result?.count ?? 0) > 0 || activityMatches.length > 0;
+
   // Concierge-Payload bauen wann immer wir ein Result haben. Memoized per
   // result-Referenz damit V4ConciergeCard nur EIN neuer Call macht wenn
   // tatsächlich ein neues Result reinkommt (nicht bei jedem Render).
@@ -147,6 +162,16 @@ export function V4EntdeckenSmartMode({ initialQuery = '' }: V4EntdeckenSmartMode
         bundesland: m.bundesland ?? null,
         price_text: m.price_text,
         _similarity: m._similarity,
+      })),
+      // Ohne diese Liste würde der Concierge bei activity-only-Antworten
+      // "(Keine Treffer in unserer Datenbank.)" zu lesen bekommen und
+      // dem User genau das erzählen.
+      activityMatches: (result.activityMatches ?? []).slice(0, 5).map(a => ({
+        name: a.name,
+        town: a.town,
+        bundesland: a.bundesland,
+        setting: a.setting,
+        tags: a.tags,
       })),
     };
   }, [result]);
@@ -207,11 +232,25 @@ export function V4EntdeckenSmartMode({ initialQuery = '' }: V4EntdeckenSmartMode
           payload changes. */}
       <V4ConciergeCard payload={conciergePayload}/>
 
-      {result && !loading && result.count === 0 && (
+      {result && !loading && !hasResults && (
         <div className="rounded-2xl border border-dashed border-[var(--v4-hairline-3)] p-8 text-center text-[var(--v4-ink-70)]">
           <p className="text-[14px]">Keine Treffer für diese Suche.</p>
           <p className="text-[12px] text-[var(--v4-ink-50)] mt-1">Anderes Keyword probieren? Oder Zeitraum erweitern?</p>
         </div>
+      )}
+
+      {result && !loading && activityMatches.length > 0 && (
+        <section className="mb-8">
+          <h2 className="text-[13px] font-semibold text-[var(--v4-ink)] mb-1">Passende Aktivitäten</h2>
+          <p className="text-[12px] text-[var(--v4-ink-50)] mb-4">
+            Ausflugsziele und Freizeit-Einrichtungen — ganzjährig, ohne fixen Termin
+          </p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {activityMatches.map(a => (
+              <V4ActivityResultCard key={a.id} activity={a}/>
+            ))}
+          </div>
+        </section>
       )}
 
       {result && !loading && result.count > 0 && (

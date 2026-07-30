@@ -31,6 +31,7 @@ import {
 } from '@/lib/activities/ingest-transform';
 import type { GroupUpdate } from '@/lib/activities/prune';
 import type { DesklineInfrastructure } from '@/lib/activities/deskline-client';
+import { REGION_UNAVAILABLE_MARKER } from '@/lib/activities/deskline-client';
 
 // ── In-Memory-Store ──────────────────────────────────────────────────────────
 
@@ -270,6 +271,7 @@ interface Harness {
   store: InMemoryStore;
   data: Record<string, DesklineInfrastructure[]>;
   failRegions: Set<string>;
+  unavailableRegions: Set<string>;
   /** Kuenstliche Fetch-Latenz pro Region (ms) — simuliert, dass Regionen
    *  im Concurrency-Pool in beliebiger Reihenfolge fertig werden. */
   delays: Record<string, number>;
@@ -280,6 +282,7 @@ function harness(): Harness {
   const store = new InMemoryStore();
   const data: Record<string, DesklineInfrastructure[]> = { r1: [], r2: [] };
   const failRegions = new Set<string>();
+  const unavailableRegions = new Set<string>();
   const delays: Record<string, number> = {};
   const deps: IngestDeps = {
     store,
@@ -287,6 +290,12 @@ function harness(): Harness {
       const delay = delays[code];
       if (delay) await new Promise((resolve) => setTimeout(resolve, delay));
       if (failRegions.has(code)) throw new Error(`${code} down`);
+      if (unavailableRegions.has(code)) {
+        // Wortlaut wie deskline-client bei HTTP 422 "Linkkey not configured".
+        throw new Error(
+          `Deskline fetch failed after 1 attempts: ${REGION_UNAVAILABLE_MARKER}: {"ErrorCode":422,"ErrorDetail":["Linkkey '${code}' not configured correctly!"]}`,
+        );
+      }
       return data[code] ?? [];
     },
     regions: REGIONS,
@@ -297,6 +306,7 @@ function harness(): Harness {
     store,
     data,
     failRegions,
+    unavailableRegions,
     delays,
     run: (opts) => runIngest(deps, { mode: 'full', dryRun: false, ...opts }),
   };
@@ -492,6 +502,30 @@ describe('runIngest — Fingerprint-Drift (Task-Spec d)', () => {
     for (const [, count] of visibleCountsPerGroup(h.store)) {
       expect(count).toBe(1);
     }
+  });
+});
+
+describe('runIngest — Regionen ohne infrastructures-Endpoint (Deskline-422)', () => {
+  it('zaehlt als unavailable, NICHT als Lauf-Fehler — Lauf bleibt complete und Prune arbeitet', async () => {
+    const h = harness();
+    h.data.r1 = [poi('p1', 'Strandbad Podersdorf'), poi('p2', 'Minigolfplatz Podersdorf')];
+    // r2 hat dauerhaft keinen infrastructures-Endpoint (422 Linkkey).
+    h.unavailableRegions.add('r2');
+
+    const first = await h.run();
+    expect(first.regionsUnavailable).toEqual(['r2']);
+    expect(first.regionsFailed).toEqual([]);
+    // Entscheidend: der Lauf gilt trotzdem als complete — sonst koennte
+    // Prune/Liveness nie aktiv werden (dauerhaft tote Slugs in REGIONS).
+    expect(first.isComplete).toBe(true);
+
+    // Zwei complete_runs ohne p2 -> Prune greift regulaer.
+    h.data.r1 = [poi('p1', 'Strandbad Podersdorf')];
+    await h.run();
+    const third = await h.run();
+    expect(third.isComplete).toBe(true);
+    expect(h.store.bySourceId('p2')!.visible).toBe(false);
+    expect(h.store.bySourceId('p1')!.visible).toBe(true);
   });
 });
 

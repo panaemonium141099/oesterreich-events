@@ -56,6 +56,7 @@ import {
   type LivenessContext,
 } from './prune';
 import type { DesklineInfrastructure } from './deskline-client';
+import { REGION_UNAVAILABLE_MARKER } from './deskline-client';
 
 // ── Store-Interface (Supabase-Implementierung: activity-store.ts) ───────────
 
@@ -162,6 +163,10 @@ export interface IngestResult {
   finished: boolean;
   regionsOk: string[];
   regionsFailed: Array<{ code: string; error: string }>;
+  /** Regionen, die keinen infrastructures-Endpoint haben (Deskline-422,
+   *  dauerhaft). Zaehlen NICHT als Lauf-Fehler — sonst waere nie ein
+   *  complete_run moeglich und Prune/Liveness blieben dauerhaft inaktiv. */
+  regionsUnavailable: string[];
   fatalTransformErrors: string[];
   /** Mirror-Overlap-Report (GUID-Annahme, Epic E11). */
   overlap: {
@@ -439,6 +444,7 @@ export async function runIngest(deps: IngestDeps, opts: IngestOptions): Promise<
     finished: false,
     regionsOk: [],
     regionsFailed: [],
+    regionsUnavailable: [],
     fatalTransformErrors: [],
     overlap: { sourceIdsInMultipleRegions: 0, fingerprintGroupsAcrossSourceIds: 0 },
   };
@@ -484,6 +490,8 @@ export async function runIngest(deps: IngestDeps, opts: IngestOptions): Promise<
 
   const state = newCollectState();
   const failed: Array<{ code: string; error: string }> = [];
+  /** Regionen ohne infrastructures-Endpoint (Deskline-422) — kein Lauf-Fehler. */
+  const unavailable: string[] = [];
   const okCodes: string[] = [];
 
   let cursor = 0;
@@ -499,8 +507,16 @@ export async function runIngest(deps: IngestDeps, opts: IngestOptions): Promise<
         okCodes.push(region.code);
       } catch (err) {
         const msg = err instanceof Error ? err.message : String(err);
-        failed.push({ code: region.code, error: msg });
-        log(`[ingest] ${region.code}: FEHLER — ${msg}`);
+        if (msg.includes(REGION_UNAVAILABLE_MARKER)) {
+          // Region ohne infrastructures-Endpoint (Deskline-422, dauerhaft).
+          // KEIN Lauf-Fehler: solche Regionen liefern grundsaetzlich keine
+          // POIs, blockieren also weder Vollstaendigkeit noch Prune-Sicherheit.
+          unavailable.push(region.code);
+          log(`[ingest] ${region.code}: kein infrastructures-Endpoint (uebersprungen)`);
+        } else {
+          failed.push({ code: region.code, error: msg });
+          log(`[ingest] ${region.code}: FEHLER — ${msg}`);
+        }
       }
     }
   };
@@ -525,6 +541,12 @@ export async function runIngest(deps: IngestDeps, opts: IngestOptions): Promise<
   result.fatalTransformErrors = state.fatalErrors;
   result.regionsOk = okCodes.filter((c) => !state.fatalRegions.has(c)).sort();
   result.regionsFailed = failed;
+  result.regionsUnavailable = unavailable.sort();
+  if (unavailable.length > 0) {
+    log(
+      `[ingest] ${unavailable.length} Regionen ohne infrastructures-Endpoint (kein Lauf-Fehler): ${unavailable.join(', ')}`,
+    );
+  }
   result.overlap = overlapReport(state, log);
 
   const topUnmapped = [...state.unmappedTopicCounts.entries()]

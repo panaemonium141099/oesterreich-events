@@ -93,3 +93,101 @@ describe('V4EntdeckenSmartMode', () => {
     });
   });
 });
+
+// ════════════════════════════════════════════════════════════════════
+// fn-18.6 — Consumer-Contract: `count` ist event-only
+// ════════════════════════════════════════════════════════════════════
+
+function activityResponse(activityMatches: unknown[], count = 0) {
+  return {
+    ok: true,
+    json: async () => ({
+      query: 'q',
+      parsed: { embedded_text: 'q', after_date: null, before_date: null, max_price_tier: null, signals: [] },
+      matches: [],
+      count,
+      activityMatches,
+    }),
+  };
+}
+
+const POI = {
+  id: 'poi-1',
+  slug: 'mountaincart-fulseck-abc123def456',
+  name: 'Mountaincart Fulseck',
+  description_short: 'Rasante Abfahrt ins Tal',
+  tags: ['bergtour'],
+  setting: 'outdoor' as const,
+  town: 'Dorfgastein',
+  gemeinde_slug: '5632-dorfgastein',
+  bundesland: 'salzburg',
+  images: null,
+  price_hint: null,
+  online_bookable: false,
+  distance_km: 1.2,
+  _similarity: 0.82,
+};
+
+describe('V4EntdeckenSmartMode — activityMatches (fn-18.6)', () => {
+  beforeEach(() => { fetchMock.mockReset(); });
+
+  it('rendert den Aktivitaets-Block mit Link auf /aktivitaet/*', async () => {
+    fetchMock.mockResolvedValueOnce(activityResponse([POI]));
+    render(<V4EntdeckenSmartMode initialQuery="mountaincart"/>);
+
+    await waitFor(() => {
+      expect(screen.getByText('Passende Aktivitäten')).toBeInTheDocument();
+    });
+    expect(screen.getByText('Mountaincart Fulseck')).toBeInTheDocument();
+    expect(screen.getByText('Aktivität')).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /mountaincart fulseck/i }))
+      .toHaveAttribute('href', '/aktivitaet/mountaincart-fulseck-abc123def456');
+  });
+
+  it('KEIN Empty-State wenn nur activityMatches Treffer enthaelt', async () => {
+    fetchMock.mockResolvedValueOnce(activityResponse([POI], 0));
+    render(<V4EntdeckenSmartMode initialQuery="mountaincart"/>);
+
+    await waitFor(() => expect(screen.getByText('Mountaincart Fulseck')).toBeInTheDocument());
+    expect(screen.queryByText(/keine treffer/i)).not.toBeInTheDocument();
+  });
+
+  it('Empty-State erscheint weiterhin wenn BEIDE Bestaende leer sind', async () => {
+    fetchMock.mockResolvedValueOnce(activityResponse([], 0));
+    render(<V4EntdeckenSmartMode initialQuery="nixda"/>);
+
+    await waitFor(() => expect(screen.getByText(/keine treffer/i)).toBeInTheDocument());
+  });
+
+  it('ABWAERTSKOMPAT: Antwort ohne activityMatches rendert unveraendert', async () => {
+    fetchMock.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({
+        query: 'x',
+        parsed: { embedded_text: 'x', after_date: null, before_date: null, max_price_tier: null, signals: [] },
+        matches: [],
+        count: 0,
+      }),
+    });
+    render(<V4EntdeckenSmartMode initialQuery="x"/>);
+
+    await waitFor(() => expect(screen.getByText(/keine treffer/i)).toBeInTheDocument());
+    expect(screen.queryByText('Passende Aktivitäten')).not.toBeInTheDocument();
+  });
+
+  it('Concierge-Payload transportiert die POI-Treffer (kein "keine Treffer" im Prompt)', async () => {
+    fetchMock.mockImplementation(async (url: string) => {
+      if (String(url).includes('/api/search/semantic')) return activityResponse([POI]);
+      return { ok: false, body: null };
+    });
+    render(<V4EntdeckenSmartMode initialQuery="mountaincart"/>);
+
+    await waitFor(() => {
+      const conciergeCall = fetchMock.mock.calls.find(c => String(c[0]).includes('/api/search/concierge'));
+      expect(conciergeCall).toBeDefined();
+      const payload = JSON.parse(String(conciergeCall![1]?.body ?? '{}'));
+      expect(payload.activityMatches).toHaveLength(1);
+      expect(payload.activityMatches[0].name).toBe('Mountaincart Fulseck');
+    });
+  });
+});
