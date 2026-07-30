@@ -47,6 +47,14 @@ interface ConciergeMatch {
   _similarity: number;
 }
 
+interface ConciergeActivity {
+  name: string;
+  town: string | null;
+  bundesland: string | null;
+  setting: 'indoor' | 'outdoor' | 'mixed' | null;
+  tags: string[];
+}
+
 interface ConciergeBody {
   query: string;
   parsed?: {
@@ -57,6 +65,12 @@ interface ConciergeBody {
     signals?: string[];
   };
   matches?: ConciergeMatch[];
+  /**
+   * fn-18.6: Freizeit-POIs aus dem Aktivitaets-Pfad der Smart-Suche.
+   * `count`/`matches` sind event-only — ohne diese Liste wuerde der
+   * Prompt bei activity-only-Antworten "(Keine Treffer …)" behaupten.
+   */
+  activityMatches?: ConciergeActivity[];
   count?: number;
   scopeLabel?: string;
 }
@@ -97,6 +111,7 @@ function buildUserPrompt(body: ConciergeBody): string {
   parts.push(`Anzahl Treffer in unserer Datenbank: ${body.count ?? 0}`);
 
   const matches = body.matches ?? [];
+  const activities = body.activityMatches ?? [];
   if (matches.length > 0) {
     parts.push('');
     parts.push('Top-Treffer (sortiert nach Relevanz):');
@@ -107,9 +122,24 @@ function buildUserPrompt(body: ConciergeBody): string {
       const loc = [m.location_name, m.bundesland].filter(Boolean).join(' · ');
       parts.push(`${i + 1}. "${m.title}" — ${date}${loc ? ' · ' + loc : ''}${m.category ? ' · [' + m.category + ']' : ''}${m.price_text ? ' · ' + m.price_text : ''} (Relevanz ${(m._similarity * 100).toFixed(0)}%)`);
     });
-  } else {
+  } else if (activities.length === 0) {
     parts.push('');
     parts.push('(Keine Treffer in unserer Datenbank.)');
+  } else {
+    parts.push('');
+    parts.push('(Keine VERANSTALTUNGEN in unserer Datenbank — dafuer die Freizeit-Ziele unten.)');
+  }
+
+  if (activities.length > 0) {
+    parts.push('');
+    parts.push(`Passende Freizeit-Ziele (Orte ohne fixen Termin, ganzjaehrig; Anzahl: ${activities.length}):`);
+    activities.slice(0, 5).forEach((a, i) => {
+      const loc = [a.town, a.bundesland].filter(Boolean).join(' · ');
+      const setting = a.setting ? ` · ${a.setting}` : '';
+      const tags = a.tags.length > 0 ? ` · [${a.tags.slice(0, 3).join(', ')}]` : '';
+      parts.push(`${i + 1}. "${a.name}"${loc ? ' — ' + loc : ''}${setting}${tags}`);
+    });
+    parts.push('Diese Freizeit-Ziele sind echte Treffer aus unserer Datenbank — behandle sie wie die Event-Treffer und sag NICHT, es gaebe nichts.');
   }
 
   return parts.join('\n');

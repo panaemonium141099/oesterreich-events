@@ -45,3 +45,24 @@ export interface PublicActivity {
   created_at: string;
   updated_at: string;
 }
+
+/**
+ * Ein Aktivitaets-Treffer der Smart-Suche (fn-18.6, Feld `activityMatches`
+ * von /api/search/semantic).
+ *
+ * Bewusst ein SUBSET von PublicActivity plus zwei Such-Metadaten — kein
+ * eigener Aktivitaets-Typ. Die RPC liefert nur sichtbare, nicht
+ * geschlossene, nicht-duplizierte POIs; `is_closed`/`visible` sind
+ * deshalb nicht Teil der Shape.
+ */
+export type ActivitySearchMatch = Pick<
+  PublicActivity,
+  | 'id' | 'slug' | 'name' | 'description_short' | 'tags' | 'setting'
+  | 'town' | 'gemeinde_slug' | 'bundesland' | 'images' | 'price_hint'
+  | 'online_bookable'
+> & {
+  /** Haversine-Distanz zum Suchzentrum in km; null ohne Ortsbezug. */
+  distance_km: number | null;
+  /** Relevanz 0..0.99 (gleiche Skala wie das "Relevanz X%"-Label der Events). */
+  _similarity: number;
+};

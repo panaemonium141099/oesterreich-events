@@ -6,8 +6,17 @@ import {
   rankCandidates,
   scoreCandidate,
   detectLocationRegex,
+  detectActivityIntent,
+  detectGemeindeInQuery,
+  extractActivitySearchTerm,
+  rankActivityCandidates,
+  emptySearchIntent,
+  isBundeslandId,
+  BUNDESLAND_IDS,
+  BUNDESLAENDER_KEYS,
   type SearchIntent,
   type CandidateEvent,
+  type ActivityCandidate,
 } from '@/lib/search/smart-query';
 
 // Fester "jetzt"-Anker: Mittwoch 2026-07-08 12:00 lokal
@@ -15,7 +24,7 @@ const NOW = new Date(2026, 6, 8, 12, 0, 0);
 
 const emptyIntent: SearchIntent = {
   categories: [], tags: [], audiences: [], occasions: [], vibes: [],
-  searchTerms: [], location: null,
+  searchTerms: [], location: null, contentTypes: ['event'],
 };
 
 describe('parseQuery', () => {
@@ -133,6 +142,7 @@ describe('scoreCandidate / rankCandidates', () => {
     vibes: [],
     searchTerms: ['jazz'],
     location: null,
+    contentTypes: ['event'],
   };
 
   const base: CandidateEvent = {
@@ -179,5 +189,219 @@ describe('scoreCandidate / rankCandidates', () => {
       vibe: null, occasion_tags: null, event_score: 100, _textHit: true,
     };
     expect(scoreCandidate(maxed, intent)).toBeLessThan(1);
+  });
+});
+
+// ════════════════════════════════════════════════════════════════════
+// fn-18.6 — Aktivitäts-Pfad
+// ════════════════════════════════════════════════════════════════════
+
+describe('Bundesland-SoT (fn-18.6)', () => {
+  it('kennt alle 9 kanonischen IDs', () => {
+    expect(BUNDESLAND_IDS).toHaveLength(9);
+    for (const id of ['burgenland', 'kaernten', 'niederoesterreich', 'oberoesterreich',
+                      'salzburg', 'steiermark', 'tirol', 'vorarlberg', 'wien']) {
+      expect(BUNDESLAND_IDS).toContain(id);
+      expect(isBundeslandId(id)).toBe(true);
+      expect(BUNDESLAENDER_KEYS[id]).toBe(id);
+    }
+    expect(isBundeslandId('bayern')).toBe(false);
+    expect(isBundeslandId(null)).toBe(false);
+  });
+
+  it('REGRESSION: Städte gewinnen weiterhin gegen die erweiterte Bundesland-Map', () => {
+    // salzburg/wien stehen jetzt AUCH in BUNDESLAENDER_KEYS — detectLocationRegex
+    // prüft CITIES zuerst, das Event-Verhalten muss identisch bleiben.
+    expect(detectLocationRegex('konzert in salzburg')?.districts)
+      .toEqual(['salzburg (stadt)', 'salzburg-umgebung']);
+    expect(detectLocationRegex('konzert in wien')).toEqual({ districts: null, bundesland: 'wien' });
+    expect(detectLocationRegex('konzert im burgenland'))
+      .toEqual({ districts: null, bundesland: 'burgenland' });
+  });
+});
+
+describe('validateIntent — contentTypes-Normalisierung (fn-18.6)', () => {
+  it('Feld fehlt → ["event"]', () => {
+    expect(validateIntent({ categories: ['Musik'] }).contentTypes).toEqual(['event']);
+  });
+
+  it('leeres Array → ["event"]', () => {
+    expect(validateIntent({ contentTypes: [] }).contentTypes).toEqual(['event']);
+  });
+
+  it('nur unbekannte Werte → ["event"]', () => {
+    expect(validateIntent({ contentTypes: ['poi', 'venue', 42] }).contentTypes).toEqual(['event']);
+  });
+
+  it('übernimmt gültige Werte, dedupliziert', () => {
+    expect(validateIntent({ contentTypes: ['activity'] }).contentTypes).toEqual(['activity']);
+    expect(validateIntent({ contentTypes: ['activity', 'activity', 'event'] }).contentTypes)
+      .toEqual(['activity', 'event']);
+  });
+
+  it('Müll-Input bleibt auf dem Default', () => {
+    expect(validateIntent(null).contentTypes).toEqual(['event']);
+    expect(validateIntent('kaputt').contentTypes).toEqual(['event']);
+  });
+});
+
+describe('intentIsEmpty — contentTypes als Signal (fn-18.6)', () => {
+  it('leerer Default-Intent ist leer', () => {
+    expect(intentIsEmpty(emptySearchIntent())).toBe(true);
+  });
+
+  it('contentTypes=["activity"] ohne Facetten zählt als Signal', () => {
+    const i = emptySearchIntent();
+    i.contentTypes = ['activity'];
+    expect(intentIsEmpty(i)).toBe(false);
+  });
+
+  it('contentTypes=["event","activity"] zählt als Signal', () => {
+    const i = emptySearchIntent();
+    i.contentTypes = ['event', 'activity'];
+    expect(intentIsEmpty(i)).toBe(false);
+  });
+});
+
+describe('detectGemeindeInQuery (fn-18.6)', () => {
+  it('erkennt Registry-Gemeinden und strippt sie aus dem Suchtext', () => {
+    const g = detectGemeindeInQuery('mountaincart dorfgastein');
+    expect(g?.name).toBe('Dorfgastein');
+    expect(g?.restText).toBe('mountaincart');
+    expect(g?.bundesland).toBe('salzburg');
+    expect(g?.radiusKm).toBe(15);
+  });
+
+  it('funktioniert unabhängig von der Wortstellung', () => {
+    const g = detectGemeindeInQuery('lutzmannsburg rutschen');
+    expect(g?.name).toBe('Lutzmannsburg');
+    expect(g?.restText).toBe('rutschen');
+    expect(g?.bundesland).toBe('burgenland');
+  });
+
+  it('Kontextwort wird mit gestrippt (Regel i)', () => {
+    const g = detectGemeindeInQuery('was tun bei regen in graz');
+    expect(g?.name).toBe('Graz');
+    expect(g?.restText).toBe('was tun bei regen');
+  });
+
+  it('Mehr-Token-Gemeindenamen matchen (Regel ii)', () => {
+    expect(detectGemeindeInQuery('rodeln in zell am see')?.name).toBe('Zell am See');
+  });
+
+  it('Tippfehler und Nicht-Orte liefern null', () => {
+    expect(detectGemeindeInQuery('mountaincart dorfgastien')).toBeNull();
+    expect(detectGemeindeInQuery('wo kann ich mountaincart fahren')).toBeNull();
+    expect(detectGemeindeInQuery('')).toBeNull();
+  });
+
+  it('NEGATIV: kollisionsträchtige Alltagswort-Gemeinden erzeugen KEINEN Filter', () => {
+    // Alle folgenden Tokens SIND Gemeindenamen (see, berg, sonntag, malta,
+    // baden) — als Einzel-Token dürfen sie nie matchen, auch nicht hinter
+    // einem Kontextwort.
+    expect(detectGemeindeInQuery('im sommer am see baden')).toBeNull();
+    expect(detectGemeindeInQuery('wandern am berg mit kindern')).toBeNull();
+    expect(detectGemeindeInQuery('was tun am sonntag')).toBeNull();
+    expect(detectGemeindeInQuery('urlaub in malta')).toBeNull();
+    expect(detectGemeindeInQuery('bei regen was unternehmen')).toBeNull();
+  });
+});
+
+describe('detectActivityIntent (No-AI-Klassifikator, fn-18.6)', () => {
+  it('POI-Frage + starker POI-Begriff → activity-only', () => {
+    const s = detectActivityIntent('wo kann ich mountaincart fahren');
+    expect(s.isActivity).toBe(true);
+    expect(s.activityOnly).toBe(true);
+    expect(s.indoor).toBe(false);
+  });
+
+  it('Regen-Query → activity-only + indoor', () => {
+    const s = detectActivityIntent('was tun bei Regen in Graz');
+    expect(s.isActivity).toBe(true);
+    expect(s.activityOnly).toBe(true);
+    expect(s.indoor).toBe(true);
+  });
+
+  it('POI-Begriff ohne Frageform reicht ("mountaincart dorfgastein")', () => {
+    expect(detectActivityIntent('mountaincart dorfgastein').activityOnly).toBe(true);
+  });
+
+  it('reine Event-Query bleibt unangetastet', () => {
+    const s = detectActivityIntent('konzerte wien heute');
+    expect(s.isActivity).toBe(false);
+    expect(s.activityOnly).toBe(false);
+    expect(s.indoor).toBe(false);
+  });
+
+  it('explizites Event-Wort blockt activity-only', () => {
+    const s = detectActivityIntent('konzert im hallenbad');
+    expect(s.isActivity).toBe(true);
+    expect(s.activityOnly).toBe(false);
+  });
+});
+
+describe('extractActivitySearchTerm (fn-18.6)', () => {
+  it('nimmt den spezifischsten Begriff aus dem Rest-Text', () => {
+    expect(extractActivitySearchTerm('wo kann ich mountaincart fahren')).toBe('mountaincart');
+  });
+
+  it('bevorzugt LLM-searchTerms', () => {
+    expect(extractActivitySearchTerm('rutschen', ['Hochseilgarten'])).toBe('Hochseilgarten');
+  });
+
+  it('liefert null wenn nur Frage-/Wetterwörter übrig sind (q=NULL-Zweig)', () => {
+    expect(extractActivitySearchTerm('was tun bei regen')).toBeNull();
+    expect(extractActivitySearchTerm('')).toBeNull();
+  });
+});
+
+describe('rankActivityCandidates (fn-18.6)', () => {
+  const baseRow: ActivityCandidate = {
+    id: 'a1', slug: 'a-1', name: 'Alpha', description: null, description_short: null,
+    tags: [], setting: null, lat: 47, lng: 13, town: null, gemeinde_slug: null,
+    bundesland: 'salzburg', images: null, price_hint: null, online_bookable: false,
+    name_similarity: 0, tag_hits: 0, distance_km: null,
+  };
+
+  it('name-trgm schlägt reine Tag-Treffer', () => {
+    const ranked = rankActivityCandidates(
+      [
+        { ...baseRow, id: 'tags', name: 'Zeta', tag_hits: 3 },
+        { ...baseRow, id: 'trgm', name: 'Alpha', name_similarity: 0.9 },
+      ],
+      emptySearchIntent(), 'alpha', 10,
+    );
+    expect(ranked[0].id).toBe('trgm');
+  });
+
+  it('Description-Treffer ist Sekundär-Signal auf der Shortlist', () => {
+    const [withDesc, without] = rankActivityCandidates(
+      [
+        { ...baseRow, id: 'desc', name: 'Alpha', description: 'Der schönste Klettersteig' },
+        { ...baseRow, id: 'plain', name: 'Alpha' },
+      ],
+      emptySearchIntent(), 'klettersteig', 10,
+    );
+    expect(withDesc.id).toBe('desc');
+    expect(withDesc._similarity).toBeGreaterThan(without._similarity);
+  });
+
+  it('nähere POIs gewinnen bei sonst gleichem Score', () => {
+    const ranked = rankActivityCandidates(
+      [
+        { ...baseRow, id: 'far', name: 'Alpha', distance_km: 14 },
+        { ...baseRow, id: 'near', name: 'Beta', distance_km: 1 },
+      ],
+      emptySearchIntent(), null, 10, 15,
+    );
+    expect(ranked[0].id).toBe('near');
+  });
+
+  it('dedupliziert per id und cappt', () => {
+    const ranked = rankActivityCandidates(
+      [baseRow, { ...baseRow, name: 'Alpha Duplikat' }, { ...baseRow, id: 'a2', name: 'Beta' }],
+      emptySearchIntent(), null, 1,
+    );
+    expect(ranked).toHaveLength(1);
   });
 });
