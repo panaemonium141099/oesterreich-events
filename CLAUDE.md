@@ -77,6 +77,10 @@ node / next.js
   mit `if: always()`.
 - **GitHub Actions `import-eventim.yml`** (alle 6 h): PFT-Feed-Import mit
   Affiliate-Links. Secrets: `EVENTIM_FEED_USER`/`EVENTIM_FEED_PASS`.
+- **GitHub Actions `ingest-activities.yml`** (wöchentlich): Deskline-
+  Infrastruktur-POIs → `poi_activities` (Run-Bookkeeping, Dedup, Prune).
+  Der OSM-Bestand (`osm_pois`) läuft NICHT im Cron — `npm run import-osm-pois`
+  ist ein manueller Ops-Lauf (OSM-Objekte ändern sich langsam, Overpass-Fair-Use).
 - **Vercel-Crons** (vercel.json): send-reminders, seo-daily-snapshot
   (GSC/CrUX-Snapshot — Collector hart deadline-begrenzt, `count: 'planned'`
   statt exact!), warm-cache, sync-feratel (stündlich), lifecycle-emails,
@@ -96,6 +100,26 @@ node / next.js
 - `src/app/api/search/concierge/route.ts` — Concierge-Tipp (Gemini + Grounding, SSE)
 - `src/app/api/me/landing/route.ts` — Client-Personalisierung der Landing
 - `src/app/entdecken/page.tsx` — Liste + Smart-Suche (Tabs)
+- **Freizeitaktivitäten (fn-18, zweite Inhaltssäule neben Events):**
+  `src/app/[locale]/aktivitaeten/page.tsx` (Übersicht),
+  `src/app/[locale]/aktivitaet/[slug]/page.tsx` (Detail, Slug→shortid-Resolver),
+  `src/app/api/activities/route.ts` (Cursor-Pagination/Filter),
+  `src/lib/activities/` (Taxonomie, Ingest, Resolver, Nearby-Loader,
+  Indexability), Tabelle `poi_activities` + View `poi_activities_public`.
+  Quelle: Feratel-Deskline `infrastructures` via
+  `src/scripts/import-activities.ts` (`npm run import:activities`).
+- **OSM-Freizeit-POIs (fn-18.7) — ODbL, STRIKT getrennt:** Tabelle `osm_pois`,
+  `src/lib/osm/` (kuratierte Whitelist + Transform + Nearby-Loader),
+  `src/scripts/import-osm-pois.ts` (`npm run import-osm-pois`, Overpass-batched
+  mit Disk-Cache), Anzeige NUR als eigene Gemeinde-Hub-Sektion
+  (`src/components/Osm/OsmPoisSection.tsx`) mit „© OpenStreetMap
+  contributors"/ODbL-Attribution. **Nie** mit `poi_activities`/`venues` mergen,
+  deduplizieren oder joinen (Share-Alike); keine eigenen OSM-Detailseiten.
+- `src/app/sitemap.xml` ist ein `<sitemapindex>` auf `sitemap-core.xml`,
+  `sitemap-events.xml`, `sitemap-activities.xml` (nicht mehr EINE Sitemap) —
+  Builder in `src/lib/seo/sitemap-xml.ts`.
+- `src/app/[locale]/quellen/page.tsx` — Datenquellen & Lizenzen
+  (Attributions-Pflichtseite: Deskline-POIs, OpenStreetMap/ODbL, …)
 - `src/app/[bundesland]/…`, `src/app/gemeinde/[slug]`, `src/app/thema/[slug]`,
   `src/app/studenten/…` — SEO-Hub-Seiten (~2 000 Gemeinden)
 - `src/app/fuer-firmen/page.tsx` — Veranstalter-Pakete (Boost 29 €, Abo 49 €/M,
@@ -128,6 +152,9 @@ npm run import:eventim       # Eventim-PFT-Feed (braucht EVENTIM_FEED_USER/PASS)
 npm run score | dedup        # Scoring / Cross-Source-Dedup
 npm run scrape:venues        # Venue-Feed-Ingestion
 npm run regen:taxonomy       # TAXONOMY.md §3 aus Code regenerieren (--check für CI)
+npm run import:activities    # Deskline-Infrastruktur-POIs → poi_activities
+npm run import-osm-pois      # OSM-Freizeit-POIs → osm_pois (Overpass, Disk-Cache;
+                             # --fetch-only | --skip-fetch | --region X | --dry-run)
 npm run openai-geocode       # Batch-Geocoding für NULL-Koordinaten
 npm run scrape:festival-lineups | match-artists
 ```
@@ -151,6 +178,16 @@ npm run scrape:festival-lineups | match-artists
   — Rotation bei Eventim angeraten (MASTERPLAN P0-Merker).
 - Dev-Umgebung Windows/Node 24: Browser-Streaming von RSC-Seiten kann lokal
   hängen (undici-TypeError) — Prod/Vercel nicht betroffen; HTML via fetch prüfen.
+- PostgREST transportiert `.in()`-Filter im QUERY-STRING (auch bei PATCH):
+  Listen IMMER auf ≤200 Elemente chunken, sonst bricht die Verbindung mit
+  „TypeError: fetch failed" (im fn-18-Vollimport zweimal reproduziert).
+  Write-Batches ≤500 Rows. Upserts müssen ALLE NOT-NULL-Spalten führen.
+- Maintenance-SQL (`ANALYZE`, `CREATE INDEX` nach Bulk-Load) geht NICHT über
+  PostgREST/Service-Key — Index-Migrationen liegen als eigene Datei vor und
+  werden samt `ANALYZE` im Supabase-Dashboard/MCP ausgeführt (Muster:
+  `20260724121000_poi_activities_indexes.sql`, `20260727091000_osm_pois_indexes.sql`).
+- Viator/GYG-Monetarisierung der Aktivitätsseiten (fn-18.5) ist noch offen —
+  die Detailseiten haben derzeit keine Buchungs-/Affiliate-Fläche.
 
 <!-- BEGIN FLOW-NEXT -->
 ## Flow-Next

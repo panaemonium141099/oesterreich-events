@@ -1461,4 +1461,67 @@ The lineup pipeline runs after regular scrapers complete and before artist match
 
 ---
 
-*Last updated: 2026-04-13*
+## Freizeitaktivitäten & POI-Bestand (fn-18, 2026-07-27)
+
+Zweite Inhaltssäule neben Events: dauerhaft verfügbare Ausflugsziele, damit
+Gemeinde-Hubs auch ohne laufenden Event-Kalender Substanz haben.
+
+### Bestand 1 — Feratel Deskline (eigener Bestand)
+
+- Tabelle `poi_activities` + Public-View `poi_activities_public`, Run-
+  Bookkeeping in `poi_activity_runs` (Sichtungs-Monotonie über `run_seq`,
+  Fingerprint-Dedup, Prune erst nach 2 kompletten Läufen).
+- Ingest `src/scripts/import-activities.ts` (`npm run import:activities`),
+  wöchentlich über `.github/workflows/ingest-activities.yml`.
+- Public-Surface: `/aktivitaeten` (Übersicht), `/aktivitaet/[slug]` (Detail mit
+  Slug→shortid-Resolver + 301), `/api/activities` (Cursor-Pagination),
+  Gemeinde-Hub-Sektion „Freizeit & Ausflüge", Event-Detail-Cross-Links,
+  Smart-Suche-Integration, eigene `sitemap-activities.xml`.
+- `/sitemap.xml` ist dadurch jetzt ein `<sitemapindex>` (core/events/activities)
+  statt einer einzelnen Sitemap.
+
+### Bestand 2 — OpenStreetMap (fn-18.7, ODbL, strikt getrennt)
+
+- Tabelle `osm_pois` (+ separate Index-Migration nach dem Bulk-Load,
+  `ANALYZE` als dokumentierter Dashboard-Ops-Schritt).
+- Kuratierte Whitelist in `src/lib/osm/poi-whitelist.ts` — EINZIGE Quelle für
+  Overpass-Query UND Kategorie-Klassifikation (kein zweites, driftendes
+  Vokabular). 7 Tag-Familien (attraction/tourism/historic/natural/leisure/
+  sport/amenity), `name` ist Pflicht.
+- Import `src/scripts/import-osm-pois.ts` (`npm run import-osm-pois`):
+  Overpass-batched über 9 Bundesland-BBoxen × 7 Familien, Disk-Cache pro
+  (Region, Familie) → resumierbar, Upsert in 500er-Batches auf
+  `(osm_type, osm_id)`. Entscheidung gegen Geofabrik-PBF + osmium: native
+  Toolchain lokal nicht verfügbar, im CI ~1,5 GB Download pro Lauf.
+- **ODbL-Regel (durchgängig):** kein Merge-/Dedup-/Join-SCHREIBPFAD zwischen
+  `osm_pois` und `poi_activities`/`venues`; Verknüpfung ausschließlich zur
+  Anzeige-Zeit per Geo-Query; keine eigenen OSM-Detailseiten; Attribution
+  „© OpenStreetMap contributors" + ODbL-Link an der Hub-Sektion UND auf
+  `/quellen`. Damit bleiben die eigenen Bestände keine abgeleitete Datenbank
+  im Sinne der Share-Alike-Klausel.
+
+### Files Added/Changed (fn-18.7)
+
+| File | Purpose |
+|------|---------|
+| `supabase/migrations/20260727090000_osm_pois.sql` | New: `osm_pois`-Schema, RLS (service-role-only), ODbL-Begründung im Header |
+| `supabase/migrations/20260727091000_osm_pois_indexes.sql` | New: Sekundär-Indizes nach dem Bulk-Load + `ANALYZE`-Ops-Note |
+| `src/lib/osm/poi-whitelist.ts` | New: kuratierte Whitelist, Overpass-Klausel-Generator, Klassifikation, Labels |
+| `src/lib/osm/poi-transform.ts` | New: Overpass-Element → `osm_pois`-Row (pure, getestet) |
+| `src/lib/osm/nearby-pois.ts` | New: `unstable_cache`-Geo-Loader (bbox + Haversine, service-role) |
+| `src/components/Osm/OsmPoisSection.tsx` | New: Hub-Sektion „Weitere Ausflugsziele" mit OSM-Badge + ODbL-Attribution |
+| `src/scripts/import-osm-pois.ts` | New: Overpass-Import-CLI (`npm run import-osm-pois`) |
+| `src/app/[locale]/gemeinde/[slug]/page.tsx` | Updated: OSM-Sektion (eigener Loader, nicht in `generateMetadata`) |
+| `src/app/[locale]/quellen/page.tsx` | Updated: OSM-Freizeit-POI-Eintrag + ODbL-Trennungs-Hinweis |
+| `src/__tests__/lib/osm/*.test.ts` | New: 13 Tests (Whitelist-Priorität, Klausel-Generierung, Transform-Skips, Dedup) |
+| `CLAUDE.md`, `docs/MASTERPLAN.md` | Updated: fn-18-Pfade/Betrieb/Roadmap-Status, PostgREST-/Maintenance-SQL-Lehren |
+
+### Offen
+
+- **fn-18.5 — Viator/GetYourGuide-Monetarisierung** der Aktivitäts-Detailseiten
+  (Affiliate-Client, Produkt-Matching, BookingBox, Preis-Refresh). Der
+  OSM-Bestand ist davon ausgenommen (ODbL, keine Detailseiten).
+
+---
+
+*Last updated: 2026-07-27*
