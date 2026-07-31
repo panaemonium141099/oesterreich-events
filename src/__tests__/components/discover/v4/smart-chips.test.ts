@@ -14,6 +14,11 @@ describe('buildUnderstoodChips', () => {
     expect(buildUnderstoodChips({ signals: ['weekend'] })[0].label).toBe('Wochenende');
   });
 
+  it('Wochentag-Signal wird kapitalisiert gemappt', () => {
+    const chips = buildUnderstoodChips({ signals: ['weekday:samstag'] });
+    expect(chips).toEqual([{ key: 'date:weekday:samstag', label: 'Samstag' }]);
+  });
+
   it('Preis-Tier wird gemappt', () => {
     const chips = buildUnderstoodChips({ signals: [], max_price_tier: 'gratis' });
     expect(chips).toEqual([{ key: 'price', label: 'Gratis' }]);

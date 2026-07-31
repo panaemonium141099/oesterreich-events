@@ -89,7 +89,7 @@ const TOOL_DECLARATIONS = [
   {
     name: 'search_events',
     description:
-      'Durchsucht die LassTreffen-Datenbank nach VERANSTALTUNGEN (Konzerte, Feste, Partys, Kultur, Sport …). Die Query ist Alltagssprache und darf Ort, Datum ("heute", "morgen", "wochenende") und Preis ("gratis", "billig") enthalten, z. B. "konzerte in wien am wochenende" oder "gratis familienfest burgenland".',
+      'Durchsucht die LassTreffen-Datenbank nach VERANSTALTUNGEN (Konzerte, Feste, Partys, Kultur, Sport …). Die Query ist Alltagssprache und darf Ort, Datum ("heute", "morgen", "wochenende" oder ein Wochentag wie "samstag") und Preis ("gratis", "billig") enthalten, z. B. "konzerte in wien am samstag" oder "gratis familienfest burgenland". Nenne IMMER das gewünschte Zeitfenster in der Query, wenn der User eines genannt hat.',
     parameters: {
       type: Type.OBJECT,
       properties: { query: { type: Type.STRING } },
@@ -99,7 +99,7 @@ const TOOL_DECLARATIONS = [
   {
     name: 'search_activities',
     description:
-      'Durchsucht dauerhafte FREIZEIT-ZIELE ohne festen Termin (Thermen, Bäder, Museen, Sommerrodelbahnen, Klettersteige, Hochseilgärten, Ausflugsziele). Query in Alltagssprache inkl. Ort, z. B. "therme in salzburg", "indoor aktivität bei regen in graz", "sommerrodelbahn pinzgau".',
+      'Durchsucht dauerhafte FREIZEIT-ZIELE ohne festen Termin (Thermen, Bäder, Museen, Sommerrodelbahnen, Klettersteige, Hochseilgärten). Query in Alltagssprache inkl. Ort — verwende KONKRETE Arten von Zielen (therme, museum, sommerrodelbahn, wandern, schwimmen, kletterpark, spielplatz), NIEMALS Oberbegriffe wie "ausflugsziel" oder "freizeitaktivität". Bei vagen Wünschen probiere 2 konkrete Arten, z. B. erst "therme salzburg", dann "museum salzburg".',
     parameters: {
       type: Type.OBJECT,
       properties: { query: { type: Type.STRING } },
