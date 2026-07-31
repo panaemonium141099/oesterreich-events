@@ -392,7 +392,14 @@
     "nearbyEventsTitle": "Events in der Nähe",
     "nearbyEventsHint": "Kommende Veranstaltungen im Umkreis von 10 km.",
     "nearbyActivitiesEyebrow": "Freizeit & Ausflüge",
-    "nearbyActivitiesTitle": "In der Nähe erleben"
+    "nearbyActivitiesTitle": "In der Nähe erleben",
+    "bookingAdLabel": "Anzeige · Provisionslink",
+    "bookingProviderLine": "Buchbar über {provider}",
+    "bookingFrom": "ab",
+    "bookingPriceDisclaimer": "Preis kann abweichen",
+    "bookingCta": "Angebot ansehen",
+    "bookingReviews": "Bewertungen",
+    "bookingDisclosure": "Buchung und Bezahlung erfolgen bei {provider}. Kaufst du dort, erhalten wir eine Provision — für dich ändert sich der Preis dadurch nicht."
   },
   "Activities": {
     "pageTitle": "Freizeitaktivitäten & Ausflugsziele in Österreich",

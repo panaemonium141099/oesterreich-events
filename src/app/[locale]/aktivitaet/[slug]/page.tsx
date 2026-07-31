@@ -21,6 +21,8 @@ import { ActivityFacts } from '@/components/Activities/ActivityFacts';
 import { ActivityMap } from '@/components/Activities/ActivityMap';
 import { ActivityExtrasSlot } from '@/components/Activities/ActivityExtrasSlot';
 import { OpenNowBadge } from '@/components/Activities/OpenNowBadge';
+import { BookingBox } from '@/components/Activities/BookingBox';
+import { hasAffiliateOffer } from '@/lib/affiliate/viator-types';
 
 /**
  * ISR wie die Event-Detailseite (events/[...slug]/page.tsx): ohne
@@ -192,6 +194,27 @@ export default async function ActivityDetailPage({
       <ActivityFacts activity={activity} gemeindeName={gemeinde?.name ?? null} />
 
       <ActivityMap name={activity.name} lat={activity.lat} lng={activity.lng} />
+
+      {/* Affiliate-Buchungsflaeche (Task 5). Serverseitig faellt hier NUR
+          die Boolean-Entscheidung "gibt es ein Angebot?" — kein einziges
+          Viator-Feld landet im ISR-HTML (Viator-ToS: keine Indexierung
+          Viator-spezifischer Inhalte). Inhalt holt die Client-Komponente
+          von /api/activities/[id]/booking. Geschlossene POIs bekommen nie
+          eine Box (Anzeige-Bedingung visible AND NOT is_closed). */}
+      {!activity.is_closed && hasAffiliateOffer(activity.affiliate_product) && (
+        <BookingBox
+          activityId={activity.id}
+          labels={{
+            adLabel: t('bookingAdLabel'),
+            providerLine: t('bookingProviderLine', { provider: 'Viator' }),
+            from: t('bookingFrom'),
+            priceDisclaimer: t('bookingPriceDisclaimer'),
+            cta: t('bookingCta'),
+            reviews: t('bookingReviews'),
+            disclosure: t('bookingDisclosure', { provider: 'Viator' }),
+          }}
+        />
+      )}
 
       {/* Slot-Contract fuer Task 4 (Events in der Naehe) — hier leer. */}
       <ActivityExtrasSlot activity={activity} />
