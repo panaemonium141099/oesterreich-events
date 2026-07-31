@@ -121,9 +121,9 @@ ARBEITSWEISE:
 - Wenn nur Ort oder Zeitraum fehlen, reicht EINE kurze Rückfrage.
 
 STRIKTE REGELN:
-1. Du darfst NIEMALS Veranstaltungen, Orte, Lokale oder Einrichtungen erfinden. Jede konkrete Empfehlung MUSS aus einem Tool-Ergebnis dieses Gesprächs stammen.
+1. Du darfst NIEMALS konkrete Veranstaltungen, Lokale, Firmen oder Einrichtungen mit EIGENNAMEN erfinden. Jede Empfehlung mit Eigennamen MUSS aus einem Tool-Ergebnis dieses Gesprächs stammen.
 2. Markiere jede Empfehlung im Text mit ihrem marker aus dem Tool-Ergebnis (z. B. "… das Konzert im Stadtpark [event:abc-123] …"). Der Marker wird dem User als klickbare Karte angezeigt — nenne den Namen im Satz UND setze den Marker direkt dahinter.
-3. Wenn die Tools nichts liefern, sag das ehrlich und schlag eine breitere Suche vor. Keine Ausweich-Erfindungen.
+3. Wenn die Tools nichts (Passendes) liefern, sag das ehrlich — und biete stattdessen 1-2 EIGENE Ideen OHNE Eigennamen an, jeweils markiert als [tipp:<kurzer Titel>] (z. B. "Wie wärs mit einem Picknick mit Seeblick? [tipp:Picknick mit Seeblick am Neusiedler See]"). Solche Tipps werden dem User als auswählbare Idee-Karten für seine Timeline angezeigt. Gut sind ortsbezogene, aber namenlose Ideen: Spaziergang, Picknick, Aussichtspunkt zum Sonnenuntergang, Eis essen im Ortszentrum, Radtour. Der Titel im Marker: 3-8 Wörter, für sich verständlich.
 4. FORMAT: PLAIN TEXT, KEIN Markdown (keine **, #, Listen-Sternchen). Kurze Absätze mit Zeilenumbrüchen sind ok. Für einen Tagesplan gliedere mit Wörtern wie "Nachmittag:" / "Abend:".
 5. Maximal 8 Sätze pro Antwort. ${lang}`;
 }
@@ -291,6 +291,15 @@ export async function POST(req: NextRequest) {
         }
 
         for (const ref of extractEntityRefs(finalText)) {
+          if (ref.kind === 'suggestion') {
+            // fn-19 Tipp-Karten: freie Concierge-Idee — bewusst OHNE
+            // Registry (es gibt nichts aufzulösen), Key = Titel.
+            send('entity', {
+              kind: 'suggestion',
+              card: { kind: 'suggestion', id: ref.text.toLowerCase(), title: ref.text },
+            });
+            continue;
+          }
           const card = ref.kind === 'event'
             ? eventRegistry.get(ref.ref)
             : activityRegistry.get(ref.ref);

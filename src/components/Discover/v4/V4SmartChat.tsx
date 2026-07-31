@@ -26,7 +26,7 @@ import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { trackEvent } from '@/lib/analytics';
 import { buildEventUrlV2 } from '@/lib/utils/slugify';
-import type { ChatEntityCard, ChatEventCard, ChatActivityCard } from '@/lib/search/chat-cards';
+import type { ChatEntityCard, ChatEventCard, ChatActivityCard, ChatSuggestionCard } from '@/lib/search/chat-cards';
 
 interface ChatTurn {
   role: 'user' | 'assistant';
@@ -54,7 +54,9 @@ const SAMPLE_QUERIES = [
 const FOLLOWUP_CHIPS = ['Eher indoor', 'Günstiger bitte', 'Mit Kindern', 'Lieber am Abend', 'Mach mir einen Tagesplan'];
 
 function cardKey(card: ChatEntityCard): string {
-  return card.kind === 'event' ? `event:${card.id}` : `activity:${card.slug}`;
+  if (card.kind === 'event') return `event:${card.id}`;
+  if (card.kind === 'activity') return `activity:${card.slug}`;
+  return `suggestion:${card.id}`;
 }
 
 function eventHref(ev: ChatEventCard): string {
@@ -71,6 +73,36 @@ function formatEventDate(iso: string): string {
   return d.toLocaleDateString('de-AT', { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
 }
 
+function SelectToggle({
+  selected,
+  title,
+  onClick,
+}: {
+  selected: boolean;
+  title: string;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-label={selected ? `${title} aus der Timeline entfernen` : `${title} zur Timeline hinzufügen`}
+      title={selected ? 'Aus der Timeline entfernen' : 'Zur Timeline hinzufügen'}
+      className={`press-haptic absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full flex items-center justify-center border transition-colors ${
+        selected
+          ? 'bg-[var(--v4-match)] border-[var(--v4-match)] text-[#0a0a0c]'
+          : 'bg-[var(--v4-surface-elevated)] border-[var(--v4-hairline-3)] text-[var(--v4-ink-70)] hover:text-[var(--v4-ink)]'
+      }`}
+    >
+      {selected ? (
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>
+      ) : (
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+      )}
+    </button>
+  );
+}
+
 function EntityCard({
   card,
   selected,
@@ -80,6 +112,28 @@ function EntityCard({
   selected: boolean;
   onToggle: (card: ChatEntityCard) => void;
 }) {
+  // fn-19 Tipp-Karten: freie Concierge-Idee — keine Detailseite, kein
+  // Link; nur Titel + Auswahl-Toggle für die Timeline.
+  if (card.kind === 'suggestion') {
+    const s = card as ChatSuggestionCard;
+    return (
+      <div className="relative">
+        <div className="flex items-center gap-3 rounded-xl border border-dashed border-[rgba(245,185,66,0.4)] bg-[rgba(245,185,66,0.06)] p-2 pr-12">
+          <div className="w-14 h-14 rounded-lg flex-shrink-0 flex items-center justify-center" style={{ background: 'rgba(245,185,66,0.14)' }}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--v4-match)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-4 10.5c.6.6 1 1.5 1 2.5h6c0-1 .4-1.9 1-2.5A6 6 0 0 0 12 3z"/>
+            </svg>
+          </div>
+          <div className="min-w-0 flex-1">
+            <p className="text-[10px] uppercase tracking-[0.16em] font-bold text-[var(--v4-match)]">Concierge-Idee</p>
+            <p className="text-[13.5px] font-semibold text-[var(--v4-ink)] leading-tight line-clamp-2">{s.title}</p>
+          </div>
+        </div>
+        <SelectToggle selected={selected} title={s.title} onClick={() => onToggle(card)}/>
+      </div>
+    );
+  }
+
   const isEvent = card.kind === 'event';
   const ev = card as ChatEventCard;
   const act = card as ChatActivityCard;
@@ -117,23 +171,7 @@ function EntityCard({
           {meta && <p className="text-[11.5px] text-[var(--v4-ink-70)] line-clamp-1">{meta}</p>}
         </div>
       </Link>
-      <button
-        type="button"
-        onClick={() => onToggle(card)}
-        aria-label={selected ? `${title} aus der Timeline entfernen` : `${title} zur Timeline hinzufügen`}
-        title={selected ? 'Aus der Timeline entfernen' : 'Zur Timeline hinzufügen'}
-        className={`press-haptic absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full flex items-center justify-center border transition-colors ${
-          selected
-            ? 'bg-[var(--v4-match)] border-[var(--v4-match)] text-[#0a0a0c]'
-            : 'bg-[var(--v4-surface-elevated)] border-[var(--v4-hairline-3)] text-[var(--v4-ink-70)] hover:text-[var(--v4-ink)]'
-        }`}
-      >
-        {selected ? (
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>
-        ) : (
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
-        )}
-      </button>
+      <SelectToggle selected={selected} title={title} onClick={() => onToggle(card)}/>
     </div>
   );
 }
@@ -264,7 +302,10 @@ export function V4SmartChat({ initialQuery = '' }: { initialQuery?: string }) {
         delete next[key];
       } else {
         next[key] = card;
-        trackEvent('chat_entity_select', { kind: card.kind, id: card.kind === 'event' ? card.id : card.slug });
+        trackEvent('chat_entity_select', {
+          kind: card.kind,
+          id: card.kind === 'activity' ? card.slug : card.id,
+        });
       }
       return next;
     });
@@ -276,18 +317,30 @@ export function V4SmartChat({ initialQuery = '' }: { initialQuery?: string }) {
     .filter((c): c is ChatEventCard => c.kind === 'event')
     .sort((a, b) => (a.start_date < b.start_date ? -1 : 1));
   const selectedActivities = selectedCards.filter((c): c is ChatActivityCard => c.kind === 'activity');
+  const selectedSuggestions = selectedCards.filter((c): c is ChatSuggestionCard => c.kind === 'suggestion');
 
   async function saveTimelineAsPlan() {
-    if (selectedEvents.length === 0 && selectedActivities.length === 0) return;
+    if (selectedCards.length === 0) return;
     setPlanSave({ status: 'saving' });
-    trackEvent('chat_save_plan', { events: selectedEvents.length, activities: selectedActivities.length });
+    trackEvent('chat_save_plan', {
+      events: selectedEvents.length,
+      activities: selectedActivities.length,
+      suggestions: selectedSuggestions.length,
+    });
 
     const firstUserMsg = turnsRef.current.find(t => t.role === 'user')?.content ?? 'Concierge';
-    const note = selectedActivities.length > 0
-      ? 'Flexible Stopps vom Concierge:\n' + selectedActivities
-          .map(a => `- ${a.name}${a.town ? ` (${a.town})` : ''} → https://lasstreffen.at/aktivitaet/${a.slug}`)
-          .join('\n')
-      : null;
+    const noteParts: string[] = [];
+    if (selectedActivities.length > 0) {
+      noteParts.push('Flexible Stopps vom Concierge:\n' + selectedActivities
+        .map(a => `- ${a.name}${a.town ? ` (${a.town})` : ''} → https://lasstreffen.at/aktivitaet/${a.slug}`)
+        .join('\n'));
+    }
+    if (selectedSuggestions.length > 0) {
+      noteParts.push('Ideen vom Concierge:\n' + selectedSuggestions
+        .map(s => `- ${s.title}`)
+        .join('\n'));
+    }
+    const note = noteParts.length > 0 ? noteParts.join('\n\n') : null;
 
     try {
       const res = await fetch('/api/plans', {
@@ -416,6 +469,22 @@ export function V4SmartChat({ initialQuery = '' }: { initialQuery?: string }) {
                   type="button"
                   onClick={() => toggleSelect(a)}
                   aria-label={`${a.name} entfernen`}
+                  className="press-haptic text-[var(--v4-ink-30)] hover:text-[var(--v4-alert)] flex-shrink-0"
+                >
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" aria-hidden="true"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                </button>
+              </li>
+            ))}
+            {selectedSuggestions.map(s => (
+              <li key={`sel-s-${s.id}`} className="flex items-center gap-2.5 text-[13px] text-[var(--v4-ink)]">
+                <span className="text-[11px] font-semibold text-[var(--v4-match)] whitespace-nowrap w-[118px] flex-shrink-0">
+                  Idee
+                </span>
+                <span className="line-clamp-1 flex-1">{s.title}</span>
+                <button
+                  type="button"
+                  onClick={() => toggleSelect(s)}
+                  aria-label={`${s.title} entfernen`}
                   className="press-haptic text-[var(--v4-ink-30)] hover:text-[var(--v4-alert)] flex-shrink-0"
                 >
                   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" aria-hidden="true"><path d="M18 6L6 18M6 6l12 12"/></svg>
