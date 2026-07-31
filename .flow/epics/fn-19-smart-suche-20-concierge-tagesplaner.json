@@ -1,0 +1,13 @@
+{
+  "branch_name": "fn-19-smart-suche-20-concierge-tagesplaner",
+  "created_at": "2026-07-31T07:19:06.846604Z",
+  "depends_on_epics": [],
+  "id": "fn-19-smart-suche-20-concierge-tagesplaner",
+  "next_task": 1,
+  "plan_review_status": "unknown",
+  "plan_reviewed_at": null,
+  "spec_path": ".flow/specs/fn-19-smart-suche-20-concierge-tagesplaner.md",
+  "status": "open",
+  "title": "Smart-Suche 2.0: Concierge-Tagesplaner (Chat) + Sichtbarkeit & Messbarkeit",
+  "updated_at": "2026-07-31T07:22:01.874530Z"
+}

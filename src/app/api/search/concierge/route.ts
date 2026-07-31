@@ -34,6 +34,13 @@
 
 import { NextResponse, type NextRequest } from 'next/server';
 import { GoogleGenAI } from '@google/genai';
+import { checkRateLimit, getClientIp } from '@/lib/rate-limit';
+
+/** fn-19: Der Concierge ist der teuerste Call der Plattform (~0,7 Cent
+ *  pro grounded Antwort) — deshalb ein eigenes, strengeres Limit
+ *  ZUSÄTZLICH zum globalen Middleware-Limit (30 POST/min/IP). 10/min
+ *  reicht für echte Nutzung locker, deckelt aber Bots und Bug-Loops. */
+const CONCIERGE_LIMIT_PER_MIN = 10;
 
 // Match-Subset der /api/search/semantic SearchMatch-Type — wir brauchen
 // nur title/location/category/start_date/_similarity für den Prompt.
@@ -166,6 +173,17 @@ export async function POST(req: NextRequest) {
   const geminiKey = process.env.GEMINI_API_KEY;
   if (!geminiKey) {
     return NextResponse.json({ error: 'Server misconfigured (no GEMINI_API_KEY)' }, { status: 503 });
+  }
+
+  const rl = checkRateLimit(`concierge:${getClientIp(req.headers)}`, CONCIERGE_LIMIT_PER_MIN, 60_000);
+  if (!rl.ok) {
+    return NextResponse.json(
+      { error: 'Too Many Requests' },
+      {
+        status: 429,
+        headers: { 'Retry-After': String(Math.max(1, Math.ceil((rl.resetAt - Date.now()) / 1000))) },
+      },
+    );
   }
 
   let body: ConciergeBody;

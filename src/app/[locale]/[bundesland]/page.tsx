@@ -5,6 +5,7 @@ import { isValidBundesland, getBundeslandName } from '@/lib/landing-slugs';
 import { loadBundeslandPage } from '@/lib/landing-data';
 import { LandingPageShell } from '@/components/Landing/LandingPageShell';
 import { HubSearchCTA } from '@/components/Hub/HubSearchCTA';
+import { HubSmartCTA } from '@/components/Hub/HubSmartCTA';
 
 export const revalidate = 3600;
 
@@ -56,10 +57,16 @@ export default async function BundeslandPage({
     <LandingPageShell
       {...data}
       searchCta={
-        <HubSearchCTA
-          scope={{ bundesland }}
-          label={`Alle Veranstaltungen in ${blName} durchsuchen`}
-        />
+        <div className="flex flex-wrap items-center gap-3">
+          <HubSearchCTA
+            scope={{ bundesland }}
+            label={`Alle Veranstaltungen in ${blName} durchsuchen`}
+          />
+          <HubSmartCTA
+            surface="bundesland-hub"
+            query={`Was geht am Wochenende in ${blName}?`}
+          />
+        </div>
       }
     />
   );

@@ -38,6 +38,9 @@ export function V4ActivityResultCard({ activity }: { activity: ActivitySearchMat
   return (
     <Link
       href={`/aktivitaet/${activity.slug}`}
+      data-track="smart_result_click"
+      data-track-id={activity.id}
+      data-track-provider="activity"
       className="press-haptic flex flex-col rounded-2xl overflow-hidden border border-[var(--v4-hairline-2)] bg-[var(--v4-surface-elevated)] hover:border-[var(--v4-hairline-3)] transition-colors"
     >
       <div

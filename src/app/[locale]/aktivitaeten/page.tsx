@@ -21,6 +21,7 @@ import { activityListCanonicalUrl } from '@/lib/activities/indexability';
 import { loadActivityListPageCached } from '@/lib/activities/list-loaders';
 import { ACTIVITY_LIST_PAGE_SIZE } from '@/lib/activities/list-query';
 import { ActivitiesBrowser } from '@/components/Activities/ActivitiesBrowser';
+import { HubSmartCTA } from '@/components/Hub/HubSmartCTA';
 
 export const revalidate = 3600;
 
@@ -74,7 +75,17 @@ export default async function ActivitiesOverviewPage({
         <h1 className="text-[26px] md:text-[34px] font-bold tracking-[-0.02em] leading-tight mb-3">
           {t('pageTitle')}
         </h1>
-        <p className="text-sm md:text-[15px] text-white/55 max-w-2xl mb-8">{t('pageIntro')}</p>
+        <p className="text-sm md:text-[15px] text-white/55 max-w-2xl mb-5">{t('pageIntro')}</p>
+
+        {/* fn-19: Smart-Suche-Einstieg — die Regen-Query ist der beste
+            Showcase des deterministischen Indoor-Filters. */}
+        <div className="mb-8">
+          <HubSmartCTA
+            surface="aktivitaeten"
+            query="Was tun bei Regen?"
+            label="Frag die KI: Was tun bei Regen?"
+          />
+        </div>
 
         <ActivitiesBrowser
           initialItems={page.items}

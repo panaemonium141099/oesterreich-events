@@ -14,6 +14,7 @@
  */
 
 import { useEffect, useRef, useState } from 'react';
+import { trackEvent } from '@/lib/analytics';
 
 export interface ConciergePayload {
   query: string;
@@ -117,6 +118,7 @@ function renderConciergeText(text: string): React.ReactNode[] {
           href={url}
           target="_blank"
           rel="noopener noreferrer nofollow"
+          data-track="concierge_link_click"
           className="text-[var(--v4-match)] underline decoration-dotted underline-offset-2 hover:text-[var(--v4-ink)] break-words"
         >
           {displayText}
@@ -168,6 +170,9 @@ export function V4ConciergeCard({ payload }: V4ConciergeCardProps) {
         const reader = res.body.getReader();
         const decoder = new TextDecoder();
         let buf = '';
+        // fn-19: EIN concierge_shown pro Payload, sobald wirklich Text
+        // ankommt (Auto-Hide-Fälle zählen so nicht als Impression).
+        let shownTracked = false;
 
         while (true) {
           const { done, value } = await reader.read();
@@ -188,6 +193,10 @@ export function V4ConciergeCard({ payload }: V4ConciergeCardProps) {
             try { data = JSON.parse(dataLine.slice(6)); } catch { continue; }
 
             if (evName === 'text' && typeof data.delta === 'string') {
+              if (!shownTracked) {
+                shownTracked = true;
+                trackEvent('concierge_shown', { query: payload.query });
+              }
               setText(prev => prev + (data.delta as string));
             } else if (evName === 'done') {
               const cits = (data.citations as Citation[] | undefined) ?? [];
@@ -261,6 +270,7 @@ export function V4ConciergeCard({ payload }: V4ConciergeCardProps) {
                       href={c.url}
                       target="_blank"
                       rel="noopener noreferrer nofollow"
+                      data-track="concierge_citation_click"
                       className="text-[12px] text-[var(--v4-ink-70)] hover:text-[var(--v4-ink)] underline decoration-dotted underline-offset-2 break-all"
                     >
                       {c.title || c.url}
