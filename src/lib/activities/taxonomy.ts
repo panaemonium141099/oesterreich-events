@@ -179,6 +179,15 @@ export const TOPIC_WHITELIST: Readonly<Record<string, TopicMapping>> = {
   'ausflugstipps':                          { tags: [], setting: 'mixed' },
   'bauwerke':                               { tags: [], setting: 'mixed' },
 
+  // ── Whitelist-Runde 3 (2026-07-31, aus dem Skip-Log von Lauf 4) ───────────
+  // Bewusst NUR diese vier: der Rest der ~21k uebersprungenen POIs ist
+  // Gastronomie (Regionale Kueche 8.101, Oesterreichische Kueche 6.171,
+  // Hausmannskost 3.343, ...) und bleibt via EXCLUDED_TOPICS/unmapped drausen.
+  'kirchen/stifte/klöster':                 { tags: [], setting: 'mixed' },
+  'kapelle':                                { tags: [], setting: 'mixed' },
+  'e-bike':                                 { tags: ['radfahren'], setting: 'outdoor' },
+  'fahrrad fahren':                         { tags: ['radfahren'], setting: 'outdoor' },
+
   // ── Wandern & Rad ────────────────────────────────────────────────────────
   'wandern':                                { tags: ['wandern'], setting: 'outdoor' },
   'wanderweg/-e':                           { tags: ['wandern'], setting: 'outdoor' },
