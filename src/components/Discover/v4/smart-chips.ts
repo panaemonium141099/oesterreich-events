@@ -55,10 +55,16 @@ export function buildUnderstoodChips(parsed: ParsedSummary | undefined): Underst
   const signals = parsed.signals ?? [];
   const chips: UnderstoodChip[] = [];
 
-  // Datum (Regex-Parser-Signale 'today' | 'tomorrow' | 'weekend')
+  // Datum (Regex-Parser-Signale 'today' | 'tomorrow' | 'weekend' |
+  // 'weekday:<tag>')
   for (const s of signals) {
     if (DATE_LABELS[s]) {
       chips.push({ key: `date:${s}`, label: DATE_LABELS[s] });
+      break;
+    }
+    if (s.startsWith('weekday:')) {
+      const day = s.slice('weekday:'.length);
+      chips.push({ key: `date:${s}`, label: day[0].toUpperCase() + day.slice(1) });
       break;
     }
   }

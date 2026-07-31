@@ -57,6 +57,35 @@ describe('parseQuery', () => {
     expect(filters.beforeDate?.getDate()).toBe(12);
   });
 
+  it('erkennt Wochentag "samstag" als Tagesfenster (nächstes Vorkommen)', () => {
+    // Mittwoch 8.7. → Samstag 11.7.
+    const { filters, text } = parseQuery('konzert am samstag', NOW);
+    expect(filters.afterDate?.getDate()).toBe(11);
+    expect(filters.afterDate?.getDay()).toBe(6);
+    expect(filters.beforeDate?.getDate()).toBe(11);
+    expect(filters.keywordSignals).toContain('weekday:samstag');
+    expect(text.toLowerCase()).not.toContain('samstag');
+  });
+
+  it('"freitagabend" matcht den Wochentag mit Suffix', () => {
+    // Mittwoch 8.7. → Freitag 10.7.
+    const { filters } = parseQuery('was geht freitagabend', NOW);
+    expect(filters.afterDate?.getDate()).toBe(10);
+    expect(filters.keywordSignals).toContain('weekday:freitag');
+  });
+
+  it('Wochentag = heute → heutiges Fenster', () => {
+    // NOW ist Mittwoch 8.7.
+    const { filters } = parseQuery('was geht am mittwoch', NOW);
+    expect(filters.afterDate?.getDate()).toBe(8);
+    expect(filters.beforeDate?.getDate()).toBe(8);
+  });
+
+  it('"heute"/"wochenende" gewinnen vor Wochentag', () => {
+    expect(parseQuery('heute samstag party', NOW).filters.keywordSignals).toContain('today');
+    expect(parseQuery('am wochenende samstag party', NOW).filters.keywordSignals).toContain('weekend');
+  });
+
   it('erkennt Preis-Signale (gratis schlägt günstig)', () => {
     expect(parseQuery('gratis konzert', NOW).filters.maxPriceTier).toBe('gratis');
     expect(parseQuery('billig fortgehen', NOW).filters.maxPriceTier).toBe('günstig');

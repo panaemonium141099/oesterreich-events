@@ -216,6 +216,25 @@ export function parseQuery(raw: string, now: Date = new Date()): { text: string;
       filters.beforeDate = sun;
     }
     signals.push('weekend');
+  } else {
+    // fn-19: Wochentage ("am samstag", "freitagabend") — vorher fiel das
+    // komplett durch und "konzert am samstag" lieferte Events irgendwann
+    // im November. Fenster = NÄCHSTES Vorkommen des Tags (heute zählt).
+    const wd = q.match(/\b(montag|dienstag|mittwoch|donnerstag|freitag|samstag|sonntag)(?:s|abend|vormittag|nachmittag|nacht)?\b/);
+    if (wd) {
+      const WEEKDAY_JS: Record<string, number> = {
+        sonntag: 0, montag: 1, dienstag: 2, mittwoch: 3,
+        donnerstag: 4, freitag: 5, samstag: 6,
+      };
+      const daysAhead = (WEEKDAY_JS[wd[1]] - now.getDay() + 7) % 7;
+      const dayStart = new Date(startOfToday);
+      dayStart.setDate(dayStart.getDate() + daysAhead);
+      const dayEnd = new Date(dayStart);
+      dayEnd.setHours(23, 59, 59, 999);
+      filters.afterDate = dayStart;
+      filters.beforeDate = dayEnd;
+      signals.push(`weekday:${wd[1]}`);
+    }
   }
 
   // ─── Price signals ───
@@ -237,6 +256,7 @@ export function parseQuery(raw: string, now: Date = new Date()): { text: string;
   let stripped = raw;
   const stripPatterns = [
     /\b(heute|tonight|today|morgen|tomorrow|dieses wochenende|am wochenende|weekend)\b/gi,
+    /\b(am\s+)?(montag|dienstag|mittwoch|donnerstag|freitag|samstag|sonntag)(s|abend|vormittag|nachmittag|nacht)?\b/gi,
     /\b(gratis|kostenlos|free|umsonst|billig|günstig|cheap)\b/gi,
     /\b(ich bin|ich will|ich möchte|ich suche|suche|will|möchte)\b/gi,
     /\b(in|im|bei|nähe|nahe|rund um|um|nach|aus)\b/gi,
