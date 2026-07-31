@@ -13,6 +13,7 @@ import Link from 'next/link';
 import { buildEventUrlV2 } from '@/lib/utils/slugify';
 import { trackEvent } from '@/lib/analytics';
 import { V4ConciergeCard, type ConciergePayload } from './V4ConciergeCard';
+import { V4SmartChat } from './V4SmartChat';
 import { V4ActivityResultCard } from './V4ActivityResultCard';
 import { buildUnderstoodChips } from './smart-chips';
 import type { ActivitySearchMatch } from '@/lib/activities/public-types';
@@ -274,6 +275,12 @@ export function V4EntdeckenSmartMode({ initialQuery = '' }: V4EntdeckenSmartMode
           empty-state) whenever we have ANY result back. Self-aborts when
           payload changes. */}
       <V4ConciergeCard payload={conciergePayload}/>
+
+      {/* fn-19 Phase B: Follow-up-Chat. Keyed auf die Query — neue Suche
+          heißt neue Chat-Session (Server ist stateless). */}
+      {result && !loading && (
+        <V4SmartChat key={result.query} baseQuery={result.query}/>
+      )}
 
       {result && !loading && !hasResults && (
         <div className="rounded-2xl border border-dashed border-[var(--v4-hairline-3)] p-8 text-center text-[var(--v4-ink-70)]">
