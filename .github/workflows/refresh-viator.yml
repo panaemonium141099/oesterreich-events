@@ -1,0 +1,100 @@
+# fn-18 Task 5: taeglicher Viator-Refresh + Matching (Affiliate).
+#
+# WARUM GITHUB-ACTION UND NICHT VERCEL-CRON: Masterplan-Linie — Imports und
+# Batch-Jobs laufen nicht mehr auf Vercel (Function-Groesse/Timeouts), und
+# der taegliche Refresh ist ein Batch ueber tausende Rows.
+#
+# Secrets (GitHub-Actions-Secrets und Vercel-Env sind GETRENNTE Speicher —
+# CLAUDE.md "Deployment"; beide pflegen!):
+#   GitHub (dieser Workflow):
+#     VIATOR_API_KEY            Viator Partner-API (Basic Access)
+#     VIATOR_PARTNER_ID         optional — ohne pid kein Provisions-Tracking
+#     VIATOR_DEEPLINK_TEMPLATE  optional — Default in viator-client.ts
+#     VIATOR_DEEPLINK_PARAMS    optional — z. B. "mcid=42383&medium=api"
+#     VIATOR_SEARCH_PATH        optional — Freitext-Suchpfad
+#     SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY (existieren bereits)
+#   Vercel (Web-Anzeige der BookingBox):
+#     VIATOR_API_KEY — die noindex-Route /api/activities/[id]/booking
+#     liefert OHNE diesen Key nichts aus (bewusster Kill-Switch).
+#
+# ERSTLAUF: workflow_dispatch mit mode=match und dry_run=true starten, im
+# Log die 20er-Stichprobe pruefen (Acceptance-Kriterium), erst danach ohne
+# dry_run laufen lassen.
+#
+# Fehlt VIATOR_API_KEY, endet das Script mit einem Hinweis und Exit 0 —
+# der Job wird nicht rot, solange das Partner-Konto noch nicht steht.
+
+name: Refresh Viator (Affiliate-Produkte)
+
+on:
+  schedule:
+    # Taeglich 05:11 UTC — nach dem Event-Scrape-Fenster (03:17) und
+    # versetzt zum woechentlichen Activities-Ingest (Mo 04:23).
+    - cron: '11 5 * * *'
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: 'Was laufen soll'
+        required: false
+        default: 'both'
+        type: choice
+        options:
+          - both
+          - match
+          - refresh
+      dry_run:
+        description: 'Trockenlauf (kein DB-Write, Report trotzdem im Log)'
+        required: false
+        default: 'false'
+        type: boolean
+      limit:
+        description: 'Max. Aktivitaeten pro Phase (leer = Script-Default)'
+        required: false
+        default: ''
+        type: string
+
+# Nie zwei Laeufe parallel — sonst konkurrieren zwei Jobs um dasselbe
+# Viator-Rate-Limit-Budget (150 req / 10 s gilt pro Key, nicht pro Job).
+concurrency:
+  group: refresh-viator
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+
+    env:
+      VIATOR_API_KEY: ${{ secrets.VIATOR_API_KEY }}
+      VIATOR_PARTNER_ID: ${{ secrets.VIATOR_PARTNER_ID }}
+      VIATOR_DEEPLINK_TEMPLATE: ${{ secrets.VIATOR_DEEPLINK_TEMPLATE }}
+      VIATOR_DEEPLINK_PARAMS: ${{ secrets.VIATOR_DEEPLINK_PARAMS }}
+      VIATOR_SEARCH_PATH: ${{ secrets.VIATOR_SEARCH_PATH }}
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - run: npm ci
+
+      - name: Match + refresh Viator products
+        run: |
+          ARGS=""
+          case "${{ github.event.inputs.mode }}" in
+            match)   ARGS="--match" ;;
+            refresh) ARGS="--refresh" ;;
+          esac
+          if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then
+            ARGS="$ARGS --dry-run"
+          fi
+          if [ -n "${{ github.event.inputs.limit }}" ]; then
+            ARGS="$ARGS --limit ${{ github.event.inputs.limit }}"
+          fi
+          npx tsx src/scripts/match-viator.ts $ARGS

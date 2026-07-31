@@ -81,6 +81,11 @@ node / next.js
   Infrastruktur-POIs → `poi_activities` (Run-Bookkeeping, Dedup, Prune).
   Der OSM-Bestand (`osm_pois`) läuft NICHT im Cron — `npm run import-osm-pois`
   ist ein manueller Ops-Lauf (OSM-Objekte ändern sich langsam, Overpass-Fair-Use).
+- **GitHub Actions `refresh-viator.yml`** (täglich 05:11 UTC): Viator-Matching
+  + Stammdaten/Preis-Refresh der Affiliate-Produkte in
+  `poi_activities.affiliate_product`. Secrets: `VIATOR_API_KEY` (+ optional
+  `VIATOR_PARTNER_ID`/`VIATOR_DEEPLINK_*`). Ohne Key endet der Job mit
+  Hinweis und Exit 0.
 - **Vercel-Crons** (vercel.json): send-reminders, seo-daily-snapshot
   (GSC/CrUX-Snapshot — Collector hart deadline-begrenzt, `count: 'planned'`
   statt exact!), warm-cache, sync-feratel (stündlich), lifecycle-emails,
@@ -108,6 +113,10 @@ node / next.js
   Indexability), Tabelle `poi_activities` + View `poi_activities_public`.
   Quelle: Feratel-Deskline `infrastructures` via
   `src/scripts/import-activities.ts` (`npm run import:activities`).
+  Affiliate: `src/lib/affiliate/` (Viator-Client + Rate-Limit-Queue +
+  Matching, GYG-Gerüst), `src/scripts/match-viator.ts`,
+  `src/components/Activities/BookingBox.tsx` (Client!) +
+  `src/app/api/activities/[id]/booking/route.ts` (noindex).
 - **OSM-Freizeit-POIs (fn-18.7) — ODbL, STRIKT getrennt:** Tabelle `osm_pois`,
   `src/lib/osm/` (kuratierte Whitelist + Transform + Nearby-Loader),
   `src/scripts/import-osm-pois.ts` (`npm run import-osm-pois`, Overpass-batched
@@ -153,6 +162,8 @@ npm run score | dedup        # Scoring / Cross-Source-Dedup
 npm run scrape:venues        # Venue-Feed-Ingestion
 npm run regen:taxonomy       # TAXONOMY.md §3 aus Code regenerieren (--check für CI)
 npm run import:activities    # Deskline-Infrastruktur-POIs → poi_activities
+npm run match:viator         # Viator-Matching + Preis-Refresh (--match | --refresh |
+                             # --dry-run | --limit N); braucht VIATOR_API_KEY
 npm run import-osm-pois      # OSM-Freizeit-POIs → osm_pois (Overpass, Disk-Cache;
                              # --fetch-only | --skip-fetch | --region X | --dry-run)
 npm run openai-geocode       # Batch-Geocoding für NULL-Koordinaten
@@ -186,8 +197,16 @@ npm run scrape:festival-lineups | match-artists
   PostgREST/Service-Key — Index-Migrationen liegen als eigene Datei vor und
   werden samt `ANALYZE` im Supabase-Dashboard/MCP ausgeführt (Muster:
   `20260724121000_poi_activities_indexes.sql`, `20260727091000_osm_pois_indexes.sql`).
-- Viator/GYG-Monetarisierung der Aktivitätsseiten (fn-18.5) ist noch offen —
-  die Detailseiten haben derzeit keine Buchungs-/Affiliate-Fläche.
+- Viator-Monetarisierung (fn-18.5) ist gebaut, aber erst scharf, wenn das
+  Partner-Konto steht: `VIATOR_API_KEY` muss in BEIDE Stores (GitHub-Actions
+  UND Vercel-Env). Ohne Key liefert `/api/activities/[id]/booking` nichts und
+  die BookingBox rendert nichts. **Viator-ToS: Viator-Inhalte dürfen NICHT
+  indexiert werden** — deshalb ist die BookingBox eine Client-Komponente, die
+  ihre Daten erst im Browser von der noindex-API-Route holt; nie Produktdaten
+  ins ISR-HTML, in Sitemaps oder Exporte ziehen. Deeplink-`pid`-Format und
+  Freitext-Suchpfad sind ohne Portal-Zugriff unverifiziert und deshalb per Env
+  konfigurierbar (TODO(viator-onboarding) im Code). GetYourGuide ist nur ein
+  Helper-Gerüst hinter Feature-Flag (kein Konto, Format unverifiziert).
 
 <!-- BEGIN FLOW-NEXT -->
 ## Flow-Next
