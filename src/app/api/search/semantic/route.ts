@@ -68,6 +68,7 @@ import {
   type ActivityCandidate,
 } from '@/lib/search/smart-query';
 import type { ActivitySearchMatch, PublicActivityImage } from '@/lib/activities/public-types';
+import { TtlCache } from '@/lib/search/search-cache';
 import {
   PRIMARY_CATEGORIES,
   TAGS,
@@ -77,6 +78,12 @@ import {
 } from '@/lib/category-classifier/enrichment-taxonomy';
 
 const INTENT_MODEL = 'gemini-2.5-flash';
+/** fn-19: identische Queries (Doppel-Submit, Sample-Chips, Back-Nav)
+ *  15 min lang aus dem Instanz-Cache bedienen — spart den Gemini-Call
+ *  und die drei DB-Queries. Datumsanker ('heute') altern innerhalb der
+ *  TTL um max. 15 min — akzeptabel. */
+const RESPONSE_CACHE_TTL_MS = 15 * 60_000;
+const responseCache = new TtlCache<Record<string, unknown>>(RESPONSE_CACHE_TTL_MS);
 /** Kandidaten pro Retrieval-Pfad — klein genug für die Micro-Instanz,
  *  groß genug dass das Ranking echte Auswahl hat. */
 const CANDIDATES_PER_PATH = 60;
@@ -402,6 +409,12 @@ export async function POST(req: NextRequest) {
   }
   const limit = Math.min(Math.max(1, body.limit ?? 20), 50);
 
+  const cacheKey = `${rawQuery.toLowerCase()}|${limit}`;
+  const cachedPayload = responseCache.get(cacheKey);
+  if (cachedPayload) {
+    return NextResponse.json(cachedPayload, { headers: { 'x-smart-cache': 'hit' } });
+  }
+
   // 1. Regex-Pass: Datum, Preis, Ort (schneller deterministischer Pfad)
   const { text: intentText, filters } = parseQuery(rawQuery);
 
@@ -541,7 +554,7 @@ export async function POST(req: NextRequest) {
   //    Contract), `activityMatches` ist additiv.
   const ranked = wantEvents ? rankCandidates(candidates, intent, limit) : [];
 
-  return NextResponse.json({
+  const payload = {
     query: rawQuery,
     parsed: {
       // Key heißt aus UI-Kompat-Gründen weiterhin embedded_text —
@@ -558,5 +571,7 @@ export async function POST(req: NextRequest) {
     matches: ranked,
     count: ranked.length,
     activityMatches,
-  });
+  };
+  responseCache.set(cacheKey, payload);
+  return NextResponse.json(payload, { headers: { 'x-smart-cache': 'miss' } });
 }

@@ -44,6 +44,18 @@ export function HeroV4() {
             >
               {t('ctaToday')}
             </Link>
+            <Link
+              href="/entdecken?mode=smart"
+              className="press-haptic inline-flex items-center gap-2 px-5 py-3 rounded-full border border-[rgba(245,185,66,0.45)] bg-[rgba(245,185,66,0.08)] text-[var(--v4-match)] text-sm font-semibold"
+              data-track="smart_cta_click"
+              data-track-id="landing-hero"
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9L12 3z"/>
+                <path d="M19 15l.9 2.1L22 18l-2.1.9L19 21l-.9-2.1L16 18l2.1-.9L19 15z"/>
+              </svg>
+              {t('ctaSmart')}
+            </Link>
           </div>
 
           <V4SearchInput variant="hero"/>

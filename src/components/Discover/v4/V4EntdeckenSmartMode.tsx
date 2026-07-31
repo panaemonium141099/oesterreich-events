@@ -11,8 +11,10 @@
 import { useEffect, useState, useMemo } from 'react';
 import Link from 'next/link';
 import { buildEventUrlV2 } from '@/lib/utils/slugify';
+import { trackEvent } from '@/lib/analytics';
 import { V4ConciergeCard, type ConciergePayload } from './V4ConciergeCard';
 import { V4ActivityResultCard } from './V4ActivityResultCard';
+import { buildUnderstoodChips } from './smart-chips';
 import type { ActivitySearchMatch } from '@/lib/activities/public-types';
 
 /**
@@ -69,6 +71,9 @@ interface SearchResponse {
     before_date: string | null;
     max_price_tier: string | null;
     signals: string[];
+    location_district?: string | null;
+    location_bundesland?: string | null;
+    content_types?: string[];
   };
   matches: SearchMatch[];
   count: number;
@@ -117,6 +122,14 @@ export function V4EntdeckenSmartMode({ initialQuery = '' }: V4EntdeckenSmartMode
       }
       const data: SearchResponse = await resp.json();
       setResult(data);
+      // fn-19: bis hier war der GESAMTE Smart-Stack ungetrackt — Wert
+      // nicht belegbar. Fire-and-forget, blockiert nie die UI.
+      trackEvent('smart_search', {
+        query: q,
+        event_count: data.count,
+        activity_count: data.activityMatches?.length ?? 0,
+        intent_source: data.parsed.signals.includes('intent:ai') ? 'ai' : 'fallback',
+      });
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
     } finally {
@@ -144,6 +157,13 @@ export function V4EntdeckenSmartMode({ initialQuery = '' }: V4EntdeckenSmartMode
   // NIE als "keine Treffer" gerendert werden.
   const activityMatches: ActivitySearchMatch[] = result?.activityMatches ?? [];
   const hasResults = (result?.count ?? 0) > 0 || activityMatches.length > 0;
+
+  // "Verstanden:"-Chips — zeigen transparent, welche Signale die Suche
+  // aus der Alltagssprache gezogen hat (fn-19 Phase A).
+  const understoodChips = useMemo(
+    () => buildUnderstoodChips(result?.parsed),
+    [result],
+  );
 
   // Concierge-Payload bauen wann immer wir ein Result haben. Memoized per
   // result-Referenz damit V4ConciergeCard nur EIN neuer Call macht wenn
@@ -199,6 +219,9 @@ export function V4EntdeckenSmartMode({ initialQuery = '' }: V4EntdeckenSmartMode
             {loading ? '…' : 'Suchen'}
           </button>
         </div>
+        <p className="text-[11px] text-[var(--v4-ink-30)] mt-2 px-1">
+          KI-Suche über alle Events &amp; Ausflugsziele Österreichs — jede Empfehlung kommt direkt aus unserer Datenbank.
+        </p>
       </form>
 
       {!result && !loading && (
@@ -210,6 +233,8 @@ export function V4EntdeckenSmartMode({ initialQuery = '' }: V4EntdeckenSmartMode
                 key={s}
                 type="button"
                 onClick={() => runSearch(s)}
+                data-track="smart_sample_click"
+                data-track-id={s}
                 className="press-haptic text-left px-3 py-2 rounded-lg text-[12px] text-[var(--v4-ink-70)] bg-[var(--v4-surface-elevated)] border border-[var(--v4-hairline-2)] hover:border-[var(--v4-hairline-3)] hover:text-[var(--v4-ink)]"
               >
                 {s}
@@ -226,6 +251,24 @@ export function V4EntdeckenSmartMode({ initialQuery = '' }: V4EntdeckenSmartMode
       )}
 
       {loading && <div className="text-[var(--v4-ink-50)] text-sm animate-pulse">Suche läuft …</div>}
+
+      {/* "Verstanden:"-Chips — Transparenz, was die Suche aus der
+          Alltagssprache gezogen hat (Datum/Preis/Ort/Absicht). */}
+      {result && !loading && understoodChips.length > 0 && (
+        <div className="flex flex-wrap items-center gap-1.5 mb-4">
+          <span className="text-[10.5px] uppercase tracking-[0.18em] font-semibold text-[var(--v4-ink-50)]">
+            Verstanden:
+          </span>
+          {understoodChips.map(c => (
+            <span
+              key={c.key}
+              className="px-2.5 py-1 rounded-full text-[11.5px] text-[var(--v4-ink-70)] bg-[var(--v4-surface-elevated)] border border-[var(--v4-hairline-2)]"
+            >
+              {c.label}
+            </span>
+          ))}
+        </div>
+      )}
 
       {/* Concierge tip card — rendered above the results (or above the
           empty-state) whenever we have ANY result back. Self-aborts when
@@ -263,6 +306,9 @@ export function V4EntdeckenSmartMode({ initialQuery = '' }: V4EntdeckenSmartMode
                 <Link
                   key={ev.id}
                   href={buildEventUrlV2(ev)}
+                  data-track="smart_result_click"
+                  data-track-id={ev.id}
+                  data-track-provider="event"
                   className="press-haptic flex flex-col rounded-2xl overflow-hidden border border-[var(--v4-hairline-2)] bg-[var(--v4-surface-elevated)] hover:border-[var(--v4-hairline-3)] transition-colors"
                 >
                   {/* Always render image area for uniform card height. Falls back
