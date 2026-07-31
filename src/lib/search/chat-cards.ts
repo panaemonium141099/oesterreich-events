@@ -32,4 +32,16 @@ export interface ChatActivityCard {
   image_url: string | null;
 }
 
-export type ChatEntityCard = ChatEventCard | ChatActivityCard;
+/**
+ * fn-19 Tipp-Karten: freie Concierge-Ideen (ohne DB-Referenz), damit
+ * auch KI-eigene Vorschläge in die Timeline wandern können. Landen beim
+ * Plan-Speichern als Ideen-Zeilen in der Notiz.
+ */
+export interface ChatSuggestionCard {
+  kind: 'suggestion';
+  /** Stabiler Key = normalisierter Titel (dedupliziert über Chat-Runden). */
+  id: string;
+  title: string;
+}
+
+export type ChatEntityCard = ChatEventCard | ChatActivityCard | ChatSuggestionCard;

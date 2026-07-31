@@ -200,6 +200,33 @@ describe('V4EntdeckenSmartMode (Chat-Rework fn-19)', () => {
     });
   });
 
+  it('Tipp-Karten (suggestion): auswählbar, landen als Ideen-Zeile in der Plan-Notiz', async () => {
+    routeFetch({
+      chat: () => sseResponse([
+        ['text', { delta: 'Leider nichts gefunden — aber eine Idee:' }],
+        ['entity', { kind: 'suggestion', card: { kind: 'suggestion', id: 'picknick mit seeblick', title: 'Picknick mit Seeblick' } }],
+        ['done', {}],
+      ]),
+    });
+    render(<V4EntdeckenSmartMode initialQuery=""/>);
+    await submitMessage('date in eisenstadt');
+    await waitFor(() => expect(screen.getByText('Picknick mit Seeblick')).toBeInTheDocument());
+    expect(screen.getByText('Concierge-Idee')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: /picknick mit seeblick zur timeline/i }));
+    expect(screen.getByText(/deine timeline \(1\)/i)).toBeInTheDocument();
+    expect(screen.getByText('Idee')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: /timeline als plan speichern/i }));
+    await waitFor(() => expect(screen.getByRole('link', { name: /plan gespeichert/i })).toBeInTheDocument());
+    const planBody = JSON.parse(String(
+      fetchMock.mock.calls.find(c => String(c[0]).includes('/api/plans'))![1]?.body ?? '{}',
+    ));
+    expect(planBody.event_ids).toEqual([]);
+    expect(planBody.note).toContain('Ideen vom Concierge');
+    expect(planBody.note).toContain('Picknick mit Seeblick');
+  });
+
   it('error-Frame rendert als Concierge-Fehlermeldung', async () => {
     routeFetch({ chat: () => sseResponse([['error', { message: 'Concierge-Chat derzeit nicht verfügbar.' }]]) });
     render(<V4EntdeckenSmartMode initialQuery=""/>);

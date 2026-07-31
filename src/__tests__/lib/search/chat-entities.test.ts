@@ -12,7 +12,7 @@ describe('extractEntityRefs', () => {
 
   it('dedupliziert wiederholte Marker', () => {
     const text = '[event:abc] und nochmal [event:abc] und [event:def]';
-    expect(extractEntityRefs(text).map(r => r.ref)).toEqual(['abc', 'def']);
+    expect(extractEntityRefs(text).map(r => (r.kind === 'suggestion' ? r.text : r.ref))).toEqual(['abc', 'def']);
   });
 
   it('ignoriert kaputte/fremde Marker', () => {
@@ -24,6 +24,19 @@ describe('extractEntityRefs', () => {
   it('leerer Text → leere Liste', () => {
     expect(extractEntityRefs('')).toEqual([]);
     expect(extractEntityRefs('ganz ohne Marker')).toEqual([]);
+  });
+
+  it('tipp-Marker werden als suggestion extrahiert (fn-19 Tipp-Karten)', () => {
+    const text = 'Wie wärs damit? [tipp:Picknick mit Seeblick] Danach das Konzert [event:abc].';
+    expect(extractEntityRefs(text)).toEqual([
+      { kind: 'suggestion', text: 'Picknick mit Seeblick' },
+      { kind: 'event', ref: 'abc' },
+    ]);
+  });
+
+  it('tipp-Dedupe ist case-insensitiv; zu kurze Tipps fallen weg', () => {
+    const refs = extractEntityRefs('[tipp:Radtour am See] und [tipp:radtour am see] und [tipp:ab]');
+    expect(refs).toEqual([{ kind: 'suggestion', text: 'Radtour am See' }]);
   });
 });
 
@@ -44,5 +57,10 @@ describe('stripEntityMarkers', () => {
 
   it('lässt Text ohne Marker unverändert', () => {
     expect(stripEntityMarkers('Servus! Wie kann ich helfen?')).toBe('Servus! Wie kann ich helfen?');
+  });
+
+  it('entfernt auch tipp-Marker', () => {
+    expect(stripEntityMarkers('Wie wärs mit einem Picknick? [tipp:Picknick mit Seeblick] Danach …'))
+      .toBe('Wie wärs mit einem Picknick? Danach …');
   });
 });
