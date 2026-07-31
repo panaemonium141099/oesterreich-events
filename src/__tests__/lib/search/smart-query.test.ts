@@ -8,6 +8,8 @@ import {
   detectLocationRegex,
   detectActivityIntent,
   detectGemeindeInQuery,
+  detectRadiusKm,
+  isWasteOrAdminEvent,
   extractActivitySearchTerm,
   rankActivityCandidates,
   emptySearchIntent,
@@ -84,6 +86,30 @@ describe('parseQuery', () => {
   it('"heute"/"wochenende" gewinnen vor Wochentag', () => {
     expect(parseQuery('heute samstag party', NOW).filters.keywordSignals).toContain('today');
     expect(parseQuery('am wochenende samstag party', NOW).filters.keywordSignals).toContain('weekend');
+  });
+
+  it('detectRadiusKm: parst "umkreis 20 km" und cappt auf 60', () => {
+    expect(detectRadiusKm('naturpark eisenstadt umkreis 20 km')).toBe(20);
+    expect(detectRadiusKm('therme 30km')).toBe(30);
+    expect(detectRadiusKm('radius 150 km')).toBe(60);
+    expect(detectRadiusKm('1 km spaziergang')).toBeNull();
+    expect(detectRadiusKm('konzerte in wien')).toBeNull();
+  });
+
+  it('strippt Umkreis-Wörter aus dem Intent-Text', () => {
+    const { text } = parseQuery('naturpark eisenstadt umkreis 20 km', NOW);
+    expect(text.toLowerCase()).not.toContain('umkreis');
+    expect(text.toLowerCase()).not.toContain('km');
+    expect(text.toLowerCase()).toContain('naturpark');
+  });
+
+  it('isWasteOrAdminEvent: filtert Müll- und Amtstermine, nie echte Events', () => {
+    for (const t of ['Sperrmüll', 'Abfallsammelstelle geöffnet', 'Deponie', 'Altstoffsammelzentrum', 'Sprechtag des Bürgermeisters', 'Gemeinderatssitzung']) {
+      expect(isWasteOrAdminEvent(t), t).toBe(true);
+    }
+    for (const t of ['Konzert im Park', 'Flohmarkt Eisenstadt', 'Weinfest', 'Müllers Büro — Kabarett', null, undefined]) {
+      expect(isWasteOrAdminEvent(t), String(t)).toBe(false);
+    }
   });
 
   it('erkennt Preis-Signale (gratis schlägt günstig)', () => {

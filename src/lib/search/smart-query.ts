@@ -168,6 +168,43 @@ export interface ParsedFilters {
   location: DetectedLocation | null;
 }
 
+/**
+ * fn-19: "umkreis 20 km" / "20km" → Radius-Override für den
+ * Aktivitäts-Pfad. Der Default (15 km) hat im Eisenstadt-Date-Fall den
+ * Naturpark Rosalia-Kogelberg knapp verfehlt, obwohl der User "ca 20km"
+ * geschrieben hatte. Gecappt auf 60 km (bbox-Vorfilter der RPC).
+ */
+export function detectRadiusKm(raw: string): number | null {
+  const m = raw.toLowerCase().match(/\b(\d{1,3})\s*km\b/);
+  if (!m) return null;
+  const km = parseInt(m[1], 10);
+  if (!Number.isFinite(km) || km < 2) return null;
+  return Math.min(km, 60);
+}
+
+/**
+ * fn-19: Müll- und Amtstermine aus den Gemeinde-Kalendern (gem2go & Co)
+ * sind für Freizeit-Suchen Gift — "Sperrmüll Rechnitz" war Top-Treffer
+ * für "was geht am samstag im burgenland" und wäre fast in einem
+ * Date-Vorschlag gelandet. Der Filter greift NUR im Smart-Suche-Pfad;
+ * Listen-Tab und Hub-Seiten zeigen weiterhin alles.
+ */
+const NON_LEISURE_TITLE_RE = new RegExp(
+  [
+    'sperrm[üu]ll', 'restm[üu]ll', 'biom[üu]ll', 'm[üu]llabfuhr', 'm[üu]llsammlung',
+    'm[üu]llentsorgung', 'abfuhrtermin', 'abfallsammel', 'abfallwirtschaft',
+    'altpapier', 'altstoff', 'problemstoff', 'wertstoff', 'recyclinghof', 'deponie',
+    'papiertonne', 'biotonne', 'gelber sack', 'gelbe tonne',
+    'sprechtag', 'sprechstunde', 'amtsstunden', 'parteienverkehr', 'gemeinderatssitzung',
+  ].join('|'),
+  'i',
+);
+
+export function isWasteOrAdminEvent(title: string | null | undefined): boolean {
+  if (!title) return false;
+  return NON_LEISURE_TITLE_RE.test(title);
+}
+
 export function parseQuery(raw: string, now: Date = new Date()): { text: string; filters: ParsedFilters } {
   const q = raw.toLowerCase();
   const signals: string[] = [];
@@ -258,6 +295,8 @@ export function parseQuery(raw: string, now: Date = new Date()): { text: string;
     /\b(heute|tonight|today|morgen|tomorrow|dieses wochenende|am wochenende|weekend)\b/gi,
     /\b(am\s+)?(montag|dienstag|mittwoch|donnerstag|freitag|samstag|sonntag)(s|abend|vormittag|nachmittag|nacht)?\b/gi,
     /\b(gratis|kostenlos|free|umsonst|billig|günstig|cheap)\b/gi,
+    /\b(umkreis|radius|umgebung)\b/gi,
+    /\b\d{1,3}\s*km\b/gi,
     /\b(ich bin|ich will|ich möchte|ich suche|suche|will|möchte)\b/gi,
     /\b(in|im|bei|nähe|nahe|rund um|um|nach|aus)\b/gi,
   ];

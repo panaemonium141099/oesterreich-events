@@ -135,7 +135,10 @@ const ALIAS_MAP: Record<BundeslandId, Record<string, string>> = {
  * Each entry now also lists the canonical Stadt-district name so the
  * reverse rule (LAND_TO_STADT) can use the same source of truth.
  */
-const STADT_PLZ: Record<string, { stadtPLZ: ReadonlySet<string>; stadtDistrict: string; landDistrict: string; bl: BundeslandId }> = {
+// Exportiert für plz-district.ts (fn-19): die Stadt-PLZ-Blöcke sind die
+// präziseste PLZ→Bezirk-Quelle für Statutarstädte (die Gemeinde-Registry
+// führt pro Stadt nur EINE PLZ).
+export const STADT_PLZ: Record<string, { stadtPLZ: ReadonlySet<string>; stadtDistrict: string; landDistrict: string; bl: BundeslandId }> = {
   'graz':            { stadtPLZ: new Set(['8010','8011','8013','8020','8021','8036','8041','8042','8043','8044','8045','8046','8047','8051','8052','8053','8054','8055','8063','8070','8071','8072','8073','8074','8075','8076','8077']), stadtDistrict: 'graz (stadt)', landDistrict: 'graz-umgebung', bl: 'steiermark' },
   'linz':            { stadtPLZ: new Set(['4010','4020','4030','4040','4050']), stadtDistrict: 'linz (stadt)', landDistrict: 'linz-land', bl: 'oberoesterreich' },
   'statutarstadt':   { stadtPLZ: new Set(['4010','4020','4030','4040','4050']), stadtDistrict: 'linz (stadt)', landDistrict: 'linz-land', bl: 'oberoesterreich' },

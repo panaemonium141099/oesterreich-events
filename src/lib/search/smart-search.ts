@@ -38,6 +38,8 @@ import {
   rankCandidates,
   detectActivityIntent,
   detectGemeindeInQuery,
+  detectRadiusKm,
+  isWasteOrAdminEvent,
   extractActivitySearchTerm,
   rankActivityCandidates,
   emptySearchIntent,
@@ -366,7 +368,30 @@ async function fetchActivityMatches(
     return [];
   }
 
-  const rows = (data ?? []) as ActivityCandidate[];
+  let rows = (data ?? []) as ActivityCandidate[];
+
+  // fn-19: 0 Treffer im Orts-Radius → einmal bundeslandweit nachfassen
+  // (deterministisch, eine zusätzliche indexierte RPC nur im Leerfall).
+  // Befund Eisenstadt-Date: die Naturparks lagen alle knapp außerhalb
+  // des 15-km-Radius, obwohl das Bundesland 4 davon hat.
+  if (rows.length === 0 && filters.gemeinde?.bundesland) {
+    const { data: retryData, error: retryErr } = await supabase.rpc('search_activities', {
+      q: filters.searchTerm,
+      tag_filter: filters.tags.length > 0 ? filters.tags : null,
+      setting_filter: filters.setting,
+      bundesland_filter: filters.gemeinde.bundesland,
+      center_lat: null,
+      center_lng: null,
+      radius_km: null,
+      max_results: ACTIVITY_SHORTLIST,
+    });
+    if (retryErr) {
+      console.error('[smart-search] search_activities bundesland-retry failed:', retryErr);
+    } else {
+      rows = (retryData ?? []) as ActivityCandidate[];
+    }
+  }
+
   // Sekundär-Scoring über die Description passiert HIER, auf der bereits
   // geladenen Shortlist — es gibt bewusst keinen description-Index.
   const ranked = rankActivityCandidates(
@@ -415,7 +440,13 @@ export async function runSmartSearch(
   //     Pfad-Gating und unabhängig vom LLM (Pflicht, Epic E9: sonst
   //     landen Aktivitäts-Queries im No-AI-Fallback doch im Event-Pfad).
   const activitySignals = detectActivityIntent(rawQuery);
-  const gemeinde = detectGemeindeInQuery(rawQuery);
+  const detectedGemeinde = detectGemeindeInQuery(rawQuery);
+  // fn-19: "umkreis 20 km" übersteuert den Default-Radius (15 km bzw.
+  // City-Hub-Wert) — der User weiß besser als die Map, wie weit er fährt.
+  const radiusOverride = detectRadiusKm(rawQuery);
+  const gemeinde: DetectedGemeinde | null = detectedGemeinde
+    ? { ...detectedGemeinde, radiusKm: radiusOverride ?? detectedGemeinde.radiusKm }
+    : null;
 
   // 2. Intent via Gemini (ersetzt Embedding + separaten Location-Call).
   //    4s-Timeout: eine hängende Gemini-API darf die Suche nicht bis zum
@@ -530,6 +561,7 @@ export async function runSmartSearch(
   const wantActivities = intent.contentTypes.includes('activity');
   if (wantActivities) filters.keywordSignals.push('content:activity');
   if (gemeinde) filters.keywordSignals.push(`location:gemeinde:${gemeinde.slug}`);
+  if (radiusOverride) filters.keywordSignals.push(`radius:${radiusOverride}km`);
   if (activityFilters.setting) filters.keywordSignals.push(`setting:${activityFilters.setting}`);
 
   // 3c. Retrieval. Beide Pfade parallel, aber JEDER nur wenn sein
@@ -544,7 +576,9 @@ export async function runSmartSearch(
         ? fetchActivityMatches(supabase, activityFilters, intent)
         : Promise.resolve([] as ActivitySearchMatch[]),
     ]);
-    candidates = ev;
+    // fn-19: Müll-/Amtstermine der Gemeinde-Kalender raus aus der
+    // Freizeit-Suche ("Sperrmüll Rechnitz" war Top-Samstag-Treffer).
+    candidates = ev.filter(c => !isWasteOrAdminEvent((c as { title?: string | null }).title));
     activityMatches = act;
   } catch (e) {
     console.error('[smart-search] candidate fetch failed:', e);
