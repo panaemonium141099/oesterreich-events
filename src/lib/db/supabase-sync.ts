@@ -33,6 +33,7 @@ import {
 } from '@/lib/category-classifier';
 import { normalizeEventLocation } from '@/lib/location-normalizer';
 import { normalizeDistrict } from '@/lib/district-normalizer';
+import { districtFromPlz } from '@/lib/plz-district';
 import { bundeslandToId } from '@/lib/bundeslaender';
 import { generateFingerprint } from '@/lib/dedup/fingerprint';
 import { generateEventSlug } from '@/lib/utils/slugify';
@@ -602,11 +603,20 @@ function toSupabaseRow(
     // back into the DB and undoes the canonical-rewrite migration.
     // Note: pass the canonicalised bundesland id so the alias map's
     // bundesland-scoped lookup actually hits.
-    district: normalizeDistrict(
-      event.district,
-      bundeslandToId(event.bundesland) ?? null,
-      resolved.postalCode ?? event.postal_code,
-    ),
+    // fn-19: Quellen ohne Bezirksfeld (Feratel, Gemeinde-Kalender,
+    // Eventim) liefern district=NULL — der Stadt-Filter der Smart-Suche
+    // wirft solche Events dann komplett raus (Eisenstadt-Befund
+    // 2026-07-31: Hub 59 Events, Suche 0). Fallback: Bezirk aus der PLZ.
+    district:
+      normalizeDistrict(
+        event.district,
+        bundeslandToId(event.bundesland) ?? null,
+        resolved.postalCode ?? event.postal_code,
+      ) ??
+      districtFromPlz(
+        resolved.postalCode ?? event.postal_code,
+        bundeslandToId(event.bundesland),
+      ),
     latitude: finalLat,
     longitude: finalLng,
     country: event.country ?? 'AT',

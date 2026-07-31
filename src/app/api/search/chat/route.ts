@@ -99,7 +99,7 @@ const TOOL_DECLARATIONS = [
   {
     name: 'search_activities',
     description:
-      'Durchsucht dauerhafte FREIZEIT-ZIELE ohne festen Termin (Thermen, Bäder, Museen, Sommerrodelbahnen, Klettersteige, Hochseilgärten). Query in Alltagssprache inkl. Ort — verwende KONKRETE Arten von Zielen (therme, museum, sommerrodelbahn, wandern, schwimmen, kletterpark, spielplatz), NIEMALS Oberbegriffe wie "ausflugsziel" oder "freizeitaktivität". Bei vagen Wünschen probiere 2 konkrete Arten, z. B. erst "therme salzburg", dann "museum salzburg".',
+      'Durchsucht dauerhafte FREIZEIT-ZIELE ohne festen Termin (Thermen, Bäder, Museen, Sommerrodelbahnen, Klettersteige, Hochseilgärten). Query in Alltagssprache inkl. Ort — verwende KONKRETE Arten von Zielen (therme, museum, sommerrodelbahn, wandern, schwimmen, kletterpark, spielplatz), NIEMALS Oberbegriffe wie "ausflugsziel" oder "freizeitaktivität". Bei vagen Wünschen probiere 2 konkrete Arten, z. B. erst "therme salzburg", dann "museum salzburg". Ein gewünschter Umkreis wird verstanden, wenn er als "umkreis 20 km" in der Query steht — übernimm ihn, wenn der User einen nennt.',
     parameters: {
       type: Type.OBJECT,
       properties: { query: { type: Type.STRING } },
