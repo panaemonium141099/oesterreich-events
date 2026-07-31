@@ -88,6 +88,19 @@ describe('parseQuery', () => {
     expect(parseQuery('am wochenende samstag party', NOW).filters.keywordSignals).toContain('weekend');
   });
 
+  it('detectActivityIntent: naturpark/museum/zoo sind starke POI-Signale (No-AI-Pfad)', () => {
+    expect(detectActivityIntent('naturpark eisenstadt umkreis 20 km')).toMatchObject({ isActivity: true, activityOnly: true });
+    expect(detectActivityIntent('museum in wien')).toMatchObject({ isActivity: true, activityOnly: true });
+    expect(detectActivityIntent('zoo salzburg')).toMatchObject({ isActivity: true });
+    // Event-Wort daneben → kein activity-only (beide Pfade laufen)
+    expect(detectActivityIntent('konzert im naturpark')).toMatchObject({ isActivity: true, activityOnly: false });
+  });
+
+  it('extractActivitySearchTerm: Umkreis-Wörter gewinnen nie', () => {
+    expect(extractActivitySearchTerm('naturpark umkreis 20 km')).toBe('naturpark');
+    expect(extractActivitySearchTerm('zoo umkreis 20 km')).toBe('zoo');
+  });
+
   it('detectRadiusKm: parst "umkreis 20 km" und cappt auf 60', () => {
     expect(detectRadiusKm('naturpark eisenstadt umkreis 20 km')).toBe(20);
     expect(detectRadiusKm('therme 30km')).toBe(30);
