@@ -113,15 +113,28 @@ async function main() {
       for (const [district, ids] of byDistrict) {
         for (let i = 0; i < ids.length; i += UPDATE_CHUNK) {
           const chunk = ids.slice(i, i + UPDATE_CHUNK);
-          const { error: upErr } = await supabase
-            .from('events')
-            .update({ district })
-            .in('id', chunk);
-          if (upErr) {
-            console.error(`update failed (${district}):`, upErr.message);
-            process.exit(1);
+          // Statement-Timeouts sind auf der Micro-Instanz Lastwellen-
+          // Lotterie (erster Lauf starb bei 'imst') — 3 Versuche mit
+          // Backoff, dann Chunk überspringen statt Gesamtabbruch
+          // (idempotent: der nächste Lauf holt ihn nach).
+          let ok = false;
+          for (let attempt = 1; attempt <= 3 && !ok; attempt++) {
+            const { error: upErr } = await supabase
+              .from('events')
+              .update({ district })
+              .in('id', chunk);
+            if (!upErr) {
+              ok = true;
+            } else {
+              console.error(`update failed (${district}, Versuch ${attempt}):`, upErr.message);
+              await new Promise(r => setTimeout(r, attempt * 5000));
+            }
           }
-          written += chunk.length;
+          if (ok) {
+            written += chunk.length;
+          } else {
+            chunk.forEach(id => seenUnmappable.add(id));
+          }
         }
       }
       if (byDistrict.size === 0) break; // nur noch Unmappbare übrig

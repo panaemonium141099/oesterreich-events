@@ -752,6 +752,14 @@ const STRONG_POI_TOKENS: ReadonlySet<string> = new Set([
   'streichelzoo', 'abenteuerspielplatz', 'erlebnisweg', 'themenweg',
   'lehrpfad', 'baumwipfelpfad', 'eislaufplatz', 'kegelbahn', 'bowling',
   'escaperoom', 'trampolinpark', 'kletterwald',
+  // fn-19: belegte Lücken aus dem Eisenstadt-Date-Fall — die Deskline-
+  // Topic-Whitelist kennt diese Ziel-Arten nicht als eigene Keys, die
+  // POIs existieren aber (z. B. 4 Naturparks im Burgenland). Ohne diese
+  // Tokens lief "naturpark eisenstadt" im Gemini-Fallback in den
+  // reinen Event-Pfad.
+  'naturpark', 'naturparks', 'nationalpark', 'nationalparks',
+  'aussichtswarte', 'aussichtswarten', 'museum', 'museen',
+  'wasserfall', 'wasserfaelle', 'klamm', 'zoo', 'tiergarten',
 ]);
 
 /** Explizite Veranstaltungs-Wörter — blockieren den activity-only-Pfad. */
@@ -844,8 +852,14 @@ const ACTIVITY_TERM_STOPWORDS: ReadonlySet<string> = new Set([
   'regen', 'regnet', 'wetter', 'schlechtwetter', 'schlechtem', 'drinnen',
   'indoor', 'outdoor', 'draussen', 'gratis', 'kostenlos', 'billig',
   'guenstig', 'schoen', 'schoene', 'toll', 'tolle', 'nahe', 'naehe',
+  // fn-19: Umkreis-Wörter — sonst gewinnt 'umkreis' als längster Token
+  // gegen kurze echte Ziel-Arten ("zoo umkreis 20 km" → q='umkreis').
+  'umkreis', 'radius', 'umgebung',
   'the', 'and', 'for',
 ]);
+
+/** Echte POI-Arten unter der 4-Zeichen-Schwelle der Term-Extraktion. */
+const SHORT_POI_TERMS: ReadonlySet<string> = new Set(['zoo']);
 
 /**
  * Bester trgm-Suchbegriff für `poi_activities.name`, oder null.
@@ -872,7 +886,7 @@ export function extractActivitySearchTerm(
   const candidates: string[] = [];
   for (const t of llmSearchTerms) {
     const n = normToken(t.split(/\s+/)[0] ?? '');
-    if (n.length >= 4 && !ACTIVITY_TERM_STOPWORDS.has(n) && restNorm.has(n)) {
+    if ((n.length >= 4 || SHORT_POI_TERMS.has(n)) && !ACTIVITY_TERM_STOPWORDS.has(n) && restNorm.has(n)) {
       candidates.push(t.trim());
     }
   }
@@ -880,7 +894,7 @@ export function extractActivitySearchTerm(
     const { rawTokens, normTokens } = tokenize(restText ?? '');
     for (let i = 0; i < normTokens.length; i++) {
       const n = normTokens[i];
-      if (n.length >= 4 && !ACTIVITY_TERM_STOPWORDS.has(n)) candidates.push(rawTokens[i]);
+      if ((n.length >= 4 || SHORT_POI_TERMS.has(n)) && !ACTIVITY_TERM_STOPWORDS.has(n)) candidates.push(rawTokens[i]);
     }
   }
   if (candidates.length === 0) return null;
