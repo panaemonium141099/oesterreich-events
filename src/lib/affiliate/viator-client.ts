@@ -75,6 +75,9 @@ export const VIATOR_SEARCH_PATH_DEFAULT = '/search/freetext';
 const DEFAULT_TIMEOUT_MS = 15_000;
 const MAX_RETRIES = 3;
 const RETRY_BASE_DELAY_MS = 500;
+
+/** Pfade, fuer die bereits eine 404-Warnung geloggt wurde (einmal je Pfad). */
+const warned404Paths = new Set<string>();
 /** Kappung absurder Retry-After-Werte. */
 const MAX_RETRY_AFTER_SECONDS = 60;
 
@@ -377,7 +380,20 @@ export function createViatorClient(options: ViatorClientOptions = {}): ViatorCli
           continue;
         }
 
-        if (response.status === 404) return null;
+        if (response.status === 404) {
+          // 404 NICHT still verschlucken: auf /products/{code} ist es normal
+          // (Produkt entfernt), auf dem Such-Endpoint bedeutet es dagegen
+          // FALSCHER PFAD — und sieht in der Auswertung sonst exakt aus wie
+          // "keine Treffer". Genau das ist im ersten Matching-Lauf passiert
+          // (0/200, davon 163x "no-candidates"). Einmal pro Pfad warnen.
+          if (!warned404Paths.has(path)) {
+            warned404Paths.add(path);
+            console.warn(
+              `[viator] HTTP 404 auf ${path} — bei Such-Pfaden ist das eine Fehlkonfiguration (VIATOR_SEARCH_PATH), kein leeres Ergebnis.`,
+            );
+          }
+          return null;
+        }
 
         if (!response.ok) {
           if (attempt >= MAX_RETRIES) {
