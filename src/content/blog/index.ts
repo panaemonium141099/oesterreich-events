@@ -66,8 +66,10 @@ import { post as spitzerMarillenkirtag } from './posts/spitzer-marillenkirtag-20
 
 export type { FestivalPost, GalleryImage, FestivalKeyFacts, LineupAct } from './types';
 
-/** All blog posts sorted by publishDate descending (newest first). */
+/** All blog posts sorted by publishDate descending (newest first). */import { post as herbstfesteErntedankOesterreich } from './posts/herbstfeste-erntedank-oesterreich';
+
 export const ALL_POSTS: FestivalPost[] = [
+  herbstfesteErntedankOesterreich,
   novaRock,
   donauinselfest,
   frequency,
