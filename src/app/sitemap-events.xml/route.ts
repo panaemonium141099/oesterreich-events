@@ -23,6 +23,12 @@ import {
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 300;
+/** 45 Keyset-Runden a ~150-700 ms plus XML-Rendering von bis zu 45.000
+ *  Eintraegen: gemessen ~15 s. Explizites Limit, damit die Route nicht am
+ *  Plattform-Default haengenbleibt. Erfolgreiche Antworten liegen danach
+ *  eine Stunde im CDN (s-maxage=3600), die DB sieht also nicht jeden
+ *  Crawler-Hit. */
+export const maxDuration = 120;
 
 /** Google's hard limit is 50k URLs; we leave headroom. Cap zaehlt EMITTIERTE
  *  URLs (uebersetzte Events liefern DE- UND /en-URL = 2 Eintraege), nicht
