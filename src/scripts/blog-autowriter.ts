@@ -241,6 +241,33 @@ Mindestens 4 faqs, mindestens 3 practicalInfo-Einträge.`;
 const isStr = (v: unknown, min = 1, max = 100_000): v is string =>
   typeof v === 'string' && v.trim().length >= min && v.length <= max;
 
+/** Kuerzt an einer Wortgrenze auf max. `max` Zeichen. */
+function truncateAtWord(s: string, max: number): string {
+  if (s.length <= max) return s;
+  const cut = s.slice(0, max);
+  const lastSpace = cut.lastIndexOf(' ');
+  return (lastSpace > max * 0.6 ? cut.slice(0, lastSpace) : cut).replace(/[,;:.\s]+$/, '');
+}
+
+/** Mechanisch fixbare Verstoesse reparieren, BEVOR validiert wird
+ *  (Befund E2E-Lauf 2026-08-26: Gemini schreibt seoDescription ein paar
+ *  Zeichen zu lang und laesst website bei kleinen Events leer — beides
+ *  liess JEDEN Kandidaten durchfallen und trieb den Job ins Timeout).
+ *  Nur zu Kurzes bleibt ein harter Fehler. */
+function sanitizeDraft(d: Record<string, unknown>, c: Candidate): void {
+  if (typeof d.seoTitle === 'string') d.seoTitle = truncateAtWord(d.seoTitle, 65);
+  if (typeof d.seoDescription === 'string') d.seoDescription = truncateAtWord(d.seoDescription, 158);
+  if (typeof d.excerpt === 'string') d.excerpt = truncateAtWord(d.excerpt, 390);
+  if (typeof d.subtitle === 'string') d.subtitle = truncateAtWord(d.subtitle, 200);
+  const kf = d.keyFacts as Record<string, unknown> | undefined;
+  if (kf && !/^https?:\/\//.test(String(kf.website ?? ''))) {
+    // Kein Web-Fund -> Ticket-/Quell-URL aus der DB ist immer eine echte
+    // URL zum Happening (Eventim-Deeplink traegt zudem die Affiliate-ID).
+    const fallback = c.ticket_url ?? c.source_url;
+    if (fallback) kf.website = fallback;
+  }
+}
+
 /** Prüft den Gemini-Entwurf hart — bei Verstoß wird der Kandidat verworfen
  *  (fail loud im Log), NIE ein halbgarer Post publiziert. */
 function validateDraft(d: Record<string, unknown>): string[] {
@@ -412,9 +439,14 @@ async function main(): Promise<void> {
   log(`${candidates.length} Kandidaten nach Dedupe`);
 
   let written = 0;
+  let attempts = 0;
+  // Jeder Versuch kostet ~1-2 min Gemini-Zeit; Cap haelt den Job weit
+  // unter dem 30-min-Timeout und failt lieber laut mit Log.
+  const maxAttempts = count * 5;
   const writtenSlugs: string[] = [];
   for (const c of candidates) {
-    if (written >= count) break;
+    if (written >= count || attempts >= maxAttempts) break;
+    attempts++;
     log(`Kandidat: "${c.title}" (${datePart(c.start_date)}, ${c.bundesland ?? '?'}, qs=${c.quality_score})`);
 
     const year = new Date(c.start_date).getFullYear();
@@ -429,6 +461,7 @@ async function main(): Promise<void> {
       }
 
       const draft = await composePost(ai, c, research);
+      sanitizeDraft(draft, c);
       const errors = validateDraft(draft);
       if (errors.length > 0) {
         log(`  Entwurf verworfen: ${errors.join('; ')}`);
