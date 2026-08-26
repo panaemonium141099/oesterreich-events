@@ -21,6 +21,7 @@ import { activityListCanonicalUrl } from '@/lib/activities/indexability';
 import { loadActivityListPageCached } from '@/lib/activities/list-loaders';
 import { ACTIVITY_LIST_PAGE_SIZE } from '@/lib/activities/list-query';
 import { ActivitiesBrowser } from '@/components/Activities/ActivitiesBrowser';
+import { NearbyActivitiesRail } from '@/components/Activities/NearbyActivitiesRail';
 import { HubSmartCTA } from '@/components/Hub/HubSmartCTA';
 
 export const revalidate = 3600;
@@ -86,6 +87,9 @@ export default async function ActivitiesOverviewPage({
             label="Frag die KI: Was tun bei Regen?"
           />
         </div>
+
+        {/* Standort-Highlights (fn-19) — client-only, ISR-neutral */}
+        <NearbyActivitiesRail />
 
         <ActivitiesBrowser
           initialItems={page.items}
