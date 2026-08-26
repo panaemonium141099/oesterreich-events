@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest, NextResponse, after } from 'next/server';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import {
@@ -163,16 +163,23 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Failed to follow artist' }, { status: 500 });
     }
 
-    // Run immediate matching so user sees events right away
-    let matchCount = 0;
-    try {
-      matchCount = await matchSingleArtist(supabase, user.id, artist_name.trim());
-    } catch (matchErr) {
-      // Non-fatal: follow succeeded, matching is best-effort
-      console.error('Auto-match after follow failed:', matchErr);
-    }
+    // Matching NACH der Response (Befund 2026-08-26): matchSingleArtist
+    // laeuft mit Fuzzy- und Beschreibungs-RPCs ueber den gesamten
+    // Events-Bestand und brauchte auf der Micro-Instanz ~30 s — solange
+    // hing der Follow-Button. after() entkoppelt das: die 201 geht sofort
+    // raus, die Match-Ergebnisse erscheinen kurz danach via Notification/
+    // naechstem /api/artists/events-Fetch. matches_found hat keinen
+    // Frontend-Konsumenten und ist jetzt konstant 0.
+    after(async () => {
+      try {
+        await matchSingleArtist(supabase, user.id, artist_name.trim());
+      } catch (matchErr) {
+        // Non-fatal: follow succeeded, matching is best-effort
+        console.error('Auto-match after follow failed:', matchErr);
+      }
+    });
 
-    return NextResponse.json({ followed_artist: data, matches_found: matchCount }, { status: 201 });
+    return NextResponse.json({ followed_artist: data, matches_found: 0 }, { status: 201 });
   } catch (err) {
     console.error('POST /api/artists/follow error:', err);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
