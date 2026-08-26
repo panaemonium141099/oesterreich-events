@@ -18,6 +18,7 @@ import {
   ArtistTeaserV4,
   PersonalizedMatches,
   WeekendSection,
+  WeatherSection,
   ConcertsSection,
   FestivalsSection,
   MapPreview,
@@ -74,6 +75,8 @@ export default async function LandingPage({
         <ArtistTeaserV4 artists={data.popularArtists}/>
         <PersonalizedMatches/>
         <WeekendSection events={data.todayWeekend}/>
+        {/* Wetter-reaktiv (fn-19): rendert nur bei Regen/Hitze, client-only */}
+        <WeatherSection/>
         <ConcertsSection events={data.concerts}/>
         <FestivalsSection festivals={data.festivals}/>
         <NewsletterSignup/>

@@ -55,7 +55,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 
   const box = bboxAround(lat, lng, RADIUS_KM);
   const supabase = createClient(url, key);
-  const { data, error } = await supabase
+  let query = supabase
     .from('poi_activities')
     .select(LIST_COLUMNS)
     .eq('visible', true)
@@ -63,7 +63,19 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     .gte('lat', box.minLat)
     .lte('lat', box.maxLat)
     .gte('lng', box.minLng)
-    .lte('lng', box.maxLng)
+    .lte('lng', box.maxLng);
+
+  // Optionale Filter (Wetter-Sektion fn-19): setting fuer Regen-Indoor,
+  // tag fuer Hitze-Programm (schwimmen/wassersport). Gleiche Semantik wie
+  // /api/activities.
+  const setting = params.get('setting');
+  if (setting === 'indoor' || setting === 'outdoor' || setting === 'mixed') {
+    query = query.eq('setting', setting);
+  }
+  const tag = params.get('tag');
+  if (tag) query = query.contains('tags', [tag]);
+
+  const { data, error } = await query
     .order('quality_score', { ascending: false })
     .limit(POOL_LIMIT);
 

@@ -140,6 +140,16 @@
       "text": "Follow artists — we'll notify you about their dates in Austria.",
       "sub": "Concerts, open airs, festival slots. No need to keep checking.",
       "cta": "Search artists"
+    },
+    "Weather": {
+      "rainKicker": "{mm} mm of rain forecast",
+      "rainTitle": "Rainy {day}? Your indoor line-up",
+      "heatKicker": "Heatwave weekend",
+      "heatTitle": "{temp}° on {day} — time to hit the water",
+      "viennaFallback": "Weather for Vienna",
+      "cardFallback": "Leisure & day trips",
+      "imageCredit": "Image:",
+      "moreLink": "All leisure activities"
     }
   },
   "Onboarding": {
