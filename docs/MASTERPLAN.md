@@ -154,6 +154,47 @@ YAML-`run: |`-Block-Scalar → „Invalid workflow file" (`expected ':' … 78:7
 geänderte Workflow-YAML immer mit einem echten Parser prüfen, nicht nur
 visuell. Details als Auto-Memory `project-ci-npm-lockfile-drift`.
 
+### 3.7 Sitemap ohne Event-URLs seit 25.07. — behoben 2026-08-26
+
+`/sitemap-events.xml` lieferte seit dem Sitemap-Split (fn-18, `543e79b`,
+25.07.) durchgehend **HTTP 500** („sitemap temporarily unavailable", live
+gemessen: 500 nach 119 s, zweiter Versuch Timeout bei 120 s). Damit stand
+**keine einzige Event-Detailseite in der Sitemap**; Google kannte nur
+`sitemap-core` (2.469 URLs) + `sitemap-activities` (7.605) — passend zu den
+10.058 „submitted URLs" im GSC-Snapshot.
+
+**Ursache:** OFFSET-Pagination (`.range(offset, offset+999)`) über bis zu
+45.000 Zeilen, sortiert nach `quality_score DESC, id`, ohne passenden Index.
+`EXPLAIN ANALYZE` auf Prod bei OFFSET 40000: Incremental Sort über
+`idx_events_quality_score`, **29.138 ms für EINE von 45 Seiten**. Die Route
+fängt Query-Fehler bewusst ab und gibt 500 statt einer truncierten Datei
+zurück (Review-Finding R3) — sie tat also genau das Richtige, nur nie
+erfolgreich.
+
+**Fix:** Keyset-Pagination über den Cursor `(quality_score, id)` plus
+Teilindex `idx_events_sitemap_keyset` (Migration
+`20260826140000_sitemap_events_keyset_index.sql`). Nachher **108 ms pro
+Seite** (Faktor 270), ~5 s für die ganze Datei.
+
+**Warum das teuer war:** 19.913 kommende Events tragen einen J70-Ticketlink,
+aber nur 1.094 dieser Seiten wurden in 50 Tagen überhaupt aufgerufen (5,6 %).
+Nur 8,0 % aller Event-Seitenaufrufe (1.901 von 23.622) landeten auf einer
+monetarisierbaren Seite. Die Klickrate dort ist mit 4,7 % (90 ticket_clicks)
+gesund — der Engpass war Auffindbarkeit, nicht die TicketBox.
+
+### 3.8 Fremde Affiliate-ID in oeticket-Links — behoben 2026-08-26
+
+520 kommende Events (1.552 insgesamt) trugen einen oeticket.com-Deeplink mit
+`?affiliate=H51`, der Partner-ID von eventfinder.at, deren Scraper den Link
+samt ID durchreichte. Da `V4SideBox` die TicketBox für **jeden** gesetzten
+`ticketUrl` rendert (nicht nur `source_name='Eventim'`), stand damit ein
+echter Ticket-Button auf unseren Seiten, dessen Provision an einen
+Mitbewerber ging — 231 Aufrufe in 50 Tagen.
+
+**Fix:** `normalizeTicketUrl()` in `src/lib/db/supabase-sync.ts` biegt jeden
+oeticket.com-Deeplink im einzigen Write-Pfad auf J70 um (7 Vitest-Fälle);
+Bestand per Backfill bereinigt, Kontrollabfrage zeigt nur noch J70.
+
 ## 4. Getroffene Grundsatz-Entscheidungen (2026-07-07)
 
 1. **Affiliate-ID `J70` ist korrekt** und gehört uns (bestätigt). Eventim-Links im Feed

@@ -57,11 +57,23 @@ export async function GET(): Promise<NextResponse> {
     // silently capped at 1000 per chunk.
     try {
       const PAGE = 1000;
-      let offset = 0;
       let capReached = false;
-      // Hard loop bound: MAX_URLS / PAGE at most.
-      while (!capReached && entries.length < MAX_URLS) {
-        const { data, error } = await supabase
+      // Keyset- statt OFFSET-Pagination (Befund 2026-08-26): `.range()` liess
+      // Postgres pro Seite die gefilterte Menge neu sortieren und bis zu 44.000
+      // Zeilen ueberspringen. EXPLAIN ANALYZE auf Prod: 29.138 ms fuer EINE
+      // Seite bei Offset 40.000, mal 45 Seiten — die Route lief seit dem
+      // Sitemap-Split (25.07.) durchgehend in den 500er-Zweig unten, d.h.
+      // KEINE einzige Event-URL stand in der Sitemap.
+      //
+      // Keyset haengt stattdessen am Cursor (quality_score, id) und liest
+      // jede Zeile genau einmal. Mit idx_events_sitemap_keyset
+      // (quality_score DESC, id) WHERE publish_status='published' AND
+      // quality_score >= 40: 108 ms pro Seite, ~5 s fuer die ganze Datei.
+      let cursor: { qs: number; id: string } | null = null;
+      // Harte Schleifengrenze als Backstop, falls der Cursor je stagniert.
+      const MAX_PAGES = Math.ceil(MAX_URLS / PAGE) + 5;
+      for (let page = 0; page < MAX_PAGES && !capReached && entries.length < MAX_URLS; page++) {
+        let query = supabase
           .from('events')
           .select('id, slug, start_date, updated_at, quality_score, postal_code, address, bundesland, location_name, title_en')
           .gte('start_date', today)
@@ -69,7 +81,18 @@ export async function GET(): Promise<NextResponse> {
           .gte('quality_score', 40)
           .order('quality_score', { ascending: false })
           .order('id', { ascending: true })
-          .range(offset, offset + PAGE - 1);
+          .limit(PAGE);
+
+        // Streng nach dem zuletzt gelieferten Paar weiterlesen. Die
+        // Sortierung ist quality_score DESC, id ASC — also "kleinerer Score"
+        // ODER "gleicher Score und groessere id".
+        if (cursor) {
+          query = query.or(
+            `quality_score.lt.${cursor.qs},and(quality_score.eq.${cursor.qs},id.gt.${cursor.id})`,
+          );
+        }
+
+        const { data, error } = await query;
 
         if (error) {
           // Kein break: eine mitten in der Pagination abgebrochene Datei
@@ -107,8 +130,13 @@ export async function GET(): Promise<NextResponse> {
           }
         }
 
+        // Cursor auf die letzte gelesene Zeile setzen. Bewusst NICHT auf die
+        // letzte emittierte: bei erreichtem Cap brechen wir ohnehin ab, und
+        // ein Cursor auf einer uebersprungenen Zeile wuerde Zeilen verlieren.
+        const last = data[data.length - 1];
+        cursor = { qs: last.quality_score ?? 40, id: last.id };
+
         if (data.length < PAGE) break; // last page
-        offset += PAGE;
       }
     } catch (err) {
       console.error('[sitemap-events] event pagination failed:', err);
