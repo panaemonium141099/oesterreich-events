@@ -92,6 +92,36 @@ function getConfidenceRank(confidence: string | null | undefined): number {
   return CONFIDENCE_RANK[confidence] ?? Infinity;
 }
 
+/** Unsere Eventim-Austria-Partner-ID. Steckt auch in den Deeplinks des
+ *  PFT-Feeds (siehe src/lib/eventim/types.ts). */
+export const EVENTIM_AFFILIATE_ID = 'J70';
+
+/**
+ * Schreibt oeticket.com-Deeplinks auf UNSERE Affiliate-ID um.
+ *
+ * oeticket.com ist Eventim Austria. Aggregator-Quellen liefern deren
+ * Deeplinks samt eigener Partner-ID mit — eventfinder.at etwa mit
+ * `?affiliate=H51`. V4SideBox rendert die TicketBox für jeden gesetzten
+ * `ticketUrl`, nicht nur für source_name='Eventim'. Ungeprüft durchgereicht
+ * steht damit ein echter Ticket-Button auf unserer Seite, dessen Provision
+ * an einen Mitbewerber geht (Befund 2026-08-26: 520 kommende Events mit
+ * H51, per Backfill bereinigt — dieser Guard hält es dauerhaft dicht).
+ *
+ * Nicht-oeticket-URLs und unparsbare Strings bleiben unangetastet.
+ */
+export function normalizeTicketUrl(raw: string | null | undefined): string | null {
+  if (!raw) return null;
+  let url: URL;
+  try {
+    url = new URL(raw);
+  } catch {
+    return raw; // kein gültiger Absolut-Link → unverändert lassen
+  }
+  if (!/(^|\.)oeticket\.com$/i.test(url.hostname)) return raw;
+  url.searchParams.set('affiliate', EVENTIM_AFFILIATE_ID);
+  return url.toString();
+}
+
 /** Haversine distance in km between two lat/lng pairs. */
 function haversineKm(lat1: number, lng1: number, lat2: number, lng2: number): number {
   const R = 6371;
@@ -530,6 +560,9 @@ function toSupabaseRow(
   const finalPriceText = overwritePrice
     ? (event.price_text ?? null)
     : (existing?.price_text ?? null);
+  // Fremde Affiliate-IDs in oeticket-Deeplinks auf J70 umbiegen, bevor der
+  // Wert sowohl ins Quality-Scoring als auch in die Zeile geht.
+  const finalTicketUrl = normalizeTicketUrl(event.ticket_url);
 
   // ─── Quality scoring at ingest ───────────────────────────────────
   // Compute against the FINAL resolved values (post-geocoding,
@@ -556,7 +589,7 @@ function toSupabaseRow(
     longitude: finalLng,
     image_url: finalImageUrl,
     source_url: event.source_url,
-    ticket_url: event.ticket_url ?? null,
+    ticket_url: finalTicketUrl,
   });
 
   const finalPublishStatus =
@@ -639,7 +672,7 @@ function toSupabaseRow(
     image_width: finalImageWidth,
     image_height: finalImageHeight,
     organizer: event.organizer ?? null,
-    ticket_url: event.ticket_url ?? null,
+    ticket_url: finalTicketUrl,
     visibility: 'public' as const,
     // Quality score + publish_status set at ingest. Eliminates the
     // "scrape writes qs=NULL → backfill-quality runs later" cycle.
