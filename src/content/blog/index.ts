@@ -63,6 +63,8 @@ import { post as schlosspieleKobersdorf } from './posts/schlossspiele-kobersdorf
 import { post as tirolerFestspiele } from './posts/tiroler-festspiele-erl-2026';
 import { post as festDerFreude } from './posts/fest-der-freude-2026';
 import { post as spitzerMarillenkirtag } from './posts/spitzer-marillenkirtag-2026';
+// Autowriter-Posts (fn-19) — Marker NICHT entfernen, das Script fuegt hier ein:
+// AUTOWRITER-IMPORTS-END
 
 export type { FestivalPost, GalleryImage, FestivalKeyFacts, LineupAct } from './types';
 
@@ -132,6 +134,7 @@ export const ALL_POSTS: FestivalPost[] = [
   tirolerFestspiele,
   festDerFreude,
   spitzerMarillenkirtag,
+  // AUTOWRITER-POSTS-END
 ].sort(
   (a, b) => new Date(b.publishDate).getTime() - new Date(a.publishDate).getTime()
 );

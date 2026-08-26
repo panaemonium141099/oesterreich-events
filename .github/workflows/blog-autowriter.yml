@@ -1,0 +1,68 @@
+# Blog-Autowriter (fn-19): schreibt täglich 1-2 SEO-Blogposts zu aktuellen
+# Events/Festivals und pusht sie direkt auf master (User-Entscheidung
+# 2026-08-26: vollautomatische Publikation). Vercel deployt den Push,
+# sitemap-core.xml zieht die neuen Posts automatisch aus ALL_POSTS.
+#
+# Recherche: Gemini 2.5 Flash + Google-Search-Grounding (2 Calls/Post,
+# Free-Tier-tauglich). Harte Fakten kommen aus der Events-DB. Ohne
+# brauchbares Hero-Bild wird kein Post publiziert — das Script failt
+# laut, wenn gar kein Kandidat durchkommt (dann Log ansehen).
+
+name: Blog Autowriter
+
+on:
+  schedule:
+    # Täglich 05:23 UTC (07:23 Wien Sommerzeit) — vor dem Tagestraffic,
+    # nach dem nächtlichen Scrape-Lauf (03:17), damit frische Events
+    # als Kandidaten bereitstehen.
+    - cron: '23 5 * * *'
+  workflow_dispatch:
+    inputs:
+      count:
+        description: 'Anzahl Posts (Default 2)'
+        required: false
+        default: '2'
+
+concurrency:
+  group: blog-autowriter
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  write:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: master
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Write blog posts
+        id: write
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: npx tsx src/scripts/blog-autowriter.ts --count ${{ github.event.inputs.count || '2' }}
+
+      - name: Commit & push
+        run: |
+          git config user.name "blog-autowriter[bot]"
+          git config user.email "noreply@lasstreffen.at"
+          git add src/content/blog public/images/blog
+          if git diff --cached --quiet; then
+            echo "Nichts zu committen — Script hätte failen müssen."
+            exit 1
+          fi
+          git commit -m "content(blog): Autowriter $(date -u +%F) — ${{ steps.write.outputs.slugs }}"
+          git push origin master

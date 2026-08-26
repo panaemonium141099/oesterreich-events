@@ -4,6 +4,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { getPostBySlug, getPostsByCategory, ALL_POSTS } from '@/content/blog';
 import { BlogTicketBox } from '@/components/Blog/BlogTicketBox';
+import { RelatedEvents } from '@/components/Blog/RelatedEvents';
 // AdSlot removed in fn-15.4 — Google AdSense was pulled completely (property
 // not approved for AdSense). The three former placements (after-lead,
 // mid-content, end-of-article) are now empty spacing only; if monetization
@@ -307,6 +308,11 @@ export default async function BlogPostPage({
             sizes="100vw"
           />
           <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/35 to-black/80" />
+          {post.heroImageCredit && (
+            <p className="absolute bottom-2 right-3 z-10 text-[10px] text-white/50">
+              {post.heroImageCredit}
+            </p>
+          )}
 
           {/* Back nav */}
           <div className="absolute top-8 left-8 z-10">
@@ -540,6 +546,9 @@ export default async function BlogPostPage({
               </div>
             </section>
           )}
+
+          {/* AEHNLICHE EVENTS — live aus der DB, Bruecke Blog -> Website (fn-19) */}
+          <RelatedEvents postTitle={post.title} />
 
           {/* CTA */}
           <div className="border border-gray-200 rounded-xl p-8 text-center bg-white">
