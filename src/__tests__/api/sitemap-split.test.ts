@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { SITEMAP_EVENTS_MAX_URLS } from '@/lib/seo/sitemap-xml';
 
 // Mock environment variables before module loads
 vi.stubEnv('NEXT_PUBLIC_SUPABASE_URL', 'https://test.supabase.co');
@@ -137,7 +138,7 @@ describe('GET /sitemap-events.xml — URL-Cap zaehlt emittierte URLs', () => {
     }));
   }
 
-  it('uebersetzte Events (2 URLs/Row) sprengen den 45k-Cap NICHT (Regression R2)', async () => {
+  it('uebersetzte Events (2 URLs/Row) sprengen den URL-Cap NICHT (Regression R2)', async () => {
     // Mock liefert unbegrenzt volle 1000er-Seiten komplett uebersetzter
     // Events — ohne URL-Cap wuerde die Datei 90k+ URLs enthalten.
     const query = createChainableQuery({ data: makeTranslatedEvents(1000, 'p'), error: null });
@@ -146,10 +147,12 @@ describe('GET /sitemap-events.xml — URL-Cap zaehlt emittierte URLs', () => {
     const response = await getEvents();
     const emitted = Number(response.headers.get('X-Sitemap-Entries'));
 
-    // Cap haelt: nie mehr als 45k EMITTIERTE URLs (Google-Limit 50k).
-    expect(emitted).toBeLessThanOrEqual(45000);
+    // Cap haelt: nie mehr EMITTIERTE URLs als die geteilte Konstante erlaubt.
+    // Bewusst gegen SITEMAP_EVENTS_MAX_URLS statt gegen eine kopierte Zahl —
+    // sonst bricht der Test bei jeder Cap-Anpassung, obwohl das Verhalten stimmt.
+    expect(emitted).toBeLessThanOrEqual(SITEMAP_EVENTS_MAX_URLS);
     // Und der Cap wird auch ausgeschoepft (kein Off-by-one weit drunter).
-    expect(emitted).toBeGreaterThanOrEqual(44999);
+    expect(emitted).toBeGreaterThanOrEqual(SITEMAP_EVENTS_MAX_URLS - 1);
     // Paar-Regel: gerade Anzahl -> nie ein halbes DE/EN-hreflang-Paar.
     expect(emitted % 2).toBe(0);
   });
@@ -210,7 +213,7 @@ describe('GET /sitemap-core.xml — Paritaet + fail loudly', () => {
     // Venues (dedupliziert aus der Mock-Query)
     expect(body).toContain('<loc>https://lasstreffen.at/venues/venue-123</loc>');
     // Kind-Datei bleibt unter dem Google-Limit
-    expect(Number(response.headers.get('X-Sitemap-Entries'))).toBeLessThanOrEqual(45000);
+    expect(Number(response.headers.get('X-Sitemap-Entries'))).toBeLessThanOrEqual(SITEMAP_EVENTS_MAX_URLS);
   });
 
   it('failt bei Venue-Query-Fehler mit 500 statt Sitemap ohne Venues', async () => {

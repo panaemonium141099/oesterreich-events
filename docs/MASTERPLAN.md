@@ -171,10 +171,35 @@ fängt Query-Fehler bewusst ab und gibt 500 statt einer truncierten Datei
 zurück (Review-Finding R3) — sie tat also genau das Richtige, nur nie
 erfolgreich.
 
-**Fix:** Keyset-Pagination über den Cursor `(quality_score, id)` plus
-Teilindex `idx_events_sitemap_keyset` (Migration
-`20260826140000_sitemap_events_keyset_index.sql`). Nachher **108 ms pro
-Seite** (Faktor 270), ~5 s für die ganze Datei.
+**Fix (deployed 2026-08-26):** Keyset-Pagination über den Cursor
+`(quality_score, id)` plus Teilindex `idx_events_sitemap_keyset_v2`
+(Migration `20260826140000_sitemap_events_keyset_index.sql`).
+
+Der Index trägt ein **statisches** `start_date >= 2026-08-01`, weil sonst
+~57.000 längst vergangene Events bei jedem Lauf sinnlos vom Heap geholt
+wurden. `CURRENT_DATE` taugt weder als Index-Prädikat (nicht immutable) noch
+als Query-Bedingung — der Planner kann die Implikation dann nicht beweisen
+und verwirft den Index. Die Route schickt deshalb ein Datums-**Literal**.
+
+Dazu wurde **MAX_URLS von 45.000 auf 15.000 gesenkt** (`SITEMAP_EVENTS_MAX_URLS`
+in `src/lib/seo/sitemap-xml.ts`, geteilt mit dem Regressionstest). Grund sind
+gemessene Laufzeiten auf der Micro-Instanz:
+
+| Zeilen | Floor | Laufzeit | verworfene Zeilen |
+|---|---|---|---|
+| 45.000 | ohne | 30.451 ms | 57.030 |
+| 45.000 | mit | 21.517 ms | 16.675 |
+| 15.000 | mit | **5.973 ms** | 3.215 |
+
+45.000 Zeilen liefen zuverlässig in den 500er-Zweig, d. h. es kam **gar nichts**
+an. 15.000 URLs nach `quality_score DESC` sind gegenüber null ein echter Gewinn
+und liegen weit über dem, was Google bei ~6.400 Klicks/Monat crawlt. Wenn die
+Instanz wächst: Wert erhöhen, aber **vorher neu messen**.
+
+**Wartung:** Der `start_date`-Floor im Index ist statisch. Er verrottet nicht
+gefährlich — der Index wird über die Jahre nur breiter und damit langsamer.
+Etwa jährlich mit höherem Floor neu anlegen und den alten droppen, sobald die
+Sitemap-Laufzeit wieder steigt.
 
 **Warum das teuer war:** 19.913 kommende Events tragen einen J70-Ticketlink,
 aber nur 1.094 dieser Seiten wurden in 50 Tagen überhaupt aufgerufen (5,6 %).

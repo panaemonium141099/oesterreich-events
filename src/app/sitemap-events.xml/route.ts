@@ -1,7 +1,7 @@
 /**
  * /sitemap-events.xml — Kind-Sitemap des Index-Splits (fn-18, Epic E12):
  * Event-Detailseiten, nach quality_score absteigend (Crawl-Budget trifft
- * die besten Events zuerst), hart gecappt auf MAX_EVENTS < 50k.
+ * die besten Events zuerst), hart gecappt auf SITEMAP_EVENTS_MAX_URLS (Begruendung siehe dort).
  *
  * Die Event-Logik (Sektion 7 des frueheren Single-File-sitemap.xml) ist
  * 1:1 hierher verschoben — inklusive der fn-17-Regel: Events mit
@@ -15,6 +15,7 @@ import { createClient } from '@supabase/supabase-js';
 import { buildEventUrlV2 } from '@/lib/utils/slugify';
 import {
   SITEMAP_BASE_URL as BASE_URL,
+  SITEMAP_EVENTS_MAX_URLS,
   renderUrlset,
   sitemapResponseHeaders,
   toISO,
@@ -23,18 +24,17 @@ import {
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 300;
-/** 45 Keyset-Runden a ~150-700 ms plus XML-Rendering von bis zu 45.000
- *  Eintraegen: gemessen ~15 s. Explizites Limit, damit die Route nicht am
+/** 15 Keyset-Runden plus XML-Rendering: gemessen ~6 s. Explizites Limit, damit die Route nicht am
  *  Plattform-Default haengenbleibt. Erfolgreiche Antworten liegen danach
  *  eine Stunde im CDN (s-maxage=3600), die DB sieht also nicht jeden
  *  Crawler-Hit. */
 export const maxDuration = 120;
 
-/** Google's hard limit is 50k URLs; we leave headroom. Cap zaehlt EMITTIERTE
- *  URLs (uebersetzte Events liefern DE- UND /en-URL = 2 Eintraege), nicht
- *  Quell-Rows — sonst koennte die Datei bei vielen title_en-Events die
- *  50k sprengen (Review-Finding R2). */
-const MAX_URLS = 45000;
+/** Siehe Begruendung und Messwerte an SITEMAP_EVENTS_MAX_URLS in
+ *  src/lib/seo/sitemap-xml.ts. Die Konstante liegt dort statt hier, damit
+ *  der Regressionstest gegen dieselbe Zahl prueft und nicht gegen eine
+ *  kopierte. */
+const MAX_URLS = SITEMAP_EVENTS_MAX_URLS;
 
 export async function GET(): Promise<NextResponse> {
   const entries: SitemapEntry[] = [];
@@ -72,9 +72,14 @@ export async function GET(): Promise<NextResponse> {
       // KEINE einzige Event-URL stand in der Sitemap.
       //
       // Keyset haengt stattdessen am Cursor (quality_score, id) und liest
-      // jede Zeile genau einmal. Mit idx_events_sitemap_keyset
-      // (quality_score DESC, id) WHERE publish_status='published' AND
-      // quality_score >= 40: 108 ms pro Seite, ~5 s fuer die ganze Datei.
+      // jede Zeile genau einmal. Mit idx_events_sitemap_keyset_v2 liegt
+      // der komplette Durchlauf bei ~6 s (Messwerte an der Konstante
+      // SITEMAP_EVENTS_MAX_URLS).
+      //
+      // Wichtig: today geht als Datums-LITERAL in die Query. Nur so kann
+      // der Planner beweisen, dass die Bedingung das statische
+      // start_date-Praedikat des Index impliziert. Mit CURRENT_DATE
+      // gelingt der Beweis nicht und er verwirft den Index.
       let cursor: { qs: number; id: string } | null = null;
       // Harte Schleifengrenze als Backstop, falls der Cursor je stagniert.
       const MAX_PAGES = Math.ceil(MAX_URLS / PAGE) + 5;
