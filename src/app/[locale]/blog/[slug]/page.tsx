@@ -384,6 +384,25 @@ export default async function BlogPostPage({
                 </div>
               ))}
             </dl>
+            {/* Ticket-Kauf-Button (fn-19): direkter Eventim-Deeplink mit
+                Affiliate-ID J70 — prominenteste Kaufgelegenheit im Post.
+                rel="sponsored" + Anzeige-Hinweis gemaess Transparenz-Zusage. */}
+            {post.ticketUrl && (
+              <div className="border-t border-gray-100 px-6 py-4">
+                <a
+                  href={post.ticketUrl}
+                  target="_blank"
+                  rel="sponsored noopener noreferrer"
+                  data-track="ticket_click"
+                  className="flex items-center justify-center gap-2 w-full bg-gray-900 text-white font-bold px-6 py-3.5 rounded-lg hover:bg-gray-800 transition-colors text-sm"
+                >
+                  🎟️ Tickets sichern
+                </a>
+                <p className="mt-2 text-center text-[10px] uppercase tracking-wider text-gray-400">
+                  Anzeige · Ticketkauf über Eventim
+                </p>
+              </div>
+            )}
             <div className="border-t border-gray-100 px-6 py-4 bg-gray-50/50">
               <a
                 href={post.keyFacts.website}

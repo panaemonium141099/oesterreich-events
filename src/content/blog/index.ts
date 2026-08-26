@@ -64,7 +64,6 @@ import { post as tirolerFestspiele } from './posts/tiroler-festspiele-erl-2026';
 import { post as festDerFreude } from './posts/fest-der-freude-2026';
 import { post as spitzerMarillenkirtag } from './posts/spitzer-marillenkirtag-2026';
 // Autowriter-Posts (fn-19) — Marker NICHT entfernen, das Script fuegt hier ein:
-import { post as beppoCalzoneDieCalzingerShowLassDieSauRausTour2026 } from './posts/beppo-calzone-die-calzinger-show-lass-die-sau-raus-tour-2026';
 import { post as theUmbilicalBrothersSpeedmouse25thAnniversaryTour2026 } from './posts/the-umbilical-brothers-speedmouse-25th-anniversary-tour-2026';
 // AUTOWRITER-IMPORTS-END
 
@@ -136,7 +135,6 @@ export const ALL_POSTS: FestivalPost[] = [
   tirolerFestspiele,
   festDerFreude,
   spitzerMarillenkirtag,
-  beppoCalzoneDieCalzingerShowLassDieSauRausTour2026,
   theUmbilicalBrothersSpeedmouse25thAnniversaryTour2026,
   // AUTOWRITER-POSTS-END
 ].sort(
