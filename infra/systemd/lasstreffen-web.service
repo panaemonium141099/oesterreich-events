@@ -1,0 +1,77 @@
+# infra/systemd/lasstreffen-web.service — fn-19
+#
+# Installation:
+#   cp infra/systemd/lasstreffen-web.service /etc/systemd/system/
+#   systemctl daemon-reload
+#   systemctl enable --now lasstreffen-web
+#
+# Erwartet den standalone-Build unter /opt/lasstreffen/current/ (siehe
+# infra/scripts/deploy.sh). `output: 'standalone'` muss in next.config.ts
+# gesetzt sein, sonst existiert server.js nicht.
+
+[Unit]
+Description=lasstreffen.at Next.js (standalone)
+Documentation=https://github.com/<owner>/oesterreich-events
+After=network-online.target docker.service
+# Kein Requires= auf docker: Next.js soll auch starten, wenn der
+# Supabase-Stack gerade neu hochkommt — die Seiten degradieren dann, statt
+# dass der Webserver ganz wegbleibt.
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=lasstreffen
+Group=lasstreffen
+
+# `current` ist ein Symlink auf das aktive Release. Deploy tauscht den
+# Symlink und macht `systemctl restart` — dadurch ist ein Rollback ein
+# einzelner ln -sfn.
+WorkingDirectory=/opt/lasstreffen/current
+
+# Secrets liegen NICHT in dieser Unit (systemd-Units sind world-readable).
+# /etc/lasstreffen/web.env gehoert root:lasstreffen mit chmod 640.
+EnvironmentFile=/etc/lasstreffen/web.env
+Environment=NODE_ENV=production
+Environment=PORT=3000
+Environment=HOSTNAME=127.0.0.1
+
+ExecStart=/usr/bin/node server.js
+
+# --- Neustartverhalten -------------------------------------------------
+Restart=always
+RestartSec=5
+# Bei Crash-Loop nicht endlos neu starten: 5 Versuche in 60 s, dann Ruhe
+# (und ein Alert ueber den failure-Handler).
+StartLimitBurst=5
+StartLimitIntervalSec=60
+
+# --- Ressourcen --------------------------------------------------------
+# 8-GB-Host: Postgres bekommt 4G (Compose-Limit), hier deckeln wir Next.js,
+# damit ein Leck nicht den OOM-Killer auf Postgres ansetzt.
+MemoryMax=1536M
+MemoryHigh=1280M
+
+# --- Haertung ----------------------------------------------------------
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+RestrictNamespaces=true
+LockPersonality=true
+
+# Next.js schreibt den ISR-Cache auf Platte (.next/cache). Bei GENAU EINEM
+# Prozess ist das korrekt und revalidateTag/revalidatePath funktionieren
+# (19 Fundstellen im Code). Bei mehreren Instanzen braeuchte es einen
+# geteilten Cache-Handler — heute nicht der Fall.
+ReadWritePaths=/opt/lasstreffen/current/.next/cache
+ReadWritePaths=/var/log/lasstreffen
+
+StandardOutput=append:/var/log/lasstreffen/web.log
+StandardError=append:/var/log/lasstreffen/web-error.log
+
+[Install]
+WantedBy=multi-user.target

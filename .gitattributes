@@ -1,1 +1,9 @@
 data/coord-backup-*.json binary
+
+# fn-19: Alles unter infra/ laeuft auf einem Linux-Server. Mit CRLF-
+# Zeilenenden bricht bash sofort ab ("$'\r': command not found") und
+# systemd/cron lesen ihre Unit- bzw. Tabellendateien falsch. Die Entwicklung
+# passiert unter Windows, also hier hart auf LF festnageln — sonst haengt der
+# Cutover an einem unsichtbaren Zeichen.
+infra/** text eol=lf
+*.sh text eol=lf

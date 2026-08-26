@@ -1,0 +1,144 @@
+# infra/docker-compose.override.yml
+#
+# Overlay auf das offizielle supabase/docker Compose-Setup (fn-19).
+#
+# Verwendung auf dem Server:
+#   cd /opt/supabase/docker
+#   ln -s /opt/lasstreffen/infra/docker-compose.override.yml docker-compose.override.yml
+#   docker compose up -d
+#
+# Docker Compose merged override auf docker-compose.yml. Alles was hier NICHT
+# steht, kommt unveraendert aus dem Upstream-File.
+#
+# Diese Datei macht drei Dinge:
+#   1. Bindet ALLE Ports auf 127.0.0.1 — nur Caddy ist oeffentlich erreichbar.
+#   2. Setzt Memory-Limits, damit ein Container den 8-GB-Host nicht auffrisst.
+#   3. Deaktiviert Services, die wir nicht brauchen (edge-runtime, supavisor)
+#      und legt Studio in ein optionales Profil.
+#
+# Image-Pins bleiben die des Upstream-Files (verifiziert 2026-08-26):
+#   db supabase/postgres:17.6.1.136 · rest postgrest/postgrest:v14.12
+#   auth supabase/gotrue:v2.189.0   · realtime supabase/realtime:v2.102.3
+#   storage supabase/storage-api:v1.60.4 · imgproxy darthsim/imgproxy:v3.30.1
+#   meta supabase/postgres-meta:v0.96.6  · api-gw envoyproxy/envoy:v1.39.0
+# Upstream vor `git pull` immer gegen diese Liste diffen — ein Postgres-
+# Major-Sprung im Upstream wuerde das Daten-Volume sonst unbrauchbar machen.
+
+services:
+  # ---------------------------------------------------------------- Postgres
+  db:
+    restart: unless-stopped
+    ports:
+      # Nur lokal. Fuer psql von aussen: SSH-Tunnel, kein offener 5432.
+      - "127.0.0.1:5432:5432"
+    volumes:
+      # Tuning fuer 8 GB RAM (CPX31). Siehe infra/postgres/tuning.conf.
+      - /opt/lasstreffen/infra/postgres/tuning.conf:/etc/postgresql-custom/lasstreffen.conf:ro
+      # Persistenz auf der NVMe, NICHT im Docker-Layer.
+      - /var/lib/lasstreffen/postgres:/var/lib/postgresql/data
+    command:
+      - postgres
+      - -c
+      - config_file=/etc/postgresql/postgresql.conf
+      - -c
+      - include_if_exists=/etc/postgresql-custom/lasstreffen.conf
+    deploy:
+      resources:
+        limits:
+          memory: 4G
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -h localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  # ------------------------------------------------------------- API-Gateway
+  # Einziger Einstiegspunkt fuer supabase-js. Caddy proxyt db.lasstreffen.at
+  # hierher; der Container selbst haengt nicht am oeffentlichen Interface.
+  api-gw:
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8000:8000"
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+
+  # ------------------------------------------------------------------ REST
+  rest:
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+
+  # ------------------------------------------------------------------ Auth
+  # 56 User, Google-OAuth + Email/Password.
+  auth:
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+
+  # -------------------------------------------------------------- Realtime
+  # Nur fuer die eingefrorenen Social-Features (7 Tabellen in der
+  # supabase_realtime-Publication). Elixir/BEAM ist der groesste
+  # Einzelverbraucher nach Postgres — deshalb hart begrenzt.
+  realtime:
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+
+  # --------------------------------------------------------------- Storage
+  # 3 Objekte, 4,5 MB. Laeuft auf lokalem Volume statt S3.
+  storage:
+    restart: unless-stopped
+    volumes:
+      - /var/lib/lasstreffen/storage:/var/lib/storage
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+
+  imgproxy:
+    restart: unless-stopped
+    volumes:
+      - /var/lib/lasstreffen/storage:/var/lib/storage
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+
+  # ------------------------------------------------------------------ Meta
+  meta:
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+
+  # ---------------------------------------------------------------- Studio
+  # Nicht im Dauerbetrieb — spart ~300 MB RAM.
+  # Bei Bedarf:  docker compose --profile admin up -d studio
+  # Erreichbar dann per SSH-Tunnel, NIE oeffentlich.
+  studio:
+    restart: "no"
+    profiles: ["admin"]
+    ports:
+      - "127.0.0.1:3001:3000"
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+
+  # ------------------------------------------------- bewusst deaktiviert
+  # Keine Edge Functions im Repo (107 API-Routes laufen alle in Next.js).
+  functions:
+    profiles: ["disabled"]
+
+  # Ein einzelner Next.js-Prozess braucht keinen externen Pooler.
+  supavisor:
+    profiles: ["disabled"]

@@ -1,0 +1,112 @@
+# infra/Caddyfile — fn-19
+#
+# Nach /etc/caddy/Caddyfile kopieren (oder symlinken), dann:
+#   caddy validate --config /etc/caddy/Caddyfile
+#   systemctl reload caddy
+#
+# Caddy ist der EINZIGE Prozess, der oeffentlich auf :80/:443 lauscht. Alle
+# Docker-Container binden auf 127.0.0.1 (siehe docker-compose.override.yml),
+# Next.js laeuft auf 127.0.0.1:3000 (siehe systemd/lasstreffen-web.service).
+#
+# DNS-Empfehlung fuer den Cutover:
+#   db.lasstreffen.at  → A-Record, Cloudflare GRAU (DNS only)
+#       Grund: Realtime nutzt WebSockets und der Storage-Upload umgeht so
+#       Cloudflares Body-Limits. Ausserdem funktioniert ACME HTTP-01 direkt.
+#   lasstreffen.at     → erst GRAU schalten, Smoke-Tests fahren, DANN auf
+#       ORANGE (proxied) umstellen und Cache-Verhalten der 25 ISR-Seiten
+#       nachmessen. Cloudflare-SSL-Modus dabei zwingend "Full (strict)".
+
+{
+	email admin@lasstreffen.at
+	# Server-Header nicht ausplaudern.
+	servers {
+		trusted_proxies static private_ranges
+	}
+}
+
+# ---------------------------------------------------------------- Web (Next.js)
+lasstreffen.at, www.lasstreffen.at {
+	encode zstd gzip
+
+	# Next.js liefert seine eigenen Security-Header inkl. der CSP mit dem
+	# CRITICAL_CSS-sha256-Hash (siehe next.config.ts / compute-csp-hash.mjs).
+	# Hier NICHTS an CSP setzen — das wuerde den Hash-Mechanismus brechen.
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		-Server
+	}
+
+	# Statische Next-Assets sind content-hashed → unbegrenzt cachebar.
+	@nextStatic path /_next/static/*
+	header @nextStatic Cache-Control "public, max-age=31536000, immutable"
+
+	reverse_proxy 127.0.0.1:3000 {
+		# Next.js braucht die echte Client-IP fuer Rate-Limits/Analytics.
+		header_up X-Real-IP {remote_host}
+		# Grosszuegig: die Smart-Suche ruft Gemini synchron auf, der
+		# Concierge-Endpoint streamt per SSE.
+		transport http {
+			read_timeout 300s
+			write_timeout 300s
+		}
+	}
+
+	log {
+		output file /var/log/caddy/web.log {
+			roll_size 50mb
+			roll_keep 5
+		}
+	}
+}
+
+# ------------------------------------------------------- Supabase-API-Gateway
+# Ersetzt https://booljdtrktpotsenbnut.supabase.co
+# supabase-js spricht hierher: /rest/v1, /auth/v1, /storage/v1, /realtime/v1
+db.lasstreffen.at {
+	encode zstd gzip
+
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		-Server
+	}
+
+	# Realtime braucht WebSocket-Upgrades. Caddy macht das seit v2
+	# automatisch, der explizite Matcher dient nur der Dokumentation und
+	# dem laengeren Timeout.
+	@websocket {
+		header Connection *Upgrade*
+		header Upgrade websocket
+	}
+	reverse_proxy @websocket 127.0.0.1:8000 {
+		transport http {
+			read_timeout 3600s
+			write_timeout 3600s
+		}
+	}
+
+	reverse_proxy 127.0.0.1:8000 {
+		header_up X-Real-IP {remote_host}
+		transport http {
+			read_timeout 120s
+			write_timeout 120s
+		}
+	}
+
+	log {
+		output file /var/log/caddy/db.log {
+			roll_size 50mb
+			roll_keep 5
+		}
+	}
+}
+
+# --------------------------------------------------------------------- Studio
+# BEWUSST NICHT KONFIGURIERT.
+#
+# Supabase Studio hat keine eigene Authentifizierung. Es oeffentlich zu
+# proxien gaebe jedem Vollzugriff auf die Datenbank. Zugriff ausschliesslich
+# per SSH-Tunnel:
+#
+#   docker compose --profile admin up -d studio
+#   ssh -N -L 3001:127.0.0.1:3001 root@<server>
+#   → http://localhost:3001

@@ -270,6 +270,35 @@ const nextConfig: NextConfig = {
     const styleSrcSources = ['style-src', ...styleSrcCommon];
     const styleSrcElemSources = ['style-src-elem', ...styleSrcCommon];
 
+    // fn-19: connect-src muss den TATSAECHLICHEN Supabase-Host erlauben.
+    //
+    // Beim Self-Hosting zeigt NEXT_PUBLIC_SUPABASE_URL auf die eigene
+    // Instanz (z.B. https://db.lasstreffen.at). Das ist eine andere Origin
+    // als die Seite selbst, also deckt 'self' sie NICHT ab — ohne diesen
+    // Eintrag blockt der Browser jeden supabase-js-Aufruf und jeden
+    // Realtime-WebSocket, und zwar lautlos in der Konsole des Users.
+    //
+    // Die *.supabase.co-Eintraege bleiben bewusst stehen: waehrend des
+    // Parallelbetriebs (14 Tage, siehe fn-19) muessen beide Origins
+    // funktionieren, und Alt-Bild-URLs in der DB zeigen weiterhin dorthin.
+    const supabaseConnectSources = ['https://*.supabase.co', 'wss://*.supabase.co'];
+    const rawSupabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    if (rawSupabaseUrl) {
+      try {
+        const { origin, host } = new URL(rawSupabaseUrl);
+        if (!origin.endsWith('.supabase.co')) {
+          supabaseConnectSources.push(origin, `wss://${host}`);
+        }
+      } catch {
+        // Unparsebare URL: nicht der richtige Ort zum Abbrechen des Builds.
+        // Der fehlende Eintrag faellt im Smoke-Test sofort auf.
+        console.warn(
+          `[next.config.ts] NEXT_PUBLIC_SUPABASE_URL ist keine gueltige URL ` +
+            `(${rawSupabaseUrl}) — CSP connect-src erlaubt nur *.supabase.co.`,
+        );
+      }
+    }
+
     // fn-15.10 round 2 (codex fix): Workbox is now SELF-HOSTED under
     // /public/workbox/, so the SW boots from the same origin as the app
     // — no third-party CDN dependency, no CSP allowlist creep, and the
@@ -285,7 +314,7 @@ const nextConfig: NextConfig = {
       "style-src-attr 'unsafe-inline'",
       "img-src 'self' data: blob: https:",
       "font-src 'self' data:",
-      "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.mapbox.com https://*.tiles.mapbox.com https://events.mapbox.com https://api.spotify.com https://accounts.spotify.com https://www.google-analytics.com https://www.googletagmanager.com https://stats.g.doubleclick.net",
+      `connect-src 'self' ${supabaseConnectSources.join(' ')} https://api.mapbox.com https://*.tiles.mapbox.com https://events.mapbox.com https://api.spotify.com https://accounts.spotify.com https://www.google-analytics.com https://www.googletagmanager.com https://stats.g.doubleclick.net`,
       "worker-src 'self' blob:",
       "child-src 'self' blob:",
       "frame-src 'self' https://accounts.google.com",

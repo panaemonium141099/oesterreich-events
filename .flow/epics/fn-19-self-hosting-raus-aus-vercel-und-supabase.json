@@ -1,0 +1,13 @@
+{
+  "branch_name": "fn-19-self-hosting-raus-aus-vercel-und-supabase",
+  "created_at": "2026-08-26T00:00:00.000000Z",
+  "depends_on_epics": [],
+  "id": "fn-19-self-hosting-raus-aus-vercel-und-supabase",
+  "next_task": 1,
+  "plan_review_status": "unknown",
+  "plan_reviewed_at": null,
+  "spec_path": ".flow/specs/fn-19-self-hosting-raus-aus-vercel-und-supabase.md",
+  "status": "open",
+  "title": "Self-Hosting: raus aus Vercel und Supabase Cloud (Hetzner CPX31)",
+  "updated_at": "2026-08-26T00:00:00.000000Z"
+}

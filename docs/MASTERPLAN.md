@@ -1,6 +1,6 @@
 # MASTERPLAN — lasstreffen.at
 
-> **Stand: 2026-07-20.** Dieses Dokument ist die gemeinsame Kontext-Basis für alle Sessions
+> **Stand: 2026-08-26.** Dieses Dokument ist die gemeinsame Kontext-Basis für alle Sessions
 > (lokal, Web, Agents). Es hält fest: Ist-Zustand mit echten Zahlen, getroffene
 > Grundsatz-Entscheidungen, kritische Betriebsbefunde und die priorisierte Roadmap.
 > Bei größeren Änderungen (Entscheidung revidiert, Meilenstein erledigt, neue Baseline
@@ -166,6 +166,47 @@ visuell. Details als Auto-Memory `project-ci-npm-lockfile-drift`.
 3. **Scraping + Feed-Imports (Eventim/Affiliate-Daten) gehören nicht auf Vercel.**
    Vercel bleibt reines Web-Hosting + Mini-Crons; die Daten-Pipeline läuft auf einem
    dedizierten Runner (GitHub Actions kurzfristig, VPS mittelfristig). Details in §5.
+4. **Raus aus Vercel und Supabase Cloud — Self-Hosting auf einem Hetzner CPX31**
+   (Entscheidung 2026-08-26, Epic `fn-19`). Der gesamte Betrieb (Web, DB, Auth,
+   Storage, Crons) zieht auf einen Host für ~17 €/Monat (CPX31 ~14 € +
+   Storage Box BX11 ~3,20 €). **Gehostet wird der Supabase-Stack selbst**
+   (Postgres + PostgREST + GoTrue + Storage + Realtime via Docker Compose),
+   nicht blankes Postgres: dadurch bleiben die 155 Files mit `@supabase/*`,
+   die 33 RLS-Policies, 74 `auth.uid()`-Referenzen, 10 RPCs und 87 Migrations
+   unverändert. Der Rewrite auf `postgres.js`/Drizzle + Auth.js wurde geprüft
+   und **verworfen** — gleicher Kostenvorteil, aber ~1 Quartal Arbeit und hohes
+   Regressionsrisiko über 107 API-Routes.
+
+   Der zweite, gleichwertige Treiber ist Performance: die in §3.5 dokumentierte
+   Sättigung ist ein RAM-Problem (Micro ~1 GB bei 3,2 GB DB). Auf 8 GB passt
+   die komplette Datenbank in den Page-Cache. Cloudflare Free kommt davor,
+   damit ohne Vercels Edge-Netz die TTFB nicht steigt (70 % des Traffics
+   kommt aus Google).
+
+   Bewusst akzeptiert: Single Point of Failure, kein managed Backup, eigene
+   Sysadmin-Verantwortung. Gegenmaßnahme ist ein **vor dem Cutover einmal
+   durchgespielter Restore-Drill** (Abnahmekriterium, nicht Kür). Scraping
+   bleibt vorerst in GitHub Actions (public repo → gratis; 144 Puppeteer-
+   Scraper würden auf 4 vCPU mit der Web-Auslieferung konkurrieren).
+   Runbook: [`infra/README.md`](../infra/README.md) ·
+   Spec: `.flow/specs/fn-19-self-hosting-raus-aus-vercel-und-supabase.md`
+
+### Nachmessung 2026-08-26 (korrigiert §3.5)
+
+Erneute Messung live gegen prod vor der fn-19-Entscheidung:
+
+| Metrik | 2026-07-07 | 2026-08-26 |
+|---|---|---|
+| DB gesamt | — | **3.207 MB**, 121 User-Tabellen |
+| `events` inkl. Indizes/TOAST | 3,75 GB | **2.575 MB** |
+| Größter Index auf `events` | `idx_events_embedding_ivfflat_future`, 1,22 GB | `events_stale_idx`, **92 MB** |
+| `auth.users` | 42 | **56** |
+| `storage.objects` | — | **3 Objekte, 4.469 kB** |
+
+⚠️ **Der 1,22-GB-Embedding-Index existiert nicht mehr** — die in §3.5
+beschriebene KI-Altlast ist bereits entfernt, `events` entsprechend
+geschrumpft. Die dortigen Größenangaben sind veraltet; die Diagnose
+„Working-Set übersteigt den RAM" bleibt für Micro (~1 GB) trotzdem gültig.
 
 ## 5. Ziel-Architektur Automatisierung
 
