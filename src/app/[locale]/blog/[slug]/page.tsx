@@ -2,7 +2,7 @@ import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
-import { getPostBySlug, getPostsByCategory, ALL_POSTS } from '@/content/blog';
+import { getPostBySlug, getPostsByCategory } from '@/content/blog';
 import { BlogTicketBox } from '@/components/Blog/BlogTicketBox';
 import { RelatedEvents } from '@/components/Blog/RelatedEvents';
 // AdSlot removed in fn-15.4 — Google AdSense was pulled completely (property
@@ -11,8 +11,18 @@ import { RelatedEvents } from '@/components/Blog/RelatedEvents';
 // returns it should land on a dedicated, GDPR-reviewed component rather
 // than re-introducing AdSense here.
 
-export function generateStaticParams() {
-  return ALL_POSTS.map(p => ({ slug: p.slug }));
+/**
+ * Build-Resilienz (Befund 2026-08-26): KEINE Build-Time-Prerenders mehr.
+ * ~65 Posts x 2 Locales feuerten beim Build je 2-3 Supabase-Queries
+ * (BlogTicketBox + RelatedEvents) als Parallel-Burst auf die
+ * Micro-Instanz — "upstream request timeout", eine Seite scheitert
+ * 3x, der ganze Vercel-Deploy bricht ab (so geschehen ab 19:05 UTC,
+ * alle master-Deploys blockiert). On-Demand-ISR entkoppelt das: die
+ * Seiten generieren sich beim ersten Hit in den Cache (revalidate
+ * unten unveraendert), der Build braucht dafuer NULL DB-Queries.
+ */
+export function generateStaticParams(): Array<{ slug: string }> {
+  return [];
 }
 
 // ISR statt reinem Build-Time-Static: die BlogTicketBox zieht live buchbare

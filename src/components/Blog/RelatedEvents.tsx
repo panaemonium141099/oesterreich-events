@@ -73,7 +73,10 @@ async function fetchRelatedEvents(postTitle: string): Promise<RelatedEvent[]> {
       for (const term of terms) {
         q = q.ilike('title', `%${term}%`);
       }
-      const { data, error } = await q.order('start_date', { ascending: true }).limit(MAX_EVENTS);
+      const { data, error } = await q
+        .order('start_date', { ascending: true })
+        .limit(MAX_EVENTS)
+        .abortSignal(AbortSignal.timeout(8000));
       if (error) {
         console.error('[RelatedEvents] title query failed:', error.message);
       } else if (data) {
@@ -92,7 +95,8 @@ async function fetchRelatedEvents(postTitle: string): Promise<RelatedEvent[]> {
         .gte('quality_score', 80)
         .order('quality_score', { ascending: false })
         .order('start_date', { ascending: true })
-        .limit(MAX_EVENTS + results.length);
+        .limit(MAX_EVENTS + results.length)
+        .abortSignal(AbortSignal.timeout(8000));
       if (error) {
         console.error('[RelatedEvents] fill query failed:', error.message);
       } else if (data) {

@@ -43,8 +43,11 @@ export const metadata: Metadata = {
 };
 
 /** Die 10 Regionen werden beim Build vorgerendert; Bezirke/Gemeinden on demand. */
-export function generateStaticParams() {
-  return Object.keys(REGION_LABELS).map((region) => ({ region }));
+/** Build-Resilienz (2026-08-26): on-demand ISR statt Build-Prerender —
+ *  die 9 Regionen x 2 Locales hingen beim Build an der Micro-Instanz
+ *  und rissen bei DB-Last den ganzen Vercel-Deploy mit (>60s-Kill). */
+export function generateStaticParams(): Array<{ region: string }> {
+  return [];
 }
 
 interface WidgetEvent {
