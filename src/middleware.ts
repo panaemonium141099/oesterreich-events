@@ -88,6 +88,16 @@ function hasSupabaseAuthCookie(request: NextRequest): boolean {
  * Jeder Parse-Fehler -> null -> Caller faellt auf den vollen
  * getUser()-Pfad zurueck (sicherer Default).
  */
+/** base64url -> UTF-8-String mit Web-APIs — die Middleware laeuft im
+ *  Edge-Runtime, Node-Buffer existiert dort nicht (Deploy-Failure
+ *  2026-08-26 19:05, erste Fassung dieses Fast-Paths). */
+function b64urlDecode(s: string): string {
+  const bin = atob(s.replace(/-/g, '+').replace(/_/g, '/'));
+  const bytes = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+  return new TextDecoder().decode(bytes);
+}
+
 function readSessionExpiry(request: NextRequest): number | null {
   try {
     const chunks = request.cookies
@@ -97,9 +107,9 @@ function readSessionExpiry(request: NextRequest): number | null {
     if (chunks.length === 0) return null;
     let raw = chunks.map(c => c.value).join('');
     if (raw.startsWith('base64-')) {
-      raw = Buffer.from(raw.slice(7), 'base64url' as BufferEncoding).toString('utf8');
+      raw = b64urlDecode(raw.slice(7));
     } else if (raw.startsWith('base64url-')) {
-      raw = Buffer.from(raw.slice(10), 'base64url' as BufferEncoding).toString('utf8');
+      raw = b64urlDecode(raw.slice(10));
     }
     let session: { expires_at?: number; access_token?: string };
     try {
@@ -112,9 +122,7 @@ function readSessionExpiry(request: NextRequest): number | null {
     // Fallback: exp aus dem JWT-Payload
     const jwt = session.access_token;
     if (typeof jwt === 'string') {
-      const payload = JSON.parse(
-        Buffer.from(jwt.split('.')[1], 'base64url' as BufferEncoding).toString('utf8'),
-      ) as { exp?: number };
+      const payload = JSON.parse(b64urlDecode(jwt.split('.')[1])) as { exp?: number };
       if (typeof payload.exp === 'number') return payload.exp;
     }
     return null;
