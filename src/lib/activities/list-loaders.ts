@@ -81,6 +81,18 @@ export const loadActivityListPageCached = unstable_cache(
       .limit(limit + 1);
 
     if (error) {
+      // BUILD-Phase: leere erste Seite statt Deploy-Abbruch — der Client
+      // (ActivitiesBrowser) laedt ohnehin ueber /api/activities nach, und
+      // das erste Revalidate fuellt den ISR-Cache, sobald die DB antwortet.
+      // Der Befund vom 2026-08-26 (I/O-Sturm): dieser throw hat als
+      // letzter verbliebener Build-Time-DB-Konsument JEDEN Vercel-Deploy
+      // gekillt. Zur LAUFZEIT bleibt er absichtlich: wirft das
+      // Revalidate, behaelt Next die letzte gute Seite (nie eine leere
+      // Liste fuer 1 h in Cache + Google-Index).
+      if (process.env.NEXT_PHASE === 'phase-production-build') {
+        console.error(`[list-loaders] Build-Fallback (leere Seite 1): ${error.message}`);
+        return { items: [], nextCursor: null };
+      }
       throw new Error(`[list-loaders] Aktivitaeten-Liste fehlgeschlagen: ${error.message}`);
     }
 
