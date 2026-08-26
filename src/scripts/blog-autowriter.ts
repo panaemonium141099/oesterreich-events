@@ -297,6 +297,30 @@ function validateDraft(d: Record<string, unknown>): string[] {
 
 // ─── Hero-Bild ────────────────────────────────────────────────────────────
 
+/** Bildbreite/-hoehe aus JPEG-SOF- bzw. PNG-IHDR-Header (ohne Dependency). */
+function imageDims(buf: Buffer): { w: number; h: number } | null {
+  if (buf.length > 24 && buf[0] === 0x89 && buf[1] === 0x50) {
+    return { w: buf.readUInt32BE(16), h: buf.readUInt32BE(20) };
+  }
+  if (buf.length > 4 && buf[0] === 0xff && buf[1] === 0xd8) {
+    let i = 2;
+    while (i < buf.length - 9) {
+      if (buf[i] !== 0xff) { i++; continue; }
+      const m = buf[i + 1];
+      if (m >= 0xc0 && m <= 0xc3) {
+        return { h: buf.readUInt16BE(i + 5), w: buf.readUInt16BE(i + 7) };
+      }
+      if (m === 0xd8 || (m >= 0xd0 && m <= 0xd7)) { i += 2; continue; }
+      i += 2 + buf.readUInt16BE(i + 2);
+    }
+  }
+  return null;
+}
+
+/** Ein Hero laeuft full-width ueber 75vh — darunter wird's sichtbar
+ *  unscharf (User-Feedback E2E 2026-08-26: Eventim-Teaser sind 222px). */
+const MIN_HERO_WIDTH = 900;
+
 async function downloadImage(url: string, destDir: string): Promise<string | null> {
   try {
     const res = await fetch(url, {
@@ -310,6 +334,11 @@ async function downloadImage(url: string, destDir: string): Promise<string | nul
     const buf = Buffer.from(await res.arrayBuffer());
     // Winzige Platzhalter/Tracking-Pixel aussortieren
     if (buf.length < 15_000) return null;
+    const dims = imageDims(buf);
+    if (!dims || dims.w < MIN_HERO_WIDTH) {
+      log(`  Bild zu klein (${dims ? dims.w + 'px' : 'unlesbar'}): ${url}`);
+      return null;
+    }
     fs.mkdirSync(destDir, { recursive: true });
     const file = path.join(destDir, `hero.${ext}`);
     fs.writeFileSync(file, buf);
@@ -325,19 +354,28 @@ interface HeroResult { heroImage: string; credit: string }
 async function wikimediaHero(title: string, destDir: string): Promise<HeroResult | null> {
   try {
     const q = encodeURIComponent(title.replace(/\b(19|20)\d{2}\b/g, '').trim());
-    const api = `https://commons.wikimedia.org/w/api.php?action=query&format=json&generator=search&gsrsearch=${q}&gsrnamespace=6&gsrlimit=8&prop=imageinfo&iiprop=url|extmetadata&iiurlwidth=1600`;
+    const api = `https://commons.wikimedia.org/w/api.php?action=query&format=json&generator=search&gsrsearch=${q}&gsrnamespace=6&gsrlimit=8&prop=imageinfo&iiprop=url|size|extmetadata&iiurlwidth=1800`;
     const res = await fetch(api, { headers: { 'User-Agent': 'LassTreffenBot/1.0 (https://lasstreffen.at)' }, signal: AbortSignal.timeout(20_000) });
     if (!res.ok) return null;
     const json = await res.json() as {
-      query?: { pages?: Record<string, { imageinfo?: Array<{ thumburl?: string; url?: string; extmetadata?: Record<string, { value?: string }> }> }> };
+      query?: { pages?: Record<string, { imageinfo?: Array<{ thumburl?: string; url?: string; width?: number; height?: number; extmetadata?: Record<string, { value?: string }> }> }> };
     };
-    for (const page of Object.values(json.query?.pages ?? {})) {
+    // Querformat zuerst — der Hero ist breit; Hochkant beschneidet Koepfe.
+    const pages = Object.values(json.query?.pages ?? {}).sort((a, b) => {
+      const ratio = (p: typeof a) => {
+        const i = p.imageinfo?.[0];
+        return i?.width && i?.height ? i.width / i.height : 0;
+      };
+      return ratio(b) - ratio(a);
+    });
+    for (const page of pages) {
       const info = page.imageinfo?.[0];
       const meta = info?.extmetadata ?? {};
       const license = meta.LicenseShortName?.value ?? '';
       const url = info?.thumburl ?? info?.url;
       if (!url || !/(^CC|Public domain)/i.test(license)) continue;
-      if (!/\.(jpe?g|png|webp)$/i.test(url)) continue;
+      if ((info?.width ?? 0) < 1200) continue;
+      if (!/\.(jpe?g|png)/i.test(url)) continue;
       const file = await downloadImage(url, destDir);
       if (!file) continue;
       const artist = (meta.Artist?.value ?? '').replace(/<[^>]+>/g, '').trim();
@@ -454,9 +492,17 @@ async function main(): Promise<void> {
     if (knownSlugs.has(slug)) slug = `${slug}-${c.id.slice(0, 6)}`;
 
     try {
+      // Hero ZUERST (billige HTTP-Checks): ohne brauchbares Bild sparen
+      // wir uns die zwei teuren Gemini-Calls komplett.
+      const hero = await resolveHero(c, slug);
+      if (!hero) {
+        log('  Kein brauchbares Hero-Bild — skip');
+        continue;
+      }
+
       const research = await researchEvent(ai, c);
       if (research.trim().length < 800) {
-        log('  Recherche zu dünn — skip');
+        log('  Recherche zu duenn — skip');
         continue;
       }
 
@@ -474,12 +520,6 @@ async function main(): Promise<void> {
         continue;
       }
 
-      const hero = await resolveHero(c, slug);
-      if (!hero) {
-        log('  Kein brauchbares Hero-Bild — skip');
-        continue;
-      }
-
       const kf = draft.keyFacts as Record<string, string>;
       const endDate = /^\d{4}-\d{2}-\d{2}$/.test(String(draft.endDate ?? ''))
         && String(draft.endDate) >= datePart(c.start_date)
@@ -494,6 +534,8 @@ async function main(): Promise<void> {
         subtitle: draft.subtitle,
         heroImage: heroPath,
         heroImageCredit: hero.credit,
+        // Direkter Kauf-Button (Eventim-Deeplink traegt Affiliate-ID J70)
+        ...(c.ticket_url ? { ticketUrl: c.ticket_url } : {}),
         publishDate: new Date().toISOString().slice(0, 10),
         updatedDate: new Date().toISOString().slice(0, 10),
         readingTime: Math.max(4, Math.round(

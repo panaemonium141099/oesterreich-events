@@ -33,6 +33,9 @@ export interface FestivalPost {
   title: string;
   subtitle: string;
   heroImage: string;
+  /** Direkter Ticket-Kauflink (traegt die Eventim-Affiliate-ID J70).
+   *  Rendert einen prominenten Kauf-Button in der KeyFacts-Box. */
+  ticketUrl?: string;
   /** Bildquelle/Lizenz-Zeile fuer das Hero-Bild (Attribution-Pflicht bei
    *  Fremdbildern, z. B. "Foto: Eventim" oder "Foto: <Autor>, CC BY 2.0,
    *  Wikimedia Commons"). Wird als Overlay unten rechts im Hero gerendert. */
