@@ -91,6 +91,51 @@ function uniqueByTitleAndImage<T extends { title: string | null; image_url?: str
   return out;
 }
 
+/** Landing-Auswahl aus dem Festival-Pool (Befund 2026-08-26):
+ *
+ *  1. Jahres-Serien raus: Zeilen mit > 45 Tagen Laufzeit, die bereits
+ *     laufen, sind Serien-Artefakte der Series-Detection ("On the Couch",
+ *     Jän–Dez), keine Festivals. Kommende Festivals zählen unabhängig
+ *     von der Dauer.
+ *  2. Tagesrotation: deterministischer Shuffle mit Datums-Seed — die
+ *     ISR-Shell (revalidate 3600) zeigt damit jeden Tag eine andere
+ *     Viererauswahl, ohne die statische Cachebarkeit zu verlieren.
+ *     Festivals mit gefetchtem Lineup zuerst (die Sektion heißt
+ *     "Festivals mit Line-up"), Anzeige chronologisch sortiert.
+ */
+function pickFestivals<T extends { id: string; starts_at: string | null; ends_at: string | null; lineup_status?: string }>(
+  pool: T[],
+  count: number,
+): T[] {
+  const todayStr = new Date().toISOString().split('T')[0];
+  const sane = pool.filter(f => {
+    if (!f.starts_at) return false;
+    if (f.starts_at >= todayStr) return true; // kommend → immer ok
+    const days = (Date.parse(f.ends_at ?? f.starts_at) - Date.parse(f.starts_at)) / 86_400_000;
+    return days <= 45; // läuft gerade → nur echte Festival-Dauern
+  });
+
+  // Mulberry32-Shuffle, Seed = Kalendertag → stabil pro Tag, rotiert täglich
+  const daySeed = Number(todayStr.replace(/-/g, ''));
+  let a = daySeed >>> 0;
+  const rand = () => {
+    a |= 0; a = (a + 0x6d2b79f5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+  const shuffled = [...sane];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(rand() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  const withLineup = shuffled.filter(f => f.lineup_status === 'fetched');
+  const rest = shuffled.filter(f => f.lineup_status !== 'fetched');
+  return [...withLineup, ...rest]
+    .slice(0, count)
+    .sort((x, y) => (x.starts_at ?? '').localeCompare(y.starts_at ?? ''));
+}
+
 /* Deterministic category-image fallback for festivals whose parent_event
    has no image_url (90 %+ of the registry data right now). Picks one of
    30 musik-N.jpg from /public/images/categories/ based on a stable hash
@@ -165,12 +210,18 @@ export async function getLandingData(): Promise<LandingData> {
     // Detail-Page in /events/ → wir signalisieren via href=null an die
     // Card dass sie nicht klickbar sein darf (sonst landet der User auf
     // einem 404 wie /events/8010-graz/2026-02-09/murszene-graz).
+    //
+    // Bewusst POOL statt Top-4 (Befund 2026-08-26): sortiert nach
+    // starts_at ASC gewannen immer dieselben vier Jahres-Serien
+    // (Start Jänner, Ende Dezember — "On the Couch", "Murszene" …) die
+    // Slots; echte kommende Festivals kamen nie dran. Die Auswahl
+    // (Serien-Filter + Tagesrotation) passiert unten in pickFestivals().
     supabase
       .from('festivals')
       .select('*, parent_event:events!parent_event_id(id, slug, start_date, postal_code, address, bundesland, location_name, image_url)')
       .gte('ends_at', today.split('T')[0])
       .order('starts_at', { ascending: true })
-      .limit(4),
+      .limit(48),
   ]);
 
   const todayWeekend = uniqueByTitleAndImage(
@@ -191,7 +242,10 @@ export async function getLandingData(): Promise<LandingData> {
   type FestivalRow = Festival & {
     parent_event: ParentEventRow | ParentEventRow[] | null;
   };
-  const festivals: LandingFestival[] = ((festivalsRes.data ?? []) as unknown as FestivalRow[]).map(f => {
+  const festivals: LandingFestival[] = pickFestivals(
+    (festivalsRes.data ?? []) as unknown as FestivalRow[],
+    4,
+  ).map(f => {
     const parentEvent = Array.isArray(f.parent_event) ? f.parent_event[0] : f.parent_event;
     const { parent_event: _omit, ...rest } = f;
     void _omit;
