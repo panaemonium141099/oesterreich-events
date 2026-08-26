@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { SITEMAP_EVENTS_MAX_URLS } from '@/lib/seo/sitemap-xml';
+import { SITEMAP_URLSET_HARD_LIMIT } from '@/lib/seo/sitemap-xml';
+import { SITEMAP_EVENTS_SHARD_COUNT, sitemapEventsShardPath } from '@/lib/seo/sitemap-events-shard';
 
 // Mock environment variables before module loads
 vi.stubEnv('NEXT_PUBLIC_SUPABASE_URL', 'https://test.supabase.co');
@@ -41,7 +42,12 @@ describe('GET /sitemap.xml (Sitemap-INDEX, Epic E12)', () => {
     expect(response.headers.get('Content-Type')).toContain('application/xml');
     expect(body).toContain('<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">');
     expect(body).toContain('<loc>https://lasstreffen.at/sitemap-core.xml</loc>');
+    // Alle Event-Shards (2026-08-26): Shard 0 unter dem alten Pfad, Rest -2..-N
+    for (let shard = 0; shard < SITEMAP_EVENTS_SHARD_COUNT; shard++) {
+      expect(body).toContain(`<loc>https://lasstreffen.at${sitemapEventsShardPath(shard)}</loc>`);
+    }
     expect(body).toContain('<loc>https://lasstreffen.at/sitemap-events.xml</loc>');
+    expect(body).toContain('<loc>https://lasstreffen.at/sitemap-events-2.xml</loc>');
     expect(body).toContain('<loc>https://lasstreffen.at/sitemap-activities.xml</loc>');
     // Ein Index enthaelt KEINE <url>-Eintraege
     expect(body).not.toContain('<urlset');
@@ -138,23 +144,18 @@ describe('GET /sitemap-events.xml — URL-Cap zaehlt emittierte URLs', () => {
     }));
   }
 
-  it('uebersetzte Events (2 URLs/Row) sprengen den URL-Cap NICHT (Regression R2)', async () => {
+  it('ein Shard ueber Googles 50k-Grenze failt LAUT mit 500 statt zu truncieren (R2+R3)', async () => {
     // Mock liefert unbegrenzt volle 1000er-Seiten komplett uebersetzter
-    // Events — ohne URL-Cap wuerde die Datei 90k+ URLs enthalten.
+    // Events (2 URLs/Row) — ein realer Shard dieser Groesse hiesse
+    // SITEMAP_EVENTS_SHARD_COUNT ist zu klein. Seit dem Shard-Split gibt
+    // es keinen stillen Cap mehr: die Route muss laut scheitern.
     const query = createChainableQuery({ data: makeTranslatedEvents(1000, 'p'), error: null });
     mockFrom.mockReturnValue(query);
 
     const response = await getEvents();
-    const emitted = Number(response.headers.get('X-Sitemap-Entries'));
 
-    // Cap haelt: nie mehr EMITTIERTE URLs als die geteilte Konstante erlaubt.
-    // Bewusst gegen SITEMAP_EVENTS_MAX_URLS statt gegen eine kopierte Zahl —
-    // sonst bricht der Test bei jeder Cap-Anpassung, obwohl das Verhalten stimmt.
-    expect(emitted).toBeLessThanOrEqual(SITEMAP_EVENTS_MAX_URLS);
-    // Und der Cap wird auch ausgeschoepft (kein Off-by-one weit drunter).
-    expect(emitted).toBeGreaterThanOrEqual(SITEMAP_EVENTS_MAX_URLS - 1);
-    // Paar-Regel: gerade Anzahl -> nie ein halbes DE/EN-hreflang-Paar.
-    expect(emitted % 2).toBe(0);
+    expect(response.status).toBe(500);
+    expect(SITEMAP_URLSET_HARD_LIMIT).toBeLessThan(50000);
   });
 
   it('emittiert DE- und /en-URL als Paar mit xhtml:link-Alternates (fn-17-Paritaet)', async () => {
@@ -213,7 +214,7 @@ describe('GET /sitemap-core.xml — Paritaet + fail loudly', () => {
     // Venues (dedupliziert aus der Mock-Query)
     expect(body).toContain('<loc>https://lasstreffen.at/venues/venue-123</loc>');
     // Kind-Datei bleibt unter dem Google-Limit
-    expect(Number(response.headers.get('X-Sitemap-Entries'))).toBeLessThanOrEqual(SITEMAP_EVENTS_MAX_URLS);
+    expect(Number(response.headers.get('X-Sitemap-Entries'))).toBeLessThanOrEqual(SITEMAP_URLSET_HARD_LIMIT);
   });
 
   it('failt bei Venue-Query-Fehler mit 500 statt Sitemap ohne Venues', async () => {

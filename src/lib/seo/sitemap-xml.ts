@@ -89,24 +89,19 @@ export function sitemapResponseHeaders(entryCount: number): Record<string, strin
 }
 
 /**
- * URL-Cap fuer /sitemap-events.xml. Zaehlt EMITTIERTE URLs (uebersetzte
- * Events liefern DE- UND /en-URL = 2 Eintraege), nicht Quell-Rows — sonst
- * koennte die Datei Googles 50k-Grenze sprengen (Review-Finding R2).
+ * Harte Obergrenze EMITTIERTER URLs pro <urlset>-Datei. Google erlaubt
+ * 50.000; wir lassen Headroom. Uebersetzte Events liefern DE- UND /en-URL
+ * = 2 Eintraege pro Row (Review-Finding R2), gezaehlt werden URLs.
  *
- * Warum 15.000 und nicht mehr: Die Micro-Instanz braucht fuer diese Zeilen
- * Random-Heap-I/O, und die skaliert linear. Gemessen auf Prod (2026-08-26,
- * EXPLAIN ANALYZE, idx_events_sitemap_keyset_v2):
+ * Das ist KEIN stiller Cap mehr: seit dem Shard-Split (2026-08-26,
+ * sitemap-events-shard.ts) enthalten die Event-Sitemaps ALLE
+ * sitemap-faehigen Events. Ueberschreitet ein Shard diese Grenze,
+ * failt die Route laut mit 500 (Review-Finding R3) — dann ist
+ * SITEMAP_EVENTS_SHARD_COUNT zu erhoehen.
  *
- *   15.000 Zeilen ->  5,97 s  (18.299 Buffer)
- *   45.000 Zeilen -> 21,52 s  (61.967 Buffer)
- *
- * Mit 45.000 lief die Route ueber alle Keyset-Runden in den 500er-Zweig und
- * lieferte GAR NICHTS aus — der Zustand seit dem Sitemap-Split am 25.07.
- * 15.000 URLs nach quality_score DESC sind gegenueber null ein echter Gewinn
- * und liegen weit ueber dem, was Google bei ~6.400 Klicks/Monat crawlt.
- *
- * Bewusst hier statt in der Route: route.ts-Dateien vertragen keine freien
- * Exports (Next-Route-Segment-Validierung), und der Test soll gegen dieselbe
- * Konstante pruefen statt gegen eine kopierte Zahl.
+ * Historie des frueheren SITEMAP_EVENTS_MAX_URLS = 15.000: die Micro-
+ * Instanz schaffte nicht mehr Zeilen in EINEM Request (15k ~6 s,
+ * 45k ~21,5 s, Random-Heap-I/O linear). Der Shard-Split loest das ueber
+ * mehrere kleine Requests statt eines grossen.
  */
-export const SITEMAP_EVENTS_MAX_URLS = 15000;
+export const SITEMAP_URLSET_HARD_LIMIT = 49000;
