@@ -46,10 +46,11 @@ function makeRequest(params: Record<string, string> = {}): NextRequest {
   return new NextRequest(url);
 }
 
-function makeRows(count: number): Array<{ id: string; name: string }> {
+function makeRows(count: number): Array<{ id: string; name: string; quality_score: number }> {
   return Array.from({ length: count }, (_, i) => ({
     id: `00000000-0000-4000-8000-${String(i).padStart(12, '0')}`,
     name: `Aktivität ${String(i).padStart(3, '0')}`,
+    quality_score: 90 - i,
   }));
 }
 
@@ -75,8 +76,9 @@ describe('GET /api/activities', () => {
     expect(query.eq).toHaveBeenCalledWith('visible', true);
     expect(query.eq).toHaveBeenCalledWith('is_closed', false);
 
-    // Fixe deterministische Sortierung: name ASC, id ASC.
-    expect(query.order).toHaveBeenNthCalledWith(1, 'name', { ascending: true });
+    // Fixe deterministische Sortierung: quality_score DESC, id ASC
+    // (Ranking-Umbau 2026-08-26).
+    expect(query.order).toHaveBeenNthCalledWith(1, 'quality_score', { ascending: false });
     expect(query.order).toHaveBeenNthCalledWith(2, 'id', { ascending: true });
 
     // limit+1 fuer hasMore — KEIN count (weder exact noch planned).
@@ -103,7 +105,7 @@ describe('GET /api/activities', () => {
     expect(query.contains).toHaveBeenCalledWith('tags', ['schwimmen']);
   });
 
-  it('paginiert per (name,id)-Cursor: limit+1, Slice, nextCursor aus letzter Row', async () => {
+  it('paginiert per (quality_score,id)-Cursor: limit+1, Slice, nextCursor aus letzter Row', async () => {
     const rows = makeRows(6); // limit 5 -> 6 Rows = hasMore
     const query = createChainableQuery({ data: rows, error: null });
     mockFrom.mockReturnValue(query);
@@ -117,7 +119,7 @@ describe('GET /api/activities', () => {
 
     // nextCursor = raw-DB-Werte der LETZTEN zurueckgegebenen Row (Index 4)
     expect(decodeActivityCursor(body.nextCursor)).toEqual({
-      name: rows[4].name,
+      q: rows[4].quality_score,
       id: rows[4].id,
     });
   });
@@ -127,13 +129,13 @@ describe('GET /api/activities', () => {
     mockFrom.mockReturnValue(query);
 
     const cursor = encodeActivityCursor({
-      name: 'Bäder, Thermen (Süd)',
+      q: 42,
       id: '01234567-89ab-cdef-0123-456789abcdef',
     });
     await GET(makeRequest({ cursor }));
 
     expect(query.or).toHaveBeenCalledWith(
-      'name.gt."Bäder, Thermen (Süd)",and(name.eq."Bäder, Thermen (Süd)",id.gt."01234567-89ab-cdef-0123-456789abcdef")',
+      'quality_score.lt.42,and(quality_score.eq.42,id.gt."01234567-89ab-cdef-0123-456789abcdef")',
     );
   });
 

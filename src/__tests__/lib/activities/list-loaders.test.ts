@@ -30,8 +30,8 @@ const ID_A = '00000000-0000-0000-0000-00000000000a';
 const ID_B = '00000000-0000-0000-0000-00000000000b';
 const ID_C = '00000000-0000-0000-0000-00000000000c';
 
-function row(id: string, name: string) {
-  return { id, name, slug: name, tags: [], town: null, bundesland: 'wien', setting: null, price_hint: null, images: null };
+function row(id: string, name: string, quality_score: number) {
+  return { id, name, quality_score, slug: name, tags: [], town: null, bundesland: 'wien', setting: null, price_hint: null, images: null };
 }
 
 describe('loadActivityListPageCached', () => {
@@ -42,17 +42,17 @@ describe('loadActivityListPageCached', () => {
   });
 
   it('kappt die limit+1-Row und kodiert den Cursor der letzten gelieferten Row', async () => {
-    limitMock.mockResolvedValue({ data: [row(ID_A, 'Alm'), row(ID_B, 'Burg'), row(ID_C, 'City')], error: null });
+    limitMock.mockResolvedValue({ data: [row(ID_A, 'Alm', 80), row(ID_B, 'Burg', 75), row(ID_C, 'City', 70)], error: null });
 
     const page = await loadActivityListPageCached(2);
 
     expect(limitMock).toHaveBeenCalledWith(3);
     expect(page.items.map((i) => i.name)).toEqual(['Alm', 'Burg']);
-    expect(decodeActivityCursor(page.nextCursor)).toEqual({ name: 'Burg', id: ID_B });
+    expect(decodeActivityCursor(page.nextCursor)).toEqual({ q: 75, id: ID_B });
   });
 
   it('liefert nextCursor=null wenn keine Folgeseite existiert und wirft bei DB-Fehlern', async () => {
-    limitMock.mockResolvedValue({ data: [row(ID_A, 'Alm')], error: null });
+    limitMock.mockResolvedValue({ data: [row(ID_A, 'Alm', 80)], error: null });
     await expect(loadActivityListPageCached(2)).resolves.toMatchObject({ nextCursor: null });
 
     limitMock.mockResolvedValue({ data: null, error: { message: 'statement timeout' } });
