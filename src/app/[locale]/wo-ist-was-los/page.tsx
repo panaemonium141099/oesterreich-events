@@ -63,8 +63,12 @@ async function loadWeekStats(): Promise<WeekStats | null> {
 
   try {
     const supabase = createClient(url, key);
+    // Harter Timeout: haengt die DB (I/O-Sturm), darf der Prerender nie in
+    // den 60s-Static-Kill laufen — Seite rendert dann ohne Ranking und das
+    // naechste Revalidate traegt es nach.
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data, error } = await (supabase.rpc as any)('get_event_map_points');
+    const { data, error } = await (supabase.rpc as any)('get_event_map_points')
+      .abortSignal(AbortSignal.timeout(15_000));
     if (error || !data) return null;
 
     const p = data as {

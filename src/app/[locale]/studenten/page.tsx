@@ -31,7 +31,15 @@ export const metadata: Metadata = {
 };
 
 export default async function StudentenIndexPage() {
-  const { cities, todayEvents } = await loadStudentIndex();
+  // Build-Resilienz (2026-08-26): haengt Supabase, rendert die Seite mit
+  // leeren Zaehlern statt den Deploy zu killen (60s-Static-Kill im
+  // I/O-Sturm, siehe Vercel-Log 20:21). Revalidate (1 h) fuellt nach.
+  const { cities, todayEvents } = await Promise.race([
+    loadStudentIndex(),
+    new Promise<Awaited<ReturnType<typeof loadStudentIndex>>>(resolve =>
+      setTimeout(() => resolve({ cities: [], todayEvents: [] } as unknown as Awaited<ReturnType<typeof loadStudentIndex>>), 15_000),
+    ),
+  ]).catch(() => ({ cities: [], todayEvents: [] } as unknown as Awaited<ReturnType<typeof loadStudentIndex>>));
 
   return (
     <main className="min-h-screen bg-surface text-white">
