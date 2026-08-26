@@ -68,6 +68,11 @@ export function V4ArtistSearchResult() {
       router.push(`/auth/login?next=/artists?q=${encodeURIComponent(artist.name)}`);
       return;
     }
+    // Optimistisch: sofort als gefolgt anzeigen, bei Fehler zuruecknehmen.
+    // Der Server-Roundtrip (Session-Refresh + Upsert) soll nie zwischen
+    // Klick und sichtbarem Zustand stehen.
+    setFollowed(prev => new Set(prev).add(artist.id));
+    setToast(`Du folgst jetzt ${artist.name}. Wir benachrichtigen dich bei Österreich-Terminen.`);
     try {
       const res = await fetch('/api/artists/follow', {
         method: 'POST',
@@ -78,13 +83,14 @@ export function V4ArtistSearchResult() {
           spotify_image_url: artist.image_url,
         }),
       });
-      if (!res.ok) {
-        return;
-      }
-      setFollowed(prev => new Set(prev).add(artist.id));
-      setToast(`Du folgst jetzt ${artist.name}. Wir benachrichtigen dich bei Österreich-Terminen.`);
+      if (!res.ok) throw new Error(String(res.status));
     } catch {
-      // silent — UI stays unchanged
+      setFollowed(prev => {
+        const next = new Set(prev);
+        next.delete(artist.id);
+        return next;
+      });
+      setToast(`Folgen von ${artist.name} hat nicht geklappt — bitte nochmal versuchen.`);
     }
   }
 

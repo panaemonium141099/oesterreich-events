@@ -71,6 +71,62 @@ function hasSupabaseAuthCookie(request: NextRequest): boolean {
   return false;
 }
 
+/**
+ * Liest expires_at aus dem Supabase-Session-Cookie OHNE Netzwerk-Roundtrip
+ * (Befund 2026-08-26: getUser() + profiles-Lookup liefen bei JEDEM Request
+ * eingeloggter User — zwei sequenzielle Supabase-Roundtrips pro Navigation,
+ * mit den 3s-Timeouts bis zu 6 s bevor irgendeine Seite rendert; bei
+ * statischen ISR-Seiten war das der GESAMTE Server-Overhead pro Klick).
+ *
+ * Solange der Access-Token noch deutlich gueltig ist, gibt es nichts zu
+ * refreshen — die RSC-/API-Handler validieren ohnehin selbst. Wir decodieren
+ * nur (keine Signatur-Pruefung — Entscheidungsgrundlage ist allein "muss
+ * bald refresht werden?", nie Autorisierung).
+ *
+ * Cookie-Format @supabase/ssr: ggf. gechunkt (.0/.1), Wert optional mit
+ * "base64url-"-Praefix; darin JSON mit expires_at (Unix-Sekunden).
+ * Jeder Parse-Fehler -> null -> Caller faellt auf den vollen
+ * getUser()-Pfad zurueck (sicherer Default).
+ */
+function readSessionExpiry(request: NextRequest): number | null {
+  try {
+    const chunks = request.cookies
+      .getAll()
+      .filter(c => c.name.startsWith('sb-') && c.name.includes('auth-token') && !c.name.includes('-code-verifier'))
+      .sort((a, b) => a.name.localeCompare(b.name, 'en', { numeric: true }));
+    if (chunks.length === 0) return null;
+    let raw = chunks.map(c => c.value).join('');
+    if (raw.startsWith('base64-')) {
+      raw = Buffer.from(raw.slice(7), 'base64url' as BufferEncoding).toString('utf8');
+    } else if (raw.startsWith('base64url-')) {
+      raw = Buffer.from(raw.slice(10), 'base64url' as BufferEncoding).toString('utf8');
+    }
+    let session: { expires_at?: number; access_token?: string };
+    try {
+      session = JSON.parse(raw);
+    } catch {
+      // Aeltere Cookie-Schreiber URL-encodieren den JSON-Wert.
+      session = JSON.parse(decodeURIComponent(raw));
+    }
+    if (typeof session.expires_at === 'number') return session.expires_at;
+    // Fallback: exp aus dem JWT-Payload
+    const jwt = session.access_token;
+    if (typeof jwt === 'string') {
+      const payload = JSON.parse(
+        Buffer.from(jwt.split('.')[1], 'base64url' as BufferEncoding).toString('utf8'),
+      ) as { exp?: number };
+      if (typeof payload.exp === 'number') return payload.exp;
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+/** Refresh-Schwelle: erst wenn der Token in < 2 min ablaeuft, lohnt der
+ *  getUser()-Roundtrip. (Supabase-Tokens leben standardmaessig 1 h.) */
+const REFRESH_MARGIN_S = 120;
+
 export async function middleware(request: NextRequest) {
   // ─── Rate-Limiting für /api/* ────────────────────────────────────
   // Schutz gegen einfache Scraper-Bots + bug-induzierte Loops + Bill-Spike.
@@ -128,6 +184,17 @@ export async function middleware(request: NextRequest) {
   // (intlMiddleware setzt kein Cookie — localeCookie: false — die
   // Response bleibt also weiterhin ISR-/cache-fähig.)
   if (!hasSupabaseAuthCookie(request)) {
+    return baseResponse();
+  }
+
+  // Fast-Path fuer eingeloggte User: Token noch laenger gueltig -> kein
+  // Session-Refresh und kein Ghost-Check noetig, Seite rendert sofort.
+  // (Der Ghost-Session-Check unten laeuft damit nur noch in den seltenen
+  // Refresh-Fenstern — fuer den Zweck "geloeschtes Profil erkennen"
+  // reicht das: spaetestens beim naechsten Token-Refresh, d. h. binnen
+  // einer Stunde, wird er wieder ausgefuehrt.)
+  const expiresAt = readSessionExpiry(request);
+  if (expiresAt !== null && expiresAt - Date.now() / 1000 > REFRESH_MARGIN_S) {
     return baseResponse();
   }
 
