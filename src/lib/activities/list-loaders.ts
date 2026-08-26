@@ -3,8 +3,9 @@
  *
  * Liefert exakt das, was /api/activities ohne Filter als Seite 1 liefern
  * wuerde — gleiche Spaltenteilmenge, gleiche Anzeige-Bedingung
- * (`visible AND NOT is_closed`), gleiche fixe Sortierung `name ASC,
- * id ASC` und derselbe Cursor (encodeActivityCursor). Nur so setzt das
+ * (`visible AND NOT is_closed`), gleiche fixe Sortierung
+ * `quality_score DESC, id ASC` (Ranking-Umbau 2026-08-26) und derselbe
+ * Cursor (encodeActivityCursor). Nur so setzt das
  * client-seitige "Mehr laden" die serverseitig gerenderte Liste
  * ueberlappungs- und lueckenfrei fort.
  *
@@ -35,6 +36,8 @@ export interface ActivityListItem {
   price_hint: string | null;
   /** Roh-jsonb — nur ueber ActivityCardImage/renderableImageUrls lesen. */
   images: unknown;
+  /** Ranking-Spalte — nur fuer die Cursor-Fortsetzung, nicht rendern. */
+  quality_score: number;
 }
 
 export interface ActivityListPage {
@@ -43,7 +46,8 @@ export interface ActivityListPage {
   nextCursor: string | null;
 }
 
-const LIST_COLUMNS = 'id, slug, name, tags, town, bundesland, setting, price_hint, images';
+const LIST_COLUMNS =
+  'id, slug, name, tags, town, bundesland, setting, price_hint, images, quality_score';
 
 /** Lazy — kein Modul-Load-Throw, damit tsc/Tests ohne Env laufen. */
 function getServiceClient(): SupabaseClient {
@@ -71,7 +75,7 @@ export const loadActivityListPageCached = unstable_cache(
       .select(LIST_COLUMNS)
       .eq('visible', true)
       .eq('is_closed', false)
-      .order('name', { ascending: true })
+      .order('quality_score', { ascending: false })
       .order('id', { ascending: true })
       // limit+1 wie die API: hasMore ohne count (Supabase Micro).
       .limit(limit + 1);
@@ -86,7 +90,7 @@ export const loadActivityListPageCached = unstable_cache(
     const last = items[items.length - 1];
     return {
       items,
-      nextCursor: hasMore && last ? encodeActivityCursor({ name: last.name, id: last.id }) : null,
+      nextCursor: hasMore && last ? encodeActivityCursor({ q: last.quality_score, id: last.id }) : null,
     };
   },
   ['activity-list-page'],

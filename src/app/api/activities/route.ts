@@ -2,10 +2,13 @@
  * /api/activities — cursor-paginierte Freizeitaktivitaeten (fn-18 Task 3).
  *
  * Wire-Contract (Task-Spec, eingefroren):
- *  - Default-Sortierung fix: `name ASC, id ASC` (deterministisch).
- *  - Cursor: base64url-JSON `{"name":"<raw-DB-Wert>","id":"<uuid>"}`
+ *  - Default-Sortierung fix: `quality_score DESC, id ASC` (Ranking-Umbau
+ *    2026-08-26 — vorberechneter Content-/Saison-Score mit taeglichem
+ *    Rotations-Jitter statt Alphabet; Migration
+ *    20260826180000_activities_quality_score.sql).
+ *  - Cursor: base64url-JSON `{"q":<int>,"id":"<uuid>"}`
  *    (src/lib/activities/cursor.ts); Lookup-Regel
- *    `name > $n OR (name = $n AND id > $i)`.
+ *    `quality_score < $q OR (quality_score = $q AND id > $i)`.
  *  - Filter: `gemeinde=<kanonischer gemeinde_slug, z.B. 7100-neusiedl-am-see>`
  *    (Spalte gemeinde_slug), `bundesland=<kanonische lowercase-ID>`,
  *    `tag=<Taxonomie-Tag>` (tags-Array-Containment),
@@ -35,7 +38,7 @@ const MAX_PAGE_SIZE = 200;
 const LIST_COLUMNS =
   'id, slug, name, description_short, tags, setting, lat, lng, town, ' +
   'gemeinde_slug, bundesland, opening_times, online_bookable, images, ' +
-  'price_hint, updated_at';
+  'price_hint, updated_at, quality_score';
 
 /** Lazy Supabase client — validates env vars at call time. */
 function getSupabaseClient(): SupabaseClient | null {
@@ -91,8 +94,8 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     query = query.or(buildActivityCursorFilter(cursor));
   }
 
-  // Fixe deterministische Sortierung (Task-Spec): name ASC, id ASC.
-  query = query.order('name', { ascending: true }).order('id', { ascending: true });
+  // Fixe deterministische Sortierung: quality_score DESC, id ASC.
+  query = query.order('quality_score', { ascending: false }).order('id', { ascending: true });
 
   // limit+1, um hasMore ohne count zu bestimmen.
   const { data, error } = await query.limit(limit + 1);
@@ -102,12 +105,12 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     return NextResponse.json({ error: 'Fehler beim Laden der Aktivitäten' }, { status: 500 });
   }
 
-  const rows = (data ?? []) as unknown as Array<{ id: string; name: string }>;
+  const rows = (data ?? []) as unknown as Array<{ id: string; quality_score: number }>;
   const hasMore = rows.length > limit;
   const activities = hasMore ? rows.slice(0, limit) : rows;
   const last = activities[activities.length - 1];
   const nextCursor =
-    hasMore && last ? encodeActivityCursor({ name: last.name, id: last.id }) : null;
+    hasMore && last ? encodeActivityCursor({ q: last.quality_score, id: last.id }) : null;
 
   return NextResponse.json(
     { activities, nextCursor, hasMore },
