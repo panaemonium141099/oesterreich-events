@@ -165,7 +165,39 @@ function festivalCategoryFallback(festivalId: string): string {
  * Festival `lineupMatch` is set to false in Phase 2 — computing per-festival
  * lineup matches requires another join we're not optimizing for here.
  */
+const EMPTY_LANDING: LandingData = {
+  todayWeekend: [],
+  concerts: [],
+  festivals: [],
+  // Statische Fallback-Liste — der Artist-Teaser braucht keine DB.
+  popularArtists: FALLBACK_ARTISTS,
+};
+
+/** Build-Resilienz-Wrapper (2026-08-26): haengt/failt Supabase, rendert
+ *  die Landing mit leeren Sektionen statt den Build/Render zu killen —
+ *  das naechste ISR-Revalidate (3600 s) fuellt sie, sobald die DB wieder
+ *  antwortet. Ein Deploy darf nie von der Tagesform der Micro-Instanz
+ *  abhaengen (Befund: alle Vercel-Builds ab 19:05 UTC am
+ *  Landing-/Widget-Prerender gescheitert). */
 export async function getLandingData(): Promise<LandingData> {
+  let timer: ReturnType<typeof setTimeout> | null = null;
+  try {
+    const result = await Promise.race([
+      getLandingDataInner(),
+      new Promise<null>(resolve => { timer = setTimeout(() => resolve(null), 15_000); }),
+    ]);
+    if (result) return result;
+    console.error('[landing] getLandingData timeout (15s) — leere Sektionen');
+    return EMPTY_LANDING;
+  } catch (err) {
+    console.error('[landing] getLandingData failed — leere Sektionen:', err);
+    return EMPTY_LANDING;
+  } finally {
+    if (timer) clearTimeout(timer);
+  }
+}
+
+async function getLandingDataInner(): Promise<LandingData> {
   const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,

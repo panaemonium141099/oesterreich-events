@@ -31,7 +31,11 @@ import { getOrTranslateEventEn } from '@/lib/i18n/translate-event';
  * (every few hours), and stale-while-revalidate keeps served pages fast while
  * the first visit after expiry triggers a silent re-render.
  */
-export const revalidate = 3600;
+// 3600 -> 86400 (2026-08-26): Googlebot crawlt seit dem Sitemap-Fix ~87k
+// Event-URLs; jeder ISR-MISS kostet ~7 Queries auf der Micro-Instanz.
+// Mit 24 h Cache-Lebensdauer zahlt jede URL das hoechstens 1x/Tag —
+// Eventdaten aendern sich langsamer als das.
+export const revalidate = 86400;
 
 /**
  * ISR opt-in for on-demand generation. Empty `generateStaticParams()` plus
