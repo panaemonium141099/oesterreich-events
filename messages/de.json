@@ -140,6 +140,16 @@
       "text": "Folge Künstler — wir benachrichtigen dich bei Österreich-Terminen.",
       "sub": "Konzerte, Open Airs, Festival-Slots. Du brauchst nicht ständig nachschauen.",
       "cta": "Künstler suchen"
+    },
+    "Weather": {
+      "rainKicker": "{mm} mm Regen angesagt",
+      "rainTitle": "Sauwetter am {day}? Dein Indoor-Programm",
+      "heatKicker": "Hitze-Wochenende",
+      "heatTitle": "{temp}° am {day} — ab ins Wasser",
+      "viennaFallback": "Wetter für Wien",
+      "cardFallback": "Freizeit & Ausflug",
+      "imageCredit": "Bild:",
+      "moreLink": "Alle Freizeitaktivitäten"
     }
   },
   "Onboarding": {

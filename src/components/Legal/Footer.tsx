@@ -45,6 +45,9 @@ export function Footer() {
             <Link href="/aktivitaeten" className="text-xs text-white/30 hover:text-white/60 transition-colors">
               {t('activities')}
             </Link>
+            <Link href="/wo-ist-was-los" className="text-xs text-white/30 hover:text-white/60 transition-colors">
+              Heatmap
+            </Link>
             <Link href="/fuer-firmen" className="text-xs text-white/30 hover:text-white/60 transition-colors">
               {t('forCompanies')}
             </Link>
