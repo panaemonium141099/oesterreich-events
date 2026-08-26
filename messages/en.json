@@ -415,6 +415,9 @@
     "empty": "Für diese Filter gibt es keine Aktivitäten.",
     "loadError": "Aktivitäten konnten nicht geladen werden. Bitte später erneut versuchen.",
     "imageCredit": "Bild:",
-    "cardFallback": "Freizeit & Ausflug"
+    "cardFallback": "Freizeit & Ausflug",
+    "nearbyCta": "Show what’s near me",
+    "nearbyTitle": "Near you",
+    "nearbyHint": "The best things to do around your location."
   }
 }
