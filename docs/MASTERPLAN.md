@@ -196,6 +196,22 @@ an. 15.000 URLs nach `quality_score DESC` sind gegenüber null ein echter Gewinn
 und liegen weit über dem, was Google bei ~6.400 Klicks/Monat crawlt. Wenn die
 Instanz wächst: Wert erhöhen, aber **vorher neu messen**.
 
+**Nachtrag (2026-08-26, Shard-Split):** Der 15k-Cap ist wieder weg — statt
+einer großen Datei liefern jetzt **8 Shard-Dateien alle ~82.600
+sitemap-fähigen Events** (25.074 → ~87.500 URLs inkl. /en-Paare). Gesharded
+wird über den uuid-Raum der Event-`id` (random uuids verteilen sich
+gleichmäßig: gemessen 10.195–10.611 Zeilen pro Achtel), jeder Shard ist ein
+eigener Request mit eigenem CDN-Cache und liest sein Fenster per Keyset über
+`id ASC` auf dem Teilindex `idx_events_sitemap_shard` (Migration
+`20260826160000_sitemap_shard_index.sql`; `keyset_v2` danach gedroppt, die
+quality-Sortierung diente nur der Auswahl unter dem Cap). Gemessen: 426 ms
+je 1000er-Seite, ~11 Seiten pro Shard. Shard 0 bleibt unter
+`/sitemap-events.xml` (GSC-Pfad bleibt gültig), Rest unter
+`/sitemap-events-2.xml` … `-8.xml`, alle im Index `/sitemap.xml` gelistet.
+Logik: `src/lib/seo/sitemap-events-shard.ts`. Überschreitet ein Shard je
+49.000 URLs (bei ~200k future events), failt er laut — dann
+`SITEMAP_EVENTS_SHARD_COUNT` erhöhen.
+
 **Wartung:** Der `start_date`-Floor im Index ist statisch. Er verrottet nicht
 gefährlich — der Index wird über die Jahre nur breiter und damit langsamer.
 Etwa jährlich mit höherem Floor neu anlegen und den alten droppen, sobald die
