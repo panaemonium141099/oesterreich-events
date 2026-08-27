@@ -65,6 +65,8 @@ import { post as festDerFreude } from './posts/fest-der-freude-2026';
 import { post as spitzerMarillenkirtag } from './posts/spitzer-marillenkirtag-2026';
 // Autowriter-Posts (fn-19) — Marker NICHT entfernen, das Script fuegt hier ein:
 import { post as theUmbilicalBrothersSpeedmouse25thAnniversaryTour2026 } from './posts/the-umbilical-brothers-speedmouse-25th-anniversary-tour-2026';
+import { post as finkEuropeTour20262026 } from './posts/fink-europe-tour-2026-2026';
+import { post as sophiaOderDasEndeDerHumanisten2026 } from './posts/sophia-oder-das-ende-der-humanisten-2026';
 // AUTOWRITER-IMPORTS-END
 
 export type { FestivalPost, GalleryImage, FestivalKeyFacts, LineupAct } from './types';
@@ -136,6 +138,8 @@ export const ALL_POSTS: FestivalPost[] = [
   festDerFreude,
   spitzerMarillenkirtag,
   theUmbilicalBrothersSpeedmouse25thAnniversaryTour2026,
+  finkEuropeTour20262026,
+  sophiaOderDasEndeDerHumanisten2026,
   // AUTOWRITER-POSTS-END
 ].sort(
   (a, b) => new Date(b.publishDate).getTime() - new Date(a.publishDate).getTime()
