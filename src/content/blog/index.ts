@@ -67,6 +67,8 @@ import { post as spitzerMarillenkirtag } from './posts/spitzer-marillenkirtag-20
 import { post as theUmbilicalBrothersSpeedmouse25thAnniversaryTour2026 } from './posts/the-umbilical-brothers-speedmouse-25th-anniversary-tour-2026';
 import { post as finkEuropeTour20262026 } from './posts/fink-europe-tour-2026-2026';
 import { post as sophiaOderDasEndeDerHumanisten2026 } from './posts/sophia-oder-das-ende-der-humanisten-2026';
+import { post as angeloKelly2026 } from './posts/angelo-kelly-2026';
+import { post as circusRoncalli2026 } from './posts/circus-roncalli-2026';
 // AUTOWRITER-IMPORTS-END
 
 export type { FestivalPost, GalleryImage, FestivalKeyFacts, LineupAct } from './types';
@@ -140,6 +142,8 @@ export const ALL_POSTS: FestivalPost[] = [
   theUmbilicalBrothersSpeedmouse25thAnniversaryTour2026,
   finkEuropeTour20262026,
   sophiaOderDasEndeDerHumanisten2026,
+  angeloKelly2026,
+  circusRoncalli2026,
   // AUTOWRITER-POSTS-END
 ].sort(
   (a, b) => new Date(b.publishDate).getTime() - new Date(a.publishDate).getTime()
