@@ -292,7 +292,12 @@ export async function middleware(request: NextRequest) {
           .eq('id', user.id)
           .maybeSingle())(),
     );
-    if (profileResult && !profileResult.data) {
+    // NUR ausloggen, wenn die Query ERFOLGREICH war und wirklich keine
+    // Zeile existiert. Ein Query-FEHLER (Timeout, RLS, "JWT issued at
+    // future" bei DB-Uhr-Drift) ist KEIN Beweis fuer eine Ghost-Session —
+    // genau dieser Pfad hat beim Incident 2026-08-26/27 (I/O-Sturm +
+    // Uhr-Drift) reihenweise gueltige Sessions ausgeloggt.
+    if (profileResult && !profileResult.error && !profileResult.data) {
       await withTimeout(
         (async () => await supabase.auth.signOut({ scope: 'local' }))(),
         1500,
