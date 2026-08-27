@@ -22,6 +22,7 @@
 import { useEffect, useState } from 'react';
 import type { Event } from '@/types/events';
 import type { DeriveCtx, V4EventState } from '@/lib/v4/derive-event-state';
+import { resolveSourceAttribution } from '@/lib/source-attribution-overrides';
 import { deriveEventState } from '@/lib/v4/derive-event-state';
 import { isLocationApproximate, isLocationTrusted } from '@/lib/utils/location-trust';
 import { V4EventDetailHero } from './V4EventDetailHero';
@@ -91,6 +92,9 @@ export function V4EventDetail({
     return () => { cancelled = true; };
   }, [event]);
 
+  // Regionale Quellen-Overrides (z. B. Oetztal Tourismus statt feratel-deskline)
+  const sourceAttribution = resolveSourceAttribution(event);
+
   return (
     <div className="bg-[var(--v4-surface)] min-h-screen">
       <V4EventDetailHero
@@ -108,8 +112,8 @@ export function V4EventDetail({
           tags={event.tags}
           hasSimilar={Boolean(similar)}
           similarChildren={similar}
-          sourceName={event.source_name}
-          sourceUrl={event.source_url}
+          sourceName={sourceAttribution.name}
+          sourceUrl={sourceAttribution.url}
         />
 
         <aside className="order-first md:order-last md:sticky md:top-[88px] md:self-start">

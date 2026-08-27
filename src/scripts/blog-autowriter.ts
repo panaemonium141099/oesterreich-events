@@ -259,6 +259,25 @@ function sanitizeDraft(d: Record<string, unknown>, c: Candidate): void {
   if (typeof d.seoDescription === 'string') d.seoDescription = truncateAtWord(d.seoDescription, 158);
   if (typeof d.excerpt === 'string') d.excerpt = truncateAtWord(d.excerpt, 390);
   if (typeof d.subtitle === 'string') d.subtitle = truncateAtWord(d.subtitle, 200);
+  // Lineup: Gemini schreibt statt der role-Enum gern Klartext
+  // ("Regie", "Hauptrolle" — Befund Lauf 2026-08-27). Gueltige Enum-Werte
+  // bleiben, alles andere wandert nach stage (dort rendert es die
+  // Detailseite als Freitext) — nie einen Kandidaten dafuer verwerfen.
+  if (Array.isArray(d.lineup)) {
+    const VALID_ROLES = new Set(['headliner', 'support', 'special']);
+    d.lineup = d.lineup
+      .filter((a): a is Record<string, unknown> => !!a && typeof a === 'object' && isStr((a as Record<string, unknown>).name))
+      .map(a => {
+        const entry: Record<string, unknown> = { name: String(a.name) };
+        if (typeof a.role === 'string' && VALID_ROLES.has(a.role)) entry.role = a.role;
+        else if (isStr(a.role) && !isStr(a.stage)) entry.stage = a.role;
+        if (isStr(a.stage)) entry.stage = a.stage;
+        if (isStr(a.day)) entry.day = a.day;
+        if (isStr(a.time)) entry.time = a.time;
+        return entry;
+      });
+  }
+
   const kf = d.keyFacts as Record<string, unknown> | undefined;
   if (kf && !/^https?:\/\//.test(String(kf.website ?? ''))) {
     // Kein Web-Fund -> Ticket-/Quell-URL aus der DB ist immer eine echte
