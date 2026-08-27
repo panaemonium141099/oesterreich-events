@@ -55,13 +55,22 @@ export async function GET(request: Request) {
       // Check if profile is complete before redirecting
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
-        const { data: profile } = await supabase
+        const { data: profile, error: profileError } = await supabase
           .from('profiles')
           .select('first_name, last_name, birth_date')
           .eq('id', user.id)
-          .single();
+          // maybeSingle statt single: "keine Zeile" (echter Neu-User) ist
+          // KEIN Fehler -> data null -> Formular. Nur echte Fehler
+          // (Timeout, Uhr-Drift) ueberspringen den Redirect.
+          .maybeSingle();
 
-        if (!isProfileComplete(profile)) {
+        // Nur bei ERFOLGREICH gelesenem, tatsaechlich unvollstaendigem
+        // Profil ins Formular schicken. Ein Query-Fehler (Timeout,
+        // DB-Uhr-Drift) hiess beim Incident 2026-08-26/27, dass JEDER
+        // Login faelschlich in "Profil vervollstaendigen" landete —
+        // im Zweifel weiter zur Ziel-URL, das Formular kommt beim
+        // naechsten sauberen Login wieder.
+        if (!profileError && !isProfileComplete(profile)) {
           return NextResponse.redirect(`${redirectBase}/auth/complete-profile`);
         }
       }
