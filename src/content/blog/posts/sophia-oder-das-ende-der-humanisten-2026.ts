@@ -29,27 +29,27 @@ export const post: FestivalPost = {
   "lineup": [
     {
       "name": "Joseph Lorenz",
-      "role": "Wolfgang (Hauptrolle)"
+      "stage": "Wolfgang (Hauptrolle)"
     },
     {
       "name": "Alma Hasun",
-      "role": "Helena (Hauptrolle)"
+      "stage": "Helena (Hauptrolle)"
     },
     {
       "name": "Nils Arztmann",
-      "role": "Jonas (Hauptrolle)"
+      "stage": "Jonas (Hauptrolle)"
     },
     {
       "name": "Silvia Meisterle",
-      "role": "Sophia (Hauptrolle)"
+      "stage": "Sophia (Hauptrolle)"
     },
     {
       "name": "Amélie Niermeyer",
-      "role": "Regie"
+      "stage": "Regie"
     },
     {
       "name": "Moritz Rinke",
-      "role": "Autor"
+      "stage": "Autor"
     }
   ],
   "lineupTitle": "Besetzung & Kreativteam",
