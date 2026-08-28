@@ -4,9 +4,8 @@ import { hasLocale } from 'next-intl';
 import { setRequestLocale } from 'next-intl/server';
 import { routing } from '@/i18n/routing';
 import type { Event } from '@/types/events';
-import { extractCity } from '@/lib/utils/city';
 import { buildEventUrlV2 } from '@/lib/utils/slugify';
-import { resolvePrimaryEventImage } from '@/lib/event-images';
+import { buildJsonLd } from '@/lib/seo/event-jsonld';
 import { V4EventDetail } from '@/components/Events/v4';
 import { V4RelatedEvents, hubLinksFor } from '@/components/Events/v4/V4RelatedEvents';
 import { deriveEventState } from '@/lib/v4/derive-event-state';
@@ -171,113 +170,6 @@ export async function generateMetadata({
   }
 
   return metadata;
-}
-
-/**
- * Extracts a numeric price from free-text like "ab 15 €", "€12,50", "Tickets 25 EUR".
- * Returns '0' for free events (frei/gratis/kostenlos), null when no price is detectable.
- */
-function parsePriceText(priceText: string | null | undefined): string | null {
-  if (!priceText) return null;
-  const lower = priceText.toLowerCase();
-  if (/\b(frei|gratis|kostenlos|free|eintritt\s*frei)\b/.test(lower)) return '0';
-  const match = priceText.match(/(\d+(?:[.,]\d+)?)/);
-  return match ? match[1].replace(',', '.') : null;
-}
-
-function buildJsonLd(event: Event): string {
-  const canonicalUrl = `https://lasstreffen.at${buildEventUrlV2(event)}`;
-  const jsonLd: Record<string, unknown> = {
-    '@context': 'https://schema.org',
-    '@type': 'Event',
-    name: event.title,
-    startDate: event.start_date,
-    eventStatus: 'https://schema.org/EventScheduled',
-    eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
-  };
-
-  if (event.end_date) {
-    jsonLd.endDate = event.end_date;
-  }
-
-  if (event.description) {
-    jsonLd.description = event.description.slice(0, 500);
-  }
-
-  // Use resolver so JSON-LD always has an image (category fallback if needed)
-  jsonLd.image = resolvePrimaryEventImage({ imageUrl: event.image_url, category: event.category, title: event.title });
-
-  const locationName = event.location_name ?? event.address ?? 'Österreich';
-  const location: Record<string, unknown> = {
-    '@type': 'Place',
-    name: locationName,
-  };
-
-  if (event.address) {
-    location.address = {
-      '@type': 'PostalAddress',
-      streetAddress: event.address,
-      ...(event.postal_code ? { postalCode: event.postal_code } : {}),
-      addressCountry: 'AT',
-    };
-  }
-
-  if (event.latitude != null && event.longitude != null) {
-    location.geo = {
-      '@type': 'GeoCoordinates',
-      latitude: event.latitude,
-      longitude: event.longitude,
-    };
-  }
-
-  jsonLd.location = location;
-
-  // Organizer — ALWAYS present. Falls back to the site when the scraper
-  // didn't capture an explicit organizer. Satisfies Google's Event rich-result
-  // field requirement ("fehlende Felder: organizer") even on scraped rows
-  // where the source page didn't expose one.
-  jsonLd.organizer = {
-    '@type': 'Organization',
-    name: event.organizer || 'LassTreffen.at',
-    url: 'https://lasstreffen.at',
-  };
-
-  // Performer — ALWAYS present. Google's Event schema treats `performer` as a
-  // recommended field; omitting it triggers the "Ereignisse für strukturierte
-  // Daten" warning in Search Console. We use the organizer when known,
-  // otherwise fall back to the event title itself as the performing entity.
-  jsonLd.performer = {
-    '@type': 'PerformingGroup',
-    name: event.organizer || event.title,
-  };
-
-  // Offers — nur emitten wenn ein Preis bekannt ist. Google's Event-Schema
-  // verlangt bei `offers` zwingend ein `price` (oder lowPrice/highPrice).
-  // Vorher hatten wir den Offer-Block immer ausgegeben und `price` nur
-  // bedingt — das produzierte ~2.280 GSC-Fehler "Feld 'price' fehlt".
-  // Lieber kein Offer-Block (Google ignoriert ihn dann) als ein invalider.
-  const parsed = parsePriceText(event.price_text);
-  const price =
-    event.price_min != null ? String(event.price_min) :
-    parsed != null ? parsed :
-    null;
-
-  if (price != null) {
-    const offers: Record<string, unknown> = {
-      '@type': 'Offer',
-      url: event.ticket_url || canonicalUrl,
-      priceCurrency: 'EUR',
-      price,
-      availability: 'https://schema.org/InStock',
-      validFrom: event.created_at || event.start_date,
-    };
-    if (event.price_text) {
-      offers.name = event.price_text;
-    }
-    jsonLd.offers = offers;
-  }
-
-  return JSON.stringify(jsonLd).replace(/<\/script>/gi, '<\\/script>');
 }
 
 export default async function EventDetailPage({
