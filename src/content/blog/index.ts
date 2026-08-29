@@ -71,6 +71,8 @@ import { post as angeloKelly2026 } from './posts/angelo-kelly-2026';
 import { post as circusRoncalli2026 } from './posts/circus-roncalli-2026';
 import { post as lumpazivagabundusNestroyIm34Takt2026 } from './posts/lumpazivagabundus-nestroy-im-3-4-takt-2026';
 import { post as soundingIslandsOliverMallyPeterSchneider2026 } from './posts/sounding-islands-oliver-mally-peter-schneider-2026';
+import { post as altstadtRundgangDeutsch2026 } from './posts/altstadt-rundgang-deutsch-2026';
+import { post as imperialGalaConcert2026 } from './posts/imperial-gala-concert-2026';
 // AUTOWRITER-IMPORTS-END
 
 export type { FestivalPost, GalleryImage, FestivalKeyFacts, LineupAct } from './types';
@@ -148,6 +150,8 @@ export const ALL_POSTS: FestivalPost[] = [
   circusRoncalli2026,
   lumpazivagabundusNestroyIm34Takt2026,
   soundingIslandsOliverMallyPeterSchneider2026,
+  altstadtRundgangDeutsch2026,
+  imperialGalaConcert2026,
   // AUTOWRITER-POSTS-END
 ].sort(
   (a, b) => new Date(b.publishDate).getTime() - new Date(a.publishDate).getTime()
