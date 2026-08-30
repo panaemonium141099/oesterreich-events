@@ -59,6 +59,18 @@
       "slug": "imperial-gala-concert-2026",
       "title": "Imperial Gala Concert",
       "writtenAt": "2026-08-29T11:43:51.083Z"
+    },
+    {
+      "eventId": "feeb9e43-a652-4bb5-be5f-52a8643959af",
+      "slug": "disney-s-arielle-die-meerjungfrau-2026",
+      "title": "Disney's Arielle, die Meerjungfrau",
+      "writtenAt": "2026-08-30T10:31:47.792Z"
+    },
+    {
+      "eventId": "90fa7c54-1474-4884-9eb9-8d6a37c25b8d",
+      "slug": "sonos-cliq-2026",
+      "title": "Sonos Cliq",
+      "writtenAt": "2026-08-30T10:32:50.531Z"
     }
   ]
 }
