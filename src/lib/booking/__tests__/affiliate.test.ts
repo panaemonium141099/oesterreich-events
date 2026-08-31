@@ -59,6 +59,12 @@ describe('deriveCityFromLocation', () => {
     ['Kärntner Messen, Messeplatz 1, 9020 Klagenfurt am Wörthersee', 'Klagenfurt am Wörthersee'],
     ['Wien, Österreich', 'Wien'],
     ['Freiluftarena B', 'Freiluftarena B'],
+    // PLZ+Stadt gewinnt vor allem anderen (Bug: "Übernachten in Theaterplatz 7")
+    ['Theaterplatz 7, 2500 Baden, Niederösterreich', 'Baden'],
+    // Straße als letzter Teil wird übersprungen, Stadt steht vorn
+    ['Baden, Theaterplatz 7', 'Baden'],
+    // Nur Straße+Hausnummer → nichts Stadtartiges → null (Box entfällt)
+    ['Theaterplatz 7', null],
     ['', null],
     [null, null],
     ['1010', null],

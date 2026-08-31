@@ -62,21 +62,35 @@ export function buildAffiliateStayLink(opts: StaySearchOptions, sid: string): st
 }
 
 /**
- * Stadt aus einem Location-Freitext ableiten ("Schloss Esterhazy, Eisenstadt"
- * → "Eisenstadt"; "Messeplatz 1, 9020 Klagenfurt am Wörthersee" → "Klagenfurt
- * am Wörthersee"). Nimmt den letzten Komma-Teil und streift eine führende PLZ.
- * Liefert null, wenn nichts Brauchbares übrig bleibt.
+ * Stadt aus einem Location-/Adress-Freitext ableiten.
+ *
+ *   "Theaterplatz 7, 2500 Baden, Niederösterreich" → "Baden"   (PLZ+Stadt)
+ *   "Baden, Theaterplatz 7"                        → "Baden"   (Straße übersprungen)
+ *   "Schloss Esterhazy, Eisenstadt"                → "Eisenstadt"
+ *
+ * Reihenfolge: (1) PLZ+Stadt-Muster irgendwo im String gewinnt; (2) sonst
+ * Komma-Teile von hinten, wobei Teile mit Ziffern (Straße+Hausnummer) und
+ * "Österreich"/"Austria" übersprungen werden. Liefert null, wenn nichts
+ * Stadtartiges übrig bleibt (Box wird dann nicht gerendert).
  */
 export function deriveCityFromLocation(location: string | null | undefined): string | null {
   const loc = (location ?? '').trim();
   if (!loc) return null;
-  const parts = loc.split(',').map((p) => p.trim()).filter(Boolean);
-  let candidate = parts.length ? parts[parts.length - 1] : loc;
-  // "Österreich"/"Austria" als letzter Teil → einen weiter nach vorn
-  if (/^(österreich|austria)$/i.test(candidate) && parts.length >= 2) {
-    candidate = parts[parts.length - 2];
+
+  // (1) "2500 Baden" / "9020 Klagenfurt am Wörthersee" — Stadt nach 4-stelliger PLZ
+  const plzMatch = loc.match(/\b\d{4}\s+([^\d,]+?)(?:,|$)/);
+  if (plzMatch) {
+    const city = plzMatch[1].trim();
+    if (city) return city;
   }
-  candidate = candidate.replace(/^\d{4}\s+/, '').trim(); // führende PLZ
-  if (!candidate || /^\d+$/.test(candidate)) return null;
-  return candidate;
+
+  // (2) Komma-Teile von hinten; Straßen (enthalten Ziffern) und Landesnamen raus
+  const parts = loc.split(',').map((p) => p.trim()).filter(Boolean);
+  for (let i = parts.length - 1; i >= 0; i--) {
+    const candidate = parts[i];
+    if (/^(österreich|austria)$/i.test(candidate)) continue;
+    if (/\d/.test(candidate)) continue;
+    return candidate;
+  }
+  return null;
 }

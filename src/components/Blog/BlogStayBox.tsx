@@ -29,8 +29,11 @@ function futureCheckin(iso: string | undefined): string | null {
 }
 
 export function BlogStayBox({ post }: { post: FestivalPost }) {
+  // keyFacts.address zuerst: enthält meist "Straße, PLZ Stadt, Bundesland" —
+  // das PLZ+Stadt-Muster ist die verlässlichste Quelle.
   const city =
     post.stayCity?.trim() ||
+    deriveCityFromLocation(post.keyFacts?.address) ||
     deriveCityFromLocation(post.jsonLdEvent?.location) ||
     deriveCityFromLocation(post.keyFacts?.location);
   if (!city) return null;
