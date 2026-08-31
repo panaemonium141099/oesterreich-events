@@ -16,6 +16,7 @@
 import type { ReactNode } from 'react';
 import type { PlanWithEvents, ArrivalMode, PlanItemStatus } from '@/types/plans';
 import { buildOebbScottyUrl, buildBookingUrl } from '@/lib/plans/deep-links';
+import { BookingStayWidget } from './BookingStayWidget';
 
 interface Props {
   plan: PlanWithEvents;
@@ -141,12 +142,19 @@ export function V4PlanModules({ plan }: Props) {
     />
   );
 
+  // fn-21: Booking-Suchwidget nur solange die Unterkunft offen ist —
+  // erledigt/übersprungen braucht keine Suche.
+  const showStayWidget = plan.accommodation_status !== 'skip' && plan.accommodation_status !== 'done';
+
   return (
-    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
-      {ticketCard}
-      {arrivalCard}
-      {accCard}
-      {reminderCard}
+    <div className="flex flex-col gap-3 md:gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
+        {ticketCard}
+        {arrivalCard}
+        {accCard}
+        {reminderCard}
+      </div>
+      {showStayWidget && <BookingStayWidget />}
     </div>
   );
 }
