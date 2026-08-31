@@ -73,6 +73,16 @@ export function buildAffiliateStayLink(opts: StaySearchOptions, sid: string): st
  * "Österreich"/"Austria" übersprungen werden. Liefert null, wenn nichts
  * Stadtartiges übrig bleibt (Box wird dann nicht gerendert).
  */
+/**
+ * Nur Kandidaten akzeptieren, die wie ein Ortsname aussehen: beginnt mit
+ * Buchstabe, danach Buchstaben/Leerzeichen/.'-/() — verwirft Emojis und
+ * Sonderzeichen-Müll aus gescrapten Adressfeldern (Live-Befund: Event mit
+ * Emoji im Adressfeld ergab "Alle Unterkünfte in 🙄").
+ */
+function isCityLike(candidate: string): boolean {
+  return /^[\p{L}][\p{L}\p{M}\s.'()\/-]{1,59}$/u.test(candidate);
+}
+
 export function deriveCityFromLocation(location: string | null | undefined): string | null {
   const loc = (location ?? '').trim();
   if (!loc) return null;
@@ -81,15 +91,17 @@ export function deriveCityFromLocation(location: string | null | undefined): str
   const plzMatch = loc.match(/\b\d{4}\s+([^\d,]+?)(?:,|$)/);
   if (plzMatch) {
     const city = plzMatch[1].trim();
-    if (city) return city;
+    if (city && isCityLike(city)) return city;
   }
 
-  // (2) Komma-Teile von hinten; Straßen (enthalten Ziffern) und Landesnamen raus
+  // (2) Komma-Teile von hinten; Straßen (enthalten Ziffern), Landesnamen
+  //     und Nicht-Ortsnamen (Emojis etc.) raus
   const parts = loc.split(',').map((p) => p.trim()).filter(Boolean);
   for (let i = parts.length - 1; i >= 0; i--) {
     const candidate = parts[i];
     if (/^(österreich|austria)$/i.test(candidate)) continue;
     if (/\d/.test(candidate)) continue;
+    if (!isCityLike(candidate)) continue;
     return candidate;
   }
   return null;
