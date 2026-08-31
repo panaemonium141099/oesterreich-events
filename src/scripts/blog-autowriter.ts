@@ -64,10 +64,14 @@ interface Candidate {
   ticket_url: string | null;
   quality_score: number | null;
   description: string | null;
+  latitude: number | null;
+  longitude: number | null;
 }
 
 interface AutowriterState {
   covered: Array<{ eventId: string; slug: string; title: string; writtenAt: string }>;
+  /** fn-21: abgearbeitete Stay-Guide-Topics (Topic-Slugs, rotieren). */
+  stayGuides?: string[];
 }
 
 // ─── Utilities ────────────────────────────────────────────────────────────
@@ -119,7 +123,7 @@ async function fetchCandidates(supabase: SupabaseClient): Promise<Candidate[]> {
 
   const { data, error } = await supabase
     .from('events')
-    .select('id, title, start_date, end_date, location_name, address, postal_code, bundesland, image_url, source_name, source_url, ticket_url, quality_score, description')
+    .select('id, title, start_date, end_date, location_name, address, postal_code, bundesland, image_url, source_name, source_url, ticket_url, quality_score, description, latitude, longitude')
     .eq('publish_status', 'published')
     .eq('visibility', 'public')
     .gte('quality_score', 70)
@@ -176,6 +180,151 @@ Recherchiere und liste strukturiert:
     },
   });
   return textOf(response);
+}
+
+// ─── fn-21: Unterkünfte ───────────────────────────────────────────────────
+
+/**
+ * Deterministische Übernachtungs-Erwähnung für Event-Posts: Name + Entfernung
+ * kommen aus unserer eigenen stay_pois-Tabelle (OSM) via nearby_stays-RPC —
+ * NICHT vom Modell, damit hier nichts halluziniert werden kann. Liefert einen
+ * practicalInfo-Eintrag oder null (Event ohne Koordinaten / keine Treffer).
+ */
+async function nearbyStayInfo(
+  supabase: SupabaseClient,
+  c: Candidate,
+): Promise<{ icon: string; label: string; text: string } | null> {
+  if (c.latitude == null || c.longitude == null) return null;
+  const { data, error } = await supabase.rpc('nearby_stays', {
+    p_lat: c.latitude,
+    p_lng: c.longitude,
+    p_limit: 2,
+  });
+  if (error || !Array.isArray(data) || data.length === 0) return null;
+  const fmt = (km: number) =>
+    km < 0.95 ? `${Math.max(1, Math.round(km * 10)) * 100} m` : `${km.toFixed(1).replace('.', ',')} km`;
+  const [a, b] = data as Array<{ name: string; distance_km: number }>;
+  const second = b ? `, das ${b.name} ${fmt(b.distance_km)}` : '';
+  return {
+    icon: '🛏️',
+    label: 'Übernachten',
+    text: `Wer nach dem Event nicht mehr fahren will: Das ${a.name} liegt nur ${fmt(a.distance_km)} vom Veranstaltungsort entfernt${second} — weitere Unterkünfte mit passendem Check-in-Datum in der Übernachten-Box weiter unten.`,
+  };
+}
+
+/**
+ * Stay-Guide-Themen (rotieren wöchentlich, State: stayGuides). Kuratierte
+ * Region×Anlass-Paare mit stabiler Slug-Basis und Wikimedia-Suchbegriff
+ * fürs Hero-Bild. ctaLink zeigt auf den passenden Bundesland-Hub.
+ */
+interface StayTopic {
+  slug: string;
+  region: string;
+  angle: string;
+  heroQuery: string;
+  ctaLink: string;
+  ctaText: string;
+}
+
+const STAY_TOPICS: StayTopic[] = [
+  { slug: 'graz-konzertbesucher', region: 'Graz', angle: 'Konzert- und Festivalbesucher (zentrumsnah, spätes Einchecken)', heroQuery: 'Graz Uhrturm Schlossberg', ctaLink: '/steiermark', ctaText: 'Events in der Steiermark entdecken' },
+  { slug: 'wien-guenstig', region: 'Wien', angle: 'günstig übernachten für Konzert- und Festivalnächte', heroQuery: 'Wien Stephansdom Panorama', ctaLink: '/wien', ctaText: 'Events in Wien entdecken' },
+  { slug: 'salzburg-festspielzeit', region: 'Salzburg', angle: 'Festspiel- und Konzertbesucher in der Altstadt', heroQuery: 'Salzburg Altstadt Festung Hohensalzburg', ctaLink: '/salzburg', ctaText: 'Events in Salzburg entdecken' },
+  { slug: 'neusiedler-see-festivalsommer', region: 'Neusiedler See / Seewinkel', angle: 'Festivalsommer zwischen Nova Rock und Seefestspielen', heroQuery: 'Neusiedler See Schilf', ctaLink: '/burgenland', ctaText: 'Events im Burgenland entdecken' },
+  { slug: 'innsbruck-berge', region: 'Innsbruck', angle: 'Städtetrip mit Bergblick, Konzerte und Bergsilvester', heroQuery: 'Innsbruck Nordkette Goldenes Dachl', ctaLink: '/tirol', ctaText: 'Events in Tirol entdecken' },
+  { slug: 'woerthersee-eventsommer', region: 'Wörthersee', angle: 'Eventsommer am See (Ironman, Fêtes, Starnacht)', heroQuery: 'Wörthersee Klagenfurt', ctaLink: '/kaernten', ctaText: 'Events in Kärnten entdecken' },
+  { slug: 'linz-staedtetrip', region: 'Linz', angle: 'Städtetrip zu Klangwolke, Ars Electronica und Konzerten', heroQuery: 'Linz Donau Hauptplatz', ctaLink: '/oberoesterreich', ctaText: 'Events in Oberösterreich entdecken' },
+  { slug: 'wachau-weinherbst', region: 'Wachau', angle: 'Weinherbst, Feste und Konzerte im Welterbe-Tal', heroQuery: 'Wachau Dürnstein Donau Weinberge', ctaLink: '/niederoesterreich', ctaText: 'Events in Niederösterreich entdecken' },
+  { slug: 'bregenz-festspiele', region: 'Bregenz', angle: 'Bregenzer Festspiele und Bodensee-Events', heroQuery: 'Bregenz Bodensee Seebühne', ctaLink: '/vorarlberg', ctaText: 'Events in Vorarlberg entdecken' },
+  { slug: 'thermen-oststeiermark', region: 'Thermenregion Oststeiermark', angle: 'Thermenwochenende kombiniert mit Festen und Kulinarik-Events', heroQuery: 'Steiermark Thermenland Landschaft', ctaLink: '/steiermark', ctaText: 'Events in der Steiermark entdecken' },
+  { slug: 'salzkammergut-sommer', region: 'Salzkammergut', angle: 'Seenhopping zwischen Festivals, Kirtagen und Konzerten', heroQuery: 'Hallstatt Salzkammergut See', ctaLink: '/oberoesterreich', ctaText: 'Events in Oberösterreich entdecken' },
+  { slug: 'zillertal-winter', region: 'Zillertal', angle: 'Skihütten und Après-Events im Winter', heroQuery: 'Zillertal Winter Berge', ctaLink: '/tirol', ctaText: 'Events in Tirol entdecken' },
+];
+
+async function researchStayGuide(ai: GoogleGenAI, topic: StayTopic): Promise<string> {
+  const prompt = `Recherchiere per Google-Suche ECHTE, aktuell existierende Unterkünfte in/um ${topic.region} (Österreich), die besonders gut passen für: ${topic.angle}.
+
+Liefere 6-8 Unterkünfte, für JEDE strukturiert und nur mit verifizierten Fakten (wenn unbekannt: "unbekannt" schreiben, NICHTS raten):
+- Exakter Name der Unterkunft
+- Ort/Gemeinde
+- Art (Hotel, Pension, Ferienwohnung, Almhütte, Camping, Design-Hotel, Therme ...)
+- Was sie besonders macht (Lage, Ausstattung, Geschichte — 2-3 Fakten)
+- Preisniveau grob (günstig / mittel / gehoben), falls auffindbar
+
+Danach zusätzlich:
+- 3-4 praktische Tipps zum Übernachten in ${topic.region} (beste Buchungszeit, Anreise, Viertel/Lagen)
+- 3-4 häufige Fragen von Besuchern mit Antworten`;
+
+  const response = await ai.models.generateContent({
+    model: 'gemini-2.5-flash',
+    contents: prompt,
+    config: {
+      tools: [{ googleSearch: {} }],
+      maxOutputTokens: 4000,
+      temperature: 0.2,
+    },
+  });
+  return textOf(response);
+}
+
+async function composeStayGuide(ai: GoogleGenAI, topic: StayTopic, research: string): Promise<Record<string, unknown>> {
+  const prompt = `Du schreibst für LassTreffen.at (österreichische Event-Plattform) einen deutschen SEO-Blogartikel der Rubrik "Übernachten": besondere/passende Unterkünfte in ${topic.region} für ${topic.angle}. Basis sind AUSSCHLIESSLICH die Recherche-Fakten unten — erfinde keine Unterkünfte und keine Fakten dazu; nimm NUR Unterkünfte, die in der Recherche vorkommen.
+
+RECHERCHE:
+${research}
+
+Antworte NUR mit einem JSON-Objekt exakt dieser Form (alle Texte Deutsch, Sie-Form, magazinig aber faktentreu):
+{
+  "title": "prägnanter Titel mit ${topic.region}",
+  "subtitle": "eine Zeile mit konkretem Nutzenversprechen",
+  "excerpt": "150-250 Zeichen Teaser",
+  "intro": "3-5 Sätze Einstieg mit Bezug zu Events/Anlass, min. 400 Zeichen",
+  "historyTitle": "Überschrift, z. B. 'Warum ${topic.region} besonders übernachtet'",
+  "history": "Kontext zur Region/Unterkunftslandschaft, min. 300 Zeichen",
+  "whatToExpectTitle": "Überschrift zur Auswahl",
+  "whatToExpect": "Wie die Auswahl zustande kommt / für wen was passt, min. 250 Zeichen",
+  "whatToExpectList": ["5-7 kompakte Merkpunkte"],
+  "practicalInfo": [{ "icon": "ein Emoji", "label": "Buchen|Anreise|Lage|...", "text": "konkreter Tipp aus der Recherche" }],
+  "stays": [{ "name": "EXAKTER Name aus der Recherche", "place": "Ort", "region": "Teilregion/Bundesland", "kind": "Kurz-Attribut wie 'Design-Hotel' oder 'Almhütte'", "description": "2-4 faktenbasierte Sätze aus der Recherche" }],
+  "seoTitle": "max. 60 Zeichen, Haupt-Keyword vorn (übernachten/${topic.region})",
+  "seoDescription": "max. 155 Zeichen",
+  "keywords": ["6-10 deutsche Suchbegriffe"],
+  "faqs": [{ "question": "…", "answer": "…" }]
+}
+Mindestens 5 stays, mindestens 3 practicalInfo, mindestens 3 faqs. KEINE Preise in Euro nennen (ändern sich) — nur Preisniveau in Worten.`;
+
+  const response = await ai.models.generateContent({
+    model: 'gemini-2.5-flash',
+    contents: prompt,
+    config: {
+      responseMimeType: 'application/json',
+      maxOutputTokens: 8000,
+      temperature: 0.5,
+    },
+  });
+  return JSON.parse(textOf(response)) as Record<string, unknown>;
+}
+
+/**
+ * Anti-Halluzinations-Gate: jede Unterkunft muss namentlich in der
+ * GEGROUNDETEN Recherche vorkommen — was Gemini beim Komponieren dazu
+ * erfindet, fliegt raus. Danach müssen >= 4 übrig sein.
+ */
+function verifyStaysAgainstResearch(
+  stays: Array<Record<string, unknown>>,
+  research: string,
+): Array<Record<string, unknown>> {
+  const haystack = research.toLowerCase();
+  return stays.filter((s) => {
+    const name = String(s.name ?? '').trim();
+    if (name.length < 3) return false;
+    // Tokenweise: die zwei längsten Namens-Tokens müssen beide vorkommen
+    // (übersteht Zusätze wie "Hotel"/"Das" im komponierten Namen).
+    const tokens = name.toLowerCase().split(/[^\p{L}\p{N}]+/u).filter(t => t.length >= 4)
+      .sort((a, b) => b.length - a.length).slice(0, 2);
+    if (tokens.length === 0) return false;
+    return tokens.every(t => haystack.includes(t));
+  });
 }
 
 async function composePost(ai: GoogleGenAI, c: Candidate, research: string): Promise<Record<string, unknown>> {
@@ -485,6 +634,13 @@ async function main(): Promise<void> {
     ? JSON.parse(fs.readFileSync(STATE_FILE, 'utf8'))
     : { covered: [] };
 
+  // fn-21: --stay-guide schreibt EINEN Unterkunfts-Artikel (Rubrik
+  // "Übernachten") aus der rotierenden Topic-Liste und beendet sich.
+  if (args.includes('--stay-guide')) {
+    await writeStayGuide(ai, state, dryRun, new Set(ALL_POSTS.map(p => p.slug)));
+    return;
+  }
+
   const knownTitles = [
     ...ALL_POSTS.map(p => p.title),
     ...state.covered.map(c => c.title),
@@ -531,6 +687,14 @@ async function main(): Promise<void> {
       if (errors.length > 0) {
         log(`  Entwurf verworfen: ${errors.join('; ')}`);
         continue;
+      }
+
+      // fn-21: deterministische Übernachtungs-Erwähnung (Name+Distanz aus
+      // stay_pois, nicht vom Modell) als zusätzlicher practicalInfo-Punkt.
+      const stayInfo = await nearbyStayInfo(supabase, c);
+      if (stayInfo && Array.isArray(draft.practicalInfo)) {
+        (draft.practicalInfo as unknown[]).push(stayInfo);
+        log(`  Übernachten-Tipp: ${stayInfo.text.slice(0, 70)}…`);
       }
 
       if (dryRun) {
@@ -627,6 +791,131 @@ async function main(): Promise<void> {
   // Für den Commit-Step der GitHub-Action
   const ghOutput = process.env.GITHUB_OUTPUT;
   if (ghOutput) fs.appendFileSync(ghOutput, `slugs=${writtenSlugs.join(' ')}\n`);
+}
+
+// ─── fn-21: Stay-Guide-Lauf ───────────────────────────────────────────────
+
+async function writeStayGuide(
+  ai: GoogleGenAI,
+  state: AutowriterState,
+  dryRun: boolean,
+  knownSlugs: Set<string>,
+): Promise<void> {
+  const covered = new Set(state.stayGuides ?? []);
+  // Rotation: erst alle Topics einmal, dann von vorn (Slug bekommt -2, -3 …)
+  let topic = STAY_TOPICS.find(t => !covered.has(t.slug));
+  let round = 1;
+  if (!topic) {
+    round = Math.floor(covered.size / STAY_TOPICS.length) + 1;
+    topic = STAY_TOPICS[covered.size % STAY_TOPICS.length];
+  }
+  let slug = `uebernachten-${topic.slug}${round > 1 ? `-${round}` : ''}`;
+  if (knownSlugs.has(slug)) slug = `${slug}-${Date.now().toString(36).slice(-4)}`;
+  log(`Stay-Guide: ${topic.region} — ${topic.angle} (${slug})`);
+
+  // Hero ZUERST (billig): Wikimedia-Regionsbild mit Lizenz-Credit.
+  const destDir = path.join(IMAGES_DIR, slug);
+  const hero = await wikimediaHero(topic.heroQuery, destDir);
+  if (!hero) throw new Error(`Kein Wikimedia-Hero für "${topic.heroQuery}" — Abbruch`);
+
+  const research = await researchStayGuide(ai, topic);
+  if (research.trim().length < 800) throw new Error('Stay-Recherche zu dünn — Abbruch');
+
+  const draft = await composeStayGuide(ai, topic, research);
+  if (typeof draft.seoTitle === 'string') draft.seoTitle = truncateAtWord(draft.seoTitle, 65);
+  if (typeof draft.seoDescription === 'string') draft.seoDescription = truncateAtWord(draft.seoDescription, 158);
+  if (typeof draft.excerpt === 'string') draft.excerpt = truncateAtWord(draft.excerpt, 390);
+
+  const rawStays = Array.isArray(draft.stays) ? (draft.stays as Array<Record<string, unknown>>) : [];
+  const stays = verifyStaysAgainstResearch(rawStays, research)
+    .filter(s => isStr(s.name, 3, 120) && isStr(s.place, 2, 100) && isStr(s.description, 40, 800))
+    .slice(0, 8)
+    .map(s => ({
+      name: String(s.name).trim(),
+      place: String(s.place).trim(),
+      region: isStr(s.region, 2, 80) ? String(s.region).trim() : topic.region,
+      kind: isStr(s.kind, 2, 40) ? String(s.kind).trim() : 'Unterkunft',
+      description: String(s.description).trim(),
+    }));
+  if (stays.length < 4) {
+    throw new Error(`Nur ${stays.length} verifizierte Unterkünfte (von ${rawStays.length}) — Abbruch statt dünnem Artikel`);
+  }
+  log(`  ${stays.length}/${rawStays.length} Unterkünfte haben das Recherche-Gate passiert`);
+
+  const required: Array<[string, number]> = [
+    ['title', 10], ['subtitle', 10], ['excerpt', 100], ['intro', 300],
+    ['historyTitle', 5], ['history', 250], ['whatToExpectTitle', 5],
+    ['whatToExpect', 200], ['seoTitle', 20], ['seoDescription', 80],
+  ];
+  for (const [field, min] of required) {
+    if (!isStr(draft[field], min)) throw new Error(`Stay-Draft: Feld ${field} fehlt/zu kurz`);
+  }
+  if (!Array.isArray(draft.whatToExpectList) || draft.whatToExpectList.length < 4) {
+    throw new Error('Stay-Draft: whatToExpectList zu kurz');
+  }
+  if (!Array.isArray(draft.faqs) || draft.faqs.length < 3) throw new Error('Stay-Draft: faqs zu kurz');
+  if (!Array.isArray(draft.practicalInfo) || draft.practicalInfo.length < 2) {
+    throw new Error('Stay-Draft: practicalInfo zu kurz');
+  }
+
+  if (dryRun) {
+    log(`DRY-RUN ok: ${slug} — "${draft.title as string}" mit ${stays.length} Unterkünften`);
+    return;
+  }
+
+  const heroPath = `/images/blog/${slug}/${hero.heroImage}`;
+  const today = new Date().toISOString().slice(0, 10);
+  const post: Record<string, unknown> = {
+    slug,
+    title: draft.title,
+    subtitle: draft.subtitle,
+    heroImage: heroPath,
+    heroImageCredit: hero.credit,
+    publishDate: today,
+    updatedDate: today,
+    readingTime: Math.max(5, Math.round(
+      [draft.intro, draft.history, draft.whatToExpect, ...stays.map(s => s.description)].join(' ').split(/\s+/).length / 180,
+    ) + 3),
+    excerpt: draft.excerpt,
+    category: 'Übernachten',
+    categoryColor: 'bg-emerald-700 text-white',
+    keyFacts: {
+      dates: 'Ganzjährig — beliebte Termine früh buchen',
+      location: topic.region,
+      address: `${topic.region}, Österreich`,
+      genre: 'Besondere Unterkünfte',
+      price: 'je nach Unterkunft und Saison',
+      website: 'https://www.austria.info',
+    },
+    lineup: [],
+    intro: draft.intro,
+    historyTitle: draft.historyTitle,
+    history: draft.history,
+    whatToExpectTitle: draft.whatToExpectTitle,
+    whatToExpect: draft.whatToExpect,
+    whatToExpectList: draft.whatToExpectList,
+    practicalInfoTitle: 'Gut zu wissen',
+    practicalInfo: draft.practicalInfo,
+    gallery: [],
+    ctaText: topic.ctaText,
+    ctaLink: topic.ctaLink,
+    seoTitle: draft.seoTitle,
+    seoDescription: draft.seoDescription,
+    keywords: Array.isArray(draft.keywords) ? draft.keywords : [`übernachten ${topic.region.toLowerCase()}`],
+    faqs: draft.faqs,
+    // Bewusst KEIN jsonLdEvent — Guides sind keine Events (fn-21).
+    stays,
+  };
+
+  writePostFile(slug, post);
+  updateRegistry(slug);
+  await smokeTest(slug);
+
+  state.stayGuides = [...(state.stayGuides ?? []), topic.slug];
+  fs.writeFileSync(STATE_FILE, JSON.stringify(state, null, 2) + '\n', 'utf8');
+  log(`Fertig: Stay-Guide ${slug}`);
+  const ghOutput = process.env.GITHUB_OUTPUT;
+  if (ghOutput) fs.appendFileSync(ghOutput, `slugs=${slug}\n`);
 }
 
 function fetchCandidatesFiltered(

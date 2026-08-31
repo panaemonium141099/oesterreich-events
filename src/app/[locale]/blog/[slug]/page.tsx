@@ -76,6 +76,15 @@ export async function generateMetadata({
 
 // ── SVG Icon components (no emoji) ──────────────────────────────────────────
 
+function IconBed() {
+  return (
+    <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-4 h-4 shrink-0">
+      <path d="M2 6v9M2 12h16v3M2 10h16v-1.5A2.5 2.5 0 0 0 15.5 6H8v4" strokeLinecap="round" strokeLinejoin="round" />
+      <circle cx="5" cy="8" r="1.3" />
+    </svg>
+  );
+}
+
 function IconTrain() {
   return (
     <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-4 h-4 shrink-0">
@@ -167,6 +176,7 @@ function IconArrowRight() {
 // Map icon label to component
 function PracticalIcon({ label }: { label: string }) {
   const l = label.toLowerCase();
+  if (l.includes('übernacht') || l.includes('hotel') || l.includes('schlaf') || l.includes('unterkunft')) return <IconBed />;
   if (l.includes('bahn') || l.includes('zug') || l.includes('növog') || l.includes('westbahn')) return <IconTrain />;
   if (l.includes('auto') || l.includes('pkw')) return <IconCar />;
   if (l.includes('camping') || l.includes('zelt')) return <IconTent />;
