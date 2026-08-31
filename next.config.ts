@@ -279,7 +279,8 @@ const nextConfig: NextConfig = {
     // connect-src have been removed.
     const csp = [
       "default-src 'self'",
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://api.mapbox.com https://events.mapbox.com https://www.googletagmanager.com https://www.google-analytics.com",
+      // booking.com: prelanding_sdk fürs Click-to-Load-Unterkunftswidget im Planer (fn-21)
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://api.mapbox.com https://events.mapbox.com https://www.googletagmanager.com https://www.google-analytics.com https://www.booking.com",
       styleSrcSources.join(' '),
       styleSrcElemSources.join(' '),
       "style-src-attr 'unsafe-inline'",
@@ -288,7 +289,7 @@ const nextConfig: NextConfig = {
       "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.lasstreffen.at wss://api.lasstreffen.at https://api.mapbox.com https://*.tiles.mapbox.com https://events.mapbox.com https://api.spotify.com https://accounts.spotify.com https://www.google-analytics.com https://www.googletagmanager.com https://stats.g.doubleclick.net",
       "worker-src 'self' blob:",
       "child-src 'self' blob:",
-      "frame-src 'self' https://accounts.google.com",
+      "frame-src 'self' https://accounts.google.com https://www.booking.com",
       "form-action 'self'",
       "base-uri 'self'",
       "object-src 'none'",
