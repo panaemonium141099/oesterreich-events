@@ -17,7 +17,7 @@ import { V4LocaleSwitcher } from './V4LocaleSwitcher';
  * their initial bundle (see fn-15.5).
  *
  * Active-state derives from usePathname() with startsWith matching:
- *   /, /entdecken*                → Entdecken
+ *   /entdecken*                   → Entdecken (auf / ist kein Tab aktiv)
  *   /aktivitaeten, /aktivitaet/*  → Freizeit
  *   /artists*                     → Künstler
  *   /map*                         → Karte
@@ -36,7 +36,9 @@ interface NavItem {
 }
 
 const NAV_ITEMS: ReadonlyArray<NavItem> = [
-  { href: '/entdecken', labelKey: 'discover', matches: ['/', '/entdecken'] },
+  // Auf der Landing (/) ist bewusst KEIN Tab aktiv — "Entdecken" leuchtet
+  // nur auf /entdecken selbst (User-Feedback: sah aus wie angeklickt).
+  { href: '/entdecken', labelKey: 'discover', matches: ['/entdecken'] },
   // fn-18 Task 8: Einstieg in den Freizeit-Bestand; aktiv auch auf den
   // Detailseiten (/aktivitaet/<slug>).
   { href: '/aktivitaeten', labelKey: 'activities', matches: ['/aktivitaeten', '/aktivitaet'] },
