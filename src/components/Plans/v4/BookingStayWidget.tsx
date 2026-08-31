@@ -86,7 +86,7 @@ export function BookingStayWidget() {
             type="button"
             onClick={() => setState('loading')}
             data-track="stay_widget_open"
-            className="press-haptic inline-flex items-center gap-1.5 rounded-xl bg-[var(--v4-ink)] text-[var(--v4-bg)] text-[12.5px] font-semibold px-4 py-2"
+            className="press-haptic inline-flex items-center gap-1.5 rounded-full bg-[var(--v4-ink)] text-[#0a0a0c] text-[12.5px] font-semibold px-4 py-2"
           >
             Booking.com-Suche laden
           </button>

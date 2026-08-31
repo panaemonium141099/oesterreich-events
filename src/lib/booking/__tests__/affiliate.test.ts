@@ -68,6 +68,10 @@ describe('deriveCityFromLocation', () => {
     ['', null],
     [null, null],
     ['1010', null],
+    // Emoji/Sonderzeichen-Müll aus gescrapten Feldern wird verworfen
+    ['🙄', null],
+    ['Gasthaus 🙄, Wien', 'Wien'],
+    ['???', null],
   ])('%s → %s', (input, expected) => {
     expect(deriveCityFromLocation(input)).toBe(expected);
   });
