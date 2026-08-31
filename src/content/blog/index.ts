@@ -78,6 +78,7 @@ import { post as altstadtRundgangDeutsch2026 } from './posts/altstadt-rundgang-d
 import { post as imperialGalaConcert2026 } from './posts/imperial-gala-concert-2026';
 import { post as disneySArielleDieMeerjungfrau2026 } from './posts/disney-s-arielle-die-meerjungfrau-2026';
 import { post as sonosCliq2026 } from './posts/sonos-cliq-2026';
+import { post as uebernachtenGrazKonzertbesucher } from './posts/uebernachten-graz-konzertbesucher';
 // AUTOWRITER-IMPORTS-END
 
 export type { FestivalPost, GalleryImage, FestivalKeyFacts, LineupAct } from './types';
@@ -161,6 +162,7 @@ export const ALL_POSTS: FestivalPost[] = [
   imperialGalaConcert2026,
   disneySArielleDieMeerjungfrau2026,
   sonosCliq2026,
+  uebernachtenGrazKonzertbesucher,
   // AUTOWRITER-POSTS-END
 ].sort(
   (a, b) => new Date(b.publishDate).getTime() - new Date(a.publishDate).getTime()
