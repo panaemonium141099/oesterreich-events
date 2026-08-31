@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { getPostBySlug, getPostsByCategory } from '@/content/blog';
 import { BlogTicketBox } from '@/components/Blog/BlogTicketBox';
 import { BlogStayBox } from '@/components/Blog/BlogStayBox';
+import { BlogStayList } from '@/components/Blog/BlogStayList';
 import { RelatedEvents } from '@/components/Blog/RelatedEvents';
 // AdSlot removed in fn-15.4 — Google AdSense was pulled completely (property
 // not approved for AdSense). The three former placements (after-lead,
@@ -212,6 +213,9 @@ export default async function BlogPostPage({
   // `eventStatus`, `eventAttendanceMode`, `performer` and `offers` are all
   // emitted unconditionally so the page never triggers "fehlende Felder"
   // warnings in Search Console (rich-results gate).
+  // fn-21: jsonLdEvent ist optional — Unterkunfts-/Guide-Artikel (post.stays)
+  // sind keine Events und dürfen KEIN Event-Schema emittieren.
+  const jsonLdEventSrc = post.jsonLdEvent;
   const priceLower = post.keyFacts.price.toLowerCase();
   const isFree = priceLower.includes('frei') || priceLower.includes('gratis') || priceLower.includes('kostenlos');
   const priceMatch = post.keyFacts.price.match(/(\d+(?:[.,]\d+)?)/);
@@ -223,53 +227,47 @@ export default async function BlogPostPage({
   // to the full list so we still emit a non-empty performer array.
   const headliners = post.lineup?.filter(act => act.role === 'headliner' || !act.role) ?? [];
   const performerSource = headliners.length > 0 ? headliners : (post.lineup ?? []);
-  const performers = performerSource.length > 0
-    ? performerSource.slice(0, 12).map(act => ({
-        '@type': 'PerformingGroup',
-        name: act.name,
-      }))
-    : [{ '@type': 'PerformingGroup', name: post.jsonLdEvent.name }];
 
-  // Offers nur emitten wenn parseable Preis vorhanden — Google verlangt bei
-  // `offers` zwingend `price`. Sonst löst das die GSC-Warning "Feld 'price'
-  // fehlt" aus. Wenn kein Preis bekannt ist, einfach offers weglassen.
-  const offers: Record<string, unknown> | null = parsedPrice != null
-    ? {
-        '@type': 'Offer',
-        url: post.keyFacts.website || post.jsonLdEvent.url,
-        priceCurrency: 'EUR',
-        price: parsedPrice,
-        availability: 'https://schema.org/InStock',
-        validFrom: post.publishDate,
-        ...(post.keyFacts.price ? { name: post.keyFacts.price } : {}),
-      }
-    : null;
-
-  const eventJsonLd: Record<string, unknown> = {
+  const eventJsonLd: Record<string, unknown> | null = jsonLdEventSrc ? {
     '@context': 'https://schema.org',
     '@type': 'Event',
-    name: post.jsonLdEvent.name,
-    startDate: post.jsonLdEvent.startDate,
-    endDate: post.jsonLdEvent.endDate,
+    name: jsonLdEventSrc.name,
+    startDate: jsonLdEventSrc.startDate,
+    endDate: jsonLdEventSrc.endDate,
     eventStatus: 'https://schema.org/EventScheduled',
     eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
     location: {
       '@type': 'Place',
-      name: post.jsonLdEvent.location,
+      name: jsonLdEventSrc.location,
       address: {
         '@type': 'PostalAddress',
         streetAddress: post.keyFacts.address,
-        addressCountry: post.jsonLdEvent.addressCountry,
+        addressCountry: jsonLdEventSrc.addressCountry,
       },
     },
-    image: post.jsonLdEvent.image,
-    url: post.jsonLdEvent.url,
-    description: post.jsonLdEvent.description,
+    image: jsonLdEventSrc.image,
+    url: jsonLdEventSrc.url,
+    description: jsonLdEventSrc.description,
     isAccessibleForFree: isFree,
     organizer: { '@type': 'Organization', name: 'LassTreffen.at', url: 'https://lasstreffen.at' },
-    performer: performers,
-    ...(offers ? { offers } : {}),
-  };
+    performer: performerSource.length > 0
+      ? performerSource.slice(0, 12).map(act => ({
+          '@type': 'PerformingGroup',
+          name: act.name,
+        }))
+      : [{ '@type': 'PerformingGroup', name: jsonLdEventSrc.name }],
+    // Offers nur wenn parseable Preis vorhanden — Google verlangt bei
+    // `offers` zwingend `price` (sonst GSC-Warning "Feld 'price' fehlt").
+    ...(parsedPrice != null ? { offers: {
+      '@type': 'Offer',
+      url: post.keyFacts.website || jsonLdEventSrc.url,
+      priceCurrency: 'EUR',
+      price: parsedPrice,
+      availability: 'https://schema.org/InStock',
+      validFrom: post.publishDate,
+      ...(post.keyFacts.price ? { name: post.keyFacts.price } : {}),
+    } } : {}),
+  } : null;
 
   // FAQPage schema — enables FAQ rich results in Google
   const faqJsonLd = post.faqs && post.faqs.length > 0 ? {
@@ -295,10 +293,12 @@ export default async function BlogPostPage({
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(blogPostingJsonLd).replace(/</g, '\u003c') }}
       />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(eventJsonLd).replace(/</g, '\u003c') }}
-      />
+      {eventJsonLd && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(eventJsonLd).replace(/</g, '\u003c') }}
+        />
+      )}
       {faqJsonLd && (
         <script
           type="application/ld+json"
@@ -530,6 +530,9 @@ export default async function BlogPostPage({
               ))}
             </ul>
           </section>
+
+          {/* Kuratierte Unterkünfte (fn-21) — nur bei "Übernachten"-Artikeln */}
+          <BlogStayList post={post} />
 
           {/* Practical Info */}
           <section className="mb-16">
