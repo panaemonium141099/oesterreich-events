@@ -285,7 +285,7 @@ const nextConfig: NextConfig = {
       "style-src-attr 'unsafe-inline'",
       "img-src 'self' data: blob: https:",
       "font-src 'self' data:",
-      "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.mapbox.com https://*.tiles.mapbox.com https://events.mapbox.com https://api.spotify.com https://accounts.spotify.com https://www.google-analytics.com https://www.googletagmanager.com https://stats.g.doubleclick.net",
+      "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.lasstreffen.at wss://api.lasstreffen.at https://api.mapbox.com https://*.tiles.mapbox.com https://events.mapbox.com https://api.spotify.com https://accounts.spotify.com https://www.google-analytics.com https://www.googletagmanager.com https://stats.g.doubleclick.net",
       "worker-src 'self' blob:",
       "child-src 'self' blob:",
       "frame-src 'self' https://accounts.google.com",
