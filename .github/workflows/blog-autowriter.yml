@@ -36,6 +36,9 @@ concurrency:
 
 permissions:
   contents: write
+  # fn-21: der Post-Commit muss das Server-Deploy selbst anstossen —
+  # Pushes mit dem GITHUB_TOKEN triggern keine anderen Workflows.
+  actions: write
 
 jobs:
   write:
@@ -83,3 +86,10 @@ jobs:
           fi
           git commit -m "content(blog): Autowriter $(date -u +%F) — ${{ steps.write.outputs.slugs || steps.staywrite.outputs.slugs }}"
           git push origin master
+
+      # Pushes aus Workflows loesen keine push-Trigger aus (GitHub-Schutz
+      # gegen Rekursion) — ohne diesen Schritt kaeme der neue Post nie live.
+      - name: Deploy anstossen
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run deploy.yml --ref master
