@@ -1,4 +1,7 @@
 import type { FestivalPost } from './types';
+// fn-21: Rubrik "Übernachten" — kuratierte Unterkunfts-Artikel
+import { post as besondereUnterkuenfteBurgenland } from './posts/besondere-unterkuenfte-burgenland';
+import { post as aussergewoehnlichUebernachtenOesterreich } from './posts/aussergewoehnlich-uebernachten-oesterreich';
 import { post as novaRock } from './posts/nova-rock-2026';
 import { post as donauinselfest } from './posts/donauinselfest-2026';
 import { post as frequency } from './posts/frequency-festival-2026';
@@ -81,6 +84,8 @@ export type { FestivalPost, GalleryImage, FestivalKeyFacts, LineupAct } from './
 
 /** All blog posts sorted by publishDate descending (newest first). */
 export const ALL_POSTS: FestivalPost[] = [
+  besondereUnterkuenfteBurgenland,
+  aussergewoehnlichUebernachtenOesterreich,
   novaRock,
   donauinselfest,
   frequency,

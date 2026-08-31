@@ -66,7 +66,11 @@ export interface FestivalPost {
   seoTitle: string;
   seoDescription: string;
   keywords: string[];
-  jsonLdEvent: {
+  /**
+   * fn-21: optional — Guide-/Unterkunfts-Artikel (stays) sind keine Events
+   * und emittieren kein Event-Schema. Event-/Festival-Posts setzen es weiter.
+   */
+  jsonLdEvent?: {
     name: string;
     startDate: string;
     endDate: string;
@@ -91,4 +95,25 @@ export interface FestivalPost {
    * dafür schlicht keine ableitbare Stadt liefern.
    */
   stayCity?: string;
+  /**
+   * fn-21: kuratierte Unterkünfte für Artikel der Rubrik "Übernachten".
+   * Wenn gesetzt, rendert die Post-Seite eine BlogStayList (jede Unterkunft
+   * mit Booking.com-Affiliate-Suchlink aus name+place) und unterdrückt die
+   * generische BlogStayBox.
+   */
+  stays?: StayItem[];
+}
+
+/** Eine kuratierte Unterkunft in einem "Übernachten"-Artikel (fn-21). */
+export interface StayItem {
+  /** Echter Name der Unterkunft, z. B. "St. Martins Therme & Lodge". */
+  name: string;
+  /** Ort für den Booking-Suchlink, z. B. "Frauenkirchen". */
+  place: string;
+  /** Bundesland/Region als Anzeige-Badge. */
+  region: string;
+  /** Was macht sie besonders — 2-4 Sätze, faktenbasiert. */
+  description: string;
+  /** Kurzes Attribut wie "Weinfass", "Baumhaus", "Therme + Lodge". */
+  kind: string;
 }

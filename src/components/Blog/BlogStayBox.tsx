@@ -29,6 +29,9 @@ function futureCheckin(iso: string | undefined): string | null {
 }
 
 export function BlogStayBox({ post }: { post: FestivalPost }) {
+  // "Übernachten"-Artikel haben ihre kuratierte BlogStayList — die
+  // generische Box wäre dort redundant.
+  if (post.stays && post.stays.length > 0) return null;
   // keyFacts.address zuerst: enthält meist "Straße, PLZ Stadt, Bundesland" —
   // das PLZ+Stadt-Muster ist die verlässlichste Quelle.
   const city =
