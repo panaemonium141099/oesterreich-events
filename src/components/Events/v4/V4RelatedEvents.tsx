@@ -17,6 +17,7 @@ import { getLocale, getTranslations } from 'next-intl/server';
 import { Link } from '@/i18n/navigation';
 import { createClient } from '@supabase/supabase-js';
 import { EventNearbyActivities } from '@/components/Activities/NearbyActivitiesSection';
+import { V4NearbyStays } from '@/components/Events/v4/V4NearbyStays';
 import { buildEventUrlV2 } from '@/lib/utils/slugify';
 import { categoryLabel } from '@/lib/i18n/category-labels';
 import { ALL_GEMEINDEN } from '@/lib/gemeinden/data';
@@ -246,9 +247,14 @@ export async function V4RelatedEvents({ event }: { event: Event }) {
   // dem Event-Detail (max 3, <= 10 km). Andockstelle bewusst hier statt
   // in page.tsx: die Sektion erscheint damit auch im Sheet/Modal, laedt
   // selbst ueber den gecachten Loader und rendert null ohne Treffer.
+  // fn-21: "Unterkuenfte in der Naehe" (Booking-Affiliate) direkt unter
+  // den Aktivitaeten — gleiche Andockstelle, rendert null ohne Treffer.
   const nearbyActivities =
     event.latitude != null && event.longitude != null ? (
-      <EventNearbyActivities lat={event.latitude} lng={event.longitude} />
+      <>
+        <EventNearbyActivities lat={event.latitude} lng={event.longitude} />
+        <V4NearbyStays event={event} />
+      </>
     ) : null;
 
   if (related.length === 0 && hubs.length === 0) return nearbyActivities;
