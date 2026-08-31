@@ -59,7 +59,14 @@ out center tags;`;
     try {
       const res = await fetch(endpoint, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          // Ohne Bot-UA + Accept antwortet overpass-api.de mit HTTP 406
+          // (Betriebs-Lehre fn-18, import-osm-pois.ts)
+          'User-Agent':
+            'OesterreichEventsBot/1.0 (+https://lasstreffen.at; stay-poi-import; contact via website)',
+          Accept: 'application/json',
+        },
         body: `data=${encodeURIComponent(query)}`,
       });
       if (res.status === 429 || res.status === 504) {
