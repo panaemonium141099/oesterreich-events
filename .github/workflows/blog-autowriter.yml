@@ -16,12 +16,19 @@ on:
     # nach dem nächtlichen Scrape-Lauf (03:17), damit frische Events
     # als Kandidaten bereitstehen.
     - cron: '23 5 * * *'
+    # Sonntags 06:23 UTC zusätzlich EIN Unterkunfts-Guide (fn-21,
+    # Rubrik "Übernachten", rotierende Topic-Liste im Script).
+    - cron: '23 6 * * 0'
   workflow_dispatch:
     inputs:
       count:
         description: 'Anzahl Posts (Default 2)'
         required: false
         default: '2'
+      stayguide:
+        description: 'true = Unterkunfts-Guide statt Event-Posts'
+        required: false
+        default: 'false'
 
 concurrency:
   group: blog-autowriter
@@ -49,11 +56,21 @@ jobs:
 
       - name: Write blog posts
         id: write
+        if: github.event.schedule != '23 6 * * 0' && github.event.inputs.stayguide != 'true'
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: npx tsx src/scripts/blog-autowriter.ts --count ${{ github.event.inputs.count || '2' }}
+
+      - name: Write stay guide (fn-21)
+        id: staywrite
+        if: github.event.schedule == '23 6 * * 0' || github.event.inputs.stayguide == 'true'
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: npx tsx src/scripts/blog-autowriter.ts --stay-guide
 
       - name: Commit & push
         run: |
@@ -64,5 +81,5 @@ jobs:
             echo "Nichts zu committen — Script hätte failen müssen."
             exit 1
           fi
-          git commit -m "content(blog): Autowriter $(date -u +%F) — ${{ steps.write.outputs.slugs }}"
+          git commit -m "content(blog): Autowriter $(date -u +%F) — ${{ steps.write.outputs.slugs || steps.staywrite.outputs.slugs }}"
           git push origin master
