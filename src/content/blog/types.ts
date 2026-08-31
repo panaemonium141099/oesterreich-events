@@ -84,4 +84,11 @@ export interface FestivalPost {
   };
   /** Optional FAQ section — rendered as visible Q&A and FAQPage JSON-LD schema for rich results. */
   faqs?: FaqItem[];
+  /**
+   * fn-21: explizite Stadt für die Booking.com-Unterkunfts-Box (BlogStayBox).
+   * Optional — ohne Angabe wird die Stadt aus jsonLdEvent.location bzw.
+   * keyFacts.location abgeleitet. Leerer String unterdrückt die Box nicht;
+   * dafür schlicht keine ableitbare Stadt liefern.
+   */
+  stayCity?: string;
 }

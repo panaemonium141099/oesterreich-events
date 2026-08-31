@@ -4,6 +4,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { getPostBySlug, getPostsByCategory } from '@/content/blog';
 import { BlogTicketBox } from '@/components/Blog/BlogTicketBox';
+import { BlogStayBox } from '@/components/Blog/BlogStayBox';
 import { RelatedEvents } from '@/components/Blog/RelatedEvents';
 // AdSlot removed in fn-15.4 — Google AdSense was pulled completely (property
 // not approved for AdSense). The three former placements (after-lead,
@@ -549,6 +550,10 @@ export default async function BlogPostPage({
               ))}
             </div>
           </section>
+
+          {/* Booking.com-Unterkunfts-Box (fn-21) — nach den Praktischen Infos,
+              weil thematisch Anreise/Aufenthalt; rendert nur mit ableitbarer Stadt */}
+          <BlogStayBox post={post} />
 
           {/* FAQ Section */}
           {post.faqs && post.faqs.length > 0 && (

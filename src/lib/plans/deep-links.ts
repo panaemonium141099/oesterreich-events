@@ -7,6 +7,7 @@
  */
 
 import type { Event } from '@/types/events';
+import { buildAffiliateStayLink } from '@/lib/booking/affiliate';
 
 /**
  * Baut ÖBB-Scotty Routenplaner-URL.
@@ -77,24 +78,11 @@ export function buildBookingUrl(
   planDate: string,
   nights = 1,
 ): string {
-  const params = new URLSearchParams();
-  const ss = (city ?? '').trim();
-  if (ss) params.set('ss', ss);
-  if (planDate && /^\d{4}-\d{2}-\d{2}$/.test(planDate)) {
-    params.set('checkin', planDate);
-    try {
-      const checkin = new Date(planDate + 'T12:00:00Z');
-      checkin.setUTCDate(checkin.getUTCDate() + Math.max(1, nights));
-      const checkout = checkin.toISOString().slice(0, 10);
-      params.set('checkout', checkout);
-    } catch { /* skip checkout */ }
-  }
-  params.set('group_adults', '2');
-  params.set('no_rooms', '1');
-  params.set('aid', '304142'); // generischer Partner-AID; durch eigenen ersetzen wenn vorhanden
-
-  const query = params.toString();
-  return `https://www.booking.com/searchresults.html${query ? `?${query}` : ''}`;
+  // fn-21: läuft jetzt über unseren CJ-Affiliate-Deeplink (sid=plan) statt
+  // des früheren generischen aid=304142 — gleiche Ziel-Suche, aber mit
+  // Provisions-Tracking. Ohne Stadt bleibt ss leer → Booking-Suchmaske.
+  const checkin = planDate && /^\d{4}-\d{2}-\d{2}$/.test(planDate) ? planDate : null;
+  return buildAffiliateStayLink({ ss: (city ?? '').trim(), checkin, nights }, 'plan');
 }
 
 /**
