@@ -1,10 +1,25 @@
 import { ArtistAppearanceCard } from '@/components/Artists/ArtistAppearanceCard';
+import { ArtistAppearanceGroup } from '@/components/Artists/ArtistAppearanceGroup';
 import type { ArtistAppearance } from '@/lib/artists/appearances';
 import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
 
 interface MatchesSectionProps {
   appearances: ArtistAppearance[];
+}
+
+// Mehrere Termine desselben Künstlers zu einer aufklappbaren Karte bündeln
+// (User-Feedback: "Pizzera und Jaus" stand sonst 2× untereinander).
+// Reihenfolge: erste Nennung gewinnt — appearances kommen datumssortiert.
+function groupByArtist(appearances: ArtistAppearance[]): ArtistAppearance[][] {
+  const byArtist = new Map<string, ArtistAppearance[]>();
+  for (const a of appearances) {
+    const key = a.artist_name.trim().toLowerCase();
+    const list = byArtist.get(key);
+    if (list) list.push(a);
+    else byArtist.set(key, [a]);
+  }
+  return [...byArtist.values()];
 }
 
 export function MatchesSection({ appearances }: MatchesSectionProps) {
@@ -38,9 +53,13 @@ export function MatchesSection({ appearances }: MatchesSectionProps) {
         </div>
       ) : (
         <div className="flex flex-col gap-2.5">
-          {appearances.map((a, i) => (
-            <ArtistAppearanceCard key={`${a.artist_name}-${a.event_id ?? a.context}-${i}`} a={a} />
-          ))}
+          {groupByArtist(appearances).map((group, i) =>
+            group.length === 1 ? (
+              <ArtistAppearanceCard key={`${group[0].artist_name}-${group[0].event_id ?? group[0].context}-${i}`} a={group[0]} />
+            ) : (
+              <ArtistAppearanceGroup key={`${group[0].artist_name}-${i}`} appearances={group} />
+            )
+          )}
         </div>
       )}
     </section>
