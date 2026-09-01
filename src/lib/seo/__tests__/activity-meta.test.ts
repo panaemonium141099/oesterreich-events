@@ -80,6 +80,15 @@ describe('buildActivityDescription', () => {
     expect(d.length).toBeLessThanOrEqual(158);
   });
 
+  it('setzt den Preis als eigenen Satz', () => {
+    const d = buildActivityDescription({
+      name: 'Seeschloss Ort', town: 'Gmunden', tags: ['burgführung'],
+      priceHint: 'ab € 3', openingTimes: { mo: '9-17' },
+    });
+    expect(d).toContain('ab € 3.');
+    expect(d).not.toContain('ab € 3 Öffnungszeiten');
+  });
+
   it('kommt ohne Tags und ohne Text aus', () => {
     const d = buildActivityDescription({ name: 'escape house Vorchdorf', town: 'Vorchdorf im Almtal' });
     expect(d).toContain('escape house Vorchdorf in Vorchdorf im Almtal');

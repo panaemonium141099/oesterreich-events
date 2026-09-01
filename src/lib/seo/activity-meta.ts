@@ -127,7 +127,12 @@ export function buildActivityDescription(input: ActivityMetaInput): string {
   const sentence = firstUsefulSentence(input.descriptionShort ?? input.description);
   if (sentence) parts.push(sentence);
 
-  if (input.priceHint) parts.push(clean(input.priceHint));
+  if (input.priceHint) {
+    // Als eigener Satz, sonst laeuft der Preis in den Schlusssatz hinein
+    // ("ab € 3 Öffnungszeiten, Karte und Events…").
+    const price = clean(input.priceHint);
+    parts.push(/[.!?]$/.test(price) ? price : `${price}.`);
+  }
 
   // Schluss-Hinweis nur, wenn danach noch Platz bleibt — sonst gewinnt Inhalt.
   const withoutTail = parts.join(' ');
