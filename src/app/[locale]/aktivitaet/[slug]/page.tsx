@@ -23,6 +23,7 @@ import { ActivityExtrasSlot } from '@/components/Activities/ActivityExtrasSlot';
 import { OpenNowBadge } from '@/components/Activities/OpenNowBadge';
 import { BookingBox } from '@/components/Activities/BookingBox';
 import { hasAffiliateOffer } from '@/lib/affiliate/viator-types';
+import { buildActivityTitle, buildActivityDescription } from '@/lib/seo/activity-meta';
 
 /**
  * ISR wie die Event-Detailseite (events/[...slug]/page.tsx): ohne
@@ -69,13 +70,22 @@ export async function generateMetadata({
   const bundesland = getBundeslandById(activity.bundesland);
   const where = activity.town ?? bundesland?.name ?? 'Österreich';
 
-  const rawTitle = `${activity.name} – ${where}`;
-  const title = rawTitle.length > 57 ? rawTitle.slice(0, 57).trimEnd() + '…' : rawTitle;
-
-  const descriptionSource = activity.description_short ?? activity.description;
-  const description = descriptionSource
-    ? descriptionSource.slice(0, 160)
-    : `${activity.name} in ${where} — Öffnungszeiten, Karte und Infos auf LassTreffen.at.`;
+  // SEO 2026-09-01: Titel/Description kommen aus strukturierten Feldern
+  // statt aus dem abgeschnittenen Quelltext. Die alte Variante lieferte
+  // Snippets wie "Willkommen im Seeschloss Ort!" — 20.492 Impressionen
+  // pro Woche brachten dadurch nur 157 Klicks (0,8 % CTR).
+  const metaInput = {
+    name: activity.name,
+    town: activity.town,
+    bundeslandName: bundesland?.name ?? null,
+    tags: activity.tags,
+    description: activity.description,
+    descriptionShort: activity.description_short,
+    openingTimes: activity.opening_times,
+    priceHint: activity.price_hint,
+  };
+  const title = buildActivityTitle(metaInput);
+  const description = buildActivityDescription(metaInput);
 
   // E13: canonical IMMER auf die DE-URL — auch fuer /en/aktivitaet/*
   // (DE-Content auf /en), und bewusst KEIN languages/hreflang-Paar,
