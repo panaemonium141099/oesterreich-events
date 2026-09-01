@@ -23,7 +23,7 @@ export default async function Image() {
   const geistText =
     'LASS TREFFEN · ÖSTERREICH lasstreffen.at ' +
     'Events in Wien, Graz, Salzburg und ganz Österreich — ' +
-    '40 000 Konzerte, Festivals, Märkte, Partys auf einer Karte. ' +
+    '85 000 Events & Ausflugsziele auf einer Karte. ' +
     'Gemeinsam hingehen gemeinsam planen';
 
   const [frauncesRegular, frauncesItalic, geist, geistMedium] = await Promise.all([
@@ -119,7 +119,7 @@ export default async function Image() {
             }}
           >
             Events in Wien, Graz, Salzburg und ganz Österreich —
-            40&thinsp;000 Konzerte, Festivals, Märkte, Partys auf einer Karte.
+            85&thinsp;000 Events & Ausflugsziele auf einer Karte.
           </div>
         </div>
 

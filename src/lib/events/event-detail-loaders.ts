@@ -293,3 +293,54 @@ export function buildBundeslandHref(bundesland: string | null): string | null {
   if (!bundesland) return null;
   return `/map?bundesland=${encodeURIComponent(bundesland)}`;
 }
+
+/**
+ * Nachfolge-Ausgabe eines vergangenen Events finden (SEO-Fix 2026-09-01).
+ *
+ * Wiederkehrende Dorffeste/Märkte/Kirtage sammeln über Monate Rankings an;
+ * nach dem Termin läuft dieser Traffic ins Leere. Wir suchen deshalb die
+ * nächste Ausgabe und verlinken sie prominent auf der vergangenen Seite:
+ *
+ *   1. exakter Slug-Treffer in der Zukunft (deckt jährliche Serien, deren
+ *      Slug stabil bleibt: "waldfest-haiming")
+ *   2. sonst Titel-Präfix am selben Ort (deckt durchnummerierte Titel:
+ *      "44. Hinterglemmer Bauernmarkt" → "45. …"); nutzt den trgm-Index
+ *      über title und ist auf 1 Zeile begrenzt.
+ *
+ * Beide Zweige sind indexiert und laufen nur auf vergangenen Detailseiten.
+ */
+export const getSuccessorEvent = unstable_cache(
+  async (
+    slug: string | null,
+    title: string,
+    locationName: string | null,
+  ): Promise<Event | null> => {
+    const nowIso = new Date().toISOString();
+
+    if (slug) {
+      const { data } = await supabase
+        .from('events').select('*')
+        .eq('slug', slug).gt('start_date', nowIso)
+        .eq('publish_status', 'published').eq('visibility', 'public')
+        .order('start_date', { ascending: true })
+        .limit(1);
+      if (data && data.length > 0) return data[0] as Event;
+    }
+
+    // Führende Nummerierung/Jahreszahl abschneiden ("44. Hinterglemmer
+    // Bauernmarkt" → "Hinterglemmer Bauernmarkt") und danach suchen.
+    const core = title.replace(/^\s*\d+\.?\s*/, '').replace(/\b(19|20)\d{2}\b/g, '').trim();
+    if (core.length < 8 || !locationName) return null;
+    const { data } = await supabase
+      .from('events').select('*')
+      .ilike('title', `%${core.slice(0, 60)}%`)
+      .eq('location_name', locationName)
+      .gt('start_date', nowIso)
+      .eq('publish_status', 'published').eq('visibility', 'public')
+      .order('start_date', { ascending: true })
+      .limit(1);
+    return data && data.length > 0 ? (data[0] as Event) : null;
+  },
+  ['event-successor'],
+  { revalidate: 3600, tags: ['event'] },
+);
