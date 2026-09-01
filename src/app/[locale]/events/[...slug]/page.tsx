@@ -6,12 +6,14 @@ import { routing } from '@/i18n/routing';
 import type { Event } from '@/types/events';
 import { buildEventUrlV2 } from '@/lib/utils/slugify';
 import { buildJsonLd } from '@/lib/seo/event-jsonld';
+import { V4PastEventNotice } from '@/components/Events/v4/V4PastEventNotice';
 import { V4EventDetail } from '@/components/Events/v4';
 import { V4RelatedEvents, hubLinksFor } from '@/components/Events/v4/V4RelatedEvents';
 import { deriveEventState } from '@/lib/v4/derive-event-state';
 import {
   parseSlugArray,
   resolveEvent,
+  getSuccessorEvent,
   getEventByShortId,
   getVenue,
   getLineupForEvent,
@@ -246,10 +248,18 @@ export default async function EventDetailPage({
   const eventEnd = event.end_date || event.start_date;
   const isPast = eventEnd ? new Date(eventEnd).getTime() < Date.now() - 24 * 60 * 60 * 1000 : false;
   if (currentPath !== canonicalPath) {
-    if (isPast) {
-      notFound();
+    // Vergangene Events: KEIN Redirect (der Kommentar oben erklaert die
+    // Loop-/Stale-Gefahr) — aber auch kein notFound() mehr. Messung
+    // 2026-09-01: 14 der 47 impressionsstaerksten Event-URLs lieferten
+    // 404 (8.800 Impressions/Woche, Positionen 4-6), weil sich ihr
+    // kanonischer Pfad nach dem Event geaendert hatte (Bezirks-Mapping,
+    // Datums-Korrektur). Wir rendern die Seite jetzt normal; das
+    // canonical-Tag zeigt ohnehin auf canonicalPath, also entsteht kein
+    // Duplicate-Content-Signal, und der Besucher landet auf Inhalt statt
+    // auf einer Sackgasse.
+    if (!isPast) {
+      permanentRedirect(canonicalPath);
     }
-    permanentRedirect(canonicalPath);
   }
 
   // Phase 3 (v4 redesign): we no longer load friendsData here — Friends
@@ -270,6 +280,13 @@ export default async function EventDetailPage({
     event.venue_id ? getVenue(event.venue_id) : Promise.resolve(null),
     getLineupForEvent(event.id),
   ]);
+
+  // SEO-Fix 2026-09-01: vergangene Seiten behalten ihr Ranking — statt sie
+  // ins Leere laufen zu lassen, suchen wir die naechste Ausgabe (nur dann
+  // eine zusaetzliche, indexierte Query).
+  const successor = isPast
+    ? await getSuccessorEvent(event.slug ?? null, event.title, event.location_name ?? null)
+    : null;
 
   // ─── fn-17 Slice 3: Lazy-Übersetzung für die /en-Ansicht ───────────
   // Cache-Hit aus der DB (title_en/description_en) oder EIN Gemini-Call
@@ -336,6 +353,9 @@ export default async function EventDetailPage({
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: breadcrumbJsonLd }}
       />
+      {isPast && (
+        <V4PastEventNotice eventEnd={eventEnd!} successor={successor} />
+      )}
       <V4EventDetail
         event={displayEvent}
         state={state}

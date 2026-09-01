@@ -4,7 +4,7 @@ export default function manifest(): MetadataRoute.Manifest {
   return {
     name: 'LassTreffen.at — Entdecke was los ist in Österreich',
     short_name: 'LassTreffen',
-    description: 'Über 40.000 Veranstaltungen in ganz Österreich auf einer interaktiven Karte.',
+    description: 'Über 85.000 Veranstaltungen & Ausflugsziele in ganz Österreich auf einer interaktiven Karte.',
     start_url: '/',
     display: 'standalone',
     background_color: '#f8f6f2',
