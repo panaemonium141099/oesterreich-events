@@ -132,6 +132,15 @@ async function main() {
       execStep('Normalize locations', `npx tsx ${envFlag}src/scripts/normalize-locations.ts`);
     }, steps);
 
+    // SEO-Bilder-Fix (2026-09-01): Breite der neuen/gewechselten Scraper-Bilder
+    // vermessen (Range-Request-Header-Parse) — der Bild-Resolver ersetzt
+    // <600px-Bilder durch grosse Kategorie-Fallbacks (Google-Thumbnail-CTR).
+    // Gedeckelt, damit der Schritt nie zum Zeitfresser wird; der Rest-Backlog
+    // rutscht in die Folgenaechte.
+    steps.image_probe = await runStep('image_probe', async () => {
+      execStep('Probe image widths', `npx tsx ${envFlag}src/scripts/probe-image-widths.ts --limit 4000`);
+    }, steps);
+
     if (!opts.skipCategorization) {
       if (!opts.skipCategorizationBackfill) {
         steps.categorization_backfill = await runStep('categorization_backfill', async () => {
