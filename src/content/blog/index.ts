@@ -79,6 +79,8 @@ import { post as imperialGalaConcert2026 } from './posts/imperial-gala-concert-2
 import { post as disneySArielleDieMeerjungfrau2026 } from './posts/disney-s-arielle-die-meerjungfrau-2026';
 import { post as sonosCliq2026 } from './posts/sonos-cliq-2026';
 import { post as uebernachtenGrazKonzertbesucher } from './posts/uebernachten-graz-konzertbesucher';
+import { post as dieMusikVonHarryPotterDasKonzert2026 } from './posts/die-musik-von-harry-potter-das-konzert-2026';
+import { post as peterCorneliusBandZeitlos2026 } from './posts/peter-cornelius-band-zeitlos-2026';
 // AUTOWRITER-IMPORTS-END
 
 export type { FestivalPost, GalleryImage, FestivalKeyFacts, LineupAct } from './types';
@@ -163,6 +165,8 @@ export const ALL_POSTS: FestivalPost[] = [
   disneySArielleDieMeerjungfrau2026,
   sonosCliq2026,
   uebernachtenGrazKonzertbesucher,
+  dieMusikVonHarryPotterDasKonzert2026,
+  peterCorneliusBandZeitlos2026,
   // AUTOWRITER-POSTS-END
 ].sort(
   (a, b) => new Date(b.publishDate).getTime() - new Date(a.publishDate).getTime()
