@@ -83,8 +83,10 @@ import { post as uebernachtenGrazKonzertbesucher } from './posts/uebernachten-gr
 
 export type { FestivalPost, GalleryImage, FestivalKeyFacts, LineupAct } from './types';
 
-/** All blog posts sorted by publishDate descending (newest first). */
+/** All blog posts sorted by publishDate descending (newest first). */import { post as adventmaerkteOesterreichGuide } from './posts/adventmaerkte-oesterreich-guide';
+
 export const ALL_POSTS: FestivalPost[] = [
+  adventmaerkteOesterreichGuide,
   besondereUnterkuenfteBurgenland,
   aussergewoehnlichUebernachtenOesterreich,
   novaRock,
