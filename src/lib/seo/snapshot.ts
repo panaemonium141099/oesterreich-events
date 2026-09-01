@@ -66,7 +66,14 @@ export interface SeoSnapshotMetrics {
   };
 }
 
-export type HubType = 'event_detail' | 'gemeinde' | 'thema' | 'bundesland' | 'blog' | 'other';
+export type HubType =
+  | 'event_detail'
+  | 'aktivitaet'
+  | 'gemeinde'
+  | 'thema'
+  | 'bundesland'
+  | 'blog'
+  | 'other';
 
 /** URL → hub-type classifier. Matches against canonical URL shapes only. */
 export function classifyPage(pagePath: string): HubType {
@@ -74,6 +81,9 @@ export function classifyPage(pagePath: string): HubType {
     const url = new URL(pagePath, SITE_URL);
     const path = url.pathname;
     if (path.startsWith('/events/')) return 'event_detail';
+    // fn-18-Bestand: 2.849 Aktivitaets-URLs sammelten 20.492 Impressionen
+    // pro Woche und liefen bis 2026-09-01 unsichtbar unter 'other' mit.
+    if (path.startsWith('/aktivitaet/') || path.startsWith('/aktivitaeten')) return 'aktivitaet';
     if (path.startsWith('/gemeinde/')) return 'gemeinde';
     if (path.startsWith('/thema/')) return 'thema';
     if (path.startsWith('/blog/')) return 'blog';
@@ -283,6 +293,7 @@ async function collectGscMetrics(today: string): Promise<SeoSnapshotMetrics['gsc
   // ── By hub-type — classify each top-page row into bucket ──
   const byHubType: Record<HubType, { clicks: number; impressions: number; pageCount: number }> = {
     event_detail: { clicks: 0, impressions: 0, pageCount: 0 },
+    aktivitaet: { clicks: 0, impressions: 0, pageCount: 0 },
     gemeinde: { clicks: 0, impressions: 0, pageCount: 0 },
     thema: { clicks: 0, impressions: 0, pageCount: 0 },
     bundesland: { clicks: 0, impressions: 0, pageCount: 0 },
@@ -334,6 +345,7 @@ async function trailingWindowClicks(endDate: string, days: number): Promise<numb
 /** Representative URL per hub-type for CrUX per-type vitals. */
 const CWV_SAMPLE_URLS: Record<Exclude<HubType, 'other'>, string> = {
   event_detail: `${SITE_URL}/`, // event pages are too numerous — skip in CrUX
+  aktivitaet: `${SITE_URL}/aktivitaeten`,
   gemeinde: `${SITE_URL}/gemeinde/1010-wien`,
   thema: `${SITE_URL}/thema/musik`,
   bundesland: `${SITE_URL}/wien`,
