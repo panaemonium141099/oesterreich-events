@@ -125,8 +125,24 @@ export const getEventBySlugOnly = unstable_cache(
       .eq('publish_status', 'published')
       .order('event_score', { ascending: false, nullsFirst: false })
       .limit(1);
-    if (error || !data || data.length === 0) return null;
-    return data[0] as Event;
+    if (!error && data && data.length > 0) return data[0] as Event;
+
+    // Zweite Stufe (SEO-Fix 2026-09-01): auch VERGANGENE Ausgaben zulassen.
+    // Bei verschobenen Terminen ("Zeltfest 06.08." wurde zu "08.08.") traf
+    // weder der Datums- noch dieser Slug-Lookup — die indexierte URL lief
+    // in ein 404, obwohl die Zeile unveraendert published in der DB liegt
+    // (gemessen: 7 Seiten, ~4.000 Impressions/Woche). Der Aufrufer
+    // rendert diese Seiten mit der Termin-vorbei-Box; ein Redirect
+    // unterbleibt fuer vergangene Events weiterhin (Loop-Schutz).
+    // Juengste Ausgabe zuerst, damit wiederkehrende Feste die letzte
+    // stattgefundene Ausgabe zeigen.
+    const { data: past } = await supabase
+      .from('events').select('*')
+      .eq('slug', slug).lt('start_date', today)
+      .eq('publish_status', 'published')
+      .order('start_date', { ascending: false })
+      .limit(1);
+    return past && past.length > 0 ? (past[0] as Event) : null;
   },
   ['event-by-slug-only'],
   // 300s — same reason as event-by-slug-date above.
