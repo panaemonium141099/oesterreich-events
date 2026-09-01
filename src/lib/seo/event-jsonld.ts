@@ -58,7 +58,13 @@ export function buildJsonLd(event: Event): string {
   // Use resolver so JSON-LD always has an image (category fallback if needed).
   // Schema.org verlangt absolute URLs — die Kategorie-Fallbacks sind relative
   // Pfade ("/images/categories/…") und damit "Ungültige URL in Feld 'image'".
-  const rawImage = resolvePrimaryEventImage({ imageUrl: event.image_url, category: event.category, title: event.title });
+  const rawImage = resolvePrimaryEventImage({
+    imageUrl: event.image_url,
+    category: event.category,
+    title: event.title,
+    bundesland: event.bundesland,
+    imageWidth: event.image_width,
+  });
   jsonLd.image =
     rawImage.startsWith('//') ? `https:${rawImage}` :
     rawImage.startsWith('/') ? `https://lasstreffen.at${rawImage}` :

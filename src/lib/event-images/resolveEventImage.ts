@@ -66,13 +66,30 @@ export function resolveGenericFallbackImage(): string {
  * 1. event's own image_url (if it passes the usability check)
  * 2. category + region specific fallback (bundesland-aware)
  */
+/**
+ * SEO-Bilder-Fix (2026-09-01): Google zeigt dank max-image-preview:large
+ * GROSSE Thumbnails aus dem Seiten-/Schema-Bild — gescrapte Mini-Bilder
+ * (Stichprobe: 222×222) wirken hochskaliert verpixelt und kosten CTR.
+ * Bilder unterhalb dieser Breite (per probe-image-widths.ts vermessen,
+ * events.image_width) werden deshalb durch die großen lokalen
+ * Kategorie-/Region-Fallbacks ersetzt statt hochskaliert.
+ * image_width null/-1 = (noch) nicht vermessen → Original behalten.
+ */
+export const MIN_TRUSTED_EVENT_IMAGE_WIDTH = 600;
+
 export function resolvePrimaryEventImage(opts: {
   imageUrl?: string | null;
   category?: string | null;
   title?: string | null;
   bundesland?: string | null;
+  /** Gemessene Breite aus events.image_width (null/-1 = unbekannt). */
+  imageWidth?: number | null;
 }): string {
-  if (isUsableImageCandidate(opts.imageUrl)) {
+  const tooSmall =
+    opts.imageWidth != null &&
+    opts.imageWidth > 0 &&
+    opts.imageWidth < MIN_TRUSTED_EVENT_IMAGE_WIDTH;
+  if (!tooSmall && isUsableImageCandidate(opts.imageUrl)) {
     return opts.imageUrl!.trim();
   }
   return resolveCategoryFallbackImage(opts.category, opts.title ?? undefined, opts.bundesland);

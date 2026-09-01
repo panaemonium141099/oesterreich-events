@@ -30,6 +30,7 @@ import { V4EventDetailContent } from './V4EventDetailContent';
 import { V4SideBox } from './V4SideBox';
 import { V4MobileStickyBar } from './V4MobileStickyBar';
 import { V4PlanWizard } from '@/components/Plans/v4';
+import { resolvePrimaryEventImage } from '@/lib/event-images';
 
 interface V4EventDetailProps {
   event: Event;
@@ -102,7 +103,16 @@ export function V4EventDetail({
         startDate={event.start_date}
         locationName={event.location_name}
         city={event.bundesland}
-        imageUrl={event.image_url}
+        // SEO-Bilder-Fix: Mini-Bilder (<600px, vermessen in image_width)
+        // durch große Kategorie-Fallbacks ersetzen — konsistent mit dem
+        // JSON-LD-Bild, damit Googles Thumbnail nie Pixelmatsch zeigt.
+        imageUrl={resolvePrimaryEventImage({
+          imageUrl: event.image_url,
+          imageWidth: event.image_width,
+          category: event.category,
+          title: event.title,
+          bundesland: event.bundesland,
+        })}
         images={event.images}
       />
 
