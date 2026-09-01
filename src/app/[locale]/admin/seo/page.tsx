@@ -22,6 +22,7 @@
  */
 
 import { useState, useEffect, useCallback } from 'react';
+import { SeoLivePages } from '@/components/Admin/SeoLivePages';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { toast } from 'sonner';
@@ -144,6 +145,9 @@ export default function SeoAdminPage() {
       </div>
 
       <SetupAndOverview />
+      {/* Live-GSC-Auswertung: zeigt was der 28-Tage-Top-50-Snapshot
+          verdeckt (Aktivitaeten, kommende vs. vergangene Termine) */}
+      <SeoLivePages />
       <HubBreakdown />
       <KeywordsTable />
       <PagesTable />
@@ -687,6 +691,7 @@ function formatHubLabel(hub: string): string {
     case 'gemeinde': return 'Gemeinden';
     case 'thema': return 'Themen';
     case 'event_detail': return 'Events';
+    case 'aktivitaet': return 'Aktivitäten';
     case 'bundesland': return 'Bundesländer';
     case 'blog': return 'Blog';
     case 'other': return 'Andere';
