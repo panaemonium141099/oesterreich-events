@@ -78,12 +78,16 @@ export async function TourBox({
   // sonst bliebe von einem Fremd-Script eine halbleere Flaeche uebrig und
   // die duennen Orte tragen die Ladezeit ohne Gegenwert. Ueberall sonst
   // bleibt der scriptfreie Link.
-  const widgetKind =
-    widget && isGygWidgetEnabled() && qualifiesForWidget(destination)
-      ? widget === 'city' && locationId == null
-        ? null
-        : widget
-      : null;
+  // Widget nur bei Zielen mit belegtem Angebot — sonst fuellt das
+  // auto-Widget mit Attraktionen vom anderen Ende der Welt auf (siehe
+  // Kommentar in gyg-destinations.ts). Ueberall sonst: der Link.
+  const widgetKind = !widget || !isGygWidgetEnabled() || !qualifiesForWidget(destination)
+    ? null
+    : widget === 'auto'
+      ? 'auto'
+      : locationId != null
+        ? 'city'
+        : null;
 
   const link = (
     <a
@@ -121,6 +125,7 @@ export async function TourBox({
       localeCode={locale === 'en' ? 'en-US' : 'de-DE'}
       minHeight={tone === 'light' ? 380 : 420}
       className={tone === 'dark' ? 'rounded-xl overflow-hidden bg-white' : ''}
+      fallback={link}
     />
   ) : null;
 

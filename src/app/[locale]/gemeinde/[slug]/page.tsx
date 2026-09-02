@@ -456,6 +456,18 @@ export default async function GemeindeHubPage({
             </section>
           )}
 
+          {/* fn-22 — Touren & Aktivitaeten (GetYourGuide). Bewusst direkt
+              unter den Veranstaltungen statt am Seitenende: dort stand die
+              Box bei 90 % Seitentiefe und wurde faktisch nie gesehen. */}
+          <TourBox
+            layout="inline"
+            className="mb-12"
+            widget="auto"
+            city={g.name}
+            bundesland={g.bundesland}
+            placement={`gemeinde-${slug}`}
+          />
+
           {/* fn-18 Fall (b): kleiner Sektionshinweis statt Seiten-Empty-State,
               wenn zwar keine Events, aber Aktivitäten da sind. */}
           {events.length === 0 && activities.length >= HUB_MIN_ACTIVITIES && (
@@ -496,18 +508,6 @@ export default async function GemeindeHubPage({
               ))}
             </div>
           </section>
-
-          {/* fn-22 — Touren & Aktivitaeten (GetYourGuide). Faellt auf die
-              Bundesland-Zielseite zurueck, wenn der Ort keine eigene hat;
-              rendert nichts, solange das Flag aus ist. */}
-          <TourBox
-            layout="inline"
-            className="mb-10"
-            widget="auto"
-            city={g.name}
-            bundesland={g.bundesland}
-            placement={`gemeinde-${slug}`}
-          />
 
           {/* SEO text block — additional context Google can extract.
               fn-18: Copy folgt dem Content-Fall — die Event-Boilerplate

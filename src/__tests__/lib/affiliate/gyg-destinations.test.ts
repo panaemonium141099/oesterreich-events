@@ -164,9 +164,14 @@ describe('Widget-Auswahl', () => {
   it('erlaubt das Widget nur bei Orten mit genug Angebot', () => {
     expect(qualifiesForWidget(findGygCity('Wien')!)).toBe(true);
     expect(qualifiesForWidget(findGygCity('Graz')!)).toBe(true);
-    // Duenne Orte und Regionen bekommen den scriptfreien Link
+    // Duenne Orte bekommen den scriptfreien Link
     expect(qualifiesForWidget(findGygCity('Klagenfurt')!)).toBe(false);
     expect(qualifiesForWidget(findGygCity('Linz')!)).toBe(false);
+    // Regionen brauchen mehr: Burgenland (29) reicht nicht — dort zeigte
+    // das auto-Widget Attraktionen aus Melbourne. Niederoesterreich (346) schon.
     expect(qualifiesForWidget(findGygRegion('Burgenland')!)).toBe(false);
+    expect(qualifiesForWidget(findGygRegion('Kärnten')!)).toBe(false);
+    expect(qualifiesForWidget(findGygRegion('Niederösterreich')!)).toBe(true);
+    expect(qualifiesForWidget(findGygRegion('Tirol')!)).toBe(true);
   });
 })
