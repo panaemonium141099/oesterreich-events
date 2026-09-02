@@ -35,7 +35,7 @@
  * TourBox.
  */
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 
 const LOADER_SRC = 'https://widget.getyourguide.com/dist/pa.umd.production.min.js';
 
@@ -60,6 +60,12 @@ export interface GygWidgetProps {
   localeCode?: string;
   /** Reservierte Mindesthoehe, verhindert Layout-Shift. */
   minHeight?: number;
+  /**
+   * Was gezeigt wird, wenn das Widget nichts liefert (Adblocker, Script
+   * geblockt, kein Angebot). Ohne Fallback verschwindet die Flaeche —
+   * mit Fallback bleibt wenigstens der scriptfreie Link stehen.
+   */
+  fallback?: ReactNode;
   className?: string;
 }
 
@@ -69,6 +75,7 @@ export function GygWidget({
   locationId,
   localeCode = 'de-DE',
   minHeight = 420,
+  fallback = null,
   className = '',
 }: GygWidgetProps) {
   const hostRef = useRef<HTMLDivElement>(null);
@@ -105,7 +112,9 @@ export function GygWidget({
     return () => clearTimeout(timer);
   }, [inView, partnerId]);
 
-  if (!usable || empty) return null;
+  // Kein Reservat-Rahmen um den Fallback: sonst klafft die volle
+  // Widget-Hoehe unter einem einzeiligen Link.
+  if (!usable || empty) return <>{fallback}</>;
 
   return (
     <div ref={hostRef} className={className} style={{ minHeight }}>

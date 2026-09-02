@@ -263,6 +263,7 @@ export async function V4RelatedEvents({ event }: { event: Event }) {
   // sondern nur Ort bzw. Bundesland.
   const tourBox = (
     <TourBox
+      widget="auto"
       address={event.address}
       locationName={event.location_name}
       bundesland={bl}
