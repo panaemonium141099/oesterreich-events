@@ -17,6 +17,7 @@ import { getLocale, getTranslations } from 'next-intl/server';
 import { Link } from '@/i18n/navigation';
 import { createClient } from '@supabase/supabase-js';
 import { EventNearbyActivities } from '@/components/Activities/NearbyActivitiesSection';
+import { TourBox } from '@/components/Affiliate/TourBox';
 import { V4NearbyStays } from '@/components/Events/v4/V4NearbyStays';
 import { buildEventUrlV2 } from '@/lib/utils/slugify';
 import { categoryLabel } from '@/lib/i18n/category-labels';
@@ -257,7 +258,25 @@ export async function V4RelatedEvents({ event }: { event: Event }) {
       </>
     ) : null;
 
-  if (related.length === 0 && hubs.length === 0) return nearbyActivities;
+  // fn-22: Touren-Box (GetYourGuide) unter den Unterkuenften. Bewusst
+  // ausserhalb des lat/lng-Zweigs: sie braucht keine Koordinaten,
+  // sondern nur Ort bzw. Bundesland.
+  const tourBox = (
+    <TourBox
+      address={event.address}
+      locationName={event.location_name}
+      bundesland={bl}
+      placement={`event-${String(event.id).slice(0, 8)}`}
+    />
+  );
+
+  if (related.length === 0 && hubs.length === 0)
+    return (
+      <>
+        {nearbyActivities}
+        {tourBox}
+      </>
+    );
 
   return (
     <>
@@ -346,6 +365,7 @@ export async function V4RelatedEvents({ event }: { event: Event }) {
       </div>
     </section>
     {nearbyActivities}
+    {tourBox}
     </>
   );
 }

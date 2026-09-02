@@ -55,6 +55,7 @@ import {
   slugifyBundesland,
 } from '@/lib/hubs/gemeinde-hub-content';
 import { loadNearbyActivitiesCached } from '@/lib/activities/nearby-loaders';
+import { TourBox } from '@/components/Affiliate/TourBox';
 import { GemeindeActivitiesSection } from '@/components/Activities/NearbyActivitiesSection';
 import { loadNearbyOsmPoisCached } from '@/lib/osm/nearby-pois';
 import { GemeindeOsmPoisSection } from '@/components/Osm/OsmPoisSection';
@@ -495,6 +496,17 @@ export default async function GemeindeHubPage({
               ))}
             </div>
           </section>
+
+          {/* fn-22 — Touren & Aktivitaeten (GetYourGuide). Faellt auf die
+              Bundesland-Zielseite zurueck, wenn der Ort keine eigene hat;
+              rendert nichts, solange das Flag aus ist. */}
+          <TourBox
+            layout="inline"
+            className="mb-10"
+            city={g.name}
+            bundesland={g.bundesland}
+            placement={`gemeinde-${slug}`}
+          />
 
           {/* SEO text block — additional context Google can extract.
               fn-18: Copy folgt dem Content-Fall — die Event-Boilerplate

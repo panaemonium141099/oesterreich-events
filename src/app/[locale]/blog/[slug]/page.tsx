@@ -4,6 +4,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { getPostBySlug, getPostsByCategory } from '@/content/blog';
 import { BlogTicketBox } from '@/components/Blog/BlogTicketBox';
+import { TourBox } from '@/components/Affiliate/TourBox';
 import { BlogStayBox } from '@/components/Blog/BlogStayBox';
 import { BlogStayList } from '@/components/Blog/BlogStayList';
 import { RelatedEvents } from '@/components/Blog/RelatedEvents';
@@ -571,6 +572,16 @@ export default async function BlogPostPage({
           {/* Booking.com-Unterkunfts-Box (fn-21) — nach den Praktischen Infos,
               weil thematisch Anreise/Aufenthalt; rendert nur mit ableitbarer Stadt */}
           <BlogStayBox post={post} />
+
+          {/* fn-22 — Touren & Aktivitaeten (GetYourGuide) direkt unter der
+              Unterkunfts-Box: gleiche Reise-Logik, gleiche Kennzeichnung. */}
+          <TourBox
+            tone="light"
+            city={post.stayCity}
+            address={post.keyFacts?.address}
+            locationName={post.jsonLdEvent?.location ?? post.keyFacts?.location}
+            placement={`blog-${post.slug}`}
+          />
 
           {/* FAQ Section */}
           {post.faqs && post.faqs.length > 0 && (

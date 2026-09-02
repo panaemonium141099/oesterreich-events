@@ -9,6 +9,7 @@
  */
 
 import type { PublicActivity } from '@/lib/activities/public-types';
+import { TourBox } from '@/components/Affiliate/TourBox';
 import { NearbyEventsSection } from './NearbyEventsSection';
 
 interface ActivityExtrasSlotProps {
@@ -16,5 +17,18 @@ interface ActivityExtrasSlotProps {
 }
 
 export function ActivityExtrasSlot({ activity }: ActivityExtrasSlotProps) {
-  return <NearbyEventsSection lat={activity.lat} lng={activity.lng} />;
+  return (
+    <>
+      <NearbyEventsSection lat={activity.lat} lng={activity.lng} />
+      {/* fn-22 — buchbare Touren am Ort (GetYourGuide). Eigene Breite wie
+          die Nachbar-Sektion, damit die Seite eine Spalte bleibt. */}
+      <TourBox
+        layout="inline"
+        className="max-w-4xl mx-auto px-6 mt-10"
+        city={activity.town}
+        bundesland={activity.bundesland}
+        placement={`aktivitaet-${activity.slug}`}
+      />
+    </>
+  );
 }

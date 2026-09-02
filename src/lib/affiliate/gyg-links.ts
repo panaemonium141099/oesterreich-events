@@ -25,6 +25,8 @@
  * Cookie-Laufzeit laut Recherche: 31 Tage (nicht codewirksam).
  */
 
+import type { GygDestination } from './gyg-destinations';
+
 export interface GygDeeplinkInput {
   /** Suchbegriff/Aktivitaetsname. */
   query: string;
@@ -70,5 +72,82 @@ export function buildGygDeeplink(input: GygDeeplinkInput): string | null {
     return null;
   }
   url.searchParams.set('partner_id', partnerId);
+  return url.toString();
+}
+
+/* ------------------------------------------------------------------ *
+ * fn-22 — Zielseiten-Links (Touren-Boxen)
+ *
+ * Anders als der Suchlink oben braucht dieser Pfad KEIN geratenes
+ * Template: die Zielseiten stehen in gyg-destinations.ts und sind dort
+ * jede einzeln mit gezaehltem Angebot belegt. Fehlt die partner_id,
+ * wird trotzdem nichts gebaut — ein Link ohne Attribution ist eine
+ * verschenkte Provision, die niemandem auffaellt.
+ * ------------------------------------------------------------------ */
+
+
+/** de-Seite fuer deutschsprachige Nutzer, .com fuer /en. */
+const GYG_HOSTS = {
+  de: 'https://www.getyourguide.de',
+  en: 'https://www.getyourguide.com',
+} as const;
+
+/**
+ * Name des Kampagnen-Parameters. GYG nutzt in seinen eigenen Links
+ * `cmp`; falls das Partner-Dashboard einen anderen Namen auswertet,
+ * laesst er sich per Env umstellen, ohne Code anzufassen.
+ */
+const DEFAULT_CAMPAIGN_PARAM = 'cmp';
+
+export interface GygDestinationLinkOptions {
+  /** Platzierung fuer die Auswertung: "event-1a2b3c4d", "gemeinde-…". */
+  placement: string;
+  locale?: string;
+  env?: Record<string, string | undefined>;
+}
+
+/**
+ * Ist die Auslieferung scharf geschaltet? Bewusst getrennt von
+ * isGygEnabled(): Zielseiten-Links brauchen KEIN Deeplink-Template,
+ * nur Flag + partner_id.
+ */
+export function isGygDestinationEnabled(
+  env: Record<string, string | undefined> = process.env,
+): boolean {
+  return (
+    env.NEXT_PUBLIC_GYG_ENABLED === 'true' &&
+    typeof env.NEXT_PUBLIC_GYG_PARTNER_ID === 'string' &&
+    env.NEXT_PUBLIC_GYG_PARTNER_ID.trim() !== ''
+  );
+}
+
+/**
+ * Affiliate-Link auf eine GYG-Zielseite — oder null, solange Flag oder
+ * partner_id fehlen.
+ */
+export function buildGygDestinationLink(
+  destination: Pick<GygDestination, 'path'>,
+  { placement, locale = 'de', env = process.env }: GygDestinationLinkOptions,
+): string | null {
+  if (!isGygDestinationEnabled(env)) return null;
+
+  const partnerId = (env.NEXT_PUBLIC_GYG_PARTNER_ID ?? '').trim();
+  const path = destination.path.replace(/^\/+|\/+$/g, '');
+  if (!path) return null;
+
+  const host = locale === 'en' ? GYG_HOSTS.en : GYG_HOSTS.de;
+  const url = new URL(`${host}/${path}/`);
+  url.searchParams.set('partner_id', partnerId);
+
+  // Gleiche Konvention wie die sid bei Booking.com (fn-21): pro
+  // Platzierung auswertbar, auf unbedenkliche Zeichen reduziert.
+  const campaign = placement.replace(/[^a-zA-Z0-9._-]/g, '-').slice(0, 60);
+  if (campaign) {
+    url.searchParams.set(
+      (env.NEXT_PUBLIC_GYG_CAMPAIGN_PARAM ?? DEFAULT_CAMPAIGN_PARAM).trim() ||
+        DEFAULT_CAMPAIGN_PARAM,
+      campaign,
+    );
+  }
   return url.toString();
 }
