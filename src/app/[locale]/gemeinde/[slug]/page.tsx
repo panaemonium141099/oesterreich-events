@@ -503,6 +503,7 @@ export default async function GemeindeHubPage({
           <TourBox
             layout="inline"
             className="mb-10"
+            widget="auto"
             city={g.name}
             bundesland={g.bundesland}
             placement={`gemeinde-${slug}`}

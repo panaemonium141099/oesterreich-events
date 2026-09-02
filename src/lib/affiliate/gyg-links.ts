@@ -151,3 +151,21 @@ export function buildGygDestinationLink(
   }
   return url.toString();
 }
+
+/**
+ * Duerfen die echten GYG-Widgets (Fremd-Script) geladen werden?
+ * Getrennt vom Link-Flag, damit sich das Fremd-Script einzeln
+ * abschalten laesst, ohne die scriptfreien Boxen mitzunehmen.
+ */
+export function isGygWidgetEnabled(
+  env: Record<string, string | undefined> = process.env,
+): boolean {
+  return env.NEXT_PUBLIC_GYG_WIDGET_ENABLED === 'true' && isGygDestinationEnabled(env);
+}
+
+/** Partner-ID zur Laufzeit — leer, solange nichts gesetzt ist. */
+export function gygPartnerId(
+  env: Record<string, string | undefined> = process.env,
+): string {
+  return (env.NEXT_PUBLIC_GYG_PARTNER_ID ?? '').trim();
+}

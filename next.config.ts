@@ -280,16 +280,19 @@ const nextConfig: NextConfig = {
     const csp = [
       "default-src 'self'",
       // booking.com: prelanding_sdk fürs Click-to-Load-Unterkunftswidget im Planer (fn-21)
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://api.mapbox.com https://events.mapbox.com https://www.googletagmanager.com https://www.google-analytics.com https://www.booking.com https://pagead2.googlesyndication.com https://partner.googleadservices.com https://tpc.googlesyndication.com https://adservice.google.com https://fundingchoicesmessages.google.com",
+      // widget.getyourguide.com: Loader + iframe der GYG-Touren-Widgets (fn-22).
+      // Ohne diese drei Eintraege (script/frame/connect) laedt der Loader nicht
+      // einmal — die Widget-Flaeche bliebe still leer.
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://api.mapbox.com https://events.mapbox.com https://www.googletagmanager.com https://www.google-analytics.com https://www.booking.com https://pagead2.googlesyndication.com https://partner.googleadservices.com https://tpc.googlesyndication.com https://adservice.google.com https://fundingchoicesmessages.google.com https://widget.getyourguide.com",
       styleSrcSources.join(' '),
       styleSrcElemSources.join(' '),
       "style-src-attr 'unsafe-inline'",
       "img-src 'self' data: blob: https:",
       "font-src 'self' data:",
-      "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.lasstreffen.at wss://api.lasstreffen.at https://api.mapbox.com https://*.tiles.mapbox.com https://events.mapbox.com https://api.spotify.com https://accounts.spotify.com https://www.google-analytics.com https://www.googletagmanager.com https://stats.g.doubleclick.net https://pagead2.googlesyndication.com https://googleads.g.doubleclick.net https://fundingchoicesmessages.google.com",
+      "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.lasstreffen.at wss://api.lasstreffen.at https://api.mapbox.com https://*.tiles.mapbox.com https://events.mapbox.com https://api.spotify.com https://accounts.spotify.com https://www.google-analytics.com https://www.googletagmanager.com https://stats.g.doubleclick.net https://pagead2.googlesyndication.com https://googleads.g.doubleclick.net https://fundingchoicesmessages.google.com https://widget.getyourguide.com",
       "worker-src 'self' blob:",
       "child-src 'self' blob:",
-      "frame-src 'self' https://accounts.google.com https://www.booking.com https://googleads.g.doubleclick.net https://tpc.googlesyndication.com https://www.google.com",
+      "frame-src 'self' https://accounts.google.com https://www.booking.com https://googleads.g.doubleclick.net https://tpc.googlesyndication.com https://www.google.com https://widget.getyourguide.com",
       "form-action 'self'",
       "base-uri 'self'",
       "object-src 'none'",
