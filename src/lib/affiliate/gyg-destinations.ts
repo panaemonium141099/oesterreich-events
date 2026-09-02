@@ -186,3 +186,24 @@ export function resolveGygDestination(input: GygResolveInput): GygDestination | 
   if (city) return city;
   return findGygRegion(input.bundesland);
 }
+
+/**
+ * Ab wie vielen Angeboten sich das echte Widget lohnt. Darunter zeigt es
+ * ein bis zwei Kacheln und wirkt duenner als unsere eigene Box — dort
+ * bleibt der schlichte Link.
+ */
+export const WIDGET_MIN_ACTIVITIES = 30;
+
+/**
+ * GYG-Location-ID aus dem Pfad ("wien-l7" -> 7). Das Staedte-Widget
+ * adressiert Orte ueber diese Zahl, nicht ueber den Slug.
+ */
+export function gygLocationId(destination: Pick<GygDestination, 'path'>): number | null {
+  const match = destination.path.match(/-l(\d+)$/);
+  return match ? Number(match[1]) : null;
+}
+
+/** Traegt der Ort genug Angebot fuer das Widget? */
+export function qualifiesForWidget(destination: GygDestination): boolean {
+  return destination.kind === 'city' && destination.activities >= WIDGET_MIN_ACTIVITIES;
+}

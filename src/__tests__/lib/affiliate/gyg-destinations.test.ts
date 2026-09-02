@@ -11,6 +11,8 @@ import {
   findGygCity,
   findGygRegion,
   gygKey,
+  gygLocationId,
+  qualifiesForWidget,
   resolveGygDestination,
 } from '@/lib/affiliate/gyg-destinations';
 import { buildGygDestinationLink, isGygDestinationEnabled } from '@/lib/affiliate/gyg-links';
@@ -151,3 +153,20 @@ describe('buildGygDestinationLink', () => {
     expect(url.searchParams.get('cmp')).toBeNull();
   });
 });
+
+describe('Widget-Auswahl', () => {
+  it('liest die Location-ID aus dem Pfad', () => {
+    expect(gygLocationId({ path: 'wien-l7' })).toBe(7);
+    expect(gygLocationId({ path: 'saalbach-hinterglemm-l156448' })).toBe(156448);
+    expect(gygLocationId({ path: 'kaputt' })).toBeNull();
+  });
+
+  it('erlaubt das Widget nur bei Orten mit genug Angebot', () => {
+    expect(qualifiesForWidget(findGygCity('Wien')!)).toBe(true);
+    expect(qualifiesForWidget(findGygCity('Graz')!)).toBe(true);
+    // Duenne Orte und Regionen bekommen den scriptfreien Link
+    expect(qualifiesForWidget(findGygCity('Klagenfurt')!)).toBe(false);
+    expect(qualifiesForWidget(findGygCity('Linz')!)).toBe(false);
+    expect(qualifiesForWidget(findGygRegion('Burgenland')!)).toBe(false);
+  });
+})

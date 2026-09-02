@@ -577,6 +577,7 @@ export default async function BlogPostPage({
               Unterkunfts-Box: gleiche Reise-Logik, gleiche Kennzeichnung. */}
           <TourBox
             tone="light"
+            widget="auto"
             city={post.stayCity}
             address={post.keyFacts?.address}
             locationName={post.jsonLdEvent?.location ?? post.keyFacts?.location}

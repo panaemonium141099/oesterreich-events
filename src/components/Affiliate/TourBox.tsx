@@ -16,19 +16,36 @@
  * Pflichten (Muster: V4NearbyStays / BookingBox):
  *   - sichtbares "Anzeige"-Label
  *   - rel="sponsored nofollow noopener noreferrer"
- *   - Offenlegung im Fuss
  *   - data-track="tour_click" fuer den globalen ClickTracker
  */
 
 import { getLocale, getTranslations } from 'next-intl/server';
-import { buildGygDestinationLink } from '@/lib/affiliate/gyg-links';
-import { resolveGygDestination, type GygResolveInput } from '@/lib/affiliate/gyg-destinations';
+import {
+  buildGygDestinationLink,
+  gygPartnerId,
+  isGygWidgetEnabled,
+} from '@/lib/affiliate/gyg-links';
+import {
+  gygLocationId,
+  qualifiesForWidget,
+  resolveGygDestination,
+  type GygResolveInput,
+} from '@/lib/affiliate/gyg-destinations';
+import { GygWidget } from '@/components/Affiliate/GygWidget';
 
 export interface TourBoxProps extends GygResolveInput {
   /** Platzierung fuer die Auswertung: "event-1a2b3c4d", "gemeinde-eisenstadt". */
   placement: string;
   /** Dunkle v4-Seiten (Default) vs. heller Blog. */
   tone?: 'dark' | 'light';
+  /**
+   * Echtes GYG-Widget statt des schlichten Links:
+   *   'city' — Top-Touren des Ortes (nur bei genug Angebot, sonst Link)
+   *   'auto' — waehlt anhand des umgebenden Artikeltexts (Blog)
+   * Auf Event-Detailseiten bewusst nicht gesetzt: dort bleibt die Seite
+   * fremd-script-frei. Fuehrt zu Fremd-JS, deshalb Opt-in pro Ort.
+   */
+  widget?: 'city' | 'auto' | false;
   /**
    * 'section' bringt den vollen Seitenrahmen mit (Event-Detail, wo die Box
    * als eigener Streifen steht); 'inline' liefert nur die Karte, wenn die
@@ -42,6 +59,7 @@ export async function TourBox({
   placement,
   tone = 'dark',
   layout = 'section',
+  widget = false,
   className = '',
   ...where
 }: TourBoxProps) {
@@ -54,6 +72,18 @@ export async function TourBox({
 
   const t = await getTranslations('Tours');
   const place = destination.name;
+
+  const locationId = gygLocationId(destination);
+  // Widget nur dort, wo der Ort wirklich Angebot hat (>= 30 Touren) —
+  // sonst bliebe von einem Fremd-Script eine halbleere Flaeche uebrig und
+  // die duennen Orte tragen die Ladezeit ohne Gegenwert. Ueberall sonst
+  // bleibt der scriptfreie Link.
+  const widgetKind =
+    widget && isGygWidgetEnabled() && qualifiesForWidget(destination)
+      ? widget === 'city' && locationId == null
+        ? null
+        : widget
+      : null;
 
   const link = (
     <a
@@ -83,6 +113,17 @@ export async function TourBox({
     </a>
   );
 
+  const widgetNode = widgetKind ? (
+    <GygWidget
+      partnerId={gygPartnerId()}
+      kind={widgetKind}
+      locationId={locationId}
+      localeCode={locale === 'en' ? 'en-US' : 'de-DE'}
+      minHeight={tone === 'light' ? 380 : 420}
+      className={tone === 'dark' ? 'rounded-xl overflow-hidden bg-white' : ''}
+    />
+  ) : null;
+
   if (tone === 'light') {
     return (
       <section className={`mb-14 border border-gray-200 rounded-xl overflow-hidden bg-white ${className}`}>
@@ -94,16 +135,22 @@ export async function TourBox({
             {t('adLabel')}
           </span>
         </div>
-        <div className="px-6 py-4 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-5">
-          <div className="min-w-0 flex-1">
-            <p className="font-semibold text-gray-900 text-sm leading-snug">{t('lead', { place })}</p>
-            <p className="text-gray-400 text-xs mt-0.5">{t('sub')}</p>
+        {widgetNode ? (
+          <div className="px-6 py-4">
+            <p className="font-semibold text-gray-900 text-sm leading-snug mb-4">
+              {t('lead', { place })}
+            </p>
+            {widgetNode}
           </div>
-          {link}
-        </div>
-        <div className="border-t border-gray-100 px-6 py-3 bg-gray-50/50">
-          <p className="text-[11px] text-gray-400 leading-relaxed">{t('disclosure')}</p>
-        </div>
+        ) : (
+          <div className="px-6 py-4 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-5">
+            <div className="min-w-0 flex-1">
+              <p className="font-semibold text-gray-900 text-sm leading-snug">{t('lead', { place })}</p>
+              <p className="text-gray-400 text-xs mt-0.5">{t('sub')}</p>
+            </div>
+            {link}
+          </div>
+        )}
       </section>
     );
   }
@@ -126,10 +173,7 @@ export async function TourBox({
           {t('adLabel')}
         </span>
       </div>
-      <div className="mt-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        {link}
-        <p className="text-[10.5px] text-[var(--v4-ink-50)] leading-relaxed">{t('disclosure')}</p>
-      </div>
+      <div className="mt-4">{widgetNode ?? link}</div>
     </div>
   );
 
