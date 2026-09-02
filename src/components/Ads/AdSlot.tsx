@@ -59,10 +59,26 @@ export function AdSlot({ slot, minHeight = 280, tone = 'dark', className = '' }:
           obs.disconnect();
         }
       },
-      { rootMargin: '300px' },
+      // Grosszuegiger Vorlauf: die Flaechen sitzen am Seitenende, ein
+      // knapper Rand liess sie in der Praxis nie ausloesen.
+      { rootMargin: '1500px' },
     );
     obs.observe(el);
-    return () => obs.disconnect();
+
+    // Sicherheitsnetz: Wenn der Beobachter aus irgendeinem Grund nicht
+    // ausloest (verschachtelte Scroll-Container, blockiertes Scrollen
+    // durch den Einwilligungsdialog, exotische Browser), wird die
+    // Anzeige nach ein paar Sekunden trotzdem angefordert. Ohne das
+    // bleibt die Flaeche dauerhaft leer — beobachtet am 02.09.2026.
+    const fallback = setTimeout(() => {
+      setInView(true);
+      obs.disconnect();
+    }, 4000);
+
+    return () => {
+      obs.disconnect();
+      clearTimeout(fallback);
+    };
   }, []);
 
   useEffect(() => {
@@ -75,7 +91,7 @@ export function AdSlot({ slot, minHeight = 280, tone = 'dark', className = '' }:
     const t = setTimeout(() => {
       const ins = ref.current?.querySelector('ins');
       if (ins?.getAttribute('data-ad-status') === 'unfilled') setUnfilled(true);
-    }, 2500);
+    }, 6000);
     return () => clearTimeout(t);
   }, [inView]);
 
