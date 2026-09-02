@@ -118,7 +118,11 @@ export function GygWidget({
           data-gyg-partner-id={partnerId}
         />
       ) : (
-        <div data-gyg-widget="auto" data-gyg-partner-id={partnerId} />
+        <div
+          data-gyg-widget="auto"
+          data-gyg-locale-code={localeCode}
+          data-gyg-partner-id={partnerId}
+        />
       )}
     </div>
   );
