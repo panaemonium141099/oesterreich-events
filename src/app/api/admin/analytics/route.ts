@@ -76,19 +76,33 @@ export async function GET(request: NextRequest) {
 
     const sinceISO = since.toISOString();
 
-    // Fetch all analytics events in period
-    const { data: events, error } = await supabase
-      .from('analytics_events')
-      .select('event_type, event_data, page, referrer, session_id, user_id, created_at')
-      .gte('created_at', sinceISO)
-      .order('created_at', { ascending: true });
+    // Fetch all analytics events in period.
+    // PostgREST deckelt jede Antwort bei PGRST_DB_MAX_ROWS (self-hosted: 1000).
+    // Ohne Paging bekamen wir nur die AELTESTEN 1000 Events des Fensters — das
+    // Panel blieb dadurch am Fensteranfang stehen ("seit Tagen keine Besucher").
+    // Kurze Seiten bedeuten nicht Ende: der Server kuerzt still auf max_rows,
+    // deshalb wird erst bei einer leeren Seite abgebrochen.
+    const PAGE_SIZE = 10_000;
+    const MAX_EVENTS = 200_000; // Sicherheitsnetz gegen Endlosschleifen
+    const allEvents: AnalyticsRow[] = [];
+    for (let offset = 0; offset < MAX_EVENTS; ) {
+      const { data: page, error } = await supabase
+        .from('analytics_events')
+        .select('event_type, event_data, page, referrer, session_id, user_id, created_at')
+        .gte('created_at', sinceISO)
+        .order('created_at', { ascending: true })
+        .range(offset, offset + PAGE_SIZE - 1);
 
-    if (error) {
-      console.error('Analytics query error:', error);
-      return NextResponse.json({ error: 'Query failed' }, { status: 500 });
+      if (error) {
+        console.error('Analytics query error:', error);
+        return NextResponse.json({ error: 'Query failed' }, { status: 500 });
+      }
+
+      const rows = (page || []) as AnalyticsRow[];
+      if (rows.length === 0) break;
+      for (const row of rows) allEvents.push(row);
+      offset += rows.length;
     }
-
-    const allEvents = (events || []) as AnalyticsRow[];
 
     // === Overview stats ===
     const pageViews = allEvents.filter(e => e.event_type === 'page_view');
