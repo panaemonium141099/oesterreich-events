@@ -7,6 +7,7 @@ import { BlogTicketBox } from '@/components/Blog/BlogTicketBox';
 import { BlogStayBox } from '@/components/Blog/BlogStayBox';
 import { BlogStayList } from '@/components/Blog/BlogStayList';
 import { RelatedEvents } from '@/components/Blog/RelatedEvents';
+import { AdSlot } from '@/components/Ads/AdSlot';
 // AdSlot removed in fn-15.4 — Google AdSense was pulled completely (property
 // not approved for AdSense). The three former placements (after-lead,
 // mid-content, end-of-article) are now empty spacing only; if monetization
@@ -540,6 +541,9 @@ export default async function BlogPostPage({
               ))}
             </ul>
           </section>
+
+          {/* Anzeige im Lesefluss, nach dem Hauptteil */}
+          <AdSlot slot={process.env.NEXT_PUBLIC_ADSENSE_SLOT_BLOG ?? ''} minHeight={280} tone="light" />
 
           {/* Kuratierte Unterkünfte (fn-21) — nur bei "Übernachten"-Artikeln */}
           <BlogStayList post={post} />

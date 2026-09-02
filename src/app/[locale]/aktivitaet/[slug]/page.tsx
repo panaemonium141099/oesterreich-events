@@ -24,6 +24,7 @@ import { OpenNowBadge } from '@/components/Activities/OpenNowBadge';
 import { BookingBox } from '@/components/Activities/BookingBox';
 import { hasAffiliateOffer } from '@/lib/affiliate/viator-types';
 import { buildActivityTitle, buildActivityDescription } from '@/lib/seo/activity-meta';
+import { AdSlot } from '@/components/Ads/AdSlot';
 
 /**
  * ISR wie die Event-Detailseite (events/[...slug]/page.tsx): ohne
@@ -225,6 +226,8 @@ export default async function ActivityDetailPage({
           }}
         />
       )}
+
+      <AdSlot slot={process.env.NEXT_PUBLIC_ADSENSE_SLOT_ACTIVITY ?? ''} minHeight={250} tone="dark" />
 
       {/* Slot-Contract fuer Task 4 (Events in der Naehe) — hier leer. */}
       <ActivityExtrasSlot activity={activity} />
