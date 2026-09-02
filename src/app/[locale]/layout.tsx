@@ -309,6 +309,26 @@ export default async function RootLayout({
           ConsentGate component that mounts only after user opt-in. Track
           re-enabling GA4 as a follow-up task.
         */}
+        {/*
+          Google AdSense (2026-09-02). Laedt NUR bei
+          NEXT_PUBLIC_ADS_ENABLED=true — der Schalter wird erst umgelegt,
+          wenn im AdSense-Konto die DSGVO-Meldung (Googles zertifizierte
+          CMP) veroeffentlicht ist. Diese CMP zeigt das Einwilligungs-
+          Banner und haelt Anzeigen sowie Werbe-Cookies bis zur Zustimmung
+          zurueck; damit bleibt die Zusage in der Datenschutzerklaerung
+          (Abschnitt 5) eingehalten. strategy="lazyOnload", damit die
+          Kernmetriken der Seite unberuehrt bleiben.
+        */}
+        {process.env.NEXT_PUBLIC_ADS_ENABLED === 'true' &&
+          process.env.NEXT_PUBLIC_ADSENSE_CLIENT_ID && (
+            <Script
+              id="adsense"
+              strategy="lazyOnload"
+              async
+              crossOrigin="anonymous"
+              src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${process.env.NEXT_PUBLIC_ADSENSE_CLIENT_ID}`}
+            />
+          )}
       </head>
       <body className="antialiased">
         <NextIntlClientProvider messages={messages}>

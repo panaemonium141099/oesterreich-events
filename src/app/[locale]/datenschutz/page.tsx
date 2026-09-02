@@ -94,13 +94,42 @@ export default function DatenschutzPage() {
             <p>Unsere Website verwendet folgende Arten von Cookies:</p>
             <ul className="list-disc list-inside mt-3 space-y-1.5">
               <li><span className="text-white/90">Notwendige Cookies:</span> Erforderlich für die Grundfunktionalität der Website (Session-Verwaltung, Authentifizierung). Diese Cookies können nicht deaktiviert werden.</li>
+              <li><span className="text-white/90">Werbe-Cookies (nur mit Ihrer Einwilligung):</span> Wir binden Anzeigen über Google AdSense ein. Dabei können Cookies und ähnliche Technologien eingesetzt werden, um Anzeigen auszuliefern, deren Leistung zu messen und Missbrauch zu verhindern.</li>
             </ul>
             <p className="mt-3">
-              Derzeit setzen wir <strong>keine Analyse- und keine Werbenetzwerk-Cookies</strong>
-              ein. Die Reichweitenmessung erfolgt ausschließlich über das cookielose
-              Vercel-Analytics (siehe Abschnitt 6). Sollten zukünftig Analyse- oder
-              Marketing-Cookies eingeführt werden, werden diese ausschließlich nach
-              ausdrücklicher Einwilligung gesetzt und an dieser Stelle dokumentiert.
+              Werbe-Cookies werden <strong>ausschließlich nach Ihrer ausdrücklichen
+              Einwilligung</strong> gesetzt. Beim ersten Besuch erhalten Sie dafür einen
+              Einwilligungsdialog; ohne Zustimmung werden keine personalisierten Anzeigen
+              ausgespielt und keine Werbe-Cookies gespeichert. Rechtsgrundlage ist Ihre
+              Einwilligung (Art. 6 Abs. 1 lit. a DSGVO, § 165 Abs. 3 TKG 2021). Sie können
+              Ihre Auswahl jederzeit über den Link im Einwilligungsdialog ändern oder Ihre
+              Einwilligung mit Wirkung für die Zukunft widerrufen.
+            </p>
+            <p className="mt-3">
+              Anbieter ist Google Ireland Limited, Gordon House, Barrow Street, Dublin 4,
+              Irland. Dabei können Daten auch in die USA übermittelt werden; Google stützt
+              sich hierfür auf das EU-US Data Privacy Framework sowie
+              Standardvertragsklauseln. Weitere Informationen finden Sie in den{' '}
+              <a
+                href="https://policies.google.com/technologies/ads"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline decoration-white/30 underline-offset-2 hover:text-white"
+              >
+                Hinweisen von Google zu Werbung
+              </a>. Ihre Anzeigeneinstellungen können Sie unter{' '}
+              <a
+                href="https://adssettings.google.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline decoration-white/30 underline-offset-2 hover:text-white"
+              >
+                adssettings.google.com
+              </a>{' '}anpassen.
+            </p>
+            <p className="mt-3">
+              Die Reichweitenmessung erfolgt weiterhin über das cookielose Vercel-Analytics
+              (siehe Abschnitt 6) sowie eine eigene, cookielose Statistik ohne Profilbildung.
             </p>
             <p className="mt-3">
               Sie können Cookies jederzeit in Ihren Browsereinstellungen verwalten oder löschen.

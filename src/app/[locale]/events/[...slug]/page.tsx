@@ -19,6 +19,7 @@ import {
   getLineupForEvent,
 } from '@/lib/events/event-detail-loaders';
 import { getOrTranslateEventEn } from '@/lib/i18n/translate-event';
+import { AdSlot } from '@/components/Ads/AdSlot';
 
 /**
  * ISR revalidation interval.
@@ -364,6 +365,11 @@ export default async function EventDetailPage({
         priceAtDoor={priceAtDoor}
       />
       <V4RelatedEvents event={event}/>
+      {/* Anzeige bewusst ganz unten: Ticket-Box und Unterkuenfte
+          verdienen pro Klick deutlich mehr und bleiben unberuehrt. */}
+      <div className="max-w-[1180px] mx-auto px-5 md:px-14 pb-10">
+        <AdSlot slot={process.env.NEXT_PUBLIC_ADSENSE_SLOT_EVENT ?? ''} minHeight={250} tone="dark" />
+      </div>
     </>
   );
 }
