@@ -157,13 +157,18 @@ export function FeedItem({
 
   const handleBookmark = async () => {
     if (!currentUserId || !activity.event?.id) return;
-    if (bookmarked) {
-      await supabase.from('saved_events').delete().eq('user_id', currentUserId).eq('event_id', activity.event.id);
-      setBookmarked(false);
-    } else {
-      await supabase.from('saved_events').insert({ user_id: currentUserId, event_id: activity.event.id });
-      setBookmarked(true);
+    // supabase-js wirft nicht: der Fehler steckt im Rueckgabewert. Ohne
+    // Pruefung sprang das Lesezeichen um, obwohl saved_events nichts bekam —
+    // derselbe Fehler, der das Merken auf der Detailseite zwei Monate lang
+    // unbrauchbar machte (PR #153).
+    const { error } = bookmarked
+      ? await supabase.from('saved_events').delete().eq('user_id', currentUserId).eq('event_id', activity.event.id)
+      : await supabase.from('saved_events').insert({ user_id: currentUserId, event_id: activity.event.id });
+    if (error) {
+      console.error('[FeedItem] bookmark toggle failed', error);
+      return;
     }
+    setBookmarked(!bookmarked);
   };
 
   const handleCommentAdded = (comment: CommentPreview) => {

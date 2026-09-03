@@ -28,6 +28,7 @@ import { isLocationApproximate, isLocationTrusted } from '@/lib/utils/location-t
 import { V4EventDetailHero } from './V4EventDetailHero';
 import { V4EventDetailContent } from './V4EventDetailContent';
 import { V4SideBox } from './V4SideBox';
+import { V4NotifyBox } from './V4NotifyBox';
 import { V4MobileStickyBar } from './V4MobileStickyBar';
 import { V4PlanWizard } from '@/components/Plans/v4';
 import { resolvePrimaryEventImage } from '@/lib/event-images';
@@ -143,6 +144,13 @@ export function V4EventDetail({
             priceMax={event.price_max}
             priceTier={event.price_tier}
           />
+          {/* Direkt unter der Zustands-Box: Erinnerung ohne Konto fuer
+              anonyme Besucher, Merken fuer eingeloggte. Vorher war der
+              E-Mail-Weg nur im Dialog hinter „Merken" erreichbar — man
+              musste also erst auf einen Button klicken, der fuer Anonyme
+              gar nichts speichert, um zu erfahren, dass es auch ohne
+              Konto geht. */}
+          <V4NotifyBox eventId={event.id} startDate={event.start_date} />
         </aside>
       </div>
 

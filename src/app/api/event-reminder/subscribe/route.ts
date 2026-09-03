@@ -17,7 +17,7 @@ export const dynamic = 'force-dynamic';
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 export async function POST(req: NextRequest) {
-  let body: { email?: string; eventId?: string };
+  let body: { email?: string; eventId?: string; windows?: unknown };
   try {
     body = await req.json();
   } catch {
@@ -26,6 +26,19 @@ export async function POST(req: NextRequest) {
 
   const email = (body.email ?? '').trim().toLowerCase();
   const eventId = (body.eventId ?? '').trim();
+
+  // Gewaehlte Erinnerungs-Zeitpunkte. Ohne Angabe bleibt es beim bisherigen
+  // Verhalten (zwei Tage vorher + am Tag des Events), damit aeltere Clients
+  // unveraendert funktionieren. Unbekannte Werte werden verworfen statt den
+  // Request abzulehnen — sonst kippt ein neuer Wert im Frontend die ganze
+  // Anmeldung. Bleibt nichts uebrig, greift wieder der Default.
+  const ALLOWED_WINDOWS = ['7d', '2d', 'day'] as const;
+  const requested = Array.isArray(body.windows) ? body.windows : [];
+  const windows = [...new Set(
+    requested.filter((w): w is string => typeof w === 'string')
+      .filter((w) => (ALLOWED_WINDOWS as readonly string[]).includes(w)),
+  )];
+  const effectiveWindows = windows.length > 0 ? windows : ['2d', 'day'];
   if (!isPlausibleEmail(email)) {
     return NextResponse.json({ error: 'Bitte gib eine gültige E-Mail-Adresse an.' }, { status: 400 });
   }
@@ -56,7 +69,7 @@ export async function POST(req: NextRequest) {
   // Upsert: erneutes Eintragen reaktiviert ein abgemeldetes Abo (neuer
   // Opt-in-Zyklus); confirmed_at bleibt unangetastet.
   const { error } = await admin.from('event_email_reminders').upsert(
-    { email, event_id: eventId, unsubscribed_at: null },
+    { email, event_id: eventId, unsubscribed_at: null, windows: effectiveWindows },
     { onConflict: 'email,event_id' },
   );
   if (error) {

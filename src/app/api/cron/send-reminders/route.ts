@@ -307,9 +307,15 @@ async function processAnonEmailReminders(supabase: SupabaseClient<any>, now: Dat
     weekday: 'long', day: 'numeric', month: 'long', timeZone: 'Europe/Vienna',
   });
 
+  // Die Fenster sind seit 2026-09 waehlbar (Spalte `windows`): '7d' eine
+  // Woche vorher, '2d' zwei Tage vorher, 'day' am Tag des Events. Der
+  // Default in der Tabelle ist {2d,day} — bestehende Abos verhalten sich
+  // damit unveraendert. `key` filtert auf die Auswahl, `col` merkt den
+  // Versand, damit dieselbe Erinnerung nicht zweimal rausgeht.
   for (const win of [
-    { daysAhead: 2, col: 'reminded_2d_at', isEventDay: false },
-    { daysAhead: 0, col: 'reminded_day_at', isEventDay: true },
+    { daysAhead: 7, col: 'reminded_7d_at', key: '7d', isEventDay: false },
+    { daysAhead: 2, col: 'reminded_2d_at', key: '2d', isEventDay: false },
+    { daysAhead: 0, col: 'reminded_day_at', key: 'day', isEventDay: true },
   ] as const) {
     const from = new Date(now);
     from.setUTCHours(0, 0, 0, 0);
@@ -323,6 +329,7 @@ async function processAnonEmailReminders(supabase: SupabaseClient<any>, now: Dat
       .not('confirmed_at', 'is', null)
       .is('unsubscribed_at', null)
       .is(win.col, null)
+      .contains('windows', [win.key])
       .gte('events.start_date', from.toISOString())
       .lt('events.start_date', to.toISOString())
       .limit(100);
@@ -342,15 +349,20 @@ async function processAnonEmailReminders(supabase: SupabaseClient<any>, now: Dat
         const unsubscribeUrl = `https://lasstreffen.at/api/event-reminder/unsubscribe?email=${encodeURIComponent(row.email)}&event=${row.event_id}&token=${unsubToken}`;
         const sent = await sendGenericEmail(
           row.email,
+          // Betreff aus dem Fenster ableiten — vorher stand hier fest
+          // "In 2 Tagen", was mit dem neuen 7-Tage-Fenster gelogen waere.
           win.isEventDay
             ? `Heute: ${ev.title}`
-            : `In 2 Tagen: ${ev.title}`,
+            : win.daysAhead === 7
+              ? `In einer Woche: ${ev.title}`
+              : `In ${win.daysAhead} Tagen: ${ev.title}`,
           reminderMailHtml({
             eventTitle: ev.title ?? 'Dein Event',
             eventDate: dateFmt.format(new Date(ev.start_date)),
             locationName: ev.location_name,
             eventUrl: `https://lasstreffen.at${buildEventUrlV2(ev)}`,
             isEventDay: win.isEventDay,
+            daysAhead: win.daysAhead,
             unsubscribeUrl,
           }),
         );
