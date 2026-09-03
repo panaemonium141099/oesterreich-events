@@ -17,6 +17,7 @@ import {
   confirmMailHtml,
   regionLabel,
 } from '@/lib/newsletter';
+import { publicOrigin } from '@/lib/site-url';
 
 export const dynamic = 'force-dynamic';
 
@@ -59,7 +60,7 @@ export async function POST(req: NextRequest) {
   }
 
   const token = await newsletterToken('confirm', email);
-  const confirmUrl = `${req.nextUrl.origin}/api/newsletter/confirm?email=${encodeURIComponent(email)}&token=${token}`;
+  const confirmUrl = `${publicOrigin(req)}/api/newsletter/confirm?email=${encodeURIComponent(email)}&token=${token}`;
   const sent = await sendGenericEmail(
     email,
     `Bitte bestätigen: dein Event-Newsletter für ${regionLabel(region)}`,
