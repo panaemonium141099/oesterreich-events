@@ -11,13 +11,13 @@ import { NextResponse, type NextRequest } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { sendGenericEmail } from '@/lib/email';
 import {
-import { publicOrigin } from '@/lib/site-url';
   isPlausibleEmail,
   isValidRegion,
   newsletterToken,
   confirmMailHtml,
   regionLabel,
 } from '@/lib/newsletter';
+import { publicOrigin } from '@/lib/site-url';
 
 export const dynamic = 'force-dynamic';
 
