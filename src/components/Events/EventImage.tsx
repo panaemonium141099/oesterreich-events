@@ -138,6 +138,20 @@ type SharedProps = {
   title?: string | null;
   /** Event bundesland — picks region-specific fallback pool. */
   bundesland?: string | null;
+  /**
+   * Gemessene Bildbreite aus events.image_width (Probe: probe-image-widths.ts).
+   *
+   * MUSS durchgereicht werden, wo sie verfuegbar ist. Ohne sie greift die
+   * MIN_TRUSTED_EVENT_IMAGE_WIDTH-Regel im Resolver nicht, und gescrapte
+   * Mini-Bilder (Eventim liefert 222x222-Teaser) landen hochskaliert und
+   * verpixelt in der Karte — waehrend die Detailseite, die den Wert
+   * uebergibt, brav den grossen Kategorie-Fallback zeigt. Genau diese
+   * Diskrepanz war das Symptom "Karte zeigt Platzhalter/Matsch, Detailseite
+   * zeigt ein Bild" (2026-09-03).
+   *
+   * null/undefined = nicht vermessen -> Original wird behalten.
+   */
+  imageWidth?: number | null;
   /** REQUIRED. CSS sizes attribute. Must reflect actual rendered size
    *  in the layout so next/image picks the right srcset entry. */
   sizes: string;
@@ -214,6 +228,7 @@ export function EventImage(props: EventImageProps) {
     fallbackCategory,
     title,
     bundesland,
+    imageWidth,
     alt = '',
     className = '',
     wrapperClassName = '',
@@ -237,6 +252,7 @@ export function EventImage(props: EventImageProps) {
     category: category ?? fallbackCategory ?? null,
     title,
     bundesland,
+    imageWidth,
   });
 
   // Local /images/... paths don't need blur — they're already optimized
