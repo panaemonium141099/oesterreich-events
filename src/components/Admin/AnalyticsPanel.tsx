@@ -292,7 +292,15 @@ export default function AnalyticsPanel() {
               {data.viewsByDay.map((day, i) => {
                 const height = maxDayViews > 0 ? (day.count / maxDayViews) * 100 : 0;
                 return (
-                  <div key={day.date} className="flex-1 flex flex-col items-center gap-1 group relative">
+                  <div key={day.date} className="flex-1 h-full flex flex-col justify-end items-center gap-1 group relative">
+                    {/* h-full + justify-end sind fuer die Balken zwingend: der aeussere
+                      Container ist `items-end`, seine Kinder bekommen dadurch
+                      align-self:flex-end und damit nur ihre Inhaltshoehe. Der
+                      Balken darin hat `height: X%` — Prozent gegen einen
+                      Elternteil mit height:auto ist nicht aufloesbar, der
+                      Browser faellt auf auto zurueck und uebrig blieb allein
+                      das min-h. Ergebnis war eine 2px-Linie statt eines
+                      Diagramms, unabhaengig von den Daten. */}
                     <div
                       className="w-full rounded-t analytics-bar-animate analytics-transition transition-all duration-300 min-h-[2px]"
                       style={{
@@ -424,7 +432,7 @@ export default function AnalyticsPanel() {
               {data.behavior.hourCounts.map((count, hour) => {
                 const height = maxHourCount > 0 ? (count / maxHourCount) * 100 : 0;
                 return (
-                  <div key={hour} className="flex-1 flex flex-col items-center gap-0.5 group relative">
+                  <div key={hour} className="flex-1 h-full flex flex-col justify-end items-center gap-0.5 group relative">
                     <div
                       className="w-full rounded-t analytics-bar-animate analytics-transition transition-all duration-300 min-h-[1px]"
                       style={{
