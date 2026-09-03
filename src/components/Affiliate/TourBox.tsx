@@ -27,7 +27,6 @@ import {
 } from '@/lib/affiliate/gyg-links';
 import {
   gygLocationId,
-  qualifiesForWidget,
   resolveGygDestination,
   type GygResolveInput,
 } from '@/lib/affiliate/gyg-destinations';
@@ -39,13 +38,12 @@ export interface TourBoxProps extends GygResolveInput {
   /** Dunkle v4-Seiten (Default) vs. heller Blog. */
   tone?: 'dark' | 'light';
   /**
-   * Echtes GYG-Widget statt des schlichten Links:
-   *   'city' — Top-Touren des Ortes (nur bei genug Angebot, sonst Link)
-   *   'auto' — waehlt anhand des umgebenden Artikeltexts (Blog)
-   * Auf Event-Detailseiten bewusst nicht gesetzt: dort bleibt die Seite
-   * fremd-script-frei. Fuehrt zu Fremd-JS, deshalb Opt-in pro Ort.
+   * Echtes GYG-Widget statt des schlichten Links. 'activities' zeigt drei
+   * Touren des aufgeloesten Ortes bzw. der Region — festgenagelt ueber die
+   * Location-ID, damit nichts Ortsfremdes hereinrutscht. Fuehrt Fremd-JS
+   * ein, deshalb Opt-in pro Platzierung.
    */
-  widget?: 'city' | 'auto' | false;
+  widget?: 'activities' | 'auto' | 'city' | false;
   /**
    * 'section' bringt den vollen Seitenrahmen mit (Event-Detail, wo die Box
    * als eigener Streifen steht); 'inline' liefert nur die Karte, wenn die
@@ -78,16 +76,15 @@ export async function TourBox({
   // sonst bliebe von einem Fremd-Script eine halbleere Flaeche uebrig und
   // die duennen Orte tragen die Ladezeit ohne Gegenwert. Ueberall sonst
   // bleibt der scriptfreie Link.
-  // Widget nur bei Zielen mit belegtem Angebot — sonst fuellt das
-  // auto-Widget mit Attraktionen vom anderen Ende der Welt auf (siehe
-  // Kommentar in gyg-destinations.ts). Ueberall sonst: der Link.
-  const widgetKind = !widget || !isGygWidgetEnabled() || !qualifiesForWidget(destination)
+  // Keine Angebotsschwelle: das Widget haengt an der Location-ID und zeigt
+  // damit immer Angebot aus genau diesem Ort bzw. dieser Region — auch dort,
+  // wo GYG nur eine Handvoll Touren hat. Ohne Location-ID (dann gaebe es
+  // nichts zum Festnageln) bleibt der Link.
+  const widgetKind = !widget || !isGygWidgetEnabled()
     ? null
-    : widget === 'auto'
-      ? 'auto'
-      : locationId != null
-        ? 'city'
-        : null;
+    : widget === 'auto' || locationId != null
+      ? widget
+      : null;
 
   const link = (
     <a

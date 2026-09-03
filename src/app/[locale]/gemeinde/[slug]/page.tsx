@@ -462,7 +462,7 @@ export default async function GemeindeHubPage({
           <TourBox
             layout="inline"
             className="mb-12"
-            widget="auto"
+            widget="activities"
             city={g.name}
             bundesland={g.bundesland}
             placement={`gemeinde-${slug}`}
