@@ -80,7 +80,19 @@ export async function POST(req: NextRequest) {
   const dateLabel = new Intl.DateTimeFormat('de-AT', {
     weekday: 'long', day: 'numeric', month: 'long', timeZone: 'Europe/Vienna',
   }).format(new Date(event.start_date));
-  const token = await reminderToken('confirm', email, eventId);
+  // Ohne Signier-Secret koennen wir keinen gueltigen Bestaetigungslink
+  // bauen. Frueher flog der WebCrypto-Fehler ungefangen bis in die
+  // Route-Antwort (HTTP 500, im Frontend nur "Eintragen fehlgeschlagen").
+  let token: string;
+  try {
+    token = await reminderToken('confirm', email, eventId);
+  } catch (err) {
+    console.error('[event-reminder/subscribe] token signing failed:', err);
+    return NextResponse.json(
+      { error: 'Erinnerungen sind gerade nicht verfügbar — bitte später erneut versuchen.' },
+      { status: 503 },
+    );
+  }
   const confirmUrl = `${req.nextUrl.origin}/api/event-reminder/confirm?email=${encodeURIComponent(email)}&event=${eventId}&token=${token}`;
   const sent = await sendGenericEmail(
     email,
