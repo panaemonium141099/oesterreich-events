@@ -104,6 +104,27 @@ export async function GET(request: NextRequest) {
       offset += rows.length;
     }
 
+    // ── Event-Typ-Gruppen ────────────────────────────────────────────
+    //
+    // Dieses Panel wurde gegen ein Namensschema gebaut, das so nie
+    // implementiert wurde. Gegen die Prod-Tabelle geprueft (03.09.2026,
+    // alle Zeilen seit Bestehen) existierten diese erwarteten Typen mit
+    // NULL Zeilen: 'link_click', 'filter_change', 'nachtleben_toggle',
+    // 'bundesland_switch', 'event_save'. Real gesendet werden die Namen
+    // unten — sie stammen aus data-track-Attributen, die der globale
+    // ClickTracker einsammelt, und wurden im Lauf der Zeit ergaenzt, ohne
+    // dass diese Auswertung nachgezogen wurde.
+    //
+    // Die Gruppen stehen bewusst an EINER Stelle: wer ein neues
+    // data-track einfuehrt, traegt es hier ein und alle Auswertungen
+    // (Funnel, Top-Listen, Domain-Aufstellung) ziehen mit.
+    const TICKET_CLICK_TYPES = ['ticket_click', 'ticket_click_mobile', 'wizard_ticket_external'];
+    const EVENT_CLICK_TYPES = ['event_click', 'widget_event_click', 'chat_entity_click', 'blog_related_event', 'smart_sample_click'];
+    const EVENT_SAVE_TYPES = ['event_save', 'event_saved_mobile'];
+    // Alles, was den Nutzer auf eine fremde Domain schickt — die
+    // affiliate-relevante Aufstellung.
+    const EXTERNAL_CLICK_TYPES = [...TICKET_CLICK_TYPES, 'stay_click', 'tour_click', 'wizard_booking_open'];
+
     // === Overview stats ===
     const pageViews = allEvents.filter(e => e.event_type === 'page_view');
     const uniqueSessions = new Set(allEvents.map(e => e.session_id).filter(Boolean));
@@ -145,8 +166,8 @@ export async function GET(request: NextRequest) {
     }
 
     // === Top events (by click) ===
-    const eventClicks = allEvents.filter(e => e.event_type === 'event_click');
-    const eventSaves = allEvents.filter(e => e.event_type === 'event_save');
+    const eventClicks = allEvents.filter(e => EVENT_CLICK_TYPES.includes(e.event_type));
+    const eventSaves = allEvents.filter(e => EVENT_SAVE_TYPES.includes(e.event_type));
 
     const clickCounts: Record<string, { title: string; clicks: number; saves: number }> = {};
     eventClicks.forEach(e => {
@@ -157,12 +178,17 @@ export async function GET(request: NextRequest) {
     });
     eventSaves.forEach(e => {
       const id = e.event_data?.event_id || 'unknown';
-      if (clickCounts[id]) clickCounts[id].saves++;
+      // Frueher nur `if (clickCounts[id])` — ein gespeichertes Event ohne
+      // vorherigen getrackten Klick fiel damit ganz aus der Liste.
+      if (!clickCounts[id]) {
+        clickCounts[id] = { title: e.event_data?.event_title || 'Unbekannt', clicks: 0, saves: 0 };
+      }
+      clickCounts[id].saves++;
     });
 
     const topEvents = Object.entries(clickCounts)
       .map(([id, data]) => ({ id, ...data }))
-      .sort((a, b) => b.clicks - a.clicks)
+      .sort((a, b) => (b.clicks + b.saves) - (a.clicks + a.saves))
       .slice(0, 20);
 
     // === Top searches ===
@@ -189,11 +215,17 @@ export async function GET(request: NextRequest) {
     // Tabelle). Der Filter-Tracker feuert 'filter_apply' — der Name hier
     // war schlicht falsch, weshalb die Filter-Statistik dauerhaft leer blieb.
     const filterChanges = allEvents.filter(e => e.event_type === 'filter_apply');
+    // Der Tracker sendet als Nutzlast NUR { count_active: n } — kein
+    // filter_type, kein value. Die frueher gebaute Aufschluesselung
+    // `${filter_type}: ${value}` ergab deshalb ausschliesslich Zeilen
+    // "unknown: ". Aggregiert wird jetzt das, was wirklich vorliegt:
+    // wie viele Filter die Nutzer gleichzeitig aktiv hatten.
     const filterCounts: Record<string, number> = {};
     filterChanges.forEach(e => {
-      const filterType = e.event_data?.filter_type || 'unknown';
-      const value = e.event_data?.value || '';
-      const key = `${filterType}: ${value}`;
+      const n = Number(e.event_data?.count_active);
+      const key = Number.isFinite(n)
+        ? `${n} Filter gleichzeitig`
+        : 'ohne Angabe';
       filterCounts[key] = (filterCounts[key] || 0) + 1;
     });
 
@@ -202,7 +234,11 @@ export async function GET(request: NextRequest) {
       .sort((a, b) => b.count - a.count)
       .slice(0, 15);
 
-    const nachtlebenToggles = allEvents.filter(e => e.event_type === 'nachtleben_toggle').length;
+    // 'nachtleben_toggle' wurde nie gesendet und es gibt im Nicht-Admin-Code
+    // auch keinen Sender mehr — das Feature existiert nicht. Bleibt als 0
+    // im Response, damit die Panel-Kachel nicht undefined rendert; die
+    // Kachel selbst ist im Frontend entfernt.
+    const nachtlebenToggles = 0;
 
     // Session durations (approx: first to last event per session)
     const sessionTimes: Record<string, { first: string; last: string }> = {};
@@ -233,15 +269,18 @@ export async function GET(request: NextRequest) {
     });
 
     // === Link clicks ===
-    const linkClicks = allEvents.filter(e => e.event_type === 'link_click');
+    const linkClicks = allEvents.filter(e => EXTERNAL_CLICK_TYPES.includes(e.event_type));
     const domainCounts: Record<string, { count: number; events: Set<string> }> = {};
     linkClicks.forEach(e => {
+      // Die realen Tracker liefern nicht immer eine volle URL: der
+      // ClickTracker schreibt data-track-provider nach event_data.provider.
+      // Ohne diesen Fallback landete alles unter 'unknown'.
       const url = e.event_data?.url || '';
       let domain: string;
       try {
         domain = new URL(url).hostname;
       } catch {
-        domain = 'unknown';
+        domain = String(e.event_data?.provider || '') || e.event_type;
       }
       if (!domainCounts[domain]) domainCounts[domain] = { count: 0, events: new Set() };
       domainCounts[domain].count++;
@@ -262,14 +301,48 @@ export async function GET(request: NextRequest) {
     const funnelPageViews = pageViews.length;
     const funnelClicks = eventClicks.length;
     const funnelSaves = eventSaves.length;
-    const funnelLinks = linkClicks.filter(e => e.event_data?.type === 'ticket').length;
+    // Vorher: linkClicks.filter(e => e.event_data?.type === 'ticket') — also
+    // ein nie gesendeter Typ, gefiltert auf ein nie gesetztes Feld. Die
+    // Funnel-Stufe stand deshalb dauerhaft auf 0, obwohl ticket_click
+    // laufend feuert.
+    const funnelLinks = allEvents.filter(e => TICKET_CLICK_TYPES.includes(e.event_type)).length;
 
     // === Bundesland heatmap ===
-    const blSwitches = allEvents.filter(e => e.event_type === 'bundesland_switch');
+    //
+    // Quelle war 'bundesland_switch' — ein Typ, der nie gesendet wurde, also
+    // ein dauerhaft leeres Panel. Ersetzt durch die tatsaechlichen
+    // Seitenaufrufe: die getrackte `page`-Spalte enthaelt bei Gemeinde- und
+    // Event-URLs die PLZ (/gemeinde/9551-…, /events/5020-stiegl/…), bei
+    // Hub-Seiten direkt den Bundesland-Slug (/wien, /steiermark).
+    // Erste PLZ-Ziffer -> Bundesland ist in Oesterreich eindeutig, einzige
+    // Ausnahme ist 6: 6000-6899 Tirol, 6900-6999 Vorarlberg.
+    const BL_BY_PLZ_PREFIX: Record<string, string> = {
+      '1': 'wien', '2': 'niederoesterreich', '3': 'niederoesterreich',
+      '4': 'oberoesterreich', '5': 'salzburg', '7': 'burgenland',
+      '8': 'steiermark', '9': 'kaernten',
+    };
+    const BL_SLUGS = new Set([
+      'wien', 'niederoesterreich', 'oberoesterreich', 'salzburg',
+      'steiermark', 'kaernten', 'tirol', 'vorarlberg', 'burgenland',
+    ]);
+    function bundeslandFromPage(page: string | null): string | null {
+      if (!page) return null;
+      const seg = page.split('?')[0].split('/').filter(Boolean);
+      if (seg.length === 0) return null;
+      // /wien, /steiermark … (auch unter /en/ oder /de/)
+      const first = seg[0] === 'en' || seg[0] === 'de' ? seg[1] : seg[0];
+      if (first && BL_SLUGS.has(first)) return first;
+      // /gemeinde/<plz>-<name> und /events/<plz>-<ort>/<datum>/<slug>
+      const plzHolder = seg.find(x => /^\d{4}-/.test(x));
+      if (!plzHolder) return null;
+      const plz = plzHolder.slice(0, 4);
+      if (plz[0] === '6') return Number(plz) >= 6900 ? 'vorarlberg' : 'tirol';
+      return BL_BY_PLZ_PREFIX[plz[0]] ?? null;
+    }
     const blCounts: Record<string, number> = {};
-    blSwitches.forEach(e => {
-      const to = e.event_data?.to || '';
-      if (to) blCounts[to] = (blCounts[to] || 0) + 1;
+    pageViews.forEach(e => {
+      const bl = bundeslandFromPage(e.page);
+      if (bl) blCounts[bl] = (blCounts[bl] || 0) + 1;
     });
 
     // Also count page views with bundesland data from filter changes
