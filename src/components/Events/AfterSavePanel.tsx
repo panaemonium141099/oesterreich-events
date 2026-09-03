@@ -70,15 +70,21 @@ export function AfterSavePanel({
         reminderDate.setTime(Date.now() + 60 * 60 * 1000);
       }
 
-      await supabase.from('event_reminders').insert({
+      // supabase-js wirft nicht: ein abgelehnter Schreibvorgang kommt als
+      // { error } zurueck. Ohne diese Pruefung meldet der catch nie etwas und
+      // der Erfolgs-Toast laeuft auch dann, wenn nichts geschrieben wurde
+      // (so war das Merken zwei Monate lang tot, PR #153).
+      const { error } = await supabase.from('event_reminders').insert({
         user_id: user.id,
         event_id: eventId,
         remind_at: reminderDate.toISOString(),
       });
+      if (error) throw error;
 
       setReminderSet(true);
       toast.success('Erinnerung gesetzt');
-    } catch {
+    } catch (err) {
+      console.error('[AfterSavePanel] reminder insert failed', err);
       toast.error('Fehler beim Setzen der Erinnerung');
     } finally {
       setReminderLoading(false);

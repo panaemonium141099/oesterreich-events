@@ -42,25 +42,32 @@ export function FollowCityButton({ city, bundesland }: FollowCityButtonProps) {
 
     try {
       if (followed) {
-        await supabase
+      // supabase-js wirft nicht: ein abgelehnter Schreibvorgang kommt als
+      // { error } zurueck. Ohne diese Pruefung meldet der catch nie etwas und
+      // der Erfolgs-Toast laeuft auch dann, wenn nichts geschrieben wurde
+      // (so war das Merken zwei Monate lang tot, PR #153).
+      const { error } = await supabase
           .from('followed_cities')
           .delete()
           .eq('user_id', user.id)
           .eq('city_normalized', cityNorm)
           .eq('bundesland', bundesland);
+        if (error) throw error;
         setFollowed(false);
         toast.success(`${city} entfolgt`);
       } else {
-        await supabase.from('followed_cities').insert({
+        const { error } = await supabase.from('followed_cities').insert({
           user_id: user.id,
           city,
           city_normalized: cityNorm,
           bundesland,
         });
+        if (error) throw error;
         setFollowed(true);
         toast.success(`${city} wird gefolgt`);
       }
-    } catch {
+    } catch (err) {
+      console.error('[FollowCityButton] toggle failed', err);
       toast.error('Fehler beim Folgen');
     } finally {
       setLoading(false);

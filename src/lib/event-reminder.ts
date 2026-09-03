@@ -72,11 +72,22 @@ export function reminderMailHtml(opts: {
   locationName: string | null;
   eventUrl: string;
   isEventDay: boolean;
+  /** Vorlauf in Tagen (7, 2 …). Steuert die Ueberschrift, wenn es nicht der
+   *  Event-Tag selbst ist. Ohne Angabe bleibt es beim bisherigen Text. */
+  daysAhead?: number;
   unsubscribeUrl: string;
 }): string {
   return `
   <div style="font-family:-apple-system,Segoe UI,Roboto,sans-serif;max-width:520px;margin:0 auto;padding:24px;color:#1a1a1a;">
-    <h2 style="margin:0 0 12px;">${opts.isEventDay ? 'Heute ist es so weit!' : 'In zwei Tagen ist es so weit!'}</h2>
+    <h2 style="margin:0 0 12px;">${
+      opts.isEventDay
+        ? 'Heute ist es so weit!'
+        : opts.daysAhead === 7
+          ? 'In einer Woche ist es so weit!'
+          : opts.daysAhead && opts.daysAhead !== 2
+            ? `In ${opts.daysAhead} Tagen ist es so weit!`
+            : 'In zwei Tagen ist es so weit!'
+    }</h2>
     <p style="line-height:1.6;color:#444;">
       <strong>${opts.eventTitle}</strong><br/>
       ${opts.eventDate}${opts.locationName ? ` · ${opts.locationName}` : ''}

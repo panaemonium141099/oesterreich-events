@@ -141,14 +141,19 @@ export function ProfilePageClient() {
         .from('avatars')
         .getPublicUrl(filePath);
 
-      await supabase
+      // supabase-js wirft nicht — ohne diese Pruefung meldet die Seite
+      // "Avatar aktualisiert", waehrend das Bild nur im Storage liegt und
+      // die profiles-Zeile unveraendert bleibt.
+      const { error: updErr } = await supabase
         .from('profiles')
         .update({ avatar_url: publicUrl })
         .eq('id', user.id);
+      if (updErr) throw updErr;
 
       await refreshProfile();
       toast.success('Avatar aktualisiert');
-    } catch {
+    } catch (err) {
+      console.error('[ProfilePageClient] avatar update failed', err);
       toast.error('Avatar konnte nicht hochgeladen werden');
     }
   };

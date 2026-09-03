@@ -41,22 +41,27 @@ export function FollowVenueButton({
 
     try {
       if (followed) {
-        await supabase
+      // supabase-js wirft nicht — abgelehnte Schreibvorgaenge kommen als
+      // { error } zurueck; ohne Pruefung laeuft der Erfolgs-Toast trotzdem.
+        const { error } = await supabase
           .from('followed_venues')
           .delete()
           .eq('user_id', user.id)
           .eq('venue_id', venueId);
+        if (error) throw error;
         setFollowed(false);
         toast.success(`${venueName} entfolgt`);
       } else {
-        await supabase.from('followed_venues').insert({
+        const { error } = await supabase.from('followed_venues').insert({
           user_id: user.id,
           venue_id: venueId,
         });
+        if (error) throw error;
         setFollowed(true);
         toast.success(`${venueName} wird gefolgt`);
       }
-    } catch {
+    } catch (err) {
+      console.error('[FollowVenueButton] toggle failed', err);
       toast.error('Fehler beim Folgen');
     } finally {
       setLoading(false);
