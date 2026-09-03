@@ -137,8 +137,21 @@ async function main() {
     // <600px-Bilder durch grosse Kategorie-Fallbacks (Google-Thumbnail-CTR).
     // Gedeckelt, damit der Schritt nie zum Zeitfresser wird; der Rest-Backlog
     // rutscht in die Folgenaechte.
+    // --requeue-failed 500 (2026-09-03): holt pro Nacht 500 Zeilen zurueck,
+    // deren Probe frueher fehlschlug (image_width = -1). Ohne das blieben sie
+    // fuer immer auf -1 stehen, denn der normale Lauf nimmt nur
+    // image_probed_url IS NULL — und -1 gilt im Resolver als "nicht
+    // vermessen", die womoeglich tote URL wurde also weiter ausgeliefert.
+    // Stichprobe ueber 400 dieser Zeilen: 34 % dauerhaft tot (403/404),
+    // 31 % luden einwandfrei und waren nur falsch markiert, 35 %
+    // voruebergehend nicht erreichbar. Bei 500/Nacht ist der damalige
+    // Bestand von ~2.600 in gut fuenf Naechten durchgesehen; danach haelt
+    // der Durchlauf die Menge klein.
     steps.image_probe = await runStep('image_probe', async () => {
-      execStep('Probe image widths', `npx tsx ${envFlag}src/scripts/probe-image-widths.ts --limit 4000`);
+      execStep(
+        'Probe image widths',
+        `npx tsx ${envFlag}src/scripts/probe-image-widths.ts --limit 4000 --requeue-failed 500`,
+      );
     }, steps);
 
     if (!opts.skipCategorization) {

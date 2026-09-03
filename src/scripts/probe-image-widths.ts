@@ -119,14 +119,47 @@ async function main() {
   const limitIdx = args.indexOf('--limit');
   const limit = limitIdx >= 0 ? Number(args[limitIdx + 1]) || 2000 : Infinity;
 
+  // --requeue-failed [n]: stellt Zeilen mit image_width = IMAGE_UNKNOWN (-1)
+  // zurueck in den Backlog, indem image_probed_url auf NULL gesetzt wird.
+  //
+  // Warum das noetig ist: der normale Lauf holt ausschliesslich
+  // image_probed_url IS NULL. Eine einmal fehlgeschlagene Probe bleibt damit
+  // fuer immer auf -1 stehen — und -1 heisst im Resolver "nicht vermessen",
+  // also wird die (womoeglich tote) URL weiter ausgeliefert. Vor der
+  // Trennung von IMAGE_DEAD/IMAGE_UNKNOWN landete JEDER Fehlschlag dort,
+  // auch die dauerhaften 404er.
+  const rqIdx = args.indexOf('--requeue-failed');
+  const requeue = rqIdx >= 0 ? Number(args[rqIdx + 1]) || 500 : 0;
+
   const url = process.env.SUPABASE_URL ?? process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
   if (!url || !key) throw new Error('SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY erforderlich');
   const supabase = createClient(url, key, { auth: { persistSession: false } });
 
+  if (requeue > 0) {
+    const { data: stale, error: sErr } = await supabase
+      .from('events')
+      .select('id')
+      .eq('image_width', IMAGE_UNKNOWN)
+      .not('image_url', 'is', null)
+      .gte('start_date', new Date().toISOString())
+      .limit(requeue);
+    if (sErr) throw new Error(`Requeue-Query: ${sErr.message}`);
+    const ids = (stale ?? []).map((r: { id: string }) => r.id);
+    for (const id of ids) {
+      const { error: rErr } = await supabase
+        .from('events')
+        .update({ image_probed_url: null })
+        .eq('id', id);
+      if (rErr) throw new Error(`Requeue ${id}: ${rErr.message}`);
+    }
+    console.log(`[image-probe] ${ids.length} fruehere Fehlschlaege zurueck in den Backlog gestellt`);
+  }
+
   let probed = 0;
   let small = 0;
   let failed = 0;
+  let dead = 0;
 
   // Seitenweise durch den Backlog (nutzt den Partial-Index)
   for (;;) {
@@ -157,13 +190,17 @@ async function main() {
         if (uerr) throw new Error(`Update ${u.id}: ${uerr.message}`);
         probed++;
         if (u.width > 0 && u.width < 600) small++;
-        if (u.width === -1) failed++;
+        if (u.width === IMAGE_UNKNOWN) failed++;
+        if (u.width === IMAGE_DEAD) dead++;
       }
     }
-    console.log(`[image-probe] ${probed} vermessen (${small} < 600px, ${failed} Fehler)…`);
+    console.log(`[image-probe] ${probed} vermessen (${small} < 600px, ${dead} tot, ${failed} nicht messbar)…`);
   }
 
-  console.log(`[image-probe] FERTIG: ${probed} vermessen, ${small} zu klein (<600px), ${failed} nicht messbar`);
+  console.log(
+    `[image-probe] FERTIG: ${probed} vermessen, ${small} zu klein (<600px), ` +
+    `${dead} dauerhaft tot (-> Fallback), ${failed} nicht messbar (-> naechster Lauf)`,
+  );
 }
 
 // Nur ausführen wenn direkt aufgerufen (imageWidthOf ist testbar exportiert)
