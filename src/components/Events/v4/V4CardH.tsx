@@ -48,6 +48,8 @@ export function V4CardH({ event }: V4CardHProps) {
       href={href}
       className="press-haptic flex items-center gap-4 rounded-2xl border border-[var(--v4-hairline-2)] bg-[var(--v4-surface-elevated)] p-3 hover:border-[var(--v4-hairline-3)] transition-colors"
       data-v4-card="horizontal"
+      data-track="event_click"
+      data-track-id={event.id}
     >
       <div className="relative w-20 h-20 rounded-xl overflow-hidden bg-[var(--v4-surface)] flex-shrink-0">
         <EventImage

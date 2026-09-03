@@ -185,7 +185,10 @@ export async function GET(request: NextRequest) {
       .slice(0, 20);
 
     // === User behavior ===
-    const filterChanges = allEvents.filter(e => e.event_type === 'filter_change');
+    // 'filter_change' wurde NIE gesendet (0 Zeilen seit Bestehen der
+    // Tabelle). Der Filter-Tracker feuert 'filter_apply' — der Name hier
+    // war schlicht falsch, weshalb die Filter-Statistik dauerhaft leer blieb.
+    const filterChanges = allEvents.filter(e => e.event_type === 'filter_apply');
     const filterCounts: Record<string, number> = {};
     filterChanges.forEach(e => {
       const filterType = e.event_data?.filter_type || 'unknown';
