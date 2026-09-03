@@ -263,7 +263,7 @@ export async function V4RelatedEvents({ event }: { event: Event }) {
   // sondern nur Ort bzw. Bundesland.
   const tourBox = (
     <TourBox
-      widget="auto"
+      widget="activities"
       address={event.address}
       locationName={event.location_name}
       bundesland={bl}
@@ -274,8 +274,8 @@ export async function V4RelatedEvents({ event }: { event: Event }) {
   if (related.length === 0 && hubs.length === 0)
     return (
       <>
-        {nearbyActivities}
         {tourBox}
+        {nearbyActivities}
       </>
     );
 
@@ -365,8 +365,10 @@ export async function V4RelatedEvents({ event }: { event: Event }) {
         )}
       </div>
     </section>
-    {nearbyActivities}
+    {/* Touren direkt unter den aehnlichen Events — weiter unten, hinter
+        Aktivitaeten und Unterkuenften, hat sie praktisch niemand gesehen. */}
     {tourBox}
+    {nearbyActivities}
     </>
   );
 }

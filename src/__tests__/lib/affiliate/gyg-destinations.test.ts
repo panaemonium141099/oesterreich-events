@@ -12,7 +12,6 @@ import {
   findGygRegion,
   gygKey,
   gygLocationId,
-  qualifiesForWidget,
   resolveGygDestination,
 } from '@/lib/affiliate/gyg-destinations';
 import { buildGygDestinationLink, isGygDestinationEnabled } from '@/lib/affiliate/gyg-links';
@@ -155,23 +154,16 @@ describe('buildGygDestinationLink', () => {
 });
 
 describe('Widget-Auswahl', () => {
-  it('liest die Location-ID aus dem Pfad', () => {
+  it('liest die Location-ID aus dem Pfad — daran haengt das Widget', () => {
     expect(gygLocationId({ path: 'wien-l7' })).toBe(7);
+    expect(gygLocationId({ path: 'burgenland-l215' })).toBe(215);
     expect(gygLocationId({ path: 'saalbach-hinterglemm-l156448' })).toBe(156448);
     expect(gygLocationId({ path: 'kaputt' })).toBeNull();
   });
 
-  it('erlaubt das Widget nur bei Orten mit genug Angebot', () => {
-    expect(qualifiesForWidget(findGygCity('Wien')!)).toBe(true);
-    expect(qualifiesForWidget(findGygCity('Graz')!)).toBe(true);
-    // Duenne Orte bekommen den scriptfreien Link
-    expect(qualifiesForWidget(findGygCity('Klagenfurt')!)).toBe(false);
-    expect(qualifiesForWidget(findGygCity('Linz')!)).toBe(false);
-    // Regionen brauchen mehr: Burgenland (29) reicht nicht — dort zeigte
-    // das auto-Widget Attraktionen aus Melbourne. Niederoesterreich (346) schon.
-    expect(qualifiesForWidget(findGygRegion('Burgenland')!)).toBe(false);
-    expect(qualifiesForWidget(findGygRegion('Kärnten')!)).toBe(false);
-    expect(qualifiesForWidget(findGygRegion('Niederösterreich')!)).toBe(true);
-    expect(qualifiesForWidget(findGygRegion('Tirol')!)).toBe(true);
+  it('hat fuer JEDES Ziel eine Location-ID — sonst gaebe es Ziele ohne Widget', () => {
+    for (const dest of [...GYG_CITIES, ...Object.values(GYG_REGIONS)]) {
+      expect(gygLocationId(dest), dest.name).not.toBeNull();
+    }
   });
 })

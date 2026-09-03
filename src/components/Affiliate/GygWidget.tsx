@@ -3,11 +3,17 @@
 /**
  * GygWidget — echtes GetYourGuide-Widget (fn-22, Stufe 2).
  *
- * Zwei Bauformen, beide aus dem Partner-Portal uebernommen:
- *   city — Top-Touren eines Ortes, braucht die GYG-Location-ID
- *          (die Zahl aus "wien-l7"), Ziel-Frame default/city.frame
- *   auto — liest den umgebenden Artikeltext und waehlt selbst passende
- *          Aktivitaeten; ohne weitere Parameter
+ * Drei Bauformen:
+ *   activities — Touren EINES Ortes, festgenagelt ueber die GYG-Location-ID
+ *                (die Zahl aus "wien-l7"). Das ist der Normalfall.
+ *   auto       — sucht sich sein Angebot selbst anhand des Seitentexts
+ *   city       — Teaser-Banner mit Such-CTA statt Tourenliste
+ *
+ * WARUM FESTGENAGELT STATT auto: das auto-Widget fuellt auf, wenn es vor
+ * Ort nichts findet — auf der Pinkafeld-Seite standen unter "Touren in
+ * Burgenland" ein Pinball-Museum und eine Pinguin-Parade aus Melbourne.
+ * Mit location_id liefert dieselbe Seite Parndorf-Outlet und
+ * Weinprobe, Klagenfurt die Tscheppaschlucht (live gegengeprueft).
  * Dazu der Loader (pa.umd.production.min.js), der die data-gyg-*-Divs
  * einsammelt und befuellt.
  *
@@ -53,9 +59,11 @@ function ensureLoader(partnerId: string): void {
 export interface GygWidgetProps {
   /** Partner-ID, kommt zur Laufzeit von der Server-Komponente. */
   partnerId: string;
-  kind: 'city' | 'auto';
-  /** Nur fuer kind="city": GYG-Location-ID, z. B. 7 fuer Wien. */
+  kind: 'activities' | 'auto' | 'city';
+  /** Fuer "activities"/"city" Pflicht: GYG-Location-ID, z. B. 7 fuer Wien. */
   locationId?: number | null;
+  /** Wie viele Touren das Widget zeigt (GYG empfiehlt 3). */
+  items?: number;
   /** GYG-Sprachcode, z. B. "de-DE". */
   localeCode?: string;
   /** Reservierte Mindesthoehe, verhindert Layout-Shift. */
@@ -73,6 +81,7 @@ export function GygWidget({
   partnerId,
   kind,
   locationId,
+  items = 3,
   localeCode = 'de-DE',
   minHeight = 420,
   fallback = null,
@@ -83,6 +92,10 @@ export function GygWidget({
   const [empty, setEmpty] = useState(false);
 
   const usable = !!partnerId && (kind === 'auto' || locationId != null);
+  const frame =
+    kind === 'city'
+      ? 'https://widget.getyourguide.com/default/city.frame'
+      : 'https://widget.getyourguide.com/default/activities.frame';
 
   useEffect(() => {
     if (!usable || !hostRef.current) return;
@@ -118,18 +131,19 @@ export function GygWidget({
 
   return (
     <div ref={hostRef} className={className} style={{ minHeight }}>
-      {kind === 'city' ? (
+      {kind === 'auto' ? (
         <div
-          data-gyg-href="https://widget.getyourguide.com/default/city.frame"
-          data-gyg-location-id={String(locationId)}
+          data-gyg-widget="auto"
           data-gyg-locale-code={localeCode}
-          data-gyg-widget="city"
           data-gyg-partner-id={partnerId}
         />
       ) : (
         <div
-          data-gyg-widget="auto"
+          data-gyg-href={frame}
+          data-gyg-location-id={String(locationId)}
           data-gyg-locale-code={localeCode}
+          data-gyg-widget={kind}
+          {...(kind === 'activities' ? { 'data-gyg-number-of-items': String(items) } : {})}
           data-gyg-partner-id={partnerId}
         />
       )}

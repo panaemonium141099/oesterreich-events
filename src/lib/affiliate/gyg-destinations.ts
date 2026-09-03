@@ -188,20 +188,6 @@ export function resolveGygDestination(input: GygResolveInput): GygDestination | 
 }
 
 /**
- * Ab wie vielen Angeboten das echte Widget ausgeliefert wird — getrennt
- * fuer Orte und Regionen, weil die Zahlen nicht vergleichbar sind.
- *
- * WARUM UEBERHAUPT EINE SCHWELLE: Das auto-Widget sucht sein Angebot
- * selbst. Findet es vor Ort nichts, fuellt es mit irgendetwas auf der
- * Welt auf — auf der Pinkafeld-Seite standen unter der Ueberschrift
- * "Touren & Aktivitaeten in Burgenland" ein Pinball-Museum und eine
- * Pinguin-Parade (Melbourne). Deshalb laeuft das Widget nur dort, wo GYG
- * nachweislich Programm hat; ueberall sonst bleibt der ehrliche Link.
- */
-export const WIDGET_MIN_CITY_ACTIVITIES = 30;
-export const WIDGET_MIN_REGION_ACTIVITIES = 100;
-
-/**
  * GYG-Location-ID aus dem Pfad ("wien-l7" -> 7). Das Staedte-Widget
  * adressiert Orte ueber diese Zahl, nicht ueber den Slug.
  */
@@ -210,9 +196,3 @@ export function gygLocationId(destination: Pick<GygDestination, 'path'>): number
   return match ? Number(match[1]) : null;
 }
 
-/** Traegt das Ziel genug Angebot fuer das Widget? */
-export function qualifiesForWidget(destination: GygDestination): boolean {
-  return destination.kind === 'city'
-    ? destination.activities >= WIDGET_MIN_CITY_ACTIVITIES
-    : destination.activities >= WIDGET_MIN_REGION_ACTIVITIES;
-}
