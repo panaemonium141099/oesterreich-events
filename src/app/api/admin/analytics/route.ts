@@ -4,6 +4,14 @@ import { createClient } from '@supabase/supabase-js';
 
 /** Shape of event_data JSON stored in analytics_events rows */
 interface AnalyticsEventData {
+  /** Vom globalen ClickTracker gesetzt (data-track-id / href / provider).
+   *  event_id, event_title und url stammen aus direkten trackEvent()-Aufrufen. */
+  id?: string;
+  href?: string;
+  provider?: string;
+  title?: string;
+  count_active?: number;
+  mode?: string;
   event_id?: string;
   event_title?: string;
   query?: string;
