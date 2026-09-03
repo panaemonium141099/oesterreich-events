@@ -1,96 +1,6 @@
 import type { NextConfig } from 'next';
 import bundleAnalyzer from '@next/bundle-analyzer';
 import createNextIntlPlugin from 'next-intl/plugin';
-import { readFileSync, existsSync } from 'node:fs';
-import { createHash } from 'node:crypto';
-import path from 'node:path';
-
-/**
- * fn-15.6 round 4 (codex) — load + RE-VERIFY CRITICAL_CSS sha256 hash.
- *
- * Why re-verify: codex flagged that a committed `.csp-hash.json` would
- * defeat the prebuild safeguard if someone invokes `next build` directly
- * (skipping the prebuild + postbuild hooks). A stale hash would silently
- * ship and CSP-block the actual rendered <style> in production.
- *
- * Behaviour:
- *   1. Read .csp-hash.json (the prebuild artifact, NOT committed — see
- *      .gitignore entry).
- *   2. Re-compute the hash from the CURRENT src/lib/critical-css.ts bytes
- *      (same algorithm as scripts/compute-csp-hash.mjs).
- *   3. If both exist AND match → trust and return.
- *      If both exist AND differ → recompute, warn loudly. The JSON is
- *      stale; we use the freshly-computed value so headers() ships a
- *      hash that matches what React will actually render.
- *      If JSON missing but we can read the source → recompute on the fly.
- *      If neither → fall back to env var, else throw in production.
- *
- * Production builds that skip prebuild are still loud-failures here — we
- * either compute the hash from source or throw. We never trust a stale
- * committed hash silently.
- */
-function extractCriticalCssFromSource(): string | null {
-  const srcPath = path.join(__dirname, 'src', 'lib', 'critical-css.ts');
-  if (!existsSync(srcPath)) return null;
-  const src = readFileSync(srcPath, 'utf8');
-  const m = src.match(/export\s+const\s+CRITICAL_CSS\s*=\s*`([\s\S]*?)`\s*;/m);
-  return m ? m[1] : null;
-}
-
-function sha256Base64(text: string): string {
-  return createHash('sha256').update(text, 'utf8').digest('base64');
-}
-
-function loadCriticalCssHash(): string {
-  // Step 1: try to compute the canonical hash from the live source. This
-  // is the ground truth — whatever React serialises into <style> at runtime
-  // must match this exact byte sequence.
-  const liveCss = extractCriticalCssFromSource();
-  const liveHash = liveCss !== null ? sha256Base64(liveCss) : null;
-
-  // Step 2: read the artifact (if present) and compare.
-  const jsonPath = path.join(__dirname, '.csp-hash.json');
-  let artifactHash: string | null = null;
-  if (existsSync(jsonPath)) {
-    try {
-      const parsed = JSON.parse(readFileSync(jsonPath, 'utf8')) as { hash?: string };
-      if (parsed.hash) artifactHash = parsed.hash;
-    } catch {
-      /* artifact unparseable — ignore, fall through */
-    }
-  }
-
-  // Decision: live wins. The artifact is only used when we can't read source.
-  if (liveHash) {
-    if (artifactHash && artifactHash !== liveHash) {
-      console.warn(
-        '[next.config.ts] .csp-hash.json is stale ' +
-          `(artifact=${artifactHash}, live=${liveHash}). Using LIVE hash — ` +
-          'run `node scripts/compute-csp-hash.mjs` to refresh the artifact.',
-      );
-    }
-    return liveHash;
-  }
-  if (artifactHash) {
-    console.warn(
-      '[next.config.ts] critical-css.ts unreadable; falling back to ' +
-        '.csp-hash.json artifact (cannot verify freshness).',
-    );
-    return artifactHash;
-  }
-  const fromEnv = process.env.NEXT_PUBLIC_CRITICAL_CSS_HASH;
-  if (fromEnv) return fromEnv;
-  if (process.env.NODE_ENV === 'production') {
-    throw new Error(
-      '[next.config.ts] CRITICAL_CSS hash unavailable: critical-css.ts not readable, ' +
-        '.csp-hash.json missing, NEXT_PUBLIC_CRITICAL_CSS_HASH unset. ' +
-        'Run `node scripts/compute-csp-hash.mjs` before `next build`.',
-    );
-  }
-  return '';
-}
-
-const CRITICAL_CSS_HASH = loadCriticalCssHash();
 
 /**
  * Remote image patterns for Next.js Image component.
@@ -199,20 +109,13 @@ const nextConfig: NextConfig = {
   //      and /planer all stay COOP/COEP-free.
   //   3. **Blog cache** (unchanged).
   //
-  // fn-15.6 — finalized CSP. `'unsafe-inline'` removed from style-src and
-  // replaced with `'sha256-<CRITICAL_CSS_HASH>'`. The hash itself is
-  // computed at prebuild time by `scripts/compute-csp-hash.mjs` from
-  // `src/lib/critical-css.ts` (the SINGLE source of truth for the inline
-  // <style> block) and written to `.env.production` as
-  // `NEXT_PUBLIC_CRITICAL_CSS_HASH`. The postbuild verifier
-  // (`scripts/verify-csp-hash.mjs`) refuses to ship if the rendered HTML
-  // <style data-critical-css> body doesn't hash to that same value.
-  //
-  // Why a fixed env var and not a runtime hash: a runtime hash would
-  // force the headers() handler to read the file system on every request
-  // (slow) AND would diverge if the build emits a different inline body
-  // than what we hashed (broken page paint). The env var is baked at
-  // build time and read once at module load.
+  // fn-15.6 shipped a `'sha256-<CRITICAL_CSS_HASH>'` on style-src/
+  // style-src-elem. That was REVERTED 2026-09-03 — see the styleSrc
+  // block below for the CSP3 rule it tripped over. `.csp-hash.json`
+  // (prebuild) and scripts/verify-csp-hash.mjs (postbuild) still run:
+  // they no longer feed the CSP, but they keep the rendered inline
+  // <style data-critical-css> byte-identical to src/lib/critical-css.ts,
+  // which is a useful regression guard on its own.
   //
   // `'unsafe-inline'` STAYS in script-src for now. Next.js still emits
   // hydration data scripts inline, and the two `<script type="application/
@@ -241,32 +144,43 @@ const nextConfig: NextConfig = {
     // and commit for the full removal — repo-grep stays clean of ad-network
     // string fragments to make the audit reproducible.
 
-    // fn-15.6: CRITICAL_CSS_HASH is loaded synchronously at module-load
-    // time via loadCriticalCssHash() (see top of file). On production
-    // builds with prebuild skipped, that helper throws — so by the time
-    // headers() runs, cssHash is guaranteed to be the correct sha256
-    // matching the rendered inline <style data-critical-css> block.
-    const cssHash = CRITICAL_CSS_HASH;
-
-    // fn-15.6 round 5 (codex re-review): hash + 'unsafe-inline' on BOTH
-    // style-src (fallback) and style-src-elem (modern). 'unsafe-inline'
-    // is required to keep inline style="..." attributes working
-    // (React renders many of these — modal backdrops, animation delays,
-    // Mapbox markers). 'unsafe-hashes' is too narrow for the dynamic
-    // attribute values we ship.
+    // 2026-09-03 — NO HASH HERE. EVER. Read this before adding one back.
     //
-    // The hash on style-src is NOT redundant: modern browsers prefer the
-    // hash over 'unsafe-inline' when both are present per CSP3 spec
-    // (the SRI/nonce rule), so the actual <style data-critical-css>
-    // block is hash-validated. The 'unsafe-inline' fallback only
-    // applies to elements/attributes NOT covered by hashes.
+    // fn-15.6 pushed `'sha256-<critical css>'` onto style-src +
+    // style-src-elem next to `'unsafe-inline'`, on the assumption that
+    // the hash covers our own <style> block while 'unsafe-inline' keeps
+    // covering everything else. That assumption is wrong: per CSP Level 3,
+    // as soon as a hash OR nonce appears in a source list, the browser
+    // IGNORES 'unsafe-inline' for that whole directive. The directive
+    // silently flips to hash-only.
     //
-    // This is the trade-off Codex round-14 ultimately steered toward:
-    // we don't get pure-hash strictness, but we get the meaningful
-    // primary-XSS-vector protection (the <style> block) AND avoid the
-    // huge refactor of moving every inline style attribute to classes.
-    const styleSrcCommon = ["'self'", "'unsafe-inline'", 'https://api.mapbox.com'];
-    if (cssHash) styleSrcCommon.push(`'sha256-${cssHash}'`);
+    // Consequence on prod: every <style> element injected at runtime by a
+    // third-party script was blocked. Chrome logged
+    //   "Applying inline style violates ... style-src-elem ... Note that
+    //    'unsafe-inline' is ignored if either a hash or nonce value is
+    //    present in the source list."
+    // The visible symptom was Google's Funding-Choices consent banner
+    // rendering completely unstyled in the bottom-left corner, with its
+    // Material-Icons ligatures ("verified_user", "expand_more", "close")
+    // showing as literal text. Same failure mode applies to the Mapbox GL,
+    // Booking.com and GetYourGuide widgets — they all inject <style>.
+    //
+    // The hash also bought us close to nothing while script-src still
+    // carries 'unsafe-inline' + 'unsafe-eval': an attacker who can inject
+    // script has no need for a CSS-only vector. If style-src is ever to be
+    // tightened for real, the route is a per-request NONCE on both our own
+    // <style> and the third-party loaders — not a static hash.
+    //
+    // fonts.googleapis.com: the consent banner appends a <link rel=
+    // stylesheet> for Material Icons / Google Symbols; without it the
+    // banner has no icon font. fonts.gstatic.com (font-src, below) serves
+    // the actual font files that stylesheet points at — both are needed.
+    const styleSrcCommon = [
+      "'self'",
+      "'unsafe-inline'",
+      'https://api.mapbox.com',
+      'https://fonts.googleapis.com',
+    ];
     const styleSrcSources = ['style-src', ...styleSrcCommon];
     const styleSrcElemSources = ['style-src-elem', ...styleSrcCommon];
 
@@ -288,7 +202,10 @@ const nextConfig: NextConfig = {
       styleSrcElemSources.join(' '),
       "style-src-attr 'unsafe-inline'",
       "img-src 'self' data: blob: https:",
-      "font-src 'self' data:",
+      // fonts.gstatic.com: font files behind the Google-Fonts stylesheet the
+      // consent banner loads (Material Icons / Google Symbols). Without it
+      // the banner's icons render as their raw ligature names.
+      "font-src 'self' data: https://fonts.gstatic.com",
       "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.lasstreffen.at wss://api.lasstreffen.at https://api.mapbox.com https://*.tiles.mapbox.com https://events.mapbox.com https://api.spotify.com https://accounts.spotify.com https://www.google-analytics.com https://www.googletagmanager.com https://stats.g.doubleclick.net https://pagead2.googlesyndication.com https://googleads.g.doubleclick.net https://fundingchoicesmessages.google.com https://widget.getyourguide.com",
       "worker-src 'self' blob:",
       "child-src 'self' blob:",
