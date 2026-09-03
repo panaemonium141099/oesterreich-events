@@ -33,11 +33,16 @@ const WINDOWS = [
 
 interface V4NotifyBoxProps {
   eventId: string;
-  /** Vergangene Events bekommen keine Box — dort waere sie sinnlos. */
+  /** Startzeit. Ist sie vorbei, tritt an die Stelle des Formulars ein
+   *  Hinweis — die API lehnt Erinnerungen auf vergangene Events ab
+   *  (404), ein Formular waere dort also eine Sackgasse. */
   startDate?: string | null;
+  /** Ende, falls bekannt. Mehrtaegige Events gelten erst danach als
+   *  vorbei; ohne Angabe zaehlt die Startzeit. */
+  endDate?: string | null;
 }
 
-export function V4NotifyBox({ eventId, startDate }: V4NotifyBoxProps) {
+export function V4NotifyBox({ eventId, startDate, endDate }: V4NotifyBoxProps) {
   const { user, loading: authLoading } = useAuth();
   const [email, setEmail] = useState('');
   const [picked, setPicked] = useState<string[]>(['2d', 'day']);
@@ -45,7 +50,13 @@ export function V4NotifyBox({ eventId, startDate }: V4NotifyBoxProps) {
   const [done, setDone] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  if (startDate && new Date(startDate) < new Date()) return null;
+  // Frueher stand hier `return null`. Das riss ein Loch in die Seite: der
+  // grosse "Event vorbei"-Hinweis der Detailseite greift erst 24 h NACH dem
+  // Ende (isPast in page.tsx), die Box verschwand aber schon beim Start.
+  // Dazwischen fehlte jede Erklaerung, waehrend daneben weiter
+  // "Tickets sichern" stand. Jetzt tritt ein Hinweis an ihre Stelle.
+  const over = endDate ?? startDate;
+  const isOver = !!over && new Date(over) < new Date();
 
   const toggle = (key: string) =>
     setPicked((cur) => (cur.includes(key) ? cur.filter((k) => k !== key) : [...cur, key]));
@@ -81,6 +92,36 @@ export function V4NotifyBox({ eventId, startDate }: V4NotifyBoxProps) {
 
   // Solange die Session laedt, nichts rendern — sonst blitzt das
   // E-Mail-Formular kurz auf, obwohl der Besucher eingeloggt ist.
+  // Der Vorbei-Hinweis haengt nicht an der Session und wird davor gerendert.
+  if (isOver) {
+    return (
+      <div
+        data-v4-side-box="notify-past"
+        className="mt-4 rounded-[18px] overflow-hidden bg-[var(--v4-surface-elevated)]"
+        style={{ border: '1px solid var(--v4-hairline-2)' }}
+      >
+        <div className="h-[3px]" style={{ background: 'var(--v4-hairline-3)' }} />
+        <div className="p-[20px_22px_22px]">
+          <p className="text-[10.5px] font-semibold uppercase tracking-[0.18em] text-[var(--v4-ink-50)]">
+            Termin vorbei
+          </p>
+          <p className="mt-2 text-[13px] text-[var(--v4-ink-70)] leading-snug">
+            Dieser Termin liegt in der Vergangenheit — eine Erinnerung ist dafür
+            nicht mehr möglich.
+          </p>
+          <a
+            href="#similar-events"
+            data-track="past_event_similar"
+            data-track-id={eventId}
+            className="press-haptic mt-3.5 inline-flex items-center gap-1.5 rounded-full px-3.5 py-2 text-[12.5px] font-semibold text-[var(--v4-ink)] border border-[var(--v4-hairline-3)] hover:bg-[var(--v4-surface)] transition-colors"
+          >
+            Ähnliche Events ansehen →
+          </a>
+        </div>
+      </div>
+    );
+  }
+
   if (authLoading) return null;
 
   return (
@@ -97,13 +138,22 @@ export function V4NotifyBox({ eventId, startDate }: V4NotifyBoxProps) {
 
         {user ? (
           <>
+            {/* Konkret statt vage: der Cron send-reminders schickt fuer
+                gemerkte Events genau zwei Erinnerungen — 7 Tage und 1 Tag
+                vorher, gesteuert ueber notification_preferences
+                (reminder_7d / reminder_1d, beide standardmaessig an). */}
             <p className="mt-2 text-[13px] text-[var(--v4-ink-70)] leading-snug">
-              Merk dir das Event — du wirst rechtzeitig erinnert. Wann genau, stellst du
-              in deinem Profil ein.
+              Merk dir das Event — wir erinnern dich eine Woche und einen Tag vorher.
             </p>
             <div className="mt-3.5">
               <V4SaveButton eventId={eventId} fillRow />
             </div>
+            <a
+              href="/settings/notifications"
+              className="mt-3 inline-block text-[11px] text-[var(--v4-ink-50)] underline underline-offset-2 hover:text-[var(--v4-ink-70)]"
+            >
+              Erinnerungen anpassen
+            </a>
           </>
         ) : done ? (
           <p className="mt-2 text-[13px] text-[var(--v4-ink-70)] leading-snug">{done}</p>

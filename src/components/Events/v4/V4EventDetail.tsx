@@ -150,7 +150,7 @@ export function V4EventDetail({
               musste also erst auf einen Button klicken, der fuer Anonyme
               gar nichts speichert, um zu erfahren, dass es auch ohne
               Konto geht. */}
-          <V4NotifyBox eventId={event.id} startDate={event.start_date} />
+          <V4NotifyBox eventId={event.id} startDate={event.start_date} endDate={event.end_date} />
         </aside>
       </div>
 
