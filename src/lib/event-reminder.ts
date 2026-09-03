@@ -17,13 +17,41 @@ function secret(): string {
   return process.env.UNSUBSCRIBE_SECRET ?? process.env.SUPABASE_JWT_SECRET ?? '';
 }
 
+/**
+ * Wirft, wenn kein Signier-Secret gesetzt ist.
+ *
+ * Warum das eine eigene Funktion ist: `secret()` gab bei fehlender Env
+ * stillschweigend '' zurueck, und crypto.subtle.importKey lief damit auf
+ * einen leeren Schluessel. Der Fehler kam dann als
+ * "DataError: Zero-length key is not supported" aus dem minifizierten
+ * Chunk — ohne jeden Hinweis auf die eigentliche Ursache. Auf Prod fehlte
+ * UNSUBSCRIBE_SECRET nach dem Hetzner-Umzug, wodurch JEDE Anmeldung zu
+ * einer Event-Erinnerung mit HTTP 500 endete (03.09.2026).
+ *
+ * Der Aufrufer faengt das und antwortet mit 503 + verstaendlichem Text
+ * statt mit einem unbehandelten 500.
+ */
+export function requireReminderSecret(): string {
+  const s = secret();
+  if (!s) {
+    throw new Error(
+      'UNSUBSCRIBE_SECRET (oder SUPABASE_JWT_SECRET) ist nicht gesetzt — ' +
+        'Bestaetigungs- und Abmelde-Links koennen nicht signiert werden.',
+    );
+  }
+  return s;
+}
+
 /** Token bindet E-Mail UND Event — ein Link kann nie ein anderes Abo treffen. */
 export async function reminderToken(
   purpose: 'confirm' | 'unsub',
   email: string,
   eventId: string,
 ): Promise<string> {
-  return generateUnsubscribeToken(`event-reminder-${purpose}:${email.toLowerCase()}:${eventId}`, secret());
+  return generateUnsubscribeToken(
+    `event-reminder-${purpose}:${email.toLowerCase()}:${eventId}`,
+    requireReminderSecret(),
+  );
 }
 
 export async function verifyReminderToken(
