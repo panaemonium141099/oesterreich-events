@@ -197,7 +197,7 @@ const nextConfig: NextConfig = {
       // widget.getyourguide.com: Loader + iframe der GYG-Touren-Widgets (fn-22).
       // Ohne diese drei Eintraege (script/frame/connect) laedt der Loader nicht
       // einmal — die Widget-Flaeche bliebe still leer.
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://api.mapbox.com https://events.mapbox.com https://www.googletagmanager.com https://www.google-analytics.com https://www.booking.com https://pagead2.googlesyndication.com https://partner.googleadservices.com https://tpc.googlesyndication.com https://adservice.google.com https://fundingchoicesmessages.google.com https://widget.getyourguide.com",
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://api.mapbox.com https://events.mapbox.com https://www.googletagmanager.com https://www.google-analytics.com https://www.booking.com https://pagead2.googlesyndication.com https://partner.googleadservices.com https://tpc.googlesyndication.com https://adservice.google.com https://fundingchoicesmessages.google.com https://*.adtrafficquality.google https://widget.getyourguide.com",
       styleSrcSources.join(' '),
       styleSrcElemSources.join(' '),
       "style-src-attr 'unsafe-inline'",
