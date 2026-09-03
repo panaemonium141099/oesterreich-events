@@ -27,6 +27,7 @@ import { usePathname } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { useAuth } from '@/lib/supabase/auth-context';
 import { toast } from 'sonner';
+import { trackEvent } from '@/lib/analytics';
 import { V4AnonSaveDialog } from './V4AnonSaveDialog';
 
 interface V4SaveButtonProps {
@@ -82,17 +83,31 @@ export function V4SaveButton({ eventId, fillRow = false, withLabel = true }: V4S
     setLoading(true);
 
     try {
+      // WICHTIG: supabase-js WIRFT NICHT. Ein fehlgeschlagener Schreibvorgang
+      // kommt als { error } zurueck, nicht als Exception. Beide Zweige hier
+      // haben den Rueckgabewert frueher ignoriert und in JEDEM Fall
+      // toast.success gezeigt — der Button meldete "Gemerkt", waehrend die
+      // Zeile nie entstand. Genau so blieb saved_events ab dem 08.07.2026
+      // leer, obwohl weiter geklickt wurde: der catch-Block konnte gar nicht
+      // greifen. Auf Prod reproduziert — ohne gueltige Session antwortet der
+      // INSERT mit "new row violates row-level security policy".
       if (wasSaved) {
-        await supabase
+        const { error } = await supabase
           .from('saved_events')
           .delete()
           .eq('user_id', user.id)
           .eq('event_id', eventId);
+        if (error) throw error;
+        trackEvent('event_unsave', { id: eventId });
         toast.success(t('toastUnsaved'));
       } else {
-        await supabase
+        const { error } = await supabase
           .from('saved_events')
           .insert({ user_id: user.id, event_id: eventId });
+        if (error) throw error;
+        // Erst nach bestaetigtem Schreibvorgang tracken — sonst zaehlt die
+        // Auswertung Versuche als Erfolge.
+        trackEvent('event_save', { id: eventId });
         toast.success(t('toastSaved'));
         // Pulse animation only on the positive action.
         setPulse(true);

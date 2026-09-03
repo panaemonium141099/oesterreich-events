@@ -65,6 +65,26 @@ export function imageWidthOf(buf: Buffer): number | null {
   return null;
 }
 
+/**
+ * Rueckgabewerte und ihre Bedeutung in events.image_width:
+ *
+ *    > 0   gemessene Breite in Pixeln
+ *   IMAGE_DEAD (0)      geprueft und dauerhaft nicht abrufbar (404/403/410)
+ *                       -> resolvePrimaryEventImage() nimmt den Fallback
+ *   IMAGE_UNKNOWN (-1)  nicht messbar (Timeout, Netzfehler, unbekanntes
+ *                       Format) -> Original bleibt, naechster Lauf misst neu
+ *
+ * Vorher landeten beide Faelle auf -1. Der Resolver wertet -1 als "noch nicht
+ * vermessen" und behielt das Original — eine nachweislich tote URL wurde
+ * dadurch weiter als <img> ausgeliefert und blieb im Layout als kaputtes Bild
+ * stehen (beobachtet 03.09.2026 an einem eventfinder.at-Bild).
+ */
+export const IMAGE_DEAD = 0;
+export const IMAGE_UNKNOWN = -1;
+
+/** HTTP-Codes, die eine URL dauerhaft als tot ausweisen. */
+const DEAD_STATUSES = new Set([400, 401, 403, 404, 410, 451]);
+
 async function probe(url: string): Promise<number> {
   try {
     const ctrl = new AbortController();
@@ -78,13 +98,19 @@ async function probe(url: string): Promise<number> {
       redirect: 'follow',
     });
     clearTimeout(t);
-    if (!res.ok && res.status !== 206) return -1;
+    if (!res.ok && res.status !== 206) {
+      // 5xx und Rate-Limits sind voruebergehend — die bleiben "unbekannt",
+      // damit ein wackeliger Fremdserver keine funktionierenden Bilder
+      // aussortiert. Nur die eindeutigen Dauerfehler zaehlen als tot.
+      return DEAD_STATUSES.has(res.status) ? IMAGE_DEAD : IMAGE_UNKNOWN;
+    }
     const buf = Buffer.from(await res.arrayBuffer());
     const w = imageWidthOf(buf);
     // smallint-Grenze: alles >= 32k Pixel clampen (praktisch nie)
-    return w == null ? -1 : Math.min(w, 32_000);
+    return w == null ? IMAGE_UNKNOWN : Math.min(w, 32_000);
   } catch {
-    return -1;
+    // Timeout / DNS / TLS — nicht entscheidbar, also erneut versuchen lassen.
+    return IMAGE_UNKNOWN;
   }
 }
 
