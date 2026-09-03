@@ -9,8 +9,20 @@
  * as the LCP element (next/image preload).
  */
 
+/*
+ * Bilder laufen ueber <EventImage>, nicht ueber next/image direkt.
+ *
+ * Grund (2026-09-03): direkt gerendertes event.image_url kennt weder den
+ * Kategorie-Fallback noch die MIN_TRUSTED_EVENT_IMAGE_WIDTH-Regel. Ergebnis
+ * waren drei sichtbare Fehler nebeneinander: 21 % der Events ohne
+ * image_url zeigten einen leeren Platzhalter, Eventim-Teaser (222x222)
+ * wurden auf Kartenbreite hochskaliert, und tote Quell-URLs blieben als
+ * kaputtes Bild stehen — waehrend die Detailseite derselben Events ueber
+ * resolvePrimaryEventImage() sauber den grossen lokalen Fallback zeigte.
+ * EventImage kapselt beides an einer Stelle.
+ */
 import Link from 'next/link';
-import Image from 'next/image';
+import { EventImage } from '@/components/Events/EventImage';
 import type { Event } from '@/types/events';
 import type { V4EventState } from '@/lib/v4/derive-event-state';
 import { buildEventUrlV2 } from '@/lib/utils/slugify';
@@ -49,20 +61,17 @@ export function V4CardHero({ event, height, priority = false }: V4CardHeroProps)
       style={height ? { height } : undefined}
       data-v4-card="hero"
     >
-      {event.image_url ? (
-        <Image
-          src={event.image_url}
-          alt={event.title}
-          fill
-          priority={priority}
-          sizes="(max-width: 768px) 100vw, 1180px"
-          style={{ objectFit: 'cover' }}
-        />
-      ) : (
-        <div className="absolute inset-0 flex items-center justify-center text-[var(--v4-ink-30)] text-xl px-6 text-center">
-          {event.title}
-        </div>
-      )}
+      <EventImage
+        src={event.image_url}
+        category={event.category}
+        title={event.title}
+        bundesland={event.bundesland}
+        imageWidth={event.image_width}
+        alt={event.title}
+        wrapperClassName="absolute inset-0"
+        preload={priority}
+        sizes="(max-width: 768px) 100vw, 1180px"
+      />
 
       <div className="absolute inset-0 bg-gradient-to-t from-[rgba(10,10,12,0.92)] via-[rgba(10,10,12,0.4)] to-transparent" aria-hidden="true"/>
 

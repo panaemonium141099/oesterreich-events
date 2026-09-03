@@ -20,7 +20,7 @@ import { EventNearbyActivities } from '@/components/Activities/NearbyActivitiesS
 import { TourBox } from '@/components/Affiliate/TourBox';
 import { V4NearbyStays } from '@/components/Events/v4/V4NearbyStays';
 import { buildEventUrlV2 } from '@/lib/utils/slugify';
-import { categoryLabel } from '@/lib/i18n/category-labels';
+import { EventImage } from '@/components/Events/EventImage';
 import { ALL_GEMEINDEN } from '@/lib/gemeinden/data';
 import { BUNDESLAND_NAMES, type BundeslandId } from '@/lib/districtsAT';
 import { getBundeslandFromPLZ } from '@/lib/plzCoordinates';
@@ -61,26 +61,20 @@ export interface RelatedRow {
   bundesland: string | null;
   category: string | null;
   image_url: string | null;
+  /** optional: aeltere Fixtures/Aufrufer liefern die Spalte nicht */
+  image_width?: number | null;
 }
 
-/** Kategorie → Gradient für bildlose Karten. Bewusst lokale Kopie des
- *  EventListView/SmartMode-Palettenmusters (gleiches Vorgehen dort). */
-const CAT_GRADIENT: Record<string, [string, string]> = {
-  Musik: ['#a855f7', '#7e22ce'],
-  'Kultur & Bühne': ['#3b82f6', '#1d4ed8'],
-  'Nightlife & Party': ['#ec4899', '#9d174d'],
-  'Essen & Trinken': ['#f59e0b', '#b45309'],
-  'Märkte & Feste': ['#10b981', '#047857'],
-  'Sport & Bewegung': ['#ef4444', '#b91c1c'],
-  'Natur & Abenteuer': ['#22c55e', '#15803d'],
-  'Wissen & Karriere': ['#0ea5e9', '#0369a1'],
-  'Familie & Kinder': ['#f472b6', '#be185d'],
-  'Community & Freizeit': ['#8b5cf6', '#5b21b6'],
-  'Wellness & Spiritualität': ['#06b6d4', '#0e7490'],
-};
-function gradientFor(cat?: string | null): [string, string] {
-  return (cat && CAT_GRADIENT[cat]) || ['#475569', '#1e293b'];
-}
+/*
+ * Die frueheren Kategorie-Gradienten (Musik = lila, Kultur = blau ...) sind
+ * entfallen. Sie sprangen ein, sobald image_url null war — was auf rund ein
+ * Fuenftel der Events zutrifft — und erzeugten einen sichtbaren Widerspruch:
+ * die Karte zeigte eine lila Flaeche mit "MUSIK", die Detailseite desselben
+ * Events darunter ein richtiges Bild. Grund war, dass nur die Detailseite
+ * ueber resolvePrimaryEventImage() lief. <EventImage> zieht denselben
+ * Resolver in die Karte, liefert also immer ein echtes Bild (Original oder
+ * lokaler Kategorie-/Region-Fallback) und macht den Gradienten ueberfluessig.
+ */
 
 function formatDate(iso: string, fmt: string): string {
   const d = new Date(iso);
@@ -152,7 +146,7 @@ export function dedupe(rows: RelatedRow[]): RelatedRow[] {
 }
 
 const RELATED_COLS =
-  'id, slug, title, start_date, location_name, postal_code, address, bundesland, category, image_url';
+  'id, slug, title, start_date, location_name, postal_code, address, bundesland, category, image_url, image_width';
 
 async function fetchRelated(event: Event): Promise<RelatedRow[]> {
   // Die Sektion muss auf JEDER Detailseite erscheinen (User-Vorgabe
@@ -234,10 +228,9 @@ export function hubLinksFor(
 }
 
 export async function V4RelatedEvents({ event }: { event: Event }) {
-  const [related, t, tCat, locale] = await Promise.all([
+  const [related, t, locale] = await Promise.all([
     fetchRelated(event),
     getTranslations('EventDetail'),
-    getTranslations('Categories'),
     getLocale(),
   ]);
   const dateFmt = locale === 'de' ? 'de-AT' : 'en-GB';
@@ -300,25 +293,23 @@ export async function V4RelatedEvents({ event }: { event: Event }) {
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
               {related.map(ev => {
-                const [g1, g2] = gradientFor(ev.category);
                 return (
                   <Link
                     key={ev.id}
                     href={buildEventUrlV2(ev)}
                     className="press-haptic flex flex-col rounded-2xl overflow-hidden border border-[var(--v4-hairline-2)] bg-[var(--v4-surface-elevated)] hover:border-[var(--v4-hairline-3)] transition-colors"
                   >
-                    <div
-                      className="w-full aspect-[16/9] relative overflow-hidden"
-                      style={ev.image_url ? undefined : { background: `linear-gradient(135deg, ${g1}, ${g2})` }}
-                    >
-                      {ev.image_url ? (
-                        /* eslint-disable-next-line @next/next/no-img-element */
-                        <img src={ev.image_url} alt="" className="absolute inset-0 w-full h-full object-cover" loading="lazy"/>
-                      ) : (
-                        <span className="absolute inset-0 flex items-center justify-center text-[11px] uppercase tracking-[0.12em] font-bold text-white/90 text-center px-3 leading-tight">
-                          {ev.category ? categoryLabel(tCat, ev.category) : t('eventFallback')}
-                        </span>
-                      )}
+                    <div className="w-full aspect-[16/9] relative overflow-hidden">
+                      <EventImage
+                        src={ev.image_url}
+                        category={ev.category}
+                        title={ev.title}
+                        bundesland={ev.bundesland}
+                        imageWidth={ev.image_width}
+                        alt=""
+                        wrapperClassName="absolute inset-0"
+                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                      />
                     </div>
                     <div className="p-4 flex flex-col gap-1.5">
                       <p className="text-[10.5px] uppercase tracking-[0.18em] font-semibold text-[var(--v4-ink-50)]">
