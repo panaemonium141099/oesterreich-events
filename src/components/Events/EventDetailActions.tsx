@@ -75,24 +75,30 @@ export function EventDetailActions({
     if (bookmarkLoading) return;
     setBookmarkLoading(true);
     try {
+      // supabase-js wirft nicht — der Fehler steckt im Rueckgabewert. Ohne
+      // diese Pruefung meldete der Button Erfolg, auch wenn RLS den
+      // Schreibvorgang abgelehnt hatte (siehe V4SaveButton).
       if (bookmarked) {
-        await supabase
+        const { error } = await supabase
           .from('saved_events')
           .delete()
           .eq('user_id', user.id)
           .eq('event_id', eventId);
+        if (error) throw error;
         setBookmarked(false);
         setShowAfterSave(false);
         toast.success('Event entfernt');
       } else {
-        await supabase
+        const { error } = await supabase
           .from('saved_events')
           .insert({ user_id: user.id, event_id: eventId });
+        if (error) throw error;
         setBookmarked(true);
         setShowAfterSave(true);
         toast.success('Event gespeichert');
       }
-    } catch {
+    } catch (err) {
+      console.error('[EventDetailActions] bookmark toggle failed', err);
       toast.error('Fehler beim Speichern');
     } finally {
       setBookmarkLoading(false);

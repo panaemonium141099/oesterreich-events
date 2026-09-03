@@ -210,7 +210,11 @@ const nextConfig: NextConfig = {
       // Erkennung, den jede AdSense-Auslieferung aufruft (gemessen:
       // ep1.adtrafficquality.google/getconfig/sodar). Wildcard statt ep1,
       // weil Google zwischen ep1/ep2 wechselt.
-      "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.lasstreffen.at wss://api.lasstreffen.at https://api.mapbox.com https://*.tiles.mapbox.com https://events.mapbox.com https://api.spotify.com https://accounts.spotify.com https://www.google-analytics.com https://www.googletagmanager.com https://stats.g.doubleclick.net https://pagead2.googlesyndication.com https://googleads.g.doubleclick.net https://fundingchoicesmessages.google.com https://*.adtrafficquality.google https://widget.getyourguide.com",
+      // api.open-meteo.com: Wetter-Vorschau auf der Landing
+      // (WeatherSection). Fehlte hier, deshalb lief der fetch bei JEDEM
+      // Landing-Aufruf in einen CSP-Verstoss und die Karte bekam nie
+      // Daten — sichtbar nur in der Browser-Konsole, nicht im Server-Log.
+      "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.lasstreffen.at wss://api.lasstreffen.at https://api.mapbox.com https://*.tiles.mapbox.com https://events.mapbox.com https://api.spotify.com https://accounts.spotify.com https://www.google-analytics.com https://www.googletagmanager.com https://stats.g.doubleclick.net https://pagead2.googlesyndication.com https://googleads.g.doubleclick.net https://fundingchoicesmessages.google.com https://*.adtrafficquality.google https://api.open-meteo.com https://widget.getyourguide.com",
       "worker-src 'self' blob:",
       "child-src 'self' blob:",
       // pagead2.googlesyndication.com MUSS hier stehen, nicht nur in

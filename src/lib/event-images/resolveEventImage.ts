@@ -85,11 +85,18 @@ export function resolvePrimaryEventImage(opts: {
   /** Gemessene Breite aus events.image_width (null/-1 = unbekannt). */
   imageWidth?: number | null;
 }): string {
+  // imageWidth === 0 heisst "geprueft und dauerhaft nicht abrufbar"
+  // (probe-image-widths.ts, IMAGE_DEAD). Vorher gab es dafuer keinen eigenen
+  // Wert: Probe-Fehler landeten wie unvermessene Bilder auf -1, und weil -1
+  // als "unbekannt" gilt, wurde eine tote URL weiter ausgeliefert und stand
+  // als kaputtes Bild in der Karte. null/-1 bleiben "noch nicht vermessen"
+  // und behalten das Original.
+  const isDead = opts.imageWidth === 0;
   const tooSmall =
     opts.imageWidth != null &&
     opts.imageWidth > 0 &&
     opts.imageWidth < MIN_TRUSTED_EVENT_IMAGE_WIDTH;
-  if (!tooSmall && isUsableImageCandidate(opts.imageUrl)) {
+  if (!isDead && !tooSmall && isUsableImageCandidate(opts.imageUrl)) {
     return opts.imageUrl!.trim();
   }
   return resolveCategoryFallbackImage(opts.category, opts.title ?? undefined, opts.bundesland);
