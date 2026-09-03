@@ -60,6 +60,8 @@ export function V4CardHero({ event, height, priority = false }: V4CardHeroProps)
       className={`press-haptic relative block rounded-3xl overflow-hidden border border-[var(--v4-hairline-2)] bg-[var(--v4-surface-elevated)] ${heightClass}`}
       style={height ? { height } : undefined}
       data-v4-card="hero"
+      data-track="event_click"
+      data-track-id={event.id}
     >
       <EventImage
         src={event.image_url}

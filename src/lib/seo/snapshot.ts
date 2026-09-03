@@ -342,33 +342,32 @@ async function trailingWindowClicks(endDate: string, days: number): Promise<numb
   return rows[0]?.clicks ?? 0;
 }
 
-/** Representative URL per hub-type for CrUX per-type vitals. */
-const CWV_SAMPLE_URLS: Record<Exclude<HubType, 'other'>, string> = {
-  event_detail: `${SITE_URL}/`, // event pages are too numerous — skip in CrUX
-  aktivitaet: `${SITE_URL}/aktivitaeten`,
-  gemeinde: `${SITE_URL}/gemeinde/1010-wien`,
-  thema: `${SITE_URL}/thema/musik`,
-  bundesland: `${SITE_URL}/wien`,
-  blog: `${SITE_URL}/blog`,
-};
 
 async function collectCwvMetrics(): Promise<SeoSnapshotMetrics['cwv']> {
-  // All CrUX calls in parallel — origin + the per-hub sample URLs. Sequential
-  // awaits (the old shape) meant 5 round-trips in series, which alone could
-  // blow the cwv deadline; parallel keeps the whole step within one round-trip.
-  const hubEntries = Object.entries(CWV_SAMPLE_URLS)
-    .filter(([hub]) => hub !== 'event_detail'); // event pages have no CrUX data
-
-  const [origin, ...hubResults] = await Promise.all([
-    fetchVitalsSummary({ origin: SITE_URL }).catch(() => null),
-    ...hubEntries.map(([, url]) => fetchVitalsSummary({ url }).catch(() => null)),
-  ]);
-
-  const byHubType: Partial<Record<HubType, VitalsSummary | null>> = {};
-  hubEntries.forEach(([hub], i) => {
-    byHubType[hub as HubType] = hubResults[i];
-  });
-  return { origin, byHubType };
+  // 2026-09-03: die Per-Hub-Abfrage ist ersatzlos entfallen.
+  //
+  // Sie fragte CrUX fuer je eine Beispiel-URL pro Hub-Typ ab
+  // (/blog, /gemeinde/1010-wien, /thema/musik, /wien, /aktivitaeten).
+  // CrUX liefert URL-Werte aber nur ueber einer Mindest-Traffic-Schwelle,
+  // die keine dieser Unterseiten erreicht. Direkt gegen die API geprueft:
+  //
+  //   origin  https://lasstreffen.at            -> Daten
+  //   url     https://lasstreffen.at/blog       -> "chrome ux report data not found"
+  //   url     .../gemeinde/1010-wien            -> "chrome ux report data not found"
+  //   url     .../thema/musik                   -> "chrome ux report data not found"
+  //   url     .../wien                          -> "chrome ux report data not found"
+  //   url     .../aktivitaeten                  -> "chrome ux report data not found"
+  //
+  // Das `.catch(() => null)` machte daraus stillschweigend `null`, und im
+  // Vitals-Panel sah das wie "noch keine Daten" statt "kann es nie geben"
+  // aus. Fuenf nutzlose API-Calls pro Snapshot-Lauf kamen dazu — auf einem
+  // Collector, der ohnehin hart deadline-begrenzt ist.
+  //
+  // Wenn Vitals je pro Seitentyp gebraucht werden, fuehrt der Weg ueber
+  // eigene Feld-Messung (web-vitals im Browser -> analytics_events), nicht
+  // ueber CrUX.
+  const origin = await fetchVitalsSummary({ origin: SITE_URL }).catch(() => null);
+  return { origin, byHubType: {} };
 }
 
 // ─────────────────────────────────────────────────────────────────

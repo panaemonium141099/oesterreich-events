@@ -62,6 +62,8 @@ export function V4CardV({ event, priority = false }: V4CardVProps) {
       href={href}
       className="press-haptic flex flex-col rounded-2xl overflow-hidden border border-[var(--v4-hairline-2)] bg-[var(--v4-surface-elevated)] hover:border-[var(--v4-hairline-3)] transition-colors"
       data-v4-card="vertical"
+      data-track="event_click"
+      data-track-id={event.id}
     >
       <div className="relative aspect-[16/9] bg-[var(--v4-surface)]">
         <EventImage
