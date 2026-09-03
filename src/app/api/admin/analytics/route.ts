@@ -16,6 +16,16 @@ interface AnalyticsEventData {
   [key: string]: unknown;
 }
 
+/** Letztes Pfadsegment eines Event-Links als lesbarer Titel. */
+function titleFromHref(href: unknown): string | null {
+  if (typeof href !== 'string' || !href) return null;
+  const seg = href.split('?')[0].split('/').filter(Boolean).pop();
+  if (!seg || /^\d/.test(seg)) return null;
+  const words = seg.replace(/-/g, ' ').trim();
+  if (!words) return null;
+  return words.charAt(0).toUpperCase() + words.slice(1);
+}
+
 /** Row shape returned by the analytics_events select query */
 interface AnalyticsRow {
   event_type: string;
@@ -128,7 +138,11 @@ export async function GET(request: NextRequest) {
     // === Overview stats ===
     const pageViews = allEvents.filter(e => e.event_type === 'page_view');
     const uniqueSessions = new Set(allEvents.map(e => e.session_id).filter(Boolean));
-    const searches = allEvents.filter(e => e.event_type === 'search');
+    // 'search' feuert kaum noch (10 Zeilen gesamt) — die Smart-Suche schickt
+    // 'smart_search' (573). Die Statistik zaehlte nur den alten Namen und
+    // meldete deshalb 1 Suchanfrage pro Woche.
+    const SEARCH_TYPES = ['search', 'smart_search'];
+    const searches = allEvents.filter(e => SEARCH_TYPES.includes(e.event_type));
     const uniqueUsers = new Set(allEvents.map(e => e.user_id).filter(Boolean));
 
     // Today stats
@@ -169,15 +183,28 @@ export async function GET(request: NextRequest) {
     const eventClicks = allEvents.filter(e => EVENT_CLICK_TYPES.includes(e.event_type));
     const eventSaves = allEvents.filter(e => EVENT_SAVE_TYPES.includes(e.event_type));
 
+    // Der globale ClickTracker schreibt die Event-UUID als `id`
+    // (aus data-track-id), NICHT als `event_id` — die Top-Events-Liste
+    // sammelte deshalb alles unter dem Sammelposten "unknown/Unbekannt".
+    // Beide Namen werden gelesen, damit aeltere Zeilen aus Komponenten,
+    // die trackEvent() direkt mit event_id aufrufen, weiter zaehlen.
     const clickCounts: Record<string, { title: string; clicks: number; saves: number }> = {};
     eventClicks.forEach(e => {
-      const id = e.event_data?.event_id || 'unknown';
-      const title = e.event_data?.event_title || 'Unbekannt';
+      const id = e.event_data?.id || e.event_data?.event_id || 'unknown';
+      // Der ClickTracker schickt keinen Titel mit — wohl aber den href, dessen
+      // letztes Segment der lesbare Event-Slug ist
+      // (/events/9020-see/2026-09-04/servus-kaernten -> "Servus Kaernten").
+      // Sonst stuende in der Top-Liste nur "Unbekannt" neben einer UUID.
+      const title =
+        e.event_data?.event_title ||
+        e.event_data?.title ||
+        titleFromHref(e.event_data?.href) ||
+        'Unbekannt';
       if (!clickCounts[id]) clickCounts[id] = { title, clicks: 0, saves: 0 };
       clickCounts[id].clicks++;
     });
     eventSaves.forEach(e => {
-      const id = e.event_data?.event_id || 'unknown';
+      const id = e.event_data?.id || e.event_data?.event_id || 'unknown';
       // Frueher nur `if (clickCounts[id])` — ein gespeichertes Event ohne
       // vorherigen getrackten Klick fiel damit ganz aus der Liste.
       if (!clickCounts[id]) {
@@ -275,7 +302,9 @@ export async function GET(request: NextRequest) {
       // Die realen Tracker liefern nicht immer eine volle URL: der
       // ClickTracker schreibt data-track-provider nach event_data.provider.
       // Ohne diesen Fallback landete alles unter 'unknown'.
-      const url = e.event_data?.url || '';
+      // `href` ist das Feld, das der ClickTracker aus dem <a> uebernimmt;
+      // `url` setzen nur die wenigen Stellen, die trackEvent() direkt rufen.
+      const url = e.event_data?.href || e.event_data?.url || '';
       let domain: string;
       try {
         domain = new URL(url).hostname;
