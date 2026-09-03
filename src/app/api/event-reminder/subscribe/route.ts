@@ -11,6 +11,7 @@ import { NextResponse, type NextRequest } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { sendGenericEmail } from '@/lib/email';
 import { isPlausibleEmail, reminderToken, reminderConfirmMailHtml } from '@/lib/event-reminder';
+import { publicOrigin } from '@/lib/site-url';
 
 export const dynamic = 'force-dynamic';
 
@@ -93,7 +94,7 @@ export async function POST(req: NextRequest) {
       { status: 503 },
     );
   }
-  const confirmUrl = `${req.nextUrl.origin}/api/event-reminder/confirm?email=${encodeURIComponent(email)}&event=${eventId}&token=${token}`;
+  const confirmUrl = `${publicOrigin(req)}/api/event-reminder/confirm?email=${encodeURIComponent(email)}&event=${eventId}&token=${token}`;
   const sent = await sendGenericEmail(
     email,
     `Bitte bestätigen: Erinnerung an „${event.title}"`,

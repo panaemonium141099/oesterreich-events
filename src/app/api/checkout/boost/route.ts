@@ -13,6 +13,7 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { getStripe, parseEventRef, BOOST_PRICE_CENTS } from '@/lib/payments/stripe-boost';
+import { publicOrigin } from '@/lib/site-url';
 
 export const dynamic = 'force-dynamic';
 
@@ -82,7 +83,10 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const origin = req.nextUrl.origin;
+    // Stripe leitet nach der Zahlung hierhin zurueck — mit nextUrl.origin
+    // waere das im Container https://0.0.0.0:3000 gewesen, die Rueckkehr
+    // aus dem Checkout also eine Sackgasse.
+    const origin = publicOrigin(req);
     const session = await getStripe().checkout.sessions.create({
       mode: 'payment',
       line_items: [

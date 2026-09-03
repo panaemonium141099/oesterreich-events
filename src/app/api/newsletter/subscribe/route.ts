@@ -11,6 +11,7 @@ import { NextResponse, type NextRequest } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { sendGenericEmail } from '@/lib/email';
 import {
+import { publicOrigin } from '@/lib/site-url';
   isPlausibleEmail,
   isValidRegion,
   newsletterToken,
@@ -59,7 +60,7 @@ export async function POST(req: NextRequest) {
   }
 
   const token = await newsletterToken('confirm', email);
-  const confirmUrl = `${req.nextUrl.origin}/api/newsletter/confirm?email=${encodeURIComponent(email)}&token=${token}`;
+  const confirmUrl = `${publicOrigin(req)}/api/newsletter/confirm?email=${encodeURIComponent(email)}&token=${token}`;
   const sent = await sendGenericEmail(
     email,
     `Bitte bestätigen: dein Event-Newsletter für ${regionLabel(region)}`,
