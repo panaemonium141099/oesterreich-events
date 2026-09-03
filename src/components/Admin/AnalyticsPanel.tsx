@@ -397,9 +397,15 @@ export default function AnalyticsPanel() {
               </div>
             )}
             <div className="mt-4 pt-3 border-t border-white/[0.06] flex gap-4">
+              {/* Frueher "Nachtleben-Toggles" — der Event-Typ wurde nie gesendet
+                  und das Feature existiert nicht mehr, die Kachel stand darum
+                  dauerhaft auf 0. Ersetzt durch die Summe der tatsaechlichen
+                  Filter-Anwendungen. */}
               <div>
-                <p className="text-[10px] text-white/30">Nachtleben-Toggles</p>
-                <p className="text-sm font-bold tabular-nums">{fmt(data.behavior.nachtlebenToggles)}</p>
+                <p className="text-[10px] text-white/30">Filter-Anwendungen</p>
+                <p className="text-sm font-bold tabular-nums">
+                  {fmt(data.behavior.topFilters.reduce((sum, f) => sum + f.count, 0))}
+                </p>
               </div>
               <div>
                 <p className="text-[10px] text-white/30">~Session-Dauer</p>
