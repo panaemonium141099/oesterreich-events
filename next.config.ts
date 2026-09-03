@@ -206,10 +206,22 @@ const nextConfig: NextConfig = {
       // consent banner loads (Material Icons / Google Symbols). Without it
       // the banner's icons render as their raw ligature names.
       "font-src 'self' data: https://fonts.gstatic.com",
-      "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.lasstreffen.at wss://api.lasstreffen.at https://api.mapbox.com https://*.tiles.mapbox.com https://events.mapbox.com https://api.spotify.com https://accounts.spotify.com https://www.google-analytics.com https://www.googletagmanager.com https://stats.g.doubleclick.net https://pagead2.googlesyndication.com https://googleads.g.doubleclick.net https://fundingchoicesmessages.google.com https://widget.getyourguide.com",
+      // *.adtrafficquality.google: Googles Sodar-Endpunkt fuer Invalid-Traffic-
+      // Erkennung, den jede AdSense-Auslieferung aufruft (gemessen:
+      // ep1.adtrafficquality.google/getconfig/sodar). Wildcard statt ep1,
+      // weil Google zwischen ep1/ep2 wechselt.
+      "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.lasstreffen.at wss://api.lasstreffen.at https://api.mapbox.com https://*.tiles.mapbox.com https://events.mapbox.com https://api.spotify.com https://accounts.spotify.com https://www.google-analytics.com https://www.googletagmanager.com https://stats.g.doubleclick.net https://pagead2.googlesyndication.com https://googleads.g.doubleclick.net https://fundingchoicesmessages.google.com https://*.adtrafficquality.google https://widget.getyourguide.com",
       "worker-src 'self' blob:",
       "child-src 'self' blob:",
-      "frame-src 'self' https://accounts.google.com https://www.booking.com https://googleads.g.doubleclick.net https://tpc.googlesyndication.com https://www.google.com https://widget.getyourguide.com",
+      // pagead2.googlesyndication.com MUSS hier stehen, nicht nur in
+      // script-src: AdSense rendert die fertige Anzeige in ein iframe von
+      // dieser Domain. Fehlte sie, blockte die CSP das iframe, Google
+      // meldete data-ad-status="unfilled" und <AdSlot> blendete die Flaeche
+      // daraufhin komplett aus — die Werbeplaetze waren unsichtbar, ohne
+      // dass im AdSense-Konto etwas falsch konfiguriert war (2026-09-03,
+      // 3 Violations pro Seitenaufruf gemessen).
+      // *.adtrafficquality.google: das Sodar-iframe derselben Auslieferung.
+      "frame-src 'self' https://accounts.google.com https://www.booking.com https://googleads.g.doubleclick.net https://tpc.googlesyndication.com https://pagead2.googlesyndication.com https://*.adtrafficquality.google https://www.google.com https://widget.getyourguide.com",
       "form-action 'self'",
       "base-uri 'self'",
       "object-src 'none'",
