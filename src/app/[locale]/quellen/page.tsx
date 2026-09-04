@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import type { Metadata } from 'next';
+import { deOnlyAlternates } from '@/lib/seo/canonical';
 
 export const revalidate = 86400;
 
@@ -7,6 +8,7 @@ export const metadata: Metadata = {
   title: 'Datenquellen & Lizenzen — LassTreffen.at',
   description:
     'Transparente Übersicht aller Datenquellen, Lizenzen und Attributionen der LassTreffen.at-Plattform.',
+  alternates: deOnlyAlternates('/quellen'),
 };
 
 /* ------------------------------------------------------------------ */

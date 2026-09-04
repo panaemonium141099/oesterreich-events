@@ -2,12 +2,14 @@
 
 import Link from 'next/link';
 import type { Metadata } from 'next';
+import { deOnlyAlternates } from '@/lib/seo/canonical';
 
 export const revalidate = 86400; // ISR: revalidate every 24 hours
 
 export const metadata: Metadata = {
   title: 'Impressum — LassTreffen.at',
   description: 'Impressum und rechtliche Angaben zu LassTreffen.at.',
+  alternates: deOnlyAlternates('/impressum'),
 };
 
 export default function ImpressumPage() {

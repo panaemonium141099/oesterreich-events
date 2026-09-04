@@ -2,12 +2,14 @@
 
 import Link from 'next/link';
 import type { Metadata } from 'next';
+import { deOnlyAlternates } from '@/lib/seo/canonical';
 
 export const revalidate = 86400; // ISR: revalidate every 24 hours
 
 export const metadata: Metadata = {
   title: 'Datenschutzerklärung — LassTreffen.at',
   description: 'Datenschutzerklärung und Informationen zur Verarbeitung personenbezogener Daten.',
+  alternates: deOnlyAlternates('/datenschutz'),
 };
 
 export default function DatenschutzPage() {

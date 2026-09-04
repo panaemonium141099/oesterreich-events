@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { loadStudentIndex } from '@/lib/student-data';
+import { deOnlyAlternates } from '@/lib/seo/canonical';
 import { StudentCityGrid } from '@/components/Landing/StudentCityGrid';
 import { EventListCard } from '@/components/Events/EventListCard';
 
@@ -23,6 +24,7 @@ export const metadata: Metadata = {
   title: 'Events für Studenten',
   description:
     'Finde Events rund um deine Uni — Nightlife, gratis Events, Pub Quizzes und mehr in Wien, Graz, Innsbruck und Salzburg.',
+  alternates: deOnlyAlternates('/studenten'),
   openGraph: {
     title: 'Events für Studenten | LassTreffen.at',
     description:

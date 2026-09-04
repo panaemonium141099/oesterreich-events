@@ -7,6 +7,7 @@ import {
   getStudentCityConfig,
 } from '@/lib/landing-slugs';
 import { loadStudentPage } from '@/lib/student-data';
+import { deOnlyAlternates } from '@/lib/seo/canonical';
 import { LandingPageShell } from '@/components/Landing/LandingPageShell';
 
 export const revalidate = 3600;
@@ -34,6 +35,7 @@ export async function generateMetadata({
   return {
     title: data.metaTitle,
     description: data.metaDescription,
+    alternates: deOnlyAlternates(`/studenten/${city}/${filter}`),
     openGraph: { title: data.metaTitle, description: data.metaDescription },
   };
 }

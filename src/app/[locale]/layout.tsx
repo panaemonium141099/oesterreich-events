@@ -99,7 +99,9 @@ export async function generateMetadata({
   const siteTitle = t('title');
   const siteDescription = t('description');
   // fn-17: DE bleibt unpräfixiert (Rankings/QR-Links), EN unter /en.
-  const canonical = locale === 'de' ? 'https://lasstreffen.at' : 'https://lasstreffen.at/en';
+  // NUR noch für og:url — der Canonical selbst lebt seit 2026-09 in den
+  // Seiten (siehe unten beim entfernten `alternates`-Block).
+  const homeUrl = locale === 'de' ? 'https://lasstreffen.at' : 'https://lasstreffen.at/en';
 
   return {
     metadataBase: new URL('https://lasstreffen.at'),
@@ -116,7 +118,7 @@ export async function generateMetadata({
     openGraph: {
       type: 'website',
       locale: locale === 'de' ? 'de_AT' : 'en_US',
-      url: canonical,
+      url: homeUrl,
       siteName: 'LassTreffen.at',
       title: siteTitle,
       description: siteDescription,
@@ -135,14 +137,16 @@ export async function generateMetadata({
       description: siteDescription,
       images: ['https://lasstreffen.at/opengraph-image'],
     },
-    alternates: {
-      canonical,
-      languages: {
-        'de-AT': 'https://lasstreffen.at',
-        en: 'https://lasstreffen.at/en',
-        'x-default': 'https://lasstreffen.at',
-      },
-    },
+    // KEIN `alternates` hier. Next.js merged Layout- und Page-Metadata:
+    // ein Canonical im Layout gilt automatisch für JEDE Unterseite, die
+    // keinen eigenen setzt. Genau das ist passiert — /wien, /wien/musik
+    // und /studenten meldeten Google am 2026-09-04 alle
+    // <link rel="canonical" href="https://lasstreffen.at">, also ~420
+    // Sitemap-URLs, die sich selbst als Startseiten-Duplikat auswiesen.
+    // Canonical + hreflang setzt jetzt jede Seite selbst über
+    // `deOnlyAlternates()` / `bilingualAlternates()` aus @/lib/seo/canonical.
+    // Vergisst eine neue Seite das, kanonisiert sie auf sich selbst —
+    // harmlos, im Gegensatz zum geerbten Startseiten-Canonical.
     robots: {
       index: true,
       follow: true,
