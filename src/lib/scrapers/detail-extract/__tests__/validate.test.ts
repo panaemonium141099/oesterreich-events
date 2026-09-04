@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import * as cheerio from 'cheerio';
-import { isValidAddressText, isValidHtml } from '../validate';
+import { isValidAddressText, isValidHtml, isContactHandleTitle } from '../validate';
 
 describe('isValidAddressText', () => {
   it('accepts a street with house number', () => {
@@ -64,5 +64,48 @@ describe('isValidHtml', () => {
     const html = `<html><head><title>Event</title></head><body><main>${cookies}</main></body></html>`;
     const $ = cheerio.load(html);
     expect(isValidHtml(html, $)).toBe(false);
+  });
+});
+
+describe('isContactHandleTitle', () => {
+  // Prod-Befund 2026-09-04: 613 Events mit reiner E-Mail als Titel,
+  // 604 davon mit source_url = "mailto:…" (Quelle: gemeinden-generic).
+  it('rejects a bare email address', () => {
+    expect(isContactHandleTitle('contact@tennis-henndorf.com')).toBe(true);
+    expect(isContactHandleTitle('seniorenbund.henndorf@outlook.com')).toBe(true);
+    expect(isContactHandleTitle('jenny.edelsbacher@gmx.net')).toBe(true);
+    expect(isContactHandleTitle('SHOCHWIMMER@GMX.AT')).toBe(true);
+    expect(isContactHandleTitle('  info@musikschildorn.at  ')).toBe(true);
+  });
+
+  it('rejects mailto:/tel: href text that leaked into the title', () => {
+    expect(isContactHandleTitle('mailto:info@sibra.cnv.at')).toBe(true);
+    expect(isContactHandleTitle('tel:+4338678044')).toBe(true);
+  });
+
+  it('rejects bare phone numbers with country/area prefix', () => {
+    expect(isContactHandleTitle('+43 732 221 055 0')).toBe(true);
+    expect(isContactHandleTitle('+43 6542 56531')).toBe(true);
+    expect(isContactHandleTitle('0699/1865 23 45')).toBe(true);
+  });
+
+  it('keeps real titles that merely contain an address or number', () => {
+    expect(isContactHandleTitle('Anmeldung bei info@verein.at')).toBe(false);
+    expect(isContactHandleTitle('Sommerfest 2026')).toBe(false);
+    expect(isContactHandleTitle('2026 / 2027')).toBe(false);
+    expect(isContactHandleTitle('1000 Jahre Henndorf')).toBe(false);
+  });
+
+  it('keeps URL-shaped titles — those have real false positives', () => {
+    // Echtes Eventim-Event: der Artist heisst so.
+    expect(isContactHandleTitle('www.illeg.art präsentiert Hemso')).toBe(false);
+    expect(isContactHandleTitle('www.seendialog.at')).toBe(false);
+  });
+
+  it('handles empty input', () => {
+    expect(isContactHandleTitle('')).toBe(false);
+    expect(isContactHandleTitle('   ')).toBe(false);
+    expect(isContactHandleTitle(undefined)).toBe(false);
+    expect(isContactHandleTitle(null)).toBe(false);
   });
 });

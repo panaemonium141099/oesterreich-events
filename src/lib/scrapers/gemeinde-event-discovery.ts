@@ -97,8 +97,10 @@ interface Candidate {
 /**
  * Detail-page link picker: rejects mailto:/tel:/javascript:/share/print/fragment-only
  * hrefs that often dominate as the "first <a>" inside event tiles.
+ * Exportiert, damit die Gemeinde-Scraper dieselbe Definition von
+ * "Kontakt-Anchor" nutzen statt je eigene Teilmengen zu pflegen.
  */
-function isUsableDetailHref(href: string | undefined): href is string {
+export function isUsableDetailHref(href: string | undefined): href is string {
   if (!href) return false;
   const lower = href.trim().toLowerCase();
   if (lower.startsWith('mailto:')) return false;

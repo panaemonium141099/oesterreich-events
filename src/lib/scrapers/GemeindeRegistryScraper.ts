@@ -8,6 +8,7 @@ import { detectNextPage, detectMonthNavigation, MAX_PAGES_PER_SITE } from './pag
 import type { ScrapedEvent } from '@/types/events';
 import { isEventType } from '../connectors/json-ld-connector';
 import { extractGem2goDetail } from './gem2go-detail';
+import { isUsableDetailHref } from './gemeinde-event-discovery';
 
 export interface PaginationLogEntry {
   gemeinde: string;
@@ -1034,7 +1035,7 @@ export class GemeindeRegistryScraper extends BaseScraper {
         if (!startDate) return;
 
         let title = $el.find('h2, h3, h4, h5, h6').first().text().trim()
-          || $el.find('a').first().text().trim()
+          || this.firstContentAnchorText($el)
           || $el.find('strong, b').first().text().trim();
 
         if (title) title = this.cleanTitle(title);
@@ -1046,7 +1047,7 @@ export class GemeindeRegistryScraper extends BaseScraper {
 
         if (new Date(startDate) < new Date(new Date().toISOString().split('T')[0])) return;
 
-        const link = $el.is('a') ? $el.attr('href') : $el.find('a').first().attr('href');
+        const link = $el.is('a') ? $el.attr('href') : this.firstContentAnchorHref($el);
         const sourceUrl = link && link.startsWith('http') ? link : link ? new URL(link, entry.eventUrl!).href : entry.eventUrl!;
 
         const imageInfo = this.imageFromElement($el.find('img').first(), entry.eventUrl!);
@@ -1233,6 +1234,31 @@ export class GemeindeRegistryScraper extends BaseScraper {
     const timeMatch = timeText.match(/(\d{1,2}):(\d{2})/);
     if (timeMatch) return `${date}T${timeMatch[1].padStart(2, '0')}:${timeMatch[2]}:00`;
     return date;
+  }
+
+  /** Text des ersten Anchors, der kein Kontakt-Link (mailto:/tel:/…) ist.
+   *  Ohne diesen Filter gewinnt der mailto:-Anchor eines Vereinsblocks gegen
+   *  die Ueberschrift und die Mailadresse landet als Event-Titel in der DB. */
+  private firstContentAnchorText($el: cheerio.Cheerio<any>): string {
+    const anchors = $el.find('a');
+    for (let i = 0; i < anchors.length; i++) {
+      const a = anchors.eq(i);
+      const href = a.attr('href');
+      if (href && !isUsableDetailHref(href)) continue;
+      const text = a.text().trim();
+      if (text) return text;
+    }
+    return '';
+  }
+
+  /** Href des ersten Anchors, der auf eine Detailseite zeigt (kein mailto:/tel:). */
+  private firstContentAnchorHref($el: cheerio.Cheerio<any>): string | undefined {
+    const anchors = $el.find('a');
+    for (let i = 0; i < anchors.length; i++) {
+      const href = anchors.eq(i).attr('href');
+      if (isUsableDetailHref(href)) return href;
+    }
+    return undefined;
   }
 
   private cleanTitle(title: string): string {

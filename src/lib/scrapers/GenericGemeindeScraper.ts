@@ -19,6 +19,7 @@ import { readFileSync, existsSync } from 'fs';
 import { join } from 'path';
 import { detectNextPage, detectMonthNavigation, MAX_PAGES_PER_SITE } from './pagination';
 import { extractGem2goDetail } from './gem2go-detail';
+import { isUsableDetailHref } from './gemeinde-event-discovery';
 
 interface GemeindeEventPage {
   gemeinde: {
@@ -352,8 +353,14 @@ export class GenericGemeindeScraper extends BaseScraper {
       // Skip past dates
       if (new Date(dateStr) < new Date('2025-01-01')) return;
 
-      // Extract title: try heading first, then first text node, then full text
-      let title = $el.find('h2, h3, h4, a, strong, b').first().text().trim();
+      // Extract title: try heading first, then first text node, then full text.
+      // Anchors sind absichtlich NACH den Headings und ohne mailto:/tel:
+      // — `find()` liefert Dokumentreihenfolge, nicht Selektorreihenfolge,
+      // sonst gewinnt der Kontakt-Link eines Vereinsblocks gegen die
+      // Ueberschrift und die Mailadresse wird zum Titel.
+      let title = $el.find('h2, h3, h4').first().text().trim()
+        || this.firstContentAnchorText($el)
+        || $el.find('strong, b').first().text().trim();
       if (!title || title.length < 5) {
         // Use the text but remove the date
         title = text.replace(/\d{1,2}\.\d{1,2}\.20\d{2}/g, '').trim();
@@ -370,8 +377,8 @@ export class GenericGemeindeScraper extends BaseScraper {
       if (seen.has(key)) return;
       seen.add(key);
 
-      // Try to find a link
-      const link = $el.find('a').first().attr('href');
+      // Try to find a link (mailto:/tel: waeren keine Detailseite)
+      const link = this.firstContentAnchorHref($el);
 
       // Try to extract time
       const timeMatch = text.match(/(\d{1,2})[:.:](\d{2})\s*(?:Uhr|h)?/);
@@ -394,6 +401,30 @@ export class GenericGemeindeScraper extends BaseScraper {
   }
 
   // ─── Helpers ────────────────────────────────────────────────────────
+
+  /** Text des ersten Anchors, der kein Kontakt-Link (mailto:/tel:/…) ist.
+   *  Anchors ganz ohne href bleiben zulaessig — die sind reine Wrapper. */
+  private firstContentAnchorText($el: cheerio.Cheerio<any>): string {
+    const anchors = $el.find('a');
+    for (let i = 0; i < anchors.length; i++) {
+      const a = anchors.eq(i);
+      const href = a.attr('href');
+      if (href && !isUsableDetailHref(href)) continue;
+      const text = a.text().trim();
+      if (text) return text;
+    }
+    return '';
+  }
+
+  /** Href des ersten Anchors, der auf eine Detailseite zeigt (kein mailto:/tel:). */
+  private firstContentAnchorHref($el: cheerio.Cheerio<any>): string | undefined {
+    const anchors = $el.find('a');
+    for (let i = 0; i < anchors.length; i++) {
+      const href = anchors.eq(i).attr('href');
+      if (isUsableDetailHref(href)) return href;
+    }
+    return undefined;
+  }
 
   private async fetchPageSafe(url: string): Promise<string | null> {
     try {

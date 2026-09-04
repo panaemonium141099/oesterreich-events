@@ -105,3 +105,31 @@ function hasEventJsonLd($: CheerioAPI): boolean {
   }
   return false;
 }
+
+// ── Kontakt-Handles als Titel ────────────────────────────────────────
+// Listing-Parser greifen den ersten <a> im Event-Container ab. Enthält der
+// Container einen Kontaktblock (Vereins-Ansprechpartner, "Anmeldung bei …"),
+// gewinnt der mailto:/tel:-Anchor gegen die Überschrift und die Mailadresse
+// landet als Titel in der DB. Prod-Befund 2026-09-04: 613 Events mit reiner
+// E-Mail als Titel, 604 davon mit source_url = "mailto:…".
+const EMAIL_ONLY_TITLE = /^[^\s@]+@[^\s@]+\.[a-z]{2,}$/i;
+// Nur Telefonnummern-Form mit Länderpräfix/Amtsziffer (+43 …, 0699/…) —
+// ohne den führenden +/0 würden Jahreszahl-Titel wie "2026 / 2027" mitgehen.
+const PHONE_ONLY_TITLE = /^[+0][\d\s/()-]{6,}$/;
+const CONTACT_SCHEME_TITLE = /^(mailto|tel|fax):/i;
+
+/**
+ * True, wenn der "Titel" in Wahrheit ein abgegriffenes Kontaktfeld ist
+ * (reine E-Mail-Adresse, reine Telefonnummer, mailto:/tel:-Href-Text).
+ * Bewusst eng gehalten: reine URL-Titel sind NICHT enthalten, weil es echte
+ * Events wie "www.illeg.art präsentiert Hemso" gibt.
+ */
+export function isContactHandleTitle(title: string | undefined | null): boolean {
+  if (!title) return false;
+  const t = title.trim();
+  if (!t) return false;
+  if (CONTACT_SCHEME_TITLE.test(t)) return true;
+  if (EMAIL_ONLY_TITLE.test(t)) return true;
+  if (PHONE_ONLY_TITLE.test(t) && (t.match(/\d/g) ?? []).length >= 7) return true;
+  return false;
+}

@@ -38,6 +38,7 @@ import { bundeslandToId } from '@/lib/bundeslaender';
 import { generateFingerprint } from '@/lib/dedup/fingerprint';
 import { generateEventSlug } from '@/lib/utils/slugify';
 import { scoreEvent } from '@/lib/quality/score-event';
+import { isContactHandleTitle } from '@/lib/scrapers/detail-extract/validate';
 import { extractDimsFromUrl } from '@/lib/event-images/extract-dims-from-url';
 import {
   validateAndUpgradeImageUrl,
@@ -712,6 +713,7 @@ const BATCH_SIZE = 100;
  * - Reject events with start_date in the past (allows today)
  * - Reject events with end_date < start_date
  * - Reject events with empty title
+ * - Reject events whose title is only a contact handle (mail/phone)
  * Returns filtered events + count of rejected.
  */
 function filterValidEvents(events: ScrapedEvent[]): { valid: ScrapedEvent[]; rejected: number } {
@@ -723,6 +725,14 @@ function filterValidEvents(events: ScrapedEvent[]): { valid: ScrapedEvent[]; rej
   const valid = events.filter(e => {
     // Must have a title
     if (!e.title || !e.title.trim()) {
+      rejected++;
+      return false;
+    }
+
+    // Listing-Parser greifen bei Kontaktbloecken den mailto:/tel:-Anchor
+    // statt der Ueberschrift ab — solche "Titel" duerfen gar nicht erst
+    // in die DB (Prod-Befund 2026-09-04: 613 Events mit E-Mail als Titel).
+    if (isContactHandleTitle(e.title)) {
       rejected++;
       return false;
     }

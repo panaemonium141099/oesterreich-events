@@ -28,6 +28,8 @@
  *      < 20   suppressed
  */
 
+import { isContactHandleTitle } from '@/lib/scrapers/detail-extract/validate';
+
 export interface ScoreableEvent {
   title?: string | null;
   description?: string | null;
@@ -57,6 +59,7 @@ export type PublishStatus =
 
 export type FlagType =
   | 'outside_austria'
+  | 'contact_handle_title'
   | 'missing_location'
   | 'missing_description'
   | 'missing_image';
@@ -219,6 +222,35 @@ export function scoreEvent(
   event: ScoreableEvent,
   options: ScoreOptions = {},
 ): ScoreResult {
+  // Titel, der in Wahrheit ein abgegriffenes Kontaktfeld ist (reine
+  // Mailadresse/Telefonnummer aus einem mailto:/tel:-Anchor). Harte
+  // Suppression VOR der Punktrechnung: solche Rows wuerden sonst ueber
+  // Datum/Ort/Bild genug Punkte sammeln, um wieder 'published' zu werden —
+  // genau so standen 605 von 613 Mail-Titeln 2026-09-04 auf published.
+  if (isContactHandleTitle(event.title)) {
+    return {
+      quality_score: 0,
+      publish_status: 'suppressed',
+      outside_austria: false,
+      flags: [
+        {
+          flag_type: 'contact_handle_title',
+          severity: 'critical',
+          details: { title: event.title },
+        },
+      ],
+      breakdown: {
+        completeness: 0,
+        date: 0,
+        location: 0,
+        image: 0,
+        link: 0,
+        dedup: 0,
+        source_trust: 0,
+      },
+    };
+  }
+
   const outside = isOutsideAustria(event.latitude, event.longitude);
   // DE/CH events are deliberately imported (country toggle) and legitimately lie
   // outside Austria — only suppress events that are meant to be in Austria

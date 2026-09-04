@@ -343,3 +343,43 @@ describe('scoreEvent', () => {
     expect(a).toEqual(b);
   });
 });
+
+// ─── Kontakt-Handle als Titel ──────────────────────────────────────
+
+describe('scoreEvent hard-suppresses contact-handle titles', () => {
+  // Prod-Befund 2026-09-04: 613 Events mit reiner E-Mail als Titel, davon
+  // 605 published. Ohne diesen Riegel sammelt so eine Row ueber Datum,
+  // Ort und Bild genug Punkte, um beim naechtlichen Scoring-Lauf wieder
+  // auf 'published' zu springen — die DB-Bereinigung waere nach einem Tag weg.
+  const wellFormed = {
+    description: 'Ein ausfuehrlicher Beschreibungstext zum Vereinsfest mit allen Details.',
+    start_date: '2026-11-20T18:00:00',
+    location_name: 'Gemeindezentrum Henndorf',
+    address: 'Hauptstraße 12',
+    postal_code: '5302',
+    bundesland: 'salzburg',
+    category: 'Sonstiges',
+    latitude: 47.9,
+    longitude: 13.2,
+    image_url: 'https://henndorf.at/bild.jpg',
+    source_url: 'https://henndorf.at/veranstaltungen',
+  };
+
+  it('suppresses an email title even when every other field is good', () => {
+    const r = scoreEvent({ ...wellFormed, title: 'contact@tennis-henndorf.com' });
+    expect(r.publish_status).toBe('suppressed');
+    expect(r.quality_score).toBe(0);
+    expect(r.flags.map(f => f.flag_type)).toContain('contact_handle_title');
+  });
+
+  it('suppresses a bare phone-number title', () => {
+    const r = scoreEvent({ ...wellFormed, title: '+43 6542 56531' });
+    expect(r.publish_status).toBe('suppressed');
+  });
+
+  it('leaves a real title untouched', () => {
+    const r = scoreEvent({ ...wellFormed, title: 'Tennis-Clubmeisterschaft' });
+    expect(r.publish_status).not.toBe('suppressed');
+    expect(r.quality_score).toBeGreaterThan(0);
+  });
+});
