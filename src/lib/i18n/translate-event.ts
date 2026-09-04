@@ -37,6 +37,63 @@ const MODEL = 'gemini-2.5-flash';
 const MAX_DESC_CHARS = 4000;
 const TIMEOUT_MS = 8000;
 
+/**
+ * Output-Budget mit Beschreibung. 2048 war zu knapp: eine 4000-Zeichen-
+ * Beschreibung braucht als Übersetzung samt JSON-Rahmen mehr, und ein
+ * `finishReason: MAX_TOKENS` liefert abgeschnittenes JSON, an dem
+ * JSON.parse scheitert — der Call ist bezahlt und das Ergebnis weg.
+ */
+const MAX_OUTPUT_TOKENS_FULL = 4096;
+/** Nur ein Titel — 256 reicht mit grossem Abstand (gemessen: 11-19). */
+const MAX_OUTPUT_TOKENS_TITLE = 256;
+
+const SHARED_RULES =
+`- Keep proper nouns unchanged: venue names, band/artist names, place names (Gemeinde/city names), festival brand names. "Heuriger"/"Kirtag" may be kept with a short English gloss on first use, e.g. "Kirtag (traditional fair)".
+- Translate faithfully — do NOT add, embellish or omit information. No marketing language that is not in the source.
+- title_en: concise translated title. If the title is a proper name that needs no translation, return it unchanged.`;
+
+const SYSTEM_FULL =
+`You translate Austrian event listings from German to natural English for an event-discovery website.
+
+Rules:
+${SHARED_RULES}
+- Keep the original paragraph/line-break structure of the description.
+- description_en: full translation of the description.`;
+
+/**
+ * Eigener Prompt für Events ohne Beschreibung.
+ *
+ * Grund (gemessen 2026-09-04): mit dem Voll-Prompt und der Eingabe
+ * "(keine Beschreibung vorhanden)" degeneriert gemini-2.5-flash — es
+ * hängt an `title_en` endlos Zeilenumbrüche an, bis `maxOutputTokens` greift
+ * (finishReason MAX_TOKENS, ~2035 Output-Tokens, ~7,5 s) und liefert
+ * abgeschnittenes JSON. Reproduzierbar bei 5 von 5 Stichproben; das
+ * betrifft 25 223 der 74 767 offenen Events (34 %). Mit dem
+ * Titel-only-Schema unten: 5 von 5 sauber, ~0,7 s, ~12 Output-Tokens.
+ */
+const SYSTEM_TITLE_ONLY =
+`You translate Austrian event titles from German to natural English for an event-discovery website.
+
+Rules:
+${SHARED_RULES}
+- Return only the translated title, nothing else.`;
+
+export interface TranslateOptions {
+  /** Abbruch pro Versuch. Default 8 s (Render-Budget des Lazy-Pfads). */
+  timeoutMs?: number;
+  /**
+   * Zusätzliche Versuche nach einem Fehlschlag. Default 0.
+   *
+   * Auch mit Beschreibung schlagen ~15-25 % der Calls transient fehl —
+   * dieselbe Zeilenumbruch-Degeneration bzw. `finishReason: RECITATION`
+   * bei wörtlich von Veranstalterseiten übernommenen Texten. Bei Wiederholung
+   * mit identischem Input geht der Grossteil durch, deshalb nutzt der
+   * Batch retries=1. Der Lazy-Pfad bleibt bei 0: er rendert eine Seite
+   * und fällt bei Fehlschlag folgenlos auf Deutsch zurück.
+   */
+  retries?: number;
+}
+
 function withTimeout<T>(p: Promise<T>, ms: number): Promise<T | null> {
   let t: ReturnType<typeof setTimeout> | null = null;
   return Promise.race<T | null>([
@@ -55,51 +112,7 @@ function isFutureEvent(startDate: string | null): boolean {
   return startDate.slice(0, 10) >= today;
 }
 
-async function translateViaGemini(
-  title: string,
-  description: string | null,
-  apiKey: string,
-): Promise<EventTranslation | null> {
-  const ai = new GoogleGenAI({ apiKey });
-  const desc = description ? description.slice(0, MAX_DESC_CHARS) : null;
-
-  const systemInstruction =
-`You translate Austrian event listings from German to natural English for an event-discovery website.
-
-Rules:
-- Keep proper nouns unchanged: venue names, band/artist names, place names (Gemeinde/city names), festival brand names. "Heuriger"/"Kirtag" may be kept with a short English gloss on first use, e.g. "Kirtag (traditional fair)".
-- Translate faithfully — do NOT add, embellish or omit information. No marketing language that is not in the source.
-- Keep the original paragraph/line-break structure of the description.
-- title_en: concise translated title. If the title is a proper name that needs no translation, return it unchanged.
-- description_en: full translation of the description. If no description is provided, return null.`;
-
-  const contents = desc
-    ? `Titel: ${title}\n\nBeschreibung:\n${desc}`
-    : `Titel: ${title}\n\n(keine Beschreibung vorhanden)`;
-
-  const resp = await withTimeout(
-    ai.models.generateContent({
-      model: MODEL,
-      contents,
-      config: {
-        systemInstruction,
-        responseMimeType: 'application/json',
-        responseSchema: {
-          type: Type.OBJECT,
-          properties: {
-            title_en: { type: Type.STRING },
-            description_en: { type: Type.STRING, nullable: true },
-          },
-        },
-        thinkingConfig: { thinkingBudget: 0 },
-        maxOutputTokens: 2048,
-        temperature: 0,
-      },
-    }),
-    TIMEOUT_MS,
-  );
-
-  const text = resp?.text;
+function parseTranslation(text: string | undefined): EventTranslation | null {
   if (!text) return null;
   try {
     const parsed = JSON.parse(text) as { title_en?: unknown; description_en?: unknown };
@@ -110,6 +123,65 @@ Rules:
   } catch {
     return null;
   }
+}
+
+/**
+ * EIN Übersetzungsversuch (plus optionale Retries) für ein Event.
+ * Exportiert, damit der Batch-Backfill
+ * (`src/scripts/translate-events-en.ts`) und der Tages-Cron
+ * (`/api/cron/translate-events`) exakt denselben Prompt benutzen wie der
+ * Lazy-Pfad — sonst driften die Übersetzungen je nach Herkunft
+ * auseinander.
+ */
+export async function translateViaGemini(
+  title: string,
+  description: string | null,
+  apiKey: string,
+  options: TranslateOptions = {},
+): Promise<EventTranslation | null> {
+  const timeoutMs = options.timeoutMs ?? TIMEOUT_MS;
+  const attempts = Math.max(1, (options.retries ?? 0) + 1);
+
+  const ai = new GoogleGenAI({ apiKey });
+  const desc = description?.trim() ? description.slice(0, MAX_DESC_CHARS) : null;
+
+  const properties = desc
+    ? {
+        title_en: { type: Type.STRING },
+        description_en: { type: Type.STRING, nullable: true },
+      }
+    : { title_en: { type: Type.STRING } };
+
+  const request = {
+    model: MODEL,
+    contents: desc
+      ? `Titel: ${title}\n\nBeschreibung:\n${desc}`
+      : `Titel: ${title}`,
+    config: {
+      systemInstruction: desc ? SYSTEM_FULL : SYSTEM_TITLE_ONLY,
+      responseMimeType: 'application/json',
+      responseSchema: {
+        type: Type.OBJECT,
+        properties,
+        required: ['title_en'],
+      },
+      thinkingConfig: { thinkingBudget: 0 },
+      maxOutputTokens: desc ? MAX_OUTPUT_TOKENS_FULL : MAX_OUTPUT_TOKENS_TITLE,
+      temperature: 0,
+    },
+  };
+
+  for (let attempt = 0; attempt < attempts; attempt++) {
+    let resp: Awaited<ReturnType<typeof ai.models.generateContent>> | null = null;
+    try {
+      resp = await withTimeout(ai.models.generateContent(request), timeoutMs);
+    } catch {
+      resp = null;
+    }
+    const parsed = parseTranslation(resp?.text);
+    if (parsed) return parsed;
+  }
+  return null;
 }
 
 /**

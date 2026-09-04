@@ -57,14 +57,29 @@ export function V4LocaleSwitcher() {
         <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
       </svg>
       <span aria-hidden="true">{LOCALE_SHORT[locale as AppLocale] ?? locale.toUpperCase()}</span>
+      {/*
+        Das native Dropdown-Popup wird vom Browser gezeichnet und ignoriert
+        das opacity-0 der Pille — es erbt aber `color` und `background-color`
+        vom <select>. Ohne eigene Werte waren das
+        `rgba(255,255,255,0.5)` (geerbtes --v4-ink-50 vom <label>) auf
+        `transparent` (Tailwind-Preflight setzt Form-Controls transparent).
+        Ergebnis: weiße Schrift auf dem weißen Default-Popup, unlesbar.
+        Deshalb hier explizit dunkler Grund + volles Weiß auf select UND
+        option (Firefox/Safari lesen die Farbe von der <option>, Chrome
+        vom <select>) plus color-scheme:dark für die Scrollbar/Rahmen.
+      */}
       <select
         value={locale}
         onChange={e => onChange(e.target.value)}
         aria-label={t('label')}
-        className="absolute inset-0 w-full opacity-0 cursor-pointer"
+        className="absolute inset-0 w-full opacity-0 cursor-pointer bg-[var(--v4-surface-elevated)] text-[var(--v4-ink)] [color-scheme:dark]"
       >
         {routing.locales.map(l => (
-          <option key={l} value={l}>
+          <option
+            key={l}
+            value={l}
+            className="bg-[var(--v4-surface-elevated)] text-[var(--v4-ink)]"
+          >
             {t(l)}
           </option>
         ))}

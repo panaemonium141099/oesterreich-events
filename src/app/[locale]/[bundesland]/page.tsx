@@ -3,6 +3,7 @@ import type { Metadata } from 'next';
 import { BUNDESLAENDER } from '@/lib/bundeslaender';
 import { isValidBundesland, getBundeslandName } from '@/lib/landing-slugs';
 import { loadBundeslandPage } from '@/lib/landing-data';
+import { deOnlyAlternates } from '@/lib/seo/canonical';
 import { LandingPageShell } from '@/components/Landing/LandingPageShell';
 import { HubSearchCTA } from '@/components/Hub/HubSearchCTA';
 import { HubSmartCTA } from '@/components/Hub/HubSmartCTA';
@@ -32,6 +33,9 @@ export async function generateMetadata({
   return {
     title: data.metaTitle,
     description: data.metaDescription,
+    // Hub-Template ist deutsch — /en/<bundesland> kanonisiert deshalb
+    // auf die DE-URL (gleiche Regel wie thema/ und gemeinde/).
+    alternates: deOnlyAlternates(`/${bundesland}`),
     openGraph: { title: data.metaTitle, description: data.metaDescription },
     twitter: {
       card: 'summary',

@@ -2,12 +2,14 @@
 
 import Link from 'next/link';
 import type { Metadata } from 'next';
+import { deOnlyAlternates } from '@/lib/seo/canonical';
 
 export const revalidate = 86400; // ISR: revalidate every 24 hours
 
 export const metadata: Metadata = {
   title: 'Allgemeine Geschäftsbedingungen — LassTreffen.at',
   description: 'Allgemeine Geschäftsbedingungen für die Nutzung von LassTreffen.at.',
+  alternates: deOnlyAlternates('/agb'),
 };
 
 export default function AGBPage() {

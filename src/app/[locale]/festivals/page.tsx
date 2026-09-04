@@ -3,6 +3,7 @@ import { createServerSupabaseClient } from '@/lib/supabase/server';
 import type { Festival } from '@/types/festivals';
 import { V4FestivalCard } from '@/components/Events/v4';
 import { buildEventUrlV2 } from '@/lib/utils/slugify';
+import { deOnlyAlternates } from '@/lib/seo/canonical';
 import overridesJson from '../../../../data/festival-overrides.json';
 
 const OVERRIDES = overridesJson as Record<string, { imageUrl?: string | null }>;
@@ -10,6 +11,7 @@ const OVERRIDES = overridesJson as Record<string, { imageUrl?: string | null }>;
 export const metadata: Metadata = {
   title: 'Festivals in Österreich — lasstreffen.at',
   description: 'Alle Festivals mit Termin und Line-up — Konzerte, Kultur, Sommer.',
+  alternates: deOnlyAlternates('/festivals'),
 };
 
 const FESTIVAL_FALLBACK_COUNT = 30;

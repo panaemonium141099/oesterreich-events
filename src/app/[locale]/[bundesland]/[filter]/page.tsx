@@ -8,6 +8,7 @@ import {
   isTimeFilter,
 } from '@/lib/landing-slugs';
 import { loadBundeslandPage } from '@/lib/landing-data';
+import { deOnlyAlternates } from '@/lib/seo/canonical';
 import { LandingPageShell } from '@/components/Landing/LandingPageShell';
 
 export const revalidate = 3600;
@@ -40,6 +41,7 @@ export async function generateMetadata({
   return {
     title: data.metaTitle,
     description: data.metaDescription,
+    alternates: deOnlyAlternates(`/${bundesland}/${filter}`),
     openGraph: { title: data.metaTitle, description: data.metaDescription },
     twitter: {
       card: 'summary',

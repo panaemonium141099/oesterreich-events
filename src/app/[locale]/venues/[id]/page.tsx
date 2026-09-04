@@ -6,6 +6,7 @@ import type { Event } from '@/types/events';
 import { EventListCard } from '@/components/Events/EventListCard';
 import { VenueDetail } from '@/components/Venues/VenueDetail';
 import { SimilarVenues } from '@/components/Venues/SimilarVenues';
+import { deOnlyAlternates } from '@/lib/seo/canonical';
 
 export const revalidate = 3600;
 
@@ -54,6 +55,7 @@ export async function generateMetadata({
   return {
     title,
     description,
+    alternates: deOnlyAlternates(`/venues/${id}`),
     openGraph: { title, description },
     twitter: { card: 'summary', title, description },
   };

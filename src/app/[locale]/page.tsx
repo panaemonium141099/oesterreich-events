@@ -25,8 +25,10 @@ import {
   HowItWorks,
   NewsletterSignup,
 } from '@/components/Landing/v4';
+import type { Metadata } from 'next';
 import { hasLocale } from 'next-intl';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
+import { bilingualAlternates } from '@/lib/seo/canonical';
 import { Onboarding } from '@/components/Landing/Onboarding';
 import { AuthErrorToast } from '@/components/Landing/AuthErrorToast';
 import { Footer } from '@/components/Legal/Footer';
@@ -35,6 +37,22 @@ import { RegionHubsSection } from '@/components/Landing/v4/RegionHubsSection';
 import { routing } from '@/i18n/routing';
 
 export const revalidate = 3600;
+
+/**
+ * Canonical + hreflang der Startseite. Lag bis 2026-09 im Layout und galt
+ * damit versehentlich für alle Unterseiten (siehe Kommentar dort). Die
+ * Startseite ist der einzige Ort, an dem der alte Layout-Wert korrekt
+ * war: sie existiert wirklich zweisprachig, also kanonisiert /en auf
+ * sich selbst.
+ */
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  return { alternates: bilingualAlternates('', locale) };
+}
 
 export default async function LandingPage({
   params,
