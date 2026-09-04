@@ -1,26 +1,22 @@
 /**
- * Backfill: englische Titel/Beschreibungen für Future-Events (fn-17).
+ * Backfill: englische Beschreibungen für Freizeit-POIs (fn-17).
  *
- * Hintergrund und Warum-Batt-statt-Lazy: siehe Kopf von
- * `src/lib/i18n/translate-batch.ts`. Kurz: der Lazy-Pfad übersetzt erst
- * beim Aufruf der /en-Seite, die /en-Seite kommt aber erst in die Sitemap
- * (und bekommt erst einen eigenen Canonical), wenn `title_en` gefüllt ist.
- * Ohne diesen Backfill bleibt die englische Seite für Google unsichtbar.
+ * Gegenstück zu `translate-events-en.ts`, gleiche Mechanik (siehe
+ * `src/lib/i18n/translate-batch.ts`), andere Tabelle. Solange
+ * `poi_activities.description_en` fehlt, rendert /en/aktivitaet/<slug>
+ * deutschen Text, kanonisiert auf die DE-URL und steht nur mit der
+ * DE-URL in der Sitemap.
  *
  * Der Lauf ist jederzeit abbrechbar und fortsetzbar — der Filter ist
- * `title_en IS NULL`, ein Neustart macht dort weiter, wo aufgehört wurde.
+ * `description_en IS NULL`.
  *
  * Usage:
- *   npm run translate:en -- --dry-run --limit 20
- *   npm run translate:en                      # alles, Concurrency 4
- *   npm run translate:en -- --limit 5000 --concurrency 8
- *
- * Auf dem Server (Env liegt in /opt/app/.env):
- *   docker exec -w /app nextjs-app npx tsx src/scripts/translate-events-en.ts
+ *   npm run translate:activities -- --dry-run --limit 20
+ *   npm run translate:activities -- --limit 3000 --concurrency 10
  */
 
 import { createClient } from '@supabase/supabase-js';
-import { runTranslationBatch, MIN_QUALITY_SCORE, isQuotaExhausted } from '../lib/i18n/translate-batch';
+import { runActivityTranslationBatch, MIN_ACTIVITY_DESCRIPTION, isQuotaExhausted } from '../lib/i18n/translate-batch';
 
 function arg(name: string): string | null {
   const idx = process.argv.indexOf(`--${name}`);
@@ -30,7 +26,7 @@ function arg(name: string): string | null {
 
 const dryRun = process.argv.includes('--dry-run');
 const limit = Number(arg('limit') ?? Number.MAX_SAFE_INTEGER);
-const concurrency = Number(arg('concurrency') ?? 4);
+const concurrency = Number(arg('concurrency') ?? 8);
 
 const apiKey = process.env.GEMINI_API_KEY;
 const supabaseUrl = process.env.SUPABASE_URL ?? process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -47,28 +43,27 @@ if (!supabaseUrl || !serviceKey) {
 
 async function main() {
   const supabase = createClient(supabaseUrl!, serviceKey!, { auth: { persistSession: false } });
-  const today = new Date().toISOString().slice(0, 10);
 
-  // count: 'planned' statt 'exact' — ein exakter COUNT über events (~280k
-  // Zeilen) läuft auf der Instanz in den statement_timeout (CLAUDE.md,
-  // "Bekannte Issues"). Der Planner-Schätzwert reicht für die Anzeige.
+  // poi_activities ist mit ~11k Zeilen klein genug für einen exakten
+  // COUNT — anders als events (~280k), wo nur count:'planned' durchgeht.
   const { count: remaining } = await supabase
-    .from('events')
-    .select('id', { count: 'planned', head: true })
-    .is('title_en', null)
-    .gte('start_date', today)
-    .eq('publish_status', 'published')
-    .gte('quality_score', MIN_QUALITY_SCORE);
+    .from('poi_activities')
+    .select('id', { count: 'exact', head: true })
+    .is('description_en', null)
+    .eq('visible', true)
+    .eq('is_closed', false)
+    .not('description', 'is', null);
 
-  console.log('─── Event-Übersetzung DE → EN ' + '─'.repeat(30));
-  console.log(`  offen (geschätzt): ${remaining ?? '?'}`);
+  console.log('─── POI-Beschreibungen DE → EN ' + '─'.repeat(29));
+  console.log(`  offen:             ${remaining ?? '?'}`);
+  console.log(`  Mindestlänge:      ${MIN_ACTIVITY_DESCRIPTION} Zeichen (E7-Gate)`);
   console.log(`  Limit dieser Lauf: ${limit === Number.MAX_SAFE_INTEGER ? 'alle' : limit}`);
   console.log(`  Concurrency:       ${concurrency}`);
   console.log(`  Modus:             ${dryRun ? 'DRY RUN (kein Write)' : 'schreibend'}`);
   console.log('─'.repeat(60));
 
   let lastLogged = 0;
-  const result = await runTranslationBatch(supabase, apiKey!, {
+  const result = await runActivityTranslationBatch(supabase, apiKey!, {
     limit,
     concurrency,
     dryRun,
@@ -77,7 +72,7 @@ async function main() {
       lastLogged = p.processed;
       process.stdout.write(
         `\r  ${p.processed} bearbeitet · ${p.translated} übersetzt · ` +
-        `${p.failed} Fehler · ${p.skipped} übersprungen   `,
+        `${p.failed} Fehler · ${p.skipped} zu kurz   `,
       );
     },
   });
@@ -87,12 +82,9 @@ async function main() {
   console.log(`  bearbeitet:    ${result.processed}`);
   console.log(`  übersetzt:     ${result.translated}`);
   console.log(`  Fehler:        ${result.failed}`);
-  console.log(`  übersprungen:  ${result.skipped}`);
+  console.log(`  zu kurz:       ${result.skipped}`);
   console.log(`  Dauer:         ${(result.durationMs / 1000).toFixed(1)}s`);
 
-  // Ohne diese Aufschluesselung sagt ein Lauf mit 8 000 Fehlern nur "8 000
-  // Fehler" — und die Ursache (Quota-Fenster? RECITATION? Timeout?)
-  // entscheidet, ob ein zweiter Lauf ueberhaupt etwas bringt.
   if (result.errorKinds.length > 0) {
     console.log('  Fehlerursachen:');
     for (const { reason, count } of result.errorKinds.slice(0, 8)) {
@@ -100,19 +92,15 @@ async function main() {
     }
   }
 
-  // Tageskontingent erschöpft ist der Normalfall auf dem Free Tier
-  // (10 000 Requests/Tag): kein Fehler, sondern "morgen weiter". Der
-  // Timer läuft täglich, der Filter title_en IS NULL macht dort weiter.
+  // Tageskontingent erschöpft ist auf dem Free Tier der Normalfall
+  // (10 000 Requests/Tag), kein Fehler — der nächste Lauf macht weiter.
   if (isQuotaExhausted(result)) {
     console.log('  Abbruch: Gemini-Tageskontingent erschöpft — der nächste Lauf macht weiter.');
     return;
   }
 
-  // Ein Lauf mit ausschließlich Fehlern ist fast immer ein Auth-Problem
-  // und darf nicht als Erfolg durchgehen (sonst meldet ein Cron grün,
-  // während nichts geschrieben wurde).
   if (result.processed > 0 && result.translated === 0 && result.failed > 0) {
-    console.error('ERROR: kein einziges Event übersetzt — Gemini-Key oder Quota prüfen.');
+    console.error('ERROR: keine einzige Beschreibung übersetzt — Gemini-Key prüfen.');
     process.exit(1);
   }
 }

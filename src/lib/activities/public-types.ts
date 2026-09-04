@@ -27,6 +27,12 @@ export interface PublicActivity {
   name: string;
   description: string | null;
   description_short: string | null;
+  /**
+   * fn-17: englische Uebersetzung von `description`. NULL = noch nicht
+   * uebersetzt; /en/aktivitaet/<slug> rendert dann deutschen Text und
+   * kanonisiert auf die DE-URL.
+   */
+  description_en: string | null;
   tags: string[];
   setting: 'indoor' | 'outdoor' | 'mixed' | null;
   lat: number;

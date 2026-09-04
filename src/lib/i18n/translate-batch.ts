@@ -16,13 +16,21 @@
  * bekommt) und ist über den `title_en IS NULL`-Filter jederzeit
  * fortsetzbar — ein Abbruch verliert nur den laufenden Chunk.
  *
+ * Die Mechanik (Worker-Pool, offsetfreies Weiterrücken, Quota-Abbruch,
+ * Fehler-Buckets) ist seit den Freizeit-POIs generisch: `runBatch` kennt
+ * nur noch "hole eine Seite", "übersetze eine Zeile", "schreibe zurück".
+ * `runTranslationBatch` (Events) und `runActivityTranslationBatch` (POIs)
+ * sind dünne Wrapper darüber.
+ *
  * Genutzt von:
- *   - `src/scripts/translate-events-en.ts` (einmaliger Backfill, CLI)
+ *   - `src/scripts/translate-events-en.ts` (Event-Backfill, CLI)
+ *   - `src/scripts/translate-activities-en.ts` (POI-Backfill, CLI)
  *   - `/api/cron/translate-events` (täglicher Nachlauf für neue Events)
  */
 
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { translateViaGemini } from './translate-event';
+import { translateActivityDescription } from './translate-activity';
 
 /**
  * Mindest-Qualität. Identisch zum Sitemap-Filter in
@@ -163,17 +171,61 @@ export async function fetchCandidates(
 
 
 /**
- * Übersetzt bis zu `limit` Events und schreibt das Ergebnis zurück.
+ * True, wenn dieser Lauf am Gemini-Tageskontingent haengt.
  *
- * Fehler-Politik: ein fehlgeschlagener Gemini-Call zählt als `failed` und
- * der Event bleibt unübersetzt (nächster Lauf versucht es erneut). Ein
- * fehlgeschlagener DB-Write wird laut gezählt — supabase-js wirft bei
- * Schreibfehlern NICHT, `error` muss explizit geprüft werden, sonst
- * meldet der Lauf Erfolg und speichert nichts.
+ * Zwei Wege dorthin: der Streak-Abbruch bei >= 25 Quota-Fehlern in Folge
+ * (grosse Laeufe), oder ein kleiner Lauf, der komplett an 429 scheitert,
+ * ohne die Streak-Schwelle zu erreichen. Beide sind auf dem Free Tier der
+ * Normalfall und duerfen nicht als "Key kaputt" gemeldet werden — sonst
+ * schlaegt der Nacht-Timer Alarm, obwohl morgen einfach weitergearbeitet
+ * wird.
  */
-export async function runTranslationBatch(
-  supabase: SupabaseClient,
-  apiKey: string,
+export function isQuotaExhausted(result: BatchResult): boolean {
+  if (result.stoppedByQuota) return true;
+  if (result.translated > 0 || result.failed === 0) return false;
+  return result.errorKinds[0]?.reason === 'Quota/Rate-Limit';
+}
+
+/** Eine Zeile, die der Batch bearbeiten kann. */
+export interface BatchRow {
+  id: string;
+}
+
+export interface TranslateHooks {
+  timeoutMs: number;
+  retries: number;
+  retryDelayMs: number;
+  onAttemptError: (reason: string) => void;
+}
+
+/**
+ * Was ein konkreter Batch beisteuert. Der Rest — Paging, Worker-Pool,
+ * Zählwerk, Quota-Abbruch — liegt in `runBatch`.
+ */
+export interface BatchIO<TRow extends BatchRow> {
+  /** Menschenlesbar für Log-Ausgaben ("Events", "Aktivitäten"). */
+  label: string;
+  /** Eine Seite unübersetzter Zeilen ab `offset`, aufsteigend sortiert. */
+  fetchPage(offset: number, size: number): Promise<{ rows: TRow[]; rawCount: number }>;
+  /**
+   * `null` → Fehlschlag (zählt als failed), `'skip'` → Zeile hat nichts zu
+   * übersetzen (zählt als skipped), sonst das Update-Objekt.
+   */
+  translate(row: TRow, hooks: TranslateHooks): Promise<Record<string, unknown> | 'skip' | null>;
+  /** Zurückschreiben. `error` MUSS geprüft werden — supabase-js wirft nicht. */
+  write(row: TRow, patch: Record<string, unknown>): Promise<{ error: unknown }>;
+}
+
+/**
+ * Arbeitet eine Tabelle ab. Fehler-Politik: ein fehlgeschlagener
+ * Gemini-Call zählt als `failed` und die Zeile bleibt unübersetzt (der
+ * nächste Lauf versucht es erneut). Ein fehlgeschlagener DB-Write wird
+ * ebenfalls laut gezählt — supabase-js wirft bei Schreibfehlern NICHT,
+ * `error` muss explizit geprüft werden, sonst meldet der Lauf Erfolg und
+ * speichert nichts.
+ */
+export async function runBatch<TRow extends BatchRow>(
+  io: BatchIO<TRow>,
   opts: BatchOptions,
 ): Promise<BatchResult> {
   const startedAt = Date.now();
@@ -188,6 +240,18 @@ export async function runTranslationBatch(
   let stoppedByDeadline = false;
   let stoppedByQuota = false;
 
+  const hooks: TranslateHooks = {
+    timeoutMs: GEMINI_TIMEOUT_MS,
+    retries: 1,
+    retryDelayMs: RETRY_DELAY_MS,
+    onAttemptError: reason => {
+      const bucket = errorBucket(reason);
+      errorKinds.set(bucket, (errorKinds.get(bucket) ?? 0) + 1);
+      if (bucket === 'Quota/Rate-Limit') quotaStreak++;
+      else quotaStreak = 0;
+    },
+  };
+
   while (progress.processed < opts.limit) {
     if (deadline && Date.now() >= deadline) {
       stoppedByDeadline = true;
@@ -200,12 +264,8 @@ export async function runTranslationBatch(
     // Unberuehrten — ohne diesen Offset liefert die Query irgendwann nur
     // noch schon versuchte Zeilen (siehe fetchCandidates).
     const offset = progress.failed + progress.skipped + skippedPages;
-    const { rows: candidates, rawCount } = await fetchCandidates(
-      supabase,
-      Math.min(remaining, FETCH_CHUNK),
-      attempted,
-      offset,
-    );
+    const { rows, rawCount } = await io.fetchPage(offset, Math.min(remaining, FETCH_CHUNK));
+    const candidates = rows.filter(r => !attempted.has(r.id));
     // Leere Seite trotz voller Roh-Antwort: der Offset lag daneben, also
     // eine Seite weiterruecken statt den Lauf zu beenden.
     if (candidates.length === 0) {
@@ -216,11 +276,11 @@ export async function runTranslationBatch(
 
     // Worker-Pool statt Slice-für-Slice: bei `Promise.all` über feste
     // Scheiben wartet die ganze Scheibe auf ihren langsamsten Call, und
-    // Gemini-Latenzen streuen von 0,5 s bis zum 25-s-Timeout. Gemessen
-    // kostete das Slice-Modell ~2,4 s pro Event bei Concurrency 5,
-    // obwohl der Median-Call unter 1 s liegt.
+    // Gemini-Latenzen streuen von 0,5 s bis zum Timeout. Gemessen kostete
+    // das Slice-Modell ~2,4 s pro Event bei Concurrency 5, obwohl der
+    // Median-Call unter 1 s liegt.
     let next = 0;
-    const takeNext = (): BatchCandidate | null => {
+    const takeNext = (): TRow | null => {
       if (progress.processed >= opts.limit) return null;
       if (deadline && Date.now() >= deadline) {
         stoppedByDeadline = true;
@@ -234,57 +294,34 @@ export async function runTranslationBatch(
     };
 
     const worker = async () => {
-      for (let event = takeNext(); event; event = takeNext()) {
-        attempted.add(event.id);
+      for (let row = takeNext(); row; row = takeNext()) {
+        attempted.add(row.id);
         progress.processed++;
 
-        if (!event.title) {
+        let patch: Record<string, unknown> | 'skip' | null = null;
+        try {
+          patch = await io.translate(row, hooks);
+        } catch {
+          patch = null;
+        }
+
+        if (patch === 'skip') {
           progress.skipped++;
           opts.onProgress?.(progress);
           continue;
         }
-
-        let translation: Awaited<ReturnType<typeof translateViaGemini>> = null;
-        try {
-          // Grosszügiger als der Lazy-Pfad: hier hängt keine Seite am
-          // Ergebnis, und ein zweiter Versuch holt die ~15-25 %
-          // transienten Gemini-Fehlschläge zurück (siehe
-          // TranslateOptions in translate-event.ts).
-          translation = await translateViaGemini(event.title, event.description, apiKey, {
-            timeoutMs: GEMINI_TIMEOUT_MS,
-            retries: 1,
-            retryDelayMs: RETRY_DELAY_MS,
-            onAttemptError: reason => {
-              const bucket = errorBucket(reason);
-              errorKinds.set(bucket, (errorKinds.get(bucket) ?? 0) + 1);
-              if (bucket === 'Quota/Rate-Limit') quotaStreak++;
-              else quotaStreak = 0;
-            },
-          });
-        } catch {
-          translation = null;
-        }
-        if (!translation) {
+        if (!patch) {
           progress.failed++;
           opts.onProgress?.(progress);
           continue;
         }
-
         if (opts.dryRun) {
           progress.translated++;
           opts.onProgress?.(progress);
           continue;
         }
 
-        const { error } = await supabase
-          .from('events')
-          .update({
-            title_en: translation.title_en,
-            description_en: translation.description_en,
-            translated_at: new Date().toISOString(),
-          })
-          .eq('id', event.id);
-
+        const { error } = await io.write(row, patch);
         if (error) progress.failed++;
         else {
           progress.translated++;
@@ -306,4 +343,114 @@ export async function runTranslationBatch(
       .map(([reason, count]) => ({ reason, count }))
       .sort((a, b) => b.count - a.count),
   };
+}
+
+/** Event-Titel und -Beschreibungen (`events.title_en`/`description_en`). */
+export function runTranslationBatch(
+  supabase: SupabaseClient,
+  apiKey: string,
+  opts: BatchOptions,
+): Promise<BatchResult> {
+  return runBatch<BatchCandidate>(
+    {
+      label: 'Events',
+      fetchPage: (offset, size) => fetchCandidates(supabase, size, new Set(), offset),
+      translate: async (row, hooks) => {
+        if (!row.title) return 'skip';
+        // Grosszügiger als der Lazy-Pfad: hier hängt keine Seite am
+        // Ergebnis, und ein zweiter Versuch holt die ~15-25 %
+        // transienten Gemini-Fehlschläge zurück.
+        const translation = await translateViaGemini(row.title, row.description, apiKey, {
+          timeoutMs: hooks.timeoutMs,
+          retries: hooks.retries,
+          retryDelayMs: hooks.retryDelayMs,
+          onAttemptError: hooks.onAttemptError,
+        });
+        if (!translation) return null;
+        return {
+          title_en: translation.title_en,
+          description_en: translation.description_en,
+          translated_at: new Date().toISOString(),
+        };
+      },
+      // await, damit der PostgrestFilterBuilder (thenable, aber kein
+      // Promise) zum erwarteten Ergebnis-Objekt wird.
+      write: async (row, patch) =>
+        supabase.from('events').update(patch).eq('id', row.id),
+    },
+    opts,
+  );
+}
+
+export interface ActivityCandidate extends BatchRow {
+  name: string;
+  description: string | null;
+}
+
+/**
+ * Unter dieser Textlänge lohnt kein Gemini-Call: das Indexierungs-Gate in
+ * `activities/indexability.ts` verlangt >= 200 Zeichen Beschreibung,
+ * darunter kommt die Seite ohnehin nicht in den Index.
+ */
+export const MIN_ACTIVITY_DESCRIPTION = 200;
+
+/**
+ * Kandidaten-Query der Freizeit-POIs. Gefiltert wie das Anzeige-Gate:
+ * sichtbar und nicht dauerhaft geschlossen.
+ */
+export async function fetchActivityCandidates(
+  supabase: SupabaseClient,
+  chunkSize: number,
+  offset = 0,
+): Promise<{ rows: ActivityCandidate[]; rawCount: number }> {
+  const size = Math.min(chunkSize, FETCH_CHUNK);
+  const { data, error } = await supabase
+    .from('poi_activities')
+    .select('id, name, description')
+    .is('description_en', null)
+    .eq('visible', true)
+    .eq('is_closed', false)
+    .not('description', 'is', null)
+    .order('id', { ascending: true })
+    .range(offset, offset + size - 1);
+
+  if (error) throw new Error(`POI-Kandidaten-Query fehlgeschlagen: ${error.message}`);
+  const raw = (data ?? []) as ActivityCandidate[];
+  return { rows: raw, rawCount: raw.length };
+}
+
+/** Freizeit-POI-Beschreibungen (`poi_activities.description_en`). */
+export function runActivityTranslationBatch(
+  supabase: SupabaseClient,
+  apiKey: string,
+  opts: BatchOptions,
+): Promise<BatchResult> {
+  return runBatch<ActivityCandidate>(
+    {
+      label: 'Aktivitäten',
+      fetchPage: (offset, size) => fetchActivityCandidates(supabase, size, offset),
+      translate: async (row, hooks) => {
+        if (!row.description || row.description.trim().length < MIN_ACTIVITY_DESCRIPTION) {
+          return 'skip';
+        }
+        const descriptionEn = await translateActivityDescription(
+          { name: row.name, description: row.description },
+          apiKey,
+          {
+            timeoutMs: hooks.timeoutMs,
+            retries: hooks.retries,
+            retryDelayMs: hooks.retryDelayMs,
+            onAttemptError: hooks.onAttemptError,
+          },
+        );
+        if (!descriptionEn) return null;
+        return { description_en: descriptionEn, translated_at: new Date().toISOString() };
+      },
+      // await, damit der PostgrestFilterBuilder (thenable, aber kein
+      // Promise) zum erwarteten Ergebnis-Objekt wird.
+      write: async (row, patch) =>
+        supabase.from('poi_activities').update(patch).eq('id', row.id),
+    },
+    opts,
+  );
 }

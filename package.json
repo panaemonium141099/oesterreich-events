@@ -58,6 +58,7 @@
     "dump-events": "tsx --env-file=.env.local src/scripts/dump-events-txt.ts",
     "regen:taxonomy": "tsx src/scripts/regen-taxonomy-doc.ts",
     "translate:en": "tsx --env-file=.env.local src/scripts/translate-events-en.ts",
+    "translate:activities": "tsx --env-file=.env.local src/scripts/translate-activities-en.ts",
     "install-google-sa": "tsx src/scripts/install-google-sa.ts",
     "download-category-images": "tsx --env-file=.env.local src/scripts/download-category-images.ts",
     "import-osm-venues": "tsx --env-file=.env.local src/scripts/import-osm-venues.ts",

@@ -10,9 +10,12 @@
  * noindex: sie bleiben als Seite erreichbar (Wiedereroeffnungs-Historie,
  * kein 301->404), gehoeren aber weder in den Index noch in die Sitemap.
  *
- * E13-Canonical: Solange keine EN-Uebersetzung der Aktivitaetsinhalte
- * existiert, kanonisieren /aktivitaet/* UND /en/aktivitaet/* auf die
- * DE-URL — ohne hreflang-Paar, Sitemap nur DE-URLs.
+ * E13-Canonical, seit fn-17 pro POI entschieden: solange
+ * `description_en` fehlt, kanonisieren /aktivitaet/* UND
+ * /en/aktivitaet/* auf die DE-URL (kein hreflang-Paar, Sitemap nur
+ * DE-URL). Liegt eine Uebersetzung vor, bekommt die /en-Seite ihren
+ * eigenen Canonical und beide Sprachen verweisen per hreflang
+ * aufeinander — dieselbe Regel wie bei Events ueber `title_en`.
  */
 
 export const MIN_INDEXABLE_DESCRIPTION_LENGTH = 200;
@@ -73,12 +76,32 @@ export function isActivityIndexable(input: ActivityIndexabilityInput): boolean {
 }
 
 /**
- * Kanonische URL einer Aktivitaet — IMMER die DE-URL, auch fuer die
- * /en-Ansicht (E13: DE-Content auf /en -> canonical auf DE, kein
- * hreflang-Paar, kein languages-Alternate).
+ * Kanonische URL einer Aktivitaet in der DE-Fassung. Bleibt der Anker
+ * fuer JSON-LD und @id — die beschreiben dieselbe Entitaet, egal in
+ * welcher Sprache die Seite gerade rendert.
  */
 export function activityCanonicalUrl(slug: string): string {
   return `${ACTIVITY_BASE_URL}/aktivitaet/${slug}`;
+}
+
+/**
+ * `alternates` fuer die Detailseite. Ohne Uebersetzung zeigt auch die
+ * /en-Seite auf die DE-URL und es gibt KEIN hreflang-Paar (sonst meldet
+ * man Google zwei URLs mit identischem deutschem Text). Mit
+ * Uebersetzung kanonisiert jede Sprache auf sich selbst.
+ */
+export function activityAlternates(
+  slug: string,
+  locale: string,
+  hasTranslation: boolean,
+): { canonical: string; languages?: Record<string, string> } {
+  const de = activityCanonicalUrl(slug);
+  if (!hasTranslation) return { canonical: de };
+  const en = `${ACTIVITY_BASE_URL}/en/aktivitaet/${slug}`;
+  return {
+    canonical: locale === 'en' ? en : de,
+    languages: { 'de-AT': de, en, 'x-default': de },
+  };
 }
 
 /** Kanonische URL der Uebersichtsseite — ebenfalls immer DE (E13). */

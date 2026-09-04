@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
-import { runTranslationBatch } from '@/lib/i18n/translate-batch';
+import { runTranslationBatch, isQuotaExhausted } from '@/lib/i18n/translate-batch';
 
 /**
  * Täglicher Nachlauf der DE→EN-Event-Übersetzung.
@@ -59,7 +59,7 @@ export async function GET(request: NextRequest) {
 
   // Tageskontingent erschöpft (Free Tier: 10 000 Requests/Tag) ist kein
   // Defekt — der nächste Lauf macht am Filter title_en IS NULL weiter.
-  if (result.stoppedByQuota) {
+  if (isQuotaExhausted(result)) {
     return NextResponse.json({ ok: true, quotaExhausted: true, ...result });
   }
 

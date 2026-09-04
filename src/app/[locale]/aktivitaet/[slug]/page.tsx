@@ -2,6 +2,7 @@ import { notFound, permanentRedirect } from 'next/navigation';
 import type { Metadata } from 'next';
 import { hasLocale } from 'next-intl';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
+import { bundeslandDisplayName } from '@/lib/i18n/bundesland-names';
 import { routing } from '@/i18n/routing';
 import { resolveActivitySlug } from '@/lib/activities/resolver';
 import {
@@ -9,6 +10,7 @@ import {
   getActivityById,
 } from '@/lib/activities/activity-detail-loaders';
 import {
+  activityAlternates,
   activityCanonicalUrl,
   isActivityIndexable,
   renderableImageUrls,
@@ -60,16 +62,19 @@ export async function generateMetadata({
 }: {
   params: Promise<{ locale: string; slug: string }>;
 }): Promise<Metadata> {
-  const { slug } = await params;
+  const { locale: rawLocale, slug } = await params;
+  const locale = hasLocale(routing.locales, rawLocale) ? rawLocale : routing.defaultLocale;
+  const t = await getTranslations({ locale, namespace: 'ActivityMeta' });
   const result = await loadActivity(slug);
 
   if (result.kind !== 'render') {
-    return { title: 'Aktivität nicht gefunden', robots: { index: false, follow: false } };
+    return { title: t('notFound'), robots: { index: false, follow: false } };
   }
 
   const { activity } = result;
   const bundesland = getBundeslandById(activity.bundesland);
-  const where = activity.town ?? bundesland?.name ?? 'Österreich';
+  const bundeslandName = bundesland ? bundeslandDisplayName(bundesland.name, locale) : null;
+  const where = activity.town ?? bundeslandName ?? t('austria');
 
   // SEO 2026-09-01: Titel/Description kommen aus strukturierten Feldern
   // statt aus dem abgeschnittenen Quelltext. Die alte Variante lieferte
@@ -78,30 +83,31 @@ export async function generateMetadata({
   const metaInput = {
     name: activity.name,
     town: activity.town,
-    bundeslandName: bundesland?.name ?? null,
+    bundeslandName,
     tags: activity.tags,
     description: activity.description,
     descriptionShort: activity.description_short,
+    descriptionEn: activity.description_en,
     openingTimes: activity.opening_times,
     priceHint: activity.price_hint,
   };
-  const title = buildActivityTitle(metaInput);
-  const description = buildActivityDescription(metaInput);
+  const title = buildActivityTitle(metaInput, t);
+  const description = buildActivityDescription(metaInput, t, locale);
 
-  // E13: canonical IMMER auf die DE-URL — auch fuer /en/aktivitaet/*
-  // (DE-Content auf /en), und bewusst KEIN languages/hreflang-Paar,
-  // solange keine EN-Uebersetzung der Aktivitaetsinhalte existiert.
-  const canonical = activityCanonicalUrl(activity.slug);
+  // fn-17: eigener /en-Canonical + hreflang-Paar NUR mit vorhandener
+  // Uebersetzung — sonst meldeten wir Google zwei URLs mit identischem
+  // deutschem Text (gleiche Regel wie bei Events ueber `title_en`).
+  const alternates = activityAlternates(activity.slug, locale, !!activity.description_en);
 
   const metadata: Metadata = {
     title: { absolute: title },
     description,
-    alternates: { canonical },
+    alternates,
     openGraph: {
       title: activity.name,
       description,
       type: 'website',
-      url: canonical,
+      url: alternates.canonical,
     },
   };
 
@@ -113,7 +119,7 @@ export async function generateMetadata({
   return metadata;
 }
 
-function buildJsonLd(activity: PublicActivity): string {
+function buildJsonLd(activity: PublicActivity, locale: string): string {
   const canonical = activityCanonicalUrl(activity.slug);
   // Einheitlicher Default-Typ (Task-Spec): KEINE Typ-Verzweigung in
   // diesem Slice — deterministisch, SEO-diff-arm; Verfeinerung nach
@@ -135,7 +141,12 @@ function buildJsonLd(activity: PublicActivity): string {
     },
   };
 
-  const description = activity.description ?? activity.description_short;
+  // Auf /en die Uebersetzung, sonst der deutsche Text. Kein Mischen:
+  // ein deutscher Beschreibungstext unter einer englischen Seite waere
+  // fuer Rich Results schlechter als gar keiner.
+  const description = locale === 'en'
+    ? activity.description_en
+    : activity.description ?? activity.description_short;
   if (description) jsonLd.description = description.slice(0, 500);
 
   // Defensiv: images kommt roh aus dem jsonb (nur gecastet) — malformte
@@ -170,11 +181,12 @@ export default async function ActivityDetailPage({
   }
 
   const { activity } = result;
+  const locale = hasLocale(routing.locales, rawLocale) ? rawLocale : routing.defaultLocale;
   const t = await getTranslations('Activity');
 
   const bundesland = getBundeslandById(activity.bundesland);
   const gemeinde = activity.gemeinde_slug ? getGemeindeBySlug(activity.gemeinde_slug) : null;
-  const jsonLd = buildJsonLd(activity);
+  const jsonLd = buildJsonLd(activity, locale);
 
   const hasOpening = (activity.opening_times?.length ?? 0) > 0;
 
@@ -185,7 +197,7 @@ export default async function ActivityDetailPage({
       <ActivityHero
         name={activity.name}
         town={activity.town}
-        bundeslandLabel={bundesland?.name ?? null}
+        bundeslandLabel={bundesland ? bundeslandDisplayName(bundesland.name, locale) : null}
         tags={activity.tags}
         images={activity.images}
         closedLabel={activity.is_closed ? t('permanentlyClosed') : null}

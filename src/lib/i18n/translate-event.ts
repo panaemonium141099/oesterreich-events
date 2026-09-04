@@ -1,5 +1,8 @@
-import { GoogleGenAI, Type } from '@google/genai';
+import { Type } from '@google/genai';
+import { generateJsonWithRetry, DEFAULT_TIMEOUT_MS, type TranslateOptions } from './gemini-json';
 import { createClient } from '@supabase/supabase-js';
+
+export type { TranslateOptions } from './gemini-json';
 
 /**
  * fn-17 Slice 3 — Lazy-Übersetzung von Event-Inhalten (Chrome-Prinzip:
@@ -35,7 +38,6 @@ export interface EventTranslation {
 
 const MODEL = 'gemini-2.5-flash';
 const MAX_DESC_CHARS = 4000;
-const TIMEOUT_MS = 8000;
 
 /**
  * Output-Budget mit Beschreibung. 2048 war zu knapp: eine 4000-Zeichen-
@@ -78,41 +80,7 @@ Rules:
 ${SHARED_RULES}
 - Return only the translated title, nothing else.`;
 
-export interface TranslateOptions {
-  /** Abbruch pro Versuch. Default 8 s (Render-Budget des Lazy-Pfads). */
-  timeoutMs?: number;
-  /**
-   * Zusätzliche Versuche nach einem Fehlschlag. Default 0.
-   *
-   * Auch mit Beschreibung schlagen ~15-25 % der Calls transient fehl —
-   * dieselbe Zeilenumbruch-Degeneration bzw. `finishReason: RECITATION`
-   * bei wörtlich von Veranstalterseiten übernommenen Texten. Bei Wiederholung
-   * mit identischem Input geht der Grossteil durch, deshalb nutzt der
-   * Batch retries=1. Der Lazy-Pfad bleibt bei 0: er rendert eine Seite
-   * und fällt bei Fehlschlag folgenlos auf Deutsch zurück.
-   */
-  retries?: number;
-  /**
-   * Wartezeit vor jedem Wiederholungsversuch, verdoppelt sich je Versuch.
-   *
-   * Gemessen im Backfill am 2026-09-04: bei Concurrency 20 lief eine
-   * Fehlerserie über ~470 aufeinanderfolgende Events, die sich von selbst
-   * wieder fing — ein zeitlich begrenztes Fenster auf Gemini-Seite, kein
-   * harter Deckel (25 parallele Test-Calls gingen währenddessen durch).
-   * Ein sofortiger Retry fällt in genau dasselbe Fenster; mit Backoff
-   * landet er dahinter. Default 0 — der Lazy-Pfad darf einen Render nicht
-   * verzögern.
-   */
-  retryDelayMs?: number;
-  /**
-   * Wird bei jedem gescheiterten Versuch gerufen. Ohne diesen Haken
-   * verschluckt der catch-Block die Ursache und ein Batch-Lauf meldet nur
-   * eine Zahl — genau die Situation, in der man wissen will, ob es Quota,
-   * Timeout oder kaputtes JSON war.
-   */
-  onAttemptError?: (reason: string, attempt: number) => void;
-}
-
+/** Nur noch fuer den Write-back unten; die Gemini-Calls timeouten in gemini-json. */
 function withTimeout<T>(p: Promise<T>, ms: number): Promise<T | null> {
   let t: ReturnType<typeof setTimeout> | null = null;
   return Promise.race<T | null>([
@@ -158,10 +126,6 @@ export async function translateViaGemini(
   apiKey: string,
   options: TranslateOptions = {},
 ): Promise<EventTranslation | null> {
-  const timeoutMs = options.timeoutMs ?? TIMEOUT_MS;
-  const attempts = Math.max(1, (options.retries ?? 0) + 1);
-
-  const ai = new GoogleGenAI({ apiKey });
   const desc = description?.trim() ? description.slice(0, MAX_DESC_CHARS) : null;
 
   const properties = desc
@@ -171,50 +135,32 @@ export async function translateViaGemini(
       }
     : { title_en: { type: Type.STRING } };
 
-  const request = {
-    model: MODEL,
-    contents: desc
-      ? `Titel: ${title}\n\nBeschreibung:\n${desc}`
-      : `Titel: ${title}`,
-    config: {
-      systemInstruction: desc ? SYSTEM_FULL : SYSTEM_TITLE_ONLY,
-      responseMimeType: 'application/json',
-      responseSchema: {
-        type: Type.OBJECT,
-        properties,
-        required: ['title_en'],
+  return generateJsonWithRetry(
+    apiKey,
+    {
+      model: MODEL,
+      contents: desc
+        ? `Titel: ${title}
+
+Beschreibung:
+${desc}`
+        : `Titel: ${title}`,
+      config: {
+        systemInstruction: desc ? SYSTEM_FULL : SYSTEM_TITLE_ONLY,
+        responseMimeType: 'application/json',
+        responseSchema: {
+          type: Type.OBJECT,
+          properties,
+          required: ['title_en'],
+        },
+        thinkingConfig: { thinkingBudget: 0 },
+        maxOutputTokens: desc ? MAX_OUTPUT_TOKENS_FULL : MAX_OUTPUT_TOKENS_TITLE,
+        temperature: 0,
       },
-      thinkingConfig: { thinkingBudget: 0 },
-      maxOutputTokens: desc ? MAX_OUTPUT_TOKENS_FULL : MAX_OUTPUT_TOKENS_TITLE,
-      temperature: 0,
     },
-  };
-
-  const retryDelayMs = options.retryDelayMs ?? 0;
-
-  for (let attempt = 0; attempt < attempts; attempt++) {
-    if (attempt > 0 && retryDelayMs > 0) {
-      await new Promise(r => setTimeout(r, retryDelayMs * 2 ** (attempt - 1)));
-    }
-
-    let resp: Awaited<ReturnType<typeof ai.models.generateContent>> | null = null;
-    let thrown: string | null = null;
-    try {
-      resp = await withTimeout(ai.models.generateContent(request), timeoutMs);
-      if (resp === null) thrown = 'timeout';
-    } catch (err) {
-      thrown = err instanceof Error ? err.message : String(err);
-    }
-
-    const parsed = parseTranslation(resp?.text);
-    if (parsed) return parsed;
-
-    options.onAttemptError?.(
-      thrown ?? `finishReason=${resp?.candidates?.[0]?.finishReason ?? 'unbekannt'}`,
-      attempt,
-    );
-  }
-  return null;
+    parseTranslation,
+    { timeoutMs: DEFAULT_TIMEOUT_MS, ...options },
+  );
 }
 
 /**
