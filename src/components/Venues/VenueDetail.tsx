@@ -1,19 +1,11 @@
+import { useTranslations } from 'next-intl';
 import { FollowVenueButton } from '@/components/Follow/FollowVenueButton';
 
-const TYPE_LABELS: Record<string, string> = {
-  bar: 'Bar',
-  pub: 'Pub',
-  nightclub: 'Nightclub',
-  club: 'Club',
-  vereinslokal: 'Vereinslokal',
-  university: 'Universitat',
-  student_org: 'Studentenorganisation',
-  cultural_center: 'Kulturzentrum',
-  concert_hall: 'Konzerthaus',
-  theater: 'Theater',
-  museum: 'Museum',
-  other: 'Venue',
-};
+/** Bekannte Venue-Typen → Message-Key unter VenuePage.types.* */
+const KNOWN_TYPES = new Set([
+  'bar', 'pub', 'nightclub', 'club', 'vereinslokal', 'university',
+  'student_org', 'cultural_center', 'concert_hall', 'theater', 'museum', 'other',
+]);
 
 interface VenueDetailProps {
   venue: {
@@ -32,7 +24,8 @@ interface VenueDetailProps {
 }
 
 export function VenueDetail({ venue, totalEvents }: VenueDetailProps) {
-  const typeLabel = TYPE_LABELS[venue.type] ?? 'Venue';
+  const t = useTranslations('VenuePage');
+  const typeLabel = t(`types.${KNOWN_TYPES.has(venue.type) ? venue.type : 'other'}`);
 
   return (
     <div className="space-y-4">
@@ -51,7 +44,7 @@ export function VenueDetail({ venue, totalEvents }: VenueDetailProps) {
 
       {/* Event count */}
       <p className="text-sm text-white/50">
-        {totalEvents} kommende Veranstaltung{totalEvents !== 1 ? 'en' : ''}
+        {t('eventCount', { count: totalEvents })}
       </p>
 
       {/* Info */}

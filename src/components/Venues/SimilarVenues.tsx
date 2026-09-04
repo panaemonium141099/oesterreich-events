@@ -1,16 +1,11 @@
-import Link from 'next/link';
+import { useTranslations } from 'next-intl';
+import { Link } from '@/i18n/navigation';
 
-const TYPE_LABELS: Record<string, string> = {
-  bar: 'Bar',
-  pub: 'Pub',
-  nightclub: 'Nightclub',
-  club: 'Club',
-  cultural_center: 'Kulturzentrum',
-  concert_hall: 'Konzerthaus',
-  theater: 'Theater',
-  museum: 'Museum',
-  other: 'Venue',
-};
+/** Bekannte Venue-Typen → Message-Key unter VenuePage.types.* */
+const KNOWN_TYPES = new Set([
+  'bar', 'pub', 'nightclub', 'club', 'cultural_center',
+  'concert_hall', 'theater', 'museum', 'other',
+]);
 
 interface SimilarVenue {
   id: string;
@@ -24,12 +19,13 @@ interface SimilarVenuesProps {
 }
 
 export function SimilarVenues({ venues }: SimilarVenuesProps) {
+  const t = useTranslations('VenuePage');
   if (venues.length === 0) return null;
 
   return (
     <section className="mt-10 pt-8 border-t border-white/10">
       <h2 className="text-lg font-semibold text-white mb-4">
-        Ahnliche Venues
+        {t('similarVenues')}
       </h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
         {venues.map((venue) => (
@@ -43,7 +39,7 @@ export function SimilarVenues({ venues }: SimilarVenuesProps) {
             </p>
             <div className="flex items-center gap-2 mt-1">
               <span className="text-[10px] text-white/40">
-                {TYPE_LABELS[venue.type] ?? 'Venue'}
+                {t(`types.${KNOWN_TYPES.has(venue.type) ? venue.type : 'other'}`)}
               </span>
               {venue.city && (
                 <>

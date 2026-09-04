@@ -93,19 +93,41 @@ export async function GET(): Promise<NextResponse> {
   }
 
   // ─── 3. Landing pages: Bundesland × Category × Time ─────────────────────
+  // fn-17 (Rest): die Bundesland-/Themen-/Studenten-/Festivals-Hubs sind
+  // vollständig zweisprachig (Copy + Metadata + hreflang auf der Seite) —
+  // deshalb werden hier DE- UND EN-URL mit Alternates emittiert. Die
+  // ~2k Gemeinde-Hubs bleiben bewusst DE-only (Template noch nicht
+  // übersetzt — Experiment-Titel + DB-rotierte Intros, siehe 5b).
+  const pushBilingual = (path: string, priority: number) => {
+    entries.push({
+      loc: `${BASE_URL}${path}`,
+      lastmod: toISO(now),
+      changefreq: 'daily',
+      priority,
+      alternates: i18nAlternates(path),
+    });
+    entries.push({
+      loc: `${BASE_URL}/en${path}`,
+      lastmod: toISO(now),
+      changefreq: 'daily',
+      priority: Math.max(priority - 0.1, 0.1),
+      alternates: i18nAlternates(path),
+    });
+  };
+
   const bundeslaender = BUNDESLAENDER.filter((b) => b.id !== 'all');
   const categorySlugs = [...CATEGORY_SLUGS.keys()];
   const timeFilters = ['heute', 'wochenende'];
 
   for (const bl of bundeslaender) {
-    entries.push({ loc: `${BASE_URL}/${bl.id}`, lastmod: toISO(now), changefreq: 'daily', priority: 0.8 });
+    pushBilingual(`/${bl.id}`, 0.8);
     for (const tf of timeFilters) {
-      entries.push({ loc: `${BASE_URL}/${bl.id}/${tf}`, lastmod: toISO(now), changefreq: 'daily', priority: 0.7 });
+      pushBilingual(`/${bl.id}/${tf}`, 0.7);
     }
     for (const cs of categorySlugs) {
-      entries.push({ loc: `${BASE_URL}/${bl.id}/${cs}`, lastmod: toISO(now), changefreq: 'daily', priority: 0.7 });
+      pushBilingual(`/${bl.id}/${cs}`, 0.7);
       for (const tf of timeFilters) {
-        entries.push({ loc: `${BASE_URL}/${bl.id}/${cs}/${tf}`, lastmod: toISO(now), changefreq: 'daily', priority: 0.6 });
+        pushBilingual(`/${bl.id}/${cs}/${tf}`, 0.6);
       }
     }
   }
@@ -116,11 +138,11 @@ export async function GET(): Promise<NextResponse> {
   // are emitted in section 5b below, elevated to priority 0.8.
 
   // ─── 5. Student pages ───────────────────────────────────────────────────
-  entries.push({ loc: `${BASE_URL}/studenten`, lastmod: toISO(now), changefreq: 'daily', priority: 0.8 });
+  pushBilingual('/studenten', 0.8);
   for (const sc of STUDENT_CITIES) {
-    entries.push({ loc: `${BASE_URL}/studenten/${sc.slug}`, lastmod: toISO(now), changefreq: 'daily', priority: 0.8 });
+    pushBilingual(`/studenten/${sc.slug}`, 0.8);
     for (const sf of STUDENT_FILTERS) {
-      entries.push({ loc: `${BASE_URL}/studenten/${sc.slug}/${sf}`, lastmod: toISO(now), changefreq: 'daily', priority: 0.7 });
+      pushBilingual(`/studenten/${sc.slug}/${sf}`, 0.7);
     }
   }
 
@@ -131,12 +153,7 @@ export async function GET(): Promise<NextResponse> {
   try {
     const { ALL_THEMES } = await import('@/lib/themes/data');
     for (const t of ALL_THEMES) {
-      entries.push({
-        loc: `${BASE_URL}/thema/${t.slug}`,
-        lastmod: toISO(now),
-        changefreq: 'daily',
-        priority: 0.85,
-      });
+      pushBilingual(`/thema/${t.slug}`, 0.85);
     }
   } catch (err) {
     // Fail loudly (Review-Finding R3): keine stillschweigend
@@ -144,6 +161,12 @@ export async function GET(): Promise<NextResponse> {
     console.error('[sitemap-core] theme import failed:', err);
     return new NextResponse('sitemap temporarily unavailable', { status: 500 });
   }
+
+  // ─── 5c. Festivals hub (fn-17 Rest) ─────────────────────────────────────
+  // /festivals bleibt bewusst DRAUSSEN: die Route liest ueber
+  // createServerSupabaseClient() Cookies und ist damit nicht ISR-cachebar
+  // (Cache-Control: private, no-store). Erst ISR-faehig machen, dann in die
+  // Sitemap aufnehmen — bis dahin findet Google sie ueber die internen Links.
 
   // ─── 5b. Gemeinde hubs (Phase 2) ────────────────────────────────────────
   // ~2 028 URLs, one per registered Austrian municipality. Each hub

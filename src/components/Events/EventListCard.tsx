@@ -1,8 +1,11 @@
-import Link from 'next/link';
+import { useLocale, useTranslations } from 'next-intl';
+import { Link } from '@/i18n/navigation';
 import type { Event } from '@/types/events';
 import { formatDateCompact, formatTime } from '@/lib/utils/date';
 import { buildEventUrlV2 } from '@/lib/utils/slugify';
 import { getCategoryBadgeClass } from '@/lib/event-images';
+import { categoryLabel } from '@/lib/i18n/category-labels';
+import { dateLocaleFor } from '@/lib/i18n/date-locale';
 import { EventImage } from './EventImage';
 
 interface EventListCardProps {
@@ -14,7 +17,10 @@ interface EventListCardProps {
  * Server Component — delegates image rendering to EventImage (client).
  */
 export function EventListCard({ event }: EventListCardProps) {
-  const time = formatTime(event.start_date);
+  const locale = useLocale();
+  const tCat = useTranslations('Categories');
+  const dateLocale = dateLocaleFor(locale);
+  const time = formatTime(event.start_date, dateLocale);
   const categoryStyle = getCategoryBadgeClass(event.category, true);
 
   return (
@@ -39,7 +45,7 @@ export function EventListCard({ event }: EventListCardProps) {
           <span
             className={`inline-block self-start text-[10px] font-medium px-2 py-0.5 rounded-full mb-1.5 ${categoryStyle}`}
           >
-            {event.category}
+            {categoryLabel(tCat, event.category)}
           </span>
         )}
 
@@ -61,7 +67,7 @@ export function EventListCard({ event }: EventListCardProps) {
               d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
             />
           </svg>
-          <span>{formatDateCompact(event.start_date)}</span>
+          <span>{formatDateCompact(event.start_date, dateLocale)}</span>
           {time && <span className="text-white/30">{time}</span>}
         </div>
 

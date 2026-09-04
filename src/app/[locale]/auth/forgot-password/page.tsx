@@ -1,10 +1,12 @@
 'use client';
 
 import { useState } from 'react';
-import Link from 'next/link';
+import { useTranslations } from 'next-intl';
+import { Link } from '@/i18n/navigation';
 import { createClient } from '@/lib/supabase/client';
 
 export default function ForgotPasswordPage() {
+  const t = useTranslations('Auth');
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
@@ -36,12 +38,14 @@ export default function ForgotPasswordPage() {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
           </svg>
         </div>
-        <h2 className="text-xl font-semibold text-white mb-2">Email gesendet</h2>
+        <h2 className="text-xl font-semibold text-white mb-2">{t('forgotSentTitle')}</h2>
         <p className="text-white/40 text-sm mb-6">
-          Wir haben dir einen Link zum Zurücksetzen deines Passworts an <strong className="text-white/60">{email}</strong> gesendet.
+          {t.rich('forgotSentBody', {
+            email: () => <strong className="text-white/60">{email}</strong>,
+          })}
         </p>
         <Link href="/auth/login" className="text-sm text-white/40 hover:text-white transition-colors">
-          ← Zurück zum Login
+          {t('backToLogin')}
         </Link>
       </div>
     );
@@ -49,9 +53,9 @@ export default function ForgotPasswordPage() {
 
   return (
     <div>
-      <h2 className="text-xl font-semibold text-white mb-2">Passwort vergessen?</h2>
+      <h2 className="text-xl font-semibold text-white mb-2">{t('forgotTitle')}</h2>
       <p className="text-white/40 text-sm mb-8">
-        Gib deine Email-Adresse ein und wir senden dir einen Link zum Zurücksetzen.
+        {t('forgotText')}
       </p>
 
       <form onSubmit={handleSubmit} className="space-y-4">
@@ -60,7 +64,7 @@ export default function ForgotPasswordPage() {
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            placeholder="Email-Adresse"
+            placeholder={t('forgotEmailPlaceholder')}
             required
             className="w-full px-4 py-3.5 rounded-xl bg-white/5 border border-white/10 text-white placeholder-white/30 focus:outline-none focus:border-white/30 transition-colors"
           />
@@ -78,14 +82,14 @@ export default function ForgotPasswordPage() {
           {loading ? (
             <div className="w-5 h-5 border-2 border-black/20 border-t-black rounded-full animate-spin" />
           ) : (
-            'Link senden'
+            t('forgotSubmit')
           )}
         </button>
       </form>
 
       <p className="text-center text-sm text-white/30 mt-6">
         <Link href="/auth/login" className="text-white/50 hover:text-white transition-colors">
-          ← Zurück zum Login
+          {t('backToLogin')}
         </Link>
       </p>
     </div>

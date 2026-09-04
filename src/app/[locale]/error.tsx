@@ -1,6 +1,8 @@
 'use client';
 
 import { useEffect } from 'react';
+import { useTranslations } from 'next-intl';
+import { Link } from '@/i18n/navigation';
 
 export default function Error({
   error,
@@ -9,6 +11,7 @@ export default function Error({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  const t = useTranslations('ErrorPage');
   useEffect(() => {
     if (process.env.NODE_ENV === 'development') {
       console.error('App error:', error);
@@ -23,23 +26,23 @@ export default function Error({
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
           </svg>
         </div>
-        <h1 className="text-2xl font-bold text-white mb-2">Etwas ist schiefgelaufen</h1>
+        <h1 className="text-2xl font-bold text-white mb-2">{t('title')}</h1>
         <p className="text-slate-400 mb-8">
-          Ein unerwarteter Fehler ist aufgetreten. Bitte versuche es erneut.
+          {t('text')}
         </p>
         <div className="flex gap-3 justify-center">
           <button
             onClick={reset}
             className="px-6 py-3 bg-white text-slate-900 font-medium rounded-xl hover:bg-slate-100 transition-colors"
           >
-            Erneut versuchen
+            {t('retry')}
           </button>
-          <a
+          <Link
             href="/"
             className="px-6 py-3 bg-slate-800 text-slate-300 font-medium rounded-xl hover:bg-slate-700 transition-colors"
           >
-            Zur Startseite
-          </a>
+            {t('home')}
+          </Link>
         </div>
       </div>
     </div>

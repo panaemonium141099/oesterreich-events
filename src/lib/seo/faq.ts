@@ -28,6 +28,19 @@ export interface FAQEntry {
   answer: string;
 }
 
+/**
+ * fn-17: Übersetzer-Signatur für die locale-fähigen FAQ-Builder
+ * (faqForTheme, faqForBundesland). Kompatibel mit dem Rückgabewert von
+ * `getTranslations({ locale, namespace: 'HubFAQ' })`. Die DE-Messages in
+ * messages/de.json sind byte-identisch zu den früher hier inlined
+ * gepflegten Strings. faqForGemeinde* bleiben bewusst DE-only (die
+ * Gemeinde-Hubs sind noch nicht übersetzt).
+ */
+export type FAQTranslator = (
+  key: string,
+  values?: Record<string, string | number>,
+) => string;
+
 export interface FAQPageSchema {
   '@context': 'https://schema.org';
   '@type': 'FAQPage';
@@ -61,41 +74,47 @@ export function buildFAQPageSchema(entries: FAQEntry[]): FAQPageSchema | null {
 
 /**
  * FAQ entries for a theme hub at `/thema/<slug>`.
- * `category` is the display name (e.g. "Kultur & Bühne"); `eventCount` is
- * the live Austria-wide total so we can drop concrete numbers into the
- * answers.
+ * `category` is the LOCALIZED display name (e.g. "Kultur & Bühne" on DE,
+ * "Culture & Stage" on EN); `eventCount` is the live Austria-wide total so
+ * we can drop concrete numbers into the answers. `t` resolves the `HubFAQ`
+ * message namespace for the page locale; `numberLocale` formats the count
+ * ('de-AT' | 'en-GB').
  */
 export function faqForTheme(params: {
   slug: string;
   category: string;
   heroNoun: string; // short noun phrase for the first sentence — "Konzerte", "Theater-Events"
   eventCount: number;
+  t: FAQTranslator;
+  numberLocale?: string;
 }): FAQEntry[] {
-  const { category, heroNoun, eventCount } = params;
-  const nice = eventCount.toLocaleString('de-AT');
+  const { category, heroNoun, eventCount, t, numberLocale = 'de-AT' } = params;
+  const nice = eventCount.toLocaleString(numberLocale);
 
   const theme = category.split(' & ')[0]; // "Kultur & Bühne" → "Kultur"
+  const categoryLower = category.toLowerCase();
+  const slug = params.slug;
 
   return [
     {
-      question: `Wie viele ${heroNoun} gibt es aktuell in Österreich?`,
-      answer: `LassTreffen.at listet derzeit ${nice} Veranstaltungen in der Kategorie ${category} für ganz Österreich. Die Datenbank wird täglich aus offiziellen Ticket-Anbietern, Gemeinde-Kalendern und Tourismus-Portalen aktualisiert.`,
+      question: t('thQ1', { heroNoun }),
+      answer: t('thA1', { nice, category }),
     },
     {
-      question: `Wo finde ich ${heroNoun} in meiner Nähe?`,
-      answer: `Auf der interaktiven Karte unter /map lassen sich alle ${category.toLowerCase()}-Events nach Standort filtern. Zusätzlich gibt es pro Bundesland eigene Übersichtsseiten (z. B. /wien/${params.slug}, /steiermark/${params.slug}) mit lokalem Fokus.`,
+      question: t('thQ2', { heroNoun }),
+      answer: t('thA2', { categoryLower, slug }),
     },
     {
-      question: `Ist LassTreffen.at kostenlos nutzbar?`,
-      answer: `Ja, die gesamte Event-Suche ist kostenlos und ohne Registrierung zugänglich. Ticket-Preise werden – wenn vom Veranstalter verfügbar – direkt auf der Event-Detailseite angezeigt; Kauf und Abwicklung laufen über den jeweiligen Ticket-Anbieter.`,
+      question: t('thQ3'),
+      answer: t('thA3'),
     },
     {
-      question: `Wie aktuell ist die Event-Liste für ${theme}?`,
-      answer: `Die ${theme}-Events werden mehrmals täglich aus über 140 Quellen neu eingelesen. Abgesagte oder verschobene Termine werden automatisch erkannt und entsprechend gekennzeichnet.`,
+      question: t('thQ4', { theme }),
+      answer: t('thA4', { theme }),
     },
     {
-      question: `Kann ich als Veranstalter eigene ${theme}-Events eintragen?`,
-      answer: `Ja — über das Einreich-Formular lassen sich eigene Veranstaltungen vorschlagen. Einreichungen werden moderiert und bei Qualitätseignung öffentlich sichtbar geschaltet.`,
+      question: t('thQ5', { theme }),
+      answer: t('thA5', { theme }),
     },
   ];
 }
@@ -172,43 +191,45 @@ export function faqForGemeindeActivities(params: {
 
 /**
  * FAQ entries for a Bundesland or Stadt landing page. `where` is the
- * display name (e.g. "Wien"), `category` is either null (pure
- * Bundesland-Page) or the category display name (combined
- * bundesland × category page).
+ * LOCALIZED display name (e.g. "Wien" / "Vienna"), `category` is either
+ * null (pure Bundesland-Page) or the LOCALIZED category display name
+ * (combined bundesland × category page). `t` resolves the `HubFAQ`
+ * namespace for the page locale.
  */
 export function faqForBundesland(params: {
   where: string;
   category: string | null;
   timeFilter: 'heute' | 'wochenende' | null;
+  t: FAQTranslator;
 }): FAQEntry[] {
-  const { where, category, timeFilter } = params;
+  const { where, category, timeFilter, t } = params;
   const timeLabel = timeFilter === 'heute'
-    ? 'heute'
+    ? t('timeToday')
     : timeFilter === 'wochenende'
-    ? 'am Wochenende'
+    ? t('timeWeekend')
     : '';
   const categoryNoun = category
-    ? `${category}-Events`
-    : 'Veranstaltungen';
+    ? t('categoryNoun', { category })
+    : t('eventsNoun');
 
   const whereWith = timeLabel ? `${timeLabel} in ${where}` : `in ${where}`;
 
   return [
     {
-      question: `Was ist ${whereWith} los?`,
-      answer: `Auf LassTreffen.at findest du aktuelle ${categoryNoun} ${whereWith} — von großen Konzerten und Festivals bis zu Stadtteil-Festen, Märkten und Clubnächten. Die Übersicht wird mehrmals täglich aktualisiert.`,
+      question: t('blQ1', { whereWith }),
+      answer: t('blA1', { categoryNoun, whereWith }),
     },
     {
-      question: `Wie finde ich ${categoryNoun} ${whereWith} auf einer Karte?`,
-      answer: `Jedes Event ist auf der interaktiven Karte unter /map verortet. Dort lassen sich Events nach Standort, Kategorie und Zeitraum filtern — ideal um zu sehen, was direkt in der Nähe ist.`,
+      question: t('blQ2', { categoryNoun, whereWith }),
+      answer: t('blA2'),
     },
     {
-      question: `Woher kommen die ${categoryNoun} für ${where}?`,
-      answer: `Die Einträge werden aus offiziellen Ticket-Anbietern (Eventim, oeticket), Tourismus-Portalen des jeweiligen Bundeslands, Gemeinde-Kalendern und Veranstaltungs-Aggregatoren zusammengeführt. Dubletten werden dabei automatisch gefiltert.`,
+      question: t('blQ3', { categoryNoun, where }),
+      answer: t('blA3'),
     },
     {
-      question: `Ist die Nutzung der Event-Übersicht für ${where} kostenlos?`,
-      answer: `Ja, das Durchsuchen und Filtern ist vollständig kostenlos und funktioniert ohne Anmeldung. Wer Events speichern, Freund:innen einladen oder Künstler:innen folgen möchte, kann optional ein kostenfreies Konto anlegen.`,
+      question: t('blQ4', { where }),
+      answer: t('blA4'),
     },
   ];
 }

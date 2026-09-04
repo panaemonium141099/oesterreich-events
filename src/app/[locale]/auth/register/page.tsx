@@ -3,14 +3,16 @@
 import { Suspense } from 'react';
 
 import { useState, useEffect, useMemo, type FormEvent } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
-import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
+import { useTranslations } from 'next-intl';
+import { Link, useRouter } from '@/i18n/navigation';
 import { useAuth } from '@/lib/supabase/auth-context';
 import { trackEvent } from '@/lib/analytics';
 
 type Step = 1 | 2;
 
 function RegisterPage() {
+  const t = useTranslations('Auth');
   const router = useRouter();
   const searchParams = useSearchParams();
   const { user, loading, signInWithGoogle, signUpWithEmail } = useAuth();
@@ -55,11 +57,11 @@ function RegisterPage() {
     setError(null);
 
     if (password.length < 8) {
-      setError('Passwort muss mindestens 8 Zeichen lang sein.');
+      setError(t('errPasswordMin8'));
       return;
     }
     if (password !== passwordConfirm) {
-      setError('Passwörter stimmen nicht überein.');
+      setError(t('errPasswordMismatch'));
       return;
     }
 
@@ -71,11 +73,11 @@ function RegisterPage() {
     setError(null);
 
     if (!firstName.trim() || !lastName.trim()) {
-      setError('Vorname und Nachname sind Pflichtfelder.');
+      setError(t('errNameRequired'));
       return;
     }
     if (!birthDate) {
-      setError('Bitte gib dein Geburtsdatum an.');
+      setError(t('errBirthDateRequired'));
       return;
     }
 
@@ -115,17 +117,18 @@ function RegisterPage() {
         <div className="w-14 h-14 rounded-full bg-emerald-500/20 flex items-center justify-center mx-auto">
           <CheckIcon />
         </div>
-        <h2 className="text-xl font-bold">Fast geschafft!</h2>
+        <h2 className="text-xl font-bold">{t('successTitle')}</h2>
         <p className="text-white/50 text-sm leading-relaxed">
-          Wir haben dir eine Bestätigungs-E-Mail an<br />
-          <span className="text-white/80 font-medium">{email}</span> gesendet.<br />
-          Bitte bestätige deine E-Mail-Adresse.
+          {t.rich('successBody', {
+            br: () => <br />,
+            email: () => <span className="text-white/80 font-medium">{email}</span>,
+          })}
         </p>
         <Link
           href={`/auth/login${passthrough}`}
           className="inline-block mt-4 text-sm text-white/50 hover:text-white/80 underline underline-offset-2 transition-colors"
         >
-          Zum Login
+          {t('toLogin')}
         </Link>
       </div>
     );
@@ -134,7 +137,7 @@ function RegisterPage() {
   return (
     <div className="space-y-6">
       <div className="text-center">
-        <h1 className="text-2xl font-bold">Konto erstellen</h1>
+        <h1 className="text-2xl font-bold">{t('registerTitle')}</h1>
         {/* Step indicator */}
         <div className="flex items-center justify-center gap-2 mt-3">
           <div className={`h-1 w-8 rounded-full transition-colors ${step >= 1 ? 'bg-white/60' : 'bg-white/10'}`} />
@@ -152,7 +155,7 @@ function RegisterPage() {
               className="w-full flex items-center justify-center gap-3 rounded-xl bg-white text-gray-900 font-medium py-3 px-4 hover:bg-gray-100 transition-colors cursor-pointer"
             >
               <GoogleIcon />
-              Mit Google registrieren
+              {t('googleRegister')}
             </button>
 
             <div className="relative group">
@@ -162,17 +165,17 @@ function RegisterPage() {
                 className="w-full flex items-center justify-center gap-3 rounded-xl bg-white/10 text-white/30 font-medium py-3 px-4 cursor-not-allowed"
               >
                 <AppleIcon />
-                Mit Apple registrieren
+                {t('appleRegister')}
               </button>
               <span className="absolute -top-8 left-1/2 -translate-x-1/2 bg-white/10 backdrop-blur text-white/60 text-xs rounded-lg px-3 py-1 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap">
-                Bald verfügbar
+                {t('comingSoon')}
               </span>
             </div>
           </div>
 
           <div className="flex items-center gap-4">
             <div className="flex-1 h-px bg-white/10" />
-            <span className="text-white/30 text-sm">oder</span>
+            <span className="text-white/30 text-sm">{t('or')}</span>
             <div className="flex-1 h-px bg-white/10" />
           </div>
         </>
@@ -183,18 +186,18 @@ function RegisterPage() {
         <form onSubmit={handleStep1} className="space-y-4 animate-fade-in">
           <InputField
             id="email"
-            label="E-Mail"
+            label={t('emailLabel')}
             type="email"
             required
             autoComplete="email"
             value={email}
             onChange={setEmail}
-            placeholder="name@beispiel.at"
+            placeholder={t('emailPlaceholder')}
           />
 
           <div>
             <label htmlFor="password" className="block text-sm text-white/50 mb-1.5">
-              Passwort
+              {t('passwordLabel')}
             </label>
             <div className="relative">
               <input
@@ -205,7 +208,7 @@ function RegisterPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="w-full rounded-xl bg-white/5 border border-white/10 text-white placeholder-white/20 px-4 py-3 pr-12 outline-none focus:border-white/30 transition-colors"
-                placeholder="Mindestens 8 Zeichen"
+                placeholder={t('passwordMinPlaceholder')}
               />
               <button
                 type="button"
@@ -220,13 +223,13 @@ function RegisterPage() {
 
           <InputField
             id="password-confirm"
-            label="Passwort bestätigen"
+            label={t('passwordConfirmLabel')}
             type={showPassword ? 'text' : 'password'}
             required
             autoComplete="new-password"
             value={passwordConfirm}
             onChange={setPasswordConfirm}
-            placeholder="Passwort wiederholen"
+            placeholder={t('passwordRepeatPlaceholder')}
           />
 
           {error && (
@@ -237,7 +240,7 @@ function RegisterPage() {
             type="submit"
             className="w-full rounded-xl border border-white/20 bg-white/5 text-white font-medium py-3 px-4 hover:bg-white/10 transition-colors cursor-pointer"
           >
-            Weiter
+            {t('next')}
           </button>
         </form>
       )}
@@ -254,35 +257,35 @@ function RegisterPage() {
               <path d="M19 12H5" />
               <path d="m12 19-7-7 7-7" />
             </svg>
-            Zurück
+            {t('back')}
           </button>
 
           <div className="grid grid-cols-2 gap-3">
             <InputField
               id="first-name"
-              label="Vorname"
+              label={t('firstName')}
               type="text"
               required
               autoComplete="given-name"
               value={firstName}
               onChange={setFirstName}
-              placeholder="Max"
+              placeholder={t('firstNamePlaceholder')}
             />
             <InputField
               id="last-name"
-              label="Nachname"
+              label={t('lastName')}
               type="text"
               required
               autoComplete="family-name"
               value={lastName}
               onChange={setLastName}
-              placeholder="Mustermann"
+              placeholder={t('lastNamePlaceholder')}
             />
           </div>
 
           <InputField
             id="birth-date"
-            label="Geburtsdatum"
+            label={t('birthDate')}
             type="date"
             required
             autoComplete="bday"
@@ -292,12 +295,12 @@ function RegisterPage() {
 
           <InputField
             id="phone"
-            label="Telefonnummer (optional)"
+            label={t('phoneOptional')}
             type="tel"
             autoComplete="tel"
             value={phone}
             onChange={setPhone}
-            placeholder="+43 660 1234567"
+            placeholder={t('phonePlaceholder')}
           />
 
           {/* Legal Consent */}
@@ -310,15 +313,18 @@ function RegisterPage() {
                 className="mt-0.5 w-5 h-5 rounded border-white/20 bg-white/5 text-blue-500 focus:ring-blue-500/30 cursor-pointer shrink-0"
               />
               <span className="text-sm text-white/50 group-hover:text-white/70 transition-colors leading-relaxed">
-                Ich stimme den{' '}
-                <Link href="/agb" target="_blank" className="text-white/80 underline underline-offset-2 hover:text-white">
-                  AGB
-                </Link>{' '}
-                zu und habe die{' '}
-                <Link href="/datenschutz" target="_blank" className="text-white/80 underline underline-offset-2 hover:text-white">
-                  Datenschutzerklärung
-                </Link>{' '}
-                gelesen. *
+                {t.rich('agbConsent', {
+                  agb: (chunks) => (
+                    <Link href="/agb" target="_blank" className="text-white/80 underline underline-offset-2 hover:text-white">
+                      {chunks}
+                    </Link>
+                  ),
+                  privacy: (chunks) => (
+                    <Link href="/datenschutz" target="_blank" className="text-white/80 underline underline-offset-2 hover:text-white">
+                      {chunks}
+                    </Link>
+                  ),
+                })}
               </span>
             </label>
 
@@ -330,7 +336,7 @@ function RegisterPage() {
                 className="mt-0.5 w-5 h-5 rounded border-white/20 bg-white/5 text-blue-500 focus:ring-blue-500/30 cursor-pointer shrink-0"
               />
               <span className="text-sm text-white/40 group-hover:text-white/60 transition-colors leading-relaxed">
-                Ich möchte über Events und Neuigkeiten per E-Mail informiert werden.
+                {t('newsletterConsent')}
               </span>
             </label>
           </div>
@@ -344,16 +350,16 @@ function RegisterPage() {
             disabled={submitting || !agbAccepted}
             className="w-full rounded-xl border border-white/20 bg-white/5 text-white font-medium py-3 px-4 hover:bg-white/10 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer"
           >
-            {submitting ? <Spinner /> : 'Registrieren'}
+            {submitting ? <Spinner /> : t('registerSubmit')}
           </button>
         </form>
       )}
 
       {/* Link to login */}
       <p className="text-center text-sm text-white/30">
-        Bereits ein Konto?{' '}
+        {t('haveAccount')}{' '}
         <Link href={`/auth/login${passthrough}`} className="text-white/70 hover:text-white transition-colors underline underline-offset-2">
-          Anmelden
+          {t('loginLink')}
         </Link>
       </p>
     </div>

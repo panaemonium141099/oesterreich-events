@@ -81,6 +81,25 @@ const KEYWORDS: Record<AppLocale, string[]> = {
   ],
 };
 
+/**
+ * Namespaces, die AUSSCHLIESSLICH server-seitig gerendert werden (SEO-Copy der
+ * Hub-Seiten, FAQ-Antworten, <head>-Metadaten). Sie werden aus dem
+ * NextIntlClientProvider-Payload gefiltert — siehe Kommentar in RootLayout.
+ * Verifiziert per Import-Graph-Scan ueber alle 'use client'-Einstiegspunkte.
+ */
+const SERVER_ONLY_NAMESPACES = new Set([
+  'HubIntros',
+  'HubFAQ',
+  'HubStudents',
+  'ThemeContent',
+  'ThemaPage',
+  'Meta',
+  'MetaDiscover',
+  'MetaMap',
+  'VenuePage',
+  'FestivalsPage',
+]);
+
 export function generateStaticParams() {
   return routing.locales.map(locale => ({ locale }));
 }
@@ -263,6 +282,21 @@ export default async function RootLayout({
   setRequestLocale(locale);
   const t = await getTranslations({ locale, namespace: 'Meta' });
   const messages = await getMessages({ locale });
+  // fn-17: NUR die client-seitig benoetigten Namespaces in den RSC-Payload.
+  // Der Katalog ist mit den SEO-Hubs von ~14 KB auf ~42 KB gewachsen; der
+  // Zuwachs ist reine Server-Copy (Hub-Intros, FAQ-Antworten, Meta-Texte),
+  // die nie eine Client-Komponente anfasst. Ungefiltert haette JEDE Seite
+  // ~23 KB zusaetzliches JSON im Payload — bei ~70 % Google-Traffic auf den
+  // Hub-Seiten die falsche Stelle zum Verschwenden.
+  //
+  // WARTUNG: Vor dem Aufnehmen eines Namespaces in diese Liste pruefen, dass
+  // ihn keine 'use client'-Komponente (auch nicht transitiv importiert) per
+  // useTranslations() liest — sonst wirft next-intl zur Laufzeit
+  // MISSING_MESSAGE. Im Zweifel drin lassen; die Liste ist eine Optimierung,
+  // keine Korrektheitsbedingung.
+  const clientMessages = Object.fromEntries(
+    Object.entries(messages).filter(([ns]) => !SERVER_ONLY_NAMESPACES.has(ns)),
+  );
   const websiteJsonLd = buildWebsiteJsonLd(locale, t('description'));
   const organizationJsonLd = buildOrganizationJsonLd(t('description'));
 
@@ -335,7 +369,7 @@ export default async function RootLayout({
           )}
       </head>
       <body className="antialiased">
-        <NextIntlClientProvider messages={messages}>
+        <NextIntlClientProvider messages={clientMessages}>
         {/*
           fn-15.5 round-2: page-transitions now use the CSS View
           Transition API. <RouteTransitions /> (client component) calls

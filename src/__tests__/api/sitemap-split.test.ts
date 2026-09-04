@@ -182,7 +182,16 @@ describe('GET /sitemap-events.xml — URL-Cap zaehlt emittierte URLs', () => {
   });
 });
 
-describe('GET /sitemap-core.xml — Paritaet + fail loudly', () => {
+/**
+ * Timeout hochgesetzt (fn-17 Rest): die Route importiert dynamisch den
+ * gesamten Gemeinde-Datensatz (~2 028 Eintraege) plus die Themen-Daten und
+ * emittiert seit den zweisprachigen Hubs beide Sprachvarianten. Isoliert
+ * laufen die 9 Faelle der Datei in 1,5 s; unter dem parallel ausgelasteten
+ * vitest-Pool riss der Default von 5 s reproduzierbar (2 Laeufe). Das ist
+ * Import- und Pool-Last, keine Laufzeit der Sitemap selbst — renderUrlset
+ * schafft 5 000 Eintraege mit Alternates in unter 50 ms.
+ */
+describe('GET /sitemap-core.xml — Paritaet + fail loudly', { timeout: 30_000 }, () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });

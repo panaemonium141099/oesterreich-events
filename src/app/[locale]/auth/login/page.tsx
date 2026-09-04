@@ -3,12 +3,14 @@
 import { Suspense } from 'react';
 
 import { useState, useEffect, useMemo, type FormEvent } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
-import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
+import { useTranslations } from 'next-intl';
+import { Link, useRouter } from '@/i18n/navigation';
 import { useAuth, isProfileComplete } from '@/lib/supabase/auth-context';
 import { trackEvent } from '@/lib/analytics';
 
 function LoginPage() {
+  const t = useTranslations('Auth');
   const router = useRouter();
   const searchParams = useSearchParams();
   const { user, profile, loading, signInWithGoogle, signInWithEmail } = useAuth();
@@ -71,7 +73,7 @@ function LoginPage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold text-center">Anmelden</h1>
+      <h1 className="text-2xl font-bold text-center">{t('loginTitle')}</h1>
 
       {/* OAuth Buttons */}
       <div className="space-y-3">
@@ -81,7 +83,7 @@ function LoginPage() {
           className="w-full flex items-center justify-center gap-3 rounded-xl bg-white text-gray-900 font-medium py-3 px-4 hover:bg-gray-100 transition-colors cursor-pointer"
         >
           <GoogleIcon />
-          Mit Google anmelden
+          {t('googleLogin')}
         </button>
 
         <div className="relative group">
@@ -91,10 +93,10 @@ function LoginPage() {
             className="w-full flex items-center justify-center gap-3 rounded-xl bg-white/10 text-white/30 font-medium py-3 px-4 cursor-not-allowed"
           >
             <AppleIcon />
-            Mit Apple anmelden
+            {t('appleLogin')}
           </button>
           <span className="absolute -top-8 left-1/2 -translate-x-1/2 bg-white/10 backdrop-blur text-white/60 text-xs rounded-lg px-3 py-1 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap">
-            Bald verfügbar
+            {t('comingSoon')}
           </span>
         </div>
       </div>
@@ -102,7 +104,7 @@ function LoginPage() {
       {/* Divider */}
       <div className="flex items-center gap-4">
         <div className="flex-1 h-px bg-white/10" />
-        <span className="text-white/30 text-sm">oder</span>
+        <span className="text-white/30 text-sm">{t('or')}</span>
         <div className="flex-1 h-px bg-white/10" />
       </div>
 
@@ -110,7 +112,7 @@ function LoginPage() {
       <form onSubmit={handleEmailLogin} className="space-y-4">
         <div>
           <label htmlFor="email" className="block text-sm text-white/50 mb-1.5">
-            E-Mail
+            {t('emailLabel')}
           </label>
           <input
             id="email"
@@ -120,13 +122,13 @@ function LoginPage() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             className="w-full rounded-xl bg-white/5 border border-white/10 text-white placeholder-white/20 px-4 py-3 outline-none focus:border-white/30 transition-colors"
-            placeholder="name@beispiel.at"
+            placeholder={t('emailPlaceholder')}
           />
         </div>
 
         <div>
           <label htmlFor="password" className="block text-sm text-white/50 mb-1.5">
-            Passwort
+            {t('passwordLabel')}
           </label>
           <div className="relative">
             <input
@@ -137,7 +139,7 @@ function LoginPage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className="w-full rounded-xl bg-white/5 border border-white/10 text-white placeholder-white/20 px-4 py-3 pr-12 outline-none focus:border-white/30 transition-colors"
-              placeholder="Passwort eingeben"
+              placeholder={t('passwordPlaceholder')}
             />
             <button
               type="button"
@@ -159,19 +161,19 @@ function LoginPage() {
           disabled={submitting}
           className="w-full rounded-xl border border-white/20 bg-white/5 text-white font-medium py-3 px-4 hover:bg-white/10 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer"
         >
-          {submitting ? <Spinner /> : 'Anmelden'}
+          {submitting ? <Spinner /> : t('loginSubmit')}
         </button>
       </form>
 
       {/* Links */}
       <div className="flex flex-col items-center gap-2 text-sm">
         <Link href="/auth/forgot-password" className="text-white/40 hover:text-white/70 transition-colors">
-          Passwort vergessen?
+          {t('forgotPassword')}
         </Link>
         <p className="text-white/30">
-          Noch kein Konto?{' '}
+          {t('noAccount')}{' '}
           <Link href={`/auth/register${passthrough}`} className="text-white/70 hover:text-white transition-colors underline underline-offset-2">
-            Registrieren
+            {t('registerLink')}
           </Link>
         </p>
       </div>

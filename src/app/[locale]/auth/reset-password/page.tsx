@@ -1,10 +1,12 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
+import { useRouter } from '@/i18n/navigation';
 import { createClient } from '@/lib/supabase/client';
 
 export default function ResetPasswordPage() {
+  const t = useTranslations('Auth');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -16,11 +18,11 @@ export default function ResetPasswordPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (password !== confirmPassword) {
-      setError('Passwörter stimmen nicht überein');
+      setError(t('errPasswordMismatchShort'));
       return;
     }
     if (password.length < 6) {
-      setError('Passwort muss mindestens 6 Zeichen haben');
+      setError(t('errPasswordMin6'));
       return;
     }
 
@@ -46,23 +48,23 @@ export default function ResetPasswordPage() {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
           </svg>
         </div>
-        <h2 className="text-xl font-semibold text-white mb-2">Passwort geändert!</h2>
-        <p className="text-white/40 text-sm">Du wirst weitergeleitet...</p>
+        <h2 className="text-xl font-semibold text-white mb-2">{t('resetSuccessTitle')}</h2>
+        <p className="text-white/40 text-sm">{t('resetSuccessText')}</p>
       </div>
     );
   }
 
   return (
     <div>
-      <h2 className="text-xl font-semibold text-white mb-2">Neues Passwort setzen</h2>
-      <p className="text-white/40 text-sm mb-8">Wähle ein neues Passwort für dein Konto.</p>
+      <h2 className="text-xl font-semibold text-white mb-2">{t('resetTitle')}</h2>
+      <p className="text-white/40 text-sm mb-8">{t('resetText')}</p>
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <input
           type="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          placeholder="Neues Passwort"
+          placeholder={t('resetNewPlaceholder')}
           required
           className="w-full px-4 py-3.5 rounded-xl bg-white/5 border border-white/10 text-white placeholder-white/30 focus:outline-none focus:border-white/30 transition-colors"
         />
@@ -70,7 +72,7 @@ export default function ResetPasswordPage() {
           type="password"
           value={confirmPassword}
           onChange={(e) => setConfirmPassword(e.target.value)}
-          placeholder="Passwort bestätigen"
+          placeholder={t('resetConfirmPlaceholder')}
           required
           className="w-full px-4 py-3.5 rounded-xl bg-white/5 border border-white/10 text-white placeholder-white/30 focus:outline-none focus:border-white/30 transition-colors"
         />
@@ -87,7 +89,7 @@ export default function ResetPasswordPage() {
           {loading ? (
             <div className="w-5 h-5 border-2 border-black/20 border-t-black rounded-full animate-spin" />
           ) : (
-            'Passwort ändern'
+            t('resetSubmit')
           )}
         </button>
       </form>

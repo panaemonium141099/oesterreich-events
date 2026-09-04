@@ -41,6 +41,30 @@ const FETCH_CHUNK = 500;
  */
 const GEMINI_TIMEOUT_MS = 25_000;
 
+/**
+ * Wartezeit vor dem Wiederholungsversuch (verdoppelt sich, siehe
+ * TranslateOptions.retryDelayMs). Ein sofortiger Retry fiel im Backfill in
+ * dasselbe Fehlerfenster wie der erste Versuch.
+ */
+const RETRY_DELAY_MS = 2_000;
+
+/**
+ * Verdichtet eine Fehlermeldung auf eine handvoll Kategorien, damit die
+ * Zusammenfassung eines Laufs mit 80 000 Events lesbar bleibt.
+ */
+export function errorBucket(reason: string): string {
+  const r = reason.toLowerCase();
+  if (r === 'timeout') return 'Timeout';
+  if (r.includes('429') || r.includes('quota') || r.includes('rate limit')) return 'Quota/Rate-Limit';
+  if (r.includes('finishreason=max_tokens')) return 'MAX_TOKENS (abgeschnittenes JSON)';
+  if (r.includes('finishreason=recitation')) return 'RECITATION (Textkopie erkannt)';
+  if (r.includes('finishreason=safety')) return 'SAFETY';
+  if (r.startsWith('finishreason=')) return reason;
+  if (r.includes('503') || r.includes('unavailable')) return 'Gemini nicht erreichbar';
+  if (r.includes('500') || r.includes('internal')) return 'Gemini 500';
+  return 'sonstiges: ' + reason.slice(0, 60);
+}
+
 export interface BatchCandidate {
   id: string;
   title: string | null;
@@ -72,6 +96,8 @@ export interface BatchResult extends BatchProgress {
   /** true, wenn wegen deadlineMs abgebrochen wurde. */
   stoppedByDeadline: boolean;
   durationMs: number;
+  /** Fehlerursachen nach Kategorie, absteigend nach Haeufigkeit. */
+  errorKinds: Array<{ reason: string; count: number }>;
 }
 
 /**
@@ -126,6 +152,7 @@ export async function runTranslationBatch(
 
   const progress: BatchProgress = { processed: 0, translated: 0, skipped: 0, failed: 0 };
   const attempted = new Set<string>();
+  const errorKinds = new Map<string, number>();
   let stoppedByDeadline = false;
 
   while (progress.processed < opts.limit) {
@@ -173,6 +200,11 @@ export async function runTranslationBatch(
           translation = await translateViaGemini(event.title, event.description, apiKey, {
             timeoutMs: GEMINI_TIMEOUT_MS,
             retries: 1,
+            retryDelayMs: RETRY_DELAY_MS,
+            onAttemptError: reason => {
+              const bucket = errorBucket(reason);
+              errorKinds.set(bucket, (errorKinds.get(bucket) ?? 0) + 1);
+            },
           });
         } catch {
           translation = null;
@@ -207,5 +239,12 @@ export async function runTranslationBatch(
     await Promise.all(Array.from({ length: concurrency }, () => worker()));
   }
 
-  return { ...progress, stoppedByDeadline, durationMs: Date.now() - startedAt };
+  return {
+    ...progress,
+    stoppedByDeadline,
+    durationMs: Date.now() - startedAt,
+    errorKinds: [...errorKinds.entries()]
+      .map(([reason, count]) => ({ reason, count }))
+      .sort((a, b) => b.count - a.count),
+  };
 }

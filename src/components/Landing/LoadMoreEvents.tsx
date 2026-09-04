@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useCallback } from 'react';
+import { useTranslations } from 'next-intl';
 import type { Event } from '@/types/events';
 import { EventListCard } from '@/components/Events/EventListCard';
 
@@ -22,6 +23,7 @@ export function LoadMoreEvents({
   initialCursor,
   hasMore: initialHasMore,
 }: LoadMoreEventsProps) {
+  const t = useTranslations('HubLanding');
   const [events, setEvents] = useState<Event[]>([]);
   const [cursor, setCursor] = useState<string | null>(initialCursor);
   const [hasMore, setHasMore] = useState(initialHasMore);
@@ -73,7 +75,7 @@ export function LoadMoreEvents({
             disabled={loading}
             className="px-6 py-2.5 rounded-full text-sm font-medium bg-white/5 text-white/60 border border-white/10 hover:bg-white/10 hover:text-white/80 transition-colors disabled:opacity-50"
           >
-            {loading ? 'Laden...' : 'Mehr Events laden'}
+            {loading ? t('loadingMore') : t('loadMore')}
           </button>
         </div>
       )}
