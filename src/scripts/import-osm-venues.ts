@@ -14,6 +14,7 @@
 import { readFileSync } from 'fs';
 import { join } from 'path';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
+import { isDirectRun } from './lib/is-direct-run';
 
 // ─── ENV LOADING ────────────────────────────────────────────────────────────
 try {
@@ -625,7 +626,13 @@ async function main() {
   }
 }
 
-main().catch((err) => {
-  console.error('Fatal error:', err);
-  process.exit(1);
-});
+// Nur ausfuehren, wenn dieses Skript der Entrypoint ist. Ohne den Guard
+// startet schon `import { elementToVenue } from './import-osm-venues'`
+// (z. B. aus dem Unit-Test) die echte Overpass-Abfrage samt Retry-Timern
+// und haelt den Vitest-Worker offen.
+if (isDirectRun(import.meta.url)) {
+  main().catch((err) => {
+    console.error('Fatal error:', err);
+    process.exit(1);
+  });
+}

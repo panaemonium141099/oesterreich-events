@@ -18,6 +18,7 @@ import { readFileSync } from 'fs';
 import { join } from 'path';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { jaroWinkler } from '../lib/dedup/jaro-winkler';
+import { isDirectRun } from './lib/is-direct-run';
 
 // ─── ENV LOADING ────────────────────────────────────────────────────────────
 try {
@@ -548,7 +549,13 @@ async function main() {
   }
 }
 
-main().catch((err) => {
-  console.error('Fatal error:', err);
-  process.exit(1);
-});
+// Nur ausfuehren, wenn dieses Skript der Entrypoint ist. Ohne den Guard
+// startet schon `import { haversineKm } from './backfill-venue-ids'`
+// (z. B. aus dem Unit-Test) echte Supabase-Queries ueber alle Venues und
+// Events und haelt den Vitest-Worker offen.
+if (isDirectRun(import.meta.url)) {
+  main().catch((err) => {
+    console.error('Fatal error:', err);
+    process.exit(1);
+  });
+}
