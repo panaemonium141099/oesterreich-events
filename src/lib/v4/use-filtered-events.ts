@@ -20,10 +20,12 @@
  */
 
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
+import { useLocale, useTranslations } from 'next-intl';
 import type { Event, EventFilters } from '@/types/events';
 import { readCache, writeCache } from '@/components/MapV3/eventsCache';
 import { BUNDESLAENDER, bundeslandToId, type Bundesland } from '@/lib/bundeslaender';
 import { displayDistrictName } from '@/lib/districtsAT';
+import { bundeslandDisplayName } from '@/lib/i18n/bundesland-names';
 import { fetchMapPointEvents, pointsEligible } from '@/lib/v4/map-points';
 
 export interface UseFilteredEventsOptions {
@@ -90,6 +92,10 @@ export function useFilteredEvents(
   options: UseFilteredEventsOptions = {},
 ): UseFilteredEventsReturn {
   const { mapPoints = false, lazyBatches = false } = options;
+  // fn-17: Locale-bewusstes scopeLabel — Bausteine kommen aus dem
+  // MapPage-Namespace (DE byte-identisch), Bundesland-Namen als Exonyme.
+  const locale = useLocale();
+  const tScope = useTranslations('MapPage');
   // Multi-bundesland selection. Source of truth — `primaryBundesland` is
   // the derived single value used for map bbox / flyTo / scope label.
   // ['all'] = no filter; ['wien','steiermark'] = both; etc.
@@ -506,19 +512,20 @@ export function useFilteredEvents(
   // Without (1) the headline of a kirtag-search read "Niederösterreich"
   // because of a stale scope — confusing.
   const scopeLabel = useMemo(() => {
-    if (filters.search && filters.search.trim()) return `„${filters.search.trim()}"`;
+    if (filters.search && filters.search.trim()) return tScope('scopeSearch', { term: filters.search.trim() });
     const districtList = filters.districts && filters.districts.length > 0
       ? filters.districts
       : filters.district ? [filters.district] : [];
     if (districtList.length === 1) return displayDistrictName(districtList[0]);
-    if (districtList.length > 1) return `${districtList.length} Bezirke`;
+    if (districtList.length > 1) return tScope('scopeDistricts', { count: districtList.length });
     const concrete = bundeslandIds.filter((b) => b !== 'all');
-    if (concrete.length === 0) return 'Österreich';
+    if (concrete.length === 0) return tScope('austria');
     if (concrete.length === 1) {
-      return BUNDESLAENDER.find((b) => b.id === concrete[0])?.name ?? concrete[0];
+      const name = BUNDESLAENDER.find((b) => b.id === concrete[0])?.name ?? concrete[0];
+      return locale === 'de' ? name : bundeslandDisplayName(concrete[0], locale);
     }
-    return `${concrete.length} Regionen`;
-  }, [bundeslandIds, filters.search, filters.districts, filters.district]);
+    return tScope('scopeRegions', { count: concrete.length });
+  }, [bundeslandIds, filters.search, filters.districts, filters.district, locale, tScope]);
 
   return {
     filters,

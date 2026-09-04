@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
-import Link from 'next/link';
+import { useTranslations } from 'next-intl';
+import { Link } from '@/i18n/navigation';
 import type { Event } from '@/types/events';
 import { EventListCard } from '@/components/Events/EventListCard';
 import { FilterChips, type FilterChip } from './FilterChips';
@@ -58,6 +59,7 @@ export function LandingPageShell({
   intro,
   searchCta,
 }: LandingPageShellProps) {
+  const t = useTranslations('HubLanding');
   // Cursor for pagination: last event's ID from server batch
   const lastEvent = events[events.length - 1];
   const initialCursor = lastEvent?.id ?? null;
@@ -113,7 +115,7 @@ export function LandingPageShell({
               <p className="mb-4">{intro.body}</p>
               {intro.tips && (
                 <p className="text-white/60 border-l-2 border-white/20 pl-4 italic">
-                  <span className="text-white/80 font-semibold not-italic">Insider-Tipp: </span>
+                  <span className="text-white/80 font-semibold not-italic">{t('insiderTip')} </span>
                   {intro.tips}
                 </p>
               )}
@@ -138,7 +140,7 @@ export function LandingPageShell({
           ) : (
             <div className="text-center py-16">
               <p className="text-white/40 text-sm">
-                Keine Events gefunden fur diesen Filter.
+                {t('noEventsForFilter')}
               </p>
             </div>
           )}

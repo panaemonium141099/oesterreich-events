@@ -1,9 +1,9 @@
 import type { Metadata } from 'next';
+import { bilingualAlternates } from '@/lib/seo/canonical';
 import { hasLocale } from 'next-intl';
 import { getTranslations } from 'next-intl/server';
 import { AppShell } from '@/components/Layout/AppShell';
 import { routing, type AppLocale } from '@/i18n/routing';
-import { localeAlternates } from '@/lib/i18n-seo';
 // fn-15.6: map-only CSS (mapbox/leaflet markers, popups, MapV3 chrome,
 // map-loading overlay) was extracted from globals.css and lives in
 // src/app/map-scope.css. Importing it here means it only ships on
@@ -21,7 +21,7 @@ export async function generateMetadata({
     ? rawLocale
     : routing.defaultLocale;
   const t = await getTranslations({ locale, namespace: 'MetaMap' });
-  const alternates = localeAlternates('/map', locale);
+  const alternates = bilingualAlternates('/map', locale);
 
   return {
     title: t('title'),

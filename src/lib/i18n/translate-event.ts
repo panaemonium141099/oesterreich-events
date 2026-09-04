@@ -92,6 +92,25 @@ export interface TranslateOptions {
    * und fällt bei Fehlschlag folgenlos auf Deutsch zurück.
    */
   retries?: number;
+  /**
+   * Wartezeit vor jedem Wiederholungsversuch, verdoppelt sich je Versuch.
+   *
+   * Gemessen im Backfill am 2026-09-04: bei Concurrency 20 lief eine
+   * Fehlerserie über ~470 aufeinanderfolgende Events, die sich von selbst
+   * wieder fing — ein zeitlich begrenztes Fenster auf Gemini-Seite, kein
+   * harter Deckel (25 parallele Test-Calls gingen währenddessen durch).
+   * Ein sofortiger Retry fällt in genau dasselbe Fenster; mit Backoff
+   * landet er dahinter. Default 0 — der Lazy-Pfad darf einen Render nicht
+   * verzögern.
+   */
+  retryDelayMs?: number;
+  /**
+   * Wird bei jedem gescheiterten Versuch gerufen. Ohne diesen Haken
+   * verschluckt der catch-Block die Ursache und ein Batch-Lauf meldet nur
+   * eine Zahl — genau die Situation, in der man wissen will, ob es Quota,
+   * Timeout oder kaputtes JSON war.
+   */
+  onAttemptError?: (reason: string, attempt: number) => void;
 }
 
 function withTimeout<T>(p: Promise<T>, ms: number): Promise<T | null> {
@@ -171,15 +190,29 @@ export async function translateViaGemini(
     },
   };
 
+  const retryDelayMs = options.retryDelayMs ?? 0;
+
   for (let attempt = 0; attempt < attempts; attempt++) {
+    if (attempt > 0 && retryDelayMs > 0) {
+      await new Promise(r => setTimeout(r, retryDelayMs * 2 ** (attempt - 1)));
+    }
+
     let resp: Awaited<ReturnType<typeof ai.models.generateContent>> | null = null;
+    let thrown: string | null = null;
     try {
       resp = await withTimeout(ai.models.generateContent(request), timeoutMs);
-    } catch {
-      resp = null;
+      if (resp === null) thrown = 'timeout';
+    } catch (err) {
+      thrown = err instanceof Error ? err.message : String(err);
     }
+
     const parsed = parseTranslation(resp?.text);
     if (parsed) return parsed;
+
+    options.onAttemptError?.(
+      thrown ?? `finishReason=${resp?.candidates?.[0]?.finishReason ?? 'unbekannt'}`,
+      attempt,
+    );
   }
   return null;
 }

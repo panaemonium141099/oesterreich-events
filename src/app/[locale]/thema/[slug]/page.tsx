@@ -19,20 +19,31 @@
  * Low-content guard: every v3 category has thousands of events Austria-
  * wide so we don't expect the noindex branch to trigger, but the logic
  * is in place defensively.
+ *
+ * fn-17: die SEO-Copy (title/seoTitle/description/heroText/bodyIntro)
+ * lebt jetzt lokalisiert im Message-Namespace `ThemeContent` (DE byte-
+ * identisch zu src/lib/themes/data.ts); Chrome-Strings unter `ThemaPage`.
  */
 
 import { notFound } from 'next/navigation';
-import Link from 'next/link';
+import { bilingualAlternates } from '@/lib/seo/canonical';
 import Image from 'next/image';
 import type { Metadata } from 'next';
 import { unstable_cache } from 'next/cache';
 import { createClient } from '@supabase/supabase-js';
+import { hasLocale } from 'next-intl';
+import { getTranslations, setRequestLocale } from 'next-intl/server';
 
 import { ALL_THEMES, getThemeBySlug, type Theme } from '@/lib/themes/data';
 import { buildEventUrlV2 } from '@/lib/utils/slugify';
 import { formatDateLong, formatTime } from '@/lib/utils/date';
 import { resolvePrimaryEventImage } from '@/lib/event-images';
-import { buildFAQPageSchema, faqForTheme } from '@/lib/seo/faq';
+import { buildFAQPageSchema, faqForTheme, type FAQTranslator } from '@/lib/seo/faq';
+import { Link } from '@/i18n/navigation';
+import { routing, type AppLocale } from '@/i18n/routing';
+import { bundeslandDisplayName } from '@/lib/i18n/bundesland-names';
+import { CATEGORY_MESSAGE_KEYS } from '@/lib/i18n/category-labels';
+import { dateLocaleFor } from '@/lib/i18n/date-locale';
 
 export const revalidate = 3600;
 // On-demand ISR — was build-time pre-rendered for all 12 themes,
@@ -43,6 +54,30 @@ export const revalidate = 3600;
 export const dynamicParams = true;
 export function generateStaticParams() {
   return [];
+}
+
+function resolveLocale(raw: string): AppLocale {
+  return hasLocale(routing.locales, raw) ? raw : routing.defaultLocale;
+}
+
+/** Lokalisierte SEO-Copy eines Themes aus dem ThemeContent-Namespace. */
+interface ThemeCopy {
+  title: string;
+  seoTitle: string;
+  description: string;
+  heroText: string;
+  bodyIntro: string;
+}
+
+async function loadThemeCopy(slug: string, locale: AppLocale): Promise<ThemeCopy> {
+  const tc = await getTranslations({ locale, namespace: 'ThemeContent' });
+  return {
+    title: tc(`${slug}.title`),
+    seoTitle: tc(`${slug}.seoTitle`),
+    description: tc(`${slug}.description`),
+    heroText: tc(`${slug}.heroText`),
+    bodyIntro: tc(`${slug}.bodyIntro`),
+  };
 }
 
 // ───────────────────────────────────────────────────────────────────────
@@ -150,30 +185,37 @@ const loadBundeslandCountsCached = unstable_cache(
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ slug: string }>;
+  params: Promise<{ locale: string; slug: string }>;
 }): Promise<Metadata> {
-  const { slug } = await params;
+  const { locale: rawLocale, slug } = await params;
+  const locale = resolveLocale(rawLocale);
   const theme = getThemeBySlug(slug);
-  if (!theme) return { title: 'Thema nicht gefunden' };
+  if (!theme) {
+    const tp = await getTranslations({ locale, namespace: 'ThemaPage' });
+    return { title: tp('notFound') };
+  }
 
+  const copy = await loadThemeCopy(theme.slug, locale);
   const events = await loadThemeEventsCached(theme.category);
-  const canonicalUrl = `https://lasstreffen.at/thema/${theme.slug}`;
+  // fn-17: Canonical zeigt auf die eigene Sprachversion, hreflang
+  // verweist wechselseitig (DE unpräfixiert, EN unter /en).
+  const alternates = bilingualAlternates(`/thema/${theme.slug}`, locale);
 
   const metadata: Metadata = {
-    title: { absolute: theme.seoTitle },
-    description: theme.description,
-    alternates: { canonical: canonicalUrl },
+    title: { absolute: copy.seoTitle },
+    description: copy.description,
+    alternates,
     openGraph: {
-      title: theme.seoTitle,
-      description: theme.description,
+      title: copy.seoTitle,
+      description: copy.description,
       type: 'website',
-      url: canonicalUrl,
+      url: alternates.canonical,
       images: theme.image ? [{ url: theme.image, width: 1200, height: 630 }] : undefined,
     },
     twitter: {
       card: 'summary_large_image',
-      title: theme.seoTitle,
-      description: theme.description,
+      title: copy.seoTitle,
+      description: copy.description,
       images: theme.image ? [theme.image] : undefined,
     },
   };
@@ -188,20 +230,30 @@ export async function generateMetadata({
 // JSON-LD
 // ───────────────────────────────────────────────────────────────────────
 
-function buildJsonLd(theme: Theme, events: ThemeEvent[], totalEvents: number): string {
-  const canonicalUrl = `https://lasstreffen.at/thema/${theme.slug}`;
+function buildJsonLd(
+  theme: Theme,
+  copy: ThemeCopy,
+  events: ThemeEvent[],
+  totalEvents: number,
+  locale: AppLocale,
+  tFaq: FAQTranslator,
+  categoryDisplay: string,
+  crumbThemes: string,
+): string {
+  const localePrefix = locale === 'en' ? '/en' : '';
+  const canonicalUrl = `https://lasstreffen.at${localePrefix}/thema/${theme.slug}`;
 
   const itemList = {
     '@type': 'ItemList',
     '@id': `${canonicalUrl}#itemlist`,
-    name: theme.title,
-    description: theme.description,
+    name: copy.title,
+    description: copy.description,
     url: canonicalUrl,
     numberOfItems: events.length,
     itemListElement: events.slice(0, 24).map((e, idx) => ({
       '@type': 'ListItem',
       position: idx + 1,
-      url: `https://lasstreffen.at${buildEventUrlV2(e)}`,
+      url: `https://lasstreffen.at${localePrefix}${buildEventUrlV2(e)}`,
       name: e.title,
     })),
   };
@@ -210,32 +262,34 @@ function buildJsonLd(theme: Theme, events: ThemeEvent[], totalEvents: number): s
     '@type': 'BreadcrumbList',
     '@id': `${canonicalUrl}#breadcrumbs`,
     itemListElement: [
-      { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://lasstreffen.at' },
-      { '@type': 'ListItem', position: 2, name: 'Themen', item: 'https://lasstreffen.at/thema' },
-      { '@type': 'ListItem', position: 3, name: theme.title, item: canonicalUrl },
+      { '@type': 'ListItem', position: 1, name: 'Home', item: localePrefix ? `https://lasstreffen.at${localePrefix}` : 'https://lasstreffen.at' },
+      { '@type': 'ListItem', position: 2, name: crumbThemes, item: `https://lasstreffen.at${localePrefix}/thema` },
+      { '@type': 'ListItem', position: 3, name: copy.title, item: canonicalUrl },
     ],
   };
 
   const collection = {
     '@type': 'CollectionPage',
     '@id': `${canonicalUrl}#page`,
-    name: theme.seoTitle,
-    description: theme.description,
+    name: copy.seoTitle,
+    description: copy.description,
     url: canonicalUrl,
-    inLanguage: 'de-AT',
-    isPartOf: { '@id': 'https://lasstreffen.at/#website' },
+    inLanguage: locale === 'en' ? 'en' : 'de-AT',
+    isPartOf: { '@id': `https://lasstreffen.at${localePrefix}/#website` },
     about: { '@id': `${canonicalUrl}#itemlist` },
   };
 
   // Category-specific FAQ (4-5 Q/A pairs). Boosts featured-snippet and
   // AI-citation eligibility. Skipped when theme has <3 events so we don't
   // emit a FAQPage for a near-empty hub (Google's threshold).
-  const heroNoun = theme.title.split(' — ')[0]; // "Konzerte, Festivals & Live-Musik" → keeps
+  const heroNoun = copy.title.split(' — ')[0]; // "Konzerte, Festivals & Live-Musik" → keeps
   const faqEntries = faqForTheme({
     slug: theme.slug,
-    category: theme.category,
+    category: categoryDisplay,
     heroNoun: heroNoun.toLowerCase(),
     eventCount: totalEvents,
+    t: tFaq,
+    numberLocale: dateLocaleFor(locale),
   });
   const faqPage = buildFAQPageSchema(faqEntries);
 
@@ -254,22 +308,43 @@ function buildJsonLd(theme: Theme, events: ThemeEvent[], totalEvents: number): s
 export default async function ThemePage({
   params,
 }: {
-  params: Promise<{ slug: string }>;
+  params: Promise<{ locale: string; slug: string }>;
 }) {
-  const { slug } = await params;
+  const { locale: rawLocale, slug } = await params;
+  const locale = resolveLocale(rawLocale);
+  setRequestLocale(locale);
   const theme = getThemeBySlug(slug);
   if (!theme) notFound();
 
-  const [events, blCounts] = await Promise.all([
+  const [copy, tp, tc, tFaq, tCat, events, blCounts] = await Promise.all([
+    loadThemeCopy(theme.slug, locale),
+    getTranslations({ locale, namespace: 'ThemaPage' }),
+    getTranslations({ locale, namespace: 'ThemeContent' }),
+    getTranslations({ locale, namespace: 'HubFAQ' }),
+    getTranslations({ locale, namespace: 'Categories' }),
     loadThemeEventsCached(theme.category),
     loadBundeslandCountsCached(theme.category),
   ]);
 
+  const numberLocale = dateLocaleFor(locale);
+  const categoryDisplay = CATEGORY_MESSAGE_KEYS[theme.category]
+    ? tCat(CATEGORY_MESSAGE_KEYS[theme.category])
+    : theme.category;
   const totalEvents = Object.values(blCounts).reduce((a, b) => a + b, 0);
-  const jsonLd = buildJsonLd(theme, events, totalEvents);
+  const jsonLd = buildJsonLd(
+    theme,
+    copy,
+    events,
+    totalEvents,
+    locale,
+    tFaq as FAQTranslator,
+    categoryDisplay,
+    tp('crumbThemes'),
+  );
 
   // Other themes — small "Verwandte Themen" block at the bottom for cross-link density.
   const otherThemes = ALL_THEMES.filter(t => t.slug !== theme.slug);
+  const themeNoun = copy.title.split(' — ')[0];
 
   return (
     <>
@@ -278,18 +353,18 @@ export default async function ThemePage({
         <div className="max-w-6xl mx-auto px-4 py-8">
           {/* Breadcrumb */}
           <nav className="text-sm text-white/50 mb-4" aria-label="Breadcrumb">
-            <Link href="/" className="hover:text-white/80">Home</Link>
+            <Link href="/" className="hover:text-white/80">{tp('crumbHome')}</Link>
             <span className="mx-2">›</span>
-            <Link href="/" className="hover:text-white/80">Themen</Link>
+            <Link href="/" className="hover:text-white/80">{tp('crumbThemes')}</Link>
             <span className="mx-2">›</span>
-            <span>{theme.title}</span>
+            <span>{copy.title}</span>
           </nav>
 
           {/* Hero */}
           <header className="relative mb-10 rounded-2xl overflow-hidden aspect-[21/9] md:aspect-[21/7]">
             <Image
               src={theme.image}
-              alt={theme.title}
+              alt={copy.title}
               fill
               sizes="(max-width: 768px) 100vw, 75vw"
               className="object-cover"
@@ -298,13 +373,13 @@ export default async function ThemePage({
             <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent" />
             <div className="absolute inset-x-0 bottom-0 p-6 md:p-10">
               <p className="text-xs md:text-sm font-medium uppercase tracking-[0.22em] text-white/60 mb-2">
-                Thema {totalEvents > 0 && <>· <span className="tabular-nums">{totalEvents.toLocaleString('de-AT')}</span> Events</>}
+                {tp('eyebrow')} {totalEvents > 0 && <>· <span className="tabular-nums">{totalEvents.toLocaleString(numberLocale)}</span> {tp('eyebrowEvents')}</>}
               </p>
               <h1 className="text-3xl md:text-5xl font-extrabold leading-tight tracking-tight mb-3 max-w-3xl">
-                {theme.title}
+                {copy.title}
               </h1>
               <p className="text-white/75 text-sm md:text-base max-w-2xl leading-relaxed">
-                {theme.heroText}
+                {copy.heroText}
               </p>
             </div>
           </header>
@@ -312,7 +387,7 @@ export default async function ThemePage({
           {/* Intro */}
           <section className="mb-10 max-w-3xl">
             <p className="text-white/80 text-[15px] leading-relaxed">
-              {theme.bodyIntro}
+              {copy.bodyIntro}
             </p>
           </section>
 
@@ -321,16 +396,16 @@ export default async function ThemePage({
             <section className="mb-14">
               <div className="flex items-baseline justify-between mb-4">
                 <h2 className="text-xl md:text-2xl font-bold">
-                  Top-Events
+                  {tp('topEvents')}
                   <span className="text-white/40 text-sm ml-2 font-normal">
-                    · {events.length} ausgewählt
+                    {tp('selectedCount', { count: events.length })}
                   </span>
                 </h2>
                 <Link
                   href={`/map?category=${encodeURIComponent(theme.category)}`}
                   className="text-sm text-white/60 hover:text-white"
                 >
-                  Alle auf der Karte →
+                  {tp('allOnMap')}
                 </Link>
               </div>
 
@@ -355,15 +430,15 @@ export default async function ThemePage({
                       </div>
                       <div className="p-3">
                         <div className="text-xs text-white/50 mb-1">
-                          {formatDateLong(e.start_date)}
-                          {formatTime(e.start_date) && ` · ${formatTime(e.start_date)}`}
+                          {formatDateLong(e.start_date, numberLocale)}
+                          {formatTime(e.start_date, numberLocale) && ` · ${formatTime(e.start_date, numberLocale)}`}
                         </div>
                         <div className="font-semibold leading-snug line-clamp-2 mb-1">
                           {e.title}
                         </div>
                         <div className="text-xs text-white/50">
                           {e.location_name ?? e.address ?? '—'}
-                          {e.bundesland && ` · ${e.bundesland}`}
+                          {e.bundesland && ` · ${bundeslandDisplayName(e.bundesland, locale)}`}
                           {blSlug && e.price_text && ' · '}
                           {e.price_text && <span>{e.price_text}</span>}
                         </div>
@@ -378,11 +453,10 @@ export default async function ThemePage({
           {/* Bundesland breakdown — internal link density */}
           <section className="mb-14">
             <h2 className="text-xl md:text-2xl font-bold mb-3">
-              {theme.title.split(' — ')[0]} nach Bundesland
+              {tp('byBundesland', { noun: themeNoun })}
             </h2>
             <p className="text-sm text-white/50 mb-5 max-w-2xl">
-              Events in einem bestimmten Bundesland? Klick durch — jede Region hat
-              eine eigene, täglich aktualisierte Agenda.
+              {tp('byBundeslandText')}
             </p>
 
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 gap-3">
@@ -396,9 +470,9 @@ export default async function ThemePage({
                       href={`/${blSlug}/${theme.slug}`}
                       className="flex items-baseline justify-between px-4 py-3 rounded-xl bg-white/5 border border-white/10 hover:border-white/25 transition-colors"
                     >
-                      <span className="font-medium">{bl}</span>
+                      <span className="font-medium">{bundeslandDisplayName(bl, locale)}</span>
                       <span className="text-sm text-white/50 tabular-nums">
-                        {count.toLocaleString('de-AT')}
+                        {count.toLocaleString(numberLocale)}
                       </span>
                     </Link>
                   );
@@ -408,10 +482,9 @@ export default async function ThemePage({
 
           {/* Related themes */}
           <section className="mb-14">
-            <h2 className="text-xl md:text-2xl font-bold mb-3">Andere Themen</h2>
+            <h2 className="text-xl md:text-2xl font-bold mb-3">{tp('otherThemes')}</h2>
             <p className="text-sm text-white/50 mb-5 max-w-2xl">
-              Falls {theme.title.split(' — ')[0]} gerade nicht passt — hier sind
-              die anderen großen Event-Kategorien auf LassTreffen.at.
+              {tp('otherThemesText', { noun: themeNoun })}
             </p>
             <div className="flex flex-wrap gap-2">
               {otherThemes.map(t => (
@@ -420,7 +493,7 @@ export default async function ThemePage({
                   href={`/thema/${t.slug}`}
                   className="px-4 py-2 rounded-full bg-white/5 border border-white/10 hover:border-white/25 text-sm text-white/80 transition-colors"
                 >
-                  {t.title.split(' — ')[0]}
+                  {tc(`${t.slug}.title`).split(' — ')[0]}
                 </Link>
               ))}
             </div>
@@ -429,18 +502,13 @@ export default async function ThemePage({
           {/* SEO footer */}
           <section className="text-sm text-white/50 leading-relaxed border-t border-white/10 pt-6 max-w-3xl">
             <p className="mb-2">
-              <strong className="text-white/70">{theme.title.split(' — ')[0]}</strong>{' '}
-              ist eine von 12 Haupt-Kategorien auf LassTreffen.at, Österreichs
-              größter Event-Aggregator. Die Termine werden täglich aus offiziellen
-              Ticket-Anbietern, Gemeinde-Kalendern, Tourismus-Portalen und
-              Veranstalter-Feeds zusammengeführt und dupliziert-gefiltert.
+              <strong className="text-white/70">{themeNoun}</strong>{' '}
+              {tp('footerP1')}
             </p>
             <p>
-              Alle Events sind auf einer interaktiven Karte verortet und nach
-              Bundesland, Bezirk oder Gemeinde filterbar. Für tägliche Empfehlungen
-              in deiner Nähe lohnt der Blick auf die{' '}
+              {tp('footerP2')}{' '}
               <Link href="/map" className="underline hover:text-white/80">
-                Event-Karte
+                {tp('footerP2Link')}
               </Link>.
             </p>
           </section>

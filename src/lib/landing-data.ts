@@ -6,6 +6,7 @@
  */
 
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
+import { getTranslations } from 'next-intl/server';
 import type { Event } from '@/types/events';
 import {
   CATEGORY_SLUGS,
@@ -20,11 +21,25 @@ import {
 import { BUNDESLAENDER } from './bundeslaender';
 import type { FilterChip } from '@/components/Landing/FilterChips';
 import type { LinkGroup } from '@/components/Landing/InternalLinks';
-import { BUNDESLAND_INTROS, STADT_INTROS } from '@/content/landing-intros';
-import { buildFAQPageSchema, faqForBundesland } from './seo/faq';
+import { STADT_INTROS } from '@/content/landing-intros';
+import { buildFAQPageSchema, faqForBundesland, type FAQEntry } from './seo/faq';
 import { STADT_TO_GEMEINDE } from './hubs/city-hubs';
+import { bundeslandDisplayName } from './i18n/bundesland-names';
+import { CATEGORY_MESSAGE_KEYS } from './i18n/category-labels';
+import type { AppLocale } from '@/i18n/routing';
 
 const BASE_URL = 'https://lasstreffen.at';
+
+/**
+ * fn-17: Übersetzer-Handle wie von `getTranslations()` geliefert.
+ * Die DE-Messages (HubLanding/HubFAQ/HubIntros in messages/de.json) sind
+ * byte-identisch zu den früher hier inlined gebauten Strings — deutsche
+ * Seiten rendern unverändert; nur /en bekommt englische Texte.
+ */
+type Translator = ((key: string, values?: Record<string, string | number>) => string) & {
+  /** next-intl: true, wenn der Key im geladenen Katalog existiert. */
+  has: (key: string) => boolean;
+};
 
 const PAGE_SIZE = 20;
 const MIN_QUALITY = 40;
@@ -68,10 +83,23 @@ export async function loadBundeslandPage(
   bundesland: string,
   category: string | null,
   timeFilter: 'heute' | 'wochenende' | null,
+  locale: AppLocale = 'de',
 ): Promise<LandingPageData | null> {
   if (!isValidBundesland(bundesland)) return null;
 
-  const blName = getBundeslandName(bundesland)!;
+  // fn-17: alle sichtbaren Strings kommen aus messages/<locale>.json.
+  // DE-Werte sind byte-identisch zur vorherigen Inline-Fassung.
+  const t = (await getTranslations({ locale, namespace: 'HubLanding' })) as Translator;
+  const tCat = (await getTranslations({ locale, namespace: 'Categories' })) as Translator;
+  const tFaq = (await getTranslations({ locale, namespace: 'HubFAQ' })) as Translator;
+
+  const blName = locale === 'de'
+    ? getBundeslandName(bundesland)!
+    : bundeslandDisplayName(bundesland, locale);
+  // Localized category display name (DB value stays German everywhere else).
+  const catDisplay = category
+    ? (CATEGORY_MESSAGE_KEYS[category] ? tCat(CATEGORY_MESSAGE_KEYS[category]) : category)
+    : null;
   const supabase = getReadClient();
 
   // Build query
@@ -85,18 +113,24 @@ export async function loadBundeslandPage(
 
   // Build page elements
   const basePath = `/${bundesland}`;
-  const title = buildTitle(blName, category, timeFilter);
-  const subtitle = `${totalCount} Veranstaltung${totalCount !== 1 ? 'en' : ''}`;
+  const title = buildTitle(blName, catDisplay, timeFilter, t);
+  const subtitle = t('subtitle', { count: totalCount });
 
-  const breadcrumbs = buildBreadcrumbs(blName, basePath, category, timeFilter);
-  const filterChips = buildFilterChips(basePath, category, timeFilter);
-  const internalLinks = buildBundeslandLinks(bundesland, blName, category);
+  const breadcrumbs = buildBreadcrumbs(blName, basePath, catDisplay, category, timeFilter, t);
+  const filterChips = buildFilterChips(basePath, category, timeFilter, t, tCat);
+  const internalLinks = buildBundeslandLinks(bundesland, blName, category, locale, t, tCat);
   // Canonical pathname for JSON-LD URLs — matches what generateMetadata
   // returns and what the route actually resolves to.
   const pathname = [basePath, category ? getCategorySlug(category) : null, timeFilter]
     .filter((p): p is string => Boolean(p))
     .join('/');
-  const metaDescription = `Entdecke ${totalCount} Events in ${blName}${timeFilter ? ` ${timeFilter}` : ''}${category ? ` — ${category}` : ''}. Alle Veranstaltungen auf einen Blick.`;
+  let metaExtra = '';
+  if (timeFilter) {
+    metaExtra += t(timeFilter === 'heute' ? 'metaExtraToday' : 'metaExtraWeekend');
+  }
+  if (catDisplay) metaExtra += ` — ${catDisplay}`;
+  const metaDescription = t('metaDescription', { count: totalCount, name: blName, extra: metaExtra });
+  const faqEntries = faqForBundesland({ where: blName, category: catDisplay, timeFilter, t: tFaq });
   const jsonLd = buildJsonLd({
     title,
     description: metaDescription,
@@ -104,9 +138,8 @@ export async function loadBundeslandPage(
     events,
     pathname: pathname.startsWith('/') ? pathname : `/${pathname}`,
     breadcrumbs,
-    where: blName,
-    category,
-    timeFilter,
+    faqEntries,
+    locale,
   });
   const paginationParams = buildPaginationParams({
     bundesland,
@@ -124,7 +157,24 @@ export async function loadBundeslandPage(
   // Only the ROOT page for each Bundesland carries the editorial intro
   // (no category, no time filter). Sub-views inherit from the crawlable
   // parent — avoids duplicate-content across the hundred permutations.
-  const intro = (!category && !timeFilter) ? BUNDESLAND_INTROS[bundesland] : undefined;
+  // fn-17: die kuratierten Intros leben jetzt in messages/<locale>.json
+  // (Namespace HubIntros, DE byte-identisch zu src/content/landing-intros.ts).
+  let intro: LandingPageData['intro'];
+  if (!category && !timeFilter) {
+    const tIntro = (await getTranslations({ locale, namespace: 'HubIntros' })) as Translator;
+    // has()-Guard: NICHT jeder gueltige Bundesland-Slug hat ein kuratiertes
+    // Intro — `at-de-ch` ist eine Pseudo-Region (src/lib/bundeslaender.ts) und
+    // war schon im alten BUNDESLAND_INTROS-Objekt nicht enthalten. Ohne den
+    // Guard rendert next-intl den rohen Key ("HubIntros.at-de-ch.lead") als
+    // sichtbaren Text. Fehlendes Intro = gar kein Intro-Block, exakt wie vorher.
+    if (tIntro.has(`${bundesland}.lead`)) {
+      intro = {
+        lead: tIntro(`${bundesland}.lead`),
+        body: tIntro(`${bundesland}.body`),
+        tips: tIntro.has(`${bundesland}.tips`) ? tIntro(`${bundesland}.tips`) : undefined,
+      };
+    }
+  }
 
   return {
     events,
@@ -150,7 +200,14 @@ export async function loadStadtPage(
   cityConfig: LandingCity,
   category: string | null,
   timeFilter: 'heute' | 'wochenende' | null,
+  locale: AppLocale = 'de',
 ): Promise<LandingPageData> {
+  const t = (await getTranslations({ locale, namespace: 'HubLanding' })) as Translator;
+  const tCat = (await getTranslations({ locale, namespace: 'Categories' })) as Translator;
+  const tFaq = (await getTranslations({ locale, namespace: 'HubFAQ' })) as Translator;
+  const catDisplay = category
+    ? (CATEGORY_MESSAGE_KEYS[category] ? tCat(CATEGORY_MESSAGE_KEYS[category]) : category)
+    : null;
   const supabase = getReadClient();
   const sortByDate = timeFilter === 'heute';
 
@@ -164,21 +221,29 @@ export async function loadStadtPage(
   });
 
   const basePath = `/stadt/${cityConfig.slug}`;
-  const title = buildTitle(cityConfig.name, category, timeFilter);
-  const subtitle = `${totalCount} Veranstaltung${totalCount !== 1 ? 'en' : ''}`;
+  const title = buildTitle(cityConfig.name, catDisplay, timeFilter, t);
+  const subtitle = t('subtitle', { count: totalCount });
 
   const breadcrumbs = buildBreadcrumbs(
     cityConfig.name,
     basePath,
+    catDisplay,
     category,
     timeFilter,
+    t,
   );
-  const filterChips = buildFilterChips(basePath, category, timeFilter);
-  const internalLinks = buildStadtLinks(cityConfig, category);
+  const filterChips = buildFilterChips(basePath, category, timeFilter, t, tCat);
+  const internalLinks = buildStadtLinks(cityConfig, category, locale, t, tCat);
   const pathname = [basePath, category ? getCategorySlug(category) : null, timeFilter]
     .filter((p): p is string => Boolean(p))
     .join('/');
-  const metaDescription = `Entdecke ${totalCount} Events in ${cityConfig.name}${timeFilter ? ` ${timeFilter}` : ''}${category ? ` — ${category}` : ''}. Alle Veranstaltungen auf einen Blick.`;
+  let metaExtra = '';
+  if (timeFilter) {
+    metaExtra += t(timeFilter === 'heute' ? 'metaExtraToday' : 'metaExtraWeekend');
+  }
+  if (catDisplay) metaExtra += ` — ${catDisplay}`;
+  const metaDescription = t('metaDescription', { count: totalCount, name: cityConfig.name, extra: metaExtra });
+  const faqEntries = faqForBundesland({ where: cityConfig.name, category: catDisplay, timeFilter, t: tFaq });
   const jsonLd = buildJsonLd({
     title,
     description: metaDescription,
@@ -186,9 +251,8 @@ export async function loadStadtPage(
     events,
     pathname: pathname.startsWith('/') ? pathname : `/${pathname}`,
     breadcrumbs,
-    where: cityConfig.name,
-    category,
-    timeFilter,
+    faqEntries,
+    locale,
   });
   const paginationParams = buildPaginationParams({
     bundesland:
@@ -314,19 +378,20 @@ async function queryEvents(
 
 function buildTitle(
   locationName: string,
-  category: string | null,
+  categoryDisplay: string | null,
   timeFilter: string | null,
+  t: Translator,
 ): string {
   let title = '';
-  if (category) {
-    title = `${category} in ${locationName}`;
+  if (categoryDisplay) {
+    title = t('titleCategory', { category: categoryDisplay, name: locationName });
   } else {
-    title = `Events in ${locationName}`;
+    title = t('titleEvents', { name: locationName });
   }
   if (timeFilter === 'heute') {
-    title += ' heute';
+    title += t('suffixToday');
   } else if (timeFilter === 'wochenende') {
-    title += ' am Wochenende';
+    title += t('suffixWeekend');
   }
   return title;
 }
@@ -334,25 +399,27 @@ function buildTitle(
 function buildBreadcrumbs(
   locationName: string,
   basePath: string,
+  categoryDisplay: string | null,
   category: string | null,
   timeFilter: string | null,
+  t: Translator,
 ): { label: string; href?: string }[] {
   const crumbs: { label: string; href?: string }[] = [
-    { label: 'Home', href: '/' },
+    { label: t('crumbHome'), href: '/' },
     { label: locationName, href: category || timeFilter ? basePath : undefined },
   ];
 
   if (category) {
     const slug = getCategorySlug(category);
     crumbs.push({
-      label: category,
+      label: categoryDisplay ?? category,
       href: timeFilter ? `${basePath}/${slug}` : undefined,
     });
   }
 
   if (timeFilter) {
     crumbs.push({
-      label: timeFilter === 'heute' ? 'Heute' : 'Wochenende',
+      label: timeFilter === 'heute' ? t('crumbToday') : t('crumbWeekend'),
     });
   }
 
@@ -368,34 +435,36 @@ function buildFilterChips(
   basePath: string,
   activeCategory: string | null,
   activeTimeFilter: string | null,
+  t: Translator,
+  tCat: Translator,
 ): FilterChip[] {
   const chips: FilterChip[] = [];
 
   // Time chips
   chips.push({
-    label: 'Alle',
+    label: t('chipAll'),
     href: basePath,
     active: !activeCategory && !activeTimeFilter,
   });
   chips.push({
-    label: 'Heute',
+    label: t('chipToday'),
     href: activeCategory
       ? `${basePath}/${getCategorySlug(activeCategory)}/heute`
       : `${basePath}/heute`,
     active: activeTimeFilter === 'heute',
   });
   chips.push({
-    label: 'Wochenende',
+    label: t('chipWeekend'),
     href: activeCategory
       ? `${basePath}/${getCategorySlug(activeCategory)}/wochenende`
       : `${basePath}/wochenende`,
     active: activeTimeFilter === 'wochenende',
   });
 
-  // Category chips
+  // Category chips (label localized, URL slug + active-check on DB name)
   for (const [slug, name] of CATEGORY_SLUGS) {
     chips.push({
-      label: name,
+      label: CATEGORY_MESSAGE_KEYS[name] ? tCat(CATEGORY_MESSAGE_KEYS[name]) : name,
       href: activeTimeFilter
         ? `${basePath}/${slug}/${activeTimeFilter}`
         : `${basePath}/${slug}`,
@@ -410,15 +479,18 @@ function buildBundeslandLinks(
   currentBundesland: string,
   blName: string,
   activeCategory: string | null,
+  locale: AppLocale,
+  t: Translator,
+  tCat: Translator,
 ): LinkGroup[] {
   const groups: LinkGroup[] = [];
 
   // Categories in same Bundesland
   const categoryLinks = [...CATEGORY_SLUGS].map(([slug, name]) => ({
-    label: name,
+    label: CATEGORY_MESSAGE_KEYS[name] ? tCat(CATEGORY_MESSAGE_KEYS[name]) : name,
     href: `/${currentBundesland}/${slug}`,
   }));
-  groups.push({ title: `Mehr in ${blName}`, links: categoryLinks });
+  groups.push({ title: t('linksMoreIn', { name: blName }), links: categoryLinks });
 
   // Cities — link to the canonical /gemeinde city hubs. The old /stadt URLs
   // now 301-redirect there; linking direct avoids the redirect hop and keeps
@@ -430,17 +502,17 @@ function buildBundeslandLinks(
     href: `/gemeinde/${STADT_TO_GEMEINDE[c.slug] ?? c.slug}`,
   }));
   if (cityLinks.length > 0) {
-    groups.push({ title: 'Stadte', links: cityLinks });
+    groups.push({ title: t('linksCities'), links: cityLinks });
   }
 
   // Other Bundeslaender
   const otherBl = BUNDESLAENDER.filter(
     (b) => b.id !== 'all' && b.id !== currentBundesland,
   ).map((b) => ({
-    label: b.name,
+    label: locale === 'de' ? b.name : bundeslandDisplayName(b.id, locale),
     href: `/${b.id}${activeCategory ? `/${getCategorySlug(activeCategory)}` : ''}`,
   }));
-  groups.push({ title: 'Andere Regionen', links: otherBl });
+  groups.push({ title: t('linksOtherRegions'), links: otherBl });
 
   return groups;
 }
@@ -448,15 +520,18 @@ function buildBundeslandLinks(
 function buildStadtLinks(
   currentCity: LandingCity,
   activeCategory: string | null,
+  locale: AppLocale,
+  t: Translator,
+  tCat: Translator,
 ): LinkGroup[] {
   const groups: LinkGroup[] = [];
 
   // Categories in same city
   const categoryLinks = [...CATEGORY_SLUGS].map(([slug, name]) => ({
-    label: name,
+    label: CATEGORY_MESSAGE_KEYS[name] ? tCat(CATEGORY_MESSAGE_KEYS[name]) : name,
     href: `/stadt/${currentCity.slug}/${slug}`,
   }));
-  groups.push({ title: `Mehr in ${currentCity.name}`, links: categoryLinks });
+  groups.push({ title: t('linksMoreIn', { name: currentCity.name }), links: categoryLinks });
 
   // Other cities
   const otherCities = LANDING_CITIES.filter(
@@ -471,7 +546,7 @@ function buildStadtLinks(
 
   // Bundeslaender
   const blLinks = BUNDESLAENDER.filter((b) => b.id !== 'all').map((b) => ({
-    label: b.name,
+    label: locale === 'de' ? b.name : bundeslandDisplayName(b.id, locale),
     href: `/${b.id}${activeCategory ? `/${getCategorySlug(activeCategory)}` : ''}`,
   }));
   groups.push({ title: 'Regionen', links: blLinks });
@@ -499,12 +574,14 @@ function buildJsonLd(params: {
   events: Event[];
   pathname: string;                                            // "/wien" or "/stadt/graz/musik/heute"
   breadcrumbs: { label: string; href?: string }[];
-  where: string;                                               // "Wien" | "Graz"
-  category: string | null;
-  timeFilter: 'heute' | 'wochenende' | null;
+  faqEntries: FAQEntry[];
+  locale: AppLocale;
 }): object {
-  const { title, description, totalCount, events, pathname, breadcrumbs, where, category, timeFilter } = params;
-  const pageUrl = `${BASE_URL}${pathname}`;
+  const { title, description, totalCount, events, pathname, breadcrumbs, faqEntries, locale } = params;
+  // fn-17: EN-Seiten leben unter /en — Canonical-/Breadcrumb-URLs und
+  // inLanguage müssen die eigene Sprachversion referenzieren.
+  const localePrefix = locale === 'en' ? '/en' : '';
+  const pageUrl = `${BASE_URL}${localePrefix}${pathname}`;
 
   const itemList = {
     '@type': 'ItemList',
@@ -534,8 +611,8 @@ function buildJsonLd(params: {
     url: pageUrl,
     name: title,
     description,
-    inLanguage: 'de-AT',
-    isPartOf: { '@id': `${BASE_URL}/#website` }, // matches root layout WebSite
+    inLanguage: locale === 'en' ? 'en' : 'de-AT',
+    isPartOf: { '@id': `${BASE_URL}${localePrefix}/#website` }, // matches root layout WebSite
     about: { '@id': `${pageUrl}#itemlist` },
   };
 
@@ -544,17 +621,18 @@ function buildJsonLd(params: {
     '@type': 'BreadcrumbList',
     '@id': `${pageUrl}#breadcrumbs`,
     itemListElement: [
-      { '@type': 'ListItem', position: 1, name: 'Home', item: BASE_URL },
+      { '@type': 'ListItem', position: 1, name: 'Home', item: `${BASE_URL}${localePrefix}` },
       ...breadcrumbs.map((b, idx) => ({
         '@type': 'ListItem',
         position: idx + 2,
         name: b.label,
-        ...(b.href ? { item: `${BASE_URL}${b.href}` } : {}),
+        ...(b.href
+          ? { item: `${BASE_URL}${b.href === '/' ? (localePrefix || '/') : `${localePrefix}${b.href}`}` }
+          : {}),
       })),
     ],
   };
 
-  const faqEntries = faqForBundesland({ where, category, timeFilter });
   const faqPage = buildFAQPageSchema(faqEntries);
 
   return {

@@ -58,10 +58,10 @@ export function formatDate(dateStr: string): string {
  * Format a date string for display in event detail view (long format).
  * Example: "Montag, 15. März 2026"
  */
-export function formatDateLong(dateStr: string): string {
+export function formatDateLong(dateStr: string, locale: string = LOCALE): string {
   try {
     const date = parseDateSafe(dateStr);
-    return date.toLocaleDateString(LOCALE, {
+    return date.toLocaleDateString(locale, {
       weekday: 'long',
       day: '2-digit',
       month: 'long',
@@ -76,10 +76,10 @@ export function formatDateLong(dateStr: string): string {
  * Format a date as a compact string (day + short month + year).
  * Example: "15. Mär. 2026"
  */
-export function formatDateCompact(dateStr: string): string {
+export function formatDateCompact(dateStr: string, locale: string = LOCALE): string {
   try {
     const date = parseDateSafe(dateStr);
-    return date.toLocaleDateString(LOCALE, {
+    return date.toLocaleDateString(locale, {
       day: 'numeric',
       month: 'short',
       year: 'numeric',
@@ -127,11 +127,11 @@ export function formatDateShort(dateStr: string): string {
  * Returns null if no meaningful time is present.
  * Example: "14:30"
  */
-export function formatTime(dateStr: string): string | null {
+export function formatTime(dateStr: string, locale: string = LOCALE): string | null {
   try {
     if (!hasRealTime(dateStr)) return null;
     const date = new Date(dateStr);
-    return date.toLocaleTimeString(LOCALE, {
+    return date.toLocaleTimeString(locale, {
       hour: '2-digit',
       minute: '2-digit',
     });

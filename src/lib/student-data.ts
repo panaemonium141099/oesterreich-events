@@ -7,6 +7,7 @@
  */
 
 import { createClient } from '@supabase/supabase-js';
+import { getTranslations } from 'next-intl/server';
 import type { Event } from '@/types/events';
 import {
   STUDENT_CITIES,
@@ -19,6 +20,16 @@ import {
 import { computeStudentScore, isFreeEvent, MIN_STUDENT_SCORE } from './utils/student-score';
 import type { FilterChip } from '@/components/Landing/FilterChips';
 import type { LinkGroup } from '@/components/Landing/InternalLinks';
+import { CATEGORY_MESSAGE_KEYS } from './i18n/category-labels';
+import type { AppLocale } from '@/i18n/routing';
+
+/**
+ * fn-17: Übersetzer-Handle wie von `getTranslations()` geliefert. Die
+ * DE-Messages im Namespace `HubStudents` sind byte-identisch zu den
+ * früher hier inlined gebauten Strings (inklusive der historischen
+ * "fur"-Schreibweise ohne Umlaut) — deutsche Seiten ändern sich nicht.
+ */
+type Translator = (key: string, values?: Record<string, string | number>) => string;
 
 const PAGE_SIZE = 20;
 const MIN_QUALITY = 40;
@@ -123,7 +134,11 @@ export async function loadStudentIndex(): Promise<StudentIndexData> {
 export async function loadStudentPage(
   city: StudentCity,
   filter: string | null,
+  locale: AppLocale = 'de',
 ): Promise<StudentPageData | null> {
+  const t = (await getTranslations({ locale, namespace: 'HubStudents' })) as Translator;
+  const tCat = (await getTranslations({ locale, namespace: 'Categories' })) as Translator;
+  const subtitleT = (await getTranslations({ locale, namespace: 'HubLanding' })) as Translator;
   const supabase = getReadClient();
 
   // Parse filter
@@ -161,17 +176,26 @@ export async function loadStudentPage(
 
   // Build page data
   const basePath = `/studenten/${city.slug}`;
-  const title = buildTitle(city.name, category, timeFilter, isFree);
-  const subtitle = `${totalCount} Veranstaltung${totalCount !== 1 ? 'en' : ''}`;
+  const catDisplay = category
+    ? (CATEGORY_MESSAGE_KEYS[category] ? tCat(CATEGORY_MESSAGE_KEYS[category]) : category)
+    : null;
+  const title = buildTitle(city.name, catDisplay, timeFilter, isFree, t);
+  const subtitle = subtitleT('subtitle', { count: totalCount });
 
-  const breadcrumbs = buildBreadcrumbs(city.name, basePath, filter);
-  const filterChips = buildFilterChips(basePath, filter);
-  const internalLinks = buildLinks(city);
+  const breadcrumbs = buildBreadcrumbs(city.name, basePath, filter, t, tCat, locale);
+  const filterChips = buildFilterChips(basePath, filter, t);
+  const internalLinks = buildLinks(city, t);
   const jsonLd = buildJsonLd(title, totalCount, events);
   const paginationParams = buildPaginationParams(city, category, timeFilter, isFree);
 
   const metaTitle = `${title} | LassTreffen.at`;
-  const metaDescription = `Entdecke ${totalCount} Events fur Studenten in ${city.name}${filter ? ` — ${filter}` : ''}. Nightlife, gratis Events und mehr.`;
+  // DE byte-identisch: extra hängt den ROHEN Filter-Slug an (" — heute");
+  // auf EN zeigen wir stattdessen das übersetzte Label.
+  const filterLabel = filter
+    ? (locale === 'de' ? filter : breadcrumbFilterLabel(filter, t, tCat, locale))
+    : null;
+  const metaExtra = filterLabel ? ` — ${filterLabel}` : '';
+  const metaDescription = t('metaDescriptionCity', { count: totalCount, city: city.name, extra: metaExtra });
 
   return {
     events,
@@ -243,44 +267,56 @@ function scoreAndFilter(candidates: Event[]): ScoredEvent[] {
 
 function buildTitle(
   cityName: string,
-  category: string | null,
+  categoryDisplay: string | null,
   timeFilter: string | null,
   isFree: boolean,
+  t: Translator,
 ): string {
   let title = '';
-  if (category) {
-    title = `${category} fur Studenten in ${cityName}`;
+  if (categoryDisplay) {
+    title = t('titleCategory', { category: categoryDisplay, city: cityName });
   } else if (isFree) {
-    title = `Gratis Events fur Studenten in ${cityName}`;
+    title = t('titleFree', { city: cityName });
   } else {
-    title = `Events fur Studenten in ${cityName}`;
+    title = t('titleDefault', { city: cityName });
   }
-  if (timeFilter === 'heute') title += ' heute';
-  else if (timeFilter === 'wochenende') title += ' am Wochenende';
+  if (timeFilter === 'heute') title += t('suffixToday');
+  else if (timeFilter === 'wochenende') title += t('suffixWeekend');
   return title;
+}
+
+/** Localized display label for a student filter slug (crumb + EN meta). */
+function breadcrumbFilterLabel(
+  filter: string,
+  t: Translator,
+  tCat: Translator,
+  locale: AppLocale,
+): string {
+  if (filter === 'heute') return t('crumbToday');
+  if (filter === 'wochenende') return t('crumbWeekend');
+  if (filter === 'gratis') return t('crumbFree');
+  const category = getCategoryFromSlug(filter);
+  if (!category) return filter;
+  if (locale === 'de') return category;
+  return CATEGORY_MESSAGE_KEYS[category] ? tCat(CATEGORY_MESSAGE_KEYS[category]) : category;
 }
 
 function buildBreadcrumbs(
   cityName: string,
   basePath: string,
   filter: string | null,
+  t: Translator,
+  tCat: Translator,
+  locale: AppLocale,
 ): { label: string; href?: string }[] {
   const crumbs: { label: string; href?: string }[] = [
     { label: 'Home', href: '/' },
-    { label: 'Studenten', href: filter ? '/studenten' : undefined },
+    { label: t('crumbStudents'), href: filter ? '/studenten' : undefined },
     { label: cityName, href: filter ? basePath : undefined },
   ];
 
   if (filter) {
-    const label =
-      filter === 'heute'
-        ? 'Heute'
-        : filter === 'wochenende'
-          ? 'Wochenende'
-          : filter === 'gratis'
-            ? 'Gratis'
-            : getCategoryFromSlug(filter) ?? filter;
-    crumbs.push({ label });
+    crumbs.push({ label: breadcrumbFilterLabel(filter, t, tCat, locale) });
   }
 
   if (!filter) {
@@ -293,19 +329,20 @@ function buildBreadcrumbs(
 function buildFilterChips(
   basePath: string,
   activeFilter: string | null,
+  t: Translator,
 ): FilterChip[] {
   return [
-    { label: 'Alle', href: basePath, active: !activeFilter },
-    { label: 'Heute', href: `${basePath}/heute`, active: activeFilter === 'heute' },
-    { label: 'Wochenende', href: `${basePath}/wochenende`, active: activeFilter === 'wochenende' },
-    { label: 'Gratis', href: `${basePath}/gratis`, active: activeFilter === 'gratis' },
-    { label: 'Nightlife', href: `${basePath}/nightlife`, active: activeFilter === 'nightlife' },
-    { label: 'Musik', href: `${basePath}/musik`, active: activeFilter === 'musik' },
-    { label: 'Kultur', href: `${basePath}/kultur`, active: activeFilter === 'kultur' },
+    { label: t('chipAll'), href: basePath, active: !activeFilter },
+    { label: t('chipToday'), href: `${basePath}/heute`, active: activeFilter === 'heute' },
+    { label: t('chipWeekend'), href: `${basePath}/wochenende`, active: activeFilter === 'wochenende' },
+    { label: t('chipFree'), href: `${basePath}/gratis`, active: activeFilter === 'gratis' },
+    { label: t('chipNightlife'), href: `${basePath}/nightlife`, active: activeFilter === 'nightlife' },
+    { label: t('chipMusic'), href: `${basePath}/musik`, active: activeFilter === 'musik' },
+    { label: t('chipCulture'), href: `${basePath}/kultur`, active: activeFilter === 'kultur' },
   ];
 }
 
-function buildLinks(currentCity: StudentCity): LinkGroup[] {
+function buildLinks(currentCity: StudentCity, t: Translator): LinkGroup[] {
   const groups: LinkGroup[] = [];
 
   // Other student cities
@@ -314,15 +351,15 @@ function buildLinks(currentCity: StudentCity): LinkGroup[] {
     href: `/studenten/${c.slug}`,
   }));
   if (otherCities.length > 0) {
-    groups.push({ title: 'Andere Studenten-Stadte', links: otherCities });
+    groups.push({ title: t('linksOtherCities'), links: otherCities });
   }
 
   // Link to general city/region page
   groups.push({
-    title: 'Alle Events',
+    title: t('linksAllEvents'),
     links: [
-      { label: `Alle Events in ${currentCity.name}`, href: `/stadt/${currentCity.slug}` },
-      { label: `Region ${currentCity.bundesland}`, href: `/${currentCity.bundesland}` },
+      { label: t('linksAllEventsIn', { city: currentCity.name }), href: `/stadt/${currentCity.slug}` },
+      { label: t('linksRegion', { name: currentCity.bundesland }), href: `/${currentCity.bundesland}` },
     ],
   });
 

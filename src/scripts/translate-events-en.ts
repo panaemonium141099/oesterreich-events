@@ -90,6 +90,16 @@ async function main() {
   console.log(`  übersprungen:  ${result.skipped}`);
   console.log(`  Dauer:         ${(result.durationMs / 1000).toFixed(1)}s`);
 
+  // Ohne diese Aufschluesselung sagt ein Lauf mit 8 000 Fehlern nur "8 000
+  // Fehler" — und die Ursache (Quota-Fenster? RECITATION? Timeout?)
+  // entscheidet, ob ein zweiter Lauf ueberhaupt etwas bringt.
+  if (result.errorKinds.length > 0) {
+    console.log('  Fehlerursachen:');
+    for (const { reason, count } of result.errorKinds.slice(0, 8)) {
+      console.log(`    ${String(count).padStart(6)} × ${reason}`);
+    }
+  }
+
   // Ein Lauf mit ausschließlich Fehlern ist fast immer ein Auth-/Quota-
   // Problem und darf nicht als Erfolg durchgehen (sonst meldet ein Cron
   // grün, während nichts geschrieben wurde).

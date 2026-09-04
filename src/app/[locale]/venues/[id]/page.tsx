@@ -1,16 +1,24 @@
 import { notFound } from 'next/navigation';
-import Link from 'next/link';
 import type { Metadata } from 'next';
 import { createClient } from '@supabase/supabase-js';
+import { hasLocale } from 'next-intl';
+import { getTranslations, setRequestLocale } from 'next-intl/server';
 import type { Event } from '@/types/events';
 import { EventListCard } from '@/components/Events/EventListCard';
 import { VenueDetail } from '@/components/Venues/VenueDetail';
 import { SimilarVenues } from '@/components/Venues/SimilarVenues';
-import { deOnlyAlternates } from '@/lib/seo/canonical';
+import { Link } from '@/i18n/navigation';
+import { routing, type AppLocale } from '@/i18n/routing';
+import { bundeslandDisplayName } from '@/lib/i18n/bundesland-names';
+import { bilingualAlternates } from '@/lib/seo/canonical';
 
 export const revalidate = 3600;
 
 const MIN_QUALITY = 40;
+
+function resolveLocale(raw: string): AppLocale {
+  return hasLocale(routing.locales, raw) ? raw : routing.defaultLocale;
+}
 
 function getReadClient() {
   return createClient(
@@ -35,9 +43,11 @@ interface VenueData {
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ id: string }>;
+  params: Promise<{ locale: string; id: string }>;
 }): Promise<Metadata> {
-  const { id } = await params;
+  const { locale: rawLocale, id } = await params;
+  const locale = resolveLocale(rawLocale);
+  const t = await getTranslations({ locale, namespace: 'VenuePage' });
   const supabase = getReadClient();
 
   const { data: venue } = await supabase
@@ -46,17 +56,25 @@ export async function generateMetadata({
     .eq('id', id)
     .single();
 
-  if (!venue) return { title: 'Venue nicht gefunden' };
+  if (!venue) return { title: t('notFound') };
 
   // Layout template already appends " | LassTreffen.at" — skip the manual suffix.
   const title = `${venue.name}${venue.city ? ` — ${venue.city}` : ''}`;
-  const description = `Kommende Events bei ${venue.name}${venue.city ? ` in ${venue.city}` : ''}. Programm, Termine und Tickets.`;
+  const description = t('metaDescription', {
+    name: venue.name,
+    cityPart: venue.city ? ` in ${venue.city}` : '',
+  });
+
+  // Venue-Seite ist jetzt real zweisprachig (VenuePage-Namespace, VenueDetail
+  // + SimilarVenues uebersetzt), also eigener Canonical je Sprache statt
+  // deOnlyAlternates.
+  const alternates = bilingualAlternates(`/venues/${id}`, locale);
 
   return {
     title,
     description,
-    alternates: deOnlyAlternates(`/venues/${id}`),
-    openGraph: { title, description },
+    alternates,
+    openGraph: { title, description, url: alternates.canonical },
     twitter: { card: 'summary', title, description },
   };
 }
@@ -64,9 +82,12 @@ export async function generateMetadata({
 export default async function VenueDetailPage({
   params,
 }: {
-  params: Promise<{ id: string }>;
+  params: Promise<{ locale: string; id: string }>;
 }) {
-  const { id } = await params;
+  const { locale: rawLocale, id } = await params;
+  const locale = resolveLocale(rawLocale);
+  setRequestLocale(locale);
+  const t = await getTranslations({ locale, namespace: 'VenuePage' });
   const supabase = getReadClient();
   const today = new Date().toISOString().split('T')[0];
 
@@ -157,14 +178,14 @@ export default async function VenueDetailPage({
   const internalLinks: { label: string; href: string }[] = [];
   if (venueData.city && venueData.bundesland) {
     internalLinks.push({
-      label: `Alle Events in ${venueData.city}`,
+      label: t('allEventsIn', { name: venueData.city }),
       href: `/stadt/${venueData.city.toLowerCase()}`,
     });
   }
   if (venueData.bundesland) {
     const blSlug = venueData.bundesland.toLowerCase();
     internalLinks.push({
-      label: `Events in ${venueData.bundesland}`,
+      label: t('eventsIn', { name: bundeslandDisplayName(venueData.bundesland, locale) }),
       href: `/${blSlug}`,
     });
   }
@@ -183,7 +204,7 @@ export default async function VenueDetailPage({
           {/* Breadcrumb */}
           <nav className="flex items-center gap-1.5 text-xs text-white/40 mb-6">
             <Link href="/" className="hover:text-white/70 transition-colors">
-              Home
+              {t('crumbHome')}
             </Link>
             <span>/</span>
             <span className="text-white/60">{venueData.name}</span>
@@ -195,7 +216,7 @@ export default async function VenueDetailPage({
           {/* Upcoming Events */}
           <section className="mt-8">
             <h2 className="text-lg font-semibold text-white mb-4">
-              Kommende Events
+              {t('upcomingEvents')}
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {eventList.map((event) => (

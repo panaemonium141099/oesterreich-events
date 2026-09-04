@@ -1,8 +1,8 @@
 import type { Metadata } from 'next';
+import { bilingualAlternates } from '@/lib/seo/canonical';
 import { hasLocale } from 'next-intl';
 import { getTranslations } from 'next-intl/server';
 import { routing, type AppLocale } from '@/i18n/routing';
-import { localeAlternates } from '@/lib/i18n-seo';
 // fn-15.6: /entdecken uses the same MapV3 FilterDrawer as /map. That drawer's
 // chip-group grid layout (`.mv3-chip-group`) lives in map-scope.css. Without
 // importing it here, the chips fell back to `display: block` and stacked
@@ -19,7 +19,7 @@ export async function generateMetadata({
     ? rawLocale
     : routing.defaultLocale;
   const t = await getTranslations({ locale, namespace: 'MetaDiscover' });
-  const alternates = localeAlternates('/entdecken', locale);
+  const alternates = bilingualAlternates('/entdecken', locale);
 
   return {
     title: t('title'),

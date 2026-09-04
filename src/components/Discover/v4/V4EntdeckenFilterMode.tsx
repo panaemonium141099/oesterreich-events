@@ -20,6 +20,7 @@
  */
 
 import { useEffect, useState } from 'react';
+import { useTranslations } from 'next-intl';
 import {
   V4FilterChips, type V4FilterChipKey,
   V4SortRow, type V4SortKey,
@@ -49,6 +50,7 @@ function chipsToParams(chips: Set<string>): URLSearchParams {
 }
 
 export function V4EntdeckenFilterMode({ activeChips, sort, onChipsChange, onSortChange }: V4EntdeckenFilterModeProps) {
+  const t = useTranslations('SmartSearch');
   const [events, setEvents] = useState<Array<Event & { state: V4EventState }>>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -96,16 +98,16 @@ export function V4EntdeckenFilterMode({ activeChips, sort, onChipsChange, onSort
       </div>
 
       {loading ? (
-        <div className="text-[var(--v4-ink-50)] text-sm animate-pulse">Lade Events …</div>
+        <div className="text-[var(--v4-ink-50)] text-sm animate-pulse">{t('loadingEvents')}</div>
       ) : events.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-[var(--v4-hairline-3)] p-8 text-center text-[var(--v4-ink-70)]">
-          <p className="text-[14px]">Keine Events passen zu deinen Filtern.</p>
+          <p className="text-[14px]">{t('noFilterMatch')}</p>
           <button
             type="button"
             onClick={() => onChipsChange(new Set())}
             className="press-haptic mt-3 inline-flex items-center gap-1.5 px-4 py-2 rounded-full border border-[var(--v4-hairline-3)] text-[12.5px] font-semibold text-[var(--v4-ink)]"
           >
-            Filter zurücksetzen
+            {t('resetFilters')}
           </button>
         </div>
       ) : (

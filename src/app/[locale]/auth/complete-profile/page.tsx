@@ -3,14 +3,16 @@
 import { Suspense } from 'react';
 
 import { useState, useEffect, useMemo, type FormEvent } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
-import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
+import { useTranslations } from 'next-intl';
+import { Link, useRouter } from '@/i18n/navigation';
 import { useAuth } from '@/lib/supabase/auth-context';
 import { isProfileComplete } from '@/lib/supabase/auth-context';
 import { createClient } from '@/lib/supabase/client';
 import { trackEvent } from '@/lib/analytics';
 
 function CompleteProfilePage() {
+  const t = useTranslations('Auth');
   const router = useRouter();
   const searchParams = useSearchParams();
   const { user, profile, loading, refreshProfile } = useAuth();
@@ -83,15 +85,15 @@ function CompleteProfilePage() {
     setError(null);
 
     if (!firstName.trim() || !lastName.trim()) {
-      setError('Vorname und Nachname sind Pflichtfelder.');
+      setError(t('errNameRequired'));
       return;
     }
     if (!birthDate) {
-      setError('Bitte gib dein Geburtsdatum an.');
+      setError(t('errBirthDateRequired'));
       return;
     }
     if (!agbAccepted) {
-      setError('Bitte stimme den AGB und der Datenschutzerklärung zu.');
+      setError(t('errAgbRequired'));
       return;
     }
 
@@ -152,50 +154,50 @@ function CompleteProfilePage() {
   return (
     <div className="space-y-6">
       <div className="text-center">
-        <h1 className="text-2xl font-bold">Profil vervollständigen</h1>
+        <h1 className="text-2xl font-bold">{t('profileTitle')}</h1>
         <p className="text-white/40 text-sm mt-2">
-          Noch ein paar Infos, dann kann&apos;s losgehen!
+          {t('profileSubtitle')}
         </p>
       </div>
 
       {/* Show email as read-only info */}
       {profile?.email && (
         <div className="rounded-xl bg-white/5 border border-white/10 px-4 py-3">
-          <p className="text-xs text-white/30 mb-0.5">Angemeldet als</p>
+          <p className="text-xs text-white/30 mb-0.5">{t('signedInAs')}</p>
           <p className="text-sm text-white/70">{profile.email}</p>
         </div>
       )}
 
       <form onSubmit={handleSubmit} className="space-y-4 animate-fade-in">
         {/* Required fields */}
-        <p className="text-xs text-white/30 uppercase tracking-wider font-medium">Pflichtfelder</p>
+        <p className="text-xs text-white/30 uppercase tracking-wider font-medium">{t('requiredFields')}</p>
 
         <div className="grid grid-cols-2 gap-3">
           <InputField
             id="first-name"
-            label="Vorname"
+            label={t('firstName')}
             type="text"
             required
             autoComplete="given-name"
             value={firstName}
             onChange={setFirstName}
-            placeholder="Max"
+            placeholder={t('firstNamePlaceholder')}
           />
           <InputField
             id="last-name"
-            label="Nachname"
+            label={t('lastName')}
             type="text"
             required
             autoComplete="family-name"
             value={lastName}
             onChange={setLastName}
-            placeholder="Mustermann"
+            placeholder={t('lastNamePlaceholder')}
           />
         </div>
 
         <InputField
           id="birth-date"
-          label="Geburtsdatum"
+          label={t('birthDate')}
           type="date"
           required
           autoComplete="bday"
@@ -205,58 +207,58 @@ function CompleteProfilePage() {
 
         {/* Optional fields */}
         <div className="pt-2">
-          <p className="text-xs text-white/30 uppercase tracking-wider font-medium mb-3">Optional</p>
+          <p className="text-xs text-white/30 uppercase tracking-wider font-medium mb-3">{t('optionalFields')}</p>
         </div>
 
         <InputField
           id="phone"
-          label="Telefonnummer"
+          label={t('phone')}
           type="tel"
           autoComplete="tel"
           value={phone}
           onChange={setPhone}
-          placeholder="+43 660 1234567"
+          placeholder={t('phonePlaceholder')}
         />
 
         <InputField
           id="street"
-          label="Straße"
+          label={t('street')}
           type="text"
           autoComplete="street-address"
           value={street}
           onChange={setStreet}
-          placeholder="Hauptstraße 1"
+          placeholder={t('streetPlaceholder')}
         />
 
         <div className="grid grid-cols-2 gap-3">
           <InputField
             id="postal-code"
-            label="PLZ"
+            label={t('postalCode')}
             type="text"
             autoComplete="postal-code"
             value={postalCode}
             onChange={setPostalCode}
-            placeholder="7000"
+            placeholder={t('postalCodePlaceholder')}
           />
           <InputField
             id="city"
-            label="Stadt"
+            label={t('city')}
             type="text"
             autoComplete="address-level2"
             value={city}
             onChange={setCity}
-            placeholder="Eisenstadt"
+            placeholder={t('cityPlaceholder')}
           />
         </div>
 
         <InputField
           id="country"
-          label="Land"
+          label={t('country')}
           type="text"
           autoComplete="country-name"
           value={country}
           onChange={setCountry}
-          placeholder="Österreich"
+          placeholder={t('countryPlaceholder')}
         />
 
         {/* Legal Consent */}
@@ -270,15 +272,18 @@ function CompleteProfilePage() {
                 className="mt-0.5 w-5 h-5 rounded border-white/20 bg-white/5 text-blue-500 focus:ring-blue-500/30 cursor-pointer shrink-0"
               />
               <span className="text-sm text-white/50 group-hover:text-white/70 transition-colors leading-relaxed">
-                Ich stimme den{' '}
-                <Link href="/agb" target="_blank" className="text-white/80 underline underline-offset-2 hover:text-white">
-                  AGB
-                </Link>{' '}
-                zu und habe die{' '}
-                <Link href="/datenschutz" target="_blank" className="text-white/80 underline underline-offset-2 hover:text-white">
-                  Datenschutzerklärung
-                </Link>{' '}
-                gelesen. *
+                {t.rich('agbConsent', {
+                  agb: (chunks) => (
+                    <Link href="/agb" target="_blank" className="text-white/80 underline underline-offset-2 hover:text-white">
+                      {chunks}
+                    </Link>
+                  ),
+                  privacy: (chunks) => (
+                    <Link href="/datenschutz" target="_blank" className="text-white/80 underline underline-offset-2 hover:text-white">
+                      {chunks}
+                    </Link>
+                  ),
+                })}
               </span>
             </label>
 
@@ -290,7 +295,7 @@ function CompleteProfilePage() {
                 className="mt-0.5 w-5 h-5 rounded border-white/20 bg-white/5 text-blue-500 focus:ring-blue-500/30 cursor-pointer shrink-0"
               />
               <span className="text-sm text-white/40 group-hover:text-white/60 transition-colors leading-relaxed">
-                Ich möchte über Events und Neuigkeiten per E-Mail informiert werden.
+                {t('newsletterConsent')}
               </span>
             </label>
           </div>
@@ -305,7 +310,7 @@ function CompleteProfilePage() {
           disabled={submitting || !agbAccepted}
           className="w-full rounded-xl border border-white/20 bg-white/5 text-white font-medium py-3 px-4 hover:bg-white/10 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer"
         >
-          {submitting ? <Spinner /> : 'Weiter'}
+          {submitting ? <Spinner /> : t('next')}
         </button>
       </form>
     </div>

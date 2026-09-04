@@ -1,12 +1,15 @@
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
-import { BUNDESLAENDER } from '@/lib/bundeslaender';
-import { isValidBundesland, getBundeslandName } from '@/lib/landing-slugs';
+import { hasLocale } from 'next-intl';
+import { getTranslations, setRequestLocale } from 'next-intl/server';
+import { isValidBundesland } from '@/lib/landing-slugs';
 import { loadBundeslandPage } from '@/lib/landing-data';
-import { deOnlyAlternates } from '@/lib/seo/canonical';
+import { bilingualAlternates } from '@/lib/seo/canonical';
 import { LandingPageShell } from '@/components/Landing/LandingPageShell';
 import { HubSearchCTA } from '@/components/Hub/HubSearchCTA';
 import { HubSmartCTA } from '@/components/Hub/HubSmartCTA';
+import { bundeslandDisplayName } from '@/lib/i18n/bundesland-names';
+import { routing, type AppLocale } from '@/i18n/routing';
 
 export const revalidate = 3600;
 
@@ -19,23 +22,30 @@ export function generateStaticParams() {
   return [];
 }
 
+function resolveLocale(raw: string): AppLocale {
+  return hasLocale(routing.locales, raw) ? raw : routing.defaultLocale;
+}
+
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ bundesland: string }>;
+  params: Promise<{ locale: string; bundesland: string }>;
 }): Promise<Metadata> {
-  const { bundesland } = await params;
-  if (!isValidBundesland(bundesland)) return { title: 'Nicht gefunden' };
+  const { locale: rawLocale, bundesland } = await params;
+  const locale = resolveLocale(rawLocale);
+  const t = await getTranslations({ locale, namespace: 'HubLanding' });
+  if (!isValidBundesland(bundesland)) return { title: t('notFound') };
 
-  const data = await loadBundeslandPage(bundesland, null, null);
-  if (!data) return { title: 'Nicht gefunden' };
+  const data = await loadBundeslandPage(bundesland, null, null, locale);
+  if (!data) return { title: t('notFound') };
 
   return {
     title: data.metaTitle,
     description: data.metaDescription,
-    // Hub-Template ist deutsch — /en/<bundesland> kanonisiert deshalb
-    // auf die DE-URL (gleiche Regel wie thema/ und gemeinde/).
-    alternates: deOnlyAlternates(`/${bundesland}`),
+    // Seite ist real zweisprachig (Copy + Metadata), deshalb kanonisiert
+    // jede Sprachvariante auf sich selbst und verweist per hreflang auf
+    // die andere — nicht mehr deOnlyAlternates wie vor der Übersetzung.
+    alternates: bilingualAlternates(`/${bundesland}`, locale),
     openGraph: { title: data.metaTitle, description: data.metaDescription },
     twitter: {
       card: 'summary',
@@ -48,15 +58,20 @@ export async function generateMetadata({
 export default async function BundeslandPage({
   params,
 }: {
-  params: Promise<{ bundesland: string }>;
+  params: Promise<{ locale: string; bundesland: string }>;
 }) {
-  const { bundesland } = await params;
+  const { locale: rawLocale, bundesland } = await params;
+  const locale = resolveLocale(rawLocale);
+  // fn-17: setRequestLocale VOR jeder Übersetzung/i18n-Link, sonst kippt
+  // next-intl die Route in dynamisches Rendering (Muster: [locale]/page.tsx).
+  setRequestLocale(locale);
   if (!isValidBundesland(bundesland)) notFound();
 
-  const data = await loadBundeslandPage(bundesland, null, null);
+  const data = await loadBundeslandPage(bundesland, null, null, locale);
   if (!data) notFound();
 
-  const blName = getBundeslandName(bundesland) ?? bundesland;
+  const t = await getTranslations({ locale, namespace: 'HubLanding' });
+  const blName = bundeslandDisplayName(bundesland, locale);
   return (
     <LandingPageShell
       {...data}
@@ -64,11 +79,11 @@ export default async function BundeslandPage({
         <div className="flex flex-wrap items-center gap-3">
           <HubSearchCTA
             scope={{ bundesland }}
-            label={`Alle Veranstaltungen in ${blName} durchsuchen`}
+            label={t('searchCta', { name: blName })}
           />
           <HubSmartCTA
             surface="bundesland-hub"
-            query={`Was geht am Wochenende in ${blName}?`}
+            query={t('smartCta', { name: blName })}
           />
         </div>
       }

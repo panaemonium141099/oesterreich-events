@@ -1,6 +1,7 @@
 'use client';
 
-import Link from 'next/link';
+import { useTranslations } from 'next-intl';
+import { Link } from '@/i18n/navigation';
 import { AuthProvider } from '@/lib/supabase/auth-context';
 
 /**
@@ -16,6 +17,7 @@ import { AuthProvider } from '@/lib/supabase/auth-context';
  * users by definition). Just AuthProvider is enough.
  */
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
+  const t = useTranslations('Auth');
   return (
     <AuthProvider>
     <div
@@ -44,7 +46,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
           <path d="M19 12H5" />
           <path d="m12 19-7-7 7-7" />
         </svg>
-        <span className="hidden sm:inline">Zurück</span>
+        <span className="hidden sm:inline">{t('back')}</span>
       </Link>
 
       {/* Branding */}
