@@ -27,6 +27,17 @@ import {
   type HubJsonLdEvent,
 } from '@/lib/hubs/gemeinde-hub-content';
 import type { AustrianGemeinde } from '@/lib/gemeinden/data';
+import { messageTranslator } from '@/test/i18n';
+
+/**
+ * fn-17: die Copy lebt jetzt in messages/<locale>.json statt inline. Die
+ * byte-identischen DE-Assertions unten pruefen damit zusaetzlich, dass der
+ * Katalog dieselben Strings liefert wie der frueher hier eingebaute Code.
+ */
+const t = messageTranslator('de', 'GemeindeHub');
+const tEn = messageTranslator('en', 'GemeindeHub');
+const tFaq = messageTranslator('de', 'HubFAQ');
+const faqDe = { t: tFaq, numberLocale: 'de-AT' };
 
 const G: AustrianGemeinde = {
   name: 'Testdorf',
@@ -102,7 +113,7 @@ describe('buildHubMeta', () => {
   };
 
   it('Fall (a) event-only: byte-identisch zur bisherigen Copy', () => {
-    const { title, description } = buildHubMeta({ ...base, eventCount: 12, activityCount: 2 });
+    const { title, description } = buildHubMeta({ ...base, eventCount: 12, activityCount: 2 }, t);
     expect(title).toBe('Events in Testdorf 7100 — 12 Veranstaltungen');
     expect(description).toBe(
       '12 Veranstaltungen in Testdorf (Neusiedl am See) — heute und in den kommenden Wochen. Konzerte, Feste, Kultur und mehr auf LassTreffen.at.',
@@ -110,12 +121,12 @@ describe('buildHubMeta', () => {
   });
 
   it('Fall (a) City-Hub: bisheriger Jahres-Title', () => {
-    const { title } = buildHubMeta({ ...base, name: 'Linz', isCityHub: true, eventCount: 250, activityCount: 0 });
+    const { title } = buildHubMeta({ ...base, name: 'Linz', isCityHub: true, eventCount: 250, activityCount: 0 }, t);
     expect(title).toBe('Veranstaltungen in Linz 2026 — 250 Events');
   });
 
   it('Fall (d) empty: bisherige Fallback-Copy inkl. Veranstaltungskalender-Title', () => {
-    const { title, description } = buildHubMeta({ ...base, eventCount: 0, activityCount: 0 });
+    const { title, description } = buildHubMeta({ ...base, eventCount: 0, activityCount: 0 }, t);
     expect(title).toBe('Events in Testdorf 7100 — Veranstaltungskalender');
     expect(description).toBe(
       'Veranstaltungen und Events in Testdorf (Neusiedl am See). Aktueller Veranstaltungskalender für Burgenland auf LassTreffen.at.',
@@ -123,7 +134,7 @@ describe('buildHubMeta', () => {
   });
 
   it('Fall (b) activity-only: Aktivitaets-Copy ohne Event-Empty-State', () => {
-    const { title, description } = buildHubMeta({ ...base, eventCount: 0, activityCount: 17 });
+    const { title, description } = buildHubMeta({ ...base, eventCount: 0, activityCount: 17 }, t);
     expect(title).toBe('Freizeitaktivitäten & Ausflugsziele in Testdorf');
     expect(description).toContain('17 Freizeitaktivitäten');
     expect(description).not.toContain('Veranstaltungskalender');
@@ -131,7 +142,7 @@ describe('buildHubMeta', () => {
   });
 
   it('Fall (c) mixed: kombinierte Copy mit beiden Zahlen', () => {
-    const { title, description } = buildHubMeta({ ...base, eventCount: 8, activityCount: 5 });
+    const { title, description } = buildHubMeta({ ...base, eventCount: 8, activityCount: 5 }, t);
     expect(title).toBe('Events & Freizeitaktivitäten in Testdorf');
     expect(description).toContain('8 Veranstaltungen');
     expect(description).toContain('5 Freizeitaktivitäten');
@@ -141,23 +152,59 @@ describe('buildHubMeta', () => {
 describe('hubDefaultH1 + hubActivityHeroLead', () => {
   it('H1 folgt den 4 Faellen; event-only/empty bleiben wie bisher', () => {
     const base = { name: 'Testdorf', isCityHub: false };
-    expect(hubDefaultH1({ ...base, eventCount: 5, activityCount: 0 })).toBe('Events in Testdorf');
-    expect(hubDefaultH1({ ...base, eventCount: 0, activityCount: 0 })).toBe('Events in Testdorf');
-    expect(hubDefaultH1({ ...base, eventCount: 5, activityCount: 0, isCityHub: true })).toBe('Veranstaltungen in Testdorf');
-    expect(hubDefaultH1({ ...base, eventCount: 0, activityCount: 4 })).toBe('Freizeitaktivitäten & Ausflugsziele in Testdorf');
-    expect(hubDefaultH1({ ...base, eventCount: 4, activityCount: 4 })).toBe('Events & Freizeit in Testdorf');
+    expect(hubDefaultH1({ ...base, eventCount: 5, activityCount: 0 }, t)).toBe('Events in Testdorf');
+    expect(hubDefaultH1({ ...base, eventCount: 0, activityCount: 0 }, t)).toBe('Events in Testdorf');
+    expect(hubDefaultH1({ ...base, eventCount: 5, activityCount: 0, isCityHub: true }, t)).toBe('Veranstaltungen in Testdorf');
+    expect(hubDefaultH1({ ...base, eventCount: 0, activityCount: 4 }, t)).toBe('Freizeitaktivitäten & Ausflugsziele in Testdorf');
+    expect(hubDefaultH1({ ...base, eventCount: 4, activityCount: 4 }, t)).toBe('Events & Freizeit in Testdorf');
   });
 
   it('Hero-Lead (Fall b) nennt die Zahl und keinen Event-Empty-State', () => {
-    const lead = hubActivityHeroLead('Testdorf', 9);
+    const lead = hubActivityHeroLead('Testdorf', 9, t);
     expect(lead).toContain('9 Freizeitaktivitäten');
     expect(lead).not.toContain('keine Events');
   });
 
   it('Hero-Lead (Fall c) kombiniert beide Zahlen', () => {
-    const lead = hubMixedHeroLead('Testdorf', 7, 4);
+    const lead = hubMixedHeroLead('Testdorf', 7, 4, t);
     expect(lead).toContain('7 Veranstaltungen');
     expect(lead).toContain('4 dauerhafte Freizeitaktivitäten');
+  });
+});
+
+describe('buildHubMeta EN (fn-17)', () => {
+  const base = {
+    name: 'Testdorf',
+    bezirk: 'Neusiedl am See',
+    plz: '7100',
+    bundesland: 'Burgenland',
+    isCityHub: false,
+    year: 2026,
+  };
+
+  it('liefert englische Copy in allen vier Faellen — und nie deutsche Reste', () => {
+    const cases = [
+      buildHubMeta({ ...base, eventCount: 12, activityCount: 2 }, tEn),
+      buildHubMeta({ ...base, eventCount: 0, activityCount: 0 }, tEn),
+      buildHubMeta({ ...base, eventCount: 0, activityCount: 17 }, tEn),
+      buildHubMeta({ ...base, eventCount: 8, activityCount: 5 }, tEn),
+    ];
+    for (const { title, description } of cases) {
+      // Ein fehlender Key faellt bei next-intl als "Namespace.key" durch —
+      // das waere sonst still im Title gelandet.
+      expect(title).not.toContain('GemeindeHub.');
+      expect(description).not.toContain('GemeindeHub.');
+      expect(`${title} ${description}`).not.toMatch(/Veranstaltung|Freizeitaktivit|Österreich/);
+    }
+    expect(cases[0].title).toBe('Events in Testdorf 7100 — 12 events');
+    expect(cases[2].title).toBe('Things to do & attractions in Testdorf');
+  });
+
+  it('H1 und Hero-Leads sind englisch', () => {
+    expect(hubDefaultH1({ name: 'Testdorf', eventCount: 4, activityCount: 4, isCityHub: false }, tEn))
+      .toBe('Events & things to do in Testdorf');
+    expect(hubActivityHeroLead('Testdorf', 9, tEn)).toContain('9 things to do');
+    expect(hubMixedHeroLead('Testdorf', 7, 4, tEn)).toContain('7 events');
   });
 });
 
@@ -165,32 +212,32 @@ describe('buildHubFaqEntries — FAQ folgt den 4 Faellen', () => {
   const input = { gemeinde: 'Testdorf', bundesland: 'Burgenland', plz: '7100' };
 
   it('event-only: bisheriges Event-FAQ', () => {
-    const entries = buildHubFaqEntries({ ...input, eventCount: 5, activityCount: 0 });
+    const entries = buildHubFaqEntries({ ...input, eventCount: 5, activityCount: 0, ...faqDe });
     expect(entries[0].question).toBe('Welche Events gibt es heute in Testdorf?');
     expect(entries.some((e) => e.question.includes('Freizeitaktivitäten'))).toBe(false);
   });
 
   it('activity-only: KEIN event-bezogenes FAQ, >= 3 Aktivitaets-Eintraege', () => {
-    const entries = buildHubFaqEntries({ ...input, eventCount: 0, activityCount: 6 });
+    const entries = buildHubFaqEntries({ ...input, eventCount: 0, activityCount: 6, ...faqDe });
     expect(entries.length).toBeGreaterThanOrEqual(3);
     expect(entries.some((e) => e.question.includes('Events gibt es heute'))).toBe(false);
     expect(entries[0].question).toContain('Freizeitaktivitäten');
   });
 
   it('mixed: Event-Set plus Aktivitaets-Kernfrage', () => {
-    const entries = buildHubFaqEntries({ ...input, eventCount: 5, activityCount: 6 });
+    const entries = buildHubFaqEntries({ ...input, eventCount: 5, activityCount: 6, ...faqDe });
     expect(entries.some((e) => e.question.includes('Events gibt es heute'))).toBe(true);
     expect(entries.some((e) => e.question.includes('Freizeitaktivitäten'))).toBe(true);
   });
 
   it('empty: kein FAQ', () => {
-    expect(buildHubFaqEntries({ ...input, eventCount: 2, activityCount: 2 })).toEqual([]);
+    expect(buildHubFaqEntries({ ...input, eventCount: 2, activityCount: 2, ...faqDe })).toEqual([]);
   });
 });
 
 describe('buildGemeindeHubJsonLd — Mixed-Modell', () => {
   it('activity-only: keine Event-ItemList, kein Event-FAQ, Aktivitaeten-ItemList vorhanden', () => {
-    const graph = parseGraph(buildGemeindeHubJsonLd(G, [], makeActivities(4)));
+    const graph = parseGraph(buildGemeindeHubJsonLd(G, [], makeActivities(4), faqDe));
 
     expect(findById(graph, '#itemlist')).toBeUndefined();
 
@@ -211,7 +258,7 @@ describe('buildGemeindeHubJsonLd — Mixed-Modell', () => {
   });
 
   it('event-only: bisherige Struktur (Event-ItemList + Event-FAQ), keine Aktivitaeten-ItemList', () => {
-    const graph = parseGraph(buildGemeindeHubJsonLd(G, makeEvents(5), []));
+    const graph = parseGraph(buildGemeindeHubJsonLd(G, makeEvents(5), [], faqDe));
 
     const eventList = findById(graph, '#itemlist');
     expect(eventList).toBeDefined();
@@ -224,7 +271,7 @@ describe('buildGemeindeHubJsonLd — Mixed-Modell', () => {
   });
 
   it('mixed: beide ItemLists + kombiniertes FAQ', () => {
-    const graph = parseGraph(buildGemeindeHubJsonLd(G, makeEvents(3), makeActivities(3)));
+    const graph = parseGraph(buildGemeindeHubJsonLd(G, makeEvents(3), makeActivities(3), faqDe));
     expect(findById(graph, '#itemlist')).toBeDefined();
     expect(findById(graph, '#activitylist')).toBeDefined();
     const faq = graph.find((n) => n['@type'] === 'FAQPage');
@@ -234,7 +281,7 @@ describe('buildGemeindeHubJsonLd — Mixed-Modell', () => {
   });
 
   it('empty: nie eine leere ItemList, kein FAQ — Place + Breadcrumb bleiben', () => {
-    const graph = parseGraph(buildGemeindeHubJsonLd(G, [], []));
+    const graph = parseGraph(buildGemeindeHubJsonLd(G, [], [], faqDe));
     expect(graph.some((n) => n['@type'] === 'ItemList')).toBe(false);
     expect(graph.some((n) => n['@type'] === 'FAQPage')).toBe(false);
     expect(findById(graph, '#place')).toBeDefined();
@@ -242,7 +289,7 @@ describe('buildGemeindeHubJsonLd — Mixed-Modell', () => {
   });
 
   it('1-2 Events (< Schwelle, empty-Modus): Event-ItemList ja (nicht leer), FAQ nein', () => {
-    const graph = parseGraph(buildGemeindeHubJsonLd(G, makeEvents(2), []));
+    const graph = parseGraph(buildGemeindeHubJsonLd(G, makeEvents(2), [], faqDe));
     const eventList = findById(graph, '#itemlist');
     expect(eventList).toBeDefined();
     expect(eventList!.numberOfItems).toBe(2);
@@ -250,7 +297,7 @@ describe('buildGemeindeHubJsonLd — Mixed-Modell', () => {
   });
 
   it('activity-only MIT 1-2 Rest-Events: trotzdem KEINE Event-ItemList (Review-Finding)', () => {
-    const graph = parseGraph(buildGemeindeHubJsonLd(G, makeEvents(2), makeActivities(4)));
+    const graph = parseGraph(buildGemeindeHubJsonLd(G, makeEvents(2), makeActivities(4), faqDe));
     expect(findById(graph, '#itemlist')).toBeUndefined();
     expect(findById(graph, '#activitylist')).toBeDefined();
     const faq = graph.find((n) => n['@type'] === 'FAQPage');
@@ -260,7 +307,7 @@ describe('buildGemeindeHubJsonLd — Mixed-Modell', () => {
   });
 
   it('2 Aktivitaeten (< Schwelle): keine Aktivitaeten-ItemList', () => {
-    const graph = parseGraph(buildGemeindeHubJsonLd(G, makeEvents(5), makeActivities(2)));
+    const graph = parseGraph(buildGemeindeHubJsonLd(G, makeEvents(5), makeActivities(2), faqDe));
     expect(findById(graph, '#activitylist')).toBeUndefined();
   });
 });

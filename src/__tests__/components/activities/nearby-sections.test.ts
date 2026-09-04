@@ -17,6 +17,8 @@ vi.mock('@/lib/activities/nearby-loaders', () => ({
 
 vi.mock('next-intl/server', () => ({
   getTranslations: vi.fn(async () => (key: string) => key),
+  // fn-17: GemeindeActivitiesSection liest die Locale fuer die Tag-Chips.
+  getLocale: vi.fn(async () => 'de'),
 }));
 
 const { NearbyEventsSection } = await import('@/components/Activities/NearbyEventsSection');
@@ -105,14 +107,16 @@ describe('EventNearbyActivities (Event-Detail-Andockstelle)', () => {
 });
 
 describe('GemeindeActivitiesSection (Hub, >=3-Gate)', () => {
-  it('null bei < 3 Aktivitaeten', () => {
+  // fn-17: die Komponente ist async (getTranslations/getLocale) — die
+  // Aufrufe muessen deshalb awaited werden.
+  it('null bei < 3 Aktivitaeten', async () => {
     expect(
-      GemeindeActivitiesSection({ activities: [1, 2].map(activity), gemeindeName: 'Testdorf' }),
+      await GemeindeActivitiesSection({ activities: [1, 2].map(activity), gemeindeName: 'Testdorf' }),
     ).toBeNull();
   });
 
-  it('rendert ab 3 Aktivitaeten mit /aktivitaet/-Links', () => {
-    const tree = GemeindeActivitiesSection({
+  it('rendert ab 3 Aktivitaeten mit /aktivitaet/-Links', async () => {
+    const tree = await GemeindeActivitiesSection({
       activities: [1, 2, 3].map(activity),
       gemeindeName: 'Testdorf',
     });
@@ -126,6 +130,9 @@ describe('tag-labels', () => {
   it('kuratierte Labels + Fallback-Prettifier', () => {
     expect(activityTagLabel('thermen-special')).toBe('Therme');
     expect(activityTagLabel('unbekannter-tag')).toBe('Unbekannter Tag');
+    // fn-17: EN-Labels; was dort fehlt, faellt auf das deutsche zurueck.
+    expect(activityTagLabel('thermen-special', 'en')).toBe('Thermal baths');
+    expect(activityTagLabel('unbekannter-tag', 'en')).toBe('Unbekannter Tag');
   });
 
   it('Chips: Haeufigkeit vor Alphabet, dedupliziert, gekappt', () => {
@@ -135,6 +142,7 @@ describe('tag-labels', () => {
         { tags: ['schwimmen'] },
         { tags: ['klettern'] },
       ],
+      'de',
       2,
     );
     expect(chips).toEqual(['Schwimmen & Baden', 'Klettern']);

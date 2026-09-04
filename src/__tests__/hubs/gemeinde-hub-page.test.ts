@@ -152,7 +152,7 @@ describe('Gemeinde-Hub: Gate + Mixed-Copy + Query-Dedup', () => {
     const g = nonCity[0];
     dbRows = { events: [], activities: makeActivityRows(g, 4) };
 
-    const metadata = await generateMetadata({ params: Promise.resolve({ slug: g.slug }) });
+    const metadata = await generateMetadata({ params: Promise.resolve({ locale: 'de', slug: g.slug }) });
 
     expect(metadata.robots).toBeUndefined();
     expect(metaTitle(metadata)).toContain('Freizeitaktivitäten & Ausflugsziele in');
@@ -169,7 +169,7 @@ describe('Gemeinde-Hub: Gate + Mixed-Copy + Query-Dedup', () => {
       payload: { title: 'EXP TITLE' },
     });
 
-    const metadata = await generateMetadata({ params: Promise.resolve({ slug: g.slug }) });
+    const metadata = await generateMetadata({ params: Promise.resolve({ locale: 'de', slug: g.slug }) });
 
     expect(metadata.robots).toEqual({ index: false, follow: true });
     expect(metaTitle(metadata)).toContain('Events in');
@@ -185,7 +185,7 @@ describe('Gemeinde-Hub: Gate + Mixed-Copy + Query-Dedup', () => {
       payload: { title: 'EXP TITLE' },
     });
 
-    const metadata = await generateMetadata({ params: Promise.resolve({ slug: g.slug }) });
+    const metadata = await generateMetadata({ params: Promise.resolve({ locale: 'de', slug: g.slug }) });
 
     expect(metadata.robots).toBeUndefined();
     expect(metaTitle(metadata)).toBe('EXP TITLE');
@@ -201,7 +201,7 @@ describe('Gemeinde-Hub: Gate + Mixed-Copy + Query-Dedup', () => {
       payload: { title: 'EXP TITLE' },
     });
 
-    const metadata = await generateMetadata({ params: Promise.resolve({ slug: g.slug }) });
+    const metadata = await generateMetadata({ params: Promise.resolve({ locale: 'de', slug: g.slug }) });
 
     expect(metaTitle(metadata)).toContain('Events & Freizeitaktivitäten in');
     expect(metadata.description).toContain('5 Veranstaltungen');
@@ -213,8 +213,8 @@ describe('Gemeinde-Hub: Gate + Mixed-Copy + Query-Dedup', () => {
     const g = nonCity[4];
     dbRows = { events: makeEventRows(g, 4), activities: makeActivityRows(g, 4) };
 
-    await generateMetadata({ params: Promise.resolve({ slug: g.slug }) });
-    await GemeindeHubPage({ params: Promise.resolve({ slug: g.slug }) });
+    await generateMetadata({ params: Promise.resolve({ locale: 'de', slug: g.slug }) });
+    await GemeindeHubPage({ params: Promise.resolve({ locale: 'de', slug: g.slug }) });
 
     expect(fromCounts['events']).toBe(1);
     expect(fromCounts['poi_activities']).toBe(1);
@@ -224,7 +224,7 @@ describe('Gemeinde-Hub: Gate + Mixed-Copy + Query-Dedup', () => {
     const g = nonCity[5];
     dbRows = { events: [], activities: makeActivityRows(g, 4) };
 
-    const tree = await GemeindeHubPage({ params: Promise.resolve({ slug: g.slug }) });
+    const tree = await GemeindeHubPage({ params: Promise.resolve({ locale: 'de', slug: g.slug }) });
     const out: { texts: string[]; scripts: string[] } = { texts: [], scripts: [] };
     collect(tree, out);
     const text = out.texts.join(' ');
@@ -248,11 +248,11 @@ describe('Gemeinde-Hub: Gate + Mixed-Copy + Query-Dedup', () => {
     const g = nonCity[6];
     dbRows = { events: makeEventRows(g, 2), activities: makeActivityRows(g, 4) };
 
-    const metadata = await generateMetadata({ params: Promise.resolve({ slug: g.slug }) });
+    const metadata = await generateMetadata({ params: Promise.resolve({ locale: 'de', slug: g.slug }) });
     expect(metadata.robots).toBeUndefined();
     expect(metaTitle(metadata)).toContain('Freizeitaktivitäten & Ausflugsziele in');
 
-    const tree = await GemeindeHubPage({ params: Promise.resolve({ slug: g.slug }) });
+    const tree = await GemeindeHubPage({ params: Promise.resolve({ locale: 'de', slug: g.slug }) });
     const out: { texts: string[]; scripts: string[] } = { texts: [], scripts: [] };
     collect(tree, out);
     const text = out.texts.join(' ');
@@ -270,10 +270,10 @@ describe('Gemeinde-Hub: Gate + Mixed-Copy + Query-Dedup', () => {
     const cityHub = getCityHub(city.slug)!;
     dbRows = { events: makeEventRows(city, 5), activities: makeActivityRows(city, 5) };
 
-    const metadata = await generateMetadata({ params: Promise.resolve({ slug: city.slug }) });
+    const metadata = await generateMetadata({ params: Promise.resolve({ locale: 'de', slug: city.slug }) });
     expect(metaTitle(metadata)).toContain('Events & Freizeitaktivitäten in');
 
-    const tree = await GemeindeHubPage({ params: Promise.resolve({ slug: city.slug }) });
+    const tree = await GemeindeHubPage({ params: Promise.resolve({ locale: 'de', slug: city.slug }) });
     const out: { texts: string[]; scripts: string[] } = { texts: [], scripts: [] };
     collect(tree, out);
     const text = out.texts.join(' ');

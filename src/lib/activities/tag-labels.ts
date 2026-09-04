@@ -39,9 +39,48 @@ export const ACTIVITY_TAG_LABELS: Readonly<Record<string, string>> = {
   'wellness-day': 'Wellness',
 };
 
-/** Deutsches Anzeige-Label fuer einen Tag (kuratiert, sonst Prettifier). */
-export function activityTagLabel(tag: string): string {
-  const curated = ACTIVITY_TAG_LABELS[tag];
+/**
+ * Englische Labels (fn-17). Nur die Tags, deren deutsches Label kein
+ * Eigenname ist — 'Kajak', 'Tennis', 'Theater', 'Ski', 'Snowboard',
+ * 'Rafting', 'Bouldern' -> 'Bouldering' usw. Was hier fehlt, faellt auf
+ * das deutsche Label zurueck; das ist bei international gleich
+ * geschriebenen Begriffen die richtige Ausgabe.
+ */
+const ACTIVITY_TAG_LABELS_EN: Readonly<Record<string, string>> = {
+  ausstellung: 'Exhibitions',
+  bergtour: 'Mountain tours',
+  bouldern: 'Bouldering',
+  'burgführung': 'Castles & palaces',
+  film: 'Film',
+  kajak: 'Kayaking',
+  kanutour: 'Canoe tours',
+  kino: 'Cinema',
+  klettern: 'Climbing',
+  langlauf: 'Cross-country skiing',
+  mountainbike: 'Mountain biking',
+  museumstour: 'Museums',
+  'naturführung': 'Nature tours',
+  radfahren: 'Cycling',
+  rafting: 'Rafting',
+  reiten: 'Horse riding',
+  'sauna-special': 'Sauna',
+  schwimmen: 'Swimming & bathing',
+  'segel-tour': 'Sailing',
+  ski: 'Skiing',
+  snowboard: 'Snowboarding',
+  tennis: 'Tennis',
+  theater: 'Theatre',
+  'thermen-special': 'Thermal baths',
+  wandern: 'Hiking',
+  wassersport: 'Water sports',
+  'wellness-day': 'Wellness',
+};
+
+/** Anzeige-Label fuer einen Tag (kuratiert, sonst Prettifier). */
+export function activityTagLabel(tag: string, locale = 'de'): string {
+  const curated = locale === 'en'
+    ? (ACTIVITY_TAG_LABELS_EN[tag] ?? ACTIVITY_TAG_LABELS[tag])
+    : ACTIVITY_TAG_LABELS[tag];
   if (curated) return curated;
   return tag
     .split('-')
@@ -57,6 +96,7 @@ export function activityTagLabel(tag: string): string {
  */
 export function deriveActivityChips(
   activities: ReadonlyArray<{ tags: string[] | null }>,
+  locale = 'de',
   max = 8,
 ): string[] {
   const counts = new Map<string, number>();
@@ -69,5 +109,5 @@ export function deriveActivityChips(
   return [...counts.entries()]
     .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0], 'de'))
     .slice(0, max)
-    .map(([tag]) => activityTagLabel(tag));
+    .map(([tag]) => activityTagLabel(tag, locale));
 }

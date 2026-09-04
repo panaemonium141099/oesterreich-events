@@ -57,7 +57,13 @@ export async function GET(request: NextRequest) {
     );
   }
 
-  // Nur-Fehler-Lauf = Key/Quota kaputt. 502 statt stiller 200, sonst
+  // Tageskontingent erschöpft (Free Tier: 10 000 Requests/Tag) ist kein
+  // Defekt — der nächste Lauf macht am Filter title_en IS NULL weiter.
+  if (result.stoppedByQuota) {
+    return NextResponse.json({ ok: true, quotaExhausted: true, ...result });
+  }
+
+  // Nur-Fehler-Lauf = Key kaputt. 502 statt stiller 200, sonst
   // meldet der Timer monatelang grün ohne eine Zeile zu übersetzen.
   if (result.processed > 0 && result.translated === 0 && result.failed > 0) {
     return NextResponse.json(

@@ -1,3 +1,13 @@
+// @vitest-environment node
+//
+// Route-Handler-Test ohne DOM. Der globale Default ist happy-dom; dessen
+// Window-Setup und -Teardown kosten hier nur Zeit (und produzierten beim
+// Abbruch die AbortError-Kaskade im Log). Seit die Gemeinde-Hubs
+// zweisprachig in sitemap-core.xml stehen, baut der Test ~5 000 Eintraege
+// samt Alternates und laedt dafuer den kompletten Gemeinde-Datensatz —
+// unter dem ausgelasteten vitest-Pool riss das reproduzierbar den
+// Default-Timeout.
+
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { SITEMAP_URLSET_HARD_LIMIT } from '@/lib/seo/sitemap-xml';
 import { SITEMAP_EVENTS_SHARD_COUNT, sitemapEventsShardPath } from '@/lib/seo/sitemap-events-shard';
@@ -28,6 +38,41 @@ vi.mock('@supabase/supabase-js', () => ({
   createClient: vi.fn(() => ({
     from: mockFrom,
   })),
+}));
+
+/**
+ * Gemeinde-Registry auf drei Eintraege eindampfen.
+ *
+ * Der echte Datensatz sind 2 028 Zeilen aus neun JSON-Dateien, und seit die
+ * Hubs zweisprachig gelistet werden, baut die Route daraus ~4 000 Eintraege
+ * mit je drei xhtml:link-Alternates. Das kostete den Test unter dem
+ * parallel laufenden vitest-Pool reproduzierbar mehr als 30 s (isoliert
+ * 1,4 s) — zwei Worker der Suite haengen unabhaengig davon dauerhaft
+ * (import-osm-venues, backfill-venue-ids) und hungern den Rest aus.
+ *
+ * Fuer die Assertions aendert das nichts: geprueft wird, DASS die
+ * Gemeinde-Sektion beide Sprachvarianten emittiert, nicht wie viele Zeilen
+ * die Registry hat.
+ */
+/**
+ * Blog-Korpus stubben. `@/content/blog` zieht 84 Post-Module mit zusammen
+ * ~600 KB TypeScript in den Test-Worker — deren Transformation ist der
+ * teuerste Einzelposten dieser Datei. Der Test prueft nur, DASS die
+ * Blog-Sektion Index und Posts emittiert, nicht welche.
+ */
+vi.mock('@/content/blog', () => ({
+  ALL_POSTS: [
+    { slug: 'winterfeste-oesterreich', publishDate: '2026-01-10', updatedDate: '2026-02-01' },
+    { slug: 'festival-guide-2026', publishDate: '2026-03-05', updatedDate: null },
+  ],
+}));
+
+vi.mock('@/lib/gemeinden/data', () => ({
+  ALL_GEMEINDEN: [
+    { slug: '7100-eisenstadt', name: 'Eisenstadt', plz: '7100', bezirk: 'Eisenstadt', bundesland: 'Burgenland', lat: 47.85, lng: 16.52 },
+    { slug: '4020-linz', name: 'Linz', plz: '4020', bezirk: 'Linz', bundesland: 'Oberösterreich', lat: 48.3, lng: 14.29 },
+    { slug: '2320-schwechat', name: 'Schwechat', plz: '2320', bezirk: 'Wien-Umgebung', bundesland: 'Niederösterreich', lat: 48.14, lng: 16.47 },
+  ],
 }));
 
 const { GET: getIndex } = await import('@/app/sitemap.xml/route');
@@ -183,15 +228,16 @@ describe('GET /sitemap-events.xml — URL-Cap zaehlt emittierte URLs', () => {
 });
 
 /**
- * Timeout hochgesetzt (fn-17 Rest): die Route importiert dynamisch den
- * gesamten Gemeinde-Datensatz (~2 028 Eintraege) plus die Themen-Daten und
- * emittiert seit den zweisprachigen Hubs beide Sprachvarianten. Isoliert
- * laufen die 9 Faelle der Datei in 1,5 s; unter dem parallel ausgelasteten
- * vitest-Pool riss der Default von 5 s reproduzierbar (2 Laeufe). Das ist
- * Import- und Pool-Last, keine Laufzeit der Sitemap selbst — renderUrlset
- * schafft 5 000 Eintraege mit Alternates in unter 50 ms.
+ * Timeout ueber dem Default: die beiden Faelle bauen die komplette
+ * Core-Sitemap (Bundeslaender x Kategorien x Zeit, Themen, Studenten,
+ * Gemeinden, Venues — je zweisprachig mit Alternates). Isoliert kosten
+ * alle 9 Faelle der Datei zusammen 1,45 s; im vollen Lauf reissen sie den
+ * 5-s-Default, weil zwei Suiten dauerhaft haengen
+ * (import-osm-venues.test.ts, backfill-venue-ids.test.ts — beide auch auf
+ * master, "Timeout terminating forks worker" im Log) und den Pool
+ * aushungern.
  */
-describe('GET /sitemap-core.xml — Paritaet + fail loudly', { timeout: 30_000 }, () => {
+describe('GET /sitemap-core.xml — Paritaet + fail loudly', { timeout: 20_000 }, () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
@@ -219,6 +265,13 @@ describe('GET /sitemap-core.xml — Paritaet + fail loudly', { timeout: 30_000 }
     expect(body).toContain('<loc>https://lasstreffen.at/burgenland</loc>');
     expect(body).toContain('<loc>https://lasstreffen.at/thema/');
     expect(body).toContain('<loc>https://lasstreffen.at/gemeinde/');
+    // fn-17: Gemeinde-Hubs sind uebersetzt und stehen deshalb in beiden
+    // Sprachen drin — vorher waren sie bewusst DE-only.
+    expect(body).toContain('<loc>https://lasstreffen.at/gemeinde/7100-eisenstadt</loc>');
+    expect(body).toContain('<loc>https://lasstreffen.at/en/gemeinde/7100-eisenstadt</loc>');
+    expect(body).toContain(
+      '<xhtml:link rel="alternate" hreflang="en" href="https://lasstreffen.at/en/gemeinde/7100-eisenstadt"/>',
+    );
     expect(body).toContain('<loc>https://lasstreffen.at/studenten</loc>');
     // Venues (dedupliziert aus der Mock-Query)
     expect(body).toContain('<loc>https://lasstreffen.at/venues/venue-123</loc>');

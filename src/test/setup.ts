@@ -58,6 +58,39 @@ vi.mock('next-intl', () => {
 });
 
 /**
+ * Server-Pendant: `getTranslations`/`setRequestLocale` aus
+ * next-intl/server. Ohne diesen Mock wirft jede Server-Komponente im Test
+ * "`getTranslations` is not supported in Client Components" — die
+ * Seiten-Tests der SEO-Hubs rendern aber genau solche Komponenten.
+ * Aufloesung wieder gegen die echten DE-Messages, damit bestehende
+ * Assertions auf deutsche Strings unveraendert greifen.
+ */
+vi.mock('next-intl/server', () => {
+  const makeT = (namespace?: string) => {
+    const t = (key: string, values?: Record<string, unknown>) =>
+      interpolate(resolveMessage(namespace, key), values);
+    t.rich = t;
+    t.markup = t;
+    t.raw = (key: string) => resolveMessage(namespace, key);
+    t.has = (key: string) => resolveMessage(namespace, key) !== (namespace ? `${namespace}.${key}` : key);
+    return t;
+  };
+  return {
+    getTranslations: async (opts?: { namespace?: string } | string) =>
+      makeT(typeof opts === 'string' ? opts : opts?.namespace),
+    getLocale: async () => 'de',
+    getMessages: async () => deMessages,
+    getFormatter: async () => ({
+      dateTime: (d: Date) => d.toISOString(),
+      number: (n: number) => String(n),
+      relativeTime: () => '',
+      list: (items: Iterable<string>) => Array.from(items).join(', '),
+    }),
+    setRequestLocale: () => {},
+  };
+});
+
+/**
  * @/i18n/navigation delegiert im Test auf next/link bzw. next/navigation —
  * per-Test-Mocks von next/navigation (useRouter/usePathname) greifen damit
  * genau wie vor der i18n-Einführung.

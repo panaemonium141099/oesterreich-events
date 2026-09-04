@@ -58,6 +58,32 @@ const BUNDESLAND_INTRO_POOL: string[] = [
   'Was ist los in {name}? Aktuelle Events aus allen Städten und Gemeinden, nach Kategorie sortiert. Eingebunden aus offiziellen Quellen, nie manipulierte Daten.',
 ];
 
+/**
+ * Englische Pools (fn-17). Gleiche Laenge und gleiche Reihenfolge wie die
+ * deutschen — der Rotations-Index aus `seo_hub_refreshes` gilt fuer beide
+ * Sprachen, also muss Variante #2 in beiden Sprachen dieselbe Aussage
+ * treffen. `poolSize()` prueft das zur Laufzeit nicht; die Gleichheit ist
+ * durch den Test in src/__tests__ abgesichert.
+ */
+const GEMEINDE_INTRO_POOL_EN: string[] = [
+  'Currently {count} events within 10 km of {name} — from concerts and festivals to cultural programmes. All dates are updated daily from official sources.',
+  '{count} events around {name} in {bundesland} — the shared calendar for everything happening in your region. Updated daily from more than 140 official sources.',
+  'What is on in {name} and nearby? Currently {count} dates within a 10 km radius: concerts, markets, club evenings, church events, sport. All in one place.',
+  'The next {count} events in {name} ({plz}) — updated daily. Every public event in the region, collected from the official calendars of the municipality, tourism boards and organisers.',
+];
+
+const THEMA_INTRO_POOL_EN: string[] = [
+  "{count} events nationwide in this category. Updated daily, straight from the organisers' calendars.",
+  'Everything on this topic in Austria — currently {count} dates from Vienna to Vorarlberg. All from official sources, all linked back to the organiser.',
+  'The Austria-wide overview — {count} dates in this category, filterable by state, updated daily.',
+];
+
+const BUNDESLAND_INTRO_POOL_EN: string[] = [
+  'All public events in {name} — concerts, festivals, cultural evenings, markets, sport. Collected from more than 140 official sources.',
+  'The shared event calendar for {name} — from the village fair to the open-air festival. Daily updates from municipal and tourism calendars.',
+  'What is on in {name}? Current events from every city and municipality, sorted by category. Sourced from official calendars, never manipulated data.',
+];
+
 export type HubType = 'gemeinde' | 'thema' | 'bundesland';
 
 const POOLS: Record<HubType, string[]> = {
@@ -65,6 +91,16 @@ const POOLS: Record<HubType, string[]> = {
   thema: THEMA_INTRO_POOL,
   bundesland: BUNDESLAND_INTRO_POOL,
 };
+
+const POOLS_EN: Record<HubType, string[]> = {
+  gemeinde: GEMEINDE_INTRO_POOL_EN,
+  thema: THEMA_INTRO_POOL_EN,
+  bundesland: BUNDESLAND_INTRO_POOL_EN,
+};
+
+function poolFor(hubType: HubType, locale: string): string[] {
+  return locale === 'en' ? POOLS_EN[hubType] : POOLS[hubType];
+}
 
 export function poolSize(hubType: HubType): number {
   return POOLS[hubType].length;
@@ -79,8 +115,9 @@ export function renderIntro(
   hubType: HubType,
   variantIndex: number,
   ctx: IntroContext,
+  locale = 'de',
 ): string {
-  const pool = POOLS[hubType];
+  const pool = poolFor(hubType, locale);
   const safeIndex = ((variantIndex % pool.length) + pool.length) % pool.length;
   const template = pool[safeIndex];
   return renderTemplate(template, ctx);
