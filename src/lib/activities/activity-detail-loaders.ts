@@ -18,7 +18,7 @@ const RESOLVER_COLUMNS = 'id, slug, visible, is_closed, duplicate_of';
 
 /** Detail-Select: Public-View-Spalten + is_closed (Hinweis-Rendering). */
 const DETAIL_COLUMNS =
-  'id, slug, shortid, name, description, description_short, tags, setting, ' +
+  'id, slug, shortid, name, description, description_short, description_en, tags, setting, ' +
   'lat, lng, town, gemeinde_slug, bundesland, opening_times, online_bookable, ' +
   'images, guest_cards, price_hint, affiliate_product, source, is_closed, ' +
   'created_at, updated_at';

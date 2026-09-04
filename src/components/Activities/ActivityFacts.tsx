@@ -9,7 +9,7 @@
  */
 
 import Link from 'next/link';
-import { getTranslations } from 'next-intl/server';
+import { getLocale, getTranslations } from 'next-intl/server';
 import type { NormalizedOpeningWindow } from '@/lib/activities/opening';
 import type { PublicActivity } from '@/lib/activities/public-types';
 import { WEEKDAY_BITS } from '@/lib/activities/opening';
@@ -53,6 +53,11 @@ interface ActivityFactsProps {
 
 export async function ActivityFacts({ activity, gemeindeName }: ActivityFactsProps) {
   const t = await getTranslations('Activity');
+  const locale = await getLocale();
+  const description =
+    locale === 'en'
+      ? activity.description_en
+      : activity.description ?? activity.description_short;
 
   const windows = activity.opening_times ?? [];
   const settingLabel =
@@ -68,10 +73,13 @@ export async function ActivityFacts({ activity, gemeindeName }: ActivityFactsPro
     <section className="max-w-4xl mx-auto px-6 mt-10 grid gap-8 md:grid-cols-[2fr_1fr]">
       <div className="space-y-8 min-w-0">
         {/* Beschreibung */}
-        {(activity.description || activity.description_short) && (
+        {/* fn-17: auf /en die Uebersetzung, sonst der deutsche Text.
+            Ohne Uebersetzung bleibt der deutsche Absatz stehen — die
+            Seite kanonisiert dann ohnehin auf die DE-URL. */}
+        {description && (
           <div>
             <p className="text-white/70 leading-relaxed whitespace-pre-line">
-              {activity.description ?? activity.description_short}
+              {description}
             </p>
           </div>
         )}

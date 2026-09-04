@@ -9,8 +9,10 @@
  *  - Basistabelle via Service-Role -> visible=true UND is_closed=false
  *    EXPLIZIT filtern (Anzeige-Bedingung; dauerhaft geschlossene POIs
  *    rendern zwar, sind aber noindex und gehoeren nicht hierher).
- *  - DE-only (Epic E13): keine /en-URLs, keine xhtml:link-Alternates,
- *    solange keine EN-Uebersetzung der Aktivitaetsinhalte existiert.
+ *  - Zweisprachig PRO POI (fn-17): ein POI mit `description_en` liefert
+ *    DE- UND /en-URL samt xhtml:link-Alternates, ohne Uebersetzung
+ *    bleibt es bei der DE-URL allein. Dieselbe Regel wie bei Events
+ *    ueber `title_en` — nie zwei URLs mit identischem deutschem Text.
  *  - 1000er-Batches (PostgREST-Limit), harter Cap < 50k URLs.
  */
 
@@ -34,6 +36,8 @@ const MAX_ACTIVITIES = 45000;
 interface ActivitySitemapRow {
   slug: string;
   description: string | null;
+  /** fn-17: gesetzt = POI wird zweisprachig gelistet. */
+  description_en: string | null;
   images: unknown;
   opening_times: unknown;
   updated_at: string | null;
@@ -66,7 +70,7 @@ export async function GET(): Promise<NextResponse> {
       while (entries.length < MAX_ACTIVITIES) {
         const { data, error } = await supabase
           .from('poi_activities')
-          .select('slug, description, images, opening_times, updated_at')
+          .select('slug, description, description_en, images, opening_times, updated_at')
           // Anzeige-Bedingung (Basistabelle, Service-Role): beide explizit.
           .eq('visible', true)
           .eq('is_closed', false)
@@ -82,15 +86,27 @@ export async function GET(): Promise<NextResponse> {
         if (!data || data.length === 0) break;
 
         for (const row of data as unknown as ActivitySitemapRow[]) {
-          if (entries.length >= MAX_ACTIVITIES) break;
+          // Ein uebersetzter POI belegt ZWEI Plaetze — beide muessen unter
+          // den Cap passen, sonst stuende ein halbes hreflang-Paar drin.
+          const slots = row.description_en ? 2 : 1;
+          if (entries.length + slots > MAX_ACTIVITIES) break;
           // Noindex-Gate (E7): Thin-POIs kommen NICHT in die Sitemap.
           if (!isActivityIndexable(row)) continue;
-          entries.push({
-            loc: `${BASE_URL}/aktivitaet/${row.slug}`,
-            lastmod: row.updated_at ? toISO(row.updated_at) : toISO(now),
-            changefreq: 'weekly',
-            priority: 0.6,
-          });
+
+          const path = `/aktivitaet/${row.slug}`;
+          const lastmod = row.updated_at ? toISO(row.updated_at) : toISO(now);
+
+          if (row.description_en) {
+            const alternates = [
+              { hreflang: 'de-AT', href: `${BASE_URL}${path}` },
+              { hreflang: 'en', href: `${BASE_URL}/en${path}` },
+              { hreflang: 'x-default', href: `${BASE_URL}${path}` },
+            ];
+            entries.push({ loc: `${BASE_URL}${path}`, lastmod, changefreq: 'weekly', priority: 0.6, alternates });
+            entries.push({ loc: `${BASE_URL}/en${path}`, lastmod, changefreq: 'weekly', priority: 0.5, alternates });
+          } else {
+            entries.push({ loc: `${BASE_URL}${path}`, lastmod, changefreq: 'weekly', priority: 0.6 });
+          }
         }
 
         if (data.length < PAGE) break; // last page

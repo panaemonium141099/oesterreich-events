@@ -863,5 +863,16 @@
     "osmAttributionMiddle": ", lizenziert unter ",
     "osmAttributionSuffix": ". Mehr dazu auf unserer ",
     "osmSourcesLink": "Quellen-Seite"
+  },
+  "ActivityMeta": {
+    "titleSuffixOpening": "Öffnungszeiten & Anfahrt",
+    "titleSuffixInfo": "Infos & Anfahrt",
+    "titleSuffixDirections": "Anfahrt",
+    "descLeadWithType": "{name} in {place} — {type}.",
+    "descLead": "{name} in {place}.",
+    "descTailOpening": "Öffnungszeiten, Karte und Events in der Nähe.",
+    "descTail": "Karte, Anfahrt und Events in der Nähe.",
+    "austria": "Österreich",
+    "notFound": "Aktivität nicht gefunden"
   }
 }
