@@ -18,26 +18,24 @@ import { runTranslationBatch } from '@/lib/i18n/translate-batch';
 type Row = { id: string; title: string | null; description: string | null; start_date: string };
 
 /**
- * Minimaler Supabase-Stub: `select(...)` liefert die noch unübersetzten
- * Zeilen, `update(...).eq('id')` markiert sie als übersetzt — genau das
- * Verhalten, auf das sich das offsetfreie Paging verlässt.
+ * Minimaler Supabase-Stub. Bildet das nach, worauf der Batch sich verlaesst:
+ * uebersetzte Zeilen fallen aus der Ergebnismenge, fehlgeschlagene bleiben
+ * drin — und `.range(from, to)` schneidet daraus das angeforderte Fenster.
  */
-function makeSupabase(rows: Row[], opts: { updateError?: boolean } = {}) {
+function makeSupabase(rows: Row[], opts: { updateError?: boolean; failIds?: Set<string> } = {}) {
   const translated = new Set<string>();
   const updates: string[] = [];
+  const ranges: Array<[number, number]> = [];
 
   const builder = () => {
     const chain: Record<string, unknown> = {};
-    let limitValue = 500;
     const self = new Proxy(chain, {
       get(_t, prop) {
-        if (prop === 'limit') {
-          return (n: number) => {
-            limitValue = n;
-            return Promise.resolve({
-              data: rows.filter(r => !translated.has(r.id)).slice(0, limitValue),
-              error: null,
-            });
+        if (prop === 'range') {
+          return (from: number, to: number) => {
+            ranges.push([from, to]);
+            const open = rows.filter(r => !translated.has(r.id));
+            return Promise.resolve({ data: open.slice(from, to + 1), error: null });
           };
         }
         if (prop === 'then') return undefined;
@@ -63,6 +61,7 @@ function makeSupabase(rows: Row[], opts: { updateError?: boolean } = {}) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any,
     updates,
+    ranges,
   };
 }
 
@@ -148,6 +147,35 @@ describe('runTranslationBatch', () => {
     expect(updates).toEqual([]);
     expect(result.translated).toBe(2);
     expect(result.processed).toBe(2);
+  });
+
+  it('arbeitet weiter, wenn mehr Events fehlschlagen als eine Seite fasst', async () => {
+    // Der Fehler, der am 2026-09-04 den Backfill nach 8 994 von 75 936
+    // Events beendete: Fehlschlaege bleiben in der Kandidaten-Query stehen
+    // und sortieren vor allem Unberuehrten. Ohne Offset lieferte die
+    // Query irgendwann nur noch schon versuchte Zeilen — der Batch hielt
+    // das fuer "nichts mehr offen".
+    //
+    // FETCH_CHUNK ist 500, also muessen hier >500 Events scheitern, bevor
+    // ein einziges durchgeht.
+    const FAILING = 520;
+    const rows = [
+      ...Array.from({ length: FAILING }, (_, i) => row(`fail-${String(i).padStart(4, '0')}`)),
+      row('zzz-ok'),
+    ];
+    translateMock.mockImplementation((title: string) =>
+      Promise.resolve(String(title).startsWith('Titel fail-')
+        ? null
+        : { title_en: 'Title', description_en: null }),
+    );
+
+    const { client, updates } = makeSupabase(rows);
+    const result = await runTranslationBatch(client, 'key', { limit: 5000, concurrency: 8 });
+
+    expect(result.failed).toBe(FAILING);
+    expect(result.translated).toBe(1);
+    expect(updates).toEqual(['zzz-ok']);
+    expect(result.processed).toBe(FAILING + 1);
   });
 
   it('bricht bei erreichter Deadline ab', async () => {
