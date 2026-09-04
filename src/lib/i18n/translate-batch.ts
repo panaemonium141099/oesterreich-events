@@ -101,22 +101,35 @@ export interface BatchResult extends BatchProgress {
 }
 
 /**
- * Holt die nächsten unübersetzten Events.
+ * Holt eine Seite unuebersetzter Events, ab `offset` in der Reihenfolge
+ * (start_date ASC, id ASC).
  *
- * Bewusst OHNE Offset-Paging: jeder übersetzte Event fällt durch das
- * `title_en IS NULL` aus dem Filter, ein Offset würde also bei jedem
- * Folgeaufruf Zeilen überspringen. Stattdessen immer wieder die erste
- * Seite — solange geschrieben wird, wandert das Fenster von allein.
- * `skipIds` fängt die Events ab, die in diesem Lauf schon versucht wurden
- * und (z. B. mangels Titel) nie ein `title_en` bekommen — ohne das würde
- * die Query sie endlos erneut liefern.
+ * Warum ein Offset noetig ist — das hat einen kompletten Backfill gekostet:
+ * uebersetzte Events fallen durch `title_en IS NULL` aus dem Filter, aber
+ * FEHLGESCHLAGENE nicht. Weil strikt nach Datum aufsteigend gearbeitet
+ * wird, sammeln sich die Fehlschlaege am Anfang der Ergebnismenge an.
+ * Sobald es mehr als eine Seite voll davon sind, liefert "immer wieder die
+ * erste Seite" nur noch Zeilen, die dieser Lauf schon versucht hat — der
+ * Batch hielt das faelschlich fuer "nichts mehr offen" und beendete sich.
+ * Gemessen am 2026-09-04: Abbruch nach 8 994 von 75 936 Events, exakt als
+ * die Fehlerzahl (502) die Chunk-Groesse (500) ueberschritt.
+ *
+ * `offset` = Anzahl der bereits versuchten, weiterhin unuebersetzten
+ * Zeilen (failed + skipped). Da jede Zeile vor der aktuellen Position
+ * schon versucht wurde, sortieren genau diese vor allen unberuehrten —
+ * der Offset ueberspringt sie also exakt. `skipIds` bleibt als zweite
+ * Sicherung: greift der Offset einmal daneben (z. B. weil ein Scraper
+ * parallel ein Event mit frueherem Datum einfuegt), wird die Zeile nicht
+ * doppelt bezahlt.
  */
 export async function fetchCandidates(
   supabase: SupabaseClient,
   chunkSize: number,
   skipIds: Set<string>,
-): Promise<BatchCandidate[]> {
+  offset = 0,
+): Promise<{ rows: BatchCandidate[]; rawCount: number }> {
   const today = new Date().toISOString().slice(0, 10);
+  const size = Math.min(chunkSize, FETCH_CHUNK);
   const { data, error } = await supabase
     .from('events')
     .select('id, title, description, start_date')
@@ -126,11 +139,14 @@ export async function fetchCandidates(
     .gte('quality_score', MIN_QUALITY_SCORE)
     .not('title', 'is', null)
     .order('start_date', { ascending: true })
-    .limit(Math.min(chunkSize, FETCH_CHUNK));
+    .order('id', { ascending: true })
+    .range(offset, offset + size - 1);
 
   if (error) throw new Error(`Kandidaten-Query fehlgeschlagen: ${error.message}`);
-  return (data ?? []).filter(e => !skipIds.has(e.id));
+  const raw = data ?? [];
+  return { rows: raw.filter(e => !skipIds.has(e.id)), rawCount: raw.length };
 }
+
 
 /**
  * Übersetzt bis zu `limit` Events und schreibt das Ergebnis zurück.
@@ -153,6 +169,7 @@ export async function runTranslationBatch(
   const progress: BatchProgress = { processed: 0, translated: 0, skipped: 0, failed: 0 };
   const attempted = new Set<string>();
   const errorKinds = new Map<string, number>();
+  let skippedPages = 0;
   let stoppedByDeadline = false;
 
   while (progress.processed < opts.limit) {
@@ -162,8 +179,23 @@ export async function runTranslationBatch(
     }
 
     const remaining = opts.limit - progress.processed;
-    const candidates = await fetchCandidates(supabase, Math.min(remaining, FETCH_CHUNK), attempted);
-    if (candidates.length === 0) break;
+    // Fehlschlaege bleiben im Filter stehen und sortieren vor allem
+    // Unberuehrten — ohne diesen Offset liefert die Query irgendwann nur
+    // noch schon versuchte Zeilen (siehe fetchCandidates).
+    const offset = progress.failed + progress.skipped + skippedPages;
+    const { rows: candidates, rawCount } = await fetchCandidates(
+      supabase,
+      Math.min(remaining, FETCH_CHUNK),
+      attempted,
+      offset,
+    );
+    // Leere Seite trotz voller Roh-Antwort: der Offset lag daneben, also
+    // eine Seite weiterruecken statt den Lauf zu beenden.
+    if (candidates.length === 0) {
+      if (rawCount === 0) break;
+      skippedPages += rawCount;
+      continue;
+    }
 
     // Worker-Pool statt Slice-für-Slice: bei `Promise.all` über feste
     // Scheiben wartet die ganze Scheibe auf ihren langsamsten Call, und
