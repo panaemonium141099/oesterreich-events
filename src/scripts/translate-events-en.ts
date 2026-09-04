@@ -100,9 +100,17 @@ async function main() {
     }
   }
 
-  // Ein Lauf mit ausschließlich Fehlern ist fast immer ein Auth-/Quota-
-  // Problem und darf nicht als Erfolg durchgehen (sonst meldet ein Cron
-  // grün, während nichts geschrieben wurde).
+  // Tageskontingent erschöpft ist der Normalfall auf dem Free Tier
+  // (10 000 Requests/Tag): kein Fehler, sondern "morgen weiter". Der
+  // Timer läuft täglich, der Filter title_en IS NULL macht dort weiter.
+  if (result.stoppedByQuota) {
+    console.log('  Abbruch: Gemini-Tageskontingent erschöpft — der nächste Lauf macht weiter.');
+    return;
+  }
+
+  // Ein Lauf mit ausschließlich Fehlern ist fast immer ein Auth-Problem
+  // und darf nicht als Erfolg durchgehen (sonst meldet ein Cron grün,
+  // während nichts geschrieben wurde).
   if (result.processed > 0 && result.translated === 0 && result.failed > 0) {
     console.error('ERROR: kein einziges Event übersetzt — Gemini-Key oder Quota prüfen.');
     process.exit(1);

@@ -62,5 +62,10 @@ describe('OSM-Whitelist (fn-18.7)', () => {
     expect(osmCategoryLabel('aussichtspunkt')).toBe('Aussichtspunkt');
     expect(osmCategoryLabel('burg-schloss')).toBe('Burg & Schloss');
     expect(osmCategoryLabel('unbekannte-kategorie')).toBe('Unbekannte Kategorie');
+    // fn-17: EN-Labels; unbekannte Kategorien fallen auf den deutschen
+    // Prettifier zurueck statt zu crashen.
+    expect(osmCategoryLabel('aussichtspunkt', 'en')).toBe('Viewpoint');
+    expect(osmCategoryLabel('burg-schloss', 'en')).toBe('Castle & palace');
+    expect(osmCategoryLabel('unbekannte-kategorie', 'en')).toBe('Unbekannte Kategorie');
   });
 });

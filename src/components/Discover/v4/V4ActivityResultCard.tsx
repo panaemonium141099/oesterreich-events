@@ -11,6 +11,7 @@
  * eigener Aktivitäts-Typ.
  */
 
+import { useLocale } from 'next-intl';
 import Link from 'next/link';
 import type { ActivitySearchMatch } from '@/lib/activities/public-types';
 import { activityTagLabel } from '@/lib/activities/tag-labels';
@@ -31,9 +32,13 @@ function firstImageUrl(images: ActivitySearchMatch['images']): string | null {
 }
 
 export function V4ActivityResultCard({ activity }: { activity: ActivitySearchMatch }) {
+  const locale = useLocale();
   const image = firstImageUrl(activity.images);
   const place = [activity.town, activity.bundesland].filter(Boolean).join(' · ');
-  const tagLabels = activity.tags.slice(0, 2).map(activityTagLabel);
+  // Kein `.map(activityTagLabel)` — die Funktion nimmt seit fn-17 eine
+  // Locale als zweiten Parameter, und map() haette den Array-Index
+  // hineingereicht.
+  const tagLabels = activity.tags.slice(0, 2).map(tag => activityTagLabel(tag, locale));
 
   return (
     <Link

@@ -181,12 +181,10 @@ export async function GET(): Promise<NextResponse> {
     for (const g of ALL_GEMEINDEN) {
       // The 5 major-city hubs (Linz/Graz/Salzburg/Innsbruck/Klagenfurt) carry
       // the retired /stadt URLs' priority (0.8); villages stay at 0.5.
-      entries.push({
-        loc: `${BASE_URL}/gemeinde/${g.slug}`,
-        lastmod: toISO(now),
-        changefreq: 'daily',
-        priority: isCityHub(g.slug) ? 0.8 : 0.5,
-      });
+      // fn-17: seit die Gemeinde-Hubs uebersetzt sind (Copy, Metadata, FAQ,
+      // Intro-Pool) wird auch hier zweisprachig gelistet — vorher waren die
+      // ~2 028 Hubs bewusst DE-only, weil das Template deutsch war.
+      pushBilingual(`/gemeinde/${g.slug}`, isCityHub(g.slug) ? 0.8 : 0.5);
     }
   } catch (err) {
     console.error('[sitemap-core] gemeinde import failed:', err);

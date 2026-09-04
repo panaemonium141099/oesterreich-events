@@ -62,11 +62,15 @@ export async function getHubIntro(
   hubType: HubType,
   hubPath: string,
   ctx: IntroContext,
+  // fn-17: der Rotations-Index wird PRO HUB gespeichert, nicht pro
+  // Sprache — `hubPath` bleibt deshalb die praefixlose DE-URL. Beide
+  // Sprachversionen zeigen dieselbe Variante, nur in ihrer Sprache.
+  locale = 'de',
 ): Promise<{ intro: string; lastModifiedAt: string | null; variantIndex: number }> {
   const row = await getRefreshRow(hubPath);
   const variantIndex = row?.intro_variant_index ?? 0;
   return {
-    intro: renderIntro(hubType, variantIndex, ctx),
+    intro: renderIntro(hubType, variantIndex, ctx, locale),
     lastModifiedAt: row?.last_refreshed_at ?? null,
     variantIndex,
   };

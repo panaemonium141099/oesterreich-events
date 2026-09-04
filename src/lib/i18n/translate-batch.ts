@@ -49,6 +49,18 @@ const GEMINI_TIMEOUT_MS = 25_000;
 const RETRY_DELAY_MS = 2_000;
 
 /**
+ * So viele Quota-Fehler am Stueck beenden den Lauf.
+ *
+ * Der Gemini-Key laeuft auf dem Free Tier: 10 000 Requests pro Tag und
+ * Modell. Ist der Deckel erreicht, antwortet JEDER weitere Call mit 429 —
+ * am 2026-09-04 lief ein Backfill danach noch ueber 2 400 Events und
+ * verbrannte mit dem Retry ~4 800 sinnlose Requests, die am naechsten Tag
+ * erneut gegen das Kontingent zaehlen wuerden. 25 in Folge sind eindeutig
+ * das Tageslimit und nicht mehr die vereinzelten transienten Fehler.
+ */
+const QUOTA_ABORT_STREAK = 25;
+
+/**
  * Verdichtet eine Fehlermeldung auf eine handvoll Kategorien, damit die
  * Zusammenfassung eines Laufs mit 80 000 Events lesbar bleibt.
  */
@@ -95,6 +107,8 @@ export interface BatchOptions {
 export interface BatchResult extends BatchProgress {
   /** true, wenn wegen deadlineMs abgebrochen wurde. */
   stoppedByDeadline: boolean;
+  /** true, wenn das Tageskontingent von Gemini erschoepft war. */
+  stoppedByQuota: boolean;
   durationMs: number;
   /** Fehlerursachen nach Kategorie, absteigend nach Haeufigkeit. */
   errorKinds: Array<{ reason: string; count: number }>;
@@ -170,13 +184,16 @@ export async function runTranslationBatch(
   const attempted = new Set<string>();
   const errorKinds = new Map<string, number>();
   let skippedPages = 0;
+  let quotaStreak = 0;
   let stoppedByDeadline = false;
+  let stoppedByQuota = false;
 
   while (progress.processed < opts.limit) {
     if (deadline && Date.now() >= deadline) {
       stoppedByDeadline = true;
       break;
     }
+    if (stoppedByQuota) break;
 
     const remaining = opts.limit - progress.processed;
     // Fehlschlaege bleiben im Filter stehen und sortieren vor allem
@@ -209,6 +226,10 @@ export async function runTranslationBatch(
         stoppedByDeadline = true;
         return null;
       }
+      if (quotaStreak >= QUOTA_ABORT_STREAK) {
+        stoppedByQuota = true;
+        return null;
+      }
       return next < candidates.length ? candidates[next++] : null;
     };
 
@@ -236,6 +257,8 @@ export async function runTranslationBatch(
             onAttemptError: reason => {
               const bucket = errorBucket(reason);
               errorKinds.set(bucket, (errorKinds.get(bucket) ?? 0) + 1);
+              if (bucket === 'Quota/Rate-Limit') quotaStreak++;
+              else quotaStreak = 0;
             },
           });
         } catch {
@@ -263,7 +286,10 @@ export async function runTranslationBatch(
           .eq('id', event.id);
 
         if (error) progress.failed++;
-        else progress.translated++;
+        else {
+          progress.translated++;
+          quotaStreak = 0;
+        }
         opts.onProgress?.(progress);
       }
     };
@@ -274,6 +300,7 @@ export async function runTranslationBatch(
   return {
     ...progress,
     stoppedByDeadline,
+    stoppedByQuota,
     durationMs: Date.now() - startedAt,
     errorKinds: [...errorKinds.entries()]
       .map(([reason, count]) => ({ reason, count }))

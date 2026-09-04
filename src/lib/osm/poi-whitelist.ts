@@ -194,7 +194,72 @@ export function classifyOsmTags(
 }
 
 /** Deutsches Anzeige-Label zu einer category-ID (Fallback: Prettifier). */
-export function osmCategoryLabel(category: string): string {
+/**
+ * Englische Kategorie-Labels (fn-17). Schluessel ist die Kategorie-Slug,
+ * nicht der OSM-Tag — mehrere Tags teilen sich eine Kategorie. Fehlt ein
+ * Eintrag, faellt `osmCategoryLabel` auf das deutsche Label zurueck.
+ */
+const OSM_CATEGORY_LABELS_EN: Readonly<Record<string, string>> = {
+  angeln: 'Fishing',
+  aquarium: 'Aquarium',
+  archaeologie: 'Archaeology',
+  ausflugsbahn: 'Scenic railway',
+  aussichtspunkt: 'Viewpoint',
+  bad: 'Pool & swimming',
+  bibliothek: 'Library',
+  bowling: 'Bowling & skittles',
+  'burg-schloss': 'Castle & palace',
+  campingplatz: 'Campsite',
+  denkmal: 'Monument',
+  eislaufen: 'Ice skating',
+  'escape-room': 'Escape room',
+  fahrgeschaeft: 'Fairground ride',
+  fitness: 'Fitness',
+  flugsport: 'Air sports',
+  freizeitpark: 'Amusement park',
+  galerie: 'Gallery',
+  gipfel: 'Summit',
+  gletscher: 'Glacier',
+  golf: 'Golf',
+  hoehle: 'Cave',
+  huette: 'Mountain hut',
+  kino: 'Cinema',
+  klettern: 'Climbing',
+  kulturzentrum: 'Cultural centre',
+  labyrinth: 'Maze & labyrinth',
+  marina: 'Marina & boat dock',
+  minigolf: 'Mini golf',
+  museum: 'Museum',
+  naturbeobachtung: 'Wildlife watching',
+  naturschutzgebiet: 'Nature reserve',
+  park: 'Park',
+  picknickplatz: 'Picnic area',
+  planetarium: 'Planetarium',
+  quelle: 'Spring',
+  reiten: 'Horse riding',
+  rodelbahn: 'Toboggan run',
+  ruine: 'Ruins',
+  sauna: 'Sauna',
+  schaubergwerk: 'Show mine',
+  sehenswuerdigkeit: 'Attraction',
+  sommerrodelbahn: 'Summer toboggan run',
+  spielplatz: 'Playground',
+  sportanlage: 'Sports facility',
+  sportplatz: 'Sports ground',
+  strand: 'Beach & bathing spot',
+  theater: 'Theatre',
+  tierpark: 'Zoo & wildlife park',
+  trampolinpark: 'Trampoline park',
+  wasserfall: 'Waterfall',
+  wasserrutsche: 'Water slide',
+  wassersport: 'Water sports',
+};
+
+export function osmCategoryLabel(category: string, locale = 'de'): string {
+  if (locale === 'en') {
+    const en = OSM_CATEGORY_LABELS_EN[category];
+    if (en) return en;
+  }
   for (const key of OSM_KEY_PRIORITY) {
     for (const def of Object.values(OSM_WHITELIST[key])) {
       if (def.category === category) return def.label;

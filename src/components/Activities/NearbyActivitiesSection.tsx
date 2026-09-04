@@ -20,7 +20,7 @@
  * Aktivitaets-Detailseite (Snippet-Ausnahme, siehe Projekt-Memory).
  */
 
-import { getTranslations } from 'next-intl/server';
+import { getLocale, getTranslations } from 'next-intl/server';
 import { Link as LocaleLink } from '@/i18n/navigation';
 import { activityTagLabel, deriveActivityChips } from '@/lib/activities/tag-labels';
 import { ActivityCardImage } from './ActivityCardImage';
@@ -47,7 +47,7 @@ function distanceLabel(km: number): string {
 // Gemeinde-Hub: "Freizeit & Ausfluege"
 // ───────────────────────────────────────────────────────────────────────
 
-export function GemeindeActivitiesSection({
+export async function GemeindeActivitiesSection({
   activities,
   gemeindeName,
 }: {
@@ -56,15 +56,22 @@ export function GemeindeActivitiesSection({
 }) {
   if (activities.length < MIN_HUB_ACTIVITIES) return null;
 
-  const chips = deriveActivityChips(activities);
+  // fn-17: async + getTranslations wie EventNearbyActivities weiter unten.
+  // setRequestLocale hat die aufrufende Seite bereits gesetzt, der
+  // ISR-Pass bleibt also statisch.
+  const [t, tAct, locale] = await Promise.all([
+    getTranslations('GemeindeHub'),
+    getTranslations('Activities'),
+    getLocale(),
+  ]);
+  const chips = deriveActivityChips(activities, locale);
   const shown = activities.slice(0, HUB_CARD_LIMIT);
 
   return (
     <section className="mb-12">
-      <h2 className="text-xl font-semibold mb-3">Freizeit &amp; Ausflüge</h2>
+      <h2 className="text-xl font-semibold mb-3">{t('activitiesTitle')}</h2>
       <p className="text-sm text-white/50 mb-4">
-        {activities.length} Freizeitaktivitäten und Ausflugsziele rund um{' '}
-        {gemeindeName} — dauerhaft verfügbar, unabhängig vom Event-Kalender.
+        {t('activitiesLead', { count: activities.length, name: gemeindeName })}
       </p>
       {chips.length > 0 && (
         <div className="flex flex-wrap gap-2 mb-5">
@@ -93,8 +100,8 @@ export function GemeindeActivitiesSection({
               <ActivityCardImage
                 images={a.images}
                 alt={a.name}
-                fallbackLabel={a.tags?.[0] ? activityTagLabel(a.tags[0]) : 'Freizeit & Ausflug'}
-                creditPrefix="Bild:"
+                fallbackLabel={a.tags?.[0] ? activityTagLabel(a.tags[0], locale) : tAct('cardFallback')}
+                creditPrefix={tAct('imageCredit')}
                 aspectClass="aspect-[4/3]"
               />
               <div className="p-3">

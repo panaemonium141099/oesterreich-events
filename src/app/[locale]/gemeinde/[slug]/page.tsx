@@ -65,6 +65,16 @@ import { getHubIntro } from '@/lib/seo/hub-refresh';
 import { getCityHub } from '@/lib/hubs/city-hubs';
 import { HubSearchCTA } from '@/components/Hub/HubSearchCTA';
 import { HubSmartCTA } from '@/components/Hub/HubSmartCTA';
+import { hasLocale } from 'next-intl';
+import { getTranslations, setRequestLocale } from 'next-intl/server';
+import { routing, type AppLocale } from '@/i18n/routing';
+import { bilingualAlternates } from '@/lib/seo/canonical';
+import { dateLocaleFor } from '@/lib/i18n/date-locale';
+import { bundeslandDisplayName, placeDisplayName } from '@/lib/i18n/bundesland-names';
+
+function resolveLocale(raw: string): AppLocale {
+  return hasLocale(routing.locales, raw) ? raw : routing.defaultLocale;
+}
 
 export const revalidate = 3600;
 export const dynamicParams = true;
@@ -176,11 +186,13 @@ function loadNearbyOsmPois(g: AustrianGemeinde) {
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ slug: string }>;
+  params: Promise<{ locale: string; slug: string }>;
 }): Promise<Metadata> {
-  const { slug } = await params;
+  const { locale: rawLocale, slug } = await params;
+  const locale = resolveLocale(rawLocale);
+  const t = await getTranslations({ locale, namespace: 'GemeindeHub' });
   const g = getGemeindeBySlug(slug);
-  if (!g) return { title: 'Gemeinde nicht gefunden' };
+  if (!g) return { title: t('notFound') };
 
   const [events, activities] = await Promise.all([
     loadNearbyEvents(g),
@@ -198,15 +210,15 @@ export async function generateMetadata({
   // year baked in (the GSC data shows "<event> 2026" is how people search).
   const cityHub = getCityHub(g.slug);
   const { title: defaultTitle, description } = buildHubMeta({
-    name: g.name,
+    name: placeDisplayName(g.name, locale),
     bezirk: g.bezirk ?? null,
     plz: g.plz,
-    bundesland: g.bundesland,
+    bundesland: bundeslandDisplayName(g.bundesland, locale),
     eventCount: count,
     activityCount,
     isCityHub: !!cityHub,
     year: new Date().getFullYear(),
-  });
+  }, t);
 
   // Resolve the A/B experiment (if one is running for 'gemeinde' scope).
   // Override the title ONLY when the variant explicitly provides a
@@ -216,7 +228,10 @@ export async function generateMetadata({
   // fn-18: Overrides gelten NUR im event-only-Fall (a) — weder Mixed-/
   // Aktivitäts-Copy (b/c) noch leere noindex-Hubs (d) dürfen von stale
   // Event-Varianten überschrieben werden (Contract-Erweiterung Follow-up).
-  const experiment = hubExperimentAllowed(count, activityCount)
+  // fn-17: NUR auf Deutsch. Die Varianten-Templates liegen als deutsche
+  // Strings in der DB (seo_experiments) — auf /en wuerden sie den
+  // uebersetzten Title wieder durch deutschen Text ersetzen.
+  const experiment = locale === 'de' && hubExperimentAllowed(count, activityCount)
     ? await resolveExperimentForScope('gemeinde', {
         name: g.name,
         count,
@@ -225,17 +240,17 @@ export async function generateMetadata({
       })
     : null;
   const title = experiment?.payload.title ?? defaultTitle;
-  const canonicalUrl = `https://lasstreffen.at/gemeinde/${g.slug}`;
+  const alternates = bilingualAlternates(`/gemeinde/${g.slug}`, locale);
 
   const metadata: Metadata = {
     title: { absolute: title.length > 60 ? title.slice(0, 57).trimEnd() + '…' : title },
     description,
-    alternates: { canonical: canonicalUrl },
+    alternates,
     openGraph: {
       title,
       description,
       type: 'website',
-      url: canonicalUrl,
+      url: alternates.canonical,
     },
     twitter: { card: 'summary', title, description },
   };
@@ -263,11 +278,22 @@ export async function generateMetadata({
 export default async function GemeindeHubPage({
   params,
 }: {
-  params: Promise<{ slug: string }>;
+  params: Promise<{ locale: string; slug: string }>;
 }) {
-  const { slug } = await params;
+  const { locale: rawLocale, slug } = await params;
+  const locale = resolveLocale(rawLocale);
+  // fn-17: setRequestLocale VOR jeder Uebersetzung, sonst kippt next-intl
+  // die Route in dynamisches Rendering und die ISR-Shell ist weg.
+  setRequestLocale(locale);
+  const t = await getTranslations({ locale, namespace: 'GemeindeHub' });
+  const tFaq = await getTranslations({ locale, namespace: 'HubFAQ' });
+  const numberLocale = dateLocaleFor(locale);
   const g = getGemeindeBySlug(slug);
   if (!g) notFound();
+  // Ortsnamen sind Eigennamen; uebersetzt wird nur, was im Englischen fest
+  // etabliert ist (Wien -> Vienna). Siehe placeDisplayName.
+  const placeName = placeDisplayName(g.name, locale);
+  const blName = bundeslandDisplayName(g.bundesland, locale);
 
   const [events, activities, osmPois] = await Promise.all([
     loadNearbyEvents(g),
@@ -275,7 +301,7 @@ export default async function GemeindeHubPage({
     loadNearbyOsmPois(g),
   ]);
   const neighbours = findNeighbourGemeinden(g, 8);
-  const jsonLd = buildGemeindeHubJsonLd(g, events, activities);
+  const jsonLd = buildGemeindeHubJsonLd(g, events, activities, { t: tFaq, numberLocale });
 
   // fn-13 phase 10 — A/B title experiment. `resolveExperimentForScope`
   // returns null when no experiment is running for 'gemeinde' scope
@@ -286,7 +312,8 @@ export default async function GemeindeHubPage({
   // deterministic within a period. See src/lib/seo/experiments.ts.
   // fn-18: wie in generateMetadata NUR im event-only-Fall (a) —
   // Mixed-/Aktivitäts-H1s und leere Hubs bleiben ohne Event-Varianten.
-  const experiment = hubExperimentAllowed(events.length, activities.length)
+  // Wie in generateMetadata: Varianten sind deutsche DB-Templates.
+  const experiment = locale === 'de' && hubExperimentAllowed(events.length, activities.length)
     ? await resolveExperimentForScope('gemeinde', {
         name: g.name,
         count: events.length,
@@ -303,11 +330,11 @@ export default async function GemeindeHubPage({
   const h1Text = experiment?.payload.heading_prefix
     ? `${experiment.payload.heading_prefix} ${g.name}`
     : hubDefaultH1({
-        name: g.name,
+        name: placeName,
         eventCount: events.length,
         activityCount: activities.length,
         isCityHub: !!cityHub,
-      });
+      }, t);
 
   // fn-13 phase 10 — rotating intro paragraph. The monthly content-
   // refresh cron picks top-traffic hubs and increments their
@@ -315,11 +342,11 @@ export default async function GemeindeHubPage({
   // `src/lib/seo/intro-pool.ts`. Freshness signal to Google without
   // rewriting everything by hand.
   const { intro: introParagraph } = await getHubIntro('gemeinde', `/gemeinde/${g.slug}`, {
-    name: g.name,
+    name: placeName,
     count: events.length,
     plz: g.plz,
-    bundesland: g.bundesland,
-  });
+    bundesland: blName,
+  }, locale);
 
   return (
     <>
@@ -335,13 +362,13 @@ export default async function GemeindeHubPage({
         <div className="max-w-5xl mx-auto px-4 py-8">
           {/* Breadcrumb */}
           <nav className="text-sm text-white/50 mb-4" aria-label="Breadcrumb">
-            <Link href="/" className="hover:text-white/80">Home</Link>
+            <Link href="/" className="hover:text-white/80">{t('crumbHome')}</Link>
             <span className="mx-2">›</span>
             <Link href={`/${slugifyBundesland(g.bundesland)}`} className="hover:text-white/80">
-              {g.bundesland}
+              {blName}
             </Link>
             <span className="mx-2">›</span>
-            <span>{g.name}</span>
+            <span>{placeName}</span>
           </nav>
 
           {/* Header */}
@@ -350,9 +377,9 @@ export default async function GemeindeHubPage({
               {h1Text}
             </h1>
             <p className="text-white/60">
-              {g.plz} {g.name}
-              {g.bezirk ? ` · Bezirk ${g.bezirk}` : ''}
-              {' · '}{g.bundesland}
+              {g.plz} {placeName}
+              {g.bezirk ? ` · ${t('bezirkLabel', { bezirk: g.bezirk })}` : ''}
+              {' · '}{blName}
             </p>
             {cityHub ? (
               mode === 'mixed' || mode === 'activities' ? (
@@ -362,8 +389,8 @@ export default async function GemeindeHubPage({
                 // Intro bleibt den event-only/empty-Fällen vorbehalten).
                 <p className="mt-3 text-white/80 leading-relaxed max-w-2xl">
                   {mode === 'mixed'
-                    ? hubMixedHeroLead(g.name, events.length, activities.length)
-                    : hubActivityHeroLead(g.name, activities.length)}
+                    ? hubMixedHeroLead(placeName, events.length, activities.length, t)
+                    : hubActivityHeroLead(placeName, activities.length, t)}
                 </p>
               ) : (
                 <>
@@ -381,18 +408,14 @@ export default async function GemeindeHubPage({
                   // fn-18 Fall (b) — auch mit 1-2 Rest-Events: Aktivitäts-
                   // Copy als Hauptinhalt; der "keine Events"-Hinweis wird
                   // unten zum kleinen Sektionshinweis, nie zum Empty-State.
-                  hubActivityHeroLead(g.name, activities.length)
+                  hubActivityHeroLead(placeName, activities.length, t)
                 ) : mode === 'mixed' ? (
                   // fn-18 Fall (c): kombinierte Copy (Events + Freizeit).
-                  hubMixedHeroLead(g.name, events.length, activities.length)
+                  hubMixedHeroLead(placeName, events.length, activities.length, t)
                 ) : events.length > 0 ? (
                   introParagraph
                 ) : (
-                  <>
-                    Aktuell keine Events im Umkreis um {g.name} gefunden.
-                    Schau in einer Nachbar-Gemeinde nach — eine Liste findest du unten
-                    auf der Seite.
-                  </>
+                  t('heroEmpty', { name: placeName })
                 )}
               </p>
             )}
@@ -408,18 +431,18 @@ export default async function GemeindeHubPage({
                 placeName: g.name,
                 placePostalCode: g.plz,
               }}
-              label={`Alle Veranstaltungen in ${g.name} durchsuchen`}
+              label={t('searchCta', { name: placeName })}
             />
             <HubSmartCTA
               surface="gemeinde-hub"
-              query={`Was kann man in ${g.name} unternehmen?`}
+              query={t('smartCta', { name: placeName })}
             />
           </div>
 
           {/* Event grid */}
           {events.length > 0 && (
             <section className="mb-12">
-              <h2 className="text-xl font-semibold mb-4">Kommende Veranstaltungen</h2>
+              <h2 className="text-xl font-semibold mb-4">{t('sectionEvents')}</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {events.map(e => (
                   <Link
@@ -439,8 +462,8 @@ export default async function GemeindeHubPage({
                     </div>
                     <div className="p-3">
                       <div className="text-xs text-white/50 mb-1">
-                        {formatDateLong(e.start_date)}
-                        {formatTime(e.start_date) && ` · ${formatTime(e.start_date)}`}
+                        {formatDateLong(e.start_date, numberLocale)}
+                        {formatTime(e.start_date, numberLocale) && ` · ${formatTime(e.start_date, numberLocale)}`}
                       </div>
                       <div className="font-semibold leading-snug line-clamp-2 mb-1">
                         {e.title}
@@ -488,10 +511,9 @@ export default async function GemeindeHubPage({
 
           {/* Neighbour gemeinden */}
           <section className="mb-12">
-            <h2 className="text-xl font-semibold mb-3">Nachbar-Gemeinden</h2>
+            <h2 className="text-xl font-semibold mb-3">{t('neighboursTitle')}</h2>
             <p className="text-sm text-white/50 mb-4">
-              Events auch in der Umgebung von {g.name} — die 8 nächstgelegenen
-              Orte mit eigener Event-Übersicht.
+              {t('neighboursLead', { name: placeName })}
             </p>
             <div className="flex flex-wrap gap-2">
               {neighbours.map(n => (
@@ -515,50 +537,26 @@ export default async function GemeindeHubPage({
               Finding Runde 2); events/empty bleiben wortgleich wie vorher. */}
           <section className="text-sm text-white/50 leading-relaxed border-t border-white/10 pt-6">
             <p className="mb-2">
-              <strong className="text-white/70">{g.name}</strong> liegt im Bezirk
-              {g.bezirk ? ` ${g.bezirk}` : ''} in {g.bundesland}, Österreich.{' '}
-              {mode === 'activities' ? (
-                <>
-                  Auf LassTreffen.at findest du dauerhafte Freizeitaktivitäten
-                  und Ausflugsziele in {g.name} und Umgebung — von Bädern und
-                  Museen bis zu Wander-, Rad- und Familienzielen.
-                </>
-              ) : mode === 'mixed' ? (
-                <>
-                  Auf LassTreffen.at findest du täglich aktualisierte
-                  Veranstaltungen sowie dauerhafte Freizeitaktivitäten in{' '}
-                  {g.name} und Umgebung — von Dorffesten, Märkten und Konzerten
-                  bis zu Bädern, Museen und Ausflugszielen.
-                </>
-              ) : (
-                <>
-                  Auf LassTreffen.at findest du täglich aktualisierte
-                  Veranstaltungen in {g.name} und Umgebung — von Dorffesten und
-                  Märkten bis zu Konzerten, Festivals und Kulturveranstaltungen.
-                </>
-              )}
+              {/* Der Ortsname bleibt als <strong> ausgezeichnet — deshalb die
+                  Aufteilung in Praefix/Suffix statt eines Message-Strings mit
+                  eingebettetem Markup. */}
+              <strong className="text-white/70">{placeName}</strong>
+              {t('seoLocation', {
+                bezirkPart: g.bezirk ? t('seoBezirkPart', { bezirk: g.bezirk }) : '',
+                bundesland: blName,
+              })}{' '}
+              {mode === 'activities'
+                ? t('seoBodyActivities', { name: placeName })
+                : mode === 'mixed'
+                ? t('seoBodyMixed', { name: placeName })
+                : t('seoBodyEvents', { name: placeName })}
             </p>
             <p>
-              {mode === 'activities' ? (
-                <>
-                  Die Aktivitäts-Liste stammt aus den offiziellen
-                  Tourismus-Datenbanken der Regionen; dauerhaft geschlossene
-                  Betriebe werden automatisch erkannt und entfernt.
-                </>
-              ) : (
-                <>
-                  Die Event-Liste wird automatisch aus offiziellen Gemeinde-Kalendern,
-                  Tourismus-Portalen, Ticket-Vendors und Veranstaltungs-Aggregatoren
-                  zusammengeführt und dupliziert-gefiltert, damit du keine
-                  Ankündigung doppelt liest.
-                  {mode === 'mixed' && (
-                    <>
-                      {' '}Die Freizeitaktivitäten stammen zusätzlich aus den
-                      offiziellen Tourismus-Datenbanken der Regionen.
-                    </>
-                  )}
-                </>
-              )}
+              {mode === 'activities'
+                ? t('seoSourcesActivities')
+                : mode === 'mixed'
+                ? `${t('seoSourcesEvents')} ${t('seoSourcesMixedExtra')}`
+                : t('seoSourcesEvents')}
             </p>
           </section>
         </div>

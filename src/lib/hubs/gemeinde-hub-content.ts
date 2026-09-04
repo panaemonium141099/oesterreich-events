@@ -30,6 +30,7 @@ import {
   faqForGemeinde,
   faqForGemeindeActivities,
   type FAQEntry,
+  type FAQTranslator,
 } from '@/lib/seo/faq';
 import { activityCanonicalUrl } from '@/lib/activities/indexability';
 import type { AustrianGemeinde } from '@/lib/gemeinden/data';
@@ -84,6 +85,17 @@ export function slugifyBundesland(bl: string): string {
   return map[bl] ?? bl.toLowerCase();
 }
 
+/**
+ * fn-17: Uebersetzer-Signatur der Hub-Copy. Kompatibel mit dem
+ * Rueckgabewert von `getTranslations({ locale, namespace: 'GemeindeHub' })`.
+ * Die DE-Messages sind byte-identisch zu den frueher hier inlined
+ * gepflegten Strings — die deutschen Hub-Seiten rendern unveraendert.
+ */
+export type HubTranslator = (
+  key: string,
+  values?: Record<string, string | number>,
+) => string;
+
 export interface HubCopyInput {
   name: string;
   bezirk: string | null;
@@ -102,41 +114,53 @@ export interface HubCopyInput {
  * events/empty byte-identisch zur Vor-fn-18-Logik (siehe Kopfkommentar);
  * die Page legt in diesen Faellen ggf. den Experiment-Title drueber.
  */
-export function buildHubMeta(input: HubCopyInput): { title: string; description: string } {
-  const { name, bezirk, plz, eventCount, activityCount, isCityHub, year } = input;
+export function buildHubMeta(
+  input: HubCopyInput,
+  t: HubTranslator,
+): { title: string; description: string } {
+  const { name, bezirk, plz, bundesland, eventCount, activityCount, isCityHub, year } = input;
   const mode = hubContentMode(eventCount, activityCount);
+  // Klammer-Zusatz wird fertig uebergeben statt im Message-String
+  // zusammengebaut — so bleibt die DE-Ausgabe byte-identisch zur
+  // Vor-fn-17-Version, auch wenn kein Bezirk existiert.
   const bezirkSuffix = bezirk ? ` (${bezirk})` : '';
 
   if (mode === 'activities') {
     return {
-      title: `Freizeitaktivitäten & Ausflugsziele in ${name}`,
-      description: `${activityCount} Freizeitaktivitäten und Ausflugsziele in ${name}${bezirkSuffix} — Bäder, Museen, Wandern, Familienausflüge und mehr auf LassTreffen.at.`,
+      title: t('metaTitleActivities', { name }),
+      description: t('metaDescActivities', { activityCount, name, bezirkSuffix }),
     };
   }
 
   if (mode === 'mixed') {
     return {
-      title: `Events & Freizeitaktivitäten in ${name}`,
-      description: `${eventCount} Veranstaltungen und ${activityCount} Freizeitaktivitäten in ${name}${bezirkSuffix} — Konzerte, Feste, Ausflugsziele, Bäder und mehr auf LassTreffen.at.`,
+      title: t('metaTitleMixed', { name }),
+      description: t('metaDescMixed', { eventCount, activityCount, name, bezirkSuffix }),
     };
   }
 
-  // events + empty: heutige Copy, unveraendert.
   const title = isCityHub
-    ? `Veranstaltungen in ${name} ${year}${eventCount > 0 ? ` — ${eventCount} Events` : ''}`
-    : `Events in ${name} ${plz} — ${eventCount > 0 ? `${eventCount} Veranstaltungen` : 'Veranstaltungskalender'}`;
+    ? (eventCount > 0
+        ? t('metaTitleCityWithCount', { name, year, eventCount })
+        : t('metaTitleCity', { name, year }))
+    : (eventCount > 0
+        ? t('metaTitleGemeindeWithCount', { name, plz, eventCount })
+        : t('metaTitleGemeinde', { name, plz }));
   const description = eventCount > 0
-    ? `${eventCount} Veranstaltungen in ${name}${bezirkSuffix} — heute und in den kommenden Wochen. Konzerte, Feste, Kultur und mehr auf LassTreffen.at.`
-    : `Veranstaltungen und Events in ${name}${bezirkSuffix}. Aktueller Veranstaltungskalender für ${input.bundesland} auf LassTreffen.at.`;
+    ? t('metaDescEvents', { eventCount, name, bezirkSuffix })
+    : t('metaDescEmpty', { name, bezirkSuffix, bundesland });
   return { title, description };
 }
 
 /** Default-H1 pro Content-Fall (Experiment-Prefix legt die Page drueber — nur a/d). */
-export function hubDefaultH1(input: Pick<HubCopyInput, 'name' | 'eventCount' | 'activityCount' | 'isCityHub'>): string {
+export function hubDefaultH1(
+  input: Pick<HubCopyInput, 'name' | 'eventCount' | 'activityCount' | 'isCityHub'>,
+  t: HubTranslator,
+): string {
   const mode = hubContentMode(input.eventCount, input.activityCount);
-  if (mode === 'activities') return `Freizeitaktivitäten & Ausflugsziele in ${input.name}`;
-  if (mode === 'mixed') return `Events & Freizeit in ${input.name}`;
-  return input.isCityHub ? `Veranstaltungen in ${input.name}` : `Events in ${input.name}`;
+  if (mode === 'activities') return t('h1Activities', { name: input.name });
+  if (mode === 'mixed') return t('h1Mixed', { name: input.name });
+  return input.isCityHub ? t('h1City', { name: input.name }) : t('h1Events', { name: input.name });
 }
 
 /**
@@ -144,13 +168,18 @@ export function hubDefaultH1(input: Pick<HubCopyInput, 'name' | 'eventCount' | '
  * "Aktuell keine Events"-Empty-States (der bleibt nur als kleiner
  * Sektionshinweis, nie als Seiten-Empty-State).
  */
-export function hubActivityHeroLead(name: string, activityCount: number): string {
-  return `Rund um ${name} findest du ${activityCount} Freizeitaktivitäten und Ausflugsziele — von Bädern und Museen bis zu Wander-, Rad- und Familienzielen, dauerhaft und unabhängig vom Event-Kalender.`;
+export function hubActivityHeroLead(name: string, activityCount: number, t: HubTranslator): string {
+  return t('heroActivities', { name, activityCount });
 }
 
 /** Hero-Absatz fuer den mixed-Fall (c): kombinierte Copy (Events + Freizeit). */
-export function hubMixedHeroLead(name: string, eventCount: number, activityCount: number): string {
-  return `In ${name} und Umgebung warten ${eventCount} Veranstaltungen und ${activityCount} dauerhafte Freizeitaktivitäten — von Konzerten und Festen bis zu Bädern, Museen und Ausflugszielen.`;
+export function hubMixedHeroLead(
+  name: string,
+  eventCount: number,
+  activityCount: number,
+  t: HubTranslator,
+): string {
+  return t('heroMixed', { name, eventCount, activityCount });
 }
 
 // ───────────────────────────────────────────────────────────────────────
@@ -177,6 +206,10 @@ export function buildHubFaqEntries(input: {
   plz: string;
   eventCount: number;
   activityCount: number;
+  /** Uebersetzer des HubFAQ-Namespace der Seiten-Locale. */
+  t: FAQTranslator;
+  /** Zahlformat der Seiten-Locale ('de-AT' / 'en-GB'). */
+  numberLocale: string;
 }): FAQEntry[] {
   const mode = hubContentMode(input.eventCount, input.activityCount);
   if (mode === 'empty') return [];
@@ -186,6 +219,8 @@ export function buildHubFaqEntries(input: {
     bundesland: input.bundesland,
     plz: input.plz,
     activityCount: input.activityCount,
+    t: input.t,
+    numberLocale: input.numberLocale,
   });
   if (mode === 'activities') return activityEntries;
 
@@ -194,6 +229,8 @@ export function buildHubFaqEntries(input: {
     bundesland: input.bundesland,
     plz: input.plz,
     eventCount: input.eventCount,
+    t: input.t,
+    numberLocale: input.numberLocale,
   });
   if (mode === 'events') return eventEntries;
 
@@ -212,7 +249,11 @@ export function buildGemeindeHubJsonLd(
   g: AustrianGemeinde,
   events: HubJsonLdEvent[],
   activities: HubJsonLdActivity[],
+  faq: { t: FAQTranslator; numberLocale: string },
 ): string {
+  // Canonical bleibt die DE-URL, auch im JSON-LD der /en-Seite: das
+  // @id-Graph beschreibt dieselbe Entitaet, und die Seiten verweisen per
+  // hreflang aufeinander.
   const canonicalUrl = `https://lasstreffen.at/gemeinde/${g.slug}`;
   const mode = hubContentMode(events.length, activities.length);
 
@@ -275,6 +316,8 @@ export function buildGemeindeHubJsonLd(
     plz: g.plz,
     eventCount: events.length,
     activityCount: activities.length,
+    t: faq.t,
+    numberLocale: faq.numberLocale,
   });
   const faqPage = faqEntries.length > 0 ? buildFAQPageSchema(faqEntries) : null;
 

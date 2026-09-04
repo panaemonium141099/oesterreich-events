@@ -51,3 +51,20 @@ export function bundeslandDisplayName(idOrName: string, locale: string): string 
   // Regionen bzw. Länderlisten, für die es keine EN-Variante gibt.
   return BUNDESLAENDER.find(b => b.id === idOrName)?.name ?? idOrName;
 }
+
+/**
+ * Anzeigename eines ORTES (Gemeinde, Stadt) für die gegebene Locale.
+ *
+ * Österreichische Ortsnamen sind Eigennamen und bleiben unübersetzt — mit
+ * einer Ausnahme, die im Englischen fest etabliert ist: Wien → Vienna.
+ * Genau diese Fälle stehen bereits in EN_NAMES (die neun Bundesländer, von
+ * denen drei zugleich Gemeindenamen sind), deshalb delegiert das hier
+ * statt eine zweite Liste zu pflegen. Alles andere kommt unverändert
+ * zurück.
+ *
+ * Ohne das stand auf /en/gemeinde/1010-wien "Events in Wien", während der
+ * Bundesland-Hub /en/wien "Events in Vienna" sagte.
+ */
+export function placeDisplayName(name: string, locale: string): string {
+  return bundeslandDisplayName(name, locale);
+}

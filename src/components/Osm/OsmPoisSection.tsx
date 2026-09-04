@@ -15,11 +15,12 @@
  *     ODbL-Herausgabe-Umfang). Nur eine vom Betreiber im OSM-Objekt
  *     hinterlegte `website` wird als externer Link ausgegeben.
  *
- * Deutsch hartkodiert wie die restliche Hub-Seite — die Gemeinde-Page setzt
- * kein setRequestLocale, ein getTranslations-Aufruf wuerde den ISR-Pass auf
- * dynamic kippen (gleiche Warnung wie in NearbyActivitiesSection.tsx).
+ * fn-17: zweisprachig. Die Gemeinde-Page setzt inzwischen setRequestLocale,
+ * getTranslations bleibt damit im statischen ISR-Pass (die alte Warnung an
+ * dieser Stelle galt fuer die Zeit davor).
  */
 
+import { getLocale, getTranslations } from 'next-intl/server';
 import { Link as LocaleLink } from '@/i18n/navigation';
 import { osmCategoryLabel } from '@/lib/osm/poi-whitelist';
 import type { NearbyOsmPoi } from '@/lib/osm/nearby-pois';
@@ -30,7 +31,7 @@ export const MIN_HUB_OSM_POIS = 3;
 /** Maximal gerenderte Kacheln — der Rest bleibt Zahl in der Copy. */
 const OSM_TILE_LIMIT = 30;
 
-export function GemeindeOsmPoisSection({
+export async function GemeindeOsmPoisSection({
   pois,
   gemeindeName,
 }: {
@@ -39,15 +40,14 @@ export function GemeindeOsmPoisSection({
 }) {
   if (pois.length < MIN_HUB_OSM_POIS) return null;
 
+  const [t, locale] = await Promise.all([getTranslations('GemeindeHub'), getLocale()]);
   const shown = pois.slice(0, OSM_TILE_LIMIT);
 
   return (
     <section className="mb-12">
-      <h2 className="text-xl font-semibold mb-3">Weitere Ausflugsziele in der Umgebung</h2>
+      <h2 className="text-xl font-semibold mb-3">{t('osmTitle')}</h2>
       <p className="text-sm text-white/50 mb-4">
-        {pois.length} Freizeit- und Ausflugsziele rund um {gemeindeName} aus der
-        offenen Karten-Datenbank OpenStreetMap — Spielplätze, Aussichtspunkte,
-        Badeplätze, Museen, Burgen und mehr.
+        {t('osmLead', { count: pois.length, name: gemeindeName })}
       </p>
 
       <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
@@ -74,14 +74,14 @@ export function GemeindeOsmPoisSection({
                   )}
                 </div>
                 <div className="text-xs text-white/40 mt-0.5">
-                  {osmCategoryLabel(p.category)}
+                  {osmCategoryLabel(p.category, locale)}
                   {` · ${p._distance_km.toFixed(1)} km`}
                 </div>
               </div>
               {/* Quellen-Badge pro Eintrag (Task-Acceptance). */}
               <span
                 className="shrink-0 text-[10px] font-medium px-1.5 py-0.5 rounded bg-white/10 text-white/50"
-                title="Quelle: OpenStreetMap"
+                title={t('osmSourceTitle')}
               >
                 OSM
               </span>
@@ -91,7 +91,7 @@ export function GemeindeOsmPoisSection({
       </ul>
 
       <p className="text-xs text-white/35 mt-3 leading-relaxed">
-        Kartendaten ©{' '}
+        {t('osmAttributionPrefix')}
         <a
           href="https://www.openstreetmap.org/copyright"
           target="_blank"
@@ -100,7 +100,7 @@ export function GemeindeOsmPoisSection({
         >
           OpenStreetMap contributors
         </a>
-        , lizenziert unter{' '}
+        {t('osmAttributionMiddle')}
         <a
           href="https://opendatacommons.org/licenses/odbl/1-0/"
           target="_blank"
@@ -109,10 +109,10 @@ export function GemeindeOsmPoisSection({
         >
           ODbL 1.0
         </a>
-        . Mehr dazu auf unserer{' '}
+        {t('osmAttributionSuffix')}
         {/* LocaleLink: /en/gemeinde/* muss auf /en/quellen zeigen. */}
         <LocaleLink href="/quellen" className="underline underline-offset-2 hover:text-white/60">
-          Quellen-Seite
+          {t('osmSourcesLink')}
         </LocaleLink>
         .
       </p>

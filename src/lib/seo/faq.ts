@@ -33,8 +33,7 @@ export interface FAQEntry {
  * (faqForTheme, faqForBundesland). Kompatibel mit dem Rückgabewert von
  * `getTranslations({ locale, namespace: 'HubFAQ' })`. Die DE-Messages in
  * messages/de.json sind byte-identisch zu den früher hier inlined
- * gepflegten Strings. faqForGemeinde* bleiben bewusst DE-only (die
- * Gemeinde-Hubs sind noch nicht übersetzt).
+ * gepflegten Strings.
  */
 export type FAQTranslator = (
   key: string,
@@ -129,27 +128,19 @@ export function faqForGemeinde(params: {
   bundesland: string;
   plz: string;
   eventCount: number;
+  t: FAQTranslator;
+  /** Zahlformat der Seiten-Locale ('de-AT' / 'en-GB'). */
+  numberLocale: string;
 }): FAQEntry[] {
-  const { gemeinde, bundesland, plz, eventCount } = params;
-  const nice = eventCount.toLocaleString('de-AT');
+  const { gemeinde, bundesland, plz, eventCount, t, numberLocale } = params;
+  const nice = eventCount.toLocaleString(numberLocale);
+  const vars = { gemeinde, bundesland, plz, nice };
 
   return [
-    {
-      question: `Welche Events gibt es heute in ${gemeinde}?`,
-      answer: `Aktuell finden sich auf LassTreffen.at ${nice} Veranstaltungen im Umkreis von 10 km um ${gemeinde} (${plz}, ${bundesland}). Die Liste reicht von Dorffesten und Märkten bis zu Konzerten, Sport-Events und Kulturveranstaltungen — täglich aus offiziellen Quellen aktualisiert.`,
-    },
-    {
-      question: `Wie werden die Events für ${gemeinde} gesammelt?`,
-      answer: `Die Termine kommen aus Gemeinde-Kalendern (${gemeinde} + Nachbarorte), Tourismus-Portalen des ${bundesland}, Ticket-Anbietern und regionalen Veranstaltungs-Feeds. Dubletten werden automatisch zusammengeführt, damit du keine Ankündigung doppelt liest.`,
-    },
-    {
-      question: `Sind auch Events aus Nachbar-Gemeinden zu ${gemeinde} aufgeführt?`,
-      answer: `Ja — der 10-km-Radius um ${gemeinde} umfasst automatisch Veranstaltungen in den Nachbarorten. Eine Liste der nächstgelegenen Orte mit eigener Event-Übersicht findet sich weiter unten auf der Seite.`,
-    },
-    {
-      question: `Kann ich ein Event in ${gemeinde} selbst eintragen?`,
-      answer: `Ja, Vereine, Veranstalter und Privatpersonen können eigene Termine über das Einreich-Formular vorschlagen. Die Einträge werden moderiert und bei Qualitätseignung öffentlich gelistet — in der Regel innerhalb von 24 Stunden.`,
-    },
+    { question: t('gemQ1', vars), answer: t('gemA1', vars) },
+    { question: t('gemQ2', vars), answer: t('gemA2', vars) },
+    { question: t('gemQ3', vars), answer: t('gemA3', vars) },
+    { question: t('gemQ4', vars), answer: t('gemA4', vars) },
   ];
 }
 
@@ -165,27 +156,19 @@ export function faqForGemeindeActivities(params: {
   bundesland: string;
   plz: string;
   activityCount: number;
+  t: FAQTranslator;
+  /** Zahlformat der Seiten-Locale ('de-AT' / 'en-GB'). */
+  numberLocale: string;
 }): FAQEntry[] {
-  const { gemeinde, bundesland, plz, activityCount } = params;
-  const nice = activityCount.toLocaleString('de-AT');
+  const { gemeinde, bundesland, plz, activityCount, t, numberLocale } = params;
+  const nice = activityCount.toLocaleString(numberLocale);
+  const vars = { gemeinde, bundesland, plz, nice };
 
   return [
-    {
-      question: `Welche Freizeitaktivitäten gibt es in ${gemeinde} und Umgebung?`,
-      answer: `LassTreffen.at listet aktuell ${nice} Freizeitaktivitäten und Ausflugsziele im Umkreis um ${gemeinde} (${plz}, ${bundesland}) — von Bädern, Museen und Burgen bis zu Wander-, Rad- und Familienzielen. Jede Aktivität hat eine eigene Seite mit Öffnungszeiten, Karte und Anfahrt.`,
-    },
-    {
-      question: `Woher kommen die Ausflugsziele für ${gemeinde}?`,
-      answer: `Die Einträge stammen aus den offiziellen Tourismus-Datenbanken der Regionen (Feratel Deskline), die auch die örtlichen Tourismusverbände in ${bundesland} pflegen. Dauerhaft geschlossene Betriebe werden automatisch erkannt und aus den Listen entfernt.`,
-    },
-    {
-      question: `Sind die Freizeitaktivitäten rund um ${gemeinde} auch bei Regen geeignet?`,
-      answer: `Viele der gelisteten Ziele sind Indoor-Aktivitäten wie Hallenbäder, Thermen, Museen oder Kletterhallen. Auf der jeweiligen Detailseite ist gekennzeichnet, ob eine Aktivität indoor, outdoor oder gemischt ist — so lässt sich der Ausflug wetterunabhängig planen.`,
-    },
-    {
-      question: `Was kostet der Eintritt bei Ausflugszielen rund um ${gemeinde}?`,
-      answer: `Wo die Betreiber Preise veröffentlichen, zeigt LassTreffen.at einen Preis-Hinweis direkt auf der Aktivitätsseite. Viele Ziele wie Wanderwege, Naturdenkmäler oder Spielplätze sind kostenlos zugänglich; verbindliche Preise nennt immer der Betreiber.`,
-    },
+    { question: t('gemActQ1', vars), answer: t('gemActA1', vars) },
+    { question: t('gemActQ2', vars), answer: t('gemActA2', vars) },
+    { question: t('gemActQ3', vars), answer: t('gemActA3', vars) },
+    { question: t('gemActQ4', vars), answer: t('gemActA4', vars) },
   ];
 }
 
