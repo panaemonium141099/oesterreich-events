@@ -47,8 +47,7 @@ vi.mock('@supabase/supabase-js', () => ({
  * Hubs zweisprachig gelistet werden, baut die Route daraus ~4 000 Eintraege
  * mit je drei xhtml:link-Alternates. Das kostete den Test unter dem
  * parallel laufenden vitest-Pool reproduzierbar mehr als 30 s (isoliert
- * 1,4 s) — zwei Worker der Suite haengen unabhaengig davon dauerhaft
- * (import-osm-venues, backfill-venue-ids) und hungern den Rest aus.
+ * 1,4 s).
  *
  * Fuer die Assertions aendert das nichts: geprueft wird, DASS die
  * Gemeinde-Sektion beide Sprachvarianten emittiert, nicht wie viele Zeilen
@@ -227,17 +226,7 @@ describe('GET /sitemap-events.xml — URL-Cap zaehlt emittierte URLs', () => {
   });
 });
 
-/**
- * Timeout ueber dem Default: die beiden Faelle bauen die komplette
- * Core-Sitemap (Bundeslaender x Kategorien x Zeit, Themen, Studenten,
- * Gemeinden, Venues — je zweisprachig mit Alternates). Isoliert kosten
- * alle 9 Faelle der Datei zusammen 1,45 s; im vollen Lauf reissen sie den
- * 5-s-Default, weil zwei Suiten dauerhaft haengen
- * (import-osm-venues.test.ts, backfill-venue-ids.test.ts — beide auch auf
- * master, "Timeout terminating forks worker" im Log) und den Pool
- * aushungern.
- */
-describe('GET /sitemap-core.xml — Paritaet + fail loudly', { timeout: 20_000 }, () => {
+describe('GET /sitemap-core.xml — Paritaet + fail loudly', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
