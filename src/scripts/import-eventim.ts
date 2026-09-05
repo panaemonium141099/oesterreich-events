@@ -69,10 +69,13 @@ async function main() {
   console.log(`[eventim] AT events without bundesland: ${atNoBundesland}`);
   // Ein Event ohne Ticket-Link verdient nichts — die Ursachen gehoeren
   // deshalb ins Log UND in den Bericht, nicht nur die Summe.
-  const ohneLink = Object.entries(notBookable).sort((a, b) => b[1] - a[1]);
+  const ohneLink = Object.entries(notBookable).sort((a, b) => b[1].count - a[1].count);
   if (ohneLink.length > 0) {
     console.log('[eventim] ohne Ticket-Link, nach Ursache:');
-    for (const [reason, count] of ohneLink) console.log(`  ${String(count).padStart(6)}  ${reason}`);
+    for (const [reason, e] of ohneLink) {
+      console.log(`  ${String(e.count).padStart(6)}  ${reason}`);
+      if (e.sample) console.log(`          Beispiel: ${e.sample}`);
+    }
   }
 
   if (verbose || dryRun) {
@@ -113,9 +116,13 @@ async function main() {
       ...Object.fromEntries(Object.entries(byCountry).map(([k, v]) => [`Land ${k}`, v])),
     },
     // Die Ursachen als Einzelposten: eine Zeile je Grund, mit Anzahl.
-    items: ohneLink.slice(0, 10).map(([reason, count]) => ({
-      title: `${count.toLocaleString('de-AT')} Events ohne Ticket-Link`,
+    // Beispiel-Link mitschicken: die eventStatus-Codes sind
+    // undokumentiert, und oeticket sperrt automatisierte Zugriffe — nur
+    // ein Mensch mit Browser kann sehen, ob dort Tickets verkauft werden.
+    items: ohneLink.slice(0, 10).map(([reason, e]) => ({
+      title: `${e.count.toLocaleString('de-AT')} Events ohne Ticket-Link`,
       excerpt: `Grund laut Feed: ${reason}`,
+      url: e.sample,
     })),
     errors: r.errors > 0 ? [`${r.errors} Events konnten nicht geschrieben werden`] : [],
   });
