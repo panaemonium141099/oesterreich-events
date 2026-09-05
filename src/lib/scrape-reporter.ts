@@ -1,6 +1,6 @@
 // src/lib/scrape-reporter.ts
 import { createClient } from '@supabase/supabase-js';
-import { renderScrapeAlertEmail } from '@/emails/scrape-alert';
+import { startWorkflowRun, finishWorkflowRun } from './reporting/workflow-run';
 import type {
   PipelineResults,
   PipelineRunStatus,
@@ -94,50 +94,81 @@ export async function finalizePipelineRun(
   if (error) console.error(`Failed to finalize pipeline_runs: ${error.message}`);
 }
 
+/**
+ * Meldet den Pipeline-Lauf ueber `workflow_runs` (die Mail verschickt
+ * `/api/cron/workflow-reports` auf dem Server).
+ *
+ * Vorher stand hier ein direkter Resend-Aufruf an
+ * `alerts@osterreich.events`, der NUR bei Fehlern feuerte. Zwei Gruende,
+ * warum davon nie eine Mail ankam:
+ *
+ *   - `RESEND_API_KEY` war weder auf dem Server noch in den
+ *     GitHub-Actions-Secrets gesetzt. Die Funktion loggte "skipping email"
+ *     und kehrte zurueck — ein stiller No-op ueber Monate.
+ *   - Die Absender-Domain osterreich.events ist seit dem Umzug auf
+ *     lasstreffen.at tot; selbst mit Key waere die Zustellung an SPF/DKIM
+ *     gescheitert.
+ *
+ * Jetzt wird JEDER Lauf gemeldet, nicht nur der gescheiterte — "lief
+ * durch" ohne Zahlen ist keine brauchbare Auskunft (der
+ * Uebersetzungs-Timer meldete tagelang Erfolg und uebersetzte nichts).
+ */
 export async function sendAlertIfNeeded(results: PipelineResults): Promise<void> {
   const status = computeFinalStatus(results.steps, results.total_errors);
-  if (status === 'success') return;
-  const alertEmail = process.env.ALERT_EMAIL;
-  const resendKey = process.env.RESEND_API_KEY;
-  if (!alertEmail || !resendKey) {
-    console.log('[reporter] ALERT_EMAIL or RESEND_API_KEY not set, skipping email');
-    return;
-  }
   const failedScrapers = results.scraper_results.filter((s) => s.status === 'failed');
-  const html = renderScrapeAlertEmail({
-    status,
-    started_at: results.started_at,
-    finished_at: results.finished_at || new Date().toISOString(),
-    total_events_scraped: results.total_events_scraped,
-    total_errors: results.total_errors,
-    failed_scrapers: failedScrapers,
-    pipeline_steps: results.steps,
-    dashboard_url: 'https://osterreich.events/admin/scraper-runs',
-    github_run_url: results.github_run_url,
-  });
-  const statusLabel = status === 'failed' ? 'FAILED' : 'Partial Failure';
-  const dateStr = new Date(results.started_at).toLocaleDateString('de-AT', {
-    day: 'numeric', month: 'short', year: 'numeric',
-  });
-  try {
-    const res = await fetch('https://api.resend.com/emails', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${resendKey}`,
-        'Content-Type': 'application/json',
+  const okScrapers = results.scraper_results.filter((s) => s.status === 'success');
+
+  // Schritte, die nicht sauber durchliefen, gehoeren in den Bericht —
+  // auch wenn die Gesamtbilanz 'success' lautet.
+  const stepErrors = Object.entries(results.steps)
+    .filter(([, step]) => step.status === 'failed' || step.status === 'partial_failure')
+    .map(([name, step]) => `Schritt "${name}": ${step.status}${step.error ? ` — ${step.error}` : ''}`);
+
+  const runId = await startWorkflowRun(
+    'scrape-pipeline',
+    results.trigger === 'manual' ? 'manual' : results.trigger === 'cron' ? 'cron' : 'github_dispatch',
+  );
+
+  await finishWorkflowRun(runId, {
+    status: status === 'success' ? 'success' : status === 'partial_failure' ? 'partial' : 'failed',
+    metrics: {
+      'Events gefunden': results.total_events_scraped,
+      'Events aktualisiert': results.total_events_updated,
+      'Scraper erfolgreich': okScrapers.length,
+      'Scraper gescheitert': failedScrapers.length,
+      'Fehler gesamt': results.total_errors,
+      ...stepMetrics(results.steps),
+    },
+    // Gescheiterte Scraper als Einzelposten: Name, Fehlertext und wie oft
+    // es probiert wurde stehen damit direkt in der Mail.
+    items: failedScrapers.slice(0, 25).map((sc) => ({
+      title: sc.scraper_name,
+      excerpt: sc.error_message ?? 'ohne Fehlermeldung abgebrochen',
+      meta: {
+        Versuche: sc.retry_count + 1,
+        Dauer: `${Math.round(sc.duration_ms / 1000)} s`,
+        Gefunden: sc.events_found,
       },
-      body: JSON.stringify({
-        from: 'alerts@osterreich.events',
-        to: alertEmail,
-        subject: `[Osterreich Events] Scrape Pipeline: ${statusLabel} - ${dateStr}`,
-        html,
-      }),
-    });
-    if (res.ok) console.log(`[reporter] Alert email sent to ${alertEmail}`);
-    else console.error(`[reporter] Email send failed: ${res.status} ${await res.text()}`);
-  } catch (err) {
-    console.error(`[reporter] Email send error: ${err}`);
+    })),
+    errors: stepErrors,
+    runUrl: results.github_run_url,
+  });
+}
+
+/**
+ * Die aussagekraeftigen Zahlen der Post-Processing-Schritte in die
+ * Kennzahlen-Tabelle heben — Dedup und Geocoding sind genau das, wonach
+ * man nach einem Lauf schaut.
+ */
+function stepMetrics(steps: Record<string, StepResult>): Record<string, number> {
+  const out: Record<string, number> = {};
+  for (const [name, step] of Object.entries(steps)) {
+    if (typeof step.fix_count === 'number') out[`${name}: korrigiert`] = step.fix_count;
+    if (typeof step.gemini_count === 'number') out[`${name}: via KI`] = step.gemini_count;
+    if (typeof step.succeeded === 'number') out[`${name}: ok`] = step.succeeded;
+    if (typeof step.failed === 'number' && step.failed > 0) out[`${name}: Fehler`] = step.failed;
   }
+  return out;
 }
 
 export function buildGitHubSummary(results: PipelineResults): string {

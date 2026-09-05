@@ -29,6 +29,7 @@ import { GoogleGenAI } from '@google/genai';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import { pathToFileURL } from 'node:url';
+import { startWorkflowRun, finishWorkflowRun, type WorkflowItem } from '../lib/reporting/workflow-run';
 
 const ROOT = path.resolve(__dirname, '..', '..');
 const POSTS_DIR = path.join(ROOT, 'src', 'content', 'blog', 'posts');
@@ -614,6 +615,12 @@ async function smokeTest(slug: string): Promise<void> {
 // ─── Main ─────────────────────────────────────────────────────────────────
 
 async function main(): Promise<void> {
+  // Lauf-Protokoll fuer die Bericht-Mail. Schlaegt es fehl, laeuft der
+  // Autowriter trotzdem weiter — der Bericht ist nie wichtiger als der Post.
+  const runId = await startWorkflowRun('blog-autowriter');
+  const reportItems: WorkflowItem[] = [];
+  const reportErrors: string[] = [];
+
   const args = process.argv.slice(2);
   const count = Number(args[args.indexOf('--count') + 1]) || 2;
   const dryRun = args.includes('--dry-run');
@@ -777,17 +784,56 @@ async function main(): Promise<void> {
       knownSlugs.add(slug);
       knownTitles.push(c.title);
       writtenSlugs.push(slug);
+      reportItems.push({
+        // Der Post-Body kommt als lose typisiertes JSON aus dem Modell;
+        // fuer den Bericht reicht die Zeichenkette, wie sie im File landet.
+        title: String(post.title ?? c.title),
+        excerpt: post.excerpt ? String(post.excerpt) : undefined,
+        url: `https://lasstreffen.at/blog/${slug}`,
+        meta: {
+          Anlass: c.title,
+          Termin: datePart(c.start_date),
+          Bundesland: c.bundesland ?? '—',
+          Lesezeit: `${post.readingTime} min`,
+        },
+      });
       written++;
       log(`  ✓ geschrieben: ${slug}`);
     } catch (err) {
-      log(`  Fehler bei "${c.title}": ${err instanceof Error ? err.message : String(err)} — skip`);
+      const msg = err instanceof Error ? err.message : String(err);
+      log(`  Fehler bei "${c.title}": ${msg} — skip`);
+      // Auch bei insgesamt erfolgreichem Lauf im Bericht ausweisen: ein
+      // Kandidat, der regelmaessig scheitert, ist ein Hinweis auf ein
+      // Muster (fehlendes Hero-Bild, Recherche ohne Treffer).
+      reportErrors.push(`Kandidat verworfen — "${c.title}": ${msg}`);
     }
   }
 
   if (written === 0) {
+    await finishWorkflowRun(runId, {
+      status: 'failed',
+      metrics: { Kandidaten: candidates.length, Versuche: attempts, Geschrieben: 0 },
+      errors: [...reportErrors, 'Kein Post geschrieben — alle Kandidaten verworfen.'],
+    });
     throw new Error('Kein Post geschrieben — alle Kandidaten verworfen (siehe Log)');
   }
   log(`Fertig: ${written} Post(s) — ${writtenSlugs.join(', ')}`);
+
+  await finishWorkflowRun(runId, {
+    // Verworfene Kandidaten sind normal (Dedupe, fehlendes Bild). Erst
+    // wenn WENIGER als gewuenscht herauskam, ist der Lauf unvollstaendig.
+    status: written < count ? 'partial' : 'success',
+    metrics: {
+      Kandidaten: candidates.length,
+      Versuche: attempts,
+      Geschrieben: written,
+      Gewuenscht: count,
+      Verworfen: reportErrors.length,
+    },
+    items: reportItems,
+    errors: reportErrors,
+  });
+
   // Für den Commit-Step der GitHub-Action
   const ghOutput = process.env.GITHUB_OUTPUT;
   if (ghOutput) fs.appendFileSync(ghOutput, `slugs=${writtenSlugs.join(' ')}\n`);
