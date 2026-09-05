@@ -27,7 +27,18 @@ const PLACEHOLDER_IMAGE = /blank\.(gif|png|jpe?g)$/i;
  * Summe ("20363/22272 bookable"), womit sich nicht beurteilen liess, ob
  * die ~1900 Events ohne Link wirklich unverkaeuflich sind.
  */
-export type NotBookableStats = Record<string, number>;
+export interface NotBookableEntry {
+  count: number;
+  /** Ein Beispiel-Link je Ursache — die eventStatus-Codes sind
+   *  undokumentiert (im Repo stehen nur 1=CANCELED, 2=AVAILABLE und ein
+   *  Testkommentar 4=sold out). Ob ein Code "ausverkauft" oder
+   *  "Vorverkauf laeuft noch" heisst, laesst sich nur an der echten Seite
+   *  ablesen — oeticket sperrt automatisierte Zugriffe (Akamai), also
+   *  braucht es einen Menschen mit Browser. */
+  sample?: string;
+}
+
+export type NotBookableStats = Record<string, NotBookableEntry>;
 
 export function parseEventimFeed(
   series: EventimSeries[],
@@ -46,7 +57,12 @@ export function parseEventimFeed(
       if (!ALLOWED_COUNTRIES.has(e.eventCountry)) continue;
       if (notBookable) {
         const reason = notBookableReason(e);
-        if (reason) notBookable[reason] = (notBookable[reason] ?? 0) + 1;
+        if (reason) {
+          const entry = notBookable[reason] ?? { count: 0 };
+          entry.count++;
+          if (!entry.sample && e.evoLink) entry.sample = e.evoLink;
+          notBookable[reason] = entry;
+        }
       }
       out.push(mapEvent(s, e, category, tags, description));
     }
