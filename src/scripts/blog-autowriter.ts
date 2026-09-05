@@ -812,6 +812,7 @@ async function main(): Promise<void> {
   if (written === 0) {
     await finishWorkflowRun(runId, {
       status: 'failed',
+      summary: 'Kein einziger Post geschrieben — alle Kandidaten verworfen',
       metrics: { Kandidaten: candidates.length, Versuche: attempts, Geschrieben: 0 },
       errors: [...reportErrors, 'Kein Post geschrieben — alle Kandidaten verworfen.'],
     });
@@ -823,6 +824,7 @@ async function main(): Promise<void> {
     // Verworfene Kandidaten sind normal (Dedupe, fehlendes Bild). Erst
     // wenn WENIGER als gewuenscht herauskam, ist der Lauf unvollstaendig.
     status: written < count ? 'partial' : 'success',
+    summary: `${written} von ${count} Posts geschrieben` + (reportErrors.length ? `, ${reportErrors.length} Kandidat(en) verworfen` : ''),
     metrics: {
       Kandidaten: candidates.length,
       Versuche: attempts,

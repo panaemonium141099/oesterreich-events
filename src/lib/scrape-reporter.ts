@@ -131,6 +131,10 @@ export async function sendAlertIfNeeded(results: PipelineResults): Promise<void>
 
   await finishWorkflowRun(runId, {
     status: status === 'success' ? 'success' : status === 'partial_failure' ? 'partial' : 'failed',
+    summary:
+      `${results.total_events_scraped.toLocaleString('de-AT')} Events gefunden, `
+      + `${results.total_events_updated.toLocaleString('de-AT')} aktualisiert`
+      + (failedScrapers.length ? `, ${failedScrapers.length} von ${results.scraper_results.length} Scrapern gescheitert` : ''),
     metrics: {
       'Events gefunden': results.total_events_scraped,
       'Events aktualisiert': results.total_events_updated,

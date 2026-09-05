@@ -10,6 +10,8 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { fetchAndParseEventim, upsertEventimEvents } from '@/lib/eventim/import';
+import type { NotBookableStats } from '@/lib/eventim/parse';
+import { startWorkflowRun, finishWorkflowRun } from '@/lib/reporting/workflow-run';
 
 // Load .env.local (Next.js does this automatically, but tsx does not) — needed
 // for the Supabase service-role key used by the write path, and optionally the
@@ -38,8 +40,11 @@ async function main() {
   const limitStr = arg('--limit');
   const limit = limitStr ? parseInt(limitStr, 10) : undefined;
 
+  const runId = dryRun ? null : await startWorkflowRun('import-eventim');
+
   console.log('[eventim] downloading + parsing feed…');
-  let events = await fetchAndParseEventim(new Date().toISOString());
+  const notBookable: NotBookableStats = {};
+  let events = await fetchAndParseEventim(new Date().toISOString(), notBookable);
   console.log(`[eventim] ${events.length} events after filtering (future, ticket, non-cancelled, AT/DE/CH)`);
 
   if (limit && events.length > limit) {
@@ -62,6 +67,13 @@ async function main() {
   console.log('[eventim] by category:', byCategory);
   console.log(`[eventim] bookable (ticket_url set): ${bookable}/${events.length}`);
   console.log(`[eventim] AT events without bundesland: ${atNoBundesland}`);
+  // Ein Event ohne Ticket-Link verdient nichts — die Ursachen gehoeren
+  // deshalb ins Log UND in den Bericht, nicht nur die Summe.
+  const ohneLink = Object.entries(notBookable).sort((a, b) => b[1] - a[1]);
+  if (ohneLink.length > 0) {
+    console.log('[eventim] ohne Ticket-Link, nach Ursache:');
+    for (const [reason, count] of ohneLink) console.log(`  ${String(count).padStart(6)}  ${reason}`);
+  }
 
   if (verbose || dryRun) {
     console.log('\n[eventim] sample events:');
@@ -80,6 +92,33 @@ async function main() {
 
   const r = await upsertEventimEvents(events, (m) => console.log(`[eventim] ${m}`));
   console.log(`[eventim] DONE — ${r.upserted} upserted, ${r.errors} errors, ${r.filtered} filtered`);
+
+  const ohneLinkGesamt = events.length - bookable;
+  await finishWorkflowRun(runId, {
+    // Upsert-Fehler sind der einzige echte Fehlerfall. Events ohne
+    // Ticket-Link sind KEIN Fehler des Imports — sie kommen so aus dem
+    // Feed —, gehoeren aber prominent in den Bericht, weil sie direkt auf
+    // die Affiliate-Einnahmen durchschlagen.
+    status: r.errors > 0 ? 'partial' : 'success',
+    summary: `${r.upserted.toLocaleString('de-AT')} Events importiert, `
+      + `${ohneLinkGesamt.toLocaleString('de-AT')} davon ohne Ticket-Link `
+      + `(${((100 * ohneLinkGesamt) / Math.max(events.length, 1)).toFixed(1)} % — verdienen nichts)`,
+    metrics: {
+      'Events aus dem Feed': events.length,
+      'in die DB geschrieben': r.upserted,
+      'mit Ticket-Link (Affiliate)': bookable,
+      'OHNE Ticket-Link': ohneLinkGesamt,
+      'Anteil ohne Link': `${((100 * ohneLinkGesamt) / Math.max(events.length, 1)).toFixed(1)} %`,
+      'Upsert-Fehler': r.errors,
+      ...Object.fromEntries(Object.entries(byCountry).map(([k, v]) => [`Land ${k}`, v])),
+    },
+    // Die Ursachen als Einzelposten: eine Zeile je Grund, mit Anzahl.
+    items: ohneLink.slice(0, 10).map(([reason, count]) => ({
+      title: `${count.toLocaleString('de-AT')} Events ohne Ticket-Link`,
+      excerpt: `Grund laut Feed: ${reason}`,
+    })),
+    errors: r.errors > 0 ? [`${r.errors} Events konnten nicht geschrieben werden`] : [],
+  });
 }
 
 main().catch((e) => { console.error(e); process.exit(1); });

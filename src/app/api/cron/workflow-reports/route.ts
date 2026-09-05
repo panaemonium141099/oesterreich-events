@@ -42,6 +42,7 @@ interface RunRow {
   started_at: string;
   finished_at: string | null;
   status: WorkflowReportData['status'];
+  summary: string | null;
   metrics: Record<string, string | number>;
   items: WorkflowReportData['items'];
   errors: string[];
@@ -71,7 +72,7 @@ export async function GET(request: NextRequest) {
   // gemeldet", der Unterschied ist nur, ob finished_at gesetzt ist.
   const { data, error } = await supabase
     .from('workflow_runs')
-    .select('id, workflow, started_at, finished_at, status, metrics, items, errors, run_url')
+    .select('id, workflow, started_at, finished_at, status, summary, metrics, items, errors, run_url')
     .is('reported_at', null)
     .or(`finished_at.not.is.null,started_at.lt.${staleBefore}`)
     .order('started_at', { ascending: true })
@@ -92,6 +93,7 @@ export async function GET(request: NextRequest) {
       status: stalled ? 'running' : row.status,
       startedAt: row.started_at,
       finishedAt: row.finished_at,
+      summary: row.summary,
       metrics: row.metrics ?? {},
       items: Array.isArray(row.items) ? row.items : [],
       errors: Array.isArray(row.errors) ? row.errors : [],

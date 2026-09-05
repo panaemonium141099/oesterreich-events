@@ -1,7 +1,7 @@
 import type { ScrapedEvent } from '@/types/events';
 import type { EventimSeries, EventimEvent } from './types';
 import { mapEventimCategory } from './category-map';
-import { isBookable, isCancelled, priceText } from './availability';
+import { isBookable, isCancelled, notBookableReason, priceText } from './availability';
 import { getCoordinatesForPLZ, getBundeslandFromPLZ } from '@/lib/plzCoordinates';
 import { bundeslandFromPolygon } from './bundesland-from-geo';
 
@@ -19,7 +19,22 @@ const PLACEHOLDER_IMAGE = /blank\.(gif|png|jpe?g)$/i;
  * Filters: ticket events only (eventType "1"), not cancelled, future-dated,
  * AT/DE/CH only. `nowIso` is injected for deterministic "future" comparison.
  */
-export function parseEventimFeed(series: EventimSeries[], nowIso: string): ScrapedEvent[] {
+/**
+ * Warum Events keinen Ticket-Link bekamen, nach Ursache gezaehlt.
+ *
+ * Der Ticket-Link ist die Einnahmequelle der Seite — ohne ihn verdient
+ * eine Event-Detailseite nichts. Das Import-Log nannte bisher nur die
+ * Summe ("20363/22272 bookable"), womit sich nicht beurteilen liess, ob
+ * die ~1900 Events ohne Link wirklich unverkaeuflich sind.
+ */
+export type NotBookableStats = Record<string, number>;
+
+export function parseEventimFeed(
+  series: EventimSeries[],
+  nowIso: string,
+  /** Wird, wenn uebergeben, mit der Ursachen-Zaehlung befuellt. */
+  notBookable?: NotBookableStats,
+): ScrapedEvent[] {
   const out: ScrapedEvent[] = [];
   for (const s of series) {
     const { category, tags } = mapEventimCategory((s.esCategories ?? []).map((c) => c.category));
@@ -29,6 +44,10 @@ export function parseEventimFeed(series: EventimSeries[], nowIso: string): Scrap
       if (isCancelled(e)) continue;
       if (!e.eventDateIso8601 || e.eventDateIso8601 < nowIso) continue; // future only
       if (!ALLOWED_COUNTRIES.has(e.eventCountry)) continue;
+      if (notBookable) {
+        const reason = notBookableReason(e);
+        if (reason) notBookable[reason] = (notBookable[reason] ?? 0) + 1;
+      }
       out.push(mapEvent(s, e, category, tags, description));
     }
   }
