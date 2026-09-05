@@ -1,6 +1,6 @@
 import type { ScrapedEvent } from '@/types/events';
 import { downloadEventimFeed } from './feed-client';
-import { parseEventimFeed } from './parse';
+import { parseEventimFeed, type NotBookableStats } from './parse';
 
 /**
  * Shared Eventim import logic, used by both the CLI script
@@ -9,10 +9,15 @@ import { parseEventimFeed } from './parse';
  * implementation of the download → parse → upsert pipeline.
  */
 
-/** Download the Eventim PFT feed and parse it into future, non-cancelled, AT/DE/CH ScrapedEvents. */
-export async function fetchAndParseEventim(nowIso: string): Promise<ScrapedEvent[]> {
+/** Download the Eventim PFT feed and parse it into future, non-cancelled, AT/DE/CH ScrapedEvents.
+ *  `notBookable` wird, wenn uebergeben, mit der Ursachen-Zaehlung der
+ *  Events ohne Ticket-Link befuellt (Einnahme-relevant, siehe parse.ts). */
+export async function fetchAndParseEventim(
+  nowIso: string,
+  notBookable?: NotBookableStats,
+): Promise<ScrapedEvent[]> {
   const series = await downloadEventimFeed();
-  return parseEventimFeed(series, nowIso);
+  return parseEventimFeed(series, nowIso, notBookable);
 }
 
 export interface EventimUpsertResult {

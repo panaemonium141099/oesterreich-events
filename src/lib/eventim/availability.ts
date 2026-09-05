@@ -17,6 +17,33 @@ export function isBookable(
   return (e.priceCategories ?? []).some((p) => p.inventory === 'buchbar');
 }
 
+/**
+ * Warum ein Event NICHT buchbar ist — eine Kategorie je Event.
+ *
+ * `isBookable` entscheidet ueber den Ticket-Link und damit ueber die
+ * Affiliate-Einnahme einer Seite. Bisher stand im Import-Log nur die
+ * Summe ("20363/22272 bookable"); ohne Aufschluesselung liess sich nicht
+ * beurteilen, ob die ~1900 Events ohne Link wirklich unverkaeuflich sind
+ * oder ob eine der drei Bedingungen zu streng greift.
+ *
+ * Rueckgabe `null` = buchbar.
+ */
+export function notBookableReason(
+  e: Pick<EventimEvent, 'eventStatus' | 'deliverable' | 'priceCategories'>,
+): string | null {
+  if (isBookable(e)) return null;
+  const parts: string[] = [];
+  if (String(e.eventStatus) !== '2') parts.push(`eventStatus=${e.eventStatus}`);
+  if (e.deliverable === false) parts.push('deliverable=false');
+  const pcs = e.priceCategories ?? [];
+  if (pcs.length === 0) parts.push('keine priceCategories');
+  else if (!pcs.some((p) => p.inventory === 'buchbar')) {
+    const kinds = [...new Set(pcs.map((p) => String(p.inventory)))].sort().join('|');
+    parts.push(`inventory=${kinds}`);
+  }
+  return parts.join(' + ') || 'unklar';
+}
+
 /** Human-readable price, German formatting (comma decimal, € suffix). */
 export function priceText(min?: number, max?: number): string | undefined {
   const fmt = (n: number) => `${n.toFixed(2).replace('.', ',')} €`;

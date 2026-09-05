@@ -33,6 +33,12 @@ export interface WorkflowItem {
 
 export interface FinishWorkflowInput {
   status: WorkflowStatus;
+  /**
+   * Ein Satz, der den Lauf zusammenfasst — steht in der Mail direkt unter
+   * dem Status. Nur der Workflow weiss, worauf es bei ihm ankommt:
+   * "2 von 2 Posts geschrieben" heisst etwas, "Geschrieben: 2" nicht.
+   */
+  summary?: string;
   /** Zahlen fuer die Tabelle, Reihenfolge bleibt erhalten. */
   metrics?: Record<string, string | number>;
   items?: WorkflowItem[];
@@ -111,6 +117,7 @@ export async function finishWorkflowRun(
       .update({
         finished_at: new Date().toISOString(),
         status: input.status,
+        summary: input.summary ?? null,
         metrics: input.metrics ?? {},
         items: input.items ?? [],
         errors: input.errors ?? [],
