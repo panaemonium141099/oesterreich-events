@@ -87,6 +87,8 @@ import { post as klassischeKonzerteHausDerMusik2026 } from './posts/klassische-k
 import { post as vivaldiVierJahreszeitenKonzert2026 } from './posts/vivaldi-vier-jahreszeiten-konzert-2026';
 import { post as wienerMozartKonzertMusikverein2026 } from './posts/wiener-mozart-konzert-musikverein-2026';
 import { post as eltonJohnBillyJoelTribute2026 } from './posts/elton-john-billy-joel-tribute-2026';
+import { post as blackSeaDahu2026 } from './posts/black-sea-dahu-2026';
+import { post as mcYankooLive2026 } from './posts/mc-yankoo-live-2026';
 // AUTOWRITER-IMPORTS-END
 
 export type { FestivalPost, GalleryImage, FestivalKeyFacts, LineupAct } from './types';
@@ -179,6 +181,8 @@ export const ALL_POSTS: FestivalPost[] = [
   vivaldiVierJahreszeitenKonzert2026,
   wienerMozartKonzertMusikverein2026,
   eltonJohnBillyJoelTribute2026,
+  blackSeaDahu2026,
+  mcYankooLive2026,
   // AUTOWRITER-POSTS-END
 ].sort(
   (a, b) => new Date(b.publishDate).getTime() - new Date(a.publishDate).getTime()
