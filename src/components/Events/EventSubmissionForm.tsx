@@ -136,11 +136,11 @@ export function EventSubmissionForm() {
   if (status === 'sent') {
     return (
       <div className="rounded-2xl border border-green-400/20 bg-green-400/5 px-6 py-12 text-center">
-        <h2 className="text-xl font-semibold mb-3">Danke — dein Inserat ist eingereicht.</h2>
+        <h2 className="text-xl font-semibold mb-3">Danke, dein Inserat ist eingereicht.</h2>
         <p className="text-white/50 text-sm max-w-md mx-auto">
           Wir prüfen jede Einreichung von Hand. Sobald dein Event freigeschaltet ist,
-          bekommst du eine E-Mail mit dem Link zur Veranstaltungsseite. Das dauert in
-          der Regel ein bis zwei Werktage.
+          schreiben wir dir und schicken den Link zur Veranstaltungsseite mit. Das
+          dauert in der Regel ein bis zwei Werktage.
         </p>
       </div>
     );
@@ -194,9 +194,6 @@ export function EventSubmissionForm() {
             placeholder="Was erwartet die Besucher:innen? Programm, Highlights, Besonderheiten …"
             className={`${FIELD} resize-y`}
           />
-          <p className="mt-1.5 text-[11px] text-white/25">
-            Bitte in eigenen Worten — kopierte Texte von anderen Seiten können wir nicht veröffentlichen.
-          </p>
         </div>
 
         <label className="flex items-center gap-2.5 text-sm text-white/60 cursor-pointer">
@@ -211,7 +208,7 @@ export function EventSubmissionForm() {
 
         <div className="grid sm:grid-cols-2 gap-4">
           <div>
-            <label htmlFor="ins-start-date" className={LABEL}>Beginn — Datum *</label>
+            <label htmlFor="ins-start-date" className={LABEL}>Startdatum *</label>
             <input
               id="ins-start-date"
               type="date"
@@ -223,7 +220,7 @@ export function EventSubmissionForm() {
           </div>
           {!isAllDay && (
             <div>
-              <label htmlFor="ins-start-time" className={LABEL}>Beginn — Uhrzeit</label>
+              <label htmlFor="ins-start-time" className={LABEL}>Startzeit</label>
               <input
                 id="ins-start-time"
                 type="time"
@@ -237,7 +234,7 @@ export function EventSubmissionForm() {
 
         <div className="grid sm:grid-cols-2 gap-4">
           <div>
-            <label htmlFor="ins-end-date" className={LABEL}>Ende — Datum</label>
+            <label htmlFor="ins-end-date" className={LABEL}>Enddatum</label>
             <input
               id="ins-end-date"
               type="date"
@@ -248,7 +245,7 @@ export function EventSubmissionForm() {
           </div>
           {!isAllDay && (
             <div>
-              <label htmlFor="ins-end-time" className={LABEL}>Ende — Uhrzeit</label>
+              <label htmlFor="ins-end-time" className={LABEL}>Endzeit</label>
               <input
                 id="ins-end-time"
                 type="time"
@@ -316,7 +313,7 @@ export function EventSubmissionForm() {
               onChange={(e) => setBundesland(e.target.value)}
               className={`${FIELD} [color-scheme:dark]`}
             >
-              <option value="">— bitte wählen —</option>
+              <option value="">Bitte wählen</option>
               {BUNDESLAENDER.map(([id, label]) => (
                 <option key={id} value={id}>{label}</option>
               ))}
@@ -360,7 +357,7 @@ export function EventSubmissionForm() {
             />
           </div>
           <div>
-            <label htmlFor="ins-ticket-url" className={LABEL}>Ticket-Link</label>
+            <label htmlFor="ins-ticket-url" className={LABEL}>Link zum Ticketverkauf</label>
             <input
               id="ins-ticket-url"
               type="url"
@@ -373,7 +370,7 @@ export function EventSubmissionForm() {
         </div>
 
         <div>
-          <label htmlFor="ins-image-url" className={LABEL}>Bild-URL</label>
+          <label htmlFor="ins-image-url" className={LABEL}>Link zum Bild</label>
           <input
             id="ins-image-url"
             type="url"
@@ -383,7 +380,7 @@ export function EventSubmissionForm() {
             className={FIELD}
           />
           <p className="mt-1.5 text-[11px] text-white/25">
-            Wir laden keine Dateien hoch — bitte den direkten Link zu einem Bild angeben,
+            Wir laden keine Dateien hoch. Gib bitte den direkten Link zu einem Bild an,
             das du selbst verwenden darfst.
           </p>
         </div>
@@ -447,7 +444,7 @@ export function EventSubmissionForm() {
             />
           </div>
           <div>
-            <label htmlFor="ins-email" className={LABEL}>E-Mail *</label>
+            <label htmlFor="ins-email" className={LABEL}>Mailadresse *</label>
             <input
               id="ins-email"
               type="email"
@@ -495,7 +492,7 @@ export function EventSubmissionForm() {
             onChange={(e) => setMessage(e.target.value)}
             rows={3}
             maxLength={2000}
-            placeholder="Optional — alles, was wir zur Prüfung wissen sollten."
+            placeholder="Optional. Alles, was wir zur Prüfung wissen sollten."
             className={`${FIELD} resize-y`}
           />
         </div>

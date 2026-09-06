@@ -210,7 +210,7 @@ export function validateSubmission(
 
   const company = clean(input.company, 200);
   if (submitterType === 'company' && !company) {
-    return { ok: false, error: 'Bitte den Firmen- oder Vereinsnamen angeben.', field: 'company' };
+    return { ok: false, error: 'Bitte den Namen der Firma oder des Vereins angeben.', field: 'company' };
   }
 
   const contactName = clean(input.contactName, 200);
@@ -220,7 +220,7 @@ export function validateSubmission(
 
   const email = clean(input.email, 320);
   if (!email || !EMAIL_REGEX.test(email)) {
-    return { ok: false, error: 'Bitte eine gültige E-Mail-Adresse angeben.', field: 'email' };
+    return { ok: false, error: 'Bitte eine gültige Mailadresse angeben.', field: 'email' };
   }
 
   if (input.rightsConfirmed !== true) {

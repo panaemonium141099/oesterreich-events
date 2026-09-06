@@ -111,7 +111,7 @@ export async function POST(request: NextRequest) {
       ['Nachricht', submission.message],
     ];
     const html = `
-      <h2>Neues Event-Inserat</h2>
+      <h2>Neues Inserat</h2>
       <table cellpadding="4">
         ${rows
           .filter(([, v]) => v)
@@ -123,11 +123,11 @@ export async function POST(request: NextRequest) {
       </table>
       <p><a href="https://lasstreffen.at/admin/inserate">Im Admin prüfen und freigeben →</a></p>
       <hr>
-      <p style="color:#888;font-size:12px">Inserat-ID: ${data.id}</p>
+      <p style="color:#888;font-size:12px">Inserat ${data.id}</p>
     `;
     await sendGenericEmail(
       NOTIFY_TO,
-      `Neues Event-Inserat: ${submission.title}`,
+      `Neues Inserat: ${submission.title}`,
       html
     );
   } catch (err) {
