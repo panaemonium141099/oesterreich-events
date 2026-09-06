@@ -25,6 +25,7 @@ import { ALL_GEMEINDEN } from '@/lib/gemeinden/data';
 import { BUNDESLAND_NAMES, type BundeslandId } from '@/lib/districtsAT';
 import { getBundeslandFromPLZ } from '@/lib/plzCoordinates';
 import type { Event } from '@/types/events';
+import { formatEventDate } from '@/lib/utils/event-time';
 
 /**
  * Effektives Bundesland: DB-Wert, sonst deterministisch aus der PLZ.
@@ -76,11 +77,13 @@ export interface RelatedRow {
  * lokaler Kategorie-/Region-Fallback) und macht den Gradienten ueberfluessig.
  */
 
+// Europe/Vienna. Ohne timeZone rendert der Server in UTC (ein 19:00-Event
+// stand als "17:00" im SSR-HTML) und Platzhalter-Uhrzeiten wuerden als
+// erfundene "02:00" auftauchen — beides siehe event-time.ts (fn-23).
 function formatDate(iso: string, fmt: string): string {
-  const d = new Date(iso);
-  const date = d.toLocaleDateString(fmt, { weekday: 'short', day: 'numeric', month: 'short' });
-  const time = d.toLocaleTimeString(fmt, { hour: '2-digit', minute: '2-digit' });
-  return time === '00:00' ? date : `${date} · ${time}`;
+  return formatEventDate({ start_date: iso }, fmt, {
+    weekday: 'short', day: 'numeric', month: 'short',
+  }).label;
 }
 
 /** Normalisierter Titel als Dedupe-Schlüssel: lowercase, Diakritika

@@ -12,6 +12,10 @@ export interface Event {
   translated_at?: string | null;
   start_date: string;
   end_date: string | null;
+  /** fn-23: schema.org-Eventstatus. Steuert `eventStatus` im JSON-LD. */
+  event_status?: 'scheduled' | 'cancelled' | 'postponed' | 'rescheduled' | 'moved_online' | null;
+  /** fn-23: alter Termin vor einer Verschiebung (Google: previousStartDate). */
+  previous_start_date?: string | null;
   is_all_day?: boolean;
   location_name: string | null;
   address: string | null;

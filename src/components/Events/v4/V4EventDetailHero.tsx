@@ -21,6 +21,7 @@ import Image from 'next/image';
 import { useLocale } from 'next-intl';
 import { V4BackButton } from './V4BackButton';
 import { V4HeroSlideshow } from './V4HeroSlideshow';
+import { formatEventDate } from '@/lib/utils/event-time';
 
 interface V4EventDetailHeroProps {
   title: string;
@@ -32,11 +33,13 @@ interface V4EventDetailHeroProps {
   images?: string[] | null;
 }
 
+// Europe/Vienna. Ohne timeZone rendert der Server in UTC (ein 19:00-Event
+// stand als "17:00" im SSR-HTML) und Platzhalter-Uhrzeiten wuerden als
+// erfundene "02:00" auftauchen — beides siehe event-time.ts (fn-23).
 function formatDate(iso: string, fmt: string): string {
-  const d = new Date(iso);
-  const date = d.toLocaleDateString(fmt, { weekday: 'long', day: 'numeric', month: 'long' });
-  const time = d.toLocaleTimeString(fmt, { hour: '2-digit', minute: '2-digit' });
-  return `${date} · ${time}`;
+  return formatEventDate({ start_date: iso }, fmt, {
+    weekday: 'long', day: 'numeric', month: 'long',
+  }).label;
 }
 
 export function V4EventDetailHero({ title, startDate, locationName, city, imageUrl, images }: V4EventDetailHeroProps) {

@@ -320,7 +320,19 @@ export default async function EventDetailPage({
 
   // Only emit JSON-LD for fully published events (skip low confidence).
   // displayEvent: auf der /en-URL stehen Name/Beschreibung übersetzt im Schema.
-  const jsonLd = event.publish_status !== 'published_low_confidence' ? buildJsonLd(displayEvent) : null;
+  //
+  // fn-23: locale + canonical folgen DERSELBEN Regel wie generateMetadata
+  // (`event.title_en` aus dem DB-Cache, nicht die evtl. gerade erst erzeugte
+  // Uebersetzung). Sonst koennte das Schema auf die /en-URL zeigen, waehrend
+  // <link rel="canonical"> noch auf DE steht.
+  const schemaIsEn = rawLocale === 'en' && !!event.title_en;
+  const jsonLd =
+    event.publish_status !== 'published_low_confidence'
+      ? buildJsonLd(displayEvent, {
+          locale: schemaIsEn ? 'en' : 'de',
+          canonicalUrl: `https://lasstreffen.at${schemaIsEn ? '/en' : ''}${canonicalPath}`,
+        })
+      : null;
 
   // BreadcrumbList-Schema: Home → Bundesland-Hub → Gemeinde-Hub → Event.
   // Nutzt dieselben verifizierten Hub-Links wie die sichtbare
