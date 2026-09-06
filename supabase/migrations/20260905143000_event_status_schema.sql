@@ -1,5 +1,10 @@
 -- fn-23: eventStatus für schema.org/Event (Absagen & Verschiebungen).
 --
+-- Angewendet auf Prod (Hetzner, /opt/supabase) am 2026-09-06:
+--   docker compose exec -T db psql -U supabase_admin -d postgres
+-- Danach `NOTIFY pgrst, 'reload schema'` — ohne den Reload liefert PostgREST
+-- die neuen Spalten trotz Migration nicht aus.
+--
 -- Bisher stand `eventStatus` im JSON-LD hart auf `EventScheduled`, weil es
 -- keine Spalte gab, in der eine Absage überhaupt gepflegt werden konnte.
 -- Google verlangt bei abgesagten/verschobenen Events, dass die Seite
