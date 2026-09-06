@@ -12,6 +12,7 @@ import { readFileSync } from 'fs';
 import { join } from 'path';
 import { KNOWN_VENUES } from './known-venues';
 import { ALL_GEMEINDEN } from './gemeinden/data';
+import { getCoordinatesForPLZ as lookupPlzCoords } from './plzCoordinates';
 
 interface GeoEntry {
   name: string;
@@ -358,6 +359,36 @@ function disambiguate(
 /**
  * Get a geographic hint from PLZ or Bundesland for closest-match disambiguation.
  */
+/**
+ * Explizit im Text genannte oesterreichische PLZ.
+ *
+ * Viele Listen-Quellen schreiben den Ort in den Titel statt in ein Feld:
+ * "Privat Flohmarkt in 1230 Wien", "Flohmarkt in 5231 Schalchen". Das ist
+ * eine ausdrueckliche Ortsangabe der Quelle und damit ein WEIT staerkerer
+ * Beleg als ein unscharfer Namensabgleich — bisher wurde sie ignoriert.
+ *
+ * Gemessen am Prod-Bestand (2026-09-06): 236 veroeffentlichte
+ * `boudicca:flohmarkt`-Events lagen unter der falschen PLZ und damit im
+ * falschen Bundesland, obwohl ihr eigener Titel die richtige PLZ nannte —
+ * Wiener Flohmaerkte auf den Hub-Seiten von Vorarlberg und Kaernten
+ * ("Privat Flohmarkt in 1230 Wien" -> PLZ 6731, vorarlberg).
+ *
+ * Bewusst eng gefasst, damit keine Jahreszahl als PLZ durchgeht:
+ *   - die Praeposition "in" MUSS unmittelbar davor stehen
+ *   - danach MUSS ein grossgeschriebener Ortsname folgen
+ *   - die PLZ muss in der oesterreichischen PLZ-Tabelle existieren
+ * "Kasperl am 17.10.2026" oder "Kammermusik 2026/2027" matchen damit nicht.
+ */
+export function extractPostalCodeFromText(text: string | undefined | null): string | null {
+  if (!text) return null;
+  const m = /\bin\s+(\d{4})\s+[A-ZÄÖÜ]/.exec(text);
+  if (!m) return null;
+  const plz = m[1];
+  // Statischer Import: ein `require()` hier scheiterte unter Vitests
+  // ESM-Transform still und liess die Funktion immer null liefern.
+  return lookupPlzCoords(plz) ? plz : null;
+}
+
 function getHint(plz?: string, bundesland?: string): { lat: number; lng: number } | undefined {
   // Try PLZ first — most precise hint
   if (plz) {
@@ -781,7 +812,16 @@ export function normalizeEventLocation(event: {
    *  Gemeinde within ~8 km. */
   postal_code: string | null;
 } | null {
-  const hint = getHint(event.postal_code, event.bundesland);
+  // Eine im Titel/in der Adresse AUSDRUECKLICH genannte PLZ ist eine
+  // Ortsangabe der Quelle und schlaegt jeden Namensabgleich. Sie wird nur
+  // herangezogen, wenn der Scraper selbst keine PLZ geliefert hat.
+  const statedPlz =
+    event.postal_code?.trim() ||
+    extractPostalCodeFromText(event.title) ||
+    extractPostalCodeFromText(event.address) ||
+    undefined;
+
+  const hint = getHint(statedPlz, event.bundesland);
 
   // Per epic design decision #5: when location_name is a venue and city was resolved
   // from context (address, title, description), use confidence "normalized" (rank 3)
@@ -790,14 +830,14 @@ export function normalizeEventLocation(event: {
 
   // 1. Try location_name (most specific)
   if (event.location_name) {
-    const result = normalizeLocation(event.location_name, event.postal_code, event.bundesland, hint);
+    const result = normalizeLocation(event.location_name, statedPlz, event.bundesland, hint);
     if (result && result.confidence !== 'none') {
       return {
         latitude: result.latitude,
         longitude: result.longitude,
         location_name: result.canonicalName,
         confidence: result.confidence,
-        postal_code: pickPlz(event.postal_code, result.latitude, result.longitude),
+        postal_code: pickPlz(statedPlz, result.latitude, result.longitude),
       };
     }
   }
@@ -808,13 +848,13 @@ export function normalizeEventLocation(event: {
     const parts = event.address.split(',').map(p => p.trim());
     const city = parts[parts.length - 1]?.replace(/^\d{4,5}\s*/, ''); // remove PLZ prefix
     if (city && city.length >= 3) {
-      const result = normalizeLocation(city, event.postal_code, event.bundesland, hint);
+      const result = normalizeLocation(city, statedPlz, event.bundesland, hint);
       if (result && result.confidence !== 'none') {
         return {
           latitude: result.latitude,
           longitude: result.longitude,
           confidence: isVenue ? 'normalized' : result.confidence,
-          postal_code: pickPlz(event.postal_code, result.latitude, result.longitude),
+          postal_code: pickPlz(statedPlz, result.latitude, result.longitude),
         };
       }
     }
@@ -825,27 +865,27 @@ export function normalizeEventLocation(event: {
   // Done after address (more authoritative) but before title (less specific).
   if (isVenue && event.location_name) {
     const venueCity = extractCityFromVenueName(
-      event.location_name, event.postal_code, event.bundesland, hint
+      event.location_name, statedPlz, event.bundesland, hint
     );
     if (venueCity) {
       return {
         latitude: venueCity.latitude,
         longitude: venueCity.longitude,
         confidence: 'normalized',
-        postal_code: pickPlz(event.postal_code, venueCity.latitude, venueCity.longitude),
+        postal_code: pickPlz(statedPlz, venueCity.latitude, venueCity.longitude),
       };
     }
   }
 
   // 3. Try extracting place name from title
   if (event.title) {
-    const result = extractPlaceFromText(event.title, event.postal_code, event.bundesland, hint);
+    const result = extractPlaceFromText(event.title, statedPlz, event.bundesland, hint);
     if (result) {
       return {
         latitude: result.latitude,
         longitude: result.longitude,
         confidence: isVenue ? 'normalized' : 'from_title',
-        postal_code: pickPlz(event.postal_code, result.latitude, result.longitude),
+        postal_code: pickPlz(statedPlz, result.latitude, result.longitude),
       };
     }
   }
@@ -853,13 +893,13 @@ export function normalizeEventLocation(event: {
   // 4. Try extracting from description (first 300 chars)
   if (event.description) {
     const snippet = event.description.slice(0, 300);
-    const result = extractPlaceFromText(snippet, event.postal_code, event.bundesland, hint);
+    const result = extractPlaceFromText(snippet, statedPlz, event.bundesland, hint);
     if (result) {
       return {
         latitude: result.latitude,
         longitude: result.longitude,
         confidence: isVenue ? 'normalized' : 'from_description',
-        postal_code: pickPlz(event.postal_code, result.latitude, result.longitude),
+        postal_code: pickPlz(statedPlz, result.latitude, result.longitude),
       };
     }
   }
@@ -867,10 +907,10 @@ export function normalizeEventLocation(event: {
   // 5. PLZ fallback: if postal code is available and location is a venue, use PLZ
   // coordinates as last resort. Only for venues to avoid coarse PLZ-based coords
   // overriding the null (unresolved) result for non-venue locations.
-  if (isVenue && event.postal_code) {
+  if (isVenue && statedPlz) {
     try {
       const { getCoordinatesForPLZ } = require('./plzCoordinates');
-      const coords = getCoordinatesForPLZ(event.postal_code);
+      const coords = getCoordinatesForPLZ(statedPlz);
       if (coords) {
         return {
           latitude: coords[0],
@@ -878,7 +918,7 @@ export function normalizeEventLocation(event: {
           confidence: 'normalized',
           // Here the input PLZ *is* the coord source, so echo it back —
           // pickPlz() would also return it, but this is cheaper.
-          postal_code: event.postal_code.trim(),
+          postal_code: statedPlz,
         };
       }
     } catch { /* PLZ module not available */ }
