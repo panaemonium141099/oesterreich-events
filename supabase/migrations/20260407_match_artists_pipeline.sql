@@ -18,7 +18,11 @@ DO $$
 BEGIN
   IF NOT EXISTS (SELECT 1 FROM vault.secrets WHERE name = 'project_url') THEN
     PERFORM vault.create_secret(
-      'https://booljdtrktpotsenbnut.supabase.co',
+      -- Interner Envoy-Gateway der self-hosted Instanz. Stand hier bis
+      -- 2026-09-06 als Supabase-Cloud-URL — die Instanz ist seit dem
+      -- Cutover 2026-08-31 tot; ein erneutes Anwenden haette den pg_cron-Job
+      -- auf eine nicht mehr existierende DB gezeigt.
+      'http://api-gw:8000',
       'project_url'
     );
   END IF;

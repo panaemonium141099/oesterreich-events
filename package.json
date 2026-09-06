@@ -4,8 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "predev": "node scripts/check-db-target.mjs",
     "dev": "next dev",
-    "prebuild": "node scripts/compute-csp-hash.mjs",
+    "prebuild": "node scripts/check-db-target.mjs && node scripts/compute-csp-hash.mjs",
     "build": "next build",
     "postbuild": "node scripts/verify-csp-hash.mjs",
     "analyze": "ANALYZE=true next build",
