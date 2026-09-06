@@ -75,7 +75,7 @@ export function buildJsonLd(event: Event, opts: BuildJsonLdOptions = {}): string
   // Vorher stand hier der rohe DB-String (`2026-10-01T17:00:00+00:00`).
   // Zwei Probleme, beide klassische Rich-Result-Killer:
   //  1. Wien ist UTC+1/+2 — der Event startet real 19:00, nicht 17:00.
-  //  2. 32,5 % der zukuenftigen Events haben gar keine bekannte Uhrzeit und
+  //  2. 23,7 % der zukuenftigen Events haben gar keine bekannte Uhrzeit und
   //     bekamen trotzdem eine erfundene (meist 00:00Z = Wien 02:00); bei der
   //     viennaToUtc-Form (22:00Z) war sogar der ausgelieferte TAG falsch.
   // Jetzt: Ortszeit mit Offset wenn die Uhrzeit echt ist, sonst reines Datum.

@@ -9,11 +9,16 @@
  *    im SSR-HTML als "17:00" gerendert — für Googlebot und für jeden User,
  *    bevor React hydratisiert. Deshalb hängt hier überall `timeZone` dran.
  *
- *  - 32,5 % der zukünftigen Events haben **keine bekannte Uhrzeit**. Sie
+ *  - 23,7 % der zukünftigen Events haben **keine bekannte Uhrzeit**. Sie
  *    liegen als Platzhalter in der DB und wurden trotzdem mit einer erfundenen
  *    Uhrzeit angezeigt (meist "02:00"). `hasKnownStartTime()` erkennt die zwei
  *    Platzhalter-Formen, damit Anzeige und Schema die Uhrzeit weglassen
  *    statt zu raten.
+ *
+ * Zahlen gemessen am 2026-09-06 direkt auf der Prod-DB (Hetzner, self-hosted
+ * Supabase): 78.565 zukünftige published Events, davon 17.935 in Form A und
+ * 680 in Form B. Eine frühere Messung nannte 32,5 % — die stammte aus der
+ * eingefrorenen Supabase-Cloud-Kopie und war nicht der Prod-Stand.
  *
  * Alles hier ist rein und ohne I/O — läuft im Client-Bundle wie im RSC.
  */
@@ -125,7 +130,7 @@ export interface EventTiming {
  * beiden eindeutigen Platzhalter-Formen, statt eine Spalte + Backfill über
  * 280k Zeilen zu bauen:
  *
- *   A) `T00:00:00Z`  — naive Mitternacht, Wien-lokal 02:00 (32,5 % der Rows)
+ *   A) `T00:00:00Z`  — naive Mitternacht, Wien-lokal 02:00 (22,8 % der Rows)
  *   B) `T22:00:00Z`  — aus viennaToUtc(); Wien-lokal 00:00 am **Folgetag**
  *
  * Falsch-negativ-Risiko: ein Event, das echt um 00:00 oder 02:00 Wien startet,
