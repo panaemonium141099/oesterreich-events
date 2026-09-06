@@ -36,6 +36,7 @@ import { normalizeDistrict } from '@/lib/district-normalizer';
 import { districtFromPlz } from '@/lib/plz-district';
 import { bundeslandToId } from '@/lib/bundeslaender';
 import { getBundeslandFromPLZ } from '@/lib/plzCoordinates';
+import { bundeslandFromPolygon } from '@/lib/eventim/bundesland-from-geo';
 import { generateFingerprint } from '@/lib/dedup/fingerprint';
 import { generateEventSlug } from '@/lib/utils/slugify';
 import { scoreAndAdmit } from '@/lib/quality/score-event';
@@ -63,33 +64,31 @@ import {
  * Punkt-in-Polygon-Auflösung Koordinate → Bundesland für die
  * Widerspruchsprüfung im Freigabevertrag.
  *
- * Lazy + fehlertolerant: das Modul liest GeoJSON aus `public/` via
- * `node:fs`. In Umgebungen, wo diese Dateien nicht mitgebündelt sind,
- * fällt die Gegenprobe still aus, statt den ganzen Sync zu killen —
- * `evaluateAdmission` behandelt ein `null` als "keine Aussage" und
- * behauptet dann nichts.
+ * `bundesland-from-geo` liest seine GeoJSON erst beim ersten Aufruf (und
+ * cached sie), der Import selbst kostet nichts. Die Datei-Pfade dort sind
+ * voll-literal, damit Vercels output-file-tracing genau die neun
+ * Bundesland-Dateien einsammelt statt public/ komplett (siehe den
+ * 597-MB-Zwischenfall im Kommentar dieses Moduls).
+ *
+ * Fehlertolerant: schlägt das Laden fehl (Dateien nicht mitgebündelt),
+ * liefert der Resolver `null`. `evaluateAdmission` behandelt das als
+ * "keine Aussage" und behauptet dann nichts, statt zu raten.
  */
-let regionResolver: ((lat: number, lng: number) => string | null) | null | undefined;
+let regionWarned = false;
 
-function getRegionResolver(): ((lat: number, lng: number) => string | null) | undefined {
-  if (regionResolver !== undefined) return regionResolver ?? undefined;
+function regionOfCoords(lat: number, lng: number): string | null {
   try {
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const mod = require('@/lib/eventim/bundesland-from-geo') as {
-      bundeslandFromPolygon: (lat: number, lng: number) => string | null;
-    };
-    regionResolver = (lat: number, lng: number) => {
-      try {
-        return mod.bundeslandFromPolygon(lat, lng);
-      } catch {
-        return null;
-      }
-    };
-  } catch {
-    console.warn('[supabase-sync] Bundesland-Polygone nicht verfügbar — Regions-Gegenprobe übersprungen');
-    regionResolver = null;
+    return bundeslandFromPolygon(lat, lng);
+  } catch (e) {
+    if (!regionWarned) {
+      regionWarned = true;
+      console.warn(
+        '[supabase-sync] Bundesland-Polygone nicht verfügbar — Regions-Gegenprobe übersprungen:',
+        e instanceof Error ? e.message : e,
+      );
+    }
+    return null;
   }
-  return regionResolver ?? undefined;
 }
 
 /**
@@ -634,7 +633,7 @@ function toSupabaseRow(
       source_url: event.source_url,
       ticket_url: finalTicketUrl,
     },
-    { regionOf: getRegionResolver(), plzRegionOf: getBundeslandFromPLZ },
+    { regionOf: regionOfCoords, plzRegionOf: getBundeslandFromPLZ },
   );
 
   // `scoreAndAdmit` hat den Freigabevertrag gegen dieselben FINALEN Werte
