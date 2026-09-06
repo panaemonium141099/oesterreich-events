@@ -23,6 +23,7 @@ import type { Event } from '@/types/events';
 import type { V4EventState } from '@/lib/v4/derive-event-state';
 import { buildEventUrlV2 } from '@/lib/utils/slugify';
 import { V4Badge } from './V4Badge';
+import { formatEventDate } from '@/lib/utils/event-time';
 
 interface V4CardHProps {
   event: Event & { state: V4EventState };
@@ -34,9 +35,13 @@ const STATE_LABELS: Partial<Record<V4EventState, string>> = {
   soldout: 'Ausverkauft',
 };
 
+// Europe/Vienna. Ohne timeZone rendert der Server in UTC (ein 19:00-Event
+// stand als "17:00" im SSR-HTML) und Platzhalter-Uhrzeiten wuerden als
+// erfundene "02:00" auftauchen — beides siehe event-time.ts (fn-23).
 function shortDate(iso: string): string {
-  const d = new Date(iso);
-  return `${d.toLocaleDateString('de-AT', { weekday: 'short', day: 'numeric', month: 'short' })} · ${d.toLocaleTimeString('de-AT', { hour: '2-digit', minute: '2-digit' })}`;
+  return formatEventDate({ start_date: iso }, 'de-AT', {
+    weekday: 'short', day: 'numeric', month: 'short',
+  }).label;
 }
 
 export function V4CardH({ event }: V4CardHProps) {

@@ -89,8 +89,8 @@ export const post: FestivalPost = {
   ],
   jsonLdEvent: {
     name: 'Wiener Neujahrskonzert 2026',
-    startDate: '2026-01-01T11:15:00',
-    endDate: '2026-01-01T13:30:00',
+    startDate: '2026-01-01T11:15:00+01:00',
+    endDate: '2026-01-01T13:30:00+01:00',
     location: 'Musikvereinsplatz 1, 1010 Wien, Austria',
     addressCountry: 'AT',
     url: 'https://www.wienerphilharmoniker.at/neujahrskonzert',

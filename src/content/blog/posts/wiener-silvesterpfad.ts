@@ -91,8 +91,8 @@ export const post: FestivalPost = {
   ],
   jsonLdEvent: {
     name: 'Wiener Silvesterpfad 2026',
-    startDate: '2026-12-31T18:00:00',
-    endDate: '2027-01-01T02:00:00',
+    startDate: '2026-12-31T18:00:00+01:00',
+    endDate: '2027-01-01T02:00:00+01:00',
     location: 'Rathausplatz 1, 1010 Wien, Austria',
     addressCountry: 'AT',
     url: 'https://www.wien.gv.at/freizeit/feiern/silvesterpfad/',

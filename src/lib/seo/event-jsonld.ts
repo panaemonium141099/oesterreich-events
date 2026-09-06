@@ -17,6 +17,13 @@ import type { Event } from '@/types/events';
 import { extractCity } from '@/lib/utils/city';
 import { buildEventUrlV2 } from '@/lib/utils/slugify';
 import { resolvePrimaryEventImage } from '@/lib/event-images';
+import {
+  hasKnownStartTime,
+  parseEventDate,
+  toViennaDate,
+  toViennaIso,
+  viennaEndDate,
+} from '@/lib/utils/event-time';
 
 /**
  * Extracts a numeric price from free-text like "ab 15 €", "€12,50", "Tickets 25 EUR".
@@ -30,20 +37,90 @@ export function parsePriceText(priceText: string | null | undefined): string | n
   return match ? match[1].replace(',', '.') : null;
 }
 
-export function buildJsonLd(event: Event): string {
-  const canonicalUrl = `https://lasstreffen.at${buildEventUrlV2(event)}`;
+export type EventStatus =
+  | 'scheduled'
+  | 'cancelled'
+  | 'postponed'
+  | 'rescheduled'
+  | 'moved_online';
+
+const STATUS_URL: Record<EventStatus, string> = {
+  scheduled: 'https://schema.org/EventScheduled',
+  cancelled: 'https://schema.org/EventCancelled',
+  postponed: 'https://schema.org/EventPostponed',
+  rescheduled: 'https://schema.org/EventRescheduled',
+  moved_online: 'https://schema.org/EventMovedOnline',
+};
+
+export function normalizeEventStatus(raw: unknown): EventStatus {
+  return typeof raw === 'string' && raw in STATUS_URL ? (raw as EventStatus) : 'scheduled';
+}
+
+export interface BuildJsonLdOptions {
+  /** 'de' | 'en' — steuert `inLanguage`. Default 'de'. */
+  locale?: string;
+  /**
+   * Absolute Canonical-URL der Seite. Wird durchgereicht statt neu gebaut,
+   * damit JSON-LD und `<link rel="canonical">` nie auseinanderlaufen (auf /en
+   * kanonisiert die Seite bewusst auf DE, solange keine Uebersetzung existiert).
+   */
+  canonicalUrl?: string;
+}
+
+export function buildJsonLd(event: Event, opts: BuildJsonLdOptions = {}): string {
+  const isEn = opts.locale === 'en';
+  const canonicalUrl = opts.canonicalUrl ?? `https://lasstreffen.at${buildEventUrlV2(event)}`;
+
+  // ─── Zeitpunkt (fn-23) ──────────────────────────────────────────────────
+  // Vorher stand hier der rohe DB-String (`2026-10-01T17:00:00+00:00`).
+  // Zwei Probleme, beide klassische Rich-Result-Killer:
+  //  1. Wien ist UTC+1/+2 — der Event startet real 19:00, nicht 17:00.
+  //  2. 32,5 % der zukuenftigen Events haben gar keine bekannte Uhrzeit und
+  //     bekamen trotzdem eine erfundene (meist 00:00Z = Wien 02:00); bei der
+  //     viennaToUtc-Form (22:00Z) war sogar der ausgelieferte TAG falsch.
+  // Jetzt: Ortszeit mit Offset wenn die Uhrzeit echt ist, sonst reines Datum.
+  const start = parseEventDate(event.start_date);
+  const timed = start != null && hasKnownStartTime(event);
+  const startValue = start ? (timed ? toViennaIso(start) : toViennaDate(start)) : event.start_date;
+
   const jsonLd: Record<string, unknown> = {
     '@context': 'https://schema.org',
     '@type': 'Event',
     name: event.title,
-    startDate: event.start_date,
-    eventStatus: 'https://schema.org/EventScheduled',
+    startDate: startValue,
     eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
+    inLanguage: isEn ? 'en' : 'de',
+    url: canonicalUrl,
   };
 
   // endDate ist ein Google-Recommended-Field; Eintages-Events (der Normalfall
   // ohne end_date-Row) sind mit endDate == startDate schema-korrekt abgebildet.
-  jsonLd.endDate = event.end_date ?? event.start_date;
+  // Das Ende folgt derselben Praezision wie der Start — ein date-only Start
+  // mit timestamp-Ende waere inkonsistent.
+  const end = parseEventDate(event.end_date);
+  if (!end || !start) {
+    jsonLd.endDate = startValue;
+  } else if (timed) {
+    jsonLd.endDate = end.getTime() > start.getTime() ? toViennaIso(end) : startValue;
+  } else {
+    const endDay = viennaEndDate(end);
+    jsonLd.endDate = endDay > toViennaDate(start) ? endDay : startValue;
+  }
+
+  // ─── eventStatus (fn-23) ────────────────────────────────────────────────
+  // War hart auf EventScheduled verdrahtet, weil es keine DB-Spalte gab.
+  // Google verlangt bei Absagen/Verschiebungen, dass die Seite ONLINE BLEIBT
+  // und der Status im Markup gepflegt wird.
+  const status = normalizeEventStatus(event.event_status);
+  jsonLd.eventStatus = STATUS_URL[status];
+  if (status === 'moved_online') {
+    jsonLd.eventAttendanceMode = 'https://schema.org/OnlineEventAttendanceMode';
+  }
+  // Bei einer Verschiebung ist der alte Termin ein Google-Pflichtfeld.
+  const previous = parseEventDate(event.previous_start_date);
+  if (status === 'rescheduled' && previous) {
+    jsonLd.previousStartDate = timed ? toViennaIso(previous) : toViennaDate(previous);
+  }
 
   if (event.description) {
     jsonLd.description = event.description.slice(0, 500);
@@ -70,7 +147,7 @@ export function buildJsonLd(event: Event): string {
     rawImage.startsWith('/') ? `https://lasstreffen.at${rawImage}` :
     rawImage;
 
-  const locationName = event.location_name ?? event.address ?? 'Österreich';
+  const locationName = event.location_name ?? event.address ?? (isEn ? 'Austria' : 'Österreich');
   const location: Record<string, unknown> = {
     '@type': 'Place',
     name: locationName,
@@ -102,7 +179,12 @@ export function buildJsonLd(event: Event): string {
     };
   }
 
-  jsonLd.location = location;
+  // Online verlegte Events brauchen eine VirtualLocation — ein Place neben
+  // OnlineEventAttendanceMode ist fuer Google widerspruechlich.
+  jsonLd.location =
+    status === 'moved_online'
+      ? { '@type': 'VirtualLocation', url: event.ticket_url || canonicalUrl }
+      : location;
 
   // Organizer — ALWAYS present. Falls back to the site when the scraper
   // didn't capture an explicit organizer. Satisfies Google's Event rich-result
@@ -140,7 +222,11 @@ export function buildJsonLd(event: Event): string {
       url: event.ticket_url || canonicalUrl,
       priceCurrency: 'EUR',
       price,
-      availability: 'https://schema.org/InStock',
+      // Ein abgesagtes Event darf nicht weiter als buchbar ausgezeichnet werden.
+      availability:
+        status === 'cancelled'
+          ? 'https://schema.org/SoldOut'
+          : 'https://schema.org/InStock',
       validFrom: event.created_at || event.start_date,
     };
     if (event.price_text) {
