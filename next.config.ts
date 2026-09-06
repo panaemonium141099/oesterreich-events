@@ -17,8 +17,10 @@ const nextConfig: NextConfig = {
       { protocol: 'https', hostname: 'images.unsplash.com' },
       // Google (user-uploaded content)
       { protocol: 'https', hostname: 'lh3.googleusercontent.com' },
-      // Supabase storage
-      { protocol: 'https', hostname: '**.supabase.co' },
+      // Supabase Storage — self-hosted hinter dem Envoy-Gateway.
+      // Ersetzt den frueheren '**.supabase.co'-Eintrag: die Cloud-Instanz ist
+      // seit dem Cutover 2026-08-31 tot, Buckets liegen auf dem Hetzner-Server.
+      { protocol: 'https', hostname: 'api.lasstreffen.at' },
 
       // Austrian domains (.at) — broad wildcard covers all *.at scraper sources
       // Includes: burgenland.at, esterhazy.at, falter.at, eventim.at, oeticket.at,
@@ -214,7 +216,7 @@ const nextConfig: NextConfig = {
       // (WeatherSection). Fehlte hier, deshalb lief der fetch bei JEDEM
       // Landing-Aufruf in einen CSP-Verstoss und die Karte bekam nie
       // Daten — sichtbar nur in der Browser-Konsole, nicht im Server-Log.
-      "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.lasstreffen.at wss://api.lasstreffen.at https://api.mapbox.com https://*.tiles.mapbox.com https://events.mapbox.com https://api.spotify.com https://accounts.spotify.com https://www.google-analytics.com https://www.googletagmanager.com https://stats.g.doubleclick.net https://pagead2.googlesyndication.com https://googleads.g.doubleclick.net https://fundingchoicesmessages.google.com https://*.adtrafficquality.google https://api.open-meteo.com https://widget.getyourguide.com",
+      "connect-src 'self' https://api.lasstreffen.at wss://api.lasstreffen.at https://api.mapbox.com https://*.tiles.mapbox.com https://events.mapbox.com https://api.spotify.com https://accounts.spotify.com https://www.google-analytics.com https://www.googletagmanager.com https://stats.g.doubleclick.net https://pagead2.googlesyndication.com https://googleads.g.doubleclick.net https://fundingchoicesmessages.google.com https://*.adtrafficquality.google https://api.open-meteo.com https://widget.getyourguide.com",
       "worker-src 'self' blob:",
       "child-src 'self' blob:",
       // pagead2.googlesyndication.com MUSS hier stehen, nicht nur in
