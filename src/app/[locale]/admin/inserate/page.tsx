@@ -73,8 +73,8 @@ const EDIT_FIELDS: Array<{
   { key: 'priceText', column: 'price_text', label: 'Eintritt' },
   { key: 'organizer', column: 'organizer', label: 'Veranstalter' },
   { key: 'eventUrl', column: 'event_url', label: 'Website' },
-  { key: 'ticketUrl', column: 'ticket_url', label: 'Ticket-Link' },
-  { key: 'imageUrl', column: 'image_url', label: 'Bild-URL' },
+  { key: 'ticketUrl', column: 'ticket_url', label: 'Link zum Ticketverkauf' },
+  { key: 'imageUrl', column: 'image_url', label: 'Link zum Bild' },
 ];
 
 const INPUT =
@@ -146,7 +146,7 @@ export default function AdminInseratePage() {
 
   const review = async (submission: Submission, action: 'approve' | 'reject') => {
     if (action === 'reject' && !note.trim()) {
-      setActionError('Bitte einen Ablehnungsgrund angeben — er geht an den Inserenten.');
+      setActionError('Bitte einen Ablehnungsgrund angeben. Er geht an den Inserenten.');
       return;
     }
     setBusyId(submission.id);
@@ -275,7 +275,7 @@ export default function AdminInseratePage() {
                       <div className="flex gap-2">
                         <dt className="text-white/30 w-24 shrink-0">Ende</dt>
                         <dd className="text-white/60">
-                          {s.end_date ? formatDateTime(s.end_date, s.is_all_day) : '—'}
+                          {s.end_date ? formatDateTime(s.end_date, s.is_all_day) : 'ohne Angabe'}
                         </dd>
                       </div>
                       <div className="flex gap-2">
@@ -286,11 +286,11 @@ export default function AdminInseratePage() {
                       </div>
                       <div className="flex gap-2">
                         <dt className="text-white/30 w-24 shrink-0">Telefon</dt>
-                        <dd className="text-white/60">{s.phone ?? '—'}</dd>
+                        <dd className="text-white/60">{s.phone ?? 'ohne Angabe'}</dd>
                       </div>
                       <div className="flex gap-2">
                         <dt className="text-white/30 w-24 shrink-0">Website</dt>
-                        <dd className="text-white/60 truncate">{s.website ?? '—'}</dd>
+                        <dd className="text-white/60 truncate">{s.website ?? 'ohne Angabe'}</dd>
                       </div>
                     </dl>
 

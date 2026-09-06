@@ -147,13 +147,13 @@ export async function PATCH(
     }
 
     await notifySubmitter(submission.email, {
-      subject: `Dein Event-Inserat "${submission.title}"`,
+      subject: `Dein Inserat "${submission.title}"`,
       html: `
         <p>Hallo ${escapeHtml(submission.contact_name)},</p>
         <p>dein Inserat <strong>${escapeHtml(submission.title)}</strong> konnten wir leider
         nicht veröffentlichen.</p>
         ${note ? `<p><strong>Grund:</strong> ${escapeHtml(note)}</p>` : ''}
-        <p>Wenn du meinst, dass das ein Irrtum ist, antworte einfach auf diese E-Mail.</p>
+        <p>Wenn du meinst, dass das ein Irrtum ist, antworte einfach auf diese Nachricht.</p>
         <p>Viele Grüße<br>LassTreffen.at</p>
       `,
     });

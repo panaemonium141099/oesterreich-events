@@ -118,6 +118,32 @@ input:focus, select:focus, textarea:focus {
 }
 
 /* ═══════════════════════════════════════════════
+   Native Dropdown-Liste (<option>) lesbar halten
+   ═══════════════════════════════════════════════
+   Die aufgeklappte Liste eines <select> malt der Browser selbst, auf
+   seinem eigenen (unter Windows/Chrome weissen) Popup-Grund. Unsere
+   Selects tragen durchgaengig `bg-white/5 text-white`; die <option>
+   erbt davon die weisse Schrift, bekommt als Hintergrund aber
+   `rgba(0, 0, 0, 0)` (Tailwind-Preflight setzt Form-Controls
+   transparent). Gemessen an /event-inserieren: option background-color
+   = rgba(0,0,0,0), color = rgb(255,255,255). Ergebnis: weisse Schrift
+   auf weissem Popup, die Liste ist unlesbar.
+
+   `color-scheme: dark` auf dem <select> reicht NICHT: die vom Autor
+   gesetzte transparente Hintergrundfarbe sticht den dunklen
+   UA-Default. Nur eine deckende Farbe auf der <option> selbst wirkt.
+
+   Diese Regel steht global, weil der Fehler im Projekt schon zweimal
+   einzeln geflickt wurde (V4LocaleSwitcher, CalendarPageClient) und
+   danach in jedem neuen Select wieder auftrat. Alle Selects der App
+   sind dunkel gestaltet, ein dunkles Popup passt also ueberall. */
+select option,
+select optgroup {
+  background-color: #111114;
+  color: #f5f5f5;
+}
+
+/* ═══════════════════════════════════════════════
    Design Tokens
    ═══════════════════════════════════════════════ */
 :root {
