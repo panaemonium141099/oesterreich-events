@@ -31,7 +31,10 @@ import {
   resolveCanonicalCategory,
   type ExistingCategoryRow,
 } from '@/lib/category-classifier';
-import { normalizeEventLocation } from '@/lib/location-normalizer';
+import {
+  normalizeEventLocation,
+  extractPostalCodeFromText,
+} from '@/lib/location-normalizer';
 import { normalizeDistrict } from '@/lib/district-normalizer';
 import { districtFromPlz } from '@/lib/plz-district';
 import { bundeslandToId } from '@/lib/bundeslaender';
@@ -368,6 +371,22 @@ function resolveCoordinates(event: ScrapedEvent): {
     }
   } catch {
     /* normalization failure should not block sync */
+  }
+
+  // Letzte Instanz fuer die PLZ: eine im Titel oder in der Adresse
+  // AUSDRUECKLICH genannte PLZ ("Flohmarkt in 1230 Wien"). Sie greift nur,
+  // wenn weder Scraper noch Normalizer eine geliefert haben.
+  //
+  // Bewusst OHNE Koordinate: die PLZ ordnet das Event der richtigen
+  // Gemeinde und damit der richtigen Hub-Seite zu, ein PLZ-Mittelpunkt
+  // waere aber kein Veranstaltungsort und darf kein genauer Pin werden.
+  // Vorher landeten 236 veroeffentlichte Flohmaerkte unter einer voellig
+  // fremden PLZ — Wiener Termine auf den Vorarlberg- und Kaernten-Hubs.
+  if (!postalCode) {
+    postalCode =
+      extractPostalCodeFromText(event.title) ??
+      extractPostalCodeFromText(event.address) ??
+      null;
   }
 
   return { latitude, longitude, locationName, confidence, source, postalCode };
