@@ -89,6 +89,7 @@ import { post as wienerMozartKonzertMusikverein2026 } from './posts/wiener-mozar
 import { post as eltonJohnBillyJoelTribute2026 } from './posts/elton-john-billy-joel-tribute-2026';
 import { post as blackSeaDahu2026 } from './posts/black-sea-dahu-2026';
 import { post as mcYankooLive2026 } from './posts/mc-yankoo-live-2026';
+import { post as uebernachtenWienGuenstig } from './posts/uebernachten-wien-guenstig';
 // AUTOWRITER-IMPORTS-END
 
 export type { FestivalPost, GalleryImage, FestivalKeyFacts, LineupAct } from './types';
@@ -183,6 +184,7 @@ export const ALL_POSTS: FestivalPost[] = [
   eltonJohnBillyJoelTribute2026,
   blackSeaDahu2026,
   mcYankooLive2026,
+  uebernachtenWienGuenstig,
   // AUTOWRITER-POSTS-END
 ].sort(
   (a, b) => new Date(b.publishDate).getTime() - new Date(a.publishDate).getTime()
