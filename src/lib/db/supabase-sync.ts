@@ -219,6 +219,9 @@ interface ExistingRow {
   description: string | null;
   enrichment_version: string | null;
   price_text: string | null;
+  /** Preis-Gruppe: der Text wird nur gemeinsam mit den Zahlen aktualisiert. */
+  price_min: number | null;
+  price_max: number | null;
   address: string | null;
 }
 
@@ -269,7 +272,8 @@ async function prefetchExistingRows(
           'category_locked, category_needs_review, category_reason, category_candidates, slug, ' +
           'publish_status, ' +
           // fn-14.5 UPSERT-Guard fields:
-          'image_url, image_width, image_height, description, enrichment_version, price_text, address',
+          'image_url, image_width, image_height, description, enrichment_version, price_text, ' +
+          'price_min, price_max, address',
       )
       .in('source_name', uniqueSourceNames)
       .in('source_id', idSlice);
@@ -550,9 +554,16 @@ function toSupabaseRow(
   );
 
   // ─── fn-14.5 Price-text guard ────────────────────────────────────
+  // Preis-Gruppe: der Text zieht mit, sobald sich der numerische Preis
+  // belegbar geaendert hat — sonst zeigt die Detailseite den alten Text
+  // neben dem neuen Betrag (Prod-Befund 2026-09-06: 875 Events).
   const overwritePrice = shouldOverwritePrice(
     event.price_text ?? null,
     existing?.price_text ?? null,
+    event.price_min ?? null,
+    existing?.price_min ?? null,
+    event.price_max ?? null,
+    existing?.price_max ?? null,
   );
 
   // ─── Address guard (hourly-sync safe) ────────────────────────────

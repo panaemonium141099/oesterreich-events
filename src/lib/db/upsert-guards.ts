@@ -174,22 +174,63 @@ export function shouldOverwriteAddress(
 }
 
 /**
- * Price-text upgrade rule: only fill when existing is empty. Once a
- * price is on the row we never clobber it from raw scrape data; the
- * enrichment script owns price refinements via its own bulk RPC.
+ * Preis-Gruppe: `price_text`, `price_min` und `price_max` stammen aus
+ * DERSELBEN Quellbeobachtung und müssen gemeinsam aktualisiert werden.
  *
- * Whitespace handling: a scraper emitting `'   '` is treated as
- * absent and cannot displace either an existing price or an empty
- * column — the latter would persist whitespace and confuse later
- * "is this column empty?" checks.
+ * Vorher galt: `price_text` nur füllen, wenn die Spalte leer ist — nie
+ * überschreiben, weil "das Enrichment-Skript besitzt Preisverfeinerungen".
+ * Das KI-Enrichment ist seit 2026-07 entfernt (MASTERPLAN §6), die
+ * numerischen Preise wurden aber weiterhin bei jedem Upsert neu
+ * geschrieben. Ergebnis: der Text fror auf der ersten Beobachtung ein,
+ * während die Zahlen weiterliefen.
+ *
+ * Am Prod-Bestand gemessen (2026-09-06): **875 veröffentlichte künftige
+ * Events** zeigten einen `price_text`, der den gespeicherten `price_min`
+ * nicht nennt — 805 davon aus dem Eventim-Feed, wo sich Preise real
+ * ändern. Beispiele: Text "20,50 €" bei min/max 26,50; Text
+ * "31,99 € – 101,99 €" bei min 29,79 / max 93,96. Der Nutzer sieht einen
+ * Preis, der Ticketlink führt zu einem anderen.
+ *
+ * Regel jetzt:
+ *   - neuer Text leer/Whitespace                → alten behalten
+ *   - alter Text leer                           → neuen schreiben
+ *   - numerischer Preis hat sich geändert       → neuen Text schreiben
+ *     (die alte Beobachtung ist überholt; Text und Zahl ziehen zusammen um)
+ *   - sonst                                     → alten behalten
+ *
+ * Whitespace-Handling: ein Scraper, der `'   '` liefert, gilt als
+ * "kein Preis" und kann weder einen bestehenden Preis verdrängen noch
+ * eine leere Spalte mit Leerzeichen füllen.
  */
 export function shouldOverwritePrice(
   newPrice: string | null,
   oldPrice: string | null,
+  newMin?: number | null,
+  oldMin?: number | null,
+  newMax?: number | null,
+  oldMax?: number | null,
 ): boolean {
   const trimmedNew = newPrice?.trim() ?? '';
   if (!trimmedNew) return false;
   const trimmedOld = oldPrice?.trim() ?? '';
   if (!trimmedOld) return true;
+  if (numericPriceChanged(newMin, oldMin) || numericPriceChanged(newMax, oldMax)) return true;
   return false;
+}
+
+/**
+ * Hat sich ein numerischer Preis belegbar geändert?
+ *
+ * `undefined`/`null` auf der NEUEN Seite heisst "die Quelle sagt diesmal
+ * nichts dazu" — das ist keine Änderung, sondern eine Lücke, und darf den
+ * Text nicht umschreiben. Vergleich mit Cent-Toleranz gegen
+ * Float-Rundung (29.79 aus dem Feed vs. 29.790000000000003).
+ */
+function numericPriceChanged(
+  next: number | null | undefined,
+  prev: number | null | undefined,
+): boolean {
+  if (next == null) return false;
+  if (prev == null) return true;
+  return Math.abs(next - prev) >= 0.005;
 }
