@@ -211,9 +211,50 @@ describe('shouldOverwritePrice (fn-14.5 UPSERT-Guard)', () => {
     expect(shouldOverwritePrice('', '15 EUR')).toBe(false);
   });
 
-  it('skips when existing already has a price', () => {
+  it('skips when existing already has a price und die Zahlen gleich bleiben', () => {
     expect(shouldOverwritePrice('25 EUR', '15 EUR')).toBe(false);
     expect(shouldOverwritePrice('Eintritt frei', 'Spende erbeten')).toBe(false);
+    // Gleiche Zahlen explizit uebergeben -> weiterhin kein Overwrite.
+    expect(shouldOverwritePrice('25 EUR', '15 EUR', 15, 15, 15, 15)).toBe(false);
+  });
+
+  // ── Preis-Gruppe: Text und Zahl ziehen zusammen um ────────────
+  // Prod-Befund 2026-09-06: 875 veroeffentlichte kuenftige Events zeigten
+  // einen price_text, der den gespeicherten price_min nicht nennt — 805
+  // davon aus dem Eventim-Feed, wo Preise sich real aendern.
+  describe('Preis-Gruppe (Text folgt der Zahl)', () => {
+    it('schreibt den neuen Text, wenn sich price_min geaendert hat', () => {
+      // Eventim-Fall: Text stand auf "20,50 €", die Zahl war laengst 26,50.
+      expect(shouldOverwritePrice('26,50 €', '20,50 €', 26.5, 20.5, 26.5, 20.5)).toBe(true);
+    });
+
+    it('schreibt den neuen Text, wenn sich nur price_max geaendert hat', () => {
+      expect(
+        shouldOverwritePrice('13,00 € – 17,93 €', '13,00 € – 17,60 €', 13, 13, 17.93, 17.6),
+      ).toBe(true);
+    });
+
+    it('behandelt Cent-Rundung nicht als Aenderung', () => {
+      expect(
+        shouldOverwritePrice('29,79 €', '29,79 €', 29.790000000000003, 29.79, null, null),
+      ).toBe(false);
+    });
+
+    it('fehlende neue Zahl ist eine Luecke, keine Aenderung', () => {
+      // Die Quelle sagt diesmal nichts zum Preis — der bestehende Text
+      // darf davon nicht ueberschrieben werden.
+      expect(shouldOverwritePrice('ab 20 €', '25 €', null, 25, null, 25)).toBe(false);
+      expect(shouldOverwritePrice('ab 20 €', '25 €', undefined, 25)).toBe(false);
+    });
+
+    it('erstmals bekannter Zahlenpreis laesst den Text mitziehen', () => {
+      expect(shouldOverwritePrice('25 €', 'Preis auf Anfrage', 25, null)).toBe(true);
+    });
+
+    it('leerer neuer Text gewinnt auch bei geaenderter Zahl nicht', () => {
+      expect(shouldOverwritePrice('   ', '20,50 €', 26.5, 20.5)).toBe(false);
+      expect(shouldOverwritePrice(null, '20,50 €', 26.5, 20.5)).toBe(false);
+    });
   });
 
   it('treats whitespace-only new price as absent (Codex regression test)', () => {
