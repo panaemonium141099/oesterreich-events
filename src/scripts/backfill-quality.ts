@@ -9,7 +9,8 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { createClient } from '@supabase/supabase-js';
-import { scoreEvent } from '../lib/quality/score-event';
+import { scoreAndAdmit } from '../lib/quality/score-event';
+import { bundeslandFromPolygon } from '../lib/eventim/bundesland-from-geo';
 import { makeBulkUpdater } from '../lib/db/bulk-update';
 
 // Load .env.local (tsx does not auto-load like Next.js does)
@@ -116,7 +117,11 @@ async function main() {
       // Single source of truth for scoring — see src/lib/quality/score-event.ts.
       // dedup=10 (assume unique), source_trust=2 (neutral) for backfill,
       // matching the previous self-contained logic.
-      const result = scoreEvent(event);
+      //
+      // scoreAndAdmit statt scoreEvent: der Backfill schreibt publish_status
+      // und würde sonst jede Quarantäne des Freigabevertrags wieder aufheben
+      // (Score allein kennt keine Ortswidersprüche).
+      const result = scoreAndAdmit(event, { regionOf: bundeslandFromPolygon });
       if (result.outside_austria) outsideAustriaCount++;
 
       // Histogram

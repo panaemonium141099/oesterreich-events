@@ -29,6 +29,12 @@
  */
 
 import { isContactHandleTitle } from '@/lib/scrapers/detail-extract/validate';
+import {
+  evaluateAdmission,
+  hasTimeOfDay,
+  type AdmissionOptions,
+  type AdmissionVerdict,
+} from './admission';
 
 export interface ScoreableEvent {
   title?: string | null;
@@ -169,9 +175,17 @@ export function computeDateScore(e: ScoreableEvent): number {
   let s = 0;
   if (e.start_date) s += 5;
   const sd = e.start_date;
-  // Bonus when the time component is non-zero (i.e. the scraper captured
-  // an actual start time, not just a midnight default).
-  if (sd && sd.includes('T') && !sd.endsWith('T00:00:00')) s += 5;
+  // Bonus when the scraper captured an ACTUAL start time rather than a
+  // midnight placeholder.
+  //
+  // Vorher: `sd.includes('T') && !sd.endsWith('T00:00:00')`. Das war ein
+  // String-Vergleich und damit von der Schreibweise abhängig, nicht von
+  // der Information: derselbe künftige Kalendertag bekam 8 Punkte als
+  // `…T00:00:00` und 13 Punkte als `…T00:00:00Z`, weil die Z-Form nicht
+  // auf `T00:00:00` endet. `hasTimeOfDay()` prüft den geparsten Instant
+  // und kennt beide Platzhalter-Formen (naive UTC-Mitternacht und
+  // Wien-Mitternacht) — siehe src/lib/quality/admission.ts.
+  if (hasTimeOfDay(sd)) s += 5;
   if (sd) {
     const d = new Date(sd);
     if (!isNaN(d.getTime())) {
@@ -317,5 +331,76 @@ export function scoreEvent(
       dedup,
       source_trust: sourceTrust,
     },
+  };
+}
+
+/**
+ * Score UND Freigabevertrag in einem Aufruf — die Form, die jeder
+ * Schreibpfad benutzen soll.
+ *
+ * WARUM: `scoreEvent()` allein leitet `publish_status` rein additiv aus
+ * dem Score ab. Ein Event ohne belastbaren Ort erreichte so über Bild,
+ * Beschreibung und Links Score 65 und damit `published` (Audit §2A).
+ * Wer nur `scoreEvent()` aufruft und dessen `publish_status` schreibt,
+ * hebt jede Quarantäne wieder auf — genau so hat `backfill-quality.ts`
+ * früher Zeilen zurück auf `published` gesetzt, die der Sync bewusst
+ * zurückgehalten hatte.
+ *
+ * Der zurückgegebene `publish_status` ist bereits gefiltert:
+ * `quarantine` → `needs_review`, unabhängig vom Score.
+ */
+export function scoreAndAdmit(
+  event: ScoreableEvent,
+  options: ScoreOptions & AdmissionOptions = {},
+): ScoreResult & {
+  admission: AdmissionVerdict;
+  /**
+   * Die Orts-Werte, die geschrieben werden SOLLEN — nach Anwendung der
+   * Korrekturen aus dem Vertrag. Der Aufrufer muss diese persistieren,
+   * nicht seine Eingabewerte, sonst schreibt er die widerlegte Angabe.
+   */
+  corrected: {
+    latitude: number | null;
+    longitude: number | null;
+    bundesland: string | null;
+  };
+} {
+  // Reihenfolge ist wichtig: erst prüfen, dann korrigieren, dann scoren.
+  // Würde gegen die UNkorrigierten Werte gescort, bekäme ein Event Punkte
+  // für eine Koordinate, die gleich darauf verworfen wird.
+  const admission = evaluateAdmission(
+    {
+      title: event.title,
+      start_date: event.start_date,
+      end_date: event.end_date,
+      location_name: event.location_name,
+      address: event.address,
+      postal_code: event.postal_code,
+      bundesland: event.bundesland,
+      country: event.country,
+      latitude: event.latitude,
+      longitude: event.longitude,
+    },
+    { regionOf: options.regionOf, plzRegionOf: options.plzRegionOf, now: options.now },
+  );
+
+  const dropCoords = admission.corrections.includes('drop_coordinates');
+  const useCoordRegion = admission.corrections.includes('use_coordinate_region');
+
+  const corrected = {
+    latitude: dropCoords ? null : (event.latitude ?? null),
+    longitude: dropCoords ? null : (event.longitude ?? null),
+    bundesland: useCoordRegion
+      ? (admission.correctedBundesland ?? event.bundesland ?? null)
+      : (event.bundesland ?? null),
+  };
+
+  const score = scoreEvent({ ...event, ...corrected }, options);
+
+  return {
+    ...score,
+    publish_status: admission.decision === 'admit' ? score.publish_status : 'needs_review',
+    admission,
+    corrected,
   };
 }

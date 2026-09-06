@@ -522,11 +522,18 @@ export async function runScraper(scraper: BaseScraper): Promise<void> {
     });
 
     // Sync all scraped events to Supabase (single write path).
+    let syncErrors = 0;
     if (events.length > 0) {
-      const { upserted, errors: syncErrors, filtered } = await syncEventsToSupabase(events);
+      const r = await syncEventsToSupabase(events);
+      const { upserted, filtered, quarantined } = r;
+      syncErrors = r.errors;
       eventsNew = upserted;
       eventsUpdated = Math.max(0, eventsFound - upserted - filtered);
-      console.log(`[${scraper.name}] Supabase sync: ${upserted} upserted, ${syncErrors} errors${filtered > 0 ? `, ${filtered} filtered (past/invalid)` : ''}`);
+      console.log(
+        `[${scraper.name}] Supabase sync: ${upserted} upserted, ${syncErrors} errors` +
+          `${filtered > 0 ? `, ${filtered} verworfen` : ''}` +
+          `${quarantined > 0 ? `, ${quarantined} quarantänisiert` : ''}`,
+      );
 
       writeProgress(scraper.name, {
         status: 'running',
@@ -540,13 +547,17 @@ export async function runScraper(scraper: BaseScraper): Promise<void> {
 
     console.log(`[${scraper.name}] Fertig: ${eventsFound} gefunden, ${eventsNew} neu, ${eventsUpdated} aktualisiert`);
     clearProgress(scraper.name);
+    // Ein Lauf, dessen Zeilen die Datenbank abgewiesen hat, ist KEIN
+    // erfolgreicher Lauf (Audit §2I). Vorher wurde `status: 'success'`
+    // geschrieben, obwohl `syncEventsToSupabase` Schreibfehler gemeldet
+    // hatte — die Telemetrie zeigte grün, während Events fehlten.
     await recordSourceRun({
       source_name: scraper.name,
       events_found: eventsFound,
       events_upserted: eventsNew,
       duration_ms: Date.now() - startedMs,
-      status: 'success',
-      error_message: null,
+      status: syncErrors > 0 ? 'error' : 'success',
+      error_message: syncErrors > 0 ? `${syncErrors} Zeilen nicht geschrieben (DB-Fehler)` : null,
     });
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
