@@ -34,7 +34,9 @@ export function Footer() {
           <p className="text-xs text-white/30">
             &copy; {new Date().getFullYear()} LassTreffen.at. {t('rights')}
           </p>
-          <nav className="flex items-center gap-6">
+          {/* flex-wrap: die Zeile trägt inzwischen 11 Einträge und läuft auf
+              schmalen Desktops sonst aus dem Container. */}
+          <nav className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2">
             <Link href="/ueber-uns" className="text-xs text-white/30 hover:text-white/60 transition-colors">
               {t('about')}
             </Link>
@@ -47,6 +49,10 @@ export function Footer() {
             </Link>
             <Link href="/wo-ist-was-los" className="text-xs text-white/30 hover:text-white/60 transition-colors">
               Heatmap
+            </Link>
+            {/* Öffentliches Inserat-Formular — Freigabe unter /admin/inserate. */}
+            <Link href="/event-inserieren" className="text-xs text-white/30 hover:text-white/60 transition-colors">
+              {t('submitEvent')}
             </Link>
             <Link href="/fuer-firmen" className="text-xs text-white/30 hover:text-white/60 transition-colors">
               {t('forCompanies')}
