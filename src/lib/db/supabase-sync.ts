@@ -35,9 +35,11 @@ import { normalizeEventLocation } from '@/lib/location-normalizer';
 import { normalizeDistrict } from '@/lib/district-normalizer';
 import { districtFromPlz } from '@/lib/plz-district';
 import { bundeslandToId } from '@/lib/bundeslaender';
+import { getBundeslandFromPLZ } from '@/lib/plzCoordinates';
+import { bundeslandFromPolygon } from '@/lib/eventim/bundesland-from-geo';
 import { generateFingerprint } from '@/lib/dedup/fingerprint';
 import { generateEventSlug } from '@/lib/utils/slugify';
-import { scoreEvent } from '@/lib/quality/score-event';
+import { scoreAndAdmit } from '@/lib/quality/score-event';
 import { isContactHandleTitle } from '@/lib/scrapers/detail-extract/validate';
 import { extractDimsFromUrl } from '@/lib/event-images/extract-dims-from-url';
 import {
@@ -52,6 +54,42 @@ import {
   shouldOverwriteDescription,
   shouldOverwritePrice,
 } from '@/lib/db/upsert-guards';
+import {
+  evaluateAdmission,
+  type AdmissionReason,
+  type AdmissionVerdict,
+} from '@/lib/quality/admission';
+
+/**
+ * Punkt-in-Polygon-Auflösung Koordinate → Bundesland für die
+ * Widerspruchsprüfung im Freigabevertrag.
+ *
+ * `bundesland-from-geo` liest seine GeoJSON erst beim ersten Aufruf (und
+ * cached sie), der Import selbst kostet nichts. Die Datei-Pfade dort sind
+ * voll-literal, damit Vercels output-file-tracing genau die neun
+ * Bundesland-Dateien einsammelt statt public/ komplett (siehe den
+ * 597-MB-Zwischenfall im Kommentar dieses Moduls).
+ *
+ * Fehlertolerant: schlägt das Laden fehl (Dateien nicht mitgebündelt),
+ * liefert der Resolver `null`. `evaluateAdmission` behandelt das als
+ * "keine Aussage" und behauptet dann nichts, statt zu raten.
+ */
+let regionWarned = false;
+
+function regionOfCoords(lat: number, lng: number): string | null {
+  try {
+    return bundeslandFromPolygon(lat, lng);
+  } catch (e) {
+    if (!regionWarned) {
+      regionWarned = true;
+      console.warn(
+        '[supabase-sync] Bundesland-Polygone nicht verfügbar — Regions-Gegenprobe übersprungen:',
+        e instanceof Error ? e.message : e,
+      );
+    }
+    return null;
+  }
+}
 
 /**
  * Confidence precedence order (highest first).
@@ -575,30 +613,54 @@ function toSupabaseRow(
   // publish_status: only overwrite when the existing value is one of
   // the computed statuses (or absent). Preserves dedup's 'duplicate'
   // marking and any future admin overrides.
-  const score = scoreEvent({
-    title: event.title,
-    description: finalDescription,
-    start_date: event.start_date,
-    end_date: event.end_date ?? null,
-    location_name: resolved.locationName,
-    address: finalAddress,
-    postal_code: resolved.postalCode,
-    bundesland: event.bundesland ?? null,
-    country: event.country ?? null,
-    category: canonical.category,
-    latitude: finalLat,
-    longitude: finalLng,
-    image_url: finalImageUrl,
-    source_url: event.source_url,
-    ticket_url: finalTicketUrl,
-  });
+  const score = scoreAndAdmit(
+    {
+      title: event.title,
+      description: finalDescription,
+      start_date: event.start_date,
+      end_date: event.end_date ?? null,
+      location_name: resolved.locationName,
+      address: finalAddress,
+      postal_code: resolved.postalCode,
+      // Kanonisierte Bundesland-ID, damit die Polygon-Gegenprobe dieselbe
+      // Schreibweise vergleicht, die auch in der Zeile landet.
+      bundesland: bundeslandToId(event.bundesland) ?? null,
+      country: event.country ?? null,
+      category: canonical.category,
+      latitude: finalLat,
+      longitude: finalLng,
+      image_url: finalImageUrl,
+      source_url: event.source_url,
+      ticket_url: finalTicketUrl,
+    },
+    { regionOf: regionOfCoords, plzRegionOf: getBundeslandFromPLZ },
+  );
+
+  // `scoreAndAdmit` hat den Freigabevertrag gegen dieselben FINALEN Werte
+  // laufen lassen. Der Score sagt "wie vollständig", der Vertrag sagt "darf
+  // das publik werden": ein `quarantine`-Verdikt schreibt die Zeile
+  // weiterhin (nichts geht verloren), nimmt ihr aber die Veröffentlichung —
+  // egal wie hoch der Score aus Bild/Text/Links wäre.
+  const admission = score.admission;
+
+  // Korrekturen des Vertrags gewinnen über die aufgelösten Werte. Wichtig:
+  // das überschreibt auch die `shouldOverwriteCoords`-Entscheidung weiter
+  // oben — eine widerlegte Koordinate darf nicht deshalb bestehen bleiben,
+  // weil sie schon in der Zeile stand.
+  finalLat = score.corrected.latitude;
+  finalLng = score.corrected.longitude;
+  if (finalLat == null || finalLng == null) {
+    finalConfidence = null;
+    finalSource = null;
+  }
+  const finalBundesland = score.corrected.bundesland;
 
   const finalPublishStatus =
     existing?.publish_status && !COMPUTED_PUBLISH_STATUSES.has(existing.publish_status)
       ? existing.publish_status
       : score.publish_status;
 
-  return {
+  const row = {
     source_type: 'scraped' as const,
     source_name: event.source_name,
     source_id: event.source_id,
@@ -630,7 +692,7 @@ function toSupabaseRow(
     // emit "Salzburg" / "Kärnten" / "Tirol" Title-Case; without this
     // 9k+ events end up under a bundesland the client filter doesn't
     // know about, leaving them invisible on the map.
-    bundesland: bundeslandToId(event.bundesland) ?? null,
+    bundesland: finalBundesland,
     // Normalise district at scrape-time so the FilterDrawer chip can
     // match by exact string. Without this, every new scrape pumps
     // freshly-spelled aliases (e.g. "bruck/leitha", "suedoststeiermark")
@@ -644,12 +706,12 @@ function toSupabaseRow(
     district:
       normalizeDistrict(
         event.district,
-        bundeslandToId(event.bundesland) ?? null,
+        finalBundesland,
         resolved.postalCode ?? event.postal_code,
       ) ??
       districtFromPlz(
         resolved.postalCode ?? event.postal_code,
-        bundeslandToId(event.bundesland),
+        finalBundesland,
       ),
     latitude: finalLat,
     longitude: finalLng,
@@ -703,76 +765,84 @@ function toSupabaseRow(
     // job in fn-14.6. INSERT or UPDATE, doesn't matter.
     last_seen_at: new Date().toISOString(),
   };
+
+  return { row, admission };
 }
 
 const BATCH_SIZE = 100;
 
 /**
- * Validate and filter events before sync:
- * - Reject events with missing/invalid start_date
- * - Reject events with start_date in the past (allows today)
- * - Reject events with end_date < start_date
- * - Reject events with empty title
- * - Reject events whose title is only a contact handle (mail/phone)
- * Returns filtered events + count of rejected.
+ * Ergebnis eines Sync-Laufs — bewusst nach Ausgang getrennt statt einer
+ * einzigen "ok"-Zahl (Audit §2I). `errors` zählt Zeilen, die die Datenbank
+ * NICHT geschrieben hat; `quarantined` Zeilen, die geschrieben wurden, aber
+ * nicht publik sind. Der Aufrufer entscheidet daraus, ob der Lauf als
+ * erfolgreich gilt.
  */
-function filterValidEvents(events: ScrapedEvent[]): { valid: ScrapedEvent[]; rejected: number } {
-  const now = new Date();
-  // Start of today (midnight) — events today are still valid
-  const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+export interface SyncResult {
+  upserted: number;
+  errors: number;
+  /** Vor dem Schreiben hart verworfen (Titel/Datum/Zeitintervall). */
+  filtered: number;
+  /** Geschrieben, aber auf `needs_review` gesetzt statt veröffentlicht. */
+  quarantined: number;
+  /** Häufigkeit je Verwerfungs-/Quarantänegrund, für den Lauf-Report. */
+  reasons: Record<string, number>;
+}
 
+/** `no_location_evidence=3, placeholder_location=1` */
+function formatReasons(reasons: Record<string, number>): string {
+  const entries = Object.entries(reasons).sort((a, b) => b[1] - a[1]);
+  return entries.length > 0 ? entries.map(([k, v]) => `${k}=${v}`).join(', ') : '—';
+}
+
+/**
+ * Eingangsprüfung: die harten Verwerfungen des Freigabevertrags
+ * (`decision === 'reject'`) — Titel, Datum, Zeitintervall.
+ *
+ * Ersetzt die frühere String-Prefix-Prüfung. Die verglich Beginn und Ende
+ * über `slice(0, 10)`, wodurch ein Event von 18:00 bis 17:00 desselben
+ * Tages den Filter passierte (Audit §2F). `evaluateAdmission` vergleicht
+ * vollständige Zeitpunkte, wenn beide eine echte Uhrzeit tragen, und sonst
+ * Kalendertage in Wien-Ortszeit.
+ *
+ * Ortsprüfungen laufen hier NICHT — der Ort steht erst nach
+ * `resolveCoordinates()` fest und wird deshalb in `toSupabaseRow()`
+ * bewertet.
+ */
+export function filterValidEvents(events: ScrapedEvent[]): {
+  valid: ScrapedEvent[];
+  rejected: number;
+  rejectionReasons: Record<string, number>;
+} {
   let rejected = 0;
-  const valid = events.filter(e => {
-    // Must have a title
-    if (!e.title || !e.title.trim()) {
-      rejected++;
-      return false;
-    }
+  const rejectionReasons: Record<string, number> = {};
 
+  const valid = events.filter(e => {
     // Listing-Parser greifen bei Kontaktbloecken den mailto:/tel:-Anchor
     // statt der Ueberschrift ab — solche "Titel" duerfen gar nicht erst
     // in die DB (Prod-Befund 2026-09-04: 613 Events mit E-Mail als Titel).
-    if (isContactHandleTitle(e.title)) {
+    if (e.title && isContactHandleTitle(e.title)) {
       rejected++;
+      rejectionReasons.contact_handle_title = (rejectionReasons.contact_handle_title ?? 0) + 1;
       return false;
     }
 
-    // Must have a parseable start_date
-    if (!e.start_date) {
-      rejected++;
-      return false;
-    }
-    const startDate = new Date(e.start_date);
-    if (isNaN(startDate.getTime())) {
-      rejected++;
-      return false;
-    }
-
-    // start_date must not be in the past (compare date strings to ignore time)
-    const startStr = e.start_date.slice(0, 10); // "YYYY-MM-DD"
-    if (startStr < todayStr) {
-      rejected++;
-      return false;
-    }
-
-    // If end_date exists, it must be valid and >= start_date
-    if (e.end_date) {
-      const endDate = new Date(e.end_date);
-      if (isNaN(endDate.getTime())) {
-        rejected++;
-        return false;
-      }
-      const endStr = e.end_date.slice(0, 10);
-      if (endStr < startStr) {
-        rejected++;
-        return false;
-      }
-    }
-
-    return true;
+    const verdict = evaluateAdmission({
+      title: e.title,
+      start_date: e.start_date,
+      end_date: e.end_date ?? null,
+      // Ortsfelder bewusst weggelassen — der Ort steht erst nach
+      // `resolveCoordinates()` fest. Etwaige Orts-Befunde kämen hier als
+      // `quarantine` zurück und werden hier ignoriert; entschieden wird
+      // darüber in `toSupabaseRow()` gegen die aufgelösten Werte.
+    });
+    if (verdict.decision !== 'reject') return true;
+    rejected++;
+    for (const r of verdict.reasons) rejectionReasons[r] = (rejectionReasons[r] ?? 0) + 1;
+    return false;
   });
 
-  return { valid, rejected };
+  return { valid, rejected, rejectionReasons };
 }
 
 /**
@@ -781,19 +851,31 @@ function filterValidEvents(events: ScrapedEvent[]): { valid: ScrapedEvent[]; rej
  */
 export async function syncEventsToSupabase(
   events: ScrapedEvent[]
-): Promise<{ upserted: number; errors: number; filtered: number }> {
-  if (events.length === 0) return { upserted: 0, errors: 0, filtered: 0 };
+): Promise<SyncResult> {
+  const empty = (): SyncResult => ({
+    upserted: 0,
+    errors: 0,
+    filtered: 0,
+    quarantined: 0,
+    reasons: {},
+  });
+  if (events.length === 0) return empty();
 
-  // Validate events before sync
-  const { valid: validEvents, rejected: filtered } = filterValidEvents(events);
+  // Harte Verwerfungen (Titel/Datum/Zeitintervall) vor dem Schreiben.
+  const { valid: validEvents, rejected: filtered, rejectionReasons } = filterValidEvents(events);
+  const reasons: Record<string, number> = { ...rejectionReasons };
   if (filtered > 0) {
-    console.log(`[supabase-sync] Filtered ${filtered} invalid/past events (${validEvents.length} remaining)`);
+    console.log(
+      `[supabase-sync] ${filtered} Kandidaten verworfen (${validEvents.length} verbleiben): ` +
+        formatReasons(rejectionReasons),
+    );
   }
-  if (validEvents.length === 0) return { upserted: 0, errors: 0, filtered };
+  if (validEvents.length === 0) return { ...empty(), filtered, reasons };
 
   const supabase = getSupabaseAdminClient();
   let upserted = 0;
   let errors = 0;
+  let quarantined = 0;
 
   // Deduplicate events by source_name+source_id before syncing
   // (ON CONFLICT DO UPDATE fails if same key appears twice in one batch)
@@ -821,7 +903,15 @@ export async function syncEventsToSupabase(
     // toSupabaseRow can look up the validated URL + extracted dims.
     const imageMap = await validateImagesForBatch(batchEvents);
 
-    const batch = batchEvents.map(e => toSupabaseRow(e, existingMap, imageMap));
+    const mapped = batchEvents.map(e => toSupabaseRow(e, existingMap, imageMap));
+    for (const { admission } of mapped) {
+      if (admission.decision === 'quarantine') {
+        quarantined++;
+        for (const r of admission.reasons) reasons[r] = (reasons[r] ?? 0) + 1;
+      }
+    }
+
+    const batch = mapped.map(m => m.row);
     const { error, count } = await supabase
       .from('events')
       .upsert(batch, {
@@ -837,7 +927,14 @@ export async function syncEventsToSupabase(
     }
   }
 
-  return { upserted, errors, filtered };
+  if (quarantined > 0) {
+    console.log(
+      `[supabase-sync] ${quarantined} Events quarantänisiert (needs_review statt published): ` +
+        formatReasons(reasons),
+    );
+  }
+
+  return { upserted, errors, filtered, quarantined, reasons };
 }
 
 // ─── fn-14.5 image validate-and-upgrade pool ─────────────────────────
