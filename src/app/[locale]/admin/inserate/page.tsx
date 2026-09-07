@@ -332,8 +332,8 @@ export default function AdminInseratePage() {
                                   onChange={(e) =>
                                     setEdits((prev) => ({ ...prev, [field.key]: e.target.value }))
                                   }
-                                  rows={4}
-                                  className={`${INPUT} resize-y`}
+                                  rows={12}
+                                  className={`${INPUT} resize-y font-mono text-[12px] leading-[1.5]`}
                                 />
                               ) : (
                                 <input

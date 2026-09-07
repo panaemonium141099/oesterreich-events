@@ -50,7 +50,21 @@ export function V4EventDetailContent({ description, tags, hasSimilar, similarChi
           <h3 className="m-0 mb-3 text-[16px] font-bold tracking-[-0.02em] text-[var(--v4-ink)]">
             {t('aboutHeading')}
           </h3>
-          <p className="m-0 max-w-[640px] text-[14.5px] leading-[1.6] text-[var(--v4-ink-70)]" style={{ textWrap: 'pretty' }}>
+          {/* whitespace-pre-line: Beschreibungen tragen ihre Absätze als
+              echte Zeilenumbrüche. HTML wirft die sonst weg und macht aus
+              einem gegliederten Text (Line-up, Uhrzeiten, Preise) eine
+              Textwand — genau so erschien am 2026-09-07 ein freigegebenes
+              Inserat, obwohl die Umbrüche in der DB standen.
+              `pre-line` (nicht `pre-wrap`) ist richtig: Umbrüche bleiben,
+              Leerzeichen-Ketten aus der Extraktion werden weiter
+              zusammengefasst. Gemessen: 13.669 künftige Events tragen
+              Umbrüche, davon nur 27 mit drei oder mehr am Stück — es
+              entstehen also keine klaffenden Lücken.
+              EventDetailV2 macht das seit jeher so; hier fehlte es. */}
+          <p
+            className="m-0 max-w-[640px] whitespace-pre-line text-[14.5px] leading-[1.6] text-[var(--v4-ink-70)]"
+            style={{ textWrap: 'pretty' }}
+          >
             {description}
           </p>
         </section>

@@ -86,6 +86,16 @@ export type ValidationResult =
 // Helfer
 // ─────────────────────────────────────────────────────────────────
 
+/**
+ * Obergrenze für die Beschreibung.
+ *
+ * Vorher 5.000 — daran ist am 2026-09-07 eine echte Einreichung
+ * gescheitert: ein Clubabend mit vollem Line-up war exakt 5.000 Zeichen
+ * lang und endete mitten im Wort ("Zha" statt "Zhané"). Wer sein Programm
+ * ordentlich beschreibt, wird nicht dafür bestraft.
+ */
+export const MAX_DESCRIPTION_LENGTH = 20000;
+
 /** Trimmt, kappt auf `max` Zeichen, macht Leerstrings zu `null`. */
 export function clean(value: unknown, max: number): string | null {
   if (typeof value !== 'string') return null;
@@ -115,6 +125,31 @@ export function cleanUrl(value: unknown, max = 500): string | null {
   } catch {
     return null;
   }
+}
+
+/**
+ * Wie `clean`, aber für mehrzeilige Freitexte: die Absatzstruktur bleibt
+ * erhalten, nur der Wildwuchs drumherum wird geglättet.
+ *
+ * Die Zeilenumbrüche sind der Inhalt, nicht Formatierung: Line-up,
+ * Uhrzeiten und Preise stehen darin untereinander. Die Detailseite gibt
+ * sie mit `whitespace-pre-line` genau so wieder aus.
+ *
+ *   - CRLF/CR aus Windows-Eingaben werden zu LF vereinheitlicht, sonst
+ *     zählt jeder Umbruch doppelt gegen das Zeichenlimit.
+ *   - Mehr als eine Leerzeile am Stück wird auf eine reduziert; drei oder
+ *     mehr Umbrüche reissen auf der Seite nur ein Loch.
+ *   - Leerraum am Zeilenende und am Textrand fliegt raus.
+ */
+export function cleanMultiline(value: unknown, max: number): string | null {
+  if (typeof value !== 'string') return null;
+  const normalized = value
+    .replace(/\r\n?/g, '\n')
+    .replace(/[ \t]+$/gm, '')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
+  if (!normalized) return null;
+  return normalized.slice(0, max);
 }
 
 /**
@@ -246,7 +281,7 @@ export function validateSubmission(
     ok: true,
     value: {
       title,
-      description: clean(input.description, 5000),
+      description: cleanMultiline(input.description, MAX_DESCRIPTION_LENGTH),
       category,
       start_date: start,
       end_date: end,
