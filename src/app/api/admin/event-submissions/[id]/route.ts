@@ -24,7 +24,12 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { requireAdminWithCaller } from '@/lib/supabase/require-admin';
 import { buildEventRow, type ApprovableSubmission } from '@/lib/inserate/approve';
-import { clean, cleanUrl } from '@/lib/inserate/submission';
+import {
+  clean,
+  cleanMultiline,
+  cleanUrl,
+  MAX_DESCRIPTION_LENGTH,
+} from '@/lib/inserate/submission';
 import { geocodeLocation } from '@/lib/geocoding';
 import { buildGeocodeCandidates } from '@/lib/inserate/geocode-query';
 import { buildEventUrlV2 } from '@/lib/utils/slugify';
@@ -40,7 +45,6 @@ const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://lasstreffen.at';
  *  Event — das gehört zurück an den Inserenten. */
 const EDITABLE_TEXT: Array<[key: string, column: string, max: number]> = [
   ['title', 'title', 200],
-  ['description', 'description', 5000],
   ['category', 'category', 60],
   ['locationName', 'location_name', 200],
   ['address', 'address', 300],
@@ -71,6 +75,14 @@ function extractEdits(raw: unknown): Record<string, string | null> {
   if (!raw || typeof raw !== 'object') return {};
   const input = raw as Record<string, unknown>;
   const edits: Record<string, string | null> = {};
+
+  // Die Beschreibung ist der einzige mehrzeilige Text: ihre Absaetze sind
+  // Inhalt (Line-up, Uhrzeiten, Preise) und muessen die Korrektur im Admin
+  // ueberleben. `clean` wuerde sie zwar nicht zerstoeren, aber auch nicht
+  // normalisieren — cleanMultiline macht beides an einer Stelle.
+  if ('description' in input) {
+    edits.description = cleanMultiline(input.description, MAX_DESCRIPTION_LENGTH);
+  }
 
   for (const [key, column, max] of EDITABLE_TEXT) {
     if (key in input) edits[column] = clean(input[key], max);

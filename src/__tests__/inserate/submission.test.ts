@@ -2,7 +2,9 @@ import { describe, it, expect } from 'vitest';
 import {
   validateSubmission,
   cleanUrl,
+  cleanMultiline,
   toInstant,
+  MAX_DESCRIPTION_LENGTH,
 } from '@/lib/inserate/submission';
 
 /** Referenzzeitpunkt für alle Tests: 1. Juni 2026, 12:00 UTC. */
@@ -218,5 +220,68 @@ describe('validateSubmission — Ableitungen', () => {
     const result = validateSubmission(base({ imageUrl: 'javascript:alert(1)' }), NOW);
     expect(result.ok).toBe(true);
     if (result.ok) expect(result.value.image_url).toBeNull();
+  });
+});
+
+describe('cleanMultiline — Absätze sind Inhalt, nicht Deko', () => {
+  it('erhält Absätze', () => {
+    // Line-up, Uhrzeiten und Preise stehen in der Beschreibung
+    // untereinander. Gingen die Umbrüche verloren, entstünde die
+    // Textwand, die am 2026-09-07 auf der Detailseite stand.
+    const text = ['Oben ab 21:50 Uhr', '', 'Unten ab 00:30 Uhr', 'Eintritt: 12 EUR'].join('\n');
+    expect(cleanMultiline(text, 1000)).toBe(text);
+  });
+
+  it('vereinheitlicht Windows-Zeilenenden', () => {
+    // Sonst zählt jeder Umbruch doppelt gegen das Zeichenlimit.
+    expect(cleanMultiline('Zeile 1\r\nZeile 2', 1000)).toBe('Zeile 1\nZeile 2');
+  });
+
+  it('reduziert mehr als eine Leerzeile am Stück', () => {
+    expect(cleanMultiline('A\n\n\n\n\nB', 1000)).toBe('A\n\nB');
+  });
+
+  it('entfernt Leerraum am Zeilenende und am Textrand', () => {
+    // `trim()` greift auf den ganzen Text, nimmt also auch die Einrückung
+    // der ERSTEN Zeile mit; die Einrückung der Folgezeilen bleibt stehen.
+    expect(cleanMultiline('  A   \n  B  \n\n  ', 1000)).toBe('A\n  B');
+  });
+
+  it('macht aus reinem Leerraum null', () => {
+    expect(cleanMultiline('   \n\n  ', 1000)).toBeNull();
+  });
+});
+
+describe('Beschreibungslänge', () => {
+  it('lässt ein volles Line-up durch, das am alten 5.000-Zeichen-Limit zerbrach', () => {
+    // Eine echte Einreichung war exakt 5.000 Zeichen lang und endete
+    // mitten im Wort ("Zha" statt "Zhané").
+    const result = validateSubmission(base({ description: 'A'.repeat(9000) }), NOW);
+    expect(result.ok).toBe(true);
+    if (result.ok) expect(result.value.description).toHaveLength(9000);
+  });
+
+  it('kappt erst an der neuen Obergrenze', () => {
+    const result = validateSubmission(
+      base({ description: 'A'.repeat(MAX_DESCRIPTION_LENGTH + 500) }),
+      NOW,
+    );
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.value.description).toHaveLength(MAX_DESCRIPTION_LENGTH);
+    }
+  });
+
+  it('behält die Absatzstruktur einer echten Einreichung bei', () => {
+    const eingereicht = [
+      '2000er Party & 2010er Party in Wien auf zwei Floors',
+      'Samstag, 19. September 2026, ab 21:50 Uhr | 18+',
+      '',
+      'Oben ab 21:50 Uhr: 2000s Club',
+      'Unten ab 00:30 Uhr: 2010s Club',
+    ].join('\n');
+    const result = validateSubmission(base({ description: eingereicht }), NOW);
+    expect(result.ok).toBe(true);
+    if (result.ok) expect(result.value.description).toBe(eingereicht);
   });
 });

@@ -16,6 +16,13 @@ import { useState } from 'react';
  * PRIMARY_CATEGORIES und verwirft Unbekanntes nach 'Sonstiges'. Bei einer
  * Taxonomie-Änderung gehört diese Liste mitgezogen.
  */
+/** Muss zu MAX_DESCRIPTION_LENGTH in src/lib/inserate/submission.ts passen.
+ *  Bewusst als Literal statt als Import: submission.ts zieht die komplette
+ *  Taxonomie- und Bezirkstabelle nach sich, die im Client-Bundle dieser
+ *  Formularseite nichts verloren hat (gleiche Entscheidung wie bei den
+ *  Kategorien unten). */
+const MAX_DESCRIPTION_LENGTH = 20000;
+
 const CATEGORIES = [
   'Musik',
   'Kultur & Bühne',
@@ -191,11 +198,14 @@ export function EventSubmissionForm() {
             id="ins-description"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            rows={5}
-            maxLength={5000}
+            rows={10}
+            maxLength={MAX_DESCRIPTION_LENGTH}
             placeholder="Was erwartet die Besucher:innen? Programm, Highlights, Besonderheiten …"
             className={`${FIELD} resize-y`}
           />
+          <p className="mt-1.5 text-[11px] text-white/25">
+            Absätze und Zeilenumbrüche übernehmen wir genau so, wie du sie hier setzt.
+          </p>
         </div>
 
         <label className="flex items-center gap-2.5 text-sm text-white/60 cursor-pointer">
