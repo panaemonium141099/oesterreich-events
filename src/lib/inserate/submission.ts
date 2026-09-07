@@ -61,6 +61,7 @@ export interface NormalizedSubmission {
   location_name: string | null;
   address: string | null;
   postal_code: string | null;
+  city: string | null;
   bundesland: string | null;
   price_text: string | null;
   ticket_url: string | null;
@@ -197,6 +198,16 @@ export function validateSubmission(
   const categoryRaw = clean(input.category, 60);
   const category = categoryRaw && CATEGORY_SET.has(categoryRaw) ? categoryRaw : 'Sonstiges';
 
+  // Ort ist Pflicht. Ohne ihn laesst sich keine geocodierbare Adresse
+  // bilden, und ein Inserat ohne Koordinaten ist nach der Freigabe
+  // unsichtbar: /api/events filtert `.not('latitude','is',null)` und die
+  // MV event_map_points verlangt lat/lng. Genau so verschwand am
+  // 2026-09-07 ein bereits freigegebenes Event aus Liste, Karte und Suche.
+  const city = clean(input.city, 200);
+  if (!city) {
+    return { ok: false, error: 'Bitte den Ort angeben.', field: 'city' };
+  }
+
   const postalCodeRaw = clean(input.postalCode, 10);
   const postalCode = postalCodeRaw && /^\d{4}$/.test(postalCodeRaw) ? postalCodeRaw : null;
 
@@ -243,6 +254,7 @@ export function validateSubmission(
       location_name: clean(input.locationName, 200),
       address: clean(input.address, 300),
       postal_code: postalCode,
+      city,
       bundesland,
       price_text: clean(input.priceText, 200),
       ticket_url: cleanUrl(input.ticketUrl),

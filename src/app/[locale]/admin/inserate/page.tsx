@@ -30,6 +30,7 @@ interface Submission {
   location_name: string | null;
   address: string | null;
   postal_code: string | null;
+  city: string | null;
   bundesland: string | null;
   price_text: string | null;
   ticket_url: string | null;
@@ -69,6 +70,7 @@ const EDIT_FIELDS: Array<{
   { key: 'locationName', column: 'location_name', label: 'Veranstaltungsort' },
   { key: 'address', column: 'address', label: 'Adresse' },
   { key: 'postalCode', column: 'postal_code', label: 'PLZ' },
+  { key: 'city', column: 'city', label: 'Ort' },
   { key: 'bundesland', column: 'bundesland', label: 'Bundesland' },
   { key: 'priceText', column: 'price_text', label: 'Eintritt' },
   { key: 'organizer', column: 'organizer', label: 'Veranstalter' },
@@ -103,6 +105,9 @@ export default function AdminInseratePage() {
   const [note, setNote] = useState('');
   const [busyId, setBusyId] = useState<string | null>(null);
   const [actionError, setActionError] = useState('');
+  /** Gesetzt, wenn die Freigabe an fehlenden Koordinaten gescheitert ist.
+   *  Erst dann bietet die Maske das Veroeffentlichen ohne Kartenpin an. */
+  const [needsCoordinates, setNeedsCoordinates] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -136,6 +141,7 @@ export default function AdminInseratePage() {
     }
     setOpenId(submission.id);
     setActionError('');
+    setNeedsCoordinates(false);
     setNote('');
     const initial: Record<string, string> = {};
     for (const field of EDIT_FIELDS) {
@@ -144,7 +150,11 @@ export default function AdminInseratePage() {
     setEdits(initial);
   };
 
-  const review = async (submission: Submission, action: 'approve' | 'reject') => {
+  const review = async (
+    submission: Submission,
+    action: 'approve' | 'reject',
+    force = false,
+  ) => {
     if (action === 'reject' && !note.trim()) {
       setActionError('Bitte einen Ablehnungsgrund angeben. Er geht an den Inserenten.');
       return;
@@ -158,15 +168,17 @@ export default function AdminInseratePage() {
         body: JSON.stringify({
           action,
           note: note.trim() || null,
-          ...(action === 'approve' ? { edits } : {}),
+          ...(action === 'approve' ? { edits, force } : {}),
         }),
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
         setActionError(data.error || 'Aktion fehlgeschlagen');
+        setNeedsCoordinates(data.needsCoordinates === true);
         return;
       }
       setOpenId(null);
+      setNeedsCoordinates(false);
       await load();
     } catch {
       setActionError('Netzwerkfehler.');
@@ -351,9 +363,18 @@ export default function AdminInseratePage() {
                         </div>
 
                         {actionError && (
-                          <p className="text-sm text-red-400 bg-red-400/10 border border-red-400/20 rounded-lg px-3 py-2">
-                            {actionError}
-                          </p>
+                          <div className="text-sm text-red-400 bg-red-400/10 border border-red-400/20 rounded-lg px-3 py-2 space-y-2">
+                            <p>{actionError}</p>
+                            {needsCoordinates && (
+                              <button
+                                onClick={() => review(s, 'approve', true)}
+                                disabled={isBusy}
+                                className="text-xs underline text-red-300/80 hover:text-red-200 disabled:opacity-40"
+                              >
+                                Trotzdem veröffentlichen (bleibt ohne Kartenpin unauffindbar)
+                              </button>
+                            )}
+                          </div>
                         )}
 
                         <div className="flex flex-wrap gap-2">

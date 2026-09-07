@@ -26,6 +26,7 @@ import { requireAdminWithCaller } from '@/lib/supabase/require-admin';
 import { buildEventRow, type ApprovableSubmission } from '@/lib/inserate/approve';
 import { clean, cleanUrl } from '@/lib/inserate/submission';
 import { geocodeLocation } from '@/lib/geocoding';
+import { buildGeocodeCandidates } from '@/lib/inserate/geocode-query';
 import { buildEventUrlV2 } from '@/lib/utils/slugify';
 import { sendGenericEmail } from '@/lib/email';
 import { escapeHtml } from '@/lib/utils/escape-html';
@@ -44,6 +45,7 @@ const EDITABLE_TEXT: Array<[key: string, column: string, max: number]> = [
   ['locationName', 'location_name', 200],
   ['address', 'address', 300],
   ['postalCode', 'postal_code', 10],
+  ['city', 'city', 200],
   ['bundesland', 'bundesland', 40],
   ['priceText', 'price_text', 200],
   ['organizer', 'organizer', 200],
@@ -175,28 +177,51 @@ export async function PATCH(
     );
   }
 
-  // Koordinaten auflösen. Ohne sie fehlt der Kartenpin und die
-  // Umkreissuche findet das Event nicht. Bestes verfügbares Signal
-  // zuerst: vollständige Adresse, dann Ort + PLZ, dann nur der Ortsname.
-  // Schlägt alles fehl, wird das Event trotzdem freigegeben — ein Event
-  // ohne Pin ist besser als eine geratene Koordinate.
-  const geoQuery =
-    [merged.address, merged.postal_code, merged.location_name]
-      .filter(Boolean)
-      .join(', ') || merged.location_name;
+  // Koordinaten aufloesen. Das ist KEINE Kuer: /api/events filtert
+  // `.not('latitude','is',null)` und die MV event_map_points verlangt
+  // lat/lng. Ein freigegebenes Inserat ohne Koordinaten ist deshalb nicht
+  // bloss ohne Kartenpin, sondern in Liste, Karte UND Suche unsichtbar.
+  // Genau so verschwand am 2026-09-07 ein bereits veroeffentlichtes Event.
+  //
+  // Die Kandidaten kommen aus buildGeocodeCandidates und gehen von genau
+  // nach grob (Adresse mit Ort -> PLZ+Ort -> Venue+Ort -> Ort). Frueher
+  // stand hier eine naiv zusammengeklebte Zeichenkette
+  // ("Strasse, PLZ, Venue"), auf die Nominatim nichts lieferte.
+  const candidates = buildGeocodeCandidates(merged);
 
   let latitude: number | null = null;
   let longitude: number | null = null;
-  if (geoQuery) {
+  let geocodedFrom: string | null = null;
+  for (const candidate of candidates) {
     try {
-      const geo = await geocodeLocation(geoQuery);
+      const geo = await geocodeLocation(candidate);
       if (geo) {
         latitude = geo.latitude;
         longitude = geo.longitude;
+        geocodedFrom = candidate;
+        break;
       }
     } catch (err) {
-      console.error('[admin/event-submissions] geocoding failed:', err);
+      console.error('[admin/event-submissions] geocoding failed:', candidate, err);
     }
+  }
+
+  // Ohne Koordinaten wird NICHT veroeffentlicht, ausser der Admin besteht
+  // ausdruecklich darauf (`force`). Sonst entstuende ein Event, das auf
+  // 'published' steht und trotzdem nirgends auffindbar ist — der
+  // schlechteste aller Zustaende, weil er wie ein Erfolg aussieht.
+  // Die Adressfelder sind in derselben Maske editierbar; der Admin kann
+  // korrigieren und sofort erneut freigeben.
+  if (latitude === null && body.force !== true) {
+    return NextResponse.json(
+      {
+        error:
+          'Die Adresse liess sich nicht auf Koordinaten aufloesen. Ohne sie erscheint das Event weder in der Liste noch auf der Karte noch in der Suche. Bitte Adresse, PLZ und Ort pruefen und erneut freigeben.',
+        needsCoordinates: true,
+        tried: candidates,
+      },
+      { status: 422 }
+    );
   }
 
   const eventRow = buildEventRow(merged, { latitude, longitude });
@@ -260,6 +285,10 @@ export async function PATCH(
     status: 'approved',
     eventId: createdEvent.id,
     eventUrl,
+    geocodedFrom,
+    // Nur bei `force` moeglich: der Admin weiss dann, dass das Event
+    // veroeffentlicht, aber nicht auffindbar ist.
+    withoutCoordinates: latitude === null,
   });
 }
 

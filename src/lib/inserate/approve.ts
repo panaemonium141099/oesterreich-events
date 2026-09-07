@@ -30,6 +30,7 @@ import { generateEventSlug } from '@/lib/utils/slugify';
 import { scoreEvent } from '@/lib/quality/score-event';
 import { getBundeslandFromPLZ } from '@/lib/plzCoordinates';
 import { districtFromPlz } from '@/lib/plz-district';
+import { composeEventAddress } from './geocode-query';
 
 /** Die Felder einer `event_submissions`-Zeile, die für die Freigabe zählen. */
 export interface ApprovableSubmission {
@@ -43,6 +44,7 @@ export interface ApprovableSubmission {
   location_name: string | null;
   address: string | null;
   postal_code: string | null;
+  city: string | null;
   bundesland: string | null;
   price_text: string | null;
   ticket_url: string | null;
@@ -85,13 +87,20 @@ export function buildEventRow(
   const latitude = options.latitude ?? null;
   const longitude = options.longitude ?? null;
 
+  // Kanonische Adresse "Strasse, PLZ Ort". `parseCityFromAddress`
+  // (slugify.ts) liest den Ort fuer das `/{plz}-{ort}/`-Segment der
+  // Event-URL genau aus dieser Form: es splittet an Kommata und schneidet
+  // eine fuehrende PLZ ab. Ohne Komma zwischen Strasse und Ort gibt es
+  // keinen zweiten Teil und die URL faellt auf die Landeshauptstadt zurueck.
+  const address = composeEventAddress(submission);
+
   const scoreable = {
     title: submission.title,
     description: submission.description,
     start_date: submission.start_date,
     end_date: submission.end_date,
     location_name: submission.location_name,
-    address: submission.address,
+    address,
     postal_code: submission.postal_code,
     bundesland,
     country: 'AT',
@@ -119,7 +128,7 @@ export function buildEventRow(
     end_date: submission.end_date,
     is_all_day: submission.is_all_day,
     location_name: submission.location_name,
-    address: submission.address,
+    address,
     postal_code: submission.postal_code,
     district: districtFromPlz(submission.postal_code, bundesland),
     bundesland,

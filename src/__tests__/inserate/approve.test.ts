@@ -15,6 +15,7 @@ function submission(overrides: Partial<ApprovableSubmission> = {}): ApprovableSu
     location_name: 'Schlosspark Esterházy',
     address: 'Esterhazyplatz 5',
     postal_code: '7000',
+    city: 'Eisenstadt',
     bundesland: 'burgenland',
     price_text: 'Eintritt frei',
     ticket_url: null,
@@ -82,7 +83,10 @@ describe('buildEventRow', () => {
     expect(row.longitude).toBe(16.5236);
   });
 
-  it('gibt ein Event ohne auflösbare Koordinaten trotzdem frei', () => {
+  it('baut auch ohne Koordinaten eine vollständige Zeile (Pfad `force`)', () => {
+    // Die Route gibt ohne Koordinaten normalerweise NICHT frei (422), weil
+    // ein solches Event in Liste, Karte und Suche unsichtbar wäre. Nur wenn
+    // der Admin ausdrücklich darauf besteht, landet diese Zeile in der DB.
     const row = buildEventRow(submission(), { now: NOW });
     expect(row.latitude).toBeNull();
     expect(row.publish_status).toBe('published');
@@ -104,6 +108,13 @@ describe('buildEventRow', () => {
   it('erzeugt einen Slug aus Titel und Ort', () => {
     const row = buildEventRow(submission(), { now: NOW });
     expect(row.slug).toBe('sommerfest-im-schlosspark-schlosspark-esterhazy');
+  });
+
+  it('schreibt die Adresse kanonisch als "Strasse, PLZ Ort"', () => {
+    // parseCityFromAddress (slugify.ts) liest den Ort fuer die Event-URL
+    // aus genau dieser Form; ohne Komma gibt es keinen zweiten Teil.
+    const row = buildEventRow(submission(), { now: NOW });
+    expect(row.address).toBe('Esterhazyplatz 5, 7000 Eisenstadt');
   });
 
   it('setzt last_seen_at auf den Freigabezeitpunkt', () => {
