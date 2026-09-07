@@ -2,10 +2,10 @@
 import { createClient } from '@supabase/supabase-js';
 import { startWorkflowRun, finishWorkflowRun } from './reporting/workflow-run';
 import type {
+  ScraperResult,
   PipelineResults,
   PipelineRunStatus,
   StepResult,
-  ScraperResult,
 } from './pipeline/scrape-pipeline-types';
 import fs from 'fs';
 
@@ -72,6 +72,67 @@ export async function insertScraperStats(
     const { error } = await supabase.from('scraper_stats').insert(batch);
     if (error) console.error(`Failed to insert scraper_stats batch: ${error.message}`);
   }
+}
+
+/**
+ * Die Scraper-Zahlen des Tages aus `source_runs` nachladen.
+ *
+ * Der naechtliche Workflow trennt Scraping und Nachbearbeitung in zwei
+ * Jobs: die Shards scrapen, danach laeuft `scrape-pipeline.ts` mit
+ * `--skip-scrapers`. Dieser zweite Lauf schreibt aber den Bericht — und
+ * hatte selbst keinen Scraper laufen lassen. Ergebnis (Bericht vom
+ * 2026-09-07): "Erfolgreich · 0 Events gefunden, 0 aktualisiert · Dauer
+ * 0 s", waehrend die Shards in Wahrheit 144 Scraper gefahren, 69.966
+ * Events gefunden und 4.801 Zeilen an einem FK-Fehler verloren hatten.
+ * Ein Bericht, der einen kaputten Lauf als Erfolg ohne Zahlen meldet, ist
+ * schlimmer als keiner.
+ *
+ * `source_runs` traegt keine GitHub-Run-ID, deshalb das Zeitfenster: pro
+ * Quelle der juengste Lauf innerhalb der letzten `hours` Stunden. Die
+ * Shards laufen unmittelbar vor der Nachbearbeitung, 12 h decken auch
+ * einen langen Lauf (die Gemeinde-Riesen brauchen bis zu 4 h) sicher ab.
+ */
+export async function loadScraperResultsFromSourceRuns(
+  hours = 12,
+): Promise<ScraperResult[]> {
+  const supabase = getSupabaseAdmin();
+  const since = new Date(Date.now() - hours * 3600_000).toISOString();
+  const { data, error } = await supabase
+    .from('source_runs')
+    .select('source_name, run_at, status, events_found, events_upserted, duration_ms, error_message')
+    .gte('run_at', since)
+    .order('run_at', { ascending: true })
+    .limit(2000);
+
+  if (error) {
+    console.error(`[reporter] source_runs nicht lesbar: ${error.message}`);
+    return [];
+  }
+
+  // Pro Quelle der juengste Lauf — bei Wiederholungen zaehlt der letzte.
+  const latest = new Map<string, ScraperResult>();
+  for (const row of data ?? []) {
+    const r = row as {
+      source_name: string;
+      status: string;
+      events_found: number | null;
+      events_upserted: number | null;
+      duration_ms: number | null;
+      error_message: string | null;
+    };
+    latest.set(r.source_name, {
+      scraper_name: r.source_name,
+      // `timeout` ist in source_runs ein eigener Status, im Bericht aber
+      // schlicht ein gescheiterter Scraper.
+      status: r.status === 'success' ? 'success' : 'failed',
+      events_found: r.events_found ?? 0,
+      events_updated: r.events_upserted ?? 0,
+      duration_ms: r.duration_ms ?? 0,
+      error_message: r.error_message,
+      retry_count: 0,
+    });
+  }
+  return [...latest.values()];
 }
 
 export async function finalizePipelineRun(
