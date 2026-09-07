@@ -496,7 +496,7 @@
     "thQ3": "Ist LassTreffen.at kostenlos nutzbar?",
     "thA3": "Ja, die gesamte Event-Suche ist kostenlos und ohne Registrierung zugänglich. Ticket-Preise werden – wenn vom Veranstalter verfügbar – direkt auf der Event-Detailseite angezeigt; Kauf und Abwicklung laufen über den jeweiligen Ticket-Anbieter.",
     "thQ4": "Wie aktuell ist die Event-Liste für {theme}?",
-    "thA4": "Die {theme}-Events werden mehrmals täglich aus über 140 Quellen neu eingelesen. Abgesagte oder verschobene Termine werden automatisch erkannt und entsprechend gekennzeichnet.",
+    "thA4": "Die {theme}-Events werden mehrmals täglich aus allen angebundenen Quellen neu eingelesen. Abgesagte oder verschobene Termine werden automatisch erkannt und entsprechend gekennzeichnet.",
     "thQ5": "Kann ich als Veranstalter eigene {theme}-Events eintragen?",
     "thA5": "Ja — über das Einreich-Formular lassen sich eigene Veranstaltungen vorschlagen. Einreichungen werden moderiert und bei Qualitätseignung öffentlich sichtbar geschaltet.",
     "gemQ1": "Welche Events gibt es heute in {gemeinde}?",

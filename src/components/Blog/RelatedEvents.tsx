@@ -127,7 +127,7 @@ export async function RelatedEvents({ postTitle }: { postTitle: string }) {
         Ähnliche Events &amp; Termine
       </h2>
       <p className="text-gray-500 text-sm mb-6">
-        Live aus unserem Kalender — täglich aktualisiert aus über 140 Quellen.
+        Live aus unserem Kalender — täglich aktualisiert.
       </p>
 
       {events.length > 0 && (
