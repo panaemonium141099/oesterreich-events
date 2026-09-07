@@ -10,6 +10,7 @@ import { V4PastEventNotice } from '@/components/Events/v4/V4PastEventNotice';
 import { V4EventDetail } from '@/components/Events/v4';
 import { V4RelatedEvents, hubLinksFor } from '@/components/Events/v4/V4RelatedEvents';
 import { deriveEventState } from '@/lib/v4/derive-event-state';
+import { deriveTicketMeta } from '@/lib/v4/ticket-meta';
 import {
   parseSlugArray,
   resolveEvent,
@@ -310,15 +311,8 @@ export default async function EventDetailPage({
     lineupMatchEventIds: new Set(),
   });
 
-  // Best-effort ticket meta inferred from event row. The fields are loose
-  // strings; V4SideBox falls back to UnknownBox if any are missing.
-  const provider = event.source_name ?? undefined;
-  // NUR ein numerischer Ab-Preis. Der frühere Rückfall auf `price_text`
-  // schob ganze Preis-Saetze in die 28px-Zeile der TicketBox; fehlt die
-  // Zahl, schluesselt die Box den Text jetzt selbst als PriceBlock auf.
-  const priceFrom =
-    event.price_min != null ? `€ ${event.price_min}` : undefined;
-  const priceAtDoor = event.price_text ?? undefined;
+  // Gemeinsame Ableitung mit der Modal-Route — siehe lib/v4/ticket-meta.ts.
+  const { provider, priceFrom, priceAtDoor } = deriveTicketMeta(event);
 
   // Only emit JSON-LD for fully published events (skip low confidence).
   // displayEvent: auf der /en-URL stehen Name/Beschreibung übersetzt im Schema.

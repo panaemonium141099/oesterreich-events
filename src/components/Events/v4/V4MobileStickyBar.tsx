@@ -36,12 +36,18 @@ export function V4MobileStickyBar({ state, eventId, provider, priceFrom, ticketU
       style={{ bottom: 82 /* V4TabBar ist 81px hoch — 76 überlappte 5px */ }}
     >
       {state === 'ticket' || state === 'match' || state === 'lineup' ? (
-        provider && priceFrom && ticketUrl ? (
+        // Bedingung ist das ZIEL, nicht der Preis. Stand hier frueher auch
+        // `priceFrom`, verschwand der Kauf-Button bei jedem Event ohne
+        // numerischen Ab-Preis — also bei jedem Inserat, dessen Preis nur
+        // als Text vorliegt. Die Preisspalte entfaellt dann einfach.
+        provider && ticketUrl ? (
           <>
-            <div className="flex flex-col">
-              <span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[var(--v4-ink-50)]">{t('from')}</span>
-              <span className="text-[17px] font-bold tracking-[-0.015em] text-[var(--v4-ink)]">{priceFrom.replace(/^ab\s*/i,'')}</span>
-            </div>
+            {priceFrom && (
+              <div className="flex flex-col">
+                <span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[var(--v4-ink-50)]">{t('from')}</span>
+                <span className="text-[17px] font-bold tracking-[-0.015em] text-[var(--v4-ink)]">{priceFrom.replace(/^ab\s*/i,'')}</span>
+              </div>
+            )}
             <div className="flex-1"/>
             <a
               href={ticketUrl}

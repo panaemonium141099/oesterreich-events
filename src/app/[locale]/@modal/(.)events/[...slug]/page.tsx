@@ -34,6 +34,7 @@ import { notFound } from 'next/navigation';
 import { V4EventDetail } from '@/components/Events/v4';
 import { V4RelatedEvents } from '@/components/Events/v4/V4RelatedEvents';
 import { deriveEventState } from '@/lib/v4/derive-event-state';
+import { deriveTicketMeta } from '@/lib/v4/ticket-meta';
 import { EventSheet } from '@/components/Events/EventSheet';
 import { ModalShell } from '@/components/Layout/ModalShell';
 import {
@@ -85,11 +86,11 @@ export default async function InterceptedEventPage({
     artistMatchEventIds: new Set(),
     lineupMatchEventIds: new Set(),
   });
-  const provider = event.source_name ?? undefined;
-  const priceFrom =
-    event.price_min != null ? `€ ${event.price_min}` :
-    event.price_text ?? undefined;
-  const priceAtDoor = event.price_text ?? undefined;
+  // Gemeinsame Ableitung mit der Voll-Seite — siehe lib/v4/ticket-meta.ts.
+  // Diese Route trug die Ableitung frueher als zweite Kopie; sie blieb bei
+  // einer Korrektur zurueck und zeigte deshalb weiter den ganzen Preistext
+  // in der grossen Preiszeile.
+  const { provider, priceFrom, priceAtDoor } = deriveTicketMeta(event);
 
   // fn-15.5 fix (round 2): the parallel `@modal` slot lives at root-
   // layout level alongside `children`, so it does NOT inherit the
