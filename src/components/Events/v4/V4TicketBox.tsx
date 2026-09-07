@@ -17,6 +17,7 @@
 import { useTranslations } from 'next-intl';
 import { V4Badge } from './V4Badge';
 import { V4SaveButton } from './V4SaveButton';
+import { V4PriceBlock } from './V4PriceBlock';
 
 export type V4TicketBoxVariant = 'ticket' | 'match' | 'lineup';
 
@@ -24,7 +25,21 @@ interface V4TicketBoxProps {
   /** Required for the Merken-toggle to write into saved_events. */
   eventId: string;
   provider: string;
-  priceFrom: string;
+  /**
+   * Kurzer Ab-Preis fuer die grosse Zeile, z. B. "€ 12". NUR setzen, wenn
+   * ein numerischer Preis vorliegt. Fehlt er, rendert die Box stattdessen
+   * den aufgeschluesselten V4PriceBlock aus `priceText`/`priceMin`/`priceMax`.
+   *
+   * Frueher war das Feld Pflicht und die Route reichte ersatzweise das
+   * ganze `price_text` durch — bei einem Inserat war das ein 120 Zeichen
+   * langer Satz ("Abendkassa regulaer: EUR 12 - Early Bird / ...") in
+   * 28px fett. Unlesbar.
+   */
+  priceFrom?: string;
+  /** Rohpreis-Angaben fuer den Fall, dass `priceFrom` fehlt. */
+  priceText?: string | null;
+  priceMin?: number | null;
+  priceMax?: number | null;
   ticketUrl: string;
   variant?: V4TicketBoxVariant;
   /** Required for `match`/`lineup` to personalise the badge label. */
@@ -45,7 +60,7 @@ const BORDER_COLOR: Record<V4TicketBoxVariant, string> = {
 };
 
 export function V4TicketBox({
-  eventId, provider, priceFrom, ticketUrl,
+  eventId, provider, priceFrom, priceText, priceMin, priceMax, ticketUrl,
   variant = 'ticket', artistName, onPlanClick,
 }: V4TicketBoxProps) {
   const t = useTranslations('EventDetail');
@@ -70,11 +85,19 @@ export function V4TicketBox({
           {provider ? t('providerLine', { name: provider }) : t('providerFallback')}
         </p>
 
-        <div className="flex items-baseline gap-2.5 mb-4">
-          <span className="text-[11px] uppercase tracking-[0.16em] font-semibold text-[var(--v4-ink-50)]">{t('from')}</span>
-          <span className="text-[28px] font-bold tracking-[-0.025em] text-[var(--v4-ink)]">{priceFrom.replace(/^ab\s*/i, '')}</span>
-          <span className="text-[12px] text-[var(--v4-ink-50)] ml-1">{t('perPerson')}</span>
-        </div>
+        {priceFrom ? (
+          <div className="flex items-baseline gap-2.5 mb-4">
+            <span className="text-[11px] uppercase tracking-[0.16em] font-semibold text-[var(--v4-ink-50)]">{t('from')}</span>
+            <span className="text-[28px] font-bold tracking-[-0.025em] text-[var(--v4-ink)]">{priceFrom.replace(/^ab\s*/i, '')}</span>
+            <span className="text-[12px] text-[var(--v4-ink-50)] ml-1">{t('perPerson')}</span>
+          </div>
+        ) : (
+          // Kein numerischer Ab-Preis: die volle Staffelung aufschluesseln
+          // statt sie zu verschweigen. Derselbe Block wie in der UnknownBox.
+          <div className="mb-4">
+            <V4PriceBlock priceText={priceText} priceMin={priceMin} priceMax={priceMax} />
+          </div>
+        )}
 
         <a
           href={ticketUrl}

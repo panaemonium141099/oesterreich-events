@@ -48,7 +48,12 @@ export function V4SideBox(props: V4SideBoxProps) {
 
   // Variants of TicketBox.
   if (state === 'ticket' || state === 'match' || state === 'lineup') {
-    if (!provider || !priceFrom || !ticketUrl) {
+    // Fallback nur noch, wenn das ZIEL fehlt. Frueher stand hier auch
+    // `!priceFrom` — dadurch landete jedes Event mit Ticket-Link, aber
+    // ohne numerischen Ab-Preis in der UnknownBox ("Kein Online-Verkauf
+    // bekannt"), obwohl der Link vorhanden war. Den Preis schluesselt die
+    // TicketBox jetzt selbst aus priceText/priceMin/priceMax auf.
+    if (!provider || !ticketUrl) {
       return <V4UnknownBox eventId={eventId} mapsUrl={mapsUrl} locationApprox={locationApprox} onPlanClick={onPlanClick} priceText={priceText} priceMin={priceMin} priceMax={priceMax} priceTier={priceTier}/>;
     }
     return (
@@ -56,6 +61,9 @@ export function V4SideBox(props: V4SideBoxProps) {
         eventId={eventId}
         provider={provider}
         priceFrom={priceFrom}
+        priceText={priceText}
+        priceMin={priceMin}
+        priceMax={priceMax}
         ticketUrl={ticketUrl}
         variant={state as V4TicketBoxVariant}
         artistName={artistName}

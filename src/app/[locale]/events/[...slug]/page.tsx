@@ -313,9 +313,11 @@ export default async function EventDetailPage({
   // Best-effort ticket meta inferred from event row. The fields are loose
   // strings; V4SideBox falls back to UnknownBox if any are missing.
   const provider = event.source_name ?? undefined;
+  // NUR ein numerischer Ab-Preis. Der frühere Rückfall auf `price_text`
+  // schob ganze Preis-Saetze in die 28px-Zeile der TicketBox; fehlt die
+  // Zahl, schluesselt die Box den Text jetzt selbst als PriceBlock auf.
   const priceFrom =
-    event.price_min != null ? `€ ${event.price_min}` :
-    event.price_text ?? undefined;
+    event.price_min != null ? `€ ${event.price_min}` : undefined;
   const priceAtDoor = event.price_text ?? undefined;
 
   // Only emit JSON-LD for fully published events (skip low confidence).
