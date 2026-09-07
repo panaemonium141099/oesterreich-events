@@ -14,6 +14,7 @@ function base(overrides: Record<string, unknown> = {}) {
     title: 'Sommerfest im Schlosspark',
     startDate: '2026-07-15',
     startTime: '19:00',
+    city: 'Eisenstadt',
     submitterType: 'company',
     company: 'Musikverein Musterdorf',
     contactName: 'Max Mustermann',
@@ -102,6 +103,13 @@ describe('validateSubmission — Pflichtfelder', () => {
       NOW,
     );
     expect(result.ok).toBe(true);
+  });
+
+  it('verlangt einen Ort', () => {
+    // Ohne Ort keine geocodierbare Adresse — und ohne Koordinaten ist ein
+    // freigegebenes Inserat in Liste, Karte und Suche unsichtbar.
+    const result = validateSubmission(base({ city: '' }), NOW);
+    expect(result).toMatchObject({ ok: false, field: 'city' });
   });
 
   it('verlangt die Rechtebestätigung', () => {

@@ -61,6 +61,7 @@ export function EventSubmissionForm() {
   const [locationName, setLocationName] = useState('');
   const [address, setAddress] = useState('');
   const [postalCode, setPostalCode] = useState('');
+  const [city, setCity] = useState('');
   const [bundesland, setBundesland] = useState('');
   const [priceText, setPriceText] = useState('');
   const [ticketUrl, setTicketUrl] = useState('');
@@ -104,6 +105,7 @@ export function EventSubmissionForm() {
           locationName,
           address,
           postalCode,
+          city,
           bundesland,
           priceText,
           ticketUrl,
@@ -290,7 +292,7 @@ export function EventSubmissionForm() {
           />
         </div>
 
-        <div className="grid sm:grid-cols-2 gap-4">
+        <div className="grid sm:grid-cols-[7rem_1fr] gap-4">
           <div>
             <label htmlFor="ins-plz" className={LABEL}>PLZ</label>
             <input
@@ -306,22 +308,38 @@ export function EventSubmissionForm() {
             />
           </div>
           <div>
-            <label htmlFor="ins-bundesland" className={LABEL}>Bundesland</label>
-            <select
-              id="ins-bundesland"
-              value={bundesland}
-              onChange={(e) => setBundesland(e.target.value)}
-              className={`${FIELD} [color-scheme:dark]`}
-            >
-              <option value="">Bitte wählen</option>
-              {BUNDESLAENDER.map(([id, label]) => (
-                <option key={id} value={id}>{label}</option>
-              ))}
-            </select>
+            <label htmlFor="ins-city" className={LABEL}>Ort *</label>
+            <input
+              id="ins-city"
+              type="text"
+              value={city}
+              onChange={(e) => setCity(e.target.value)}
+              placeholder="Eisenstadt"
+              required
+              maxLength={200}
+              className={FIELD}
+            />
           </div>
         </div>
+
+        <div>
+          <label htmlFor="ins-bundesland" className={LABEL}>Bundesland</label>
+          <select
+            id="ins-bundesland"
+            value={bundesland}
+            onChange={(e) => setBundesland(e.target.value)}
+            className={`${FIELD} [color-scheme:dark]`}
+          >
+            <option value="">Bitte wählen</option>
+            {BUNDESLAENDER.map(([id, label]) => (
+              <option key={id} value={id}>{label}</option>
+            ))}
+          </select>
+        </div>
+
         <p className="text-[11px] text-white/25">
-          Je genauer die Adresse, desto sicherer landet dein Event auf der Karte.
+          Ort und PLZ brauchen wir, um dein Event auf der Karte zu verorten. Ohne
+          eine auffindbare Adresse können wir es nicht veröffentlichen.
         </p>
       </section>
 
