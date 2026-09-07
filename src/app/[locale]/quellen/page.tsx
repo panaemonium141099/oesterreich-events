@@ -304,7 +304,7 @@ const SOURCE_CATEGORIES: SourceCategory[] = [
       {
         name: 'Universitäten & Fachhochschulen',
         description:
-          '56 Scraper für öffentliche Veranstaltungskalender aller österreichischen Unis, FHs und Pädagogischen Hochschulen.',
+          'Öffentliche Veranstaltungskalender österreichischer Unis, FHs und Pädagogischer Hochschulen.',
       },
     ],
   },
@@ -378,8 +378,8 @@ export default function QuellenPage() {
         </h1>
         <p className="text-white/50 leading-relaxed mb-12 max-w-2xl">
           LassTreffen.at aggregiert öffentlich zugängliche Veranstaltungsdaten
-          aus über 140 Quellen in ganz Österreich. Wir legen Wert auf Transparenz
-          und die Einhaltung aller Lizenzbedingungen. Nachfolgend eine Übersicht
+          aus ganz Österreich. Wir legen Wert auf Transparenz und die
+          Einhaltung aller Lizenzbedingungen. Nachfolgend eine Übersicht
           aller genutzten Datenquellen.
         </p>
 

@@ -131,8 +131,10 @@ const PLANS: Plan[] = [
   },
 ];
 
+// Keine Quellen-Anzahl mehr: die Zahl war fest verdrahtet und veraltete
+// mit jedem hinzugefügten oder stillgelegten Scraper, ohne dass es jemand
+// bemerkt hätte. Was hier steht, muss ohne Pflege wahr bleiben.
 const STATS = [
-  { value: '141+', label: 'Event-Quellen in ganz Österreich' },
   { value: '9', label: 'Bundesländer abgedeckt' },
   { value: 'Karte', label: 'Interaktive Entdeckung statt Listen' },
 ];
@@ -186,7 +188,7 @@ export default function FuerFirmenPage() {
         </header>
 
         {/* Stats */}
-        <div className="grid grid-cols-3 gap-4 mt-16">
+        <div className="grid grid-cols-2 gap-4 mt-16">
           {STATS.map((s) => (
             <div key={s.label} className="rounded-2xl border border-white/[0.06] bg-white/[0.03] px-4 py-6 text-center">
               <div className="text-2xl md:text-3xl font-bold mb-1">{s.value}</div>
@@ -352,7 +354,7 @@ export default function FuerFirmenPage() {
               Zeigt die nächsten Events eurer Region direkt auf eurer eigenen
               Website — ideal für Gemeinden, Tourismusverbände, Hotels und
               Medien. Region wählen, Code kopieren, einbetten. Die Events
-              aktualisieren sich automatisch aus unseren 141+ Quellen.
+              aktualisieren sich automatisch aus unseren Quellen.
             </p>
             <WidgetCodeGenerator />
           </div>

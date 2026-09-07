@@ -1,7 +1,7 @@
 /**
  * Master scrape script: runs everything in the correct order.
  *
- * 1. Regular scrapers (141 sources)
+ * 1. Regular scrapers (alle registrierten Quellen)
  * 2. Venue feed ingestion (ICS/JSON-LD/RSS from registered venues)
  * 3. Score calculation (with venue/student bonuses)
  *
@@ -35,7 +35,7 @@ async function main() {
 
   // 1. Regular scrapers
   if (!skipScrapers) {
-    run('Step 1/3: Running 141 scrapers', 'npx tsx src/scripts/scrape.ts');
+    run('Step 1/3: Running all registered scrapers', 'npx tsx src/scripts/scrape.ts');
   } else {
     console.log('\nSkipping regular scrapers (--skip-scrapers)');
   }

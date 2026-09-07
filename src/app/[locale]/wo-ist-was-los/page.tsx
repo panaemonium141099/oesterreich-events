@@ -11,7 +11,7 @@ import { Link } from '@/i18n/navigation';
  * CDN-Points-Snapshot — null zusätzliche DB-Last) + serverseitig
  * gerendertes Bezirks-Ranking der nächsten 7 Tage als teilbarer,
  * indexierbarer Inhalt. Datenbasis, die sonst niemand hat: ~90k kommende
- * Events aus ~144 Quellen.
+ * Events aus allen angebundenen Quellen.
  *
  * Ranking-Aggregation läuft 1x/h (ISR) über die RPC get_event_map_points
  * (liest die schmale MV, anon-Key wie /api/events/map-points).
@@ -25,7 +25,7 @@ const EPOCH_MS = Date.UTC(2026, 0, 1);
 export const metadata: Metadata = {
   title: 'Wo ist was los in Österreich? Die Event-Heatmap',
   description:
-    'Live-Heatmap der Event-Dichte in ganz Österreich: Welche Bezirke haben diese Woche das meiste Programm? Basierend auf zehntausenden Terminen aus über 140 Quellen.',
+    'Live-Heatmap der Event-Dichte in ganz Österreich: Welche Bezirke haben diese Woche das meiste Programm? Basierend auf zehntausenden Terminen aus ganz Österreich.',
   alternates: { canonical: 'https://lasstreffen.at/wo-ist-was-los' },
   openGraph: {
     title: 'Wo ist was los in Österreich? Die Event-Heatmap',
@@ -129,7 +129,7 @@ export default async function HeatmapPage() {
     <div className="min-h-screen bg-[var(--v4-surface)] text-[var(--v4-ink)] flex flex-col">
       <main className="flex-1 max-w-[1180px] w-full mx-auto px-4 md:px-14 py-10">
         <p className="text-[10.5px] font-semibold uppercase tracking-[0.22em] text-[var(--v4-ink-50)] mb-2">
-          Live aus {stats ? stats.total.toLocaleString('de-AT') : 'zehntausenden'} Terminen · über 140 Quellen
+          Live aus {stats ? stats.total.toLocaleString('de-AT') : 'zehntausenden'} Terminen
         </p>
         <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight mb-3">
           Wo ist was los in Österreich?
@@ -193,7 +193,7 @@ export default async function HeatmapPage() {
         <section className="mt-12 border border-white/10 rounded-2xl p-6 md:p-8">
           <h2 className="text-lg font-bold mb-2">Woher kommen die Daten?</h2>
           <p className="text-sm text-[var(--v4-ink-70)] max-w-3xl leading-relaxed">
-            LassTreffen aggregiert täglich Veranstaltungen aus über 140 Quellen — von
+            LassTreffen aggregiert täglich Veranstaltungen — von
             Gemeinde-Kalendern über Venue-Programme bis zu Ticket-Anbietern — und
             verortet sie auf der Karte. Die Heatmap und das Ranking aktualisieren sich
             laufend aus diesem Bestand.{' '}

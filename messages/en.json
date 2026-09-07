@@ -496,7 +496,7 @@
     "thQ3": "Is LassTreffen.at free to use?",
     "thA3": "Yes, the entire event search is free and accessible without registration. Ticket prices — where provided by the organiser — are shown directly on the event detail page; purchase and processing happen with the respective ticket vendor.",
     "thQ4": "How up to date is the event list for {theme}?",
-    "thA4": "The {theme} events are re-imported several times a day from more than 140 sources. Cancelled or postponed dates are detected automatically and flagged accordingly.",
+    "thA4": "The {theme} events are re-imported several times a day from every connected source. Cancelled or postponed dates are detected automatically and flagged accordingly.",
     "thQ5": "Can I submit my own {theme} events as an organiser?",
     "thA5": "Yes — you can suggest your own events via the submission form. Submissions are moderated and published once they meet the quality bar.",
     "gemQ1": "What events are on in {gemeinde} today?",
