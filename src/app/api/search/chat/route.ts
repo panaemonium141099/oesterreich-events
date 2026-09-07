@@ -29,6 +29,7 @@ import { GoogleGenAI, Type, type Content, type Part } from '@google/genai';
 import { checkRateLimit, getClientIp } from '@/lib/rate-limit';
 import { runSmartSearch } from '@/lib/search/smart-search';
 import { validateChatMessages, type ChatMessage } from '@/lib/search/chat-validate';
+import { isQuotaExhausted } from '@/lib/search/gemini-error';
 import { extractEntityRefs, stripEntityMarkers } from '@/lib/search/chat-entities';
 import type { CandidateEvent } from '@/lib/search/smart-query';
 import type { ActivitySearchMatch } from '@/lib/activities/public-types';
@@ -309,7 +310,14 @@ export async function POST(req: NextRequest) {
         send('done', {});
       } catch (e) {
         console.error('[chat] failed:', e);
-        send('error', { message: 'Concierge-Chat derzeit nicht verfügbar.' });
+        // Ein erschöpftes Tageskontingent ist keine Störung, sondern eine
+        // Grenze bis zum nächsten Tag. Als generisches "nicht verfügbar"
+        // war das weder für Nutzer noch im Betrieb zu erkennen.
+        send('error', {
+          message: isQuotaExhausted(e)
+            ? 'Der Concierge hat sein Tageskontingent aufgebraucht. Morgen ist er wieder da — die normale Suche funktioniert weiterhin.'
+            : 'Concierge-Chat derzeit nicht verfügbar.',
+        });
       } finally {
         try { controller.close(); } catch { /* already closed */ }
       }
