@@ -90,6 +90,8 @@ import { post as eltonJohnBillyJoelTribute2026 } from './posts/elton-john-billy-
 import { post as blackSeaDahu2026 } from './posts/black-sea-dahu-2026';
 import { post as mcYankooLive2026 } from './posts/mc-yankoo-live-2026';
 import { post as uebernachtenWienGuenstig } from './posts/uebernachten-wien-guenstig';
+import { post as theDarkTenor2026 } from './posts/the-dark-tenor-2026';
+import { post as freddieMercuryOperaShow2026 } from './posts/freddie-mercury-opera-show-2026';
 // AUTOWRITER-IMPORTS-END
 
 export type { FestivalPost, GalleryImage, FestivalKeyFacts, LineupAct } from './types';
@@ -185,6 +187,8 @@ export const ALL_POSTS: FestivalPost[] = [
   blackSeaDahu2026,
   mcYankooLive2026,
   uebernachtenWienGuenstig,
+  theDarkTenor2026,
+  freddieMercuryOperaShow2026,
   // AUTOWRITER-POSTS-END
 ].sort(
   (a, b) => new Date(b.publishDate).getTime() - new Date(a.publishDate).getTime()
