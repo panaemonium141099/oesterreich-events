@@ -35,7 +35,7 @@ import {
   normalizeEventLocation,
   extractPostalCodeFromText,
 } from '@/lib/location-normalizer';
-import { normalizeDistrict } from '@/lib/district-normalizer';
+import { normalizeDistrict, isCanonicalDistrict } from '@/lib/district-normalizer';
 import { districtFromPlz } from '@/lib/plz-district';
 import { bundeslandToId } from '@/lib/bundeslaender';
 import { getBundeslandFromPLZ } from '@/lib/plzCoordinates';
@@ -690,6 +690,32 @@ function toSupabaseRow(
       ? existing.publish_status
       : score.publish_status;
 
+  // ─── Bezirk: NUR kanonische Werte ───────────────────────────────
+  // `events.district` haengt an einem Fremdschluessel auf
+  // `district_canonical(name)`. `normalizeDistrict()` laesst unbekannte
+  // Schreibweisen aber unveraendert durch (nur lowercase) — und PostgREST
+  // upsertet batchweise, also reisst EIN unbekannter Bezirk die ganzen
+  // 100 Zeilen des Batches mit.
+  //
+  // Gemessen am Lauf 2026-09-07: 4.801 Zeilen gingen so verloren, allein
+  // meinbezirk 3.700 von 3.701 — der Adapter schreibt den URL-Slug
+  // ("wr-neustadt", "zell-am-see") als Bezirk. Der Fehler stand schon
+  // vorher im Log (41 Treffer am 2026-09-06), nur meldete der Lauf
+  // trotzdem "success".
+  //
+  // Deshalb: ein nicht-kanonischer Wert wird verworfen statt geschrieben.
+  // Danach greift der PLZ-Fallback (der validiert bereits selbst), sonst
+  // bleibt die Spalte NULL. Ein fehlender Bezirk kostet Filter-Treffer,
+  // ein ungueltiger kostet 100 Events.
+  const normalizedDistrict = normalizeDistrict(
+    event.district,
+    finalBundesland,
+    resolved.postalCode ?? event.postal_code,
+  );
+  const finalDistrict =
+    (normalizedDistrict && isCanonicalDistrict(normalizedDistrict) ? normalizedDistrict : null) ??
+    districtFromPlz(resolved.postalCode ?? event.postal_code, finalBundesland);
+
   const row = {
     source_type: 'scraped' as const,
     source_name: event.source_name,
@@ -733,16 +759,7 @@ function toSupabaseRow(
     // Eventim) liefern district=NULL — der Stadt-Filter der Smart-Suche
     // wirft solche Events dann komplett raus (Eisenstadt-Befund
     // 2026-07-31: Hub 59 Events, Suche 0). Fallback: Bezirk aus der PLZ.
-    district:
-      normalizeDistrict(
-        event.district,
-        finalBundesland,
-        resolved.postalCode ?? event.postal_code,
-      ) ??
-      districtFromPlz(
-        resolved.postalCode ?? event.postal_code,
-        finalBundesland,
-      ),
+    district: finalDistrict,
     latitude: finalLat,
     longitude: finalLng,
     country: event.country ?? 'AT',
@@ -817,6 +834,13 @@ export interface SyncResult {
   quarantined: number;
   /** Häufigkeit je Verwerfungs-/Quarantänegrund, für den Lauf-Report. */
   reasons: Record<string, number>;
+  /**
+   * Die tatsächlichen Postgres-Meldungen der fehlgeschlagenen Batches,
+   * dedupliziert. Ohne sie stand in `source_runs.error_message` nur
+   * "N Zeilen nicht geschrieben" — die Ursache (`events_district_fkey`)
+   * liess sich erst durch ein Grep über 4 MB GitHub-Actions-Log finden.
+   */
+  errorMessages: string[];
 }
 
 /** `no_location_evidence=3, placeholder_location=1` */
@@ -888,6 +912,7 @@ export async function syncEventsToSupabase(
     filtered: 0,
     quarantined: 0,
     reasons: {},
+    errorMessages: [],
   });
   if (events.length === 0) return empty();
 
@@ -906,6 +931,7 @@ export async function syncEventsToSupabase(
   let upserted = 0;
   let errors = 0;
   let quarantined = 0;
+  const errorMessages = new Set<string>();
 
   // Deduplicate events by source_name+source_id before syncing
   // (ON CONFLICT DO UPDATE fails if same key appears twice in one batch)
@@ -951,6 +977,7 @@ export async function syncEventsToSupabase(
 
     if (error) {
       console.error(`[supabase-sync] Batch ${i}-${i + batch.length} error:`, error.message);
+      errorMessages.add(error.message);
       errors += batch.length;
     } else {
       upserted += count ?? batch.length;
@@ -964,7 +991,7 @@ export async function syncEventsToSupabase(
     );
   }
 
-  return { upserted, errors, filtered, quarantined, reasons };
+  return { upserted, errors, filtered, quarantined, reasons, errorMessages: [...errorMessages] };
 }
 
 // ─── fn-14.5 image validate-and-upgrade pool ─────────────────────────
