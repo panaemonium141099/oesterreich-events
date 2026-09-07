@@ -37,6 +37,7 @@ import {
   createPipelineRun,
   finalizePipelineRun,
   sendAlertIfNeeded,
+  loadScraperResultsFromSourceRuns,
   writeGitHubSummary,
   computeFinalStatus,
 } from '../lib/scrape-reporter';
@@ -237,6 +238,27 @@ async function main() {
     results.steps = steps;
     results.finished_at = new Date().toISOString();
     results.total_errors = Object.values(steps).filter((s) => s.status === 'failed').length;
+
+    // Der naechtliche Workflow scrapt in eigenen Shard-Jobs und ruft dieses
+    // Skript danach mit --skip-scrapers auf. Ohne Nachladen berichtet der
+    // Lauf dann "0 Events gefunden, 0 Scraper" — obwohl die Shards gerade
+    // 144 Scraper gefahren sind (Bericht vom 2026-09-07). Die echten Zahlen
+    // stehen in source_runs.
+    if (opts.skipScrapers && !opts.dryRun && results.scraper_results.length === 0) {
+      try {
+        results.scraper_results = await loadScraperResultsFromSourceRuns();
+        results.total_events_scraped = results.scraper_results.reduce((n, r) => n + r.events_found, 0);
+        results.total_events_updated = results.scraper_results.reduce((n, r) => n + r.events_updated, 0);
+        const failed = results.scraper_results.filter((r) => r.status !== 'success').length;
+        results.total_errors += failed;
+        console.log(
+          `[pipeline] Scraper-Zahlen aus source_runs: ${results.scraper_results.length} Quellen, ` +
+            `${results.total_events_scraped} gefunden, ${failed} gescheitert`,
+        );
+      } catch (err) {
+        console.error(`[pipeline] source_runs nicht lesbar: ${err}`);
+      }
+    }
 
     if (!opts.dryRun && runId) {
       console.log(`[pipeline] Finalizing run ${runId}...`);
