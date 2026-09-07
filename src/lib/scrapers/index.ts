@@ -523,10 +523,12 @@ export async function runScraper(scraper: BaseScraper): Promise<void> {
 
     // Sync all scraped events to Supabase (single write path).
     let syncErrors = 0;
+    let syncErrorDetail = '';
     if (events.length > 0) {
       const r = await syncEventsToSupabase(events);
       const { upserted, filtered, quarantined } = r;
       syncErrors = r.errors;
+      syncErrorDetail = r.errorMessages.join(' | ').slice(0, 400);
       eventsNew = upserted;
       eventsUpdated = Math.max(0, eventsFound - upserted - filtered);
       console.log(
@@ -557,7 +559,12 @@ export async function runScraper(scraper: BaseScraper): Promise<void> {
       events_upserted: eventsNew,
       duration_ms: Date.now() - startedMs,
       status: syncErrors > 0 ? 'error' : 'success',
-      error_message: syncErrors > 0 ? `${syncErrors} Zeilen nicht geschrieben (DB-Fehler)` : null,
+      // Die echte Postgres-Meldung mitschreiben — sonst ist der Lauf zwar
+      // als Fehler markiert, die Ursache steht aber nur im Actions-Log.
+      error_message:
+        syncErrors > 0
+          ? `${syncErrors} Zeilen nicht geschrieben: ${syncErrorDetail || 'DB-Fehler'}`.slice(0, 500)
+          : null,
     });
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);

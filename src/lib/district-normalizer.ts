@@ -29,6 +29,11 @@ const ALIAS_MAP: Record<BundeslandId, Record<string, string>> = {
     'hartberg-fuerstenfeld': 'hartberg-fürstenfeld',
   },
   niederoesterreich: {
+    // MeinBezirk schreibt den URL-Slug als Bezirk (fn-25).
+    'waidhofen-an-der-thaya': 'waidhofen an der thaya',
+    'waidhofen-an-der-ybbs': 'waidhofen an der ybbs',
+    'wr-neustadt': 'wiener neustadt (stadt)',
+    'wr-neustadt-land': 'wiener neustadt (land)',
     'gaenserndorf': 'gänserndorf',
     'moedling': 'mödling',
     'gmuend': 'gmünd',
@@ -46,6 +51,9 @@ const ALIAS_MAP: Record<BundeslandId, Record<string, string>> = {
     'waidhofenybbstal': 'waidhofen an der ybbs',
   },
   oberoesterreich: {
+    // MeinBezirk-Slugs (fn-25).
+    'steyr': 'steyr (stadt)',
+    'wels': 'wels (stadt)',
     'voecklabruck': 'vöcklabruck',
     'schaerding': 'schärding',
     'gmuend': 'gmünd',
@@ -63,6 +71,9 @@ const ALIAS_MAP: Record<BundeslandId, Record<string, string>> = {
     'grieskirchen-eferding': 'grieskirchen',
   },
   salzburg: {
+    // MeinBezirk-Slugs (fn-25).
+    'st-johann-im-pongau': 'sankt johann im pongau',
+    'zell-am-see': 'zell am see',
     'salzburg': 'salzburg (stadt)',
     'salzburg-stadt': 'salzburg (stadt)',
     'st. johann/pongau': 'sankt johann im pongau',
@@ -73,6 +84,9 @@ const ALIAS_MAP: Record<BundeslandId, Record<string, string>> = {
     'lungau': 'tamsweg',
   },
   steiermark: {
+    // MeinBezirk-Slugs (fn-25). 'hartberg' allein meint heute den
+    // fusionierten Bezirk Hartberg-Fuerstenfeld.
+    'hartberg': 'hartberg-fürstenfeld',
     'suedoststeiermark': 'südoststeiermark',
     'hartberg-fuerstenfeld': 'hartberg-fürstenfeld',
     'graz': 'graz (stadt)', // PLZ check below disambiguates land/stadt
