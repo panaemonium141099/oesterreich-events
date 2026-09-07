@@ -125,3 +125,45 @@ describe('deriveEventState', () => {
     expect(deriveEventState(ev, ctx)).toBe('inplan');
   });
 });
+
+describe('deriveEventState — Inserate', () => {
+  it('zeigt den Kauf-Button, wenn der Veranstalter den Ticket-Link selbst eingetragen hat', () => {
+    // Ohne diesen Zweig landete jedes freigegebene Inserat in der
+    // UnknownBox mit "Kein Online-Verkauf bekannt", obwohl ticket_url in
+    // der Zeile stand (beobachtet in Produktion am 2026-09-07).
+    const ev = baseEvent({
+      source_id: 'inserat:11111111-2222-3333-4444-555555555555',
+      source_name: 'The Loft',
+      ticket_url: 'https://www.theloft.at/shop',
+    });
+    expect(deriveEventState(ev, emptyCtx())).toBe('ticket');
+  });
+
+  it('zeigt ihn NICHT, wenn das Inserat gar keinen Ticket-Link hat', () => {
+    const ev = baseEvent({
+      source_id: 'inserat:11111111-2222-3333-4444-555555555555',
+      source_name: 'The Loft',
+    });
+    expect(deriveEventState(ev, emptyCtx())).toBe('unknown');
+  });
+
+  it('lässt gescrapte Quellen weiterhin aussen vor', () => {
+    // Dort ist ein ticket_url oft nur eine Veranstalterseite und beweist
+    // keine Buchbarkeit — die alte Regel bleibt für sie bestehen.
+    const ev = baseEvent({
+      source_id: 'feratel:4711',
+      source_name: 'feratel-deskline',
+      ticket_url: 'https://beispiel.at/tickets',
+    });
+    expect(deriveEventState(ev, emptyCtx())).toBe('unknown');
+  });
+
+  it('verwechselt kein Event, dessen source_id nur zufällig so beginnt', () => {
+    const ev = baseEvent({
+      source_id: 'inseratXY:1',
+      source_name: 'Irgendwas',
+      ticket_url: 'https://beispiel.at/tickets',
+    });
+    expect(deriveEventState(ev, emptyCtx())).toBe('unknown');
+  });
+});

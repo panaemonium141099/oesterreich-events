@@ -120,7 +120,11 @@ export function V4EventDetail({
       <div className="max-w-[1180px] mx-auto px-5 md:px-14 py-8 md:py-12 grid grid-cols-1 md:grid-cols-[1fr_400px] gap-8 md:gap-12 pb-[120px] md:pb-12">
         <V4EventDetailContent
           description={event.description}
+          category={event.category}
           tags={event.tags}
+          locationName={event.location_name}
+          address={event.address}
+          organizer={event.organizer}
           hasSimilar={Boolean(similar)}
           similarChildren={similar}
           sourceName={sourceAttribution.name}

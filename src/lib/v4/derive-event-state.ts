@@ -49,12 +49,24 @@ export function deriveEventState(event: Event, ctx: DeriveCtx): V4EventState {
   if (ctx.artistMatchEventIds.has(event.id))   return 'match';
   if (ctx.lineupMatchEventIds.has(event.id))   return 'lineup';
 
-  // Buy button is exclusive to the Eventim feed (authoritative ticket truth).
-  // The importer sets ticket_url ONLY when the event is actually bookable
-  // (status AVAILABLE + a "buchbar" price category), so ticket_url presence on
-  // an Eventim event is itself the live-availability signal. Other sources
-  // never show a buy button, even if they carry a ticket_url.
-  if (event.source_name === 'Eventim' && event.ticket_url) {
+  // Zwei Quellen dürfen einen Kauf-Button zeigen, beide aus demselben
+  // Grund: bei ihnen ist der Ticket-Link belegt und nicht geraten.
+  //
+  //  1. Eventim-Feed. Der Importer setzt ticket_url NUR, wenn das Event
+  //     tatsächlich buchbar ist (Status AVAILABLE + "buchbar"-Preiskategorie);
+  //     das Vorhandensein ist damit selbst das Verfügbarkeitssignal.
+  //
+  //  2. Inserate. Den Link hat der Veranstalter im Formular selbst
+  //     eingetragen und dabei die Richtigkeit seiner Angaben bestätigt —
+  //     eine mindestens so gute Quelle wie ein Feed. Ohne diesen Zweig
+  //     landete jedes Inserat mit Ticket-Link in der UnknownBox mit der
+  //     Meldung "Kein Online-Verkauf bekannt", obwohl der Link in der
+  //     Zeile stand (beobachtet 2026-09-07).
+  //
+  // Gescrapte Quellen bleiben ausgenommen: dort ist ein ticket_url oft
+  // nur eine Veranstalterseite und beweist keine Buchbarkeit.
+  const isInserat = event.source_id?.startsWith('inserat:') ?? false;
+  if ((event.source_name === 'Eventim' || isInserat) && event.ticket_url) {
     return 'ticket';
   }
 
