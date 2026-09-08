@@ -92,6 +92,8 @@ import { post as mcYankooLive2026 } from './posts/mc-yankoo-live-2026';
 import { post as uebernachtenWienGuenstig } from './posts/uebernachten-wien-guenstig';
 import { post as theDarkTenor2026 } from './posts/the-dark-tenor-2026';
 import { post as freddieMercuryOperaShow2026 } from './posts/freddie-mercury-opera-show-2026';
+import { post as scienceBustersForKids2026 } from './posts/science-busters-for-kids-2026';
+import { post as mariaUndDieFledermaus2026 } from './posts/maria-und-die-fledermaus-2026';
 // AUTOWRITER-IMPORTS-END
 
 export type { FestivalPost, GalleryImage, FestivalKeyFacts, LineupAct } from './types';
@@ -189,6 +191,8 @@ export const ALL_POSTS: FestivalPost[] = [
   uebernachtenWienGuenstig,
   theDarkTenor2026,
   freddieMercuryOperaShow2026,
+  scienceBustersForKids2026,
+  mariaUndDieFledermaus2026,
   // AUTOWRITER-POSTS-END
 ].sort(
   (a, b) => new Date(b.publishDate).getTime() - new Date(a.publishDate).getTime()
