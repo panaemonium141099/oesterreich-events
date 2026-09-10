@@ -89,7 +89,7 @@ export const SAISON_KALENDER: SaisonGuideSpec[] = [
     categories: ['Kultur & Bühne'],
     bestandsPosts: ['ars-electronica-festival', 'viennale'],
     brief: [
-      'Erkläre das Prinzip (ein Ticket für alle teilnehmenden Häuser),',
+      'REGEL 1: Die Seite beantwortet vor allem "was kann ich in dieser Zeit unternehmen". Konkrete Veranstaltungen und Unternehmungen stehen vor Hintergrundwissen. REGEL 2: Alle neun Bundeslaender kommen vor, mit mindestens einem konkreten Tipp je Bundesland aus den bereitgestellten Events. Kein Bundesland auslassen, auch wenn Wien mehr hergibt. Erkläre das Prinzip (ein Ticket für alle teilnehmenden Häuser),',
       'wie viele Häuser man an einem Abend realistisch schafft,',
       'wo das Ticket zusätzlich als Öffi-Fahrschein gilt und wo nur für die',
       'Shuttlebusse, was für Familien mit Kindern drin ist, und praktische',
@@ -131,7 +131,7 @@ export const SAISON_KALENDER: SaisonGuideSpec[] = [
     categories: ['Märkte & Feste', 'Familie & Kinder', 'Nightlife & Party'],
     bestandsPosts: ['nationalfeiertag-oesterreich'],
     brief: [
-      'Gliedere die Saison in ihre Phasen (Kürbiszeit, Warm-Up, Kernwoche, Peak).',
+      'REGEL 1: Die Seite beantwortet vor allem "was kann ich in dieser Zeit unternehmen". Konkrete Veranstaltungen und Unternehmungen stehen vor Hintergrundwissen. REGEL 2: Alle neun Bundeslaender kommen vor, mit mindestens einem konkreten Tipp je Bundesland aus den bereitgestellten Events. Kein Bundesland auslassen, auch wenn Wien mehr hergibt. Gliedere die Saison in ihre Phasen (Kürbiszeit, Warm-Up, Kernwoche, Peak).',
       'Decke ab: Gruselburgen und Schlösser, Freizeitparks, Halloween-Läufe,',
       'Nachtführungen, Kürbishöfe, und die ruhige Alternative für Familien mit',
       'kleinen Kindern. Nenne nur Veranstaltungen, die in den bereitgestellten',
@@ -171,7 +171,7 @@ export const SAISON_KALENDER: SaisonGuideSpec[] = [
     categories: ['Kultur & Bühne', 'Familie & Kinder', 'Märkte & Feste'],
     bestandsPosts: ['halloween-oesterreich', 'lange-nacht-der-museen'],
     brief: [
-      'Beantworte zuerst die Suchfrage: was hat offen, was nicht, wie fahren',
+      'REGEL 1: Die Seite beantwortet vor allem "was kann ich in dieser Zeit unternehmen". Konkrete Veranstaltungen und Unternehmungen stehen vor Hintergrundwissen. REGEL 2: Alle neun Bundeslaender kommen vor, mit mindestens einem konkreten Tipp je Bundesland aus den bereitgestellten Events. Kein Bundesland auslassen, auch wenn Wien mehr hergibt. Beantworte zuerst die Suchfrage: was hat offen, was nicht, wie fahren',
       'die Öffis. Erkläre dann die Herkunft des Datums, das Ferienfenster und',
       'wie man mit wenig Urlaub viele freie Tage bekommt. Räume mit dem Irrtum',
       'auf, am Nationalfeiertag sei der Eintritt in alle Bundesmuseen frei —',
@@ -219,7 +219,7 @@ export const SAISON_KALENDER: SaisonGuideSpec[] = [
       'salzburger-christkindlmarkt', 'innsbruck-christkindlmarkt',
     ],
     brief: [
-      'Der Hub verteilt auf die Stadtseiten. Erkläre die zwei Startregeln:',
+      'REGEL 1: Die Seite beantwortet vor allem "was kann ich in dieser Zeit unternehmen". Konkrete Veranstaltungen und Unternehmungen stehen vor Hintergrundwissen. REGEL 2: Alle neun Bundeslaender kommen vor, mit mindestens einem konkreten Tipp je Bundesland aus den bereitgestellten Events. Kein Bundesland auslassen, auch wenn Wien mehr hergibt. Der Hub verteilt auf die Stadtseiten. Erkläre die zwei Startregeln:',
       'Wien hängt nicht am Advent (die Märkte starten fix Mitte November),',
       'Graz schon (eine Woche vor dem ersten Adventsonntag). Weise darauf hin,',
       'dass Salzburg als einziger großer Markt bis Anfang Jänner läuft und',
@@ -252,7 +252,7 @@ export const SAISON_KALENDER: SaisonGuideSpec[] = [
     categories: ['Märkte & Feste', 'Kultur & Bühne'],
     bestandsPosts: ['christkindlmaerkte-oesterreich'],
     brief: [
-      'Der wichtigste Erklärteil ist der Unterschied zwischen Krampus',
+      'REGEL 1: Die Seite beantwortet vor allem "was kann ich in dieser Zeit unternehmen". Konkrete Veranstaltungen und Unternehmungen stehen vor Hintergrundwissen. REGEL 2: Alle neun Bundeslaender kommen vor, mit mindestens einem konkreten Tipp je Bundesland aus den bereitgestellten Events. Kein Bundesland auslassen, auch wenn Wien mehr hergibt. Der wichtigste Erklärteil ist der Unterschied zwischen Krampus',
       '(christlich, Begleiter des Nikolaus, Mitte November bis 20. Dezember)',
       'und Percht (vorchristlich, Rauhnächte, 21. Dezember bis 6. Jänner),',
       'inklusive Schiach- und Schönperchten und der regionalen Namen',
