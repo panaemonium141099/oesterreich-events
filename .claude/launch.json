@@ -2,10 +2,15 @@
   "version": "0.0.1",
   "configurations": [
     {
-      "name": "dev",
+      "name": "dev-worktree",
       "runtimeExecutable": "node",
-      "runtimeArgs": ["./node_modules/next/dist/bin/next", "dev"],
-      "port": 3000,
+      "runtimeArgs": [
+        "../../../node_modules/next/dist/bin/next",
+        "dev",
+        "--port",
+        "3111"
+      ],
+      "port": 3111,
       "autoPort": true
     }
   ]

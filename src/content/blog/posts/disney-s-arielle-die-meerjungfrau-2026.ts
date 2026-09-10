@@ -7,8 +7,10 @@ export const post: FestivalPost = {
   "slug": "disney-s-arielle-die-meerjungfrau-2026",
   "title": "Disney's Arielle, die Meerjungfrau in Baden",
   "subtitle": "Tauchen Sie ein in eine magische Unterwasserwelt im Stadttheater Baden!",
-  "heroImage": "/images/blog/disney-s-arielle-die-meerjungfrau-2026/hero.png",
-  "heroImageCredit": "Foto: Original: Walt Disney Pictures Vector:  Balara86, Public domain, Wikimedia Commons",
+  "heroImage": "/images/blog/disney-s-arielle-die-meerjungfrau-2026/hero.jpg",
+  "heroImageCredit": "Foto: Eventim",
+  "heroLayout": "poster",
+  "heroImageWidth": 222,
   "ticketUrl": "https://www.oeticket.com/noapp/event/buehne-baden-disneys-arielle-die-meerjungfrau-stadttheater-baden-stadttheater-buehne-baden-21012682/?affiliate=J70",
   "publishDate": "2026-08-30",
   "updatedDate": "2026-08-30",
@@ -129,7 +131,7 @@ export const post: FestivalPost = {
     "addressCountry": "AT",
     "url": "https://www.oeticket.com/noapp/event/buehne-baden-disneys-arielle-die-meerjungfrau-stadttheater-baden-stadttheater-buehne-baden-21012682/?affiliate=J70",
     "description": "Erleben Sie Disney's Arielle, die Meerjungfrau als deutschsprachige Erstaufführung in Österreich! Ein farbenprächtiges Musical für die ganze Familie mit weltberühmten Songs erwartet Sie in Baden.",
-    "image": "https://lasstreffen.at/images/blog/disney-s-arielle-die-meerjungfrau-2026/hero.png"
+    "image": "https://lasstreffen.at/images/blog/disney-s-arielle-die-meerjungfrau-2026/hero.jpg"
   },
   "faqs": [
     {
