@@ -83,11 +83,12 @@
  *      ist korrekt und nicht bloß Schadensbegrenzung: in der Edge-Runtime
  *      gibt es kein Dateisystem, dort ist ein FS-Cache ohnehin unmöglich,
  *      und die Middleware cacht nichts.
- *   2. Der Zugriff läuft über `eval('require')`. Damit sieht der Bundler
- *      keinen auflösbaren Import und packt node:path/node:fs gar nicht erst
- *      in den Edge-Chunk — unabhängig davon, ob er den Guard aus (1) als
- *      toten Code erkennt und wegoptimiert. Hässlich, aber genau das ist
- *      der Punkt: die statische Analyse soll hier nichts finden.
+ *   2. Die `require`-Aufrufe stehen INNERHALB des Guards, nicht auf
+ *      Modulebene. Turbopack ersetzt `process.env.NEXT_RUNTIME` beim Bauen
+ *      des Edge-Chunks durch 'edge' und wirft den Zweig als toten Code weg,
+ *      sodass node:path/node:fs dort gar nicht erst referenziert werden.
+ *      (`eval('require')` wäre der brachialere Weg, Turbopack lehnt eval
+ *      aber rundheraus ab: "Ecmascript file had an error".)
  */
 const IS_EDGE_RUNTIME = process.env.NEXT_RUNTIME === 'edge';
 
@@ -96,17 +97,15 @@ let fs = null;
 let FileSystemCache = null;
 
 if (!IS_EDGE_RUNTIME) {
-  // eslint-disable-next-line no-eval
-  const nodeRequire = eval('require');
-  path = nodeRequire('node:path');
-  fs = nodeRequire('node:fs/promises');
+  path = require('node:path');
+  fs = require('node:fs/promises');
 
   // Interner Next-Pfad. Bewusst hart geladen statt weich abgesichert: wenn
   // ein Next-Upgrade ihn verschiebt, soll der Server laut scheitern statt
   // still ohne Cache weiterzulaufen. Ein stiller Cache-Ausfall wäre der
   // schlechtere Zustand — die Seite bliebe oben, würde aber jede Anfrage
   // gegen die Supabase-Micro-Instanz rendern.
-  const mod = nodeRequire('next/dist/server/lib/incremental-cache/file-system-cache');
+  const mod = require('next/dist/server/lib/incremental-cache/file-system-cache');
   FileSystemCache = mod.default || mod;
 
   if (typeof FileSystemCache !== 'function') {
