@@ -1,4 +1,8 @@
 import type { FestivalPost } from './types';
+// fn-24: Saison-Seiten (SAISON_KALENDER, frist-getrieben)
+import { post as langeNachtDerMuseen } from './posts/lange-nacht-der-museen';
+import { post as halloweenOesterreich } from './posts/halloween-oesterreich';
+import { post as nationalfeiertagOesterreich } from './posts/nationalfeiertag-oesterreich';
 // fn-21: Rubrik "Übernachten" — kuratierte Unterkunfts-Artikel
 import { post as besondereUnterkuenfteBurgenland } from './posts/besondere-unterkuenfte-burgenland';
 import { post as aussergewoehnlichUebernachtenOesterreich } from './posts/aussergewoehnlich-uebernachten-oesterreich';
@@ -100,6 +104,9 @@ export type { FestivalPost, GalleryImage, FestivalKeyFacts, LineupAct } from './
 
 /** All blog posts sorted by publishDate descending (newest first). */
 export const ALL_POSTS: FestivalPost[] = [
+  langeNachtDerMuseen,
+  halloweenOesterreich,
+  nationalfeiertagOesterreich,
   besondereUnterkuenfteBurgenland,
   aussergewoehnlichUebernachtenOesterreich,
   novaRock,

@@ -36,6 +36,19 @@ export interface FestivalPost {
   /** Direkter Ticket-Kauflink (traegt die Eventim-Affiliate-ID J70).
    *  Rendert einen prominenten Kauf-Button in der KeyFacts-Box. */
   ticketUrl?: string;
+  /** Wie das Hero-Bild im Kopf der Seite sitzt.
+   *  `cover` (Default) = full-bleed ueber die ganze Breite — braucht ein
+   *  breites Motiv ab ca. 900 px.
+   *  `poster` = das Originalartwork bleibt scharf und vollstaendig sichtbar,
+   *  dahinter fuellt eine unscharf gezoomte Kopie derselben Datei den Rahmen.
+   *  Fuer quadratische Veranstalter-Artworks (Eventim liefert 222x222) — ein
+   *  echtes kleines Bild ist richtiger als ein grosses fremdes.
+   */
+  heroLayout?: 'cover' | 'poster';
+  /** Tatsaechliche Pixelbreite der Hero-Datei. Im Poster-Layout die
+   *  Obergrenze fuer die Darstellung: ein 222px-Artwork wird nie
+   *  hochskaliert, damit es scharf bleibt statt matschig gross. */
+  heroImageWidth?: number;
   /** Bildquelle/Lizenz-Zeile fuer das Hero-Bild (Attribution-Pflicht bei
    *  Fremdbildern, z. B. "Foto: Eventim" oder "Foto: <Autor>, CC BY 2.0,
    *  Wikimedia Commons"). Wird als Overlay unten rechts im Hero gerendert. */

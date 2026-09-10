@@ -486,11 +486,20 @@ function imageDims(buf: Buffer): { w: number; h: number } | null {
   return null;
 }
 
-/** Ein Hero laeuft full-width ueber 75vh — darunter wird's sichtbar
- *  unscharf (User-Feedback E2E 2026-08-26: Eventim-Teaser sind 222px). */
-const MIN_HERO_WIDTH = 900;
+/** Ab dieser Breite traegt ein Motiv den full-bleed-Hero ueber 75vh.
+ *  Darunter kommt das Poster-Layout: Originalartwork scharf und contained,
+ *  dahinter eine unscharfe Kopie als Fuellung. */
+const COVER_HERO_WIDTH = 900;
 
-async function downloadImage(url: string, destDir: string): Promise<string | null> {
+/** Untergrenze fuer "ueberhaupt ein Bild". Eventim-Artworks sind 222x222 —
+ *  das ist bewusst erlaubt: fuer Eventim-Events haben wir das Nutzungsrecht
+ *  am echten Bild, und ein kleines richtiges Bild schlaegt jedes grosse
+ *  fremde. Ausgesiebt werden hier nur Icons und Tracking-Pixel. */
+const MIN_HERO_WIDTH = 200;
+
+interface DownloadedImage { file: string; width: number; height: number }
+
+async function downloadImage(url: string, destDir: string): Promise<DownloadedImage | null> {
   try {
     const res = await fetch(url, {
       headers: { 'User-Agent': 'Mozilla/5.0 (compatible; LassTreffenBot/1.0; +https://lasstreffen.at)' },
@@ -502,7 +511,7 @@ async function downloadImage(url: string, destDir: string): Promise<string | nul
     if (!ct.startsWith('image/')) return null;
     const buf = Buffer.from(await res.arrayBuffer());
     // Winzige Platzhalter/Tracking-Pixel aussortieren
-    if (buf.length < 15_000) return null;
+    if (buf.length < 4_000) return null;
     const dims = imageDims(buf);
     if (!dims || dims.w < MIN_HERO_WIDTH) {
       log(`  Bild zu klein (${dims ? dims.w + 'px' : 'unlesbar'}): ${url}`);
@@ -511,15 +520,50 @@ async function downloadImage(url: string, destDir: string): Promise<string | nul
     fs.mkdirSync(destDir, { recursive: true });
     const file = path.join(destDir, `hero.${ext}`);
     fs.writeFileSync(file, buf);
-    return `hero.${ext}`;
+    return { file: `hero.${ext}`, width: dims.w, height: dims.h };
   } catch {
     return null;
   }
 }
 
-interface HeroResult { heroImage: string; credit: string }
+interface HeroResult { heroImage: string; credit: string; layout: 'cover' | 'poster'; width: number }
 
-/** Wikimedia-Commons-Fallback: CC-Foto des Happenings selbst. */
+function layoutFor(width: number): 'cover' | 'poster' {
+  return width >= COVER_HERO_WIDTH ? 'cover' : 'poster';
+}
+
+/** Woerter, die als Treffer nichts beweisen — "Konzert" kommt in jedem
+ *  zweiten Commons-Dateinamen vor und wuerde das Relevanz-Gate aushebeln. */
+const STOPWORDS = new Set([
+  'der', 'die', 'das', 'und', 'oder', 'ein', 'eine', 'einer', 'des', 'dem', 'den',
+  'von', 'vom', 'zum', 'zur', 'mit', 'fuer', 'the', 'and', 'live', 'tour',
+  'show', 'konzert', 'concert', 'festival', 'open', 'air', 'gala', 'night',
+]);
+
+/** Traegt der Commons-Dateiname wirklich das Thema?
+ *
+ *  Ohne diese Pruefung matcht die Volltextsuche auf irgendein Wort des Titels:
+ *  "Science Busters for Kids" landete so auf dem Cover von "YANK The Army
+ *  Weekly" von 1945, weil dort "Burma Bridge Busters" auf der Titelseite steht.
+ *  Ein Foto darf nur durch, wenn ein aussagekraeftiges Token der Suchanfrage
+ *  auch im Dateinamen vorkommt. */
+function isRelevantCommonsFile(query: string, fileUrl: string): boolean {
+  const tokens = query
+    .toLowerCase()
+    .split(/[^a-z0-9äöüß]+/i)
+    .filter(t => t.length >= 4 && !STOPWORDS.has(t));
+  if (tokens.length === 0) return false;
+  const name = decodeURIComponent(fileUrl).toLowerCase().replace(/[_-]+/g, ' ');
+  return tokens.some(t => name.includes(t));
+}
+
+/** Wikimedia-Commons-Bild fuer eine KURATIERTE Suchanfrage (Stay-Guides,
+ *  Saison-Hubs: "Graz Uhrturm Schlossberg", "Christkindlmarkt Wien").
+ *
+ *  Ausdruecklich NICHT fuer Event-Titel gedacht: eine Volltextsuche ueber
+ *  einen Veranstaltungsnamen liefert zufaellige Treffer, die aussehen wie ein
+ *  Bild zum Thema, aber keines sind. Event-Posts nehmen das Bild des
+ *  Veranstalters oder gar keines (siehe resolveHero). */
 async function wikimediaHero(title: string, destDir: string): Promise<HeroResult | null> {
   try {
     const q = encodeURIComponent(title.replace(/\b(19|20)\d{2}\b/g, '').trim());
@@ -544,13 +588,19 @@ async function wikimediaHero(title: string, destDir: string): Promise<HeroResult
       const url = info?.thumburl ?? info?.url;
       if (!url || !/(^CC|Public domain)/i.test(license)) continue;
       if ((info?.width ?? 0) < 1200) continue;
+      if (!isRelevantCommonsFile(title, info?.url ?? url)) {
+        log(`  Commons-Treffer verworfen (Thema passt nicht): ${info?.url ?? url}`);
+        continue;
+      }
       if (!/\.(jpe?g|png)/i.test(url)) continue;
-      const file = await downloadImage(url, destDir);
-      if (!file) continue;
+      const dl = await downloadImage(url, destDir);
+      if (!dl) continue;
       const artist = (meta.Artist?.value ?? '').replace(/<[^>]+>/g, '').trim();
       return {
-        heroImage: file,
+        heroImage: dl.file,
         credit: `Foto: ${artist || 'Wikimedia Commons'}, ${license}, Wikimedia Commons`,
+        layout: layoutFor(dl.width),
+        width: dl.width,
       };
     }
     return null;
@@ -559,16 +609,27 @@ async function wikimediaHero(title: string, destDir: string): Promise<HeroResult
   }
 }
 
+/** Hero fuer einen Event-Post: das Bild des Veranstalters oder keines.
+ *
+ *  Fuer Eventim-Events haben wir das Nutzungsrecht am Originalbild — es ist
+ *  mit 222x222 klein, aber es zeigt das Event. Faellt es aus, wird der
+ *  Kandidat uebersprungen; Kandidaten gibt es genug. Frueher lief hier ein
+ *  Wikimedia-Fallback ueber den Event-Titel, der 25 Posts mit thematisch
+ *  fremden Fotos bestueckt hat. */
 async function resolveHero(c: Candidate, slug: string): Promise<HeroResult | null> {
+  if (!c.image_url) return null;
   const destDir = path.join(IMAGES_DIR, slug);
-  if (c.image_url) {
-    const file = await downloadImage(c.image_url, destDir);
-    if (file) {
-      return { heroImage: file, credit: `Foto: ${c.source_name ?? 'Veranstalter'}` };
-    }
-    log(`  Bild-Download fehlgeschlagen (${c.image_url}) — versuche Wikimedia`);
+  const dl = await downloadImage(c.image_url, destDir);
+  if (!dl) {
+    log(`  Bild-Download fehlgeschlagen (${c.image_url}) — skip`);
+    return null;
   }
-  return wikimediaHero(c.title, destDir);
+  return {
+    heroImage: dl.file,
+    credit: `Foto: ${c.source_name ?? 'Veranstalter'}`,
+    layout: layoutFor(dl.width),
+    width: dl.width,
+  };
 }
 
 // ─── Datei-Ausgabe ────────────────────────────────────────────────────────
@@ -724,6 +785,7 @@ async function main(): Promise<void> {
         subtitle: draft.subtitle,
         heroImage: heroPath,
         heroImageCredit: hero.credit,
+        ...(hero.layout === 'poster' ? { heroLayout: 'poster', heroImageWidth: hero.width } : {}),
         // Direkter Kauf-Button (Eventim-Deeplink traegt Affiliate-ID J70)
         ...(c.ticket_url ? { ticketUrl: c.ticket_url } : {}),
         publishDate: new Date().toISOString().slice(0, 10),
@@ -919,6 +981,7 @@ async function writeStayGuide(
     subtitle: draft.subtitle,
     heroImage: heroPath,
     heroImageCredit: hero.credit,
+    ...(hero.layout === 'poster' ? { heroLayout: 'poster', heroImageWidth: hero.width } : {}),
     publishDate: today,
     updatedDate: today,
     readingTime: Math.max(5, Math.round(

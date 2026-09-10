@@ -1,0 +1,13 @@
+{
+  "branch_name": "fn-24-blog-bildfehler-beheben-saison-autopilot",
+  "created_at": "2026-09-10T13:13:03.758282Z",
+  "depends_on_epics": [],
+  "id": "fn-24-blog-bildfehler-beheben-saison-autopilot",
+  "next_task": 1,
+  "plan_review_status": "unknown",
+  "plan_reviewed_at": null,
+  "spec_path": ".flow/specs/fn-24-blog-bildfehler-beheben-saison-autopilot.md",
+  "status": "open",
+  "title": "Blog: Bildfehler beheben + Saison-Autopilot",
+  "updated_at": "2026-09-10T13:13:52.454722Z"
+}

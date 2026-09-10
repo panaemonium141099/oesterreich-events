@@ -1,39 +1,62 @@
-# Saison-Guide-Autopilot (MASTERPLAN P3, User-Go 2026-07-15):
-# monatlich prüfen, ob laut SAISON_KALENDER ein Sammel-Guide fällig ist,
-# Entwurf aus echten DB-Events + Gemini generieren und als PR öffnen.
-# Publiziert wird NIE automatisch — Merge = bewusste Review-Entscheidung.
+# Saison-Guide-Autopilot (MASTERPLAN P3).
+#
+# Laeuft TAEGLICH und arbeitet den SAISON_KALENDER frist-getrieben ab: ein
+# Eintrag wird faellig, sobald sein `liveBy`-Termin naeher rueckt als seine
+# `leadDays`. Der frueher monatliche Lauf (Monatserster) konnte Fristen wie
+# "live bis 20.09." grundsaetzlich nicht treffen — eine Saisonseite muss live
+# UND indexiert sein, bevor die Suchnachfrage anzieht, nicht erst wenn das
+# Event stattfindet.
+#
+# Publikationsweg haengt am Alter der geprueften Fakten:
+#   • Fakten frisch  -> direkt auf master, wie beim Blog-Autowriter (fn-19).
+#   • Fakten zu alt  -> PR zum Review, damit keine Vorjahrestermine live gehen.
+# Ein Eintrag ohne `facts` (reiner Sammel-Guide aus DB-Events) gilt als frisch.
+#
 # Secrets: GEMINI_API_KEY (Actions-Secret, NICHT aus Vercel lesbar),
-# SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY (existieren für die Scrape-Jobs).
+# SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY (existieren fuer die Scrape-Jobs).
 name: saison-guide
 
 on:
   schedule:
-    - cron: '0 5 1 * *'   # Monatserster, 05:00 UTC
+    - cron: '40 5 * * *'   # taeglich 05:40 UTC, nach dem naechtlichen Scrape (03:17)
   workflow_dispatch:
     inputs:
       slug:
-        description: 'Kalender-Slug erzwingen (leer = Monat entscheidet)'
+        description: 'Kalender-Slug erzwingen (leer = Frist entscheidet)'
         required: false
         default: ''
       force:
-        description: 'Bestehende Post-Datei überschreiben (true/false)'
+        description: 'Bestehende Post-Datei ueberschreiben (true/false)'
         required: false
         default: 'false'
+      dry_run:
+        description: 'Nur generieren und pruefen, nichts schreiben (true/false)'
+        required: false
+        default: 'false'
+
+concurrency:
+  group: saison-guide
+  cancel-in-progress: false
 
 permissions:
   contents: write
   pull-requests: write
+  # Pushes mit dem GITHUB_TOKEN triggern keine anderen Workflows —
+  # das Deploy muss explizit angestossen werden (wie in fn-21).
+  actions: write
 
 jobs:
   generate:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     env:
       SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
       SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
       GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: master
 
       - uses: actions/setup-node@v4
         with:
@@ -49,33 +72,58 @@ jobs:
           ARGS=""
           [ -n "${{ github.event.inputs.slug }}" ] && ARGS="--slug ${{ github.event.inputs.slug }}"
           [ "${{ github.event.inputs.force }}" = "true" ] && ARGS="$ARGS --force"
+          [ "${{ github.event.inputs.dry_run }}" = "true" ] && ARGS="$ARGS --dry-run"
           npx tsx src/scripts/generate-saison-guide.ts $ARGS
           code=$?
+          # Exit 78 = keine Frist faellig. Das ist der Normalfall an den
+          # meisten Tagen und darf den Job nicht rot faerben.
           if [ "$code" = "78" ]; then
             echo "skip=true" >> "$GITHUB_OUTPUT"
             exit 0
           fi
           exit $code
 
-      - name: PR öffnen
-        if: steps.gen.outputs.skip != 'true'
+      - name: Publizieren (Fakten frisch)
+        if: steps.gen.outputs.skip != 'true' && steps.gen.outputs.review == 'false' && github.event.inputs.dry_run != 'true'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          slug=$(git status --porcelain src/content/blog/posts/ | awk '{print $2}' | head -1 | xargs -r basename | sed 's/\.ts$//')
-          if [ -z "$slug" ]; then echo "Keine neue Post-Datei — nichts zu committen."; exit 0; fi
+          slug="${{ steps.gen.outputs.slug }}"
+          git config user.name "saison-autopilot[bot]"
+          git config user.email "noreply@lasstreffen.at"
+          git add src/content/blog
+          if git diff --cached --quiet; then
+            echo "Nichts zu committen — das Script haette failen muessen."
+            exit 1
+          fi
+          git commit -m "content(saison): $slug — Saison-Guide zur Frist"
+          git push origin master
+          gh workflow run deploy.yml --ref master
+
+      - name: PR oeffnen (Fakten zu alt)
+        if: steps.gen.outputs.skip != 'true' && steps.gen.outputs.review == 'true' && github.event.inputs.dry_run != 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          slug="${{ steps.gen.outputs.slug }}"
           branch="saison/$slug"
-          git config user.name "saison-autopilot"
+          git config user.name "saison-autopilot[bot]"
           git config user.email "noreply@lasstreffen.at"
           git checkout -b "$branch"
           git add src/content/blog/
-          git commit -m "content(saison): $slug — automatischer Guide-Entwurf zum Review"
+          git commit -m "content(saison): $slug — Entwurf mit veralteten Fakten"
           git push -u origin "$branch" --force
           gh pr create \
-            --title "Saison-Guide: $slug" \
-            --body "Automatisch generierter Saison-Guide (Quelle: echte DB-Events + Gemini, Script generate-saison-guide.ts).
+            --title "Saison-Guide: $slug (Fakten pruefen)" \
+            --body "Automatisch generierter Saison-Guide (generate-saison-guide.ts).
 
-          **Vor dem Merge prüfen:** Fakten/Termine/Preise der genannten Events, Tonfall, interne Links. Merge = publiziert beim nächsten Deploy (Blog-Route ISR).
+          **Warum ein PR statt Auto-Publish:** die geprueften Fakten im
+          SAISON_KALENDER sind aelter als FACTS_MAX_AGE_DAYS. Termine, Preise
+          und Oeffnungszeiten stammen also aus einer vergangenen Saison.
+
+          **Vor dem Merge:** \`facts\` und \`factsVerified\` in
+          \`src/content/blog/saison-kalender.ts\` an den Primaerquellen
+          nachziehen, dann den Guide neu generieren.
 
           🤖 Generated with [Claude Code](https://claude.com/claude-code)" \
             --base master || echo "PR existiert vermutlich schon."

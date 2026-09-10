@@ -1,4 +1,5 @@
 import { notFound } from 'next/navigation';
+import type { CSSProperties } from 'react';
 import type { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -320,17 +321,49 @@ export default async function BlogPostPage({
 
       <article className="min-h-screen bg-[#f8f6f2] text-gray-900">
 
-        {/* ── HERO ── */}
+        {/* ── HERO ──
+            Zwei Layouts. `cover` (Default) zieht ein breites Motiv full-bleed
+            ueber den Kopf. `poster` ist fuer quadratische Veranstalter-Artworks
+            (Eventim liefert 222x222): das Original bleibt scharf und
+            vollstaendig sichtbar, den Rahmen fuellt eine unscharf gezoomte
+            Kopie derselben Datei. Ein kleines echtes Bild ist richtiger als
+            ein grosses fremdes — deshalb wird hier nicht hochskaliert. */}
         <div className="relative w-full h-[75vh] min-h-[420px] max-h-[700px] overflow-hidden">
           <Image
             src={post.heroImage}
-            alt={post.title}
+            alt={post.heroLayout === 'poster' ? '' : post.title}
+            aria-hidden={post.heroLayout === 'poster' ? true : undefined}
             fill
             priority
-            className="object-cover"
+            className={post.heroLayout === 'poster' ? 'object-cover scale-125 blur-2xl' : 'object-cover'}
             sizes="100vw"
           />
           <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/35 to-black/80" />
+          {post.heroLayout === 'poster' && (
+            // Liegt ueber dem Verlauf, damit das Artwork nicht mitgedunkelt
+            // wird. Auf Handy sitzt es oben ueber dem Text, ab md rechts
+            // neben dem Textblock (der ist max-w-3xl breit und links buendig)
+            // — sonst laeuft eine dreizeilige H1 mitten durchs Bild.
+            <div
+              className="pointer-events-none absolute inset-x-0 top-20 bottom-[17rem] z-[1] flex items-start justify-center px-8
+                         md:inset-y-0 md:left-auto md:right-0 md:bottom-0 md:w-[38%] md:items-center md:px-12"
+            >
+              <Image
+                src={post.heroImage}
+                alt={post.title}
+                width={post.heroImageWidth ?? 300}
+                height={post.heroImageWidth ?? 300}
+                priority
+                unoptimized
+                // --hero-w ist die Originalbreite. Sie deckelt die Darstellung,
+                // damit ein 222px-Artwork bei 222px scharf bleibt statt
+                // hochgerechnet weich zu werden. Auf dem Handy zusaetzlich
+                // kleiner, sonst laeuft es in die Ueberschrift.
+                style={{ '--hero-w': `${post.heroImageWidth ?? 300}px` } as CSSProperties}
+                className="h-auto w-auto max-h-full max-w-[min(40vw,var(--hero-w))] rounded-sm object-contain shadow-2xl ring-1 ring-white/15 md:max-w-[min(62vw,var(--hero-w))]"
+              />
+            </div>
+          )}
           {post.heroImageCredit && (
             <p className="absolute bottom-2 right-3 z-10 text-[10px] text-white/50">
               {post.heroImageCredit}
