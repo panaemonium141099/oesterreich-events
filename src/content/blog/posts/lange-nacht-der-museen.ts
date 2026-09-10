@@ -133,6 +133,14 @@ export const post: FestivalPost = {
     'lange nacht der museen programm',
     'orf lange nacht der museen',
   ],
+  relatedEvents: {
+    // Bewusst ohne 'kunst' und 'führung': als Teilstring treffen die
+    // "Die Kunst, Recht zu behalten" und "Vorführung".
+    terms: ['museum', 'museen', 'ausstellung', 'galerie', 'sammlung', 'kunsthaus'],
+    from: '2026-09-25',
+    to: '2026-10-31',
+    categories: ['Kultur & Bühne', 'Familie & Kinder'],
+  },
   jsonLdEvent: {
     name: 'ORF-Lange Nacht der Museen 2026',
     startDate: '2026-10-03T18:00:00+02:00',

@@ -488,7 +488,7 @@ export default async function BlogPostPage({
           {post.lineup && post.lineup.length > 0 && (
             <section className="mb-14">
               <h2 className="text-2xl md:text-3xl font-extrabold text-gray-900 tracking-tight mb-2">
-                {post.lineupTitle ?? 'Lineup'} {post.title}
+                {post.lineupTitle ?? `Lineup ${post.title}`}
               </h2>
               {post.lineupNote && (
                 <p className="text-gray-400 text-xs uppercase tracking-wider mb-6 flex items-center gap-2">
@@ -644,7 +644,12 @@ export default async function BlogPostPage({
           )}
 
           {/* AEHNLICHE EVENTS — live aus der DB, Bruecke Blog -> Website (fn-19) */}
-          <RelatedEvents postTitle={post.title} />
+          <RelatedEvents
+            postTitle={post.title}
+            keywords={post.keywords}
+            category={post.category}
+            spec={post.relatedEvents}
+          />
 
           {/* CTA */}
           <div className="border border-gray-200 rounded-xl p-8 text-center bg-white">

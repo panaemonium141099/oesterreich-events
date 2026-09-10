@@ -3,55 +3,66 @@ import type { FestivalPost } from '../types';
 // Saison-Seite (fn-24), Frist laut SAISON_KALENDER: liveBy 10-01.
 // Feiertags- und Ferientermine stammen aus den geprüften `facts` des
 // Kalenders (Primärquellen BMB-Ferientermine und RIS), verifiziert am
-// 2026-09-10. Bewusst KEINE Liste von Museen mit freiem Eintritt: die
-// wechselt jährlich und war zum Redaktionsschluss nicht bestätigt.
+// 2026-09-10. Die Programm-Tipps pro Bundesland sind echte Events aus
+// der eigenen Datenbank, kein Modell-Output.
+//
+// Bewusst KEINE Liste von Museen mit freiem Eintritt: die wechselt
+// jährlich und war zum Redaktionsschluss nicht bestätigt.
 export const post: FestivalPost = {
   slug: 'nationalfeiertag-oesterreich',
   title: 'Nationalfeiertag 2026: Montag, 26. Oktober',
-  subtitle: 'Was offen ist, was zu hat und was in der Ferienwoche danach läuft',
+  subtitle: 'Zehn freie Tage am Stück und was du in jedem Bundesland damit anfangen kannst',
   heroImage: '/images/blog/nationalfeiertag-oesterreich/hero.jpg',
   heroImageCredit: 'Foto: Gerd Eichmann, CC BY-SA 4.0, Wikimedia Commons',
   publishDate: '2026-09-10',
   updatedDate: '2026-09-10',
-  readingTime: 6,
+  readingTime: 8,
   excerpt:
-    'Der Nationalfeiertag 2026 fällt auf einen Montag und startet zehn schulfreie Tage. Was geöffnet hat, wie die Öffis fahren, warum nicht alle Museen gratis sind und was in den Herbstferien läuft.',
+    'Der Nationalfeiertag 2026 fällt auf einen Montag und startet zehn schulfreie Tage. Was in jedem Bundesland läuft, was am Feiertag offen hat und wie du mit vier Urlaubstagen auf neun freie kommst.',
   category: 'Kultur & Tradition',
   categoryColor: 'bg-red-700 text-white',
   keyFacts: {
     dates: 'Montag, 26. Oktober 2026, Herbstferien 27. bis 31. Oktober',
-    location: 'Ganz Österreich',
+    location: 'Ganz Österreich, alle neun Bundesländer',
     address: 'Zentrale Veranstaltungen traditionell am Heldenplatz in Wien',
-    genre: 'Feiertag, Tag der offenen Tür, Familienausflüge',
+    genre: 'Feiertag, Herbstferien, Familienausflüge, Kultur',
     price: 'Viele Programmpunkte kostenlos',
     website: 'https://www.bmb.gv.at/Themen/schule/schulpraxis/termine/ferientermine_26_27.html',
     since: '1965',
   },
   lineup: [
-    { name: 'Nationalfeiertag, Montag 26. Oktober', role: 'headliner' },
-    { name: 'Herbstferien, Dienstag 27. bis Samstag 31. Oktober', role: 'headliner' },
-    { name: 'Halloween, Samstag 31. Oktober', role: 'special' },
-    { name: 'Allerheiligen, Sonntag 1. November', role: 'special' },
-    { name: 'Allerseelen, Montag 2. November', role: 'support' },
+    { name: 'Circus Roncalli, Innsbruck', role: 'headliner', day: '25., 26. Oktober und 1. November', stage: 'Tirol' },
+    { name: 'Cirque du Soleil OVO, Salzburgarena', role: 'headliner', day: '25. Oktober', stage: 'Salzburg' },
+    { name: 'Josef Hader "Hader On Ice", Helmut List Halle Graz', role: 'headliner', day: '24. Oktober', stage: 'Steiermark' },
+    { name: 'Vivaldi, Vier Jahreszeiten in der Karlskirche Wien', role: 'special', day: '28. Oktober', stage: 'Wien' },
+    { name: 'Der Revisor, Akademietheater Wien', role: 'special', day: '26. Oktober', stage: 'Wien' },
+    { name: 'Alfred Dorfer "GLEICH"', role: 'special', day: '26. Oktober', stage: 'Niederösterreich' },
+    { name: 'Alexander Eder Unplugged, Brucknerhaus Linz', role: 'special', day: '24. Oktober', stage: 'Oberösterreich' },
+    { name: 'Harry G "HoamStories", Konzerthaus Klagenfurt', role: 'special', day: '28. Oktober', stage: 'Kärnten' },
+    { name: 'Symphonieorchester Vorarlberg, Feldkirch', role: 'special', day: '24. Oktober', stage: 'Vorarlberg' },
+    { name: 'Dracula auf Burg Lockenhaus', role: 'special', day: '24. und 31. Oktober', stage: 'Burgenland' },
+    { name: 'Altstadt-Rundgang Graz', role: 'support', day: '25. Oktober', stage: 'Steiermark' },
+    { name: 'Klavierkonzert im Franziskanerkloster Salzburg', role: 'support', day: '27. und 28. Oktober', stage: 'Salzburg' },
   ],
-  lineupTitle: 'Die zehn freien Tage im Überblick',
+  lineupTitle: 'Was in der Ferienwoche läuft, Bundesland für Bundesland',
   lineupNote:
-    'Das Detailprogramm zum Nationalfeiertag, also Leistungsschau, Angelobung und die Tage der offenen Tür in Parlament und Ministerien, wird erfahrungsgemäß erst Anfang bis Mitte Oktober veröffentlicht.',
+    'Ein Ausschnitt aus unserem Kalender, Stand September. Bis Mitte Oktober kommen laufend Termine dazu, gerade die von Gemeinden und Vereinen. Aktuelle Zeiten und Preise stehen jeweils auf der Event-Seite.',
   intro:
-    'Beim Nationalfeiertag ist 2026 alles günstig gelegen: Der 26. Oktober fällt auf einen Montag. Daraus wird ein langes Wochenende, und für Familien sogar deutlich mehr, denn direkt danach beginnen die Herbstferien. Wer vier Urlaubstage nimmt, hat neun Tage am Stück frei.',
+    'Beim Nationalfeiertag ist 2026 alles günstig gelegen: Der 26. Oktober fällt auf einen Montag, direkt danach beginnen die Herbstferien, und am Sonntag darauf folgt Allerheiligen. Zehn freie Tage am Stück. Die Frage ist also weniger, ob du Zeit hast, sondern was du damit anfängst. Hier steht beides: was in deinem Bundesland läuft und was am Feiertag selbst offen hat.',
   historyTitle: 'Warum überhaupt der 26. Oktober',
   history:
-    'Am 26. Oktober 1955 beschloss der Nationalrat das Bundesverfassungsgesetz über die immerwährende Neutralität Österreichs, einen Tag nachdem der letzte alliierte Soldat das Land verlassen hatte. Zum Nationalfeiertag wurde das Datum aber erst zehn Jahre später erklärt, mit dem Bundesgesetz vom 25. Oktober 1965. Und arbeitsfrei war der Tag anfangs nicht: Bis 1967 war er lediglich schulfrei. Erst ein Bundesgesetz vom 28. Juni 1967 machte den 26. Oktober zum arbeitsfreien Feiertag.',
-  whatToExpectTitle: 'Was am 26. Oktober offen ist',
+    'Am 26. Oktober 1955 beschloss der Nationalrat das Bundesverfassungsgesetz über die immerwährende Neutralität Österreichs, einen Tag nachdem der letzte alliierte Soldat das Land verlassen hatte. Zum Nationalfeiertag wurde das Datum aber erst zehn Jahre später, mit dem Bundesgesetz vom 25. Oktober 1965. Und arbeitsfrei war der Tag anfangs nicht: Bis 1967 war er lediglich schulfrei. Erst ein Bundesgesetz vom 28. Juni 1967 machte den 26. Oktober zum arbeitsfreien Feiertag.',
+  whatToExpectTitle: 'Was du in den zehn Tagen machen kannst',
   whatToExpect:
-    'Der häufigste Stolperstein sind die Öffis: Sie fahren nach Sonn- und Feiertagsfahrplan. Plane den Rückweg entsprechend, gerade wenn du einen Ausflug aufs Land machst. Und ein hartnäckiger Irrtum gehört ausgeräumt: Es gibt keinen flächendeckend freien Eintritt in allen Bundesmuseen am Nationalfeiertag. Manche Häuser sind gratis, andere nur ermäßigt, wieder andere ganz normal kostenpflichtig. Das hat sich über die Jahre verschoben, und welche Museen heuer mitmachen, steht üblicherweise erst Mitte Oktober fest.',
+    'Die Ferienwoche ist die dichteste Kulturwoche des Herbstes, weil Veranstalter genau auf sie hin programmieren. Zwei große Zirkusproduktionen sind gleichzeitig im Land, Circus Roncalli in Innsbruck und Cirque du Soleil in der Salzburgarena. Das Kabarett hat Hochsaison, von Josef Hader in Graz über Alfred Dorfer in Niederösterreich bis Harry G in Klagenfurt. Dazu kommen die Klassiker der Woche: Museen und Schaubetriebe mit Ferienprogramm, Thermen, und ab dem letzten Oktoberwochenende überlagert sich alles mit der Halloween-Saison. Wer lieber draußen ist, hat mit dem späten Oktober meist noch brauchbares Wanderwetter in den Tallagen, während oben schon der erste Schnee liegt.',
   whatToExpectList: [
-    'Geschlossen: Geschäfte und Supermärkte, Ämter und Behörden, Banken, Post, Schulen',
-    'Offen: Gastronomie, Tankstellen, Bahnhofs- und Flughafenshops, die meisten Museen und Freizeiteinrichtungen',
-    'Öffis: Betrieb nach Sonn- und Feiertagsfahrplan',
-    'Freier Museumseintritt gilt nicht pauschal, sondern nur für einzelne Häuser',
-    'Tage der offenen Tür in Parlament, Hofburg und Ministerien werden meist Anfang Oktober angekündigt',
-    'Ein Wermutstropfen: Allerheiligen fällt 2026 auf einen Sonntag, und Österreich kennt keinen Ersatzruhetag',
+    'Zirkus als Familienfixpunkt: Circus Roncalli in Innsbruck und Cirque du Soleil OVO in Salzburg laufen beide in der Ferienwoche',
+    'Kabarett und Comedy haben Hochsaison, unter anderem Josef Hader in Graz, Alfred Dorfer in Niederösterreich und Harry G in Klagenfurt',
+    'Klassik in besonderen Räumen: Vivaldi in der Wiener Karlskirche, Klavierkonzerte im Salzburger Franziskanerkloster, das Symphonieorchester Vorarlberg in Feldkirch',
+    'Stadtführungen und Museumsprogramme, etwa der Altstadt-Rundgang in Graz',
+    'Gruseliges für die zweite Wochenhälfte: Dracula auf Burg Lockenhaus im Burgenland, passend zum Übergang in die Halloween-Woche',
+    'Thermen und Indoor-Klassiker als Schlechtwetterplan, in dieser Woche allerdings gut besucht',
+    'Am Feiertag selbst: die Tage der offenen Tür in Parlament, Hofburg und Ministerien, deren Programm meist Anfang Oktober veröffentlicht wird',
   ],
   practicalInfoTitle: 'Praktische Infos zum langen Wochenende',
   practicalInfo: [
@@ -76,14 +87,24 @@ export const post: FestivalPost = {
       text: 'Mit vier Urlaubstagen von Dienstag 27. bis Freitag 30. Oktober kommst du auf neun freie Tage am Stück, von 24. Oktober bis 1. November. Eines der effizientesten Urlaubsfenster des Jahres.',
     },
     {
-      icon: '🚆',
-      label: 'Öffis',
-      text: 'Am 26. Oktober gilt der Sonn- und Feiertagsfahrplan. Das ist der Punkt, an dem die meisten Ausflugspläne scheitern.',
+      icon: '🔒',
+      label: 'Am Feiertag geschlossen',
+      text: 'Geschäfte und Supermärkte, Ämter und Behörden, Banken, Post und Schulen.',
     },
     {
-      icon: '🌧️',
-      label: 'Schlechtwetterplan',
-      text: 'Thermen, Museen, Indoorspielplätze, Kletterhallen und Trampolinparks sind in dieser Woche erfahrungsgemäß voll. Wer hin will, bucht besser vorher.',
+      icon: '🔓',
+      label: 'Am Feiertag offen',
+      text: 'Gastronomie, Tankstellen, Bahnhofs- und Flughafenshops sowie die meisten Museen und Freizeiteinrichtungen. Einen flächendeckend freien Museumseintritt gibt es entgegen dem verbreiteten Irrtum nicht: manche Häuser sind gratis, andere nur ermäßigt, wieder andere ganz normal kostenpflichtig. Welche heuer mitmachen, steht üblicherweise erst Mitte Oktober fest.',
+    },
+    {
+      icon: '🚆',
+      label: 'Öffis',
+      text: 'Am 26. Oktober gilt der Sonn- und Feiertagsfahrplan. Das ist der Punkt, an dem die meisten Ausflugspläne scheitern, gerade auf dem Rückweg vom Land.',
+    },
+    {
+      icon: '🎟️',
+      label: 'Rechtzeitig buchen',
+      text: 'Zirkus, Kabarett und Gruseldinner in dieser Woche sind regelmäßig schon Anfang Oktober ausverkauft. Wenn du etwas Bestimmtes vorhast, buche früh.',
     },
     {
       icon: '🐄',
@@ -93,6 +114,10 @@ export const post: FestivalPost = {
   ],
   gallery: [],
   faqs: [
+    {
+      question: 'Was kann man am Nationalfeiertag unternehmen?',
+      answer: 'Die meisten Museen und Freizeiteinrichtungen haben offen, dazu gibt es die Tage der offenen Tür in Parlament, Hofburg und Ministerien. In der Woche danach laufen Circus Roncalli in Innsbruck, Cirque du Soleil in Salzburg sowie viel Kabarett und Klassik in allen Bundesländern.',
+    },
     {
       question: 'Ist der 26. Oktober 2026 ein Feiertag?',
       answer: 'Ja, ein gesetzlicher, arbeitsfreier Feiertag in ganz Österreich. 2026 fällt er auf einen Montag.',
@@ -114,6 +139,10 @@ export const post: FestivalPost = {
       answer: 'Zehn: von Samstag, 24. Oktober, bis Montag, 2. November.',
     },
     {
+      question: 'Was macht man in den Herbstferien mit Kindern?',
+      answer: 'Die beiden großen Zirkusproduktionen der Woche sind Circus Roncalli in Innsbruck und Cirque du Soleil OVO in der Salzburgarena. Dazu kommen Museums- und Ferienprogramme, Thermen und ab dem letzten Wochenende die Halloween-Veranstaltungen.',
+    },
+    {
       question: 'Ist Allerseelen in Österreich ein Feiertag?',
       answer: 'Nein, der 2. November ist kein gesetzlicher Feiertag. Geschäfte und Ämter haben regulär offen. Schulfrei ist er 2026 aber.',
     },
@@ -122,11 +151,11 @@ export const post: FestivalPost = {
       answer: 'Mit vier Urlaubstagen von Dienstag, 27., bis Freitag, 30. Oktober kommst du auf neun freie Tage am Stück, von 24. Oktober bis 1. November.',
     },
   ],
-  ctaText: 'Ausflüge und Events in den Herbstferien finden',
+  ctaText: 'Alle Events in den Herbstferien finden',
   ctaLink: '/entdecken',
-  seoTitle: 'Nationalfeiertag 26. Oktober 2026: Was offen ist und was los ist',
+  seoTitle: 'Nationalfeiertag 26. Oktober 2026: Was offen ist und was läuft',
   seoDescription:
-    'Der Nationalfeiertag 2026 fällt auf einen Montag und startet zehn schulfreie Tage. Was geöffnet hat, wie die Öffis fahren und was in den Herbstferien läuft.',
+    'Der Nationalfeiertag 2026 fällt auf einen Montag und startet zehn schulfreie Tage. Programm in allen neun Bundesländern, was geöffnet hat und der Urlaubstrick.',
   keywords: [
     'nationalfeiertag 2026',
     'nationalfeiertag was ist offen',
@@ -134,7 +163,16 @@ export const post: FestivalPost = {
     '26. oktober feiertag',
     'herbstferien 2026',
     'herbstferien ausflug',
+    'herbstferien mit kindern',
   ],
+  // Das Zeitfenster ist hier das Relevanzsignal, nicht der Titel: gesucht
+  // wird "was kann ich in dieser Woche machen".
+  relatedEvents: {
+    terms: ['circus', 'roncalli', 'cirque', 'kabarett', 'museum', 'theater', 'konzert', 'familien'],
+    from: '2026-10-24',
+    to: '2026-11-03',
+    categories: ['Kultur & Bühne', 'Familie & Kinder', 'Märkte & Feste', 'Musik'],
+  },
   jsonLdEvent: {
     name: 'Nationalfeiertag Österreich 2026',
     startDate: '2026-10-26T00:00:00+02:00',
