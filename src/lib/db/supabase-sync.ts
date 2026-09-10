@@ -38,6 +38,7 @@ import {
 import { normalizeDistrict, isCanonicalDistrict } from '@/lib/district-normalizer';
 import { districtFromPlz } from '@/lib/plz-district';
 import { bundeslandToId } from '@/lib/bundeslaender';
+import { toUtcInstant } from '@/lib/pipeline/normalize-date';
 import { getBundeslandFromPLZ } from '@/lib/plzCoordinates';
 import { bundeslandFromPolygon } from '@/lib/eventim/bundesland-from-geo';
 import { generateFingerprint } from '@/lib/dedup/fingerprint';
@@ -900,11 +901,35 @@ export function filterValidEvents(events: ScrapedEvent[]): {
 }
 
 /**
+ * Zeitzonen-Normalisierung fuer den gesamten Schreibpfad.
+ *
+ * Die ~64 Scraper bauen ihre Datums-Strings jeder fuer sich; die meisten
+ * geben Wiener Wandzeit ohne Zone aus ("2026-10-04T11:00:00"). Ohne Zone
+ * liest Postgres den Wert in der Session-Zeitzone - die steht auf UTC -,
+ * und die Seite rendert ihn wieder in Europe/Vienna. Ergebnis: die Uhrzeit
+ * springt um den Wiener Offset nach vorn (Sommer 2 h, Winter 1 h).
+ *
+ * Hier ist die einzige Stelle, durch die alle Scraper-Schreibvorgaenge
+ * laufen, also wird hier umgerechnet - vor `filterValidEvents`, damit
+ * Zulassung, Scoring, Fingerprint und Zeile denselben Instant sehen.
+ * Werte mit Zone und reine Datums-Werte bleiben unangetastet
+ * (siehe `toUtcInstant`).
+ */
+export function normalizeEventTimestamps(events: ScrapedEvent[]): ScrapedEvent[] {
+  return events.map(e => {
+    const start = toUtcInstant(e.start_date) as string;
+    const end = toUtcInstant(e.end_date) as string | undefined;
+    if (start === e.start_date && end === e.end_date) return e;
+    return { ...e, start_date: start, end_date: end };
+  });
+}
+
+/**
  * Upserts a list of scraped events into Supabase in batches.
  * Returns counts of inserted/updated rows.
  */
 export async function syncEventsToSupabase(
-  events: ScrapedEvent[]
+  rawEvents: ScrapedEvent[]
 ): Promise<SyncResult> {
   const empty = (): SyncResult => ({
     upserted: 0,
@@ -914,7 +939,11 @@ export async function syncEventsToSupabase(
     reasons: {},
     errorMessages: [],
   });
-  if (events.length === 0) return empty();
+  if (rawEvents.length === 0) return empty();
+
+  // Nackte Wandzeiten der Scraper in echte Instants drehen, bevor
+  // irgendjemand sie liest.
+  const events = normalizeEventTimestamps(rawEvents);
 
   // Harte Verwerfungen (Titel/Datum/Zeitintervall) vor dem Schreiben.
   const { valid: validEvents, rejected: filtered, rejectionReasons } = filterValidEvents(events);
