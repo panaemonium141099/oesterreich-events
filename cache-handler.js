@@ -135,8 +135,18 @@ const DEBUG = process.env.ISR_CACHE_DEBUG === '1';
 // das einige hundert Millisekunden, deshalb läuft er nicht bei jedem set,
 // sondern erst nachdem grob SWEEP_TRIGGER_BYTES neu geschrieben wurden, und
 // nie öfter als alle SWEEP_MIN_INTERVAL_MS.
-const SWEEP_TRIGGER_BYTES = 128 * 1024 * 1024;
-const SWEEP_MIN_INTERVAL_MS = 30_000;
+//
+// Der Trigger hängt am Limit statt fest zu stehen: zwischen zwei Sweeps darf
+// der Cache um genau diesen Betrag über das Limit hinauswachsen. Bei 5 % des
+// Limits ist dieser Überhang vernachlässigbar, die Obergrenze von 128 MB hält
+// die Sweep-Frequenz bei großen Limits im Rahmen, die Untergrenze von 8 MB
+// verhindert, dass ein sehr kleines Limit den Scan bei jedem zweiten Request
+// auslöst.
+const SWEEP_TRIGGER_BYTES = positiveNumberFromEnv(
+  'ISR_CACHE_SWEEP_TRIGGER_BYTES',
+  Math.min(128 * 1024 * 1024, Math.max(8 * 1024 * 1024, MAX_BYTES * 0.05)),
+);
+const SWEEP_MIN_INTERVAL_MS = positiveNumberFromEnv('ISR_CACHE_SWEEP_INTERVAL_MS', 30_000);
 
 // Alles, was vor dem Prozessstart auf der Platte lag, stammt aus dem Build.
 const PROCESS_START_MS = Date.now();
