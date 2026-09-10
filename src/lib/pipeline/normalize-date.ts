@@ -58,11 +58,47 @@ function getViennaOffsetMs(year: number, month: number, day: number): number {
 /**
  * Convert a Vienna local datetime to a UTC Date.
  */
-function viennaToUtc(year: number, month: number, day: number, hour: number, minute: number): Date {
+function viennaToUtc(
+  year: number,
+  month: number,
+  day: number,
+  hour: number,
+  minute: number,
+  second = 0,
+): Date {
   const offsetMs = getViennaOffsetMs(year, month, day);
   // local = UTC + offset => UTC = local - offset
-  const localAsUtc = Date.UTC(year, month, day, hour, minute, 0);
+  const localAsUtc = Date.UTC(year, month, day, hour, minute, second);
   return new Date(localAsUtc - offsetMs);
+}
+
+/**
+ * Nackte Wandzeit -> echter Instant. Wird vom Schreibpfad
+ * (`syncEventsToSupabase`) auf jedes `start_date`/`end_date` angewendet.
+ *
+ * Scraper liefern Datums-Strings in drei Formen:
+ *   1. mit Zone  ("...T20:00:00Z", "...T20:00:00+02:00") - schon ein Instant
+ *   2. nackt     ("2026-10-04T11:00:00")                 - Wiener Wandzeit
+ *   3. nur Datum ("2026-10-04")                          - Uhrzeit unbekannt
+ *
+ * Form 2 geht ohne Umrechnung als UTC in die `timestamptz`-Spalte, weil die
+ * Postgres-Session auf UTC steht. Die Seite rendert wieder in Europe/Vienna
+ * und zeigt die Zeit dadurch um den Wiener Offset zu spaet - im Sommer zwei,
+ * im Winter eine Stunde (Prod-Befund 2026-09-10: Matinee 11:00 wurde 13:00).
+ *
+ * Nur Form 2 wird umgerechnet. Form 1 ist bereits eindeutig. Form 3 ist der
+ * dokumentierte "Uhrzeit unbekannt"-Platzhalter, dessen UTC-Tag den gemeinten
+ * Tag traegt und den Datums-Slug der Event-URL bildet - eine Verschiebung
+ * wuerde ihn brechen.
+ */
+const NAIVE_DATETIME_RE = /^(\d{4})-(\d{2})-(\d{2})[T ](\d{1,2}):(\d{2})(?::(\d{2}))?(?:\.\d+)?$/;
+
+export function toUtcInstant(raw: string | null | undefined): string | null | undefined {
+  if (!raw) return raw;
+  const m = raw.trim().match(NAIVE_DATETIME_RE);
+  if (!m) return raw;
+  const utc = viennaToUtc(+m[1], +m[2] - 1, +m[3], +m[4], +m[5], m[6] ? +m[6] : 0);
+  return isNaN(utc.getTime()) ? raw : utc.toISOString();
 }
 
 function parseTime(text: string): { hour: number; minute: number } | null {

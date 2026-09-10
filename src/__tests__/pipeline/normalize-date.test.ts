@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { normalizeDate } from '@/lib/pipeline/normalize-date';
+import { normalizeDate, toUtcInstant } from '@/lib/pipeline/normalize-date';
 
 describe('normalizeDate', () => {
   it('parses ISO 8601 datetime as exact', () => {
@@ -99,5 +99,41 @@ describe('normalizeDate', () => {
     const result = normalizeDate('14. Juni 2026, 20:30 Uhr');
     expect(result.startAt).not.toBeNull();
     expect(result.startPrecision).toBe('exact');
+  });
+});
+
+describe('toUtcInstant', () => {
+  it('reads a naive summer datetime as Vienna wall clock (11:00 CEST -> 09:00 UTC)', () => {
+    // Prod-Fall 2026-09-10: meinbezirk lieferte "2026-10-04T11:00:00",
+    // in der DB landete 11:00 UTC und die Seite zeigte 13:00 statt 11:00.
+    expect(toUtcInstant('2026-10-04T11:00:00')).toBe('2026-10-04T09:00:00.000Z');
+  });
+
+  it('reads a naive winter datetime as Vienna wall clock (19:30 CET -> 18:30 UTC)', () => {
+    expect(toUtcInstant('2027-01-15T19:30:00')).toBe('2027-01-15T18:30:00.000Z');
+  });
+
+  it('accepts a space separator and a missing seconds part', () => {
+    expect(toUtcInstant('2026-07-01 20:00')).toBe('2026-07-01T18:00:00.000Z');
+  });
+
+  it('leaves a Z-qualified instant untouched', () => {
+    expect(toUtcInstant('2026-10-04T09:00:00.000Z')).toBe('2026-10-04T09:00:00.000Z');
+  });
+
+  it('leaves an offset-qualified instant untouched', () => {
+    expect(toUtcInstant('2026-10-04T11:00:00+02:00')).toBe('2026-10-04T11:00:00+02:00');
+  });
+
+  it('leaves a date-only value untouched (documented "time unknown" placeholder)', () => {
+    // Der UTC-Tag dieser Form traegt den gemeinten Tag und bildet den
+    // Datums-Slug der Event-URL — eine Verschiebung wuerde ihn brechen.
+    expect(toUtcInstant('2026-10-04')).toBe('2026-10-04');
+  });
+
+  it('passes through empty and unparsable values', () => {
+    expect(toUtcInstant('')).toBe('');
+    expect(toUtcInstant(undefined)).toBeUndefined();
+    expect(toUtcInstant('demnaechst')).toBe('demnaechst');
   });
 });
