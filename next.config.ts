@@ -416,27 +416,6 @@ const nextConfig: NextConfig = {
   serverExternalPackages: ['better-sqlite3'],
   // Standalone output for Docker deployment (Coolify)
   output: 'standalone',
-  /**
-   * ISR-Cache mit Obergrenze (Incident 10.09.2026).
-   *
-   * Der eingebaute FileSystemCache kennt kein Größenlimit. Bei ~280k Event-
-   * Detailseiten schrieb er 39 GB in 7 Stunden in den Container-Layer, die
-   * Platte lief auf 100 % und Postgres ging in den Crash-Loop. cache-handler.js
-   * delegiert unverändert an den FileSystemCache (die Werte enthalten Buffer
-   * und Map, die eine eigene Serialisierung nicht überleben würden) und
-   * ergänzt nur eine LRU-artige Räumung. Details im Kopf jener Datei.
-   *
-   * `cacheMaxMemorySize` bleibt bewusst auf dem Default von 50 MB. Die
-   * Empfehlung, ihn bei custom Handlern auf 0 zu setzen, zielt auf verteilte
-   * Setups, in denen mehrere Instanzen inkonsistent werden können — hier
-   * läuft genau ein Container, und der In-Memory-Layer erspart der Supabase-
-   * Micro-Instanz Last.
-   *
-   * require.resolve ist der von Next dokumentierte Weg und löst relativ zu
-   * dieser Datei auf. Next kompiliert next.config.ts vor der Ausführung nach
-   * CommonJS, `require` ist hier also vorhanden.
-   */
-  cacheHandler: require.resolve('./cache-handler.js'),
 };
 
 const withBundleAnalyzer = bundleAnalyzer({
