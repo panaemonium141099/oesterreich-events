@@ -67,6 +67,16 @@ COPY --from=builder --chown=node:node /app/.next/standalone ./
 COPY --from=builder --chown=node:node /app/.next/static ./.next/static
 COPY --from=builder --chown=node:node /app/public ./public
 
+# Copy the bounded ISR cache handler explicitly.
+#
+# next.config.ts points `cacheHandler` at /app/cache-handler.js (build and
+# runtime WORKDIR are both /app, so the absolute path baked into
+# required-server-files.json resolves correctly here). Whether the standalone
+# file tracer picks the file up on its own is not something to rely on — same
+# reasoning as the explicit sharp install above. Without this line the server
+# would exit on boot with MODULE_NOT_FOUND.
+COPY --from=builder --chown=node:node /app/cache-handler.js ./cache-handler.js
+
 EXPOSE 3000
 
 # Standalone mode: start via node server.js, NOT `next start`
