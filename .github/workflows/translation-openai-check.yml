@@ -1,0 +1,38 @@
+name: Translation OpenAI access check
+
+# One bounded diagnostic on this branch. No schedule and no production writes.
+on:
+  push:
+    branches: [codex/translation-openai-eval]
+    paths:
+      - scripts/check-openai-translation-access.mjs
+      - .github/workflows/translation-openai-check.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: translation-openai-check
+  cancel-in-progress: false
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check the website runtime and translation timer
+        env:
+          DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+        run: |
+          set -euo pipefail
+          test -n "$DEPLOY_SSH_KEY"
+          mkdir -p ~/.ssh
+          printf '%s\n' "$DEPLOY_SSH_KEY" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          trap 'rm -f ~/.ssh/id_ed25519' EXIT
+          ssh -o BatchMode=yes -o ConnectTimeout=15 -o StrictHostKeyChecking=accept-new root@157.180.42.4 \
+            'systemctl show lt-translate-backfill.timer -p ActiveState -p SubState -p LastTriggerUSec -p NextElapseUSecRealtime; systemctl show lt-translate-backfill.service -p Result -p ExecMainStatus'
+          ssh -o BatchMode=yes -o ConnectTimeout=15 -o StrictHostKeyChecking=accept-new root@157.180.42.4 \
+            'docker exec -i nextjs-app node --input-type=module' < scripts/check-openai-translation-access.mjs

@@ -1,0 +1,14 @@
+{
+  "assignee": null,
+  "claim_note": "",
+  "claimed_at": null,
+  "created_at": "2026-09-12T11:18:42.426822Z",
+  "depends_on": [],
+  "epic": "fn-17-i18n-englische-version-unter-en-next",
+  "id": "fn-17-i18n-englische-version-unter-en-next.5",
+  "priority": null,
+  "spec_path": ".flow/tasks/fn-17-i18n-englische-version-unter-en-next.5.md",
+  "status": "todo",
+  "title": "OpenAI-Zugang und \u00dcbersetzungsqualit\u00e4t pr\u00fcfen; Backfill nur nach bestandenem Vergleich migrieren",
+  "updated_at": "2026-09-12T11:18:42.426841Z"
+}
