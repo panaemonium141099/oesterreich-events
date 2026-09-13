@@ -370,7 +370,7 @@ export function resolveConservativeLocation(input: LocationInput, now: Date = ne
           status: 'conflict',
           precision: 'unknown',
           postal_code: plz,
-          gemeinde: gemeinde ? { name: gemeinde.name, plz: gemeinde.plz, bundesland: gemeinde.bundesland } : null,
+          gemeinde: gemeinde ? { name: gemeinde.name, plz: gemeinde.plz, bundesland: gemeinde.bundesland, bezirk: gemeinde.bezirk } : null,
           latitude: null,
           longitude: null,
           geocoding_confidence: null,
@@ -383,7 +383,7 @@ export function resolveConservativeLocation(input: LocationInput, now: Date = ne
 
   const routable = hasHouseNumber(input.address);
   const gemeindeOut = gemeinde
-    ? { name: gemeinde.name, plz: gemeinde.plz, bundesland: gemeinde.bundesland }
+    ? { name: gemeinde.name, plz: gemeinde.plz, bundesland: gemeinde.bundesland, bezirk: gemeinde.bezirk }
     : null;
 
   // ── Quellkoordinate übernehmen ─────────────────────────────────────

@@ -41,10 +41,13 @@ export async function getCachedGeo(cacheKey: string): Promise<GeoCacheEntry | nu
   if (memo.has(cacheKey)) return memo.get(cacheKey) ?? null;
   const client = getClient();
   if (!client) return null;
+  // fn-25: der Cache kennt auch negative Treffer (status 'none'); nur
+  // erfolgreiche Zeilen liefern Koordinaten.
   const { data, error } = await client
     .from('geocode_cache')
     .select('latitude, longitude')
     .eq('query', cacheKey)
+    .eq('status', 'ok')
     .maybeSingle();
   if (error) {
     console.warn(`[geocode-cache] read ${cacheKey}: ${error.message}`);

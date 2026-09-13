@@ -185,6 +185,15 @@ async function main() {
       // Fully superseded by the enrichment step below. Not scheduled.
     }
 
+    // fn-25 C3: Adress-Geocoder (Nominatim, 1,2 s Takt, Tagesbudget) füllt
+    // den Cache für Eventadressen mit Hausnummer und entscheidet die
+    // betroffenen Events über den gemeinsamen Resolver neu.
+    if (!opts.skipGeocoding) {
+      steps.address_geocoding = await runStep('address_geocoding', async () => {
+        execStep('Geocode event addresses', `npx tsx ${envFlag}src/scripts/geocode-addresses.ts --limit 600`);
+      }, steps);
+    }
+
     if (opts.legacyGeo && !opts.skipGeocoding) {
       steps.geocoding = await runStep('geocoding', async () => {
         execStep('Fix geocoding (LEGACY)', `npx tsx ${envFlag}src/scripts/fix-geocoding.ts`);

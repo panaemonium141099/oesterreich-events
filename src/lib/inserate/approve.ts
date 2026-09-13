@@ -29,7 +29,8 @@
 import { generateEventSlug } from '@/lib/utils/slugify';
 import { scoreEvent } from '@/lib/quality/score-event';
 import { getBundeslandFromPLZ } from '@/lib/plzCoordinates';
-import { districtFromPlz } from '@/lib/plz-district';
+import { districtFromPlz, districtFromGemeinde } from '@/lib/plz-district';
+import { resolveEventLocation } from '@/lib/location/resolver';
 import { composeEventAddress } from './geocode-query';
 
 /** Die Felder einer `event_submissions`-Zeile, die für die Freigabe zählen. */
@@ -60,6 +61,12 @@ export interface ApproveOptions {
   /** Im Admin vor der Freigabe aufgelöste Koordinaten (Geocoding). */
   latitude?: number | null;
   longitude?: number | null;
+  /**
+   * fn-25: Auf welcher Ebene der Geocoder getroffen hat — `address`
+   * (Straße + Hausnummer), `venue` (Veranstaltungsort + Ort) oder
+   * `municipality` (nur PLZ/Ort). Bestimmt Status und erlaubte Ausspielung.
+   */
+  coords_precision?: 'address' | 'venue' | 'municipality' | null;
   /** Referenzzeitpunkt für created_at/last_seen_at — im Test injizierbar. */
   now?: Date;
 }
@@ -116,6 +123,22 @@ export function buildEventRow(
   // berechnet. Nur die Freigabe (publish_status) kommt vom Menschen.
   const { quality_score } = scoreEvent(scoreable);
 
+  // fn-25: dieselbe Ortsentscheidung wie im Scraper-Pfad (Vertrag für alle
+  // Geo-Schreibpfade). Ohne Genauigkeitsangabe gilt die Position als
+  // unbestätigt.
+  const decision = resolveEventLocation({
+    title: submission.title,
+    location_name: submission.location_name,
+    address,
+    postal_code: submission.postal_code,
+    city: submission.city ?? null,
+    bundesland,
+    country: 'AT',
+    latitude,
+    longitude,
+    coords_precision: latitude != null ? (options.coords_precision ?? 'unknown') : null,
+  });
+
   return {
     source_type: submission.submitter_type === 'person' ? 'user' : 'business',
     source_name: submission.company ?? submission.contact_name,
@@ -130,11 +153,28 @@ export function buildEventRow(
     location_name: submission.location_name,
     address,
     postal_code: submission.postal_code,
-    district: districtFromPlz(submission.postal_code, bundesland),
+    district:
+      (decision.gemeinde
+        ? districtFromGemeinde(decision.gemeinde.bezirk, decision.gemeinde.bundesland, decision.gemeinde.plz)
+        : null) ?? districtFromPlz(submission.postal_code, bundesland),
     bundesland,
     country: 'AT',
-    latitude,
-    longitude,
+    latitude: decision.latitude,
+    longitude: decision.longitude,
+    geocoding_confidence: decision.geocoding_confidence,
+    geocoding_source: decision.geocoding_source,
+    location_name_raw: submission.location_name,
+    address_raw: address,
+    postal_code_raw: submission.postal_code,
+    city_raw: submission.city ?? null,
+    country_raw: 'AT',
+    latitude_raw: latitude,
+    longitude_raw: longitude,
+    coords_precision_raw: latitude != null ? (options.coords_precision ?? 'unknown') : null,
+    location_status: decision.status,
+    location_precision: decision.precision,
+    location_resolution: { ...decision, phase: 'inserat-approve' },
+    location_provenance: decision.provenance,
     image_url: submission.image_url,
     price_text: submission.price_text,
     ticket_url: submission.ticket_url,

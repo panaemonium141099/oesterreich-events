@@ -102,3 +102,16 @@ export function composeEventAddress(parts: AddressParts): string | null {
   if (street) return street;
   return place;
 }
+
+/**
+ * fn-25: Auf welcher Ebene ein Kandidat aus `buildGeocodeCandidates`
+ * trifft. Straße + Ort → `address`, Veranstaltungsort (+ Ort) → `venue`,
+ * nur PLZ/Ort → `municipality`. Steuert Status und Ausspielung des Events.
+ */
+export function precisionOfCandidate(candidate: string, parts: AddressParts): 'address' | 'venue' | 'municipality' {
+  const street = clean(parts.address);
+  const venue = clean(parts.location_name);
+  if (street && candidate.startsWith(street)) return 'address';
+  if (venue && candidate.startsWith(venue)) return 'venue';
+  return 'municipality';
+}

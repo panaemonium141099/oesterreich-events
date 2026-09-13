@@ -88,11 +88,11 @@ export interface LocationDecision {
   location_name: string | null;
   postal_code: string | null;
   /** Gemeinde aus der Registry, falls belegt (Name + PLZ der Registry). */
-  gemeinde: { name: string; plz: string; bundesland: string } | null;
+  gemeinde: { name: string; plz: string; bundesland: string; bezirk: string | null } | null;
   latitude: number | null;
   longitude: number | null;
   /** Kompatibler Wert für `events.geocoding_confidence`. */
-  geocoding_confidence: 'scraper' | 'gemeinde-centroid' | null;
+  geocoding_confidence: 'scraper' | 'venue' | 'address' | 'gemeinde-centroid' | null;
   geocoding_source: string | null;
   country: string;
   allowed: AllowedOutputs;

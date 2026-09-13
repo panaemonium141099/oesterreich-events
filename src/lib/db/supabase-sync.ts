@@ -35,10 +35,9 @@ import {
   resolveCanonicalCategory,
   type ExistingCategoryRow,
 } from '@/lib/category-classifier';
-import {
-  resolveConservativeLocation,
-  type LocationInput,
-} from '@/lib/location/conservative-resolution';
+import type { LocationInput } from '@/lib/location/conservative-resolution';
+import { resolveEventLocation, type LocationEvidence, type ResolvedLocation } from '@/lib/location/resolver';
+import { loadLocationEvidence } from '@/lib/location/evidence';
 import type { LocationDecision, LocationStatus } from '@/lib/location/types';
 import {
   closeScrapeRun,
@@ -46,7 +45,7 @@ import {
   persistRawEvents,
 } from '@/lib/db/raw-persist';
 import { normalizeDistrict, isCanonicalDistrict } from '@/lib/district-normalizer';
-import { districtFromPlz } from '@/lib/plz-district';
+import { districtFromPlz, districtFromGemeinde } from '@/lib/plz-district';
 import { bundeslandToId } from '@/lib/bundeslaender';
 import { toUtcInstant } from '@/lib/pipeline/normalize-date';
 import { getBundeslandFromPLZ } from '@/lib/plzCoordinates';
@@ -120,18 +119,24 @@ const CONFIDENCE_RANK: Record<string, number> = {
   manual: 0,                 // Hand-Korrektur — nie automatisch überschreiben
   'json-ld-venue': 1,        // strukturierte Venue-Angabe der Quellseite
   scraper: 2,                // Koordinate der Quelle selbst
-  openai: 3,                 // Alt-Refinement (wird nicht mehr geschrieben)
-  gemini: 3,
-  nominatim: 4,
-  'gemeinde-centroid': 5,    // Gemeinde-/PLZ-Mittelpunkt aus genannter PLZ (Gebietsangabe)
-  'gemeinde-registry': 5,    // Mapbox-verifizierter Gemeinde-Zentroid (Gebietsangabe)
-  exact: 6,                  // Alt-Normalizer, nicht mehr geschrieben
-  normalized: 7,
-  verified: 8,               // Alt-Master-Koordinaten (apply_master_coords_bulk)
-  from_title: 9,
-  from_description: 10,
-  gemini_low: 11,
+  venue: 2,                  // belegter Venue-Kandidat / bestätigte Quellen-Venue-Zuordnung (Resolver)
+  address: 3,                // geocodierte Eventadresse mit Hausnummer (Resolver)
+  openai: 4,                 // Alt-Refinement (wird nicht mehr geschrieben)
+  gemini: 4,
+  nominatim: 5,
+  'gemeinde-centroid': 6,    // Gemeinde-/PLZ-Mittelpunkt aus genannter PLZ (Gebietsangabe)
+  'gemeinde-registry': 6,    // Mapbox-verifizierter Gemeinde-Zentroid (Gebietsangabe)
+  exact: 7,                  // Alt-Normalizer, nicht mehr geschrieben
+  normalized: 8,
+  verified: 9,               // Alt-Master-Koordinaten (apply_master_coords_bulk)
+  from_title: 10,
+  from_description: 11,
+  gemini_low: 12,
 };
+
+/** Herkünfte, deren Position deterministisch aus Belegen folgt: eine
+ *  geänderte Position ist dann eine Korrektur, kein Rauschen. */
+const DETERMINISTIC_CONFIDENCES = new Set(['scraper', 'venue', 'address']);
 
 function getConfidenceRank(confidence: string | null | undefined): number {
   if (!confidence) return Infinity; // NULL = lowest priority
@@ -298,8 +303,8 @@ async function prefetchExistingRows(
  * Namen, die Entscheidung liefert Position, PLZ, Gemeinde, Status,
  * Genauigkeit und die erlaubte Ausspielung. Kein Namensabgleich mehr.
  */
-function decideLocation(event: ScrapedEvent): LocationDecision {
-  const input: LocationInput = {
+function locationInputOf(event: ScrapedEvent): LocationInput {
+  return {
     title: event.title,
     location_name: event.location_name ?? null,
     address: event.address ?? null,
@@ -312,7 +317,10 @@ function decideLocation(event: ScrapedEvent): LocationDecision {
     coords_precision: event.coords_precision ?? null,
     source_venue_id: event.source_venue_id ?? null,
   };
-  return resolveConservativeLocation(input);
+}
+
+function decideLocation(event: ScrapedEvent, evidence: LocationEvidence): ResolvedLocation {
+  return resolveEventLocation(locationInputOf(event), evidence);
 }
 
 /**
@@ -328,6 +336,10 @@ function retainedStatusFor(confidence: string | null): { status: LocationStatus;
     case 'manual':
     case 'json-ld-venue':
       return { status: 'address_confirmed', precision: 'building' };
+    case 'venue':
+      return { status: 'venue_confirmed', precision: 'building' };
+    case 'address':
+      return { status: 'address_confirmed', precision: 'street' };
     case 'gemeinde-registry':
     case 'gemeinde-centroid':
       return { status: 'municipality_only', precision: 'municipality' };
@@ -361,7 +373,7 @@ export function shouldOverwriteCoords(
   const newRank = getConfidenceRank(newConfidence);
 
   if (newRank < existingRank) return true;
-  if (newRank === existingRank && newConfidence === 'scraper') {
+  if (newRank === existingRank && newConfidence && DETERMINISTIC_CONFIDENCES.has(newConfidence)) {
     return existing.latitude !== newLat || existing.longitude !== newLng;
   }
   return false;
@@ -418,8 +430,9 @@ function toSupabaseRow(
   existingMap: Map<string, ExistingRow>,
   imageMap: Map<string, ValidatedImage>,
   rawRefs: RawRefs = { ids: new Map(), failed: new Set() },
+  evidence: LocationEvidence = {},
 ) {
-  const decision = decideLocation(event);
+  const decision = decideLocation(event, evidence);
   // `resolved` bündelt, was tatsächlich in die Zeile geschrieben wird —
   // die Entscheidung selbst bleibt unverändert und wandert als Protokoll
   // in `location_resolution`.
@@ -740,8 +753,14 @@ function toSupabaseRow(
     finalBundesland,
     resolved.postalCode ?? event.postal_code,
   );
+  // fn-25 C2: Bezirk zuerst aus der belegten Gemeinde (Registry), dann aus
+  // der PLZ — aber nur, wenn die PLZ genau einen Bezirk hat. 438 PLZ decken
+  // mehrere Bezirke; dort entschied bisher Häufigkeit oder Alphabet.
   const finalDistrict =
     (normalizedDistrict && isCanonicalDistrict(normalizedDistrict) ? normalizedDistrict : null) ??
+    (decision.gemeinde
+      ? districtFromGemeinde(decision.gemeinde.bezirk, decision.gemeinde.bundesland, decision.gemeinde.plz)
+      : null) ??
     districtFromPlz(resolved.postalCode ?? event.postal_code, finalBundesland);
 
   const row = {
@@ -800,6 +819,7 @@ function toSupabaseRow(
     source_venue_id: event.source_venue_id ?? null,
     latitude_raw: typeof event.latitude === 'number' ? event.latitude : null,
     longitude_raw: typeof event.longitude === 'number' ? event.longitude : null,
+    coords_precision_raw: event.coords_precision ?? null,
     location_status: finalStatus,
     location_precision: finalPrecision,
     location_resolution: locationResolution,
@@ -848,8 +868,9 @@ function toSupabaseRow(
     // the shortId anchored the lookup. With the new {plz-ort}/{date}/{slug}
     // shape, slug = primary lookup key, so it MUST be stable.
     slug: existing?.slug ?? generateEventSlug(event.title, resolved.locationName ?? event.location_name),
-    // venue_id from registry-based scraper (null for regular scrapers)
-    ...(event.venue_id ? { venue_id: event.venue_id } : {}),
+    // venue_id: vom Registry-Scraper oder von einem belegten Venue-Kandidaten
+    // des Resolvers (fn-25 C3).
+    ...(event.venue_id || decision.venue_id ? { venue_id: event.venue_id ?? decision.venue_id } : {}),
     // fn-14.5: ALWAYS bump last_seen_at — anchor for the soft-delete
     // job in fn-14.6. INSERT or UPDATE, doesn't matter.
     last_seen_at: new Date().toISOString(),
@@ -1059,7 +1080,15 @@ export async function syncEventsToSupabase(
     // toSupabaseRow can look up the validated URL + extracted dims.
     const imageMap = await validateImagesForBatch(batchEvents);
 
-    const mapped = batchEvents.map(e => toSupabaseRow(e, existingMap, imageMap, rawRefs));
+    // Belege für die Ortsentscheidung (Venue-Kandidaten, Adress-Geocodes,
+    // Quellen-Venue-Zuordnungen) batchweise laden — nie live geocodieren.
+    let evidence: LocationEvidence[] = batchEvents.map(() => ({}));
+    try {
+      evidence = await loadLocationEvidence(supabase, batchEvents.map(locationInputOf));
+    } catch (e) {
+      console.warn('[supabase-sync] Belege nicht ladbar, Entscheidung ohne Belege:', e instanceof Error ? e.message : e);
+    }
+    const mapped = batchEvents.map((e, idx) => toSupabaseRow(e, existingMap, imageMap, rawRefs, evidence[idx]));
     for (const { admission, rawPersistFailed } of mapped) {
       if (admission.decision === 'quarantine') {
         quarantined++;

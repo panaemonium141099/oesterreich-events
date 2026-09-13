@@ -85,7 +85,15 @@ const SOURCE_CATEGORIES: SourceCategory[] = [
         license: 'CC BY 4.0',
         licenseUrl: 'https://creativecommons.org/licenses/by/4.0/',
         description:
-          'Ortsnamen-Normalisierung und Geocoding für österreichische Gemeinden.',
+          'Verzeichnis österreichischer Ortsnamen (Siedlungen und Verwaltungseinheiten) zur Zuordnung ausdrücklich genannter Orte zu Gemeinden.',
+      },
+      {
+        name: 'PLZ-Verzeichnis Österreich (RTR / Österreichische Post)',
+        url: 'https://data.rtr.at/api/v1/tables/plz.json',
+        license: 'CC BY 4.0',
+        licenseUrl: 'https://creativecommons.org/licenses/by/4.0/',
+        description:
+          'Amtliche Postleitzahlen mit Orten, politischen Bezirken und Bundesländern; Grundlage der PLZ-Prüfung und der Bezirkszuordnung von Veranstaltungen.',
       },
     ],
   },
