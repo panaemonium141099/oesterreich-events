@@ -6,6 +6,9 @@ on:
     branches: [codex/translation-openai-eval]
     paths:
       - scripts/check-openai-translation-access.mjs
+      - scripts/eval-openai-translations.mjs
+      - src/__tests__/fixtures/translation-public-samples.json
+      - scripts/inspect-translation-runtime.sh
       - .github/workflows/translation-openai-check.yml
   workflow_dispatch:
 
@@ -19,7 +22,7 @@ concurrency:
 jobs:
   check:
     runs-on: ubuntu-latest
-    timeout-minutes: 3
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
       - name: Check the website runtime and translation timer
@@ -36,3 +39,8 @@ jobs:
             'systemctl show lt-translate-backfill.timer -p ActiveState -p SubState -p LastTriggerUSec -p NextElapseUSecRealtime; systemctl show lt-translate-backfill.service -p Result -p ExecMainStatus'
           ssh -o BatchMode=yes -o ConnectTimeout=15 -o StrictHostKeyChecking=accept-new root@157.180.42.4 \
             'docker exec -i nextjs-app node --input-type=module' < scripts/check-openai-translation-access.mjs
+          ssh -o BatchMode=yes -o ConnectTimeout=15 -o StrictHostKeyChecking=accept-new root@157.180.42.4 \
+            'bash -s' < scripts/inspect-translation-runtime.sh
+          node -e 'const fs = require("node:fs"); process.stdout.write("const PUBLIC_TRANSLATION_SAMPLES = " + fs.readFileSync("src/__tests__/fixtures/translation-public-samples.json", "utf8") + ";\n" + fs.readFileSync("scripts/eval-openai-translations.mjs", "utf8"));' | \
+            ssh -o BatchMode=yes -o ConnectTimeout=15 -o StrictHostKeyChecking=accept-new root@157.180.42.4 \
+              'docker exec -i nextjs-app node --input-type=module'
