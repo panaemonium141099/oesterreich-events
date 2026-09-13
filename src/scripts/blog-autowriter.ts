@@ -328,7 +328,8 @@ Antworte NUR mit einem JSON-Objekt exakt dieser Form (alle Texte Deutsch, Sie-Fo
   "keywords": ["6-10 deutsche Suchbegriffe"],
   "faqs": [{ "question": "…", "answer": "…" }]
 }
-Mindestens 5 stays, mindestens 3 practicalInfo, mindestens 3 faqs. KEINE Preise in Euro nennen (ändern sich) — nur Preisniveau in Worten.`;
+Mindestens 5 stays, mindestens 3 practicalInfo, mindestens 3 faqs. KEINE Preise in Euro nennen (ändern sich), nur Preisniveau in Worten.
+STIL: Keine Gedankenstriche (– oder —) als Einschub in sichtbaren Texten. Stattdessen Komma, Doppelpunkt oder ein neuer Satz.`;
 
   return claudeJson(prompt, STAY_GUIDE_SCHEMA as unknown as Record<string, unknown>, { model: MODEL_COMPOSE });
 }
@@ -399,7 +400,8 @@ Antworte NUR mit einem JSON-Objekt exakt dieser Form (alle Texte Deutsch, Sie-Fo
   "faqs": [{ "question": "…", "answer": "…" }],
   "endDate": "yyyy-mm-dd letzter Eventtag laut Recherche, sonst leer"
 }
-Mindestens 4 faqs, mindestens 3 practicalInfo-Einträge.`;
+Mindestens 4 faqs, mindestens 3 practicalInfo-Einträge.
+STIL: Keine Gedankenstriche (– oder —) als Einschub in sichtbaren Texten. Stattdessen Komma, Doppelpunkt oder ein neuer Satz.`;
 
   return claudeJson(prompt, POST_SCHEMA as unknown as Record<string, unknown>, { model: MODEL_COMPOSE });
 }
