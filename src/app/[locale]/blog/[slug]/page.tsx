@@ -197,6 +197,11 @@ export default async function BlogPostPage({
   const post = getPostBySlug(slug);
   if (!post) notFound();
 
+  // Poster-Hero: bis zu diesem Faktor ueber die Originalbreite hinaus
+  // vergroessern. Mehr wird bei 222px-Artworks sichtbar weich.
+  const POSTER_MAX_UPSCALE = 2;
+  const posterMax = Math.round((post.heroImageWidth ?? 300) * POSTER_MAX_UPSCALE);
+
   // BreadcrumbList schema — helps Google display navigation path
   const breadcrumbJsonLd = {
     '@context': 'https://schema.org',
@@ -328,7 +333,15 @@ export default async function BlogPostPage({
             vollstaendig sichtbar, den Rahmen fuellt eine unscharf gezoomte
             Kopie derselben Datei. Ein kleines echtes Bild ist richtiger als
             ein grosses fremdes — deshalb wird hier nicht hochskaliert. */}
-        <div className="relative w-full h-[75vh] min-h-[420px] max-h-[700px] overflow-hidden">
+        {/* Im Poster-Layout waechst der Hero auf dem Handy mit dem Inhalt:
+            eine sechszeilige Ueberschrift plus Poster sprengt sonst die
+            feste 75vh-Hoehe und schiebt das Poster unter die Navigation
+            (Befund 2026-09-13). Ab md gilt wieder die feste Hoehe. */}
+        <div
+          className={post.heroLayout === 'poster'
+            ? 'relative flex w-full min-h-[75vh] flex-col justify-end overflow-hidden md:block md:h-[75vh] md:min-h-[420px] md:max-h-[700px]'
+            : 'relative w-full h-[75vh] min-h-[420px] max-h-[700px] overflow-hidden'}
+        >
           <Image
             src={post.heroImage}
             alt={post.heroLayout === 'poster' ? '' : post.title}
@@ -340,34 +353,29 @@ export default async function BlogPostPage({
           />
           <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/35 to-black/80" />
           {post.heroLayout === 'poster' && (
-            // Liegt ueber dem Verlauf, damit das Artwork nicht mitgedunkelt
-            // wird. Auf Handy sitzt es oben ueber dem Text, ab md rechts
-            // neben dem Textblock (der ist max-w-3xl breit und links buendig)
-            // — sonst laeuft eine dreizeilige H1 mitten durchs Bild.
+            // Desktop: rechts neben dem Textblock (der ist max-w-3xl breit und
+            // links buendig), ueber dem Verlauf, damit das Artwork nicht
+            // mitgedunkelt wird. Auf dem Handy steht das Poster stattdessen IM
+            // Textblock (siehe unten): eine absolute Ueberlagerung lief bei
+            // vierzeiligen Ueberschriften in die H1.
             <div
-              className="pointer-events-none absolute inset-x-0 top-20 bottom-[17rem] z-[1] flex items-start justify-center px-8
-                         md:inset-y-0 md:left-auto md:right-0 md:bottom-0 md:w-[38%] md:items-center md:px-12"
+              className="pointer-events-none absolute inset-y-0 right-0 z-[1] hidden w-[38%] items-center justify-center px-12 md:flex"
             >
               <Image
                 src={post.heroImage}
                 alt={post.title}
-                width={post.heroImageWidth ?? 300}
-                height={post.heroImageWidth ?? 300}
+                width={posterMax}
+                height={posterMax}
                 priority
                 unoptimized
-                // --hero-w ist die Originalbreite. Sie deckelt die Darstellung,
-                // damit ein 222px-Artwork bei 222px scharf bleibt statt
-                // hochgerechnet weich zu werden. Auf dem Handy zusaetzlich
-                // kleiner, sonst laeuft es in die Ueberschrift.
-                style={{ '--hero-w': `${post.heroImageWidth ?? 300}px` } as CSSProperties}
-                className="h-auto w-auto max-h-full max-w-[min(40vw,var(--hero-w))] rounded-sm object-contain shadow-2xl ring-1 ring-white/15 md:max-w-[min(62vw,var(--hero-w))]"
+                // w-full laesst das Bild bis --hero-max wachsen, das ist das
+                // POSTER_MAX_UPSCALE-fache der Originalbreite (222 -> 444 px).
+                // Bei 1:1 wirkte es auf breiten Bildschirmen verloren (User-
+                // Feedback 2026-09-13), full-bleed auf 75vh waere Matsch.
+                style={{ '--hero-max': `${posterMax}px` } as CSSProperties}
+                className="h-auto w-full max-h-full max-w-[min(62vw,var(--hero-max))] rounded-sm object-contain shadow-2xl ring-1 ring-white/15"
               />
             </div>
-          )}
-          {post.heroImageCredit && (
-            <p className="absolute bottom-2 right-3 z-10 text-[10px] text-white/50">
-              {post.heroImageCredit}
-            </p>
           )}
 
           {/* Back nav */}
@@ -382,8 +390,25 @@ export default async function BlogPostPage({
           </div>
 
           {/* Hero text */}
-          <div className="absolute bottom-0 left-0 right-0 px-8 py-10 md:px-16 md:py-14">
+          <div
+            className={post.heroLayout === 'poster'
+              ? 'relative px-8 pb-10 pt-24 md:absolute md:bottom-0 md:left-0 md:right-0 md:px-16 md:py-14'
+              : 'absolute bottom-0 left-0 right-0 px-8 py-10 md:px-16 md:py-14'}
+          >
             <div className="max-w-3xl">
+              {post.heroLayout === 'poster' && (
+                // Handy: Poster als Teil des Textblocks, damit es unabhaengig
+                // von der Titellaenge ueber der Ueberschrift sitzt.
+                <Image
+                  src={post.heroImage}
+                  alt={post.title}
+                  width={posterMax}
+                  height={posterMax}
+                  priority
+                  unoptimized
+                  className="mb-5 h-auto w-[34vw] max-w-[180px] rounded-sm object-contain shadow-2xl ring-1 ring-white/15 md:hidden"
+                />
+              )}
               <div className="flex items-center gap-3 mb-4">
                 <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/80 border border-white/30 px-3 py-1">
                   {post.category}
