@@ -107,7 +107,7 @@ export class FeverUpScraper extends BaseScraper {
           source_url: sourceUrl,
           title: ev.title,
           start_date: startDate,
-          location_name: ev.venue || 'Wien',
+          location_name: ev.venue || undefined,
           latitude: 48.2082,
           longitude: 16.3738,
           bundesland: 'wien',

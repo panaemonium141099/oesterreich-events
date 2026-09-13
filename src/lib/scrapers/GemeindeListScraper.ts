@@ -1,5 +1,6 @@
 import * as cheerio from 'cheerio';
 import { BaseScraper } from './BaseScraper';
+import { applyGemeindeContext } from './gemeinde-context';
 import { categorizeEvent } from '../categorize';
 import { GEMEINDEN, type GemeindeInfo } from './gemeinden/gemeindeList';
 import type { ScrapedEvent } from '@/types/events';
@@ -226,16 +227,10 @@ export class GemeindeListScraper extends BaseScraper {
       }
     }
 
-    // Koordinaten und Metadaten für alle Events setzen
-    return allEvents.map(e => ({
-      ...e,
-      latitude: e.latitude ?? gemeinde.lat,
-      longitude: e.longitude ?? gemeinde.lng,
-      postal_code: e.postal_code ?? gemeinde.plz,
-      bundesland: e.bundesland ?? gemeinde.bundesland,
-      district: e.district ?? gemeinde.bezirk,
-      location_name: e.location_name ?? gemeinde.name,
-    }));
+    // fn-25 B3: Gemeinde als Kontext (city + PLZ), Mittelpunkt nur als
+    // gekennzeichnete Gebietsangabe, kein Gemeindename als Veranstaltungsort.
+    const ctx = { name: gemeinde.name, plz: gemeinde.plz, lat: gemeinde.lat, lng: gemeinde.lng, bundesland: gemeinde.bundesland, bezirk: gemeinde.bezirk };
+    return allEvents.map(e => applyGemeindeContext(e, ctx));
   }
 
   /** Parse a single calendar page with all 4 strategies */

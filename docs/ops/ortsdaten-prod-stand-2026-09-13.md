@@ -101,3 +101,23 @@ zurückspielen):
   `lt-db-backup` (`/var/backups/lasstreffen-<Wochentag>.dump`).
 
 Rückweg für Einzelfälle: `select * from snap_20260913.events_location where id = …`.
+
+## 8. Phase A6: nachweislich falsche Pins aus der präzisen Ausspielung genommen (2026-09-13, 19:05 UTC)
+
+Nur künftige, veröffentlichte Events; jede Änderung ist in
+`snap_20260913.a6_revocations` (alte Werte, Gruppe, Distanz) und im
+`location_resolution.revoked` der Zeile protokolliert, also reversibel.
+
+| Gruppe | Regel | Zeilen | Ergebnis |
+|---|---|---|---|
+| g1a | Adress-PLZ (Quelltext) > 25 km vom Pin, PLZ-Spalte leer oder gleich, PLZ eindeutig einer Gemeinde zugeordnet | 193 | Gemeinde-Mittelpunkt der Adress-PLZ als Gebietsangabe (`gemeinde-centroid`, `municipality_only`, kein Pin-Recht) |
+| g1b | Adress-PLZ widerspricht Pin UND PLZ-Spalte | 168 | `conflict`, keine Position |
+| g2 | PLZ-Spalte > 25 km vom Pin (Herkunft der PLZ unbekannt) | 3.443 | `conflict`, keine Position |
+| g2 multi | wie g2, PLZ mit mehreren Gemeinden: > 25 km von allen | 516 | `conflict`, keine Position |
+| g3 | `country <> 'AT'`, Pin in Österreich, Koordinate aus Alt-Namenstreffer | 412 | `conflict`, keine Position |
+
+Summe 4.732. Diese Events sind bis zum nächsten Quellabruf nicht auf Karte
+und Liste (Detailseiten bleiben erreichbar). Eventim (6-h-Import) und
+Feratel (stündlich) liefern ihre Positionen selbst zurück; Gemeinde- und
+Listenquellen im Nachtlauf. Bleibt der Widerspruch bestehen, bleibt der
+Status `conflict` (Prüfung in Phase D/E).

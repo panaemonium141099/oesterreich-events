@@ -72,7 +72,7 @@ export class GrazTourismusScraper extends BaseScraper {
             title: name,
             description: item.description ? String(item.description).slice(0, 500) : undefined,
             start_date: startDate,
-            location_name: location?.name ? String(location.name) : 'Graz',
+            location_name: location?.name ? String(location.name) : undefined,
             bundesland: 'steiermark',
             latitude: 47.0707,
             longitude: 15.4395,

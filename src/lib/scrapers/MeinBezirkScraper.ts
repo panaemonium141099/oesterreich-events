@@ -1,5 +1,6 @@
 import * as cheerio from 'cheerio';
 import { BaseScraper } from './BaseScraper';
+import { isRegionLabel } from './gemeinde-context';
 import { categorizeEvent } from '../categorize';
 import type { ScrapedEvent } from '@/types/events';
 
@@ -406,6 +407,9 @@ export class MeinBezirkScraper extends BaseScraper {
           // Usually: li[0]=date, li[1]=venue, li[2]=detail
           locationName = $lis.eq(1).text().trim() || undefined;
         }
+        // fn-25 B3: Fehlt das Venue, steht in li[1] das Bundesland ("Tirol").
+        // Das ist kein Veranstaltungsort.
+        if (locationName && isRegionLabel(locationName)) locationName = undefined;
 
         // Category from URL slug
         const category = this.mapCategory(categorySlug) || categorizeEvent(title);
