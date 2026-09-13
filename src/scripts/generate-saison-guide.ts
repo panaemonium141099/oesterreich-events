@@ -13,8 +13,9 @@
  *
  *   • Themen-Seiten (`brief` + `facts`): handeln von Terminen und Preisen in
  *     der Welt. Diese Zahlen kommen NICHT aus dem Modell, sondern geprueft
- *     aus `facts` und werden woertlich uebernommen. Gemini schreibt nur die
- *     Prosa darum herum und recherchiert mit Google-Search-Grounding.
+ *     aus `facts` und werden woertlich uebernommen. Claude schreibt nur die
+ *     Prosa darum herum und recherchiert per `claude -p` mit Websuche
+ *     (src/lib/llm/claude-cli.ts, laeuft ueber das Claude-Abo).
  *     Ein Gate verwirft Entwuerfe, die eigene Jahreszahlen erfinden.
  *
  * Bewusst KEIN Event-Daten-Enrichment (Grundsatz MASTERPLAN §6).
@@ -32,10 +33,17 @@ import { readFileSync, writeFileSync, existsSync, appendFileSync, mkdirSync, rea
 import { join } from 'path';
 import { createClient } from '@supabase/supabase-js';
 import { findCommonsPhoto, fetchImage, layoutFor } from '../lib/blog/hero-image';
+import { claudeText, claudeJson } from '../lib/llm/claude-cli';
 import {
   SAISON_KALENDER, daysUntilDeadline, isDue, factsAreStale,
   type SaisonGuideSpec,
 } from '../content/blog/saison-kalender';
+
+// Texte kommen von `claude -p` ueber das Claude-Abo (CLAUDE_CODE_OAUTH_TOKEN),
+// seit 2026-09-13 statt Gemini. Recherche werkzeuglastig -> Sonnet reicht,
+// Komposition entscheidet ueber die Textqualitaet -> Opus.
+const MODEL_RESEARCH = process.env.CLAUDE_BLOG_MODEL_RESEARCH || 'sonnet';
+const MODEL_COMPOSE = process.env.CLAUDE_BLOG_MODEL_COMPOSE || 'opus';
 
 const POSTS_DIR = join(process.cwd(), 'src', 'content', 'blog', 'posts');
 const INDEX_PATH = join(process.cwd(), 'src', 'content', 'blog', 'index.ts');
@@ -86,41 +94,25 @@ async function researchEvents(spec: SaisonGuideSpec): Promise<ResearchEvent[]> {
 }
 
 /**
- * Google-Search-Grounding: laesst Gemini den aktuellen Stand zum Thema
+ * Recherche mit Websuche: laesst Claude den aktuellen Stand zum Thema
  * zusammentragen. Das Ergebnis ist RECHERCHE-MATERIAL fuer die Prosa, keine
  * Faktenquelle — verbindlich sind allein die geprueften `facts` aus dem
  * Kalender. Faellt der Call aus, laeuft der Guide ohne Aussenrecherche
  * weiter (die Fakten stehen ja im Kalender).
  */
 async function groundedResearch(spec: SaisonGuideSpec): Promise<string> {
-  const apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey || !spec.brief) return '';
-  const prompt = `Recherchiere den aktuellen Stand zu "${spec.title}" in Oesterreich fuer die kommende Saison.
+  if (!spec.brief) return '';
+  const prompt = `Recherchiere per Websuche den aktuellen Stand zu "${spec.title}" in Oesterreich fuer die kommende Saison.
 ${spec.brief}
 ${spec.sources?.length ? `Bevorzugte Primaerquellen: ${spec.sources.join(', ')}` : ''}
 Antworte in Stichpunkten auf Deutsch. Schreibe zu jeder Angabe dazu, woher sie stammt.
 Wenn etwas fuer die kommende Saison noch nicht offiziell angekuendigt ist, schreibe das ausdruecklich hin, statt eine Vermutung zu formulieren.`;
   try {
-    const res = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: prompt }] }],
-          tools: [{ google_search: {} }],
-          generationConfig: { temperature: 0.2 },
-        }),
-        signal: AbortSignal.timeout(90_000),
-      },
-    );
-    if (!res.ok) {
-      console.warn(`Grounding-Recherche HTTP ${res.status} — weiter ohne.`);
-      return '';
-    }
-    const body = await res.json();
-    const parts = body?.candidates?.[0]?.content?.parts ?? [];
-    return parts.map((x: { text?: string }) => x.text ?? '').join('\n').trim();
+    return await claudeText(prompt, {
+      model: MODEL_RESEARCH,
+      allowedTools: ['WebSearch', 'WebFetch'],
+      maxTurns: 12,
+    });
   } catch (err) {
     console.warn(`Grounding-Recherche fehlgeschlagen (${String(err)}) — weiter ohne.`);
     return '';
@@ -151,14 +143,11 @@ function unsupportedDates(draft: Record<string, unknown>, allowed: string): stri
   return [...found];
 }
 
-async function generateWithGemini(
+async function generateDraft(
   spec: SaisonGuideSpec,
   events: ResearchEvent[],
   research: string,
 ): Promise<Record<string, unknown>> {
-  const apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey) throw new Error('GEMINI_API_KEY fehlt');
-
   // Die geprüften Fakten sind die einzige gültige Quelle für Termine und
   // Preise. Die Grounding-Recherche liefert nur Material für die Prosa.
   const factsBlock = spec.facts?.length
@@ -235,22 +224,18 @@ Schreibe auf Deutsch (de-AT). Der Guide soll Lesern helfen, die Saison zu planen
     required: ['excerpt', 'readingTime', 'keyFacts', 'intro', 'historyTitle', 'history', 'whatToExpectTitle', 'whatToExpect', 'whatToExpectList', 'practicalInfoTitle', 'practicalInfo', 'faqs'],
   };
 
-  const res = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
-    {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: { responseMimeType: 'application/json', responseSchema, temperature: 0.6 },
-      }),
-    },
-  );
-  if (!res.ok) throw new Error(`Gemini HTTP ${res.status}: ${(await res.text()).slice(0, 300)}`);
-  const body = await res.json();
-  const text = body?.candidates?.[0]?.content?.parts?.[0]?.text;
-  if (!text) throw new Error('Gemini lieferte keinen Text');
-  return JSON.parse(text);
+  return claudeJson(prompt, toJsonSchema(responseSchema), { model: MODEL_COMPOSE });
+}
+
+/** Gemini-Schreibweise (OBJECT, STRING, …) in JSON-Schema-Typen drehen. */
+function toJsonSchema(node: unknown): Record<string, unknown> {
+  if (Array.isArray(node)) return node.map(toJsonSchema) as unknown as Record<string, unknown>;
+  if (!node || typeof node !== 'object') return node as Record<string, unknown>;
+  const out: Record<string, unknown> = {};
+  for (const [k, v] of Object.entries(node as Record<string, unknown>)) {
+    out[k] = k === 'type' && typeof v === 'string' ? v.toLowerCase() : toJsonSchema(v);
+  }
+  return out;
 }
 
 interface SaisonHero {
@@ -413,7 +398,7 @@ async function main() {
   const research = await groundedResearch(spec);
   if (research) console.log(`Grounding-Recherche: ${research.length} Zeichen`);
 
-  const gen = await generateWithGemini(spec, events, research);
+  const gen = await generateDraft(spec, events, research);
 
   // Gate gegen erfundene Termine: jede Datumsangabe im Entwurf muss aus den
   // geprüften Fakten oder aus echten DB-Events stammen.

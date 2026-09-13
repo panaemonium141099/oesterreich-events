@@ -3,10 +3,12 @@
 # 2026-08-26: vollautomatische Publikation). Vercel deployt den Push,
 # sitemap-core.xml zieht die neuen Posts automatisch aus ALL_POSTS.
 #
-# Recherche: Gemini 2.5 Flash + Google-Search-Grounding (2 Calls/Post,
-# Free-Tier-tauglich). Harte Fakten kommen aus der Events-DB. Ohne
-# brauchbares Hero-Bild wird kein Post publiziert — das Script failt
-# laut, wenn gar kein Kandidat durchkommt (dann Log ansehen).
+# Recherche + Text: `claude -p` (Claude Code CLI) ueber das Claude-Abo des
+# Betreibers, seit 2026-09-13 statt Gemini. Auth ist ein einjaehriges Token
+# aus `claude setup-token` im Secret CLAUDE_CODE_OAUTH_TOKEN — kein
+# API-Guthaben, kein Laptop. Harte Fakten kommen aus der Events-DB. Ohne
+# brauchbares Hero-Bild wird kein Post publiziert — das Script failt laut,
+# wenn gar kein Kandidat durchkommt (dann Log ansehen).
 
 name: Blog Autowriter
 
@@ -57,13 +59,19 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      # Die CLI ist bewusst NICHT in package.json: sie ist ein Betriebs-
+      # werkzeug dieses Jobs, kein Bestandteil der App. Immer die aktuelle
+      # Version — --max-turns und --json-schema kamen erst mit 2.1.2xx.
+      - name: Install Claude Code CLI
+        run: npm install -g @anthropic-ai/claude-code && claude --version
+
       - name: Write blog posts
         id: write
         if: github.event.schedule != '23 6 * * 0' && github.event.inputs.stayguide != 'true'
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
-          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
         run: npx tsx src/scripts/blog-autowriter.ts --count ${{ github.event.inputs.count || '2' }}
 
       - name: Write stay guide (fn-21)
@@ -72,7 +80,7 @@ jobs:
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
-          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
         run: npx tsx src/scripts/blog-autowriter.ts --stay-guide
 
       - name: Commit & push
