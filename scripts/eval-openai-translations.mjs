@@ -12,7 +12,7 @@ console.log(JSON.stringify({ check: 'report-recipient',
 const rules = `- Keep proper nouns unchanged: venue names, band/artist names, place names (Gemeinde/city names), festival brand names. "Heuriger"/"Kirtag" may be kept with a short English gloss on first use, e.g. "Kirtag (traditional fair)".
 - Preserve the complete spelling and word order of proper names, including ensembles, organizations, branded events and named buildings. Translate only surrounding generic words.
 - Translate idioms naturally by their intended meaning, not word for word.
-- Keep numeric values, dates, times and contact details in their original notation. Never convert 24-hour times to a.m./p.m.
+- Keep numeric values, date digits, times and contact details in their original notation. Translate words such as Uhr and Jahre into English, but never convert 24-hour times to a.m./p.m.
 - Keep existing HTML tags and escaped HTML entities unchanged; translate only human-readable text.
 - Translate faithfully — do NOT add, embellish or omit information. No marketing language that is not in the source.
 - title_en: concise translated title. If the title is a proper name that needs no translation, return it unchanged.`;
@@ -33,7 +33,7 @@ Rules:
 - Keep proper nouns unchanged: the name of the destination itself, place names, mountain and lake names, operator and brand names.
 - Preserve the complete spelling and word order of proper names, including ensembles, organizations, branded events and named buildings. Translate only surrounding generic words.
 - Translate idioms naturally by their intended meaning, not word for word.
-- Keep numeric values, dates, times and contact details in their original notation. Never convert 24-hour times to a.m./p.m.
+- Keep numeric values, date digits, times and contact details in their original notation. Translate words such as Uhr and Jahre into English, but never convert 24-hour times to a.m./p.m.
 - Keep existing HTML tags and escaped HTML entities unchanged; translate only human-readable text.
 - Translate faithfully — do NOT add, embellish or omit information. No marketing language that is not in the source.
 - Keep the original paragraph and line-break structure.
@@ -63,10 +63,10 @@ async function worker() {
     const started = Date.now();
     const r = await fetch('https://api.openai.com/v1/responses', {
       method:'POST', headers:{Authorization:`Bearer ${key}`,'Content-Type':'application/json'}, signal:AbortSignal.timeout(30_000),
-      body:JSON.stringify({ model,store:false,reasoning:{effort:'none'},
+      body:JSON.stringify({ model,store:false,reasoning:{effort:'low'},
         instructions:activity ? activityPrompt : description ? eventFull : eventTitle,
         input:activity ? `Name: ${row.name}\n\nBeschreibung:\n${description}` : description ? `Titel: ${row.title}\n\nBeschreibung:\n${description}` : `Titel: ${row.title}`,
-        max_output_tokens:activity ? 6144 : description ? 4096 : 256,
+        max_output_tokens:activity ? 6144 : description ? 4096 : 1024,
         text:{format:{type:'json_schema',name:'translation',strict:true,schema}},
       }),
     });
