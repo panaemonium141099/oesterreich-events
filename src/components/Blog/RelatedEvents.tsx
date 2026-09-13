@@ -146,8 +146,11 @@ function pickSpread(pool: RelatedEvent[], take: number, seen: Set<string>): Rela
     for (const e of [...pool].sort(rank)) {
       if (out.length >= take) break;
       if (seen.has(e.id)) continue;
-      // Serien wie "Ladies Night" an vier Abenden sollen die Liste nicht füllen.
-      const key = e.title.toLowerCase().slice(0, 40);
+      // Serien wie "Ladies Night" an vier Abenden sollen die Liste nicht
+      // füllen. Der Zusatz nach dem Gedankenstrich fällt weg, sonst stehen
+      // "Cirque du Soleil OVO" und "Cirque du Soleil OVO - Zusatzshow"
+      // nebeneinander.
+      const key = e.title.toLowerCase().split(/\s+[-–|]\s+/)[0].slice(0, 40);
       if (titles.has(key)) continue;
       const bl = e.bundesland ?? 'unbekannt';
       if ((perBl.get(bl) ?? 0) >= MAX_PER_BUNDESLAND) continue;
