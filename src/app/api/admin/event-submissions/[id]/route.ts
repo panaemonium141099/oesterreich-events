@@ -31,7 +31,7 @@ import {
   MAX_DESCRIPTION_LENGTH,
 } from '@/lib/inserate/submission';
 import { geocodeLocation } from '@/lib/geocoding';
-import { buildGeocodeCandidates } from '@/lib/inserate/geocode-query';
+import { buildGeocodeCandidates, precisionOfCandidate } from '@/lib/inserate/geocode-query';
 import { buildEventUrlV2 } from '@/lib/utils/slugify';
 import { sendGenericEmail } from '@/lib/email';
 import { escapeHtml } from '@/lib/utils/escape-html';
@@ -204,6 +204,7 @@ export async function PATCH(
   let latitude: number | null = null;
   let longitude: number | null = null;
   let geocodedFrom: string | null = null;
+  let coordsPrecision: 'address' | 'venue' | 'municipality' | null = null;
   for (const candidate of candidates) {
     try {
       const geo = await geocodeLocation(candidate);
@@ -211,6 +212,7 @@ export async function PATCH(
         latitude = geo.latitude;
         longitude = geo.longitude;
         geocodedFrom = candidate;
+        coordsPrecision = precisionOfCandidate(candidate, merged);
         break;
       }
     } catch (err) {
@@ -236,7 +238,7 @@ export async function PATCH(
     );
   }
 
-  const eventRow = buildEventRow(merged, { latitude, longitude });
+  const eventRow = buildEventRow(merged, { latitude, longitude, coords_precision: coordsPrecision });
 
   const { data: createdEvent, error: insertError } = await supabase
     .from('events')

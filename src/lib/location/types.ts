@@ -92,7 +92,7 @@ export interface LocationDecision {
   latitude: number | null;
   longitude: number | null;
   /** Kompatibler Wert für `events.geocoding_confidence`. */
-  geocoding_confidence: 'scraper' | 'gemeinde-centroid' | null;
+  geocoding_confidence: 'scraper' | 'venue' | 'address' | 'gemeinde-centroid' | null;
   geocoding_source: string | null;
   country: string;
   allowed: AllowedOutputs;

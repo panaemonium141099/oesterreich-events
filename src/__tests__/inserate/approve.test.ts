@@ -83,13 +83,24 @@ describe('buildEventRow', () => {
     expect(row.longitude).toBe(16.5236);
   });
 
-  it('baut auch ohne Koordinaten eine vollständige Zeile (Pfad `force`)', () => {
-    // Die Route gibt ohne Koordinaten normalerweise NICHT frei (422), weil
-    // ein solches Event in Liste, Karte und Suche unsichtbar wäre. Nur wenn
-    // der Admin ausdrücklich darauf besteht, landet diese Zeile in der DB.
+  it('ohne Geocode-Treffer bleibt die Zeile auf Gemeinde-Ebene (fn-25): Mittelpunkt der PLZ, kein Pin-Recht', () => {
+    // Früher entstand hier ein Event ohne Koordinaten (unsichtbar). Jetzt
+    // trägt die Zeile den Gemeinde-Mittelpunkt als Gebietsangabe mit
+    // Status municipality_only; Karte/Route bleiben gesperrt.
     const row = buildEventRow(submission(), { now: NOW });
-    expect(row.latitude).toBeNull();
+    expect(row.location_status).toBe('municipality_only');
+    expect(row.geocoding_confidence).toBe('gemeinde-centroid');
+    expect(row.latitude).toBeCloseTo(47.85, 1);
+    expect((row.location_resolution as { allowed: { pin: boolean } }).allowed.pin).toBe(false);
     expect(row.publish_status).toBe('published');
+  });
+
+  it('geocodierte Adresse mit Hausnummer → address_confirmed mit Pin und Route (fn-25)', () => {
+    const row = buildEventRow(submission(), { now: NOW, latitude: 47.8457, longitude: 16.5236, coords_precision: 'address' });
+    expect(row.location_status).toBe('address_confirmed');
+    expect(row.location_precision).toBe('building');
+    expect((row.location_resolution as { allowed: { route: boolean } }).allowed.route).toBe(true);
+    expect(row.location_name_raw).toBe(row.location_name);
   });
 
   it('leitet ein fehlendes Bundesland aus der PLZ ab', () => {

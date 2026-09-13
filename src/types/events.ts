@@ -56,6 +56,8 @@ export interface Event {
     precision?: string;
     reasons?: string[];
   } | null;
+  /** fn-25: Herkunft je Ortsfeld. */
+  location_provenance?: Record<string, string> | null;
   /** fn-25: Veranstaltungsort exakt wie von der Quelle geliefert. */
   location_name_raw?: string | null;
   publish_status?: 'draft' | 'published' | 'published_low_confidence' | 'suppressed' | 'needs_review' | 'expired' | 'duplicate';

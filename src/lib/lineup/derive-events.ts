@@ -82,7 +82,8 @@ async function fetchParentEvent(
   const { data, error } = await supabase
     .from('events')
     .select(
-      'id, location_name, address, postal_code, bundesland, district, latitude, longitude, category, image_url'
+      'id, location_name, address, postal_code, bundesland, district, latitude, longitude, category, image_url, ' +
+        'geocoding_confidence, geocoding_source, location_status, location_precision, location_resolution, location_provenance, venue_id'
     )
     .eq('id', parentEventId)
     .single();
@@ -206,6 +207,17 @@ export async function deriveFestivalEvents(
       district: locationData?.district ?? null,
       latitude: locationData?.latitude ?? null,
       longitude: locationData?.longitude ?? null,
+      // fn-25: abgeleitete Events erben die Ortsentscheidung des Festivals,
+      // nicht nur die Koordinate — sonst stünden sie ohne Status da.
+      geocoding_confidence: locationData?.geocoding_confidence ?? null,
+      geocoding_source: locationData?.geocoding_source ?? null,
+      location_status: locationData?.location_status ?? null,
+      location_precision: locationData?.location_precision ?? null,
+      location_resolution: locationData
+        ? { ...(locationData.location_resolution ?? {}), inherited_from_event: locationData.id ?? null }
+        : null,
+      location_provenance: locationData?.location_provenance ?? null,
+      venue_id: locationData?.venue_id ?? null,
       category: locationData?.category ?? 'Musik',
       image_url: locationData?.image_url ?? null,
       tags: ['Festival', 'Lineup'],
