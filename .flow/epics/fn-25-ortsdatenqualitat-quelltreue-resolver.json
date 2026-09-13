@@ -1,0 +1,13 @@
+{
+  "branch_name": "fn-25-ortsdatenqualitat-quelltreue-resolver",
+  "created_at": "2026-09-13T18:17:56.772522Z",
+  "depends_on_epics": [],
+  "id": "fn-25-ortsdatenqualitat-quelltreue-resolver",
+  "next_task": 1,
+  "plan_review_status": "unknown",
+  "plan_reviewed_at": null,
+  "spec_path": ".flow/specs/fn-25-ortsdatenqualitat-quelltreue-resolver.md",
+  "status": "open",
+  "title": "Ortsdatenqualit\u00e4t: Quelltreue, Resolver-Vertrag, Ausspielungs-Gating, Bestandssanierung",
+  "updated_at": "2026-09-13T18:17:56.772557Z"
+}

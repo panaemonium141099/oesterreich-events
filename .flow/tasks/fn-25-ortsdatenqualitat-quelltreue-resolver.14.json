@@ -1,0 +1,16 @@
+{
+  "assignee": null,
+  "claim_note": "",
+  "claimed_at": null,
+  "created_at": "2026-09-13T18:19:51.685277Z",
+  "depends_on": [
+    "fn-25-ortsdatenqualitat-quelltreue-resolver.12"
+  ],
+  "epic": "fn-25-ortsdatenqualitat-quelltreue-resolver",
+  "id": "fn-25-ortsdatenqualitat-quelltreue-resolver.14",
+  "priority": 14,
+  "spec_path": ".flow/tasks/fn-25-ortsdatenqualitat-quelltreue-resolver.14.md",
+  "status": "todo",
+  "title": "C5 Ausspielungs-Gating nach Wissensstand (Detail, Karte, Umkreis, Hubs, API, JSON-LD, Widgets, Benachrichtigungen)",
+  "updated_at": "2026-09-13T18:19:51.685312Z"
+}

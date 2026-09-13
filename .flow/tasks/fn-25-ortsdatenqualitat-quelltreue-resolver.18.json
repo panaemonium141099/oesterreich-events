@@ -1,0 +1,17 @@
+{
+  "assignee": null,
+  "claim_note": "",
+  "claimed_at": null,
+  "created_at": "2026-09-13T18:19:55.906869Z",
+  "depends_on": [
+    "fn-25-ortsdatenqualitat-quelltreue-resolver.14",
+    "fn-25-ortsdatenqualitat-quelltreue-resolver.17"
+  ],
+  "epic": "fn-25-ortsdatenqualitat-quelltreue-resolver",
+  "id": "fn-25-ortsdatenqualitat-quelltreue-resolver.18",
+  "priority": 18,
+  "spec_path": ".flow/tasks/fn-25-ortsdatenqualitat-quelltreue-resolver.18.md",
+  "status": "todo",
+  "title": "F1 Gestufte Freigabe, Folgewirkungen (Caches, MVs, Hubs, Suchindex, \u00dcbersetzungen, URLs) und Wiederholungslauf",
+  "updated_at": "2026-09-13T18:19:55.906903Z"
+}

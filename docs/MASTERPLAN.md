@@ -236,6 +236,21 @@ Mitbewerber ging — 231 Aufrufe in 50 Tagen.
 oeticket.com-Deeplink im einzigen Write-Pfad auf J70 um (7 Vitest-Fälle);
 Bestand per Backfill bereinigt, Kontrollabfrage zeigt nur noch J70.
 
+### 3.9 Falsche Veranstaltungsorte durch den Location-Normalizer — offen (Analyse 2026-09-13)
+
+Der GeoNames-Normalizer ersetzt Veranstaltungsorte durch gleichnamige Dörfer
+("Haus der Frau" → "Haus im Ennstal", "Martin-Luther-Kirche" → "Hirschegg",
+"Theater in der Innenstadt" → "Theater an der Wien"); das GeoNames-Verzeichnis
+trägt für 59 % der Einträge das falsche Bundesland (ADMIN1-Mapping vertauscht
+OÖ↔Stmk, Sbg↔Tirol); PLZ/Bundesland/Bezirk werden aus der falschen Koordinate
+zurückgerechnet; ein nächtlicher Lauf normalisiert alle Events erneut und der
+Master-Coords-Trigger zementiert das Ergebnis. Gemessen: 57 % der Live-Events
+tragen einen nackten Ortsnamen, ~5.500 messbare Widersprüche, Eventim AT zu
+49 % betroffen (695× "Theater an der Wien"). Rohwerte sind nicht gespeichert,
+kommen aber per Nacht-Scrape zurück. Analyse, Belege und Sanierungsplan:
+[docs/ORTSDATEN-ANALYSE-2026-09-13.md](ORTSDATEN-ANALYSE-2026-09-13.md).
+Revidiert damit §6 Punkt 3.
+
 ## 4. Getroffene Grundsatz-Entscheidungen (2026-07-07)
 
 1. **Affiliate-ID `J70` ist korrekt** und gehört uns (bestätigt). Eventim-Links im Feed
@@ -308,7 +323,11 @@ für 300k Events, nicht KI im Request-Pfad.
    deterministisch pflegen statt nachträglich per LLM raten.
 2. **Deterministischer Classifier** ([src/lib/category-classifier](../src/lib/category-classifier))
    bleibt der einzige Kategorien-Pfad (`categorization_backfill`-Step bleibt).
-3. **GeoNames-Location-Normalizer** + Koordinaten-Confidence-Ranking bleiben.
+3. ~~**GeoNames-Location-Normalizer** + Koordinaten-Confidence-Ranking bleiben.~~
+   **Revidiert 2026-09-13:** Der Normalizer ist die Hauptursache falscher
+   Veranstaltungsorte (§3.9). Name kommt künftig unverändert von der Quelle,
+   Koordinaten aus Adresse/PLZ/Venue-Register; GeoNames nur noch für
+   Stadtname → Gemeinde mit PLZ-/Bundesland-Sperre.
 4. **Quality-Gates statt KI:** `publish_status`-Mechanik (low-confidence) existiert —
    lieber ein Event konservativ ausspielen als falsch anreichern.
 

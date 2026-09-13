@@ -1,0 +1,16 @@
+{
+  "assignee": null,
+  "claim_note": "",
+  "claimed_at": null,
+  "created_at": "2026-09-13T18:19:42.899111Z",
+  "depends_on": [
+    "fn-25-ortsdatenqualitat-quelltreue-resolver.4"
+  ],
+  "epic": "fn-25-ortsdatenqualitat-quelltreue-resolver",
+  "id": "fn-25-ortsdatenqualitat-quelltreue-resolver.6",
+  "priority": 6,
+  "spec_path": ".flow/tasks/fn-25-ortsdatenqualitat-quelltreue-resolver.6.md",
+  "status": "todo",
+  "title": "A6 Nachweislich falsche Zuordnungen sofort aus pr\u00e4ziser Ausspielung nehmen (protokolliert, reversibel)",
+  "updated_at": "2026-09-13T18:19:42.899144Z"
+}

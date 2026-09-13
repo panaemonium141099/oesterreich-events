@@ -1,0 +1,14 @@
+{
+  "assignee": null,
+  "claim_note": "",
+  "claimed_at": null,
+  "created_at": "2026-09-13T18:19:38.651362Z",
+  "depends_on": [],
+  "epic": "fn-25-ortsdatenqualitat-quelltreue-resolver",
+  "id": "fn-25-ortsdatenqualitat-quelltreue-resolver.2",
+  "priority": 2,
+  "spec_path": ".flow/tasks/fn-25-ortsdatenqualitat-quelltreue-resolver.2.md",
+  "status": "todo",
+  "title": "A2 Konsistenter Snapshot der Ortsdaten (kontaminierter Ausgangsstand) auf dem Server",
+  "updated_at": "2026-09-13T18:19:38.651405Z"
+}

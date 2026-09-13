@@ -1,0 +1,17 @@
+{
+  "assignee": null,
+  "claim_note": "",
+  "claimed_at": null,
+  "created_at": "2026-09-13T18:19:53.820790Z",
+  "depends_on": [
+    "fn-25-ortsdatenqualitat-quelltreue-resolver.13",
+    "fn-25-ortsdatenqualitat-quelltreue-resolver.15"
+  ],
+  "epic": "fn-25-ortsdatenqualitat-quelltreue-resolver",
+  "id": "fn-25-ortsdatenqualitat-quelltreue-resolver.16",
+  "priority": 16,
+  "spec_path": ".flow/tasks/fn-25-ortsdatenqualitat-quelltreue-resolver.16.md",
+  "status": "todo",
+  "title": "D1 Vergleichslauf: neuer Resolver \u00fcber den Quellenstand, separate Ergebnismenge, Report je Event/Venue-Gruppe",
+  "updated_at": "2026-09-13T18:19:53.820824Z"
+}

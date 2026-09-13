@@ -3,6 +3,19 @@
  *
  * Run: npx tsx src/scripts/normalize-locations.ts
  */
+
+// fn-25 (2026-09-13): Dieses Skript gehört zum abgeschalteten Alt-Geo-Pfad.
+// Es ersetzte Veranstaltungsorte durch GeoNames-Worttreffer bzw. zementierte
+// solche Treffer (docs/ORTSDATEN-ANALYSE-2026-09-13.md). Es läuft nur noch
+// ausdrücklich für Forensik: LEGACY_GEO_OK=1 setzen.
+if (process.env.LEGACY_GEO_OK !== '1') {
+  console.error(
+    '[fn-25] Abgeschaltet: dieses Skript schreibt Ortsdaten über den alten ' +
+      'Namensabgleich. Nur mit LEGACY_GEO_OK=1 ausführbar (Forensik).',
+  );
+  process.exit(2);
+}
+
 import { readFileSync } from 'fs';
 import { join } from 'path';
 import { createClient } from '@supabase/supabase-js';

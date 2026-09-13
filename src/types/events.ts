@@ -43,6 +43,21 @@ export interface Event {
   visibility?: string;
   geocoding_confidence?: string | null;
   geocoding_source?: string | null;
+  /** fn-25: Wissensstand zum Ort (venue_confirmed | address_confirmed |
+   *  municipality_only | region_only | unresolved | conflict | online).
+   *  NULL bei Zeilen, die seit der Umstellung noch nicht neu geschrieben wurden. */
+  location_status?: string | null;
+  /** fn-25: räumliche Genauigkeit der gespeicherten Position. */
+  location_precision?: string | null;
+  /** fn-25: Protokoll der Ortsentscheidung; `allowed` steuert Pin/Anreise/Distanz. */
+  location_resolution?: {
+    allowed?: { pin?: boolean; route?: boolean; distance?: boolean; municipality_page?: boolean };
+    status?: string;
+    precision?: string;
+    reasons?: string[];
+  } | null;
+  /** fn-25: Veranstaltungsort exakt wie von der Quelle geliefert. */
+  location_name_raw?: string | null;
   publish_status?: 'draft' | 'published' | 'published_low_confidence' | 'suppressed' | 'needs_review' | 'expired' | 'duplicate';
   quality_score?: number | null;
   raw_event_id?: string | null;
@@ -176,6 +191,23 @@ export interface ScrapedEvent {
    * write-path must NOT override it.
    */
   category_locked?: boolean;
+  /**
+   * Von der Quelle ausdrücklich genannter Ort/Gemeinde (Eventim `eventCity`,
+   * Feratel `town`, Gemeinde-Kalender: die eigene Gemeinde). Getrennt vom
+   * Veranstaltungsort (`location_name`), der ein Venue-Name ist (fn-25).
+   */
+  city?: string;
+  /** Venue-Kennung der Quelle im Namensraum der Quelle, z. B. `eventim:12345`. */
+  source_venue_id?: string;
+  /**
+   * Genauigkeit, die der Adapter für `latitude`/`longitude` behauptet:
+   * `venue` (Koordinate des Veranstaltungsorts aus einem strukturierten
+   * Feed), `address` (geocodierte Adresse), `municipality`/`postcode`
+   * (Gemeinde- bzw. PLZ-Mittelpunkt), `region` (Regions-/Bundeslandzentrum,
+   * wird nicht als Position übernommen). Fehlt: `unknown`, die Position
+   * wird gespeichert, aber nicht als bestätigt behandelt.
+   */
+  coords_precision?: 'venue' | 'address' | 'municipality' | 'postcode' | 'region' | 'unknown';
 }
 
 export interface EventFilters {
