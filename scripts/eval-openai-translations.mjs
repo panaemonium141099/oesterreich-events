@@ -6,10 +6,14 @@ const model = 'gpt-5.6-luna';
 const key = process.env.OPENAI_API_KEY;
 if (!key) throw new Error('OPENAI_API_KEY is missing');
 console.log(JSON.stringify({ check: 'report-recipient',
-  alertRecipientMatchesProjectOwner: process.env.ALERT_EMAIL === 'jona.glatz@gmail.com',
+  alertRecipientMatchesProjectOwner: ['jona.glatz@gmail.com', 'dev@glatzdev.com'].includes(process.env.ALERT_EMAIL),
   alertEmailConfigured: Boolean(process.env.ALERT_EMAIL),
   brevoConfigured: Boolean(process.env.BREVO_API_KEY), resendConfigured: Boolean(process.env.RESEND_API_KEY) }));
 const rules = `- Keep proper nouns unchanged: venue names, band/artist names, place names (Gemeinde/city names), festival brand names. "Heuriger"/"Kirtag" may be kept with a short English gloss on first use, e.g. "Kirtag (traditional fair)".
+- Preserve the complete spelling and word order of proper names, including ensembles, organizations, branded events and named buildings. Translate only surrounding generic words.
+- Translate idioms naturally by their intended meaning, not word for word.
+- Keep numeric values, dates, times and contact details in their original notation. Never convert 24-hour times to a.m./p.m.
+- Keep existing HTML tags and escaped HTML entities unchanged; translate only human-readable text.
 - Translate faithfully — do NOT add, embellish or omit information. No marketing language that is not in the source.
 - title_en: concise translated title. If the title is a proper name that needs no translation, return it unchanged.`;
 const eventFull = `You translate Austrian event listings from German to natural English for an event-discovery website.
@@ -27,10 +31,15 @@ const activityPrompt = `You translate descriptions of Austrian leisure destinati
 
 Rules:
 - Keep proper nouns unchanged: the name of the destination itself, place names, mountain and lake names, operator and brand names.
+- Preserve the complete spelling and word order of proper names, including ensembles, organizations, branded events and named buildings. Translate only surrounding generic words.
+- Translate idioms naturally by their intended meaning, not word for word.
+- Keep numeric values, dates, times and contact details in their original notation. Never convert 24-hour times to a.m./p.m.
+- Keep existing HTML tags and escaped HTML entities unchanged; translate only human-readable text.
 - Translate faithfully — do NOT add, embellish or omit information. No marketing language that is not in the source.
 - Keep the original paragraph and line-break structure.
 - Convert nothing: prices, opening hours, distances and altitudes stay exactly as written.
 - Austrian terms without an English equivalent may keep the German word with a short gloss on first use, e.g. "Alm (mountain pasture)", "Heuriger (wine tavern)".
+- The Name field is context only. Never prepend the name, input labels (Name/Description), an introduction or a summary to description_en.
 - description_en: the full translation. Return nothing else.`;
 
 // Supplied by the workflow from a checked-in fixture collected without authentication.
