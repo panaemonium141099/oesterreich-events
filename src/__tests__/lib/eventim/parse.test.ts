@@ -46,6 +46,9 @@ describe('parseEventimFeed', () => {
     expect(a1.country).toBe('AT');
     expect(a1.bundesland).toBe('wien');
     expect(a1.latitude).toBe(48.2);
+    expect(a1.coords_precision).toBe('venue');
+    expect(a1.city).toBe('WIEN');
+    expect(a1.source_venue_id).toBe('eventim:V1');
     expect(a1.price_text).toBe('20,00 € – 40,00 €');
     expect(a1.source_type).toBe('scraped');
     expect(a1.image_url).toBe('https://img/x.jpg');
@@ -66,6 +69,18 @@ describe('parseEventimFeed', () => {
     const de = out.find((e) => e.source_id === 'DE1')!;
     expect(de.country).toBe('DE');
     expect(de.bundesland).toBeUndefined();
+  });
+
+  it('fn-25: ohne Venue-Koordinate kein PLZ-Mittelpunkt als Position, PLZ und Ort bleiben Quellangaben', () => {
+    const s: EventimSeries[] = [{ esId: 'S', esName: 'X', esCategories: [{ category: '1A' }],
+      events: [baseEvent({ eventId: 'NOCOORDS', venueLatitude: 0, venueLongitude: 0, eventZip: '7000', eventCity: 'EISENSTADT' })] }];
+    const ev = parseEventimFeed(s, NOW)[0];
+    expect(ev.latitude).toBeUndefined();
+    expect(ev.longitude).toBeUndefined();
+    expect(ev.coords_precision).toBeUndefined();
+    expect(ev.postal_code).toBe('7000');
+    expect(ev.city).toBe('EISENSTADT');
+    expect(ev.bundesland).toBe('burgenland');
   });
 
   it('drops Eventim blank.gif placeholder images', () => {

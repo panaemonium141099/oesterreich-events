@@ -7,9 +7,8 @@ TBD
 - [ ] TBD
 
 ## Done summary
-TBD
-
+location-trust.ts: vertraut nur noch location_resolution.allowed.route, manual, json-ld-venue; Adress-String und exact/verified reichen nicht mehr. 8 Tests. PR #196.
 ## Evidence
-- Commits:
-- Tests:
-- PRs:
+- Commits: 1a4000e
+- Tests: npx vitest run src/__tests__/lib/location-trust.test.ts
+- PRs: https://github.com/panaemonium141099/oesterreich-events/pull/196

@@ -7,9 +7,8 @@ TBD
 - [ ] TBD
 
 ## Done summary
-TBD
-
+Nachtlauf: normalize/geocoding/master_coords nur mit --legacy-geo, Skripte mit LEGACY_GEO_OK-Guard; Trigger trg_apply_master_coords entfernt, apply_master_coords_bulk No-op (Migration 20260913201000 auf Prod angewendet, verifiziert: 4 Trigger uebrig, RPC liefert 0 + WARNING). PR #196.
 ## Evidence
-- Commits:
+- Commits: 1a4000e
 - Tests:
-- PRs:
+- PRs: https://github.com/panaemonium141099/oesterreich-events/pull/196

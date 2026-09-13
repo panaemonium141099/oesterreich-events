@@ -40,6 +40,11 @@ import {
   type LocationInput,
 } from '@/lib/location/conservative-resolution';
 import type { LocationDecision, LocationStatus } from '@/lib/location/types';
+import {
+  closeScrapeRun,
+  openScrapeRun,
+  persistRawEvents,
+} from '@/lib/db/raw-persist';
 import { normalizeDistrict, isCanonicalDistrict } from '@/lib/district-normalizer';
 import { districtFromPlz } from '@/lib/plz-district';
 import { bundeslandToId } from '@/lib/bundeslaender';
@@ -400,10 +405,19 @@ function toExistingCategoryRow(row: ExistingRow | undefined): ExistingCategoryRo
 }
 
 /** Maps a ScrapedEvent to the Supabase events row shape. */
+/** Rohschicht-Ergebnis für einen Batch (fn-25 B1). */
+interface RawRefs {
+  /** `source_name::source_id` → raw_events.id */
+  ids: Map<string, string>;
+  /** Schlüssel ohne gesicherten Quellenstand → nicht veröffentlichen. */
+  failed: Set<string>;
+}
+
 function toSupabaseRow(
   event: ScrapedEvent,
   existingMap: Map<string, ExistingRow>,
   imageMap: Map<string, ValidatedImage>,
+  rawRefs: RawRefs = { ids: new Map(), failed: new Set() },
 ) {
   const decision = decideLocation(event);
   // `resolved` bündelt, was tatsächlich in die Zeile geschrieben wird —
@@ -692,10 +706,17 @@ function toSupabaseRow(
     admission: { decision: admission.decision, reasons: admission.reasons, corrections: admission.corrections },
   };
 
+  // Ohne erhaltenen Quellenstand keine Veröffentlichung (fn-25 B1): die
+  // Ortsentscheidung wäre nicht reproduzierbar. Die Zeile wird trotzdem
+  // geschrieben, damit nichts verloren geht.
+  const rawPersistFailed = rawRefs.failed.has(key);
+  if (rawPersistFailed) resolved.reasons.push('raw_persist_failed');
   const finalPublishStatus =
     existing?.publish_status && !COMPUTED_PUBLISH_STATUSES.has(existing.publish_status)
       ? existing.publish_status
-      : score.publish_status;
+      : rawPersistFailed && score.publish_status === 'published'
+        ? 'needs_review'
+        : score.publish_status;
 
   // ─── Bezirk: NUR kanonische Werte ───────────────────────────────
   // `events.district` haengt an einem Fremdschluessel auf
@@ -783,6 +804,7 @@ function toSupabaseRow(
     location_precision: finalPrecision,
     location_resolution: locationResolution,
     location_provenance: decision.provenance,
+    raw_event_id: rawRefs.ids.get(key) ?? null,
     category: canonical.category,
     tags: canonical.tags && canonical.tags.length > 0 ? canonical.tags : null,
     source_category_raw: event.category ?? null,
@@ -833,7 +855,7 @@ function toSupabaseRow(
     last_seen_at: new Date().toISOString(),
   };
 
-  return { row, admission };
+  return { row, admission, rawPersistFailed };
 }
 
 const BATCH_SIZE = 100;
@@ -854,6 +876,8 @@ export interface SyncResult {
   quarantined: number;
   /** Häufigkeit je Verwerfungs-/Quarantänegrund, für den Lauf-Report. */
   reasons: Record<string, number>;
+  /** Neu gesicherte Rohzeilen (`raw_events`); unveränderte Events zählen nicht. */
+  rawWritten: number;
   /**
    * Die tatsächlichen Postgres-Meldungen der fehlgeschlagenen Batches,
    * dedupliziert. Ohne sie stand in `source_runs.error_message` nur
@@ -947,8 +971,18 @@ export function normalizeEventTimestamps(events: ScrapedEvent[]): ScrapedEvent[]
  * Upserts a list of scraped events into Supabase in batches.
  * Returns counts of inserted/updated rows.
  */
+export interface SyncOptions {
+  /**
+   * Lauf-ID aus `scrape_runs`, wenn der Aufrufer mehrere Batches zu EINEM
+   * Lauf bündelt (Eventim-Import). Fehlt sie, öffnet und schließt der Sync
+   * einen eigenen Lauf für diesen Aufruf.
+   */
+  scrapeRunId?: string | null;
+}
+
 export async function syncEventsToSupabase(
-  rawEvents: ScrapedEvent[]
+  rawEvents: ScrapedEvent[],
+  options: SyncOptions = {},
 ): Promise<SyncResult> {
   const empty = (): SyncResult => ({
     upserted: 0,
@@ -956,9 +990,11 @@ export async function syncEventsToSupabase(
     filtered: 0,
     quarantined: 0,
     reasons: {},
+    rawWritten: 0,
     errorMessages: [],
   });
   if (rawEvents.length === 0) return empty();
+  const startedMs = Date.now();
 
   // Nackte Wandzeiten der Scraper in echte Instants drehen, bevor
   // irgendjemand sie liest.
@@ -979,6 +1015,7 @@ export async function syncEventsToSupabase(
   let upserted = 0;
   let errors = 0;
   let quarantined = 0;
+  let rawWritten = 0;
   const errorMessages = new Set<string>();
 
   // Deduplicate events by source_name+source_id before syncing
@@ -991,6 +1028,13 @@ export async function syncEventsToSupabase(
     return true;
   });
 
+  // Rohschicht (fn-25 B1): ein Lauf je Aufruf, sofern der Aufrufer keinen
+  // übergibt. Ohne Lauf-ID kann keine Rohzeile geschrieben werden — dann
+  // gelten alle Kandidaten als „Quellenstand nicht gesichert".
+  const sourceNames = [...new Set(dedupedEvents.map(e => e.source_name))];
+  const ownsRun = !options.scrapeRunId;
+  const runId = options.scrapeRunId ?? (await openScrapeRun(supabase, sourceNames.length === 1 ? sourceNames[0] : 'mixed'));
+
   for (let i = 0; i < dedupedEvents.length; i += BATCH_SIZE) {
     const batchEvents = dedupedEvents.slice(i, i + BATCH_SIZE);
 
@@ -1001,17 +1045,28 @@ export async function syncEventsToSupabase(
     }));
     const existingMap = await prefetchExistingRows(supabase, keys);
 
+    // Quellenstand VOR der Normalisierung sichern.
+    let rawRefs: RawRefs = { ids: new Map(), failed: new Set(keys.map(k => `${k.source_name}::${k.source_id}`)) };
+    if (runId) {
+      const raw = await persistRawEvents(supabase, runId, batchEvents);
+      rawRefs = { ids: raw.ids, failed: raw.failed };
+      rawWritten += raw.written;
+    }
+
     // fn-14.5: validate + (when applicable) upgrade image URLs in
     // parallel with bounded concurrency. Pure no-op for events without
     // image_url. The map is keyed by `source_name::source_id` so
     // toSupabaseRow can look up the validated URL + extracted dims.
     const imageMap = await validateImagesForBatch(batchEvents);
 
-    const mapped = batchEvents.map(e => toSupabaseRow(e, existingMap, imageMap));
-    for (const { admission } of mapped) {
+    const mapped = batchEvents.map(e => toSupabaseRow(e, existingMap, imageMap, rawRefs));
+    for (const { admission, rawPersistFailed } of mapped) {
       if (admission.decision === 'quarantine') {
         quarantined++;
         for (const r of admission.reasons) reasons[r] = (reasons[r] ?? 0) + 1;
+      } else if (rawPersistFailed) {
+        quarantined++;
+        reasons.raw_persist_failed = (reasons.raw_persist_failed ?? 0) + 1;
       }
     }
 
@@ -1039,7 +1094,19 @@ export async function syncEventsToSupabase(
     );
   }
 
-  return { upserted, errors, filtered, quarantined, reasons, errorMessages: [...errorMessages] };
+  if (runId && ownsRun) {
+    await closeScrapeRun(supabase, runId, startedMs, {
+      items_found: rawEvents.length,
+      raw_written: rawWritten,
+      items_updated: upserted,
+      needs_review_count: quarantined,
+      batch_errors: errorMessages.size,
+      status: errors === 0 ? 'success' : upserted > 0 ? 'partial' : 'error',
+      error_message: errorMessages.size > 0 ? [...errorMessages].join(' | ').slice(0, 1000) : null,
+    });
+  }
+
+  return { upserted, errors, filtered, quarantined, reasons, rawWritten, errorMessages: [...errorMessages] };
 }
 
 // ─── fn-14.5 image validate-and-upgrade pool ─────────────────────────
@@ -1092,4 +1159,21 @@ async function validateImagesForBatch(
   );
   await Promise.all(workers);
   return result;
+}
+
+// ─── fn-25 B1: Lauf-Klammer für Aufrufer mit mehreren Batches ────────
+// Der Eventim-Import ruft `syncEventsToSupabase` ~50× je Import auf; ein
+// Lauf je Aufruf würde die Rohschicht zerstückeln. Diese Wrapper öffnen
+// und schließen EINEN `scrape_runs`-Eintrag um alle Batches herum.
+
+export async function beginScrapeRun(sourceName: string): Promise<string | null> {
+  return openScrapeRun(getSupabaseAdminClient(), sourceName);
+}
+
+export async function finishScrapeRun(
+  runId: string,
+  startedMs: number,
+  stats: Parameters<typeof closeScrapeRun>[3],
+): Promise<void> {
+  return closeScrapeRun(getSupabaseAdminClient(), runId, startedMs, stats);
 }

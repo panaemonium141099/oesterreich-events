@@ -2,7 +2,7 @@ import type { ScrapedEvent } from '@/types/events';
 import type { EventimSeries, EventimEvent } from './types';
 import { mapEventimCategory } from './category-map';
 import { isBookable, isCancelled, notBookableReason, priceText } from './availability';
-import { getCoordinatesForPLZ, getBundeslandFromPLZ } from '@/lib/plzCoordinates';
+import { getBundeslandFromPLZ } from '@/lib/plzCoordinates';
 import { bundeslandFromPolygon } from './bundesland-from-geo';
 
 const ALLOWED_COUNTRIES = new Set(['AT', 'DE', 'CH']);
@@ -92,18 +92,20 @@ function mapEvent(
     latitude = undefined;
     longitude = undefined;
   }
-  // Coordless AT events → PLZ centroid (Austria-only PLZ DB) for a map position.
-  if ((latitude === undefined || longitude === undefined) && e.eventCountry === 'AT' && e.eventZip) {
-    const plz = getCoordinatesForPLZ(e.eventZip);
-    if (plz) { latitude = plz[0]; longitude = plz[1]; }
-  }
-  // Bundesland (AT only): exact via point-in-polygon on the coordinates; if none
-  // resolve, the platform's PLZ→Bundesland range map (administrative ranges,
-  // deterministic — not a first-digit guess).
+  // fn-25 (2026-09-13): KEIN PLZ-Mittelpunkt mehr als Event-Position. Der
+  // Feed liefert entweder eine Venue-Koordinate (dann `coords_precision:
+  // 'venue'`) oder gar keine; einen Gebietsmittelpunkt aus der PLZ leitet
+  // der Schreibpfad selbst ab und kennzeichnet ihn als solchen
+  // (`gemeinde-centroid`, Status `municipality_only`). Vorher landeten
+  // PLZ-Zentren ununterscheidbar als „Scraper-Koordinate" in der DB.
+  const hasVenueCoords = latitude !== undefined && longitude !== undefined;
+  // Bundesland (AT only): exact via point-in-polygon on the venue coordinates;
+  // if none resolve, the platform's PLZ→Bundesland range map (administrative
+  // ranges, deterministic — not a first-digit guess).
   let bundesland: string | undefined;
   if (e.eventCountry === 'AT') {
-    if (latitude !== undefined && longitude !== undefined) {
-      bundesland = bundeslandFromPolygon(latitude, longitude) ?? undefined;
+    if (hasVenueCoords) {
+      bundesland = bundeslandFromPolygon(latitude!, longitude!) ?? undefined;
     }
     if (!bundesland && e.eventZip) {
       bundesland = getBundeslandFromPLZ(e.eventZip) ?? undefined;
@@ -121,8 +123,12 @@ function mapEvent(
     location_name: e.eventVenue || undefined,
     address: e.eventStreet ?? undefined,
     postal_code: e.eventZip ?? undefined,
+    // fn-25: Ort und Venue-Kennung der Quelle bleiben erhalten (Review §2 P0).
+    city: e.eventCity?.trim() || undefined,
+    source_venue_id: e.eventVenueId ? `eventim:${e.eventVenueId}` : undefined,
     latitude,
     longitude,
+    coords_precision: hasVenueCoords ? 'venue' : undefined,
     country: e.eventCountry,
     bundesland,
     category,
