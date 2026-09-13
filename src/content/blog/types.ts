@@ -28,6 +28,24 @@ export interface FaqItem {
   answer: string;
 }
 
+/**
+ * Steuert die "Passende Events"-Sektion unter einem Post.
+ *
+ * Ohne diese Angabe leitet RelatedEvents die Suchbegriffe aus den SEO-
+ * Keywords ab. Saison-Seiten sollten sie setzen: bei "Halloween" ist das
+ * Zeitfenster das viel staerkere Relevanzsignal als der Titel.
+ */
+export interface RelatedEventsSpec {
+  /** ilike-Suchbegriffe, ODER-verknuepft. Ein Treffer reicht. */
+  terms?: string[];
+  /** Fruehestes Startdatum (ISO). Default: jetzt. */
+  from?: string;
+  /** Spaetestes Startdatum (ISO). Default: in 120 Tagen. */
+  to?: string;
+  /** Taxonomie-Kategorien fuers Auffuellen. Default: die Rubrik des Posts. */
+  categories?: string[];
+}
+
 export interface FestivalPost {
   slug: string;
   title: string;
@@ -115,6 +133,8 @@ export interface FestivalPost {
    * generische BlogStayBox.
    */
   stays?: StayItem[];
+  /** Steuert die "Passende Events"-Sektion (siehe RelatedEventsSpec). */
+  relatedEvents?: RelatedEventsSpec;
 }
 
 /** Eine kuratierte Unterkunft in einem "Übernachten"-Artikel (fn-21). */
