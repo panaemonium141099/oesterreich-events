@@ -100,7 +100,11 @@ export class KulturGrazScraper extends BaseScraper {
           if (part === title) continue;
           if (/^\d{1,2}:\d{2}/.test(part)) continue;
           if (this.isCategory(part)) continue;
-          if (part.length > 3 && part.length < 100 && !part.includes('Uhr')) {
+          // fn-25 B3: Info-/Foto-/Reihen-Zeilen und Kategorie-Aufzählungen
+          // ("- Literaturhaus  - Lesung/Vortrag") sind kein Veranstaltungsort;
+          // vorher landeten sie samt Foto-Credits in location_name.
+          if (/^[-–•]\s/.test(part) || /(Info|Foto|Reihe|Tickets?|Eintritt|Karten)\s*:/.test(part) || part.includes('↗')) continue;
+          if (part.length > 3 && part.length < 60 && !part.includes('Uhr') && !/[.!?]\s+\S/.test(part)) {
             locationName = part;
             break;
           }
@@ -133,7 +137,9 @@ export class KulturGrazScraper extends BaseScraper {
           source_url: sourceUrl,
           title,
           start_date: startDate,
-          location_name: locationName || 'Graz',
+          // fn-25 B3: Graz ist der Ortskontext, kein Ersatz-Venue.
+          location_name: locationName,
+          city: 'Graz',
           bundesland: 'steiermark',
           category: categorizeEvent(title, undefined, categoryTag ? [categoryTag] : undefined),
           image_url: imageUrl,

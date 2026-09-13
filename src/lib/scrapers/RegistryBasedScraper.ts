@@ -182,9 +182,14 @@ export async function ingestVenueFeed(
           `ICS: ${result.rawEventCount} raw, ${result.expandedEventCount} expanded`
         );
 
-        // Attach venue_id to all events
+        // Attach venue_id to all events (fn-25: Registry-Venue = belegte Spielstätte)
         for (const event of result.events) {
-          events.push({ ...event, venue_id: venue.id });
+          events.push({
+            ...event,
+            venue_id: venue.id,
+            source_venue_id: `registry:${venue.id}`,
+            coords_precision: event.coords_precision ?? (event.latitude != null ? 'venue' : undefined),
+          });
         }
 
         if (result.warnings.length > 0) {
@@ -219,6 +224,8 @@ export async function ingestVenueFeed(
             ...event,
             source_name: `registry:${slugify(venue.name)}`,
             venue_id: venue.id,
+            source_venue_id: `registry:${venue.id}`,
+            coords_precision: event.coords_precision ?? (event.latitude != null ? 'venue' : undefined),
           });
         }
 

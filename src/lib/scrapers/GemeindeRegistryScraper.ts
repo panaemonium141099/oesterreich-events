@@ -3,6 +3,7 @@ import * as vm from 'vm';
 import { readFileSync, readdirSync, writeFileSync, existsSync, mkdirSync } from 'fs';
 import { join } from 'path';
 import { BaseScraper } from './BaseScraper';
+import { applyGemeindeContext } from './gemeinde-context';
 import { categorizeEvent } from '../categorize';
 import { detectNextPage, detectMonthNavigation, MAX_PAGES_PER_SITE } from './pagination';
 import type { ScrapedEvent } from '@/types/events';
@@ -115,7 +116,10 @@ export class GemeindeRegistryScraper extends BaseScraper {
             this.log(`  [${i + 1}/${scrapeable.length}] ${entry.name}: FETCH FEHLER [${entry.strategy}] ${entry.eventUrl}`);
           }
         } else if (result.length > 0) {
-          allEvents.push(...result);
+          // fn-25 B3: Gemeinde als Kontext (city + PLZ), Mittelpunkt nur als
+          // gekennzeichnete Gebietsangabe, kein Gemeindename als Venue.
+          const ctx = { name: entry.name, plz: entry.plz, lat: entry.lat, lng: entry.lng, bundesland: entry.bundesland, bezirk: entry.bezirk };
+          allEvents.push(...result.map(e => applyGemeindeContext(e, ctx)));
           scraped++;
           this.log(`  [${i + 1}/${scrapeable.length}] ${entry.name}: ${result.length} Events [${entry.strategy}]`);
         } else {

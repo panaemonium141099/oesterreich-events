@@ -316,6 +316,20 @@ export function resolveConservativeLocation(input: LocationInput, now: Date = ne
     }
   }
 
+  // Anzeigename: der Rohwert der Quelle. Nennt die Quelle keinen
+  // Veranstaltungsort, zeigt die Zeile die belegte Gemeinde bzw. den
+  // genannten Ort; `location_name_raw` bleibt dabei leer, die Herkunft
+  // steht im Protokoll.
+  if (!locationName) {
+    if (gemeinde) {
+      base.location_name = gemeinde.name;
+      provenance.location_name = 'registry';
+    } else if (cityText) {
+      base.location_name = cityText;
+      provenance.location_name = hasText(input.city) ? 'source' : 'address_text';
+    }
+  }
+
   // ── Quellkoordinaten prüfen ────────────────────────────────────────
   let lat: number | null = null;
   let lng: number | null = null;

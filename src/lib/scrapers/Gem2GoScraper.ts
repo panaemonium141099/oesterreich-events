@@ -4,6 +4,7 @@ import { categorizeEvent } from '../categorize';
 import { GEM2GO_GEMEINDEN, type Gem2GoGemeinde } from './gemeinden/gem2goGemeinden';
 import { extractGem2goDetail } from './gem2go-detail';
 import { discoverAndParseGemeindeEvents, asScrapedEvent } from './gemeinde-event-discovery';
+import { applyGemeindeContext } from './gemeinde-context';
 import type { ScrapedEvent } from '@/types/events';
 
 /**
@@ -136,7 +137,9 @@ export class Gem2GoScraper extends BaseScraper {
           if (this.enableDetailEnrichment) {
             await this.enrichEventsFromDetailPages(events);
           }
-          allEvents.push(...events);
+          // fn-25 B3: Gemeinde als Kontext, Mittelpunkt als Gebietsangabe.
+          const ctx = { name: gemeinde.name, plz: gemeinde.plz, lat: gemeinde.lat, lng: gemeinde.lng, bundesland: gemeinde.bundesland, bezirk: gemeinde.bezirk };
+          allEvents.push(...events.map(e => applyGemeindeContext(e, ctx)));
           gemeindenScraped++;
           this.log(`[${i + 1}/${GEM2GO_GEMEINDEN.length}] ${gemeinde.name}: ${events.length} Events (gesamt: ${allEvents.length})`);
         } else {
@@ -182,7 +185,8 @@ export class Gem2GoScraper extends BaseScraper {
         this.log(`[${i + 1}/${GEM2GO_GEMEINDEN.length}] ${gemeinde.name}: Fallback URL gefunden (${eventListUrl}) aber 0 events parsed`);
         return [];
       }
-      const scraped = parsed.map((p) => asScrapedEvent(p, gemeinde));
+      const ctx = { name: gemeinde.name, plz: gemeinde.plz, lat: gemeinde.lat, lng: gemeinde.lng, bundesland: gemeinde.bundesland, bezirk: gemeinde.bezirk };
+      const scraped = parsed.map((p) => applyGemeindeContext(asScrapedEvent(p, gemeinde), ctx));
       this.log(`[${i + 1}/${GEM2GO_GEMEINDEN.length}] ${gemeinde.name}: ${scraped.length} Events via FALLBACK (${eventListUrl})`);
       return scraped;
     } catch (err) {

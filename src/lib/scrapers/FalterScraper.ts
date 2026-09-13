@@ -125,7 +125,7 @@ export class FalterScraper extends BaseScraper {
           source_url: eventUrl,
           title,
           start_date: startDate,
-          location_name: venue || 'Wien',
+          location_name: venue || undefined,
           latitude: 48.2082,
           longitude: 16.3738,
           category: categorizeEvent(title),

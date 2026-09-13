@@ -118,8 +118,11 @@ export class MariazellAtScraper extends BaseScraper {
           bundesland: MARIAZELL_BUNDESLAND,
           district: MARIAZELL_DISTRICT,
           postal_code: MARIAZELL_PLZ,
+          // fn-25 B3: Ortsmittelpunkt von Mariazell, keine Venue-Position.
+          city: 'Mariazell',
           latitude: MARIAZELL_LAT,
           longitude: MARIAZELL_LNG,
+          coords_precision: 'municipality',
           category: categorizeEvent(title),
         });
       } catch { /* skip malformed entries */ }
@@ -248,8 +251,11 @@ export class BasilikaMariazellScraper extends BaseScraper {
           bundesland: MARIAZELL_BUNDESLAND,
           district: MARIAZELL_DISTRICT,
           postal_code: MARIAZELL_PLZ,
+          // fn-25 B3: Ortsmittelpunkt von Mariazell, keine Venue-Position.
+          city: 'Mariazell',
           latitude: MARIAZELL_LAT,
           longitude: MARIAZELL_LNG,
+          coords_precision: 'municipality',
           category: categorizeEvent(title),
         });
       } catch { /* skip malformed rows */ }
@@ -350,7 +356,12 @@ export class MariazellGvScraper extends BaseScraper {
         }
 
         // Extract date/time from text: "Am Tag, DD.MM.YYYY um HH:MM Uhr"
-        const paragraphs = $child.find('p');
+        // fn-25 B3: nur die Absätze AUSSERHALB des Beschreibungs-Panels
+        // lesen und den Ort nur aus dem Datums-Absatz nehmen. Vorher lief
+        // die Schleife über alle Absätze, und der letzte `<br>`-Umbruch eines
+        // Fließtexts ("Werfen Sie einen Blick…", "Lassen Sie sich…") wurde
+        // zum Veranstaltungsort.
+        const paragraphs = $child.find('p').filter((_, p) => $(p).closest('.panel').length === 0);
         let dateStr = currentDateStr;
         let time: string | undefined;
         let locationName: string | undefined;
@@ -361,24 +372,24 @@ export class MariazellGvScraper extends BaseScraper {
 
           // Match date+time pattern
           const dtMatch = pText.match(/(\d{1,2})\.(\d{2})\.(\d{4})\s+um\s+(\d{1,2}:\d{2})/);
+          const dateOnlyMatch = dtMatch ? null : pText.match(/(\d{1,2})\.(\d{2})\.(\d{4})/);
           if (dtMatch) {
             const day = dtMatch[1].padStart(2, '0');
             dateStr = `${dtMatch[3]}-${dtMatch[2]}-${day}`;
             time = dtMatch[4];
-          } else {
-            const dateOnlyMatch = pText.match(/(\d{1,2})\.(\d{2})\.(\d{4})/);
-            if (dateOnlyMatch) {
-              const day = dateOnlyMatch[1].padStart(2, '0');
-              dateStr = `${dateOnlyMatch[3]}-${dateOnlyMatch[2]}-${day}`;
-            }
+          } else if (dateOnlyMatch) {
+            const day = dateOnlyMatch[1].padStart(2, '0');
+            dateStr = `${dateOnlyMatch[3]}-${dateOnlyMatch[2]}-${day}`;
           }
 
-          // Location: text after <br> in the date paragraph
-          const brParts = pHtml.split(/<br\s*\/?>/i);
-          if (brParts.length > 1) {
-            const locText = brParts.slice(1).join(' ').replace(/<[^>]*>/g, '').trim();
-            if (locText && locText.length > 2 && !locText.match(/^\d/)) {
-              locationName = locText;
+          // Location: text after <br> in the DATE paragraph only
+          if ((dtMatch || dateOnlyMatch) && !locationName) {
+            const brParts = pHtml.split(/<br\s*\/?>/i);
+            if (brParts.length > 1) {
+              const locText = brParts.slice(1).join(' ').replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim();
+              if (locText && locText.length > 2 && locText.length <= 80 && !locText.match(/^\d/) && !/[.!?]$/.test(locText)) {
+                locationName = locText;
+              }
             }
           }
         });
@@ -407,8 +418,11 @@ export class MariazellGvScraper extends BaseScraper {
           bundesland: MARIAZELL_BUNDESLAND,
           district: MARIAZELL_DISTRICT,
           postal_code: MARIAZELL_PLZ,
+          // fn-25 B3: Ortsmittelpunkt von Mariazell, keine Venue-Position.
+          city: 'Mariazell',
           latitude: MARIAZELL_LAT,
           longitude: MARIAZELL_LNG,
+          coords_precision: 'municipality',
           category: categorizeEvent(title, description),
         });
       } catch { /* skip malformed entries */ }

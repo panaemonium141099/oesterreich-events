@@ -545,15 +545,25 @@ export class FeratelScraper extends BaseScraper {
     // timestamptz column made Postgres misread it as UTC (+1h/+2h shift).
     const startDate = feratelLocalToUtcIso(event.date) ?? event.date;
 
-    // Location
+    // Location (fn-25 B3): `place` ist der Veranstaltungsort, `town` der
+    // ausdrücklich genannte Ort. Beides getrennt weitergeben; kein
+    // Regionsname und keine Stadt als Ersatz-Venue.
     const loc = event.location;
     const place = loc?.place?.trim();
     const town = loc?.town?.trim();
-    const locationName = [place, town].filter(Boolean).join(', ') || town || region.name;
+    const locationName = place || undefined;
 
-    // Coordinates — use from API if available, otherwise fallback to region center
-    const lat = loc?.coordinate?.lat ?? region.fallbackLat;
-    const lng = loc?.coordinate?.long ?? region.fallbackLng;
+    // Koordinaten nur aus der API. Ein Regionsmittelpunkt ist keine
+    // Event-Position (vorher landeten 4.247 Live-Events auf ~30 geteilten
+    // Fallback-Punkten). Liegt nur ein Ort ohne Venue vor, ist die
+    // API-Koordinate ein Ortsmittelpunkt.
+    const apiLat = loc?.coordinate?.lat;
+    const apiLng = loc?.coordinate?.long;
+    const hasApiCoords = typeof apiLat === 'number' && typeof apiLng === 'number' && !(apiLat === 0 && apiLng === 0);
+    const lat = hasApiCoords ? apiLat : undefined;
+    const lng = hasApiCoords ? apiLng : undefined;
+    const coordsPrecision = hasApiCoords ? (place ? 'venue' : 'municipality') : undefined;
+    const country = loc?.country?.trim().toUpperCase() || undefined;
 
     // Bundesland — derive from API regions data or use config
     const bundesland = mapBundesland(loc?.regions ?? null, region.bundesland);
@@ -628,8 +638,11 @@ export class FeratelScraper extends BaseScraper {
       description,
       start_date: startDate,
       location_name: locationName,
+      city: town || undefined,
       latitude: lat,
       longitude: lng,
+      coords_precision: coordsPrecision,
+      country,
       bundesland,
       category,
       image_url: imageUrl,

@@ -20,6 +20,7 @@ import { join } from 'path';
 import { detectNextPage, detectMonthNavigation, MAX_PAGES_PER_SITE } from './pagination';
 import { extractGem2goDetail } from './gem2go-detail';
 import { isUsableDetailHref } from './gemeinde-event-discovery';
+import { applyGemeindeContext } from './gemeinde-context';
 
 interface GemeindeEventPage {
   gemeinde: {
@@ -164,15 +165,10 @@ export class GenericGemeindeScraper extends BaseScraper {
       await this.enrichEventsFromDetailPages(allEvents, page.eventPageUrl);
     }
 
-    // Enrich with gemeinde metadata
-    return allEvents.map(e => ({
-      ...e,
-      bundesland,
-      latitude: e.latitude || g.lat,
-      longitude: e.longitude || g.lng,
-      postal_code: e.postal_code || g.plz,
-      district: e.district || g.bezirk,
-    }));
+    // fn-25 B3: Gemeinde als Kontext (city + PLZ), Mittelpunkt nur als
+    // gekennzeichnete Gebietsangabe, kein Gemeindename als Veranstaltungsort.
+    const ctx = { name: g.name, plz: g.plz, lat: g.lat, lng: g.lng, bundesland, bezirk: g.bezirk };
+    return allEvents.map(e => applyGemeindeContext({ ...e, bundesland }, ctx));
   }
 
   /** Detail-fetch toggle. ON by default — listing-level data is usually too thin.
