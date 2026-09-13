@@ -6,11 +6,13 @@
  *   1. Kandidat aus Supabase: kommendes Event (10-75 Tage), quality_score
  *      hoch, MIT Bild (Hero-Pflicht!), Eventim/Ticket-Events bevorzugt
  *      (Affiliate), Dedupe gegen bestehende Posts + autowriter-state.json.
- *   2. Recherche: Gemini 2.5 Flash + Google-Search-Grounding — echte
- *      Fakten (Termine, Preise, Programm, Geschichte) statt Halluzination.
- *   3. Komposition: zweiter Gemini-Call OHNE Tools im JSON-Modus gegen
- *      ein striktes Template; harte Felder (Datum, Ort, JSON-LD-Termine)
- *      kommen aus der DB, nie vom Modell.
+ *   2. Recherche: `claude -p` mit Websuche (src/lib/llm/claude-cli.ts) —
+ *      echte Fakten (Termine, Preise, Programm, Geschichte) statt
+ *      Halluzination. Läuft über das Claude-Abo (CLAUDE_CODE_OAUTH_TOKEN),
+ *      nicht über API-Guthaben — seit 2026-09-13, vorher Gemini.
+ *   3. Komposition: zweiter `claude -p`-Lauf OHNE Werkzeuge gegen ein
+ *      JSON-Schema; harte Felder (Datum, Ort, JSON-LD-Termine) kommen aus
+ *      der DB, nie vom Modell.
  *   4. Hero-Bild: event.image_url herunterladen (Promo-Bild des Happenings
  *      selbst, v. a. Eventim-PFT); Fallback Wikimedia-Commons-CC-Suche;
  *      ohne Bild wird der Kandidat verworfen — nie ein Post ohne Hero.
@@ -19,13 +21,13 @@
  *      Registry-Eintrag über Marker-Kommentare in index.ts + Smoke-Import.
  *
  * Läuft in GitHub Actions (blog-autowriter.yml) und committet direkt auf
- * master → Vercel deployt, sitemap-core.xml zieht ALL_POSTS automatisch.
+ * master → deploy.yml baut auf Hetzner, sitemap-core.xml zieht ALL_POSTS.
  *
  * Aufruf: tsx src/scripts/blog-autowriter.ts [--count 2] [--dry-run]
  */
 
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
-import { GoogleGenAI } from '@google/genai';
+import { claudeText, claudeJson, ClaudeCliError } from '../lib/llm/claude-cli';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import { pathToFileURL } from 'node:url';
@@ -146,16 +148,60 @@ async function fetchCandidates(supabase: SupabaseClient): Promise<Candidate[]> {
   });
 }
 
-// ─── Gemini ───────────────────────────────────────────────────────────────
+// ─── Claude-CLI: Modelle und Ausgabe-Schemas ─────────────────────────────
+//
+// Die Recherche ist werkzeuglastig (jede Websuche eine Runde, viele Tokens),
+// da reicht Sonnet. Das Komponieren ist ein einzelner Durchgang, bei dem die
+// Textqualität den Post ausmacht — dafür Opus. Beides per Env übersteuerbar,
+// falls die Abo-Limits mal knapp werden.
+const MODEL_RESEARCH = process.env.CLAUDE_BLOG_MODEL_RESEARCH || 'sonnet';
+const MODEL_COMPOSE = process.env.CLAUDE_BLOG_MODEL_COMPOSE || 'opus';
+/** Websuche-Runden pro Recherche. Reicht für 7 Rechercheblöcke mit Nachfassen. */
+const RESEARCH_MAX_TURNS = 14;
 
-function textOf(response: unknown): string {
-  const r = response as { text?: string; candidates?: Array<{ content?: { parts?: Array<{ text?: string }> } }> };
-  if (typeof r.text === 'string' && r.text.length > 0) return r.text;
-  return (r.candidates?.[0]?.content?.parts ?? []).map(p => p.text ?? '').join('');
-}
+const str = { type: 'string' } as const;
+const strArr = { type: 'array', items: str } as const;
 
-async function researchEvent(ai: GoogleGenAI, c: Candidate): Promise<string> {
-  const prompt = `Recherchiere gründlich das folgende Event in Österreich für einen Blogartikel. Nutze aktiv die Google-Suche und liefere NUR verifizierte Fakten mit heutigem Stand — wenn du etwas nicht findest, schreib "unbekannt" statt zu raten.
+/** Schema für composePost — spiegelt exakt die im Prompt beschriebene Form. */
+const POST_SCHEMA = {
+  type: 'object',
+  properties: {
+    title: str, subtitle: str, excerpt: str, category: str,
+    keyFacts: {
+      type: 'object',
+      properties: { dates: str, location: str, address: str, genre: str, price: str, website: str, capacity: str, since: str },
+      required: ['dates', 'location', 'address', 'genre', 'price', 'website'],
+    },
+    lineup: { type: 'array', items: { type: 'object', properties: { name: str, role: { type: 'string', enum: ['headliner', 'support', 'special'] }, stage: str }, required: ['name', 'role'] } },
+    lineupTitle: str, lineupNote: str,
+    intro: str, historyTitle: str, history: str,
+    whatToExpectTitle: str, whatToExpect: str, whatToExpectList: strArr,
+    practicalInfo: { type: 'array', items: { type: 'object', properties: { icon: str, label: str, text: str }, required: ['icon', 'label', 'text'] } },
+    ctaText: str, seoTitle: str, seoDescription: str, keywords: strArr,
+    faqs: { type: 'array', items: { type: 'object', properties: { question: str, answer: str }, required: ['question', 'answer'] } },
+    endDate: str,
+  },
+  required: ['title', 'subtitle', 'excerpt', 'category', 'keyFacts', 'lineup', 'intro', 'historyTitle', 'history',
+    'whatToExpectTitle', 'whatToExpect', 'whatToExpectList', 'practicalInfo', 'ctaText', 'seoTitle', 'seoDescription', 'keywords', 'faqs'],
+} as const;
+
+/** Schema für composeStayGuide (fn-21). */
+const STAY_GUIDE_SCHEMA = {
+  type: 'object',
+  properties: {
+    title: str, subtitle: str, excerpt: str, intro: str, historyTitle: str, history: str,
+    whatToExpectTitle: str, whatToExpect: str, whatToExpectList: strArr,
+    practicalInfo: { type: 'array', items: { type: 'object', properties: { icon: str, label: str, text: str }, required: ['icon', 'label', 'text'] } },
+    stays: { type: 'array', items: { type: 'object', properties: { name: str, place: str, region: str, kind: str, description: str }, required: ['name', 'place', 'region', 'kind', 'description'] } },
+    seoTitle: str, seoDescription: str, keywords: strArr,
+    faqs: { type: 'array', items: { type: 'object', properties: { question: str, answer: str }, required: ['question', 'answer'] } },
+  },
+  required: ['title', 'subtitle', 'excerpt', 'intro', 'historyTitle', 'history', 'whatToExpectTitle', 'whatToExpect',
+    'whatToExpectList', 'practicalInfo', 'stays', 'seoTitle', 'seoDescription', 'keywords', 'faqs'],
+} as const;
+
+async function researchEvent(c: Candidate): Promise<string> {
+  const prompt = `Recherchiere gründlich das folgende Event in Österreich für einen Blogartikel. Nutze aktiv die Websuche und liefere NUR verifizierte Fakten mit heutigem Stand — wenn du etwas nicht findest, schreib "unbekannt" statt zu raten.
 
 Event: ${c.title}
 Datum laut unserer Datenbank: ${datePart(c.start_date)}${c.end_date ? ` bis ${datePart(c.end_date)}` : ''}
@@ -171,16 +217,11 @@ Recherchiere und liste strukturiert:
 6. Praktische Tipps (Wetter/Ausrüstung/Verpflegung, was man wissen muss)
 7. Häufig gestellte Fragen von Besuchern und deren Antworten`;
 
-  const response = await ai.models.generateContent({
-    model: 'gemini-2.5-flash',
-    contents: prompt,
-    config: {
-      tools: [{ googleSearch: {} }],
-      maxOutputTokens: 4000,
-      temperature: 0.2,
-    },
+  return claudeText(prompt, {
+    model: MODEL_RESEARCH,
+    allowedTools: ['WebSearch', 'WebFetch'],
+    maxTurns: RESEARCH_MAX_TURNS,
   });
-  return textOf(response);
 }
 
 // ─── fn-21: Unterkünfte ───────────────────────────────────────────────────
@@ -242,8 +283,8 @@ const STAY_TOPICS: StayTopic[] = [
   { slug: 'zillertal-winter', region: 'Zillertal', angle: 'Skihütten und Après-Events im Winter', heroQuery: 'Zillertal Winter Berge', ctaLink: '/tirol', ctaText: 'Events in Tirol entdecken' },
 ];
 
-async function researchStayGuide(ai: GoogleGenAI, topic: StayTopic): Promise<string> {
-  const prompt = `Recherchiere per Google-Suche ECHTE, aktuell existierende Unterkünfte in/um ${topic.region} (Österreich), die besonders gut passen für: ${topic.angle}.
+async function researchStayGuide(topic: StayTopic): Promise<string> {
+  const prompt = `Recherchiere per Websuche ECHTE, aktuell existierende Unterkünfte in/um ${topic.region} (Österreich), die besonders gut passen für: ${topic.angle}.
 
 Liefere 6-8 Unterkünfte, für JEDE strukturiert und nur mit verifizierten Fakten (wenn unbekannt: "unbekannt" schreiben, NICHTS raten):
 - Exakter Name der Unterkunft
@@ -256,19 +297,14 @@ Danach zusätzlich:
 - 3-4 praktische Tipps zum Übernachten in ${topic.region} (beste Buchungszeit, Anreise, Viertel/Lagen)
 - 3-4 häufige Fragen von Besuchern mit Antworten`;
 
-  const response = await ai.models.generateContent({
-    model: 'gemini-2.5-flash',
-    contents: prompt,
-    config: {
-      tools: [{ googleSearch: {} }],
-      maxOutputTokens: 4000,
-      temperature: 0.2,
-    },
+  return claudeText(prompt, {
+    model: MODEL_RESEARCH,
+    allowedTools: ['WebSearch', 'WebFetch'],
+    maxTurns: RESEARCH_MAX_TURNS,
   });
-  return textOf(response);
 }
 
-async function composeStayGuide(ai: GoogleGenAI, topic: StayTopic, research: string): Promise<Record<string, unknown>> {
+async function composeStayGuide(topic: StayTopic, research: string): Promise<Record<string, unknown>> {
   const prompt = `Du schreibst für LassTreffen.at (österreichische Event-Plattform) einen deutschen SEO-Blogartikel der Rubrik "Übernachten": besondere/passende Unterkünfte in ${topic.region} für ${topic.angle}. Basis sind AUSSCHLIESSLICH die Recherche-Fakten unten — erfinde keine Unterkünfte und keine Fakten dazu; nimm NUR Unterkünfte, die in der Recherche vorkommen.
 
 RECHERCHE:
@@ -294,16 +330,7 @@ Antworte NUR mit einem JSON-Objekt exakt dieser Form (alle Texte Deutsch, Sie-Fo
 }
 Mindestens 5 stays, mindestens 3 practicalInfo, mindestens 3 faqs. KEINE Preise in Euro nennen (ändern sich) — nur Preisniveau in Worten.`;
 
-  const response = await ai.models.generateContent({
-    model: 'gemini-2.5-flash',
-    contents: prompt,
-    config: {
-      responseMimeType: 'application/json',
-      maxOutputTokens: 8000,
-      temperature: 0.5,
-    },
-  });
-  return JSON.parse(textOf(response)) as Record<string, unknown>;
+  return claudeJson(prompt, STAY_GUIDE_SCHEMA as unknown as Record<string, unknown>, { model: MODEL_COMPOSE });
 }
 
 /**
@@ -328,7 +355,7 @@ function verifyStaysAgainstResearch(
   });
 }
 
-async function composePost(ai: GoogleGenAI, c: Candidate, research: string): Promise<Record<string, unknown>> {
+async function composePost(c: Candidate, research: string): Promise<Record<string, unknown>> {
   const categories = Object.keys(CATEGORIES).join(' | ');
   const prompt = `Du schreibst für LassTreffen.at (österreichische Event-Plattform) einen hochwertigen deutschen SEO-Blogartikel über dieses Event. Basis sind AUSSCHLIESSLICH die Recherche-Fakten unten — erfinde nichts dazu; wo die Recherche "unbekannt" sagt, formuliere ohne konkrete Zahl.
 
@@ -374,16 +401,7 @@ Antworte NUR mit einem JSON-Objekt exakt dieser Form (alle Texte Deutsch, Sie-Fo
 }
 Mindestens 4 faqs, mindestens 3 practicalInfo-Einträge.`;
 
-  const response = await ai.models.generateContent({
-    model: 'gemini-2.5-flash',
-    contents: prompt,
-    config: {
-      responseMimeType: 'application/json',
-      maxOutputTokens: 8000,
-      temperature: 0.5,
-    },
-  });
-  return JSON.parse(textOf(response)) as Record<string, unknown>;
+  return claudeJson(prompt, POST_SCHEMA as unknown as Record<string, unknown>, { model: MODEL_COMPOSE });
 }
 
 // ─── Validierung ──────────────────────────────────────────────────────────
@@ -644,8 +662,8 @@ function writePostFile(slug: string, post: Record<string, unknown>): string {
   const body = `import type { FestivalPost } from '../types';
 
 // Automatisch generiert vom Blog-Autowriter (fn-19) am ${new Date().toISOString().slice(0, 10)}.
-// Recherche: Gemini + Google-Search-Grounding; harte Fakten (Termine, Ort,
-// JSON-LD) stammen aus der Events-DB, nicht vom Modell.
+// Recherche: claude -p mit Websuche; harte Fakten (Termine, Ort, JSON-LD)
+// stammen aus der Events-DB, nicht vom Modell.
 export const post: FestivalPost = ${JSON.stringify(post, null, 2)};
 `;
   fs.writeFileSync(file, body, 'utf8');
@@ -688,13 +706,17 @@ async function main(): Promise<void> {
 
   const supabaseUrl = process.env.SUPABASE_URL ?? process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  const geminiKey = process.env.GEMINI_API_KEY;
-  if (!supabaseUrl || !supabaseKey || !geminiKey) {
-    throw new Error('SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY / GEMINI_API_KEY erforderlich');
+  if (!supabaseUrl || !supabaseKey) {
+    throw new Error('SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY erforderlich');
+  }
+  // Die Texte kommen von `claude -p` ueber das Abo-Token (CLAUDE_CODE_OAUTH_TOKEN),
+  // nicht mehr von Gemini. Fehlt das Token, meldet die CLI "Not logged in" und
+  // der Lauf bricht laut ab — kein stiller Post ohne Inhalt.
+  if (!process.env.CLAUDE_CODE_OAUTH_TOKEN) {
+    log('Hinweis: CLAUDE_CODE_OAUTH_TOKEN nicht gesetzt — claude -p nutzt den lokalen Login, falls vorhanden.');
   }
 
   const supabase = createClient(supabaseUrl, supabaseKey);
-  const ai = new GoogleGenAI({ apiKey: geminiKey });
 
   // Bestehende Posts für Dedupe (Import via tsx — gleiche Quelle wie die App)
   const { ALL_POSTS } = await import('../content/blog/index') as { ALL_POSTS: Array<{ slug: string; title: string }> };
@@ -705,7 +727,7 @@ async function main(): Promise<void> {
   // fn-21: --stay-guide schreibt EINEN Unterkunfts-Artikel (Rubrik
   // "Übernachten") aus der rotierenden Topic-Liste und beendet sich.
   if (args.includes('--stay-guide')) {
-    await writeStayGuide(ai, state, dryRun, new Set(ALL_POSTS.map(p => p.slug)));
+    await writeStayGuide(state, dryRun, new Set(ALL_POSTS.map(p => p.slug)));
     return;
   }
 
@@ -743,13 +765,13 @@ async function main(): Promise<void> {
         continue;
       }
 
-      const research = await researchEvent(ai, c);
+      const research = await researchEvent(c);
       if (research.trim().length < 800) {
         log('  Recherche zu duenn — skip');
         continue;
       }
 
-      const draft = await composePost(ai, c, research);
+      const draft = await composePost(c, research);
       sanitizeDraft(draft, c);
       const errors = validateDraft(draft);
       if (errors.length > 0) {
@@ -863,6 +885,18 @@ async function main(): Promise<void> {
       log(`  ✓ geschrieben: ${slug}`);
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
+      // Ein Problem der CLI selbst (kein Login, Rate-Limit, Binary fehlt)
+      // loest sich beim naechsten Kandidaten nicht — sofort abbrechen statt
+      // fuenfmal Hero laden und fuenfmal denselben Fehler kassieren.
+      if (err instanceof ClaudeCliError) {
+        await finishWorkflowRun(runId, {
+          status: 'failed',
+          summary: 'Claude-CLI nicht nutzbar — Lauf abgebrochen',
+          items: reportItems,
+          errors: [...reportErrors, msg],
+        });
+        throw err;
+      }
       log(`  Fehler bei "${c.title}": ${msg} — skip`);
       // Auch bei insgesamt erfolgreichem Lauf im Bericht ausweisen: ein
       // Kandidat, der regelmaessig scheitert, ist ein Hinweis auf ein
@@ -906,7 +940,6 @@ async function main(): Promise<void> {
 // ─── fn-21: Stay-Guide-Lauf ───────────────────────────────────────────────
 
 async function writeStayGuide(
-  ai: GoogleGenAI,
   state: AutowriterState,
   dryRun: boolean,
   knownSlugs: Set<string>,
@@ -928,10 +961,10 @@ async function writeStayGuide(
   const hero = await wikimediaHero(topic.heroQuery, destDir);
   if (!hero) throw new Error(`Kein Wikimedia-Hero für "${topic.heroQuery}" — Abbruch`);
 
-  const research = await researchStayGuide(ai, topic);
+  const research = await researchStayGuide(topic);
   if (research.trim().length < 800) throw new Error('Stay-Recherche zu dünn — Abbruch');
 
-  const draft = await composeStayGuide(ai, topic, research);
+  const draft = await composeStayGuide(topic, research);
   if (typeof draft.seoTitle === 'string') draft.seoTitle = truncateAtWord(draft.seoTitle, 65);
   if (typeof draft.seoDescription === 'string') draft.seoDescription = truncateAtWord(draft.seoDescription, 158);
   if (typeof draft.excerpt === 'string') draft.excerpt = truncateAtWord(draft.excerpt, 390);
