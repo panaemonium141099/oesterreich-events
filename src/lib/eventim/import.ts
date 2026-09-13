@@ -36,19 +36,39 @@ export async function upsertEventimEvents(
   events: ScrapedEvent[],
   log: (msg: string) => void = () => {},
 ): Promise<EventimUpsertResult> {
-  const { syncEventsToSupabase } = await import('@/lib/db/supabase-sync');
+  const { syncEventsToSupabase, beginScrapeRun, finishScrapeRun } = await import('@/lib/db/supabase-sync');
   const BATCH = 500;
   let upserted = 0;
   let errors = 0;
   let filtered = 0;
   let batches = 0;
+  let quarantined = 0;
+  let rawWritten = 0;
+  const startedMs = Date.now();
+  // fn-25 B1: EIN Rohschicht-Lauf für den ganzen Import statt einem je Batch.
+  const runId = await beginScrapeRun('Eventim');
+  const errorMessages = new Set<string>();
   for (let i = 0; i < events.length; i += BATCH) {
-    const r = await syncEventsToSupabase(events.slice(i, i + BATCH));
+    const r = await syncEventsToSupabase(events.slice(i, i + BATCH), { scrapeRunId: runId });
     upserted += r.upserted;
     errors += r.errors;
     filtered += r.filtered;
+    quarantined += r.quarantined;
+    rawWritten += r.rawWritten;
+    for (const m of r.errorMessages) errorMessages.add(m);
     batches += 1;
-    log(`batch ${batches}: +${r.upserted} (${r.errors} err, ${r.filtered} filtered)`);
+    log(`batch ${batches}: +${r.upserted} (${r.errors} err, ${r.filtered} filtered, ${r.rawWritten} raw)`);
+  }
+  if (runId) {
+    await finishScrapeRun(runId, startedMs, {
+      items_found: events.length,
+      raw_written: rawWritten,
+      items_updated: upserted,
+      needs_review_count: quarantined,
+      batch_errors: errorMessages.size,
+      status: errors === 0 ? 'success' : upserted > 0 ? 'partial' : 'error',
+      error_message: errorMessages.size > 0 ? [...errorMessages].join(' | ').slice(0, 1000) : null,
+    });
   }
   return { upserted, errors, filtered, batches };
 }
