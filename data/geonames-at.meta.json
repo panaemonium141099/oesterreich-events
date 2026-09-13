@@ -1,0 +1,41 @@
+{
+  "source": "https://download.geonames.org/export/dump/AT.zip",
+  "dump_file": ".\\data\\AT.txt",
+  "dump_mtime": "2026-09-13T02:30:58.000Z",
+  "dump_newest_modification_date": "2026-09-11",
+  "built_at": "2026-09-13T19:13:04.425Z",
+  "entries": 23160,
+  "by_bundesland": {
+    "Wien": 147,
+    "Niederösterreich": 5000,
+    "Oberösterreich": 6814,
+    "Steiermark": 4008,
+    "Tirol": 1636,
+    "Kärnten": 2858,
+    "Salzburg": 1476,
+    "Vorarlberg": 625,
+    "Burgenland": 596
+  },
+  "admin1_map": {
+    "01": "Burgenland",
+    "02": "Kärnten",
+    "03": "Niederösterreich",
+    "04": "Oberösterreich",
+    "05": "Salzburg",
+    "06": "Steiermark",
+    "07": "Tirol",
+    "08": "Vorarlberg",
+    "09": "Wien"
+  },
+  "feature_filter": "P (alle Siedlungen) + A/ADM1-4",
+  "alt_names": {
+    "kept": 408,
+    "dropped": 13770,
+    "rule": "nur Schreib-/Transliterationsvarianten + Exonyme der Landeshauptstädte"
+  },
+  "checks": {
+    "known_cities": 13,
+    "polygon_checked": 5052,
+    "polygon_mismatched": 1
+  }
+}

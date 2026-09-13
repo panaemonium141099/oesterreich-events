@@ -46,7 +46,7 @@ import {
   persistRawEvents,
 } from '@/lib/db/raw-persist';
 import { normalizeDistrict, isCanonicalDistrict } from '@/lib/district-normalizer';
-import { districtFromPlz } from '@/lib/plz-district';
+import { districtFromPlz, districtFromGemeinde } from '@/lib/plz-district';
 import { bundeslandToId } from '@/lib/bundeslaender';
 import { toUtcInstant } from '@/lib/pipeline/normalize-date';
 import { getBundeslandFromPLZ } from '@/lib/plzCoordinates';
@@ -740,8 +740,14 @@ function toSupabaseRow(
     finalBundesland,
     resolved.postalCode ?? event.postal_code,
   );
+  // fn-25 C2: Bezirk zuerst aus der belegten Gemeinde (Registry), dann aus
+  // der PLZ — aber nur, wenn die PLZ genau einen Bezirk hat. 438 PLZ decken
+  // mehrere Bezirke; dort entschied bisher Häufigkeit oder Alphabet.
   const finalDistrict =
     (normalizedDistrict && isCanonicalDistrict(normalizedDistrict) ? normalizedDistrict : null) ??
+    (decision.gemeinde
+      ? districtFromGemeinde(decision.gemeinde.bezirk, decision.gemeinde.bundesland, decision.gemeinde.plz)
+      : null) ??
     districtFromPlz(resolved.postalCode ?? event.postal_code, finalBundesland);
 
   const row = {

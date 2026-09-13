@@ -13,12 +13,15 @@ import { ALL_GEMEINDEN, type AustrianGemeinde } from '@/lib/gemeinden/data';
 import { STADT_PLZ } from '@/lib/district-normalizer';
 import { bundeslandToId } from '@/lib/bundeslaender';
 import { getCoordinatesForPLZ } from '@/lib/plzCoordinates';
+import { isOfficialAustrianPlz } from './plz-reference';
 
 export interface GemeindeRef {
   name: string;
   plz: string;
   /** kanonische Bundesland-ID (`oberoesterreich`, …) */
   bundesland: string;
+  /** Bezirk laut Registry (Rohschreibweise). */
+  bezirk: string | null;
   lat: number;
   lng: number;
 }
@@ -48,7 +51,7 @@ let byName: Map<string, GemeindeRef[]> | null = null;
 function toRef(g: AustrianGemeinde): GemeindeRef | null {
   const bl = bundeslandToId(g.bundesland);
   if (!bl) return null;
-  return { name: g.name, plz: g.plz, bundesland: bl, lat: g.lat, lng: g.lng };
+  return { name: g.name, plz: g.plz, bundesland: bl, bezirk: g.bezirk || null, lat: g.lat, lng: g.lng };
 }
 
 function build(): void {
@@ -96,6 +99,7 @@ export function gemeindenByName(name: string): GemeindeRef[] {
  *  PLZ-Tabelle)? */
 export function isKnownAustrianPlz(plz: string): boolean {
   if (!/^\d{4}$/.test(plz)) return false;
+  if (isOfficialAustrianPlz(plz)) return true;
   build();
   return byPlz!.has(plz) || getCoordinatesForPLZ(plz) !== null;
 }
