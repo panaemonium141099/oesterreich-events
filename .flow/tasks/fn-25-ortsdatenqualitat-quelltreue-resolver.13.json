@@ -1,0 +1,16 @@
+{
+  "assignee": null,
+  "claim_note": "",
+  "claimed_at": null,
+  "created_at": "2026-09-13T18:19:50.617119Z",
+  "depends_on": [
+    "fn-25-ortsdatenqualitat-quelltreue-resolver.12"
+  ],
+  "epic": "fn-25-ortsdatenqualitat-quelltreue-resolver",
+  "id": "fn-25-ortsdatenqualitat-quelltreue-resolver.13",
+  "priority": 13,
+  "spec_path": ".flow/tasks/fn-25-ortsdatenqualitat-quelltreue-resolver.13.md",
+  "status": "todo",
+  "title": "C4 Master/Alias/Cache versioniert ung\u00fcltig setzen; verified-Labels nicht \u00fcbernehmen; Korrekturtabelle",
+  "updated_at": "2026-09-13T18:19:50.617152Z"
+}

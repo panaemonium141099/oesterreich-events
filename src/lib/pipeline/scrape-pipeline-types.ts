@@ -60,6 +60,16 @@ export interface PipelineOptions {
    * step manually.
    */
   skipMasterCoords?: boolean;
+  /**
+   * fn-25 (2026-09-13): Die Alt-Geo-Schritte `normalize`
+   * (normalize-locations.ts), `geocoding` (fix-geocoding.ts,
+   * openai-geocode.ts) und `master_coords` (fix-duplicate-coords.ts) haben
+   * Veranstaltungsorte durch GeoNames-Worttreffer ersetzt und die Fehler
+   * per Master-Trigger zementiert (docs/ORTSDATEN-ANALYSE-2026-09-13.md).
+   * Sie laufen NICHT mehr standardmäßig. Nur mit diesem Schalter (und der
+   * Env LEGACY_GEO_OK=1 in den Skripten) lassen sie sich noch starten.
+   */
+  legacyGeo?: boolean;
   skipScore?: boolean;
   /** Skip both categorization sub-steps (backfill + AI residue). */
   skipCategorization?: boolean;

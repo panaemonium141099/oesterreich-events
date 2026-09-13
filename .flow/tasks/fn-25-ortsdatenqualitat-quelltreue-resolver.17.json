@@ -1,0 +1,16 @@
+{
+  "assignee": null,
+  "claim_note": "",
+  "claimed_at": null,
+  "created_at": "2026-09-13T18:19:54.831199Z",
+  "depends_on": [
+    "fn-25-ortsdatenqualitat-quelltreue-resolver.16"
+  ],
+  "epic": "fn-25-ortsdatenqualitat-quelltreue-resolver",
+  "id": "fn-25-ortsdatenqualitat-quelltreue-resolver.17",
+  "priority": 17,
+  "spec_path": ".flow/tasks/fn-25-ortsdatenqualitat-quelltreue-resolver.17.md",
+  "status": "todo",
+  "title": "E1 Bestand kontrolliert bereinigen (Batches, Hash-/Versionspr\u00fcfung, alle Felder, ungekl\u00e4rt sichtbar, Dedup-Pr\u00fcfung)",
+  "updated_at": "2026-09-13T18:19:54.831232Z"
+}

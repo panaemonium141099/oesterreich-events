@@ -1,0 +1,18 @@
+{
+  "assignee": null,
+  "claim_note": "",
+  "claimed_at": null,
+  "created_at": "2026-09-13T18:19:49.557224Z",
+  "depends_on": [
+    "fn-25-ortsdatenqualitat-quelltreue-resolver.7",
+    "fn-25-ortsdatenqualitat-quelltreue-resolver.8",
+    "fn-25-ortsdatenqualitat-quelltreue-resolver.11"
+  ],
+  "epic": "fn-25-ortsdatenqualitat-quelltreue-resolver",
+  "id": "fn-25-ortsdatenqualitat-quelltreue-resolver.12",
+  "priority": 12,
+  "spec_path": ".flow/tasks/fn-25-ortsdatenqualitat-quelltreue-resolver.12.md",
+  "status": "todo",
+  "title": "C3 Resolver mit Genauigkeit, Herkunft, Konfliktregeln und erlaubter Ausspielung; alle Geo-Schreibpfade \u00fcber den Vertrag",
+  "updated_at": "2026-09-13T18:19:49.557257Z"
+}

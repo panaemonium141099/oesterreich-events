@@ -5,11 +5,15 @@
  * the service role key (bypasses RLS). Conflict resolution: ON CONFLICT
  * (source_name, source_id) -> update all mutable fields.
  *
- * Confidence-aware coordinate handling:
- * - Batch-prefetches existing rows to compare geocoding_confidence before upsert
- * - Only overwrites coords when new confidence is strictly higher rank
- * - Skips overwrite when distance < 5km and existing confidence is not NULL
- * - Fuzzy normalizer results are never stored as coordinates
+ * Ortsentscheidung (fn-25, Phase A):
+ * - `location_name` ist immer der Rohwert der Quelle; kein Normalizer
+ *   ersetzt ihn mehr (siehe docs/ORTSDATEN-ANALYSE-2026-09-13.md).
+ * - Koordinaten kommen nur von der Quelle oder als gekennzeichneter
+ *   Gemeinde-/PLZ-Mittelpunkt aus einer genannten PLZ
+ *   (`src/lib/location/conservative-resolution.ts`).
+ * - Batch-prefetch der Bestandszeilen; Altkoordinaten werden nur nach dem
+ *   Rang in CONFIDENCE_RANK ersetzt, die Entscheidung protokolliert, was
+ *   tatsächlich in der Zeile steht (`location_resolution`).
  *
  * Confidence-aware category handling (central classifier):
  * - Raw scraper-provided category/tags are persisted as source_category_raw /
@@ -32,9 +36,10 @@ import {
   type ExistingCategoryRow,
 } from '@/lib/category-classifier';
 import {
-  normalizeEventLocation,
-  extractPostalCodeFromText,
-} from '@/lib/location-normalizer';
+  resolveConservativeLocation,
+  type LocationInput,
+} from '@/lib/location/conservative-resolution';
+import type { LocationDecision, LocationStatus } from '@/lib/location/types';
 import { normalizeDistrict, isCanonicalDistrict } from '@/lib/district-normalizer';
 import { districtFromPlz } from '@/lib/plz-district';
 import { bundeslandToId } from '@/lib/bundeslaender';
@@ -96,39 +101,32 @@ function regionOfCoords(lat: number, lng: number): string | null {
 }
 
 /**
- * Confidence precedence order (highest first).
- * Index = rank; lower index = higher confidence.
- * NULL is treated as lowest priority (rank = Infinity).
+ * Rangfolge der Koordinatenherkunft (kleiner = gewinnt beim Überschreiben).
+ *
+ * Neu geordnet 2026-09-13 (fn-25): Die Quelle ist für ihre eigene
+ * Koordinate maßgeblich. Vorher standen Normalizer-Treffer (`exact`,
+ * `normalized`) und KI-Ergebnisse ÜBER Feed-Koordinaten und
+ * Gemeinde-Zentroide auf einer Stufe mit manuellen Korrekturen; damit
+ * konnte weder ein Re-Scrape noch eine belegte Position eine falsche
+ * Zuordnung ablösen (Review-Befund P0). Gemeinde-/PLZ-Mittelpunkte sind
+ * Gebietsangaben und sperren keine bessere belegte Position.
  */
-// Priority order (lower number = higher confidence = wins on overwrite).
-//
-// Rationale: refinement pipelines (openai-geocode, manual fixes, fix-geocoding)
-// run AFTER scraping with full context (venue name + address + bundesland),
-// so they deserve priority over raw scraper coords. Scrapers often give
-// bundesland-capital fallback coordinates (see the Georgi Kirtag case:
-// Feratel placed it at Eisenstadt-Hauptplatz instead of St. Georgen) — those
-// must not clobber a targeted geocode.
 const CONFIDENCE_RANK: Record<string, number> = {
-  manual: 0,                 // Hand-fixed by admin / user — never overwrite
-  'gemeinde-registry': 0,    // Mapbox-verified Austrian Gemeinde centroids from
-                             // data/gemeinden-registry/*.json — authoritative
-                             // truth for PLZ→(lat,lng). Tied with manual at
-                             // rank 0: once a row wears this confidence, no
-                             // scraper/normalizer/nominatim pass is allowed
-                             // to move the pin. See refresh-gemeinden-coords.ts.
-  openai: 1,                 // openai-geocode.ts refinement
-  gemini: 1,                 // legacy alias for openai
-  exact: 2,                  // normalizer exact match
-  normalized: 3,             // normalizer best-guess
-  nominatim: 4,              // reverse-geocoded
-  scraper: 5,                // raw scraper output — lowest among "ok" values
-  from_title: 6,
-  from_description: 7,
-  gemini_low: 8,             // low-confidence fallback
+  manual: 0,                 // Hand-Korrektur — nie automatisch überschreiben
+  'json-ld-venue': 1,        // strukturierte Venue-Angabe der Quellseite
+  scraper: 2,                // Koordinate der Quelle selbst
+  openai: 3,                 // Alt-Refinement (wird nicht mehr geschrieben)
+  gemini: 3,
+  nominatim: 4,
+  'gemeinde-centroid': 5,    // Gemeinde-/PLZ-Mittelpunkt aus genannter PLZ (Gebietsangabe)
+  'gemeinde-registry': 5,    // Mapbox-verifizierter Gemeinde-Zentroid (Gebietsangabe)
+  exact: 6,                  // Alt-Normalizer, nicht mehr geschrieben
+  normalized: 7,
+  verified: 8,               // Alt-Master-Koordinaten (apply_master_coords_bulk)
+  from_title: 9,
+  from_description: 10,
+  gemini_low: 11,
 };
-
-/** Distance threshold in km; below this we skip overwrite to preserve precise coords. */
-const DISTANCE_THRESHOLD_KM = 5;
 
 function getConfidenceRank(confidence: string | null | undefined): number {
   if (!confidence) return Infinity; // NULL = lowest priority
@@ -163,17 +161,6 @@ export function normalizeTicketUrl(raw: string | null | undefined): string | nul
   if (!/(^|\.)oeticket\.com$/i.test(url.hostname)) return raw;
   url.searchParams.set('affiliate', EVENTIM_AFFILIATE_ID);
   return url.toString();
-}
-
-/** Haversine distance in km between two lat/lng pairs. */
-function haversineKm(lat1: number, lng1: number, lat2: number, lng2: number): number {
-  const R = 6371;
-  const dLat = ((lat2 - lat1) * Math.PI) / 180;
-  const dLng = ((lng2 - lng1) * Math.PI) / 180;
-  const a =
-    Math.sin(dLat / 2) ** 2 +
-    Math.cos((lat1 * Math.PI) / 180) * Math.cos((lat2 * Math.PI) / 180) * Math.sin(dLng / 2) ** 2;
-  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
 function getSupabaseAdminClient() {
@@ -302,127 +289,77 @@ async function prefetchExistingRows(
 }
 
 /**
- * Determine the geocoding confidence and source for an event,
- * plus resolved coordinates and location name.
+ * Ortsentscheidung für ein Scraper-Event (fn-25). Die Quelle liefert den
+ * Namen, die Entscheidung liefert Position, PLZ, Gemeinde, Status,
+ * Genauigkeit und die erlaubte Ausspielung. Kein Namensabgleich mehr.
  */
-function resolveCoordinates(event: ScrapedEvent): {
-  latitude: number | null;
-  longitude: number | null;
-  locationName: string | null;
-  confidence: string | null;
-  source: string | null;
-  /** PLZ derived from the normalizer's Gemeinde lookup. Only set when the
-   *  scraper didn't supply one — we never override an existing PLZ with an
-   *  inferred guess. Populated whether or not we use the normalizer's
-   *  coords, because PLZ is orthogonal to coord confidence. */
-  postalCode: string | null;
-} {
-  // Start with scraper-provided values
-  let latitude = event.latitude ?? null;
-  let longitude = event.longitude ?? null;
-  let locationName = event.location_name ?? null;
-  let confidence: string | null = null;
-  let source: string | null = null;
-  let postalCode: string | null = event.postal_code ?? null;
-
-  // If scraper provides coords, mark as scraper confidence
-  if (latitude != null && longitude != null) {
-    confidence = 'scraper';
-    source = 'scraper';
-  }
-
-  // Try normalizer for better/additional data
-  try {
-    const normalized = normalizeEventLocation({
-      location_name: event.location_name,
-      address: event.address,
-      postal_code: event.postal_code,
-      bundesland: event.bundesland,
-      latitude: event.latitude,
-      longitude: event.longitude,
-      title: event.title,
-      description: event.description,
-    });
-
-    if (normalized && normalized.confidence !== 'fuzzy') {
-      // Always update location name if normalizer found a canonical one
-      if (normalized.location_name) {
-        locationName = normalized.location_name;
-      }
-
-      // For coordinates: normalizer result can fill missing coords
-      // or upgrade confidence when scraper didn't provide coords
-      if (latitude == null || longitude == null) {
-        // No scraper coords - use normalizer result
-        latitude = normalized.latitude;
-        longitude = normalized.longitude;
-        confidence = normalized.confidence;
-        source = 'geonames';
-      }
-      // If scraper provided coords, keep them (scraper rank > normalizer rank)
-
-      // Back-fill postal_code from the normalizer's nearest-Gemeinde
-      // lookup if the scraper didn't provide one. Regardless of which
-      // coord source wins above, the PLZ is always useful downstream
-      // (URL prefix resolution, gemeinde-hub linking, registry-based
-      // coord correction) so we write it even when keeping scraper coords.
-      if (!postalCode && normalized.postal_code) {
-        postalCode = normalized.postal_code;
-      }
-    }
-  } catch {
-    /* normalization failure should not block sync */
-  }
-
-  // Letzte Instanz fuer die PLZ: eine im Titel oder in der Adresse
-  // AUSDRUECKLICH genannte PLZ ("Flohmarkt in 1230 Wien"). Sie greift nur,
-  // wenn weder Scraper noch Normalizer eine geliefert haben.
-  //
-  // Bewusst OHNE Koordinate: die PLZ ordnet das Event der richtigen
-  // Gemeinde und damit der richtigen Hub-Seite zu, ein PLZ-Mittelpunkt
-  // waere aber kein Veranstaltungsort und darf kein genauer Pin werden.
-  // Vorher landeten 236 veroeffentlichte Flohmaerkte unter einer voellig
-  // fremden PLZ — Wiener Termine auf den Vorarlberg- und Kaernten-Hubs.
-  if (!postalCode) {
-    postalCode =
-      extractPostalCodeFromText(event.title) ??
-      extractPostalCodeFromText(event.address) ??
-      null;
-  }
-
-  return { latitude, longitude, locationName, confidence, source, postalCode };
+function decideLocation(event: ScrapedEvent): LocationDecision {
+  const input: LocationInput = {
+    title: event.title,
+    location_name: event.location_name ?? null,
+    address: event.address ?? null,
+    postal_code: event.postal_code ?? null,
+    city: event.city ?? null,
+    bundesland: event.bundesland ?? null,
+    country: event.country ?? null,
+    latitude: event.latitude ?? null,
+    longitude: event.longitude ?? null,
+    coords_precision: event.coords_precision ?? null,
+    source_venue_id: event.source_venue_id ?? null,
+  };
+  return resolveConservativeLocation(input);
 }
 
 /**
- * Decide whether to overwrite existing coordinates with new ones.
- * Returns true if the new coords should replace existing ones.
+ * Wenn der Rang-Vergleich die Bestandskoordinate behält, muss die
+ * gespeicherte Entscheidung DAS beschreiben, was tatsächlich in der Zeile
+ * steht, nicht das, was die Quelle diesmal geliefert hat. Alt-Labels
+ * (`exact`, `normalized`, `verified`, …) stammen aus dem abgeschalteten
+ * Namensabgleich und gelten deshalb als unbestätigt; Phase E findet sie
+ * über den Grund `legacy_coords_retained`.
  */
-function shouldOverwriteCoords(
-  existing: ExistingRow,
+function retainedStatusFor(confidence: string | null): { status: LocationStatus; precision: LocationDecision['precision'] } {
+  switch (confidence) {
+    case 'manual':
+    case 'json-ld-venue':
+      return { status: 'address_confirmed', precision: 'building' };
+    case 'gemeinde-registry':
+    case 'gemeinde-centroid':
+      return { status: 'municipality_only', precision: 'municipality' };
+    default:
+      return { status: 'unresolved', precision: 'unknown' };
+  }
+}
+
+/**
+ * Entscheidet, ob neue Koordinaten die bestehenden ersetzen.
+ *
+ * - Ohne Bestandskoordinate wird immer geschrieben.
+ * - Ein besserer Rang ersetzt; derselbe Rang ersetzt NUR bei `scraper`
+ *   (die Quelle ist für ihre eigene Koordinate maßgeblich, eine geänderte
+ *   Quellkoordinate ist eine Korrektur oder eine Verlegung).
+ * - `manual` wird nie automatisch ersetzt.
+ * - Die frühere 5-km-Sperre entfällt: Sie hielt falsche Zuordnungen fest,
+ *   sobald der richtige Ort zufällig in der Nähe lag.
+ */
+export function shouldOverwriteCoords(
+  existing: Pick<ExistingRow, 'latitude' | 'longitude' | 'geocoding_confidence'>,
   newLat: number | null,
   newLng: number | null,
   newConfidence: string | null
 ): boolean {
-  // No new coords to write
   if (newLat == null || newLng == null) return false;
-
-  // No existing coords - always write
   if (existing.latitude == null || existing.longitude == null) return true;
+  if (existing.geocoding_confidence === 'manual') return false;
 
   const existingRank = getConfidenceRank(existing.geocoding_confidence);
   const newRank = getConfidenceRank(newConfidence);
 
-  // Only overwrite when new confidence is strictly higher (lower rank number)
-  if (newRank >= existingRank) return false;
-
-  // Even with higher confidence, skip if distance < 5km and existing has confidence
-  // (prevents overwriting precise scraper coords with nearby town-center GeoNames coords)
-  if (existing.geocoding_confidence != null) {
-    const distance = haversineKm(existing.latitude, existing.longitude, newLat, newLng);
-    if (distance < DISTANCE_THRESHOLD_KM) return false;
+  if (newRank < existingRank) return true;
+  if (newRank === existingRank && newConfidence === 'scraper') {
+    return existing.latitude !== newLat || existing.longitude !== newLng;
   }
-
-  return true;
+  return false;
 }
 
 // ─── fn-14.5 UPSERT-Guards ───────────────────────────────────────────
@@ -468,7 +405,21 @@ function toSupabaseRow(
   existingMap: Map<string, ExistingRow>,
   imageMap: Map<string, ValidatedImage>,
 ) {
-  const resolved = resolveCoordinates(event);
+  const decision = decideLocation(event);
+  // `resolved` bündelt, was tatsächlich in die Zeile geschrieben wird —
+  // die Entscheidung selbst bleibt unverändert und wandert als Protokoll
+  // in `location_resolution`.
+  const resolved = {
+    locationName: decision.location_name,
+    postalCode: decision.postal_code,
+    latitude: decision.latitude,
+    longitude: decision.longitude,
+    confidence: decision.geocoding_confidence as string | null,
+    source: decision.geocoding_source,
+    status: decision.status,
+    precision: decision.precision,
+    reasons: [...decision.reasons],
+  };
 
   const key = `${event.source_name}::${event.source_id}`;
   const existing = existingMap.get(key);
@@ -480,11 +431,25 @@ function toSupabaseRow(
 
   if (existing) {
     if (!shouldOverwriteCoords(existing, resolved.latitude, resolved.longitude, resolved.confidence)) {
-      // Keep existing coords, confidence, and source
+      // Bestandskoordinate bleibt — die gespeicherte Entscheidung muss das
+      // abbilden, sonst behauptet sie eine Position, die nicht in der Zeile
+      // steht.
       finalLat = existing.latitude;
       finalLng = existing.longitude;
       finalConfidence = existing.geocoding_confidence;
       finalSource = existing.geocoding_source;
+      if (existing.latitude != null && existing.longitude != null) {
+        const retained = retainedStatusFor(existing.geocoding_confidence);
+        if (
+          resolved.latitude == null ||
+          existing.latitude !== resolved.latitude ||
+          existing.longitude !== resolved.longitude
+        ) {
+          resolved.status = retained.status;
+          resolved.precision = retained.precision;
+          resolved.reasons.push(`legacy_coords_retained:${existing.geocoding_confidence ?? 'null'}`);
+        }
+      }
     }
   }
 
@@ -686,6 +651,47 @@ function toSupabaseRow(
   }
   const finalBundesland = score.corrected.bundesland;
 
+  // Ortsstatus nach dem Freigabevertrag: eine verworfene Koordinate oder
+  // ein Orts-Widerspruch macht aus der Entscheidung einen Konflikt bzw.
+  // einen ungeklärten Ort. Das Protokoll trägt die Gründe des Vertrags mit.
+  let finalStatus: LocationStatus = resolved.status;
+  let finalPrecision = resolved.precision;
+  if (admission.corrections.includes('drop_coordinates')) {
+    finalStatus = 'conflict';
+    finalPrecision = 'unknown';
+    resolved.reasons.push('admission:drop_coordinates');
+  }
+  if (admission.decision === 'quarantine') {
+    for (const r of admission.reasons) resolved.reasons.push(`admission:${r}`);
+    if (admission.reasons.includes('region_contradicts_coords') || admission.reasons.includes('foreign_place_signal')) {
+      finalStatus = 'conflict';
+      finalPrecision = 'unknown';
+    } else if (finalStatus !== 'conflict' && finalStatus !== 'online') {
+      finalStatus = 'unresolved';
+      finalPrecision = 'unknown';
+    }
+  }
+  const hasFinalCoords = finalLat != null && finalLng != null;
+  const preciseStatus = finalStatus === 'venue_confirmed' || finalStatus === 'address_confirmed';
+  const finalAllowed = {
+    pin: hasFinalCoords && preciseStatus && decision.allowed.pin,
+    route: hasFinalCoords && preciseStatus && decision.allowed.route,
+    distance: hasFinalCoords && preciseStatus && decision.allowed.distance,
+    municipality_page: decision.allowed.municipality_page && finalStatus !== 'conflict' && finalStatus !== 'unresolved',
+  };
+  const locationResolution = {
+    ...decision,
+    status: finalStatus,
+    precision: finalPrecision,
+    latitude: finalLat,
+    longitude: finalLng,
+    geocoding_confidence: finalConfidence,
+    geocoding_source: finalSource,
+    reasons: resolved.reasons,
+    allowed: finalAllowed,
+    admission: { decision: admission.decision, reasons: admission.reasons, corrections: admission.corrections },
+  };
+
   const finalPublishStatus =
     existing?.publish_status && !COMPUTED_PUBLISH_STATUSES.has(existing.publish_status)
       ? existing.publish_status
@@ -764,6 +770,19 @@ function toSupabaseRow(
     latitude: finalLat,
     longitude: finalLng,
     country: event.country ?? 'AT',
+    // ─── fn-25: Rohwerte der Quelle (unverändert) und Ortsentscheidung ──
+    location_name_raw: event.location_name ?? null,
+    address_raw: event.address ?? null,
+    postal_code_raw: event.postal_code ?? null,
+    city_raw: event.city ?? null,
+    country_raw: event.country ?? null,
+    source_venue_id: event.source_venue_id ?? null,
+    latitude_raw: typeof event.latitude === 'number' ? event.latitude : null,
+    longitude_raw: typeof event.longitude === 'number' ? event.longitude : null,
+    location_status: finalStatus,
+    location_precision: finalPrecision,
+    location_resolution: locationResolution,
+    location_provenance: decision.provenance,
     category: canonical.category,
     tags: canonical.tags && canonical.tags.length > 0 ? canonical.tags : null,
     source_category_raw: event.category ?? null,

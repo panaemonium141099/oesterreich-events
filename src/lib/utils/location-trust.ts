@@ -1,45 +1,43 @@
 /**
- * Trust gate for event coordinates.
+ * Vertrauens-Gate für Event-Koordinaten (Anreise-Link, „Ortsangabe ungefähr").
  *
- * Background: ~30% of our future events have lat/lng that point at a town or
- * gemeinde center (Feratel region fallback, scraper-defaults, gemeinde-registry
- * lookups), not at the actual venue. Examples: 1545 events sit on the Linz
- * Hauptplatz coord, 904 on Wiener Neustadt center, etc. If we open a Google
- * Maps directions URL to those, the user drives to the wrong place — bad
- * reputation hit.
+ * Hintergrund: Mehr als die Hälfte der Live-Events sitzt auf Gemeinde-,
+ * PLZ- oder GeoNames-Mittelpunkten, nicht am Veranstaltungsort
+ * (docs/ORTSDATEN-ANALYSE-2026-09-13.md). Ein Routenlink dorthin schickt
+ * Nutzer an den falschen Ort.
  *
- * Trust criteria: we keep the Route affordance ONLY when at least one of
- *   1. The event row has a specific `address` string (street + number).
- *   2. The geocoding pipeline marked confidence as one of the "venue-level"
- *      buckets: 'exact', 'manual', 'verified', 'json-ld-venue'.
+ * Regel seit fn-25 (2026-09-13): Der Anreise-Button braucht eine BELEGTE
+ * Zielposition. Belegt ist eine Position nur, wenn
+ *   1. die Ortsentscheidung des Schreibpfads die Anreise ausdrücklich
+ *      erlaubt (`location_resolution.allowed.route`), oder
+ *   2. die Koordinate manuell bzw. aus strukturierten Venue-Daten der
+ *      Quellseite stammt (`manual`, `json-ld-venue`).
+ * Ein beliebiger Adresstext oder die Alt-Labels `exact`/`verified` reichen
+ * nicht mehr: `exact` war ein GeoNames-Namenstreffer („Ronacher" → Weiler
+ * in Kärnten), `verified` eine Master-Koordinate aus demselben Verfahren.
  *
- * Everything else ('scraper', 'normalized', 'gemeinde-registry', 'gemini',
- * 'from_title', 'from_description', null) is treated as approximate — the
- * UI shows a grey "Ortsangabe ungefähr — beim Veranstalter prüfen" pill
- * instead of a routing link.
+ * Alles andere gilt als ungefähr: die UI zeigt „Ortsangabe ungefähr, beim
+ * Veranstalter prüfen" statt eines Routenlinks.
  */
 
-const TRUSTED_GEOCODING_CONFIDENCES = new Set<string>([
-  'exact',
-  'manual',
-  'verified',
-  'json-ld-venue',
-]);
+const TRUSTED_GEOCODING_CONFIDENCES = new Set<string>(['manual', 'json-ld-venue']);
 
 export interface EventLocationLike {
   latitude?: number | null;
   longitude?: number | null;
   address?: string | null;
   geocoding_confidence?: string | null;
+  location_status?: string | null;
+  location_resolution?: { allowed?: { route?: boolean; pin?: boolean } | null } | null;
 }
 
 /**
- * Returns true when the coordinates are reliable enough to send a user to.
- * Always false when coords are missing.
+ * True, wenn die Koordinate belastbar genug ist, um Nutzer dorthin zu schicken.
+ * Immer false ohne Koordinaten.
  */
 export function isLocationTrusted(event: EventLocationLike): boolean {
   if (event.latitude == null || event.longitude == null) return false;
-  if (event.address && event.address.trim().length > 0) return true;
+  if (event.location_resolution?.allowed?.route === true) return true;
   if (event.geocoding_confidence && TRUSTED_GEOCODING_CONFIDENCES.has(event.geocoding_confidence)) {
     return true;
   }
@@ -47,8 +45,8 @@ export function isLocationTrusted(event: EventLocationLike): boolean {
 }
 
 /**
- * True when we have coordinates but they're too approximate to route to.
- * Used by the UI to show the "Ortsangabe ungefähr" pill instead of nothing.
+ * True, wenn Koordinaten vorhanden, aber nicht belegt genug für eine Route
+ * sind. Die UI zeigt dann den „Ortsangabe ungefähr"-Hinweis.
  */
 export function isLocationApproximate(event: EventLocationLike): boolean {
   if (event.latitude == null || event.longitude == null) return false;
