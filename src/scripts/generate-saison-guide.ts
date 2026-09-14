@@ -33,7 +33,7 @@ import { readFileSync, writeFileSync, existsSync, appendFileSync, mkdirSync, rea
 import { join } from 'path';
 import { createClient } from '@supabase/supabase-js';
 import { findCommonsPhoto, fetchImage, layoutFor } from '../lib/blog/hero-image';
-import { claudeText, claudeJson } from '../lib/llm/claude-cli';
+import { claudeText, claudeJson, ClaudeRateLimitError } from '../lib/llm/claude-cli';
 import {
   SAISON_KALENDER, daysUntilDeadline, isDue, factsAreStale,
   type SaisonGuideSpec,
@@ -114,6 +114,7 @@ Wenn etwas fuer die kommende Saison noch nicht offiziell angekuendigt ist, schre
       maxTurns: 12,
     });
   } catch (err) {
+    if (err instanceof ClaudeRateLimitError) throw err;
     console.warn(`Grounding-Recherche fehlgeschlagen (${String(err)}) — weiter ohne.`);
     return '';
   }
@@ -440,5 +441,10 @@ async function main() {
 
 main().then(
   () => process.exit(0),
-  (err) => { console.error('Fehler:', err); process.exit(1); },
+  (err) => {
+    console.error('Fehler:', err);
+    // Exit 75 = Abo-Sitzungslimit, der Workflow versucht es im naechsten
+    // Slot erneut (siehe saison-guide.yml).
+    process.exit(err instanceof ClaudeRateLimitError ? 75 : 1);
+  },
 );

@@ -27,7 +27,7 @@
  */
 
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
-import { claudeText, claudeJson, ClaudeCliError } from '../lib/llm/claude-cli';
+import { claudeText, claudeJson, ClaudeCliError, ClaudeRateLimitError } from '../lib/llm/claude-cli';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import { pathToFileURL } from 'node:url';
@@ -158,6 +158,8 @@ const MODEL_RESEARCH = process.env.CLAUDE_BLOG_MODEL_RESEARCH || 'sonnet';
 const MODEL_COMPOSE = process.env.CLAUDE_BLOG_MODEL_COMPOSE || 'opus';
 /** Websuche-Runden pro Recherche. Reicht für 7 Rechercheblöcke mit Nachfassen. */
 const RESEARCH_MAX_TURNS = 14;
+/** Exit-Code fuer "Abo-Sitzungslimit, spaeter nochmal" (EX_TEMPFAIL). */
+const EXIT_RATE_LIMITED = 75;
 
 const str = { type: 'string' } as const;
 const strArr = { type: 'array', items: str } as const;
@@ -891,12 +893,23 @@ async function main(): Promise<void> {
       // loest sich beim naechsten Kandidaten nicht — sofort abbrechen statt
       // fuenfmal Hero laden und fuenfmal denselben Fehler kassieren.
       if (err instanceof ClaudeCliError) {
+        // Sitzungslimit des Abos: kein Defekt, sondern der falsche Zeitpunkt
+        // (das 5-h-Fenster teilt sich der Cron mit der interaktiven Arbeit).
+        // Der Workflow wertet Exit 75 als "spaeter nochmal" — der Abend-Slot
+        // versucht es erneut, statt dass eine rote Fehlermail rausgeht.
+        const rateLimited = err instanceof ClaudeRateLimitError;
         await finishWorkflowRun(runId, {
           status: 'failed',
-          summary: 'Claude-CLI nicht nutzbar — Lauf abgebrochen',
+          summary: rateLimited
+            ? `Abo-Sitzungslimit erreicht${err.resetsAt ? `, Reset ${err.resetsAt.toISOString().slice(11, 16)} UTC` : ''} — naechster Slot versucht es erneut`
+            : 'Claude-CLI nicht nutzbar — Lauf abgebrochen',
           items: reportItems,
           errors: [...reportErrors, msg],
         });
+        if (rateLimited) {
+          log(`RATE-LIMIT: ${msg}`);
+          process.exit(EXIT_RATE_LIMITED);
+        }
         throw err;
       }
       log(`  Fehler bei "${c.title}": ${msg} — skip`);
@@ -1085,5 +1098,5 @@ function fetchCandidatesFiltered(
 
 main().catch(err => {
   console.error('[autowriter] FATAL:', err);
-  process.exit(1);
+  process.exit(err instanceof ClaudeRateLimitError ? EXIT_RATE_LIMITED : 1);
 });

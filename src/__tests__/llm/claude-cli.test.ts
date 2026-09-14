@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import {
-  buildClaudeArgs, buildClaudeEnv, parseClaudeOutput, ClaudeCliError,
+  buildClaudeArgs, buildClaudeEnv, parseClaudeOutput, parseResetTime, ClaudeCliError,
 } from '@/lib/llm/claude-cli';
 
 const ALL = new Set(['--max-turns', '--json-schema']);
@@ -66,5 +66,28 @@ describe('parseClaudeOutput', () => {
 
   it('wirft bei kaputtem JSON einen ClaudeCliError', () => {
     expect(() => parseClaudeOutput('{"result": ')).toThrow(ClaudeCliError);
+  });
+});
+
+describe('parseResetTime', () => {
+  const at = (iso: string) => new Date(iso);
+
+  it('liest "resets 11:10am (UTC)" als heutigen Zeitpunkt, wenn er noch vor uns liegt', () => {
+    const r = parseResetTime("You've hit your session limit · resets 11:10am (UTC)", at('2026-09-14T10:46:00Z'));
+    expect(r?.toISOString()).toBe('2026-09-14T11:10:00.000Z');
+  });
+
+  it('rollt auf morgen, wenn die Uhrzeit heute schon vorbei ist', () => {
+    const r = parseResetTime('resets 9am (UTC)', at('2026-09-14T10:46:00Z'));
+    expect(r?.toISOString()).toBe('2026-09-15T09:00:00.000Z');
+  });
+
+  it('versteht pm und 12am', () => {
+    expect(parseResetTime('resets 3:30pm (UTC)', at('2026-09-14T10:00:00Z'))?.toISOString()).toBe('2026-09-14T15:30:00.000Z');
+    expect(parseResetTime('resets 12am (UTC)', at('2026-09-14T10:00:00Z'))?.toISOString()).toBe('2026-09-15T00:00:00.000Z');
+  });
+
+  it('gibt null zurueck, wenn keine Reset-Zeit im Text steht', () => {
+    expect(parseResetTime('Not logged in · Please run /login')).toBeNull();
   });
 });

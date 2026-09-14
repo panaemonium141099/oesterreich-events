@@ -44,6 +44,8 @@ export interface ClaudeCliResult {
   result?: string;
   structured_output?: unknown;
   is_error?: boolean;
+  /** HTTP-Status des letzten API-Fehlers, z. B. 429 beim Sitzungslimit. */
+  api_error_status?: number;
   num_turns?: number;
   total_cost_usd?: number;
   session_id?: string;
@@ -56,7 +58,46 @@ export class ClaudeCliError extends Error {
   }
 }
 
+/**
+ * Das Abo-Kontingent ist fuer diese Sitzung aufgebraucht (HTTP 429,
+ * "You've hit your session limit · resets 11:10am (UTC)"). Kein Defekt,
+ * sondern eine Frage des Zeitpunkts: das 5-Stunden-Fenster teilt sich der
+ * Cron mit der interaktiven Arbeit des Betreibers. Aufrufer koennen damit
+ * "spaeter nochmal" von "kaputt" unterscheiden.
+ */
+export class ClaudeRateLimitError extends ClaudeCliError {
+  constructor(message: string, readonly resetsAt: Date | null, raw?: ClaudeCliResult) {
+    super(message, raw);
+    this.name = 'ClaudeRateLimitError';
+  }
+}
+
 const DEFAULT_TIMEOUT_MS = 6 * 60_000;
+/** So lange warten wir hoechstens auf das Ende eines Sitzungslimits. */
+const RATE_LIMIT_MAX_WAIT_MS = 50 * 60_000;
+
+/**
+ * "resets 11:10am (UTC)" -> naechster Zeitpunkt mit dieser Uhrzeit in UTC.
+ * Liegt die Uhrzeit heute schon hinter uns, ist morgen gemeint.
+ */
+export function parseResetTime(text: string, now: Date = new Date()): Date | null {
+  const m = text.match(/resets\s+(\d{1,2})(?::(\d{2}))?\s*(am|pm)?\s*\(UTC\)/i);
+  if (!m) return null;
+  let hour = Number(m[1]);
+  const minute = Number(m[2] ?? '0');
+  const ampm = m[3]?.toLowerCase();
+  if (ampm === 'pm' && hour < 12) hour += 12;
+  if (ampm === 'am' && hour === 12) hour = 0;
+  const reset = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), hour, minute, 0));
+  if (reset.getTime() <= now.getTime()) reset.setUTCDate(reset.getUTCDate() + 1);
+  return reset;
+}
+
+function isSessionLimit(res: ClaudeCliResult): boolean {
+  return res.api_error_status === 429 || /session limit|usage limit|rate limit/i.test(res.result ?? '');
+}
+
+const sleep = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
 
 /** Reine Funktion, damit die Flag-Zusammenstellung testbar ist. */
 export function buildClaudeArgs(opts: ClaudeCliOptions, supported: Set<string> = ALL_FLAGS): string[] {
@@ -115,8 +156,29 @@ function claudeBinary(): string {
   return process.env.CLAUDE_BIN || 'claude';
 }
 
-/** Einen `claude -p`-Lauf ausführen; der Prompt geht über stdin. */
+/**
+ * Einen `claude -p`-Lauf ausführen; der Prompt geht über stdin.
+ *
+ * Meldet die CLI ein Sitzungslimit mit Reset-Zeit, die weniger als
+ * RATE_LIMIT_MAX_WAIT_MS entfernt liegt, wartet der Aufruf bis dahin und
+ * versucht es genau einmal erneut. Liegt der Reset weiter weg, fliegt ein
+ * ClaudeRateLimitError, damit der Workflow den Lauf als "spaeter" statt
+ * "kaputt" behandeln kann.
+ */
 export async function runClaude(prompt: string, opts: ClaudeCliOptions = {}): Promise<ClaudeCliResult> {
+  try {
+    return await runClaudeOnce(prompt, opts);
+  } catch (err) {
+    if (!(err instanceof ClaudeRateLimitError) || !err.resetsAt) throw err;
+    const waitMs = err.resetsAt.getTime() - Date.now() + 30_000;
+    if (waitMs > RATE_LIMIT_MAX_WAIT_MS) throw err;
+    console.log(`[claude-cli] Sitzungslimit — warte ${Math.ceil(waitMs / 60_000)} min bis ${err.resetsAt.toISOString()} und versuche es einmal erneut.`);
+    await sleep(waitMs);
+    return runClaudeOnce(prompt, opts);
+  }
+}
+
+async function runClaudeOnce(prompt: string, opts: ClaudeCliOptions = {}): Promise<ClaudeCliResult> {
   const cwd = mkdtempSync(path.join(os.tmpdir(), 'claude-p-'));
   const args = buildClaudeArgs(opts, supportedFlags());
   const timeoutMs = opts.timeoutMs ?? DEFAULT_TIMEOUT_MS;
@@ -150,7 +212,11 @@ export async function runClaude(prompt: string, opts: ClaudeCliOptions = {}): Pr
     }
     const parsed = parseClaudeOutput(stdout);
     if (parsed.is_error) {
-      throw new ClaudeCliError(`claude -p meldet Fehler: ${parsed.result ?? '(ohne Text)'}`, parsed);
+      const text = parsed.result ?? '(ohne Text)';
+      if (isSessionLimit(parsed)) {
+        throw new ClaudeRateLimitError(`Abo-Sitzungslimit: ${text}`, parseResetTime(text), parsed);
+      }
+      throw new ClaudeCliError(`claude -p meldet Fehler: ${text}`, parsed);
     }
     return parsed;
   } finally {
