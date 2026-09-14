@@ -7,9 +7,8 @@ TBD
 - [ ] TBD
 
 ## Done summary
-TBD
-
+GeoNames neu gebaut: ADMIN1 korrigiert, nur P/ADM, Alt-Namen gefiltert, Meta mit Datenstand, Build-Pruefungen (23.160 Eintraege). PR #199.
 ## Evidence
-- Commits:
-- Tests:
-- PRs:
+- Commits: a122735
+- Tests: npx tsx src/scripts/build-geonames-db.ts
+- PRs: https://github.com/panaemonium141099/oesterreich-events/pull/199

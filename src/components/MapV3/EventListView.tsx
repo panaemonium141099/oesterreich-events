@@ -35,6 +35,7 @@ const T = {
 } as const;
 import { formatTime } from '@/lib/utils/date';
 import { distanceKm } from '@/lib/geolocation';
+import { locationOutputs } from '@/lib/location/gating';
 import { displayDistrictName } from '@/lib/districtsAT';
 import { bundeslandDisplayName } from '@/lib/i18n/bundesland-names';
 import { buildEventUrlV2 } from '@/lib/utils/slugify';
@@ -153,7 +154,7 @@ export function EventListView({
       const withD = list.map((e) => ({
         e,
         d:
-          e.latitude != null && e.longitude != null
+          e.latitude != null && e.longitude != null && locationOutputs(e).distance
             ? distanceKm(userLocation.lat, userLocation.lng, e.latitude, e.longitude)
             : Number.POSITIVE_INFINITY,
       }));
@@ -409,8 +410,9 @@ function BigRow({
   const time = formatTime(ev.start_date);
   const cat = ev.category || 'Sonstiges';
   const title = decodeEntities(ev.title || '');
+  // fn-25 C5: keine Kilometerangabe aus einem Gemeinde-Mittelpunkt.
   const km =
-    userLocation && ev.latitude != null && ev.longitude != null
+    userLocation && ev.latitude != null && ev.longitude != null && locationOutputs(ev).distance
       ? Math.round(distanceKm(userLocation.lat, userLocation.lng, ev.latitude, ev.longitude) * 10) / 10
       : null;
   const dateLabel = formatDateLabel(ev.start_date, fmt, t('groupHeute'), t('groupMorgen'));

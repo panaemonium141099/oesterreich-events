@@ -7,9 +7,8 @@ TBD
 - [ ] TBD
 
 ## Done summary
-TBD
-
+Resolver mit Belegen (source_venue_map, Venue-Kandidat mit zweitem Beleg, Adress-Geocode), Evidenzlader, re-resolve mit updated_at-Schutz, Adress-Geocoder-Nachtjob, Vertrag in Inserate/Lineup-Pfaden, Migration 20260913210000 auf Prod. PR #199.
 ## Evidence
-- Commits:
-- Tests:
-- PRs:
+- Commits: a122735
+- Tests: npx vitest run src/__tests__/lib/location-resolver.test.ts
+- PRs: https://github.com/panaemonium141099/oesterreich-events/pull/199

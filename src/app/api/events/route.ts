@@ -284,7 +284,9 @@ export async function GET(request: NextRequest) {
     const slimSelect =
       'id, title, slug, start_date, end_date, location_name, address, ' +
       'postal_code, district, bundesland, latitude, longitude, category, ' +
-      'tags, image_url, price_text, event_score, is_boosted';
+      'tags, image_url, price_text, event_score, is_boosted, ' +
+      // fn-25: Wissensstand zum Ort, damit Karte/Liste Pin und Distanz gaten können
+      'geocoding_confidence, location_status, location_precision, location_resolution';
     let query = suggestMode
       ? baseQuery.select('id, title, category, location_name')
       : slimMode
@@ -295,7 +297,7 @@ export async function GET(request: NextRequest) {
           // `description`/`price_text`. Frontend falls back cleanly when these
           // props are undefined. Keeping them in the SELECT broke the entire
           // API call because PostgREST 400s on missing columns.
-          'id, title, description, start_date, end_date, location_name, address, postal_code, district, bundesland, latitude, longitude, category, tags, image_url, price_text, price_min, price_max, ticket_url, source_name, source_url, organizer, visibility, event_score, is_boosted, slug, ' +
+          'id, title, description, start_date, end_date, location_name, address, postal_code, district, bundesland, latitude, longitude, category, tags, image_url, price_text, price_min, price_max, ticket_url, source_name, source_url, organizer, visibility, event_score, is_boosted, slug, geocoding_confidence, location_status, location_precision, location_resolution, ' +
           'audience, vibe, setting, language, price_tier, duration_type, is_student_friendly, is_family_friendly, ' +
           'occasion_tags, price_flags',
           needsCount ? { count: 'exact' } : undefined
@@ -802,7 +804,7 @@ export async function GET(request: NextRequest) {
     if (includeUnmapped && !suggestMode) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       let unmappedQuery = (supabase.from('events') as any).select(
-        'id, title, description, start_date, end_date, location_name, address, postal_code, district, bundesland, latitude, longitude, category, image_url, price_text, price_min, price_max, ticket_url, source_name, source_url, organizer, visibility, event_score, slug'
+        'id, title, description, start_date, end_date, location_name, address, postal_code, district, bundesland, latitude, longitude, category, image_url, price_text, price_min, price_max, ticket_url, source_name, source_url, organizer, visibility, event_score, slug, geocoding_confidence, location_status, location_precision, location_resolution'
       );
       unmappedQuery = unmappedQuery.eq('visibility', 'public');
       if (!includeAll) {

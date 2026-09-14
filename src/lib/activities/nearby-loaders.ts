@@ -21,6 +21,7 @@
  * importiert geschlossene POIs mit is_closed=true, aber visible=true).
  */
 
+import { locationOutputs } from '@/lib/location/gating';
 import { unstable_cache } from 'next/cache';
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import { bboxAround, haversineKm } from '@/lib/gemeinden/data';
@@ -190,7 +191,9 @@ export const loadNearbyActivitiesCached = unstable_cache(
 
 const EVENT_COLUMNS =
   'id, title, slug, start_date, location_name, address, postal_code, bundesland, ' +
-  'latitude, longitude, category, image_url, event_score';
+  'latitude, longitude, category, image_url, event_score, ' +
+  // fn-25: Umkreis nur mit belegter Position (Review §6)
+  'geocoding_confidence, location_status, location_resolution';
 
 /** bbox-Kandidaten-Pool (Review Runde 4): radius-/Koordinaten-Filter
  *  laeuft NACH dem Fetch — mit zu kleinem Pool koennte die Sektion in
@@ -229,6 +232,8 @@ function toNearbyEvents(rows: EventRow[], lat: number, lng: number, radiusKm: nu
   return rows
     .map((e) => {
       if (e.latitude == null || e.longitude == null) return null;
+      // fn-25 C5: „in der Nähe" behauptet eine Distanz — nur mit belegter Position.
+      if (!locationOutputs(e as unknown as Parameters<typeof locationOutputs>[0]).distance) return null;
       const d = haversineKm(lat, lng, e.latitude, e.longitude);
       if (d > radiusKm) return null;
       return { ...e, _distance_km: d };
