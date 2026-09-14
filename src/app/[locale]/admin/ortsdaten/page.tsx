@@ -75,6 +75,117 @@ function CorrectionForm({ sample, onDone }: { sample: Sample; onDone: () => void
   );
 }
 
+interface Candidate { venue_id: string; name: string; type: string | null; address: string | null; postal_code: string | null; city: string | null; latitude: number | null; longitude: number | null; score: number }
+
+/**
+ * Zuordnung je Gruppe: Kandidaten aus dem OSM-Bestand im selben PLZ-Gebiet
+ * bzw. Ort, eine Bestätigung gilt für alle Events der Gruppe und jeden
+ * späteren Sync (source_venue_map mit Namensschlüssel).
+ */
+function VenueMapPanel({ group, onDone }: { group: Group; onDone: () => void }) {
+  const [cands, setCands] = useState<Candidate[] | null>(null);
+  const [info, setInfo] = useState<{ key?: string; events?: number; existing?: { latitude: number; longitude: number; confirmed_by: string; evidence: string | null; valid_to: string | null } | null; note?: string; error?: string } | null>(null);
+  const [lat, setLat] = useState('');
+  const [lng, setLng] = useState('');
+  const [precision, setPrecision] = useState('building');
+  const [evidence, setEvidence] = useState('');
+  const [busy, setBusy] = useState(false);
+  const [msg, setMsg] = useState<string | null>(null);
+
+  const params = `source=${encodeURIComponent(group.source_name)}&name=${encodeURIComponent(group.name)}&plz=${encodeURIComponent(group.postal_code ?? '')}&city=${encodeURIComponent(group.city ?? '')}`;
+
+  useEffect(() => {
+    let alive = true;
+    fetch(`/api/admin/ortsdaten/venue-map?${params}`).then(r => r.json()).then(j => {
+      if (!alive) return;
+      setInfo(j);
+      setCands(j.candidates ?? []);
+    }).catch(e => alive && setInfo({ error: e instanceof Error ? e.message : 'Fehler' }));
+    return () => { alive = false; };
+  }, [params]);
+
+  const confirm = async (c: { latitude: number; longitude: number; venue_id?: string; evidence: string; precision?: string }) => {
+    setBusy(true);
+    setMsg(null);
+    try {
+      const res = await fetch('/api/admin/ortsdaten/venue-map', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          source_name: group.source_name, location_name: group.name, postal_code: group.postal_code ?? undefined, city: group.city ?? undefined,
+          latitude: c.latitude, longitude: c.longitude, venue_id: c.venue_id, precision: c.precision ?? precision, evidence: c.evidence,
+        }),
+      });
+      const j = await res.json();
+      if (!res.ok) { setMsg(j.error ?? 'Fehler'); return; }
+      setMsg(`Zugeordnet: ${j.written} von ${j.group_events} Events neu entschieden.`);
+      onDone();
+    } catch (e) {
+      setMsg(e instanceof Error ? e.message : 'Fehler');
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const revoke = async () => {
+    if (!window.confirm('Zuordnung beenden und Gruppe neu entscheiden?')) return;
+    setBusy(true);
+    const res = await fetch(`/api/admin/ortsdaten/venue-map?${params}`, { method: 'DELETE' });
+    const j = await res.json();
+    setMsg(res.ok ? `Beendet: ${j.written} Events neu entschieden.` : (j.error ?? 'Fehler'));
+    setBusy(false);
+    onDone();
+  };
+
+  const cls = 'rounded border border-gray-300 dark:border-gray-600 bg-transparent px-2 py-1 text-xs';
+  return (
+    <div className="border-t border-dashed border-gray-300 dark:border-gray-600 p-3 space-y-2 text-sm">
+      <div className="text-xs text-gray-500">
+        Zuordnung für <span className="font-mono">{group.name}</span> · {group.postal_code ?? group.city ?? 'ohne Ortskontext'} · gilt für {info?.events ?? group.count} Events dieser Quelle
+        {info?.existing && !info.existing.valid_to && (
+          <> · <span className="text-emerald-700 dark:text-emerald-400">bereits zugeordnet ({info.existing.latitude.toFixed(4)}, {info.existing.longitude.toFixed(4)}, {info.existing.confirmed_by})</span> <button className="underline" onClick={revoke} disabled={busy}>beenden</button></>
+        )}
+      </div>
+      {info?.error && <div className="text-xs text-red-600">{info.error}</div>}
+      {info?.note && <div className="text-xs text-amber-700">{info.note}</div>}
+      {cands === null ? <div className="text-xs text-gray-500">Suche Kandidaten …</div> : cands.length === 0 ? (
+        <div className="text-xs text-gray-500">Kein passender OSM-Eintrag im Ortskontext. Position unten von Hand eintragen (Karte/Adresse prüfen).</div>
+      ) : (
+        <ul className="space-y-1">
+          {cands.map(c => (
+            <li key={c.venue_id} className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs">
+              <span className="font-medium">{c.name}</span>
+              <span className="text-gray-500">{c.type ?? '∅'} · {c.address ?? 'ohne Adresse'} · {c.postal_code ?? ''} {c.city ?? ''} · Ähnlichkeit {Math.round(c.score * 100)} %</span>
+              {c.latitude != null && c.longitude != null && (
+                <a className="underline" href={`https://www.openstreetmap.org/?mlat=${c.latitude}&mlon=${c.longitude}#map=17/${c.latitude}/${c.longitude}`} target="_blank" rel="noreferrer">Karte</a>
+              )}
+              <button disabled={busy || c.latitude == null} className="px-2 py-0.5 rounded bg-blue-600 text-white disabled:opacity-50"
+                onClick={() => confirm({ latitude: c.latitude!, longitude: c.longitude!, venue_id: c.venue_id, evidence: `osm:${c.venue_id} ${c.name}${c.address ? ', ' + c.address : ''}` })}>
+                Übernehmen
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+      <div className="flex flex-wrap gap-2 items-center">
+        <input className={cls} placeholder="Breite (lat)" value={lat} onChange={e => setLat(e.target.value)} size={12} />
+        <input className={cls} placeholder="Länge (lng)" value={lng} onChange={e => setLng(e.target.value)} size={12} />
+        <select className={cls} value={precision} onChange={e => setPrecision(e.target.value)}>
+          <option value="building">Gebäude</option>
+          <option value="site">Gelände/Treffpunkt</option>
+          <option value="street">Straße</option>
+        </select>
+        <input className={cls} placeholder="Beleg (URL, Adresse)" value={evidence} onChange={e => setEvidence(e.target.value)} size={36} />
+        <button disabled={busy || !lat || !lng || evidence.trim().length < 3} className="text-xs px-3 py-1 rounded bg-blue-600 text-white disabled:opacity-50"
+          onClick={() => confirm({ latitude: Number(lat), longitude: Number(lng), evidence: evidence.trim() })}>
+          Von Hand zuordnen
+        </button>
+      </div>
+      {msg && <div className="text-xs">{msg}</div>}
+    </div>
+  );
+}
+
 function correctionIdOf(s: Sample): string | null {
   for (const e of s.location_resolution?.evidence ?? []) {
     const m = /^correction:([^:]+):/.exec(e);
@@ -107,6 +218,8 @@ interface Group {
   key: string;
   source_name: string;
   name: string;
+  postal_code: string | null;
+  city: string | null;
   count: number;
   next_start: string;
   has_raw: number;
@@ -129,6 +242,7 @@ export default function OrtsdatenPage() {
   const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState<string | null>(null);
   const [editing, setEditing] = useState<string | null>(null);
+  const [mapping, setMapping] = useState<string | null>(null);
 
   const revoke = async (id: string) => {
     if (!confirm('Korrektur beenden und neu entscheiden?')) return;
@@ -197,6 +311,11 @@ export default function OrtsdatenPage() {
                 <span className="text-xs text-gray-500">{g.has_raw}/{g.count} mit Quellenstand</span>
                 <span className="text-xs text-amber-700 dark:text-amber-400 truncate max-w-full">{g.reasons.slice(0, 3).join(' · ')}</span>
               </button>
+              <div className="px-3 pb-2 text-xs space-x-3">
+                <span className="text-gray-500">{g.postal_code ?? g.city ?? 'ohne Ortskontext'}</span>
+                <button className="underline" onClick={() => setMapping(mapping === g.key ? null : g.key)}>Spielstätte zuordnen (gilt für alle {g.count})</button>
+              </div>
+              {mapping === g.key && <VenueMapPanel group={g} onDone={load} />}
               {open === g.key && (
                 <div className="border-t border-gray-100 dark:border-gray-800 p-3 space-y-3 text-sm">
                   {g.samples.map(s => (

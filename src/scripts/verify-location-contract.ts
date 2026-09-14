@@ -22,6 +22,7 @@
 import { createClient } from '@supabase/supabase-js';
 import { syncEventsToSupabase } from '../lib/db/supabase-sync';
 import { locationBasisHash } from '../lib/location/conservative-resolution';
+import { venueMapKey } from '../lib/location/venue-key';
 import type { ScrapedEvent } from '../types/events';
 
 const SRC = 'fn25-contract-check';
@@ -146,7 +147,23 @@ async function main() {
     const ev = await read('admission-conflict');
     check('E: Vertragskonflikt ohne Position, verworfene Position protokolliert',
       ev.location_status === 'conflict' && ev.latitude === null && (ev.location_resolution as { revoked?: { latitude?: number } } | null)?.revoked?.latitude === 48.2082, ev);
+
+    // Fall F: bestätigte Spielstätten-Zuordnung über den Namensschlüssel (Admin
+    // „Spielstätte zuordnen"): Quelle nennt nur Name + PLZ, die Bestätigung gilt
+    // für alle Events der Gruppe.
+    const fSource: ScrapedEvent = { source_name: SRC, source_id: 'venue-map', source_url: 'https://example.invalid/f', title: 'fn25 Vertrag Namenszuordnung',
+      start_date: start, location_name: 'Kulturhaus Musterstadt', postal_code: '7000', bundesland: 'burgenland' };
+    await syncEventsToSupabase([fSource]);
+    let f = await read('venue-map');
+    check('F: vor der Zuordnung nur Gemeinde-Ebene', f.location_status === 'municipality_only', f);
+    const fKey = venueMapKey({ source_name: SRC, location_name: fSource.location_name, postal_code: fSource.postal_code });
+    const { error: mapErr } = await sb.from('source_venue_map').upsert({ source_venue_id: fKey, venue_id: null, latitude: 47.8457, longitude: 16.5259, precision: 'building', confirmed_by: 'fn25-contract-check', evidence: 'Vertragsprüfung' }, { onConflict: 'source_venue_id' });
+    check('F: Zuordnung gespeichert', !mapErr, mapErr?.message);
+    await syncEventsToSupabase([fSource]);
+    f = await read('venue-map');
+    check('F: Sync wendet die Namenszuordnung an (venue_confirmed, Pin + Route)', f.location_status === 'venue_confirmed' && f.latitude === 47.8457 && f.location_resolution?.allowed?.route === true, f);
   } finally {
+    await sb.from('source_venue_map').delete().eq('confirmed_by', 'fn25-contract-check');
     await sb.from('event_location_corrections').delete().eq('corrected_by', 'fn25-contract-check');
     const { data: del } = await sb.from('events').delete().eq('source_name', SRC).select('id');
     await sb.from('raw_events').delete().eq('source_name', SRC);

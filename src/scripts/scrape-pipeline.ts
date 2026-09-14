@@ -190,7 +190,9 @@ async function main() {
     // betroffenen Events über den gemeinsamen Resolver neu.
     if (!opts.skipGeocoding) {
       steps.address_geocoding = await runStep('address_geocoding', async () => {
-        execStep('Geocode event addresses', `npx tsx ${envFlag}src/scripts/geocode-addresses.ts --limit 600`);
+        // 1 Anfrage je 1,2 s: 1.500 Adressen sind 30 Minuten, innerhalb der
+        // Nominatim-Regel (max. 1/s) und weit unter Massengeocodierung.
+        execStep('Geocode event addresses', `npx tsx ${envFlag}src/scripts/geocode-addresses.ts --limit 1500`);
       }, steps);
     }
 

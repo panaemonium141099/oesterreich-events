@@ -92,7 +92,12 @@ async function main() {
   // Kandidaten: künftige Events mit Hausnummer, aber ohne belegte Position.
   const candidates: StoredEventLocationRow[] = [];
   const PAGE = 500;
-  for (let from = 0; candidates.length < LIMIT * 3 && from < 20000; from += PAGE) {
+  // Alle Kandidaten einlesen (nicht nur die nächsten Termine): die
+  // Reihenfolge der Abfragen richtet sich nach der Zahl der Events je
+  // Adresse, damit das Tagesbudget zuerst die Spielstätten mit den meisten
+  // Terminen trifft (Eventim: 989 Adressen tragen 6.812 Events, Stand
+  // 2026-09-14). Vorher ging es nach Datum, also viele Einzeltermine zuerst.
+  for (let from = 0; from < 60000; from += PAGE) {
     const { data, error } = await supabase
       .from('events')
       .select(STORED_LOCATION_COLUMNS)
@@ -135,8 +140,12 @@ async function main() {
       else if (r.expires_at && r.expires_at > new Date().toISOString()) known.add(r.query);
     }
   }
-  const todo = keys.filter(k => !known.has(k)).slice(0, LIMIT);
-  console.log(`[geocode-addresses] ${keys.length} Adressen, ${known.size} im Cache, ${todo.length} werden abgefragt`);
+  const todo = keys
+    .filter(k => !known.has(k))
+    .sort((a, b) => (byKey.get(b)?.length ?? 0) - (byKey.get(a)?.length ?? 0))
+    .slice(0, LIMIT);
+  const todoEvents = todo.reduce((n, k) => n + (byKey.get(k)?.length ?? 0), 0);
+  console.log(`[geocode-addresses] ${keys.length} Adressen, ${known.size} im Cache, ${todo.length} werden abgefragt (${todoEvents} Events, nach Eventzahl je Adresse)`);
 
   let ok = 0, none = 0, errors = 0;
   const touched: StoredEventLocationRow[] = [];

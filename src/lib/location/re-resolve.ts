@@ -23,6 +23,7 @@ import type { SourceCoordsPrecision } from './types';
 
 export interface StoredEventLocationRow {
   id: string;
+  source_name?: string | null;
   title: string | null;
   start_date?: string | null;
   location_name: string | null;
@@ -49,7 +50,7 @@ export interface StoredEventLocationRow {
 }
 
 export const STORED_LOCATION_COLUMNS =
-  'id, title, start_date, location_name, location_name_raw, address, address_raw, postal_code, postal_code_raw, city_raw, ' +
+  'id, source_name, title, start_date, location_name, location_name_raw, address, address_raw, postal_code, postal_code_raw, city_raw, ' +
   'country, country_raw, bundesland, latitude, longitude, latitude_raw, longitude_raw, coords_precision_raw, ' +
   'source_venue_id, geocoding_confidence, location_status, location_status_changed_at, location_resolution, updated_at';
 
@@ -76,6 +77,7 @@ export function inputFromStoredRow(row: StoredEventLocationRow): LocationInput {
       coords_precision: (row.coords_precision_raw as SourceCoordsPrecision | null) ?? null,
       source_venue_id: row.source_venue_id,
       event_id: row.id,
+      source_name: row.source_name ?? null,
     };
   }
   const sourceCoords = row.geocoding_confidence === 'scraper';
@@ -92,6 +94,7 @@ export function inputFromStoredRow(row: StoredEventLocationRow): LocationInput {
     coords_precision: sourceCoords ? 'unknown' : null,
     source_venue_id: row.source_venue_id,
     event_id: row.id,
+    source_name: row.source_name ?? null,
   };
 }
 

@@ -166,7 +166,7 @@ Stand 2026-09-14 abends (Phasen A–F umgesetzt, O1 live; Wiederholungslauf
 - [ ] Noch ohne automatisierten Test: geteilte Ticket-Domain (alter
       Venue-Matcher nicht in Prod), Footer-Adresse (adapterspezifisch).
 - [x] Integrationstest am gespeicherten Datensatz (`verify-location-
-      contract.ts`): 23 Prüfungen, inkl. Trigger, Titel-/Score-Update,
+      contract.ts`): 26 Prüfungen, inkl. Trigger, Titel-/Score-Update,
       manuelle Korrektur und Verlegung.
 - [x] Jeder öffentlich präzise Ort hat Entscheidung + erhaltenen Quellenstand:
       DB-Check `events_location_precise_has_position` (validiert) verlangt
