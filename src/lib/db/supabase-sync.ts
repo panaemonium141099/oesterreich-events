@@ -859,7 +859,9 @@ function toSupabaseRow(
     district: finalDistrict,
     latitude: finalLat,
     longitude: finalLng,
-    country: event.country ?? 'AT',
+    // ISO-Code aus der Entscheidung (Adapter liefern teils Ländernamen; der
+    // Länderfilter der API vergleicht exakt mit 'AT').
+    country: decision.country,
     // ─── fn-25: Rohwerte der Quelle (unverändert) und Ortsentscheidung ──
     location_name_raw: event.location_name ?? null,
     address_raw: event.address ?? null,

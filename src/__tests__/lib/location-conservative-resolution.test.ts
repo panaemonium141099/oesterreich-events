@@ -9,6 +9,8 @@ import {
   extractPlzFromAddress,
   extractCityFromAddress,
   hasHouseNumber,
+  normalizeCountryCode,
+  locationBasisHash,
 } from '@/lib/location/conservative-resolution';
 import { shouldOverwriteCoords } from '@/lib/db/supabase-sync';
 
@@ -338,5 +340,40 @@ describe('geteilte Stadt-PLZ: Stadt und Umlandgemeinde sind beide Kandidaten (RT
     expect(resolveConservativeLocation({ location_name: 'Kirche', address: 'Kirchplatz 1, 8044 Graz' }, NOW).gemeinde?.name).toBe('Graz');
     expect(resolveConservativeLocation({ location_name: 'Saal', postal_code: '4050' }, NOW).gemeinde?.name).toBe('Traun');
     expect(resolveConservativeLocation({ location_name: 'Saal', postal_code: '9061' }, NOW).gemeinde?.name).toBe('Klagenfurt am Wörthersee');
+  });
+});
+
+describe('Ländernamen der Adapter sind Österreich (Feratel „ÖSTERREICH", Prod-Befund 2026-09-14)', () => {
+  it('normalizeCountryCode bildet Namen und Kürzel auf ISO-Codes ab, leer = AT, Unbekanntes bleibt', () => {
+    for (const v of ['ÖSTERREICH', 'Österreich', 'Oesterreich', 'AUSTRIA', 'at', 'A', null, undefined, '']) expect(normalizeCountryCode(v)).toBe('AT');
+    expect(normalizeCountryCode('DEUTSCHLAND')).toBe('DE');
+    expect(normalizeCountryCode('Schweiz')).toBe('CH');
+    expect(normalizeCountryCode('Italien')).toBe('IT');
+    expect(normalizeCountryCode('hu')).toBe('HU');
+    expect(normalizeCountryCode('Narnia')).toBe('NARNIA');
+  });
+
+  it('Feratel-Event mit country „ÖSTERREICH" und Ortsname bekommt Gemeinde und Gemeinde-Ebene statt „nur Bundesland"', () => {
+    const d = resolveConservativeLocation({ location_name: 'Heimatsaal Kammern', city: 'Kammern im Liesingtal', bundesland: 'Steiermark', country: 'ÖSTERREICH' }, NOW);
+    expect(d.country).toBe('AT');
+    expect(d.gemeinde?.name).toBe('Kammern im Liesingtal');
+    expect(d.status).toBe('municipality_only');
+    expect(d.latitude).not.toBeNull();
+  });
+
+  it('Feratel-Event mit Venue-Koordinate und Ort: address_confirmed mit Gemeinde', () => {
+    const d = resolveConservativeLocation({ location_name: 'Baumwipfelpfad Salzkammergut', city: 'Gmunden', bundesland: 'Oberösterreich', country: 'ÖSTERREICH', latitude: 47.8978, longitude: 13.823, coords_precision: 'venue' }, NOW);
+    expect(d.status).toBe('address_confirmed');
+    expect(d.gemeinde?.name).toBe('Gmunden');
+    expect(d.country).toBe('AT');
+  });
+
+  it('Eingabehash: Adapterform (Sync) und Zeilenform (Backfill) ergeben denselben Quellenstand', () => {
+    const sync = { location_name: 'Musikpavillon', city: 'Bad Hall', bundesland: 'Oberösterreich', country: 'ÖSTERREICH', latitude: 48.0337, longitude: 14.2068, coords_precision: 'venue' as const };
+    const row = { ...sync, bundesland: 'oberoesterreich', country: 'ÖSTERREICH' };
+    expect(resolveConservativeLocation(sync, NOW).input_hash).toBe(resolveConservativeLocation(row, NOW).input_hash);
+    expect(locationBasisHash(sync)).toBe(locationBasisHash({ ...sync, country: 'AT' }));
+    // Ein anderes Bundesland ist ein anderer Quellenstand.
+    expect(resolveConservativeLocation(sync, NOW).input_hash).not.toBe(resolveConservativeLocation({ ...sync, bundesland: 'Salzburg' }, NOW).input_hash);
   });
 });

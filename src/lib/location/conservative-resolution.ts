@@ -144,15 +144,56 @@ function round6(v: number | null | undefined): number | null {
   return typeof v === 'number' && Number.isFinite(v) ? Math.round(v * 1e6) / 1e6 : null;
 }
 
+/**
+ * Ländercode der Quelle. Adapter liefern teils Namen statt Codes (Deskline:
+ * „ÖSTERREICH", „DEUTSCHLAND"); ohne Abbildung galt jedes Feratel-Event als
+ * Ausland, ohne Gemeinde- und PLZ-Logik, und fiel aus dem Länderfilter der
+ * API (9.432 Events, Prod 2026-09-14). Unbekannte Namen bleiben erhalten
+ * (nicht AT), leere Angabe heißt AT.
+ */
+const COUNTRY_NAMES: Record<string, string> = {
+  AT: 'AT', A: 'AT', AUT: 'AT', OESTERREICH: 'AT', OSTERREICH: 'AT', AUSTRIA: 'AT', OESTERR: 'AT',
+  DE: 'DE', D: 'DE', DEU: 'DE', DEUTSCHLAND: 'DE', GERMANY: 'DE',
+  CH: 'CH', CHE: 'CH', SCHWEIZ: 'CH', SWITZERLAND: 'CH', SUISSE: 'CH', SVIZZERA: 'CH',
+  IT: 'IT', ITA: 'IT', ITALIEN: 'IT', ITALY: 'IT', ITALIA: 'IT',
+  HU: 'HU', HUN: 'HU', UNGARN: 'HU', HUNGARY: 'HU',
+  SI: 'SI', SVN: 'SI', SLOWENIEN: 'SI', SLOVENIA: 'SI',
+  CZ: 'CZ', CZE: 'CZ', TSCHECHIEN: 'CZ', CZECHIA: 'CZ',
+  SK: 'SK', SVK: 'SK', SLOWAKEI: 'SK', SLOVAKIA: 'SK',
+  LI: 'LI', LIE: 'LI', LIECHTENSTEIN: 'LI',
+};
+
+export function normalizeCountryCode(raw: string | null | undefined): string {
+  if (!hasText(raw)) return 'AT';
+  const key = raw
+    .trim()
+    .toUpperCase()
+    .replace(/Ä/g, 'AE').replace(/Ö/g, 'OE').replace(/Ü/g, 'UE').replace(/ß/g, 'SS')
+    .replace(/[^A-Z]/g, '');
+  if (!key) return 'AT';
+  return COUNTRY_NAMES[key] ?? (key.length === 2 ? key : raw.trim().toUpperCase());
+}
+
+/** Kanonische Form der Kontextangaben für den Hash: Sync (Adapterform
+ *  „Oberösterreich", „ÖSTERREICH") und Backfill (Zeile: „oberoesterreich")
+ *  müssen denselben Quellenstand als denselben erkennen. */
+function hashContext(input: LocationInput): { b: string | null; co: string | null } {
+  return {
+    b: bundeslandToId(input.bundesland) ?? (hasText(input.bundesland) ? input.bundesland.trim().toLowerCase() : null),
+    co: hasText(input.country) ? normalizeCountryCode(input.country) : null,
+  };
+}
+
 function inputHash(input: LocationInput): string {
+  const ctx = hashContext(input);
   const payload = JSON.stringify({
     t: input.title ?? null,
     l: input.location_name ?? null,
     a: input.address ?? null,
     p: input.postal_code ?? null,
     c: input.city ?? null,
-    b: input.bundesland ?? null,
-    co: input.country ?? null,
+    b: ctx.b,
+    co: ctx.co,
     la: round6(input.latitude),
     lo: round6(input.longitude),
     pr: input.coords_precision ?? null,
@@ -173,7 +214,7 @@ export function locationBasisHash(input: LocationInput): string {
     a: input.address ?? null,
     p: input.postal_code ?? null,
     c: input.city ?? null,
-    co: input.country ?? null,
+    co: hashContext(input).co,
     la: round6(input.latitude),
     lo: round6(input.longitude),
     pr: input.coords_precision ?? null,
@@ -206,7 +247,7 @@ export function resolveConservativeLocation(input: LocationInput, now: Date = ne
   const rejected: string[] = [];
   const provenance: LocationDecision['provenance'] = {};
 
-  const country = (input.country ?? 'AT').trim().toUpperCase() || 'AT';
+  const country = normalizeCountryCode(input.country);
   const isAT = country === 'AT';
   provenance.country = hasText(input.country) ? 'source' : 'default';
 
