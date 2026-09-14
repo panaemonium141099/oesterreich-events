@@ -11,7 +11,10 @@
  *     ein Titel-Update sie nicht verändert,
  *  5. eine manuelle Korrektur (`event_location_corrections`) beim nächsten
  *     Sync angewendet wird und ein späterer Quellenstand mit anderen
- *     Ortsangaben (Verlegung) sie ablöst statt an ihr zu scheitern.
+ *     Ortsangaben (Verlegung) sie ablöst statt an ihr zu scheitern,
+ *  6. die Quelle für ihre eigene Koordinate maßgeblich bleibt: stuft sie
+ *     eine Venue-Koordinate zur Gebietsangabe ab (Feed-Platzhalter), wird
+ *     die Zeile abgestuft, auch wenn sich die Koordinate minimal ändert.
  *
  * Schreibt unter der Quelle `fn25-contract-check` und räumt danach auf.
  * Aufruf: npx tsx --env-file=.env.local src/scripts/verify-location-contract.ts
@@ -117,6 +120,19 @@ async function main() {
     c = await read('corr');
     check('C: Verlegung löst die Korrektur ab (keine ewige Sperre)', c.geocoding_confidence !== 'manual' && c.latitude !== 47.8457 && c.location_status === 'municipality_only', c);
     check('C: Grund correction_stale protokolliert', ((c.location_resolution as { reasons?: string[] } | null)?.reasons ?? []).some(r => r.startsWith('correction_stale:')), c.location_resolution);
+
+    // Fall D: Feed-Platzhalter. Erst als Venue-Koordinate geliefert (venue_confirmed),
+    // dann vom Parser als Gebietsangabe erkannt (municipality) mit minimal anderer Gleitkommazahl.
+    const dSource: ScrapedEvent = { source_name: SRC, source_id: 'placeholder', source_url: 'https://example.invalid/p', title: 'fn25 Vertrag Platzhalter',
+      start_date: start, location_name: 'Royal Vienna Hall', address: 'Mariahilfer Straße 1', postal_code: '1060', city: 'WIEN', country: 'AT',
+      latitude: 48.2089999946173, longitude: 16.3700000256988, coords_precision: 'venue', source_venue_id: 'eventim:contract-placeholder' };
+    await syncEventsToSupabase([dSource]);
+    let d = await read('placeholder');
+    check('D: Venue-Koordinate der Quelle → venue_confirmed', d.location_status === 'venue_confirmed' && d.geocoding_confidence === 'scraper', d);
+    await syncEventsToSupabase([{ ...dSource, latitude: 48.209, longitude: 16.37, coords_precision: 'municipality' }]);
+    d = await read('placeholder');
+    check('D: Abstufung durch die Quelle wird übernommen (municipality_only, gemeinde-centroid, kein Pin)',
+      d.location_status === 'municipality_only' && d.geocoding_confidence === 'gemeinde-centroid' && d.latitude === 48.209 && d.location_resolution?.allowed?.pin === false, d);
   } finally {
     await sb.from('event_location_corrections').delete().eq('corrected_by', 'fn25-contract-check');
     const { data: del } = await sb.from('events').delete().eq('source_name', SRC).select('id');

@@ -90,6 +90,10 @@ export interface LocationEvidence {
    *  wurde (auch ohne Treffer). Nur dann darf ein altes `manual`-Label in
    *  der Zeile fallen gelassen werden. */
   correctionsLoaded?: boolean;
+  /** true, wenn ALLE Belegquellen für diesen Batch erfolgreich gelesen
+   *  wurden. Bei Ausfall bleibt ein belegter Bestand unverändert (kein
+   *  Abstufen auf die Quellkoordinate, Review §9 „Geocoder-Ausfall"). */
+  complete?: boolean;
 }
 
 export interface ResolvedLocation extends LocationDecision {

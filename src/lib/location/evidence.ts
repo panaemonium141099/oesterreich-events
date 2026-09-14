@@ -133,6 +133,7 @@ export async function loadLocationEvidence(
   inputs: LocationInput[],
 ): Promise<LocationEvidence[]> {
   const out: LocationEvidence[] = inputs.map(() => ({}));
+  let failures = 0;
 
   // ── source_venue_map ────────────────────────────────────────────────
   const svids = [...new Set(inputs.map(i => i.source_venue_id?.trim()).filter((v): v is string => !!v))];
@@ -164,6 +165,7 @@ export async function loadLocationEvidence(
         if (hit) out[i].sourceVenueMap = hit;
       });
     } catch (e) {
+      failures++;
       console.warn('[location-evidence] source_venue_map:', e instanceof Error ? e.message : e);
     }
   }
@@ -224,6 +226,7 @@ export async function loadLocationEvidence(
         }
       }
     } catch (e) {
+      failures++;
       console.warn('[location-evidence] venues:', e instanceof Error ? e.message : e);
     }
   }
@@ -257,6 +260,7 @@ export async function loadLocationEvidence(
         if (hit) out[i].addressGeocode = hit;
       }
     } catch (e) {
+      failures++;
       console.warn('[location-evidence] geocode_cache:', e instanceof Error ? e.message : e);
     }
   }
@@ -281,6 +285,7 @@ export async function loadLocationEvidence(
         if (hit) out[i].correction = hit;
       });
     } catch (e) {
+      failures++;
       console.warn('[location-evidence] event_location_corrections:', e instanceof Error ? e.message : e);
     }
   } else {
@@ -288,6 +293,7 @@ export async function loadLocationEvidence(
     for (const o of out) o.correctionsLoaded = true;
   }
 
+  for (const o of out) o.complete = failures === 0;
   return out;
 }
 
