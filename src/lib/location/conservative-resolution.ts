@@ -56,6 +56,9 @@ export interface LocationInput {
   /** Bestehende Event-ID (nur zum Laden eventbezogener Korrekturen; geht
    *  nicht in den Eingabehash ein). */
   event_id?: string | null;
+  /** Quelle (nur für den Schlüssel bestätigter Namens-Zuordnungen, siehe
+   *  `venue-key.ts`; nicht im Eingabehash). */
+  source_name?: string | null;
 }
 
 // Österreich-Bounding-Box wie in admission.ts / score-event.ts.

@@ -21,6 +21,7 @@ import type { LocationInput } from './conservative-resolution';
 import { extractPlzFromAddress, extractCityFromAddress } from './conservative-resolution';
 import { normalizeGemeindeName } from './gemeinde-index';
 import type { LocationEvidence, VenueCandidateEvidence, AddressGeocodeEvidence, SourceVenueMapEvidence, CorrectionEvidence } from './resolver';
+import { venueMapKey } from './venue-key';
 import type { LocationPrecision } from './types';
 
 const CHUNK = 200;
@@ -136,7 +137,10 @@ export async function loadLocationEvidence(
   let failures = 0;
 
   // ── source_venue_map ────────────────────────────────────────────────
-  const svids = [...new Set(inputs.map(i => i.source_venue_id?.trim()).filter((v): v is string => !!v))];
+  // Schlüssel je Eingabe: Quellen-Venue-Kennung des Feeds, sonst der
+  // Namensschlüssel (Quelle + Name + PLZ/Ort) für Admin-Bestätigungen.
+  const mapKeyOf = (i: LocationInput): string | null => i.source_venue_id?.trim() || venueMapKey(i);
+  const svids = [...new Set(inputs.map(mapKeyOf).filter((v): v is string => !!v))];
   if (svids.length > 0) {
     try {
       const rows = await inChunks(svids, async slice => {
@@ -161,7 +165,8 @@ export async function loadLocationEvidence(
         });
       }
       inputs.forEach((inp, i) => {
-        const hit = inp.source_venue_id ? byId.get(inp.source_venue_id.trim()) : undefined;
+        const key = mapKeyOf(inp);
+        const hit = key ? byId.get(key) : undefined;
         if (hit) out[i].sourceVenueMap = hit;
       });
     } catch (e) {

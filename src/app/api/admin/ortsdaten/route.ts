@@ -69,13 +69,18 @@ export async function GET(request: NextRequest) {
     .limit(2000);
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
-  const groups = new Map<string, { key: string; source_name: string; name: string; count: number; next_start: string; has_raw: number; reasons: Map<string, number>; samples: EventRowLite[] }>();
+  // Gruppe = Quelle + Rohname + Ortskontext (PLZ, sonst Ortsname): derselbe
+  // Name in einer anderen Gemeinde ist eine andere Spielstätte, und die
+  // Zuordnung im Admin gilt genau für diesen Schlüssel (venue-key.ts).
+  const groups = new Map<string, { key: string; source_name: string; name: string; postal_code: string | null; city: string | null; count: number; next_start: string; has_raw: number; reasons: Map<string, number>; samples: EventRowLite[] }>();
   for (const r of (data ?? []) as unknown as EventRowLite[]) {
     const name = r.location_name_raw ?? r.location_name ?? '∅';
-    const key = `${r.source_name}::${name}`;
+    const plz = r.postal_code ?? null;
+    const city = r.city_raw ?? null;
+    const key = `${r.source_name}::${name}::${plz ?? city ?? ''}`;
     let g = groups.get(key);
     if (!g) {
-      g = { key, source_name: r.source_name, name, count: 0, next_start: r.start_date, has_raw: 0, reasons: new Map(), samples: [] };
+      g = { key, source_name: r.source_name, name, postal_code: plz, city, count: 0, next_start: r.start_date, has_raw: 0, reasons: new Map(), samples: [] };
       groups.set(key, g);
     }
     g.count++;

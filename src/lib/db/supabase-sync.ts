@@ -311,6 +311,7 @@ async function prefetchExistingRows(
 function locationInputOf(event: ScrapedEvent, existingId?: string | null): LocationInput {
   return {
     event_id: existingId ?? null,
+    source_name: event.source_name,
     title: event.title,
     location_name: event.location_name ?? null,
     address: event.address ?? null,
