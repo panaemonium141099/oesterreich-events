@@ -94,6 +94,12 @@ async function main() {
 
   const out = join(process.cwd(), 'data', 'plz-at.json');
   writeFileSync(out, JSON.stringify(entries));
+  // Kompakte Tabelle PLZ → Bundesland-ID für Adapter, Vertrag und Trigger
+  // (nur eindeutige PLZ). Ersetzt die Präfixregel „4xxx = Oberösterreich",
+  // die für 99 PLZ falsch liegt (Osttirol, Innviertel, Ennsdorf, Kittsee …).
+  const blTable: Record<string, string> = {};
+  for (const e of entries) if (e.bundeslaender.length === 1) blTable[e.plz] = e.bundeslaender[0];
+  writeFileSync(join(process.cwd(), 'data', 'plz-bundesland.json'), JSON.stringify(blTable, Object.keys(blTable).sort()));
   writeFileSync(
     join(process.cwd(), 'data', 'plz-at.meta.json'),
     JSON.stringify(
