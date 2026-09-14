@@ -12,6 +12,7 @@ import { buildEventUrlV2 } from '@/lib/utils/slugify';
 import { createClient } from '@/lib/supabase/client';
 import { useAuth } from '@/lib/supabase/auth-context';
 import { useSavedEvents } from '@/lib/saved-events-context';
+import { locationOutputs, locationGatingEnabled } from '@/lib/location/gating';
 
 interface PlannedEventMarker {
   id: string;
@@ -463,9 +464,18 @@ function EventMap({ events, hoveredEventId, eveningMode, bundesland, flyToCoords
     </div>`;
   }, []);
 
+  // fn-25 C5: Events ohne belegte Position (Gemeinde-/PLZ-Mittelpunkt,
+  // unbestätigt) bekommen keinen Event-Pin. Sie liegen in einer eigenen
+  // Quelle, die nur Sammelmarker rendert („N Events · Ort unbestätigt").
+  const gatingOn = locationGatingEnabled();
+  const isApproximate = useCallback(
+    (e: Event) => gatingOn && !locationOutputs(e, { enforce: true }).pin,
+    [gatingOn],
+  );
+
   // Helper: build GeoJSON from events with jitter for overlapping coords
   const buildGeoJSON = useCallback((eventList: typeof events): GeoJSON.FeatureCollection => {
-    const eventsWithCoords = eventList.filter(e => e.latitude && e.longitude);
+    const eventsWithCoords = eventList.filter(e => e.latitude && e.longitude && !isApproximate(e));
     const coordCounts = new Map<string, number>();
     const jitteredEvents = eventsWithCoords.map(e => {
       const key = `${e.latitude!.toFixed(5)}_${e.longitude!.toFixed(5)}`;
@@ -484,7 +494,19 @@ function EventMap({ events, hoveredEventId, eveningMode, bundesland, flyToCoords
         geometry: { type: 'Point', coordinates: [e.longitude!, e.latitude!] },
       })),
     };
-  }, []);
+  }, [isApproximate]);
+
+  /** Sammelmarker-Quelle: ungefähre Positionen ohne Jitter, ohne Pins. */
+  const buildApproxGeoJSON = useCallback((eventList: typeof events): GeoJSON.FeatureCollection => ({
+    type: 'FeatureCollection',
+    features: eventList
+      .filter(e => e.latitude && e.longitude && isApproximate(e))
+      .map(e => ({
+        type: 'Feature' as const,
+        properties: { id: e.id, district: e.district ?? '', bundesland: e.bundesland ?? '' },
+        geometry: { type: 'Point' as const, coordinates: [e.longitude!, e.latitude!] },
+      })),
+  }), [isApproximate]);
 
   // Track whether source+layers are already initialized
   const sourceInitialized = useRef(false);
@@ -500,6 +522,7 @@ function EventMap({ events, hoveredEventId, eveningMode, bundesland, flyToCoords
     }
 
     const geojson = buildGeoJSON(events);
+    const approxGeojson = buildApproxGeoJSON(events);
 
     // Build separate GeoJSON for events that must NOT cluster: artist matches
     // AND paid-boosted events both live in the dedicated unclustered source.
@@ -528,13 +551,17 @@ function EventMap({ events, hoveredEventId, eveningMode, bundesland, flyToCoords
       if (m.getSource('artist-events')) {
         (m.getSource('artist-events') as mapboxgl.GeoJSONSource).setData(artistGeojson);
       }
+      if (m.getSource('approx-events')) {
+        (m.getSource('approx-events') as mapboxgl.GeoJSONSource).setData(approxGeojson);
+      }
       // Don't return — let the marker update logic below run
     } else {
       // First time: create source + layers — remove layers before source
-      for (const layerId of ['unclustered-artist-point', 'unclustered-point', 'cluster-count', 'clusters']) {
+      for (const layerId of ['approx-count', 'approx-marker', 'unclustered-artist-point', 'unclustered-point', 'cluster-count', 'clusters']) {
         if (m.getLayer(layerId)) m.removeLayer(layerId);
       }
       if (m.getSource('artist-events')) m.removeSource('artist-events');
+      if (m.getSource('approx-events')) m.removeSource('approx-events');
       if (m.getSource('events')) m.removeSource('events');
 
       markersOnScreen.current.forEach(marker => marker.remove());
@@ -552,6 +579,16 @@ function EventMap({ events, hoveredEventId, eveningMode, bundesland, flyToCoords
       m.addSource('artist-events', {
         type: 'geojson',
         data: artistGeojson,
+      });
+
+      // fn-25: ungefähre Positionen — clustern bis zur höchsten Zoomstufe,
+      // Einzelpunkte erscheinen als Sammelmarker mit Zähler „1".
+      m.addSource('approx-events', {
+        type: 'geojson',
+        data: approxGeojson,
+        cluster: true,
+        clusterMaxZoom: 22,
+        clusterRadius: 60,
       });
 
       sourceInitialized.current = true;
@@ -612,6 +649,46 @@ function EventMap({ events, hoveredEventId, eveningMode, bundesland, flyToCoords
         'circle-opacity': 0,
       },
     });
+
+    // fn-25: Sammelmarker für ungefähre Positionen (Cluster UND Einzelpunkte
+    // sehen gleich aus — es gibt hier keinen Event-Pin).
+    m.addLayer({
+      id: 'approx-marker',
+      type: 'circle',
+      source: 'approx-events',
+      paint: {
+        'circle-color': isDark ? 'rgba(30, 41, 59, 0.55)' : 'rgba(241, 245, 249, 0.85)',
+        'circle-radius': ['case', ['has', 'point_count'], ['step', ['get', 'point_count'], 16, 10, 20, 50, 24, 100, 30], 12],
+        'circle-stroke-width': 1.5,
+        'circle-stroke-color': isDark ? 'rgba(148, 163, 184, 0.6)' : 'rgba(100, 116, 139, 0.6)',
+        'circle-opacity': 0.85,
+      },
+    });
+    m.addLayer({
+      id: 'approx-count',
+      type: 'symbol',
+      source: 'approx-events',
+      layout: {
+        'text-field': ['case', ['has', 'point_count'], ['get', 'point_count_abbreviated'], '1'],
+        'text-font': ['DIN Pro Medium', 'Arial Unicode MS Bold'],
+        'text-size': 12,
+        'text-allow-overlap': true,
+      },
+      paint: { 'text-color': isDark ? '#94a3b8' : '#475569' },
+    });
+    m.on('click', 'approx-marker', (e) => {
+      const f = e.features?.[0];
+      if (!f) return;
+      const count = (f.properties?.point_count as number | undefined) ?? 1;
+      const where = [f.properties?.district, f.properties?.bundesland].filter(Boolean).join(', ');
+      const html = `<div style="font:13px/1.4 system-ui;padding:8px 10px;max-width:220px;">`
+        + `<strong>${count} ${count === 1 ? 'Veranstaltung' : 'Veranstaltungen'}</strong><br/>`
+        + `Genauer Veranstaltungsort noch nicht bestätigt${where ? ` · ${where}` : ''}.<br/>`
+        + `<span style="color:#64748b">Details auf der Event-Seite prüfen.</span></div>`;
+      new mapboxgl.Popup({ closeButton: true, offset: 12 }).setLngLat(e.lngLat).setHTML(html).addTo(m);
+    });
+    m.on('mouseenter', 'approx-marker', () => { m.getCanvas().style.cursor = 'pointer'; });
+    m.on('mouseleave', 'approx-marker', () => { m.getCanvas().style.cursor = ''; });
 
     // Click on cluster -> zoom in
     m.on('click', 'clusters', (e) => {

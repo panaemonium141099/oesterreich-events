@@ -724,10 +724,16 @@ function toSupabaseRow(
   // geschrieben, damit nichts verloren geht.
   const rawPersistFailed = rawRefs.failed.has(key);
   if (rawPersistFailed) resolved.reasons.push('raw_persist_failed');
+  // Ein belegter Widerspruch (Quellkoordinate, Beleg oder Vertrag gegen die
+  // genannte PLZ) wird nicht veröffentlicht, sondern zur Prüfung gegeben
+  // (Review §6): der Freigabevertrag sieht nach dem Verwerfen der Koordinate
+  // nur noch Ortstext + PLZ und würde die Zeile sonst durchwinken.
+  const locationConflict = finalStatus === 'conflict';
+  if (locationConflict) resolved.reasons.push('location_conflict_withheld');
   const finalPublishStatus =
     existing?.publish_status && !COMPUTED_PUBLISH_STATUSES.has(existing.publish_status)
       ? existing.publish_status
-      : rawPersistFailed && score.publish_status === 'published'
+      : (rawPersistFailed || locationConflict) && score.publish_status === 'published'
         ? 'needs_review'
         : score.publish_status;
 
@@ -876,7 +882,7 @@ function toSupabaseRow(
     last_seen_at: new Date().toISOString(),
   };
 
-  return { row, admission, rawPersistFailed };
+  return { row, admission, rawPersistFailed, locationConflict };
 }
 
 const BATCH_SIZE = 100;
@@ -1089,10 +1095,13 @@ export async function syncEventsToSupabase(
       console.warn('[supabase-sync] Belege nicht ladbar, Entscheidung ohne Belege:', e instanceof Error ? e.message : e);
     }
     const mapped = batchEvents.map((e, idx) => toSupabaseRow(e, existingMap, imageMap, rawRefs, evidence[idx]));
-    for (const { admission, rawPersistFailed } of mapped) {
+    for (const { admission, rawPersistFailed, locationConflict } of mapped) {
       if (admission.decision === 'quarantine') {
         quarantined++;
         for (const r of admission.reasons) reasons[r] = (reasons[r] ?? 0) + 1;
+      } else if (locationConflict) {
+        quarantined++;
+        reasons.location_conflict = (reasons.location_conflict ?? 0) + 1;
       } else if (rawPersistFailed) {
         quarantined++;
         reasons.raw_persist_failed = (reasons.raw_persist_failed ?? 0) + 1;

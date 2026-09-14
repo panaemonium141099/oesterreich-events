@@ -17,6 +17,7 @@
  * die Persistenz zwischen Navigationen.
  */
 import type { Event, EventFilters } from '@/types/events';
+import { MAP_FLAG_APPROXIMATE } from '@/lib/location/gating';
 
 interface MapPointsPayload {
   v: number;
@@ -35,7 +36,7 @@ interface MapPointsPayload {
   districts: string[];
   tier: number[];
   tiers: string[];
-  flags: number[]; // bit0 boosted, bit1 student, bit2 family, bit3 gratis
+  flags: number[]; // bit0 boosted, bit1 student, bit2 family, bit3 gratis, bit4 Position ungefähr (fn-25)
   score: number[];
 }
 
@@ -93,6 +94,10 @@ function decode(p: MapPointsPayload): PointEvent[] {
       is_boosted: !!(flags & 1),
       is_student_friendly: !!(flags & 2),
       is_family_friendly: !!(flags & 4),
+      // fn-25: Bit 4 markiert Gemeinde-/PLZ-Mittelpunkte und unbestätigte
+      // Positionen; die Karte zeigt sie als Sammelmarker, nie als Event-Pin.
+      location_status: flags & MAP_FLAG_APPROXIMATE ? 'municipality_only' : 'address_confirmed',
+      geocoding_confidence: flags & MAP_FLAG_APPROXIMATE ? 'gemeinde-centroid' : 'scraper',
       image_url: null,
       location_name: null,
     } as unknown as PointEvent;

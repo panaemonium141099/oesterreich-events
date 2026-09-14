@@ -13,6 +13,7 @@
  * Alle Fallbacks speisen sich aus echten Row-Feldern — nie erfundene Werte.
  */
 
+import { locationOutputs } from '@/lib/location/gating';
 import type { Event } from '@/types/events';
 import { extractCity } from '@/lib/utils/city';
 import { buildEventUrlV2 } from '@/lib/utils/slugify';
@@ -171,7 +172,10 @@ export function buildJsonLd(event: Event, opts: BuildJsonLdOptions = {}): string
     };
   }
 
-  if (event.latitude != null && event.longitude != null) {
+  // fn-25 C5: GeoCoordinates nur für eine belegte Veranstaltungsposition.
+  // Ein Gemeinde-/PLZ-Mittelpunkt ist eine Gebietsangabe; die steht bereits
+  // in der PostalAddress (PLZ/Ort) und darf nicht als Punkt behauptet werden.
+  if (event.latitude != null && event.longitude != null && locationOutputs(event).pin) {
     location.geo = {
       '@type': 'GeoCoordinates',
       latitude: event.latitude,

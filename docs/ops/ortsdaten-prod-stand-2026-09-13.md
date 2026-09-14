@@ -121,3 +121,39 @@ und Liste (Detailseiten bleiben erreichbar). Eventim (6-h-Import) und
 Feratel (stündlich) liefern ihre Positionen selbst zurück; Gemeinde- und
 Listenquellen im Nachtlauf. Bleibt der Widerspruch bestehen, bleibt der
 Status `conflict` (Prüfung in Phase D/E).
+
+## 9. Phase C4: Master, Aliase, Caches versioniert ungültig gesetzt (2026-09-13, 21:40 UTC)
+
+- `location_master_coords`: 5.266 `geonames`-Master, alle `review`-Einträge
+  und 138 weitere, deren Koordinate > 30 km von jeder Gemeinde ihrer PLZ
+  liegt, stehen auf `status='revoked'` (`revoked_reason`, `revoked_at`).
+  Aktiv bleiben 1.527 (nominatim 804, openai 478, venues 106, geocode_cache 70,
+  known_venues 69). Der Resolver liest die Tabelle nicht mehr; sie ist
+  Historie.
+- `geocode_cache`: 3.043 namensbasierte Alt-Schlüssel (`gemini::…`,
+  Venue-Name ohne Ziffer) auf `status='error'`; 70 adressbasierte bleiben.
+  Neue Schlüssel des Adress-Geocoders: `addr:v1:<straße hausnr>|<plz>|<ort>`.
+- `verified`-Labels werden im Schreibpfad nicht übernommen
+  (`retainedStatusFor` → `unresolved`, Rang 9).
+- Korrekturtabelle `event_location_corrections` und `source_venue_map`
+  angelegt (Migration 20260913210000), noch leer.
+
+## 10. Phase C5: Ausspielungs-Gating vorbereitet (2026-09-14)
+
+- `src/lib/location/gating.ts` ist die eine Regelstelle (Pin, Route,
+  Distanz, Gemeindeseite). Schalter `NEXT_PUBLIC_LOCATION_GATING=1`
+  (Phase F): bis dahin Pin/Distanz wie bisher, Route seit A5 nur mit Beleg.
+- `event_map_points` trägt `location_status` + `pin_allowed`; der Payload
+  setzt Flag-Bit 16 für ungefähre Positionen (Migration 20260914090000,
+  angewendet; Payload neu gebaut: 62.297 Punkte, davon 13.127 mit Pin-Recht,
+  48.605 ungefähr, überwiegend Altzeilen ohne Entscheidung).
+- Karte: ungefähre Positionen wandern mit Schalter in einen Sammelmarker-
+  Layer („N Veranstaltungen · genauer Ort unbestätigt"), nie Event-Pins.
+  Liste/Umkreis: Kilometerangaben nur mit Distanz-Recht. JSON-LD: `geo` nur
+  für belegte Positionen. `/api/events` liefert `location_status`,
+  `location_precision`, `location_resolution`.
+- Vertragsprüfung am gespeicherten Datensatz:
+  `npx tsx --env-file=.env.local src/scripts/verify-location-contract.ts`
+  (14 Prüfungen, inkl. Titel-/Score-Update nach Verwerfung; bestanden).
+  Befund dabei: Konflikte wurden trotz verworfener Koordinate veröffentlicht,
+  seitdem `needs_review` (Grund `location_conflict_withheld`).
