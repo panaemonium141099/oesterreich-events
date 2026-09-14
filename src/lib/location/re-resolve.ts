@@ -15,11 +15,16 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 import type { LocationInput } from './conservative-resolution';
 import { loadLocationEvidence } from './evidence';
 import { resolveEventLocation, type ResolvedLocation } from './resolver';
+import { applyAdmissionToPosition } from './contract';
+import { evaluateAdmission } from '@/lib/quality/admission';
+import { bundeslandFromPolygon } from '@/lib/eventim/bundesland-from-geo';
+import { getBundeslandFromPLZ } from '@/lib/plzCoordinates';
 import type { SourceCoordsPrecision } from './types';
 
 export interface StoredEventLocationRow {
   id: string;
   title: string | null;
+  start_date?: string | null;
   location_name: string | null;
   location_name_raw: string | null;
   address: string | null;
@@ -44,7 +49,7 @@ export interface StoredEventLocationRow {
 }
 
 export const STORED_LOCATION_COLUMNS =
-  'id, title, location_name, location_name_raw, address, address_raw, postal_code, postal_code_raw, city_raw, ' +
+  'id, title, start_date, location_name, location_name_raw, address, address_raw, postal_code, postal_code_raw, city_raw, ' +
   'country, country_raw, bundesland, latitude, longitude, latitude_raw, longitude_raw, coords_precision_raw, ' +
   'source_venue_id, geocoding_confidence, location_status, location_status_changed_at, location_resolution, updated_at';
 
@@ -97,6 +102,65 @@ export interface ReResolveResult {
   skipped_reason?: 'unchanged' | 'concurrent_update' | 'write_error';
 }
 
+let regionWarned = false;
+function regionOfCoords(lat: number, lng: number): string | null {
+  try {
+    return bundeslandFromPolygon(lat, lng);
+  } catch (e) {
+    if (!regionWarned) {
+      regionWarned = true;
+      console.warn('[re-resolve] Bundesland-Polygone nicht verfügbar, Regions-Gegenprobe entfällt:', e instanceof Error ? e.message : e);
+    }
+    return null;
+  }
+}
+
+/**
+ * Freigabevertrag auf die Entscheidung anwenden, genau wie im Sync: die
+ * ortsbezogenen Prüfungen (Polygon gegen deklariertes Bundesland, PLZ als
+ * dritte Stimme, Auslandssignal) laufen gegen die FINALEN Werte. Ohne das
+ * schrieb der Backfill eine Position zurück, die der Sync in der nächsten
+ * Nacht wieder verwarf (Wiederholbarkeits-Befund Galtür, 2026-09-14).
+ */
+export function contractedDecision(row: StoredEventLocationRow, decision: ResolvedLocation): ResolvedLocation {
+  const admission = evaluateAdmission(
+    {
+      title: row.title ?? 'Bestand',
+      // Vergangene Termine würden abgewiesen; hier zählt nur der Ortsvertrag.
+      start_date: row.start_date && row.start_date > new Date().toISOString() ? row.start_date : '2999-01-01T00:00:00.000Z',
+      location_name: decision.location_name,
+      address: row.address_raw ?? row.address,
+      postal_code: decision.postal_code,
+      bundesland: row.bundesland,
+      country: decision.country,
+      latitude: decision.latitude,
+      longitude: decision.longitude,
+    },
+    { regionOf: regionOfCoords, plzRegionOf: getBundeslandFromPLZ },
+  );
+  const c = applyAdmissionToPosition(decision, admission);
+  if (c.reasons.length === 0 && c.status === decision.status) return decision;
+  const hasCoords = c.latitude != null && c.longitude != null;
+  const precise = c.status === 'venue_confirmed' || c.status === 'address_confirmed';
+  return {
+    ...decision,
+    status: c.status,
+    precision: c.precision,
+    latitude: c.latitude,
+    longitude: c.longitude,
+    geocoding_confidence: c.geocoding_confidence as ResolvedLocation['geocoding_confidence'],
+    geocoding_source: c.geocoding_source,
+    reasons: [...decision.reasons, ...c.reasons],
+    allowed: {
+      pin: hasCoords && precise && decision.allowed.pin,
+      route: hasCoords && precise && decision.allowed.route,
+      distance: hasCoords && precise && decision.allowed.distance,
+      municipality_page: decision.allowed.municipality_page && c.status !== 'conflict' && c.status !== 'unresolved',
+    },
+    ...(c.revoked ? { revoked: c.revoked } : {}),
+  } as ResolvedLocation;
+}
+
 /** Entscheidet die Zeilen neu und schreibt geänderte Entscheidungen zurück. */
 export async function reResolveStoredEvents(
   supabase: SupabaseClient,
@@ -108,7 +172,7 @@ export async function reResolveStoredEvents(
   const results: ReResolveResult[] = [];
   for (let i = 0; i < rows.length; i++) {
     const row = rows[i];
-    const decision = resolveEventLocation(inputs[i], evidence[i]);
+    const decision = contractedDecision(row, resolveEventLocation(inputs[i], evidence[i]));
     const unchanged =
       row.location_status === decision.status &&
       row.geocoding_confidence === decision.geocoding_confidence &&
