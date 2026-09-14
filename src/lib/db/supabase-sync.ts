@@ -726,6 +726,21 @@ function toSupabaseRow(
       finalPrecision = 'unknown';
     }
   }
+  // Ein Konflikt hat KEINE Position (Review §7, DB-Check
+  // events_location_conflict_no_position). Der Vertrag stellt bei
+  // `region_contradicts_coords`/`foreign_place_signal` nur in Quarantäne und
+  // lässt die Koordinate stehen; hier wird sie ausdrücklich entfernt und im
+  // Protokoll als verworfen festgehalten. Ohne das scheiterte der ganze
+  // Upsert-Batch am Check (Feratel 1.400, meinbezirk 400 Zeilen, 2026-09-14).
+  let revoked: { latitude: number; longitude: number; geocoding_confidence: string | null } | null = null;
+  if (finalStatus === 'conflict' && finalLat != null && finalLng != null) {
+    revoked = { latitude: finalLat, longitude: finalLng, geocoding_confidence: finalConfidence };
+    resolved.reasons.push('conflict_position_revoked');
+    finalLat = null;
+    finalLng = null;
+    finalConfidence = null;
+    finalSource = null;
+  }
   const hasFinalCoords = finalLat != null && finalLng != null;
   const preciseStatus = finalStatus === 'venue_confirmed' || finalStatus === 'address_confirmed';
   const finalAllowed = {
@@ -745,6 +760,7 @@ function toSupabaseRow(
     reasons: resolved.reasons,
     allowed: finalAllowed,
     admission: { decision: admission.decision, reasons: admission.reasons, corrections: admission.corrections },
+    ...(revoked ? { revoked } : {}),
   };
 
   // Ohne erhaltenen Quellenstand keine Veröffentlichung (fn-25 B1): die

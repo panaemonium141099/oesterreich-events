@@ -133,6 +133,19 @@ async function main() {
     d = await read('placeholder');
     check('D: Abstufung durch die Quelle wird übernommen (municipality_only, gemeinde-centroid, kein Pin)',
       d.location_status === 'municipality_only' && d.geocoding_confidence === 'gemeinde-centroid' && d.latitude === 48.209 && d.location_resolution?.allowed?.pin === false, d);
+
+    // Fall E: Konflikt erst durch den Freigabevertrag (deklariertes Bundesland
+    // widerspricht der Koordinate, PLZ unbekannt → keine dritte Stimme). Die
+    // Zeile muss OHNE Position ankommen, sonst scheitert der ganze Batch am
+    // DB-Check events_location_conflict_no_position.
+    const eSource: ScrapedEvent = { source_name: SRC, source_id: 'admission-conflict', source_url: 'https://example.invalid/e', title: 'fn25 Vertrag Vertragskonflikt',
+      start_date: start, location_name: 'Kulturhaus', postal_code: '9999', bundesland: 'kaernten', country: 'AT',
+      latitude: 48.2082, longitude: 16.3738, coords_precision: 'venue', source_venue_id: 'x:contract-e' };
+    const rE = await syncEventsToSupabase([eSource]);
+    check('E: Sync ohne Schreibfehler (kein Check-Verstoß)', rE.errors === 0, rE);
+    const ev = await read('admission-conflict');
+    check('E: Vertragskonflikt ohne Position, verworfene Position protokolliert',
+      ev.location_status === 'conflict' && ev.latitude === null && (ev.location_resolution as { revoked?: { latitude?: number } } | null)?.revoked?.latitude === 48.2082, ev);
   } finally {
     await sb.from('event_location_corrections').delete().eq('corrected_by', 'fn25-contract-check');
     const { data: del } = await sb.from('events').delete().eq('source_name', SRC).select('id');
