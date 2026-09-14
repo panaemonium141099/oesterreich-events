@@ -208,6 +208,9 @@ interface ExistingRow {
    *  (e.g. 'duplicate' set by dedup, or any future manual admin status)
    *  on re-upsert. See COMPUTED_PUBLISH_STATUSES below. */
   publish_status: string | null;
+  /** fn-25 O1: bisheriger Ortsstatus und Zeitpunkt seines letzten Wechsels. */
+  location_status: string | null;
+  location_status_changed_at: string | null;
   // ─── UPSERT-Guard fields (fn-14.5) ─────────────────────────────────
   // These are read so toSupabaseRow() can decide whether to upgrade or
   // preserve the existing value. When a guard says "keep old", the
@@ -272,7 +275,7 @@ async function prefetchExistingRows(
         'id, source_name, source_id, latitude, longitude, geocoding_confidence, geocoding_source, ' +
           'category, tags, category_confidence, category_source, category_version, ' +
           'category_locked, category_needs_review, category_reason, category_candidates, slug, ' +
-          'publish_status, ' +
+          'publish_status, location_status, location_status_changed_at, ' +
           // fn-14.5 UPSERT-Guard fields:
           'image_url, image_width, image_height, description, enrichment_version, price_text, ' +
           'price_min, price_max, address',
@@ -873,6 +876,12 @@ function toSupabaseRow(
     longitude_raw: typeof event.longitude === 'number' ? event.longitude : null,
     coords_precision_raw: event.coords_precision ?? null,
     location_status: finalStatus,
+    // Zeitpunkt des letzten Statuswechsels (Kennzahl „neue Konflikte"):
+    // unverändert zurückschreiben, wenn der Status gleich bleibt.
+    location_status_changed_at:
+      existing && existing.location_status === finalStatus
+        ? existing.location_status_changed_at
+        : new Date().toISOString(),
     location_precision: finalPrecision,
     location_resolution: locationResolution,
     location_provenance: decision.provenance,

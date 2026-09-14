@@ -38,6 +38,7 @@ export interface StoredEventLocationRow {
   source_venue_id: string | null;
   geocoding_confidence: string | null;
   location_status: string | null;
+  location_status_changed_at?: string | null;
   location_resolution: { input_hash?: string } | null;
   updated_at: string | null;
 }
@@ -45,7 +46,7 @@ export interface StoredEventLocationRow {
 export const STORED_LOCATION_COLUMNS =
   'id, title, location_name, location_name_raw, address, address_raw, postal_code, postal_code_raw, city_raw, ' +
   'country, country_raw, bundesland, latitude, longitude, latitude_raw, longitude_raw, coords_precision_raw, ' +
-  'source_venue_id, geocoding_confidence, location_status, location_resolution, updated_at';
+  'source_venue_id, geocoding_confidence, location_status, location_status_changed_at, location_resolution, updated_at';
 
 /**
  * Eingabe aus der Zeile. Rohspalten haben Vorrang; fehlen sie (Zeile seit
@@ -128,6 +129,7 @@ export async function reResolveStoredEvents(
       geocoding_confidence: decision.geocoding_confidence,
       geocoding_source: decision.geocoding_source,
       location_status: decision.status,
+      location_status_changed_at: row.location_status === decision.status ? (row.location_status_changed_at ?? null) : new Date().toISOString(),
       location_precision: decision.precision,
       location_resolution: { ...decision, phase: opts.phase },
       location_provenance: decision.provenance,
