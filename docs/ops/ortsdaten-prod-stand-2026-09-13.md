@@ -193,3 +193,42 @@ Ursache: ohne Bezirk fehlte der Ortsvergleich, gleichnamige Termine
 verschmolzen österreichweit. Seit PR #201 harte Regel im Scorer (andere
 PLZ-Region oder PLZ ohne gemeinsame Gemeinde → distinct). Un-Merge der 166
 Paare erfolgt nach E1 (siehe §13).
+
+## 13. Betriebsmodell ab Phase C (Stand 2026-09-14)
+
+**Schreibpfad (jeder Sync):** Rohschicht → `resolveEventLocation()` mit
+Belegen (`source_venue_map`, `venues`/`venue_aliases` mit zweitem Beleg,
+`geocode_cache addr:v1`) → Freigabevertrag → eine Zeile mit Position,
+Status, Genauigkeit, Herkunft, Protokoll. Konflikte werden nicht
+veröffentlicht (`needs_review`). Kein Trigger ändert Ortswerte.
+
+**Nachtlauf (`scrape-pipeline.ts`):** Scraper → `address_geocoding`
+(Nominatim, ≤ 600 Adressen, 1,2 s Takt, Cache) → Scoring → Dedup (mit
+PLZ-Regionen-Sperre) → `location_metrics` (workflow_runs `location-audit`,
+Alarm bei > 500 neuen Konflikten oder Wiederholbarkeit < 100 %) → Report.
+Alt-Schritte `normalize`/`fix-geocoding`/`openai-geocode`/`master_coords`
+laufen nur mit `--legacy-geo` + `LEGACY_GEO_OK=1` (Forensik).
+
+**Prüfung:** `/admin/ortsdaten` (Konflikt-, ungeklärt-, Gemeinde-Gruppen je
+Quell-Spielstätte mit Beleg, Gründen, verworfener Position, Karte, Quelle).
+Korrekturen mit Geltungsbereich: `event_location_corrections` (Historie)
+und `source_venue_map` (bestätigte Quellen-Venue → Position; wirkt beim
+nächsten Sync/Backfill). Schreibpfad dafür: SQL/psql oder Backfill; eine
+Admin-Maske ist noch offen.
+
+**Werkzeuge:**
+- `location-compare-run.ts` (D1): neuer Resolver über den Quellenstand →
+  `location_compare_runs`, ohne öffentliche Änderung.
+- `location-backfill.ts --with-raw` (E1): Zeilen mit Quellenstand neu
+  entscheiden; `--stale-since <iso>`: nicht neu gelieferte Zeilen als
+  ungeklärt erfassen.
+- `location-unmerge-duplicates.ts` (E): falsche Zusammenführungen über
+  PLZ-Regionen aufheben.
+- `verify-location-contract.ts` (C6): Vertragsprüfung am Datensatz.
+- `location-metrics.ts` (O1): Kennzahlen, auch manuell startbar.
+
+**Schalter Phase F:** `NEXT_PUBLIC_LOCATION_GATING=1` in
+`/opt/app/.env.master` + Deploy (Build-Zeit-Variable): Karte zeigt
+ungefähre Positionen nur als Sammelmarker, Listen/Umkreis ohne Kilometer
+für unbelegte Positionen, JSON-LD ohne `geo`. Rückweg: Variable entfernen
+und erneut deployen.
