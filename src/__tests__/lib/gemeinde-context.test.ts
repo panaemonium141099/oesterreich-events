@@ -58,3 +58,19 @@ describe('applyGemeindeContext', () => {
     expect(d.allowed.pin).toBe(false);
   });
 });
+
+describe('Adresse in fremder PLZ-Region ist Beiwerk der Seite (Linz/Schlachthausgasse 1030, Prod 2026-09-14)', () => {
+  const linz = { name: 'Linz', plz: '4020', bundesland: 'oberoesterreich', bezirk: 'Linz (Stadt)', lat: 48.3064, lng: 14.2858 };
+  it('Wiener Datenschutz-Adresse auf einer Linzer Kalenderseite fällt weg, Kalender-Kontext bleibt', () => {
+    const e = applyGemeindeContext({ source_name: 'gemeinden-generic', source_id: '1', source_url: null, title: 'Orgelvesper', start_date: '2027-01-01T18:00:00+01:00', address: 'Schlachthausgasse 52/8', postal_code: '1030', city: 'Wien' }, linz);
+    expect(e.address).toBeUndefined();
+    expect(e.postal_code).toBe('4020');
+    expect(e.city).toBe('Linz');
+    expect(e.coords_precision).toBe('municipality');
+  });
+  it('Nachbargemeinde derselben Region bleibt als Angabe der Quelle', () => {
+    const e = applyGemeindeContext({ source_name: 'gemeinden-generic', source_id: '2', source_url: null, title: 'Fest', start_date: '2027-01-01T18:00:00+01:00', address: 'Hauptplatz 1, 4050 Traun' }, linz);
+    expect(e.postal_code).toBe('4050');
+    expect(e.address).toBe('Hauptplatz 1, 4050 Traun');
+  });
+});

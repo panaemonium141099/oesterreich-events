@@ -44,6 +44,17 @@ export function isRegionLabel(name: string | null | undefined): boolean {
 }
 
 export function applyGemeindeContext<T extends ScrapedEvent>(event: T, g: GemeindeContext): T {
+  // Eine Adresse bzw. PLZ in einer anderen PLZ-Region (erste Stelle) als die
+  // Gemeinde ist bei Gemeinde-Kalendern kein Veranstaltungsort, sondern
+  // Beiwerk der Seite (Datenschutzbeauftragter in Wien, Agentur,
+  // Veranstaltersitz; linztourismus.at: „Schlachthausgasse 52/8, 1030 Wien"
+  // an Linzer Events, Prod 2026-09-14): Adresse, PLZ und Ort fallen weg,
+  // der Kalender-Kontext bleibt. Eine andere PLZ derselben Region
+  // (Nachbargemeinde) bleibt als Angabe der Quelle.
+  const claimedPlz = extractPlzFromAddress(event.address) ?? (event.postal_code && /^\d{4}$/.test(event.postal_code) ? event.postal_code : undefined);
+  if (claimedPlz && claimedPlz.charAt(0) !== g.plz.charAt(0)) {
+    event = { ...event, address: undefined, postal_code: undefined, city: undefined };
+  }
   const addressPlz = extractPlzFromAddress(event.address);
   const addressNamesOtherPlz = !!addressPlz && addressPlz !== g.plz;
   const hasOwnCoords =

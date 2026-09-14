@@ -131,6 +131,16 @@ describe('applyRegexFallbacks', () => {
     expect(out.postal_code).toBe('4020');
   });
 
+  it('Adressen aus Cookie-/Datenschutztexten und Footer werden nicht zur Veranstaltungsadresse', () => {
+    const html = `<html><body><main><h1>Orgelvesper</h1><p>Musik in der Lutherkirche, ${'x'.repeat(60)}</p>
+      <div class="cookie-consent"><p>Datenschutzbeauftragter: rosa elefant OG, Schlachthausgasse 52/8, 1030 Wien</p></div>
+      <footer>Tourismusverband, Hauptplatz 1, 4020 Linz</footer></main></body></html>`;
+    const out: DetailEnrichment = { description: 'Orgelvesper in der Lutherkirche' };
+    applyRegexFallbacks(out, cheerio.load(html));
+    expect(out.address).toBeUndefined();
+    expect(out.postal_code).toBeUndefined();
+  });
+
   it('rejects "Tisch 5" as address via validity guard', () => {
     const html = `<html><body><main>${'x'.repeat(200)}</main></body></html>`;
     const out: DetailEnrichment = { description: 'Adresse: Tisch 5' };

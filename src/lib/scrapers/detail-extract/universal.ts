@@ -406,6 +406,17 @@ function normalizePriceText(out: DetailEnrichment): void {
   }
 }
 
+/** Seitenteile, deren Adressen nie die Veranstaltungsadresse sind. */
+const BOILERPLATE_SELECTOR = [
+  'footer', 'nav', 'header', 'aside',
+  '[role="dialog"]', '[aria-modal="true"]',
+  '[class*="cookie" i]', '[id*="cookie" i]',
+  '[class*="consent" i]', '[id*="consent" i]',
+  '[class*="privacy" i]', '[id*="privacy" i]',
+  '[class*="datenschutz" i]', '[id*="datenschutz" i]',
+  '[class*="impressum" i]', '[id*="impressum" i]',
+].join(', ');
+
 export function applyRegexFallbacks(out: DetailEnrichment, $?: CheerioAPI): void {
   normalizePriceText(out);
 
@@ -419,7 +430,20 @@ export function applyRegexFallbacks(out: DetailEnrichment, $?: CheerioAPI): void
   if ($ && !out.address) {
     const $bodyParts = $('main, article, .main-content, #content, .event-detail, .entry-content');
     if ($bodyParts.length) {
-      const body = $bodyParts.map((_, el) => $(el).text()).get().join(' ').replace(/\s+/g, ' ').trim();
+      // Cookie-/Datenschutz-/Consent-Texte, Footer und Navigation raus:
+      // linztourismus.at trägt im Datenschutztext die Adresse des
+      // Datenschutzbeauftragten („Schlachthausgasse 52/8, 1030 Wien"), und
+      // die landete als Veranstaltungsadresse Linzer Events (Prod 2026-09-14).
+      const body = $bodyParts
+        .map((_, el) => {
+          const $clone = $(el).clone();
+          $clone.find(BOILERPLATE_SELECTOR).remove();
+          return $clone.text();
+        })
+        .get()
+        .join(' ')
+        .replace(/\s+/g, ' ')
+        .trim();
       if (body.length > 30 && body.length < 10000) {
         text = (text + ' ' + body).slice(0, 10000);
       }
