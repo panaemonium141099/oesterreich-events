@@ -1,4 +1,5 @@
 import { BaseScraper } from './BaseScraper';
+import { normalizeCountryCode } from '@/lib/location/conservative-resolution';
 import { categorizeEvent } from '../categorize';
 import type { ScrapedEvent } from '@/types/events';
 
@@ -563,7 +564,9 @@ export class FeratelScraper extends BaseScraper {
     const lat = hasApiCoords ? apiLat : undefined;
     const lng = hasApiCoords ? apiLng : undefined;
     const coordsPrecision = hasApiCoords ? (place ? 'venue' : 'municipality') : undefined;
-    const country = loc?.country?.trim().toUpperCase() || undefined;
+    // Deskline liefert Ländernamen („ÖSTERREICH", „DEUTSCHLAND"); die
+    // Zeile und der Länderfilter der API erwarten ISO-Codes.
+    const country = loc?.country?.trim() ? normalizeCountryCode(loc.country) : undefined;
 
     // Bundesland — derive from API regions data or use config
     const bundesland = mapBundesland(loc?.regions ?? null, region.bundesland);
