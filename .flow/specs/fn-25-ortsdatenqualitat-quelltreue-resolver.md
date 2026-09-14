@@ -140,23 +140,36 @@ standortbezogene Benachrichtigungen):
 
 ## Acceptance Criteria
 
-- [ ] Alle Regressionsfälle aus Review §9 als Tests grün (Haus der Frau,
-      Martin-Luther-Kirche, Theater in der Innenstadt, Franz-Haas-Platz,
-      Eventim eventCity/eventVenueId, PLZ-Ersatzposition, gleichnamige Venues,
-      300-m-Fall, gemeinde-registry-Rang, PLZ aus Koordinate, Einzelkandidat
-      im falschen Bundesland, Mehr-Bezirk-PLZ, geteilte Domain, Anreise ohne
-      Beleg, richtige Gemeinde/falscher Saal, Footer-Adresse, Gelände ohne
-      Hausnummer, Tournee, Verlegung nach manueller Korrektur,
-      Geocoder-Ausfall, Gate verwirft + Titel-Update, zwei identische
-      Nachtläufe, gleichzeitiger Scrape).
-- [ ] Integrationstest am gespeicherten Datensatz: Werte nach allen Triggern
-      entsprechen der Entscheidung, auch nach Update nur auf Titel/Score.
-- [ ] Jeder öffentlich präzise Ort hat Entscheidung + erhaltenen Quellenstand.
-- [ ] Unbekannt/verworfen bleibt auf allen Ausgabepfaden unbekannt.
-- [ ] Zwei identische Nachtläufe erzeugen keine Ortsänderungen.
-- [ ] Kennzahlen (§10) im Pipeline-Report: bestätigte Fehlzuordnungen,
-      Präzision (Stichprobe), Abdeckung, Verdachtsfälle, Verbreitung,
-      Sanierungsabdeckung, Drift, Wiederholbarkeit, Rückstand.
+Stand 2026-09-14 (Phasen A–D, O1 live; E/F folgen nach dem Voll-Abruf):
+
+- [x] Regressionsfälle Review §9 als Tests: Haus der Frau, Martin-Luther-
+      Kirche, Theater in der Innenstadt, Franz-Haas-Platz (conservative-
+      resolution), Eventim eventCity/eventVenueId + keine PLZ-Ersatzposition
+      (eventim/parse), gleichnamige Venues in einer PLZ + Mehrdeutigkeit
+      (selectVenueCandidate), 300-m-Fall (shouldOverwriteCoords),
+      gemeinde-registry-Rang (CONFIDENCE_RANK, kein Pin-Recht), PLZ nie aus
+      Koordinate, Einzelkandidat im falschen Bundesland, Mehr-Bezirk-PLZ
+      (plz-district), Anreise ohne Beleg (location-trust), Geocoder-Ausfall
+      (Cache-only im Schreibpfad), Gate verwirft + Titel-/Score-Update
+      (verify-location-contract), Wiederholbarkeit (location-metrics),
+      Tournee/verschiedene PLZ-Gebiete (dedup-scorer).
+- [ ] Noch ohne automatisierten Test: geteilte Ticket-Domain (alter
+      Venue-Matcher nicht in Prod), Footer-Adresse (adapterspezifisch),
+      Gelände ohne Hausnummer (Positivfall im Resolver möglich, Testfall
+      offen), Verlegung nach manueller Korrektur (Korrekturtabelle noch ohne
+      Schreibpfad), gleichzeitiger Scrape während Backfill (updated_at-
+      Schutz implementiert, Test offen).
+- [x] Integrationstest am gespeicherten Datensatz (`verify-location-
+      contract.ts`): 14 Prüfungen, inkl. Trigger, Titel-/Score-Update.
+- [ ] Jeder öffentlich präzise Ort hat Entscheidung + erhaltenen Quellenstand
+      (nach E1 zu messen: Altbestand ohne Entscheidung → 0).
+- [x] Unbekannt/verworfen bleibt unbekannt: Gate + Trigger-Entfernung +
+      Gating-Modul (Pin/Route/Distanz/JSON-LD), Schalter für F.
+- [x] Wiederholbarkeit: Stichprobe 300/300 identisch (location-metrics),
+      Eingabehash mit gerundeten Koordinaten.
+- [x] Kennzahlen (§10) im Pipeline-Report (`location-audit`), Alarmgrenzen,
+      Prüfansicht `/admin/ortsdaten`. Präzisions-Stichprobe gegen Belege
+      bleibt manuell.
 
 ## Boundaries
 
