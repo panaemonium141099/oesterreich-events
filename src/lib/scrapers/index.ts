@@ -91,7 +91,7 @@ import {
 } from './uni';
 import { closeSharedBrowser } from './puppeteerBrowser';
 import { syncEventsToSupabase } from '../db/supabase-sync';
-import { applySourceCoordsPolicy } from './source-coords-policy';
+import { applySourceCoordsPolicy, demotePlaceholderCoords } from './source-coords-policy';
 import { createClient } from '@supabase/supabase-js';
 import type { ScrapedEvent } from '@/types/events';
 import fs from 'fs';
@@ -512,7 +512,11 @@ export async function runScraper(scraper: BaseScraper): Promise<void> {
   try {
     // fn-25 B3: Genauigkeit der Adapter-Koordinaten je Quelle deklarieren,
     // bevor der Schreibpfad entscheidet (src/lib/scrapers/source-coords-policy.ts).
-    const events: ScrapedEvent[] = (await scrapeWithTimeout(scraper)).map(applySourceCoordsPolicy);
+    const policed = demotePlaceholderCoords((await scrapeWithTimeout(scraper)).map(applySourceCoordsPolicy));
+    if (policed.demoted > 0) {
+      console.log(`[${scraper.name}] ${policed.demoted} Koordinaten als Platzhalter abgestuft (${policed.groups.map(g => `${g.key}: ${g.venues} Spielstätten/${g.streets} Straßen`).join('; ')})`);
+    }
+    const events: ScrapedEvent[] = policed.events;
     eventsFound = events.length;
 
     writeProgress(scraper.name, {

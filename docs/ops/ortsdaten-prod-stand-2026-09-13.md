@@ -239,6 +239,32 @@ offen, kein Mittelpunkt. Wirkt ab dem Backfill (E1).
 - `verify-location-contract.ts` (C6): Vertragsprüfung am Datensatz.
 - `location-metrics.ts` (O1): Kennzahlen, auch manuell startbar.
 
+**Platzhalter-Koordinaten der Feeds (Befund 2026-09-14, Stichprobe):**
+Eventim liefert für Spielstätten ohne eigene Geodaten den Stadtmittelpunkt
+als Venue-Koordinate: 48.209/16.37 für 92 Wiener Spielstätten in 20 PLZ
+(1.855 künftige Termine), Salzburg 47.76667/13.05 (14 Spielstätten, 774),
+Graz 47.07233/15.43907 (14, 326), Klagenfurt 46.63/14.31 (7, 219),
+St. Pölten 48.2/15.61667 (7, 74); Deskline ebenso Ortsmittelpunkte
+(Steyr 21 Spielstätten, Weyer 25, Andorf 13, Kufstein 5). Bisher als
+`venue_confirmed` mit Pin. Seit `demotePlaceholderCoords` (Eventim-Parser,
+runScraper, sync-feratel) gilt: eine Koordinate für ≥ 3 Spielstätten in
+≥ 3 Straßen (ohne Adressen: ≥ 3 Namensstämme) ist eine Gebietsangabe
+(`coords_precision municipality` → `municipality_only`, kein Pin); Säle
+eines Hauses (Posthof, Stadthalle, Musikverein, Schloss Esterházy) bleiben
+Venue-Koordinaten. Die richtige Position kommt danach über Belege (Straße
+im Kandidatenbestand, Adress-Geocoder). Der Rohanspruch der Bestandszeilen
+(`coords_precision_raw`) wird beim nächsten Import überschrieben; die
+Sync-Regel „gleiche Position → Label folgt der Entscheidung" stuft die
+Zeilen dabei ohne Backfill ab.
+
+**Präzisions-Stichprobe:** `location-precision-sample.ts [--n 50]` prüft
+zufällige `venue_confirmed`/`address_confirmed`-Positionen per Nominatim-
+Reverse-Lookup (≤ 1/s) gegen PLZ und Ortsname der Quelle. Prüfung, kein
+Beleg; Abweichungen sind Prüfaufträge. Erste Stichprobe (vor E1, 20+20):
+venue 15/20 PLZ passend (5 × Eventim-Platzhalter Wien), address 16/20
+(2 × Nachbar-PLZ derselben Stadt, 1 × Flachau/Reitdorf, 1 × Markt St.
+Martin/Lindgraben).
+
 **Schalter Phase F:** `NEXT_PUBLIC_LOCATION_GATING=1` in
 `/opt/app/.env.master` + Deploy (Build-Zeit-Variable): Karte zeigt
 ungefähre Positionen nur als Sammelmarker, Listen/Umkreis ohne Kilometer

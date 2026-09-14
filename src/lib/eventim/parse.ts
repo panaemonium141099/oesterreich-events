@@ -1,4 +1,5 @@
 import type { ScrapedEvent } from '@/types/events';
+import { demotePlaceholderCoords } from '@/lib/scrapers/source-coords-policy';
 import type { EventimSeries, EventimEvent } from './types';
 import { mapEventimCategory } from './category-map';
 import { isBookable, isCancelled, notBookableReason, priceText } from './availability';
@@ -67,7 +68,13 @@ export function parseEventimFeed(
       out.push(mapEvent(s, e, category, tags, description));
     }
   }
-  return out;
+  // fn-25: Stadtmittelpunkte, die der Feed als Venue-Koordinate vieler
+  // Spielstätten führt, sind Gebietsangaben (siehe demotePlaceholderCoords).
+  const policed = demotePlaceholderCoords(out);
+  if (policed.demoted > 0) {
+    console.log(`[eventim] ${policed.demoted} Termine mit Platzhalter-Koordinate auf Gemeinde-Ebene abgestuft: ${policed.groups.slice(0, 8).map(g => `${g.key} (${g.venues} Spielstätten, ${g.streets} Straßen, ${g.events} Termine)`).join('; ')}`);
+  }
+  return policed.events;
 }
 
 function mapEvent(
