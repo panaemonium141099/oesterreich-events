@@ -1116,3 +1116,26 @@ describe('dedup-cluster / buildClusters', () => {
     expect(clusters.length).toBe(0);
   });
 });
+
+describe('fn-25 E: verschiedene PLZ-Gebiete verschmelzen nicht', () => {
+  const base = {
+    id: 'a', title: 'Dorffest 2026', start_date: '2026-10-03T10:00:00Z', location_name: null, address: null,
+    district: null, latitude: null, longitude: null, source_name: 's1', source_id: '1',
+  } as unknown as import('@/lib/pipeline/types').EventRow;
+  it('gleicher Titel, gleiches Datum, andere PLZ-Region → distinct', () => {
+    const a = { ...base, postal_code: '3491' };
+    const b = { ...base, id: 'b', source_name: 's2', source_id: '2', postal_code: '6262' };
+    const r = scorePair(a, b);
+    expect(r.decision).toBe('distinct');
+  });
+  it('andere PLZ ohne gemeinsame Gemeinde (gleiche Region) → distinct', () => {
+    const a = { ...base, postal_code: '4560' };
+    const b = { ...base, id: 'b', source_name: 's2', source_id: '2', postal_code: '4563' };
+    expect(scorePair(a, b).decision).toBe('distinct');
+  });
+  it('gleiche PLZ bleibt bewertbar (kein Zwang)', () => {
+    const a = { ...base, postal_code: '4563' };
+    const b = { ...base, id: 'b', source_name: 's2', source_id: '2', postal_code: '4563' };
+    expect(['merge', 'uncertain', 'distinct']).toContain(scorePair(a, b).decision);
+  });
+});

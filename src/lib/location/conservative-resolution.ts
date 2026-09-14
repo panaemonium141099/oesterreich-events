@@ -134,6 +134,13 @@ function uniqueInBundesland(refs: GemeindeRef[], bl: string | null): GemeindeRef
   return pool.length === 1 ? pool[0] : null;
 }
 
+/** Koordinaten auf 6 Nachkommastellen (~0,1 m): PostgREST liefert double
+ *  precision mit weniger Stellen zurück als der Adapter geliefert hat; ohne
+ *  Rundung wäre derselbe Quellenstand nach dem Rücklesen ein „anderer". */
+function round6(v: number | null | undefined): number | null {
+  return typeof v === 'number' && Number.isFinite(v) ? Math.round(v * 1e6) / 1e6 : null;
+}
+
 function inputHash(input: LocationInput): string {
   const payload = JSON.stringify({
     t: input.title ?? null,
@@ -143,8 +150,8 @@ function inputHash(input: LocationInput): string {
     c: input.city ?? null,
     b: input.bundesland ?? null,
     co: input.country ?? null,
-    la: input.latitude ?? null,
-    lo: input.longitude ?? null,
+    la: round6(input.latitude),
+    lo: round6(input.longitude),
     pr: input.coords_precision ?? null,
     v: input.source_venue_id ?? null,
   });

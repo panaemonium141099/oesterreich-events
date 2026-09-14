@@ -7,9 +7,8 @@ TBD
 - [ ] TBD
 
 ## Done summary
-TBD
-
+Master (geonames/review/>30km) revoked, namensbasierte Cache-Schluessel ungueltig, verified nicht uebernommen, Korrektur-/Zuordnungstabellen vorhanden. Doku ops §9. PR #200.
 ## Evidence
-- Commits:
+- Commits: PR200
 - Tests:
-- PRs:
+- PRs: https://github.com/panaemonium141099/oesterreich-events/pull/200
