@@ -69,6 +69,7 @@ export function inputFromStoredRow(row: StoredEventLocationRow): LocationInput {
       longitude: row.longitude_raw,
       coords_precision: (row.coords_precision_raw as SourceCoordsPrecision | null) ?? null,
       source_venue_id: row.source_venue_id,
+      event_id: row.id,
     };
   }
   const sourceCoords = row.geocoding_confidence === 'scraper';
@@ -84,6 +85,7 @@ export function inputFromStoredRow(row: StoredEventLocationRow): LocationInput {
     longitude: sourceCoords ? row.longitude : null,
     coords_precision: sourceCoords ? 'unknown' : null,
     source_venue_id: row.source_venue_id,
+    event_id: row.id,
   };
 }
 
@@ -108,6 +110,7 @@ export async function reResolveStoredEvents(
     const decision = resolveEventLocation(inputs[i], evidence[i]);
     const unchanged =
       row.location_status === decision.status &&
+      row.geocoding_confidence === decision.geocoding_confidence &&
       row.latitude === decision.latitude &&
       row.longitude === decision.longitude &&
       row.location_resolution?.input_hash === decision.input_hash;

@@ -10,6 +10,79 @@
 import { useCallback, useEffect, useState } from 'react';
 import { MapPin } from 'lucide-react';
 
+/**
+ * Korrekturformular je Event: Position, Genauigkeit, Grund, Beleg. Die
+ * Korrektur gilt nur für dieses Event und nur, solange die Quelle dieselben
+ * Ortsangaben liefert (Verlegung → neue Entscheidung).
+ */
+function CorrectionForm({ sample, onDone }: { sample: Sample; onDone: () => void }) {
+  const [lat, setLat] = useState(sample.latitude?.toString() ?? '');
+  const [lng, setLng] = useState(sample.longitude?.toString() ?? '');
+  const [precision, setPrecision] = useState('building');
+  const [name, setName] = useState('');
+  const [plz, setPlz] = useState('');
+  const [reason, setReason] = useState('');
+  const [evidence, setEvidence] = useState('');
+  const [busy, setBusy] = useState(false);
+  const [msg, setMsg] = useState<string | null>(null);
+
+  const submit = async () => {
+    setBusy(true);
+    setMsg(null);
+    try {
+      const res = await fetch('/api/admin/ortsdaten/correction', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          event_id: sample.id, latitude: Number(lat), longitude: Number(lng), precision,
+          location_name: name || undefined, postal_code: plz || undefined, reason, evidence: evidence || undefined,
+        }),
+      });
+      const json = await res.json();
+      if (!res.ok) { setMsg(json.error ?? 'Fehler'); return; }
+      setMsg(json.written ? `Gespeichert: ${json.decision?.status} (${json.decision?.precision})` : `Korrektur gespeichert, Zeile nicht geschrieben (${json.skipped_reason ?? 'unverändert'})`);
+      onDone();
+    } catch (e) {
+      setMsg(e instanceof Error ? e.message : 'Fehler');
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const cls = 'rounded border border-gray-300 dark:border-gray-600 bg-transparent px-2 py-1 text-xs';
+  return (
+    <div className="mt-2 rounded-lg border border-dashed border-gray-300 dark:border-gray-600 p-2 space-y-2">
+      <div className="flex flex-wrap gap-2">
+        <input className={cls} placeholder="Breite (lat)" value={lat} onChange={e => setLat(e.target.value)} size={12} />
+        <input className={cls} placeholder="Länge (lng)" value={lng} onChange={e => setLng(e.target.value)} size={12} />
+        <select className={cls} value={precision} onChange={e => setPrecision(e.target.value)}>
+          <option value="building">Gebäude</option>
+          <option value="entrance">Eingang</option>
+          <option value="site">Gelände/Treffpunkt</option>
+          <option value="street">Straße</option>
+        </select>
+        <input className={cls} placeholder="Anzeigename (optional)" value={name} onChange={e => setName(e.target.value)} size={22} />
+        <input className={cls} placeholder="PLZ (optional)" value={plz} onChange={e => setPlz(e.target.value)} size={6} />
+      </div>
+      <div className="flex flex-wrap gap-2">
+        <input className={cls} placeholder="Grund (Pflicht)" value={reason} onChange={e => setReason(e.target.value)} size={40} />
+        <input className={cls} placeholder="Beleg (URL, Quelle)" value={evidence} onChange={e => setEvidence(e.target.value)} size={40} />
+        <button disabled={busy || reason.trim().length < 5 || !lat || !lng} onClick={submit}
+          className="text-xs px-3 py-1 rounded bg-blue-600 text-white disabled:opacity-50">Korrektur speichern</button>
+      </div>
+      {msg && <div className="text-xs">{msg}</div>}
+    </div>
+  );
+}
+
+function correctionIdOf(s: Sample): string | null {
+  for (const e of s.location_resolution?.evidence ?? []) {
+    const m = /^correction:([^:]+):/.exec(e);
+    if (m) return m[1];
+  }
+  return null;
+}
+
 interface Sample {
   id: string;
   title: string;
@@ -55,6 +128,13 @@ export default function OrtsdatenPage() {
   const [metrics, setMetrics] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState<string | null>(null);
+  const [editing, setEditing] = useState<string | null>(null);
+
+  const revoke = async (id: string) => {
+    if (!confirm('Korrektur beenden und neu entscheiden?')) return;
+    await fetch(`/api/admin/ortsdaten/correction?id=${encodeURIComponent(id)}`, { method: 'DELETE' });
+    load();
+  };
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -133,6 +213,8 @@ export default function OrtsdatenPage() {
                         )}
                       </div>
                       <div className="text-xs space-x-3">
+                        <button className="underline" onClick={() => setEditing(editing === s.id ? null : s.id)}>Korrigieren</button>
+                        {correctionIdOf(s) && <button className="underline" onClick={() => revoke(correctionIdOf(s)!)}>Korrektur beenden</button>}
                         {s.slug && <a className="underline" href={`/events/${s.id}`} target="_blank" rel="noreferrer">Event</a>}
                         {s.source_url && <a className="underline" href={s.source_url} target="_blank" rel="noreferrer">Quelle</a>}
                         {s.latitude != null && s.longitude != null && (
@@ -141,6 +223,7 @@ export default function OrtsdatenPage() {
                         {s.address_raw && (
                           <a className="underline" href={`https://www.openstreetmap.org/search?query=${encodeURIComponent(`${s.address_raw} ${s.postal_code ?? ''} ${s.city_raw ?? ''}`)}`} target="_blank" rel="noreferrer">Adresse suchen</a>
                         )}
+                        {editing === s.id && <CorrectionForm sample={s} onDone={() => { setEditing(null); load(); }} />}
                       </div>
                     </div>
                   ))}

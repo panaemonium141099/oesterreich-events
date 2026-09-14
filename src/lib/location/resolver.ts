@@ -20,10 +20,18 @@
  *  5. Sonst bleibt es bei der Gemeinde (`municipality_only`) oder der
  *     Zurückhaltung.
  *
+ * Davor steht die manuelle Korrektur (`event_location_corrections`, Scope
+ * event): Sie gilt nur, solange die Quelle dieselben Ortsangaben liefert wie
+ * zum Zeitpunkt der Korrektur (`before.location_basis_hash`). Liefert die
+ * Quelle andere Ortsangaben (Verlegung), ist die Korrektur veraltet und die
+ * Entscheidung wird neu getroffen; es gibt keine ewige Koordinatensperre
+ * (Review §7, §9 „Venue-Verlegung nach einer früheren manuellen Korrektur").
+ *
  * Jede so gewonnene Position muss zur genannten PLZ passen (≤ 30 km),
  * sonst `conflict`. Rein: alle Belege kommen von außen (`evidence.ts`).
  */
-import { resolveConservativeLocation, hasHouseNumber, type LocationInput } from './conservative-resolution';
+import { resolveConservativeLocation, hasHouseNumber, locationBasisHash, type LocationInput } from './conservative-resolution';
+import { gemeindenByPlz } from './gemeinde-index';
 import { plzCentroid } from './gemeinde-index';
 import type { LocationDecision, LocationPrecision } from './types';
 
@@ -57,10 +65,31 @@ export interface SourceVenueMapEvidence {
   confirmed_by: string;
 }
 
+/** Gültige manuelle Korrektur für genau dieses Event. */
+export interface CorrectionEvidence {
+  id: string;
+  latitude: number;
+  longitude: number;
+  precision: LocationPrecision;
+  venue_id: string | null;
+  /** Dokumentierte Anzeigebezeichnung (optional). */
+  location_name: string | null;
+  /** Korrigierte PLZ (optional; sonst bleibt die PLZ der Quelle). */
+  postal_code: string | null;
+  /** Ortsangaben-Hash der Quelle, auf den sich die Korrektur bezog; null = unabhängig vom Quellenstand. */
+  basis_hash: string | null;
+  corrected_by: string;
+}
+
 export interface LocationEvidence {
   venueCandidate?: VenueCandidateEvidence | null;
   addressGeocode?: AddressGeocodeEvidence | null;
   sourceVenueMap?: SourceVenueMapEvidence | null;
+  correction?: CorrectionEvidence | null;
+  /** true, wenn die Korrekturtabelle für diesen Batch erfolgreich gelesen
+   *  wurde (auch ohne Treffer). Nur dann darf ein altes `manual`-Label in
+   *  der Zeile fallen gelassen werden. */
+  correctionsLoaded?: boolean;
 }
 
 export interface ResolvedLocation extends LocationDecision {
@@ -105,6 +134,38 @@ function conflict(base: LocationDecision, reason: string, rejectedPos: string): 
   };
 }
 
+function applyCorrection(decision: ResolvedLocation, corr: CorrectionEvidence): ResolvedLocation {
+  const status: LocationDecision['status'] = corr.venue_id ? 'venue_confirmed' : 'address_confirmed';
+  const routable = status === 'venue_confirmed' || corr.precision === 'entrance' || corr.precision === 'building' || corr.precision === 'site';
+  let postal_code = decision.postal_code;
+  let gemeinde = decision.gemeinde;
+  const provenance = { ...decision.provenance, latitude: 'manual' as const };
+  if (corr.postal_code && corr.postal_code !== decision.postal_code) {
+    postal_code = corr.postal_code;
+    provenance.postal_code = 'manual';
+    const g = gemeindenByPlz(corr.postal_code);
+    gemeinde = g.length === 1 ? { name: g[0].name, plz: g[0].plz, bundesland: g[0].bundesland, bezirk: g[0].bezirk ?? null } : null;
+    if (gemeinde) provenance.gemeinde = 'manual';
+  }
+  return {
+    ...decision,
+    status,
+    precision: corr.precision,
+    location_name: corr.location_name ?? decision.location_name,
+    postal_code,
+    gemeinde,
+    latitude: corr.latitude,
+    longitude: corr.longitude,
+    geocoding_confidence: 'manual',
+    geocoding_source: 'event_location_corrections',
+    venue_id: corr.venue_id,
+    provenance: corr.location_name ? { ...provenance, location_name: 'manual' } : provenance,
+    evidence: [...decision.evidence, `correction:${corr.id}:${corr.corrected_by}`],
+    reasons: [...decision.reasons, 'position_from_manual_correction'],
+    allowed: { pin: true, route: routable, distance: true, municipality_page: !!(gemeinde || postal_code) },
+  };
+}
+
 export function resolveEventLocation(
   input: LocationInput,
   evidence: LocationEvidence = {},
@@ -113,6 +174,18 @@ export function resolveEventLocation(
   const base = resolveConservativeLocation(input, now);
   const decision: ResolvedLocation = { ...base, version: RESOLVER_VERSION, venue_id: null };
   const routable = hasHouseNumber(input.address);
+
+  // 0. Manuelle Korrektur für dieses Event — nur zum passenden Quellenstand.
+  const corr = evidence.correction;
+  if (corr) {
+    const basisNow = locationBasisHash(input);
+    if (corr.basis_hash && corr.basis_hash !== basisNow) {
+      decision.reasons = [...decision.reasons, `correction_stale:${corr.id}`];
+      decision.rejected = [...decision.rejected, `correction:${corr.id}:source_location_changed`];
+    } else {
+      return applyCorrection(decision, corr);
+    }
+  }
 
   // Keine Aufwertung für Online-Events oder belegte Widersprüche.
   if (base.status === 'online' || base.status === 'conflict') return decision;

@@ -53,6 +53,9 @@ export interface LocationInput {
   /** Vom Adapter behauptete Genauigkeit der gelieferten Koordinaten. */
   coords_precision?: SourceCoordsPrecision | null;
   source_venue_id?: string | null;
+  /** Bestehende Event-ID (nur zum Laden eventbezogener Korrekturen; geht
+   *  nicht in den Eingabehash ein). */
+  event_id?: string | null;
 }
 
 // Österreich-Bounding-Box wie in admission.ts / score-event.ts.
@@ -149,6 +152,27 @@ function inputHash(input: LocationInput): string {
     p: input.postal_code ?? null,
     c: input.city ?? null,
     b: input.bundesland ?? null,
+    co: input.country ?? null,
+    la: round6(input.latitude),
+    lo: round6(input.longitude),
+    pr: input.coords_precision ?? null,
+    v: input.source_venue_id ?? null,
+  });
+  return createHash('sha1').update(payload).digest('hex').slice(0, 16);
+}
+
+/**
+ * Hash nur der ORTSANGABEN der Quelle (ohne Titel). Eine manuelle Korrektur
+ * bezieht sich auf diesen Stand: Liefert die Quelle später andere
+ * Ortsangaben (Verlegung, anderer Saal, neue Venue-Kennung), passt die
+ * Korrektur nicht mehr und die Entscheidung wird neu getroffen (Review §7).
+ */
+export function locationBasisHash(input: LocationInput): string {
+  const payload = JSON.stringify({
+    l: input.location_name ?? null,
+    a: input.address ?? null,
+    p: input.postal_code ?? null,
+    c: input.city ?? null,
     co: input.country ?? null,
     la: round6(input.latitude),
     lo: round6(input.longitude),
