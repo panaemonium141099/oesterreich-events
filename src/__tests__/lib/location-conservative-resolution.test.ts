@@ -302,3 +302,11 @@ describe('shouldOverwriteCoords: die Quelle ist für ihre Koordinate maßgeblich
     expect(shouldOverwriteCoords(row(48.3, 14.29, 'manual'), 48.31, 14.28, 'scraper')).toBe(false);
   });
 });
+
+describe('shouldOverwriteCoords: verworfene Werte werden entfernt', () => {
+  it('ein Konflikt darf keine alte Koordinate behalten (Schreibpfad setzt NULL, siehe supabase-sync decisionForbidsPosition)', () => {
+    // Die Rang-Regel allein liefert bei neuer NULL-Koordinate false ("alte behalten");
+    // der Schreibpfad übergeht sie für conflict/online. Hier nur die Vorbedingung:
+    expect(shouldOverwriteCoords({ latitude: 47.4, longitude: 13.7, geocoding_confidence: 'exact' }, null, null, null)).toBe(false);
+  });
+});

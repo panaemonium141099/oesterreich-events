@@ -456,7 +456,13 @@ function toSupabaseRow(
   let finalConfidence = resolved.confidence;
   let finalSource = resolved.source;
 
-  if (existing) {
+  // Verworfene Werte werden explizit entfernt (Review §7): ein Konflikt
+  // oder ein Online-Event hat KEINE Position — auch nicht die alte aus der
+  // Zeile. Vorher hielt die Rang-Regel („keine neue Koordinate → alte
+  // behalten") 686 Konflikt-Zeilen mit Pin fest (Prod-Befund 2026-09-14).
+  const decisionForbidsPosition = decision.status === 'conflict' || decision.status === 'online';
+
+  if (existing && !decisionForbidsPosition) {
     if (!shouldOverwriteCoords(existing, resolved.latitude, resolved.longitude, resolved.confidence)) {
       // Bestandskoordinate bleibt — die gespeicherte Entscheidung muss das
       // abbilden, sonst behauptet sie eine Position, die nicht in der Zeile
