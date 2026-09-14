@@ -91,10 +91,11 @@ describe('dropSharedAddresses: Seitenadresse für viele Veranstaltungsorte (Geme
     expect(dropSharedAddresses([gem('1', 'Stadtsaal Großer Saal'), gem('2', 'Stadtsaal Kleiner Saal'), gem('3', 'Stadtsaal Foyer')]).dropped).toBe(0);
   });
 
-  it('Quellen mit einer Spielstätte sind ausgenommen (Landestheater, Stadthalle)', () => {
+  it('nur Gemeinde-Kalender: Stadtportale (MuseumsQuartier) und Ein-Venue-Quellen bleiben unberührt', () => {
     const r = dropSharedAddresses([
       gem('1', 'Kammerspiele Linz', 'Promenade 39', 'boudicca:landestheater linz'), gem('2', 'Schauspielhaus Linz', 'Promenade 39', 'boudicca:landestheater linz'), gem('3', 'Studiobühne Linz', 'Promenade 39', 'boudicca:landestheater linz'),
       gem('4', 'Halle D', 'Roland-Rainer-Platz 1', 'stadthalle'), gem('5', 'Halle F', 'Roland-Rainer-Platz 1', 'stadthalle'), gem('6', 'Halle E', 'Roland-Rainer-Platz 1', 'stadthalle'),
+      gem('7', 'Leopold Museum', 'Museumsplatz 1', 'falter'), gem('8', 'mumok', 'Museumsplatz 1', 'falter'), gem('9', 'Kunsthalle Wien', 'Museumsplatz 1', 'falter'),
     ]);
     expect(r.dropped).toBe(0);
   });
