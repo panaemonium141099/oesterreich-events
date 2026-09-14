@@ -85,17 +85,9 @@ async function runWithRaw(sb: SupabaseClient) {
         else if (r.skipped_reason === 'concurrent_update') concurrent++;
         else if (r.skipped_reason === 'write_error') errors++;
         else wouldWrite++;
-        // Veröffentlichung nachziehen (nur unsere Ortsgründe).
-        const row = slice.find(x => x.id === r.id)!;
-        const prevReasons = ((row.location_resolution as { reasons?: string[] } | null)?.reasons ?? []);
-        const heldByUs = prevReasons.some(x => x.startsWith('a6_') || x === 'location_conflict_withheld');
-        if (r.decision.status === 'conflict' && row.publish_status === 'published') {
-          withheld++;
-          if (!DRY_RUN) await sb.from('events').update({ publish_status: 'needs_review' }).eq('id', row.id);
-        } else if (r.decision.status !== 'conflict' && row.publish_status === 'needs_review' && heldByUs) {
-          republished++;
-          if (!DRY_RUN) await sb.from('events').update({ publish_status: 'published' }).eq('id', row.id);
-        }
+        // Veröffentlichung zieht reResolveStoredEvents selbst nach (publishChangeFor).
+        if (r.publish_change === 'withheld') withheld++;
+        else if (r.publish_change === 'republished') republished++;
       }
     }
     process.stdout.write(`\r[E1 raw] ${seen} gelesen, ${written} geschrieben, ${wouldWrite} würden geschrieben (dry-run), ${unchanged} unverändert, ${concurrent} parallel, ${errors} Fehler, ${withheld} zurückgehalten, ${republished} wieder veröffentlicht`);
@@ -183,6 +175,7 @@ async function runStale(sb: SupabaseClient) {
         payload = { location_status: row.latitude != null ? 'unresolved' : (row.location_status ?? 'unresolved'), location_precision: row.latitude != null ? 'unknown' : (row.location_status ? undefined : 'unknown') };
       }
       if (payload.location_status !== row.location_status) payload.location_status_changed_at = new Date().toISOString();
+      if (payload.location_status === 'conflict' && (row.publish_status === 'published' || row.publish_status === 'published_low_confidence')) payload.publish_status = 'needs_review';
       payload.location_resolution = {
         version: 1, status: payload.location_status, precision: payload.location_precision ?? 'unknown', reasons, phase: 'E1-stale',
         allowed: { pin: false, route: false, distance: false, municipality_page: payload.location_status === 'municipality_only' },

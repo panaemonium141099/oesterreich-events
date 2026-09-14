@@ -45,14 +45,15 @@ export interface StoredEventLocationRow {
   geocoding_confidence: string | null;
   location_status: string | null;
   location_status_changed_at?: string | null;
-  location_resolution: { input_hash?: string } | null;
+  location_resolution: { input_hash?: string; reasons?: string[] } | null;
+  publish_status?: string | null;
   updated_at: string | null;
 }
 
 export const STORED_LOCATION_COLUMNS =
   'id, source_name, title, start_date, location_name, location_name_raw, address, address_raw, postal_code, postal_code_raw, city_raw, ' +
   'country, country_raw, bundesland, latitude, longitude, latitude_raw, longitude_raw, coords_precision_raw, ' +
-  'source_venue_id, geocoding_confidence, location_status, location_status_changed_at, location_resolution, updated_at';
+  'source_venue_id, geocoding_confidence, location_status, location_status_changed_at, location_resolution, publish_status, updated_at';
 
 /**
  * Eingabe aus der Zeile. Rohspalten haben Vorrang; fehlen sie (Zeile seit
@@ -103,6 +104,34 @@ export interface ReResolveResult {
   decision: ResolvedLocation;
   written: boolean;
   skipped_reason?: 'unchanged' | 'concurrent_update' | 'write_error';
+  /** Veröffentlichung wegen Ortskonflikt zurückgehalten bzw. nach Auflösung wieder freigegeben. */
+  publish_change?: 'withheld' | 'republished';
+}
+
+/** Gründe, die nur von der Ortsentscheidung stammen (A6, Vertrag, Sync). */
+const LOCATION_HOLD_REASONS = /^(a6_|location_conflict_withheld$|coords_vs_plz_conflict|.*_vs_plz_conflict|admission:|conflict_position_revoked$)/;
+
+/**
+ * Veröffentlichungsregel der Ortsentscheidung (Review §6: Konflikt =
+ * zurückhalten), für jeden Pfad, der eine Entscheidung in den Bestand
+ * schreibt. Ein Konflikt nimmt der Zeile die Veröffentlichung; ist eine
+ * Zeile NUR wegen eines früheren Ortskonflikts zurückgehalten und der
+ * Konflikt ist weg, wird sie wieder veröffentlicht. Vorher kannte nur der
+ * Backfill-Aufrufer diese Regel; der Adress-Geocoder-Nachtjob schrieb
+ * Konflikte, die veröffentlicht blieben (Prod 2026-09-14: 61 Zeilen, dazu
+ * 831 aus A6/Stale).
+ */
+export function publishChangeFor(row: Pick<StoredEventLocationRow, 'publish_status' | 'location_resolution'>, decision: Pick<ResolvedLocation, 'status'>): { publish_status: string } | null {
+  const current = row.publish_status ?? null;
+  if (decision.status === 'conflict') {
+    return current === 'published' || current === 'published_low_confidence' ? { publish_status: 'needs_review' } : null;
+  }
+  if (current === 'needs_review') {
+    const prev = row.location_resolution?.reasons ?? [];
+    const heldByLocation = prev.some(r => LOCATION_HOLD_REASONS.test(r));
+    if (heldByLocation) return { publish_status: 'published' };
+  }
+  return null;
 }
 
 let regionWarned = false;
@@ -176,21 +205,29 @@ export async function reResolveStoredEvents(
   for (let i = 0; i < rows.length; i++) {
     const row = rows[i];
     const decision = contractedDecision(row, resolveEventLocation(inputs[i], evidence[i]));
+    const publishChange = publishChangeFor(row, decision);
     const unchanged =
       row.location_status === decision.status &&
       row.geocoding_confidence === decision.geocoding_confidence &&
       row.latitude === decision.latitude &&
       row.longitude === decision.longitude &&
       row.location_resolution?.input_hash === decision.input_hash;
-    if (unchanged) {
+    if (unchanged && !publishChange) {
       results.push({ id: row.id, decision, written: false, skipped_reason: 'unchanged' });
       continue;
     }
     if (opts.dryRun) {
-      results.push({ id: row.id, decision, written: false });
+      results.push({ id: row.id, decision, written: false, ...(publishChange ? { publish_change: publishChange.publish_status === 'needs_review' ? 'withheld' as const : 'republished' as const } : {}) });
+      continue;
+    }
+    if (unchanged && publishChange) {
+      // Nur die Veröffentlichung nachziehen, die Entscheidung steht schon so in der Zeile.
+      const { error } = await supabase.from('events').update(publishChange).eq('id', row.id);
+      results.push({ id: row.id, decision, written: !error, skipped_reason: error ? 'write_error' : undefined, publish_change: publishChange.publish_status === 'needs_review' ? 'withheld' : 'republished' });
       continue;
     }
     const payload = {
+      ...(publishChange ?? {}),
       latitude: decision.latitude,
       longitude: decision.longitude,
       geocoding_confidence: decision.geocoding_confidence,
@@ -212,7 +249,7 @@ export async function reResolveStoredEvents(
     } else if (!data || data.length === 0) {
       results.push({ id: row.id, decision, written: false, skipped_reason: 'concurrent_update' });
     } else {
-      results.push({ id: row.id, decision, written: true });
+      results.push({ id: row.id, decision, written: true, ...(publishChange ? { publish_change: publishChange.publish_status === 'needs_review' ? 'withheld' as const : 'republished' as const } : {}) });
     }
   }
   return results;

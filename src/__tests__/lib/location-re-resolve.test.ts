@@ -6,7 +6,7 @@
  */
 import { describe, it, expect } from 'vitest';
 import type { SupabaseClient } from '@supabase/supabase-js';
-import { inputFromStoredRow, reResolveStoredEvents, contractedDecision, type StoredEventLocationRow } from '@/lib/location/re-resolve';
+import { inputFromStoredRow, reResolveStoredEvents, contractedDecision, publishChangeFor, type StoredEventLocationRow } from '@/lib/location/re-resolve';
 import { resolveEventLocation } from '@/lib/location/resolver';
 
 interface DbEvent { id: string; updated_at: string | null }
@@ -160,5 +160,29 @@ describe('contractedDecision: Freigabevertrag gilt auch im Bestand (Galtür-Befu
     const row = baseRow();
     const pure = resolveEventLocation(inputFromStoredRow(row));
     expect(contractedDecision(row, pure)).toBe(pure);
+  });
+});
+
+describe('Veröffentlichungsregel bei erneuter Entscheidung (Review §6: Konflikt = zurückhalten)', () => {
+  it('publishChangeFor: Konflikt nimmt die Veröffentlichung; nur wegen Ortskonflikt zurückgehaltene Zeilen kommen zurück', () => {
+    expect(publishChangeFor({ publish_status: 'published', location_resolution: null }, { status: 'conflict' })).toEqual({ publish_status: 'needs_review' });
+    expect(publishChangeFor({ publish_status: 'needs_review', location_resolution: { reasons: ['a6_pin_contradicts_postal_code:45km'] } }, { status: 'municipality_only' })).toEqual({ publish_status: 'published' });
+    expect(publishChangeFor({ publish_status: 'needs_review', location_resolution: { reasons: ['admission:placeholder_location'] } }, { status: 'municipality_only' })).toEqual({ publish_status: 'published' });
+    // Aus anderen Gründen zurückgehalten (z. B. Score/Qualität): bleibt.
+    expect(publishChangeFor({ publish_status: 'needs_review', location_resolution: { reasons: ['gemeinde_centroid_from_plz'] } }, { status: 'municipality_only' })).toBeNull();
+    expect(publishChangeFor({ publish_status: 'suppressed', location_resolution: null }, { status: 'conflict' })).toBeNull();
+    expect(publishChangeFor({ publish_status: 'published', location_resolution: null }, { status: 'address_confirmed' })).toBeNull();
+  });
+
+  it('Konflikt-Zeile, die veröffentlicht ist, wird beim Re-Resolve auf needs_review gesetzt (auch wenn die Entscheidung unverändert ist)', async () => {
+    // Deklariert Tirol, Koordinate in Vorarlberg, PLZ stützt Tirol → Vertragskonflikt.
+    const row: StoredEventLocationRow = { ...baseRow(), bundesland: 'tirol', address: null, address_raw: null, postal_code: '6563', postal_code_raw: '6563', city_raw: 'Galtür', location_name_raw: 'Silvretta Bielerhöhe', latitude_raw: 46.9186, longitude_raw: 10.0968, coords_precision_raw: 'venue', publish_status: 'published' };
+    const writes: Array<{ id: unknown; payload: Record<string, unknown> }> = [];
+    const sb = fakeClient([{ id: 'ev-1', updated_at: '2026-09-14T08:00:00Z' }], writes);
+    const [res] = await reResolveStoredEvents(sb, [row], { phase: 'test' });
+    expect(res.decision.status).toBe('conflict');
+    expect(res.publish_change).toBe('withheld');
+    expect(writes[0].payload.publish_status).toBe('needs_review');
+    expect(writes[0].payload.latitude).toBeNull();
   });
 });
