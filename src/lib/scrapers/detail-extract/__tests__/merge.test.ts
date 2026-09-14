@@ -37,6 +37,22 @@ describe('mergeEnrichment', () => {
     expect(e.postal_code).toBe('1010');
   });
 
+  it('location_name: konfigurierter Veranstaltungsort bleibt, auch wenn die Detailseite etwas Längeres findet (fn-25)', () => {
+    const e = baseEvent();
+    e.location_name = 'p.m.k';
+    mergeEnrichment(e, { location_name: 'EPs under AWAL' });
+    expect(e.location_name).toBe('p.m.k');
+    e.location_name = 'Treibhaus';
+    mergeEnrichment(e, { location_name: 'Treibhaus Innsbruck' });
+    expect(e.location_name).toBe('Treibhaus');
+  });
+
+  it('location_name: leere Liste wird gefüllt', () => {
+    const e = baseEvent();
+    mergeEnrichment(e, { location_name: 'Stadthalle Wien' });
+    expect(e.location_name).toBe('Stadthalle Wien');
+  });
+
   it('location_name: detail wins only when longer', () => {
     const e = baseEvent();
     e.location_name = 'Wien';

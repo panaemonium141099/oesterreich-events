@@ -4,6 +4,15 @@
 import type { ScrapedEvent } from '@/types/events';
 import type { DetailEnrichment } from './types';
 import { isValidAddressText } from './validate';
+import { gemeindenByName } from '@/lib/location/gemeinde-index';
+import { isRegionLabel } from '@/lib/scrapers/gemeinde-context';
+
+/** Bloße Orts-/Bundeslandangabe statt Spielstätte („Wien", „Steiermark"). */
+function isBarePlaceName(name: string): boolean {
+  const n = name.trim();
+  if (!n) return true;
+  return isRegionLabel(n) || gemeindenByName(n).length > 0;
+}
 
 export function mergeEnrichment(e: ScrapedEvent, d: Partial<DetailEnrichment>): void {
   // address — detail wins when valid. Strip trailing punctuation noise.
@@ -16,10 +25,15 @@ export function mergeEnrichment(e: ScrapedEvent, d: Partial<DetailEnrichment>): 
     e.postal_code = d.postal_code;
   }
 
-  // location_name — detail wins when longer than listing
+  // location_name — der Veranstaltungsort der Listenseite bzw. der
+  // Adapter-Konfiguration ist der Quellwert und bleibt (fn-25, Review §2:
+  // „Eine unklare Zuordnung darf keinen anderen Venue-Namen erzeugen").
+  // Die Detailseite füllt nur eine Lücke oder ersetzt eine bloße Ortsangabe
+  // („Wien" → „Stadthalle Wien"). Vorher gewann jeder längere Fund, auch
+  // Fließtextfragmente aus der Heuristik.
   if (d.location_name) {
     const cur = e.location_name ?? '';
-    if (d.location_name.length > cur.length) e.location_name = d.location_name;
+    if (isBarePlaceName(cur) && d.location_name.length > cur.length) e.location_name = d.location_name;
   }
 
   // description — listing wins when already substantial (>= 200 chars)

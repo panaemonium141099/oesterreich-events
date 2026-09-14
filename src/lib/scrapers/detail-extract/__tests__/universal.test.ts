@@ -113,6 +113,24 @@ describe('applyRegexFallbacks', () => {
     expect(out.price_text?.toLowerCase()).toContain('frei');
   });
 
+  it('Fließtext mit „two"/„Export" liefert keinen Veranstaltungsort (Wortgrenzen, fn-25)', () => {
+    const html = `<html><body><main>${'x'.repeat(200)}</main></body></html>`;
+    const bio = 'Since her relocation to London, having released two EPs under AWAL, has reached over 20 million streams. Export in München prägt er dort den Sound der Nacht, vielseitig.';
+    const out: DetailEnrichment = { description: bio };
+    applyRegexFallbacks(out, cheerio.load(html));
+    expect(out.location_name).toBeUndefined();
+    expect(out.address).toBeUndefined();
+  });
+
+  it('„Ort:" und „Wo:" mit Doppelpunkt liefern weiterhin Ort und Adresse', () => {
+    const html = `<html><body><main>${'x'.repeat(200)}</main></body></html>`;
+    const out: DetailEnrichment = { description: 'Wo: Stadtsaal, Am Anger 1, 4020 Linz' };
+    applyRegexFallbacks(out, cheerio.load(html));
+    expect(out.location_name).toBe('Stadtsaal');
+    expect(out.address).toBe('Am Anger 1');
+    expect(out.postal_code).toBe('4020');
+  });
+
   it('rejects "Tisch 5" as address via validity guard', () => {
     const html = `<html><body><main>${'x'.repeat(200)}</main></body></html>`;
     const out: DetailEnrichment = { description: 'Adresse: Tisch 5' };
