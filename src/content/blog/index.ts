@@ -99,6 +99,8 @@ import { post as freddieMercuryOperaShow2026 } from './posts/freddie-mercury-ope
 import { post as scienceBustersForKids2026 } from './posts/science-busters-for-kids-2026';
 import { post as mariaUndDieFledermaus2026 } from './posts/maria-und-die-fledermaus-2026';
 import { post as konzerteInDerMinoritenkircheGrandeMusica2026 } from './posts/konzerte-in-der-minoritenkirche-grande-musica-2026';
+import { post as viennaDeathfest20262026 } from './posts/vienna-deathfest-2026-2026';
+import { post as rockPubRevivalFestivalVol12026 } from './posts/rock-pub-revival-festival-vol-1-2026';
 // AUTOWRITER-IMPORTS-END
 
 export type { FestivalPost, GalleryImage, FestivalKeyFacts, LineupAct } from './types';
@@ -202,6 +204,8 @@ export const ALL_POSTS: FestivalPost[] = [
   scienceBustersForKids2026,
   mariaUndDieFledermaus2026,
   konzerteInDerMinoritenkircheGrandeMusica2026,
+  viennaDeathfest20262026,
+  rockPubRevivalFestivalVol12026,
   // AUTOWRITER-POSTS-END
 ].sort(
   (a, b) => new Date(b.publishDate).getTime() - new Date(a.publishDate).getTime()
