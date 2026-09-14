@@ -157,3 +157,39 @@ Status `conflict` (Prüfung in Phase D/E).
   (14 Prüfungen, inkl. Titel-/Score-Update nach Verwerfung; bestanden).
   Befund dabei: Konflikte wurden trotz verworfener Koordinate veröffentlicht,
   seitdem `needs_review` (Grund `location_conflict_withheld`).
+
+## 11. Phase D1: Vergleichslauf vor dem Voll-Abruf (2026-09-14, 05:54 UTC, `d1-202609140554`)
+
+83.663 künftige Events; Ergebnis in `public.location_compare_runs`. Nur
+Zeilen mit gesichertem Quellenstand (Eventim, Feratel, Boudicca-Quellen,
+Clubs) wurden neu entschieden, alle anderen stehen als `awaiting_rescrape`:
+
+| Quelle | gesamt | ohne Quellenstand | unverändert | präziser | → Konflikt | Position verschoben | nur Status |
+|---|---|---|---|---|---|---|---|
+| Eventim | 22.940 | 352 | 22.342 | 0 | 1 | 168 | 77 |
+| feratel-deskline | 10.508 | 1.754 | 6.720 | 20 | 0 | 4 | 2.010 |
+| boudicca:linz termine | 1.766 | 615 | 1.132 | 0 | 0 | 0 | 19 |
+| boudicca:kupfticket | 1.349 | 435 | 912 | 0 | 0 | 0 | 2 |
+| Gemeinde-Quellen (gemeinden-generic, gem2go, gemeinde-registry, gemeinden), meinbezirk, oeticket, eventfinder, falter, … | 39.000+ | alle | | | | | |
+
+Die 168 Eventim-Verschiebungen sind Gemeinde-Mittelpunkte der Registry
+statt der alten 273er-PLZ-Tabelle (bis 26 km, Gemeinde-Ebene). Die 352
+Eventim-Zeilen ohne Quellenstand sind Termine, die der Feed nicht mehr
+liefert. Voll-Abruf aller Quellen manuell gestartet (GitHub-Run
+34811161143, 05:51 UTC), danach zweiter Vergleichslauf.
+
+**URL-Folgen:** Event-URLs werden über `(slug, Datum)` aufgelöst, der
+`{plz}-{ort}`-Präfix ist kein Schlüssel; nicht-kanonische Pfade bekommen
+308 auf die kanonische URL. PLZ-Korrekturen brechen daher keine Links;
+Slugs mit alten Ortsnamen („…-haus-im-ennstal") bleiben aus Stabilitäts-
+gründen bestehen (Entscheidung 2026-09-14: keine Slug-Regeneration).
+
+## 12. Dedup-Befund (E, 2026-09-14)
+
+7.122 Duplikat-Paare unter künftigen Events; 609 mit unterschiedlicher PLZ,
+166 mit unterschiedlicher PLZ-Region („Dorffest 2026" Mühlbach am
+Manhartsberg ↔ Schlitters/Tirol, „Martinsfest" Kematen ↔ Herrnbaumgarten).
+Ursache: ohne Bezirk fehlte der Ortsvergleich, gleichnamige Termine
+verschmolzen österreichweit. Seit PR #201 harte Regel im Scorer (andere
+PLZ-Region oder PLZ ohne gemeinsame Gemeinde → distinct). Un-Merge der 166
+Paare erfolgt nach E1 (siehe §13).
