@@ -480,11 +480,18 @@ function toSupabaseRow(
 
   if (existing && !decisionForbidsPosition && !manualLabelReleased) {
     const samePoint =
-      existing.latitude != null && resolved.latitude != null &&
-      existing.latitude === resolved.latitude && existing.longitude === resolved.longitude;
+      existing.latitude != null && existing.longitude != null && resolved.latitude != null && resolved.longitude != null &&
+      Math.abs(existing.latitude - resolved.latitude) < 1e-6 && Math.abs(existing.longitude - resolved.longitude) < 1e-6;
+    // Stammt die Position aus der Quelle selbst (Provenienz `source`), ist
+    // die Quelle für ihre eigene Koordinate maßgeblich, gleich welches Label
+    // die Entscheidung trägt (Feed-Platzhalter → `gemeinde-centroid`): eine
+    // geänderte Quellkoordinate ist eine Korrektur oder Verlegung.
+    // Nur bei vollständig geladenen Belegen: ohne Belege sähe ein belegter
+    // Bestand fälschlich wie „von der Quelle abgestuft" aus.
+    const rankConfidence = decision.provenance.latitude === 'source' && evidence.complete === true ? 'scraper' : resolved.confidence;
     // Gleiche Position: das Label folgt der Entscheidung (z. B. Feed-
     // Platzhalter, bisher `scraper`, jetzt Gebietsangabe `gemeinde-centroid`).
-    if (!samePoint && !shouldOverwriteCoords(existing, resolved.latitude, resolved.longitude, resolved.confidence)) {
+    if (!samePoint && !shouldOverwriteCoords(existing, resolved.latitude, resolved.longitude, rankConfidence)) {
       // Bestandskoordinate bleibt — die gespeicherte Entscheidung muss das
       // abbilden, sonst behauptet sie eine Position, die nicht in der Zeile
       // steht.

@@ -165,7 +165,7 @@ Stand 2026-09-14 (Phasen A–D, O1 live; E/F folgen nach dem Voll-Abruf):
 - [ ] Noch ohne automatisierten Test: geteilte Ticket-Domain (alter
       Venue-Matcher nicht in Prod), Footer-Adresse (adapterspezifisch).
 - [x] Integrationstest am gespeicherten Datensatz (`verify-location-
-      contract.ts`): 19 Prüfungen, inkl. Trigger, Titel-/Score-Update,
+      contract.ts`): 21 Prüfungen, inkl. Trigger, Titel-/Score-Update,
       manuelle Korrektur und Verlegung.
 - [ ] Jeder öffentlich präzise Ort hat Entscheidung + erhaltenen Quellenstand
       (nach E1 zu messen: Altbestand ohne Entscheidung → 0).
