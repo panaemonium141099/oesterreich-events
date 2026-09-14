@@ -16,10 +16,13 @@
  *     geliefert hat (`--stale-since <iso>`): sie werden als ungeklärt
  *     erfasst (`unresolved`, Grund `source_not_redelivered`). Als „nicht
  *     mehr geliefert" gilt ein Event nur, wenn der jüngste Abruf seiner
- *     Quelle seit dem Stichtag vollständig erfolgreich war (source_runs
- *     status = success, keine abgewiesenen Zeilen); Quellen mit Fehler,
- *     Timeout, Schreibfehlern oder ohne Abruf werden übersprungen und
- *     genannt, denn dort fehlt der Beleg, dass das Event verschwunden ist.
+ *     Quelle seit dem Stichtag vollständig erfolgreich war: laut Rohschicht
+ *     (`scrape_runs`: success, keine Batch-Fehler, mindestens ein Event;
+ *     deckt Scraper, Eventim-Import und Feratel-Cron) oder laut Scraper-
+ *     Protokoll (`source_runs`: success, Events gefunden, keine abgewiesenen
+ *     Zeilen). Quellen mit Fehler, Timeout, abgewiesenen Zeilen, Sammel-
+ *     Syncs („mixed") oder ohne Abruf werden übersprungen und genannt,
+ *     denn dort fehlt der Beleg, dass das Event verschwunden ist.
  *     Positionen aus
  *     dem alten Namensabgleich (exact, normalized, verified, from_title,
  *     from_description, gemini, gemini_low, nominatim, openai)
@@ -106,18 +109,36 @@ async function runWithRaw(sb: SupabaseClient) {
  * und nicht über den Abruf.
  */
 async function sourcesWithCleanRun(sb: SupabaseClient, since: string): Promise<{ ok: Set<string>; skipped: Map<string, string> }> {
-  const latest = new Map<string, { status: string; error: string | null }>();
+  const latest = new Map<string, { status: string; error: string | null; found: number; batchErrors: number }>();
   for (let from = 0; ; from += 1000) {
-    const { data, error } = await sb.from('source_runs').select('source_name, run_at, status, error_message').gte('run_at', since).order('run_at', { ascending: true }).range(from, from + 999);
+    const { data, error } = await sb.from('scrape_runs').select('source_name, started_at, status, error_message, items_found, batch_errors').gte('started_at', since).order('started_at', { ascending: true }).range(from, from + 999);
     if (error) throw new Error(error.message);
-    for (const r of (data ?? []) as Array<{ source_name: string; status: string; error_message: string | null }>) latest.set(r.source_name, { status: r.status, error: r.error_message });
+    for (const r of (data ?? []) as Array<{ source_name: string; status: string; error_message: string | null; items_found: number | null; batch_errors: number | null }>) {
+      latest.set(r.source_name, { status: r.status, error: r.error_message, found: r.items_found ?? 0, batchErrors: r.batch_errors ?? 0 });
+    }
     if (!data || data.length < 1000) break;
   }
   const ok = new Set<string>();
   const skipped = new Map<string, string>();
   for (const [name, r] of latest) {
-    if (r.status === 'success' && !(r.error ?? '').includes('nicht geschrieben')) ok.add(name);
-    else skipped.set(name, `${r.status}${r.error ? ': ' + r.error.slice(0, 60) : ''}`);
+    if (r.status === 'success' && r.batchErrors === 0 && r.found > 0) ok.add(name);
+    else skipped.set(name, `${r.status}, ${r.found} gefunden, ${r.batchErrors} Batch-Fehler${r.error ? ': ' + r.error.slice(0, 50) : ''}`);
+  }
+  // Zweite Stimme: das Scraper-Protokoll (jüngster Lauf je Quelle).
+  const latestSource = new Map<string, { status: string; found: number; error: string | null }>();
+  for (let from = 0; ; from += 1000) {
+    const { data, error } = await sb.from('source_runs').select('source_name, run_at, status, events_found, error_message').gte('run_at', since).order('run_at', { ascending: true }).range(from, from + 999);
+    if (error) throw new Error(error.message);
+    for (const r of (data ?? []) as Array<{ source_name: string; status: string; events_found: number | null; error_message: string | null }>) {
+      latestSource.set(r.source_name, { status: r.status, found: r.events_found ?? 0, error: r.error_message });
+    }
+    if (!data || data.length < 1000) break;
+  }
+  for (const [name, r] of latestSource) {
+    if (ok.has(name)) continue;
+    const clean = r.status === 'success' && r.found > 0 && !(r.error ?? '').includes('nicht geschrieben');
+    if (clean && !skipped.has(name)) ok.add(name);
+    else if (!skipped.has(name)) skipped.set(name, `${r.status}, ${r.found} gefunden${r.error ? ': ' + r.error.slice(0, 50) : ''}`);
   }
   return { ok, skipped };
 }
