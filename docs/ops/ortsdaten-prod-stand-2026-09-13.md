@@ -211,10 +211,22 @@ laufen nur mit `--legacy-geo` + `LEGACY_GEO_OK=1` (Forensik).
 
 **Prüfung:** `/admin/ortsdaten` (Konflikt-, ungeklärt-, Gemeinde-Gruppen je
 Quell-Spielstätte mit Beleg, Gründen, verworfener Position, Karte, Quelle).
-Korrekturen mit Geltungsbereich: `event_location_corrections` (Historie)
-und `source_venue_map` (bestätigte Quellen-Venue → Position; wirkt beim
-nächsten Sync/Backfill). Schreibpfad dafür: SQL/psql oder Backfill; eine
-Admin-Maske ist noch offen.
+Korrekturen mit Geltungsbereich: `event_location_corrections` (Scope
+event, vorher/nachher, Grund, Beleg, wer, gültig ab/bis) über
+`/admin/ortsdaten` → „Korrigieren" (`POST /api/admin/ortsdaten/correction`,
+„Korrektur beenden" = `DELETE`). Die Korrektur ist Beleg im Resolver und an
+den Ortsangaben-Hash des Quellenstands gebunden (`before.location_basis_
+hash`): liefert die Quelle später andere Ortsangaben (Verlegung), gilt sie
+nicht mehr, die Entscheidung wird neu getroffen und das `manual`-Label
+fällt (keine ewige Koordinatensperre, Review §7). `source_venue_map`
+(bestätigte Quellen-Venue → Position) wird weiterhin per SQL gepflegt.
+
+Referenzkorrektur 2026-09-14: geteilte Stadt-PLZ (4040 Linz/Lichtenberg,
+8044/8046/8051/8054/8073/8074 Graz/Umland, 9063 Klagenfurt/Maria Saal)
+führen jetzt BEIDE Gemeinden als Kandidaten (RTR-Stadtbezirk entscheidet,
+ob die Stadt dazugehört); vorher gewann die Umlandgemeinde (271 Linzer
+Events mit Gemeinde „Lichtenberg"). Ohne Ortsnamen bleibt die Gemeinde
+offen, kein Mittelpunkt. Wirkt ab dem Backfill (E1).
 
 **Werkzeuge:**
 - `location-compare-run.ts` (D1): neuer Resolver über den Quellenstand →

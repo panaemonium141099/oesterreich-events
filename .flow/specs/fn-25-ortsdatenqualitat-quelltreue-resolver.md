@@ -153,14 +153,20 @@ Stand 2026-09-14 (Phasen A–D, O1 live; E/F folgen nach dem Voll-Abruf):
       (Cache-only im Schreibpfad), Gate verwirft + Titel-/Score-Update
       (verify-location-contract), Wiederholbarkeit (location-metrics),
       Tournee/verschiedene PLZ-Gebiete (dedup-scorer).
+- [x] Verlegung nach manueller Korrektur: Korrekturen (`event_location_
+      corrections`, Scope event) sind Beleg im Resolver, gebunden an den
+      Ortsangaben-Hash des Quellenstands; anderer Quellenstand → Korrektur
+      veraltet, neue Entscheidung, `manual`-Label fällt (Resolver-Tests +
+      Vertragsprüfung Fall C). Schreibpfad: `/admin/ortsdaten` → Korrigieren
+      (`POST/DELETE /api/admin/ortsdaten/correction`).
+- [x] Gleichzeitiger Scrape während Backfill: `updated_at`-Vergleich,
+      Test `location-re-resolve.test.ts` (concurrent_update, dry-run,
+      unverändert). Gelände ohne Hausnummer: Positivfall getestet.
 - [ ] Noch ohne automatisierten Test: geteilte Ticket-Domain (alter
-      Venue-Matcher nicht in Prod), Footer-Adresse (adapterspezifisch),
-      Gelände ohne Hausnummer (Positivfall im Resolver möglich, Testfall
-      offen), Verlegung nach manueller Korrektur (Korrekturtabelle noch ohne
-      Schreibpfad), gleichzeitiger Scrape während Backfill (updated_at-
-      Schutz implementiert, Test offen).
+      Venue-Matcher nicht in Prod), Footer-Adresse (adapterspezifisch).
 - [x] Integrationstest am gespeicherten Datensatz (`verify-location-
-      contract.ts`): 14 Prüfungen, inkl. Trigger, Titel-/Score-Update.
+      contract.ts`): 19 Prüfungen, inkl. Trigger, Titel-/Score-Update,
+      manuelle Korrektur und Verlegung.
 - [ ] Jeder öffentlich präzise Ort hat Entscheidung + erhaltenen Quellenstand
       (nach E1 zu messen: Altbestand ohne Entscheidung → 0).
 - [x] Unbekannt/verworfen bleibt unbekannt: Gate + Trigger-Entfernung +

@@ -4,7 +4,8 @@
  */
 import { describe, it, expect } from 'vitest';
 import { resolveEventLocation, type LocationEvidence } from '@/lib/location/resolver';
-import { addressCacheKey, streetKey, foldVenueName } from '@/lib/location/evidence';
+import { addressCacheKey, streetKey, foldVenueName, pickCorrections } from '@/lib/location/evidence';
+import { locationBasisHash } from '@/lib/location/conservative-resolution';
 
 const NOW = new Date('2026-09-13T12:00:00Z');
 const r = (input: Parameters<typeof resolveEventLocation>[0], ev: LocationEvidence = {}) => resolveEventLocation(input, ev, NOW);
@@ -143,5 +144,113 @@ describe('selectVenueCandidate: kein Treffer nach Reihenfolge, Name oder Anzahl 
   it('Kandidaten außerhalb des Ortskontexts (andere PLZ, anderer Ort) zählen nicht', () => {
     const pick = selectVenueCandidate({ location_name: 'Stadtsaal', postal_code: '4020', address: 'Hauptplatz 1' }, [mk('x', 'Hauptplatz 1', 47.0, 15.4, '8010')]);
     expect(pick).toBeNull();
+  });
+});
+
+describe('manuelle Korrektur: Geltungsbereich, Gültigkeit, Verlegung (Review §7/§9)', () => {
+  // Quelle nennt Haus der Frau; die Position der Quelle war falsch, ein Admin korrigiert.
+  const source = { location_name: 'Haus der Frau', address: 'Volksgartenstraße 18, 4020, Linz', bundesland: 'oberoesterreich', event_id: 'ev-1' };
+  const corr = {
+    id: 'c-1', latitude: 48.3021, longitude: 14.2917, precision: 'building' as const, venue_id: null,
+    location_name: null, postal_code: null, basis_hash: locationBasisHash(source), corrected_by: 'admin:x',
+  };
+
+  it('gültige Korrektur zum passenden Quellenstand wird angewendet (manual, Pin + Route)', () => {
+    const d = r(source, { correction: corr, correctionsLoaded: true });
+    expect(d.status).toBe('address_confirmed');
+    expect(d.geocoding_confidence).toBe('manual');
+    expect(d.latitude).toBe(48.3021);
+    expect(d.allowed).toEqual({ pin: true, route: true, distance: true, municipality_page: true });
+    expect(d.evidence).toContain('correction:c-1:admin:x');
+    expect(d.provenance.latitude).toBe('manual');
+    expect(d.location_name).toBe('Haus der Frau');
+  });
+
+  it('Korrektur schlägt Quellkoordinate und Venue-Kandidat (Basis = Quellenstand mit Koordinate)', () => {
+    const withCoords = { ...source, latitude: 48.20, longitude: 16.37, coords_precision: 'venue' as const };
+    const d = r(
+      withCoords,
+      { correction: { ...corr, basis_hash: locationBasisHash(withCoords) }, correctionsLoaded: true, venueCandidate: { ...linzVenue, latitude: 48.31, longitude: 14.30, matched_by: ['street'] } },
+    );
+    expect(d.geocoding_confidence).toBe('manual');
+    expect(d.latitude).toBe(48.3021);
+  });
+
+  it('eine neue Quellkoordinate ist ein neuer Quellenstand: die Korrektur wird nicht blind weitergeführt', () => {
+    const d = r({ ...source, latitude: 48.20, longitude: 16.37, coords_precision: 'venue' }, { correction: corr, correctionsLoaded: true });
+    expect(d.reasons).toContain('correction_stale:c-1');
+    expect(d.geocoding_confidence).not.toBe('manual');
+  });
+
+  it('Verlegung: liefert die Quelle andere Ortsangaben, ist die Korrektur veraltet und die Entscheidung wird neu getroffen', () => {
+    const moved = { ...source, location_name: 'Posthof', address: 'Posthofstraße 43, 4020 Linz' };
+    const d = r(moved, { correction: corr, correctionsLoaded: true });
+    expect(d.geocoding_confidence).not.toBe('manual');
+    expect(d.status).toBe('municipality_only');
+    expect(d.latitude).not.toBe(48.3021);
+    expect(d.reasons).toContain('correction_stale:c-1');
+    expect(d.rejected).toContain('correction:c-1:source_location_changed');
+  });
+
+  it('ein geänderter Titel allein macht die Korrektur nicht ungültig', () => {
+    const d = r({ ...source, title: 'Neuer Titel 2027' }, { correction: corr, correctionsLoaded: true });
+    expect(d.geocoding_confidence).toBe('manual');
+  });
+
+  it('Korrektur ohne Quellenbezug (basis_hash null) gilt für jeden Quellenstand', () => {
+    const d = r({ ...source, location_name: 'Irgendwo' }, { correction: { ...corr, basis_hash: null }, correctionsLoaded: true });
+    expect(d.geocoding_confidence).toBe('manual');
+  });
+
+  it('Korrektur mit Venue-ID → venue_confirmed; mit PLZ → Gemeinde folgt der Korrektur', () => {
+    const d = r(source, { correction: { ...corr, venue_id: 'v-hdf', postal_code: '4030' }, correctionsLoaded: true });
+    expect(d.status).toBe('venue_confirmed');
+    expect(d.venue_id).toBe('v-hdf');
+    expect(d.postal_code).toBe('4030');
+    expect(d.provenance.postal_code).toBe('manual');
+    expect(d.gemeinde?.name).toBe('Linz');
+  });
+
+  it('korrigierte PLZ mit mehreren Gemeinden (4040 Linz/Lichtenberg): PLZ übernommen, Gemeinde bleibt offen', () => {
+    const d = r(source, { correction: { ...corr, postal_code: '4040' }, correctionsLoaded: true });
+    expect(d.postal_code).toBe('4040');
+    expect(d.gemeinde).toBeNull();
+    expect(d.allowed.municipality_page).toBe(true);
+  });
+
+  it('Korrektur löst auch einen Konflikt der Quelle auf', () => {
+    const d = r({ ...source, latitude: 47.07, longitude: 15.44, coords_precision: 'venue' }, { correction: { ...corr, basis_hash: null }, correctionsLoaded: true });
+    expect(d.status).toBe('address_confirmed');
+    expect(d.latitude).toBe(48.3021);
+  });
+});
+
+describe('pickCorrections: Gültigkeit und jüngste Korrektur je Event', () => {
+  const NOW = new Date('2026-09-14T12:00:00Z');
+  const row = (id: string, scope_id: string, extra: Partial<Parameters<typeof pickCorrections>[0][number]> = {}) => ({
+    id, scope_id, before: { location_basis_hash: 'abc' }, after: { latitude: 48.3, longitude: 14.29, precision: 'building' },
+    corrected_by: 'admin:x', valid_from: '2026-09-01T00:00:00Z', valid_to: null, created_at: '2026-09-01T00:00:00Z', ...extra,
+  });
+
+  it('beendete oder künftige Korrekturen zählen nicht', () => {
+    const m = pickCorrections([
+      row('a', 'e1', { valid_to: '2026-09-10T00:00:00Z' }),
+      row('b', 'e2', { valid_from: '2026-10-01T00:00:00Z' }),
+      row('c', 'e3'),
+    ], NOW);
+    expect(m.has('e1')).toBe(false);
+    expect(m.has('e2')).toBe(false);
+    expect(m.get('e3')?.basis_hash).toBe('abc');
+  });
+
+  it('die jüngste gültige Korrektur gewinnt; ohne Position keine Korrektur', () => {
+    const m = pickCorrections([
+      row('old', 'e1', { valid_from: '2026-08-01T00:00:00Z', after: { latitude: 47.0, longitude: 15.0 } }),
+      row('new', 'e1', { valid_from: '2026-09-05T00:00:00Z' }),
+      row('nopos', 'e2', { after: { precision: 'building' } }),
+    ], NOW);
+    expect(m.get('e1')?.id).toBe('new');
+    expect(m.get('e1')?.precision).toBe('building');
+    expect(m.has('e2')).toBe(false);
   });
 });

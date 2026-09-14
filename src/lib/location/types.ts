@@ -91,8 +91,10 @@ export interface LocationDecision {
   gemeinde: { name: string; plz: string; bundesland: string; bezirk: string | null } | null;
   latitude: number | null;
   longitude: number | null;
-  /** Kompatibler Wert für `events.geocoding_confidence`. */
-  geocoding_confidence: 'scraper' | 'venue' | 'address' | 'gemeinde-centroid' | null;
+  /** Kompatibler Wert für `events.geocoding_confidence`. `manual` nur aus
+   *  einer gültigen Korrektur (`event_location_corrections`), nie aus dem
+   *  Label einer Bestandszeile. */
+  geocoding_confidence: 'scraper' | 'venue' | 'address' | 'gemeinde-centroid' | 'manual' | null;
   geocoding_source: string | null;
   country: string;
   allowed: AllowedOutputs;

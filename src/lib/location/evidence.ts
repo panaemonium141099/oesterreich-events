@@ -11,6 +11,8 @@
  *  - `geocode_cache` (Schlüssel `addr:v1:…`): geocodierte Eventadressen aus
  *    dem Nachtjob `geocode-addresses.ts`. Im Schreibpfad wird NIE live
  *    geocodiert.
+ *  - `event_location_corrections` (Scope event): manuelle Korrekturen mit
+ *    Gültigkeit; der Resolver prüft, ob sie noch zum Quellenstand passen.
  *
  * PostgREST-Regeln: `.in()`-Listen ≤ 200 Elemente.
  */
@@ -18,7 +20,8 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 import type { LocationInput } from './conservative-resolution';
 import { extractPlzFromAddress, extractCityFromAddress } from './conservative-resolution';
 import { normalizeGemeindeName } from './gemeinde-index';
-import type { LocationEvidence, VenueCandidateEvidence, AddressGeocodeEvidence, SourceVenueMapEvidence } from './resolver';
+import type { LocationEvidence, VenueCandidateEvidence, AddressGeocodeEvidence, SourceVenueMapEvidence, CorrectionEvidence } from './resolver';
+import type { LocationPrecision } from './types';
 
 const CHUNK = 200;
 const NEARBY_M = 300;
@@ -258,5 +261,80 @@ export async function loadLocationEvidence(
     }
   }
 
+  // ── Manuelle Korrekturen (Scope event) ──────────────────────────────
+  const eventIds = [...new Set(inputs.map(i => i.event_id?.trim()).filter((v): v is string => !!v))];
+  if (eventIds.length > 0) {
+    try {
+      const rows = await inChunks(eventIds, async slice => {
+        const { data, error } = await supabase
+          .from('event_location_corrections')
+          .select('id, scope_id, before, after, corrected_by, valid_from, valid_to, created_at')
+          .eq('scope', 'event')
+          .in('scope_id', slice);
+        if (error) throw error;
+        return (data ?? []) as CorrectionRow[];
+      });
+      const byEvent = pickCorrections(rows, new Date());
+      inputs.forEach((inp, i) => {
+        out[i].correctionsLoaded = true;
+        const hit = inp.event_id ? byEvent.get(inp.event_id.trim()) : undefined;
+        if (hit) out[i].correction = hit;
+      });
+    } catch (e) {
+      console.warn('[location-evidence] event_location_corrections:', e instanceof Error ? e.message : e);
+    }
+  } else {
+    // Ohne bestehende Zeilen gibt es nichts zu laden; die Tabelle gilt als gelesen.
+    for (const o of out) o.correctionsLoaded = true;
+  }
+
   return out;
+}
+
+export interface CorrectionRow {
+  id: string;
+  scope_id: string;
+  before: Record<string, unknown> | null;
+  after: Record<string, unknown> | null;
+  corrected_by: string;
+  valid_from: string | null;
+  valid_to: string | null;
+  created_at: string | null;
+}
+
+const PRECISIONS = new Set<LocationPrecision>(['entrance', 'building', 'site', 'street', 'locality', 'municipality', 'postcode', 'region', 'unknown']);
+
+/**
+ * Je Event die jüngste zum Zeitpunkt gültige Korrektur mit Position. Rein,
+ * damit Gültigkeit und Auswahl testbar sind.
+ */
+export function pickCorrections(rows: CorrectionRow[], now: Date): Map<string, CorrectionEvidence> {
+  const nowIso = now.toISOString();
+  const best = new Map<string, { row: CorrectionRow; ev: CorrectionEvidence }>();
+  for (const r of rows) {
+    if (r.valid_from && r.valid_from > nowIso) continue;
+    if (r.valid_to && r.valid_to <= nowIso) continue;
+    const after = r.after ?? {};
+    const lat = typeof after.latitude === 'number' ? after.latitude : null;
+    const lng = typeof after.longitude === 'number' ? after.longitude : null;
+    if (lat == null || lng == null) continue;
+    const precision = PRECISIONS.has(after.precision as LocationPrecision) ? (after.precision as LocationPrecision) : 'building';
+    const basis = r.before && typeof r.before.location_basis_hash === 'string' ? (r.before.location_basis_hash as string) : null;
+    const ev: CorrectionEvidence = {
+      id: r.id,
+      latitude: lat,
+      longitude: lng,
+      precision,
+      venue_id: typeof after.venue_id === 'string' && after.venue_id ? after.venue_id : null,
+      location_name: typeof after.location_name === 'string' && after.location_name.trim() ? after.location_name.trim() : null,
+      postal_code: typeof after.postal_code === 'string' && /^\d{4}$/.test(after.postal_code) ? after.postal_code : null,
+      basis_hash: basis,
+      corrected_by: r.corrected_by,
+    };
+    const prev = best.get(r.scope_id);
+    const stamp = r.valid_from ?? r.created_at ?? '';
+    const prevStamp = prev ? (prev.row.valid_from ?? prev.row.created_at ?? '') : '';
+    if (!prev || stamp >= prevStamp) best.set(r.scope_id, { row: r, ev });
+  }
+  return new Map([...best.entries()].map(([k, v]) => [k, v.ev]));
 }

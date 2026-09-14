@@ -298,8 +298,11 @@ describe('shouldOverwriteCoords: die Quelle ist für ihre Koordinate maßgeblich
     expect(shouldOverwriteCoords(row(47.41, 13.77, 'exact'), 48.31, 14.28, 'gemeinde-centroid')).toBe(true);
   });
 
-  it('manuelle Korrekturen bleiben', () => {
+  it('manuelle Korrekturen weichen keiner automatischen Herkunft, aber einer neuen Korrektur', () => {
     expect(shouldOverwriteCoords(row(48.3, 14.29, 'manual'), 48.31, 14.28, 'scraper')).toBe(false);
+    expect(shouldOverwriteCoords(row(48.3, 14.29, 'manual'), 48.31, 14.28, 'venue')).toBe(false);
+    expect(shouldOverwriteCoords(row(48.3, 14.29, 'manual'), 48.31, 14.28, 'manual')).toBe(true);
+    expect(shouldOverwriteCoords(row(48.3, 14.29, 'manual'), 48.3, 14.29, 'manual')).toBe(false);
   });
 });
 
@@ -308,5 +311,32 @@ describe('shouldOverwriteCoords: verworfene Werte werden entfernt', () => {
     // Die Rang-Regel allein liefert bei neuer NULL-Koordinate false ("alte behalten");
     // der Schreibpfad übergeht sie für conflict/online. Hier nur die Vorbedingung:
     expect(shouldOverwriteCoords({ latitude: 47.4, longitude: 13.7, geocoding_confidence: 'exact' }, null, null, null)).toBe(false);
+  });
+});
+
+describe('geteilte Stadt-PLZ: Stadt und Umlandgemeinde sind beide Kandidaten (RTR-Stadtbezirk)', () => {
+  it('4040 mit Ortsname Linz → Gemeinde Linz, nicht Lichtenberg', () => {
+    const d = resolveConservativeLocation({ location_name: 'Posthof', address: 'Posthofstraße 43, 4040 Linz', bundesland: 'oberoesterreich' }, NOW);
+    expect(d.postal_code).toBe('4040');
+    expect(d.gemeinde?.name).toBe('Linz');
+    expect(d.status).toBe('municipality_only');
+  });
+
+  it('4040 mit Ortsname Lichtenberg → Lichtenberg', () => {
+    const d = resolveConservativeLocation({ location_name: 'Gemeindesaal', address: 'Hauptstraße 1, 4040 Lichtenberg', bundesland: 'oberoesterreich' }, NOW);
+    expect(d.gemeinde?.name).toBe('Lichtenberg');
+  });
+
+  it('4040 ohne Ortsname → keine geratene Gemeinde und kein Mittelpunkt', () => {
+    const d = resolveConservativeLocation({ location_name: 'Saal', postal_code: '4040', bundesland: 'oberoesterreich' }, NOW);
+    expect(d.gemeinde).toBeNull();
+    expect(d.latitude).toBeNull();
+    expect(d.reasons).toContain('plz_covers_multiple_gemeinden');
+  });
+
+  it('8044 Graz-Mariatrost gehört zu Graz; 4050 bleibt Traun; 9061 ist Klagenfurt', () => {
+    expect(resolveConservativeLocation({ location_name: 'Kirche', address: 'Kirchplatz 1, 8044 Graz' }, NOW).gemeinde?.name).toBe('Graz');
+    expect(resolveConservativeLocation({ location_name: 'Saal', postal_code: '4050' }, NOW).gemeinde?.name).toBe('Traun');
+    expect(resolveConservativeLocation({ location_name: 'Saal', postal_code: '9061' }, NOW).gemeinde?.name).toBe('Klagenfurt am Wörthersee');
   });
 });

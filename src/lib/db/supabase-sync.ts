@@ -116,7 +116,7 @@ function regionOfCoords(lat: number, lng: number): string | null {
  * Gebietsangaben und sperren keine bessere belegte Position.
  */
 const CONFIDENCE_RANK: Record<string, number> = {
-  manual: 0,                 // Hand-Korrektur — nie automatisch überschreiben
+  manual: 0,                 // gültige Korrektur aus event_location_corrections (Resolver)
   'json-ld-venue': 1,        // strukturierte Venue-Angabe der Quellseite
   scraper: 2,                // Koordinate der Quelle selbst
   venue: 2,                  // belegter Venue-Kandidat / bestätigte Quellen-Venue-Zuordnung (Resolver)
@@ -136,7 +136,7 @@ const CONFIDENCE_RANK: Record<string, number> = {
 
 /** Herkünfte, deren Position deterministisch aus Belegen folgt: eine
  *  geänderte Position ist dann eine Korrektur, kein Rauschen. */
-const DETERMINISTIC_CONFIDENCES = new Set(['scraper', 'venue', 'address']);
+const DETERMINISTIC_CONFIDENCES = new Set(['manual', 'scraper', 'venue', 'address']);
 
 function getConfidenceRank(confidence: string | null | undefined): number {
   if (!confidence) return Infinity; // NULL = lowest priority
@@ -184,6 +184,7 @@ function getSupabaseAdminClient() {
 
 /** Existing row shape returned by batch-prefetch. */
 interface ExistingRow {
+  id: string;
   source_name: string;
   source_id: string;
   latitude: number | null;
@@ -268,7 +269,7 @@ async function prefetchExistingRows(
     const { data, error } = await supabase
       .from('events')
       .select(
-        'source_name, source_id, latitude, longitude, geocoding_confidence, geocoding_source, ' +
+        'id, source_name, source_id, latitude, longitude, geocoding_confidence, geocoding_source, ' +
           'category, tags, category_confidence, category_source, category_version, ' +
           'category_locked, category_needs_review, category_reason, category_candidates, slug, ' +
           'publish_status, ' +
@@ -303,8 +304,9 @@ async function prefetchExistingRows(
  * Namen, die Entscheidung liefert Position, PLZ, Gemeinde, Status,
  * Genauigkeit und die erlaubte Ausspielung. Kein Namensabgleich mehr.
  */
-function locationInputOf(event: ScrapedEvent): LocationInput {
+function locationInputOf(event: ScrapedEvent, existingId?: string | null): LocationInput {
   return {
+    event_id: existingId ?? null,
     title: event.title,
     location_name: event.location_name ?? null,
     address: event.address ?? null,
@@ -319,8 +321,8 @@ function locationInputOf(event: ScrapedEvent): LocationInput {
   };
 }
 
-function decideLocation(event: ScrapedEvent, evidence: LocationEvidence): ResolvedLocation {
-  return resolveEventLocation(locationInputOf(event), evidence);
+function decideLocation(event: ScrapedEvent, evidence: LocationEvidence, existingId?: string | null): ResolvedLocation {
+  return resolveEventLocation(locationInputOf(event, existingId), evidence);
 }
 
 /**
@@ -352,10 +354,14 @@ function retainedStatusFor(confidence: string | null): { status: LocationStatus;
  * Entscheidet, ob neue Koordinaten die bestehenden ersetzen.
  *
  * - Ohne Bestandskoordinate wird immer geschrieben.
- * - Ein besserer Rang ersetzt; derselbe Rang ersetzt NUR bei `scraper`
- *   (die Quelle ist für ihre eigene Koordinate maßgeblich, eine geänderte
- *   Quellkoordinate ist eine Korrektur oder eine Verlegung).
- * - `manual` wird nie automatisch ersetzt.
+ * - Ein besserer Rang ersetzt; derselbe Rang ersetzt NUR bei
+ *   deterministischen Herkünften (`manual`, `scraper`, `venue`, `address`):
+ *   die Quelle ist für ihre eigene Koordinate maßgeblich, eine geänderte
+ *   Quellkoordinate ist eine Korrektur oder eine Verlegung; eine neue
+ *   Korrektur ersetzt die alte.
+ * - `manual` (Rang 0) wird von keiner automatischen Herkunft ersetzt. Ob
+ *   das Label noch durch eine gültige Korrektur gedeckt ist, prüft der
+ *   Schreibpfad (`toSupabaseRow`), nicht diese Rangregel.
  * - Die frühere 5-km-Sperre entfällt: Sie hielt falsche Zuordnungen fest,
  *   sobald der richtige Ort zufällig in der Nähe lag.
  */
@@ -367,7 +373,6 @@ export function shouldOverwriteCoords(
 ): boolean {
   if (newLat == null || newLng == null) return false;
   if (existing.latitude == null || existing.longitude == null) return true;
-  if (existing.geocoding_confidence === 'manual') return false;
 
   const existingRank = getConfidenceRank(existing.geocoding_confidence);
   const newRank = getConfidenceRank(newConfidence);
@@ -432,7 +437,9 @@ function toSupabaseRow(
   rawRefs: RawRefs = { ids: new Map(), failed: new Set() },
   evidence: LocationEvidence = {},
 ) {
-  const decision = decideLocation(event, evidence);
+  const key = `${event.source_name}::${event.source_id}`;
+  const existing = existingMap.get(key);
+  const decision = decideLocation(event, evidence, existing?.id);
   // `resolved` bündelt, was tatsächlich in die Zeile geschrieben wird —
   // die Entscheidung selbst bleibt unverändert und wandert als Protokoll
   // in `location_resolution`.
@@ -448,9 +455,6 @@ function toSupabaseRow(
     reasons: [...decision.reasons],
   };
 
-  const key = `${event.source_name}::${event.source_id}`;
-  const existing = existingMap.get(key);
-
   let finalLat = resolved.latitude;
   let finalLng = resolved.longitude;
   let finalConfidence = resolved.confidence;
@@ -462,7 +466,19 @@ function toSupabaseRow(
   // behalten") 686 Konflikt-Zeilen mit Pin fest (Prod-Befund 2026-09-14).
   const decisionForbidsPosition = decision.status === 'conflict' || decision.status === 'online';
 
-  if (existing && !decisionForbidsPosition) {
+  // Ein `manual`-Label in der Zeile schützt nur, solange eine gültige
+  // Korrektur als Beleg vorliegt und zum Quellenstand passt; dann ist die
+  // Entscheidung selbst `manual`. Fehlt sie oder ist sie veraltet
+  // (Verlegung), fällt die alte Position: keine ewige Koordinatensperre
+  // (Review §7). Konnte die Korrekturtabelle nicht gelesen werden, bleibt
+  // der Bestand unverändert.
+  const manualLabelReleased =
+    existing?.geocoding_confidence === 'manual' &&
+    decision.geocoding_confidence !== 'manual' &&
+    evidence.correctionsLoaded === true;
+  if (manualLabelReleased) resolved.reasons.push('manual_label_released');
+
+  if (existing && !decisionForbidsPosition && !manualLabelReleased) {
     if (!shouldOverwriteCoords(existing, resolved.latitude, resolved.longitude, resolved.confidence)) {
       // Bestandskoordinate bleibt — die gespeicherte Entscheidung muss das
       // abbilden, sonst behauptet sie eine Position, die nicht in der Zeile
@@ -1096,7 +1112,10 @@ export async function syncEventsToSupabase(
     // Quellen-Venue-Zuordnungen) batchweise laden — nie live geocodieren.
     let evidence: LocationEvidence[] = batchEvents.map(() => ({}));
     try {
-      evidence = await loadLocationEvidence(supabase, batchEvents.map(locationInputOf));
+      evidence = await loadLocationEvidence(
+        supabase,
+        batchEvents.map(e => locationInputOf(e, existingMap.get(`${e.source_name}::${e.source_id}`)?.id)),
+      );
     } catch (e) {
       console.warn('[supabase-sync] Belege nicht ladbar, Entscheidung ohne Belege:', e instanceof Error ? e.message : e);
     }

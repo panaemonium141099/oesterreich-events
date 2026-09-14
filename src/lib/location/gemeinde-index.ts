@@ -13,7 +13,7 @@ import { ALL_GEMEINDEN, type AustrianGemeinde } from '@/lib/gemeinden/data';
 import { STADT_PLZ } from '@/lib/district-normalizer';
 import { bundeslandToId } from '@/lib/bundeslaender';
 import { getCoordinatesForPLZ } from '@/lib/plzCoordinates';
-import { isOfficialAustrianPlz } from './plz-reference';
+import { isOfficialAustrianPlz, plzReference } from './plz-reference';
 
 export interface GemeindeRef {
   name: string;
@@ -71,14 +71,49 @@ function build(): void {
   }
   // Statutarstädte: die Registry kennt pro Stadt nur EINE PLZ (8010 Graz),
   // die übrigen Stadt-PLZ (8020, 8036, …) gehören zur selben Gemeinde.
+  // Teilen sich Stadt und Umlandgemeinde eine PLZ (4040 Linz-Urfahr und
+  // Lichtenberg, 8044 Graz-Mariatrost und Weinitzen), sind BEIDE
+  // Kandidaten; ob die Stadt dazugehört, sagt die RTR-Tabelle über den
+  // Stadtbezirk. Vorher gewann die Umlandgemeinde, weil sie die PLZ als
+  // Hauptpostleitzahl führt (271 Linzer Events mit Gemeinde „Lichtenberg",
+  // Prod-Befund 2026-09-14).
   for (const [cityKey, rule] of Object.entries(STADT_PLZ)) {
-    const cityRefs = byName.get(normalizeGemeindeName(cityKey.replace(/-/g, ' ')));
-    const city = cityRefs?.find(r => r.bundesland === rule.bl);
+    const city = findCityRef(byName, cityKey, rule.bl);
     if (!city) continue;
+    const cityLetters = lettersOf(city.name.split(/\s+(?:am|an|bei|im)\s+/)[0].split(/\s+/).pop() ?? city.name);
     for (const plz of rule.stadtPLZ) {
-      if (!byPlz.has(plz)) byPlz.set(plz, [city]);
+      const list = byPlz.get(plz);
+      if (!list) {
+        byPlz.set(plz, [city]);
+        continue;
+      }
+      if (list.includes(city)) continue;
+      const ref = plzReference(plz);
+      const cityCovers = ref?.bezirke.some(b => {
+        const k = lettersOf(b);
+        return k.includes('stadt') && k.includes(cityLetters);
+      }) ?? false;
+      if (cityCovers) list.push(city);
     }
   }
+}
+
+function lettersOf(s: string): string {
+  return s.toLowerCase().replace(/ä/g, 'ae').replace(/ö/g, 'oe').replace(/ü/g, 'ue').replace(/ß/g, 'ss').replace(/[^a-z]/g, '');
+}
+
+/** Registry-Eintrag der Statutarstadt: exakter Name, sonst eindeutiger
+ *  Langname im selben Bundesland („klagenfurt" → Klagenfurt am Wörthersee). */
+function findCityRef(byName: Map<string, GemeindeRef[]>, cityKey: string, bl: string): GemeindeRef | null {
+  const key = normalizeGemeindeName(cityKey.replace(/-/g, ' '));
+  const exact = byName.get(key)?.find(r => r.bundesland === bl);
+  if (exact) return exact;
+  const longer: GemeindeRef[] = [];
+  for (const [k, refs] of byName) {
+    if (!k.startsWith(`${key} `)) continue;
+    for (const r of refs) if (r.bundesland === bl) longer.push(r);
+  }
+  return longer.length === 1 ? longer[0] : null;
 }
 
 /** Alle Gemeinden zu einer PLZ (leer, wenn unbekannt). */
