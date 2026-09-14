@@ -163,6 +163,13 @@ describe('Genauigkeit der Quellkoordinate bestimmt Status und Ausspielung', () =
     expect(d.gemeinde?.name).toBe('Innsbruck');
   });
 
+  it('Festivalgelände ohne Hausnummer mit Venue-Koordinate der Quelle: Pin und Route erlaubt', () => {
+    const d = resolve({ location_name: 'Festgelände Wiesen', city: 'Wiesen', postal_code: '7203', bundesland: 'burgenland', latitude: 47.741, longitude: 16.335, coords_precision: 'venue' });
+    expect(d.status).toBe('address_confirmed');
+    expect(d.allowed.pin).toBe(true);
+    expect(d.allowed.route).toBe(true);
+  });
+
   it('Alte Adapter ohne Genauigkeitsangabe: Position gespeichert, aber nicht bestätigt', () => {
     const d = resolve({ location_name: 'Kulturverein Röda', address: 'Gaswerkgasse 2, 4400 Steyr', latitude: 48.04, longitude: 14.42 });
     expect(d.status).toBe('unresolved');
