@@ -14,7 +14,13 @@
  *     wieder veröffentlicht.
  *  B) Zeilen OHNE Quellenstand, die die Quelle beim Voll-Abruf nicht mehr
  *     geliefert hat (`--stale-since <iso>`): sie werden als ungeklärt
- *     erfasst (`unresolved`, Grund `source_not_redelivered`). Positionen aus
+ *     erfasst (`unresolved`, Grund `source_not_redelivered`). Als „nicht
+ *     mehr geliefert" gilt ein Event nur, wenn der jüngste Abruf seiner
+ *     Quelle seit dem Stichtag vollständig erfolgreich war (source_runs
+ *     status = success, keine abgewiesenen Zeilen); Quellen mit Fehler,
+ *     Timeout, Schreibfehlern oder ohne Abruf werden übersprungen und
+ *     genannt, denn dort fehlt der Beleg, dass das Event verschwunden ist.
+ *     Positionen aus
  *     dem alten Namensabgleich (exact, normalized, verified, from_title,
  *     from_description, gemini, gemini_low, nominatim, openai)
  *     werden durch den Gemeinde-Mittelpunkt der PLZ ersetzt (falls
@@ -94,15 +100,46 @@ async function runWithRaw(sb: SupabaseClient) {
   console.log('');
 }
 
+/**
+ * Quellen, deren jüngster Abruf seit dem Stichtag vollständig erfolgreich
+ * war. Nur für diese ist „nicht neu geliefert" ein Befund über das Event
+ * und nicht über den Abruf.
+ */
+async function sourcesWithCleanRun(sb: SupabaseClient, since: string): Promise<{ ok: Set<string>; skipped: Map<string, string> }> {
+  const latest = new Map<string, { status: string; error: string | null }>();
+  for (let from = 0; ; from += 1000) {
+    const { data, error } = await sb.from('source_runs').select('source_name, run_at, status, error_message').gte('run_at', since).order('run_at', { ascending: true }).range(from, from + 999);
+    if (error) throw new Error(error.message);
+    for (const r of (data ?? []) as Array<{ source_name: string; status: string; error_message: string | null }>) latest.set(r.source_name, { status: r.status, error: r.error_message });
+    if (!data || data.length < 1000) break;
+  }
+  const ok = new Set<string>();
+  const skipped = new Map<string, string>();
+  for (const [name, r] of latest) {
+    if (r.status === 'success' && !(r.error ?? '').includes('nicht geschrieben')) ok.add(name);
+    else skipped.set(name, `${r.status}${r.error ? ': ' + r.error.slice(0, 60) : ''}`);
+  }
+  return { ok, skipped };
+}
+
 async function runStale(sb: SupabaseClient) {
+  const runs = await sourcesWithCleanRun(sb, STALE_SINCE!);
+  console.log(`[E1 stale] ${runs.ok.size} Quellen mit vollständigem Abruf seit ${STALE_SINCE}; übersprungen (${runs.skipped.size}): ${[...runs.skipped.entries()].map(([k, v]) => `${k} (${v})`).join('; ') || 'keine'}`);
+  if (SOURCE && !runs.ok.has(SOURCE)) { console.log(`[E1 stale] Quelle ${SOURCE} hat keinen vollständigen Abruf seit dem Stichtag; nichts zu tun.`); return; }
   let after: string | null = null;
-  let seen = 0, centroid = 0, dropped = 0, kept = 0, errors = 0;
+  let seen = 0, skippedRows = 0, centroid = 0, dropped = 0, kept = 0, errors = 0;
+  const skippedBySource = new Map<string, number>();
   while (seen < LIMIT) {
     const rows = await page(sb, after, 'stale');
     if (rows.length === 0) break;
     after = rows[rows.length - 1].id;
     seen += rows.length;
     for (const row of rows) {
+      if (!runs.ok.has(row.source_name)) {
+        skippedRows++;
+        skippedBySource.set(row.source_name, (skippedBySource.get(row.source_name) ?? 0) + 1);
+        continue;
+      }
       const legacy = row.latitude != null && (row.geocoding_confidence == null || LEGACY_LABELS.has(row.geocoding_confidence) || (row.geocoding_source ?? '').startsWith('master'));
       const reasons = [`source_not_redelivered_since:${STALE_SINCE}`];
       let payload: Record<string, unknown>;
@@ -137,9 +174,13 @@ async function runStale(sb: SupabaseClient) {
         if (error) { errors++; console.error(`[E1 stale] ${row.id}: ${error.message}`); }
       }
     }
-    process.stdout.write(`\r[E1 stale] ${seen} gelesen, ${centroid} auf PLZ-Mittelpunkt, ${dropped} Position entfernt, ${kept} Quellkoordinate behalten (unbestätigt), ${errors} Fehler`);
+    process.stdout.write(`\r[E1 stale] ${seen} gelesen, ${skippedRows} übersprungen (Quelle ohne vollständigen Abruf), ${centroid} auf PLZ-Mittelpunkt, ${dropped} Position entfernt, ${kept} Quellkoordinate behalten (unbestätigt), ${errors} Fehler`);
   }
   console.log('');
+  if (skippedBySource.size > 0) {
+    const top = [...skippedBySource.entries()].sort((a, b) => b[1] - a[1]).slice(0, 15).map(([k, n]) => `${k} ${n}`).join(', ');
+    console.log(`[E1 stale] Übersprungene Zeilen je Quelle (ohne vollständigen Abruf seit Stichtag): ${top}`);
+  }
 }
 
 async function main() {
