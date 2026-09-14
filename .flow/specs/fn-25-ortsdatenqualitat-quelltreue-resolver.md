@@ -140,7 +140,8 @@ standortbezogene Benachrichtigungen):
 
 ## Acceptance Criteria
 
-Stand 2026-09-14 (Phasen A–D, O1 live; E/F folgen nach dem Voll-Abruf):
+Stand 2026-09-14 abends (Phasen A–F umgesetzt, O1 live; Wiederholungslauf
+über zwei Nachtläufe 15./16.09. als Folgeprüfung, Ops §14):
 
 - [x] Regressionsfälle Review §9 als Tests: Haus der Frau, Martin-Luther-
       Kirche, Theater in der Innenstadt, Franz-Haas-Platz (conservative-
@@ -167,8 +168,12 @@ Stand 2026-09-14 (Phasen A–D, O1 live; E/F folgen nach dem Voll-Abruf):
 - [x] Integrationstest am gespeicherten Datensatz (`verify-location-
       contract.ts`): 23 Prüfungen, inkl. Trigger, Titel-/Score-Update,
       manuelle Korrektur und Verlegung.
-- [ ] Jeder öffentlich präzise Ort hat Entscheidung + erhaltenen Quellenstand
-      (nach E1 zu messen: Altbestand ohne Entscheidung → 0).
+- [x] Jeder öffentlich präzise Ort hat Entscheidung + erhaltenen Quellenstand:
+      DB-Check `events_location_precise_has_position` (validiert) verlangt
+      Position + Entscheidung für venue/address_confirmed; unter dem Schalter
+      zeigen Zeilen ohne Entscheidung keinen Pin. Rest ohne Entscheidung nach
+      E1: 9.186 (Quellen ohne sauberen Lauf am 14.09., folgen mit dem
+      nächsten Nachtlauf; siehe Ops §14).
 - [x] Unbekannt/verworfen bleibt unbekannt: Gate + Trigger-Entfernung +
       Gating-Modul (Pin/Route/Distanz/JSON-LD), Schalter für F.
 - [x] Wiederholbarkeit: Stichprobe 300/300 identisch (location-metrics),
