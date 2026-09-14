@@ -1,6 +1,7 @@
 import type { ScrapedEvent } from '@/types/events';
 import { downloadEventimFeed } from './feed-client';
 import { parseEventimFeed, type NotBookableStats } from './parse';
+import type { EventimSeries } from './types';
 
 /**
  * Shared Eventim import logic, used by both the CLI script
@@ -17,7 +18,41 @@ export async function fetchAndParseEventim(
   notBookable?: NotBookableStats,
 ): Promise<ScrapedEvent[]> {
   const series = await downloadEventimFeed();
+  console.log(feedFieldReport(series));
   return parseEventimFeed(series, nowIso, notBookable);
+}
+
+/**
+ * Feldbericht des Rohfeeds (fn-25): welche Felder liefert der Feed je
+ * Event, wie oft, und welche kennt unser Typ nicht? Dazu ein Beispiel-Event
+ * mit Platzhalter-Koordinate (Stadtmittelpunkt für viele Spielstätten) und
+ * die meistgeteilten Koordinaten. Reine Log-Ausgabe, damit der Import-Lauf
+ * belegt, was der Feed tatsächlich enthält (Typen sind nur ein Snapshot).
+ */
+export function feedFieldReport(series: EventimSeries[]): string {
+  const known = new Set(['eventId', 'eventName', 'eventDateIso8601', 'eventStatus', 'eventType', 'deliverable', 'eventCity', 'eventCountry', 'eventZip', 'eventStreet', 'eventVenue', 'eventVenueId', 'venueLatitude', 'venueLongitude', 'minPrice', 'maxPrice', 'evoLink', 'priceCategories']);
+  const counts = new Map<string, number>();
+  const shared = new Map<string, Set<string>>();
+  let events = 0;
+  let sample: Record<string, unknown> | null = null;
+  for (const s of series) {
+    for (const e of s.events ?? []) {
+      events++;
+      for (const k of Object.keys(e)) counts.set(k, (counts.get(k) ?? 0) + 1);
+      if (e.eventCountry !== 'AT' || !e.venueLatitude || !e.venueLongitude) continue;
+      const key = `${e.venueLatitude.toFixed(5)},${e.venueLongitude.toFixed(5)}`;
+      const set = shared.get(key) ?? new Set<string>();
+      set.add(e.eventVenueId);
+      shared.set(key, set);
+      if (!sample && Math.abs(e.venueLatitude - 48.209) < 0.0005 && Math.abs(e.venueLongitude - 16.37) < 0.0005) {
+        sample = { ...(e as unknown as Record<string, unknown>) };
+        delete sample.priceCategories;
+      }
+    }
+  }
+  const fields = [...counts.entries()].sort((a, b) => b[1] - a[1]).map(([k, n]) => `${k}${known.has(k) ? '' : ' (NEU)'}:${n}`).join(' ');
+  const top = [...shared.entries()].filter(([, v]) => v.size >= 3).sort((a, b) => b[1].size - a[1].size).slice(0, 6).map(([k, v]) => `${k}=${v.size} Spielstätten`).join('; ');
+  return `[eventim] Feldbericht: ${series.length} Serien, ${events} Events; Felder je Event: ${fields}; geteilte AT-Koordinaten: ${top || 'keine'}; Beispiel Platzhalter: ${sample ? JSON.stringify(sample) : 'keins'}`;
 }
 
 export interface EventimUpsertResult {
