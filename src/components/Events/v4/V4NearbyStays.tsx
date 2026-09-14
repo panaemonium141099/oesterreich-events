@@ -14,6 +14,7 @@
 
 import { buildAffiliateStayLink, deriveCityFromLocation } from '@/lib/booking/affiliate';
 import { loadNearbyStaysCached, roundCoord } from '@/lib/booking/nearby-stays-loader';
+import { locationOutputs } from '@/lib/location/gating';
 import type { Event } from '@/types/events';
 
 const KIND_LABELS: Record<string, string> = {
@@ -81,9 +82,13 @@ function futureDate(iso: string | null | undefined): string | null {
 export async function V4NearbyStays({
   event,
 }: {
-  event: Pick<Event, 'id' | 'latitude' | 'longitude' | 'start_date' | 'location_name' | 'address' | 'bundesland'>;
+  event: Pick<Event, 'id' | 'latitude' | 'longitude' | 'start_date' | 'location_name' | 'address' | 'bundesland' | 'geocoding_confidence' | 'location_status' | 'location_precision' | 'location_resolution'>;
 }) {
   if (event.latitude == null || event.longitude == null) return null;
+  // fn-25 (Review §6): Entfernungen nur zu einer belegten Position. Bei
+  // Gemeinde-Ebene bleibt die Liste (Unterkünfte im Ort), aber ohne
+  // Kilometerangabe zum Event.
+  const showDistance = locationOutputs(event).distance;
 
   const stays = await loadNearbyStaysCached(roundCoord(event.latitude), roundCoord(event.longitude));
   if (stays.length === 0) return null;
@@ -139,9 +144,11 @@ export async function V4NearbyStays({
                 </span>
                 <h3 className="text-[15px] font-semibold leading-tight line-clamp-2">{stay.name}</h3>
                 <p className="text-[12.5px] text-[var(--v4-ink-70)]">
-                  {stay.distance_km < 0.95
-                    ? `${Math.max(1, Math.round(stay.distance_km * 10)) * 100} m entfernt`
-                    : `${stay.distance_km.toFixed(1).replace('.', ',')} km entfernt`}
+                  {!showDistance
+                    ? (stay.city ? `in ${stay.city}` : 'in der Nähe')
+                    : stay.distance_km < 0.95
+                      ? `${Math.max(1, Math.round(stay.distance_km * 10)) * 100} m entfernt`
+                      : `${stay.distance_km.toFixed(1).replace('.', ',')} km entfernt`}
                 </p>
                 <span className="mt-auto pt-1 text-[12px] font-semibold text-[var(--v4-ink)] inline-flex items-center gap-1">
                   Bei Booking.com prüfen
