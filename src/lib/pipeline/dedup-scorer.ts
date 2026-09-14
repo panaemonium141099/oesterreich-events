@@ -9,6 +9,7 @@
 
 import { jaroWinkler } from '@/lib/dedup/jaro-winkler';
 import { normalizeTitle, generateFingerprint } from '@/lib/dedup/fingerprint';
+import { gemeindenByPlz } from '@/lib/location/gemeinde-index';
 import { normalizeUrl, hashUrl } from '@/lib/pipeline/normalize-url';
 import { haversineDistance } from '@/lib/pipeline/normalize-venue';
 import type { EventRow, DedupScoreBreakdown } from './types';
@@ -249,6 +250,25 @@ function checkHardRules(a: EventRow, b: EventRow): HardRuleResult {
     // Check: same source_id + source_name already handled above
     // No exception found → distinct
     return { forced: true, decision: 'distinct', reason: 'different_district' };
+  }
+
+  // Rule 5 (fn-25 E): verschiedene PLZ-Gebiete → distinct. Der Bezirk fehlt
+  // bei vielen Quellen; dann verschmolzen gleichnamige Termine („Dorffest
+  // 2026", „Martinsfest") quer durch Österreich (Prod-Befund 2026-09-14:
+  // 166 Duplikat-Paare mit unterschiedlicher PLZ-Region). Zwei Gemeinden
+  // sind auch dann verschieden, wenn ihre PLZ dieselbe erste Ziffer haben,
+  // sofern die PLZ keine gemeinsame Gemeinde teilen.
+  const plzA = (a.postal_code ?? '').trim();
+  const plzB = (b.postal_code ?? '').trim();
+  if (/^\d{4}$/.test(plzA) && /^\d{4}$/.test(plzB) && plzA !== plzB) {
+    if (plzA[0] !== plzB[0]) {
+      return { forced: true, decision: 'distinct', reason: 'different_plz_region' };
+    }
+    const gA = new Set(gemeindenByPlz(plzA).map(g => g.name + '|' + g.bundesland));
+    const gB = new Set(gemeindenByPlz(plzB).map(g => g.name + '|' + g.bundesland));
+    if (gA.size > 0 && gB.size > 0 && ![...gA].some(x => gB.has(x))) {
+      return { forced: true, decision: 'distinct', reason: 'different_gemeinde' };
+    }
   }
 
   return { forced: false };
