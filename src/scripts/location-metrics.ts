@@ -75,11 +75,13 @@ async function main() {
     metrics['Abdeckung präzise %'] = total ? Math.round((1000 * precise) / total) / 10 : 0;
     metrics['Abdeckung Gemeinde %'] = total ? Math.round((1000 * metrics['status municipality_only']) / total) / 10 : 0;
 
-    // Neue Konflikte der letzten 24 h (aus dem Protokoll)
+    // Neue Konflikte der letzten 24 h: Zeilen, deren Status in dem Fenster
+    // AUF conflict gewechselt ist (location_status_changed_at). Nicht
+    // updated_at: das fasst der Score-Lauf jede Nacht an.
     const since = new Date(Date.now() - 86400000).toISOString();
     const { count: newConflicts, error: e1 } = await sb
       .from('events').select('id', { count: 'exact', head: true })
-      .gte('start_date', new Date().toISOString()).eq('location_status', 'conflict').gte('updated_at', since);
+      .gte('start_date', new Date().toISOString()).eq('location_status', 'conflict').gte('location_status_changed_at', since);
     if (e1) errors.push(`neue Konflikte: ${e1.message}`);
     metrics['Konflikte neu (24 h)'] = newConflicts ?? 0;
 

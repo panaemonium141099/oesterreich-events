@@ -182,6 +182,7 @@ async function runStale(sb: SupabaseClient) {
         kept++;
         payload = { location_status: row.latitude != null ? 'unresolved' : (row.location_status ?? 'unresolved'), location_precision: row.latitude != null ? 'unknown' : (row.location_status ? undefined : 'unknown') };
       }
+      if (payload.location_status !== row.location_status) payload.location_status_changed_at = new Date().toISOString();
       payload.location_resolution = {
         version: 1, status: payload.location_status, precision: payload.location_precision ?? 'unknown', reasons, phase: 'E1-stale',
         allowed: { pin: false, route: false, distance: false, municipality_page: payload.location_status === 'municipality_only' },
