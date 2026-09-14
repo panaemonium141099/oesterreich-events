@@ -65,7 +65,7 @@ function haversineM(lat1: number, lng1: number, lat2: number, lng2: number): num
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
-interface VenueRow {
+export interface VenueRow {
   id: string;
   name: string;
   name_normalized: string | null;
@@ -80,6 +80,45 @@ async function inChunks<T>(values: string[], fn: (slice: string[]) => Promise<T[
   const out: T[] = [];
   for (let i = 0; i < values.length; i += CHUNK) out.push(...(await fn(values.slice(i, i + CHUNK))));
   return out;
+}
+
+export interface VenueCandidateRow {
+  row: VenueRow;
+  viaAlias: boolean;
+}
+
+/**
+ * Wählt aus namensgleichen Kandidaten den EINEN mit zweitem Beleg (Straße,
+ * Quellkoordinate ≤ 300 m, Alias) im Ortskontext (PLZ oder Ort). Mehrere
+ * belegte Kandidaten → Mehrdeutigkeit, kein Ergebnis. Genau ein Kandidat
+ * ohne zweiten Beleg wird zurückgegeben, aber mit leerem `matched_by` — der
+ * Resolver protokolliert ihn nur. Reihenfolge, Name allein oder Anzahl
+ * entscheiden nie (Review §4/§9).
+ */
+export function selectVenueCandidate(inp: LocationInput, cands: VenueCandidateRow[]): VenueCandidateEvidence | null {
+  const plz = inp.postal_code?.trim() || extractPlzFromAddress(inp.address);
+  const city = inp.city?.trim() || extractCityFromAddress(inp.address);
+  const cityKey = city ? normalizeGemeindeName(city) : null;
+  const street = streetKey(inp.address);
+  const scored: VenueCandidateEvidence[] = [];
+  for (const { row, viaAlias } of cands) {
+    if (row.latitude == null || row.longitude == null) continue;
+    const samePlz = !!plz && row.postal_code === plz;
+    const sameCity = !!cityKey && !!row.city && normalizeGemeindeName(row.city) === cityKey;
+    if (!samePlz && !sameCity) continue;
+    const matched: VenueCandidateEvidence['matched_by'] = [];
+    if (street && row.address && streetKey(row.address) === street) matched.push('street');
+    if (
+      typeof inp.latitude === 'number' && typeof inp.longitude === 'number' &&
+      haversineM(inp.latitude, inp.longitude, row.latitude, row.longitude) <= NEARBY_M
+    ) matched.push('source_coords');
+    if (viaAlias) matched.push('alias');
+    scored.push({ venue_id: row.id, name: row.name, latitude: row.latitude, longitude: row.longitude, postal_code: row.postal_code, city: row.city, matched_by: matched });
+  }
+  const withEvidence = scored.filter(c => c.matched_by.length > 0);
+  if (withEvidence.length === 1) return withEvidence[0];
+  if (withEvidence.length === 0 && scored.length === 1) return scored[0];
+  return null;
 }
 
 /**
@@ -177,37 +216,8 @@ export async function loadLocationEvidence(
         const cands = byName.get(key);
         if (!cands || cands.length === 0) continue;
         for (const i of idxs) {
-          const inp = inputs[i];
-          const plz = inp.postal_code?.trim() || extractPlzFromAddress(inp.address);
-          const city = inp.city?.trim() || extractCityFromAddress(inp.address);
-          const cityKey = city ? normalizeGemeindeName(city) : null;
-          const street = streetKey(inp.address);
-          const scored: VenueCandidateEvidence[] = [];
-          for (const { row, viaAlias } of cands) {
-            const samePlz = !!plz && row.postal_code === plz;
-            const sameCity = !!cityKey && !!row.city && normalizeGemeindeName(row.city) === cityKey;
-            if (!samePlz && !sameCity) continue;
-            const matched: VenueCandidateEvidence['matched_by'] = [];
-            if (street && row.address && streetKey(row.address) === street) matched.push('street');
-            if (
-              typeof inp.latitude === 'number' && typeof inp.longitude === 'number' &&
-              haversineM(inp.latitude, inp.longitude, row.latitude!, row.longitude!) <= NEARBY_M
-            ) matched.push('source_coords');
-            if (viaAlias) matched.push('alias');
-            scored.push({
-              venue_id: row.id,
-              name: row.name,
-              latitude: row.latitude!,
-              longitude: row.longitude!,
-              postal_code: row.postal_code,
-              city: row.city,
-              matched_by: matched,
-            });
-          }
-          const withEvidence = scored.filter(c => c.matched_by.length > 0);
-          if (withEvidence.length === 1) out[i].venueCandidate = withEvidence[0];
-          else if (withEvidence.length === 0 && scored.length === 1) out[i].venueCandidate = scored[0]; // Name+Ort, ohne zweiten Beleg → Resolver protokolliert nur
-          // mehrere belegte Kandidaten: Mehrdeutigkeit, kein Beleg
+          const pick = selectVenueCandidate(inputs[i], cands);
+          if (pick) out[i].venueCandidate = pick;
         }
       }
     } catch (e) {

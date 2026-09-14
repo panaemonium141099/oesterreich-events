@@ -435,7 +435,9 @@ export function resolveConservativeLocation(input: LocationInput, now: Date = ne
       geocoding_confidence:
         precisionClaim === 'municipality' || precisionClaim === 'postcode' ? 'gemeinde-centroid' : 'scraper',
       geocoding_source: 'scraper',
-      allowed: allowedFor(status, true, routable, !!gemeindeOut || !!plz),
+      // Ein Gelände, Treffpunkt oder Wanderstart hat keine Hausnummer; eine
+      // Venue-Koordinate der Quelle ist trotzdem ein belegter Zielpunkt.
+      allowed: allowedFor(status, true, routable || precisionClaim === 'venue', !!gemeindeOut || !!plz),
     };
   }
 

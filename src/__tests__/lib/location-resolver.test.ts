@@ -111,3 +111,37 @@ describe('Cache- und Vergleichsschlüssel', () => {
     expect(foldVenueName('Theater „Die Bühne“')).toBe('theater die buehne');
   });
 });
+
+describe('selectVenueCandidate: kein Treffer nach Reihenfolge, Name oder Anzahl (Review §9)', async () => {
+  const { selectVenueCandidate } = await import('@/lib/location/evidence');
+  const mk = (id: string, address: string | null, lat = 48.30, lng = 14.29, plz = '4020', viaAlias = false) => ({
+    row: { id, name: 'Stadtsaal', name_normalized: 'stadtsaal', address, postal_code: plz, city: 'Linz', latitude: lat, longitude: lng },
+    viaAlias,
+  });
+
+  it('zwei gleichnamige Venues in derselben PLZ ohne zweiten Beleg → kein Kandidat', () => {
+    const pick = selectVenueCandidate({ location_name: 'Stadtsaal', address: 'Am Hauptplatz', postal_code: '4020' }, [mk('a', 'Hauptplatz 1'), mk('b', 'Landstraße 5', 48.31, 14.30)]);
+    expect(pick).toBeNull();
+  });
+
+  it('die Straße im Adresstext entscheidet zwischen zwei gleichnamigen Venues', () => {
+    const pick = selectVenueCandidate({ location_name: 'Stadtsaal', address: 'Landstraße 5, 4020 Linz', postal_code: '4020' }, [mk('a', 'Hauptplatz 1'), mk('b', 'Landstraße 5', 48.31, 14.30)]);
+    expect(pick?.venue_id).toBe('b');
+    expect(pick?.matched_by).toEqual(['street']);
+  });
+
+  it('zwei belegte Kandidaten bleiben mehrdeutig', () => {
+    const pick = selectVenueCandidate({ location_name: 'Stadtsaal', address: 'Landstraße 5', postal_code: '4020', latitude: 48.30, longitude: 14.29 }, [mk('a', 'Landstraße 5'), mk('b', 'Landstraße 5', 48.3001, 14.2901)]);
+    expect(pick).toBeNull();
+  });
+
+  it('Einzelkandidat ohne Beleg wird nur protokolliert (leeres matched_by)', () => {
+    const pick = selectVenueCandidate({ location_name: 'Stadtsaal', postal_code: '4020' }, [mk('a', 'Hauptplatz 1')]);
+    expect(pick?.matched_by).toEqual([]);
+  });
+
+  it('Kandidaten außerhalb des Ortskontexts (andere PLZ, anderer Ort) zählen nicht', () => {
+    const pick = selectVenueCandidate({ location_name: 'Stadtsaal', postal_code: '4020', address: 'Hauptplatz 1' }, [mk('x', 'Hauptplatz 1', 47.0, 15.4, '8010')]);
+    expect(pick).toBeNull();
+  });
+});
