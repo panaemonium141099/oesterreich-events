@@ -168,17 +168,16 @@ export function demotePlaceholderCoords(events: ScrapedEvent[]): { events: Scrap
  * im selben Abruf für mindestens drei verschieden benannte Veranstaltungs-
  * orte liefert, ist die Adresse der Seite: sie wird verworfen und als
  * `address_rejected` markiert, damit der Schreibpfad auch eine früher
- * gespeicherte Fassung entfernt. Quellen mit EINER Spielstätte (Adapter-
- * Konfiguration, boudicca-Kollektoren, Stadthalle, Posthof …) sind
- * ausgenommen: dort teilen sich Säle eines Hauses zu Recht eine Adresse.
+ * gespeicherte Fassung entfernt. Die Regel gilt NUR für Gemeinde-Kalender:
+ * Stadtportale führen Häuser mit mehreren Institutionen an einer Adresse
+ * zu Recht (falter: MuseumsQuartier „Museumsplatz 1" für Leopold Museum,
+ * mumok, Kunsthalle, ZOOM; WUK „Währinger Straße 59"), und Quellen mit
+ * einer Spielstätte teilen Säle eines Hauses.
  */
 const SHARED_ADDRESS_MIN_VENUES = 3;
 
-function isSingleVenueSource(sourceName: string): boolean {
-  if (sourceName.startsWith(BOUDICCA_PREFIX)) return true;
-  const policy = POLICIES[sourceName];
-  return !!policy && policy.precision === 'venue';
-}
+/** Gemeinde-Kalender: viele Veranstaltungsorte je Gemeinde, Seitenadresse = Gemeindeamt. */
+const GEMEINDE_CALENDAR_SOURCES = new Set(['gemeinden-generic', 'gem2go', 'gemeinde-registry', 'gemeinden', 'gemeinde-fallback', 'gemeinden-wp-burgenland']);
 
 export interface SharedAddressGroup {
   address: string;
@@ -189,7 +188,7 @@ export interface SharedAddressGroup {
 export function dropSharedAddresses(events: ScrapedEvent[]): { events: ScrapedEvent[]; dropped: number; groups: SharedAddressGroup[] } {
   const groups = new Map<string, { address: string; stems: Set<string>; idx: number[] }>();
   events.forEach((e, i) => {
-    if (isSingleVenueSource(e.source_name)) return;
+    if (!GEMEINDE_CALENDAR_SOURCES.has(e.source_name)) return;
     const addr = e.address?.trim();
     if (!addr || !/\d/.test(addr)) return;
     const key = `${e.source_name}|${streetIdentity(addr) ?? addr.toLowerCase()}`;
