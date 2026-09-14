@@ -90,3 +90,32 @@ describe('parseEventimFeed', () => {
     expect(parseEventimFeed(s, NOW)[0].image_url).toBeUndefined();
   });
 });
+
+describe('parseEventimFeed: Platzhalter-Koordinaten des Feeds (fn-25)', () => {
+  const placeholder: EventimSeries[] = [{
+    esId: 'S2', esName: 'Wien Abende', esText: '', esPictureBig: undefined as unknown as string, esCategories: [{ category: '1A' }],
+    events: [
+      baseEvent({ eventId: 'W1', eventVenue: 'Royal Vienna Hall', eventVenueId: '385010', eventStreet: 'Mariahilfer Straße 1', eventZip: '1060', venueLatitude: 48.209, venueLongitude: 16.37 }),
+      baseEvent({ eventId: 'W2', eventVenue: 'Mirage', eventVenueId: '507152', eventStreet: 'Praterstraße 2', eventZip: '1020', venueLatitude: 48.209, venueLongitude: 16.37 }),
+      baseEvent({ eventId: 'W3', eventVenue: 'Bolena', eventVenueId: '523095', eventStreet: 'Josefstädter Straße 3', eventZip: '1080', venueLatitude: 48.209, venueLongitude: 16.37 }),
+      baseEvent({ eventId: 'M1', eventVenue: 'Musikverein Wien', eventVenueId: '201', eventStreet: 'Musikvereinsplatz 1', eventZip: '1010', venueLatitude: 48.20044, venueLongitude: 16.37068 }),
+      baseEvent({ eventId: 'M2', eventVenue: 'Musikverein Wien, Brahms-Saal', eventVenueId: '202', eventStreet: 'Musikvereinsplatz 1', eventZip: '1010', venueLatitude: 48.20044, venueLongitude: 16.37068 }),
+      baseEvent({ eventId: 'M3', eventVenue: 'Musikverein Wien, Großer Saal', eventVenueId: '203', eventStreet: 'Bösendorferstraße 12', eventZip: '1010', venueLatitude: 48.20044, venueLongitude: 16.37068 }),
+    ],
+  }];
+  const out = parseEventimFeed(placeholder, NOW);
+
+  it('Stadtmittelpunkt für drei Spielstätten in drei Straßen → municipality, Koordinate und Venue-Kennung bleiben', () => {
+    for (const id of ['W1', 'W2', 'W3']) {
+      const e = out.find(x => x.source_id === id)!;
+      expect(e.coords_precision).toBe('municipality');
+      expect(e.latitude).toBe(48.209);
+      expect(e.source_venue_id).toBeDefined();
+      expect(e.city).toBe('WIEN');
+    }
+  });
+
+  it('Säle eines Hauses (zwei Straßenschreibweisen) bleiben Venue-Koordinaten', () => {
+    for (const id of ['M1', 'M2', 'M3']) expect(out.find(x => x.source_id === id)!.coords_precision).toBe('venue');
+  });
+});

@@ -479,7 +479,12 @@ function toSupabaseRow(
   if (manualLabelReleased) resolved.reasons.push('manual_label_released');
 
   if (existing && !decisionForbidsPosition && !manualLabelReleased) {
-    if (!shouldOverwriteCoords(existing, resolved.latitude, resolved.longitude, resolved.confidence)) {
+    const samePoint =
+      existing.latitude != null && resolved.latitude != null &&
+      existing.latitude === resolved.latitude && existing.longitude === resolved.longitude;
+    // Gleiche Position: das Label folgt der Entscheidung (z. B. Feed-
+    // Platzhalter, bisher `scraper`, jetzt Gebietsangabe `gemeinde-centroid`).
+    if (!samePoint && !shouldOverwriteCoords(existing, resolved.latitude, resolved.longitude, resolved.confidence)) {
       // Bestandskoordinate bleibt — die gespeicherte Entscheidung muss das
       // abbilden, sonst behauptet sie eine Position, die nicht in der Zeile
       // steht.
@@ -489,15 +494,9 @@ function toSupabaseRow(
       finalSource = existing.geocoding_source;
       if (existing.latitude != null && existing.longitude != null) {
         const retained = retainedStatusFor(existing.geocoding_confidence);
-        if (
-          resolved.latitude == null ||
-          existing.latitude !== resolved.latitude ||
-          existing.longitude !== resolved.longitude
-        ) {
-          resolved.status = retained.status;
-          resolved.precision = retained.precision;
-          resolved.reasons.push(`legacy_coords_retained:${existing.geocoding_confidence ?? 'null'}`);
-        }
+        resolved.status = retained.status;
+        resolved.precision = retained.precision;
+        resolved.reasons.push(`legacy_coords_retained:${existing.geocoding_confidence ?? 'null'}`);
       }
     }
   }

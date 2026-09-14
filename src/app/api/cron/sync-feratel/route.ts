@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { FeratelScraper } from '@/lib/scrapers/FeratelScraper';
 import { syncEventsToSupabase } from '@/lib/db/supabase-sync';
+import { demotePlaceholderCoords } from '@/lib/scrapers/source-coords-policy';
 
 /**
  * Hourly Feratel/Deskline re-sync.
@@ -53,7 +54,13 @@ export async function GET(request: NextRequest) {
 
   try {
     const scraper = new FeratelScraper();
-    const events = await scraper.scrape();
+    // fn-25: Ortsmittelpunkte, die Deskline als Koordinate vieler
+    // Spielstätten führt, sind Gebietsangaben (kein Pin).
+    const policed = demotePlaceholderCoords(await scraper.scrape());
+    if (policed.demoted > 0) {
+      console.log(`[cron:sync-feratel] ${policed.demoted} Termine mit Platzhalter-Koordinate abgestuft (${policed.groups.length} Punkte)`);
+    }
+    const events = policed.events;
 
     if (events.length === 0) {
       const body: CronResponse = {
