@@ -210,6 +210,10 @@ export interface ScrapedEvent {
    * wird gespeichert, aber nicht als bestätigt behandelt.
    */
   coords_precision?: 'venue' | 'address' | 'municipality' | 'postcode' | 'region' | 'unknown';
+  /** fn-25: Die Quelle lieferte eine Adresse, die verworfen wurde (z. B.
+   *  Seitenadresse des Kalenders für viele verschiedene Veranstaltungsorte).
+   *  Der Schreibpfad entfernt dann auch eine früher gespeicherte Adresse. */
+  address_rejected?: 'page_boilerplate';
 }
 
 export interface EventFilters {

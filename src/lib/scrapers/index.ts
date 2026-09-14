@@ -91,7 +91,7 @@ import {
 } from './uni';
 import { closeSharedBrowser } from './puppeteerBrowser';
 import { syncEventsToSupabase } from '../db/supabase-sync';
-import { applySourceCoordsPolicy, demotePlaceholderCoords } from './source-coords-policy';
+import { applySourceCoordsPolicy, demotePlaceholderCoords, dropSharedAddresses } from './source-coords-policy';
 import { createClient } from '@supabase/supabase-js';
 import type { ScrapedEvent } from '@/types/events';
 import fs from 'fs';
@@ -516,7 +516,11 @@ export async function runScraper(scraper: BaseScraper): Promise<void> {
     if (policed.demoted > 0) {
       console.log(`[${scraper.name}] ${policed.demoted} Koordinaten als Platzhalter abgestuft (${policed.groups.map(g => `${g.key}: ${g.venues} Spielstätten/${g.streets} Straßen`).join('; ')})`);
     }
-    const events: ScrapedEvent[] = policed.events;
+    const addressed = dropSharedAddresses(policed.events);
+    if (addressed.dropped > 0) {
+      console.log(`[${scraper.name}] ${addressed.dropped} Seitenadressen verworfen (${addressed.groups.slice(0, 5).map(g => `„${g.address}" für ${g.venues} Veranstaltungsorte/${g.events} Termine`).join('; ')})`);
+    }
+    const events: ScrapedEvent[] = addressed.events;
     eventsFound = events.length;
 
     writeProgress(scraper.name, {
