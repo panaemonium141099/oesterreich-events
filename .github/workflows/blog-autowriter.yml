@@ -14,13 +14,19 @@ name: Blog Autowriter
 
 on:
   schedule:
-    # Täglich 05:23 UTC (07:23 Wien Sommerzeit) — vor dem Tagestraffic,
-    # nach dem nächtlichen Scrape-Lauf (03:17), damit frische Events
-    # als Kandidaten bereitstehen.
-    - cron: '23 5 * * *'
-    # Sonntags 06:23 UTC zusätzlich EIN Unterkunfts-Guide (fn-21,
+    # Zwei Slots pro Tag, weil `claude -p` ueber das Abo laeuft und sich das
+    # 5-Stunden-Sitzungslimit mit der interaktiven Arbeit des Betreibers
+    # teilt. GitHub feuert Cron-Jobs ausserdem gern 1-5 h verspaetet: der
+    # fruehere 05:23-Slot lief real um 09:25 bis 10:45 UTC, mitten in der
+    # Arbeitszeit, und scheiterte am Limit (Befund 2026-09-14).
+    #   02:40 UTC (04:40 Wien): Nachtruhe, Fenster ist frei. Hauptslot.
+    #   21:10 UTC (23:10 Wien): Rueckfall, falls der Morgen am Limit
+    #   scheiterte. Der Guard unten verhindert doppelte Posts an einem Tag.
+    - cron: '40 2 * * *'
+    - cron: '10 21 * * *'
+    # Sonntags 03:40 UTC zusätzlich EIN Unterkunfts-Guide (fn-21,
     # Rubrik "Übernachten", rotierende Topic-Liste im Script).
-    - cron: '23 6 * * 0'
+    - cron: '40 3 * * 0'
   workflow_dispatch:
     inputs:
       count:
@@ -65,25 +71,63 @@ jobs:
       - name: Install Claude Code CLI
         run: npm install -g @anthropic-ai/claude-code && claude --version
 
+      # Guard: hat der Bot heute schon Event-Posts committet (Morgen-Slot
+      # war erfolgreich), ist der Abend-Slot ein No-op. Nur fuer geplante
+      # Laeufe — ein manueller Start soll immer schreiben.
+      - name: Heute schon geschrieben?
+        id: today
+        if: github.event_name == 'schedule' && github.event.schedule != '40 3 * * 0'
+        run: |
+          git fetch --deepen=30 origin master >/dev/null 2>&1 || true
+          # Stay-Guides (Slug "uebernachten-…") zaehlen nicht: die laufen sonntags
+          # in einem eigenen Slot und sollen die Event-Posts nicht blockieren.
+          if git log --since="$(date -u +%F)T00:00:00Z" --author="blog-autowriter" --grep="Autowriter" --oneline | grep -v "uebernachten-" | grep -q .; then
+            echo "done=true" >> "$GITHUB_OUTPUT"
+            echo "Heute ist bereits ein Autowriter-Commit auf master — nichts zu tun."
+          else
+            echo "done=false" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Write blog posts
         id: write
-        if: github.event.schedule != '23 6 * * 0' && github.event.inputs.stayguide != 'true'
+        if: github.event.schedule != '40 3 * * 0' && github.event.inputs.stayguide != 'true' && steps.today.outputs.done != 'true'
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
           CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
-        run: npx tsx src/scripts/blog-autowriter.ts --count ${{ github.event.inputs.count || '2' }}
+        run: |
+          set +e
+          npx tsx src/scripts/blog-autowriter.ts --count ${{ github.event.inputs.count || '2' }}
+          code=$?
+          # Exit 75 = Abo-Sitzungslimit. Kein Defekt, der naechste Slot
+          # versucht es erneut — deshalb Warnung statt rotem Lauf.
+          if [ "$code" = "75" ]; then
+            echo "::warning::Abo-Sitzungslimit erreicht — der naechste Slot versucht es erneut."
+            echo "ratelimited=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          exit $code
 
       - name: Write stay guide (fn-21)
         id: staywrite
-        if: github.event.schedule == '23 6 * * 0' || github.event.inputs.stayguide == 'true'
+        if: github.event.schedule == '40 3 * * 0' || github.event.inputs.stayguide == 'true'
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
           CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
-        run: npx tsx src/scripts/blog-autowriter.ts --stay-guide
+        run: |
+          set +e
+          npx tsx src/scripts/blog-autowriter.ts --stay-guide
+          code=$?
+          if [ "$code" = "75" ]; then
+            echo "::warning::Abo-Sitzungslimit erreicht — Unterkunfts-Guide faellt diese Woche aus."
+            echo "ratelimited=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          exit $code
 
       - name: Commit & push
+        if: steps.today.outputs.done != 'true' && steps.write.outputs.ratelimited != 'true' && steps.staywrite.outputs.ratelimited != 'true'
         run: |
           git config user.name "blog-autowriter[bot]"
           git config user.email "noreply@lasstreffen.at"
@@ -98,6 +142,7 @@ jobs:
       # Pushes aus Workflows loesen keine push-Trigger aus (GitHub-Schutz
       # gegen Rekursion) — ohne diesen Schritt kaeme der neue Post nie live.
       - name: Deploy anstossen
+        if: steps.today.outputs.done != 'true' && steps.write.outputs.ratelimited != 'true' && steps.staywrite.outputs.ratelimited != 'true'
         env:
           GH_TOKEN: ${{ github.token }}
         run: gh workflow run deploy.yml --ref master

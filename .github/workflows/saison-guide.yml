@@ -18,7 +18,13 @@ name: saison-guide
 
 on:
   schedule:
-    - cron: '40 5 * * *'   # taeglich 05:40 UTC, nach dem naechtlichen Scrape (03:17)
+    # Zwei Slots wie beim Autowriter: `claude -p` laeuft ueber das Abo und
+    # teilt sich das 5-h-Sitzungslimit mit der interaktiven Arbeit; GitHub
+    # verzoegert Cron-Jobs zudem um Stunden. Nachts ist das Fenster frei,
+    # der Abend-Slot ist der Rueckfall. Das Script ist idempotent (Exit 78,
+    # wenn die faellige Seite schon existiert), darum kein Guard noetig.
+    - cron: '55 2 * * *'
+    - cron: '25 21 * * *'
   workflow_dispatch:
     inputs:
       slug:
@@ -83,6 +89,12 @@ jobs:
           # Exit 78 = keine Frist faellig. Das ist der Normalfall an den
           # meisten Tagen und darf den Job nicht rot faerben.
           if [ "$code" = "78" ]; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          # Exit 75 = Abo-Sitzungslimit, der naechste Slot versucht es erneut.
+          if [ "$code" = "75" ]; then
+            echo "::warning::Abo-Sitzungslimit erreicht — der naechste Slot versucht es erneut."
             echo "skip=true" >> "$GITHUB_OUTPUT"
             exit 0
           fi
