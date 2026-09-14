@@ -23,6 +23,7 @@ import {
   ArrowLeft,
   Menu,
   X,
+  MapPin,
 } from 'lucide-react';
 
 const NAV_ITEMS = [
@@ -34,6 +35,8 @@ const NAV_ITEMS = [
   { label: 'Enrichments', icon: Sparkles, href: '/admin/enrichments' },
   { label: 'Source Trust', icon: Shield, href: '/admin/source-trust' },
   { label: 'Quality Stats', icon: BarChart3, href: '/admin/quality-stats' },
+  // fn-25: Prüfansicht für ungeklärte/widersprüchliche Veranstaltungsorte
+  { label: 'Ortsdaten', icon: MapPin, href: '/admin/ortsdaten' },
   { label: 'Sources', icon: Database, href: '/admin/sources' },
   { label: 'Events', icon: Calendar, href: '/admin/events' },
   { label: 'Users', icon: Users, href: '/admin/users' },

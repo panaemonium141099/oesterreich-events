@@ -251,6 +251,12 @@ async function main() {
     }
 
     // Report generation (always runs, no dependencies)
+    // fn-25 O1: Kennzahlen zur Ortsqualität (Abdeckung, Konflikte, Drift,
+    // Wiederholbarkeit) mit Alarmgrenzen → workflow_runs 'location-audit'.
+    steps.location_metrics = await runStep('location_metrics', async () => {
+      execStep('Location metrics', `npx tsx ${envFlag}src/scripts/location-metrics.ts`);
+    }, steps);
+
     steps.report = await runStep('report', async () => {
       execStep('Generate scrape report', `npx tsx ${envFlag}src/scripts/generate-scrape-report.ts`);
     }, steps);
