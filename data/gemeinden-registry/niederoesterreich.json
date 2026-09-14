@@ -8011,7 +8011,7 @@
   },
   {
     "name": "Ottenschlag",
-    "website": "https://www.ottenschlag.at",
+    "website": "https://www.ottenschlag.com",
     "eventUrl": "https://www.ottenschlag.com/aktuelles/",
     "cms": "wordpress",
     "strategy": "generic-dates",
@@ -8021,7 +8021,7 @@
     "lat": 48.42458,
     "lng": 15.220136,
     "status": "active",
-    "notes": "WordPress site. Waldviertler Kammerbühne as theater venue.",
+    "notes": "2026-09-14: website war ottenschlag.at (Ottenschlag im Mühlkreis, 4204, GEM2GO); 46 Events liefen unter NÖ-Kontext. Korrigiert auf ottenschlag.com.",
     "verifiedAt": "2026-04-02"
   },
   {

@@ -1261,17 +1261,17 @@
   },
   {
     "name": "Micheldorf",
-    "website": "https://www.micheldorf.at",
-    "eventUrl": "https://www.micheldorf.at/system/web/veranstaltung.aspx?sprache=1",
-    "cms": "gem2go",
-    "strategy": "gem2go",
+    "website": "",
+    "eventUrl": null,
+    "cms": "unknown",
+    "strategy": "none",
     "plz": "9322",
     "bezirk": "St. Veit an der Glan",
     "bundesland": "Kärnten",
     "lat": 46.8361,
     "lng": 14.3902,
-    "status": "active",
-    "notes": "Gem2Go CMS. 70 date patterns found. Body 207999 bytes.",
+    "status": "wrong-website",
+    "notes": "2026-09-14: micheldorf.at ist Micheldorf in Oberösterreich (4563); 61 Events liefen unter Kärnten-Kontext. Website der Kärntner Gemeinde nicht belegt, daher nicht scrapen.",
     "verifiedAt": "2026-04-02"
   },
   {
