@@ -371,8 +371,13 @@ const ADDRESS_REGEX =
 const RURAL_ADDRESS_REGEX =
   /\b([A-ZÄÖÜ][A-Za-zäöüß\-]{2,40})\s+(\d{1,4}[a-zA-Z]?(?:\/\d+[a-zA-Z]?)?)(?=[,\s\n])/u;
 
+// Wortgrenzen sind Pflicht: ohne sie traf „Wo" in „two" und „Ort" in
+// „Export"/„Sport" mitten im Fließtext, und aus einer Künstlerbiografie wurde
+// der Veranstaltungsort „EPs under AWAL" (innsbruck-clubs/p.m.k, Prod
+// 2026-09-14). Die kurzen Labels „Wo"/„Ort" zählen nur mit Doppelpunkt oder
+// Strich, damit ein „wo" im Satz keine Adresse einleitet.
 const LABELED_ADDRESS_REGEX =
-  /(?:Adresse|Anschrift|Wo|Treffpunkt|Veranstaltungsort|Ort)\s*[:\-]?\s+([^\n;]{4,160})/iu;
+  /(?:\b(?:Adresse|Anschrift|Treffpunkt|Veranstaltungsort)\b\s*[:\-]?\s+|\b(?:Wo|Ort)\s*[:\-]\s*)([^\n;]{4,160})/iu;
 
 const LABELED_PRICE_REGEX =
   /(?:Eintritt|Kosten|Preis|Gebühr|Teilnahmegebühr|Kursgebühr|Kosten?beitrag|Tickets?)\s*[:\-]\s*((?:€\s*)?\d+(?:[.,]\d{1,2})?(?:\s*€)?(?:\s*[-–]\s*\d+(?:[.,]\d{1,2})?\s*€?)?|frei|kostenlos|gratis|kostenfrei|Spende[^\n;]*)/iu;
