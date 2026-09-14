@@ -1,3 +1,4 @@
+import PLZ_BUNDESLAND from '../../data/plz-bundesland.json';
 /**
  * PLZ → Koordinaten Mapping für ganz Österreich.
  * Jede PLZ wird dem Zentrum der zugehörigen Stadt/Gemeinde zugeordnet.
@@ -308,10 +309,19 @@ export function getCoordinatesForPLZ(plz: string): [number, number] | null {
 }
 
 /**
- * Get Bundesland from PLZ prefix.
+ * Bundesland zu einer PLZ: zuerst die amtliche RTR-Tabelle
+ * (`data/plz-bundesland.json`, 2.234 PLZ), erst für unbekannte PLZ die
+ * Präfixregel. Die Präfixregel allein lag für 99 PLZ falsch: Osttirol
+ * (99xx ist Tirol, nicht Kärnten), Innviertel (51xx–53xx ist
+ * Oberösterreich, nicht Salzburg), St. Valentin/Ennsdorf (43xx/44xx ist
+ * Niederösterreich), Kittsee/Nickelsdorf (24xx ist Burgenland),
+ * Jennersdorf (838x ist Burgenland). Mit dem falschen Label verwarf der
+ * Freigabevertrag richtige Koordinaten (Prod 2026-09-14, 1.624 Events).
  */
 export function getBundeslandFromPLZ(plz: string): string | null {
   if (!plz) return null;
+  const official = (PLZ_BUNDESLAND as Record<string, string>)[plz.trim().slice(0, 4)];
+  if (official) return official;
   const first = parseInt(plz.charAt(0));
   const firstTwo = parseInt(plz.slice(0, 2));
 
