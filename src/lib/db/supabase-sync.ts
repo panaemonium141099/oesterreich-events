@@ -38,6 +38,7 @@ import {
 import type { LocationInput } from '@/lib/location/conservative-resolution';
 import { resolveEventLocation, type LocationEvidence, type ResolvedLocation } from '@/lib/location/resolver';
 import { loadLocationEvidence } from '@/lib/location/evidence';
+import { applyAdmissionToPosition } from '@/lib/location/contract';
 import type { LocationDecision, LocationStatus } from '@/lib/location/types';
 import {
   closeScrapeRun,
@@ -712,38 +713,21 @@ function toSupabaseRow(
   // Ortsstatus nach dem Freigabevertrag: eine verworfene Koordinate oder
   // ein Orts-Widerspruch macht aus der Entscheidung einen Konflikt bzw.
   // einen ungeklärten Ort. Das Protokoll trägt die Gründe des Vertrags mit.
-  let finalStatus: LocationStatus = resolved.status;
-  let finalPrecision = resolved.precision;
-  if (admission.corrections.includes('drop_coordinates')) {
-    finalStatus = 'conflict';
-    finalPrecision = 'unknown';
-    resolved.reasons.push('admission:drop_coordinates');
-  }
-  if (admission.decision === 'quarantine') {
-    for (const r of admission.reasons) resolved.reasons.push(`admission:${r}`);
-    if (admission.reasons.includes('region_contradicts_coords') || admission.reasons.includes('foreign_place_signal')) {
-      finalStatus = 'conflict';
-      finalPrecision = 'unknown';
-    } else if (finalStatus !== 'conflict' && finalStatus !== 'online') {
-      finalStatus = 'unresolved';
-      finalPrecision = 'unknown';
-    }
-  }
-  // Ein Konflikt hat KEINE Position (Review §7, DB-Check
-  // events_location_conflict_no_position). Der Vertrag stellt bei
-  // `region_contradicts_coords`/`foreign_place_signal` nur in Quarantäne und
-  // lässt die Koordinate stehen; hier wird sie ausdrücklich entfernt und im
-  // Protokoll als verworfen festgehalten. Ohne das scheiterte der ganze
-  // Upsert-Batch am Check (Feratel 1.400, meinbezirk 400 Zeilen, 2026-09-14).
-  let revoked: { latitude: number; longitude: number; geocoding_confidence: string | null } | null = null;
-  if (finalStatus === 'conflict' && finalLat != null && finalLng != null) {
-    revoked = { latitude: finalLat, longitude: finalLng, geocoding_confidence: finalConfidence };
-    resolved.reasons.push('conflict_position_revoked');
-    finalLat = null;
-    finalLng = null;
-    finalConfidence = null;
-    finalSource = null;
-  }
+  // Dieselbe Abbildung wie in der erneuten Entscheidung im Bestand
+  // (`applyAdmissionToPosition`): ein Konflikt hat keine Position, die
+  // verworfene wird protokolliert (DB-Check events_location_conflict_no_position).
+  const contracted = applyAdmissionToPosition(
+    { status: resolved.status, precision: resolved.precision, latitude: finalLat, longitude: finalLng, geocoding_confidence: finalConfidence, geocoding_source: finalSource },
+    admission,
+  );
+  const finalStatus: LocationStatus = contracted.status;
+  const finalPrecision = contracted.precision;
+  finalLat = contracted.latitude;
+  finalLng = contracted.longitude;
+  finalConfidence = contracted.geocoding_confidence as string | null;
+  finalSource = contracted.geocoding_source;
+  resolved.reasons.push(...contracted.reasons);
+  const revoked = contracted.revoked;
   const hasFinalCoords = finalLat != null && finalLng != null;
   const preciseStatus = finalStatus === 'venue_confirmed' || finalStatus === 'address_confirmed';
   const finalAllowed = {

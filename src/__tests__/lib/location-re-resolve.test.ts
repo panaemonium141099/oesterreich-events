@@ -6,7 +6,7 @@
  */
 import { describe, it, expect } from 'vitest';
 import type { SupabaseClient } from '@supabase/supabase-js';
-import { inputFromStoredRow, reResolveStoredEvents, type StoredEventLocationRow } from '@/lib/location/re-resolve';
+import { inputFromStoredRow, reResolveStoredEvents, contractedDecision, type StoredEventLocationRow } from '@/lib/location/re-resolve';
 import { resolveEventLocation } from '@/lib/location/resolver';
 
 interface DbEvent { id: string; updated_at: string | null }
@@ -139,5 +139,26 @@ describe('reResolveStoredEvents: Schutz vor Überrollen', () => {
     expect(inputFromStoredRow(legacy).latitude).toBeNull();
     expect(inputFromStoredRow({ ...legacy, geocoding_confidence: 'scraper' }).coords_precision).toBe('unknown');
     expect(inputFromStoredRow({ ...legacy, geocoding_confidence: 'scraper' }).latitude).toBe(47.41);
+  });
+});
+
+describe('contractedDecision: Freigabevertrag gilt auch im Bestand (Galtür-Befund)', () => {
+  it('Koordinate widerspricht dem deklarierten Bundesland, PLZ stützt das Bundesland → Konflikt ohne Position, verworfen protokolliert', () => {
+    // Deklariert Tirol (Galtür, PLZ 6563), Koordinate liegt in Vorarlberg (Bielerhöhe).
+    const row: StoredEventLocationRow = { ...baseRow(), bundesland: 'tirol', address: null, address_raw: null, postal_code: '6563', postal_code_raw: '6563', city_raw: 'Galtür', location_name_raw: 'Silvretta Bielerhöhe', latitude_raw: 46.9186, longitude_raw: 10.0968, coords_precision_raw: 'venue' };
+    const pure = resolveEventLocation(inputFromStoredRow(row));
+    expect(pure.status).toBe('address_confirmed');
+    const d = contractedDecision(row, pure);
+    expect(d.status).toBe('conflict');
+    expect(d.latitude).toBeNull();
+    expect(d.reasons).toContain('admission:drop_coordinates');
+    expect((d as unknown as { revoked?: { latitude: number } }).revoked?.latitude).toBe(46.9186);
+    expect(d.allowed.pin).toBe(false);
+  });
+
+  it('stimmige Zeile bleibt unverändert (Referenzgleichheit)', () => {
+    const row = baseRow();
+    const pure = resolveEventLocation(inputFromStoredRow(row));
+    expect(contractedDecision(row, pure)).toBe(pure);
   });
 });
