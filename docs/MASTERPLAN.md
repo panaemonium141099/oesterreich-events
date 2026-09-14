@@ -236,7 +236,24 @@ Mitbewerber ging — 231 Aufrufe in 50 Tagen.
 oeticket.com-Deeplink im einzigen Write-Pfad auf J70 um (7 Vitest-Fälle);
 Bestand per Backfill bereinigt, Kontrollabfrage zeigt nur noch J70.
 
-### 3.9 Falsche Veranstaltungsorte durch den Location-Normalizer — offen (Analyse 2026-09-13)
+### 3.9 Falsche Veranstaltungsorte durch den Location-Normalizer — saniert (fn-25, 2026-09-14)
+
+**Stand 2026-09-14:** Epic fn-25 umgesetzt (PRs #196–#216). Namensabgleich,
+Nachtlauf-Normalisierung und Master-Coords-Trigger sind abgeschaltet; jeder
+Schreibpfad läuft über den Resolver mit Belegen und den Freigabevertrag,
+Rohwerte liegen in `raw_events` und `*_raw`-Spalten. Bestand bereinigt
+(Backfill, Un-Merge von 149 Paaren, nicht mehr gelieferte Events als
+ungeklärt erfasst), DB-Checks validiert, Ausspielung gestuft
+(`NEXT_PUBLIC_LOCATION_GATING=1`: Pin, Anreise, Distanz und JSON-LD-`geo`
+nur mit Beleg; Gemeinde-Ebene als Sammelmarker). Kennzahlen: 38,6 % der
+künftigen Events präzise belegt, 34,3 % Gemeinde-Ebene, 2.198 Konflikte
+zurückgehalten, 9.186 ohne Entscheidung bis zum nächsten sauberen Nachtlauf.
+Nebenbefunde des Tages (Feed-Platzhalter, Deskline-Ländernamen, geteilte
+Stadt-PLZ, Detailseiten-Heuristik) sind behoben. Betrieb und Werkzeuge:
+[docs/ops/ortsdaten-prod-stand-2026-09-13.md](ops/ortsdaten-prod-stand-2026-09-13.md)
+§13/§14, Prüfansicht `/admin/ortsdaten`.
+
+*Ursprüngliche Analyse (2026-09-13):*
 
 Der GeoNames-Normalizer ersetzt Veranstaltungsorte durch gleichnamige Dörfer
 ("Haus der Frau" → "Haus im Ennstal", "Martin-Luther-Kirche" → "Hirschegg",

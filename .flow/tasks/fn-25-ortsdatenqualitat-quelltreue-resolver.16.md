@@ -7,8 +7,7 @@ TBD
 - [ ] TBD
 
 ## Done summary
-TBD
-
+D1 Vergleichslauf zweimal ausgeführt (vor dem Voll-Abruf `d1-202609140554`, danach `d1-202609140818` über 83.851 Events) in `public.location_compare_runs`, Reports in Ops-Doku §11/§14. Ergebnis: Eventim 204 Positionen auf Gemeinde-Mittelpunkte, Feratel/meinbezirk überwiegend Statuswechsel, keine unerklärten Verschiebungen. Keine öffentliche Änderung durch den Vergleichslauf.
 ## Evidence
 - Commits:
 - Tests:

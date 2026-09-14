@@ -270,3 +270,84 @@ Martin/Lindgraben).
 ungefähre Positionen nur als Sammelmarker, Listen/Umkreis ohne Kilometer
 für unbelegte Positionen, JSON-LD ohne `geo`. Rückweg: Variable entfernen
 und erneut deployen.
+
+## 14. Phase E1/F1: Bestand bereinigt, Ausspielung gestuft (2026-09-14)
+
+**Reihenfolge und Läufe (alle UTC):**
+1. Voll-Abruf 34811161143 (05:51–11:07; parallel der verspätete Nachtlauf
+   34813194843, 06:22–11:07). 273 Läufe erfolgreich, Fehler: eventfinder
+   (403), basilika-mariazell (fetch), eventfrog/events.at (Timeout).
+2. Zweiter Vergleichslauf `d1-202609140818` (83.851 Events) vor jeder
+   Änderung: Eventim 204 Positionen verschoben (0,4–1,3 km, Gemeinde-
+   Mittelpunkte), gemeinden 588, Feratel 1.830 und meinbezirk 1.762 nur
+   Statuswechsel (unresolved → region_only/municipality_only).
+3. Un-Merge: 7.115 Duplikat-Paare geprüft, 149 Paare mit anderer PLZ-Region
+   getrennt (`event_dedup_log.decided_by = fn-25-E-unmerge`, wieder
+   `published`), 363 gleiche Region/andere Gemeinde nur gemeldet.
+4. Backfill `--with-raw`: Lauf 1 (08:20) 44.624 Zeilen mit Quellenstand,
+   22.318 geschrieben, 121 wieder veröffentlicht; Lauf 2 (11:12, nach den
+   Gemeinde-Shards) 68.196 Zeilen, 33.256 geschrieben, 38 parallel
+   übersprungen, 0 Fehler; Lauf 3 (12:25, mit Freigabevertrag im Backfill,
+   #216) 68.095 Zeilen, 3.447 geschrieben, 89 neu zurückgehalten.
+5. Stale `--stale-since 2026-09-14T05:50:00Z` (12:05): 16.602 Zeilen ohne
+   Quellenstand, 78 Quellen mit vollständigem Abruf; 6.607 bearbeitet
+   (2.810 auf PLZ-Mittelpunkt, 381 Position entfernt, 3.416 Quellkoordinate
+   als unbestätigt), 9.995 übersprungen, weil die Quelle keinen sauberen
+   Lauf hatte (gemeinden-generic 4.486, gemeinde-registry 2.804 durch
+   Batch-Fehler des alten Codes, oeticket 530, eventfinder 380,
+   boudicca-Sammel-Sync, eventfrog/events.at).
+6. DB-Checks validiert: `events_location_conflict_no_position`,
+   `events_location_precise_has_position`, `events_location_status_check`,
+   `events_location_precision_check` (alle `convalidated`).
+7. F1: `NEXT_PUBLIC_LOCATION_GATING=1` in `/opt/app/.env.master`
+   (Sicherung `.env.master.bak-202609141202`), Deploy 34841237458 (12:04),
+   MV `event_map_points` + Payload neu gebaut: 67.378 Punkte, 37.180
+   ungefähr (Flag 16), 30.198 präzise.
+
+**Kennzahlen (künftige Events, 12:20 UTC):** venue_confirmed 13.318,
+address_confirmed 19.348 (präzise 38,6 %), municipality_only 29.070
+(34,3 %), region_only 4.277, unresolved 7.181, conflict 2.198, online 111,
+ohne Entscheidung 9.186 (nur Quellen ohne sauberen Lauf; der nächste
+Nachtlauf mit dem Code ab #210 liefert sie). Vorher (13.09.): 82.405
+Events mit Pin, davon 63.940 aus dem Namensabgleich ohne Beleg.
+Wiederholbarkeit Stichprobe 300: 1 Abweichung (Galtür, Vertrag nur im Sync;
+seit #216 behoben).
+
+**Stichprobe gegen Belege (Reverse-Lookup, 40 + 40):** venue_confirmed 38/40
+PLZ passend (1 × Eventim-Punkt Schwertberg/Fraundorf, 1 × Nachbar-PLZ Linz),
+address_confirmed 37/40 (2 × Feratel mit Alt-PLZ aus dem Normalizer, die der
+12:15-Cron bereits ersetzt hat, 1 × Nachbar-PLZ Linz).
+
+**Befunde des Tages, alle behoben:** Feed-Platzhalter (#207/#208), Konflikt
+mit Position ließ ganze Upsert-Batches am DB-Check scheitern (#210: Feratel
+1.400 + 1.600, meinbezirk 400, Gemeinde-Shards 1.400 Zeilen; Feratel-Cron
+08:15 wieder 0 Fehler), Deskline-Ländernamen (#212: 9.432 Events fehlten in
+`/api/events`, Resolver ohne Gemeinde-Logik, Hash Sync ≠ Backfill),
+Detailseiten-Heuristik ersetzte konfigurierte Veranstaltungsorte (#209),
+geteilte Stadt-PLZ (#206), Unterkünfte-Box mit Kilometern zur Gemeinde-
+Mitte (#214), Kennzahl „neue Konflikte" über updated_at (#215), Vertrag
+nur im Sync (#216).
+
+**Sichtprüfung nach F1:** Karte zeigt ungefähre Positionen als eigene
+Sammelmarker („763 Veranstaltungen · Genauer Veranstaltungsort noch nicht
+bestätigt."), Event-Detail einer Gemeinde-Ebene-Zeile „Ortsangabe ungefähr"
+ohne Anreise, JSON-LD ohne `geo` (Atzenbrugg) bzw. mit `geo`
+(Belvedere, venue_confirmed), Entdecken-Liste ohne Konsolenfehler.
+
+**Offen / Folgeprüfung:**
+- Wiederholungslauf: zwei Nachtläufe ohne unerklärte Ortsänderungen
+  (`workflow_runs.location-audit` 15./16.09.: Wiederholbarkeit 100 %,
+  „Konflikte neu" nahe 0). Heute nicht beweisbar, weil der Code den Tag
+  über geändert wurde.
+- 9.186 Zeilen ohne Entscheidung (Quellen ohne sauberen Lauf): nach dem
+  Nachtlauf 15.09. erneut `--with-raw`, dann `--stale-since
+  2026-09-15T03:00:00Z` für die dann sauberen Quellen.
+- Feratel: 4.249 von 10.405 Zeilen mit Gemeinde; Ortsangaben mit
+  Abkürzungen („St. Peter a. Ottersbach") treffen die Registry nicht.
+- Legacy-PLZ ohne Beleg bleibt in der Zeile, wenn die Quelle keine PLZ und
+  keine erkennbare Gemeinde liefert (Omit-Regel im Sync); in gemischten
+  Batches wird sie faktisch NULL.
+- Lineup-Schritt: 792 abgeleitete Festival-Events scheitern nächtlich am
+  `events_bundesland_check` (vorbestehend, separater Auftrag).
+- Rückweg F1: Variable aus `.env.master` entfernen, `gh workflow run
+  deploy.yml`; Daten bleiben unverändert.
