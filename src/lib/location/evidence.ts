@@ -26,6 +26,9 @@ import type { LocationPrecision } from './types';
 
 const CHUNK = 200;
 const NEARBY_M = 300;
+/** Toleranz für Uhrenabweichung zwischen DB (`valid_from default now()`) und
+ *  Aufrufer: eine soeben gespeicherte Bestätigung gilt sofort. */
+const CLOCK_SKEW_MS = 10 * 60 * 1000;
 
 /** Venue-Namen für den Vergleich: klein, Leerraum gefaltet, Diakritika weg. */
 export function foldVenueName(name: string): string {
@@ -152,9 +155,10 @@ export async function loadLocationEvidence(
         return (data ?? []) as Array<{ source_venue_id: string; venue_id: string | null; latitude: number; longitude: number; precision: string; confirmed_by: string; valid_from: string | null; valid_to: string | null }>;
       });
       const nowIso = new Date().toISOString();
+      const notBefore = new Date(Date.now() + CLOCK_SKEW_MS).toISOString();
       const byId = new Map<string, SourceVenueMapEvidence>();
       for (const r of rows) {
-        if (r.valid_from && r.valid_from > nowIso) continue;
+        if (r.valid_from && r.valid_from > notBefore) continue;
         if (r.valid_to && r.valid_to < nowIso) continue;
         byId.set(r.source_venue_id, {
           venue_id: r.venue_id,
@@ -321,9 +325,10 @@ const PRECISIONS = new Set<LocationPrecision>(['entrance', 'building', 'site', '
  */
 export function pickCorrections(rows: CorrectionRow[], now: Date): Map<string, CorrectionEvidence> {
   const nowIso = now.toISOString();
+  const notBefore = new Date(now.getTime() + CLOCK_SKEW_MS).toISOString();
   const best = new Map<string, { row: CorrectionRow; ev: CorrectionEvidence }>();
   for (const r of rows) {
-    if (r.valid_from && r.valid_from > nowIso) continue;
+    if (r.valid_from && r.valid_from > notBefore) continue;
     if (r.valid_to && r.valid_to <= nowIso) continue;
     const after = r.after ?? {};
     const lat = typeof after.latitude === 'number' ? after.latitude : null;
