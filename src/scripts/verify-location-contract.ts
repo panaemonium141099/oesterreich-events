@@ -162,7 +162,24 @@ async function main() {
     await syncEventsToSupabase([fSource]);
     f = await read('venue-map');
     check('F: Sync wendet die Namenszuordnung an (venue_confirmed, Pin + Route)', f.location_status === 'venue_confirmed' && f.latitude === 47.8457 && f.location_resolution?.allowed?.route === true, f);
+
+    // Fall G: verworfene Seitenadresse. Erst kam eine Adresse (geocodiert →
+    // address_confirmed), dann erkennt der Abruf sie als Seitenadresse: die
+    // gespeicherte Adresse und die daraus geocodierte Position fallen weg.
+    const gSource: ScrapedEvent = { source_name: SRC, source_id: 'shared-address', source_url: 'https://example.invalid/g', title: 'fn25 Vertrag Seitenadresse',
+      start_date: start, location_name: 'Schloss Musterhof', address: 'Hauptplatz 1', postal_code: '7000', city: 'Eisenstadt', bundesland: 'burgenland', country: 'AT' };
+    const { error: cacheErr } = await sb.from('geocode_cache').upsert({ query: 'addr:v1:hauptplatz 1|7000|eisenstadt', latitude: 47.8455, longitude: 16.5251, status: 'ok', precision: 'building', provider: 'fn25-contract-check', cached_at: new Date().toISOString() }, { onConflict: 'query' });
+    check('G: Geocode-Cache-Eintrag gesetzt', !cacheErr, cacheErr?.message);
+    await syncEventsToSupabase([gSource]);
+    let g = await read('shared-address');
+    check('G: Adresse geocodiert → address_confirmed', g.location_status === 'address_confirmed' && g.latitude === 47.8455, g);
+    await syncEventsToSupabase([{ ...gSource, address: undefined, address_rejected: 'page_boilerplate' }]);
+    g = await read('shared-address');
+    const gRow = await sb.from('events').select('address').eq('id', g.id).single();
+    check('G: verworfene Seitenadresse entfernt Adresse und geocodierte Position (Gemeinde-Ebene)',
+      g.location_status === 'municipality_only' && g.latitude !== 47.8455 && gRow.data?.address === null, { ...g, address: gRow.data?.address });
   } finally {
+    await sb.from('geocode_cache').delete().eq('provider', 'fn25-contract-check');
     await sb.from('source_venue_map').delete().eq('confirmed_by', 'fn25-contract-check');
     await sb.from('event_location_corrections').delete().eq('corrected_by', 'fn25-contract-check');
     const { data: del } = await sb.from('events').delete().eq('source_name', SRC).select('id');

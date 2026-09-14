@@ -154,3 +154,65 @@ export function demotePlaceholderCoords(events: ScrapedEvent[]): { events: Scrap
     groups: hits.sort((a, b) => b.events - a.events),
   };
 }
+
+/**
+ * Seitenadresse statt Veranstaltungsadresse (fn-25, Review §9
+ * „Veranstalteradresse im Footer einer Eventseite").
+ *
+ * Gemeinde-Kalender und Portale tragen auf jeder Eventseite die Adresse
+ * des Gemeindeamts bzw. Betreibers (Hauptplatz 1, Marktplatz 1 …); der
+ * Adress-Scan der Detailseite nahm sie als Veranstaltungsadresse, und der
+ * Geocoder setzte den Pin für „Schloss Puchenau" oder „Alpentherme
+ * Ehrenberg" aufs Gemeindeamt (Prod 2026-09-14: 137 Adressen, 3.383
+ * Termine, 3.027 davon mit präzisem Pin). Eine Adresse, die eine Quelle
+ * im selben Abruf für mindestens drei verschieden benannte Veranstaltungs-
+ * orte liefert, ist die Adresse der Seite: sie wird verworfen und als
+ * `address_rejected` markiert, damit der Schreibpfad auch eine früher
+ * gespeicherte Fassung entfernt. Quellen mit EINER Spielstätte (Adapter-
+ * Konfiguration, boudicca-Kollektoren, Stadthalle, Posthof …) sind
+ * ausgenommen: dort teilen sich Säle eines Hauses zu Recht eine Adresse.
+ */
+const SHARED_ADDRESS_MIN_VENUES = 3;
+
+function isSingleVenueSource(sourceName: string): boolean {
+  if (sourceName.startsWith(BOUDICCA_PREFIX)) return true;
+  const policy = POLICIES[sourceName];
+  return !!policy && policy.precision === 'venue';
+}
+
+export interface SharedAddressGroup {
+  address: string;
+  venues: number;
+  events: number;
+}
+
+export function dropSharedAddresses(events: ScrapedEvent[]): { events: ScrapedEvent[]; dropped: number; groups: SharedAddressGroup[] } {
+  const groups = new Map<string, { address: string; stems: Set<string>; idx: number[] }>();
+  events.forEach((e, i) => {
+    if (isSingleVenueSource(e.source_name)) return;
+    const addr = e.address?.trim();
+    if (!addr || !/\d/.test(addr)) return;
+    const key = `${e.source_name}|${streetIdentity(addr) ?? addr.toLowerCase()}`;
+    const g = groups.get(key) ?? { address: addr, stems: new Set<string>(), idx: [] };
+    // Haus-Stamm = erstes Wort des Namens: „Stadtsaal Großer Saal" und
+    // „Stadtsaal Foyer" sind ein Haus, „Altes Rathaus", „Pfarrkirche" und
+    // „Festhalle" sind drei.
+    const stem = nameStem(e.location_name)?.split(' ')[0] ?? null;
+    if (stem) g.stems.add(stem);
+    g.idx.push(i);
+    groups.set(key, g);
+  });
+  const hits: SharedAddressGroup[] = [];
+  const drop = new Set<number>();
+  for (const g of groups.values()) {
+    if (g.stems.size < SHARED_ADDRESS_MIN_VENUES) continue;
+    hits.push({ address: g.address, venues: g.stems.size, events: g.idx.length });
+    for (const i of g.idx) drop.add(i);
+  }
+  if (drop.size === 0) return { events, dropped: 0, groups: [] };
+  return {
+    events: events.map((e, i) => (drop.has(i) ? { ...e, address: undefined, address_rejected: 'page_boilerplate' as const } : e)),
+    dropped: drop.size,
+    groups: hits.sort((a, b) => b.events - a.events),
+  };
+}

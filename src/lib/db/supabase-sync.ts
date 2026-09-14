@@ -483,7 +483,19 @@ function toSupabaseRow(
     evidence.correctionsLoaded === true;
   if (manualLabelReleased) resolved.reasons.push('manual_label_released');
 
-  if (existing && !decisionForbidsPosition && !manualLabelReleased) {
+  // Belegte Positionen (`venue`, `address`) leben von ihrem Beleg. Trägt die
+  // aktuelle Entscheidung keinen solchen Beleg mehr (Adresse verworfen oder
+  // nicht mehr geliefert, Kandidat weg), ist die alte Position nicht mehr
+  // gedeckt und wird nicht per Rang festgehalten. Nur bei vollständig
+  // geladenen Belegen, sonst bliebe ein Ausfall der Belegquellen unbemerkt.
+  const evidenceGone =
+    !!existing &&
+    (existing.geocoding_confidence === 'address' || existing.geocoding_confidence === 'venue') &&
+    decision.geocoding_confidence !== 'address' && decision.geocoding_confidence !== 'venue' && decision.geocoding_confidence !== 'manual' &&
+    evidence.complete === true;
+  if (evidenceGone) resolved.reasons.push(`evidence_gone:${existing!.geocoding_confidence}`);
+
+  if (existing && !decisionForbidsPosition && !manualLabelReleased && !evidenceGone) {
     const samePoint =
       existing.latitude != null && existing.longitude != null && resolved.latitude != null && resolved.longitude != null &&
       Math.abs(existing.latitude - resolved.latitude) < 1e-6 && Math.abs(existing.longitude - resolved.longitude) < 1e-6;
@@ -618,9 +630,14 @@ function toSupabaseRow(
     event.address ?? null,
     existing?.address ?? null,
   );
-  const finalAddress = overwriteAddress
-    ? (event.address ?? null)
-    : (existing?.address ?? null);
+  // fn-25: Eine als Seitenadresse verworfene Angabe darf nicht über die
+  // „nicht auf NULL setzen"-Regel aus dem Bestand weiterleben.
+  const finalAddress = event.address_rejected
+    ? null
+    : overwriteAddress
+      ? (event.address ?? null)
+      : (existing?.address ?? null);
+  if (event.address_rejected) resolved.reasons.push(`address_rejected:${event.address_rejected}`);
 
   // Resolve final guarded values FIRST so every row in the batch
   // carries the SAME key set (otherwise PostgREST's bulk-upsert

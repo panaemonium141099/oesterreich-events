@@ -1,6 +1,6 @@
 /** fn-25 B3: Genauigkeits-Policy je Quelle. */
 import { describe, it, expect } from 'vitest';
-import { applySourceCoordsPolicy, demotePlaceholderCoords } from '@/lib/scrapers/source-coords-policy';
+import { applySourceCoordsPolicy, demotePlaceholderCoords, dropSharedAddresses } from '@/lib/scrapers/source-coords-policy';
 import type { ScrapedEvent } from '@/types/events';
 
 const ev = (over: Partial<ScrapedEvent>): ScrapedEvent => ({
@@ -71,5 +71,31 @@ describe('demotePlaceholderCoords: Stadtmittelpunkt als „Venue-Koordinate" vie
     const unknown = [at('1', 'A', 'X-Gasse 1'), at('2', 'B', 'Y-Gasse 2'), at('3', 'C', 'Z-Gasse 3')].map(e => ({ ...e, coords_precision: undefined }));
     expect(demotePlaceholderCoords(unknown).demoted).toBe(0);
     expect(demotePlaceholderCoords([at('1', 'A', 'X-Gasse 1'), at('2', 'B', 'Y-Gasse 2')]).demoted).toBe(0);
+  });
+});
+
+describe('dropSharedAddresses: Seitenadresse für viele Veranstaltungsorte (Gemeindeamt-Befund)', () => {
+  const gem = (id: string, venue: string, address = 'Hauptplatz 1', source = 'gem2go'): ScrapedEvent =>
+    ev({ source_name: source, source_id: id, location_name: venue, address, postal_code: '3920', city: 'Groß Gerungs' });
+
+  it('eine Adresse für drei verschieden benannte Orte wird verworfen und markiert', () => {
+    const r = dropSharedAddresses([gem('1', 'Altes Rathaus'), gem('2', 'Festhalle der FF'), gem('3', 'Pfarrkirche'), gem('4', 'Altes Rathaus')]);
+    expect(r.dropped).toBe(4);
+    expect(r.groups[0]).toMatchObject({ address: 'Hauptplatz 1', venues: 3, events: 4 });
+    expect(r.events.every(e => e.address === undefined && e.address_rejected === 'page_boilerplate')).toBe(true);
+    expect(r.events[0].postal_code).toBe('3920');
+  });
+
+  it('zwei Orte oder Säle eines Hauses teilen sich eine Adresse zu Recht', () => {
+    expect(dropSharedAddresses([gem('1', 'Altes Rathaus'), gem('2', 'Pfarrkirche')]).dropped).toBe(0);
+    expect(dropSharedAddresses([gem('1', 'Stadtsaal Großer Saal'), gem('2', 'Stadtsaal Kleiner Saal'), gem('3', 'Stadtsaal Foyer')]).dropped).toBe(0);
+  });
+
+  it('Quellen mit einer Spielstätte sind ausgenommen (Landestheater, Stadthalle)', () => {
+    const r = dropSharedAddresses([
+      gem('1', 'Kammerspiele Linz', 'Promenade 39', 'boudicca:landestheater linz'), gem('2', 'Schauspielhaus Linz', 'Promenade 39', 'boudicca:landestheater linz'), gem('3', 'Studiobühne Linz', 'Promenade 39', 'boudicca:landestheater linz'),
+      gem('4', 'Halle D', 'Roland-Rainer-Platz 1', 'stadthalle'), gem('5', 'Halle F', 'Roland-Rainer-Platz 1', 'stadthalle'), gem('6', 'Halle E', 'Roland-Rainer-Platz 1', 'stadthalle'),
+    ]);
+    expect(r.dropped).toBe(0);
   });
 });
