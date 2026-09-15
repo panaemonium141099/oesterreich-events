@@ -62,6 +62,13 @@ export const post: FestivalPost = {
       "text": "Im September sind kleine Häuser am schnellsten voll. Bei Doppelterminen hast du bessere Chancen: Schatten Rosen Schatten läuft im Architektur Haus Kärnten am 15.09. und 17.09.2026, Was ihr wollt im Schauspielhaus Salzburg am 16.09. und 18.09.2026, Walter Kammerhofer spielt Amoi Ois am 15.09. und 17.09.2026 an zwei oberösterreichischen Spielorten. Ist ein Datum ausverkauft, schau auf das zweite."
     }
   ],
+  "lineup": [],
+  "gallery": [],
+  "ctaText": "Herbst-Events in ganz Österreich entdecken",
+  "ctaLink": "/entdecken",
+  "seoTitle": "Herbstfeste & Erntedank in Österreich 2026: Weinlese, Almabtrieb, Termine",
+  "seoDescription": "Weinlese, Almabtrieb, Erntedank: Was wann passiert, wo die Termine für 2026 herkommen und welche Feste sich mit einem Abend in der Region verbinden lassen.",
+  "keywords": ["herbstfeste österreich", "erntedank 2026", "almabtrieb termine", "weinlesefest", "kellergassenfest"],
   "faqs": [
     {
       "question": "Welche Herbstfeste gibt es in Österreich und wann ist die beste Zeit dafür?",
