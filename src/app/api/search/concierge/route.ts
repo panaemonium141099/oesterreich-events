@@ -34,6 +34,7 @@
 
 import { NextResponse, type NextRequest } from 'next/server';
 import { GoogleGenAI } from '@google/genai';
+import OpenAI from 'openai';
 import { checkRateLimit, getClientIp } from '@/lib/rate-limit';
 
 /** fn-19: Der Concierge ist der teuerste Call der Plattform (~0,7 Cent
@@ -41,6 +42,29 @@ import { checkRateLimit, getClientIp } from '@/lib/rate-limit';
  *  ZUSÄTZLICH zum globalen Middleware-Limit (30 POST/min/IP). 10/min
  *  reicht für echte Nutzung locker, deckelt aber Bots und Bug-Loops. */
 const CONCIERGE_LIMIT_PER_MIN = 10;
+
+/**
+ * Welches Modell den Tipp schreibt. Umschaltbar per Env, OHNE Deploy —
+ * nur Container-Neustart.
+ *
+ * Anlass (2026-09-15): Google hat das Cloud-Projekt des Gemini-Keys
+ * gesperrt ("Lightning dunning decision is deny", HTTP 403 auf jeden
+ * Aufruf seit 09.09.). Der Concierge war damit sechs Tage tot, ohne dass
+ * es jemand gemerkt hat — die Smart-Suche faellt still auf ihren
+ * deterministischen Parser zurueck, der Concierge hat keinen Fallback.
+ *
+ * Der OpenAI-Pfad nutzt die Responses-API mit `web_search`, also dasselbe
+ * Prinzip wie Googles Grounding: aktuelle Lokal-Tipps aus dem Web plus
+ * Quellen-Links. Das SSE-Format nach aussen ist identisch.
+ */
+type ConciergeProvider = 'gemini' | 'openai';
+const PROVIDER: ConciergeProvider =
+  process.env.CONCIERGE_PROVIDER === 'openai' ? 'openai' : 'gemini';
+
+/** gpt-4o-mini: bereits fuer Outreach-Drafts und Geocoding im Projekt,
+ *  unterstuetzt `web_search` in der Responses-API und liegt preislich
+ *  in der Groessenordnung des Gemini-Calls. */
+const OPENAI_MODEL = 'gpt-4o-mini';
 
 // Match-Subset der /api/search/semantic SearchMatch-Type — wir brauchen
 // nur title/location/category/start_date/_similarity für den Prompt.
@@ -169,10 +193,115 @@ function hasStrongLocalSignal(body: ConciergeBody): boolean {
   return hasLocationHint || wantsLocalTip;
 }
 
+type Citation = { url: string; title: string | null };
+type Send = (event: string, data: unknown) => void;
+
+async function streamViaGemini(apiKey: string, prompt: string, send: Send): Promise<Citation[]> {
+  const ai = new GoogleGenAI({ apiKey });
+  const response = await ai.models.generateContentStream({
+    model: 'gemini-2.5-flash',
+    contents: prompt,
+    config: {
+      systemInstruction: SYSTEM_PROMPT,
+      tools: [{ googleSearch: {} }],
+      // Wir wollen kurze direkte Antworten — kein Reasoning nötig.
+      // Default hat Gemini 2.5 Flash thinking-Tokens AN, die vom
+      // maxOutputTokens-Budget abgezogen werden BEVOR sichtbarer
+      // Text gestreamt wird. Bei 600 token und ~500 thinking-token
+      // verbrauchen war der Output mid-sentence abgewürgt.
+      // thinkingBudget=0 schaltet's komplett ab.
+      thinkingConfig: { thinkingBudget: 0 },
+      maxOutputTokens: 1500,
+      temperature: 0.4,
+    },
+  });
+
+  let groundingChunks: Array<{ web?: { uri?: string; title?: string } }> | undefined;
+  let finishReason: string | undefined;
+
+  for await (const chunk of response) {
+    // Gemini-streaming chunks tragen entweder text-deltas, function-calls
+    // oder grounding-Metadata. Wir greppen defensiv.
+    const text = chunk.text;
+    if (text) send('text', { delta: text });
+    const candidate = chunk.candidates?.[0];
+    const meta = candidate?.groundingMetadata;
+    if (meta?.groundingChunks) {
+      // Letzter Chunk gewinnt — Gemini liefert die Grounding-Liste
+      // typischerweise im finalen Chunk.
+      groundingChunks = meta.groundingChunks as typeof groundingChunks;
+    }
+    if (candidate?.finishReason) finishReason = candidate.finishReason as string;
+  }
+
+  if (process.env.NODE_ENV === 'development' && finishReason && finishReason !== 'STOP') {
+    console.warn('[concierge/gemini] unusual finishReason:', finishReason);
+  }
+
+  const citations: Citation[] = [];
+  for (const gc of groundingChunks ?? []) {
+    const url = gc.web?.uri;
+    if (typeof url === 'string') citations.push({ url, title: gc.web?.title ?? null });
+  }
+  return citations;
+}
+
+/**
+ * OpenAI Responses-API mit `web_search`. Text kommt als
+ * `response.output_text.delta`, die Quellen haengen als
+ * `url_citation`-Annotationen am fertigen Output — deshalb werden sie
+ * erst aus dem `response.completed`-Event gezogen.
+ */
+async function streamViaOpenAI(apiKey: string, prompt: string, send: Send): Promise<Citation[]> {
+  const client = new OpenAI({ apiKey });
+  const stream = await client.responses.create({
+    model: OPENAI_MODEL,
+    instructions: SYSTEM_PROMPT,
+    input: prompt,
+    tools: [{ type: 'web_search' }],
+    max_output_tokens: 1500,
+    temperature: 0.4,
+    stream: true,
+  });
+
+  const citations: Citation[] = [];
+  const seen = new Set<string>();
+
+  for await (const event of stream) {
+    if (event.type === 'response.output_text.delta') {
+      send('text', { delta: event.delta });
+      continue;
+    }
+    if (event.type === 'response.completed') {
+      for (const item of event.response.output) {
+        if (item.type !== 'message') continue;
+        for (const part of item.content) {
+          if (part.type !== 'output_text') continue;
+          for (const a of part.annotations ?? []) {
+            if (a.type === 'url_citation' && !seen.has(a.url)) {
+              seen.add(a.url);
+              citations.push({ url: a.url, title: a.title ?? null });
+            }
+          }
+        }
+      }
+      continue;
+    }
+    if (event.type === 'response.failed') {
+      throw new Error(event.response.error?.message ?? 'OpenAI response failed');
+    }
+  }
+  return citations;
+}
+
 export async function POST(req: NextRequest) {
   const geminiKey = process.env.GEMINI_API_KEY;
-  if (!geminiKey) {
-    return NextResponse.json({ error: 'Server misconfigured (no GEMINI_API_KEY)' }, { status: 503 });
+  const openaiKey = process.env.OPENAI_API_KEY;
+  if (PROVIDER === 'openai' ? !openaiKey : !geminiKey) {
+    return NextResponse.json(
+      { error: `Server misconfigured (no ${PROVIDER === 'openai' ? 'OPENAI_API_KEY' : 'GEMINI_API_KEY'})` },
+      { status: 503 },
+    );
   }
 
   const rl = checkRateLimit(`concierge:${getClientIp(req.headers)}`, CONCIERGE_LIMIT_PER_MIN, 60_000);
@@ -199,16 +328,14 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'query too long (max 500 chars)' }, { status: 400 });
   }
 
-  const ai = new GoogleGenAI({ apiKey: geminiKey });
   const userPrompt = buildUserPrompt(body);
   const localHint = hasStrongLocalSignal(body)
-    ? '\n\n[Hinweis: Diese Anfrage verlangt vermutlich nach lokalen Lokal-Tipps. Bitte aktiv Google-Suche nutzen.]'
+    ? '\n\n[Hinweis: Diese Anfrage verlangt vermutlich nach lokalen Lokal-Tipps. Bitte aktiv die Websuche nutzen.]'
     : '';
 
-  // Streaming via Server-Sent-Events. Wir wandeln den Gemini-Stream in
-  // unser eigenes SSE-Format (text deltas + done event mit citations).
-  // Frontend (V4ConciergeCard) konsumiert das gleiche Format wie vorher
-  // mit OpenAI — keine Frontend-Änderung nötig.
+  // Streaming via Server-Sent-Events. Beide Anbieter werden in dasselbe
+  // Format gewandelt (text deltas + done event mit citations). Frontend
+  // (V4ConciergeCard) kennt keinen Unterschied.
   const stream = new ReadableStream({
     async start(controller) {
       const enc = new TextEncoder();
@@ -217,68 +344,15 @@ export async function POST(req: NextRequest) {
       };
 
       try {
-        const response = await ai.models.generateContentStream({
-          model: 'gemini-2.5-flash',
-          contents: userPrompt + localHint,
-          config: {
-            systemInstruction: SYSTEM_PROMPT,
-            tools: [{ googleSearch: {} }],
-            // Wir wollen kurze direkte Antworten — kein Reasoning nötig.
-            // Default hat Gemini 2.5 Flash thinking-Tokens AN, die vom
-            // maxOutputTokens-Budget abgezogen werden BEVOR sichtbarer
-            // Text gestreamt wird. Bei 600 token und ~500 thinking-token
-            // verbrauchen war der Output mid-sentence abgewürgt.
-            // thinkingBudget=0 schaltet's komplett ab.
-            thinkingConfig: { thinkingBudget: 0 },
-            maxOutputTokens: 1500,
-            temperature: 0.4,
-          },
-        });
-
-        let groundingChunks: Array<{ web?: { uri?: string; title?: string } }> | undefined;
-        let finishReason: string | undefined;
-
-        for await (const chunk of response) {
-          // Gemini-streaming chunks tragen entweder text-deltas, function-calls
-          // oder grounding-Metadata. Wir greppen defensiv.
-          const text = chunk.text;
-          if (text) {
-            send('text', { delta: text });
-          }
-          const candidate = chunk.candidates?.[0];
-          const meta = candidate?.groundingMetadata;
-          if (meta?.groundingChunks) {
-            // Letzter Chunk gewinnt — Gemini liefert die Grounding-Liste
-            // typischerweise im finalen Chunk.
-            groundingChunks = meta.groundingChunks as typeof groundingChunks;
-          }
-          if (candidate?.finishReason) {
-            finishReason = candidate.finishReason as string;
-          }
-        }
-
-        // Wenn das Modell wegen MAX_TOKENS abgewürgt wurde, in Dev loggen.
-        // SAFETY/RECITATION-Reasons ebenfalls hilfreich für Debugging.
-        if (process.env.NODE_ENV === 'development' && finishReason && finishReason !== 'STOP') {
-          console.warn('[concierge/gemini] unusual finishReason:', finishReason);
-        }
-
-        const citations: Array<{ url: string; title: string | null }> = [];
-        if (groundingChunks) {
-          for (const gc of groundingChunks) {
-            const url = gc.web?.uri;
-            if (typeof url === 'string') {
-              citations.push({ url, title: gc.web?.title ?? null });
-            }
-          }
-        }
-
+        const citations = PROVIDER === 'openai'
+          ? await streamViaOpenAI(openaiKey!, userPrompt + localHint, send)
+          : await streamViaGemini(geminiKey!, userPrompt + localHint, send);
         send('done', { citations });
         controller.close();
       } catch (err) {
         const msg = err instanceof Error ? err.message : String(err);
         if (process.env.NODE_ENV === 'development') {
-          console.error('[concierge/gemini] error:', err);
+          console.error(`[concierge/${PROVIDER}] error:`, err);
         }
         send('error', { message: msg });
         controller.close();
