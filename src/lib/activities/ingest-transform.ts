@@ -28,6 +28,7 @@
  */
 
 import { mapTopics, type ActivitySetting } from './taxonomy';
+import { activityBezirk } from './bezirk';
 import { matchGemeinde } from './gemeinde-match';
 import { buildActivitySlug, activityShortId } from './slug';
 import { extractPriceHint } from './price-hint';
@@ -78,6 +79,9 @@ export interface TransformedActivity {
   town: string | null;
   gemeinde_slug: string;
   bundesland: string;
+  /** Kanonischer Bezirk (Vokabular DISTRICTS_BY_BUNDESLAND) aus der
+   *  Registry-Zeile via bezirk.ts; null wenn nicht ableitbar (Wien). */
+  bezirk: string | null;
   opening_times_raw: unknown;
   opening_times: NormalizedOpeningWindow[] | null;
   open_status: number | null;
@@ -294,6 +298,7 @@ export function transformInfrastructure(
     town: toNullableString(raw.location?.town),
     gemeinde_slug: gemeinde.gemeindeSlug,
     bundesland,
+    bezirk: activityBezirk(gemeinde.gemeinde, bundesland),
     opening_times_raw: openingTimesRaw,
     opening_times: openingTimes,
     open_status: typeof raw.openStatus === 'number' && Number.isInteger(raw.openStatus) ? raw.openStatus : null,
@@ -331,6 +336,7 @@ export const UPDATE_BUSINESS_COLUMNS = [
   'town',
   'gemeinde_slug',
   'bundesland',
+  'bezirk',
   'opening_times_raw',
   'opening_times',
   'open_status',

@@ -105,6 +105,49 @@ describe('GET /api/activities', () => {
     expect(query.contains).toHaveBeenCalledWith('tags', ['schwimmen']);
   });
 
+  it('Filter-Modul: bezirk (nur kanonische Bezirke des Bundeslands), q als or-ilike, count=1 liefert total', async () => {
+    const query = createChainableQuery({ data: makeRows(2), error: null });
+    // Der Mock hat keinen Content-Range — `count` kommt aus dem Resolve-Wert.
+    query.then = vi.fn().mockImplementation(
+      (onFulfilled?: (value: unknown) => unknown) =>
+        Promise.resolve({ data: makeRows(2), error: null, count: 864 }).then(onFulfilled),
+    );
+    mockFrom.mockReturnValue(query);
+
+    const response = await GET(
+      makeRequest({
+        bundesland: 'salzburg',
+        // Tirol-Bezirk + Duplikat + Gross-/Kleinschreibung: nur Salzburg-Bezirke bleiben, sortiert.
+        bezirk: 'Zell am See,kitzbühel,hallein,zell am see',
+        q: 'St. Johann',
+        count: '1',
+      }),
+    );
+    const body = await response.json();
+
+    expect(query.in).toHaveBeenCalledWith('bezirk', ['hallein', 'zell am see']);
+    expect(query.or).toHaveBeenCalledWith('name.ilike.*St* Johann*,town.ilike.*St* Johann*');
+    expect(query.select.mock.calls[0][1]).toEqual({ count: 'exact' });
+    expect(body.total).toBe(864);
+  });
+
+  it('ohne bundesland gilt jeder kanonische Bezirk; Muell im bezirk-/q-Param wird ignoriert', async () => {
+    const query = createChainableQuery({ data: [], error: null });
+    mockFrom.mockReturnValue(query);
+
+    await GET(makeRequest({ bezirk: 'Zell am See,atlantis', q: 'a' }));
+    expect(query.in).toHaveBeenCalledWith('bezirk', ['zell am see']);
+    // q unter Mindestlaenge -> kein or-Filter (nur der Cursor nutzt .or()).
+    expect(query.or).not.toHaveBeenCalled();
+
+    vi.clearAllMocks();
+    mockFrom.mockReturnValue(query);
+    await GET(makeRequest({ bezirk: 'atlantis' }));
+    expect(query.in).not.toHaveBeenCalled();
+    // Ohne count=1 keine Count-Option und kein total-Feld.
+    expect(query.select.mock.calls[0][1]).toBeUndefined();
+  });
+
   it('paginiert per (quality_score,id)-Cursor: limit+1, Slice, nextCursor aus letzter Row', async () => {
     const rows = makeRows(6); // limit 5 -> 6 Rows = hasMore
     const query = createChainableQuery({ data: rows, error: null });

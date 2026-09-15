@@ -65,6 +65,10 @@ describe('transformInfrastructure — Happy Path', () => {
     expect(a.content_fingerprint).toMatch(/^[0-9a-f]{40}$/);
     expect(a.guest_cards).toEqual([{ id: 'gc1', name: 'Neusiedler See Card', type: 1, webLink: null }]);
     expect(a.topics_raw).toEqual([{ id: 't1', name: 'Strandbad' }]);
+    // bezirk: kanonischer Name aus der Registry-Zeile (Podersdorf -> Bezirk
+    // Neusiedl am See), gleiches Vokabular wie events.district.
+    expect(a.bezirk).toBe('neusiedl am see');
+    expect(UPDATE_BUSINESS_COLUMNS).toContain('bezirk');
   });
 
   it('bundesland kommt normalisiert aus der Gemeinde-Registry (bundeslandToId), nicht aus der Config', () => {

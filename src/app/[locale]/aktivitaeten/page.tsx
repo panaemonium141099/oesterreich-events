@@ -6,7 +6,10 @@
  * zurueck und die Route kippt auf dynamic), KEINE searchParams und kein
  * cookies()/auth im RSC-Pfad. Die erste Karten-Seite kommt aus dem
  * gecachten Server-Loader; Filter und "Mehr laden" laufen client-seitig
- * ueber /api/activities (ActivitiesBrowser).
+ * ueber /api/activities (ActivitiesBrowser). Die Bezirks-Facetten fuers
+ * Filter-Modul (poi_activity_bezirk_counts) kommen ebenfalls aus einem
+ * 1-h-Cache und wandern als Prop in den Client — Filter-Klicks brauchen
+ * so keinen eigenen Facetten-Request.
  *
  * E13: /en/aktivitaeten rendert denselben DE-Content und kanonisiert auf
  * die DE-URL — kein hreflang-Paar, in der Sitemap steht nur die DE-URL.
@@ -18,7 +21,10 @@ import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { routing } from '@/i18n/routing';
 import { BUNDESLAENDER } from '@/lib/bundeslaender';
 import { activityListCanonicalUrl } from '@/lib/activities/indexability';
-import { loadActivityListPageCached } from '@/lib/activities/list-loaders';
+import {
+  loadActivityBezirkCountsCached,
+  loadActivityListPageCached,
+} from '@/lib/activities/list-loaders';
 import { ACTIVITY_LIST_PAGE_SIZE } from '@/lib/activities/list-query';
 import { ActivitiesBrowser } from '@/components/Activities/ActivitiesBrowser';
 import { NearbyActivitiesRail } from '@/components/Activities/NearbyActivitiesRail';
@@ -65,8 +71,9 @@ export default async function ActivitiesOverviewPage({
   const { locale: rawLocale } = await params;
   setRequestLocale(hasLocale(routing.locales, rawLocale) ? rawLocale : routing.defaultLocale);
 
-  const [page, t] = await Promise.all([
+  const [page, bezirkCounts, t] = await Promise.all([
     loadActivityListPageCached(ACTIVITY_LIST_PAGE_SIZE),
+    loadActivityBezirkCountsCached(),
     getTranslations('Activities'),
   ]);
 
@@ -94,7 +101,9 @@ export default async function ActivitiesOverviewPage({
         <ActivitiesBrowser
           initialItems={page.items}
           initialCursor={page.nextCursor}
+          initialTotal={page.total}
           bundeslaender={BUNDESLAND_OPTIONS}
+          bezirkCounts={bezirkCounts}
         />
       </div>
     </div>
