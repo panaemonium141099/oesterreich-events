@@ -27,9 +27,10 @@ describe('V4TabBar', () => {
     mockGetSession.mockResolvedValue({ data: { session: null } });
   });
 
-  it('renders all 5 primary mobile tabs', () => {
+  it('renders all 6 primary mobile tabs', () => {
     render(<V4TabBar />);
     expect(screen.getByRole('link', { name: /entdecken/i })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /freizeit/i })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: /künstler/i })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: /karte/i })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: /pläne/i })).toBeInTheDocument();
@@ -69,6 +70,15 @@ describe('V4TabBar', () => {
     mockPathname.mockReturnValue('/map');
     render(<V4TabBar />);
     expect(screen.getByRole('link', { name: /karte/i }).getAttribute('data-active')).toBe('true');
+    expect(screen.getByRole('link', { name: /entdecken/i }).getAttribute('data-active')).toBe('false');
+  });
+
+  it('Freizeit-Tab links to /aktivitaeten and is active on list and detail pages', () => {
+    mockPathname.mockReturnValue('/aktivitaet/strandbad-podersdorf-abc123def456');
+    render(<V4TabBar />);
+    const tab = screen.getByRole('link', { name: /freizeit/i });
+    expect(tab.getAttribute('href')).toBe('/aktivitaeten');
+    expect(tab.getAttribute('data-active')).toBe('true');
     expect(screen.getByRole('link', { name: /entdecken/i }).getAttribute('data-active')).toBe('false');
   });
 
