@@ -11,8 +11,18 @@
  *    `quality_score < $q OR (quality_score = $q AND id > $i)`.
  *  - Filter: `gemeinde=<kanonischer gemeinde_slug, z.B. 7100-neusiedl-am-see>`
  *    (Spalte gemeinde_slug), `bundesland=<kanonische lowercase-ID>`,
- *    `tag=<Taxonomie-Tag>` (tags-Array-Containment),
- *    `setting=indoor|outdoor|mixed` (exakter Spaltenwert, Task 8).
+ *    `bezirk=<a,b,c>` (Filter-Modul 2026-09-15: kommagetrennte kanonische
+ *    lowercase-Bezirksnamen, Vokabular DISTRICTS_BY_BUNDESLAND; mit
+ *    `bundesland` nur dessen Bezirke, sonst jeder kanonische; unbekannte
+ *    Werte werden verworfen, max. 30), `tag=<Taxonomie-Tag>`
+ *    (tags-Array-Containment), `setting=indoor|outdoor|mixed` (exakter
+ *    Spaltenwert, Task 8), `q=<Freitext>` (ilike auf name ODER town,
+ *    Muster via activitySearchPattern; town hat keinen Index — 11k Rows,
+ *    Seq-Scan im ms-Bereich).
+ *  - `count=1`: zusaetzlich exakte Trefferzahl `total` (Content-Range).
+ *    poi_activities ist mit ~11k Rows klein — die Micro-Warnung vor
+ *    count(*) gilt fuer `events` (280k), nicht hier. Ohne den Param bleibt
+ *    die Antwort wie bisher ohne Count.
  *  - Liest via Service-Role die Basistabelle -> visible=true UND
  *    is_closed=false werden EXPLIZIT gefiltert (Anzeige-Bedingung ist
  *    ueberall `visible AND NOT is_closed`; die Public-View haette den
@@ -28,6 +38,13 @@ import {
   decodeActivityCursor,
   encodeActivityCursor,
 } from '@/lib/activities/cursor';
+import {
+  ACTIVITY_MAX_BEZIRKE,
+  activitySearchPattern,
+  canonicalBezirkeFor,
+  splitBezirkParam,
+} from '@/lib/activities/list-query';
+import { isCanonicalDistrict } from '@/lib/district-normalizer';
 
 const DEFAULT_PAGE_SIZE = 50;
 const MAX_PAGE_SIZE = 200;
@@ -39,6 +56,19 @@ const LIST_COLUMNS =
   'id, slug, name, description_short, tags, setting, lat, lng, town, ' +
   'gemeinde_slug, bundesland, opening_times, online_bookable, images, ' +
   'price_hint, updated_at, quality_score';
+
+/**
+ * `bezirk`-Param -> validierte, deduplizierte, sortierte Liste. Mit
+ * Bundesland zaehlt nur dessen kanonische Bezirksliste, ohne Bundesland
+ * jeder kanonische Bezirksname (Vokabular DISTRICTS_BY_BUNDESLAND).
+ */
+function parseBezirkParam(raw: string | null, bundesland: string | null): string[] {
+  const wanted = splitBezirkParam(raw).map((b) => b.toLowerCase());
+  if (wanted.length === 0) return [];
+  const allowed = bundesland ? new Set(canonicalBezirkeFor(bundesland)) : null;
+  const valid = wanted.filter((b) => (allowed ? allowed.has(b) : isCanonicalDistrict(b)));
+  return [...new Set(valid)].sort().slice(0, ACTIVITY_MAX_BEZIRKE);
+}
 
 /** Lazy Supabase client — validates env vars at call time. */
 function getSupabaseClient(): SupabaseClient | null {
@@ -67,9 +97,11 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     return NextResponse.json({ error: 'Ungültiger Cursor' }, { status: 400 });
   }
 
+  const withCount = params.get('count') === '1';
+
   let query = supabase
     .from('poi_activities')
-    .select(LIST_COLUMNS)
+    .select(LIST_COLUMNS, withCount ? { count: 'exact' } : undefined)
     // Anzeige-Bedingung (Basistabelle via Service-Role -> beide explizit):
     .eq('visible', true)
     .eq('is_closed', false);
@@ -77,11 +109,18 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
   const gemeinde = params.get('gemeinde');
   if (gemeinde) query = query.eq('gemeinde_slug', gemeinde);
 
-  const bundesland = params.get('bundesland');
-  if (bundesland) query = query.eq('bundesland', bundesland.toLowerCase());
+  const bundesland = params.get('bundesland')?.toLowerCase() ?? null;
+  if (bundesland) query = query.eq('bundesland', bundesland);
+
+  const bezirke = parseBezirkParam(params.get('bezirk'), bundesland);
+  if (bezirke.length > 0) query = query.in('bezirk', bezirke);
 
   const tag = params.get('tag');
   if (tag) query = query.contains('tags', [tag]);
+
+  // Freitext: EIN or-Filter ueber name/town (PostgREST-Wildcard `*`).
+  const pattern = activitySearchPattern(params.get('q'));
+  if (pattern) query = query.or(`name.ilike.${pattern},town.ilike.${pattern}`);
 
   // `setting` (Task 8): EXAKTER Spaltenwert — 'mixed' ist ein eigener
   // Wert und wird von 'indoor'/'outdoor' NICHT mitgefiltert.
@@ -98,7 +137,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
   query = query.order('quality_score', { ascending: false }).order('id', { ascending: true });
 
   // limit+1, um hasMore ohne count zu bestimmen.
-  const { data, error } = await query.limit(limit + 1);
+  const { data, error, count } = await query.limit(limit + 1);
 
   if (error) {
     console.error('[api/activities] query failed:', error.message);
@@ -113,7 +152,9 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     hasMore && last ? encodeActivityCursor({ q: last.quality_score, id: last.id }) : null;
 
   return NextResponse.json(
-    { activities, nextCursor, hasMore },
+    withCount
+      ? { activities, nextCursor, hasMore, total: typeof count === 'number' ? count : null }
+      : { activities, nextCursor, hasMore },
     {
       headers: {
         // POI-Bestand aendert sich woechentlich — grosszuegig edge-cachen.

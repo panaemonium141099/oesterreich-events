@@ -527,6 +527,22 @@ body {
   animation: fadeIn 0.3s ease-out both;
 }
 
+/* Filter-Modul /aktivitaeten: Popover-Einblendung — kurz, leicht von oben,
+   Ursprung am Trigger. Reduced-motion: nur Opacity. */
+@keyframes popIn {
+  from { opacity: 0; transform: translateY(-4px) scale(0.98); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+.animate-pop-in {
+  animation: popIn 0.16s cubic-bezier(0.16, 1, 0.3, 1) both;
+  transform-origin: top left;
+}
+@media (prefers-reduced-motion: reduce) {
+  .animate-pop-in {
+    animation: fadeIn 0.12s ease-out both;
+  }
+}
+
 .animate-slide-up {
   animation: slideUp 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
 }

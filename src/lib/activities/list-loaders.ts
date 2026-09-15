@@ -44,6 +44,18 @@ export interface ActivityListPage {
   items: ActivityListItem[];
   /** Cursor fuer den naechsten /api/activities-Fetch (null == Ende). */
   nextCursor: string | null;
+  /** Exakte Anzahl sichtbarer POIs (Content-Range der Seite-1-Query);
+   *  null nur im Build-Fallback. Filter-Modul zeigt sie als "X Orte". */
+  total: number | null;
+}
+
+/** Eine Zeile der View poi_activity_bezirk_counts (Migration
+ *  20260915120000): sichtbare, nicht geschlossene POIs je Bezirk. */
+export interface ActivityBezirkCount {
+  bundesland: string;
+  /** Kanonischer lowercase-Bezirksname (Vokabular DISTRICTS_BY_BUNDESLAND). */
+  bezirk: string;
+  n: number;
 }
 
 const LIST_COLUMNS =
@@ -70,9 +82,12 @@ function getServiceClient(): SupabaseClient {
  */
 export const loadActivityListPageCached = unstable_cache(
   async (limit: number): Promise<ActivityListPage> => {
-    const { data, error } = await getServiceClient()
+    const { data, error, count } = await getServiceClient()
       .from('poi_activities')
-      .select(LIST_COLUMNS)
+      // count:'exact' ist auf den ~11k Rows von poi_activities billig
+      // (die Micro-Warnung gilt fuer `events`) und liefert die Gesamtzahl
+      // fuer die Ergebniszeile des Filter-Moduls ohne zweite Query.
+      .select(LIST_COLUMNS, { count: 'exact' })
       .eq('visible', true)
       .eq('is_closed', false)
       .order('quality_score', { ascending: false })
@@ -91,7 +106,7 @@ export const loadActivityListPageCached = unstable_cache(
       // Liste fuer 1 h in Cache + Google-Index).
       if (process.env.NEXT_PHASE === 'phase-production-build') {
         console.error(`[list-loaders] Build-Fallback (leere Seite 1): ${error.message}`);
-        return { items: [], nextCursor: null };
+        return { items: [], nextCursor: null, total: null };
       }
       throw new Error(`[list-loaders] Aktivitaeten-Liste fehlgeschlagen: ${error.message}`);
     }
@@ -103,8 +118,36 @@ export const loadActivityListPageCached = unstable_cache(
     return {
       items,
       nextCursor: hasMore && last ? encodeActivityCursor({ q: last.quality_score, id: last.id }) : null,
+      total: typeof count === 'number' ? count : null,
     };
   },
   ['activity-list-page'],
+  { revalidate: 3600, tags: ['activity'] },
+);
+
+/**
+ * Bezirks-Facetten fuers Filter-Modul: (bundesland, bezirk, n) aus der
+ * View poi_activity_bezirk_counts. ~70 Zeilen, einmal pro Stunde gelesen
+ * und als Prop an den Client gereicht — die Bezirks-Auswahl zeigt damit
+ * nur Bezirke mit Bestand und deren Anzahl, ohne Request pro Klick.
+ * Fehler degradieren zu einer leeren Liste: die Seite bleibt nutzbar, das
+ * Modul faellt dann auf die statische Bezirksliste des Bundeslands zurueck.
+ */
+export const loadActivityBezirkCountsCached = unstable_cache(
+  async (): Promise<ActivityBezirkCount[]> => {
+    const { data, error } = await getServiceClient()
+      .from('poi_activity_bezirk_counts')
+      .select('bundesland, bezirk, n')
+      .order('bundesland', { ascending: true })
+      .order('bezirk', { ascending: true });
+    if (error) {
+      console.error(`[list-loaders] Bezirks-Facetten fehlgeschlagen: ${error.message}`);
+      return [];
+    }
+    return ((data ?? []) as unknown as ActivityBezirkCount[]).filter(
+      (row) => typeof row.bezirk === 'string' && typeof row.n === 'number',
+    );
+  },
+  ['activity-bezirk-counts'],
   { revalidate: 3600, tags: ['activity'] },
 );

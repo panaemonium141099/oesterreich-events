@@ -71,6 +71,7 @@
     "import:stay-pois": "tsx src/scripts/import-stay-pois.ts",
     "import-student-orgs": "tsx --env-file=.env.local src/scripts/import-student-orgs.ts",
     "backfill-venue-ids": "tsx --env-file=.env.local src/scripts/backfill-venue-ids.ts",
+    "backfill:activity-bezirk": "tsx --env-file=.env.local src/scripts/backfill-activity-bezirk.ts",
     "scrape:venues": "tsx --env-file=.env.local src/scripts/scrape-venues.ts",
     "match-artists": "tsx --env-file=.env.local src/scripts/match-artists.ts",
     "seed:festivals": "tsx --env-file=.env.local src/scripts/seed-festivals.ts",
