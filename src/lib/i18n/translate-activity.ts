@@ -24,7 +24,7 @@ const MODEL = 'gemini-2.5-flash';
  * Ausreißer liegt weit darüber; 6000 fängt praktisch alles ab, ohne dass
  * ein einzelner POI das Output-Budget sprengt.
  */
-const MAX_DESC_CHARS = 6000;
+export const MAX_DESC_CHARS = 6000;
 
 /**
  * Großzügiger als bei Events (4096): POI-Texte sind länger und in sich
@@ -33,7 +33,7 @@ const MAX_DESC_CHARS = 6000;
  */
 const MAX_OUTPUT_TOKENS = 6144;
 
-const SYSTEM_INSTRUCTION =
+export const SYSTEM_INSTRUCTION =
 `You translate descriptions of Austrian leisure destinations (museums, pools, castles, hiking areas, thermal baths, viewpoints) from German to natural English for a travel-and-events website.
 
 Rules:

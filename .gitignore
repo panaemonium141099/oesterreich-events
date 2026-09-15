@@ -119,3 +119,6 @@ tmp/
 _*.sh
 _*.ts
 .worktrees/
+
+# Lauf-State der OpenAI-Batch-Uebersetzung (Server: /opt/app/state)
+/state/

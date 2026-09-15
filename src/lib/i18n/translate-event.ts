@@ -37,7 +37,7 @@ export interface EventTranslation {
 }
 
 const MODEL = 'gemini-2.5-flash';
-const MAX_DESC_CHARS = 4000;
+export const MAX_DESC_CHARS = 4000;
 
 /**
  * Output-Budget mit Beschreibung. 2048 war zu knapp: eine 4000-Zeichen-
@@ -54,7 +54,7 @@ const SHARED_RULES =
 - Translate faithfully — do NOT add, embellish or omit information. No marketing language that is not in the source.
 - title_en: concise translated title. If the title is a proper name that needs no translation, return it unchanged.`;
 
-const SYSTEM_FULL =
+export const SYSTEM_FULL =
 `You translate Austrian event listings from German to natural English for an event-discovery website.
 
 Rules:
@@ -73,7 +73,7 @@ ${SHARED_RULES}
  * betrifft 25 223 der 74 767 offenen Events (34 %). Mit dem
  * Titel-only-Schema unten: 5 von 5 sauber, ~0,7 s, ~12 Output-Tokens.
  */
-const SYSTEM_TITLE_ONLY =
+export const SYSTEM_TITLE_ONLY =
 `You translate Austrian event titles from German to natural English for an event-discovery website.
 
 Rules:
