@@ -35,7 +35,8 @@ import { existsSync, mkdirSync, writeFileSync } from 'fs';
 import { dirname } from 'path';
 import { createClient } from '@supabase/supabase-js';
 import { sendGenericEmail } from '../lib/email';
-import { MIN_QUALITY_SCORE } from '../lib/i18n/translate-batch';
+import { fetchActivityCandidates, MIN_QUALITY_SCORE } from '../lib/i18n/translate-batch';
+import { activityWorthTranslating } from '../lib/i18n/openai-batch';
 
 /** Rückstand, ab dem der Event-Bestand als abgearbeitet gilt. */
 const EVENT_BACKLOG_OK = 2000;
@@ -104,10 +105,10 @@ function renderMail(c: Counts): string {
     </p>
 
     <p style="margin:0;font-size:12px;line-height:1.6;color:#6b7280;">
-      Ein kleiner Rest bleibt dauerhaft deutsch: Texte, die Gemini als
-      wörtliche Übernahme von einer Veranstalterseite erkennt, lehnt es ab
-      (RECITATION). Dazu kommt der tägliche Nachschub der Scraper, den der
-      Timer alle drei Stunden mitnimmt — hier ist nichts mehr zu tun.
+      Ein kleiner Rest bleibt dauerhaft deutsch: Texte, deren Übersetzung
+      zweimal durch die Qualitätsprüfung gefallen ist. Dazu kommt der
+      tägliche Nachschub der Scraper, den der Timer alle drei Stunden
+      mitnimmt — hier ist nichts mehr zu tun.
     </p>
   </div>
 </body></html>`;
@@ -133,24 +134,36 @@ async function main() {
       .eq('is_closed', false)
       .not('description', 'is', null);
 
-  const [eventsTotalRes, eventsDoneRes, poisTotalRes, poisDoneRes] = await Promise.all([
+  const [eventsTotalRes, eventsDoneRes, poisDoneRes] = await Promise.all([
     eventsBase(),
     eventsBase().not('title_en', 'is', null),
-    poisBase(),
     poisBase().not('description_en', 'is', null),
   ]);
 
-  for (const r of [eventsTotalRes, eventsDoneRes, poisTotalRes, poisDoneRes]) {
+  for (const r of [eventsTotalRes, eventsDoneRes, poisDoneRes]) {
     if (r.error) {
       console.error('ERROR: Zaehl-Query fehlgeschlagen:', r.error.message);
       process.exit(1);
     }
   }
 
+  // Offene POIs: nur die, die ueberhaupt uebersetzt werden. 929 POIs haben
+  // eine Beschreibung unter 200 Zeichen (Indexierungs-Gate) und werden von
+  // keinem Backfill angefasst — mit ihnen im Zaehler waere der Rueckstand
+  // nie 0 gewesen und diese Mail nie verschickt worden (Befund 2026-09-15).
+  // PostgREST kann nicht nach Textlaenge filtern, deshalb kurz durchblaettern.
+  let poiOpen = 0;
+  for (let offset = 0; ; ) {
+    const { rows, rawCount } = await fetchActivityCandidates(supabase, 500, offset);
+    if (rawCount === 0) break;
+    offset += rawCount;
+    poiOpen += rows.filter(r => activityWorthTranslating(r.description)).length;
+  }
+
   const c: Counts = {
     eventsTotal: eventsTotalRes.count ?? 0,
     eventsDone: eventsDoneRes.count ?? 0,
-    poisTotal: poisTotalRes.count ?? 0,
+    poisTotal: (poisDoneRes.count ?? 0) + poiOpen,
     poisDone: poisDoneRes.count ?? 0,
   };
 

@@ -43,6 +43,12 @@ const CATALOG: Record<string, WorkflowInfo> = {
     purpose: 'Aktualisiert die Freizeitaktivitäten aus Deskline und OpenStreetMap.',
     schedule: 'wöchentlich',
   },
+  'translate-openai-batch': {
+    name: 'Übersetzung DE→EN (OpenAI Batch)',
+    purpose:
+      'Übersetzt Event-Titel/-Beschreibungen und POI-Beschreibungen ins Englische über die OpenAI Batch API; löst den Gemini-Backfill ab.',
+    schedule: 'alle 3 Stunden, bis der Rückstand leer ist',
+  },
   'translate-events': {
     name: 'Übersetzung Events',
     purpose: 'Übersetzt Event-Titel und -Beschreibungen ins Englische für die /en-Seiten.',

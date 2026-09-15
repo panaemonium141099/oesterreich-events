@@ -61,6 +61,7 @@
     "translate:en": "tsx --env-file=.env.local src/scripts/translate-events-en.ts",
     "translate:activities": "tsx --env-file=.env.local src/scripts/translate-activities-en.ts",
     "notify:translation": "tsx --env-file=.env.local src/scripts/notify-translation-complete.ts",
+    "translate:batch": "tsx --env-file=.env.local src/scripts/translate-openai-batch.ts",
     "install-google-sa": "tsx src/scripts/install-google-sa.ts",
     "download-category-images": "tsx --env-file=.env.local src/scripts/download-category-images.ts",
     "import-osm-venues": "tsx --env-file=.env.local src/scripts/import-osm-venues.ts",
