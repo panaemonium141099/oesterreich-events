@@ -9,8 +9,11 @@ import { createClient } from '@/lib/supabase/client';
 /**
  * V4TabBar — fixed mobile bottom-tab-bar introduced in v4 redesign Phase 1.
  *
- * Five primary tabs (Entdecken · Künstler · Karte · Pläne · Profil) match
- * the bottom-tab-bar in mockups/v4-shared.jsx (V4TabBar). Desktop hides
+ * Six primary tabs (Entdecken · Freizeit · Künstler · Karte · Pläne ·
+ * Profil), Reihenfolge wie die Textlinks im V4TopNav. Die fuenf aus
+ * mockups/v4-shared.jsx (V4TabBar) plus Freizeit (2026-09-15): das Top-Nav
+ * blendet seine Textlinks auf Mobile aus, ohne eigenen Tab war der
+ * Freizeit-Bestand mobil nur ueber den Footer erreichbar. Desktop hides
  * this whole bar (md:hidden) since V4TopNav already exposes the same
  * destinations.
  *
@@ -28,13 +31,16 @@ interface TabItem {
   /** The href shown when authed; for /profile we override to /auth/login when anon. */
   href: string;
   /** Message-Key im Namespace `TabBar` (fn-17 i18n) */
-  labelKey: 'discover' | 'artists' | 'map' | 'plans' | 'profile';
+  labelKey: 'discover' | 'activities' | 'artists' | 'map' | 'plans' | 'profile';
   matches: ReadonlyArray<string>;
-  icon: 'home' | 'music' | 'map' | 'ticket' | 'user';
+  icon: 'home' | 'mountain' | 'music' | 'map' | 'ticket' | 'user';
 }
 
 const TABS: ReadonlyArray<TabItem> = [
   { href: '/entdecken', labelKey: 'discover', matches: ['/', '/entdecken'], icon: 'home' },
+  // Freizeit-Bestand (fn-18): aktiv auf Uebersicht UND Detailseiten,
+  // gleiche matches wie der Top-Nav-Link.
+  { href: '/aktivitaeten', labelKey: 'activities', matches: ['/aktivitaeten', '/aktivitaet'], icon: 'mountain' },
   { href: '/artists',  labelKey: 'artists',  matches: ['/artists'],         icon: 'music' },
   { href: '/map',      labelKey: 'map',      matches: ['/map'],             icon: 'map' },
   { href: '/plans',    labelKey: 'plans',    matches: ['/plans', '/saved'], icon: 'ticket' },
@@ -66,6 +72,12 @@ function TabIcon({ name, active }: { name: TabItem['icon']; active: boolean }) {
         <svg {...common}>
           <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
           <polyline points="9 22 9 12 15 12 15 22" />
+        </svg>
+      );
+    case 'mountain':
+      return (
+        <svg {...common}>
+          <path d="m8 3 4 8 5-5 5 15H2L8 3z" />
         </svg>
       );
     case 'music':
@@ -156,7 +168,7 @@ export function V4TabBar() {
               }
             >
               <TabIcon name={tab.icon} active={active} />
-              <span className="text-[10px] font-semibold tracking-[0.2px]">
+              <span className="text-[10px] font-semibold tracking-[0.2px] whitespace-nowrap">
                 {label}
               </span>
             </Link>
