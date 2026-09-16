@@ -92,7 +92,9 @@ jobs:
           cache: 'npm'
       - run: npm ci
       - name: Scrape ${{ github.event.inputs.scraper }}
-        run: npx tsx src/scripts/scrape.ts --source ${{ github.event.inputs.scraper }}
+        env:
+          SCRAPER_SOURCE: ${{ github.event.inputs.scraper }}
+        run: npx tsx src/scripts/scrape-single.ts "$SCRAPER_SOURCE"
 
   venues:
     if: ${{ github.event_name == 'schedule' || (github.event.inputs.skip_scrapers != 'true' && github.event.inputs.scraper == '') }}

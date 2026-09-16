@@ -492,7 +492,14 @@ async function recordSourceRun(row: {
   }
 }
 
-export async function runScraper(scraper: BaseScraper): Promise<void> {
+export interface ScraperRunResult {
+  eventsFound: number;
+  eventsUpserted: number;
+  durationMs: number;
+  error?: string;
+}
+
+export async function runScraper(scraper: BaseScraper): Promise<ScraperRunResult> {
   // Supabase is the single source of truth — no local SQLite dual-write.
   let eventsFound = 0;
   let eventsNew = 0;
@@ -577,6 +584,10 @@ export async function runScraper(scraper: BaseScraper): Promise<void> {
           ? `${syncErrors} Zeilen nicht geschrieben: ${syncErrorDetail || 'DB-Fehler'}`.slice(0, 500)
           : null,
     });
+    return {
+      eventsFound, eventsUpserted: eventsNew, durationMs: Date.now() - startedMs,
+      error: syncErrors > 0 ? `${syncErrors} Schreibfehler: ${syncErrorDetail || 'DB-Fehler'}` : undefined,
+    };
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
     console.error(`[${scraper.name}] FEHLER: ${message}`);
@@ -596,6 +607,7 @@ export async function runScraper(scraper: BaseScraper): Promise<void> {
       message: `Fehler: ${message}`,
       startedAt,
     });
+    return { eventsFound, eventsUpserted: 0, durationMs: Date.now() - startedMs, error: message };
   }
 }
 
