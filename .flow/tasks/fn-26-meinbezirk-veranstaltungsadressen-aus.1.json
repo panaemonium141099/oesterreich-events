@@ -1,0 +1,14 @@
+{
+  "assignee": null,
+  "claim_note": "",
+  "claimed_at": null,
+  "created_at": "2026-09-16T06:37:30.897557Z",
+  "depends_on": [],
+  "epic": "fn-26-meinbezirk-veranstaltungsadressen-aus",
+  "id": "fn-26-meinbezirk-veranstaltungsadressen-aus.1",
+  "priority": null,
+  "spec_path": ".flow/tasks/fn-26-meinbezirk-veranstaltungsadressen-aus.1.md",
+  "status": "todo",
+  "title": "Event-Ortsdaten strukturiert und aus sichtbarer Ortszeile extrahieren, alle Details anreichern und testen",
+  "updated_at": "2026-09-16T06:45:09.886867Z"
+}

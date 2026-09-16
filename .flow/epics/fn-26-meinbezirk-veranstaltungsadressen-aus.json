@@ -1,0 +1,13 @@
+{
+  "branch_name": "fn-26-meinbezirk-veranstaltungsadressen-aus",
+  "created_at": "2026-09-16T06:37:08.606516Z",
+  "depends_on_epics": [],
+  "id": "fn-26-meinbezirk-veranstaltungsadressen-aus",
+  "next_task": 1,
+  "plan_review_status": "unknown",
+  "plan_reviewed_at": null,
+  "spec_path": ".flow/specs/fn-26-meinbezirk-veranstaltungsadressen-aus.md",
+  "status": "open",
+  "title": "MeinBezirk Veranstaltungsadressen aus Detailseiten korrekt \u00fcbernehmen",
+  "updated_at": "2026-09-16T06:42:22.910655Z"
+}

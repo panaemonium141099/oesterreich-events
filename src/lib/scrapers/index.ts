@@ -334,7 +334,7 @@ const SCRAPER_TIMEOUT_OVERRIDES_MIN: Record<string, number> = {
   'gemeinden-generic': 280,
   'gemeinde-registry': 280,
   'gemeinden': 280, // 4. Kommunal-Aggregator (253 Gemeinden), Befund 2026-07-15
-  'meinbezirk': 45,
+  'meinbezirk': 90, // Full detail coverage (formerly capped at 500), three workers
 };
 
 function timeoutMsFor(name: string): number {
@@ -381,7 +381,7 @@ const SCRAPER_WEIGHTS: Record<string, number> = {
   'gemeinde-registry': 250,             // ~1900 Gemeinden, oft Budget-begrenzt
   'gemeinden': 130,                     // 253 Gemeinden inkl. Kalender-Discovery (Schätzung, Telemetrie liefert bald Messwert)
   // Gemessen 2026-07-14 (max_min, mit Headroom aufgerundet):
-  'meinbezirk': 30,                     // 24,7
+  'meinbezirk': 60,                     // Estimate with full detail coverage; update from telemetry
   'veranstaltungskalender.net': 25,     // 21,6
   'marxhalle': 20,                      // 17,6
   'falter': 14,                         // 11,4

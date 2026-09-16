@@ -1,6 +1,7 @@
 import * as cheerio from 'cheerio';
 import { BaseScraper } from './BaseScraper';
 import { isRegionLabel } from './gemeinde-context';
+import { extractMeinBezirkLocation } from './meinbezirk-location';
 import { categorizeEvent } from '../categorize';
 import type { ScrapedEvent } from '@/types/events';
 
@@ -150,8 +151,8 @@ const MONTHS: Record<string, string> = {
   'dezember': '12', 'dez': '12', 'dec': '12',
 };
 
-/** Max number of detail pages to scrape for richer data */
-const DETAIL_SCRAPE_LIMIT = 500;
+/** Bound load while covering every event, including later listing pages. */
+const DETAIL_CONCURRENCY = 3;
 
 export class MeinBezirkScraper extends BaseScraper {
   readonly name = 'meinbezirk';
@@ -199,70 +200,76 @@ export class MeinBezirkScraper extends BaseScraper {
     const events = Array.from(allEvents.values());
     this.log(`${events.length} Events gescrapt von ${page - 1} Seiten`);
 
-    // Scrape detail pages for the first N events to get richer data
+    // Scrape every detail page to retain the source location data
     await this.enrichWithDetails(events);
 
     return events;
   }
 
   /**
-   * Scrape detail pages for the first DETAIL_SCRAPE_LIMIT events
+   * Scrape detail pages for all events with bounded concurrency
    * to get full address, better images, and descriptions.
    */
   private async enrichWithDetails(events: ScrapedEvent[]): Promise<void> {
-    const toEnrich = events.slice(0, DETAIL_SCRAPE_LIMIT);
+    const toEnrich = events;
     this.log(`Scrape ${toEnrich.length} Detail-Seiten für bessere Daten...`);
     let enriched = 0;
     let failed = 0;
 
-    for (const event of toEnrich) {
-      // Skip events without a source_url — MeinBezirk always has one,
-      // but the type is nullable now (other scrapers like Feratel return
-      // null). Narrow here so we don't pass null into fetchPage.
-      if (!event.source_url) continue;
-      try {
-        const html = await this.fetchPage(event.source_url);
-        const detail = this.parseDetailPage(html);
+    let next = 0;
+    const worker = async () => {
+      while (next < toEnrich.length) {
+        const event = toEnrich[next++];
+        // Skip events without a source_url — MeinBezirk always has one,
+        // but the type is nullable now (other scrapers like Feratel return
+        // null). Narrow here so we don't pass null into fetchPage.
+        if (!event.source_url) continue;
+        try {
+          const html = await this.fetchPage(event.source_url);
+          const detail = this.parseDetailPage(html, event.source_url);
 
-        if (detail.description) event.description = detail.description;
-        if (detail.address) event.address = detail.address;
-        if (detail.postalCode) event.postal_code = detail.postalCode;
-        // Image: when the detail page provides a DIFFERENT URL, swap
-        // image_url AND its dims atomically. Keeping the listing-page
-        // thumbnail dims on a new hero URL would emit impossible
-        // metadata (e.g. 400x300 thumbnail dims on a 1200×630 og URL).
-        //
-        // When the URL is identical to the listing page's, we only
-        // BACKFILL missing dims — never erase a real listing-page
-        // dim with `undefined`. This keeps the dim columns sticky
-        // even when the detail page doesn't expose explicit width/
-        // height meta.
-        if (detail.imageUrl) {
-          if (detail.imageUrl !== event.image_url) {
-            event.image_url = detail.imageUrl;
-            event.image_width = detail.imageWidth;
-            event.image_height = detail.imageHeight;
-          } else {
-            if (detail.imageWidth !== undefined && event.image_width === undefined) {
+          if (detail.description) event.description = detail.description;
+          if (detail.address) event.address = detail.address;
+          if (detail.postalCode) event.postal_code = detail.postalCode;
+          if (detail.city) event.city = detail.city;
+          // Image: when the detail page provides a DIFFERENT URL, swap
+          // image_url AND its dims atomically. Keeping the listing-page
+          // thumbnail dims on a new hero URL would emit impossible
+          // metadata (e.g. 400x300 thumbnail dims on a 1200×630 og URL).
+          //
+          // When the URL is identical to the listing page's, we only
+          // BACKFILL missing dims — never erase a real listing-page
+          // dim with `undefined`. This keeps the dim columns sticky
+          // even when the detail page doesn't expose explicit width/
+          // height meta.
+          if (detail.imageUrl) {
+            if (detail.imageUrl !== event.image_url) {
+              event.image_url = detail.imageUrl;
               event.image_width = detail.imageWidth;
-            }
-            if (detail.imageHeight !== undefined && event.image_height === undefined) {
               event.image_height = detail.imageHeight;
+            } else {
+              if (detail.imageWidth !== undefined && event.image_width === undefined) {
+                event.image_width = detail.imageWidth;
+              }
+              if (detail.imageHeight !== undefined && event.image_height === undefined) {
+                event.image_height = detail.imageHeight;
+              }
             }
           }
-        }
-        if (detail.locationName && !event.location_name) {
-          event.location_name = detail.locationName;
+          if (detail.locationName) {
+            event.location_name = detail.locationName;
+          }
+
+          enriched++;
+        } catch {
+          failed++;
         }
 
-        enriched++;
-      } catch {
-        failed++;
+        // Each worker pauses; at most three requests are in flight
+        await this.sleep(1000);
       }
-
-      // Rate-limit: 1 second between detail requests
-      await this.sleep(1000);
-    }
+    };
+    await Promise.all(Array.from({ length: DETAIL_CONCURRENCY }, () => worker()));
 
     this.log(`Detail-Enrichment: ${enriched} angereichert, ${failed} fehlgeschlagen`);
   }
@@ -270,10 +277,11 @@ export class MeinBezirkScraper extends BaseScraper {
   /**
    * Parse a detail page for richer event data.
    */
-  private parseDetailPage(html: string): {
+  private parseDetailPage(html: string, sourceUrl?: string): {
     description?: string;
     address?: string;
     postalCode?: string;
+    city?: string;
     imageUrl?: string;
     imageWidth?: number;
     imageHeight?: number;
@@ -284,6 +292,7 @@ export class MeinBezirkScraper extends BaseScraper {
       description?: string;
       address?: string;
       postalCode?: string;
+      city?: string;
       imageUrl?: string;
       imageWidth?: number;
       imageHeight?: number;
@@ -299,37 +308,7 @@ export class MeinBezirkScraper extends BaseScraper {
       }
     }
 
-    // Address: look for structured address or location info
-    const $address = $('[itemprop="address"], .event-detail__location, .event-location').first();
-    if ($address.length) {
-      const streetName = $address.find('[itemprop="streetAddress"]').text().trim();
-      const postalCode = $address.find('[itemprop="postalCode"]').text().trim();
-      const locality = $address.find('[itemprop="addressLocality"]').text().trim();
-
-      if (streetName || locality) {
-        const parts = [streetName, postalCode, locality].filter(Boolean);
-        result.address = parts.join(', ');
-      }
-      if (postalCode) {
-        result.postalCode = postalCode;
-      }
-    }
-
-    // Fallback: try to extract PLZ from any text matching "A-XXXX" or just 4 digits near address context
-    if (!result.postalCode) {
-      const bodyText = $('body').text();
-      const plzMatch = bodyText.match(/\b(?:A-)?(\d{4})\s+[A-ZÄÖÜ]/);
-      if (plzMatch) {
-        result.postalCode = plzMatch[1];
-      }
-    }
-
-    // Location name from venue
-    const $venue = $('[itemprop="location"] [itemprop="name"], .event-detail__venue').first();
-    if ($venue.length) {
-      const venueName = $venue.text().trim();
-      if (venueName) result.locationName = venueName;
-    }
+    Object.assign(result, extractMeinBezirkLocation($, sourceUrl));
 
     // Better image: defer to extractImageCandidate so the same
     // best-of-source scoring (og:image vs in-page hero, with content
@@ -402,14 +381,17 @@ export class MeinBezirkScraper extends BaseScraper {
 
         // Extract venue from list items
         let locationName: string | undefined;
-        const $lis = $container.find('ul li');
+        const $lis = $container.find('.content-card-date-location > li');
         if ($lis.length >= 2) {
-          // Usually: li[0]=date, li[1]=venue, li[2]=detail
+          // li[0]=date, li[1]=venue, li[2]=locality (not the editorial district)
           locationName = $lis.eq(1).text().trim() || undefined;
         }
         // fn-25 B3: Fehlt das Venue, steht in li[1] das Bundesland ("Tirol").
         // Das ist kein Veranstaltungsort.
         if (locationName && isRegionLabel(locationName)) locationName = undefined;
+
+        const locality = $lis.length >= 3 ? $lis.eq(2).text().trim() : '';
+        const city = locality && !isRegionLabel(locality) ? locality : undefined;
 
         // Category from URL slug
         const category = this.mapCategory(categorySlug) || categorizeEvent(title);
@@ -423,6 +405,7 @@ export class MeinBezirkScraper extends BaseScraper {
           title,
           start_date: startDate,
           location_name: locationName,
+          city,
           district,
           bundesland,
           category,
