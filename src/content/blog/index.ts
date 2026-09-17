@@ -105,6 +105,8 @@ import { post as zipfZapfFest2026 } from './posts/zipf-zapf-fest-2026';
 import { post as marinAlsopHorizonteBenefizkonzert2026 } from './posts/marin-alsop-horizonte-benefizkonzert-2026';
 import { post as pavelShalmanBokiRadenkovicElectricRoseKlezmoreFestiva2026 } from './posts/pavel-shalman-boki-radenkovic-electric-rose-klezmore-festiva-2026';
 import { post as tomWalekDerOe3MicromannLive2026 } from './posts/tom-walek-der-oe3-micromann-live-2026';
+import { post as konzerteInDerPeterskircheWien2026 } from './posts/konzerte-in-der-peterskirche-wien-2026';
+import { post as designDistrictLivingLifestyleMesse2026 } from './posts/design-district-living-lifestyle-messe-2026';
 // AUTOWRITER-IMPORTS-END
 
 export type { FestivalPost, GalleryImage, FestivalKeyFacts, LineupAct } from './types';
@@ -216,6 +218,8 @@ export const ALL_POSTS: FestivalPost[] = [
   marinAlsopHorizonteBenefizkonzert2026,
   pavelShalmanBokiRadenkovicElectricRoseKlezmoreFestiva2026,
   tomWalekDerOe3MicromannLive2026,
+  konzerteInDerPeterskircheWien2026,
+  designDistrictLivingLifestyleMesse2026,
   // AUTOWRITER-POSTS-END
 ].sort(
   (a, b) => new Date(b.publishDate).getTime() - new Date(a.publishDate).getTime()
