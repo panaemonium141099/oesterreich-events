@@ -1,0 +1,497 @@
+{
+  "austria-info:campingbeach-annenheim-ossiacher-see": {
+    "lat": 46.660145,
+    "lng": 13.9065735,
+    "query": "Seeuferstraße 35, 9520 Annenheim"
+  },
+  "austria-info:strandbad-klagenfurt-woerthersee": {
+    "lat": 46.618634,
+    "lng": 14.2551165,
+    "query": "Metnitzstrand 2, 9020 Klagenfurt am Wörthersee"
+  },
+  "austria-info:seeberuehrungen-doebriach-millstaetter-see": {
+    "lat": 46.7777403,
+    "lng": 13.6530018,
+    "query": "Seestraße, 9873 Döbriach"
+  },
+  "austria-info:strandbad-egg-faaker-see": {
+    "lat": 46.5866336,
+    "lng": 13.9344022,
+    "query": "Egger Seeuferstraße 24, 9580 Egg am Faaker See"
+  },
+  "austria-info:strandbad-seewalchen-attersee": {
+    "lat": 47.9497822,
+    "lng": 13.5900749,
+    "query": "Strandbad Seewalchen am Attersee, Seewalchen am Attersee"
+  },
+  "austria-info:strandbad-unterach-attersee": {
+    "lat": 47.803095,
+    "lng": 13.4865385,
+    "query": "Strandbad Unterach am Attersee, Unterach am Attersee"
+  },
+  "austria-info:strandbad-weyregg-attersee": {
+    "lat": 47.9041333,
+    "lng": 13.5701686,
+    "query": "Weyregg 6, 4852 Weyregg am Attersee"
+  },
+  "austria-info:seeham-obertrumer-see-poollift": {
+    "lat": 47.9649041,
+    "lng": 13.0610503,
+    "query": "5164 Seeham"
+  },
+  "austria-info:badesee-ried-tirol": {
+    "lat": 47.0601315,
+    "lng": 10.6603659,
+    "query": "Badesee Ried im Oberinntal, Ried im Oberinntal"
+  },
+  "austria-info:wien-museum": {
+    "lat": 48.1992128,
+    "lng": 16.3730689,
+    "query": "Karlsplatz 8, 1040 Wien"
+  },
+  "austria-info:lentos-kunstmuseum-linz": {
+    "lat": 48.3085988,
+    "lng": 14.2888948,
+    "query": "Ernst-Koref-Promenade 1, 4020 Linz"
+  },
+  "austria-info:salzburg-museum-neue-residenz": {
+    "lat": 47.7986175,
+    "lng": 13.0475043,
+    "query": "Mozartplatz 1, 5020 Salzburg"
+  },
+  "austria-info:festspielhaus-bregenz": {
+    "lat": 47.5044801,
+    "lng": 9.738732,
+    "query": "Platz der Wiener Symphoniker 1, 6900 Bregenz"
+  },
+  "austria-info:keltenmuseum-hallein": {
+    "lat": 47.6834257,
+    "lng": 13.093525,
+    "query": "Pflegerplatz 5, 5400 Hallein"
+  },
+  "austria-info:albertina-wien": {
+    "lat": 48.2046365,
+    "lng": 16.3682605,
+    "query": "Albertinaplatz 1, 1010 Wien"
+  },
+  "austria-info:domquartier-salzburg": {
+    "lat": 47.7983096,
+    "lng": 13.0456409,
+    "query": "DomQuartier Salzburg, Salzburg"
+  },
+  "austria-info:vorarlberg-museum-bregenz": {
+    "lat": 47.5045897,
+    "lng": 9.7466362,
+    "query": "Kornmarktplatz 1, 6900 Bregenz"
+  },
+  "austria-info:festspielhaus-erl": {
+    "lat": 47.6720397,
+    "lng": 12.1878567,
+    "query": "Mühlgraben 56, 6343 Erl"
+  },
+  "austria-info:kunsthistorisches-museum-wien": {
+    "lat": 48.2045105,
+    "lng": 16.3608955,
+    "query": "Maria-Theresien-Platz, 1010 Wien"
+  },
+  "austria-info:schloss-schoenbrunn-wien": {
+    "lat": 48.1849894,
+    "lng": 16.3115684,
+    "query": "Schönbrunner Schloßstraße 47, 1130 Wien"
+  },
+  "austria-info:schloss-hof": {
+    "lat": 48.2122309,
+    "lng": 16.9353833,
+    "query": "Schloßhof 1, 2294 Engelhartstetten"
+  },
+  "austria-info:dom-museum-wien": {
+    "lat": 48.2087382,
+    "lng": 16.3740053,
+    "query": "Stephansplatz 6, 1010 Wien"
+  },
+  "austria-info:salzburg-stadtfuehrung-barrierefrei": {
+    "lat": 47.7990628,
+    "lng": 13.0479217,
+    "query": "Mozartplatz 5, 5020 Salzburg"
+  },
+  "austria-info:graz-stadtfuehrung-hoeren-fuehlen": {
+    "lat": 47.0708831,
+    "lng": 15.4382135,
+    "query": "Hauptplatz, 8010 Graz"
+  },
+  "austria-info:innsbruck-barrierefreie-stadtrunde": {
+    "lat": 47.2686574,
+    "lng": 11.3932692,
+    "query": "Herzog-Friedrich-Straße 15, 6020 Innsbruck"
+  },
+  "austria-info:wien-barrierefrei-guides": {
+    "lat": 48.2043655,
+    "lng": 16.3689133,
+    "query": "Albertinaplatz, 1010 Wien"
+  },
+  "austria-info:vienna-watersports-arena": {
+    "lat": 48.2727928,
+    "lng": 16.373066,
+    "query": "Am Hubertusdamm 50, 1210 Wien"
+  },
+  "donau-com:donauseen-runde-leiben": {
+    "lat": 48.2400228,
+    "lng": 15.2626367,
+    "query": "3652 Leiben"
+  },
+  "donau-com:stadtrunde-ybbs": {
+    "lat": 48.1772453,
+    "lng": 15.08489,
+    "query": "Hauptplatz, 3370 Ybbs an der Donau"
+  },
+  "donau-com:nibelungenweg-runde-poechlarn": {
+    "lat": 48.2118827,
+    "lng": 15.2072636,
+    "query": "Regensburger Straße, 3380 Pöchlarn"
+  },
+  "donau-com:egon-schiele-weg-tulln": {
+    "lat": 48.3308924,
+    "lng": 16.0508919,
+    "query": "Hauptplatz, 3430 Tulln an der Donau"
+  },
+  "graztourismus-at:salon-stolz-shg-7385": {
+    "lat": 47.0846418,
+    "lng": 15.430733,
+    "query": "Theodor-Körner-Straße 67, 8010 Graz"
+  },
+  "graztourismus-at:kunsthaus-graz-shg-1462": {
+    "lat": 47.0712975,
+    "lng": 15.4341193,
+    "query": "Lendkai 1, 8020 Graz"
+  },
+  "graztourismus-at:schlossbergbahn-graz-shg-1482": {
+    "lat": 47.0748283,
+    "lng": 15.4351378,
+    "query": "Kaiser-Franz-Josef-Kai 38, 8010 Graz"
+  },
+  "graztourismus-at:joanneumsviertel-shg-1494": {
+    "lat": 47.0686191,
+    "lng": 15.4378175,
+    "query": "Joanneumsviertel, 8010 Graz"
+  },
+  "graztourismus-at:helmut-list-halle-shg-9730": {
+    "lat": 47.0796989,
+    "lng": 15.411993,
+    "query": "Waagner-Biro-Straße 98 a, 8020 Graz"
+  },
+  "graztourismus-at:schloss-eggenberg-graz-shg-1478": {
+    "lat": 47.0739232,
+    "lng": 15.3918001,
+    "query": "Eggenberger Allee 90, 8020 Graz"
+  },
+  "graztourismus-at:schlossberglift-shg-1484": {
+    "lat": 47.0727454,
+    "lng": 15.4357861,
+    "query": "Schloßbergplatz, 8010 Graz"
+  },
+  "graztourismus-at:oper-graz-shg-1472": {
+    "lat": 47.0689957,
+    "lng": 15.4456981,
+    "query": "Kaiser-Josef-Platz 10, 8010 Graz"
+  },
+  "graztourismus-at:schauspielhaus-graz-shg-8868": {
+    "lat": 47.0727061,
+    "lng": 15.4415137,
+    "query": "Hofgasse 11, 8010 Graz"
+  },
+  "graztourismus-at:landeszeughaus-shg-1464": {
+    "lat": 47.0698025,
+    "lng": 15.4398828,
+    "query": "Herrengasse 16, 8010 Graz"
+  },
+  "graztourismus-at:dom-im-berg-i-grazer-spielstaetten-shg-9486": {
+    "lat": 47.0734725,
+    "lng": 15.4380818,
+    "query": "Schlossbergplatz 1, 8010 Graz"
+  },
+  "graztourismus-at:orpheum-graz-i-grazer-spielstaetten-shg-9729": {
+    "lat": 47.0723099,
+    "lng": 15.429964,
+    "query": "Orpheumgasse 8, 8020 Graz"
+  },
+  "graztourismus-at:next-liberty-shg-8869": {
+    "lat": 47.0689957,
+    "lng": 15.4456981,
+    "query": "Kaiser-Josef-Platz 10, 8010 Graz"
+  },
+  "graztourismus-at:schlossbergbuehne-kasematten-i-grazer-spielstaetten-shg-8871": {
+    "lat": 47.0757333,
+    "lng": 15.4374763,
+    "query": "Schlossberg, 8010 Graz"
+  },
+  "graztourismus-at:prunkraeume-shg-2224": {
+    "lat": 47.0739232,
+    "lng": 15.3918001,
+    "query": "Eggenberger Allee 90, 8020 Graz"
+  },
+  "graztourismus-at:graz-museum-shg-2236": {
+    "lat": 47.0726872,
+    "lng": 15.4365423,
+    "query": "Sackstraße 18, 8010 Graz"
+  },
+  "graztourismus-at:steiermaerkische-landesbibliothek-im-joanneumsviertel-shg-8641": {
+    "lat": 47.0683365,
+    "lng": 15.4384434,
+    "query": "Kalchberggasse 2, 8010 Graz"
+  },
+  "graztourismus-at:archaeologiemuseum-shg-2221": {
+    "lat": 47.0763704,
+    "lng": 15.3926306,
+    "query": "Archäologiemuseum, Graz"
+  },
+  "graztourismus-at:cosa-center-of-science-activities-shg-2230": {
+    "lat": 47.0686191,
+    "lng": 15.4378175,
+    "query": "Joanneumsviertel, 8010 Graz"
+  },
+  "graztourismus-at:alte-galerie-shg-11438": {
+    "lat": 47.0739232,
+    "lng": 15.3918001,
+    "query": "Eggenberger Allee 90, 8020 Graz"
+  },
+  "graztourismus-at:muenzkabinett-shg-2254": {
+    "lat": 47.0739232,
+    "lng": 15.3918001,
+    "query": "Eggenberger Allee 90, 8020 Graz"
+  },
+  "graztourismus-at:naturkundemuseum-shg-2258": {
+    "lat": 47.0686191,
+    "lng": 15.4378175,
+    "query": "Joanneumsviertel, 8010 Graz"
+  },
+  "graztourismus-at:neue-galerie-graz-und-bruseum-shg-2260": {
+    "lat": 47.0686191,
+    "lng": 15.4378175,
+    "query": "Joanneumsviertel, 8010 Graz"
+  },
+  "museumsguide-net:albertina": {
+    "lat": 48.2046365,
+    "lng": 16.3682605,
+    "query": "Albertinaplatz 1, 1010 Wien"
+  },
+  "museumsguide-net:alte-galerie-schloss-eggenberg": {
+    "lat": 47.0739232,
+    "lng": 15.3918001,
+    "query": "Eggenberger Allee 90, 8020 Graz"
+  },
+  "museumsguide-net:archaeologiemuseum-schloss-eggenberg-universalmuseum-joanneum": {
+    "lat": 47.0739232,
+    "lng": 15.3918001,
+    "query": "Eggenberger Allee 90, 8020 Graz"
+  },
+  "museumsguide-net:burg-forchtenstein": {
+    "lat": 47.7081,
+    "lng": 16.3283,
+    "query": "Burg Forchtenstein, Forchtenstein"
+  },
+  "museumsguide-net:dom-museum-wien": {
+    "lat": 48.2087382,
+    "lng": 16.3740053,
+    "query": "Stephansplatz 6, 1010 Wien"
+  },
+  "museumsguide-net:domquartier-salzburg": {
+    "lat": 47.7983096,
+    "lng": 13.0456409,
+    "query": "DomQuartier Salzburg, Salzburg"
+  },
+  "museumsguide-net:friedensburg-schlaining": {
+    "lat": 47.3258,
+    "lng": 16.2733,
+    "query": "Rochusplatz 1, 7461 Stadtschlaining"
+  },
+  "museumsguide-net:graz-museum": {
+    "lat": 47.0726872,
+    "lng": 15.4365423,
+    "query": "Sackstraße 18, 8010 Graz"
+  },
+  "museumsguide-net:haydn-haus-eisenstadt": {
+    "lat": 47.8456,
+    "lng": 16.5213,
+    "query": "Haydn-Haus Eisenstadt, Eisenstadt"
+  },
+  "museumsguide-net:keltenmuseum-hallein": {
+    "lat": 47.6834257,
+    "lng": 13.093525,
+    "query": "Pflegerplatz 5, 5400 Hallein"
+  },
+  "museumsguide-net:kunsthaus-graz-universalmuseum-joanneum": {
+    "lat": 47.0712975,
+    "lng": 15.4341193,
+    "query": "Lendkai 1, 8020 Graz"
+  },
+  "museumsguide-net:landeszeughaus-universalmuseum-joanneum": {
+    "lat": 47.0698025,
+    "lng": 15.4398828,
+    "query": "Herrengasse 16, 8010 Graz"
+  },
+  "museumsguide-net:lentos-kunstmuseum-linz": {
+    "lat": 48.3085988,
+    "lng": 14.2888948,
+    "query": "Ernst-Koref-Promenade 1, 4020 Linz"
+  },
+  "museumsguide-net:schloss-eggenberg-prunkraeume-universalmuseum-joanneum": {
+    "lat": 47.0739232,
+    "lng": 15.3918001,
+    "query": "Eggenberger Allee 90, 8020 Graz"
+  },
+  "museumsguide-net:neue-galerie-graz-universalmuseum-joanneum": {
+    "lat": 47.0686191,
+    "lng": 15.4378175,
+    "query": "Joanneumsviertel, 8010 Graz"
+  },
+  "museumsguide-net:salon-stolz": {
+    "lat": 47.0846418,
+    "lng": 15.430733,
+    "query": "Theodor-Körner-Straße 67, 8010 Graz"
+  },
+  "museumsguide-net:neue-residenz-salzburg-museum": {
+    "lat": 47.7986175,
+    "lng": 13.0475043,
+    "query": "Mozartplatz 1, 5020 Salzburg"
+  },
+  "museumsguide-net:schloss-esterhazy": {
+    "lat": 47.8458,
+    "lng": 16.5182,
+    "query": "Schloss Esterhazy 1, 7000 Eisenstadt"
+  },
+  "museumsguide-net:stift-klosterneuburg": {
+    "lat": 48.3072033,
+    "lng": 16.3261584,
+    "query": "Stift Klosterneuburg, Klosterneuburg"
+  },
+  "museumsguide-net:stille-nacht-museum-hallein-2": {
+    "lat": 47.6807993,
+    "lng": 13.0918115,
+    "query": "Gruberplatz 1, 5400 Hallein"
+  },
+  "museumsguide-net:stille-nacht-museum-im-pflegerschloessl": {
+    "lat": 47.3347174,
+    "lng": 13.2993022,
+    "query": "Museumsgasse 3, 5602 Wagrain"
+  },
+  "museumsguide-net:stillfried-zentrum-der-urzeit": {
+    "lat": 48.4127282,
+    "lng": 16.8427049,
+    "query": "Hauptstraße 23, 2262 Stillfried"
+  },
+  "museumsguide-net:suedbahn-museum": {
+    "lat": 47.6084605,
+    "lng": 15.6802807,
+    "query": "Heizhausgasse 2, 8680 Mürzzuschlag"
+  },
+  "museumsguide-net:swarovski-kristallwelten": {
+    "lat": 47.2947079,
+    "lng": 11.6011599,
+    "query": "Kristallweltenstraße 1, 6112 Wattens"
+  },
+  "museumsguide-net:technisches-museum-wien": {
+    "lat": 48.1909208,
+    "lng": 16.3180346,
+    "query": "Mariahilfer Straße 212, 1140 Wien"
+  },
+  "museumsguide-net:tirol-panorama-mit-kaiserjaegermuseum": {
+    "lat": 47.2501402,
+    "lng": 11.4004251,
+    "query": "Bergisel 1-2, 6020 Innsbruck"
+  },
+  "museumsguide-net:tiroler-landesmuseum-ferdinandeum": {
+    "lat": 47.2673189,
+    "lng": 11.3977328,
+    "query": "Museumstraße 15, 6020 Innsbruck"
+  },
+  "museumsguide-net:tiroler-volkskunstmuseum": {
+    "lat": 47.2682981,
+    "lng": 11.3958512,
+    "query": "Universitätsstraße 2, 6020 Innsbruck"
+  },
+  "museumsguide-net:torf-glas-ziegel-museum-buermoos": {
+    "lat": 47.9834449,
+    "lng": 12.9208289,
+    "query": "Ignaz Glaser Straße 50, 5111 Bürmoos"
+  },
+  "museumsguide-net:uhrmacher-handwerkmuseum": {
+    "lat": 48.00277,
+    "lng": 13.4854911,
+    "query": "Marktstrasse 2, 4870 Vöcklamarkt"
+  },
+  "museumsguide-net:unteres-belvedere": {
+    "lat": 48.1970325,
+    "lng": 16.3796445,
+    "query": "Rennweg 6, 1030 Wien"
+  },
+  "museumsguide-net:viktor-frankl-museum-wien": {
+    "lat": 48.2163314,
+    "lng": 16.3460235,
+    "query": "Mariannengasse 1/15, 1090 Wien"
+  },
+  "museumsguide-net:volkskundemuseum-universalmuseum-joanneum": {
+    "lat": 47.0754301,
+    "lng": 15.4404279,
+    "query": "Paulustorgasse 11-13a, 8010 Graz"
+  },
+  "museumsguide-net:volkskundemuseum-wien": {
+    "lat": 48.213176,
+    "lng": 16.350333,
+    "query": "Laudongasse 15–19, 1080 Wien"
+  },
+  "museumsguide-net:vorarlberg-museum": {
+    "lat": 47.5045897,
+    "lng": 9.7466362,
+    "query": "Kornmarktplatz 1, 6900 Bregenz"
+  },
+  "museumsguide-net:waldbauernmuseum-gutenstein": {
+    "lat": 47.8761569,
+    "lng": 15.892199,
+    "query": "Markt 31, 2770 Gutenstein"
+  },
+  "museumsguide-net:wien-museum-karlsplatz": {
+    "lat": 48.1992128,
+    "lng": 16.3730689,
+    "query": "Karlsplatz 8, 1040 Wien"
+  },
+  "vorarlberg-travel:spaziergang-der-litz-entlang": {
+    "lat": 47.0802089,
+    "lng": 9.9197063,
+    "query": "Schruns"
+  },
+  "vorarlberg-travel:spaziergang-entlang-der-ill": {
+    "lat": 47.0957061,
+    "lng": 9.8644414,
+    "query": "Vandans"
+  },
+  "vorarlberg-travel:um-das-staubecken-von-latschau": {
+    "lat": 47.0753588,
+    "lng": 9.8722119,
+    "query": "Golmerbahn Latschau"
+  },
+  "vorarlberg-travel:gemutlicher-spaziergang-von-st-anton-im-montafon-nach-tschagguns": {
+    "lat": 47.1116168,
+    "lng": 9.866415,
+    "query": "St. Anton im Montafon"
+  },
+  "vorarlberg-travel:gemutliche-runde-um-das-rifabecken": {
+    "lat": 46.9738622,
+    "lng": 10.042429,
+    "query": "Rifabecken"
+  },
+  "vorarlberg-travel:dorfrunde-schruns-tschagguns": {
+    "lat": 47.0805197,
+    "lng": 9.9194158,
+    "query": "Kirchplatz Schruns"
+  },
+  "wanderdoerfer-at:kundler-klamm": {
+    "lat": 47.4282136,
+    "lng": 12.0275622,
+    "query": "Mühltal, 6311 Wildschönau"
+  },
+  "wanderdoerfer-at:reintalersee-kramsach": {
+    "lat": 47.4589073,
+    "lng": 11.8702871,
+    "query": "6233 Kramsach"
+  }
+}

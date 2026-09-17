@@ -185,6 +185,9 @@ export function geocodeCandidates(entry: DatasetEntry): string[] {
     entry.address && entry.town && !entry.postal_code ? `${entry.address}, ${entry.town}` : null,
     entry.town ? `${entry.name}, ${entry.town}` : null,
     place,
+    // Letzter Versuch ohne Ortsangabe (Nominatim ist auf AT begrenzt, die
+    // Gemeinde-Registry prueft das Ergebnis danach).
+    !entry.town && !entry.address ? entry.name.split(/\s*[\/(]/)[0] : null,
   ];
   return [...new Set(out.filter((c): c is string => Boolean(c)))];
 }

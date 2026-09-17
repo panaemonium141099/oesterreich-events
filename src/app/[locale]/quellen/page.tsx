@@ -64,6 +64,21 @@ const SOURCE_CATEGORIES: SourceCategory[] = [
           'Dauerhafte Freizeitaktivitäten (Bäder, Sommerrodelbahnen, Museen, Klettersteige u. v. m.) aus dem Deskline-Infrastrukturbestand der Tourismusregionen — Datenbasis der /aktivitaet-Seiten. Bild-Copyrights werden pro Aktivität sichtbar ausgewiesen.',
       },
       {
+        name: 'Barrierefrei-Verzeichnis (Tourismusorganisationen)',
+        url: 'https://www.austria.info/de/planning/barrierefreier-urlaub',
+        license: 'Redaktionelle Übernahme mit Quellenangabe',
+        description:
+          'Barrierefreie Ausflugsziele, Wege und Kulturhäuser aus den Barrierefrei-Seiten von Österreich Werbung, Niederösterreich Werbung, WienTourismus, Tirol Werbung, Tourismus Salzburg, Graz Tourismus, Steiermark Tourismus, Vorarlberg Tourismus, Kärnten Werbung, Innsbruck Tourismus, Donau Niederösterreich, Nationalpark Hohe Tauern, Österreichs Wanderdörfern, Holidays on Wheels, museumsguide.net und dem Fachverband der Seilbahnen (WKO). Jeder Eintrag nennt Quelle, Prüfdatum und den Wortlaut des Befunds; Fotos nur mit Bildnachweis der Quelle oder aus Wikimedia Commons mit Lizenz und Urheber.',
+      },
+      {
+        name: 'Wikimedia Commons',
+        url: 'https://commons.wikimedia.org/',
+        license: 'CC BY / CC BY-SA / Public Domain (je Bild)',
+        licenseUrl: 'https://commons.wikimedia.org/wiki/Commons:Lizenzierung',
+        description:
+          'Fotos für Aktivitäten ohne Bild aus der Quellseite; Lizenz und Urheber werden pro Bild angezeigt.',
+      },
+      {
         name: 'OpenStreetMap',
         url: 'https://www.openstreetmap.org/',
         license: 'ODbL 1.0',

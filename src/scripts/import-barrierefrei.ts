@@ -29,6 +29,7 @@ import { readdirSync, readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { createActivityStoreClient } from '@/lib/activities/activity-store';
 import { geocodeLocation } from '@/lib/geocoding';
+import { parseCuratedAccessibility } from '@/lib/activities/accessibility';
 import {
   BARRIEREFREI_SOURCE,
   buildCuratedInsertRow,
@@ -79,10 +80,25 @@ interface Stats {
   noCoords: number;
   outsideRegistry: number;
   mergedIntoDeskline: number;
+  mergedIntoCurated: number;
   inserted: number;
   updated: number;
   imagesFromWikimedia: number;
   errors: string[];
+}
+
+/** Nominatim sperrt bei >1 Anfrage/s per 429; dann nichts als "kein Treffer" cachen. */
+let geocoderBlocked = false;
+async function probeNominatim(): Promise<void> {
+  try {
+    const res = await fetch('https://nominatim.openstreetmap.org/search?q=Wien%2C%20Austria&format=json&limit=1&countrycodes=at', {
+      headers: { 'User-Agent': 'AustriaEvents-Scraper/1.0 (educational project)' },
+    });
+    geocoderBlocked = res.status === 429 || res.status === 403;
+  } catch {
+    geocoderBlocked = true;
+  }
+  if (geocoderBlocked) console.log('[import-barrierefrei] Nominatim antwortet mit 429/403: Eintraege ohne Koordinaten werden uebersprungen, Cache bleibt unberuehrt');
 }
 
 async function resolveCoords(
@@ -96,7 +112,11 @@ async function resolveCoords(
     const c = geoCache[key];
     return c ? { lat: c.lat, lng: c.lng } : null;
   }
+  if (geocoderBlocked) return null;
   for (const candidate of geocodeCandidates(entry)) {
+    // Nominatim erlaubt 1 Anfrage/s; ohne Pause antwortet es mit 429 und
+    // geocodeLocation liefert dann still null.
+    await new Promise((r) => setTimeout(r, 1100));
     const geo = await geocodeLocation(candidate);
     if (geo) {
       geoCache[key] = { lat: geo.latitude, lng: geo.longitude, query: candidate };
@@ -116,6 +136,7 @@ async function main(): Promise<void> {
   const onlySource = sourceIdx >= 0 ? (args[sourceIdx + 1] ?? null) : null;
 
   const files = loadDataset(onlySource);
+  await probeNominatim();
   const supabase = createActivityStoreClient();
   const wikiCache = readJson<WikimediaCache>(WIKIMEDIA_CACHE, {});
   const geoCache = readJson<GeoCache>(GEO_CACHE, {});
@@ -127,6 +148,7 @@ async function main(): Promise<void> {
     noCoords: 0,
     outsideRegistry: 0,
     mergedIntoDeskline: 0,
+    mergedIntoCurated: 0,
     inserted: 0,
     updated: 0,
     imagesFromWikimedia: 0,
@@ -170,25 +192,34 @@ async function main(): Promise<void> {
           continue;
         }
 
-        // Deskline-Kandidaten im Umkreis (bbox ~700 m).
+        // Kandidaten im Umkreis (bbox ~700 m): Deskline-POIs und bereits
+        // kuratierte Zeilen ANDERER Quellen (dieselbe Sehenswuerdigkeit steht
+        // oft bei austria.info, wien.info und museumsguide.net).
         const { data: cand, error: candErr } = await supabase
           .from('poi_activities')
-          .select('id, name, lat, lng, images')
-          .eq('source', 'deskline')
+          .select('id, name, lat, lng, images, source, source_region, accessibility_curated')
+          .in('source', ['deskline', BARRIEREFREI_SOURCE])
           .eq('visible', true)
           .gte('lat', coords.lat - 0.0065)
           .lte('lat', coords.lat + 0.0065)
           .gte('lng', coords.lng - 0.0095)
           .lte('lng', coords.lng + 0.0095)
-          .limit(50);
+          .limit(80);
         if (candErr) throw new Error(`Kandidaten: ${candErr.message}`);
-        const candidates = (cand ?? []) as Array<MatchCandidate & { images: unknown }>;
-        const match = findDesklineMatch({ name: entry.name, lat: coords.lat, lng: coords.lng }, candidates);
-        const matchRow = match ? candidates.find((c) => c.id === match.id) ?? null : null;
+        type CandRow = MatchCandidate & { images: unknown; source: string; source_region: string | null; accessibility_curated: unknown };
+        const all = (cand ?? []) as CandRow[];
+        const desklineCands = all.filter((c) => c.source === 'deskline');
+        const curatedCands = all.filter((c) => c.source === BARRIEREFREI_SOURCE && c.source_region !== file.source);
+        const match = findDesklineMatch({ name: entry.name, lat: coords.lat, lng: coords.lng }, desklineCands);
+        const matchRow = match ? desklineCands.find((c) => c.id === match.id) ?? null : null;
+        const curatedMatch = match ? null : findDesklineMatch({ name: entry.name, lat: coords.lat, lng: coords.lng }, curatedCands);
+        const curatedRow = curatedMatch ? curatedCands.find((c) => c.id === curatedMatch.id) ?? null : null;
 
         // Bilder: Quelle, sonst Wikimedia (gecacht), sonst keins.
         let images: DatasetImage[] = entry.images ?? [];
-        const matchHasImage = Array.isArray(matchRow?.images) && matchRow.images.length > 0;
+        const matchHasImage =
+          (Array.isArray(matchRow?.images) && matchRow.images.length > 0) ||
+          (Array.isArray(curatedRow?.images) && curatedRow.images.length > 0);
         if (images.length === 0 && !matchHasImage) {
           if (wikimedia && !(key in wikiCache)) {
             wikiCache[key] = await findWikimediaImage(entry.name, entry.town ?? place.townFallback);
@@ -203,8 +234,26 @@ async function main(): Promise<void> {
 
         if (dryRun) {
           if (match) stats.mergedIntoDeskline++;
+          else if (curatedRow) stats.mergedIntoCurated++;
           else if (existingBySourceId.has(key)) stats.updated++;
           else stats.inserted++;
+          continue;
+        }
+
+        // Dublette einer anderen kuratierten Quelle: Merkmale vereinigen,
+        // Eintrag der ersten Quelle bleibt fuehrend (Notiz, Quelle, Bild).
+        if (curatedRow && !existingBySourceId.has(key)) {
+          const prev = parseCuratedAccessibility(curatedRow.accessibility_curated);
+          const mine = curatedAccessibilityOf(entry, file);
+          const features = [...new Set([...(prev?.features ?? []), ...mine.features])];
+          const patch: Record<string, unknown> = {
+            accessibility_curated: prev ? { ...prev, features } : mine,
+            updated_at: nowIso,
+          };
+          if (!matchHasImage && images.length > 0) patch.images = images.map(toImageJson);
+          const { error } = await supabase.from('poi_activities').update(patch).eq('id', curatedRow.id);
+          if (error) throw new Error(`Merge kuratiert ${curatedRow.id}: ${error.message}`);
+          stats.mergedIntoCurated++;
           continue;
         }
 
@@ -248,7 +297,7 @@ async function main(): Promise<void> {
 
   console.log(
     `[import-barrierefrei] ${stats.entries} Eintraege: ${stats.inserted} neu, ${stats.updated} aktualisiert, ` +
-      `${stats.mergedIntoDeskline} in Deskline-Zeilen gemerged, ${stats.geocoded} geocodiert, ` +
+      `${stats.mergedIntoDeskline} in Deskline-Zeilen gemerged, ${stats.mergedIntoCurated} Dubletten anderer Quellen gemerged, ${stats.geocoded} geocodiert, ` +
       `${stats.imagesFromWikimedia} Wikimedia-Bilder, ${stats.noCoords} ohne Koordinaten, ` +
       `${stats.outsideRegistry} ausserhalb Registry, ${stats.errors.length} Fehler`,
   );
