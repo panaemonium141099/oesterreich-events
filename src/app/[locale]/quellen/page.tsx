@@ -68,7 +68,7 @@ const SOURCE_CATEGORIES: SourceCategory[] = [
         url: 'https://www.austria.info/de/planning/barrierefreier-urlaub',
         license: 'Redaktionelle Übernahme mit Quellenangabe',
         description:
-          'Barrierefreie Ausflugsziele, Wege und Kulturhäuser aus den Barrierefrei-Seiten von Österreich Werbung, Niederösterreich Werbung, WienTourismus, Tirol Werbung, Tourismus Salzburg, Graz Tourismus, Steiermark Tourismus, Vorarlberg Tourismus, Kärnten Werbung, Innsbruck Tourismus, Donau Niederösterreich, Nationalpark Hohe Tauern, Österreichs Wanderdörfern, Holidays on Wheels, museumsguide.net und dem Fachverband der Seilbahnen (WKO). Jeder Eintrag nennt Quelle, Prüfdatum und den Wortlaut des Befunds; Fotos nur mit Bildnachweis der Quelle oder aus Wikimedia Commons mit Lizenz und Urheber.',
+          'Barrierefreie Ausflugsziele, Wege und Kulturhäuser aus den Barrierefrei-Seiten von Österreich Werbung, Niederösterreich Werbung, WienTourismus, Tirol Werbung, Tourismus Salzburg, Graz Tourismus, Steiermark Tourismus, Vorarlberg Tourismus, Kärnten Werbung, Innsbruck Tourismus, Donau Niederösterreich, Nationalpark Hohe Tauern, Österreichs Wanderdörfern, Holidays on Wheels, dem Verein Barrierefreier Urlaub (barrierefreierurlaub.at), museumsguide.net und dem Fachverband der Seilbahnen (WKO). Jeder Eintrag nennt Quelle, Prüfdatum und den Wortlaut des Befunds; Fotos nur mit Bildnachweis der Quelle oder aus Wikimedia Commons mit Lizenz und Urheber.',
       },
       {
         name: 'Wikimedia Commons',

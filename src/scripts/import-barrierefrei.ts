@@ -98,7 +98,34 @@ async function probeNominatim(): Promise<void> {
   } catch {
     geocoderBlocked = true;
   }
-  if (geocoderBlocked) console.log('[import-barrierefrei] Nominatim antwortet mit 429/403: Eintraege ohne Koordinaten werden uebersprungen, Cache bleibt unberuehrt');
+  if (geocoderBlocked) console.log('[import-barrierefrei] Nominatim antwortet mit 429/403: Ausweichen auf Photon (komoot), Fehltreffer werden nicht gecacht');
+}
+
+/**
+ * Photon (photon.komoot.io, OSM-Daten) als Ausweich-Geocoder, wenn Nominatim
+ * sperrt. Bounding-Box Oesterreich; die Gemeinde-Registry prueft danach.
+ * Liefert bei Verbindungs-/Statusfehlern undefined (nicht cachen), bei
+ * "kein Treffer" null.
+ */
+async function photonGeocode(query: string): Promise<{ lat: number; lng: number } | null | undefined> {
+  try {
+    const url = `https://photon.komoot.io/api/?q=${encodeURIComponent(query)}&limit=1&lang=de&bbox=9.5,46.3,17.2,49.1`;
+    const res = await fetch(url, { headers: { 'User-Agent': 'Mozilla/5.0 (compatible; lasstreffen.at/1.0; +https://lasstreffen.at/quellen)' } });
+    if (!res.ok) return undefined;
+    const data = (await res.json()) as {
+      features?: { geometry?: { coordinates?: [number, number] }; properties?: { osm_key?: string; type?: string; countrycode?: string } }[];
+    };
+    const f = data.features?.[0];
+    const c = f?.geometry?.coordinates;
+    if (!c) return null;
+    // Nur Treffer in Oesterreich (die bbox ist ein Rechteck, Muenchen liegt drin)
+    // und mit Ortsbezug (kein reines Land/Bundesland)
+    if (f?.properties?.countrycode !== 'AT') return null;
+    if (f?.properties?.type === 'country' || f?.properties?.type === 'state') return null;
+    return { lat: c[1], lng: c[0] };
+  } catch {
+    return undefined;
+  }
 }
 
 async function resolveCoords(
@@ -112,11 +139,24 @@ async function resolveCoords(
     const c = geoCache[key];
     return c ? { lat: c.lat, lng: c.lng } : null;
   }
-  if (geocoderBlocked) return null;
+  let transientFailure = false;
   for (const candidate of geocodeCandidates(entry)) {
     // Nominatim erlaubt 1 Anfrage/s; ohne Pause antwortet es mit 429 und
     // geocodeLocation liefert dann still null.
     await new Promise((r) => setTimeout(r, 1100));
+    if (geocoderBlocked) {
+      const geo = await photonGeocode(candidate);
+      if (geo === undefined) {
+        transientFailure = true;
+        continue;
+      }
+      if (geo) {
+        geoCache[key] = { lat: geo.lat, lng: geo.lng, query: `photon:${candidate}` };
+        stats.geocoded++;
+        return geo;
+      }
+      continue;
+    }
     const geo = await geocodeLocation(candidate);
     if (geo) {
       geoCache[key] = { lat: geo.latitude, lng: geo.longitude, query: candidate };
@@ -124,7 +164,7 @@ async function resolveCoords(
       return { lat: geo.latitude, lng: geo.longitude };
     }
   }
-  geoCache[key] = null;
+  if (!transientFailure) geoCache[key] = null;
   return null;
 }
 

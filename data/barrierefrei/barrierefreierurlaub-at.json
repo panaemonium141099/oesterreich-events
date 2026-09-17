@@ -1,0 +1,1173 @@
+{
+  "source": "barrierefreierurlaub-at",
+  "source_label": "Verein Barrierefreier Urlaub (barrierefreierurlaub.at)",
+  "source_url": "https://barrierefreierurlaub.at/suche.2305.html",
+  "checked_at": "2026-09-17",
+  "entries": [
+    {
+      "id": "106-augustiner-chorherrenstift-vorau",
+      "name": "Augustiner Chorherrenstift Vorau",
+      "description": "Augustiner Chorherrenstift Vorau. Typ laut barrierefreierurlaub.at: Ausflugsziel.",
+      "description_short": null,
+      "tags": [
+        "burgführung",
+        "museumstour"
+      ],
+      "setting": "indoor",
+      "address": "Vorau 1",
+      "postal_code": "8250",
+      "town": "Vorau",
+      "lat": 47.40151,
+      "lng": 15.88812,
+      "website": "https://www.stift-vorau.at",
+      "source_url": "https://barrierefreierurlaub.at/Eintrag.2305.html?bsghid=106",
+      "accessibility": {
+        "features": [
+          "rollstuhl",
+          "wc"
+        ],
+        "note": "Laut barrierefreierurlaub.at (Praxistest am 03.01.2013): Rollstuhlbewertung 2 von 3; Eingang barrierefrei: Ja; WC barrierefrei: Ja."
+      },
+      "images": [],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "252-david-golles-house-of-whiskey-gin-und-rum",
+      "name": "David Gölles - house of whiskey, gin und rum",
+      "description": "David Gölles - house of whiskey, gin und rum. Typ laut barrierefreierurlaub.at: Ausflugsziel.",
+      "description_short": null,
+      "tags": [
+        "naturführung"
+      ],
+      "setting": null,
+      "address": "Lembach 16",
+      "postal_code": "8333",
+      "town": "Riegersburg",
+      "lat": 47.02153,
+      "lng": 15.9332,
+      "website": "https://www.ruotkers.at",
+      "source_url": "https://barrierefreierurlaub.at/Eintrag.2305.html?bsghid=252",
+      "accessibility": {
+        "features": [
+          "rollstuhl",
+          "wc"
+        ],
+        "note": "Laut barrierefreierurlaub.at (Praxistest durch Narnhofer am 24.05.2021): Rollstuhlbewertung 3 von 3; Zugang barrierefrei: Nein; Eingang barrierefrei: Ja; WC barrierefrei: Ja; Türlichte 90, WC Höhe 46, WC Anfahrbarkeit Ja, Türart Drehflügeltür, Entfernung der nächsten Haltestelle 100."
+      },
+      "images": [],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "228-felber-schokoladenmanufaktur",
+      "name": "Felber-Schokoladenmanufaktur",
+      "description": "Felber-Schokoladenmanufaktur. Typ laut barrierefreierurlaub.at: Ausflugsziel.",
+      "description_short": null,
+      "tags": [
+        "naturführung"
+      ],
+      "setting": null,
+      "address": "Gasener-Straße 4",
+      "postal_code": "8190",
+      "town": "Birkfeld",
+      "lat": null,
+      "lng": null,
+      "website": "https://www.felber-schokoladen.at",
+      "source_url": "https://barrierefreierurlaub.at/Eintrag.2305.html?bsghid=228",
+      "accessibility": {
+        "features": [
+          "rollstuhl"
+        ],
+        "note": "Laut barrierefreierurlaub.at (Praxistest durch Robert Narnhofer am 23. Oktober 2018): Rollstuhlbewertung 1 von 3; Zugang barrierefrei: Nein; Eingang barrierefrei: Nein; WC barrierefrei: Nein; Türlichte 80 cm, WC Höhe 41 cm, WC Anfahrbarkeit Ja, Türart Drehflügeltür, Entfernung der nächsten Haltestelle 150 m."
+      },
+      "images": [],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "244-holzmuseum",
+      "name": "Holzmuseum",
+      "description": "Das Holzmuseum lädt ein, auf über 10 000 m2 alles über die Vielfalt und Verwendung des faszinierenden Rohstoffs Holz zu erfahren.. Typ laut barrierefreierurlaub.at: Ausflugsziel.",
+      "description_short": null,
+      "tags": [
+        "museumstour",
+        "ausstellung"
+      ],
+      "setting": "indoor",
+      "address": "Hans-Edler-Platz 1",
+      "postal_code": "8862",
+      "town": "St. Ruprecht ob Murau",
+      "lat": 47.11201,
+      "lng": 14.02554,
+      "website": "https://www.holzmuseum.at",
+      "source_url": "https://barrierefreierurlaub.at/Eintrag.2305.html?bsghid=244",
+      "accessibility": {
+        "features": [
+          "rollstuhl",
+          "wc"
+        ],
+        "note": "Laut barrierefreierurlaub.at (Praxistest durch Narnhofer Robert am 27.02.2020): Rollstuhlbewertung 1 von 3; Zugang barrierefrei: Nein; Eingang barrierefrei: Nein; WC barrierefrei: Ja; Türlichte 84 cm, WC Höhe 48 cm, WC Anfahrbarkeit Ja, Türart Drehflügeltür."
+      },
+      "images": [],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "273-k-hof-kammerhof-museum-gmunden",
+      "name": "K-Hof Kammerhof Museum Gmunden",
+      "description": "Der K-Hof, das Kammerhof Museum Gmunden bietet im Rahmen von 5 Teilen einen chronologischen Querschnitt durch die Geschichte der Stadt und des Traunseegebietes von den erdgeschichtlichen Anfängen bis in das 21. Jahrhundert mit besonderer Berücksichtigung des lokalen Keramikschaffens, der zeitgenössischen Kunst und der Sanitärkeramik.. Typ laut barrierefreierurlaub.at: Ausflugsziel.",
+      "description_short": null,
+      "tags": [
+        "museumstour",
+        "ausstellung"
+      ],
+      "setting": "indoor",
+      "address": "Kammerhofgasse 8",
+      "postal_code": "4810",
+      "town": "Gmunden",
+      "lat": 47.91866,
+      "lng": 13.80102,
+      "website": "https://www.gmunden.at/kultur-freizeit-tourismus/museum-ausstellungen/",
+      "source_url": "https://barrierefreierurlaub.at/Eintrag.2305.html?bsghid=273",
+      "accessibility": {
+        "features": [
+          "rollstuhl",
+          "wc"
+        ],
+        "note": "Laut barrierefreierurlaub.at (Praxistest durch Pflanzl/Lackner am 15.10.2024): Rollstuhlbewertung 3 von 3; WC barrierefrei: Ja; Türlichte 90 cm, WC Höhe 48 cm, WC Anfahrbarkeit Ja, Türart Drehflügeltür."
+      },
+      "images": [
+        {
+          "url": "https://barrierefreierurlaub.at/data/image/169/bsgh/business484a4f6ffcbff196972244f99efeae80.jpg",
+          "credit": "barrierefreierurlaub.at / Betrieb",
+          "license": null,
+          "author": null
+        },
+        {
+          "url": "https://barrierefreierurlaub.at/data/image/169/bsgh/businessa7a2b5c0402e1b56200d7b1a85adeaed.jpg",
+          "credit": "barrierefreierurlaub.at / Betrieb",
+          "license": null,
+          "author": null
+        },
+        {
+          "url": "https://barrierefreierurlaub.at/data/image/169/bsgh/business96998fec57d81a588cb70dfd7a56bab8.jpg",
+          "credit": "barrierefreierurlaub.at / Betrieb",
+          "license": null,
+          "author": null
+        }
+      ],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "270-kraftereich-st-jakob-im-walde",
+      "name": "Kräftereich St. Jakob im Walde",
+      "description": "Das Kräftereich St. Jakob im Walde ist ein Ort der Begegnung mit unterschiedlichen Theorien, Konzepten und Erkenntnissen rund um das Thema Kraft!. Typ laut barrierefreierurlaub.at: Ausflugsziel.",
+      "description_short": null,
+      "tags": [
+        "naturführung"
+      ],
+      "setting": null,
+      "address": "Kirchenviertel 70",
+      "postal_code": "8255",
+      "town": "St. Jakob im Walde",
+      "lat": 47.46675,
+      "lng": 15.78677,
+      "website": "https://www.kraeftereich.at",
+      "source_url": "https://barrierefreierurlaub.at/Eintrag.2305.html?bsghid=270",
+      "accessibility": {
+        "features": [
+          "rollstuhl",
+          "wc"
+        ],
+        "note": "Laut barrierefreierurlaub.at (Praxistest durch Pflanzl/Lackner am 08.04.2024): Rollstuhlbewertung 1 von 3; Zugang barrierefrei: Ja; Eingang barrierefrei: Ja; WC barrierefrei: Ja; Türlichte 84 cm, WC Höhe 48 cm, WC Anfahrbarkeit Ja, Türart Drehflügeltür."
+      },
+      "images": [
+        {
+          "url": "https://barrierefreierurlaub.at/data/image/169/bsgh/business288a8d4e8014cf089c28ac2eba7c7d0b.jpg",
+          "credit": "barrierefreierurlaub.at / Betrieb",
+          "license": null,
+          "author": null
+        },
+        {
+          "url": "https://barrierefreierurlaub.at/data/image/169/bsgh/businessef506d74a18e4f36dd89d484a868fbbe.jpg",
+          "credit": "barrierefreierurlaub.at / Betrieb",
+          "license": null,
+          "author": null
+        },
+        {
+          "url": "https://barrierefreierurlaub.at/data/image/169/bsgh/business8a753930bed115201d363077dba97642.jpg",
+          "credit": "barrierefreierurlaub.at / Betrieb",
+          "license": null,
+          "author": null
+        }
+      ],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "110-museum-hartberg",
+      "name": "Museum Hartberg",
+      "description": "Museum Hartberg. Typ laut barrierefreierurlaub.at: Ausflugsziel.",
+      "description_short": null,
+      "tags": [
+        "museumstour",
+        "ausstellung"
+      ],
+      "setting": "indoor",
+      "address": "Herrengasse 6",
+      "postal_code": "8230",
+      "town": "Hartberg",
+      "lat": null,
+      "lng": null,
+      "website": "https://www.hartberg.at",
+      "source_url": "https://barrierefreierurlaub.at/Eintrag.2305.html?bsghid=110",
+      "accessibility": {
+        "features": [
+          "rollstuhl"
+        ],
+        "note": "Laut barrierefreierurlaub.at (Praxistest am 04.07.2013): Rollstuhlbewertung 2 von 3."
+      },
+      "images": [],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "150-nationalpark-gesause",
+      "name": "Nationalpark Gesäuse",
+      "description": "Um Familien mit (Klein-)Kindern, Menschen mit Gehbeeinträchtigung oder älteren Personen dieses Naturjuwel in ganz besonderes naturnaher Form zeigen zu können, wird im Nationalpark Gesäuse spezieller Wert auf barrierefreie Angebote gelegt. Rund um das Nationalpark Erlebniszentrum Weidendom befinden sich zwei Themenwege, die von Personen mit eingeschränkter Mobilität gut erlebt werden können: der barrierefreie Themenweg „Leierweg“ und der Themenweg „Lettmair Au“. Die Brücke über die Enns (Johnsbachsteg) erlaubt barrierefreie Einblicke in den Nationalpark Gesäuse. Auch der Nationalpark Pavillon Gstatterboden kann barrierefrei genutzt werden.. Typ laut barrierefreierurlaub.at: Ausflugsziel.",
+      "description_short": null,
+      "tags": [
+        "wandern",
+        "naturführung"
+      ],
+      "setting": "outdoor",
+      "address": "Hauptstraße 35",
+      "postal_code": "8911",
+      "town": "Admont",
+      "lat": 47.56538,
+      "lng": 14.58911,
+      "website": "https://www.nationalpark-gesaeuse.at/nationalpark-erleben/aktivitaeten/mit_besonderen_beduerfnissen/",
+      "source_url": "https://barrierefreierurlaub.at/Eintrag.2305.html?bsghid=150",
+      "accessibility": {
+        "features": [
+          "rollstuhl",
+          "wc"
+        ],
+        "note": "Laut barrierefreierurlaub.at (Praxistest am 18.07.2007): Rollstuhlbewertung 2 von 3; Eingang barrierefrei: Nein; WC barrierefrei: Ja; Türlichte 90, Türart Drehflügeltür."
+      },
+      "images": [
+        {
+          "url": "https://barrierefreierurlaub.at/data/image/169/bsgh/business73d9a13c03401164e3c95d54537d8818.jpg",
+          "credit": "barrierefreierurlaub.at / Betrieb",
+          "license": null,
+          "author": null
+        },
+        {
+          "url": "https://barrierefreierurlaub.at/data/image/169/bsgh/business084598ae326866741065c98a226b0374.jpg",
+          "credit": "barrierefreierurlaub.at / Betrieb",
+          "license": null,
+          "author": null
+        },
+        {
+          "url": "https://barrierefreierurlaub.at/data/image/169/bsgh/businesscf57d08a994170907f4f367c647e075e.jpg",
+          "credit": "barrierefreierurlaub.at / Betrieb",
+          "license": null,
+          "author": null
+        }
+      ],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "107-olmuhle-fandler",
+      "name": "Ölmühle Fandler",
+      "description": "Ölmühle Fandler. Typ laut barrierefreierurlaub.at: Ausflugsziel.",
+      "description_short": null,
+      "tags": [
+        "naturführung"
+      ],
+      "setting": null,
+      "address": "Prätis 1",
+      "postal_code": "8225",
+      "town": "Pöllau",
+      "lat": 47.31321,
+      "lng": 15.82788,
+      "website": "https://www.fandler.at",
+      "source_url": "https://barrierefreierurlaub.at/Eintrag.2305.html?bsghid=107",
+      "accessibility": {
+        "features": [
+          "rollstuhl"
+        ],
+        "note": "Laut barrierefreierurlaub.at (Praxistest am 05.06.2013): Rollstuhlbewertung 2 von 3."
+      },
+      "images": [],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "108-schloss-hartberg",
+      "name": "Schloss Hartberg",
+      "description": "Schloss Hartberg. Typ laut barrierefreierurlaub.at: Ausflugsziel.",
+      "description_short": null,
+      "tags": [
+        "burgführung",
+        "museumstour"
+      ],
+      "setting": "indoor",
+      "address": "Herrengasse 1",
+      "postal_code": "8230",
+      "town": "Hartberg",
+      "lat": 47.28164,
+      "lng": 15.96598,
+      "website": "https://www.hartberg.at",
+      "source_url": "https://barrierefreierurlaub.at/Eintrag.2305.html?bsghid=108",
+      "accessibility": {
+        "features": [
+          "rollstuhl"
+        ],
+        "note": "Laut barrierefreierurlaub.at (Praxistest am 03.04.2013): Rollstuhlbewertung 2 von 3."
+      },
+      "images": [],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "290-schloss-trautenfels",
+      "name": "Schloss Trautenfels",
+      "description": "Schloss Trautenfels steht als vielschichtiger Kunst- und Kulturstandort für die Geschichte, Kultur und Natur des Bezirkes Liezen. Auseinandersetzungen mit regionsspezifischen Themen führen zu Kontexten auf nationaler und internationaler Ebene. Schloss Trautenfels liegt im mittleren steirischen Ennstal und überragt mit seinen markanten Wehrbasteien den Talboden. Sonderausstellungen mit vorrangig regionalem Themenfokus im nationalen und internationalen Kontext ergänzen das museale Angebot von Schloss Trautenfels.. Typ laut barrierefreierurlaub.at: Ausflugsziel.",
+      "description_short": null,
+      "tags": [
+        "burgführung",
+        "museumstour"
+      ],
+      "setting": "indoor",
+      "address": "Trautenfels 1",
+      "postal_code": "8951",
+      "town": "Steinach-Pürgg",
+      "lat": 47.518704,
+      "lng": 14.0814123,
+      "website": "https://www.schloss-trautenfels.at",
+      "source_url": "https://barrierefreierurlaub.at/Eintrag.2305.html?bsghid=290",
+      "accessibility": {
+        "features": [
+          "rollstuhl",
+          "wc"
+        ],
+        "note": "Laut barrierefreierurlaub.at (Praxistest durch Narnhofer am 06.2026): Rollstuhlbewertung 2 von 3; Eingang barrierefrei: Ja; WC barrierefrei: Ja; Türlichte 140 cm, Türart 2x 70 cm Dreflügel, Entfernung der nächsten Haltestelle 300 m."
+      },
+      "images": [
+        {
+          "url": "https://barrierefreierurlaub.at/data/image/169/bsgh/business5034210da24d425a31074c70f22b6ada.jpg",
+          "credit": "barrierefreierurlaub.at / Betrieb",
+          "license": null,
+          "author": null
+        },
+        {
+          "url": "https://barrierefreierurlaub.at/data/image/169/bsgh/businesscc400c599731258286fbd4b27355c708.jpg",
+          "credit": "barrierefreierurlaub.at / Betrieb",
+          "license": null,
+          "author": null
+        },
+        {
+          "url": "https://barrierefreierurlaub.at/data/image/169/bsgh/business95fc89ca13483074262837b49e45c04d.jpg",
+          "credit": "barrierefreierurlaub.at / Betrieb",
+          "license": null,
+          "author": null
+        }
+      ],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "182-steirisches-feuerwehrmuseum-kunst-kultur",
+      "name": "Steirisches Feuerwehrmuseum Kunst & Kultur",
+      "description": "Feuer & Kunst - die explosive Mischung! Erfahren und entdecken Sie im Steirischen Feuerwehrmuseum Kunst & Kultur alles über die Geschichte der steirischen Feuerwehren: Die Schausammlung des Museums wagt dabei einen Blick hinter die Kulissen: Wer sind die Menschen bei der Feuerwehr und welche Geschichten können sie erzählen?. Typ laut barrierefreierurlaub.at: Ausflugsziel.",
+      "description_short": null,
+      "tags": [
+        "museumstour",
+        "ausstellung"
+      ],
+      "setting": "indoor",
+      "address": "Marktstraße 1",
+      "postal_code": "8522",
+      "town": "Groß St. Florian",
+      "lat": null,
+      "lng": null,
+      "website": "https://www.feuerwehrmuseum.at",
+      "source_url": "https://barrierefreierurlaub.at/Eintrag.2305.html?bsghid=182",
+      "accessibility": {
+        "features": [
+          "rollstuhl"
+        ],
+        "note": "Laut barrierefreierurlaub.at (Praxistest am 08.11.2013): Rollstuhlbewertung 2 von 3."
+      },
+      "images": [
+        {
+          "url": "https://barrierefreierurlaub.at/data/image/169/bsgh/business003d0784ea21e9d39ba2ca382a9c7eab.jpg",
+          "credit": "barrierefreierurlaub.at / Betrieb",
+          "license": null,
+          "author": null
+        },
+        {
+          "url": "https://barrierefreierurlaub.at/data/image/169/bsgh/business380faf0fabf88feab9eb8a898f72bab5.jpg",
+          "credit": "barrierefreierurlaub.at / Betrieb",
+          "license": null,
+          "author": null
+        },
+        {
+          "url": "https://barrierefreierurlaub.at/data/image/169/bsgh/businesseff8b2aefd57b15a4558a4d48f375b9f.jpg",
+          "credit": "barrierefreierurlaub.at / Betrieb",
+          "license": null,
+          "author": null
+        }
+      ],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "109-stoani-haus-der-musik",
+      "name": "Stoani Haus der Musik",
+      "description": "In der Welt der Stoakogler. Typ laut barrierefreierurlaub.at: Ausflugsziel.",
+      "description_short": null,
+      "tags": [
+        "museumstour",
+        "ausstellung"
+      ],
+      "setting": "indoor",
+      "address": "Dorfplatz 9",
+      "postal_code": "8616",
+      "town": "Gasen",
+      "lat": 47.38388,
+      "lng": 15.57086,
+      "website": "https://www.stoanihaus.at",
+      "source_url": "https://barrierefreierurlaub.at/Eintrag.2305.html?bsghid=109",
+      "accessibility": {
+        "features": [
+          "rollstuhl",
+          "wc"
+        ],
+        "note": "Laut barrierefreierurlaub.at (Praxistest am 03.10.2012): Rollstuhlbewertung 2 von 3; Eingang barrierefrei: Ja; WC barrierefrei: Ja."
+      },
+      "images": [],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "282-volkskundemuseum-am-paulustor",
+      "name": "Volkskundemuseum am Paulustor",
+      "description": "Das neue Volkskundemuseum am Paulustor in Graz erzählt von unterschiedlichen Lebenswelten, sozialem und kulturellem Wandel und davon, wie uns Veränderungen im Alltag prägen und bewegen.. Typ laut barrierefreierurlaub.at: Ausflugsziel.",
+      "description_short": null,
+      "tags": [
+        "museumstour",
+        "ausstellung"
+      ],
+      "setting": "indoor",
+      "address": "Paulustorgasse 13a",
+      "postal_code": "8010",
+      "town": "Graz",
+      "lat": null,
+      "lng": null,
+      "website": "https://museum-joanneum.at/volkskunde",
+      "source_url": "https://barrierefreierurlaub.at/Eintrag.2305.html?bsghid=282",
+      "accessibility": {
+        "features": [
+          "rollstuhl",
+          "wc"
+        ],
+        "note": "Laut barrierefreierurlaub.at (Praxistest durch Narnhofer/Lackner am 12.05.2025): Rollstuhlbewertung 2 von 3; Eingang barrierefrei: Ja; WC barrierefrei: Ja; Türlichte 2x 90 cm, WC Anfahrbarkeit Ja, Türart Drehflügeltür."
+      },
+      "images": [
+        {
+          "url": "https://barrierefreierurlaub.at/data/image/169/bsgh/business6e424728ef620be5adbaeea12d5b861f.jpg",
+          "credit": "barrierefreierurlaub.at / Betrieb",
+          "license": null,
+          "author": null
+        },
+        {
+          "url": "https://barrierefreierurlaub.at/data/image/169/bsgh/business8712da8c1fac83bff9522b6d744661ad.jpg",
+          "credit": "barrierefreierurlaub.at / Betrieb",
+          "license": null,
+          "author": null
+        },
+        {
+          "url": "https://barrierefreierurlaub.at/data/image/169/bsgh/business8492d9f292afd3083f785028e2b3bb8a.jpg",
+          "credit": "barrierefreierurlaub.at / Betrieb",
+          "license": null,
+          "author": null
+        }
+      ],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "272-wildpark-grunau",
+      "name": "Wildpark Grünau",
+      "description": "Der Wildpark Grünau, gelegen im schönen Salzkammergut ist ein beliebtes Ausflugsziel für Natur- und Tierliebhaber. Er zeichnet sich durch eine beeindruckende Landschaft und eine Vielzahl von Wildtieren aus, die in der natürlichen Umgebung beobachtet werden können. Ein besonderes Augenmerk wird dabei auf die Barrierefreiheit des Parks gelegt um allen Besuchern, unabhängig von ihren körperlichen Einschränkungen, ein angenehmes und unvergessliches Erlebnis zu bieten.. Typ laut barrierefreierurlaub.at: Ausflugsziel.",
+      "description_short": null,
+      "tags": [
+        "wandern",
+        "naturführung"
+      ],
+      "setting": "outdoor",
+      "address": "Fischerau 12",
+      "postal_code": "4645",
+      "town": "Grünau im Almtal",
+      "lat": 47.80661,
+      "lng": 13.95033,
+      "website": "https://www.wildpark.at",
+      "source_url": "https://barrierefreierurlaub.at/Eintrag.2305.html?bsghid=272",
+      "accessibility": {
+        "features": [
+          "rollstuhl",
+          "wc"
+        ],
+        "note": "Laut barrierefreierurlaub.at (Praxistest durch Pflanzl/Lackner am 15.10.2024): Rollstuhlbewertung 3 von 3; Zugang barrierefrei: Ja; Eingang barrierefrei: Ja; WC barrierefrei: Ja; Türlichte 3,11 m, Türart Drehflügeltür."
+      },
+      "images": [
+        {
+          "url": "https://barrierefreierurlaub.at/data/image/169/bsgh/businessb394a8934ceba6ac1fc9ddc1a52781b8.jpg",
+          "credit": "barrierefreierurlaub.at / Betrieb",
+          "license": null,
+          "author": null
+        },
+        {
+          "url": "https://barrierefreierurlaub.at/data/image/169/bsgh/businessda7b2bbe18b45425340a6d56181af1b9.jpg",
+          "credit": "barrierefreierurlaub.at / Betrieb",
+          "license": null,
+          "author": null
+        },
+        {
+          "url": "https://barrierefreierurlaub.at/data/image/169/bsgh/business397ca02f6873205d3de9613fa11487b8.jpg",
+          "credit": "barrierefreierurlaub.at / Betrieb",
+          "license": null,
+          "author": null
+        }
+      ],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "285-archaologiemuseum-graz",
+      "name": "Archäologiemuseum Graz",
+      "description": "Archäologische Glanzstücke aus der Steiermark wie der „Kultwagen von Strettweg“, die „Maske aus Kleinklein“ sowie Objekte aus der Antike und Ägypten.. Typ laut barrierefreierurlaub.at: Ausstellung.",
+      "description_short": null,
+      "tags": [
+        "museumstour",
+        "ausstellung"
+      ],
+      "setting": "indoor",
+      "address": "Eggenberger Allee 90",
+      "postal_code": "8020",
+      "town": "Graz",
+      "lat": 47.07638,
+      "lng": 15.39217,
+      "website": "https://.www.museum-joanneum.at/archaeologiemuseum-schloss-eggenberg/",
+      "source_url": "https://barrierefreierurlaub.at/Eintrag.2305.html?bsghid=285",
+      "accessibility": {
+        "features": [
+          "rollstuhl",
+          "wc"
+        ],
+        "note": "Laut barrierefreierurlaub.at (Praxistest durch Pflanzl/Lackner am 15.05.2025): Rollstuhlbewertung 2 von 3; Eingang barrierefrei: Ja; WC barrierefrei: Ja; Türlichte 120 cm, WC Anfahrbarkeit Ja, Türart Drehflügeltür."
+      },
+      "images": [
+        {
+          "url": "https://barrierefreierurlaub.at/data/image/169/bsgh/business5b28fe6be40e03c6be333dbed0d87143.jpg",
+          "credit": "barrierefreierurlaub.at / Betrieb",
+          "license": null,
+          "author": null
+        },
+        {
+          "url": "https://barrierefreierurlaub.at/data/image/169/bsgh/business732aa80aece470fa03786d15eb9124e7.jpg",
+          "credit": "barrierefreierurlaub.at / Betrieb",
+          "license": null,
+          "author": null
+        },
+        {
+          "url": "https://barrierefreierurlaub.at/data/image/169/bsgh/businessa0ed7fb5c5554cf37e860dcc5741943a.jpg",
+          "credit": "barrierefreierurlaub.at / Betrieb",
+          "license": null,
+          "author": null
+        }
+      ],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "242-bergwerksmuseum-montanarum",
+      "name": "Bergwerksmuseum Montanarum",
+      "description": "Bergwerksmuseum Montanarum. Typ laut barrierefreierurlaub.at: Ausstellung.",
+      "description_short": null,
+      "tags": [
+        "museumstour",
+        "ausstellung"
+      ],
+      "setting": "indoor",
+      "address": "Altenberg 14",
+      "postal_code": "8691",
+      "town": "Neuberg an der Mürz",
+      "lat": null,
+      "lng": null,
+      "website": "https://www.bergwerksmuseum-montanarum.at",
+      "source_url": "https://barrierefreierurlaub.at/Eintrag.2305.html?bsghid=242",
+      "accessibility": {
+        "features": [
+          "rollstuhl"
+        ],
+        "note": "Laut barrierefreierurlaub.at (Praxistest durch Robert Narnhofer am 12.10.2019): Rollstuhlbewertung 3 von 3; Zugang barrierefrei: Nein; Eingang barrierefrei: Nein; WC barrierefrei: Nein; Entfernung der nächsten Haltestelle 100 m."
+      },
+      "images": [],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "284-schloss-eggenberg",
+      "name": "Schloss Eggenberg",
+      "description": "Schloss Eggenberg ist ein erstrangiges Gesamtkunstwerk der Barockzeit, das seit 2010 zu den UNESCO-Welterbestätten zählt. Architektur und Ausstattung verbinden sich zu einer symbolischen Darstellung des Universums, das zur Repräsentation der fürstlichen Familie Eggenberg errichtet wurde. Das Schloss bewahrt ein kostbares Ensemble historischer Interieurs mit einem wichtigen Zyklus von über 500 Deckengemälden. Es ist ein nahezu unverfälschtes Raumkunstwerk, in dem sich die Ausstattungsphasen des 17. und 18. Jahrhunderts zu einem Ensemble von besonderem Erlebniswert verbinden.. Typ laut barrierefreierurlaub.at: Ausstellung.",
+      "description_short": null,
+      "tags": [
+        "burgführung",
+        "museumstour"
+      ],
+      "setting": "indoor",
+      "address": "Eggenberger Allee 90",
+      "postal_code": "8020",
+      "town": "Graz",
+      "lat": 47.07392,
+      "lng": 15.39177,
+      "website": "https://www.museum-joanneum.at/schloss-eggenberg-prunkraeume-und-gaerten",
+      "source_url": "https://barrierefreierurlaub.at/Eintrag.2305.html?bsghid=284",
+      "accessibility": {
+        "features": [
+          "rollstuhl",
+          "wc"
+        ],
+        "note": "Laut barrierefreierurlaub.at (Praxistest durch Pflanzl/Lackner am 15.05.2025): Rollstuhlbewertung 1 von 3; Eingang barrierefrei: Ja; WC barrierefrei: Ja; Türlichte 130 cm, WC Anfahrbarkeit Ja, Türart Drehflügeltür, Entfernung der nächsten Haltestelle 50m zur Straßenbahn."
+      },
+      "images": [
+        {
+          "url": "https://barrierefreierurlaub.at/data/image/169/bsgh/business92b6aeb35402814fa4152bb1f8f4a78e.jpg",
+          "credit": "barrierefreierurlaub.at / Betrieb",
+          "license": null,
+          "author": null
+        },
+        {
+          "url": "https://barrierefreierurlaub.at/data/image/169/bsgh/business07a8dbbf51dff647a26ddb5a57ca13a4.jpg",
+          "credit": "barrierefreierurlaub.at / Betrieb",
+          "license": null,
+          "author": null
+        },
+        {
+          "url": "https://barrierefreierurlaub.at/data/image/169/bsgh/businesse3169a03934d237681c48be2e03e6097.jpg",
+          "credit": "barrierefreierurlaub.at / Betrieb",
+          "license": null,
+          "author": null
+        }
+      ],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "246-baumwipfelpfad-salzkammergut",
+      "name": "Baumwipfelpfad Salzkammergut",
+      "description": "Die Anlagen sind weitestgehendst barrerefrei, für Rollstuhlfahrer wäre eine Begleitperson sofern es sich nicht um sehr Sportliche handelt, von Vorteil.. Typ laut barrierefreierurlaub.at: Freizeit.",
+      "description_short": null,
+      "tags": [
+        "wandern",
+        "naturführung"
+      ],
+      "setting": "outdoor",
+      "address": "Traunsteinstraße 41",
+      "postal_code": "4810",
+      "town": "Gmunden",
+      "lat": 47.89793,
+      "lng": 13.82313,
+      "website": "https://www.baumwipfelpfade.at",
+      "source_url": "https://barrierefreierurlaub.at/Eintrag.2305.html?bsghid=246",
+      "accessibility": {
+        "features": [
+          "rollstuhl"
+        ],
+        "note": "Laut barrierefreierurlaub.at (Praxistest durch Narnhofer am 25.06.2020): Rollstuhlbewertung 1 von 3; Zugang barrierefrei: Nein; Eingang barrierefrei: Ja; WC barrierefrei: Nein; Türlichte 85, WC Höhe 48, WC Anfahrbarkeit Ja, Türart Drehflügeltür."
+      },
+      "images": [],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "241-lipizzanergestut-piber-gor",
+      "name": "Lipizzanergestüt Piber Gör",
+      "description": "Die Heimat der weißen Hengste! Erleben Sie, wo die Stars der Spanischen Hofreitschule ihre Kindheit verbringen!. Typ laut barrierefreierurlaub.at: Freizeit - Ausflugsziel.",
+      "description_short": null,
+      "tags": [
+        "reiten",
+        "naturführung"
+      ],
+      "setting": "outdoor",
+      "address": "Piber 1",
+      "postal_code": "8580",
+      "town": "Köflach",
+      "lat": 47.08096,
+      "lng": 15.10039,
+      "website": "https://www.piber.com",
+      "source_url": "https://barrierefreierurlaub.at/Eintrag.2305.html?bsghid=241",
+      "accessibility": {
+        "features": [
+          "rollstuhl",
+          "wc"
+        ],
+        "note": "Laut barrierefreierurlaub.at (Praxistest durch Pflanzl/Lackner am 01.02.2024): Rollstuhlbewertung 2 von 3; Zugang barrierefrei: Ja; Eingang barrierefrei: Ja; WC barrierefrei: Ja; Türlichte 90, WC Höhe 46 cm, WC Anfahrbarkeit Ja, Türart Drehflügeltür, Entfernung der nächsten Haltestelle 200 m."
+      },
+      "images": [
+        {
+          "url": "https://barrierefreierurlaub.at/data/image/169/bsgh/businessc9d5b8959ce193d5005d44ff39d42e55.jpg",
+          "credit": "barrierefreierurlaub.at / Betrieb",
+          "license": null,
+          "author": null
+        },
+        {
+          "url": "https://barrierefreierurlaub.at/data/image/169/bsgh/businessf14e48f7875bb17647cec7f4cbc54a04.jpg",
+          "credit": "barrierefreierurlaub.at / Betrieb",
+          "license": null,
+          "author": null
+        },
+        {
+          "url": "https://barrierefreierurlaub.at/data/image/169/bsgh/businessb712aa0fbc1b027b7b3b9d25fbec362b.jpg",
+          "credit": "barrierefreierurlaub.at / Betrieb",
+          "license": null,
+          "author": null
+        }
+      ],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "255-ausseer-lebkuchen",
+      "name": "Ausseer Lebkuchen",
+      "description": "Neben den Verkauf von Lebkuchen und feinsten Konditoreiwaren im angeschlossenen Panorama Café können sich Interessierte die Produktstätte ansehen.. Typ laut barrierefreierurlaub.at: Freizeit - Ausflugsziel.",
+      "description_short": null,
+      "tags": [
+        "naturführung"
+      ],
+      "setting": null,
+      "address": "Pötschenstraße 146",
+      "postal_code": "8990",
+      "town": "Bad Aussee",
+      "lat": 47.61277,
+      "lng": 13.76766,
+      "website": "https://www.lebkuchen.at",
+      "source_url": "https://barrierefreierurlaub.at/Eintrag.2305.html?bsghid=255",
+      "accessibility": {
+        "features": [
+          "rollstuhl"
+        ],
+        "note": "Laut barrierefreierurlaub.at (Praxistest durch Narnhofer/Lackner am 24.01.2022): Rollstuhlbewertung 1 von 3; Zugang barrierefrei: Nein; Eingang barrierefrei: Nein; WC barrierefrei: Nein; Türlichte 100, Türart Drehflügeltür."
+      },
+      "images": [],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "254-manufaktur-golles-golles-gmbh",
+      "name": "Manufaktur Gölles (Gölles GmbH)",
+      "description": "Wenn wir in der Manufaktur Gölles von Essig und Edelbränden sprechen, dann meinen wir stets 100% reine Frucht. Dahinter steckt viel Handarbeit, Feingefühl und Leidenschaft.. Typ laut barrierefreierurlaub.at: Freizeit - Ausflugsziel.",
+      "description_short": null,
+      "tags": [
+        "naturführung"
+      ],
+      "setting": null,
+      "address": "Stang 52",
+      "postal_code": "8333",
+      "town": "Riegersburg",
+      "lat": 47.00312,
+      "lng": 15.96915,
+      "website": "https://www.goelles.at",
+      "source_url": "https://barrierefreierurlaub.at/Eintrag.2305.html?bsghid=254",
+      "accessibility": {
+        "features": [
+          "rollstuhl"
+        ],
+        "note": "Laut barrierefreierurlaub.at (Praxistest durch Narnhofer am 26.05.2021): Rollstuhlbewertung 3 von 3; Zugang barrierefrei: Ja; Eingang barrierefrei: Ja; WC barrierefrei: Nein; Türlichte 83cm, WC Höhe 45cm, WC Anfahrbarkeit Ja, Türart Drehflügeltür, Entfernung der nächsten Haltestelle 400m."
+      },
+      "images": [],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "286-osterreichischer-skulpturenpark",
+      "name": "Österreichischer Skulpturenpark",
+      "description": "Der sieben Kilometer südlich von Graz gelegene Österreichische Skulpturenpark hat sich seit seiner Gründung im Jahr 2003 als Zentrum für zeitgenössische Skulptur etabliert. Die faszinierende Parkanlage des Landschaftsarchitekten Dieter Kienast erstreckt sich über ein Areal von rund sieben Hektar und ist Entfaltungsraum für mehr als 80 Skulpturen. Werke renommierter Künstler*innen aus Österreich – von Fritz Wotruba über Franz West bis hin zu Erwin Wurm, Heimo Zobernig und Michael Kienzer – kommunizieren hier mit Beispielen internationaler Bildhauerei, zum Beispiel von Jeppe Hein, Nancy Rubins, Tobias Rehberger oder Susana Solano.. Typ laut barrierefreierurlaub.at: Freizeit - Ausflugsziel.",
+      "description_short": null,
+      "tags": [
+        "wandern",
+        "naturführung"
+      ],
+      "setting": "outdoor",
+      "address": "Thalerhofstraße 85",
+      "postal_code": "8141",
+      "town": "Premstätten",
+      "lat": 46.97882,
+      "lng": 15.43178,
+      "website": "https://www.museum-joaneum@skulpturenpark.at",
+      "source_url": "https://barrierefreierurlaub.at/Eintrag.2305.html?bsghid=286",
+      "accessibility": {
+        "features": [
+          "rollstuhl",
+          "wc"
+        ],
+        "note": "Laut barrierefreierurlaub.at (Praxistest durch Pflanzl am 26.05.2025): Rollstuhlbewertung 2 von 3; Eingang barrierefrei: Ja; WC barrierefrei: Ja; Türlichte 150 cm/600 cm, WC Anfahrbarkeit Ja, Türart automatisches Tor, Entfernung der nächsten Haltestelle 160 m."
+      },
+      "images": [
+        {
+          "url": "https://barrierefreierurlaub.at/data/image/169/bsgh/businessabab8d77bb83c7db40aa248cf0659ff3.jpg",
+          "credit": "barrierefreierurlaub.at / Betrieb",
+          "license": null,
+          "author": null
+        },
+        {
+          "url": "https://barrierefreierurlaub.at/data/image/169/bsgh/business2762f3e23feab814265af686031f4f03.jpg",
+          "credit": "barrierefreierurlaub.at / Betrieb",
+          "license": null,
+          "author": null
+        },
+        {
+          "url": "https://barrierefreierurlaub.at/data/image/169/bsgh/business6f3daadcdaf8c2d79dbe524cf49f678e.jpg",
+          "credit": "barrierefreierurlaub.at / Betrieb",
+          "license": null,
+          "author": null
+        }
+      ],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "219-tierwelt-herberstein",
+      "name": "Tierwelt Herberstein",
+      "description": "Zugang bis zum Restaurant kein Problem, danach sollte man als Rollifahrer auf eine weiterfahrt verzichten, es wird zu steil!. Typ laut barrierefreierurlaub.at: Freizeit - Ausflugsziel.",
+      "description_short": null,
+      "tags": [
+        "naturführung"
+      ],
+      "setting": null,
+      "address": "Buchberg 50",
+      "postal_code": "8223",
+      "town": "Stubenberg am See",
+      "lat": null,
+      "lng": null,
+      "website": "https://www.tierwelt-herberstein.at",
+      "source_url": "https://barrierefreierurlaub.at/Eintrag.2305.html?bsghid=219",
+      "accessibility": {
+        "features": [
+          "rollstuhl",
+          "wc"
+        ],
+        "note": "Laut barrierefreierurlaub.at (Praxistest durch Robert Narnhofer am 17. September 2018): Rollstuhlbewertung 2 von 3; Zugang barrierefrei: Ja; WC barrierefrei: Ja; Türlichte 90 cm, WC Höhe 45 cm, WC Anfahrbarkeit Ja, Türart Drehflügeltür."
+      },
+      "images": [],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "111-herz",
+      "name": "HERZ",
+      "description": "Erholungszentrum. Typ laut barrierefreierurlaub.at: Freizeiteinrichtung.",
+      "description_short": null,
+      "tags": [
+        "naturführung"
+      ],
+      "setting": null,
+      "address": "Wiesengasse 16",
+      "postal_code": "8230",
+      "town": "Hartberg",
+      "lat": 47.28026,
+      "lng": 15.97465,
+      "website": "https://www.hartberg.at",
+      "source_url": "https://barrierefreierurlaub.at/Eintrag.2305.html?bsghid=111",
+      "accessibility": {
+        "features": [
+          "rollstuhl",
+          "wc"
+        ],
+        "note": "Laut barrierefreierurlaub.at (Praxistest am 04.04.2013): Rollstuhlbewertung 2 von 3; Eingang barrierefrei: Ja; WC barrierefrei: Ja; Türart Drehflügeltüre."
+      },
+      "images": [],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "264-tierpark-preding",
+      "name": "Tierpark Preding",
+      "description": "Bei uns kannst Du Deine Tiere hautnah erleben! Ein besonderes Erlebnis für Groß und Klein!. Typ laut barrierefreierurlaub.at: Freizeiteinrichtung.",
+      "description_short": null,
+      "tags": [
+        "wandern",
+        "naturführung"
+      ],
+      "setting": "outdoor",
+      "address": "Zehndorf 10 B",
+      "postal_code": "8504",
+      "town": "Preding",
+      "lat": 46.84486,
+      "lng": 15.41218,
+      "website": "https://www.tierpark-preding.at",
+      "source_url": "https://barrierefreierurlaub.at/Eintrag.2305.html?bsghid=264",
+      "accessibility": {
+        "features": [
+          "rollstuhl",
+          "wc"
+        ],
+        "note": "Laut barrierefreierurlaub.at (Praxistest durch Narnhofer Robert am 26.04.2023): Rollstuhlbewertung 1 von 3; WC barrierefrei: Ja; Türlichte 90, Türart Drehflügeltür."
+      },
+      "images": [
+        {
+          "url": "https://barrierefreierurlaub.at/data/image/169/bsgh/business71315bc6ea3c0b7c50d856508279487d.jpg",
+          "credit": "barrierefreierurlaub.at / Betrieb",
+          "license": null,
+          "author": null
+        },
+        {
+          "url": "https://barrierefreierurlaub.at/data/image/169/bsgh/businesscd36a187d608a900c08ca7d480361e79.jpg",
+          "credit": "barrierefreierurlaub.at / Betrieb",
+          "license": null,
+          "author": null
+        },
+        {
+          "url": "https://barrierefreierurlaub.at/data/image/169/bsgh/business94f2094657c15b54e3a71a5f2514014c.jpg",
+          "credit": "barrierefreierurlaub.at / Betrieb",
+          "license": null,
+          "author": null
+        }
+      ],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "221-greini-freizeitwelt",
+      "name": "Greini-Freizeitwelt",
+      "description": "Greini-Freizeitwelt. Typ laut barrierefreierurlaub.at: Freizeiteinrichtung-Badesee.",
+      "description_short": null,
+      "tags": [
+        "schwimmen"
+      ],
+      "setting": "outdoor",
+      "address": "Penzendorf 292",
+      "postal_code": "8230",
+      "town": "Greinbach",
+      "lat": 47.31076,
+      "lng": 15.97833,
+      "website": "https://www.gemeinde-greinbach.at",
+      "source_url": "https://barrierefreierurlaub.at/Eintrag.2305.html?bsghid=221",
+      "accessibility": {
+        "features": [
+          "rollstuhl",
+          "wc"
+        ],
+        "note": "Laut barrierefreierurlaub.at (Praxistest durch Robert Narnhofer am 25. September 2018): Rollstuhlbewertung 2 von 3; Zugang barrierefrei: Nein; Eingang barrierefrei: Nein; WC barrierefrei: Ja; Türlichte 95 cm, WC Höhe 49 cm, WC Anfahrbarkeit Ja, Türart Drehflügeltür."
+      },
+      "images": [],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "105-stubenbergsee",
+      "name": "Stubenbergsee",
+      "description": "wärmster Badesee Österreichs. Typ laut barrierefreierurlaub.at: Freizeiteinrichtung-Badesee.",
+      "description_short": null,
+      "tags": [
+        "schwimmen"
+      ],
+      "setting": "outdoor",
+      "address": "Stubenberg am See 5",
+      "postal_code": "8223",
+      "town": "Stubenberg am See",
+      "lat": null,
+      "lng": null,
+      "website": "https://www.apfelland.info",
+      "source_url": "https://barrierefreierurlaub.at/Eintrag.2305.html?bsghid=105",
+      "accessibility": {
+        "features": [
+          "rollstuhl",
+          "wc"
+        ],
+        "note": "Laut barrierefreierurlaub.at (Praxistest am 11.01.2013): Rollstuhlbewertung 2 von 3; Eingang barrierefrei: Ja; WC barrierefrei: Ja."
+      },
+      "images": [],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "164-freizeit-pso",
+      "name": "Freizeit - PSO",
+      "description": "Barrierefreie Urlaube & Skischule für Menschen mit Behinderung. Typ laut barrierefreierurlaub.at: Sport für Menschen mit Behinderung.",
+      "description_short": null,
+      "tags": [
+        "wassersport"
+      ],
+      "setting": null,
+      "address": "Schwaigerweg 19",
+      "postal_code": "8971",
+      "town": "Rohrmoos",
+      "lat": 47.38093,
+      "lng": 13.66061,
+      "website": "https://www.freizeit-pso.at",
+      "source_url": "https://barrierefreierurlaub.at/Eintrag.2305.html?bsghid=164",
+      "accessibility": {
+        "features": [
+          "rollstuhl",
+          "wc"
+        ],
+        "note": "Laut barrierefreierurlaub.at (Praxistest am 02.05.2013): Rollstuhlbewertung 3 von 3; Eingang barrierefrei: Ja; WC barrierefrei: Ja."
+      },
+      "images": [
+        {
+          "url": "https://barrierefreierurlaub.at/data/image/169/bsgh/business3b441e60ac642e913595f763736f6e63.jpg",
+          "credit": "barrierefreierurlaub.at / Betrieb",
+          "license": null,
+          "author": null
+        },
+        {
+          "url": "https://barrierefreierurlaub.at/data/image/169/bsgh/business5e306c5bd3ab3476c7c952d924044a14.jpg",
+          "credit": "barrierefreierurlaub.at / Betrieb",
+          "license": null,
+          "author": null
+        },
+        {
+          "url": "https://barrierefreierurlaub.at/data/image/169/bsgh/business908d139fadc56a731135f96e130c652a.jpg",
+          "credit": "barrierefreierurlaub.at / Betrieb",
+          "license": null,
+          "author": null
+        }
+      ],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "148-benediktinerstift-admont",
+      "name": "Benediktinerstift Admont",
+      "description": "Weltgrößte Klosterbibliothek. Typ laut barrierefreierurlaub.at: Stift.",
+      "description_short": null,
+      "tags": [
+        "burgführung",
+        "museumstour"
+      ],
+      "setting": "indoor",
+      "address": "Kirchplatz 1",
+      "postal_code": "8911",
+      "town": "Admont",
+      "lat": 47.57514,
+      "lng": 14.46276,
+      "website": "https://www.stiftadmont.at",
+      "source_url": "https://barrierefreierurlaub.at/Eintrag.2305.html?bsghid=148",
+      "accessibility": {
+        "features": [
+          "rollstuhl",
+          "wc"
+        ],
+        "note": "Laut barrierefreierurlaub.at (Praxistest am 05.09.2013): Rollstuhlbewertung 3 von 3; Eingang barrierefrei: Ja; WC barrierefrei: Ja."
+      },
+      "images": [
+        {
+          "url": "https://barrierefreierurlaub.at/data/image/169/bsgh/businessf6b22c18271fa7be5327633100bce092.jpg",
+          "credit": "barrierefreierurlaub.at / Betrieb",
+          "license": null,
+          "author": null
+        }
+      ],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "281-gut-moser",
+      "name": "Gut Moser",
+      "description": "Ganz egal ob du mit dem Bus, dem Taxi oder mit dem Fahrrad unterwegs bist. Ein Besuch bei uns am Gut Moser ist immer einen Abstecher wert. Einkehren, Verkosten, Essen, Trinken und Einkaufen im Wein-Genuss-Laden. So viele Möglichkeiten an einem Ort, und dazu mit herrlicher Aussicht, ist einzigartig.. Typ laut barrierefreierurlaub.at: Weingut.",
+      "description_short": null,
+      "tags": [],
+      "setting": null,
+      "address": "Großwalz 80-81",
+      "postal_code": "8463",
+      "town": "Leutschach a. d. Weinstraße",
+      "lat": 46.62414,
+      "lng": 15.48416,
+      "website": "https://www.gut-moser.at",
+      "source_url": "https://barrierefreierurlaub.at/Eintrag.2305.html?bsghid=281",
+      "accessibility": {
+        "features": [
+          "rollstuhl",
+          "wc"
+        ],
+        "note": "Laut barrierefreierurlaub.at (Praxistest durch Narnhofer/Lackner am 28.04.2025): Rollstuhlbewertung 3 von 3; Zugang barrierefrei: Ja; WC barrierefrei: Ja; Türlichte 180 cm, WC Anfahrbarkeit Ja, Türart Drehflügeltür."
+      },
+      "images": [
+        {
+          "url": "https://barrierefreierurlaub.at/data/image/169/bsgh/business40d5b6c10e2baeeeb848031bec74f8ed.jpg",
+          "credit": "barrierefreierurlaub.at / Betrieb",
+          "license": null,
+          "author": null
+        },
+        {
+          "url": "https://barrierefreierurlaub.at/data/image/169/bsgh/business3e2cc0b477610acd8c4eb33e2b8d4145.jpg",
+          "credit": "barrierefreierurlaub.at / Betrieb",
+          "license": null,
+          "author": null
+        },
+        {
+          "url": "https://barrierefreierurlaub.at/data/image/169/bsgh/business55840b7120876eebe1ce50e4e0e5ade4.jpg",
+          "credit": "barrierefreierurlaub.at / Betrieb",
+          "license": null,
+          "author": null
+        }
+      ],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "142-weinschloss-thaller",
+      "name": "Weinschloss Thaller",
+      "description": "Hoch über Maierhofen liegt das Weinschloss der Familie Thaller, eingebettet in Rebkulturen und blühenden Gärten, am Wege nach Fürstenfeld, im Thermen-Vulkanland Steiermark.. Typ laut barrierefreierurlaub.at: Weingut.",
+      "description_short": null,
+      "tags": [
+        "burgführung",
+        "museumstour"
+      ],
+      "setting": "indoor",
+      "address": "Maierhofbergen 24",
+      "postal_code": "8263",
+      "town": "Großwilfersdorf",
+      "lat": 47.05491,
+      "lng": 16.00661,
+      "website": "https://www.weinschloss-thaller.at",
+      "source_url": "https://barrierefreierurlaub.at/Eintrag.2305.html?bsghid=142",
+      "accessibility": {
+        "features": [
+          "rollstuhl",
+          "wc"
+        ],
+        "note": "Laut barrierefreierurlaub.at (Praxistest durch Pflanzl/Lackner am 04.03.2015, RZ 18.03.2024): Rollstuhlbewertung 2 von 3; Zugang barrierefrei: Ja; Eingang barrierefrei: Ja; WC barrierefrei: Ja; Türlichte 96cm/192cm, Türart Drehflügeltür, Entfernung der nächsten Haltestelle 3 km."
+      },
+      "images": [
+        {
+          "url": "https://barrierefreierurlaub.at/data/image/169/bsgh/business81f4f86935602be49f51de2a8000dcaf.jpg",
+          "credit": "barrierefreierurlaub.at / Betrieb",
+          "license": null,
+          "author": null
+        },
+        {
+          "url": "https://barrierefreierurlaub.at/data/image/169/bsgh/business5e2247cc3f600f3ac9eeffb501314d02.jpg",
+          "credit": "barrierefreierurlaub.at / Betrieb",
+          "license": null,
+          "author": null
+        },
+        {
+          "url": "https://barrierefreierurlaub.at/data/image/169/bsgh/business454105ec02f00fbea491870e989bc012.jpg",
+          "credit": "barrierefreierurlaub.at / Betrieb",
+          "license": null,
+          "author": null
+        }
+      ],
+      "price_hint": null,
+      "opening_hint": null
+    }
+  ]
+}
