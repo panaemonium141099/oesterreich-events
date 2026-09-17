@@ -1,0 +1,456 @@
+{
+  "source": "austria-info",
+  "source_label": "Österreich Werbung (austria.info, Barrierefreier Urlaub)",
+  "source_url": "https://www.austria.info/de-at/planung/barrierefreier-urlaub/",
+  "checked_at": "2026-09-17",
+  "entries": [
+    {
+      "id": "campingbeach-annenheim-ossiacher-see",
+      "name": "Strandbad Campingbeach Annenheim am Ossiacher See",
+      "description": "Strandbad am Ossiacher See in Annenheim mit barrierefreiem Seezugang. Das Bad steht laut Österreich Werbung Campinggästen und Tagesgästen offen.",
+      "tags": ["schwimmen", "wassersport"],
+      "setting": "outdoor",
+      "address": "Seeuferstraße 35",
+      "postal_code": "9520",
+      "town": "Annenheim",
+      "website": "https://campingbeach.at/strandbad/",
+      "source_url": "https://www.austria.info/de-at/planung/barrierefreier-urlaub/",
+      "accessibility": {
+        "features": ["rollstuhl", "badelift"],
+        "note": "Laut austria.info: barrierefreier Seezugang im Strandbad, nutzbar für Campinggäste und externe Besucherinnen und Besucher."
+      }
+    },
+    {
+      "id": "strandbad-klagenfurt-woerthersee",
+      "name": "Strandbad Klagenfurt am Wörthersee",
+      "description": "Größtes Binnensee-Strandbad Europas am Ostufer des Wörthersees. Barrierefreier Seezugang, rollstuhlgerechte Einrichtungen und Parkplatz direkt vor dem Bad.",
+      "tags": ["schwimmen", "wassersport"],
+      "setting": "outdoor",
+      "address": "Metnitzstrand 2",
+      "postal_code": "9020",
+      "town": "Klagenfurt am Wörthersee",
+      "website": "https://sup.woerthersee.com/strandbad-klagenfurt",
+      "source_url": "https://www.austria.info/de-at/planung/barrierefreier-urlaub/",
+      "accessibility": {
+        "features": ["rollstuhl", "parkplatz", "wc"],
+        "note": "Laut austria.info: barrierefreier Seezugang, rollstuhlgerechte Einrichtungen und Parkplatz vor dem Strandbad."
+      }
+    },
+    {
+      "id": "seeberuehrungen-doebriach-millstaetter-see",
+      "name": "Seeberührungen Döbriach am Millstätter See",
+      "description": "Barrierefreier Seezugang im Fischerpark von Döbriach am Millstätter See: Rampe ins Wasser, Schwimmrollstuhl und barrierefreie Toilette, dazu die ÖZIV-geprüfte barrierefreie Promenade Seeberührungen.",
+      "tags": ["schwimmen", "wandern"],
+      "setting": "outdoor",
+      "address": "Seestraße",
+      "postal_code": "9873",
+      "town": "Döbriach",
+      "website": "https://www.doebriach.net/sport-freizeit-ausflugsziele-sehenswertes/barrierefreien-seezugang-seeberuehrungen/",
+      "source_url": "https://www.austria.info/de-at/planung/barrierefreier-urlaub/",
+      "accessibility": {
+        "features": ["rollstuhl", "badelift", "wc"],
+        "note": "Laut austria.info und doebriach.net: barrierefreie Rampe in den See, Schwimmrollstuhl (mit Eurokey-System gesichert, jederzeit zugänglich) und barrierefreie Toilette."
+      }
+    },
+    {
+      "id": "strandbad-egg-faaker-see",
+      "name": "Strandbad Egg am Faaker See (sunsetbeach)",
+      "description": "Städtisches Strandbad der Stadt Villach am Faaker See. Die Anlage ist barrierefrei gestaltet, mit Einstiegsrampe, Lift ins Wasser und barrierefreien Toilettenanlagen. Menschen im Rollstuhl haben laut Stadt Villach freien Eintritt.",
+      "tags": ["schwimmen", "wassersport"],
+      "setting": "outdoor",
+      "address": "Egger Seeuferstraße 24",
+      "postal_code": "9580",
+      "town": "Egg am Faaker See",
+      "website": "https://villach.at/stadt-erleben/freizeit/baeder-badeseen/sunsetbeach-egg-faaker-see",
+      "source_url": "https://www.austria.info/de-at/planung/barrierefreier-urlaub/",
+      "accessibility": {
+        "features": ["rollstuhl", "badelift", "wc"],
+        "note": "Laut austria.info: barrierefreie Einstiegsrampe, Lift ins Wasser und Toilettenanlagen. Laut villach.at ist der gesamte sunsetbeach barrierefrei gestaltet, freier Eintritt für Menschen mit Behinderung im Rollstuhl."
+      }
+    },
+    {
+      "id": "strandbad-seewalchen-attersee",
+      "name": "Strandbad Seewalchen am Attersee",
+      "description": "Strandbad am Nordufer des Attersees mit Badelift für den barrierefreien Seezugang. Die Region Attersee-Attergau nennt außerdem barrierefreie öffentliche WC-Anlagen und einen Verleih von Rollstuhl und Rollator.",
+      "tags": ["schwimmen"],
+      "setting": "outdoor",
+      "address": "Seestraße",
+      "postal_code": "4863",
+      "town": "Seewalchen am Attersee",
+      "website": "https://attersee-attergau.salzkammergut.at/erleben/sport-und-gesundheit/baden/barrierefrei-baden-am-attersee.html",
+      "source_url": "https://www.austria.info/de-at/planung/barrierefreier-urlaub/",
+      "accessibility": {
+        "features": ["rollstuhl", "badelift", "wc", "leihrollstuhl"],
+        "note": "Laut austria.info: Badelift für einen barrierefreien Seezugang. Laut Tourismusverband Attersee-Attergau gibt es in der Region barrierefreie Seezugänge, barrierefreie öffentliche WC-Anlagen sowie Verleih von Rollstuhl und Rollator."
+      }
+    },
+    {
+      "id": "strandbad-unterach-attersee",
+      "name": "Strandbad Unterach am Attersee",
+      "description": "Strandbad am Südende des Attersees mit Badelift für den barrierefreien Seezugang, laut Österreich Werbung eines von drei Strandbädern am Attersee mit dieser Ausstattung.",
+      "tags": ["schwimmen"],
+      "setting": "outdoor",
+      "address": "Seestraße",
+      "postal_code": "4866",
+      "town": "Unterach am Attersee",
+      "website": "https://attersee-attergau.salzkammergut.at/erleben/sport-und-gesundheit/baden/barrierefrei-baden-am-attersee.html",
+      "source_url": "https://www.austria.info/de-at/planung/barrierefreier-urlaub/",
+      "accessibility": {
+        "features": ["rollstuhl", "badelift"],
+        "note": "Laut austria.info: Badelift für einen barrierefreien Seezugang."
+      }
+    },
+    {
+      "id": "strandbad-weyregg-attersee",
+      "name": "Strandbad Weyregg am Attersee",
+      "description": "Strandbad am Ostufer des Attersees mit Badelift für den barrierefreien Seezugang, laut Österreich Werbung eines von drei Strandbädern am Attersee mit dieser Ausstattung.",
+      "tags": ["schwimmen"],
+      "setting": "outdoor",
+      "address": "Weyregg 6",
+      "postal_code": "4852",
+      "town": "Weyregg am Attersee",
+      "website": "https://attersee-attergau.salzkammergut.at/erleben/sport-und-gesundheit/baden/barrierefrei-baden-am-attersee.html",
+      "source_url": "https://www.austria.info/de-at/planung/barrierefreier-urlaub/",
+      "accessibility": {
+        "features": ["rollstuhl", "badelift"],
+        "note": "Laut austria.info: Badelift für einen barrierefreien Seezugang."
+      }
+    },
+    {
+      "id": "seeham-obertrumer-see-poollift",
+      "name": "Strandbad Seeham am Obertrumer See",
+      "description": "Badeplatz im Biodorf Seeham am Obertrumer See mit barrierefreiem Poollift ins Wasser und weiteren rollstuhlgerechten Einrichtungen.",
+      "tags": ["schwimmen"],
+      "setting": "outdoor",
+      "address": "Seestraße",
+      "postal_code": "5164",
+      "town": "Seeham",
+      "website": "https://www.seeham-info.at/index.php/de/seeham-barrierefrei",
+      "source_url": "https://www.austria.info/de-at/planung/barrierefreier-urlaub/",
+      "accessibility": {
+        "features": ["rollstuhl", "badelift"],
+        "note": "Laut austria.info: barrierefreier Poollift und weitere rollstuhlgerechte Einrichtungen im Biodorf Seeham."
+      }
+    },
+    {
+      "id": "badesee-ried-tirol",
+      "name": "Badesee Ried im Oberinntal",
+      "description": "Badesee in Ried im Oberinntal (Tiroler Oberland) mit Poollift für den barrierefreien Zugang zum Wasser und barrierefreier Toilette. Vor Ort gibt es Stand-up-Paddle- und Tretbootverleih.",
+      "tags": ["schwimmen"],
+      "setting": "outdoor",
+      "address": "Badesee",
+      "postal_code": "6531",
+      "town": "Ried im Oberinntal",
+      "website": "https://www.tiroler-oberland.com/de/Ihr-Tiroler-Oberland/Tiroler-Oberland-von-A-Z/Badesee-Ried_i-4057",
+      "source_url": "https://www.austria.info/de-at/planung/barrierefreier-urlaub/",
+      "accessibility": {
+        "features": ["rollstuhl", "badelift", "wc"],
+        "note": "Laut austria.info: Pool-Lift für den barrierefreien Zugang zum See sowie eine barrierefreie Toilette."
+      }
+    },
+    {
+      "id": "wien-museum",
+      "name": "Wien Museum",
+      "description": "Stadtmuseum am Karlsplatz mit barrierefreiem Programm: Informationen in einfacher Sprache, Videos in Österreichischer Gebärdensprache, inklusive Vermittlungsprogramme und ein Leitbild Inklusion.",
+      "tags": ["museumstour", "ausstellung"],
+      "setting": "indoor",
+      "address": "Karlsplatz 8",
+      "postal_code": "1040",
+      "town": "Wien",
+      "website": "https://www.wienmuseum.at/barrierefreier_besuch",
+      "source_url": "https://www.austria.info/de-at/planung/barrierefreier-urlaub/",
+      "accessibility": {
+        "features": ["rollstuhl", "gehoerlos", "leichte-sprache"],
+        "note": "Laut wienmuseum.at: Informationen zur Barrierefreiheit, Besuchsplanung in einfacher Sprache, Videos in ÖGS und inklusive Programme. Details zur baulichen Ausstattung auf der Seite des Museums."
+      }
+    },
+    {
+      "id": "lentos-kunstmuseum-linz",
+      "name": "Lentos Kunstmuseum Linz",
+      "description": "Kunstmuseum an der Donau in Linz. Ebenerdiger Haupteingang mit automatischen Schiebetüren, alle Räume barrierefrei zugänglich, Personenlift, Behinderten-WC, zwei Behindertenparkplätze in der Tiefgarage, Leihrollstuhl, regelmäßige Führungen in Österreichischer Gebärdensprache.",
+      "tags": ["museumstour", "ausstellung"],
+      "setting": "indoor",
+      "address": "Ernst-Koref-Promenade 1",
+      "postal_code": "4020",
+      "town": "Linz",
+      "website": "https://www.lentos.at/besuch/barrierefreier-besuch",
+      "source_url": "https://www.austria.info/de-at/planung/barrierefreier-urlaub/",
+      "accessibility": {
+        "features": ["rollstuhl", "parkplatz", "wc", "lift", "leihrollstuhl", "gehoerlos"],
+        "note": "Laut lentos.at: ebenerdiger Zugang durch den Haupteingang, alle Räume barrierefrei, Personenlift, Behinderten-WC im Untergeschoss, zwei Behindertenparkplätze in der Tiefgarage, Leihrollstuhl, Führungen in ÖGS."
+      }
+    },
+    {
+      "id": "salzburg-museum-neue-residenz",
+      "name": "Salzburg Museum in der Neuen Residenz",
+      "description": "Landesmuseum in der Neuen Residenz am Mozartplatz. Alle Räumlichkeiten sind für Besucherinnen und Besucher im Rollstuhl barrierefrei zugänglich (Rampe im Innenhof, Lift), Behinderten-WC auf Ebene 0, Führungen für blinde und sehbehinderte Menschen sowie in Gebärdensprache, Blinden- und Partnerhunde erlaubt.",
+      "tags": ["museumstour", "ausstellung"],
+      "setting": "indoor",
+      "address": "Mozartplatz 1",
+      "postal_code": "5020",
+      "town": "Salzburg",
+      "website": "https://barrierefrei.carolino-augusteum.at/salzburgmuseum-barrierefrei/",
+      "source_url": "https://www.austria.info/de-at/planung/barrierefreier-urlaub/",
+      "accessibility": {
+        "features": ["rollstuhl", "wc", "lift", "blind", "gehoerlos", "assistenzhund"],
+        "note": "Laut Salzburg Museum: alle Räumlichkeiten barrierefrei zugänglich, Rampe im Innenhof, Behinderten-WC auf Ebene 0 per Lift erreichbar, Stufenmarkierungen für sehbehinderte Menschen, Führungen für blinde und sehbehinderte Menschen und in Gebärdensprache, Blinden- und Partnerhunde erlaubt."
+      }
+    },
+    {
+      "id": "festspielhaus-bregenz",
+      "name": "Festspielhaus Bregenz",
+      "description": "Veranstaltungshaus am Bodensee: alle Veranstaltungsräume über Liftanlagen erreichbar, acht Rollstuhlplätze im Großen Saal, sehbehindertengerechte Beschriftung an Handläufen und Liften sowie Führungsrillen am Boden. Vom ÖZIV per Barriere-Check geprüft.",
+      "tags": ["theater"],
+      "setting": "indoor",
+      "address": "Platz der Wiener Symphoniker 1",
+      "postal_code": "6900",
+      "town": "Bregenz",
+      "website": "https://www.kongresskultur.com/t/barrierefreies-haus",
+      "source_url": "https://www.austria.info/de-at/planung/barrierefreier-urlaub/",
+      "accessibility": {
+        "features": ["rollstuhl", "lift", "blind"],
+        "note": "Laut kongresskultur.com: alle Veranstaltungsräume barrierefrei über Lifte erreichbar, acht Rollstuhlplätze im Großen Saal (nach Anmeldung bis neun), Besucherleitsystem für sehbehinderte Menschen, ÖZIV Barriere-Check."
+      }
+    },
+    {
+      "id": "keltenmuseum-hallein",
+      "name": "Keltenmuseum Hallein",
+      "description": "Museum zur Salzburger und Halleiner Urgeschichte: barrierefreier Eingang, Lift in alle Stockwerke, barrierefreies WC im Erdgeschoss, Bewegungsraum für Rollstuhlfahrerinnen und Rollstuhlfahrer, Führungen in Gebärdensprache, in Leichter Sprache und für sehbeeinträchtigte und blinde Menschen.",
+      "tags": ["museumstour", "ausstellung"],
+      "setting": "indoor",
+      "address": "Pflegerplatz 5",
+      "postal_code": "5400",
+      "town": "Hallein",
+      "website": "https://museumsguide.net/museum/keltenmuseum-hallein/",
+      "source_url": "https://www.austria.info/de-at/planung/barrierefreier-urlaub/",
+      "accessibility": {
+        "features": ["rollstuhl", "wc", "lift", "blind", "gehoerlos", "leichte-sprache"],
+        "note": "Laut Museums Guide inklusiv: barrierefreier Eingang, Lift in alle Stockwerke, barrierefreies WC im Erdgeschoss, Führungen in Gebärdensprache, in Leichter Sprache und für sehbeeinträchtigte und blinde Menschen."
+      }
+    },
+    {
+      "id": "albertina-wien",
+      "name": "Albertina",
+      "description": "Grafische Sammlung und Kunstmuseum bei der Wiener Hofburg. Eingang über Lift und Rolltreppen, Lifte und WCs im Gebäude, monatliche Führungen in Österreichischer Gebärdensprache, Smartphone Guide mit Informationen in Leichter Sprache, ermäßigter Eintritt mit Behindertenpass und freier Eintritt für eine Assistenzperson.",
+      "tags": ["museumstour", "ausstellung"],
+      "setting": "indoor",
+      "address": "Albertinaplatz 1",
+      "postal_code": "1010",
+      "town": "Wien",
+      "website": "https://www.albertina.at/besuch/programm/fuehrungen-in-gebaerdensprache/",
+      "source_url": "https://www.austria.info/de-at/planung/barrierefreier-urlaub/",
+      "accessibility": {
+        "features": ["rollstuhl", "wc", "lift", "gehoerlos", "leichte-sprache"],
+        "note": "Laut albertina.at: Führungen mit Übersetzung in ÖGS, Eintritt und Führungsbeitrag für eine Assistenzperson frei. Laut Museums Guide inklusiv: Eingang über Lift und Rolltreppen, Lifte und WCs im Gebäude, Smartphone Guide in Leichter Sprache."
+      }
+    },
+    {
+      "id": "swarovski-kristallwelten-wattens",
+      "name": "Swarovski Kristallwelten",
+      "description": "Erlebniswelt in Wattens mit Wunderkammern und Park. Wunderkammern und Park sind für Rollstühle, Kinderwagen und Gehhilfen geeignet (Ausnahme: der Alpingarten mit steilen Passagen), acht barrierefreie Parkplätze beim Eingang, barrierefreie Toiletten, Leihrollstühle und ein barrierefreier E-Shuttlebus mit Rollstuhlplatz.",
+      "tags": ["museumstour", "ausstellung"],
+      "setting": "mixed",
+      "address": "Kristallweltenstraße 1",
+      "postal_code": "6112",
+      "town": "Wattens",
+      "website": "https://www.kristallwelten.swarovski.com/de/besuchen",
+      "source_url": "https://www.austria.info/de-at/planung/barrierefreier-urlaub/",
+      "accessibility": {
+        "features": ["rollstuhl", "parkplatz", "wc", "leihrollstuhl"],
+        "note": "Laut kristallwelten.swarovski.com: Wunderkammern und Park für Rollstühle geeignet (Alpingarten ausgenommen), acht barrierefreie Parkplätze direkt neben dem Eingang, barrierefreie Toiletten, Leihrollstühle, barrierefreier E-Shuttlebus."
+      }
+    },
+    {
+      "id": "domquartier-salzburg",
+      "name": "DomQuartier Salzburg",
+      "description": "Museumsrundgang durch Residenz, Dom und Stift St. Peter. Barrierefreier Zugang in zwei Etappen über Residenz und Dom (Lifte in Begleitung von Mitarbeiterinnen und Mitarbeitern), Leihrollstuhl an der Kassa nach Voranmeldung, induktive Höranlagen an den Kassen, iPads mit Gebärdensprachvideos, taktile Station zu einem Stillleben, Assistenzhunde erlaubt, Behindertenparkplätze in der Nähe.",
+      "tags": ["museumstour", "ausstellung"],
+      "setting": "indoor",
+      "address": "Residenzplatz 1",
+      "postal_code": "5020",
+      "town": "Salzburg",
+      "website": "https://www.domquartier.at/besuchen/barrierefreiheit/",
+      "source_url": "https://www.austria.info/de-at/planung/barrierefreier-urlaub/",
+      "accessibility": {
+        "features": ["rollstuhl", "parkplatz", "lift", "leihrollstuhl", "blind", "gehoerlos", "assistenzhund"],
+        "note": "Laut domquartier.at: barrierefreier Zugang in zwei Etappen (Lifte nur in Begleitung von Personal), Leihrollstuhl an der Kassa nach Voranmeldung, induktive Höranlagen, iPads mit Gebärdensprachvideos, taktile Station, Assistenzhunde erlaubt, Behindertenparkplätze im Toscaninihof, am Mozartplatz und in der Hofstallgasse."
+      }
+    },
+    {
+      "id": "vorarlberg-museum-bregenz",
+      "name": "vorarlberg museum",
+      "description": "Landesmuseum am Kornmarktplatz in Bregenz. Alle Räume für Rollstuhlfahrerinnen und Rollstuhlfahrer über Rampen, breite Türen und zwei Lifte zugänglich, taktile Bodenmarkierungen vom Kornmarktplatz bis zu Kassa und Lift, tastbare Beschriftungen und Braille im Lift mit Stockwerksansage, inklusive Ausstellungsstationen.",
+      "tags": ["museumstour", "ausstellung"],
+      "setting": "indoor",
+      "address": "Kornmarktplatz 1",
+      "postal_code": "6900",
+      "town": "Bregenz",
+      "website": "https://www.vorarlbergmuseum.at/museum/nachhaltigkeit-und-barrierefreiheit/",
+      "source_url": "https://www.austria.info/de-at/planung/barrierefreier-urlaub/",
+      "accessibility": {
+        "features": ["rollstuhl", "wc", "lift", "blind", "gehoerlos"],
+        "note": "Laut vorarlbergmuseum.at: Rampen, ausreichende Türbreiten und zwei Lifte, taktile Bodenmarkierungen, tastbare Beschriftungen und Braille im Lift, barrierefrei erschlossene Toiletten im Untergeschoss, inklusive Ausstellungsstationen für seh- und hörbeeinträchtigte Menschen."
+      }
+    },
+    {
+      "id": "festspielhaus-erl",
+      "name": "Festspielhaus Erl (Tiroler Festspiele)",
+      "description": "Fest- und Passionsspielhaus der Tiroler Festspiele in Erl. Eigene Rollstuhlplätze im Festspielhaus, barrierefreie Sanitäranlagen im Erdgeschoss und im ersten Stock, Personenaufzug zum Foyer.",
+      "tags": ["theater"],
+      "setting": "indoor",
+      "address": "Mühlgraben 56",
+      "postal_code": "6343",
+      "town": "Erl",
+      "website": "https://www.tiroler-festspiele.at/service/barrierefreiheit",
+      "source_url": "https://www.austria.info/de-at/planung/barrierefreier-urlaub/",
+      "accessibility": {
+        "features": ["rollstuhl", "wc", "lift"],
+        "note": "Laut tiroler-festspiele.at: eigene Rollstuhlplätze (Reservierung erforderlich), barrierefreie Sanitäranlagen im Erdgeschoss und im ersten Stock, Personenaufzug."
+      }
+    },
+    {
+      "id": "kunsthistorisches-museum-wien",
+      "name": "Kunsthistorisches Museum Wien",
+      "description": "Museum am Maria-Theresien-Platz. Barrierefreier Zugang über den Seiteneingang Burgring 5 mit Begleitung durch den Besucherservice, fünf barrierefreie WCs, Rollstuhlverleih nach Reservierung, Behindertenparkplätze am Heldenplatz und beim Seiteneingang, barrierefreie Führungen auf Anfrage und Online-Führung in Gebärdensprache.",
+      "tags": ["museumstour", "ausstellung"],
+      "setting": "indoor",
+      "address": "Maria-Theresien-Platz",
+      "postal_code": "1010",
+      "town": "Wien",
+      "website": "https://www.khm.at/erfahren/kunstvermittlung/barrierefreie-angebote/",
+      "source_url": "https://www.austria.info/de-at/planung/barrierefreier-urlaub/",
+      "accessibility": {
+        "features": ["rollstuhl", "parkplatz", "wc", "lift", "leihrollstuhl", "gehoerlos"],
+        "note": "Laut khm.at: barrierefreier Zugang über den Seiteneingang Burgring 5, fünf barrierefreie WCs, Rollstuhlverleih (Reservierung am Vortag), Behindertenparkplätze am Heldenplatz und Burgring, ermäßigter Eintritt für Begleitperson, Führungen für Menschen mit Behinderung auf Anfrage."
+      }
+    },
+    {
+      "id": "schloss-schoenbrunn-wien",
+      "name": "Schloss Schönbrunn",
+      "description": "Barocke Schlossanlage in Wien-Hietzing. Alle Ausstellungsbereiche über Rampen oder Lift barrierefrei zugänglich, drei Behindertenparkplätze am Vorplatz beim Haupttor, barrierefreie Toiletten in Besucherzentrum, Schloss, Kindermuseum und Irrgarten, Rampe in den Garten, Assistenzhunde erlaubt, Spezialführungen für blinde und sehbehinderte Menschen auf Anfrage.",
+      "tags": ["burgführung", "museumstour"],
+      "setting": "mixed",
+      "address": "Schönbrunner Schloßstraße 47",
+      "postal_code": "1130",
+      "town": "Wien",
+      "website": "https://www.schoenbrunn.at/besucher-informationen/barrierefreier-besuch",
+      "source_url": "https://www.austria.info/de-at/planung/barrierefreier-urlaub/",
+      "accessibility": {
+        "features": ["rollstuhl", "parkplatz", "wc", "lift", "blind", "assistenzhund"],
+        "note": "Laut schoenbrunn.at: Ausstellungsbereiche über Rampen oder Lift barrierefrei zugänglich, drei Behindertenparkplätze am Vorplatz, barrierefreie Toiletten, Rampe in den Garten, Assistenzhunde gestattet, freier Eintritt für eingetragene Begleitperson, Spezialführungen für blinde und sehbehinderte Menschen auf Anfrage."
+      }
+    },
+    {
+      "id": "schloss-hof",
+      "name": "Schloss Hof",
+      "description": "Barockes Schloss mit Garten und Gutshof im Marchfeld. Haupteingang stufenlos, Rampen mit zehn Prozent Steigung zum Schloss (Hilfe an der Kassa), Behindertenparkplätze rund 200 Meter vom Haupteingang, barrierefreies WC, Lift im Schloss, Ausstellungsräume und Café stufenlos erreichbar.",
+      "tags": ["burgführung", "museumstour"],
+      "setting": "mixed",
+      "address": "Schloßhof 1",
+      "postal_code": "2294",
+      "town": "Engelhartstetten",
+      "website": "https://www.schlosshof.at/besucherinfo/barrierefreiheit",
+      "source_url": "https://www.austria.info/de-at/planung/barrierefreier-urlaub/",
+      "accessibility": {
+        "features": ["rollstuhl", "parkplatz", "wc", "lift"],
+        "note": "Laut schlosshof.at: Haupteingang stufenlos, Rampen mit 10 Prozent Steigung, Behindertenparkplätze vorhanden (ca. 200 m zum Eingang), barrierefreies WC, Lift im Schloss, Ausstellungsräume und Café Arkadenhof stufenlos."
+      }
+    },
+    {
+      "id": "dom-museum-wien",
+      "name": "Dom Museum Wien",
+      "description": "Museum am Stephansplatz. Stufenloser Haupteingang mit kraftbetriebener Drehtür, Lift in den ersten Stock, barrierefreie WC-Anlagen, Rollstuhl an der Kassa entlehnbar, Blindenführhund gestattet, Museums-App mit Talk-Back- und Voice-Over-Modus, taktile Reliefdarstellungen ausgewählter Werke, inklusive Kunstvermittlungsprogramme.",
+      "tags": ["museumstour", "ausstellung"],
+      "setting": "indoor",
+      "address": "Stephansplatz 6",
+      "postal_code": "1010",
+      "town": "Wien",
+      "website": "https://dommuseum.at/barrier_free",
+      "source_url": "https://www.austria.info/de-at/planung/barrierefreier-urlaub/",
+      "accessibility": {
+        "features": ["rollstuhl", "wc", "lift", "leihrollstuhl", "blind", "assistenzhund"],
+        "note": "Laut dommuseum.at: Haupteingang stufenlos (Türbreite 154 cm), Lift in den ersten Stock (Türbreite 102 cm), barrierefreie WC-Anlagen, Rollstuhl entlehnbar, Blindenführhund gestattet, App mit Talk-Back und Voice-Over, taktile Reliefs."
+      }
+    },
+    {
+      "id": "salzburg-stadtfuehrung-barrierefrei",
+      "name": "Barrierefreie Stadtführungen Salzburg (Salzburg Guides)",
+      "description": "Themenführungen der Salzburger Fremdenführerinnen und Fremdenführer für blinde und sehbehinderte Gäste sowie für Gäste mit eingeschränkter Mobilität durch die Salzburger Altstadt. Treffpunkt und Route werden bei der Buchung vereinbart.",
+      "tags": ["naturführung"],
+      "setting": "outdoor",
+      "address": "Mozartplatz 5",
+      "postal_code": "5020",
+      "town": "Salzburg",
+      "website": "https://www.salzburg-guide.at/fuehrungen/themenfuehrungen/salzburg-barrierefrei/salzburg-barrierefrei/",
+      "source_url": "https://www.austria.info/de-at/planung/barrierefreier-urlaub/",
+      "accessibility": {
+        "features": ["rollstuhl", "blind"],
+        "note": "Laut austria.info: Stadtführungen für blinde und sehbehinderte Gäste durch spezialisierte Guides; Routen für mobilitätseingeschränkte Gäste nach Absprache."
+      }
+    },
+    {
+      "id": "graz-stadtfuehrung-hoeren-fuehlen",
+      "name": "Stadtführungen zum Mithören und Fühlen in Graz (Graz Guides)",
+      "description": "Führungen der Grazer Austria Guides durch die Altstadt, die auf Hören und Fühlen ausgelegt sind und sich an blinde und sehbehinderte Gäste richten. Treffpunkt nach Vereinbarung.",
+      "tags": ["naturführung"],
+      "setting": "outdoor",
+      "address": "Hauptplatz",
+      "postal_code": "8010",
+      "town": "Graz",
+      "website": "https://www.grazguides.at/de/component/content/article/hoeren-und-fuehlen?catid=17&Itemid=163",
+      "source_url": "https://www.austria.info/de-at/planung/barrierefreier-urlaub/",
+      "accessibility": {
+        "features": ["blind"],
+        "note": "Laut austria.info: Stadtführungen zum Mithören für blinde und sehbehinderte Gäste durch spezialisierte Guides."
+      }
+    },
+    {
+      "id": "innsbruck-barrierefreie-stadtrunde",
+      "name": "Barrierefreie Stadtrunde Innsbruck",
+      "description": "Rollstuhlgerechte Stadtrunde durch die Innsbrucker Altstadt, zusammengestellt von Innsbruck Tourismus, mit Hinweisen zu Wegen, Zugängen und barrierefreien Sehenswürdigkeiten.",
+      "tags": ["wandern"],
+      "setting": "outdoor",
+      "address": "Herzog-Friedrich-Straße 15",
+      "postal_code": "6020",
+      "town": "Innsbruck",
+      "website": "https://www.innsbruck.info/sehenswuerdigkeiten/m/barrierefreie-stadtrunde.html",
+      "source_url": "https://www.austria.info/de-at/planung/barrierefreier-urlaub/",
+      "accessibility": {
+        "features": ["rollstuhl"],
+        "note": "Laut innsbruck.info: barrierefreie Stadtrunde mit Beschreibung der Wege und Zugänge für Gäste mit eingeschränkter Mobilität."
+      }
+    },
+    {
+      "id": "wien-barrierefrei-guides",
+      "name": "Spezialisierte Blinden- und Behindertenführungen in Wien",
+      "description": "Von WienTourismus gelistete Fremdenführerinnen und Fremdenführer mit Spezialisierung auf Führungen für blinde, sehbehinderte, gehörlose und mobilitätseingeschränkte Gäste in Wien. Routen und Treffpunkte nach Vereinbarung.",
+      "tags": ["naturführung"],
+      "setting": "outdoor",
+      "address": "Albertinaplatz",
+      "postal_code": "1010",
+      "town": "Wien",
+      "website": "https://www.wien.info/de/reiseinfos/wien-barrierefrei/barrierefrei-guides-340372",
+      "source_url": "https://www.austria.info/de-at/planung/barrierefreier-urlaub/",
+      "accessibility": {
+        "features": ["rollstuhl", "blind", "gehoerlos"],
+        "note": "Laut wien.info: spezialisierte Guides für Blinden- und Behindertenführungen, darunter Führungen in Gebärdensprache und für Gäste mit eingeschränkter Mobilität."
+      }
+    },
+    {
+      "id": "vienna-watersports-arena",
+      "name": "Vienna Watersports Arena",
+      "description": "Wassersportanlage an der Neuen Donau in Wien-Floridsdorf mit Angeboten für Menschen mit Behinderung (Kanu, Kajak, Stand-up-Paddling) und barrierefreier Nutzung der Anlage.",
+      "tags": ["wassersport", "kajak"],
+      "setting": "outdoor",
+      "address": "Am Hubertusdamm 50",
+      "postal_code": "1210",
+      "town": "Wien",
+      "website": "https://www.viennawatersportsarena.at/die-arena/barrierefreie-nutzung",
+      "source_url": "https://www.austria.info/de-at/planung/barrierefreier-urlaub/",
+      "accessibility": {
+        "features": ["rollstuhl"],
+        "note": "Laut austria.info: Wassersport für Menschen mit Behinderung; laut viennawatersportsarena.at barrierefreie Nutzung der Anlage."
+      }
+    }
+  ]
+}

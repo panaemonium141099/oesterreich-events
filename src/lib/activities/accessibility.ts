@@ -73,10 +73,11 @@ export function accessibilityFeatureLabel(feature: string, locale: string): stri
 
 // ── Erkennung ───────────────────────────────────────────────────────────────
 
-/** Deskline-holidayThemes, die Barrierefreiheit bedeuten (live verprobt
- *  2026-09-17: "Barrierefrei", "Rollstuhlgängig" in SalzburgerLand und
- *  Salzkammergut). */
-const THEME_RE = /barrierefrei|rollstuhl/i;
+/** Deskline-holidayThemes/-Klassifizierungen, die Barrierefreiheit bedeuten
+ *  (live verprobt 2026-09-17: "Barrierefrei", "Rollstuhlgängig" in
+ *  SalzburgerLand und Salzkammergut; Klassifizierung "ÖZIV geprüft" in
+ *  Kaernten = Siegel des Verbands fuer Menschen mit Behinderung). */
+const THEME_RE = /barrierefrei|rollstuhl|öziv|oeziv/i;
 
 export function detectAccessibilityFromThemes(themeNames: ReadonlyArray<string>): string[] {
   return themeNames.filter((n) => typeof n === 'string' && THEME_RE.test(n));

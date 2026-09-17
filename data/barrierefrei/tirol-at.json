@@ -1,0 +1,1741 @@
+{
+  "source": "tirol-at",
+  "source_label": "Tirol Werbung (tirol.at)",
+  "source_url": "https://www.tirol.at/reisefuehrer/barrierefrei",
+  "checked_at": "2026-09-17",
+  "entries": [
+    {
+      "id": "rolli-maurach-pertisau-maurach",
+      "name": "Maurach - Pertisau - Maurach",
+      "description": "Rolli-Wandertour laut Tirol Werbung: mit dem Rollstuhl passierbarer Weg. Schwierigkeit leicht Länge 9,6 km Dauer 3:00 h Höhenmeter bergauf 40 m, Ort Pertisau am Achensee / Karwendel. Entlang der Seepromenade des Achensees. Rückfahrt mit dem Achenseeschiff. Asphalt und fester Kiesbelag.",
+      "description_short": null,
+      "tags": [
+        "wandern"
+      ],
+      "setting": "outdoor",
+      "address": null,
+      "postal_code": null,
+      "town": "Pertisau am Achensee",
+      "lat": 47.43045,
+      "lng": 11.73721,
+      "website": "https://www.tirol.at/aktivitaeten/sport/wandern/wandertouren/maurach-pertisau-maurach-1",
+      "source_url": "https://www.tirol.at/reiseservice/barrierefrei/rolli-wandertouren",
+      "accessibility": {
+        "features": [
+          "rollstuhl"
+        ],
+        "note": "Laut tirol.at: Entlang der Seepromenade des Achensees. Rückfahrt mit dem Achenseeschiff. Asphalt und fester Kiesbelag."
+      },
+      "images": [
+        {
+          "url": "https://www.tirol.at/images/MVKyUmJ-jZc/cb:/g:ce/aHR0cHM6Ly91cGxvYWRzLm1hcHNlcnZpY2VzLmV1L25lZm9zX3Rpcm9sL3NpdGUtZmlsZXMvMTAxNi91cGxvYWRzL3JvbGxpLXdhbmRlcnRvdXIuanBn",
+          "credit": "Achensee Tourismus",
+          "license": null,
+          "author": null
+        }
+      ],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "rolli-arnig-kals-am-grossglockner",
+      "name": "Arnig - Kals am Großglockner",
+      "description": "Rolli-Wandertour laut Tirol Werbung: mit dem Rollstuhl passierbarer Weg. Schwierigkeit leicht Länge 3,2 km Dauer 1:30 h Höhenmeter bergauf 135 m, Ort Kals am Großglockner / Glocknergruppe. Route im Nationalpark Hohe Tauern. Swiss Trac wird empfohlen. Schotterweg mit zwei Bachquerungen.",
+      "description_short": null,
+      "tags": [
+        "wandern"
+      ],
+      "setting": "outdoor",
+      "address": null,
+      "postal_code": null,
+      "town": "Kals am Großglockner",
+      "lat": 47.02176,
+      "lng": 12.68946,
+      "website": "https://www.tirol.at/aktivitaeten/sport/wandern/wandertouren/rollitour-nationalpark-hohe-tauern",
+      "source_url": "https://www.tirol.at/reiseservice/barrierefrei/rolli-wandertouren",
+      "accessibility": {
+        "features": [
+          "rollstuhl"
+        ],
+        "note": "Laut tirol.at: Route im Nationalpark Hohe Tauern. Swiss Trac wird empfohlen. Schotterweg mit zwei Bachquerungen."
+      },
+      "images": [
+        {
+          "url": "https://www.tirol.at/images/Em6Rx2lqjfM/cb:/g:ce/aHR0cHM6Ly91cGxvYWRzLm1hcHNlcnZpY2VzLmV1L25lZm9zX3Rpcm9sL3NpdGUtZmlsZXMvMTAyMS91cGxvYWRzL3N3aXNzLXRyYWNrMDItYy1ucGh0LW1hcnRpbi1rdXJ6dGhhbGVyLmpwZWc",
+          "credit": "Nationalpark Hohe Tauern / Martin Kurzthaler",
+          "license": null,
+          "author": null
+        }
+      ],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "rolli-wanderweg-hildegard-von-bingen",
+      "name": "Wanderweg Hildegard von Bingen",
+      "description": "Rolli-Wandertour laut Tirol Werbung: mit dem Rollstuhl passierbarer Weg. Schwierigkeit leicht Länge 3,1 km Dauer 1:30 h Höhenmeter bergauf 20 m, Ort Reith im Alpbachtal / Kitzbüheler Alpen. Erste Schau- und Erholungsgarten nach Hildegard von Bingen. Aussichtsplattform. Rundweg durch Reith im Alpbachtal.",
+      "description_short": null,
+      "tags": [
+        "wandern"
+      ],
+      "setting": "outdoor",
+      "address": null,
+      "postal_code": null,
+      "town": "Reith im Alpbachtal",
+      "lat": 47.41537,
+      "lng": 11.88047,
+      "website": "https://www.tirol.at/aktivitaeten/sport/wandern/wandertouren/kultour-wanderweg-hildegard-von-bingen-barrierefrei",
+      "source_url": "https://www.tirol.at/reiseservice/barrierefrei/rolli-wandertouren",
+      "accessibility": {
+        "features": [
+          "rollstuhl"
+        ],
+        "note": "Laut tirol.at: Erste Schau- und Erholungsgarten nach Hildegard von Bingen. Aussichtsplattform. Rundweg durch Reith im Alpbachtal."
+      },
+      "images": [
+        {
+          "url": "https://www.tirol.at/images/Yyk_xSw8rZM/cb:/g:ce/aHR0cHM6Ly91cGxvYWRzLm1hcHNlcnZpY2VzLmV1L25lZm9zX3Rpcm9sL3NpdGUtZmlsZXMvMTEyOC91cGxvYWRzLzYwOTA2ODYwOC5qcGc",
+          "credit": "shootandstyle",
+          "license": null,
+          "author": null
+        }
+      ],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "rolli-wanderweg-entlang-des-reintalersees",
+      "name": "Wanderweg entlang des Reintalersees",
+      "description": "Rolli-Wandertour laut Tirol Werbung: mit dem Rollstuhl passierbarer Weg. Schwierigkeit mittelschwierig Länge 7,0 km Dauer 1:45 h Höhenmeter bergauf 15 m, Ort Kramsach / Brandenberger Alpen (Rofan). Minimales Gefälle. Barrierefreier Bewegungspark am Westufer. Rampe für direkten Zugang ins Wasser im Osten.",
+      "description_short": null,
+      "tags": [
+        "wandern"
+      ],
+      "setting": "outdoor",
+      "address": null,
+      "postal_code": null,
+      "town": "Kramsach",
+      "lat": 47.4597,
+      "lng": 11.88837,
+      "website": "https://www.tirol.at/aktivitaeten/sport/wandern/wandertouren/barrierefreier-wanderweg-reintalersees",
+      "source_url": "https://www.tirol.at/reiseservice/barrierefrei/rolli-wandertouren",
+      "accessibility": {
+        "features": [
+          "rollstuhl"
+        ],
+        "note": "Laut tirol.at: Minimales Gefälle. Barrierefreier Bewegungspark am Westufer. Rampe für direkten Zugang ins Wasser im Osten."
+      },
+      "images": [
+        {
+          "url": "https://www.tirol.at/images/rnKon89P_vU/cb:/g:ce/aHR0cHM6Ly91cGxvYWRzLm1hcHNlcnZpY2VzLmV1L25lZm9zX3Rpcm9sL3NpdGUtZmlsZXMvMTEyOC91cGxvYWRzLzc4NjM0NzkwLmpwZw",
+          "credit": "shootandstyle",
+          "license": null,
+          "author": null
+        }
+      ],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "rolli-rolli-wanderung-am-piller-moor",
+      "name": "Rolli-Wanderung am Piller Moor",
+      "description": "Rolli-Wandertour laut Tirol Werbung: mit dem Rollstuhl passierbarer Weg. Schwierigkeit leicht Länge 2,0 km, Ort Fliess / Ötztaler Alpen. Weg über barrierefreie Holzstege. Einkehr im Naturparkhaus Kaunergrat. Aussichtsplattform Gacher Blick.",
+      "description_short": null,
+      "tags": [
+        "wandern"
+      ],
+      "setting": "outdoor",
+      "address": null,
+      "postal_code": null,
+      "town": "Fliess",
+      "lat": 47.12309,
+      "lng": 10.6693,
+      "website": "https://www.tirol.at/aktivitaeten/sport/wandern/wandertouren/rolli-wanderung-piller-moor",
+      "source_url": "https://www.tirol.at/reiseservice/barrierefrei/rolli-wandertouren",
+      "accessibility": {
+        "features": [
+          "rollstuhl"
+        ],
+        "note": "Laut tirol.at: Weg über barrierefreie Holzstege. Einkehr im Naturparkhaus Kaunergrat. Aussichtsplattform Gacher Blick."
+      },
+      "images": [
+        {
+          "url": "https://www.tirol.at/images/qMo_nMxR2iI/cb:/g:ce/aHR0cHM6Ly91cGxvYWRzLm1hcHNlcnZpY2VzLmV1L25lZm9zX3Rpcm9sL3NpdGUtZmlsZXMvMTAzNi91cGxvYWRzLy10dmItdGlyb2xlci1vYmVybGFuZC1rYXVuZXJ0YWwtZGFuaWVsLXphbmdlcmwtcGlsbGVyLW1vb3ItZmFtaWxpZS0yMDE0LTI4LmpwZw",
+          "credit": "-TVB-Tiroler-Oberland-Kaunertal-Daniel-Zangerl-Piller-Moor-Familie-2014-(28).jpg © Daniel Zangerl",
+          "license": null,
+          "author": null
+        }
+      ],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "rolli-rundweg-st-nikolaus-kirche",
+      "name": "Rundweg St. Nikolaus-Kirche",
+      "description": "Rolli-Wandertour laut Tirol Werbung: mit dem Rollstuhl passierbarer Weg. Schwierigkeit leicht Länge 5,4 km Dauer 1:39 h Höhenmeter bergauf 150 m, Ort Matrei in Osttirol / Venedigergruppe. Moderate Steigungen. St. Nikolaus Kirch mit historischen Freskenmalereien. Asphalt und Schotterbelag.",
+      "description_short": null,
+      "tags": [
+        "wandern"
+      ],
+      "setting": "outdoor",
+      "address": null,
+      "postal_code": null,
+      "town": "Matrei in Osttirol",
+      "lat": 47.00097,
+      "lng": 12.53858,
+      "website": "https://www.tirol.at/aktivitaeten/sport/wandern/wandertouren/rundweg-st-nikolaus-kirche",
+      "source_url": "https://www.tirol.at/reiseservice/barrierefrei/rolli-wandertouren",
+      "accessibility": {
+        "features": [
+          "rollstuhl"
+        ],
+        "note": "Laut tirol.at: Moderate Steigungen. St. Nikolaus Kirch mit historischen Freskenmalereien. Asphalt und Schotterbelag."
+      },
+      "images": [
+        {
+          "url": "https://www.tirol.at/images/Yy_fvOX7Ve8/cb:/g:ce/aHR0cHM6Ly91cGxvYWRzLm1hcHNlcnZpY2VzLmV1L25lZm9zX3Rpcm9sL3NpdGUtZmlsZXMvMTAyMS91cGxvYWRzL25pa29sYXVza2lyY2hlLXZpcmdlbnRhbC1tYXRyZWktaW4tb3N0dGlyb2wtYy1iZXJuaGFyZC1hc3NtYWlyLmpwZw",
+          "credit": "Bernhard Aßmair",
+          "license": null,
+          "author": null
+        }
+      ],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "rolli-talwanderung-kaunertal",
+      "name": "Talwanderung Kaunertal",
+      "description": "Rolli-Wandertour laut Tirol Werbung: mit dem Rollstuhl passierbarer Weg. Schwierigkeit leicht Dauer 2:30 h Höhenmeter bergauf 295 m, Ort Kaunertal / Ötztaler Alpen. Verschiedene Wegvarianten. Forstwege und Asphaltbelag. Meditationsplatz am Mühlbach.",
+      "description_short": null,
+      "tags": [
+        "wandern"
+      ],
+      "setting": "outdoor",
+      "address": null,
+      "postal_code": null,
+      "town": "Kaunertal",
+      "lat": 47.03163,
+      "lng": 10.7473,
+      "website": "https://www.tirol.at/aktivitaeten/sport/wandern/wandertouren/talwanderung-kaunertal",
+      "source_url": "https://www.tirol.at/reiseservice/barrierefrei/rolli-wandertouren",
+      "accessibility": {
+        "features": [
+          "rollstuhl"
+        ],
+        "note": "Laut tirol.at: Verschiedene Wegvarianten. Forstwege und Asphaltbelag. Meditationsplatz am Mühlbach."
+      },
+      "images": [
+        {
+          "url": "https://www.tirol.at/images/AK-fhSak59c/cb:/g:ce/aHR0cHM6Ly91cGxvYWRzLm1hcHNlcnZpY2VzLmV1L25lZm9zX3Rpcm9sL3NpdGUtZmlsZXMvMTAzNi91cGxvYWRzL19rbnlpajUuSlBH",
+          "credit": "-TVB-Tiroler-Oberland-Kaunertal-Michael-Veit-Klima-Führer-2018-Talwanderweg-Vergötschen-Platz-2018 © Michael Veit",
+          "license": null,
+          "author": null
+        }
+      ],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "rolli-rolli-wanderung-falkaunsalm",
+      "name": "Rolli-Wanderung Falkaunsalm",
+      "description": "Rolli-Wandertour laut Tirol Werbung: mit dem Rollstuhl passierbarer Weg. Schwierigkeit mittelschwierig Länge 4,5 km Dauer 1:45 h Höhenmeter bergauf 392 m, Ort Kaunertal / Ötztaler Alpen. Swiss-Trac wird empfhohlen. Asphalt und Shotterbelag. Einkehr in der Falkaunsalm, teilweise barrierefrei.",
+      "description_short": null,
+      "tags": [
+        "wandern"
+      ],
+      "setting": "outdoor",
+      "address": null,
+      "postal_code": null,
+      "town": "Kaunertal",
+      "lat": 47.06607,
+      "lng": 10.741,
+      "website": "https://www.tirol.at/aktivitaeten/sport/wandern/wandertouren/rolli-wanderung-falkaunsalm",
+      "source_url": "https://www.tirol.at/reiseservice/barrierefrei/rolli-wandertouren",
+      "accessibility": {
+        "features": [
+          "rollstuhl"
+        ],
+        "note": "Laut tirol.at: Swiss-Trac wird empfhohlen. Asphalt und Shotterbelag. Einkehr in der Falkaunsalm, teilweise barrierefrei."
+      },
+      "images": [
+        {
+          "url": "https://www.tirol.at/images/8iavVbsjRh4/cb:/g:ce/aHR0cHM6Ly91cGxvYWRzLm1hcHNlcnZpY2VzLmV1L25lZm9zX3Rpcm9sL3NpdGUtZmlsZXMvMTAzNi91cGxvYWRzLy10dmItdGlyb2xlci1vYmVybGFuZC1rYXVuZXJ0YWwtZGFuaWVsLXphbmdlcmwtZmFsa2F1bnNhbG0tMjAxNi02LmpwZw",
+          "credit": "-TVB-Tiroler-Oberland-Kaunertal-Daniel-Zangerl-Falkaunsalm-2016-(6).jpg © Daniel Zangerl",
+          "license": null,
+          "author": null
+        }
+      ],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "rolli-rolli-wanderung-gepatschhaus",
+      "name": "Rolli-Wanderung Gepatschhaus",
+      "description": "Rolli-Wandertour laut Tirol Werbung: mit dem Rollstuhl passierbarer Weg. Länge 8,5 km Dauer 1:45 h Höhenmeter bergauf 156 m, Ort Kaunertal / Ötztaler Alpen. Mit Swiss-Trac leicht zu bewältigen. Steinige Steigung kurz vor dem Restaurant. Ausblick auf den Gepatschgletscher.",
+      "description_short": null,
+      "tags": [
+        "wandern"
+      ],
+      "setting": "outdoor",
+      "address": null,
+      "postal_code": null,
+      "town": "Kaunertal",
+      "lat": 46.95886,
+      "lng": 10.74294,
+      "website": "https://www.tirol.at/aktivitaeten/sport/wandern/wandertouren/rolli-wanderung-gepatschhaus",
+      "source_url": "https://www.tirol.at/reiseservice/barrierefrei/rolli-wandertouren",
+      "accessibility": {
+        "features": [
+          "rollstuhl"
+        ],
+        "note": "Laut tirol.at: Mit Swiss-Trac leicht zu bewältigen. Steinige Steigung kurz vor dem Restaurant. Ausblick auf den Gepatschgletscher."
+      },
+      "images": [
+        {
+          "url": "https://www.tirol.at/images/6Zl7b8aJ-Mo/cb:/g:ce/aHR0cHM6Ly91cGxvYWRzLm1hcHNlcnZpY2VzLmV1L25lZm9zX3Rpcm9sL3NpdGUtZmlsZXMvMTAzNi91cGxvYWRzLy10dmItdGlyb2xlci1vYmVybGFuZC1rYXVuZXJ0YWwtZGFuaWVsLXphbmdlcmwtMjAxNi1nZXBhdHNjaGhhdXMtMy5qcGc",
+          "credit": "-TVB-Tiroler-Oberland-Kaunertal-Daniel-Zangerl-2016-Gepatschhaus-(3).jpg © Daniel Zangerl",
+          "license": null,
+          "author": null
+        }
+      ],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "rolli-rolli-wanderung-nassereinalm",
+      "name": "Rolli-Wanderung Nassereinalm",
+      "description": "Rolli-Wandertour laut Tirol Werbung: mit dem Rollstuhl passierbarer Weg. Schwierigkeit mittelschwierig Länge 5,5 km Dauer 1:45 h Höhenmeter bergauf 269 m, Ort Kaunertal / Ötztaler Alpen. Swiss-Trac wird empfohlen. Entlang des Gepatsch Stausee. Anspruchsvollere Route mit Steigungen und steinigem Weg.",
+      "description_short": null,
+      "tags": [
+        "wandern"
+      ],
+      "setting": "outdoor",
+      "address": null,
+      "postal_code": null,
+      "town": "Kaunertal",
+      "lat": 46.95864,
+      "lng": 10.743,
+      "website": "https://www.tirol.at/aktivitaeten/sport/wandern/wandertouren/rolli-wanderung-nassereinalm",
+      "source_url": "https://www.tirol.at/reiseservice/barrierefrei/rolli-wandertouren",
+      "accessibility": {
+        "features": [
+          "rollstuhl"
+        ],
+        "note": "Laut tirol.at: Swiss-Trac wird empfohlen. Entlang des Gepatsch Stausee. Anspruchsvollere Route mit Steigungen und steinigem Weg."
+      },
+      "images": [
+        {
+          "url": "https://www.tirol.at/images/86C-EefttFg/cb:/g:ce/aHR0cHM6Ly91cGxvYWRzLm1hcHNlcnZpY2VzLmV1L25lZm9zX3Rpcm9sL3NpdGUtZmlsZXMvMTAzNi91cGxvYWRzLy10dmItdGlyb2xlci1vYmVybGFuZC1rYXVuZXJ0YWwtZGFuaWVsLXphbmdlcmwtMjAxNi1uYXNzZXJlaW5hbG0tNS5qcGc",
+          "credit": "-TVB-Tiroler-Oberland-Kaunertal-Daniel-Zangerl-2016-Nassereinalm-(5).jpg © Daniel Zangerl",
+          "license": null,
+          "author": null
+        }
+      ],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "rolli-rolli-wanderung-aifner-alm",
+      "name": "Rolli-Wanderung Aifner Alm",
+      "description": "Rolli-Wandertour laut Tirol Werbung: mit dem Rollstuhl passierbarer Weg. Schwierigkeit mittelschwierig Länge 6,0 km Dauer 2:30 h Höhenmeter bergauf 460 m, Ort Kaunerberg / Ötztaler Alpen. Swiss-Trac erforderlich. Steiler und holpriger Anstieg vor der Alm. Aussichtspunkt vor der Alm.",
+      "description_short": null,
+      "tags": [
+        "wandern"
+      ],
+      "setting": "outdoor",
+      "address": null,
+      "postal_code": null,
+      "town": "Kaunerberg",
+      "lat": 47.09888,
+      "lng": 10.68448,
+      "website": "https://www.tirol.at/aktivitaeten/sport/wandern/wandertouren/rolli-wanderung-aifner-alm",
+      "source_url": "https://www.tirol.at/reiseservice/barrierefrei/rolli-wandertouren",
+      "accessibility": {
+        "features": [
+          "rollstuhl"
+        ],
+        "note": "Laut tirol.at: Swiss-Trac erforderlich. Steiler und holpriger Anstieg vor der Alm. Aussichtspunkt vor der Alm."
+      },
+      "images": [
+        {
+          "url": "https://www.tirol.at/images/ujoo0ESZPrE/cb:/g:ce/aHR0cHM6Ly91cGxvYWRzLm1hcHNlcnZpY2VzLmV1L25lZm9zX3Rpcm9sL3NpdGUtZmlsZXMvMTAzNi91cGxvYWRzLy10dmItdGlyb2xlci1vYmVybGFuZC1rYXVuZXJ0YWwtZGFuaWVsLXphbmdlcmwtYWlmbmVyYWxtLTIwMTYtMTkuanBn",
+          "credit": "-TVB-Tiroler-Oberland-Kaunertal-Daniel-Zangerl-Aifneralm-2016-(19).jpg © Daniel Zangerl",
+          "license": null,
+          "author": null
+        }
+      ],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "rolli-barrierefreie-rolli-wandertour-auf-dem-alpenrosenweg",
+      "name": "Barrierefreie Rolli-Wandertour auf dem Alpenrosenweg",
+      "description": "Rolli-Wandertour laut Tirol Werbung: mit dem Rollstuhl passierbarer Weg. Schwierigkeit leicht Länge 5,2 km Dauer 1:30 h Höhenmeter bergauf 90 m, Ort Höfen / Allgäuer Alpen. Von der Hahnenkammbahn über den Alpenrosenweg zur Lechaschauer Alm. Befahrung mit Rollstuhl und Swiss-Trac, Vorspannbike, E-Rolli und Kinderwagen möglich. Anspruchsvolle Route.",
+      "description_short": null,
+      "tags": [
+        "wandern"
+      ],
+      "setting": "outdoor",
+      "address": null,
+      "postal_code": null,
+      "town": "Höfen",
+      "lat": 47.47485,
+      "lng": 10.64644,
+      "website": "https://www.tirol.at/aktivitaeten/sport/wandern/wandertouren/barrierefreie-rolli-wandertour-alpenrosenweg",
+      "source_url": "https://www.tirol.at/reiseservice/barrierefrei/rolli-wandertouren",
+      "accessibility": {
+        "features": [
+          "rollstuhl"
+        ],
+        "note": "Laut tirol.at: Von der Hahnenkammbahn über den Alpenrosenweg zur Lechaschauer Alm. Befahrung mit Rollstuhl und Swiss-Trac, Vorspannbike, E-Rolli und Kinderwagen möglich. Anspruchsvolle Route."
+      },
+      "images": [
+        {
+          "url": "https://www.tirol.at/images/82cOxTE1MU4/cb:/g:ce/aHR0cHM6Ly91cGxvYWRzLm1hcHNlcnZpY2VzLmV1L25lZm9zX3Rpcm9sL3NpdGUtZmlsZXMvMTA0OS91cGxvYWRzL2JlZmFocnVuZ19hbHBlbnJvc2Vud2VnXzEwX25hdHVycGFya3JlZ2lvbl9yZXV0dGUuanBn",
+          "credit": "TVB Naturparkregion Reutte",
+          "license": null,
+          "author": null
+        }
+      ],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "rolli-barrierefreier-themenweg-am-schlosskopf",
+      "name": "Barrierefreier Themenweg am Schlosskopf",
+      "description": "Rolli-Wandertour laut Tirol Werbung: mit dem Rollstuhl passierbarer Weg. Schwierigkeit leicht Länge 1,0 km Dauer 0:20 h Höhenmeter bergauf 26 m, Ort Reutte / Lechtaler Alpen. Erschließung aller historischen Festungselementen mit Infotafeln. Audio-Video Guide mit taktilen Maßnahmen. Barrierefreier Schrägaufzug Ehrenberg Liner.",
+      "description_short": null,
+      "tags": [
+        "wandern"
+      ],
+      "setting": "outdoor",
+      "address": null,
+      "postal_code": null,
+      "town": "Reutte",
+      "lat": 47.46453,
+      "lng": 10.7117,
+      "website": "https://www.tirol.at/aktivitaeten/sport/wandern/wandertouren/barrierefreier-themenweg-am-schlosskopf",
+      "source_url": "https://www.tirol.at/reiseservice/barrierefrei/rolli-wandertouren",
+      "accessibility": {
+        "features": [
+          "rollstuhl"
+        ],
+        "note": "Laut tirol.at: Erschließung aller historischen Festungselementen mit Infotafeln. Audio-Video Guide mit taktilen Maßnahmen. Barrierefreier Schrägaufzug Ehrenberg Liner."
+      },
+      "images": [
+        {
+          "url": "https://www.tirol.at/images/gdJSA6tTk_o/cb:/g:ce/aHR0cHM6Ly91cGxvYWRzLm1hcHNlcnZpY2VzLmV1L25lZm9zX3Rpcm9sL3NpdGUtZmlsZXMvMTA0OS91cGxvYWRzL3RvcF9saW5lcl9lcm9lZmZudW5nLTE1NS5qcGc",
+          "credit": "Inn-Frame Fotografie www.inn-frame.at",
+          "license": null,
+          "author": null
+        }
+      ],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "rolli-themenweg-kreuzweg-virgen",
+      "name": "Themenweg \"Kreuzweg Virgen\"",
+      "description": "Rolli-Wandertour laut Tirol Werbung: mit dem Rollstuhl passierbarer Weg. Schwierigkeit leicht Länge 3,2 km Dauer 1:00 h Höhenmeter bergauf 104 m, Ort Virgen in Osttirol / Venedigergruppe. 15 Stationen von heimischen Künstlern. Forstweg. Wallfahrtskirche Maria Schnee in Obermauern.",
+      "description_short": null,
+      "tags": [
+        "wandern"
+      ],
+      "setting": "outdoor",
+      "address": null,
+      "postal_code": null,
+      "town": "Virgen in Osttirol",
+      "lat": 47.00325,
+      "lng": 12.45743,
+      "website": "https://www.tirol.at/aktivitaeten/sport/wandern/wandertouren/themenweg-kreuzweg-virgen",
+      "source_url": "https://www.tirol.at/reiseservice/barrierefrei/rolli-wandertouren",
+      "accessibility": {
+        "features": [
+          "rollstuhl"
+        ],
+        "note": "Laut tirol.at: 15 Stationen von heimischen Künstlern. Forstweg. Wallfahrtskirche Maria Schnee in Obermauern."
+      },
+      "images": [
+        {
+          "url": "https://www.tirol.at/images/nS8Jpt3-Igg/cb:/g:ce/aHR0cHM6Ly91cGxvYWRzLm1hcHNlcnZpY2VzLmV1L25lZm9zX3Rpcm9sL3NpdGUtZmlsZXMvMTAyMS91cGxvYWRzL3dhbGxmYWhydHNraXJjaGUtbWFyaWEtc2NobmVlLW9iZXJtYXVlcm4tbmlsYmFjaC1ob2NoLWMtYmVybmhhcmQtYXNzbWFpci5qcGc",
+          "credit": "Bernhard Aßmair",
+          "license": null,
+          "author": null
+        }
+      ],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "rolli-erlebnisreichweg-gerlos",
+      "name": "Erlebnisreichweg Gerlos",
+      "description": "Rolli-Wandertour laut Tirol Werbung: mit dem Rollstuhl passierbarer Weg. Schwierigkeit leicht Länge 4,0 km Dauer 1:30 h Höhenmeter bergauf 10 m, Ort Gerlos, Zillertal / Zillertaler Alpen. Entlang des Gerlosbachs bis zum Ortskern, teilweise im Wald. Untergrund - Forststraße. Barrierefrei Stufe mittelschwierig. Stationen, Skulpturen und Sinneserfahrungen teilweise für Rolli-Fahrende erreichbar.",
+      "description_short": null,
+      "tags": [
+        "wandern"
+      ],
+      "setting": "outdoor",
+      "address": null,
+      "postal_code": null,
+      "town": "Gerlos, Zillertal",
+      "lat": 47.22649,
+      "lng": 12.04187,
+      "website": "https://www.tirol.at/aktivitaeten/sport/wandern/wandertouren/erlebnisreichweg-gerlos",
+      "source_url": "https://www.tirol.at/reiseservice/barrierefrei/rolli-wandertouren",
+      "accessibility": {
+        "features": [
+          "rollstuhl"
+        ],
+        "note": "Laut tirol.at: Entlang des Gerlosbachs bis zum Ortskern, teilweise im Wald. Untergrund - Forststraße. Barrierefrei Stufe mittelschwierig. Stationen, Skulpturen und Sinneserfahrungen teilweise für Rolli-Fahrende erreichbar."
+      },
+      "images": [
+        {
+          "url": "https://www.tirol.at/images/SGL2ijK_p5Q/cb:/g:ce/aHR0cHM6Ly91cGxvYWRzLm1hcHNlcnZpY2VzLmV1L25lZm9zX3Rpcm9sL3NpdGUtZmlsZXMvMTExMC91cGxvYWRzL2RzY18wMjgxXzc2Njc4NjgwLmpwZw",
+          "credit": "Tirol Werbung",
+          "license": null,
+          "author": null
+        }
+      ],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "handbike-handbike-tour-kaunertaler-gletscher",
+      "name": "Handbike Tour Kaunertaler Gletscher",
+      "description": "Handbike-Route laut Tirol Werbung: für Handbikes geeignete Strecke. Schwierigkeit schwierig Länge 27,5 km Dauer 4:00 h Höhenmeter bergauf 1.500 m, Ort Kaunertal / Ötztaler Alpen. Kurvenreiche Bergstraße. Anspruchsvolle Route. Asphaltstraße.",
+      "description_short": null,
+      "tags": [
+        "radfahren"
+      ],
+      "setting": "outdoor",
+      "address": null,
+      "postal_code": null,
+      "town": "Kaunertal",
+      "lat": 47.03173,
+      "lng": 10.74735,
+      "website": "https://www.tirol.at/aktivitaeten/sport/rad/bike-touren/handbike-route-kaunertaler-gletscher",
+      "source_url": "https://www.tirol.at/reisefuehrer/barrierefrei/handbike-routen",
+      "accessibility": {
+        "features": [
+          "rollstuhl"
+        ],
+        "note": "Laut tirol.at: Kurvenreiche Bergstraße. Anspruchsvolle Route. Asphaltstraße."
+      },
+      "images": [
+        {
+          "url": "https://www.tirol.at/images/I3gNBFBQ_bg/cb:/g:ce/aHR0cHM6Ly91cGxvYWRzLm1hcHNlcnZpY2VzLmV1L25lZm9zX3Rpcm9sL3NpdGUtZmlsZXMvMTAzNi91cGxvYWRzLy10dmItdGlyb2xlci1vYmVybGFuZC1rYXVuZXJ0YWwtbWljaGFlbGEtZ2Fzc2VyLW1hcmstaGFuZGJpa2ViYXR0bGUtMjAxNy04ODYzLmpwZw",
+          "credit": "-TVB-Tiroler-Oberland-Kaunertal-Michaela-Gasser-Mark-Handbikebattle-2017-8863.jpg © Michaela Gasser-Mark",
+          "license": null,
+          "author": null
+        }
+      ],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "handbike-radtour-durch-s-leutaschtal",
+      "name": "Radtour Durch's Leutaschtal",
+      "description": "Handbike-Route laut Tirol Werbung: für Handbikes geeignete Strecke. Schwierigkeit leicht Länge 32,4 km Dauer 1:10 h Höhenmeter bergauf 210 m, Ort Leutasch / Wetterstein-Gebirge und Mieminger Kette. Barrierefreie Einkehrmöglichkeiten entlang der Tour. Einfache Strecke mit Einblick in die Natur des Leutaschtals. Kulturhaus Ganghofermuseum entlang der Strecke.",
+      "description_short": null,
+      "tags": [
+        "radfahren"
+      ],
+      "setting": "outdoor",
+      "address": null,
+      "postal_code": null,
+      "town": "Leutasch",
+      "lat": 47.36532,
+      "lng": 11.09373,
+      "website": "https://www.tirol.at/aktivitaeten/sport/rad/bike-touren/radtour-durch-das-leutaschtal",
+      "source_url": "https://www.tirol.at/reisefuehrer/barrierefrei/handbike-routen",
+      "accessibility": {
+        "features": [
+          "rollstuhl"
+        ],
+        "note": "Laut tirol.at: Barrierefreie Einkehrmöglichkeiten entlang der Tour. Einfache Strecke mit Einblick in die Natur des Leutaschtals. Kulturhaus Ganghofermuseum entlang der Strecke."
+      },
+      "images": [
+        {
+          "url": "https://www.tirol.at/images/Y74rypCiLWw/cb:/g:ce/aHR0cHM6Ly91cGxvYWRzLm1hcHNlcnZpY2VzLmV1L25lZm9zX3Rpcm9sL3NpdGUtZmlsZXMvMTAxNS91cGxvYWRzL2dyYXZlbGJpa2VyX2F1Zl9kZW1fcmFkd2VnX2R1cmNoX2Rhc19sZXV0YXNjaHRhbF9pbV9zb21tZXJfMi5qcGc",
+          "credit": "Region Seefeld - Florian Breitenberger",
+          "license": null,
+          "author": null
+        }
+      ],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "handbike-landeck-telfs",
+      "name": "Landeck - Telfs",
+      "description": "Handbike-Route laut Tirol Werbung: für Handbikes geeignete Strecke. Schwierigkeit leicht Länge 50,5 km Dauer 3:45 h Höhenmeter bergauf 728 m. Genußhandbiketour durch das Oberinntal. Moderate Steigungen. Einkehrmöglichkeit im Stift Stams. Ein Abschnitt der Innradweg Etappe 2.",
+      "description_short": null,
+      "tags": [
+        "radfahren"
+      ],
+      "setting": "outdoor",
+      "address": null,
+      "postal_code": null,
+      "town": null,
+      "lat": null,
+      "lng": null,
+      "website": "https://www.tirol.at/aktivitaeten/sport/rad/bike-touren/innradweg-etappe-2-landeck-telfs-1",
+      "source_url": "https://www.tirol.at/reisefuehrer/barrierefrei/handbike-routen",
+      "accessibility": {
+        "features": [
+          "rollstuhl"
+        ],
+        "note": "Laut tirol.at: Genußhandbiketour durch das Oberinntal. Moderate Steigungen. Einkehrmöglichkeit im Stift Stams. Ein Abschnitt der Innradweg Etappe 2."
+      },
+      "images": [
+        {
+          "url": "https://www.tirol.at/images/1ONSIPR_GLc/cb:/g:ce/aHR0cHM6Ly91cGxvYWRzLm1hcHNlcnZpY2VzLmV1L25lZm9zX3Rpcm9sL3NpdGUtZmlsZXMvMTAwMC91cGxvYWRzL3Rpcm9sd2VyYnVuZ181ODA0NjIuanBn",
+          "credit": "Tirol Werbung/Frank Bauer",
+          "license": null,
+          "author": null
+        }
+      ],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "handbike-achenkirch-pertisau",
+      "name": "Achenkirch - Pertisau",
+      "description": "Handbike-Route laut Tirol Werbung: für Handbikes geeignete Strecke. Schwierigkeit mittelschwierig Länge 13,5 km Dauer 1:00 h Höhenmeter bergauf 35 m, Ort Achenkirch am Achensee / Brandenberger Alpen (Rofan). Leichte Route entlang des Achenseeufers. Einfache Steigerungen. Retour mit dem Achensee Schiff.",
+      "description_short": null,
+      "tags": [
+        "radfahren"
+      ],
+      "setting": "outdoor",
+      "address": null,
+      "postal_code": null,
+      "town": "Achenkirch am Achensee",
+      "lat": 47.50098,
+      "lng": 11.70625,
+      "website": "https://www.tirol.at/aktivitaeten/sport/rad/bike-touren/handbike-route-achenkirch-pertisau",
+      "source_url": "https://www.tirol.at/reisefuehrer/barrierefrei/handbike-routen",
+      "accessibility": {
+        "features": [
+          "rollstuhl"
+        ],
+        "note": "Laut tirol.at: Leichte Route entlang des Achenseeufers. Einfache Steigerungen. Retour mit dem Achensee Schiff."
+      },
+      "images": [
+        {
+          "url": "https://www.tirol.at/images/fd9tUdnEd_A/cb:/g:ce/aHR0cHM6Ly91cGxvYWRzLm1hcHNlcnZpY2VzLmV1L25lZm9zX3Rpcm9sL3NpdGUtZmlsZXMvMTAxNi91cGxvYWRzL2JhcnJpZXJlZnJlaTMuZ2lm",
+          "credit": "Achensee Tourismus",
+          "license": null,
+          "author": null
+        }
+      ],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "handbike-maurach-achenkirch",
+      "name": "Maurach - Achenkirch",
+      "description": "Handbike-Route laut Tirol Werbung: für Handbikes geeignete Strecke. Schwierigkeit mittelschwierig Länge 9,0 km Dauer 1:00 h Höhenmeter bergauf 35 m, Ort Achenkirch am Achensee / Brandenberger Alpen (Rofan). Entlang des Seeufers vom Achensee. Rückweg mit dem Achenseeschiff. Asphalt und fester Schotterbelag.",
+      "description_short": null,
+      "tags": [
+        "radfahren"
+      ],
+      "setting": "outdoor",
+      "address": null,
+      "postal_code": null,
+      "town": "Achenkirch am Achensee",
+      "lat": 47.43132,
+      "lng": 11.73689,
+      "website": "https://www.tirol.at/aktivitaeten/sport/rad/bike-touren/handbike-route-maurach-achenkirch",
+      "source_url": "https://www.tirol.at/reisefuehrer/barrierefrei/handbike-routen",
+      "accessibility": {
+        "features": [
+          "rollstuhl"
+        ],
+        "note": "Laut tirol.at: Entlang des Seeufers vom Achensee. Rückweg mit dem Achenseeschiff. Asphalt und fester Schotterbelag."
+      },
+      "images": [
+        {
+          "url": "https://www.tirol.at/images/tkR6thJvQTg/cb:/g:ce/aHR0cHM6Ly91cGxvYWRzLm1hcHNlcnZpY2VzLmV1L25lZm9zX3Rpcm9sL3NpdGUtZmlsZXMvMTAxNi91cGxvYWRzL2JhcnJpZXJlZnJlaS1oYW5kYmlrZS1hY2hlbnNlZS5qcGc",
+          "credit": "Achensee Tourismus",
+          "license": null,
+          "author": null
+        }
+      ],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "handbike-pertisau-falzthurnalm",
+      "name": "Pertisau - Falzthurnalm",
+      "description": "Handbike-Route laut Tirol Werbung: für Handbikes geeignete Strecke. Schwierigkeit schwierig Länge 3,3 km Dauer 1:00 h Höhenmeter bergauf 105 m, Ort Pertisau am Achensee / Karwendel. Geringe Steigungen. Fahrt durch einen lichten Fichtenwald. Einkehr im Alpengasthaus Falzturn.",
+      "description_short": null,
+      "tags": [
+        "radfahren"
+      ],
+      "setting": "outdoor",
+      "address": null,
+      "postal_code": null,
+      "town": "Pertisau am Achensee",
+      "lat": 47.44003,
+      "lng": 11.68421,
+      "website": "https://www.tirol.at/aktivitaeten/sport/rad/bike-touren/handbike-route-pertisau-falzthurnalm",
+      "source_url": "https://www.tirol.at/reisefuehrer/barrierefrei/handbike-routen",
+      "accessibility": {
+        "features": [
+          "rollstuhl"
+        ],
+        "note": "Laut tirol.at: Geringe Steigungen. Fahrt durch einen lichten Fichtenwald. Einkehr im Alpengasthaus Falzturn."
+      },
+      "images": [
+        {
+          "url": "https://www.tirol.at/images/2Ct5OjiX4fY/cb:/g:ce/aHR0cHM6Ly91cGxvYWRzLm1hcHNlcnZpY2VzLmV1L25lZm9zX3Rpcm9sL3NpdGUtZmlsZXMvMTAxNi91cGxvYWRzL2ZhbHp0aHVybnRhbC1wZXJ0aXNhdS1hY2hlbnNlZS5qcGc",
+          "credit": "Achensee Tourismus",
+          "license": null,
+          "author": null
+        }
+      ],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "loipe-schlittenlanglauf-barrierefreie-loipe-in-maurach-am-achensee",
+      "name": "Schlittenlanglauf: Barrierefreie Loipe in Maurach am Achensee",
+      "description": "Schlittenlanglauf-Loipe laut Tirol Werbung: für Langlaufschlitten geeignet, mit entsprechend ausgestatteten Park- und Zustiegsmöglichkeiten (Tiroler Gütesiegel). Schwierigkeit leicht Stil: skating, klassisch Länge 4,0 km Dauer 1:00 h Höhenmeter bergauf 21 m, Ort Buch in Tirol / Brandenberger Alpen (Rofan). Leichte und kurze Schlittenlanglauf-Strecke als landschaftliches Schmankerl direkt am Achensee. Vorwiegend flach und nur sanfte Steigungen. Parkplatz direkt beim Einstieg.",
+      "description_short": null,
+      "tags": [
+        "langlauf"
+      ],
+      "setting": "outdoor",
+      "address": null,
+      "postal_code": null,
+      "town": "Buch in Tirol",
+      "lat": 47.43192,
+      "lng": 11.73531,
+      "website": "https://www.tirol.at/aktivitaeten/sport/langlaufen/loipen/loipe-maurach-m4",
+      "source_url": "https://www.tirol.at/reisefuehrer/barrierefrei/schlittenlanglauf",
+      "accessibility": {
+        "features": [
+          "rollstuhl",
+          "parkplatz"
+        ],
+        "note": "Laut tirol.at: Leichte und kurze Schlittenlanglauf-Strecke als landschaftliches Schmankerl direkt am Achensee. Vorwiegend flach und nur sanfte Steigungen. Parkplatz direkt beim Einstieg."
+      },
+      "images": [
+        {
+          "url": "https://www.tirol.at/images/WiGzQJPkLt4/cb:/g:ce/aHR0cHM6Ly91cGxvYWRzLm1hcHNlcnZpY2VzLmV1L25lZm9zX3Rpcm9sL3NpdGUtZmlsZXMvMTAxNi91cGxvYWRzL2xhbmdsYXVmZW4tbG9pcGUtbWF1cmFjaC1hY2hlbnNlZS5qcGc",
+          "credit": "Achensee Tourismus",
+          "license": null,
+          "author": null
+        }
+      ],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "loipe-beleuchtete-schlittenloipe-doadleralm",
+      "name": "Beleuchtete Schlittenloipe Doadleralm",
+      "description": "Schlittenlanglauf-Loipe laut Tirol Werbung: für Langlaufschlitten geeignet, mit entsprechend ausgestatteten Park- und Zustiegsmöglichkeiten (Tiroler Gütesiegel). Schwierigkeit mittelschwierig Stil: klassisch Länge 2,4 km Höhenmeter bergauf 20 m, Ort Neustift im Stubaital / Stubaier Alpen. Zwei kraft-treibende Anstiege in der äußeren Schleife. Einkehrmöglichkeit im Marend Stüberl. Beleuchtung Loipe von 17:00 bis 21:00.",
+      "description_short": null,
+      "tags": [
+        "langlauf"
+      ],
+      "setting": "outdoor",
+      "address": null,
+      "postal_code": null,
+      "town": "Neustift im Stubaital",
+      "lat": 47.04622,
+      "lng": 11.23306,
+      "website": "https://www.tirol.at/aktivitaeten/sport/langlaufen/loipen/beleuchtete-schlittenloipe-doadleralm",
+      "source_url": "https://www.tirol.at/reisefuehrer/barrierefrei/schlittenlanglauf",
+      "accessibility": {
+        "features": [
+          "rollstuhl",
+          "parkplatz"
+        ],
+        "note": "Laut tirol.at: Zwei kraft-treibende Anstiege in der äußeren Schleife. Einkehrmöglichkeit im Marend Stüberl. Beleuchtung Loipe von 17:00 bis 21:00."
+      },
+      "images": [
+        {
+          "url": "https://www.tirol.at/images/tHt0PUvwfCg/cb:/g:ce/aHR0cHM6Ly91cGxvYWRzLm1hcHNlcnZpY2VzLmV1L25lZm9zX3Rpcm9sL3NpdGUtZmlsZXMvMTExOC91cGxvYWRzL3NjaGxpdHRlbmxhbmdsYXVmLXN0dWJhaS0wMi5qcGc",
+          "credit": "ANDRE SCHOENHERR",
+          "license": null,
+          "author": null
+        }
+      ],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "loipe-nacht-langlauf-in-seefeld-barrierefreie-nachtloipe-fur-schlittenlanglauf",
+      "name": "Nacht-Langlauf in Seefeld: Barrierefreie Nachtloipe für Schlittenlanglauf",
+      "description": "Schlittenlanglauf-Loipe laut Tirol Werbung: für Langlaufschlitten geeignet, mit entsprechend ausgestatteten Park- und Zustiegsmöglichkeiten (Tiroler Gütesiegel). Schwierigkeit leicht Stil: skating, klassisch Länge 3,0 km Höhenmeter bergauf 19 m, Ort Seefeld / Wetterstein-Gebirge und Mieminger Kette. Besonders schöne Stimmung beim Nacht-Schlittenlanglauf durch hügeliges Terrain. Kupierte Strecke für Anfänger und Geübte mit viel Kondition. Gute Schneebedingungen dank Beschneiung.",
+      "description_short": null,
+      "tags": [
+        "langlauf"
+      ],
+      "setting": "outdoor",
+      "address": null,
+      "postal_code": null,
+      "town": "Seefeld",
+      "lat": 47.32652,
+      "lng": 11.1809,
+      "website": "https://www.tirol.at/aktivitaeten/sport/langlaufen/loipen/nachtloipe-seefeld-a1",
+      "source_url": "https://www.tirol.at/reisefuehrer/barrierefrei/schlittenlanglauf",
+      "accessibility": {
+        "features": [
+          "rollstuhl",
+          "parkplatz"
+        ],
+        "note": "Laut tirol.at: Besonders schöne Stimmung beim Nacht-Schlittenlanglauf durch hügeliges Terrain. Kupierte Strecke für Anfänger und Geübte mit viel Kondition. Gute Schneebedingungen dank Beschneiung."
+      },
+      "images": [
+        {
+          "url": "https://www.tirol.at/images/2lAl-gLp_QE/cb:/g:ce/aHR0cHM6Ly91cGxvYWRzLm1hcHNlcnZpY2VzLmV1L25lZm9zX3Rpcm9sL3NpdGUtZmlsZXMvMTAxNS91cGxvYWRzL3NlZWZlbGRfbmFjaHRsb2lwZV9hN19taXRfc2Vla2lyY2hsX3p1cl9ibGF1ZW5fc3R1bmRlLmpwZw",
+          "credit": "Region Seefeld",
+          "license": null,
+          "author": null
+        }
+      ],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "loipe-barrierefrei-langlaufen-im-kaunertal-die-anger-runde",
+      "name": "Barrierefrei Langlaufen im Kaunertal: Die Anger-Runde",
+      "description": "Schlittenlanglauf-Loipe laut Tirol Werbung: für Langlaufschlitten geeignet, mit entsprechend ausgestatteten Park- und Zustiegsmöglichkeiten (Tiroler Gütesiegel). Schwierigkeit leicht Stil: skating, klassisch Länge 1,0 km Höhenmeter bergauf 5 m, Ort Kaunertal / Ötztaler Alpen. Sehr kurze, anfängerfreundliche Loipe mit einem sportlicheren Abschnitt. Schön eingebettet in die Ötztaler Alpen. Auch für Kinder geeignet.",
+      "description_short": null,
+      "tags": [
+        "langlauf"
+      ],
+      "setting": "outdoor",
+      "address": null,
+      "postal_code": null,
+      "town": "Kaunertal",
+      "lat": 47.03272,
+      "lng": 10.74695,
+      "website": "https://www.tirol.at/aktivitaeten/sport/langlaufen/loipen/barrierefreie-loipe-anger-runde-kaunertal",
+      "source_url": "https://www.tirol.at/reisefuehrer/barrierefrei/schlittenlanglauf",
+      "accessibility": {
+        "features": [
+          "rollstuhl",
+          "parkplatz"
+        ],
+        "note": "Laut tirol.at: Sehr kurze, anfängerfreundliche Loipe mit einem sportlicheren Abschnitt. Schön eingebettet in die Ötztaler Alpen. Auch für Kinder geeignet."
+      },
+      "images": [
+        {
+          "url": "https://www.tirol.at/images/fW7XisNSdDI/cb:/g:ce/aHR0cHM6Ly91cGxvYWRzLm1hcHNlcnZpY2VzLmV1L25lZm9zX3Rpcm9sL3NpdGUtZmlsZXMvMTAzNi91cGxvYWRzLy10dmItdGlyb2xlci1vYmVybGFuZC1rYXVuZXJ0YWwtZGllLXdlc3QtYmFycmllcmVmcmVpLWxhbmdsYXVmZW4tMV8zLmpwZw",
+          "credit": "-TVB-Tiroler-Oberland-Kaunertal-Die-West-Barrierefrei-Langlaufen-1 (3).jpg © Die West GmbH",
+          "license": null,
+          "author": null
+        }
+      ],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "loipe-barrierefrei-langlaufen-in-leutasch-schlittenloipe-a7-gasse",
+      "name": "Barrierefrei Langlaufen in Leutasch: Schlittenloipe A7 Gasse",
+      "description": "Schlittenlanglauf-Loipe laut Tirol Werbung: für Langlaufschlitten geeignet, mit entsprechend ausgestatteten Park- und Zustiegsmöglichkeiten (Tiroler Gütesiegel). Schwierigkeit leicht Stil: skating, klassisch Länge 4,7 km Höhenmeter bergauf 37 m, Ort Leutasch / Wetterstein-Gebirge und Mieminger Kette. ideale Schlittenlanglauf-Runde für Anfänger. sonnige Loipe mit nur kurzen und sanften Anstiegen. Strecke ist Teil des bekannten und traditionellen Ganghoferlaufs.",
+      "description_short": null,
+      "tags": [
+        "langlauf"
+      ],
+      "setting": "outdoor",
+      "address": null,
+      "postal_code": null,
+      "town": "Leutasch",
+      "lat": 47.37358,
+      "lng": 11.15219,
+      "website": "https://www.tirol.at/aktivitaeten/sport/langlaufen/loipen/schlittenloipe-gasse-leutasch-a7",
+      "source_url": "https://www.tirol.at/reisefuehrer/barrierefrei/schlittenlanglauf",
+      "accessibility": {
+        "features": [
+          "rollstuhl",
+          "parkplatz"
+        ],
+        "note": "Laut tirol.at: ideale Schlittenlanglauf-Runde für Anfänger. sonnige Loipe mit nur kurzen und sanften Anstiegen. Strecke ist Teil des bekannten und traditionellen Ganghoferlaufs."
+      },
+      "images": [
+        {
+          "url": "https://www.tirol.at/images/DiJK3qFFf0Y/cb:/g:ce/aHR0cHM6Ly91cGxvYWRzLm1hcHNlcnZpY2VzLmV1L25lZm9zX3Rpcm9sL3NpdGUtZmlsZXMvMTAxNS91cGxvYWRzL2xvaXBlX2E3X2dhc3NlX21pdF9sYW5nbGFldWZlcmluLmpwZw",
+          "credit": "Region Seefeld",
+          "license": null,
+          "author": null
+        }
+      ],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "loipe-barrierefreie-loipe-fur-anfanger-dorfloipe-pertisau",
+      "name": "Barrierefreie Loipe für Anfänger: Dorfloipe Pertisau",
+      "description": "Schlittenlanglauf-Loipe laut Tirol Werbung: für Langlaufschlitten geeignet, mit entsprechend ausgestatteten Park- und Zustiegsmöglichkeiten (Tiroler Gütesiegel). Schwierigkeit leicht Stil: skating, klassisch Länge 3,5 km Dauer 1:00 h Höhenmeter bergauf 68 m, Ort Pertisau am Achensee / Karwendel. Kurze, anfängerfreundliche Loipe mit nur mäßigem Gefälle. Schöne Ortsrunde, um Pertisau kennenzulernen. Gute Schneebedingungen dank Beschneiung.",
+      "description_short": null,
+      "tags": [
+        "langlauf"
+      ],
+      "setting": "outdoor",
+      "address": null,
+      "postal_code": null,
+      "town": "Pertisau am Achensee",
+      "lat": 47.43983,
+      "lng": 11.68411,
+      "website": "https://www.tirol.at/aktivitaeten/sport/langlaufen/loipen/dorfloipe-pertisau",
+      "source_url": "https://www.tirol.at/reisefuehrer/barrierefrei/schlittenlanglauf",
+      "accessibility": {
+        "features": [
+          "rollstuhl",
+          "parkplatz"
+        ],
+        "note": "Laut tirol.at: Kurze, anfängerfreundliche Loipe mit nur mäßigem Gefälle. Schöne Ortsrunde, um Pertisau kennenzulernen. Gute Schneebedingungen dank Beschneiung."
+      },
+      "images": [
+        {
+          "url": "https://www.tirol.at/images/Sc2mD5TTPV8/cb:/g:ce/aHR0cHM6Ly91cGxvYWRzLm1hcHNlcnZpY2VzLmV1L25lZm9zX3Rpcm9sL3NpdGUtZmlsZXMvMTAxNi91cGxvYWRzL2FjaGVuc2VlLWxhbmdsYXVmemVudHJ1bS1wZXJ0aXNhdS1rYXJ3ZW5kZWx0YWVsZXIuanBn",
+          "credit": "Achensee Tourismus",
+          "license": null,
+          "author": null
+        }
+      ],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "loipe-langlauf-am-seeufer-schlittenloipe-buchau-am-achensee",
+      "name": "Langlauf am Seeufer: Schlittenloipe Buchau am Achensee",
+      "description": "Schlittenlanglauf-Loipe laut Tirol Werbung: für Langlaufschlitten geeignet, mit entsprechend ausgestatteten Park- und Zustiegsmöglichkeiten (Tiroler Gütesiegel). Schwierigkeit leicht Stil: skating, klassisch Länge 2,0 km Dauer 0:30 h Höhenmeter bergauf 14 m, Ort Buch in Tirol / Brandenberger Alpen (Rofan). Kurze, vorwiegend ebene Loipe für erste Versuche im Schlittenlanglauf. Tolle Ausblicke auf den Achensee. Parkplatz direkt beim Einstieg.",
+      "description_short": null,
+      "tags": [
+        "langlauf"
+      ],
+      "setting": "outdoor",
+      "address": null,
+      "postal_code": null,
+      "town": "Buch in Tirol",
+      "lat": 47.4319,
+      "lng": 11.73534,
+      "website": "https://www.tirol.at/aktivitaeten/sport/langlaufen/loipen/schlittenloipe-buchau-m1",
+      "source_url": "https://www.tirol.at/reisefuehrer/barrierefrei/schlittenlanglauf",
+      "accessibility": {
+        "features": [
+          "rollstuhl",
+          "parkplatz"
+        ],
+        "note": "Laut tirol.at: Kurze, vorwiegend ebene Loipe für erste Versuche im Schlittenlanglauf. Tolle Ausblicke auf den Achensee. Parkplatz direkt beim Einstieg."
+      },
+      "images": [
+        {
+          "url": "https://www.tirol.at/images/Qm_S0IFLP6Y/cb:/g:ce/aHR0cHM6Ly91cGxvYWRzLm1hcHNlcnZpY2VzLmV1L25lZm9zX3Rpcm9sL3NpdGUtZmlsZXMvMTAxNi91cGxvYWRzL2xhbmdsYXVmZW4tbWF1cmFjaC1sb2lwZS1idWNoYXUtYWNoZW5zZWUuanBn",
+          "credit": "Achensee Tourismus",
+          "license": null,
+          "author": null
+        }
+      ],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "loipe-barrierefrei-langlaufen-loch-runde-im-kaunertal",
+      "name": "Barrierefrei Langlaufen: Loch-Runde im Kaunertal",
+      "description": "Schlittenlanglauf-Loipe laut Tirol Werbung: für Langlaufschlitten geeignet, mit entsprechend ausgestatteten Park- und Zustiegsmöglichkeiten (Tiroler Gütesiegel). Schwierigkeit leicht Stil: skating, klassisch Länge 1,0 km Höhenmeter bergauf 10 m, Ort Kaunertal / Ötztaler Alpen. Ruhige Anfänger-Loipe über Wiesen mit kurzem Steilstück am Anfang. Ideal für erste Versuche auf Langlauf-Skiern und -Schlitten. Schöne Lage im Kaunertal zwischen markanten Gipfeln der Ötztaler Alpen.",
+      "description_short": null,
+      "tags": [
+        "langlauf"
+      ],
+      "setting": "outdoor",
+      "address": null,
+      "postal_code": null,
+      "town": "Kaunertal",
+      "lat": 47.05584,
+      "lng": 10.75069,
+      "website": "https://www.tirol.at/aktivitaeten/sport/langlaufen/loipen/barrierefreieloipe-loch-runde-kaunertal",
+      "source_url": "https://www.tirol.at/reisefuehrer/barrierefrei/schlittenlanglauf",
+      "accessibility": {
+        "features": [
+          "rollstuhl",
+          "parkplatz"
+        ],
+        "note": "Laut tirol.at: Ruhige Anfänger-Loipe über Wiesen mit kurzem Steilstück am Anfang. Ideal für erste Versuche auf Langlauf-Skiern und -Schlitten. Schöne Lage im Kaunertal zwischen markanten Gipfeln der Ötztaler Alpen."
+      },
+      "images": [
+        {
+          "url": "https://www.tirol.at/images/5HW13t3HRPc/cb:/g:ce/aHR0cHM6Ly91cGxvYWRzLm1hcHNlcnZpY2VzLmV1L25lZm9zX3Rpcm9sL3NpdGUtZmlsZXMvMTAzNi91cGxvYWRzLy10dmItdGlyb2xlci1vYmVybGFuZC1rYXVuZXJ0YWwtZGllLXdlc3QtYmFycmllcmVmcmVpLWxhbmdsYXVmZW4tMV8xOS5qcGc",
+          "credit": "-TVB-Tiroler-Oberland-Kaunertal-Die-West-Barrierefrei-Langlaufen-1 (19).jpg © Die West GmbH",
+          "license": null,
+          "author": null
+        }
+      ],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "loipe-schlittenloipe-bei-der-doadleralm",
+      "name": "Schlittenloipe bei der Doadleralm",
+      "description": "Schlittenlanglauf-Loipe laut Tirol Werbung: für Langlaufschlitten geeignet, mit entsprechend ausgestatteten Park- und Zustiegsmöglichkeiten (Tiroler Gütesiegel). Schwierigkeit leicht Stil: klassisch Länge 2,2 km Höhenmeter bergauf 10 m, Ort Neustift im Stubaital / Stubaier Alpen. Leichte überschaubare Steigungen. Ideal für erste Versuche auf Langlauf-Skiern und -Schlitten.",
+      "description_short": null,
+      "tags": [
+        "langlauf"
+      ],
+      "setting": "outdoor",
+      "address": null,
+      "postal_code": null,
+      "town": "Neustift im Stubaital",
+      "lat": 47.0462,
+      "lng": 11.23339,
+      "website": "https://www.tirol.at/aktivitaeten/sport/langlaufen/loipen/schlittenloipe-bei-der-doadleralm",
+      "source_url": "https://www.tirol.at/reisefuehrer/barrierefrei/schlittenlanglauf",
+      "accessibility": {
+        "features": [
+          "rollstuhl",
+          "parkplatz"
+        ],
+        "note": "Laut tirol.at: Leichte überschaubare Steigungen. Ideal für erste Versuche auf Langlauf-Skiern und -Schlitten."
+      },
+      "images": [
+        {
+          "url": "https://www.tirol.at/images/NGcc7zpIzHE/cb:/g:ce/aHR0cHM6Ly91cGxvYWRzLm1hcHNlcnZpY2VzLmV1L25lZm9zX3Rpcm9sL3NpdGUtZmlsZXMvMTExOC91cGxvYWRzL3NjaGxpdHRlbmxhbmdsYXVmLXN0dWJhaS0wMS5qcGc",
+          "credit": "Hasselblad H5D",
+          "license": null,
+          "author": null
+        }
+      ],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "loipe-barrierefreie-feld-runde-fur-langlauf-einsteiger",
+      "name": "Barrierefreie Feld-Runde für Langlauf-Einsteiger",
+      "description": "Schlittenlanglauf-Loipe laut Tirol Werbung: für Langlaufschlitten geeignet, mit entsprechend ausgestatteten Park- und Zustiegsmöglichkeiten (Tiroler Gütesiegel). Schwierigkeit leicht Stil: skating, klassisch Länge 1,0 km Höhenmeter bergauf 3 m, Ort Kaunertal / Ötztaler Alpen. Für Schlittenlanglauf und Langlauf mit Kindern geeignete Loipe. Gemütliche, kurze Schlittenlanglauf-Runde vor schöner Bergkulisse. Gute Schneebindungen dank Höhenlage des Kaunertals.",
+      "description_short": null,
+      "tags": [
+        "langlauf"
+      ],
+      "setting": "outdoor",
+      "address": null,
+      "postal_code": null,
+      "town": "Kaunertal",
+      "lat": 47.04455,
+      "lng": 10.75124,
+      "website": "https://www.tirol.at/aktivitaeten/sport/langlaufen/loipen/loipe-feld-runde-kaunertal",
+      "source_url": "https://www.tirol.at/reisefuehrer/barrierefrei/schlittenlanglauf",
+      "accessibility": {
+        "features": [
+          "rollstuhl",
+          "parkplatz"
+        ],
+        "note": "Laut tirol.at: Für Schlittenlanglauf und Langlauf mit Kindern geeignete Loipe. Gemütliche, kurze Schlittenlanglauf-Runde vor schöner Bergkulisse. Gute Schneebindungen dank Höhenlage des Kaunertals."
+      },
+      "images": [
+        {
+          "url": "https://www.tirol.at/images/tiFOWo61Kvg/cb:/g:ce/aHR0cHM6Ly91cGxvYWRzLm1hcHNlcnZpY2VzLmV1L25lZm9zX3Rpcm9sL3NpdGUtZmlsZXMvMTAzNi91cGxvYWRzLy10dmItdGlyb2xlci1vYmVybGFuZC1rYXVuZXJ0YWwtZGllLXdlc3QtYmFycmllcmVmcmVpLWxhbmdsYXVmZW4tMV8xMS5qcGc",
+          "credit": "-TVB-Tiroler-Oberland-Kaunertal-Die-West-Barrierefrei-Langlaufen-1 (11).jpg © Die West GmbH",
+          "license": null,
+          "author": null
+        }
+      ],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "loipe-schlittenloipe-a12-scharnitz-barrierefreie-loipe-fur-geubte",
+      "name": "Schlittenloipe A12 Scharnitz: Barrierefreie Loipe für Geübte",
+      "description": "Schlittenlanglauf-Loipe laut Tirol Werbung: für Langlaufschlitten geeignet, mit entsprechend ausgestatteten Park- und Zustiegsmöglichkeiten (Tiroler Gütesiegel). Schwierigkeit leicht Stil: skating, klassisch Länge 3,4 km Höhenmeter bergauf 20 m, Ort Scharnitz / Karwendel. Schöne Schlittenloipe mit herausfordernden Abschnitten für Fortgeschrittene. Besonders sonnige Runde auf Wiesengelände. Einkehrmöglichkeiten in Scharnitz und Gießenbach.",
+      "description_short": null,
+      "tags": [
+        "langlauf"
+      ],
+      "setting": "outdoor",
+      "address": null,
+      "postal_code": null,
+      "town": "Scharnitz",
+      "lat": 47.38405,
+      "lng": 11.24263,
+      "website": "https://www.tirol.at/aktivitaeten/sport/langlaufen/loipen/schlittenloipe-scharnitz-a12",
+      "source_url": "https://www.tirol.at/reisefuehrer/barrierefrei/schlittenlanglauf",
+      "accessibility": {
+        "features": [
+          "rollstuhl",
+          "parkplatz"
+        ],
+        "note": "Laut tirol.at: Schöne Schlittenloipe mit herausfordernden Abschnitten für Fortgeschrittene. Besonders sonnige Runde auf Wiesengelände. Einkehrmöglichkeiten in Scharnitz und Gießenbach."
+      },
+      "images": [
+        {
+          "url": "https://www.tirol.at/images/IZ995YxQML4/cb:/g:ce/aHR0cHM6Ly91cGxvYWRzLm1hcHNlcnZpY2VzLmV1L25lZm9zX3Rpcm9sL3NpdGUtZmlsZXMvMTAxNS91cGxvYWRzL2xvaXBlX2ExMl8tX3NjaGFybml0el8tX2x1ZnRhdWZuYWhtZS5qcGc",
+          "credit": "Region Seefeld",
+          "license": null,
+          "author": null
+        }
+      ],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "loipe-loipe-eben-fur-schlittenlanglauf-am-achensee",
+      "name": "Loipe Eben für Schlittenlanglauf am Achensee",
+      "description": "Schlittenlanglauf-Loipe laut Tirol Werbung: für Langlaufschlitten geeignet, mit entsprechend ausgestatteten Park- und Zustiegsmöglichkeiten (Tiroler Gütesiegel). Schwierigkeit leicht Stil: klassisch Länge 4,5 km Dauer 1:00 h Höhenmeter bergauf 94 m, Ort Buch in Tirol / Brandenberger Alpen (Rofan). Abwechslungsreiche Loipe für konditionsstarke, fortgeschrittene Schlittenlangläufer. Sonnig und leicht kupiert für mehr sportliche Herausforderung. Ausblick auf die Zillertaler Alpen.",
+      "description_short": null,
+      "tags": [
+        "langlauf"
+      ],
+      "setting": "outdoor",
+      "address": null,
+      "postal_code": null,
+      "town": "Buch in Tirol",
+      "lat": 47.42031,
+      "lng": 11.75504,
+      "website": "https://www.tirol.at/aktivitaeten/sport/langlaufen/loipen/schlittenlanglaufloipe-eben-achensee",
+      "source_url": "https://www.tirol.at/reisefuehrer/barrierefrei/schlittenlanglauf",
+      "accessibility": {
+        "features": [
+          "rollstuhl",
+          "parkplatz"
+        ],
+        "note": "Laut tirol.at: Abwechslungsreiche Loipe für konditionsstarke, fortgeschrittene Schlittenlangläufer. Sonnig und leicht kupiert für mehr sportliche Herausforderung. Ausblick auf die Zillertaler Alpen."
+      },
+      "images": [
+        {
+          "url": "https://www.tirol.at/images/GQTZ7IBRBAs/cb:/g:ce/aHR0cHM6Ly91cGxvYWRzLm1hcHNlcnZpY2VzLmV1L25lZm9zX3Rpcm9sL3NpdGUtZmlsZXMvMTAxNi91cGxvYWRzL2xvaXBlLWViZW5fMTM1MjAwNTk1LmpwZw",
+          "credit": "Achensee Tourismus",
+          "license": null,
+          "author": null
+        }
+      ],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "loipe-loipe-obern-barrierefrei-langlaufen-in-der-leutasch",
+      "name": "Loipe Obern: Barrierefrei Langlaufen in der Leutasch",
+      "description": "Schlittenlanglauf-Loipe laut Tirol Werbung: für Langlaufschlitten geeignet, mit entsprechend ausgestatteten Park- und Zustiegsmöglichkeiten (Tiroler Gütesiegel). Schwierigkeit leicht Stil: skating, klassisch Länge 5,3 km Höhenmeter bergauf 29 m, Ort Leutasch / Wetterstein-Gebirge und Mieminger Kette. Kurze, ideale Anfänger-Loipe für Schlittenlanglauf ohne markante Steigungen. Schöner Ausblick auf den Telfer Hausberg Hohe Munde. Viel Sonne auf Wiesengelände.",
+      "description_short": null,
+      "tags": [
+        "langlauf"
+      ],
+      "setting": "outdoor",
+      "address": null,
+      "postal_code": null,
+      "town": "Leutasch",
+      "lat": 47.34686,
+      "lng": 11.12873,
+      "website": "https://www.tirol.at/aktivitaeten/sport/langlaufen/loipen/loipe-obern-a5",
+      "source_url": "https://www.tirol.at/reisefuehrer/barrierefrei/schlittenlanglauf",
+      "accessibility": {
+        "features": [
+          "rollstuhl",
+          "parkplatz"
+        ],
+        "note": "Laut tirol.at: Kurze, ideale Anfänger-Loipe für Schlittenlanglauf ohne markante Steigungen. Schöner Ausblick auf den Telfer Hausberg Hohe Munde. Viel Sonne auf Wiesengelände."
+      },
+      "images": [
+        {
+          "url": "https://www.tirol.at/images/SFSTmX4jii4/cb:/g:ce/aHR0cHM6Ly91cGxvYWRzLm1hcHNlcnZpY2VzLmV1L25lZm9zX3Rpcm9sL3NpdGUtZmlsZXMvMTAxNS91cGxvYWRzL2xvaXBlX2E1X29iZXJuX2luX2xldXRhc2NoXy1fbHVmdGF1Zm5haG1lXzIuanBn",
+          "credit": "Region Seefeld, Moritz Klee",
+          "license": null,
+          "author": null
+        }
+      ],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "loipe-kaser-runde-schlittenloipe-im-kaunertal",
+      "name": "Kaser-Runde: Schlittenloipe im Kaunertal",
+      "description": "Schlittenlanglauf-Loipe laut Tirol Werbung: für Langlaufschlitten geeignet, mit entsprechend ausgestatteten Park- und Zustiegsmöglichkeiten (Tiroler Gütesiegel). Schwierigkeit leicht Stil: skating, klassisch Länge 1,0 km Höhenmeter bergauf 10 m, Ort Kaunertal / Ötztaler Alpen. Ideale, vorwiegend flache Einsteiger-Loipe für Schlittenlanglauf. Möglichkeit, die eigene Technik an sanften Hängen zu trainieren. Auch abends beleuchtet.",
+      "description_short": null,
+      "tags": [
+        "langlauf"
+      ],
+      "setting": "outdoor",
+      "address": null,
+      "postal_code": null,
+      "town": "Kaunertal",
+      "lat": 47.03203,
+      "lng": 10.74699,
+      "website": "https://www.tirol.at/aktivitaeten/sport/langlaufen/loipen/loipe-kaser-runde-kaunertal",
+      "source_url": "https://www.tirol.at/reisefuehrer/barrierefrei/schlittenlanglauf",
+      "accessibility": {
+        "features": [
+          "rollstuhl",
+          "parkplatz"
+        ],
+        "note": "Laut tirol.at: Ideale, vorwiegend flache Einsteiger-Loipe für Schlittenlanglauf. Möglichkeit, die eigene Technik an sanften Hängen zu trainieren. Auch abends beleuchtet."
+      },
+      "images": [
+        {
+          "url": "https://www.tirol.at/images/oMqYQyEUAGQ/cb:/g:ce/aHR0cHM6Ly91cGxvYWRzLm1hcHNlcnZpY2VzLmV1L25lZm9zX3Rpcm9sL3NpdGUtZmlsZXMvMTAzNi91cGxvYWRzLy10dmItdGlyb2xlci1vYmVybGFuZC1rYXVuZXJ0YWwtZGllLXdlc3QtYmFycmllcmVmcmVpLWxhbmdsYXVmZW4tMV8xNS5qcGc",
+          "credit": "-TVB-Tiroler-Oberland-Kaunertal-Die-West-Barrierefrei-Langlaufen-1 (15).jpg © Die West GmbH",
+          "license": null,
+          "author": null
+        }
+      ],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "loipe-unterleutasch-barrierefreie-loipe-fur-konditionsstarke-schlittenlaufer",
+      "name": "Unterleutasch: Barrierefreie Loipe für konditionsstarke Schlittenläufer",
+      "description": "Schlittenlanglauf-Loipe laut Tirol Werbung: für Langlaufschlitten geeignet, mit entsprechend ausgestatteten Park- und Zustiegsmöglichkeiten (Tiroler Gütesiegel). Schwierigkeit leicht Stil: skating, klassisch Länge 13,7 km Höhenmeter bergauf 81 m, Ort Leutasch / Wetterstein-Gebirge und Mieminger Kette. Lange, landschaftlich sehr schöne Loipe für Schlittenlanglauf-Einsteiger mit guter Kondition. Blick auf die markante Arnspitze. Möglichkeit, den Bus zurück zum Ausgangsort zu nehmen.",
+      "description_short": null,
+      "tags": [
+        "langlauf"
+      ],
+      "setting": "outdoor",
+      "address": null,
+      "postal_code": null,
+      "town": "Leutasch",
+      "lat": 47.38285,
+      "lng": 11.17028,
+      "website": "https://www.tirol.at/aktivitaeten/sport/langlaufen/loipen/a9-unterleutasch-schlittenlanglauf",
+      "source_url": "https://www.tirol.at/reisefuehrer/barrierefrei/schlittenlanglauf",
+      "accessibility": {
+        "features": [
+          "rollstuhl",
+          "parkplatz"
+        ],
+        "note": "Laut tirol.at: Lange, landschaftlich sehr schöne Loipe für Schlittenlanglauf-Einsteiger mit guter Kondition. Blick auf die markante Arnspitze. Möglichkeit, den Bus zurück zum Ausgangsort zu nehmen."
+      },
+      "images": [
+        {
+          "url": "https://www.tirol.at/images/mEvvHKL_dE0/cb:/g:ce/aHR0cHM6Ly91cGxvYWRzLm1hcHNlcnZpY2VzLmV1L25lZm9zX3Rpcm9sL3NpdGUtZmlsZXMvMTAxNS91cGxvYWRzL2xvaXBlX2E5X3VudGVybGV1dGFzY2guanBn",
+          "credit": "Region Seefeld",
+          "license": null,
+          "author": null
+        }
+      ],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "loipe-barrierefrei-langlaufen-ortsloipe-achenkirch-am-achensee",
+      "name": "Barrierefrei Langlaufen: Ortsloipe Achenkirch am Achensee",
+      "description": "Schlittenlanglauf-Loipe laut Tirol Werbung: für Langlaufschlitten geeignet, mit entsprechend ausgestatteten Park- und Zustiegsmöglichkeiten (Tiroler Gütesiegel). Schwierigkeit leicht Stil: skating, klassisch Länge 10,0 km Dauer 2:00 h Höhenmeter bergauf 99 m, Ort Achenkirch am Achensee / Brandenberger Alpen (Rofan). Längere, vorwiegend ebene Rundloipe mit tollem Bergpanorama. Gut erreichbar durch Parkplätze vor Ort. Nähe zum landschaftlich reizvollen Achensee.",
+      "description_short": null,
+      "tags": [
+        "langlauf"
+      ],
+      "setting": "outdoor",
+      "address": null,
+      "postal_code": null,
+      "town": "Achenkirch am Achensee",
+      "lat": 47.51007,
+      "lng": 11.70342,
+      "website": "https://www.tirol.at/aktivitaeten/sport/langlaufen/loipen/ortsloipe-achenkirch-a3",
+      "source_url": "https://www.tirol.at/reisefuehrer/barrierefrei/schlittenlanglauf",
+      "accessibility": {
+        "features": [
+          "rollstuhl",
+          "parkplatz"
+        ],
+        "note": "Laut tirol.at: Längere, vorwiegend ebene Rundloipe mit tollem Bergpanorama. Gut erreichbar durch Parkplätze vor Ort. Nähe zum landschaftlich reizvollen Achensee."
+      },
+      "images": [
+        {
+          "url": "https://www.tirol.at/images/v2WjfpSmhRs/cb:/g:ce/aHR0cHM6Ly91cGxvYWRzLm1hcHNlcnZpY2VzLmV1L25lZm9zX3Rpcm9sL3NpdGUtZmlsZXMvMTAxNi91cGxvYWRzL29ydHNsb2lwZS1hY2hlbmtpcmNoMS5qcGc",
+          "credit": "Achensee Tourismus",
+          "license": null,
+          "author": null
+        }
+      ],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "loipe-viel-ruhe-und-natur-die-schlittenloipe-bodenalm-bei-scharnitz",
+      "name": "Viel Ruhe und Natur - die Schlittenloipe Bodenalm bei Scharnitz",
+      "description": "Schlittenlanglauf-Loipe laut Tirol Werbung: für Langlaufschlitten geeignet, mit entsprechend ausgestatteten Park- und Zustiegsmöglichkeiten (Tiroler Gütesiegel). Schwierigkeit leicht Stil: skating, klassisch Länge 10,7 km Höhenmeter bergauf 60 m, Ort Scharnitz / Karwendel. gemütliche Schlittenlanglauf-Tour auf ruhiger, wenig frequentierter Loipe. mit öffentlichen Verkehrsmitteln erreichbar. Einkehroption im Gasthof Ramona.",
+      "description_short": null,
+      "tags": [
+        "langlauf"
+      ],
+      "setting": "outdoor",
+      "address": null,
+      "postal_code": null,
+      "town": "Scharnitz",
+      "lat": 47.38388,
+      "lng": 11.24281,
+      "website": "https://www.tirol.at/aktivitaeten/sport/langlaufen/loipen/a11-bodenalm",
+      "source_url": "https://www.tirol.at/reisefuehrer/barrierefrei/schlittenlanglauf",
+      "accessibility": {
+        "features": [
+          "rollstuhl",
+          "parkplatz"
+        ],
+        "note": "Laut tirol.at: gemütliche Schlittenlanglauf-Tour auf ruhiger, wenig frequentierter Loipe. mit öffentlichen Verkehrsmitteln erreichbar. Einkehroption im Gasthof Ramona."
+      },
+      "images": [
+        {
+          "url": "https://www.tirol.at/images/nRenh9LshBI/cb:/g:ce/aHR0cHM6Ly91cGxvYWRzLm1hcHNlcnZpY2VzLmV1L25lZm9zX3Rpcm9sL3NpdGUtZmlsZXMvMTAxNS91cGxvYWRzL2xhbmdsYXVmbG9pcGVfYTExX2F1Zl93ZWl0ZW1fZmVsZC5qcGc",
+          "credit": "Region Seefeld",
+          "license": null,
+          "author": null
+        }
+      ],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "monoski-kitzski-kitzbuhel-kirchberg",
+      "name": "KitzSki - Kitzbühel | Kirchberg",
+      "description": "Von Tirol Werbung als Skigebiet zum Monoskifahren empfohlen: barrierefrei zugängliche Liftanlagen und Infrastruktur, geschultes Liftpersonal. Pistenkilometer: 179,0 km, Höhenlage: 800 - 2.000 m.",
+      "description_short": null,
+      "tags": [
+        "ski"
+      ],
+      "setting": "outdoor",
+      "address": null,
+      "postal_code": null,
+      "town": null,
+      "lat": 47.444,
+      "lng": 12.3896,
+      "website": "https://www.tirol.at/aktivitaeten/sport/skifahren/skigebiete/skigebiet-bergbahn-kitzbuehel",
+      "source_url": "https://www.tirol.at/aktivitaeten/sport/skifahren/mono-skigebiete",
+      "accessibility": {
+        "features": [
+          "rollstuhl"
+        ],
+        "note": "Von Tirol Werbung als Skigebiet zum Monoskifahren empfohlen: barrierefrei zugängliche Liftanlagen und Infrastruktur, geschultes Liftpersonal."
+      },
+      "images": [
+        {
+          "url": "https://www.tirol.at/images/srzT5eE_Y5w/cb:/g:ce/aHR0cHM6Ly9pbXhwbGF0Zm9ybS1jdXN0LXR3LmZzbjEueW91ci1vYmplY3RzdG9yYWdlLmNvbS9tZWRpYS9raXR6c2tpLWMtdHZiLWtpdHpidWhlbGVyLWFscGVuLWJyaXhlbnRhbC1mb3RvZ3JhZi1tYXRoYXVzLWdhcnRuZXJfMTkuanBn",
+          "credit": "TVB Kitzbüheler Alpen - Brixental | Mathäus Gartner",
+          "license": null,
+          "author": null
+        }
+      ],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "monoski-hintertuxer-gletscher",
+      "name": "Hintertuxer Gletscher",
+      "description": "Von Tirol Werbung als Skigebiet zum Monoskifahren empfohlen: barrierefrei zugängliche Liftanlagen und Infrastruktur, geschultes Liftpersonal. Pistenkilometer: 48,8 km, Höhenlage: 1.500 - 3.250 m.",
+      "description_short": null,
+      "tags": [
+        "ski"
+      ],
+      "setting": "outdoor",
+      "address": null,
+      "postal_code": null,
+      "town": null,
+      "lat": 47.106,
+      "lng": 11.6741,
+      "website": "https://www.tirol.at/aktivitaeten/sport/skifahren/skigebiete/hintertuxer-gletscher",
+      "source_url": "https://www.tirol.at/aktivitaeten/sport/skifahren/mono-skigebiete",
+      "accessibility": {
+        "features": [
+          "rollstuhl"
+        ],
+        "note": "Von Tirol Werbung als Skigebiet zum Monoskifahren empfohlen: barrierefrei zugängliche Liftanlagen und Infrastruktur, geschultes Liftpersonal."
+      },
+      "images": [
+        {
+          "url": "https://www.tirol.at/images/XqZ9uZw_H6I/cb:/g:ce/aHR0cHM6Ly9pbXhwbGF0Zm9ybS1jdXN0LXR3LmZzbjEueW91ci1vYmplY3RzdG9yYWdlLmNvbS9tZWRpYS9oaW50ZXJ0dXhlci1nbGV0c2NoZXJfZG9taW5pa190YXViZXJfMS5qcGc",
+          "credit": "Tirol Werbung | Dominik Tauber",
+          "license": null,
+          "author": null
+        }
+      ],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "monoski-bergeralm-steinach-am-brenner",
+      "name": "Bergeralm Steinach am Brenner",
+      "description": "Von Tirol Werbung als Skigebiet zum Monoskifahren empfohlen: barrierefrei zugängliche Liftanlagen und Infrastruktur, geschultes Liftpersonal. Pistenkilometer: 29,0 km, Höhenlage: 1.000 - 2.200 m.",
+      "description_short": null,
+      "tags": [
+        "ski"
+      ],
+      "setting": "outdoor",
+      "address": null,
+      "postal_code": null,
+      "town": null,
+      "lat": 47.0783,
+      "lng": 11.4589,
+      "website": "https://www.tirol.at/aktivitaeten/sport/skifahren/skigebiete/skigebiet-bergeralm",
+      "source_url": "https://www.tirol.at/aktivitaeten/sport/skifahren/mono-skigebiete",
+      "accessibility": {
+        "features": [
+          "rollstuhl"
+        ],
+        "note": "Von Tirol Werbung als Skigebiet zum Monoskifahren empfohlen: barrierefrei zugängliche Liftanlagen und Infrastruktur, geschultes Liftpersonal."
+      },
+      "images": [
+        {
+          "url": "https://www.tirol.at/images/BseD_Soi_Ks/cb:/g:ce/aHR0cHM6Ly9pbXhwbGF0Zm9ybS1jdXN0LXR3LmZzbjEueW91ci1vYmplY3RzdG9yYWdlLmNvbS9tZWRpYS9kamlfMDE5OS5qcGc",
+          "credit": "Skigebiet Bergeralm",
+          "license": null,
+          "author": null
+        }
+      ],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "monoski-bergwelt-hahnenkamm",
+      "name": "Bergwelt Hahnenkamm",
+      "description": "Von Tirol Werbung als Skigebiet zum Monoskifahren empfohlen: barrierefrei zugängliche Liftanlagen und Infrastruktur, geschultes Liftpersonal. Pistenkilometer: 16,0 km, Höhenlage: 910 - 1.900 m.",
+      "description_short": null,
+      "tags": [
+        "ski"
+      ],
+      "setting": "outdoor",
+      "address": null,
+      "postal_code": null,
+      "town": null,
+      "lat": 47.4781,
+      "lng": 10.6792,
+      "website": "https://www.tirol.at/aktivitaeten/sport/skifahren/skigebiete/skigebiet-bergwelt-hahnenkamm",
+      "source_url": "https://www.tirol.at/aktivitaeten/sport/skifahren/mono-skigebiete",
+      "accessibility": {
+        "features": [
+          "rollstuhl"
+        ],
+        "note": "Von Tirol Werbung als Skigebiet zum Monoskifahren empfohlen: barrierefrei zugängliche Liftanlagen und Infrastruktur, geschultes Liftpersonal."
+      },
+      "images": [
+        {
+          "url": "https://www.tirol.at/images/2kMUawr9HcI/cb:/g:ce/aHR0cHM6Ly9pbXhwbGF0Zm9ybS1jdXN0LXR3LmZzbjEueW91ci1vYmplY3RzdG9yYWdlLmNvbS9tZWRpYS9za2lnZWJpZXQtaGFobmVua2FtbS1pbi1yZXV0dGUuanBn",
+          "credit": "Robert Eder",
+          "license": null,
+          "author": null
+        }
+      ],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "monoski-skigebiet-hochoetz",
+      "name": "Skigebiet Hochoetz",
+      "description": "Von Tirol Werbung als Skigebiet zum Monoskifahren empfohlen: barrierefrei zugängliche Liftanlagen und Infrastruktur, geschultes Liftpersonal. Pistenkilometer: 41,0 km, Höhenlage: 670 - 2.020 m.",
+      "description_short": null,
+      "tags": [
+        "ski"
+      ],
+      "setting": "outdoor",
+      "address": null,
+      "postal_code": null,
+      "town": null,
+      "lat": 47.2,
+      "lng": 10.9032,
+      "website": "https://www.tirol.at/aktivitaeten/sport/skifahren/skigebiete/skigebiet-hochoetz",
+      "source_url": "https://www.tirol.at/aktivitaeten/sport/skifahren/mono-skigebiete",
+      "accessibility": {
+        "features": [
+          "rollstuhl"
+        ],
+        "note": "Von Tirol Werbung als Skigebiet zum Monoskifahren empfohlen: barrierefrei zugängliche Liftanlagen und Infrastruktur, geschultes Liftpersonal."
+      },
+      "images": [
+        {
+          "url": "https://www.tirol.at/images/g5hgzor2YhI/cb:/g:ce/aHR0cHM6Ly9pbXhwbGF0Zm9ybS1jdXN0LXR3LmZzbjEueW91ci1vYmplY3RzdG9yYWdlLmNvbS9tZWRpYS9ob2Nob2V0ei5qcGc",
+          "credit": "Ötztal Tourismus",
+          "license": null,
+          "author": null
+        }
+      ],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "monoski-kaunertaler-gletscher",
+      "name": "Kaunertaler Gletscher",
+      "description": "Von Tirol Werbung als Skigebiet zum Monoskifahren empfohlen: barrierefrei zugängliche Liftanlagen und Infrastruktur, geschultes Liftpersonal. Pistenkilometer: 30,0 km, Höhenlage: 2.150 - 3.113 m.",
+      "description_short": null,
+      "tags": [
+        "ski"
+      ],
+      "setting": "outdoor",
+      "address": null,
+      "postal_code": null,
+      "town": null,
+      "lat": 46.864,
+      "lng": 10.7126,
+      "website": "https://www.tirol.at/aktivitaeten/sport/skifahren/skigebiete/kaunertaler-gletscher",
+      "source_url": "https://www.tirol.at/aktivitaeten/sport/skifahren/mono-skigebiete",
+      "accessibility": {
+        "features": [
+          "rollstuhl"
+        ],
+        "note": "Von Tirol Werbung als Skigebiet zum Monoskifahren empfohlen: barrierefrei zugängliche Liftanlagen und Infrastruktur, geschultes Liftpersonal."
+      },
+      "images": [
+        {
+          "url": "https://www.tirol.at/images/OHw88v5yXIc/cb:/g:ce/aHR0cHM6Ly9pbXhwbGF0Zm9ybS1jdXN0LXR3LmZzbjEueW91ci1vYmplY3RzdG9yYWdlLmNvbS9tZWRpYS8lQzIlQTktVFZCLVRpcm9sZXItT2JlcmxhbmQtS2F1bmVydGFsLVJvbWFuLUh1YmVyLUthdW5lcnRhbGVyLUdsZXRzY2hlciUyMFNraS1BbHBpbi1GYWxnaW5qb2NoYmFobi0yM0E3MzQwXzEuanBn",
+          "credit": "TVB Tiroler Oberland | Roman Huber",
+          "license": null,
+          "author": null
+        }
+      ],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "monoski-mayrhofner-bergbahnen",
+      "name": "Mayrhofner Bergbahnen",
+      "description": "Von Tirol Werbung als Skigebiet zum Monoskifahren empfohlen: barrierefrei zugängliche Liftanlagen und Infrastruktur, geschultes Liftpersonal. Pistenkilometer: 142,0 km, Höhenlage: 630 - 2.500 m.",
+      "description_short": null,
+      "tags": [
+        "ski"
+      ],
+      "setting": "outdoor",
+      "address": null,
+      "postal_code": null,
+      "town": null,
+      "lat": 47.1612,
+      "lng": 11.8612,
+      "website": "https://www.tirol.at/aktivitaeten/sport/skifahren/skigebiete/skigebiet-mayrhofner-bergbahnen",
+      "source_url": "https://www.tirol.at/aktivitaeten/sport/skifahren/mono-skigebiete",
+      "accessibility": {
+        "features": [
+          "rollstuhl"
+        ],
+        "note": "Von Tirol Werbung als Skigebiet zum Monoskifahren empfohlen: barrierefrei zugängliche Liftanlagen und Infrastruktur, geschultes Liftpersonal."
+      },
+      "images": [
+        {
+          "url": "https://www.tirol.at/images/XpZWudMmwE8/cb:/g:ce/aHR0cHM6Ly9pbXhwbGF0Zm9ybS1jdXN0LXR3LmZzbjEueW91ci1vYmplY3RzdG9yYWdlLmNvbS9tZWRpYS9QZW5rZW5fU2tpZmFocmVuX2ZhbWlseV8wMS5qcGc",
+          "credit": "Mayrhofner Bergbahnen",
+          "license": null,
+          "author": null
+        }
+      ],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "monoski-schlick-2000",
+      "name": "Schlick 2000",
+      "description": "Von Tirol Werbung als Skigebiet zum Monoskifahren empfohlen: barrierefrei zugängliche Liftanlagen und Infrastruktur, geschultes Liftpersonal. Pistenkilometer: 22,0 km, Höhenlage: 1.000 - 2.240 m.",
+      "description_short": null,
+      "tags": [
+        "ski"
+      ],
+      "setting": "outdoor",
+      "address": null,
+      "postal_code": null,
+      "town": null,
+      "lat": 47.1556,
+      "lng": 11.3436,
+      "website": "https://www.tirol.at/aktivitaeten/sport/skifahren/skigebiete/skigebiet-schlick-2000",
+      "source_url": "https://www.tirol.at/aktivitaeten/sport/skifahren/mono-skigebiete",
+      "accessibility": {
+        "features": [
+          "rollstuhl"
+        ],
+        "note": "Von Tirol Werbung als Skigebiet zum Monoskifahren empfohlen: barrierefrei zugängliche Liftanlagen und Infrastruktur, geschultes Liftpersonal."
+      },
+      "images": [
+        {
+          "url": "https://www.tirol.at/images/77erUeQmxkQ/cb:/g:ce/aHR0cHM6Ly9pbXhwbGF0Zm9ybS1jdXN0LXR3LmZzbjEueW91ci1vYmplY3RzdG9yYWdlLmNvbS9tZWRpYS9za2lnZWJpZXQtc2NobGljay0yMDAwXzEuanBn",
+          "credit": "Stubaital Tirol",
+          "license": null,
+          "author": null
+        }
+      ],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "monoski-serfaus-fiss-ladis",
+      "name": "Serfaus-Fiss-Ladis",
+      "description": "Von Tirol Werbung als Skigebiet zum Monoskifahren empfohlen: barrierefrei zugängliche Liftanlagen und Infrastruktur, geschultes Liftpersonal. Pistenkilometer: 161,0 km, Höhenlage: 1.200 - 2.828 m.",
+      "description_short": null,
+      "tags": [
+        "ski"
+      ],
+      "setting": "outdoor",
+      "address": null,
+      "postal_code": null,
+      "town": null,
+      "lat": 47.0406,
+      "lng": 10.5974,
+      "website": "https://www.tirol.at/aktivitaeten/sport/skifahren/skigebiete/skigebiet-serfaus-fiss-ladis",
+      "source_url": "https://www.tirol.at/aktivitaeten/sport/skifahren/mono-skigebiete",
+      "accessibility": {
+        "features": [
+          "rollstuhl"
+        ],
+        "note": "Von Tirol Werbung als Skigebiet zum Monoskifahren empfohlen: barrierefrei zugängliche Liftanlagen und Infrastruktur, geschultes Liftpersonal."
+      },
+      "images": [
+        {
+          "url": "https://www.tirol.at/images/QJ2CBmzdqgA/cb:/g:ce/aHR0cHM6Ly9pbXhwbGF0Zm9ybS1jdXN0LXR3LmZzbjEueW91ci1vYmplY3RzdG9yYWdlLmNvbS9tZWRpYS9zZXJmYXVzLWZpc3MtbGFkaXNfYmFlcmVucGlzdGUtMTI4MHg0ODBweGNhbmRyZWFzLWtpcnNjaG5lci5qcGc",
+          "credit": "Andreas Kirschner",
+          "license": null,
+          "author": null
+        }
+      ],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "monoski-silvretta-arena-ischgl",
+      "name": "Silvretta Arena Ischgl",
+      "description": "Von Tirol Werbung als Skigebiet zum Monoskifahren empfohlen: barrierefrei zugängliche Liftanlagen und Infrastruktur, geschultes Liftpersonal. Pistenkilometer: 159,0 km, Höhenlage: 1.400 - 2.872 m.",
+      "description_short": null,
+      "tags": [
+        "ski"
+      ],
+      "setting": "outdoor",
+      "address": null,
+      "postal_code": null,
+      "town": null,
+      "lat": 47.0152,
+      "lng": 10.2937,
+      "website": "https://www.tirol.at/aktivitaeten/sport/skifahren/skigebiete/skigebiet-silvretta-arena-ischgl",
+      "source_url": "https://www.tirol.at/aktivitaeten/sport/skifahren/mono-skigebiete",
+      "accessibility": {
+        "features": [
+          "rollstuhl"
+        ],
+        "note": "Von Tirol Werbung als Skigebiet zum Monoskifahren empfohlen: barrierefrei zugängliche Liftanlagen und Infrastruktur, geschultes Liftpersonal."
+      },
+      "images": [
+        {
+          "url": "https://www.tirol.at/images/kuvXYv6XQIE/cb:/g:ce/aHR0cHM6Ly9pbXhwbGF0Zm9ybS1jdXN0LXR3LmZzbjEueW91ci1vYmplY3RzdG9yYWdlLmNvbS9tZWRpYS9yZWlzZWZ1ZWhyZXJfc3BvcnRfc2tpZmFocmVuX3NraWdlYmlldGVfYS1zaWx2cmV0dGEtYXJlbmEtaXNjaGdsLXNhbW5hdW5fMS5qcGc",
+          "credit": "TVB Paznaun - Ischgl",
+          "license": null,
+          "author": null
+        }
+      ],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "monoski-ski-juwel-alpbachtal-wildschonau",
+      "name": "Ski Juwel Alpbachtal Wildschönau",
+      "description": "Von Tirol Werbung als Skigebiet zum Monoskifahren empfohlen: barrierefrei zugängliche Liftanlagen und Infrastruktur, geschultes Liftpersonal. Pistenkilometer: 114,0 km, Höhenlage: 600 - 2.100 m.",
+      "description_short": null,
+      "tags": [
+        "ski"
+      ],
+      "setting": "outdoor",
+      "address": null,
+      "postal_code": null,
+      "town": null,
+      "lat": 47.3764,
+      "lng": 11.9581,
+      "website": "https://www.tirol.at/aktivitaeten/sport/skifahren/skigebiete/skigebiet-skijuwel-alpbachtal-wildschoenau",
+      "source_url": "https://www.tirol.at/aktivitaeten/sport/skifahren/mono-skigebiete",
+      "accessibility": {
+        "features": [
+          "rollstuhl"
+        ],
+        "note": "Von Tirol Werbung als Skigebiet zum Monoskifahren empfohlen: barrierefrei zugängliche Liftanlagen und Infrastruktur, geschultes Liftpersonal."
+      },
+      "images": [
+        {
+          "url": "https://www.tirol.at/images/9PeHPoVIbOM/cb:/g:ce/aHR0cHM6Ly9pbXhwbGF0Zm9ybS1jdXN0LXR3LmZzbjEueW91ci1vYmplY3RzdG9yYWdlLmNvbS9tZWRpYS9mYW1pbHlfYXVzc2ljaHRfaW5fZGVuX2tpdHpidWVoZWxlcl9hbHBlbnNraV9qdXdlbF9hbHBiYWNodGFsX3dpbGRzY2hvZW5hdS5qcGc",
+          "credit": "Ski Juwel Alpbachtal Wildschönau",
+          "license": null,
+          "author": null
+        }
+      ],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "monoski-steinplatte-waidring",
+      "name": "Steinplatte Waidring",
+      "description": "Von Tirol Werbung als Skigebiet zum Monoskifahren empfohlen: barrierefrei zugängliche Liftanlagen und Infrastruktur, geschultes Liftpersonal. Pistenkilometer: 42,0 km, Höhenlage: 780 - 1.860 m.",
+      "description_short": null,
+      "tags": [
+        "ski"
+      ],
+      "setting": "outdoor",
+      "address": null,
+      "postal_code": null,
+      "town": null,
+      "lat": 47.5876,
+      "lng": 12.5651,
+      "website": "https://www.tirol.at/aktivitaeten/sport/skifahren/skigebiete/skigebiet-steinplatte-waidring",
+      "source_url": "https://www.tirol.at/aktivitaeten/sport/skifahren/mono-skigebiete",
+      "accessibility": {
+        "features": [
+          "rollstuhl"
+        ],
+        "note": "Von Tirol Werbung als Skigebiet zum Monoskifahren empfohlen: barrierefrei zugängliche Liftanlagen und Infrastruktur, geschultes Liftpersonal."
+      },
+      "images": [
+        {
+          "url": "https://www.tirol.at/images/oMaMGGxV_0Y/cb:/g:ce/aHR0cHM6Ly9pbXhwbGF0Zm9ybS1jdXN0LXR3LmZzbjEueW91ci1vYmplY3RzdG9yYWdlLmNvbS9tZWRpYS9mYW1pbGllbnNraWdlYmlldF9zdGVpbnBsYXR0ZV93aW5rbG1vb3NhbG1fY2ZyZWV6aW5nbW90aW9ucy0xNS5qcGc",
+          "credit": "Freezing Motions",
+          "license": null,
+          "author": null
+        }
+      ],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "monoski-stubaier-gletscher",
+      "name": "Stubaier Gletscher",
+      "description": "Von Tirol Werbung als Skigebiet zum Monoskifahren empfohlen: barrierefrei zugängliche Liftanlagen und Infrastruktur, geschultes Liftpersonal. Pistenkilometer: 41,0 km, Höhenlage: 1.750 - 3.210 m.",
+      "description_short": null,
+      "tags": [
+        "ski"
+      ],
+      "setting": "outdoor",
+      "address": null,
+      "postal_code": null,
+      "town": null,
+      "lat": 47.0106,
+      "lng": 11.155,
+      "website": "https://www.tirol.at/aktivitaeten/sport/skifahren/skigebiete/stubaier-gletscher",
+      "source_url": "https://www.tirol.at/aktivitaeten/sport/skifahren/mono-skigebiete",
+      "accessibility": {
+        "features": [
+          "rollstuhl"
+        ],
+        "note": "Von Tirol Werbung als Skigebiet zum Monoskifahren empfohlen: barrierefrei zugängliche Liftanlagen und Infrastruktur, geschultes Liftpersonal."
+      },
+      "images": [
+        {
+          "url": "https://www.tirol.at/images/a8s4xCN-qQA/cb:/g:ce/aHR0cHM6Ly9pbXhwbGF0Zm9ybS1jdXN0LXR3LmZzbjEueW91ci1vYmplY3RzdG9yYWdlLmNvbS9tZWRpYS9zZWJhc3RpYW5tYXJrb19QSVNURV8wMDEyLmpwZw",
+          "credit": "Sebastian Marko",
+          "license": null,
+          "author": null
+        }
+      ],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "monoski-venet-bergbahnen",
+      "name": "Venet Bergbahnen",
+      "description": "Von Tirol Werbung als Skigebiet zum Monoskifahren empfohlen: barrierefrei zugängliche Liftanlagen und Infrastruktur, geschultes Liftpersonal. Pistenkilometer: 22,0 km, Höhenlage: 780 - 2.210 m.",
+      "description_short": null,
+      "tags": [
+        "ski"
+      ],
+      "setting": "outdoor",
+      "address": null,
+      "postal_code": null,
+      "town": null,
+      "lat": 47.1536,
+      "lng": 10.5857,
+      "website": "https://www.tirol.at/aktivitaeten/sport/skifahren/skigebiete/skigebiet-venet-bergbahnen",
+      "source_url": "https://www.tirol.at/aktivitaeten/sport/skifahren/mono-skigebiete",
+      "accessibility": {
+        "features": [
+          "rollstuhl"
+        ],
+        "note": "Von Tirol Werbung als Skigebiet zum Monoskifahren empfohlen: barrierefrei zugängliche Liftanlagen und Infrastruktur, geschultes Liftpersonal."
+      },
+      "images": [
+        {
+          "url": "https://www.tirol.at/images/xGhy_abv15g/cb:/g:ce/aHR0cHM6Ly9pbXhwbGF0Zm9ybS1jdXN0LXR3LmZzbjEueW91ci1vYmplY3RzdG9yYWdlLmNvbS9tZWRpYS9rcmFmdHJhdW0tdmVuZXQuanBn",
+          "credit": "Venet Bergbahnen",
+          "license": null,
+          "author": null
+        }
+      ],
+      "price_hint": null,
+      "opening_hint": null
+    }
+  ]
+}

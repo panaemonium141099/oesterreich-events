@@ -1,0 +1,1080 @@
+{
+  "source": "wko-at",
+  "source_label": "Fachverband der Seilbahnen, WKO (wko.at)",
+  "source_url": "https://www.wko.at/oe/transport-verkehr/seilbahnen/barrierefreie-bergwelt",
+  "checked_at": "2026-09-17",
+  "entries": [
+    {
+      "id": "hochficht-bergbahnen",
+      "name": "Hochficht Bergbahnen",
+      "description": "Hochficht Bergbahnen GmbH (Oberösterreich): barrierefreie Bergwelt laut Datenblatt des Fachverbands der Seilbahnen. Höchster barrierefrei erreichbarer Punkt: 1337m. Mit dem Rollstuhl befahrbare Bahnen im Sommer: 10EUB Reischlbergbahn. Idealer barrierefreier Einstieg: Skiarena Hochficht, 10EUB Reischlbergbahn. Barrierefreie Restaurants: Skiarena Hochficht. Barrierefreie Toiletten: Skiarena Hochficht. Barrierefreie Parkplätze: Skiarena Hochficht, Parkplatz Schwarzenbergbahn. Winter: 2 mit Monoski befahrbare Anlagen (10EUB Reischlbergbahn, 4-CLD Hochfichtbahn).",
+      "description_short": null,
+      "tags": [
+        "bergtour",
+        "wandern",
+        "ski"
+      ],
+      "setting": "outdoor",
+      "address": "Talstation Hochficht",
+      "postal_code": "4163",
+      "town": "Klaffer am Hochficht",
+      "lat": null,
+      "lng": null,
+      "website": "https://skisport.com/hochficht/de",
+      "source_url": "https://www.wko.at/oe/transport-verkehr/seilbahnen/barrierefreie-bergwelt-hochficht-bergbahnen.pdf",
+      "accessibility": {
+        "features": [
+          "rollstuhl",
+          "parkplatz",
+          "wc"
+        ],
+        "note": "Laut WKO-Datenblatt „Barrierefreie Bergwelt auf einen Blick“ (Stand November 2024): Höchster barrierefrei erreichbarer Punkt: 1337m. Mit dem Rollstuhl befahrbare Bahnen im Sommer: 10EUB Reischlbergbahn. Idealer barrierefreier Einstieg: Skiarena Hochficht, 10EUB Reischlbergbahn. Barrierefreie Restaurants: Skiarena Hochficht."
+      },
+      "images": [],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "kaprun",
+      "name": "Kitzsteinhorn und Maiskogel (Gletscherbahnen Kaprun)",
+      "description": "Gletscherbahnen Kaprun AG (Salzburg): barrierefreie Bergwelt laut Datenblatt des Fachverbands der Seilbahnen. Höchster barrierefrei erreichbarer Punkt: 3.029 m. Mit dem Rollstuhl befahrbare Bahnen im Sommer: Maiskogel: MK Maiskogelbahn, 3K K-onnection; Kitzsteinhorn: Gletscherjet 1, Gletscherjet 2, Gletscherjet 3 + 4, Gipfelbahn. Mit dem Rollstuhl befahrbare Wege: Maiskogel Bergstation – Unterbergalm; Langwied – Aussichtspunkt (Manggeifamilie). Mit dem Rollstuhl befahrbare Attraktionen: TOP OF SALZBURG; Langwied – Aussichtspunkt (Manggeifamilie). Idealer barrierefreier Einstieg: Maiskogel Talstation; Gletscherjet 1 Talstation. Barrierefreie Restaurants: auf vier Ebenen – 768 mMh, 911 mMh, 2.450 mMh, 3.029 mMh. Barrierefreie Toiletten: auf allen Ebenen – 768 mMh, 911 mMh, 1.570 mMh,1.976 mMh, 2.450 mMh, 3.029 mMh. Barrierefreie Parkplätze: Parkplatz Gletscherjet 1 Talstation; Parkplatz Maiskogel. Winter: 8 mit Monoski befahrbare Anlagen (Maiskogel: MK Maiskogelbahn, Almbahn; Kitzsteinhorn: Gletscherjet 2, Langwiedbahn, Gletscherjet 3 + 4, Kristallbahn, Sonnenkarbahn).",
+      "description_short": null,
+      "tags": [
+        "bergtour",
+        "wandern",
+        "ski"
+      ],
+      "setting": "outdoor",
+      "address": "Talstation Gletscherjet 1",
+      "postal_code": "5710",
+      "town": "Kaprun",
+      "lat": null,
+      "lng": null,
+      "website": "https://www.kitzsteinhorn.at",
+      "source_url": "https://www.wko.at/oe/transport-verkehr/seilbahnen/barrierefreie-bergwelt-kaprun.pdf",
+      "accessibility": {
+        "features": [
+          "rollstuhl",
+          "parkplatz",
+          "wc"
+        ],
+        "note": "Laut WKO-Datenblatt „Barrierefreie Bergwelt auf einen Blick“ (Stand November 2024): Höchster barrierefrei erreichbarer Punkt: 3.029 m. Mit dem Rollstuhl befahrbare Bahnen im Sommer: Maiskogel: MK Maiskogelbahn, 3K K-onnection; Kitzsteinhorn: Gletscherjet 1, Gletscherjet 2, Gletscherjet 3 + 4, Gipfelbahn. Mit dem Rollstuhl befahrbare Wege: Maiskogel Bergstation – Unterbergalm; Langwied – Aussichtspunkt (Manggeifamilie). Mit dem Rollstuhl befahrbare Attraktionen: TOP OF SALZBURG; Langwied – Aussichtspunkt (Manggeifamilie)."
+      },
+      "images": [],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "grossarl",
+      "name": "Großarler Bergbahnen",
+      "description": "Großarler Bergbahnen GmbH & CO KG (Salzburg): barrierefreie Bergwelt laut Datenblatt des Fachverbands der Seilbahnen. Höchster barrierefrei erreichbarer Punkt: 1945. Mit dem Rollstuhl befahrbare Bahnen im Sommer: Kieserlbahn. Mit dem Rollstuhl befahrbare Attraktionen: Bergstation Kieserlbahn mit Aussichtsterrasse. Idealer barrierefreier Einstieg: Talstation Kieserlbahn, 10er Kabinenbahn aus dem Jahr 2023; Unterbergstraße 48; Großarl. Barrierefreie Restaurants: Inferno, Kieserlbahn Tal; Wolke 7, Kieserlbahn Berg; Laireteralm, Panoramabahn Berg. Barrierefreie Toiletten: Kieserl Tal und Berg; Panoramabahn Tal (nur im Winter über Skidepot erreichbar). Barrierefreie Parkplätze: 2 Tiefgarage Kieserlbahn; 1 Panoramabahn. Winter: 1 mit Monoski befahrbare Anlagen (10 er Kieserlbahn).",
+      "description_short": null,
+      "tags": [
+        "bergtour",
+        "wandern",
+        "ski"
+      ],
+      "setting": "outdoor",
+      "address": "Talstation Panoramabahn",
+      "postal_code": "5611",
+      "town": "Großarl",
+      "lat": null,
+      "lng": null,
+      "website": "https://www.grossarltal.info",
+      "source_url": "https://www.wko.at/oe/transport-verkehr/seilbahnen/barrierefreie-bergwelt-grossarl.pdf",
+      "accessibility": {
+        "features": [
+          "rollstuhl",
+          "parkplatz",
+          "wc"
+        ],
+        "note": "Laut WKO-Datenblatt „Barrierefreie Bergwelt auf einen Blick“ (Stand November 2024): Höchster barrierefrei erreichbarer Punkt: 1945. Mit dem Rollstuhl befahrbare Bahnen im Sommer: Kieserlbahn. Mit dem Rollstuhl befahrbare Attraktionen: Bergstation Kieserlbahn mit Aussichtsterrasse. Idealer barrierefreier Einstieg: Talstation Kieserlbahn, 10er Kabinenbahn aus dem Jahr 2023; Unterbergstraße 48; Großarl."
+      },
+      "images": [],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "leogang",
+      "name": "Leoganger Bergbahnen",
+      "description": "Leoganger Bergbahnen GmbH (Salzburg): barrierefreie Bergwelt laut Datenblatt des Fachverbands der Seilbahnen. Höchster barrierefrei erreichbarer Punkt: 1750. Mit dem Rollstuhl befahrbare Bahnen im Sommer: Steinbergbahn; Asitzbahn. Mit dem Rollstuhl befahrbare Wege: Spielewanderweg mit Leos Rätseljagd; je nach Rollstuhl-Modell & Kondition mit Unterstützung - aufgrund der teils steileren Bereiche. Mit dem Rollstuhl befahrbare Attraktionen: alle o.a. Berghütten mit Terrassen (3 Stück); je nach Rollstuhl-Modell & Kondition: Leos Rätseljagd (mit Unterstützung - aufgrund der teils; steileren Bereiche). Idealer barrierefreier Einstieg: Steinbergbahn Talstation. Barrierefreie Restaurants: Steinadler - Asitzbahn Mittelstation; hendl fischerei - Steinbergbahn Bergstation; AsitzBräu - Steinbergbahn Bergstation. Barrierefreie Toiletten: 1 Asitzbahn Talstation; 1 Steinbergbahn Talstation. Barrierefreie Parkplätze: 3 Asitzbahn Talstation; 3 Steinbergbahn Talstation. Winter: 10 mit Monoski befahrbare Anlagen (Steinbergbahn (bevorzugt), Asitzbahn, Asitzgipfel-, Asitzmulden-, Asitzkogelbahn, Almbahn; Riederfeldlift, Übungslift Asitz, Krallerlift, Schanteilift).",
+      "description_short": null,
+      "tags": [
+        "bergtour",
+        "wandern",
+        "ski"
+      ],
+      "setting": "outdoor",
+      "address": "Talstation Asitzbahn",
+      "postal_code": "5771",
+      "town": "Leogang",
+      "lat": null,
+      "lng": null,
+      "website": "https://www.saalfelden-leogang.com/de/service-info/Barrierefreier-Urlaub",
+      "source_url": "https://www.wko.at/oe/transport-verkehr/seilbahnen/barrierefreie-bergwelt-leogang.pdf",
+      "accessibility": {
+        "features": [
+          "rollstuhl",
+          "parkplatz",
+          "wc"
+        ],
+        "note": "Laut WKO-Datenblatt „Barrierefreie Bergwelt auf einen Blick“ (Stand November 2024): Höchster barrierefrei erreichbarer Punkt: 1750. Mit dem Rollstuhl befahrbare Bahnen im Sommer: Steinbergbahn; Asitzbahn. Mit dem Rollstuhl befahrbare Wege: Spielewanderweg mit Leos Rätseljagd; je nach Rollstuhl-Modell & Kondition mit Unterstützung - aufgrund der teils steileren Bereiche. Mit dem Rollstuhl befahrbare Attraktionen: alle o.a. Berghütten mit Terrassen (3 Stück); je nach Rollstuhl-Modell & Kondition: Leos Rätseljagd (mit Unterstützung - aufgrund der teils; steileren Bereiche)."
+      },
+      "images": [],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "zwoelferhorn",
+      "name": "Zwölferhorn Seilbahn",
+      "description": "Zwölferhorn-Seilbahn Ges.m.b.H (Salzburg): barrierefreie Bergwelt laut Datenblatt des Fachverbands der Seilbahnen. Höchster barrierefrei erreichbarer Punkt: 1500m. Mit dem Rollstuhl befahrbare Bahnen im Sommer: Zwölferhorn-Seilbahn. Mit dem Rollstuhl befahrbare Wege: mit Begleitung - Pillstein Rundwanderweg. Idealer barrierefreier Einstieg: Zwölferhorn-Seilbahn. Barrierefreie Restaurants: Das Zwölfer - Bistro. Barrierefreie Toiletten: Talstation und Bergstation Zwölferhorn-Seilbahn. Barrierefreie Parkplätze: Talstation Zwölferhorn-Seilbahn.",
+      "description_short": null,
+      "tags": [
+        "bergtour",
+        "wandern"
+      ],
+      "setting": "outdoor",
+      "address": "Talstation Zwölferhorn Seilbahn",
+      "postal_code": "5340",
+      "town": "St. Gilgen",
+      "lat": null,
+      "lng": null,
+      "website": "https://www.zwoelferhorn.at",
+      "source_url": "https://www.wko.at/oe/transport-verkehr/seilbahnen/barrierefreie-bergwelt-zwoelferhorn.pdf",
+      "accessibility": {
+        "features": [
+          "rollstuhl",
+          "parkplatz",
+          "wc"
+        ],
+        "note": "Laut WKO-Datenblatt „Barrierefreie Bergwelt auf einen Blick“ (Stand November 2024): Höchster barrierefrei erreichbarer Punkt: 1500m. Mit dem Rollstuhl befahrbare Bahnen im Sommer: Zwölferhorn-Seilbahn. Mit dem Rollstuhl befahrbare Wege: mit Begleitung - Pillstein Rundwanderweg. Idealer barrierefreier Einstieg: Zwölferhorn-Seilbahn."
+      },
+      "images": [],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "loser-bergbahnen",
+      "name": "Loser Bergbahnen",
+      "description": "Loser Bergbahnen GmbH & Co KG (Steiermark): barrierefreie Bergwelt laut Datenblatt des Fachverbands der Seilbahnen. Höchster barrierefrei erreichbarer Punkt: Bergstation neue Panoramabahn - 1.609 m. Mit dem Rollstuhl befahrbare Bahnen im Sommer: Panoramabahn. Mit dem Rollstuhl befahrbare Wege: - Loser Arena; Augstsee Rundwanderweg (Schotterweg mit Aufstieg, breit genug auch für Kinderwägen). Mit dem Rollstuhl befahrbare Attraktionen: Panoramabahn. Idealer barrierefreier Einstieg: Panoramabahn Talstation (Loser Arena). Barrierefreie Restaurants: Loseralm Bergrestaurant. Barrierefreie Toiletten: je 1 in der neuen Talstation, Zwischenstation und Bergstation. Barrierefreie Parkplätze: - Loser Arena Parkplatz (7 Plätze); Panoramabahn Bergstation / Loseralm Parkplatz (alle). Winter: 2 mit Monoski befahrbare Anlagen (- Sandling; Panoramabahn (mit Hilfe vom Personal)).",
+      "description_short": null,
+      "tags": [
+        "bergtour",
+        "wandern",
+        "ski"
+      ],
+      "setting": "outdoor",
+      "address": "Talstation Loser",
+      "postal_code": "8992",
+      "town": "Altaussee",
+      "lat": null,
+      "lng": null,
+      "website": "https://www.loser.at",
+      "source_url": "https://www.wko.at/oe/transport-verkehr/seilbahnen/barrierefreie-bergwelt-loser-bergbahnen.pdf",
+      "accessibility": {
+        "features": [
+          "rollstuhl",
+          "parkplatz",
+          "wc"
+        ],
+        "note": "Laut WKO-Datenblatt „Barrierefreie Bergwelt auf einen Blick“ (Stand November 2024): Höchster barrierefrei erreichbarer Punkt: Bergstation neue Panoramabahn - 1.609 m. Mit dem Rollstuhl befahrbare Bahnen im Sommer: Panoramabahn. Mit dem Rollstuhl befahrbare Wege: - Loser Arena; Augstsee Rundwanderweg (Schotterweg mit Aufstieg, breit genug auch für Kinderwägen). Mit dem Rollstuhl befahrbare Attraktionen: Panoramabahn."
+      },
+      "images": [],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "reiteralm",
+      "name": "Reiteralm Bergbahnen",
+      "description": "Reiteralm Bergbahnen (Steiermark): barrierefreie Bergwelt laut Datenblatt des Fachverbands der Seilbahnen. Höchster barrierefrei erreichbarer Punkt: 1750. Mit dem Rollstuhl befahrbare Bahnen im Sommer: Preunegg Jet. Mit dem Rollstuhl befahrbare Wege: Kinderwagenweg mit Erlebnisstationen. Mit dem Rollstuhl befahrbare Attraktionen: Kinderwagenweg mit Erlebnisstationen; Spielplatz Preunegg Jet Berg. Idealer barrierefreier Einstieg: Preunegg Jet. Barrierefreie Restaurants: Mühlstodl Gleiming; Gasselhöhhütte Preunegg Jet Bergstation. Barrierefreie Toiletten: Silver Jet Talstation Gleiming 1x; Preunegg Jet Talstation 1x und Bergstation 1x. Barrierefreie Parkplätze: Silver Jet Talstation Gleiming 4x; Preunegg Jet Talstation 4x. Winter: 7 mit Monoski befahrbare Anlagen (Silver Jet, Sepp´n Jet , Preunegg Jet, Gasslhöhe II, Schoberbahn, Muldenlifte).",
+      "description_short": null,
+      "tags": [
+        "bergtour",
+        "wandern",
+        "ski"
+      ],
+      "setting": "outdoor",
+      "address": "Talstation Reiteralm, Pichl",
+      "postal_code": "8973",
+      "town": "Schladming",
+      "lat": null,
+      "lng": null,
+      "website": "https://www.reiteralm.at/de/sommer/uebersicht-bergangebot",
+      "source_url": "https://www.wko.at/oe/transport-verkehr/seilbahnen/barrierefreie-bergwelt-reiteralm.pdf",
+      "accessibility": {
+        "features": [
+          "rollstuhl",
+          "parkplatz",
+          "wc"
+        ],
+        "note": "Laut WKO-Datenblatt „Barrierefreie Bergwelt auf einen Blick“ (Stand November 2024): Höchster barrierefrei erreichbarer Punkt: 1750. Mit dem Rollstuhl befahrbare Bahnen im Sommer: Preunegg Jet. Mit dem Rollstuhl befahrbare Wege: Kinderwagenweg mit Erlebnisstationen. Mit dem Rollstuhl befahrbare Attraktionen: Kinderwagenweg mit Erlebnisstationen; Spielplatz Preunegg Jet Berg."
+      },
+      "images": [],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "kitzbuehel",
+      "name": "Bergbahn Kitzbühel (Hahnenkamm, Kitzbüheler Horn)",
+      "description": "Bergbahn AG Kitzbühel (Tirol): barrierefreie Bergwelt laut Datenblatt des Fachverbands der Seilbahnen. Höchster barrierefrei erreichbarer Punkt: Hahnenkamm 1650m (Rollstühle bis 60cm Breite); Ehrenbachhöhe 1802m; Resterkogel 1890m; Kitzbüheler Horn 1996m (. Mit dem Rollstuhl befahrbare Bahnen im Sommer: 6EUB Hahnenkammbahn (Rollstuhlbreite max. 60cm, entsprechende Leihrollstühle; vorhanden); 6EUB Hornbahn 1 + 2 (Rollstuhlbreite max. 60cm, entsprechende Leihrollstühle vorhanden); Horn-Gipfelbahn; Mit Rollstuhl b1e0faEhUrBbaFreleWckeaglme bahn; 2 Panorama-Rundweg Hahnenkamm; asphaltierter Fahrweg von der Hahnenkamm-Bergstation; in Richtung Fleckalmbahn-Bergstation (teils Eben, teils mit Steigungen); Mit Rollstuhl befahrbare Attraktionen; 3 barrierefreie Aussichtsplattform auf Hochkitzbühel; Panorama-Rundweg Hahnenkamm; Sommererlebnis Resterkogel (Erlebniswelt für Kinder); Idealer „barrierefreier“ Einstiegspunkt in die Sommerbergwelt; 10EUB Fleckalmbahn (Einstiegsebene mittels barrierefreien Aufzug erreichbar, Kassen auf Parkplatzebene; Ein- und Ausstieg ohne Höhenunterschied, große Gondel mit entsprechender Türöffnungsweite); 6EUB Hahnenkammbahn (Kassen im Parterre, Einstieg erreichbar über Rampe, Einstieg in die Gondel mit; Rollstuhl Breite 60cm (vorhanden) über Rampe durch Mithilfe des Bahnpersonals; 8LEinUkBWPeabnsoitreamabahn Kitzbüheler Alpen (Zugang über Rampe zum Kassen und Einstiegsbereich); www.kitzski.at; Hinweis:; Ohne Gewähr für Richtigkeit und Vollständigkeit der Angaben. Es wird keine Haftung übernommen. Änderungen vorbehalten.; Stand: November 2024; Kontakt:; Fachverband Seilbahnen | marketingforum.seilbahnen@wko.at. Mit dem Rollstuhl befahrbare Attraktionen: barrierefreie Aussichtsplattform auf Hochkitzbühel; Panorama-Rundweg Hahnenkamm; Sommererlebnis Resterkogel (Erlebniswelt für Kinder). Idealer barrierefreier Einstieg: 10EUB Fleckalmbahn (Einstiegsebene mittels barrierefreien Aufzug erreichbar, Kassen auf Parkplatzebene; Ein- und Ausstieg ohne Höhenunterschied, große Gondel mit entsprechender Türöffnungsweite); 6EUB Hahnenkammbahn (Kassen im Parterre, Einstieg erreichbar über Rampe, Einstieg in die Gondel mit; Rollstuhl Breite 60cm (vorhanden) über Rampe durch Mithilfe des Bahnpersonals; 8LEinUkBWPeabnsoitreamabahn Kitzbüheler Alpen (Zugang über Rampe zum Kassen und Einstiegsbereich); www.kitzski.at; Hinweis:; Ohne Gewähr für Richtigkeit und Vollständigkeit der Angaben. Es wird keine Haftung übernommen. Änderungen vorbehalten.; Stand: November 2024; Kontakt:; Fachverband Seilbahnen | marketingforum.seilbahnen@wko.at. Barrierefreie Toiletten: Parkplatz Klosterfeld (unterer Parkplatz Hahnenkammbahn), 6EUB Hahnenkammbahn; Talstation, 4SB Ganslern Talstation, 10EUB Fleckalmbahn Tal- und Bergstation, 10EUB; Maierlbahn Talstation, 8EUB Pengelstein 1 (auf Einstiegsebene), 6EUB Hornbahn; Bergstation, 2SL Bichlalm Talstation, 10EUB Wagstätt Talstation, 6SB Resterhöhe Talstation; Barrierefreien8REeUsBtaPuarnaonrtasmabahn Talstation; Legendencafe, Phönix am Hornplatz, Hochkitzbühel bei Tomschy, Alpenhaus am Kitzbüheler; Horn, Horn Gipfelhaus, sowie weitere private Restaurants im Umkreis; Winter am Berg; Mit Monoski befahrbaren/barrierefreien Liftanlagen; Prinzipiell können die meisten Seilbahn- und Liftanlagen mit Monoski benutzt werden; gegebenenfalls unter Hilfestellung des Seilbahnpersonals. Daher kann hier keine genaue; stehen 58 Liftanlagen zur Verfügung.; Mit Monoski bezf.Bah.:r8bEarUeBPPisetnegnelstein I, 4SB Pengelstein II, 10EUB Maierlbahn, 10EUB Fleckalmbahn; Raintal, ...; ~60; Mit Rollstuhl befahrbare Attraktionen; 0 im Winter nicht gegeben; Idealer „barrierefreier“ Einstiegspunkt ins Skigebiet; 10EUB Fleckalmbahn (Einstiegsebene mittels barrierefreien Aufzug erreichbar, Kassen auf Parkplatzebene; Ein- und Ausstieg ohne Höhenunterschied); Sommer am Berg; mit Rollstuhl befahrbaren/barrierefreien Liftanlagen; 5 6EUB Hahnenkammbahn (Rollstuhlbreite max. 60cm, entsprechende Leihrollstühle; vorhanden); 6EUB Hornbahn 1 + 2 (Rollstuhlbreite max. 60cm, entsprechende Leihrollstühle vorhanden); Horn-Gipfelbahn; Mit Rollstuhl b1e0faEhUrBbaFreleWckeaglme bahn; 2 Panorama-Rundweg Hahnenkamm; asphaltierter Fahrweg von der Hahnenkamm-Bergstation; in Richtung Fleckalmbahn-Bergstation (teils Eben, teils mit Steigungen); Mit Rollstuhl befahrbare Attraktionen; 3 barrierefreie Aussichtsplattform auf Hochkitzbühel; Panorama-Rundweg Hahnenkamm; Sommererlebnis Resterkogel (Erlebniswelt für Kinder); Idealer „barrierefreier“ Einstiegspunkt in die Sommerbergwelt; 10EUB Fleckalmbahn (Einstiegsebene mittels barrierefreien Aufzug erreichbar, Kassen auf Parkplatzebene; Ein- und Ausstieg ohne Höhenunterschied, große Gondel mit entsprechender Türöffnungsweite); 6EUB Hahnenkammbahn (Kassen im Parterre, Einstieg erreichbar über Rampe, Einstieg in die Gondel mit; Rollstuhl Breite 60cm (vorhanden) über Rampe durch Mithilfe des Bahnpersonals; 8LEinUkBWPeabnsoitreamabahn Kitzbüheler Alpen (Zugang über Rampe zum Kassen und Einstiegsbereich); www.kitzski.at; Hinweis:; Ohne Gewähr für Richtigkeit und Vollständigkeit der Angaben. Es wird keine Haftung übernommen. Änderungen vorbehalten.; Stand: November 2024; Kontakt:; Fachverband Seilbahnen | marketingforum.seilbahnen@wko.at. Barrierefreie Parkplätze: 8EUB Pengelstein 1 (oberes Parkdeck), 10EUB Maierlbahn, 4SB Gaisberg, 10EUB; Fleckalmbahn, 6EUB Hahnenkammbahn, 4SB Ganslern, 6EUB Hornbahn 1, 2SL Bichlalm; Talstation, 10EUB Wagstättbahn, 6SB Resterhöhe, 8EUB Panoramabahn Talstation und; Mittelstation.",
+      "description_short": null,
+      "tags": [
+        "bergtour",
+        "wandern"
+      ],
+      "setting": "outdoor",
+      "address": "Talstation Hahnenkammbahn",
+      "postal_code": "6370",
+      "town": "Kitzbühel",
+      "lat": null,
+      "lng": null,
+      "website": null,
+      "source_url": "https://www.wko.at/oe/transport-verkehr/seilbahnen/barrierefreie-bergwelt-kitzbuehel.pdf",
+      "accessibility": {
+        "features": [
+          "rollstuhl",
+          "parkplatz",
+          "wc"
+        ],
+        "note": "Laut WKO-Datenblatt „Barrierefreie Bergwelt auf einen Blick“ (Stand November 2024): Höchster barrierefrei erreichbarer Punkt: Hahnenkamm 1650m (Rollstühle bis 60cm Breite); Ehrenbachhöhe 1802m; Resterkogel 1890m; Kitzbüheler Horn 1996m (. Mit dem Rollstuhl befahrbare Bahnen im Sommer: 6EUB Hahnenkammbahn (Rollstuhlbreite max. 60cm, entsprechende Leihrollstühle; vorhanden); 6EUB Hornbahn 1 + 2 (Rollstuhlbreite max. 60cm, entsprechende Leihrollstühle vorhanden); Horn-Gipfelbahn; Mit Rollstuhl b1e0faEhUrBbaFreleWckeaglme bahn; 2 Panorama-Rundweg Hahnenkamm; asphaltierter Fahrweg von der Hahnenkamm-Bergstation; in Richtung Fleckalmbahn-Bergstation (teils Eben, teils mit Steigungen); Mit Rollstuhl befahrbare Attraktionen; 3 barrierefreie Aussichtsplattform auf Hochkitzbühel; Panorama-Rundweg Hahnenkamm; Sommererlebnis Resterkogel (Erlebniswelt für Kinder); Idealer „barrierefreier“ Einstiegspunkt in die Sommerbergwelt; 10EUB Fleckalmbahn (Einstiegsebene mittels barrierefreien Aufzug erreichbar, Kassen auf Parkplatzebene; Ein- und Ausstieg ohne Höhenunterschied, große Gondel mit entsprechender Türöffnungsweite); 6EUB Hahnenkammbahn (Kassen im Parterre, Einstieg erreichbar über Rampe, Einstieg in die Gondel mit; Rollstuhl Breite 60cm (vorhanden) über Rampe durch Mithilfe des Bahnpersonals; 8LEinUkBWPeabnsoitreamabahn Kitzbüheler Alpen (Zugang über Rampe zum Kassen und Einstiegsbereich); www.kitzski.at; Hinweis:; Ohne Gewähr für Richtigkeit und Vollständigkeit der Angaben. Es wird keine Haftung übernommen. Änderungen vorbehalten.; Stand: November 2024; Kontakt:; Fachverband Seilbahnen | marketingforum.seilbahnen@wko.at. Mit dem Rollstuhl befahrbare Attraktionen: barrierefreie Aussichtsplattform auf Hochkitzbühel; Panorama-Rundweg Hahnenkamm; Sommererlebnis Resterkogel (Erlebniswelt für Kinder). Idealer barrierefreier Einstieg: 10EUB Fleckalmbahn (Einstiegsebene mittels barrierefreien Aufzug erreichbar, Kassen auf Parkplatzebene; Ein- und Ausstieg ohne Höhenunterschied, große Gondel mit entsprechender Türöffnungsweite); 6EUB Hahnenkammbahn (Kassen im Parterre, Einstieg erreichbar über Rampe, Einstieg in die Gondel mit; Rollstuhl Breite 60cm (vorhanden) über Rampe durch Mithilfe des Bahnpersonals; 8LEinUkBWPeabnsoitreamabahn Kitzbüheler Alpen (Zugang über Rampe zum Kassen und Einstiegsbereich); www.kitzski.at; Hinweis:; Ohne Gewähr für Richtigkeit und Vollständigkeit der Angaben. Es wird keine Haftung übernommen. Änderungen vorbehalten.; Stand: November 2024; Kontakt:; Fachverband Seilbahnen | marketingforum.seilbahnen@wko.at."
+      },
+      "images": [],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "brixen",
+      "name": "Bergbahn Brixen im Thale",
+      "description": "Bergbahn Brixen im Thale AG (Tirol): barrierefreie Bergwelt laut Datenblatt des Fachverbands der Seilbahnen. Höchster barrierefrei erreichbarer Punkt: 1674 m. Mit dem Rollstuhl befahrbare Bahnen im Sommer: Gondelbahn Hochbrixen iund Zinsbergbahn. Mit dem Rollstuhl befahrbare Wege: Filzalmsee, Brantlalmsee, Nieding, Frankalm & Verbindung Hochsöll (Hexenwasser). Mit dem Rollstuhl befahrbare Attraktionen: RiesenWelt Brixen im Thale. Idealer barrierefreier Einstieg: RiesenWelt Brixen im Thale. Barrierefreie Toiletten: SkiWeltbahn Brixen im Thale Talstation. Barrierefreie Parkplätze: Parkplatz Gondelbahn Hochbrixen Talstation.",
+      "description_short": null,
+      "tags": [
+        "bergtour",
+        "wandern"
+      ],
+      "setting": "outdoor",
+      "address": "Talstation Bergbahn Brixen",
+      "postal_code": "6364",
+      "town": "Brixen im Thale",
+      "lat": null,
+      "lng": null,
+      "website": "https://www.riesenwelt.at",
+      "source_url": "https://www.wko.at/oe/transport-verkehr/seilbahnen/barrierefreie-bergwelt-brixen.pdf",
+      "accessibility": {
+        "features": [
+          "rollstuhl",
+          "parkplatz",
+          "wc"
+        ],
+        "note": "Laut WKO-Datenblatt „Barrierefreie Bergwelt auf einen Blick“ (Stand November 2024): Höchster barrierefrei erreichbarer Punkt: 1674 m. Mit dem Rollstuhl befahrbare Bahnen im Sommer: Gondelbahn Hochbrixen iund Zinsbergbahn. Mit dem Rollstuhl befahrbare Wege: Filzalmsee, Brantlalmsee, Nieding, Frankalm & Verbindung Hochsöll (Hexenwasser). Mit dem Rollstuhl befahrbare Attraktionen: RiesenWelt Brixen im Thale."
+      },
+      "images": [],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "bergbahnen-fieberbrunn",
+      "name": "Bergbahnen Fieberbrunn",
+      "description": "Bergbahnen Fieberbrunn GmbH (Tirol): barrierefreie Bergwelt laut Datenblatt des Fachverbands der Seilbahnen. Höchster barrierefrei erreichbarer Punkt: Die Auffahrt ist bis zum Lärchfilzkogel auf 1.645 m barrierefrei möglich. Dort oben hat man einen wunderschönen Ausblick. Mit dem Rollstuhl befahrbare Bahnen im Sommer: F1 + F2 Streubödenbahn. Mit dem Rollstuhl befahrbare Wege: Der für Rollstuhlfahrer am besten geeignete Weg ist an der Mittelstation Streuböden (durch; Timoks Wilde Welt, rund um den Streubödensee). Mit dem Rollstuhl befahrbare Attraktionen: Timoks Wilde Welt an der Mittelstation Streuböden (Familien- und Freizeitpark). Ein gut; befahrbarer Weg führt vorbei am Waldseilgarten, an Timoks Alpine Coaster, an den; Wasserspielen usw.; ebenso kann der Streubödensee umrundet werden). Idealer barrierefreier Einstieg: Talstation F1 Streuböden. Barrierefreie Restaurants: An der Talstation \"Alpen Style\" und \"UpsideDown\"; an der Mittelstation Streuböden die; \"Streuböden Alm\" (Toiletten sind nicht barrierefrei, können aber im direkt daneben; befindlichen Mittelstations-Gebäude der Bergbahn benützt werden. Barrierefreie Toiletten: Tal-, Mittel- & Bergstation der neuen Streubödenbahn. Barrierefreie Parkplätze: Talstation Bergbahnen Fieberbrunn, Lindau 17. Winter: 3 mit Monoski befahrbare Anlagen (F1+F2 Streubödenbahn; F3 Doischbergbahn).",
+      "description_short": null,
+      "tags": [
+        "bergtour",
+        "wandern",
+        "ski"
+      ],
+      "setting": "outdoor",
+      "address": "Talstation Bergbahnen Fieberbrunn",
+      "postal_code": "6391",
+      "town": "Fieberbrunn",
+      "lat": null,
+      "lng": null,
+      "website": "https://www.fieberbrunn.com",
+      "source_url": "https://www.wko.at/oe/transport-verkehr/seilbahnen/barrierefreie-bergwelt-bergbahnen-fieberbrunn.pdf",
+      "accessibility": {
+        "features": [
+          "rollstuhl",
+          "parkplatz",
+          "wc"
+        ],
+        "note": "Laut WKO-Datenblatt „Barrierefreie Bergwelt auf einen Blick“ (Stand November 2024): Höchster barrierefrei erreichbarer Punkt: Die Auffahrt ist bis zum Lärchfilzkogel auf 1.645 m barrierefrei möglich. Dort oben hat man einen wunderschönen Ausblick. Mit dem Rollstuhl befahrbare Bahnen im Sommer: F1 + F2 Streubödenbahn. Mit dem Rollstuhl befahrbare Wege: Der für Rollstuhlfahrer am besten geeignete Weg ist an der Mittelstation Streuböden (durch; Timoks Wilde Welt, rund um den Streubödensee). Mit dem Rollstuhl befahrbare Attraktionen: Timoks Wilde Welt an der Mittelstation Streuböden (Familien- und Freizeitpark). Ein gut; befahrbarer Weg führt vorbei am Waldseilgarten, an Timoks Alpine Coaster, an den; Wasserspielen usw.; ebenso kann der Streubödensee umrundet werden)."
+      },
+      "images": [],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "hohe-salve-hopfgarten-itter",
+      "name": "Bergbahnen Hohe Salve Hopfgarten-Itter",
+      "description": "Bergbahnen Hohe Salve Hopfgarten-Itter GmbH & Co KG (Tirol): barrierefreie Bergwelt laut Datenblatt des Fachverbands der Seilbahnen. Höchster barrierefrei erreichbarer Punkt: 1829 m. Mit dem Rollstuhl befahrbare Bahnen im Sommer: Salvenbahn I und II Hopfgarten; Salvistabahn Itter. Mit dem Rollstuhl befahrbare Wege: Sonnenweg Hohe Salve. Mit dem Rollstuhl befahrbare Attraktionen: Gipfel Hohe und Kleine Salve. Idealer barrierefreier Einstieg: w.o.. Barrierefreie Restaurants: Gipfelalm Hohe Salve, KRAFTalm. Barrierefreie Toiletten: 1 x Talstation Hopfgarten; 1x Mittelstation Hopfgarten; 1x Talstation Itter. Barrierefreie Parkplätze: Talstation Hopfgarten und Talstation Itter. Winter: 3 mit Monoski befahrbare Anlagen (Salvenbahn I, Salvenbahn II, Salvistabahn Itter).",
+      "description_short": null,
+      "tags": [
+        "bergtour",
+        "wandern",
+        "ski"
+      ],
+      "setting": "outdoor",
+      "address": "Talstation Salvenbahn",
+      "postal_code": "6361",
+      "town": "Hopfgarten im Brixental",
+      "lat": null,
+      "lng": null,
+      "website": "https://www.hohe.salve.at",
+      "source_url": "https://www.wko.at/oe/transport-verkehr/seilbahnen/barrierefreie-bergbahnen-hohe-salve-hopfgarten-itter.pdf",
+      "accessibility": {
+        "features": [
+          "rollstuhl",
+          "parkplatz",
+          "wc"
+        ],
+        "note": "Laut WKO-Datenblatt „Barrierefreie Bergwelt auf einen Blick“ (Stand November 2024): Höchster barrierefrei erreichbarer Punkt: 1829 m. Mit dem Rollstuhl befahrbare Bahnen im Sommer: Salvenbahn I und II Hopfgarten; Salvistabahn Itter. Mit dem Rollstuhl befahrbare Wege: Sonnenweg Hohe Salve. Mit dem Rollstuhl befahrbare Attraktionen: Gipfel Hohe und Kleine Salve."
+      },
+      "images": [],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "bergbahnen-steinplatte-waidring",
+      "name": "Bergbahnen Steinplatte Waidring",
+      "description": "Bergbahnen Steinplatte Waidring (Tirol): barrierefreie Bergwelt laut Datenblatt des Fachverbands der Seilbahnen. Höchster barrierefrei erreichbarer Punkt: 1680m. Mit dem Rollstuhl befahrbare Bahnen im Sommer: Gondelbahn Steinplatte Waidring. Mit dem Rollstuhl befahrbare Wege: Triassic Trail bis zur Aussichtsplattform. Mit dem Rollstuhl befahrbare Attraktionen: Triassic Park mit Triassic Center, Triassic Beach, Triassic Trail ink. Aussichtsplattform; Panorama Muschel und Tropfsteinhöle. Idealer barrierefreier Einstieg: Gondelbahn Steinplatte Waidring. Barrierefreie Restaurants: Panorama Restaurant Kammerkör. Barrierefreie Toiletten: Gondelbahn Steinplatte Waidring (Talstation); Panorama Restaurant Kammerkör (Berg). Barrierefreie Parkplätze: Parkplatz Gondelbahn Steinplatte Waidring. Winter: 8 mit Monoski befahrbare Anlagen (sämtliche Anlagen im Skigebiet Steinplatte Waidring).",
+      "description_short": null,
+      "tags": [
+        "bergtour",
+        "wandern",
+        "ski"
+      ],
+      "setting": "outdoor",
+      "address": "Talstation Steinplatte",
+      "postal_code": "6384",
+      "town": "Waidring",
+      "lat": null,
+      "lng": null,
+      "website": "https://www.steinplatte.tirol/",
+      "source_url": "https://www.wko.at/oe/transport-verkehr/seilbahnen/barrierefreie-bergwelt-bergbahnen-steinplatte-waidring.pdf",
+      "accessibility": {
+        "features": [
+          "rollstuhl",
+          "parkplatz",
+          "wc"
+        ],
+        "note": "Laut WKO-Datenblatt „Barrierefreie Bergwelt auf einen Blick“ (Stand November 2024): Höchster barrierefrei erreichbarer Punkt: 1680m. Mit dem Rollstuhl befahrbare Bahnen im Sommer: Gondelbahn Steinplatte Waidring. Mit dem Rollstuhl befahrbare Wege: Triassic Trail bis zur Aussichtsplattform. Mit dem Rollstuhl befahrbare Attraktionen: Triassic Park mit Triassic Center, Triassic Beach, Triassic Trail ink. Aussichtsplattform; Panorama Muschel und Tropfsteinhöle."
+      },
+      "images": [],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "auf-einen-blick-westendorf",
+      "name": "Bergbahnen Westendorf",
+      "description": "Bergbahnen Westendorf GmbH (Tirol): barrierefreie Bergwelt laut Datenblatt des Fachverbands der Seilbahnen. Höchster barrierefrei erreichbarer Punkt: 1820m. Mit dem Rollstuhl befahrbare Bahnen im Sommer: Alpenrosenbahn. Mit dem Rollstuhl befahrbare Wege: Alpinolinoweg von der Alpenrosenbahn bis zur Choralpe (Schotter Untergrund - Forststraße); Alpinoramaweg von der Alprenrosenbahn bis zum Brechhornhaus (Schotter Untergrund -; Forststraße). Mit dem Rollstuhl befahrbare Attraktionen: Spoggolin - Holzkugelbahn; Alpinolinoweg von der Alpenrosenbahn bis zur Choralpe (Schotter Untergrund - Forststraße). Idealer barrierefreier Einstieg: Alpenrosenbahn Westendorf, Bergliftstraße 18, 6363 Westendorf; Zufahrt über die Rampe hinter der Gondelbahn. Parkplätze und Zustieg auf gleichen Niveau wie die; Gondelbahn. Gondelbahn Türbreite 60cm.. Barrierefreie Restaurants: X. Barrierefreie Toiletten: Alpenrosenbahn Westendorf / Talstation & Bergstation | Toilette barrierefrei erreichbar; jedoch stehen \"nur\" reguläre Toiletten und keine barrierefreien Toiletten zur Verfügung. Barrierefreie Parkplätze: Alpenrosenbahn Westendorf / Talstation. Winter: 1 mit Monoski befahrbare Anlagen (Alpenrosenbahn).",
+      "description_short": null,
+      "tags": [
+        "bergtour",
+        "wandern",
+        "ski"
+      ],
+      "setting": "outdoor",
+      "address": "Talstation Alpenrosenbahn",
+      "postal_code": "6363",
+      "town": "Westendorf",
+      "lat": null,
+      "lng": null,
+      "website": "https://www.westendorf.at",
+      "source_url": "https://www.wko.at/oe/transport-verkehr/seilbahnen/barrierefreie-bergwelt-auf-einen-blick-westendorf.pdf",
+      "accessibility": {
+        "features": [
+          "rollstuhl",
+          "parkplatz",
+          "wc"
+        ],
+        "note": "Laut WKO-Datenblatt „Barrierefreie Bergwelt auf einen Blick“ (Stand November 2024): Höchster barrierefrei erreichbarer Punkt: 1820m. Mit dem Rollstuhl befahrbare Bahnen im Sommer: Alpenrosenbahn. Mit dem Rollstuhl befahrbare Wege: Alpinolinoweg von der Alpenrosenbahn bis zur Choralpe (Schotter Untergrund - Forststraße); Alpinoramaweg von der Alprenrosenbahn bis zum Brechhornhaus (Schotter Untergrund -; Forststraße). Mit dem Rollstuhl befahrbare Attraktionen: Spoggolin - Holzkugelbahn; Alpinolinoweg von der Alpenrosenbahn bis zur Choralpe (Schotter Untergrund - Forststraße)."
+      },
+      "images": [],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "wilder-kaiser",
+      "name": "Bergbahnen Wilder Kaiser (Söll, Scheffau, Ellmau, Going)",
+      "description": "Bergbahnen Wilder Kaiser GmbH (Tirol): barrierefreie Bergwelt laut Datenblatt des Fachverbands der Seilbahnen. Höchster barrierefrei erreichbarer Punkt: 1.555. Mit dem Rollstuhl befahrbare Bahnen im Sommer: Hartkaiserbahn. Mit dem Rollstuhl befahrbare Wege: alle geschotterte Wege. Mit dem Rollstuhl befahrbare Attraktionen: Ellmi's Zauberwelt. Idealer barrierefreier Einstieg: Hartkaiserbahn, Weißachgraben 5, 6352 Ellmau. Barrierefreie Restaurants: Panoramarestaurant Bergkaiser (Selbstbedienung); Kaiserlounge; T.B.G. by da Vinci family. Barrierefreie Toiletten: 2x Talstation Hartkaiserbahn; 1x Bergstation Hartkaiserbahn. Barrierefreie Parkplätze: Talstation Hartkaiserbahn - alle barrierefrei davon 6 ausgewiesene Rollstuhlparkplätze. Winter: 6 mit Monoski befahrbare Anlagen (Hartkaiserbahn, Almbahn, Köglbahn, Tanzbodenbahn, Kaiserexpress, Ellmi's 6er).",
+      "description_short": null,
+      "tags": [
+        "bergtour",
+        "wandern",
+        "ski"
+      ],
+      "setting": "outdoor",
+      "address": "Talstation Hochsöll",
+      "postal_code": "6306",
+      "town": "Söll",
+      "lat": null,
+      "lng": null,
+      "website": "https://www.ellmau-going.at",
+      "source_url": "https://www.wko.at/oe/transport-verkehr/seilbahnen/barrierefreie-bergwelt-wilder-kaiser.pdf",
+      "accessibility": {
+        "features": [
+          "rollstuhl",
+          "parkplatz",
+          "wc"
+        ],
+        "note": "Laut WKO-Datenblatt „Barrierefreie Bergwelt auf einen Blick“ (Stand November 2024): Höchster barrierefrei erreichbarer Punkt: 1.555. Mit dem Rollstuhl befahrbare Bahnen im Sommer: Hartkaiserbahn. Mit dem Rollstuhl befahrbare Wege: alle geschotterte Wege. Mit dem Rollstuhl befahrbare Attraktionen: Ellmi's Zauberwelt."
+      },
+      "images": [],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "ehrwalder-alm",
+      "name": "Ehrwalder Almbahn",
+      "description": "Ehrwalder Almbahn (Tirol): barrierefreie Bergwelt laut Datenblatt des Fachverbands der Seilbahnen. Höchster barrierefrei erreichbarer Punkt: 1.500 m. Mit dem Rollstuhl befahrbare Bahnen im Sommer: Ehrwalder Almbahn. Mit dem Rollstuhl befahrbare Wege: zum Almsee - Schotter!. Idealer barrierefreier Einstieg: Ehrwalder Almbahn. Barrierefreie Restaurants: Tirolerhaus. Barrierefreie Toiletten: 1 x Tirolerhaus / Bergstation; 1 x Talstation. Barrierefreie Parkplätze: Ehrwalder Almbahn Talstation. Winter: 6 mit Monoski befahrbare Anlagen ().",
+      "description_short": null,
+      "tags": [
+        "bergtour",
+        "wandern",
+        "ski"
+      ],
+      "setting": "outdoor",
+      "address": "Talstation Ehrwalder Almbahn",
+      "postal_code": "6632",
+      "town": "Ehrwald",
+      "lat": null,
+      "lng": null,
+      "website": "https://www.almbahn.tirol",
+      "source_url": "https://www.wko.at/oe/transport-verkehr/seilbahnen/barrierefreie-bergwelt-ehrwalder-alm.pdf",
+      "accessibility": {
+        "features": [
+          "rollstuhl",
+          "parkplatz",
+          "wc"
+        ],
+        "note": "Laut WKO-Datenblatt „Barrierefreie Bergwelt auf einen Blick“ (Stand November 2024): Höchster barrierefrei erreichbarer Punkt: 1.500 m. Mit dem Rollstuhl befahrbare Bahnen im Sommer: Ehrwalder Almbahn. Mit dem Rollstuhl befahrbare Wege: zum Almsee - Schotter!. Idealer barrierefreier Einstieg: Ehrwalder Almbahn."
+      },
+      "images": [],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "fuegen-bergbahn",
+      "name": "Spieljochbahn Fügen",
+      "description": "Fügen Bergbahn Ges.m.b.H. & Co.KG (Tirol): barrierefreie Bergwelt laut Datenblatt des Fachverbands der Seilbahnen. Höchster barrierefrei erreichbarer Punkt: 1920 m Sh Gipfelkreuz Spieljoch. Mit dem Rollstuhl befahrbare Bahnen im Sommer: Spieljochbahn I und II Sektion. Mit dem Rollstuhl befahrbare Wege: Alle Forstwege sind mit dem Rollstuhl befahrbar - Wege sind geschottert. Mit dem Rollstuhl befahrbare Attraktionen: Alle Attraktionen direkt an der Bergstation sind mit dem Rollstuhl befahrbar. Idealer barrierefreier Einstieg: Talstation Spieljochbahn. Barrierefreie Restaurants: Mountain Loft - Bedienungsrestaurant in der Bergstation; Selbstbedienungsrestaurant in der Bergstation. Barrierefreie Toiletten: Spieljochbahn Talstation, Spieljochbahn Mittelstation, Spieljochbahn Bergstation. Barrierefreie Parkplätze: Parkplatz Talstation Spieljochbahn. Winter: 11 mit Monoski befahrbare Anlagen (Alle Seilbahnen, Sesselbahnen, Schlepplifte und Förderbänder sind mit Monoski; befahrbar).",
+      "description_short": null,
+      "tags": [
+        "bergtour",
+        "wandern",
+        "ski"
+      ],
+      "setting": "outdoor",
+      "address": "Talstation Spieljochbahn",
+      "postal_code": "6263",
+      "town": "Fügen",
+      "lat": null,
+      "lng": null,
+      "website": "https://www.spieljochbahn.at/",
+      "source_url": "https://www.wko.at/oe/transport-verkehr/seilbahnen/barrierefreie-bergwelt-fuegen-bergbahn.pdf",
+      "accessibility": {
+        "features": [
+          "rollstuhl",
+          "parkplatz",
+          "wc"
+        ],
+        "note": "Laut WKO-Datenblatt „Barrierefreie Bergwelt auf einen Blick“ (Stand November 2024): Höchster barrierefrei erreichbarer Punkt: 1920 m Sh Gipfelkreuz Spieljoch. Mit dem Rollstuhl befahrbare Bahnen im Sommer: Spieljochbahn I und II Sektion. Mit dem Rollstuhl befahrbare Wege: Alle Forstwege sind mit dem Rollstuhl befahrbar - Wege sind geschottert. Mit dem Rollstuhl befahrbare Attraktionen: Alle Attraktionen direkt an der Bergstation sind mit dem Rollstuhl befahrbar."
+      },
+      "images": [],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "gerlospass-koenigsleiten",
+      "name": "Gerlospass Königsleiten Bergbahnen",
+      "description": "Gerlospass Königsleiten Bergbahnen GmbH (Tirol): barrierefreie Bergwelt laut Datenblatt des Fachverbands der Seilbahnen. Höchster barrierefrei erreichbarer Punkt: 2.250. Mit dem Rollstuhl befahrbare Bahnen im Sommer: Dorfbahn Königsleiten. Mit dem Rollstuhl befahrbare Wege: Jodelwanderweg Königsleiten - von der Bergstation retour ins Tal; Sagenerlebnisweg - um den Speicherteich. Mit dem Rollstuhl befahrbare Attraktionen: wie oben. Idealer barrierefreier Einstieg: Dorfbahn Königsleiten. Barrierefreie Restaurants: Restaurant Gipfeltreffen an der Bergstation der Dorfbahn Königsleiten. Barrierefreie Toiletten: 1x Dorfbahn Königsleiten Talstation; 1x Dorfbahn Königsleiten Bergstation (im Restaurant Gipfeltreffen). Barrierefreie Parkplätze: 50 in der Tiefgarage der Dorfbahn Königsleiten Talstation; ca. 250 am Parkplatz neben der Dorfbahn Königsleiten Talstation. Winter: 5 mit Monoski befahrbare Anlagen (Mit Begleitperson und Hilfe der Liftbediensteten können die Gondelbahnen (Dorfbahn; Königsleiten, Gipfelbahn, Sonnwendkopf) mit Monoski benutzt werden.; Die Sesselbahnen \"Larmach und Mitterleger\" können alleine benutzt werden.).",
+      "description_short": null,
+      "tags": [
+        "bergtour",
+        "wandern",
+        "ski"
+      ],
+      "setting": "outdoor",
+      "address": "Talstation Dorfbahn Königsleiten",
+      "postal_code": "5742",
+      "town": "Wald im Pinzgau",
+      "lat": null,
+      "lng": null,
+      "website": "https://www.zillertalarena.com",
+      "source_url": "https://www.wko.at/oe/transport-verkehr/seilbahnen/barrierefreie-bergwelt-gerlospass-koenigsleiten.pdf",
+      "accessibility": {
+        "features": [
+          "rollstuhl",
+          "parkplatz",
+          "wc"
+        ],
+        "note": "Laut WKO-Datenblatt „Barrierefreie Bergwelt auf einen Blick“ (Stand November 2024): Höchster barrierefrei erreichbarer Punkt: 2.250. Mit dem Rollstuhl befahrbare Bahnen im Sommer: Dorfbahn Königsleiten. Mit dem Rollstuhl befahrbare Wege: Jodelwanderweg Königsleiten - von der Bergstation retour ins Tal; Sagenerlebnisweg - um den Speicherteich. Mit dem Rollstuhl befahrbare Attraktionen: wie oben."
+      },
+      "images": [],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "glungezerbahn",
+      "name": "Glungezerbahn",
+      "description": "Glungezerbahn (Tirol): barrierefreie Bergwelt laut Datenblatt des Fachverbands der Seilbahnen. Höchster barrierefrei erreichbarer Punkt: 2054m. Mit dem Rollstuhl befahrbare Bahnen im Sommer: Beide Gondelbahnen. Mit dem Rollstuhl befahrbare Wege: Wanderwege in der Nähe der Liftstationen. Idealer barrierefreier Einstieg: Talstation in Tulfes. Barrierefreie Restaurants: Gasthaus Halsmarter direkt an der Mittelstation und die Tulfeinalm in der Nähe der; Bergstation, im Sommer gut erreichbar, im Winter bei Schneelage schwer erreichbar.. Barrierefreie Toiletten: Eine im Tal und eine am Berg. Barrierefreie Parkplätze: Direkt neben der Talstation an der Hauptstraße. Winter: 3 mit Monoski befahrbare Anlagen (Alle 3 Bahnen).",
+      "description_short": null,
+      "tags": [
+        "bergtour",
+        "wandern",
+        "ski"
+      ],
+      "setting": "outdoor",
+      "address": "Talstation Glungezerbahn",
+      "postal_code": "6075",
+      "town": "Tulfes",
+      "lat": null,
+      "lng": null,
+      "website": "https://www.glungezerbahn.at",
+      "source_url": "https://www.wko.at/oe/transport-verkehr/seilbahnen/barrierefreie-bergwelt-glungezerbahn.pdf",
+      "accessibility": {
+        "features": [
+          "rollstuhl",
+          "parkplatz",
+          "wc"
+        ],
+        "note": "Laut WKO-Datenblatt „Barrierefreie Bergwelt auf einen Blick“ (Stand November 2024): Höchster barrierefrei erreichbarer Punkt: 2054m. Mit dem Rollstuhl befahrbare Bahnen im Sommer: Beide Gondelbahnen. Mit dem Rollstuhl befahrbare Wege: Wanderwege in der Nähe der Liftstationen. Idealer barrierefreier Einstieg: Talstation in Tulfes."
+      },
+      "images": [],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "karwendel-bergbahn",
+      "name": "Karwendel-Bergbahn Pertisau",
+      "description": "Karwendel-Bergbahn (Tirol): barrierefreie Bergwelt laut Datenblatt des Fachverbands der Seilbahnen. Höchster barrierefrei erreichbarer Punkt: 1500m. Mit dem Rollstuhl befahrbare Bahnen im Sommer: Karwendel-Bergbahn. Mit dem Rollstuhl befahrbare Wege: Alpentiere-Rundwanderweg. Mit dem Rollstuhl befahrbare Attraktionen: Aussichtsterrasse an der Bergstation. Idealer barrierefreier Einstieg: Talstation Karwendel-Bergbahn. Barrierefreie Toiletten: Talstation. Barrierefreie Parkplätze: Talstation.",
+      "description_short": null,
+      "tags": [
+        "bergtour",
+        "wandern"
+      ],
+      "setting": "outdoor",
+      "address": "Talstation Karwendel-Bergbahn",
+      "postal_code": "6213",
+      "town": "Pertisau",
+      "lat": null,
+      "lng": null,
+      "website": "https://www.karwendel-bergbahn.at",
+      "source_url": "https://www.wko.at/oe/transport-verkehr/seilbahnen/barrierefreie-bergwelt-karwendel-bergbahn.pdf",
+      "accessibility": {
+        "features": [
+          "rollstuhl",
+          "parkplatz",
+          "wc"
+        ],
+        "note": "Laut WKO-Datenblatt „Barrierefreie Bergwelt auf einen Blick“ (Stand November 2024): Höchster barrierefrei erreichbarer Punkt: 1500m. Mit dem Rollstuhl befahrbare Bahnen im Sommer: Karwendel-Bergbahn. Mit dem Rollstuhl befahrbare Wege: Alpentiere-Rundwanderweg. Mit dem Rollstuhl befahrbare Attraktionen: Aussichtsterrasse an der Bergstation."
+      },
+      "images": [],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "kellerjoch-schwaz",
+      "name": "Kellerjochbahn Schwaz",
+      "description": "Kellerjoch Bahn Berg & Schilift Schwaz Pill Ges.m.b.H (Tirol): barrierefreie Bergwelt laut Datenblatt des Fachverbands der Seilbahnen. Laut Datenblatt im Sommer keine mit dem Rollstuhl befahrbaren Bahnen oder Wege gemeldet. Höchster barrierefrei erreichbarer Punkt: Talstation/Kassagebäude Grafenast. Barrierefreie Restaurants: Café Rodel Toni im Kassagebäude. Barrierefreie Toiletten: Kassagebäude. Winter: 1 mit Monoski befahrbare Anlagen (Schleppliftanlage Grafenast).",
+      "description_short": null,
+      "tags": [
+        "bergtour",
+        "wandern",
+        "ski"
+      ],
+      "setting": "outdoor",
+      "address": "Talstation Kellerjochbahn",
+      "postal_code": "6130",
+      "town": "Schwaz",
+      "lat": null,
+      "lng": null,
+      "website": "https://www.kellerjochbahn.at",
+      "source_url": "https://www.wko.at/oe/transport-verkehr/seilbahnen/barrierefreie-bergwelt-kellerjoch-schwaz.pdf",
+      "accessibility": {
+        "features": [
+          "rollstuhl",
+          "wc"
+        ],
+        "note": "Laut WKO-Datenblatt „Barrierefreie Bergwelt auf einen Blick“ (Stand November 2024): Laut Datenblatt im Sommer keine mit dem Rollstuhl befahrbaren Bahnen oder Wege gemeldet. Höchster barrierefrei erreichbarer Punkt: Talstation/Kassagebäude Grafenast. Barrierefreie Restaurants: Café Rodel Toni im Kassagebäude. Barrierefreie Toiletten: Kassagebäude."
+      },
+      "images": [],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "mayrhofner-bergbahnen",
+      "name": "Mayrhofner Bergbahnen (Penken, Ahorn)",
+      "description": "Mayrhofner Bergbahnen AG (Tirol): barrierefreie Bergwelt laut Datenblatt des Fachverbands der Seilbahnen. Höchster barrierefrei erreichbarer Punkt: Kombibahn Penken Bergstation, 1.999m (erreichbar mit der Kombibahn Penken). Mit dem Rollstuhl befahrbare Bahnen im Sommer: Penkenbahn, Kombibahn Penken, Ahornbahn. Mit dem Rollstuhl befahrbare Wege: Bergstation Penkenbahn zur Gschösswand; Kombibahn Penken Bergstation rund um die Speicherseen. Mit dem Rollstuhl befahrbare Attraktionen: AdlerBühne Ahorn, Paragleiter Startplatz (inkl. Tandemflugangebot für Menschen mit; Beeinträchtigung durch Anbieter \"wheels4flying\") MusikInsel am Penken, AlbertAdler; SpieleWelt, SonnenAufgangsGondel, SonnenUntergangsGondel. Idealer barrierefreier Einstieg: Penkenbahn, Hauptstraße Mayrhofen; Ahornbahn, Ahornstraße Mayrhofen. Barrierefreie Restaurants: Bergrestaurant Horberg (erreichbar über die Horbergbahn); Lärchwaldhütte (erreichbar über die Kombibahn Penken); Bergrast (erreichbar über die Penkenbahn). Barrierefreie Toiletten: Ahornbahn Bergstation, Ahornbahn Talstation, Penkenbahn Bergstation, Penkenbahn; Talstation, Horbergbahn Talstation, Kombibahn Penken Talstation, Möslbahn Talstation. Barrierefreie Parkplätze: Ahornbahn Talstation; Horbergbahn Talstation. Winter: 37 mit Monoski befahrbare Anlagen (Gondelbahnen:; Penkenbahn, Ahornbahn, Kombibahn Penken und Möslbahn. Die Horbergbahn ist bei einer; Bedarfsmeldung an die MitarbeiterInnen der Mayrhofner Bergbahnen an den Kassen ebenfalls; für beeinträchtigte Personen mit Hilfe des Personals möglich.).",
+      "description_short": null,
+      "tags": [
+        "bergtour",
+        "wandern",
+        "ski"
+      ],
+      "setting": "outdoor",
+      "address": "Talstation Penkenbahn",
+      "postal_code": "6290",
+      "town": "Mayrhofen",
+      "lat": null,
+      "lng": null,
+      "website": "https://www.mountopolis.at",
+      "source_url": "https://www.wko.at/oe/transport-verkehr/seilbahnen/barrierefreie-bergwelt-mayrhofner-bergbahnen.pdf",
+      "accessibility": {
+        "features": [
+          "rollstuhl",
+          "parkplatz",
+          "wc"
+        ],
+        "note": "Laut WKO-Datenblatt „Barrierefreie Bergwelt auf einen Blick“ (Stand November 2024): Höchster barrierefrei erreichbarer Punkt: Kombibahn Penken Bergstation, 1.999m (erreichbar mit der Kombibahn Penken). Mit dem Rollstuhl befahrbare Bahnen im Sommer: Penkenbahn, Kombibahn Penken, Ahornbahn. Mit dem Rollstuhl befahrbare Wege: Bergstation Penkenbahn zur Gschösswand; Kombibahn Penken Bergstation rund um die Speicherseen. Mit dem Rollstuhl befahrbare Attraktionen: AdlerBühne Ahorn, Paragleiter Startplatz (inkl. Tandemflugangebot für Menschen mit; Beeinträchtigung durch Anbieter \"wheels4flying\") MusikInsel am Penken, AlbertAdler; SpieleWelt, SonnenAufgangsGondel, SonnenUntergangsGondel."
+      },
+      "images": [],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "patscherkofelbahn",
+      "name": "Patscherkofelbahn",
+      "description": "Patscherkofelbahn Betriebs GmbH (Tirol): barrierefreie Bergwelt laut Datenblatt des Fachverbands der Seilbahnen. Höchster barrierefrei erreichbarer Punkt: 1965. Mit dem Rollstuhl befahrbare Bahnen im Sommer: Patscherkofelbahn Sektion I + II. Mit dem Rollstuhl befahrbare Attraktionen: Panoramaterrasse der Bergstation. Idealer barrierefreier Einstieg: Talstation Patscherkofelbahn - mit dem Personenaufzug beim Intersport Shop gelangt man direkt zur Kassa; in der Talstation. Barrierefreie Restaurants: Das Hausberg (Talstation); Das Kofel (Bergstation). Barrierefreie Toiletten: Talstation; Mittelstation; Bergstation. Barrierefreie Parkplätze: 3 unmittelbar vor der Talstation Römerstraße 81; 4 am Parkplatz P2. Winter: 2 mit Monoski befahrbare Anlagen (Patscherkofelbahn Sektion I+II; Schlepplift Heiligwasserwiese).",
+      "description_short": null,
+      "tags": [
+        "bergtour",
+        "wandern",
+        "ski"
+      ],
+      "setting": "outdoor",
+      "address": "Talstation Patscherkofelbahn, Igls",
+      "postal_code": "6080",
+      "town": "Innsbruck",
+      "lat": null,
+      "lng": null,
+      "website": "https://www.patscherkofelbahn.at",
+      "source_url": "https://www.wko.at/oe/transport-verkehr/seilbahnen/barrierefreie-bergwelt-patscherkofelbahn.pdf",
+      "accessibility": {
+        "features": [
+          "rollstuhl",
+          "parkplatz",
+          "wc"
+        ],
+        "note": "Laut WKO-Datenblatt „Barrierefreie Bergwelt auf einen Blick“ (Stand November 2024): Höchster barrierefrei erreichbarer Punkt: 1965. Mit dem Rollstuhl befahrbare Bahnen im Sommer: Patscherkofelbahn Sektion I + II. Mit dem Rollstuhl befahrbare Attraktionen: Panoramaterrasse der Bergstation. Idealer barrierefreier Einstieg: Talstation Patscherkofelbahn - mit dem Personenaufzug beim Intersport Shop gelangt man direkt zur Kassa; in der Talstation."
+      },
+      "images": [],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "reuttener-seilbahnen",
+      "name": "Reuttener Seilbahnen (Hahnenkamm)",
+      "description": "Reuttener Seilbahnen GmbH & Co KG (Tirol): barrierefreie Bergwelt laut Datenblatt des Fachverbands der Seilbahnen. Höchster barrierefrei erreichbarer Punkt: 1735 m. Mit dem Rollstuhl befahrbare Bahnen im Sommer: Reuttener Seilbahnen - Bergwelt Hahnenkamm. Mit dem Rollstuhl befahrbare Wege: Rundweg um den Bergsee/Speicherteich; Weg zum Alpengarten mit Begleitperson oder Schiebehilfe; Alpenrosenweg mit Begleitperson oder Schiebehilfe. Mit dem Rollstuhl befahrbare Attraktionen: Alpiner Alpengarten. Idealer barrierefreier Einstieg: Reuttener Seilbahnen - Bergwelt Hahnenkamm. Barrierefreie Restaurants: Panorama Restaurant. Barrierefreie Toiletten: Talstation; Bergstation Restaurant. Barrierefreie Parkplätze: Reuttener Seilbahnen - Bergwelt Hahnenkamm. Winter: 1 mit Monoski befahrbare Anlagen (Reuttener Bergbahnen - Bergwelt Hahnenkamm; 8-Einseilumlaufbahn).",
+      "description_short": null,
+      "tags": [
+        "bergtour",
+        "wandern",
+        "ski"
+      ],
+      "setting": "outdoor",
+      "address": "Talstation Reuttener Seilbahnen",
+      "postal_code": "6604",
+      "town": "Höfen",
+      "lat": null,
+      "lng": null,
+      "website": "https://www.bergwelt-hahnenkamm.at",
+      "source_url": "https://www.wko.at/oe/transport-verkehr/seilbahnen/barrierefreie-bergwelt-reuttener-seilbahnen.pdf",
+      "accessibility": {
+        "features": [
+          "rollstuhl",
+          "parkplatz",
+          "wc"
+        ],
+        "note": "Laut WKO-Datenblatt „Barrierefreie Bergwelt auf einen Blick“ (Stand November 2024): Höchster barrierefrei erreichbarer Punkt: 1735 m. Mit dem Rollstuhl befahrbare Bahnen im Sommer: Reuttener Seilbahnen - Bergwelt Hahnenkamm. Mit dem Rollstuhl befahrbare Wege: Rundweg um den Bergsee/Speicherteich; Weg zum Alpengarten mit Begleitperson oder Schiebehilfe; Alpenrosenweg mit Begleitperson oder Schiebehilfe. Mit dem Rollstuhl befahrbare Attraktionen: Alpiner Alpengarten."
+      },
+      "images": [],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "schilift-zentrum-gerlos",
+      "name": "Zillertal Arena Gerlos (Schilift-Zentrum Gerlos)",
+      "description": "Schilift-Zentrum-Gerlos GmbH (Tirol): barrierefreie Bergwelt laut Datenblatt des Fachverbands der Seilbahnen. Höchster barrierefrei erreichbarer Punkt: Im Sommer 1900m Im Winter 2500m. Mit dem Rollstuhl befahrbare Bahnen im Sommer: Isskogelbahn. Mit dem Rollstuhl befahrbare Wege: Wege rund um das Arena Center. Idealer barrierefreier Einstieg: Isskogelbahn. Barrierefreie Restaurants: im Sommer Arena Center; im Winter mehrere im ganzen Skigebiet. Barrierefreie Toiletten: im Sommer Isskogelbahn Berg und Talstation; im Winter mehrere verteilt im ganzen Skigebiet. Barrierefreie Parkplätze: Isskogelbahn; Dorfbahn. Winter: 52 mit Monoski befahrbare Anlagen (Alle Anlagen in der Arena bei entsprechenden Können).",
+      "description_short": null,
+      "tags": [
+        "bergtour",
+        "wandern",
+        "ski"
+      ],
+      "setting": "outdoor",
+      "address": "Talstation Isskogelbahn",
+      "postal_code": "6281",
+      "town": "Gerlos",
+      "lat": null,
+      "lng": null,
+      "website": "https://www.zillertalarena.com",
+      "source_url": "https://www.wko.at/oe/transport-verkehr/seilbahnen/barrierefreie-bergwelt-schilift-zentrum-gerlos.pdf",
+      "accessibility": {
+        "features": [
+          "rollstuhl",
+          "parkplatz",
+          "wc"
+        ],
+        "note": "Laut WKO-Datenblatt „Barrierefreie Bergwelt auf einen Blick“ (Stand November 2024): Höchster barrierefrei erreichbarer Punkt: Im Sommer 1900m Im Winter 2500m. Mit dem Rollstuhl befahrbare Bahnen im Sommer: Isskogelbahn. Mit dem Rollstuhl befahrbare Wege: Wege rund um das Arena Center. Idealer barrierefreier Einstieg: Isskogelbahn."
+      },
+      "images": [],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "skiliftgesellschaft-hochfuegen",
+      "name": "Skiliftgesellschaft Hochfügen",
+      "description": "Skiliftgesellschaft Hochfügen (Tirol): barrierefreie Bergwelt laut Datenblatt des Fachverbands der Seilbahnen. Höchster barrierefrei erreichbarer Punkt: 2170m Berg Station Holzalmbahn. Mit dem Rollstuhl befahrbare Bahnen im Sommer: Kein Sommerbetrieb. Barrierefreie Restaurants: Panorama,8er Alm, Berghotell, Almhof, Hotel Lamark, Zirmhof, Montana Alm, Aar Wirt; Holzalm Hütte. Barrierefreie Toiletten: Kasse Hochfügen. Barrierefreie Parkplätze: Talboden Hochfügen. Winter: 4 mit Monoski befahrbare Anlagen (6er KSB Holzalm, Lamark I ,DSL Pfaffenbühel, 6er SB Waidoffen).",
+      "description_short": null,
+      "tags": [
+        "bergtour",
+        "wandern",
+        "ski"
+      ],
+      "setting": "outdoor",
+      "address": "Hochfügen",
+      "postal_code": "6264",
+      "town": "Fügenberg",
+      "lat": null,
+      "lng": null,
+      "website": null,
+      "source_url": "https://www.wko.at/oe/transport-verkehr/seilbahnen/barrierefreie-bergwelt-skiliftgesellschaft-hochfuegen.pdf",
+      "accessibility": {
+        "features": [
+          "rollstuhl",
+          "parkplatz",
+          "wc"
+        ],
+        "note": "Laut WKO-Datenblatt „Barrierefreie Bergwelt auf einen Blick“ (Stand November 2024): Höchster barrierefrei erreichbarer Punkt: 2170m Berg Station Holzalmbahn. Mit dem Rollstuhl befahrbare Bahnen im Sommer: Kein Sommerbetrieb. Barrierefreie Restaurants: Panorama,8er Alm, Berghotell, Almhof, Hotel Lamark, Zirmhof, Montana Alm, Aar Wirt; Holzalm Hütte. Barrierefreie Toiletten: Kasse Hochfügen."
+      },
+      "images": [],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "komperdell",
+      "name": "Seilbahn Komperdell Serfaus",
+      "description": "Seilbahn Komperdell GmbH / Dorfbahnstraße 75 / 6534 Serfaus (Tirol): barrierefreie Bergwelt laut Datenblatt des Fachverbands der Seilbahnen. Höchster barrierefrei erreichbarer Punkt: 2820 m. Mit dem Rollstuhl befahrbare Bahnen im Sommer: Komperdellbahn, Alpkopfbahn, Lazidbahn, Sunliner. Mit dem Rollstuhl befahrbare Wege: Themenwege (Zughilfen wie Swiss -Trac oder Begleitperson teilweise von Vorteil). Mit dem Rollstuhl befahrbare Attraktionen: Themenwege (Zughilfen wie Swiss -Trac oder Begleitperson teilweise von Vorteil). Idealer barrierefreier Einstieg: U-Bahnstation Parkplatz. Barrierefreie Restaurants: Rest. Seealm Hög, Rest. Masner, Rest. Komperdell, Rest. Leithe Wirt, Ski-Lounge; Suppenkasper, Rest. Lassida. Barrierefreie Toiletten: U-Bahnstation Parkplatz, Spielplatz am Föhrenwald, Seilbahn Talstation; am Pavillon (Zentrum); Im Skigebiet: Rest. Seealm Hög, Rest. Masner, Rest. Komperdell, Rest. Leithe Wirt, Seilbahn; Komperdell Bergstation. Barrierefreie Parkplätze: Ortsanfang (U-Bahnstation Parkplatz). Winter: 17 mit Monoski befahrbare Anlagen (Alpkopfbahn, Komperdellbahn, Lazidbahn, Pezidbahn, Sunliner, Waldbahn, Alpkopf 4 SB; Arrezjochbahn, Familienbahn Gampen, Königsleithebahn, Laustalbahn, Lawensbahn; Masnerkopfbahn, Moosbahn, Obere Scheidbahn, Planseggbahn, Scheidbahn).",
+      "description_short": null,
+      "tags": [
+        "bergtour",
+        "wandern",
+        "ski"
+      ],
+      "setting": "outdoor",
+      "address": "Talstation Komperdellbahn",
+      "postal_code": "6534",
+      "town": "Serfaus",
+      "lat": null,
+      "lng": null,
+      "website": "https://www.seilbahn-serfaus.at",
+      "source_url": "https://www.wko.at/oe/transport-verkehr/seilbahnen/barrierefreie-bergwelt-komperdell.pdf",
+      "accessibility": {
+        "features": [
+          "rollstuhl",
+          "parkplatz",
+          "wc"
+        ],
+        "note": "Laut WKO-Datenblatt „Barrierefreie Bergwelt auf einen Blick“ (Stand November 2024): Höchster barrierefrei erreichbarer Punkt: 2820 m. Mit dem Rollstuhl befahrbare Bahnen im Sommer: Komperdellbahn, Alpkopfbahn, Lazidbahn, Sunliner. Mit dem Rollstuhl befahrbare Wege: Themenwege (Zughilfen wie Swiss -Trac oder Begleitperson teilweise von Vorteil). Mit dem Rollstuhl befahrbare Attraktionen: Themenwege (Zughilfen wie Swiss -Trac oder Begleitperson teilweise von Vorteil)."
+      },
+      "images": [],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "zugspitzbahn",
+      "name": "Tiroler Zugspitzbahn",
+      "description": "Tiroler Zugspitzbahn (Tirol): barrierefreie Bergwelt laut Datenblatt des Fachverbands der Seilbahnen. Höchster barrierefrei erreichbarer Punkt: 2.950 m. Mit dem Rollstuhl befahrbare Bahnen im Sommer: Tiroler Zugspitzbahn. Mit dem Rollstuhl befahrbare Attraktionen: Technik-Schauraum; BAHNORAMA anno 1926 - Museum an der Talstation; Faszination Zugspitze - Museum am Gipfel. Idealer barrierefreier Einstieg: Tiroler Zugspitzbahn. Barrierefreie Restaurants: 1 x Panorama-Gipfelrestaurant; 1 x Zugspitz Resort Talstation. Barrierefreie Toiletten: 1 x Bergstation; 1 x Zugspitz Resort Talstation. Barrierefreie Parkplätze: Tiroler Zugspitzbahn Talstation.",
+      "description_short": null,
+      "tags": [
+        "bergtour",
+        "wandern"
+      ],
+      "setting": "outdoor",
+      "address": "Talstation Tiroler Zugspitzbahn, Obermoos",
+      "postal_code": "6632",
+      "town": "Ehrwald",
+      "lat": null,
+      "lng": null,
+      "website": "https://www.zugspitze.tirol",
+      "source_url": "https://www.wko.at/oe/transport-verkehr/seilbahnen/barrierefreie-bergwelt-zugspitzbahn.pdf",
+      "accessibility": {
+        "features": [
+          "rollstuhl",
+          "parkplatz",
+          "wc"
+        ],
+        "note": "Laut WKO-Datenblatt „Barrierefreie Bergwelt auf einen Blick“ (Stand November 2024): Höchster barrierefrei erreichbarer Punkt: 2.950 m. Mit dem Rollstuhl befahrbare Bahnen im Sommer: Tiroler Zugspitzbahn. Mit dem Rollstuhl befahrbare Attraktionen: Technik-Schauraum; BAHNORAMA anno 1926 - Museum an der Talstation; Faszination Zugspitze - Museum am Gipfel. Idealer barrierefreier Einstieg: Tiroler Zugspitzbahn."
+      },
+      "images": [],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "stubaier-gletscher",
+      "name": "Stubaier Gletscher",
+      "description": "Wintersport Tirol AG & CO - Stubaier Bergbahnen KG / STUBAIER GLETSCHER (Tirol): barrierefreie Bergwelt laut Datenblatt des Fachverbands der Seilbahnen. Höchster barrierefrei erreichbarer Punkt: Winter - Sessellift Wildspitz Bergstation 3210m / Sommer - Gondelbahn Schaufeljoch Bergstation 3165m. Mit dem Rollstuhl befahrbare Bahnen im Sommer: 3S Eisgratbahn 1+2, 8er Gondelbahn Schaufeljoch. Mit dem Rollstuhl befahrbare Attraktionen: Mammut Spielplatz. Idealer barrierefreier Einstieg: Talstation 3S Eisgratbahn. Barrierefreie Restaurants: SB Restaurant Gamsgarten, Bedienungsrestaurant Goldene Gams, SB Rest. Eisgrat; Gourmetrestaurant Schaufelspitz, Steinbockbar, Pavillon. Barrierefreie Toiletten: alle Hauptgebäude -- Gamsgarten Talstation, Eisgrat Talstation, Mittelstation Fernau; Gamsgarten Bergstation, Eisgrat Bergstation. Barrierefreie Parkplätze: 10x Gamsgarten Talstation; 15x Eisgrat Talstation. Winter: 23 mit Monoski befahrbare Anlagen (Ausgenommen Schlepplift Daunscharte, Übungslift Gamsgarten, Gaiskar2 (Zooshuttle)).",
+      "description_short": null,
+      "tags": [
+        "bergtour",
+        "wandern",
+        "ski"
+      ],
+      "setting": "outdoor",
+      "address": "Talstation Mutterberg",
+      "postal_code": "6167",
+      "town": "Neustift im Stubaital",
+      "lat": null,
+      "lng": null,
+      "website": "https://www.stubaier-gletscher.com/",
+      "source_url": "https://www.wko.at/oe/transport-verkehr/seilbahnen/barrierefreie-bergwelt-stubaier-gletscher.pdf",
+      "accessibility": {
+        "features": [
+          "rollstuhl",
+          "parkplatz",
+          "wc"
+        ],
+        "note": "Laut WKO-Datenblatt „Barrierefreie Bergwelt auf einen Blick“ (Stand November 2024): Höchster barrierefrei erreichbarer Punkt: Winter - Sessellift Wildspitz Bergstation 3210m / Sommer - Gondelbahn Schaufeljoch Bergstation 3165m. Mit dem Rollstuhl befahrbare Bahnen im Sommer: 3S Eisgratbahn 1+2, 8er Gondelbahn Schaufeljoch. Mit dem Rollstuhl befahrbare Attraktionen: Mammut Spielplatz. Idealer barrierefreier Einstieg: Talstation 3S Eisgratbahn."
+      },
+      "images": [],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "bergbahn-buchensteinwand-pillersee",
+      "name": "Bergbahn Buchensteinwand Pillersee",
+      "description": "Bergbahn Buchensteinwand Pillersee GmbH (Tirol): barrierefreie Bergwelt laut Datenblatt des Fachverbands der Seilbahnen. Höchster barrierefrei erreichbarer Punkt: 1450 m. Mit dem Rollstuhl befahrbare Bahnen im Sommer: 4SBK Buchensteinwand. Mit dem Rollstuhl befahrbare Wege: Weg von der Bergstation der 4SBK Buchensteinwand zum Jakobskreuz mit dem Rollstuhl befahrbar. Mit dem Rollstuhl befahrbare Attraktionen: Das Jakobskreuz. Idealer barrierefreier Einstieg: 4SBK Buchensteinwand. Barrierefreie Restaurants: Das Bergblick. Barrierefreie Toiletten: Talstation St. Ulrich am Pillersee / alle WCs barrierefrei zugänglich (kein barrierefreies WC vorhanden). Barrierefreie Parkplätze: 4SBK Buchensteinwand. Winter: 2 mit Monoski befahrbare Anlagen (4SBK Buchensteinwand; 4CLF Panoramabahn).",
+      "description_short": null,
+      "tags": [
+        "bergtour",
+        "wandern",
+        "ski"
+      ],
+      "setting": "outdoor",
+      "address": "Talstation Buchensteinwand",
+      "postal_code": "6392",
+      "town": "St. Jakob in Haus",
+      "lat": null,
+      "lng": null,
+      "website": "https://www.bergbahn-pillersee.com",
+      "source_url": "https://www.wko.at/oe/transport-verkehr/seilbahnen/barrierefreie-bergwelt-bergbahn-buchensteinwand-pillersee.pdf",
+      "accessibility": {
+        "features": [
+          "rollstuhl",
+          "parkplatz",
+          "wc"
+        ],
+        "note": "Laut WKO-Datenblatt „Barrierefreie Bergwelt auf einen Blick“ (Stand November 2024): Höchster barrierefrei erreichbarer Punkt: 1450 m. Mit dem Rollstuhl befahrbare Bahnen im Sommer: 4SBK Buchensteinwand. Mit dem Rollstuhl befahrbare Wege: Weg von der Bergstation der 4SBK Buchensteinwand zum Jakobskreuz mit dem Rollstuhl befahrbar. Mit dem Rollstuhl befahrbare Attraktionen: Das Jakobskreuz."
+      },
+      "images": [],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "finkenberger-almbahnen",
+      "name": "Finkenberger Almbahnen",
+      "description": "Finkenberger Almbahnen GmbH (Tirol): barrierefreie Bergwelt laut Datenblatt des Fachverbands der Seilbahnen. Höchster barrierefrei erreichbarer Punkt: 2.095 m. Mit dem Rollstuhl befahrbare Bahnen im Sommer: Talstation Finkenberg. Mit dem Rollstuhl befahrbare Wege: Wanderweg zum Speicherteich bei der Granatkapelle; Penken Panoramaweg. Mit dem Rollstuhl befahrbare Attraktionen: Speicherteich bei der Granatkapelle. Idealer barrierefreier Einstieg: Talstation Finkenberger Almbahnen. Barrierefreie Restaurants: Granatalm. Barrierefreie Toiletten: Talstation Finkenberg 1; Talstation Finkenberg 2 (Mittelstation). Barrierefreie Parkplätze: 100+ Alle Parkplätze an der Talstation der Finkenberger Almbahnen sind barrierefrei. Winter: 4 mit Monoski befahrbare Anlagen (Finkenberg 1; Finkenberg 2; Hasenmulde 1; Hasenmulde 2).",
+      "description_short": null,
+      "tags": [
+        "bergtour",
+        "wandern",
+        "ski"
+      ],
+      "setting": "outdoor",
+      "address": "Talstation Finkenberger Almbahn",
+      "postal_code": "6292",
+      "town": "Finkenberg",
+      "lat": null,
+      "lng": null,
+      "website": "https://www.hintertuxergletscher.at",
+      "source_url": "https://www.wko.at/oe/transport-verkehr/seilbahnen/barrierefreie-bergwelt-finkenberger-almbahnen.pdf",
+      "accessibility": {
+        "features": [
+          "rollstuhl",
+          "parkplatz",
+          "wc"
+        ],
+        "note": "Laut WKO-Datenblatt „Barrierefreie Bergwelt auf einen Blick“ (Stand November 2024): Höchster barrierefrei erreichbarer Punkt: 2.095 m. Mit dem Rollstuhl befahrbare Bahnen im Sommer: Talstation Finkenberg. Mit dem Rollstuhl befahrbare Wege: Wanderweg zum Speicherteich bei der Granatkapelle; Penken Panoramaweg. Mit dem Rollstuhl befahrbare Attraktionen: Speicherteich bei der Granatkapelle."
+      },
+      "images": [],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "zeller-bergbahnen-zillertal",
+      "name": "Zeller Bergbahnen (Zillertal Arena Zell am Ziller)",
+      "description": "Zeller Bergbahnen Zillertal GmbH & CoKG (Tirol): barrierefreie Bergwelt laut Datenblatt des Fachverbands der Seilbahnen. Höchster barrierefrei erreichbarer Punkt: 1.740 m, Bergstation Rosenalmbahn. Mit dem Rollstuhl befahrbare Bahnen im Sommer: Rosenalmbahn. Mit dem Rollstuhl befahrbare Wege: Fichtenweg - Rundweg von der Bergstation Rosenalmbahn durchs Fichtenschloss zum; Fichtensee. Befestigter Forstweg - Begleitung notwendig, da teilweise steilere Abschnitte.. Mit dem Rollstuhl befahrbare Attraktionen: Fichtensee - Speicherteich bzw. Badesee auf 1.700 Meter mit Fichtenkiosk; Aussichtsplattform, Panoramablick, Genussnischen und Bademöglichkeiten. Idealer barrierefreier Einstieg: Rosenalmbahn. Barrierefreie Restaurants: Arena Bistro, Talstation Rosenalmbahn; Wiesenalm, Mittelstation Rosenalmbahn. Barrierefreie Toiletten: Rosenalmbahn Talstation, Rosenalmbahn Bergstation, Wiesenalm (Rosenalmbahn; Mittelstation), Karspitzbahn Talstation, Fichtensee & Fichtenschloss (Sommer). Barrierefreie Parkplätze: 2x Karspitzbahn Talstation; 4x Rosenalmbahn Talstation, K2. Winter: 10 mit Monoski befahrbare Anlagen (Rosenalmbahn 1+2, Karspitzbahn 1+2, Kreuzwiesen-XPress, Karpsitz-XPress; Hanser-XPress, Kreuzjoch-XPress, Kapauns, Wilde Krimml, Plattenanger 1+2).",
+      "description_short": null,
+      "tags": [
+        "bergtour",
+        "wandern",
+        "ski"
+      ],
+      "setting": "outdoor",
+      "address": "Talstation Rosenalmbahn",
+      "postal_code": "6280",
+      "town": "Zell am Ziller",
+      "lat": null,
+      "lng": null,
+      "website": "https://www.zillertalarena.com",
+      "source_url": "https://www.wko.at/oe/transport-verkehr/seilbahnen/barrierefreie-bergwelt-zeller-bergbahnen-zillertal.pdf",
+      "accessibility": {
+        "features": [
+          "rollstuhl",
+          "parkplatz",
+          "wc"
+        ],
+        "note": "Laut WKO-Datenblatt „Barrierefreie Bergwelt auf einen Blick“ (Stand November 2024): Höchster barrierefrei erreichbarer Punkt: 1.740 m, Bergstation Rosenalmbahn. Mit dem Rollstuhl befahrbare Bahnen im Sommer: Rosenalmbahn. Mit dem Rollstuhl befahrbare Wege: Fichtenweg - Rundweg von der Bergstation Rosenalmbahn durchs Fichtenschloss zum; Fichtensee. Befestigter Forstweg - Begleitung notwendig, da teilweise steilere Abschnitte.. Mit dem Rollstuhl befahrbare Attraktionen: Fichtensee - Speicherteich bzw. Badesee auf 1.700 Meter mit Fichtenkiosk; Aussichtsplattform, Panoramablick, Genussnischen und Bademöglichkeiten."
+      },
+      "images": [],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "zillertaler-gletscherbahn",
+      "name": "Hintertuxer Gletscher (Zillertaler Gletscherbahn)",
+      "description": "Zillertaler Gletscherbahn GmbH & Co KG (Tirol): barrierefreie Bergwelt laut Datenblatt des Fachverbands der Seilbahnen. Höchster barrierefrei erreichbarer Punkt: 3.250 m. Mit dem Rollstuhl befahrbare Bahnen im Sommer: Talstation Hintertux. Mit dem Rollstuhl befahrbare Wege: Auffahrt von der Talstation bis zur Panoramaterrasse auf 3.250 m; Wanderweg Bichlalm - HIntertux; Wanderweg zum Tuxerjoch Haus. Mit dem Rollstuhl befahrbare Attraktionen: Luis' Gletscherflohsafari + Luis' Kugelsafari (2.100 m); Panoramaterrasse (3.250 m). Idealer barrierefreier Einstieg: Talstation Hintertux. Barrierefreie Restaurants: Restaurant Sommerberg Alm (2.100 m); SB Restaurant Tuxer Ferner (2.660 m); Wirtshaus im Tuxer Ferner (2.660 m). Barrierefreie Toiletten: Talstation; Restaurant Sommerberg Alm (2.100 m); Tuxer Fernerhaus (2.660 m). Barrierefreie Parkplätze: 100+ Alle Parkplätze an der Talstation in Hintertux sind barrierefrei. Winter: 15 mit Monoski befahrbare Anlagen (Alle Bahnen ausgenommen:; 4er Tuxerjoch, 6er Sommerberg, Lärmstange 1, Lärmstange 2).",
+      "description_short": null,
+      "tags": [
+        "bergtour",
+        "wandern",
+        "ski"
+      ],
+      "setting": "outdoor",
+      "address": "Talstation Gletscherbus 1, Hintertux",
+      "postal_code": "6294",
+      "town": "Tux",
+      "lat": null,
+      "lng": null,
+      "website": "https://www.hintertuxergletscher.at",
+      "source_url": "https://www.wko.at/oe/transport-verkehr/seilbahnen/barrierefreie-bergwelt-zillertaler-gletscherbahn.pdf",
+      "accessibility": {
+        "features": [
+          "rollstuhl",
+          "parkplatz",
+          "wc"
+        ],
+        "note": "Laut WKO-Datenblatt „Barrierefreie Bergwelt auf einen Blick“ (Stand November 2024): Höchster barrierefrei erreichbarer Punkt: 3.250 m. Mit dem Rollstuhl befahrbare Bahnen im Sommer: Talstation Hintertux. Mit dem Rollstuhl befahrbare Wege: Auffahrt von der Talstation bis zur Panoramaterrasse auf 3.250 m; Wanderweg Bichlalm - HIntertux; Wanderweg zum Tuxerjoch Haus. Mit dem Rollstuhl befahrbare Attraktionen: Luis' Gletscherflohsafari + Luis' Kugelsafari (2.100 m); Panoramaterrasse (3.250 m)."
+      },
+      "images": [],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "oberstorf-kleinwalsertall",
+      "name": "Oberstdorf Kleinwalsertal Bergbahnen",
+      "description": "Oberstdorf · Kleinwalsertal Bergbahnen (Vorarlberg): barrierefreie Bergwelt laut Datenblatt des Fachverbands der Seilbahnen. Höchster barrierefrei erreichbarer Punkt: 2.220 m (Nebelhornbahn Gipfelstation). Mit dem Rollstuhl befahrbare Bahnen im Sommer: Nebelhornbahn, Fellhornbahn, Söllereckbahn, Kanzelwandbahn, Walmendingerhornbahn; Ifenbahn. Mit dem Rollstuhl befahrbare Wege: Panoramaweg an der Nebelhornbahn Bergstation, Wanderweg zur Alpe Schlappold am; Fellhorn, Wanderweg von der Bergstation Söllereck zur Alpe Schrattenwang. Mit dem Rollstuhl befahrbare Attraktionen: Nordwandsteig am Nebelhorn, Panoramaaufzug am Walmendingerhorn, Burmiwasserweg an; der Kanzelwandbahn. Idealer barrierefreier Einstieg: Alle aufgeführten Bergbahnen sind barrierefrei und daher empfehlenswert. Am Fellhorn und an der; Kanzelwandbahn ist für den Zugang zum Perron Hilfspersonal nötig.. Barrierefreie Restaurants: Nebelhornbahn: Nebelhorn Gipfelrestaurant 2224 sowie Marktrestaurant, Fellhornbahn:; Fellhorn Restaurant, Kanzelwandbahn: Panoramarestaurant, Walmendingerhornbahn:; Gipfelstuba. Barrierefreie Toiletten: Nebelhornbahn: Tal-, Berg- und Gipfelstation, Söllereckbahn: Tal-, Mittel- und Bergstation; Fellhornbahn: Tal-, Berg- und Gipfelstation, Kanzelwandbahn: Tal- und Bergstation; Walmendingerhornbahn: Tal- und Bergstation, Ifenbahn: Bergstation. Barrierefreie Parkplätze: Barrierefreie Parkplätze vorhanden..",
+      "description_short": null,
+      "tags": [
+        "bergtour",
+        "wandern"
+      ],
+      "setting": "outdoor",
+      "address": "Talstation Kanzelwandbahn",
+      "postal_code": "6991",
+      "town": "Riezlern",
+      "lat": null,
+      "lng": null,
+      "website": "https://www.ok-bergbahnen.com/service/barrierefrei-berg/",
+      "source_url": "https://www.wko.at/oe/transport-verkehr/seilbahnen/barrierefreie-bergwelt-oberstorf-kleinwalsertall.pdf",
+      "accessibility": {
+        "features": [
+          "rollstuhl",
+          "parkplatz",
+          "wc"
+        ],
+        "note": "Laut WKO-Datenblatt „Barrierefreie Bergwelt auf einen Blick“ (Stand November 2024): Höchster barrierefrei erreichbarer Punkt: 2.220 m (Nebelhornbahn Gipfelstation). Mit dem Rollstuhl befahrbare Bahnen im Sommer: Nebelhornbahn, Fellhornbahn, Söllereckbahn, Kanzelwandbahn, Walmendingerhornbahn; Ifenbahn. Mit dem Rollstuhl befahrbare Wege: Panoramaweg an der Nebelhornbahn Bergstation, Wanderweg zur Alpe Schlappold am; Fellhorn, Wanderweg von der Bergstation Söllereck zur Alpe Schrattenwang. Mit dem Rollstuhl befahrbare Attraktionen: Nordwandsteig am Nebelhorn, Panoramaaufzug am Walmendingerhorn, Burmiwasserweg an; der Kanzelwandbahn."
+      },
+      "images": [],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "pfaender",
+      "name": "Pfänderbahn Bregenz",
+      "description": "Pfänderbahn AG (Vorarlberg): barrierefreie Bergwelt laut Datenblatt des Fachverbands der Seilbahnen. Höchster barrierefrei erreichbarer Punkt: 1022 m. Mit dem Rollstuhl befahrbare Bahnen im Sommer: Pfänderbahn. Mit dem Rollstuhl befahrbare Wege: im Bereich Bergbahn - Spielplatz - Oberer Wildpark. Mit dem Rollstuhl befahrbare Attraktionen: Steinbock, Kaninchen, Ziegen und Wildschweingehege, Mufflon und Hirschgehege am Berg; teilweise befahrbar. Idealer barrierefreier Einstieg: Pfänderbahn Bregenz, Parkplätze barrierefrei, Ebnergasse. Barrierefreie Toiletten: 1x Talstation; 1x Bergstation. Barrierefreie Parkplätze: Pfänderbahn Bregenz, Zufahrt über Steinbruchgasse 4, auch für Kleinbusse Höhe 3,4m; geeignet..",
+      "description_short": null,
+      "tags": [
+        "bergtour",
+        "wandern"
+      ],
+      "setting": "outdoor",
+      "address": "Talstation Pfänderbahn, Steinbruchgasse 4",
+      "postal_code": "6900",
+      "town": "Bregenz",
+      "lat": null,
+      "lng": null,
+      "website": "https://www.pfaenderbahn.at/de/service/barrierefrei",
+      "source_url": "https://www.wko.at/oe/transport-verkehr/seilbahnen/barrierefreie-bergwelt-pfaender.pdf",
+      "accessibility": {
+        "features": [
+          "rollstuhl",
+          "parkplatz",
+          "wc"
+        ],
+        "note": "Laut WKO-Datenblatt „Barrierefreie Bergwelt auf einen Blick“ (Stand November 2024): Höchster barrierefrei erreichbarer Punkt: 1022 m. Mit dem Rollstuhl befahrbare Bahnen im Sommer: Pfänderbahn. Mit dem Rollstuhl befahrbare Wege: im Bereich Bergbahn - Spielplatz - Oberer Wildpark. Mit dem Rollstuhl befahrbare Attraktionen: Steinbock, Kaninchen, Ziegen und Wildschweingehege, Mufflon und Hirschgehege am Berg; teilweise befahrbar."
+      },
+      "images": [],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "seilbahn-bezau",
+      "name": "Seilbahn Bezau",
+      "description": "Seilbahn Bezau GmbH & CO KG (Vorarlberg): barrierefreie Bergwelt laut Datenblatt des Fachverbands der Seilbahnen. Höchster barrierefrei erreichbarer Punkt: 1648 m. Mit dem Rollstuhl befahrbare Bahnen im Sommer: Kabinenbahn Bezau. Idealer barrierefreier Einstieg: Bezau, Obere 394. Barrierefreie Restaurants: Panoramarestaurant Baumgarten. Barrierefreie Toiletten: 1x Panoramarestaurant/Bergstation; 1x Talstation. Barrierefreie Parkplätze: Parkplatz Talstation. Winter: 1 mit Monoski befahrbare Anlagen (Kabinenbahn Bezau).",
+      "description_short": null,
+      "tags": [
+        "bergtour",
+        "wandern",
+        "ski"
+      ],
+      "setting": "outdoor",
+      "address": "Talstation Seilbahn Bezau",
+      "postal_code": "6870",
+      "town": "Bezau",
+      "lat": null,
+      "lng": null,
+      "website": "https://www.seilbahn-bezau.at",
+      "source_url": "https://www.wko.at/oe/transport-verkehr/seilbahnen/barrierefreie-bergwelt-seilbahn-bezau.pdf",
+      "accessibility": {
+        "features": [
+          "rollstuhl",
+          "parkplatz",
+          "wc"
+        ],
+        "note": "Laut WKO-Datenblatt „Barrierefreie Bergwelt auf einen Blick“ (Stand November 2024): Höchster barrierefrei erreichbarer Punkt: 1648 m. Mit dem Rollstuhl befahrbare Bahnen im Sommer: Kabinenbahn Bezau. Idealer barrierefreier Einstieg: Bezau, Obere 394. Barrierefreie Restaurants: Panoramarestaurant Baumgarten."
+      },
+      "images": [],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "silvretta-montafon",
+      "name": "Silvretta Montafon",
+      "description": "Silvretta Montafon (Vorarlberg): barrierefreie Bergwelt laut Datenblatt des Fachverbands der Seilbahnen. Höchster barrierefrei erreichbarer Punkt: 2430. Mit dem Rollstuhl befahrbare Bahnen im Sommer: Hochjoch Bahn, Valisera Bahn, Grasjoch Bahn, Hochalpila Bahn. Barrierefreie Restaurants: Markthalle; Josefsheim. Barrierefreie Toiletten: 1x Valisera Bahn Talstation; 1x Kapellrestaurant. Barrierefreie Parkplätze: 1x Hochjoch Bahn; 2x Valisera bzw. Grasjoch Bahn Tiefgarage; 2x Zamang Bahn. Winter: 21 mit Monoski befahrbare Anlagen (Hochjoch, Kropfen, Sennigrat, Seebliga, Kapell; Grasjoch, Hochalpila, Freda; Valisera, Sonnen, Silvretta, Jöchle, Heimspitz, Madrisella, Schwarzköpfle, Rinderhütte, Nova; Spatla).",
+      "description_short": null,
+      "tags": [
+        "bergtour",
+        "wandern",
+        "ski"
+      ],
+      "setting": "outdoor",
+      "address": "Talstation Hochjochbahn",
+      "postal_code": "6780",
+      "town": "Schruns",
+      "lat": null,
+      "lng": null,
+      "website": "https://www.silvretta-montafon.at/de",
+      "source_url": "https://www.wko.at/oe/transport-verkehr/seilbahnen/barrierefreie-bergwelt-silvretta-montafon.pdf",
+      "accessibility": {
+        "features": [
+          "rollstuhl",
+          "parkplatz",
+          "wc"
+        ],
+        "note": "Laut WKO-Datenblatt „Barrierefreie Bergwelt auf einen Blick“ (Stand November 2024): Höchster barrierefrei erreichbarer Punkt: 2430. Mit dem Rollstuhl befahrbare Bahnen im Sommer: Hochjoch Bahn, Valisera Bahn, Grasjoch Bahn, Hochalpila Bahn. Barrierefreie Restaurants: Markthalle; Josefsheim. Barrierefreie Toiletten: 1x Valisera Bahn Talstation; 1x Kapellrestaurant."
+      },
+      "images": [],
+      "price_hint": null,
+      "opening_hint": null
+    }
+  ]
+}

@@ -70,6 +70,10 @@ export interface ExistingActivityRow {
   // verbatim zurueckgeschrieben — siehe buildUpdateRow.
   source_region: string;
   shortid: string;
+  /** Bestehende Bilder (roh). Der Update-Pfad haelt sie, wenn Deskline
+   *  selbst keine liefert — kuratierte Bilder (Barrierefrei-Import) auf
+   *  Deskline-Zeilen wuerden sonst woechentlich geloescht. */
+  images?: unknown;
 }
 
 /** Sichtung einer Row in DIESEM Lauf: id + die liefernden Regionen.

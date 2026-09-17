@@ -259,11 +259,18 @@ export function transformInfrastructure(
   const descriptionShort = descTexts.get(DESC_TYPE_SHORT) ?? null;
   const priceHint = extractPriceHint(allTexts.join('\n'));
 
-  // 5b) Barrierefreiheit: holidayThemes (strukturiert) vor Text.
-  const themeNames = Array.isArray(raw.holidayThemes)
-    ? raw.holidayThemes.map((t) => t?.name).filter((n): n is string => typeof n === 'string')
+  // 5b) Barrierefreiheit: holidayThemes + Klassifizierungen (strukturiert)
+  // vor Text. Beide landen als ein Array in themes_raw (Klassifizierungen
+  // mit kind: 'classification').
+  const holidayThemes = Array.isArray(raw.holidayThemes) ? raw.holidayThemes.filter((t) => t != null) : [];
+  const classifications = Array.isArray(raw.classifications)
+    ? raw.classifications.filter((t) => t != null).map((t) => ({ ...t, kind: 'classification' as const }))
     : [];
+  const themeNames = [...holidayThemes, ...classifications]
+    .map((t) => t?.name)
+    .filter((n): n is string => typeof n === 'string');
   const accessibility = buildDesklineAccessibility(themeNames, allTexts);
+  const themesRaw = [...holidayThemes, ...classifications];
 
   // 6) Bilder (Attribution ist Pflicht — copyright/license/author mitnehmen).
   let images: ActivityImage[] | null = null;
@@ -305,7 +312,7 @@ export function transformInfrastructure(
     description_short: descriptionShort,
     tags: topicResult.tags,
     topics_raw: Array.isArray(raw.topics) && raw.topics.length > 0 ? raw.topics : null,
-    themes_raw: Array.isArray(raw.holidayThemes) && raw.holidayThemes.length > 0 ? raw.holidayThemes : null,
+    themes_raw: themesRaw.length > 0 ? themesRaw : null,
     accessibility,
     setting: topicResult.setting,
     lat,
@@ -401,6 +408,9 @@ export function buildInsertRow(a: TransformedActivity): ActivityInsertRow {
 /** Bestehende Werte der write-once-Spalten (aus dem Prefetch). */
 export type WriteOnceValues = {
   [K in (typeof INSERT_ONLY_COLUMNS)[number]]: string;
+} & {
+  /** Bestehende Bilder der Zeile (optional, siehe buildUpdateRow). */
+  images?: unknown;
 };
 
 export function buildUpdateRow(
@@ -420,6 +430,13 @@ export function buildUpdateRow(
   // supabase-sync.ts:334-350) statt ihn neu zu berechnen — so bleibt
   // write-once gewahrt und der Slug SEO-stabil.
   for (const col of INSERT_ONLY_COLUMNS) row[col] = existing[col];
+  // Bilder-Guard (2026-09-17): liefert Deskline keine Bilder, bleiben die
+  // bestehenden stehen. Der Barrierefrei-Import haengt kuratierte Bilder
+  // (Quelle/Wikimedia) an bildlose Deskline-Zeilen; ein NULL aus dem
+  // Feed darf sie nicht woechentlich wieder entfernen.
+  if (a.images == null && Array.isArray(existing.images) && existing.images.length > 0) {
+    row.images = existing.images;
+  }
   row.updated_at = updatedAtIso;
   return row;
 }

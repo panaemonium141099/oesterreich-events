@@ -1,0 +1,218 @@
+{
+  "source": "innsbruck-info",
+  "source_label": "Innsbruck Tourismus (innsbruck.info)",
+  "source_url": "https://www.innsbruck.info/l/barrierefrei.html",
+  "checked_at": "2026-09-17",
+  "entries": [
+    {
+      "id": "kaiserliche-hofburg-innsbruck",
+      "name": "Kaiserliche Hofburg Innsbruck",
+      "description": "Ehemalige Habsburger Residenz in der Innsbrucker Altstadt mit Prunkräumen und Museum. Von Innsbruck Tourismus als leicht zugängliche Sehenswürdigkeit gelistet; 2000 mit dem Goldenen Rollstuhl ausgezeichnet.",
+      "tags": ["burgführung", "museumstour"],
+      "setting": "indoor",
+      "address": "Rennweg 1",
+      "postal_code": "6020",
+      "town": "Innsbruck",
+      "website": "https://www.innsbruck.info/sehenswuerdigkeiten/i/kaiserliche-hofburg.html",
+      "source_url": "https://www.innsbruck.info/l/barrierefrei.html",
+      "accessibility": {
+        "features": ["rollstuhl"],
+        "note": "Laut innsbruck.info: leicht zugängliche Sehenswürdigkeit, im Jahr 2000 mit dem Goldenen Rollstuhl prämiert."
+      }
+    },
+    {
+      "id": "waldmoor-tantegert-rundwanderung",
+      "name": "Rundwanderung Waldmoor Tantegert",
+      "description": "Kurze Rundwanderung durch das Waldmoor Tantegert bei Innsbruck (0,6 km, etwa 10 Minuten), barrierearm und kinderwagentauglich.",
+      "tags": ["wandern", "naturführung"],
+      "setting": "outdoor",
+      "address": "Waldmoor Tantegert",
+      "postal_code": "6020",
+      "town": "Innsbruck",
+      "lat": 47.2478,
+      "lng": 11.4429,
+      "website": "https://www.innsbruck.info/wandern/m/rundwanderung-waldmoor-tantegert.html",
+      "source_url": "https://www.innsbruck.info/l/barrierefrei.html",
+      "accessibility": {
+        "features": ["rollstuhl"],
+        "note": "Laut innsbruck.info: barrierearme und kinderwagentaugliche Rundwanderung, 0,6 km, rund 10 Minuten."
+      }
+    },
+    {
+      "id": "sightseer-hop-on-hop-off-innsbruck",
+      "name": "Sightseer Hop-on Hop-off Bus Innsbruck",
+      "description": "Hop-on Hop-off Bus zu den Innsbrucker Sehenswürdigkeiten, von Innsbruck Tourismus im Barrierefrei-Bereich als Möglichkeit gelistet, die Stadt ohne weite Wege zu erkunden. In der Innsbruck Card enthalten.",
+      "tags": [],
+      "setting": "mixed",
+      "address": "Burggraben 3",
+      "postal_code": "6020",
+      "town": "Innsbruck",
+      "website": "https://www.innsbruck.info/sehenswuerdigkeiten/sightseeing/sightseer.html",
+      "source_url": "https://www.innsbruck.info/l/barrierefrei.html",
+      "accessibility": {
+        "features": ["rollstuhl"],
+        "note": "Laut innsbruck.info im Barrierefrei-Bereich gelistet. Details zu Rollstuhlplätzen bitte beim Betreiber erfragen."
+      }
+    },
+    {
+      "id": "trainingsloipe-luesens-schlittenlanglauf",
+      "name": "Trainingsloipe Praxmar-Lüsens (Schlittenlanglauf)",
+      "description": "0,7 km lange, für Schlittenlanglauf prämierte Loipe in Praxmar-Lüsens im Sellraintal, anfängertauglich und inklusiv.",
+      "tags": ["langlauf"],
+      "setting": "outdoor",
+      "address": "Lüsens",
+      "postal_code": "6184",
+      "town": "St. Sigmund im Sellrain",
+      "website": "https://www.innsbruck.info/sport/m/trainings-loipe-luesens.html",
+      "source_url": "https://www.innsbruck.info/l/barrierefrei.html",
+      "accessibility": {
+        "features": ["rollstuhl"],
+        "note": "Laut innsbruck.info: für Schlittenlanglauf prämierte, inklusive Loipe, 0,7 km, für erste barrierefreie Versuche geeignet."
+      }
+    },
+    {
+      "id": "tiroler-loipe-luesens-schlittenlanglauf",
+      "name": "Tiroler Loipe Lüsens (Schlittenlanglauf)",
+      "description": "5,5 km lange, prämierte Loipe in Praxmar-Lüsens für Schlittenlanglauf, sportlich anspruchsvoller als die Trainingsloipe (etwa 69 Höhenmeter).",
+      "tags": ["langlauf"],
+      "setting": "outdoor",
+      "address": "Lüsens",
+      "postal_code": "6184",
+      "town": "St. Sigmund im Sellrain",
+      "website": "https://www.innsbruck.info/sport/m/tiroler-loipe-luesens.html",
+      "source_url": "https://www.innsbruck.info/l/barrierefrei.html",
+      "accessibility": {
+        "features": ["rollstuhl"],
+        "note": "Laut innsbruck.info: prämierte Loipe für Schlittenlanglauf, 5,5 km, forderndes Wintererlebnis für Menschen mit Beeinträchtigung."
+      }
+    },
+    {
+      "id": "huegelspielplatz-innsbruck",
+      "name": "Hügelspielplatz Egerdachstraße",
+      "description": "Großzügig angelegter Spielplatz in Innsbruck, mit dem Rollstuhl überall befahrbar, mit barrierefreiem Karussell.",
+      "tags": [],
+      "setting": "outdoor",
+      "address": "Egerdachstraße",
+      "postal_code": "6020",
+      "town": "Innsbruck",
+      "website": "https://www.innsbruck.gv.at/freizeit/natur-umwelt/spielplaetze/KS16",
+      "source_url": "https://www.innsbruck.info/l/barrierefrei.html",
+      "accessibility": {
+        "features": ["rollstuhl"],
+        "note": "Laut innsbruck.info: mit dem Rollstuhl überallhin befahrbar, barrierefreies Karussell."
+      }
+    },
+    {
+      "id": "alpenzoo-innsbruck",
+      "name": "Alpenzoo Innsbruck",
+      "description": "Höchstgelegener Zoo Europas am Fuß der Nordkette mit Angeboten für Menschen mit unterschiedlichen Beeinträchtigungen. In der Innsbruck Card enthalten.",
+      "tags": ["naturführung"],
+      "setting": "outdoor",
+      "address": "Weiherburggasse 37",
+      "postal_code": "6020",
+      "town": "Innsbruck",
+      "website": "https://www.innsbruck.info/sehenswuerdigkeiten/highlights/alpenzoo.html",
+      "source_url": "https://www.innsbruck.info/l/barrierefrei.html",
+      "accessibility": {
+        "features": ["rollstuhl"],
+        "note": "Laut innsbruck.info: vielfältige Angebote für Menschen mit diversen Beeinträchtigungen, inklusiver Zoobesuch. Details zu Wegen und Steigungen beim Zoo erfragen."
+      }
+    },
+    {
+      "id": "innatur-inklusive-bergerlebnisse",
+      "name": "InNatur: Inklusive Natur- und Bergerlebnisse",
+      "description": "Anbieter barrierefreier Outdoor-Aktivitäten in der Region Innsbruck: Wandern, Skifahren und Bergerlebnisse mit professioneller Begleitung und angepasster Ausrüstung.",
+      "tags": ["wandern", "ski"],
+      "setting": "outdoor",
+      "address": "Burggraben 3",
+      "postal_code": "6020",
+      "town": "Innsbruck",
+      "website": "https://innatur.at/de/startseite/",
+      "source_url": "https://www.innsbruck.info/l/barrierefrei.html",
+      "accessibility": {
+        "features": ["rollstuhl"],
+        "note": "Laut innsbruck.info: barrierefreie Outdoor-Aktivitäten mit professioneller Begleitung und angepasster Ausrüstung, individuell und inklusiv."
+      }
+    },
+    {
+      "id": "nordkettenbahnen-innsbruck",
+      "name": "Innsbrucker Nordkettenbahnen",
+      "description": "Bergbahn von der Innsbrucker Innenstadt (Congress) über die Hungerburg auf Seegrube und Hafelekar, von Innsbruck Tourismus als barrierefreie Bergbahn gelistet.",
+      "tags": ["bergtour"],
+      "setting": "outdoor",
+      "address": "Rennweg 3",
+      "postal_code": "6020",
+      "town": "Innsbruck",
+      "website": "https://www.nordkette.com/",
+      "source_url": "https://www.innsbruck.info/wandern/d/barrierefreie-bergbahnen.html",
+      "accessibility": {
+        "features": ["rollstuhl"],
+        "note": "Laut innsbruck.info in der Liste der barrierefreien Bergbahnen der Region Innsbruck."
+      }
+    },
+    {
+      "id": "drei-seen-sesselbahn-kuehtai",
+      "name": "Drei Seen Sesselbahn Kühtai",
+      "description": "Bergbahn in Kühtai, von Innsbruck Tourismus als barrierefreie Bergbahn gelistet.",
+      "tags": ["bergtour"],
+      "setting": "outdoor",
+      "address": "Kühtai 48",
+      "postal_code": "6183",
+      "town": "Kühtai",
+      "website": "https://www.lifte.at",
+      "source_url": "https://www.innsbruck.info/wandern/d/barrierefreie-bergbahnen.html",
+      "accessibility": {
+        "features": ["rollstuhl"],
+        "note": "Laut innsbruck.info in der Liste der barrierefreien Bergbahnen der Region Innsbruck."
+      }
+    },
+    {
+      "id": "muttereralm-bergbahn",
+      "name": "Bergbahn Muttereralm",
+      "description": "Bergbahn von Mutters auf die Muttereralm, von Innsbruck Tourismus als barrierefreie Bergbahn gelistet.",
+      "tags": ["bergtour"],
+      "setting": "outdoor",
+      "address": "Nockhofweg 40",
+      "postal_code": "6162",
+      "town": "Mutters",
+      "website": "https://www.muttereralm.at",
+      "source_url": "https://www.innsbruck.info/wandern/d/barrierefreie-bergbahnen.html",
+      "accessibility": {
+        "features": ["rollstuhl"],
+        "note": "Laut innsbruck.info in der Liste der barrierefreien Bergbahnen der Region Innsbruck."
+      }
+    },
+    {
+      "id": "patscherkofelbahn-igls",
+      "name": "Patscherkofelbahn",
+      "description": "Bergbahn von Igls auf den Patscherkofel, von Innsbruck Tourismus als barrierefreie Bergbahn gelistet. In der Innsbruck Card enthalten.",
+      "tags": ["bergtour"],
+      "setting": "outdoor",
+      "address": "Römerstraße 81",
+      "postal_code": "6080",
+      "town": "Igls",
+      "website": "https://www.patscherkofelbahn.at",
+      "source_url": "https://www.innsbruck.info/wandern/d/barrierefreie-bergbahnen.html",
+      "accessibility": {
+        "features": ["rollstuhl"],
+        "note": "Laut innsbruck.info in der Liste der barrierefreien Bergbahnen der Region Innsbruck."
+      }
+    },
+    {
+      "id": "bergbahnen-axamer-lizum",
+      "name": "Bergbahnen Axamer Lizum",
+      "description": "Bergbahnen in der Axamer Lizum bei Axams, von Innsbruck Tourismus als barrierefreie Bergbahn gelistet.",
+      "tags": ["bergtour", "ski"],
+      "setting": "outdoor",
+      "address": "Axamer Lizum",
+      "postal_code": "6094",
+      "town": "Axams",
+      "website": "https://www.axamer-lizum.at",
+      "source_url": "https://www.innsbruck.info/wandern/d/barrierefreie-bergbahnen.html",
+      "accessibility": {
+        "features": ["rollstuhl"],
+        "note": "Laut innsbruck.info in der Liste der barrierefreien Bergbahnen der Region Innsbruck."
+      }
+    }
+  ]
+}

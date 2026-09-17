@@ -1,0 +1,676 @@
+{
+  "source": "steiermark-com",
+  "source_label": "Steiermark Tourismus (steiermark.com)",
+  "source_url": "https://www.steiermark.com/de/Urlaub-planen/Barrierefreier-Urlaub/barrierefreie-Ausflugsziele",
+  "checked_at": "2026-09-17",
+  "entries": [
+    {
+      "id": "salon-stolz-74306192",
+      "name": "Salon Stolz",
+      "description": "Salon Stolz in Graz: von Steiermark Tourismus als barrierefreies Ausflugsziel zertifiziert. Geeignet laut Zertifizierung für: blinde Personen, Personen im Rollstuhl, Familien mit Kleinkindern, ältere, gehbehinderte und herzkranke Personen, hörbehinderte und gehörlose Personen, Menschen mit Lernschwierigkeiten, Rollstuhlfahrerinnen und Rollstuhlfahrer mit Unterstützung, sehbehinderte Personen.",
+      "description_short": null,
+      "tags": [
+        "museumstour",
+        "ausstellung"
+      ],
+      "setting": "indoor",
+      "address": "Theodor-Körner-Straße 67",
+      "postal_code": "8010",
+      "town": "Graz",
+      "lat": 47.085043753224,
+      "lng": 15.430991706746,
+      "website": "https://www.steiermark.com/de/Region-Graz/Region/Kultur-und-Ausflugsziele/Ausflugsziele/Salon-Stolz_isd_74306192",
+      "source_url": "https://www.steiermark.com/de/Region-Graz/Region/Kultur-und-Ausflugsziele/Ausflugsziele/Salon-Stolz_isd_74306192",
+      "accessibility": {
+        "features": [
+          "rollstuhl",
+          "blind",
+          "gehoerlos",
+          "leichte-sprache"
+        ],
+        "note": "Laut steiermark.com zertifiziert für: blinde Personen, Personen im Rollstuhl, Familien mit Kleinkindern, ältere, gehbehinderte und herzkranke Personen, hörbehinderte und gehörlose Personen, Menschen mit Lernschwierigkeiten, Rollstuhlfahrerinnen und Rollstuhlfahrer mit Unterstützung, sehbehinderte Personen. Grundlage sind Mindestkriterien pro Zielgruppe (z. B. markierter Behindertenparkplatz, Behinderten-WC mit Haltegriffen)."
+      },
+      "images": [
+        {
+          "url": "https://www.steiermark.com/deskline/infrastruktur/objekte/Salon%20Stolz_74306192/6894433/image-thumb__6894433__flatrate-teaser/salon-stolz_74306881.3cf8b785.jpg",
+          "credit": "Salon Stolz - Stella Kager",
+          "license": null,
+          "author": null
+        }
+      ],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "stadthalle-graz-27189373",
+      "name": "Stadthalle Graz",
+      "description": "Stadthalle Graz in Graz: von Steiermark Tourismus als barrierefreies Ausflugsziel zertifiziert. Geeignet laut Zertifizierung für: Personen im Rollstuhl, ältere, gehbehinderte und herzkranke Personen, Menschen mit Lernschwierigkeiten, Rollstuhlfahrerinnen und Rollstuhlfahrer mit Unterstützung, sehbehinderte Personen.",
+      "description_short": null,
+      "tags": [
+        "theater"
+      ],
+      "setting": "indoor",
+      "address": "Messeplatz 1",
+      "postal_code": "8010",
+      "town": "Graz",
+      "lat": 47.057546642861,
+      "lng": 15.446437957642,
+      "website": "https://www.steiermark.com/de/Region-Graz/Region/Kultur-und-Ausflugsziele/Ausflugsziele/Stadthalle-Graz_isd_27189373",
+      "source_url": "https://www.steiermark.com/de/Region-Graz/Region/Kultur-und-Ausflugsziele/Ausflugsziele/Stadthalle-Graz_isd_27189373",
+      "accessibility": {
+        "features": [
+          "rollstuhl",
+          "blind",
+          "leichte-sprache"
+        ],
+        "note": "Laut steiermark.com zertifiziert für: Personen im Rollstuhl, ältere, gehbehinderte und herzkranke Personen, Menschen mit Lernschwierigkeiten, Rollstuhlfahrerinnen und Rollstuhlfahrer mit Unterstützung, sehbehinderte Personen. Grundlage sind Mindestkriterien pro Zielgruppe (z. B. markierter Behindertenparkplatz, Behinderten-WC mit Haltegriffen)."
+      },
+      "images": [
+        {
+          "url": "https://www.steiermark.com/deskline/infrastruktur/objekte/Stadthalle%20Graz_27189373/6624501/image-thumb__6624501__flatrate-teaser/stadthalle-graz_68576882.6f20e1b5.jpg",
+          "credit": "MCG - Werner Krug",
+          "license": null,
+          "author": null
+        }
+      ],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "congress-graz-68576901",
+      "name": "Congress Graz",
+      "description": "Congress Graz in Graz: von Steiermark Tourismus als barrierefreies Ausflugsziel zertifiziert. Geeignet laut Zertifizierung für: Menschen mit Lernschwierigkeiten.",
+      "description_short": null,
+      "tags": [],
+      "setting": null,
+      "address": "Albrechtgasse 1, Sparkassenplatz",
+      "postal_code": "8010",
+      "town": "Graz",
+      "lat": 47.0702641,
+      "lng": 15.4379097,
+      "website": "https://www.steiermark.com/de/Region-Graz/Region/Kultur-und-Ausflugsziele/Ausflugsziele/Congress-Graz_isd_68576901",
+      "source_url": "https://www.steiermark.com/de/Region-Graz/Region/Kultur-und-Ausflugsziele/Ausflugsziele/Congress-Graz_isd_68576901",
+      "accessibility": {
+        "features": [
+          "leichte-sprache"
+        ],
+        "note": "Laut steiermark.com zertifiziert für: Menschen mit Lernschwierigkeiten. Grundlage sind Mindestkriterien pro Zielgruppe (z. B. markierter Behindertenparkplatz, Behinderten-WC mit Haltegriffen)."
+      },
+      "images": [
+        {
+          "url": "https://www.steiermark.com/deskline/infrastruktur/objekte/Congress%20Graz_68576901/7368380/image-thumb__7368380__flatrate-teaser/congress-graz_78876286.5183c016.png",
+          "credit": "MCG - Werner Krug",
+          "license": null,
+          "author": null
+        }
+      ],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "orpheum-74235328",
+      "name": "Orpheum",
+      "description": "Orpheum in Graz Graz: von Steiermark Tourismus als barrierefreies Ausflugsziel zertifiziert. Geeignet laut Zertifizierung für: Personen im Rollstuhl, ältere, gehbehinderte und herzkranke Personen, Menschen mit Lernschwierigkeiten, Rollstuhlfahrerinnen und Rollstuhlfahrer mit Unterstützung, sehbehinderte Personen.",
+      "description_short": null,
+      "tags": [],
+      "setting": null,
+      "address": "Orpheumgasse 8",
+      "postal_code": "8020",
+      "town": "Graz Graz",
+      "lat": 47.0723975,
+      "lng": 15.4300099,
+      "website": "https://www.steiermark.com/de/Region-Graz/Region/Kultur-und-Ausflugsziele/Ausflugsziele/Orpheum_isd_74235328",
+      "source_url": "https://www.steiermark.com/de/Region-Graz/Region/Kultur-und-Ausflugsziele/Ausflugsziele/Orpheum_isd_74235328",
+      "accessibility": {
+        "features": [
+          "rollstuhl",
+          "blind",
+          "leichte-sprache"
+        ],
+        "note": "Laut steiermark.com zertifiziert für: Personen im Rollstuhl, ältere, gehbehinderte und herzkranke Personen, Menschen mit Lernschwierigkeiten, Rollstuhlfahrerinnen und Rollstuhlfahrer mit Unterstützung, sehbehinderte Personen. Grundlage sind Mindestkriterien pro Zielgruppe (z. B. markierter Behindertenparkplatz, Behinderten-WC mit Haltegriffen)."
+      },
+      "images": [
+        {
+          "url": "https://www.steiermark.com/deskline/infrastruktur/objekte/Orpheum_74235328/7235378/image-thumb__7235378__flatrate-teaser/orpheum_77875729.8af184e8.jpg",
+          "credit": "Johanna Lamprecht",
+          "license": null,
+          "author": null
+        }
+      ],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "kasemattenbuhne-74379229",
+      "name": "Kasemattenbühne",
+      "description": "Kasemattenbühne in Graz: von Steiermark Tourismus als barrierefreies Ausflugsziel zertifiziert. Geeignet laut Zertifizierung für: Menschen mit Lernschwierigkeiten.",
+      "description_short": null,
+      "tags": [
+        "theater"
+      ],
+      "setting": "indoor",
+      "address": "Schlossberg 5",
+      "postal_code": "8010",
+      "town": "Graz",
+      "lat": 47.0762613,
+      "lng": 15.4380671,
+      "website": "https://www.steiermark.com/de/Region-Graz/Region/Kultur-und-Ausflugsziele/Ausflugsziele/Kasemattenbuehne_isd_74379229",
+      "source_url": "https://www.steiermark.com/de/Region-Graz/Region/Kultur-und-Ausflugsziele/Ausflugsziele/Kasemattenbuehne_isd_74379229",
+      "accessibility": {
+        "features": [
+          "leichte-sprache"
+        ],
+        "note": "Laut steiermark.com zertifiziert für: Menschen mit Lernschwierigkeiten. Grundlage sind Mindestkriterien pro Zielgruppe (z. B. markierter Behindertenparkplatz, Behinderten-WC mit Haltegriffen)."
+      },
+      "images": [
+        {
+          "url": "https://www.steiermark.com/deskline/infrastruktur/objekte/Kasemattenb%C3%BChne_74379229/6940905/image-thumb__6940905__flatrate-teaser/kasemattenbuhne_75295790.789274fb.jpg",
+          "credit": "Palme Peter",
+          "license": null,
+          "author": null
+        }
+      ],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "steiermarkische-landesbibliothek-74308748",
+      "name": "Steiermärkische Landesbibliothek",
+      "description": "Steiermärkische Landesbibliothek in Graz: von Steiermark Tourismus als barrierefreies Ausflugsziel zertifiziert. Geeignet laut Zertifizierung für: Personen im Rollstuhl, Rollstuhlfahrerinnen und Rollstuhlfahrer mit Unterstützung.",
+      "description_short": null,
+      "tags": [],
+      "setting": null,
+      "address": "Kalchberggasse 2",
+      "postal_code": "8010",
+      "town": "Graz",
+      "lat": 47.0683314,
+      "lng": 15.4385195,
+      "website": "https://www.steiermark.com/de/Region-Graz/Region/Kultur-und-Ausflugsziele/Ausflugsziele/Steiermaerkische-Landesbibliothek_isd_74308748",
+      "source_url": "https://www.steiermark.com/de/Region-Graz/Region/Kultur-und-Ausflugsziele/Ausflugsziele/Steiermaerkische-Landesbibliothek_isd_74308748",
+      "accessibility": {
+        "features": [
+          "rollstuhl"
+        ],
+        "note": "Laut steiermark.com zertifiziert für: Personen im Rollstuhl, Rollstuhlfahrerinnen und Rollstuhlfahrer mit Unterstützung. Grundlage sind Mindestkriterien pro Zielgruppe (z. B. markierter Behindertenparkplatz, Behinderten-WC mit Haltegriffen)."
+      },
+      "images": [
+        {
+          "url": "https://www.steiermark.com/deskline/infrastruktur/objekte/Steierm%C3%A4rkische%20Landesbibliothek_74308748/7646507/image-thumb__7646507__flatrate-teaser/eingang-steiermarkische-landesbibliothek_86738716.db753e9b.jpg",
+          "credit": "Graz Tourismus - Harry Schiffer",
+          "license": null,
+          "author": null
+        }
+      ],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "dom-im-berg-i-grazer-spielstatten-74379250",
+      "name": "Dom im Berg I Grazer Spielstätten",
+      "description": "Dom im Berg I Grazer Spielstätten in Graz: von Steiermark Tourismus als barrierefreies Ausflugsziel zertifiziert. Geeignet laut Zertifizierung für: Menschen mit Lernschwierigkeiten.",
+      "description_short": null,
+      "tags": [],
+      "setting": null,
+      "address": "Schlossbergplatz 1",
+      "postal_code": "8010",
+      "town": "Graz",
+      "lat": 47.0731962,
+      "lng": 15.436878,
+      "website": "https://www.steiermark.com/de/Region-Graz/Region/Kultur-und-Ausflugsziele/Ausflugsziele/Dom-im-Berg-I-Grazer-Spielstaetten_isd_74379250",
+      "source_url": "https://www.steiermark.com/de/Region-Graz/Region/Kultur-und-Ausflugsziele/Ausflugsziele/Dom-im-Berg-I-Grazer-Spielstaetten_isd_74379250",
+      "accessibility": {
+        "features": [
+          "leichte-sprache"
+        ],
+        "note": "Laut steiermark.com zertifiziert für: Menschen mit Lernschwierigkeiten. Grundlage sind Mindestkriterien pro Zielgruppe (z. B. markierter Behindertenparkplatz, Behinderten-WC mit Haltegriffen)."
+      },
+      "images": [
+        {
+          "url": "https://www.steiermark.com/deskline/infrastruktur/objekte/Dom%20im%20Berg%20I%20Grazer%20Spielst%C3%A4tten_74379250/6880492/image-thumb__6880492__flatrate-teaser/dom-im-berg_74559391.a106bca5.jpg",
+          "credit": "Graz Tourismus - Harry Schiffer",
+          "license": null,
+          "author": null
+        }
+      ],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "naturkundemuseum-26687593",
+      "name": "Naturkundemuseum",
+      "description": "Naturkundemuseum in Graz: von Steiermark Tourismus als barrierefreies Ausflugsziel zertifiziert. Geeignet laut Zertifizierung für: Personen im Rollstuhl, Familien mit Kleinkindern, ältere, gehbehinderte und herzkranke Personen, Menschen mit Lernschwierigkeiten, Rollstuhlfahrerinnen und Rollstuhlfahrer mit Unterstützung.",
+      "description_short": null,
+      "tags": [
+        "museumstour",
+        "ausstellung"
+      ],
+      "setting": "indoor",
+      "address": "Joanneumsviertel",
+      "postal_code": "8010",
+      "town": "Graz",
+      "lat": 47.068748007401,
+      "lng": 15.437631011009,
+      "website": "https://www.steiermark.com/de/Region-Graz/Region/Kultur-und-Ausflugsziele/Ausflugsziele/Naturkundemuseum_isd_26687593",
+      "source_url": "https://www.steiermark.com/de/Region-Graz/Region/Kultur-und-Ausflugsziele/Ausflugsziele/Naturkundemuseum_isd_26687593",
+      "accessibility": {
+        "features": [
+          "rollstuhl",
+          "leichte-sprache"
+        ],
+        "note": "Laut steiermark.com zertifiziert für: Personen im Rollstuhl, Familien mit Kleinkindern, ältere, gehbehinderte und herzkranke Personen, Menschen mit Lernschwierigkeiten, Rollstuhlfahrerinnen und Rollstuhlfahrer mit Unterstützung. Grundlage sind Mindestkriterien pro Zielgruppe (z. B. markierter Behindertenparkplatz, Behinderten-WC mit Haltegriffen)."
+      },
+      "images": [
+        {
+          "url": "https://www.steiermark.com/deskline/infrastruktur/objekte/Naturkundemuseum_26687593/6709538/image-thumb__6709538__flatrate-teaser/prapariertes-eichhornchen-im-naturkundemuseum-graz_70449667.adfe0749.jpg",
+          "credit": "UMJ-N. Lackner",
+          "license": null,
+          "author": null
+        }
+      ],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "next-liberty-74235352",
+      "name": "Next Liberty",
+      "description": "Next Liberty in Graz: von Steiermark Tourismus als barrierefreies Ausflugsziel zertifiziert. Geeignet laut Zertifizierung für: Menschen mit Lernschwierigkeiten.",
+      "description_short": null,
+      "tags": [],
+      "setting": null,
+      "address": "Kaiser-Josef-Platz 10",
+      "postal_code": "8010",
+      "town": "Graz",
+      "lat": 47.0689326,
+      "lng": 15.445844,
+      "website": "https://www.steiermark.com/de/Region-Graz/Region/Kultur-und-Ausflugsziele/Ausflugsziele/Next-Liberty_isd_74235352",
+      "source_url": "https://www.steiermark.com/de/Region-Graz/Region/Kultur-und-Ausflugsziele/Ausflugsziele/Next-Liberty_isd_74235352",
+      "accessibility": {
+        "features": [
+          "leichte-sprache"
+        ],
+        "note": "Laut steiermark.com zertifiziert für: Menschen mit Lernschwierigkeiten. Grundlage sind Mindestkriterien pro Zielgruppe (z. B. markierter Behindertenparkplatz, Behinderten-WC mit Haltegriffen)."
+      },
+      "images": [
+        {
+          "url": "https://www.steiermark.com/deskline/infrastruktur/objekte/Next%20Liberty_74235352/6862113/image-thumb__6862113__flatrate-teaser/next-liberty_74235354.aeff72c5.jpg",
+          "credit": "Gudrun Krinzinger",
+          "license": null,
+          "author": null
+        }
+      ],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "helmut-list-halle-74306196",
+      "name": "Helmut List Halle",
+      "description": "Helmut List Halle in Graz: von Steiermark Tourismus als barrierefreies Ausflugsziel zertifiziert. Geeignet laut Zertifizierung für: Menschen mit Lernschwierigkeiten.",
+      "description_short": null,
+      "tags": [
+        "theater"
+      ],
+      "setting": "indoor",
+      "address": "Waagner-Biro Straße 98a",
+      "postal_code": "8020",
+      "town": "Graz",
+      "lat": 47.079472903461,
+      "lng": 15.411336927509,
+      "website": "https://www.steiermark.com/de/Region-Graz/Region/Kultur-und-Ausflugsziele/Ausflugsziele/Helmut-List-Halle_isd_74306196",
+      "source_url": "https://www.steiermark.com/de/Region-Graz/Region/Kultur-und-Ausflugsziele/Ausflugsziele/Helmut-List-Halle_isd_74306196",
+      "accessibility": {
+        "features": [
+          "leichte-sprache"
+        ],
+        "note": "Laut steiermark.com zertifiziert für: Menschen mit Lernschwierigkeiten. Grundlage sind Mindestkriterien pro Zielgruppe (z. B. markierter Behindertenparkplatz, Behinderten-WC mit Haltegriffen)."
+      },
+      "images": [
+        {
+          "url": "https://www.steiermark.com/deskline/infrastruktur/objekte/Helmut%20List%20Halle_74306196/6866041/image-thumb__6866041__flatrate-teaser/buhne-und-zuschauerraum-der-helmut-list-halle-graz_74306198.41bc0e84.jpg",
+          "credit": "Graz Tourismus-Harry Schiffer",
+          "license": null,
+          "author": null
+        }
+      ],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "cosa-center-of-science-activities-26688893",
+      "name": "CoSA – Center of Science Activities",
+      "description": "CoSA – Center of Science Activities in Graz: von Steiermark Tourismus als barrierefreies Ausflugsziel zertifiziert. Geeignet laut Zertifizierung für: Personen im Rollstuhl, Rollstuhlfahrerinnen und Rollstuhlfahrer mit Unterstützung.",
+      "description_short": null,
+      "tags": [],
+      "setting": null,
+      "address": "Joanneumsviertel 1",
+      "postal_code": "8010",
+      "town": "Graz",
+      "lat": 47.068673907317,
+      "lng": 15.437997215334,
+      "website": "https://www.steiermark.com/de/Region-Graz/Region/Kultur-und-Ausflugsziele/Ausflugsziele/CoSA-Center-of-Science-Activities_isd_26688893",
+      "source_url": "https://www.steiermark.com/de/Region-Graz/Region/Kultur-und-Ausflugsziele/Ausflugsziele/CoSA-Center-of-Science-Activities_isd_26688893",
+      "accessibility": {
+        "features": [
+          "rollstuhl"
+        ],
+        "note": "Laut steiermark.com zertifiziert für: Personen im Rollstuhl, Rollstuhlfahrerinnen und Rollstuhlfahrer mit Unterstützung. Grundlage sind Mindestkriterien pro Zielgruppe (z. B. markierter Behindertenparkplatz, Behinderten-WC mit Haltegriffen)."
+      },
+      "images": [
+        {
+          "url": "https://www.steiermark.com/deskline/infrastruktur/objekte/CoSA%20%E2%80%93%20Center%20of%20Science%20Activities_26688893/6681533/image-thumb__6681533__flatrate-teaser/interaktive-ausstellung-planet-wir-im-cosa-graz_69895553.4b97d4f4.jpg",
+          "credit": "UMJ-J.Kucek",
+          "license": null,
+          "author": null
+        }
+      ],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "oper-graz-26689382",
+      "name": "Oper Graz",
+      "description": "Oper Graz in Graz: von Steiermark Tourismus als barrierefreies Ausflugsziel zertifiziert. Geeignet laut Zertifizierung für: Menschen mit Lernschwierigkeiten.",
+      "description_short": null,
+      "tags": [
+        "theater"
+      ],
+      "setting": "indoor",
+      "address": "Kaiser-Josef-Platz 10",
+      "postal_code": "8010",
+      "town": "Graz",
+      "lat": 47.069167808137,
+      "lng": 15.445322276721,
+      "website": "https://www.steiermark.com/de/Region-Graz/Region/Kultur-und-Ausflugsziele/Ausflugsziele/Oper-Graz_isd_26689382",
+      "source_url": "https://www.steiermark.com/de/Region-Graz/Region/Kultur-und-Ausflugsziele/Ausflugsziele/Oper-Graz_isd_26689382",
+      "accessibility": {
+        "features": [
+          "leichte-sprache"
+        ],
+        "note": "Laut steiermark.com zertifiziert für: Menschen mit Lernschwierigkeiten. Grundlage sind Mindestkriterien pro Zielgruppe (z. B. markierter Behindertenparkplatz, Behinderten-WC mit Haltegriffen)."
+      },
+      "images": [
+        {
+          "url": "https://www.steiermark.com/deskline/infrastruktur/objekte/Oper%20Graz_26689382/6676203/image-thumb__6676203__flatrate-teaser/opernhaus-aussenansicht-mit-lichtschwert_28329155.41502f01.jpg",
+          "credit": "Graz Tourismus - Harry Schiffer",
+          "license": null,
+          "author": null
+        }
+      ],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "neue-galerie-graz-und-bruseum-26689581",
+      "name": "Neue Galerie Graz und BRUSEUM",
+      "description": "Neue Galerie Graz und BRUSEUM in Graz: von Steiermark Tourismus als barrierefreies Ausflugsziel zertifiziert. Geeignet laut Zertifizierung für: Personen im Rollstuhl, Familien mit Kleinkindern, ältere, gehbehinderte und herzkranke Personen, hörbehinderte und gehörlose Personen, Rollstuhlfahrerinnen und Rollstuhlfahrer mit Unterstützung.",
+      "description_short": null,
+      "tags": [
+        "museumstour",
+        "ausstellung"
+      ],
+      "setting": "indoor",
+      "address": "Joanneumsviertel",
+      "postal_code": "8010",
+      "town": "Graz",
+      "lat": 47.06837349013,
+      "lng": 15.438022613525,
+      "website": "https://www.steiermark.com/de/Region-Graz/Region/Kultur-und-Ausflugsziele/Ausflugsziele/Neue-Galerie-Graz-und-BRUSEUM_isd_26689581",
+      "source_url": "https://www.steiermark.com/de/Region-Graz/Region/Kultur-und-Ausflugsziele/Ausflugsziele/Neue-Galerie-Graz-und-BRUSEUM_isd_26689581",
+      "accessibility": {
+        "features": [
+          "rollstuhl",
+          "gehoerlos"
+        ],
+        "note": "Laut steiermark.com zertifiziert für: Personen im Rollstuhl, Familien mit Kleinkindern, ältere, gehbehinderte und herzkranke Personen, hörbehinderte und gehörlose Personen, Rollstuhlfahrerinnen und Rollstuhlfahrer mit Unterstützung. Grundlage sind Mindestkriterien pro Zielgruppe (z. B. markierter Behindertenparkplatz, Behinderten-WC mit Haltegriffen)."
+      },
+      "images": [
+        {
+          "url": "https://www.steiermark.com/deskline/infrastruktur/objekte/Neue%20Galerie%20Graz%20und%20BRUSEUM_26689581/6709544/image-thumb__6709544__flatrate-teaser/zeitgenossische-kunst-in-der-neuen-galerie-graz_70449788.831475d8.jpg",
+          "credit": "Graz Tourismus-Harry Schiffer",
+          "license": null,
+          "author": null
+        }
+      ],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "kunsthaus-graz-26689980",
+      "name": "Kunsthaus Graz",
+      "description": "Kunsthaus Graz: von Steiermark Tourismus als barrierefreies Ausflugsziel zertifiziert. Geeignet laut Zertifizierung für: Personen im Rollstuhl, ältere, gehbehinderte und herzkranke Personen, hörbehinderte und gehörlose Personen, Menschen mit Lernschwierigkeiten, Rollstuhlfahrerinnen und Rollstuhlfahrer mit Unterstützung, sehbehinderte Personen.",
+      "description_short": null,
+      "tags": [
+        "museumstour",
+        "ausstellung"
+      ],
+      "setting": "indoor",
+      "address": null,
+      "postal_code": null,
+      "town": null,
+      "lat": null,
+      "lng": null,
+      "website": "https://www.steiermark.com/de/Region-Graz/Region/Kultur-und-Ausflugsziele/Ausflugsziele/Kunsthaus-Graz_isd_26689980",
+      "source_url": "https://www.steiermark.com/de/Region-Graz/Region/Kultur-und-Ausflugsziele/Ausflugsziele/Kunsthaus-Graz_isd_26689980",
+      "accessibility": {
+        "features": [
+          "rollstuhl",
+          "blind",
+          "gehoerlos",
+          "leichte-sprache"
+        ],
+        "note": "Laut steiermark.com zertifiziert für: Personen im Rollstuhl, ältere, gehbehinderte und herzkranke Personen, hörbehinderte und gehörlose Personen, Menschen mit Lernschwierigkeiten, Rollstuhlfahrerinnen und Rollstuhlfahrer mit Unterstützung, sehbehinderte Personen. Grundlage sind Mindestkriterien pro Zielgruppe (z. B. markierter Behindertenparkplatz, Behinderten-WC mit Haltegriffen)."
+      },
+      "images": [
+        {
+          "url": "https://www.steiermark.com/deskline/infrastruktur/objekte/Kunsthaus%20Graz_26689980/3400430/image-thumb__3400430__flatrate-teaser/Kunsthaus%20Graz_28329674.9ed7239e.jpg",
+          "credit": "Graz Tourismus - Harry Schiffer",
+          "license": null,
+          "author": null
+        }
+      ],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "schauspielhaus-graz-74308833",
+      "name": "Schauspielhaus Graz",
+      "description": "Schauspielhaus Graz in Graz: von Steiermark Tourismus als barrierefreies Ausflugsziel zertifiziert. Geeignet laut Zertifizierung für: Menschen mit Lernschwierigkeiten.",
+      "description_short": null,
+      "tags": [],
+      "setting": null,
+      "address": "Hofgasse 11",
+      "postal_code": "8010",
+      "town": "Graz",
+      "lat": 47.0727939,
+      "lng": 15.4415463,
+      "website": "https://www.steiermark.com/de/Region-Graz/Region/Kultur-und-Ausflugsziele/Ausflugsziele/Schauspielhaus-Graz_isd_74308833",
+      "source_url": "https://www.steiermark.com/de/Region-Graz/Region/Kultur-und-Ausflugsziele/Ausflugsziele/Schauspielhaus-Graz_isd_74308833",
+      "accessibility": {
+        "features": [
+          "leichte-sprache"
+        ],
+        "note": "Laut steiermark.com zertifiziert für: Menschen mit Lernschwierigkeiten. Grundlage sind Mindestkriterien pro Zielgruppe (z. B. markierter Behindertenparkplatz, Behinderten-WC mit Haltegriffen)."
+      },
+      "images": [
+        {
+          "url": "https://www.steiermark.com/deskline/infrastruktur/objekte/Schauspielhaus%20Graz_74308833/6880619/image-thumb__6880619__flatrate-teaser/schauspielhaus-graz_74559739.cdc38389.jpg",
+          "credit": "Lupi Spuma",
+          "license": null,
+          "author": null
+        }
+      ],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "das-lorenz-68576426",
+      "name": "Das Lorenz",
+      "description": "Das Lorenz in Graz: von Steiermark Tourismus als barrierefreies Ausflugsziel zertifiziert. Geeignet laut Zertifizierung für: Familien mit Kleinkindern, Menschen mit Lernschwierigkeiten.",
+      "description_short": null,
+      "tags": [],
+      "setting": null,
+      "address": "Heinrichstraße 145",
+      "postal_code": "8010",
+      "town": "Graz",
+      "lat": 47.0864226,
+      "lng": 15.4566832,
+      "website": "https://www.steiermark.com/de/Region-Graz/Region/Kultur-und-Ausflugsziele/Ausflugsziele/Das-Lorenz_isd_68576426",
+      "source_url": "https://www.steiermark.com/de/Region-Graz/Region/Kultur-und-Ausflugsziele/Ausflugsziele/Das-Lorenz_isd_68576426",
+      "accessibility": {
+        "features": [
+          "leichte-sprache"
+        ],
+        "note": "Laut steiermark.com zertifiziert für: Familien mit Kleinkindern, Menschen mit Lernschwierigkeiten. Grundlage sind Mindestkriterien pro Zielgruppe (z. B. markierter Behindertenparkplatz, Behinderten-WC mit Haltegriffen)."
+      },
+      "images": [
+        {
+          "url": "https://www.steiermark.com/deskline/infrastruktur/objekte/Das%20Lorenz_68576426/6624506/image-thumb__6624506__flatrate-teaser/symbolbild_68576924.94d86639.jpg",
+          "credit": "Region Graz - Harry Schiffer",
+          "license": null,
+          "author": null
+        }
+      ],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "museum-fur-geschichte-26690225",
+      "name": "Museum für Geschichte",
+      "description": "Museum für Geschichte in Graz: von Steiermark Tourismus als barrierefreies Ausflugsziel zertifiziert. Geeignet laut Zertifizierung für: Menschen mit Lernschwierigkeiten.",
+      "description_short": null,
+      "tags": [
+        "museumstour",
+        "ausstellung"
+      ],
+      "setting": "indoor",
+      "address": "Sackstraße 16",
+      "postal_code": "8010",
+      "town": "Graz",
+      "lat": 47.0724935,
+      "lng": 15.4367961,
+      "website": "https://www.steiermark.com/de/Region-Graz/Region/Kultur-und-Ausflugsziele/Ausflugsziele/Museum-fuer-Geschichte_isd_26690225",
+      "source_url": "https://www.steiermark.com/de/Region-Graz/Region/Kultur-und-Ausflugsziele/Ausflugsziele/Museum-fuer-Geschichte_isd_26690225",
+      "accessibility": {
+        "features": [
+          "leichte-sprache"
+        ],
+        "note": "Laut steiermark.com zertifiziert für: Menschen mit Lernschwierigkeiten. Grundlage sind Mindestkriterien pro Zielgruppe (z. B. markierter Behindertenparkplatz, Behinderten-WC mit Haltegriffen)."
+      },
+      "images": [
+        {
+          "url": "https://www.steiermark.com/deskline/infrastruktur/objekte/Museum%20f%C3%BCr%20Geschichte_26690225/6709559/image-thumb__6709559__flatrate-teaser/barockportal-im-museum-fur-geschichte-graz_70449809.e6a5dd7b.jpg",
+          "credit": "UMJ-J. Kucek",
+          "license": null,
+          "author": null
+        }
+      ],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "das-holzmuseum-5920145",
+      "name": "Das Holzmuseum",
+      "description": "Das Holzmuseum in St. Ruprecht: von Steiermark Tourismus als barrierefreies Ausflugsziel zertifiziert. Geeignet laut Zertifizierung für: blinde Personen, Familien mit Kleinkindern, ältere, gehbehinderte und herzkranke Personen, hörbehinderte und gehörlose Personen, Menschen mit Lernschwierigkeiten, Rollstuhlfahrerinnen und Rollstuhlfahrer mit Unterstützung, sehbehinderte Personen.",
+      "description_short": null,
+      "tags": [
+        "museumstour",
+        "ausstellung"
+      ],
+      "setting": "indoor",
+      "address": "Hans-Edler-Platz 1",
+      "postal_code": "8862",
+      "town": "St. Ruprecht",
+      "lat": 47.112184825178,
+      "lng": 14.025965871828,
+      "website": "https://www.steiermark.com/de/Murau/Urlaub-planen/Ausflugsziele/Das-Holzmuseum_isd_5920145",
+      "source_url": "https://www.steiermark.com/de/Murau/Urlaub-planen/Ausflugsziele/Das-Holzmuseum_isd_5920145",
+      "accessibility": {
+        "features": [
+          "rollstuhl",
+          "blind",
+          "gehoerlos",
+          "leichte-sprache"
+        ],
+        "note": "Laut steiermark.com zertifiziert für: blinde Personen, Familien mit Kleinkindern, ältere, gehbehinderte und herzkranke Personen, hörbehinderte und gehörlose Personen, Menschen mit Lernschwierigkeiten, Rollstuhlfahrerinnen und Rollstuhlfahrer mit Unterstützung, sehbehinderte Personen. Grundlage sind Mindestkriterien pro Zielgruppe (z. B. markierter Behindertenparkplatz, Behinderten-WC mit Haltegriffen)."
+      },
+      "images": [
+        {
+          "url": "https://www.steiermark.com/deskline/infrastruktur/objekte/Das%20Holzmuseum_5920145/7656716/image-thumb__7656716__flatrate-teaser/holzmuseum-ausstellung_87056816.a52fb00f.jpg",
+          "credit": "Steiermark Tourismus",
+          "license": null,
+          "author": null
+        }
+      ],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "zotter-schoko-erlebniswelt-2544230",
+      "name": "Zotter Schoko Erlebniswelt",
+      "description": "Zotter Schoko Erlebniswelt in Riegersburg: von Steiermark Tourismus als barrierefreies Ausflugsziel zertifiziert. Geeignet laut Zertifizierung für: Menschen mit Lernschwierigkeiten.",
+      "description_short": null,
+      "tags": [
+        "museumstour",
+        "ausstellung"
+      ],
+      "setting": "indoor",
+      "address": "Bergl 56",
+      "postal_code": "8333",
+      "town": "Riegersburg",
+      "lat": 46.9916142,
+      "lng": 15.9084092,
+      "website": "https://www.steiermark.com/de/Thermen-Vulkanland/Urlaub-planen/Ausflugsziele/Zotter-Schoko-Erlebniswelt_isd_2544230",
+      "source_url": "https://www.steiermark.com/de/Thermen-Vulkanland/Urlaub-planen/Ausflugsziele/Zotter-Schoko-Erlebniswelt_isd_2544230",
+      "accessibility": {
+        "features": [
+          "leichte-sprache"
+        ],
+        "note": "Laut steiermark.com zertifiziert für: Menschen mit Lernschwierigkeiten. Grundlage sind Mindestkriterien pro Zielgruppe (z. B. markierter Behindertenparkplatz, Behinderten-WC mit Haltegriffen)."
+      },
+      "images": [
+        {
+          "url": "https://www.steiermark.com/deskline/infrastruktur/objekte/Zotter%20Schokolade_2544230/4854784/image-thumb__4854784__flatrate-teaser/julia-josef-zotter_42105150.797fd503.jpg",
+          "credit": "Zotter Erlebniswelt",
+          "license": null,
+          "author": null
+        }
+      ],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "narzissen-vital-resort-solebad-3418708",
+      "name": "Narzissen Vital Resort - Solebad",
+      "description": "Narzissen Vital Resort - Solebad in Bad Aussee: von Steiermark Tourismus als barrierefreies Ausflugsziel zertifiziert. Geeignet laut Zertifizierung für: Familien mit Kleinkindern, ältere, gehbehinderte und herzkranke Personen, Menschen mit Lernschwierigkeiten, Rollstuhlfahrerinnen und Rollstuhlfahrer mit Unterstützung.",
+      "description_short": null,
+      "tags": [
+        "schwimmen",
+        "thermen-special"
+      ],
+      "setting": "indoor",
+      "address": "Pötschenstraße 172",
+      "postal_code": "8990",
+      "town": "Bad Aussee",
+      "lat": 47.611125076963,
+      "lng": 13.764774799347,
+      "website": "https://www.steiermark.com/de/Ausseerland-Salzkammergut/Urlaub-planen/Ausflugsziele/Narzissen-Vital-Resort-Solebad_isd_3418708",
+      "source_url": "https://www.steiermark.com/de/Ausseerland-Salzkammergut/Urlaub-planen/Ausflugsziele/Narzissen-Vital-Resort-Solebad_isd_3418708",
+      "accessibility": {
+        "features": [
+          "rollstuhl",
+          "leichte-sprache"
+        ],
+        "note": "Laut steiermark.com zertifiziert für: Familien mit Kleinkindern, ältere, gehbehinderte und herzkranke Personen, Menschen mit Lernschwierigkeiten, Rollstuhlfahrerinnen und Rollstuhlfahrer mit Unterstützung. Grundlage sind Mindestkriterien pro Zielgruppe (z. B. markierter Behindertenparkplatz, Behinderten-WC mit Haltegriffen)."
+      },
+      "images": [
+        {
+          "url": "https://www.steiermark.com/deskline/infrastruktur/objekte/Narzissen%20Vital%20Resort%20-%20Solebad_3418708/6254346/image-thumb__6254346__flatrate-teaser/narzissen-vital-resort-bad-aussee-aussenansicht_16382137.5ebdb1ca.jpg",
+          "credit": "Karl Steinegger",
+          "license": null,
+          "author": null
+        }
+      ],
+      "price_hint": null,
+      "opening_hint": null
+    }
+  ]
+}
