@@ -26,6 +26,7 @@ function rawPoi(overrides: Partial<DesklineInfrastructure> = {}): DesklineInfras
       { dateFrom: '2026-05-01T00:00:00', dateTo: '2026-09-30T00:00:00', timeFrom: '09:00', timeTo: '19:00', weekdays: 127 },
     ],
     topics: [{ id: 't1', name: 'Strandbad' }],
+    holidayThemes: [{ id: 'h1', name: 'Sommer' }, { id: 'h2', name: 'Barrierefrei' }],
     location: { town: 'Podersdorf am See', coordinate: { lat: 47.852, long: 16.847 } },
     images: [
       { copyright: 'TVB Podersdorf', license: 'CC BY', author: 'M. Muster', urls: ['//resc.deskline.net/images/BGL/1/x/10/bild.jpg'] },
@@ -65,6 +66,10 @@ describe('transformInfrastructure — Happy Path', () => {
     expect(a.content_fingerprint).toMatch(/^[0-9a-f]{40}$/);
     expect(a.guest_cards).toEqual([{ id: 'gc1', name: 'Neusiedler See Card', type: 1, webLink: null }]);
     expect(a.topics_raw).toEqual([{ id: 't1', name: 'Strandbad' }]);
+    expect(a.themes_raw).toEqual([{ id: 'h1', name: 'Sommer' }, { id: 'h2', name: 'Barrierefrei' }]);
+    expect(a.accessibility).toEqual({ basis: 'deskline-theme', themes: ['Barrierefrei'], features: [] });
+    expect(UPDATE_BUSINESS_COLUMNS).toContain('themes_raw');
+    expect(UPDATE_BUSINESS_COLUMNS).toContain('accessibility');
     // bezirk: kanonischer Name aus der Registry-Zeile (Podersdorf -> Bezirk
     // Neusiedl am See), gleiches Vokabular wie events.district.
     expect(a.bezirk).toBe('neusiedl am see');
@@ -282,5 +287,36 @@ describe('Text-Helpers', () => {
 
   it('cleanActivityName: NBSP + Mehrfach-Whitespace kollabiert', () => {
     expect(cleanActivityName('  Bad   Sauerbrunn  ')).toBe('Bad Sauerbrunn');
+  });
+});
+
+describe('transformInfrastructure — Barrierefreiheit', () => {
+  it('ohne Thema und ohne Text-Signal kein Befund', () => {
+    const a = transformOk({ holidayThemes: [{ id: 'h1', name: 'Sommer' }] });
+    expect(a.accessibility).toBeNull();
+    expect(a.themes_raw).toEqual([{ id: 'h1', name: 'Sommer' }]);
+  });
+
+  it('Text-Signal ohne Thema: basis deskline-text mit Merkmalen', () => {
+    const a = transformOk({
+      holidayThemes: null,
+      plainDescriptions: [
+        { description: 'Rollstuhlgerechter Zugang, Behindertenparkplatz vor dem Eingang.', type: 42 },
+      ],
+    });
+    expect(a.themes_raw).toBeNull();
+    expect(a.accessibility).toEqual({
+      basis: 'deskline-text',
+      themes: [],
+      features: ['rollstuhl', 'parkplatz'],
+    });
+  });
+
+  it('Verneinung im Text ergibt keinen Befund', () => {
+    const a = transformOk({
+      holidayThemes: null,
+      plainDescriptions: [{ description: 'Der Turm ist leider nicht barrierefrei.', type: 42 }],
+    });
+    expect(a.accessibility).toBeNull();
   });
 });

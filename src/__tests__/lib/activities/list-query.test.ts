@@ -55,6 +55,7 @@ describe('buildActivitiesQuery', () => {
         tag: 'schwimmen',
         setting: null,
         q: 'Bad  Gastein ',
+        accessible: false,
       },
       { count: true },
     );
@@ -160,17 +161,37 @@ describe('Seiten-URL-Codec', () => {
       tag: 'ski',
       setting: 'outdoor',
       q: 'Lift',
+      accessible: true,
     });
     const search = filtersToPageSearch(filters);
-    expect(search).toBe('?bundesland=tirol&bezirk=kitzb%C3%BChel%2Cschwaz&tag=ski&setting=outdoor&q=Lift');
+    expect(search).toBe(
+      '?bundesland=tirol&bezirk=kitzb%C3%BChel%2Cschwaz&tag=ski&setting=outdoor&q=Lift&barrierefrei=1',
+    );
     expect(filtersFromPageSearch(search)).toEqual(filters);
     expect(filtersFromPageSearch(search.slice(1))).toEqual(filters);
   });
 
   it('liefert ohne Filter einen leeren String und verwirft Muell aus der URL', () => {
     expect(filtersToPageSearch(EMPTY_ACTIVITY_FILTERS)).toBe('');
-    expect(filtersFromPageSearch('?bezirk=zell+am+see&tag=foo&setting=bar&q=a')).toEqual(
+    expect(filtersFromPageSearch('?bezirk=zell+am+see&tag=foo&setting=bar&q=a&barrierefrei=ja')).toEqual(
       EMPTY_ACTIVITY_FILTERS,
     );
+  });
+});
+
+describe('Barrierefrei (2026-09-17)', () => {
+  it('ist eine eigene UND-Dimension: Param barrierefrei=1 vor count/limit, zaehlt als Filter', () => {
+    const filters = normalizeActivityFilters({ ...EMPTY_ACTIVITY_FILTERS, tag: 'museumstour', accessible: true });
+    expect(buildActivitiesQuery(filters, { count: true })).toBe(
+      `?tag=museumstour&barrierefrei=1&count=1&limit=${ACTIVITY_LIST_PAGE_SIZE}`,
+    );
+    expect(hasActiveFilter({ ...EMPTY_ACTIVITY_FILTERS, accessible: true })).toBe(true);
+    expect(countActiveFilters(filters)).toBe(2);
+    expect(filtersFromPageSearch('?barrierefrei=1')).toEqual({ ...EMPTY_ACTIVITY_FILTERS, accessible: true });
+  });
+
+  it('nur der Wert 1 schaltet den Filter ein', () => {
+    expect(normalizeActivityFilters({ accessible: 'true' as never })).toEqual(EMPTY_ACTIVITY_FILTERS);
+    expect(filtersFromPageSearch('?barrierefrei=0')).toEqual(EMPTY_ACTIVITY_FILTERS);
   });
 });

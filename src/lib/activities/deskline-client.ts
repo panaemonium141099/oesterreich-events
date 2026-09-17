@@ -65,6 +65,10 @@ export const INFRASTRUCTURE_FIELDS = [
   'openStatus',
   'openingTimes{dateFrom,dateTo,timeFrom,timeTo,weekdays}',
   'topics{id,name}',
+  // Urlaubsthemen der Region; darin steckt die einzige strukturierte
+  // Barrierefrei-Markierung ("Barrierefrei", "Rollstuhlgängig" — live
+  // verprobt 2026-09-17 in SalzburgerLand/Salzkammergut).
+  'holidayThemes{id,name}',
   'location{town,coordinate{name,long,lat}}',
   'images(count:3,sizes:[10]){copyright,license,author,urls}',
   'plainDescriptions{description,type}',
@@ -113,6 +117,7 @@ export interface DesklineInfrastructure {
   openStatus?: number;
   openingTimes?: DesklineOpeningTime[] | null;
   topics?: DesklineTopic[] | null;
+  holidayThemes?: DesklineTopic[] | null;
   location?: {
     town?: string | null;
     coordinate?: { name?: string; long?: number; lat?: number } | null;

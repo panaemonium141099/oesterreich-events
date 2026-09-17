@@ -38,6 +38,8 @@ export interface ActivityListItem {
   images: unknown;
   /** Ranking-Spalte — nur fuer die Cursor-Fortsetzung, nicht rendern. */
   quality_score: number;
+  /** Barrierefrei-Badge auf der Karte (generierte Spalte, 2026-09-17). */
+  accessible?: boolean;
 }
 
 export interface ActivityListPage {
@@ -59,7 +61,7 @@ export interface ActivityBezirkCount {
 }
 
 const LIST_COLUMNS =
-  'id, slug, name, tags, town, bundesland, setting, price_hint, images, quality_score';
+  'id, slug, name, tags, town, bundesland, setting, price_hint, images, quality_score, accessible';
 
 /** Lazy — kein Modul-Load-Throw, damit tsc/Tests ohne Env laufen. */
 function getServiceClient(): SupabaseClient {

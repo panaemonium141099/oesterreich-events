@@ -199,6 +199,10 @@ export class SupabaseActivityStore implements ActivityStore {
         const { data, error } = await this.supabase
           .from(TABLE)
           .select('id, source_id, content_fingerprint, created_at, visible, duplicate_of, last_seen_complete_run_seq')
+          // Nur Deskline-Zeilen: kuratierte Quellen (barrierefrei-web,
+          // 2026-09-17) haben keine Laufsichtungen und duerfen weder
+          // Canonical werden noch als tot gelten.
+          .eq('source', 'deskline')
           .in('content_fingerprint', slice)
           .order('id', { ascending: true })
           .range(from, from + PAGE_SIZE - 1);
@@ -249,6 +253,10 @@ export class SupabaseActivityStore implements ActivityStore {
       const { data, error } = await this.supabase
         .from(TABLE)
         .select('id, content_fingerprint')
+        // Prune gilt nur fuer den Deskline-Bestand — kuratierte Zeilen
+        // (source barrierefrei-web) haben nie eine Laufsichtung und waeren
+        // sonst nach zwei complete_runs unsichtbar.
+        .eq('source', 'deskline')
         .or(`last_seen_complete_run_seq.is.null,last_seen_complete_run_seq.lt.${thresholdSeq}`)
         .lt('created_at', thresholdStartedAtIso)
         .or('visible.eq.true,duplicate_of.not.is.null')

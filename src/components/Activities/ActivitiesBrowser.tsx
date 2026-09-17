@@ -28,6 +28,7 @@ import { useLocale, useTranslations } from 'next-intl';
 import { Link as LocaleLink } from '@/i18n/navigation';
 import { activityTagLabel } from '@/lib/activities/tag-labels';
 import { ActivityCardImage } from './ActivityCardImage';
+import { AccessibilityIcon } from '@/components/UI/Icons';
 import { ActivityFilterBar, type BundeslandOption } from './ActivityFilterBar';
 import type { ActivityBezirkCount, ActivityListItem } from '@/lib/activities/list-loaders';
 import {
@@ -224,7 +225,18 @@ export function ActivitiesBrowser({
               />
               <div className="p-3">
                 <div className="font-semibold leading-snug line-clamp-2 mb-1">{a.name}</div>
-                {a.town && <div className="text-xs text-white/50">{a.town}</div>}
+                <div className="flex items-center gap-2 text-xs text-white/50">
+                  {a.town && <span>{a.town}</span>}
+                  {a.accessible && (
+                    <span
+                      className="inline-flex items-center gap-1 rounded-full bg-sky-400/15 text-sky-200 px-2 py-0.5 text-[11px] font-medium"
+                      title={t('accessibleBadge')}
+                    >
+                      <AccessibilityIcon size={12} />
+                      {t('accessibleBadge')}
+                    </span>
+                  )}
+                </div>
                 {a.price_hint && (
                   <div className="text-xs text-white/40 mt-1 line-clamp-1">{a.price_hint}</div>
                 )}

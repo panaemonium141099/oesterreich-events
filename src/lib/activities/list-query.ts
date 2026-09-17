@@ -68,6 +68,10 @@ export interface ActivityListFilters {
   setting: ActivitySetting | null;
   /** Freitext auf Name/Ort; '' = kein Filter. */
   q: string;
+  /** Nur barrierefreie Orte (Spalte `accessible`, 2026-09-17). Eigene
+   *  UND-Dimension, kein Thema: ein barrierefreies Museum bleibt ein
+   *  Museum und muss mit Thema/Bezirk/Umgebung kombinierbar sein. */
+  accessible: boolean;
 }
 
 export const EMPTY_ACTIVITY_FILTERS: ActivityListFilters = {
@@ -76,6 +80,7 @@ export const EMPTY_ACTIVITY_FILTERS: ActivityListFilters = {
   tag: null,
   setting: null,
   q: '',
+  accessible: false,
 };
 
 /** Bundesland-IDs sind lowercase-Slugs — alles andere wird verworfen. */
@@ -87,7 +92,8 @@ export function hasActiveFilter(filters: ActivityListFilters): boolean {
     filters.bezirke.length > 0 ||
     filters.tag !== null ||
     filters.setting !== null ||
-    filters.q !== ''
+    filters.q !== '' ||
+    filters.accessible
   );
 }
 
@@ -98,7 +104,8 @@ export function countActiveFilters(filters: ActivityListFilters): number {
     (filters.bezirke.length > 0 ? 1 : 0) +
     (filters.tag ? 1 : 0) +
     (filters.setting ? 1 : 0) +
-    (filters.q ? 1 : 0)
+    (filters.q ? 1 : 0) +
+    (filters.accessible ? 1 : 0)
   );
 }
 
@@ -175,7 +182,8 @@ export function normalizeActivityFilters(raw: Partial<ActivityListFilters>): Act
       ? (raw.setting as ActivitySetting)
       : null;
   const q = normalizeActivitySearch(raw.q);
-  return { bundesland, bezirke, tag, setting, q };
+  const accessible = raw.accessible === true;
+  return { bundesland, bezirke, tag, setting, q, accessible };
 }
 
 /** `bezirk`-Query-Param (kommagetrennt) -> Liste; Kodierung via URLSearchParams. */
@@ -186,8 +194,8 @@ export function splitBezirkParam(raw: string | null | undefined): string[] {
 
 /**
  * Query-String fuer /api/activities inkl. fuehrendem '?'. Parameter-
- * Reihenfolge ist fix (bundesland, bezirk, tag, setting, q, count, limit,
- * cursor), damit gleiche Filter denselben URL-String und damit denselben
+ * Reihenfolge ist fix (bundesland, bezirk, tag, setting, q, barrierefrei,
+ * count, limit, cursor), damit gleiche Filter denselben URL-String und damit denselben
  * Edge-Cache-Key erzeugen. Kodierung uebernimmt URLSearchParams (Umlaut-
  * Tags wie 'naturführung' und Bezirke wie 'zell am see' muessen
  * prozentkodiert raus).
@@ -203,6 +211,7 @@ export function buildActivitiesQuery(
   if (normalized.tag) params.set('tag', normalized.tag);
   if (normalized.setting) params.set('setting', normalized.setting);
   if (normalized.q) params.set('q', normalized.q);
+  if (normalized.accessible) params.set('barrierefrei', '1');
   if (options.count) params.set('count', '1');
   params.set('limit', String(options.limit ?? ACTIVITY_LIST_PAGE_SIZE));
   if (options.cursor) params.set('cursor', options.cursor);
@@ -222,6 +231,7 @@ export function filtersToPageSearch(filters: ActivityListFilters): string {
   if (normalized.tag) params.set('tag', normalized.tag);
   if (normalized.setting) params.set('setting', normalized.setting);
   if (normalized.q) params.set('q', normalized.q);
+  if (normalized.accessible) params.set('barrierefrei', '1');
   const s = params.toString();
   return s ? `?${s}` : '';
 }
@@ -234,5 +244,6 @@ export function filtersFromPageSearch(search: string): ActivityListFilters {
     tag: params.get('tag'),
     setting: params.get('setting') as ActivitySetting | null,
     q: params.get('q') ?? '',
+    accessible: params.get('barrierefrei') === '1',
   });
 }

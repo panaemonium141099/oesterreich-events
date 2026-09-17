@@ -418,7 +418,13 @@
     "bookingPriceDisclaimer": "Price may vary",
     "bookingCta": "View offer",
     "bookingReviews": "reviews",
-    "bookingDisclosure": "Booking and payment happen at {provider}. If you buy there we receive a commission — the price stays the same for you."
+    "bookingDisclosure": "Booking and payment happen at {provider}. If you buy there we receive a commission — the price stays the same for you.",
+    "accessibilityTitle": "Accessibility",
+    "accessibilityReported": "Accessibility has been reported for this place. Details are in the description or available from the operator.",
+    "accessibilitySource": "According to",
+    "accessibilitySourceRegion": "the tourism region (Feratel Deskline)",
+    "accessibilitySourceText": "the description by the operator (Feratel Deskline)",
+    "accessibilityChecked": "checked on {date}"
   },
   "Activities": {
     "pageTitle": "Things to do & attractions in Austria",
@@ -461,7 +467,11 @@
     "emptyTitle": "No places for this selection",
     "emptyHint": "Try fewer districts, another topic, or reset the filters.",
     "openFilters": "Open filters",
-    "closeFilters": "Close filters"
+    "closeFilters": "Close filters",
+    "filterAccessibility": "Accessibility",
+    "filterAccessible": "Accessible",
+    "filterAccessibleHint": "Only places with reported accessibility: from the region, the operator or verified directories. Details are on each page.",
+    "accessibleBadge": "Accessible"
   },
   "Tours": {
     "eyebrow": "Experiences",

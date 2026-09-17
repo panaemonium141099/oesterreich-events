@@ -35,6 +35,7 @@ import { extractPriceHint } from './price-hint';
 import { contentFingerprint, fixMojibake } from './fingerprint';
 import { normalizeOpeningTimes, type NormalizedOpeningWindow } from './opening';
 import { bundeslandToId } from '@/lib/bundeslaender';
+import { buildDesklineAccessibility, type DesklineAccessibility } from './accessibility';
 import type { DesklineInfrastructure } from './deskline-client';
 
 export const ACTIVITY_SOURCE = 'deskline';
@@ -73,6 +74,12 @@ export interface TransformedActivity {
   description_short: string | null;
   tags: string[];
   topics_raw: unknown;
+  /** holidayThemes der Region (roh), Quelle der Barrierefrei-Markierung. */
+  themes_raw: unknown;
+  /** Barrierefrei-Befund aus Themen/Text; NULL = kein Befund. Die
+   *  kuratierte Spalte accessibility_curated gehoert NICHT zum Deskline-
+   *  Pfad (siehe accessibility.ts). */
+  accessibility: DesklineAccessibility | null;
   setting: ActivitySetting | null;
   lat: number;
   lng: number;
@@ -252,6 +259,12 @@ export function transformInfrastructure(
   const descriptionShort = descTexts.get(DESC_TYPE_SHORT) ?? null;
   const priceHint = extractPriceHint(allTexts.join('\n'));
 
+  // 5b) Barrierefreiheit: holidayThemes (strukturiert) vor Text.
+  const themeNames = Array.isArray(raw.holidayThemes)
+    ? raw.holidayThemes.map((t) => t?.name).filter((n): n is string => typeof n === 'string')
+    : [];
+  const accessibility = buildDesklineAccessibility(themeNames, allTexts);
+
   // 6) Bilder (Attribution ist Pflicht — copyright/license/author mitnehmen).
   let images: ActivityImage[] | null = null;
   if (Array.isArray(raw.images)) {
@@ -292,6 +305,8 @@ export function transformInfrastructure(
     description_short: descriptionShort,
     tags: topicResult.tags,
     topics_raw: Array.isArray(raw.topics) && raw.topics.length > 0 ? raw.topics : null,
+    themes_raw: Array.isArray(raw.holidayThemes) && raw.holidayThemes.length > 0 ? raw.holidayThemes : null,
+    accessibility,
     setting: topicResult.setting,
     lat,
     lng,
@@ -330,6 +345,8 @@ export const UPDATE_BUSINESS_COLUMNS = [
   'description_short',
   'tags',
   'topics_raw',
+  'themes_raw',
+  'accessibility',
   'setting',
   'lat',
   'lng',

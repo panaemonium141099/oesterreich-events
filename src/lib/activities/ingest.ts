@@ -37,6 +37,7 @@
  * DIESEM Lauf gesehenen Regionen pro Row.
  */
 
+import { suppressSharedTextEvidence } from './accessibility';
 import {
   transformInfrastructure,
   buildInsertRow,
@@ -583,7 +584,9 @@ export async function runIngest(deps: IngestDeps, opts: IngestOptions): Promise<
   }
 
   // ── Schreibphase + Rekonsolidierung + Prune (crash-konsistent) ────────────
-  const activities = [...state.bySourceId.values()];
+  // Barrierefrei-Textbefunde, die nur aus einem Ortstext-Baustein stammen,
+  // der an vielen POIs haengt, zaehlen nicht (accessibility.ts).
+  const activities = suppressSharedTextEvidence([...state.bySourceId.values()]);
   const finishedCompletes = await store.getRecentCompleteRuns(2);
   // Fuer Liveness/Prune zaehlt der AKTUELLE Lauf mit, sobald er complete ist
   // (seine Sichtungen sind vor Reconcile/Prune vollstaendig gestempelt).

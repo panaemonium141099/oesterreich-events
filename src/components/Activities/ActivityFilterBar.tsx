@@ -38,7 +38,7 @@ import {
 } from 'react';
 import { createPortal } from 'react-dom';
 import { useLocale, useTranslations } from 'next-intl';
-import { CheckIcon, MapPinIcon, SearchIcon, SlidersIcon } from '@/components/UI/Icons';
+import { AccessibilityIcon, CheckIcon, MapPinIcon, SearchIcon, SlidersIcon } from '@/components/UI/Icons';
 import { activityTagLabel } from '@/lib/activities/tag-labels';
 import type { ActivityBezirkCount } from '@/lib/activities/list-loaders';
 import {
@@ -159,6 +159,11 @@ export function ActivityFilterBar({
     [filters, onChange],
   );
 
+  const toggleAccessible = useCallback(
+    () => onChange({ ...filters, accessible: !filters.accessible }),
+    [filters, onChange],
+  );
+
   const setSearch = useCallback(
     (q: string) => {
       const normalized = normalizeActivitySearch(q);
@@ -233,6 +238,13 @@ export function ActivityFilterBar({
       key: 'setting',
       label: filters.setting === 'indoor' ? t('settingIndoor') : t('settingOutdoor'),
       remove: () => setSetting(null),
+    });
+  }
+  if (filters.accessible) {
+    activePills.push({
+      key: 'accessible',
+      label: t('filterAccessible'),
+      remove: toggleAccessible,
     });
   }
 
@@ -373,6 +385,8 @@ export function ActivityFilterBar({
           </FilterPill>
 
           <SettingSegment value={filters.setting} onChange={setSetting} />
+
+          <AccessibleToggle active={filters.accessible} onToggle={toggleAccessible} />
 
           {activeCount > 0 && (
             <button
@@ -534,6 +548,14 @@ export function ActivityFilterBar({
 
         <SheetBlock label={t('filterSetting')}>
           <SettingSegment value={filters.setting} onChange={setSetting} grow />
+        </SheetBlock>
+
+        <SheetBlock label={t('filterAccessibility')}>
+          <SheetChip active={filters.accessible} onClick={toggleAccessible} multi>
+            <AccessibilityIcon size={14} />
+            {t('filterAccessible')}
+          </SheetChip>
+          <p className="mt-2 text-[13px] leading-snug text-white/45">{t('filterAccessibleHint')}</p>
         </SheetBlock>
       </FilterSheet>
     </section>
@@ -801,6 +823,29 @@ function SettingSegment({
         );
       })}
     </div>
+  );
+}
+
+// ── Barrierefrei-Schalter (Desktop-Reihe) ─────────────────────────────────
+
+function AccessibleToggle({ active, onToggle }: { active: boolean; onToggle: () => void }) {
+  const t = useTranslations('Activities');
+  return (
+    <button
+      type="button"
+      aria-pressed={active}
+      onClick={onToggle}
+      title={t('filterAccessibleHint')}
+      className={
+        'press-haptic inline-flex items-center gap-1.5 h-10 px-3.5 rounded-full border text-[13px] font-medium transition-colors ' +
+        (active
+          ? 'bg-white text-black border-white'
+          : 'bg-white/[0.04] text-white/80 border-white/10 hover:bg-white/[0.08]')
+      }
+    >
+      <AccessibilityIcon size={15} />
+      {t('filterAccessible')}
+    </button>
   );
 }
 

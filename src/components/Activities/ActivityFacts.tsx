@@ -13,6 +13,12 @@ import { getLocale, getTranslations } from 'next-intl/server';
 import type { NormalizedOpeningWindow } from '@/lib/activities/opening';
 import type { PublicActivity } from '@/lib/activities/public-types';
 import { WEEKDAY_BITS } from '@/lib/activities/opening';
+import {
+  accessibilityFeatureLabel,
+  parseCuratedAccessibility,
+  parseDesklineAccessibility,
+} from '@/lib/activities/accessibility';
+import { AccessibilityIcon } from '@/components/UI/Icons';
 
 const WEEKDAY_LABELS: ReadonlyArray<{ bit: number; label: string }> = [
   { bit: WEEKDAY_BITS.mo, label: 'Mo' },
@@ -60,6 +66,22 @@ export async function ActivityFacts({ activity, gemeindeName }: ActivityFactsPro
       : activity.description ?? activity.description_short;
 
   const windows = activity.opening_times ?? [];
+
+  // Barrierefreiheit: kuratierte Angabe (mit eigener Quelle) und/oder
+  // Deskline-Befund. Merkmale beider Quellen werden vereinigt, die
+  // Reihenfolge des Vokabulars bleibt.
+  const curated = parseCuratedAccessibility(activity.accessibility_curated);
+  const deskline = parseDesklineAccessibility(activity.accessibility);
+  const accessible = activity.accessible === true || curated != null || deskline != null;
+  const features = [...new Set([...(curated?.features ?? []), ...(deskline?.features ?? [])])];
+
+  // Quellen-Attribution: Deskline-Zeilen tragen die feste Feratel-Quelle,
+  // kuratierte Zeilen ihre eigene Seite (source_url/source_label).
+  const sourceLink =
+    activity.source !== 'deskline' && activity.source_url && activity.source_label
+      ? { href: activity.source_url, label: activity.source_label }
+      : { href: 'https://www.feratel.at/', label: 'Feratel Deskline' };
+
   const settingLabel =
     activity.setting === 'indoor'
       ? t('settingIndoor')
@@ -80,6 +102,55 @@ export async function ActivityFacts({ activity, gemeindeName }: ActivityFactsPro
           <div>
             <p className="text-white/70 leading-relaxed whitespace-pre-line">
               {description}
+            </p>
+          </div>
+        )}
+
+        {/* Barrierefreiheit */}
+        {accessible && (
+          <div>
+            <h2 className="text-lg font-semibold text-white mb-3 flex items-center gap-2">
+              <AccessibilityIcon size={18} className="text-sky-300" />
+              {t('accessibilityTitle')}
+            </h2>
+            {features.length > 0 && (
+              <ul className="flex flex-wrap gap-2 mb-3">
+                {features.map((f) => (
+                  <li
+                    key={f}
+                    className="text-sm text-sky-100 bg-sky-400/10 border border-sky-400/20 rounded-full px-3 py-1"
+                  >
+                    {accessibilityFeatureLabel(f, locale)}
+                  </li>
+                ))}
+              </ul>
+            )}
+            {curated?.note && (
+              <p className="text-white/70 leading-relaxed whitespace-pre-line">{curated.note}</p>
+            )}
+            {!curated && deskline && features.length === 0 && (
+              <p className="text-white/60 text-sm">{t('accessibilityReported')}</p>
+            )}
+            <p className="text-xs text-white/40 mt-3">
+              {t('accessibilitySource')}{' '}
+              {curated ? (
+                <a
+                  href={curated.source_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="underline underline-offset-2 hover:text-white/70"
+                >
+                  {curated.source_label}
+                </a>
+              ) : (
+                <span>
+                  {deskline?.basis === 'deskline-theme'
+                    ? t('accessibilitySourceRegion')
+                    : t('accessibilitySourceText')}
+                </span>
+              )}
+              {curated?.checked_at &&
+                ` · ${t('accessibilityChecked', { date: formatDate(curated.checked_at.slice(0, 10)) })}`}
             </p>
           </div>
         )}
@@ -142,12 +213,12 @@ export async function ActivityFacts({ activity, gemeindeName }: ActivityFactsPro
         <div className="bg-white/[0.03] border border-white/[0.06] rounded-xl px-5 py-4 text-xs text-white/40 leading-relaxed">
           {t('source')}:{' '}
           <a
-            href="https://www.feratel.at/"
+            href={sourceLink.href}
             target="_blank"
             rel="noopener noreferrer"
             className="text-white/60 hover:text-white transition-colors underline underline-offset-2"
           >
-            Feratel Deskline
+            {sourceLink.label}
           </a>
           {' · '}
           <Link href="/quellen" className="hover:text-white/60 transition-colors underline underline-offset-2">

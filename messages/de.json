@@ -418,7 +418,13 @@
     "bookingPriceDisclaimer": "Preis kann abweichen",
     "bookingCta": "Angebot ansehen",
     "bookingReviews": "Bewertungen",
-    "bookingDisclosure": "Buchung und Bezahlung erfolgen bei {provider}. Kaufst du dort, erhalten wir eine Provision — für dich ändert sich der Preis dadurch nicht."
+    "bookingDisclosure": "Buchung und Bezahlung erfolgen bei {provider}. Kaufst du dort, erhalten wir eine Provision — für dich ändert sich der Preis dadurch nicht.",
+    "accessibilityTitle": "Barrierefreiheit",
+    "accessibilityReported": "Für diesen Ort ist Barrierefreiheit gemeldet. Details zur Ausstattung stehen in der Beschreibung oder beim Betreiber.",
+    "accessibilitySource": "Angaben laut",
+    "accessibilitySourceRegion": "Tourismusregion (Feratel Deskline)",
+    "accessibilitySourceText": "Beschreibung des Betreibers (Feratel Deskline)",
+    "accessibilityChecked": "geprüft am {date}"
   },
   "Activities": {
     "pageTitle": "Freizeitaktivitäten & Ausflugsziele in Österreich",
@@ -461,7 +467,11 @@
     "emptyTitle": "Keine Orte für diese Auswahl",
     "emptyHint": "Probier weniger Bezirke, ein anderes Thema oder setz die Filter zurück.",
     "openFilters": "Filter öffnen",
-    "closeFilters": "Filter schließen"
+    "closeFilters": "Filter schließen",
+    "filterAccessibility": "Barrierefreiheit",
+    "filterAccessible": "Barrierefrei",
+    "filterAccessibleHint": "Nur Orte, für die Barrierefreiheit gemeldet ist: von der Region, dem Betreiber oder aus geprüften Verzeichnissen. Details stehen auf der jeweiligen Seite.",
+    "accessibleBadge": "Barrierefrei"
   },
   "Tours": {
     "eyebrow": "Erleben",
