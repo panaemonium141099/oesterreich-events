@@ -1,5 +1,10 @@
 import { BaseScraper } from './BaseScraper';
 import type { ScrapedEvent } from '@/types/events';
+import {
+  expandFlohmarktOccurrences,
+  flohmarktListingKey,
+  stripFlohmarktScheduleBlock,
+} from './flohmarkt-occurrences';
 
 /**
  * boudicca.events scraper — pulls events via their public Search API
@@ -35,6 +40,14 @@ import type { ScrapedEvent } from '@/types/events';
  *   from a direct ArenaWien scraper, (source_name, source_id) differ
  *   across entries; the content-fingerprint dedup in the pipeline
  *   (title + date + venue) is what will collapse them post-ingest.
+ *
+ *   Ausnahme `boudicca:flohmarkt`: flohmarkt.at führt wiederkehrende
+ *   Märkte als EINEN Eintrag mit wanderndem Datum und einer Terminliste
+ *   im Text; Boudicca vergibt für jeden Stand eine neue UUID. Für diesen
+ *   Collector ist die Kennung deshalb `flohmarkt:<listing>:<yyyy-mm-dd>`
+ *   und jeder Listentermin wird ein eigenes Event — siehe
+ *   flohmarkt-occurrences.ts. Bestand migriert am 2026-09-17
+ *   (supabase/migrations/20260917120000_flohmarkt_occurrence_ids.sql).
  *
  * Geocoding:
  *   Boudicca entries often carry location.coordinates.{lat,lon} but
@@ -84,8 +97,7 @@ export class BoudiccaEventsScraper extends BaseScraper {
       if (batch.length === 0) break;
 
       for (const kv of batch) {
-        const ev = this.mapEntry(kv);
-        if (ev) events.push(ev);
+        events.push(...this.mapEntry(kv));
       }
 
       this.log(`Seite ${page + 1}: ${batch.length} entries (offset=${offset}, total=${totalResults})`);
@@ -136,7 +148,7 @@ export class BoudiccaEventsScraper extends BaseScraper {
 
   // ─── Entry → ScrapedEvent ─────────────────────────────────────────────
 
-  private mapEntry(rawKv: Record<string, string>): ScrapedEvent | null {
+  private mapEntry(rawKv: Record<string, string>): ScrapedEvent[] {
     // Boudicca keys come with a full variant chain suffixed onto the base:
     //   name                              (base)
     //   name:lang=de                      (variant)
@@ -162,7 +174,7 @@ export class BoudiccaEventsScraper extends BaseScraper {
     const startDate = readField('startDate');
 
     // Hard requirements — drop entries that can't be deduped or dated.
-    if (!boudiccaId || !collector || !title || !startDate) return null;
+    if (!boudiccaId || !collector || !title || !startDate) return [];
 
     // ISO-8601 check — Boudicca typically emits `2026-04-27T23:59:00+02:00`.
     // If it's a plain date, we leave it — the pipeline accepts both.
@@ -177,7 +189,13 @@ export class BoudiccaEventsScraper extends BaseScraper {
     const longitude = Number.isFinite(lng) ? lng : null;
 
     const description = readField('description');
-    const plainDescription = description ? this.markdownToPlain(description) : null;
+    let plainDescription = description ? this.markdownToPlain(description) : null;
+    // flohmarkt.at: Datums-Kopfzeile und Terminliste sind auf einer
+    // Einzelseite redundant oder nach einer Woche falsch — die Termine
+    // werden unten zu eigenen Events (siehe flohmarkt-occurrences.ts).
+    if (collector === 'flohmarkt' && plainDescription) {
+      plainDescription = stripFlohmarktScheduleBlock(plainDescription) || null;
+    }
 
     const boudiccaCategory = readField('category');         // MUSIC | ART | TECH | SPORT | OTHER
     const boudiccaType = readField('type');                 // free-text: konzert, party, theatre, …
@@ -215,6 +233,10 @@ export class BoudiccaEventsScraper extends BaseScraper {
     // `event.tags`, so the scraper only sets the primary fields.
     const locationName = readField('location.name')?.trim();
     const address = readField('location.address')?.trim();
+    // `location.city` ist bei flohmarkt.at-Einträgen die einzige Ortsangabe
+    // neben der Straße; ohne sie fiel die Event-URL auf die Landeshauptstadt
+    // zurück (`/events/2020-st-poelten/…` für Hollabrunn).
+    const city = readField('location.city')?.trim();
     const organizer = readField('organizer')?.trim();
 
     const event: ScrapedEvent = {
@@ -227,6 +249,7 @@ export class BoudiccaEventsScraper extends BaseScraper {
       ...(end ? { end_date: end } : {}),
       ...(locationName ? { location_name: locationName } : {}),
       ...(address ? { address: address } : {}),
+      ...(city ? { city } : {}),
       ...(latitude != null ? { latitude } : {}),
       ...(longitude != null ? { longitude } : {}),
       ...(v3Category ? { category: v3Category } : {}),
@@ -243,7 +266,42 @@ export class BoudiccaEventsScraper extends BaseScraper {
     // source_category_raw automatically from `event.category`.
     void boudiccaCategory;
 
-    return event;
+    if (collector === 'flohmarkt') {
+      return this.expandFlohmarkt(event, boudiccaId, description);
+    }
+
+    return [event];
+  }
+
+  /**
+   * flohmarkt.at: ein Event pro Termin der Liste, mit stabiler Kennung
+   * `flohmarkt:<listing>:<tag>` (Listing = letztes Pfadsegment der
+   * Detailseite). Beginn/Ende als nackte Wiener Wandzeit — der Schreibpfad
+   * rechnet sie je Tag DST-korrekt nach UTC um.
+   *
+   * Fällt die Auflösung aus (kein Datum lesbar), bleibt das Event wie es
+   * ist, unter der Boudicca-UUID — lieber ein Termin wie bisher als keiner.
+   */
+  private expandFlohmarkt(base: ScrapedEvent, boudiccaId: string, rawDescription: string | null): ScrapedEvent[] {
+    const occurrences = expandFlohmarktOccurrences({
+      start: base.start_date,
+      end: base.end_date ?? null,
+      // Die Liste steckt im Rohtext; die bereinigte Beschreibung hat sie nicht mehr.
+      description: rawDescription,
+    });
+    if (occurrences.length === 0) return [base];
+
+    const listing = flohmarktListingKey(base.source_url);
+    // Das Boudicca-Ende gilt nur über den Tagesabstand in `occ.end`; ein
+    // verworfenes Ende (vor dem Beginn) darf nicht aus `base` durchsickern.
+    const template: ScrapedEvent = { ...base };
+    delete template.end_date;
+    return occurrences.map(occ => ({
+      ...template,
+      source_id: listing ? `flohmarkt:${listing}:${occ.date}` : `${boudiccaId}:${occ.date}`,
+      start_date: occ.start,
+      ...(occ.end ? { end_date: occ.end } : {}),
+    }));
   }
 
   // ─── Helpers ──────────────────────────────────────────────────────────
