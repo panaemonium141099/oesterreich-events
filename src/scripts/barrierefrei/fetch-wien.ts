@@ -43,6 +43,8 @@ interface LocationBlob {
 }
 
 const EXCLUDED_CATEGORY_RE = /hotel|restaurant|caf[eé]|lokal|bar\b|shop|geschäft|heurige|club|unterkunft|pension|apartment/i;
+// Verkehrsinfrastruktur (Bahnhoefe, Flughafen) ist keine Freizeitaktivitaet.
+const EXCLUDED_NAME_RE = /\bbahnhof\b|\bflughafen\b|hauptbahnhof|westbahnhof/i;
 
 function extractBlobs(html: string): LocationBlob[] {
   const out: LocationBlob[] = [];
@@ -160,6 +162,7 @@ async function main(): Promise<void> {
   for (const loc of blobs.values()) {
     checked++;
     if (EXCLUDED_CATEGORY_RE.test(loc.category ?? '') || EXCLUDED_CATEGORY_RE.test(loc.class ?? '')) continue;
+    if (EXCLUDED_NAME_RE.test(loc.title ?? '')) continue;
     let fragment: { html?: string };
     try {
       fragment = await fetchJson<{ html?: string }>(`${BASE}/content/${loc.id}/asJson`);

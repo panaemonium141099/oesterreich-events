@@ -493,5 +493,1666 @@
     "lat": 47.4589073,
     "lng": 11.8702871,
     "query": "6233 Kramsach"
+  },
+  "austria-info:swarovski-kristallwelten-wattens": {
+    "lat": 47.2947079,
+    "lng": 11.6011599,
+    "query": "photon:Kristallweltenstraße 1, 6112 Wattens"
+  },
+  "donau-com:roemerstadt-carnuntum": {
+    "lat": 48.1158218,
+    "lng": 16.8757514,
+    "query": "photon:Hauptstraße 1A, 2404 Petronell-Carnuntum"
+  },
+  "donau-com:stift-melk": {
+    "lat": 48.2280134,
+    "lng": 15.3354944,
+    "query": "photon:Abt-Berthold-Dietmayr-Straße 1, 3390 Melk"
+  },
+  "donau-com:stift-goettweig": {
+    "lat": 48.3665037,
+    "lng": 15.6123625,
+    "query": "photon:Stift Göttweig 1, 3511 Furth bei Göttweig"
+  },
+  "donau-com:stift-klosterneuburg": {
+    "lat": 48.3072033,
+    "lng": 16.3261584,
+    "query": "photon:Stiftsplatz 1, 3400 Klosterneuburg"
+  },
+  "donau-com:die-garten-tulln": {
+    "lat": 48.3295785,
+    "lng": 16.0347892,
+    "query": "photon:Am Wasserpark 1, 3430 Tulln an der Donau"
+  },
+  "donau-com:kittenberger-erlebnisgaerten": {
+    "lat": 48.5118005,
+    "lng": 15.6314531,
+    "query": "photon:Laabergstraße 15, 3553 Schiltern"
+  },
+  "donau-com:schlossorth-nationalpark-zentrum": {
+    "lat": 48.1443391,
+    "lng": 16.7010883,
+    "query": "photon:Schlossplatz 1, 2304 Orth an der Donau"
+  },
+  "donau-com:donauweg-mautern": {
+    "lat": 48.3851319,
+    "lng": 15.562753,
+    "query": "photon:Römerhalle, 3512 Mautern an der Donau"
+  },
+  "donau-com:marillenmeile-rossatz": {
+    "lat": 48.3975203,
+    "lng": 15.5049162,
+    "query": "photon:Rossatz, 3602 Rossatz-Arnsdorf"
+  },
+  "donau-com:welterbesteig-rothenhof-unterloiben": {
+    "lat": 48.3874936,
+    "lng": 15.5413766,
+    "query": "photon:Unterloiben, 3601 Dürnstein"
+  },
+  "graztourismus-at:graz-museum-schlossberg-shg-2238": {
+    "lat": 47.0750531,
+    "lng": 15.436778,
+    "query": "photon:Schlossberg 5, 8010 Graz"
+  },
+  "graztourismus-at:museum-fuer-geschichte-shg-2244": {
+    "lat": 47.0725897,
+    "lng": 15.4371846,
+    "query": "photon:Sackstraße 16, 8010 Graz"
+  },
+  "graztourismus-at:dioezesanmuseum-shg-2232": {
+    "lat": 47.0716982,
+    "lng": 15.4417555,
+    "query": "photon:Bürgergasse 2, 8010 Graz"
+  },
+  "graztourismus-at:halle-fuer-kunst-steiermark-shg-2240": {
+    "lat": 47.0717401,
+    "lng": 15.4446122,
+    "query": "photon:Burgring 2, 8010 Graz"
+  },
+  "graztourismus-at:kindermuseum-frida-fred-shg-2252": {
+    "lat": 47.0631649,
+    "lng": 15.4362411,
+    "query": "photon:Friedrichgasse 34, 8010 Graz"
+  },
+  "graztourismus-at:volkskundemuseum-graz-shg-2272": {
+    "lat": 47.0747915,
+    "lng": 15.4395871,
+    "query": "photon:Paulustorgasse 11-13a, 8010 Graz"
+  },
+  "graztourismus-at:murinsel": {
+    "lat": 47.0729585,
+    "lng": 15.433909,
+    "query": "photon:Lendkai 19, 8020 Graz"
+  },
+  "graztourismus-at:uhrturm": {
+    "lat": 47.0765398,
+    "lng": 15.4376074,
+    "query": "photon:Schlossberg 6, 8010 Graz"
+  },
+  "hohetauern-at:bios-nationalparkzentrum-mallnitz": {
+    "lat": 46.9908767,
+    "lng": 13.1649992,
+    "query": "photon:Mallnitz 36, 9822 Mallnitz"
+  },
+  "hohetauern-at:haus-der-steinboecke-heiligenblut": {
+    "lat": 47.0391458,
+    "lng": 12.8440589,
+    "query": "photon:Hof 38, 9844 Heiligenblut am Großglockner"
+  },
+  "hohetauern-at:nationalparkinfostelle-obervellach": {
+    "lat": 46.932565,
+    "lng": 13.2016441,
+    "query": "photon:Obervellach 58, 9821 Obervellach"
+  },
+  "hohetauern-at:nationalparkzentrum-mittersill": {
+    "lat": 47.2788852,
+    "lng": 12.4779035,
+    "query": "photon:Gerlosstraße 18, 5730 Mittersill"
+  },
+  "hohetauern-at:muhrsprung-muhr": {
+    "lat": 47.0988188,
+    "lng": 13.501127,
+    "query": "photon:Vordermuhr 5, 5583 Muhr"
+  },
+  "hohetauern-at:leben-unter-wasser-ferleiten": {
+    "lat": 47.169022,
+    "lng": 12.8146774,
+    "query": "photon:Taxenbacher Fusch 96, 5672 Fusch an der Großglocknerstraße"
+  },
+  "hohetauern-at:facettenreich-rauris": {
+    "lat": 47.1960102,
+    "lng": 12.9757788,
+    "query": "photon:Dorfstraße 27, 5661 Rauris"
+  },
+  "hohetauern-at:smaragde-kristalle-bramberg": {
+    "lat": 47.2702887,
+    "lng": 12.3382631,
+    "query": "photon:Weichseldorf 27, 5733 Bramberg am Wildkogel"
+  },
+  "hohetauern-at:nationalparkhaus-matrei": {
+    "lat": 47.0004493,
+    "lng": 12.5408003,
+    "query": "photon:Kirchplatz 2, 9971 Matrei in Osttirol"
+  },
+  "hohetauern-at:jenseits-der-zeit-virgen": {
+    "lat": 47.0031407,
+    "lng": 12.4578086,
+    "query": "photon:Nationalpark-Ausstellung „Jenseits der Zeit“ Virgen, Virgen"
+  },
+  "hohetauern-at:erlebnis-zirbe-st-jakob": {
+    "lat": 46.9161971,
+    "lng": 12.3315353,
+    "query": "photon:Unterrotte 44, 9963 St. Jakob in Defereggen"
+  },
+  "holidaysonwheels-at:sport-sporthalle-fohnsdorf": {
+    "lat": 47.2085315,
+    "lng": 14.6761565,
+    "query": "photon:Kontakt Sporthalle Fohnsdorf Schulplatz 9, 8753 Fohnsdorf"
+  },
+  "holidaysonwheels-at:sport-manhattan-sd-fitnessanlagen-gmbh": {
+    "lat": 48.2503165,
+    "lng": 16.3051737,
+    "query": "photon:Heiligenstädterlände 17, 1190 Wien"
+  },
+  "holidaysonwheels-at:freizeit-erlebnisweg-mariatrost-basilika-mariatrost": {
+    "lat": 47.0965369,
+    "lng": 15.4694163,
+    "query": "photon:Erlebnisweg Mariatrost"
+  },
+  "holidaysonwheels-at:freizeit-tragss-grner-see": {
+    "lat": 47.4300958,
+    "lng": 15.243172,
+    "query": "photon:Tragöss"
+  },
+  "holidaysonwheels-at:freizeit-st-ilgen-panoramaweg-beim-bodenbauer-mit-hochschwabmuseum": {
+    "lat": 47.3545679,
+    "lng": 16.0214091,
+    "query": "photon:St. Ilgen"
+  },
+  "holidaysonwheels-at:freizeit-deutschlandsberg": {
+    "lat": 46.8146272,
+    "lng": 15.2137799,
+    "query": "photon:Deutschlandsberg"
+  },
+  "holidaysonwheels-at:freizeit-schloss-eggenberg": {
+    "lat": 47.0739232,
+    "lng": 15.3918001,
+    "query": "photon:Schloss Eggenberg"
+  },
+  "holidaysonwheels-at:freizeit-st-barbara-hundertwasserkirche-brnbach-und-lipizzanergestt-piber": {
+    "lat": 48.209643,
+    "lng": 16.3791489,
+    "query": "photon:St. Barbara"
+  },
+  "holidaysonwheels-at:freizeit-lurgrotte-semriach": {
+    "lat": 47.2270285,
+    "lng": 15.3796564,
+    "query": "photon:Kontakt Lurgrotte Semriach Lurgrottenstraße 1, 8102 Semriach"
+  },
+  "holidaysonwheels-at:freizeit-schokoladenmanufaktur-zotter": {
+    "lat": 46.9916615,
+    "lng": 15.9083329,
+    "query": "photon:Kontakt Schokoladenmanufaktur Zotter Bergl 56, 8333 Riegersburg"
+  },
+  "holidaysonwheels-at:freizeit-krftereich-st-jakob-im-walde": {
+    "lat": 47.466564,
+    "lng": 15.7868369,
+    "query": "photon:Kontakt Kräftereich St. Jakob im Walde Kirchenviertel 70, 8255 St. Jakob im Walde"
+  },
+  "holidaysonwheels-at:freizeit-stutenmilchgestt-tchterlehof": {
+    "lat": 47.2551081,
+    "lng": 15.7136378,
+    "query": "photon:Stutenmilchgestüt Töchterlehof, Oberfeistritz"
+  },
+  "holidaysonwheels-at:freizeit-elfenberg-wild-und-erlebnispark-mautern": {
+    "lat": 47.4009222,
+    "lng": 14.8247523,
+    "query": "photon:8774 Mautern"
+  },
+  "holidaysonwheels-at:freizeit-wipfelwanderweg-rachau": {
+    "lat": 47.2163675,
+    "lng": 14.9136765,
+    "query": "photon:Wipfelwanderweg Rachau, Rachau"
+  },
+  "holidaysonwheels-at:freizeit-tierpark-herberstein": {
+    "lat": 47.2174597,
+    "lng": 15.813083,
+    "query": "photon:Kontakt Tierpark Herberstein Buchberg 50, 8223 Stubenberg am See"
+  },
+  "holidaysonwheels-at:freizeit-grimmingtherme-gmbh": {
+    "lat": 47.545441,
+    "lng": 13.9286194,
+    "query": "photon:Kontakt GrimmingTherme GmbH Neuhofen 182, 8983 Bad Mitterndorf"
+  },
+  "holidaysonwheels-at:freizeit-freizeit-pso-verein-fr-freizeit-para-special-outdoorsports": {
+    "lat": 47.39717372114976,
+    "lng": 13.679508716503692,
+    "query": "photon:8970 Schladming"
+  },
+  "holidaysonwheels-at:freizeit-nationalpark-gesuse-nationalpark-pavillon-gstatterboden": {
+    "lat": 47.5913658,
+    "lng": 14.6336062,
+    "query": "photon:Nationalpark Gesäuse - Nationalpark Pavillon Gstatterboden, Weng im Gesäuse"
+  },
+  "holidaysonwheels-at:freizeit-next-liberty-kinder-und-jugend-theater": {
+    "lat": 47.0778573,
+    "lng": 15.4498491,
+    "query": "photon:8010 Graz"
+  },
+  "holidaysonwheels-at:freizeit-mrchenwald-steiermark": {
+    "lat": 47.2113402,
+    "lng": 14.5149115,
+    "query": "photon:Märchenwald Steiermark, St. Georgen"
+  },
+  "holidaysonwheels-at:freizeit-chalet-royal": {
+    "lat": 47.3616181,
+    "lng": 11.1374104,
+    "query": "photon:Chalet Royal, Klöch"
+  },
+  "holidaysonwheels-at:freizeit-wanderweg-stainz": {
+    "lat": 46.8941735,
+    "lng": 15.2628938,
+    "query": "photon:Kontakt Wanderweg Stainz Rathausplatz 4, 8510 Stainz"
+  },
+  "holidaysonwheels-at:freizeit-neue-galerie": {
+    "lat": 47.0684645,
+    "lng": 15.4375813,
+    "query": "photon:Neue Galerie, Graz"
+  },
+  "holidaysonwheels-at:freizeit-fahrtechnikzentrum-fohnsdorf": {
+    "lat": 47.1988473,
+    "lng": 14.6969672,
+    "query": "photon:Kontakt Fahrtechnikzentrum Fohnsdorf Fahrtechnikstraße 1, 8753 Fohnsdorf"
+  },
+  "holidaysonwheels-at:freizeit-steirisches-feuerwehrmuseum": {
+    "lat": 46.8231404,
+    "lng": 15.3169878,
+    "query": "photon:Kontakt Steirisches Feuerwehrmuseum Marktstraße 1, 8552 Groß St. Florian"
+  },
+  "holidaysonwheels-at:freizeit-nationalpark-gesuse-erlebniszentrum-weidendom": {
+    "lat": 47.5914722,
+    "lng": 14.6336026,
+    "query": "photon:Nationalpark Gesäuse - Erlebniszentrum Weidendom, Weng im Gesäuse"
+  },
+  "holidaysonwheels-at:freizeit-bibliothek-fohnsdorf": {
+    "lat": 47.207217,
+    "lng": 14.6776404,
+    "query": "photon:Kontakt Bibliothek Fohnsdorf Dr. Heinrich-Hulla Platz 1, 8753 Fohnsdorf"
+  },
+  "holidaysonwheels-at:freizeit-frida-fred-kindermuseum-graz": {
+    "lat": 47.0631649,
+    "lng": 15.4362411,
+    "query": "photon:Kontakt FRida & freD - Kindermuseum Graz Friedrichgasse 34, 8010 Graz"
+  },
+  "holidaysonwheels-at:freizeit-alpinpark-steinmhle-seckauer-alpen": {
+    "lat": 47.2838087,
+    "lng": 14.7588719,
+    "query": "photon:Alpinpark Steinmühle - Seckauer Alpen, Seckau"
+  },
+  "holidaysonwheels-at:freizeit-lmhle-hartlieb": {
+    "lat": 46.7596369,
+    "lng": 15.4892355,
+    "query": "photon:Ölmühle Hartlieb, Heimschuh"
+  },
+  "holidaysonwheels-at:freizeit-area-47": {
+    "lat": 47.2290041,
+    "lng": 10.8429474,
+    "query": "photon:Kontakt AREA 47 Ötztaler Achstrasse 1, 6430 Ötztal Bahnhof"
+  },
+  "holidaysonwheels-at:freizeit-parkbad-krumpendorf": {
+    "lat": 46.6219742,
+    "lng": 14.2159942,
+    "query": "photon:Kontakt Parkbad Krumpendorf Pamperlallee 35, 9201 Krumpendorf am Wörthersee"
+  },
+  "holidaysonwheels-at:kultur-albertina-00002": {
+    "lat": 48.2046365,
+    "lng": 16.3682605,
+    "query": "photon:Kontakt Albertina Albertinaplatz 1, 1010 Wien"
+  },
+  "holidaysonwheels-at:kultur-blasmusikmuseum-ratten": {
+    "lat": 47.4849263,
+    "lng": 15.7195682,
+    "query": "photon:Kontakt Blasmusikmuseum Ratten Kirchenviertel 104, 8673 Ratten"
+  },
+  "holidaysonwheels-at:kultur-grazer-oper": {
+    "lat": 47.0689957,
+    "lng": 15.4456981,
+    "query": "photon:Kontakt Grazer Oper Kaiser-Josef-Platz 10, 8010 Graz"
+  },
+  "holidaysonwheels-at:kultur-museumscenter-und-kunsthalle-leoben": {
+    "lat": 47.3807373,
+    "lng": 15.09172,
+    "query": "photon:Kontakt MuseumsCenter und Kunsthalle Leoben Kirchgasse 6, 8700 Leoben"
+  },
+  "holidaysonwheels-at:kultur-benediktinerstift-admont-bibliothek-und-museum": {
+    "lat": 47.573782,
+    "lng": 14.4615721,
+    "query": "photon:8911 Admont"
+  },
+  "holidaysonwheels-at:kultur-benediktinerabtei-seckau": {
+    "lat": 47.274542,
+    "lng": 14.7874821,
+    "query": "photon:Kontakt Benediktinerabtei Seckau Seckau 1, 8732 Seckau"
+  },
+  "holidaysonwheels-at:kultur-das-holzmuseum": {
+    "lat": 47.1121734,
+    "lng": 14.0259365,
+    "query": "photon:Das Holzmuseum, St. Ruprecht ob Murau"
+  },
+  "holidaysonwheels-at:kultur-sterreichisches-forstmuseum-silvanum": {
+    "lat": 47.6669396,
+    "lng": 14.7120474,
+    "query": "photon:Österreichisches Forstmuseum Silvanum, Großreifling"
+  },
+  "holidaysonwheels-at:kultur-1-sterreichisches-faschingsmuseum": {
+    "lat": 47.2275301,
+    "lng": 14.8588444,
+    "query": "photon:8720 Knittelfeld"
+  },
+  "holidaysonwheels-at:kultur-kunsthaus-graz": {
+    "lat": 47.0712975,
+    "lng": 15.4341193,
+    "query": "photon:Kontakt Kunsthaus Graz Lendkai 1, 8020 Graz"
+  },
+  "holidaysonwheels-at:kultur-schauspielhaus-graz-hauptbhne": {
+    "lat": 47.0727061,
+    "lng": 15.4415137,
+    "query": "photon:Kontakt Schauspielhaus Graz - Hauptbühne Hofgasse 11, 8010 Graz"
+  },
+  "holidaysonwheels-at:sightseeing-universalmuseum-joanneum-schloss-eggenberg": {
+    "lat": 47.0725026,
+    "lng": 15.3948015,
+    "query": "photon:Universalmuseum Joanneum- Schloss Eggenberg, Graz"
+  },
+  "holidaysonwheels-at:sightseeing-landeszeughaus-graz": {
+    "lat": 47.0698025,
+    "lng": 15.4398828,
+    "query": "photon:Kontakt Landeszeughaus Graz Herrengasse 16, 8010 Graz"
+  },
+  "holidaysonwheels-at:sightseeing-hans-gross-kriminalmuseum": {
+    "lat": 47.0784987,
+    "lng": 15.4466638,
+    "query": "photon:Hans Gross Kriminalmuseum, Graz"
+  },
+  "holidaysonwheels-at:sightseeing-heilwassermuseum-johannisbrunnen": {
+    "lat": 46.7999622,
+    "lng": 15.8870454,
+    "query": "photon:Kontakt Heilwassermuseum Johannisbrunnen Hof 17, 8345 Straden"
+  },
+  "holidaysonwheels-at:sightseeing-bergbaumuseum-ratten": {
+    "lat": 47.485376,
+    "lng": 15.7245496,
+    "query": "photon:Kontakt Bergbaumuseum Ratten Kirchenviertel 211, 8673 Ratten"
+  },
+  "holidaysonwheels-at:sightseeing-landwirtschaftsmuseum-schloss-stainz": {
+    "lat": 46.8961829,
+    "lng": 15.2641886,
+    "query": "photon:Kontakt Landwirtschaftsmuseum Schloss Stainz Schlossplatz 1, 8510 Stainz"
+  },
+  "holidaysonwheels-at:sightseeing-heimatmuseum-zeitroas": {
+    "lat": 47.421799,
+    "lng": 13.6543615,
+    "query": "photon:Heimatmuseum Zeitroas, Ramsau am Dachstein"
+  },
+  "holidaysonwheels-at:sightseeing-naturlesepark-neumarkt-naturpark-zirbitzkogel-grebenzen": {
+    "lat": 47.0728548,
+    "lng": 14.4256673,
+    "query": "photon:NaturLesePark Neumarkt- Naturpark Zirbitzkogel-Grebenzen, Neumarkt i. Stmk"
+  },
+  "holidaysonwheels-at:sightseeing-museum-im-palais": {
+    "lat": 47.0723502,
+    "lng": 15.4369359,
+    "query": "photon:Kontakt Museum im Palais Sackstraße 16, 8010 Graz"
+  },
+  "holidaysonwheels-at:sightseeing-naturkundemuseum": {
+    "lat": 47.0684989,
+    "lng": 15.4383162,
+    "query": "photon:Naturkundemuseum, Graz"
+  },
+  "holidaysonwheels-at:sightseeing-heimatmuseum-arzberg": {
+    "lat": 47.2489379,
+    "lng": 15.5138857,
+    "query": "photon:Kontakt Heimatmuseum Arzberg Arzberg 3, 8162 Arzberg"
+  },
+  "holidaysonwheels-at:sightseeing-hrfeldmoor-mhlen-naturpark-zirbitzkogel-grebenzen": {
+    "lat": 47.0663045,
+    "lng": 14.4270444,
+    "query": "photon:8820 Neumarkt"
+  },
+  "holidaysonwheels-at:sightseeing-theriak-labor": {
+    "lat": 47.0907154,
+    "lng": 15.4041799,
+    "query": "photon:Theriak-Labor, Graz"
+  },
+  "holidaysonwheels-at:sightseeing-landschaftsmuseum-im-schloss-trautenfels": {
+    "lat": 47.5204123,
+    "lng": 14.0833996,
+    "query": "photon:8951 Trautenfels"
+  },
+  "holidaysonwheels-at:sightseeing-teml-technisches-eisenbahnmuseum-lieboch": {
+    "lat": 46.9703455,
+    "lng": 15.3439683,
+    "query": "photon:Kontakt TEML- Technisches Eisenbahnmuseum Lieboch Bahnhofstraße 8, 8501 Lieboch"
+  },
+  "holidaysonwheels-at:sightseeing-vw-kfermuseum-gaal": {
+    "lat": 47.2686951,
+    "lng": 14.6941705,
+    "query": "photon:Kontakt VW Käfermuseum - Gaal Ingering II, 8731 Gaal"
+  },
+  "holidaysonwheels-at:sightseeing-gsseum-ehem-gsser-braumuseum": {
+    "lat": 47.3805128,
+    "lng": 15.0947756,
+    "query": "photon:8707 Leoben"
+  },
+  "holidaysonwheels-at:wellness-aqualux-therme-fohnsdorf": {
+    "lat": 47.1943229,
+    "lng": 14.6739012,
+    "query": "photon:Kontakt Aqualux Therme Fohnsdorf Thermenallee 10, 8753 Fohnsdorf"
+  },
+  "holidaysonwheels-at:wellness-heiltherme-bad-waltersdorf-quellenhotel-spa": {
+    "lat": 47.1705951,
+    "lng": 16.0278573,
+    "query": "photon:Heiltherme Bad Waltersdorf- Quellenhotel & Spa, Bad Waltersdorf"
+  },
+  "innsbruck-info:kaiserliche-hofburg-innsbruck": {
+    "lat": 47.2691806,
+    "lng": 11.3947088,
+    "query": "photon:Rennweg 1, 6020 Innsbruck"
+  },
+  "innsbruck-info:sightseer-hop-on-hop-off-innsbruck": {
+    "lat": 47.2672741,
+    "lng": 11.3940185,
+    "query": "photon:Burggraben 3, 6020 Innsbruck"
+  },
+  "innsbruck-info:trainingsloipe-luesens-schlittenlanglauf": {
+    "lat": 47.1301175,
+    "lng": 11.1379018,
+    "query": "photon:Lüsens, 6184 St. Sigmund im Sellrain"
+  },
+  "innsbruck-info:tiroler-loipe-luesens-schlittenlanglauf": {
+    "lat": 47.1301175,
+    "lng": 11.1379018,
+    "query": "photon:Lüsens, 6184 St. Sigmund im Sellrain"
+  },
+  "innsbruck-info:huegelspielplatz-innsbruck": {
+    "lat": 47.2686244,
+    "lng": 11.4127776,
+    "query": "photon:Egerdachstraße, 6020 Innsbruck"
+  },
+  "innsbruck-info:alpenzoo-innsbruck": {
+    "lat": 47.2817268,
+    "lng": 11.3975706,
+    "query": "photon:Weiherburggasse 37, 6020 Innsbruck"
+  },
+  "innsbruck-info:innatur-inklusive-bergerlebnisse": {
+    "lat": 47.2672741,
+    "lng": 11.3940185,
+    "query": "photon:Burggraben 3, 6020 Innsbruck"
+  },
+  "innsbruck-info:nordkettenbahnen-innsbruck": {
+    "lat": 47.2705233,
+    "lng": 11.3951188,
+    "query": "photon:Rennweg 3, 6020 Innsbruck"
+  },
+  "innsbruck-info:drei-seen-sesselbahn-kuehtai": {
+    "lat": 47.214308,
+    "lng": 11.0260581,
+    "query": "photon:Kühtai 48, 6183 Kühtai"
+  },
+  "innsbruck-info:muttereralm-bergbahn": {
+    "lat": 47.2224708,
+    "lng": 11.3665761,
+    "query": "photon:Nockhofweg 40, 6162 Mutters"
+  },
+  "innsbruck-info:patscherkofelbahn-igls": {
+    "lat": 47.2218056,
+    "lng": 11.4259444,
+    "query": "photon:Römerstraße 81, 6080 Igls"
+  },
+  "innsbruck-info:bergbahnen-axamer-lizum": {
+    "lat": 47.1943801,
+    "lng": 11.3030187,
+    "query": "photon:Axamer Lizum, 6094 Axams"
+  },
+  "kaernten-at:fischlehrpfad-weissensee": {
+    "lat": 46.7095271,
+    "lng": 13.333298,
+    "query": "photon:Techendorf, 9762 Weissensee"
+  },
+  "kaernten-at:sternbildwanderung-egger-alm-dellacher-alm": {
+    "lat": 46.5856048,
+    "lng": 13.3803934,
+    "query": "photon:Egger Alm, 9620 Hermagor"
+  },
+  "kaernten-at:seelehrpfad-weissensee-ost": {
+    "lat": 46.7162316,
+    "lng": 13.3056477,
+    "query": "photon:Weissensee Ostufer, 9762 Weissensee"
+  },
+  "kaernten-at:silva-magica-nockberge": {
+    "lat": 46.8741459,
+    "lng": 13.8682398,
+    "query": "photon:Nockalmstraße, Grundalm, 9565 Ebene Reichenau"
+  },
+  "kaernten-at:leben-im-wassertropfen-weissensee": {
+    "lat": 46.7095271,
+    "lng": 13.333298,
+    "query": "photon:Techendorf, 9762 Weissensee"
+  },
+  "kaernten-at:bergpromenade-brunnach": {
+    "lat": 46.8457375,
+    "lng": 13.7594778,
+    "query": "photon:Bergstation Brunnach, 9546 Bad Kleinkirchheim"
+  },
+  "kaernten-at:kraeuterwanderung-egger-alm-grundalm": {
+    "lat": 46.8741459,
+    "lng": 13.8682398,
+    "query": "photon:Nockalmstraße, Grundalm, 9565 Ebene Reichenau"
+  },
+  "museumsguide-net:5-elemente-museum": {
+    "lat": 47.962646,
+    "lng": 14.7741218,
+    "query": "photon:Schlossweg 2, 3340 Waidhofen an der Ybbs"
+  },
+  "museumsguide-net:akademie-der-bildenden-kuenste-wien-gemaeldegalerie": {
+    "lat": 48.2014227,
+    "lng": 16.3656335,
+    "query": "photon:Schillerplatz 3, 1010 Wien"
+  },
+  "museumsguide-net:albertina-klosterneuburg": {
+    "lat": 48.3019242,
+    "lng": 16.3332909,
+    "query": "photon:An der Donau-Au 1, 3400 Klosterneuburg"
+  },
+  "museumsguide-net:albertina-modern": {
+    "lat": 48.2007328,
+    "lng": 16.3718139,
+    "query": "photon:Karlsplatz 5, 1010 Wien"
+  },
+  "museumsguide-net:alpinarium-galtuer": {
+    "lat": 46.9681588,
+    "lng": 10.1839104,
+    "query": "photon:Hauptstraße 29c, 6563 Galtür"
+  },
+  "museumsguide-net:archaeologischer-park-magdalensberg": {
+    "lat": 46.7246968,
+    "lng": 14.4294112,
+    "query": "photon:Magdalensberg 15, 9064 Magdalensberg"
+  },
+  "museumsguide-net:architekturzentrum-wien": {
+    "lat": 48.2037402,
+    "lng": 16.3578325,
+    "query": "photon:Museumsplatz 1, 1070 Wien"
+  },
+  "museumsguide-net:arnulf-rainer-museum": {
+    "lat": 48.0063699,
+    "lng": 16.2337264,
+    "query": "photon:Josefsplatz 5, 2500 Baden"
+  },
+  "museumsguide-net:ars-electronica-center": {
+    "lat": 48.3102543,
+    "lng": 14.2855592,
+    "query": "photon:Ars-Electronica-Straße 1, 4040 Linz"
+  },
+  "museumsguide-net:augustinermuseum-rattenberg": {
+    "lat": 47.440364,
+    "lng": 11.8934531,
+    "query": "photon:Klostergasse 95, 6240 Rattenberg"
+  },
+  "museumsguide-net:beethovenhaus-baden": {
+    "lat": 48.0077604,
+    "lng": 16.2329221,
+    "query": "photon:Rathausgasse 10, 2500 Baden"
+  },
+  "museumsguide-net:belvedere-21": {
+    "lat": 48.1857971,
+    "lng": 16.3838491,
+    "query": "photon:Arsenalstraße 1, 1030 Wien"
+  },
+  "museumsguide-net:stift-admont-museum-und-bibliothek": {
+    "lat": 47.5765792,
+    "lng": 14.4623446,
+    "query": "photon:Kirchplatz 1, 8911 Admont"
+  },
+  "museumsguide-net:bergbau-und-gotikmuseum-leogang": {
+    "lat": 47.4418235,
+    "lng": 12.7102171,
+    "query": "photon:Hütten 10, 5771 Leogang"
+  },
+  "museumsguide-net:lern-und-gedenkort-charlotte-taitl-haus": {
+    "lat": 48.2106845,
+    "lng": 13.487935,
+    "query": "photon:Rossmarkt 29, 4910 Ried im Innkreis"
+  },
+  "museumsguide-net:cosa-center-of-science-activities": {
+    "lat": 47.0684645,
+    "lng": 15.4375813,
+    "query": "photon:Joanneumsviertel 1, 8010 Graz"
+  },
+  "museumsguide-net:das-kunstmuseum-waldviertel": {
+    "lat": 48.7949163,
+    "lng": 15.0679198,
+    "query": "photon:Mühlgasse 7a, 3943 Schrems"
+  },
+  "museumsguide-net:dioezesanmuseum-graz": {
+    "lat": 47.0716982,
+    "lng": 15.4417555,
+    "query": "photon:Bürgergasse 2, 8010 Graz"
+  },
+  "museumsguide-net:eboardmuseum": {
+    "lat": 46.6164923,
+    "lng": 14.304934,
+    "query": "photon:Florian Gröger Straße 20, 9020 Klagenfurt am Wörthersee"
+  },
+  "museumsguide-net:erlauf-erinnert-museum-der-friedensgemeinde-erlauf": {
+    "lat": 48.1824088,
+    "lng": 15.183171,
+    "query": "photon:Kirchenplatz 3, 3253 Erlauf"
+  },
+  "museumsguide-net:erste-financial-life-park-flip": {
+    "lat": 48.1866454,
+    "lng": 16.3812563,
+    "query": "photon:Am Belvedere 1, 1100 Wien"
+  },
+  "museumsguide-net:eumigmuseum": {
+    "lat": 48.0827432,
+    "lng": 16.3166442,
+    "query": "photon:Parkstraße 6, 2351 Wiener Neudorf"
+  },
+  "museumsguide-net:feuerwehrmuseum-wien": {
+    "lat": 48.2115187,
+    "lng": 16.3674623,
+    "query": "photon:Am Hof 7, 1010 Wien"
+  },
+  "museumsguide-net:frauenmuseum-hittisau": {
+    "lat": 47.456326,
+    "lng": 9.9613815,
+    "query": "photon:Platz 501, 6952 Hittisau"
+  },
+  "museumsguide-net:frida-fred-das-grazer-kindermuseum": {
+    "lat": 47.0631649,
+    "lng": 15.4362411,
+    "query": "photon:Friedrichgasse 34, 8010 Graz"
+  },
+  "museumsguide-net:globenmuseum-und-esperantomuseum-der-oenb": {
+    "lat": 48.2093508,
+    "lng": 16.3653275,
+    "query": "photon:Herrengasse 9, 1010 Wien"
+  },
+  "museumsguide-net:granatium": {
+    "lat": 46.8026153,
+    "lng": 13.7041816,
+    "query": "photon:Klammweg 10, 9545 Radenthein"
+  },
+  "museumsguide-net:graz-museum-schlossberg": {
+    "lat": 47.0752237,
+    "lng": 15.4368076,
+    "query": "photon:Schloßberg 5a, 8010 Graz"
+  },
+  "museumsguide-net:hands-up-erlebnis-gebaerdensprache": {
+    "lat": 48.2159719,
+    "lng": 16.3772935,
+    "query": "photon:Hollandstraße 14, 1020 Wien"
+  },
+  "museumsguide-net:haus-der-geschichte-oesterreich": {
+    "lat": 48.2052743,
+    "lng": 16.3637567,
+    "query": "photon:Neue Hofburg, Heldenplatz, 1015 Wien"
+  },
+  "museumsguide-net:heidi-horten-collection": {
+    "lat": 48.2041802,
+    "lng": 16.3680526,
+    "query": "photon:Hanuschgasse 3, 1010 Wien"
+  },
+  "museumsguide-net:heimathaus-stadtmuseum-perg": {
+    "lat": 48.2481981,
+    "lng": 14.6339759,
+    "query": "photon:Stifterstraße 1, 4320 Perg"
+  },
+  "museumsguide-net:hofkirche-innsbruck": {
+    "lat": 47.2682981,
+    "lng": 11.3958512,
+    "query": "photon:Universitätsstraße 2, 6020 Innsbruck"
+  },
+  "museumsguide-net:inatura-erlebnis-naturschau-dornbirn": {
+    "lat": 47.4091029,
+    "lng": 9.7388315,
+    "query": "photon:Jahngasse 9, 6850 Dornbirn"
+  },
+  "museumsguide-net:jenbacher-museum": {
+    "lat": 47.3898295,
+    "lng": 11.7734296,
+    "query": "photon:Achenseestraße 21, 6200 Jenbach"
+  },
+  "museumsguide-net:juedisches-museum-hohenems": {
+    "lat": 47.3646421,
+    "lng": 9.688622,
+    "query": "photon:Schweizer Straße 5, 6845 Hohenems"
+  },
+  "museumsguide-net:juedisches-museum-wien-dorotheergasse": {
+    "lat": 48.2071298,
+    "lng": 16.3692931,
+    "query": "photon:Dorotheergasse 11, 1010 Wien"
+  },
+  "museumsguide-net:juedisches-museum-wien-judenplatz": {
+    "lat": 48.2119107,
+    "lng": 16.3692172,
+    "query": "photon:Judenplatz 8, 1010 Wien"
+  },
+  "museumsguide-net:kaiserliche-schatzkammer-wien": {
+    "lat": 48.206897,
+    "lng": 16.3657958,
+    "query": "photon:Schweizerhof, 1010 Wien"
+  },
+  "museumsguide-net:kaiserliche-wagenburg-wien": {
+    "lat": 48.1849894,
+    "lng": 16.3115684,
+    "query": "photon:Schloss Schönbrunn, 1130 Wien"
+  },
+  "museumsguide-net:karikaturmuseum-krems": {
+    "lat": 48.4048962,
+    "lng": 15.5881421,
+    "query": "photon:Museumsplatz 3, 3500 Krems an der Donau"
+  },
+  "museumsguide-net:kaernten-museum": {
+    "lat": 46.6344126,
+    "lng": 14.3055036,
+    "query": "photon:Museumsgasse 2, 9020 Klagenfurt am Wörthersee"
+  },
+  "museumsguide-net:kaerntner-botanikzentrum-botanischer-garten-klagenfurt": {
+    "lat": 46.6293744,
+    "lng": 14.2935126,
+    "query": "photon:Prof.-Dr.-Kahler-Platz 1, 9020 Klagenfurt am Wörthersee"
+  },
+  "museumsguide-net:kaerntner-freilichtmuseum-maria-saal": {
+    "lat": 46.6852949,
+    "lng": 14.3470211,
+    "query": "photon:Museumweg 10, 9063 Maria Saal"
+  },
+  "museumsguide-net:kinderkunstlabor-fuer-zeitgenoessische-kunst": {
+    "lat": 48.2012615,
+    "lng": 15.6279437,
+    "query": "photon:Schulring 24, 3100 St.Pölten"
+  },
+  "museumsguide-net:klimt-villa-wien": {
+    "lat": 48.1885565,
+    "lng": 16.283058,
+    "query": "photon:Feldmühlgasse 11, 1130 Wien"
+  },
+  "museumsguide-net:knappenwelt-gurgltal-und-die-heilerin-vom-gurgltal": {
+    "lat": 47.2587778,
+    "lng": 10.7768683,
+    "query": "photon:Tschirgant 1, 6464 Tarrenz"
+  },
+  "museumsguide-net:krahuletz-museum": {
+    "lat": 48.6398011,
+    "lng": 15.8177818,
+    "query": "photon:Krahuletzplatz 1, 3730 Eggenburg"
+  },
+  "museumsguide-net:ktm-motohall": {
+    "lat": 48.1027005,
+    "lng": 13.1520248,
+    "query": "photon:KTM Platz 1, 5230 Mattighofen"
+  },
+  "museumsguide-net:kunsthalle-krems": {
+    "lat": 48.4048962,
+    "lng": 15.5881421,
+    "query": "photon:Museumsplatz 5, 3500 Krems an der Donau"
+  },
+  "museumsguide-net:kunsthalle-wien": {
+    "lat": 48.2037402,
+    "lng": 16.3578325,
+    "query": "photon:Museumsplatz 1, 1070 Wien"
+  },
+  "museumsguide-net:kunst-haus-wien-museum-hundertwasser": {
+    "lat": 48.2111338,
+    "lng": 16.3932757,
+    "query": "photon:Untere Weißgerberstraße 13, 1030 Wien"
+  },
+  "museumsguide-net:kunsthistorisches-museum-wien": {
+    "lat": 48.2037395,
+    "lng": 16.3617819,
+    "query": "photon:Burgring 5, 1010 Wien"
+  },
+  "museumsguide-net:kuenstlerhaus-vereinigung": {
+    "lat": 48.2007328,
+    "lng": 16.3718139,
+    "query": "photon:Karlsplatz 5, 1010 Wien"
+  },
+  "museumsguide-net:landesgalerie-niederoesterreich": {
+    "lat": 48.4042546,
+    "lng": 15.5879179,
+    "query": "photon:Museumsplatz 1, 3500 Krems an der Donau"
+  },
+  "museumsguide-net:landesmuseum-burgenland": {
+    "lat": 47.8464004,
+    "lng": 16.5171376,
+    "query": "photon:Museumgasse 1-5, 7000 Eisenstadt"
+  },
+  "museumsguide-net:landtechnik-museum-burgenland": {
+    "lat": 47.126562,
+    "lng": 16.2731096,
+    "query": "photon:Schulstraße 2, 7535 St. Michael"
+  },
+  "museumsguide-net:leopold-museum": {
+    "lat": 48.2037402,
+    "lng": 16.3578325,
+    "query": "photon:Museumsplatz 1, 1070 Wien"
+  },
+  "museumsguide-net:literaturmuseum-der-oenb": {
+    "lat": 48.2047655,
+    "lng": 16.3726084,
+    "query": "photon:Johannesgasse 6, 1010 Wien"
+  },
+  "museumsguide-net:mak-museum-fuer-angewandte-kunst": {
+    "lat": 48.2074202,
+    "lng": 16.3815068,
+    "query": "photon:Stubenring 5, 1010 Wien"
+  },
+  "museumsguide-net:mamuz-museum-mistelbach": {
+    "lat": 48.5758996,
+    "lng": 16.5716051,
+    "query": "photon:Waldstraße 44-46, 2130 Mistelbach"
+  },
+  "museumsguide-net:mamuz-schloss-asparn-zaya": {
+    "lat": 48.5888448,
+    "lng": 16.4912326,
+    "query": "photon:Schlossgasse 1, 2151 Asparn/Zaya"
+  },
+  "museumsguide-net:michelstettner-schule": {
+    "lat": 48.5843458,
+    "lng": 16.4253828,
+    "query": "photon:Schulberg 1, 2151 Michelstetten"
+  },
+  "museumsguide-net:mozarthaus-vienna": {
+    "lat": 48.2082175,
+    "lng": 16.3749334,
+    "query": "photon:Domgasse 5, 1010 Wien"
+  },
+  "museumsguide-net:mumok-museum-moderner-kunst-stiftung-ludwig-wien": {
+    "lat": 48.2037402,
+    "lng": 16.3578325,
+    "query": "photon:Museumsplatz 1, 1070 Wien"
+  },
+  "museumsguide-net:museum-1212-enns": {
+    "lat": 48.2152294,
+    "lng": 14.4819054,
+    "query": "photon:Schlossgasse 4, 4470 Enns"
+  },
+  "museumsguide-net:museum-1915-1918": {
+    "lat": 46.6717523,
+    "lng": 13.000338,
+    "query": "photon:Kötschach 390, 9640 Kötschach-Mauthen"
+  },
+  "museumsguide-net:museum-arbeitswelt": {
+    "lat": 48.0431149,
+    "lng": 14.4164328,
+    "query": "photon:Wehrgrabengasse 7, 4400 Steyr"
+  },
+  "museumsguide-net:museum-bramberg": {
+    "lat": 47.2702887,
+    "lng": 12.3382631,
+    "query": "photon:Weichseldorf 27, 5733 Bramberg"
+  },
+  "museumsguide-net:museum-der-moderne-salzburg-altstadt-rupertinum": {
+    "lat": 47.798198,
+    "lng": 13.0432833,
+    "query": "photon:Wiener-Philharmoniker-Gasse 9, 5020 Salzburg"
+  },
+  "museumsguide-net:museum-der-moderne-salzburg-moenchsberg": {
+    "lat": 47.8009031,
+    "lng": 13.0382993,
+    "query": "photon:Mönchsberg 32, 5020 Salzburg"
+  },
+  "museumsguide-net:museum-der-voelker": {
+    "lat": 47.3509042,
+    "lng": 11.7185946,
+    "query": "photon:St. Martin 16, 6130 Schwaz"
+  },
+  "museumsguide-net:museum-fliess": {
+    "lat": 47.1197239,
+    "lng": 10.62842,
+    "query": "photon:Dorf 89, 6521 Fließ"
+  },
+  "museumsguide-net:museum-fuer-geschichte-universalmuseum-joanneum": {
+    "lat": 47.0725897,
+    "lng": 15.4371846,
+    "query": "photon:Sackstraße 16, 8010 Graz"
+  },
+  "museumsguide-net:museum-gugging": {
+    "lat": 48.3131793,
+    "lng": 16.258335,
+    "query": "photon:Maria Gugging, 3400 Am Campus 2"
+  },
+  "museumsguide-net:museum-hartberg": {
+    "lat": 47.2814526,
+    "lng": 15.9659904,
+    "query": "photon:Herrengasse 6, 8230 Hartberg"
+  },
+  "museumsguide-net:museum-horn": {
+    "lat": 48.6647775,
+    "lng": 15.6615051,
+    "query": "photon:Wiener Straße 4, 3580 Horn"
+  },
+  "museumsguide-net:museum-im-zeughaus": {
+    "lat": 47.2707578,
+    "lng": 11.4071156,
+    "query": "photon:Zeughausgasse 1, 6020 Innsbruck"
+  },
+  "museumsguide-net:museum-in-der-schule-radiomuseum": {
+    "lat": 48.409152,
+    "lng": 13.5324056,
+    "query": "photon:Schulstraße 3, 4775 Taufkirchen"
+  },
+  "museumsguide-net:heimatmuseum-in-der-widumspfiste": {
+    "lat": 47.345364,
+    "lng": 11.8486483,
+    "query": "photon:Lindenweg 2, 6263 Fügen"
+  },
+  "museumsguide-net:museum-innviertler-volkskundehaus": {
+    "lat": 48.2093529,
+    "lng": 13.4898081,
+    "query": "photon:Kirchenplatz 13, 4910 Ried im Innkreis"
+  },
+  "museumsguide-net:museum-lauriacum": {
+    "lat": 48.2139223,
+    "lng": 14.4797366,
+    "query": "photon:Hauptplatz 19, 4470 Enns"
+  },
+  "museumsguide-net:museum-liaunig": {
+    "lat": 46.6464104,
+    "lng": 14.8918737,
+    "query": "photon:Neuhaus 41, 9155 Neuhaus"
+  },
+  "museumsguide-net:museum-moderner-kunst-kaernten": {
+    "lat": 46.6241696,
+    "lng": 14.3101324,
+    "query": "photon:Burggasse 8, 9020 Klagenfurt am Wörthersee"
+  },
+  "museumsguide-net:museum-murtal": {
+    "lat": 47.1694454,
+    "lng": 14.6585195,
+    "query": "photon:Herrengasse 12, 8750 Judenburg"
+  },
+  "museumsguide-net:museum-niederoesterreich": {
+    "lat": 48.2000476,
+    "lng": 15.6308808,
+    "query": "photon:Kulturbezirk 5, 3100 St. Pölten"
+  },
+  "museumsguide-net:museum-pfeilburg-fuerstenfeld": {
+    "lat": 47.0499736,
+    "lng": 16.0757219,
+    "query": "photon:Klostergasse 18, 8280 Fürstenfeld"
+  },
+  "museumsguide-net:museum-pregarten": {
+    "lat": 48.3556777,
+    "lng": 14.5302978,
+    "query": "photon:Stadtplatz 13, 4230 Pregarten"
+  },
+  "museumsguide-net:museum-rablhaus": {
+    "lat": 47.3039346,
+    "lng": 11.6635417,
+    "query": "photon:Kirchgasse 17, 6133 Weerberg"
+  },
+  "museumsguide-net:museum-st-peter-an-der-sperr": {
+    "lat": 47.8161721,
+    "lng": 16.2431365,
+    "query": "photon:Johannes-von-Nepomuk-Platz 1, 2700 Wiener Neustadt"
+  },
+  "museumsguide-net:museum-tauernbahn": {
+    "lat": 47.3189122,
+    "lng": 13.1562042,
+    "query": "photon:Bahnhofstrasse 14, 5620 Schwarzach im Pongau"
+  },
+  "museumsguide-net:museum-zeitroas": {
+    "lat": 47.4218126,
+    "lng": 13.6543412,
+    "query": "photon:Ramsau 227, 8972 Ramsau am Dachstein"
+  },
+  "museumsguide-net:kulturquartier-leoben": {
+    "lat": 47.3805942,
+    "lng": 15.0917437,
+    "query": "photon:Leopoldine-Pohl-Platz 1 (vorm. Kirchgasse 6), 8700 Leoben"
+  },
+  "museumsguide-net:museumsquartier-wien": {
+    "lat": 48.2037402,
+    "lng": 16.3578325,
+    "query": "photon:Museumsplatz 1, 1070 Wien"
+  },
+  "museumsguide-net:naturhistorisches-museum-wien": {
+    "lat": 48.2052692,
+    "lng": 16.3597554,
+    "query": "photon:Burgring 7, 1010 Wien"
+  },
+  "museumsguide-net:naturkundemuseum-universalmuseum-joanneum": {
+    "lat": 47.0684645,
+    "lng": 15.4375813,
+    "query": "photon:Graz, 8010 Joanneumsviertel"
+  },
+  "museumsguide-net:naturlese-museum-neumarkt": {
+    "lat": 47.0727735,
+    "lng": 14.4257278,
+    "query": "photon:Hauptplatz 1, 8820 Neumarkt in der Steiermark"
+  },
+  "museumsguide-net:nitsch-museum": {
+    "lat": 48.5758996,
+    "lng": 16.5716051,
+    "query": "photon:Waldstraße 44-46, 2130 Mistelbach"
+  },
+  "museumsguide-net:nordico-stadtmuseum-linz": {
+    "lat": 48.3041273,
+    "lng": 14.2914619,
+    "query": "photon:Simon-Wiesenthal-Platz 1, 4020 Linz"
+  },
+  "museumsguide-net:oberes-belvedere": {
+    "lat": 48.1912243,
+    "lng": 16.3798261,
+    "query": "photon:Prinz Eugen-Straße 27, 1030 Wien"
+  },
+  "museumsguide-net:ooe-literaturmuseum-im-stifterhaus": {
+    "lat": 48.3075575,
+    "lng": 14.2882231,
+    "query": "photon:Adalbert-Stifter-Platz 1, 4020 Linz"
+  },
+  "museumsguide-net:oesterreichischer-skulpturenpark": {
+    "lat": 46.9799096,
+    "lng": 15.427529,
+    "query": "photon:Thalerhofstraße 85, 8140 Premstätten"
+  },
+  "museumsguide-net:oesterreichisches-filmmuseum": {
+    "lat": 48.2047264,
+    "lng": 16.3683704,
+    "query": "photon:Augustinerstraße 1, 1010 Wien"
+  },
+  "museumsguide-net:oesterreichisches-freilichtmuseum-stuebing": {
+    "lat": 47.1581659,
+    "lng": 15.315442,
+    "query": "photon:Enzenbach 32, 8114 Stübing"
+  },
+  "museumsguide-net:oesterreichisches-sattlermuseum": {
+    "lat": 48.1441418,
+    "lng": 14.3907013,
+    "query": "photon:Ipfmühlstraße 15, 4492 Hofkirchen"
+  },
+  "museumsguide-net:heimatmuseum-oetztal": {
+    "lat": 47.0842649,
+    "lng": 10.9449345,
+    "query": "photon:Lehn 24, 6444 Längenfeld"
+  },
+  "museumsguide-net:paneum-wunderkammer-des-brotes": {
+    "lat": 48.2158082,
+    "lng": 14.40911,
+    "query": "photon:Kornspitzstraße 1, 4481 Asten"
+  },
+  "museumsguide-net:parlament-oesterreich": {
+    "lat": 48.208087,
+    "lng": 16.3584649,
+    "query": "photon:Dr.-Karl-Renner-Ring 3, 1010 Wien"
+  },
+  "museumsguide-net:pratermuseum": {
+    "lat": 48.2169385,
+    "lng": 16.3968882,
+    "query": "photon:Prater 92 (Straße des 1. Mai), 1020 Wien"
+  },
+  "museumsguide-net:prunksaal-der-oenb": {
+    "lat": 48.2064786,
+    "lng": 16.3668171,
+    "query": "photon:Josefsplatz 1, 1010 Wien"
+  },
+  "museumsguide-net:rabalderhaus-museum-kunst-in-schwaz": {
+    "lat": 47.3465838,
+    "lng": 11.7118344,
+    "query": "photon:Winterstellergasse 9, 6130 Schwaz"
+  },
+  "museumsguide-net:rapideum": {
+    "lat": 48.1980102,
+    "lng": 16.2651557,
+    "query": "photon:Gerhard-Hanappi-Platz 1, 1140 Wien"
+  },
+  "museumsguide-net:rhein-schauen-museum-und-rheinbaehnle": {
+    "lat": 47.4473854,
+    "lng": 9.6610441,
+    "query": "photon:Höchster Straße 4, 6890 Lustenau"
+  },
+  "museumsguide-net:roemermuseum-wien-museum": {
+    "lat": 48.2106907,
+    "lng": 16.3728003,
+    "query": "photon:Hoher Markt 3, 1010 Wien"
+  },
+  "museumsguide-net:roemermuseum-teurnia": {
+    "lat": 46.8213083,
+    "lng": 13.4518713,
+    "query": "photon:St. Peter in Holz, 9811 Lendorf"
+  },
+  "museumsguide-net:roemerstadt-carnuntum": {
+    "lat": 48.1158218,
+    "lng": 16.8757514,
+    "query": "photon:Hauptstraße 1A, 2404 Petronell-Carnuntum"
+  },
+  "museumsguide-net:rosegger-geburtshaus": {
+    "lat": 47.4954022,
+    "lng": 15.6289388,
+    "query": "photon:Alpl 42, 8671 Alpl"
+  },
+  "museumsguide-net:rosegger-museum": {
+    "lat": 47.5467817,
+    "lng": 15.5643158,
+    "query": "photon:Roseggerstraße 44, 8670 Krieglach"
+  },
+  "museumsguide-net:salzburger-freilichtmuseum": {
+    "lat": 47.75141,
+    "lng": 12.9470922,
+    "query": "photon:Hasenweg 1, 5084 Großgmain"
+  },
+  "museumsguide-net:schloss-ambras-innsbruck": {
+    "lat": 47.256487,
+    "lng": 11.4347572,
+    "query": "photon:Schlossstraße 20, 6020 Innsbruck"
+  },
+  "museumsguide-net:lern-und-gedenkort-schloss-hartheim": {
+    "lat": 48.2810459,
+    "lng": 14.1136767,
+    "query": "photon:Schloßstraße 1, 4072 Alkoven"
+  },
+  "museumsguide-net:schloss-trautenfels-universalmuseum-joanneum": {
+    "lat": 47.518704,
+    "lng": 14.0814123,
+    "query": "photon:Trautenfels 1, 8951 Stainach-Pürgg"
+  },
+  "museumsguide-net:sigmund-freud-museum": {
+    "lat": 48.218659,
+    "lng": 16.3630536,
+    "query": "photon:Berggasse 19, 1090 Wien"
+  },
+  "museumsguide-net:stadtarchiv-stadtmuseum-innsbruck": {
+    "lat": 47.268648,
+    "lng": 11.3922755,
+    "query": "photon:Badgasse 2 / Herzog- Friedrich-Straße 3, 6020 Innsbruck"
+  },
+  "museumsguide-net:stadtmuseum-klosterneuburg": {
+    "lat": 48.3034161,
+    "lng": 16.3207986,
+    "query": "photon:Kardinal-Piffl-Platz 8, 3400 Klosterneuburg"
+  },
+  "museumsguide-net:stadtmuseum-steyr": {
+    "lat": 48.036803,
+    "lng": 14.4178765,
+    "query": "photon:Grünmarkt 26, 4400 Steyr"
+  },
+  "museumsguide-net:stadtmuseum-tulln": {
+    "lat": 48.3333086,
+    "lng": 16.0570976,
+    "query": "photon:Marc-Aurel-Park 1b, 3430 Tulln an der Donau"
+  },
+  "museumsguide-net:stadtmuseum-villach": {
+    "lat": 46.6131432,
+    "lng": 13.8442959,
+    "query": "photon:Widmanngasse 38, 9500 Villach"
+  },
+  "museumsguide-net:steirisches-feuerwehrmuseum-kunst-kultur": {
+    "lat": 46.8231404,
+    "lng": 15.3169878,
+    "query": "photon:Marktstraße 1, 8522 Groß St. Florian"
+  },
+  "museumsguide-net:wappensaal-im-landhaus": {
+    "lat": 46.6250217,
+    "lng": 14.3057929,
+    "query": "photon:Landhaushof 1, 9020 Klagenfurt am Wörthersee"
+  },
+  "museumsguide-net:weinviertler-museumsdorf-niedersulz": {
+    "lat": 48.4819397,
+    "lng": 16.676504,
+    "query": "photon:Am Schmalzberg 1, 2224 Niedersulz"
+  },
+  "museumsguide-net:weltmuseum-wien": {
+    "lat": 48.2052743,
+    "lng": 16.3637567,
+    "query": "photon:Neue Hofburg, Heldenplatz, 1010 Wien"
+  },
+  "museumsguide-net:wien-museum-musa": {
+    "lat": 48.2120179,
+    "lng": 16.3571903,
+    "query": "photon:Felderstraße 6-8, 1010 Wien"
+  },
+  "museumsguide-net:wiener-aktionismus-museum": {
+    "lat": 48.2051718,
+    "lng": 16.3757881,
+    "query": "photon:Weihburggasse 26, 1010 Wien"
+  },
+  "museumsguide-net:wiener-secession-vereinigung-bildender-kuenstlerinnen": {
+    "lat": 48.200497,
+    "lng": 16.3657683,
+    "query": "photon:Friedrichstraße 12, 1010 Wien"
+  },
+  "museumsguide-net:wienerwaldmuseum-eichgraben": {
+    "lat": 48.1763063,
+    "lng": 15.9929049,
+    "query": "photon:Hauptstraße 17, 3032 Eichgraben"
+  },
+  "museumsguide-net:wintersport-museum-muerzzuschlag": {
+    "lat": 47.6059988,
+    "lng": 15.673092,
+    "query": "photon:Wiener Straße 13, 8680 Mürzzuschlag"
+  },
+  "museumsguide-net:zoom-kindermuseum": {
+    "lat": 48.2037402,
+    "lng": 16.3578325,
+    "query": "photon:Museumsplatz 1, 1070 Wien"
+  },
+  "museumsguide-net:zwischen-himmel-und-erde-gerlinde-kaltenbrunner-und-die-welt-der-8000er": {
+    "lat": 47.6645145,
+    "lng": 14.3395569,
+    "query": "photon:Stiftsplatz 1, 4582 Spital am Pyhrn"
+  },
+  "oststeiermark-com:seerundweg-stubenbergsee": {
+    "lat": 47.2295458,
+    "lng": 15.7997011,
+    "query": "photon:Seerundweg Stubenbergsee, Stubenberg am See"
+  },
+  "oststeiermark-com:hartberger-gmoos": {
+    "lat": 47.278325,
+    "lng": 15.9744153,
+    "query": "photon:HERZ Erholungszentrum, 8230 Hartberg"
+  },
+  "steiermark-com:kunsthaus-graz-26689980": {
+    "lat": 47.0712975,
+    "lng": 15.4341193,
+    "query": "photon:Kunsthaus Graz"
+  },
+  "tirol-at:handbike-landeck-telfs": {
+    "lat": 47.0491467,
+    "lng": 10.6321296,
+    "query": "photon:Landeck - Telfs"
+  },
+  "vorarlberg-travel:seepromenade-in-der-harder-bucht-seepark-und-gruner-damm": {
+    "lat": 47.4920749,
+    "lng": 9.686555,
+    "query": "photon:Seepark, Hard"
+  },
+  "vorarlberg-travel:an-der-bregenzerach-der-uferrundweg-lauterach-rieden": {
+    "lat": 47.4848647,
+    "lng": 9.7314541,
+    "query": "photon:Achpark, Lauterach"
+  },
+  "vorarlberg-travel:am-alten-diepoldsauer-rhein-rundwanderung-lustenau-schmitter": {
+    "lat": 47.4104626,
+    "lng": 9.6577841,
+    "query": "photon:Wiesenrain, Lustenau"
+  },
+  "vorarlberg-travel:emser-himmelsnahe-rundwanderung-am-flugplatz-hohenems": {
+    "lat": 47.3815386,
+    "lng": 9.6985089,
+    "query": "photon:Flugplatz, Hohenems"
+  },
+  "vorarlberg-travel:ried-und-auwald-zwischen-bangs-und-nofels": {
+    "lat": 47.2672543,
+    "lng": 9.5443627,
+    "query": "photon:Bangs, Feldkirch"
+  },
+  "vorarlberg-travel:angleroasen-erholung-an-den-nenzinger-seen": {
+    "lat": 47.1585253,
+    "lng": 9.6208778,
+    "query": "photon:Galina, Frastanz"
+  },
+  "vorarlberg-travel:in-der-frutzau-zwischen-sulz-und-rankweil": {
+    "lat": 47.2943453,
+    "lng": 9.6345507,
+    "query": "photon:Sulz-Röthis"
+  },
+  "vorarlberg-travel:am-rande-des-furstentums-ein-liechtensteiner-rundweg-ab-tisis": {
+    "lat": 47.2260967,
+    "lng": 9.5818484,
+    "query": "photon:Feldkirch-Tisis"
+  },
+  "vorarlberg-travel:lingenau-zwischen-dorfplatz-und-bad-wellness-in-lingenau": {
+    "lat": 47.450486,
+    "lng": 9.9202196,
+    "query": "photon:Lingenau - Dorfplatz"
+  },
+  "vorarlberg-travel:tolle-aussicht-auf-dem-panoramaweg-geniessen": null,
+  "wanderdoerfer-at:mellau-am-fusse-der-kanisfluh": {
+    "lat": 47.3373533,
+    "lng": 9.8877462,
+    "query": "photon:Talstation Mellaubahn, 6881 Mellau"
+  },
+  "wko-at:hochficht-bergbahnen": {
+    "lat": 48.7372362,
+    "lng": 13.8989191,
+    "query": "photon:Talstation Hochficht, 4163 Klaffer am Hochficht"
+  },
+  "wko-at:kaprun": {
+    "lat": 47.2713898,
+    "lng": 12.7573679,
+    "query": "photon:5710 Kaprun"
+  },
+  "wko-at:grossarl": {
+    "lat": 47.2415579,
+    "lng": 13.1950398,
+    "query": "photon:Talstation Panoramabahn, 5611 Großarl"
+  },
+  "wko-at:leogang": {
+    "lat": 47.4274817,
+    "lng": 12.7139344,
+    "query": "photon:Talstation Asitzbahn, 5771 Leogang"
+  },
+  "wko-at:zwoelferhorn": {
+    "lat": 47.7654084,
+    "lng": 13.3644327,
+    "query": "photon:Talstation Zwölferhorn Seilbahn, 5340 St. Gilgen"
+  },
+  "wko-at:loser-bergbahnen": {
+    "lat": 47.6607391,
+    "lng": 13.7710285,
+    "query": "photon:Talstation Loser, 8992 Altaussee"
+  },
+  "wko-at:reiteralm": {
+    "lat": 47.3888915,
+    "lng": 13.5975847,
+    "query": "photon:Talstation Reiteralm, Pichl, 8973 Schladming"
+  },
+  "wko-at:kitzbuehel": {
+    "lat": 47.4432633,
+    "lng": 12.389373,
+    "query": "photon:Talstation Hahnenkammbahn, 6370 Kitzbühel"
+  },
+  "wko-at:brixen": {
+    "lat": 47.4607824,
+    "lng": 12.2266218,
+    "query": "photon:Talstation Bergbahn Brixen, 6364 Brixen im Thale"
+  },
+  "wko-at:bergbahnen-fieberbrunn": {
+    "lat": 47.4674803,
+    "lng": 12.5513818,
+    "query": "photon:Talstation Bergbahnen Fieberbrunn, 6391 Fieberbrunn"
+  },
+  "wko-at:hohe-salve-hopfgarten-itter": {
+    "lat": 47.4466255,
+    "lng": 12.1620101,
+    "query": "photon:Talstation Salvenbahn, 6361 Hopfgarten im Brixental"
+  },
+  "wko-at:bergbahnen-steinplatte-waidring": {
+    "lat": 47.5873687,
+    "lng": 12.5645382,
+    "query": "photon:Talstation Steinplatte, 6384 Waidring"
+  },
+  "wko-at:auf-einen-blick-westendorf": {
+    "lat": 47.4280841,
+    "lng": 12.214434,
+    "query": "photon:Talstation Alpenrosenbahn, 6363 Westendorf"
+  },
+  "wko-at:wilder-kaiser": {
+    "lat": 47.4798347,
+    "lng": 12.198955,
+    "query": "photon:Talstation Hochsöll, 6306 Söll"
+  },
+  "wko-at:ehrwalder-alm": {
+    "lat": 47.3874387,
+    "lng": 10.9380646,
+    "query": "photon:Talstation Ehrwalder Almbahn, 6632 Ehrwald"
+  },
+  "wko-at:fuegen-bergbahn": {
+    "lat": 47.3389412,
+    "lng": 11.8431077,
+    "query": "photon:Talstation Spieljochbahn, 6263 Fügen"
+  },
+  "wko-at:gerlospass-koenigsleiten": {
+    "lat": 47.2508118,
+    "lng": 12.1221917,
+    "query": "photon:Talstation Dorfbahn Königsleiten, 5742 Wald im Pinzgau"
+  },
+  "wko-at:glungezerbahn": {
+    "lat": 47.2564406,
+    "lng": 11.5357177,
+    "query": "photon:Talstation Glungezerbahn, 6075 Tulfes"
+  },
+  "wko-at:karwendel-bergbahn": {
+    "lat": 47.4371458,
+    "lng": 11.6968035,
+    "query": "photon:Talstation Karwendel-Bergbahn, 6213 Pertisau"
+  },
+  "wko-at:kellerjoch-schwaz": {
+    "lat": 47.3211229,
+    "lng": 11.7310256,
+    "query": "photon:Talstation Kellerjochbahn, 6130 Schwaz"
+  },
+  "wko-at:mayrhofner-bergbahnen": {
+    "lat": 47.163382,
+    "lng": 11.8605734,
+    "query": "photon:Talstation Penkenbahn, 6290 Mayrhofen"
+  },
+  "wko-at:patscherkofelbahn": {
+    "lat": 47.2295352,
+    "lng": 11.4138687,
+    "query": "photon:Talstation Patscherkofelbahn, Igls, 6080 Innsbruck"
+  },
+  "wko-at:reuttener-seilbahnen": {
+    "lat": 47.4726962,
+    "lng": 10.6857071,
+    "query": "photon:Talstation Reuttener Seilbahnen, 6604 Höfen"
+  },
+  "wko-at:schilift-zentrum-gerlos": {
+    "lat": 47.2287797,
+    "lng": 12.0491844,
+    "query": "photon:Talstation Isskogelbahn, 6281 Gerlos"
+  },
+  "wko-at:skiliftgesellschaft-hochfuegen": {
+    "lat": 47.2695579,
+    "lng": 11.7762159,
+    "query": "photon:Hochfügen, 6264 Fügenberg"
+  },
+  "wko-at:komperdell": {
+    "lat": 47.0409598,
+    "lng": 10.5962387,
+    "query": "photon:Talstation Komperdellbahn, 6534 Serfaus"
+  },
+  "wko-at:zugspitzbahn": {
+    "lat": 47.4265111,
+    "lng": 10.9428424,
+    "query": "photon:Talstation Tiroler Zugspitzbahn, Obermoos, 6632 Ehrwald"
+  },
+  "wko-at:stubaier-gletscher": {
+    "lat": 47.0107579,
+    "lng": 11.1549091,
+    "query": "photon:Talstation Mutterberg, 6167 Neustift im Stubaital"
+  },
+  "wko-at:bergbahn-buchensteinwand-pillersee": {
+    "lat": 47.4845879,
+    "lng": 12.5797662,
+    "query": "photon:Talstation Buchensteinwand, 6392 St. Jakob in Haus"
+  },
+  "wko-at:finkenberger-almbahnen": {
+    "lat": 47.1526046,
+    "lng": 11.8217544,
+    "query": "photon:Talstation Finkenberger Almbahn, 6292 Finkenberg"
+  },
+  "wko-at:zeller-bergbahnen-zillertal": {
+    "lat": 47.2372033,
+    "lng": 11.8992513,
+    "query": "photon:Zeller Bergbahnen (Zillertal Arena Zell am Ziller), Zell am Ziller"
+  },
+  "wko-at:zillertaler-gletscherbahn": {
+    "lat": 47.1068255,
+    "lng": 11.6749802,
+    "query": "photon:Talstation Gletscherbus 1, Hintertux, 6294 Tux"
+  },
+  "wko-at:oberstorf-kleinwalsertall": {
+    "lat": 47.3558401,
+    "lng": 10.184858,
+    "query": "photon:Talstation Kanzelwandbahn, 6991 Riezlern"
+  },
+  "wko-at:pfaender": {
+    "lat": 47.5049362,
+    "lng": 9.7530613,
+    "query": "photon:Talstation Pfänderbahn, Steinbruchgasse 4, 6900 Bregenz"
+  },
+  "wko-at:seilbahn-bezau": {
+    "lat": 47.3854985,
+    "lng": 9.9206441,
+    "query": "photon:Talstation Seilbahn Bezau, 6870 Bezau"
+  },
+  "wko-at:silvretta-montafon": {
+    "lat": 47.0797243,
+    "lng": 9.9235479,
+    "query": "photon:Talstation Hochjochbahn, 6780 Schruns"
+  },
+  "barrierefreierurlaub-at:228-felber-schokoladenmanufaktur": {
+    "lat": 47.3496011,
+    "lng": 15.6907261,
+    "query": "Gasener-Straße 4, 8190 Birkfeld"
+  },
+  "barrierefreierurlaub-at:110-museum-hartberg": {
+    "lat": 47.2803749,
+    "lng": 15.9668197,
+    "query": "Herrengasse 6, 8230 Hartberg"
+  },
+  "barrierefreierurlaub-at:182-steirisches-feuerwehrmuseum-kunst-kultur": {
+    "lat": 46.8231404,
+    "lng": 15.3169878,
+    "query": "Marktstraße 1, 8522 Groß St. Florian"
+  },
+  "barrierefreierurlaub-at:282-volkskundemuseum-am-paulustor": {
+    "lat": 47.0751886,
+    "lng": 15.4400134,
+    "query": "Paulustorgasse 13a, 8010 Graz"
+  },
+  "barrierefreierurlaub-at:242-bergwerksmuseum-montanarum": {
+    "lat": 47.6773226,
+    "lng": 15.6448274,
+    "query": "Altenberg 14, 8691 Neuberg an der Mürz"
+  },
+  "barrierefreierurlaub-at:219-tierwelt-herberstein": {
+    "lat": 47.2174597,
+    "lng": 15.813083,
+    "query": "Buchberg 50, 8223 Stubenberg am See"
+  },
+  "barrierefreierurlaub-at:105-stubenbergsee": {
+    "lat": 47.2433698,
+    "lng": 15.8006942,
+    "query": "Stubenberg am See 5, 8223 Stubenberg am See"
+  },
+  "holidaysonwheels-at:freizeit-botanischer-garten-und-anschlieend-hilmteich": {
+    "lat": 47.2678468,
+    "lng": 11.3798402,
+    "query": "Botanischer Garten"
+  },
+  "holidaysonwheels-at:freizeit-eisbach-zisterzienserstift-rein-kruterweg-im-stiftswald": {
+    "lat": 47.1319067,
+    "lng": 15.2869042,
+    "query": "Eisbach"
+  },
+  "holidaysonwheels-at:sightseeing-museum-der-landtechnik": {
+    "lat": 47.2073653,
+    "lng": 14.931938,
+    "query": "8720 Knittelfeld"
+  },
+  "tirol-at-ausflugsziele:aussichtsplattform-adlerblick": {
+    "lat": 46.9455839,
+    "lng": 10.7420821,
+    "query": "6524 Kaunertal"
+  },
+  "tirol-at-ausflugsziele:achenseeschifffahrt": {
+    "lat": 47.4416744,
+    "lng": 11.7007689,
+    "query": "6213 Pertisau"
+  },
+  "tirol-at-ausflugsziele:piller-moor": {
+    "lat": 47.1217832,
+    "lng": 10.6374311,
+    "query": "6521 Fließ"
+  },
+  "tirol-at-ausflugsziele:hintertuxer-gletscher": {
+    "lat": 47.1069989,
+    "lng": 11.67501,
+    "query": "Hintertux 794, 6294 Tux"
+  },
+  "tirol-at-ausflugsziele:festung-schlosskopf-reutte": {
+    "lat": 47.4643535,
+    "lng": 10.7190431,
+    "query": "Klause 1, 6600 Reutte"
+  },
+  "tirol-at-ausflugsziele:hexenwasser-soell": {
+    "lat": 47.4806171,
+    "lng": 12.1961984,
+    "query": "Hexenwasser Söll, Söll"
+  },
+  "tirol-at-ausflugsziele:erlebnissennerei-zillertal": {
+    "lat": 47.1789381,
+    "lng": 11.8714896,
+    "query": "Hollenzen 116, 6290 Mayrhofen"
+  },
+  "tirol-at-ausflugsziele:triassic-park-steinplatte": {
+    "lat": 47.5842656,
+    "lng": 12.569176,
+    "query": "6384 Waidring"
+  },
+  "tirol-at-ausflugsziele:aqua-dome-laengenfeld": {
+    "lat": 47.0700799,
+    "lng": 10.9647773,
+    "query": "Oberlängenfeld 140, 6444 Längenfeld"
+  },
+  "tirol-at-ausflugsziele:highline179": {
+    "lat": 47.4643535,
+    "lng": 10.7190431,
+    "query": "Klause 1, 6600 Reutte"
+  },
+  "tirol-at-ausflugsziele:007-elements-soelden": {
+    "lat": 46.9420005,
+    "lng": 10.9669237,
+    "query": "007 ELEMENTS, Sölden"
+  },
+  "tirol-at-ausflugsziele:museum-rablhaus-weerberg": {
+    "lat": 47.3039346,
+    "lng": 11.6635417,
+    "query": "Museum Rablhaus, Weerberg"
+  },
+  "tirol-at-ausflugsziele:augustinermuseum-rattenberg": {
+    "lat": 47.440364,
+    "lng": 11.8934531,
+    "query": "Augustinermuseum Rattenberg, Rattenberg"
+  },
+  "tirol-at-ausflugsziele:barrierefreie-stadtrunde-innsbruck": {
+    "lat": 47.2752231,
+    "lng": 11.3976882,
+    "query": "Rennweg, 6020 Innsbruck"
+  },
+  "tirol-at-ausflugsziele:jenbacher-museum": {
+    "lat": 47.3898295,
+    "lng": 11.7734296,
+    "query": "Jenbacher Museum, Jenbach"
+  },
+  "tirol-at-ausflugsziele:tirol-panorama-kaiserjaegermuseum": {
+    "lat": 47.2510618,
+    "lng": 11.4011375,
+    "query": "Bergisel 1, 6020 Innsbruck"
+  },
+  "tirol-at-ausflugsziele:stadtarchiv-stadtmuseum-innsbruck": {
+    "lat": 47.2691033,
+    "lng": 11.3927079,
+    "query": "Badgasse 2, 6020 Innsbruck"
+  },
+  "tirol-at-ausflugsziele:oetztaler-heimatmuseum-laengenfeld": {
+    "lat": 47.0842649,
+    "lng": 10.9449345,
+    "query": "Lehn 24, 6444 Längenfeld"
+  },
+  "tirol-at-ausflugsziele:rabalderhaus-schwaz": {
+    "lat": 47.3465838,
+    "lng": 11.7118344,
+    "query": "Winterstellergasse 9, 6130 Schwaz"
+  },
+  "tirol-at-ausflugsziele:museum-der-voelker-schwaz": {
+    "lat": 47.3509042,
+    "lng": 11.7185946,
+    "query": "St. Martin 16, 6130 Schwaz"
+  },
+  "tirol-at-ausflugsziele:tiroler-volkskunstmuseum": {
+    "lat": 47.2682981,
+    "lng": 11.3958512,
+    "query": "Universitätsstraße 2, 6020 Innsbruck"
+  },
+  "tirol-at-ausflugsziele:museum-zeughaus-innsbruck": {
+    "lat": 47.2702076,
+    "lng": 11.4063823,
+    "query": "Zeughausgasse, 6020 Innsbruck"
   }
 }
