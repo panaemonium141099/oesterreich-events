@@ -18,7 +18,9 @@
  *    (tags-Array-Containment), `setting=indoor|outdoor|mixed` (exakter
  *    Spaltenwert, Task 8), `q=<Freitext>` (ilike auf name ODER town,
  *    Muster via activitySearchPattern; town hat keinen Index — 11k Rows,
- *    Seq-Scan im ms-Bereich).
+ *    Seq-Scan im ms-Bereich), `barrierefrei=1` (Spalte `accessible`,
+ *    generiert aus Deskline-Befund ODER kuratierter Angabe, 2026-09-17;
+ *    UND-verknuepft mit allen anderen Filtern).
  *  - `count=1`: zusaetzlich exakte Trefferzahl `total` (Content-Range).
  *    poi_activities ist mit ~11k Rows klein — die Micro-Warnung vor
  *    count(*) gilt fuer `events` (280k), nicht hier. Ohne den Param bleibt
@@ -55,7 +57,7 @@ const MAX_PAGE_SIZE = 200;
 const LIST_COLUMNS =
   'id, slug, name, description_short, tags, setting, lat, lng, town, ' +
   'gemeinde_slug, bundesland, opening_times, online_bookable, images, ' +
-  'price_hint, updated_at, quality_score';
+  'price_hint, updated_at, quality_score, accessible';
 
 /**
  * `bezirk`-Param -> validierte, deduplizierte, sortierte Liste. Mit
@@ -128,6 +130,10 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
   if (setting === 'indoor' || setting === 'outdoor' || setting === 'mixed') {
     query = query.eq('setting', setting);
   }
+
+  // Barrierefrei: generierte Spalte, Partial-Index (quality_score, id)
+  // WHERE visible AND accessible traegt genau diese Sortierung.
+  if (params.get('barrierefrei') === '1') query = query.eq('accessible', true);
 
   if (cursor) {
     query = query.or(buildActivityCursorFilter(cursor));

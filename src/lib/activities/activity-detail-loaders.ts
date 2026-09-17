@@ -21,7 +21,8 @@ const DETAIL_COLUMNS =
   'id, slug, shortid, name, description, description_short, description_en, tags, setting, ' +
   'lat, lng, town, gemeinde_slug, bundesland, opening_times, online_bookable, ' +
   'images, guest_cards, price_hint, affiliate_product, source, is_closed, ' +
-  'created_at, updated_at';
+  'created_at, updated_at, accessible, accessibility, accessibility_curated, ' +
+  'source_url, source_label';
 
 /**
  * Lazy — kein Modul-Load-Throw, damit tsc/Tests ohne Env funktionieren.

@@ -372,6 +372,19 @@ export function BarChart3Icon(props: IconProps) {
   );
 }
 
+// Accessibility icon — Rollstuhl-Piktogramm fuer den Barrierefrei-Filter (2026-09-17)
+export function AccessibilityIcon(props: IconProps) {
+  return (
+    <svg {...defaultProps(props)}>
+      <circle cx="16" cy="4" r="1" />
+      <path d="M18 19l1-7-6 1" />
+      <path d="M5 8l3-3 5.5 3-2.36 3.5" />
+      <path d="M4.24 14.5a5 5 0 006.88 6" />
+      <path d="M13.76 17.5a5 5 0 00-6.88-6" />
+    </svg>
+  );
+}
+
 // Colored dot — replaces 🟢 (use CSS background-color)
 export function StatusDot({ color = 'bg-green-500', pulse = false, className = '' }: { color?: string; pulse?: boolean; className?: string }) {
   return (

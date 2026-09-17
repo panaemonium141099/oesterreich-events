@@ -50,6 +50,14 @@ export interface PublicActivity {
   is_closed: boolean;
   created_at: string;
   updated_at: string;
+  /** Barrierefreiheit (2026-09-17): generierte Flag-Spalte + die beiden
+   *  Befund-Spalten (roh aus dem jsonb — ueber accessibility.ts parsen). */
+  accessible?: boolean;
+  accessibility?: unknown;
+  accessibility_curated?: unknown;
+  /** Attribution kuratierter Quellen (NULL bei Deskline-Zeilen). */
+  source_url?: string | null;
+  source_label?: string | null;
 }
 
 /**
