@@ -1,0 +1,232 @@
+{
+  "source": "donau-com",
+  "source_label": "Donau Niederösterreich Tourismus (donau.com)",
+  "source_url": "https://www.donau.com/barrierefreies-reisen",
+  "checked_at": "2026-09-17",
+  "entries": [
+    {
+      "id": "roemerstadt-carnuntum",
+      "name": "Römerstadt Carnuntum",
+      "description": "Archäologischer Park mit rekonstruierten römischen Häusern in Petronell-Carnuntum. Für Gäste im Rollstuhl wird das Innere der Häuser an einer barrierefrei zugänglichen Infoinsel als Film gezeigt, mobile Rampen stehen im Gelände bereit; taktiles Bodenleitsystem vom Parkplatz ins Gelände, taktile Infotafeln in Braille, Kurzführer in Braille und für Leseschwäche, induktive Systeme für hörbehinderte Gäste.",
+      "tags": ["museumstour", "ausstellung"],
+      "setting": "mixed",
+      "address": "Hauptstraße 1A",
+      "postal_code": "2404",
+      "town": "Petronell-Carnuntum",
+      "website": "https://www.carnuntum.at/",
+      "source_url": "https://www.donau.com/barrierefreies-reisen",
+      "accessibility": {
+        "features": ["rollstuhl", "parkplatz", "blind", "gehoerlos"],
+        "note": "Laut donau.com: barrierefrei zugängliche Infoinsel, mobile Rampen für die römischen Häuser (Unebenheiten und höhere Stufen im Gelände), taktiles Bodenleitsystem, Infotafeln in Braille, induktive Systeme."
+      }
+    },
+    {
+      "id": "stift-melk",
+      "name": "Stift Melk",
+      "description": "Barockes Benediktinerstift hoch über der Donau in Melk, laut Donau Niederösterreich hürdenlos zu besuchen.",
+      "tags": ["burgführung", "museumstour"],
+      "setting": "mixed",
+      "address": "Abt-Berthold-Dietmayr-Straße 1",
+      "postal_code": "3390",
+      "town": "Melk",
+      "website": "https://www.stiftmelk.at/",
+      "source_url": "https://www.donau.com/barrierefreies-reisen",
+      "accessibility": {
+        "features": ["rollstuhl"],
+        "note": "Laut donau.com hürdenlos zu besuchen. Details zu Lift, WC und Führungen beim Stift erfragen."
+      }
+    },
+    {
+      "id": "stift-goettweig",
+      "name": "Stift Göttweig",
+      "description": "Benediktinerstift auf dem Göttweiger Berg über der Wachau bei Furth, laut Donau Niederösterreich hürdenlos zu besuchen.",
+      "tags": ["burgführung", "museumstour"],
+      "setting": "mixed",
+      "address": "Stift Göttweig 1",
+      "postal_code": "3511",
+      "town": "Furth bei Göttweig",
+      "website": "https://www.stiftgoettweig.at/",
+      "source_url": "https://www.donau.com/barrierefreies-reisen",
+      "accessibility": {
+        "features": ["rollstuhl"],
+        "note": "Laut donau.com hürdenlos zu besuchen. Details zu Lift, WC und Führungen beim Stift erfragen."
+      }
+    },
+    {
+      "id": "stift-klosterneuburg",
+      "name": "Stift Klosterneuburg",
+      "description": "Augustiner-Chorherrenstift in Klosterneuburg mit Museum und Kaiserzimmern, laut Donau Niederösterreich für Menschen mit eingeschränkter Bewegungsfreiheit gut zu besuchen.",
+      "tags": ["burgführung", "museumstour"],
+      "setting": "mixed",
+      "address": "Stiftsplatz 1",
+      "postal_code": "3400",
+      "town": "Klosterneuburg",
+      "website": "https://www.stift-klosterneuburg.at/",
+      "source_url": "https://www.donau.com/barrierefreies-reisen",
+      "accessibility": {
+        "features": ["rollstuhl"],
+        "note": "Laut donau.com für Menschen mit eingeschränkter Bewegungsfreiheit gut zu besuchen."
+      }
+    },
+    {
+      "id": "die-garten-tulln",
+      "name": "Die Garten Tulln",
+      "description": "Ökologische Gartenschau in Tulln mit über 70 Schaugärten, Baumwipfelweg und großem Spielplatz, laut Donau Niederösterreich ein hürdenloses Naturerlebnis für die ganze Familie.",
+      "tags": ["naturführung", "wandern"],
+      "setting": "outdoor",
+      "address": "Am Wasserpark 1",
+      "postal_code": "3430",
+      "town": "Tulln an der Donau",
+      "website": "https://diegartentulln.at/de/",
+      "source_url": "https://www.donau.com/barrierefreies-reisen",
+      "accessibility": {
+        "features": ["rollstuhl"],
+        "note": "Laut donau.com hürdenlos zugänglich."
+      }
+    },
+    {
+      "id": "kittenberger-erlebnisgaerten",
+      "name": "Kittenberger Erlebnisgärten",
+      "description": "Weitläufige Themengärten in Schiltern bei Langenlois mit Spielplätzen und Gastronomie, laut Donau Niederösterreich ein hürdenloses Naturerlebnis.",
+      "tags": ["naturführung", "wandern"],
+      "setting": "outdoor",
+      "address": "Laabergstraße 15",
+      "postal_code": "3553",
+      "town": "Schiltern",
+      "website": "https://www.kittenberger.at/",
+      "source_url": "https://www.donau.com/barrierefreies-reisen",
+      "accessibility": {
+        "features": ["rollstuhl"],
+        "note": "Laut donau.com hürdenlos zugänglich."
+      }
+    },
+    {
+      "id": "schlossorth-nationalpark-zentrum",
+      "name": "schlossORTH Nationalpark-Zentrum",
+      "description": "Besucherzentrum des Nationalparks Donau-Auen im Schloss Orth an der Donau mit Schlossinsel. Mehrere Stationen mit taktilen Übersichtsplänen, drehbaren Infotafeln mit 3D-Tiermodellen und Audiotexten über QR-Codes.",
+      "tags": ["naturführung", "museumstour"],
+      "setting": "mixed",
+      "address": "Schlossplatz 1",
+      "postal_code": "2304",
+      "town": "Orth an der Donau",
+      "website": "https://www.donauauen.at/besuchen/schloss-orth-an-der-donau-nationalparkzentrum",
+      "source_url": "https://www.donau.com/barrierefreies-reisen",
+      "accessibility": {
+        "features": ["rollstuhl", "blind"],
+        "note": "Laut donau.com: unbeschwerter Ausflug in die Natur, taktile Übersichtspläne, drehbare Infotafeln mit 3D-Tiermodellen, Audiotexte per QR-Code."
+      }
+    },
+    {
+      "id": "donauweg-mautern",
+      "name": "Donauweg bei Mautern",
+      "description": "Asphaltierter Weg von der Römerhalle in Mautern entlang der Donau mit Blick auf Krems und Stift Göttweig, laut Donau Niederösterreich auch mit dem Elektro-Rollstuhl befahrbar.",
+      "tags": ["wandern"],
+      "setting": "outdoor",
+      "address": "Römerhalle",
+      "postal_code": "3512",
+      "town": "Mautern an der Donau",
+      "website": "https://www.wohlfuehlwege.at/wege/der-donauweg-bei-mautern",
+      "source_url": "https://www.donau.com/barrierefreies-reisen",
+      "accessibility": {
+        "features": ["rollstuhl"],
+        "note": "Laut donau.com: leichter, asphaltierter Wanderweg, auch mit Elektro-Rollstuhl befahrbar."
+      }
+    },
+    {
+      "id": "marillenmeile-rossatz",
+      "name": "Marillenmeile Rossatz",
+      "description": "Asphaltierte Strecke zwischen Donau und Bundesstraße rund um den Winzerort Rossatz in der Wachau, laut Donau Niederösterreich bequem mit dem Rollstuhl befahrbar.",
+      "tags": ["wandern", "radfahren"],
+      "setting": "outdoor",
+      "address": "Rossatz",
+      "postal_code": "3602",
+      "town": "Rossatz-Arnsdorf",
+      "website": "https://www.donau.com/wachau-nibelungengau-kremstal/marillenmeile",
+      "source_url": "https://www.donau.com/barrierefreies-reisen",
+      "accessibility": {
+        "features": ["rollstuhl"],
+        "note": "Laut donau.com: auf Asphalt bequem befahrbar, auch mit Elektro-Rollstuhl."
+      }
+    },
+    {
+      "id": "welterbesteig-rothenhof-unterloiben",
+      "name": "Welterbesteig Wachau: Teilstück Rothenhof bis Unterloiben",
+      "description": "Hürdenlos zu bewältigendes Teilstück der Etappe 1 des Welterbesteigs Wachau (Krems bis Dürnstein) zwischen Rothenhof und Unterloiben.",
+      "tags": ["wandern"],
+      "setting": "outdoor",
+      "address": "Unterloiben",
+      "postal_code": "3601",
+      "town": "Dürnstein",
+      "website": "https://www.donau.com/touren/welterbesteig-wachau-01-krems-duernstein",
+      "source_url": "https://www.donau.com/barrierefreies-reisen",
+      "accessibility": {
+        "features": ["rollstuhl"],
+        "note": "Laut donau.com hürdenlos zu bewältigen (nur dieses Teilstück der Etappe)."
+      }
+    },
+    {
+      "id": "donauseen-runde-leiben",
+      "name": "Donauseen-Runde bei Leiben",
+      "description": "Leichte Rundwanderung um die Donauseen bei Leiben im Nibelungengau, von Donau Niederösterreich als barrierefreier Wanderweg empfohlen.",
+      "tags": ["wandern"],
+      "setting": "outdoor",
+      "address": "Leiben",
+      "postal_code": "3652",
+      "town": "Leiben",
+      "website": "https://www.donau.com/touren/leiben-3-donauseen-runde",
+      "source_url": "https://www.donau.com/barrierefreies-reisen",
+      "accessibility": {
+        "features": ["rollstuhl"],
+        "note": "Laut donau.com als leichter, auch mit Elektro-Rollstuhl befahrbarer Wanderweg empfohlen."
+      }
+    },
+    {
+      "id": "stadtrunde-ybbs",
+      "name": "Stadtrunde Ybbs an der Donau",
+      "description": "Rundweg durch die Altstadt von Ybbs an der Donau, von Donau Niederösterreich als barrierefreier Wanderweg empfohlen.",
+      "tags": ["wandern"],
+      "setting": "outdoor",
+      "address": "Hauptplatz",
+      "postal_code": "3370",
+      "town": "Ybbs an der Donau",
+      "website": "https://www.donau.com/touren/ybbs-1-stadtrunde",
+      "source_url": "https://www.donau.com/barrierefreies-reisen",
+      "accessibility": {
+        "features": ["rollstuhl"],
+        "note": "Laut donau.com als leichter, auch mit Elektro-Rollstuhl befahrbarer Wanderweg empfohlen."
+      }
+    },
+    {
+      "id": "nibelungenweg-runde-poechlarn",
+      "name": "Nibelungenweg-Runde Pöchlarn",
+      "description": "Rundweg in Pöchlarn, der Geburtsstadt Oskar Kokoschkas, von Donau Niederösterreich als barrierefreier Wanderweg empfohlen.",
+      "tags": ["wandern"],
+      "setting": "outdoor",
+      "address": "Regensburger Straße",
+      "postal_code": "3380",
+      "town": "Pöchlarn",
+      "website": "https://www.donau.com/touren/poechlarn-1-nibelungenweg-runde",
+      "source_url": "https://www.donau.com/barrierefreies-reisen",
+      "accessibility": {
+        "features": ["rollstuhl"],
+        "note": "Laut donau.com als leichter, auch mit Elektro-Rollstuhl befahrbarer Wanderweg empfohlen."
+      }
+    },
+    {
+      "id": "egon-schiele-weg-tulln",
+      "name": "Egon Schiele Weg Tulln",
+      "description": "Durchgehend asphaltierter Themenweg auf den Spuren Egon Schieles durch Tulln an der Donau.",
+      "tags": ["wandern"],
+      "setting": "outdoor",
+      "address": "Hauptplatz",
+      "postal_code": "3430",
+      "town": "Tulln an der Donau",
+      "website": "https://www.donau.com/touren/egon-schiele-weg-1",
+      "source_url": "https://www.donau.com/barrierefreies-reisen",
+      "accessibility": {
+        "features": ["rollstuhl"],
+        "note": "Laut donau.com durchgehend asphaltiert und barrierefrei begehbar."
+      }
+    }
+  ]
+}

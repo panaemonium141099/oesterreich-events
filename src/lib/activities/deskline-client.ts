@@ -69,6 +69,9 @@ export const INFRASTRUCTURE_FIELDS = [
   // Barrierefrei-Markierung ("Barrierefrei", "Rollstuhlgängig" — live
   // verprobt 2026-09-17 in SalzburgerLand/Salzkammergut).
   'holidayThemes{id,name}',
+  // Klassifizierungen tragen in Kaernten das Siegel "ÖZIV geprüft"
+  // (Verband fuer Menschen mit Behinderung; live verprobt 2026-09-17).
+  'classifications{id,name}',
   'location{town,coordinate{name,long,lat}}',
   'images(count:3,sizes:[10]){copyright,license,author,urls}',
   'plainDescriptions{description,type}',
@@ -118,6 +121,7 @@ export interface DesklineInfrastructure {
   openingTimes?: DesklineOpeningTime[] | null;
   topics?: DesklineTopic[] | null;
   holidayThemes?: DesklineTopic[] | null;
+  classifications?: DesklineTopic[] | null;
   location?: {
     town?: string | null;
     coordinate?: { name?: string; long?: number; lat?: number } | null;

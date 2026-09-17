@@ -1,0 +1,100 @@
+{
+  "source": "oststeiermark-com",
+  "source_label": "Oststeiermark Tourismus (steiermark.com)",
+  "source_url": "https://www.steiermark.com/de/Oststeiermark/Themen/Bewegung/Wandern/Barrierefreie-Wege",
+  "checked_at": "2026-09-17",
+  "entries": [
+    {
+      "id": "teichalm-runde-moorlehrpfad",
+      "name": "Teichalm-Runde mit Moorlehrpfad",
+      "description": "Gemütliche Runde auf der Teichalm im Naturpark Almenland: vom Holzochsen über weiche Almböden zur Pension Holzmeister, vorbei an der Harrerhütte, der letzten Sennerei der Oststeiermark, dann um den Teichalmsee und über den Lärchenplanken-Schauweg durch das Teichalmmoor. Gesamt 9,8 km, rund 3 Stunden, 150 Höhenmeter; barrierefrei ist der Teilabschnitt rund um den Teichalmsee und durch das Hochmoor. Der Moorweg ist im Winter gesperrt und öffnet voraussichtlich im April.",
+      "tags": ["wandern", "naturführung"],
+      "setting": "outdoor",
+      "address": "Teichalm, Holzochse",
+      "postal_code": "8163",
+      "town": "Fladnitz an der Teichalm",
+      "lat": 47.3495,
+      "lng": 15.4631,
+      "website": "https://www.steiermark.com/de/Oststeiermark/Themen/Bewegung/Wandern/Barrierefreie-Wege/Teichalm-Runde-mit-Moorlehrpfad-Teichalm_tour_324965",
+      "source_url": "https://www.steiermark.com/de/Oststeiermark/Themen/Bewegung/Wandern/Barrierefreie-Wege",
+      "accessibility": {
+        "features": ["rollstuhl"],
+        "note": "Laut steiermark.com und wanderdoerfer.at: nur der Teilabschnitt um den Teichalmsee und durch das Hochmoor ist für Kinderwagen und Rollstühle geeignet (Schotter, teilweise Holzstege); Moorweg im Winter gesperrt."
+      },
+      "images": [
+        {
+          "url": "https://www.steiermark.com/Alpstein/Images/15713285/456408/image-thumb__456408__img-teaser/moorlehrpfad-teichalm-57821064.ef73582f.jpg",
+          "credit": "Oststeiermark Tourismus / Christine Pollhammer"
+        }
+      ]
+    },
+    {
+      "id": "seerundweg-stubenbergsee",
+      "name": "Seerundweg Stubenbergsee",
+      "description": "Barrierefreier, beleuchteter Rundweg um den Stubenbergsee im Apfelland, einen der größten und wärmsten Badeseen der Steiermark mit gänzlich unverbauten Ufern. Rund 3,3 km, 50 Minuten, 7 Höhenmeter, auch als Lauf- und Skaterstrecke beliebt; bei Badebetrieb wird Eintritt kassiert. Möglicher Startpunkt: Seeparkplatz bei der Feistritzbrücke an der Einfahrt Oststrand.",
+      "tags": ["wandern", "schwimmen"],
+      "setting": "outdoor",
+      "address": "Seeparkplatz Feistritzbrücke",
+      "postal_code": "8223",
+      "town": "Stubenberg am See",
+      "website": "https://www.steiermark.com/de/Oststeiermark/Themen/Bewegung/Wandern/Barrierefreie-Wege/Seerundweg-Stubenbergsee_tour_1580420",
+      "source_url": "https://www.steiermark.com/de/Oststeiermark/Themen/Bewegung/Wandern/Barrierefreie-Wege",
+      "accessibility": {
+        "features": ["rollstuhl", "parkplatz", "assistenzhund"],
+        "note": "Laut steiermark.com: barrierefreier Wanderweg um den See auf ebenem, befestigtem Untergrund; Parkplätze gebührenpflichtig, ausgenommen Ausweis § 29b; Hunde im Seeareal nicht erlaubt, gekennzeichnete Assistenzhunde ausgenommen."
+      },
+      "images": [
+        {
+          "url": "https://www.steiermark.com/Alpstein/Images/23836988/7822440/image-thumb__7822440__img-teaser/stubenbergsee-ort_e.neffe.cce91cc5.jpg",
+          "credit": "Oststeiermark Tourismus"
+        }
+      ]
+    },
+    {
+      "id": "hinterbruehl-runde-poellau",
+      "name": "Hinterbrühl-Runde barrierefrei (Pöllau)",
+      "description": "Komplett barrierefreie Runde durch die Hinterbrühl im Naturpark Pöllauer Tal, entlang der Saifen bis zum Badeteich: leicht zu befahren für Kinderwagen, kleine Kinderfahrzeuge sowie ältere und bewegungseingeschränkte Menschen. Rund 4,9 km, 1,5 Stunden, 50 Höhenmeter; Start im Schlosspark Pöllau, Park & Ride an der Umfahrung.",
+      "tags": ["wandern", "naturführung"],
+      "setting": "outdoor",
+      "address": "Schlosspark",
+      "postal_code": "8225",
+      "town": "Pöllau",
+      "lat": 47.3025,
+      "lng": 15.8322,
+      "website": "https://www.steiermark.com/de/Oststeiermark/Themen/Bewegung/Wandern/Barrierefreie-Wege/Hinterbruehl-Runde-barrierefrei-Poellau_tour_1580374",
+      "source_url": "https://www.steiermark.com/de/Oststeiermark/Themen/Bewegung/Wandern/Barrierefreie-Wege",
+      "accessibility": {
+        "features": ["rollstuhl", "parkplatz"],
+        "note": "Laut steiermark.com: die gesamte Länge von rund 4 km ist komplett barrierefrei, ebener befestigter Untergrund, breit genug für Rollstühle, Rollatoren und Kinderwagen."
+      },
+      "images": [
+        {
+          "url": "https://www.steiermark.com/Alpstein/Images/50992367/5108823/image-thumb__5108823__img-teaser/bench-hinterbruhl_pollau_eastern-styria-81587133.982adf04.jpg",
+          "credit": "Helmut Schweighofer"
+        }
+      ]
+    },
+    {
+      "id": "hartberger-gmoos",
+      "name": "Naturerlebnisweg Hartberger Gmoos",
+      "description": "Themenweg durch das Hartberger Gmoos, ein rund 65 ha großes Flachmoor und Europaschutzgebiet Natura 2000 am südlichen Stadtrand von Hartberg, entstanden durch Verlandung des Edelsees. Lebensraum von Weißstörchen, Wasserrallen, Libellen und Unken; Start beim HERZ Erholungszentrum. Rund 3,6 km, 1 Stunde, 15 Höhenmeter.",
+      "tags": ["wandern", "naturführung"],
+      "setting": "outdoor",
+      "address": "HERZ Erholungszentrum",
+      "postal_code": "8230",
+      "town": "Hartberg",
+      "website": "https://www.steiermark.com/de/Oststeiermark/Themen/Bewegung/Wandern/Barrierefreie-Wege/Tauch-ein-in-die-Natur-im-Hartberger-Gmoos-Hartberg_tour_1253",
+      "source_url": "https://www.steiermark.com/de/Oststeiermark/Themen/Bewegung/Wandern/Barrierefreie-Wege",
+      "accessibility": {
+        "features": ["rollstuhl", "parkplatz"],
+        "note": "Laut steiermark.com als barrierefreier Weg der Oststeiermark gelistet: ebener, befestigter Untergrund, breit genug für Rollstühle und Rollatoren, vom Parkplatz HERZ ohne Hindernisse erreichbar."
+      },
+      "images": [
+        {
+          "url": "https://www.steiermark.com/Alpstein/Images/17301995/7092945/image-thumb__7092945__img-teaser/17635010_1047563353.921c1f2a.jpg",
+          "credit": "TV Hartbergerland / Bernhard Bergmann"
+        }
+      ]
+    }
+  ]
+}

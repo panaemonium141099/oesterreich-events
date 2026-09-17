@@ -312,11 +312,44 @@ describe('transformInfrastructure — Barrierefreiheit', () => {
     });
   });
 
+  it('Klassifizierung "ÖZIV geprüft" zaehlt wie ein Thema und landet in themes_raw', () => {
+    const a = transformOk({
+      holidayThemes: null,
+      classifications: [{ id: 'c1', name: 'ÖZIV geprüft' }],
+      plainDescriptions: [{ description: 'Schöner Ort.', type: 42 }],
+    });
+    expect(a.accessibility).toEqual({ basis: 'deskline-theme', themes: ['ÖZIV geprüft'], features: [] });
+    expect(a.themes_raw).toEqual([{ id: 'c1', name: 'ÖZIV geprüft', kind: 'classification' }]);
+  });
+
   it('Verneinung im Text ergibt keinen Befund', () => {
     const a = transformOk({
       holidayThemes: null,
       plainDescriptions: [{ description: 'Der Turm ist leider nicht barrierefrei.', type: 42 }],
     });
     expect(a.accessibility).toBeNull();
+  });
+});
+
+describe('buildUpdateRow — Bilder-Guard', () => {
+  const writeOnce = { source_region: 'burgenland', slug: 's-abc', shortid: 'abc' };
+
+  it('haelt bestehende Bilder, wenn Deskline keine liefert', () => {
+    const a = transformOk({ images: null });
+    const kept = [{ urls: ['https://upload.wikimedia.org/x.jpg'], copyright: 'Wikimedia Commons, CC BY-SA 4.0', license: 'CC BY-SA 4.0', author: 'X' }];
+    const row = buildUpdateRow(a, '2026-09-17T00:00:00Z', { ...writeOnce, images: kept });
+    expect(row.images).toEqual(kept);
+  });
+
+  it('Deskline-Bilder schlagen bestehende', () => {
+    const a = transformOk();
+    const row = buildUpdateRow(a, '2026-09-17T00:00:00Z', { ...writeOnce, images: [{ urls: ['https://alt.example/x.jpg'], copyright: null, license: null, author: null }] });
+    expect(row.images).toEqual(a.images);
+  });
+
+  it('ohne bestehende Bilder bleibt null', () => {
+    const a = transformOk({ images: null });
+    const row = buildUpdateRow(a, '2026-09-17T00:00:00Z', writeOnce);
+    expect(row.images).toBeNull();
   });
 });

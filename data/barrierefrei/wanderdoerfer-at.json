@@ -1,0 +1,68 @@
+{
+  "source": "wanderdoerfer-at",
+  "source_label": "Österreichs Wanderdörfer (wanderdoerfer.at)",
+  "source_url": "https://www.wanderdoerfer.at/barrierefreie-wanderwege/",
+  "checked_at": "2026-09-17",
+  "entries": [
+    {
+      "id": "kundler-klamm",
+      "name": "Kundler Klamm",
+      "description": "Die Kundler Klamm zählt zu den schönsten Schluchten Österreichs und verbindet die Wildschönau mit dem Inntal. Der rund 3,5 km lange Weg folgt der Wildschönauer Ache auf einem ehemaligen Güterweg durch bis zu 200 m hohe Felswände und ist mit Kinderwagen oder Rollstuhl gut begehbar; am Ende wartet das Gasthaus Kundler Klamm. Von Mai bis Oktober fährt ab dem Hotel Färberwirt im Mühltal ein rollstuhlgerechter Bummelzug durch die Klamm. Gesamtroute laut Wanderdörfer 4,9 km, rund 1,5 Stunden, keine Höhenmeter.",
+      "tags": ["wandern", "naturführung"],
+      "setting": "outdoor",
+      "address": "Mühltal",
+      "postal_code": "6311",
+      "town": "Wildschönau",
+      "website": "https://www.wildschoenau.com/de/urlaub-planen-buchen/barrierefreier-urlaub",
+      "source_url": "https://www.wanderdoerfer.at/barrierefreie-wanderwege/",
+      "accessibility": {
+        "features": ["rollstuhl", "wc"],
+        "note": "Laut wanderdoerfer.at: mit Rollstuhl gut begehbar, Begleitung und/oder ein technisches Hilfsmittel wie Swiss-Trac empfohlen; barrierefreies WC im oberen Teil der Klamm und im Gasthaus; rollstuhlgerechter Bummelzug von Mai bis Oktober."
+      },
+      "images": [
+        {
+          "url": "https://www.wanderdoerfer.at/wp-content/uploads/2025/04/Kundler-Klamm-Wandern-Familie-Sommer_Alpbachtal-Tourismus_Foto-Hannes-Sautner-shootandstyle-2-scaled-1200x801.jpg",
+          "credit": "Alpbachtal Tourismus / Hannes Sautner, shootandstyle"
+        }
+      ]
+    },
+    {
+      "id": "reintalersee-kramsach",
+      "name": "Barrierefreier Wanderweg entlang des Reintaler Sees",
+      "description": "Naturnaher Spazierweg am Reintalersee bei Kramsach im Alpbachtal: über breite, gut ausgebaute Wege, Holzstege und sanfte Uferabschnitte vom Parkplatz West bis zur Südspitze des Sees, mit Rastplätzen, Badestellen und Ausblicken. An der Kohlerwiese ermöglicht eine eigens errichtete Rampe den Einstieg ins Wasser mit dem Rollstuhl, beim Ausgangspunkt liegt ein barrierefreier Bewegungspark. Kein Rundweg, in Teilstrecken begehbar; laut Wanderdörfer 7 km, rund 1,75 Stunden, 15 Höhenmeter.",
+      "tags": ["wandern", "schwimmen"],
+      "setting": "outdoor",
+      "address": "Reintalersee, Parkplatz West",
+      "postal_code": "6233",
+      "town": "Kramsach",
+      "website": "https://www.alpbachtal.at/de/urlaub-planen-und-buchen/tourenplaner/Barrierefreier-Wanderweg-entlang-des-Reintalersees_tour_257550",
+      "source_url": "https://www.wanderdoerfer.at/barrierefreie-wanderwege/",
+      "accessibility": {
+        "features": ["rollstuhl", "parkplatz"],
+        "note": "Laut wanderdoerfer.at: breite Wege, Schotter, Holzstege, geringe Steigungen; an der Kohlerwiese Rampe für Rollstühle zum Einstieg ins Wasser; Restaurant Fischerstube; barrierefreier Bewegungspark am Ausgangspunkt."
+      },
+      "images": [
+        {
+          "url": "https://www.wanderdoerfer.at/wp-content/uploads/2025/06/Barrierefreier-Wanderweg-Reintalersee-3_Alpbachtal-Tourismus_shootandstyle.com_Kramsach-scaled-1200x801.jpg",
+          "credit": "Alpbachtal Tourismus / Shootandstyle"
+        }
+      ]
+    },
+    {
+      "id": "mellau-am-fusse-der-kanisfluh",
+      "name": "Barrierefrei: Mellau am Fuße der Kanisfluh",
+      "description": "Meist ebener Weg entlang der Bregenzerach am Fuß der markanten Kanisfluh im Bregenzerwald, durch Wiesen und Waldstücke mit Blick auf die bis zu 1.300 m hohen Felswände der Nordseite. Laut Wanderdörfer 4,5 km, rund 1 Stunde, 15 Höhenmeter; Start bei der Talstation der Mellaubahn.",
+      "tags": ["wandern"],
+      "setting": "outdoor",
+      "address": "Talstation Mellaubahn",
+      "postal_code": "6881",
+      "town": "Mellau",
+      "website": "https://www.bregenzerwald.at/aktivitaet/barrierefrei-mellau-am-fusse-der-kanisfluh/",
+      "source_url": "https://www.wanderdoerfer.at/barrierefreie-wanderwege/",
+      "accessibility": {
+        "features": ["rollstuhl", "wc", "parkplatz"],
+        "note": "Laut wanderdoerfer.at: Asphalt und Schotter, geringe Steigung; barrierefreies WC und Parkplatz bei der Talstation Mellaubahn."
+      }
+    }
+  ]
+}

@@ -1,0 +1,174 @@
+{
+  "source": "kaernten-at",
+  "source_label": "Kärnten Werbung (kaernten.at)",
+  "source_url": "https://www.kaernten.at/barrierefrei/",
+  "checked_at": "2026-09-17",
+  "entries": [
+    {
+      "id": "fischlehrpfad-weissensee",
+      "name": "Fischlehrpfad Weissensee",
+      "description": "Barrierefreier Naturlehrpfad im Naturpark Weissensee: fünf Schautafeln mit haptischen Elementen und in Braille-Schrift erklären die Fischarten des Sees. Leicht, 2,5 km, rund 50 Minuten, 10 Höhenmeter. ÖZIV geprüft.",
+      "tags": ["wandern", "naturführung"],
+      "setting": "outdoor",
+      "address": "Techendorf",
+      "postal_code": "9762",
+      "town": "Weissensee",
+      "website": "https://www.kaernten.at/barrierefrei/",
+      "source_url": "https://www.kaernten.at/barrierefrei/",
+      "accessibility": {
+        "features": ["rollstuhl", "blind"],
+        "note": "Laut kaernten.at: ÖZIV-geprüfter barrierefreier Wanderweg, Schautafeln mit haptischen Elementen und Braille-Schrift, Schwierigkeit leicht, 2,5 km, 10 Höhenmeter."
+      }
+    },
+    {
+      "id": "sternbildwanderung-egger-alm-dellacher-alm",
+      "name": "Sternbildwanderung Egger Alm bis Dellacher Alm",
+      "description": "Asphaltierter Weg mitten durch das Hochalmgebiet am Nassfeld, der die Almdörfer Egger Alm und Dellacher Alm verbindet. Leicht, 7,7 km, rund 2 Stunden, 77 Höhenmeter. ÖZIV geprüft.",
+      "tags": ["wandern"],
+      "setting": "outdoor",
+      "address": "Egger Alm",
+      "postal_code": "9620",
+      "town": "Hermagor",
+      "website": "https://www.kaernten.at/barrierefrei/",
+      "source_url": "https://www.kaernten.at/barrierefrei/",
+      "accessibility": {
+        "features": ["rollstuhl"],
+        "note": "Laut kaernten.at: ÖZIV-geprüfter barrierefreier Wanderweg auf Asphalt, Schwierigkeit leicht, 7,7 km, 77 Höhenmeter."
+      }
+    },
+    {
+      "id": "seelehrpfad-weissensee-ost",
+      "name": "Seelehrpfad Weissensee Ost",
+      "description": "Kurzer Lehrpfad am Ostufer des Weissensees mit sieben Infotafeln und vielen Sitzplätzen zur Welt am und unter Wasser. Leicht, 0,4 km, rund 35 Minuten, 10 Höhenmeter. ÖZIV geprüft.",
+      "tags": ["wandern", "naturführung"],
+      "setting": "outdoor",
+      "address": "Weissensee Ostufer",
+      "postal_code": "9762",
+      "town": "Weissensee",
+      "website": "https://www.kaernten.at/barrierefrei/",
+      "source_url": "https://www.kaernten.at/barrierefrei/",
+      "accessibility": {
+        "features": ["rollstuhl"],
+        "note": "Laut kaernten.at: ÖZIV-geprüfter barrierefreier Wanderweg, Schotter mit kaum Steigung, 0,4 km."
+      }
+    },
+    {
+      "id": "silva-magica-nockberge",
+      "name": "Silva Magica Naturbegegnungspark",
+      "description": "Rundweg zum Thema Naturgeheimnisse und Naturwesen bei der Grundalm an der Nockalmstraße im Biosphärenpark Nockberge. 2021 barrierefrei ausgebaut, leicht, 0,7 km, rund 20 Minuten, 20 Höhenmeter. ÖZIV geprüft, barrierefreies WC vorhanden.",
+      "tags": ["wandern", "naturführung"],
+      "setting": "outdoor",
+      "address": "Nockalmstraße, Grundalm",
+      "postal_code": "9565",
+      "town": "Ebene Reichenau",
+      "website": "https://www.kaernten.at/barrierefrei/",
+      "source_url": "https://www.kaernten.at/barrierefrei/",
+      "accessibility": {
+        "features": ["rollstuhl", "wc"],
+        "note": "Laut kaernten.at und wanderdoerfer.at: ÖZIV-geprüfter Rundweg, Schotter, breite Wege und geringe Steigungen, barrierefreies WC vorhanden."
+      }
+    },
+    {
+      "id": "geolehrpfad-dobratsch-rosstratte",
+      "name": "Geolehrpfad am Dobratsch (Rosstratte)",
+      "description": "Barrierefreier Geolehrpfad auf 1.700 m Seehöhe auf der Rosstratte am Fuß des Gipfelwanderweges Dobratsch im Naturpark Dobratsch. Leicht, 0,6 km, rund 20 Minuten, 14 Höhenmeter. ÖZIV geprüft.",
+      "tags": ["wandern", "naturführung"],
+      "setting": "outdoor",
+      "address": "Rosstratte, Villacher Alpenstraße",
+      "postal_code": "9500",
+      "town": "Villach",
+      "lat": 46.5878,
+      "lng": 13.7089,
+      "website": "https://www.kaernten.at/barrierefrei/",
+      "source_url": "https://www.kaernten.at/barrierefrei/",
+      "accessibility": {
+        "features": ["rollstuhl"],
+        "note": "Laut kaernten.at: ÖZIV-geprüfter barrierefreier Lehrpfad, Schwierigkeit leicht, 0,6 km, 14 Höhenmeter."
+      }
+    },
+    {
+      "id": "dobratsch-skywalk-rote-wand",
+      "name": "Skywalk Rote Wand am Dobratsch",
+      "description": "Barrierefreie Aussichtsplattform am Dobratsch: über 7 m freitragende Metallplattform auf rund 1.483 m Seehöhe, erreichbar vom Parkplatz 6 der Villacher Alpenstraße. Leicht, 0,6 km, rund 10 Minuten, 12 Höhenmeter. ÖZIV geprüft.",
+      "tags": ["wandern"],
+      "setting": "outdoor",
+      "address": "Villacher Alpenstraße, Parkplatz 6",
+      "postal_code": "9500",
+      "town": "Villach",
+      "lat": 46.5987,
+      "lng": 13.7333,
+      "website": "https://www.kaernten.at/barrierefrei/",
+      "source_url": "https://www.kaernten.at/barrierefrei/",
+      "accessibility": {
+        "features": ["rollstuhl", "parkplatz"],
+        "note": "Laut kaernten.at: barrierefreier Skywalk, ÖZIV geprüft, vom Parkplatz 6 rund 0,6 km mit 12 Höhenmetern."
+      }
+    },
+    {
+      "id": "leben-im-wassertropfen-weissensee",
+      "name": "Das Leben im Wassertropfen (Weissensee)",
+      "description": "Aussichtsreiche barrierefreie Wanderung am Weissensee mit Aussichtsplattform und Beobachtungssteg und großer Vielfalt an Tier- und Pflanzenarten. Leicht, 3,2 km, rund 50 Minuten, 4 Höhenmeter. ÖZIV geprüft.",
+      "tags": ["wandern", "naturführung"],
+      "setting": "outdoor",
+      "address": "Techendorf",
+      "postal_code": "9762",
+      "town": "Weissensee",
+      "website": "https://www.kaernten.at/barrierefrei/",
+      "source_url": "https://www.kaernten.at/barrierefrei/",
+      "accessibility": {
+        "features": ["rollstuhl"],
+        "note": "Laut kaernten.at: ÖZIV-geprüfter barrierefreier Wanderweg, Schwierigkeit leicht, 3,2 km, 4 Höhenmeter."
+      }
+    },
+    {
+      "id": "stappitzer-see-mallnitz",
+      "name": "Wanderweg zum Stappitzer See",
+      "description": "Barrierefreier Weg vom Parkplatz der Ankogelbahn in Mallnitz zum Stappitzer See im Seebachtal des Nationalparks Hohe Tauern: feiner, 4 m breiter Makadamweg mit rund 3 Höhenmetern und höchstens 6 Prozent Steigung, barrierefreie Rastplätze, Infotafeln in Blindenschrift und Sinnes-Erlebnisstationen. ÖZIV zertifiziert; barrierefreies WC im Besucherzentrum Mallnitz.",
+      "tags": ["wandern", "naturführung"],
+      "setting": "outdoor",
+      "address": "Parkplatz Ankogelbahn",
+      "postal_code": "9822",
+      "town": "Mallnitz",
+      "lat": 47.0106,
+      "lng": 13.1836,
+      "website": "https://hohetauern.at/de/besuchen/barrierefrei.html?view=article&id=2225:themenwege-outdoor&catid=92",
+      "source_url": "https://www.kaernten.at/barrierefrei/",
+      "accessibility": {
+        "features": ["rollstuhl", "parkplatz", "blind"],
+        "note": "Laut kaernten.at und hohetauern.at: ÖZIV-zertifizierter barrierefreier Weg ab barrierefreiem Parkplatz Ankogelbahn, 800 m einfache Strecke, Infotafeln in Blindenschrift, barrierefreie Rastplätze; Anreise mit Bus, Bahn oder Wandertaxi möglich."
+      }
+    },
+    {
+      "id": "bergpromenade-brunnach",
+      "name": "Rundwanderweg Bergpromenade Brunnach",
+      "description": "Rundwanderweg ab der barrierefrei zugänglichen Bergstation Brunnach in Bad Kleinkirchheim (Nockberge) mit barrierefreien Lehrtafeln zum Thema Speik und aussichtsreichen Rastmöglichkeiten. Leicht, 2,5 km, rund 40 Minuten, 30 Höhenmeter. ÖZIV geprüft.",
+      "tags": ["wandern", "bergtour"],
+      "setting": "outdoor",
+      "address": "Bergstation Brunnach",
+      "postal_code": "9546",
+      "town": "Bad Kleinkirchheim",
+      "website": "https://www.kaernten.at/barrierefrei/",
+      "source_url": "https://www.kaernten.at/barrierefrei/",
+      "accessibility": {
+        "features": ["rollstuhl"],
+        "note": "Laut kaernten.at: ÖZIV-geprüfter barrierefreier Rundwanderweg ab barrierefrei zugänglicher Bergstation, Schwierigkeit leicht, 2,5 km, 30 Höhenmeter."
+      }
+    },
+    {
+      "id": "kraeuterwanderung-egger-alm-grundalm",
+      "name": "Barrierefreies Naturerlebnis Grundalm (Nockberge)",
+      "description": "Barrierefreies Naturerlebnis bei der Grundalm an der Nockalmstraße im Biosphärenpark Nockberge, von Kärnten Werbung unter den barrierefreien Naturerlebnissen mit ÖZIV-Kriterien geführt.",
+      "tags": ["wandern", "naturführung"],
+      "setting": "outdoor",
+      "address": "Nockalmstraße, Grundalm",
+      "postal_code": "9565",
+      "town": "Ebene Reichenau",
+      "website": "https://www.kaernten.at/barrierefrei/",
+      "source_url": "https://www.kaernten.at/barrierefrei/",
+      "accessibility": {
+        "features": ["rollstuhl"],
+        "note": "Laut kaernten.at: barrierefreies Naturerlebnis nach den ÖZIV-Kriterien für Naturerlebnis-Infrastrukturen."
+      }
+    }
+  ]
+}

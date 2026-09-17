@@ -1,0 +1,1062 @@
+{
+  "source": "graztourismus-at",
+  "source_label": "Graz Tourismus (graztourismus.at)",
+  "source_url": "https://www.graztourismus.at/de/unterkuenfte-packages/barrierefrei-in-graz",
+  "checked_at": "2026-09-17",
+  "entries": [
+    {
+      "id": "salon-stolz-shg-7385",
+      "name": "Salon Stolz",
+      "description": "Ein Museum für Robert Stolz: Entdecken Sie das Leben und Werk des Komponisten und Dirigenten. Der Salon Stolz ist modern, inklusiv und offen für alle Generationen. Hier kann man Musik nicht nur hören, sondern ihr auf unterschiedliche überraschende Weise begegnen. Lernen Sie das Leben und die Melodien von Robert Stolz kennen. Der Salon Stolz bietet Platz, um unterschiedliche Zugänge und Übersetzungen von Musik zu schaffen. Musik und Tanz sind mit allen Sinnen erlebbar. Alle Generationen sind eingeladen, sich im Salon Stolz auf eine Zeit- und Entdeckungsreise zu wagen.",
+      "description_short": null,
+      "tags": [
+        "museumstour",
+        "ausstellung"
+      ],
+      "setting": "indoor",
+      "address": "Theodor-Körner-Straße 67",
+      "postal_code": "8010",
+      "town": "Graz",
+      "lat": null,
+      "lng": null,
+      "website": "https://www.graztourismus.at/de/sightseeing-kultur/sehenswuerdigkeiten/salon-stolz_shg_7385",
+      "source_url": "https://www.graztourismus.at/de/sightseeing-kultur/sehenswuerdigkeiten/salon-stolz_shg_7385",
+      "accessibility": {
+        "features": [
+          "rollstuhl",
+          "blind",
+          "gehoerlos",
+          "leichte-sprache"
+        ],
+        "note": "Laut Graz Tourismus geeignet für: Personen im Rollstuhl, blinde Personen, hörbehinderte/gehörlose Personen, barrierefreier Betrieb, Rollstuhlfahrer mit Unterstützung, mobilitätseingeschränkte Personen, sehbehinderte Personen, Personen mit Lernschwierigkeiten. Messwerte im Barrierefrei-Datenblatt: https://www.graztourismus.at/Barrierefrei/PDFs/museen/barrierefreie-museen-2024_salon-stolz.pdf"
+      },
+      "images": [
+        {
+          "url": "https://www.graztourismus.at/Sightseeing-Kultur/Museen-und-Galerien/Museen/Salon%20Stolz/19995/image-thumb__19995__jsonld/salon-stolz-eingang%C2%A9salon-stolz-stella-kager.c53b6752.jpg",
+          "credit": "Salon Stolz - Stella Kager",
+          "license": null,
+          "author": null
+        }
+      ],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "kunsthaus-graz-shg-1462",
+      "name": "Kunsthaus Graz",
+      "description": "Wie ein riesiger Tropfen fiel es 2003, als Graz Kulturhauptstadt Europas war, mitten in die Stadt. Es wurde zum modernen Wahrzeichen und glänzt mit seinem biomorphen Äußeren ebenso wie mit den inneren Werten seiner Ausstellungen. „The Friendly Alien“, wie das Kunsthaus Graz liebevoll genannt wird, ist mit dem traditionsreichen „Eisernen Haus“ verbunden. Das „Eiserne Haus“, 1848 errichtet, war eines der ersten gusseisernen Gebäude Kontinentaleuropas – ein Warenhaus mit großen, einladenden Schaufenstern. In den langen Jahren vielfach umgebaut, wurde es bei der Errichtung des Kunsthauses in seinen Urzustand zurückversetzt.",
+      "description_short": null,
+      "tags": [
+        "museumstour",
+        "ausstellung"
+      ],
+      "setting": "indoor",
+      "address": "Lendkai 1",
+      "postal_code": "8020",
+      "town": "Graz",
+      "lat": null,
+      "lng": null,
+      "website": "https://www.graztourismus.at/de/sightseeing-kultur/sehenswuerdigkeiten/kunsthaus-graz_shg_1462",
+      "source_url": "https://www.graztourismus.at/de/sightseeing-kultur/sehenswuerdigkeiten/kunsthaus-graz_shg_1462",
+      "accessibility": {
+        "features": [
+          "rollstuhl",
+          "blind",
+          "leichte-sprache"
+        ],
+        "note": "Laut Graz Tourismus geeignet für: Personen im Rollstuhl, Rollstuhlfahrer mit Unterstützung, mobilitätseingeschränkte Personen, blinde Personen, sehbehinderte Personen, Personen mit Lernschwierigkeiten. Messwerte im Barrierefrei-Datenblatt: https://www.graztourismus.at/Barrierefrei/PDFs/museen/barrierefreie-museen-2024_kunsthaus.pdf"
+      },
+      "images": [
+        {
+          "url": "https://www.graztourismus.at/Sightseeing-Kultur/Sehensw%C3%BCrdigkeiten/Kunsthaus/19710/image-thumb__19710__jsonld/aussicht-vom-schlossberg-%28c%29-graz-tourismus---harry-schiffer-%289%29.170fb0b1.jpg",
+          "credit": "Graz Tourismus - Harry Schiffer",
+          "license": null,
+          "author": null
+        }
+      ],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "schlossbergbahn-graz-shg-1482",
+      "name": "Schlossbergbahn Graz",
+      "description": "Was haben Graz und die Niagarafälle gemeinsam? Zugegeben, es ist nicht einfach zu erraten: Es ist eine Standseilbahn. Mit der Schlossbergbahn werden Besucher in eineinhalb Minuten auf den Schlossberg, den Grazer Hausberg, gebracht. Die äußerst steile Strecke bietet immer wieder einen kleinen Nervenkitzel und wunderbare Ausblicke auf Graz und seine Altstadt. Schon seit über einhundert Jahren besteht diese spektakuläre Bahn, mit der man schick auf den Schlossberg gelangt, um dort das Panorama und so manch rauschendes Fest zu genießen.",
+      "description_short": null,
+      "tags": [
+        "bergtour"
+      ],
+      "setting": "outdoor",
+      "address": "Kaiser-Franz-Josef-Kai 38",
+      "postal_code": "8010",
+      "town": "Graz",
+      "lat": null,
+      "lng": null,
+      "website": "https://www.graztourismus.at/de/sightseeing-kultur/sehenswuerdigkeiten/schlossbergbahn-graz_shg_1482",
+      "source_url": "https://www.graztourismus.at/de/sightseeing-kultur/sehenswuerdigkeiten/schlossbergbahn-graz_shg_1482",
+      "accessibility": {
+        "features": [
+          "rollstuhl"
+        ],
+        "note": "Laut Graz Tourismus geeignet für: barrierefreier Betrieb. Messwerte im Barrierefrei-Datenblatt: https://www.graztourismus.at/Barrierefrei/PDFs/sehenswuerdigkeiten/Schlossbergbahn_barrierefrei 2022.pdf"
+      },
+      "images": [
+        {
+          "url": "https://www.graztourismus.at/Sightseeing-Kultur/Sehensw%C3%BCrdigkeiten/Schlossbergbahn/2248/image-thumb__2248__jsonld/schlossberg-bahn-4.a64ee448.jpg",
+          "credit": "Graz Tourismus - Harry Schiffer",
+          "license": null,
+          "author": null
+        }
+      ],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "joanneumsviertel-shg-1494",
+      "name": "Joanneumsviertel",
+      "description": "Kultur pur – das bietet das Joanneumsviertel in Graz. Das vielseitige Kulturzentrum verbindet die historischen Museums- und Bibliotheksgebäude in der Rauber-, Neutor- und Kalchberggasse zu einer modernen architektonischen Einheit. Diese Mischung macht das Joanneumsviertel zu einem attraktiven Ort der Begegnung. Vom ansprechend angelegten Joanneumsviertelplatz gelangt man über Rolltreppen in das zentrale Besucherzentrum – auch ein barrierefreier Zugang ist vorhanden. Im Joanneumsviertel begeistert die Neue Galerie Graz mit qualitätsvoller Kunst in thematisch wechselnden Ausstellungen. Das Naturkundemuseum lädt zu Streifzügen durch die wunderbare Welt der Tiere, Pflanzen und Gesteine ein und das CoSA - Center of Science Activities ermöglicht spannende Forschungsabenteuer rund um Technik und Naturwissenschaften. Die Steiermärkische Landesbibliothek ist ebenfalls Teil des Joanneumsviertels u",
+      "description_short": null,
+      "tags": [
+        "museumstour",
+        "ausstellung"
+      ],
+      "setting": "indoor",
+      "address": "Joanneumsviertel",
+      "postal_code": "8010",
+      "town": "Graz",
+      "lat": null,
+      "lng": null,
+      "website": "https://www.graztourismus.at/de/sightseeing-kultur/sehenswuerdigkeiten/joanneumsviertel_shg_1494",
+      "source_url": "https://www.graztourismus.at/de/sightseeing-kultur/sehenswuerdigkeiten/joanneumsviertel_shg_1494",
+      "accessibility": {
+        "features": [
+          "rollstuhl"
+        ],
+        "note": "Laut Graz Tourismus geeignet für: barrierefreier Betrieb. Messwerte im Barrierefrei-Datenblatt: https://www.graztourismus.at/Barrierefrei/PDFs/museen/joanneumsviertel_barrierefrei.pdf"
+      },
+      "images": [
+        {
+          "url": "https://www.graztourismus.at/Sightseeing-Kultur/Museen-und-Galerien/Museen/Joanneumsviertel/2295/image-thumb__2295__jsonld/joanneumsviertel-3.a9bd53b0.jpg",
+          "credit": "Graz Tourismus - Harry Schiffer",
+          "license": null,
+          "author": null
+        }
+      ],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "helmut-list-halle-shg-9730",
+      "name": "Helmut List Halle",
+      "description": "Die Helmut List Halle zählt zu den bedeutendsten Veranstaltungsorten in Graz und verbindet auf einzigartige Weise Industriearchitektur, Kultur und Innovation. Die ehemalige Fabrikhalle wurde im Zuge des Kulturhauptstadtjahres Graz 2003 von Architekt Markus Pernthaler zu einer multifunktionalen Eventlocation mit herausragender Akustik umgebaut. Heute bietet sie Raum für Konzerte, Festivals, Kongresse, Theaterproduktionen und zahlreiche weitere Veranstaltungen. Mit ihrer flexiblen Architektur, modernster Technik und internationalen Ausrichtung ist die Helmut List Halle ein lebendiger Treffpunkt für Kunst, Kultur und Begegnung im Herzen von Graz.",
+      "description_short": null,
+      "tags": [
+        "theater"
+      ],
+      "setting": "indoor",
+      "address": "Waagner-Biro-Straße 98 a",
+      "postal_code": "8020",
+      "town": "Graz",
+      "lat": null,
+      "lng": null,
+      "website": "https://www.graztourismus.at/de/sightseeing-kultur/sehenswuerdigkeiten/helmut-list-halle_shg_9730",
+      "source_url": "https://www.graztourismus.at/de/sightseeing-kultur/sehenswuerdigkeiten/helmut-list-halle_shg_9730",
+      "accessibility": {
+        "features": [
+          "rollstuhl"
+        ],
+        "note": "Laut Graz Tourismus geeignet für: mobilitätseingeschränkte Personen, Rollstuhlfahrer mit Unterstützung, Personen im Rollstuhl. Messwerte im Barrierefrei-Datenblatt: https://www.graztourismus.at/Barrierefrei/PDFs/va-orte/list-halle_barrierefrei_2025.pdf"
+      },
+      "images": [
+        {
+          "url": "https://www.graztourismus.at/Kongress/Venue%20Finder/1_Veranstaltungszentren/Helmut%20List%20Halle/20022/image-thumb__20022__jsonld/helmut-list-halle-%28c%29-stefan-leitner.3c4176e1.jpg",
+          "credit": "Stefan Leitner",
+          "license": null,
+          "author": null
+        }
+      ],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "schloss-eggenberg-graz-shg-1478",
+      "name": "Schloss Eggenberg Graz",
+      "description": "Schloss Eggenberg ist ein erstrangiges Gesamtkunstwerk der Barockzeit, das seit 2010 zu den UNESCO-Welterbestätten zählt. Architektur und Ausstattung verbinden sich zu einer symbolischen Darstellung des Universums, das zur Repräsentation der fürstlichen Familie Eggenberg errichtet wurde. Das Schloss bewahrt ein kostbares Ensemble historischer Interieurs mit einem wichtigen Zyklus von über 500 Deckengemälden. Es ist ein nahezu unverfälschtes Raumkunstwerk, in dem sich die Ausstattungsphasen des 17. und 18. Jahrhunderts zu einem Ensemble von besonderem Erlebniswert verbinden.",
+      "description_short": null,
+      "tags": [
+        "burgführung",
+        "museumstour"
+      ],
+      "setting": "mixed",
+      "address": "Eggenberger Allee 90",
+      "postal_code": "8020",
+      "town": "Graz",
+      "lat": null,
+      "lng": null,
+      "website": "https://www.graztourismus.at/de/sightseeing-kultur/sehenswuerdigkeiten/schloss-eggenberg-graz_shg_1478",
+      "source_url": "https://www.graztourismus.at/de/sightseeing-kultur/sehenswuerdigkeiten/schloss-eggenberg-graz_shg_1478",
+      "accessibility": {
+        "features": [
+          "rollstuhl"
+        ],
+        "note": "Laut Graz Tourismus geeignet für: Personen im Rollstuhl, Rollstuhlfahrer mit Unterstützung, mobilitätseingeschränkte Personen. Messwerte im Barrierefrei-Datenblatt: https://www.graztourismus.at/Barrierefrei/PDFs/museen/barrierefreie-museen-2026_schloss-eggenberg.pdf"
+      },
+      "images": [
+        {
+          "url": "https://www.graztourismus.at/Sightseeing-Kultur/Sehensw%C3%BCrdigkeiten/Schloss%20Eggenberg/Schloss%20Eggenberg/21472/image-thumb__21472__jsonld/schloss-eggenberg-%28c%29-graz-tourismus---mias-photoart-%2870%29.f5ed53f3.jpg",
+          "credit": "Graz Tourismus - Mias Photoart",
+          "license": null,
+          "author": null
+        }
+      ],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "schlossberglift-shg-1484",
+      "name": "Schlossberglift",
+      "description": "Auf der Überholspur. Eine ungewöhnliche, schnelle und zugleich bequeme Art, den Schlossberg von Graz zu erklimmen, ist der Schlossberglift. Die ästhetisch äußerst ansprechende Lösung des in das Innere des Berges eingebauten Liftes ist äußerst praktisch, wenn man es etwas eiliger hat oder gerade einmal nicht so gut zu Fuß ist. Die Glaskabinen des Liftes lassen während der Fahrt den Blick auf die beleuchtete Felsstruktur zu – Bergschau von innen. Seit 2000 verbindet der Lift im Berg barrierefrei und zügig den Fuß des Schlossbergs mit dem Uhrturm. Mit zwei Zwischenhaltestellen bietet er auch Zugang zum Dom im Berg sowie zu den Uhrturmkasematten. Doch der 77 Meter hohe Lift ist mehr als bloßes Transportmittel – er ist ein Erlebnisraum, da die beiden Panoramakabinen Einblicke in das Felsinnere gewähren. 2019 kam mit der Schlossbergrutsche, die einen ebenso tempo- wie kurvenreichen Abstieg erm",
+      "description_short": null,
+      "tags": [
+        "bergtour"
+      ],
+      "setting": "outdoor",
+      "address": "Schloßbergplatz",
+      "postal_code": "8010",
+      "town": "Graz",
+      "lat": null,
+      "lng": null,
+      "website": "https://www.graztourismus.at/de/sightseeing-kultur/sehenswuerdigkeiten/schlossberglift_shg_1484",
+      "source_url": "https://www.graztourismus.at/de/sightseeing-kultur/sehenswuerdigkeiten/schlossberglift_shg_1484",
+      "accessibility": {
+        "features": [
+          "rollstuhl"
+        ],
+        "note": "Laut Graz Tourismus geeignet für: barrierefreier Betrieb. Messwerte im Barrierefrei-Datenblatt: https://www.graztourismus.at/Barrierefrei/PDFs/sehenswuerdigkeiten/Schlossberglift_barrierefrei 2022.pdf"
+      },
+      "images": [
+        {
+          "url": "https://www.graztourismus.at/Sightseeing-Kultur/Sehensw%C3%BCrdigkeiten/Schlossberglift/9835/image-thumb__9835__jsonld/Schlossberg_Lift%20%28c%29%20Graz%20Tourismus%20-%20Harry%20Schiffer%20%282%29.f67146e7.jpg",
+          "credit": "Graz Tourismus - Harry Schiffer",
+          "license": null,
+          "author": null
+        }
+      ],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "oper-graz-shg-1472",
+      "name": "Oper Graz",
+      "description": "Die Grazer Oper wurde nach Plänen vom berühmten Architektenduo Helmer und Fellner 1899 erbaut wurde. Hier treffen Tradition und Moderne eindrucksvoll aufeinander: Einen spannenden Kontrast bildet die Stahlskulptur „Lichtschwert“ von Hartmut Skerbisch, die als Symbol für Offenheit und Toleranz vor der Oper steht. Die Oper selbst, einst Stadttheater, ist nun prunkvolle Bühne für atemberaubende Inszenierungen in Graz, die von Musiktheater bis Ballett reichen und sie ist Teil der Europastraße Historische Theater.",
+      "description_short": null,
+      "tags": [
+        "theater"
+      ],
+      "setting": "indoor",
+      "address": "Kaiser-Josef-Platz 10",
+      "postal_code": "8010",
+      "town": "Graz",
+      "lat": null,
+      "lng": null,
+      "website": "https://www.graztourismus.at/de/sightseeing-kultur/sehenswuerdigkeiten/oper-graz_shg_1472",
+      "source_url": "https://www.graztourismus.at/de/sightseeing-kultur/sehenswuerdigkeiten/oper-graz_shg_1472",
+      "accessibility": {
+        "features": [
+          "blind",
+          "gehoerlos",
+          "leichte-sprache",
+          "rollstuhl"
+        ],
+        "note": "Laut Graz Tourismus geeignet für: blinde Personen, hörbehinderte/gehörlose Personen, Personen mit Lernschwierigkeiten, Rollstuhlfahrer mit Unterstützung, mobilitätseingeschränkte Personen, sehbehinderte Personen, Personen im Rollstuhl. Messwerte im Barrierefrei-Datenblatt: https://www.graztourismus.at/Barrierefrei/PDFs/va-orte/oper-graz_barrierefrei_2026.pdf"
+      },
+      "images": [
+        {
+          "url": "https://www.graztourismus.at/Sightseeing-Kultur/Sehensw%C3%BCrdigkeiten/Oper%20Graz/10424/image-thumb__10424__jsonld/Opernhaus%20%28c%29%20Graz%20Tourismus%20-%20Harry%20Schiffer%20%286%29.ea12c2f8.jpg",
+          "credit": "Graz Tourismus - Harry Schiffer",
+          "license": null,
+          "author": null
+        }
+      ],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "schauspielhaus-graz-shg-8868",
+      "name": "Schauspielhaus Graz",
+      "description": "Das stilvolle Schauspielhaus Graz wird von September bis Juni als Ensembletheater mit unterschiedlichstem Sprechtheater bespielt.",
+      "description_short": null,
+      "tags": [
+        "theater"
+      ],
+      "setting": "indoor",
+      "address": "Hofgasse 11",
+      "postal_code": "8010",
+      "town": "Graz",
+      "lat": null,
+      "lng": null,
+      "website": "https://www.graztourismus.at/de/sightseeing-kultur/sehenswuerdigkeiten/schauspielhaus-graz_shg_8868",
+      "source_url": "https://www.graztourismus.at/de/sightseeing-kultur/sehenswuerdigkeiten/schauspielhaus-graz_shg_8868",
+      "accessibility": {
+        "features": [
+          "rollstuhl",
+          "leichte-sprache"
+        ],
+        "note": "Laut Graz Tourismus geeignet für: Personen im Rollstuhl, Rollstuhlfahrer mit Unterstützung, mobilitätseingeschränkte Personen, sehbehinderte Personen, Personen mit Lernschwierigkeiten. Messwerte im Barrierefrei-Datenblatt: https://www.graztourismus.at/Barrierefrei/PDFs/va-orte/schauspielhaus_barrierefrei_2025.pdf"
+      },
+      "images": [
+        {
+          "url": "https://www.graztourismus.at/Kongress/Venue%20Finder/1_Veranstaltungszentren/Schauspielhaus/9162/image-thumb__9162__jsonld/schauspielhaus-graz-eckansicht-%28c%29-lex-karelly.71c8ea01.jpg",
+          "credit": "Lex Karelly",
+          "license": null,
+          "author": null
+        }
+      ],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "landeszeughaus-shg-1464",
+      "name": "Landeszeughaus",
+      "description": "Unglaubliche 32.000 Harnische und Waffen, die einst von tapferen Soldaten benutzt wurden, stehen hier auf vier Etagen in Reih und Glied aufgestellt. Der besondere Rahmen dieses im 17. Jahrhundert erbauten Hauses und die beeindruckende Zahl der Sammlerstücke machen einen Besuch der Grazer Rüstkammer zum unvergesslichen Erlebnis. Das weltbekannte Landeszeughaus war einst die wichtigste Ausrüstungs-Zentrale im Südosten des Habsburgerreiches. Seit rund 140 Jahren ist dieses historische Denkmal für Besucher zugänglich und regt zum Nachdenken über Krieg und Frieden an.",
+      "description_short": null,
+      "tags": [
+        "museumstour",
+        "ausstellung"
+      ],
+      "setting": "indoor",
+      "address": "Herrengasse 16",
+      "postal_code": "8010",
+      "town": "Graz",
+      "lat": null,
+      "lng": null,
+      "website": "https://www.graztourismus.at/de/sightseeing-kultur/sehenswuerdigkeiten/landeszeughaus_shg_1464",
+      "source_url": "https://www.graztourismus.at/de/sightseeing-kultur/sehenswuerdigkeiten/landeszeughaus_shg_1464",
+      "accessibility": {
+        "features": [
+          "rollstuhl",
+          "gehoerlos",
+          "leichte-sprache"
+        ],
+        "note": "Laut Graz Tourismus geeignet für: Personen im Rollstuhl, Rollstuhlfahrer mit Unterstützung, mobilitätseingeschränkte Personen, sehbehinderte Personen, hörbehinderte/gehörlose Personen, Personen mit Lernschwierigkeiten. Messwerte im Barrierefrei-Datenblatt: https://www.graztourismus.at/Barrierefrei/PDFs/museen/barrierefreie-museen-2020_landeszeughaus.pdf"
+      },
+      "images": [
+        {
+          "url": "https://www.graztourismus.at/Sightseeing-Kultur/Sehensw%C3%BCrdigkeiten/Landeszeughaus/21474/image-thumb__21474__jsonld/landeszeughaus-%28c%29-universalmuseum-joanneum_n.-lackner-%281%29.af5d7a00.jpg",
+          "credit": "Universalmuseum Joanneum - N. Lackner",
+          "license": null,
+          "author": null
+        }
+      ],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "dom-im-berg-i-grazer-spielstaetten-shg-9486",
+      "name": "Dom im Berg I Grazer Spielstätten",
+      "description": "Im Inneren des Schlossbergs befindet sich der futuristisch anmutende Dom im Berg, ein Ort, dessen Architektur einzigartig im Grazer Veranstaltungsbereich ist. Mit einer Gesamtfläche von 733 Quadratmetern und einer Höhe von 11 Metern bietet der Dom im Berg Raum für die vielfältigsten Veranstaltungen: Konzerte in allen Genres (durch die spezielle Wandverkleidung ergibt sich eine hervorragende Akustik), Kongresse, Bälle, Theateraufführungen, Clubbings etc. Insbesondere die elektronische Musik hat im Dom im Berg ein Zuhause gefunden, denn hier finden Besucher perfekte Voraussetzungen vor, um bis in die Morgenstunden zu tanzen.",
+      "description_short": null,
+      "tags": [
+        "theater"
+      ],
+      "setting": "indoor",
+      "address": "Schlossbergplatz 1",
+      "postal_code": "8010",
+      "town": "Graz",
+      "lat": null,
+      "lng": null,
+      "website": "https://www.graztourismus.at/de/sightseeing-kultur/sehenswuerdigkeiten/dom-im-berg-i-grazer-spielstaetten_shg_9486",
+      "source_url": "https://www.graztourismus.at/de/sightseeing-kultur/sehenswuerdigkeiten/dom-im-berg-i-grazer-spielstaetten_shg_9486",
+      "accessibility": {
+        "features": [
+          "rollstuhl"
+        ],
+        "note": "Laut Graz Tourismus geeignet für: barrierefreier Betrieb. Messwerte im Barrierefrei-Datenblatt: https://www.graztourismus.at/Barrierefrei/PDFs/va-orte/dom-im-berg_barrierefrei_2025.pdf"
+      },
+      "images": [
+        {
+          "url": "https://www.graztourismus.at/Kongress/Venue%20Finder/1_Veranstaltungszentren/Dom%20im%20Berg/9340/image-thumb__9340__jsonld/dom-im-berg-imagebilder-05.a228dcd6.jpg",
+          "credit": "Lupi Spuma",
+          "license": null,
+          "author": null
+        }
+      ],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "orpheum-graz-i-grazer-spielstaetten-shg-9729",
+      "name": "Orpheum Graz I Grazer Spielstätten",
+      "description": "Das Grazer Orpheum genießt nicht ohne Grund einen beinahe legendären Ruf bei Künstlern und Gästen aus aller Welt. Das Haus strahlt eine besondere Atmosphäre und einzigartigen Charme aus – Eigenschaften, die man heute nur noch selten findet. Als eine der letzten vielseitig nutzbaren Spielstätten mit klassischer Theaterbühne ist es würdevoll gealtert und dennoch lebendig geblieben. Im Jahr 2016 wurde das Orpheum behutsam modernisiert: Die Technik entspricht seither höchsten Standards, während der unverwechselbare Charakter des Hauses erhalten blieb.",
+      "description_short": null,
+      "tags": [
+        "theater"
+      ],
+      "setting": "indoor",
+      "address": "Orpheumgasse 8",
+      "postal_code": "8020",
+      "town": "Graz",
+      "lat": null,
+      "lng": null,
+      "website": "https://www.graztourismus.at/de/sightseeing-kultur/sehenswuerdigkeiten/orpheum-graz-i-grazer-spielstaetten_shg_9729",
+      "source_url": "https://www.graztourismus.at/de/sightseeing-kultur/sehenswuerdigkeiten/orpheum-graz-i-grazer-spielstaetten_shg_9729",
+      "accessibility": {
+        "features": [
+          "leichte-sprache",
+          "rollstuhl",
+          "blind"
+        ],
+        "note": "Laut Graz Tourismus geeignet für: Personen mit Lernschwierigkeiten, mobilitätseingeschränkte Personen, Rollstuhlfahrer mit Unterstützung, Personen im Rollstuhl, blinde Personen. Messwerte im Barrierefrei-Datenblatt: https://www.graztourismus.at/Barrierefrei/PDFs/va-orte/orpheum_barrierefrei_2025.pdf"
+      },
+      "images": [
+        {
+          "url": "https://www.graztourismus.at/Events/B%C3%BChnen%20Graz%20Veranstaltungen/Spielst%C3%A4tten/Orpheum/13237/image-thumb__13237__jsonld/Orpheum%20au%C3%9Fen%20%28c%29%20Spielst%C3%A4tten%20-%20Lupi%20Spuma.c5daeb77.jpg",
+          "credit": "Spielstätten - Lupi Spuma",
+          "license": null,
+          "author": null
+        }
+      ],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "next-liberty-shg-8869",
+      "name": "Next Liberty",
+      "description": "Das moderne und trendige Next Liberty wird von September bis Juni als Ensembletheater mit dem Schwerpunkt Kinder- und Jugendtheater bespielt.",
+      "description_short": null,
+      "tags": [
+        "theater"
+      ],
+      "setting": "indoor",
+      "address": "Kaiser-Josef-Platz 10",
+      "postal_code": "8010",
+      "town": "Graz",
+      "lat": null,
+      "lng": null,
+      "website": "https://www.graztourismus.at/de/sightseeing-kultur/sehenswuerdigkeiten/next-liberty_shg_8869",
+      "source_url": "https://www.graztourismus.at/de/sightseeing-kultur/sehenswuerdigkeiten/next-liberty_shg_8869",
+      "accessibility": {
+        "features": [
+          "leichte-sprache",
+          "rollstuhl"
+        ],
+        "note": "Laut Graz Tourismus geeignet für: Personen mit Lernschwierigkeiten, Rollstuhlfahrer mit Unterstützung. Messwerte im Barrierefrei-Datenblatt: https://www.graztourismus.at/Barrierefrei/PDFs/va-orte/next-liberty_barrierefrei_2025.pdf"
+      },
+      "images": [
+        {
+          "url": "https://www.graztourismus.at/Kongress/Venue%20Finder/1_Veranstaltungszentren/Next%20Liberty/20299/image-thumb__20299__jsonld/platz-fuer-heldinnen-%28c%29-stella-%281%29.02b621cf.jpg",
+          "credit": "Stella",
+          "license": null,
+          "author": null
+        }
+      ],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "schlossbergbuehne-kasematten-i-grazer-spielstaetten-shg-8871",
+      "name": "Schlossbergbühne Kasematten I Grazer Spielstätten",
+      "description": "Diese Bühne lässt sich am einfachsten mit dem Schlossberglift oder mit der Grazer Schlossbergbahn erreichen. Von der Ausstiegsstelle überquert man eine Piazza, die sich übrigens in Veranstaltungen einbinden lässt, und erreicht den Eingang der historischen Kasematten. Diese alten Mauern umfassen eine große, leicht abfallende Fläche hin zur Bühne. Die Nischen in den Mauern bieten Platz für Logen. Durch eine mobile Überdachung und die neu angebrachte Verglasung der Rückseite ist die Schlossbergbühne Kasematten wetterunabhängig bespielbar.",
+      "description_short": null,
+      "tags": [
+        "theater"
+      ],
+      "setting": "indoor",
+      "address": "Schlossberg",
+      "postal_code": "8010",
+      "town": "Graz",
+      "lat": null,
+      "lng": null,
+      "website": "https://www.graztourismus.at/de/sightseeing-kultur/sehenswuerdigkeiten/schlossbergbuehne-kasematten-i-grazer-spielstaetten_shg_8871",
+      "source_url": "https://www.graztourismus.at/de/sightseeing-kultur/sehenswuerdigkeiten/schlossbergbuehne-kasematten-i-grazer-spielstaetten_shg_8871",
+      "accessibility": {
+        "features": [
+          "leichte-sprache"
+        ],
+        "note": "Laut Graz Tourismus geeignet für: Personen mit Lernschwierigkeiten. Messwerte im Barrierefrei-Datenblatt: https://www.graztourismus.at/Barrierefrei/PDFs/va-orte/kasematten_barrierefrei_2025.pdf"
+      },
+      "images": [
+        {
+          "url": "https://www.graztourismus.at/Kongress/Venue%20Finder/1_Veranstaltungszentren/Kasematten/8625/image-thumb__8625__jsonld/kasematten-theater-leer.b88c4aa3.jpg",
+          "credit": "Grazer Spielstätten - Palme Peter",
+          "license": null,
+          "author": null
+        }
+      ],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "prunkraeume-shg-2224",
+      "name": "Prunkräume",
+      "description": "Die Beletage von Schloss Eggenberg hat ihr ursprüngliches Erscheinungsbild bis heute nahezu unverändert erhalten. Der Zyklus von 24 Prunkräumen mit originaler Ausstattung des 17. und 18. Jahrhunderts gehört zu den bedeutendsten Ensembles historischer Innenräume, die Österreich besitzt. Selten hat sich eine Raumausstattung von vergleichbarer künstlerischer Qualität so vollständig und so ungestört erhalten. Ihr Mittelpunkt ist der glanzvolle Planetensaal.",
+      "description_short": null,
+      "tags": [
+        "museumstour",
+        "ausstellung"
+      ],
+      "setting": "indoor",
+      "address": "Eggenberger Allee 90",
+      "postal_code": "8020",
+      "town": "Graz",
+      "lat": null,
+      "lng": null,
+      "website": "https://www.graztourismus.at/de/sightseeing-kultur/sehenswuerdigkeiten/prunkraeume_shg_2224",
+      "source_url": "https://www.graztourismus.at/de/sightseeing-kultur/sehenswuerdigkeiten/prunkraeume_shg_2224",
+      "accessibility": {
+        "features": [
+          "rollstuhl"
+        ],
+        "note": "Laut Graz Tourismus geeignet für: Personen im Rollstuhl, Rollstuhlfahrer mit Unterstützung, mobilitätseingeschränkte Personen. Messwerte im Barrierefrei-Datenblatt: https://www.graztourismus.at/Barrierefrei/PDFs/museen/schloss-eggenberg_barrierefrei.pdf"
+      },
+      "images": [
+        {
+          "url": "https://www.graztourismus.at/Sightseeing-Kultur/Sehensw%C3%BCrdigkeiten/Schloss%20Eggenberg/Planetensaal/21467/image-thumb__21467__jsonld/schloss-eggenberg-%28c%29-graz-tourismus---mias-photoart-%2864%29.04464601.jpg",
+          "credit": "Graz Tourismus - Mias Photoart",
+          "license": null,
+          "author": null
+        }
+      ],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "graz-museum-shg-2236",
+      "name": "Graz Museum",
+      "description": "Das Graz Museum ist die erste Adresse, um alles über die Stadt- und Kulturgeschichte von Graz zu erfahren und ist für Besucher täglich ohne Schließtag geöffnet. Die Dauerausstellung „360 GRAZ – Eine Geschichte der Stadt“ reicht von 1128 bis 2003 und steht auch in digitaler Form zur Verfügung. Die wechselnden Sonderausstellungen setzen sich sowohl mit der Geschichte wie auch mit der Gegenwart der Stadt auseinander.",
+      "description_short": null,
+      "tags": [
+        "museumstour",
+        "ausstellung"
+      ],
+      "setting": "indoor",
+      "address": "Sackstraße 18",
+      "postal_code": "8010",
+      "town": "Graz",
+      "lat": null,
+      "lng": null,
+      "website": "https://www.graztourismus.at/de/sightseeing-kultur/sehenswuerdigkeiten/graz-museum_shg_2236",
+      "source_url": "https://www.graztourismus.at/de/sightseeing-kultur/sehenswuerdigkeiten/graz-museum_shg_2236",
+      "accessibility": {
+        "features": [
+          "rollstuhl"
+        ],
+        "note": "Laut Graz Tourismus geeignet für: barrierefreier Betrieb. Messwerte im Barrierefrei-Datenblatt: https://www.graztourismus.at/Barrierefrei/PDFs/museen/graz-museum_barrierefrei_2020.pdf"
+      },
+      "images": [
+        {
+          "url": "https://www.graztourismus.at/Sightseeing-Kultur/Museen-und-Galerien/Museen/Graz%20Museum/9480/image-thumb__9480__jsonld/Graz%20Museum%20%28c%29%20Sebastian%20Reiser.667cb779.jpg",
+          "credit": "Sebastian Reiser",
+          "license": null,
+          "author": null
+        }
+      ],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "steiermaerkische-landesbibliothek-im-joanneumsviertel-shg-8641",
+      "name": "Steiermärkische Landesbibliothek im Joanneumsviertel",
+      "description": "Die Steiermärkische Landesbibliothek ist die älteste Landesbibliothek Österreichs. Sie ist eine öffentliche, wissenschaftliche Bibliothek, die allen Steirern zur Verfügung steht. Die Landesbibliothek ist im Grazer Joanneumsviertel angesiedelt und barrierefrei zugänglich.",
+      "description_short": null,
+      "tags": [
+        "museumstour",
+        "ausstellung"
+      ],
+      "setting": "indoor",
+      "address": "Kalchberggasse 2",
+      "postal_code": "8010",
+      "town": "Graz",
+      "lat": null,
+      "lng": null,
+      "website": "https://www.graztourismus.at/de/sightseeing-kultur/sehenswuerdigkeiten/steiermaerkische-landesbibliothek-im-joanneumsviertel_shg_8641",
+      "source_url": "https://www.graztourismus.at/de/sightseeing-kultur/sehenswuerdigkeiten/steiermaerkische-landesbibliothek-im-joanneumsviertel_shg_8641",
+      "accessibility": {
+        "features": [
+          "rollstuhl"
+        ],
+        "note": "Laut Graz Tourismus geeignet für: Personen im Rollstuhl, Rollstuhlfahrer mit Unterstützung."
+      },
+      "images": [
+        {
+          "url": "https://www.graztourismus.at/Sightseeing-Kultur/Museen-und-Galerien/Museen/Joanneumsviertel/21209/image-thumb__21209__jsonld/joanneumsviertel-%28c%29-universalmuseum-joanneum---n.-lackner-%281%29.7e5f23c2.jpg",
+          "credit": "Universalmuseum Joanneum - N. Lackner",
+          "license": null,
+          "author": null
+        }
+      ],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "archaeologiemuseum-shg-2221",
+      "name": "Archäologiemuseum",
+      "description": "Scherben bringen Glück – aber nur dem Archäologen. Stimmt nicht, denn auch die Besucher des Archäologiemuseums werden beglückt. Sie können im neuen, unterirdisch angelegten Museum spannende Fundstücke aus „steirischer“ Urzeit sowie der Klassischen Antike, dem Alten Orient und aus Ägypten entdecken. Es geht um Lebensthemen, die Zeiten und Orte überdauern. Man findet berühmte und international bedeutende Prunkstücke, aber auch Unbekanntes und noch nie Gezeigtes in neuer Zusammenstellung.Infos zu den Ausstellungen finden Sie hier.",
+      "description_short": null,
+      "tags": [
+        "museumstour",
+        "ausstellung"
+      ],
+      "setting": "indoor",
+      "address": null,
+      "postal_code": null,
+      "town": "Graz",
+      "lat": null,
+      "lng": null,
+      "website": "https://www.graztourismus.at/de/sightseeing-kultur/sehenswuerdigkeiten/archaeologiemuseum_shg_2221",
+      "source_url": "https://www.graztourismus.at/de/sightseeing-kultur/sehenswuerdigkeiten/archaeologiemuseum_shg_2221",
+      "accessibility": {
+        "features": [
+          "rollstuhl"
+        ],
+        "note": "Laut Graz Tourismus geeignet für: Personen im Rollstuhl, mobilitätseingeschränkte Personen. Messwerte im Barrierefrei-Datenblatt: https://www.graztourismus.at/Barrierefrei/PDFs/museen/barrierefreie-museen-2026_archaeologiemuseum-schloss-eggenberg.pdf"
+      },
+      "images": [
+        {
+          "url": "https://www.graztourismus.at/Sightseeing-Kultur/Museen-und-Galerien/Museen/Archaeologiemuseum/21451/image-thumb__21451__ogImage/schloss-eggenberg_archaeologiemuseum-%28c%29universalmuseum-joanneum_n.-lackner.0dae5000.jpg",
+          "credit": "Graz Tourismus",
+          "license": null,
+          "author": null
+        }
+      ],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "cosa-center-of-science-activities-shg-2230",
+      "name": "CoSA – Center of Science Activities",
+      "description": "Spielerisch die Welt verbessern, ein fantastisches Fahrzeug entwickeln oder auf medizinische Forschungsreise gehen. Im CoSA können Jugendliche ab 12 Jahren und interessierte Erwachsene Technik und Naturwissenschaften auf unterhaltsame Art ausprobieren. Das Motto lautet: „Anfassen erwünscht statt berühren verboten!“ Das CoSA besteht aus verschiedenen Spaces, in denen man vielfältige Stationen selbstständig erkunden kann. Vermittler stehen dabei mit Rat und Tat zur Seite. Man kann zum Beispiel in der Wunderkammer voller naturwissenschaftlicher Phänomene und Erkenntnisse stöbern, als Mediziner die richtige Therapie für verschiedene Krankheiten finden, im FLiP ein interaktives Abenteuer rund ums Geld erleben, basteln und werkeln oder vom Weltall bis in die Tiefsee reisen. Laufend wechselnde interaktive Sonderausstellungen ermöglichen zudem vielfältige Einblicke in die Welt der Naturwissensch",
+      "description_short": null,
+      "tags": [
+        "museumstour",
+        "ausstellung"
+      ],
+      "setting": "indoor",
+      "address": "Joanneumsviertel",
+      "postal_code": "8010",
+      "town": "Graz",
+      "lat": null,
+      "lng": null,
+      "website": "https://www.graztourismus.at/de/sightseeing-kultur/sehenswuerdigkeiten/cosa-center-of-science-activities_shg_2230",
+      "source_url": "https://www.graztourismus.at/de/sightseeing-kultur/sehenswuerdigkeiten/cosa-center-of-science-activities_shg_2230",
+      "accessibility": {
+        "features": [
+          "rollstuhl",
+          "gehoerlos",
+          "leichte-sprache"
+        ],
+        "note": "Laut Graz Tourismus geeignet für: Personen im Rollstuhl, Rollstuhlfahrer mit Unterstützung, mobilitätseingeschränkte Personen, sehbehinderte Personen, hörbehinderte/gehörlose Personen, Personen mit Lernschwierigkeiten. Messwerte im Barrierefrei-Datenblatt: https://www.graztourismus.at/Barrierefrei/PDFs/museen/barrierefreie-museen-2024_cosa.pdf"
+      },
+      "images": [
+        {
+          "url": "https://www.graztourismus.at/Sightseeing-Kultur/Museen-und-Galerien/Museen/CoSA/21455/image-thumb__21455__jsonld/cosa_medizin-%28c%29-universalmuseum-joanneum_j.j.kucek.ae0c0876.jpg",
+          "credit": "Universalmuseum Joanneum - J. Kucek",
+          "license": null,
+          "author": null
+        }
+      ],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "graz-museum-schlossberg-shg-2238",
+      "name": "Graz Museum Schlossberg",
+      "description": "Das Graz Museum Schlossberg bietet allen Besuchern am Grazer Schlossberg einen neuen Ort zum Verweilen und Ankommen. Dieses familienfreundliche und zur Gänze barrierefreie Museum stellt auf zeitgenössische Art die Geschichte des Schlossbergs und seine Bedeutung für Graz dar. Ganzjährig geöffnet und zum Teil als Freilichtmuseum konzipiert ist es die erste Anlaufstelle aller Schlossberg-Gäste. Das Graz Museum Schlossberg ist zur Gänze barrierefrei zugänglich und bietet spezielle Angebote für Blinde und sehbehinderte Menschen.",
+      "description_short": null,
+      "tags": [
+        "burgführung",
+        "museumstour"
+      ],
+      "setting": "mixed",
+      "address": "Schlossberg 5",
+      "postal_code": "8010",
+      "town": "Graz",
+      "lat": null,
+      "lng": null,
+      "website": "https://www.graztourismus.at/de/sightseeing-kultur/sehenswuerdigkeiten/graz-museum-schlossberg_shg_2238",
+      "source_url": "https://www.graztourismus.at/de/sightseeing-kultur/sehenswuerdigkeiten/graz-museum-schlossberg_shg_2238",
+      "accessibility": {
+        "features": [
+          "rollstuhl",
+          "leichte-sprache"
+        ],
+        "note": "Laut Graz Tourismus geeignet für: Personen im Rollstuhl, Rollstuhlfahrer mit Unterstützung, mobilitätseingeschränkte Personen, Personen mit Lernschwierigkeiten. Messwerte im Barrierefrei-Datenblatt: https://www.graztourismus.at/Barrierefrei/PDFs/museen/barrierefreie-museen-2023_graz-museum-schlossberg.pdf"
+      },
+      "images": [
+        {
+          "url": "https://www.graztourismus.at/Sightseeing-Kultur/Museen-und-Galerien/Museen/Graz%20Museum%20Schlossberg/16239/image-thumb__16239__jsonld/schlossberg-%28c%29-graz-tourismus---tom-lamm-%2824%29.c1b4dda5.jpg",
+          "credit": "Graz Tourismus - Tom Lamm",
+          "license": null,
+          "author": null
+        }
+      ],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "museum-fuer-geschichte-shg-2244",
+      "name": "Museum für Geschichte",
+      "description": "Werfen Sie im Schaudepot einen Blick ins Herz dieses Museums! Hier sehen Sie die ganze Fülle der beiden großen Sammlungen des Hauses: Die Kulturhistorische Sammlung umfasst rund 35.000 Objekte seit dem Hochmittelalter wie Musikinstrumente, Möbel, Mode, Monstranzen, Orden und Medaillen, Kacheln und Büsten, Leuchter und Grabkreuze, Trinkgefäße und Vasen. Die Multimedialen Sammlungen sind den Medien Foto, Film und Ton gewidmet und dokumentieren die Steiermark auf dem Weg ins digitale Zeitalter.Infos zu den Ausstellungen finden Sie hier.",
+      "description_short": null,
+      "tags": [
+        "museumstour",
+        "ausstellung"
+      ],
+      "setting": "indoor",
+      "address": "Sackstraße 16",
+      "postal_code": "8010",
+      "town": "Graz",
+      "lat": null,
+      "lng": null,
+      "website": "https://www.graztourismus.at/de/sightseeing-kultur/sehenswuerdigkeiten/museum-fuer-geschichte_shg_2244",
+      "source_url": "https://www.graztourismus.at/de/sightseeing-kultur/sehenswuerdigkeiten/museum-fuer-geschichte_shg_2244",
+      "accessibility": {
+        "features": [
+          "rollstuhl",
+          "leichte-sprache"
+        ],
+        "note": "Laut Graz Tourismus geeignet für: Personen im Rollstuhl, Rollstuhlfahrer mit Unterstützung, mobilitätseingeschränkte Personen, Personen mit Lernschwierigkeiten. Messwerte im Barrierefrei-Datenblatt: https://www.graztourismus.at/Barrierefrei/PDFs/museen/barrierefreie-museen-2024_museum-fuer-geschichte.pdf"
+      },
+      "images": [
+        {
+          "url": "https://www.graztourismus.at/Sightseeing-Kultur/Museen-und-Galerien/Museen/Museum%20f%C3%BCr%20Geschichte/7452/image-thumb__7452__jsonld/Museum%20f%C3%BCr%20Geschichte%20%28c%29%20UMJ-Paul%20Ott%20%283%29.4486175c.jpg",
+          "credit": "UMJ - Paul Ott",
+          "license": null,
+          "author": null
+        }
+      ],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "alte-galerie-shg-11438",
+      "name": "Alte Galerie",
+      "description": "Erleben Sie in 22 Themenräumen die kostbarste Sammlung Alter Meister in der Steiermark: Herausragende Kunstwerke der Gotik bezeugen Glauben und Weltbild des Mittelalters. Meisterwerke aus Renaissance und Barock erzählen von Kriegen und Nöten genauso wie von prachtvoller Lebensfreude der Frühen Neuzeit.Infos zu den Ausstellungen finden Sie hier.",
+      "description_short": null,
+      "tags": [
+        "museumstour",
+        "ausstellung"
+      ],
+      "setting": "indoor",
+      "address": "Eggenberger Allee 90",
+      "postal_code": "8020",
+      "town": "Graz",
+      "lat": null,
+      "lng": null,
+      "website": "https://www.graztourismus.at/de/sightseeing-kultur/sehenswuerdigkeiten/alte-galerie_shg_11438",
+      "source_url": "https://www.graztourismus.at/de/sightseeing-kultur/sehenswuerdigkeiten/alte-galerie_shg_11438",
+      "accessibility": {
+        "features": [
+          "rollstuhl"
+        ],
+        "note": "Laut Graz Tourismus geeignet für: Personen im Rollstuhl, Rollstuhlfahrer mit Unterstützung, mobilitätseingeschränkte Personen. Messwerte im Barrierefrei-Datenblatt: https://www.graztourismus.at/Barrierefrei/PDFs/museen/schloss-eggenberg_barrierefrei.pdf"
+      },
+      "images": [
+        {
+          "url": "https://www.graztourismus.at/Sightseeing-Kultur/Museen-und-Galerien/Museen/Alte%20Galerie/21450/image-thumb__21450__jsonld/schloss-eggenberg_alte-galerie%2C%28c%29universalmuseum-joanneum-n.-lackner.56f533a2.jpg",
+          "credit": "Universalmuseum Joanneum - N. Lackner",
+          "license": null,
+          "author": null
+        }
+      ],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "dioezesanmuseum-shg-2232",
+      "name": "Diözesanmuseum",
+      "description": "Das Museum der steirischen Kirche befindet sich im Herzen der Grazer Altstadt, ist Museum und Denkmalpflegestelle der katholischen Kirche. Das Diözesanmuseum Graz versteht sich als Ort des künstlerischen Dialoges, der zur Auseinandersetzung mit Geschichte, Entwicklung undGegenwart der Kirche und des christlichen Glaubens einlädt.",
+      "description_short": null,
+      "tags": [
+        "museumstour",
+        "ausstellung"
+      ],
+      "setting": "indoor",
+      "address": "Bürgergasse 2",
+      "postal_code": "8010",
+      "town": "Graz",
+      "lat": null,
+      "lng": null,
+      "website": "https://www.graztourismus.at/de/sightseeing-kultur/sehenswuerdigkeiten/dioezesanmuseum_shg_2232",
+      "source_url": "https://www.graztourismus.at/de/sightseeing-kultur/sehenswuerdigkeiten/dioezesanmuseum_shg_2232",
+      "accessibility": {
+        "features": [
+          "rollstuhl"
+        ],
+        "note": "Laut Graz Tourismus geeignet für: barrierefreier Betrieb. Messwerte im Barrierefrei-Datenblatt: https://www.graztourismus.at/Barrierefrei/PDFs/museen/barrierefreie-museen-2024_dioezesanmuseum.pdf"
+      },
+      "images": [
+        {
+          "url": "https://www.graztourismus.at/Sightseeing-Kultur/Museen-und-Galerien/Museen/Di%C3%B6zesanmuseum/7403/image-thumb__7403__jsonld/Di%C3%B6zesanmuseum%20%28c%29%20Di%C3%B6zesanmuseum%20Graz%20%286%29.1d672cf9.png",
+          "credit": "Diözesanmuseum Graz",
+          "license": null,
+          "author": null
+        }
+      ],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "halle-fuer-kunst-steiermark-shg-2240",
+      "name": "HALLE FÜR KUNST Steiermark",
+      "description": "Die HALLE FÜR KUNST Steiermark gilt als eines der innovativsten Ausstellungshäuser für Gegenwartskunst in Österreich und der umliegenden Region. Die herausragende modernistische Pavillionarchitektur aus den frühen 1950er Jahren wurde als einer der ersten White Cubes in Österreich gebaut.",
+      "description_short": null,
+      "tags": [
+        "museumstour",
+        "ausstellung"
+      ],
+      "setting": "indoor",
+      "address": "Burgring 2",
+      "postal_code": "8010",
+      "town": "Graz",
+      "lat": null,
+      "lng": null,
+      "website": "https://www.graztourismus.at/de/sightseeing-kultur/sehenswuerdigkeiten/halle-fUer-kunst-steiermark_shg_2240",
+      "source_url": "https://www.graztourismus.at/de/sightseeing-kultur/sehenswuerdigkeiten/halle-fUer-kunst-steiermark_shg_2240",
+      "accessibility": {
+        "features": [
+          "rollstuhl"
+        ],
+        "note": "Laut Graz Tourismus geeignet für: barrierefreier Betrieb. Messwerte im Barrierefrei-Datenblatt: https://www.graztourismus.at/Barrierefrei/PDFs/museen/barrierefreie-museen-2024_halle-fuer-kunst.pdf"
+      },
+      "images": [
+        {
+          "url": "https://www.graztourismus.at/Sightseeing-Kultur/Museen-und-Galerien/Museen/Halle%20f%C3%BCr%20Kunst%20Steiermark/18603/image-thumb__18603__jsonld/halle-fuer-kunst-%28c%29-kunst-dokumentation.com.e8d360ce.jpg",
+          "credit": "kunst-dokumentation",
+          "license": null,
+          "author": null
+        }
+      ],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "kindermuseum-frida-fred-shg-2252",
+      "name": "Kindermuseum FRida & freD",
+      "description": "Das Grazer Kindermuseum FRida & freD ist das Haus für alle Kinder und bestbesuchtes Museum der steirischen Landeshauptstadt: Die Besucher erwarten interaktive Ausstellungen für die ganze Familie, ein umfangreiches Workshopangebot und zahlreiche Veranstaltungen in den Ferien. Neugierige erfahren mehr im Forschungslabor, von Donnerstag bis Sonntag finden Theateraufführungen im FRida & freD Knopftheater statt. Ausnahmsweise geschlossen: 25.12.2026, 26.12.2026, 31.12.2026, 01.01.2027 Die Tüftelmäuse – Powered by Die INDUSTRIEEin Mitmach-Mäuse-Abenteuer für Kinder zwischen 3 und 7 Jahren!Im Kindermuseum sind Mäuse zu Gast – die Tüftelmäuse! Sie tüfteln den ganzen Tag und haben dabei viel Spaß. Erfinde doch mit ihnen gemeinsam etwas Neues… Tanz mit den Tüftelmäusen und mach für sie mit einer Spieluhr Musik. Bring mit dem Gokart den Mäusefilm in Gang und dreh am Mäusekarussell. Mit einer Streic",
+      "description_short": null,
+      "tags": [
+        "museumstour",
+        "ausstellung"
+      ],
+      "setting": "indoor",
+      "address": "Friedrichgasse 34",
+      "postal_code": "8010",
+      "town": "Graz",
+      "lat": null,
+      "lng": null,
+      "website": "https://www.graztourismus.at/de/sightseeing-kultur/sehenswuerdigkeiten/kindermuseum-frida-fred_shg_2252",
+      "source_url": "https://www.graztourismus.at/de/sightseeing-kultur/sehenswuerdigkeiten/kindermuseum-frida-fred_shg_2252",
+      "accessibility": {
+        "features": [
+          "rollstuhl",
+          "leichte-sprache"
+        ],
+        "note": "Laut Graz Tourismus geeignet für: Personen im Rollstuhl, mobilitätseingeschränkte Personen, sehbehinderte Personen, Personen mit Lernschwierigkeiten. Messwerte im Barrierefrei-Datenblatt: https://www.graztourismus.at/Barrierefrei/PDFs/museen/barrierefreie-museen-2025_frida-%26-fred.pdf"
+      },
+      "images": [
+        {
+          "url": "https://www.graztourismus.at/Sightseeing-Kultur/Museen-und-Galerien/Museen/Kindermuseum%20FRida%20%26%20freD/ausstellungen-2026-27/24770/image-thumb__24770__jsonld/kindermuseum-frida-%26-fred---die-tueftelmaeuse-%28c%29-frida%26fred---hannes-loske-%2811%29.3c193a69.jpg",
+          "credit": "FRida&amp;freD - Hannes Loske",
+          "license": null,
+          "author": null
+        }
+      ],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "muenzkabinett-shg-2254",
+      "name": "Münzkabinett",
+      "description": "Mit den Highlights aus der zweitgrößten öffentlichen Münzensammlung Österreichs lädt das Münzkabinett zu einer einprägsamen Entdeckungsreise durch die Jahrtausende ein.Infos zu den Ausstellungen finden Sie hier. Geld regiert die Welt und Münzen sind weit mehr als nur ein Zahlungsmittel: Sie spiegeln die politischen, kulturellen und gesellschaftlichen Gegebenheiten ihrer Zeit wider. Das Münzkabinett in Schloss Eggenberg erzählt einprägsame Münzgeschichten aus der Steiermark – vom Panthertaler der Münzstätte Graz bis zum Wuschelkopf-Typ der Kelten, von der Goldmünze aus Flavia Solva, die zu einem Schmuckstück umgearbeitet wurde, bis zum Renaissance-Medaillenkleinod Erzherzog Karls II. von Innerösterreich.",
+      "description_short": null,
+      "tags": [
+        "museumstour",
+        "ausstellung"
+      ],
+      "setting": "indoor",
+      "address": "Eggenberger Allee 90",
+      "postal_code": "8020",
+      "town": "Graz",
+      "lat": null,
+      "lng": null,
+      "website": "https://www.graztourismus.at/de/sightseeing-kultur/sehenswuerdigkeiten/muenzkabinett_shg_2254",
+      "source_url": "https://www.graztourismus.at/de/sightseeing-kultur/sehenswuerdigkeiten/muenzkabinett_shg_2254",
+      "accessibility": {
+        "features": [
+          "rollstuhl"
+        ],
+        "note": "Laut Graz Tourismus geeignet für: Personen im Rollstuhl, Rollstuhlfahrer mit Unterstützung, mobilitätseingeschränkte Personen. Messwerte im Barrierefrei-Datenblatt: https://www.graztourismus.at/Barrierefrei/PDFs/museen/schloss-eggenberg_barrierefrei.pdf"
+      },
+      "images": [
+        {
+          "url": "https://www.graztourismus.at/Sightseeing-Kultur/Museen-und-Galerien/Museen/M%C3%BCnzkabinett/7478/image-thumb__7478__jsonld/Schloss%20Eggenberg_M%C3%BCnzkabinett%20%28c%29%20UMJ%20-%20Nicolas%20Lackner%20-%20%2804%29.384854b8.jpg",
+          "credit": "UMJ - Nicolas Lackner",
+          "license": null,
+          "author": null
+        }
+      ],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "naturkundemuseum-shg-2258",
+      "name": "Naturkundemuseum",
+      "description": "Wilde Katzen, Vögel im Flug, sonderbare Pflanzen, rätselhafte Fossilien ... Dies und vieles mehr von dem, was unsere Erde bietet, kann man im Naturkundemuseum bestaunen. Geboten werden Einblicke in 400 Millionen Jahre steirischer Erdgeschichte und in die faszinierende Evolution unterschiedlichster Lebewesen. Das Naturkundemuseum beherbergt große naturkundliche Sammlungen mit Schwerpunkten in den Bereichen Botanik & Mykologie, Geologie & Paläontologie, Mineralogie und Zoologie, geografisch im Wesentlichen auf die Steiermark bezogen. Die Dauerausstellung ermöglicht einen spannenden Spaziergang durch die Erdgeschichte und zeigt die biologische Vielfalt vor der Haustür. Sonderausstellungen sowie ein reichhaltiges Vermittlungsprogramm runden das Angebot für Besucher ab.Infos zu den Ausstellungen finden Sie hier.",
+      "description_short": null,
+      "tags": [
+        "museumstour",
+        "ausstellung"
+      ],
+      "setting": "indoor",
+      "address": "Joanneumsviertel",
+      "postal_code": "8010",
+      "town": "Graz",
+      "lat": null,
+      "lng": null,
+      "website": "https://www.graztourismus.at/de/sightseeing-kultur/sehenswuerdigkeiten/naturkundemuseum_shg_2258",
+      "source_url": "https://www.graztourismus.at/de/sightseeing-kultur/sehenswuerdigkeiten/naturkundemuseum_shg_2258",
+      "accessibility": {
+        "features": [
+          "rollstuhl",
+          "gehoerlos",
+          "leichte-sprache"
+        ],
+        "note": "Laut Graz Tourismus geeignet für: Personen im Rollstuhl, Rollstuhlfahrer mit Unterstützung, mobilitätseingeschränkte Personen, sehbehinderte Personen, hörbehinderte/gehörlose Personen, Personen mit Lernschwierigkeiten. Messwerte im Barrierefrei-Datenblatt: https://www.graztourismus.at/Barrierefrei/PDFs/museen/barrierefreie-museen-2024_naturkundemuseum.pdf"
+      },
+      "images": [
+        {
+          "url": "https://www.graztourismus.at/Sightseeing-Kultur/Museen-und-Galerien/Museen/Naturkundemuseum/7493/image-thumb__7493__jsonld/Joanneumsviertel_Naturkundemuseum%20%28c%29%20UMJ%20-%20N.%20Lackner%20-%20%2801%29.ca8d130e.jpg",
+          "credit": "UMJ - N. Lackner",
+          "license": null,
+          "author": null
+        }
+      ],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "volkskundemuseum-graz-shg-2272",
+      "name": "Volkskundemuseum Graz",
+      "description": "Das Volkskundemuseum am Paulustor erzählt von steirischen Selbstbildern und unterschiedlichen Lebenswelten in der Steiermark, von sozialem und kulturellem Wandel und davon, wie uns Veränderungen im Alltag prägen und bewegen. Die 2021 eröffnete Dauerausstellung erfährt immer wieder Ergänzung. Besonderes Highlight des Museums: der neu gestaltete Trachtensaal. Das Volkskundemuseum in Graz verfügt über eine einzigartige Sammlung hauptsächlich aus der vorindustriellen Zeit. Mehr als 40.000 Objekte dokumentieren die materielle und geistige Volkskultur der Steiermark.",
+      "description_short": null,
+      "tags": [
+        "museumstour",
+        "ausstellung"
+      ],
+      "setting": "indoor",
+      "address": "Paulustorgasse 11-13a",
+      "postal_code": "8010",
+      "town": "Graz",
+      "lat": null,
+      "lng": null,
+      "website": "https://www.graztourismus.at/de/sightseeing-kultur/sehenswuerdigkeiten/volkskundemuseum-graz_shg_2272",
+      "source_url": "https://www.graztourismus.at/de/sightseeing-kultur/sehenswuerdigkeiten/volkskundemuseum-graz_shg_2272",
+      "accessibility": {
+        "features": [
+          "rollstuhl",
+          "leichte-sprache"
+        ],
+        "note": "Laut Graz Tourismus geeignet für: Personen im Rollstuhl, Rollstuhlfahrer mit Unterstützung, mobilitätseingeschränkte Personen, sehbehinderte Personen, Personen mit Lernschwierigkeiten. Messwerte im Barrierefrei-Datenblatt: https://www.graztourismus.at/Barrierefrei/PDFs/museen/barrierefreie-museen-2024_volkskundemuseum.pdf"
+      },
+      "images": [
+        {
+          "url": "https://www.graztourismus.at/Sightseeing-Kultur/Museen-und-Galerien/Museen/Volkskundemuseum/13479/image-thumb__13479__jsonld/Volkskundemuseum-Dauerausstellung%20wie-es-ist%20%28c%29%20Universalmuseum%20Joanneum%20-%20J.J.%20Kucek%20-%20%282%29.b401b235.jpg",
+          "credit": "Universalmuseum Joanneum - J. Kucek",
+          "license": null,
+          "author": null
+        }
+      ],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "neue-galerie-graz-und-bruseum-shg-2260",
+      "name": "Neue Galerie Graz und BRUSEUM",
+      "description": "Die Neue Galerie Graz zählt zu den größten und bedeutendsten Kunstmuseen des Landes. Ihre Sammlung umfasst mehr als 70.000 Werke österreichischer und internationaler Künstler und Künstlerinnen vom 19. Jahrhundert bis zur Gegenwart. Insbesondere seit den 1960er-Jahren hat sich die Neue Galerie Graz zu einem Zentrum für aktuelle Strömungen der zeitgenössischen bildenden Kunst entwickelt. Gezeigt werden wechselnde Ausstellungen zu ausgewählten künstlerischen Positionen und Entwicklungen sowie zu aktuellen gesellschaftlichen Themen. Das BRUSEUM in der Neuen Galerie Graz lädt in ebenfalls wechselnden Ausstellungen dazu ein, sich mit dem vielseitigen künstlerischen Schaffen des weltbekannten steirischen Künstlers Günter Brus, seinem künstlerischen Umfeld sowie seiner Wirkung auf die Gegenwartkunst zu befassen.Infos zu den Ausstellungen finden Sie hier.",
+      "description_short": null,
+      "tags": [
+        "museumstour",
+        "ausstellung"
+      ],
+      "setting": "indoor",
+      "address": "Joanneumsviertel",
+      "postal_code": "8010",
+      "town": "Graz",
+      "lat": null,
+      "lng": null,
+      "website": "https://www.graztourismus.at/de/sightseeing-kultur/sehenswuerdigkeiten/neue-galerie-graz-und-bruseum_shg_2260",
+      "source_url": "https://www.graztourismus.at/de/sightseeing-kultur/sehenswuerdigkeiten/neue-galerie-graz-und-bruseum_shg_2260",
+      "accessibility": {
+        "features": [
+          "rollstuhl",
+          "leichte-sprache"
+        ],
+        "note": "Laut Graz Tourismus geeignet für: Personen im Rollstuhl, Rollstuhlfahrer mit Unterstützung, mobilitätseingeschränkte Personen, sehbehinderte Personen, Personen mit Lernschwierigkeiten. Messwerte im Barrierefrei-Datenblatt: https://www.graztourismus.at/Barrierefrei/PDFs/museen/barrierefreie-museen-2024_neue-galerie.pdf"
+      },
+      "images": [
+        {
+          "url": "https://www.graztourismus.at/Sightseeing-Kultur/Museen-und-Galerien/Museen/Neue%20Galerie%20Graz%20und%20BRUSEUM/7502/image-thumb__7502__jsonld/Joanneumsviertel_Neue%20Galerie%20%28c%29%20UMJ%20-%20N.%20Lackner%20-%20%2806%29.2c977f19.jpg",
+          "credit": "UMJ - N. Lackner",
+          "license": null,
+          "author": null
+        }
+      ],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "murinsel",
+      "name": "Murinsel Graz",
+      "description": "Schwimmende Plattform in der Mur nach einem Entwurf von Vito Acconci (Kulturhauptstadt 2003) mit Café und Amphitheater, über Stege mit beiden Ufern verbunden.",
+      "description_short": null,
+      "tags": [
+        "wandern"
+      ],
+      "setting": "outdoor",
+      "address": "Lendkai 19",
+      "postal_code": "8020",
+      "town": "Graz",
+      "lat": null,
+      "lng": null,
+      "website": "https://www.graztourismus.at/de/sightseeing-kultur/sehenswuerdigkeiten/murinsel_shg_1470",
+      "source_url": "https://www.graztourismus.at/de/unterkuenfte-packages/barrierefrei-in-graz/sightseeing-barrierefrei",
+      "accessibility": {
+        "features": [
+          "rollstuhl",
+          "lift"
+        ],
+        "note": "Laut Graz Tourismus mit dem Rollstuhl befahrbar: vom rechten Murufer über eine asphaltierte Rampe (6 bis 10 % Steigung), vom linken Murufer über Rampe und Lift."
+      },
+      "images": [],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "uhrturm",
+      "name": "Grazer Uhrturm",
+      "description": "Wahrzeichen von Graz auf dem Schlossberg, mit Schlossbergbahn oder Schlossberglift barrierefrei erreichbar. Vor dem Uhrturm steht ein dreidimensional ertastbares Bronze-Miniaturmodell für blinde und sehbehinderte Gäste.",
+      "description_short": null,
+      "tags": [
+        "wandern"
+      ],
+      "setting": "outdoor",
+      "address": "Schlossberg 6",
+      "postal_code": "8010",
+      "town": "Graz",
+      "lat": null,
+      "lng": null,
+      "website": "https://www.graztourismus.at/de/sightseeing-kultur/sehenswuerdigkeiten/uhrturm_shg_1488",
+      "source_url": "https://www.graztourismus.at/de/unterkuenfte-packages/barrierefrei-in-graz/sightseeing-barrierefrei",
+      "accessibility": {
+        "features": [
+          "rollstuhl",
+          "blind"
+        ],
+        "note": "Laut Graz Tourismus: Schlossbergbahn und Schlossberglift für Personen mit körperlichen Beeinträchtigungen nutzbar (Euro-Key-Besitzer fahren im Lift gratis); Tastmodell aus Bronze direkt vor dem Uhrturm."
+      },
+      "images": [],
+      "price_hint": null,
+      "opening_hint": null
+    }
+  ]
+}

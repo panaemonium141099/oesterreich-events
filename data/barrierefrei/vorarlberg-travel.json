@@ -1,0 +1,536 @@
+{
+  "source": "vorarlberg-travel",
+  "source_label": "Vorarlberg Tourismus (vorarlberg.travel)",
+  "source_url": "https://www.vorarlberg.travel/aktivitaet/barrierefrei-reisen-ohne-handicap/",
+  "checked_at": "2026-09-17",
+  "entries": [
+    {
+      "id": "seepromenade-in-der-harder-bucht-seepark-und-gruner-damm",
+      "name": "Seepromenade in der Harder Bucht – Seepark und Grüner Damm",
+      "description": "Rollstuhl-Wanderweg laut Vorarlberg Tourismus (Strecken mit angemessener Länge und Neigung, Asphalt oder geglätteter Schotter). Schwierigkeit leicht, Strecke 4.45 km, Aufstieg 8 m, Abstieg 8 m, Dauer 1.3 h, Tiefster Punkt 397 m, Höchster Punkt 399 m. Start und Ziel: Hard, Seepark.",
+      "description_short": null,
+      "tags": [
+        "wandern"
+      ],
+      "setting": "outdoor",
+      "address": "Seepark",
+      "postal_code": null,
+      "town": "Hard",
+      "lat": null,
+      "lng": null,
+      "website": "https://www.vorarlberg.travel/route/barrierefrei-seepromenade-in-der-harder-bucht-seepark-und-gruener-damm/",
+      "source_url": "https://www.vorarlberg.travel/aktivitaet/barrierefrei-reisen-ohne-handicap/",
+      "accessibility": {
+        "features": [
+          "rollstuhl"
+        ],
+        "note": "Laut vorarlberg.travel als Rollstuhl-Wanderweg empfohlen. Schwierigkeit leicht, Strecke 4.45 km, Aufstieg 8 m, Abstieg 8 m, Dauer 1.3 h, Tiefster Punkt 397 m, Höchster Punkt 399 m."
+      },
+      "images": [
+        {
+          "url": "https://v-cloud.vorarlberg.travel/asset/207f8d0d-57d8-4625-8303-752c6df8336e/J_nC1apdcdIxLX5TPA07fi56Q3fujdLkJ1EYlE5r6gE/1789624362/default/fill/1400/700/0/sm/gruener_damm.jpeg",
+          "credit": "Wolfgang Baldreich",
+          "license": null,
+          "author": null
+        }
+      ],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "an-der-bregenzerach-der-uferrundweg-lauterach-rieden",
+      "name": "An der Bregenzerach – Der Uferrundweg Lauterach-Rieden",
+      "description": "Rollstuhl-Wanderweg laut Vorarlberg Tourismus (Strecken mit angemessener Länge und Neigung, Asphalt oder geglätteter Schotter). Schwierigkeit leicht, Strecke 3.86 km, Aufstieg 10 m, Abstieg 10 m, Dauer 1.3 h, Tiefster Punkt 408 m, Höchster Punkt 418 m. Start und Ziel: Lauterach, Achpark.",
+      "description_short": null,
+      "tags": [
+        "wandern"
+      ],
+      "setting": "outdoor",
+      "address": "Achpark",
+      "postal_code": null,
+      "town": "Lauterach",
+      "lat": null,
+      "lng": null,
+      "website": "https://www.vorarlberg.travel/route/barrierefrei-an-der-bregenzerach-der-uferrundweg-lauterach-rieden/",
+      "source_url": "https://www.vorarlberg.travel/aktivitaet/barrierefrei-reisen-ohne-handicap/",
+      "accessibility": {
+        "features": [
+          "rollstuhl"
+        ],
+        "note": "Laut vorarlberg.travel als Rollstuhl-Wanderweg empfohlen. Schwierigkeit leicht, Strecke 3.86 km, Aufstieg 10 m, Abstieg 10 m, Dauer 1.3 h, Tiefster Punkt 408 m, Höchster Punkt 418 m."
+      },
+      "images": [
+        {
+          "url": "https://v-cloud.vorarlberg.travel/asset/4d2c1367-c062-46fb-ab17-b3857f73bd66/meBwoK8u-uIfSnlXB_bWfRELfwDJfMaVj2AwzV3dWOA/1789624362/default/fill/1400/700/0/sm/bregenzerach_und_bregenzer_achweg.jpeg",
+          "credit": "Vorarlberg Tourismus",
+          "license": null,
+          "author": null
+        }
+      ],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "am-alten-diepoldsauer-rhein-rundwanderung-lustenau-schmitter",
+      "name": "Am Alten Diepoldsauer Rhein – Rundwanderung Lustenau-Schmitter",
+      "description": "Rollstuhl-Wanderweg laut Vorarlberg Tourismus (Strecken mit angemessener Länge und Neigung, Asphalt oder geglätteter Schotter). Schwierigkeit leicht, Strecke 4.58 km, Aufstieg 7 m, Abstieg 7 m, Dauer 1.3 h, Tiefster Punkt 405 m, Höchster Punkt 412 m. Start und Ziel: Lustenau, Wiesenrain.",
+      "description_short": null,
+      "tags": [
+        "wandern"
+      ],
+      "setting": "outdoor",
+      "address": "Wiesenrain",
+      "postal_code": null,
+      "town": "Lustenau",
+      "lat": null,
+      "lng": null,
+      "website": "https://www.vorarlberg.travel/route/barrierefrei-am-alten-diepoldsauer-rhein-rundwanderung-lustenau-schmitter/",
+      "source_url": "https://www.vorarlberg.travel/aktivitaet/barrierefrei-reisen-ohne-handicap/",
+      "accessibility": {
+        "features": [
+          "rollstuhl"
+        ],
+        "note": "Laut vorarlberg.travel als Rollstuhl-Wanderweg empfohlen. Schwierigkeit leicht, Strecke 4.58 km, Aufstieg 7 m, Abstieg 7 m, Dauer 1.3 h, Tiefster Punkt 405 m, Höchster Punkt 412 m."
+      },
+      "images": [
+        {
+          "url": "https://v-cloud.vorarlberg.travel/asset/3aa20ad1-570b-4de3-bfd4-9860e34ecf4b/keuvAs0amvKBjWMEkGbU_kCxcnSfC0_wA9h4Sl6FQQo/1789635644/default/fill/1400/700/0/sm/alter_rhein_zwischen_schmitterbruecke_und_wiesenrain.jpeg",
+          "credit": "Vorarlberg Tourismus",
+          "license": null,
+          "author": null
+        }
+      ],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "emser-himmelsnahe-rundwanderung-am-flugplatz-hohenems",
+      "name": "Emser Himmelsnähe – Rundwanderung am Flugplatz Hohenems",
+      "description": "Rollstuhl-Wanderweg laut Vorarlberg Tourismus (Strecken mit angemessener Länge und Neigung, Asphalt oder geglätteter Schotter). Schwierigkeit leicht, Strecke 3.55 km, Aufstieg 10 m, Abstieg 10 m, Dauer 1 h, Tiefster Punkt 408 m, Höchster Punkt 413 m. Start und Ziel: Hohenems, Flugplatz.",
+      "description_short": null,
+      "tags": [
+        "wandern"
+      ],
+      "setting": "outdoor",
+      "address": "Flugplatz",
+      "postal_code": null,
+      "town": "Hohenems",
+      "lat": null,
+      "lng": null,
+      "website": "https://www.vorarlberg.travel/route/barrierefrei-emser-himmelsnaehe-rundwanderng-am-flugplatz-hohenems/",
+      "source_url": "https://www.vorarlberg.travel/aktivitaet/barrierefrei-reisen-ohne-handicap/",
+      "accessibility": {
+        "features": [
+          "rollstuhl"
+        ],
+        "note": "Laut vorarlberg.travel als Rollstuhl-Wanderweg empfohlen. Schwierigkeit leicht, Strecke 3.55 km, Aufstieg 10 m, Abstieg 10 m, Dauer 1 h, Tiefster Punkt 408 m, Höchster Punkt 413 m."
+      },
+      "images": [
+        {
+          "url": "https://v-cloud.vorarlberg.travel/asset/66d60dd9-bc7b-4e5e-99a4-03f9402f3a40/R8916YB1_zptClhV25ak-n5WjR3c5GssryhtSHfsUDA/1789596693/default/fill/1400/700/0/sm/eine_kurze_schotterwegstrecke.jpeg",
+          "credit": "Christina Spritzendorfer",
+          "license": null,
+          "author": null
+        }
+      ],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "ried-und-auwald-zwischen-bangs-und-nofels",
+      "name": "Ried und Auwald – Zwischen Bangs und Nofels",
+      "description": "Rollstuhl-Wanderweg laut Vorarlberg Tourismus (Strecken mit angemessener Länge und Neigung, Asphalt oder geglätteter Schotter). Schwierigkeit leicht, Strecke 4.11 km, Aufstieg 14 m, Abstieg 2 m, Dauer 1 h, Tiefster Punkt 430 m, Höchster Punkt 443 m. Start und Ziel: Feldkirch, Bangs.",
+      "description_short": null,
+      "tags": [
+        "wandern"
+      ],
+      "setting": "outdoor",
+      "address": "Bangs",
+      "postal_code": null,
+      "town": "Feldkirch",
+      "lat": null,
+      "lng": null,
+      "website": "https://www.vorarlberg.travel/route/barrierefrei-ried-und-auwald-zwischen-bangs-und-nofels/",
+      "source_url": "https://www.vorarlberg.travel/aktivitaet/barrierefrei-reisen-ohne-handicap/",
+      "accessibility": {
+        "features": [
+          "rollstuhl"
+        ],
+        "note": "Laut vorarlberg.travel als Rollstuhl-Wanderweg empfohlen. Schwierigkeit leicht, Strecke 4.11 km, Aufstieg 14 m, Abstieg 2 m, Dauer 1 h, Tiefster Punkt 430 m, Höchster Punkt 443 m."
+      },
+      "images": [
+        {
+          "url": "https://v-cloud.vorarlberg.travel/asset/b85fc608-ab93-4030-aeb5-ab583d9ce587/hUmDY0mXssgQT00qywc29-V1s8etRjTj3e_RF3MUd-w/1789596917/default/fill/1400/700/0/sm/bangser_ried.jpeg",
+          "credit": "Vorarlberg Tourismus",
+          "license": null,
+          "author": null
+        }
+      ],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "angleroasen-erholung-an-den-nenzinger-seen",
+      "name": "Angleroasen – Erholung an den Nenzinger Seen",
+      "description": "Rollstuhl-Wanderweg laut Vorarlberg Tourismus (Strecken mit angemessener Länge und Neigung, Asphalt oder geglätteter Schotter). Schwierigkeit leicht, Strecke 4 km, Aufstieg 21 m, Abstieg 21 m, Dauer 1 h, Tiefster Punkt 481 m, Höchster Punkt 490 m. Start und Ziel: Frastanz, Galina.",
+      "description_short": null,
+      "tags": [
+        "wandern"
+      ],
+      "setting": "outdoor",
+      "address": "Galina",
+      "postal_code": null,
+      "town": "Frastanz",
+      "lat": null,
+      "lng": null,
+      "website": "https://www.vorarlberg.travel/route/barrierefrei-angleroasen-erholung-an-den-nenzinger-seen/",
+      "source_url": "https://www.vorarlberg.travel/aktivitaet/barrierefrei-reisen-ohne-handicap/",
+      "accessibility": {
+        "features": [
+          "rollstuhl"
+        ],
+        "note": "Laut vorarlberg.travel als Rollstuhl-Wanderweg empfohlen. Schwierigkeit leicht, Strecke 4 km, Aufstieg 21 m, Abstieg 21 m, Dauer 1 h, Tiefster Punkt 481 m, Höchster Punkt 490 m."
+      },
+      "images": [
+        {
+          "url": "https://v-cloud.vorarlberg.travel/asset/93ae03fb-f4fc-4856-a907-3adf16595081/qKT3N8iVN6QiXeat8vdlpONslrDOgktlxivOVNJmTsM/1789624362/default/fill/1400/700/0/sm/galinasee.jpeg",
+          "credit": "Vorarlberg Tourismus",
+          "license": null,
+          "author": null
+        }
+      ],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "in-der-frutzau-zwischen-sulz-und-rankweil",
+      "name": "In der Frutzau – zwischen Sulz und Rankweil",
+      "description": "Rollstuhl-Wanderweg laut Vorarlberg Tourismus (Strecken mit angemessener Länge und Neigung, Asphalt oder geglätteter Schotter). Schwierigkeit leicht, Strecke 3.73 km, Aufstieg 25 m, Abstieg 25 m, Dauer 1 h, Tiefster Punkt 456 m, Höchster Punkt 479 m. Start und Ziel: Bahnhaltestelle Sulz-Röthis.",
+      "description_short": null,
+      "tags": [
+        "wandern"
+      ],
+      "setting": "outdoor",
+      "address": null,
+      "postal_code": null,
+      "town": "Sulz-Röthis",
+      "lat": null,
+      "lng": null,
+      "website": "https://www.vorarlberg.travel/route/barrierefrei-in-der-frutzau-zwischen-sulz-und-rankweil/",
+      "source_url": "https://www.vorarlberg.travel/aktivitaet/barrierefrei-reisen-ohne-handicap/",
+      "accessibility": {
+        "features": [
+          "rollstuhl"
+        ],
+        "note": "Laut vorarlberg.travel als Rollstuhl-Wanderweg empfohlen. Schwierigkeit leicht, Strecke 3.73 km, Aufstieg 25 m, Abstieg 25 m, Dauer 1 h, Tiefster Punkt 456 m, Höchster Punkt 479 m."
+      },
+      "images": [
+        {
+          "url": "https://v-cloud.vorarlberg.travel/asset/d268aaf8-1540-435d-95d3-55d9ba84367c/CXWSC_ODD1Npl8SE8kUAWEXrhY-WalUXBWIt8-7EiJs/1789568647/default/fill/1400/700/0/sm/vorarlberger_wanderwegekonzept.jpeg",
+          "credit": "Vorarlberg Tourismus",
+          "license": null,
+          "author": null
+        }
+      ],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "am-rande-des-furstentums-ein-liechtensteiner-rundweg-ab-tisis",
+      "name": "Am Rande des Fürstentums – Ein Liechtensteiner Rundweg ab Tisis",
+      "description": "Rollstuhl-Wanderweg laut Vorarlberg Tourismus (Strecken mit angemessener Länge und Neigung, Asphalt oder geglätteter Schotter). Schwierigkeit leicht, Strecke 6.47 km, Aufstieg 27 m, Abstieg 28 m, Dauer 2 h, Tiefster Punkt 439 m, Höchster Punkt 455 m. Start und Ziel: Feldkirch-Tisis, Kirche St. Michael.",
+      "description_short": null,
+      "tags": [
+        "wandern"
+      ],
+      "setting": "outdoor",
+      "address": "Kirche St. Michael",
+      "postal_code": null,
+      "town": "Feldkirch-Tisis",
+      "lat": null,
+      "lng": null,
+      "website": "https://www.vorarlberg.travel/route/barrierefrei-am-rande-des-fuerstentums-ein-liechtensteiner-rundweg-ab-tisis/",
+      "source_url": "https://www.vorarlberg.travel/aktivitaet/barrierefrei-reisen-ohne-handicap/",
+      "accessibility": {
+        "features": [
+          "rollstuhl"
+        ],
+        "note": "Laut vorarlberg.travel als Rollstuhl-Wanderweg empfohlen. Schwierigkeit leicht, Strecke 6.47 km, Aufstieg 27 m, Abstieg 28 m, Dauer 2 h, Tiefster Punkt 439 m, Höchster Punkt 455 m."
+      },
+      "images": [
+        {
+          "url": "https://v-cloud.vorarlberg.travel/asset/b3960faf-4fe8-430c-9565-c0faecb3307d/UKlEiUGF2QZbrxL7TkqpdkfBTeURhD_9WHpzMun27vU/1789546322/default/fill/1400/700/0/sm/tisner_ried.jpeg",
+          "credit": "Vorarlberg Tourismus",
+          "license": null,
+          "author": null
+        }
+      ],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "lingenau-zwischen-dorfplatz-und-bad-wellness-in-lingenau",
+      "name": "Lingenau | Zwischen Dorfplatz und Bad: Wellness in Lingenau",
+      "description": "Rollstuhl-Wanderweg laut Vorarlberg Tourismus (Strecken mit angemessener Länge und Neigung, Asphalt oder geglätteter Schotter). Schwierigkeit leicht, Strecke 3.03 km, Aufstieg 19 m, Abstieg 19 m, Dauer 1 h, Tiefster Punkt 664 m, Höchster Punkt 682 m. Start und Ziel: Lingenau - Dorfplatz.",
+      "description_short": null,
+      "tags": [
+        "wandern"
+      ],
+      "setting": "outdoor",
+      "address": null,
+      "postal_code": null,
+      "town": "Lingenau - Dorfplatz",
+      "lat": null,
+      "lng": null,
+      "website": "https://www.vorarlberg.travel/route/lingenau-zwischen-dorfplatz-und-bad-wellness-in-lingenau/",
+      "source_url": "https://www.vorarlberg.travel/aktivitaet/barrierefrei-reisen-ohne-handicap/",
+      "accessibility": {
+        "features": [
+          "rollstuhl"
+        ],
+        "note": "Laut vorarlberg.travel als Rollstuhl-Wanderweg empfohlen. Schwierigkeit leicht, Strecke 3.03 km, Aufstieg 19 m, Abstieg 19 m, Dauer 1 h, Tiefster Punkt 664 m, Höchster Punkt 682 m."
+      },
+      "images": [
+        {
+          "url": "https://v-cloud.vorarlberg.travel/asset/585ccd73-bf31-442d-bb3d-3489902e5853/22PLZwD1D_qgtC_io5fD_g07_XzIudP70EcQtBhRRm4/1789599053/default/fill/1400/700/0/sm/doernlesee_lingenau.jpeg",
+          "credit": "Vorarlberg Tourismus",
+          "license": null,
+          "author": null
+        }
+      ],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "spaziergang-der-litz-entlang",
+      "name": "Spaziergang der Litz entlang",
+      "description": "Rollstuhl-Wanderweg laut Vorarlberg Tourismus (Strecken mit angemessener Länge und Neigung, Asphalt oder geglätteter Schotter). Schwierigkeit leicht, Strecke 2.09 km, Aufstieg 29 m, Abstieg 29 m, Dauer 0.8 h, Tiefster Punkt 660 m, Höchster Punkt 688 m. Start und Ziel: Schruns (linker Litzpromenadenweg).",
+      "description_short": null,
+      "tags": [
+        "wandern"
+      ],
+      "setting": "outdoor",
+      "address": "linker Litzpromenadenweg",
+      "postal_code": null,
+      "town": "Schruns",
+      "lat": null,
+      "lng": null,
+      "website": "https://www.vorarlberg.travel/route/barrierefrei-spaziergang-der-litz-entlang/",
+      "source_url": "https://www.vorarlberg.travel/aktivitaet/barrierefrei-reisen-ohne-handicap/",
+      "accessibility": {
+        "features": [
+          "rollstuhl"
+        ],
+        "note": "Laut vorarlberg.travel als Rollstuhl-Wanderweg empfohlen. Schwierigkeit leicht, Strecke 2.09 km, Aufstieg 29 m, Abstieg 29 m, Dauer 0.8 h, Tiefster Punkt 660 m, Höchster Punkt 688 m."
+      },
+      "images": [
+        {
+          "url": "https://v-cloud.vorarlberg.travel/asset/382b92be-e49a-4ea8-a814-456211aa20be/KmfAobECtSZVuO_71KOiOmntt87R93z36ubv4G4POtk/1786442225/default/fill/1400/700/0/sm/litzpromenade.jpeg",
+          "credit": "Vorarlberg Tourismus",
+          "license": null,
+          "author": null
+        }
+      ],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "spaziergang-entlang-der-ill",
+      "name": "Spaziergang entlang der Ill",
+      "description": "Rollstuhl-Wanderweg laut Vorarlberg Tourismus (Strecken mit angemessener Länge und Neigung, Asphalt oder geglätteter Schotter). Schwierigkeit leicht, Strecke 3.81 km, Aufstieg 1 m, Abstieg 34 m, Dauer 1 h, Tiefster Punkt 631 m, Höchster Punkt 665 m. Start und Ziel: Vandans/Bahnhof Tschagguns.",
+      "description_short": null,
+      "tags": [
+        "wandern"
+      ],
+      "setting": "outdoor",
+      "address": null,
+      "postal_code": null,
+      "town": "Vandans",
+      "lat": null,
+      "lng": null,
+      "website": "https://www.vorarlberg.travel/route/barrierefrei-spaziergang-entlang-der-ill/",
+      "source_url": "https://www.vorarlberg.travel/aktivitaet/barrierefrei-reisen-ohne-handicap/",
+      "accessibility": {
+        "features": [
+          "rollstuhl"
+        ],
+        "note": "Laut vorarlberg.travel als Rollstuhl-Wanderweg empfohlen. Schwierigkeit leicht, Strecke 3.81 km, Aufstieg 1 m, Abstieg 34 m, Dauer 1 h, Tiefster Punkt 631 m, Höchster Punkt 665 m."
+      },
+      "images": [
+        {
+          "url": "https://v-cloud.vorarlberg.travel/asset/c213a87b-8ede-4f6c-b2c2-44e0ff285789/WBjUaWABNkhx1w4OKSTqvCTMdDKuHfCNuHxVZJQKWS4/1786442225/default/fill/1400/700/0/sm/illweg_vandans.jpeg",
+          "credit": "Vorarlberg Tourismus",
+          "license": null,
+          "author": null
+        }
+      ],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "tolle-aussicht-auf-dem-panoramaweg-geniessen",
+      "name": "tolle Aussicht auf dem Panoramaweg genießen",
+      "description": "Rollstuhl-Wanderweg laut Vorarlberg Tourismus (Strecken mit angemessener Länge und Neigung, Asphalt oder geglätteter Schotter). Schwierigkeit leicht, Strecke 3.75 km, Aufstieg 29 m, Abstieg 29 m, Dauer 0.9 h, Tiefster Punkt 1084 m, Höchster Punkt 1111 m. Start und Ziel: Barockkirche Bartholomäberg.",
+      "description_short": null,
+      "tags": [
+        "wandern"
+      ],
+      "setting": "outdoor",
+      "address": null,
+      "postal_code": null,
+      "town": "Barockkirche Bartholomäberg",
+      "lat": null,
+      "lng": null,
+      "website": "https://www.vorarlberg.travel/route/barrierefrei-tolle-aussicht-auf-dem-panoramaweg-geniessen/",
+      "source_url": "https://www.vorarlberg.travel/aktivitaet/barrierefrei-reisen-ohne-handicap/",
+      "accessibility": {
+        "features": [
+          "rollstuhl"
+        ],
+        "note": "Laut vorarlberg.travel als Rollstuhl-Wanderweg empfohlen. Schwierigkeit leicht, Strecke 3.75 km, Aufstieg 29 m, Abstieg 29 m, Dauer 0.9 h, Tiefster Punkt 1084 m, Höchster Punkt 1111 m."
+      },
+      "images": [
+        {
+          "url": "https://v-cloud.vorarlberg.travel/asset/cf7f3824-00fa-4742-b843-b04d21521860/LE4gK6t7ffzwxtahK0KFnIxrPVZ3zq3bRftmYiuHZ1Y/1789386620/default/fill/1400/700/0/sm/barockkirche_bartholomaeberg.jpeg",
+          "credit": "Vorarlberg Tourismus",
+          "license": null,
+          "author": null
+        }
+      ],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "um-das-staubecken-von-latschau",
+      "name": "um das Staubecken von Latschau",
+      "description": "Rollstuhl-Wanderweg laut Vorarlberg Tourismus (Strecken mit angemessener Länge und Neigung, Asphalt oder geglätteter Schotter). Schwierigkeit leicht, Strecke 1.63 km, Aufstieg 19 m, Abstieg 18 m, Dauer 0.5 h, Tiefster Punkt 985 m, Höchster Punkt 1004 m. Start und Ziel: Golmerbahn Latschau.",
+      "description_short": null,
+      "tags": [
+        "wandern"
+      ],
+      "setting": "outdoor",
+      "address": null,
+      "postal_code": null,
+      "town": "Golmerbahn Latschau",
+      "lat": null,
+      "lng": null,
+      "website": "https://www.vorarlberg.travel/route/barrierefrei-um-das-staubecken-von-latschau/",
+      "source_url": "https://www.vorarlberg.travel/aktivitaet/barrierefrei-reisen-ohne-handicap/",
+      "accessibility": {
+        "features": [
+          "rollstuhl"
+        ],
+        "note": "Laut vorarlberg.travel als Rollstuhl-Wanderweg empfohlen. Schwierigkeit leicht, Strecke 1.63 km, Aufstieg 19 m, Abstieg 18 m, Dauer 0.5 h, Tiefster Punkt 985 m, Höchster Punkt 1004 m."
+      },
+      "images": [
+        {
+          "url": "https://v-cloud.vorarlberg.travel/asset/0c6dc4f0-aa40-4b67-b01c-f2e568c40b55/X_7FOcjem7mxacQVa_GK7WDrSHBJkTMj01x95c_Ep0Q/1786442225/default/fill/1400/700/0/sm/no_name.jpeg",
+          "credit": "Vorarlberg Tourismus",
+          "license": null,
+          "author": null
+        }
+      ],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "gemutlicher-spaziergang-von-st-anton-im-montafon-nach-tschagguns",
+      "name": "gemütlicher Spaziergang von St. Anton im Montafon nach Tschagguns",
+      "description": "Rollstuhl-Wanderweg laut Vorarlberg Tourismus (Strecken mit angemessener Länge und Neigung, Asphalt oder geglätteter Schotter). Schwierigkeit leicht, Strecke 6.61 km, Aufstieg 59 m, Abstieg 8 m, Dauer 1.7 h, Tiefster Punkt 618 m, Höchster Punkt 677 m. Start und Ziel: St. Anton im Montafon (beim Bahnhof).",
+      "description_short": null,
+      "tags": [
+        "wandern"
+      ],
+      "setting": "outdoor",
+      "address": "beim Bahnhof",
+      "postal_code": null,
+      "town": "St. Anton im Montafon",
+      "lat": null,
+      "lng": null,
+      "website": "https://www.vorarlberg.travel/route/barrierefrei-gemuetlicher-spaziergang-von-st-anton-im-montafon-nach-tschagguns/",
+      "source_url": "https://www.vorarlberg.travel/aktivitaet/barrierefrei-reisen-ohne-handicap/",
+      "accessibility": {
+        "features": [
+          "rollstuhl"
+        ],
+        "note": "Laut vorarlberg.travel als Rollstuhl-Wanderweg empfohlen. Schwierigkeit leicht, Strecke 6.61 km, Aufstieg 59 m, Abstieg 8 m, Dauer 1.7 h, Tiefster Punkt 618 m, Höchster Punkt 677 m."
+      },
+      "images": [
+        {
+          "url": "https://v-cloud.vorarlberg.travel/asset/872cb085-5ecb-4c47-b1d5-bbc0bf3c41de/Fpb1DLfMktaAAb7NnrKdr1oizN4xnWbZILOtOs0wNaY/1786442225/default/fill/1400/700/0/sm/tschagguns.jpeg",
+          "credit": "Vorarlberg Tourismus",
+          "license": null,
+          "author": null
+        }
+      ],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "gemutliche-runde-um-das-rifabecken",
+      "name": "gemütliche Runde um das Rifabecken",
+      "description": "Rollstuhl-Wanderweg laut Vorarlberg Tourismus (Strecken mit angemessener Länge und Neigung, Asphalt oder geglätteter Schotter). Schwierigkeit leicht, Strecke 1.51 km, Aufstieg 34 m, Abstieg 34 m, Dauer 0.5 h, Tiefster Punkt 996 m, Höchster Punkt 1027 m. Start und Ziel: beim Rifabecken.",
+      "description_short": null,
+      "tags": [
+        "wandern"
+      ],
+      "setting": "outdoor",
+      "address": null,
+      "postal_code": null,
+      "town": "Rifabecken",
+      "lat": null,
+      "lng": null,
+      "website": "https://www.vorarlberg.travel/route/barrierefrei-gemuetliche-runde-um-das-rifabecken/",
+      "source_url": "https://www.vorarlberg.travel/aktivitaet/barrierefrei-reisen-ohne-handicap/",
+      "accessibility": {
+        "features": [
+          "rollstuhl"
+        ],
+        "note": "Laut vorarlberg.travel als Rollstuhl-Wanderweg empfohlen. Schwierigkeit leicht, Strecke 1.51 km, Aufstieg 34 m, Abstieg 34 m, Dauer 0.5 h, Tiefster Punkt 996 m, Höchster Punkt 1027 m."
+      },
+      "images": [
+        {
+          "url": "https://v-cloud.vorarlberg.travel/asset/8cead06b-af92-4099-a24a-f223a5022d7c/J9qjcgZRZfueRYGjgEnyrHMy8XPqk0DvXTHOU3wYyqw/1786442225/default/fill/1400/700/0/sm/rifabecken.jpeg",
+          "credit": "Vorarlberg Tourismus",
+          "license": null,
+          "author": null
+        }
+      ],
+      "price_hint": null,
+      "opening_hint": null
+    },
+    {
+      "id": "dorfrunde-schruns-tschagguns",
+      "name": "Dorfrunde Schruns-Tschagguns",
+      "description": "Rollstuhl-Wanderweg laut Vorarlberg Tourismus (Strecken mit angemessener Länge und Neigung, Asphalt oder geglätteter Schotter). Schwierigkeit leicht, Strecke 3.82 km, Aufstieg 30 m, Abstieg 30 m, Dauer 1.3 h, Tiefster Punkt 659 m, Höchster Punkt 689 m. Start und Ziel: Kirchplatz Schruns.",
+      "description_short": null,
+      "tags": [
+        "wandern"
+      ],
+      "setting": "outdoor",
+      "address": null,
+      "postal_code": null,
+      "town": "Kirchplatz Schruns",
+      "lat": null,
+      "lng": null,
+      "website": "https://www.vorarlberg.travel/route/barrierefrei-dorfrunde-schruns-tschagguns/",
+      "source_url": "https://www.vorarlberg.travel/aktivitaet/barrierefrei-reisen-ohne-handicap/",
+      "accessibility": {
+        "features": [
+          "rollstuhl"
+        ],
+        "note": "Laut vorarlberg.travel als Rollstuhl-Wanderweg empfohlen. Schwierigkeit leicht, Strecke 3.82 km, Aufstieg 30 m, Abstieg 30 m, Dauer 1.3 h, Tiefster Punkt 659 m, Höchster Punkt 689 m."
+      },
+      "images": [
+        {
+          "url": "https://v-cloud.vorarlberg.travel/asset/3ab62059-dd74-4828-a875-f7eb40631abe/G9dDgZvJZPtGH0zizD76t9GpF667-5iCR4Z_ZJMNHcE/1789388877/default/fill/1400/700/0/sm/pfarrkirche_st_jodok_in_schruns.jpeg",
+          "credit": "Vorarlberg Tourismus",
+          "license": null,
+          "author": null
+        }
+      ],
+      "price_hint": null,
+      "opening_hint": null
+    }
+  ]
+}

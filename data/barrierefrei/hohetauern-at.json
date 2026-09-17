@@ -1,0 +1,409 @@
+{
+  "source": "hohetauern-at",
+  "source_label": "Nationalpark Hohe Tauern (hohetauern.at)",
+  "source_url": "https://hohetauern.at/de/besuchen/barrierefrei.html",
+  "checked_at": "2026-09-17",
+  "entries": [
+    {
+      "id": "hintersee-mittersill",
+      "name": "Barrierefreier Weg zum Hintersee (Felbertal)",
+      "description": "Der von steilen Felswänden umrahmte Hintersee im Felbertal bei Mittersill ist vom Parkplatz über einen geschotterten Forstweg erreichbar. Das Ufer selbst ist mit dem Rollstuhl nicht direkt erreichbar, entlang des ufernahen Forstwegs geht es 581 m bis zur Gamsblickhütte (6 Höhenmeter, zwei Holzgatter, kurzer asphaltierter Aufschwung nach dem Parkplatz). Rund 15 Minuten je Richtung.",
+      "tags": [
+        "wandern",
+        "naturführung"
+      ],
+      "setting": "outdoor",
+      "address": "Parkplatz Hintersee, Felbertal",
+      "postal_code": "5730",
+      "town": "Mittersill",
+      "lat": 47.1666,
+      "lng": 12.4906,
+      "website": "https://hohetauern.at/de/besuchen/barrierefrei.html?view=article&id=2225:themenwege-outdoor&catid=92",
+      "source_url": "https://hohetauern.at/de/besuchen/barrierefrei.html?view=article&id=2225:themenwege-outdoor&catid=92",
+      "accessibility": {
+        "features": [
+          "rollstuhl",
+          "wc",
+          "parkplatz"
+        ],
+        "note": "Laut hohetauern.at: grober Schotterforstweg, beinahe durchgehend flach, 2 Holzgatter; barrierefreie Toilette am Parkplatz Hintersee (Damentoilette); Hütten nicht barrierefrei, Sitzbereiche im Freien; keine Anreise mit Öffis; ÖZIV geprüft: nein."
+      }
+    },
+    {
+      "id": "oetzlsee-huettschlag",
+      "name": "Barrierefreier Weg zum Ötzlsee (Hüttschlag)",
+      "description": "Der Ötzlsee am Talschluss von Hüttschlag im Großarltal liegt an der Außengrenze des Nationalparks Hohe Tauern und ist über einen breiten, großteils asphaltierten Fahrweg mit dem Rollstuhl erreichbar (2 km, 30 Höhenmeter je Richtung, rund 30 Minuten). Das letzte Stück ist ein Schotterweg mit mittelgroßer Körnung, zwei Autobrücken sind zu queren.",
+      "tags": [
+        "wandern",
+        "naturführung"
+      ],
+      "setting": "outdoor",
+      "address": "Parkplatz Talschluss",
+      "postal_code": "5612",
+      "town": "Hüttschlag",
+      "lat": 47.1613,
+      "lng": 13.2427,
+      "website": "https://hohetauern.at/de/besuchen/barrierefrei.html?view=article&id=2225:themenwege-outdoor&catid=92",
+      "source_url": "https://hohetauern.at/de/besuchen/barrierefrei.html?view=article&id=2225:themenwege-outdoor&catid=92",
+      "accessibility": {
+        "features": [
+          "rollstuhl",
+          "wc"
+        ],
+        "note": "Laut hohetauern.at: teils asphaltierter, teils geschotterter Fahrweg, beinahe kein Gefälle, Gegenverkehr mit Traktoren möglich; barrierefreies WC beim Talwirt in Hüttschlag; Anreise mit Öffis möglich; ÖZIV geprüft: nein."
+      }
+    },
+    {
+      "id": "themenweg-glocknerspur-kals",
+      "name": "Themenweg Glocknerspur mit Swiss-Trac (Kals am Großglockner)",
+      "description": "Im Kalser Ködnitztal stellt der Nationalpark Hohe Tauern an der Infostelle Glocknerwinkel zwei Swiss-Tracs und einen E-Scooter kostenlos zur Verfügung. Mit dem geländegängigen Zugfahrzeug geht es nach kurzer Einschulung vom Parkplatz Glocknerwinkel (1.920 m) beim Lucknerhaus 1,5 km zum Talschluss am Fuß des Großglockners, vorbei an Stationen des Themenwegs Glocknerspur (32 Höhenmeter, rund 1 Stunde). Eine Begleitperson ist Voraussetzung.",
+      "tags": [
+        "wandern",
+        "naturführung"
+      ],
+      "setting": "outdoor",
+      "address": "Parkplatz Glocknerwinkel, Lucknerhaus",
+      "postal_code": "9981",
+      "town": "Kals am Großglockner",
+      "lat": 47.0407,
+      "lng": 12.7106,
+      "website": "https://hohetauern.at/de/besuchen/barrierefrei.html?view=article&id=2225:themenwege-outdoor&catid=92",
+      "source_url": "https://hohetauern.at/de/besuchen/barrierefrei.html?view=article&id=2225:themenwege-outdoor&catid=92",
+      "accessibility": {
+        "features": [
+          "rollstuhl",
+          "wc",
+          "parkplatz"
+        ],
+        "note": "Laut hohetauern.at: feinkörnige Schotterung, einspuriger Steg und zwei seichte Bachquerungen, max. 14 % Steigung; Swiss-Tracs und E-Scooter kostenlos gegen Einschulung, Begleitperson nötig; rollstuhlgerechte Toilette im Parkplatzgebäude; Anreise mit Öffis nicht barrierefrei; ÖZIV geprüft: nein."
+      }
+    },
+    {
+      "id": "oberhauser-zirbenwald-rundweg",
+      "name": "Rundweg über die Oberhausalm im Oberhauser Zirbenwald",
+      "description": "Der Oberhauser Zirbenwald im hinteren Defereggental ist mit über 170 ha der größte zusammenhängende Zirbenbestand der Ostalpen. Ein rund 1,3 km langer Rundweg über die Oberhausalm ist mit dem Rollstuhl befahrbar (51 Höhenmeter, max. 12 % Steigung); Ausgangspunkt ist der Parkplatz am ehemaligen Alpengasthof Oberhaus am Ende der Mautstraße, wo ein E-Scooter kostenlos zum Verleih bereitsteht.",
+      "tags": [
+        "wandern",
+        "naturführung"
+      ],
+      "setting": "outdoor",
+      "address": "Parkplatz Oberhaus, Mautstraße",
+      "postal_code": "9963",
+      "town": "St. Jakob in Defereggen",
+      "lat": 46.9226,
+      "lng": 12.2215,
+      "website": "https://hohetauern.at/de/besuchen/barrierefrei.html?view=article&id=2225:themenwege-outdoor&catid=92",
+      "source_url": "https://hohetauern.at/de/besuchen/barrierefrei.html?view=article&id=2225:themenwege-outdoor&catid=92",
+      "accessibility": {
+        "features": [
+          "rollstuhl"
+        ],
+        "note": "Laut hohetauern.at: feinkörnige Schotterung, breite Holzbrücke und zwei schmalere Holzbrücken, 4 Gatter zu öffnen; keine rollstuhlgerechte Toilette vorhanden; keine Anreise mit Öffis; ÖZIV geprüft: nein."
+      }
+    },
+    {
+      "id": "bios-nationalparkzentrum-mallnitz",
+      "name": "BIOS Nationalparkzentrum Mallnitz",
+      "description": "Das BIOS Nationalparkzentrum in Mallnitz hält alle Informationen über den Kärntner Teil des Nationalparks Hohe Tauern bereit: Ausstellung, Wildtierbeobachtung, Tourenvorschläge. Ausstellung, Sanitäranlagen, Parkplatz und Gastronomie sind barrierefrei; auf Anfrage gibt es die Führung „Mit allen Sinnen“ am barrierefreien Wanderweg zum Stappitzer See.",
+      "tags": [
+        "ausstellung",
+        "naturführung"
+      ],
+      "setting": "indoor",
+      "address": "Mallnitz 36",
+      "postal_code": "9822",
+      "town": "Mallnitz",
+      "website": "https://bios-mallnitz.at/",
+      "source_url": "https://hohetauern.at/de/besuchen/barrierefrei.html?view=article&id=2223:besucherzentren-infostellen-barrierefrei&catid=92",
+      "accessibility": {
+        "features": [
+          "rollstuhl",
+          "wc",
+          "parkplatz"
+        ],
+        "note": "Laut hohetauern.at: Ausstellung rollstuhlgerecht (keine Blindenschrift, kein Audioguide), Sanitäranlagen, Parkplatz und Gastronomie barrierefrei; ÖZIV-Zertifizierung in Umsetzung; mit Öffis grundsätzlich barrierefrei erreichbar (Station Mallnitz Tauernbad/BIOS)."
+      }
+    },
+    {
+      "id": "haus-der-steinboecke-heiligenblut",
+      "name": "Haus der Steinböcke Heiligenblut",
+      "description": "Erlebnisausstellung zum Steinbock und seinem Lebensraum in Heiligenblut am Großglockner mit Panorama-Terrasse und Großglocknerblick. Ausstellung, Sanitäranlagen, Gastronomie und Tiefgaragenparkplatz mit Lift sind barrierefrei.",
+      "tags": [
+        "ausstellung",
+        "naturführung"
+      ],
+      "setting": "indoor",
+      "address": "Hof 38",
+      "postal_code": "9844",
+      "town": "Heiligenblut am Großglockner",
+      "website": "https://www.hausdersteinboecke.at/",
+      "source_url": "https://hohetauern.at/de/besuchen/barrierefrei.html?view=article&id=2223:besucherzentren-infostellen-barrierefrei&catid=92",
+      "accessibility": {
+        "features": [
+          "rollstuhl",
+          "wc",
+          "parkplatz",
+          "lift"
+        ],
+        "note": "Laut hohetauern.at: Ausstellung rollstuhlgerecht (keine Blindenschrift, kein Audioguide), Sanitäranlagen barrierefrei, Parkplatz in Tiefgarage mit Lift, Gastronomie barrierefrei; ÖZIV-Zertifizierung in Umsetzung; Öffis-Anreise nicht barrierefrei (Bordstein an der Haltestelle)."
+      }
+    },
+    {
+      "id": "nationalparkausstellung-kaiser-franz-josefs-hoehe",
+      "name": "Nationalpark-Ausstellung Kaiser-Franz-Josefs-Höhe",
+      "description": "Infozentrum des Nationalparks Hohe Tauern am Fuß des Großglockners an der Großglockner Hochalpenstraße mit über 300 m² naturkundlicher und touristischer Information, Kino mit HD-Projektion und Touchscreen-Terminals. Ausstellung, Parkplatz und Gastronomie sind barrierefrei, ein barrierefreies WC liegt nebenan.",
+      "tags": [
+        "ausstellung",
+        "naturführung"
+      ],
+      "setting": "indoor",
+      "address": "Kaiser-Franz-Josefs-Höhe, Großglockner Hochalpenstraße",
+      "postal_code": "9844",
+      "town": "Heiligenblut am Großglockner",
+      "lat": 47.0748,
+      "lng": 12.7513,
+      "website": "https://www.grossglockner.at/gg/de/service/barrierefreiheit",
+      "source_url": "https://hohetauern.at/de/besuchen/barrierefrei.html?view=article&id=2223:besucherzentren-infostellen-barrierefrei&catid=92",
+      "accessibility": {
+        "features": [
+          "rollstuhl",
+          "wc",
+          "parkplatz"
+        ],
+        "note": "Laut hohetauern.at: Ausstellung rollstuhlgerecht (keine Blindenschrift, kein Audioguide), barrierefreie Sanitäranlagen nebenan, Parkplatz und Gastronomie barrierefrei; ÖZIV zertifiziert: nein."
+      }
+    },
+    {
+      "id": "nationalparkinfostelle-obervellach",
+      "name": "Nationalpark-Infostelle Obervellach",
+      "description": "Ausstellung zum Nationalpark Hohe Tauern und zur Kulturgeschichte Obervellachs im denkmalgeschützten Oberbergmeisteramt, mit dem „Nationalpark-Explorer“, einer großen interaktiven Karte der Region. Zugang über die Rampe vor der Raiffeisenbank; im historischen Gebäude ist der Steinboden etwas uneben.",
+      "tags": [
+        "ausstellung",
+        "museumstour"
+      ],
+      "setting": "indoor",
+      "address": "Obervellach 58",
+      "postal_code": "9821",
+      "town": "Obervellach",
+      "website": "https://hohetauern.at/de/besuchen/infozentren-ausstellungen.html?view=article&id=335:oberbergmeisteramt&catid=45",
+      "source_url": "https://hohetauern.at/de/besuchen/barrierefrei.html?view=article&id=2223:besucherzentren-infostellen-barrierefrei&catid=92",
+      "accessibility": {
+        "features": [
+          "rollstuhl",
+          "wc",
+          "parkplatz"
+        ],
+        "note": "Laut hohetauern.at: Ausstellung rollstuhlgerecht (keine Blindenschrift, kein Audioguide), Sanitäranlagen barrierefrei (Zugang über Rampe, Steinboden leicht uneben), Parkplatz barrierefrei, Gastronomie nur Terrasse; ÖZIV zertifiziert: nein."
+      }
+    },
+    {
+      "id": "nationalparkzentrum-mittersill",
+      "name": "Nationalparkwelten Hohe Tauern Mittersill",
+      "description": "Nationalparkzentrum in Mittersill mit zehn 2024 neu eröffneten Ausstellungsräumen, 360°-Kino und Adlerflugpanorama. Ausstellung, Sanitäranlagen, Parkplatz und Gastronomie sind barrierefrei; ein Audioguide auf Deutsch und Englisch und ein virtueller 3D-Rundgang zur Vorbereitung stehen zur Verfügung.",
+      "tags": [
+        "ausstellung",
+        "museumstour"
+      ],
+      "setting": "indoor",
+      "address": "Gerlosstraße 18",
+      "postal_code": "5730",
+      "town": "Mittersill",
+      "website": "https://hohetauern.at/de/besuchen/nationalparkzentrum-mittersill.html",
+      "source_url": "https://hohetauern.at/de/besuchen/barrierefrei.html?view=article&id=2223:besucherzentren-infostellen-barrierefrei&catid=92",
+      "accessibility": {
+        "features": [
+          "rollstuhl",
+          "wc",
+          "parkplatz"
+        ],
+        "note": "Laut hohetauern.at: Ausstellung rollstuhlgerecht mit Audioguide (keine Blindenschrift, kein einfacher Text), Sanitäranlagen, Parkplatz und Gastronomie barrierefrei; ÖZIV zertifiziert: nein; mit Öffis grundsätzlich barrierefrei erreichbar (Haltestelle Mittersill Stadtplatz, 6 Minuten)."
+      }
+    },
+    {
+      "id": "muhrsprung-muhr",
+      "name": "Nationalpark-Ausstellung (M)Uhrsprung Muhr",
+      "description": "Ausstellung zum Ursprung der Mur im östlichen Tauerngebirge in Muhr im Lungau: natürliche und kulturelle Prozesse, Lebensräume und die Region zwischen Nationalpark Hohe Tauern und Biosphärenpark Lungau. Ausstellung, Sanitäranlagen und Parkplatz barrierefrei.",
+      "tags": [
+        "ausstellung",
+        "naturführung"
+      ],
+      "setting": "indoor",
+      "address": "Vordermuhr 5",
+      "postal_code": "5583",
+      "town": "Muhr",
+      "website": "https://hohetauern.at/de/besuchen/infozentren-ausstellungen.html?view=article&id=454:m-ursprung&catid=45",
+      "source_url": "https://hohetauern.at/de/besuchen/barrierefrei.html?view=article&id=2223:besucherzentren-infostellen-barrierefrei&catid=92",
+      "accessibility": {
+        "features": [
+          "rollstuhl",
+          "wc",
+          "parkplatz"
+        ],
+        "note": "Laut hohetauern.at: Ausstellung rollstuhlgerecht (keine Blindenschrift, kein Audioguide), Sanitäranlagen und Parkplatz barrierefrei, keine Gastronomie; ÖZIV zertifiziert: nein; Regionalbus 700/710 bis Muhr Ortsmitte."
+      }
+    },
+    {
+      "id": "leben-unter-wasser-ferleiten",
+      "name": "Nationalpark-Ausstellung „Leben unter Wasser“ im Wildpark Ferleiten",
+      "description": "Ausstellung mit integriertem Kino im Wildpark Ferleiten in Fusch an der Großglocknerstraße über das Leben in den Seen und Bächen des Nationalparks Hohe Tauern und die Anpassung der Lebewesen an das Hochgebirge. Ausstellung und Wildpark sind rollstuhlgerecht, Sanitäranlagen und Parkplatz barrierefrei.",
+      "tags": [
+        "ausstellung",
+        "naturführung"
+      ],
+      "setting": "mixed",
+      "address": "Taxenbacher Fusch 96",
+      "postal_code": "5672",
+      "town": "Fusch an der Großglocknerstraße",
+      "website": "https://hohetauern.at/de/besuchen/infozentren-ausstellungen.html?view=article&id=332:leben-unter-wasser&catid=45",
+      "source_url": "https://hohetauern.at/de/besuchen/barrierefrei.html?view=article&id=2223:besucherzentren-infostellen-barrierefrei&catid=92",
+      "accessibility": {
+        "features": [
+          "rollstuhl",
+          "wc",
+          "parkplatz"
+        ],
+        "note": "Laut hohetauern.at: Ausstellung und Wildpark rollstuhlgerecht (keine Blindenschrift, kein Audioguide), Sanitäranlagen und Parkplatz barrierefrei, Gastronomie nicht barrierefrei; ÖZIV zertifiziert: nein; Bus 650 ab Zell am See, barrierefreie Anreise vorab erfragen."
+      }
+    },
+    {
+      "id": "facettenreich-rauris",
+      "name": "Nationalpark-Ausstellung „Im Facettenreich“ Rauris",
+      "description": "Nationalpark-Ausstellung in Wörth im Raurisertal über die Besonderheiten des Tals und seiner drei Nebentäler Krumltal, Seidlwinkltal und Hüttwinkltal: Tier-, Pflanzen- und Menschenwelt im Wechselspiel. Ausstellung, Sanitäranlagen und Parkplatz barrierefrei.",
+      "tags": [
+        "ausstellung",
+        "naturführung"
+      ],
+      "setting": "indoor",
+      "address": "Dorfstraße 27",
+      "postal_code": "5661",
+      "town": "Rauris",
+      "website": "https://hohetauern.at/de/besuchen/infozentren-ausstellungen.html?view=article&id=327:haus-im-facettenreich&catid=45",
+      "source_url": "https://hohetauern.at/de/besuchen/barrierefrei.html?view=article&id=2223:besucherzentren-infostellen-barrierefrei&catid=92",
+      "accessibility": {
+        "features": [
+          "rollstuhl",
+          "wc",
+          "parkplatz"
+        ],
+        "note": "Laut hohetauern.at: Ausstellung rollstuhlgerecht (keine Blindenschrift, kein Audioguide), Sanitäranlagen und Parkplatz barrierefrei, keine Gastronomie; ÖZIV zertifiziert: nein; Bus 640 ab Taxenbach bis Wörth Ortsmitte, 5 Minuten zur Ausstellung."
+      }
+    },
+    {
+      "id": "smaragde-kristalle-bramberg",
+      "name": "Nationalpark-Ausstellung „Smaragde & Kristalle“ im Museum Bramberg",
+      "description": "Mineralienausstellung des Nationalparks Hohe Tauern im Museum Bramberg am Wildkogel über Smaragde, Bergkristalle, Fluorite und die Tradition der „Stoasuacher“. Die Nationalpark-Ausstellung ist per Treppenlift erreichbar, der volkskundliche Bereich im historischen Bauernhaus wegen Denkmalschutz nicht. Tastführungen für Blinde möglich, Begleithunde erlaubt, ermäßigter Eintritt für Menschen mit Beeinträchtigung.",
+      "tags": [
+        "museumstour",
+        "ausstellung"
+      ],
+      "setting": "indoor",
+      "address": "Weichseldorf 27",
+      "postal_code": "5733",
+      "town": "Bramberg am Wildkogel",
+      "website": "https://hohetauern.at/de/besuchen/infozentren-ausstellungen.html?view=article&id=453:smaragde-kristalle&catid=45",
+      "source_url": "https://hohetauern.at/de/besuchen/barrierefrei.html?view=article&id=2223:besucherzentren-infostellen-barrierefrei&catid=92",
+      "accessibility": {
+        "features": [
+          "rollstuhl",
+          "wc",
+          "parkplatz",
+          "blind",
+          "assistenzhund"
+        ],
+        "note": "Laut hohetauern.at: Nationalpark-Ausstellung per Treppenlift rollstuhlgerecht, barrierefreier Eingang und Empfang, Tastführungen für Blinde, Begleithunde erlaubt, Sanitäranlagen und Parkplatz barrierefrei; Bereich „Mensch und Kultur“ im Bauernhaus nicht barrierefrei; ÖZIV zertifiziert: nein."
+      }
+    },
+    {
+      "id": "nationalparkhaus-matrei",
+      "name": "Nationalparkhaus Matrei in Osttirol",
+      "description": "Interaktive Ausstellung des Nationalparks Hohe Tauern in Matrei in Osttirol mit sechs Erlebnisräumen und 360°-Videos zu den Nationalpark-Hotspots. Ausstellung rollstuhlgerecht mit Audioguide, Sanitäranlagen und Parkplatz barrierefrei, Anreise mit Öffis möglich.",
+      "tags": [
+        "ausstellung",
+        "naturführung"
+      ],
+      "setting": "indoor",
+      "address": "Kirchplatz 2",
+      "postal_code": "9971",
+      "town": "Matrei in Osttirol",
+      "website": "https://hohetauern.at/de/besuchen/nationalparkhaus-matrei.html",
+      "source_url": "https://hohetauern.at/de/besuchen/barrierefrei.html?view=article&id=2223:besucherzentren-infostellen-barrierefrei&catid=92",
+      "accessibility": {
+        "features": [
+          "rollstuhl",
+          "wc",
+          "parkplatz"
+        ],
+        "note": "Laut hohetauern.at: Ausstellung rollstuhlgerecht mit Audioguide (keine Blindenschrift, kein einfacher Text), Sanitäranlagen und Parkplatz barrierefrei, keine Gastronomie; ÖZIV zertifiziert: nein; Öffis: ja."
+      }
+    },
+    {
+      "id": "glocknerwinkel-kals",
+      "name": "Besucher- und Informationszentrum Glocknerwinkel (Kals)",
+      "description": "2017 neu erbautes Besucherzentrum des Nationalparks Hohe Tauern am Ende der Kalser Glocknerstraße beim Lucknerhaus mit Ausstellung rund um den Großglockner und die „Big Five“ des Nationalparks sowie Glocknerpanorama. Ausstellung, Sanitäranlagen und Parkplatz barrierefrei, Gastronomie im Lucknerhaus nebenan.",
+      "tags": [
+        "ausstellung",
+        "naturführung"
+      ],
+      "setting": "mixed",
+      "address": "Glocknerwinkel, Lucknerhaus",
+      "postal_code": "9981",
+      "town": "Kals am Großglockner",
+      "lat": 47.0407,
+      "lng": 12.7106,
+      "website": "https://hohetauern.at/de/besuchen/infozentren-ausstellungen.html?view=article&id=575:besucher-und-informationszentrum-glocknerwinkel&catid=45",
+      "source_url": "https://hohetauern.at/de/besuchen/barrierefrei.html?view=article&id=2223:besucherzentren-infostellen-barrierefrei&catid=92",
+      "accessibility": {
+        "features": [
+          "rollstuhl",
+          "wc",
+          "parkplatz"
+        ],
+        "note": "Laut hohetauern.at: Ausstellung rollstuhlgerecht (keine Blindenschrift, kein Audioguide), Sanitäranlagen und Parkplatz barrierefrei, Gastronomiebetrieb nebenan; ÖZIV zertifiziert: nein; Öffis nicht barrierefrei."
+      }
+    },
+    {
+      "id": "jenseits-der-zeit-virgen",
+      "name": "Nationalpark-Ausstellung „Jenseits der Zeit“ Virgen",
+      "description": "Dauerausstellung im Ortszentrum von Virgen in Osttirol über die Menschen und Geschichten des Virgentals von der Vergangenheit bis in die Gegenwart. Ausstellung rollstuhlgerecht, Parkplatz barrierefrei, Anreise mit Öffis möglich; keine Sanitäranlagen und keine Gastronomie im Haus.",
+      "tags": [
+        "ausstellung",
+        "museumstour"
+      ],
+      "setting": "indoor",
+      "address": "Nationalparkinfostelle Virgen (Tourismusbüro)",
+      "postal_code": "9972",
+      "town": "Virgen",
+      "website": "https://hohetauern.at/de/besuchen/infozentren-ausstellungen.html?view=article&id=499:virgen-jenseits-der-zeit&catid=45",
+      "source_url": "https://hohetauern.at/de/besuchen/barrierefrei.html?view=article&id=2223:besucherzentren-infostellen-barrierefrei&catid=92",
+      "accessibility": {
+        "features": [
+          "rollstuhl",
+          "parkplatz"
+        ],
+        "note": "Laut hohetauern.at: Ausstellung rollstuhlgerecht (keine Blindenschrift, kein Audioguide), Parkplatz barrierefrei, keine Sanitäranlagen, keine Gastronomie; ÖZIV zertifiziert: nein; Öffis: ja."
+      }
+    },
+    {
+      "id": "erlebnis-zirbe-st-jakob",
+      "name": "Nationalpark-Ausstellung „Erlebnis Zirbe“ St. Jakob in Defereggen",
+      "description": "Ausstellung des Nationalparks Hohe Tauern in St. Jakob in Defereggen mit interaktiven Modulen zur Ökologie des Zirbenwaldes. Ausstellung rollstuhlgerecht, Parkplatz barrierefrei, Gastronomie nebenan; keine Sanitäranlagen im Haus.",
+      "tags": [
+        "ausstellung",
+        "naturführung"
+      ],
+      "setting": "indoor",
+      "address": "Unterrotte 44",
+      "postal_code": "9963",
+      "town": "St. Jakob in Defereggen",
+      "website": "https://hohetauern.at/de/besuchen/infozentren-ausstellungen.html?view=article&id=312:erlebnis-zirbe&catid=45",
+      "source_url": "https://hohetauern.at/de/besuchen/barrierefrei.html?view=article&id=2223:besucherzentren-infostellen-barrierefrei&catid=92",
+      "accessibility": {
+        "features": [
+          "rollstuhl",
+          "parkplatz"
+        ],
+        "note": "Laut hohetauern.at: Ausstellung rollstuhlgerecht (keine Blindenschrift, kein Audioguide), Parkplatz barrierefrei, Gastronomie barrierefrei nebenan, keine Sanitäranlagen; ÖZIV zertifiziert: nein; Öffis nicht barrierefrei."
+      }
+    }
+  ]
+}
