@@ -787,12 +787,16 @@ function toSupabaseRow(
   // genannte PLZ) wird nicht veröffentlicht, sondern zur Prüfung gegeben
   // (Review §6): der Freigabevertrag sieht nach dem Verwerfen der Koordinate
   // nur noch Ortstext + PLZ und würde die Zeile sonst durchwinken.
+  // Der DB-Check events_location_conflict_not_published verbietet bei
+  // 'conflict' beide veroeffentlichten Stati; 'published_low_confidence'
+  // fehlte hier und liess pro Feratel-Lauf einen 100er-Batch platzen.
   const locationConflict = finalStatus === 'conflict';
   if (locationConflict) resolved.reasons.push('location_conflict_withheld');
   const finalPublishStatus =
     existing?.publish_status && !COMPUTED_PUBLISH_STATUSES.has(existing.publish_status)
       ? existing.publish_status
-      : (rawPersistFailed || locationConflict) && score.publish_status === 'published'
+      : (rawPersistFailed || locationConflict) &&
+          (score.publish_status === 'published' || score.publish_status === 'published_low_confidence')
         ? 'needs_review'
         : score.publish_status;
 
@@ -921,8 +925,10 @@ function toSupabaseRow(
     // Wert; leere Arrays der Quelle gelten als "nichts gesagt".
     audience: event.audience && event.audience.length > 0 ? event.audience : existing?.audience ?? null,
     setting: event.setting && event.setting.length > 0 ? event.setting : existing?.setting ?? null,
-    occasion_tags: event.occasion_tags && event.occasion_tags.length > 0 ? event.occasion_tags : existing?.occasion_tags ?? null,
-    price_flags: event.price_flags && event.price_flags.length > 0 ? event.price_flags : existing?.price_flags ?? null,
+    // occasion_tags/price_flags sind NOT NULL DEFAULT '{}' (Taxonomie v3):
+    // ein explizites null im Upsert verletzt den Constraint und kostet den Batch.
+    occasion_tags: event.occasion_tags && event.occasion_tags.length > 0 ? event.occasion_tags : existing?.occasion_tags ?? [],
+    price_flags: event.price_flags && event.price_flags.length > 0 ? event.price_flags : existing?.price_flags ?? [],
     language: event.language ?? existing?.language ?? null,
     is_family_friendly: event.is_family_friendly ?? existing?.is_family_friendly ?? null,
     image_credit: event.image_credit ?? existing?.image_credit ?? null,
