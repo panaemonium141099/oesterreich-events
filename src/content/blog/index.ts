@@ -107,6 +107,8 @@ import { post as pavelShalmanBokiRadenkovicElectricRoseKlezmoreFestiva2026 } fro
 import { post as tomWalekDerOe3MicromannLive2026 } from './posts/tom-walek-der-oe3-micromann-live-2026';
 import { post as konzerteInDerPeterskircheWien2026 } from './posts/konzerte-in-der-peterskirche-wien-2026';
 import { post as designDistrictLivingLifestyleMesse2026 } from './posts/design-district-living-lifestyle-messe-2026';
+import { post as againstTheCurrent2026 } from './posts/against-the-current-2026';
+import { post as neilDiamondMoments2026 } from './posts/neil-diamond-moments-2026';
 // AUTOWRITER-IMPORTS-END
 
 export type { FestivalPost, GalleryImage, FestivalKeyFacts, LineupAct } from './types';
@@ -222,6 +224,8 @@ export const ALL_POSTS: FestivalPost[] = [
   tomWalekDerOe3MicromannLive2026,
   konzerteInDerPeterskircheWien2026,
   designDistrictLivingLifestyleMesse2026,
+  againstTheCurrent2026,
+  neilDiamondMoments2026,
   // AUTOWRITER-POSTS-END
 ].sort(
   (a, b) => new Date(b.publishDate).getTime() - new Date(a.publishDate).getTime()
