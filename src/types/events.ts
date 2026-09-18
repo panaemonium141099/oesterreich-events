@@ -120,6 +120,8 @@ export interface Event {
   suggested_price_text?: string | null;
   enrichment_version?: string | null;
   enrichment_at?: string | null;
+  /** Bildnachweis der Quelle (Fotograf/Copyright), z. B. Feratel `images.copyright`. */
+  image_credit?: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -193,6 +195,21 @@ export interface ScrapedEvent {
    * write-path must NOT override it.
    */
   category_locked?: boolean;
+  /** Begründung der Sperre für `category_reason` (Standard: Eventim-Code-Map). */
+  category_lock_reason?: string;
+  /**
+   * Strukturierte Facetten aus der Quelle (Feratel holidayThemes/criteria).
+   * Werte aus enrichment-taxonomy.ts; `undefined` = Quelle sagt nichts, der
+   * Schreibpfad behält dann den bestehenden Wert.
+   */
+  audience?: string[];
+  setting?: string[];
+  occasion_tags?: string[];
+  price_flags?: string[];
+  language?: 'deutsch' | 'dialekt' | 'englisch' | 'mehrsprachig' | 'ohne-sprache';
+  is_family_friendly?: boolean;
+  /** Bildnachweis der Quelle (Fotograf/Copyright), sofern geliefert. */
+  image_credit?: string;
   /**
    * Von der Quelle ausdrücklich genannter Ort/Gemeinde (Eventim `eventCity`,
    * Feratel `town`, Gemeinde-Kalender: die eigene Gemeinde). Getrennt vom
