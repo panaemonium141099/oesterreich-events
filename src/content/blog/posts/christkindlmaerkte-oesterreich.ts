@@ -83,6 +83,13 @@ export const post: FestivalPost = {
       "text": "Die ruhigsten Stunden erwischst du unter der Woche am Vormittag, in Wien also gleich ab 10 Uhr. Wer Krampusse und Perchten sehen will, plant früh: In Kärnten und Tirol laufen die ersten Umzüge schon Mitte November, lange vor dem Advent. Und wenn dir der 24. Dezember zu knapp wird, hast du mit Wien bis 26. Dezember und Salzburg bis Anfang Jänner noch zwei Nachzügler."
     }
   ],
+  "lineup": [],
+  "gallery": [],
+  "ctaText": "Adventmärkte in ganz Österreich entdecken",
+  "ctaLink": "/entdecken",
+  "seoTitle": "Christkindlmärkte in Österreich 2026: Termine, Öffnungszeiten, Tipps",
+  "seoDescription": "Alle großen Christkindlmärkte in Österreich 2026 von Wien bis Bregenz: Termine, Öffnungszeiten, Eintritt und Tipps für den Besuch in jedem Bundesland.",
+  "keywords": ["christkindlmarkt österreich", "weihnachtsmarkt öffnungszeiten", "adventmarkt termine", "christkindlmarkt wann öffnet", "adventmärkte 2026"],
   "faqs": [
     {
       "question": "Wann öffnen die Christkindlmärkte in Österreich 2026?",

@@ -221,8 +221,12 @@ Schreibe auf Deutsch (de-AT). Der Guide soll Lesern helfen, die Saison zu planen
         },
         description: '4 FAQs entlang der Such-Intentionen',
       },
+      seoTitle: { type: 'STRING', description: 'Title-Tag, max. 60 Zeichen, mit Jahr' },
+      seoDescription: { type: 'STRING', description: 'Meta-Description, 140 bis 160 Zeichen' },
+      keywords: { type: 'ARRAY', items: { type: 'STRING' }, description: '5 Suchbegriffe, kleingeschrieben' },
+      ctaText: { type: 'STRING', description: 'Button-Text zur Event-Suche, z. B. "Adventmärkte in ganz Österreich entdecken"' },
     },
-    required: ['excerpt', 'readingTime', 'keyFacts', 'intro', 'historyTitle', 'history', 'whatToExpectTitle', 'whatToExpect', 'whatToExpectList', 'practicalInfoTitle', 'practicalInfo', 'faqs'],
+    required: ['excerpt', 'readingTime', 'keyFacts', 'intro', 'historyTitle', 'history', 'whatToExpectTitle', 'whatToExpect', 'whatToExpectList', 'practicalInfoTitle', 'practicalInfo', 'faqs', 'seoTitle', 'seoDescription', 'keywords', 'ctaText'],
   };
 
   return claudeJson(prompt, toJsonSchema(responseSchema), { model: MODEL_COMPOSE });
@@ -320,8 +324,18 @@ function writePostFile(
     whatToExpectList: gen.whatToExpectList,
     practicalInfoTitle: gen.practicalInfoTitle,
     practicalInfo: [...factRows, ...generated],
+    // Pflichtfelder von FestivalPost, die ein Saison-Guide nicht braucht,
+    // aber ohne die der Build bricht (zweimal passiert: 15.09. und 18.09.2026).
+    lineup: [],
+    gallery: [],
+    ctaText: typeof gen.ctaText === 'string' && gen.ctaText.trim() ? gen.ctaText.trim() : `${spec.title} entdecken`,
+    ctaLink: '/entdecken',
+    seoTitle: typeof gen.seoTitle === 'string' && gen.seoTitle.trim() ? gen.seoTitle.trim().slice(0, 70) : `${spec.title} ${new Date().getFullYear()}: Termine und Tipps`,
+    seoDescription: typeof gen.seoDescription === 'string' && gen.seoDescription.trim() ? gen.seoDescription.trim().slice(0, 170) : String(gen.excerpt ?? '').slice(0, 160),
+    keywords: Array.isArray(gen.keywords) && gen.keywords.length > 0 ? gen.keywords.map((k: unknown) => String(k)) : spec.searchKeywords,
     faqs: gen.faqs,
   };
+  assertFestivalPostShape(post);
   const file = join(POSTS_DIR, `${spec.slug}.ts`);
   writeFileSync(
     file,
@@ -331,6 +345,22 @@ function writePostFile(
     'utf8',
   );
   return file;
+}
+
+/**
+ * Letzte Sperre vor dem Schreiben: alle Pflichtfelder von FestivalPost
+ * (src/content/blog/types.ts) muessen gesetzt sein, sonst faellt `next build`
+ * am Typfehler und der Deploy steht (Autopilot pusht direkt auf master).
+ */
+function assertFestivalPostShape(post: Record<string, unknown>): void {
+  const required = [
+    'slug', 'title', 'subtitle', 'heroImage', 'publishDate', 'updatedDate', 'readingTime', 'excerpt', 'category',
+    'categoryColor', 'keyFacts', 'lineup', 'intro', 'historyTitle', 'history', 'whatToExpectTitle', 'whatToExpect',
+    'whatToExpectList', 'practicalInfoTitle', 'practicalInfo', 'gallery', 'ctaText', 'ctaLink', 'seoTitle',
+    'seoDescription', 'keywords',
+  ];
+  const missing = required.filter((k) => post[k] === undefined || post[k] === null || post[k] === '');
+  if (missing.length > 0) throw new Error(`Saison-Guide unvollstaendig, fehlende FestivalPost-Felder: ${missing.join(', ')}`);
 }
 
 /** Import + ALL_POSTS-Eintrag in index.ts registrieren. */

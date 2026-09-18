@@ -1,7 +1,28 @@
+import { createClient } from '@supabase/supabase-js';
 import { BaseScraper } from './BaseScraper';
 import { normalizeCountryCode } from '@/lib/location/conservative-resolution';
 import { categorizeEvent } from '../categorize';
 import type { ScrapedEvent } from '@/types/events';
+import {
+  feratelCategoryFromCriteria,
+  feratelFacets,
+  feratelLocalEnd,
+  pickFeratelDescription,
+  pickFeratelImage,
+  type FeratelCriterion,
+  type FeratelImage,
+  type FeratelStartTimeDuration,
+} from './feratel-facets';
+import {
+  DETAIL_FIELDS,
+  extractFeratelDetail,
+  loadDetailCache,
+  saveDetailCache,
+  selectDetailCandidates,
+  type DetailCacheRow,
+  type FeratelDetail,
+  type RawDetail,
+} from './feratel-details';
 
 /**
  * Configuration for a single Deskline/Feratel TOSC5 region.
@@ -36,6 +57,11 @@ export const REGIONS: FeratelRegionConfig[] = [
   // Generated from feratel-active-urls.txt (2026-05-28 4-phase bruteforce: 12.653 slugs
   // probed, 131 active, 3 mirrors skipped — kaerntencard/kaerntenevents/innsbruckcard
   // are duplicate views of canonical regions and would double-count events).
+  // 2026-09-18: zwölf Linkkeys entfernt, die deutsche Orte liefern (eisenberg =
+  // Eisenberg/Pfalz, fischen = Allgäu, frein = Freinsheim, hochwald, kirchberg =
+  // Hunsrück, kohlgrub, lahnstein, linz = Linz am Rhein, neustadt = Neustadt/
+  // Weinstraße, oberbuch = Oberstaufen, rieden = Forggensee, waldburg = Amtzell);
+  // sie brachten 466 Events aus Deutschland in den Bestand.
 
   // ── Burgenland ──
   { code: 'burgenland', name: 'Burgenland', bundesland: 'Burgenland', fallbackLat: 47.845, fallbackLng: 16.525 },  // 958 events
@@ -43,14 +69,12 @@ export const REGIONS: FeratelRegionConfig[] = [
   { code: 'lutzmannsburg', name: 'Lutzmannsburg', bundesland: 'Burgenland', fallbackLat: 47.452, fallbackLng: 16.56 },  // 128 events
   { code: 'eisenstadt', name: 'Eisenstadt', bundesland: 'Burgenland', fallbackLat: 47.846, fallbackLng: 16.526 },  // 110 events
   { code: 'illmitz', name: 'Illmitz', bundesland: 'Burgenland', fallbackLat: 47.77, fallbackLng: 16.802 },  // 62 events
-  { code: 'eisenberg', name: 'Eisenberg an der Pinka', bundesland: 'Burgenland', fallbackLat: 47.689, fallbackLng: 16.531 },  // 44 events
   { code: 'podersdorf', name: 'Podersdorf am See', bundesland: 'Burgenland', fallbackLat: 47.852, fallbackLng: 16.847 },  // 42 events
   { code: 'gols', name: 'Gols', bundesland: 'Burgenland', fallbackLat: 47.689, fallbackLng: 16.531 },  // 34 events
   { code: 'rust', name: 'Rust', bundesland: 'Burgenland', fallbackLat: 47.798, fallbackLng: 16.679 },  // 33 events
   { code: 'jois', name: 'Jois', bundesland: 'Burgenland', fallbackLat: 47.969, fallbackLng: 16.788 },  // 27 events
 
   // ── Niederösterreich ──
-  { code: 'neustadt', name: 'Neustadt (vermutl. Wiener Neustadt)', bundesland: 'Niederösterreich', fallbackLat: 48.108, fallbackLng: 15.805 },  // 72 events
   { code: 'gmuend', name: 'Gmuend', bundesland: 'Niederösterreich', fallbackLat: 48.77, fallbackLng: 14.978 },  // 61 events
 
   // ── Oberösterreich ──
@@ -59,9 +83,7 @@ export const REGIONS: FeratelRegionConfig[] = [
   { code: 'pyhrn', name: 'Pyhrn-Priel', bundesland: 'Oberösterreich', fallbackLat: 47.715, fallbackLng: 14.116 },  // 414 events
   { code: 'traunseealmtal', name: 'Traunsee-Almtal', bundesland: 'Oberösterreich', fallbackLat: 47.862, fallbackLng: 13.789 },  // 366 events
   { code: 'wels', name: 'Wels', bundesland: 'Oberösterreich', fallbackLat: 48.16, fallbackLng: 14.025 },  // 205 events
-  { code: 'linz', name: 'Linz', bundesland: 'Oberösterreich', fallbackLat: 48.306, fallbackLng: 14.286 },  // 19 events
   { code: 'reichenau', name: 'Reichenau im Mühlkreis', bundesland: 'Oberösterreich', fallbackLat: 48.025, fallbackLng: 14.105 },  // 11 events
-  { code: 'waldburg', name: 'Waldburg (Mühlviertel)', bundesland: 'Oberösterreich', fallbackLat: 48.025, fallbackLng: 14.105 },  // 3 events
 
   // ── Salzburg ──
   { code: 'blsalzb', name: 'SalzburgerLand', bundesland: 'Salzburg', fallbackLat: 47.349, fallbackLng: 13.06 },  // 4127 events
@@ -111,7 +133,6 @@ export const REGIONS: FeratelRegionConfig[] = [
   { code: 'spielberg', name: 'Spielberg (Red Bull Ring, Murtal)', bundesland: 'Steiermark', fallbackLat: 47.359, fallbackLng: 14.886 },  // 119 events
   { code: 'erzberg', name: 'Erzberg / Eisenerz', bundesland: 'Steiermark', fallbackLat: 47.359, fallbackLng: 14.886 },  // 95 events
   { code: 'gesaeuse', name: 'Gesaeuse', bundesland: 'Steiermark', fallbackLat: 47.577, fallbackLng: 14.627 },  // 83 events
-  { code: 'frein', name: 'Frein an der Mürz', bundesland: 'Steiermark', fallbackLat: 47.359, fallbackLng: 14.886 },  // 83 events
   { code: 'ramsau', name: 'Ramsau am Dachstein', bundesland: 'Steiermark', fallbackLat: 47.421, fallbackLng: 13.643 },  // 39 events
 
   // ── Tirol ──
@@ -135,7 +156,6 @@ export const REGIONS: FeratelRegionConfig[] = [
   { code: 'hochfuegen', name: 'Hochfügen', bundesland: 'Tirol', fallbackLat: 47.255, fallbackLng: 11.842 },  // 118 events
   { code: 'wipptal', name: 'Wipptal', bundesland: 'Tirol', fallbackLat: 47.085, fallbackLng: 11.46 },  // 89 events
   { code: 'kaiserwinkl', name: 'Kaiserwinkl', bundesland: 'Tirol', fallbackLat: 47.625, fallbackLng: 12.3 },  // 87 events
-  { code: 'fischen', name: 'Fischen / Tannheimer Tal', bundesland: 'Tirol', fallbackLat: 47.26, fallbackLng: 11.395 },  // 78 events
   { code: 'hochpustertal', name: 'Hochpustertal', bundesland: 'Tirol', fallbackLat: 46.74, fallbackLng: 12.42 },  // 74 events
   { code: 'lechtal', name: 'Lechtal', bundesland: 'Tirol', fallbackLat: 47.261, fallbackLng: 10.555 },  // 56 events
   { code: 'serfaus', name: 'Serfaus-Fiss-Ladis', bundesland: 'Tirol', fallbackLat: 47.039, fallbackLng: 10.602 },  // 50 events
@@ -144,7 +164,6 @@ export const REGIONS: FeratelRegionConfig[] = [
   { code: 'galtuer', name: 'Galtür', bundesland: 'Tirol', fallbackLat: 46.969, fallbackLng: 10.184 },  // 39 events
   { code: 'ischgl', name: 'Ischgl-Paznaun', bundesland: 'Tirol', fallbackLat: 47.01, fallbackLng: 10.293 },  // 39 events
   { code: 'kappl', name: 'Kappl (Paznaun)', bundesland: 'Tirol', fallbackLat: 47.073, fallbackLng: 10.382 },  // 39 events
-  { code: 'kirchberg', name: 'Kirchberg in Tirol', bundesland: 'Tirol', fallbackLat: 47.449, fallbackLng: 12.32 },  // 33 events
   { code: 'mayrhofen', name: 'Mayrhofen', bundesland: 'Tirol', fallbackLat: 47.16, fallbackLng: 11.862 },  // 27 events
   { code: 'defereggen', name: 'Defereggental', bundesland: 'Tirol', fallbackLat: 47.26, fallbackLng: 11.395 },  // 17 events
   { code: 'kaltenbach', name: 'Kaltenbach (Zillertal)', bundesland: 'Tirol', fallbackLat: 47.295, fallbackLng: 11.873 },  // 14 events
@@ -152,7 +171,6 @@ export const REGIONS: FeratelRegionConfig[] = [
   // ── Vorarlberg ──
   { code: 'bludenz', name: 'Bludenz', bundesland: 'Vorarlberg', fallbackLat: 47.155, fallbackLng: 9.823 },  // 235 events
   { code: 'klostertal', name: 'Klostertal', bundesland: 'Vorarlberg', fallbackLat: 47.13, fallbackLng: 10.08 },  // 68 events
-  { code: 'rieden', name: 'Rieden', bundesland: 'Vorarlberg', fallbackLat: 47.25, fallbackLng: 9.879 },  // 36 events
   { code: 'bezau', name: 'Bezau (Bregenzerwald)', bundesland: 'Vorarlberg', fallbackLat: 47.25, fallbackLng: 9.879 },  // 1 events
   { code: 'reuthe', name: 'Reuthe (Bregenzerwald)', bundesland: 'Vorarlberg', fallbackLat: 47.25, fallbackLng: 9.879 },  // 1 events
   { code: 'bizau', name: 'Bizau (Bregenzerwald)', bundesland: 'Vorarlberg', fallbackLat: 47.25, fallbackLng: 9.879 },  // 1 events
@@ -181,10 +199,6 @@ export const REGIONS: FeratelRegionConfig[] = [
   { code: 'falkert', name: 'Falkert / Nockberge', bundesland: 'Kärnten', fallbackLat: 46.724, fallbackLng: 14.091 },  // 8 events
 
   // ── Österreich ──
-  { code: 'oberbuch', name: 'Oberbuch', bundesland: 'Österreich', fallbackLat: 47.5, fallbackLng: 14.5 },  // 140 events
-  { code: 'lahnstein', name: 'Lahnstein', bundesland: 'Österreich', fallbackLat: 47.5, fallbackLng: 14.5 },  // 65 events
-  { code: 'kohlgrub', name: 'Kohlgrub', bundesland: 'Österreich', fallbackLat: 47.5, fallbackLng: 14.5 },  // 42 events
-  { code: 'hochwald', name: 'Hochwald', bundesland: 'Österreich', fallbackLat: 47.5, fallbackLng: 14.5 },  // 34 events
 ];
 
 // ─────────────────── API configuration ───────────────────
@@ -192,14 +206,29 @@ export const REGIONS: FeratelRegionConfig[] = [
 const API_BASE = 'https://webapi.deskline.net';
 const DW_SOURCE = 'desklineweb';
 
-/** Fields requested from the API — GraphQL-like field selection */
+/**
+ * Fields requested from the API — GraphQL-like field selection.
+ *
+ * 2026-09-18: Kriterienbaum, Urlaubsthemen, Dauer, Top-Event, Buchbarkeit,
+ * Gästekarten, Kurztext (33) und Bild-Metadaten (KI-Flag, Credit) kommen
+ * mit; bis dahin flogen sie weg und 52 % der Feratel-Events standen in
+ * "Sonstiges" (Auswertung feratel-facets.ts). `dbCode` braucht die
+ * Detail-Abfrage (feratel-details.ts).
+ */
 const EVENT_FIELDS = [
   'id',
+  'dbCode',
   'name',
   'date',
   'hasMoreDates',
+  'isTopEvent',
+  'onlineBookable',
+  'startTimeDurations{time,weekDays,duration}',
+  'criteria{groupName,items{name}}',
+  'holidayThemes{name}',
+  'guestCards{name}',
   'location{place,town,regions,country,coordinate{name,long,lat}}',
-  'descriptions(types:[32]){description,type}',
+  'descriptions(types:[32,33]){description,type}',
   // Feratel image size IDs (probed 2026-05-26):
   //   1   = 1 KB (tiny thumb)
   //   2   = 13 KB (small)
@@ -211,13 +240,23 @@ const EVENT_FIELDS = [
   //         pixelated hero images because the listing scraper got nothing
   //         usable back. Replaced 2026-05-26.
   //   100 = 69 KB (large, identical to 10)
-  'images(count:1,sizes:[10]){urls}',
+  'images(count:3,sizes:[10]){urls,copyright,license,author,resolutionX,resolutionY,ai{isAiGenerated}}',
   'urlFriendlyName',
   'mainCriteria{id,name,value}',
   'eventGroups{id,name}',
 ].join(',');
 
-const PAGE_SIZE = 50;
+/** Wie der Infrastruktur-Client (deskline-client.ts): 400 pro Seite ist live
+ *  verprobt; mit 50 brauchte SalzburgerLand (2.996 Events) 60 Seiten. */
+const PAGE_SIZE = 400;
+
+/** Detail-Aufrufe pro Lauf (siehe feratel-details.ts). */
+const DETAIL_BUDGET = Math.max(0, Number(process.env.FERATEL_DETAIL_BUDGET ?? '900') || 0);
+/** Cache-Eintraege juenger als das werden nicht aufgefrischt. */
+const DETAIL_MIN_AGE_MS = 6 * 60 * 60 * 1000;
+const DETAIL_CONCURRENCY = 3;
+/** Zeitbudget der Detail-Phase (der Stundenlauf hat 15 min, die Liste braucht ~2). */
+const DETAIL_TIME_BUDGET_MS = 6 * 60 * 1000;
 
 /**
  * Concurrency for region scraping. 131 regions sequentially × ~3s API + 500ms
@@ -315,9 +354,16 @@ export function feratelLocalToUtcIso(raw: string): string | null {
 
 interface DesklineEvent {
   id: string;
+  dbCode?: string | null;
   name: string;
   date: string;
   hasMoreDates?: boolean;
+  isTopEvent?: boolean | null;
+  onlineBookable?: boolean | null;
+  startTimeDurations?: FeratelStartTimeDuration[] | null;
+  criteria?: Array<{ groupName?: string | null; items?: Array<{ name?: string | null }> | null }> | null;
+  holidayThemes?: Array<{ name?: string | null }> | null;
+  guestCards?: Array<{ name?: string | null }> | null;
   location?: {
     place?: string;
     town?: string;
@@ -333,9 +379,7 @@ interface DesklineEvent {
     description: string;
     type: number;
   }>;
-  images?: Array<{
-    urls?: string[];
-  }>;
+  images?: FeratelImage[] | null;
   urlFriendlyName?: string;
   mainCriteria?: {
     id: string;
@@ -370,8 +414,13 @@ export class FeratelScraper extends BaseScraper {
   // Larger delay to be respectful — many regions to scrape
   protected delayMs = 500;
 
-  // Max events per region to avoid overwhelming the API
-  private maxEventsPerRegion = 500;
+  // Obergrenze pro Region gegen Endlos-Pagination. 500 war zu wenig:
+  // SalzburgerLand (2.996), Kärnten (1.633) und Burgenland (759) verloren
+  // dadurch ~1.440 Events, die in keiner Teilregion vorkommen (2026-09-18).
+  private maxEventsPerRegion = 6000;
+
+  // Listen-Rohdaten je Event-Id (Region + dbCode) fuer die Detail-Phase
+  private detailKeys = new Map<string, { region: string; dbCode: string }>();
 
   // Track seen event IDs to deduplicate across regions
   private seenEventIds = new Set<string>();
@@ -380,7 +429,10 @@ export class FeratelScraper extends BaseScraper {
     const allEvents: ScrapedEvent[] = [];
     const sessionId = generateSessionId();
 
-    this.log(`Starting Feratel Deskline scrape across ${REGIONS.length} regions (parallel, concurrency=${SCRAPE_CONCURRENCY})`);
+    // FERATEL_REGIONS=abtenau,annaberg begrenzt den Lauf (Ops/Debug).
+    const only = (process.env.FERATEL_REGIONS ?? '').split(',').map((s) => s.trim()).filter(Boolean);
+    const regions = only.length > 0 ? REGIONS.filter((r) => only.includes(r.code)) : REGIONS;
+    this.log(`Starting Feratel Deskline scrape across ${regions.length} regions (parallel, concurrency=${SCRAPE_CONCURRENCY})`);
 
     // Parallel pool. 128 regions × sequential = >300s timeout on Vercel.
     // Concurrency 6 stays well under Feratel's 3500 calls/h IP limit
@@ -389,9 +441,9 @@ export class FeratelScraper extends BaseScraper {
     // any race produces a few extra dupes the DB upsert (PK) handles cleanly.
     let cursor = 0;
     const worker = async (): Promise<void> => {
-      while (cursor < REGIONS.length) {
+      while (cursor < regions.length) {
         const idx = cursor++;
-        const region = REGIONS[idx];
+        const region = regions[idx];
         try {
           const events = await this.scrapeRegion(region, sessionId);
           allEvents.push(...events);
@@ -405,8 +457,95 @@ export class FeratelScraper extends BaseScraper {
 
     await Promise.all(Array.from({ length: SCRAPE_CONCURRENCY }, () => worker()));
 
-    this.log(`Feratel scrape complete: ${allEvents.length} events from ${REGIONS.length} regions`);
-    return allEvents;
+    this.log(`Feratel scrape complete: ${allEvents.length} events from ${regions.length} regions`);
+
+    try {
+      return await this.applyDetails(allEvents, sessionId);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      this.log(`Detail-Phase uebersprungen: ${msg}`);
+      return allEvents;
+    }
+  }
+
+  /**
+   * Detail-Phase: Cache lesen, Budget an Detailseiten auffrischen, Cache
+   * schreiben, dann Adresse/Veranstalter/Link/Preis/weitere Termine in die
+   * Events mischen (siehe feratel-details.ts). Ohne Supabase-Zugang oder
+   * bei DB-Fehlern bleibt es bei den Listendaten.
+   */
+  private async applyDetails(events: ScrapedEvent[], sessionId: string): Promise<ScrapedEvent[]> {
+    const url = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL;
+    const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    if (!url || !key || process.env.FERATEL_DETAILS === 'off') {
+      this.log('Detail-Phase aus (kein Supabase-Zugang oder FERATEL_DETAILS=off)');
+      return events;
+    }
+    const supabase = createClient(url, key, { auth: { persistSession: false } });
+    const ids = events.map((e) => e.source_id.replace(/^feratel-/, '')).filter((id) => this.detailKeys.has(id));
+    const index = await loadDetailCache(supabase, ids);
+    const candidates = selectDetailCandidates(ids, index, DETAIL_BUDGET, DETAIL_MIN_AGE_MS);
+    this.log(`Detail-Phase: ${index.detail.size} im Cache, ${candidates.length} werden geholt (Budget ${DETAIL_BUDGET})`);
+
+    const fresh: DetailCacheRow[] = [];
+    const started = Date.now();
+    let cursor = 0;
+    let failed = 0;
+    const worker = async (): Promise<void> => {
+      while (cursor < candidates.length && Date.now() - started < DETAIL_TIME_BUDGET_MS) {
+        const id = candidates[cursor++];
+        const keyInfo = this.detailKeys.get(id);
+        if (!keyInfo) continue;
+        const raw = await this.fetchDetail(keyInfo.region, keyInfo.dbCode, id, sessionId);
+        if (!raw) {
+          failed++;
+          continue;
+        }
+        const detail = extractFeratelDetail(raw);
+        fresh.push({ event_id: id, db_code: keyInfo.dbCode, region: keyInfo.region, fetched_at: new Date().toISOString(), detail });
+        index.detail.set(id, detail);
+        await this.sleep(200);
+      }
+    };
+    await Promise.all(Array.from({ length: DETAIL_CONCURRENCY }, () => worker()));
+    if (fresh.length > 0) await saveDetailCache(supabase, fresh);
+    this.log(`Detail-Phase: ${fresh.length} aufgefrischt, ${failed} Fehler, ${Math.round((Date.now() - started) / 1000)} s`);
+
+    const out: ScrapedEvent[] = [];
+    for (const event of events) {
+      const id = event.source_id.replace(/^feratel-/, '');
+      const detail = index.detail.get(id);
+      if (!detail) {
+        out.push(event);
+        continue;
+      }
+      out.push(...mergeFeratelDetail(event, detail));
+    }
+    return out;
+  }
+
+  private async fetchDetail(region: string, dbCode: string, id: string, sessionId: string): Promise<RawDetail | null> {
+    const url = `${API_BASE}/${region}/de/events/${dbCode}/${id}?fields=${DETAIL_FIELDS}`;
+    for (let attempt = 1; attempt <= 2; attempt++) {
+      try {
+        const response = await fetch(url, {
+          headers: { Accept: 'application/json', 'DW-Source': DW_SOURCE, 'DW-SessionId': sessionId, 'User-Agent': this.userAgent },
+        });
+        if (response.status === 429) {
+          const retryAfter = Math.min(120, parseInt(response.headers.get('Retry-After') || '30', 10) || 30);
+          this.log(`Detail 429, warte ${retryAfter}s`);
+          await this.sleep(retryAfter * 1000);
+          continue;
+        }
+        if (!response.ok) return null;
+        const json = (await response.json()) as { data?: RawDetail } | RawDetail;
+        return ('data' in json && json.data && typeof json.data === 'object' ? json.data : json) as RawDetail;
+      } catch (err) {
+        if (attempt === 2) this.log(`Detail ${id}: ${err instanceof Error ? err.message : String(err)}`);
+        await this.sleep(500);
+      }
+    }
+    return null;
   }
 
   private async scrapeRegion(region: FeratelRegionConfig, sessionId: string): Promise<ScrapedEvent[]> {
@@ -428,7 +567,10 @@ export class FeratelScraper extends BaseScraper {
         this.seenEventIds.add(event.id);
 
         const parsed = this.parseEvent(event, region);
-        if (parsed) events.push(parsed);
+        if (parsed) {
+          events.push(parsed);
+          if (event.dbCode) this.detailKeys.set(event.id, { region: region.code, dbCode: event.dbCode });
+        }
       }
 
       // Respect max events per region
@@ -571,28 +713,24 @@ export class FeratelScraper extends BaseScraper {
     // Bundesland — derive from API regions data or use config
     const bundesland = mapBundesland(loc?.regions ?? null, region.bundesland);
 
-    // Description
+    // Description: Langtext (32), sonst Kurztext (33)
     let description: string | undefined;
-    if (event.descriptions && event.descriptions.length > 0) {
-      const raw = event.descriptions[0].description;
-      if (raw) {
-        description = stripHtml(raw);
-        if (description.length > 1000) {
-          description = description.substring(0, 997) + '...';
-        }
+    const rawDescription = pickFeratelDescription(event.descriptions);
+    if (rawDescription) {
+      description = stripHtml(rawDescription);
+      if (description.length > 1000) {
+        description = description.substring(0, 997) + '...';
       }
     }
 
-    // Image URL
+    // Image URL: erstes Foto, das nicht als KI-generiert markiert ist
     let imageUrl: string | undefined;
-    if (event.images && event.images.length > 0 && event.images[0].urls && event.images[0].urls.length > 0) {
-      let url = event.images[0].urls[0];
-      // Fix protocol-relative URLs
-      if (url.startsWith('//')) {
-        url = 'https:' + url;
-      }
-      imageUrl = this.cleanImageUrl(url);
-    }
+    const picked = pickFeratelImage(event.images);
+    if (picked) imageUrl = this.cleanImageUrl(picked.url);
+
+    // Endzeit aus der Dauer (naive Wandzeit -> UTC wie das Startdatum)
+    const localEnd = feratelLocalEnd(event.date, event.startTimeDurations);
+    const endDate = localEnd ? (feratelLocalToUtcIso(localEnd) ?? undefined) : undefined;
 
     // Source URL — deliberately null.
     //
@@ -619,19 +757,38 @@ export class FeratelScraper extends BaseScraper {
     // const slug = event.urlFriendlyName || event.id;
     const sourceUrl: string | null = null;
 
-    // Category
-    const category = categorizeEvent(title + ' ' + (description || ''));
+    // Kategorie: Kriterienbaum der Region (eindeutig -> gesperrt), sonst
+    // Vorgabe aus dem Baum bzw. Textheuristik als schwacher Prior
+    const criteria: FeratelCriterion[] = (event.criteria ?? []).map((c) => ({
+      groupName: c.groupName ?? null,
+      items: (c.items ?? []).map((i) => i.name ?? '').filter(Boolean),
+    }));
+    const fromCriteria = feratelCategoryFromCriteria(criteria, event.mainCriteria?.name ?? null);
+    const category = fromCriteria.category ?? categorizeEvent(title + ' ' + (description || ''));
 
-    // Tags from event groups
-    const tags: string[] = [];
-    if (event.eventGroups) {
-      for (const group of event.eventGroups) {
-        if (group.name) tags.push(group.name);
+    // Tags: eindeutige Kategorie -> kanonische Tags (werden gespeichert);
+    // sonst Rohbegriffe der Quelle als Signal fuer den Klassifizierer
+    const facets = feratelFacets({
+      holidayThemes: (event.holidayThemes ?? []).map((t) => t.name ?? '').filter(Boolean),
+      criteria,
+      isTopEvent: event.isTopEvent,
+      onlineBookable: event.onlineBookable,
+      guestCards: (event.guestCards ?? []).map((g) => g.name ?? '').filter(Boolean),
+    });
+    const tags: string[] = fromCriteria.unambiguous ? [...fromCriteria.tags] : [];
+    if (!fromCriteria.unambiguous) {
+      for (const c of criteria) {
+        if (c.groupName) tags.push(c.groupName);
+        tags.push(...c.items);
       }
+      tags.push(...fromCriteria.categories);
+      if (event.mainCriteria?.name) tags.push(event.mainCriteria.name);
     }
-    if (event.mainCriteria?.name) {
-      tags.push(event.mainCriteria.name);
+    for (const group of event.eventGroups ?? []) {
+      if (group.name && !fromCriteria.unambiguous) tags.push(group.name);
     }
+    tags.push(...facets.rawTags);
+    const uniqueTags = [...new Set(tags.map((t) => t.trim()).filter(Boolean))];
 
     return {
       source_id: `feratel-${event.id}`,
@@ -640,6 +797,7 @@ export class FeratelScraper extends BaseScraper {
       title,
       description,
       start_date: startDate,
+      end_date: endDate,
       location_name: locationName,
       city: town || undefined,
       latitude: lat,
@@ -648,8 +806,76 @@ export class FeratelScraper extends BaseScraper {
       country,
       bundesland,
       category,
+      category_locked: fromCriteria.unambiguous || undefined,
+      category_lock_reason: fromCriteria.unambiguous ? 'feratel criteria map' : undefined,
       image_url: imageUrl,
-      tags: tags.length > 0 ? tags : undefined,
+      image_credit: picked?.credit ?? undefined,
+      tags: uniqueTags.length > 0 ? uniqueTags : undefined,
+      audience: facets.audience,
+      setting: facets.setting,
+      occasion_tags: facets.occasion_tags,
+      price_flags: facets.price_flags,
+      language: facets.language ?? undefined,
+      is_family_friendly: facets.is_family_friendly ?? undefined,
     };
   }
+}
+
+/**
+ * Detail-Auszug in ein Listen-Event mischen und die weiteren Termine als
+ * eigene Zeilen (`feratel-<id>:<datum>`) anlegen. Der erste Termin ist der
+ * Listentermin selbst (gleiche source_id, damit Slug und Verlauf bleiben).
+ */
+export function mergeFeratelDetail(event: ScrapedEvent, detail: FeratelDetail): ScrapedEvent[] {
+  const venue = detail.venue;
+  const organizer = detail.organizer;
+  const extraLines: string[] = [];
+  if (detail.meetingPoint) extraLines.push(`Treffpunkt: ${detail.meetingPoint}`);
+  if (detail.opening) extraLines.push(`Öffnungszeiten: ${detail.opening}`);
+  if (detail.suitableFor) extraLines.push(`Geeignet für: ${detail.suitableFor}`);
+  let description = event.description;
+  if (extraLines.length > 0) {
+    const extra = extraLines.join('\n');
+    description = description ? `${description}\n\n${extra}` : extra;
+    if (description.length > 1500) description = `${description.slice(0, 1497)}...`;
+  }
+  const priceFlags = [...(event.price_flags ?? [])];
+  if (detail.price && /eintritt\s*frei|kostenlos|gratis|freier eintritt/i.test(detail.price) && !priceFlags.includes('freier-eintritt')) {
+    priceFlags.push('freier-eintritt');
+  }
+  if (detail.handicap.length > 0 && !priceFlags.includes('barrierefrei')) priceFlags.push('barrierefrei');
+
+  const base: ScrapedEvent = {
+    ...event,
+    description,
+    source_url: detail.website ?? event.source_url,
+    ticket_url: detail.ticketUrl ?? event.ticket_url,
+    organizer: organizer?.company ?? organizer?.name ?? event.organizer,
+    address: venue?.street ?? event.address,
+    postal_code: venue?.zip ?? event.postal_code,
+    city: event.city ?? venue?.city ?? undefined,
+    location_name: event.location_name ?? venue?.company ?? undefined,
+    price_text: detail.price ?? event.price_text,
+    price_flags: priceFlags,
+  };
+
+  // Weitere Termine: Deskline liefert rollierend die naechsten drei; der
+  // erste entspricht dem Listentermin und wird nicht dupliziert.
+  const out: ScrapedEvent[] = [base];
+  const seenDays = new Set<string>([event.start_date.slice(0, 10)]);
+  for (const occ of detail.occurrences) {
+    const startUtc = feratelLocalToUtcIso(occ.localStart);
+    if (!startUtc) continue;
+    const day = startUtc.slice(0, 10);
+    if (seenDays.has(day)) continue;
+    seenDays.add(day);
+    const localEnd = feratelLocalEnd(occ.localStart, occ.duration > 0 ? [{ time: occ.localStart.slice(11, 16), duration: occ.duration }] : null);
+    out.push({
+      ...base,
+      source_id: `${event.source_id}:${occ.localStart.slice(0, 10)}`,
+      start_date: startUtc,
+      end_date: localEnd ? (feratelLocalToUtcIso(localEnd) ?? undefined) : undefined,
+    });
+  }
+  return out;
 }

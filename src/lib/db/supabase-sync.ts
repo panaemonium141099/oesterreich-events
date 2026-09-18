@@ -229,6 +229,15 @@ interface ExistingRow {
   price_min: number | null;
   price_max: number | null;
   address: string | null;
+  // Facetten (Quelle oder frühere Anreicherung): werden nur ersetzt, wenn
+  // der Adapter selbst welche liefert, sonst verbatim zurückgeschrieben.
+  audience: string[] | null;
+  setting: string[] | null;
+  occasion_tags: string[] | null;
+  price_flags: string[] | null;
+  language: string | null;
+  is_family_friendly: boolean | null;
+  image_credit: string | null;
 }
 
 /** Statuses that the scoring pipeline owns. Everything else (e.g.
@@ -279,7 +288,8 @@ async function prefetchExistingRows(
           'publish_status, location_status, location_status_changed_at, ' +
           // fn-14.5 UPSERT-Guard fields:
           'image_url, image_width, image_height, description, enrichment_version, price_text, ' +
-          'price_min, price_max, address',
+          'price_min, price_max, address, ' +
+          'audience, setting, occasion_tags, price_flags, language, is_family_friendly, image_credit',
       )
       .in('source_name', uniqueSourceNames)
       .in('source_id', idSlice);
@@ -534,10 +544,10 @@ function toSupabaseRow(
         tags: event.tags ?? null,
         category_confidence: 'manual',
         category_source: 'manual',
-        category_version: 'eventim-feed',
+        category_version: event.category_lock_reason ? 'source-map' : 'eventim-feed',
         category_locked: true,
         category_needs_review: false,
-        category_reason: 'eventim feed category code map',
+        category_reason: event.category_lock_reason ?? 'eventim feed category code map',
         category_candidates: null,
         changed: true,
         reconcileReason: 'locked',
@@ -907,6 +917,15 @@ function toSupabaseRow(
     image_width: finalImageWidth,
     image_height: finalImageHeight,
     organizer: event.organizer ?? null,
+    // Facetten: liefert der Adapter nichts (undefined), bleibt der bestehende
+    // Wert; leere Arrays der Quelle gelten als "nichts gesagt".
+    audience: event.audience && event.audience.length > 0 ? event.audience : existing?.audience ?? null,
+    setting: event.setting && event.setting.length > 0 ? event.setting : existing?.setting ?? null,
+    occasion_tags: event.occasion_tags && event.occasion_tags.length > 0 ? event.occasion_tags : existing?.occasion_tags ?? null,
+    price_flags: event.price_flags && event.price_flags.length > 0 ? event.price_flags : existing?.price_flags ?? null,
+    language: event.language ?? existing?.language ?? null,
+    is_family_friendly: event.is_family_friendly ?? existing?.is_family_friendly ?? null,
+    image_credit: event.image_credit ?? existing?.image_credit ?? null,
     ticket_url: finalTicketUrl,
     visibility: 'public' as const,
     // Quality score + publish_status set at ingest. Eliminates the
