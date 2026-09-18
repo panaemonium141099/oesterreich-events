@@ -451,3 +451,34 @@ export function pickFeratelDescription(descriptions: Array<{ description?: strin
   const byType = (t: number) => descriptions?.find((d) => d.type === t && norm(d.description))?.description ?? null;
   return byType(32) ?? byType(33) ?? descriptions?.find((d) => norm(d.description))?.description ?? null;
 }
+
+/**
+ * Betraege aus einer Preisangabe der Quelle ("Preis Erwachsene: EUR 69,00
+ * Kinder auf Anfrage", "€ 19,-/Erw. (€ 9,-/Kind)", "10,70", "Eintritt frei").
+ * min = erster genannter Betrag (die Regionen nennen den Erwachsenenpreis
+ * zuerst), max = groesster Betrag, wenn er darueber liegt. "frei/gratis/
+ * kostenlos" ohne Betrag = 0. Ohne erkennbaren Betrag null.
+ */
+export function parseFeratelPrice(text: string | null | undefined): { min: number; max: number | null } | null {
+  if (!text) return null;
+  const t = text.replace(/\s+/g, ' ');
+  const amounts: number[] = [];
+  const re = /(?:€|eur|euro)\s*(\d{1,4}(?:[.,]\d{1,2})?)|(\d{1,4}(?:[.,]\d{1,2})?)\s*(?:,-|,–|€|eur\b|euro\b)/gi;
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(t)) !== null) {
+    const raw = (m[1] ?? m[2] ?? '').replace(',', '.');
+    const v = Number(raw);
+    if (Number.isFinite(v) && v >= 0 && v < 10000) amounts.push(v);
+  }
+  if (amounts.length === 0) {
+    // "10,70" ohne Waehrung, aber als einziger Inhalt
+    const bare = /^\s*(\d{1,4}[.,]\d{2})\s*$/.exec(t);
+    if (bare) amounts.push(Number(bare[1].replace(',', '.')));
+  }
+  if (amounts.length === 0) {
+    return /\b(eintritt\s*frei|frei(?:er)?\s*eintritt|gratis|kostenlos|kostenfrei|free)\b/i.test(t) ? { min: 0, max: null } : null;
+  }
+  const min = amounts[0];
+  const max = Math.max(...amounts);
+  return { min, max: max > min ? max : null };
+}
