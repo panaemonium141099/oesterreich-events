@@ -112,8 +112,10 @@ import { post as designDistrictLivingLifestyleMesse2026 } from './posts/design-d
 export type { FestivalPost, GalleryImage, FestivalKeyFacts, LineupAct } from './types';
 
 /** All blog posts sorted by publishDate descending (newest first). */import { post as herbstfesteErntedankOesterreich } from './posts/herbstfeste-erntedank-oesterreich';
+import { post as christkindlmaerkteOesterreich } from './posts/christkindlmaerkte-oesterreich';
 
 export const ALL_POSTS: FestivalPost[] = [
+  christkindlmaerkteOesterreich,
   herbstfesteErntedankOesterreich,
   langeNachtDerMuseen,
   halloweenOesterreich,
