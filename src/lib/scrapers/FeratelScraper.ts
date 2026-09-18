@@ -254,7 +254,10 @@ const PAGE_SIZE = 400;
 const DETAIL_BUDGET = Math.max(0, Number(process.env.FERATEL_DETAIL_BUDGET ?? '900') || 0);
 /** Cache-Eintraege juenger als das werden nicht aufgefrischt. */
 const DETAIL_MIN_AGE_MS = 6 * 60 * 60 * 1000;
-const DETAIL_CONCURRENCY = 3;
+/** 3 Worker x 200 ms liefen im ersten Prod-Lauf in 429-Wellen (Retry-After
+ *  28 bis 60 s); 2 x 450 ms bleibt unter der Deskline-Burst-Grenze. */
+const DETAIL_CONCURRENCY = 2;
+const DETAIL_SPACING_MS = 450;
 /** Zeitbudget der Detail-Phase (der Stundenlauf hat 15 min, die Liste braucht ~2). */
 const DETAIL_TIME_BUDGET_MS = 6 * 60 * 1000;
 
@@ -504,7 +507,7 @@ export class FeratelScraper extends BaseScraper {
         const detail = extractFeratelDetail(raw);
         fresh.push({ event_id: id, db_code: keyInfo.dbCode, region: keyInfo.region, fetched_at: new Date().toISOString(), detail });
         index.detail.set(id, detail);
-        await this.sleep(200);
+        await this.sleep(DETAIL_SPACING_MS);
       }
     };
     await Promise.all(Array.from({ length: DETAIL_CONCURRENCY }, () => worker()));
