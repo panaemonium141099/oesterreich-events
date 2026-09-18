@@ -7,6 +7,7 @@ import {
   feratelCategoryFromCriteria,
   feratelFacets,
   feratelLocalEnd,
+  parseFeratelPrice,
   pickFeratelDescription,
   pickFeratelImage,
   type FeratelCriterion,
@@ -843,9 +844,8 @@ export function mergeFeratelDetail(event: ScrapedEvent, detail: FeratelDetail): 
     if (description.length > 1500) description = `${description.slice(0, 1497)}...`;
   }
   const priceFlags = [...(event.price_flags ?? [])];
-  if (detail.price && /eintritt\s*frei|kostenlos|gratis|freier eintritt/i.test(detail.price) && !priceFlags.includes('freier-eintritt')) {
-    priceFlags.push('freier-eintritt');
-  }
+  const parsedPrice = parseFeratelPrice(detail.price);
+  if (parsedPrice && parsedPrice.min === 0 && !priceFlags.includes('freier-eintritt')) priceFlags.push('freier-eintritt');
   if (detail.handicap.length > 0 && !priceFlags.includes('barrierefrei')) priceFlags.push('barrierefrei');
 
   const base: ScrapedEvent = {
@@ -859,6 +859,10 @@ export function mergeFeratelDetail(event: ScrapedEvent, detail: FeratelDetail): 
     city: event.city ?? venue?.city ?? undefined,
     location_name: event.location_name ?? venue?.company ?? undefined,
     price_text: detail.price ?? event.price_text,
+    // Zahlen zum Text, damit Preis-Gruppe, price_tier und Kartenfilter
+    // zusammenpassen (vorher zeigte ein 69-Euro-Ausflug "Eintritt frei",
+    // weil price_tier noch vom alten Enrichment stammte)
+    ...(parsedPrice ? { price_min: parsedPrice.min, price_max: parsedPrice.max ?? undefined } : {}),
     price_flags: priceFlags,
   };
 

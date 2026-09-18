@@ -131,3 +131,16 @@ describe('Bild und Beschreibung', () => {
     expect(pickFeratelDescription(null)).toBeNull();
   });
 });
+
+describe('parseFeratelPrice', () => {
+  it('liest Betraege aus Preisangaben der Regionen', async () => {
+    const { parseFeratelPrice } = await import('@/lib/scrapers/feratel-facets');
+    expect(parseFeratelPrice('Preis Erwachsene: EUR 69,00 Kinder auf Anfrage. Bei Zusendung von Gutscheinen wird eine Bearbeitungsgebühr von EUR 2,00 berechnet')).toEqual({ min: 69, max: null });
+    expect(parseFeratelPrice('€ 19,-/Erw. (€ 9,-/Kind)')).toEqual({ min: 19, max: null });
+    expect(parseFeratelPrice('Erwachsene € 15,00 Kinder ab 6 Jahren € 6,00 Familie (2 Erw. & Kinder bis 18) € 34,00')).toEqual({ min: 15, max: 34 });
+    expect(parseFeratelPrice('10,70')).toEqual({ min: 10.7, max: null });
+    expect(parseFeratelPrice('Eintritt frei!')).toEqual({ min: 0, max: null });
+    expect(parseFeratelPrice('Preis auf Anfrage!')).toBeNull();
+    expect(parseFeratelPrice(null)).toBeNull();
+  });
+});

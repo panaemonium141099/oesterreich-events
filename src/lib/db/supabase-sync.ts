@@ -238,6 +238,7 @@ interface ExistingRow {
   language: string | null;
   is_family_friendly: boolean | null;
   image_credit: string | null;
+  price_tier: string | null;
 }
 
 /** Statuses that the scoring pipeline owns. Everything else (e.g.
@@ -289,7 +290,7 @@ async function prefetchExistingRows(
           // fn-14.5 UPSERT-Guard fields:
           'image_url, image_width, image_height, description, enrichment_version, price_text, ' +
           'price_min, price_max, address, ' +
-          'audience, setting, occasion_tags, price_flags, language, is_family_friendly, image_credit',
+          'audience, setting, occasion_tags, price_flags, language, is_family_friendly, image_credit, price_tier',
       )
       .in('source_name', uniqueSourceNames)
       .in('source_id', idSlice);
@@ -832,6 +833,17 @@ function toSupabaseRow(
       : null) ??
     districtFromPlz(resolved.postalCode ?? event.postal_code, finalBundesland);
 
+  // ─── Preis-Konsistenz ──────────────────────────────────────────────
+  // Liefert die Quelle einen Betrag, darf weder das Flag "freier-eintritt"
+  // noch price_tier 'gratis' aus einer alten Anreicherung stehen bleiben
+  // (Prod 2026-09-18: 134 Events mit price_tier gratis und Betrag im Text).
+  const sourceMin = overwritePrice ? (event.price_min ?? null) : (existing?.price_min ?? null);
+  const tierFromPrice: string | null =
+    event.price_min == null ? null : event.price_min <= 0 ? 'gratis' : event.price_min <= 15 ? 'günstig' : event.price_min <= 50 ? 'mittel' : 'premium';
+  const baseFlags = event.price_flags && event.price_flags.length > 0 ? event.price_flags : existing?.price_flags ?? [];
+  const finalPriceFlags =
+    sourceMin != null && sourceMin > 0 ? baseFlags.filter((f) => f !== 'freier-eintritt' && f !== 'spende-erbeten') : baseFlags;
+
   const row = {
     source_type: 'scraped' as const,
     source_name: event.source_name,
@@ -928,7 +940,11 @@ function toSupabaseRow(
     // occasion_tags/price_flags sind NOT NULL DEFAULT '{}' (Taxonomie v3):
     // ein explizites null im Upsert verletzt den Constraint und kostet den Batch.
     occasion_tags: event.occasion_tags && event.occasion_tags.length > 0 ? event.occasion_tags : existing?.occasion_tags ?? [],
-    price_flags: event.price_flags && event.price_flags.length > 0 ? event.price_flags : existing?.price_flags ?? [],
+    price_flags: finalPriceFlags,
+    // price_tier folgt einem von der Quelle gelieferten Betrag (Feed oder
+    // Detailseite); ohne Betrag bleibt der bestehende Wert (alte
+    // Anreicherung) stehen.
+    ...(tierFromPrice ? { price_tier: tierFromPrice } : {}),
     language: event.language ?? existing?.language ?? null,
     is_family_friendly: event.is_family_friendly ?? existing?.is_family_friendly ?? null,
     image_credit: event.image_credit ?? existing?.image_credit ?? null,
