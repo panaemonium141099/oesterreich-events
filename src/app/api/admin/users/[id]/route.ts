@@ -3,6 +3,80 @@ import { createClient } from '@supabase/supabase-js';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
 import { requireAdminWithCaller } from '@/lib/supabase/require-admin';
 
+function createServiceClient() {
+  const serviceUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!serviceUrl || !serviceKey) return null;
+  return createClient(serviceUrl, serviceKey, { auth: { persistSession: false } });
+}
+
+/**
+ * PATCH /api/admin/users/[id] — Account werbefrei schalten (2026-09-19).
+ *
+ * Body: { ads_disabled: boolean }. Nur dieses eine Feld ist erlaubt; alles
+ * andere bleibt bei den bestehenden Wegen (Rolle, Loeschen).
+ *
+ * Warum ueber den Server statt `supabase.from('profiles').update()` aus dem
+ * Browser: die UPDATE-Policy auf profiles erlaubt nur das eigene Profil
+ * (`auth.uid() = id`, Security-Hardening 2026-05). Ein Admin-Update auf
+ * einen fremden Account traefe still 0 Zeilen, ohne Fehler (supabase-js
+ * wirft bei Schreibfehlern nicht). Der service_role-Client umgeht RLS;
+ * `.select()` stellt sicher, dass wirklich eine Zeile getroffen wurde.
+ *
+ * Hintergrund: AdSense hat die Einnahmen wegen ungueltiger Klicks
+ * eingeschraenkt. Werbefreie Accounts laden weder Script noch Flaechen
+ * (src/lib/ads/ads-allowed.ts).
+ */
+export async function PATCH(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> },
+) {
+  try {
+    const auth = await requireAdminWithCaller();
+    if ('error' in auth) return auth.error;
+
+    const { id } = await params;
+    if (!id || typeof id !== 'string') {
+      return NextResponse.json({ error: 'Invalid user id' }, { status: 400 });
+    }
+
+    const body = await request.json().catch(() => null);
+    const adsDisabled = body?.ads_disabled;
+    if (typeof adsDisabled !== 'boolean') {
+      return NextResponse.json({ error: 'ads_disabled (boolean) erwartet' }, { status: 400 });
+    }
+
+    const serviceClient = createServiceClient();
+    if (!serviceClient) {
+      console.error('[admin/users PATCH] SUPABASE_SERVICE_ROLE_KEY is missing');
+      return NextResponse.json(
+        { error: 'Server not configured for admin operations' },
+        { status: 500 },
+      );
+    }
+
+    const { data, error } = await serviceClient
+      .from('profiles')
+      .update({ ads_disabled: adsDisabled })
+      .eq('id', id)
+      .select('id, ads_disabled')
+      .maybeSingle();
+
+    if (error) {
+      console.error('[admin/users PATCH] update failed:', error);
+      return NextResponse.json({ error: error.message || 'Update fehlgeschlagen' }, { status: 500 });
+    }
+    if (!data) {
+      return NextResponse.json({ error: 'User nicht gefunden' }, { status: 404 });
+    }
+
+    return NextResponse.json({ success: true, id: data.id, ads_disabled: data.ads_disabled });
+  } catch (err) {
+    console.error('[admin/users PATCH] unexpected error:', err);
+    return NextResponse.json({ error: 'Unexpected server error' }, { status: 500 });
+  }
+}
+
 /**
  * DELETE /api/admin/users/[id] — remove a user from the system completely.
  *

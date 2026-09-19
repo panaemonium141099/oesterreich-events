@@ -27,6 +27,8 @@ export interface Profile {
   notification_enabled: boolean;
   agb_accepted_at: string | null;
   newsletter_opt_in: boolean;
+  /** Werbefrei (Admin-Schalter unter /admin/users): kein AdSense fuer diesen Account. */
+  ads_disabled: boolean;
   created_at: string;
   updated_at: string;
 }
