@@ -24,6 +24,15 @@
  *      keine Flaeche; bis useAdsAllowed() entschieden hat, rendert der
  *      Slot nichts, damit es keinen Moment mit sichtbarer Anzeige gibt.
  *
+ *   6. **Nur fuer Menschen (2026-09-19).** Angefordert wird erst nach
+ *      einer echten Nutzergeste (Rad, Touch, Zeiger, Taste) und nie unter
+ *      Automation (navigator.webdriver). Eine Headless-Chrome-Farm hat ab
+ *      13.09. ~800 Anzeigen-Seiten pro Tag geladen; der damalige
+ *      4-s-Fallback machte jede dieser Seitenladungen zur Impression —
+ *      das war der Ausloeser der AdSense-Einschraenkung. Crawler scrollen
+ *      nicht per Rad und bewegen keinen Zeiger; ein programmatisches
+ *      window.scrollTo zaehlt deshalb bewusst NICHT als Geste.
+ *
  * Bleibt eine Flaeche unbefuellt, verschwindet sie ganz statt einen
  * leeren Rahmen stehen zu lassen.
  */
@@ -50,16 +59,37 @@ export interface AdSlotProps {
   className?: string;
 }
 
+/** Eingaben, die nur ein Mensch (oder ein gezielt simulierender Bot) erzeugt. */
+const GESTURE_EVENTS = ['wheel', 'touchstart', 'pointerdown', 'pointermove', 'keydown'] as const;
+
 export function AdSlot({ slot, minHeight = 280, tone = 'dark', className = '' }: AdSlotProps) {
   const ref = useRef<HTMLDivElement>(null);
+  const [interacted, setInteracted] = useState(false);
   const [inView, setInView] = useState(false);
   const [unfilled, setUnfilled] = useState(false);
   const adsAllowed = useAdsAllowed();
 
+  // Erste echte Nutzergeste abwarten. Unter Automation (Playwright,
+  // Puppeteer, Selenium setzen navigator.webdriver) wird nie angefordert.
+  useEffect(() => {
+    if (!ADS_ENABLED || !CLIENT_ID) return;
+    if (typeof navigator !== 'undefined' && navigator.webdriver) return;
+    const onGesture = () => {
+      setInteracted(true);
+      remove();
+    };
+    const remove = () => {
+      for (const ev of GESTURE_EVENTS) window.removeEventListener(ev, onGesture);
+    };
+    for (const ev of GESTURE_EVENTS) window.addEventListener(ev, onGesture, { passive: true });
+    return remove;
+  }, []);
+
   useEffect(() => {
     // Der Container existiert erst, wenn Anzeigen erlaubt sind; der Effekt
-    // laeuft deshalb erneut, sobald adsAllowed kippt.
-    if (!ADS_ENABLED || !CLIENT_ID || adsAllowed !== true || !ref.current) return;
+    // laeuft deshalb erneut, sobald adsAllowed kippt — und erst nach der
+    // ersten Nutzergeste.
+    if (!interacted || adsAllowed !== true || !ref.current) return;
     const el = ref.current;
     const obs = new IntersectionObserver(
       (entries) => {
@@ -79,6 +109,8 @@ export function AdSlot({ slot, minHeight = 280, tone = 'dark', className = '' }:
     // durch den Einwilligungsdialog, exotische Browser), wird die
     // Anzeige nach ein paar Sekunden trotzdem angefordert. Ohne das
     // bleibt die Flaeche dauerhaft leer — beobachtet am 02.09.2026.
+    // Der Timer laeuft erst ab der Nutzergeste, nie fuer reine
+    // Seitenladungen.
     const fallback = setTimeout(() => {
       setInView(true);
       obs.disconnect();
@@ -88,7 +120,7 @@ export function AdSlot({ slot, minHeight = 280, tone = 'dark', className = '' }:
       obs.disconnect();
       clearTimeout(fallback);
     };
-  }, [adsAllowed]);
+  }, [interacted, adsAllowed]);
 
   useEffect(() => {
     if (!inView) return;

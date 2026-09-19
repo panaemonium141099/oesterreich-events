@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { V4EntdeckenSmartMode } from '@/components/Discover/v4/V4EntdeckenSmartMode';
+import { markSmartAutorun } from '@/lib/search/smart-autorun';
 
 /**
  * fn-19 Rework: Der Smart-Tab ist EIN durchgehender Concierge-Chat
@@ -99,7 +100,7 @@ async function submitMessage(text: string) {
 }
 
 describe('V4EntdeckenSmartMode (Chat-Rework fn-19)', () => {
-  beforeEach(() => { fetchMock.mockReset(); routeFetch(); });
+  beforeEach(() => { fetchMock.mockReset(); routeFetch(); window.sessionStorage.clear(); });
 
   it('rendert Composer + Starter-Chips', () => {
     render(<V4EntdeckenSmartMode initialQuery=""/>);
@@ -123,16 +124,41 @@ describe('V4EntdeckenSmartMode (Chat-Rework fn-19)', () => {
       .toHaveAttribute('href', '/aktivitaet/therme-nova-abc123');
   });
 
-  it('initialQuery startet den Chat automatisch; Änderung startet neu', async () => {
+  it('initialQuery startet den Chat automatisch, wenn der Deep-Link in der App angeklickt wurde; Änderung startet neu', async () => {
+    markSmartAutorun('preset');
     const { rerender } = render(<V4EntdeckenSmartMode initialQuery="preset"/>);
     await waitFor(() => expect(chatCalls().length).toBeGreaterThan(0));
     expect(JSON.parse(String(chatCalls()[0][1]?.body ?? '{}')).messages[0].content).toBe('preset');
 
+    markSmartAutorun('wiesmath');
     rerender(<V4EntdeckenSmartMode initialQuery="wiesmath"/>);
     await waitFor(() => {
       const last = JSON.parse(String(chatCalls().at(-1)?.[1]?.body ?? '{}'));
       expect(last.messages[0].content).toBe('wiesmath');
     });
+  });
+
+  it('direkt aufgerufener Deep-Link (Lesezeichen, Crawler): nur vorbefüllt, keine Gemini-Anfrage', async () => {
+    render(<V4EntdeckenSmartMode initialQuery="Was kann man in Vils unternehmen?"/>);
+    const input = screen.getByRole('textbox') as HTMLInputElement;
+    await waitFor(() => expect(input.value).toBe('Was kann man in Vils unternehmen?'));
+    // Nichts abgeschickt — auch nicht nach kurzer Wartezeit.
+    await new Promise(r => setTimeout(r, 50));
+    expect(chatCalls().length).toBe(0);
+
+    // Der Mensch schickt mit einem Klick ab.
+    fireEvent.submit(input.closest('form')!);
+    await waitFor(() => expect(chatCalls().length).toBe(1));
+    expect(JSON.parse(String(chatCalls()[0][1]?.body ?? '{}')).messages[0].content)
+      .toBe('Was kann man in Vils unternehmen?');
+  });
+
+  it('ein Vermerk gilt nur für genau diese Query und nur einmal', async () => {
+    markSmartAutorun('andere query');
+    render(<V4EntdeckenSmartMode initialQuery="preset"/>);
+    await new Promise(r => setTimeout(r, 50));
+    expect(chatCalls().length).toBe(0);
+    expect(window.sessionStorage.getItem('lt.smart.autorun')).toBeNull();
   });
 
   it('Follow-up schickt den Verlauf mit', async () => {

@@ -25,6 +25,7 @@
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { trackEvent } from '@/lib/analytics';
+import { consumeSmartAutorun } from '@/lib/search/smart-autorun';
 import { buildEventUrlV2 } from '@/lib/utils/slugify';
 import type { ChatEntityCard, ChatEventCard, ChatActivityCard, ChatSuggestionCard } from '@/lib/search/chat-cards';
 
@@ -282,6 +283,11 @@ export function V4SmartChat({ initialQuery = '' }: { initialQuery?: string }) {
 
   // Deep-Link (?q=…) startet eine frische Session — auch wenn sich die
   // Query per Top-Nav/CTA ändert, während der Tab schon offen ist.
+  // Automatisch abgeschickt wird nur, wenn der Link in der App angeklickt
+  // wurde (Vermerk aus markSmartAutorun). Direkt aufgerufene URLs —
+  // Lesezeichen, geteilte Links, Crawler — bekommen die Query nur
+  // vorbefüllt: ein Headless-Crawler hat über diesen Deep-Link ~1.000
+  // Gemini-Anfragen pro Tag ausgelöst (13.09.2026).
   useEffect(() => {
     const q = initialQuery.trim();
     if (!q || autoSentRef.current === q) return;
@@ -290,7 +296,8 @@ export function V4SmartChat({ initialQuery = '' }: { initialQuery?: string }) {
     commitTurns([]);
     setSelection({});
     setPlanSave({ status: 'idle' });
-    void sendMessage(q, false);
+    if (consumeSmartAutorun(q)) void sendMessage(q, false);
+    else setInput(q);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialQuery]);
 
