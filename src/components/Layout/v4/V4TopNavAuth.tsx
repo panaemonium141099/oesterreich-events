@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { Link } from '@/i18n/navigation';
+import { Link, usePathname } from '@/i18n/navigation';
 import type { Session } from '@supabase/supabase-js';
 import { createClient } from '@/lib/supabase/client';
 
@@ -46,6 +46,17 @@ export function V4TopNavAuth() {
   const [profile, setProfile] = useState<MiniProfile | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+  const pathname = usePathname();
+
+  // Menü beim Routenwechsel schließen. Der onClick auf den Menü-Links
+  // reicht nicht: RouteTransitions fängt interne Link-Klicks in der
+  // Capture-Phase ab (preventDefault + stopPropagation), damit erreicht das
+  // Event Reacts onClick in Browsern mit View-Transition-Support (Chrome,
+  // Edge, Safari) nie — die Nav lebt im Layout, das Menü bliebe sonst auf
+  // der Zielseite offen.
+  useEffect(() => {
+    setMenuOpen(false);
+  }, [pathname]);
 
   useEffect(() => {
     const supabase = createClient();
