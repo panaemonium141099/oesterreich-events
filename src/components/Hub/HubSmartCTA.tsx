@@ -16,6 +16,13 @@ import { markSmartAutorun } from '@/lib/search/smart-autorun';
  * (Crawler folgten dem Link tausendfach, siehe lib/search/smart-autorun).
  * Klicks laufen weiter über den globalen ClickTracker (`data-track` +
  * `data-track-id` = Einbau-Fläche).
+ *
+ * `data-route-transition-skip`: RouteTransitions fängt interne Link-Klicks
+ * in der Capture-Phase ab (preventDefault + stopPropagation) und navigiert
+ * selbst — Reacts onClick auf dem Link feuert dann nie (auf Prod
+ * nachgemessen, 2026-09-19). Mit dem Opt-out übernimmt Next's eigener
+ * Link-Handler, der Vermerk wird gesetzt; der Seitenübergang ohne
+ * View-Transition ist der Preis.
  */
 export function HubSmartCTA({
   query,
@@ -32,6 +39,7 @@ export function HubSmartCTA({
     <Link
       href={`/entdecken?mode=smart&q=${encodeURIComponent(query)}`}
       onClick={() => markSmartAutorun(query)}
+      data-route-transition-skip=""
       data-track="smart_cta_click"
       data-track-id={surface}
       className="inline-flex items-center gap-2 rounded-full border border-[rgba(245,185,66,0.45)] bg-[rgba(245,185,66,0.10)] px-5 py-2.5 text-[14px] font-semibold text-[#f5b942] hover:bg-[rgba(245,185,66,0.18)] transition-colors"
