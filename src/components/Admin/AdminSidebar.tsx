@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
@@ -55,6 +55,15 @@ const NAV_ITEMS = [
 export function AdminSidebar() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+
+  // Mobilen Drawer beim Routenwechsel schließen. Der onClick auf den
+  // Nav-Links reicht nicht: RouteTransitions fängt interne Link-Klicks in
+  // der Capture-Phase ab (preventDefault + stopPropagation), damit erreicht
+  // das Event Reacts onClick in Browsern mit View-Transition-Support nie —
+  // die Sidebar lebt im Admin-Layout, der Drawer bliebe sonst offen.
+  useEffect(() => {
+    setOpen(false);
+  }, [pathname]);
 
   return (
     <>
