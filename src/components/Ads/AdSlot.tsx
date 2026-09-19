@@ -18,12 +18,18 @@
  *      das "Anzeige"-Label ueber der Flaeche.
  *   4. **Lazy.** Die Anzeige wird erst angefordert, wenn der Slot in die
  *      Naehe des Sichtbereichs kommt — oben blockiert nichts.
+ *   5. **Werbefreie Accounts (2026-09-19).** AdSense hat die Einnahmen
+ *      wegen ungueltiger Klicks eingeschraenkt. Accounts mit
+ *      profiles.ads_disabled (Admin-Schalter unter /admin/users) bekommen
+ *      keine Flaeche; bis useAdsAllowed() entschieden hat, rendert der
+ *      Slot nichts, damit es keinen Moment mit sichtbarer Anzeige gibt.
  *
  * Bleibt eine Flaeche unbefuellt, verschwindet sie ganz statt einen
  * leeren Rahmen stehen zu lassen.
  */
 
 import { useEffect, useRef, useState } from 'react';
+import { useAdsAllowed } from '@/lib/ads/ads-allowed';
 
 const CLIENT_ID = process.env.NEXT_PUBLIC_ADSENSE_CLIENT_ID;
 const ADS_ENABLED = process.env.NEXT_PUBLIC_ADS_ENABLED === 'true';
@@ -48,9 +54,12 @@ export function AdSlot({ slot, minHeight = 280, tone = 'dark', className = '' }:
   const ref = useRef<HTMLDivElement>(null);
   const [inView, setInView] = useState(false);
   const [unfilled, setUnfilled] = useState(false);
+  const adsAllowed = useAdsAllowed();
 
   useEffect(() => {
-    if (!ADS_ENABLED || !CLIENT_ID || !ref.current) return;
+    // Der Container existiert erst, wenn Anzeigen erlaubt sind; der Effekt
+    // laeuft deshalb erneut, sobald adsAllowed kippt.
+    if (!ADS_ENABLED || !CLIENT_ID || adsAllowed !== true || !ref.current) return;
     const el = ref.current;
     const obs = new IntersectionObserver(
       (entries) => {
@@ -79,7 +88,7 @@ export function AdSlot({ slot, minHeight = 280, tone = 'dark', className = '' }:
       obs.disconnect();
       clearTimeout(fallback);
     };
-  }, []);
+  }, [adsAllowed]);
 
   useEffect(() => {
     if (!inView) return;
@@ -95,10 +104,11 @@ export function AdSlot({ slot, minHeight = 280, tone = 'dark', className = '' }:
     return () => clearTimeout(t);
   }, [inView]);
 
-  // Ohne Schalter, ohne Konto-ID oder ohne konfigurierte Slot-ID
-  // rendert der Slot gar nichts — so bleibt die Seite unveraendert,
-  // solange die Anzeigenbloecke im AdSense-Konto nicht angelegt sind.
-  if (!ADS_ENABLED || !CLIENT_ID || !slot || unfilled) return null;
+  // Ohne Schalter, ohne Konto-ID, ohne konfigurierte Slot-ID oder ohne
+  // Freigabe fuer diesen Besucher rendert der Slot gar nichts — so bleibt
+  // die Seite unveraendert, solange die Anzeigenbloecke im AdSense-Konto
+  // nicht angelegt sind bzw. der Account werbefrei ist.
+  if (!ADS_ENABLED || !CLIENT_ID || !slot || unfilled || adsAllowed !== true) return null;
 
   const labelColor = tone === 'dark' ? 'text-white/30' : 'text-gray-400';
   const borderColor = tone === 'dark' ? 'border-white/[0.06]' : 'border-gray-200';

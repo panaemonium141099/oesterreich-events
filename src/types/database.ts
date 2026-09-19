@@ -37,6 +37,7 @@ export type Database = {
           notification_enabled: boolean
           agb_accepted_at: string | null
           newsletter_opt_in: boolean
+          ads_disabled: boolean
           created_at: string
           updated_at: string
           last_seen_at: string

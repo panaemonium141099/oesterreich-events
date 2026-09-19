@@ -3,9 +3,10 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
-import { Users, Search, ChevronRight, Trash2, Bookmark, UsersRound, UserCheck } from 'lucide-react';
+import { Users, Search, ChevronRight, Trash2, Bookmark, UsersRound, UserCheck, BadgeCheck } from 'lucide-react';
 import { useAuth } from '@/lib/supabase/auth-context';
 import { createClient } from '@/lib/supabase/client';
+import { resetAdsAllowed } from '@/lib/ads/ads-allowed';
 
 interface UserRow {
   id: string;
@@ -15,6 +16,8 @@ interface UserRow {
   role: string;
   avatar_url: string | null;
   created_at: string;
+  /** Werbefrei: kein AdSense fuer diesen Account (gesetzt via PATCH /api/admin/users/[id]). */
+  ads_disabled: boolean;
 }
 
 const ROLE_STYLES: Record<string, string> = {
@@ -46,6 +49,7 @@ export default function UsersPage() {
   } | null>(null);
   const [roleChanging, setRoleChanging] = useState<string | null>(null);
   const [deletingUser, setDeletingUser] = useState<string | null>(null);
+  const [adsToggling, setAdsToggling] = useState<string | null>(null);
 
   // Auth gate — redirect non-admins away before any fetch runs.
   useEffect(() => {
@@ -64,7 +68,7 @@ export default function UsersPage() {
     setLoading(true);
     let query = supabase
       .from('profiles')
-      .select('id, first_name, last_name, email, role, avatar_url, created_at')
+      .select('id, first_name, last_name, email, role, avatar_url, created_at, ads_disabled')
       .order('created_at', { ascending: false })
       .limit(50);
 
@@ -122,6 +126,34 @@ export default function UsersPage() {
     await supabase.from('profiles').update({ role: newRole }).eq('id', userId);
     setUsers((prev) => prev.map((u) => (u.id === userId ? { ...u, role: newRole } : u)));
     setRoleChanging(null);
+  };
+
+  // Werbefrei-Schalter. Laeuft ueber die Server-Route (service_role), weil
+  // die UPDATE-Policy auf profiles nur das eigene Profil zulaesst; ein
+  // Client-Update auf fremde Accounts wuerde still ins Leere gehen.
+  const toggleAdsDisabled = async (userId: string, next: boolean) => {
+    setAdsToggling(userId);
+    try {
+      const res = await fetch(`/api/admin/users/${userId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ads_disabled: next }),
+      });
+      const body = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(body.error || `HTTP ${res.status}`);
+      setUsers((prev) =>
+        prev.map((u) => (u.id === userId ? { ...u, ads_disabled: body.ads_disabled === true } : u)),
+      );
+      // Eigener Account: die Anzeigen-Entscheidung dieser Seitenladung
+      // verwerfen, damit der Schalter ohne Reload greift.
+      if (userId === user?.id) resetAdsAllowed();
+      toast.success(next ? 'Account ist jetzt werbefrei' : 'Anzeigen wieder aktiv');
+    } catch (err) {
+      console.error('[admin/users] ads toggle failed:', err);
+      toast.error(err instanceof Error ? err.message : 'Speichern fehlgeschlagen');
+    } finally {
+      setAdsToggling(null);
+    }
   };
 
   const deleteUser = async (userId: string) => {
@@ -221,6 +253,15 @@ export default function UsersPage() {
                   </p>
                   <p className="text-xs text-white/30 truncate">{u.email}</p>
                 </div>
+                {u.ads_disabled && (
+                  <span
+                    title="Werbefrei: kein AdSense für diesen Account"
+                    className="hidden sm:inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-emerald-400/15 text-emerald-300"
+                  >
+                    <BadgeCheck className="w-3 h-3" />
+                    werbefrei
+                  </span>
+                )}
                 <span
                   className={`text-[10px] px-2 py-0.5 rounded-full ${ROLE_STYLES[u.role] || ROLE_STYLES.user}`}
                 >
@@ -265,6 +306,33 @@ export default function UsersPage() {
                       <option value="admin">admin</option>
                       <option value="god">god</option>
                     </select>
+                    <button
+                      type="button"
+                      role="switch"
+                      aria-checked={u.ads_disabled}
+                      onClick={() => toggleAdsDisabled(u.id, !u.ads_disabled)}
+                      disabled={adsToggling === u.id}
+                      title="Werbefrei: kein AdSense-Script und keine Anzeigen für diesen Account"
+                      className={`flex items-center gap-2 text-xs px-3 py-1 rounded-lg border transition-colors disabled:opacity-50 ${
+                        u.ads_disabled
+                          ? 'border-emerald-400/30 bg-emerald-400/10 text-emerald-300'
+                          : 'border-white/[0.06] bg-white/[0.03] text-white/50 hover:text-white/80'
+                      }`}
+                    >
+                      <span
+                        aria-hidden="true"
+                        className={`relative inline-block h-3.5 w-6 rounded-full transition-colors ${
+                          u.ads_disabled ? 'bg-emerald-400/70' : 'bg-white/15'
+                        }`}
+                      >
+                        <span
+                          className={`absolute top-0.5 h-2.5 w-2.5 rounded-full bg-white transition-transform ${
+                            u.ads_disabled ? 'translate-x-3' : 'translate-x-0.5'
+                          }`}
+                        />
+                      </span>
+                      {adsToggling === u.id ? 'Speichern…' : 'Werbefrei'}
+                    </button>
                     <button
                       onClick={() => deleteUser(u.id)}
                       disabled={deletingUser === u.id || u.id === user?.id}

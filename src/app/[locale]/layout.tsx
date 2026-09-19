@@ -33,6 +33,7 @@ import { RouteTransitions } from '@/components/Layout/RouteTransitions';
 import { ServiceWorkerProvider } from '@/components/Layout/ServiceWorkerProvider';
 import { PageviewTracker } from '@/components/Analytics/PageviewTracker';
 import { ClickTracker } from '@/components/Analytics/ClickTracker';
+import { AdSenseScript } from '@/components/Ads/AdSenseScript';
 // fn-15.8: only Geist mounts at the root. The editorial serif and the
 // handwriting face moved to `@/lib/fonts-planer` and are imported by
 // per-route layouts that actually render the .planer-scope chrome
@@ -347,26 +348,6 @@ export default async function RootLayout({
           ConsentGate component that mounts only after user opt-in. Track
           re-enabling GA4 as a follow-up task.
         */}
-        {/*
-          Google AdSense (2026-09-02). Laedt NUR bei
-          NEXT_PUBLIC_ADS_ENABLED=true — der Schalter wird erst umgelegt,
-          wenn im AdSense-Konto die DSGVO-Meldung (Googles zertifizierte
-          CMP) veroeffentlicht ist. Diese CMP zeigt das Einwilligungs-
-          Banner und haelt Anzeigen sowie Werbe-Cookies bis zur Zustimmung
-          zurueck; damit bleibt die Zusage in der Datenschutzerklaerung
-          (Abschnitt 5) eingehalten. strategy="lazyOnload", damit die
-          Kernmetriken der Seite unberuehrt bleiben.
-        */}
-        {process.env.NEXT_PUBLIC_ADS_ENABLED === 'true' &&
-          process.env.NEXT_PUBLIC_ADSENSE_CLIENT_ID && (
-            <Script
-              id="adsense"
-              strategy="lazyOnload"
-              async
-              crossOrigin="anonymous"
-              src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${process.env.NEXT_PUBLIC_ADSENSE_CLIENT_ID}`}
-            />
-          )}
       </head>
       <body className="antialiased">
         <NextIntlClientProvider messages={clientMessages}>
@@ -409,6 +390,20 @@ export default async function RootLayout({
         {/* Globaler Klick-Tracker — macht alle data-track-Marker scharf
             (ticket_click, cta_*, plan_* …); Basis fürs Affiliate-Reporting. */}
         <ClickTracker />
+        {/*
+          Google AdSense (2026-09-02). Laedt NUR bei
+          NEXT_PUBLIC_ADS_ENABLED=true — der Schalter wird erst umgelegt,
+          wenn im AdSense-Konto die DSGVO-Meldung (Googles zertifizierte
+          CMP) veroeffentlicht ist. Diese CMP zeigt das Einwilligungs-
+          Banner und haelt Anzeigen sowie Werbe-Cookies bis zur Zustimmung
+          zurueck; damit bleibt die Zusage in der Datenschutzerklaerung
+          (Abschnitt 5) eingehalten. strategy="lazyOnload", damit die
+          Kernmetriken der Seite unberuehrt bleiben.
+          Seit 2026-09-19 als Client-Komponente: werbefreie Accounts
+          (profiles.ads_disabled, Admin-Schalter unter /admin/users) laden
+          das Script gar nicht erst, s. src/lib/ads/ads-allowed.ts.
+        */}
+        <AdSenseScript />
         <Toaster
           theme="dark"
           position="bottom-center"
