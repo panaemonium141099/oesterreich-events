@@ -1,4 +1,7 @@
+'use client';
+
 import Link from 'next/link';
+import { markSmartAutorun } from '@/lib/search/smart-autorun';
 
 /**
  * "Frag die KI"-Bridge (fn-19 Phase A): Deep-Link in den Smart-Tab von
@@ -6,9 +9,13 @@ import Link from 'next/link';
  * Smart-Suche AUSSCHLIESSLICH über den Tab auf /entdecken erreichbar —
  * null externe Einstiegspunkte für das teuerste Feature der Plattform.
  *
- * Server component wie HubSearchCTA: der Link muss im SSR-HTML stehen
- * (interner Link + sofort klickbar). Klicks laufen über den globalen
- * ClickTracker (`data-track` + `data-track-id` = Einbau-Fläche).
+ * Der Link steht weiterhin im SSR-HTML (Client-Komponenten werden
+ * serverseitig gerendert). Client-Komponente seit 2026-09-19, weil der
+ * Klick die Query für den Auto-Start im Chat vormerkt — ohne diesen
+ * Vermerk startet /entdecken die Gemini-Anfrage nicht mehr von selbst
+ * (Crawler folgten dem Link tausendfach, siehe lib/search/smart-autorun).
+ * Klicks laufen weiter über den globalen ClickTracker (`data-track` +
+ * `data-track-id` = Einbau-Fläche).
  */
 export function HubSmartCTA({
   query,
@@ -24,6 +31,7 @@ export function HubSmartCTA({
   return (
     <Link
       href={`/entdecken?mode=smart&q=${encodeURIComponent(query)}`}
+      onClick={() => markSmartAutorun(query)}
       data-track="smart_cta_click"
       data-track-id={surface}
       className="inline-flex items-center gap-2 rounded-full border border-[rgba(245,185,66,0.45)] bg-[rgba(245,185,66,0.10)] px-5 py-2.5 text-[14px] font-semibold text-[#f5b942] hover:bg-[rgba(245,185,66,0.18)] transition-colors"
