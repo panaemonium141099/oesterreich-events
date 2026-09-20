@@ -111,6 +111,7 @@ import { post as againstTheCurrent2026 } from './posts/against-the-current-2026'
 import { post as neilDiamondMoments2026 } from './posts/neil-diamond-moments-2026';
 import { post as derDienerZweierHerren2026 } from './posts/der-diener-zweier-herren-2026';
 import { post as steamingSatellites2026 } from './posts/steaming-satellites-2026';
+import { post as uebernachtenSalzburgFestspielzeit } from './posts/uebernachten-salzburg-festspielzeit';
 // AUTOWRITER-IMPORTS-END
 
 export type { FestivalPost, GalleryImage, FestivalKeyFacts, LineupAct } from './types';
@@ -230,6 +231,7 @@ export const ALL_POSTS: FestivalPost[] = [
   neilDiamondMoments2026,
   derDienerZweierHerren2026,
   steamingSatellites2026,
+  uebernachtenSalzburgFestspielzeit,
   // AUTOWRITER-POSTS-END
 ].sort(
   (a, b) => new Date(b.publishDate).getTime() - new Date(a.publishDate).getTime()
