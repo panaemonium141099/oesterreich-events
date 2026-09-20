@@ -112,6 +112,8 @@ import { post as neilDiamondMoments2026 } from './posts/neil-diamond-moments-202
 import { post as derDienerZweierHerren2026 } from './posts/der-diener-zweier-herren-2026';
 import { post as steamingSatellites2026 } from './posts/steaming-satellites-2026';
 import { post as uebernachtenSalzburgFestspielzeit } from './posts/uebernachten-salzburg-festspielzeit';
+import { post as kreiskyAdieuUnsterblichkeitRosentalRozFestival2026 } from './posts/kreisky-adieu-unsterblichkeit-rosental-roz-festival-2026';
+import { post as robertStadloberRosentalRozFestival2026 } from './posts/robert-stadlober-rosental-roz-festival-2026';
 // AUTOWRITER-IMPORTS-END
 
 export type { FestivalPost, GalleryImage, FestivalKeyFacts, LineupAct } from './types';
@@ -232,6 +234,8 @@ export const ALL_POSTS: FestivalPost[] = [
   derDienerZweierHerren2026,
   steamingSatellites2026,
   uebernachtenSalzburgFestspielzeit,
+  kreiskyAdieuUnsterblichkeitRosentalRozFestival2026,
+  robertStadloberRosentalRozFestival2026,
   // AUTOWRITER-POSTS-END
 ].sort(
   (a, b) => new Date(b.publishDate).getTime() - new Date(a.publishDate).getTime()
