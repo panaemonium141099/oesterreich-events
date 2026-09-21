@@ -114,6 +114,8 @@ import { post as steamingSatellites2026 } from './posts/steaming-satellites-2026
 import { post as uebernachtenSalzburgFestspielzeit } from './posts/uebernachten-salzburg-festspielzeit';
 import { post as kreiskyAdieuUnsterblichkeitRosentalRozFestival2026 } from './posts/kreisky-adieu-unsterblichkeit-rosental-roz-festival-2026';
 import { post as robertStadloberRosentalRozFestival2026 } from './posts/robert-stadlober-rosental-roz-festival-2026';
+import { post as adventkonzerteInDerKapuzinerkirche2026 } from './posts/adventkonzerte-in-der-kapuzinerkirche-2026';
+import { post as wir4DieJubilaeumstour20262026 } from './posts/wir4-die-jubilaeumstour-2026-2026';
 // AUTOWRITER-IMPORTS-END
 
 export type { FestivalPost, GalleryImage, FestivalKeyFacts, LineupAct } from './types';
@@ -236,6 +238,8 @@ export const ALL_POSTS: FestivalPost[] = [
   uebernachtenSalzburgFestspielzeit,
   kreiskyAdieuUnsterblichkeitRosentalRozFestival2026,
   robertStadloberRosentalRozFestival2026,
+  adventkonzerteInDerKapuzinerkirche2026,
+  wir4DieJubilaeumstour20262026,
   // AUTOWRITER-POSTS-END
 ].sort(
   (a, b) => new Date(b.publishDate).getTime() - new Date(a.publishDate).getTime()
