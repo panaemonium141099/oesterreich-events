@@ -116,6 +116,8 @@ import { post as kreiskyAdieuUnsterblichkeitRosentalRozFestival2026 } from './po
 import { post as robertStadloberRosentalRozFestival2026 } from './posts/robert-stadlober-rosental-roz-festival-2026';
 import { post as adventkonzerteInDerKapuzinerkirche2026 } from './posts/adventkonzerte-in-der-kapuzinerkirche-2026';
 import { post as wir4DieJubilaeumstour20262026 } from './posts/wir4-die-jubilaeumstour-2026-2026';
+import { post as lansdowneWishYouWellTourPart22026 } from './posts/lansdowne-wish-you-well-tour-part-2-2026';
+import { post as melanieBaker2026 } from './posts/melanie-baker-2026';
 // AUTOWRITER-IMPORTS-END
 
 export type { FestivalPost, GalleryImage, FestivalKeyFacts, LineupAct } from './types';
@@ -240,6 +242,8 @@ export const ALL_POSTS: FestivalPost[] = [
   robertStadloberRosentalRozFestival2026,
   adventkonzerteInDerKapuzinerkirche2026,
   wir4DieJubilaeumstour20262026,
+  lansdowneWishYouWellTourPart22026,
+  melanieBaker2026,
   // AUTOWRITER-POSTS-END
 ].sort(
   (a, b) => new Date(b.publishDate).getTime() - new Date(a.publishDate).getTime()
