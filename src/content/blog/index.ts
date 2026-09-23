@@ -118,6 +118,8 @@ import { post as adventkonzerteInDerKapuzinerkirche2026 } from './posts/adventko
 import { post as wir4DieJubilaeumstour20262026 } from './posts/wir4-die-jubilaeumstour-2026-2026';
 import { post as lansdowneWishYouWellTourPart22026 } from './posts/lansdowne-wish-you-well-tour-part-2-2026';
 import { post as melanieBaker2026 } from './posts/melanie-baker-2026';
+import { post as symphonieorchesterVorarlbergKonzert3DiakunSchumannDvor2026 } from './posts/symphonieorchester-vorarlberg-konzert-3-diakun-schumann-dvor-2026';
+import { post as averageKayo2026 } from './posts/average-kayo-2026';
 // AUTOWRITER-IMPORTS-END
 
 export type { FestivalPost, GalleryImage, FestivalKeyFacts, LineupAct } from './types';
@@ -244,6 +246,8 @@ export const ALL_POSTS: FestivalPost[] = [
   wir4DieJubilaeumstour20262026,
   lansdowneWishYouWellTourPart22026,
   melanieBaker2026,
+  symphonieorchesterVorarlbergKonzert3DiakunSchumannDvor2026,
+  averageKayo2026,
   // AUTOWRITER-POSTS-END
 ].sort(
   (a, b) => new Date(b.publishDate).getTime() - new Date(a.publishDate).getTime()
