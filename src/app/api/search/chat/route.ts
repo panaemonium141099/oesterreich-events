@@ -9,7 +9,8 @@
  * Architektur:
  * - STATELESS: der Verlauf kommt komplett vom Client (sessionStorage),
  *   hart gecappt via chat-validate.ts (12 Msgs, 600 Zeichen/User-Turn).
- * - Gemini 2.5 Flash mit Function-Calling: `search_events` und
+ * - Anbieter per CONCIERGE_PROVIDER (gemini | openai, wie der Einmal-
+ *   Concierge). Beide mit Function-Calling: `search_events` und
  *   `search_activities` sind dünne Wrapper um runSmartSearch() — also
  *   exakt dieselbe Whitelist-validierte, indexierte Pipeline wie
  *   /api/search/semantic. Die KI hat KEINEN freien DB-Zugriff.
@@ -26,6 +27,8 @@
 
 import { NextResponse, type NextRequest } from 'next/server';
 import { GoogleGenAI, Type, type Content, type Part } from '@google/genai';
+import OpenAI from 'openai';
+import type { ChatCompletionMessageParam, ChatCompletionTool } from 'openai/resources/chat/completions';
 import { checkRateLimit, getClientIp } from '@/lib/rate-limit';
 import { runSmartSearch } from '@/lib/search/smart-search';
 import { validateChatMessages, type ChatMessage } from '@/lib/search/chat-validate';
@@ -36,6 +39,18 @@ import type { ActivitySearchMatch } from '@/lib/activities/public-types';
 import type { ChatEventCard, ChatActivityCard } from '@/lib/search/chat-cards';
 
 const CHAT_MODEL = 'gemini-2.5-flash';
+
+/**
+ * Derselbe Schalter wie /api/search/concierge. Der Chat hing bis
+ * 2026-09-24 fest an Gemini, obwohl Prod seit 15.09. auf openai steht:
+ * Gemini antwortete mit 503 "high demand" und der Chat zeigte nur
+ * "derzeit nicht verfügbar".
+ */
+type ChatProvider = 'gemini' | 'openai';
+const PROVIDER: ChatProvider =
+  process.env.CONCIERGE_PROVIDER === 'openai' ? 'openai' : 'gemini';
+/** Wie im Einmal-Concierge: gpt-4o-mini, kann Function-Calling. */
+const OPENAI_MODEL = 'gpt-4o-mini';
 const MAX_TOOL_ROUNDS = 4;
 const CHAT_LIMIT_PER_MIN = 6;
 /** Treffer pro Tool-Aufruf — klein halten, das Modell soll kuratieren. */
@@ -109,6 +124,21 @@ const TOOL_DECLARATIONS = [
   },
 ];
 
+/** Dieselben Tools im OpenAI-Format (JSON-Schema statt Gemini-Type-Enum). */
+const OPENAI_TOOLS: ChatCompletionTool[] = TOOL_DECLARATIONS.map(t => ({
+  type: 'function',
+  function: {
+    name: t.name,
+    description: t.description,
+    parameters: {
+      type: 'object',
+      properties: { query: { type: 'string' } },
+      required: ['query'],
+      additionalProperties: false,
+    },
+  },
+}));
+
 function buildSystemInstruction(locale: string): string {
   const lang = locale === 'en'
     ? 'Answer in English (the platform data itself is German — keep proper names as-is).'
@@ -133,8 +163,12 @@ STRIKTE REGELN:
 
 export async function POST(req: NextRequest) {
   const geminiKey = process.env.GEMINI_API_KEY;
-  if (!geminiKey) {
-    return NextResponse.json({ error: 'Server misconfigured (no GEMINI_API_KEY)' }, { status: 503 });
+  const openaiKey = process.env.OPENAI_API_KEY;
+  if (PROVIDER === 'openai' ? !openaiKey : !geminiKey) {
+    return NextResponse.json(
+      { error: `Server misconfigured (no ${PROVIDER === 'openai' ? 'OPENAI_API_KEY' : 'GEMINI_API_KEY'})` },
+      { status: 503 },
+    );
   }
 
   const rl = checkRateLimit(`chat:${getClientIp(req.headers)}`, CHAT_LIMIT_PER_MIN, 60_000);
@@ -159,8 +193,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: validated.error }, { status: 400 });
   }
   const locale = body.locale === 'en' ? 'en' : 'de';
+  const chatMessages = validated.messages;
 
-  const ai = new GoogleGenAI({ apiKey: geminiKey });
   // Registry: NUR Entitäten aus Tool-Ergebnissen dieses Requests sind
   // referenzierbar — erfundene Marker laufen ins Leere.
   const eventRegistry = new Map<string, ChatEventCard>();
@@ -212,10 +246,118 @@ export async function POST(req: NextRequest) {
     }
   }
 
-  const contents: Content[] = validated.messages.map((m: ChatMessage) => ({
-    role: m.role === 'assistant' ? 'model' : 'user',
-    parts: [{ text: m.content }],
-  }));
+  /** Gemini: generateContent-Schleife mit functionCalls. */
+  async function runGemini(): Promise<string> {
+    const ai = new GoogleGenAI({ apiKey: geminiKey! });
+    const contents: Content[] = chatMessages.map((m: ChatMessage) => ({
+      role: m.role === 'assistant' ? 'model' : 'user',
+      parts: [{ text: m.content }],
+    }));
+    let finalText: string | null = null;
+
+    for (let round = 0; round < MAX_TOOL_ROUNDS && finalText === null; round++) {
+      const resp = await ai.models.generateContent({
+        model: CHAT_MODEL,
+        contents,
+        config: {
+          systemInstruction: buildSystemInstruction(locale),
+          tools: [{ functionDeclarations: TOOL_DECLARATIONS }],
+          thinkingConfig: { thinkingBudget: 0 },
+          maxOutputTokens: 1200,
+          temperature: 0.4,
+        },
+      });
+
+      const calls = resp.functionCalls ?? [];
+      if (calls.length === 0) {
+        finalText = resp.text ?? '';
+        break;
+      }
+
+      const modelContent = resp.candidates?.[0]?.content;
+      if (modelContent) contents.push(modelContent);
+
+      const responseParts: Part[] = [];
+      // Max 3 Tool-Aufrufe pro Runde ausführen (Prompt sagt es dem
+      // Modell; hier der harte Backstop).
+      for (const call of calls.slice(0, 3)) {
+        const result = await execTool(call.name ?? '', call.args as Record<string, unknown>);
+        responseParts.push({
+          functionResponse: { name: call.name ?? '', response: result as Record<string, unknown> },
+        });
+      }
+      contents.push({ role: 'user', parts: responseParts });
+    }
+
+    if (finalText === null) {
+      // Runden-Budget erschöpft → Zwangs-Antwort ohne Tools.
+      const resp = await ai.models.generateContent({
+        model: CHAT_MODEL,
+        contents,
+        config: {
+          systemInstruction: buildSystemInstruction(locale),
+          thinkingConfig: { thinkingBudget: 0 },
+          maxOutputTokens: 1200,
+          temperature: 0.4,
+        },
+      });
+      finalText = resp.text ?? '';
+    }
+    return finalText;
+  }
+
+  /** OpenAI: Chat-Completions-Schleife mit tool_calls, gleiche Regeln. */
+  async function runOpenAI(): Promise<string> {
+    const client = new OpenAI({ apiKey: openaiKey! });
+    const messages: ChatCompletionMessageParam[] = [
+      { role: 'system', content: buildSystemInstruction(locale) },
+      ...chatMessages.map((m: ChatMessage): ChatCompletionMessageParam => ({
+        role: m.role === 'assistant' ? 'assistant' : 'user',
+        content: m.content,
+      })),
+    ];
+
+    for (let round = 0; round < MAX_TOOL_ROUNDS; round++) {
+      const resp = await client.chat.completions.create({
+        model: OPENAI_MODEL,
+        messages,
+        tools: OPENAI_TOOLS,
+        max_tokens: 1200,
+        temperature: 0.4,
+      });
+      const msg = resp.choices[0]?.message;
+      if (!msg) return '';
+      const calls = (msg.tool_calls ?? []).filter(c => c.type === 'function');
+      if (calls.length === 0) return msg.content ?? '';
+
+      // Max 3 Tool-Aufrufe pro Runde ausführen. Jeder tool_call der
+      // Assistant-Nachricht braucht eine Antwort, sonst lehnt die API
+      // den nächsten Request ab: überzählige bekommen einen Hinweis.
+      messages.push(msg);
+      for (const [i, call] of calls.entries()) {
+        let result: unknown = { error: 'Maximal 3 Suchen pro Antwort.' };
+        if (i < 3) {
+          let args: Record<string, unknown> | undefined;
+          try {
+            args = JSON.parse(call.function.arguments || '{}');
+          } catch {
+            args = undefined;
+          }
+          result = await execTool(call.function.name, args);
+        }
+        messages.push({ role: 'tool', tool_call_id: call.id, content: JSON.stringify(result) });
+      }
+    }
+
+    // Runden-Budget erschöpft → Zwangs-Antwort ohne Tools.
+    const resp = await client.chat.completions.create({
+      model: OPENAI_MODEL,
+      messages,
+      max_tokens: 1200,
+      temperature: 0.4,
+    });
+    return resp.choices[0]?.message?.content ?? '';
+  }
 
   const stream = new ReadableStream({
     async start(controller) {
@@ -225,56 +367,7 @@ export async function POST(req: NextRequest) {
       };
 
       try {
-        let finalText: string | null = null;
-
-        for (let round = 0; round < MAX_TOOL_ROUNDS && finalText === null; round++) {
-          const resp = await ai.models.generateContent({
-            model: CHAT_MODEL,
-            contents,
-            config: {
-              systemInstruction: buildSystemInstruction(locale),
-              tools: [{ functionDeclarations: TOOL_DECLARATIONS }],
-              thinkingConfig: { thinkingBudget: 0 },
-              maxOutputTokens: 1200,
-              temperature: 0.4,
-            },
-          });
-
-          const calls = resp.functionCalls ?? [];
-          if (calls.length === 0) {
-            finalText = resp.text ?? '';
-            break;
-          }
-
-          const modelContent = resp.candidates?.[0]?.content;
-          if (modelContent) contents.push(modelContent);
-
-          const responseParts: Part[] = [];
-          // Max 3 Tool-Aufrufe pro Runde ausführen (Prompt sagt es dem
-          // Modell; hier der harte Backstop).
-          for (const call of calls.slice(0, 3)) {
-            const result = await execTool(call.name ?? '', call.args as Record<string, unknown>);
-            responseParts.push({
-              functionResponse: { name: call.name ?? '', response: result as Record<string, unknown> },
-            });
-          }
-          contents.push({ role: 'user', parts: responseParts });
-        }
-
-        if (finalText === null) {
-          // Runden-Budget erschöpft → Zwangs-Antwort ohne Tools.
-          const resp = await ai.models.generateContent({
-            model: CHAT_MODEL,
-            contents,
-            config: {
-              systemInstruction: buildSystemInstruction(locale),
-              thinkingConfig: { thinkingBudget: 0 },
-              maxOutputTokens: 1200,
-              temperature: 0.4,
-            },
-          });
-          finalText = resp.text ?? '';
-        }
+        const finalText = PROVIDER === 'openai' ? await runOpenAI() : await runGemini();
 
         if (!finalText.trim()) {
           send('error', { message: 'Keine Antwort vom Concierge.' });

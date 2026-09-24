@@ -50,6 +50,11 @@ export function extractEntityRefs(text: string): EntityRef[] {
 export function stripEntityMarkers(text: string): string {
   return text
     .replace(MARKER_RE, '')
+    // Der Chat rendert Plain Text. gpt-4o-mini setzt trotz Prompt-Verbot
+    // **fett** und #-Überschriften, die stünden sonst roh in der Antwort.
+    .replace(/\*\*(.+?)\*\*/g, '$1')
+    .replace(/__(.+?)__/g, '$1')
+    .replace(/^#{1,6}\s+/gm, '')
     .replace(/[ \t]{2,}/g, ' ')
     .replace(/[ \t]+\n/g, '\n')
     .replace(/ ([.,!?;:])/g, '$1')
