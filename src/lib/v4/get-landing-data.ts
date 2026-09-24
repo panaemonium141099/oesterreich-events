@@ -3,6 +3,7 @@ import type { Festival } from '@/types/festivals';
 import { deriveEventState, type V4EventState, type DeriveCtx } from './derive-event-state';
 import { buildEventUrlV2 } from '@/lib/utils/slugify';
 import { createClient } from '@supabase/supabase-js';
+import { MIN_TRUSTED_EVENT_IMAGE_WIDTH } from '@/lib/event-images/resolveEventImage';
 import overridesJson from '../../../data/festival-overrides.json';
 
 const FESTIVAL_OVERRIDES = overridesJson as Record<string, { imageUrl?: string | null }>;
@@ -91,40 +92,58 @@ function uniqueByTitleAndImage<T extends { title: string | null; image_url?: str
   return out;
 }
 
-/** Landing-Auswahl aus dem Festival-Pool (Befund 2026-08-26):
+const isSharp = (e: Event) => (e.image_width ?? 0) >= MIN_TRUSTED_EVENT_IMAGE_WIDTH;
+
+/**
+ * Führt den Pool scharfer Bilder mit dem Score-Pool zusammen: vorne steht
+ * das bestgescorte Event mit scharfem Bild (Hero-Slot), danach alle nach
+ * Score, bei Gleichstand scharfe zuerst. Kleine Teaser bleiben also drin,
+ * wenn sie relevanter sind, und zeigen über image_width den großen
+ * Kategorie-Fallback statt eines hochskalierten 222px-Bildes.
+ */
+export function arrangeBySharpness(sharp: unknown[] | null, rest: unknown[] | null): Event[] {
+  const sharpRows = (sharp ?? []) as Event[];
+  const ids = new Set(sharpRows.map(e => e.id));
+  const merged = [...sharpRows, ...((rest ?? []) as Event[]).filter(e => !ids.has(e.id))];
+  const hero = merged.find(isSharp) ?? merged[0];
+  if (!hero) return [];
+  const others = merged
+    .filter(e => e !== hero)
+    .sort((a, b) => (b.event_score ?? 0) - (a.event_score ?? 0) || Number(isSharp(b)) - Number(isSharp(a)));
+  return [hero, ...others];
+}
+
+/** Landing-Auswahl aus dem Festival-Pool:
  *
- *  1. Jahres-Serien raus: Zeilen mit > 45 Tagen Laufzeit, die bereits
- *     laufen, sind Serien-Artefakte der Series-Detection ("On the Couch",
- *     Jän–Dez), keine Festivals. Kommende Festivals zählen unabhängig
- *     von der Dauer.
- *  2. Tagesrotation: deterministischer Shuffle mit Datums-Seed — die
- *     ISR-Shell (revalidate 3600) zeigt damit jeden Tag eine andere
- *     Viererauswahl, ohne die statische Cachebarkeit zu verlieren.
+ *  1. Nur kommende Festivals (starts_at >= heute). Bereits laufende
+ *     fliegen raus (User-Vorgabe 2026-09-24) und damit auch die
+ *     Jahres-Serien-Artefakte der Series-Detection ("On the Couch",
+ *     Jän–Dez), die früher per 45-Tage-Regel gefiltert wurden.
+ *  2. Stundenrotation: deterministischer Shuffle mit Stunden-Seed. Die
+ *     ISR-Shell (revalidate 3600) zeigt damit bei jedem Revalidate eine
+ *     andere Viererauswahl, ohne die statische Cachebarkeit zu verlieren.
+ *     Die frühere Tagesrotation wirkte bei ~10 Kandidaten wie Stillstand.
  *     Festivals mit gefetchtem Lineup zuerst (die Sektion heißt
  *     "Festivals mit Line-up"), Anzeige chronologisch sortiert.
  */
-function pickFestivals<T extends { id: string; starts_at: string | null; ends_at: string | null; lineup_status?: string }>(
+export function pickFestivals<T extends { id: string; starts_at: string | null; ends_at: string | null; lineup_status?: string }>(
   pool: T[],
   count: number,
+  now: Date = new Date(),
 ): T[] {
-  const todayStr = new Date().toISOString().split('T')[0];
-  const sane = pool.filter(f => {
-    if (!f.starts_at) return false;
-    if (f.starts_at >= todayStr) return true; // kommend → immer ok
-    const days = (Date.parse(f.ends_at ?? f.starts_at) - Date.parse(f.starts_at)) / 86_400_000;
-    return days <= 45; // läuft gerade → nur echte Festival-Dauern
-  });
+  const todayStr = now.toISOString().split('T')[0];
+  const upcoming = pool.filter(f => f.starts_at != null && f.starts_at >= todayStr);
 
-  // Mulberry32-Shuffle, Seed = Kalendertag → stabil pro Tag, rotiert täglich
-  const daySeed = Number(todayStr.replace(/-/g, ''));
-  let a = daySeed >>> 0;
+  // Mulberry32-Shuffle, Seed = Kalenderstunde → stabil pro ISR-Fenster
+  const hourSeed = Math.floor(now.getTime() / 3_600_000);
+  let a = hourSeed >>> 0;
   const rand = () => {
     a |= 0; a = (a + 0x6d2b79f5) | 0;
     let t = Math.imul(a ^ (a >>> 15), 1 | a);
     t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
     return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
   };
-  const shuffled = [...sane];
+  const shuffled = [...upcoming];
   for (let i = shuffled.length - 1; i > 0; i--) {
     const j = Math.floor(rand() * (i + 1));
     [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
@@ -206,8 +225,10 @@ async function getLandingDataInner(): Promise<LandingData> {
   const today = new Date().toISOString();
   const weekendEnd = new Date(Date.now() + 7 * 24 * 3600 * 1000).toISOString();
 
-  // Base column list — kept tight to what the cards consume.
-  const eventCols = 'id,slug,title,description,start_date,end_date,location_name,bundesland,district,category,image_url,ticket_url,price_text,price_min,price_max,price_tier,price_flags,publish_status,event_score,tags,created_at,updated_at,source_id,source_name,source_url';
+  // Base column list — kept tight to what the cards consume. image_width
+  // MUSS mit: ohne sie greift die MIN_TRUSTED_EVENT_IMAGE_WIDTH-Regel in
+  // EventImage nicht und 222px-Teaser werden auf 1180px hochgezogen.
+  const eventCols = 'id,slug,title,description,start_date,end_date,location_name,bundesland,district,category,image_url,image_width,ticket_url,price_text,price_min,price_max,price_tier,price_flags,publish_status,event_score,tags,created_at,updated_at,source_id,source_name,source_url';
 
   // WeekendSection rendert 1 Hero + 2× 3 Cards = 7 Slots. Wir ziehen
   // ~4× soviel als Reserve, dann dedupliziert die uniqueByTitleAndImage-
@@ -217,24 +238,34 @@ async function getLandingDataInner(): Promise<LandingData> {
   const TODAYWEEKEND_LIMIT = 7;
   const TODAYWEEKEND_POOL = 30;
 
-  const [weekendRes, concertsRes, festivalsRes] = await Promise.all([
+  // Scharfe Bilder zuerst (Befund 2026-09-24): die Top-30 nach Score waren
+  // ausnahmslos Eventim-/eventfinder-Teaser mit 222px, die Landing zeigte
+  // sieben verpixelte Karten. Deshalb ein zweiter Pool nur mit vermessenen
+  // Bildern >= MIN_TRUSTED_EVENT_IMAGE_WIDTH, der den Hero-Slot und
+  // Gleichstände gewinnt (arrangeBySharpness).
+  const weekendBase = () => supabase
+    .from('events')
+    .select(eventCols)
+    .gte('start_date', today)
+    .lte('start_date', weekendEnd)
+    .eq('publish_status', 'published');
+  const concertsBase = () => weekendBase().or('category.eq.music,category.eq.konzerte');
+
+  const [weekendSharpRes, weekendRes, concertsSharpRes, concertsRes, festivalsRes] = await Promise.all([
     // todayWeekend: top events in next 7 days
-    supabase
-      .from('events')
-      .select(eventCols)
-      .gte('start_date', today)
-      .lte('start_date', weekendEnd)
-      .eq('publish_status', 'published')
+    weekendBase()
+      .gte('image_width', MIN_TRUSTED_EVENT_IMAGE_WIDTH)
+      .order('event_score', { ascending: false })
+      .limit(TODAYWEEKEND_POOL),
+    weekendBase()
       .order('event_score', { ascending: false })
       .limit(TODAYWEEKEND_POOL),
     // concerts: music in next 7 days
-    supabase
-      .from('events')
-      .select(eventCols)
-      .gte('start_date', today)
-      .lte('start_date', weekendEnd)
-      .eq('publish_status', 'published')
-      .or('category.eq.music,category.eq.konzerte')
+    concertsBase()
+      .gte('image_width', MIN_TRUSTED_EVENT_IMAGE_WIDTH)
+      .order('event_score', { ascending: false })
+      .limit(3),
+    concertsBase()
       .order('event_score', { ascending: false })
       .limit(3),
     // festivals: upcoming. JOIN parent event to grab its image_url AND
@@ -251,15 +282,15 @@ async function getLandingDataInner(): Promise<LandingData> {
     supabase
       .from('festivals')
       .select('*, parent_event:events!parent_event_id(id, slug, start_date, postal_code, address, bundesland, location_name, image_url)')
-      .gte('ends_at', today.split('T')[0])
+      .gte('starts_at', today.split('T')[0])
       .order('starts_at', { ascending: true })
       .limit(48),
   ]);
 
   const todayWeekend = uniqueByTitleAndImage(
-    enrichEvents((weekendRes.data ?? []) as unknown as Event[]),
+    enrichEvents(arrangeBySharpness(weekendSharpRes.data, weekendRes.data)),
   ).slice(0, TODAYWEEKEND_LIMIT);
-  const concerts = enrichEvents((concertsRes.data ?? []) as unknown as Event[]);
+  const concerts = enrichEvents(arrangeBySharpness(concertsSharpRes.data, concertsRes.data)).slice(0, 3);
 
   type ParentEventRow = {
     id: string;
