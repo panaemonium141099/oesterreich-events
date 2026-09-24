@@ -41,6 +41,13 @@ describe('extractEntityRefs', () => {
 });
 
 describe('stripEntityMarkers', () => {
+  it('entfernt Markdown-Fett und Überschriften (Chat ist Plain Text)', () => {
+    expect(stripEntityMarkers('### Tipps
+1. **Museum Jois** [activity:museum-jois-1] in Jois'))
+      .toBe('Tipps
+1. Museum Jois in Jois');
+  });
+
   it('entfernt Marker und räumt doppelte Leerzeichen auf', () => {
     const text = 'Das Konzert [event:abc-123] im Stadtpark ist super.';
     expect(stripEntityMarkers(text)).toBe('Das Konzert im Stadtpark ist super.');
