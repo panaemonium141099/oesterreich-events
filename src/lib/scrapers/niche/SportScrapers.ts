@@ -435,13 +435,13 @@ export class OeFBScraper extends BaseScraper {
     'ernst-happel-stadion': { lat: 48.2085, lon: 16.4203, bundesland: 'Wien' },
     'allianz stadion': { lat: 48.1963, lon: 16.2664, bundesland: 'Wien' },
     'generali arena': { lat: 48.1621, lon: 16.3893, bundesland: 'Wien' },
-    'red bull arena': { lat: 47.8161, lon: 13.0458, bundesland: 'Salzburg' },
+    'red bull arena': { lat: 47.8164, lon: 12.99824, bundesland: 'Salzburg' },
     'merkur arena': { lat: 47.0462, lon: 15.4530, bundesland: 'Steiermark' },
-    'tivoli stadion': { lat: 47.2581, lon: 11.4036, bundesland: 'Tirol' },
-    'wörthersee stadion': { lat: 46.6268, lon: 14.2925, bundesland: 'Kärnten' },
-    'linzer stadion': { lat: 48.3219, lon: 14.2886, bundesland: 'Oberösterreich' },
-    'cashpoint arena': { lat: 47.4210, lon: 9.6575, bundesland: 'Vorarlberg' },
-    'pappelstadion': { lat: 48.3261, lon: 14.2927, bundesland: 'Oberösterreich' },
+    'tivoli stadion': { lat: 47.25588, lon: 11.41207, bundesland: 'Tirol' },
+    'wörthersee stadion': { lat: 46.60879, lon: 14.27744, bundesland: 'Kärnten' },
+    'linzer stadion': { lat: 48.29357, lon: 14.27656, bundesland: 'Oberösterreich' },
+    'cashpoint arena': { lat: 47.35493, lon: 9.63766, bundesland: 'Vorarlberg' },
+    'pappelstadion': { lat: 47.73944, lon: 16.40632, bundesland: 'Burgenland' },
   };
 
   async scrape(): Promise<ScrapedEvent[]> {

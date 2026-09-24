@@ -191,8 +191,8 @@ export class ARGEkulturScraper extends BaseScraper {
           address: 'Ulrike-Gschwandtner-Straße 5, 5020 Salzburg',
           postal_code: '5020',
           bundesland: 'salzburg',
-          latitude: 47.8017,
-          longitude: 13.0372,
+          latitude: 47.79398,
+          longitude: 13.05633,
           category: categorizeEvent(title, undefined, tags.length > 0 ? tags : undefined),
           tags,
         });
@@ -287,8 +287,8 @@ export class SzeneSalzburgScraper extends BaseScraper {
           address: 'Anton-Neumayr-Platz 2, 5020 Salzburg',
           postal_code: '5020',
           bundesland: 'salzburg',
-          latitude: 47.7986,
-          longitude: 13.0400,
+          latitude: 47.80143,
+          longitude: 13.03966,
           category: categorizeEvent(title, undefined, genre ? [genre] : undefined),
           image_url: imageUrl,
         });

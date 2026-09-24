@@ -18,14 +18,14 @@ const CLUBS: ClubConfig[] = [
     id: 'treibhaus',
     name: 'Treibhaus',
     url: 'https://treibhaus.at/programm',
-    latitude: 47.2620, longitude: 11.3930,
+    latitude: 47.26762, longitude: 11.39637,
     postalCode: '6020',
   },
   {
     id: 'music-hall',
     name: 'Music Hall',
     url: 'https://music-hall.at/veranstaltungen/aktuelleveranstaltungen.html',
-    latitude: 47.2635, longitude: 11.3885,
+    latitude: 47.26486, longitude: 11.44149,
     postalCode: '6020',
   },
   {
@@ -39,7 +39,7 @@ const CLUBS: ClubConfig[] = [
     id: 'die-baeckerei',
     name: 'Die Bäckerei',
     url: 'https://diebaeckerei.at/programm',
-    latitude: 47.2590, longitude: 11.3950,
+    latitude: 47.26884, longitude: 11.40479,
     postalCode: '6020',
   },
   {

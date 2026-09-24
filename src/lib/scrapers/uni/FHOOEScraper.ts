@@ -22,9 +22,9 @@ export class FHOOEScraper extends UniBaseScraper {
   // Campus coordinates for more precise geocoding
   private readonly CAMPUS_COORDS: Record<string, { lat: number; lng: number; city: string }> = {
     'hagenberg': { lat: 48.3685, lng: 14.5153, city: 'Hagenberg' },
-    'linz': { lat: 48.3064, lng: 14.2858, city: 'Linz' },
-    'steyr': { lat: 48.0378, lng: 14.4213, city: 'Steyr' },
-    'wels': { lat: 48.1575, lng: 14.0289, city: 'Wels' },
+    'linz': { lat: 48.3015, lng: 14.31164, city: 'Linz' },
+    'steyr': { lat: 48.04294, lng: 14.418, city: 'Steyr' },
+    'wels': { lat: 48.16143, lng: 14.02779, city: 'Wels' },
   };
 
   async scrape(): Promise<ScrapedEvent[]> {
