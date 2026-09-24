@@ -1,11 +1,22 @@
 import * as cheerio from 'cheerio';
 import { BaseScraper } from './BaseScraper';
 import { categorizeEvent } from '../categorize';
-import { GEM2GO_GEMEINDEN, type Gem2GoGemeinde } from './gemeinden/gem2goGemeinden';
+import { GEM2GO_GEMEINDEN_LISTE } from './gemeinden/gem2goGemeinden';
+import { withStammdaten } from './gemeinden/stammdaten';
+
 import { extractGem2goDetail } from './gem2go-detail';
 import { discoverAndParseGemeindeEvents, asScrapedEvent } from './gemeinde-event-discovery';
 import { applyGemeindeContext } from './gemeinde-context';
 import type { ScrapedEvent } from '@/types/events';
+
+// Ortsdaten (PLZ, Bezirk, Mittelpunkt) nur aus der Stammdatei, siehe
+// gemeinden/stammdaten.ts. Lazy, damit der Import nichts von Platte liest.
+let gem2goCache: ReturnType<typeof withStammdaten<(typeof GEM2GO_GEMEINDEN_LISTE)[number]>> | null = null;
+function gem2goGemeinden() {
+  gem2goCache ??= withStammdaten(GEM2GO_GEMEINDEN_LISTE);
+  return gem2goCache;
+}
+type Gem2GoGemeinde = ReturnType<typeof gem2goGemeinden>[number];
 
 /**
  * GEM2GO-Scraper: Scrapt Veranstaltungen von ~2.000 österreichischen Gemeinden,
@@ -54,7 +65,7 @@ export class Gem2GoScraper extends BaseScraper {
   };
 
   async scrape(): Promise<ScrapedEvent[]> {
-    this.log(`Starte GEM2GO Scraping (${GEM2GO_GEMEINDEN.length} Gemeinden)...`);
+    this.log(`Starte GEM2GO Scraping (${gem2goGemeinden().length} Gemeinden)...`);
     const allEvents: ScrapedEvent[] = [];
     let gemeindenScraped = 0;
     let gemeindenFailed = 0;
@@ -67,7 +78,7 @@ export class Gem2GoScraper extends BaseScraper {
     const deadline = this.softDeadline();
     // 'https://none': keine eigene Website bekannt, oder die eingetragene
     // gehört einer anderen Gemeinde (siehe gemeinde-config.test.ts).
-    const gemeindenRotated = this.rotateDaily(GEM2GO_GEMEINDEN.filter(g => g.website !== 'https://none'));
+    const gemeindenRotated = this.rotateDaily(gem2goGemeinden().filter(g => g.website !== 'https://none'));
 
     for (let i = 0; i < gemeindenRotated.length; i++) {
       if (Date.now() > deadline) {
@@ -101,7 +112,7 @@ export class Gem2GoScraper extends BaseScraper {
             gemeindenScraped++;
           } else {
             gemeindenNotGem2Go++;
-            this.log(`[${i + 1}/${GEM2GO_GEMEINDEN.length}] ${gemeinde.name}: KEIN GEM2GO Layout + Fallback ohne Events`);
+            this.log(`[${i + 1}/${gem2goGemeinden().length}] ${gemeinde.name}: KEIN GEM2GO Layout + Fallback ohne Events`);
           }
           continue;
         }
@@ -140,22 +151,22 @@ export class Gem2GoScraper extends BaseScraper {
             await this.enrichEventsFromDetailPages(events);
           }
           // fn-25 B3: Gemeinde als Kontext, Mittelpunkt als Gebietsangabe.
-          const ctx = { name: gemeinde.name, plz: gemeinde.plz, lat: gemeinde.lat, lng: gemeinde.lng, bundesland: gemeinde.bundesland, bezirk: gemeinde.bezirk };
+          const ctx = { name: gemeinde.name, plz: gemeinde.plz, lat: gemeinde.lat, lng: gemeinde.lng, bundesland: gemeinde.bundesland, bezirk: gemeinde.bezirk, region: gemeinde.region };
           allEvents.push(...events.map(e => applyGemeindeContext(e, ctx)));
           gemeindenScraped++;
-          this.log(`[${i + 1}/${GEM2GO_GEMEINDEN.length}] ${gemeinde.name}: ${events.length} Events (gesamt: ${allEvents.length})`);
+          this.log(`[${i + 1}/${gem2goGemeinden().length}] ${gemeinde.name}: ${events.length} Events (gesamt: ${allEvents.length})`);
         } else {
           gemeindenNoEvents++;
-          this.log(`[${i + 1}/${GEM2GO_GEMEINDEN.length}] ${gemeinde.name}: 0 Events`);
+          this.log(`[${i + 1}/${gem2goGemeinden().length}] ${gemeinde.name}: 0 Events`);
         }
       } catch (err) {
         gemeindenFailed++;
-        this.log(`[${i + 1}/${GEM2GO_GEMEINDEN.length}] ${gemeinde.name}: FEHLER (${(err as Error).message?.slice(0, 60)})`);
+        this.log(`[${i + 1}/${gem2goGemeinden().length}] ${gemeinde.name}: FEHLER (${(err as Error).message?.slice(0, 60)})`);
       }
 
       // Per-100 milestone summary stays as before
       if ((i + 1) % 100 === 0) {
-        this.log(`── Milestone: ${i + 1}/${GEM2GO_GEMEINDEN.length} Gemeinden, ${allEvents.length} Events, ${gemeindenFailed} Fehler, ${gemeindenNotGem2Go} kein GEM2GO`);
+        this.log(`── Milestone: ${i + 1}/${gem2goGemeinden().length} Gemeinden, ${allEvents.length} Events, ${gemeindenFailed} Fehler, ${gemeindenNotGem2Go} kein GEM2GO`);
       }
       await this.sleep(this.gemeindeDelayMs);
     }
@@ -180,19 +191,19 @@ export class Gem2GoScraper extends BaseScraper {
     try {
       const { events: parsed, eventListUrl } = await discoverAndParseGemeindeEvents(gemeinde.website);
       if (!eventListUrl) {
-        this.log(`[${i + 1}/${GEM2GO_GEMEINDEN.length}] ${gemeinde.name}: FETCH-FAIL (kein event-URL discoverable)`);
+        this.log(`[${i + 1}/${gem2goGemeinden().length}] ${gemeinde.name}: FETCH-FAIL (kein event-URL discoverable)`);
         return [];
       }
       if (parsed.length === 0) {
-        this.log(`[${i + 1}/${GEM2GO_GEMEINDEN.length}] ${gemeinde.name}: Fallback URL gefunden (${eventListUrl}) aber 0 events parsed`);
+        this.log(`[${i + 1}/${gem2goGemeinden().length}] ${gemeinde.name}: Fallback URL gefunden (${eventListUrl}) aber 0 events parsed`);
         return [];
       }
-      const ctx = { name: gemeinde.name, plz: gemeinde.plz, lat: gemeinde.lat, lng: gemeinde.lng, bundesland: gemeinde.bundesland, bezirk: gemeinde.bezirk };
+      const ctx = { name: gemeinde.name, plz: gemeinde.plz, lat: gemeinde.lat, lng: gemeinde.lng, bundesland: gemeinde.bundesland, bezirk: gemeinde.bezirk, region: gemeinde.region };
       const scraped = parsed.map((p) => applyGemeindeContext(asScrapedEvent(p, gemeinde), ctx));
-      this.log(`[${i + 1}/${GEM2GO_GEMEINDEN.length}] ${gemeinde.name}: ${scraped.length} Events via FALLBACK (${eventListUrl})`);
+      this.log(`[${i + 1}/${gem2goGemeinden().length}] ${gemeinde.name}: ${scraped.length} Events via FALLBACK (${eventListUrl})`);
       return scraped;
     } catch (err) {
-      this.log(`[${i + 1}/${GEM2GO_GEMEINDEN.length}] ${gemeinde.name}: Fallback-Exception (${(err as Error).message?.slice(0, 60)})`);
+      this.log(`[${i + 1}/${gem2goGemeinden().length}] ${gemeinde.name}: Fallback-Exception (${(err as Error).message?.slice(0, 60)})`);
       return [];
     }
   }
@@ -578,7 +589,7 @@ export class Gem2GoScraper extends BaseScraper {
         );
 
         events.push({
-          source_id: `gem2go-${gemeinde.plz}-${eventId}`,
+          source_id: `gem2go-${gemeinde.idKey}-${eventId}`,
           source_name: this.name,
           source_url: detailUrl,
           title,

@@ -7,11 +7,12 @@
  *      middle, so "Neusiedl am See - Konzert" stays intact).
  *   2. The candidate suffix must be preceded by a known preposition
  *      (`in`, `im`, `am`, `an der`, `bei`, `zu`, `nach`) OR a standalone dash.
- *   3. The joined suffix must match `isKnownAustrianPlace(...)` via GeoNames.
+ *   3. The joined suffix must be an Austrian place name (Gemeinde-Stammdatei
+ *      oder Post-Ort, `isKnownAustrianPlaceName`).
  *      If it does not, we leave the title unchanged.
  *
  * Counter-examples that are preserved:
- *   - "Konzert im Park"          → "Park" is not in GeoNames → kept
+ *   - "Konzert im Park"          → "Park" is no place name → kept
  *   - "Jazz bei Kerzenschein"    → not a place → kept
  *   - "Messe am Berg"            → "Berg" may be a place but the whole title
  *                                  is ambiguous, and the event-type word
@@ -24,7 +25,7 @@
  *   - "Vortrag - Linz"           → "Vortrag"
  */
 
-import { isKnownAustrianPlace, normalizeString } from '@/lib/location-normalizer';
+import { isKnownAustrianPlaceName } from '@/lib/location/gemeinde-index';
 
 /** Prepositions (normalized form) that mark a trailing-place segment. */
 const PREPOSITIONS = new Set(['in', 'im', 'am', 'bei', 'zu', 'nach']);
@@ -52,7 +53,7 @@ export function stripLocationTails(normalizedTitle: string): string {
     const placePhrase = placeTokens.join(' ');
 
     // Guard: the joined suffix must be a known Austrian place.
-    if (!isKnownAustrianPlace(normalizeString(placePhrase))) continue;
+    if (!isKnownAustrianPlaceName(placePhrase)) continue;
 
     // What precedes the place? Either a single-word preposition, a multi-word
     // preposition, or a standalone dash.

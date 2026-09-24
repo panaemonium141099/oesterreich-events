@@ -61,8 +61,6 @@ function parseArgs(): PipelineOptions {
     skipScrapers: has('--skip-scrapers'),
     skipVenues: has('--skip-venues'),
     skipGeocoding: has('--skip-geocoding'),
-    skipMasterCoords: has('--skip-master-coords'),
-    legacyGeo: has('--legacy-geo'),
     skipScore: has('--skip-score'),
     skipCategorization: has('--skip-categorization'),
     skipCategorizationBackfill: has('--skip-categorization-backfill'),
@@ -130,20 +128,9 @@ async function main() {
       }, steps);
     }
 
-    // fn-25: Alt-Geo-Schritte sind abgeschaltet (siehe PipelineOptions.legacyGeo).
-    // Der Schreibpfad trifft die Ortsentscheidung selbst
-    // (src/lib/location/conservative-resolution.ts); ein nächtlicher Lauf,
-    // der ALLE Events erneut auf ihren eigenen, bereits abgeleiteten Angaben
-    // normalisiert, darf nicht mehr stattfinden.
-    if (opts.legacyGeo) {
-      // execSync erbt process.env — so erreicht die Freigabe die Kind-Skripte
-      // plattformunabhängig.
-      process.env.LEGACY_GEO_OK = '1';
-      console.warn('[pipeline] --legacy-geo gesetzt: Alt-Normalizer/Geocoder/Master-Coords laufen. Nur für Forensik gedacht.');
-      steps.normalize = await runStep('normalize', async () => {
-        execStep('Normalize locations (LEGACY)', `npx tsx ${envFlag}src/scripts/normalize-locations.ts`);
-      }, steps);
-    }
+    // Ortsdaten entscheidet allein der Schreibpfad (src/lib/location/,
+    // Stammdaten data/gemeinden-at.json). Die früheren Alt-Geo-Schritte
+    // (GeoNames-Normalizer, Namens-Geocoder, Master-Coords) sind gelöscht.
 
     // SEO-Bilder-Fix (2026-09-01): Breite der neuen/gewechselten Scraper-Bilder
     // vermessen (Range-Request-Header-Parse) — der Bild-Resolver ersetzt
@@ -193,27 +180,6 @@ async function main() {
         // 1 Anfrage je 1,2 s: 1.500 Adressen sind 30 Minuten, innerhalb der
         // Nominatim-Regel (max. 1/s) und weit unter Massengeocodierung.
         execStep('Geocode event addresses', `npx tsx ${envFlag}src/scripts/geocode-addresses.ts --limit 1500`);
-      }, steps);
-    }
-
-    if (opts.legacyGeo && !opts.skipGeocoding) {
-      steps.geocoding = await runStep('geocoding', async () => {
-        execStep('Fix geocoding (LEGACY)', `npx tsx ${envFlag}src/scripts/fix-geocoding.ts`);
-        execStep('OpenAI geocode NULLs (LEGACY)', `npx tsx ${envFlag}src/scripts/openai-geocode.ts --null`);
-      }, steps);
-    }
-
-    // Master-Coords: pro (location_name, postal_code) eine verifizierte Koord
-    // ermitteln und auf alle Events anwenden. Trigger trg_apply_master_coords
-    // hält künftige Inserts/Updates dort fest. Im Pipeline-Mode überspringt das
-    // Skript bereits aufgelöste Cluster (idempotent + schnell). Hängt nach
-    // geocoding, weil wir frisch geocodete Events ebenfalls vereinheitlichen wollen.
-    if (opts.legacyGeo && !opts.skipMasterCoords) {
-      steps.master_coords = await runStep('master_coords', async () => {
-        execStep(
-          'Apply master coords (LEGACY, resolve duplicates, sync events)',
-          `npx tsx ${envFlag}src/scripts/fix-duplicate-coords.ts --pipeline-mode`,
-        );
       }, steps);
     }
 

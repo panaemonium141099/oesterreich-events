@@ -1,7 +1,6 @@
 import * as cheerio from 'cheerio';
 import { BaseScraper } from './BaseScraper';
 import { categorizeEvent } from '../categorize';
-import { geocodeLocation } from '../geocoding';
 import type { ScrapedEvent } from '@/types/events';
 
 /**
@@ -47,27 +46,10 @@ export class PartytimerScraper extends BaseScraper {
       }
     }
 
-    // Geocode unique venues
+    // Koordinaten liefert nicht der Scraper: Adressen geocodiert die Pipeline
+    // strukturiert (geocode-addresses.ts), Namenssuche gibt es bewusst nicht.
     const events = Array.from(allEvents.values());
-    const venueCache = new Map<string, { lat: number; lon: number } | null>();
-
-    for (const ev of events) {
-      const key = ev.location_name || '';
-      if (!key || key === 'Wien') continue;
-
-      if (!venueCache.has(key)) {
-        const coords = await geocodeLocation(`${key}, Wien`, 'Wien, Austria');
-        venueCache.set(key, coords ? { lat: coords.latitude, lon: coords.longitude } : null);
-        await this.sleep(1100);
-      }
-      const c = venueCache.get(key);
-      if (c) {
-        ev.latitude = c.lat;
-        ev.longitude = c.lon;
-      }
-    }
-
-    this.log(`${events.length} Events gescrapt, ${venueCache.size} Venues geocodiert`);
+    this.log(`${events.length} Events gescrapt`);
     return events;
   }
 
@@ -139,8 +121,6 @@ export class PartytimerScraper extends BaseScraper {
           location_name: venue || 'Wien',
           postal_code: postalCode,
           bundesland: 'wien',
-          latitude: 48.2082,
-          longitude: 16.3738,
           category: categorizeEvent(title, undefined, categoryTag ? [categoryTag] : undefined),
           image_url: imageUrl,
         });

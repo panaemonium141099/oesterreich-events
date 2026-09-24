@@ -1,7 +1,6 @@
 import * as cheerio from 'cheerio';
 import { BaseScraper } from './BaseScraper';
 import { categorizeEvent } from '../categorize';
-import { getDistrictByLocation } from '../districts';
 import type { ScrapedEvent } from '@/types/events';
 
 export class EsterházyScraper extends BaseScraper {
@@ -88,7 +87,6 @@ export class EsterházyScraper extends BaseScraper {
           title,
           start_date: startDate,
           location_name: venue || 'Esterhazy',
-          district: getDistrictByLocation(venue) || 'Eisenstadt',
           latitude: coords?.lat,
           longitude: coords?.lng,
           category: categorizeEvent(title, titleAndDesc),

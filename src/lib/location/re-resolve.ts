@@ -18,7 +18,8 @@ import { resolveEventLocation, type ResolvedLocation } from './resolver';
 import { applyAdmissionToPosition } from './contract';
 import { evaluateAdmission } from '@/lib/quality/admission';
 import { bundeslandFromPolygon } from '@/lib/eventim/bundesland-from-geo';
-import { getBundeslandFromPLZ } from '@/lib/plzCoordinates';
+import { getBundeslandFromPLZ } from '@/lib/location/plz-bundesland';
+import { districtForLocation } from '@/lib/plz-district';
 import type { SourceCoordsPrecision } from './types';
 
 export interface StoredEventLocationRow {
@@ -36,6 +37,7 @@ export interface StoredEventLocationRow {
   country: string | null;
   country_raw: string | null;
   bundesland: string | null;
+  district?: string | null;
   latitude: number | null;
   longitude: number | null;
   latitude_raw: number | null;
@@ -52,7 +54,7 @@ export interface StoredEventLocationRow {
 
 export const STORED_LOCATION_COLUMNS =
   'id, source_name, title, start_date, location_name, location_name_raw, address, address_raw, postal_code, postal_code_raw, city_raw, ' +
-  'country, country_raw, bundesland, latitude, longitude, latitude_raw, longitude_raw, coords_precision_raw, ' +
+  'country, country_raw, bundesland, district, latitude, longitude, latitude_raw, longitude_raw, coords_precision_raw, ' +
   'source_venue_id, geocoding_confidence, location_status, location_status_changed_at, location_resolution, publish_status, updated_at';
 
 /**
@@ -206,7 +208,10 @@ export async function reResolveStoredEvents(
     const row = rows[i];
     const decision = contractedDecision(row, resolveEventLocation(inputs[i], evidence[i]));
     const publishChange = publishChangeFor(row, decision);
+    // Bezirk über dieselbe Funktion wie der Schreibpfad (districtForLocation).
+    const district = districtForLocation(decision.gemeinde, decision.postal_code ?? row.postal_code, row.bundesland, row.district);
     const unchanged =
+      (row.district ?? null) === district &&
       row.location_status === decision.status &&
       row.geocoding_confidence === decision.geocoding_confidence &&
       row.latitude === decision.latitude &&
@@ -228,6 +233,7 @@ export async function reResolveStoredEvents(
     }
     const payload = {
       ...(publishChange ?? {}),
+      district,
       latitude: decision.latitude,
       longitude: decision.longitude,
       geocoding_confidence: decision.geocoding_confidence,

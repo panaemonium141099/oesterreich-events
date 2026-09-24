@@ -28,8 +28,8 @@
 
 import { generateEventSlug } from '@/lib/utils/slugify';
 import { scoreEvent } from '@/lib/quality/score-event';
-import { getBundeslandFromPLZ } from '@/lib/plzCoordinates';
-import { districtFromPlz, districtFromGemeinde } from '@/lib/plz-district';
+import { getBundeslandFromPLZ } from '@/lib/location/plz-bundesland';
+import { districtForLocation } from '@/lib/plz-district';
 import { resolveEventLocation } from '@/lib/location/resolver';
 import { composeEventAddress } from './geocode-query';
 
@@ -153,10 +153,7 @@ export function buildEventRow(
     location_name: submission.location_name,
     address,
     postal_code: submission.postal_code,
-    district:
-      (decision.gemeinde
-        ? districtFromGemeinde(decision.gemeinde.bezirk, decision.gemeinde.bundesland, decision.gemeinde.plz)
-        : null) ?? districtFromPlz(submission.postal_code, bundesland),
+    district: districtForLocation(decision.gemeinde, submission.postal_code, bundesland),
     bundesland,
     country: 'AT',
     latitude: decision.latitude,

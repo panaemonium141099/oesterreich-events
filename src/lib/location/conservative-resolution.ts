@@ -24,6 +24,7 @@ import { bundeslandToId } from '@/lib/bundeslaender';
 import {
   gemeindenByName,
   gemeindenByPlz,
+  hauptgemeindeFuerPlz,
   isKnownAustrianPlz,
   normalizeGemeindeName,
   plzCentroid,
@@ -338,16 +339,21 @@ export function resolveConservativeLocation(input: LocationInput, now: Date = ne
       gemeinde = refs[0];
       gemeindeProvenance = 'derived:plz';
     } else if (refs.length > 1) {
-      // Mehrere Gemeinden teilen die PLZ (154 von 1.719 in der Registry,
-      // z. B. 2413 Berg/NÖ und Edelstal/Bgld). Auflösung nur über einen
-      // genannten Ortsnamen oder das deklarierte Bundesland, nie über
-      // Reihenfolge oder Nähe.
+      // Mehrere Gemeinden teilen die PLZ (amtliche Gemeindeliste: jede
+      // Gemeinde mit allen PLZ). Auflösung über den genannten Ortsnamen, die
+      // amtliche Hauptgemeinde der PLZ (hauptgemeindeFuerPlz) oder das
+      // deklarierte Bundesland, nie über Reihenfolge oder Nähe.
       const key = cityText ? normalizeGemeindeName(cityText) : null;
       const byName = key ? refs.find(r => normalizeGemeindeName(r.name) === key) : undefined;
+      const haupt = hauptgemeindeFuerPlz(plz);
       const byBl = declaredBl ? refs.filter(r => r.bundesland === declaredBl) : [];
       if (byName) {
         gemeinde = byName;
         gemeindeProvenance = 'registry';
+      } else if (haupt && (!declaredBl || haupt.bundesland === declaredBl)) {
+        gemeinde = haupt;
+        gemeindeProvenance = 'derived:plz';
+        evidence.push(`gemeinde:hauptgemeinde_plz:${haupt.name}`);
       } else if (byBl.length === 1) {
         gemeinde = byBl[0];
         gemeindeProvenance = 'derived:plz';

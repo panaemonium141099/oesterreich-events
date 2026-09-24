@@ -136,6 +136,8 @@ export class LinzTermineScraper extends BaseScraper {
       district: 'Linz',
       latitude: 48.3069,
       longitude: 14.2858,
+      // Stadtmittelpunkt, kein Veranstaltungsort: als Gebietsangabe kennzeichnen.
+      coords_precision: 'municipality',
       category: categorizeEvent(title),
     };
   }

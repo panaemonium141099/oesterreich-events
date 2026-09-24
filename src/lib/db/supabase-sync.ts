@@ -45,11 +45,10 @@ import {
   openScrapeRun,
   persistRawEvents,
 } from '@/lib/db/raw-persist';
-import { normalizeDistrict, isCanonicalDistrict } from '@/lib/district-normalizer';
-import { districtFromPlz, districtFromGemeinde } from '@/lib/plz-district';
+import { districtForLocation } from '@/lib/plz-district';
 import { bundeslandToId } from '@/lib/bundeslaender';
 import { toUtcInstant } from '@/lib/pipeline/normalize-date';
-import { getBundeslandFromPLZ } from '@/lib/plzCoordinates';
+import { getBundeslandFromPLZ } from '@/lib/location/plz-bundesland';
 import { bundeslandFromPolygon } from '@/lib/eventim/bundesland-from-geo';
 import { generateFingerprint } from '@/lib/dedup/fingerprint';
 import { generateEventSlug } from '@/lib/utils/slugify';
@@ -818,20 +817,12 @@ function toSupabaseRow(
   // Danach greift der PLZ-Fallback (der validiert bereits selbst), sonst
   // bleibt die Spalte NULL. Ein fehlender Bezirk kostet Filter-Treffer,
   // ein ungueltiger kostet 100 Events.
-  const normalizedDistrict = normalizeDistrict(
-    event.district,
-    finalBundesland,
+  const finalDistrict = districtForLocation(
+    decision.gemeinde,
     resolved.postalCode ?? event.postal_code,
+    finalBundesland,
+    event.district,
   );
-  // fn-25 C2: Bezirk zuerst aus der belegten Gemeinde (Registry), dann aus
-  // der PLZ — aber nur, wenn die PLZ genau einen Bezirk hat. 438 PLZ decken
-  // mehrere Bezirke; dort entschied bisher Häufigkeit oder Alphabet.
-  const finalDistrict =
-    (normalizedDistrict && isCanonicalDistrict(normalizedDistrict) ? normalizedDistrict : null) ??
-    (decision.gemeinde
-      ? districtFromGemeinde(decision.gemeinde.bezirk, decision.gemeinde.bundesland, decision.gemeinde.plz)
-      : null) ??
-    districtFromPlz(resolved.postalCode ?? event.postal_code, finalBundesland);
 
   // ─── Preis-Konsistenz ──────────────────────────────────────────────
   // Liefert die Quelle einen Betrag, darf weder das Flag "freier-eintritt"

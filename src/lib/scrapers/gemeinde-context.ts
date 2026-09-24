@@ -29,6 +29,10 @@ export interface GemeindeContext {
   lng: number;
   bundesland: string;
   bezirk?: string | null;
+  /** Gemeinsame Seite mehrerer Gemeinden (Verwaltungsgemeinschaft,
+   *  Talportal): der Kalender belegt nur Bezirk und Bundesland, keine
+   *  einzelne Gemeinde. Dann weder Gemeinde-PLZ noch Mittelpunkt. */
+  region?: boolean;
 }
 
 const BUNDESLAND_NAMES = new Set([
@@ -79,6 +83,18 @@ export function applyGemeindeContext<T extends ScrapedEvent>(event: T, g: Gemein
     // Die Adresse widerspricht dem Kalender-Kontext: nur die Adresse zählt.
     out.postal_code = event.postal_code ?? addressPlz;
     out.city = event.city;
+    if (hasOwnCoords) out.coords_precision = event.coords_precision ?? 'venue';
+    else {
+      out.latitude = undefined;
+      out.longitude = undefined;
+      out.coords_precision = undefined;
+    }
+    return out;
+  }
+
+  if (g.region) {
+    out.city = event.city;
+    out.postal_code = event.postal_code;
     if (hasOwnCoords) out.coords_precision = event.coords_precision ?? 'venue';
     else {
       out.latitude = undefined;

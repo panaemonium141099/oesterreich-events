@@ -1,5 +1,7 @@
 import * as cheerio from 'cheerio';
 import { BaseScraper } from './BaseScraper';
+import { applyGemeindeContext } from './gemeinde-context';
+import { withStammdaten, type GemeindeStammdaten } from './gemeinden/stammdaten';
 import { categorizeEvent } from '../categorize';
 import type { ScrapedEvent } from '@/types/events';
 import { detectNextPage, MAX_PAGES_PER_SITE } from './pagination';
@@ -29,35 +31,36 @@ export class BurgenlandWPEventsScraper extends BaseScraper {
     'okt': '10', 'nov': '11', 'dez': '12',
   };
 
-  private readonly MUNICIPALITIES: WPMunicipality[] = [
+  private readonly MUNICIPALITIES: WPMunicipalityConfig[] = [
     // JSON-LD available on listing page
-    { name: 'Trausdorf an der Wulka', eventUrl: 'https://www.trausdorf-wulka.gv.at/events/', plz: '7061', bezirk: 'Eisenstadt-Umgebung', lat: 47.8205, lng: 16.5406 },
-    { name: 'Pama', eventUrl: 'https://www.gemeinde-pama.at/veranstaltungen/', plz: '2422', bezirk: 'Neusiedl am See', lat: 48.0178, lng: 17.0583 },
+    { name: 'Trausdorf an der Wulka', eventUrl: 'https://www.trausdorf-wulka.gv.at/events/' },
+    { name: 'Pama', eventUrl: 'https://www.gemeinde-pama.at/veranstaltungen/' },
     // MEC HTML (detail pages may have JSON-LD)
-    { name: 'Gattendorf', eventUrl: 'https://www.gattendorf.at/events/', plz: '2474', bezirk: 'Neusiedl am See', lat: 47.9939, lng: 17.0275 },
-    { name: 'Sieggraben', eventUrl: 'https://www.sieggraben.at/veranstaltungen/', plz: '7223', bezirk: 'Mattersburg', lat: 47.6356, lng: 16.3733 },
-    { name: 'Schachendorf', eventUrl: 'https://schachendorf.at/events/', plz: '7472', bezirk: 'Oberwart', lat: 47.1803, lng: 16.4283 },
-    { name: 'Wörterberg', eventUrl: 'https://www.woerterberg.at/veranstaltungen/', plz: '8293', bezirk: 'Güssing', lat: 47.1553, lng: 16.1553 },
+    { name: 'Gattendorf', eventUrl: 'https://www.gattendorf.at/events/' },
+    { name: 'Sieggraben', eventUrl: 'https://www.sieggraben.at/veranstaltungen/' },
+    { name: 'Schachendorf', eventUrl: 'https://schachendorf.at/events/' },
+    { name: 'Wörterberg', eventUrl: 'https://www.woerterberg.at/veranstaltungen/' },
     // Generic WordPress
-    { name: 'Bildein', eventUrl: 'https://bildein.at/termine/', plz: '7521', bezirk: 'Güssing', lat: 47.1500, lng: 16.4667 },
-    { name: 'Unterrabnitz-Schwendgraben', eventUrl: 'https://www.unterrabnitz.at/events/', plz: '7371', bezirk: 'Oberpullendorf', lat: 47.4500, lng: 16.3667 },
-    { name: 'Heiligenbrunn', eventUrl: 'https://www.heiligenbrunn.at/veranstaltungen/', plz: '7522', bezirk: 'Güssing', lat: 47.1333, lng: 16.4500 },
+    { name: 'Bildein', eventUrl: 'https://bildein.at/termine/' },
+    { name: 'Unterrabnitz-Schwendgraben', eventUrl: 'https://www.unterrabnitz.at/events/' },
+    { name: 'Heiligenbrunn', eventUrl: 'https://www.heiligenbrunn.at/veranstaltungen/' },
     // GEM2GO sites with non-standard event paths (not found by Gem2GoScraper)
-    { name: 'Stoob', eventUrl: 'https://www.stoob.at/gemeinde/veranstaltungen', plz: '7344', bezirk: 'Oberpullendorf', lat: 47.5261, lng: 16.4836 },
-    { name: 'Loipersdorf-Kitzladen', eventUrl: 'https://www.loipersdorf-kitzladen.at/buergerservice/veranstaltungen', plz: '7410', bezirk: 'Oberwart', lat: 47.2833, lng: 16.1000 },
-    { name: 'Markt Allhau', eventUrl: 'https://www.marktallhau.gv.at/buergerservice/veranstaltungen', plz: '7411', bezirk: 'Oberwart', lat: 47.2900, lng: 16.0756 },
+    { name: 'Stoob', eventUrl: 'https://www.stoob.at/gemeinde/veranstaltungen' },
+    { name: 'Loipersdorf-Kitzladen', eventUrl: 'https://www.loipersdorf-kitzladen.at/buergerservice/veranstaltungen' },
+    { name: 'Markt Allhau', eventUrl: 'https://www.marktallhau.gv.at/buergerservice/veranstaltungen' },
     // Other CMS with event pages
-    { name: 'Mogersdorf', eventUrl: 'https://www.mogersdorf.at/veranstaltungen', plz: '8382', bezirk: 'Jennersdorf', lat: 46.9500, lng: 16.0167 },
-    { name: 'Loretto', eventUrl: 'https://www.gemeinde-loretto.at/kalender', plz: '2443', bezirk: 'Eisenstadt-Umgebung', lat: 47.8333, lng: 16.5333 },
+    { name: 'Mogersdorf', eventUrl: 'https://www.mogersdorf.at/veranstaltungen' },
+    { name: 'Loretto', eventUrl: 'https://www.gemeinde-loretto.at/kalender' },
   ];
 
   async scrape(): Promise<ScrapedEvent[]> {
-    this.log(`Starte WordPress-Events Scraping (${this.MUNICIPALITIES.length} Gemeinden)...`);
+    const municipalities = withStammdaten(this.MUNICIPALITIES, 'burgenland');
+    this.log(`Starte WordPress-Events Scraping (${municipalities.length} Gemeinden)...`);
     const allEvents: ScrapedEvent[] = [];
     let scraped = 0;
 
-    for (let i = 0; i < this.MUNICIPALITIES.length; i++) {
-      const m = this.MUNICIPALITIES[i];
+    for (let i = 0; i < municipalities.length; i++) {
+      const m = municipalities[i];
       try {
         const html = await this.fetchWithTimeout(m.eventUrl);
         if (!html) continue;
@@ -89,12 +92,13 @@ export class BurgenlandWPEventsScraper extends BaseScraper {
         }
 
         if (allPageEvents.length > 0) {
-          allEvents.push(...allPageEvents);
+          const ctx = { name: m.name, plz: m.plz, lat: m.lat, lng: m.lng, bundesland: m.bundesland, bezirk: m.bezirk };
+          allEvents.push(...allPageEvents.map(e => applyGemeindeContext(e, ctx)));
           scraped++;
-          this.log(`  [${i + 1}/${this.MUNICIPALITIES.length}] ${m.name}: ${allPageEvents.length} Events`);
+          this.log(`  [${i + 1}/${municipalities.length}] ${m.name}: ${allPageEvents.length} Events`);
         }
       } catch (err) {
-        this.log(`  [${i + 1}/${this.MUNICIPALITIES.length}] ${m.name}: FEHLER - ${err instanceof Error ? err.message : err}`);
+        this.log(`  [${i + 1}/${municipalities.length}] ${m.name}: FEHLER - ${err instanceof Error ? err.message : err}`);
       }
       await this.rateLimit();
     }
@@ -158,7 +162,7 @@ export class BurgenlandWPEventsScraper extends BaseScraper {
             if (typeof rawImage.width === 'number') imageWidth = rawImage.width;
             if (typeof rawImage.height === 'number') imageHeight = rawImage.height;
           }
-          const locationName = item.location?.name || m.name;
+          const locationName = item.location?.name;
           const organizer = item.organizer?.name;
           const url = item.url || m.eventUrl;
 
@@ -170,12 +174,8 @@ export class BurgenlandWPEventsScraper extends BaseScraper {
             description: description || undefined,
             start_date: startDate,
             end_date: endDate,
-            location_name: locationName || m.name,
-            postal_code: m.plz,
+            location_name: locationName,
             bundesland: 'Burgenland',
-            district: m.bezirk,
-            latitude: m.lat,
-            longitude: m.lng,
             category: categorizeEvent(item.name, description),
             image_url: imageUrl,
             image_width: imageWidth,
@@ -258,12 +258,8 @@ export class BurgenlandWPEventsScraper extends BaseScraper {
           source_url: link.startsWith('http') ? link : new URL(link, m.eventUrl).href,
           title,
           start_date: startDate,
-          location_name: locationText || m.name,
-          postal_code: m.plz,
+          location_name: locationText || undefined,
           bundesland: 'Burgenland',
-          district: m.bezirk,
-          latitude: m.lat,
-          longitude: m.lng,
           category: categorizeEvent(title, ''),
           image_url: imageInfo?.url,
           image_width: imageInfo?.image_width,
@@ -397,12 +393,7 @@ export class BurgenlandWPEventsScraper extends BaseScraper {
           source_url: sourceUrl,
           title,
           start_date: startDate,
-          location_name: m.name,
-          postal_code: m.plz,
           bundesland: 'Burgenland',
-          district: m.bezirk,
-          latitude: m.lat,
-          longitude: m.lng,
           category: categorizeEvent(title, ''),
           image_url: imageInfo?.url,
           image_width: imageInfo?.image_width,
@@ -450,11 +441,10 @@ export class BurgenlandWPEventsScraper extends BaseScraper {
   }
 }
 
-interface WPMunicipality {
+/** Identität + Kalender-URL; Ortsdaten liefert withStammdaten(). */
+interface WPMunicipalityConfig {
   name: string;
   eventUrl: string;
-  plz: string;
-  bezirk: string;
-  lat: number;
-  lng: number;
 }
+
+type WPMunicipality = WPMunicipalityConfig & GemeindeStammdaten;

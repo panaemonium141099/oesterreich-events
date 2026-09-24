@@ -7,7 +7,7 @@
  * Hub-Seiten von Vorarlberg und Kaernten.
  */
 import { describe, it, expect } from 'vitest';
-import { extractPostalCodeFromText } from '@/lib/location-normalizer';
+import { extractPlzFromTitle as extractPostalCodeFromText } from '@/lib/location/conservative-resolution';
 
 describe('extractPostalCodeFromText', () => {
   it('liest die PLZ aus der Form "in <PLZ> <Ort>"', () => {

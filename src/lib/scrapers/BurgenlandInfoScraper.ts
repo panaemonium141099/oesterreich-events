@@ -1,7 +1,6 @@
 import * as cheerio from 'cheerio';
 import { BaseScraper } from './BaseScraper';
 import { categorizeEvent } from '../categorize';
-import { getDistrictByPostalCode, getDistrictByLocation, getDistrictByCoordinates } from '../districts';
 import type { ScrapedEvent } from '@/types/events';
 import { isEventType } from '../connectors/json-ld-connector';
 
@@ -243,10 +242,6 @@ export class BurgenlandInfoScraper extends BaseScraper {
         location_name: location?.name || undefined,
         address: this.formatAddress(location?.address || organizer?.address),
         postal_code: postalCode || undefined,
-        district: getDistrictByLocation(location?.name || '')
-          || (location?.geo?.latitude ? getDistrictByCoordinates(location.geo.latitude, location.geo.longitude) : null)
-          || (postalCode ? getDistrictByPostalCode(postalCode) : null)
-          || undefined,
         latitude: location?.geo?.latitude || undefined,
         longitude: location?.geo?.longitude || undefined,
         category: categorizeEvent(

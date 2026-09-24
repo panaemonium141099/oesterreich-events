@@ -23,7 +23,7 @@ import { buildEventUrlV2 } from '@/lib/utils/slugify';
 import { EventImage } from '@/components/Events/EventImage';
 import { ALL_GEMEINDEN } from '@/lib/gemeinden/data';
 import { BUNDESLAND_NAMES, type BundeslandId } from '@/lib/districtsAT';
-import { getBundeslandFromPLZ } from '@/lib/plzCoordinates';
+import { getBundeslandFromPLZ } from '@/lib/location/plz-bundesland';
 import type { Event } from '@/types/events';
 import { formatEventDate } from '@/lib/utils/event-time';
 

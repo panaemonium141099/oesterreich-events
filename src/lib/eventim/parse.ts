@@ -3,7 +3,7 @@ import { demotePlaceholderCoords } from '@/lib/scrapers/source-coords-policy';
 import type { EventimSeries, EventimEvent } from './types';
 import { mapEventimCategory } from './category-map';
 import { isBookable, isCancelled, notBookableReason, priceText } from './availability';
-import { getBundeslandFromPLZ } from '@/lib/plzCoordinates';
+import { getBundeslandFromPLZ } from '@/lib/location/plz-bundesland';
 import { bundeslandFromPolygon } from './bundesland-from-geo';
 
 const ALLOWED_COUNTRIES = new Set(['AT', 'DE', 'CH']);

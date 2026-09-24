@@ -129,6 +129,8 @@ function parseZellamsee(html: string, cfg: PortalConfig): ScrapedEvent[] {
         location_name: cfg.locationName,
         latitude: cfg.latitude,
         longitude: cfg.longitude,
+        // Portal-Mittelpunkt (Region), kein Veranstaltungsort.
+        coords_precision: 'municipality',
         bundesland: cfg.bundesland,
         category: categorizeEvent(title),
         image_url: imageUrl,
@@ -196,6 +198,8 @@ function parseStubaital(html: string, cfg: PortalConfig): ScrapedEvent[] {
         location_name: locationName,
         latitude: cfg.latitude,
         longitude: cfg.longitude,
+        // Portal-Mittelpunkt (Region), kein Veranstaltungsort.
+        coords_precision: 'municipality',
         bundesland: cfg.bundesland,
         category: categorizeEvent(title),
         image_url: imageUrl,
@@ -266,6 +270,8 @@ function parseOsttirol(html: string, cfg: PortalConfig): ScrapedEvent[] {
         location_name: locationName,
         latitude: cfg.latitude,
         longitude: cfg.longitude,
+        // Portal-Mittelpunkt (Region), kein Veranstaltungsort.
+        coords_precision: 'municipality',
         bundesland: cfg.bundesland,
         category: categorizeEvent(title),
         image_url: imageUrl,
@@ -337,6 +343,8 @@ function parseAchensee(html: string, cfg: PortalConfig): ScrapedEvent[] {
         location_name: locationName,
         latitude: cfg.latitude,
         longitude: cfg.longitude,
+        // Portal-Mittelpunkt (Region), kein Veranstaltungsort.
+        coords_precision: 'municipality',
         bundesland: cfg.bundesland,
         category: categorizeEvent(title),
         image_url: imageUrl,
@@ -405,6 +413,8 @@ function parseKitzbuehel(html: string, cfg: PortalConfig): ScrapedEvent[] {
         location_name: locationName,
         latitude: cfg.latitude,
         longitude: cfg.longitude,
+        // Portal-Mittelpunkt (Region), kein Veranstaltungsort.
+        coords_precision: 'municipality',
         bundesland: cfg.bundesland,
         category: categorizeEvent(title),
       });
@@ -472,6 +482,8 @@ function parseGeneric(html: string, cfg: PortalConfig): ScrapedEvent[] {
           location_name: cfg.locationName,
           latitude: cfg.latitude,
           longitude: cfg.longitude,
+          // Portal-Mittelpunkt (Region), kein Veranstaltungsort.
+          coords_precision: 'municipality',
           bundesland: cfg.bundesland,
           category: categorizeEvent(title),
           image_url: imageUrl,

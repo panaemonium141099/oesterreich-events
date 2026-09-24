@@ -13,18 +13,12 @@
  *   npx tsx --env-file=.env.local src/scripts/generate-scrape-report.ts --dry-run
  */
 import { createClient } from '@supabase/supabase-js';
+import { loadGemeindenMaster } from '../lib/gemeinden/data';
 import { readFileSync, writeFileSync, readdirSync, existsSync, mkdirSync } from 'fs';
 import { join } from 'path';
 import type { PaginationLogEntry } from '../lib/scrapers/GemeindeRegistryScraper';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
-
-interface GeoNameEntry {
-  name: string;
-  bundesland: string;
-  pop: number;
-  type: string;
-}
 
 interface GemeindeRow {
   gemeinde: string;
@@ -50,7 +44,6 @@ interface Snapshot {
 // ─── Config ──────────────────────────────────────────────────────────────────
 
 const REPORTS_DIR = join(process.cwd(), 'reports');
-const GEONAMES_PATH = join(process.cwd(), 'data', 'geonames-at.json');
 
 const BUNDESLAND_ORDER = [
   'Wien', 'Niederösterreich', 'Oberösterreich', 'Steiermark',
@@ -87,12 +80,12 @@ function getSupabase() {
 
 // ─── Data Loading ────────────────────────────────────────────────────────────
 
+// Gemeinden aus der Stammdatei (data/gemeinden-at.json). Einwohnerzahlen
+// führt sie nicht; die Sortierung im Report fällt damit auf den Namen zurück.
 function loadGemeinden(): Map<string, { bundesland: string; pop: number }> {
-  const raw: GeoNameEntry[] = JSON.parse(readFileSync(GEONAMES_PATH, 'utf8'));
-  const adm3 = raw.filter((e) => e.type === 'ADM3');
   const map = new Map<string, { bundesland: string; pop: number }>();
-  for (const g of adm3) {
-    map.set(g.name, { bundesland: normBundesland(g.bundesland), pop: g.pop || 0 });
+  for (const g of loadGemeindenMaster()) {
+    map.set(g.name, { bundesland: normBundesland(g.bundesland), pop: 0 });
   }
   return map;
 }

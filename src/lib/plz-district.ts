@@ -6,8 +6,8 @@
  * der Smart-Suche (`district IN (...)`) wirft diese Events komplett raus
  * (belegt 2026-07-31: Eisenstadt-Hub zeigt 59 Events, Suche fand 0).
  *
- * Quelle: ALL_GEMEINDEN (~2.028 Einträge mit PLZ + Bezirk aus der
- * Gemeinden-Registry). Bezirksnamen werden durch denselben
+ * Quelle: Gemeinde-Stammdatei (ALL_GEMEINDEN, Statistik Austria) und die
+ * amtliche PLZ-Tabelle. Bezirksnamen werden durch denselben
  * district-normalizer gedreht wie der Schreibpfad, damit die Werte exakt
  * dem kanonischen Format in der DB entsprechen. Bei PLZ, die mehrere
  * Bezirke abdecken, gewinnt der häufigste (Tie → alphabetisch, damit
@@ -18,7 +18,7 @@
  */
 
 import { ALL_GEMEINDEN } from '@/lib/gemeinden/data';
-import { normalizeDistrict, isCanonicalDistrict, STADT_PLZ } from '@/lib/district-normalizer';
+import { normalizeDistrict, isCanonicalDistrict, stadtPlzRules } from '@/lib/district-normalizer';
 import { bundeslandToId } from '@/lib/bundeslaender';
 import { allPlzReferenceEntries } from '@/lib/location/plz-reference';
 
@@ -42,6 +42,16 @@ function toCanonicalDistrict(bezirk: string, bl: string, plz: string): string | 
   if (stadtFix !== normalized && isCanonicalDistrict(stadtFix)) return stadtFix;
   const landFix = normalized.replace(/[ -]land$/, '-land');
   if (landFix !== normalized && isCanonicalDistrict(landFix)) return landFix;
+  // Amtliche Schreibweise der Statistik Austria: „Sankt Pölten (Land)",
+  // „Waidhofen an der Ybbs (Stadt)" (kanonisch: „st. pölten (land)",
+  // „waidhofen an der ybbs").
+  const sanktFix = normalized.replace(/^sankt /, 'st. ');
+  if (sanktFix !== normalized && isCanonicalDistrict(sanktFix)) return sanktFix;
+  const ohneStadt = normalized.replace(/ \(stadt\)$/, '');
+  if (ohneStadt !== normalized && isCanonicalDistrict(ohneStadt)) return ohneStadt;
+  // Rust ist Statutarstadt ohne eigenen Eintrag in district_canonical; der
+  // Filter „eisenstadt" deckt Eisenstadt-Stadt, -Umgebung und Rust ab.
+  if (ohneStadt === 'rust' && bl === 'burgenland') return 'eisenstadt';
   return null; // z. B. 'wien' — Wien ist bewusst Bundesland-only
 }
 
@@ -79,13 +89,16 @@ const PLZ_TO_DISTRICTS: ReadonlyMap<string, ReadonlyMap<string, ReadonlySet<stri
 })();
 
 /** Statutarstadt-PLZ-Blöcke: die präziseste Quelle für Stadt-PLZ. */
-const STADT_PLZ_LOOKUP: ReadonlyMap<string, PlzEntry> = (() => {
+let stadtLookup: Map<string, PlzEntry> | null = null;
+function stadtPlzLookup(): ReadonlyMap<string, PlzEntry> {
+  if (stadtLookup) return stadtLookup;
   const out = new Map<string, PlzEntry>();
-  for (const rule of Object.values(STADT_PLZ)) {
+  for (const rule of Object.values(stadtPlzRules())) {
     for (const plz of rule.stadtPLZ) out.set(plz, { district: rule.stadtDistrict, bundesland: rule.bl });
   }
+  stadtLookup = out;
   return out;
-})();
+}
 
 /**
  * Alle kanonischen Bezirke, die für eine PLZ (im Bundesland, falls gegeben)
@@ -94,7 +107,7 @@ const STADT_PLZ_LOOKUP: ReadonlyMap<string, PlzEntry> = (() => {
 export function districtsForPlz(plz: string | null | undefined, bundeslandId?: string | null): string[] {
   const trimmed = plz?.trim();
   if (!trimmed) return [];
-  const stadt = STADT_PLZ_LOOKUP.get(trimmed);
+  const stadt = stadtPlzLookup().get(trimmed);
   if (stadt && (!bundeslandId || stadt.bundesland === bundeslandId)) return [stadt.district];
   const byBl = PLZ_TO_DISTRICTS.get(trimmed);
   if (!byBl) return [];
@@ -128,7 +141,29 @@ export function districtFromGemeinde(
   plz: string | null | undefined,
 ): string | null {
   if (!bezirk || !bundeslandId) return null;
-  const stadt = plz ? STADT_PLZ_LOOKUP.get(plz.trim()) : undefined;
+  const stadt = plz ? stadtPlzLookup().get(plz.trim()) : undefined;
   if (stadt && stadt.bundesland === bundeslandId) return stadt.district;
   return toCanonicalDistrict(bezirk, bundeslandId, plz ?? '');
+}
+
+/**
+ * DER Bezirk eines Events, für jeden Schreibweg gleich (Scraper-Sync,
+ * Einreichungen, Neu-Entscheidung im Bestand): zuerst die belegte Gemeinde,
+ * dann die PLZ, wenn sie genau einen Bezirk hat, zuletzt der Bezirk der
+ * Quelle, falls er kanonisch ist. Bis 2026-09-24 hatte der Quell-Bezirk
+ * Vorrang; 15.266 künftige Events standen in einem anderen Bezirk als ihre
+ * Gemeinde. Nur kanonische Werte (FK auf district_canonical).
+ */
+export function districtForLocation(
+  gemeinde: { bezirk: string | null; bundesland: string; plz: string } | null | undefined,
+  postalCode: string | null | undefined,
+  bundeslandId: string | null | undefined,
+  sourceDistrict?: string | null,
+): string | null {
+  const fromGemeinde = gemeinde ? districtFromGemeinde(gemeinde.bezirk, gemeinde.bundesland, gemeinde.plz) : null;
+  if (fromGemeinde) return fromGemeinde;
+  const fromPlz = districtFromPlz(postalCode, bundeslandId);
+  if (fromPlz) return fromPlz;
+  const normalized = normalizeDistrict(sourceDistrict, bundeslandId, postalCode);
+  return normalized && isCanonicalDistrict(normalized) ? normalized : null;
 }

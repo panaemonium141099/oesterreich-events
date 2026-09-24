@@ -1,6 +1,5 @@
 import { BaseScraper } from './BaseScraper';
 import { categorizeEvent } from '../categorize';
-import { geocodeLocation } from '../geocoding';
 import { getSharedBrowser } from './puppeteerBrowser';
 import type { ScrapedEvent } from '@/types/events';
 
@@ -128,32 +127,15 @@ export class WienInfoScraper extends BaseScraper {
           description: ev.description || undefined,
           start_date: startDate,
           location_name: ev.venue || 'Wien',
-          latitude: 48.2082,
-          longitude: 16.3738,
           bundesland: 'wien',
           category: categorizeEvent(ev.title, ev.description),
           image_url: ev.image || undefined,
         });
       }
 
-      // Geocode venues
-      const venueCache = new Map<string, { lat: number; lon: number } | null>();
-      for (const ev of scrapedEvents) {
-        const key = ev.location_name || '';
-        if (!key || key === 'Wien') continue;
-        if (!venueCache.has(key)) {
-          const coords = await geocodeLocation(`${key}, Wien`, 'Wien, Austria');
-          venueCache.set(key, coords ? { lat: coords.latitude, lon: coords.longitude } : null);
-          await this.sleep(1100);
-        }
-        const c = venueCache.get(key);
-        if (c) {
-          ev.latitude = c.lat;
-          ev.longitude = c.lon;
-        }
-      }
-
-      this.log(`${scrapedEvents.length} Events gescrapt, ${venueCache.size} Venues geocodiert`);
+      // Koordinaten liefert nicht der Scraper: Adressen geocodiert die Pipeline
+      // strukturiert (geocode-addresses.ts), Namenssuche gibt es bewusst nicht.
+      this.log(`${scrapedEvents.length} Events gescrapt`);
       return scrapedEvents;
     } catch (err) {
       this.log(`Puppeteer fehlgeschlagen: ${err instanceof Error ? err.message : err}`);
