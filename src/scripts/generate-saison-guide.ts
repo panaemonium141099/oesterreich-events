@@ -403,8 +403,14 @@ async function main() {
     : pickDue(force);
 
   if (!spec) {
-    const next = [...SAISON_KALENDER].sort((a, b) => daysUntilDeadline(a) - daysUntilDeadline(b))[0];
-    console.log(`Kein Saison-Guide fällig. Nächste Frist: ${next.slug} in ${daysUntilDeadline(next)} Tagen (liveBy ${next.liveBy}).`);
+    // Nur ungeschriebene Einträge zählen, sonst meldete das Log einen längst
+    // publizierten Beitrag als "in -54 Tagen" fällig.
+    const next = SAISON_KALENDER
+      .filter((s) => !existsSync(join(POSTS_DIR, `${s.slug}.ts`)))
+      .sort((a, b) => daysUntilDeadline(a) - daysUntilDeadline(b))[0];
+    console.log(next
+      ? `Kein Saison-Guide fällig. Nächster: ${next.slug} startet in ${daysUntilDeadline(next) - next.leadDays} Tagen (liveBy ${next.liveBy}).`
+      : 'Kein Saison-Guide fällig. Alle Kalendereinträge sind geschrieben.');
     process.exit(78);
   }
   if (existsSync(join(POSTS_DIR, `${spec.slug}.ts`)) && !force) {
