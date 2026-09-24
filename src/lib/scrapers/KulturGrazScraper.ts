@@ -2,6 +2,7 @@ import * as cheerio from 'cheerio';
 import { BaseScraper } from './BaseScraper';
 import { categorizeEvent } from '../categorize';
 import type { ScrapedEvent } from '@/types/events';
+import { cleanKulturGrazVenue } from './kultur-graz-venue';
 
 /**
  * kultur.graz.at Scraper (Graz / Steiermark)
@@ -53,15 +54,33 @@ export class KulturGrazScraper extends BaseScraper {
     return events;
   }
 
-  private parseDayPage(html: string, fallbackDate: string): ScrapedEvent[] {
+  /**
+   * Tagesseite parsen. Jeder Termin steht in der Eventliste als eigene Zeile:
+   *
+   *   <div class="kategorie show" data-ort="p.p.c" data-kategorie="Musik">
+   *     <div class="truncatesmall">
+   *       <span class="beginnzeit">19:00 Uhr </span>
+   *       <b><a href="/kalender/event/1788769785">Black Sea Dahu</a></b>
+   *       <span class="tag-ort"> - p.p.c</span> <span class="tag-kategorie"> - Musik</span>
+   *     </div>
+   *     <div class="showtexthover">…<img …-thumbnail.jpg>…</div>
+   *   </div>
+   *
+   * Die Highlight-Karten oben auf der Seite wiederholen Termine der Liste
+   * mit Label, Titel und Zeit in EINEM Link und werden übersprungen. Vorher
+   * nahm der Parser den ersten Link je Event (oft die Karte) und riet den
+   * Ort aus dem Zeilentext: heraus kamen „Eröffnung", „Beginnzeit nicht
+   * bekannt" oder gar nichts, was die Pipeline dann mit „Graz" füllte.
+   */
+  parseDayPage(html: string, fallbackDate: string): ScrapedEvent[] {
     const $ = cheerio.load(html);
     const events: ScrapedEvent[] = [];
     const seen = new Set<string>();
 
-    // Events are listed as linked entries with pattern: time, title (link to /kalender/event/ID), venue, category
-    $('a[href*="/kalender/event/"]').each((_, el) => {
+    $('.eventliste div.kategorie').each((_, el) => {
       try {
-        const $link = $(el);
+        const $row = $(el);
+        const $link = $row.find('.truncatesmall a[href*="/kalender/event/"]').first();
         const href = $link.attr('href') || '';
         const idMatch = href.match(/\/kalender\/event\/(\d+)/);
         if (!idMatch) return;
@@ -70,58 +89,22 @@ export class KulturGrazScraper extends BaseScraper {
         if (seen.has(eventId)) return;
         seen.add(eventId);
 
-        // Title is the link text
-        const title = $link.text().trim();
+        const title = $link.text().replace(/\s+/g, ' ').trim();
         if (!title || title.length < 3) return;
 
-        // Navigate up to find the containing context
-        const $parent = $link.parent();
-        const $container = $parent.parent();
-        const containerText = $container.text();
-        const parentText = $parent.text();
+        // „19:00 Uhr", „Beginnzeit nicht bekannt" oder „Ganztägig"
+        const timeMatch = $row.find('.beginnzeit').first().text().match(/(\d{1,2}):(\d{2})\s*Uhr/);
+        const startDate = timeMatch
+          ? `${fallbackDate}T${timeMatch[1].padStart(2, '0')}:${timeMatch[2]}`
+          : fallbackDate;
 
-        // Time — look for HH:MM pattern before the link
-        let time: string | undefined;
-        const timeMatch = containerText.match(/(\d{1,2}):(\d{2})\s*Uhr/);
-        if (timeMatch) {
-          time = `${timeMatch[1].padStart(2, '0')}:${timeMatch[2]}`;
-        }
+        const locationName =
+          cleanKulturGrazVenue($row.find('.tag-ort').first().text()) ??
+          cleanKulturGrazVenue($row.attr('data-ort'));
 
-        // Start date with optional time
-        const startDate = time ? `${fallbackDate}T${time}` : fallbackDate;
+        const categoryTag = $row.attr('data-kategorie')?.trim() || undefined;
 
-        // Location / Venue — text after the title, before category
-        let locationName: string | undefined;
-        // The structure seems to be: time | title | venue | category
-        // Try extracting from sibling text or context
-        const textParts = containerText.split(/\n/).map(s => s.trim()).filter(Boolean);
-        // Look for venue-like text (not the title, not the time, not a category)
-        for (const part of textParts) {
-          if (part === title) continue;
-          if (/^\d{1,2}:\d{2}/.test(part)) continue;
-          if (this.isCategory(part)) continue;
-          // fn-25 B3: Info-/Foto-/Reihen-Zeilen und Kategorie-Aufzählungen
-          // ("- Literaturhaus  - Lesung/Vortrag") sind kein Veranstaltungsort;
-          // vorher landeten sie samt Foto-Credits in location_name.
-          if (/^[-–•]\s/.test(part) || /(Info|Foto|Reihe|Tickets?|Eintritt|Karten)\s*:/.test(part) || part.includes('↗')) continue;
-          if (part.length > 3 && part.length < 60 && !part.includes('Uhr') && !/[.!?]\s+\S/.test(part)) {
-            locationName = part;
-            break;
-          }
-        }
-
-        // Category from text (known Graz categories)
-        let categoryTag: string | undefined;
-        for (const part of textParts) {
-          if (this.isCategory(part)) {
-            categoryTag = part;
-            break;
-          }
-        }
-
-        // Image
-        const $img = $container.find('img').first();
-        const imgSrc = $img.attr('src') || '';
+        const imgSrc = $row.find('img').first().attr('src') || '';
         let imageUrl: string | undefined;
         if (imgSrc) {
           const fullImg = imgSrc.startsWith('http') ? imgSrc : `${this.BASE}${imgSrc}`;
@@ -148,15 +131,6 @@ export class KulturGrazScraper extends BaseScraper {
     });
 
     return events;
-  }
-
-  private isCategory(text: string): boolean {
-    const categories = [
-      'Musik', 'Theater/Tanz', 'Kabarett/Kleinkunst', 'Ausstellungen',
-      'Film', 'Literatur', 'Wissenschaft', 'Kinder/Jugend',
-      'Feste/Festivals', 'Sonstiges',
-    ];
-    return categories.some(c => text.trim() === c || text.trim().startsWith(c));
   }
 
   private formatDateForUrl(date: Date): string {
