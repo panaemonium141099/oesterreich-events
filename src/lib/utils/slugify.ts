@@ -19,10 +19,11 @@
  *   - slug    = human-readable descriptor from title + location
  *   - plz     = Austrian postal code (4 digits); falls back to the
  *               bundesland-capital PLZ when a row has no postal_code
- *   - ort     = canonical city slug (from extractCity + slugify) or the
- *               bundesland-capital name as fallback
+ *   - ort     = Ort der PLZ laut amtlicher Post-Tabelle; ohne gültige PLZ
+ *               Stadt aus Adresse/Ortsname oder die Landeshauptstadt
  */
 
+import { PLZ_ORT_SLUGS } from './plz-ort-slugs.generated';
 
 const MAX_SLUG_LENGTH = 60;
 
@@ -216,7 +217,7 @@ function normalizeBundesland(name: string | null | undefined): string | null {
 }
 
 /** Slug a single location-ish string (city name, address fragment). */
-function slugifyLocation(value: string): string {
+export function slugifyPlace(value: string): string {
   let s = value;
   for (const [char, replacement] of Object.entries(UMLAUT_MAP)) {
     s = s.split(char).join(replacement);
@@ -340,22 +341,44 @@ export function resolveEventUrlPrefix(
   // ─── ort resolution ──────────────────────────────────────────────────
   // Try real city sources in order of precision, only falling back to the
   // bundesland capital when nothing else is available.
+  // ─── plz resolution ──────────────────────────────────────────────────
+  const plzFromRow = (event.postal_code ?? '').trim();
+  const hasPlz = /^\d{4}$/.test(plzFromRow);
+  const plz = hasPlz ? plzFromRow : (blDefault?.plz ?? '0000');
+
+  // Mit gültiger PLZ ist der Ort der Post-Ort dieser PLZ. Nur so hängt die
+  // URL allein an der PLZ: Ortsname und Adresse ändern sich mit jedem
+  // Re-Scrape und jeder Ortskorrektur, und der alte Weg (Adresse mit Komma,
+  // sonst einwortiger Ortsname, sonst Landeshauptstadt) lieferte für 53 %
+  // der Events mit belegter Gemeinde einen falschen Ort (Prod 2026-09-24).
+  const postOrt = hasPlz ? plzOrtSlug(plzFromRow) : null;
+  if (postOrt) return { plz, ort: postOrt };
+
   const addressCity = parseCityFromAddress(event.address);
   const locationCity = normaliseLocationName(event.location_name);
   const cityStateWien = canonicalBl === 'Wien' ? 'Wien' : null;
 
   const cityChoice = addressCity ?? locationCity ?? cityStateWien;
   const ort = cityChoice
-    ? slugifyLocation(cityChoice)
+    ? slugifyPlace(cityChoice)
     : (blDefault?.citySlug ?? 'at');
 
-  // ─── plz resolution ──────────────────────────────────────────────────
-  const plzFromRow = (event.postal_code ?? '').trim();
-  const plz = /^\d{4}$/.test(plzFromRow)
-    ? plzFromRow
-    : (blDefault?.plz ?? '0000');
-
   return { plz, ort };
+}
+
+let plzOrtIndex: Map<string, string> | null = null;
+
+/** Ort-Slug zur PLZ laut Post-Tabelle, `null` bei unbekannter PLZ. */
+export function plzOrtSlug(plz: string): string | null {
+  if (!plzOrtIndex) {
+    plzOrtIndex = new Map();
+    for (const group of PLZ_ORT_SLUGS.split(';')) {
+      const [slug, plzs] = group.split(':');
+      if (!slug || !plzs) continue;
+      for (const p of plzs.split(',')) plzOrtIndex.set(p, slug);
+    }
+  }
+  return plzOrtIndex.get(plz) ?? null;
 }
 
 /**

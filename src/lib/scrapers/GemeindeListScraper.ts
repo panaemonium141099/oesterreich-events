@@ -60,7 +60,7 @@ export class GemeindeListScraper extends BaseScraper {
     // wie gem2go & Co (Telemetrie 2026-07-15: Timeout nach 25 min, Daten
     // verworfen) → Soft-Budget + Tagesrotation, s. BaseScraper.
     const deadline = this.softDeadline();
-    const rotated = this.rotateDaily([...GEMEINDEN]);
+    const rotated = this.rotateDaily(GEMEINDEN.filter(g => g.website !== 'https://none'));
 
     for (let i = 0; i < rotated.length; i++) {
       if (Date.now() > deadline) {
