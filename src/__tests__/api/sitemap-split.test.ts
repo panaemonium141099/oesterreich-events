@@ -210,8 +210,8 @@ describe('GET /sitemap-events.xml — URL-Cap zaehlt emittierte URLs', () => {
 
     // Prefix kommt aus der PLZ-Registry (7100 -> eisenstadt), nicht aus
     // location_name — hier zaehlt nur: DE- und /en-URL erscheinen als Paar.
-    expect(body).toContain('<loc>https://lasstreffen.at/events/7100-eisenstadt/2026-09-15/event-x-0</loc>');
-    expect(body).toContain('<loc>https://lasstreffen.at/en/events/7100-eisenstadt/2026-09-15/event-x-0</loc>');
+    expect(body).toContain('<loc>https://lasstreffen.at/events/7100-neusiedl-am-see/2026-09-15/event-x-0</loc>');
+    expect(body).toContain('<loc>https://lasstreffen.at/en/events/7100-neusiedl-am-see/2026-09-15/event-x-0</loc>');
     expect(body).toContain('xhtml:link rel="alternate" hreflang="de-AT"');
     expect(body).toContain('xhtml:link rel="alternate" hreflang="en"');
     expect(body).toContain('xhtml:link rel="alternate" hreflang="x-default"');

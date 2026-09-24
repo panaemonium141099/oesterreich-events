@@ -138,7 +138,7 @@ const STEIERMARK: GemeindeInfo[] = [
   { name: 'Leibnitz', website: 'https://www.leibnitz.at', plz: '8430', bezirk: 'Leibnitz', bundesland: 'Steiermark', lat: 46.7805, lng: 15.5407 },
   { name: 'Feldbach', website: 'https://www.feldbach.gv.at', plz: '8330', bezirk: 'Südoststeiermark', bundesland: 'Steiermark', lat: 46.9528, lng: 15.8886 },
   { name: 'Knittelfeld', website: 'https://www.knittelfeld.at', plz: '8720', bezirk: 'Murtal', bundesland: 'Steiermark', lat: 47.2147, lng: 14.8297 },
-  { name: 'Gratwein-Straßengel', website: 'https://www.gratwein-strassengel.gv.at', plz: '8112', bezirk: 'Graz-Umgebung', bundesland: 'Steiermark', lat: 47.1231, lng: 15.3305 },
+  { name: 'Gratwein-Straßengel', website: 'https://www.gratwein-strassengel.gv.at', plz: '8111', bezirk: 'Graz-Umgebung', bundesland: 'Steiermark', lat: 47.1231, lng: 15.3305 },
   { name: 'Seiersberg-Pirka', website: 'https://www.seiersberg-pirka.at', plz: '8054', bezirk: 'Graz-Umgebung', bundesland: 'Steiermark', lat: 47.0122, lng: 15.3996 },
   { name: 'Weiz', website: 'https://www.weiz.at', plz: '8160', bezirk: 'Weiz', bundesland: 'Steiermark', lat: 47.2174, lng: 15.6222 },
   { name: 'Deutschlandsberg', website: 'https://www.deutschlandsberg.at', plz: '8530', bezirk: 'Deutschlandsberg', bundesland: 'Steiermark', lat: 46.8146, lng: 15.2138 },
@@ -216,7 +216,7 @@ const TIROL: GemeindeInfo[] = [
   { name: 'Landeck', website: 'https://www.landeck.tirol.gv.at', plz: '6500', bezirk: 'Landeck', bundesland: 'Tirol', lat: 47.1424, lng: 10.5705 },
   { name: 'Reutte', website: 'https://www.reutte.at', plz: '6600', bezirk: 'Reutte', bundesland: 'Tirol', lat: 47.4891, lng: 10.7188 },
   { name: 'Jenbach', website: 'https://www.jenbach.at', plz: '6200', bezirk: 'Schwaz', bundesland: 'Tirol', lat: 47.3915, lng: 11.7717 },
-  { name: 'Kematen in Tirol', website: 'https://www.kematen.at', plz: '6175', bezirk: 'Innsbruck-Land', bundesland: 'Tirol', lat: 47.2543, lng: 11.2729 },
+  { name: 'Kematen in Tirol', website: 'https://none', plz: '6175', bezirk: 'Innsbruck-Land', bundesland: 'Tirol', lat: 47.2543, lng: 11.2729 },
   { name: 'Axams', website: 'https://www.axams.at', plz: '6094', bezirk: 'Innsbruck-Land', bundesland: 'Tirol', lat: 47.2306, lng: 11.2783 },
   { name: 'Kirchbichl', website: 'https://www.kirchbichl.at', plz: '6322', bezirk: 'Kufstein', bundesland: 'Tirol', lat: 47.5112, lng: 12.0859 },
   { name: 'Kundl', website: 'https://www.kundl.tirol.gv.at', plz: '6250', bezirk: 'Kufstein', bundesland: 'Tirol', lat: 47.4691, lng: 11.9846 },
@@ -304,7 +304,7 @@ const BURGENLAND: GemeindeInfo[] = [
   { name: 'Pöttsching', website: 'https://www.poettsching.at', plz: '7033', bezirk: 'Mattersburg', bundesland: 'Burgenland', lat: 47.8064, lng: 16.37 },
   { name: 'Steinbrunn', website: 'https://www.steinbrunn.at', plz: '7035', bezirk: 'Eisenstadt-Umgebung', bundesland: 'Burgenland', lat: 47.8358, lng: 16.4146 },
   { name: 'Lockenhaus', website: 'https://www.lockenhaus.at', plz: '7442', bezirk: 'Oberpullendorf', bundesland: 'Burgenland', lat: 47.4067, lng: 16.4182 },
-  { name: 'Wallern im Burgenland', website: 'https://www.wallern.at', plz: '7151', bezirk: 'Neusiedl am See', bundesland: 'Burgenland', lat: 47.7262, lng: 16.9381 },
+  { name: 'Wallern im Burgenland', website: 'https://none', plz: '7151', bezirk: 'Neusiedl am See', bundesland: 'Burgenland', lat: 47.7262, lng: 16.9381 },
   { name: 'Mörbisch am See', website: 'https://www.moerbisch.at', plz: '7072', bezirk: 'Eisenstadt-Umgebung', bundesland: 'Burgenland', lat: 47.7533, lng: 16.6659 },
 ];
 

@@ -168,6 +168,17 @@ export async function middleware(request: NextRequest) {
     }
   }
 
+  // Doppelter Location-Header (Next-Bug, gepatcht per
+  // scripts/patch-next-header-replay.mjs) liess Clients "pfad, pfad"
+  // aufrufen. Diese Adressen kennt Google bereits; auf den ersten Pfad
+  // umleiten statt 404.
+  const commaDup = request.nextUrl.pathname.match(/^(\/[^,]*?)(?:,|%2C)(?:\s|%20)*\/.*$/i);
+  if (commaDup) {
+    const target = request.nextUrl.clone();
+    target.pathname = commaDup[1];
+    return NextResponse.redirect(target, 308);
+  }
+
   // The landing (`/`) is reachable for everyone — anonymous AND logged-in
   // visitors. The fn-15.7 edge-redirect to `/feed` was removed because the
   // landing has its own role (search + discovery + brand) that authenticated

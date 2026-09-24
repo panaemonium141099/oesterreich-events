@@ -65,7 +65,9 @@ export class Gem2GoScraper extends BaseScraper {
     // Budget bricht mit Teilergebnis ab, Tagesrotation deckt den Rest in
     // den Folgeläufen ab (siehe BaseScraper.softDeadline/rotateDaily).
     const deadline = this.softDeadline();
-    const gemeindenRotated = this.rotateDaily(GEM2GO_GEMEINDEN);
+    // 'https://none': keine eigene Website bekannt, oder die eingetragene
+    // gehört einer anderen Gemeinde (siehe gemeinde-config.test.ts).
+    const gemeindenRotated = this.rotateDaily(GEM2GO_GEMEINDEN.filter(g => g.website !== 'https://none'));
 
     for (let i = 0; i < gemeindenRotated.length; i++) {
       if (Date.now() > deadline) {
