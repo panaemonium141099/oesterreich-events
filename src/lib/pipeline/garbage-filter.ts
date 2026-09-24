@@ -26,12 +26,17 @@ const GARBAGE_TITLES = new Set([
   'sponsoren', 'sponsors', 'partner',
   'mehr informationen', 'more information',
   'weitere informationen', 'details',
+  'event',
 ]);
 
 /**
  * Check if a title (after normalization/lowercasing) is a garbage non-event page.
  */
 export function isGarbageTitle(title: string): boolean {
+  // Badge-Leiste statt Titel: Kartentext wie "Event\n   Pop / Rock\n …"
+  // (partytimer 2026-09). Ein echter Titel bricht nie direkt nach "Event" um.
+  if (/^\s*event[ \t]*[\r\n]/i.test(title)) return true;
+
   const normalized = title
     .normalize('NFC')
     .toLowerCase()

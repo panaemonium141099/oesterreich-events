@@ -53,94 +53,111 @@ export class PartytimerScraper extends BaseScraper {
     return events;
   }
 
-  private parsePage(html: string): ScrapedEvent[] {
+  /**
+   * Jede Karte ist selbst ein `<a href=".../events/{id}">`. Titel steht im
+   * `font-display`-Block, darüber die Badges ("Event", Genre, "Empfohlen"),
+   * darunter Datum ("Do 24.9."), Uhrzeit ("17:00 Uhr") und "Venue, PLZ Ort".
+   * Nie aus dem Linktext oder einem umgebenden Container lesen: der Linktext
+   * beginnt mit den Badges ("Event Pop / Rock …") und der Container ist die
+   * ganze Liste.
+   */
+  parsePage(html: string, now: Date = new Date()): ScrapedEvent[] {
     const $ = cheerio.load(html);
     const events: ScrapedEvent[] = [];
 
-    // PartyTimer uses .Event class containers and /events/{id} links
     $('a[href*="/events/"]').each((_, el) => {
-      try {
-        const $link = $(el);
-        const href = $link.attr('href') || '';
+      const $card = $(el);
+      const href = $card.attr('href') || '';
 
-        // Must be event detail: /events/{numeric-id}
-        const idMatch = href.match(/\/events\/(\d+)/);
-        if (!idMatch) return;
-        const eventId = idMatch[1];
+      // Must be event detail: /events/{numeric-id}
+      const idMatch = href.match(/\/events\/(\d+)(?:[/?#]|$)/);
+      if (!idMatch) return;
+      const eventId = idMatch[1];
 
-        // Get containing element
-        const $container = $link.closest('.Event, article, li, div').first();
-        if (!$container.length) return;
+      // Ohne echten Namen kein Event (sonst landet "Event Pop / Rock" als Titel).
+      const title = this.clean($card.find('.font-display').first().text());
+      if (!title || title.length < 3) return;
 
-        const containerText = $container.text();
+      const cardText = this.clean($card.text());
+      if (/\babgesagt\b/i.test(cardText)) return;
 
-        // Title from heading or strong
-        let title = $container.find('h2, h3, h4, strong').first().text().trim();
-        if (!title) title = $link.text().trim();
-        if (!title || title.length < 3) return;
+      const $date = $card.find('p.font-bold').first();
+      const dateText = this.clean($date.text());
+      const timeText = this.clean($date.parent().text());
+      const startDate = this.parseDate(dateText, timeText, now);
+      if (!startDate) return;
 
-        // Skip cancelled
-        if (containerText.toLowerCase().includes('abgesagt')) return;
+      const badges = $card.find('[class*="badge"]').map((_, b) => this.clean($(b).text())).get();
+      const genre = badges.find(b => b !== 'Event' && b !== 'Empfohlen');
 
-        // Date: "Fr 27.3." or "Sa 28.03.2026" with optional time
-        const startDate = this.parseDate(containerText);
-        if (!startDate) return;
+      const subtitle = this.clean($card.find('.font-display').first().nextAll('p').first().text()) || undefined;
 
-        // Venue + postal code: "U4, 1120 Wien" or "Flex, 1010 Wien"
-        let venue: string | undefined;
-        let postalCode: string | undefined;
-        const venueMatch = containerText.match(/([A-Za-zÄÖÜäöüß\s&.-]+),\s*(\d{4})\s*Wien/);
-        if (venueMatch) {
-          venue = venueMatch[1].trim();
-          postalCode = venueMatch[2];
-        }
+      // Ortszeile: letzter Block der Karte, "Venue, 1120 Wien"
+      let venue: string | undefined;
+      let postalCode: string | undefined;
+      let city: string | undefined;
+      const locText = this.clean($card.find('div.flex-row').last().children('div').last().text());
+      const locMatch = locText.match(/^(.*?),\s*(\d{4})\s+(.+)$/);
+      if (locMatch) {
+        venue = locMatch[1].trim() || undefined;
+        postalCode = locMatch[2];
+        city = locMatch[3].trim();
+      } else if (locText) {
+        venue = locText;
+      }
 
-        // Category from tags/badges
-        let categoryTag: string | undefined;
-        $container.find('[class*="badge"], [class*="tag"], [class*="category"]').each((_, t) => {
-          if (!categoryTag) categoryTag = $(t).text().trim();
-        });
+      let imageUrl: string | undefined;
+      const imgSrc = ($card.find('img').first().attr('src') || '').trim();
+      if (imgSrc && !imgSrc.startsWith('data:')) {
+        const resolved = imgSrc.startsWith('http') ? imgSrc : `${this.BASE}${imgSrc.startsWith('/') ? '' : '/'}${imgSrc}`;
+        imageUrl = this.cleanImageUrl(resolved);
+      }
 
-        // Image
-        let imageUrl: string | undefined;
-        const $img = $container.find('img').first();
-        const imgSrc = ($img.attr('src') || $img.attr('data-src') || '').trim();
-        if (imgSrc && !imgSrc.startsWith('data:')) {
-          const resolved = imgSrc.startsWith('http') ? imgSrc : `${this.BASE}${imgSrc.startsWith('/') ? '' : '/'}${imgSrc}`;
-          imageUrl = this.cleanImageUrl(resolved);
-        }
+      const sourceUrl = href.startsWith('http') ? href : `${this.BASE}${href}`;
 
-        const sourceUrl = href.startsWith('http') ? href : `${this.BASE}${href}`;
-
-        events.push({
-          source_id: `partytimer-${eventId}`,
-          source_name: this.name,
-          source_url: sourceUrl,
-          title,
-          start_date: startDate,
-          location_name: venue || 'Wien',
-          postal_code: postalCode,
-          bundesland: 'wien',
-          category: categorizeEvent(title, undefined, categoryTag ? [categoryTag] : undefined),
-          image_url: imageUrl,
-        });
-      } catch { /* skip */ }
+      events.push({
+        source_id: `partytimer-${eventId}`,
+        source_name: this.name,
+        source_url: sourceUrl,
+        title,
+        description: subtitle,
+        start_date: startDate,
+        location_name: venue || city || 'Wien',
+        city,
+        postal_code: postalCode,
+        bundesland: 'wien',
+        category: categorizeEvent(title, subtitle, genre ? [genre] : undefined),
+        image_url: imageUrl,
+      });
     });
 
     return events;
   }
 
-  private parseDate(text: string): string | null {
-    if (!text) return null;
+  private clean(text: string): string {
+    return text.replace(/\s+/g, ' ').trim();
+  }
 
-    // "27.3." or "27.03.2026" with optional time
-    const m = text.match(/(\d{1,2})\.(\d{1,2})\.(\d{4})?/);
-    if (m) {
-      const [, day, mo, year] = m;
-      const y = year || new Date().getFullYear().toString();
-      return `${y}-${mo.padStart(2, '0')}-${day.padStart(2, '0')}`;
+  /**
+   * "Do 24.9." (+ "17:00 Uhr") → Wiener Wandzeit "2026-09-24T17:00:00".
+   * Ohne Jahr: laufendes Jahr, ab mehr als 60 Tagen Vergangenheit das nächste
+   * (Dezember-Liste zeigt Jänner-Termine).
+   */
+  private parseDate(dateText: string, timeText: string, now: Date): string | null {
+    const m = dateText.match(/(\d{1,2})\.(\d{1,2})\.(\d{4})?/);
+    if (!m) return null;
+    const day = Number(m[1]);
+    const month = Number(m[2]);
+    if (day < 1 || day > 31 || month < 1 || month > 12) return null;
+
+    let year = m[3] ? Number(m[3]) : now.getFullYear();
+    if (!m[3]) {
+      const candidate = Date.UTC(year, month - 1, day);
+      if (candidate < now.getTime() - 60 * 86_400_000) year++;
     }
+    const date = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
 
-    return null;
+    const t = timeText.match(/(\d{1,2}):(\d{2})\s*Uhr/);
+    return t ? `${date}T${t[1].padStart(2, '0')}:${t[2]}:00` : date;
   }
 }

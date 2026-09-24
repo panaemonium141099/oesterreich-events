@@ -1,0 +1,806 @@
+<!DOCTYPE html>
+<html lang="de"
+    class="mx-auto sm:max-w-screen-sm md:max-w-screen-md lg:max-w-4xl">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="preload" as="style" href="https://www.partytimer.at/build/assets/app-27292e99.css" /><link rel="stylesheet" href="https://www.partytimer.at/build/assets/app-27292e99.css" data-navigate-track="reload" />    <link rel="preload" as="style" href="https://www.partytimer.at/build/assets/app-5c43ece1.css" /><link rel="modulepreload" as="script" href="https://www.partytimer.at/build/assets/app-8e2072b2.js" /><link rel="stylesheet" href="https://www.partytimer.at/build/assets/app-5c43ece1.css" data-navigate-track="reload" /><script type="module" src="https://www.partytimer.at/build/assets/app-8e2072b2.js" data-navigate-track="reload"></script>
+    <title>Aktuelle Termine - partytimer.at </title>
+
+    <!-- Livewire Styles --><style >[wire\:loading][wire\:loading], [wire\:loading\.delay][wire\:loading\.delay], [wire\:loading\.list-item][wire\:loading\.list-item], [wire\:loading\.inline-block][wire\:loading\.inline-block], [wire\:loading\.inline][wire\:loading\.inline], [wire\:loading\.block][wire\:loading\.block], [wire\:loading\.flex][wire\:loading\.flex], [wire\:loading\.table][wire\:loading\.table], [wire\:loading\.grid][wire\:loading\.grid], [wire\:loading\.inline-flex][wire\:loading\.inline-flex] {display: none;}[wire\:loading\.delay\.none][wire\:loading\.delay\.none], [wire\:loading\.delay\.shortest][wire\:loading\.delay\.shortest], [wire\:loading\.delay\.shorter][wire\:loading\.delay\.shorter], [wire\:loading\.delay\.short][wire\:loading\.delay\.short], [wire\:loading\.delay\.default][wire\:loading\.delay\.default], [wire\:loading\.delay\.long][wire\:loading\.delay\.long], [wire\:loading\.delay\.longer][wire\:loading\.delay\.longer], [wire\:loading\.delay\.longest][wire\:loading\.delay\.longest] {display: none;}[wire\:offline][wire\:offline] {display: none;}[wire\:dirty]:not(textarea):not(input):not(select) {display: none;}:root {--livewire-progress-bar-color: #2299dd;}[x-cloak] {display: none !important;}[wire\:cloak] {display: none !important;}dialog#livewire-error::backdrop {background-color: rgba(0, 0, 0, .6);}</style>
+
+    <link rel="modulepreload" as="script" href="https://www.partytimer.at/build/assets/didomi-1ea91d4e.js" /><script type="module" src="https://www.partytimer.at/build/assets/didomi-1ea91d4e.js" data-navigate-track="reload"></script>    <link rel="modulepreload" as="script" href="https://www.partytimer.at/build/assets/deleteAllCookies-73a08ca1.js" /><script type="module" src="https://www.partytimer.at/build/assets/deleteAllCookies-73a08ca1.js" data-navigate-track="reload"></script>
+    <script type="text/javascript" src="https://imagesrv.adition.com/js/srp.js" async charset="utf-8"></script>
+    <script type="text/javascript" src="https://imagesrv.adition.com/js/aut.js" async charset="utf-8"></script>
+    <link rel='preload' href='https://data-706868203b.partytimer.at/iomm/latest/manager/base/es6/bundle.js' as='script'
+    id='IOMmBundle' crossorigin>
+<link rel='preload' href='https://data-706868203b.partytimer.at/iomm/latest/bootstrap/loader.js' as='script'
+    crossorigin>
+<script type="text/javascript" src="https://data-706868203b.partytimer.at/iomm/latest/bootstrap/loader.js" crossorigin>
+</script>
+
+<script type="text/javascript">
+    IOMm('configure', {
+        st: 'at_w_atpartytim',
+        dn: 'data-706868203b.partytimer.at',
+        cn: 'at',
+        mh: 5
+    });
+</script>
+
+<script>
+    window.dataLayer = window.dataLayer || [];
+    window.gtag = function() {};
+</script>
+
+<script type="didomi/javascript" data-vendor="c:googleana-4TXnJigR">
+    (function(w, d, s, l, i) {
+        w[l] = w[l] || []
+        w[l].push({
+            'gtm.start': new Date().getTime(),
+            event: 'gtm.js',
+        })
+        var f = d.getElementsByTagName(s)[0],
+            j = d.createElement(s),
+            dl = l != 'dataLayer' ? '&l=' + l : ''
+        j.async = true
+        j.src =
+            'https://www.googletagmanager.com/gtm.js?id=' + i + dl
+        f.parentNode.insertBefore(j, f)
+    })(window, document, 'script', 'dataLayer', 'GTM-K526NK7')
+
+    function gtag() {
+        window.dataLayer.push(arguments)
+    }
+
+    window.gtag = gtag;
+</script>
+            <script>
+            IOMm('pageview', {
+                cp: 'Service/ProgrammeUndLokalfuehrer/Veranstaltungsprogramme/event"'
+            });
+
+            document.addEventListener("DOMContentLoaded", () => {
+                Livewire.hook('commit', ({
+                    component,
+                    commit,
+                    respond,
+                    succeed,
+                    fail
+                }) => {
+                    succeed(({
+                        snapshot,
+                        effect
+                    }) => {
+                        queueMicrotask(() => {
+                            IOMm('pageview', {
+                                cp: 'Service/ProgrammeUndLokalfuehrer/Veranstaltungsprogramme/event"'
+                            });
+
+                        })
+                    })
+                })
+            });
+        </script>
+    
+</head>
+
+<body class="antialiased bg-gray-50" x-data="body">
+    <script type="didomi/html" data-vendor="c:googleana-4TXnJigR">
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-K526NK7" height="0" width="0"
+            style="display:none;visibility:hidden"></iframe></noscript>
+    </script>
+
+    <div class="hidden pt-0 md:w-full md:flex md:flex-row md:justify-center md:h-fit" id="Top"
+        content-unit-id="3100937"></div>
+    <div class="relative block">
+        <div class="hidden md:block md:absolute md:top-0 md:left-full md:w-fit md:h-fit md:pl-2" id="Right1"
+            content-unit-id="3100938">
+        </div>
+        <div class="bg-black h-12 py-2 sticky top-0 z-10 overflow-x-auto">
+    <div
+        class="py-1 px-4 h-8
+        flex flex-row flex-nowrap justify-start
+        font-sans text-base text-white text-center
+        whitespace-nowrap gap-x-4">
+        <a class="hover:text-brown pr-2 tracking-wider" href="/">PARTYTIMER</a>
+        <a class=" text-brown  hover:text-brown"
+            href="https://www.partytimer.at/events">Aktuelle Termine</a>
+        <a class=" hover:text-brown"
+            href="https://www.partytimer.at/kalender">Kalender</a>
+        <a class=" hover:text-brown"
+            href="https://www.partytimer.at/lokaltipps">Bars & Szene</a>
+        <div class="p-0.5"></div>
+    </div>
+</div>
+
+        <div class="bg-white">
+        <div
+    class="flex flex-row flex-nowrap items-center
+        bg-image-title bg-origin-border bg-no-repeat bg-bottom bg-cover sm:bg-auto
+        w-full h-fit py-6 px-4">
+    <div class="font-display text-white w-full sm:w-3/4 text-ellipsis my-3">
+        <p class="pt-2 pb-4 text-4xl sm:text-5xl font-bold">Party in Wien</p>
+        <p class="pt-2 pb-4 text-md sm:text-lg font-bold">Aktuelle Party-Termine aus der FALTER:WOCHE</p>
+    </div>
+    <div class="hidden sm:block sm:w-1/4 sm:h-fit">
+        <img src="https://www.partytimer.at/build/assets/adler_partytimer_kreis-7e2a26f8.png" alt="Partytimer.at Logo"
+            class="m-auto" />
+    </div>
+</div>
+        <div wire:key="lw-4145256987-0" wire:snapshot="{&quot;data&quot;:{&quot;endDate&quot;:&quot;&quot;,&quot;events&quot;:[[[{&quot;event_id&quot;:1683089,&quot;prod&quot;:&quot;Klub66&quot;,&quot;beginn&quot;:&quot;2026-09-24T17:00:00+0200&quot;,&quot;is_free&quot;:false,&quot;is_recommended&quot;:true,&quot;is_cancelled&quot;:false,&quot;shortinfo&quot;:&quot;(Pensionisten Clubbing, Anmeldung!)&quot;,&quot;images&quot;:[[[{&quot;filename&quot;:&quot;136472.jpeg&quot;},{&quot;s&quot;:&quot;arr&quot;}]],{&quot;s&quot;:&quot;arr&quot;}],&quot;kat&quot;:[{&quot;kat&quot;:&quot;Party&quot;},{&quot;s&quot;:&quot;arr&quot;}],&quot;location&quot;:[{&quot;loc&quot;:&quot;U4&quot;,&quot;ort&quot;:&quot;Wien&quot;,&quot;plz&quot;:&quot;1120&quot;},{&quot;s&quot;:&quot;arr&quot;}]},{&quot;s&quot;:&quot;arr&quot;}],[{&quot;event_id&quot;:1526212,&quot;prod&quot;:&quot;B\u00fcroschluss&quot;,&quot;beginn&quot;:&quot;2026-09-24T18:00:00+0200&quot;,&quot;is_free&quot;:false,&quot;is_recommended&quot;:false,&quot;is_cancelled&quot;:false,&quot;shortinfo&quot;:null,&quot;images&quot;:[[[{&quot;filename&quot;:&quot;106764.jpeg&quot;},{&quot;s&quot;:&quot;arr&quot;}]],{&quot;s&quot;:&quot;arr&quot;}],&quot;kat&quot;:[{&quot;kat&quot;:&quot;Party&quot;},{&quot;s&quot;:&quot;arr&quot;}],&quot;location&quot;:[{&quot;loc&quot;:&quot;O - der Klub&quot;,&quot;ort&quot;:&quot;Wien&quot;,&quot;plz&quot;:&quot;1010&quot;},{&quot;s&quot;:&quot;arr&quot;}]},{&quot;s&quot;:&quot;arr&quot;}],[{&quot;event_id&quot;:1697180,&quot;prod&quot;:&quot;Let\u2019s Get Started&quot;,&quot;beginn&quot;:&quot;2026-09-24T18:00:00+0200&quot;,&quot;is_free&quot;:false,&quot;is_recommended&quot;:false,&quot;is_cancelled&quot;:false,&quot;shortinfo&quot;:null,&quot;images&quot;:[[[{&quot;filename&quot;:&quot;106976.jpeg&quot;},{&quot;s&quot;:&quot;arr&quot;}]],{&quot;s&quot;:&quot;arr&quot;}],&quot;kat&quot;:[{&quot;kat&quot;:&quot;Party&quot;},{&quot;s&quot;:&quot;arr&quot;}],&quot;location&quot;:[{&quot;loc&quot;:&quot;Viper Room&quot;,&quot;ort&quot;:&quot;Wien&quot;,&quot;plz&quot;:&quot;1030&quot;},{&quot;s&quot;:&quot;arr&quot;}]},{&quot;s&quot;:&quot;arr&quot;}],[{&quot;event_id&quot;:730610,&quot;prod&quot;:&quot;Singen im Herbst&quot;,&quot;beginn&quot;:&quot;2026-09-24T18:00:00+0200&quot;,&quot;is_free&quot;:false,&quot;is_recommended&quot;:false,&quot;is_cancelled&quot;:false,&quot;shortinfo&quot;:&quot;Offenes Singen)&quot;,&quot;images&quot;:[[[{&quot;filename&quot;:&quot;38840.jpeg&quot;},{&quot;s&quot;:&quot;arr&quot;}]],{&quot;s&quot;:&quot;arr&quot;}],&quot;kat&quot;:[{&quot;kat&quot;:&quot;Lokal \/ Global&quot;},{&quot;s&quot;:&quot;arr&quot;}],&quot;location&quot;:[{&quot;loc&quot;:&quot;Liebhartstaler Bockkeller\/Wiener Volksliedwerk&quot;,&quot;ort&quot;:&quot;Wien&quot;,&quot;plz&quot;:&quot;1160&quot;},{&quot;s&quot;:&quot;arr&quot;}]},{&quot;s&quot;:&quot;arr&quot;}],[{&quot;event_id&quot;:1734958,&quot;prod&quot;:&quot;Solid Soul Afterwork&quot;,&quot;beginn&quot;:&quot;2026-09-24T18:00:00+0200&quot;,&quot;is_free&quot;:false,&quot;is_recommended&quot;:false,&quot;is_cancelled&quot;:false,&quot;shortinfo&quot;:null,&quot;images&quot;:[[],{&quot;s&quot;:&quot;arr&quot;}],&quot;kat&quot;:[{&quot;kat&quot;:&quot;Party&quot;},{&quot;s&quot;:&quot;arr&quot;}],&quot;location&quot;:[{&quot;loc&quot;:&quot;Hotel Jaz in the City&quot;,&quot;ort&quot;:&quot;Wien&quot;,&quot;plz&quot;:&quot;1060&quot;},{&quot;s&quot;:&quot;arr&quot;}]},{&quot;s&quot;:&quot;arr&quot;}],[{&quot;event_id&quot;:1732807,&quot;prod&quot;:&quot;Voodoo J\u00fcrgens &amp; Die Ansa Panier \/ Euroteuro&quot;,&quot;beginn&quot;:&quot;2026-09-24T18:00:00+0200&quot;,&quot;is_free&quot;:false,&quot;is_recommended&quot;:true,&quot;is_cancelled&quot;:false,&quot;shortinfo&quot;:null,&quot;images&quot;:[[[{&quot;filename&quot;:&quot;123309.jpeg&quot;},{&quot;s&quot;:&quot;arr&quot;}]],{&quot;s&quot;:&quot;arr&quot;}],&quot;kat&quot;:[{&quot;kat&quot;:&quot;Pop \/ Rock&quot;},{&quot;s&quot;:&quot;arr&quot;}],&quot;location&quot;:[{&quot;loc&quot;:&quot;Arena&quot;,&quot;ort&quot;:&quot;Wien&quot;,&quot;plz&quot;:&quot;1030&quot;},{&quot;s&quot;:&quot;arr&quot;}]},{&quot;s&quot;:&quot;arr&quot;}],[{&quot;event_id&quot;:1312221,&quot;prod&quot;:&quot;Duo Fadeev Lechner&quot;,&quot;beginn&quot;:&quot;2026-09-24T18:30:00+0200&quot;,&quot;is_free&quot;:false,&quot;is_recommended&quot;:false,&quot;is_cancelled&quot;:false,&quot;shortinfo&quot;:null,&quot;images&quot;:[[],{&quot;s&quot;:&quot;arr&quot;}],&quot;kat&quot;:[{&quot;kat&quot;:&quot;Lokal \/ Global&quot;},{&quot;s&quot;:&quot;arr&quot;}],&quot;location&quot;:[{&quot;loc&quot;:&quot;Heuriger \&quot;Zum Martin Sepp\&quot;&quot;,&quot;ort&quot;:&quot;Wien&quot;,&quot;plz&quot;:&quot;1190&quot;},{&quot;s&quot;:&quot;arr&quot;}]},{&quot;s&quot;:&quot;arr&quot;}],[{&quot;event_id&quot;:1732968,&quot;prod&quot;:&quot;Average &amp; Kayo \/ Joshy&quot;,&quot;beginn&quot;:&quot;2026-09-24T19:00:00+0200&quot;,&quot;is_free&quot;:false,&quot;is_recommended&quot;:false,&quot;is_cancelled&quot;:false,&quot;shortinfo&quot;:null,&quot;images&quot;:[[[{&quot;filename&quot;:&quot;139859.jpeg&quot;},{&quot;s&quot;:&quot;arr&quot;}]],{&quot;s&quot;:&quot;arr&quot;}],&quot;kat&quot;:[{&quot;kat&quot;:&quot;Hiphop \/ Elektronik&quot;},{&quot;s&quot;:&quot;arr&quot;}],&quot;location&quot;:[{&quot;loc&quot;:&quot;Flex Caf\u00e9&quot;,&quot;ort&quot;:&quot;Wien&quot;,&quot;plz&quot;:&quot;1010&quot;},{&quot;s&quot;:&quot;arr&quot;}]},{&quot;s&quot;:&quot;arr&quot;}],[{&quot;event_id&quot;:1550064,&quot;prod&quot;:&quot;Gertis Klavierspielereien&quot;,&quot;beginn&quot;:&quot;2026-09-24T19:00:00+0200&quot;,&quot;is_free&quot;:false,&quot;is_recommended&quot;:false,&quot;is_cancelled&quot;:false,&quot;shortinfo&quot;:null,&quot;images&quot;:[[],{&quot;s&quot;:&quot;arr&quot;}],&quot;kat&quot;:[{&quot;kat&quot;:&quot;Lokal \/ Global&quot;},{&quot;s&quot;:&quot;arr&quot;}],&quot;location&quot;:[{&quot;loc&quot;:&quot;Wiener Stadtbr\u00e4u&quot;,&quot;ort&quot;:&quot;Wien&quot;,&quot;plz&quot;:&quot;1010&quot;},{&quot;s&quot;:&quot;arr&quot;}]},{&quot;s&quot;:&quot;arr&quot;}],[{&quot;event_id&quot;:1734406,&quot;prod&quot;:&quot;Medical Thursday - First Aid&quot;,&quot;beginn&quot;:&quot;2026-09-24T19:00:00+0200&quot;,&quot;is_free&quot;:false,&quot;is_recommended&quot;:false,&quot;is_cancelled&quot;:false,&quot;shortinfo&quot;:null,&quot;images&quot;:[[],{&quot;s&quot;:&quot;arr&quot;}],&quot;kat&quot;:[{&quot;kat&quot;:&quot;Party&quot;},{&quot;s&quot;:&quot;arr&quot;}],&quot;location&quot;:[{&quot;loc&quot;:&quot;Chamber Bar&quot;,&quot;ort&quot;:&quot;Wien&quot;,&quot;plz&quot;:&quot;1080&quot;},{&quot;s&quot;:&quot;arr&quot;}]},{&quot;s&quot;:&quot;arr&quot;}]],{&quot;s&quot;:&quot;arr&quot;}],&quot;filterSet&quot;:false,&quot;isFree&quot;:false,&quot;isRecommended&quot;:false,&quot;maxPageIndex&quot;:144,&quot;page&quot;:1,&quot;searchTerm&quot;:&quot;&quot;,&quot;startDate&quot;:&quot;&quot;,&quot;totalCount&quot;:1432},&quot;memo&quot;:{&quot;id&quot;:&quot;nBSHGMtQf41QWLMyTw5k&quot;,&quot;name&quot;:&quot;events.list-events&quot;,&quot;path&quot;:&quot;events&quot;,&quot;method&quot;:&quot;GET&quot;,&quot;release&quot;:&quot;a-a-a&quot;,&quot;children&quot;:[],&quot;scripts&quot;:[],&quot;assets&quot;:[],&quot;errors&quot;:[],&quot;locale&quot;:&quot;de&quot;,&quot;islands&quot;:[]},&quot;checksum&quot;:&quot;e4e75249f2098b6bf9ac2490be89c51eabf870ffbe1c5928997fa3818762baeb&quot;}" wire:effects="{&quot;url&quot;:{&quot;endDate&quot;:{&quot;as&quot;:&quot;to&quot;,&quot;use&quot;:&quot;push&quot;,&quot;alwaysShow&quot;:false,&quot;except&quot;:&quot;&quot;},&quot;isFree&quot;:{&quot;as&quot;:&quot;frei&quot;,&quot;use&quot;:&quot;push&quot;,&quot;alwaysShow&quot;:false,&quot;except&quot;:false},&quot;isRecommended&quot;:{&quot;as&quot;:&quot;empfohlen&quot;,&quot;use&quot;:&quot;push&quot;,&quot;alwaysShow&quot;:false,&quot;except&quot;:false},&quot;page&quot;:{&quot;as&quot;:&quot;page&quot;,&quot;use&quot;:&quot;push&quot;,&quot;alwaysShow&quot;:false,&quot;except&quot;:1},&quot;searchTerm&quot;:{&quot;as&quot;:&quot;s&quot;,&quot;use&quot;:&quot;push&quot;,&quot;alwaysShow&quot;:false,&quot;except&quot;:&quot;&quot;},&quot;startDate&quot;:{&quot;as&quot;:&quot;from&quot;,&quot;use&quot;:&quot;push&quot;,&quot;alwaysShow&quot;:false,&quot;except&quot;:&quot;&quot;}}}" wire:id="nBSHGMtQf41QWLMyTw5k" wire:name="events.list-events" class="max-w-full">
+    <div x-data="datepicker(
+    window.Livewire.find('nBSHGMtQf41QWLMyTw5k').entangle('startDate'),
+    window.Livewire.find('nBSHGMtQf41QWLMyTw5k').entangle('endDate'),
+    '2026-09-24',
+    '2027-09-24',
+    false,
+)">
+    <form method="get" wire:submit="$refresh">
+        <div class="bg-brown py-4 px-3 flex flex-row flex-wrap gap-y-2 justify-center sm:justify-start" id="scrollMarker">
+            <label for="s" class="hidden">Events durchsuchen</label>
+            <input type="text" wire:model.blur="searchTerm" name="s" value=""
+                class="form-input text-gray-500 h-10 w-44 sm:w-1/3
+                flex-initial sm:grow-0 rounded-l-sm border-white focus:border-b-2 focus:border-b-black focus:outline-0
+                focus:ring-0 focus:border-l-2 focus:border-l-white focus:border-r-2 focus:border-r-white
+                focus:border-t-2 focus:border-t-white"
+                placeholder="Events durchsuchen" maxlength="100" spellcheck="false" autocomplete="off" />
+            <div class="w-44 h-10 inline-flex">
+                <button
+                    class="w-32 h-10 bg-white text-black flex-initial
+                    appearance-none text-center
+                    border-b-2 border-white border-x-2
+                    focus:border-b-2 focus:border-b-black focus:outline-0
+                    focus:border-x-2 focus:border-x-white
+                    flex flex-row flex-nowrap justify-between justify-self-center items-center
+                    px-2"
+                    @click="open = !open" type="button">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
+                        class="w-4 h-4 mb-0.5">
+                        <path fill-rule="evenodd"
+                            d="M3.792 2.938A49.069 49.069 0 0112 2.25c2.797 0 5.54.236 8.209.688a1.857 1.857 0 011.541 1.836v1.044a3 3 0 01-.879 2.121l-6.182 6.182a1.5 1.5 0 00-.439 1.061v2.927a3 3 0 01-1.658 2.684l-1.757.878A.75.75 0 019.75 21v-5.818a1.5 1.5 0 00-.44-1.06L3.13 7.938a3 3 0 01-.879-2.121V4.774c0-.897.64-1.683 1.542-1.836z"
+                            clip-rule="evenodd" />
+                    </svg>
+                    <p class="px-1">Filter</p>
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5">
+                        <path fill-rule="evenodd"
+                            d="M12.53 16.28a.75.75 0 01-1.06 0l-7.5-7.5a.75.75 0 011.06-1.06L12 14.69l6.97-6.97a.75.75 0 111.06 1.06l-7.5 7.5z"
+                            clip-rule="evenodd" />
+                    </svg>
+                </button>
+
+                <div class="bg-black w-12 h-10 rounded-r-sm flex-initial">
+                    <button
+                        class="w-full h-full text-white rounded-r-sm appearance-none transition-all duration-150 ease-in-out focus:outline focus:outline-4 focus:outline-black/50"
+                        type="submit">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
+                            class="w-5 h-5 m-auto">
+                            <path fill-rule="evenodd"
+                                d="M10.5 3.75a6.75 6.75 0 100 13.5 6.75 6.75 0 000-13.5zM2.25 10.5a8.25 8.25 0 1114.59 5.28l4.69 4.69a.75.75 0 11-1.06 1.06l-4.69-4.69A8.25 8.25 0 012.25 10.5z"
+                                clip-rule="evenodd" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div x-show="open" class="w-full bg-white py-4 px-3 border-b-[1px] border-solid border-b-gray-50">
+            <div class="flex flex-col md:flex-row md:justify-evenly items-center gap-x-8 gap-y-4">
+                <noscript class="flex gap-2 flex-row flex-wrap">
+                    <div class="whitespace-nowrap">
+                        <label for="startDateNoScript" class="inline-block align-middle pl-1 w-8">von</label>
+                        <input type="date" class="form-input focus:ring-0 text-black" id="startDateNoScript"
+                            name="from" min="2026-09-24" max="2027-09-24"
+                            >
+                    </div>
+                    <div class="whitespace-nowrap">
+                        <label for="endDateNoScript" class="inline-block align-middle pl-1 w-8">bis</label>
+                        <input type="date" class="form-input focus:ring-0 text-black" id="endDateNoScript"
+                            name="to" min="2026-09-24" max="2027-09-24"
+                            >
+                    </div>
+                </noscript>
+                <div class="hidden" x-ref="datePickerWrapper" x-init="initDatePicker()" wire:ignore>
+                    <div class="whitespace-nowrap relative">
+                        <label for="dateRange" class="inline-block align-middle pl-1">Datum</label>
+                        <input type="text"
+                            class="form-input focus:ring-0 focus:border-brown text-black text-left w-60" id="dateRange"
+                            x-ref="datePicker">
+                        <span class="absolute inset-y-0 right-0 pr-2 mb-0.5 flex items-center pointer-events-none">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5m-9-6h.008v.008H12v-.008zM12 15h.008v.008H12V15zm0 2.25h.008v.008H12v-.008zM9.75 15h.008v.008H9.75V15zm0 2.25h.008v.008H9.75v-.008zM7.5 15h.008v.008H7.5V15zm0 2.25h.008v.008H7.5v-.008zm6.75-4.5h.008v.008h-.008v-.008zm0 2.25h.008v.008h-.008V15zm0 2.25h.008v.008h-.008v-.008zm2.25-4.5h.008v.008H16.5v-.008zm0 2.25h.008v.008H16.5V15z" />
+                            </svg>
+                        </span>
+                    </div>
+                </div>
+                <div class="whitespace-nowrap w-32">
+                    <input type="checkbox" class="form-checkbox focus:ring-0 text-black" id="free" name="frei"
+                        wire:model.live="isFree" value="true"  />
+                    <label for="free" class="align-middle pl-1">freier Eintritt</label>
+                </div>
+
+                <div class="whitespace-nowrap w-32">
+                    <input type="checkbox" class="form-checkbox focus:ring-0 text-black" id="recommended"
+                        name="empfohlen" wire:model.live="isRecommended" value="true"
+                         />
+                    <label for="recommended" class="align-middle pl-1">Empfohlen</label>
+                </div>
+
+            </div>
+            <div class="flex text-xs justify-end w-full gap-y-4 mt-4 hidden" x-ref="datePickerReset" wire:ignore>
+                <input type="reset" class="cursor-pointer" value="Filter zurücksetzen"
+                    x-on:click.prevent="resetFilter()">
+            </div>
+        </div>
+    </form>
+</div>
+
+    <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->
+    <div>
+        <!--[if BLOCK]><![endif]-->            <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->            <a class="flex py-2 px-3 flex-row
+             items-start
+             border-b-[1px] border-solid border-b-gray-50 border-l-white border-l-4 bg-white
+             hover:bg-brown-50 hover:border-l-brown-400
+             hover:pr-3"
+    href="https://www.partytimer.at/events/1683089" wire:key="1683089">
+    <div class="sm:w-fit sm:shrink-0">
+        <!--[if BLOCK]><![endif]-->            <img class="h-36 object-center object-none sm:object-fill sm:w-40 pr-4 bg-cover" src=" https://cdn2.falter.at/events/136472.jpeg?width=300&amp;aspect_ratio=1:1&amp;crop=fill">
+        <!--[if ENDBLOCK]><![endif]-->    </div>
+    <div class="w-3/4 sm:w-full p-0 m-0">
+        <div class="flex flex-row flex-wrap gap-x-2.5 gap-y-1.5">
+            <div class="badge-primary">Event</div>
+            <div class="badge-primary">Party</div>
+            <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->
+            <!--[if BLOCK]><![endif]-->                <div class="badge-dark">Empfohlen</div>
+            <!--[if ENDBLOCK]><![endif]-->        </div>
+
+        <div class="text-2xl font-bold font-display mt-2">Klub66</div>
+
+        <!--[if BLOCK]><![endif]-->            <p class="text-base text-gray-500 mt-2">(Pensionisten Clubbing, Anmeldung!)</p>
+        <!--[if ENDBLOCK]><![endif]-->
+        <div class=" mt-2  font-sans flex flex-row">
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                    stroke="currentColor" class="w-5 h-5 inline mb-1 mr-1.5">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+            </div>
+            <div>
+                <!--[if BLOCK]><![endif]-->                    <p class="inline font-bold">
+                        Do 24.9.</p>,
+                    17:00 Uhr
+                <!--[if ENDBLOCK]><![endif]-->            </div>
+        </div>
+        <div class=" font-sans flex flex-row">
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                    stroke="currentColor" class="w-5 h-5 inline mb-1 mr-1.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
+                </svg>
+            </div>
+            <div>
+                U4, 1120 Wien
+            </div>
+        </div>
+    </div>
+</a>
+                    <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->            <a class="flex py-2 px-3 flex-row
+             items-start
+             border-b-[1px] border-solid border-b-gray-50 border-l-white border-l-4 bg-white
+             hover:bg-brown-50 hover:border-l-brown-400
+             hover:pr-3"
+    href="https://www.partytimer.at/events/1526212" wire:key="1526212">
+    <div class="sm:w-fit sm:shrink-0">
+        <!--[if BLOCK]><![endif]-->            <img class="h-36 object-center object-none sm:object-fill sm:w-40 pr-4 bg-cover" src=" https://cdn2.falter.at/events/106764.jpeg?width=300&amp;aspect_ratio=1:1&amp;crop=fill">
+        <!--[if ENDBLOCK]><![endif]-->    </div>
+    <div class="w-3/4 sm:w-full p-0 m-0">
+        <div class="flex flex-row flex-wrap gap-x-2.5 gap-y-1.5">
+            <div class="badge-primary">Event</div>
+            <div class="badge-primary">Party</div>
+            <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->
+            <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->        </div>
+
+        <div class="text-2xl font-bold font-display mt-2">Büroschluss</div>
+
+        <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->
+        <div class=" mt-4  font-sans flex flex-row">
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                    stroke="currentColor" class="w-5 h-5 inline mb-1 mr-1.5">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+            </div>
+            <div>
+                <!--[if BLOCK]><![endif]-->                    <p class="inline font-bold">
+                        Do 24.9.</p>,
+                    18:00 Uhr
+                <!--[if ENDBLOCK]><![endif]-->            </div>
+        </div>
+        <div class=" my-2  font-sans flex flex-row">
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                    stroke="currentColor" class="w-5 h-5 inline mb-1 mr-1.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
+                </svg>
+            </div>
+            <div>
+                O - der Klub, 1010 Wien
+            </div>
+        </div>
+    </div>
+</a>
+                    <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->            <a class="flex py-2 px-3 flex-row
+             items-start
+             border-b-[1px] border-solid border-b-gray-50 border-l-white border-l-4 bg-white
+             hover:bg-brown-50 hover:border-l-brown-400
+             hover:pr-3"
+    href="https://www.partytimer.at/events/1697180" wire:key="1697180">
+    <div class="sm:w-fit sm:shrink-0">
+        <!--[if BLOCK]><![endif]-->            <img class="h-36 object-center object-none sm:object-fill sm:w-40 pr-4 bg-cover" src=" https://cdn2.falter.at/events/106976.jpeg?width=300&amp;aspect_ratio=1:1&amp;crop=fill">
+        <!--[if ENDBLOCK]><![endif]-->    </div>
+    <div class="w-3/4 sm:w-full p-0 m-0">
+        <div class="flex flex-row flex-wrap gap-x-2.5 gap-y-1.5">
+            <div class="badge-primary">Event</div>
+            <div class="badge-primary">Party</div>
+            <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->
+            <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->        </div>
+
+        <div class="text-2xl font-bold font-display mt-2">Let’s Get Started</div>
+
+        <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->
+        <div class=" mt-4  font-sans flex flex-row">
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                    stroke="currentColor" class="w-5 h-5 inline mb-1 mr-1.5">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+            </div>
+            <div>
+                <!--[if BLOCK]><![endif]-->                    <p class="inline font-bold">
+                        Do 24.9.</p>,
+                    18:00 Uhr
+                <!--[if ENDBLOCK]><![endif]-->            </div>
+        </div>
+        <div class=" my-2  font-sans flex flex-row">
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                    stroke="currentColor" class="w-5 h-5 inline mb-1 mr-1.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
+                </svg>
+            </div>
+            <div>
+                Viper Room, 1030 Wien
+            </div>
+        </div>
+    </div>
+</a>
+                    <!--[if BLOCK]><![endif]-->                <div class="flex flex-row justify-center items-center">
+                    <div class="p-2" id="Middle1" content-unit-id="3100939" wire:key="list-slot-3">
+                    </div>
+                </div>
+            <!--[if ENDBLOCK]><![endif]-->            <a class="flex py-2 px-3 flex-row
+             items-start
+             border-b-[1px] border-solid border-b-gray-50 border-l-white border-l-4 bg-white
+             hover:bg-brown-50 hover:border-l-brown-400
+             hover:pr-3"
+    href="https://www.partytimer.at/events/730610" wire:key="730610">
+    <div class="sm:w-fit sm:shrink-0">
+        <!--[if BLOCK]><![endif]-->            <img class="h-36 object-center object-none sm:object-fill sm:w-40 pr-4 bg-cover" src=" https://cdn2.falter.at/events/38840.jpeg?width=300&amp;aspect_ratio=1:1&amp;crop=fill">
+        <!--[if ENDBLOCK]><![endif]-->    </div>
+    <div class="w-3/4 sm:w-full p-0 m-0">
+        <div class="flex flex-row flex-wrap gap-x-2.5 gap-y-1.5">
+            <div class="badge-primary">Event</div>
+            <div class="badge-primary">Lokal / Global</div>
+            <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->
+            <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->        </div>
+
+        <div class="text-2xl font-bold font-display mt-2">Singen im Herbst</div>
+
+        <!--[if BLOCK]><![endif]-->            <p class="text-base text-gray-500 mt-2">Offenes Singen)</p>
+        <!--[if ENDBLOCK]><![endif]-->
+        <div class=" mt-2  font-sans flex flex-row">
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                    stroke="currentColor" class="w-5 h-5 inline mb-1 mr-1.5">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+            </div>
+            <div>
+                <!--[if BLOCK]><![endif]-->                    <p class="inline font-bold">
+                        Do 24.9.</p>,
+                    18:00 Uhr
+                <!--[if ENDBLOCK]><![endif]-->            </div>
+        </div>
+        <div class=" font-sans flex flex-row">
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                    stroke="currentColor" class="w-5 h-5 inline mb-1 mr-1.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
+                </svg>
+            </div>
+            <div>
+                Liebhartstaler Bockkeller/Wiener Volksliedwerk, 1160 Wien
+            </div>
+        </div>
+    </div>
+</a>
+                    <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->            <a class="flex py-2 px-3 flex-row
+             items-start
+             border-b-[1px] border-solid border-b-gray-50 border-l-white border-l-4 bg-white
+             hover:bg-brown-50 hover:border-l-brown-400
+             hover:pr-3"
+    href="https://www.partytimer.at/events/1734958" wire:key="1734958">
+    <div class="sm:w-fit sm:shrink-0">
+        <!--[if BLOCK]><![endif]-->            <img class="h-36 object-center object-none w-40 pr-4 bg-cover"
+                src=" https://www.partytimer.at/build/assets/background-85fb6cd3.jpg ">
+        <!--[if ENDBLOCK]><![endif]-->    </div>
+    <div class="w-3/4 sm:w-full p-0 m-0">
+        <div class="flex flex-row flex-wrap gap-x-2.5 gap-y-1.5">
+            <div class="badge-primary">Event</div>
+            <div class="badge-primary">Party</div>
+            <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->
+            <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->        </div>
+
+        <div class="text-2xl font-bold font-display mt-2">Solid Soul Afterwork</div>
+
+        <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->
+        <div class=" mt-4  font-sans flex flex-row">
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                    stroke="currentColor" class="w-5 h-5 inline mb-1 mr-1.5">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+            </div>
+            <div>
+                <!--[if BLOCK]><![endif]-->                    <p class="inline font-bold">
+                        Do 24.9.</p>,
+                    18:00 Uhr
+                <!--[if ENDBLOCK]><![endif]-->            </div>
+        </div>
+        <div class=" my-2  font-sans flex flex-row">
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                    stroke="currentColor" class="w-5 h-5 inline mb-1 mr-1.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
+                </svg>
+            </div>
+            <div>
+                Hotel Jaz in the City, 1060 Wien
+            </div>
+        </div>
+    </div>
+</a>
+                    <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->            <a class="flex py-2 px-3 flex-row
+             items-start
+             border-b-[1px] border-solid border-b-gray-50 border-l-white border-l-4 bg-white
+             hover:bg-brown-50 hover:border-l-brown-400
+             hover:pr-3"
+    href="https://www.partytimer.at/events/1732807" wire:key="1732807">
+    <div class="sm:w-fit sm:shrink-0">
+        <!--[if BLOCK]><![endif]-->            <img class="h-36 object-center object-none sm:object-fill sm:w-40 pr-4 bg-cover" src=" https://cdn2.falter.at/events/123309.jpeg?width=300&amp;aspect_ratio=1:1&amp;crop=fill">
+        <!--[if ENDBLOCK]><![endif]-->    </div>
+    <div class="w-3/4 sm:w-full p-0 m-0">
+        <div class="flex flex-row flex-wrap gap-x-2.5 gap-y-1.5">
+            <div class="badge-primary">Event</div>
+            <div class="badge-primary">Pop / Rock</div>
+            <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->
+            <!--[if BLOCK]><![endif]-->                <div class="badge-dark">Empfohlen</div>
+            <!--[if ENDBLOCK]><![endif]-->        </div>
+
+        <div class="text-2xl font-bold font-display mt-2">Voodoo Jürgens &amp; Die Ansa Panier / Euroteuro</div>
+
+        <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->
+        <div class=" mt-4  font-sans flex flex-row">
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                    stroke="currentColor" class="w-5 h-5 inline mb-1 mr-1.5">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+            </div>
+            <div>
+                <!--[if BLOCK]><![endif]-->                    <p class="inline font-bold">
+                        Do 24.9.</p>,
+                    18:00 Uhr
+                <!--[if ENDBLOCK]><![endif]-->            </div>
+        </div>
+        <div class=" my-2  font-sans flex flex-row">
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                    stroke="currentColor" class="w-5 h-5 inline mb-1 mr-1.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
+                </svg>
+            </div>
+            <div>
+                Arena, 1030 Wien
+            </div>
+        </div>
+    </div>
+</a>
+                    <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->            <a class="flex py-2 px-3 flex-row
+             items-start
+             border-b-[1px] border-solid border-b-gray-50 border-l-white border-l-4 bg-white
+             hover:bg-brown-50 hover:border-l-brown-400
+             hover:pr-3"
+    href="https://www.partytimer.at/events/1312221" wire:key="1312221">
+    <div class="sm:w-fit sm:shrink-0">
+        <!--[if BLOCK]><![endif]-->            <img class="h-36 object-center object-none w-40 pr-4 bg-cover"
+                src=" https://www.partytimer.at/build/assets/background-85fb6cd3.jpg ">
+        <!--[if ENDBLOCK]><![endif]-->    </div>
+    <div class="w-3/4 sm:w-full p-0 m-0">
+        <div class="flex flex-row flex-wrap gap-x-2.5 gap-y-1.5">
+            <div class="badge-primary">Event</div>
+            <div class="badge-primary">Lokal / Global</div>
+            <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->
+            <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->        </div>
+
+        <div class="text-2xl font-bold font-display mt-2">Duo Fadeev Lechner</div>
+
+        <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->
+        <div class=" mt-4  font-sans flex flex-row">
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                    stroke="currentColor" class="w-5 h-5 inline mb-1 mr-1.5">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+            </div>
+            <div>
+                <!--[if BLOCK]><![endif]-->                    <p class="inline font-bold">
+                        Do 24.9.</p>,
+                    18:30 Uhr
+                <!--[if ENDBLOCK]><![endif]-->            </div>
+        </div>
+        <div class=" my-2  font-sans flex flex-row">
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                    stroke="currentColor" class="w-5 h-5 inline mb-1 mr-1.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
+                </svg>
+            </div>
+            <div>
+                Heuriger &quot;Zum Martin Sepp&quot;, 1190 Wien
+            </div>
+        </div>
+    </div>
+</a>
+                    <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->            <a class="flex py-2 px-3 flex-row
+             items-start
+             border-b-[1px] border-solid border-b-gray-50 border-l-white border-l-4 bg-white
+             hover:bg-brown-50 hover:border-l-brown-400
+             hover:pr-3"
+    href="https://www.partytimer.at/events/1732968" wire:key="1732968">
+    <div class="sm:w-fit sm:shrink-0">
+        <!--[if BLOCK]><![endif]-->            <img class="h-36 object-center object-none sm:object-fill sm:w-40 pr-4 bg-cover" src=" https://cdn2.falter.at/events/139859.jpeg?width=300&amp;aspect_ratio=1:1&amp;crop=fill">
+        <!--[if ENDBLOCK]><![endif]-->    </div>
+    <div class="w-3/4 sm:w-full p-0 m-0">
+        <div class="flex flex-row flex-wrap gap-x-2.5 gap-y-1.5">
+            <div class="badge-primary">Event</div>
+            <div class="badge-primary">Hiphop / Elektronik</div>
+            <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->
+            <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->        </div>
+
+        <div class="text-2xl font-bold font-display mt-2">Average &amp; Kayo / Joshy</div>
+
+        <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->
+        <div class=" mt-4  font-sans flex flex-row">
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                    stroke="currentColor" class="w-5 h-5 inline mb-1 mr-1.5">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+            </div>
+            <div>
+                <!--[if BLOCK]><![endif]-->                    <p class="inline font-bold">
+                        Do 24.9.</p>,
+                    19:00 Uhr
+                <!--[if ENDBLOCK]><![endif]-->            </div>
+        </div>
+        <div class=" my-2  font-sans flex flex-row">
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                    stroke="currentColor" class="w-5 h-5 inline mb-1 mr-1.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
+                </svg>
+            </div>
+            <div>
+                Flex Café, 1010 Wien
+            </div>
+        </div>
+    </div>
+</a>
+                    <!--[if BLOCK]><![endif]-->                <div class="flex flex-row justify-center items-center">
+                    <div class="p-2" id="Middle2" content-unit-id="3100940"
+                        wire:key="list-slot-8"></div>
+                </div>
+            <!--[if ENDBLOCK]><![endif]-->            <a class="flex py-2 px-3 flex-row
+             items-start
+             border-b-[1px] border-solid border-b-gray-50 border-l-white border-l-4 bg-white
+             hover:bg-brown-50 hover:border-l-brown-400
+             hover:pr-3"
+    href="https://www.partytimer.at/events/1550064" wire:key="1550064">
+    <div class="sm:w-fit sm:shrink-0">
+        <!--[if BLOCK]><![endif]-->            <img class="h-36 object-center object-none w-40 pr-4 bg-cover"
+                src=" https://www.partytimer.at/build/assets/background-85fb6cd3.jpg ">
+        <!--[if ENDBLOCK]><![endif]-->    </div>
+    <div class="w-3/4 sm:w-full p-0 m-0">
+        <div class="flex flex-row flex-wrap gap-x-2.5 gap-y-1.5">
+            <div class="badge-primary">Event</div>
+            <div class="badge-primary">Lokal / Global</div>
+            <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->
+            <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->        </div>
+
+        <div class="text-2xl font-bold font-display mt-2">Gertis Klavierspielereien</div>
+
+        <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->
+        <div class=" mt-4  font-sans flex flex-row">
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                    stroke="currentColor" class="w-5 h-5 inline mb-1 mr-1.5">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+            </div>
+            <div>
+                <!--[if BLOCK]><![endif]-->                    <p class="inline font-bold">
+                        Do 24.9.</p>,
+                    19:00 Uhr
+                <!--[if ENDBLOCK]><![endif]-->            </div>
+        </div>
+        <div class=" my-2  font-sans flex flex-row">
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                    stroke="currentColor" class="w-5 h-5 inline mb-1 mr-1.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
+                </svg>
+            </div>
+            <div>
+                Wiener Stadtbräu, 1010 Wien
+            </div>
+        </div>
+    </div>
+</a>
+                    <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->            <a class="flex py-2 px-3 flex-row
+             items-start
+             border-b-[1px] border-solid border-b-gray-50 border-l-white border-l-4 bg-white
+             hover:bg-brown-50 hover:border-l-brown-400
+             hover:pr-3"
+    href="https://www.partytimer.at/events/1734406" wire:key="1734406">
+    <div class="sm:w-fit sm:shrink-0">
+        <!--[if BLOCK]><![endif]-->            <img class="h-36 object-center object-none w-40 pr-4 bg-cover"
+                src=" https://www.partytimer.at/build/assets/background-85fb6cd3.jpg ">
+        <!--[if ENDBLOCK]><![endif]-->    </div>
+    <div class="w-3/4 sm:w-full p-0 m-0">
+        <div class="flex flex-row flex-wrap gap-x-2.5 gap-y-1.5">
+            <div class="badge-primary">Event</div>
+            <div class="badge-primary">Party</div>
+            <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->
+            <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->        </div>
+
+        <div class="text-2xl font-bold font-display mt-2">Medical Thursday - First Aid</div>
+
+        <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->
+        <div class=" mt-4  font-sans flex flex-row">
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                    stroke="currentColor" class="w-5 h-5 inline mb-1 mr-1.5">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+            </div>
+            <div>
+                <!--[if BLOCK]><![endif]-->                    <p class="inline font-bold">
+                        Do 24.9.</p>,
+                    19:00 Uhr
+                <!--[if ENDBLOCK]><![endif]-->            </div>
+        </div>
+        <div class=" my-2  font-sans flex flex-row">
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                    stroke="currentColor" class="w-5 h-5 inline mb-1 mr-1.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
+                </svg>
+            </div>
+            <div>
+                Chamber Bar, 1080 Wien
+            </div>
+        </div>
+    </div>
+</a>
+        <!--[if ENDBLOCK]><![endif]-->    </div>
+
+    
+    <!--[if BLOCK]><![endif]-->        <div class="p-8 m-auto text-center text-lg">
+    <ul class="inline-flex flex-row justify-center items-center font-display m-auto  flex-wrap sm:flex-nowrap">
+        <a href="https://www.partytimer.at/events?empfohlen=&amp;frei=&amp;from=&amp;s=&amp;to=&page=0"
+            class="px-2 py-1 appearance-none text-black bg-white text-center border border-white hover:bg-brown hover:text-white focus:ring-0  invisible "
+             disabled  wire:click.prevent="$set('page', 0)">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                stroke="currentColor"
+                class="w-6 h-6 inline-block mb-0.5  stroke-gray-300 ">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+            </svg>
+        </a>
+
+        <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->
+        <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->        <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->
+        <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->        <li class="px-2 py-1 appearance-none text-center border border-white bg-brown text-white">
+            1</li>
+        <!--[if BLOCK]><![endif]-->            <a href="https://www.partytimer.at/events?empfohlen=&amp;frei=&amp;from=&amp;s=&amp;to=&page=2"
+                class="px-2 py-1 appearance-none text-black bg-white text-center border border-white hover:bg-brown hover:text-white focus:ring-0"
+                wire:click.prevent="$set('page', 2)">2</a>
+        <!--[if ENDBLOCK]><![endif]-->
+        <!--[if BLOCK]><![endif]-->            <a href="https://www.partytimer.at/events?empfohlen=&amp;frei=&amp;from=&amp;s=&amp;to=&page=3"
+                class="px-2 py-1 appearance-none text-black bg-white text-center border border-white hover:bg-brown hover:text-white focus:ring-0"
+                wire:click.prevent="$set('page', 3)">3</a>
+        <!--[if ENDBLOCK]><![endif]-->
+        <!--[if BLOCK]><![endif]-->            <li class="px-2 py-1 appearance-none text-black bg-white text-center border border-white">
+                ...
+            </li>
+        <!--[if ENDBLOCK]><![endif]-->
+        <!--[if BLOCK]><![endif]-->            <a href="https://www.partytimer.at/events?empfohlen=&amp;frei=&amp;from=&amp;s=&amp;to=&page=144"
+                class="px-2 py-1 appearance-none text-black bg-white text-center border border-white hover:bg-brown hover:text-white focus:ring-0"
+                wire:click.prevent="$set('page', 144)">144</a>
+        <!--[if ENDBLOCK]><![endif]-->
+        <a href="https://www.partytimer.at/events?empfohlen=&amp;frei=&amp;from=&amp;s=&amp;to=&page=2"
+            class="px-2 py-1 appearance-none text-black bg-white text-center border border-white hover:bg-brown hover:text-white focus:ring-0 "
+             wire:click.prevent="$set('page', 2)">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                stroke="currentColor"
+                class="w-6 h-6 inline-block mb-0.5 ">>
+                <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+            </svg>
+        </a>
+    </ul>
+</div>
+    <!--[if ENDBLOCK]><![endif]--></div>
+    </div>
+
+        <footer class="bg-gray-50 py-8">
+    <div class="text-center font-sans text-black">
+        ©
+        2026        Falter Verlagsgesellschaft m.b.H.
+        |
+        <a href="https://www.falter.at/offenlegung/falter-at/"
+            class="text-brown hover:text-brown-700">Impressum/Offenlegung</a>
+        |
+        <a href="https://www.partytimer.at/datenschutz" class="text-brown hover:text-brown-700">Datenschutz</a>
+        |
+        <a href="javascript:Didomi.preferences.show()" class="text-brown hover:text-brown-700"
+            dusk="cookie-settings">Cookie-Einstellungen ändern</a>
+    </div>
+</footer>
+    </div>
+
+    <script src="https://www.partytimer.at/livewire-cabec1ab/livewire.min.js?id=2d027ffb"   data-csrf="nvuPA39LtBUUpurov2vnaOuHOvGd2YbMFQq752jH" data-module-url="https://www.partytimer.at/livewire-cabec1ab" data-update-uri="https://www.partytimer.at/livewire-cabec1ab/update" data-navigate-once="true"></script>
+</body>
+
+</html>
