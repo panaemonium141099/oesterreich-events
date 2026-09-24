@@ -24,13 +24,9 @@
 import { useEffect, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
-import { getStoredLocation } from '@/lib/geolocation';
 import { ActivityCardImage } from '@/components/Activities/ActivityCardImage';
 import { activityTagLabel } from '@/lib/activities/tag-labels';
-
-const VIENNA = { lat: 48.21, lng: 16.37 };
-const RAIN_MM = 3;
-const HEAT_C = 27;
+import { loadWeekendWeather, roundCoord } from '@/lib/landing/weekend-weather';
 
 interface NearbyActivity {
   id: string;
@@ -52,17 +48,6 @@ interface WeatherState {
   activities: NearbyActivity[];
 }
 
-/** Naechster Wochenendtag (heute, falls Sa/So — sonst kommender Samstag). */
-function nextWeekendOffset(now: Date): number {
-  const dow = now.getDay(); // 0 So … 6 Sa
-  if (dow === 6 || dow === 0) return 0;
-  return 6 - dow;
-}
-
-function roundCoord(v: number): number {
-  return Math.round(v * 100) / 100;
-}
-
 export function WeatherSection() {
   const t = useTranslations('Landing.Weather');
   const locale = useLocale();
@@ -71,32 +56,10 @@ export function WeatherSection() {
   useEffect(() => {
     let alive = true;
     (async () => {
+      const weather = await loadWeekendWeather();
+      if (!weather || !weather.mode || !alive) return; // normales Wetter → Sektion bleibt unsichtbar
+      const { mode, loc } = weather;
       try {
-        const stored = getStoredLocation();
-        const loc = stored ?? VIENNA;
-        const offset = nextWeekendOffset(new Date());
-
-        const res = await fetch(
-          `https://api.open-meteo.com/v1/forecast?latitude=${roundCoord(loc.lat)}&longitude=${roundCoord(loc.lng)}` +
-          '&daily=temperature_2m_max,precipitation_sum&timezone=Europe%2FVienna&forecast_days=7',
-        );
-        if (!res.ok) return;
-        const data = (await res.json()) as {
-          daily?: { time: string[]; temperature_2m_max: number[]; precipitation_sum: number[] };
-        };
-        const daily = data.daily;
-        if (!daily || !alive) return;
-
-        const idx = Math.min(offset, daily.time.length - 1);
-        const tempMax = daily.temperature_2m_max[idx];
-        const precipMm = daily.precipitation_sum[idx];
-        if (typeof tempMax !== 'number' || typeof precipMm !== 'number') return;
-
-        let mode: 'rain' | 'heat' | null = null;
-        if (precipMm >= RAIN_MM) mode = 'rain';
-        else if (tempMax >= HEAT_C) mode = 'heat';
-        if (!mode) return; // normales Wetter → Sektion bleibt unsichtbar
-
         const filter = mode === 'rain' ? 'setting=indoor' : 'tag=schwimmen';
         const actRes = await fetch(
           `/api/activities/nearby?lat=${roundCoord(loc.lat)}&lng=${roundCoord(loc.lng)}&limit=8&${filter}`,
@@ -105,16 +68,16 @@ export function WeatherSection() {
         const actBody = (await actRes.json()) as { activities?: NearbyActivity[] };
         if (!actBody.activities || actBody.activities.length < 3) return;
 
-        const dayLabel = new Date(daily.time[idx] + 'T12:00:00').toLocaleDateString(
+        const dayLabel = new Date(weather.day + 'T12:00:00').toLocaleDateString(
           locale === 'de' ? 'de-AT' : 'en-GB',
           { weekday: 'long' },
         );
         setState({
           mode,
           dayLabel,
-          tempMax: Math.round(tempMax),
-          precipMm: Math.round(precipMm),
-          usedStoredLocation: stored != null,
+          tempMax: weather.tempMax,
+          precipMm: weather.precipMm,
+          usedStoredLocation: weather.usedStoredLocation,
           activities: actBody.activities,
         });
       } catch {
@@ -136,7 +99,7 @@ export function WeatherSection() {
       : t('heatKicker');
 
   return (
-    <section className="max-w-[1180px] mx-auto px-4 md:px-14 py-6 md:py-10" data-testid="weather-section">
+    <section id="wetter" className="max-w-[1180px] mx-auto px-4 md:px-14 py-6 md:py-10 scroll-mt-20" data-testid="weather-section">
       <div className="mb-4">
         <p className="text-[10.5px] font-semibold uppercase tracking-[0.22em] text-[var(--v4-ink-50)] mb-2">
           {state.mode === 'rain' ? '🌧' : '☀️'} {kicker}

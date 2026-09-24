@@ -39,21 +39,65 @@
     "devNotice": "Diese Seite ist noch in Entwicklung — technische Fehler sind möglich. Feedback bitte an",
     "Hero": {
       "badge": "Events in Österreich",
-      "title": "Finde Events, die wirklich zu dir passen.",
+      "title": "Bleib ned daham.",
       "subtitle": "Folge deinen Lieblingskünstlern, finde Konzerte, Festivals und alles dazwischen — mit Ticket, an der Abendkasse oder einfach hingehen. Plane den Abend an einem Ort.",
       "ctaArtists": "Künstler suchen",
       "ctaToday": "Heute & Wochenende",
       "ctaSmart": "Frag die KI",
-      "trendLabel": "Trend:",
-      "funnel1Title": "Lieblingskünstler folgen",
-      "funnel1Sub": "Such und folge deine Lieblingskünstler. Wir sagen Bescheid, wenn sie in Österreich spielen.",
-      "funnel1Cta": "Künstler suchen",
-      "funnel2Title": "Events entdecken",
-      "funnel2Sub": "Konzerte, Festivals, Heurige, Märkte — alles, was gerade in Österreich läuft.",
-      "funnel2Cta": "Was läuft heute?",
-      "funnel3Title": "Abend planen",
-      "funnel3Sub": "Ticketlink, Anreise, Reminder — in deiner Tasche, für jedes Event.",
-      "funnel3Cta": "Plan ausprobieren"
+      "trendLabel": "Trend:"
+    },
+    "Season": {
+      "featured": "Tipp",
+      "weatherLine": "{temp}° am {day} {place}",
+      "weatherVienna": "in Wien",
+      "weatherNearby": "bei dir",
+      "weatherRain": "Regen am {day}: ab ins Trockene",
+      "weatherHeat": "{temp}° am {day}: ab ins Wasser",
+      "herbst": {
+        "kicker": "Herbst in Österreich",
+        "title": "Sturm, Heuriger & Kirtag",
+        "more": "Mehr Herbstfeste"
+      },
+      "halloween": {
+        "kicker": "Halloween",
+        "title": "Grusel, Kürbis & Weinfeste",
+        "more": "Mehr zu Halloween"
+      },
+      "advent": {
+        "kicker": "Advent",
+        "title": "Punsch, Krampus & Christkindlmarkt",
+        "more": "Alle Adventmärkte"
+      },
+      "silvester": {
+        "kicker": "Jahreswechsel",
+        "title": "Silvester & die ersten Bälle",
+        "more": "Mehr zu Silvester"
+      },
+      "fasching": {
+        "kicker": "Ballsaison",
+        "title": "Bälle & Fasching",
+        "more": "Alle Bälle"
+      },
+      "winter": {
+        "kicker": "Winter",
+        "title": "Piste, Perchten & Ballnächte",
+        "more": "Mehr Winter"
+      },
+      "ostern": {
+        "kicker": "Ostern",
+        "title": "Ostermärkte & Frühlingsmärkte",
+        "more": "Alle Ostermärkte"
+      },
+      "fruehling": {
+        "kicker": "Frühling",
+        "title": "Maibaum, Märkte & Weinfeste",
+        "more": "Mehr Frühling"
+      },
+      "sommer": {
+        "kicker": "Sommer",
+        "title": "Sonnwend, Kirtag & Open Air",
+        "more": "Mehr Sommerfeste"
+      }
     },
     "ArtistTeaser": {
       "badge": "Lieblingskünstler · nur eingeloggt",

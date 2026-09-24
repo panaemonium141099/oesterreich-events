@@ -1,11 +1,12 @@
 import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
-import { V4FunnelCard } from '@/components/Events/v4';
 import { V4SearchInput } from '@/components/Layout/v4/V4SearchInput';
+import type { LandingSeason } from '@/lib/v4/get-landing-data';
+import { SeasonCard } from './SeasonCard';
 
 const TRENDS = ['Bilderbuch', 'FM4 Frequency', 'Wanda', 'Seefestspiele Mörbisch'];
 
-export function HeroV4() {
+export function HeroV4({ season }: { season: LandingSeason }) {
   const t = useTranslations('Landing.Hero');
   return (
     <section className="relative overflow-hidden border-b border-[var(--v4-hairline-1)] py-9 md:py-18">
@@ -74,26 +75,7 @@ export function HeroV4() {
           </div>
         </div>
 
-        <div className="flex flex-col gap-2.5">
-          <V4FunnelCard
-            ordinal="01" icon="music" accent="match" primary
-            title={t('funnel1Title')}
-            sub={t('funnel1Sub')}
-            cta={t('funnel1Cta')} href="/artists" trackId="funnel_artists"
-          />
-          <V4FunnelCard
-            ordinal="02" icon="map" accent="ticket"
-            title={t('funnel2Title')}
-            sub={t('funnel2Sub')}
-            cta={t('funnel2Cta')} href="/entdecken" trackId="funnel_entdecken"
-          />
-          <V4FunnelCard
-            ordinal="03" icon="ticket" accent="go"
-            title={t('funnel3Title')}
-            sub={t('funnel3Sub')}
-            cta={t('funnel3Cta')} href="/plans" trackId="funnel_plan"
-          />
-        </div>
+        <SeasonCard season={season}/>
       </div>
     </section>
   );
