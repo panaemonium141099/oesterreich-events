@@ -1,7 +1,6 @@
 import * as cheerio from 'cheerio';
 import { BaseScraper } from './BaseScraper';
 import { categorizeEvent } from '../categorize';
-import { getDistrictByLocation } from '../districts';
 import type { ScrapedEvent } from '@/types/events';
 
 export class LandesregierungScraper extends BaseScraper {
@@ -49,7 +48,6 @@ export class LandesregierungScraper extends BaseScraper {
           end_date: endDate || undefined,
           location_name: location || undefined,
           bundesland: 'burgenland',
-          district: getDistrictByLocation(location) || undefined,
           category: categorizeEvent(title, description),
           image_url: imageUrl,
         });

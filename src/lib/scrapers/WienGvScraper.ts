@@ -113,6 +113,8 @@ export class WienGvScraper extends BaseScraper {
       bundesland: 'wien',
       latitude: 48.2082,
       longitude: 16.3738,
+      // Stadtmittelpunkt, kein Veranstaltungsort: als Gebietsangabe kennzeichnen.
+      coords_precision: 'municipality',
       category: categorizeEvent(title),
       image_url: imageUrl || undefined,
     };

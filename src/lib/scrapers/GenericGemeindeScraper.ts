@@ -21,17 +21,21 @@ import { detectNextPage, detectMonthNavigation, MAX_PAGES_PER_SITE } from './pag
 import { extractGem2goDetail } from './gem2go-detail';
 import { isUsableDetailHref } from './gemeinde-event-discovery';
 import { applyGemeindeContext } from './gemeinde-context';
+import { withStammdaten, type GemeindeStammdaten } from './gemeinden/stammdaten';
+
+// Die Datei führt nur die Identität der Gemeinde; PLZ, Bezirk und
+// Mittelpunkt ergänzt withStammdaten() aus der Stammdatei.
+interface GemeindeEventPageRaw {
+  gemeinde: { name: string; website: string; bundesland: string; idKey: string; region?: boolean };
+  eventPageUrl: string;
+  path: string;
+  dateCount: number;
+  eventKeywords: number;
+  htmlSize: number;
+}
 
 interface GemeindeEventPage {
-  gemeinde: {
-    name: string;
-    website: string;
-    plz: string;
-    bezirk: string;
-    bundesland: string;
-    lat: number;
-    lng: number;
-  };
+  gemeinde: GemeindeStammdaten & { website: string; region?: boolean };
   eventPageUrl: string;
   path: string;
   dateCount: number;
@@ -66,7 +70,11 @@ export class GenericGemeindeScraper extends BaseScraper {
       return [];
     }
 
-    const pages: GemeindeEventPage[] = JSON.parse(readFileSync(dataPath, 'utf8'));
+    const rawPages: GemeindeEventPageRaw[] = JSON.parse(readFileSync(dataPath, 'utf8'));
+    const pages: GemeindeEventPage[] = rawPages.flatMap(p => {
+      const [g] = withStammdaten([p.gemeinde]);
+      return g ? [{ ...p, gemeinde: g }] : [];
+    });
     console.log(`  Loading ${pages.length} municipality event pages...`);
 
     const allEvents: ScrapedEvent[] = [];
@@ -167,7 +175,7 @@ export class GenericGemeindeScraper extends BaseScraper {
 
     // fn-25 B3: Gemeinde als Kontext (city + PLZ), Mittelpunkt nur als
     // gekennzeichnete Gebietsangabe, kein Gemeindename als Veranstaltungsort.
-    const ctx = { name: g.name, plz: g.plz, lat: g.lat, lng: g.lng, bundesland, bezirk: g.bezirk };
+    const ctx = { name: g.name, plz: g.plz, lat: g.lat, lng: g.lng, bundesland, bezirk: g.bezirk, region: g.region };
     return allEvents.map(e => applyGemeindeContext({ ...e, bundesland }, ctx));
   }
 
@@ -244,7 +252,7 @@ export class GenericGemeindeScraper extends BaseScraper {
       const date = this.parseDate(dateText);
 
       events.push({
-        source_id: `gemeinden-generic-${g.plz}-${this.slugify(title)}`,
+        source_id: `gemeinden-generic-${g.idKey}-${this.slugify(title)}`,
         source_name: this.name,
         source_url: link ? new URL(link, page.eventPageUrl).href : page.eventPageUrl,
         title,
@@ -267,7 +275,7 @@ export class GenericGemeindeScraper extends BaseScraper {
         const date = this.parseDate(dateText);
 
         events.push({
-          source_id: `gemeinden-generic-${g.plz}-${this.slugify(title)}`,
+          source_id: `gemeinden-generic-${g.idKey}-${this.slugify(title)}`,
           source_name: this.name,
           source_url: link ? new URL(link, page.eventPageUrl).href : page.eventPageUrl,
           title,
@@ -300,7 +308,7 @@ export class GenericGemeindeScraper extends BaseScraper {
       if (!date) return; // Must have a valid date for Typo3
 
       events.push({
-        source_id: `gemeinden-generic-${g.plz}-${this.slugify(title)}`,
+        source_id: `gemeinden-generic-${g.idKey}-${this.slugify(title)}`,
         source_name: this.name,
         source_url: link ? new URL(link, page.eventPageUrl).href : page.eventPageUrl,
         title,
@@ -383,7 +391,7 @@ export class GenericGemeindeScraper extends BaseScraper {
         : dateStr;
 
       events.push({
-        source_id: `gemeinden-generic-${g.plz}-${this.slugify(title)}-${dateStr}`,
+        source_id: `gemeinden-generic-${g.idKey}-${this.slugify(title)}-${dateStr}`,
         source_name: this.name,
         source_url: link ? new URL(link, page.eventPageUrl).href : page.eventPageUrl,
         title,

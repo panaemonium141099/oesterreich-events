@@ -110,6 +110,8 @@ export class FeverUpScraper extends BaseScraper {
           location_name: ev.venue || undefined,
           latitude: 48.2082,
           longitude: 16.3738,
+          // Stadtmittelpunkt, kein Veranstaltungsort: als Gebietsangabe kennzeichnen.
+          coords_precision: 'municipality',
           bundesland: 'wien',
           category: categorizeEvent(ev.title),
           image_url: ev.image || undefined,

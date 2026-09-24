@@ -2,10 +2,20 @@ import * as cheerio from 'cheerio';
 import { BaseScraper } from './BaseScraper';
 import { applyGemeindeContext } from './gemeinde-context';
 import { categorizeEvent } from '../categorize';
-import { GEMEINDEN, type GemeindeInfo } from './gemeinden/gemeindeList';
+import { GEMEINDEN as GEMEINDEN_LISTE } from './gemeinden/gemeindeList';
+import { withStammdaten } from './gemeinden/stammdaten';
+
 import type { ScrapedEvent } from '@/types/events';
 import { detectNextPage, detectMonthNavigation, MAX_PAGES_PER_SITE } from './pagination';
 import { isEventType } from '../connectors/json-ld-connector';
+
+// Ortsdaten nur aus der Stammdatei (gemeinden/stammdaten.ts), lazy geladen.
+let listCache: ReturnType<typeof withStammdaten<(typeof GEMEINDEN_LISTE)[number]>> | null = null;
+function gemeindenListe() {
+  listCache ??= withStammdaten(GEMEINDEN_LISTE);
+  return listCache;
+}
+type GemeindeInfo = ReturnType<typeof gemeindenListe>[number];
 
 /**
  * Meta-Scraper der systematisch österreichische Gemeinde-Websites
@@ -50,7 +60,7 @@ export class GemeindeListScraper extends BaseScraper {
   };
 
   async scrape(): Promise<ScrapedEvent[]> {
-    this.log(`Starte Gemeinde-Scraping für ${GEMEINDEN.length} Gemeinden...`);
+    this.log(`Starte Gemeinde-Scraping für ${gemeindenListe().length} Gemeinden...`);
     const allEvents: ScrapedEvent[] = [];
     let gemeindenMitKalender = 0;
     let gemeindenOhneKalender = 0;
@@ -60,7 +70,7 @@ export class GemeindeListScraper extends BaseScraper {
     // wie gem2go & Co (Telemetrie 2026-07-15: Timeout nach 25 min, Daten
     // verworfen) → Soft-Budget + Tagesrotation, s. BaseScraper.
     const deadline = this.softDeadline();
-    const rotated = this.rotateDaily(GEMEINDEN.filter(g => g.website !== 'https://none'));
+    const rotated = this.rotateDaily(gemeindenListe().filter(g => g.website !== 'https://none'));
 
     for (let i = 0; i < rotated.length; i++) {
       if (Date.now() > deadline) {
@@ -69,7 +79,7 @@ export class GemeindeListScraper extends BaseScraper {
       }
       const gemeinde = rotated[i];
       try {
-        this.log(`[${i + 1}/${GEMEINDEN.length}] ${gemeinde.name} (${gemeinde.bundesland})...`);
+        this.log(`[${i + 1}/${gemeindenListe().length}] ${gemeinde.name} (${gemeinde.bundesland})...`);
 
         // 1. Finde den Event-Kalender
         const calendarUrl = await this.findCalendarUrl(gemeinde);
@@ -268,7 +278,7 @@ export class GemeindeListScraper extends BaseScraper {
 
           const slug = this.slugify(title);
           const event: ScrapedEvent = {
-            source_id: `gemeinde-${gemeinde.plz}-${slug}`,
+            source_id: `gemeinde-${gemeinde.idKey}-${slug}`,
             source_name: this.name,
             source_url: pageUrl,
             title,
@@ -379,7 +389,7 @@ export class GemeindeListScraper extends BaseScraper {
 
         const slug = this.slugify(title);
         events.push({
-          source_id: `gemeinde-${gemeinde.plz}-${slug}`,
+          source_id: `gemeinde-${gemeinde.idKey}-${slug}`,
           source_name: this.name,
           source_url: eventUrl,
           title,
@@ -431,7 +441,7 @@ export class GemeindeListScraper extends BaseScraper {
 
       const slug = this.slugify(title);
       events.push({
-        source_id: `gemeinde-${gemeinde.plz}-${slug}`,
+        source_id: `gemeinde-${gemeinde.idKey}-${slug}`,
         source_name: this.name,
         source_url: eventUrl,
         title,
@@ -464,7 +474,7 @@ export class GemeindeListScraper extends BaseScraper {
 
         const slug = this.slugify(title);
         events.push({
-          source_id: `gemeinde-${gemeinde.plz}-${slug}`,
+          source_id: `gemeinde-${gemeinde.idKey}-${slug}`,
           source_name: this.name,
           source_url: eventUrl,
           title,
@@ -503,7 +513,7 @@ export class GemeindeListScraper extends BaseScraper {
 
       const slug = this.slugify(title);
       events.push({
-        source_id: `gemeinde-${gemeinde.plz}-${slug}`,
+        source_id: `gemeinde-${gemeinde.idKey}-${slug}`,
         source_name: this.name,
         source_url: eventUrl,
         title,

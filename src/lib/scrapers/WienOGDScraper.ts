@@ -194,6 +194,8 @@ export class WienOGDScraper extends BaseScraper {
           // Wien center — geocoding happens in the pipeline
           latitude: 48.2082,
           longitude: 16.3738,
+          // Stadtmittelpunkt, kein Veranstaltungsort: als Gebietsangabe kennzeichnen.
+          coords_precision: 'municipality',
           category,
           price_text: priceRaw,
           image_url: imageUrl,

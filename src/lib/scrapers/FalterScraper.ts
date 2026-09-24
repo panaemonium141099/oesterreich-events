@@ -1,7 +1,6 @@
 import * as cheerio from 'cheerio';
 import { BaseScraper } from './BaseScraper';
 import { categorizeEvent } from '../categorize';
-import { geocodeLocation } from '../geocoding';
 import type { ScrapedEvent } from '@/types/events';
 
 /**
@@ -46,28 +45,10 @@ export class FalterScraper extends BaseScraper {
       }
     }
 
-    // Geocode unique venue names
-    const venueCache = new Map<string, { lat: number; lon: number } | null>();
+    // Koordinaten liefert nicht der Scraper: Adressen geocodiert die Pipeline
+    // strukturiert (geocode-addresses.ts), Namenssuche gibt es bewusst nicht.
     const events = Array.from(allEvents.values());
-
-    for (const ev of events) {
-      if (ev.latitude && ev.latitude !== 48.2082) continue; // already geocoded
-      const key = ev.location_name || '';
-      if (!key || key === 'Wien') continue;
-
-      if (!venueCache.has(key)) {
-        const coords = await geocodeLocation(`${key}, Wien`, 'Wien, Austria');
-        venueCache.set(key, coords ? { lat: coords.latitude, lon: coords.longitude } : null);
-        await this.sleep(1100);
-      }
-      const c = venueCache.get(key);
-      if (c) {
-        ev.latitude = c.lat;
-        ev.longitude = c.lon;
-      }
-    }
-
-    this.log(`${events.length} Events gescrapt, ${venueCache.size} Venues geocodiert`);
+    this.log(`${events.length} Events gescrapt`);
 
     // Detail-page enrichment via the shared extractor. Falter pages carry
     // Schema.org microdata with streetAddress — universal-only achieves
@@ -126,8 +107,6 @@ export class FalterScraper extends BaseScraper {
           title,
           start_date: startDate,
           location_name: venue || undefined,
-          latitude: 48.2082,
-          longitude: 16.3738,
           category: categorizeEvent(title),
           image_url: imageUrl,
           bundesland: 'wien',

@@ -9,6 +9,7 @@
  * file too, otherwise existing rows stay misspelled.
  */
 import { DISTRICTS_BY_BUNDESLAND, type BundeslandId } from './districtsAT';
+import { loadGemeindenMaster } from './gemeinden/data';
 
 export type CanonicalDistrict = string; // lowercased canonical name
 
@@ -149,23 +150,40 @@ const ALIAS_MAP: Record<BundeslandId, Record<string, string>> = {
  * Each entry now also lists the canonical Stadt-district name so the
  * reverse rule (LAND_TO_STADT) can use the same source of truth.
  */
-// Exportiert für plz-district.ts (fn-19): die Stadt-PLZ-Blöcke sind die
-// präziseste PLZ→Bezirk-Quelle für Statutarstädte (die Gemeinde-Registry
-// führt pro Stadt nur EINE PLZ).
-export const STADT_PLZ: Record<string, { stadtPLZ: ReadonlySet<string>; stadtDistrict: string; landDistrict: string; bl: BundeslandId }> = {
-  'graz':            { stadtPLZ: new Set(['8010','8011','8013','8020','8021','8036','8041','8042','8043','8044','8045','8046','8047','8051','8052','8053','8054','8055','8063','8070','8071','8072','8073','8074','8075','8076','8077']), stadtDistrict: 'graz (stadt)', landDistrict: 'graz-umgebung', bl: 'steiermark' },
-  'linz':            { stadtPLZ: new Set(['4010','4020','4030','4040','4050']), stadtDistrict: 'linz (stadt)', landDistrict: 'linz-land', bl: 'oberoesterreich' },
-  'statutarstadt':   { stadtPLZ: new Set(['4010','4020','4030','4040','4050']), stadtDistrict: 'linz (stadt)', landDistrict: 'linz-land', bl: 'oberoesterreich' },
-  'steyr':           { stadtPLZ: new Set(['4400','4402']), stadtDistrict: 'steyr (stadt)', landDistrict: 'steyr-land', bl: 'oberoesterreich' },
-  'wels':            { stadtPLZ: new Set(['4600']), stadtDistrict: 'wels (stadt)', landDistrict: 'wels-land', bl: 'oberoesterreich' },
-  'salzburg':        { stadtPLZ: new Set(['5020','5023','5026']), stadtDistrict: 'salzburg (stadt)', landDistrict: 'salzburg-umgebung', bl: 'salzburg' },
-  'klagenfurt':      { stadtPLZ: new Set(['9010','9020','9061','9062','9063']), stadtDistrict: 'klagenfurt (stadt)', landDistrict: 'klagenfurt-land', bl: 'kaernten' },
-  'villach':         { stadtPLZ: new Set(['9500','9504','9505','9506','9507','9508']), stadtDistrict: 'villach (stadt)', landDistrict: 'villach-land', bl: 'kaernten' },
-  'innsbruck':       { stadtPLZ: new Set(['6010','6015','6020']), stadtDistrict: 'innsbruck (stadt)', landDistrict: 'innsbruck-land', bl: 'tirol' },
-  'wiener-neustadt': { stadtPLZ: new Set(['2700']), stadtDistrict: 'wiener neustadt (stadt)', landDistrict: 'wiener neustadt (land)', bl: 'niederoesterreich' },
-  'st-poelten':      { stadtPLZ: new Set(['3100','3104','3107','3109']), stadtDistrict: 'st. pölten (stadt)', landDistrict: 'st. pölten (land)', bl: 'niederoesterreich' },
-  'krems':           { stadtPLZ: new Set(['3500']), stadtDistrict: 'krems (stadt)', landDistrict: 'krems (land)', bl: 'niederoesterreich' },
+// Statutarstädte: Stadt- und Umlandbezirk. Welche PLZ zur Stadt gehören,
+// steht NICHT hier, sondern kommt aus der Gemeinde-Stammdatei (alle PLZ der
+// Stadtgemeinde laut Statistik Austria). Die frühere Handliste zählte für
+// Graz 8063/8071/8072/8075/8076 zur Stadt, das sind Eggersdorf,
+// Hausmannstätten, Fernitz, Hart und Vasoldsberg: deren Events standen
+// unter Bezirk „graz (stadt)" (Befund 2026-09-24).
+const STADT_RULES: Record<string, { gkz: string; stadtDistrict: string; landDistrict: string; bl: BundeslandId }> = {
+  'graz':            { gkz: '60101', stadtDistrict: 'graz (stadt)', landDistrict: 'graz-umgebung', bl: 'steiermark' },
+  'linz':            { gkz: '40101', stadtDistrict: 'linz (stadt)', landDistrict: 'linz-land', bl: 'oberoesterreich' },
+  'statutarstadt':   { gkz: '40101', stadtDistrict: 'linz (stadt)', landDistrict: 'linz-land', bl: 'oberoesterreich' },
+  'steyr':           { gkz: '40201', stadtDistrict: 'steyr (stadt)', landDistrict: 'steyr-land', bl: 'oberoesterreich' },
+  'wels':            { gkz: '40301', stadtDistrict: 'wels (stadt)', landDistrict: 'wels-land', bl: 'oberoesterreich' },
+  'salzburg':        { gkz: '50101', stadtDistrict: 'salzburg (stadt)', landDistrict: 'salzburg-umgebung', bl: 'salzburg' },
+  'klagenfurt':      { gkz: '20101', stadtDistrict: 'klagenfurt (stadt)', landDistrict: 'klagenfurt-land', bl: 'kaernten' },
+  'villach':         { gkz: '20201', stadtDistrict: 'villach (stadt)', landDistrict: 'villach-land', bl: 'kaernten' },
+  'innsbruck':       { gkz: '70101', stadtDistrict: 'innsbruck (stadt)', landDistrict: 'innsbruck-land', bl: 'tirol' },
+  'wiener-neustadt': { gkz: '30401', stadtDistrict: 'wiener neustadt (stadt)', landDistrict: 'wiener neustadt (land)', bl: 'niederoesterreich' },
+  'st-poelten':      { gkz: '30201', stadtDistrict: 'st. pölten (stadt)', landDistrict: 'st. pölten (land)', bl: 'niederoesterreich' },
+  'krems':           { gkz: '30101', stadtDistrict: 'krems (stadt)', landDistrict: 'krems (land)', bl: 'niederoesterreich' },
 };
+
+type StadtRule = { stadtPLZ: ReadonlySet<string>; stadtDistrict: string; landDistrict: string; bl: BundeslandId };
+let stadtCache: Record<string, StadtRule> | null = null;
+
+/** Stadt-PLZ-Blöcke der Statutarstädte, abgeleitet aus der Stammdatei. */
+export function stadtPlzRules(): Record<string, StadtRule> {
+  if (stadtCache) return stadtCache;
+  const byGkz = new Map(loadGemeindenMaster().map(g => [g.gkz, g]));
+  stadtCache = Object.fromEntries(Object.entries(STADT_RULES).map(([k, r]) => [
+    k,
+    { stadtPLZ: new Set(byGkz.get(r.gkz)?.plzAll ?? []), stadtDistrict: r.stadtDistrict, landDistrict: r.landDistrict, bl: r.bl },
+  ]));
+  return stadtCache;
+}
 
 /**
  * Reverse lookup — when the scraper tags an event as the surrounding
@@ -174,13 +192,11 @@ export const STADT_PLZ: Record<string, { stadtPLZ: ReadonlySet<string>; stadtDis
  * tourism feeds that lump everything under "graz-umgebung" leak ~1.4k
  * Graz-city events into the Umgebung filter (and out of Graz-Stadt).
  */
-const LAND_TO_STADT: Record<string, { stadtPLZ: ReadonlySet<string>; stadtDistrict: string; bl: BundeslandId }> = (() => {
-  const out: Record<string, { stadtPLZ: ReadonlySet<string>; stadtDistrict: string; bl: BundeslandId }> = {};
-  for (const rule of Object.values(STADT_PLZ)) {
-    out[rule.landDistrict] = { stadtPLZ: rule.stadtPLZ, stadtDistrict: rule.stadtDistrict, bl: rule.bl };
-  }
+function landToStadt(): Record<string, StadtRule> {
+  const out: Record<string, StadtRule> = {};
+  for (const rule of Object.values(stadtPlzRules())) out[rule.landDistrict] = rule;
   return out;
-})();
+}
 
 /**
  * Normalise a raw district string. Returns the canonical lowercase name
@@ -204,7 +220,7 @@ export function normalizeDistrict(
 
   // (1) Stadt-name + Land-PLZ → Land. Catches scrapes that tag
   // bare "graz" but the event lives in the surrounding district.
-  const stadtRule = STADT_PLZ[raw];
+  const stadtRule = stadtPlzRules()[raw];
   if (stadtRule && stadtRule.bl === blId && trimmedPLZ && !stadtRule.stadtPLZ.has(trimmedPLZ)) {
     return stadtRule.landDistrict;
   }
@@ -213,7 +229,7 @@ export function normalizeDistrict(
   // everything under "graz-umgebung" but the event PLZ is in the
   // city block — without this, ~1.4k Graz-city events disappear
   // into the Umgebung filter on every fresh scrape.
-  const landRule = LAND_TO_STADT[raw];
+  const landRule = landToStadt()[raw];
   if (landRule && landRule.bl === blId && trimmedPLZ && landRule.stadtPLZ.has(trimmedPLZ)) {
     return landRule.stadtDistrict;
   }
@@ -224,7 +240,7 @@ export function normalizeDistrict(
     // Alias resolved — but if the resolved value is a Stadt with a
     // PLZ that doesn't fit, kick it to the corresponding Land instead.
     const resolved = aliases[raw];
-    for (const rule of Object.values(STADT_PLZ)) {
+    for (const rule of Object.values(stadtPlzRules())) {
       if (rule.stadtDistrict === resolved && rule.bl === blId && trimmedPLZ && !rule.stadtPLZ.has(trimmedPLZ)) {
         return rule.landDistrict;
       }

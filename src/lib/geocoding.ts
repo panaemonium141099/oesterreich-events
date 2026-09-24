@@ -1,14 +1,10 @@
 /**
- * Nominatim-backed geocoder with shared Supabase cache.
- *
- * `geocodeEventsWithoutCoords` (the SQLite-reading batch helper) was removed
- * as part of the Supabase-only standardisation; the scrape pipeline's
- * `fix-geocoding.ts` + `openai-geocode.ts` steps handle post-scrape coord
- * resolution against Supabase.
+ * Nominatim-Geocoder mit gemeinsamem Cache, nur für Freitext, den ein Mensch
+ * prüft (Veranstalter-Einreichungen im Admin, Barrierefrei-Import). Scraper
+ * geocodieren NICHT selbst: Eventadressen löst die Pipeline strukturiert auf
+ * (src/scripts/geocode-addresses.ts), die Entscheidung trifft der Resolver.
  */
 
-import { KNOWN_VENUES } from './known-venues';
-import { matchPlaceName } from './utils/place-match';
 import { getCachedGeo, setCachedGeo } from './geocode-cache';
 
 interface GeoResult {
@@ -27,15 +23,8 @@ const AUSTRIA_BBOX = {
 // Nominatim place_rank threshold: reject results broader than town/village level.
 const MIN_PLACE_RANK = 16;
 
-const KNOWN_LOCATIONS: Record<string, GeoResult> = KNOWN_VENUES;
-
 export async function geocodeLocation(query: string, hint = 'Austria'): Promise<GeoResult | null> {
   if (!query) return null;
-
-  // Check known locations first (Unicode-aware token matching, no substring FPs).
-  for (const [key, coords] of Object.entries(KNOWN_LOCATIONS)) {
-    if (matchPlaceName(query, key)) return coords;
-  }
 
   // Shared Supabase cache (include hint in key so different regions don't collide).
   const queryLower = query.toLowerCase().trim();

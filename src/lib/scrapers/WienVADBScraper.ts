@@ -1,7 +1,6 @@
 import * as cheerio from 'cheerio';
 import { BaseScraper } from './BaseScraper';
 import { categorizeEvent } from '../categorize';
-import { geocodeLocation } from '../geocoding';
 import type { ScrapedEvent } from '@/types/events';
 
 /**
@@ -76,30 +75,10 @@ export class WienVADBScraper extends BaseScraper {
       await this.rateLimit();
     }
 
-    // Geocode events without coordinates
+    // Koordinaten liefert nicht der Scraper: Adressen geocodiert die Pipeline
+    // strukturiert (geocode-addresses.ts), Namenssuche gibt es bewusst nicht.
     const events = Array.from(allEvents.values());
-    let geocoded = 0;
-    for (const ev of events) {
-      if (!ev.latitude && ev.address) {
-        const coords = await geocodeLocation(ev.address, 'Wien, Austria');
-        if (coords) {
-          ev.latitude = coords.latitude;
-          ev.longitude = coords.longitude;
-          geocoded++;
-        }
-        await this.sleep(1100); // Nominatim rate limit
-      } else if (!ev.latitude && ev.location_name && ev.location_name !== 'Wien') {
-        const coords = await geocodeLocation(ev.location_name + ', Wien', 'Wien, Austria');
-        if (coords) {
-          ev.latitude = coords.latitude;
-          ev.longitude = coords.longitude;
-          geocoded++;
-        }
-        await this.sleep(1100);
-      }
-    }
-
-    this.log(`${events.length} Events total, ${geocoded} neu geocodiert`);
+    this.log(`${events.length} Events total`);
     return events;
   }
 
@@ -181,8 +160,6 @@ export class WienVADBScraper extends BaseScraper {
           address: addressRaw || undefined,
           district,
           // Wien center as fallback — will be replaced by geocoding above
-          latitude: 48.2082,
-          longitude: 16.3738,
           category: categorizeEvent(title, description, tags),
           image_url: imageUrl,
           organizer,

@@ -952,7 +952,7 @@ export function EventDetailV2({
           )}
         </div>
         <div className="flex gap-4">
-          <Link href={`/events/create?from=${event.id}`} className="hover:text-white">
+          <Link href="/event-inserieren" className="hover:text-white">
             Ähnliches Event erstellen
           </Link>
         </div>

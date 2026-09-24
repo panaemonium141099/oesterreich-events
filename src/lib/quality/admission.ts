@@ -101,7 +101,7 @@ export interface AdmissionOptions {
    * PLZ → Bundesland-ID. Dritte, von Koordinate UND Label unabhängige
    * Stimme: sie entscheidet, welche der beiden widersprüchlichen Angaben
    * der Ausreisser ist. In Produktion `getBundeslandFromPLZ` aus
-   * `@/lib/plzCoordinates`.
+   * `@/lib/location/plz-bundesland`.
    */
   plzRegionOf?: (plz: string) => string | null;
   /** Referenzzeitpunkt (Tests). Default: jetzt. */

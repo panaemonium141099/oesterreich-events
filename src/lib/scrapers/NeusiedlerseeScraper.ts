@@ -1,7 +1,6 @@
 import * as cheerio from 'cheerio';
 import { BaseScraper } from './BaseScraper';
 import { categorizeEvent } from '../categorize';
-import { getDistrictByLocation, getDistrictByCoordinates } from '../districts';
 import type { ScrapedEvent } from '@/types/events';
 
 export class NeusiedlerseeScraper extends BaseScraper {
@@ -178,9 +177,6 @@ export class NeusiedlerseeScraper extends BaseScraper {
         // BurgenlandInfoScraper for the same fix and audit numbers.
         address: this.formatAddress(location?.address || organizer?.address),
         postal_code: location?.address?.postalCode || organizer?.address?.postalCode || undefined,
-        district: getDistrictByLocation(location?.name || '')
-          || (lat ? getDistrictByCoordinates(lat, lng!) : null)
-          || undefined,
         latitude: lat,
         longitude: lng,
         category: categorizeEvent(title, description),

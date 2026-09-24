@@ -26,10 +26,10 @@ describe('scrape-pipeline wiring (cat-v2)', () => {
     expect(file).toMatch(/categorize-events\.ts --deterministic-backfill/);
   });
 
-  it('categorization_backfill runs before geocoding', () => {
+  it('categorization_backfill runs before address geocoding', () => {
     const file = readFileSync(join(process.cwd(), 'src/scripts/scrape-pipeline.ts'), 'utf8');
     const bIdx = file.indexOf("runStep('categorization_backfill'");
-    const gIdx = file.indexOf("runStep('geocoding'");
+    const gIdx = file.indexOf("runStep('address_geocoding'");
     expect(bIdx).toBeGreaterThan(-1);
     expect(gIdx).toBeGreaterThan(-1);
     expect(bIdx).toBeLessThan(gIdx);

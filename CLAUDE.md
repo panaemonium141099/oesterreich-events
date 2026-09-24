@@ -53,7 +53,7 @@ node / next.js
 - **Scraping:** Cheerio (SSR) + Puppeteer-core (SPA); Eventim via offiziellen
   PFT-Feed (`src/lib/eventim/`, Basic Auth, Affiliate-Deeplinks)
 - **KI (nur Query-Zeit / Batch-Utility, KEIN Enrichment):** Gemini 2.5 Flash
-  für Smart-Suche-Intent + Concierge; OpenAI für Batch-Geocoding + Outreach-Drafts
+  für Smart-Suche-Intent + Concierge; OpenAI für Outreach-Drafts
 - **E-Mail:** Brevo (primär) + Resend (Fallback); SMS: Twilio
 - **Analytics:** eigene `analytics_events`-Tabelle (PageviewTracker +
   ClickTracker sammeln alle `data-track`-Attribute ein, u. a. `ticket_click`)
@@ -94,6 +94,20 @@ node / next.js
   event_map_points stündlich), match-artists stündlich.
 
 ## Wichtige Pfade
+- **Ortsdaten: EIN System (fn-27, 2026-09-24).** Stammdaten nur in
+  `data/gemeinden-at.json` (Statistik Austria: Kennziffer, Name, alle PLZ,
+  Bezirk; Mittelpunkte in `data/stammdaten/`) und `data/plz-at.json`
+  (RTR/Post). Zugriff nur über `src/lib/gemeinden/data.ts` und
+  `src/lib/location/`. Scraper-Gemeindelisten tragen NUR Identität + URL,
+  Ortsdaten via `src/lib/scrapers/gemeinden/stammdaten.ts`
+  (`withStammdaten`), Kontext via `applyGemeindeContext`. Scraper
+  geocodieren nicht und setzen keine Platzhalter-Koordinaten (Stadt-
+  mittelpunkt nur mit `coords_precision: 'municipality'`). Bezirk nur über
+  `districtForLocation` (plz-district.ts), Event-URL-Ort = Post-Ort der PLZ.
+  Events entstehen nur serverseitig (keine Insert-Policy für Nutzer).
+  Wächter: `src/__tests__/lib/scrapers/gemeinde-config.test.ts`. Keine
+  neuen PLZ-/Koordinaten-Tabellen anlegen, keine Fix-Skripte: Fehler an der
+  Quelle (Stammdaten oder Scraper-Liste) beheben.
 - `src/app/page.tsx` — Landing: statische ISR-Shell (KEIN cookies()/auth im
   RSC-Pfad — Personalisierung client-seitig via `/api/me/landing` +
   `PersonalizedMatches`); Datenqueries über cookie-freien Anon-Client
@@ -166,7 +180,7 @@ npm run match:viator         # Viator-Matching + Preis-Refresh (--match | --refr
                              # --dry-run | --limit N); braucht VIATOR_API_KEY
 npm run import-osm-pois      # OSM-Freizeit-POIs → osm_pois (Overpass, Disk-Cache;
                              # --fetch-only | --skip-fetch | --region X | --dry-run)
-npm run openai-geocode       # Batch-Geocoding für NULL-Koordinaten
+npm run build:stammdaten     # data/gemeinden-at.json + URL-Ortsslugs neu bauen
 npm run scrape:festival-lineups | match-artists
 ```
 

@@ -1,14 +1,11 @@
-import { requireUserOrRedirect } from '@/lib/supabase/require-user';
-import { CreateEventPageClient } from './CreateEventPageClient';
+import { permanentRedirect } from 'next/navigation';
 
 /**
- * /events/create — user-submitted event creation form.
- *
- * Server-side auth-gate; creating events requires a logged-in user.
- * Anonymous visitors get a 307 to /auth/login with
- * ?returnTo=/events/create.
+ * /events/create schrieb früher direkt aus dem Browser in `events`, an
+ * Ortsentscheidung (Resolver) und Freigabe vorbei. Events kommen jetzt nur
+ * noch über die Einreichung mit Admin-Freigabe (/event-inserieren), die
+ * denselben Schreibweg wie die Scraper nutzt.
  */
-export default async function CreateEventPage() {
-  await requireUserOrRedirect('/events/create');
-  return <CreateEventPageClient />;
+export default function CreateEventPage() {
+  permanentRedirect('/event-inserieren');
 }

@@ -38,7 +38,7 @@ describe('activityBezirk', () => {
       ['Bruck an der Leitha', 'bruck an der leitha'],
       ['Krems an der Donau', 'krems (stadt)'],
       ['Eisenstadt', 'eisenstadt'],
-      ['Sankt Johann im Pongau', 'sankt johann im pongau'],
+      ['St. Johann im Pongau', 'sankt johann im pongau'],
     ];
     for (const [name, expected] of cases) {
       const { gemeinde, bl } = byName(name);

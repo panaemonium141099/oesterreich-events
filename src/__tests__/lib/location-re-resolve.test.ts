@@ -8,6 +8,7 @@ import { describe, it, expect } from 'vitest';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { inputFromStoredRow, reResolveStoredEvents, contractedDecision, publishChangeFor, type StoredEventLocationRow } from '@/lib/location/re-resolve';
 import { resolveEventLocation } from '@/lib/location/resolver';
+import { districtForLocation } from '@/lib/plz-district';
 
 interface DbEvent { id: string; updated_at: string | null }
 
@@ -115,6 +116,7 @@ describe('reResolveStoredEvents: Schutz vor Überrollen', () => {
     row.latitude = d.latitude;
     row.longitude = d.longitude;
     row.location_resolution = { input_hash: d.input_hash };
+    row.district = districtForLocation(d.gemeinde, d.postal_code ?? row.postal_code, row.bundesland, row.district);
     const writes: Array<{ id: unknown; payload: Record<string, unknown> }> = [];
     const sb = fakeClient([{ id: 'ev-1', updated_at: '2026-09-14T08:00:00Z' }], writes);
     const [res] = await reResolveStoredEvents(sb, [row], { phase: 'test' });

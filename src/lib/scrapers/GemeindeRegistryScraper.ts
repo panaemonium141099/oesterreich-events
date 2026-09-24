@@ -4,6 +4,7 @@ import { readFileSync, readdirSync, writeFileSync, existsSync, mkdirSync } from 
 import { join } from 'path';
 import { BaseScraper } from './BaseScraper';
 import { applyGemeindeContext } from './gemeinde-context';
+import { withStammdaten, type GemeindeStammdaten } from './gemeinden/stammdaten';
 import { categorizeEvent } from '../categorize';
 import { detectNextPage, detectMonthNavigation, MAX_PAGES_PER_SITE } from './pagination';
 import type { ScrapedEvent } from '@/types/events';
@@ -66,8 +67,9 @@ export class GemeindeRegistryScraper extends BaseScraper {
       const entries: GemeindeRegistryEntry[] = [];
       for (const file of files) {
         const content = readFileSync(join(registryDir, file), 'utf8');
-        const parsed = JSON.parse(content) as GemeindeRegistryEntry[];
-        entries.push(...parsed);
+        const parsed = JSON.parse(content) as GemeindeRegistryConfig[];
+        // Dateiname = Bundesland; Ortsdaten nur aus der Stammdatei.
+        entries.push(...withStammdaten(parsed, file.replace('.json', '')));
       }
       return entries;
     } catch {
@@ -118,7 +120,7 @@ export class GemeindeRegistryScraper extends BaseScraper {
         } else if (result.length > 0) {
           // fn-25 B3: Gemeinde als Kontext (city + PLZ), Mittelpunkt nur als
           // gekennzeichnete Gebietsangabe, kein Gemeindename als Venue.
-          const ctx = { name: entry.name, plz: entry.plz, lat: entry.lat, lng: entry.lng, bundesland: entry.bundesland, bezirk: entry.bezirk };
+          const ctx = { name: entry.name, plz: entry.plz, lat: entry.lat, lng: entry.lng, bundesland: entry.bundesland, bezirk: entry.bezirk, region: entry.region };
           allEvents.push(...result.map(e => applyGemeindeContext(e, ctx)));
           scraped++;
           this.log(`  [${i + 1}/${scrapeable.length}] ${entry.name}: ${result.length} Events [${entry.strategy}]`);
@@ -1311,21 +1313,22 @@ export class GemeindeRegistryScraper extends BaseScraper {
 
 // ── Types ───────────────────────────────────────────────────────────
 
-interface GemeindeRegistryEntry {
+/** Eintrag in data/gemeinden-registry/{bundesland}.json: nur Kalender-
+ *  Konfiguration, keine Ortsdaten (die liefert withStammdaten). */
+interface GemeindeRegistryConfig {
   name: string;
   website: string;
   eventUrl: string | null;
   cms: string;
   strategy: string;
-  plz: string;
-  bezirk: string;
-  bundesland: string;
-  lat: number;
-  lng: number;
   status: string;
   notes: string;
   verifiedAt: string;
+  /** Gemeinsame Seite mehrerer Gemeinden (siehe gemeinde-context.ts). */
+  region?: boolean;
 }
+
+type GemeindeRegistryEntry = GemeindeRegistryConfig & GemeindeStammdaten;
 
 interface CitiesPageEvents {
   upcomingEvents?: CitiesEvent[];

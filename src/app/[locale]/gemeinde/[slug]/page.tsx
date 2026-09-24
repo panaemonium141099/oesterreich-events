@@ -24,7 +24,7 @@
  * im Page-Body über dieselbe hubIsIndexable()-Regel.
  */
 
-import { notFound } from 'next/navigation';
+import { notFound, permanentRedirect } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import type { Metadata } from 'next';
@@ -36,6 +36,7 @@ import {
   bboxAround,
   findNeighbourGemeinden,
   getGemeindeBySlug,
+  currentGemeindeSlug,
   haversineKm,
   type AustrianGemeinde,
 } from '@/lib/gemeinden/data';
@@ -289,7 +290,12 @@ export default async function GemeindeHubPage({
   const tFaq = await getTranslations({ locale, namespace: 'HubFAQ' });
   const numberLocale = dateLocaleFor(locale);
   const g = getGemeindeBySlug(slug);
-  if (!g) notFound();
+  if (!g) {
+    // Frühere Slugs (PLZ/Name vor der Stammdaten-Umstellung) leiten um.
+    const current = currentGemeindeSlug(slug);
+    if (current) permanentRedirect(`${locale === routing.defaultLocale ? '' : `/${locale}`}/gemeinde/${current}`);
+    notFound();
+  }
   // Ortsnamen sind Eigennamen; uebersetzt wird nur, was im Englischen fest
   // etabliert ist (Wien -> Vienna). Siehe placeDisplayName.
   const placeName = placeDisplayName(g.name, locale);

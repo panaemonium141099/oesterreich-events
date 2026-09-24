@@ -76,6 +76,8 @@ export class GrazTourismusScraper extends BaseScraper {
             bundesland: 'steiermark',
             latitude: 47.0707,
             longitude: 15.4395,
+            // Stadtmittelpunkt, kein Veranstaltungsort: als Gebietsangabe kennzeichnen.
+            coords_precision: 'municipality',
             category: categorizeEvent(name, item.description ? String(item.description) : undefined),
             image_url: item.image ? String(typeof item.image === 'string' ? item.image : (item.image as Record<string, unknown>).url || '') : undefined,
           });
@@ -118,6 +120,8 @@ export class GrazTourismusScraper extends BaseScraper {
           bundesland: 'steiermark',
           latitude: 47.0707,
           longitude: 15.4395,
+          // Stadtmittelpunkt, kein Veranstaltungsort: als Gebietsangabe kennzeichnen.
+          coords_precision: 'municipality',
           category: categorizeEvent(title),
         });
       } catch {}

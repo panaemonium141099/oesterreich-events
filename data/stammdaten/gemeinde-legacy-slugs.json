@@ -1,0 +1,199 @@
+{
+ "10401": [
+  "7551-bocksdorf"
+ ],
+ "10402": [
+  "8291-burgauberg-neudauberg"
+ ],
+ "10410": [
+  "7540-neustift-bei-guessing"
+ ],
+ "10419": [
+  "8293-woerterberg"
+ ],
+ "10425": [
+  "7551-rohr-im-burgenland"
+ ],
+ "10428": [
+  "7540-moschendorf"
+ ],
+ "10608": [
+  "7023-poettelsdorf"
+ ],
+ "10725": [
+  "2475-neudorf-bei-parndorf"
+ ],
+ "10925": [
+  "7501-unterwart"
+ ],
+ "10927": [
+  "7423-wiesfleck"
+ ],
+ "10929": [
+  "7423-neustift-an-der-lafnitz"
+ ],
+ "30614": [
+  "2560-hernstein"
+ ],
+ "30819": [
+  "2282-glinzendorf"
+ ],
+ "30831": [
+  "2285-leopoldsdorf-im-marchfelde"
+ ],
+ "31542": [
+  "3642-schoenbuehel-aggsbach"
+ ],
+ "31922": [
+  "3385-markersdorf-haindorf"
+ ],
+ "32333": [
+  "2822-walpersbach"
+ ],
+ "40402": [
+  "5253-aspach"
+ ],
+ "40403": [
+  "5084-auerbach"
+ ],
+ "40411": [
+  "5141-haigermoos"
+ ],
+ "40445": [
+  "5122-ueberackern"
+ ],
+ "41217": [
+  "5270-muehlheim-am-inn"
+ ],
+ "41707": [
+  "4893-desselbrunn"
+ ],
+ "41712": [
+  "5311-innerschwand-am-mondsee"
+ ],
+ "41713": [
+  "4860-lenzing"
+ ],
+ "41724": [
+  "4891-pilsbach"
+ ],
+ "41729": [
+  "4893-redleiten"
+ ],
+ "41736": [
+  "4882-schlatt"
+ ],
+ "50211": [
+  "5423-sankt-koloman"
+ ],
+ "50329": [
+  "5113-sankt-georgen-bei-salzburg"
+ ],
+ "50330": [
+  "5340-sankt-gilgen"
+ ],
+ "50418": [
+  "5600-sankt-johann-im-pongau"
+ ],
+ "50419": [
+  "5522-sankt-martin-am-tennengebirge"
+ ],
+ "50420": [
+  "5621-sankt-veit-im-pongau"
+ ],
+ "50507": [
+  "5572-sankt-andrae-im-lungau"
+ ],
+ "50508": [
+  "5581-sankt-margarethen-im-lungau"
+ ],
+ "50509": [
+  "5582-sankt-michael-im-lungau"
+ ],
+ "50620": [
+  "5092-sankt-martin-bei-lofer"
+ ],
+ "60660": [
+  "8143-zwaring-poels"
+ ],
+ "61043": [
+  "8430-tillmitsch"
+ ],
+ "61759": [
+  "8212-gersdorf-an-der-feistritz"
+ ],
+ "61761": [
+  "8160-gutenberg-stenzengreith"
+ ],
+ "62280": [
+  "8362-soechau"
+ ],
+ "70308": [
+  "6175-flaurling"
+ ],
+ "70315": [
+  "6094-grinzens"
+ ],
+ "70370": [
+  "6143-muehlbachl",
+  "6143-pfons"
+ ],
+ "70810": [
+  "6653-forchach"
+ ],
+ "70812": [
+  "6654-gramais"
+ ],
+ "70815": [
+  "6651-hinterhornbach"
+ ],
+ "70816": [
+  "6600-hoefen"
+ ],
+ "70819": [
+  "6654-kaisers"
+ ],
+ "70823": [
+  "6631-namlos"
+ ],
+ "70911": [
+  "6232-gallzein"
+ ],
+ "70923": [
+  "6274-ried-im-zillertal"
+ ],
+ "70931": [
+  "6276-stumm"
+ ],
+ "70932": [
+  "6276-stummerberg"
+ ],
+ "80237": [
+  "6767-sibratsgfaell"
+ ],
+ "80238": [
+  "6952-sulzberg"
+ ],
+ "80239": [
+  "6934-warth"
+ ],
+ "80240": [
+  "6767-wolfurt"
+ ],
+ "80410": [
+  "6833-koblach"
+ ],
+ "80411": [
+  "6842-laterns"
+ ],
+ "80413": [
+  "6830-meiningen"
+ ],
+ "80422": [
+  "6834-viktorsberg"
+ ],
+ "80423": [
+  "6922-weiler"
+ ],
+ "_quelle": "Hub-Slugs /gemeinde/{plz}-{name} vor der Stammdaten-Umstellung 2026-09-24, je Gemeindekennziffer; leiten per 308 auf den aktuellen Slug."
+}
