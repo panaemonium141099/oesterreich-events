@@ -12,6 +12,7 @@ import { normalizeTitle, generateFingerprint } from '@/lib/dedup/fingerprint';
 import { gemeindenByPlz } from '@/lib/location/gemeinde-index';
 import { normalizeUrl, hashUrl } from '@/lib/pipeline/normalize-url';
 import { haversineDistance } from '@/lib/pipeline/normalize-venue';
+import { hasKnownStartTime } from '@/lib/utils/event-time';
 import type { EventRow, DedupScoreBreakdown } from './types';
 
 // ---------------------------------------------------------------------------
@@ -222,6 +223,13 @@ interface HardRuleResult {
   reason?: string;
 }
 
+/** Startzeit in ms, wenn die Uhrzeit echt ist; null bei Platzhaltern. */
+function knownStartMs(e: EventRow): number | null {
+  if (!e.start_date || !hasKnownStartTime({ start_date: e.start_date })) return null;
+  const t = new Date(e.start_date).getTime();
+  return Number.isNaN(t) ? null : t;
+}
+
 function checkHardRules(a: EventRow, b: EventRow): HardRuleResult {
   // Rule 1: Different venue_id (both non-null) → always distinct
   if (a.venue_id && b.venue_id && a.venue_id !== b.venue_id) {
@@ -234,11 +242,39 @@ function checkHardRules(a: EventRow, b: EventRow): HardRuleResult {
     return { forced: true, decision: 'merge', reason: 'same_source_id' };
   }
 
+  // Rule 6: Beide mit echter Uhrzeit, mehr als 2 h auseinander → zwei
+  // Vorstellungen (Circus Roncalli 13:00 und 17:30, Kinderstück 09:00 und
+  // 13:00). Einlass vs. Beginn liegt darunter und bleibt zusammenführbar.
+  // Platzhalter-Uhrzeiten zählen nicht (hasKnownStartTime). Steht vor der
+  // Ticket-Regel: Quellen wie Linz Termine verlinken alle Vorstellungen
+  // eines Tages auf dieselbe Seite.
+  const timeA = knownStartMs(a);
+  const timeB = knownStartMs(b);
+  if (timeA !== null && timeB !== null && Math.abs(timeA - timeB) > 120 * 60_000) {
+    return { forced: true, decision: 'distinct', reason: 'different_showtime' };
+  }
+
+  // Rule 7: Dieselbe Quelle, verschiedene source_id → verschiedene Events,
+  // wenn die echten Uhrzeiten abweichen (Messen um 08:00 und 09:15,
+  // Workshop-Slots) oder, ohne gemeinsamen Ticket-Link, die Titel
+  // („Kaiser Wiesn – Dirndl Rocker“ und „– Die Lauser“). Die Titelähnlichkeit
+  // allein verschmolz solche Programmpunkte (Probelauf 2026-09-24). Echte
+  // Doppel einer Quelle haben denselben Titel zur selben Zeit oder dieselbe
+  // Ticket-Seite zur selben Zeit und bleiben zusammenführbar.
+  const sameSourceOtherId = !!a.source_name && a.source_name === b.source_name && a.source_id !== b.source_id;
+  if (sameSourceOtherId && timeA !== null && timeB !== null && Math.abs(timeA - timeB) > 15 * 60_000) {
+    return { forced: true, decision: 'distinct', reason: 'same_source_other_time' };
+  }
+
   // Rule 4: Same ticket_url (normalized, non-empty) → always merge
   const ticketA = normalizeUrlForDedup(a.ticket_url);
   const ticketB = normalizeUrlForDedup(b.ticket_url);
   if (ticketA && ticketB && ticketA === ticketB) {
     return { forced: true, decision: 'merge', reason: 'same_ticket_url' };
+  }
+
+  if (sameSourceOtherId && normalizeTitle(a.title ?? '') !== normalizeTitle(b.title ?? '')) {
+    return { forced: true, decision: 'distinct', reason: 'same_source_other_title' };
   }
 
   // Rule 2: Different district (both non-null/non-empty) → distinct unless hard proof

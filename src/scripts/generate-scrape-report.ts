@@ -14,6 +14,7 @@
  */
 import { createClient } from '@supabase/supabase-js';
 import { loadGemeindenMaster } from '../lib/gemeinden/data';
+import { POSTGREST_MAX_ROWS } from '../lib/db/fetch-all';
 import { readFileSync, writeFileSync, readdirSync, existsSync, mkdirSync } from 'fs';
 import { join } from 'path';
 import type { PaginationLogEntry } from '../lib/scrapers/GemeindeRegistryScraper';
@@ -210,19 +211,21 @@ async function fetchAllEventCounts(): Promise<{
   let totalEvents = 0;
   let futureEvents = 0;
 
-  // Fetch in pages of 10,000
-  const PAGE_SIZE = 10000;
+  // Seiten zu POSTGREST_MAX_ROWS; mehr liefert der Server nicht (früher 10000
+  // mit Abbruch bei kurzer Seite: der Bericht zählte nur 1000 Events).
+  const PAGE_SIZE = POSTGREST_MAX_ROWS;
   let offset = 0;
-  let hasMore = true;
 
   console.log('[report] Fetching events from Supabase...');
 
-  while (hasMore) {
+  // Ende erst bei leerer Seite (kurze Seite kann gekürzt sein).
+  while (true) {
     const { data, error } = await supabase
       .from('events')
       .select('location_name, bundesland, source_name, start_date')
       .not('location_name', 'is', null)
       .not('source_name', 'is', null)
+      .order('id')
       .range(offset, offset + PAGE_SIZE - 1);
 
     if (error) throw new Error(`Fetch failed at offset ${offset}: ${error.message}`);
@@ -259,7 +262,6 @@ async function fetchAllEventCounts(): Promise<{
     }
 
     offset += data.length;
-    if (data.length < PAGE_SIZE) hasMore = false;
     process.stdout.write(`\r[report] Fetched ${totalEvents.toLocaleString()} events...`);
   }
 

@@ -247,6 +247,14 @@ function parseCityFromAddress(address: string | null | undefined): string | null
   return null;
 }
 
+/**
+ * Spalten, die buildEventUrlV2 braucht. Jede Abfrage, deren Zeilen zu
+ * Event-Links werden, muss sie laden: fehlt `postal_code`, fällt die URL auf
+ * die Landeshauptstadt zurück (1010-wien, 8010-graz) und jeder Klick läuft
+ * über eine Weiterleitung (Landing, Befund 2026-09-24).
+ */
+export const EVENT_URL_COLUMNS = 'id,slug,start_date,postal_code,address,bundesland,location_name';
+
 export interface EventForUrl {
   id: string;
   slug?: string | null;

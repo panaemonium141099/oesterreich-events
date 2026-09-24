@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
 import { requireAdmin } from '@/lib/supabase/require-admin';
+import { fetchAllRows } from '@/lib/db/fetch-all';
 
 export const dynamic = 'force-dynamic';
 
@@ -11,13 +12,16 @@ export async function GET() {
 
     const supabase = await createServerSupabaseClient();
 
-    // Fetch all events with relevant fields for stats computation
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data: events, error } = await (supabase.from('events') as any)
-      .select('quality_score, publish_status, source_name, venue_id, latitude, longitude, description, image_url')
-      .limit(100000);
-
-    if (error) {
+    // Alle Events seitenweise: `.limit(100000)` lieferte still nur 1000
+    // Zeilen (PostgREST-Deckel), die Statistik zeigte eine Stichprobe.
+    let events: unknown[];
+    try {
+      events = await fetchAllRows<unknown>((from, to) => supabase
+        .from('events')
+        .select('quality_score, publish_status, source_name, venue_id, latitude, longitude, description, image_url')
+        .order('id')
+        .range(from, to), { label: 'quality-stats' });
+    } catch (error) {
       console.error('[quality-stats] Query error:', error);
       return NextResponse.json({ error: 'Failed to fetch stats' }, { status: 500 });
     }

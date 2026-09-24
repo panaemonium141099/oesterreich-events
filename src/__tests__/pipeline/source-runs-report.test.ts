@@ -25,7 +25,13 @@ vi.mock('@supabase/supabase-js', () => ({
       select: () => ({
         gte: () => ({
           order: () => ({
-            limit: () => Promise.resolve({ data: [...rows].sort((a, b) => a.run_at.localeCompare(b.run_at)), error: null }),
+            order: () => ({
+              // Seitenweises Lesen (fetchAllRows): erste Seite alle Zeilen, dann leer.
+              range: (from: number) => Promise.resolve({
+                data: from === 0 ? [...rows].sort((a, b) => a.run_at.localeCompare(b.run_at)) : [],
+                error: null,
+              }),
+            }),
           }),
         }),
       }),

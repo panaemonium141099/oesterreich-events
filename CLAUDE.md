@@ -209,6 +209,11 @@ npm run scrape:festival-lineups | match-artists
   Listen IMMER auf ≤200 Elemente chunken, sonst bricht die Verbindung mit
   „TypeError: fetch failed" (im fn-18-Vollimport zweimal reproduziert).
   Write-Batches ≤500 Rows. Upserts müssen ALLE NOT-NULL-Spalten führen.
+- PostgREST (Hetzner) liefert pro Antwort höchstens 1000 Zeilen, still und
+  ohne Fehler: `.limit(5000)` gibt 1000 zurück, eine kurze Seite heißt nicht
+  Ende. Mehr als 1000 Zeilen nur über `fetchAllRows`/`forEachPage`
+  (`src/lib/db/fetch-all.ts`); Wächter `postgrest-row-cap.test.ts`. So lief
+  der Dedup bis 2026-09-24 nur über vergangene Tage.
 - Maintenance-SQL (`ANALYZE`, `CREATE INDEX` nach Bulk-Load) geht NICHT über
   PostgREST/Service-Key — Index-Migrationen liegen als eigene Datei vor und
   werden samt `ANALYZE` im Supabase-Dashboard/MCP ausgeführt (Muster:

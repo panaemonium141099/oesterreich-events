@@ -1139,3 +1139,62 @@ describe('fn-25 E: verschiedene PLZ-Gebiete verschmelzen nicht', () => {
     expect(['merge', 'uncertain', 'distinct']).toContain(scorePair(a, b).decision);
   });
 });
+
+describe('Vorstellungen und Programmpunkte verschmelzen nicht (Probelauf 2026-09-24)', () => {
+  const base = {
+    location_name: 'Stadthalle', district: 'Wien', postal_code: '1150',
+    latitude: 48.2, longitude: 16.33,
+  };
+  const ev = (o: Partial<EventRow> & { id: string; title: string; start_date: string }) =>
+    ({ ...base, ...o }) as EventRow;
+
+  it('zwei echte Uhrzeiten mehr als 2 h auseinander sind zwei Vorstellungen', () => {
+    const a = ev({ id: 'a', title: 'Circus Roncalli', start_date: '2026-09-26T11:00:00+00:00', source_name: 'Eventim', source_id: '1' });
+    const b = ev({ id: 'b', title: 'Circus Roncalli', start_date: '2026-09-26T15:30:00+00:00', source_name: 'oeticket', source_id: '2' });
+    expect(scorePair(a, b).decision).toBe('distinct');
+  });
+
+  it('auch mit gemeinsamem Ticket-Link (Quelle verlinkt alle Termine auf eine Seite)', () => {
+    const shared = { ticket_url: 'https://www.linztermine.at/event/719800' };
+    const a = ev({ id: 'a', title: 'Albertos Abenteuer', start_date: '2026-09-26T07:00:00+00:00', source_name: 'linz', source_id: '1', ...shared });
+    const b = ev({ id: 'b', title: 'Albertos Abenteuer', start_date: '2026-09-26T11:00:00+00:00', source_name: 'linz', source_id: '2', ...shared });
+    expect(scorePair(a, b).decision).toBe('distinct');
+  });
+
+  it('Einlass und Beginn aus zwei Quellen bleiben zusammenführbar', () => {
+    const a = ev({ id: 'a', title: 'Black Sea Dahu', start_date: '2026-09-26T18:00:00+00:00', source_name: 'Eventim', source_id: '1' });
+    const b = ev({ id: 'b', title: 'Black Sea Dahu', start_date: '2026-09-26T17:00:00+00:00', source_name: 'graz-clubs', source_id: '2' });
+    expect(scorePair(a, b).decision).toBe('merge');
+  });
+
+  it('Platzhalter-Uhrzeiten zählen nicht als Vorstellungszeit', () => {
+    const a = ev({ id: 'a', title: 'Flohmarkt', start_date: '2026-09-26T00:00:00+00:00', source_name: 'gem2go', source_id: '1' });
+    const b = ev({ id: 'b', title: 'Flohmarkt', start_date: '2026-09-26T13:00:00+00:00', source_name: 'gemeinde-registry', source_id: '2' });
+    expect(scorePair(a, b).decision).toBe('merge');
+  });
+
+  it('dieselbe Quelle, anderer Titel: verschiedene Acts', () => {
+    const a = ev({ id: 'a', title: 'Wiener Kaiser Wiesn 2026 - Dirndl Rocker', start_date: '2026-09-26T14:30:00+00:00', source_name: 'Eventim', source_id: '1' });
+    const b = ev({ id: 'b', title: 'Wiener Kaiser Wiesn 2026 - Die Lauser', start_date: '2026-09-26T14:30:00+00:00', source_name: 'Eventim', source_id: '2' });
+    expect(scorePair(a, b).decision).toBe('distinct');
+  });
+
+  it('dieselbe Quelle, andere echte Uhrzeit: verschiedene Termine', () => {
+    const a = ev({ id: 'a', title: 'Hl. Messe', start_date: '2026-09-26T06:00:00+00:00', source_name: 'basilika', source_id: '1' });
+    const b = ev({ id: 'b', title: 'Hl. Messe', start_date: '2026-09-26T07:15:00+00:00', source_name: 'basilika', source_id: '2' });
+    expect(scorePair(a, b).decision).toBe('distinct');
+  });
+
+  it('dieselbe Quelle, gleicher Titel zur gleichen Zeit: echtes Doppel', () => {
+    const a = ev({ id: 'a', title: 'Cara Rose', start_date: '2026-09-27T18:00:00+00:00', source_name: 'oeticket', source_id: '1' });
+    const b = ev({ id: 'b', title: 'Cara Rose', start_date: '2026-09-27T18:00:00+00:00', source_name: 'oeticket', source_id: '2' });
+    expect(scorePair(a, b).decision).toBe('merge');
+  });
+
+  it('dieselbe Quelle, anderer Titel, aber dieselbe Ticket-Seite zur selben Zeit: Doppel', () => {
+    const shared = { ticket_url: 'http://www.linztermine.at/event/719703' };
+    const a = ev({ id: 'a', title: 'Familienkonzert: Hänsel und Gretel', start_date: '2026-09-27T09:30:00+00:00', source_name: 'linz', source_id: '1', ...shared });
+    const b = ev({ id: 'b', title: 'Hänsel und Gretel', start_date: '2026-09-27T09:30:00+00:00', source_name: 'linz', source_id: '2', ...shared });
+    expect(scorePair(a, b).decision).toBe('merge');
+  });
+});

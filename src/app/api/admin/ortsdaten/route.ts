@@ -12,6 +12,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
 import { requireAdmin } from '@/lib/supabase/require-admin';
+import { fetchAllRows } from '@/lib/db/fetch-all';
 
 interface EventRowLite {
   id: string;
@@ -59,15 +60,20 @@ export async function GET(request: NextRequest) {
 
   const status = searchParams.get('status') || 'conflict';
   const limit = Math.min(parseInt(searchParams.get('limit') || '50', 10) || 50, 200);
-  const { data, error } = await supabase
-    .from('events')
-    .select('id, title, slug, source_name, source_url, start_date, location_name, location_name_raw, address_raw, address, postal_code, city_raw, bundesland, latitude, longitude, location_status, location_precision, location_resolution, raw_event_id, publish_status')
-    .gte('start_date', nowIso)
-    .in('publish_status', ['published', 'published_low_confidence', 'needs_review'])
-    .eq('location_status', status)
-    .order('start_date', { ascending: true })
-    .limit(2000);
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  let data: unknown[];
+  try {
+    data = await fetchAllRows<unknown>((from, to) => supabase
+      .from('events')
+      .select('id, title, slug, source_name, source_url, start_date, location_name, location_name_raw, address_raw, address, postal_code, city_raw, bundesland, latitude, longitude, location_status, location_precision, location_resolution, raw_event_id, publish_status')
+      .gte('start_date', nowIso)
+      .in('publish_status', ['published', 'published_low_confidence', 'needs_review'])
+      .eq('location_status', status)
+      .order('start_date', { ascending: true })
+      .order('id', { ascending: true })
+      .range(from, to), { maxRows: 2000 });
+  } catch (err) {
+    return NextResponse.json({ error: (err as Error).message }, { status: 500 });
+  }
 
   // Gruppe = Quelle + Rohname + Ortskontext (PLZ, sonst Ortsname): derselbe
   // Name in einer anderen Gemeinde ist eine andere Spielstätte, und die

@@ -1,4 +1,5 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
+import { fetchAllRows } from '@/lib/db/fetch-all';
 import { normalizeDomain } from './domain';
 import type { ProspectCandidate } from './types';
 
@@ -17,20 +18,22 @@ export async function discoverWarmProspects(
   const today = new Date().toISOString().slice(0, 10);
 
   // 1. Organizer websites from upcoming published events.
-  const { data: evRows } = await supabase
+  const evRows = await fetchAllRows<unknown>((from, to) => supabase
     .from('events')
     .select('id, organizer, organizer_url, bundesland')
     .not('organizer_url', 'is', null)
     .eq('publish_status', 'published')
     .gte('start_date', today)
-    .limit(BATCH);
+    .order('id')
+    .range(from, to), { maxRows: BATCH, label: 'warm: events' });
 
   // 2. Venue websites.
-  const { data: venueRows } = await supabase
+  const venueRows = await fetchAllRows<unknown>((from, to) => supabase
     .from('venues')
     .select('id, name, website')
     .not('website', 'is', null)
-    .limit(BATCH);
+    .order('id')
+    .range(from, to), { maxRows: BATCH, label: 'warm: venues' });
 
   // Aggregate by normalized domain.
   const byDomain = new Map<string, ProspectCandidate>();
@@ -57,13 +60,15 @@ export async function discoverWarmProspects(
   // Exclude existing prospects + suppression.
   const domains = [...byDomain.keys()];
   if (domains.length === 0) return [];
-  const [{ data: existing }, { data: suppressed }] = await Promise.all([
-    supabase.from('outreach_prospects').select('domain').in('domain', domains),
-    supabase.from('outreach_suppression').select('domain').in('domain', domains),
-  ]);
-  const blocked = new Set<string>([
-    ...((existing ?? []) as Array<{ domain: string }>).map((r) => r.domain),
-    ...((suppressed ?? []) as Array<{ domain: string }>).map((r) => r.domain),
-  ]);
+  // `.in()` steht im Query-String: in Stücken zu höchstens 200 abfragen.
+  const blocked = new Set<string>();
+  for (let i = 0; i < domains.length; i += 200) {
+    const chunk = domains.slice(i, i + 200);
+    const [{ data: existing }, { data: suppressed }] = await Promise.all([
+      supabase.from('outreach_prospects').select('domain').in('domain', chunk),
+      supabase.from('outreach_suppression').select('domain').in('domain', chunk),
+    ]);
+    for (const r of [...(existing ?? []), ...(suppressed ?? [])] as Array<{ domain: string }>) blocked.add(r.domain);
+  }
   return [...byDomain.values()].filter((c) => !blocked.has(c.domain)).slice(0, limit);
 }

@@ -25,6 +25,7 @@
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { createClient } from '@supabase/supabase-js';
+import { fetchAllRows } from '../lib/db/fetch-all';
 
 // ─── Env loader (tsx does not auto-load .env.local) ───
 try {
@@ -223,13 +224,12 @@ async function captureInternalAnalytics(): Promise<Snapshot['internal_analytics'
       .gte('created_at', cutoff);
     empty.events_last_30d = totalEvents ?? 0;
 
-    const { data: rows } = await supabase
+    const rows = await fetchAllRows<unknown>((from, to) => supabase
       .from('analytics_events')
       .select('event_type, page, referrer, session_id')
       .gte('created_at', cutoff)
-      .limit(50_000);
-
-    if (!rows) return empty;
+      .order('id')
+      .range(from, to), { maxRows: 50_000, label: 'seo-baseline' });
 
     const types: Record<string, number> = {};
     const pages: Record<string, number> = {};

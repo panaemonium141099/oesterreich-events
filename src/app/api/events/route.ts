@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import type { EventFilters } from '@/types/events';
+import { POSTGREST_MAX_ROWS } from '@/lib/db/fetch-all';
 import { computeStudentScore, isFreeEvent, MIN_STUDENT_SCORE } from '@/lib/utils/student-score';
 
 // Edge-cached: s-maxage in der Response bestimmt die TTL pro URL.
@@ -71,9 +72,11 @@ const SEARCH_SYNONYMS: Record<string, string[]> = {
   meditation: ['Wellness & Spiritualität'],
   community: ['Community & Freizeit'],
 };
-// 10000 statt 5000 — Map lädt in größeren Batches damit weniger
-// Round-Trips für die 76k events nötig sind.
-const MAX_PAGE_SIZE = 10000;
+// PostgREST liefert höchstens POSTGREST_MAX_ROWS Zeilen. Die Seite holt eine
+// Zeile mehr, um hasMore zu erkennen; also höchstens MAX_ROWS - 1 zusagen.
+// Früher 10000: die Antwort kam still mit 1000 Zeilen, hasMore=false, ohne
+// Cursor, und Liste/Karte endeten nach 1000 Events (Befund 2026-09-24).
+const MAX_PAGE_SIZE = POSTGREST_MAX_ROWS - 1;
 
 /** Compute a relevance score combining quality and recency (0-100). */
 function computeRelevance(event: Record<string, unknown>, nowMs: number): number {
