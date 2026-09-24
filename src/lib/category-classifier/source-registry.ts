@@ -25,16 +25,16 @@ import { normalizeText } from './normalization';
  */
 const TRUSTED_SOURCE_SEED: Record<string, Category> = {
   // Nightlife — dedicated club aggregators
-  'wien-clubs': 'Nightlife',
-  'graz-clubs': 'Nightlife',
-  'salzburg-clubs': 'Nightlife',
-  'linz-clubs': 'Nightlife',
-  'innsbruck-clubs': 'Nightlife',
-  'kleinstadte-clubs': 'Nightlife',
-  'partytimer': 'Nightlife',
-  'ra.co/austria': 'Nightlife',
-  'clubmap.at': 'Nightlife',
-  'rockhouse': 'Nightlife',
+  'wien-clubs': 'Nightlife & Party',
+  'graz-clubs': 'Nightlife & Party',
+  'salzburg-clubs': 'Nightlife & Party',
+  'linz-clubs': 'Nightlife & Party',
+  'innsbruck-clubs': 'Nightlife & Party',
+  'kleinstadte-clubs': 'Nightlife & Party',
+  'partytimer': 'Nightlife & Party',
+  'ra.co/austria': 'Nightlife & Party',
+  'clubmap.at': 'Nightlife & Party',
+  'rockhouse': 'Nightlife & Party',
 
   // Musik — concert halls
   'konzerthaus.at': 'Musik',
@@ -42,44 +42,44 @@ const TRUSTED_SOURCE_SEED: Record<string, Category> = {
   'posthof': 'Musik', // posthof is a music venue too; demote to Kultur if audit shows mixed program
 
   // Kultur — theatres + major museums
-  'bundestheater.at': 'Kultur',
-  'theater.at': 'Kultur',
-  'argekultur': 'Kultur',
-  'basiskultur': 'Kultur',
-  'khm.at': 'Kultur',
-  'albertina.at': 'Kultur',
-  'mumok.at': 'Kultur',
-  'belvedere.at': 'Kultur',
-  'leopoldmuseum.org': 'Kultur',
-  'nhm-wien.ac.at': 'Kultur',
-  'technischesmuseum.at': 'Kultur',
+  'bundestheater.at': 'Kultur & Bühne',
+  'theater.at': 'Kultur & Bühne',
+  'argekultur': 'Kultur & Bühne',
+  'basiskultur': 'Kultur & Bühne',
+  'khm.at': 'Kultur & Bühne',
+  'albertina.at': 'Kultur & Bühne',
+  'mumok.at': 'Kultur & Bühne',
+  'belvedere.at': 'Kultur & Bühne',
+  'leopoldmuseum.org': 'Kultur & Bühne',
+  'nhm-wien.ac.at': 'Kultur & Bühne',
+  'technischesmuseum.at': 'Kultur & Bühne',
 
   // Märkte
-  'bauernmarkt.at': 'Märkte',
+  'bauernmarkt.at': 'Märkte & Feste',
 
   // Wein & Kulinarik
-  'genussregion.at': 'Wein & Kulinarik',
+  'genussregion.at': 'Essen & Trinken',
 
   // Sport
-  'laufen.at': 'Sport',
-  'rad-net.at': 'Sport',
-  'oefb.at': 'Sport',
-  'oeav-events.at': 'Sport',
-  'runnersfun.at': 'Sport',
+  'laufen.at': 'Sport & Bewegung',
+  'rad-net.at': 'Sport & Bewegung',
+  'oefb.at': 'Sport & Bewegung',
+  'oeav-events.at': 'Sport & Bewegung',
+  'runnersfun.at': 'Sport & Bewegung',
 
   // Natur
-  'naturfreunde.at': 'Natur',
-  'alpenverein.at': 'Natur',
+  'naturfreunde.at': 'Natur & Abenteuer',
+  'alpenverein.at': 'Natur & Abenteuer',
 
   // Familie
-  'familiii.at': 'Familie',
-  'familienurlaub.at': 'Familie',
+  'familiii.at': 'Familie & Kinder',
+  'familienurlaub.at': 'Familie & Kinder',
 
   // Wirtschaft
-  'wko.at': 'Wirtschaft',
-  'messecenter.at': 'Wirtschaft',
-  'messe-wels.at': 'Wirtschaft',
-  'mcg.at': 'Wirtschaft',
+  'wko.at': 'Wissen & Karriere',
+  'messecenter.at': 'Wissen & Karriere',
+  'messe-wels.at': 'Wissen & Karriere',
+  'mcg.at': 'Wissen & Karriere',
 };
 
 /**

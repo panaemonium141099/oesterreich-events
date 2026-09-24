@@ -17,6 +17,7 @@
  */
 
 import type { Category } from '@/types/events';
+import { OLD_TO_NEW_CATEGORY } from './taxonomy';
 
 export const SCORE = {
   TRUSTED_EXACT: 100,
@@ -53,19 +54,15 @@ export interface CategoryLexicon {
 /**
  * Per-category lexicon for the rule-based fallback classifier.
  *
- * Note: this still uses the legacy v1/v2 category names (Nightlife, Märkte,
- * Wein & Kulinarik, Bildung, Wirtschaft, Gesundheit, Religion). The rule-
- * based classifier is now only the backfill/fallback — the AI-enrichment
- * step (see src/scripts/enrich-openai.ts) writes the authoritative v3
- * categories from docs/TAXONOMY.md. Events processed by enrichment get
- * their legacy rule-category overwritten; events that skip enrichment
- * keep the legacy value until the SQL migration maps them over.
- *
- * Partial<Record> because the v3 target categories ("Nightlife & Party",
- * "Wissen & Karriere", etc.) have no legacy lexicon — they exist only
- * for AI output.
+ * Die Einträge sind nach den früheren 14 Kategorien gegliedert (feinere
+ * Stichwortgruppen). LEXICON unten führt sie über OLD_TO_NEW_CATEGORY auf die
+ * 11 Hauptkategorien der Taxonomie v3 zusammen; der Classifier sieht nur
+ * v3-Namen. Bis 2026-09-24 schlug der Classifier mit v3-Namen in dieser
+ * nach Altnamen geordneten Tabelle nach und fand für 10 von 12 Kategorien
+ * nichts (39 % aller Events landeten in „Sonstiges"); das verdeckte bis Juli
+ * die KI-Anreicherung, die es nicht mehr gibt.
  */
-export const LEXICON: Partial<Record<Category, CategoryLexicon>> = {
+const LEXICON_NACH_ALTKATEGORIE: Record<string, CategoryLexicon> = {
   Musik: {
     trustedRawTags: ['Musik', 'Konzert', 'Unterhaltung & Tanzmusik'],
     highPrecisionPhrases: [
@@ -153,28 +150,25 @@ export const LEXICON: Partial<Record<Category, CategoryLexicon>> = {
   Sport: {
     trustedRawTags: ['Sport', 'AKTIV', 'Aktivität / Erlebnis'],
     highPrecisionPhrases: [
-      'trail run', 'ultra marathon', 'stadtlauf', 'volkslauf',
-      'berg wanderung', 'bergwanderung', 'schneeschuh wanderung',
-      'via ferrata', 'e-bike tour',
+      'trail run', 'ultra marathon', 'stadtlauf', 'volkslauf', 'e-bike tour',
     ],
     highPrecisionPatterns: [
       /\b[a-zäöüß]*lauf\b/,          // marathon, stadtlauf
       /\b[a-zäöüß]*turnier\b/,
-      /\b[a-zäöüß]*wanderung\b/,     // bergwanderung, themenwanderung
     ],
+    // Wandern, Klettern, Rafting, Canyoning: laut Taxonomie v3 Natur & Abenteuer.
     highPrecisionTokens: [
-      'marathon', 'wanderung', 'wandern', 'trailrunning', 'cycling', 'mountainbike',
-      'e-bike', 'bouldern', 'klettern', 'yoga', 'pilates', 'fitness',
+      'marathon', 'trailrunning', 'cycling', 'mountainbike',
+      'e-bike', 'bouldern', 'yoga', 'pilates', 'fitness',
       'gymnastik', 'tennis', 'fussball', 'triathlon', 'schwimmen',
       'skifahren', 'snowboard', 'eislaufen', 'eishockey', 'volleyball',
       'basketball', 'handball', 'leichtathletik', 'turnier', 'meisterschaft',
-      'motorsport', 'rafting', 'canyoning', 'paddeln',
+      'motorsport',
     ],
-    weakStemContains: ['wanderung', 'marathon'],
-    weakContextTokens: ['sport', 'lauf', 'bike', 'hiking', 'run'],
+    weakStemContains: ['marathon'],
+    weakContextTokens: ['sport', 'lauf', 'bike', 'run'],
     stemFamilies: {
       lauf: ['lauf', 'marathon', 'stadtlauf', 'volkslauf', 'trailrunning', 'ultramarathon'],
-      wanderung: ['wanderung', 'wandern', 'bergwanderung', 'themenwanderung', 'schneeschuhwanderung', 'hike', 'hiking'],
       bike: ['bike', 'biking', 'cycling', 'mountainbike', 'e-bike', 'rennrad'],
       ball: ['fussball', 'volleyball', 'basketball', 'handball'],
     },
@@ -245,9 +239,9 @@ export const LEXICON: Partial<Record<Category, CategoryLexicon>> = {
   'Wein & Kulinarik': {
     trustedRawTags: ['Kulinarium'],
     highPrecisionPhrases: [
-      'wein verkostung', 'weinverkostung', 'wein wanderung', 'weinwanderung',
+      'wein verkostung', 'weinverkostung',
       'gin tasting', 'whiskey tasting', 'bier verkostung', 'bierverkostung',
-      'kulinarik wanderung', 'weinfruhling', 'weinherbst',
+      'weinfruhling', 'weinherbst',
     ],
     highPrecisionPatterns: [
       /\b[a-zäöüß]*verkostung\b/,          // bierverkostung, schnapsverkostung
@@ -255,7 +249,7 @@ export const LEXICON: Partial<Record<Category, CategoryLexicon>> = {
       /\bkoch(kurs|workshop)\b/,
     ],
     highPrecisionTokens: [
-      'weinfest', 'weinverkostung', 'weinwanderung', 'weinlese', 'winzer',
+      'weinfest', 'weinverkostung', 'weinlese', 'winzer',
       'heuriger', 'buschenschank', 'verkostung', 'tasting', 'degustation',
       'kochkurs', 'gourmet', 'bierfest', 'brauerei', 'craftbeer', 'schnaps',
       'brunch', 'sennerei', 'kase', 'kaseverkostung',
@@ -263,7 +257,7 @@ export const LEXICON: Partial<Record<Category, CategoryLexicon>> = {
     weakStemContains: ['verkostung', 'weinfest'],
     weakContextTokens: ['wein', 'bier', 'kulinar', 'genuss', 'food', 'koch'],
     stemFamilies: {
-      wein: ['wein', 'weinfest', 'weinverkostung', 'weinwanderung', 'weinlese', 'weingut', 'winzer', 'buschenschank', 'weinfruhling', 'weinherbst'],
+      wein: ['wein', 'weinfest', 'weinverkostung', 'weinlese', 'weingut', 'winzer', 'buschenschank', 'weinfruhling', 'weinherbst'],
       verkostung: ['verkostung', 'weinverkostung', 'bierverkostung', 'schnapsverkostung', 'degustation', 'tasting'],
       kochen: ['kochkurs', 'kochworkshop', 'kochabend'],
     },
@@ -303,19 +297,24 @@ export const LEXICON: Partial<Record<Category, CategoryLexicon>> = {
       'nationalpark exkursion', 'vogel beobachtung', 'vogelbeobachtung',
       'krauter wanderung', 'krauterwanderung', 'pilz wanderung',
       'imker fuhrung', 'imkerfuhrung', 'sternen wanderung', 'sternenwanderung',
+      'berg wanderung', 'bergwanderung', 'schneeschuh wanderung', 'via ferrata',
+      'wein wanderung', 'weinwanderung', 'kulinarik wanderung',
     ],
     highPrecisionPatterns: [
       /\b(natur|national|imker)[a-zäöüß]*\b/,
+      /\b[a-zäöüß]*wanderung\b/,     // bergwanderung, weinwanderung, themenwanderung
     ],
     highPrecisionTokens: [
+      'wanderung', 'wandern', 'klettern', 'rafting', 'canyoning', 'paddeln',
       'nationalpark', 'naturfuhrung', 'naturerlebnis', 'vogelbeobachtung',
       'ornithologie', 'naturpark', 'almsommer', 'almwanderung', 'krauter',
       'wildkrauter', 'heilkrauter', 'flurreinigung', 'sternwarte', 'astronomie',
       'schaugarten', 'permakultur', 'imker', 'tierpark', 'wildpark',
     ],
-    weakStemContains: ['natur', 'nationalpark'],
-    weakContextTokens: ['garten', 'umwelt', 'klimaschutz', 'botanik', 'zoo'],
+    weakStemContains: ['natur', 'nationalpark', 'wanderung'],
+    weakContextTokens: ['garten', 'umwelt', 'klimaschutz', 'botanik', 'zoo', 'hiking'],
     stemFamilies: {
+      wanderung: ['wanderung', 'wandern', 'bergwanderung', 'themenwanderung', 'schneeschuhwanderung', 'weinwanderung', 'hike', 'hiking'],
       natur: ['natur', 'naturfuhrung', 'naturerlebnis', 'naturpark', 'nationalpark'],
       imker: ['imker', 'imkerfuhrung', 'bienen', 'honig'],
     },
@@ -429,6 +428,29 @@ export const LEXICON: Partial<Record<Category, CategoryLexicon>> = {
   },
 };
 
+function mergeLexica(a: CategoryLexicon, b: CategoryLexicon): CategoryLexicon {
+  return {
+    trustedRawTags: [...a.trustedRawTags, ...b.trustedRawTags],
+    highPrecisionPhrases: [...a.highPrecisionPhrases, ...b.highPrecisionPhrases],
+    highPrecisionPatterns: [...a.highPrecisionPatterns, ...b.highPrecisionPatterns],
+    highPrecisionTokens: [...a.highPrecisionTokens, ...b.highPrecisionTokens],
+    weakStemContains: [...a.weakStemContains, ...b.weakStemContains],
+    weakContextTokens: [...a.weakContextTokens, ...b.weakContextTokens],
+    stemFamilies: { ...a.stemFamilies, ...b.stemFamilies },
+  };
+}
+
+/** Stichwort-Regelwerk je v3-Hauptkategorie (siehe Kommentar oben). */
+export const LEXICON: Partial<Record<Category, CategoryLexicon>> = (() => {
+  const out: Partial<Record<Category, CategoryLexicon>> = {};
+  for (const [alt, lex] of Object.entries(LEXICON_NACH_ALTKATEGORIE)) {
+    const neu = OLD_TO_NEW_CATEGORY[alt];
+    if (!neu) throw new Error(`rules.ts: Altkategorie ohne v3-Zuordnung: ${alt}`);
+    out[neu] = out[neu] ? mergeLexica(out[neu]!, lex) : lex;
+  }
+  return out;
+})();
+
 /**
  * Negative blockers. Substring-OK on the full text (title + description +
  * source context). Fire against a specific target category. Values are
@@ -442,22 +464,22 @@ export interface CategoryBlocker {
 
 export const NEGATIVE_BLOCKERS: CategoryBlocker[] = [
   {
-    target: 'Kultur',
+    target: 'Kultur & Bühne',
     whenAnyToken: ['operation', 'op termin', 'op-termin', 'chirurgie'],
     reason: 'medical context blocks Kultur for "oper" matches',
   },
   {
-    target: 'Wirtschaft',
+    target: 'Wissen & Karriere',
     whenAnyToken: ['pfarre', 'pfarrkirche', 'diozese', 'seelsorge', 'erzdiozese'],
     reason: 'parish context blocks Wirtschaft for "messe" matches',
   },
   {
-    target: 'Religion',
+    target: 'Wellness & Spiritualität',
     whenAnyToken: ['wko', 'gewerbe', 'handelsmesse', 'fachmesse', 'branchentreff', 'startup pitch'],
     reason: 'trade-fair context blocks Religion for "messe" matches',
   },
   {
-    target: 'Nightlife',
+    target: 'Nightlife & Party',
     whenAnyToken: ['pfarre', 'gottesdienst', 'kinder', 'kids', 'familienfreundlich'],
     reason: 'liturgical or kids context blocks Nightlife',
   },
@@ -467,14 +489,15 @@ export const NEGATIVE_BLOCKERS: CategoryBlocker[] = [
     reason: 'club lineup context blocks Musik in favour of Nightlife',
   },
   {
-    target: 'Märkte',
+    target: 'Märkte & Feste',
     whenAnyToken: ['weinverkostung', 'degustation'],
     reason: 'dedicated tasting context blocks Märkte',
   },
 ];
 
 /**
- * Pairwise disambiguator matrix. Only the six registered confusable pairs.
+ * Pairwise disambiguator matrix (v3-Kategorien). Bildung/Wirtschaft und
+ * Feste/Märkte sind in v3 jeweils eine Kategorie und brauchen kein Paar mehr.
  * Lambdas are pure: they inspect evidence and return a category or null.
  */
 export interface DisambiguatorContext {
@@ -498,7 +521,7 @@ const hasAny = (text: string, needles: string[]): boolean =>
 
 export const DISAMBIGUATOR_PAIRS: Disambiguator[] = [
   {
-    pair: ['Nightlife', 'Musik'],
+    pair: ['Nightlife & Party', 'Musik'],
     resolve(ctx) {
       const nightlifeHits = hasAny(
         ctx.title + ' ' + ctx.description,
@@ -510,60 +533,40 @@ export const DISAMBIGUATOR_PAIRS: Disambiguator[] = [
       );
       const isClubVenue = hasAny(ctx.sourceName + ' ' + ctx.organizer, ['wien-clubs', 'graz-clubs', 'salzburg-clubs', 'linz-clubs', 'clubmap', 'ra.co', 'partytimer', 'rockhouse']);
       const isConcertVenue = hasAny(ctx.sourceName + ' ' + ctx.organizer, ['konzerthaus', 'musikverein']);
-      if (isClubVenue && !musikHits) return 'Nightlife';
+      if (isClubVenue && !musikHits) return 'Nightlife & Party';
       if (isConcertVenue && !nightlifeHits) return 'Musik';
-      if (nightlifeHits && !musikHits) return 'Nightlife';
+      if (nightlifeHits && !musikHits) return 'Nightlife & Party';
       if (musikHits && !nightlifeHits) return 'Musik';
       return null;
     },
   },
   {
-    pair: ['Märkte', 'Wein & Kulinarik'],
+    pair: ['Märkte & Feste', 'Essen & Trinken'],
     resolve(ctx) {
       const marketCompound = /\b(weihnachts|oster|advent|christkindl|bauern|floh|wochen|genuss|biomarkt)markt\b/.test(ctx.title);
       const tastingFocus = hasAny(ctx.title + ' ' + ctx.description, ['verkostung', 'tasting', 'degustation', 'heuriger', 'buschenschank', 'winzer', 'kochkurs']);
-      if (marketCompound && !tastingFocus) return 'Märkte';
-      if (tastingFocus && !marketCompound) return 'Wein & Kulinarik';
+      if (marketCompound && !tastingFocus) return 'Märkte & Feste';
+      if (tastingFocus && !marketCompound) return 'Essen & Trinken';
       return null;
     },
   },
   {
-    pair: ['Bildung', 'Wirtschaft'],
-    resolve(ctx) {
-      const educational = hasAny(ctx.title + ' ' + ctx.description, ['workshop', 'seminar', 'vortrag', 'kurs', 'fortbildung']);
-      const business = hasAny(ctx.title + ' ' + ctx.description, ['networking', 'jobmesse', 'karrieremesse', 'branchentreff', 'fachmesse', 'startup pitch', 'b2b', 'gewerbemesse', 'wirtschaftskammer', 'wko']);
-      if (business && !educational) return 'Wirtschaft';
-      if (educational && !business) return 'Bildung';
-      return null;
-    },
-  },
-  {
-    pair: ['Religion', 'Kultur'],
+    pair: ['Wellness & Spiritualität', 'Kultur & Bühne'],
     resolve(ctx) {
       const liturgical = hasAny(ctx.title + ' ' + ctx.description, ['gottesdienst', 'hochamt', 'andacht', 'wallfahrt', 'prozession', 'firmung', 'osternacht', 'karfreitag', 'pfarre']);
       const cultural = hasAny(ctx.title + ' ' + ctx.description, ['theater', 'ausstellung', 'museum', 'lesung', 'kabarett', 'vernissage']);
-      if (liturgical && !cultural) return 'Religion';
-      if (cultural && !liturgical) return 'Kultur';
+      if (liturgical && !cultural) return 'Wellness & Spiritualität';
+      if (cultural && !liturgical) return 'Kultur & Bühne';
       return null;
     },
   },
   {
-    pair: ['Religion', 'Musik'],
+    pair: ['Wellness & Spiritualität', 'Musik'],
     resolve(ctx) {
       const liturgical = hasAny(ctx.title + ' ' + ctx.description, ['gottesdienst', 'hochamt', 'festmesse', 'osternacht', 'karfreitag', 'wallfahrt', 'prozession', 'firmung', 'pfarre']);
       const concert = hasAny(ctx.title, ['konzert', 'orchester', 'chor', 'matinee', 'symphon', 'philharmon']);
       if (concert && !liturgical) return 'Musik';
-      if (liturgical && !concert) return 'Religion';
-      return null;
-    },
-  },
-  {
-    pair: ['Feste & Brauchtum', 'Märkte'],
-    resolve(ctx) {
-      const festIndicator = /\b(dorf|orts|volks|stadt|pfarr|gemeinde|feuerwehr|vereins)fest\b/.test(ctx.title) || hasAny(ctx.title, ['kirtag', 'maibaum', 'fasching', 'erntedank', 'sonnwendfeier']);
-      const marketIndicator = /\b(weihnachts|oster|advent|christkindl|bauern|floh|wochen|genuss)markt\b/.test(ctx.title);
-      if (festIndicator && !marketIndicator) return 'Feste & Brauchtum';
-      if (marketIndicator && !festIndicator) return 'Märkte';
+      if (liturgical && !concert) return 'Wellness & Spiritualität';
       return null;
     },
   },

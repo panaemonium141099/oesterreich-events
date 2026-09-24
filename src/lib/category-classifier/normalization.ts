@@ -9,6 +9,7 @@
  *      changes (title, raw tags, source, organizer, cleaned description).
  */
 
+import { migrateOldCategory } from './taxonomy';
 import { createHash } from 'crypto';
 import { CLASSIFIER_VERSION } from './taxonomy';
 
@@ -148,7 +149,10 @@ export function normalizeInput(input: ClassifierInputShape): NormalizedInput {
   const title = normalizeText(input.title);
   const description = normalizeText(cleanDescriptionForSignals(input.description));
   const tags = normalizeTags(input.source_tags_raw);
-  const sourceCategory = normalizeText(input.source_category_raw);
+  // Scraper liefern teils noch Altnamen der Taxonomie v2 („Nightlife",
+  // „Wein & Kulinarik"): hier einmal auf v3 übersetzen, damit der Hinweis
+  // eine echte Kategorie trifft.
+  const sourceCategory = normalizeText(migrateOldCategory(input.source_category_raw) ?? input.source_category_raw);
   const sourceName = normalizeText(input.source_name);
   const organizer = normalizeText(input.organizer);
   const locationName = normalizeText(input.location_name);
