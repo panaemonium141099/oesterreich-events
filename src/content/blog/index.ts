@@ -120,6 +120,8 @@ import { post as lansdowneWishYouWellTourPart22026 } from './posts/lansdowne-wis
 import { post as melanieBaker2026 } from './posts/melanie-baker-2026';
 import { post as symphonieorchesterVorarlbergKonzert3DiakunSchumannDvor2026 } from './posts/symphonieorchester-vorarlberg-konzert-3-diakun-schumann-dvor-2026';
 import { post as averageKayo2026 } from './posts/average-kayo-2026';
+import { post as oskarHaagLostCauseTour20262026 } from './posts/oskar-haag-lost-cause-tour-2026-2026';
+import { post as charityFestival2Tagesticket2026 } from './posts/charity-festival-2-tagesticket-2026';
 // AUTOWRITER-IMPORTS-END
 
 export type { FestivalPost, GalleryImage, FestivalKeyFacts, LineupAct } from './types';
@@ -248,6 +250,8 @@ export const ALL_POSTS: FestivalPost[] = [
   melanieBaker2026,
   symphonieorchesterVorarlbergKonzert3DiakunSchumannDvor2026,
   averageKayo2026,
+  oskarHaagLostCauseTour20262026,
+  charityFestival2Tagesticket2026,
   // AUTOWRITER-POSTS-END
 ].sort(
   (a, b) => new Date(b.publishDate).getTime() - new Date(a.publishDate).getTime()
