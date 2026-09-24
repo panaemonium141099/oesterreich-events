@@ -26,10 +26,10 @@ import type { Category } from '@/types/events';
  *
  * Bumped to cat-v3 with the 11-category rework.
  */
-export const CLASSIFIER_VERSION = 'cat-v3-rules1-prompt1' as const;
+export const CLASSIFIER_VERSION = 'cat-v3-rules2-prompt1' as const;
 
 /** Prefix used by the backfill query's LIKE filter. Bump when rules change. */
-export const CLASSIFIER_VERSION_PREFIX = 'cat-v3-rules1-' as const;
+export const CLASSIFIER_VERSION_PREFIX = 'cat-v3-rules2-' as const;
 
 export const CATEGORIES: Category[] = [
   'Musik',
