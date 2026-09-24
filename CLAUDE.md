@@ -105,7 +105,10 @@ node / next.js
   mittelpunkt nur mit `coords_precision: 'municipality'`). Bezirk nur über
   `districtForLocation` (plz-district.ts), Event-URL-Ort = Post-Ort der PLZ.
   Events entstehen nur serverseitig (keine Insert-Policy für Nutzer).
-  Wächter: `src/__tests__/lib/scrapers/gemeinde-config.test.ts`. Keine
+  Feste Venue-Koordinaten im Scraper-Code nur mit Eintrag in
+  `data/stammdaten/scraper-koordinaten.json` (OSM-geprüft / Gebiet /
+  ungeprüft mit Grund). Wächter: `src/__tests__/lib/scrapers/
+  gemeinde-config.test.ts` und `scraper-koordinaten.test.ts`. Keine
   neuen PLZ-/Koordinaten-Tabellen anlegen, keine Fix-Skripte: Fehler an der
   Quelle (Stammdaten oder Scraper-Liste) beheben.
 - `src/app/page.tsx` — Landing: statische ISR-Shell (KEIN cookies()/auth im

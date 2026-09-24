@@ -26,9 +26,9 @@ export class BundestheaterScraper extends BaseScraper {
 
     // Each federal theater has its own spielplan
     const theaterUrls = [
-      { url: `${this.BASE}/burgtheater/spielplan`, venue: 'Burgtheater Wien', lat: 48.2063, lon: 16.3617 },
+      { url: `${this.BASE}/burgtheater/spielplan`, venue: 'Burgtheater Wien', lat: 48.21034, lon: 16.36148 },
       { url: `${this.BASE}/staatsoper/spielplan`, venue: 'Wiener Staatsoper', lat: 48.2033, lon: 16.3694 },
-      { url: `${this.BASE}/volksoper/spielplan`, venue: 'Volksoper Wien', lat: 48.2265, lon: 16.3560 },
+      { url: `${this.BASE}/volksoper/spielplan`, venue: 'Volksoper Wien', lat: 48.22467, lon: 16.35024 },
     ];
 
     for (const { url, venue, lat, lon } of theaterUrls) {

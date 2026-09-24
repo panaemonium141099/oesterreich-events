@@ -11,8 +11,8 @@ export class EsterházyScraper extends BaseScraper {
   private readonly VENUE_COORDS: Record<string, { lat: number; lng: number }> = {
     'schloss esterházy': { lat: 47.8458, lng: 16.5182 },
     'schloss esterhazy': { lat: 47.8458, lng: 16.5182 },
-    'burg forchtenstein': { lat: 47.7081, lng: 16.3283 },
-    'steinbruch st. margarethen': { lat: 47.8028, lng: 16.6039 },
+    'burg forchtenstein': { lat: 47.70982, lng: 16.3316 },
+    'steinbruch st. margarethen': { lat: 47.8015, lng: 16.63279 },
     'schloss lackenbach': { lat: 47.5862, lng: 16.4673 },
     'burg güssing': { lat: 47.0567, lng: 16.3237 },
   };

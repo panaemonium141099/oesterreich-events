@@ -1,0 +1,1237 @@
+{
+ "_zweck": "Jede feste Koordinate im Scraper-Code muss hier stehen (Test gemeinde-config.test.ts). status: osm = gegen OpenStreetMap geprüft; gebiet = als Gebietsangabe gekennzeichnet; ungeprueft = nicht belegbar, Grund in quelle. Geprüft 2026-09-24.",
+ "koordinaten": [
+  {
+   "datei": "src/lib/scrapers/EsterházyScraper.ts",
+   "name": "schloss esterházy",
+   "lat": 47.8458,
+   "lng": 16.5182,
+   "status": "osm",
+   "quelle": "Schloss Esterházy"
+  },
+  {
+   "datei": "src/lib/scrapers/EsterházyScraper.ts",
+   "name": "schloss esterhazy",
+   "lat": 47.8458,
+   "lng": 16.5182,
+   "status": "osm",
+   "quelle": "Schloss Esterházy"
+  },
+  {
+   "datei": "src/lib/scrapers/EsterházyScraper.ts",
+   "name": "burg forchtenstein",
+   "lat": 47.70982,
+   "lng": 16.3316,
+   "status": "osm",
+   "quelle": "Burg Forchtenstein"
+  },
+  {
+   "datei": "src/lib/scrapers/EsterházyScraper.ts",
+   "name": "steinbruch st. margarethen",
+   "lat": 47.8015,
+   "lng": 16.63279,
+   "status": "osm",
+   "quelle": "Römersteinbruch, 7062 St. Margarethen im Burgenland"
+  },
+  {
+   "datei": "src/lib/scrapers/EsterházyScraper.ts",
+   "name": "schloss lackenbach",
+   "lat": 47.5862,
+   "lng": 16.4673,
+   "status": "osm",
+   "quelle": "Schloss Lackenbach"
+  },
+  {
+   "datei": "src/lib/scrapers/EsterházyScraper.ts",
+   "name": "burg güssing",
+   "lat": 47.0567,
+   "lng": 16.3237,
+   "status": "osm",
+   "quelle": "Burg Güssing"
+  },
+  {
+   "datei": "src/lib/scrapers/EsterházyScraper.ts",
+   "name": null,
+   "lat": 47.8458,
+   "lng": 16.5182,
+   "status": "ungeprueft",
+   "quelle": "Fallback/Standardwert"
+  },
+  {
+   "datei": "src/lib/scrapers/FeverUpScraper.ts",
+   "name": null,
+   "lat": 48.2082,
+   "lng": 16.3738,
+   "status": "gebiet",
+   "quelle": "Stadt-/Portalmittelpunkt, im Code als coords_precision 'municipality' gekennzeichnet"
+  },
+  {
+   "datei": "src/lib/scrapers/GrazClubsScraper.ts",
+   "name": "Postgarage",
+   "lat": 47.06611,
+   "lng": 15.4283,
+   "status": "osm",
+   "quelle": "Dreihackengasse 42, 8020 Graz"
+  },
+  {
+   "datei": "src/lib/scrapers/GrazClubsScraper.ts",
+   "name": "PPC",
+   "lat": 47.07588,
+   "lng": 15.43146,
+   "status": "osm",
+   "quelle": "p.p.c., Neubaugasse 6, Graz (OSM)"
+  },
+  {
+   "datei": "src/lib/scrapers/GrazClubsScraper.ts",
+   "name": "Dom im Berg",
+   "lat": 47.07347,
+   "lng": 15.43808,
+   "status": "osm",
+   "quelle": "Dom im Berg"
+  },
+  {
+   "datei": "src/lib/scrapers/GrazClubsScraper.ts",
+   "name": "Orpheum Graz",
+   "lat": 47.07231,
+   "lng": 15.42996,
+   "status": "osm",
+   "quelle": "Orpheum"
+  },
+  {
+   "datei": "src/lib/scrapers/GrazClubsScraper.ts",
+   "name": "Kottulinsky",
+   "lat": 47.071,
+   "lng": 15.437,
+   "status": "ungeprueft",
+   "quelle": "OSM-Treffer zweifelhaft: Kottulinsky (1.16 km)"
+  },
+  {
+   "datei": "src/lib/scrapers/GrazClubsScraper.ts",
+   "name": "Forum Stadtpark",
+   "lat": 47.07468,
+   "lng": 15.44359,
+   "status": "osm",
+   "quelle": "Forum Stadtpark"
+  },
+  {
+   "datei": "src/lib/scrapers/GrazClubsScraper.ts",
+   "name": "Explosiv",
+   "lat": 47.07759,
+   "lng": 15.41769,
+   "status": "osm",
+   "quelle": "Explosiv"
+  },
+  {
+   "datei": "src/lib/scrapers/GrazClubsScraper.ts",
+   "name": "Seifenfabrik",
+   "lat": 47.04752,
+   "lng": 15.4424,
+   "status": "osm",
+   "quelle": "Angergasse 43, 8010 Graz"
+  },
+  {
+   "datei": "src/lib/scrapers/GrazClubsScraper.ts",
+   "name": "SUbSUbSUb",
+   "lat": 47.068,
+   "lng": 15.432,
+   "status": "ungeprueft",
+   "quelle": "kein OSM-Treffer unter diesem Namen"
+  },
+  {
+   "datei": "src/lib/scrapers/GrazClubsScraper.ts",
+   "name": "Grazer Spielstätten",
+   "lat": 47.073,
+   "lng": 15.44,
+   "status": "ungeprueft",
+   "quelle": "kein OSM-Treffer unter diesem Namen"
+  },
+  {
+   "datei": "src/lib/scrapers/GrazTourismusScraper.ts",
+   "name": null,
+   "lat": 47.0707,
+   "lng": 15.4395,
+   "status": "gebiet",
+   "quelle": "Stadt-/Portalmittelpunkt, im Code als coords_precision 'municipality' gekennzeichnet"
+  },
+  {
+   "datei": "src/lib/scrapers/GrazTourismusScraper.ts",
+   "name": null,
+   "lat": 47.0707,
+   "lng": 15.4395,
+   "status": "gebiet",
+   "quelle": "Stadt-/Portalmittelpunkt, im Code als coords_precision 'municipality' gekennzeichnet"
+  },
+  {
+   "datei": "src/lib/scrapers/InnsbruckClubsScraper.ts",
+   "name": "Treibhaus",
+   "lat": 47.26762,
+   "lng": 11.39637,
+   "status": "osm",
+   "quelle": "Treibhaus"
+  },
+  {
+   "datei": "src/lib/scrapers/InnsbruckClubsScraper.ts",
+   "name": "Music Hall",
+   "lat": 47.26486,
+   "lng": 11.44149,
+   "status": "osm",
+   "quelle": "Music Hall"
+  },
+  {
+   "datei": "src/lib/scrapers/InnsbruckClubsScraper.ts",
+   "name": "p.m.k",
+   "lat": 47.268,
+   "lng": 11.392,
+   "status": "ungeprueft",
+   "quelle": "kein OSM-Treffer unter diesem Namen"
+  },
+  {
+   "datei": "src/lib/scrapers/InnsbruckClubsScraper.ts",
+   "name": "Die Bäckerei",
+   "lat": 47.26884,
+   "lng": 11.40479,
+   "status": "osm",
+   "quelle": "Die Bäckerei"
+  },
+  {
+   "datei": "src/lib/scrapers/InnsbruckClubsScraper.ts",
+   "name": "Weekender Club",
+   "lat": 47.261,
+   "lng": 11.394,
+   "status": "ungeprueft",
+   "quelle": "kein OSM-Treffer unter diesem Namen"
+  },
+  {
+   "datei": "src/lib/scrapers/KleinstaedteClubsScraper.ts",
+   "name": "Stereo Club",
+   "lat": 46.624,
+   "lng": 14.308,
+   "status": "ungeprueft",
+   "quelle": "kein OSM-Treffer unter diesem Namen"
+  },
+  {
+   "datei": "src/lib/scrapers/KleinstaedteClubsScraper.ts",
+   "name": "VolXhaus",
+   "lat": 46.6235,
+   "lng": 14.312,
+   "status": "ungeprueft",
+   "quelle": "kein OSM-Treffer unter diesem Namen"
+  },
+  {
+   "datei": "src/lib/scrapers/KleinstaedteClubsScraper.ts",
+   "name": "Zoo Club",
+   "lat": 46.623,
+   "lng": 14.31,
+   "status": "ungeprueft",
+   "quelle": "kein OSM-Treffer unter diesem Namen"
+  },
+  {
+   "datei": "src/lib/scrapers/KleinstaedteClubsScraper.ts",
+   "name": "Fritz Club",
+   "lat": 46.62045,
+   "lng": 14.30724,
+   "status": "osm",
+   "quelle": "fritz! Club"
+  },
+  {
+   "datei": "src/lib/scrapers/KleinstaedteClubsScraper.ts",
+   "name": "Schleppe Eventhalle",
+   "lat": 46.625,
+   "lng": 14.305,
+   "status": "ungeprueft",
+   "quelle": "kein OSM-Treffer unter diesem Namen"
+  },
+  {
+   "datei": "src/lib/scrapers/KleinstaedteClubsScraper.ts",
+   "name": "Conrad Sohm",
+   "lat": 47.39385,
+   "lng": 9.76639,
+   "status": "osm",
+   "quelle": "Conrad Sohm"
+  },
+  {
+   "datei": "src/lib/scrapers/KleinstaedteClubsScraper.ts",
+   "name": "Spielboden",
+   "lat": 47.42221,
+   "lng": 9.73754,
+   "status": "osm",
+   "quelle": "Spielboden"
+  },
+  {
+   "datei": "src/lib/scrapers/KleinstaedteClubsScraper.ts",
+   "name": "poolbar Festival",
+   "lat": 47.239,
+   "lng": 9.599,
+   "status": "ungeprueft",
+   "quelle": "kein OSM-Treffer unter diesem Namen"
+  },
+  {
+   "datei": "src/lib/scrapers/KleinstaedteClubsScraper.ts",
+   "name": "Warehouse",
+   "lat": 48.1783,
+   "lng": 15.62169,
+   "status": "osm",
+   "quelle": "Warehouse Eventhouse"
+  },
+  {
+   "datei": "src/lib/scrapers/KleinstaedteClubsScraper.ts",
+   "name": "Freiraum",
+   "lat": 48.20858,
+   "lng": 15.63384,
+   "status": "osm",
+   "quelle": "Freiraum"
+  },
+  {
+   "datei": "src/lib/scrapers/KleinstaedteClubsScraper.ts",
+   "name": "Cinema Paradiso",
+   "lat": 48.2045,
+   "lng": 15.626,
+   "status": "osm",
+   "quelle": "Cinema Paradiso"
+  },
+  {
+   "datei": "src/lib/scrapers/KleinstaedteClubsScraper.ts",
+   "name": "Triebwerk",
+   "lat": 47.8032,
+   "lng": 16.2344,
+   "status": "osm",
+   "quelle": "Jugend- und Kulturhaus Triebwerk"
+  },
+  {
+   "datei": "src/lib/scrapers/KleinstaedteClubsScraper.ts",
+   "name": "Alter Schlachthof",
+   "lat": 48.159,
+   "lng": 14.025,
+   "status": "osm",
+   "quelle": "Alter Schlachthof (0.58 km, innerhalb Gebäudekomplex/Areal)"
+  },
+  {
+   "datei": "src/lib/scrapers/KleinstaedteClubsScraper.ts",
+   "name": "Kulturverein Röda",
+   "lat": 48.038,
+   "lng": 14.414,
+   "status": "ungeprueft",
+   "quelle": "kein OSM-Treffer unter diesem Namen"
+  },
+  {
+   "datei": "src/lib/scrapers/KleinstaedteClubsScraper.ts",
+   "name": "Q-Stall",
+   "lat": 48.41213,
+   "lng": 15.60158,
+   "status": "osm",
+   "quelle": "Q-Stall Krems"
+  },
+  {
+   "datei": "src/lib/scrapers/KleinstaedteClubsScraper.ts",
+   "name": "Marquee",
+   "lat": 48.41197,
+   "lng": 15.60208,
+   "status": "osm",
+   "quelle": "Marquée"
+  },
+  {
+   "datei": "src/lib/scrapers/LinzClubsScraper.ts",
+   "name": "Posthof",
+   "lat": 48.31172,
+   "lng": 14.31166,
+   "status": "osm",
+   "quelle": "Posthof"
+  },
+  {
+   "datei": "src/lib/scrapers/LinzClubsScraper.ts",
+   "name": "Stadtwerkstatt",
+   "lat": 48.31018,
+   "lng": 14.28454,
+   "status": "osm",
+   "quelle": "Stadtwerkstatt"
+  },
+  {
+   "datei": "src/lib/scrapers/LinzClubsScraper.ts",
+   "name": "KAPU",
+   "lat": 48.30073,
+   "lng": 14.28211,
+   "status": "osm",
+   "quelle": "KAPU"
+  },
+  {
+   "datei": "src/lib/scrapers/LinzClubsScraper.ts",
+   "name": "Remembar",
+   "lat": 48.3029,
+   "lng": 14.29027,
+   "status": "osm",
+   "quelle": "Remembar"
+  },
+  {
+   "datei": "src/lib/scrapers/LinzClubsScraper.ts",
+   "name": "Passage Linz",
+   "lat": 48.305,
+   "lng": 14.286,
+   "status": "ungeprueft",
+   "quelle": "OSM-Treffer zweifelhaft: aLaska-Passage (1.33 km)"
+  },
+  {
+   "datei": "src/lib/scrapers/LinzClubsScraper.ts",
+   "name": "Musikpark A1",
+   "lat": 48.295,
+   "lng": 14.285,
+   "status": "ungeprueft",
+   "quelle": "kein OSM-Treffer unter diesem Namen"
+  },
+  {
+   "datei": "src/lib/scrapers/LinzClubsScraper.ts",
+   "name": "Solaris",
+   "lat": 48.302,
+   "lng": 14.289,
+   "status": "osm",
+   "quelle": "Solaris"
+  },
+  {
+   "datei": "src/lib/scrapers/LinzClubsScraper.ts",
+   "name": "Cafe Strom",
+   "lat": 48.31012,
+   "lng": 14.28455,
+   "status": "osm",
+   "quelle": "Café Strom"
+  },
+  {
+   "datei": "src/lib/scrapers/LinzTermineScraper.ts",
+   "name": null,
+   "lat": 48.3069,
+   "lng": 14.2858,
+   "status": "gebiet",
+   "quelle": "Stadt-/Portalmittelpunkt, im Code als coords_precision 'municipality' gekennzeichnet"
+  },
+  {
+   "datei": "src/lib/scrapers/niche/CultureTheaterScrapers.ts",
+   "name": "Burgtheater Wien",
+   "lat": 48.21034,
+   "lng": 16.36148,
+   "status": "osm",
+   "quelle": "Burgtheater"
+  },
+  {
+   "datei": "src/lib/scrapers/niche/CultureTheaterScrapers.ts",
+   "name": "Wiener Staatsoper",
+   "lat": 48.2033,
+   "lng": 16.3694,
+   "status": "osm",
+   "quelle": "Wiener Staatsoper"
+  },
+  {
+   "datei": "src/lib/scrapers/niche/CultureTheaterScrapers.ts",
+   "name": "Volksoper Wien",
+   "lat": 48.22467,
+   "lng": 16.35024,
+   "status": "osm",
+   "quelle": "Volksoper"
+  },
+  {
+   "datei": "src/lib/scrapers/niche/MuseumScrapers.ts",
+   "name": "Kunsthistorisches Museum Wien",
+   "lat": 48.2037,
+   "lng": 16.3614,
+   "status": "osm",
+   "quelle": "Kunsthistorisches Museum"
+  },
+  {
+   "datei": "src/lib/scrapers/niche/MuseumScrapers.ts",
+   "name": "Albertina Wien",
+   "lat": 48.2047,
+   "lng": 16.3684,
+   "status": "osm",
+   "quelle": "Albertina"
+  },
+  {
+   "datei": "src/lib/scrapers/niche/MuseumScrapers.ts",
+   "name": "MUMOK Wien",
+   "lat": 48.2041,
+   "lng": 16.3575,
+   "status": "osm",
+   "quelle": "Museum Moderner Kunst Stiftung Ludwig Wien"
+  },
+  {
+   "datei": "src/lib/scrapers/niche/MuseumScrapers.ts",
+   "name": "Belvedere Wien",
+   "lat": 48.1916,
+   "lng": 16.3808,
+   "status": "osm",
+   "quelle": "Belvedere"
+  },
+  {
+   "datei": "src/lib/scrapers/niche/MuseumScrapers.ts",
+   "name": "Naturhistorisches Museum Wien",
+   "lat": 48.2054,
+   "lng": 16.3597,
+   "status": "osm",
+   "quelle": "Naturhistorisches Museum"
+  },
+  {
+   "datei": "src/lib/scrapers/niche/MuseumScrapers.ts",
+   "name": "Technisches Museum Wien",
+   "lat": 48.1914,
+   "lng": 16.3179,
+   "status": "osm",
+   "quelle": "Technisches Museum"
+  },
+  {
+   "datei": "src/lib/scrapers/niche/MuseumScrapers.ts",
+   "name": "Leopold Museum Wien",
+   "lat": 48.2036,
+   "lng": 16.3585,
+   "status": "osm",
+   "quelle": "Leopold Museum"
+  },
+  {
+   "datei": "src/lib/scrapers/niche/MuseumScrapers.ts",
+   "name": "Ars Electronica Center Linz",
+   "lat": 48.3094,
+   "lng": 14.2853,
+   "status": "osm",
+   "quelle": "Ars Electronica Center"
+  },
+  {
+   "datei": "src/lib/scrapers/niche/SportScrapers.ts",
+   "name": "ernst-happel-stadion",
+   "lat": 48.2085,
+   "lng": 16.4203,
+   "status": "osm",
+   "quelle": "Ernst-Happel-Stadion"
+  },
+  {
+   "datei": "src/lib/scrapers/niche/SportScrapers.ts",
+   "name": "allianz stadion",
+   "lat": 48.1963,
+   "lng": 16.2664,
+   "status": "osm",
+   "quelle": "Allianz Stadion"
+  },
+  {
+   "datei": "src/lib/scrapers/niche/SportScrapers.ts",
+   "name": "generali arena",
+   "lat": 48.1621,
+   "lng": 16.3893,
+   "status": "osm",
+   "quelle": "Generali Arena"
+  },
+  {
+   "datei": "src/lib/scrapers/niche/SportScrapers.ts",
+   "name": "red bull arena",
+   "lat": 47.8164,
+   "lng": 12.99824,
+   "status": "osm",
+   "quelle": "Red Bull Arena"
+  },
+  {
+   "datei": "src/lib/scrapers/niche/SportScrapers.ts",
+   "name": "merkur arena",
+   "lat": 47.0462,
+   "lng": 15.453,
+   "status": "osm",
+   "quelle": "Merkur Arena"
+  },
+  {
+   "datei": "src/lib/scrapers/niche/SportScrapers.ts",
+   "name": "tivoli stadion",
+   "lat": 47.25588,
+   "lng": 11.41207,
+   "status": "osm",
+   "quelle": "Tivoli Stadion Tirol, Innsbruck"
+  },
+  {
+   "datei": "src/lib/scrapers/niche/SportScrapers.ts",
+   "name": "wörthersee stadion",
+   "lat": 46.60879,
+   "lng": 14.27744,
+   "status": "osm",
+   "quelle": "28 Black Arena (ehem. Wörthersee Stadion), OSM"
+  },
+  {
+   "datei": "src/lib/scrapers/niche/SportScrapers.ts",
+   "name": "linzer stadion",
+   "lat": 48.29357,
+   "lng": 14.27656,
+   "status": "osm",
+   "quelle": "Raiffeisen Arena (neues Linzer Stadion), OSM"
+  },
+  {
+   "datei": "src/lib/scrapers/niche/SportScrapers.ts",
+   "name": "cashpoint arena",
+   "lat": 47.35493,
+   "lng": 9.63766,
+   "status": "osm",
+   "quelle": "Stadion Schnabelholz, Altach (OSM)"
+  },
+  {
+   "datei": "src/lib/scrapers/niche/SportScrapers.ts",
+   "name": "pappelstadion",
+   "lat": 47.73944,
+   "lng": 16.40632,
+   "status": "osm",
+   "quelle": "Pappelstadion Mattersburg (OSM)"
+  },
+  {
+   "datei": "src/lib/scrapers/PopcultureScraper.ts",
+   "name": null,
+   "lat": 47.0707,
+   "lng": 15.4395,
+   "status": "gebiet",
+   "quelle": "Stadt-/Portalmittelpunkt, im Code als coords_precision 'municipality' gekennzeichnet"
+  },
+  {
+   "datei": "src/lib/scrapers/SalzburgClubsScraper.ts",
+   "name": "Rockhouse",
+   "lat": 47.80692,
+   "lng": 13.05893,
+   "status": "osm",
+   "quelle": "Rockhouse"
+  },
+  {
+   "datei": "src/lib/scrapers/SalzburgClubsScraper.ts",
+   "name": "Republic",
+   "lat": 47.80114,
+   "lng": 13.03951,
+   "status": "osm",
+   "quelle": "Anton-Neumayr-Platz 2, 5020 Salzburg"
+  },
+  {
+   "datei": "src/lib/scrapers/SalzburgClubsScraper.ts",
+   "name": "SZENE Salzburg",
+   "lat": 47.80143,
+   "lng": 13.03966,
+   "status": "osm",
+   "quelle": "Szene"
+  },
+  {
+   "datei": "src/lib/scrapers/SalzburgClubsScraper.ts",
+   "name": "Jazzit",
+   "lat": 47.81213,
+   "lng": 13.04166,
+   "status": "osm",
+   "quelle": "Jazzit"
+  },
+  {
+   "datei": "src/lib/scrapers/SalzburgClubsScraper.ts",
+   "name": "ARGEkultur",
+   "lat": 47.79398,
+   "lng": 13.05633,
+   "status": "osm",
+   "quelle": "ARGEkultur Salzburg"
+  },
+  {
+   "datei": "src/lib/scrapers/SalzburgClubsScraper.ts",
+   "name": "Half Moon Club",
+   "lat": 47.7995,
+   "lng": 13.044,
+   "status": "ungeprueft",
+   "quelle": "kein OSM-Treffer unter diesem Namen"
+  },
+  {
+   "datei": "src/lib/scrapers/SalzburgClubsScraper.ts",
+   "name": "MARK Salzburg",
+   "lat": 47.82458,
+   "lng": 13.06479,
+   "status": "osm",
+   "quelle": "Mark Volxküche"
+  },
+  {
+   "datei": "src/lib/scrapers/SalzburgScrapers.ts",
+   "name": "Rockhouse Salzburg",
+   "lat": 47.8065,
+   "lng": 13.055,
+   "status": "osm",
+   "quelle": "Rockhouse"
+  },
+  {
+   "datei": "src/lib/scrapers/SalzburgScrapers.ts",
+   "name": "ARGEkultur",
+   "lat": 47.79398,
+   "lng": 13.05633,
+   "status": "osm",
+   "quelle": "ARGEkultur Salzburg"
+  },
+  {
+   "datei": "src/lib/scrapers/SalzburgScrapers.ts",
+   "name": "SZENE Salzburg",
+   "lat": 47.80143,
+   "lng": 13.03966,
+   "status": "osm",
+   "quelle": "Szene"
+  },
+  {
+   "datei": "src/lib/scrapers/TourismusPortaleScraper.ts",
+   "name": null,
+   "lat": 47.3233,
+   "lng": 12.7967,
+   "status": "gebiet",
+   "quelle": "Stadt-/Portalmittelpunkt, im Code als coords_precision 'municipality' gekennzeichnet"
+  },
+  {
+   "datei": "src/lib/scrapers/TourismusPortaleScraper.ts",
+   "name": null,
+   "lat": 47.1,
+   "lng": 11.3,
+   "status": "gebiet",
+   "quelle": "Stadt-/Portalmittelpunkt, im Code als coords_precision 'municipality' gekennzeichnet"
+  },
+  {
+   "datei": "src/lib/scrapers/TourismusPortaleScraper.ts",
+   "name": null,
+   "lat": 46.9833,
+   "lng": 12.4667,
+   "status": "gebiet",
+   "quelle": "Stadt-/Portalmittelpunkt, im Code als coords_precision 'municipality' gekennzeichnet"
+  },
+  {
+   "datei": "src/lib/scrapers/TourismusPortaleScraper.ts",
+   "name": null,
+   "lat": 47.4333,
+   "lng": 11.7167,
+   "status": "gebiet",
+   "quelle": "Stadt-/Portalmittelpunkt, im Code als coords_precision 'municipality' gekennzeichnet"
+  },
+  {
+   "datei": "src/lib/scrapers/TourismusPortaleScraper.ts",
+   "name": null,
+   "lat": 47.4467,
+   "lng": 12.3667,
+   "status": "gebiet",
+   "quelle": "Stadt-/Portalmittelpunkt, im Code als coords_precision 'municipality' gekennzeichnet"
+  },
+  {
+   "datei": "src/lib/scrapers/TourismusPortaleScraper.ts",
+   "name": null,
+   "lat": 46.9667,
+   "lng": 11.0075,
+   "status": "gebiet",
+   "quelle": "Stadt-/Portalmittelpunkt, im Code als coords_precision 'municipality' gekennzeichnet"
+  },
+  {
+   "datei": "src/lib/scrapers/TourismusPortaleScraper.ts",
+   "name": null,
+   "lat": 47.03,
+   "lng": 10.86,
+   "status": "gebiet",
+   "quelle": "Stadt-/Portalmittelpunkt, im Code als coords_precision 'municipality' gekennzeichnet"
+  },
+  {
+   "datei": "src/lib/scrapers/TourismusPortaleScraper.ts",
+   "name": null,
+   "lat": 47.01,
+   "lng": 10.29,
+   "status": "gebiet",
+   "quelle": "Stadt-/Portalmittelpunkt, im Code als coords_precision 'municipality' gekennzeichnet"
+  },
+  {
+   "datei": "src/lib/scrapers/TourismusPortaleScraper.ts",
+   "name": null,
+   "lat": 47.39,
+   "lng": 12.64,
+   "status": "gebiet",
+   "quelle": "Stadt-/Portalmittelpunkt, im Code als coords_precision 'municipality' gekennzeichnet"
+  },
+  {
+   "datei": "src/lib/scrapers/TourismusPortaleScraper.ts",
+   "name": null,
+   "lat": 47.16,
+   "lng": 11.86,
+   "status": "gebiet",
+   "quelle": "Stadt-/Portalmittelpunkt, im Code als coords_precision 'municipality' gekennzeichnet"
+  },
+  {
+   "datei": "src/lib/scrapers/TourismusPortaleScraper.ts",
+   "name": null,
+   "lat": 47.04,
+   "lng": 10.6,
+   "status": "gebiet",
+   "quelle": "Stadt-/Portalmittelpunkt, im Code als coords_precision 'municipality' gekennzeichnet"
+  },
+  {
+   "datei": "src/lib/scrapers/TourismusPortaleScraper.ts",
+   "name": null,
+   "lat": 47.39,
+   "lng": 13.69,
+   "status": "gebiet",
+   "quelle": "Stadt-/Portalmittelpunkt, im Code als coords_precision 'municipality' gekennzeichnet"
+  },
+  {
+   "datei": "src/lib/scrapers/TourismusPortaleScraper.ts",
+   "name": null,
+   "lat": 46.56,
+   "lng": 13.28,
+   "status": "gebiet",
+   "quelle": "Stadt-/Portalmittelpunkt, im Code als coords_precision 'municipality' gekennzeichnet"
+  },
+  {
+   "datei": "src/lib/scrapers/TourismusPortaleScraper.ts",
+   "name": null,
+   "lat": 47.92,
+   "lng": 13.54,
+   "status": "gebiet",
+   "quelle": "Stadt-/Portalmittelpunkt, im Code als coords_precision 'municipality' gekennzeichnet"
+  },
+  {
+   "datei": "src/lib/scrapers/TourismusPortaleScraper.ts",
+   "name": null,
+   "lat": 47.17,
+   "lng": 11.87,
+   "status": "gebiet",
+   "quelle": "Stadt-/Portalmittelpunkt, im Code als coords_precision 'municipality' gekennzeichnet"
+  },
+  {
+   "datei": "src/lib/scrapers/uni/FHOOEScraper.ts",
+   "name": "hagenberg",
+   "lat": 48.3685,
+   "lng": 14.5153,
+   "status": "osm",
+   "quelle": "FH OÖ Campus Hagenberg, Softwarepark 11 (OSM-Adresse)"
+  },
+  {
+   "datei": "src/lib/scrapers/uni/FHOOEScraper.ts",
+   "name": "linz",
+   "lat": 48.3015,
+   "lng": 14.31164,
+   "status": "osm",
+   "quelle": "Garnisonstraße 21, 4020 Linz"
+  },
+  {
+   "datei": "src/lib/scrapers/uni/FHOOEScraper.ts",
+   "name": "steyr",
+   "lat": 48.04294,
+   "lng": 14.418,
+   "status": "osm",
+   "quelle": "Wehrgrabengasse 1, 4400 Steyr"
+  },
+  {
+   "datei": "src/lib/scrapers/uni/FHOOEScraper.ts",
+   "name": "wels",
+   "lat": 48.16143,
+   "lng": 14.02779,
+   "status": "osm",
+   "quelle": "Stelzhamerstraße 23, 4600 Wels"
+  },
+  {
+   "datei": "src/lib/scrapers/WienClubsScraper.ts",
+   "name": "Grelle Forelle",
+   "lat": 48.23441,
+   "lng": 16.36106,
+   "status": "osm",
+   "quelle": "Grelle Forelle"
+  },
+  {
+   "datei": "src/lib/scrapers/WienClubsScraper.ts",
+   "name": "Flex",
+   "lat": 48.21778,
+   "lng": 16.37091,
+   "status": "osm",
+   "quelle": "Flex"
+  },
+  {
+   "datei": "src/lib/scrapers/WienClubsScraper.ts",
+   "name": "U4",
+   "lat": 48.18328,
+   "lng": 16.32773,
+   "status": "osm",
+   "quelle": "Schönbrunner Straße 222, 1120 Wien"
+  },
+  {
+   "datei": "src/lib/scrapers/WienClubsScraper.ts",
+   "name": "Pratersauna",
+   "lat": 48.21341,
+   "lng": 16.405,
+   "status": "osm",
+   "quelle": "Pratersauna, Waldsteingartenstraße 135 (OSM-Adresse)"
+  },
+  {
+   "datei": "src/lib/scrapers/WienClubsScraper.ts",
+   "name": "Praterdome",
+   "lat": 48.2152,
+   "lng": 16.3989,
+   "status": "osm",
+   "quelle": "Prater Dome, Riesenradplatz 7 (OSM-Adresse)"
+  },
+  {
+   "datei": "src/lib/scrapers/WienClubsScraper.ts",
+   "name": "Volksgarten",
+   "lat": 48.2047,
+   "lng": 16.3608,
+   "status": "osm",
+   "quelle": "Volksgarten"
+  },
+  {
+   "datei": "src/lib/scrapers/WienClubsScraper.ts",
+   "name": "Fluc",
+   "lat": 48.2178,
+   "lng": 16.3903,
+   "status": "osm",
+   "quelle": "Flucc"
+  },
+  {
+   "datei": "src/lib/scrapers/WienClubsScraper.ts",
+   "name": "Das Werk",
+   "lat": 48.23361,
+   "lng": 16.3608,
+   "status": "osm",
+   "quelle": "Das Werk"
+  },
+  {
+   "datei": "src/lib/scrapers/WienClubsScraper.ts",
+   "name": "Sass Music Club",
+   "lat": 48.20107,
+   "lng": 16.36951,
+   "status": "osm",
+   "quelle": "SASS Music Club"
+  },
+  {
+   "datei": "src/lib/scrapers/WienClubsScraper.ts",
+   "name": "Camera Club",
+   "lat": 48.19859,
+   "lng": 16.35006,
+   "status": "osm",
+   "quelle": "Camera Club"
+  },
+  {
+   "datei": "src/lib/scrapers/WienClubsScraper.ts",
+   "name": "Chelsea",
+   "lat": 48.2089,
+   "lng": 16.337,
+   "status": "osm",
+   "quelle": "Chelsea"
+  },
+  {
+   "datei": "src/lib/scrapers/WienClubsScraper.ts",
+   "name": "Rhiz",
+   "lat": 48.2083,
+   "lng": 16.3397,
+   "status": "osm",
+   "quelle": "rhiz"
+  },
+  {
+   "datei": "src/lib/scrapers/WienClubsScraper.ts",
+   "name": "B72",
+   "lat": 48.21461,
+   "lng": 16.34064,
+   "status": "osm",
+   "quelle": "B72"
+  },
+  {
+   "datei": "src/lib/scrapers/WienClubsScraper.ts",
+   "name": "Arena Wien",
+   "lat": 48.1893,
+   "lng": 16.4103,
+   "status": "osm",
+   "quelle": "Arena Wien"
+  },
+  {
+   "datei": "src/lib/scrapers/WienClubsScraper.ts",
+   "name": "WUK",
+   "lat": 48.22298,
+   "lng": 16.35151,
+   "status": "osm",
+   "quelle": "WUK"
+  },
+  {
+   "datei": "src/lib/scrapers/WienClubsScraper.ts",
+   "name": "Szene Wien",
+   "lat": 48.17558,
+   "lng": 16.40795,
+   "status": "osm",
+   "quelle": "Szene Wien"
+  },
+  {
+   "datei": "src/lib/scrapers/WienClubsScraper.ts",
+   "name": "Ottakringer Brauerei",
+   "lat": 48.21204,
+   "lng": 16.32393,
+   "status": "osm",
+   "quelle": "Ottakringer Brauerei"
+  },
+  {
+   "datei": "src/lib/scrapers/WienClubsScraper.ts",
+   "name": "Das Techno Cafe",
+   "lat": 48.2098,
+   "lng": 16.3594,
+   "status": "ungeprueft",
+   "quelle": "kein OSM-Treffer unter diesem Namen"
+  },
+  {
+   "datei": "src/lib/scrapers/WienClubsScraper.ts",
+   "name": "Celeste",
+   "lat": 48.19552,
+   "lng": 16.35547,
+   "status": "osm",
+   "quelle": "Celeste"
+  },
+  {
+   "datei": "src/lib/scrapers/WienClubsScraper.ts",
+   "name": "O-Klub",
+   "lat": 48.20291,
+   "lng": 16.3683,
+   "status": "osm",
+   "quelle": "O der Klub"
+  },
+  {
+   "datei": "src/lib/scrapers/WienClubsScraper.ts",
+   "name": "Babenberger Passage",
+   "lat": 48.204,
+   "lng": 16.362,
+   "status": "osm",
+   "quelle": "Babenberger Passage"
+  },
+  {
+   "datei": "src/lib/scrapers/WienClubsScraper.ts",
+   "name": "Horst",
+   "lat": 48.21095,
+   "lng": 16.37431,
+   "status": "osm",
+   "quelle": "Horst"
+  },
+  {
+   "datei": "src/lib/scrapers/WienClubsScraper.ts",
+   "name": "Donau Techno",
+   "lat": 48.237,
+   "lng": 16.366,
+   "status": "ungeprueft",
+   "quelle": "kein OSM-Treffer unter diesem Namen"
+  },
+  {
+   "datei": "src/lib/scrapers/WienClubsScraper.ts",
+   "name": "The Loft",
+   "lat": 48.2075,
+   "lng": 16.3402,
+   "status": "osm",
+   "quelle": "The Loft"
+  },
+  {
+   "datei": "src/lib/scrapers/WienClubsScraper.ts",
+   "name": "Chaya Fuera",
+   "lat": 48.2025,
+   "lng": 16.3615,
+   "status": "ungeprueft",
+   "quelle": "kein OSM-Treffer unter diesem Namen"
+  },
+  {
+   "datei": "src/lib/scrapers/WienClubsScraper.ts",
+   "name": "Tunnel Vienna Live",
+   "lat": 48.21187,
+   "lng": 16.34825,
+   "status": "osm",
+   "quelle": "Tunnel Vienna Live"
+  },
+  {
+   "datei": "src/lib/scrapers/WienClubsScraper.ts",
+   "name": "Club U",
+   "lat": 48.20011,
+   "lng": 16.37084,
+   "status": "osm",
+   "quelle": "Club U"
+  },
+  {
+   "datei": "src/lib/scrapers/WienClubsScraper.ts",
+   "name": "Why Not",
+   "lat": 48.21252,
+   "lng": 16.36857,
+   "status": "osm",
+   "quelle": "Why Not - Clubdiskothek"
+  },
+  {
+   "datei": "src/lib/scrapers/WienClubsScraper.ts",
+   "name": "KEN Club",
+   "lat": 48.2015,
+   "lng": 16.3645,
+   "status": "ungeprueft",
+   "quelle": "kein OSM-Treffer unter diesem Namen"
+  },
+  {
+   "datei": "src/lib/scrapers/WienClubsScraper.ts",
+   "name": "Club Dual",
+   "lat": 48.205,
+   "lng": 16.365,
+   "status": "ungeprueft",
+   "quelle": "kein OSM-Treffer unter diesem Namen"
+  },
+  {
+   "datei": "src/lib/scrapers/WienClubsScraper.ts",
+   "name": "Platzhirsch",
+   "lat": 48.2038,
+   "lng": 16.366,
+   "status": "osm",
+   "quelle": "Platzhirsch"
+  },
+  {
+   "datei": "src/lib/scrapers/WienClubsScraper.ts",
+   "name": "Porgy & Bess",
+   "lat": 48.2068,
+   "lng": 16.377,
+   "status": "osm",
+   "quelle": "Porgy & Bess"
+  },
+  {
+   "datei": "src/lib/scrapers/WienClubsScraper.ts",
+   "name": "Jazzland",
+   "lat": 48.2118,
+   "lng": 16.3755,
+   "status": "osm",
+   "quelle": "Jazzland"
+  },
+  {
+   "datei": "src/lib/scrapers/WienClubsScraper.ts",
+   "name": "ZWE",
+   "lat": 48.21629,
+   "lng": 16.37483,
+   "status": "osm",
+   "quelle": "Jazzclub ZWE"
+  },
+  {
+   "datei": "src/lib/scrapers/WienClubsScraper.ts",
+   "name": "Cafe Carina",
+   "lat": 48.2092,
+   "lng": 16.3385,
+   "status": "osm",
+   "quelle": "Café Carina"
+  },
+  {
+   "datei": "src/lib/scrapers/WienClubsScraper.ts",
+   "name": "Cafe Concerto",
+   "lat": 48.21094,
+   "lng": 16.33849,
+   "status": "osm",
+   "quelle": "Cafe Concerto"
+  },
+  {
+   "datei": "src/lib/scrapers/WienClubsScraper.ts",
+   "name": "Loop",
+   "lat": 48.2088,
+   "lng": 16.3378,
+   "status": "osm",
+   "quelle": "Loop"
+  },
+  {
+   "datei": "src/lib/scrapers/WienClubsScraper.ts",
+   "name": "Kramladen",
+   "lat": 48.209,
+   "lng": 16.339,
+   "status": "osm",
+   "quelle": "Kramladen"
+  },
+  {
+   "datei": "src/lib/scrapers/WienClubsScraper.ts",
+   "name": "Venster 99",
+   "lat": 48.2095,
+   "lng": 16.3395,
+   "status": "ungeprueft",
+   "quelle": "kein OSM-Treffer unter diesem Namen"
+  },
+  {
+   "datei": "src/lib/scrapers/WienClubsScraper.ts",
+   "name": "Weberknecht",
+   "lat": 48.21022,
+   "lng": 16.33856,
+   "status": "osm",
+   "quelle": "Weberknecht"
+  },
+  {
+   "datei": "src/lib/scrapers/WienClubsScraper.ts",
+   "name": "Elektro Gönner",
+   "lat": 48.19647,
+   "lng": 16.34607,
+   "status": "osm",
+   "quelle": "Mariahilfer Straße 101, 1060 Wien"
+  },
+  {
+   "datei": "src/lib/scrapers/WienClubsScraper.ts",
+   "name": "Reigen",
+   "lat": 48.18841,
+   "lng": 16.30362,
+   "status": "osm",
+   "quelle": "Reigen"
+  },
+  {
+   "datei": "src/lib/scrapers/WienClubsScraper.ts",
+   "name": "Sargfabrik",
+   "lat": 48.19489,
+   "lng": 16.30502,
+   "status": "osm",
+   "quelle": "Sargfabrik"
+  },
+  {
+   "datei": "src/lib/scrapers/WienClubsScraper.ts",
+   "name": "Wiener Metropol",
+   "lat": 48.228,
+   "lng": 16.343,
+   "status": "ungeprueft",
+   "quelle": "kein OSM-Treffer unter diesem Namen"
+  },
+  {
+   "datei": "src/lib/scrapers/WienClubsScraper.ts",
+   "name": "Dachboden Wien",
+   "lat": 48.20637,
+   "lng": 16.35468,
+   "status": "osm",
+   "quelle": "Der Dachboden im 25hours Hotel beim MuseumsQuartier"
+  },
+  {
+   "datei": "src/lib/scrapers/WienClubsScraper.ts",
+   "name": "Strandbar Herrmann",
+   "lat": 48.21195,
+   "lng": 16.38581,
+   "status": "osm",
+   "quelle": "Strandbar Herrmann"
+  },
+  {
+   "datei": "src/lib/scrapers/WienClubsScraper.ts",
+   "name": "Kulisse",
+   "lat": 48.21702,
+   "lng": 16.3256,
+   "status": "osm",
+   "quelle": "Kulisse"
+  },
+  {
+   "datei": "src/lib/scrapers/WienClubsScraper.ts",
+   "name": "BettelAlm",
+   "lat": 48.2055,
+   "lng": 16.372,
+   "status": "ungeprueft",
+   "quelle": "kein OSM-Treffer unter diesem Namen"
+  },
+  {
+   "datei": "src/lib/scrapers/WienClubsScraper.ts",
+   "name": "Café Leopold",
+   "lat": 48.2034,
+   "lng": 16.3584,
+   "status": "osm",
+   "quelle": "Café Leopold"
+  },
+  {
+   "datei": "src/lib/scrapers/WienClubsScraper.ts",
+   "name": "Loco Bar",
+   "lat": 48.23107,
+   "lng": 16.3519,
+   "status": "osm",
+   "quelle": "Loco Bar"
+  },
+  {
+   "datei": "src/lib/scrapers/WienClubsScraper.ts",
+   "name": "Miles Smiles",
+   "lat": 48.211,
+   "lng": 16.349,
+   "status": "osm",
+   "quelle": "miles smiles Jazz Café"
+  },
+  {
+   "datei": "src/lib/scrapers/WienGvScraper.ts",
+   "name": null,
+   "lat": 48.2082,
+   "lng": 16.3738,
+   "status": "gebiet",
+   "quelle": "Stadt-/Portalmittelpunkt, im Code als coords_precision 'municipality' gekennzeichnet"
+  },
+  {
+   "datei": "src/lib/scrapers/WienOGDScraper.ts",
+   "name": null,
+   "lat": 48.2082,
+   "lng": 16.3738,
+   "status": "gebiet",
+   "quelle": "Stadt-/Portalmittelpunkt, im Code als coords_precision 'municipality' gekennzeichnet"
+  }
+ ]
+}
