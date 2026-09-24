@@ -5,14 +5,14 @@ describe('precision-classed matching (cat-v2)', () => {
   it('`markt` does NOT match inside `Neckenmarkt` (no Märkte evidence)', () => {
     const norm = normalizeInput({ title: 'Neckenmarkt Event' });
     const scores = aggregate(extractSignals(norm));
-    const maerkte = scores.find(s => s.category === 'Märkte');
+    const maerkte = scores.find(s => s.category === 'Märkte & Feste');
     expect(maerkte?.score ?? 0).toBe(0);
   });
 
-  it('compound `weihnachtsmarkt` DOES match Märkte via pattern', () => {
+  it('compound `weihnachtsmarkt` DOES match Märkte & Feste via pattern', () => {
     const norm = normalizeInput({ title: 'Weihnachtsmarkt in Wien' });
     const scores = aggregate(extractSignals(norm));
-    const maerkte = scores.find(s => s.category === 'Märkte');
+    const maerkte = scores.find(s => s.category === 'Märkte & Feste');
     expect((maerkte?.score ?? 0)).toBeGreaterThan(0);
   });
 

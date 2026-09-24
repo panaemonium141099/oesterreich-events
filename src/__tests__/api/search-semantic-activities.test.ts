@@ -43,7 +43,10 @@ vi.mock('@google/genai', () => ({
   Type: { OBJECT: 'OBJECT', ARRAY: 'ARRAY', STRING: 'STRING' },
 }));
 
-const { POST } = await import('@/app/api/search/semantic/route');
+// Die Route hält einen 15-Minuten-Antwort-Cache auf Modulebene. Pro Test frisch
+// laden, sonst beantwortet ein früherer Test mit gleicher Anfrage den nächsten
+// aus dem Cache und dessen Mocks/Assertions greifen nie.
+let POST: typeof import('@/app/api/search/semantic/route').POST;
 
 function makeRequest(body: Record<string, unknown>): NextRequest {
   return new NextRequest('http://localhost:3000/api/search/semantic', {
@@ -77,7 +80,9 @@ function activityRow(over: Record<string, unknown> = {}) {
   };
 }
 
-beforeEach(() => {
+beforeEach(async () => {
+  vi.resetModules();
+  ({ POST } = await import('@/app/api/search/semantic/route'));
   vi.clearAllMocks();
   vi.stubEnv('GEMINI_API_KEY', '');
   mockRpc.mockResolvedValue({ data: [], error: null });

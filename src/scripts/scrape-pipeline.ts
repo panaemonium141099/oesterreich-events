@@ -157,19 +157,16 @@ async function main() {
     if (!opts.skipCategorization) {
       if (!opts.skipCategorizationBackfill) {
         steps.categorization_backfill = await runStep('categorization_backfill', async () => {
-          // Free, deterministic, idempotent. Writes a coarse `category`
-          // to every stale row so events without enrichment still have
-          // SOMETHING. Since v3 (2026-04-23) the enrichment step below
-          // overwrites this with the AI-derived 11-Hauptkategorie from
-          // docs/TAXONOMY.md — but this step stays as the safety net
-          // for pipeline runs with --skip-enrichment.
+          // Deterministische Kategorie-Einordnung (Taxonomie v3), der
+          // einzige Kategorieschritt seit dem Ende der KI-Anreicherung
+          // (MASTERPLAN §6). Ordnet jede Zeile mit veralteter
+          // Classifier-Version neu ein; reconcile schützt stärkere
+          // bestehende Kategorien. Idempotent.
           execStep('Categorize events (deterministic backfill)',
             `npx tsx ${envFlag}src/scripts/categorize-events.ts --deterministic-backfill`);
         }, steps);
       }
 
-      // Legacy AI-residue step (categorize-events.ts without flags).
-      // Fully superseded by the enrichment step below. Not scheduled.
     }
 
     // fn-25 C3: Adress-Geocoder (Nominatim, 1,2 s Takt, Tagesbudget) füllt

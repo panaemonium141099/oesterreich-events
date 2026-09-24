@@ -297,6 +297,8 @@ function createMockSupabase() {
     gt: vi.fn().mockReturnThis(),
     single: vi.fn().mockResolvedValue({ data: null, error: null }),
     range: vi.fn().mockResolvedValue({ data: [], error: null }),
+    // createGroupedNotifications lädt die URL-Felder der Events per .in('id', …).
+    in: vi.fn().mockResolvedValue({ data: [], error: null }),
   };
 
   const fromChain = {

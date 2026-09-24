@@ -33,26 +33,32 @@ describe('buildOebbScottyUrl', () => {
 });
 
 describe('buildBookingUrl', () => {
-  it('builds a booking.com URL with ss, checkin, checkout', () => {
-    const url = buildBookingUrl('Eisenstadt', '2026-06-15', 1);
-    const u = new URL(url);
-    expect(u.hostname).toBe('www.booking.com');
-    expect(u.searchParams.get('ss')).toBe('Eisenstadt');
-    expect(u.searchParams.get('checkin')).toBe('2026-06-15');
-    expect(u.searchParams.get('checkout')).toBe('2026-06-16');
+  // fn-21: Booking-Links laufen über den CJ-Affiliate-Klick; die eigentliche
+  // booking.com-Suche steckt im Parameter `url`.
+  const unwrap = (link: string) => {
+    const outer = new URL(link);
+    return { outer, inner: new URL(outer.searchParams.get('url')!) };
+  };
+
+  it('wraps a booking.com search (ss, checkin, checkout) in the CJ affiliate click with sid=plan', () => {
+    const { outer, inner } = unwrap(buildBookingUrl('Eisenstadt', '2026-06-15', 1));
+    expect(outer.hostname).toBe('www.kqzyfj.com');
+    expect(outer.searchParams.get('sid')).toBe('plan');
+    expect(inner.hostname).toBe('www.booking.com');
+    expect(inner.searchParams.get('ss')).toBe('Eisenstadt');
+    expect(inner.searchParams.get('checkin')).toBe('2026-06-15');
+    expect(inner.searchParams.get('checkout')).toBe('2026-06-16');
   });
 
-  it('builds a city-less URL when city is null', () => {
-    const url = buildBookingUrl(null, '2026-06-15', 1);
-    const u = new URL(url);
-    expect(u.searchParams.has('ss')).toBe(false);
-    expect(u.searchParams.get('checkin')).toBe('2026-06-15');
+  it('builds a city-less search when city is null', () => {
+    const { inner } = unwrap(buildBookingUrl(null, '2026-06-15', 1));
+    expect(inner.searchParams.has('ss')).toBe(false);
+    expect(inner.searchParams.get('checkin')).toBe('2026-06-15');
   });
 
   it('respects nights param for checkout calculation', () => {
-    const url = buildBookingUrl('Wien', '2026-06-15', 3);
-    const u = new URL(url);
-    expect(u.searchParams.get('checkout')).toBe('2026-06-18');
+    const { inner } = unwrap(buildBookingUrl('Wien', '2026-06-15', 3));
+    expect(inner.searchParams.get('checkout')).toBe('2026-06-18');
   });
 });
 

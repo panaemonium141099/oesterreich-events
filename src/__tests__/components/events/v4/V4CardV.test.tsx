@@ -7,8 +7,9 @@ import type { V4EventState } from '@/lib/v4/derive-event-state';
 vi.mock('next/image', () => ({
   __esModule: true,
   default: (props: Record<string, unknown>) => {
-    const { src, alt, priority, fill, sizes, ...rest } = props as Record<string, unknown>;
-    return <img src={String(src)} alt={String(alt)} data-priority={priority ? 'true' : 'false'} {...rest as object} />;
+    // Next.js 16: `preload` ersetzt das veraltete `priority` (EventImage reicht preload durch).
+    const { src, alt, priority, preload, fill, sizes, ...rest } = props as Record<string, unknown>;
+    return <img src={String(src)} alt={String(alt)} data-priority={priority || preload ? 'true' : 'false'} {...rest as object} />;
   },
 }));
 

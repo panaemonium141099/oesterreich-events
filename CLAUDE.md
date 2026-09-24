@@ -57,9 +57,10 @@ node / next.js
 - **E-Mail:** Brevo (primär) + Resend (Fallback); SMS: Twilio
 - **Analytics:** eigene `analytics_events`-Tabelle (PageviewTracker +
   ClickTracker sammeln alle `data-track`-Attribute ein, u. a. `ticket_click`)
-- **Testing:** Vitest (~1600 Tests; einige Suiten brauchen DB/Netz bzw.
-  Router-Mocks und schlagen in Sandbox-Umgebungen fehl — Vergleich immer
-  gegen Baseline, nicht absolut)
+- **Testing:** Vitest (~2 660 Tests), seit 2026-09-24 komplett grün und
+  Pflicht: `.github/workflows/tests.yml` läuft bei jedem PR und vor jedem
+  Deploy (deploy.yml wartet darauf). Ein roter Test heißt Fehler beheben
+  oder bewusst geänderte Erwartung nachziehen, nie „war schon rot".
 
 ## Betrieb / Automatisierung (Stand 2026-07)
 - **GitHub Actions `scrape-events.yml`** (täglich 03:17): 10 lastbalancierte
@@ -171,7 +172,7 @@ node / next.js
 ## Build & Test
 ```bash
 npm run dev / build / start
-npm test                     # Vitest (Baseline beachten, s. Tech-Stack)
+npm test                     # Vitest, muss grün sein (CI + Deploy-Gate)
 npm run scrape               # alle Scraper | --source <name> | --shard i/N
 npm run scrape:pipeline      # scrape + post-processing (CI nutzt --skip-scrapers im post-Job)
 npm run import:eventim       # Eventim-PFT-Feed (braucht EVENTIM_FEED_USER/PASS)
@@ -197,8 +198,6 @@ npm run scrape:festival-lineups | match-artists
 - Supabase Micro: `count(*) exact`/breite Scans auf `events` (~280k rows)
   laufen in Statement-Timeouts — `count: 'planned'`, MVs oder indexierte
   Pfade nutzen (MASTERPLAN §10.1/§10.4).
-- Teile der Vitest-Suite brauchen DB/Netz bzw. App-Router-Mocks und schlagen
-  in Sandboxen fehl; immer Diff gegen Baseline statt Absolut-Grün erwarten.
 - Personalisierte Karten-Badges (inplan/match/lineup) auf der Landing sind
   seit dem Statik-Umbau nicht mehr im Server-HTML (ID-Sets liegen in
   /api/me/landing für spätere Client-Hydration bereit).

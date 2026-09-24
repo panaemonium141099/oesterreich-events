@@ -37,6 +37,16 @@ const mockFromChain = {
   }),
 };
 
+// Die Follow-Route erledigt Nacharbeiten per after() nach dem Senden der
+// Antwort. after() braucht den Request-Kontext, den Next.js in Produktion
+// liefert, im Test aber fehlt; hier läuft der Callback sofort.
+vi.mock('next/server', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('next/server')>()),
+  after: (task: Promise<unknown> | (() => unknown)) => {
+    void (typeof task === 'function' ? Promise.resolve().then(task) : task);
+  },
+}));
+
 vi.mock('@/lib/supabase/server', () => ({
   createServerSupabaseClient: vi.fn().mockResolvedValue({
     auth: {

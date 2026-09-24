@@ -508,25 +508,25 @@ describe('categoryImages', () => {
   it('getEventImage falls back to category image', async () => {
     const { getEventImage } = await import('@/lib/categoryImages');
     const result = getEventImage(undefined, 'Musik', 'test');
-    expect(result).toMatch(/\/images\/categories\/musik-\d\.jpg/);
+    expect(result).toMatch(/\/images\/categories\/musik-\d+\.jpg/);
   });
 
   it('getEventImage falls back to default for unknown category', async () => {
     const { getEventImage } = await import('@/lib/categoryImages');
     const result = getEventImage(undefined, 'UnknownCategory', 'test');
-    expect(result).toMatch(/\/images\/categories\/default-\d\.jpg/);
+    expect(result).toMatch(/\/images\/categories\/default-\d+\.jpg/);
   });
 
   it('getEventImage falls back to default for null category', async () => {
     const { getEventImage } = await import('@/lib/categoryImages');
     const result = getEventImage(null, null, 'test');
-    expect(result).toMatch(/\/images\/categories\/default-\d\.jpg/);
+    expect(result).toMatch(/\/images\/categories\/default-\d+\.jpg/);
   });
 
   it('getCategoryFallbackImage handles Maerkte alias', async () => {
     const { getCategoryFallbackImage } = await import('@/lib/categoryImages');
     const result = getCategoryFallbackImage('Märkte', 'test');
-    expect(result).toMatch(/\/images\/categories\/maerkte-\d\.jpg/);
+    expect(result).toMatch(/\/images\/categories\/maerkte-\d+\.jpg/);
     const defaultResult = getCategoryFallbackImage(null, 'test');
     expect(result).not.toBe(defaultResult);
   });

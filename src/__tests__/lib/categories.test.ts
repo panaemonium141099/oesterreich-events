@@ -9,38 +9,38 @@ describe('categorizeEvent', () => {
     });
 
     it('maps "Kulinarium" tag to Wein & Kulinarik', () => {
-      expect(categorizeEvent('Some Event', '', ['Kulinarium'])).toBe('Wein & Kulinarik');
+      expect(categorizeEvent('Some Event', '', ['Kulinarium'])).toBe('Essen & Trinken');
     });
 
     it('maps "Kinder- & Familienveranstaltungen" tag to Familie', () => {
-      expect(categorizeEvent('Some Event', '', ['Kinder- & Familienveranstaltungen'])).toBe('Familie');
+      expect(categorizeEvent('Some Event', '', ['Kinder- & Familienveranstaltungen'])).toBe('Familie & Kinder');
     });
 
     it('maps "Brauchtum & Feste" tag to Feste & Brauchtum', () => {
-      expect(categorizeEvent('Some Event', '', ['Brauchtum & Feste'])).toBe('Feste & Brauchtum');
+      expect(categorizeEvent('Some Event', '', ['Brauchtum & Feste'])).toBe('Märkte & Feste');
     });
 
     it('maps "AKTIV" tag to Sport', () => {
-      expect(categorizeEvent('Some Event', '', ['AKTIV'])).toBe('Sport');
+      expect(categorizeEvent('Some Event', '', ['AKTIV'])).toBe('Sport & Bewegung');
     });
 
     it('maps "Almsommer" tag to Natur', () => {
-      expect(categorizeEvent('Some Event', '', ['Almsommer'])).toBe('Natur');
+      expect(categorizeEvent('Some Event', '', ['Almsommer'])).toBe('Natur & Abenteuer');
     });
 
     it('Feratel tag takes priority over title keywords', () => {
       // Title says "Konzert" (Musik), but Feratel tag says "Sport"
-      expect(categorizeEvent('Konzert im Stadion', '', ['Sport'])).toBe('Sport');
+      expect(categorizeEvent('Konzert im Stadion', '', ['Sport'])).toBe('Sport & Bewegung');
     });
   });
 
   describe('title keyword matching (second priority)', () => {
     it('categorizes techno events as Nightlife', () => {
-      expect(categorizeEvent('Techno Night at the Warehouse')).toBe('Nightlife');
+      expect(categorizeEvent('Techno Night at the Warehouse')).toBe('Nightlife & Party');
     });
 
     it('categorizes rave events as Nightlife', () => {
-      expect(categorizeEvent('Forest Rave 2026')).toBe('Nightlife');
+      expect(categorizeEvent('Forest Rave 2026')).toBe('Nightlife & Party');
     });
 
     it('categorizes concerts as Musik', () => {
@@ -48,62 +48,61 @@ describe('categorizeEvent', () => {
     });
 
     it('categorizes theater as Kultur', () => {
-      expect(categorizeEvent('Theaterstück: Der Richter')).toBe('Kultur');
+      expect(categorizeEvent('Theaterstück: Der Richter')).toBe('Kultur & Bühne');
     });
 
-    it('categorizes Wanderung as Sport when no higher-priority keywords match', () => {
-      // Note: "nationalpark" triggers Natur which has higher priority than Sport
-      expect(categorizeEvent('Geführte Wanderung im Wald')).toBe('Sport');
+    it('categorizes Wanderung as Natur & Abenteuer (Taxonomie v3)', () => {
+      expect(categorizeEvent('Geführte Wanderung im Wald')).toBe('Natur & Abenteuer');
     });
 
     it('categorizes Weihnachtsmarkt as Märkte', () => {
-      expect(categorizeEvent('Weihnachtsmarkt in Eisenstadt')).toBe('Märkte');
+      expect(categorizeEvent('Weihnachtsmarkt in Eisenstadt')).toBe('Märkte & Feste');
     });
 
     it('categorizes Weinverkostung as Wein & Kulinarik', () => {
-      expect(categorizeEvent('Weinverkostung am Neusiedler See')).toBe('Wein & Kulinarik');
+      expect(categorizeEvent('Weinverkostung am Neusiedler See')).toBe('Essen & Trinken');
     });
 
     it('categorizes Kinderfest as Familie', () => {
-      expect(categorizeEvent('Kinderfest im Park')).toBe('Familie');
+      expect(categorizeEvent('Kinderfest im Park')).toBe('Familie & Kinder');
     });
 
     it('categorizes Naturführung as Natur', () => {
-      expect(categorizeEvent('Naturführung im Nationalpark')).toBe('Natur');
+      expect(categorizeEvent('Naturführung im Nationalpark')).toBe('Natur & Abenteuer');
     });
 
     it('categorizes Dorffest as Feste & Brauchtum', () => {
-      expect(categorizeEvent('Dorffest in Neckenmarkt')).toBe('Feste & Brauchtum');
+      expect(categorizeEvent('Dorffest in Neckenmarkt')).toBe('Märkte & Feste');
     });
 
     it('categorizes Gottesdienst as Religion', () => {
-      expect(categorizeEvent('Festgottesdienst in der Pfarrkirche')).toBe('Religion');
+      expect(categorizeEvent('Festgottesdienst in der Pfarrkirche')).toBe('Wellness & Spiritualität');
     });
 
     it('categorizes Gesundheitsvortrag as Gesundheit', () => {
-      expect(categorizeEvent('Gesundheitsvortrag: Burnout-Prävention')).toBe('Gesundheit');
+      expect(categorizeEvent('Gesundheitsvortrag: Burnout-Prävention')).toBe('Wellness & Spiritualität');
     });
 
     it('categorizes Vortrag as Bildung when no higher-priority keywords match', () => {
       // Note: "klimaschutz" triggers Natur which has higher priority than Bildung
-      expect(categorizeEvent('Vortrag über Geschichte')).toBe('Bildung');
+      expect(categorizeEvent('Vortrag über Geschichte')).toBe('Wissen & Karriere');
     });
   });
 
   describe('priority ordering', () => {
     it('Nightlife wins over Musik when both match title', () => {
       // "clubbing" = Nightlife, "musik" = Musik; Nightlife has higher priority
-      expect(categorizeEvent('Clubbing Nacht mit Live Musik')).toBe('Nightlife');
+      expect(categorizeEvent('Clubbing Nacht mit Live Musik')).toBe('Nightlife & Party');
     });
 
     it('Religion wins over Kultur for church events', () => {
       // "gottesdienst" = Religion, "kultur" present in desc
-      expect(categorizeEvent('Festgottesdienst', 'kulturelle Veranstaltung')).toBe('Religion');
+      expect(categorizeEvent('Festgottesdienst', 'kulturelle Veranstaltung')).toBe('Wellness & Spiritualität');
     });
 
     it('Familie wins over Kultur for children theater', () => {
       // "kindertheater" = Familie keyword
-      expect(categorizeEvent('Kindertheater: Der kleine Prinz')).toBe('Familie');
+      expect(categorizeEvent('Kindertheater: Der kleine Prinz')).toBe('Familie & Kinder');
     });
   });
 
@@ -120,9 +119,9 @@ describe('categorizeEvent', () => {
     });
 
     it('title match wins over description match', () => {
-      // Title: "Wanderung" = Sport, Description: "Konzert" = Musik
-      // Sport should win because title is checked first
-      expect(categorizeEvent('Wanderung durch den Wald', 'mit Konzert am Abend')).toBe('Sport');
+      // Title: "Wanderung" = Natur & Abenteuer, Description: "Konzert" = Musik
+      // Natur should win because title is checked first
+      expect(categorizeEvent('Wanderung durch den Wald', 'mit Konzert am Abend')).toBe('Natur & Abenteuer');
     });
   });
 
@@ -141,8 +140,8 @@ describe('categorizeEvent', () => {
   });
 
   describe('CATEGORIES constant', () => {
-    it('contains all 14 categories', () => {
-      expect(CATEGORIES).toHaveLength(14);
+    it('contains all 12 categories (Taxonomie v3)', () => {
+      expect(CATEGORIES).toHaveLength(12);
     });
 
     it('includes Sonstiges as fallback', () => {
@@ -151,9 +150,10 @@ describe('categorizeEvent', () => {
 
     it('includes all main categories', () => {
       const expected = [
-        'Musik', 'Kultur', 'Sport', 'Feste & Brauchtum', 'Märkte',
-        'Wein & Kulinarik', 'Familie', 'Natur', 'Nightlife',
-        'Bildung', 'Gesundheit', 'Religion', 'Wirtschaft', 'Sonstiges',
+        'Musik', 'Kultur & Bühne', 'Nightlife & Party', 'Essen & Trinken',
+        'Märkte & Feste', 'Sport & Bewegung', 'Natur & Abenteuer',
+        'Wissen & Karriere', 'Familie & Kinder', 'Community & Freizeit',
+        'Wellness & Spiritualität', 'Sonstiges',
       ];
       for (const cat of expected) {
         expect(CATEGORIES).toContain(cat);

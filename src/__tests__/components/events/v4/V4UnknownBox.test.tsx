@@ -15,7 +15,8 @@ describe('V4UnknownBox', () => {
 
   it('offers Merken as primary action even without coordinates', () => {
     render(<V4UnknownBox eventId="test-id"/>);
-    expect(screen.getByRole('link', { name: /merken/i })).toBeInTheDocument();
+    // Merken ist ein Knopf (V4SaveButton), kein Link.
+    expect(screen.getByRole('button', { name: /merken/i })).toBeInTheDocument();
     // Route-Button rendert nicht ohne mapsUrl — ein leerer `#route`-Link
     // war der Bug, der den User auf der selben Seite festhielt.
     expect(screen.queryByRole('link', { name: /route/i })).toBeNull();

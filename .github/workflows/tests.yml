@@ -1,0 +1,25 @@
+name: tests
+
+# Bis 2026-09-24 lief die Testsuite nirgends automatisch; 113 rote Tests
+# sammelten sich unbemerkt an, darunter ein Classifier, der 39 % der Events
+# in „Sonstiges" schob. Seitdem: Tests bei jedem PR und vor jedem Deploy
+# (deploy.yml ruft diesen Workflow auf und wartet auf ihn).
+
+on:
+  pull_request:
+  workflow_call:
+  workflow_dispatch:
+
+jobs:
+  vitest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+      - run: npm ci
+      - name: Vitest
+        run: npx vitest run

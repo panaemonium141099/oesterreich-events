@@ -24,7 +24,7 @@ describe('decideDeterministic (cat-v2)', () => {
         title: 'Konzert im Stadion',
         source_tags_raw: ['Sport'],
       });
-      expect(outcome.category).toBe('Sport');
+      expect(outcome.category).toBe('Sport & Bewegung');
       expect(outcome.confidence).toBe('rules_exact');
     });
 
@@ -33,7 +33,7 @@ describe('decideDeterministic (cat-v2)', () => {
         title: 'Opening Night',
         source_name: 'wien-clubs',
       });
-      expect(outcome.category).toBe('Nightlife');
+      expect(outcome.category).toBe('Nightlife & Party');
       expect(outcome.confidence).toBe('rules_exact');
     });
   });
@@ -51,7 +51,7 @@ describe('decideDeterministic (cat-v2)', () => {
       const outcome = classifyDeterministic({
         title: 'Dorffest in Neckenmarkt',
       });
-      expect(outcome.category).toBe('Feste & Brauchtum');
+      expect(outcome.category).toBe('Märkte & Feste');
       // markt inside Neckenmarkt must NOT have produced a Märkte signal
       const maerkte = outcome.candidates.find(c => c.category === 'Märkte');
       expect(maerkte?.score ?? 0).toBe(0);
@@ -60,13 +60,13 @@ describe('decideDeterministic (cat-v2)', () => {
 
     it('Vortrag → Bildung rules_high', () => {
       const outcome = classifyDeterministic({ title: 'Vortrag über Geschichte' });
-      expect(outcome.category).toBe('Bildung');
+      expect(outcome.category).toBe('Wissen & Karriere');
       expect(outcome.confidence).toBe('rules_high');
     });
 
     it('Weihnachtsmarkt → Märkte rules_high (pattern hits)', () => {
       const outcome = classifyDeterministic({ title: 'Weihnachtsmarkt in Eisenstadt' });
-      expect(outcome.category).toBe('Märkte');
+      expect(outcome.category).toBe('Märkte & Feste');
       expect(['rules_exact', 'rules_high']).toContain(outcome.confidence);
     });
   });
@@ -77,7 +77,7 @@ describe('decideDeterministic (cat-v2)', () => {
         title: 'Fachmesse Wien',
         description: 'Networking Event für Gründer und Unternehmer',
       });
-      expect(outcome.category).toBe('Wirtschaft');
+      expect(outcome.category).toBe('Wissen & Karriere');
       expect(['rules_medium', 'rules_high']).toContain(outcome.confidence);
     });
   });
@@ -85,7 +85,7 @@ describe('decideDeterministic (cat-v2)', () => {
   describe('Gate 4 — weak deterministic', () => {
     it('single high-precision title token accepts as rules_high or rules_low', () => {
       const outcome = classifyDeterministic({ title: 'Rave Night' });
-      expect(outcome.category).toBe('Nightlife');
+      expect(outcome.category).toBe('Nightlife & Party');
       expect(['rules_high', 'rules_low', 'rules_medium']).toContain(outcome.confidence);
     });
   });
@@ -118,7 +118,7 @@ describe('decideDeterministic (cat-v2)', () => {
         title: 'Kinder Party im Park',
         description: 'Ein Nachmittag für kinder mit Spielen',
       });
-      expect(outcome.category).not.toBe('Nightlife');
+      expect(outcome.category).not.toBe('Nightlife & Party');
     });
 
     it('WKO context blocks Religion for "Messe" match', () => {
@@ -127,7 +127,7 @@ describe('decideDeterministic (cat-v2)', () => {
         description: 'Fachmesse mit Networking und Gewerbe',
         source_name: 'wko.at',
       });
-      expect(outcome.category).toBe('Wirtschaft');
+      expect(outcome.category).toBe('Wissen & Karriere');
     });
   });
 
@@ -135,7 +135,7 @@ describe('decideDeterministic (cat-v2)', () => {
     it('includes evidence strings for auditing', () => {
       const outcome = classifyDeterministic({ title: 'Weihnachtsmarkt in Wien' });
       expect(outcome.candidates.length).toBeGreaterThan(0);
-      expect(outcome.candidates[0].category).toBe('Märkte');
+      expect(outcome.candidates[0].category).toBe('Märkte & Feste');
       const hasTitleEvidence = outcome.candidates[0].evidence?.some(e =>
         e.startsWith('title_precision') || e.startsWith('trusted'),
       );
