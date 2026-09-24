@@ -284,7 +284,9 @@ export function useFilteredEvents(
       // below will overwrite with the full set when it completes.
       writeCache(filtersWithBl, firstEvents, finalTotal);
 
-      if (!firstData.hasMore && firstEvents.length < BATCH_SIZE) {
+      // Ende nur über den Cursor erkennen: die API liefert pro Seite weniger
+      // als BATCH_SIZE (PostgREST-Deckel), eine kurze Seite heißt nicht Ende.
+      if (!firstData.nextCursor) {
         return;
       }
 
@@ -337,7 +339,6 @@ export function useFilteredEvents(
         setAllEvents(acc);
 
         cursor = data.nextCursor || null;
-        if (batch.length < BATCH_SIZE) break;
       }
 
       // Persist the full freshly-loaded set so the next navigation hits

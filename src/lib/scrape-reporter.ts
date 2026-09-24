@@ -1,5 +1,6 @@
 // src/lib/scrape-reporter.ts
 import { createClient } from '@supabase/supabase-js';
+import { fetchAllRows } from './db/fetch-all';
 import { startWorkflowRun, finishWorkflowRun } from './reporting/workflow-run';
 import type {
   ScraperResult,
@@ -97,15 +98,17 @@ export async function loadScraperResultsFromSourceRuns(
 ): Promise<ScraperResult[]> {
   const supabase = getSupabaseAdmin();
   const since = new Date(Date.now() - hours * 3600_000).toISOString();
-  const { data, error } = await supabase
-    .from('source_runs')
-    .select('source_name, run_at, status, events_found, events_upserted, duration_ms, error_message')
-    .gte('run_at', since)
-    .order('run_at', { ascending: true })
-    .limit(2000);
-
-  if (error) {
-    console.error(`[reporter] source_runs nicht lesbar: ${error.message}`);
+  let data: Record<string, unknown>[];
+  try {
+    data = await fetchAllRows<Record<string, unknown>>((from, to) => supabase
+      .from('source_runs')
+      .select('source_name, run_at, status, events_found, events_upserted, duration_ms, error_message')
+      .gte('run_at', since)
+      .order('run_at', { ascending: true })
+      .order('id', { ascending: true })
+      .range(from, to));
+  } catch (err) {
+    console.error(`[reporter] source_runs nicht lesbar: ${(err as Error).message}`);
     return [];
   }
 

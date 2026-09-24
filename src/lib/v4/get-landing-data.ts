@@ -1,7 +1,7 @@
 import type { Event } from '@/types/events';
 import type { Festival } from '@/types/festivals';
 import { deriveEventState, type V4EventState, type DeriveCtx } from './derive-event-state';
-import { buildEventUrlV2 } from '@/lib/utils/slugify';
+import { buildEventUrlV2, EVENT_URL_COLUMNS } from '@/lib/utils/slugify';
 import { createClient } from '@supabase/supabase-js';
 import { MIN_TRUSTED_EVENT_IMAGE_WIDTH } from '@/lib/event-images/resolveEventImage';
 import overridesJson from '../../../data/festival-overrides.json';
@@ -228,7 +228,9 @@ async function getLandingDataInner(): Promise<LandingData> {
   // Base column list — kept tight to what the cards consume. image_width
   // MUSS mit: ohne sie greift die MIN_TRUSTED_EVENT_IMAGE_WIDTH-Regel in
   // EventImage nicht und 222px-Teaser werden auf 1180px hochgezogen.
-  const eventCols = 'id,slug,title,description,start_date,end_date,location_name,bundesland,district,category,image_url,image_width,ticket_url,price_text,price_min,price_max,price_tier,price_flags,publish_status,event_score,tags,created_at,updated_at,source_id,source_name,source_url';
+  // EVENT_URL_COLUMNS MUSS mit: ohne postal_code zeigten alle Karten auf
+  // 1010-wien bzw. 8010-graz und liefen über eine Weiterleitung.
+  const eventCols = `${EVENT_URL_COLUMNS},title,description,end_date,district,category,image_url,image_width,ticket_url,price_text,price_min,price_max,price_tier,price_flags,publish_status,event_score,tags,created_at,updated_at,source_id,source_name,source_url`;
 
   // WeekendSection rendert 1 Hero + 2× 3 Cards = 7 Slots. Wir ziehen
   // ~4× soviel als Reserve, dann dedupliziert die uniqueByTitleAndImage-

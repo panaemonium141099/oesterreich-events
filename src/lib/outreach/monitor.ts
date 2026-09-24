@@ -1,4 +1,5 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
+import { fetchAllRows } from '@/lib/db/fetch-all';
 import { normalizeDomain } from './domain';
 import { isBlockedDomain } from './discover-cold';
 import type { SearchProvider } from './search-provider';
@@ -18,9 +19,13 @@ export async function findReferrerMentions(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   supabase: SupabaseClient<any>,
 ): Promise<MentionRow[]> {
-  const { data } = await supabase
+  // Jüngste 8000 Referrer, seitenweise (eine Antwort hat höchstens 1000).
+  const data = await fetchAllRows<{ referrer: string | null }>((from, to) => supabase
     .from('analytics_events').select('referrer')
-    .not('referrer', 'is', null).limit(8000);
+    .not('referrer', 'is', null)
+    .order('created_at', { ascending: false })
+    .order('id', { ascending: false })
+    .range(from, to), { maxRows: 8000, label: 'outreach monitor' });
 
   const byDomain = new Map<string, string>(); // domain -> first url
   for (const r of (data ?? []) as Array<{ referrer: string | null }>) {

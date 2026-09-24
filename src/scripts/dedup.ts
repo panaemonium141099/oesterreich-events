@@ -14,6 +14,7 @@ import { scorePair, canonicalizeIds } from '@/lib/pipeline/dedup-scorer';
 import { buildClusters, resolvePrimary, type ScoredPair } from '@/lib/pipeline/dedup-cluster';
 import { isGarbageTitle } from '@/lib/pipeline/garbage-filter';
 import { generateFingerprint } from '@/lib/dedup/fingerprint';
+import { forEachPage } from '@/lib/db/fetch-all';
 import type { EventRow, DedupScoreBreakdown } from '@/lib/pipeline/types';
 
 // ---------------------------------------------------------------------------
@@ -127,33 +128,28 @@ async function cleanupGarbage(stats: DedupStats): Promise<void> {
 // ---------------------------------------------------------------------------
 
 async function getDistinctDays(): Promise<string[]> {
-  const days: string[] = [];
-  let offset = 0;
-
-  // Fetch distinct days using raw query via RPC or pagination
-  while (true) {
-    const { data, error } = await supabase
+  // Früher `.range(offset, offset + 4999)` mit Abbruch bei „< 5000 Zeilen“:
+  // PostgREST liefert höchstens 1000, also endete die Schleife nach der
+  // ersten Seite und der Dedup sah nur die 81 ältesten Tage, nie die Zukunft.
+  const days = new Set<string>();
+  await forEachPage<{ start_date: string | null }>(
+    (from, to) => supabase
       .from('events')
       .select('start_date')
       .not('start_date', 'is', null)
       .not('publish_status', 'in', '("suppressed","duplicate")')
       .order('start_date')
-      .range(offset, offset + 4999);
-
-    if (error || !data || data.length === 0) break;
-
-    for (const e of data) {
-      const day = e.start_date?.slice(0, 10);
-      if (day && (days.length === 0 || days[days.length - 1] !== day)) {
-        days.push(day);
+      .order('id')
+      .range(from, to),
+    (rows) => {
+      for (const e of rows) {
+        const day = e.start_date?.slice(0, 10);
+        if (day) days.add(day);
       }
-    }
-
-    offset += data.length;
-    if (data.length < 5000) break;
-  }
-
-  return [...new Set(days)].sort();
+    },
+    { label: 'dedup: Tage lesen' },
+  );
+  return [...days].sort();
 }
 
 async function loadEventsForDay(day: string): Promise<EventRow[]> {
