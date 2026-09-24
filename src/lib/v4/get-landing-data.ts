@@ -5,6 +5,7 @@ import { buildEventUrlV2, EVENT_URL_COLUMNS } from '@/lib/utils/slugify';
 import { createClient } from '@supabase/supabase-js';
 import { MIN_TRUSTED_EVENT_IMAGE_WIDTH } from '@/lib/event-images/resolveEventImage';
 import overridesJson from '../../../data/festival-overrides.json';
+import { currentSeason, titleMatchesSeason } from '@/lib/landing/seasons';
 
 const FESTIVAL_OVERRIDES = overridesJson as Record<string, { imageUrl?: string | null }>;
 
@@ -32,7 +33,18 @@ export type LandingFestival = Festival & {
   href: string | null;
 };
 
+/**
+ * Saison-Karte im Hero: erst die im Admin gepinnten Events
+ * (landing_features), dann die stündlich rotierende Saison-Auswahl.
+ */
+export interface LandingSeason {
+  seasonId: string;
+  moreQuery: string;
+  picks: Array<Event & { featured: boolean }>;
+}
+
 export interface LandingData {
+  season: LandingSeason;
   todayWeekend: Array<Event & { state: V4EventState }>;
   concerts: Array<Event & { state: V4EventState }>;
   festivals: LandingFestival[];
@@ -126,15 +138,8 @@ export function arrangeBySharpness(sharp: unknown[] | null, rest: unknown[] | nu
  *     Festivals mit gefetchtem Lineup zuerst (die Sektion heißt
  *     "Festivals mit Line-up"), Anzeige chronologisch sortiert.
  */
-export function pickFestivals<T extends { id: string; starts_at: string | null; ends_at: string | null; lineup_status?: string }>(
-  pool: T[],
-  count: number,
-  now: Date = new Date(),
-): T[] {
-  const todayStr = now.toISOString().split('T')[0];
-  const upcoming = pool.filter(f => f.starts_at != null && f.starts_at >= todayStr);
-
-  // Mulberry32-Shuffle, Seed = Kalenderstunde → stabil pro ISR-Fenster
+/** Mulberry32-Shuffle, Seed = Kalenderstunde → stabil pro ISR-Fenster. */
+function hourlyShuffle<T>(items: T[], now: Date): T[] {
   const hourSeed = Math.floor(now.getTime() / 3_600_000);
   let a = hourSeed >>> 0;
   const rand = () => {
@@ -143,11 +148,75 @@ export function pickFestivals<T extends { id: string; starts_at: string | null; 
     t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
     return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
   };
-  const shuffled = [...upcoming];
+  const shuffled = [...items];
   for (let i = shuffled.length - 1; i > 0; i--) {
     const j = Math.floor(rand() * (i + 1));
     [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
   }
+  return shuffled;
+}
+
+/** Größe des Pools, aus dem die Saison-Rotation stündlich zieht. */
+export const SEASON_ROTATION_POOL = 12;
+
+/**
+ * Auswahl der Saison-Karte:
+ *
+ *  1. Gepinnte Events (Admin, bezahlt oder eigene Saison-Wahl) zuerst,
+ *     in der Reihenfolge, in der sie kommen (neueste Pins vorne).
+ *  2. Den Rest füllt die Rotation: die Top-Events der Saison nach Score,
+ *     ohne Titel-Wiederholungen (Heuriger an zehn Tagen) und ohne Events,
+ *     die schon in der Wochenend-Sektion darunter stehen. Aus den besten
+ *     SEASON_ROTATION_POOL wird stündlich neu gemischt.
+ */
+export function pickSeasonEvents(
+  featured: Event[],
+  pool: Event[],
+  excludeIds: Set<string>,
+  count: number,
+  now: Date = new Date(),
+): Array<Event & { featured: boolean }> {
+  const out: Array<Event & { featured: boolean }> = [];
+  const seenIds = new Set<string>();
+  const seenTitles = new Set<string>();
+  const take = (e: Event, isFeatured: boolean) => {
+    const titleKey = (e.title ?? '').trim().toLowerCase();
+    if (seenIds.has(e.id) || (titleKey && seenTitles.has(titleKey))) return;
+    seenIds.add(e.id);
+    if (titleKey) seenTitles.add(titleKey);
+    out.push({ ...e, featured: isFeatured });
+  };
+
+  for (const e of featured) {
+    if (out.length >= count) break;
+    take(e, true);
+  }
+
+  const candidates: Event[] = [];
+  const poolTitles = new Set(seenTitles);
+  for (const e of pool) {
+    const titleKey = (e.title ?? '').trim().toLowerCase();
+    if (excludeIds.has(e.id) || seenIds.has(e.id) || (titleKey && poolTitles.has(titleKey))) continue;
+    if (titleKey) poolTitles.add(titleKey);
+    candidates.push(e);
+    if (candidates.length >= SEASON_ROTATION_POOL) break;
+  }
+  for (const e of hourlyShuffle(candidates, now)) {
+    if (out.length >= count) break;
+    take(e, false);
+  }
+  return out;
+}
+
+export function pickFestivals<T extends { id: string; starts_at: string | null; ends_at: string | null; lineup_status?: string }>(
+  pool: T[],
+  count: number,
+  now: Date = new Date(),
+): T[] {
+  const todayStr = now.toISOString().split('T')[0];
+  const upcoming = pool.filter(f => f.starts_at != null && f.starts_at >= todayStr);
+
+  const shuffled = hourlyShuffle(upcoming, now);
   const withLineup = shuffled.filter(f => f.lineup_status === 'fetched');
   const rest = shuffled.filter(f => f.lineup_status !== 'fetched');
   return [...withLineup, ...rest]
@@ -184,13 +253,14 @@ function festivalCategoryFallback(festivalId: string): string {
  * Festival `lineupMatch` is set to false in Phase 2 — computing per-festival
  * lineup matches requires another join we're not optimizing for here.
  */
-const EMPTY_LANDING: LandingData = {
+const emptyLanding = (): LandingData => ({
+  season: { seasonId: currentSeason().id, moreQuery: currentSeason().moreQuery, picks: [] },
   todayWeekend: [],
   concerts: [],
   festivals: [],
   // Statische Fallback-Liste — der Artist-Teaser braucht keine DB.
   popularArtists: FALLBACK_ARTISTS,
-};
+});
 
 /** Build-Resilienz-Wrapper (2026-08-26): haengt/failt Supabase, rendert
  *  die Landing mit leeren Sektionen statt den Build/Render zu killen —
@@ -207,10 +277,10 @@ export async function getLandingData(): Promise<LandingData> {
     ]);
     if (result) return result;
     console.error('[landing] getLandingData timeout (15s) — leere Sektionen');
-    return EMPTY_LANDING;
+    return emptyLanding();
   } catch (err) {
     console.error('[landing] getLandingData failed — leere Sektionen:', err);
-    return EMPTY_LANDING;
+    return emptyLanding();
   } finally {
     if (timer) clearTimeout(timer);
   }
@@ -253,7 +323,12 @@ async function getLandingDataInner(): Promise<LandingData> {
     .eq('publish_status', 'published');
   const concertsBase = () => weekendBase().or('category.eq.music,category.eq.konzerte');
 
-  const [weekendSharpRes, weekendRes, concertsSharpRes, concertsRes, festivalsRes] = await Promise.all([
+  // Saison-Karte (Hero): 14 Tage voraus, Tag-Overlap mit der Saison.
+  // EXPLAIN 2026-09-24: Bitmap über idx_events_start_date, ~130 ms.
+  const season = currentSeason();
+  const seasonEnd = new Date(Date.now() + 14 * 24 * 3600 * 1000).toISOString();
+
+  const [weekendSharpRes, weekendRes, concertsSharpRes, concertsRes, festivalsRes, featuredRes, seasonRes] = await Promise.all([
     // todayWeekend: top events in next 7 days
     weekendBase()
       .gte('image_width', MIN_TRUSTED_EVENT_IMAGE_WIDTH)
@@ -287,6 +362,23 @@ async function getLandingDataInner(): Promise<LandingData> {
       .gte('starts_at', today.split('T')[0])
       .order('starts_at', { ascending: true })
       .limit(48),
+    // Admin-Pins (landing_features), nur aktive Fenster.
+    supabase
+      .from('landing_features')
+      .select(`created_at, event:events!inner(${eventCols})`)
+      .lte('starts_at', today)
+      .or(`ends_at.is.null,ends_at.gt.${today}`)
+      .order('created_at', { ascending: false })
+      .limit(8),
+    supabase
+      .from('events')
+      .select(eventCols)
+      .gte('start_date', today)
+      .lte('start_date', seasonEnd)
+      .eq('publish_status', 'published')
+      .overlaps('tags', season.tags)
+      .order('event_score', { ascending: false })
+      .limit(40),
   ]);
 
   const todayWeekend = uniqueByTitleAndImage(
@@ -342,7 +434,21 @@ async function getLandingDataInner(): Promise<LandingData> {
     };
   });
 
+  type FeaturedRow = { event: Event | Event[] | null };
+  const featuredEvents = ((featuredRes.data ?? []) as unknown as FeaturedRow[])
+    .map(r => (Array.isArray(r.event) ? r.event[0] : r.event))
+    .filter((e): e is Event => !!e && e.publish_status === 'published' && (e.end_date ?? e.start_date) >= today);
+  const seasonPicks = pickSeasonEvents(
+    featuredEvents,
+    // Saison-Wort im Titel zuerst, sonst Score-Reihenfolge (sort ist stabil)
+    ((seasonRes.data ?? []) as unknown as Event[])
+      .sort((a, b) => Number(titleMatchesSeason(b.title, season)) - Number(titleMatchesSeason(a.title, season))),
+    new Set(todayWeekend.map(e => e.id)),
+    4,
+  );
+
   return {
+    season: { seasonId: season.id, moreQuery: season.moreQuery, picks: seasonPicks },
     todayWeekend,
     concerts,
     festivals,

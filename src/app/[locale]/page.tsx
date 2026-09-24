@@ -89,7 +89,7 @@ export default async function LandingPage({
       </div>
 
       <main className="flex-1">
-        <HeroV4/>
+        <HeroV4 season={data.season}/>
         <ArtistTeaserV4 artists={data.popularArtists}/>
         <PersonalizedMatches/>
         <WeekendSection events={data.todayWeekend}/>

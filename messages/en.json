@@ -39,21 +39,65 @@
     "devNotice": "This site is still under development — technical glitches are possible. Please send feedback to",
     "Hero": {
       "badge": "Events in Austria",
-      "title": "Find events that truly match you.",
+      "title": "Don't just stay home.",
       "subtitle": "Follow your favourite artists, find concerts, festivals and everything in between — with a ticket, at the box office or just show up. Plan your night in one place.",
       "ctaArtists": "Search artists",
       "ctaToday": "Today & weekend",
       "ctaSmart": "Ask the AI",
-      "trendLabel": "Trending:",
-      "funnel1Title": "Follow your favourite artists",
-      "funnel1Sub": "Search and follow your favourite artists. We'll let you know when they play in Austria.",
-      "funnel1Cta": "Search artists",
-      "funnel2Title": "Discover events",
-      "funnel2Sub": "Concerts, festivals, wine taverns, markets — everything happening in Austria right now.",
-      "funnel2Cta": "What's on today?",
-      "funnel3Title": "Plan your night",
-      "funnel3Sub": "Ticket link, directions, reminders — in your pocket, for every event.",
-      "funnel3Cta": "Try the planner"
+      "trendLabel": "Trending:"
+    },
+    "Season": {
+      "featured": "Pick",
+      "weatherLine": "{temp}° on {day} {place}",
+      "weatherVienna": "in Vienna",
+      "weatherNearby": "near you",
+      "weatherRain": "Rain on {day}: stay dry",
+      "weatherHeat": "{temp}° on {day}: time to hit the water",
+      "herbst": {
+        "kicker": "Autumn in Austria",
+        "title": "Sturm, Heuriger & village fairs",
+        "more": "More autumn festivals"
+      },
+      "halloween": {
+        "kicker": "Halloween",
+        "title": "Spooky nights, pumpkins & wine festivals",
+        "more": "More Halloween"
+      },
+      "advent": {
+        "kicker": "Advent",
+        "title": "Punch, Krampus & Christmas markets",
+        "more": "All Christmas markets"
+      },
+      "silvester": {
+        "kicker": "New Year",
+        "title": "New Year's Eve & the first balls",
+        "more": "More New Year's Eve"
+      },
+      "fasching": {
+        "kicker": "Ball season",
+        "title": "Balls & carnival",
+        "more": "All balls"
+      },
+      "winter": {
+        "kicker": "Winter",
+        "title": "Slopes, Perchten & ball nights",
+        "more": "More winter"
+      },
+      "ostern": {
+        "kicker": "Easter",
+        "title": "Easter & spring markets",
+        "more": "All Easter markets"
+      },
+      "fruehling": {
+        "kicker": "Spring",
+        "title": "Maypoles, markets & wine festivals",
+        "more": "More spring"
+      },
+      "sommer": {
+        "kicker": "Summer",
+        "title": "Midsummer, village fairs & open air",
+        "more": "More summer festivals"
+      }
     },
     "ArtistTeaser": {
       "badge": "Favourite artists · signed-in only",

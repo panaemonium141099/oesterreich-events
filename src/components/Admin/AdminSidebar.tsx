@@ -47,7 +47,7 @@ const NAV_ITEMS = [
   { label: 'Moderation', icon: Shield, href: '/admin/moderation' },
   // Öffentlich eingereichte Events aus /event-inserieren — manuelle Freigabe
   { label: 'Inserate', icon: FileText, href: '/admin/inserate' },
-  { label: 'Boosten', icon: Rocket, href: '/admin/boost' },
+  { label: 'Boost & Startseite', icon: Rocket, href: '/admin/boost' },
   // QR-Codes für Tourismusbüros (fn-17 Slice 4) — DE/EN-Ziele + utm_source
   { label: 'QR-Codes', icon: QrCode, href: '/admin/qr' },
 ] as const;
