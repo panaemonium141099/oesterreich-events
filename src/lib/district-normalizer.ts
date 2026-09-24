@@ -171,16 +171,30 @@ const STADT_RULES: Record<string, { gkz: string; stadtDistrict: string; landDist
   'krems':           { gkz: '30101', stadtDistrict: 'krems (stadt)', landDistrict: 'krems (land)', bl: 'niederoesterreich' },
 };
 
-type StadtRule = { stadtPLZ: ReadonlySet<string>; stadtDistrict: string; landDistrict: string; bl: BundeslandId };
+/** stadtPLZ: alle PLZ der Stadtgemeinde (liegt eine PLZ außerhalb, ist es
+ *  sicher nicht die Stadt). stadtPLZExklusiv: PLZ, die allein die Stadt
+ *  bedient, plus ihre Amts-PLZ (nur dann ist es sicher die Stadt). */
+type StadtRule = { stadtPLZ: ReadonlySet<string>; stadtPLZExklusiv: ReadonlySet<string>; stadtDistrict: string; landDistrict: string; bl: BundeslandId };
 let stadtCache: Record<string, StadtRule> | null = null;
 
 /** Stadt-PLZ-Blöcke der Statutarstädte, abgeleitet aus der Stammdatei. */
 export function stadtPlzRules(): Record<string, StadtRule> {
   if (stadtCache) return stadtCache;
-  const byGkz = new Map(loadGemeindenMaster().map(g => [g.gkz, g]));
+  const master = loadGemeindenMaster();
+  const byGkz = new Map(master.map(g => [g.gkz, g]));
+  // „Sicher Stadt": PLZ, die nur die Stadt bedient, und die Amts-PLZ der
+  // Stadt selbst (8010 Graz, auch wenn Kainbach sein Amt dort hat). Neben-PLZ,
+  // die eine andere Gemeinde als Amts- oder Neben-PLZ führt (4040 Lichtenberg,
+  // 2751 Matzendorf-Hölles), sagen allein nichts über Stadt oder Land.
+  const users = new Map<string, number>();
+  for (const g of master) for (const p of g.plzAll) users.set(p, (users.get(p) ?? 0) + 1);
   stadtCache = Object.fromEntries(Object.entries(STADT_RULES).map(([k, r]) => [
     k,
-    { stadtPLZ: new Set(byGkz.get(r.gkz)?.plzAll ?? []), stadtDistrict: r.stadtDistrict, landDistrict: r.landDistrict, bl: r.bl },
+    {
+      stadtPLZ: new Set(byGkz.get(r.gkz)?.plzAll ?? []),
+      stadtPLZExklusiv: new Set((byGkz.get(r.gkz)?.plzAll ?? []).filter(p => users.get(p) === 1 || p === byGkz.get(r.gkz)?.plz)),
+      stadtDistrict: r.stadtDistrict, landDistrict: r.landDistrict, bl: r.bl,
+    },
   ]));
   return stadtCache;
 }
@@ -230,7 +244,7 @@ export function normalizeDistrict(
   // city block — without this, ~1.4k Graz-city events disappear
   // into the Umgebung filter on every fresh scrape.
   const landRule = landToStadt()[raw];
-  if (landRule && landRule.bl === blId && trimmedPLZ && landRule.stadtPLZ.has(trimmedPLZ)) {
+  if (landRule && landRule.bl === blId && trimmedPLZ && landRule.stadtPLZExklusiv.has(trimmedPLZ)) {
     return landRule.stadtDistrict;
   }
 

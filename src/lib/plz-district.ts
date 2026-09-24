@@ -49,6 +49,9 @@ function toCanonicalDistrict(bezirk: string, bl: string, plz: string): string | 
   if (sanktFix !== normalized && isCanonicalDistrict(sanktFix)) return sanktFix;
   const ohneStadt = normalized.replace(/ \(stadt\)$/, '');
   if (ohneStadt !== normalized && isCanonicalDistrict(ohneStadt)) return ohneStadt;
+  // Oberösterreich schreibt „Stadt Linz", „Stadt Steyr", „Stadt Wels".
+  const stadtVorne = normalized.replace(/^stadt (.+)$/, '$1 (stadt)');
+  if (stadtVorne !== normalized && isCanonicalDistrict(stadtVorne)) return stadtVorne;
   // Rust ist Statutarstadt ohne eigenen Eintrag in district_canonical; der
   // Filter „eisenstadt" deckt Eisenstadt-Stadt, -Umgebung und Rust ab.
   if (ohneStadt === 'rust' && bl === 'burgenland') return 'eisenstadt';
@@ -94,7 +97,7 @@ function stadtPlzLookup(): ReadonlyMap<string, PlzEntry> {
   if (stadtLookup) return stadtLookup;
   const out = new Map<string, PlzEntry>();
   for (const rule of Object.values(stadtPlzRules())) {
-    for (const plz of rule.stadtPLZ) out.set(plz, { district: rule.stadtDistrict, bundesland: rule.bl });
+    for (const plz of rule.stadtPLZExklusiv) out.set(plz, { district: rule.stadtDistrict, bundesland: rule.bl });
   }
   stadtLookup = out;
   return out;
@@ -141,9 +144,10 @@ export function districtFromGemeinde(
   plz: string | null | undefined,
 ): string | null {
   if (!bezirk || !bundeslandId) return null;
-  const stadt = plz ? stadtPlzLookup().get(plz.trim()) : undefined;
-  if (stadt && stadt.bundesland === bundeslandId) return stadt.district;
-  return toCanonicalDistrict(bezirk, bundeslandId, plz ?? '');
+  // Steht die Gemeinde fest, gilt ihr amtlicher Bezirk. Kein Umweg über die
+  // PLZ: 2751 ist Amts-PLZ von Matzendorf-Hölles (Wiener Neustadt-Land) und
+  // zugleich Neben-PLZ der Stadt Wiener Neustadt.
+  return toCanonicalDistrict(bezirk, bundeslandId, '');
 }
 
 /**
