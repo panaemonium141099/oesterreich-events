@@ -3,6 +3,14 @@ import { vi } from 'vitest';
 import React from 'react';
 import deMessages from '../../messages/de.json';
 
+// Komponenten wie V4SaveButton legen beim Rendern einen Supabase-Browser-
+// Client an. Ohne diese Variablen brach jeder Test der Event-Detail-Boxen
+// (Ticket, Tür, Gratis, Seitenbox) schon beim Rendern ab und prüfte nichts.
+// Platzhalter auf eine nicht erreichbare lokale Adresse: kein Test spricht
+// je mit einer echten Datenbank.
+process.env.NEXT_PUBLIC_SUPABASE_URL ??= 'http://127.0.0.1:54321';
+process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ??= 'test-anon-key';
+
 /**
  * fn-17 i18n: Komponenten-Tests rendern ohne NextIntlClientProvider.
  * Wir mocken next-intl global mit den ECHTEN deutschen Messages, damit

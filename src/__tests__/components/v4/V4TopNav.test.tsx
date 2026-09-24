@@ -41,11 +41,11 @@ describe('V4TopNav', () => {
     expect(screen.getByRole('link', { name: 'Meine Pläne' })).toBeInTheDocument();
   });
 
-  it('Entdecken is active on /', () => {
+  it('no tab is active on / (Landing ist kein Entdecken-Tab, User-Feedback 2026-08-31)', () => {
     mockPathname.mockReturnValue('/');
     render(<V4TopNav />);
     const link = screen.getByRole('link', { name: 'Entdecken' });
-    expect(link.getAttribute('data-active')).toBe('true');
+    expect(link.getAttribute('data-active')).toBe('false');
   });
 
   it('Entdecken is active on /entdecken', () => {

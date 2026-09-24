@@ -30,9 +30,12 @@ function createChainableQuery(resolvedValue: { data: unknown; error: unknown; co
 
 // Mock @supabase/supabase-js
 const mockFrom = vi.fn();
+// Volltextsuche läuft über die RPC search_event_ids (trgm-Index).
+const mockRpc = vi.fn(async () => ({ data: [{ id: 'e1' }], error: null }));
 vi.mock('@supabase/supabase-js', () => ({
   createClient: vi.fn(() => ({
     from: mockFrom,
+    rpc: mockRpc,
   })),
 }));
 
@@ -95,7 +98,8 @@ describe('GET /api/events', () => {
 
     await GET(makeRequest({ district: 'Eisenstadt' }));
 
-    expect(query.eq).toHaveBeenCalledWith('district', 'Eisenstadt');
+    // DB-Spalte ist kanonisch klein geschrieben, Chips senden Title Case.
+    expect(query.ilike).toHaveBeenCalledWith('district', 'Eisenstadt');
   });
 
   it('applies category filter', async () => {
@@ -134,18 +138,8 @@ describe('GET /api/events', () => {
 
     await GET(makeRequest({ search: 'test.*()%_\\injection' }));
 
-    // The sanitized search should not contain special chars
-    const orCalls = query.or.mock.calls;
-    // Find the search-related or call (contains ilike)
-    const searchCall = orCalls.find((call: unknown[]) =>
-      typeof call[0] === 'string' && call[0].includes('ilike')
-    );
-    expect(searchCall).toBeDefined();
-    // Should not contain the injected special characters (but % is used as ILIKE wildcard)
-    expect(searchCall![0]).not.toContain('.*');
-    expect(searchCall![0]).not.toContain('()');
-    // The sanitized search term is wrapped in %...% for ILIKE, which is expected
-    expect(searchCall![0]).toContain('testinjection');
+    // Die Suche geht bereinigt an die RPC search_event_ids (trgm-Index).
+    expect(mockRpc).toHaveBeenCalledWith('search_event_ids', { q: 'testinjection', max_ids: 250 });
   });
 
   it('skips search filter when sanitized input is empty', async () => {
@@ -295,19 +289,15 @@ describe('GET /api/events', () => {
     });
   });
 
-  it('filters for public or null visibility events', async () => {
+  it('filters for public events', async () => {
     const query = createChainableQuery({ data: [], error: null, count: 0 });
     mockFrom.mockReturnValue(query);
 
     await GET(makeRequest());
 
-    const orCalls = query.or.mock.calls;
-    const visibilityCall = orCalls.find((call: unknown[]) =>
-      typeof call[0] === 'string' && call[0].includes('visibility')
-    );
-    expect(visibilityCall).toBeDefined();
-    expect(visibilityCall![0]).toContain('visibility.eq.public');
-    expect(visibilityCall![0]).toContain('visibility.is.null');
+    // visibility ist seit 20260428220000 NOT NULL DEFAULT 'public'; das
+    // frühere OR visibility IS NULL erzwang einen SeqScan.
+    expect(query.eq).toHaveBeenCalledWith('visibility', 'public');
   });
 
   it('orders results by start_date ascending', async () => {
@@ -333,7 +323,7 @@ describe('GET /api/events', () => {
     }));
 
     expect(query.eq).toHaveBeenCalledWith('bundesland', 'Burgenland');
-    expect(query.eq).toHaveBeenCalledWith('district', 'Eisenstadt');
+    expect(query.ilike).toHaveBeenCalledWith('district', 'Eisenstadt');
     expect(query.eq).toHaveBeenCalledWith('category', 'Musik');
     expect(query.lte).toHaveBeenCalledWith('start_date', '2026-06-30T23:59:59');
   });

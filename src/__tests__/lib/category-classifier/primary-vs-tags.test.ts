@@ -4,11 +4,11 @@ import { classifyDeterministic } from '@/lib/category-classifier';
 describe('primary vs secondary tags (R1)', () => {
   it('Adventmarkt mit Live-Musik → category=Märkte, tags include Musik', () => {
     const outcome = classifyDeterministic({ title: 'Adventmarkt mit Live Musik in Wien' });
-    expect(outcome.category).toBe('Märkte');
-    expect(outcome.tags).toContain('Märkte');
+    expect(outcome.category).toBe('Märkte & Feste');
+    expect(outcome.tags).toContain('Märkte & Feste');
     // Musik may or may not appear — depends on whether 'konzert'/'musik' word match.
     // At minimum the primary is Märkte and tags contain the primary.
-    expect(outcome.tags[0]).toBe('Märkte');
+    expect(outcome.tags[0]).toBe('Märkte & Feste');
   });
 
   it('primary appears first in tags array', () => {

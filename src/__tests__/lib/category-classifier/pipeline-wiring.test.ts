@@ -12,13 +12,10 @@ describe('scrape-pipeline wiring (cat-v2)', () => {
     expect(STEP_DEPENDENCIES.categorization).toContain('categorization_backfill');
   });
 
-  it('scrape-pipeline.ts invokes categorization_backfill BEFORE categorization', () => {
+  it('deterministic backfill is the only categorization step (no AI step since fn KI-Ende 2026-07)', () => {
     const file = readFileSync(join(process.cwd(), 'src/scripts/scrape-pipeline.ts'), 'utf8');
-    const bIdx = file.indexOf("runStep('categorization_backfill'");
-    const cIdx = file.indexOf("runStep('categorization'");
-    expect(bIdx).toBeGreaterThan(-1);
-    expect(cIdx).toBeGreaterThan(-1);
-    expect(bIdx).toBeLessThan(cIdx);
+    expect(file.indexOf("runStep('categorization_backfill'")).toBeGreaterThan(-1);
+    expect(file.indexOf("runStep('categorization'")).toBe(-1);
   });
 
   it('pipeline passes --deterministic-backfill to the backfill sub-step', () => {

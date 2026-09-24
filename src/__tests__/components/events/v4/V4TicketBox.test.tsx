@@ -7,12 +7,12 @@ describe('V4TicketBox', () => {
     render(<V4TicketBox eventId="test-id" provider="Eventim" priceFrom="€ 48,00" ticketUrl="https://eventim.de/x"/>);
     expect(screen.getByText('Offizieller Ticketshop: Eventim')).toBeInTheDocument();
     expect(screen.getByText('€ 48,00')).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /zu eventim/i })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /tickets sichern/i })).toBeInTheDocument();
   });
 
   it('CTA href is the ticketUrl', () => {
     render(<V4TicketBox eventId="test-id" provider="oeticket" priceFrom="€ 25,00" ticketUrl="https://oeticket.com/abc"/>);
-    expect(screen.getByRole('link', { name: /zu oeticket/i }).getAttribute('href')).toBe('https://oeticket.com/abc');
+    expect(screen.getByRole('link', { name: /tickets sichern/i }).getAttribute('href')).toBe('https://oeticket.com/abc');
   });
 
   it('shows ticket badge by default', () => {
@@ -40,9 +40,17 @@ describe('V4TicketBox', () => {
 
   it('ticket-shop link opens in new tab + rel safe', () => {
     render(<V4TicketBox eventId="test-id" provider="Eventim" priceFrom="€ 10" ticketUrl="x"/>);
-    const link = screen.getByRole('link', { name: /zu eventim/i });
+    const link = screen.getByRole('link', { name: /tickets sichern/i });
     expect(link.getAttribute('target')).toBe('_blank');
     expect(link.getAttribute('rel')).toMatch(/noopener/);
     expect(link.getAttribute('rel')).toMatch(/noreferrer/);
+  });
+
+  it('ticket click is tracked with event id and provider (Affiliate-Auswertung)', () => {
+    render(<V4TicketBox eventId="test-id" provider="Eventim" priceFrom="€ 10" ticketUrl="x"/>);
+    const link = screen.getByRole('link', { name: /tickets sichern/i });
+    expect(link.getAttribute('data-track')).toBe('ticket_click');
+    expect(link.getAttribute('data-track-id')).toBe('test-id');
+    expect(link.getAttribute('data-track-provider')).toBe('Eventim');
   });
 });

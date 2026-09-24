@@ -60,7 +60,7 @@ describe('AI cache behavior', () => {
 
   it('writes to cache after a successful AI call', async () => {
     const ai = makeAi({
-      primaryCategory: 'Nightlife',
+      primaryCategory: 'Nightlife & Party',
       secondaryCategories: [],
       confidence: 'high',
       shortReason: 'club',
@@ -76,7 +76,7 @@ describe('AI cache behavior', () => {
 
   it('second call hits the cache and does not invoke AI again', async () => {
     const firstAi = makeAi({
-      primaryCategory: 'Nightlife',
+      primaryCategory: 'Nightlife & Party',
       secondaryCategories: [],
       confidence: 'high',
       shortReason: 'club',
@@ -99,13 +99,13 @@ describe('AI cache behavior', () => {
 
     expect(secondAi.chat.completions.create).not.toHaveBeenCalled();
     // Cache hit returns the category stored under the earlier call
-    expect(outcome.category).toBe('Nightlife');
+    expect(outcome.category).toBe('Nightlife & Party');
     expect(outcome.usedAi).toBe(true);
   });
 
   it('bypassCache skips both read and write', async () => {
     const ai = makeAi({
-      primaryCategory: 'Nightlife',
+      primaryCategory: 'Nightlife & Party',
       secondaryCategories: [],
       confidence: 'high',
       shortReason: 'club',

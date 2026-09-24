@@ -50,7 +50,7 @@ describe('classifyWithAiFallback (cat-v2)', () => {
 
   it('invokes AI for genuinely hard cases and accepts high-confidence result', async () => {
     const ai = makeAi({
-      primaryCategory: 'Nightlife',
+      primaryCategory: 'Nightlife & Party',
       secondaryCategories: ['Musik'],
       confidence: 'high',
       shortReason: 'night event',
@@ -61,7 +61,7 @@ describe('classifyWithAiFallback (cat-v2)', () => {
       { ai, bypassCache: true },
     );
     if (outcome.usedAi) {
-      expect(outcome.category).toBe('Nightlife');
+      expect(outcome.category).toBe('Nightlife & Party');
       expect(outcome.confidence).toBe('ai');
       expect(outcome.source).toBe('ai');
       expect(ai.chat.completions.create).toHaveBeenCalledOnce();
@@ -75,7 +75,7 @@ describe('classifyWithAiFallback (cat-v2)', () => {
 
   it('low-confidence AI keeps deterministic provisional and flags review', async () => {
     const ai = makeAi({
-      primaryCategory: 'Kultur',
+      primaryCategory: 'Kultur & Bühne',
       secondaryCategories: [],
       confidence: 'low',
       shortReason: 'unclear',
