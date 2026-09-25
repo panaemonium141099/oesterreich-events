@@ -13,20 +13,10 @@
  *   categoryLabel(tCat, event.category)   // → 'Musik' | 'Music' | Rohwert
  */
 
-export const CATEGORY_MESSAGE_KEYS: Record<string, string> = {
-  'Musik': 'music',
-  'Kultur & Bühne': 'culture',
-  'Nightlife & Party': 'nightlife',
-  'Essen & Trinken': 'food',
-  'Märkte & Feste': 'markets',
-  'Sport & Bewegung': 'sports',
-  'Natur & Abenteuer': 'nature',
-  'Wissen & Karriere': 'knowledge',
-  'Familie & Kinder': 'family',
-  'Community & Freizeit': 'community',
-  'Wellness & Spiritualität': 'wellness',
-  'Sonstiges': 'other',
-};
+import { CATEGORY_KEYS } from '@/lib/category-classifier/taxonomy';
+
+/** Message-Keys je Kategorie (Quelle: CATEGORY_KEYS in taxonomy.ts). */
+export const CATEGORY_MESSAGE_KEYS = CATEGORY_KEYS as Record<string, string>;
 
 /**
  * Übersetzter Anzeigename einer Kategorie. Unbekannte Werte (freie

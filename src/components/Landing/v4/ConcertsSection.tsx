@@ -24,7 +24,7 @@ export function ConcertsSection({ events }: ConcertsSectionProps) {
           </h2>
         </div>
         <Link
-          href="/entdecken?category=music"
+          href="/entdecken?category=Musik"
           className="hidden md:inline-flex items-center gap-1.5 text-[13px] font-semibold text-[var(--v4-ink-70)]"
         >
           {t('viewAll')}
