@@ -457,15 +457,15 @@ function Body({
         {/* 'at-de-ch' ist eine Karten-Pseudo-Region, kein Bundesland: als
             Chip in der Liste lieferte sie 0 Events. Deutschland und Schweiz
             laufen über filters.atOnly wie der Schalter auf der Karte. */}
-        <div style={{ marginTop: 12 }}>
-          <ChipGroup>
-            <Chip
-              active={draft.atOnly === false}
-              onClick={() => setDraft((d) => ({ ...d, atOnly: d.atOnly === false ? undefined : false }))}
-            >
-              {t('includeDeCh')}
-            </Chip>
-          </ChipGroup>
+        {/* Einzelner Schalter: Breite nach Text statt einer Rasterzelle,
+            sonst bricht das Label auf zwei Zeilen um. */}
+        <div style={{ marginTop: 12, display: 'flex' }}>
+          <Chip
+            active={draft.atOnly === false}
+            onClick={() => setDraft((d) => ({ ...d, atOnly: d.atOnly === false ? undefined : false }))}
+          >
+            {t('includeDeCh')}
+          </Chip>
         </div>
         {districts.length > 0 && (
           <div style={{ marginTop: 12 }}>
