@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import type { EventFilters } from '@/types/events';
 import { POSTGREST_MAX_ROWS } from '@/lib/db/fetch-all';
+import { resolveCategoryParam } from '@/lib/category-classifier/taxonomy';
 import { computeStudentScore, isFreeEvent, MIN_STUDENT_SCORE } from '@/lib/utils/student-score';
 
 // Edge-cached: s-maxage in der Response bestimmt die TTL pro URL.
@@ -120,10 +121,12 @@ export async function GET(request: NextRequest) {
   const districts = searchParams.get('districts');
   if (districts) filters.districts = districts.split(',').map(s => s.trim()).filter(Boolean);
 
+  // Kategorien auf die Taxonomie abbilden (?category=music → Musik).
+  // Unbekannte Werte bleiben unverändert und liefern wie bisher 0 Treffer.
   const category = searchParams.get('category');
-  if (category) filters.category = category;
+  if (category) filters.category = resolveCategoryParam(category) ?? category;
   const categories = searchParams.get('categories');
-  if (categories) filters.categories = categories.split(',').map(s => s.trim()).filter(Boolean);
+  if (categories) filters.categories = categories.split(',').map(s => s.trim()).filter(Boolean).map(c => resolveCategoryParam(c) ?? c);
 
   const tags = searchParams.get('tags');
   if (tags) filters.tags = tags.split(',').map(t => t.trim()).filter(Boolean);

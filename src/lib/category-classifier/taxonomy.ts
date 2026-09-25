@@ -219,6 +219,51 @@ export function migrateOldCategory(input: string | null | undefined): Category |
 }
 
 /**
+ * Stabile Kurz-IDs je Kategorie. Dienen als Message-Keys der Übersetzung
+ * (category-labels.ts) und als Aliase in URLs (?category=music).
+ */
+export const CATEGORY_KEYS: Partial<Record<Category, string>> = {
+  'Musik': 'music',
+  'Kultur & Bühne': 'culture',
+  'Nightlife & Party': 'nightlife',
+  'Essen & Trinken': 'food',
+  'Märkte & Feste': 'markets',
+  'Sport & Bewegung': 'sports',
+  'Natur & Abenteuer': 'nature',
+  'Wissen & Karriere': 'knowledge',
+  'Familie & Kinder': 'family',
+  'Community & Freizeit': 'community',
+  'Wellness & Spiritualität': 'wellness',
+  'Sonstiges': 'other',
+};
+
+/**
+ * Kategorie aus einem URL- oder API-Parameter: aktueller Name, Altname
+ * (OLD_TO_NEW_CATEGORY), Kurz-ID ('music') oder alte Konzert-Schreibweise.
+ * Groß-/Kleinschreibung egal. null = keine Kategorie.
+ *
+ * Nur für Parameter von außen. Der Classifier nutzt bewusst weiter
+ * migrateOldCategory (strikt), damit sich die Klassifizierung nicht ändert.
+ * Befund 2026-09-25: ?category=music und die Landing-Konzerte fragten
+ * einen Namen ab, den es seit Taxonomie v3 nicht mehr gibt (0 Treffer).
+ */
+export function resolveCategoryParam(input: string | null | undefined): Category | null {
+  const raw = (input ?? '').trim();
+  if (!raw) return null;
+  const strict = migrateOldCategory(raw);
+  if (strict) return strict;
+  const lower = raw.toLowerCase();
+  for (const c of CATEGORIES) {
+    if (c.toLowerCase() === lower || CATEGORY_KEYS[c] === lower) return c;
+  }
+  for (const [old, c] of Object.entries(OLD_TO_NEW_CATEGORY)) {
+    if (old.toLowerCase() === lower) return c;
+  }
+  if (lower === 'konzert' || lower === 'konzerte') return 'Musik';
+  return null;
+}
+
+/**
  * Confidence precedence helper. Lower rank = higher priority.
  *
  * Used by `reconcile.ts` to enforce overwrite semantics centrally:

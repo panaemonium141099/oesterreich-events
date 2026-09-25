@@ -22,6 +22,7 @@ import {
 import { type V4EntdeckenMode } from '@/components/Events/v4';
 import type { EventFilters } from '@/types/events';
 import { seasonById, seasonEndDate } from '@/lib/landing/seasons';
+import { resolveCategoryParam } from '@/lib/category-classifier/taxonomy';
 
 function resolveMode(raw: string | null): V4EntdeckenMode {
   if (raw === 'smart') return 'smart';
@@ -41,8 +42,10 @@ function deriveInitialFilters(
   if (district) out.district = district;
   const search_ = search.get('search');
   if (search_) out.search = search_;
+  // Gleiche Abbildung wie die API: die Liste filtert client-seitig auf
+  // e.category, ein Altname wie 'music' ließe sonst alles herausfallen.
   const category = search.get('category');
-  if (category) out.category = category;
+  if (category) out.category = resolveCategoryParam(category) ?? category;
   // Place-scope deep-link from a hub page (gemeinde / city / bundesland):
   // ?plz + ?ort scope the list to one place via the compound place filter;
   // the user can widen it via the FilterDrawer to browse all events.

@@ -6,6 +6,9 @@ import { createClient } from '@supabase/supabase-js';
 import { MIN_TRUSTED_EVENT_IMAGE_WIDTH } from '@/lib/event-images/resolveEventImage';
 import overridesJson from '../../../data/festival-overrides.json';
 import { currentSeason, titleMatchesSeason } from '@/lib/landing/seasons';
+import type { Category } from '@/types/events';
+
+const MUSIC_CATEGORY: Category = 'Musik';
 
 const FESTIVAL_OVERRIDES = overridesJson as Record<string, { imageUrl?: string | null }>;
 
@@ -261,12 +264,20 @@ const emptyLanding = (): LandingData => ({
   popularArtists: FALLBACK_ARTISTS,
 });
 
-/** Build-Resilienz-Wrapper (2026-08-26): haengt/failt Supabase, rendert
- *  die Landing mit leeren Sektionen statt den Build/Render zu killen —
- *  das naechste ISR-Revalidate (3600 s) fuellt sie, sobald die DB wieder
- *  antwortet. Ein Deploy darf nie von der Tagesform der Micro-Instanz
- *  abhaengen (Befund: alle Vercel-Builds ab 19:05 UTC am
- *  Landing-/Widget-Prerender gescheitert). */
+/** Läuft gerade `next build` (Prerender) statt einer Laufzeit-Revalidierung? */
+const isBuildPhase = () => process.env.NEXT_PHASE === 'phase-production-build';
+
+/**
+ * Fehlerbehandlung, zwei Fälle:
+ *
+ *  - Build (2026-08-26): ein Deploy darf nie an der Tagesform der DB
+ *    scheitern. Gescheiterte Sektionen bleiben leer, der Rest wird gebaut.
+ *  - Laufzeit (ISR-Revalidierung): NICHT still leer rendern, sondern
+ *    werfen. Next behält dann die letzte gute Seite und versucht es beim
+ *    nächsten Aufruf erneut. Vorher wurde eine leere Sektion für eine
+ *    Stunde gecacht (Saison-Karte leer, 2026-09-25: statement timeout der
+ *    Saison-Abfrage unter Build-Last).
+ */
 export async function getLandingData(): Promise<LandingData> {
   let timer: ReturnType<typeof setTimeout> | null = null;
   try {
@@ -274,18 +285,45 @@ export async function getLandingData(): Promise<LandingData> {
       getLandingDataInner(),
       new Promise<null>(resolve => { timer = setTimeout(() => resolve(null), 15_000); }),
     ]);
-    if (result) return result;
-    console.error('[landing] getLandingData timeout (15s) — leere Sektionen');
-    return emptyLanding();
+    if (!result) {
+      if (!isBuildPhase()) throw new Error('[landing] getLandingData timeout (15s)');
+      console.error('[landing] getLandingData timeout (15s) im Build — leere Sektionen');
+      return emptyLanding();
+    }
+    if (result.failed.length > 0) {
+      if (!isBuildPhase()) throw new Error(`[landing] Abfragen gescheitert: ${result.failed.join(', ')}`);
+      console.error(`[landing] Abfragen im Build gescheitert, Sektionen leer: ${result.failed.join(', ')}`);
+    }
+    return result.data;
   } catch (err) {
-    console.error('[landing] getLandingData failed — leere Sektionen:', err);
+    if (!isBuildPhase()) throw err;
+    console.error('[landing] getLandingData failed im Build — leere Sektionen:', err);
     return emptyLanding();
   } finally {
     if (timer) clearTimeout(timer);
   }
 }
 
-async function getLandingDataInner(): Promise<LandingData> {
+type QueryResult = { data: unknown[] | null; error: { message: string } | null };
+
+/**
+ * Eine Abfrage mit bis zu zwei Wiederholungen. Unter Last (Build rendert
+ * hunderte Seiten parallel) scheitern Abfragen vereinzelt am
+ * statement_timeout; ein zweiter Versuch geht fast immer durch.
+ */
+async function withRetry(label: string, run: () => PromiseLike<QueryResult>, failed: string[]): Promise<QueryResult> {
+  let res: QueryResult = { data: null, error: { message: 'nicht ausgeführt' } };
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (attempt > 0) await new Promise(r => setTimeout(r, 400 * attempt));
+    res = await run();
+    if (!res.error) return res;
+    console.error(`[landing] ${label} Versuch ${attempt + 1}: ${res.error.message}`);
+  }
+  failed.push(label);
+  return res;
+}
+
+async function getLandingDataInner(): Promise<{ data: LandingData; failed: string[] }> {
   const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -320,30 +358,33 @@ async function getLandingDataInner(): Promise<LandingData> {
     .gte('start_date', today)
     .lte('start_date', weekendEnd)
     .eq('publish_status', 'published');
-  const concertsBase = () => weekendBase().or('category.eq.music,category.eq.konzerte');
+  // Kategorie-Namen nur aus der Taxonomie: 'music'/'konzerte' gab es seit v3
+  // nicht mehr, die Sektion war leer (2026-09-25).
+  const concertsBase = () => weekendBase().eq('category', MUSIC_CATEGORY);
 
   // Saison-Karte (Hero): 14 Tage voraus, Tag-Overlap mit der Saison.
   // EXPLAIN 2026-09-24: Bitmap über idx_events_start_date, ~130 ms.
   const season = currentSeason();
   const seasonEnd = new Date(Date.now() + 14 * 24 * 3600 * 1000).toISOString();
 
+  const failed: string[] = [];
   const [weekendSharpRes, weekendRes, concertsSharpRes, concertsRes, festivalsRes, featuredRes, seasonRes] = await Promise.all([
     // todayWeekend: top events in next 7 days
-    weekendBase()
+    withRetry('weekendSharp', () => weekendBase()
       .gte('image_width', MIN_TRUSTED_EVENT_IMAGE_WIDTH)
       .order('event_score', { ascending: false })
-      .limit(TODAYWEEKEND_POOL),
-    weekendBase()
+      .limit(TODAYWEEKEND_POOL), failed),
+    withRetry('weekend', () => weekendBase()
       .order('event_score', { ascending: false })
-      .limit(TODAYWEEKEND_POOL),
+      .limit(TODAYWEEKEND_POOL), failed),
     // concerts: music in next 7 days
-    concertsBase()
+    withRetry('concertsSharp', () => concertsBase()
       .gte('image_width', MIN_TRUSTED_EVENT_IMAGE_WIDTH)
       .order('event_score', { ascending: false })
-      .limit(3),
-    concertsBase()
+      .limit(3), failed),
+    withRetry('concerts', () => concertsBase()
       .order('event_score', { ascending: false })
-      .limit(3),
+      .limit(3), failed),
     // festivals: upcoming. JOIN parent event to grab its image_url AND
     // all url-building fields. Ohne parent_event hat das Festival keine
     // Detail-Page in /events/ → wir signalisieren via href=null an die
@@ -355,21 +396,21 @@ async function getLandingDataInner(): Promise<LandingData> {
     // (Start Jänner, Ende Dezember — "On the Couch", "Murszene" …) die
     // Slots; echte kommende Festivals kamen nie dran. Die Auswahl
     // (Serien-Filter + Tagesrotation) passiert unten in pickFestivals().
-    supabase
+    withRetry('festivals', () => supabase
       .from('festivals')
       .select('*, parent_event:events!parent_event_id(id, slug, start_date, postal_code, address, bundesland, location_name, image_url)')
       .gte('starts_at', today.split('T')[0])
       .order('starts_at', { ascending: true })
-      .limit(48),
+      .limit(48), failed),
     // Admin-Pins (landing_features), nur aktive Fenster.
-    supabase
+    withRetry('featured', () => supabase
       .from('landing_features')
       .select(`created_at, event:events!inner(${eventCols})`)
       .lte('starts_at', today)
       .or(`ends_at.is.null,ends_at.gt.${today}`)
       .order('created_at', { ascending: false })
-      .limit(8),
-    supabase
+      .limit(8), failed),
+    withRetry('season', () => supabase
       .from('events')
       .select(eventCols)
       .gte('start_date', today)
@@ -377,7 +418,7 @@ async function getLandingDataInner(): Promise<LandingData> {
       .eq('publish_status', 'published')
       .overlaps('tags', season.tags)
       .order('event_score', { ascending: false })
-      .limit(40),
+      .limit(40), failed),
   ]);
 
   const todayWeekend = uniqueByTitleAndImage(
@@ -447,10 +488,13 @@ async function getLandingDataInner(): Promise<LandingData> {
   );
 
   return {
-    season: { seasonId: season.id, picks: seasonPicks },
-    todayWeekend,
-    concerts,
-    festivals,
-    popularArtists: FALLBACK_ARTISTS,
+    data: {
+      season: { seasonId: season.id, picks: seasonPicks },
+      todayWeekend,
+      concerts,
+      festivals,
+      popularArtists: FALLBACK_ARTISTS,
+    },
+    failed,
   };
 }
