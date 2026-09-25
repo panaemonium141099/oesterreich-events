@@ -122,6 +122,8 @@ import { post as symphonieorchesterVorarlbergKonzert3DiakunSchumannDvor2026 } fr
 import { post as averageKayo2026 } from './posts/average-kayo-2026';
 import { post as oskarHaagLostCauseTour20262026 } from './posts/oskar-haag-lost-cause-tour-2026-2026';
 import { post as charityFestival2Tagesticket2026 } from './posts/charity-festival-2-tagesticket-2026';
+import { post as gunklAproposUebrigens2026 } from './posts/gunkl-apropos-uebrigens-2026';
+import { post as post4GaengeGourmetDinner2026 } from './posts/4-gaenge-gourmet-dinner-2026';
 // AUTOWRITER-IMPORTS-END
 
 export type { FestivalPost, GalleryImage, FestivalKeyFacts, LineupAct } from './types';
@@ -252,6 +254,8 @@ export const ALL_POSTS: FestivalPost[] = [
   averageKayo2026,
   oskarHaagLostCauseTour20262026,
   charityFestival2Tagesticket2026,
+  gunklAproposUebrigens2026,
+  post4GaengeGourmetDinner2026,
   // AUTOWRITER-POSTS-END
 ].sort(
   (a, b) => new Date(b.publishDate).getTime() - new Date(a.publishDate).getTime()
