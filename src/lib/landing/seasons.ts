@@ -25,8 +25,6 @@ export interface Season {
    * deshalb gehen Events mit Saison-Wort im Titel in der Rotation vor.
    */
   titleHints: string[];
-  /** Suchbegriff für den „Mehr davon"-Link auf /entdecken. */
-  moreQuery: string;
 }
 
 export const SEASONS: Season[] = [
@@ -35,65 +33,84 @@ export const SEASONS: Season[] = [
     from: [12, 27], to: [1, 1],
     tags: ['silvester-party', 'ball'],
     titleHints: ['silvester', 'neujahr', 'jahreswechsel', 'ball'],
-    moreQuery: 'Silvester',
   },
   {
     id: 'advent',
     from: [11, 14], to: [12, 26],
     tags: ['christkindlmarkt', 'adventmarkt', 'krampuslauf', 'perchtenlauf', 'perchten'],
     titleHints: ['advent', 'christkind', 'krampus', 'percht', 'punsch', 'weihnacht', 'nikolo'],
-    moreQuery: 'Adventmarkt',
   },
   {
     id: 'halloween',
     from: [10, 24], to: [10, 31],
     tags: ['halloween-party', 'weinfest', 'heurigenfest', 'erntedank', 'kirtag'],
     titleHints: ['halloween', 'grusel', 'kürbis', 'horror', 'sturm', 'heurig'],
-    moreQuery: 'Halloween',
   },
   {
     id: 'fasching',
     from: [1, 7], to: [2, 28],
     tags: ['ball', 'fasching', 'fasching-party'],
     titleHints: ['ball', 'fasching', 'gschnas', 'maskenball', 'krapfen'],
-    moreQuery: 'Ball',
   },
   {
     id: 'winter',
     from: [1, 2], to: [3, 15],
     tags: ['ski', 'langlauf', 'snowboard', 'perchten', 'ball'],
     titleHints: ['ski', 'rodel', 'eislauf', 'percht', 'ball', 'winter'],
-    moreQuery: 'Winter',
   },
   {
     id: 'ostern',
     from: [3, 16], to: [4, 25],
     tags: ['ostermarkt', 'bauernmarkt', 'flohmarkt'],
     titleHints: ['oster', 'palm', 'frühling'],
-    moreQuery: 'Ostermarkt',
   },
   {
     id: 'fruehling',
     from: [4, 26], to: [6, 14],
     tags: ['maibaumfest', 'flohmarkt', 'bauernmarkt', 'weinfest', 'geführte-wanderung', 'street-food'],
     titleHints: ['maibaum', 'frühling', 'flohmarkt', 'spargel', 'wein'],
-    moreQuery: 'Maibaum',
   },
   {
     id: 'sommer',
     from: [6, 15], to: [8, 31],
     tags: ['sonnwendfeier', 'dorffest', 'kirtag', 'feuerwehrfest', 'weinfest', 'street-food', 'outdoor-festival'],
     titleHints: ['sonnwend', 'kirtag', 'open air', 'sommer', 'seefest', 'feuerwehrfest', 'badefest'],
-    moreQuery: 'Open Air',
   },
   {
     id: 'herbst',
     from: [9, 1], to: [11, 13],
     tags: ['weinfest', 'heurigenfest', 'heuriger', 'buschenschank', 'erntedank', 'almabtrieb', 'kirtag', 'weinverkostung', 'pilzwanderung'],
     titleHints: ['sturm', 'heurig', 'ernte', 'kürbis', 'kastanie', 'maroni', 'wein', 'kirtag', 'herbst', 'almabtrieb', 'kellergasse'],
-    moreQuery: 'Heuriger',
   },
 ];
+
+/** Saison per id (für /entdecken?saison=…), sonst undefined. */
+export function seasonById(id: string | null | undefined): Season | undefined {
+  return SEASONS.find(s => s.id === id);
+}
+
+function viennaYmd(now: Date): [number, number, number] {
+  const [y, m, d] = now.toLocaleDateString('en-CA', { timeZone: 'Europe/Vienna' }).split('-').map(Number);
+  return [y, m, d];
+}
+
+/**
+ * Letzter Tag des Saison-Fensters, das heute läuft oder als nächstes kommt
+ * (YYYY-MM-DD, Wiener Kalender). Grenze für „Mehr davon“ auf /entdecken:
+ * der Classifier vergibt Saison-Tags auch außerhalb der Saison.
+ */
+export function seasonEndDate(season: Season, now: Date = new Date()): string {
+  const [y, m, d] = viennaYmd(now);
+  const today = m * 100 + d;
+  const to = season.to[0] * 100 + season.to[1];
+  const from = season.from[0] * 100 + season.from[1];
+  const wraps = from > to;
+  // Ende liegt im nächsten Jahr, wenn das Fenster über Neujahr läuft und wir
+  // vor Neujahr sind, oder wenn das Ende dieses Jahres schon vorbei ist.
+  const nextYear = wraps ? today >= from : today > to;
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return `${nextYear ? y + 1 : y}-${pad(season.to[0])}-${pad(season.to[1])}`;
+}
 
 function inWindow(month: number, day: number, s: Season): boolean {
   const v = month * 100 + day;

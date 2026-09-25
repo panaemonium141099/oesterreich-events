@@ -514,6 +514,7 @@ export function useFilteredEvents(
   // because of a stale scope — confusing.
   const scopeLabel = useMemo(() => {
     if (filters.search && filters.search.trim()) return tScope('scopeSearch', { term: filters.search.trim() });
+    if (filters.topicLabel && filters.tags && filters.tags.length > 0) return tScope('scopeSearch', { term: filters.topicLabel });
     const districtList = filters.districts && filters.districts.length > 0
       ? filters.districts
       : filters.district ? [filters.district] : [];
@@ -526,7 +527,7 @@ export function useFilteredEvents(
       return locale === 'de' ? name : bundeslandDisplayName(concrete[0], locale);
     }
     return tScope('scopeRegions', { count: concrete.length });
-  }, [bundeslandIds, filters.search, filters.districts, filters.district, locale, tScope]);
+  }, [bundeslandIds, filters.search, filters.topicLabel, filters.tags, filters.districts, filters.district, locale, tScope]);
 
   return {
     filters,

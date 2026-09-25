@@ -39,7 +39,6 @@ export type LandingFestival = Festival & {
  */
 export interface LandingSeason {
   seasonId: string;
-  moreQuery: string;
   picks: Array<Event & { featured: boolean }>;
 }
 
@@ -254,7 +253,7 @@ function festivalCategoryFallback(festivalId: string): string {
  * lineup matches requires another join we're not optimizing for here.
  */
 const emptyLanding = (): LandingData => ({
-  season: { seasonId: currentSeason().id, moreQuery: currentSeason().moreQuery, picks: [] },
+  season: { seasonId: currentSeason().id, picks: [] },
   todayWeekend: [],
   concerts: [],
   festivals: [],
@@ -448,7 +447,7 @@ async function getLandingDataInner(): Promise<LandingData> {
   );
 
   return {
-    season: { seasonId: season.id, moreQuery: season.moreQuery, picks: seasonPicks },
+    season: { seasonId: season.id, picks: seasonPicks },
     todayWeekend,
     concerts,
     festivals,

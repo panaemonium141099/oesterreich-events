@@ -416,22 +416,9 @@ export async function GET(request: NextRequest) {
     }
 
     if (filters.tags && filters.tags.length > 0) {
-      // Multi-tag filter: find events that have ANY of the specified tags
-      // Uses the event_tags junction table via a subquery
-      const { data: taggedEventIds } = await supabase
-        .from('event_tags')
-        .select('event_id')
-        .in('tag', filters.tags);
-
-      if (taggedEventIds && taggedEventIds.length > 0) {
-        const ids = taggedEventIds.map((r: { event_id: string }) => r.event_id);
-        query = query.in('id', ids);
-      } else {
-        // No events match the tags — return empty
-        const res = NextResponse.json({ events: [], total: 0 });
-        res.headers.set('X-Total-Count', '0');
-        return res;
-      }
+      // Events mit IRGENDEINEM der Tags. Früher über eine Tabelle
+      // event_tags, die es nie gab: jeder Tag-Filter kam still leer zurück.
+      query = query.overlaps('tags', filters.tags);
     } else if (filters.categories && filters.categories.length > 0) {
       query = query.in('category', filters.categories);
     } else if (filters.category) {
