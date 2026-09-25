@@ -19,6 +19,9 @@ function getSupabaseClient(): SupabaseClient | null {
 /** Default and maximum page sizes for cursor-based pagination */
 const DEFAULT_PAGE_SIZE = 50;
 
+/** Search hit cap: the ids travel as an id-IN list in the PostgREST URL. */
+const SEARCH_MAX_IDS = 250;
+
 /**
  * Synonym map: common German search terms → taxonomy-v3 category names.
  * Values must match the category strings stored in `events.category` exactly
@@ -442,9 +445,14 @@ export async function GET(request: NextRequest) {
 
     // Search prefilter via the search_event_ids RPC (uses the partial
     // gin_trgm functional index over the concatenated search columns).
-    // RPC returns all matching ids; we then narrow with id-IN. Cap on
+    // RPC returns matching ids; we then narrow with id-IN. Cap on
     // the IN-list because PostgREST URL has a 16 KB header cap — UUIDs
     // are 37 chars so 250 ids ≈ 9 KB plus the rest of the filter URL.
+    // The RPC gets the list's own base filters (future, AT/countries,
+    // coordinates) and orders by start_date, id: the cap must only count
+    // showable events and always cut the same way. Without that it cut 250
+    // arbitrary ids incl. past events and identical requests returned
+    // 76 vs. 102 events (2026-09-25).
     // For broader queries we'll need a comprehensive RPC that takes
     // all filters and returns events directly (no id round-trip).
     if (filters.search) {
@@ -455,7 +463,13 @@ export async function GET(request: NextRequest) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const { data: matchedRows, error: rpcErr } = await (supabase.rpc as any)(
           'search_event_ids',
-          { q: sanitizedSearch, max_ids: 250 },
+          {
+            q: sanitizedSearch,
+            max_ids: SEARCH_MAX_IDS,
+            from_date: today,
+            countries: countryFilter,
+            require_coords: true,
+          },
         );
         if (rpcErr) {
           console.error('search_event_ids RPC failed, falling back to ILIKE OR-clause:', rpcErr);

@@ -149,7 +149,42 @@ describe('GET /api/events', () => {
     await GET(makeRequest({ search: 'test.*()%_\\injection' }));
 
     // Die Suche geht bereinigt an die RPC search_event_ids (trgm-Index).
-    expect(mockRpc).toHaveBeenCalledWith('search_event_ids', { q: 'testinjection', max_ids: 250 });
+    expect(mockRpc).toHaveBeenCalledWith(
+      'search_event_ids',
+      expect.objectContaining({ q: 'testinjection', max_ids: 250 }),
+    );
+  });
+
+  // 2026-09-25: identische Suchen lieferten 76 bzw. 102 Events, weil die RPC
+  // 250 beliebige ids inkl. vergangener kappte und die API erst danach
+  // filterte. Die RPC muss dieselben Basisfilter wie die Liste bekommen.
+  it('hands the list base filters to search_event_ids so the cap only counts showable events', async () => {
+    const query = createChainableQuery({ data: [], error: null, count: 0 });
+    mockFrom.mockReturnValue(query);
+
+    await GET(makeRequest({ search: 'bier' }));
+
+    const today = new Date().toISOString().slice(0, 10);
+    expect(mockRpc).toHaveBeenCalledWith('search_event_ids', {
+      q: 'bier',
+      max_ids: 250,
+      from_date: today,
+      countries: ['AT'],
+      require_coords: true,
+    });
+    expect(query.gte).toHaveBeenCalledWith('start_date', today);
+  });
+
+  it('passes explicit countries to search_event_ids', async () => {
+    const query = createChainableQuery({ data: [], error: null, count: 0 });
+    mockFrom.mockReturnValue(query);
+
+    await GET(makeRequest({ search: 'bier', countries: 'AT,DE,CH' }));
+
+    expect(mockRpc).toHaveBeenCalledWith(
+      'search_event_ids',
+      expect.objectContaining({ countries: ['AT', 'DE', 'CH'] }),
+    );
   });
 
   it('skips search filter when sanitized input is empty', async () => {
