@@ -452,8 +452,16 @@
 /* MapV3 filter-drawer chip groups — equal-width grid */
 .mv3-chip-group {
   display: grid;
+  /* Handy: zwei Spalten (Bottom-Sheet ~340px). */
   grid-template-columns: repeat(auto-fill, minmax(min(140px, 100%), 1fr));
   gap: 8px;
+}
+/* Desktop-Dialog (720px): drei statt vier Spalten, damit Chips mit Zähler
+   (Wellness & Spiritualität 12) einzeilig bleiben. */
+@media (min-width: 768px) {
+  .mv3-chip-group {
+    grid-template-columns: repeat(auto-fill, minmax(min(170px, 100%), 1fr));
+  }
 }
 
 /* MapV3 price-range dual-thumb slider thumbs.
