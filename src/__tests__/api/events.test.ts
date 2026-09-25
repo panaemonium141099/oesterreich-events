@@ -12,7 +12,7 @@ function createChainableQuery(resolvedValue: { data: unknown; error: unknown; co
   const chainMethods = [
     'select', 'eq', 'neq', 'gt', 'gte', 'lt', 'lte',
     'like', 'ilike', 'in', 'or', 'not', 'is',
-    'order', 'limit', 'range', 'filter', 'match',
+    'order', 'limit', 'range', 'filter', 'match', 'overlaps',
   ];
 
   for (const method of chainMethods) {
@@ -109,6 +109,16 @@ describe('GET /api/events', () => {
     await GET(makeRequest({ category: 'Musik' }));
 
     expect(query.eq).toHaveBeenCalledWith('category', 'Musik');
+  });
+
+  it('filtert Tags über die tags-Spalte (irgendeiner der Tags)', async () => {
+    const query = createChainableQuery({ data: [], error: null, count: 0 });
+    mockFrom.mockReturnValue(query);
+
+    await GET(makeRequest({ tags: 'weinfest,heurigenfest, kirtag' }));
+
+    expect(query.overlaps).toHaveBeenCalledWith('tags', ['weinfest', 'heurigenfest', 'kirtag']);
+    expect(mockFrom).not.toHaveBeenCalledWith('event_tags');
   });
 
   it('applies dateFrom filter', async () => {

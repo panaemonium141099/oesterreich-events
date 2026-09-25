@@ -84,7 +84,7 @@ export function SeasonCard({ season }: { season: LandingSeason }) {
       )}
 
       <LocaleLink
-        href={`/entdecken?search=${encodeURIComponent(season.moreQuery)}`}
+        href={`/entdecken?saison=${season.seasonId}`}
         className="mt-3 inline-flex items-center gap-1.5 text-[13px] font-semibold text-[var(--v4-ink-70)] hover:text-[var(--v4-ink)]"
         data-track="landing_season_more"
       >

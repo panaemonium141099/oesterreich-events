@@ -13,6 +13,7 @@
 
 import { useState, useCallback, useEffect, Suspense } from 'react';
 import { useSearchParams, useRouter, usePathname } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import {
   V4EntdeckenHero,
   V4EntdeckenListMode,
@@ -20,6 +21,7 @@ import {
 } from '@/components/Discover/v4';
 import { type V4EntdeckenMode } from '@/components/Events/v4';
 import type { EventFilters } from '@/types/events';
+import { seasonById, seasonEndDate } from '@/lib/landing/seasons';
 
 function resolveMode(raw: string | null): V4EntdeckenMode {
   if (raw === 'smart') return 'smart';
@@ -27,7 +29,10 @@ function resolveMode(raw: string | null): V4EntdeckenMode {
   return 'list';
 }
 
-function deriveInitialFilters(search: URLSearchParams): Partial<EventFilters> | undefined {
+function deriveInitialFilters(
+  search: URLSearchParams,
+  seasonLabel: (id: string) => string,
+): Partial<EventFilters> | undefined {
   // Pick up the common URL filter params if present. This is best-effort:
   // most users will land on /entdecken with no params. Deep-links from
   // landing-page links (e.g. /entdecken?district=eisenstadt) work too.
@@ -49,6 +54,14 @@ function deriveInitialFilters(search: URLSearchParams): Partial<EventFilters> | 
   // True region→district filtering is a follow-up; this at least scopes results.
   const region = search.get('region');
   if (region && !out.search) out.search = region;
+  // Saison-Link der Landing (?saison=herbst): alle Stichwörter der Saison
+  // statt eines einzelnen Suchworts, begrenzt auf das Saisonende.
+  const season = seasonById(search.get('saison'));
+  if (season) {
+    out.tags = season.tags;
+    out.dateTo = seasonEndDate(season);
+    out.topicLabel = seasonLabel(season.id);
+  }
   return Object.keys(out).length > 0 ? out : undefined;
 }
 
@@ -65,7 +78,8 @@ function EntdeckenInner() {
   const initialBundeslandIds = initialBlParam
     ? initialBlParam.split(',').map((s) => s.trim()).filter(Boolean)
     : undefined;
-  const initialFilters = deriveInitialFilters(search);
+  const tSeason = useTranslations('Landing.Season');
+  const initialFilters = deriveInitialFilters(search, (id) => tSeason(`${id}.title`));
 
   // Mirror mode back into URL — list-Modus default unparametrisiert
   // damit /entdecken eine saubere URL hat. Smart-Modus persistiert
@@ -110,6 +124,7 @@ function EntdeckenInner() {
     initialFilters?.category ?? '',
     initialFilters?.placeName ?? '',
     initialFilters?.placePostalCode ?? '',
+    initialFilters?.tags?.join(',') ?? '',
   ].join('|');
 
   return (

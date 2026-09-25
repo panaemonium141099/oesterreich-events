@@ -254,6 +254,8 @@ export interface EventFilters {
   categories?: string[];
   /** Multi-tag filter: events matching ANY of the provided tags */
   tags?: string[];
+  /** Nur Anzeige: Name des Themas hinter `tags` (z. B. Saison), geht nicht an die API. */
+  topicLabel?: string;
   dateFrom?: string;
   dateTo?: string;
   priceMin?: number;
