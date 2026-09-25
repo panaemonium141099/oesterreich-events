@@ -49,6 +49,14 @@ export interface UseFilteredEventsOptions {
 
 // ── Public contract ───────────────────────────────────────────────────────
 
+export interface EventPreview {
+  count: number;
+  /** Kategorie-Zähler für den Entwurf, nur wenn exakt berechenbar. */
+  categoryCounts?: Record<string, number>;
+  /** Serverzählung ohne die Titel-Zusammenfassung der Liste. */
+  approximate?: boolean;
+}
+
 export interface UseFilteredEventsReturn {
   // ── State ────────────────────────────────────────────────────────────
   filters: EventFilters;
@@ -67,6 +75,15 @@ export interface UseFilteredEventsReturn {
   totalMatchCount: number | null; // displayed count (null = trust apiTotalCount when no client narrower)
   categoryCounts: Record<string, number>;
 
+  // ── Vorschau für den FilterDrawer ──────────────────────────────────
+  /**
+   * Trefferzahl für einen noch NICHT übernommenen Filterstand. Nutzt die
+   * gleiche Rechnung wie die Liste: Punkte-Snapshot client-seitig, sonst
+   * die erste Listenseite; nur bei mehr als einer Seite die Serverzählung
+   * (approximate). null = unbekannt (Fehler/Abbruch).
+   */
+  previewCount: (draft: EventFilters, blIds: string[], signal?: AbortSignal) => Promise<EventPreview | null>;
+
   // ── Lazy-Batches (nur mit options.lazyBatches, sonst inert) ─────────
   loadMore: () => void;
   hasMoreBatches: boolean;
@@ -75,6 +92,140 @@ export interface UseFilteredEventsReturn {
   // ── Context ──────────────────────────────────────────────────────────
   scopeLabel: string;              // "Heute · Burgenland"
   bundesland: Bundesland;          // current bundesland object (primary)
+}
+
+// ── Reine Helfer (Liste und Vorschau teilen sie) ─────────────────────────
+
+/** Seitengröße der Liste (Edge-Cache-Parität mit warm-cache, siehe unten). */
+const LIST_BATCH_SIZE = 3000;
+
+/**
+ * URL-Parameter für /api/events aus Filtern + Bundesland-Auswahl. Rein, damit
+ * Liste und Vorschau-Zählung (FilterDrawer) exakt dieselbe Abfrage stellen.
+ */
+export function buildEventParams(filters: EventFilters, blIds: string[]): URLSearchParams {
+  const params = new URLSearchParams();
+  // Multi-bundesland: send `bundeslands` (comma-separated) when the user
+  // picked >1 region; otherwise the single `bundesland` param so the
+  // server can short-circuit and use its idx_events_bundesland_start_date
+  // single-eq path.
+  const concrete = blIds.filter((b) => b !== 'all');
+  if (concrete.length > 1) params.set('bundeslands', concrete.join(','));
+  else params.set('bundesland', concrete[0] ?? 'all');
+  // Country scope — default Austria; toggle off includes DE/CH (all sources).
+  if (filters.atOnly === false) params.set('countries', 'AT,DE,CH');
+  // Slim payload — list + markers only need ~17 fields.
+  params.set('slim', 'true');
+  if (filters.tags && filters.tags.length > 0) params.set('tags', filters.tags.join(','));
+  else if (filters.categories && filters.categories.length > 0) params.set('categories', filters.categories.join(','));
+  else if (filters.category) params.set('category', filters.category);
+  if (filters.districts && filters.districts.length > 0) params.set('districts', filters.districts.join(','));
+  if (filters.dateFrom) params.set('dateFrom', filters.dateFrom);
+  if (filters.dateTo) params.set('dateTo', filters.dateTo);
+  if (filters.priceMin !== undefined) params.set('priceMin', String(filters.priceMin));
+  if (filters.priceMax !== undefined) params.set('priceMax', String(filters.priceMax));
+  if (filters.search) params.set('search', filters.search);
+  if (filters.bbox) params.set('bbox', filters.bbox.join(','));
+  if (filters.placeName) params.set('placeName', filters.placeName);
+  if (filters.placePostalCode) params.set('placePostalCode', filters.placePostalCode);
+  if (filters.eveningOnly) params.set('eveningOnly', 'true');
+  if (filters.sourceName) params.set('sourceName', filters.sourceName);
+  if (filters.studentFriendly) params.set('studentFriendly', 'true');
+  if (filters.familyFriendly) params.set('familyFriendly', 'true');
+  if (filters.priceTiers && filters.priceTiers.length > 0) params.set('priceTiers', filters.priceTiers.join(','));
+  else if (filters.priceTier) params.set('priceTier', filters.priceTier);
+  // Sort signal — keyword search benefits from sort=relevance so the
+  // best title/location matches surface first instead of by date.
+  if (filters.sort) params.set('sort', filters.sort);
+  return params;
+}
+
+/** Auswahl nach Bundesländern (client-seitig, ['all'] = alle). */
+export function filterByBundesland(events: Event[], blIds: string[]): Event[] {
+  const concrete = blIds.filter((b) => b !== 'all');
+  if (concrete.length === 0) return events;
+  const targets = new Set(concrete);
+  return events.filter((e) => {
+    const id = bundeslandToId(e.bundesland);
+    return id != null && targets.has(id);
+  });
+}
+
+/** Gleicher Titel am gleichen Tag = ein Eintrag (Punkte haben keinen Titel). */
+export function dedupeEvents(events: Event[]): Event[] {
+  const seen = new Set<string>();
+  return events.filter((e) => {
+    // Points-Modus: Punkte haben KEINEN Titel — der Key wäre '::datum'
+    // und würde alle Events eines Tages zu einem kollabieren. Punkte
+    // sind serverseitig schon eindeutig (MV, ein Row pro Event).
+    if (!e.title) return true;
+    const key = `${e.title.trim().toLowerCase()}::${(e.start_date || '').split('T')[0]}`;
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+}
+
+/** Bezirk, Kategorie, Preisstufe, Datum, Zielgruppe (client-seitig). */
+export function narrowEvents(events: Event[], filters: EventFilters): Event[] {
+  let out = events;
+  // Multi-district takes precedence; fall back to legacy single field.
+  const districtList = filters.districts && filters.districts.length > 0
+    ? filters.districts
+    : filters.district ? [filters.district] : null;
+  if (districtList) {
+    const targets = new Set(districtList.map((d) => d.toLowerCase()));
+    out = out.filter((e) => targets.has((e.district ?? '').toLowerCase()));
+  }
+  // Multi-category client-side filter (server already filtered, but
+  // belt-and-suspenders for cache hits where the request shape differs).
+  const catList = filters.categories && filters.categories.length > 0
+    ? filters.categories
+    : filters.category ? [filters.category] : null;
+  if (catList) {
+    const targets = new Set(catList);
+    out = out.filter((e) => e.category != null && targets.has(e.category));
+  }
+  // Multi-priceTier client-side
+  const ptList = filters.priceTiers && filters.priceTiers.length > 0
+    ? filters.priceTiers
+    : filters.priceTier ? [filters.priceTier] : null;
+  if (ptList) {
+    const targets = new Set<string>(ptList);
+    out = out.filter((e) => {
+      // Slim payload (CachedEvent) doesn't include price_tier — keep
+      // the row when missing instead of dropping. Server-side filter
+      // is the authoritative one for this field.
+      const pt = (e as { price_tier?: string }).price_tier;
+      return pt == null || targets.has(pt);
+    });
+  }
+  // fn-16: Datum + Student/Family client-seitig. Im Batch-Modus hat der
+  // Server das schon gefiltert (belt-and-suspenders, gleiche Semantik:
+  // Tagesvergleich auf YYYY-MM-DD); im Points-Modus ist DAS der Filter.
+  // Felder, die der Payload nicht kennt (undefined), lassen die Zeile
+  // durch — Muster wie bei price_tier oben.
+  if (filters.dateFrom) {
+    const from = filters.dateFrom.slice(0, 10);
+    out = out.filter((e) => !e.start_date || e.start_date.slice(0, 10) >= from);
+  }
+  if (filters.dateTo) {
+    const to = filters.dateTo.slice(0, 10);
+    out = out.filter((e) => !e.start_date || e.start_date.slice(0, 10) <= to);
+  }
+  if (filters.studentFriendly) {
+    out = out.filter((e) => {
+      const v = (e as { is_student_friendly?: boolean }).is_student_friendly;
+      return v == null || v === true;
+    });
+  }
+  if (filters.familyFriendly) {
+    out = out.filter((e) => {
+      const v = (e as { is_family_friendly?: boolean }).is_family_friendly;
+      return v == null || v === true;
+    });
+  }
+  return out;
 }
 
 // ── Hook ─────────────────────────────────────────────────────────────────
@@ -125,6 +276,8 @@ export function useFilteredEvents(
   const [loading, setLoading] = useState(true);
   const [backgroundLoading, setBackgroundLoading] = useState(false);
   const [apiTotalCount, setApiTotalCount] = useState<number | null>(null);
+  // Daten stammen aus dem Punkte-Snapshot (kompletter Bestand) statt aus Seiten.
+  const [pointsMode, setPointsMode] = useState(false);
   const abortRef = useRef<AbortController | null>(null);
 
   // Lazy-Batches-Zustand (fn-16 Liste): Cursor + Akkumulator überleben
@@ -140,42 +293,10 @@ export function useFilteredEvents(
   } | null>(null);
 
   // ── Data fetch (progressive batches, same shape as the old page) ───────
-  const buildParams = useCallback(() => {
-    const params = new URLSearchParams();
-    // Multi-bundesland: send `bundeslands` (comma-separated) when the user
-    // picked >1 region; otherwise the single `bundesland` param so the
-    // server can short-circuit and use its idx_events_bundesland_start_date
-    // single-eq path.
-    const concrete = bundeslandIds.filter((b) => b !== 'all');
-    if (concrete.length > 1) params.set('bundeslands', concrete.join(','));
-    else params.set('bundesland', concrete[0] ?? 'all');
-    // Country scope — default Austria; toggle off includes DE/CH (all sources).
-    if (filters.atOnly === false) params.set('countries', 'AT,DE,CH');
-    // Slim payload — list + markers only need ~17 fields.
-    params.set('slim', 'true');
-    if (filters.tags && filters.tags.length > 0) params.set('tags', filters.tags.join(','));
-    else if (filters.categories && filters.categories.length > 0) params.set('categories', filters.categories.join(','));
-    else if (filters.category) params.set('category', filters.category);
-    if (filters.districts && filters.districts.length > 0) params.set('districts', filters.districts.join(','));
-    if (filters.dateFrom) params.set('dateFrom', filters.dateFrom);
-    if (filters.dateTo) params.set('dateTo', filters.dateTo);
-    if (filters.priceMin !== undefined) params.set('priceMin', String(filters.priceMin));
-    if (filters.priceMax !== undefined) params.set('priceMax', String(filters.priceMax));
-    if (filters.search) params.set('search', filters.search);
-    if (filters.bbox) params.set('bbox', filters.bbox.join(','));
-    if (filters.placeName) params.set('placeName', filters.placeName);
-    if (filters.placePostalCode) params.set('placePostalCode', filters.placePostalCode);
-    if (filters.eveningOnly) params.set('eveningOnly', 'true');
-    if (filters.sourceName) params.set('sourceName', filters.sourceName);
-    if (filters.studentFriendly) params.set('studentFriendly', 'true');
-    if (filters.familyFriendly) params.set('familyFriendly', 'true');
-    if (filters.priceTiers && filters.priceTiers.length > 0) params.set('priceTiers', filters.priceTiers.join(','));
-    else if (filters.priceTier) params.set('priceTier', filters.priceTier);
-    // Sort signal — keyword search benefits from sort=relevance so the
-    // best title/location matches surface first instead of by date.
-    if (filters.sort) params.set('sort', filters.sort);
-    return params;
-  }, [filters, bundeslandIds]);
+  const buildParams = useCallback(
+    () => buildEventParams(filters, bundeslandIds),
+    [filters, bundeslandIds],
+  );
 
   const fetchEventsProgressive = useCallback(async () => {
     if (abortRef.current) abortRef.current.abort();
@@ -185,6 +306,7 @@ export function useFilteredEvents(
     // Filter-/Scope-Wechsel invalidiert eine laufende Lazy-Pagination.
     lazyRef.current = null;
     setHasMoreBatches(false);
+    setPointsMode(false);
 
     // Sync the parent-state bundesland selection into filters for cache+API
     // parity. Single concrete pick → use legacy `bundesland`; multi → use
@@ -237,6 +359,7 @@ export function useFilteredEvents(
       if (points && points.length > 0) {
         setAllEvents(points);
         setApiTotalCount(points.length);
+        setPointsMode(true);
         setLoading(false);
         return;
       }
@@ -247,7 +370,7 @@ export function useFilteredEvents(
     // Request triggert eine Cold-Path-DB-Query. 3000 deckt alle aktuell
     // gemessenen (bundesland × category) Counts ab; größere Kombis
     // paginieren via cursor in den Background-Batches unten weiter.
-    const BATCH_SIZE = 3000;
+    const BATCH_SIZE = LIST_BATCH_SIZE;
     let acc: Event[] = [];
     let finalTotal: number | null = null;
 
@@ -399,90 +522,11 @@ export function useFilteredEvents(
   }, [buildParams, loadingMore]);
 
   // ── Client-side filtering pipeline ────────────────────────────────────
-  const bundeslandEvents = useMemo(() => {
-    const concrete = bundeslandIds.filter((b) => b !== 'all');
-    if (concrete.length === 0) return allEvents;
-    const targets = new Set(concrete);
-    return allEvents.filter((e) => {
-      const id = bundeslandToId(e.bundesland);
-      return id != null && targets.has(id);
-    });
-  }, [allEvents, bundeslandIds]);
+  const bundeslandEvents = useMemo(() => filterByBundesland(allEvents, bundeslandIds), [allEvents, bundeslandIds]);
 
-  const dedupedEvents = useMemo(() => {
-    const seen = new Set<string>();
-    return bundeslandEvents.filter((e) => {
-      // Points-Modus: Punkte haben KEINEN Titel — der Key wäre '::datum'
-      // und würde alle Events eines Tages zu einem kollabieren. Punkte
-      // sind serverseitig schon eindeutig (MV, ein Row pro Event).
-      if (!e.title) return true;
-      const key = `${e.title.trim().toLowerCase()}::${(e.start_date || '').split('T')[0]}`;
-      if (seen.has(key)) return false;
-      seen.add(key);
-      return true;
-    });
-  }, [bundeslandEvents]);
+  const dedupedEvents = useMemo(() => dedupeEvents(bundeslandEvents), [bundeslandEvents]);
 
-  const finalEvents = useMemo(() => {
-    let out = dedupedEvents;
-    // Multi-district takes precedence; fall back to legacy single field.
-    const districtList = filters.districts && filters.districts.length > 0
-      ? filters.districts
-      : filters.district ? [filters.district] : null;
-    if (districtList) {
-      const targets = new Set(districtList.map((d) => d.toLowerCase()));
-      out = out.filter((e) => targets.has((e.district ?? '').toLowerCase()));
-    }
-    // Multi-category client-side filter (server already filtered, but
-    // belt-and-suspenders for cache hits where the request shape differs).
-    const catList = filters.categories && filters.categories.length > 0
-      ? filters.categories
-      : filters.category ? [filters.category] : null;
-    if (catList) {
-      const targets = new Set(catList);
-      out = out.filter((e) => e.category != null && targets.has(e.category));
-    }
-    // Multi-priceTier client-side
-    const ptList = filters.priceTiers && filters.priceTiers.length > 0
-      ? filters.priceTiers
-      : filters.priceTier ? [filters.priceTier] : null;
-    if (ptList) {
-      const targets = new Set<string>(ptList);
-      out = out.filter((e) => {
-        // Slim payload (CachedEvent) doesn't include price_tier — keep
-        // the row when missing instead of dropping. Server-side filter
-        // is the authoritative one for this field.
-        const pt = (e as { price_tier?: string }).price_tier;
-        return pt == null || targets.has(pt);
-      });
-    }
-    // fn-16: Datum + Student/Family client-seitig. Im Batch-Modus hat der
-    // Server das schon gefiltert (belt-and-suspenders, gleiche Semantik:
-    // Tagesvergleich auf YYYY-MM-DD); im Points-Modus ist DAS der Filter.
-    // Felder, die der Payload nicht kennt (undefined), lassen die Zeile
-    // durch — Muster wie bei price_tier oben.
-    if (filters.dateFrom) {
-      const from = filters.dateFrom.slice(0, 10);
-      out = out.filter((e) => !e.start_date || e.start_date.slice(0, 10) >= from);
-    }
-    if (filters.dateTo) {
-      const to = filters.dateTo.slice(0, 10);
-      out = out.filter((e) => !e.start_date || e.start_date.slice(0, 10) <= to);
-    }
-    if (filters.studentFriendly) {
-      out = out.filter((e) => {
-        const v = (e as { is_student_friendly?: boolean }).is_student_friendly;
-        return v == null || v === true;
-      });
-    }
-    if (filters.familyFriendly) {
-      out = out.filter((e) => {
-        const v = (e as { is_family_friendly?: boolean }).is_family_friendly;
-        return v == null || v === true;
-      });
-    }
-    return out;
-  }, [dedupedEvents, filters.district, filters.districts, filters.category, filters.categories, filters.priceTier, filters.priceTiers, filters.dateFrom, filters.dateTo, filters.studentFriendly, filters.familyFriendly]);
+  const finalEvents = useMemo(() => narrowEvents(dedupedEvents, filters), [dedupedEvents, filters]);
 
   // Category counts for the FilterDrawer — fed off the post-deduplication,
   // pre-category-filter set so each chip shows its own contribution.
@@ -501,8 +545,11 @@ export function useFilteredEvents(
     !!filters.district ||
     (filters.districts && filters.districts.length > 0) ||
     (filters.categories && filters.categories.length > 0);
-  const totalMatchCount =
-    bundeslandIds.includes('all') && !hasClientNarrower ? apiTotalCount : null;
+  // Punkte-Snapshot = kompletter Bestand: finalEvents IST die exakte Zahl.
+  // points.length zu zeigen hieß bei aktivem Datum „609 von 80.000“.
+  const totalMatchCount = pointsMode
+    ? finalEvents.length
+    : bundeslandIds.includes('all') && !hasClientNarrower ? apiTotalCount : null;
 
   // Scope label priority — show the most specific dimension the user
   // narrowed by, falling back outward:
@@ -529,9 +576,53 @@ export function useFilteredEvents(
     return tScope('scopeRegions', { count: concrete.length });
   }, [bundeslandIds, filters.search, filters.topicLabel, filters.tags, filters.districts, filters.district, locale, tScope]);
 
+  const previewCount = useCallback(
+    async (draft: EventFilters, blIds: string[], signal?: AbortSignal): Promise<EventPreview | null> => {
+      try {
+        // Punkte-Snapshot (Modul-Cache): dieselbe client-seitige Rechnung
+        // wie finalEvents, also exakt die Zahl, die die Liste danach zeigt.
+        if (mapPoints && pointsEligible(draft)) {
+          const points = await fetchMapPointEvents();
+          if (signal?.aborted) return null;
+          if (points && points.length > 0) {
+            const deduped = dedupeEvents(filterByBundesland(points, blIds));
+            const counts: Record<string, number> = {};
+            for (const e of deduped) if (e.category) counts[e.category] = (counts[e.category] || 0) + 1;
+            return { count: narrowEvents(deduped, draft).length, categoryCounts: counts };
+          }
+        }
+        // Server-Pfad (Tags, Suche, Ort …): dieselbe erste Seite, die die
+        // Liste nach dem Übernehmen lädt (gleiche URL, also Cache-Treffer),
+        // mit derselben client-seitigen Zusammenfassung.
+        const params = buildEventParams(draft, blIds);
+        params.set('limit', String(LIST_BATCH_SIZE));
+        const res = await fetch(`/api/events?${params.toString()}`, { signal });
+        if (!res.ok) return null;
+        const json = await res.json();
+        const deduped = dedupeEvents(filterByBundesland((json.events ?? []) as Event[], blIds));
+        if (!json.nextCursor) {
+          const counts: Record<string, number> = {};
+          for (const e of deduped) if (e.category) counts[e.category] = (counts[e.category] || 0) + 1;
+          return { count: narrowEvents(deduped, draft).length, categoryCounts: counts };
+        }
+        // Mehr als eine Seite: Zählung am Server (ohne Titel-Zusammenfassung).
+        const countParams = buildEventParams(draft, blIds);
+        countParams.set('countOnly', 'true');
+        const countRes = await fetch(`/api/events?${countParams.toString()}`, { signal });
+        if (!countRes.ok) return null;
+        const countJson = await countRes.json();
+        return typeof countJson.total === 'number' ? { count: countJson.total, approximate: true } : null;
+      } catch {
+        return null;
+      }
+    },
+    [mapPoints],
+  );
+
   return {
     filters,
     setFilters,
+    previewCount,
     bundeslandIds,
     setBundeslandIds,
     allEvents,

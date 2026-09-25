@@ -37,7 +37,7 @@ export function V4EntdeckenListMode({
     bundeslandIds, setBundeslandIds,
     finalEvents, loading,
     totalMatchCount, categoryCounts, scopeLabel,
-    loadMore, hasMoreBatches, loadingMore,
+    loadMore, hasMoreBatches, loadingMore, previewCount,
   } = useFilteredEvents(initialBundeslandIds, initialFilters, {
     // fn-16 Option A (User-Go 2026-07-16): die Liste läuft wie die Karte
     // über den Points-Snapshot — exakter Zähler, global korrekte
@@ -141,6 +141,7 @@ export function V4EntdeckenListMode({
         onBundeslandIdsChange={setBundeslandIds}
         resultCount={resultCount}
         categoryCounts={categoryCounts}
+        previewCount={previewCount}
       />
 
     </div>

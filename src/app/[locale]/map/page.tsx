@@ -167,7 +167,7 @@ function MapPageInner() {
     bundeslandIds, setBundeslandIds,
     finalEvents, allEvents, loading, backgroundLoading,
     apiTotalCount: _apiTotalCount, totalMatchCount, categoryCounts, scopeLabel,
-    bundesland,
+    bundesland, previewCount,
   } = useFilteredEvents(initialBundeslandIds, initialFilters, {
     // fn-16: Karte konsumiert den kompakten Points-Snapshot (ein Request
     // statt ~30 Batches); Marker-Popups laden das volle Event lazy nach.
@@ -461,6 +461,7 @@ function MapPageInner() {
         <FilterDrawer
           open={filterOpen}
           onClose={() => setFilterOpen(false)}
+          previewCount={previewCount}
           filters={filters}
           onFiltersChange={(f) => {
             setFilters(f);
