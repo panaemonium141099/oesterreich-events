@@ -18,6 +18,14 @@
  *   npm run categorize-events -- --deterministic-backfill
  *   npm run categorize-events -- --dry-run --limit 200
  *   npm run categorize-events -- --retry-low
+ *   npm run categorize-events -- --deterministic-backfill --max-minutes 45
+ *
+ * --max-minutes: Zeitbudget. Danach endet der Lauf regulär; der Rest behält
+ * seine alte category_version und wird beim nächsten Lauf abgeholt. Nach
+ * einem Versionssprung (cat-v3-rules2, 2026-09-24) standen 150.000 Zeilen
+ * zur Neueinordnung an, Einzel-Updates mit ~8/s: der Schritt fraß am
+ * 25.09. das komplette 300-min-Budget des Post-Jobs, Scoring, Dedup und
+ * Indexing liefen nicht.
  */
 
 import { readFileSync } from 'fs';
@@ -64,6 +72,8 @@ function parseArgs() {
   const has = (flag: string) => args.includes(flag);
   const limitRaw = get('--limit');
   const limit = limitRaw ? parseInt(limitRaw, 10) : undefined;
+  const maxMinutesRaw = get('--max-minutes');
+  const maxMinutes = maxMinutesRaw ? parseFloat(maxMinutesRaw) : undefined;
   return {
     dryRun: has('--dry-run'),
     resume: has('--resume'),
@@ -73,6 +83,7 @@ function parseArgs() {
     changedSince: get('--changed-since'),
     source: get('--source'),
     limit: limit && Number.isFinite(limit) && limit > 0 ? limit : undefined,
+    maxMinutes: maxMinutes && Number.isFinite(maxMinutes) && maxMinutes > 0 ? maxMinutes : undefined,
   } as const;
 }
 
@@ -348,8 +359,16 @@ async function main() {
   let needsAiDeferred = 0;
   let aiErrors = 0;
   const processedIds = Array.from(processed);
+  const deadline = opts.maxMinutes ? Date.now() + opts.maxMinutes * 60_000 : Infinity;
+  let budgetStop = false;
 
   for (let i = 0; i < pending.length; i++) {
+    if (Date.now() > deadline) {
+      budgetStop = true;
+      console.log(`
+  Zeitbudget ${opts.maxMinutes} min erreicht nach ${i}/${pending.length}; Rest folgt im nächsten Lauf.`);
+      break;
+    }
     const e = pending[i];
 
     if (e.category_locked) {
@@ -492,6 +511,7 @@ async function main() {
   console.log(`  Mode:             ${modeLabel}`);
   console.log(`  Version:          ${CLASSIFIER_VERSION}`);
   console.log(`  Candidates:       ${events.length}`);
+  if (budgetStop) console.log(`  Budget-Stopp:     ja (--max-minutes ${opts.maxMinutes})`);
   console.log(`  Writes:           ${writes}`);
   console.log(`  No-ops:           ${noops}`);
   console.log(`  Rewrite rate:     ${events.length > 0 ? ((writes / events.length) * 100).toFixed(1) : '0.0'}%`);

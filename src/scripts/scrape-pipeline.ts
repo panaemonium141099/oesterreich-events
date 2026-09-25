@@ -166,9 +166,11 @@ async function main() {
           // einzige Kategorieschritt seit dem Ende der KI-Anreicherung
           // (MASTERPLAN §6). Ordnet jede Zeile mit veralteter
           // Classifier-Version neu ein; reconcile schützt stärkere
-          // bestehende Kategorien. Idempotent.
+          // bestehende Kategorien. Idempotent. Zeitbudget, weil ein
+          // Versionssprung alle Zeilen neu einordnet (25.09.: 150.000 Zeilen,
+          // 5 h, Post-Job abgebrochen); der Rest folgt in den nächsten Nächten.
           execStep('Categorize events (deterministic backfill)',
-            `npx tsx ${envFlag}src/scripts/categorize-events.ts --deterministic-backfill`);
+            `npx tsx ${envFlag}src/scripts/categorize-events.ts --deterministic-backfill --max-minutes 45`);
         }, steps);
       }
 
