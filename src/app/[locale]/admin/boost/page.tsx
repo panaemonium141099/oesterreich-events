@@ -114,6 +114,9 @@ export default function BoostAdminPage() {
     const { data: matched, error } = await supabase.rpc('search_event_ids', {
       q,
       max_ids: 150,
+      // Kappen erst NACH dem Zukunftsfilter, sonst fressen vergangene
+      // Treffer die 150 Plätze.
+      from_date: today,
     });
 
     if (!error && matched) {
