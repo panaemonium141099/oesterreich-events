@@ -18,7 +18,9 @@
  * aktuellen image_url abweicht (Scraper hat das Bild getauscht).
  */
 
+import { randomUUID } from 'node:crypto';
 import { createClient } from '@supabase/supabase-js';
+import { POSTGREST_MAX_ROWS } from '../lib/db/fetch-all';
 
 const CONCURRENCY = 12;
 const FETCH_TIMEOUT_MS = 10_000;
@@ -85,6 +87,20 @@ export const IMAGE_UNKNOWN = -1;
 /** HTTP-Codes, die eine URL dauerhaft als tot ausweisen. */
 const DEAD_STATUSES = new Set([400, 401, 403, 404, 410, 451]);
 
+/**
+ * Wertet eine erfolgreiche Antwort (2xx) aus. Ein leerer Body ist kein
+ * Messfehler, sondern ein totes Bild: linztermine.at (via Boudicca) antwortet
+ * auf entfernte Medien mit 200 und Content-Length 0. Der Browser zeigt dann
+ * nur den Alt-Text. Als -1 blieb die URL "unbekannt" und wurde weiter
+ * ausgeliefert (2026-09-25: 328 Events, dazu 229 frueher gemessene).
+ */
+export function widthFromBody(buf: Buffer): number {
+  if (buf.length === 0) return IMAGE_DEAD;
+  const w = imageWidthOf(buf);
+  // smallint-Grenze: alles >= 32k Pixel clampen (praktisch nie)
+  return w == null ? IMAGE_UNKNOWN : Math.min(w, 32_000);
+}
+
 async function probe(url: string): Promise<number> {
   try {
     const ctrl = new AbortController();
@@ -104,10 +120,7 @@ async function probe(url: string): Promise<number> {
       // aussortiert. Nur die eindeutigen Dauerfehler zaehlen als tot.
       return DEAD_STATUSES.has(res.status) ? IMAGE_DEAD : IMAGE_UNKNOWN;
     }
-    const buf = Buffer.from(await res.arrayBuffer());
-    const w = imageWidthOf(buf);
-    // smallint-Grenze: alles >= 32k Pixel clampen (praktisch nie)
-    return w == null ? IMAGE_UNKNOWN : Math.min(w, 32_000);
+    return widthFromBody(Buffer.from(await res.arrayBuffer()));
   } catch {
     // Timeout / DNS / TLS — nicht entscheidbar, also erneut versuchen lassen.
     return IMAGE_UNKNOWN;
@@ -130,6 +143,16 @@ async function main() {
   // auch die dauerhaften 404er.
   const rqIdx = args.indexOf('--requeue-failed');
   const requeue = rqIdx >= 0 ? Number(args[rqIdx + 1]) || 500 : 0;
+
+  // --recheck-measured [n]: stellt n bereits erfolgreich vermessene Zeilen
+  // (image_width > 0) zurueck in den Backlog. Ohne das wird ein Bild nur
+  // einmal geprueft: verschwindet es spaeter an der Quelle, bleibt die
+  // alte Breite stehen und die tote URL wird fuer immer ausgeliefert
+  // (2026-09-25: 229 linztermine-Bilder, beim Messen 3840 px, danach leer).
+  // Startpunkt ist eine zufaellige UUID, damit jede Nacht ein anderer
+  // Ausschnitt drankommt und ueber mehrere Laeufe alles abgedeckt ist.
+  const rcIdx = args.indexOf('--recheck-measured');
+  const recheck = rcIdx >= 0 ? Number(args[rcIdx + 1]) || 500 : 0;
 
   const url = process.env.SUPABASE_URL ?? process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -154,6 +177,51 @@ async function main() {
       if (rErr) throw new Error(`Requeue ${id}: ${rErr.message}`);
     }
     console.log(`[image-probe] ${ids.length} fruehere Fehlschlaege zurueck in den Backlog gestellt`);
+  }
+
+  if (recheck > 0) {
+    const nowIso = new Date().toISOString();
+    const startId = randomUUID();
+    // Keyset-Seiten (id > cursor): PostgREST liefert hoechstens
+    // POSTGREST_MAX_ROWS Zeilen pro Antwort, ein .limit(2500) kaeme still
+    // mit 1000 zurueck (CLAUDE.md, Bekannte Issues).
+    const pickMeasured = async (after: string | null, before: string | null, n: number): Promise<string[]> => {
+      const out: string[] = [];
+      let cursor = after;
+      while (out.length < n) {
+        let q = supabase
+          .from('events')
+          .select('id')
+          .gt('image_width', 0)
+          .not('image_url', 'is', null)
+          .gte('start_date', nowIso);
+        if (cursor) q = q.gt('id', cursor);
+        if (before) q = q.lt('id', before);
+        const { data, error } = await q
+          .order('id', { ascending: true })
+          .limit(Math.min(POSTGREST_MAX_ROWS, n - out.length));
+        if (error) throw new Error(`Recheck-Query: ${error.message}`);
+        const page = (data ?? []).map((r: { id: string }) => r.id);
+        if (page.length === 0) break;
+        out.push(...page);
+        cursor = page[page.length - 1];
+      }
+      return out;
+    };
+    // Ab dem Startpunkt, bei zu wenig Treffern von vorne weiter (Ringpuffer).
+    // startId ist frisch zufaellig und kommt praktisch nie als Event-ID vor,
+    // daher reicht "id > startId" fuer den ersten Teil.
+    const ids = await pickMeasured(startId, null, recheck);
+    if (ids.length < recheck) ids.push(...(await pickMeasured(null, startId, recheck - ids.length)));
+    // .in()-Listen gehen im Query-String: auf <= 200 IDs chunken (CLAUDE.md).
+    for (let i = 0; i < ids.length; i += 200) {
+      const { error: rErr } = await supabase
+        .from('events')
+        .update({ image_probed_url: null })
+        .in('id', ids.slice(i, i + 200));
+      if (rErr) throw new Error(`Recheck-Requeue: ${rErr.message}`);
+    }
+    console.log(`[image-probe] ${ids.length} vermessene Bilder zur Nachpruefung in den Backlog gestellt`);
   }
 
   let probed = 0;

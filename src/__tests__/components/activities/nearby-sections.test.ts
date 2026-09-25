@@ -88,7 +88,36 @@ describe('NearbyEventsSection (ActivityExtrasSlot-Inhalt)', () => {
     loadNearbyFutureEventsCached.mockResolvedValue([]);
     expect(await NearbyEventsSection({ lat: 47.8, lng: 16.5 })).toBeNull();
   });
+
+  // 2026-09-25: linztermine-Bilder (200, leerer Body) zeigten nur den Alt-Text,
+  // weil die Sektion image_width nicht an den Resolver weitergab.
+  it('ersetzt ein als tot vermessenes Bild (image_width 0) durch den Fallback', async () => {
+    const dead = 'https://www.linztermine.at/m/949674';
+    const alive = 'https://example.org/bild.jpg';
+    loadNearbyFutureEventsCached.mockResolvedValue([
+      { ...futureEvent(1), image_url: dead, image_width: 0, source_id: 'x' },
+      { ...futureEvent(2), image_url: alive, image_width: 1200, source_id: 'y' },
+    ]);
+    const srcs = collectImgSrcs(await NearbyEventsSection({ lat: 47.8, lng: 16.5 }));
+    expect(srcs).toHaveLength(2);
+    expect(srcs[0]).not.toBe(dead);
+    expect(srcs[0]).toMatch(/^\//);
+    expect(srcs[1]).toBe(alive);
+  });
 });
+
+function collectImgSrcs(node: unknown, out: string[] = []): string[] {
+  if (node == null || typeof node !== 'object') return out;
+  if (Array.isArray(node)) {
+    for (const child of node) collectImgSrcs(child, out);
+    return out;
+  }
+  const el = node as { type?: unknown; props?: Record<string, unknown> };
+  if (!el.props) return out;
+  if (el.type === 'img' && typeof el.props.src === 'string') out.push(el.props.src);
+  collectImgSrcs(el.props.children, out);
+  return out;
+}
 
 describe('EventNearbyActivities (Event-Detail-Andockstelle)', () => {
   it('max 3 Aktivitaeten, Links auf /aktivitaet/*, Radius 10', async () => {

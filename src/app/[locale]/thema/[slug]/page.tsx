@@ -103,6 +103,8 @@ interface ThemeEvent {
   longitude: number | null;
   category: string | null;
   image_url: string | null;
+  image_width: number | null;
+  source_id: string | null;
   price_text: string | null;
   event_score: number | null;
 }
@@ -136,7 +138,7 @@ const loadThemeEventsCached = unstable_cache(
     const today = new Date().toISOString().slice(0, 10);
     const { data, error } = await supabase
       .from('events')
-      .select('id, title, slug, start_date, end_date, location_name, address, postal_code, bundesland, latitude, longitude, category, image_url, price_text, event_score')
+      .select('id, title, slug, start_date, end_date, location_name, address, postal_code, bundesland, latitude, longitude, category, image_url, image_width, source_id, price_text, event_score')
       .eq('category', category)
       .eq('publish_status', 'published')
       .gte('start_date', today)
@@ -420,7 +422,7 @@ export default async function ThemePage({
                     >
                       <div className="relative w-full aspect-[4/3] bg-white/5">
                         <Image
-                          src={resolvePrimaryEventImage({ imageUrl: e.image_url, category: e.category, title: e.title })}
+                          src={resolvePrimaryEventImage({ imageUrl: e.image_url, category: e.category, title: e.title, imageWidth: e.image_width, sourceId: e.source_id })}
                           alt={e.title}
                           fill
                           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"

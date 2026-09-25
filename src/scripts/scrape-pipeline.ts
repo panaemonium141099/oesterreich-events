@@ -147,10 +147,15 @@ async function main() {
     // voruebergehend nicht erreichbar. Bei 500/Nacht ist der damalige
     // Bestand von ~2.600 in gut fuenf Naechten durchgesehen; danach haelt
     // der Durchlauf die Menge klein.
+    // --recheck-measured 2500 (2026-09-25): Bilder verschwinden auch NACH
+    // dem Messen an der Quelle (linztermine: 229 Stueck, jetzt leere
+    // 200-Antwort). Bei ~73k vermessenen Zukunfts-Events ist jedes Bild
+    // so etwa alle 30 Naechte erneut dran; zusammen mit ~700 neuen und
+    // 500 requeued bleibt der Lauf unter dem 4000er-Deckel.
     steps.image_probe = await runStep('image_probe', async () => {
       execStep(
         'Probe image widths',
-        `npx tsx ${envFlag}src/scripts/probe-image-widths.ts --limit 4000 --requeue-failed 500`,
+        `npx tsx ${envFlag}src/scripts/probe-image-widths.ts --limit 4000 --requeue-failed 500 --recheck-measured 2500`,
       );
     }, steps);
 
