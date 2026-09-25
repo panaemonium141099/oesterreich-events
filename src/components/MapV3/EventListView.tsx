@@ -208,6 +208,16 @@ export function EventListView({
   const visible = useDetailHydration(visibleRaw);
   const grouped = useMemo(() => groupEvents(visible), [visible]);
 
+  // API knows of more matches than the client has after dedup or progressive
+  // loading — show both so the user sees that 14 duplicates were collapsed
+  // (or that a few batches are still streaming in the background).
+  const headingText = (loading && events.length === 0
+    ? t('searching')
+    : totalCount != null && totalCount > events.length
+    ? t('eventsOf', { shown: events.length.toLocaleString(fmt), total: totalCount.toLocaleString(fmt) })
+    : t('nEventsMany', { count: events.length.toLocaleString(fmt) }))
+    + (scopeLabel ? ` · ${scopeLabel}` : '');
+
   // Phase 4.2: kein eigenes `position: absolute, inset: 0` mehr — EventListView
   // wird in /entdecken im normalen Flow-Layout unterhalb des V4EntdeckenHero
   // gemountet. Höhe ergibt sich aus dem Content (infinite-scroll im Page-Scroll
@@ -237,16 +247,12 @@ export function EventListView({
                 margin: 0,
               }}
             >
-              {loading && events.length === 0
-                ? t('searching')
-                : totalCount != null && totalCount > events.length
-                // API knows of more matches than the client has after
-                // dedup or progressive loading — show both so the user
-                // sees that 14 duplicates were collapsed (or that a few
-                // batches are still streaming in the background).
-                ? t('eventsOf', { shown: events.length.toLocaleString(fmt), total: totalCount.toLocaleString(fmt) })
-                : t('nEventsMany', { count: events.length.toLocaleString(fmt) })}
-              {scopeLabel ? ` · ${scopeLabel}` : ''}
+              {/* key = Text: AdSense (Auto-Ads „google-anno") zerlegt Textknoten
+                  und hängt Links ein; React schrieb danach in den abgehängten
+                  Knoten und die Zahl blieb stehen (609 statt 77 nach
+                  Filterwechsel, 2026-09-25). Neues Element je Text ersetzt
+                  den eingefrorenen Knoten vollständig. */}
+              <span key={headingText}>{headingText}</span>
             </h2>
           </div>
 
