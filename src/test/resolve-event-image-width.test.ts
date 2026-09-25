@@ -38,4 +38,13 @@ describe('resolvePrimaryEventImage — image_width', () => {
   it('nimmt den Fallback, wenn gar keine URL da ist', () => {
     expect(isFallback(resolvePrimaryEventImage({ ...base, imageUrl: null, imageWidth: 1200 }))).toBe(true);
   });
+
+  it('behaelt bei Inseraten das eingereichte Bild trotz zu kleiner Breite', () => {
+    const r = resolvePrimaryEventImage({ ...base, imageWidth: 300, sourceId: 'inserat:f48a103c' });
+    expect(r).toBe(REMOTE);
+  });
+
+  it('ersetzt auch bei Inseraten ein als tot markiertes Bild (0)', () => {
+    expect(isFallback(resolvePrimaryEventImage({ ...base, imageWidth: 0, sourceId: 'inserat:x' }))).toBe(true);
+  });
 });

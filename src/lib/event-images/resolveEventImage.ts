@@ -77,6 +77,18 @@ export function resolveGenericFallbackImage(): string {
  */
 export const MIN_TRUSTED_EVENT_IMAGE_WIDTH = 600;
 
+/**
+ * Inserate (source_id `inserat:<submission-id>`, gebaut in
+ * src/lib/inserate/approve.ts) tragen das Bild, das der Veranstalter selbst
+ * eingereicht und freigegeben bekommen hat. Das ersetzen wir nie durch ein
+ * Stockfoto, auch wenn es kleiner als MIN_TRUSTED_EVENT_IMAGE_WIDTH ist:
+ * sonst sieht der Inserent in der Liste sein Bild und auf der Detailseite
+ * ein fremdes (Photo & Adventure 2026, 300 px Logo, 2026-09-25).
+ */
+export function isInseratSourceId(sourceId: string | null | undefined): boolean {
+  return typeof sourceId === 'string' && sourceId.startsWith('inserat:');
+}
+
 export function resolvePrimaryEventImage(opts: {
   imageUrl?: string | null;
   category?: string | null;
@@ -84,6 +96,8 @@ export function resolvePrimaryEventImage(opts: {
   bundesland?: string | null;
   /** Gemessene Breite aus events.image_width (null/-1 = unbekannt). */
   imageWidth?: number | null;
+  /** events.source_id; Inserate sind von der Mindestbreite ausgenommen. */
+  sourceId?: string | null;
 }): string {
   // imageWidth === 0 heisst "geprueft und dauerhaft nicht abrufbar"
   // (probe-image-widths.ts, IMAGE_DEAD). Vorher gab es dafuer keinen eigenen
@@ -93,6 +107,7 @@ export function resolvePrimaryEventImage(opts: {
   // und behalten das Original.
   const isDead = opts.imageWidth === 0;
   const tooSmall =
+    !isInseratSourceId(opts.sourceId) &&
     opts.imageWidth != null &&
     opts.imageWidth > 0 &&
     opts.imageWidth < MIN_TRUSTED_EVENT_IMAGE_WIDTH;

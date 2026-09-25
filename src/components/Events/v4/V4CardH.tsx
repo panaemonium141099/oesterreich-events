@@ -63,6 +63,7 @@ export function V4CardH({ event }: V4CardHProps) {
           title={event.title}
           bundesland={event.bundesland}
           imageWidth={event.image_width}
+          sourceId={event.source_id}
           alt={event.title}
           wrapperClassName="absolute inset-0"
           sizes="80px"

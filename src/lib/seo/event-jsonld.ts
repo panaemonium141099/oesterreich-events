@@ -142,6 +142,7 @@ export function buildJsonLd(event: Event, opts: BuildJsonLdOptions = {}): string
     title: event.title,
     bundesland: event.bundesland,
     imageWidth: event.image_width,
+    sourceId: event.source_id,
   });
   jsonLd.image =
     rawImage.startsWith('//') ? `https:${rawImage}` :
