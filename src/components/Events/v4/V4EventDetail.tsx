@@ -110,6 +110,7 @@ export function V4EventDetail({
         imageUrl={resolvePrimaryEventImage({
           imageUrl: event.image_url,
           imageWidth: event.image_width,
+          sourceId: event.source_id,
           category: event.category,
           title: event.title,
           bundesland: event.bundesland,

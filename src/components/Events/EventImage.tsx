@@ -152,6 +152,8 @@ type SharedProps = {
    * null/undefined = nicht vermessen -> Original wird behalten.
    */
   imageWidth?: number | null;
+  /** events.source_id: Inserate behalten ihr Bild trotz Mindestbreite. */
+  sourceId?: string | null;
   /** REQUIRED. CSS sizes attribute. Must reflect actual rendered size
    *  in the layout so next/image picks the right srcset entry. */
   sizes: string;
@@ -229,6 +231,7 @@ export function EventImage(props: EventImageProps) {
     title,
     bundesland,
     imageWidth,
+    sourceId,
     alt = '',
     className = '',
     wrapperClassName = '',
@@ -253,6 +256,7 @@ export function EventImage(props: EventImageProps) {
     title,
     bundesland,
     imageWidth,
+    sourceId,
   });
 
   // Local /images/... paths don't need blur — they're already optimized

@@ -10,6 +10,7 @@ export type { CanonicalCategory, CategoryMeta } from './categoryMeta';
 
 export {
   resolvePrimaryEventImage,
+  isInseratSourceId,
   resolveCategoryFallbackImage,
   resolveGenericFallbackImage,
   isUsableImageCandidate,

@@ -73,6 +73,7 @@ export function V4CardV({ event, priority = false }: V4CardVProps) {
           title={event.title}
           bundesland={event.bundesland}
           imageWidth={event.image_width}
+          sourceId={event.source_id}
           alt={event.title}
           wrapperClassName="absolute inset-0"
           preload={priority}
