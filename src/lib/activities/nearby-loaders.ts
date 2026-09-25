@@ -55,6 +55,10 @@ export interface NearbyFutureEvent {
   longitude: number | null;
   category: string | null;
   image_url: string | null;
+  /** events.image_width (0 = tot, <600 = zu klein) fuer resolvePrimaryEventImage. */
+  image_width: number | null;
+  /** events.source_id: Inserate behalten ihr Bild trotz Mindestbreite. */
+  source_id: string | null;
   event_score: number | null;
   _distance_km: number;
 }
@@ -191,7 +195,7 @@ export const loadNearbyActivitiesCached = unstable_cache(
 
 const EVENT_COLUMNS =
   'id, title, slug, start_date, location_name, address, postal_code, bundesland, ' +
-  'latitude, longitude, category, image_url, event_score, ' +
+  'latitude, longitude, category, image_url, image_width, source_id, event_score, ' +
   // fn-25: Umkreis nur mit belegter Position (Review §6)
   'geocoding_confidence, location_status, location_resolution';
 

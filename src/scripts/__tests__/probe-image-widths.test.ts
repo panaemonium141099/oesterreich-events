@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { imageWidthOf } from '../probe-image-widths';
+import { imageWidthOf, widthFromBody, IMAGE_DEAD, IMAGE_UNKNOWN } from '../probe-image-widths';
 
 function pngHeader(width: number): Buffer {
   const b = Buffer.alloc(33);
@@ -50,5 +50,17 @@ describe('imageWidthOf', () => {
   it('liefert null für Nicht-Bilder und Mini-Buffer', () => {
     expect(imageWidthOf(Buffer.from('<html>not an image</html>'))).toBe(null);
     expect(imageWidthOf(Buffer.alloc(4))).toBe(null);
+  });
+});
+
+describe('widthFromBody', () => {
+  // linztermine.at antwortet auf entfernte Medien mit 200 und leerem Body
+  it('leerer Body gilt als totes Bild', () => {
+    expect(widthFromBody(Buffer.alloc(0))).toBe(IMAGE_DEAD);
+  });
+
+  it('Nicht-Bild bleibt unbekannt, Bild liefert die Breite', () => {
+    expect(widthFromBody(Buffer.from('<html>not an image</html>'))).toBe(IMAGE_UNKNOWN);
+    expect(widthFromBody(pngHeader(1280))).toBe(1280);
   });
 });

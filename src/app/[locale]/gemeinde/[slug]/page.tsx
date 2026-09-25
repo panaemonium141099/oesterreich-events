@@ -112,6 +112,8 @@ interface NearbyEvent {
   longitude: number | null;
   category: string | null;
   image_url: string | null;
+  image_width: number | null;
+  source_id: string | null;
   price_text: string | null;
   event_score: number | null;
   _distance_km?: number;
@@ -124,7 +126,7 @@ const loadNearbyEventsCached = unstable_cache(
 
     const { data, error } = await supabase
       .from('events')
-      .select('id, title, slug, start_date, end_date, location_name, address, postal_code, bundesland, latitude, longitude, category, image_url, price_text, event_score')
+      .select('id, title, slug, start_date, end_date, location_name, address, postal_code, bundesland, latitude, longitude, category, image_url, image_width, source_id, price_text, event_score')
       .gte('start_date', today)
       .eq('publish_status', 'published')
       .gte('latitude', minLat).lte('latitude', maxLat)
@@ -458,7 +460,7 @@ export default async function GemeindeHubPage({
                   >
                     <div className="relative w-full aspect-[4/3] bg-white/5">
                       <Image
-                        src={resolvePrimaryEventImage({ imageUrl: e.image_url, category: e.category, title: e.title })}
+                        src={resolvePrimaryEventImage({ imageUrl: e.image_url, category: e.category, title: e.title, imageWidth: e.image_width, sourceId: e.source_id })}
                         alt={e.title}
                         fill
                         sizes="(max-width: 768px) 100vw, 33vw"

@@ -11,6 +11,9 @@
  * Event-Detailseite (V4RelatedEvents-Muster) — resolvePrimaryEventImage
  * liefert bei fehlendem Bild den Kategorie-Fallback, daher plain <img>
  * ohne onError-Zweig (gleich wie das Event-Grid der Gemeinde-Hub-Seite).
+ * Tote Bild-URLs erkennt der naechtliche Image-Probe (image_width = 0);
+ * damit der Resolver sie ersetzt, MUESSEN image_width und source_id
+ * mitgegeben werden (2026-09-25: linztermine-Bilder zeigten nur Alt-Text).
  */
 
 import { getTranslations } from 'next-intl/server';
@@ -45,7 +48,7 @@ export async function NearbyEventsSection({ lat, lng }: { lat: number; lng: numb
             <div className="relative w-full aspect-[16/9] bg-white/5">
               {/* eslint-disable-next-line @next/next/no-img-element -- Event-Bild-Domains sind nicht im next/image-Allowlist; Resolver liefert immer eine URL (Kategorie-Fallback) */}
               <img
-                src={resolvePrimaryEventImage({ imageUrl: e.image_url, category: e.category, title: e.title })}
+                src={resolvePrimaryEventImage({ imageUrl: e.image_url, category: e.category, title: e.title, imageWidth: e.image_width, sourceId: e.source_id })}
                 alt={e.title}
                 loading="lazy"
                 className="absolute inset-0 w-full h-full object-cover"
