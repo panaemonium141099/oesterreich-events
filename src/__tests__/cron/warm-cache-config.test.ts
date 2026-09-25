@@ -52,8 +52,8 @@ describe('warm-cache cron + UI fetch alignment', () => {
       // useFilteredEvents fetches /api/events?limit={BATCH_SIZE}. If this
       // diverges from the cron's limit=3000, every UI fetch creates a new
       // (uncached) edge-cache key and triggers a cold DB path.
-      const match = useFilteredSrc.match(/const BATCH_SIZE\s*=\s*(\d+);/);
-      expect(match, 'BATCH_SIZE constant not found in use-filtered-events.ts').toBeTruthy();
+      const match = useFilteredSrc.match(/const LIST_BATCH_SIZE\s*=\s*(\d+);/);
+      expect(match, 'LIST_BATCH_SIZE constant not found in use-filtered-events.ts').toBeTruthy();
       expect(parseInt(match![1], 10)).toBe(3000);
     });
   });

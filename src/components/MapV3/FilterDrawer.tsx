@@ -31,6 +31,7 @@ import { CATEGORIES } from '@/lib/categories';
 import { BUNDESLAENDER } from '@/lib/bundeslaender';
 import { getDistrictsByBundesland, displayDistrictName } from '@/lib/districtsAT';
 import type { EventFilters } from '@/types/events';
+import type { EventPreview } from '@/lib/v4/use-filtered-events';
 import { trackEvent } from '@/lib/analytics';
 
 /** fn-17: Anzeige-Label pro Datum-Preset-Id aus dem MapPage-Namespace;
@@ -55,6 +56,11 @@ interface FilterDrawerProps {
   onBundeslandIdsChange: (ids: string[]) => void;
   /** Live result count for the "X Events anzeigen" CTA. */
   resultCount: number;
+  /**
+   * Trefferzahl für den noch nicht übernommenen Entwurf (useFilteredEvents).
+   * Ohne sie zeigt der Button die Zahl des übernommenen Stands.
+   */
+  previewCount?: (draft: EventFilters, blIds: string[], signal?: AbortSignal) => Promise<EventPreview | null>;
   /** Optional category counts so chips can show "Musik · 18". Skip if unknown. */
   categoryCounts?: Record<string, number>;
 }
@@ -68,6 +74,7 @@ export function FilterDrawer({
   onBundeslandIdsChange,
   resultCount,
   categoryCounts,
+  previewCount,
 }: FilterDrawerProps) {
   const t = useTranslations('MapPage');
   // Local draft so the user can fiddle without thrashing the map. Apply on
@@ -103,6 +110,41 @@ export function FilterDrawer({
     document.addEventListener('keydown', onKey);
     return () => document.removeEventListener('keydown', onKey);
   }, [open, onClose]);
+
+  // Vorschau: die Zahl im Button gilt für den ENTWURF, nicht für den
+  // übernommenen Stand. Vorher zeigte sie die alte Zahl und sprang erst
+  // nach dem Übernehmen und Laden der Liste.
+  const [preview, setPreview] = useState<EventPreview | null>(null);
+  const [previewPending, setPreviewPending] = useState(false);
+  useEffect(() => {
+    if (!open || !previewCount) return;
+    const controller = new AbortController();
+    setPreviewPending(true);
+    const timer = setTimeout(() => {
+      previewCount(draft, draftBlIds, controller.signal).then((p) => {
+        if (controller.signal.aborted) return;
+        setPreview(p);
+        setPreviewPending(false);
+      });
+    }, 150);
+    return () => {
+      clearTimeout(timer);
+      controller.abort();
+    };
+  }, [open, draft, draftBlIds, previewCount]);
+
+  const draftUnchanged =
+    JSON.stringify(draft) === JSON.stringify(filters) &&
+    draftBlIds.join(',') === bundeslandIds.join(',');
+  // Ohne Vorschau-Funktion bleibt es bei der Zahl des übernommenen Stands;
+  // mit ihr zeigt der Button während der Rechnung keine (veraltete) Zahl.
+  const footerCount: number | null = !previewCount
+    ? resultCount
+    : previewPending || !preview ? null : preview.count;
+  const footerApprox = !!previewCount && !previewPending && !!preview?.approximate;
+  const chipCounts = preview?.categoryCounts && !previewPending
+    ? preview.categoryCounts
+    : draftUnchanged ? categoryCounts : undefined;
 
   const dDefault = defaultDateTo();
 
@@ -263,10 +305,10 @@ export function FilterDrawer({
             setPreset={setPreset}
             showCustomDate={showCustomDate}
             setShowCustomDate={setShowCustomDate}
-            categoryCounts={categoryCounts}
+            categoryCounts={chipCounts}
           />
         </div>
-        <DrawerFooter onReset={handleReset} onApply={handleApply} count={resultCount} />
+        <DrawerFooter onReset={handleReset} onApply={handleApply} count={footerCount} approximate={footerApprox} />
       </div>
 
       <div
@@ -304,10 +346,10 @@ export function FilterDrawer({
             setPreset={setPreset}
             showCustomDate={showCustomDate}
             setShowCustomDate={setShowCustomDate}
-            categoryCounts={categoryCounts}
+            categoryCounts={chipCounts}
           />
         </div>
-        <DrawerFooter onReset={handleReset} onApply={handleApply} count={resultCount} />
+        <DrawerFooter onReset={handleReset} onApply={handleApply} count={footerCount} approximate={footerApprox} />
       </div>
 
       <style jsx global>{`
@@ -379,9 +421,10 @@ function Body({
           })}
         </ChipGroup>
         {showCustomDate && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 12 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) auto minmax(0, 1fr)', alignItems: 'center', gap: 8, marginTop: 12 }}>
             <input
               type="date"
+              aria-label={t('dateFromAria')}
               value={draft.dateFrom || ''}
               onChange={(e) => setDraft((d) => ({ ...d, dateFrom: e.target.value || undefined }))}
               style={dateInputStyle}
@@ -389,6 +432,7 @@ function Body({
             <span style={{ color: T.ink50, fontSize: 12 }}>–</span>
             <input
               type="date"
+              aria-label={t('dateToAria')}
               value={draft.dateTo && draft.dateTo !== defaultDateTo() ? draft.dateTo : ''}
               onChange={(e) => setDraft((d) => ({ ...d, dateTo: e.target.value || defaultDateTo() }))}
               style={dateInputStyle}
@@ -399,7 +443,7 @@ function Body({
 
       <FilterBlock label={t('blockRegion')}>
         <ChipGroup>
-          {BUNDESLAENDER.map((bl) => {
+          {BUNDESLAENDER.filter((bl) => bl.id !== 'at-de-ch').map((bl) => {
             const active = bl.id === 'all'
               ? draftBlIds.length === 0 || draftBlIds.includes('all')
               : draftBlIds.includes(bl.id);
@@ -410,6 +454,19 @@ function Body({
             );
           })}
         </ChipGroup>
+        {/* 'at-de-ch' ist eine Karten-Pseudo-Region, kein Bundesland: als
+            Chip in der Liste lieferte sie 0 Events. Deutschland und Schweiz
+            laufen über filters.atOnly wie der Schalter auf der Karte. */}
+        <div style={{ marginTop: 12 }}>
+          <ChipGroup>
+            <Chip
+              active={draft.atOnly === false}
+              onClick={() => setDraft((d) => ({ ...d, atOnly: d.atOnly === false ? undefined : false }))}
+            >
+              {t('includeDeCh')}
+            </Chip>
+          </ChipGroup>
+        </div>
         {districts.length > 0 && (
           <div style={{ marginTop: 12 }}>
             <ChipGroup>
@@ -644,10 +701,13 @@ function DrawerFooter({
   onReset,
   onApply,
   count,
+  approximate = false,
 }: {
   onReset: () => void;
   onApply: () => void;
-  count: number;
+  /** null = wird gerade berechnet */
+  count: number | null;
+  approximate?: boolean;
 }) {
   const t = useTranslations('MapPage');
   const locale = useLocale();
@@ -698,7 +758,9 @@ function DrawerFooter({
           minHeight: 44,
         }}
       >
-        {t('showEvents', { count: count.toLocaleString(locale === 'de' ? 'de-AT' : 'en-GB') })}
+        {count === null
+          ? t('showEventsNoCount')
+          : t(approximate ? 'showEventsApprox' : 'showEvents', { count: count.toLocaleString(locale === 'de' ? 'de-AT' : 'en-GB') })}
       </button>
     </div>
   );
@@ -754,7 +816,10 @@ function Chip({
         fontFamily: 'inherit',
         letterSpacing: '-0.005em',
         minHeight: 36,
-        whiteSpace: 'nowrap',
+        minWidth: 0,
+        textAlign: 'center',
+        lineHeight: 1.25,
+        overflowWrap: 'anywhere',
         transition: 'background 0.15s, border-color 0.15s',
       }}
     >
@@ -764,6 +829,10 @@ function Chip({
 }
 
 const dateInputStyle: React.CSSProperties = {
+  width: '100%',
+  minWidth: 0,
+  boxSizing: 'border-box',
+  minHeight: 36,
   padding: '8px 12px',
   fontSize: 13,
   fontWeight: 500,

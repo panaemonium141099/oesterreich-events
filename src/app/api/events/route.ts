@@ -241,6 +241,10 @@ export async function GET(request: NextRequest) {
   // Used by the autocomplete typeahead in FilterBar to avoid heavyweight DB queries on every keystroke
   const suggestMode = searchParams.get('suggest') === 'true';
 
+  // Nur die Trefferzahl (Vorschau im Filterfenster, wenn die Treffer über
+  // eine Seite hinausgehen): gleiche Filter, keine Zeilen.
+  const countOnly = searchParams.get('countOnly') === 'true';
+
   // Bounding box filter: bbox=south_lat,west_lng,north_lat,east_lng
   const bboxParam = searchParams.get('bbox');
   if (bboxParam) {
@@ -290,7 +294,9 @@ export async function GET(request: NextRequest) {
       'tags, image_url, price_text, event_score, is_boosted, ' +
       // fn-25: Wissensstand zum Ort, damit Karte/Liste Pin und Distanz gaten können
       'geocoding_confidence, location_status, location_precision, location_resolution';
-    let query = suggestMode
+    let query = countOnly
+      ? baseQuery.select('id', { count: 'exact', head: true })
+      : suggestMode
       ? baseQuery.select('id, title, category, location_name')
       : slimMode
       ? baseQuery.select(slimSelect, needsCount ? { count: 'exact' } : undefined)
@@ -680,6 +686,17 @@ export async function GET(request: NextRequest) {
           );
         }
       }
+    }
+
+    if (countOnly) {
+      const { count: onlyCount, error: countErr } = await query;
+      if (countErr) {
+        console.error('Supabase count error:', countErr);
+        return NextResponse.json({ error: 'Fehler beim Zählen' }, { status: 500 });
+      }
+      const res = NextResponse.json({ total: onlyCount ?? 0 });
+      res.headers.set('Cache-Control', 'public, s-maxage=600, stale-while-revalidate=3600');
+      return res;
     }
 
     // Apply limit (fetch one extra to determine if there's a next page)
