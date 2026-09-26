@@ -15,7 +15,7 @@ import {
   parseSlugArray,
   resolveEvent,
   getSuccessorEvent,
-  getEventByShortId,
+  resolveDuplicateRedirect,
   getVenue,
   getLineupForEvent,
 } from '@/lib/events/event-detail-loaders';
@@ -217,15 +217,16 @@ export default async function EventDetailPage({
   // Fix: resolve duplicate_of to its primary event row here, then
   // redirect directly to the primary's canonical V3 URL. Skipping the
   // UUID hop eliminates the ping-pong entirely.
-  if (event.publish_status === 'duplicate' && event.duplicate_of) {
-    if (event.duplicate_of === event.id) {
+  //
+  // resolveDuplicateRedirect folgt duplicate_of-Ketten bis zum ersten
+  // Nicht-Duplikat und liefert null, wenn das Ziel die angefragte URL
+  // selbst waere (Loop-Schutz).
+  if (event.publish_status === 'duplicate') {
+    const target = await resolveDuplicateRedirect(event, `/events/${slugArr.join('/')}`);
+    if (!target) {
       notFound();
     }
-    const primary = await getEventByShortId(event.duplicate_of);
-    if (!primary || primary.publish_status === 'duplicate') {
-      notFound();
-    }
-    permanentRedirect(buildEventUrlV2(primary));
+    permanentRedirect(target);
   }
 
   // Hide suppressed/needs_review events from public access

@@ -14,7 +14,7 @@
 import { unstable_cache } from 'next/cache';
 import { createClient } from '@supabase/supabase-js';
 import type { Event } from '@/types/events';
-import { extractShortId } from '@/lib/utils/slugify';
+import { extractShortId, buildEventUrlV2 } from '@/lib/utils/slugify';
 import type { FriendAttendee, LineupAct } from '@/components/Events/EventDetailV2';
 
 if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
@@ -148,6 +148,72 @@ export const getEventBySlugOnly = unstable_cache(
   // 300s — same reason as event-by-slug-date above.
   { revalidate: 300, tags: ['event'] },
 );
+
+/**
+ * Dritte Stufe fuer V2-URLs: die Zeile ist inzwischen als Dublette markiert.
+ *
+ * Die beiden Lookups oben blenden `duplicate` bewusst aus (Loop-Schutz, s.o.).
+ * Hat die Dublette aber einen anderen Slug oder Tag als ihr Primary
+ * (gemessen 2026-09-26: 5.258 von 12.497 kuenftigen Dubletten), fand keiner
+ * der Lookups etwas und die frueher veroeffentlichte URL lief in ein 404
+ * statt per 308 zum Primary. Diese Stufe laeuft nur, wenn beide anderen
+ * leer sind, und nutzt denselben Index-Pfad (idx_events_slug + Tagesfenster).
+ */
+export const getDuplicateBySlugAndDate = unstable_cache(
+  async (slug: string, date: string): Promise<Event | null> => {
+    const dayStart = `${date}T00:00:00.000Z`;
+    const nextDay = new Date(date + 'T00:00:00Z');
+    nextDay.setUTCDate(nextDay.getUTCDate() + 1);
+    const dayEnd = nextDay.toISOString();
+    const { data, error } = await supabase
+      .from('events').select('*')
+      .eq('slug', slug).gte('start_date', dayStart).lt('start_date', dayEnd)
+      .eq('publish_status', 'duplicate')
+      .not('duplicate_of', 'is', null)
+      .limit(1);
+    if (error || !data || data.length === 0) return null;
+    return data[0] as Event;
+  },
+  ['event-duplicate-by-slug-date'],
+  { revalidate: 300, tags: ['event'] },
+);
+
+/** Obergrenze fuer duplicate_of-Ketten (Prod 2026-09-26: 452 Dubletten zeigen auf eine Dublette). */
+const MAX_DUPLICATE_HOPS = 5;
+
+/**
+ * Folgt `duplicate_of` bis zur ersten Nicht-Dublette. Liefert null bei
+ * Zyklen, fehlenden Zeilen oder zu langen Ketten.
+ */
+export async function resolveDuplicatePrimary(event: Event): Promise<Event | null> {
+  const seen = new Set<string>([event.id]);
+  let current: Event = event;
+  for (let hop = 0; hop < MAX_DUPLICATE_HOPS; hop++) {
+    const nextId = current.duplicate_of;
+    if (!nextId || seen.has(nextId)) return null;
+    seen.add(nextId);
+    const next = await getEventByShortId(nextId);
+    if (!next) return null;
+    if (next.publish_status !== 'duplicate') return next;
+    current = next;
+  }
+  return null;
+}
+
+/**
+ * Redirect-Ziel fuer eine Dublette: kanonische URL des Primarys, oder null,
+ * wenn es keinen gibt oder die Ziel-URL der angefragten entspricht
+ * (Loop-Schutz — dann 404 statt Redirect auf sich selbst).
+ */
+export async function resolveDuplicateRedirect(
+  event: Event,
+  currentPath: string,
+): Promise<string | null> {
+  const primary = await resolveDuplicatePrimary(event);
+  if (!primary) return null;
+  const target = buildEventUrlV2(primary);
+  return target === currentPath ? null : target;
+}
 
 // ─────────────────────────────────────────────────────────────────────
 // Venue lookup
@@ -293,7 +359,11 @@ export async function resolveEvent(parsed: ParsedSlugArray): Promise<Event | nul
   if (parsed.mode === 'v2-3seg' && parsed.slug && parsed.date) {
     const exact = await getEventBySlugAndDate(parsed.slug, parsed.date);
     if (exact) return exact;
-    return getEventBySlugOnly(parsed.slug);
+    const bySlug = await getEventBySlugOnly(parsed.slug);
+    if (bySlug) return bySlug;
+    // Nur wenn nichts Lebendiges passt: Dublette zurueckgeben, die Seite
+    // leitet sie per resolveDuplicateRedirect zum Primary um.
+    return getDuplicateBySlugAndDate(parsed.slug, parsed.date);
   }
   if (parsed.shortId) {
     return getEventByShortId(parsed.shortId);
