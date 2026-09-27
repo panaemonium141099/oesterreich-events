@@ -126,6 +126,8 @@ import { post as gunklAproposUebrigens2026 } from './posts/gunkl-apropos-uebrige
 import { post as post4GaengeGourmetDinner2026 } from './posts/4-gaenge-gourmet-dinner-2026';
 import { post as orgelkonzertBachMozartChopinUA2026 } from './posts/orgelkonzert-bach-mozart-chopin-u-a-2026';
 import { post as panEnglishComedyTour20262026 } from './posts/pan-english-comedy-tour-2026-2026';
+import { post as amadeusConcertsVienna2026 } from './posts/amadeus-concerts-vienna-2026';
+import { post as starsOfBoogieWoogieMitDanielEcklbauer2026 } from './posts/stars-of-boogie-woogie-mit-daniel-ecklbauer-2026';
 // AUTOWRITER-IMPORTS-END
 
 export type { FestivalPost, GalleryImage, FestivalKeyFacts, LineupAct } from './types';
@@ -260,6 +262,8 @@ export const ALL_POSTS: FestivalPost[] = [
   post4GaengeGourmetDinner2026,
   orgelkonzertBachMozartChopinUA2026,
   panEnglishComedyTour20262026,
+  amadeusConcertsVienna2026,
+  starsOfBoogieWoogieMitDanielEcklbauer2026,
   // AUTOWRITER-POSTS-END
 ].sort(
   (a, b) => new Date(b.publishDate).getTime() - new Date(a.publishDate).getTime()
