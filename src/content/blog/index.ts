@@ -129,6 +129,8 @@ import { post as panEnglishComedyTour20262026 } from './posts/pan-english-comedy
 import { post as amadeusConcertsVienna2026 } from './posts/amadeus-concerts-vienna-2026';
 import { post as starsOfBoogieWoogieMitDanielEcklbauer2026 } from './posts/stars-of-boogie-woogie-mit-daniel-ecklbauer-2026';
 import { post as uebernachtenNeusiedlerSeeFestivalsommer } from './posts/uebernachten-neusiedler-see-festivalsommer';
+import { post as oe3GasteinSounds2026PizzeraJausFolkshilfeKarl2026 } from './posts/oe3-gastein-sounds-2026-pizzera-jaus-folkshilfe-karl-2026';
+import { post as lilianKlebowGernotHaasOPannenbaum2026 } from './posts/lilian-klebow-gernot-haas-o-pannenbaum-2026';
 // AUTOWRITER-IMPORTS-END
 
 export type { FestivalPost, GalleryImage, FestivalKeyFacts, LineupAct } from './types';
@@ -266,6 +268,8 @@ export const ALL_POSTS: FestivalPost[] = [
   amadeusConcertsVienna2026,
   starsOfBoogieWoogieMitDanielEcklbauer2026,
   uebernachtenNeusiedlerSeeFestivalsommer,
+  oe3GasteinSounds2026PizzeraJausFolkshilfeKarl2026,
+  lilianKlebowGernotHaasOPannenbaum2026,
   // AUTOWRITER-POSTS-END
 ].sort(
   (a, b) => new Date(b.publishDate).getTime() - new Date(a.publishDate).getTime()
