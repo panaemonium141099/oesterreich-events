@@ -436,7 +436,10 @@
     "shownOf": "{shown} of {total} shown — scroll for more",
     "scopeSearch": "“{term}”",
     "scopeDistricts": "{count} districts",
-    "scopeRegions": "{count} regions"
+    "scopeRegions": "{count} regions",
+    "approxHint": "Exact venue not confirmed yet. Please check the address on the event page.",
+    "approxMore": "Show more",
+    "approxClose": "Close list"
   },
   "Activity": {
     "openNow": "Open now",
