@@ -436,7 +436,10 @@
     "shownOf": "{shown} von {total} angezeigt — scrolle für mehr",
     "scopeSearch": "„{term}\"",
     "scopeDistricts": "{count} Bezirke",
-    "scopeRegions": "{count} Regionen"
+    "scopeRegions": "{count} Regionen",
+    "approxHint": "Genauer Ort noch nicht bestätigt. Adresse bitte auf der Eventseite prüfen.",
+    "approxMore": "Weitere anzeigen",
+    "approxClose": "Liste schließen"
   },
   "Activity": {
     "openNow": "Jetzt geöffnet",

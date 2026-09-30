@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import { useRouter } from 'next/navigation';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
@@ -13,6 +14,8 @@ import { createClient } from '@/lib/supabase/client';
 import { useAuth } from '@/lib/supabase/auth-context';
 import { useSavedEvents } from '@/lib/saved-events-context';
 import { locationOutputs, locationGatingEnabled } from '@/lib/location/gating';
+import { approxClusterAction, sortApproxEvents } from '@/lib/v4/approx-list';
+import { ApproxEventsList } from './ApproxEventsList';
 
 interface PlannedEventMarker {
   id: string;
@@ -92,6 +95,35 @@ function addBaseOverlays(m: mapboxgl.Map, dark: boolean) {
       filter: ['==', 'extrude', 'true'], type: 'fill-extrusion', minzoom: 14,
       paint: { 'fill-extrusion-color': dark ? '#1a1a2e' : '#ddd', 'fill-extrusion-height': ['get', 'height'], 'fill-extrusion-base': ['get', 'min_height'], 'fill-extrusion-opacity': 0.7 },
     }, labelLayerId);
+  }
+}
+
+/** fn-25: gestrichelter Ring für Sammelmarker „Position ungefähr" — grenzt
+ *  sie sichtbar von normalen Clustern ab (Kreis-Layer können nicht
+ *  stricheln). Ein Bild pro Radius, damit Strichstärke und Strichlänge
+ *  nicht mitskalieren. setStyle verwirft Bilder → nach jedem Style-Wechsel
+ *  neu anlegen. */
+const APPROX_RING_RADII = [12, 16, 20, 24, 30] as const;
+function addApproxRingImages(m: mapboxgl.Map, dark: boolean) {
+  const ratio = 2;
+  for (const r of APPROX_RING_RADII) {
+    const name = `approx-ring-${r}`;
+    if (m.hasImage(name)) continue;
+    const size = (r + 2) * 2;
+    const canvas = document.createElement('canvas');
+    canvas.width = canvas.height = size * ratio;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) continue;
+    ctx.scale(ratio, ratio);
+    const circumference = 2 * Math.PI * r;
+    const seg = circumference / Math.round(circumference / 8);
+    ctx.setLineDash([seg * 0.6, seg * 0.4]);
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = dark ? '#cbd5e1' : '#475569';
+    ctx.beginPath();
+    ctx.arc(size / 2, size / 2, r, 0, 2 * Math.PI);
+    ctx.stroke();
+    m.addImage(name, ctx.getImageData(0, 0, canvas.width, canvas.height), { pixelRatio: ratio });
   }
 }
 
@@ -176,6 +208,52 @@ function EventMap({ events, hoveredEventId, eveningMode, bundesland, flyToCoords
   const activePopupRef = useRef<{ popup: mapboxgl.Popup; close: () => void } | null>(null);
   const [mapReady, setMapReady] = useState(false);
   const prevBundeslandRef = useRef(bundesland.id);
+
+  // fn-25: Liste hinter einem Sammelmarker „Position ungefähr". Der Container
+  // hängt im Mapbox-Popup, React rendert die Liste per Portal hinein.
+  const [approxList, setApproxList] = useState<{
+    events: Event[];
+    lngLat: [number, number];
+    container: HTMLDivElement;
+  } | null>(null);
+  useEffect(() => {
+    if (!approxList || !map.current) return;
+    const popup = new mapboxgl.Popup({
+      offset: 16,
+      closeButton: false,
+      maxWidth: '340px',
+      className: 'bubble-mini-popup',
+    })
+      .setLngLat(approxList.lngLat)
+      .setDOMContent(approxList.container)
+      .addTo(map.current);
+    // Nur die eigene Auswahl leeren: beim Klick auf einen anderen
+    // Sammelmarker schließt Mapbox dieses Popup erst NACH dessen Auswahl.
+    popup.on('close', () => setApproxList((cur) => (cur === approxList ? null : cur)));
+    // Die Liste ist höher als ein Marker-Popup: ragt sie aus der Karte (vor
+    // allem am Handy), die Karte so weit schieben, dass sie ganz sichtbar
+    // ist. Unten mehr Rand: dort liegt die Zähler-Pille der Seite über der
+    // Karte, am Handy zusätzlich die Tab-Leiste (Pille bei +96 px statt 22).
+    const m = map.current;
+    const bottomInset = window.matchMedia('(min-width: 768px)').matches ? 60 : 156;
+    const fitFrame = requestAnimationFrame(() => {
+      const el = popup.getElement();
+      if (!el) return;
+      const box = m.getContainer().getBoundingClientRect();
+      const r = el.getBoundingClientRect();
+      const over = (lo: number, hi: number, min: number, max: number) =>
+        hi > max ? hi - max : lo < min ? lo - min : 0;
+      const dx = over(r.left, r.right, box.left + 12, box.right - 12);
+      const dy = over(r.top, r.bottom, box.top + 12, box.bottom - bottomInset);
+      if (dx || dy) m.panBy([dx, dy], { duration: 300 });
+    });
+    return () => {
+      cancelAnimationFrame(fitFrame);
+      try { popup.remove(); } catch { /* map already removed */ }
+    };
+  }, [approxList]);
+  // Filterwechsel: die Liste passt nicht mehr zum Marker.
+  useEffect(() => { setApproxList(null); }, [events]);
 
   // fn-16 Marker-Hydration: der Points-Snapshot enthält keine Bild-URLs —
   // Marker starteten deshalb mit dem Kategorie-Fallback und bekamen das
@@ -651,17 +729,17 @@ function EventMap({ events, hoveredEventId, eveningMode, bundesland, flyToCoords
     });
 
     // fn-25: Sammelmarker für ungefähre Positionen (Cluster UND Einzelpunkte
-    // sehen gleich aus — es gibt hier keinen Event-Pin).
+    // sehen gleich aus — es gibt hier keinen Event-Pin). Gestrichelter Ring
+    // statt Vollkreis: diese Marker lösen sich beim Zoomen nie auf und
+    // dürfen deshalb nicht wie normale Cluster aussehen.
+    addApproxRingImages(m, isDark);
     m.addLayer({
       id: 'approx-marker',
       type: 'circle',
       source: 'approx-events',
       paint: {
-        'circle-color': isDark ? 'rgba(30, 41, 59, 0.55)' : 'rgba(241, 245, 249, 0.85)',
+        'circle-color': isDark ? 'rgba(30, 41, 59, 0.7)' : 'rgba(226, 232, 240, 0.85)',
         'circle-radius': ['case', ['has', 'point_count'], ['step', ['get', 'point_count'], 16, 10, 20, 50, 24, 100, 30], 12],
-        'circle-stroke-width': 1.5,
-        'circle-stroke-color': isDark ? 'rgba(148, 163, 184, 0.6)' : 'rgba(100, 116, 139, 0.6)',
-        'circle-opacity': 0.85,
       },
     });
     m.addLayer({
@@ -669,23 +747,49 @@ function EventMap({ events, hoveredEventId, eveningMode, bundesland, flyToCoords
       type: 'symbol',
       source: 'approx-events',
       layout: {
+        // Ring-Radien = circle-radius-Stufen oben (APPROX_RING_RADII).
+        'icon-image': ['case', ['has', 'point_count'], ['step', ['get', 'point_count'], 'approx-ring-16', 10, 'approx-ring-20', 50, 'approx-ring-24', 100, 'approx-ring-30'], 'approx-ring-12'],
+        'icon-allow-overlap': true,
         'text-field': ['case', ['has', 'point_count'], ['get', 'point_count_abbreviated'], '1'],
         'text-font': ['DIN Pro Medium', 'Arial Unicode MS Bold'],
         'text-size': 12,
         'text-allow-overlap': true,
       },
-      paint: { 'text-color': isDark ? '#94a3b8' : '#475569' },
+      paint: { 'text-color': isDark ? '#cbd5e1' : '#334155' },
     });
+    // Klick auf den Sammelmarker: Teilt sich der Cluster beim Zoomen noch,
+    // wird hineingezoomt (wie bei normalen Clustern). Liegen alle Punkte auf
+    // derselben Koordinate, öffnet sich die Liste der Events an diesem Ort.
     m.on('click', 'approx-marker', (e) => {
       const f = e.features?.[0];
       if (!f) return;
-      const count = (f.properties?.point_count as number | undefined) ?? 1;
-      const where = [f.properties?.district, f.properties?.bundesland].filter(Boolean).join(', ');
-      const html = `<div style="font:13px/1.4 system-ui;padding:8px 10px;max-width:220px;">`
-        + `<strong>${count} ${count === 1 ? 'Veranstaltung' : 'Veranstaltungen'}</strong><br/>`
-        + `Genauer Veranstaltungsort noch nicht bestätigt${where ? ` · ${where}` : ''}.<br/>`
-        + `<span style="color:#64748b">Details auf der Event-Seite prüfen.</span></div>`;
-      new mapboxgl.Popup({ closeButton: true, offset: 12 }).setLngLat(e.lngLat).setHTML(html).addTo(m);
+      const coords = (f.geometry as GeoJSON.Point).coordinates as [number, number];
+      const openList = (ids: unknown[]) => {
+        const list = ids
+          .map((id) => eventLookup.current.get(String(id)))
+          .filter((ev): ev is Event => !!ev);
+        if (list.length === 0) return;
+        activePopupRef.current?.close();
+        setApproxList({ events: sortApproxEvents(list), lngLat: coords, container: document.createElement('div') });
+      };
+      const clusterId = f.properties?.cluster_id as number | undefined;
+      if (clusterId == null) {
+        openList([f.properties?.id]);
+        return;
+      }
+      const source = m.getSource('approx-events') as mapboxgl.GeoJSONSource | undefined;
+      if (!source) return;
+      source.getClusterExpansionZoom(clusterId, (err, zoom) => {
+        if (err || zoom == null) return;
+        if (approxClusterAction(zoom, m.getMaxZoom()) === 'zoom') {
+          m.flyTo({ center: coords, zoom, duration: 800 });
+          return;
+        }
+        source.getClusterLeaves(clusterId, (f.properties?.point_count as number | undefined) ?? 0, 0, (leafErr, leaves) => {
+          if (leafErr || !leaves) return;
+          openList(leaves.map((leaf) => leaf.properties?.id));
+        });
+      });
     });
     m.on('mouseenter', 'approx-marker', () => { m.getCanvas().style.cursor = 'pointer'; });
     m.on('mouseleave', 'approx-marker', () => { m.getCanvas().style.cursor = ''; });
@@ -1307,6 +1411,11 @@ function EventMap({ events, hoveredEventId, eveningMode, bundesland, flyToCoords
   return (
     <div className="absolute inset-0">
       <div ref={mapContainer} className="h-full w-full" />
+
+      {approxList && createPortal(
+        <ApproxEventsList events={approxList.events} onClose={() => setApproxList(null)} />,
+        approxList.container,
+      )}
 
       {/* God-role filter */}
       {isGod && (
