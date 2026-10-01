@@ -135,6 +135,8 @@ import { post as eggBigBandWeihnachtskonzert2026 } from './posts/egg-big-band-we
 import { post as oe3GasteinSounds2026PaulKalkbrenner2026 } from './posts/oe3-gastein-sounds-2026-paul-kalkbrenner-2026';
 import { post as schwarzautalerWiesNOktoberfest20262026 } from './posts/schwarzautaler-wies-n-oktoberfest-2026-2026';
 import { post as autumnLeaves2026Festivalpass2026 } from './posts/autumn-leaves-2026-festivalpass-2026';
+import { post as letSDanceDieLiveTour20262026 } from './posts/let-s-dance-die-live-tour-2026-2026';
+import { post as weihnachtskonzertImKerzenscheinIvaHoelzlNikolovaDaniel2026 } from './posts/weihnachtskonzert-im-kerzenschein-iva-hoelzl-nikolova-daniel-2026';
 // AUTOWRITER-IMPORTS-END
 
 export type { FestivalPost, GalleryImage, FestivalKeyFacts, LineupAct } from './types';
@@ -278,6 +280,8 @@ export const ALL_POSTS: FestivalPost[] = [
   oe3GasteinSounds2026PaulKalkbrenner2026,
   schwarzautalerWiesNOktoberfest20262026,
   autumnLeaves2026Festivalpass2026,
+  letSDanceDieLiveTour20262026,
+  weihnachtskonzertImKerzenscheinIvaHoelzlNikolovaDaniel2026,
   // AUTOWRITER-POSTS-END
 ].sort(
   (a, b) => new Date(b.publishDate).getTime() - new Date(a.publishDate).getTime()
