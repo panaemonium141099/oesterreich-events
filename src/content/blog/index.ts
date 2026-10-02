@@ -137,6 +137,8 @@ import { post as schwarzautalerWiesNOktoberfest20262026 } from './posts/schwarza
 import { post as autumnLeaves2026Festivalpass2026 } from './posts/autumn-leaves-2026-festivalpass-2026';
 import { post as letSDanceDieLiveTour20262026 } from './posts/let-s-dance-die-live-tour-2026-2026';
 import { post as weihnachtskonzertImKerzenscheinIvaHoelzlNikolovaDaniel2026 } from './posts/weihnachtskonzert-im-kerzenschein-iva-hoelzl-nikolova-daniel-2026';
+import { post as benefizkonzertFuerOswaldKiechle2026 } from './posts/benefizkonzert-fuer-oswald-kiechle-2026';
+import { post as hellbrunnerSchlosskonzerte2026 } from './posts/hellbrunner-schlosskonzerte-2026';
 // AUTOWRITER-IMPORTS-END
 
 export type { FestivalPost, GalleryImage, FestivalKeyFacts, LineupAct } from './types';
@@ -282,6 +284,8 @@ export const ALL_POSTS: FestivalPost[] = [
   autumnLeaves2026Festivalpass2026,
   letSDanceDieLiveTour20262026,
   weihnachtskonzertImKerzenscheinIvaHoelzlNikolovaDaniel2026,
+  benefizkonzertFuerOswaldKiechle2026,
+  hellbrunnerSchlosskonzerte2026,
   // AUTOWRITER-POSTS-END
 ].sort(
   (a, b) => new Date(b.publishDate).getTime() - new Date(a.publishDate).getTime()
