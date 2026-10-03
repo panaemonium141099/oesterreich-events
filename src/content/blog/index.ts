@@ -139,6 +139,8 @@ import { post as letSDanceDieLiveTour20262026 } from './posts/let-s-dance-die-li
 import { post as weihnachtskonzertImKerzenscheinIvaHoelzlNikolovaDaniel2026 } from './posts/weihnachtskonzert-im-kerzenschein-iva-hoelzl-nikolova-daniel-2026';
 import { post as benefizkonzertFuerOswaldKiechle2026 } from './posts/benefizkonzert-fuer-oswald-kiechle-2026';
 import { post as hellbrunnerSchlosskonzerte2026 } from './posts/hellbrunner-schlosskonzerte-2026';
+import { post as gregorMeyleBandUnpluggedDasWohnzimmerkonzert2026 } from './posts/gregor-meyle-band-unplugged-das-wohnzimmerkonzert-2026';
+import { post as nuitDesLumieresDinnerkonzertWien2026 } from './posts/nuit-des-lumieres-dinnerkonzert-wien-2026';
 // AUTOWRITER-IMPORTS-END
 
 export type { FestivalPost, GalleryImage, FestivalKeyFacts, LineupAct } from './types';
@@ -286,6 +288,8 @@ export const ALL_POSTS: FestivalPost[] = [
   weihnachtskonzertImKerzenscheinIvaHoelzlNikolovaDaniel2026,
   benefizkonzertFuerOswaldKiechle2026,
   hellbrunnerSchlosskonzerte2026,
+  gregorMeyleBandUnpluggedDasWohnzimmerkonzert2026,
+  nuitDesLumieresDinnerkonzertWien2026,
   // AUTOWRITER-POSTS-END
 ].sort(
   (a, b) => new Date(b.publishDate).getTime() - new Date(a.publishDate).getTime()
