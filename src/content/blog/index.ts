@@ -143,6 +143,7 @@ import { post as gregorMeyleBandUnpluggedDasWohnzimmerkonzert2026 } from './post
 import { post as nuitDesLumieresDinnerkonzertWien2026 } from './posts/nuit-des-lumieres-dinnerkonzert-wien-2026';
 import { post as diePaldauerWeihnachtskonzert2026 } from './posts/die-paldauer-weihnachtskonzert-2026';
 import { post as derSuessesteWahnsinn2026 } from './posts/der-suesseste-wahnsinn-2026';
+import { post as uebernachtenInnsbruckBerge } from './posts/uebernachten-innsbruck-berge';
 // AUTOWRITER-IMPORTS-END
 
 export type { FestivalPost, GalleryImage, FestivalKeyFacts, LineupAct } from './types';
@@ -294,6 +295,7 @@ export const ALL_POSTS: FestivalPost[] = [
   nuitDesLumieresDinnerkonzertWien2026,
   diePaldauerWeihnachtskonzert2026,
   derSuessesteWahnsinn2026,
+  uebernachtenInnsbruckBerge,
   // AUTOWRITER-POSTS-END
 ].sort(
   (a, b) => new Date(b.publishDate).getTime() - new Date(a.publishDate).getTime()
