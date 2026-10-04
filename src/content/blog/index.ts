@@ -141,6 +141,8 @@ import { post as benefizkonzertFuerOswaldKiechle2026 } from './posts/benefizkonz
 import { post as hellbrunnerSchlosskonzerte2026 } from './posts/hellbrunner-schlosskonzerte-2026';
 import { post as gregorMeyleBandUnpluggedDasWohnzimmerkonzert2026 } from './posts/gregor-meyle-band-unplugged-das-wohnzimmerkonzert-2026';
 import { post as nuitDesLumieresDinnerkonzertWien2026 } from './posts/nuit-des-lumieres-dinnerkonzert-wien-2026';
+import { post as diePaldauerWeihnachtskonzert2026 } from './posts/die-paldauer-weihnachtskonzert-2026';
+import { post as derSuessesteWahnsinn2026 } from './posts/der-suesseste-wahnsinn-2026';
 // AUTOWRITER-IMPORTS-END
 
 export type { FestivalPost, GalleryImage, FestivalKeyFacts, LineupAct } from './types';
@@ -290,6 +292,8 @@ export const ALL_POSTS: FestivalPost[] = [
   hellbrunnerSchlosskonzerte2026,
   gregorMeyleBandUnpluggedDasWohnzimmerkonzert2026,
   nuitDesLumieresDinnerkonzertWien2026,
+  diePaldauerWeihnachtskonzert2026,
+  derSuessesteWahnsinn2026,
   // AUTOWRITER-POSTS-END
 ].sort(
   (a, b) => new Date(b.publishDate).getTime() - new Date(a.publishDate).getTime()
