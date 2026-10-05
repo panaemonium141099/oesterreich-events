@@ -144,6 +144,8 @@ import { post as nuitDesLumieresDinnerkonzertWien2026 } from './posts/nuit-des-l
 import { post as diePaldauerWeihnachtskonzert2026 } from './posts/die-paldauer-weihnachtskonzert-2026';
 import { post as derSuessesteWahnsinn2026 } from './posts/der-suesseste-wahnsinn-2026';
 import { post as uebernachtenInnsbruckBerge } from './posts/uebernachten-innsbruck-berge';
+import { post as sowiFestLessStudyingMoreDancing2026 } from './posts/sowi-fest-less-studying-more-dancing-2026';
+import { post as houseOfBanksyWienAnUnauthorizedExhibition2026 } from './posts/house-of-banksy-wien-an-unauthorized-exhibition-2026';
 // AUTOWRITER-IMPORTS-END
 
 export type { FestivalPost, GalleryImage, FestivalKeyFacts, LineupAct } from './types';
@@ -296,6 +298,8 @@ export const ALL_POSTS: FestivalPost[] = [
   diePaldauerWeihnachtskonzert2026,
   derSuessesteWahnsinn2026,
   uebernachtenInnsbruckBerge,
+  sowiFestLessStudyingMoreDancing2026,
+  houseOfBanksyWienAnUnauthorizedExhibition2026,
   // AUTOWRITER-POSTS-END
 ].sort(
   (a, b) => new Date(b.publishDate).getTime() - new Date(a.publishDate).getTime()
