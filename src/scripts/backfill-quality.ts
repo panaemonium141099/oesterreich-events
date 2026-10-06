@@ -93,6 +93,8 @@ async function main() {
       .from('events')
       .select('*')
       .is('quality_score', null)
+      // Zurückgezogene Events (withdraw-stale-events) nicht wieder freigeben.
+      .is('withdrawn_at', null)
       .order('id')
       .limit(BATCH_SIZE);
     if (lastId !== null) {

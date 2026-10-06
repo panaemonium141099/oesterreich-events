@@ -445,7 +445,7 @@ interface RawRefs {
   failed: Set<string>;
 }
 
-function toSupabaseRow(
+export function toSupabaseRow(
   event: ScrapedEvent,
   existingMap: Map<string, ExistingRow>,
   imageMap: Map<string, ValidatedImage>,
@@ -969,6 +969,9 @@ function toSupabaseRow(
     // fn-14.5: ALWAYS bump last_seen_at — anchor for the soft-delete
     // job in fn-14.6. INSERT or UPDATE, doesn't matter.
     last_seen_at: new Date().toISOString(),
+    // Gesehen = nicht zurückgezogen. Der Rückzug (withdraw-stale-events)
+    // setzt das Feld; listet die Quelle das Event wieder, gilt es wieder.
+    withdrawn_at: null,
   };
 
   return { row, admission, rawPersistFailed, locationConflict };
