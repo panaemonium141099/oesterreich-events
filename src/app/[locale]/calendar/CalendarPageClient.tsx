@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { useAuth } from '@/lib/supabase/auth-context';
 import { createClient } from '@/lib/supabase/client';
 import { EventImage } from '@/components/Events/EventImage';
-import { EVENT_TZ, hasKnownStartTime } from '@/lib/utils/event-time';
+import { EVENT_TZ, hasKnownStartTime, viennaDayRange, viennaDayStart, viennaFields } from '@/lib/utils/event-time';
 
 interface CalendarEvent {
   id: string;
@@ -122,13 +122,25 @@ const FRIEND_COLORS = [
 
 const WEEKDAYS = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'];
 
+// Kalenderraster und Tages-Zuordnung in Wien-Ortszeit: SSR (UTC) und
+// Browser (Zone des Besuchers) dürfen nicht auf verschiedene Tage kommen.
 function getDaysInMonth(year: number, month: number) {
-  return new Date(year, month + 1, 0).getDate();
+  return new Date(Date.UTC(year, month + 1, 0)).getUTCDate();
 }
 
 function getFirstDayOfMonth(year: number, month: number) {
-  const day = new Date(year, month, 1).getDay();
+  const day = new Date(Date.UTC(year, month, 1)).getUTCDay();
   return day === 0 ? 6 : day - 1; // Monday = 0
+}
+
+/** Monat als Instant-Intervall: 00:00 Wien am 1. bis 23:59:59.999 Wien am Letzten. */
+function monthRangeIso(year: number, month: number) {
+  const mm = String(month + 1).padStart(2, '0');
+  const last = String(getDaysInMonth(year, month)).padStart(2, '0');
+  return {
+    startOfMonth: viennaDayStart(`${year}-${mm}-01`).toISOString(),
+    endOfMonth: viennaDayRange(`${year}-${mm}-${last}`).end.toISOString(),
+  };
 }
 
 function formatMonthYear(year: number, month: number) {
@@ -153,9 +165,9 @@ export function CalendarPageClient() {
   const router = useRouter();
   const supabase = createClient();
 
-  const today = new Date();
-  const [currentYear, setCurrentYear] = useState(today.getFullYear());
-  const [currentMonth, setCurrentMonth] = useState(today.getMonth());
+  const today = viennaFields(new Date());
+  const [currentYear, setCurrentYear] = useState(today.year);
+  const [currentMonth, setCurrentMonth] = useState(today.month - 1);
   const [selectedDay, setSelectedDay] = useState<number | null>(null);
   const [viewMode, setViewMode] = useState<ViewMode>('mine');
   const [events, setEvents] = useState<FriendEvent[]>([]);
@@ -264,8 +276,7 @@ export function CalendarPageClient() {
     if (!user) return;
     setLoadingEvents(true);
 
-    const startOfMonth = new Date(currentYear, currentMonth, 1).toISOString();
-    const endOfMonth = new Date(currentYear, currentMonth + 1, 0, 23, 59, 59).toISOString();
+    const { startOfMonth, endOfMonth } = monthRangeIso(currentYear, currentMonth);
 
     // Use !inner join to only return saved_events where the event still exists
     const { data, error } = await supabase
@@ -298,8 +309,7 @@ export function CalendarPageClient() {
   const fetchCustomEvents = useCallback(async () => {
     setLoadingEvents(true);
 
-    const startOfMonth = new Date(currentYear, currentMonth, 1).toISOString();
-    const endOfMonth = new Date(currentYear, currentMonth + 1, 0, 23, 59, 59).toISOString();
+    const { startOfMonth, endOfMonth } = monthRangeIso(currentYear, currentMonth);
 
     // Only fetch if at least one filter is set
     if (!customFilters.category && !customFilters.bundesland) {
@@ -333,8 +343,7 @@ export function CalendarPageClient() {
     if (!user) return;
     setLoadingEvents(true);
 
-    const startOfMonth = new Date(currentYear, currentMonth, 1).toISOString();
-    const endOfMonth = new Date(currentYear, currentMonth + 1, 0, 23, 59, 59).toISOString();
+    const { startOfMonth, endOfMonth } = monthRangeIso(currentYear, currentMonth);
 
     // Only fetch events from selected friends who have shared their calendar with us
     const acceptedShares = calendarShares.filter(s => s.status === 'accepted');
@@ -460,8 +469,10 @@ export function CalendarPageClient() {
     const map: Record<number, FriendEvent[]> = {};
     for (const evt of events) {
       const d = new Date(evt.start_date);
-      if (d.getFullYear() === currentYear && d.getMonth() === currentMonth) {
-        const day = d.getDate();
+      if (isNaN(d.getTime())) continue;
+      const f = viennaFields(d);
+      if (f.year === currentYear && f.month - 1 === currentMonth) {
+        const day = f.day;
         if (!map[day]) map[day] = [];
         map[day].push(evt);
       }
@@ -473,7 +484,7 @@ export function CalendarPageClient() {
 
   const daysInMonth = getDaysInMonth(currentYear, currentMonth);
   const firstDay = getFirstDayOfMonth(currentYear, currentMonth);
-  const todayDay = today.getFullYear() === currentYear && today.getMonth() === currentMonth ? today.getDate() : null;
+  const todayDay = today.year === currentYear && today.month - 1 === currentMonth ? today.day : null;
 
   const goToPrev = () => {
     if (currentMonth === 0) {
@@ -496,9 +507,9 @@ export function CalendarPageClient() {
   };
 
   const goToToday = () => {
-    setCurrentYear(today.getFullYear());
-    setCurrentMonth(today.getMonth());
-    setSelectedDay(today.getDate());
+    setCurrentYear(today.year);
+    setCurrentMonth(today.month - 1);
+    setSelectedDay(today.day);
   };
 
   const selectedDayEvents = selectedDay ? (eventsByDay[selectedDay] || []) : [];

@@ -13,7 +13,7 @@
 
 import { useRouter } from 'next/navigation';
 import type { PlanWithEvents } from '@/types/plans';
-import { EVENT_TZ } from '@/lib/utils/event-time';
+import { EVENT_TZ, viennaDayDiff, viennaToday } from '@/lib/utils/event-time';
 
 interface Props {
   plan: PlanWithEvents;
@@ -67,11 +67,8 @@ function deriveTitle(plan: PlanWithEvents): { lead: string; italic: string } {
 
 function daysUntil(iso: string): number {
   try {
-    const target = new Date(iso + 'T00:00:00');
-    const now = new Date();
-    now.setHours(0, 0, 0, 0);
-    const ms = target.getTime() - now.getTime();
-    return Math.round(ms / (24 * 60 * 60 * 1000));
+    const n = viennaDayDiff(viennaToday(), iso.slice(0, 10));
+    return Number.isFinite(n) ? n : 0;
   } catch { return 0; }
 }
 

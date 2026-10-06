@@ -185,3 +185,73 @@ export function formatEventDate(
 
   return { date, time, label: time ? `${date} · ${time}` : date };
 }
+
+// ─── Wien-Kalendertage ───────────────────────────────────────────────────
+//
+// `getDate()/getDay()/setHours(0,0,0,0)` & Co. rechnen in der Zone der
+// Runtime: der Server läuft in UTC, der Browser in der Zone des Besuchers.
+// Ein Event um 00:30 Wien landete serverseitig am Vortag, "heute/morgen"
+// unterschieden sich zwischen SSR und Client. Tages-Logik läuft deshalb
+// über Wien-Kalendertage als `YYYY-MM-DD`-String; die Arithmetik darauf
+// ist reine Kalenderrechnung (UTC-Mitternacht als Träger, kein DST).
+
+/** Wien-lokale Kalenderfelder eines Instants als Zahlen (month 1–12, weekday 0 = So). */
+export function viennaFields(d: Date): {
+  year: number;
+  month: number;
+  day: number;
+  hour: number;
+  minute: number;
+  weekday: number;
+} {
+  const p = viennaParts(d);
+  const weekday = new Date(Date.UTC(+p.year, +p.month - 1, +p.day)).getUTCDay();
+  return { year: +p.year, month: +p.month, day: +p.day, hour: +p.hour, minute: +p.minute, weekday };
+}
+
+/** Heutiger Kalendertag in Wien, `YYYY-MM-DD`. */
+export function viennaToday(now: Date = new Date()): string {
+  return toViennaDate(now);
+}
+
+function dayToUtcMs(day: string): number {
+  const [y, m, d] = day.split('-').map(Number);
+  return Date.UTC(y, m - 1, d);
+}
+
+/** Wochentag eines Wien-Kalendertags (`YYYY-MM-DD`) oder Instants, 0 = So … 6 = Sa. */
+export function viennaWeekday(day: string | Date): number {
+  if (day instanceof Date) return viennaFields(day).weekday;
+  return new Date(dayToUtcMs(day)).getUTCDay();
+}
+
+/** Kalendertag + n Tage, `YYYY-MM-DD` (DST-neutral, reine Kalenderrechnung). */
+export function addViennaDays(day: string, n: number): string {
+  return new Date(dayToUtcMs(day) + n * 86_400_000).toISOString().slice(0, 10);
+}
+
+/** Abstand in Kalendertagen: `to − from` (beide `YYYY-MM-DD`). */
+export function viennaDayDiff(from: string, to: string): number {
+  return Math.round((dayToUtcMs(to) - dayToUtcMs(from)) / 86_400_000);
+}
+
+/** Instant von 00:00 Wien am Kalendertag `YYYY-MM-DD` (22:00Z bzw. 23:00Z am Vortag). */
+export function viennaDayStart(day: string): Date {
+  const guess = dayToUtcMs(day);
+  let t = guess - viennaOffsetMinutes(new Date(guess)) * 60_000;
+  // Offset am Ergebnis nachprüfen — rund um die Umstellung weicht er ab.
+  const off = viennaOffsetMinutes(new Date(t));
+  t = guess - off * 60_000;
+  return new Date(t);
+}
+
+/**
+ * Ein Wien-Kalendertag als Instant-Intervall: `start` = 00:00 Wien,
+ * `end` = 23:59:59.999 Wien (inklusive, für `.lte()`), `next` = 00:00 Wien
+ * des Folgetags (exklusiv, für `.lt()`). Am Umstellungstag 23 bzw. 25 Stunden.
+ */
+export function viennaDayRange(day: string): { start: Date; end: Date; next: Date } {
+  const start = viennaDayStart(day);
+  const next = viennaDayStart(addViennaDays(day, 1));
+  return { start, end: new Date(next.getTime() - 1), next };
+}

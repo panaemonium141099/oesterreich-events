@@ -10,6 +10,7 @@
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { NextRequest } from 'next/server';
+import { viennaDayStart, viennaToday } from '@/lib/utils/event-time';
 
 vi.stubEnv('NEXT_PUBLIC_SUPABASE_URL', 'https://test.supabase.co');
 vi.stubEnv('SUPABASE_SERVICE_ROLE_KEY', 'test-service-role-key');
@@ -229,8 +230,8 @@ describe('Event-Pfad-Regression (unveraendert)', () => {
 
     await POST(makeRequest({ query: 'konzerte wien heute' }));
 
-    const startOfToday = new Date();
-    startOfToday.setHours(0, 0, 0, 0);
+    // 00:00 Wien heute — die Suche zählt Tage in Wien, nicht in der Runtime-Zone.
+    const startOfToday = viennaDayStart(viennaToday());
     const gteCall = query.gte.mock.calls.find(c => c[0] === 'start_date');
     expect(gteCall).toBeDefined();
     expect(new Date(gteCall![1]).getTime()).toBeGreaterThanOrEqual(startOfToday.getTime());

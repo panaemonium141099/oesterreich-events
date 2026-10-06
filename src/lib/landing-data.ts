@@ -356,7 +356,7 @@ async function queryEvents(
   // Time filter
   if (params.timeFilter) {
     const range = getDateRange(params.timeFilter);
-    query = query.gte('start_date', range.from).lt('start_date', range.to);
+    query = query.gte('start_date', range.fromIso).lt('start_date', range.toIso);
   }
 
   // Sort

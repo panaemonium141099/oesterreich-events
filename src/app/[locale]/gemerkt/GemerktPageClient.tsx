@@ -6,7 +6,7 @@ import { createClient } from '@/lib/supabase/client';
 import { useAuth } from '@/lib/supabase/auth-context';
 import { buildEventUrlV2 } from '@/lib/utils/slugify';
 import { toast } from 'sonner';
-import { EVENT_TZ } from '@/lib/utils/event-time';
+import { EVENT_TZ, viennaDayStart, viennaToday } from '@/lib/utils/event-time';
 
 interface SavedEvent {
   id: string;
@@ -68,13 +68,9 @@ export function GemerktPageClient() {
   }, [user, items, supabase]);
 
   // ── Split + filter ──────────────────────────────────────────────────
-  // Use today (00:00 local) as the cutoff so an event happening today
+  // Use today (00:00 Wien) as the cutoff so an event happening today
   // still shows under "Kommende", not "Vergangene".
-  const todayCutoff = useMemo(() => {
-    const d = new Date();
-    d.setHours(0, 0, 0, 0);
-    return d.getTime();
-  }, []);
+  const todayCutoff = useMemo(() => viennaDayStart(viennaToday()).getTime(), []);
 
   const { futureItems, pastItems } = useMemo(() => {
     const future: SavedEvent[] = [];

@@ -9,6 +9,7 @@
  */
 
 import { getStoredLocation } from '@/lib/geolocation';
+import { viennaWeekday } from '@/lib/utils/event-time';
 
 export const VIENNA = { lat: 48.21, lng: 16.37 };
 export const RAIN_MM = 3;
@@ -24,9 +25,10 @@ export interface WeekendWeather {
   loc: { lat: number; lng: number };
 }
 
-/** Nächster Wochenendtag (heute, falls Sa/So, sonst kommender Samstag). */
+/** Nächster Wochenendtag (heute, falls Sa/So, sonst kommender Samstag).
+ *  Wien-Wochentag, passend zu Open-Meteo `timezone=Europe/Vienna`. */
 function nextWeekendOffset(now: Date): number {
-  const dow = now.getDay(); // 0 So … 6 Sa
+  const dow = viennaWeekday(now); // 0 So … 6 Sa
   if (dow === 6 || dow === 0) return 0;
   return 6 - dow;
 }

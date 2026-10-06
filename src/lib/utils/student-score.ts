@@ -5,6 +5,7 @@
  * Used by both student-data.ts (server render) and the Events API (?studentScore=true)
  * to ensure pagination parity.
  */
+import { viennaFields } from './event-time';
 
 /** Minimum student score to appear on student pages */
 export const MIN_STUDENT_SCORE = 15;
@@ -92,19 +93,12 @@ export function computeStudentScore(
 
   // 4. Day of week: Thu/Fri/Sat (+10)
   try {
-    const eventDate = new Date(event.start_date);
-    // Get day in Vienna timezone
-    const viennaDay = new Date(
-      eventDate.toLocaleString('en-US', { timeZone: 'Europe/Vienna' }),
-    ).getDay();
+    const { weekday: viennaDay, hour: viennaHour } = viennaFields(new Date(event.start_date));
     if (GOING_OUT_DAYS.has(viennaDay)) {
       score += 10;
     }
 
     // 5. Evening: start >= 20:00 (+5)
-    const viennaHour = new Date(
-      eventDate.toLocaleString('en-US', { timeZone: 'Europe/Vienna' }),
-    ).getHours();
     if (viennaHour >= 20) {
       score += 5;
     }

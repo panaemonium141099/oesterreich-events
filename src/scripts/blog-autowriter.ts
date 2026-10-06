@@ -32,6 +32,7 @@ import * as fs from 'node:fs';
 import * as path from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { startWorkflowRun, finishWorkflowRun, type WorkflowItem } from '../lib/reporting/workflow-run';
+import { toViennaDate } from '../lib/utils/event-time';
 
 const ROOT = path.resolve(__dirname, '..', '..');
 const POSTS_DIR = path.join(ROOT, 'src', 'content', 'blog', 'posts');
@@ -756,7 +757,7 @@ async function main(): Promise<void> {
     attempts++;
     log(`Kandidat: "${c.title}" (${datePart(c.start_date)}, ${c.bundesland ?? '?'}, qs=${c.quality_score})`);
 
-    const year = new Date(c.start_date).getFullYear();
+    const year = toViennaDate(new Date(c.start_date)).slice(0, 4);
     let slug = `${slugifyTitle(c.title)}-${year}`;
     if (knownSlugs.has(slug)) slug = `${slug}-${c.id.slice(0, 6)}`;
 

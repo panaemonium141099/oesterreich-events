@@ -237,7 +237,8 @@ describe('detectSeries', () => {
   });
 
   it('should extract typical start time', () => {
-    const events = weeklyEvents('Late Night Show', '2026-04-07T21:30:00Z', 4, { city: 'Wien' });
+    // 19:30Z = 21:30 Wien (Sommerzeit); start_time ist Wien-Wandzeit.
+    const events = weeklyEvents('Late Night Show', '2026-04-07T19:30:00Z', 4, { city: 'Wien' });
 
     const candidates = detectSeries(events);
     expect(candidates).toHaveLength(1);

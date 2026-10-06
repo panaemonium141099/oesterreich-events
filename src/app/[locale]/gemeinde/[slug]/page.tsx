@@ -68,6 +68,7 @@ import { HubSearchCTA } from '@/components/Hub/HubSearchCTA';
 import { HubSmartCTA } from '@/components/Hub/HubSmartCTA';
 import { hasLocale } from 'next-intl';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
+import { viennaFields } from '@/lib/utils/event-time';
 import { routing, type AppLocale } from '@/i18n/routing';
 import { bilingualAlternates } from '@/lib/seo/canonical';
 import { dateLocaleFor } from '@/lib/i18n/date-locale';
@@ -220,7 +221,7 @@ export async function generateMetadata({
     eventCount: count,
     activityCount,
     isCityHub: !!cityHub,
-    year: new Date().getFullYear(),
+    year: viennaFields(new Date()).year,
   }, t);
 
   // Resolve the A/B experiment (if one is running for 'gemeinde' scope).

@@ -18,7 +18,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import type { Festival } from '@/types/festivals';
 import { V4Badge } from './V4Badge';
-import { EVENT_TZ } from '@/lib/utils/event-time';
+import { EVENT_TZ, viennaFields } from '@/lib/utils/event-time';
 
 interface V4FestivalCardProps {
   /** Festival-Row plus pre-built `href` (siehe LandingFestival type). */
@@ -32,10 +32,12 @@ function dateRange(startIso: string | null, endIso?: string | null): string {
   const start = new Date(startIso);
   const end = endIso ? new Date(endIso) : null;
   const startStr = start.toLocaleDateString('de-AT', { day: 'numeric', month: 'short', timeZone: EVENT_TZ });
-  if (!end || end.toDateString() === start.toDateString()) return startStr;
-  const sameMonth = start.getMonth() === end.getMonth();
-  const startDay = start.getDate();
-  const endDay = end.getDate();
+  const s = viennaFields(start);
+  const e = end ? viennaFields(end) : null;
+  if (!end || !e || (e.year === s.year && e.month === s.month && e.day === s.day)) return startStr;
+  const sameMonth = s.month === e.month;
+  const startDay = s.day;
+  const endDay = e.day;
   if (sameMonth) {
     const month = start.toLocaleDateString('de-AT', { month: 'short', timeZone: EVENT_TZ });
     return `${startDay}.–${endDay}. ${month}`;

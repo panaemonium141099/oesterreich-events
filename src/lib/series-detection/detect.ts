@@ -7,6 +7,7 @@
 
 import { normalizeTitle } from '../dedup/fingerprint';
 import type { EventSeriesInsert } from '@/types/venues';
+import { viennaFields, viennaWeekday } from '@/lib/utils/event-time';
 
 /**
  * Minimal event shape required by the series detection pipeline.
@@ -103,10 +104,11 @@ function parseDate(startDate: string): Date {
 }
 
 /**
- * Get the day of week (0=Sun, 6=Sat) from a start_date string.
+ * Get the day of week (0=Sun, 6=Sat) from a start_date string — in Wien,
+ * not UTC: ein Event um 00:30 Wien gehört zum Wien-Tag, nicht zum UTC-Vortag.
  */
 function getDayOfWeek(startDate: string): number {
-  return parseDate(startDate).getUTCDay();
+  return viennaWeekday(parseDate(startDate));
 }
 
 /**
@@ -117,9 +119,8 @@ function findTypicalStartTime(events: SeriesEvent[]): string | null {
   const timeCounts = new Map<string, number>();
 
   for (const event of events) {
-    const date = parseDate(event.start_date);
-    const hours = date.getUTCHours();
-    const minutes = date.getUTCMinutes();
+    // Wien-Wandzeit: bleibt über die Zeitumstellung gleich (UTC springt um 1 h).
+    const { hour: hours, minute: minutes } = viennaFields(parseDate(event.start_date));
     // Only count events that have a specific time (not midnight/00:00 unless many)
     const timeKey = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:00`;
     timeCounts.set(timeKey, (timeCounts.get(timeKey) ?? 0) + 1);

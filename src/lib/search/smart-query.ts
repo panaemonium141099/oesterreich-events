@@ -36,6 +36,7 @@ import { ALL_GEMEINDEN } from '@/lib/gemeinden/data';
 import { getCityHub } from '@/lib/hubs/city-hubs';
 import { bundeslandToId } from '@/lib/bundeslaender';
 import { TOPIC_WHITELIST } from '@/lib/activities/taxonomy';
+import { addViennaDays, viennaDayRange, viennaToday, viennaWeekday } from '@/lib/utils/event-time';
 
 // ────────────────────────────────────────────────────────────────────
 // Ort-Erkennung (unverändert aus der alten Route übernommen)
@@ -220,37 +221,33 @@ export function parseQuery(raw: string, now: Date = new Date()): { text: string;
   if (location?.bundesland) signals.push(`location:bundesland:${location.bundesland}`);
 
   // ─── Date signals ───
-  const startOfToday = new Date(now); startOfToday.setHours(0, 0, 0, 0);
-  const endOfToday = new Date(now); endOfToday.setHours(23, 59, 59, 999);
-  const startOfTomorrow = new Date(startOfToday); startOfTomorrow.setDate(startOfTomorrow.getDate() + 1);
-  const endOfTomorrow = new Date(endOfToday); endOfTomorrow.setDate(endOfTomorrow.getDate() + 1);
+  // Wien-Kalendertage, nicht die Zone der Runtime (Server = UTC): "heute"
+  // um 00:30 Wien ist schon der neue Tag. Fenster = 00:00–23:59:59.999 Wien.
+  const today = viennaToday(now);
+  const todayRange = viennaDayRange(today);
+  const tomorrowRange = viennaDayRange(addViennaDays(today, 1));
+  const dow = viennaWeekday(today); // 0 = Sun, 6 = Sat
 
   if (/\b(heute|tonight|today)\b/.test(q)) {
-    filters.afterDate = startOfToday;
-    filters.beforeDate = endOfToday;
+    filters.afterDate = todayRange.start;
+    filters.beforeDate = todayRange.end;
     signals.push('today');
   } else if (/\b(morgen|tomorrow)\b/.test(q)) {
-    filters.afterDate = startOfTomorrow;
-    filters.beforeDate = endOfTomorrow;
+    filters.afterDate = tomorrowRange.start;
+    filters.beforeDate = tomorrowRange.end;
     signals.push('tomorrow');
   } else if (/\b(wochenende|weekend)\b/.test(q)) {
-    const day = now.getDay(); // 0 = Sun, 6 = Sat
-    if (day === 0) {
+    if (dow === 0) {
       // Sonntag: "am Wochenende" meint das LAUFENDE Wochenende — Fenster
       // ist der heutige Sonntag. ((6-0+7)%7 = 6 würde sonst aufs nächste
       // Wochenende springen und den heutigen Abend wegfiltern.)
-      filters.afterDate = startOfToday;
-      filters.beforeDate = endOfToday;
+      filters.afterDate = todayRange.start;
+      filters.beforeDate = todayRange.end;
     } else {
       // Mo–Sa: nächstes (bzw. am Samstag: laufendes) Sa–So-Fenster.
-      const daysToSat = (6 - day + 7) % 7;
-      const sat = new Date(startOfToday);
-      sat.setDate(sat.getDate() + daysToSat);
-      const sun = new Date(sat);
-      sun.setDate(sun.getDate() + 1);
-      sun.setHours(23, 59, 59, 999);
-      filters.afterDate = sat;
-      filters.beforeDate = sun;
+      const sat = addViennaDays(today, (6 - dow + 7) % 7);
+      filters.afterDate = viennaDayRange(sat).start;
+      filters.beforeDate = viennaDayRange(addViennaDays(sat, 1)).end;
     }
     signals.push('weekend');
   } else {
@@ -263,13 +260,10 @@ export function parseQuery(raw: string, now: Date = new Date()): { text: string;
         sonntag: 0, montag: 1, dienstag: 2, mittwoch: 3,
         donnerstag: 4, freitag: 5, samstag: 6,
       };
-      const daysAhead = (WEEKDAY_JS[wd[1]] - now.getDay() + 7) % 7;
-      const dayStart = new Date(startOfToday);
-      dayStart.setDate(dayStart.getDate() + daysAhead);
-      const dayEnd = new Date(dayStart);
-      dayEnd.setHours(23, 59, 59, 999);
-      filters.afterDate = dayStart;
-      filters.beforeDate = dayEnd;
+      const daysAhead = (WEEKDAY_JS[wd[1]] - dow + 7) % 7;
+      const range = viennaDayRange(addViennaDays(today, daysAhead));
+      filters.afterDate = range.start;
+      filters.beforeDate = range.end;
       signals.push(`weekday:${wd[1]}`);
     }
   }

@@ -7,21 +7,14 @@
  * DateRangeFilter's manual inputs could overwrite each other (Bug #2 the
  * user confirmed) — this module centralizes the math.
  *
- * All dates are formatted as ISO YYYY-MM-DD in the local timezone (we use
- * the user's clock, not UTC, because event start_dates are stored as
- * naive local timestamps).
+ * All dates are Vienna calendar days (YYYY-MM-DD), independent of the
+ * runtime zone: the server renders in UTC, the browser in the visitor's
+ * zone, and both must agree on "heute" — see event-time.ts.
  */
 import type { DatePresetId } from './tokens';
+import { addViennaDays, viennaToday, viennaWeekday } from '@/lib/utils/event-time';
 
 const SIX_MONTHS_MS = 1000 * 60 * 60 * 24 * 30 * 6;
-
-function toLocalIso(d: Date): string {
-  // toISOString uses UTC — for "today" we want the user's local day.
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, '0');
-  const day = String(d.getDate()).padStart(2, '0');
-  return `${y}-${m}-${day}`;
-}
 
 /**
  * Default upper bound when no explicit "wann" preset is active. Six months
@@ -29,7 +22,7 @@ function toLocalIso(d: Date): string {
  * season.
  */
 export function defaultDateTo(): string {
-  return toLocalIso(new Date(Date.now() + SIX_MONTHS_MS));
+  return viennaToday(new Date(Date.now() + SIX_MONTHS_MS));
 }
 
 /**
@@ -38,8 +31,7 @@ export function defaultDateTo(): string {
  * picker for that branch.
  */
 export function applyDatePreset(id: DatePresetId): { dateFrom?: string; dateTo?: string } | null {
-  const now = new Date();
-  const today = toLocalIso(now);
+  const today = viennaToday();
 
   switch (id) {
     case 'jetzt':
@@ -51,35 +43,27 @@ export function applyDatePreset(id: DatePresetId): { dateFrom?: string; dateTo?:
       return { dateFrom: today, dateTo: today };
 
     case 'morgen': {
-      const t = new Date(now);
-      t.setDate(t.getDate() + 1);
-      const tomorrow = toLocalIso(t);
+      const tomorrow = addViennaDays(today, 1);
       return { dateFrom: tomorrow, dateTo: tomorrow };
     }
 
     case 'wochenende': {
       // Saturday + Sunday of the upcoming weekend (or the current one if
       // it's Saturday/Sunday already).
-      const day = now.getDay(); // 0 Sun, 6 Sat
-      const sat = new Date(now);
+      const day = viennaWeekday(today); // 0 Sun, 6 Sat
       const daysToSat = day === 6 ? 0 : day === 0 ? -1 : 6 - day;
-      sat.setDate(sat.getDate() + daysToSat);
-      const sun = new Date(sat);
-      sun.setDate(sat.getDate() + 1);
-      return { dateFrom: toLocalIso(sat), dateTo: toLocalIso(sun) };
+      const sat = addViennaDays(today, daysToSat);
+      return { dateFrom: sat, dateTo: addViennaDays(sat, 1) };
     }
 
     case 'woche': {
       // Mon–Sun of the current ISO week. Distinct from "wochenende" so the
       // two chips can be told apart on a Saturday (where today→Sun would
       // otherwise collide with Sat→Sun and the visual would jump).
-      const day = now.getDay(); // 0 Sun, 1 Mon, ..., 6 Sat
-      const mon = new Date(now);
+      const day = viennaWeekday(today); // 0 Sun, 1 Mon, ..., 6 Sat
       const daysToMon = day === 0 ? -6 : 1 - day;
-      mon.setDate(mon.getDate() + daysToMon);
-      const sun = new Date(mon);
-      sun.setDate(mon.getDate() + 6);
-      return { dateFrom: toLocalIso(mon), dateTo: toLocalIso(sun) };
+      const mon = addViennaDays(today, daysToMon);
+      return { dateFrom: mon, dateTo: addViennaDays(mon, 6) };
     }
 
     case 'custom':
@@ -98,28 +82,20 @@ export function detectActivePreset(
 ): DatePresetId | null {
   if (!dateFrom && !dateTo) return null;
 
-  const now = new Date();
-  const today = toLocalIso(now);
+  const today = viennaToday();
 
   if (dateFrom === today && dateTo === today) return 'heute';
 
-  const t = new Date(now);
-  t.setDate(t.getDate() + 1);
-  const tomorrow = toLocalIso(t);
+  const tomorrow = addViennaDays(today, 1);
   if (dateFrom === tomorrow && dateTo === tomorrow) return 'morgen';
 
-  const day = now.getDay();
-  const sat = new Date(now);
+  const day = viennaWeekday(today);
   const daysToSat = day === 6 ? 0 : day === 0 ? -1 : 6 - day;
-  sat.setDate(sat.getDate() + daysToSat);
-  const sun = new Date(sat);
-  sun.setDate(sat.getDate() + 1);
-  if (dateFrom === toLocalIso(sat) && dateTo === toLocalIso(sun)) return 'wochenende';
+  const sat = addViennaDays(today, daysToSat);
+  if (dateFrom === sat && dateTo === addViennaDays(sat, 1)) return 'wochenende';
 
-  const sunWk = new Date(now);
   const daysToSun = day === 0 ? 0 : 7 - day;
-  sunWk.setDate(sunWk.getDate() + daysToSun);
-  if (dateFrom === today && dateTo === toLocalIso(sunWk)) return 'woche';
+  if (dateFrom === today && dateTo === addViennaDays(today, daysToSun)) return 'woche';
 
   return null;
 }

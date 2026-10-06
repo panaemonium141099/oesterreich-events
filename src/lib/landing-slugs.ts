@@ -6,6 +6,7 @@
  */
 
 import { BUNDESLAENDER } from './bundeslaender';
+import { addViennaDays, viennaDayStart, viennaToday, viennaWeekday } from './utils/event-time';
 
 // ---------------------------------------------------------------------------
 // Category Slugs
@@ -70,52 +71,44 @@ export function isTimeFilter(slug: string): boolean {
 
 /**
  * Returns date range for a time filter in Europe/Vienna timezone.
- * Both `from` and `to` are ISO date strings (YYYY-MM-DD) suitable for
- * Supabase .gte()/.lt() queries on start_date.
+ * `from`/`to` are Vienna calendar days (YYYY-MM-DD, `to` exclusive) for URL
+ * params; `fromIso`/`toIso` are the matching instants (00:00 Wien) for
+ * Supabase `.gte()/.lt()` on start_date — a bare date there would compare
+ * against 00:00 UTC and pull 00:00–02:00-Wien events onto the previous day.
  */
 export function getDateRange(filter: 'heute' | 'wochenende'): {
   from: string;
   to: string;
+  fromIso: string;
+  toIso: string;
 } {
-  // Get current date in Vienna timezone
-  const now = new Date();
-  const viennaDate = new Date(
-    now.toLocaleString('en-US', { timeZone: 'Europe/Vienna' }),
-  );
-  const year = viennaDate.getFullYear();
-  const month = viennaDate.getMonth();
-  const date = viennaDate.getDate();
-  const dayOfWeek = viennaDate.getDay(); // 0=Sun, 6=Sat
+  const today = viennaToday();
+  const dayOfWeek = viennaWeekday(today); // 0=Sun, 6=Sat
 
+  let from: string;
+  let to: string;
   if (filter === 'heute') {
-    const today = formatDate(year, month, date);
-    const tomorrow = formatDate(year, month, date + 1);
-    return { from: today, to: tomorrow };
-  }
-
-  // wochenende: Saturday 00:00 to Monday 00:00
-  if (dayOfWeek === 0) {
+    from = today;
+    to = addViennaDays(today, 1);
+  } else if (dayOfWeek === 0) {
     // Sunday — weekend is today through end of day
-    const sunday = formatDate(year, month, date);
-    const monday = formatDate(year, month, date + 1);
-    return { from: sunday, to: monday };
-  }
-  if (dayOfWeek === 6) {
+    from = today;
+    to = addViennaDays(today, 1);
+  } else if (dayOfWeek === 6) {
     // Saturday — weekend is today through Sunday
-    const saturday = formatDate(year, month, date);
-    const monday = formatDate(year, month, date + 2);
-    return { from: saturday, to: monday };
+    from = today;
+    to = addViennaDays(today, 2);
+  } else {
+    // Weekday — next Saturday 00:00 to Monday 00:00
+    from = addViennaDays(today, 6 - dayOfWeek);
+    to = addViennaDays(from, 2);
   }
-  // Weekday — next Saturday to Monday
-  const daysUntilSaturday = 6 - dayOfWeek;
-  const saturday = formatDate(year, month, date + daysUntilSaturday);
-  const monday = formatDate(year, month, date + daysUntilSaturday + 2);
-  return { from: saturday, to: monday };
-}
-
-function formatDate(year: number, month: number, day: number): string {
-  const d = new Date(year, month, day);
-  return d.toISOString().split('T')[0];
+  return {
+    from,
+    to,
+    fromIso: viennaDayStart(from).toISOString(),
+    toIso: viennaDayStart(to).toISOString(),
+  };
 }
 
 // ---------------------------------------------------------------------------

@@ -38,7 +38,7 @@ import {
   useNotifications,
   type NotificationRow,
 } from './NotificationsProvider';
-import { EVENT_TZ } from '@/lib/utils/event-time';
+import { EVENT_TZ, toViennaDate, viennaDayDiff, viennaToday } from '@/lib/utils/event-time';
 
 interface EventJoin {
   id: string;
@@ -88,11 +88,7 @@ interface ArtistBundle {
 
 function fmtEventDate(iso: string): string {
   const d = new Date(iso);
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const eventDay = new Date(d);
-  eventDay.setHours(0, 0, 0, 0);
-  const diffDays = Math.round((eventDay.getTime() - today.getTime()) / 86_400_000);
+  const diffDays = viennaDayDiff(viennaToday(), toViennaDate(d));
   if (diffDays === 0) return 'Heute';
   if (diffDays === 1) return 'Morgen';
   if (diffDays >= 0 && diffDays < 7) {

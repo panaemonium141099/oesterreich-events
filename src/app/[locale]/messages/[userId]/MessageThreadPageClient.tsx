@@ -8,7 +8,7 @@ import { createClient } from '@/lib/supabase/client';
 import { EventPreviewMessage } from '@/components/Chat/EventPreviewMessage';
 import { EventSearchInline } from '@/components/Chat/EventSearchInline';
 import { toast } from 'sonner';
-import { EVENT_TZ } from '@/lib/utils/event-time';
+import { EVENT_TZ, addViennaDays, toViennaDate, viennaToday } from '@/lib/utils/event-time';
 
 interface DirectMessage {
   id: string;
@@ -205,12 +205,11 @@ export function MessageThreadPageClient() {
 
   const formatDateSeparator = (dateStr: string) => {
     const d = new Date(dateStr);
-    const today = new Date();
-    const yesterday = new Date(today);
-    yesterday.setDate(yesterday.getDate() - 1);
+    const day = toViennaDate(d);
+    const today = viennaToday();
 
-    if (d.toDateString() === today.toDateString()) return 'Heute';
-    if (d.toDateString() === yesterday.toDateString()) return 'Gestern';
+    if (day === today) return 'Heute';
+    if (day === addViennaDays(today, -1)) return 'Gestern';
     return d.toLocaleDateString('de-AT', { weekday: 'long', day: 'numeric', month: 'long', timeZone: EVENT_TZ });
   };
 
@@ -218,7 +217,7 @@ export function MessageThreadPageClient() {
   const groupedMessages: { date: string; messages: DirectMessage[] }[] = [];
   let currentDate = '';
   for (const msg of messages) {
-    const msgDate = new Date(msg.created_at).toDateString();
+    const msgDate = toViennaDate(new Date(msg.created_at));
     if (msgDate !== currentDate) {
       currentDate = msgDate;
       groupedMessages.push({ date: msg.created_at, messages: [msg] });

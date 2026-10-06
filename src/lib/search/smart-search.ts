@@ -56,6 +56,7 @@ import {
   type ActivityCandidate,
 } from '@/lib/search/smart-query';
 import type { ActivitySearchMatch, PublicActivityImage } from '@/lib/activities/public-types';
+import { viennaDayStart, viennaToday } from '@/lib/utils/event-time';
 import {
   PRIMARY_CATEGORIES,
   TAGS,
@@ -527,9 +528,8 @@ export async function runSmartSearch(
 
   // 3. Kandidaten holen (parallel, indexierte Queries)
   const supabase = createClient(supabaseUrl, supabaseKey, { auth: { persistSession: false } });
-  // Future-only: nie past events durchsuchen. Default = heute 00:00.
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
+  // Future-only: nie past events durchsuchen. Default = heute 00:00 Wien.
+  const today = viennaDayStart(viennaToday());
   const hard: HardFilters = {
     afterIso: (filters.afterDate ?? today).toISOString(),
     beforeIso: filters.beforeDate?.toISOString() ?? null,

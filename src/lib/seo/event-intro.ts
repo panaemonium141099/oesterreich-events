@@ -22,6 +22,7 @@
  */
 
 import { formatDateLong, formatTime } from '@/lib/utils/date';
+import { toViennaDate, viennaEndDate } from '@/lib/utils/event-time';
 
 export interface EventIntroInput {
   title: string;
@@ -96,9 +97,9 @@ export function buildCitableIntro(e: EventIntroInput): string {
     const end = new Date(e.end_date);
     const start = new Date(e.start_date);
     // Only mention the end date when it's at least the next calendar
-    // day — avoids "bis 15. Mai 2026 um 22:00 Uhr" for single-evening
-    // events where the scraper happened to record both times.
-    if (end.toDateString() !== start.toDateString()) {
+    // day (in Wien) — avoids "bis 15. Mai 2026 um 22:00 Uhr" for
+    // single-evening events where the scraper recorded both times.
+    if (!isNaN(end.getTime()) && !isNaN(start.getTime()) && viennaEndDate(end) !== toViennaDate(start)) {
       sentence += ` Das Event läuft bis zum ${formatDateLong(e.end_date)}.`;
     }
   }

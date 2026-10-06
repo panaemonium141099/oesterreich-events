@@ -11,7 +11,7 @@ import {
   useNotifications,
   type NotificationRow,
 } from '@/components/Notifications/NotificationsProvider';
-import { EVENT_TZ } from '@/lib/utils/event-time';
+import { EVENT_TZ, addViennaDays, toViennaDate, viennaToday } from '@/lib/utils/event-time';
 
 function timeAgo(dateStr: string): string {
   const seconds = Math.floor((Date.now() - new Date(dateStr).getTime()) / 1000);
@@ -26,10 +26,8 @@ function timeAgo(dateStr: string): string {
 }
 
 function groupByDate(notifications: NotificationRow[]): { label: string; items: NotificationRow[] }[] {
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const yesterday = new Date(today);
-  yesterday.setDate(yesterday.getDate() - 1);
+  const today = viennaToday();
+  const yesterday = addViennaDays(today, -1);
 
   const groups: { label: string; items: NotificationRow[] }[] = [];
   const todayItems: NotificationRow[] = [];
@@ -37,11 +35,10 @@ function groupByDate(notifications: NotificationRow[]): { label: string; items: 
   const olderItems: NotificationRow[] = [];
 
   for (const n of notifications) {
-    const d = new Date(n.created_at);
-    d.setHours(0, 0, 0, 0);
-    if (d.getTime() === today.getTime()) {
+    const d = toViennaDate(new Date(n.created_at));
+    if (d === today) {
       todayItems.push(n);
-    } else if (d.getTime() === yesterday.getTime()) {
+    } else if (d === yesterday) {
       yesterdayItems.push(n);
     } else {
       olderItems.push(n);
