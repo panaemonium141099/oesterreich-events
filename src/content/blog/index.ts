@@ -146,6 +146,8 @@ import { post as derSuessesteWahnsinn2026 } from './posts/der-suesseste-wahnsinn
 import { post as uebernachtenInnsbruckBerge } from './posts/uebernachten-innsbruck-berge';
 import { post as sowiFestLessStudyingMoreDancing2026 } from './posts/sowi-fest-less-studying-more-dancing-2026';
 import { post as houseOfBanksyWienAnUnauthorizedExhibition2026 } from './posts/house-of-banksy-wien-an-unauthorized-exhibition-2026';
+import { post as konzerteInDerMinoritenkircheAdventskonzertInDerMinori2026 } from './posts/konzerte-in-der-minoritenkirche-adventskonzert-in-der-minori-2026';
+import { post as poxruckerSistersHorizontSupportRobaRosentalRozFestiva2026 } from './posts/poxrucker-sisters-horizont-support-roba-rosental-roz-festiva-2026';
 // AUTOWRITER-IMPORTS-END
 
 export type { FestivalPost, GalleryImage, FestivalKeyFacts, LineupAct } from './types';
@@ -300,6 +302,8 @@ export const ALL_POSTS: FestivalPost[] = [
   uebernachtenInnsbruckBerge,
   sowiFestLessStudyingMoreDancing2026,
   houseOfBanksyWienAnUnauthorizedExhibition2026,
+  konzerteInDerMinoritenkircheAdventskonzertInDerMinori2026,
+  poxruckerSistersHorizontSupportRobaRosentalRozFestiva2026,
   // AUTOWRITER-POSTS-END
 ].sort(
   (a, b) => new Date(b.publishDate).getTime() - new Date(a.publishDate).getTime()
