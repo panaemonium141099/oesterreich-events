@@ -5,6 +5,7 @@ import { Home, Rocket, Search, Sparkles } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { BoostControl } from '@/components/Admin/BoostControl';
 import { setEventBoost, setLandingFeature } from '@/lib/admin/boost';
+import { EVENT_TZ } from '@/lib/utils/event-time';
 
 interface EventRow {
   id: string;
@@ -40,6 +41,7 @@ function formatDate(dateStr: string | null) {
     day: 'numeric',
     month: 'short',
     year: 'numeric',
+    timeZone: EVENT_TZ,
   });
 }
 

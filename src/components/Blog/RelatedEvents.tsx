@@ -35,6 +35,7 @@ import Link from 'next/link';
 import { createClient } from '@supabase/supabase-js';
 import { buildEventUrlV2 } from '@/lib/utils/slugify';
 import type { RelatedEventsSpec } from '@/content/blog/types';
+import { EVENT_TZ } from '@/lib/utils/event-time';
 
 const MAX_EVENTS = 6;
 /** Sonst zeigt die Sektion sechsmal Wien. */
@@ -86,6 +87,7 @@ function formatDate(iso: string): string {
     day: 'numeric',
     month: 'short',
     year: 'numeric',
+    timeZone: EVENT_TZ,
   });
 }
 

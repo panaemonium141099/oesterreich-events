@@ -8,6 +8,7 @@ import { buildEventUrlV2 } from '@/lib/utils/slugify';
 import { getFestivalEnrichment } from '@/lib/festivals/enrich';
 import type { Festival, FestivalArtist } from '@/types/festivals';
 import { V4FestivalActions } from '@/components/Festivals/V4FestivalActions';
+import { EVENT_TZ, toViennaDate } from '@/lib/utils/event-time';
 
 // Dynamic — slug params with non-ASCII (umlauts) were getting served
 // stale 404 responses under Next's default revalidation. Forcing the
@@ -29,13 +30,13 @@ function formatDateRange(startIso: string | null, endIso: string | null): string
   if (!startIso) return 'Termin offen';
   const start = new Date(startIso);
   const end = endIso ? new Date(endIso) : null;
-  const startStr = start.toLocaleDateString('de-AT', { day: 'numeric', month: 'long', year: 'numeric' });
-  if (!end || end.toDateString() === start.toDateString()) return startStr;
-  const sameYear = start.getFullYear() === end.getFullYear();
+  const startStr = start.toLocaleDateString('de-AT', { day: 'numeric', month: 'long', year: 'numeric', timeZone: EVENT_TZ });
+  if (!end || toViennaDate(end) === toViennaDate(start)) return startStr;
+  const sameYear = toViennaDate(start).slice(0, 4) === toViennaDate(end).slice(0, 4);
   const startShort = start.toLocaleDateString('de-AT', sameYear
-    ? { day: 'numeric', month: 'long' }
-    : { day: 'numeric', month: 'long', year: 'numeric' });
-  const endStr = end.toLocaleDateString('de-AT', { day: 'numeric', month: 'long', year: 'numeric' });
+    ? { day: 'numeric', month: 'long', timeZone: EVENT_TZ }
+    : { day: 'numeric', month: 'long', year: 'numeric', timeZone: EVENT_TZ });
+  const endStr = end.toLocaleDateString('de-AT', { day: 'numeric', month: 'long', year: 'numeric', timeZone: EVENT_TZ });
   return `${startShort} – ${endStr}`;
 }
 

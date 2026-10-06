@@ -28,6 +28,7 @@ import { trackEvent } from '@/lib/analytics';
 import { consumeSmartAutorun } from '@/lib/search/smart-autorun';
 import { buildEventUrlV2 } from '@/lib/utils/slugify';
 import type { ChatEntityCard, ChatEventCard, ChatActivityCard, ChatSuggestionCard } from '@/lib/search/chat-cards';
+import { EVENT_TZ } from '@/lib/utils/event-time';
 
 interface ChatTurn {
   role: 'user' | 'assistant';
@@ -71,7 +72,7 @@ function eventHref(ev: ChatEventCard): string {
 function formatEventDate(iso: string): string {
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return '';
-  return d.toLocaleDateString('de-AT', { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+  return d.toLocaleDateString('de-AT', { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit', timeZone: EVENT_TZ });
 }
 
 function SelectToggle({

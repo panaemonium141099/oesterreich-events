@@ -74,7 +74,8 @@ describe('formatDateShort', () => {
 
 describe('formatTime', () => {
   it('returns formatted time for a datetime with real time', () => {
-    const result = formatTime('2026-03-15T14:30:00');
+    // So kommt start_date aus Postgres: UTC-Instant mit Offset.
+    const result = formatTime('2026-03-15T13:30:00+00:00');
     expect(result).toBe('14:30');
   });
 
@@ -97,14 +98,12 @@ describe('formatTime', () => {
     expect(formatTime('2026-03-15T01:00:00+00:00')).not.toBeNull();
   });
 
-  it('returns time for 01:30 (not a midnight artifact)', () => {
-    const oneThirty = new Date(2026, 2, 15, 1, 30, 0);
-    const isoStr = oneThirty.toISOString();
-    expect(formatTime(isoStr)).toBe('01:30');
+  it('returns time for 01:30 Vienna (not a midnight artifact)', () => {
+    expect(formatTime('2026-03-15T00:30:00.000Z')).toBe('01:30');
   });
 
   it('returns time for evening hours', () => {
-    const result = formatTime('2026-03-15T20:00:00');
+    const result = formatTime('2026-03-15T19:00:00+00:00');
     expect(result).toBe('20:00');
   });
 
@@ -126,13 +125,13 @@ describe('formatDateRange', () => {
   });
 
   it('includes time when present', () => {
-    const result = formatDateRange('2026-03-15T14:30:00');
+    const result = formatDateRange('2026-03-15T13:30:00+00:00');
     expect(result).toContain('um');
     expect(result).toContain('14:30');
   });
 
   it('shows only end time for same-day range', () => {
-    const result = formatDateRange('2026-03-15T14:00:00', '2026-03-15T18:00:00');
+    const result = formatDateRange('2026-03-15T13:00:00+00:00', '2026-03-15T17:00:00+00:00');
     expect(result).toContain('14:00');
     expect(result).toContain('18:00');
     // Should have a dash separator
@@ -174,5 +173,42 @@ describe('formatMonthYear', () => {
     const result = formatMonthYear(2026, 11);
     expect(result).toContain('Dezember');
     expect(result).toContain('2026');
+  });
+});
+
+// Befund 2026-10-06: /thema/musik zeigte "Fehringer's Kalte Küche" um 17:30,
+// die Detailseite 19:30 (richtig, laut wien-ticket 19:30+02:00). Die DB hält
+// 17:30 UTC; date.ts formatierte in der Zeitzone der Runtime, und der Server
+// läuft in UTC. vitest.config.ts pinnt TZ=UTC, damit diese Tests auf einem
+// Rechner in Österreich nicht zufällig grün sind.
+describe('Wien-Zeitzone unabhängig von der Runtime', () => {
+  it('läuft in UTC wie der Server', () => {
+    expect(new Date('2026-10-07T17:30:00Z').getHours()).toBe(17);
+  });
+
+  it('zeigt den UTC-Instant aus der DB in Wiener Ortszeit (Sommerzeit)', () => {
+    expect(formatTime('2026-10-07T17:30:00+00:00')).toBe('19:30');
+  });
+
+  it('zeigt den UTC-Instant aus der DB in Wiener Ortszeit (Winterzeit)', () => {
+    expect(formatTime('2026-12-07T18:30:00+00:00')).toBe('19:30');
+  });
+
+  it('nimmt den Wiener Kalendertag, nicht den UTC-Tag', () => {
+    // 23:30 UTC am 7. = 01:30 Wien am 8.
+    expect(formatDateLong('2026-10-07T23:30:00+00:00')).toContain('08');
+    expect(formatDateShort('2026-10-07T23:30:00+00:00')).toContain('8');
+  });
+
+  it('blendet beide Platzhalter-Formen aus, wie die Detailseite', () => {
+    expect(formatTime('2026-10-07T00:00:00+00:00')).toBeNull();
+    // viennaToUtc() für "nur Datum": Wien-Mitternacht
+    expect(formatTime('2026-10-06T22:00:00+00:00')).toBeNull();
+    expect(formatTime('2026-12-06T23:00:00+00:00')).toBeNull();
+  });
+
+  it('Zeitraum am selben Wiener Tag zeigt nur die Endzeit', () => {
+    const r = formatDateRange('2026-10-07T17:30:00+00:00', '2026-10-07T21:00:00+00:00');
+    expect(r).toContain('um 19:30 - 23:00');
   });
 });

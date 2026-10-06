@@ -11,6 +11,7 @@ import {
   useNotifications,
   type NotificationRow,
 } from '@/components/Notifications/NotificationsProvider';
+import { EVENT_TZ } from '@/lib/utils/event-time';
 
 function timeAgo(dateStr: string): string {
   const seconds = Math.floor((Date.now() - new Date(dateStr).getTime()) / 1000);
@@ -21,7 +22,7 @@ function timeAgo(dateStr: string): string {
   if (hours < 24) return `vor ${hours} Std.`;
   const days = Math.floor(hours / 24);
   if (days < 7) return `vor ${days} T.`;
-  return new Date(dateStr).toLocaleDateString('de-AT', { day: 'numeric', month: 'short' });
+  return new Date(dateStr).toLocaleDateString('de-AT', { day: 'numeric', month: 'short', timeZone: EVENT_TZ });
 }
 
 function groupByDate(notifications: NotificationRow[]): { label: string; items: NotificationRow[] }[] {

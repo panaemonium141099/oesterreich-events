@@ -1,6 +1,8 @@
 import Link from 'next/link';
 import { buildEventUrlV2 } from '@/lib/utils/slugify';
 import type { ArtistAppearance } from '@/lib/artists/appearances';
+import { EVENT_TZ } from '@/lib/utils/event-time';
+import { formatTime } from '@/lib/utils/date';
 
 /**
  * Einheitliche, artist-forward Auftritts-Karte — identisch auf Landing
@@ -11,10 +13,10 @@ import type { ArtistAppearance } from '@/lib/artists/appearances';
 
 function fmtDate(iso: string): string {
   const d = new Date(iso);
-  const date = d.toLocaleDateString('de-AT', { weekday: 'short', day: 'numeric', month: 'short' });
-  const time = d.toLocaleTimeString('de-AT', { hour: '2-digit', minute: '2-digit' });
-  // 00:00 = unbekannte Uhrzeit (häufig bei Festival-Tagen) → ohne Zeit
-  return time === '00:00' ? date : `${date} · ${time}`;
+  const date = d.toLocaleDateString('de-AT', { weekday: 'short', day: 'numeric', month: 'short', timeZone: EVENT_TZ });
+  // null = unbekannte Uhrzeit (häufig bei Festival-Tagen) → ohne Zeit
+  const time = formatTime(iso);
+  return time ? `${date} · ${time}` : date;
 }
 
 function initial(name: string): string {

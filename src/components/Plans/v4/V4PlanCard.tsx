@@ -15,6 +15,7 @@
 import Link from 'next/link';
 import type { Plan } from '@/types/plans';
 import { V4Status, type V4StatusKind } from '@/components/Events/v4';
+import { EVENT_TZ } from '@/lib/utils/event-time';
 
 interface Props {
   plan: Plan;
@@ -44,9 +45,9 @@ function shortStatusLabel(s: Plan['tickets_status']): string {
 
 export function V4PlanCard({ plan, eventCount, previewTitles = [] }: Props) {
   const d = new Date(plan.plan_date);
-  const dow = d.toLocaleDateString('de-AT', { weekday: 'short' });
-  const day = d.toLocaleDateString('de-AT', { day: 'numeric' });
-  const mon = d.toLocaleDateString('de-AT', { month: 'short' });
+  const dow = d.toLocaleDateString('de-AT', { weekday: 'short', timeZone: EVENT_TZ });
+  const day = d.toLocaleDateString('de-AT', { day: 'numeric', timeZone: EVENT_TZ });
+  const mon = d.toLocaleDateString('de-AT', { month: 'short', timeZone: EVENT_TZ });
 
   const remindersCount = [plan.reminder_7d, plan.reminder_1d, plan.reminder_3h].filter(Boolean).length;
 

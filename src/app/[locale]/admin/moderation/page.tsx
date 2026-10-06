@@ -5,6 +5,7 @@ import { Shield, Trash2, CheckCircle, AlertTriangle, Sparkles } from 'lucide-rea
 import { createClient } from '@/lib/supabase/client';
 import { BoostControl } from '@/components/Admin/BoostControl';
 import { setEventBoost } from '@/lib/admin/boost';
+import { EVENT_TZ } from '@/lib/utils/event-time';
 
 interface EventRow {
   id: string;
@@ -74,6 +75,7 @@ export default function ModerationPage() {
       day: 'numeric',
       month: 'short',
       year: 'numeric',
+      timeZone: EVENT_TZ,
     });
 
   return (

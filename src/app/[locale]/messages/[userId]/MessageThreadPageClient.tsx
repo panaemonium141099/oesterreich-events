@@ -8,6 +8,7 @@ import { createClient } from '@/lib/supabase/client';
 import { EventPreviewMessage } from '@/components/Chat/EventPreviewMessage';
 import { EventSearchInline } from '@/components/Chat/EventSearchInline';
 import { toast } from 'sonner';
+import { EVENT_TZ } from '@/lib/utils/event-time';
 
 interface DirectMessage {
   id: string;
@@ -199,7 +200,7 @@ export function MessageThreadPageClient() {
 
   const formatTime = (dateStr: string) => {
     const d = new Date(dateStr);
-    return d.toLocaleTimeString('de-AT', { hour: '2-digit', minute: '2-digit' });
+    return d.toLocaleTimeString('de-AT', { hour: '2-digit', minute: '2-digit', timeZone: EVENT_TZ });
   };
 
   const formatDateSeparator = (dateStr: string) => {
@@ -210,7 +211,7 @@ export function MessageThreadPageClient() {
 
     if (d.toDateString() === today.toDateString()) return 'Heute';
     if (d.toDateString() === yesterday.toDateString()) return 'Gestern';
-    return d.toLocaleDateString('de-AT', { weekday: 'long', day: 'numeric', month: 'long' });
+    return d.toLocaleDateString('de-AT', { weekday: 'long', day: 'numeric', month: 'long', timeZone: EVENT_TZ });
   };
 
   // Group messages by date

@@ -22,6 +22,8 @@
 import Link from 'next/link';
 import { createClient } from '@supabase/supabase-js';
 import { buildEventUrlV2 } from '@/lib/utils/slugify';
+import { EVENT_TZ } from '@/lib/utils/event-time';
+import { formatTime } from '@/lib/utils/date';
 
 interface TicketEvent {
   id: string;
@@ -55,9 +57,9 @@ export function deriveSearchTerms(postTitle: string): string[] {
 
 function formatDate(iso: string): string {
   const d = new Date(iso);
-  const date = d.toLocaleDateString('de-AT', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
-  const time = d.toLocaleTimeString('de-AT', { hour: '2-digit', minute: '2-digit' });
-  return time === '00:00' ? date : `${date}, ${time}`;
+  const date = d.toLocaleDateString('de-AT', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric', timeZone: EVENT_TZ });
+  const time = formatTime(iso);
+  return time ? `${date}, ${time}` : date;
 }
 
 function formatPrice(e: TicketEvent): string | null {

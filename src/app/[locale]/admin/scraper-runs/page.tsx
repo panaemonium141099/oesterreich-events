@@ -3,6 +3,7 @@
 import { Fragment, useState, useEffect, useCallback } from 'react';
 import { Activity, Clock, AlertTriangle, ChevronDown, ChevronRight, ExternalLink } from 'lucide-react';
 import { StatusBadge } from '@/components/Admin/StatusBadge';
+import { EVENT_TZ } from '@/lib/utils/event-time';
 
 interface PipelineStep {
   status: string;
@@ -97,6 +98,7 @@ function formatDate(dateStr: string): string {
     year: 'numeric',
     hour: '2-digit',
     minute: '2-digit',
+    timeZone: EVENT_TZ,
   });
 }
 

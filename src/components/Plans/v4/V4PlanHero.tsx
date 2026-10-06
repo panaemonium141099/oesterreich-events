@@ -13,6 +13,7 @@
 
 import { useRouter } from 'next/navigation';
 import type { PlanWithEvents } from '@/types/plans';
+import { EVENT_TZ } from '@/lib/utils/event-time';
 
 interface Props {
   plan: PlanWithEvents;
@@ -47,6 +48,7 @@ function formatLongDate(iso: string): string {
     if (isNaN(d.getTime())) return iso;
     return d.toLocaleDateString('de-AT', {
       weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',
+      timeZone: EVENT_TZ,
     });
   } catch { return iso; }
 }

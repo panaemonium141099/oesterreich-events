@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { FileText, Check, X, ExternalLink, Loader2, Inbox } from 'lucide-react';
+import { EVENT_TZ } from '@/lib/utils/event-time';
 
 /**
  * /admin/inserate — Freigabe der öffentlich eingereichten Event-Inserate.
@@ -266,7 +267,7 @@ export default function AdminInseratePage() {
                       </p>
                     </div>
                     <span className="text-[11px] text-white/25 shrink-0">
-                      {new Date(s.created_at).toLocaleDateString('de-AT')}
+                      {new Date(s.created_at).toLocaleDateString('de-AT', { timeZone: EVENT_TZ })}
                     </span>
                   </div>
                 </button>

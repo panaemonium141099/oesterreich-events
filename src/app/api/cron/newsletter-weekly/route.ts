@@ -20,6 +20,8 @@ import { sendGenericEmail } from '@/lib/email';
 import { renderCityDigestEmail } from '@/emails/city-digest';
 import { newsletterToken, regionLabel, regionToBundeslandFilter, NEWSLETTER_REGIONS } from '@/lib/newsletter';
 import { buildEventUrlV2 } from '@/lib/utils/slugify';
+import { EVENT_TZ } from '@/lib/utils/event-time';
+import { formatTime } from '@/lib/utils/date';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 300;
@@ -42,9 +44,9 @@ interface DigestEvent {
 
 function fmt(iso: string): { date: string; time?: string } {
   const d = new Date(iso);
-  const date = d.toLocaleDateString('de-AT', { weekday: 'long', day: 'numeric', month: 'long' });
-  const time = d.toLocaleTimeString('de-AT', { hour: '2-digit', minute: '2-digit' });
-  return time === '00:00' ? { date } : { date, time };
+  const date = d.toLocaleDateString('de-AT', { weekday: 'long', day: 'numeric', month: 'long', timeZone: EVENT_TZ });
+  const time = formatTime(iso);
+  return time ? { date, time } : { date };
 }
 
 async function fetchWeekendEvents(region: string): Promise<DigestEvent[]> {

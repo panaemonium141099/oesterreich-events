@@ -14,6 +14,7 @@ import {
   Loader2,
 } from 'lucide-react';
 import { ScoreBar } from '@/components/Admin/ScoreBar';
+import { EVENT_TZ } from '@/lib/utils/event-time';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -193,6 +194,7 @@ export default function DedupPage() {
       day: 'numeric',
       month: 'short',
       year: 'numeric',
+      timeZone: EVENT_TZ,
     });
   };
 

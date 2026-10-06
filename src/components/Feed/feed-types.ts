@@ -1,3 +1,5 @@
+import { EVENT_TZ } from '@/lib/utils/event-time';
+
 export interface FeedActivity {
   id: string;
   user_id: string;
@@ -113,12 +115,12 @@ export function formatRelativeTime(dateStr: string): string {
   if (diff < 3600000) return `vor ${Math.floor(diff / 60000)} Min.`;
   if (diff < 86400000) return `vor ${Math.floor(diff / 3600000)} Std.`;
   if (diff < 604800000) return `vor ${Math.floor(diff / 86400000)} Tagen`;
-  return d.toLocaleDateString('de-AT', { day: 'numeric', month: 'short' });
+  return d.toLocaleDateString('de-AT', { day: 'numeric', month: 'short', timeZone: EVENT_TZ });
 }
 
 export function formatEventDate(dateStr: string): string {
   const d = new Date(dateStr);
-  return d.toLocaleDateString('de-AT', { day: 'numeric', month: 'short', year: 'numeric' });
+  return d.toLocaleDateString('de-AT', { day: 'numeric', month: 'short', year: 'numeric', timeZone: EVENT_TZ });
 }
 
 /** Activity types that render as compact single-line notifications, not full posts */

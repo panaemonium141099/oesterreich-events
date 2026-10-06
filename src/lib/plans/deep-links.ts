@@ -8,6 +8,7 @@
 
 import type { Event } from '@/types/events';
 import { buildAffiliateStayLink } from '@/lib/booking/affiliate';
+import { formatTime } from '@/lib/utils/date';
 
 /**
  * Baut ÖBB-Scotty Routenplaner-URL.
@@ -41,12 +42,8 @@ export function buildOebbScottyUrl(
   let timeParam = '18:00';
   if (event.start_date) {
     try {
-      const d = new Date(event.start_date);
-      if (!isNaN(d.getTime())) {
-        timeParam = d.toLocaleTimeString('de-AT', {
-          hour: '2-digit', minute: '2-digit', hour12: false,
-        });
-      }
+      // Platzhalter (Uhrzeit unbekannt) behalten den Fallback.
+      timeParam = formatTime(event.start_date) ?? timeParam;
     } catch { /* keep fallback */ }
   }
 

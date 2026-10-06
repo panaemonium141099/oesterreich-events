@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { useAuth } from '@/lib/supabase/auth-context';
 import { createClient } from '@/lib/supabase/client';
 import { toast } from 'sonner';
+import { EVENT_TZ } from '@/lib/utils/event-time';
 
 interface Memory {
   id: string;
@@ -291,6 +292,7 @@ export function MemoriesPageClient() {
   const formatDate = (dateStr: string) => {
     return new Date(dateStr).toLocaleDateString('de-AT', {
       day: 'numeric', month: 'long', year: 'numeric',
+      timeZone: EVENT_TZ,
     });
   };
 

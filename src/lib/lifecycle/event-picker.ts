@@ -16,6 +16,7 @@ import { bboxFromCenter, type ResolvedLocation } from './location-resolver';
 import type { LifecycleCohort } from './cohort-detector';
 import type { LifecycleEmailEvent } from '@/emails/lifecycle-weekend';
 import { buildEventUrlV2 } from '@/lib/utils/slugify';
+import { EVENT_TZ } from '@/lib/utils/event-time';
 
 // Real `events` table columns. There is NO `venue`, NO `start_time`, NO `slug`,
 // NO `city`. The location string the email shows is `location_name` (the venue
@@ -236,6 +237,7 @@ function formatDateDE(iso: string): string {
       weekday: 'short',
       day: 'numeric',
       month: 'long',
+      timeZone: EVENT_TZ,
     });
   } catch {
     return iso;

@@ -22,6 +22,7 @@ import {
   generateUnsubscribeToken,
   type ArtistAlertEmailData,
 } from '@/lib/email';
+import { EVENT_TZ } from '@/lib/utils/event-time';
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -809,6 +810,7 @@ function formatDateDE(dateStr: string): string {
       day: 'numeric',
       month: 'long',
       year: 'numeric',
+      timeZone: EVENT_TZ,
     });
   } catch {
     return dateStr;

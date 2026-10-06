@@ -13,6 +13,7 @@
 import Link from 'next/link';
 import { createClient } from '@supabase/supabase-js';
 import { getStripe, computeBoostUntil } from '@/lib/payments/stripe-boost';
+import { EVENT_TZ } from '@/lib/utils/event-time';
 
 export const dynamic = 'force-dynamic';
 
@@ -117,7 +118,7 @@ export default async function BoostErfolgPage({
             {result.boostUntil && (
               <p className="text-white/50 text-sm mt-2">
                 Hervorgehoben bis{' '}
-                {new Date(result.boostUntil).toLocaleDateString('de-AT', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
+                {new Date(result.boostUntil).toLocaleDateString('de-AT', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: EVENT_TZ })}
                 {' '}— auf der Karte (nie in Clustern versteckt) und ganz oben in den Listen, gekennzeichnet als „Anzeige".
               </p>
             )}

@@ -16,6 +16,7 @@ import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'fs';
 import { join } from 'path';
 import { gzipSync, gunzipSync } from 'zlib';
 import { createClient } from '@supabase/supabase-js';
+import { EVENT_TZ } from '@/lib/utils/event-time';
 
 // ── Load .env.local ─────────────────────────────────────────────
 try {
@@ -76,8 +77,8 @@ function getWeekRange(date: Date): { start: string; end: string } {
   const sunday = new Date(monday);
   sunday.setDate(monday.getDate() + 6);
   return {
-    start: monday.toLocaleDateString('de-AT', { day: '2-digit', month: '2-digit', year: 'numeric' }),
-    end: sunday.toLocaleDateString('de-AT', { day: '2-digit', month: '2-digit', year: 'numeric' }),
+    start: monday.toLocaleDateString('de-AT', { day: '2-digit', month: '2-digit', year: 'numeric', timeZone: EVENT_TZ }),
+    end: sunday.toLocaleDateString('de-AT', { day: '2-digit', month: '2-digit', year: 'numeric', timeZone: EVENT_TZ }),
   };
 }
 
