@@ -20,9 +20,14 @@ import {
   type CandidateEvent,
   type ActivityCandidate,
 } from '@/lib/search/smart-query';
+import { viennaFields } from '@/lib/utils/event-time';
 
-// Fester "jetzt"-Anker: Mittwoch 2026-07-08 12:00 lokal
-const NOW = new Date(2026, 6, 8, 12, 0, 0);
+// Fester "jetzt"-Anker: Mittwoch 2026-07-08 12:00 Wien
+const NOW = new Date('2026-07-08T10:00:00Z');
+
+// Datumsfenster sind Wien-Kalendertage (Grenzfälle: vienna-days.test.ts).
+const vDay = (d: Date | null) => (d ? viennaFields(d).day : undefined);
+const vDow = (d: Date | null) => (d ? viennaFields(d).weekday : undefined);
 
 const emptyIntent: SearchIntent = {
   categories: [], tags: [], audiences: [], occasions: [], vibes: [],
@@ -32,39 +37,39 @@ const emptyIntent: SearchIntent = {
 describe('parseQuery', () => {
   it('erkennt "heute" als Tagesfenster', () => {
     const { filters } = parseQuery('Ich will heute abend saufen gehen', NOW);
-    expect(filters.afterDate?.getDate()).toBe(8);
-    expect(filters.beforeDate?.getDate()).toBe(8);
+    expect(vDay(filters.afterDate)).toBe(8);
+    expect(vDay(filters.beforeDate)).toBe(8);
     expect(filters.keywordSignals).toContain('today');
   });
 
   it('erkennt "wochenende" als Sa–So-Fenster', () => {
     const { filters } = parseQuery('Techno-Party am Wochenende', NOW);
     // Mittwoch 8.7. → Samstag 11.7. bis Sonntag 12.7.
-    expect(filters.afterDate?.getDay()).toBe(6);
-    expect(filters.beforeDate?.getDay()).toBe(0);
-    expect(filters.afterDate?.getDate()).toBe(11);
+    expect(vDow(filters.afterDate)).toBe(6);
+    expect(vDow(filters.beforeDate)).toBe(0);
+    expect(vDay(filters.afterDate)).toBe(11);
   });
 
   it('"wochenende" am Samstag = laufendes Wochenende (heute)', () => {
-    const sat = new Date(2026, 6, 11, 14, 0, 0); // Samstag 11.7.
+    const sat = new Date('2026-07-11T12:00:00Z'); // Samstag 11.7. 14:00 Wien
     const { filters } = parseQuery('party am wochenende', sat);
-    expect(filters.afterDate?.getDate()).toBe(11);
-    expect(filters.beforeDate?.getDate()).toBe(12);
+    expect(vDay(filters.afterDate)).toBe(11);
+    expect(vDay(filters.beforeDate)).toBe(12);
   });
 
   it('"wochenende" am Sonntag = heutiger Sonntag, NICHT nächstes Wochenende', () => {
-    const sun = new Date(2026, 6, 12, 14, 0, 0); // Sonntag 12.7.
+    const sun = new Date('2026-07-12T12:00:00Z'); // Sonntag 12.7. 14:00 Wien
     const { filters } = parseQuery('party am wochenende', sun);
-    expect(filters.afterDate?.getDate()).toBe(12);
-    expect(filters.beforeDate?.getDate()).toBe(12);
+    expect(vDay(filters.afterDate)).toBe(12);
+    expect(vDay(filters.beforeDate)).toBe(12);
   });
 
   it('erkennt Wochentag "samstag" als Tagesfenster (nächstes Vorkommen)', () => {
     // Mittwoch 8.7. → Samstag 11.7.
     const { filters, text } = parseQuery('konzert am samstag', NOW);
-    expect(filters.afterDate?.getDate()).toBe(11);
-    expect(filters.afterDate?.getDay()).toBe(6);
-    expect(filters.beforeDate?.getDate()).toBe(11);
+    expect(vDay(filters.afterDate)).toBe(11);
+    expect(vDow(filters.afterDate)).toBe(6);
+    expect(vDay(filters.beforeDate)).toBe(11);
     expect(filters.keywordSignals).toContain('weekday:samstag');
     expect(text.toLowerCase()).not.toContain('samstag');
   });
@@ -72,15 +77,15 @@ describe('parseQuery', () => {
   it('"freitagabend" matcht den Wochentag mit Suffix', () => {
     // Mittwoch 8.7. → Freitag 10.7.
     const { filters } = parseQuery('was geht freitagabend', NOW);
-    expect(filters.afterDate?.getDate()).toBe(10);
+    expect(vDay(filters.afterDate)).toBe(10);
     expect(filters.keywordSignals).toContain('weekday:freitag');
   });
 
   it('Wochentag = heute → heutiges Fenster', () => {
     // NOW ist Mittwoch 8.7.
     const { filters } = parseQuery('was geht am mittwoch', NOW);
-    expect(filters.afterDate?.getDate()).toBe(8);
-    expect(filters.beforeDate?.getDate()).toBe(8);
+    expect(vDay(filters.afterDate)).toBe(8);
+    expect(vDay(filters.beforeDate)).toBe(8);
   });
 
   it('"heute"/"wochenende" gewinnen vor Wochentag', () => {

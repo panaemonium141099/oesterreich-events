@@ -1,5 +1,6 @@
 import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
+import { viennaFields } from '@/lib/utils/event-time';
 
 /**
  * Site footer with navigation links and data attribution.
@@ -100,7 +101,7 @@ export function Footer() {
         <div className="mt-8 pt-6 border-t border-white/[0.04] flex flex-col items-center gap-3">
           <DataAttribution />
           <p className="text-xs text-white/25 text-center">
-            &copy; {new Date().getFullYear()} LassTreffen.at. {t('rights')}
+            &copy; {viennaFields(new Date()).year} LassTreffen.at. {t('rights')}
           </p>
         </div>
       </div>

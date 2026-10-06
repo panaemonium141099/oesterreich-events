@@ -16,10 +16,12 @@
 import { useEffect, useRef, useState } from 'react';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
+import { viennaDayDiff, viennaToday, viennaWeekday } from '@/lib/utils/event-time';
 
 mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN || '';
 
-const EPOCH_MS = Date.UTC(2026, 0, 1);
+/** Epoche der start/end-Day-Offsets (siehe src/lib/v4/map-points.ts). */
+const EPOCH_DAY = '2026-01-01';
 
 interface Payload {
   n: number;
@@ -32,7 +34,8 @@ interface Payload {
 type Window = 'today' | 'weekend' | 'week';
 
 function todayOffset(): number {
-  return Math.floor((Date.now() - EPOCH_MS) / 86_400_000);
+  // Heute = Wien-Kalendertag, nicht UTC/Browser-Zone.
+  return viennaDayDiff(EPOCH_DAY, viennaToday());
 }
 
 /** [von, bis] als Day-Offsets (inklusive). */
@@ -41,7 +44,7 @@ function windowRange(win: Window): [number, number] {
   if (win === 'today') return [today, today];
   if (win === 'week') return [today, today + 6];
   // Wochenende: kommender Samstag + Sonntag (heute, falls schon Sa/So)
-  const dow = new Date().getDay(); // 0 So … 6 Sa
+  const dow = viennaWeekday(viennaToday()); // 0 So … 6 Sa
   const satOffset = dow === 6 ? 0 : dow === 0 ? -1 : 6 - dow;
   return [today + Math.max(0, satOffset), today + satOffset + 1];
 }

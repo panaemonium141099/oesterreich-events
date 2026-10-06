@@ -41,7 +41,7 @@ import { bundeslandDisplayName } from '@/lib/i18n/bundesland-names';
 import { buildEventUrlV2 } from '@/lib/utils/slugify';
 import { useDetailHydration } from '@/lib/v4/use-detail-hydration';
 import { decodeEntities } from '@/lib/utils/decode-entities';
-import { EVENT_TZ } from '@/lib/utils/event-time';
+import { EVENT_TZ, addViennaDays, toViennaDate, viennaDayStart, viennaToday, viennaWeekday } from '@/lib/utils/event-time';
 
 /**
  * Category → tinted gradient pair for placeholders. Uses the same hue
@@ -176,9 +176,9 @@ export function EventListView({
   // (Datum >= heute) — eine Anzeige für ein vergangenes Event macht keinen Sinn.
   const { ads, rest } = useMemo(() => {
     const isAd = (e: Event) => (boostedIds ? boostedIds.has(e.id) : !!e.is_boosted);
-    const startToday = startOfDay(new Date()).getTime();
+    const today = viennaToday();
     const ads = sorted.filter(
-      (e) => isAd(e) && startOfDay(new Date(e.start_date)).getTime() >= startToday,
+      (e) => isAd(e) && toViennaDate(new Date(e.start_date)) >= today,
     );
     const adIds = new Set(ads.map((e) => e.id));
     const rest = adIds.size ? sorted.filter((e) => !adIds.has(e.id)) : sorted;
@@ -655,15 +655,15 @@ interface Group {
   events: Event[];
 }
 
-function groupEvents(events: Event[]): Group[] {
-  const today = startOfDay(new Date());
-  const tomorrow = addDays(today, 1);
-  const dayAfter = addDays(today, 2);
+export function groupEvents(events: Event[]): Group[] {
+  // Wien-Kalendertage (YYYY-MM-DD): SSR (UTC) und Browser gruppieren gleich.
+  const today = viennaToday();
+  const tomorrow = addViennaDays(today, 1);
+  const dayAfter = addViennaDays(today, 2);
   // End-of-week (Sunday)
-  const dow = today.getDay();
+  const dow = viennaWeekday(today);
   const daysToSun = dow === 0 ? 0 : 7 - dow;
-  const endOfWeek = addDays(today, daysToSun);
-  const dayAfterWeek = addDays(endOfWeek, 1);
+  const endOfWeek = addViennaDays(today, daysToSun);
 
   const buckets: Record<string, Event[]> = {
     heute: [],
@@ -674,19 +674,17 @@ function groupEvents(events: Event[]): Group[] {
   };
 
   for (const e of events) {
-    const d = startOfDay(new Date(e.start_date));
-    const t = d.getTime();
-    if (t < today.getTime()) {
-      // already started — show in "Heute" if same day, else skip up to "Später"
-      if (sameDay(d, today)) buckets.heute.push(e);
-      else buckets.spaeter.push(e);
-    } else if (sameDay(d, today)) {
+    const d = toViennaDate(new Date(e.start_date));
+    if (d < today) {
+      // already started — vergangene Starttage landen unter "Später"
+      buckets.spaeter.push(e);
+    } else if (d === today) {
       buckets.heute.push(e);
-    } else if (sameDay(d, tomorrow)) {
+    } else if (d === tomorrow) {
       buckets.morgen.push(e);
-    } else if (t >= dayAfter.getTime() && t <= endOfWeek.getTime() && (d.getDay() === 6 || d.getDay() === 0)) {
+    } else if (d >= dayAfter && d <= endOfWeek && (viennaWeekday(d) === 6 || viennaWeekday(d) === 0)) {
       buckets.wochenende.push(e);
-    } else if (t >= dayAfter.getTime() && t < dayAfterWeek.getTime()) {
+    } else if (d >= dayAfter && d <= endOfWeek) {
       buckets.woche.push(e);
     } else {
       buckets.spaeter.push(e);
@@ -694,36 +692,21 @@ function groupEvents(events: Event[]): Group[] {
   }
 
   const groups: Group[] = [];
-  if (buckets.heute.length) groups.push({ id: 'heute', sub: today, events: buckets.heute });
-  if (buckets.morgen.length) groups.push({ id: 'morgen', sub: tomorrow, events: buckets.morgen });
+  if (buckets.heute.length) groups.push({ id: 'heute', sub: viennaDayStart(today), events: buckets.heute });
+  if (buckets.morgen.length) groups.push({ id: 'morgen', sub: viennaDayStart(tomorrow), events: buckets.morgen });
   if (buckets.wochenende.length) groups.push({ id: 'wochenende', events: buckets.wochenende });
   if (buckets.woche.length) groups.push({ id: 'woche', events: buckets.woche });
   if (buckets.spaeter.length) groups.push({ id: 'spaeter', events: buckets.spaeter });
   return groups;
 }
 
-function startOfDay(d: Date): Date {
-  const r = new Date(d);
-  r.setHours(0, 0, 0, 0);
-  return r;
-}
-
-function addDays(d: Date, n: number): Date {
-  const r = new Date(d);
-  r.setDate(r.getDate() + n);
-  return r;
-}
-
-function sameDay(a: Date, b: Date): boolean {
-  return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
-}
-
 function formatDateLabel(dateStr: string, fmt: string, todayLabel: string, tomorrowLabel: string): string {
   try {
     const d = new Date(dateStr);
-    const today = startOfDay(new Date());
-    if (sameDay(startOfDay(d), today)) return todayLabel;
-    if (sameDay(startOfDay(d), addDays(today, 1))) return tomorrowLabel;
+    const day = toViennaDate(d);
+    const today = viennaToday();
+    if (day === today) return todayLabel;
+    if (day === addViennaDays(today, 1)) return tomorrowLabel;
     return d.toLocaleDateString(fmt, { weekday: 'short', day: 'numeric', month: 'short', timeZone: EVENT_TZ });
   } catch {
     return dateStr.slice(0, 10);

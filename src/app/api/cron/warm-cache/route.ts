@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { applyDatePreset } from '@/components/MapV3/datePresets';
 
 /**
  * Cache-Warming-Cron für ~183 Top-Filter-Kombis.
@@ -78,61 +79,13 @@ const KATEGORIEN = [
   'Wellness & Spiritualität',
 ] as const;
 
-/** YYYY-MM-DD in Europe/Vienna timezone — matched mit toLocalIso aus
- *  datePresets.ts wenn der User in Österreich sitzt (was er meistens tut). */
-function viennaIso(d: Date): string {
-  // en-CA-Locale formatiert ISO-mässig als YYYY-MM-DD.
-  const fmt = new Intl.DateTimeFormat('en-CA', {
-    timeZone: 'Europe/Vienna',
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-  });
-  return fmt.format(d);
-}
-
-/** Day of week in Vienna timezone (0 = Sonntag, 6 = Samstag), exakt wie
- *  `new Date().getDay()` im Browser-Client in Wien. */
-function viennaDayOfWeek(d: Date): number {
-  const name = new Intl.DateTimeFormat('en-US', {
-    timeZone: 'Europe/Vienna',
-    weekday: 'short',
-  }).format(d);
-  return ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].indexOf(name);
-}
-
-/** Replicates applyDatePreset() aus datePresets.ts für die 4 wichtigen
- *  Presets. Reihenfolge der Berechnung muss identisch zum UI-Code sein,
+/** Die 4 wichtigen Presets — exakt die Funktion, die auch das UI nutzt,
  *  sonst stimmen die Cache-Keys nicht überein. */
 function getDatePresets(): Array<{ id: string; dateFrom: string; dateTo: string }> {
-  const now = new Date();
-  const today = viennaIso(now);
-
-  // morgen
-  const tomorrow = new Date(now);
-  tomorrow.setDate(tomorrow.getDate() + 1);
-
-  // wochenende: kommendes Sat + Sun (oder das aktuelle wenn Sa/So heute)
-  const day = viennaDayOfWeek(now);
-  const sat = new Date(now);
-  const daysToSat = day === 6 ? 0 : day === 0 ? -1 : 6 - day;
-  sat.setDate(sat.getDate() + daysToSat);
-  const sun = new Date(sat);
-  sun.setDate(sat.getDate() + 1);
-
-  // woche: Mo-So der ISO-Woche
-  const mon = new Date(now);
-  const daysToMon = day === 0 ? -6 : 1 - day;
-  mon.setDate(mon.getDate() + daysToMon);
-  const wkSun = new Date(mon);
-  wkSun.setDate(mon.getDate() + 6);
-
-  return [
-    { id: 'heute', dateFrom: today, dateTo: today },
-    { id: 'morgen', dateFrom: viennaIso(tomorrow), dateTo: viennaIso(tomorrow) },
-    { id: 'wochenende', dateFrom: viennaIso(sat), dateTo: viennaIso(sun) },
-    { id: 'woche', dateFrom: viennaIso(mon), dateTo: viennaIso(wkSun) },
-  ];
+  return (['heute', 'morgen', 'wochenende', 'woche'] as const).map((id) => {
+    const r = applyDatePreset(id)!;
+    return { id, dateFrom: r.dateFrom!, dateTo: r.dateTo! };
+  });
 }
 
 function buildPaths(): string[] {

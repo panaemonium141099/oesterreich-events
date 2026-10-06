@@ -61,8 +61,7 @@ export function AfterSavePanel({
     try {
       // Default reminder: 1 day before the event
       const eventDate = new Date(startDate);
-      const reminderDate = new Date(eventDate);
-      reminderDate.setDate(reminderDate.getDate() - 1);
+      const reminderDate = new Date(eventDate.getTime() - 24 * 60 * 60 * 1000);
 
       // Don't set reminder in the past
       if (reminderDate <= new Date()) {

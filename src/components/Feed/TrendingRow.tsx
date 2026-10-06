@@ -6,6 +6,7 @@ import type { TrendingEvent } from './feed-types';
 import { StoriesViewer } from './StoriesViewer';
 import { EventImage } from '@/components/Events/EventImage';
 import { isUsableImageCandidate } from '@/lib/event-images';
+import { viennaToday } from '@/lib/utils/event-time';
 
 // Pool size for daily rotation — we randomize within the N nearest events,
 // so the user still sees local events but different ones each day.
@@ -14,8 +15,8 @@ const VISIBLE_COUNT = 15;
 
 /** Deterministic per-day seed: hash "YYYY-MM-DD" to a 32-bit uint. */
 function dailySeed(): number {
-  const d = new Date();
-  const key = `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`;
+  // Wien-Tag: SSR (UTC) und Browser würfeln denselben Tag.
+  const key = viennaToday();
   let h = 2166136261;
   for (let i = 0; i < key.length; i++) {
     h ^= key.charCodeAt(i);
@@ -77,8 +78,7 @@ export function TrendingRow() {
       }
 
       // Fetch upcoming events with coordinates, filter by distance client-side
-      const nextMonth = new Date();
-      nextMonth.setDate(nextMonth.getDate() + 30);
+      const nextMonth = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
 
       // Fetch only events with a real image (no placeholders in story circles)
       // and coordinates so we can distance-sort. image_url IS NOT NULL alone isn't

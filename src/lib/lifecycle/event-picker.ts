@@ -16,7 +16,7 @@ import { bboxFromCenter, type ResolvedLocation } from './location-resolver';
 import type { LifecycleCohort } from './cohort-detector';
 import type { LifecycleEmailEvent } from '@/emails/lifecycle-weekend';
 import { buildEventUrlV2 } from '@/lib/utils/slugify';
-import { EVENT_TZ } from '@/lib/utils/event-time';
+import { EVENT_TZ, addViennaDays, viennaDayRange, viennaDayStart, viennaFields, viennaToday, viennaWeekday } from '@/lib/utils/event-time';
 
 // Real `events` table columns. There is NO `venue`, NO `start_time`, NO `slug`,
 // NO `city`. The location string the email shows is `location_name` (the venue
@@ -160,42 +160,31 @@ async function isImageHealthy(url: string | null | undefined): Promise<boolean> 
 
 // ── Helpers ─────────────────────────────────────────────────────────────
 
+// Fenster in Wien-Kalendertagen — der Cron läuft in UTC, gemeint ist
+// "Freitag 00:00 bis Sonntag 23:59 in Österreich".
 function startOfWindow(cohort: LifecycleCohort, now: Date): Date {
   if (cohort === 'weekend') {
-    // From Friday 00:00 local (CET) to Sunday 23:59 local
-    return nextFriday(now);
+    // From Friday 00:00 Wien to Sunday 23:59 Wien
+    return viennaDayStart(nextFriday(now));
   }
   // Welcome + Reactivation: now → +14d
-  return startOfDay(now);
+  return viennaDayStart(viennaToday(now));
 }
 
 function endOfWindow(cohort: LifecycleCohort, now: Date): Date {
   if (cohort === 'weekend') {
-    const fri = nextFriday(now);
-    const sun = new Date(fri);
-    sun.setDate(fri.getDate() + 2);
-    sun.setHours(23, 59, 59, 999);
-    return sun;
+    return viennaDayRange(addViennaDays(nextFriday(now), 2)).end;
   }
-  const end = startOfDay(now);
-  end.setDate(end.getDate() + 14);
-  return end;
+  return viennaDayStart(addViennaDays(viennaToday(now), 14));
 }
 
-function startOfDay(d: Date): Date {
-  const r = new Date(d);
-  r.setHours(0, 0, 0, 0);
-  return r;
-}
-
-/** Returns the next (or current) Friday at 00:00. */
-function nextFriday(from: Date): Date {
-  const r = startOfDay(from);
-  const day = r.getDay(); // 0=Sun..6=Sat
+/** Returns the next (or current) Friday as Wien-Kalendertag (YYYY-MM-DD). */
+function nextFriday(from: Date): string {
+  const today = viennaToday(from);
+  const day = viennaWeekday(today); // 0=Sun..6=Sat
   // Friday = 5. If today is Sat/Sun, the "weekend" is today (already started).
   const daysToFri = day === 5 ? 0 : day === 6 || day === 0 ? -((day + 2) % 7) : 5 - day;
-  r.setDate(r.getDate() + daysToFri);
-  return r;
+  return addViennaDays(today, daysToFri);
 }
 
 function toEmailEvent(r: DbEventRow): LifecycleEmailEvent {
@@ -251,10 +240,11 @@ function dayChipFromIso(iso: string): { dayName: string; dayNum: string; monthSh
   try {
     const d = new Date(iso);
     if (Number.isNaN(d.getTime())) return undefined;
+    const f = viennaFields(d);
     return {
-      dayName: DE_WEEKDAYS[d.getDay()],
-      dayNum: String(d.getDate()),
-      monthShort: DE_MONTHS[d.getMonth()],
+      dayName: DE_WEEKDAYS[f.weekday],
+      dayNum: String(f.day),
+      monthShort: DE_MONTHS[f.month - 1],
     };
   } catch {
     return undefined;

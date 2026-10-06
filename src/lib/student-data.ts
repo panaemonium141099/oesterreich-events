@@ -101,8 +101,8 @@ export async function loadStudentIndex(): Promise<StudentIndexData> {
     (supabase.from('events') as any)
       .select('id, title, start_date, end_date, location_name, image_url, category, price_min, price_text, event_score, quality_score, bundesland, address')
       .in('publish_status', ['published', 'published_low_confidence'])
-      .gte('start_date', todayRange.from)
-      .lt('start_date', todayRange.to)
+      .gte('start_date', todayRange.fromIso)
+      .lt('start_date', todayRange.toIso)
       .gte('quality_score', MIN_QUALITY)
       .in('bundesland', studentBundeslaender)
       .order('event_score', { ascending: false, nullsFirst: false })
@@ -246,7 +246,7 @@ async function loadCandidates(
 
   if (timeFilter) {
     const range = getDateRange(timeFilter);
-    query = query.gte('start_date', range.from).lt('start_date', range.to);
+    query = query.gte('start_date', range.fromIso).lt('start_date', range.toIso);
   }
 
   // Load all candidates (no DB limit — offset pagination needs full set)

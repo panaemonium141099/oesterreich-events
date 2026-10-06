@@ -20,7 +20,7 @@ import { sendGenericEmail } from '@/lib/email';
 import { renderCityDigestEmail } from '@/emails/city-digest';
 import { newsletterToken, regionLabel, regionToBundeslandFilter, NEWSLETTER_REGIONS } from '@/lib/newsletter';
 import { buildEventUrlV2 } from '@/lib/utils/slugify';
-import { EVENT_TZ } from '@/lib/utils/event-time';
+import { EVENT_TZ, addViennaDays, viennaDayRange, viennaToday, viennaWeekday } from '@/lib/utils/event-time';
 import { formatTime } from '@/lib/utils/date';
 
 export const dynamic = 'force-dynamic';
@@ -55,11 +55,10 @@ async function fetchWeekendEvents(region: string): Promise<DigestEvent[]> {
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     { auth: { persistSession: false } },
   );
-  // Fenster: jetzt bis Ende Sonntag (Cron läuft freitags)
+  // Fenster: jetzt bis Ende Sonntag Wien (Cron läuft freitags in UTC)
   const now = new Date();
-  const sunday = new Date(now);
-  sunday.setDate(sunday.getDate() + ((7 - sunday.getDay()) % 7));
-  sunday.setHours(23, 59, 59, 999);
+  const today = viennaToday(now);
+  const sunday = viennaDayRange(addViennaDays(today, (7 - viennaWeekday(today)) % 7)).end;
 
   let q = anon
     .from('events')

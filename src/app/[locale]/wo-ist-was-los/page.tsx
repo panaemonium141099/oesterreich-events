@@ -3,6 +3,7 @@ import { createClient } from '@supabase/supabase-js';
 import { WeekHeatmap } from '@/components/Heatmap/WeekHeatmap';
 import { Footer } from '@/components/Legal/Footer';
 import { Link } from '@/i18n/navigation';
+import { viennaDayDiff, viennaToday } from '@/lib/utils/event-time';
 
 /**
  * /wo-ist-was-los — öffentliche Event-Dichte-Heatmap Österreichs (fn-19).
@@ -19,8 +20,6 @@ import { Link } from '@/i18n/navigation';
  */
 
 export const revalidate = 3600;
-
-const EPOCH_MS = Date.UTC(2026, 0, 1);
 
 export const metadata: Metadata = {
   title: 'Wo ist was los in Österreich? Die Event-Heatmap',
@@ -77,7 +76,7 @@ async function loadWeekStats(): Promise<WeekStats | null> {
       bl: number[]; bls: string[];
     };
 
-    const today = Math.floor((Date.now() - EPOCH_MS) / 86_400_000);
+    const today = viennaDayDiff('2026-01-01', viennaToday());
     const to = today + 6;
 
     const districtCounts = new Map<number, number>();
