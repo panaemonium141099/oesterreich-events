@@ -8,6 +8,7 @@ import { createClient } from '@/lib/supabase/client';
 import { toast } from 'sonner';
 import { EventImage } from '@/components/Events/EventImage';
 import { buildEventUrlV2 } from '@/lib/utils/slugify';
+import { EVENT_TZ } from '@/lib/utils/event-time';
 
 interface Photo {
   id: string;
@@ -197,12 +198,14 @@ export function MemoryDetailPageClient() {
   const formatDate = (dateStr: string) => {
     return new Date(dateStr).toLocaleDateString('de-AT', {
       day: 'numeric', month: 'long', year: 'numeric',
+      timeZone: EVENT_TZ,
     });
   };
 
   const formatDateTime = (dateStr: string) => {
     return new Date(dateStr).toLocaleDateString('de-AT', {
       day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit',
+      timeZone: EVENT_TZ,
     });
   };
 

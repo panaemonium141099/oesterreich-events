@@ -7,6 +7,7 @@ import { Users, Search, ChevronRight, Trash2, Bookmark, UsersRound, UserCheck, B
 import { useAuth } from '@/lib/supabase/auth-context';
 import { createClient } from '@/lib/supabase/client';
 import { resetAdsAllowed } from '@/lib/ads/ads-allowed';
+import { EVENT_TZ } from '@/lib/utils/event-time';
 
 interface UserRow {
   id: string;
@@ -187,6 +188,7 @@ export default function UsersPage() {
       day: 'numeric',
       month: 'short',
       year: 'numeric',
+      timeZone: EVENT_TZ,
     });
 
   // Auth still loading or non-admin: render nothing (the useEffect above

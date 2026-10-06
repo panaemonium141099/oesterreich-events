@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/lib/supabase/auth-context';
 import { useRouter } from 'next/navigation';
+import { EVENT_TZ } from '@/lib/utils/event-time';
 
 interface SourceMetrics {
   source_name: string;
@@ -58,6 +59,7 @@ export default function AdminSourcesPage() {
       day: 'numeric',
       month: 'short',
       year: 'numeric',
+      timeZone: EVENT_TZ,
     });
   };
 

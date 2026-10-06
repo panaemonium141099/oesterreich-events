@@ -37,6 +37,7 @@ import {
   EditorialCaption,
   AvatarStack,
 } from './primitives';
+import { EVENT_TZ } from '@/lib/utils/event-time';
 
 // fn-15.5: every motion-lib construct in this file is replaced with
 // CSS. curtainEnter → `animate-fade-in` on the overlay root. stepSlide
@@ -639,7 +640,7 @@ function StepEssenz({
 }) {
   const formatDate = (dateStr: string | null) => {
     if (!dateStr) return '';
-    return new Date(dateStr).toLocaleDateString('de-AT', { day: 'numeric', month: 'long', year: 'numeric' });
+    return new Date(dateStr).toLocaleDateString('de-AT', { day: 'numeric', month: 'long', year: 'numeric', timeZone: EVENT_TZ });
   };
 
   return (
@@ -979,7 +980,7 @@ function StepFeinschliff({
   };
   const formatDate = (dateStr: string | null) => {
     if (!dateStr) return '';
-    return new Date(dateStr).toLocaleDateString('de-AT', { day: 'numeric', month: 'long' });
+    return new Date(dateStr).toLocaleDateString('de-AT', { day: 'numeric', month: 'long', timeZone: EVENT_TZ });
   };
 
   const previewDate = draft.selectedEvent

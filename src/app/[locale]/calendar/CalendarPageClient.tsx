@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { useAuth } from '@/lib/supabase/auth-context';
 import { createClient } from '@/lib/supabase/client';
 import { EventImage } from '@/components/Events/EventImage';
+import { EVENT_TZ, hasKnownStartTime } from '@/lib/utils/event-time';
 
 interface CalendarEvent {
   id: string;
@@ -131,19 +132,20 @@ function getFirstDayOfMonth(year: number, month: number) {
 }
 
 function formatMonthYear(year: number, month: number) {
-  return new Date(year, month).toLocaleDateString('de-AT', { month: 'long', year: 'numeric' });
+  // Monatsmitte in UTC: in keiner Zeitzone ein anderer Monat.
+  return new Date(Date.UTC(year, month, 15)).toLocaleDateString('de-AT', { month: 'long', year: 'numeric', timeZone: EVENT_TZ });
 }
 
 function formatEventDate(dateStr: string) {
   const d = new Date(dateStr);
-  return d.toLocaleDateString('de-AT', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+  return d.toLocaleDateString('de-AT', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: EVENT_TZ });
 }
 
 function formatEventTime(dateStr: string): string | null {
   if (!dateStr || dateStr.length <= 10 || !dateStr.includes('T')) return null;
+  if (!hasKnownStartTime({ start_date: dateStr })) return null;
   const d = new Date(dateStr);
-  if (d.getHours() === 0 && d.getMinutes() === 0) return null;
-  return d.toLocaleTimeString('de-AT', { hour: '2-digit', minute: '2-digit' });
+  return d.toLocaleTimeString('de-AT', { hour: '2-digit', minute: '2-digit', timeZone: EVENT_TZ });
 }
 
 export function CalendarPageClient() {
@@ -855,10 +857,11 @@ export function CalendarPageClient() {
         {selectedDay !== null && (
           <div className="border-t border-white/10 pt-6">
             <h3 className="text-sm font-semibold text-white/60 mb-4">
-              {new Date(currentYear, currentMonth, selectedDay).toLocaleDateString('de-AT', {
+              {new Date(Date.UTC(currentYear, currentMonth, selectedDay, 12)).toLocaleDateString('de-AT', {
                 weekday: 'long',
                 day: 'numeric',
                 month: 'long',
+                timeZone: EVENT_TZ,
               })}
               <span className="ml-2 text-white/30">({selectedDayEvents.length} Events)</span>
             </h3>

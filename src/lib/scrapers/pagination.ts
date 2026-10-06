@@ -10,6 +10,7 @@
  */
 
 import * as cheerio from 'cheerio';
+import { EVENT_TZ } from '@/lib/utils/event-time';
 
 export interface PaginationResult {
   /** Next page URL (absolute), or null if no more pages */
@@ -157,7 +158,7 @@ function buildFutureMonthUrls(currentUrl: string): MonthPageUrl[] {
           const newUrl = new URL(currentUrl);
           newUrl.searchParams.set(paramName, monthStr);
 
-          const label = new Date(year, month - 1).toLocaleDateString('de-AT', { month: 'long', year: 'numeric' });
+          const label = new Date(Date.UTC(year, month - 1, 15)).toLocaleDateString('de-AT', { month: 'long', year: 'numeric', timeZone: EVENT_TZ });
           urls.push({ url: newUrl.href, label });
         }
       }

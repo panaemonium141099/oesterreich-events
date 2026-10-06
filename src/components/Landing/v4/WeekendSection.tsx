@@ -3,6 +3,7 @@ import type { V4EventState } from '@/lib/v4/derive-event-state';
 import { V4CardV, V4CardHero } from '@/components/Events/v4';
 import { useLocale, useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
+import { EVENT_TZ } from '@/lib/utils/event-time';
 
 interface WeekendSectionProps {
   events: Array<Event & { state: V4EventState }>;
@@ -12,8 +13,8 @@ function dateRangeLabel(locale: string): string {
   const fmt = locale === 'de' ? 'de-AT' : 'en-GB';
   const start = new Date();
   const end = new Date(Date.now() + 7 * 24 * 3600 * 1000);
-  const startStr = start.toLocaleDateString(fmt, { weekday: 'short', day: 'numeric', month: 'short' });
-  const endStr = end.toLocaleDateString(fmt, { weekday: 'short', day: 'numeric', month: 'short' });
+  const startStr = start.toLocaleDateString(fmt, { weekday: 'short', day: 'numeric', month: 'short', timeZone: EVENT_TZ });
+  const endStr = end.toLocaleDateString(fmt, { weekday: 'short', day: 'numeric', month: 'short', timeZone: EVENT_TZ });
   return `${startStr.replace(/\.$/,'')} – ${endStr.replace(/\.$/,'')}`;
 }
 

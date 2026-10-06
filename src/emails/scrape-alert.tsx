@@ -1,6 +1,7 @@
 // src/emails/scrape-alert.tsx
 
 import type { PipelineRunStatus, ScraperResult } from '@/lib/pipeline/scrape-pipeline-types';
+import { EVENT_TZ } from '@/lib/utils/event-time';
 
 interface ScrapeAlertEmailData {
   status: PipelineRunStatus;
@@ -59,7 +60,7 @@ export function renderScrapeAlertEmail(data: ScrapeAlertEmailData): string {
   <div style="max-width:600px;margin:0 auto;padding:24px">
     <div style="background:${statusColor}22;border:1px solid ${statusColor}44;border-radius:12px;padding:20px;margin-bottom:24px">
       <h1 style="margin:0;color:${statusColor};font-size:20px">Scrape Pipeline: ${statusLabel}</h1>
-      <p style="margin:8px 0 0;color:#ccc;font-size:14px">${new Date(data.started_at).toLocaleDateString('de-AT', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</p>
+      <p style="margin:8px 0 0;color:#ccc;font-size:14px">${new Date(data.started_at).toLocaleDateString('de-AT', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit', timeZone: EVENT_TZ })}</p>
     </div>
 
     <div style="background:#1a1a1a;border:1px solid #333;border-radius:12px;padding:16px;margin-bottom:16px">

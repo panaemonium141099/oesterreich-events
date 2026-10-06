@@ -11,6 +11,7 @@ import { useEffect, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
 import { loadWeekendWeather, type WeekendWeather } from '@/lib/landing/weekend-weather';
+import { EVENT_TZ } from '@/lib/utils/event-time';
 
 export function SeasonWeather() {
   const t = useTranslations('Landing.Season');
@@ -25,9 +26,9 @@ export function SeasonWeather() {
 
   if (!weather) return null;
 
-  const day = new Date(weather.day + 'T12:00:00').toLocaleDateString(
+  const day = new Date(weather.day + 'T12:00:00Z').toLocaleDateString(
     locale === 'de' ? 'de-AT' : 'en-GB',
-    { weekday: 'long' },
+    { weekday: 'long', timeZone: EVENT_TZ },
   );
   const place = weather.usedStoredLocation ? t('weatherNearby') : t('weatherVienna');
   const icon = weather.mode === 'rain' ? '🌧' : weather.precipMm > 0 ? '⛅' : '☀️';

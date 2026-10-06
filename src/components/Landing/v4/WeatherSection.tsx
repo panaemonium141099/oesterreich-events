@@ -27,6 +27,7 @@ import { Link } from '@/i18n/navigation';
 import { ActivityCardImage } from '@/components/Activities/ActivityCardImage';
 import { activityTagLabel } from '@/lib/activities/tag-labels';
 import { loadWeekendWeather, roundCoord } from '@/lib/landing/weekend-weather';
+import { EVENT_TZ } from '@/lib/utils/event-time';
 
 interface NearbyActivity {
   id: string;
@@ -68,9 +69,9 @@ export function WeatherSection() {
         const actBody = (await actRes.json()) as { activities?: NearbyActivity[] };
         if (!actBody.activities || actBody.activities.length < 3) return;
 
-        const dayLabel = new Date(weather.day + 'T12:00:00').toLocaleDateString(
+        const dayLabel = new Date(weather.day + 'T12:00:00Z').toLocaleDateString(
           locale === 'de' ? 'de-AT' : 'en-GB',
-          { weekday: 'long' },
+          { weekday: 'long', timeZone: EVENT_TZ },
         );
         setState({
           mode,

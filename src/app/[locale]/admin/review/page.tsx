@@ -14,6 +14,7 @@ import {
   Loader2,
 } from 'lucide-react';
 import { SeverityBadge } from '@/components/Admin/SeverityBadge';
+import { EVENT_TZ } from '@/lib/utils/event-time';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -162,6 +163,7 @@ export default function ReviewQueuePage() {
       day: 'numeric',
       month: 'short',
       year: 'numeric',
+      timeZone: EVENT_TZ,
     });
 
   const totalPending = counts.dedup + counts.quality + counts.confidence;

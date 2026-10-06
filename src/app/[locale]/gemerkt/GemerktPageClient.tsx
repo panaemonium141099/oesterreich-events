@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase/client';
 import { useAuth } from '@/lib/supabase/auth-context';
 import { buildEventUrlV2 } from '@/lib/utils/slugify';
 import { toast } from 'sonner';
+import { EVENT_TZ } from '@/lib/utils/event-time';
 
 interface SavedEvent {
   id: string;
@@ -428,6 +429,7 @@ function formatDateDE(iso: string): string {
       day: 'numeric',
       month: 'long',
       year: 'numeric',
+      timeZone: EVENT_TZ,
     });
   } catch {
     return iso;

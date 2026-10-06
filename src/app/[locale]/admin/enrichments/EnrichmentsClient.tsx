@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Sparkles, Check, CheckCheck, X, Loader2, ExternalLink, ImageOff, RefreshCw, Eye } from 'lucide-react';
 import type { EnrichmentProposal } from '@/app/api/admin/enrichments/route';
 import { buildEventUrlV2 } from '@/lib/utils/slugify';
+import { EVENT_TZ } from '@/lib/utils/event-time';
 
 type StatusFilter = 'pending' | 'approved' | 'declined';
 
@@ -261,7 +262,7 @@ function ProposalCard({ proposal, busy, readOnly, onApprove, onDecline }: Propos
             </a>
           </h2>
           <div className="text-xs text-white/40 mt-1 flex items-center gap-2 flex-wrap">
-            <span>{new Date(e.start_date).toLocaleDateString('de-AT')}</span>
+            <span>{new Date(e.start_date).toLocaleDateString('de-AT', { timeZone: EVENT_TZ })}</span>
             {e.location_name && <span>· {e.location_name}</span>}
             {e.bundesland && <span>· {e.bundesland}</span>}
             {e.source_name && <span>· {e.source_name}</span>}

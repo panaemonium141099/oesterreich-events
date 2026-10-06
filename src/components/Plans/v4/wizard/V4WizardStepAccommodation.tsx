@@ -16,6 +16,7 @@
 import type { PlanItemStatus } from '@/types/plans';
 import { V4WizardHead } from './V4WizardShared';
 import { buildBookingUrl } from '@/lib/plans/deep-links';
+import { EVENT_TZ } from '@/lib/utils/event-time';
 
 interface Props {
   planDate: string;
@@ -137,6 +138,6 @@ function formatShortDate(iso: string): string {
   try {
     const d = new Date(iso);
     if (isNaN(d.getTime())) return iso;
-    return d.toLocaleDateString('de-AT', { day: 'numeric', month: 'short' });
+    return d.toLocaleDateString('de-AT', { day: 'numeric', month: 'short', timeZone: EVENT_TZ });
   } catch { return iso; }
 }

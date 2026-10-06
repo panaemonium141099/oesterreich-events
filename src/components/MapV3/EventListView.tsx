@@ -41,6 +41,7 @@ import { bundeslandDisplayName } from '@/lib/i18n/bundesland-names';
 import { buildEventUrlV2 } from '@/lib/utils/slugify';
 import { useDetailHydration } from '@/lib/v4/use-detail-hydration';
 import { decodeEntities } from '@/lib/utils/decode-entities';
+import { EVENT_TZ } from '@/lib/utils/event-time';
 
 /**
  * Category → tinted gradient pair for placeholders. Uses the same hue
@@ -339,7 +340,7 @@ export function EventListView({
                   {t(GROUP_MESSAGE_KEYS[g.id])}
                 </h2>
                 {g.sub && (
-                  <span style={{ fontSize: 12.5, color: T.ink60, fontWeight: 500 }}>· {g.sub.toLocaleDateString(fmt, { day: 'numeric', month: 'short' })}</span>
+                  <span style={{ fontSize: 12.5, color: T.ink60, fontWeight: 500 }}>· {new Date(g.sub.getTime() + 12 * 3600_000).toLocaleDateString(fmt, { day: 'numeric', month: 'short', timeZone: EVENT_TZ })}</span>
                 )}
                 <span style={{ marginLeft: 'auto', fontSize: 12, color: T.ink50 }}>
                   {t(g.events.length === 1 ? 'nEventsOne' : 'nEventsMany', { count: g.events.length })}
@@ -723,7 +724,7 @@ function formatDateLabel(dateStr: string, fmt: string, todayLabel: string, tomor
     const today = startOfDay(new Date());
     if (sameDay(startOfDay(d), today)) return todayLabel;
     if (sameDay(startOfDay(d), addDays(today, 1))) return tomorrowLabel;
-    return d.toLocaleDateString(fmt, { weekday: 'short', day: 'numeric', month: 'short' });
+    return d.toLocaleDateString(fmt, { weekday: 'short', day: 'numeric', month: 'short', timeZone: EVENT_TZ });
   } catch {
     return dateStr.slice(0, 10);
   }

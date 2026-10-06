@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { ShieldCheck, Check, EyeOff, Eye } from 'lucide-react';
 import { SeverityBadge } from '@/components/Admin/SeverityBadge';
+import { EVENT_TZ } from '@/lib/utils/event-time';
 
 interface QualityFlag {
   id: string;
@@ -81,6 +82,7 @@ export default function QualityPage() {
       day: 'numeric',
       month: 'short',
       year: 'numeric',
+      timeZone: EVENT_TZ,
     });
 
   // Extract unique flag types from data

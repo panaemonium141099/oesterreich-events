@@ -36,6 +36,7 @@ import { NextResponse, type NextRequest } from 'next/server';
 import { GoogleGenAI } from '@google/genai';
 import OpenAI from 'openai';
 import { checkRateLimit, getClientIp } from '@/lib/rate-limit';
+import { EVENT_TZ } from '@/lib/utils/event-time';
 
 /** fn-19: Der Concierge ist der teuerste Call der Plattform (~0,7 Cent
  *  pro grounded Antwort) — deshalb ein eigenes, strengeres Limit
@@ -149,6 +150,7 @@ function buildUserPrompt(body: ConciergeBody): string {
     matches.slice(0, 5).forEach((m, i) => {
       const date = new Date(m.start_date).toLocaleDateString('de-AT', {
         weekday: 'short', day: 'numeric', month: 'short',
+        timeZone: EVENT_TZ,
       });
       const loc = [m.location_name, m.bundesland].filter(Boolean).join(' · ');
       parts.push(`${i + 1}. "${m.title}" — ${date}${loc ? ' · ' + loc : ''}${m.category ? ' · [' + m.category + ']' : ''}${m.price_text ? ' · ' + m.price_text : ''} (Relevanz ${(m._similarity * 100).toFixed(0)}%)`);

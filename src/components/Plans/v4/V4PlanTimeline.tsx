@@ -2,6 +2,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import type { Event } from '@/types/events';
 import { buildEventUrlV2 } from '@/lib/utils/slugify';
+import { EVENT_TZ } from '@/lib/utils/event-time';
 
 export function V4PlanTimeline({ events }: { events: Event[] }) {
   if (events.length === 0) {
@@ -15,7 +16,7 @@ export function V4PlanTimeline({ events }: { events: Event[] }) {
   return (
     <ol className="relative flex flex-col gap-4 pl-6 before:absolute before:left-2 before:top-3 before:bottom-3 before:w-px before:bg-[var(--v4-hairline-3)]">
       {events.map(ev => {
-        const date = new Date(ev.start_date).toLocaleString('de-AT', { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+        const date = new Date(ev.start_date).toLocaleString('de-AT', { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit', timeZone: EVENT_TZ });
         return (
           <li key={ev.id} className="relative">
             <span className="absolute -left-[18px] top-3 w-3 h-3 rounded-full bg-[var(--v4-match)] border-2 border-[var(--v4-surface)]" aria-hidden="true"/>

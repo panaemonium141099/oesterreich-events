@@ -5,6 +5,7 @@ import { Calendar, Search, Trash2 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { StatusBadge } from '@/components/Admin/StatusBadge';
 import { ScoreBar } from '@/components/Admin/ScoreBar';
+import { EVENT_TZ } from '@/lib/utils/event-time';
 
 interface EventRow {
   id: string;
@@ -99,6 +100,7 @@ export default function EventsPage() {
       day: 'numeric',
       month: 'short',
       year: 'numeric',
+      timeZone: EVENT_TZ,
     });
 
   return (

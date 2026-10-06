@@ -36,6 +36,8 @@ import {
   EditorialCaption,
   EditorialHeading,
 } from '@/components/Planer/primitives';
+import { EVENT_TZ } from '@/lib/utils/event-time';
+import { formatTime } from '@/lib/utils/date';
 
 // fn-15.5: motion-lib staggerContainer + riseItem replaced by the
 // global `.stagger-children` CSS helper. Direct children of the
@@ -64,11 +66,9 @@ interface PlanPreview {
 function formatDate(iso: string | null): string | null {
   if (!iso) return null;
   const d = new Date(iso);
-  const date = d.toLocaleDateString('de-AT', { weekday: 'long', day: 'numeric', month: 'long' });
-  const h = d.getHours();
-  const m = d.getMinutes();
-  if (h === 0 && m === 0) return date;
-  return `${date} · ${d.toLocaleTimeString('de-AT', { hour: '2-digit', minute: '2-digit' })}`;
+  const date = d.toLocaleDateString('de-AT', { weekday: 'long', day: 'numeric', month: 'long', timeZone: EVENT_TZ });
+  const time = formatTime(iso);
+  return time ? `${date} · ${time}` : date;
 }
 
 function JoinPage() {

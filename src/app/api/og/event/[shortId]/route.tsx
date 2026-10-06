@@ -17,6 +17,7 @@
 import { ImageResponse } from 'next/og';
 import { createClient } from '@supabase/supabase-js';
 import { extractShortId } from '@/lib/utils/slugify';
+import { EVENT_TZ } from '@/lib/utils/event-time';
 
 export const runtime = 'nodejs';
 export const revalidate = 86400; // re-render OG image once per day per event
@@ -64,6 +65,7 @@ export async function GET(
           day: 'numeric',
           month: 'long',
           year: 'numeric',
+          timeZone: EVENT_TZ,
         })
       : null,
     event?.location_name || event?.bundesland || 'Österreich',

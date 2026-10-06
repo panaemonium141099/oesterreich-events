@@ -13,6 +13,7 @@
 
 import { V4WizardEventSummary, V4WizardHead, V4WizardToggle } from './V4WizardShared';
 import type { Event } from '@/types/events';
+import { EVENT_TZ } from '@/lib/utils/event-time';
 
 interface Props {
   event: Event;
@@ -78,6 +79,6 @@ function formatEventDate(iso: string): string {
   try {
     const d = new Date(iso);
     if (isNaN(d.getTime())) return '';
-    return d.toLocaleDateString('de-AT', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+    return d.toLocaleDateString('de-AT', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: EVENT_TZ });
   } catch { return ''; }
 }

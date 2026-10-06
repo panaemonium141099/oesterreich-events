@@ -18,6 +18,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import type { Festival } from '@/types/festivals';
 import { V4Badge } from './V4Badge';
+import { EVENT_TZ } from '@/lib/utils/event-time';
 
 interface V4FestivalCardProps {
   /** Festival-Row plus pre-built `href` (siehe LandingFestival type). */
@@ -30,16 +31,16 @@ function dateRange(startIso: string | null, endIso?: string | null): string {
   if (!startIso) return '';
   const start = new Date(startIso);
   const end = endIso ? new Date(endIso) : null;
-  const startStr = start.toLocaleDateString('de-AT', { day: 'numeric', month: 'short' });
+  const startStr = start.toLocaleDateString('de-AT', { day: 'numeric', month: 'short', timeZone: EVENT_TZ });
   if (!end || end.toDateString() === start.toDateString()) return startStr;
   const sameMonth = start.getMonth() === end.getMonth();
   const startDay = start.getDate();
   const endDay = end.getDate();
   if (sameMonth) {
-    const month = start.toLocaleDateString('de-AT', { month: 'short' });
+    const month = start.toLocaleDateString('de-AT', { month: 'short', timeZone: EVENT_TZ });
     return `${startDay}.–${endDay}. ${month}`;
   }
-  const endStr = end.toLocaleDateString('de-AT', { day: 'numeric', month: 'short' });
+  const endStr = end.toLocaleDateString('de-AT', { day: 'numeric', month: 'short', timeZone: EVENT_TZ });
   return `${startStr} – ${endStr}`;
 }
 

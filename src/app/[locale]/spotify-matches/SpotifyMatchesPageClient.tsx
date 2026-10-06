@@ -7,6 +7,7 @@ import { useAuth } from '@/lib/supabase/auth-context';
 import { createClient } from '@/lib/supabase/client';
 import { EventImage } from '@/components/Events/EventImage';
 import { buildEventUrlV2 } from '@/lib/utils/slugify';
+import { EVENT_TZ } from '@/lib/utils/event-time';
 
 interface SpotifyMatch {
   id: string;
@@ -103,6 +104,7 @@ export function SpotifyMatchesPageClient() {
   const formatDate = (dateStr: string) => {
     return new Date(dateStr).toLocaleDateString('de-AT', {
       weekday: 'short', day: 'numeric', month: 'long', year: 'numeric',
+      timeZone: EVENT_TZ,
     });
   };
 

@@ -18,6 +18,7 @@ import { POSTGREST_MAX_ROWS } from '../lib/db/fetch-all';
 import { readFileSync, writeFileSync, readdirSync, existsSync, mkdirSync } from 'fs';
 import { join } from 'path';
 import type { PaginationLogEntry } from '../lib/scrapers/GemeindeRegistryScraper';
+import { EVENT_TZ } from '@/lib/utils/event-time';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -291,8 +292,9 @@ function generateReport(
   const lines: string[] = [];
   const dateStr = new Date().toLocaleDateString('de-AT', {
     weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',
+    timeZone: EVENT_TZ,
   });
-  const timeStr = new Date().toLocaleTimeString('de-AT', { hour: '2-digit', minute: '2-digit' });
+  const timeStr = new Date().toLocaleTimeString('de-AT', { hour: '2-digit', minute: '2-digit', timeZone: EVENT_TZ });
 
   // ── Header ──
   lines.push('╔══════════════════════════════════════════════════════════════════════════════╗');

@@ -14,6 +14,7 @@ import { NextResponse, type NextRequest } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { getStripe, parseEventRef, BOOST_PRICE_CENTS } from '@/lib/payments/stripe-boost';
 import { publicOrigin } from '@/lib/site-url';
+import { EVENT_TZ } from '@/lib/utils/event-time';
 
 export const dynamic = 'force-dynamic';
 
@@ -77,7 +78,7 @@ export async function POST(req: NextRequest) {
   }
   if (event.is_boosted && event.boost_until && new Date(event.boost_until) > new Date()) {
     return NextResponse.json(
-      { error: `„${event.title}" ist bereits geboostet (bis ${new Date(event.boost_until).toLocaleDateString('de-AT')}).` },
+      { error: `„${event.title}" ist bereits geboostet (bis ${new Date(event.boost_until).toLocaleDateString('de-AT', { timeZone: EVENT_TZ })}).` },
       { status: 409 },
     );
   }

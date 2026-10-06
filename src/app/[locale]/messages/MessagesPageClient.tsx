@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/lib/supabase/auth-context';
 import { createClient } from '@/lib/supabase/client';
+import { EVENT_TZ } from '@/lib/utils/event-time';
 
 interface Conversation {
   friendId: string;
@@ -195,7 +196,7 @@ export function MessagesPageClient() {
     if (diff < 60000) return 'gerade eben';
     if (diff < 3600000) return `vor ${Math.floor(diff / 60000)} Min.`;
     if (diff < 86400000) return `vor ${Math.floor(diff / 3600000)} Std.`;
-    return d.toLocaleDateString('de-AT', { day: 'numeric', month: 'short' });
+    return d.toLocaleDateString('de-AT', { day: 'numeric', month: 'short', timeZone: EVENT_TZ });
   };
 
   // Rule 5: Skeleton loading instead of spinner for auth loading

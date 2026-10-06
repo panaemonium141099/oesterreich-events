@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import type { Event } from '@/types/events';
 import type { WizardState } from './V4PlanWizard';
+import { EVENT_TZ } from '@/lib/utils/event-time';
 
 interface Props {
   state: WizardState;
@@ -53,7 +54,7 @@ export function V4PlanWizardStep2({ state, update }: Props) {
               <div className="flex-1 min-w-0">
                 <div className="text-[14px] font-semibold text-[var(--v4-ink)] truncate">{ev.title}</div>
                 <div className="text-[12px] text-[var(--v4-ink-50)] truncate">
-                  {new Date(ev.start_date).toLocaleDateString('de-AT', { weekday: 'short', day: 'numeric', month: 'short' })}
+                  {new Date(ev.start_date).toLocaleDateString('de-AT', { weekday: 'short', day: 'numeric', month: 'short', timeZone: EVENT_TZ })}
                   {ev.location_name ? ` · ${ev.location_name}` : ''}
                 </div>
               </div>
@@ -90,7 +91,7 @@ export function V4PlanWizardStep2({ state, update }: Props) {
             >
               <div className="text-[13.5px] font-semibold text-[var(--v4-ink)] truncate">{ev.title}</div>
               <div className="text-[11.5px] text-[var(--v4-ink-50)]">
-                {new Date(ev.start_date).toLocaleDateString('de-AT', { weekday: 'short', day: 'numeric', month: 'short' })}
+                {new Date(ev.start_date).toLocaleDateString('de-AT', { weekday: 'short', day: 'numeric', month: 'short', timeZone: EVENT_TZ })}
                 {ev.location_name ? ` · ${ev.location_name}` : ''}
               </div>
             </button>

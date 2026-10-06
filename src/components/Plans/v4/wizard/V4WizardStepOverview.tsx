@@ -12,6 +12,7 @@ import type { Event } from '@/types/events';
 import type { PlanItemStatus, ArrivalMode } from '@/types/plans';
 import { V4WizardHead } from './V4WizardShared';
 import { V4Status, type V4StatusKind } from '@/components/Events/v4';
+import { EVENT_TZ } from '@/lib/utils/event-time';
 
 interface Props {
   event: Event;
@@ -196,7 +197,7 @@ function formatLongDate(iso: string): string {
   try {
     const d = new Date(iso);
     if (isNaN(d.getTime())) return iso;
-    return d.toLocaleDateString('de-AT', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+    return d.toLocaleDateString('de-AT', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: EVENT_TZ });
   } catch { return iso; }
 }
 
@@ -204,7 +205,7 @@ function formatShort(iso: string): string {
   try {
     const d = new Date(iso);
     if (isNaN(d.getTime())) return '';
-    return d.toLocaleString('de-AT', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+    return d.toLocaleString('de-AT', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit', timeZone: EVENT_TZ });
   } catch { return ''; }
 }
 

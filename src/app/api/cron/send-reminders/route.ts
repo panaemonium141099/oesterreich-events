@@ -22,6 +22,7 @@ import {
   type ArtistReminderEmailData,
 } from '@/lib/email';
 import { reminderToken, reminderMailHtml } from '@/lib/event-reminder';
+import { EVENT_TZ } from '@/lib/utils/event-time';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
@@ -43,6 +44,7 @@ function formatDateDE(dateStr: string): string {
       day: 'numeric',
       month: 'long',
       year: 'numeric',
+      timeZone: EVENT_TZ,
     });
   } catch {
     return dateStr;

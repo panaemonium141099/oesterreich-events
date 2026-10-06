@@ -40,6 +40,7 @@ import {
 } from '../lib/scrapers/RegistryBasedScraper';
 import { syncEventsToSupabase } from '../lib/db/supabase-sync';
 import type { EventFeedType } from '@/types/venues';
+import { EVENT_TZ } from '@/lib/utils/event-time';
 
 function parseArgs(): RegistryScraperOptions & { dryRun: boolean; sync: boolean } {
   const args = process.argv.slice(2);
@@ -132,7 +133,7 @@ async function main() {
 
     for (const v of venues) {
       const lastScraped = v.last_scraped_at
-        ? new Date(v.last_scraped_at).toLocaleDateString('de-AT')
+        ? new Date(v.last_scraped_at).toLocaleDateString('de-AT', { timeZone: EVENT_TZ })
         : 'never';
       console.log(
         `  ${v.name} [${v.event_feed_type}] (${v.bundesland ?? 'unknown'}) — last scraped: ${lastScraped}`
