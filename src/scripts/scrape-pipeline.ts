@@ -202,6 +202,12 @@ async function main() {
       }, steps);
     }
 
+    // Nach dem Dedup: ein Primary bleibt stehen, solange ein Duplikat noch
+    // gelistet wird (siehe src/lib/quality/withdrawal.ts).
+    steps.withdrawal = await runStep('withdrawal', async () => {
+      execStep('Withdraw events no longer listed', `npx tsx ${envFlag}src/scripts/withdraw-stale-events.ts`);
+    }, steps);
+
     steps.artist_matching = await runStep('artist_matching', async () => {
       await triggerMatchArtists();
     }, steps);

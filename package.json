@@ -43,6 +43,7 @@
     "scrape:gemeinden-generic": "tsx src/scripts/scrape.ts --source gemeinden-generic",
     "score": "tsx --env-file=.env.local src/scripts/calculate-scores.ts",
     "dedup": "tsx --env-file=.env.local src/scripts/dedup.ts",
+    "withdraw:stale": "tsx --env-file=.env.local src/scripts/withdraw-stale-events.ts",
     "migrate": "tsx --env-file=.env.local src/scripts/apply-migration.ts",
     "test": "vitest run",
     "test:watch": "vitest",

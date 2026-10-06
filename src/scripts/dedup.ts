@@ -83,7 +83,7 @@ async function cleanupGarbage(stats: DedupStats): Promise<void> {
   while (true) {
     const { data, error } = await supabase
       .from('events')
-      .select('id,title,publish_status')
+      .select('id,title,publish_status,source_name')
       .neq('publish_status', 'suppressed')
       .neq('publish_status', 'duplicate')
       .range(offset, offset + 999)
@@ -96,7 +96,7 @@ async function cleanupGarbage(stats: DedupStats): Promise<void> {
     if (!data || data.length === 0) break;
 
     for (const e of data) {
-      if (e.title && isGarbageTitle(e.title)) {
+      if (e.title && isGarbageTitle(e.title, { sourceName: e.source_name })) {
         garbageIds.push(e.id);
       }
     }
