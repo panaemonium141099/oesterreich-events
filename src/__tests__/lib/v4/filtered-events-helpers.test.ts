@@ -33,4 +33,12 @@ describe('Client-Filter (Liste und Vorschau)', () => {
     expect(bl).toHaveLength(2);
     expect(narrowEvents(bl, { dateTo: '2026-11-13', categories: ['Musik'] })).toHaveLength(1);
   });
+  it('Datumsfilter nimmt den Wien-Tag, nicht den UTC-Prefix', () => {
+    // 22:30Z am 06.10. = 00:30 Wien am 07.10.
+    const late = ev({ start_date: '2026-10-06T22:30:00Z' });
+    // Kartenpunkt: dayToIso liefert T00:00Z des Wien-Tags
+    const point = ev({ title: null as unknown as string, start_date: '2026-10-07T00:00:00.000Z' });
+    expect(narrowEvents([late, point], { dateFrom: '2026-10-07', dateTo: '2026-10-07' })).toHaveLength(2);
+    expect(narrowEvents([late, point], { dateTo: '2026-10-06' })).toHaveLength(0);
+  });
 });
