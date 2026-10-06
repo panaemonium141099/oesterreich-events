@@ -40,7 +40,11 @@ interface MapPointsPayload {
   score: number[];
 }
 
-/** Referenz-Epoche der start/end-Day-Offsets (siehe RPC get_event_map_points). */
+/**
+ * Referenz-Epoche der start/end-Day-Offsets (siehe RPC get_event_map_points).
+ * Die Offsets zählen Wien-Kalendertage (Migration 20261006120000);
+ * dayToIso liefert T00:00Z dieses Tages, in Wien also derselbe Tag.
+ */
 const EPOCH_MS = Date.UTC(2026, 0, 1);
 
 function dayToIso(day: number): string {

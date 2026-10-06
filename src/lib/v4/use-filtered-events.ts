@@ -27,6 +27,7 @@ import { BUNDESLAENDER, bundeslandToId, type Bundesland } from '@/lib/bundeslaen
 import { displayDistrictName } from '@/lib/districtsAT';
 import { bundeslandDisplayName } from '@/lib/i18n/bundesland-names';
 import { fetchMapPointEvents, pointsEligible } from '@/lib/v4/map-points';
+import { parseEventDate, toViennaDate } from '@/lib/utils/event-time';
 
 export interface UseFilteredEventsOptions {
   /**
@@ -205,13 +206,20 @@ export function narrowEvents(events: Event[], filters: EventFilters): Event[] {
   // Tagesvergleich auf YYYY-MM-DD); im Points-Modus ist DAS der Filter.
   // Felder, die der Payload nicht kennt (undefined), lassen die Zeile
   // durch — Muster wie bei price_tier oben.
+  // Tag = Wien-Kalendertag des Instants, nicht der UTC-Prefix des Strings:
+  // 00:30 Wien steht als 22:30Z am Vortag in der DB. Punkte tragen
+  // T00:00Z des Wien-Tags (dayToIso), das ergibt denselben Tag.
+  const viennaDay = (iso: string) => {
+    const d = parseEventDate(iso);
+    return d ? toViennaDate(d) : iso.slice(0, 10);
+  };
   if (filters.dateFrom) {
     const from = filters.dateFrom.slice(0, 10);
-    out = out.filter((e) => !e.start_date || e.start_date.slice(0, 10) >= from);
+    out = out.filter((e) => !e.start_date || viennaDay(e.start_date) >= from);
   }
   if (filters.dateTo) {
     const to = filters.dateTo.slice(0, 10);
-    out = out.filter((e) => !e.start_date || e.start_date.slice(0, 10) <= to);
+    out = out.filter((e) => !e.start_date || viennaDay(e.start_date) <= to);
   }
   if (filters.studentFriendly) {
     out = out.filter((e) => {
