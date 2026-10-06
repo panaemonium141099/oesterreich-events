@@ -34,6 +34,37 @@ interface GemeindeEventPageRaw {
   htmlSize: number;
 }
 
+const DATE_RE = /(\d{1,2})\.(\d{1,2})\.(20\d{2})/g;
+
+/** Alle Datumsangaben D.M.YYYY im Text als YYYY-MM-DD, in Fundreihenfolge. */
+function findDates(text: string): string[] {
+  return [...text.matchAll(DATE_RE)].map(
+    m => `${m[3]}-${m[2].padStart(2, '0')}-${m[1].padStart(2, '0')}`,
+  );
+}
+
+/**
+ * Uhrzeit (HH:MM) aus einem Listen-Eintrag. Datumsangaben werden vorher
+ * entfernt: sonst liest "14.10.2026" sich als 14:10 (Prod-Befund
+ * 2026-10-06: die Minute war bei fast allen Events der Monat). Ein Punkt
+ * als Trenner zählt nur mit folgendem "Uhr" ("19.30 Uhr"), der Doppelpunkt
+ * immer. Stunden/Minuten außerhalb des Tages gelten als keine Uhrzeit.
+ */
+export function extractTimeOfDay(text: string): string | null {
+  // Datumsfragmente auch ohne Jahr ("9.11.") und mit Jahr entfernen.
+  const withoutDates = text.replace(/\d{1,2}\.\d{1,2}\.(?:\d{2,4})?/g, ' ');
+  const re = /(?<![\d:])(\d{1,2})(?::(\d{2})(?!\d)|\.(\d{2})(?=\s*Uhr))/g;
+  for (const m of withoutDates.matchAll(re)) {
+    const h = Number(m[1]);
+    const min = Number(m[2] ?? m[3]);
+    if (h <= 23 && min <= 59) return `${String(h).padStart(2, '0')}:${String(min).padStart(2, '0')}`;
+  }
+  return null;
+}
+
+/** Linktexte, die kein Event benennen ("mehr Informationen" o. ä.). */
+const GENERIC_LINK_TEXT = /^(mehr( informationen| infos?| erfahren| lesen)?|weiter(lesen)?|details?|zur veranstaltung|read more)\W*$/i;
+
 interface GemeindeEventPage {
   gemeinde: GemeindeStammdaten & { website: string; region?: boolean };
   eventPageUrl: string;
@@ -331,28 +362,47 @@ export class GenericGemeindeScraper extends BaseScraper {
 
     // Strategy: Find all elements containing a date pattern DD.MM.YYYY
     // Then extract the nearest heading/text as the event title
-    const body = $.html();
-
-    // Find date patterns with surrounding context
-    const dateRegex = /(\d{1,2})\.(\d{1,2})\.(20\d{2})/g;
-    let match;
+    const BLOCK = 'li, tr, div, article, section';
+    const blockDates = (node: any): string[] | null => {
+      const text = $(node).text();
+      if (text.length > 1000 || text.length < 10) return null;
+      const dates = findDates(text);
+      return dates.length > 0 ? dates : null;
+    };
+    const sameDateSet = (a: string[], b: string[]) => {
+      const sa = new Set(a), sb = new Set(b);
+      return sa.size === sb.size && [...sa].every(d => sb.has(d));
+    };
 
     // First try: look for list items, table rows, or divs that contain dates
-    $('li, tr, div, article, section').each((_, el) => {
+    $(BLOCK).each((_, el) => {
       const $el = $(el);
       const text = $el.text();
-      const dateMatch = text.match(/(\d{1,2})\.(\d{1,2})\.(20\d{2})/);
-      if (!dateMatch) return;
+      const dates = blockDates(el);
+      if (!dates) return;
 
-      // Skip if this is a huge container (not specific enough)
-      if (text.length > 1000) return;
-      // Skip if too small
-      if (text.length < 10) return;
+      // Ein Event = der äußerste Block mit genau diesen Daten (die Kachel).
+      // Die inneren Blöcke derselben Kachel (Datums-Badge, Wochentag,
+      // Ortszeile) lieferten sonst eigene Events mit Titeln wie "Mittwoch",
+      // "Gemeindesaal" oder "Datum der VeranstaltungMi," (Prod 2026-10-06).
+      const parentBlock = $el.parent().closest(BLOCK);
+      if (parentBlock.length) {
+        const parentDates = blockDates(parentBlock[0]);
+        if (parentDates && sameDateSet(parentDates, dates)) return;
+      }
+      // Umgekehrt ist ein Block mit mehreren Kacheln (eigene Datums-Blöcke
+      // mit verschiedenen Detail-Links) nur die Liste, kein Event. Spalten
+      // EINER Kachel (Bild + Text) verlinken dasselbe Ziel.
+      const cardLinks = new Set<string>();
+      $el.find(BLOCK).each((_, n) => {
+        if ($(n).parent().closest(BLOCK)[0] !== el) return;
+        if (findDates($(n).text()).length === 0) return;
+        const href = this.firstContentAnchorHref($(n));
+        if (href) cardLinks.add(href);
+      });
+      if (cardLinks.size >= 2) return;
 
-      const day = dateMatch[1].padStart(2, '0');
-      const month = dateMatch[2].padStart(2, '0');
-      const year = dateMatch[3];
-      const dateStr = `${year}-${month}-${day}`;
+      const dateStr = dates[0];
 
       // Skip past dates
       if (new Date(dateStr) < new Date('2025-01-01')) return;
@@ -362,7 +412,8 @@ export class GenericGemeindeScraper extends BaseScraper {
       // — `find()` liefert Dokumentreihenfolge, nicht Selektorreihenfolge,
       // sonst gewinnt der Kontakt-Link eines Vereinsblocks gegen die
       // Ueberschrift und die Mailadresse wird zum Titel.
-      let title = $el.find('h2, h3, h4').first().text().trim()
+      let title = $el.find('h2, h3, h4, h5, h6').first().text().trim()
+        || this.titleElementText($el)
         || this.firstContentAnchorText($el)
         || $el.find('strong, b').first().text().trim();
       if (!title || title.length < 5) {
@@ -385,10 +436,8 @@ export class GenericGemeindeScraper extends BaseScraper {
       const link = this.firstContentAnchorHref($el);
 
       // Try to extract time
-      const timeMatch = text.match(/(\d{1,2})[:.:](\d{2})\s*(?:Uhr|h)?/);
-      const startDate = timeMatch
-        ? `${dateStr}T${timeMatch[1].padStart(2, '0')}:${timeMatch[2]}`
-        : dateStr;
+      const time = extractTimeOfDay(text);
+      const startDate = time ? `${dateStr}T${time}` : dateStr;
 
       events.push({
         source_id: `gemeinden-generic-${g.idKey}-${this.slugify(title)}-${dateStr}`,
@@ -406,8 +455,23 @@ export class GenericGemeindeScraper extends BaseScraper {
 
   // ─── Helpers ────────────────────────────────────────────────────────
 
+  /** Text des innersten Elements mit "title"/"header" in der Klasse
+   *  (z. B. gem2go-Karten: `.card-title > .bemHeader`), ohne Datum. */
+  private titleElementText($el: cheerio.Cheerio<any>): string {
+    const sel = '[class*="title" i], [class*="header" i]';
+    const nodes = $el.find(sel);
+    for (let i = 0; i < nodes.length; i++) {
+      if (nodes.eq(i).find(sel).length > 0) continue;
+      const text = nodes.eq(i).text().replace(/\s+/g, ' ').trim();
+      if (text.length >= 5 && findDates(text).length === 0) return text;
+    }
+    return '';
+  }
+
   /** Text des ersten Anchors, der kein Kontakt-Link (mailto:/tel:/…) ist.
-   *  Anchors ganz ohne href bleiben zulaessig — die sind reine Wrapper. */
+   *  Anchors ganz ohne href bleiben zulaessig — die sind reine Wrapper.
+   *  Generische Linktexte ("mehr Informationen") und Anchors, die die
+   *  ganze Kachel samt Datum umschließen, benennen kein Event. */
   private firstContentAnchorText($el: cheerio.Cheerio<any>): string {
     const anchors = $el.find('a');
     for (let i = 0; i < anchors.length; i++) {
@@ -415,6 +479,7 @@ export class GenericGemeindeScraper extends BaseScraper {
       const href = a.attr('href');
       if (href && !isUsableDetailHref(href)) continue;
       const text = a.text().trim();
+      if (GENERIC_LINK_TEXT.test(text) || findDates(text).length > 0) continue;
       if (text) return text;
     }
     return '';
