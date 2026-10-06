@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { coverageScope, planWithdrawals, type SightingRow } from '@/lib/quality/withdrawal';
+import { coverageScope, planWithdrawals, probeGone, type SightingRow } from '@/lib/quality/withdrawal';
 
 const NOW = new Date('2026-10-06T12:00:00Z');
 const daysAgo = (d: number) => new Date(NOW.getTime() - d * 86_400_000).toISOString();
@@ -25,7 +25,10 @@ function visit(p: Partial<SightingRow> = {}): SightingRow[] {
   return [row({ start_date: inDays(5), ...p }), row({ start_date: inDays(15), ...p }), row({ start_date: inDays(30), ...p })];
 }
 
-const ids = (plan: ReturnType<typeof planWithdrawals>) => plan.withdraw.map((w) => w.id).sort();
+/** Sofort zurückzuziehen (Quelle tot) plus Kandidaten, die erst geprüft werden. */
+const ids = (plan: ReturnType<typeof planWithdrawals>) =>
+  [...plan.withdraw, ...plan.probe].map((w) => w.id).sort();
+const probeIds = (plan: ReturnType<typeof planWithdrawals>) => plan.probe.map((w) => w.id).sort();
 
 describe('coverageScope', () => {
   it('ist die Domain der Quell-URL, ohne www und Grossschreibung', () => {
@@ -42,11 +45,21 @@ describe('coverageScope', () => {
 });
 
 describe('planWithdrawals — Quelle hat neu gelistet, Event fehlte', () => {
-  it('zieht ein Event zurück, das ein späterer Besuch derselben Seite nicht mehr fand', () => {
+  it('schickt ein Event zur Prüfung, das ein späterer Besuch derselben Seite nicht mehr fand', () => {
+    // Nicht gesehen ist kein Beleg: Stichprobe 2026-10-06, von 125 solchen
+    // Kandidaten waren nur 15 an der Quelle wirklich weg (404/410).
     const gone = row({ id: 'gone', last_seen_at: daysAgo(8) });
     const plan = planWithdrawals([gone, ...visit()], { now: NOW });
-    expect(ids(plan)).toEqual(['gone']);
-    expect(plan.withdraw[0].reason).toBe('missing_from_source');
+    expect(plan.withdraw).toEqual([]);
+    expect(probeIds(plan)).toEqual(['gone']);
+    expect(plan.probe[0]).toMatchObject({ reason: 'missing_from_source', url: gone.source_url });
+  });
+
+  it('prüft nicht, wenn die URL eine Listen-Seite mehrerer Events ist', () => {
+    const list = 'https://www.pill.gv.at/veranstaltungen';
+    const gone = row({ id: 'gone', last_seen_at: daysAgo(20), source_url: list });
+    const other = row({ source_url: list });
+    expect(probeIds(planWithdrawals([gone, other, ...visit()], { now: NOW }))).toEqual([]);
   });
 
   it('wartet sieben Tage nach der letzten Sichtung', () => {
@@ -88,14 +101,6 @@ describe('planWithdrawals — Quelle hat neu gelistet, Event fehlte', () => {
     expect(ids(planWithdrawals([past, review, ...visit()], { now: NOW }))).toEqual([]);
   });
 
-  it('überspringt eine Seite, auf der mehr als die Hälfte verschwinden würde (Scraper kaputt)', () => {
-    const gone = Array.from({ length: 6 }, (_, i) => row({ id: `g${i}`, last_seen_at: daysAgo(20) }));
-    const plan = planWithdrawals([...gone, ...visit()], { now: NOW });
-    expect(ids(plan)).toEqual([]);
-    expect(plan.skippedScopes).toEqual([
-      { source_name: 'gem2go', scope: 'gem2go|pill.gv.at', candidates: 6, visible: 9 },
-    ]);
-  });
 });
 
 describe('planWithdrawals — Quelle liefert gar nicht mehr', () => {
@@ -105,13 +110,88 @@ describe('planWithdrawals — Quelle liefert gar nicht mehr', () => {
       row({ id: 'd2', source_name: 'oeticket', source_url: 'https://www.oeticket.com/b', last_seen_at: daysAgo(150) }),
     ];
     const plan = planWithdrawals([...dead, ...visit()], { now: NOW });
-    expect(ids(plan)).toEqual(['d1', 'd2']);
+    expect(plan.withdraw.map((w) => w.id).sort()).toEqual(['d1', 'd2']);
     expect(plan.withdraw.every((w) => w.reason === 'source_dead')).toBe(true);
+    expect(plan.probe).toEqual([]);
+  });
+
+  it('läuft der Scraper noch (findet nur nichts), wird erst geprüft statt sofort zurückgezogen', () => {
+    // ticketmaster/events.at/oho.at liefen 2026-10-06 täglich und fanden
+    // seit Mai nichts: kaputter Scraper, kein Beleg für abgesagte Events.
+    const stale = row({ id: 't1', source_name: 'ticketmaster', source_url: 'https://www.ticketmaster.at/event/1', last_seen_at: daysAgo(150) });
+    const plan = planWithdrawals([stale, ...visit()], { now: NOW, runningSources: new Set(['ticketmaster', 'gem2go']) });
+    expect(plan.withdraw).toEqual([]);
+    expect(plan.probe).toMatchObject([{ id: 't1', reason: 'source_dead', url: 'https://www.ticketmaster.at/event/1' }]);
   });
 
   it('greift nicht, wenn die ganze Pipeline steht (seit zwei Tagen nichts gesehen)', () => {
     const dead = row({ id: 'd1', source_name: 'oeticket', last_seen_at: daysAgo(150) });
     const stalled = visit({ last_seen_at: daysAgo(3) });
     expect(ids(planWithdrawals([dead, ...stalled], { now: NOW }))).toEqual([]);
+  });
+});
+
+describe('probeGone — Beleg an der Quelle', () => {
+  const res = (status: number) => ({ status }) as Response;
+
+  it('weg ist nur, was nach allen Weiterleitungen 404 oder 410 liefert', async () => {
+    const status: Record<string, number> = {
+      'https://a.at/1': 404, 'https://b.at/1': 410, 'https://c.at/1': 200, 'https://d.at/1': 500, 'https://e.at/1': 403,
+    };
+    const gone = await probeGone(Object.keys(status), {
+      fetchImpl: async (u) => res(status[String(u)]),
+    });
+    expect([...gone].sort()).toEqual(['https://a.at/1', 'https://b.at/1']);
+  });
+
+  it('Netzwerkfehler und Zeitüberschreitung gelten nicht als weg', async () => {
+    const gone = await probeGone(['https://a.at/1'], {
+      fetchImpl: async () => { throw new Error('ECONNRESET'); },
+    });
+    expect(gone.size).toBe(0);
+  });
+
+  it('fragt je Website nur eine Seite gleichzeitig ab und hält das Budget ein', async () => {
+    let active = 0;
+    let maxActive = 0;
+    const calls: string[] = [];
+    const urls = ['https://a.at/1', 'https://a.at/2', 'https://a.at/3', 'https://b.at/1'];
+    await probeGone(urls, {
+      budget: 3,
+      hostDelayMs: 0,
+      fetchImpl: async (u) => {
+        const host = new URL(String(u)).host;
+        calls.push(String(u));
+        if (host === 'a.at') { active++; maxActive = Math.max(maxActive, active); }
+        await new Promise((r) => setTimeout(r, 5));
+        if (host === 'a.at') active--;
+        return res(404);
+      },
+    });
+    expect(maxActive).toBe(1);
+    expect(calls).toHaveLength(3);
+  });
+
+  it('gibt eine Website auf, die drei Mal in Folge keine verwertbare Antwort gibt (Bot-Sperre)', async () => {
+    const calls: string[] = [];
+    const urls = Array.from({ length: 10 }, (_, i) => `https://www.oeticket.com/e/${i}`);
+    const gone = await probeGone([...urls, 'https://b.at/1'], {
+      hostDelayMs: 0,
+      fetchImpl: async (u) => {
+        calls.push(String(u));
+        if (String(u).includes('oeticket')) throw new Error('timeout');
+        return res(404);
+      },
+    });
+    expect(calls.filter((c) => c.includes('oeticket'))).toHaveLength(3);
+    expect([...gone]).toEqual(['https://b.at/1']);
+  });
+
+  it('eine 200 setzt die Fehlerserie zurück', async () => {
+    const seq = [500, 403, 200, 500, 429, 404];
+    let i = 0;
+    const urls = seq.map((_, k) => `https://a.at/${k}`);
+    const gone = await probeGone(urls, { hostDelayMs: 0, fetchImpl: async () => res(seq[i++]) });
+    expect([...gone]).toEqual(['https://a.at/5']);
   });
 });

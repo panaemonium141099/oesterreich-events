@@ -1,16 +1,41 @@
 import { describe, it, expect } from 'vitest';
 import { isGarbageTitle } from '@/lib/pipeline/garbage-filter';
 
-describe('isGarbageTitle: Badge-Leiste statt Titel', () => {
-  it('verwirft "Event" + Umbruch + Genre (partytimer-Kartentext)', () => {
-    expect(isGarbageTitle('Event\n           Pop / Rock\n           Arsen')).toBe(true);
-    expect(isGarbageTitle('Event\r\n Party')).toBe(true);
-    expect(isGarbageTitle('Event')).toBe(true);
+// Befund 2026-10-06: der Gemeinde-Parser (vor #275) machte aus Kachel-Teilen
+// eigene Events. Diese Titel stehen noch in der DB; der nächtliche Dedup
+// unterdrückt alles, was isGarbageTitle erkennt.
+describe('isGarbageTitle — Kachel-Teile statt Titel', () => {
+  it.each([
+    'Mehr Infos',
+    'gefundene Veranstaltungen',
+    'Suche ab:',
+    'Datum der VeranstaltungMi,',
+    'Datum der Veranstaltung',
+  ])('überall: %s', (title) => {
+    expect(isGarbageTitle(title)).toBe(true);
+    expect(isGarbageTitle(title, { sourceName: 'Eventim' })).toBe(true);
   });
 
-  it('lässt echte Titel mit "Event" am Anfang durch', () => {
-    expect(isGarbageTitle('Event Horizon Festival')).toBe(false);
-    expect(isGarbageTitle('Eventnacht im Flex')).toBe(false);
-    expect(isGarbageTitle('Klub66')).toBe(false);
+  it.each(['Mittwoch', ' Sonntag ', 'Heute', 'Morgen', 'Gemeindesaal'])(
+    'bei Gemeinde-Aggregatoren: %s',
+    (title) => {
+      expect(isGarbageTitle(title, { sourceName: 'gemeinden-generic' })).toBe(true);
+      expect(isGarbageTitle(title, { sourceName: 'gem2go' })).toBe(true);
+    },
+  );
+
+  it('ein Stück namens "Montag" bei Eventim ist echt (Dschungel Wien, Feb. 2027)', () => {
+    expect(isGarbageTitle('Montag', { sourceName: 'Eventim' })).toBe(false);
+    expect(isGarbageTitle('Montag')).toBe(false);
+  });
+
+  it.each([
+    'Bauernmarkt',
+    'Sonntagsbrunch im Gemeindesaal',
+    'Heute Abend: Jazz im Keller',
+    'Mittwochs-Stammtisch',
+    'Biomüll',
+  ])('lässt echte Titel durch: %s', (title) => {
+    expect(isGarbageTitle(title, { sourceName: 'gemeinden-generic' })).toBe(false);
   });
 });

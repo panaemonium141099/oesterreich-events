@@ -27,12 +27,29 @@ const GARBAGE_TITLES = new Set([
   'mehr informationen', 'more information',
   'weitere informationen', 'details',
   'event',
+  // Listen-Überschriften und Buttons, die der Gemeinde-Parser vor #275 als
+  // Titel las (Befund 2026-10-06)
+  'mehr infos', 'mehr info', 'mehr erfahren', 'weiterlesen',
+  'gefundene veranstaltungen', 'suche ab',
+]);
+
+/**
+ * Einzelwörter, die bei Gemeinde-Kalendern nie ein Titel sind, sondern ein
+ * Datums-Badge oder die Ortszeile einer Kachel. Anderswo können sie echt
+ * sein: Eventim führt ein Stück namens "Montag" (Dschungel Wien).
+ */
+const GEMEINDE_TILE_WORDS = new Set([
+  'montag', 'dienstag', 'mittwoch', 'donnerstag', 'freitag', 'samstag', 'sonntag',
+  'heute', 'morgen', 'gemeindesaal',
+]);
+const GEMEINDE_AGGREGATORS = new Set([
+  'gemeinden-generic', 'gem2go', 'gemeinde-registry', 'gemeinden', 'gemeinde-fallback',
 ]);
 
 /**
  * Check if a title (after normalization/lowercasing) is a garbage non-event page.
  */
-export function isGarbageTitle(title: string): boolean {
+export function isGarbageTitle(title: string, context: { sourceName?: string | null } = {}): boolean {
   // Badge-Leiste statt Titel: Kartentext wie "Event\n   Pop / Rock\n …"
   // (partytimer 2026-09). Ein echter Titel bricht nie direkt nach "Event" um.
   if (/^\s*event[ \t]*[\r\n]/i.test(title)) return true;
@@ -46,6 +63,11 @@ export function isGarbageTitle(title: string): boolean {
 
   // Exact match against blacklist
   if (GARBAGE_TITLES.has(normalized)) return true;
+
+  // Feldbeschriftung statt Titel: "Datum der VeranstaltungMi,"
+  if (normalized.startsWith('datum der veranstaltung')) return true;
+
+  if (GEMEINDE_AGGREGATORS.has(context.sourceName ?? '') && GEMEINDE_TILE_WORDS.has(normalized)) return true;
 
   // Too short (< 3 chars after normalization)
   if (normalized.length < 3) return true;
