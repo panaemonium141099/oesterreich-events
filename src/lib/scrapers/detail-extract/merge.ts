@@ -49,6 +49,8 @@ export function mergeEnrichment(e: ScrapedEvent, d: Partial<DetailEnrichment>): 
   if (!e.price_text && d.price_text) e.price_text = d.price_text;
   if (e.price_min === undefined && d.price_min !== undefined) e.price_min = d.price_min;
   if (e.price_max === undefined && d.price_max !== undefined) e.price_max = d.price_max;
+  // "frei" nur neben einem Betrag: ein früher gespeichertes "Eintritt frei" fällt.
+  if (d.price_unclear && !e.price_text) e.price_rejected = 'unclear_free';
 
   // organizer — only when listing was empty
   if (!e.organizer && d.organizer) e.organizer = d.organizer;

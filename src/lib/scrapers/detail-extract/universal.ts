@@ -380,7 +380,7 @@ const LABELED_ADDRESS_REGEX =
   /(?:\b(?:Adresse|Anschrift|Treffpunkt|Veranstaltungsort)\b\s*[:\-]?\s+|\b(?:Wo|Ort)\s*[:\-]\s*)([^\n;]{4,160})/iu;
 
 const LABELED_PRICE_REGEX =
-  /(?:Eintritt|Kosten|Preis|Gebühr|Teilnahmegebühr|Kursgebühr|Kosten?beitrag|Tickets?)\s*[:\-]\s*((?:€\s*)?\d+(?:[.,]\d{1,2})?(?:\s*€)?(?:\s*[-–]\s*\d+(?:[.,]\d{1,2})?\s*€?)?|frei|kostenlos|gratis|kostenfrei|Spende[^\n;]*)/iu;
+  /(?:Eintritt|Kosten|Preis|Gebühr|Teilnahmegebühr|Kursgebühr|Kosten?beitrag|Tickets?)\s*[:\-]\s*((?:€\s*)?\d+(?:[.,]\d{1,2})?(?:\s*€)?(?:\s*[-–]\s*\d+(?:[.,]\d{1,2})?\s*€?)?|(?:frei|kostenlos|gratis|kostenfrei)(?![a-zäöüß])|Spende[^\n;]*)/iu;
 
 const PLZ_CITY_REGEX =
   /\b(\d{4})\s+((?:Bad|Sankt|St\.?|Wiener|Klein|Groß|Ober|Unter|Nieder)\s+[A-ZÄÖÜ][A-Za-zäöüß\-]{2,}|[A-ZÄÖÜ][A-Za-zäöüß\-]{2,})/u;
@@ -393,6 +393,8 @@ const EURO_REGEX =
   /(?:eintritt|kosten|preis|gebühr|teilnahmegebühr|kursgebühr|kurskosten|tickets?|karte[ns]?|erwachsene|ermäßigt|ermaessigt|vvk|ak|abendkasse|kostet)\s*[:\-]?\s*(?:ab\s+)?€?\s*(\d{1,3}(?:[.,]\d{1,2})?)/i;
 const GENERIC_EURO_REGEX =
   /(?:€\s*(\d{1,3}(?:[.,]\d{1,2})?)|(\d{1,3}(?:[.,]\d{1,2})?)\s*(?:€|EUR|Euro))(?!\s*\d)/i;
+/** Irgendein Betrag über 0, auch "EUR 13,-" und "1.000 Euro" (nur für die Frage, ob einer dasteht). */
+const ANY_POSITIVE_AMOUNT = /(?:€|\bEUR\b|\bEuro\b)\s*[1-9]|[1-9][\d.,]*\s*(?:€|\bEUR\b|\bEuro\b)/i;
 
 function normalizePriceText(out: DetailEnrichment): void {
   if (!out.price_text || out.price_min !== undefined) return;
@@ -538,8 +540,7 @@ export function applyRegexFallbacks(out: DetailEnrichment, $?: CheerioAPI): void
   // Infoabende"). Dann zählt nur ein Betrag mit Preiswort, sonst bleibt der
   // Preis leer. Prod 2026-10-07: 199 von 2.112 "Eintritt frei" hatten einen
   // Betrag im Text, Stichprobe 18 von 18 falsch.
-  const amount = text ? text.match(GENERIC_EURO_REGEX) : null;
-  const freeButPriced = !!text && FREE_PATTERNS.test(text) && !!amount && parseFloat((amount[1] ?? amount[2]).replace(',', '.')) > 0;
+  const freeButPriced = !!text && FREE_PATTERNS.test(text) && ANY_POSITIVE_AMOUNT.test(text);
   if (!out.price_text && text) {
     if (FREE_PATTERNS.test(text) && !freeButPriced) { out.price_text = 'Eintritt frei'; out.price_min = 0; out.price_max = 0; }
     else if (!freeButPriced && DONATION_PATTERNS.test(text)) { out.price_text = 'Spende erbeten'; out.price_min = 0; }
@@ -559,6 +560,8 @@ export function applyRegexFallbacks(out: DetailEnrichment, $?: CheerioAPI): void
       if (!isNaN(v) && v >= 2 && v <= 500) { out.price_text = formatEuro(v); out.price_min = v; out.price_max = v; }
     }
   }
+  // Ohne Preis melden, damit ein gespeichertes "Eintritt frei" fällt.
+  if (freeButPriced && !out.price_text) out.price_unclear = true;
 
   // Address validity guard — reject false-positives that universal regexes
   // can produce ("Tisch 5", "12. Bezirk").

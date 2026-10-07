@@ -244,10 +244,11 @@ export class Gem2GoScraper extends BaseScraper {
         // produces "Platz 1806881 Mellau" (strasse+hnr+plz+ort smushed). Detail
         // wins for these structural fields whenever it provides a value.
         if (enrichment.address) e.address = enrichment.address;
-        // Nennt weder Liste noch gelesene Detailseite eine Adresse, stammt eine
-        // gespeicherte aus der Fußzeile (Gemeindeamt, Stichprobe 2026-10-07:
-        // 21 von 21). Ohne Markierung behielte der Schreibpfad sie.
-        else if (!e.address) e.address_rejected = 'page_boilerplate';
+        // Hat die gelesene Detailseite Event-Inhalt, aber weder sie noch die
+        // Liste eine Adresse, stammt eine gespeicherte aus der Fußzeile
+        // (Gemeindeamt, Stichprobe 2026-10-07: 21 von 21). Ohne Markierung
+        // behielte der Schreibpfad sie.
+        else if (!e.address && (enrichment.description || enrichment.location_name)) e.address_rejected = 'page_boilerplate';
         if (enrichment.postal_code) e.postal_code = enrichment.postal_code;
         if (enrichment.location_name) {
           // Prefer detail venue unless listing already has something more specific.
@@ -271,6 +272,8 @@ export class Gem2GoScraper extends BaseScraper {
         if (e.price_max === undefined && enrichment.price_max !== undefined) {
           e.price_max = enrichment.price_max;
         }
+        // "frei" nur neben einem Betrag: ein früher gespeichertes "Eintritt frei" fällt.
+        if (enrichment.price_unclear && !e.price_text) e.price_rejected = 'unclear_free';
         if (!e.organizer && enrichment.organizer) e.organizer = enrichment.organizer;
       } catch {
         // Silent per-event failure — keep the listing data we already have.

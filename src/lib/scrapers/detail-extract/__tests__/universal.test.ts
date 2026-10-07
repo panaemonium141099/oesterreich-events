@@ -131,6 +131,29 @@ describe('applyRegexFallbacks', () => {
     expect(price('Trainingskosten pro Einheit: 11,00 € Kommen Sie zu einer kostenlosen Schnupperstunde!')).toEqual({ text: undefined, min: undefined });
   });
 
+  it('"freie Sitzplatzwahl" und "Freie Spende" hinter einem Preis-Label sind kein freier Eintritt', () => {
+    expect(price('Arkadensaal Langenlois TICKETS: freie Sitzplatzwahl Vorverkauf // Abendkasse € 20,- Kinderticket')).toMatchObject({ min: 20 });
+    expect(price('Vorkenntnisse sind nicht notwendig Unkostenbeitrag: Freie Spende (5 -10 € pro Kursabend)').text).not.toBe('Eintritt frei');
+  });
+
+  it('erkennt Beträge mit EUR davor und Tausenderpunkt neben "frei"', () => {
+    expect(price('Vorverkauf EUR 13,- Abendkasse: 16,- / 14,- U21: Eintritt frei!').text).not.toBe('Eintritt frei');
+    expect(price('Kosten: EUR 72,- inkl. gratis Beatmungstuch (EKiZ-Teilnehmer)').text).not.toBe('Eintritt frei');
+    expect(price('Die Teilnahme ist kostenlos. Preisgelder von bis zu 1.000 Euro.').text).not.toBe('Eintritt frei');
+  });
+
+  it('meldet einen unklaren Gratis-Hinweis, damit ein gespeichertes "Eintritt frei" fällt', () => {
+    const run = (description: string) => {
+      const out: DetailEnrichment = { description };
+      applyRegexFallbacks(out, cheerio.load(`<html><body><main>${'x'.repeat(200)}</main></body></html>`));
+      return out.price_unclear;
+    };
+    expect(run('Maß Bier nur 9,90 € Mit Dirndl oder Lederhose gibt’s a gratis Schnapserl!')).toBe(true);
+    // Mit Preiswort gibt es einen Preis, der ersetzt den alten ohnehin.
+    expect(run('VVK € 15,00; AK € 19,00(bis 15 Jahre freier Eintritt)')).toBeUndefined();
+    expect(run('Eintritt frei. Wir freuen uns auf euch!')).toBeUndefined();
+  });
+
   it('Fließtext mit „two"/„Export" liefert keinen Veranstaltungsort (Wortgrenzen, fn-25)', () => {
     const html = `<html><body><main>${'x'.repeat(200)}</main></body></html>`;
     const bio = 'Since her relocation to London, having released two EPs under AWAL, has reached over 20 million streams. Export in München prägt er dort den Sound der Nacht, vielseitig.';

@@ -27,6 +27,8 @@ export interface DetailEnrichment {
   organizer?: string;
   /** Detail can also correct corrupted titles (e.g. partytimer listings). */
   title?: string;
+  /** Text nennt "frei" neben einem Betrag, ohne eindeutigen Preis: kein Gratis. */
+  price_unclear?: boolean;
 }
 
 export interface EnrichmentResult extends DetailEnrichment {
