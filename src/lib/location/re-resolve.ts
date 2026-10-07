@@ -209,7 +209,13 @@ export async function reResolveStoredEvents(
     const decision = contractedDecision(row, resolveEventLocation(inputs[i], evidence[i]));
     const publishChange = publishChangeFor(row, decision);
     // Bezirk über dieselbe Funktion wie der Schreibpfad (districtForLocation).
-    const district = districtForLocation(decision.gemeinde, decision.postal_code ?? row.postal_code, row.bundesland, row.district);
+    const district = districtForLocation(
+      decision.gemeinde,
+      decision.postal_code ?? row.postal_code,
+      row.bundesland,
+      row.district,
+      decision.postal_code ? decision.provenance.postal_code : null,
+    );
     const unchanged =
       (row.district ?? null) === district &&
       row.location_status === decision.status &&

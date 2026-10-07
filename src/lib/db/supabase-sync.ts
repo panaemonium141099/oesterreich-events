@@ -822,6 +822,7 @@ export function toSupabaseRow(
     resolved.postalCode ?? event.postal_code,
     finalBundesland,
     event.district,
+    resolved.postalCode ? decision.provenance.postal_code : null,
   );
 
   // ─── Preis-Konsistenz ──────────────────────────────────────────────

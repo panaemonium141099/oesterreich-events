@@ -39,8 +39,42 @@ describe('districtFromPlz', () => {
   });
 
   it('liefert NUR kanonische Werte — nie Passthrough-Wildwuchs', () => {
-    // Wien ist bewusst Bundesland-only ('wien' ist kein kanonischer Bezirk)
-    expect(districtFromPlz('1010', 'wien')).toBeNull();
+    // Der Registry-Bezirk der Gemeinde Wien heißt „Wien" und ist kein
+    // kanonischer Wert; die PLZ liefert den Gemeindebezirk.
+    expect(districtFromPlz('1010', 'wien')).toBe('1. innere stadt');
+  });
+});
+
+// Produktentscheidung 2026-10-07: Wiener Gemeindebezirke kommen aus der PLZ.
+// Die RTR schreibt sie „Wien 14.,Penzing" (kanonisch „14. penzing"). Vorher
+// hatten 7.949 künftige Wiener Events keinen Bezirk.
+describe('Wiener Gemeindebezirke aus der PLZ', () => {
+  it('eine Wiener PLZ mit genau einem Gemeindebezirk liefert ihn', () => {
+    expect(districtFromPlz('1030', 'wien')).toBe('3. landstraße');
+    expect(districtFromPlz('1150', 'wien')).toBe('15. rudolfsheim-fünfhaus');
+    expect(districtFromPlz('1230')).toBe('23. liesing');
+  });
+
+  it('PLZ über zwei Gemeindebezirke oder über die Landesgrenze bleiben mehrdeutig', () => {
+    expect(districtsForPlz('1170', 'wien').sort()).toEqual(['16. ottakring', '17. hernals']);
+    expect(districtFromPlz('1170', 'wien')).toBeNull();
+    expect(districtFromPlz('1190', 'wien')).toBeNull(); // Währing, Döbling, Tulln
+  });
+
+  it('der Gemeindebezirk der PLZ gilt vor dem Bezirk der Quelle', () => {
+    // Wiener Stadthalle, Roland-Rainer-Platz 1, 1150 Wien: ganz-wien schrieb „1. innere stadt".
+    const wien = { bezirk: 'Wien', bundesland: 'wien', plz: '1010' };
+    expect(districtForLocation(wien, '1150', 'wien', 'innere-stadt')).toBe('15. rudolfsheim-fünfhaus');
+  });
+
+  it('die Amts-PLZ der Gemeinde Wien ist kein Beleg für den 1. Bezirk', () => {
+    // uni-wien, mdw, akbild …: Ort „Wien" ohne Adresse; der Resolver übernimmt
+    // die PLZ der Gemeinde (Provenienz 'registry'). 299 künftige Events.
+    const wien = { bezirk: 'Wien', bundesland: 'wien', plz: '1010' };
+    expect(districtForLocation(wien, '1010', 'wien', null, 'registry')).toBeNull();
+    expect(districtForLocation(wien, '1010', 'wien', 'innere-stadt', 'registry')).toBe('1. innere stadt');
+    // Peterskirche, Petersplatz, 1010: die PLZ steht in der Quelle.
+    expect(districtForLocation(wien, '1010', 'wien', null, 'source')).toBe('1. innere stadt');
   });
 });
 
@@ -148,22 +182,28 @@ describe('RTR-Schreibweisen werden gelesen, nie still verworfen', () => {
     // 7202 Bad Sauerbrunn (Burgenland): auch „Wiener Neustadt(Land)".
     expect(districtsForPlz('7202', 'burgenland').sort()).toEqual(['mattersburg', 'wiener neustadt (land)']);
     expect(districtFromPlz('7202', 'burgenland')).toBeNull();
+    // 2301 Groß-Enzersdorf stellt auch in den 22. Bezirk zu („Wien 22.,Donaustadt").
+    expect(districtsForPlz('2301', 'niederoesterreich').sort()).toEqual(['22. donaustadt', 'gänserndorf']);
+    expect(districtFromPlz('2301', 'niederoesterreich')).toBeNull();
+  });
+
+  it('auf mehrdeutiger PLZ entscheidet ein Regionsname der Quelle nicht zwischen Stadt und Land', () => {
+    // meinbezirk-Event in Hölles, 2751: die Region „wiener-neustadt" umfasst Stadt und Land.
+    expect(districtForLocation(null, '2751', 'niederoesterreich', 'wiener-neustadt')).toBeNull();
+    // Seiersberg, 8054: Region „graz".
+    expect(districtForLocation(null, '8054', 'steiermark', 'graz')).toBeNull();
   });
 
   it('ein unlesbarer Bezirksname macht die PLZ mehrdeutig', () => {
     // RTR führt für 8280 Fürstenfeld neben Hartberg-Fürstenfeld eine Zeile mit Bezirk „NULL".
+    expect(districtsForPlz('8280', 'steiermark')).toEqual(['hartberg-fürstenfeld']);
     expect(districtFromPlz('8280', 'steiermark')).toBeNull();
     expect(districtFromPlz('8280')).toBeNull();
-    // 2301 Groß-Enzersdorf stellt auch in den 22. Bezirk zu („Wien 22.,Donaustadt").
-    expect(districtFromPlz('2301', 'niederoesterreich')).toBeNull();
   });
 
-  it('Wächter: jede Bezirksschreibweise wird gelesen oder ist als unlesbar bekannt', () => {
+  it('Wächter: jede Bezirksschreibweise wird gelesen, nur „NULL" der RTR ist unlesbar', () => {
     // Neue Schreibweisen nach einem Neubau von data/plz-at.json landen hier,
     // statt still aus der Kandidatenmenge zu fallen.
-    const names = new Set(unreadablePlzDistricts().map(u => u.bezirk));
-    const unknown = [...names].filter(b => b !== 'NULL' && b !== 'Wien' && !/^Wien +\d{1,2}\.,/.test(b));
-    expect(unknown).toEqual([]);
-    expect(names.has('NULL')).toBe(true);
+    expect([...new Set(unreadablePlzDistricts().map(u => u.bezirk))]).toEqual(['NULL']);
   });
 });

@@ -22,6 +22,7 @@ import { normalizeDistrict, isCanonicalDistrict, stadtPlzRules, bundeslandOfDist
 import { bundeslandToId } from '@/lib/bundeslaender';
 import { allPlzReferenceEntries } from '@/lib/location/plz-reference';
 import { DISTRICTS_BY_BUNDESLAND } from '@/lib/districtsAT';
+import type { Provenance } from '@/lib/location/types';
 
 interface PlzEntry {
   district: string;
@@ -37,8 +38,12 @@ interface PlzEntry {
  */
 function toCanonicalDistrict(bezirk: string, bl: string, plz: string): string | null {
   // Die RTR schreibt „Graz(Stadt)", „Sankt Pölten(Land)", die Statistik
-  // Austria „Graz (Stadt)".
-  const normalized = normalizeDistrict(bezirk.replace(/\s*\((land|stadt)\)\s*$/i, ' ($1)'), bl, plz);
+  // Austria „Graz (Stadt)". Wiener Gemeindebezirke schreibt die RTR
+  // „Wien 14.,Penzing" (kanonisch „14. penzing").
+  const spelled = bezirk
+    .replace(/\s*\((land|stadt)\)\s*$/i, ' ($1)')
+    .replace(/^wien\s+(\d{1,2})\.,\s*/i, '$1. ');
+  const normalized = normalizeDistrict(spelled, bl, plz);
   if (!normalized) return null;
   if (isCanonicalDistrict(normalized)) return normalized;
   const stadtFix = normalized.replace(/[ -]stadt$/, ' (stadt)');
@@ -61,7 +66,7 @@ function toCanonicalDistrict(bezirk: string, bl: string, plz: string): string | 
   // Rust ist Statutarstadt ohne eigenen Eintrag in district_canonical; der
   // Filter „eisenstadt" deckt Eisenstadt-Stadt, -Umgebung und Rust ab.
   if (ohneStadt === 'rust' && bl === 'burgenland') return 'eisenstadt';
-  return null; // z. B. 'wien' — Wien ist bewusst Bundesland-only
+  return null; // z. B. 'wien': die Gemeinde Wien als Ganzes ist kein Bezirk
 }
 
 /**
@@ -85,7 +90,7 @@ function readRtrDistrict(bezirk: string, bl: string, plz: string): string | null
 
 interface PlzDistricts {
   districts: Set<string>;
-  /** Bezirksnamen, die kein kanonischer Wert sind („NULL", „Wien 14.,Penzing"). */
+  /** Bezirksnamen, die kein kanonischer Wert sind (RTR-Zeilen mit Bezirk „NULL"). */
   unreadable: Set<string>;
 }
 
@@ -120,6 +125,10 @@ const PLZ_TO_DISTRICTS: ReadonlyMap<string, ReadonlyMap<string, PlzDistricts>> =
   for (const g of ALL_GEMEINDEN) {
     const bl = bundeslandToId(g.bundesland);
     if (!bl || !g.plz || !g.bezirk) continue;
+    // Die Gemeinde Wien ist zugleich ihr eigener Bezirk „Wien"; ihre 23
+    // Gemeindebezirke kennt nur die RTR. Der Registry-Eintrag (PLZ 1010)
+    // ist die Summe aller, kein weiterer Kandidat neben „1. innere stadt".
+    if (bl === 'wien' && g.bezirk === 'Wien') continue;
     add(g.plz, bl, g.bezirk, toCanonicalDistrict(g.bezirk, bl, g.plz));
   }
   for (const e of allPlzReferenceEntries()) {
@@ -192,9 +201,9 @@ export function districtsForPlz(plz: string | null | undefined, bundeslandId?: s
  * Der Bezirk muss im Bundesland liegen, für das gefragt wird (ohne
  * Bundesland: in dem der PLZ). Bis 2026-10-07 standen 523 Wiener Events mit
  * PLZ 1140/1190/1210 in Tulln bzw. Korneuburg: deren Wiener Gemeindebezirke
- * schreibt die RTR als „Wien 14.,Penzing", das kein kanonischer Wert ist,
- * also blieb der niederösterreichische Bezirk als einziger Kandidat übrig.
- * Ein unlesbarer Bezirksname zählt deshalb als weiterer Kandidat.
+ * („Wien 14.,Penzing") wurden nicht gelesen, also blieb der
+ * niederösterreichische Bezirk als einziger Kandidat übrig. Ein unlesbarer
+ * Bezirksname zählt deshalb als weiterer Kandidat.
  */
 export function districtFromPlz(
   plz: string | null | undefined,
@@ -229,16 +238,22 @@ export function districtFromGemeinde(
  * Quelle, falls er kanonisch ist. Bis 2026-09-24 hatte der Quell-Bezirk
  * Vorrang; 15.266 künftige Events standen in einem anderen Bezirk als ihre
  * Gemeinde. Nur kanonische Werte (FK auf district_canonical).
+ *
+ * Eine PLZ, die der Resolver nur von der Gemeinde übernommen hat
+ * (Provenienz 'registry'), belegt keinen Bezirk. Das zählt nur in Wien,
+ * wo die Gemeinde gröber ist als ihre Bezirke: „Wien" ohne Adresse hätte
+ * sonst über die Amts-PLZ 1010 den 1. Bezirk bekommen.
  */
 export function districtForLocation(
   gemeinde: { bezirk: string | null; bundesland: string; plz: string } | null | undefined,
   postalCode: string | null | undefined,
   bundeslandId: string | null | undefined,
   sourceDistrict?: string | null,
+  postalCodeProvenance?: Provenance | null,
 ): string | null {
   const fromGemeinde = gemeinde ? districtFromGemeinde(gemeinde.bezirk, gemeinde.bundesland, gemeinde.plz) : null;
   if (fromGemeinde) return fromGemeinde;
-  const fromPlz = districtFromPlz(postalCode, bundeslandId);
+  const fromPlz = postalCodeProvenance === 'registry' ? null : districtFromPlz(postalCode, bundeslandId);
   if (fromPlz) return fromPlz;
   const normalized = normalizeDistrict(sourceDistrict, bundeslandId, postalCode);
   return normalized && isCanonicalDistrict(normalized) ? normalized : null;
