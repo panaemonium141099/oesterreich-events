@@ -44,6 +44,8 @@ export interface StoredEventLocationRow {
   longitude_raw: number | null;
   coords_precision_raw: string | null;
   source_venue_id: string | null;
+  /** Rohschicht des Syncs (fn-25 B1); gesetzt heißt: Zeile mit Quellenstand. */
+  raw_event_id?: string | null;
   geocoding_confidence: string | null;
   location_status: string | null;
   location_status_changed_at?: string | null;
@@ -73,18 +75,33 @@ export function sourceBundeslandOf(row: Pick<StoredEventLocationRow, 'bundesland
 export const STORED_LOCATION_COLUMNS =
   'id, source_name, title, start_date, location_name, location_name_raw, address, address_raw, postal_code, postal_code_raw, city_raw, ' +
   'country, country_raw, bundesland, district, latitude, longitude, latitude_raw, longitude_raw, coords_precision_raw, ' +
-  'source_venue_id, geocoding_confidence, location_status, location_status_changed_at, location_resolution, publish_status, updated_at';
+  'source_venue_id, raw_event_id, geocoding_confidence, location_status, location_status_changed_at, location_resolution, publish_status, updated_at';
 
 /**
- * Eingabe aus der Zeile. Rohspalten haben Vorrang; fehlen sie (Zeile seit
- * der Umstellung nicht neu geschrieben), gelten die Anzeigespalten als
- * Quellwert, Koordinaten aber nur, wenn sie von der Quelle stammen
- * (`geocoding_confidence = 'scraper'`), und dann mit unbekannter
- * Genauigkeit.
+ * Zeile mit Quellenstand: der Sync schreibt die Rohspalten bei jeder
+ * Lieferung, auch leer. Erkennbar an irgendeinem Rohwert oder an
+ * `raw_event_id` (seit 2026-09-14 an jeder Sync-Zeile; kein Altbestand trägt
+ * eine). Nur Zeilen ohne beides sind Altbestand. Bis 2026-10 zählten nur
+ * vier Rohspalten: 219 Sync-Zeilen, deren Quelle keinen Ort nennt, liefen als
+ * Altbestand mit den Anzeigewerten, die der Sync aus früheren Lieferungen
+ * behält, und eine Neu-Entscheidung gab 9 davon trotz Quarantäne frei.
  */
 function hasRawLocation(row: StoredEventLocationRow): boolean {
-  return row.location_name_raw !== null || row.address_raw !== null || row.latitude_raw !== null || row.postal_code_raw !== null;
+  return (
+    row.raw_event_id != null ||
+    row.location_name_raw != null || row.address_raw != null || row.postal_code_raw != null || row.city_raw != null ||
+    row.country_raw != null || row.latitude_raw != null || row.longitude_raw != null || row.coords_precision_raw != null ||
+    row.source_venue_id != null
+  );
 }
+
+/**
+ * Eingabe aus der Zeile. Bei Zeilen mit Quellenstand ausschließlich die
+ * Rohspalten; im Altbestand (seit der Umstellung nicht neu geschrieben)
+ * gelten die Anzeigespalten als Quellwert, Koordinaten aber nur, wenn sie
+ * von der Quelle stammen (`geocoding_confidence = 'scraper'`), und dann mit
+ * unbekannter Genauigkeit.
+ */
 
 export function inputFromStoredRow(row: StoredEventLocationRow): LocationInput {
   if (hasRawLocation(row)) {
@@ -136,6 +153,15 @@ export interface ReResolveResult {
   publish_change?: 'withheld' | 'republished';
 }
 
+/**
+ * Quarantäne des Freigabevertrags in einer Entscheidung aus
+ * `contractedDecision` (Gründe `admission:<Grund>`). `drop_coordinates` ist
+ * eine Korrektur und führt ohnehin zum Konflikt.
+ */
+function heldByAdmission(decision: { reasons?: string[] }): boolean {
+  return (decision.reasons ?? []).some(r => r.startsWith('admission:') && r !== 'admission:drop_coordinates');
+}
+
 /** Gründe, die nur von der Ortsentscheidung stammen (A6, Vertrag, Sync). */
 const LOCATION_HOLD_REASONS = /^(a6_|location_conflict_withheld$|coords_vs_plz_conflict|.*_vs_plz_conflict|admission:|conflict_position_revoked$)/;
 
@@ -149,9 +175,16 @@ const LOCATION_HOLD_REASONS = /^(a6_|location_conflict_withheld$|coords_vs_plz_c
  * Konflikte, die veröffentlicht blieben (Prod 2026-09-14: 61 Zeilen, dazu
  * 831 aus A6/Stale).
  */
-export function publishChangeFor(row: Pick<StoredEventLocationRow, 'publish_status' | 'location_resolution'>, decision: Pick<ResolvedLocation, 'status'>): { publish_status: string } | null {
+export function publishChangeFor(
+  row: Pick<StoredEventLocationRow, 'publish_status' | 'location_resolution'>,
+  decision: Pick<ResolvedLocation, 'status'> & { reasons?: string[] },
+): { publish_status: string } | null {
   const current = row.publish_status ?? null;
-  if (decision.status === 'conflict') {
+  // Wie der Sync (scoreAndAdmit): auch eine Quarantäne des Freigabevertrags
+  // nimmt die Veröffentlichung. Vorher galt nur der Konflikt; eine
+  // Neu-Entscheidung gab so 9 Events ohne jeden Ort wieder frei, darunter
+  // US-Meetups (Prod 2026-10-07).
+  if (decision.status === 'conflict' || heldByAdmission(decision)) {
     return current === 'published' || current === 'published_low_confidence' ? { publish_status: 'needs_review' } : null;
   }
   if (current === 'needs_review') {
@@ -267,9 +300,12 @@ export async function reResolveStoredEvents(
     // früheren Koordinatenabgleich (Boudicca: Stadthalle „Roland-Rainer-Platz
     // 1, 1150 Wien" mit PLZ 1010); die Entscheidung hält sie für eine
     // Quellangabe. Sie zählt wie eine übernommene PLZ.
-    const postalCode = decision.postal_code ?? row.postal_code;
+    // Wie der Sync (`resolved.postalCode ?? event.postal_code`): bei Zeilen mit
+    // Quellenstand die PLZ der Quelle, nie die behaltene Anzeige-PLZ.
+    const raw = hasRawLocation(row);
+    const postalCode = decision.postal_code ?? (raw ? row.postal_code_raw : row.postal_code);
     const postalCodeProvenance =
-      !hasRawLocation(row) && decision.gemeinde && postalCode === decision.gemeinde.plz
+      !raw && decision.gemeinde && postalCode === decision.gemeinde.plz
         ? 'registry'
         : decision.postal_code ? decision.provenance.postal_code : null;
     const district = districtForLocation(decision.gemeinde, postalCode, bundesland, row.district, postalCodeProvenance);
