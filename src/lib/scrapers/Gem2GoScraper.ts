@@ -545,14 +545,16 @@ export class Gem2GoScraper extends BaseScraper {
 
   /**
    * Parst das neuere GEM2GO Bootstrap-Card-Layout:
-   * <div class="bemCard bemCard--list">
-   *   <div class="card">
-   *     <div class="card-body">
-   *       <h5 class="card-title"><a href="...">Event Titel</a></h5>
-   *       <p class="card-text">Datum, Ort, Beschreibung</p>
+   * <div class="bemCard bemCard--list card">
+   *   <div class="card-body">
+   *     <div class="bemHeaderContainer card-title">
+   *       <span class="bemHeader">Event Titel</span><small class="d-block text-muted">Musik, Konzerte</small>
    *     </div>
+   *     <div class="card-text">Datum, Ort, Beschreibung</div>
    *   </div>
    * </div>
+   * Der Titel ist meist kein Link; die <small>-Zeile ist die Kategorie der
+   * Quelle (lange Listen gekürzt mit ", ...").
    */
   private parseBemCardLayout($: cheerio.CheerioAPI, gemeinde: Gem2GoGemeinde, pageUrl: string): ScrapedEvent[] {
     const events: ScrapedEvent[] = [];
@@ -563,17 +565,25 @@ export class Gem2GoScraper extends BaseScraper {
 
         // Title from card-title or any heading with link
         const $titleLink = $card.find('.card-title a, h5 a, h4 a, h3 a').first();
-        let title = $titleLink.text().trim();
-        if (!title) title = $card.find('.card-title, h5, h4').first().text().trim();
+        const $header = $card.find('.card-title, h5, h4').first();
+        // text() des Kopfs klebte die Kategorie an den Titel ("TanzabendMusik,
+        // Konzerte", Befund 2026-10-07): Titel ohne <small>, Kategorie getrennt.
+        const title = $titleLink.text().trim() || $header.clone().find('small').remove().end().text().trim();
         if (!title || title.length < 3) return;
+        const sourceCategory = $header.find('small').first().text().replace(/,\s*\.{3}$/, '').trim();
+        const tags = sourceCategory ? [sourceCategory] : undefined;
 
         // Detail link
         const href = $titleLink.attr('href') || '';
         const detailUrl = href ? (href.startsWith('http') ? href : `${gemeinde.website}${href.startsWith('/') ? '' : '/'}${href}`) : pageUrl;
 
-        // Extract event ID from URL
+        // Extract event ID from URL. Ohne detailonr bleibt die ID aus dem
+        // ganzen Kopftext (Titel + Kategorie) wie bisher: eine neue ID gäbe
+        // neue Zeilen, und die alten mit Klebetitel blieben sichtbar, weil der
+        // Rückzug Events mit geteilter Listen-URL nicht prüfen kann.
         const idMatch = href.match(/detailonr=(\d+)/);
-        const eventId = idMatch ? idMatch[1] : title.toLowerCase().replace(/\W+/g, '-').slice(0, 60);
+        const idText = $titleLink.text().trim() || $header.text().trim();
+        const eventId = idMatch ? idMatch[1] : idText.toLowerCase().replace(/\W+/g, '-').slice(0, 60);
 
         // Card text contains date, location, description mixed together
         const cardText = $card.find('.card-text, .card-body').text();
@@ -600,7 +610,8 @@ export class Gem2GoScraper extends BaseScraper {
           district: gemeinde.bezirk,
           latitude: gemeinde.lat,
           longitude: gemeinde.lng,
-          category: categorizeEvent(title),
+          category: categorizeEvent(title, undefined, tags),
+          tags,
           image_url: imageInfo?.url,
           image_width: imageInfo?.image_width,
           image_height: imageInfo?.image_height,
