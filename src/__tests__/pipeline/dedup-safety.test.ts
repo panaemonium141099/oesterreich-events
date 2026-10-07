@@ -56,6 +56,24 @@ describe('Mehrdeutige Einträge verbinden keine verschiedenen Events', () => {
   });
 });
 
+describe('Dieselbe Quelle listet eine Show mehrfach (Prod 2026-10-07)', () => {
+  it('„Bob Dylan" und „Bob Dylan - VIP Packages" sind dieselbe Show und machen andere Quellen nicht mehrdeutig', () => {
+    const main = ev({ id: 'e1', title: 'Bob Dylan', start_date: '2026-11-12T19:00:00Z', source_name: 'Eventim' });
+    const vip = ev({ id: 'e2', title: 'Bob Dylan - VIP Packages', start_date: '2026-11-12T19:00:00Z', source_name: 'Eventim' });
+    const hall = ev({ id: 'h', title: 'Bob Dylan', start_date: '2026-11-12T19:00:00Z', source_name: 'stadthalle' });
+    const owner = ownerMap([main, vip, hall]);
+    expect(owner.get('h')).toBe(owner.get('e1'));
+    expect(owner.get('e2')).toBe(owner.get('e1'));
+  });
+
+  it('verschiedene Acts derselben Quelle bleiben getrennt', () => {
+    const a = ev({ id: 'a', title: 'Kaiser Wiesn - Dirndl Rocker', start_date: '2026-09-26T14:30:00Z', source_name: 'Eventim' });
+    const b = ev({ id: 'b', title: 'Kaiser Wiesn - Die Lauser', start_date: '2026-09-26T14:30:00Z', source_name: 'Eventim' });
+    const owner = ownerMap([a, b]);
+    expect(owner.get('a')).not.toBe(owner.get('b'));
+  });
+});
+
 describe('Verwaiste Altzeilen (Quelle liefert sie nicht mehr)', () => {
   const lastSeen = new Map([['q1', '2026-10-07T03:00:00Z'], ['q2', '2026-10-07T03:00:00Z']]);
   const fresh = { last_seen_at: '2026-10-07T03:00:00Z' };
@@ -136,6 +154,14 @@ describe('Primary-Wahl', () => {
     const ok = ev({ id: 'o', title: 'Konzert X', start_date: '2026-10-08T18:00:00Z', source_name: 'q2', quality_score: 50 });
     const [cluster] = dedupDay([conflict, ok]).clusters;
     expect(cluster.primaryId).toBe('o');
+  });
+
+  it('Titel ohne eingebautes Datum wird angezeigt (Prod: „Biodiversitätszentrum … 19.11.2026")', () => {
+    const ticket = { ticket_url: 'https://www.ooe.gv.at/v/123' };
+    const dated = ev({ id: 'd', title: 'Biodiversitätszentrum Oberösterreich 19.11.2026', start_date: '2026-11-19T17:00:00Z', source_name: 'q1', quality_score: 95, ...ticket });
+    const clean = ev({ id: 'c', title: 'Alaskas hocharktische Vogelwelt', start_date: '2026-11-19T17:00:00Z', source_name: 'q2', quality_score: 60, ...ticket });
+    const [cluster] = dedupDay([dated, clean]).clusters;
+    expect(cluster.primaryId).toBe('c');
   });
 
   it('sichtbare Zeile vor needs_review', () => {

@@ -114,8 +114,26 @@ describe('planDedup: Freigabe nur mit Gegenbeleg', () => {
     expect(p.release).toEqual([]);
   });
 
-  it('Primary unterdrückt oder gelöscht: Verbindung bleibt', () => {
+  it('Primary unterdrückt (Müll-Titel „Event / Party"): aktuelle echte Zeile wird freigegeben', () => {
+    const junk = primary({ title: 'Event\n            Party', publish_status: 'suppressed' });
+    const p = planWith([dup({ title: 'Wickie, Slime und Paiper' }), junk]);
+    expect(p.release).toEqual([expect.objectContaining({ id: 'a', reason: 'primary_hidden' })]);
+  });
+
+  it('Primary mit Ortskonflikt zurückgehalten: aktuelle Zeile wird freigegeben', () => {
+    const held = primary({ title: 'Ganz anderer Titel', publish_status: 'needs_review', location_status: 'conflict' });
+    const p = planWith([dup({}), held]);
+    expect(p.release).toEqual([expect.objectContaining({ id: 'a', reason: 'primary_hidden' })]);
+  });
+
+  it('Primary verschwunden: aktuelle Zeile wird freigegeben', () => {
     const p = planWith([dup({ duplicate_of: 'weg' })]);
+    expect(p.release).toEqual([expect.objectContaining({ id: 'a', reason: 'primary_hidden' })]);
+  });
+
+  it('Primary unterdrückt, aber das Duplikat ist selbst Müll: bleibt verborgen', () => {
+    const junk = primary({ title: 'Event\n            Party', publish_status: 'suppressed' });
+    const p = planWith([dup({ title: 'Event\n            Jazz' }), junk]);
     expect(p.release).toEqual([]);
   });
 

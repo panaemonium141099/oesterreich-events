@@ -9,6 +9,8 @@ import type { EventRow } from './types';
 
 const DATE_WORDS = /\b(montag|dienstag|mittwoch|donnerstag|freitag|samstag|sonntag|mo|di|mi|do|fr|sa|so|januar|jaenner|jänner|februar|maerz|märz|april|mai|juni|juli|august|september|oktober|november|dezember|jan|feb|mär|apr|jun|jul|aug|sep|sept|okt|nov|dez|uhr|ab|bis)\b/gi;
 
+const DATE_IN_TITLE = /\b\d{1,2}\.\s?\d{1,2}\.\s?(\d{2}|\d{4})?\b/;
+
 /** Titel, der nach Abzug von Datum, Wochentag, Uhrzeit und Satzzeichen leer ist. */
 export function isDateOnlyTitle(title: string | null | undefined): boolean {
   const rest = (title ?? '').toLowerCase().replace(DATE_WORDS, ' ').replace(/[^\p{L}]+/gu, '');
@@ -23,15 +25,17 @@ export function isDateOnlyTitle(title: string | null | undefined): boolean {
  * Select the best event as primary from a cluster.
  *
  * Criteria (in order):
- * 1. Sichtbar (nicht needs_review/suppressed)
+ * 1. Sichtbar (nicht needs_review/suppressed/Ortskonflikt)
  * 2. Von der Quelle noch geliefert (nicht verwaist)
- * 3. Eventim (Affiliate-Ticketlink)
- * 4. Bisheriger Primary (stabile URL)
- * 5. Highest quality_score
- * 6. Longest meaningful description (> 50 chars)
- * 7. Has image_url
- * 8. Has ticket_url
- * 9. Oldest created_at
+ * 3. Echter Titel (nicht nur Datum/Uhrzeit)
+ * 4. Eventim (Affiliate-Ticketlink)
+ * 5. Titel ohne eingebautes Datum
+ * 6. Bisheriger Primary (stabile URL)
+ * 7. Highest quality_score
+ * 8. Longest meaningful description (> 50 chars)
+ * 9. Has image_url
+ * 10. Has ticket_url
+ * 11. Oldest created_at
  */
 export function selectPrimary(events: EventRow[], isOrphan: (id: string) => boolean = () => false): EventRow {
   // Bisheriger Primary: auf ihn zeigt ein anderes Mitglied, er selbst ist
@@ -61,6 +65,11 @@ export function selectPrimary(events: EventRow[], isOrphan: (id: string) => bool
     const eventimA = a.source_name === 'Eventim' ? 1 : 0;
     const eventimB = b.source_name === 'Eventim' ? 1 : 0;
     if (eventimA !== eventimB) return eventimB - eventimA;
+
+    // Eingebautes Datum („… 19.11.2026") ist Listen-Text der Quelle, kein Titel.
+    const cleanA = DATE_IN_TITLE.test(a.title ?? '') ? 0 : 1;
+    const cleanB = DATE_IN_TITLE.test(b.title ?? '') ? 0 : 1;
+    if (cleanA !== cleanB) return cleanB - cleanA;
 
     if (isCurrentPrimary(a) !== isCurrentPrimary(b)) return isCurrentPrimary(b) - isCurrentPrimary(a);
 

@@ -247,8 +247,12 @@ function decide(a: EventRow, b: EventRow): Verdict {
   const ticketB = normalizeUrlForDedup(b.ticket_url);
   if (ticketA && ticketB && ticketA === ticketB) return merge('same_ticket_url', 'strong');
 
+  // Verschiedene Titel derselben Quelle sind verschiedene Programmpunkte
+  // („Kaiser Wiesn – Dirndl Rocker" / „– Die Lauser"). Verschachtelte Titel
+  // („Bob Dylan" / „Bob Dylan - VIP Packages") sind dieselbe Show, mehrfach
+  // gelistet; die prüft die normale Tabelle samt Mehrdeutigkeitsschutz.
   const title = titleRelation(a, b);
-  if (sameSourceOtherId && title !== 'equal' && title !== 'near') return distinct('same_source_other_title');
+  if (sameSourceOtherId && (title === 'different' || title === 'related')) return distinct('same_source_other_title');
   if (place.relation === 'conflict') return distinct(place.reason);
 
   switch (title) {
