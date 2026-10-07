@@ -189,7 +189,7 @@ node / next.js
   `npm run dedup -- --dry-run --report r.json` gegen Prod.
 - `src/lib/dedup/` (Fingerprint/Jaro-Winkler, Dedup innerhalb eines Scraper-Laufs), `src/lib/series-detection/`,
   `src/lib/lineup/`, `src/lib/artist-matching.ts` — Serien / Festival-Lineups / Matching
-- `.github/workflows/` — scrape-events.yml (Shards+post), import-eventim.yml, lhci.yml
+- `.github/workflows/` — scrape-events.yml (Shards+post), import-eventim.yml, tests.yml, deploy.yml
 - `docs/MASTERPLAN.md` — Strategie & Betriebszustand; `docs/TAXONOMY.md` — Taxonomie
 
 ## Build & Test
