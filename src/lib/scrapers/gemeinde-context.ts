@@ -21,6 +21,7 @@
  */
 import type { ScrapedEvent } from '@/types/events';
 import { extractPlzFromAddress } from '@/lib/location/conservative-resolution';
+import { bundeslandToId } from '@/lib/bundeslaender';
 
 export interface GemeindeContext {
   name: string;
@@ -105,7 +106,11 @@ export function applyGemeindeContext<T extends ScrapedEvent>(event: T, g: Gemein
   }
 
   out.city = event.city ?? g.name;
-  out.postal_code = event.postal_code ?? g.plz;
+  // Wien ist eine Gemeinde mit 23 Bezirken: die Amts-PLZ 1010 sagt nichts
+  // über den Ort eines Events und belegte über die PLZ den 1. Bezirk
+  // (2026-10-07). Die PLZ der Gemeinde übernimmt dann der Resolver, als
+  // übernommen gekennzeichnet (Provenienz 'registry').
+  out.postal_code = event.postal_code ?? (bundeslandToId(g.bundesland) === 'wien' ? undefined : g.plz);
   if (hasOwnCoords) {
     out.coords_precision = event.coords_precision ?? 'venue';
   } else {

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { normalizeDistrict } from '../lib/district-normalizer';
+import { normalizeDistrict, isCanonicalDistrict } from '../lib/district-normalizer';
 
 describe('normalizeDistrict — Stadt/Land PLZ disambiguation', () => {
   // Stadt-name + Stadt-PLZ → Stadt (alias map)
@@ -11,12 +11,27 @@ describe('normalizeDistrict — Stadt/Land PLZ disambiguation', () => {
   });
 
   // Stadt-name + Land-PLZ → Land
-  it('graz + 8045 (Andritz/Umgebung) → graz-umgebung', () => {
-    expect(normalizeDistrict('graz', 'steiermark', '8045')).toBe('graz (stadt)');
+  it('graz + 8101 (Gratkorn) → graz-umgebung', () => {
     expect(normalizeDistrict('graz', 'steiermark', '8101')).toBe('graz-umgebung');
   });
   it('linz + 4060 → linz-land', () => {
     expect(normalizeDistrict('linz', 'oberoesterreich', '4060')).toBe('linz-land');
+  });
+
+  // Stadt-name + PLZ, die sich Stadt und Umland teilen → nicht entscheidbar.
+  // Befund 2026-10-07: meinbezirk schreibt die Region („wiener-neustadt",
+  // „graz"); ein Event in Hölles (2751, Amts-PLZ von Matzendorf-Hölles,
+  // Neben-PLZ der Stadt) landete so in „wiener neustadt (stadt)".
+  it('Stadtname auf geteilter PLZ bleibt unaufgelöst (nicht kanonisch)', () => {
+    expect(isCanonicalDistrict(normalizeDistrict('wiener-neustadt', 'niederoesterreich', '2751') ?? '')).toBe(false);
+    expect(isCanonicalDistrict(normalizeDistrict('graz', 'steiermark', '8045') ?? '')).toBe(false);
+    expect(isCanonicalDistrict(normalizeDistrict('graz', 'steiermark', '8054') ?? '')).toBe(false);
+    expect(isCanonicalDistrict(normalizeDistrict('linz', 'oberoesterreich', '4040') ?? '')).toBe(false);
+    expect(isCanonicalDistrict(normalizeDistrict('krems', 'niederoesterreich', '3541') ?? '')).toBe(false);
+  });
+  it('ein ausdrücklicher Stadt-Bezirk bleibt auch auf geteilter PLZ stehen', () => {
+    expect(normalizeDistrict('graz (stadt)', 'steiermark', '8045')).toBe('graz (stadt)');
+    expect(normalizeDistrict('wiener neustadt (land)', 'niederoesterreich', '2751')).toBe('wiener neustadt (land)');
   });
 
   // Land-name + Stadt-PLZ → Stadt (the new reverse rule)
