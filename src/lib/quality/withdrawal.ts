@@ -33,25 +33,43 @@
  *     abgesagt: dann gilt derselbe Detailseiten-Beleg wie bei A. Ein
  *     Scraper ohne Pflicht-Konfiguration (ticketmaster ohne API-Key) läuft
  *     nicht: `runScraper` schreibt für ihn keinen source_runs-Eintrag.
+ *  C) superseded — die Quelle listet dieselbe Seite am selben Wiener Tag
+ *     unter einer neuen Kennung. Scraper mit source_id aus dem Titel legen
+ *     nach jeder Titel-Korrektur eine neue Zeile an, die alte bekommt nie
+ *     wieder ein Upsert (Prod 2026-10-07: gemeinden-generic, Linzer
+ *     Detailseiten, "Linz-Card" neben "Pre-Concert für Danish String
+ *     Quartet", dazu die Wiener Datenschutz-PLZ aus der Zeit vor dem
+ *     Kontext-Filter). Beleg ist die neue Zeile: der letzte Besuch dieser
+ *     URL hat für den Tag eine andere Zeile geliefert, die erst auftauchte,
+ *     als die alte schon nicht mehr kam (nie beide zugleich gelistet), und
+ *     die Seite trug dabei nur einen Titel (eigene Seite eines Events, keine
+ *     Liste). Kein Abruf nötig — linztourismus.at leitet jede Detailseite
+ *     ohne Sitzung auf die Startseite um, ein 404 gibt es dort nie.
+ *     Gilt auch für zurückgehaltene Zeilen (needs_review): die Orts-
+ *     Neuberechnung gibt sie frei, sobald ihr Konflikt verschwindet.
  *
- * Ein Primary bleibt stehen, solange ein Duplikat (andere Quelle) noch
- * gelistet ist: der Dedup befördert Duplikate nie zurück, das Event wäre
- * sonst ganz weg, obwohl eine Quelle es bestätigt.
+ * Ein Primary bleibt stehen, solange ein verborgenes Duplikat noch gelistet
+ * ist: das Event wäre sonst ganz weg, obwohl eine Quelle es bestätigt, bis
+ * der nächste Dedup-Lauf das Duplikat freigibt.
  *
  * Rein und ohne I/O. Ausführung: `src/scripts/withdraw-stale-events.ts`.
  */
+import { toViennaDate } from '@/lib/utils/event-time';
 
 export interface SightingRow {
   id: string;
   source_name: string;
   source_url: string | null;
+  title: string | null;
   start_date: string;
+  /** Erste Sichtung (Insert durch den Sync). */
+  created_at: string | null;
   last_seen_at: string | null;
   publish_status: string | null;
   duplicate_of: string | null;
 }
 
-export type WithdrawalReason = 'missing_from_source' | 'source_dead';
+export type WithdrawalReason = 'missing_from_source' | 'source_dead' | 'superseded';
 
 export interface WithdrawalItem {
   id: string;
@@ -79,6 +97,9 @@ export interface WithdrawalOptions {
 }
 
 const VISIBLE = new Set(['published', 'published_low_confidence']);
+/** Was ein Rückzug ändern darf: sichtbar oder (nur Regel C) zurückgehalten. */
+export const WITHDRAWABLE_STATUSES = ['published', 'published_low_confidence', 'needs_review'] as const;
+const WITHDRAWABLE = new Set<string>(WITHDRAWABLE_STATUSES);
 const DAY = 86_400_000;
 
 /**
@@ -98,6 +119,50 @@ export function coverageScope(row: Pick<SightingRow, 'source_name' | 'source_url
 }
 
 const ms = (iso: string | null) => (iso ? Date.parse(iso) : NaN);
+const viennaDay = (iso: string) => toViennaDate(new Date(iso));
+const titleKey = (title: string | null) => (title ?? '').replace(/\s+/g, ' ').trim().toLowerCase();
+
+/**
+ * Regel C: Zeilen, die ihre Quelle unter neuer Kennung listet. Je Quelle +
+ * URL zählt der letzte Besuch (jüngste Sichtung, `visitWindowHours`).
+ */
+function supersededCheck(rows: SightingRow[], minGapDays: number, visitWindowHours: number) {
+  const pageKey = (r: SightingRow) => `${r.source_name}|${r.source_url}`;
+  const lastVisit = new Map<string, number>();
+  for (const r of rows) {
+    const seen = ms(r.last_seen_at);
+    if (!r.source_url || isNaN(seen)) continue;
+    lastVisit.set(pageKey(r), Math.max(lastVisit.get(pageKey(r)) ?? -Infinity, seen));
+  }
+  // Titel der Seite im letzten Besuch; Zeilen dieses Besuchs je Wiener Tag.
+  // Eine unterdrückte Zeile (Müll-Titel) belegt kein Event, zählt aber als
+  // weiterer Titel: dann ist die Seite nicht eindeutig.
+  const titles = new Map<string, Set<string>>();
+  const byDay = new Map<string, SightingRow[]>();
+  for (const r of rows) {
+    const seen = ms(r.last_seen_at);
+    if (!r.source_url || isNaN(seen)) continue;
+    const key = pageKey(r);
+    if (seen < lastVisit.get(key)! - visitWindowHours * 3_600_000) continue;
+    titles.set(key, (titles.get(key) ?? new Set()).add(titleKey(r.title)));
+    if (r.publish_status === 'suppressed') continue;
+    const dayKey = `${key}|${viennaDay(r.start_date)}`;
+    const list = byDay.get(dayKey);
+    if (list) list.push(r);
+    else byDay.set(dayKey, [r]);
+  }
+
+  return (r: SightingRow): boolean => {
+    if (!r.source_url) return false;
+    const key = pageKey(r);
+    const seen = ms(r.last_seen_at);
+    if (isNaN(seen) || seen >= lastVisit.get(key)! - minGapDays * DAY) return false;
+    if (titles.get(key)?.size !== 1) return false;
+    // Erst nach der letzten Sichtung der alten Zeile aufgetaucht: beide
+    // zugleich gelistet hieße zwei Events auf einer Seite.
+    return (byDay.get(`${key}|${viennaDay(r.start_date)}`) ?? []).some((n) => ms(n.created_at) >= seen);
+  };
+}
 
 export function planWithdrawals(rows: SightingRow[], options: WithdrawalOptions): WithdrawalPlan {
   const {
@@ -140,17 +205,27 @@ export function planWithdrawals(rows: SightingRow[], options: WithdrawalOptions)
   // Nur eine eigene Detailseite kann belegen, dass das Event weg ist.
   const urlUses = new Map<string, number>();
   for (const r of rows) {
-    if (r.duplicate_of && ms(r.last_seen_at) >= nowMs - minGapDays * DAY) confirmedElsewhere.add(r.duplicate_of);
+    // Nur ein verborgenes Duplikat: sichtbare Zeilen mit altem Verweis
+    // (Prod 2026-10-07: 79 künftige) zeigen das Event ohnehin selbst.
+    if (r.duplicate_of && r.publish_status === 'duplicate' && ms(r.last_seen_at) >= nowMs - minGapDays * DAY) {
+      confirmedElsewhere.add(r.duplicate_of);
+    }
     if (r.source_url) urlUses.set(r.source_url, (urlUses.get(r.source_url) ?? 0) + 1);
   }
 
   const pipelineRuns = globalLastSeen >= nowMs - freshnessDays * DAY;
+  const isSuperseded = supersededCheck(rows, minGapDays, visitWindowHours);
   const plan: WithdrawalPlan = { withdraw: [], probe: [] };
 
   for (const r of rows) {
-    if (!VISIBLE.has(r.publish_status ?? '') || ms(r.start_date) < nowMs) continue;
+    if (!WITHDRAWABLE.has(r.publish_status ?? '') || ms(r.start_date) < nowMs) continue;
     if (confirmedElsewhere.has(r.id)) continue;
     const scope = coverageScope(r);
+    if (isSuperseded(r)) {
+      plan.withdraw.push({ id: r.id, source_name: r.source_name, scope, reason: 'superseded' });
+      continue;
+    }
+    if (!VISIBLE.has(r.publish_status ?? '')) continue;
 
     const seen = ms(r.last_seen_at);
     const url = r.source_url && urlUses.get(r.source_url) === 1 ? r.source_url : null;

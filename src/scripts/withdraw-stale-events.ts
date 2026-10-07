@@ -3,8 +3,9 @@
  *
  * Regeln und Begründung: src/lib/quality/withdrawal.ts. Nicht mehr
  * gelistete Kandidaten werden nur zurückgezogen, wenn ihre Detailseite an
- * der Quelle 404/410 liefert. Läuft nächtlich im Post-Processing
- * (scrape-pipeline.ts, nach dem Dedup). Zurückgezogen heißt
+ * der Quelle 404/410 liefert oder die Quelle sie unter neuer Kennung
+ * listet. Läuft nächtlich im Post-Processing (scrape-pipeline.ts, nach dem
+ * Dedup). Zurückgezogen heißt
  * `publish_status = 'suppressed'` + `withdrawn_at`; listet die Quelle das
  * Event wieder, hebt der Schreibpfad (supabase-sync) beides auf.
  *
@@ -14,7 +15,7 @@
 
 import { createClient } from '@supabase/supabase-js';
 import { fetchAllRows, forEachPage } from '../lib/db/fetch-all';
-import { planWithdrawals, probeGone, type SightingRow } from '../lib/quality/withdrawal';
+import { planWithdrawals, probeGone, WITHDRAWABLE_STATUSES, type SightingRow } from '../lib/quality/withdrawal';
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -40,7 +41,7 @@ async function main() {
     (from, to) =>
       supabase
         .from('events')
-        .select('id, source_name, source_url, start_date, last_seen_at, publish_status, duplicate_of')
+        .select('id, source_name, source_url, title, start_date, created_at, last_seen_at, publish_status, duplicate_of')
         .gte('start_date', since)
         .order('id')
         .range(from, to),
@@ -71,18 +72,23 @@ async function main() {
   const confirmed = checked.filter((c) => gone.has(c.url));
   const withdraw = [...plan.withdraw, ...confirmed];
 
-  const bySource = new Map<string, { missing: number; dead: number }>();
+  const bySource = new Map<string, { missing: number; dead: number; superseded: number }>();
   for (const w of withdraw) {
-    const s = bySource.get(w.source_name) ?? { missing: 0, dead: 0 };
+    const s = bySource.get(w.source_name) ?? { missing: 0, dead: 0, superseded: 0 };
     if (w.reason === 'source_dead') s.dead++;
+    else if (w.reason === 'superseded') s.superseded++;
     else s.missing++;
     bySource.set(w.source_name, s);
   }
+  const total = (s: { missing: number; dead: number; superseded: number }) => s.missing + s.dead + s.superseded;
+  const supersededCount = plan.withdraw.filter((w) => w.reason === 'superseded').length;
   console.log(`${rows.length} Zeilen gelesen${DRY_RUN ? ' (dry-run)' : ''}`);
-  console.log(`  Quelle abgeschaltet: ${plan.withdraw.length}`);
+  console.log(`  Quelle abgeschaltet: ${plan.withdraw.length - supersededCount}`);
+  console.log(`  Unter neuer Kennung gelistet: ${supersededCount}`);
   console.log(`  Kandidaten: ${plan.probe.length}, ${checked.length} geprüft, ${confirmed.length} an der Quelle weg (404/410)`);
-  for (const [source, s] of [...bySource].sort((a, b) => b[1].missing + b[1].dead - (a[1].missing + a[1].dead))) {
-    console.log(`  ${source}: ${s.missing} weg an der Quelle${s.dead ? `, ${s.dead} Quelle tot` : ''}`);
+  for (const [source, s] of [...bySource].sort((a, b) => total(b[1]) - total(a[1]))) {
+    const parts = [`${s.missing} weg an der Quelle`, s.superseded ? `${s.superseded} abgelöst` : '', s.dead ? `${s.dead} Quelle tot` : ''];
+    console.log(`  ${source}: ${parts.filter(Boolean).join(', ')}`);
   }
   if (DRY_RUN || withdraw.length === 0) return;
 
@@ -93,7 +99,7 @@ async function main() {
       .from('events')
       .update({ publish_status: 'suppressed', withdrawn_at: now.toISOString() })
       .in('id', ids.slice(i, i + CHUNK))
-      .in('publish_status', ['published', 'published_low_confidence'])
+      .in('publish_status', [...WITHDRAWABLE_STATUSES])
       .select('id');
     // supabase-js wirft bei Schreibfehlern nicht: Fehler UND Zahl prüfen.
     if (error) throw new Error(`Update ab ${i}: ${error.message}`);
