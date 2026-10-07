@@ -109,7 +109,11 @@ node / next.js
   (`withStammdaten`), Kontext via `applyGemeindeContext`. Scraper
   geocodieren nicht und setzen keine Platzhalter-Koordinaten (Stadt-
   mittelpunkt nur mit `coords_precision: 'municipality'`). Bezirk nur über
-  `districtForLocation` (plz-district.ts), Event-URL-Ort = Post-Ort der PLZ.
+  `districtForLocation`, Bundesland nur über `bundeslandForLocation`
+  (beide plz-district.ts; Quelle, sonst Gemeinde, sonst eindeutige PLZ),
+  Event-URL-Ort = Post-Ort der PLZ. Die Spalte `bundesland` ist damit
+  abgeleitet: die Angabe der Quelle steht im Protokoll
+  (`bundesland:source:`, gelesen von `sourceBundeslandOf`).
   Events entstehen nur serverseitig (keine Insert-Policy für Nutzer).
   Feste Venue-Koordinaten im Scraper-Code nur mit Eintrag in
   `data/stammdaten/scraper-koordinaten.json` (OSM-geprüft / Gebiet /

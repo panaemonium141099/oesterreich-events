@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { districtFromPlz, districtsForPlz, districtFromGemeinde, districtForLocation, unreadablePlzDistricts } from '@/lib/plz-district';
+import { districtFromPlz, districtsForPlz, districtFromGemeinde, districtForLocation, unreadablePlzDistricts, bundeslandForLocation } from '@/lib/plz-district';
 import { bundeslandOfDistrict } from '@/lib/district-normalizer';
 import { allPlzReferenceEntries } from '@/lib/location/plz-reference';
 import { ALL_GEMEINDEN } from '@/lib/gemeinden/data';
@@ -205,5 +205,44 @@ describe('RTR-Schreibweisen werden gelesen, nie still verworfen', () => {
     // Neue Schreibweisen nach einem Neubau von data/plz-at.json landen hier,
     // statt still aus der Kandidatenmenge zu fallen.
     expect([...new Set(unreadablePlzDistricts().map(u => u.bezirk))]).toEqual(['NULL']);
+  });
+});
+
+describe('bundeslandForLocation: das Bundesland eines Events', () => {
+  it('die Angabe der Quelle gilt, in kanonischer Schreibweise', () => {
+    expect(bundeslandForLocation('Wien', null, null)).toBe('wien');
+    expect(bundeslandForLocation('tirol', { bundesland: 'vorarlberg' }, '6960')).toBe('tirol');
+  });
+
+  it('ohne Angabe der Quelle das Bundesland der belegten Gemeinde (Prod 2026-10-07: 4.181 Events ohne Bundesland)', () => {
+    expect(bundeslandForLocation(null, { bundesland: 'wien' }, '1150')).toBe('wien');
+    expect(bundeslandForLocation(undefined, { bundesland: 'oberoesterreich' }, null)).toBe('oberoesterreich');
+  });
+
+  it('die Gemeinde geht der PLZ vor: 1300 Wien-Flughafen liegt in Schwechat (NÖ)', () => {
+    expect(bundeslandForLocation(null, { bundesland: 'niederoesterreich' }, '1300')).toBe('niederoesterreich');
+  });
+
+  it('ohne Gemeinde die PLZ, wenn alle ihre Gemeinden im selben Bundesland liegen', () => {
+    // 4240: Freistadt, Waldburg, Kefermarkt, Lasberg, Reichenthal
+    expect(bundeslandForLocation(null, null, '4240')).toBe('oberoesterreich');
+    // Schwechat ist die einzige Gemeinde der PLZ 1300, die RTR nennt das Wiener Postamt.
+    expect(bundeslandForLocation(null, null, '1300')).toBe('niederoesterreich');
+  });
+
+  it('eine PLZ über die Landesgrenze bleibt offen, auch wenn die RTR ein Bundesland nennt', () => {
+    // 8292 Neudau (Steiermark) stellt auch ins Burgenland zu.
+    expect(bundeslandForLocation(null, null, '8292')).toBeNull();
+    expect(bundeslandForLocation(null, null, '2413')).toBeNull();
+  });
+
+  it('PLZ ohne Gemeinde in der Stammdatei: Bundesland laut RTR', () => {
+    expect(bundeslandForLocation(null, null, '2654')).toBe('niederoesterreich');
+  });
+
+  it('nichts belegt, nichts geraten', () => {
+    expect(bundeslandForLocation(null, null, null)).toBeNull();
+    expect(bundeslandForLocation(null, null, '0000')).toBeNull();
+    expect(bundeslandForLocation('', null, '')).toBeNull();
   });
 });
