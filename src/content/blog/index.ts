@@ -148,6 +148,8 @@ import { post as sowiFestLessStudyingMoreDancing2026 } from './posts/sowi-fest-l
 import { post as houseOfBanksyWienAnUnauthorizedExhibition2026 } from './posts/house-of-banksy-wien-an-unauthorized-exhibition-2026';
 import { post as konzerteInDerMinoritenkircheAdventskonzertInDerMinori2026 } from './posts/konzerte-in-der-minoritenkirche-adventskonzert-in-der-minori-2026';
 import { post as poxruckerSistersHorizontSupportRobaRosentalRozFestiva2026 } from './posts/poxrucker-sisters-horizont-support-roba-rosental-roz-festiva-2026';
+import { post as bolschoiDonKosakenAdventkonzert2026 } from './posts/bolschoi-don-kosaken-adventkonzert-2026';
+import { post as inaRegenRevolutionDerLiebesliederTour2026 } from './posts/ina-regen-revolution-der-liebeslieder-tour-2026';
 // AUTOWRITER-IMPORTS-END
 
 export type { FestivalPost, GalleryImage, FestivalKeyFacts, LineupAct } from './types';
@@ -304,6 +306,8 @@ export const ALL_POSTS: FestivalPost[] = [
   houseOfBanksyWienAnUnauthorizedExhibition2026,
   konzerteInDerMinoritenkircheAdventskonzertInDerMinori2026,
   poxruckerSistersHorizontSupportRobaRosentalRozFestiva2026,
+  bolschoiDonKosakenAdventkonzert2026,
+  inaRegenRevolutionDerLiebesliederTour2026,
   // AUTOWRITER-POSTS-END
 ].sort(
   (a, b) => new Date(b.publishDate).getTime() - new Date(a.publishDate).getTime()
