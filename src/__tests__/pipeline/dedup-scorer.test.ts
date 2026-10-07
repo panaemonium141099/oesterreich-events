@@ -6,10 +6,8 @@ import { isGarbageTitle } from '@/lib/pipeline/garbage-filter';
 import {
   selectPrimary,
   computeEnrichments,
-  buildClusters,
-  type ScoredPair,
 } from '@/lib/pipeline/dedup-cluster';
-import type { EventRow, DedupScoreBreakdown } from '@/lib/pipeline/types';
+import type { EventRow } from '@/lib/pipeline/types';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -340,8 +338,10 @@ describe('dedup-scorer / scorePair', () => {
 // ---------------------------------------------------------------------------
 
 describe('dedup-scorer / sparse-data boost', () => {
-  it('identical title + same day + no conflicts + no venue/geo/url → merge via boost', () => {
-    // This pair would score ~0.50 without the boost (only title+datetime contribute)
+  it('identical title + same day + no conflicts + no venue/geo/url → merge', () => {
+    // Die gewichtete Summe ist seit 2026-10 nur noch Auskunft; entschieden
+    // wird aus Belegen. Ohne jede Ortsangabe auf beiden Seiten gibt es auch
+    // keinen Widerspruch.
     const a = makeEvent({
       id: 'aaa',
       title: 'Sommerfest im Park',
@@ -355,7 +355,7 @@ describe('dedup-scorer / sparse-data boost', () => {
 
     const result = scorePair(a, b);
     expect(result.decision).toBe('merge');
-    expect(result.overallScore).toBeGreaterThanOrEqual(0.80);
+    expect(result.reason).toBe('equal_title_no_place_data');
   });
 
   it('identical title + same day + same district + both no location → merge via boost', () => {
@@ -944,176 +944,6 @@ describe('dedup-cluster / computeEnrichments', () => {
 
     const enrichments = computeEnrichments(primary, [dup1, dup2]);
     expect(enrichments.description).toBe(dup2.description);
-  });
-});
-
-// ---------------------------------------------------------------------------
-// dedup-cluster.ts — buildClusters()
-// ---------------------------------------------------------------------------
-
-describe('dedup-cluster / buildClusters', () => {
-  it('forms a cluster from a single merge pair', () => {
-    const a = makeEvent({ id: 'a', title: 'Event', start_date: '2026-01-01', quality_score: 90 });
-    const b = makeEvent({ id: 'b', title: 'Event', start_date: '2026-01-01', quality_score: 60 });
-
-    const eventsById = new Map<string, EventRow>([
-      ['a', a],
-      ['b', b],
-    ]);
-
-    const pairs: ScoredPair[] = [
-      {
-        eventA: a,
-        eventB: b,
-        score: {
-          titleScore: 1, datetimeScore: 1, venueScore: 0, geoScore: 0, urlScore: 0,
-          overallScore: 0.9, decision: 'merge',
-        },
-      },
-    ];
-
-    const clusters = buildClusters(pairs, eventsById);
-    expect(clusters.length).toBe(1);
-    expect(clusters[0].primaryId).toBe('a');
-    expect(clusters[0].duplicateIds).toEqual(['b']);
-  });
-
-  it('forms a transitive cluster from chained merge pairs (A-B, B-C)', () => {
-    const a = makeEvent({ id: 'a', title: 'E', start_date: '2026-01-01', quality_score: 95 });
-    const b = makeEvent({ id: 'b', title: 'E', start_date: '2026-01-01', quality_score: 80 });
-    const c = makeEvent({ id: 'c', title: 'E', start_date: '2026-01-01', quality_score: 70 });
-
-    const eventsById = new Map<string, EventRow>([
-      ['a', a], ['b', b], ['c', c],
-    ]);
-
-    const mergeScore: DedupScoreBreakdown = {
-      titleScore: 1, datetimeScore: 1, venueScore: 0, geoScore: 0, urlScore: 0,
-      overallScore: 0.9, decision: 'merge',
-    };
-
-    const pairs: ScoredPair[] = [
-      { eventA: a, eventB: b, score: mergeScore },
-      { eventA: b, eventB: c, score: mergeScore },
-    ];
-
-    const clusters = buildClusters(pairs, eventsById);
-    expect(clusters.length).toBe(1);
-    expect(clusters[0].primaryId).toBe('a');
-    expect(clusters[0].duplicateIds.sort()).toEqual(['b', 'c']);
-  });
-
-  it('does NOT form clusters from uncertain or distinct pairs', () => {
-    const a = makeEvent({ id: 'a', title: 'E', start_date: '2026-01-01' });
-    const b = makeEvent({ id: 'b', title: 'E', start_date: '2026-01-01' });
-
-    const eventsById = new Map<string, EventRow>([
-      ['a', a], ['b', b],
-    ]);
-
-    const pairs: ScoredPair[] = [
-      {
-        eventA: a,
-        eventB: b,
-        score: {
-          titleScore: 0.5, datetimeScore: 0.5, venueScore: 0, geoScore: 0, urlScore: 0,
-          overallScore: 0.5, decision: 'uncertain',
-        },
-      },
-    ];
-
-    const clusters = buildClusters(pairs, eventsById);
-    expect(clusters.length).toBe(0);
-  });
-
-  it('forms two separate clusters from independent merge pairs', () => {
-    const a = makeEvent({ id: 'a', title: 'Event1', start_date: '2026-01-01', quality_score: 90 });
-    const b = makeEvent({ id: 'b', title: 'Event1', start_date: '2026-01-01', quality_score: 50 });
-    const c = makeEvent({ id: 'c', title: 'Event2', start_date: '2026-02-01', quality_score: 85 });
-    const d = makeEvent({ id: 'd', title: 'Event2', start_date: '2026-02-01', quality_score: 60 });
-
-    const eventsById = new Map<string, EventRow>([
-      ['a', a], ['b', b], ['c', c], ['d', d],
-    ]);
-
-    const mergeScore: DedupScoreBreakdown = {
-      titleScore: 1, datetimeScore: 1, venueScore: 0, geoScore: 0, urlScore: 0,
-      overallScore: 0.9, decision: 'merge',
-    };
-
-    const pairs: ScoredPair[] = [
-      { eventA: a, eventB: b, score: mergeScore },
-      { eventA: c, eventB: d, score: mergeScore },
-    ];
-
-    const clusters = buildClusters(pairs, eventsById);
-    expect(clusters.length).toBe(2);
-
-    const primaryIds = clusters.map(c => c.primaryId).sort();
-    expect(primaryIds).toEqual(['a', 'c']);
-  });
-
-  it('each cluster has a clusterId', () => {
-    const a = makeEvent({ id: 'a', title: 'E', start_date: '2026-01-01', quality_score: 90 });
-    const b = makeEvent({ id: 'b', title: 'E', start_date: '2026-01-01', quality_score: 50 });
-
-    const eventsById = new Map<string, EventRow>([['a', a], ['b', b]]);
-    const pairs: ScoredPair[] = [
-      {
-        eventA: a, eventB: b,
-        score: {
-          titleScore: 1, datetimeScore: 1, venueScore: 0, geoScore: 0, urlScore: 0,
-          overallScore: 0.9, decision: 'merge',
-        },
-      },
-    ];
-
-    const clusters = buildClusters(pairs, eventsById);
-    expect(clusters[0].clusterId).toBeTruthy();
-    expect(typeof clusters[0].clusterId).toBe('string');
-  });
-
-  it('cluster scores map contains overall scores for each duplicate', () => {
-    const a = makeEvent({ id: 'a', title: 'E', start_date: '2026-01-01', quality_score: 90 });
-    const b = makeEvent({ id: 'b', title: 'E', start_date: '2026-01-01', quality_score: 50 });
-
-    const eventsById = new Map<string, EventRow>([['a', a], ['b', b]]);
-    const pairs: ScoredPair[] = [
-      {
-        eventA: a, eventB: b,
-        score: {
-          titleScore: 1, datetimeScore: 1, venueScore: 0, geoScore: 0, urlScore: 0,
-          overallScore: 0.92, decision: 'merge',
-        },
-      },
-    ];
-
-    const clusters = buildClusters(pairs, eventsById);
-    expect(clusters[0].scores.get('b')).toBe(0.92);
-  });
-
-  it('returns empty array when no pairs are provided', () => {
-    const clusters = buildClusters([], new Map());
-    expect(clusters).toEqual([]);
-  });
-
-  it('returns empty array when all pairs are distinct', () => {
-    const a = makeEvent({ id: 'a', title: 'E', start_date: '2026-01-01' });
-    const b = makeEvent({ id: 'b', title: 'E', start_date: '2026-01-01' });
-
-    const eventsById = new Map<string, EventRow>([['a', a], ['b', b]]);
-    const pairs: ScoredPair[] = [
-      {
-        eventA: a, eventB: b,
-        score: {
-          titleScore: 0.1, datetimeScore: 0, venueScore: 0, geoScore: 0, urlScore: 0,
-          overallScore: 0.03, decision: 'distinct',
-        },
-      },
-    ];
-
-    const clusters = buildClusters(pairs, eventsById);
-    expect(clusters.length).toBe(0);
   });
 });
 

@@ -268,6 +268,40 @@ kommen aber per Nacht-Scrape zurück. Analyse, Belege und Sanierungsplan:
 [docs/ORTSDATEN-ANALYSE-2026-09-13.md](ORTSDATEN-ANALYSE-2026-09-13.md).
 Revidiert damit §6 Punkt 3.
 
+### 3.10 Dubletten trotz Dedup — Dedup auf Belege umgebaut (2026-10-07)
+
+**Befund:** Dasselbe Konzert („Fehringer´s Kalte Küche", Sargfabrik, 7.10.)
+war 4× sichtbar (Eventim, Wien-Ticket, Falter, ntry.at). Prod-Messung:
+2.097 quellenübergreifende Paare mit identischem Titel, gleichem Wiener Tag,
+< 200 m, beide sichtbar; 10.441 nie aufgelöste „uncertain"-Paare im Log.
+Wurzeln: (1) gewichtete Punktsumme bestrafte fehlende Daten — URL und
+Venue-Id stimmen quellenübergreifend fast nie überein, Ortsnamen sind
+verschieden geschrieben → gleicher Titel + gleiche Uhrzeit + gleicher Pin =
+0,775 „uncertain"; (2) Untertitel/Tournamen und „(A)" nicht erkannt;
+(3) Platzhalter-Uhrzeiten als echte Zeit, UTC- statt Wiener Tage; (4) kein
+Schutz gegen Ketten-Fusion, deshalb waren die Regeln nicht lockerbar;
+(5) einmalige, klebrige Markierung (frühere Fehl-Fusionen und Altzeilen
+blieben für immer); (6) keine Nachkontrolle.
+
+**Umbau** (`src/lib/pipeline/dedup-*.ts`, CLAUDE.md „Event-Dedup"):
+Entscheidung aus Belegen je Dimension (Titel gleich/Tippfehler/enthalten,
+Ort gleich/Gemeinde/Widerspruch, Zeit gleich/unbekannt/Widerspruch), fehlende
+Daten sind kein Gegenbeweis; Wiener Kalendertag; Mehrdeutigkeitsschutz
+(ein Eintrag, der zu zwei verschiedenen Events passt, wird keinem
+zugeordnet) und Widerspruchsprüfung im ganzen Cluster; jeder Lauf rechnet
+alles neu, schreibt nur Abweichungen, löst Verbindungen nur mit Gegenbeleg;
+verwaiste Altzeilen (Quelle liefert sie > 21 Tage nicht mehr) sind nie
+Gegenbeleg und werden nie wieder sichtbar; Sicherheitsventil gegen
+Massenänderungen; Pipeline-Schritt `dedup_audit` wird rot, wenn sichtbare
+offensichtliche Dubletten übrig bleiben. Keine Quellen-Sonderregeln —
+neue Fehlerfälle gehören ins Golden-Set
+(`src/__tests__/pipeline/dedup-golden.test.ts`).
+
+**Nebenbefunde (eigene Tasks):** Ticketmaster speichert Wandzeit als UTC
+(+1/+2 h); gem2go klebt Kategorie-Text an 1.928 Titel; 279 Events mit PLZ
+1140 tragen Bezirk „tulln"; ntry.at liefert „Österreich" als Ort; einzelne
+Quellen liefern Termine im Jahr 1 bzw. 2919.
+
 ## 4. Getroffene Grundsatz-Entscheidungen (2026-07-07)
 
 1. **Affiliate-ID `J70` ist korrekt** und gehört uns (bestätigt). Eventim-Links im Feed

@@ -1,0 +1,182 @@
+// src/lib/pipeline/dedup-plan.ts
+
+/**
+ * Vom Sollzustand zum Schreibplan.
+ *
+ * Der Dedup rechnet jede Nacht ALLE Cluster aus den aktuellen Daten neu
+ * (dedup-engine) und schreibt nur die Abweichungen zum Ist-Zustand. Damit
+ * gilt: gleiche Daten → gleiches Ergebnis, egal was frühere Läufe oder
+ * frühere Regeln markiert haben.
+ *  - Neue Dubletten werden markiert, umgezogene Primaries umgehängt.
+ *  - Ein Duplikat ohne passenden Partner (Regeln geschärft, Primary
+ *    unterdrückt, Event geändert) wird wieder freigegeben.
+ *  - Der Primary bekommt fehlende Felder aus seinen Duplikaten — in jedem
+ *    Lauf neu, weil der nächtliche Upsert seiner Quelle sie überschreibt.
+ *
+ * Rein und ohne I/O.
+ */
+
+import { computeEnrichments, isDateOnlyTitle } from './dedup-cluster';
+import { newClusterId as defaultClusterId, pairKey, type ClusterResult } from './dedup-engine';
+import { isOrphanRow } from './dedup-evidence';
+import { scorePair } from './dedup-scorer';
+import { scoreToPublishStatus, type PublishStatus } from '@/lib/quality/score-event';
+import type { EventRow } from './types';
+
+export interface MarkDuplicate {
+  id: string;
+  primaryId: string;
+  clusterId: string;
+  score: number;
+  /** War vorher kein Duplikat (zählt fürs Sicherheitsventil). */
+  isNew: boolean;
+}
+
+export interface Release {
+  id: string;
+  previousPrimaryId: string | null;
+  /** Gegenbeleg, z. B. 'different_showtime' oder 'primary_of_cluster'. */
+  reason: string;
+}
+
+export interface PrimaryUpdate {
+  id: string;
+  clusterId: string;
+  enrichments: Record<string, unknown>;
+}
+
+export interface DedupPlan {
+  markDuplicate: MarkDuplicate[];
+  release: Release[];
+  primaries: PrimaryUpdate[];
+}
+
+export interface PlanOptions {
+  newClusterId?: () => string;
+  /** Jüngstes last_seen_at je Quelle (verwaiste Zeilen, isOrphanRow). */
+  sourceLastSeen?: Map<string, string>;
+  /** Bisherige Primaries, die nicht im Tagessatz liegen (anderer Tag). */
+  externalPrimaries?: Map<string, EventRow>;
+  manualSplits?: Set<string>;
+}
+
+function sameValue(a: unknown, b: unknown): boolean {
+  if (Array.isArray(a) && Array.isArray(b)) {
+    return a.length === b.length && a.every((v, i) => v === b[i]);
+  }
+  return a === b;
+}
+
+export function planDedup(events: EventRow[], clusters: ClusterResult[], opts: PlanOptions = {}): DedupPlan {
+  const nextId = opts.newClusterId ?? defaultClusterId;
+  const byId = new Map(events.map(e => [e.id, e]));
+  const plan: DedupPlan = { markDuplicate: [], release: [], primaries: [] };
+  const desiredDuplicate = new Set<string>();
+
+  for (const c of clusters) {
+    const primary = byId.get(c.primaryId);
+    if (!primary) continue;
+    const members = c.memberIds.map(id => byId.get(id)).filter((e): e is EventRow => !!e);
+    // Cluster-Id stabil halten: die des Primary, sonst irgendeines Mitglieds.
+    const clusterId = c.clusterId ?? primary.dedup_cluster_id ??
+      members.find(m => m.dedup_cluster_id)?.dedup_cluster_id ?? nextId();
+
+    const duplicates = members.filter(m => m.id !== primary.id);
+    for (const d of duplicates) {
+      desiredDuplicate.add(d.id);
+      const correct = d.publish_status === 'duplicate' && d.duplicate_of === primary.id && d.dedup_cluster_id === clusterId;
+      if (correct) continue;
+      plan.markDuplicate.push({
+        id: d.id,
+        primaryId: primary.id,
+        clusterId,
+        score: c.scores.get(d.id) ?? 0,
+        isNew: d.publish_status !== 'duplicate',
+      });
+    }
+
+    const enrichments: Record<string, unknown> = {};
+    for (const [k, v] of Object.entries(computeEnrichments(primary, duplicates))) {
+      if (!sameValue((primary as unknown as Record<string, unknown>)[k], v)) enrichments[k] = v;
+    }
+    if (primary.dedup_cluster_id !== clusterId || Object.keys(enrichments).length > 0) {
+      plan.primaries.push({ id: primary.id, clusterId, enrichments });
+    }
+  }
+
+  // Bestehende Duplikate, die der Lauf nicht mehr bestätigt: nur mit
+  // Gegenbeleg lösen. Ohne Beleg (Primary weg, nur unsicher, mehrdeutig)
+  // bleibt die Verbindung — sonst tauchen Altzeilen, die frühere Läufe zu
+  // Recht versteckt hatten, als Phantome wieder auf (Probelauf 2026-10-07:
+  // 11.837 Freigaben, überwiegend verwaiste Zeilen aus behobenen Scraper-Fehlern).
+  const clusterPrimaries = new Set(clusters.map(c => c.primaryId));
+  for (const e of events) {
+    if (e.publish_status !== 'duplicate' || desiredDuplicate.has(e.id)) continue;
+    const previousPrimaryId = e.duplicate_of ?? null;
+    if (clusterPrimaries.has(e.id)) {
+      plan.release.push({ id: e.id, previousPrimaryId, reason: 'primary_of_cluster' });
+      continue;
+    }
+    if (isOrphanRow(e, opts.sourceLastSeen) || isDateOnlyTitle(e.title)) continue;
+    const p = previousPrimaryId ? (byId.get(previousPrimaryId) ?? opts.externalPrimaries?.get(previousPrimaryId)) : undefined;
+    if (!p || p.publish_status === 'suppressed' || isOrphanRow(p, opts.sourceLastSeen)) continue;
+    const verdict = opts.manualSplits?.has(pairKey(e.id, p.id))
+      ? { decision: 'distinct', reason: 'manual_split' }
+      : scorePair(e, p);
+    if (verdict.decision === 'distinct' && verdict.reason && RELEASE_REASONS.has(verdict.reason)) {
+      plan.release.push({ id: e.id, previousPrimaryId, reason: verdict.reason });
+    }
+  }
+  return plan;
+}
+
+/**
+ * Gegenbelege, die eine bestehende Verbindung lösen (beide Zeilen aktuell
+ * geliefert). Bewusst nicht dabei:
+ *  - Bezirks-/PLZ-Etiketten: bei einzelnen Quellen falsch (5592 statt 5575
+ *    für Lessach)
+ *  - gleiche Quelle mit anderem Titel: darunter Navigations-Müll („zum
+ *    Footer", „Springe zum Hauptinhalt"), den frühere Läufe versteckt hatten
+ */
+const RELEASE_REASONS = new Set([
+  'different_day',
+  'different_title',
+  'different_showtime',
+  'different_venue_id',
+  'different_place',
+  'different_venue',
+  'same_source_other_time',
+  'manual_split',
+]);
+
+/**
+ * Status beim Freigeben eines Duplikats: derselbe wie beim Upsert (Score →
+ * Status, Quarantäne bleibt Quarantäne). Der nächste Scrape der Quelle
+ * rechnet ihn ohnehin neu.
+ */
+export function releaseStatus(row: { quality_score?: number | null; admission_decision?: string | null }): PublishStatus {
+  if (row.admission_decision === 'quarantine') return 'needs_review';
+  return scoreToPublishStatus(row.quality_score ?? 0);
+}
+
+export interface SafetyLimits {
+  maxNewDuplicates: number;
+  maxReleases: number;
+}
+
+/**
+ * Massenänderungen sind fast immer ein Fehler (Regel kaputt, Daten halb
+ * geladen). Dann schreibt der Lauf nichts und meldet sich laut; ein Mensch
+ * prüft den Probelauf und gibt mit höheren Grenzen frei.
+ */
+export function checkSafetyValve(plan: DedupPlan, limits: SafetyLimits): string[] {
+  const violations: string[] = [];
+  const newDuplicates = plan.markDuplicate.filter(m => m.isNew).length;
+  if (newDuplicates > limits.maxNewDuplicates) {
+    violations.push(`${newDuplicates} neue Duplikate > Grenze ${limits.maxNewDuplicates}`);
+  }
+  if (plan.release.length > limits.maxReleases) {
+    violations.push(`${plan.release.length} Freigaben > Grenze ${limits.maxReleases}`);
+  }
+  return violations;
+}

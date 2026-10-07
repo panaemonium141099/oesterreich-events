@@ -1,157 +1,18 @@
 // src/lib/pipeline/dedup-cluster.ts
 
 /**
- * Cluster formation and primary selection for dedup.
- *
- * Takes scored pairs and forms clusters using union-find,
- * selects the primary event, and enriches it from duplicates.
+ * Primary-Wahl und Feld-Anreicherung für Dedup-Cluster. Die Cluster selbst
+ * bildet dedup-engine.ts (mit Mehrdeutigkeits- und Widerspruchsschutz).
  */
 
-import type { EventRow, DedupScoreBreakdown } from './types';
-import { v4 as uuidv4 } from 'uuid';
+import type { EventRow } from './types';
 
-// ---------------------------------------------------------------------------
-// Union-Find for cluster formation
-// ---------------------------------------------------------------------------
+const DATE_WORDS = /\b(montag|dienstag|mittwoch|donnerstag|freitag|samstag|sonntag|mo|di|mi|do|fr|sa|so|januar|jaenner|jänner|februar|maerz|märz|april|mai|juni|juli|august|september|oktober|november|dezember|jan|feb|mär|apr|jun|jul|aug|sep|sept|okt|nov|dez|uhr|ab|bis)\b/gi;
 
-class UnionFind {
-  private parent: Map<string, string> = new Map();
-  private rank: Map<string, number> = new Map();
-
-  find(x: string): string {
-    if (!this.parent.has(x)) {
-      this.parent.set(x, x);
-      this.rank.set(x, 0);
-    }
-    let root = x;
-    while (this.parent.get(root) !== root) {
-      root = this.parent.get(root)!;
-    }
-    // Path compression
-    let curr = x;
-    while (curr !== root) {
-      const next = this.parent.get(curr)!;
-      this.parent.set(curr, root);
-      curr = next;
-    }
-    return root;
-  }
-
-  union(a: string, b: string): void {
-    const rootA = this.find(a);
-    const rootB = this.find(b);
-    if (rootA === rootB) return;
-
-    const rankA = this.rank.get(rootA) ?? 0;
-    const rankB = this.rank.get(rootB) ?? 0;
-    if (rankA < rankB) {
-      this.parent.set(rootA, rootB);
-    } else if (rankA > rankB) {
-      this.parent.set(rootB, rootA);
-    } else {
-      this.parent.set(rootB, rootA);
-      this.rank.set(rootA, rankA + 1);
-    }
-  }
-
-  getClusters(): Map<string, string[]> {
-    const clusters = new Map<string, string[]>();
-    for (const id of Array.from(this.parent.keys())) {
-      const root = this.find(id);
-      if (!clusters.has(root)) clusters.set(root, []);
-      clusters.get(root)!.push(id);
-    }
-    return clusters;
-  }
-}
-
-// ---------------------------------------------------------------------------
-// Scored pair type
-// ---------------------------------------------------------------------------
-
-export interface ScoredPair {
-  eventA: EventRow;
-  eventB: EventRow;
-  score: DedupScoreBreakdown;
-}
-
-// ---------------------------------------------------------------------------
-// Cluster type
-// ---------------------------------------------------------------------------
-
-export interface DedupCluster {
-  clusterId: string;
-  primaryId: string;
-  duplicateIds: string[];
-  /** Fields to enrich on the primary from duplicates */
-  enrichments: Record<string, unknown>;
-  /** Dedup scores for each duplicate relative to primary */
-  scores: Map<string, number>;
-}
-
-// ---------------------------------------------------------------------------
-// Build clusters from merge pairs
-// ---------------------------------------------------------------------------
-
-/**
- * Build dedup clusters from scored pairs.
- * Only 'merge' decisions create clusters.
- */
-export function buildClusters(
-  pairs: ScoredPair[],
-  eventsById: Map<string, EventRow>,
-): DedupCluster[] {
-  const uf = new UnionFind();
-
-  // Union all merge pairs
-  for (const pair of pairs) {
-    if (pair.score.decision === 'merge') {
-      uf.union(pair.eventA.id, pair.eventB.id);
-    }
-  }
-
-  // Get clusters (only multi-member ones)
-  const rawClusters = uf.getClusters();
-  const results: DedupCluster[] = [];
-
-  for (const [, memberIds] of Array.from(rawClusters)) {
-    if (memberIds.length < 2) continue;
-
-    const members = memberIds
-      .map(id => eventsById.get(id))
-      .filter((e): e is EventRow => !!e);
-
-    if (members.length < 2) continue;
-
-    // Select primary
-    const primary = selectPrimary(members);
-    const duplicates = members.filter(m => m.id !== primary.id);
-
-    // Compute enrichments
-    const enrichments = computeEnrichments(primary, duplicates);
-
-    // Build score map (use overall score from pairs)
-    const scores = new Map<string, number>();
-    for (const dup of duplicates) {
-      // Find the pair score for this duplicate
-      const pair = pairs.find(
-        p =>
-          (p.eventA.id === primary.id && p.eventB.id === dup.id) ||
-          (p.eventA.id === dup.id && p.eventB.id === primary.id),
-      );
-      scores.set(dup.id, pair?.score.overallScore ?? 0);
-    }
-
-    results.push({
-      clusterId: uuidv4(),
-      primaryId: primary.id,
-      duplicateIds: duplicates.map(d => d.id),
-      enrichments,
-      scores,
-    });
-  }
-
-  return results;
+/** Titel, der nach Abzug von Datum, Wochentag, Uhrzeit und Satzzeichen leer ist. */
+export function isDateOnlyTitle(title: string | null | undefined): boolean {
+  const rest = (title ?? '').toLowerCase().replace(DATE_WORDS, ' ').replace(/[^\p{L}]+/gu, '');
+  return rest.length === 0;
 }
 
 // ---------------------------------------------------------------------------
@@ -162,19 +23,45 @@ export function buildClusters(
  * Select the best event as primary from a cluster.
  *
  * Criteria (in order):
- * 1. Highest quality_score
- * 2. Longest meaningful description (> 50 chars)
- * 3. Has image_url
- * 4. Has ticket_url
- * 5. Oldest created_at
+ * 1. Sichtbar (nicht needs_review/suppressed)
+ * 2. Von der Quelle noch geliefert (nicht verwaist)
+ * 3. Eventim (Affiliate-Ticketlink)
+ * 4. Bisheriger Primary (stabile URL)
+ * 5. Highest quality_score
+ * 6. Longest meaningful description (> 50 chars)
+ * 7. Has image_url
+ * 8. Has ticket_url
+ * 9. Oldest created_at
  */
-export function selectPrimary(events: EventRow[]): EventRow {
+export function selectPrimary(events: EventRow[], isOrphan: (id: string) => boolean = () => false): EventRow {
+  // Bisheriger Primary: auf ihn zeigt ein anderes Mitglied, er selbst ist
+  // kein Duplikat. Er bleibt bei Gleichstand, sonst wechselt die kanonische
+  // URL von Nacht zu Nacht (der Dedup rechnet jeden Lauf neu).
+  const pointedAt = new Set(events.map(e => e.duplicate_of).filter((id): id is string => !!id));
+  const isCurrentPrimary = (e: EventRow) => (pointedAt.has(e.id) && e.publish_status !== 'duplicate') ? 1 : 0;
+  // Zurückgehaltene Zeilen (needs_review/suppressed) dürfen keine sichtbare
+  // Zeile verdrängen — sonst verschwände das Event ganz.
+  const isVisible = (e: EventRow) =>
+    e.publish_status === 'needs_review' || e.publish_status === 'suppressed' ? 0 : 1;
+
   return events.sort((a, b) => {
+    if (isVisible(a) !== isVisible(b)) return isVisible(b) - isVisible(a);
+    // Eine Zeile, die die Quelle nicht mehr liefert, darf nicht die kanonische sein.
+    const freshA = isOrphan(a.id) ? 0 : 1;
+    const freshB = isOrphan(b.id) ? 0 : 1;
+    if (freshA !== freshB) return freshB - freshA;
+    // Ein „Titel" nur aus Datum/Uhrzeit (Scraper-Artefakt) wird nicht angezeigt.
+    const titledA = isDateOnlyTitle(a.title) ? 0 : 1;
+    const titledB = isDateOnlyTitle(b.title) ? 0 : 1;
+    if (titledA !== titledB) return titledB - titledA;
+
     // 0. Eventim always wins — it's the official ticket source with the
     //    affiliate buy link, so it must be the canonical event in any cluster.
     const eventimA = a.source_name === 'Eventim' ? 1 : 0;
     const eventimB = b.source_name === 'Eventim' ? 1 : 0;
     if (eventimA !== eventimB) return eventimB - eventimA;
+
+    if (isCurrentPrimary(a) !== isCurrentPrimary(b)) return isCurrentPrimary(b) - isCurrentPrimary(a);
 
     // 1. quality_score DESC
     const scoreA = a.quality_score ?? 0;
@@ -268,24 +155,4 @@ export function computeEnrichments(
   }
 
   return enrichments;
-}
-
-/**
- * Resolve a duplicate_of target to the actual primary.
- * Prevents chains by following the reference until we find a non-duplicate.
- */
-export function resolvePrimary(
-  targetId: string,
-  eventsById: Map<string, EventRow>,
-  maxDepth = 10,
-): string {
-  let current = targetId;
-  let depth = 0;
-  while (depth < maxDepth) {
-    const event = eventsById.get(current);
-    if (!event || !event.duplicate_of) return current;
-    current = event.duplicate_of;
-    depth++;
-  }
-  return current; // Safety: return whatever we have after maxDepth
 }
