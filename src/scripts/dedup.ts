@@ -77,7 +77,7 @@ if (args.includes('--reset')) {
   console.log('Hinweis: --reset ist überflüssig — jeder Lauf rechnet alle Cluster neu.');
 }
 
-const EVENT_SELECT = 'id,title,description,start_date,end_date,is_all_day,location_name,address,district,postal_code,bundesland,latitude,longitude,location_precision,source_url,ticket_url,image_url,category,tags,source_id,source_name,venue_id,quality_score,publish_status,content_fingerprint,duplicate_of,dedup_score,dedup_cluster_id,organizer,price_text,created_at,last_seen_at';
+const EVENT_SELECT = 'id,title,description,start_date,end_date,is_all_day,location_name,address,district,postal_code,bundesland,latitude,longitude,location_precision,source_url,ticket_url,image_url,category,tags,source_id,source_name,venue_id,quality_score,publish_status,content_fingerprint,duplicate_of,dedup_score,dedup_cluster_id,organizer,price_text,created_at,last_seen_at,location_status';
 
 // ---------------------------------------------------------------------------
 // Phase 1: Garbage cleanup
@@ -226,22 +226,30 @@ async function applyPlan(plan: DedupPlan, errors: string[]): Promise<void> {
     for (let i = 0; i < ids.length; i += 200) {
       const { data, error } = await supabase
         .from('events')
-        .select('id,quality_score,admission:location_resolution->admission->>decision')
+        .select('id,quality_score,location_status,admission:location_resolution->admission->>decision')
         .in('id', ids.slice(i, i + 200));
       if (error) { errors.push(`Freigabe lesen: ${error.message}`); continue; }
-      for (const r of (data ?? []) as Array<{ id: string; quality_score: number | null; admission: string | null }>) {
-        statusById.set(r.id, releaseStatus({ quality_score: r.quality_score, admission_decision: r.admission }));
+      for (const r of (data ?? []) as Array<{ id: string; quality_score: number | null; location_status: string | null; admission: string | null }>) {
+        statusById.set(r.id, releaseStatus({ quality_score: r.quality_score, admission_decision: r.admission, location_status: r.location_status }));
       }
     }
     const byStatus = new Map<string, string[]>();
     for (const [id, status] of statusById) byStatus.set(status, [...(byStatus.get(status) ?? []), id]);
+    const release = (ids: string[], status: string) => supabase
+      .from('events')
+      .update({ publish_status: status, duplicate_of: null, dedup_score: null, dedup_cluster_id: null })
+      .in('id', ids);
     for (const [status, list] of byStatus) {
       for (let i = 0; i < list.length; i += 200) {
-        const { error } = await supabase
-          .from('events')
-          .update({ publish_status: status, duplicate_of: null, dedup_score: null, dedup_cluster_id: null })
-          .in('id', list.slice(i, i + 200));
-        if (error) errors.push(`Freigabe schreiben: ${error.message}`);
+        const chunk = list.slice(i, i + 200);
+        const { error } = await release(chunk, status);
+        if (!error) continue;
+        // Ein abgelehnter Datensatz darf nicht 199 andere blockieren:
+        // einzeln nachschreiben und nur die echten Ausreißer melden.
+        await inPool(chunk, async (id) => {
+          const { error: e } = await release([id], status);
+          if (e) errors.push(`Freigabe ${id}: ${e.message}`);
+        });
       }
     }
   }

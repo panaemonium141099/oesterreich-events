@@ -17,6 +17,7 @@
  */
 
 import { computeEnrichments, isDateOnlyTitle } from './dedup-cluster';
+import { isGarbageTitle } from './garbage-filter';
 import { newClusterId as defaultClusterId, pairKey, type ClusterResult } from './dedup-engine';
 import { isOrphanRow } from './dedup-evidence';
 import { scorePair } from './dedup-scorer';
@@ -117,9 +118,19 @@ export function planDedup(events: EventRow[], clusters: ClusterResult[], opts: P
       plan.release.push({ id: e.id, previousPrimaryId, reason: 'primary_of_cluster' });
       continue;
     }
-    if (isOrphanRow(e, opts.sourceLastSeen) || isDateOnlyTitle(e.title)) continue;
+    // Altzeilen, Datums- und Müll-Titel bleiben verborgen, egal was mit
+    // ihrem Primary ist.
+    if (isOrphanRow(e, opts.sourceLastSeen) || isDateOnlyTitle(e.title) ||
+        isGarbageTitle(e.title, { sourceName: e.source_name })) continue;
     const p = previousPrimaryId ? (byId.get(previousPrimaryId) ?? opts.externalPrimaries?.get(previousPrimaryId)) : undefined;
-    if (!p || p.publish_status === 'suppressed' || isOrphanRow(p, opts.sourceLastSeen)) continue;
+    // Der bisherige Primary ist selbst nicht (mehr) sichtbar: dann versteckt
+    // die Verbindung ein echtes Event (Prod 2026-10-07: „Wickie, Slime und
+    // Paiper" hinter dem als Müll unterdrückten „Event / Party").
+    if (!p || p.publish_status === 'suppressed' || p.publish_status === 'needs_review' || p.location_status === 'conflict') {
+      plan.release.push({ id: e.id, previousPrimaryId, reason: 'primary_hidden' });
+      continue;
+    }
+    if (isOrphanRow(p, opts.sourceLastSeen)) continue;
     const verdict = opts.manualSplits?.has(pairKey(e.id, p.id))
       ? { decision: 'distinct', reason: 'manual_split' }
       : scorePair(e, p);
@@ -154,8 +165,14 @@ const RELEASE_REASONS = new Set([
  * Status, Quarantäne bleibt Quarantäne). Der nächste Scrape der Quelle
  * rechnet ihn ohnehin neu.
  */
-export function releaseStatus(row: { quality_score?: number | null; admission_decision?: string | null }): PublishStatus {
+export function releaseStatus(row: {
+  quality_score?: number | null;
+  admission_decision?: string | null;
+  location_status?: string | null;
+}): PublishStatus {
   if (row.admission_decision === 'quarantine') return 'needs_review';
+  // Wie im Upsert: Ortskonflikte bleiben zurückgehalten (DB-Constraint).
+  if (row.location_status === 'conflict') return 'needs_review';
   return scoreToPublishStatus(row.quality_score ?? 0);
 }
 
