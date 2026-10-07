@@ -20,7 +20,8 @@
 import { ALL_GEMEINDEN } from '@/lib/gemeinden/data';
 import { normalizeDistrict, isCanonicalDistrict, stadtPlzRules, bundeslandOfDistrict } from '@/lib/district-normalizer';
 import { bundeslandToId } from '@/lib/bundeslaender';
-import { allPlzReferenceEntries } from '@/lib/location/plz-reference';
+import { allPlzReferenceEntries, bundeslandForPlz } from '@/lib/location/plz-reference';
+import { gemeindenByPlz } from '@/lib/location/gemeinde-index';
 
 interface PlzEntry {
   district: string;
@@ -187,4 +188,38 @@ export function districtForLocation(
   if (fromPlz) return fromPlz;
   const normalized = normalizeDistrict(sourceDistrict, bundeslandId, postalCode);
   return normalized && isCanonicalDistrict(normalized) ? normalized : null;
+}
+
+/**
+ * DAS Bundesland eines Events, für jeden Schreibweg gleich (Scraper-Sync,
+ * Neu-Entscheidung im Bestand): die Angabe der Quelle, sonst das Bundesland
+ * der belegten Gemeinde, sonst das der PLZ, wenn alle ihre Gemeinden in
+ * einem Bundesland liegen (für PLZ ohne Gemeinde in der Stammdatei die RTR).
+ *
+ * Bis 2026-09-24 füllte ein DB-Trigger die Lücke aus der PLZ. fn-27 hat ihn
+ * entfernt, weil „der Resolver es selbst setzt"; der Sync schrieb aber nur
+ * die Angabe der Quelle. Prod 2026-10-07: 4.181 künftige Events mit belegter
+ * Gemeinde standen ohne Bundesland und fielen aus jedem Bundesland-Filter.
+ *
+ * Die Quelle steht vorne, weil der Freigabevertrag genau ihre Angabe gegen
+ * Koordinate und PLZ prüft (und sie bei Bedarf korrigiert, das Ergebnis
+ * kommt hier herein). Die abgeleiteten Stufen gehen nicht in diese
+ * Gegenprobe ein: sie stammen selbst aus der PLZ. Die RTR nennt je PLZ nur
+ * das Bundesland des Postamts; 50 PLZ stellen über die Landesgrenze zu
+ * (8292 Neudau auch ins Burgenland), dort bleibt das Bundesland offen.
+ */
+export function bundeslandForLocation(
+  sourceBundesland: string | null | undefined,
+  gemeinde: { bundesland: string } | null | undefined,
+  postalCode: string | null | undefined,
+): string | null {
+  const fromSource = bundeslandToId(sourceBundesland);
+  if (fromSource) return fromSource;
+  const fromGemeinde = bundeslandToId(gemeinde?.bundesland);
+  if (fromGemeinde) return fromGemeinde;
+  const plz = postalCode?.trim();
+  if (!plz) return null;
+  const lands = new Set(gemeindenByPlz(plz).map(g => bundeslandToId(g.bundesland)));
+  if (lands.size === 0) return bundeslandForPlz(plz);
+  return lands.size === 1 ? [...lands][0] : null;
 }

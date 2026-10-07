@@ -45,7 +45,7 @@ import {
   openScrapeRun,
   persistRawEvents,
 } from '@/lib/db/raw-persist';
-import { districtForLocation } from '@/lib/plz-district';
+import { districtForLocation, bundeslandForLocation } from '@/lib/plz-district';
 import { bundeslandToId } from '@/lib/bundeslaender';
 import { toUtcInstant } from '@/lib/pipeline/normalize-date';
 import { migrateSourceIds } from '@/lib/db/source-id-migration';
@@ -737,7 +737,10 @@ export function toSupabaseRow(
     finalConfidence = null;
     finalSource = null;
   }
-  const finalBundesland = score.corrected.bundesland;
+  // Nennt die Quelle kein Bundesland, gilt das der Ortsentscheidung (Gemeinde,
+  // sonst eindeutige PLZ). Der Vertrag oben hat nur die Angabe der Quelle
+  // geprüft; dabei bleibt es (siehe bundeslandForLocation).
+  const finalBundesland = bundeslandForLocation(score.corrected.bundesland, decision.gemeinde, resolved.postalCode);
 
   // Ortsstatus nach dem Freigabevertrag: eine verworfene Koordinate oder
   // ein Orts-Widerspruch macht aus der Entscheidung einen Konflikt bzw.

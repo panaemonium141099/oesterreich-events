@@ -9,6 +9,8 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 import { inputFromStoredRow, reResolveStoredEvents, contractedDecision, publishChangeFor, type StoredEventLocationRow } from '@/lib/location/re-resolve';
 import { resolveEventLocation } from '@/lib/location/resolver';
 import { districtForLocation } from '@/lib/plz-district';
+import { toSupabaseRow } from '@/lib/db/supabase-sync';
+import type { ScrapedEvent } from '@/types/events';
 
 interface DbEvent { id: string; updated_at: string | null }
 
@@ -186,5 +188,65 @@ describe('Veröffentlichungsregel bei erneuter Entscheidung (Review §6: Konflik
     expect(res.publish_change).toBe('withheld');
     expect(writes[0].payload.publish_status).toBe('needs_review');
     expect(writes[0].payload.latitude).toBeNull();
+  });
+});
+
+describe('Bundesland bei erneuter Entscheidung (Quellangabe statt abgeleiteter Spalte)', () => {
+  it('Eingabe aus der Zeile: das Bundesland der Quelle steht im Protokoll, nicht in der Spalte', () => {
+    // Die Spalte trägt seit 2026-10 auch das aus Gemeinde/PLZ abgeleitete Bundesland.
+    const derived = { ...baseRow(), bundesland: 'oberoesterreich', location_resolution: { input_hash: 'x', evidence: ['plz:address_text:4020'] } };
+    expect(inputFromStoredRow(derived).bundesland).toBeNull();
+    const declared = { ...derived, location_resolution: { input_hash: 'x', evidence: ['plz:address_text:4020', 'bundesland:source:oberoesterreich'] } };
+    expect(inputFromStoredRow(declared).bundesland).toBe('oberoesterreich');
+    // Ohne gespeicherte Entscheidung (Altbestand) bleibt die Spalte der einzige Wert.
+    expect(inputFromStoredRow({ ...derived, location_resolution: null }).bundesland).toBe('oberoesterreich');
+  });
+
+  it('Sync-Zeile ohne Bundesland der Quelle: Neu-Entscheidung kommt zum selben Ergebnis und schreibt nicht', async () => {
+    const event = {
+      source_name: 'boudicca:stadthallewien',
+      source_id: 'a',
+      source_url: 'https://example.at/a',
+      title: 'Testkonzert',
+      start_date: '2030-03-01T18:00:00.000Z',
+      location_name: 'Wiener Stadthalle',
+      address: 'Roland-Rainer-Platz 1, 1150 Wien',
+      country: 'AT',
+    } as ScrapedEvent;
+    const synced = toSupabaseRow(event, new Map(), new Map()).row as unknown as StoredEventLocationRow;
+    expect(synced.bundesland).toBe('wien');
+    const stored: StoredEventLocationRow = { ...synced, id: 'ev-1', updated_at: '2026-09-14T08:00:00Z' };
+    const writes: Array<{ id: unknown; payload: Record<string, unknown> }> = [];
+    const sb = fakeClient([{ id: 'ev-1', updated_at: '2026-09-14T08:00:00Z' }], writes);
+    const [res] = await reResolveStoredEvents(sb, [stored], { phase: 'test' });
+    expect(res.decision.input_hash).toBe(synced.location_resolution?.input_hash);
+    expect(res.skipped_reason).toBe('unchanged');
+    expect(writes).toHaveLength(0);
+  });
+
+  it('fehlendes Bundesland wird aus der belegten Gemeinde geschrieben', async () => {
+    const row: StoredEventLocationRow = { ...baseRow(), bundesland: null, location_resolution: { evidence: [] } as StoredEventLocationRow['location_resolution'] };
+    const writes: Array<{ id: unknown; payload: Record<string, unknown> }> = [];
+    const sb = fakeClient([{ id: 'ev-1', updated_at: '2026-09-14T08:00:00Z' }], writes);
+    const [res] = await reResolveStoredEvents(sb, [row], { phase: 'test' });
+    expect(res.written).toBe(true);
+    expect(writes[0].payload.bundesland).toBe('oberoesterreich');
+  });
+
+  it('vom Freigabevertrag korrigierte Quellangabe bleibt korrigiert (wie im Sync)', async () => {
+    // Quelle sagt Salzburg, Koordinate und PLZ 4020 liegen in Oberösterreich → use_coordinate_region.
+    const row: StoredEventLocationRow = {
+      ...baseRow(),
+      bundesland: 'oberoesterreich',
+      latitude_raw: 48.3069,
+      longitude_raw: 14.2858,
+      coords_precision_raw: 'address',
+      location_resolution: { evidence: ['bundesland:source:salzburg'] } as StoredEventLocationRow['location_resolution'],
+    };
+    const writes: Array<{ id: unknown; payload: Record<string, unknown> }> = [];
+    const sb = fakeClient([{ id: 'ev-1', updated_at: '2026-09-14T08:00:00Z' }], writes);
+    const [res] = await reResolveStoredEvents(sb, [row], { phase: 'test' });
+    expect(res.decision.latitude).toBe(48.3069);
+    expect(writes[0].payload.bundesland).toBe('oberoesterreich');
   });
 });

@@ -16,10 +16,10 @@ import type { LocationInput } from './conservative-resolution';
 import { loadLocationEvidence } from './evidence';
 import { resolveEventLocation, type ResolvedLocation } from './resolver';
 import { applyAdmissionToPosition } from './contract';
-import { evaluateAdmission } from '@/lib/quality/admission';
+import { evaluateAdmission, type AdmissionVerdict } from '@/lib/quality/admission';
 import { bundeslandFromPolygon } from '@/lib/eventim/bundesland-from-geo';
 import { getBundeslandFromPLZ } from '@/lib/location/plz-bundesland';
-import { districtForLocation } from '@/lib/plz-district';
+import { districtForLocation, bundeslandForLocation } from '@/lib/plz-district';
 import type { SourceCoordsPrecision } from './types';
 
 export interface StoredEventLocationRow {
@@ -47,9 +47,27 @@ export interface StoredEventLocationRow {
   geocoding_confidence: string | null;
   location_status: string | null;
   location_status_changed_at?: string | null;
-  location_resolution: { input_hash?: string; reasons?: string[] } | null;
+  location_resolution: { input_hash?: string; reasons?: string[]; evidence?: string[] } | null;
   publish_status?: string | null;
   updated_at: string | null;
+}
+
+/**
+ * Das Bundesland, das die QUELLE genannt hat. Die Spalte `bundesland` taugt
+ * dafür nicht: sie trägt auch das aus Gemeinde oder PLZ abgeleitete und das
+ * vom Freigabevertrag korrigierte Bundesland (`bundeslandForLocation`). Als
+ * Eingabe zurückgespielt, sähe es aus wie eine Angabe der Quelle: anderer
+ * Eingabehash als im Sync, Gegenprobe gegen einen abgeleiteten Wert. Die
+ * Angabe der Quelle protokolliert die Entscheidung als `bundesland:source:`;
+ * ohne gespeicherte Entscheidung (Altbestand) bleibt nur die Spalte.
+ */
+export function sourceBundeslandOf(row: Pick<StoredEventLocationRow, 'bundesland' | 'location_resolution'>): string | null {
+  const evidence = row.location_resolution?.evidence;
+  if (!Array.isArray(evidence)) return row.bundesland;
+  for (const e of evidence) {
+    if (typeof e === 'string' && e.startsWith('bundesland:source:')) return e.slice('bundesland:source:'.length);
+  }
+  return null;
 }
 
 export const STORED_LOCATION_COLUMNS =
@@ -73,7 +91,7 @@ export function inputFromStoredRow(row: StoredEventLocationRow): LocationInput {
       address: row.address_raw,
       postal_code: row.postal_code_raw,
       city: row.city_raw,
-      bundesland: row.bundesland,
+      bundesland: sourceBundeslandOf(row),
       country: row.country_raw ?? row.country,
       latitude: row.latitude_raw,
       longitude: row.longitude_raw,
@@ -90,7 +108,7 @@ export function inputFromStoredRow(row: StoredEventLocationRow): LocationInput {
     address: row.address,
     postal_code: row.postal_code,
     city: null,
-    bundesland: row.bundesland,
+    bundesland: sourceBundeslandOf(row),
     country: row.country,
     latitude: sourceCoords ? row.latitude : null,
     longitude: sourceCoords ? row.longitude : null,
@@ -157,6 +175,10 @@ function regionOfCoords(lat: number, lng: number): string | null {
  * Nacht wieder verwarf (Wiederholbarkeits-Befund Galtür, 2026-09-14).
  */
 export function contractedDecision(row: StoredEventLocationRow, decision: ResolvedLocation): ResolvedLocation {
+  return contract(row, decision).decision;
+}
+
+function contract(row: StoredEventLocationRow, decision: ResolvedLocation): { decision: ResolvedLocation; admission: AdmissionVerdict } {
   const admission = evaluateAdmission(
     {
       title: row.title ?? 'Bestand',
@@ -165,7 +187,8 @@ export function contractedDecision(row: StoredEventLocationRow, decision: Resolv
       location_name: decision.location_name,
       address: row.address_raw ?? row.address,
       postal_code: decision.postal_code,
-      bundesland: row.bundesland,
+      // Wie im Sync: geprüft wird die Angabe der Quelle, nicht die abgeleitete Spalte.
+      bundesland: sourceBundeslandOf(row),
       country: decision.country,
       latitude: decision.latitude,
       longitude: decision.longitude,
@@ -173,10 +196,10 @@ export function contractedDecision(row: StoredEventLocationRow, decision: Resolv
     { regionOf: regionOfCoords, plzRegionOf: getBundeslandFromPLZ },
   );
   const c = applyAdmissionToPosition(decision, admission);
-  if (c.reasons.length === 0 && c.status === decision.status) return decision;
+  if (c.reasons.length === 0 && c.status === decision.status) return { decision, admission };
   const hasCoords = c.latitude != null && c.longitude != null;
   const precise = c.status === 'venue_confirmed' || c.status === 'address_confirmed';
-  return {
+  const contracted = {
     ...decision,
     status: c.status,
     precision: c.precision,
@@ -193,6 +216,7 @@ export function contractedDecision(row: StoredEventLocationRow, decision: Resolv
     },
     ...(c.revoked ? { revoked: c.revoked } : {}),
   } as ResolvedLocation;
+  return { decision: contracted, admission };
 }
 
 /** Entscheidet die Zeilen neu und schreibt geänderte Entscheidungen zurück. */
@@ -206,11 +230,14 @@ export async function reResolveStoredEvents(
   const results: ReResolveResult[] = [];
   for (let i = 0; i < rows.length; i++) {
     const row = rows[i];
-    const decision = contractedDecision(row, resolveEventLocation(inputs[i], evidence[i]));
+    const { decision, admission } = contract(row, resolveEventLocation(inputs[i], evidence[i]));
     const publishChange = publishChangeFor(row, decision);
-    // Bezirk über dieselbe Funktion wie der Schreibpfad (districtForLocation).
-    const district = districtForLocation(decision.gemeinde, decision.postal_code ?? row.postal_code, row.bundesland, row.district);
+    // Bundesland und Bezirk über dieselben Funktionen wie der Schreibpfad:
+    // Quelle (nach Korrektur des Vertrags), sonst Gemeinde bzw. PLZ.
+    const bundesland = bundeslandForLocation(admission.correctedBundesland ?? inputs[i].bundesland, decision.gemeinde, decision.postal_code);
+    const district = districtForLocation(decision.gemeinde, decision.postal_code ?? row.postal_code, bundesland, row.district);
     const unchanged =
+      (row.bundesland ?? null) === bundesland &&
       (row.district ?? null) === district &&
       row.location_status === decision.status &&
       row.geocoding_confidence === decision.geocoding_confidence &&
@@ -233,6 +260,7 @@ export async function reResolveStoredEvents(
     }
     const payload = {
       ...(publishChange ?? {}),
+      bundesland,
       district,
       latitude: decision.latitude,
       longitude: decision.longitude,
