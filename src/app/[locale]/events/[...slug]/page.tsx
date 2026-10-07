@@ -18,6 +18,7 @@ import {
   resolveDuplicateRedirect,
   getVenue,
   getLineupForEvent,
+  getDuplicateSources,
 } from '@/lib/events/event-detail-loaders';
 import { getOrTranslateEventEn } from '@/lib/i18n/translate-event';
 import { AdSlot } from '@/components/Ads/AdSlot';
@@ -279,9 +280,12 @@ export default async function EventDetailPage({
   // The personal overlay is instead fetched client-side by
   // V4EventDetail via /api/events/[id]/personal-context. The server-
   // rendered HTML reflects the anon-view state derivation below.
-  await Promise.all([
+  // duplicateSources: Quellen der Dubletten, deren Inhalte der Dedup in
+  // diese Zeile übernommen hat („Auch gelistet bei", Attributionspflicht).
+  const [, , duplicateSources] = await Promise.all([
     event.venue_id ? getVenue(event.venue_id) : Promise.resolve(null),
     getLineupForEvent(event.id),
+    getDuplicateSources(event.id),
   ]);
 
   // SEO-Fix 2026-09-01: vergangene Seiten behalten ihr Ranking — statt sie
@@ -372,6 +376,7 @@ export default async function EventDetailPage({
         provider={provider}
         priceFrom={priceFrom}
         priceAtDoor={priceAtDoor}
+        duplicateSources={duplicateSources}
       />
       <V4RelatedEvents event={event}/>
       {/* Anzeige bewusst ganz unten: Ticket-Box und Unterkuenfte

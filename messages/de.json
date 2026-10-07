@@ -312,6 +312,7 @@
     "venueHeading": "Wo?",
     "organizerLabel": "Veranstalter:",
     "sourceLabel": "Quelle:",
+    "alsoListedLabel": "Auch gelistet bei:",
     "relatedEyebrow": "Das könnte dich auch interessieren",
     "relatedHeading": "Ähnliche Events",
     "relatedHeadingIn": "Ähnliche Events in {region}",
