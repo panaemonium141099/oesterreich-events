@@ -147,6 +147,12 @@ export interface ScrapedEvent {
   source_id: string;
   source_name: string;
   /**
+   * Frühere source_id desselben Termins, wenn ein Scraper seine ID-Bildung
+   * geändert hat. Der Schreibpfad schlüsselt die alte Zeile einmalig um
+   * (src/lib/db/source-id-migration.ts), statt eine zweite anzulegen.
+   */
+  previous_source_id?: string;
+  /**
    * Public-facing source URL. Nullable because some scrapers (notably
    * Feratel-Deskline via webapi.deskline.net) only have backend API
    * endpoints which aren't usable by humans or our enrichment fetcher.
