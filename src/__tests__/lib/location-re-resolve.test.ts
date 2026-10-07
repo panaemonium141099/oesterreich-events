@@ -144,6 +144,42 @@ describe('reResolveStoredEvents: Schutz vor Überrollen', () => {
   });
 });
 
+// Befund 2026-10-07: Altzeilen ohne Rohwerte tragen oft die Amts-PLZ ihrer
+// Gemeinde aus dem früheren Koordinatenabgleich (Boudicca: Stadthalle
+// „Roland-Rainer-Platz 1, 1150 Wien" mit PLZ 1010). Die Entscheidung hält sie
+// für eine Quellangabe; über die PLZ stünde das Event im 1. Bezirk.
+describe('Altzeilen ohne Rohwerte: die Amts-PLZ der Gemeinde belegt keinen Bezirk', () => {
+  const legacyWien = (over: Partial<StoredEventLocationRow>): StoredEventLocationRow => ({
+    ...baseRow(),
+    location_name_raw: null,
+    address_raw: null,
+    postal_code_raw: null,
+    bundesland: 'wien',
+    latitude: null,
+    longitude: null,
+    geocoding_confidence: null,
+    district: null,
+    ...over,
+  });
+
+  it('Stadthalle mit Alt-PLZ 1010 kommt nicht in den 1. Bezirk', async () => {
+    const writes: Array<{ id: unknown; payload: Record<string, unknown> }> = [];
+    const sb = fakeClient([{ id: 'ev-1', updated_at: '2026-09-14T08:00:00Z' }], writes);
+    const row = legacyWien({ location_name: 'Stadthalle Wien', address: 'Roland-Rainer-Platz 1, 1150 Wien', postal_code: '1010' });
+    await reResolveStoredEvents(sb, [row], { phase: 'test' });
+    expect(writes).toHaveLength(1);
+    expect(writes[0].payload.district).toBeNull();
+  });
+
+  it('eine Alt-PLZ, die nicht die Amts-PLZ der Gemeinde ist, belegt den Bezirk', async () => {
+    const writes: Array<{ id: unknown; payload: Record<string, unknown> }> = [];
+    const sb = fakeClient([{ id: 'ev-1', updated_at: '2026-09-14T08:00:00Z' }], writes);
+    const row = legacyWien({ location_name: 'Theater in der Josefstadt', address: 'Josefstädter Straße 26', postal_code: '1080' });
+    await reResolveStoredEvents(sb, [row], { phase: 'test' });
+    expect(writes[0].payload.district).toBe('8. josefstadt');
+  });
+});
+
 describe('contractedDecision: Freigabevertrag gilt auch im Bestand (Galtür-Befund)', () => {
   it('Koordinate widerspricht dem deklarierten Bundesland, PLZ stützt das Bundesland → Konflikt ohne Position, verworfen protokolliert', () => {
     // Deklariert Tirol (Galtür, PLZ 6563), Koordinate liegt in Vorarlberg (Bielerhöhe).
