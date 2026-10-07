@@ -194,7 +194,7 @@ npm run scrape:pipeline      # scrape + post-processing (CI nutzt --skip-scraper
 npm run import:eventim       # Eventim-PFT-Feed (braucht EVENTIM_FEED_USER/PASS)
 npm run score | dedup        # Scoring / Cross-Source-Dedup (--dry-run --report r.json;
                              # Sicherheitsventil: --max-new-duplicates / --max-releases)
-npm run dedup:audit          # sichtbare Restdubletten zählen (Exit 1 über --max, Std. 25)
+npm run dedup:audit          # sichtbare Restdubletten zählen (Exit 1 über --max, Std. 100)
 npm run scrape:venues        # Venue-Feed-Ingestion
 npm run regen:taxonomy       # TAXONOMY.md §3 aus Code regenerieren (--check für CI)
 npm run import:activities    # Deskline-Infrastruktur-POIs → poi_activities

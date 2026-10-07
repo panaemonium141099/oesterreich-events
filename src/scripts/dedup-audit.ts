@@ -6,7 +6,7 @@
 // Über der Grenze: Exit 1 → Pipeline-Schritt rot → Alarm-Mail.
 //
 // Usage:
-//   npm run dedup:audit                 # Grenze 25
+//   npm run dedup:audit                 # Grenze 100
 //   npm run dedup:audit -- --max 0      # jede Restdublette meldet
 //   npm run dedup:audit -- --samples 50
 
@@ -35,7 +35,10 @@ function numArg(name: string, fallback: number): number {
   const v = i >= 0 ? Number(args[i + 1]) : NaN;
   return Number.isFinite(v) ? v : fallback;
 }
-const MAX_RESIDUAL = numArg('--max', 25);
+// Normalstand nach dem Umbau (2026-10-07): ~20 echte Unklarheiten (zwei
+// Christmetten im Ort, dieselbe Show zu zwei Zeiten). Ein ausgefallener Dedup
+// bringt schon in einer Nacht deutlich mehr (Ausgangswert vorher: 837).
+const MAX_RESIDUAL = numArg('--max', 100);
 const SAMPLES = numArg('--samples', 20);
 
 const SELECT = 'id,title,start_date,is_all_day,location_name,postal_code,district,latitude,longitude,location_precision,source_name,source_id,venue_id,publish_status';
