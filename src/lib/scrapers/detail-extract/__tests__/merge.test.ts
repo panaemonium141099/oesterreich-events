@@ -11,6 +11,15 @@ const baseEvent = (): ScrapedEvent => ({
 });
 
 describe('mergeEnrichment', () => {
+  it('reicht einen unklaren Gratis-Hinweis als price_rejected weiter, wenn die Liste keinen Preis hat', () => {
+    const e = baseEvent();
+    mergeEnrichment(e, { price_unclear: true });
+    expect(e.price_rejected).toBe('unclear_free');
+    const mitPreis = { ...baseEvent(), price_text: '€ 8,–' };
+    mergeEnrichment(mitPreis, { price_unclear: true });
+    expect(mitPreis.price_rejected).toBeUndefined();
+  });
+
   it('detail address wins when valid and listing missing', () => {
     const e = baseEvent();
     mergeEnrichment(e, { address: 'Schlossplatz 1' });

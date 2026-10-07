@@ -27,6 +27,8 @@ export interface DetailEnrichment {
   organizer?: string;
   /** Detail can also correct corrupted titles (e.g. partytimer listings). */
   title?: string;
+  /** Text nennt "frei" neben einem Betrag, ohne eindeutigen Preis: kein Gratis. */
+  price_unclear?: boolean;
 }
 
 export interface EnrichmentResult extends DetailEnrichment {
@@ -52,6 +54,20 @@ export interface Adapter {
 
   /** When true, adapter values override JSON-LD even when JSON-LD found them. */
   overridesJsonLd?: boolean;
+
+  /**
+   * false, wenn das JSON-LD dieser Seite keinen verlässlichen Ort trägt. Dann
+   * übernimmt die JSON-LD-Schicht weder Ortsnamen noch Adresse; die übrigen
+   * Felder (Beschreibung, Bild, Preis) bleiben.
+   */
+  jsonLdLocationReliable?($: CheerioAPI): boolean;
+
+  /**
+   * Seitenbereiche, die nie den Veranstaltungsort tragen (z. B. die
+   * Gemeindeamt-Adresse in der Fußzeile). Werden nach dem Adapter und vor
+   * den Rückfall-Schichten (Microdata, Regex, Proximity) entfernt.
+   */
+  ignoreRegions?: string;
 
   /**
    * Optional gate: return false if this URL/HTML is not actually a detail

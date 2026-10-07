@@ -147,11 +147,8 @@ export class Gem2GoScraper extends BaseScraper {
         }
 
         if (events.length > 0) {
-          // Card-Layout vorerst ohne Detailabruf: der Extraktor kennt dessen
-          // Detailseiten nicht und nähme die Gemeindeamt-Adresse aus der
-          // Fußzeile als Veranstaltungsort (Stichprobe 2026-10-07).
-          if (this.enableDetailEnrichment && this.layoutOf(html) !== 'card') {
-            await this.enrichEventsFromDetailPages(events);
+          if (this.enableDetailEnrichment) {
+            await this.enrichEventsFromDetailPages(events, gemeinde.name);
           }
           // fn-25 B3: Gemeinde als Kontext, Mittelpunkt als Gebietsangabe.
           const ctx = { name: gemeinde.name, plz: gemeinde.plz, lat: gemeinde.lat, lng: gemeinde.lng, bundesland: gemeinde.bundesland, bezirk: gemeinde.bezirk, region: gemeinde.region };
@@ -221,7 +218,10 @@ export class Gem2GoScraper extends BaseScraper {
    * Errors per-event are swallowed: a broken detail page must not block the
    * rest of the gemeinde batch. The event keeps its listing-level data.
    */
-  private async enrichEventsFromDetailPages(events: ScrapedEvent[]): Promise<void> {
+  private async enrichEventsFromDetailPages(events: ScrapedEvent[], placeholderLocation: string): Promise<void> {
+    // Serientermine teilen sich eine Detailseite (Card-Layout, Stichprobe
+    // 2026-10-07: 540 Links, 416 Seiten): jede Seite nur einmal abrufen.
+    const fetched = new Map<string, ReturnType<typeof extractGem2goDetail> | null>();
     for (const e of events) {
       const detailUrl = e.source_url;
       if (!detailUrl) continue;
@@ -229,9 +229,14 @@ export class Gem2GoScraper extends BaseScraper {
       if (/veranstaltung\.aspx\?sprache=1$/.test(detailUrl)) continue;
 
       try {
-        const html = await this.fetchWithTimeout(detailUrl, this.detailTimeoutMs);
-        if (!html) continue;
-        const enrichment = extractGem2goDetail(html);
+        if (!fetched.has(detailUrl)) {
+          fetched.set(detailUrl, null);
+          const html = await this.fetchWithTimeout(detailUrl, this.detailTimeoutMs);
+          await this.sleep(this.detailDelayMs);
+          if (html) fetched.set(detailUrl, extractGem2goDetail(html));
+        }
+        const enrichment = fetched.get(detailUrl);
+        if (!enrichment) continue;
 
         // Detail-page values (especially via JSON-LD) are CLEAN structured data.
         // Listing values come from DOM scraping where sub-spans get concatenated
@@ -239,10 +244,16 @@ export class Gem2GoScraper extends BaseScraper {
         // produces "Platz 1806881 Mellau" (strasse+hnr+plz+ort smushed). Detail
         // wins for these structural fields whenever it provides a value.
         if (enrichment.address) e.address = enrichment.address;
+        // Hat die gelesene Detailseite Event-Inhalt, aber weder sie noch die
+        // Liste eine Adresse, stammt eine gespeicherte aus der Fußzeile
+        // (Gemeindeamt, Stichprobe 2026-10-07: 21 von 21). Ohne Markierung
+        // behielte der Schreibpfad sie.
+        else if (!e.address && (enrichment.description || enrichment.location_name)) e.address_rejected = 'page_boilerplate';
         if (enrichment.postal_code) e.postal_code = enrichment.postal_code;
         if (enrichment.location_name) {
-          // Prefer detail venue unless listing already has something more specific
-          if (!e.location_name || e.location_name.length < enrichment.location_name.length) {
+          // Prefer detail venue unless listing already has something more specific.
+          // Der Gemeindename ist nur Platzhalter der Liste und weicht jedem Ort.
+          if (!e.location_name || e.location_name === placeholderLocation || e.location_name.length < enrichment.location_name.length) {
             e.location_name = enrichment.location_name;
           }
         }
@@ -261,12 +272,12 @@ export class Gem2GoScraper extends BaseScraper {
         if (e.price_max === undefined && enrichment.price_max !== undefined) {
           e.price_max = enrichment.price_max;
         }
+        // "frei" nur neben einem Betrag: ein früher gespeichertes "Eintritt frei" fällt.
+        if (enrichment.price_unclear && !e.price_text) e.price_rejected = 'unclear_free';
         if (!e.organizer && enrichment.organizer) e.organizer = enrichment.organizer;
       } catch {
         // Silent per-event failure — keep the listing data we already have.
       }
-
-      await this.sleep(this.detailDelayMs);
     }
   }
 

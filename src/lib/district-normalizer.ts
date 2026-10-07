@@ -169,6 +169,9 @@ const STADT_RULES: Record<string, { gkz: string; stadtDistrict: string; landDist
   'wiener-neustadt': { gkz: '30401', stadtDistrict: 'wiener neustadt (stadt)', landDistrict: 'wiener neustadt (land)', bl: 'niederoesterreich' },
   'st-poelten':      { gkz: '30201', stadtDistrict: 'st. pölten (stadt)', landDistrict: 'st. pölten (land)', bl: 'niederoesterreich' },
   'krems':           { gkz: '30101', stadtDistrict: 'krems (stadt)', landDistrict: 'krems (land)', bl: 'niederoesterreich' },
+  // MeinBezirk-Regionen, die Stadt und Umland zusammenfassen.
+  'steyr-steyr-land': { gkz: '40201', stadtDistrict: 'steyr (stadt)', landDistrict: 'steyr-land', bl: 'oberoesterreich' },
+  'wels-wels-land':  { gkz: '40301', stadtDistrict: 'wels (stadt)', landDistrict: 'wels-land', bl: 'oberoesterreich' },
 };
 
 /** stadtPLZ: alle PLZ der Stadtgemeinde (liegt eine PLZ außerhalb, ist es
@@ -232,11 +235,18 @@ export function normalizeDistrict(
 
   const trimmedPLZ = postalCode?.trim();
 
-  // (1) Stadt-name + Land-PLZ → Land. Catches scrapes that tag
-  // bare "graz" but the event lives in the surrounding district.
+  // (1) Ein Stadtname ohne Zusatz („graz", MeinBezirk „wiener-neustadt")
+  // meint Stadt oder Umland. Entscheiden kann nur die PLZ: gehört sie
+  // allein der Stadt, ist es die Stadt; liegt sie außerhalb, das Umland.
+  // Teilen sich Stadt und Umland die PLZ, bleibt es offen: der Name wird
+  // unverändert durchgereicht, der Schreibpfad verwirft ihn. Bis 2026-10-07
+  // landete so ein Event in Hölles (2751, Amts-PLZ von Matzendorf-Hölles,
+  // Neben-PLZ der Stadt) in „wiener neustadt (stadt)".
   const stadtRule = stadtPlzRules()[raw];
-  if (stadtRule && stadtRule.bl === blId && trimmedPLZ && !stadtRule.stadtPLZ.has(trimmedPLZ)) {
-    return stadtRule.landDistrict;
+  if (stadtRule && stadtRule.bl === blId && trimmedPLZ) {
+    if (stadtRule.stadtPLZExklusiv.has(trimmedPLZ)) return stadtRule.stadtDistrict;
+    if (!stadtRule.stadtPLZ.has(trimmedPLZ)) return stadtRule.landDistrict;
+    return raw;
   }
 
   // (2) Land-name + Stadt-PLZ → Stadt. Catches scrapes that lump

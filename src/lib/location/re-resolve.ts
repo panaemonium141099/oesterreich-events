@@ -82,9 +82,12 @@ export const STORED_LOCATION_COLUMNS =
  * (`geocoding_confidence = 'scraper'`), und dann mit unbekannter
  * Genauigkeit.
  */
+function hasRawLocation(row: StoredEventLocationRow): boolean {
+  return row.location_name_raw !== null || row.address_raw !== null || row.latitude_raw !== null || row.postal_code_raw !== null;
+}
+
 export function inputFromStoredRow(row: StoredEventLocationRow): LocationInput {
-  const hasRaw = row.location_name_raw !== null || row.address_raw !== null || row.latitude_raw !== null || row.postal_code_raw !== null;
-  if (hasRaw) {
+  if (hasRawLocation(row)) {
     return {
       title: row.title,
       location_name: row.location_name_raw,
@@ -235,7 +238,16 @@ export async function reResolveStoredEvents(
     // Bundesland und Bezirk über dieselben Funktionen wie der Schreibpfad:
     // Quelle (nach Korrektur des Vertrags), sonst Gemeinde bzw. PLZ.
     const bundesland = bundeslandForLocation(admission.correctedBundesland ?? inputs[i].bundesland, decision.gemeinde, decision.postal_code);
-    const district = districtForLocation(decision.gemeinde, decision.postal_code ?? row.postal_code, bundesland, row.district);
+    // Altzeilen ohne Rohwerte tragen oft die Amts-PLZ ihrer Gemeinde aus dem
+    // früheren Koordinatenabgleich (Boudicca: Stadthalle „Roland-Rainer-Platz
+    // 1, 1150 Wien" mit PLZ 1010); die Entscheidung hält sie für eine
+    // Quellangabe. Sie zählt wie eine übernommene PLZ.
+    const postalCode = decision.postal_code ?? row.postal_code;
+    const postalCodeProvenance =
+      !hasRawLocation(row) && decision.gemeinde && postalCode === decision.gemeinde.plz
+        ? 'registry'
+        : decision.postal_code ? decision.provenance.postal_code : null;
+    const district = districtForLocation(decision.gemeinde, postalCode, bundesland, row.district, postalCodeProvenance);
     const unchanged =
       (row.bundesland ?? null) === bundesland &&
       (row.district ?? null) === district &&

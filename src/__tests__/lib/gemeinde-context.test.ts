@@ -4,6 +4,7 @@
 import { describe, it, expect } from 'vitest';
 import { applyGemeindeContext, isRegionLabel } from '@/lib/scrapers/gemeinde-context';
 import { resolveConservativeLocation } from '@/lib/location/conservative-resolution';
+import { districtForLocation } from '@/lib/plz-district';
 import type { ScrapedEvent } from '@/types/events';
 
 const berg = { name: 'Berg', plz: '2413', lat: 48.1015, lng: 17.0384, bundesland: 'Niederösterreich', bezirk: 'Bruck an der Leitha' };
@@ -56,6 +57,33 @@ describe('applyGemeindeContext', () => {
     expect(d.latitude).toBeCloseTo(48.1, 1);
     expect(d.longitude).toBeCloseTo(17.04, 1);
     expect(d.allowed.pin).toBe(false);
+  });
+});
+
+// Wien ist eine Gemeinde mit 23 Bezirken. Die Amts-PLZ 1010, die der
+// Kalender-Kontext einsetzte, sagt nichts über den Ort eines Events und hätte
+// über die PLZ den 1. Bezirk belegt (Befund 2026-10-07: 23 Events).
+describe('Wiener Kalender: keine Gemeinde-PLZ', () => {
+  const wien = { name: 'Wien', plz: '1010', lat: 48.2083, lng: 16.3731, bundesland: 'Wien', bezirk: 'Wien' };
+
+  it('ohne PLZ der Quelle bleibt die PLZ leer, der Ort ist Wien', () => {
+    const e = applyGemeindeContext(base({ source_name: 'gemeinden', location_name: 'Wien' }), wien);
+    expect(e.postal_code).toBeUndefined();
+    expect(e.city).toBe('Wien');
+    expect(e.coords_precision).toBe('municipality');
+  });
+
+  it('eine PLZ der Quelle oder aus der Adresse bleibt', () => {
+    expect(applyGemeindeContext(base({ postal_code: '1070' }), wien).postal_code).toBe('1070');
+    expect(applyGemeindeContext(base({ address: 'Stephansplatz 3, 1010 Wien' }), wien).address).toBe('Stephansplatz 3, 1010 Wien');
+  });
+
+  it('Ende-zu-Ende: Gemeinde Wien, PLZ nur übernommen, kein Bezirk', () => {
+    const e = applyGemeindeContext(base({ source_name: 'gemeinden', location_name: 'Wien' }), wien);
+    const d = resolveConservativeLocation(e, new Date('2026-10-07T12:00:00Z'));
+    expect(d.gemeinde?.name).toBe('Wien');
+    expect(d.provenance.postal_code).toBe('registry');
+    expect(districtForLocation(d.gemeinde, d.postal_code, 'wien', null, d.provenance.postal_code)).toBeNull();
   });
 });
 

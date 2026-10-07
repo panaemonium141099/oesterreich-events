@@ -48,6 +48,12 @@ export function enrichFromDetailHtml(
   // Layer 1: JSON-LD
   const snap0 = snapshot(result);
   applyJsonLd($, result);
+  if (adapter?.jsonLdLocationReliable?.($) === false) {
+    delete result.location_name;
+    delete result.address;
+    delete result.postal_code;
+    delete result.address_locality;
+  }
   if (changed(snap0, result)) result.layersHit.push('jsonld');
 
   // Layer 2: Adapter (source-specific)
@@ -61,6 +67,8 @@ export function enrichFromDetailHtml(
       (result as unknown as Record<string, unknown>)[k] = v;
     }
     if (changed(snapA, result)) result.layersHit.push('adapter');
+    // Bereiche ohne Veranstaltungsort aus Sicht der Rückfall-Schichten entfernen.
+    if (adapter.ignoreRegions) $(adapter.ignoreRegions).remove();
   }
 
   // Layer 3a: Schema.org Microdata (itemprop)

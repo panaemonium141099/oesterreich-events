@@ -246,6 +246,9 @@ export class GemeindeRegistryScraper extends BaseScraper {
         if (!html) continue;
         const det = extractGem2goDetail(html);
         if (det.address) e.address = det.address;
+        // Seite mit Event-Inhalt ohne Adresse: eine gespeicherte stammt aus der
+        // Fußzeile (Gemeindeamt), der Schreibpfad soll sie entfernen.
+        else if (!e.address && (det.description || det.location_name)) e.address_rejected = 'page_boilerplate';
         if (det.postal_code) e.postal_code = det.postal_code;
         if (det.location_name && (!e.location_name || e.location_name.length < det.location_name.length)) {
           e.location_name = det.location_name;
@@ -257,6 +260,8 @@ export class GemeindeRegistryScraper extends BaseScraper {
         if (!e.price_text && det.price_text) e.price_text = det.price_text;
         if (e.price_min === undefined && det.price_min !== undefined) e.price_min = det.price_min;
         if (e.price_max === undefined && det.price_max !== undefined) e.price_max = det.price_max;
+        // "frei" nur neben einem Betrag: ein früher gespeichertes "Eintritt frei" fällt.
+        if (det.price_unclear && !e.price_text) e.price_rejected = 'unclear_free';
         if (!e.organizer && det.organizer) e.organizer = det.organizer;
       } catch {
         // per-event errors swallowed
