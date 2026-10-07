@@ -680,9 +680,19 @@ export function toSupabaseRow(
   const finalDescription = overwriteDescription
     ? newDescription
     : (existing?.description ?? null);
-  const finalPriceText = overwritePrice
-    ? (event.price_text ?? null)
-    : (existing?.price_text ?? null);
+  // Stützt die Quelle keinen Gratis-Preis mehr ("frei" stand nur neben
+  // einem Betrag), fällt ein gespeichertes "Eintritt frei" samt Stufe und
+  // Flag; der Preis-Schutz oben hielte es sonst fest. Ein gespeicherter
+  // Betrag bleibt. Prod 2026-10-07: 199 von 2.112 "Eintritt frei" falsch.
+  const dropFreeClaim =
+    event.price_rejected === 'unclear_free' &&
+    !event.price_text &&
+    (existing?.price_text === 'Eintritt frei' || (!existing?.price_text && existing?.price_tier === 'gratis'));
+  const finalPriceText = dropFreeClaim
+    ? null
+    : overwritePrice
+      ? (event.price_text ?? null)
+      : (existing?.price_text ?? null);
   // Fremde Affiliate-IDs in oeticket-Deeplinks auf J70 umbiegen, bevor der
   // Wert sowohl ins Quality-Scoring als auch in die Zeile geht.
   const finalTicketUrl = normalizeTicketUrl(event.ticket_url);
@@ -834,7 +844,11 @@ export function toSupabaseRow(
     event.price_min == null ? null : event.price_min <= 0 ? 'gratis' : event.price_min <= 15 ? 'günstig' : event.price_min <= 50 ? 'mittel' : 'premium';
   const baseFlags = event.price_flags && event.price_flags.length > 0 ? event.price_flags : existing?.price_flags ?? [];
   const finalPriceFlags =
-    sourceMin != null && sourceMin > 0 ? baseFlags.filter((f) => f !== 'freier-eintritt' && f !== 'spende-erbeten') : baseFlags;
+    sourceMin != null && sourceMin > 0
+      ? baseFlags.filter((f) => f !== 'freier-eintritt' && f !== 'spende-erbeten')
+      : dropFreeClaim
+        ? baseFlags.filter((f) => f !== 'freier-eintritt')
+        : baseFlags;
 
   const row = {
     source_type: 'scraped' as const,
@@ -936,7 +950,7 @@ export function toSupabaseRow(
     // price_tier folgt einem von der Quelle gelieferten Betrag (Feed oder
     // Detailseite); ohne Betrag bleibt der bestehende Wert (alte
     // Anreicherung) stehen.
-    ...(tierFromPrice ? { price_tier: tierFromPrice } : {}),
+    ...(tierFromPrice ? { price_tier: tierFromPrice } : dropFreeClaim && existing?.price_tier === 'gratis' ? { price_tier: null } : {}),
     language: event.language ?? existing?.language ?? null,
     is_family_friendly: event.is_family_friendly ?? existing?.is_family_friendly ?? null,
     image_credit: event.image_credit ?? existing?.image_credit ?? null,

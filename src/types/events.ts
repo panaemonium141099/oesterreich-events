@@ -237,6 +237,10 @@ export interface ScrapedEvent {
    *  Seitenadresse des Kalenders für viele verschiedene Veranstaltungsorte).
    *  Der Schreibpfad entfernt dann auch eine früher gespeicherte Adresse. */
   address_rejected?: 'page_boilerplate';
+  /** Die Quelle stützt keinen Gratis-Preis: ihr Text nennt "frei" nur neben
+   *  einem Betrag (Kinder, Shuttle, Schnapserl). Der Schreibpfad entfernt
+   *  dann ein früher gespeichertes "Eintritt frei" samt Stufe und Flag. */
+  price_rejected?: 'unclear_free';
 }
 
 export interface EventFilters {
