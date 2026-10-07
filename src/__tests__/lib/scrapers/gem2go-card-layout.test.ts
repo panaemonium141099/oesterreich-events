@@ -65,13 +65,77 @@ describe('Gem2GoScraper Card-Layout: Titel und Kategorie getrennt', () => {
     for (const e of cut) expect(e.tags).toEqual(['Musik, Konzerte, Theater, Kabarett, Show']);
   });
 
-  it('behält die source_id bestehender Events', () => {
-    // Die IDs in Prod sind aus dem zusammengeklebten Kopf gebildet. Eine neue
-    // ID gäbe neue Zeilen; die alten blieben mit Klebetitel sichtbar, weil der
-    // Rückzug Events mit geteilter Listen-URL nicht prüfen kann.
-    expect(pram.find((e) => e.title === 'Buchausstellung')?.source_id).toBe('gem2go-4742-buchausstellungausstellung');
-    expect(waldegg.find((e) => e.title.startsWith('Zirkeltraining'))?.source_id).toBe(
+  it('meldet die bisherige ID, damit der Schreibpfad die alte Zeile übernimmt', () => {
+    // Die IDs in Prod sind aus dem zusammengeklebten Kopf gebildet, ohne Datum.
+    for (const e of pram.filter((x) => x.title === 'Buchausstellung')) {
+      expect(e.previous_source_id).toBe('gem2go-4742-buchausstellungausstellung');
+    }
+    expect(waldegg.find((e) => e.title.startsWith('Zirkeltraining'))?.previous_source_id).toBe(
       'gem2go-2754-zirkeltraining-ask-waldeggsport-freizeit',
     );
+  });
+});
+
+describe('Gem2GoScraper Card-Layout: eine Zeile je Termin', () => {
+  const pram = parse('pram-liste.html', 'Pram');
+  const waldegg = parse('waldegg-liste.html', 'Waldegg');
+  const strasswalchen = parse('strasswalchen-liste.html', 'Straßwalchen');
+  const ruestorf = parse('ruestorf-liste.html', 'Rüstorf');
+
+  it('verliert keinen Termin: jede Karte bekommt eine eigene source_id', () => {
+    // Bisher teilten sich gleichnamige Termine eine ID, der Sync behielt den ersten.
+    for (const [events, cards] of [[pram, 18], [waldegg, 10], [strasswalchen, 6], [ruestorf, 4]] as const) {
+      expect(events).toHaveLength(cards);
+      expect(new Set(events.map((e) => e.source_id)).size).toBe(cards);
+    }
+    expect(pram.filter((e) => e.title === 'Buchausstellung').map((e) => e.source_id)).toEqual([
+      'gem2go-4742-228563044-2026-10-10',
+      'gem2go-4742-228563050-2026-10-11',
+      'gem2go-4742-228563063-2026-10-11',
+    ]);
+    // Dieselbe detailonr an zwei Tagen.
+    expect(pram.filter((e) => e.title === 'Leopoldimarkt').map((e) => e.source_id)).toEqual([
+      'gem2go-4742-228527789-2026-11-14',
+      'gem2go-4742-228527789-2026-11-15',
+    ]);
+  });
+
+  it('verlinkt die Detailseite statt der Liste', () => {
+    expect(pram[0].source_url).toBe(
+      'https://www.pram.at/system/web/veranstaltung.aspx?detailonr=228563044&sprache=1&menuonr=223812352',
+    );
+    // SEO-URL ohne detailonr: der Pfad ist der Schlüssel.
+    expect(strasswalchen[0]).toMatchObject({
+      source_url: 'http://www.strasswalchen.at/Fit_von_Kopf_bis_Fuss_-_Ganzkoerpertraining_fuer_jedes_Alter_2',
+      source_id: 'gem2go-5204-fit-von-kopf-bis-fuss-ganzkoerpertraining-fuer-jedes-alter-2-2026-10-08',
+    });
+    for (const e of [...pram, ...waldegg, ...strasswalchen, ...ruestorf]) {
+      expect(e.source_url).not.toMatch(/veranstaltung\.aspx\?sprache=1$/);
+    }
+  });
+
+  it('nimmt keine fremde Website als Detailseite', () => {
+    // Hirschbach verlinkt den Vereinsausflug direkt auf die Website des Musikvereins.
+    const g = gemeinde('Hirschbach im Mühlkreis');
+    const listUrl = `${g.website}/system/web/veranstaltung.aspx?sprache=1`;
+    const events = parse('hirschbach-liste.html', 'Hirschbach im Mühlkreis');
+    const ausflug = events.filter((e) => e.title === '2-Tagesausflug des Musikvereines');
+    expect(ausflug).toHaveLength(2);
+    for (const e of ausflug) expect(e.source_url).toBe(listUrl);
+    // Ohne eigene Detailseite: Titel und Tag bilden die ID.
+    expect(new Set(ausflug.map((e) => e.source_id)).size).toBe(2);
+    expect(ausflug[0].source_id).toMatch(/^gem2go-4242-2-tagesausflug-des-musikvereines-2026-\d\d-\d\d$/);
+    expect(events.find((e) => e.title !== '2-Tagesausflug des Musikvereines')?.source_url).toContain('detailonr=228563122');
+  });
+
+  it('liest Datum und Uhrzeit aus dem Terminblock', () => {
+    expect(pram[0].start_date).toBe('2026-10-10T14:00');
+    expect(pram.find((e) => e.title.startsWith('Perchtenlauf'))?.start_date).toBe('2026-11-29T17:30');
+    // "Ganztägig": nur der Tag.
+    expect(pram.find((e) => e.title.startsWith('In der Furthmühle'))?.start_date).toBe('2026-10-11');
+    // Straßwalchen: erstes Datumsfeld ist die Bild-Plakette "08Okt" ohne Jahr.
+    expect(strasswalchen[0].start_date).toBe('2026-10-08T08:30');
+    // Kurztext "Anmeldung telefonisch bis 09. Oktober 2026" ist nicht der Termin.
+    expect(ruestorf.find((e) => e.title === 'Rüstorfer Kinderflohmarkt')?.start_date).toBe('2026-10-10T09:00');
   });
 });

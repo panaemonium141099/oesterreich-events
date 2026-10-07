@@ -5,7 +5,7 @@ import { GEM2GO_GEMEINDEN_LISTE } from './gemeinden/gem2goGemeinden';
 import { withStammdaten } from './gemeinden/stammdaten';
 
 import { extractGem2goDetail } from './gem2go-detail';
-import { discoverAndParseGemeindeEvents, asScrapedEvent } from './gemeinde-event-discovery';
+import { discoverAndParseGemeindeEvents, asScrapedEvent, isUsableDetailHref } from './gemeinde-event-discovery';
 import { applyGemeindeContext } from './gemeinde-context';
 import type { ScrapedEvent } from '@/types/events';
 
@@ -147,7 +147,10 @@ export class Gem2GoScraper extends BaseScraper {
         }
 
         if (events.length > 0) {
-          if (this.enableDetailEnrichment) {
+          // Card-Layout vorerst ohne Detailabruf: der Extraktor kennt dessen
+          // Detailseiten nicht und nähme die Gemeindeamt-Adresse aus der
+          // Fußzeile als Veranstaltungsort (Stichprobe 2026-10-07).
+          if (this.enableDetailEnrichment && this.layoutOf(html) !== 'card') {
             await this.enrichEventsFromDetailPages(events);
           }
           // fn-25 B3: Gemeinde als Kontext, Mittelpunkt als Gebietsangabe.
@@ -333,24 +336,23 @@ export class Gem2GoScraper extends BaseScraper {
    */
   private parseGem2GoPage(html: string, gemeinde: Gem2GoGemeinde, pageUrl: string): ScrapedEvent[] {
     const $ = cheerio.load(html);
+    switch (this.layoutOf(html)) {
+      case 'table': return this.parseTableLayout($, gemeinde, pageUrl);
+      case 'raster': return this.parseRasterLayout($, gemeinde, pageUrl);
+      case 'card': return this.parseBemCardLayout($, gemeinde, pageUrl);
+      default: return this.parseFallbackLayout($, gemeinde, pageUrl);
+    }
+  }
 
+  private layoutOf(html: string): 'table' | 'raster' | 'card' | 'fallback' {
     // Try table layout first (more common)
-    if (html.includes('va_list_table') || html.includes('va_list_bez')) {
-      return this.parseTableLayout($, gemeinde, pageUrl);
-    }
-
+    if (html.includes('va_list_table') || html.includes('va_list_bez')) return 'table';
     // Try raster/list layout
-    if (html.includes('rasterListEntry') || html.includes('rasterList')) {
-      return this.parseRasterLayout($, gemeinde, pageUrl);
-    }
-
+    if (html.includes('rasterListEntry') || html.includes('rasterList')) return 'raster';
     // Try Bootstrap Card layout (newer GEM2GO version)
-    if (html.includes('bemCard') || html.includes('bemEvent')) {
-      return this.parseBemCardLayout($, gemeinde, pageUrl);
-    }
-
+    if (html.includes('bemCard') || html.includes('bemEvent')) return 'card';
     // Fallback: Try to find any event-like content
-    return this.parseFallbackLayout($, gemeinde, pageUrl);
+    return 'fallback';
   }
 
   // ─── TABELLEN-LAYOUT ──────────────────────────────────────────────────────
@@ -550,7 +552,10 @@ export class Gem2GoScraper extends BaseScraper {
    *     <div class="bemHeaderContainer card-title">
    *       <span class="bemHeader">Event Titel</span><small class="d-block text-muted">Musik, Konzerte</small>
    *     </div>
-   *     <div class="card-text">Datum, Ort, Beschreibung</div>
+   *     <div class="bemContainer--appointmentInfo">
+   *       <div class="bemContainer--date">Sa, 10.10.2026</div><div class="bemContainer--time">14:00 - 17:00 Uhr</div>
+   *     </div>
+   *     <a class="bemLink-detail" href="/system/web/veranstaltung.aspx?detailonr=…">mehr Informationen</a>
    *   </div>
    * </div>
    * Der Titel ist meist kein Link; die <small>-Zeile ist die Kategorie der
@@ -558,6 +563,7 @@ export class Gem2GoScraper extends BaseScraper {
    */
   private parseBemCardLayout($: cheerio.CheerioAPI, gemeinde: Gem2GoGemeinde, pageUrl: string): ScrapedEvent[] {
     const events: ScrapedEvent[] = [];
+    const baseOrigin = this.getOrigin(gemeinde.website);
 
     $('.bemCard, .card').each((_, el) => {
       try {
@@ -573,24 +579,42 @@ export class Gem2GoScraper extends BaseScraper {
         const sourceCategory = $header.find('small').first().text().replace(/,\s*\.{3}$/, '').trim();
         const tags = sourceCategory ? [sourceCategory] : undefined;
 
-        // Detail link
-        const href = $titleLink.attr('href') || '';
-        const detailUrl = href ? (href.startsWith('http') ? href : `${gemeinde.website}${href.startsWith('/') ? '' : '/'}${href}`) : pageUrl;
+        // Termin aus dem Terminblock: das erste Datumsfeld mit vollem Datum
+        // (in Straßwalchen ist das erste die Bild-Plakette "08Okt"). Der
+        // Kartentext nennt oft andere Daten ("Anmeldung bis 09. Oktober
+        // 2026") und ist nur Rückfall für Karten ohne Datumsfeld.
+        const day =
+          $card.find('.bemContainer--date').toArray().map((d) => this.parseDateTimeText($(d).text())).find(Boolean) ??
+          this.parseDateTimeText($card.find('.card-text, .card-body').text());
+        if (!day) return;
+        // "14:00 - 17:00 Uhr" → Beginn; "Ganztägig" oder kein Feld → nur der Tag.
+        // Das Feld beginnt mit dem Screenreader-Label ohne Leerzeichen
+        // ("…Veranstaltung14:00"), daher keine Wortgrenze davor.
+        const time = $card.find('.bemContainer--time').first().text().match(/(?<!\d)(\d{1,2}):(\d{2})(?!\d)/);
+        const startDate = time ? `${day}T${time[1].padStart(2, '0')}:${time[2]}` : day;
 
-        // Extract event ID from URL. Ohne detailonr bleibt die ID aus dem
-        // ganzen Kopftext (Titel + Kategorie) wie bisher: eine neue ID gäbe
-        // neue Zeilen, und die alten mit Klebetitel blieben sichtbar, weil der
-        // Rückzug Events mit geteilter Listen-URL nicht prüfen kann.
-        const idMatch = href.match(/detailonr=(\d+)/);
-        const idText = $titleLink.text().trim() || $header.text().trim();
-        const eventId = idMatch ? idMatch[1] : idText.toLowerCase().replace(/\W+/g, '-').slice(0, 60);
+        // Detail-Link: Button "mehr Informationen", Bild-Link oder die ganze
+        // Karte als Link. Nur Seiten der Gemeinde-Website: manche Karten
+        // verlinken direkt Vereins- oder Tourismusseiten (Klasse extlink),
+        // die bleiben ohne eigene Detailseite bei der Liste als Quelle.
+        const href = [
+          $card.find('a.bemLink-detail').first().attr('href'),
+          $card.find('a.bemImageLink').first().attr('href'),
+          $card.find('a.stretched-link').first().attr('href'),
+          $titleLink.attr('href'),
+        ].find((h) => isUsableDetailHref(h) && this.isOwnSite(this.resolveUrl(h, baseOrigin), gemeinde));
+        const detailUrl = href ? this.resolveUrl(href, baseOrigin) : null;
 
-        // Card text contains date, location, description mixed together
-        const cardText = $card.find('.card-text, .card-body').text();
-
-        // Parse date
-        const startDate = this.parseDateTimeText(cardText);
-        if (!startDate) return;
+        // Eine ID je Termin: detailonr, sonst Pfad der Detailseite, sonst
+        // Titel, jeweils mit Tag. Die frühere ID (Kopftext ohne Datum)
+        // teilten Serientermine, der Sync behielt nur den ersten (Befund
+        // 2026-10-07: 27 % der Termine). Sie geht als previous_source_id mit,
+        // damit der Schreibpfad die bestehende Zeile übernimmt.
+        const detailKey =
+          href?.match(/detailonr=([\d-]+)/)?.[1] ?? this.idSlug(detailUrl ? new URL(detailUrl).pathname : title);
+        const legacyHref = $titleLink.attr('href') || '';
+        const legacyText = $titleLink.text().trim() || $header.text().trim();
+        const legacyId = legacyHref.match(/detailonr=(\d+)/)?.[1] ?? legacyText.toLowerCase().replace(/\W+/g, '-').slice(0, 60);
 
         // Extract image (carries width/height from HTML attrs into the upsert)
         const imageInfo = this.imageFromElement(
@@ -599,9 +623,10 @@ export class Gem2GoScraper extends BaseScraper {
         );
 
         events.push({
-          source_id: `gem2go-${gemeinde.idKey}-${eventId}`,
+          source_id: `gem2go-${gemeinde.idKey}-${detailKey}-${day}`,
+          previous_source_id: `gem2go-${gemeinde.idKey}-${legacyId}`,
           source_name: this.name,
-          source_url: detailUrl,
+          source_url: detailUrl ?? pageUrl,
           title,
           start_date: startDate,
           location_name: gemeinde.name,
@@ -834,16 +859,19 @@ export class Gem2GoScraper extends BaseScraper {
    * Erzeugt eine eindeutige Source-ID für ein Event.
    */
   private buildSourceId(gemeinde: Gem2GoGemeinde, title: string, date: string): string {
-    const slug = title
+    return `gem2go-${gemeinde.gkz}-${this.idSlug(title).slice(0, 50)}-${date.slice(0, 10)}`;
+  }
+
+  /** Kleinbuchstaben, Umlaute umschrieben, alles andere zu Bindestrichen. */
+  private idSlug(text: string): string {
+    return text
       .toLowerCase()
       .replace(/[äÄ]/g, 'ae')
       .replace(/[öÖ]/g, 'oe')
       .replace(/[üÜ]/g, 'ue')
       .replace(/ß/g, 'ss')
       .replace(/[^a-z0-9]+/g, '-')
-      .replace(/^-+|-+$/g, '')
-      .slice(0, 50);
-    return `gem2go-${gemeinde.gkz}-${slug}-${date.slice(0, 10)}`;
+      .replace(/^-+|-+$/g, '');
   }
 
   /**
@@ -854,6 +882,17 @@ export class Gem2GoScraper extends BaseScraper {
       return new URL(href, baseUrl).href;
     } catch {
       return baseUrl;
+    }
+  }
+
+  /** Liegt die URL auf der Website der Gemeinde (www egal, Subdomains erlaubt)? */
+  private isOwnSite(url: string, gemeinde: Gem2GoGemeinde): boolean {
+    try {
+      const host = new URL(url).hostname.replace(/^www\./, '');
+      const own = new URL(gemeinde.website).hostname.replace(/^www\./, '');
+      return host === own || host.endsWith('.' + own) || own.endsWith('.' + host);
+    } catch {
+      return false;
     }
   }
 

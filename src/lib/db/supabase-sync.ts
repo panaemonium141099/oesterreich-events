@@ -48,6 +48,7 @@ import {
 import { districtForLocation } from '@/lib/plz-district';
 import { bundeslandToId } from '@/lib/bundeslaender';
 import { toUtcInstant } from '@/lib/pipeline/normalize-date';
+import { migrateSourceIds } from '@/lib/db/source-id-migration';
 import { getBundeslandFromPLZ } from '@/lib/location/plz-bundesland';
 import { bundeslandFromPolygon } from '@/lib/eventim/bundesland-from-geo';
 import { generateFingerprint } from '@/lib/dedup/fingerprint';
@@ -1146,6 +1147,22 @@ export async function syncEventsToSupabase(
     seen.add(key);
     return true;
   });
+
+  // Geänderte ID-Bildung eines Scrapers: alte Zeilen vor dem Upsert
+  // umschlüsseln, sonst entstünden Dubletten (source-id-migration.ts).
+  // Scheitert es, legt der Upsert neue Zeilen an; der nächste Lauf
+  // versucht es erneut, solange die alten Zeilen stehen.
+  try {
+    const migrated = await migrateSourceIds(supabase, dedupedEvents);
+    if (migrated.moved > 0 || migrated.failed > 0) {
+      console.log(
+        `[supabase-sync] ${migrated.moved} Zeilen auf neue source_id umgeschlüsselt` +
+          (migrated.failed > 0 ? `, ${migrated.failed} abgelehnt: ${migrated.errors.join(' | ')}` : ''),
+      );
+    }
+  } catch (e) {
+    console.warn('[supabase-sync] source_id-Übernahme übersprungen:', e instanceof Error ? e.message : e);
+  }
 
   // Rohschicht (fn-25 B1): ein Lauf je Aufruf, sofern der Aufrufer keinen
   // übergibt. Ohne Lauf-ID kann keine Rohzeile geschrieben werden — dann
