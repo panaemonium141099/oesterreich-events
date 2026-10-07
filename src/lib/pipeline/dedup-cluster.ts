@@ -41,8 +41,9 @@ export function selectPrimary(events: EventRow[], isOrphan: (id: string) => bool
   const isCurrentPrimary = (e: EventRow) => (pointedAt.has(e.id) && e.publish_status !== 'duplicate') ? 1 : 0;
   // Zurückgehaltene Zeilen (needs_review/suppressed) dürfen keine sichtbare
   // Zeile verdrängen — sonst verschwände das Event ganz.
+  // Ortskonflikte dürfen per DB-Constraint nie veröffentlicht werden.
   const isVisible = (e: EventRow) =>
-    e.publish_status === 'needs_review' || e.publish_status === 'suppressed' ? 0 : 1;
+    e.publish_status === 'needs_review' || e.publish_status === 'suppressed' || e.location_status === 'conflict' ? 0 : 1;
 
   return events.sort((a, b) => {
     if (isVisible(a) !== isVisible(b)) return isVisible(b) - isVisible(a);

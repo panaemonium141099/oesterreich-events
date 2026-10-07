@@ -154,8 +154,14 @@ const RELEASE_REASONS = new Set([
  * Status, Quarantäne bleibt Quarantäne). Der nächste Scrape der Quelle
  * rechnet ihn ohnehin neu.
  */
-export function releaseStatus(row: { quality_score?: number | null; admission_decision?: string | null }): PublishStatus {
+export function releaseStatus(row: {
+  quality_score?: number | null;
+  admission_decision?: string | null;
+  location_status?: string | null;
+}): PublishStatus {
   if (row.admission_decision === 'quarantine') return 'needs_review';
+  // Wie im Upsert: Ortskonflikte bleiben zurückgehalten (DB-Constraint).
+  if (row.location_status === 'conflict') return 'needs_review';
   return scoreToPublishStatus(row.quality_score ?? 0);
 }
 

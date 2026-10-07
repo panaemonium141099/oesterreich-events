@@ -131,6 +131,13 @@ describe('Primary-Wahl', () => {
     expect(cluster.primaryId).toBe('r');
   });
 
+  it('Zeile mit Ortskonflikt wird nicht Primary (dürfte nie veröffentlicht werden)', () => {
+    const conflict = ev({ id: 'c', title: 'Konzert X', start_date: '2026-10-08T18:00:00Z', source_name: 'Eventim', quality_score: 99, publish_status: 'duplicate', location_status: 'conflict' } as Partial<EventRow> & { id: string; title: string; start_date: string; source_name: string });
+    const ok = ev({ id: 'o', title: 'Konzert X', start_date: '2026-10-08T18:00:00Z', source_name: 'q2', quality_score: 50 });
+    const [cluster] = dedupDay([conflict, ok]).clusters;
+    expect(cluster.primaryId).toBe('o');
+  });
+
   it('sichtbare Zeile vor needs_review', () => {
     const a = ev({ id: 'a', title: 'Konzert X', start_date: '2026-10-08T18:00:00Z', source_name: 'q1', quality_score: 99, publish_status: 'needs_review' });
     const b = ev({ id: 'b', title: 'Konzert X', start_date: '2026-10-08T18:00:00Z', source_name: 'q2', quality_score: 50 });

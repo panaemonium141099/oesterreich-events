@@ -150,6 +150,9 @@ describe('releaseStatus', () => {
   it('Quarantäne aus der Aufnahmeprüfung bleibt Quarantäne', () => {
     expect(releaseStatus({ quality_score: 90, admission_decision: 'quarantine' })).toBe('needs_review');
   });
+  it('Ortskonflikt darf nicht veröffentlicht werden (DB-Constraint events_location_conflict_not_published)', () => {
+    expect(releaseStatus({ quality_score: 90, location_status: 'conflict' })).toBe('needs_review');
+  });
 });
 
 describe('checkSafetyValve', () => {

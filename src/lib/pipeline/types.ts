@@ -63,6 +63,8 @@ export interface EventRow {
   /** fn-25: 'building' | 'street' | 'postcode' | 'municipality' | … — nur
    *  'building'/'street' sind genaue Pins, der Rest Gebietsmittelpunkte. */
   location_precision?: string | null;
+  /** fn-25: 'conflict' darf nicht veröffentlicht werden (DB-Constraint). */
+  location_status?: string | null;
   source_url?: string | null;
   ticket_url?: string | null;
   image_url?: string | null;
