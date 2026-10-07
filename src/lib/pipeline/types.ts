@@ -51,6 +51,8 @@ export interface EventRow {
   description?: string | null;
   start_date: string;
   end_date?: string | null;
+  /** Ganztägig: die Uhrzeit in start_date ist dann kein Beleg. */
+  is_all_day?: boolean | null;
   location_name?: string | null;
   address?: string | null;
   district?: string | null;
@@ -58,6 +60,9 @@ export interface EventRow {
   bundesland?: string | null;
   latitude?: number | null;
   longitude?: number | null;
+  /** fn-25: 'building' | 'street' | 'postcode' | 'municipality' | … — nur
+   *  'building'/'street' sind genaue Pins, der Rest Gebietsmittelpunkte. */
+  location_precision?: string | null;
   source_url?: string | null;
   ticket_url?: string | null;
   image_url?: string | null;
@@ -77,6 +82,8 @@ export interface EventRow {
   organizer?: string | null;
   price_text?: string | null;
   created_at?: string | null;
+  /** Letzter Scrape, in dem die Quelle die Zeile noch lieferte. */
+  last_seen_at?: string | null;
 }
 
 /**
@@ -90,6 +97,12 @@ export interface DedupScoreBreakdown {
   urlScore: number;
   overallScore: number;
   decision: 'merge' | 'uncertain' | 'distinct';
+  /** Welcher Beleg die Entscheidung trägt (z. B. 'equal_title_same_place',
+   *  'different_showtime'). Steht in Log und Probelauf-Bericht. */
+  reason?: string;
+  /** 'weak' = nur Titel-Enthaltensein; solche Verbindungen dürfen keinen
+   *  Eintrag mit zwei verschiedenen Events verketten (dedup-engine). */
+  strength?: 'strong' | 'weak';
 }
 
 export interface QualityFlag {

@@ -195,10 +195,16 @@ async function main() {
 
     if (!opts.skipDedup) {
       steps.dedup = await runStep('dedup', async () => {
-        // Cross-source dedup: garbage filter + fingerprint blocks + fuzzy
-        // within (date, venue, location) blocks. Marks losers with
-        // publish_status='duplicate'; the app filters those out.
+        // Quellenübergreifender Dedup: rechnet alle Cluster je Wiener Tag neu
+        // (Belege für Titel, Ort, Zeit) und schreibt nur Abweichungen.
+        // Sicherheitsventil bei Massenänderungen → Schritt rot.
         execStep('Deduplicate events', `npx tsx ${envFlag}src/scripts/dedup.ts`);
+      }, steps);
+
+      // Nachkontrolle: bleiben offensichtliche Dubletten sichtbar (Dedup lief
+      // nicht, brach ab, neue Quelle läuft vorbei), wird der Schritt rot.
+      steps.dedup_audit = await runStep('dedup_audit', async () => {
+        execStep('Audit remaining duplicates', `npx tsx ${envFlag}src/scripts/dedup-audit.ts`);
       }, steps);
     }
 

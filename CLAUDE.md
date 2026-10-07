@@ -74,8 +74,8 @@ node / next.js
   verwaiste Sockets getimeouteter Scraper den Job stundenlang am Leben.
   Dazu Venues-Job + EIN Post-Processing-Job (`scrape-pipeline.ts
   --skip-scrapers --skip-venues`: normalize → categorize → geocode →
-  master_coords → score → dedup → withdrawal → artist_matching → indexing →
-  report) mit `if: always()`. `withdrawal` (`withdraw-stale-events.ts`,
+  master_coords → score → dedup → dedup_audit → withdrawal → artist_matching →
+  indexing → report) mit `if: always()`. `withdrawal` (`withdraw-stale-events.ts`,
   Regeln in `src/lib/quality/withdrawal.ts`) zieht Events zurück, die ihre
   Quelle nicht mehr listet: nur mit Beleg (Detailseite 404/410) oder wenn
   die Quelle seit 30 Tagen nichts liefert. „Nicht gesehen" allein ist kein
@@ -169,8 +169,19 @@ node / next.js
 - `src/lib/seo/` — GSC/CrUX-Clients (fetchWithTimeout!), Snapshot-Builder
 - `src/lib/outreach/` + `/admin/outreach` — B2B-Kaltakquise (Discovery→Draft→Send)
 - `src/lib/category-classifier/` — deterministischer Classifier + Taxonomie-SoT
-- `src/lib/dedup/`, `src/lib/series-detection/`, `src/lib/lineup/`,
-  `src/lib/artist-matching.ts` — Dedup / Serien / Festival-Lineups / Matching
+- **Event-Dedup (2026-10):** `src/lib/pipeline/dedup-evidence.ts` (Belege
+  Titel/Ort/Zeit als Relation, quellen-unabhängig) → `dedup-scorer.ts`
+  (Entscheidungstabelle + Grund) → `dedup-engine.ts` (Wiener Tag, Kandidaten,
+  Mehrdeutigkeits- und Widerspruchsschutz, Primary: sichtbar > Eventim >
+  bisheriger) → `dedup-plan.ts` (Sollzustand → nur Abweichungen, Freigabe,
+  Sicherheitsventil). `src/scripts/dedup.ts` rechnet JEDEN Lauf alle Cluster
+  neu (kein `--reset` mehr nötig); `dedup-audit.ts` macht den Schritt rot,
+  wenn offensichtliche Dubletten sichtbar bleiben. Golden-Set aus echten
+  Prod-Fällen: `src/__tests__/pipeline/dedup-golden.test.ts` — neue
+  Fehlerfälle dort ergänzen, keine Quellen-Sonderregeln. Vor Regeländerungen
+  `npm run dedup -- --dry-run --report r.json` gegen Prod.
+- `src/lib/dedup/` (Fingerprint/Jaro-Winkler, Dedup innerhalb eines Scraper-Laufs), `src/lib/series-detection/`,
+  `src/lib/lineup/`, `src/lib/artist-matching.ts` — Serien / Festival-Lineups / Matching
 - `.github/workflows/` — scrape-events.yml (Shards+post), import-eventim.yml, lhci.yml
 - `docs/MASTERPLAN.md` — Strategie & Betriebszustand; `docs/TAXONOMY.md` — Taxonomie
 
@@ -181,7 +192,9 @@ npm test                     # Vitest, muss grün sein (CI + Deploy-Gate)
 npm run scrape               # alle Scraper | --source <name> | --shard i/N
 npm run scrape:pipeline      # scrape + post-processing (CI nutzt --skip-scrapers im post-Job)
 npm run import:eventim       # Eventim-PFT-Feed (braucht EVENTIM_FEED_USER/PASS)
-npm run score | dedup        # Scoring / Cross-Source-Dedup
+npm run score | dedup        # Scoring / Cross-Source-Dedup (--dry-run --report r.json;
+                             # Sicherheitsventil: --max-new-duplicates / --max-releases)
+npm run dedup:audit          # sichtbare Restdubletten zählen (Exit 1 über --max, Std. 25)
 npm run scrape:venues        # Venue-Feed-Ingestion
 npm run regen:taxonomy       # TAXONOMY.md §3 aus Code regenerieren (--check für CI)
 npm run import:activities    # Deskline-Infrastruktur-POIs → poi_activities

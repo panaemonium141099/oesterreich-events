@@ -1,22 +1,28 @@
 // src/lib/pipeline/dedup-scorer.ts
 
 /**
- * Multi-dimensional dedup scoring engine.
- *
- * Compares two events and produces a score breakdown with a merge/uncertain/distinct decision.
- * Used by both batch dedup and live dedup flows.
+ * Paar-Entscheidung des Event-Dedups: merge / uncertain / distinct mit
+ * Begründung. Die Belege liefert dedup-evidence.ts; Cluster, Mehrdeutigkeit
+ * und Primary-Wahl macht dedup-engine.ts.
  */
 
 import { jaroWinkler } from '@/lib/dedup/jaro-winkler';
 import { normalizeTitle, generateFingerprint } from '@/lib/dedup/fingerprint';
-import { gemeindenByPlz } from '@/lib/location/gemeinde-index';
-import { normalizeUrl, hashUrl } from '@/lib/pipeline/normalize-url';
+import { normalizeUrl } from '@/lib/pipeline/normalize-url';
 import { haversineDistance } from '@/lib/pipeline/normalize-venue';
-import { hasKnownStartTime } from '@/lib/utils/event-time';
+import {
+  isPlaceless,
+  isSpecificTitle,
+  placeEvidence,
+  sameViennaDay,
+  timeRelation,
+  titleRelation,
+  titleTokensOf,
+} from './dedup-evidence';
 import type { EventRow, DedupScoreBreakdown } from './types';
 
 // ---------------------------------------------------------------------------
-// Weights
+// Teilwerte — nur Auskunft für Log und Admin-Prüfansicht
 // ---------------------------------------------------------------------------
 
 const W_TITLE = 0.30;
@@ -24,19 +30,6 @@ const W_DATETIME = 0.20;
 const W_VENUE = 0.25;
 const W_GEO = 0.15;
 const W_URL = 0.10;
-
-// Thresholds
-const MERGE_THRESHOLD = 0.80;
-const UNCERTAIN_THRESHOLD = 0.75;
-
-// Minimum title similarity to allow a merge decision (prevents merging
-// events that share location/date but have completely different titles).
-// Hard rules (same source_id, same ticket_url) bypass this guard.
-const MIN_TITLE_FOR_MERGE = 0.70;
-
-// ---------------------------------------------------------------------------
-// Title Score
-// ---------------------------------------------------------------------------
 
 function tokenize(s: string): Set<string> {
   return new Set(s.toLowerCase().split(/\s+/).filter(t => t.length > 1));
@@ -69,19 +62,10 @@ function computeTitleScore(a: EventRow, b: EventRow): number {
     if (fpA && fpB && fpA === fpB) fpMatch = 1.0;
   }
 
-  // Jaro-Winkler on normalized titles
   const jw = jaroWinkler(titleA, titleB);
-
-  // Token overlap
   const to = tokenOverlap(titleA, titleB);
-
-  // Combined: max of fingerprint or weighted JW+token
   return Math.max(fpMatch, 0.7 * jw + 0.3 * to);
 }
-
-// ---------------------------------------------------------------------------
-// DateTime Score
-// ---------------------------------------------------------------------------
 
 function computeDatetimeScore(a: EventRow, b: EventRow): number {
   if (!a.start_date || !b.start_date) return 0;
@@ -90,7 +74,6 @@ function computeDatetimeScore(a: EventRow, b: EventRow): number {
   const dayB = b.start_date.slice(0, 10);
 
   if (dayA !== dayB) {
-    // Check adjacent days
     const dA = new Date(dayA);
     const dB = new Date(dayB);
     const diffDays = Math.abs(dA.getTime() - dB.getTime()) / (1000 * 60 * 60 * 24);
@@ -98,52 +81,39 @@ function computeDatetimeScore(a: EventRow, b: EventRow): number {
     return 0;
   }
 
-  // Same day — check time
   const timeA = a.start_date.includes('T') ? a.start_date : null;
   const timeB = b.start_date.includes('T') ? b.start_date : null;
 
   if (!timeA || !timeB) {
-    // One or both have no time component
     const hasTimeA = timeA && !timeA.endsWith('T00:00:00');
     const hasTimeB = timeB && !timeB.endsWith('T00:00:00');
-    if (!hasTimeA && !hasTimeB) return 0.7; // Both day-only
-    if (!hasTimeA || !hasTimeB) return 0.7; // One day-only
+    if (!hasTimeA && !hasTimeB) return 0.7;
+    if (!hasTimeA || !hasTimeB) return 0.7;
   }
 
-  // Both have time — compare
   const dateA = new Date(a.start_date);
   const dateB = new Date(b.start_date);
   const diffMinutes = Math.abs(dateA.getTime() - dateB.getTime()) / (1000 * 60);
 
   if (diffMinutes <= 15) return 1.0;
   if (diffMinutes <= 120) return 0.8;
-  return 0.3; // Same day but different time
+  return 0.3;
 }
 
-// ---------------------------------------------------------------------------
-// Venue Score
-// ---------------------------------------------------------------------------
-
 function computeVenueScore(a: EventRow, b: EventRow): number {
-  // Both have venue_id
   if (a.venue_id && b.venue_id) {
-    if (a.venue_id === b.venue_id) return 1.0;
-    // Different venue_id — hard distinct signal
-    return 0.0;
+    return a.venue_id === b.venue_id ? 1.0 : 0.0;
   }
 
-  // Compare location names
   const locA = (a.location_name ?? '').toLowerCase().trim();
   const locB = (b.location_name ?? '').toLowerCase().trim();
 
   if (!locA || !locB) return 0;
-
   if (locA === locB) return 0.8;
 
   const jw = jaroWinkler(locA, locB);
   if (jw > 0.85) return 0.6;
 
-  // Same district + similar name
   const distA = (a.district ?? a.bundesland ?? '').toLowerCase();
   const distB = (b.district ?? b.bundesland ?? '').toLowerCase();
   if (distA && distB && distA === distB && jw > 0.7) return 0.5;
@@ -151,13 +121,8 @@ function computeVenueScore(a: EventRow, b: EventRow): number {
   return 0;
 }
 
-// ---------------------------------------------------------------------------
-// Geo Score
-// ---------------------------------------------------------------------------
-
 function computeGeoScore(a: EventRow, b: EventRow, venueScore: number): number {
   if (!a.latitude || !a.longitude || !b.latitude || !b.longitude) {
-    // No coords on one/both — use venue as proxy
     if (venueScore >= 1.0) return 0.8;
     return 0;
   }
@@ -171,11 +136,7 @@ function computeGeoScore(a: EventRow, b: EventRow, venueScore: number): number {
   return 0;
 }
 
-// ---------------------------------------------------------------------------
-// URL Score
-// ---------------------------------------------------------------------------
-
-function normalizeUrlForDedup(url: string | null | undefined): string {
+export function normalizeUrlForDedup(url: string | null | undefined): string {
   if (!url) return '';
   try {
     const normalized = normalizeUrl(url);
@@ -186,25 +147,20 @@ function normalizeUrlForDedup(url: string | null | undefined): string {
 }
 
 function computeUrlScore(a: EventRow, b: EventRow): number {
-  // Ticket URL match — strongest URL signal
   const ticketA = normalizeUrlForDedup(a.ticket_url);
   const ticketB = normalizeUrlForDedup(b.ticket_url);
   if (ticketA && ticketB && ticketA === ticketB) return 0.9;
 
-  // Source URL match
   const srcA = normalizeUrlForDedup(a.source_url);
   const srcB = normalizeUrlForDedup(b.source_url);
   if (srcA && srcB && srcA === srcB) return 1.0;
 
-  // Same host + similar path
   try {
     if (srcA && srcB) {
       const hostA = new URL(srcA).hostname;
       const hostB = new URL(srcB).hostname;
       if (hostA === hostB) {
-        const pathA = new URL(srcA).pathname;
-        const pathB = new URL(srcB).pathname;
-        const pathSim = jaroWinkler(pathA, pathB);
+        const pathSim = jaroWinkler(new URL(srcA).pathname, new URL(srcB).pathname);
         if (pathSim > 0.8) return 0.4;
       }
     }
@@ -214,142 +170,123 @@ function computeUrlScore(a: EventRow, b: EventRow): number {
 }
 
 // ---------------------------------------------------------------------------
-// Hard Rules
-// ---------------------------------------------------------------------------
-
-interface HardRuleResult {
-  forced: boolean;
-  decision?: 'merge' | 'distinct';
-  reason?: string;
-}
-
-/** Startzeit in ms, wenn die Uhrzeit echt ist; null bei Platzhaltern. */
-function knownStartMs(e: EventRow): number | null {
-  if (!e.start_date || !hasKnownStartTime({ start_date: e.start_date })) return null;
-  const t = new Date(e.start_date).getTime();
-  return Number.isNaN(t) ? null : t;
-}
-
-function checkHardRules(a: EventRow, b: EventRow): HardRuleResult {
-  // Rule 1: Different venue_id (both non-null) → always distinct
-  if (a.venue_id && b.venue_id && a.venue_id !== b.venue_id) {
-    return { forced: true, decision: 'distinct', reason: 'different_venue_id' };
-  }
-
-  // Rule 3: Same source_id + same source_name → always merge
-  if (a.source_id && b.source_id && a.source_name && b.source_name &&
-      a.source_id === b.source_id && a.source_name === b.source_name) {
-    return { forced: true, decision: 'merge', reason: 'same_source_id' };
-  }
-
-  // Rule 6: Beide mit echter Uhrzeit, mehr als 2 h auseinander → zwei
-  // Vorstellungen (Circus Roncalli 13:00 und 17:30, Kinderstück 09:00 und
-  // 13:00). Einlass vs. Beginn liegt darunter und bleibt zusammenführbar.
-  // Platzhalter-Uhrzeiten zählen nicht (hasKnownStartTime). Steht vor der
-  // Ticket-Regel: Quellen wie Linz Termine verlinken alle Vorstellungen
-  // eines Tages auf dieselbe Seite.
-  const timeA = knownStartMs(a);
-  const timeB = knownStartMs(b);
-  if (timeA !== null && timeB !== null && Math.abs(timeA - timeB) > 120 * 60_000) {
-    return { forced: true, decision: 'distinct', reason: 'different_showtime' };
-  }
-
-  // Rule 7: Dieselbe Quelle, verschiedene source_id → verschiedene Events,
-  // wenn die echten Uhrzeiten abweichen (Messen um 08:00 und 09:15,
-  // Workshop-Slots) oder, ohne gemeinsamen Ticket-Link, die Titel
-  // („Kaiser Wiesn – Dirndl Rocker“ und „– Die Lauser“). Die Titelähnlichkeit
-  // allein verschmolz solche Programmpunkte (Probelauf 2026-09-24). Echte
-  // Doppel einer Quelle haben denselben Titel zur selben Zeit oder dieselbe
-  // Ticket-Seite zur selben Zeit und bleiben zusammenführbar.
-  const sameSourceOtherId = !!a.source_name && a.source_name === b.source_name && a.source_id !== b.source_id;
-  if (sameSourceOtherId && timeA !== null && timeB !== null && Math.abs(timeA - timeB) > 15 * 60_000) {
-    return { forced: true, decision: 'distinct', reason: 'same_source_other_time' };
-  }
-
-  // Rule 4: Same ticket_url (normalized, non-empty) → always merge
-  const ticketA = normalizeUrlForDedup(a.ticket_url);
-  const ticketB = normalizeUrlForDedup(b.ticket_url);
-  if (ticketA && ticketB && ticketA === ticketB) {
-    return { forced: true, decision: 'merge', reason: 'same_ticket_url' };
-  }
-
-  if (sameSourceOtherId && normalizeTitle(a.title ?? '') !== normalizeTitle(b.title ?? '')) {
-    return { forced: true, decision: 'distinct', reason: 'same_source_other_title' };
-  }
-
-  // Rule 2: Different district (both non-null/non-empty) → distinct unless hard proof
-  const distA = (a.district ?? '').toLowerCase().trim();
-  const distB = (b.district ?? '').toLowerCase().trim();
-  if (distA && distB && distA !== distB) {
-    // Check exceptions: same venue_id already handled above (would be merge if same)
-    // Check: same ticket_url already handled above
-    // Check: same source_id + source_name already handled above
-    // No exception found → distinct
-    return { forced: true, decision: 'distinct', reason: 'different_district' };
-  }
-
-  // Rule 5 (fn-25 E): verschiedene PLZ-Gebiete → distinct. Der Bezirk fehlt
-  // bei vielen Quellen; dann verschmolzen gleichnamige Termine („Dorffest
-  // 2026", „Martinsfest") quer durch Österreich (Prod-Befund 2026-09-14:
-  // 166 Duplikat-Paare mit unterschiedlicher PLZ-Region). Zwei Gemeinden
-  // sind auch dann verschieden, wenn ihre PLZ dieselbe erste Ziffer haben,
-  // sofern die PLZ keine gemeinsame Gemeinde teilen.
-  const plzA = (a.postal_code ?? '').trim();
-  const plzB = (b.postal_code ?? '').trim();
-  if (/^\d{4}$/.test(plzA) && /^\d{4}$/.test(plzB) && plzA !== plzB) {
-    if (plzA[0] !== plzB[0]) {
-      return { forced: true, decision: 'distinct', reason: 'different_plz_region' };
-    }
-    const gA = new Set(gemeindenByPlz(plzA).map(g => g.name + '|' + g.bundesland));
-    const gB = new Set(gemeindenByPlz(plzB).map(g => g.name + '|' + g.bundesland));
-    if (gA.size > 0 && gB.size > 0 && ![...gA].some(x => gB.has(x))) {
-      return { forced: true, decision: 'distinct', reason: 'different_gemeinde' };
-    }
-  }
-
-  return { forced: false };
-}
-
-// ---------------------------------------------------------------------------
-// Sparse-data boost
+// Entscheidung aus Belegen (dedup-evidence.ts)
 // ---------------------------------------------------------------------------
 
 /**
- * Check if two events are obvious duplicates despite sparse data.
- * Returns true when ALL conditions are met:
- * - Identical normalized title (compact form)
- * - Same calendar day
- * - No hard conflict (no different venue_id, no different district)
- * - location_name either identical or both empty
+ * Gründe, aus denen zwei Events nie in einen Cluster dürfen — auch nicht
+ * über einen dritten Eintrag (dedup-engine prüft das beim Zusammenlegen).
  */
-function checkSparseDataMatch(a: EventRow, b: EventRow): boolean {
-  // 1. Identical normalized title
-  const titleA = normalizeTitle(a.title);
-  const titleB = normalizeTitle(b.title);
-  if (!titleA || !titleB || titleA !== titleB) return false;
+export const HARD_DISTINCT_REASONS = new Set([
+  'different_day',
+  'different_venue_id',
+  'different_place',
+  'different_venue',
+  'different_district',
+  'different_plz_region',
+  'different_gemeinde',
+  'different_showtime',
+  'same_source_other_time',
+  'same_source_other_title',
+  'manual_split',
+]);
 
-  // 2. Same calendar day
-  const dayA = a.start_date?.slice(0, 10);
-  const dayB = b.start_date?.slice(0, 10);
-  if (!dayA || !dayB || dayA !== dayB) return false;
+/** Etiketten-Widersprüche (Bezirk/PLZ), die ein gemeinsamer Ticket-Link aufhebt. */
+const LABEL_CONFLICTS = new Set(['different_district', 'different_plz_region', 'different_gemeinde']);
 
-  // 3. No hard conflicts
-  // Different venue_id → conflict
-  if (a.venue_id && b.venue_id && a.venue_id !== b.venue_id) return false;
-  // Different district → conflict
-  const distA = (a.district ?? '').toLowerCase().trim();
-  const distB = (b.district ?? '').toLowerCase().trim();
-  if (distA && distB && distA !== distB) return false;
+interface Verdict {
+  decision: 'merge' | 'uncertain' | 'distinct';
+  reason: string;
+  strength?: 'strong' | 'weak';
+}
 
-  // 4. location_name: either both match or both empty
-  const locA = (a.location_name ?? '').toLowerCase().trim();
-  const locB = (b.location_name ?? '').toLowerCase().trim();
-  if (locA && locB && locA !== locB) {
-    // Both have location_name but they differ → no boost
-    return false;
+const merge = (reason: string, strength: 'strong' | 'weak'): Verdict => ({ decision: 'merge', reason, strength });
+const uncertain = (reason: string): Verdict => ({ decision: 'uncertain', reason });
+const distinct = (reason: string): Verdict => ({ decision: 'distinct', reason });
+
+export function isHardDistinct(b: Pick<DedupScoreBreakdown, 'decision' | 'reason'>): boolean {
+  return b.decision === 'distinct' && !!b.reason && HARD_DISTINCT_REASONS.has(b.reason);
+}
+
+/**
+ * Zusammenführen nur mit Beleg für Titel UND Ort UND Zeit; fehlende Angaben
+ * sind kein Gegenbeweis, widersprechende schon.
+ *
+ * | Titel           | Ort gleich               | gleiche Gemeinde            | Ort unbekannt          |
+ * |-----------------|--------------------------|-----------------------------|------------------------|
+ * | gleich/Tippfehl.| merge (Zeit ≤ 60 min     | merge (Zeit gleich oder     | merge nur bei gleicher |
+ * |                 |  oder unbekannt)         |  unbekannt)                 |  Uhrzeit               |
+ * | enthalten       | merge (Zeit gleich oder  | merge, wenn der kürzere     | getrennt               |
+ * |                 |  unbekannt), „weak"      |  Titel konkret ist, „weak"  |                        |
+ * | Hauptteil gleich| prüfen bei gleicher Zeit | getrennt                    | getrennt               |
+ */
+function decide(a: EventRow, b: EventRow): Verdict {
+  // Dieselbe Zeile der Quelle (z. B. nach Datumskorrektur doppelt angelegt).
+  if (a.source_id && b.source_id && a.source_name && b.source_name &&
+      a.source_id === b.source_id && a.source_name === b.source_name) {
+    return merge('same_source_id', 'strong');
   }
+  if (!sameViennaDay(a, b)) return distinct('different_day');
 
-  return true;
+  const place = placeEvidence(a, b);
+  if (place.relation === 'conflict' && !LABEL_CONFLICTS.has(place.reason)) return distinct(place.reason);
+
+  // Zwei echte Uhrzeiten mehr als 2 h auseinander sind zwei Vorstellungen
+  // (Circus Roncalli 13:00 und 17:30). Steht vor der Ticket-Regel: Quellen
+  // wie Linz Termine verlinken alle Vorstellungen eines Tages auf eine Seite.
+  const time = timeRelation(a, b);
+  if (time === 'conflict') return distinct('different_showtime');
+
+  // Dieselbe Quelle listet zwei Einträge: verschiedene echte Uhrzeiten
+  // (Messen 08:00 und 09:15) oder verschiedene Titel (Acts eines Festivals)
+  // sind verschiedene Programmpunkte (Probelauf 2026-09-24).
+  const sameSourceOtherId = !!a.source_name && a.source_name === b.source_name && a.source_id !== b.source_id;
+  if (sameSourceOtherId && time !== 'exact' && time !== 'unknown') return distinct('same_source_other_time');
+
+  const ticketA = normalizeUrlForDedup(a.ticket_url);
+  const ticketB = normalizeUrlForDedup(b.ticket_url);
+  if (ticketA && ticketB && ticketA === ticketB) return merge('same_ticket_url', 'strong');
+
+  const title = titleRelation(a, b);
+  if (sameSourceOtherId && title !== 'equal' && title !== 'near') return distinct('same_source_other_title');
+  if (place.relation === 'conflict') return distinct(place.reason);
+
+  switch (title) {
+    case 'equal':
+    case 'near': {
+      const t = `${title}_title`;
+      if (place.relation === 'same') {
+        return time === 'far' ? uncertain(`${t}_same_place_far_time`) : merge(`${t}_same_place`, 'strong');
+      }
+      if (place.relation === 'town') {
+        return time === 'exact' || time === 'unknown'
+          ? merge(`${t}_same_town`, 'strong')
+          : uncertain(`${t}_same_town_other_time`);
+      }
+      if (time === 'exact') return merge(`${t}_same_time`, 'strong');
+      if (time === 'unknown' && isPlaceless(a) && isPlaceless(b)) return merge(`${t}_no_place_data`, 'strong');
+      return uncertain(`${t}_place_unknown`);
+    }
+    case 'contains': {
+      const timeOk = time === 'exact' || time === 'unknown';
+      if (place.relation === 'same') {
+        return timeOk ? merge('contained_title_same_place', 'weak') : uncertain('contained_title_other_time');
+      }
+      if (place.relation === 'town') {
+        const shorter = titleTokensOf(a).length <= titleTokensOf(b).length ? a : b;
+        return timeOk && isSpecificTitle(shorter)
+          ? merge('contained_title_same_town', 'weak')
+          : uncertain('contained_title_same_town');
+      }
+      return distinct('contained_title_place_unknown');
+    }
+    case 'related':
+      return place.relation === 'same' && time === 'exact'
+        ? uncertain('related_title_same_place')
+        : distinct('different_title');
+    default:
+      return distinct('different_title');
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -357,72 +294,26 @@ function checkSparseDataMatch(a: EventRow, b: EventRow): boolean {
 // ---------------------------------------------------------------------------
 
 /**
- * Compute the full dedup score breakdown for a pair of events.
+ * Bewertet ein Paar. Die Teilwerte (title/datetime/venue/geo/url) sind nur
+ * Auskunft für Log und Admin-Prüfansicht — die Entscheidung kommt aus den
+ * Belegen (decide), nicht aus der gewichteten Summe. Die Summe ließ gleiche
+ * Titel zur gleichen Zeit am gleichen Pin bei 0,775 „uncertain" liegen,
+ * weil quellenübergreifend URL und Venue-Id fast nie übereinstimmen.
  */
 export function scorePair(a: EventRow, b: EventRow): DedupScoreBreakdown {
-  // Check hard rules first
-  const hardRule = checkHardRules(a, b);
-  if (hardRule.forced) {
-    // Compute scores anyway for the log, but override decision
-    const titleScore = computeTitleScore(a, b);
-    const datetimeScore = computeDatetimeScore(a, b);
-    const venueScore = computeVenueScore(a, b);
-    const geoScore = computeGeoScore(a, b, venueScore);
-    const urlScore = computeUrlScore(a, b);
-    const overallScore =
-      titleScore * W_TITLE +
-      datetimeScore * W_DATETIME +
-      venueScore * W_VENUE +
-      geoScore * W_GEO +
-      urlScore * W_URL;
-
-    return {
-      titleScore,
-      datetimeScore,
-      venueScore,
-      geoScore,
-      urlScore,
-      overallScore,
-      decision: hardRule.decision!,
-    };
-  }
-
-  // Normal scoring
   const titleScore = computeTitleScore(a, b);
   const datetimeScore = computeDatetimeScore(a, b);
   const venueScore = computeVenueScore(a, b);
   const geoScore = computeGeoScore(a, b, venueScore);
   const urlScore = computeUrlScore(a, b);
-
-  let overallScore =
+  const overallScore =
     titleScore * W_TITLE +
     datetimeScore * W_DATETIME +
     venueScore * W_VENUE +
     geoScore * W_GEO +
     urlScore * W_URL;
 
-  // Sparse-data boost: identical normalized title + same day + no hard conflict
-  // + location_name matches or both empty → floor score at MERGE_THRESHOLD.
-  // Catches obvious duplicates that score low only because venue/geo/url are missing.
-  if (overallScore < MERGE_THRESHOLD) {
-    const sparseDataMatch = checkSparseDataMatch(a, b);
-    if (sparseDataMatch) {
-      overallScore = Math.max(overallScore, MERGE_THRESHOLD);
-    }
-  }
-
-  let decision: 'merge' | 'uncertain' | 'distinct';
-  if (overallScore >= MERGE_THRESHOLD && titleScore >= MIN_TITLE_FOR_MERGE) {
-    decision = 'merge';
-  } else if (overallScore >= MERGE_THRESHOLD && titleScore < MIN_TITLE_FOR_MERGE) {
-    // High overall but low title similarity → demote to uncertain
-    decision = 'uncertain';
-  } else if (overallScore >= UNCERTAIN_THRESHOLD) {
-    decision = 'uncertain';
-  } else {
-    decision = 'distinct';
-  }
-
+  const verdict = decide(a, b);
   return {
     titleScore,
     datetimeScore,
@@ -430,7 +321,9 @@ export function scorePair(a: EventRow, b: EventRow): DedupScoreBreakdown {
     geoScore,
     urlScore,
     overallScore,
-    decision,
+    decision: verdict.decision,
+    reason: verdict.reason,
+    ...(verdict.strength ? { strength: verdict.strength } : {}),
   };
 }
 
