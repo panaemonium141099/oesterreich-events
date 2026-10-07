@@ -113,6 +113,24 @@ describe('applyRegexFallbacks', () => {
     expect(out.price_text?.toLowerCase()).toContain('frei');
   });
 
+  // Prod 2026-10-07: 199 von 2.112 "Eintritt frei" hatten einen Betrag im
+  // Text; in der Stichprobe galt das "frei" jedes Mal nur für einen Teil.
+  const price = (description: string) => {
+    const out: DetailEnrichment = { description };
+    applyRegexFallbacks(out, cheerio.load(`<html><body><main>${'x'.repeat(200)}</main></body></html>`));
+    return { text: out.price_text, min: out.price_min };
+  };
+
+  it('"frei" für Kinder neben Eintrittspreisen ist kein freier Eintritt', () => {
+    expect(price('VVK € 15,00; AK € 19,00(bis 15 Jahre freier Eintritt)')).toEqual({ text: '€ 15,–', min: 15 });
+    expect(price('im Volksheim Ebergassing VVK: € 13,- AK: € 15,- Freier Eintritt: Kinder unter 14 Jahren')).toMatchObject({ min: 13 });
+  });
+
+  it('"gratis" neben einem Betrag ohne Preiswort ergibt keine Preisangabe', () => {
+    expect(price('Maß Bier nur 9,90 € Mit Dirndl oder Lederhose gibt’s a gratis Schnapserl!')).toEqual({ text: undefined, min: undefined });
+    expect(price('Trainingskosten pro Einheit: 11,00 € Kommen Sie zu einer kostenlosen Schnupperstunde!')).toEqual({ text: undefined, min: undefined });
+  });
+
   it('Fließtext mit „two"/„Export" liefert keinen Veranstaltungsort (Wortgrenzen, fn-25)', () => {
     const html = `<html><body><main>${'x'.repeat(200)}</main></body></html>`;
     const bio = 'Since her relocation to London, having released two EPs under AWAL, has reached over 20 million streams. Export in München prägt er dort den Sound der Nacht, vielseitig.';

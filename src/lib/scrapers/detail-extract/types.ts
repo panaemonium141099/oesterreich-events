@@ -54,6 +54,20 @@ export interface Adapter {
   overridesJsonLd?: boolean;
 
   /**
+   * false, wenn das JSON-LD dieser Seite keinen verlässlichen Ort trägt. Dann
+   * übernimmt die JSON-LD-Schicht weder Ortsnamen noch Adresse; die übrigen
+   * Felder (Beschreibung, Bild, Preis) bleiben.
+   */
+  jsonLdLocationReliable?($: CheerioAPI): boolean;
+
+  /**
+   * Seitenbereiche, die nie den Veranstaltungsort tragen (z. B. die
+   * Gemeindeamt-Adresse in der Fußzeile). Werden nach dem Adapter und vor
+   * den Rückfall-Schichten (Microdata, Regex, Proximity) entfernt.
+   */
+  ignoreRegions?: string;
+
+  /**
    * Optional gate: return false if this URL/HTML is not actually a detail
    * page (e.g. redirect to listing). Default behaviour relies on
    * `isValidHtml()` in validate.ts.
