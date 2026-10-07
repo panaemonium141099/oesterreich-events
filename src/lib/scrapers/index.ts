@@ -500,6 +500,16 @@ export interface ScraperRunResult {
 }
 
 export async function runScraper(scraper: BaseScraper): Promise<ScraperRunResult> {
+  // Ohne Pflicht-Konfiguration ist das kein Lauf und kommt nicht nach
+  // source_runs. Vorher stand jeder übersprungene Aufruf dort als success
+  // mit 0 Treffern; ticketmaster galt dem Rückzug so seit Juli als
+  // "läuft, findet nichts", und seine Altzeilen blieben stehen (2026-10-07).
+  const missing = scraper.missingConfig();
+  if (missing) {
+    console.log(`[${scraper.name}] übersprungen: ${missing}`);
+    return { eventsFound: 0, eventsUpserted: 0, durationMs: 0 };
+  }
+
   // Supabase is the single source of truth — no local SQLite dual-write.
   let eventsFound = 0;
   let eventsNew = 0;

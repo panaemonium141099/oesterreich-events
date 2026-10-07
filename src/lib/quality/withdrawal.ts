@@ -29,8 +29,10 @@
  *     geliefert, während die Pipeline sonst läuft. Ist sie ganz abgeschaltet
  *     (kein Lauf mehr, z. B. oeticket nach dem Eventim-Feed), wird ohne
  *     Abruf zurückgezogen. Läuft ihr Scraper noch und findet nur nichts
- *     (ticketmaster, events.at 2026-10), ist der Scraper kaputt, nicht das
- *     Event abgesagt: dann gilt derselbe Detailseiten-Beleg wie bei A.
+ *     (events.at 2026-10), ist der Scraper kaputt, nicht das Event
+ *     abgesagt: dann gilt derselbe Detailseiten-Beleg wie bei A. Ein
+ *     Scraper ohne Pflicht-Konfiguration (ticketmaster ohne API-Key) läuft
+ *     nicht: `runScraper` schreibt für ihn keinen source_runs-Eintrag.
  *
  * Ein Primary bleibt stehen, solange ein Duplikat (andere Quelle) noch
  * gelistet ist: der Dedup befördert Duplikate nie zurück, das Event wäre
