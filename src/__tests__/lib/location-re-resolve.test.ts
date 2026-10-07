@@ -6,8 +6,9 @@
  */
 import { describe, it, expect } from 'vitest';
 import type { SupabaseClient } from '@supabase/supabase-js';
-import { inputFromStoredRow, reResolveStoredEvents, contractedDecision, publishChangeFor, type StoredEventLocationRow } from '@/lib/location/re-resolve';
+import { inputFromStoredRow, reResolveStoredEvents, contractedDecision, publishChangeFor, repeatabilityOf, type StoredEventLocationRow } from '@/lib/location/re-resolve';
 import { resolveEventLocation } from '@/lib/location/resolver';
+import { locationBasisHash } from '@/lib/location/conservative-resolution';
 import { districtForLocation } from '@/lib/plz-district';
 import { toSupabaseRow } from '@/lib/db/supabase-sync';
 import type { ScrapedEvent } from '@/types/events';
@@ -247,7 +248,6 @@ describe('Bundesland bei erneuter Entscheidung (Quellangabe statt abgeleiteter S
       start_date: '2030-03-01T18:00:00.000Z',
       location_name: 'Wiener Stadthalle',
       address: 'Roland-Rainer-Platz 1, 1150 Wien',
-      country: 'AT',
     } as ScrapedEvent;
     const synced = toSupabaseRow(event, new Map(), new Map()).row as unknown as StoredEventLocationRow;
     expect(synced.bundesland).toBe('wien');
@@ -284,5 +284,69 @@ describe('Bundesland bei erneuter Entscheidung (Quellangabe statt abgeleiteter S
     const [res] = await reResolveStoredEvents(sb, [row], { phase: 'test' });
     expect(res.decision.latitude).toBe(48.3069);
     expect(writes[0].payload.bundesland).toBe('oberoesterreich');
+  });
+});
+
+describe('Land bei erneuter Entscheidung (Quellangabe statt abgeleiteter Spalte)', () => {
+  it('Eingabe aus der Zeile: Land der Quelle aus country_raw, nicht aus der abgeleiteten Spalte', () => {
+    const raw = { ...baseRow(), country: 'AT', country_raw: null };
+    expect(inputFromStoredRow(raw).country).toBeNull();
+    expect(inputFromStoredRow({ ...raw, country_raw: 'Deutschland' }).country).toBe('Deutschland');
+    // Altbestand ohne Rohwerte: die Anzeigespalte ist der einzige Wert.
+    expect(inputFromStoredRow({ ...raw, location_name_raw: null, address_raw: null }).country).toBe('AT');
+  });
+
+  it('Sync-Zeile einer Quelle ohne Länderangabe: Neu-Entscheidung hat denselben Eingabehash und schreibt nicht', async () => {
+    const event = { source_name: 'meinbezirk', source_id: 'v', source_url: 'https://example.at/v', title: 'Vortrag', start_date: '2030-03-01T18:00:00.000Z', location_name: 'Pfarrhof', city: 'Gansbach' } as ScrapedEvent;
+    const synced = toSupabaseRow(event, new Map(), new Map()).row as unknown as StoredEventLocationRow;
+    expect(synced.country).toBe('AT');
+    const stored: StoredEventLocationRow = { ...synced, id: 'ev-1', updated_at: '2026-09-14T08:00:00Z' };
+    const writes: Array<{ id: unknown; payload: Record<string, unknown> }> = [];
+    const sb = fakeClient([{ id: 'ev-1', updated_at: '2026-09-14T08:00:00Z' }], writes);
+    const [res] = await reResolveStoredEvents(sb, [stored], { phase: 'test' });
+    expect(res.decision.input_hash).toBe(synced.location_resolution?.input_hash);
+    expect(res.skipped_reason).toBe('unchanged');
+    expect(writes).toHaveLength(0);
+  });
+
+  it('Admin-Korrektur einer Quelle ohne Länderangabe überlebt den nächsten Scrape (Prod 2026-09-16: Pfarrhof Gansbach)', () => {
+    const event = { source_name: 'meinbezirk', source_id: 'v', source_url: 'https://example.at/v', title: 'Vortrag', start_date: '2030-03-01T18:00:00.000Z', location_name: 'Pfarrhof', city: 'Gansbach' } as ScrapedEvent;
+    const stored = { ...(toSupabaseRow(event, new Map(), new Map()).row as unknown as StoredEventLocationRow), id: 'ev-1', updated_at: '2026-09-16T06:00:00Z' };
+    // So bindet /api/admin/ortsdaten/correction die Korrektur an den Quellenstand.
+    const basis_hash = locationBasisHash(inputFromStoredRow(stored));
+    const correction = { id: 'c1', latitude: 48.306529, longitude: 15.471689, precision: 'building' as const, venue_id: null, location_name: 'Pfarre, Gansbach', postal_code: '3122', basis_hash, corrected_by: 'admin:test' };
+    const next = toSupabaseRow(event, new Map(), new Map(), undefined, { correction, correctionsLoaded: true, complete: true }).row as unknown as StoredEventLocationRow & { location_resolution: { reasons: string[] } };
+    expect(next.location_resolution.reasons.filter(r => r.startsWith('correction_stale'))).toEqual([]);
+    expect(next.latitude).toBe(48.306529);
+    expect(next.geocoding_confidence).toBe('manual');
+  });
+});
+
+describe('Wiederholbarkeit (Kennzahl location-audit): gleiche Eingabe, gleiche Entscheidung', () => {
+  const synced = (e: Partial<ScrapedEvent>) => ({
+    ...(toSupabaseRow({ source_name: 'boudicca:linz termine', source_id: 'w', source_url: 'https://example.at/w', title: 'Konzert', start_date: '2030-03-01T18:00:00.000Z', ...e } as ScrapedEvent, new Map(), new Map()).row as unknown as StoredEventLocationRow),
+    id: 'ev-1',
+    updated_at: '2026-10-07T08:00:00Z',
+  });
+
+  it('Sync-Zeile einer Quelle ohne Länderangabe ist vergleichbar und gleich', () => {
+    const row = synced({ location_name: 'Posthof', address: 'Posthofstraße 43, 4020 Linz' });
+    expect(repeatabilityOf(row, resolveEventLocation(inputFromStoredRow(row)))).toBe('same');
+  });
+
+  it('vom Vertrag gesetzter Status zählt nicht als Abweichung (drop_coordinates, Galtür-Muster)', () => {
+    // Quelle: Tirol, PLZ 6563 Galtür, Koordinate auf der Bielerhöhe (Vorarlberg) → Vertrag verwirft die Koordinate.
+    const row = synced({ bundesland: 'Tirol', postal_code: '6563', city: 'Galtür', location_name: 'Silvretta Bielerhöhe', latitude: 46.9186, longitude: 10.0968, coords_precision: 'venue' });
+    expect(row.location_status).toBe('conflict');
+    expect(resolveEventLocation(inputFromStoredRow(row)).status).toBe('address_confirmed');
+    expect(repeatabilityOf(row, resolveEventLocation(inputFromStoredRow(row)))).toBe('same');
+  });
+
+  it('anderer Eingabehash: nicht vergleichbar; behaltene Altkoordinate: eigene Klasse; echte Abweichung: drift', () => {
+    const row = synced({ location_name: 'Posthof', address: 'Posthofstraße 43, 4020 Linz' });
+    const d = resolveEventLocation(inputFromStoredRow(row));
+    expect(repeatabilityOf({ ...row, location_resolution: { ...row.location_resolution, input_hash: 'anders' } }, d)).toBe('not_comparable');
+    expect(repeatabilityOf({ ...row, location_resolution: { ...row.location_resolution, reasons: ['legacy_coords_retained:scraper'] } }, d)).toBe('legacy');
+    expect(repeatabilityOf({ ...row, latitude: 47.0 }, d)).toBe('drift');
   });
 });

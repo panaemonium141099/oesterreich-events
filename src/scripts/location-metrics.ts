@@ -10,12 +10,15 @@
  *  - Drift: Zeilen, deren Ortsentscheidung sich seit dem Vortag geändert hat,
  *    obwohl der Eingabehash gleich blieb (unerklärte Änderung)
  *  - Wiederholbarkeit: Stichprobe von 300 Zeilen mit Quellenstand erneut
- *    entschieden → Abweichungen müssen 0 sein
+ *    entschieden (samt Freigabevertrag, `repeatabilityOf`) → Abweichungen
+ *    müssen 0 sein; ausgewiesen wird auch, wie viele Stichproben überhaupt
+ *    vergleichbar waren (gleicher Eingabehash)
  *  - Rückstand: offene Konflikt-Gruppen und die nächsten betroffenen Termine
  *
  * Ergebnis: Zeile in `workflow_runs` (Workflow `location-audit`), Status
  * `failed`, wenn eine Alarmgrenze reißt (neue Konflikte > 500 in 24 h,
- * Wiederholbarkeit < 100 %, Drift > 200). Präzision (Stichprobe gegen
+ * Wiederholbarkeit < 100 %, Drift > 200, weniger als die Hälfte der
+ * Stichprobe vergleichbar). Präzision (Stichprobe gegen
  * Belege) bleibt ein manueller Schritt, dafür liefert die Prüfansicht
  * `/admin/ortsdaten` die Fälle.
  *
@@ -41,12 +44,14 @@ try {
 
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import { startWorkflowRun, finishWorkflowRun, type WorkflowItem } from '../lib/reporting/workflow-run';
-import { inputFromStoredRow, STORED_LOCATION_COLUMNS, type StoredEventLocationRow } from '../lib/location/re-resolve';
+import { inputFromStoredRow, repeatabilityOf, STORED_LOCATION_COLUMNS, type StoredEventLocationRow } from '../lib/location/re-resolve';
 import { resolveEventLocation } from '../lib/location/resolver';
 import { loadLocationEvidence } from '../lib/location/evidence';
 
 const NEW_CONFLICTS_ALARM = 500;
 const DRIFT_ALARM = 200;
+/** Unter diesem Anteil vergleichbarer Stichproben ist die Wiederholbarkeit nicht gemessen. */
+const COMPARABLE_MIN_SHARE = 0.5;
 
 async function countWhere(sb: SupabaseClient, apply: (q: ReturnType<SupabaseClient['from']>['select'] extends never ? never : any) => any): Promise<number> {
   const base = sb.from('events').select('id', { count: 'exact', head: true }).gte('start_date', new Date().toISOString()).in('publish_status', ['published', 'published_low_confidence', 'needs_review']);
@@ -110,20 +115,19 @@ async function main() {
       .gte('start_date', new Date().toISOString()).not('raw_event_id', 'is', null).not('location_status', 'is', null)
       .order('updated_at', { ascending: false }).limit(300);
     const rows = (sample ?? []) as unknown as StoredEventLocationRow[];
-    let drift = 0;
+    const repeat = { same: 0, drift: 0, not_comparable: 0, legacy: 0 };
     if (rows.length > 0) {
       const inputs = rows.map(inputFromStoredRow);
       const evidence = await loadLocationEvidence(sb, inputs);
-      rows.forEach((row, i) => {
-        const d = resolveEventLocation(inputs[i], evidence[i]);
-        const sameInput = row.location_resolution?.input_hash === d.input_hash;
-        const sameOutcome = row.location_status === d.status && row.latitude === d.latitude && row.longitude === d.longitude;
-        if (sameInput && !sameOutcome) drift++;
-      });
+      rows.forEach((row, i) => { repeat[repeatabilityOf(row, resolveEventLocation(inputs[i], evidence[i]))]++; });
     }
+    const drift = repeat.drift;
+    const comparable = repeat.same + repeat.drift;
     metrics['Wiederholbarkeit Stichprobe'] = rows.length;
+    metrics['Wiederholbarkeit vergleichbar'] = comparable;
+    metrics['Wiederholbarkeit Altkoordinate behalten'] = repeat.legacy;
     metrics['Wiederholbarkeit Abweichungen'] = drift;
-    metrics['Wiederholbarkeit %'] = rows.length ? Math.round((1000 * (rows.length - drift)) / rows.length) / 10 : 100;
+    metrics['Wiederholbarkeit %'] = comparable ? Math.round((1000 * (comparable - drift)) / comparable) / 10 : 100;
 
     // Drift im Bestand: geänderte Entscheidung in 24 h (Näherung über updated_at + Status)
     const { count: changed24, error: e2 } = await sb
@@ -135,6 +139,9 @@ async function main() {
     const alarms: string[] = [];
     if ((newConflicts ?? 0) > NEW_CONFLICTS_ALARM) alarms.push(`Neue Konflikte ${newConflicts} > ${NEW_CONFLICTS_ALARM}`);
     if (drift > 0) alarms.push(`Wiederholbarkeit verletzt: ${drift} Abweichungen bei gleichem Eingabehash`);
+    if (rows.length > 0 && comparable < rows.length * COMPARABLE_MIN_SHARE) {
+      alarms.push(`Wiederholbarkeit nicht gemessen: nur ${comparable} von ${rows.length} Stichproben mit gleichem Eingabehash`);
+    }
     if (drift > DRIFT_ALARM) alarms.push(`Drift ${drift} > ${DRIFT_ALARM}`);
 
     const summary =

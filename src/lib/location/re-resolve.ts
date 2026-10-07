@@ -95,7 +95,12 @@ export function inputFromStoredRow(row: StoredEventLocationRow): LocationInput {
       postal_code: row.postal_code_raw,
       city: row.city_raw,
       bundesland: sourceBundeslandOf(row),
-      country: row.country_raw ?? row.country,
+      // Nur der Rohwert: `country` ist die Entscheidung (ohne Angabe 'AT').
+      // Der Sync hasht eine fehlende Angabe als null; mit dem Rückfall auf
+      // 'AT' wich der Eingabehash bei 46.123 künftigen Zeilen ab, und jede
+      // Admin-Korrektur einer solchen Quelle galt beim nächsten Scrape als
+      // veraltet (Prod 2026-10-07: die einzige Korrektur, Pfarrhof Gansbach).
+      country: row.country_raw,
       latitude: row.latitude_raw,
       longitude: row.longitude_raw,
       coords_precision: (row.coords_precision_raw as SourceCoordsPrecision | null) ?? null,
@@ -220,6 +225,26 @@ function contract(row: StoredEventLocationRow, decision: ResolvedLocation): { de
     ...(c.revoked ? { revoked: c.revoked } : {}),
   } as ResolvedLocation;
   return { decision: contracted, admission };
+}
+
+export type Repeatability = 'same' | 'drift' | 'not_comparable' | 'legacy';
+
+/**
+ * Wiederholbarkeit einer gespeicherten Entscheidung (Kennzahl location-audit):
+ * dieselbe Eingabe muss zur selben Entscheidung führen. Verglichen wird samt
+ * Freigabevertrag, wie ihn jeder Schreibweg anwendet; ohne ihn zählte jeder
+ * vom Vertrag gesetzte Status (no_location_evidence, drop_coordinates) als
+ * Abweichung. Eine behaltene Altkoordinate (`legacy_coords_retained`) hängt
+ * am Bestand der Zeile, nicht an der Eingabe: eigene Klasse statt Abweichung.
+ * Ein anderer Eingabehash ist nicht vergleichbar und muss als solcher
+ * gezählt werden: bis 2026-10 verglich die Kennzahl so nur 96 von 300
+ * Stichproben und meldete trotzdem 100 %.
+ */
+export function repeatabilityOf(row: StoredEventLocationRow, pure: ResolvedLocation): Repeatability {
+  if (row.location_resolution?.input_hash !== pure.input_hash) return 'not_comparable';
+  if (row.location_resolution?.reasons?.some(r => r.startsWith('legacy_coords_retained'))) return 'legacy';
+  const d = contractedDecision(row, pure);
+  return row.location_status === d.status && row.latitude === d.latitude && row.longitude === d.longitude ? 'same' : 'drift';
 }
 
 /** Entscheidet die Zeilen neu und schreibt geänderte Entscheidungen zurück. */
