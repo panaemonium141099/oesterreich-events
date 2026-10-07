@@ -156,8 +156,10 @@ export type { FestivalPost, GalleryImage, FestivalKeyFacts, LineupAct } from './
 
 /** All blog posts sorted by publishDate descending (newest first). */import { post as herbstfesteErntedankOesterreich } from './posts/herbstfeste-erntedank-oesterreich';
 import { post as christkindlmaerkteOesterreich } from './posts/christkindlmaerkte-oesterreich';
+import { post as krampuslaufPerchtenlaufOesterreich } from './posts/krampuslauf-perchtenlauf-oesterreich';
 
 export const ALL_POSTS: FestivalPost[] = [
+  krampuslaufPerchtenlaufOesterreich,
   christkindlmaerkteOesterreich,
   herbstfesteErntedankOesterreich,
   langeNachtDerMuseen,
