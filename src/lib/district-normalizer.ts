@@ -269,3 +269,15 @@ export function normalizeDistrict(
 export function isCanonicalDistrict(district: string): boolean {
   return CANONICAL_DISTRICTS.has(district.trim().toLowerCase());
 }
+
+/** Kanonischer Bezirk → Bundesland, in dem er liegt. */
+const DISTRICT_BUNDESLAND: ReadonlyMap<string, BundeslandId> = new Map(
+  (Object.entries(DISTRICTS_BY_BUNDESLAND) as [BundeslandId, { name: string }[]][]).flatMap(([bl, districts]) =>
+    districts.map((d) => [d.name.toLowerCase(), bl] as const),
+  ),
+);
+
+/** Bundesland eines kanonischen Bezirks, null für unbekannte Werte. */
+export function bundeslandOfDistrict(district: string): BundeslandId | null {
+  return DISTRICT_BUNDESLAND.get(district.trim().toLowerCase()) ?? null;
+}
