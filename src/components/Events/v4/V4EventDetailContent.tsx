@@ -14,6 +14,7 @@
 
 import type { ReactNode } from 'react';
 import { useTranslations } from 'next-intl';
+import { sourceLabelOf, type ListedSource } from '@/lib/events/also-listed-sources';
 
 interface V4EventDetailContentProps {
   description: string | null;
@@ -41,19 +42,35 @@ interface V4EventDetailContentProps {
    *  Feratel-Deskline via the TOSC5 API) have no human-visitable URL —
    *  in that case the source block falls back to the name-only line. */
   sourceUrl?: string | null;
+  /** Quellen der Dubletten („Auch gelistet bei"), schon entdoppelt und ohne
+   *  die Primary-Quelle (buildAlsoListedSources). Der Dedup übernimmt deren
+   *  Beschreibung, Bild, Preise usw. in diese Zeile; ohne die Nennung
+   *  stünden fremde Inhalte unter der Attribution des Primarys. */
+  alsoListedSources?: ListedSource[];
 }
 
-function hostnameOf(url: string): string {
-  try {
-    return new URL(url).hostname.replace(/^www\./, '');
-  } catch {
-    return url;
-  }
+function SourceLink({ label, url }: ListedSource) {
+  if (!url) return <span className="text-[var(--v4-ink-70)]">{label}</span>;
+  return (
+    <a
+      href={url}
+      target="_blank"
+      rel="noopener noreferrer nofollow"
+      className="text-[var(--v4-ink-70)] hover:text-[var(--v4-ink)] underline decoration-[var(--v4-hairline-3)] underline-offset-2 inline-flex items-center gap-1"
+    >
+      {label}
+      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+        <polyline points="15 3 21 3 21 9"/>
+        <line x1="10" y1="14" x2="21" y2="3"/>
+      </svg>
+    </a>
+  );
 }
 
 export function V4EventDetailContent({
   description, category, tags, locationName, address, organizer,
-  hasSimilar, similarChildren, sourceName, sourceUrl,
+  hasSimilar, similarChildren, sourceName, sourceUrl, alsoListedSources,
 }: V4EventDetailContentProps) {
   const t = useTranslations('EventDetail');
   // Kategorie zuerst, danach die Tags — ohne Dublette, falls die Kategorie
@@ -70,8 +87,9 @@ export function V4EventDetailContent({
     organizer?.trim() && organizer.trim() !== sourceName?.trim()
       ? organizer.trim()
       : null;
-  const sourceLabel = sourceName?.trim() || (sourceUrl ? hostnameOf(sourceUrl) : null);
-  const showSource = Boolean(sourceLabel);
+  const sourceLabel = sourceLabelOf({ name: sourceName ?? null, url: sourceUrl ?? null });
+  const alsoListed = alsoListedSources ?? [];
+  const showSource = Boolean(sourceLabel) || alsoListed.length > 0;
 
   return (
     <div className="max-w-[700px]">
@@ -133,26 +151,23 @@ export function V4EventDetailContent({
 
       {showSource && (
         <section className="mt-8 pt-5 border-t border-[var(--v4-hairline-1)]">
-          <p className="m-0 text-[12px] text-[var(--v4-ink-50)] leading-[1.5]">
-            {t('sourceLabel')}{' '}
-            {sourceUrl ? (
-              <a
-                href={sourceUrl}
-                target="_blank"
-                rel="noopener noreferrer nofollow"
-                className="text-[var(--v4-ink-70)] hover:text-[var(--v4-ink)] underline decoration-[var(--v4-hairline-3)] underline-offset-2 inline-flex items-center gap-1"
-              >
-                {sourceLabel}
-                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                  <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
-                  <polyline points="15 3 21 3 21 9"/>
-                  <line x1="10" y1="14" x2="21" y2="3"/>
-                </svg>
-              </a>
-            ) : (
-              <span className="text-[var(--v4-ink-70)]">{sourceLabel}</span>
-            )}
-          </p>
+          {sourceLabel && (
+            <p className="m-0 text-[12px] text-[var(--v4-ink-50)] leading-[1.5]">
+              {t('sourceLabel')}{' '}
+              <SourceLink label={sourceLabel} url={sourceUrl ?? null} />
+            </p>
+          )}
+          {alsoListed.length > 0 && (
+            <p className={`m-0 text-[12px] text-[var(--v4-ink-50)] leading-[1.5]${sourceLabel ? ' mt-1' : ''}`}>
+              {t('alsoListedLabel')}{' '}
+              {alsoListed.map((s, i) => (
+                <span key={s.label}>
+                  {i > 0 && ', '}
+                  <SourceLink label={s.label} url={s.url} />
+                </span>
+              ))}
+            </p>
+          )}
         </section>
       )}
 

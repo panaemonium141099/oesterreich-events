@@ -42,6 +42,7 @@ import {
   resolveEvent,
   getVenue,
   getLineupForEvent,
+  getDuplicateSources,
 } from '@/lib/events/event-detail-loaders';
 
 export const revalidate = 3600;
@@ -75,9 +76,12 @@ export default async function InterceptedEventPage({
   // dynamic API is touched during the static prerender pass.
   // V4EventDetail fetches the personal overlay client-side from
   // /api/events/[id]/personal-context.
-  await Promise.all([
+  // duplicateSources: Quellen der Dubletten, deren Inhalte der Dedup in
+  // diese Zeile übernommen hat („Auch gelistet bei", Attributionspflicht).
+  const [, , duplicateSources] = await Promise.all([
     event.venue_id ? getVenue(event.venue_id) : Promise.resolve(null),
     getLineupForEvent(event.id),
+    getDuplicateSources(event.id),
   ]);
 
   const state = deriveEventState(event, {
@@ -106,6 +110,7 @@ export default async function InterceptedEventPage({
           provider={provider}
           priceFrom={priceFrom}
           priceAtDoor={priceAtDoor}
+          duplicateSources={duplicateSources}
         />
         {/* Gleiche Sektion wie auf der Voll-Seite (app/events/[...slug]).
             Ohne sie sah kein in-App-Navigierender je „Ähnliche Events" —

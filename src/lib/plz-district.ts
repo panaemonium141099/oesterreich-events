@@ -18,7 +18,7 @@
  */
 
 import { ALL_GEMEINDEN } from '@/lib/gemeinden/data';
-import { normalizeDistrict, isCanonicalDistrict, stadtPlzRules } from '@/lib/district-normalizer';
+import { normalizeDistrict, isCanonicalDistrict, stadtPlzRules, bundeslandOfDistrict } from '@/lib/district-normalizer';
 import { bundeslandToId } from '@/lib/bundeslaender';
 import { allPlzReferenceEntries } from '@/lib/location/plz-reference';
 
@@ -64,6 +64,12 @@ function toCanonicalDistrict(bezirk: string, bl: string, plz: string): string | 
  * Bezirke je PLZ). Bezirksnamen werden durch denselben district-normalizer
  * gedreht wie der Schreibpfad. Kein Häufigkeits- und kein Alphabetentscheid:
  * Mehrdeutigkeit bleibt Mehrdeutigkeit.
+ *
+ * Schlüssel ist das Bundesland der PLZ, nicht das des Bezirks: die RTR-Zeile
+ * „1140, Wien, Tulln, W" heißt, die Wiener PLZ 1140 stellt auch nach
+ * Klosterneuburg (Bezirk Tulln) zu. Solche Bezirke jenseits der Landesgrenze
+ * bleiben in der Menge, weil sie die PLZ mehrdeutig machen; als Antwort
+ * taugen sie nie (`districtFromPlz`).
  */
 const PLZ_TO_DISTRICTS: ReadonlyMap<string, ReadonlyMap<string, ReadonlySet<string>>> = (() => {
   const out = new Map<string, Map<string, Set<string>>>();
@@ -128,13 +134,24 @@ export function districtsForPlz(plz: string | null | undefined, bundeslandId?: s
  * Bezirke infrage kommen (438 PLZ laut RTR). Wer den Bezirk trotzdem
  * braucht, leitet ihn aus einer belegten Gemeinde ab
  * (`districtFromGemeinde`).
+ *
+ * Der Bezirk muss im Bundesland liegen, für das gefragt wird (ohne
+ * Bundesland: in dem der PLZ). Bis 2026-10-07 standen 523 Wiener Events mit
+ * PLZ 1140/1190/1210 in Tulln bzw. Korneuburg: deren Wiener Gemeindebezirke
+ * schreibt die RTR als „Wien 14.,Penzing", das kein kanonischer Wert ist,
+ * also blieb der niederösterreichische Bezirk als einziger Kandidat übrig.
  */
 export function districtFromPlz(
   plz: string | null | undefined,
   bundeslandId?: string | null,
 ): string | null {
   const candidates = districtsForPlz(plz, bundeslandId);
-  return candidates.length === 1 ? candidates[0] : null;
+  if (candidates.length !== 1) return null;
+  const [district] = candidates;
+  const home = bundeslandOfDistrict(district);
+  if (!home) return null;
+  if (bundeslandId) return home === bundeslandId ? district : null;
+  return districtsForPlz(plz, home).includes(district) ? district : null;
 }
 
 /** Kanonischer Bezirk einer per Registry belegten Gemeinde. */

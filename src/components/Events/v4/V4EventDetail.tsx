@@ -23,6 +23,7 @@ import { useEffect, useState } from 'react';
 import type { Event } from '@/types/events';
 import type { DeriveCtx, V4EventState } from '@/lib/v4/derive-event-state';
 import { resolveSourceAttribution } from '@/lib/source-attribution-overrides';
+import { buildAlsoListedSources, type DuplicateSourceRow } from '@/lib/events/also-listed-sources';
 import { deriveEventState } from '@/lib/v4/derive-event-state';
 import { isLocationApproximate, isLocationTrusted } from '@/lib/utils/location-trust';
 import { V4EventDetailHero } from './V4EventDetailHero';
@@ -42,6 +43,8 @@ interface V4EventDetailProps {
   artistName?: string;
   /** Pre-rendered similar-events grid; mounted under #similar-events anchor. */
   similar?: React.ReactNode;
+  /** Quellen-Zeilen der Dubletten dieses Events (getDuplicateSources). */
+  duplicateSources?: DuplicateSourceRow[];
 }
 
 interface PersonalContextResponse {
@@ -55,7 +58,7 @@ interface PersonalContextResponse {
 export function V4EventDetail({
   event, state: initialState,
   provider, priceFrom, priceAtDoor, artistName: initialArtistName,
-  similar,
+  similar, duplicateSources,
 }: V4EventDetailProps) {
   const ticketUrl = event.ticket_url ?? undefined;
   // Gate the Route affordance: only emit a Maps URL when the coordinates are
@@ -96,6 +99,8 @@ export function V4EventDetail({
 
   // Regionale Quellen-Overrides (z. B. Oetztal Tourismus statt feratel-deskline)
   const sourceAttribution = resolveSourceAttribution(event);
+  // Dubletten-Quellen: der Dedup hat ihre Inhalte in diese Zeile übernommen.
+  const alsoListedSources = buildAlsoListedSources(sourceAttribution, duplicateSources ?? []);
 
   return (
     <div className="bg-[var(--v4-surface)] min-h-screen">
@@ -130,6 +135,7 @@ export function V4EventDetail({
           similarChildren={similar}
           sourceName={sourceAttribution.name}
           sourceUrl={sourceAttribution.url}
+          alsoListedSources={alsoListedSources}
         />
 
         <aside className="order-first md:order-last md:sticky md:top-[88px] md:self-start">

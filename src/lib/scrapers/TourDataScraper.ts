@@ -72,6 +72,10 @@ export class TourDataScraper extends BaseScraper {
     'Tirol', 'Vorarlberg', 'Kärnten', 'Steiermark', 'Burgenland',
   ];
 
+  missingConfig(): string | null {
+    return this.API_KEY ? null : 'TOURDATA_API_KEY nicht gesetzt';
+  }
+
   async scrape(): Promise<ScrapedEvent[]> {
     if (!this.API_KEY) {
       this.log(

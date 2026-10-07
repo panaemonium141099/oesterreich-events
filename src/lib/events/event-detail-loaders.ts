@@ -16,6 +16,8 @@ import { createClient } from '@supabase/supabase-js';
 import type { Event } from '@/types/events';
 import { extractShortId, buildEventUrlV2 } from '@/lib/utils/slugify';
 import type { FriendAttendee, LineupAct } from '@/components/Events/EventDetailV2';
+import { uniqueSourceRows, type DuplicateSourceRow } from '@/lib/events/also-listed-sources';
+import { POSTGREST_MAX_ROWS } from '@/lib/db/fetch-all';
 
 if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
   throw new Error('SUPABASE_SERVICE_ROLE_KEY is required');
@@ -213,6 +215,46 @@ export async function resolveDuplicateRedirect(
   if (!primary) return null;
   const target = buildEventUrlV2(primary);
   return target === currentPath ? null : target;
+}
+
+// ─────────────────────────────────────────────────────────────────────
+// Quellen der Dubletten („Auch gelistet bei")
+// ─────────────────────────────────────────────────────────────────────
+
+const fetchDuplicateSources = unstable_cache(
+  async (eventId: string): Promise<DuplicateSourceRow[]> => {
+    // idx_events_duplicate_of deckt den Filter ab. Eine Antwort reicht:
+    // Prod 2026-10-07 hat höchstens 155 Dubletten je Primary (eine Quelle),
+    // höchstens 5 verschiedene Quellen. Ein knapperes Limit könnte eine
+    // zweite Quelle hinter vielen Zeilen derselben Quelle abschneiden.
+    const { data, error } = await supabase
+      .from('events')
+      .select('source_name, source_url, postal_code, location_name, address')
+      .eq('duplicate_of', eventId)
+      .eq('publish_status', 'duplicate')
+      .limit(POSTGREST_MAX_ROWS);
+    // Werfen statt [] liefern: unstable_cache speichert nur Erfolge, ein
+    // Timeout darf die leere Liste nicht eine Stunde lang festschreiben.
+    if (error) throw new Error(`duplicate sources for ${eventId}: ${error.message}`);
+    return uniqueSourceRows((data ?? []) as DuplicateSourceRow[]);
+  },
+  ['event-duplicate-sources'],
+  { revalidate: 3600, tags: ['event'] },
+);
+
+/**
+ * Quellen-Zeilen aller Dubletten, die auf dieses Event zeigen. Der Dedup
+ * übernimmt deren Inhalte in den Primary; die Detailseite muss sie deshalb
+ * mit nennen (Attributionspflicht). Ein DB-Fehler kostet nur diese Zeile,
+ * nicht die ganze Seite.
+ */
+export async function getDuplicateSources(eventId: string): Promise<DuplicateSourceRow[]> {
+  try {
+    return await fetchDuplicateSources(eventId);
+  } catch (err) {
+    console.error('[event-detail] getDuplicateSources failed:', err);
+    return [];
+  }
 }
 
 // ─────────────────────────────────────────────────────────────────────

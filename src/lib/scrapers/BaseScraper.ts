@@ -201,6 +201,16 @@ export abstract class BaseScraper {
 
   abstract scrape(): Promise<ScrapedEvent[]>;
 
+  /**
+   * Fehlende Pflicht-Konfiguration (API-Key o. ä.) als Grund, sonst null.
+   * Ein so übersprungener Scraper ist kein Lauf: `runScraper` schreibt
+   * dann keinen `source_runs`-Eintrag, sonst gilt die Quelle dem Rückzug
+   * als "läuft, findet nichts" statt als abgeschaltet (withdrawal.ts, B).
+   */
+  missingConfig(): string | null {
+    return null;
+  }
+
   /** Request timeout in milliseconds (default: 30s) */
   protected fetchTimeoutMs: number = 30000;
 

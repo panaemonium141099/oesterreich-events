@@ -24,4 +24,41 @@ describe('V4EventDetailContent', () => {
     const { container } = render(<V4EventDetailContent description={null} hasSimilar/>);
     expect(container.querySelector('#similar-events')).toBeTruthy();
   });
+
+  it('nennt die Dubletten-Quellen unter der Quelle, verlinkt mit nofollow', () => {
+    render(
+      <V4EventDetailContent
+        description={null}
+        sourceName="falter"
+        sourceUrl="https://www.falter.at/event/1081199"
+        alsoListedSources={[
+          { label: 'partytimer', url: 'https://www.partytimer.at/events/1741099' },
+          { label: 'wien-ticket', url: null },
+        ]}
+      />,
+    );
+    const line = screen.getByText(/auch gelistet bei/i);
+    expect(line).toHaveTextContent('Auch gelistet bei: partytimer, wien-ticket');
+    const link = screen.getByRole('link', { name: /partytimer/ });
+    expect(link).toHaveAttribute('href', 'https://www.partytimer.at/events/1741099');
+    expect(link).toHaveAttribute('rel', 'noopener noreferrer nofollow');
+    expect(link).toHaveAttribute('target', '_blank');
+    // ohne URL: Name als Text, kein Link
+    expect(screen.queryByRole('link', { name: /wien-ticket/ })).toBeNull();
+    expect(screen.getByRole('link', { name: /falter/ })).toHaveAttribute('rel', 'noopener noreferrer nofollow');
+  });
+
+  it('ohne Dubletten keine „Auch gelistet bei"-Zeile', () => {
+    render(<V4EventDetailContent description={null} sourceName="falter" alsoListedSources={[]} />);
+    expect(screen.getByText(/quelle:/i)).toBeInTheDocument();
+    expect(screen.queryByText(/auch gelistet bei/i)).toBeNull();
+  });
+
+  it('Primary ohne Quelle: die Dubletten-Quellen stehen trotzdem da', () => {
+    render(
+      <V4EventDetailContent description={null} alsoListedSources={[{ label: 'partytimer', url: null }]} />,
+    );
+    expect(screen.queryByText(/quelle:/i)).toBeNull();
+    expect(screen.getByText(/auch gelistet bei/i)).toHaveTextContent('partytimer');
+  });
 });

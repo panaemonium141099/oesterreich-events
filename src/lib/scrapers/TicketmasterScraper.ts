@@ -74,6 +74,10 @@ export class TicketmasterScraper extends BaseScraper {
   private readonly API_KEY = process.env.TICKETMASTER_API_KEY || '';
   private readonly BASE_URL = 'https://app.ticketmaster.com/discovery/v2';
 
+  missingConfig(): string | null {
+    return this.API_KEY ? null : 'TICKETMASTER_API_KEY nicht gesetzt';
+  }
+
   async scrape(): Promise<ScrapedEvent[]> {
     if (!this.API_KEY) {
       this.log('TICKETMASTER_API_KEY nicht gesetzt — Scraper übersprungen.');
