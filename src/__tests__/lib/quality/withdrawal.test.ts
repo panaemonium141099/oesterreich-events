@@ -12,7 +12,9 @@ function row(p: Partial<SightingRow> = {}): SightingRow {
     id: p.id ?? `e${seq}`,
     source_name: 'gem2go',
     source_url: `https://www.pill.gv.at/veranstaltung/${seq}`,
+    title: `Veranstaltung ${seq}`,
     start_date: inDays(10),
+    created_at: daysAgo(60),
     last_seen_at: daysAgo(0),
     publish_status: 'published',
     duplicate_of: null,
@@ -101,6 +103,88 @@ describe('planWithdrawals — Quelle hat neu gelistet, Event fehlte', () => {
     expect(ids(planWithdrawals([past, review, ...visit()], { now: NOW }))).toEqual([]);
   });
 
+});
+
+describe('planWithdrawals — Quelle listet dieselbe Seite unter neuer Kennung', () => {
+  // Prod 2026-10-07: gemeinden-generic bildet die source_id aus Titel und
+  // Datum. Zwei Parser-Korrekturen (04.09., 06.10.) gaben den Linzer
+  // Detailseiten neue Titel, die alten Zeilen bekamen nie wieder ein
+  // Upsert ("Linz-Card" neben "Pre-Concert für Danish String Quartet").
+  const page = 'https://www.linztourismus.at/veranstaltungskalender/select/154914';
+  const linz = (p: Partial<SightingRow>) => row({ source_name: 'gemeinden-generic', source_url: page, ...p });
+  const successor = (p: Partial<SightingRow> = {}) =>
+    linz({ id: 'neu', title: 'Pre-Concert für Danish String Quartet', created_at: daysAgo(0), ...p });
+
+  it('zieht die Altzeile zurück, wenn die Detailseite am selben Tag eine neue Zeile liefert', () => {
+    const old = linz({ id: 'alt', title: 'Linz-Card', last_seen_at: daysAgo(34), created_at: daysAgo(80) });
+    const plan = planWithdrawals([old, successor()], { now: NOW });
+    expect(plan.withdraw).toEqual([
+      { id: 'alt', source_name: 'gemeinden-generic', scope: 'gemeinden-generic|linztourismus.at', reason: 'superseded' },
+    ]);
+    expect(plan.probe).toEqual([]);
+  });
+
+  it('gilt auch für zurückgehaltene Altzeilen (needs_review), die der Orts-Nachtjob sonst wieder freigibt', () => {
+    const old = linz({ id: 'alt', title: 'Linz-Card', publish_status: 'needs_review', last_seen_at: daysAgo(34) });
+    expect(ids(planWithdrawals([old, successor()], { now: NOW }))).toEqual(['alt']);
+  });
+
+  it('wartet sieben Tage nach der letzten Sichtung der Altzeile', () => {
+    const old = linz({ id: 'alt', title: 'Linz-Card', last_seen_at: daysAgo(6), created_at: daysAgo(30) });
+    expect(ids(planWithdrawals([old, successor({ created_at: daysAgo(5) })], { now: NOW }))).toEqual([]);
+  });
+
+  it('nicht, wenn beide Zeilen gleichzeitig gelistet waren (zwei Events auf einer Seite)', () => {
+    // Die neue Zeile gab es schon, als die alte noch gesehen wurde: dann ist
+    // die alte nicht abgelöst, sondern nur nicht mehr gefunden.
+    const old = linz({ id: 'alt', title: 'Kinderprogramm', last_seen_at: daysAgo(20) });
+    expect(ids(planWithdrawals([old, successor({ created_at: daysAgo(40) })], { now: NOW }))).toEqual([]);
+  });
+
+  it('nicht, wenn die Seite im letzten Besuch mehrere Titel trägt (Listen-Seite)', () => {
+    const old = linz({ id: 'alt', title: 'Linz-Card', last_seen_at: daysAgo(34) });
+    const other = linz({ title: 'Stadtführung', start_date: inDays(12), created_at: daysAgo(0) });
+    expect(ids(planWithdrawals([old, successor(), other], { now: NOW }))).toEqual([]);
+  });
+
+  it('nicht an einem Tag, für den die Seite keine Zeile mehr liefert', () => {
+    const old = linz({ id: 'alt', title: 'Linz-Card', start_date: inDays(11), last_seen_at: daysAgo(34) });
+    expect(ids(planWithdrawals([old, successor()], { now: NOW }))).toEqual([]);
+  });
+
+  it('ein unterdrückter Nachfolger (Müll-Titel) löst nichts ab', () => {
+    const old = linz({ id: 'alt', title: 'Konzert', last_seen_at: daysAgo(34) });
+    expect(ids(planWithdrawals([old, successor({ title: 'mehr Informationen', publish_status: 'suppressed' })], { now: NOW }))).toEqual([]);
+  });
+
+  it('nur Zeilen derselben Quelle lösen ab', () => {
+    const old = linz({ id: 'alt', title: 'Linz-Card', last_seen_at: daysAgo(34) });
+    const alive = visit({ source_name: 'gemeinden-generic' });
+    expect(ids(planWithdrawals([old, successor({ source_name: 'linztermine' }), ...alive], { now: NOW }))).toEqual([]);
+  });
+
+  it('ein sichtbares Duplikat mit veraltetem Verweis hält die Altzeile nicht', () => {
+    // Prod 2026-10-07: "Neues Rathaus" (Wiener PLZ, zuletzt im Mai gesehen)
+    // blieb Primary, weil eine sichtbare Zeile noch auf sie zeigte.
+    const old = linz({ id: 'alt', title: 'Neues Rathaus', last_seen_at: daysAgo(150) });
+    const stale = row({ source_name: 'gemeinden-generic', publish_status: 'published', duplicate_of: 'alt' });
+    expect(ids(planWithdrawals([old, successor(), stale], { now: NOW }))).toEqual(['alt']);
+  });
+
+  it('lässt Duplikate und schon unterdrückte Altzeilen stehen', () => {
+    const dup = linz({ id: 'dup', title: 'Linz-Card', publish_status: 'duplicate', duplicate_of: 'x', last_seen_at: daysAgo(34) });
+    const supp = linz({ id: 'supp', title: 'Familie', publish_status: 'suppressed', last_seen_at: daysAgo(34) });
+    expect(ids(planWithdrawals([dup, supp, successor()], { now: NOW }))).toEqual([]);
+  });
+
+  it('löst je Termin ab: Serien-Seite mit mehreren Tagen', () => {
+    const day1 = inDays(10);
+    const day2 = inDays(20);
+    const old1 = linz({ id: 'alt1', title: 'Highlight', start_date: day1, last_seen_at: daysAgo(34) });
+    const old3 = linz({ id: 'alt3', title: 'Highlight', start_date: inDays(30), last_seen_at: daysAgo(34) });
+    const plan = planWithdrawals([old1, old3, successor({ start_date: day1 }), successor({ id: 'neu2', start_date: day2 })], { now: NOW });
+    expect(ids(plan)).toEqual(['alt1']);
+  });
 });
 
 describe('planWithdrawals — Quelle liefert gar nicht mehr', () => {

@@ -77,10 +77,13 @@ node / next.js
   master_coords → score → dedup → dedup_audit → withdrawal → artist_matching →
   indexing → report) mit `if: always()`. `withdrawal` (`withdraw-stale-events.ts`,
   Regeln in `src/lib/quality/withdrawal.ts`) zieht Events zurück, die ihre
-  Quelle nicht mehr listet: nur mit Beleg (Detailseite 404/410) oder wenn
-  die Quelle seit 30 Tagen nichts liefert. „Nicht gesehen" allein ist kein
-  Beleg (Stichprobe: 15 von 125 wirklich weg). Zurückgezogen =
-  `suppressed` + `withdrawn_at`; der Upsert hebt beides auf.
+  Quelle nicht mehr listet: nur mit Beleg (Detailseite 404/410), wenn
+  die Quelle seit 30 Tagen nichts liefert, oder wenn sie dieselbe
+  Detailseite am selben Tag unter neuer source_id listet (abgelöst, auch
+  needs_review: Titel-IDs verwaisen bei jeder Parser-Korrektur).
+  „Nicht gesehen" allein ist kein Beleg (Stichprobe: 15 von 125 wirklich
+  weg). Zurückgezogen = `suppressed` + `withdrawn_at`; der Upsert hebt
+  beides auf.
 - **GitHub Actions `import-eventim.yml`** (alle 6 h): PFT-Feed-Import mit
   Affiliate-Links. Secrets: `EVENTIM_FEED_USER`/`EVENTIM_FEED_PASS`.
 - **GitHub Actions `ingest-activities.yml`** (wöchentlich): Deskline-
