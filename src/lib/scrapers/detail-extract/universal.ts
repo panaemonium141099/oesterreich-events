@@ -533,9 +533,16 @@ export function applyRegexFallbacks(out: DetailEnrichment, $?: CheerioAPI): void
       }
     }
   }
+  // Ein "frei" neben einem Betrag gilt meist nur für einen Teil ("Kinder
+  // unter 14 freier Eintritt", "gratis Schnapserl", "kostenlose
+  // Infoabende"). Dann zählt nur ein Betrag mit Preiswort, sonst bleibt der
+  // Preis leer. Prod 2026-10-07: 199 von 2.112 "Eintritt frei" hatten einen
+  // Betrag im Text, Stichprobe 18 von 18 falsch.
+  const amount = text ? text.match(GENERIC_EURO_REGEX) : null;
+  const freeButPriced = !!text && FREE_PATTERNS.test(text) && !!amount && parseFloat((amount[1] ?? amount[2]).replace(',', '.')) > 0;
   if (!out.price_text && text) {
-    if (FREE_PATTERNS.test(text)) { out.price_text = 'Eintritt frei'; out.price_min = 0; out.price_max = 0; }
-    else if (DONATION_PATTERNS.test(text)) { out.price_text = 'Spende erbeten'; out.price_min = 0; }
+    if (FREE_PATTERNS.test(text) && !freeButPriced) { out.price_text = 'Eintritt frei'; out.price_min = 0; out.price_max = 0; }
+    else if (!freeButPriced && DONATION_PATTERNS.test(text)) { out.price_text = 'Spende erbeten'; out.price_min = 0; }
     else {
       const m = text.match(EURO_REGEX);
       if (m) {
@@ -544,7 +551,7 @@ export function applyRegexFallbacks(out: DetailEnrichment, $?: CheerioAPI): void
       }
     }
   }
-  if (!out.price_text && text) {
+  if (!out.price_text && text && !freeButPriced) {
     const m = text.match(GENERIC_EURO_REGEX);
     if (m) {
       const raw = m[1] ?? m[2];

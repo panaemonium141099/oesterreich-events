@@ -2,7 +2,18 @@
 // Source-specific CSS-selector extraction for the gem2go CMS (used by
 // ~2000 Austrian municipalities). Refactored out of gem2go-detail.ts.
 
+import type { CheerioAPI, Cheerio } from 'cheerio';
 import type { Adapter, DetailEnrichment } from '../types';
+
+/** Wert eines Listeneintrags im neuen Layout: `<li><span class="sr-only">Adresse</span>…</li>`. */
+function bemField($: CheerioAPI, $scope: Cheerio<any>, label: string): string {
+  const $li = $scope
+    .find('li.bemList__item')
+    .filter((_, li) => $(li).find('.sr-only').first().text().trim() === label)
+    .first();
+  if (!$li.length) return '';
+  return $li.clone().find('.sr-only, [aria-hidden="true"]').remove().end().text().replace(/\s+/g, ' ').trim();
+}
 
 export const gem2goAdapter: Adapter = {
   sourceNames: [
@@ -12,8 +23,36 @@ export const gem2goAdapter: Adapter = {
     'gemeinden',
     'gemeinden-wp-burgenland',
   ],
+  // Fußzeile der Gemeinde-Website (Gemeindeamt) und Veranstalterblock (dessen
+  // eigene Adresse): nie der Veranstaltungsort. Die Proximity-Schicht las sie
+  // sonst als Event-Adresse (Befund 2026-10-07).
+  ignoreRegions: '#footer, footer, .bemContainer--mainHostContact',
+  // Im neuen Layout trägt das JSON-LD als Ort die Adresse des Veranstalters
+  // (Stichprobe 2026-10-07: 17 von 17), auch wenn die Seite einen anderen
+  // Ort nennt. Ort und Adresse dort nur aus dem sichtbaren Kontaktblock.
+  jsonLdLocationReliable: ($) => $('.bemContainer').length === 0,
   extract($) {
     const out: Partial<DetailEnrichment> = {};
+
+    // Neues Detaillayout: der Ort steht im Block "Kontakt"
+    // (.bemContainer--contact). Der Veranstalter hat einen eigenen Block mit
+    // seiner Adresse (.bemContainer--mainHostContact), die nicht der Ort ist.
+    const $contact = $('.bemContainer--contact').first();
+    const bemVenue = bemField($, $contact, 'Veranstaltungsstätte') || bemField($, $contact, 'Standort');
+    if (bemVenue) out.location_name = bemVenue;
+    const bemAddress = bemField($, $contact, 'Adresse');
+    const parts = bemAddress.match(/^(?:(.+?),\s*)?(\d{4})\s+([^,]+)/);
+    if (parts) {
+      // "Hans-Holz-Straße 1, 4770 Andorf", "3681 Hofamt Priel", "Europastraße, 3902 Vitis, Österreich"
+      if (parts[1]) out.address = parts[1].trim();
+      out.postal_code = parts[2];
+      out.address_locality = parts[3].trim();
+    } else if (bemAddress) {
+      out.address = bemAddress;
+    }
+    const bemOrganizer =
+      bemField($, $contact, 'Organisator') || bemField($, $('.bemContainer--mainHostContact').first(), 'Organisator');
+    if (bemOrganizer) out.organizer = bemOrganizer;
 
     const venue = $('.va-vaort').first().text().trim();
     if (venue) out.location_name = venue;
