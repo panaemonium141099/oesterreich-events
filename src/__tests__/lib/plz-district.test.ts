@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { districtFromPlz, districtsForPlz, districtFromGemeinde, districtForLocation } from '@/lib/plz-district';
+import { districtFromPlz, districtsForPlz, districtFromGemeinde, districtForLocation, unreadablePlzDistricts } from '@/lib/plz-district';
 import { bundeslandOfDistrict } from '@/lib/district-normalizer';
 import { allPlzReferenceEntries } from '@/lib/location/plz-reference';
 import { ALL_GEMEINDEN } from '@/lib/gemeinden/data';
@@ -106,5 +106,64 @@ describe('PLZ-Bezirk liegt im Bundesland des Events', () => {
       if (d && !landsOf(plz).has(bundeslandOfDistrict(d) ?? '')) wrong.push(`${plz}/ohne Land → ${d}`);
     }
     expect(wrong).toEqual([]);
+  });
+});
+
+// Befund 2026-10-07: toCanonicalDistrict verwarf RTR-Schreibweisen wie
+// „Graz(Stadt)", „Sankt Pölten(Land)" oder „Eisenstadt-Umgebung" unter einer
+// NÖ-PLZ still. Die Kandidatenmenge war zu klein, und districtFromPlz hielt
+// mehrdeutige PLZ für eindeutig (5071 Wals → salzburg-umgebung, 8051 →
+// graz-umgebung, 3400 Klosterneuburg → tulln).
+describe('RTR-Schreibweisen werden gelesen, nie still verworfen', () => {
+  it('„Graz(Stadt)", „Salzburg(Stadt)", „Steyr(Stadt)": Stadt und Umland bleiben mehrdeutig', () => {
+    for (const plz of ['8051', '8073', '8074']) {
+      expect(districtsForPlz(plz, 'steiermark').sort()).toEqual(['graz (stadt)', 'graz-umgebung']);
+      expect(districtFromPlz(plz, 'steiermark')).toBeNull();
+    }
+    for (const plz of ['5061', '5071']) {
+      expect(districtsForPlz(plz, 'salzburg').sort()).toEqual(['salzburg (stadt)', 'salzburg-umgebung']);
+      expect(districtFromPlz(plz, 'salzburg')).toBeNull();
+    }
+    expect(districtsForPlz('4451', 'oberoesterreich').sort()).toEqual(['steyr (stadt)', 'steyr-land']);
+    expect(districtFromPlz('4451', 'oberoesterreich')).toBeNull();
+  });
+
+  it('„Sankt Pölten(Land)", „St. Pölten(Land)", „Wiener Neustadt(Land)" zählen als Kandidaten', () => {
+    for (const plz of ['3400', '3443', '3451', '3004']) {
+      expect(districtsForPlz(plz, 'niederoesterreich').sort()).toEqual(['st. pölten (land)', 'tulln']);
+      expect(districtFromPlz(plz, 'niederoesterreich')).toBeNull();
+    }
+    expect(districtsForPlz('3385', 'niederoesterreich').sort()).toEqual(['st. pölten (land)', 'st. pölten (stadt)']);
+    expect(districtFromPlz('3385', 'niederoesterreich')).toBeNull();
+    expect(districtsForPlz('2602', 'niederoesterreich').sort()).toEqual(['baden', 'wiener neustadt (land)']);
+    expect(districtFromPlz('2602', 'niederoesterreich')).toBeNull();
+  });
+
+  it('Bezirke jenseits der Landesgrenze werden in der Schreibweise ihres Bundeslands gelesen', () => {
+    // 2443 Deutsch-Brodersdorf (NÖ) stellt auch in den Bezirk Eisenstadt-Umgebung zu.
+    expect(districtsForPlz('2443', 'niederoesterreich').sort()).toEqual(['baden', 'eisenstadt']);
+    expect(districtFromPlz('2443', 'niederoesterreich')).toBeNull();
+    // 5163 Mattsee (Salzburg): RTR schreibt „Braunau" und „Braunau am Inn".
+    expect(districtsForPlz('5163', 'salzburg').sort()).toEqual(['braunau am inn', 'salzburg-umgebung']);
+    // 7202 Bad Sauerbrunn (Burgenland): auch „Wiener Neustadt(Land)".
+    expect(districtsForPlz('7202', 'burgenland').sort()).toEqual(['mattersburg', 'wiener neustadt (land)']);
+    expect(districtFromPlz('7202', 'burgenland')).toBeNull();
+  });
+
+  it('ein unlesbarer Bezirksname macht die PLZ mehrdeutig', () => {
+    // RTR führt für 8280 Fürstenfeld neben Hartberg-Fürstenfeld eine Zeile mit Bezirk „NULL".
+    expect(districtFromPlz('8280', 'steiermark')).toBeNull();
+    expect(districtFromPlz('8280')).toBeNull();
+    // 2301 Groß-Enzersdorf stellt auch in den 22. Bezirk zu („Wien 22.,Donaustadt").
+    expect(districtFromPlz('2301', 'niederoesterreich')).toBeNull();
+  });
+
+  it('Wächter: jede Bezirksschreibweise wird gelesen oder ist als unlesbar bekannt', () => {
+    // Neue Schreibweisen nach einem Neubau von data/plz-at.json landen hier,
+    // statt still aus der Kandidatenmenge zu fallen.
+    const names = new Set(unreadablePlzDistricts().map(u => u.bezirk));
+    const unknown = [...names].filter(b => b !== 'NULL' && b !== 'Wien' && !/^Wien +\d{1,2}\.,/.test(b));
+    expect(unknown).toEqual([]);
+    expect(names.has('NULL')).toBe(true);
   });
 });
