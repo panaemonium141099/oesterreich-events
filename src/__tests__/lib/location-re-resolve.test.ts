@@ -34,7 +34,8 @@ function fakeClient(db: DbEvent[], writes: Array<{ id: unknown; payload: Record<
             const id = filters.find(f => f[1] === 'id')?.[2];
             const upd = filters.find(f => f[1] === 'updated_at');
             const row = db.find(r => r.id === id);
-            const match = !!row && (upd?.[0] === 'is' ? row.updated_at === null : row.updated_at === upd?.[2]);
+            // Ohne updated_at-Bedingung (nur Veröffentlichung nachziehen) trifft das Update per ID.
+            const match = !!row && (!upd || (upd[0] === 'is' ? row.updated_at === null : row.updated_at === upd[2]));
             if (match) {
               writes.push({ id, payload });
               row!.updated_at = '2026-09-14T09:00:00Z';
@@ -348,5 +349,67 @@ describe('Wiederholbarkeit (Kennzahl location-audit): gleiche Eingabe, gleiche E
     expect(repeatabilityOf({ ...row, location_resolution: { ...row.location_resolution, input_hash: 'anders' } }, d)).toBe('not_comparable');
     expect(repeatabilityOf({ ...row, location_resolution: { ...row.location_resolution, reasons: ['legacy_coords_retained:scraper'] } }, d)).toBe('legacy');
     expect(repeatabilityOf({ ...row, latitude: 47.0 }, d)).toBe('drift');
+  });
+});
+
+describe('Sync-Zeile ohne jede Ortsangabe der Quelle (kein Altbestand)', () => {
+  // Prod 2026-10-07: 219 Zeilen mit raw_event_id, aber ohne Rohwerte zum Ort. Die
+  // Anzeigespalten tragen dort, was der Sync aus früheren Lieferungen behalten hat
+  // (Adress-Guard, PLZ wird ohne neue PLZ nicht überschrieben). Eine behaltene
+  // Adresse prüft auch der Vertrag im Sync (finalAddress), sie verhindert dort
+  // die Quarantäne; die zurückgehaltenen Prod-Zeilen haben keine.
+  const storedWithoutLocation = (over: Partial<StoredEventLocationRow> = {}): StoredEventLocationRow => {
+    const event = { source_name: 'meinbezirk', source_id: 's', source_url: 'https://example.at/s', title: 'Weihnachtliche Segensfeier für Trauernde in Oberpullendorf', start_date: '2030-12-01T17:00:00.000Z' } as ScrapedEvent;
+    const row = toSupabaseRow(event, new Map(), new Map()).row as unknown as StoredEventLocationRow & { raw_event_id?: string | null };
+    return { ...row, id: 'ev-1', updated_at: '2026-10-07T08:00:00Z', raw_event_id: 'raw-1', postal_code: '7350', ...over } as StoredEventLocationRow;
+  };
+
+  it('Eingabe aus den (leeren) Rohspalten, nicht aus behaltenen Anzeigewerten', () => {
+    const row = storedWithoutLocation({ address: 'Hauptstraße 5' });
+    const inp = inputFromStoredRow(row);
+    expect(inp.address).toBeNull();
+    expect(inp.postal_code).toBeNull();
+    expect(resolveEventLocation(inp).input_hash).toBe(row.location_resolution?.input_hash);
+    // Ohne raw_event_id und ohne Rohwerte bleibt es Altbestand.
+    expect(inputFromStoredRow({ ...row, raw_event_id: null } as StoredEventLocationRow).address).toBe('Hauptstraße 5');
+  });
+
+  it('nur ein Ortsname der Quelle (city_raw) zählt ebenfalls als Rohwert', () => {
+    const row = storedWithoutLocation({ raw_event_id: null, city_raw: 'Oberpullendorf', address: 'Hauptstraße 5' } as Partial<StoredEventLocationRow>);
+    expect(inputFromStoredRow(row).address).toBeNull();
+    expect(inputFromStoredRow(row).city).toBe('Oberpullendorf');
+  });
+
+  it('Neu-Entscheidung kommt zum Ergebnis des Syncs: zurückgehalten, kein Bezirk aus der behaltenen PLZ, kein Schreibzugriff', async () => {
+    const row = storedWithoutLocation();
+    expect(row.publish_status).toBe('needs_review');
+    expect(row.location_resolution?.reasons).toContain('admission:no_location_evidence');
+    const writes: Array<{ id: unknown; payload: Record<string, unknown> }> = [];
+    const sb = fakeClient([{ id: 'ev-1', updated_at: '2026-10-07T08:00:00Z' }], writes);
+    const [res] = await reResolveStoredEvents(sb, [row], { phase: 'test' });
+    expect(res.skipped_reason).toBe('unchanged');
+    expect(writes).toHaveLength(0);
+  });
+
+  it('eine vom Vertrag zurückgehaltene Zeile wird nicht wieder veröffentlicht, eine veröffentlichte zurückgehalten (Prod: 9 Events, u. a. US-Meetups)', async () => {
+    const row = storedWithoutLocation({ publish_status: 'published' });
+    const writes: Array<{ id: unknown; payload: Record<string, unknown> }> = [];
+    const sb = fakeClient([{ id: 'ev-1', updated_at: '2026-10-07T08:00:00Z' }], writes);
+    const [res] = await reResolveStoredEvents(sb, [row], { phase: 'test' });
+    expect(res.publish_change).toBe('withheld');
+    expect(writes[0].payload.publish_status).toBe('needs_review');
+  });
+});
+
+describe('publishChangeFor folgt dem Freigabevertrag wie der Sync', () => {
+  const held = { publish_status: 'needs_review', location_resolution: { reasons: ['admission:no_location_evidence'] } };
+  it('weiterhin unter Quarantäne: bleibt zurückgehalten', () => {
+    expect(publishChangeFor(held, { status: 'unresolved', reasons: ['admission:no_location_evidence'] })).toBeNull();
+  });
+  it('veröffentlicht, aber unter Quarantäne: zurückhalten', () => {
+    expect(publishChangeFor({ ...held, publish_status: 'published' }, { status: 'unresolved', reasons: ['admission:placeholder_location'] })).toEqual({ publish_status: 'needs_review' });
+  });
+  it('Quarantäne aufgelöst: wieder veröffentlichen', () => {
+    expect(publishChangeFor(held, { status: 'municipality_only', reasons: ['gemeinde_centroid_from_plz'] })).toEqual({ publish_status: 'published' });
   });
 });
