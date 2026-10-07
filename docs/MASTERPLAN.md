@@ -293,9 +293,21 @@ alles neu, schreibt nur Abweichungen, löst Verbindungen nur mit Gegenbeleg;
 verwaiste Altzeilen (Quelle liefert sie > 21 Tage nicht mehr) sind nie
 Gegenbeleg und werden nie wieder sichtbar; Sicherheitsventil gegen
 Massenänderungen; Pipeline-Schritt `dedup_audit` wird rot, wenn sichtbare
-offensichtliche Dubletten übrig bleiben. Keine Quellen-Sonderregeln —
-neue Fehlerfälle gehören ins Golden-Set
+offensichtliche Dubletten übrig bleiben (Grenze 100). Keine
+Quellen-Sonderregeln — neue Fehlerfälle gehören ins Golden-Set
 (`src/__tests__/pipeline/dedup-golden.test.ts`).
+
+**Ergebnis auf Prod (2026-10-07, PRs #283/#284, drei Läufe):** künftige
+Duplikate 11.499 → ~19.000; sichtbare offensichtliche Restdubletten
+837 → 22 (Rest: echte Unklarheiten wie zwei Christmetten im Ort);
+Sargfabrik-Konzert 1× sichtbar (Eventim, J70) mit vier „Auch gelistet bei".
+Nebenbei freigegeben: ~200 künftige Termine, die seit Monaten als Duplikat
+versteckt waren (wiederkehrende Zeile wechselte per Upsert das Datum und
+behielt die Markierung auf einen Apriltermin), echte Eventim-Vorstellungen
+(Cirque du Soleil, „Tal des Unheils") und Events hinter als Müll
+unterdrückten Primaries. Altfehler in `rewire_saved_events_to_primaries`
+(Unique-Verletzung bei mehreren Duplikaten) behoben, Migration
+`20261007150000_…` auf Prod angewendet.
 
 **Nebenbefunde (eigene Tasks):** Ticketmaster speichert Wandzeit als UTC
 (+1/+2 h); gem2go klebt Kategorie-Text an 1.928 Titel; 279 Events mit PLZ
