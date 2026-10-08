@@ -16,6 +16,7 @@
 import { createClient } from '@supabase/supabase-js';
 import { searchAnalytics, listSitemaps } from './gsc';
 import { fetchVitalsSummary, type VitalsSummary } from './crux';
+import { SITE_COUNTRY } from '@/lib/site-country';
 
 export const SITE_URL = 'https://lasstreffen.at';
 /** GSC siteUrl property form — sc-domain for domain-level verification,
@@ -235,12 +236,14 @@ async function collectInternalMetrics(): Promise<SeoSnapshotMetrics['internal']>
       .eq('publish_status', 'published'),
     sb.from('events').select('*', { count: 'planned', head: true })
       .eq('publish_status', 'published')
+      .eq('country', SITE_COUNTRY)
       .gte('start_date', today),
     sb.from('events').select('*', { count: 'planned', head: true })
       .eq('enrichment_version', 'v3'),
     // Sitemap-eligible ≈ future published with quality_score ≥ 40.
     sb.from('events').select('*', { count: 'planned', head: true })
       .eq('publish_status', 'published')
+      .eq('country', SITE_COUNTRY)
       .gte('start_date', today)
       .gte('quality_score', 40),
   ]);

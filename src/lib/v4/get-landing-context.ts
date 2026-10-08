@@ -1,6 +1,7 @@
 import { createServerSupabaseClient } from '@/lib/supabase/server';
 import { isFalsePositiveMatch } from '@/lib/artist-matching';
 import type { DeriveCtx } from './derive-event-state';
+import { SITE_COUNTRY } from '@/lib/site-country';
 
 export interface LandingContext extends DeriveCtx {
   signedIn: boolean;
@@ -50,6 +51,7 @@ export async function getLandingContext(): Promise<LandingContext> {
         events!inner ( title, start_date, publish_status )
       `)
       .eq('user_id', user.id)
+      .eq('events.country', SITE_COUNTRY)
       .gte('events.start_date', today)
       .lte('events.start_date', horizon)
       .eq('events.publish_status', 'published'),

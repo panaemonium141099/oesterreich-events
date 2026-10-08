@@ -15,6 +15,7 @@ import { createClient } from '@supabase/supabase-js';
 import { getStripe, parseEventRef, BOOST_PRICE_CENTS } from '@/lib/payments/stripe-boost';
 import { publicOrigin } from '@/lib/site-url';
 import { EVENT_TZ } from '@/lib/utils/event-time';
+import { SITE_COUNTRY } from '@/lib/site-country';
 
 export const dynamic = 'force-dynamic';
 
@@ -58,6 +59,9 @@ export async function POST(req: NextRequest) {
     .from('events')
     .select('id, title, start_date, is_boosted, boost_until')
     .eq('visibility', 'public')
+    // Boostbar ist nur, was auf lasstreffen.at sichtbar ist: DE/CH-Events
+    // (Eventim) nie, und bei gleichem Slug gewinnt die österreichische Zeile.
+    .eq('country', SITE_COUNTRY)
     .in('publish_status', ['published', 'published_low_confidence'])
     .or(`start_date.gte.${startOfTodayUtc},end_date.gte.${now.toISOString()}`)
     .order('start_date', { ascending: true })

@@ -18,6 +18,7 @@ import { ImageResponse } from 'next/og';
 import { createClient } from '@supabase/supabase-js';
 import { extractShortId } from '@/lib/utils/slugify';
 import { EVENT_TZ } from '@/lib/utils/event-time';
+import { SITE_COUNTRY } from '@/lib/site-country';
 
 export const runtime = 'nodejs';
 export const revalidate = 86400; // re-render OG image once per day per event
@@ -29,12 +30,16 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!,
 );
 
+// Beide Abfragen filtern auf SITE_COUNTRY: ein DE/CH-Event (Eventim) bekommt
+// das generische Bild, und teilt es den 8-stelligen Präfix mit einem
+// österreichischen Event, gewinnt das österreichische.
 async function getEvent(token: string) {
   if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(token)) {
     const { data } = await supabase
       .from('events')
       .select('id, title, start_date, location_name, bundesland, category, slug')
       .eq('id', token)
+      .eq('country', SITE_COUNTRY)
       .single();
     if (data) return data;
   }
@@ -46,6 +51,7 @@ async function getEvent(token: string) {
     .select('id, title, start_date, location_name, bundesland, category, slug')
     .gte('id', rangeStart)
     .lte('id', rangeEnd)
+    .eq('country', SITE_COUNTRY)
     .limit(1)
     .single();
   return data;

@@ -73,6 +73,7 @@ import { routing, type AppLocale } from '@/i18n/routing';
 import { bilingualAlternates } from '@/lib/seo/canonical';
 import { dateLocaleFor } from '@/lib/i18n/date-locale';
 import { bundeslandDisplayName, placeDisplayName } from '@/lib/i18n/bundesland-names';
+import { SITE_COUNTRY } from '@/lib/site-country';
 
 function resolveLocale(raw: string): AppLocale {
   return hasLocale(routing.locales, raw) ? raw : routing.defaultLocale;
@@ -130,6 +131,10 @@ const loadNearbyEventsCached = unstable_cache(
       .select('id, title, slug, start_date, end_date, location_name, address, postal_code, bundesland, latitude, longitude, category, image_url, image_width, source_id, price_text, event_score')
       .gte('start_date', today)
       .eq('publish_status', 'published')
+      // Der Umkreis reicht über die Grenze (Bregenz → Lindau, Braunau →
+      // Simbach): Land ausdrücklich filtern, und zwar vor limit(60), damit
+      // die Plätze nur mit Events dieser Seite gefüllt werden.
+      .eq('country', SITE_COUNTRY)
       .gte('latitude', minLat).lte('latitude', maxLat)
       .gte('longitude', minLng).lte('longitude', maxLng)
       .order('event_score', { ascending: false, nullsFirst: false })
@@ -149,7 +154,8 @@ const loadNearbyEventsCached = unstable_cache(
       })
       .filter((x): x is NearbyEvent & { _distance_km: number } => x !== null);
   },
-  ['gemeinde-nearby-events'],
+  // -v2: ohne Länderfilter gecachte Ergebnisse nicht weiter ausliefern
+  ['gemeinde-nearby-events-v2'],
   { revalidate: 3600, tags: ['event', 'gemeinde'] },
 );
 

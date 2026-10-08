@@ -34,6 +34,7 @@ import { BUNDESLAND_NAMES, type BundeslandId } from '@/lib/districtsAT';
 import { buildEventUrlV2 } from '@/lib/utils/slugify';
 import { bboxAround, haversineKm } from '@/lib/gemeinden/data';
 import { resolveWidgetScope, REGION_LABELS, type WidgetScope } from '@/lib/widget/scopes';
+import { SITE_COUNTRY } from '@/lib/site-country';
 
 export const revalidate = 1800;
 
@@ -105,6 +106,9 @@ async function loadEvents(scope: WidgetScope): Promise<WidgetEvent[]> {
     .gte('start_date', new Date().toISOString())
     .eq('publish_status', 'published')
     .eq('visibility', 'public')
+    // Für alle Scopes: 'oesterreich' hat keinen Ortsfilter, und der
+    // Gemeinde-Umkreis reicht über die Grenze (Bregenz bis Lindau).
+    .eq('country', SITE_COUNTRY)
     .not('latitude', 'is', null)
     .not('longitude', 'is', null)
     .order('start_date', { ascending: true });

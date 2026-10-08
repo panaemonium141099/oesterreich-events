@@ -25,6 +25,7 @@ import { locationOutputs } from '@/lib/location/gating';
 import { unstable_cache } from 'next/cache';
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import { bboxAround, haversineKm } from '@/lib/gemeinden/data';
+import { SITE_COUNTRY } from '@/lib/site-country';
 
 /** Kartenfaehige Aktivitaets-Teilmenge (Snippet-Cards, keine Attribution noetig). */
 export interface NearbyActivity {
@@ -223,6 +224,9 @@ async function queryEventBbox(
     .gte('start_date', nowIso)
     .eq('publish_status', 'published')
     .eq('visibility', 'public')
+    // Die bbox reicht über die Grenze (Lindau, Garmisch): Land ausdrücklich
+    // filtern, vor dem Pool-Limit. Gilt auch für den Backfill.
+    .eq('country', SITE_COUNTRY)
     .gte('latitude', minLat).lte('latitude', maxLat)
     .gte('longitude', minLng).lte('longitude', maxLng)
     .order('event_score', { ascending: false, nullsFirst: false })
@@ -290,6 +294,7 @@ export const loadNearbyFutureEventsCached = unstable_cache(
 
     return result;
   },
-  ['activity-nearby-events'],
+  // -v2: ohne Länderfilter gecachte Ergebnisse nicht weiter ausliefern
+  ['activity-nearby-events-v2'],
   { revalidate: 3600, tags: ['event', 'activity'] },
 );

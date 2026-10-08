@@ -410,6 +410,15 @@ const nextConfig: NextConfig = {
         { source: `/stadt/${city}`, destination, permanent: true },
         { source: `/stadt/${city}/:path*`, destination, permanent: true },
       ]),
+      // Ehemalige Pseudo-Region 'at-de-ch' (Österreich, Deutschland, Schweiz).
+      // Ihre Hub-Seiten standen mit allen Unterseiten zweisprachig in
+      // sitemap-core.xml. Seit die Seite nur österreichische Events zeigt,
+      // gibt es den Hub nicht mehr; 301 auf die Startseite statt 404, damit
+      // Google die bekannten URLs sauber zusammenführt.
+      { source: '/at-de-ch', destination: '/', permanent: true },
+      { source: '/at-de-ch/:path*', destination: '/', permanent: true },
+      { source: '/en/at-de-ch', destination: '/en', permanent: true },
+      { source: '/en/at-de-ch/:path*', destination: '/en', permanent: true },
     ];
   },
   // better-sqlite3 only used by scraper scripts, not by API routes

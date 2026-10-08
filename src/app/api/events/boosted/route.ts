@@ -14,6 +14,7 @@
 
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { SITE_COUNTRY } from '@/lib/site-country';
 
 export const dynamic = 'force-dynamic';
 
@@ -31,6 +32,7 @@ export async function GET() {
     .from('events')
     .select('id, boost_until')
     .eq('is_boosted', true)
+    .eq('country', SITE_COUNTRY)
     .limit(500);
 
   if (error) {

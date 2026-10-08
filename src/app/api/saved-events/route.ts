@@ -14,6 +14,7 @@
 
 import { NextResponse } from 'next/server';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
+import { SITE_COUNTRY } from '@/lib/site-country';
 
 export const dynamic = 'force-dynamic';
 
@@ -35,6 +36,8 @@ export async function GET() {
       )
     `)
     .eq('user_id', user.id)
+    // Ein früher gemerktes DE/CH-Event kommt als null und fällt unten raus.
+    .eq('event.country', SITE_COUNTRY)
     .order('created_at', { ascending: false })
     .limit(200);
 

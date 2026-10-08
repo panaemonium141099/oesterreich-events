@@ -65,6 +65,7 @@ import {
   resolveDuplicateRedirect,
 } from '@/lib/events/event-detail-loaders';
 import type { Event } from '@/types/events';
+import { SITE_COUNTRY } from '@/lib/site-country';
 
 const PRIMARY_ID = '685a2c6b-56e8-44ee-9dad-2bc3d8982941';
 const DUP_ID = 'ab6d57f0-0c5d-4a78-9920-cfbef3e6a9e3';
@@ -77,6 +78,8 @@ function ev(over: Partial<Row> & { id: string }): Row {
     location_name: 'Judenburg',
     address: '8750 Judenburg',
     bundesland: 'Steiermark',
+    // Die Loader filtern auf das Land der Seite (country ist NOT NULL).
+    country: SITE_COUNTRY,
     publish_status: 'published',
     duplicate_of: null,
     event_score: 50,

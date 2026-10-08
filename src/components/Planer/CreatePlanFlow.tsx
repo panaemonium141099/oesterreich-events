@@ -38,6 +38,7 @@ import {
   AvatarStack,
 } from './primitives';
 import { EVENT_TZ } from '@/lib/utils/event-time';
+import { SITE_COUNTRY } from '@/lib/site-country';
 
 // fn-15.5: every motion-lib construct in this file is replaced with
 // CSS. curtainEnter → `animate-fade-in` on the overlay root. stepSlide
@@ -204,6 +205,7 @@ export function CreatePlanFlow({ open, onClose, supabase, user, friends }: Creat
         .from('events')
         .select('id, title, start_date, location_name, address, latitude, longitude, image_url, category')
         .ilike('title', `%${eventSearch}%`)
+        .eq('country', SITE_COUNTRY)
         .order('start_date', { ascending: true })
         .limit(8);
       setEventResults(data || []);

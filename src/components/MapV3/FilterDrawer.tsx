@@ -443,7 +443,7 @@ function Body({
 
       <FilterBlock label={t('blockRegion')}>
         <ChipGroup>
-          {BUNDESLAENDER.filter((bl) => bl.id !== 'at-de-ch').map((bl) => {
+          {BUNDESLAENDER.map((bl) => {
             const active = bl.id === 'all'
               ? draftBlIds.length === 0 || draftBlIds.includes('all')
               : draftBlIds.includes(bl.id);
@@ -454,19 +454,6 @@ function Body({
             );
           })}
         </ChipGroup>
-        {/* 'at-de-ch' ist eine Karten-Pseudo-Region, kein Bundesland: als
-            Chip in der Liste lieferte sie 0 Events. Deutschland und Schweiz
-            laufen über filters.atOnly wie der Schalter auf der Karte. */}
-        {/* Einzelner Schalter: Breite nach Text statt einer Rasterzelle,
-            sonst bricht das Label auf zwei Zeilen um. */}
-        <div style={{ marginTop: 12, display: 'flex' }}>
-          <Chip
-            active={draft.atOnly === false}
-            onClick={() => setDraft((d) => ({ ...d, atOnly: d.atOnly === false ? undefined : false }))}
-          >
-            {t('includeDeCh')}
-          </Chip>
-        </div>
         {districts.length > 0 && (
           <div style={{ marginTop: 12 }}>
             <ChipGroup>

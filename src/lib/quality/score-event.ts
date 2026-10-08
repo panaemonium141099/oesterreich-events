@@ -266,9 +266,9 @@ export function scoreEvent(
   }
 
   const outside = isOutsideAustria(event.latitude, event.longitude);
-  // DE/CH events are deliberately imported (country toggle) and legitimately lie
-  // outside Austria — only suppress events that are meant to be in Austria
-  // (country AT or unset = mis-geocoded).
+  // DE/CH-Events (Eventim) werden bewusst importiert, für spätere eigene
+  // .de/.ch-Seiten, und liegen legitim außerhalb Österreichs. Unterdrückt wird
+  // nur, was in Österreich liegen soll (country AT oder leer = falsch geocodiert).
   const isForeign = event.country === 'DE' || event.country === 'CH';
 
   if (outside && !isForeign) {

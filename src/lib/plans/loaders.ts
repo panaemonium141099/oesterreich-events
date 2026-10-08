@@ -2,6 +2,7 @@ import 'server-only';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
 import type { Plan, PlanWithEvents } from '@/types/plans';
 import type { Event } from '@/types/events';
+import { SITE_COUNTRY } from '@/lib/site-country';
 
 export async function listPlans(opts: {
   scope?: 'upcoming' | 'past';
@@ -37,7 +38,8 @@ export async function getPlan(id: string): Promise<PlanWithEvents | null> {
   const { data: events } = await supabase
     .from('events')
     .select('*')
-    .in('id', eventIds);
+    .in('id', eventIds)
+    .eq('country', SITE_COUNTRY);
   const eventMap = new Map<string, Event>((events ?? []).map((e) => [e.id as string, e as Event]));
   const ordered = (items ?? [])
     .map(it => eventMap.get(it.event_id))

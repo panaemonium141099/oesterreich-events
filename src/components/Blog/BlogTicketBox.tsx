@@ -24,6 +24,7 @@ import { createClient } from '@supabase/supabase-js';
 import { buildEventUrlV2 } from '@/lib/utils/slugify';
 import { EVENT_TZ } from '@/lib/utils/event-time';
 import { formatTime } from '@/lib/utils/date';
+import { SITE_COUNTRY } from '@/lib/site-country';
 
 interface TicketEvent {
   id: string;
@@ -83,6 +84,9 @@ async function fetchTicketEvents(postTitle: string): Promise<TicketEvent[]> {
     .from('events')
     .select('id, slug, title, start_date, location_name, postal_code, address, bundesland, price_min, price_text, ticket_url')
     .eq('source_name', 'Eventim')
+    // Eventim führt auch Termine in Deutschland und der Schweiz (Tour-Titel
+    // wie "Harry Potter" trafen Gießen und Bremen): vor limit(4) filtern.
+    .eq('country', SITE_COUNTRY)
     .eq('visibility', 'public')
     .in('publish_status', ['published', 'published_low_confidence'])
     .not('ticket_url', 'is', null)

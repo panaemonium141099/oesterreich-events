@@ -8,6 +8,7 @@ import { V4FestivalCard } from '@/components/Events/v4';
 import { buildEventUrlV2 } from '@/lib/utils/slugify';
 import { routing, type AppLocale } from '@/i18n/routing';
 import overridesJson from '../../../../data/festival-overrides.json';
+import { SITE_COUNTRY } from '@/lib/site-country';
 
 const OVERRIDES = overridesJson as Record<string, { imageUrl?: string | null }>;
 
@@ -68,6 +69,8 @@ export default async function FestivalsPage({
     .from('festivals')
     .select('*, parent_event:events!parent_event_id(id, slug, start_date, postal_code, address, bundesland, location_name, image_url)')
     .gte('ends_at', today)
+    // Nicht-inner-Einbettung: ein ausländisches Haupt-Event kommt als null.
+    .eq('parent_event.country', SITE_COUNTRY)
     .order('starts_at', { ascending: true });
 
   const festivals = ((data ?? []) as unknown as FestivalRow[]).map(f => {

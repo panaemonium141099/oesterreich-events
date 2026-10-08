@@ -7,6 +7,7 @@ import { useAuth } from '@/lib/supabase/auth-context';
 import { createClient } from '@/lib/supabase/client';
 import { toast } from 'sonner';
 import { EVENT_TZ } from '@/lib/utils/event-time';
+import { SITE_COUNTRY } from '@/lib/site-country';
 
 interface Memory {
   id: string;
@@ -102,9 +103,10 @@ export function MemoriesPageClient() {
     const eventIds = memoriesData.map((m: any) => m.event_id).filter(Boolean);
 
     // 3 batch queries instead of 3*N individual queries
+    // (verknüpfte DE/CH-Events zeigen wir nicht, die Erinnerung selbst bleibt)
     const [eventsResult, photosResult, participantsResult] = await Promise.all([
       eventIds.length > 0
-        ? supabase.from('events').select('id, title, start_date').in('id', eventIds)
+        ? supabase.from('events').select('id, title, start_date').in('id', eventIds).eq('country', SITE_COUNTRY)
         : Promise.resolve({ data: [] }),
       supabase.from('memory_photos').select('memory_id').in('memory_id', memIds),
       supabase.from('memory_participants')
@@ -176,6 +178,7 @@ export function MemoriesPageClient() {
         .from('events')
         .select('id, title, start_date')
         .ilike('title', `%${eventSearch}%`)
+        .eq('country', SITE_COUNTRY)
         .order('start_date', { ascending: false })
         .limit(8);
       setEventResults(data || []);

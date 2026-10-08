@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { SITE_COUNTRY } from '@/lib/site-country';
 
 export const dynamic = 'force-dynamic';
 
@@ -39,7 +40,7 @@ export async function GET(request: NextRequest) {
       )
       .eq('visibility', 'public')
       .eq('publish_status', 'published')
-      .eq('country', 'AT') // landing/featured stays Austria-only (the toggle is map-page-only)
+      .eq('country', SITE_COUNTRY)
       .gte('start_date', today)
       .gt('event_score', 30)
       .gte('quality_score', 50)

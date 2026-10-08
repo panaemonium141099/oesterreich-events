@@ -44,6 +44,7 @@ import { routing, type AppLocale } from '@/i18n/routing';
 import { bundeslandDisplayName } from '@/lib/i18n/bundesland-names';
 import { CATEGORY_MESSAGE_KEYS } from '@/lib/i18n/category-labels';
 import { dateLocaleFor } from '@/lib/i18n/date-locale';
+import { SITE_COUNTRY } from '@/lib/site-country';
 
 export const revalidate = 3600;
 // On-demand ISR — was build-time pre-rendered for all 12 themes,
@@ -141,6 +142,9 @@ const loadThemeEventsCached = unstable_cache(
       .select('id, title, slug, start_date, end_date, location_name, address, postal_code, bundesland, latitude, longitude, category, image_url, image_width, source_id, price_text, event_score')
       .eq('category', category)
       .eq('publish_status', 'published')
+      // Österreichweit heißt hier ohne Ortsfilter: nach Score standen sonst
+      // Eventim-Termine aus Deutschland und der Schweiz in den Top 48.
+      .eq('country', SITE_COUNTRY)
       .gte('start_date', today)
       .order('event_score', { ascending: false, nullsFirst: false })
       .order('start_date', { ascending: true })
@@ -149,7 +153,8 @@ const loadThemeEventsCached = unstable_cache(
     if (error || !data) return [];
     return data as ThemeEvent[];
   },
-  ['thema-events'],
+  // -v2: ohne Länderfilter gecachte Listen nicht weiter ausliefern
+  ['thema-events-v2'],
   { revalidate: 3600, tags: ['event', 'thema'] },
 );
 
@@ -170,6 +175,7 @@ const loadBundeslandCountsCached = unstable_cache(
           .eq('category', category)
           .eq('bundesland', bl)
           .eq('publish_status', 'published')
+          .eq('country', SITE_COUNTRY)
           .gte('start_date', today);
         counts[bl] = count ?? 0;
       }),

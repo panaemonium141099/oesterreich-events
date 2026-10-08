@@ -56,11 +56,10 @@ function dayToIso(day: number): string {
  * beantwortet werden? Bundesland/District/Kategorie/Datum/PriceTier/
  * Student/Family filtert der Hook selbst; alles andere (Volltext, Tags,
  * bbox/Ort, eveningOnly — Punkte haben nur Tagesgenauigkeit —, Preis-
- * Zahlenwerte, DE/CH) braucht den Server-Pfad.
+ * Zahlenwerte) braucht den Server-Pfad.
  */
 export function pointsEligible(filters: EventFilters): boolean {
   return (
-    filters.atOnly !== false &&
     !(filters.tags && filters.tags.length > 0) &&
     !filters.search &&
     !filters.bbox &&

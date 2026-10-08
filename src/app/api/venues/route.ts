@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
+import { SITE_COUNTRY } from '@/lib/site-country';
 
 // Edge-cached: s-maxage in der Response bestimmt die TTL pro URL.
 // Route bleibt automatisch dynamic wegen request.nextUrl.searchParams.
@@ -97,6 +98,7 @@ export async function GET(request: NextRequest) {
       const { data: venueIds } = await supabase
         .from('events')
         .select('venue_id')
+        .eq('country', SITE_COUNTRY)
         .not('venue_id', 'is', null);
 
       if (venueIds && venueIds.length > 0) {

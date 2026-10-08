@@ -11,6 +11,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { NextRequest } from 'next/server';
 import { viennaDayStart, viennaToday } from '@/lib/utils/event-time';
+import { SITE_COUNTRY } from '@/lib/site-country';
 
 vi.stubEnv('NEXT_PUBLIC_SUPABASE_URL', 'https://test.supabase.co');
 vi.stubEnv('SUPABASE_SERVICE_ROLE_KEY', 'test-service-role-key');
@@ -244,6 +245,8 @@ describe('Event-Pfad-Regression (unveraendert)', () => {
     await POST(makeRequest({ query: 'konzert in graz' }));
 
     expect(query.eq).toHaveBeenCalledWith('visibility', 'public');
+    // lasstreffen.at spielt nur österreichische Events aus (site-country.ts)
+    expect(query.eq).toHaveBeenCalledWith('country', SITE_COUNTRY);
     expect(query.in).toHaveBeenCalledWith('publish_status', ['published', 'published_low_confidence']);
     expect(query.eq).toHaveBeenCalledWith('bundesland', 'steiermark');
     expect(query.in).toHaveBeenCalledWith('district', ['graz (stadt)', 'graz-umgebung']);

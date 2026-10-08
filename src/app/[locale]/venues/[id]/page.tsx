@@ -11,6 +11,7 @@ import { Link } from '@/i18n/navigation';
 import { routing, type AppLocale } from '@/i18n/routing';
 import { bundeslandDisplayName } from '@/lib/i18n/bundesland-names';
 import { bilingualAlternates } from '@/lib/seo/canonical';
+import { SITE_COUNTRY } from '@/lib/site-country';
 
 export const revalidate = 3600;
 
@@ -112,6 +113,7 @@ export default async function VenueDetailPage({
       { count: 'exact' },
     )
     .eq('venue_id', id)
+    .eq('country', SITE_COUNTRY)
     .in('publish_status', ['published', 'published_low_confidence'])
     .gte('start_date', today)
     .gte('quality_score', MIN_QUALITY)
@@ -141,6 +143,7 @@ export default async function VenueDetailPage({
       const { data: venueCounts } = await (supabase.from('events') as any)
         .select('venue_id')
         .in('venue_id', candidateIds)
+        .eq('country', SITE_COUNTRY)
         .in('publish_status', ['published', 'published_low_confidence'])
         .gte('start_date', today)
         .gte('quality_score', MIN_QUALITY);

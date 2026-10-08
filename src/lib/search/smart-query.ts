@@ -99,8 +99,8 @@ export const CITIES: Record<string, DetectedLocation> = {
 /**
  * Source-of-Truth der 9 kanonischen Bundesland-IDs (fn-18.6).
  *
- * Exakt die `id`-Werte aus `src/lib/bundeslaender.ts` (ohne die
- * Pseudo-Scopes 'all'/'at-de-ch') und identisch mit den lowercase-Werten
+ * Exakt die `id`-Werte aus `src/lib/bundeslaender.ts` (ohne den
+ * Karten-Scope 'all') und identisch mit den lowercase-Werten
  * in `events.bundesland` UND `poi_activities.bundesland`. Jede
  * Bundesland-Whitelist der Smart-Suche wird hieraus gespeist — vorher
  * war die Inline-Map unvollständig (salzburg/wien fehlten).
