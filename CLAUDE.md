@@ -124,6 +124,12 @@ node / next.js
   gemeinde-config.test.ts` und `scraper-koordinaten.test.ts`. Keine
   neuen PLZ-/Koordinaten-Tabellen anlegen, keine Fix-Skripte: Fehler an der
   Quelle (Stammdaten oder Scraper-Liste) beheben.
+- **Nur Österreich (2026-10-08):** lasstreffen.at spielt ausschließlich
+  Events mit `country = SITE_COUNTRY` (`src/lib/site-country.ts`, 'AT') aus.
+  DE/CH-Events (Eventim) bleiben in der DB und im Import für spätere
+  .de/.ch-Seiten. Jede öffentliche events-Abfrage filtert das Land selbst;
+  Bundesland/Bezirk/Umkreis reichen nicht. Wächter:
+  `src/__tests__/lib/site-country-guard.test.ts` (Ausnahmen mit Begründung).
 - `src/app/page.tsx` — Landing: statische ISR-Shell (KEIN cookies()/auth im
   RSC-Pfad — Personalisierung client-seitig via `/api/me/landing` +
   `PersonalizedMatches`); Datenqueries über cookie-freien Anon-Client
