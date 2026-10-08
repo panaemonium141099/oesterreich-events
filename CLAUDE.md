@@ -243,6 +243,14 @@ npm run scrape:festival-lineups | match-artists
   PostgREST/Service-Key — Index-Migrationen liegen als eigene Datei vor und
   werden samt `ANALYZE` im Supabase-Dashboard/MCP ausgeführt (Muster:
   `20260724121000_poi_activities_indexes.sql`, `20260727091000_osm_pois_indexes.sql`).
+- API-Rechte in `public` (2026-10-08): Die Default-Privileges geben anon/
+  authenticated auf jede neue Tabelle und View ALLE Rechte, Schutz kommt nur
+  aus RLS. Ein Event-Trigger (`api_rollen_neue_objekte_absichern`) schaltet
+  deshalb bei jedem CREATE TABLE RLS ein und nimmt neuen Views die
+  Schreibrechte. Neue Tabelle, die anon lesen soll → Policy anlegen, sonst
+  liefert sie still nichts. Views laufen mit Owner-Rechten an der RLS vorbei:
+  nie Schreibrechte für anon/authenticated vergeben.
+  Migrationen: `20261008120000_api_rollen_rechte_zurueckschneiden.sql`, `20261008120100_api_rollen_neue_objekte.sql`.
 - Viator-Monetarisierung (fn-18.5) ist gebaut, aber erst scharf, wenn das
   Partner-Konto steht: `VIATOR_API_KEY` muss in BEIDE Stores (GitHub-Actions
   UND Vercel-Env). Ohne Key liefert `/api/activities/[id]/booking` nichts und
