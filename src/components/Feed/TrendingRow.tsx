@@ -7,6 +7,7 @@ import { StoriesViewer } from './StoriesViewer';
 import { EventImage } from '@/components/Events/EventImage';
 import { isUsableImageCandidate } from '@/lib/event-images';
 import { viennaToday } from '@/lib/utils/event-time';
+import { SITE_COUNTRY } from '@/lib/site-country';
 
 // Pool size for daily rotation — we randomize within the N nearest events,
 // so the user still sees local events but different ones each day.
@@ -89,6 +90,9 @@ export function TrendingRow() {
         .gte('start_date', new Date().toISOString())
         .lte('start_date', nextMonth.toISOString())
         .eq('visibility', 'public')
+        // Land auf dem Server vor dem limit, sonst füllen DE-Events die 500
+        // Plätze bzw. gewinnen mit einer deutschen Position die Distanzsortierung
+        .eq('country', SITE_COUNTRY)
         .not('latitude', 'is', null)
         .not('longitude', 'is', null)
         .not('image_url', 'is', null)

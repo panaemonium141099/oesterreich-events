@@ -7,6 +7,7 @@ import { useAuth } from '@/lib/supabase/auth-context';
 import { createClient } from '@/lib/supabase/client';
 import { EventImage } from '@/components/Events/EventImage';
 import { EVENT_TZ, hasKnownStartTime, viennaDayRange, viennaDayStart, viennaFields } from '@/lib/utils/event-time';
+import { SITE_COUNTRY } from '@/lib/site-country';
 
 interface CalendarEvent {
   id: string;
@@ -279,10 +280,13 @@ export function CalendarPageClient() {
     const { startOfMonth, endOfMonth } = monthRangeIso(currentYear, currentMonth);
 
     // Use !inner join to only return saved_events where the event still exists
+    // (und nur Events der Seite: gemerkte DE/CH-Events bleiben gespeichert,
+    // erscheinen hier aber nicht)
     const { data, error } = await supabase
       .from('saved_events')
       .select('id, event_id, events!inner(id, title, start_date, end_date, location_name, image_url, category, source_url, description)')
-      .eq('user_id', user.id);
+      .eq('user_id', user.id)
+      .eq('events.country', SITE_COUNTRY);
 
     if (error) {
       if (process.env.NODE_ENV === 'development') console.warn('fetchMyEvents error:', error.message);
@@ -323,6 +327,8 @@ export function CalendarPageClient() {
       .select('id, title, start_date, end_date, location_name, image_url, category, source_url, description')
       .gte('start_date', startOfMonth)
       .lte('start_date', endOfMonth)
+      // Land immer: mit nur einer Kategorie gäbe es sonst gar keinen Ortsfilter
+      .eq('country', SITE_COUNTRY)
       .order('start_date')
       .limit(500);
 
@@ -360,10 +366,13 @@ export function CalendarPageClient() {
       return;
     }
 
+    // Der Länderfilter auf der nicht-inner Einbettung setzt events bei
+    // DE/CH-Events auf null, der Filter unten wirft diese Zeilen dann raus.
     const { data } = await supabase
       .from('saved_events')
       .select('id, event_id, user_id, events(id, title, start_date, end_date, location_name, image_url, category, source_url, description)')
-      .in('user_id', friendIdsToFetch);
+      .in('user_id', friendIdsToFetch)
+      .eq('events.country', SITE_COUNTRY);
 
     if (data) {
       const evts = (data as unknown as (SavedEventRow & { user_id: string })[])

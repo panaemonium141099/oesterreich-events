@@ -29,6 +29,7 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { buildEventUrlV2 } from '@/lib/utils/slugify';
+import { SITE_COUNTRY } from '@/lib/site-country';
 import {
   SITEMAP_BASE_URL as BASE_URL,
   SITEMAP_URLSET_HARD_LIMIT,
@@ -92,6 +93,10 @@ export async function buildEventsShardResponse(shard: number): Promise<NextRespo
         .gte('start_date', today)
         .eq('publish_status', 'published')
         .gte('quality_score', 40)
+        // Nur Events dieser Seite (sonst ~8.500 DE/CH-Events samt /en-URL).
+        // Reiner Zeilenfilter: Shard-Fenster und Keyset-Cursor bleiben
+        // gleich, der Cursor ist weiter die letzte gelieferte id.
+        .eq('country', SITE_COUNTRY)
         .order('id', { ascending: true })
         .limit(PAGE);
 

@@ -365,8 +365,6 @@
   "MapPage": {
     "srTitle": "Event-Karte Österreich — Konzerte, Festivals, Märkte und Veranstaltungen auf Karte",
     "loadingMap": "Karte wird geladen…",
-    "atOnly": "nur Österreich",
-    "atOnlyTitle": "Nur Österreich anzeigen — aus: auch Deutschland & Schweiz",
     "loadingEvents": "Lade Events…",
     "eventsCount": "{count} Events",
     "legendTickets": "Tickets verfügbar",
@@ -411,7 +409,6 @@
     "showEvents": "{count} Events anzeigen",
     "showEventsNoCount": "Events anzeigen",
     "showEventsApprox": "ca. {count} Events anzeigen",
-    "includeDeCh": "Auch Deutschland & Schweiz",
     "dateFromAria": "Von Datum",
     "dateToAria": "Bis Datum",
     "searching": "Suche läuft …",

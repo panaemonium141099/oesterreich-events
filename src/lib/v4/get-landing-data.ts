@@ -7,6 +7,7 @@ import { MIN_TRUSTED_EVENT_IMAGE_WIDTH } from '@/lib/event-images/resolveEventIm
 import overridesJson from '../../../data/festival-overrides.json';
 import { currentSeason, titleMatchesSeason } from '@/lib/landing/seasons';
 import type { Category } from '@/types/events';
+import { SITE_COUNTRY } from '@/lib/site-country';
 
 const MUSIC_CATEGORY: Category = 'Musik';
 
@@ -352,12 +353,17 @@ async function getLandingDataInner(): Promise<{ data: LandingData; failed: strin
   // sieben verpixelte Karten. Deshalb ein zweiter Pool nur mit vermessenen
   // Bildern >= MIN_TRUSTED_EVENT_IMAGE_WIDTH, der den Hero-Slot und
   // Gleichstände gewinnt (arrangeBySharpness).
+  //
+  // Nur Events des Landes der Seite: nach Score standen sonst Eventim-
+  // Konzerte aus Deutschland (Simple Plan, Mitsubishi Electric Halle) im
+  // Wochenend-Hero. Gilt über concertsBase auch für die Konzerte.
   const weekendBase = () => supabase
     .from('events')
     .select(eventCols)
     .gte('start_date', today)
     .lte('start_date', weekendEnd)
-    .eq('publish_status', 'published');
+    .eq('publish_status', 'published')
+    .eq('country', SITE_COUNTRY);
   // Kategorie-Namen nur aus der Taxonomie: 'music'/'konzerte' gab es seit v3
   // nicht mehr, die Sektion war leer (2026-09-25).
   const concertsBase = () => weekendBase().eq('category', MUSIC_CATEGORY);
@@ -396,16 +402,25 @@ async function getLandingDataInner(): Promise<{ data: LandingData; failed: strin
     // (Start Jänner, Ende Dezember — "On the Couch", "Murszene" …) die
     // Slots; echte kommende Festivals kamen nie dran. Die Auswahl
     // (Serien-Filter + Tagesrotation) passiert unten in pickFestivals().
+    //
+    // Der Länderfilter auf der (nicht inner) Einbettung lässt das Festival
+    // stehen und setzt nur ein ausländisches parent_event auf null: die
+    // Karte verlinkt dann auf /festivals/[slug] statt auf ein Event, das
+    // diese Seite nicht ausspielt.
     withRetry('festivals', () => supabase
       .from('festivals')
       .select('*, parent_event:events!parent_event_id(id, slug, start_date, postal_code, address, bundesland, location_name, image_url)')
+      .eq('parent_event.country', SITE_COUNTRY)
       .gte('starts_at', today.split('T')[0])
       .order('starts_at', { ascending: true })
       .limit(48), failed),
-    // Admin-Pins (landing_features), nur aktive Fenster.
+    // Admin-Pins (landing_features), nur aktive Fenster. events!inner:
+    // ein gepinntes Event aus einem anderen Land fällt serverseitig weg,
+    // bevor limit(8) greift.
     withRetry('featured', () => supabase
       .from('landing_features')
       .select(`created_at, event:events!inner(${eventCols})`)
+      .eq('event.country', SITE_COUNTRY)
       .lte('starts_at', today)
       .or(`ends_at.is.null,ends_at.gt.${today}`)
       .order('created_at', { ascending: false })
@@ -416,6 +431,7 @@ async function getLandingDataInner(): Promise<{ data: LandingData; failed: strin
       .gte('start_date', today)
       .lte('start_date', seasonEnd)
       .eq('publish_status', 'published')
+      .eq('country', SITE_COUNTRY)
       .overlaps('tags', season.tags)
       .order('event_score', { ascending: false })
       .limit(40), failed),

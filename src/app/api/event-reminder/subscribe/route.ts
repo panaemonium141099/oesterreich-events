@@ -12,6 +12,7 @@ import { createClient } from '@supabase/supabase-js';
 import { sendGenericEmail } from '@/lib/email';
 import { isPlausibleEmail, reminderToken, reminderConfirmMailHtml } from '@/lib/event-reminder';
 import { publicOrigin } from '@/lib/site-url';
+import { SITE_COUNTRY } from '@/lib/site-country';
 
 export const dynamic = 'force-dynamic';
 
@@ -58,10 +59,13 @@ export async function POST(req: NextRequest) {
 
   // Event muss existieren und in der Zukunft liegen — sonst wäre die
   // Erinnerung sinnlos (und die Tabelle ein offener Spam-Endpunkt).
+  // DE/CH-Events (Eventim) sind auf lasstreffen.at unsichtbar und bekommen
+  // deshalb ebenfalls 404.
   const { data: event } = await admin
     .from('events')
     .select('id,title,start_date,publish_status')
     .eq('id', eventId)
+    .eq('country', SITE_COUNTRY)
     .maybeSingle();
   if (!event || event.publish_status !== 'published' || new Date(event.start_date) < new Date()) {
     return NextResponse.json({ error: 'Für dieses Event sind keine Erinnerungen möglich.' }, { status: 404 });

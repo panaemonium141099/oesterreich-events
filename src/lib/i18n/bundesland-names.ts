@@ -44,11 +44,10 @@ function toId(idOrName: string): BundeslandId | null {
 export function bundeslandDisplayName(idOrName: string, locale: string): string {
   const id = toId(idOrName);
   if (id) return locale === 'en' ? EN_NAMES[id] : BUNDESLAND_NAMES[id];
-  // Kein echtes Bundesland: BUNDESLAENDER kennt Pseudo-Regionen wie
-  // 'at-de-ch' ("Österreich, Deutschland, Schweiz"). Ohne diesen Fallback
-  // stünde der rohe Slug im sichtbaren Text ("Events in at-de-ch").
-  // Beide Sprachen zeigen den deutschen Namen — es sind Eigennamen von
-  // Regionen bzw. Länderlisten, für die es keine EN-Variante gibt.
+  // Kein echtes Bundesland: BUNDESLAENDER kennt auch den Karten-Scope
+  // 'all' ("Ganz Österreich"). Ohne diesen Fallback stünde der rohe Slug
+  // im sichtbaren Text ("Events in all"). Beide Sprachen zeigen hier den
+  // deutschen Namen.
   return BUNDESLAENDER.find(b => b.id === idOrName)?.name ?? idOrName;
 }
 

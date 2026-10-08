@@ -59,7 +59,8 @@ export default async function InterceptedEventPage({
   // Sheet doesn't try to be clever with redirects (see header comment).
   // Treat anything not directly viewable as 404 inside the sheet — the
   // user can refresh to fall back to the full page handler which has
-  // the redirect chains.
+  // the redirect chains. Events aus Deutschland oder der Schweiz liefern
+  // die Loader gar nicht erst (Länderfilter), sie enden hier als 404.
   if (
     !event ||
     event.publish_status === 'duplicate' ||

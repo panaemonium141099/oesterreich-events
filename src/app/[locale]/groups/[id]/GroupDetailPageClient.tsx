@@ -42,6 +42,7 @@ import { Pinboard } from '@/components/Planer/detail/Pinboard';
 import { PlanSettingsDrawer } from '@/components/Planer/detail/PlanSettingsDrawer';
 import { EVENT_TZ } from '@/lib/utils/event-time';
 import { formatTime as formatStartTime } from '@/lib/utils/date';
+import { SITE_COUNTRY } from '@/lib/site-country';
 
 // fn-15.5: motion-lib staggerContainer/riseItem/EASE_OUT_EXPO replaced
 // with the global `.stagger-children` CSS helper and plain divs. The
@@ -216,6 +217,7 @@ export function GroupDetailPageClient() {
         .from('events')
         .select('id, title, start_date, end_date, location_name, image_url, source_url, category')
         .eq('id', g.linked_event_id)
+        .eq('country', SITE_COUNTRY)
         .single();
       if (evt) setLinkedEvent(evt);
     }

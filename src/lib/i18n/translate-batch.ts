@@ -31,6 +31,7 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { translateViaGemini } from './translate-event';
 import { translateActivityDescription } from './translate-activity';
+import { SITE_COUNTRY } from '@/lib/site-country';
 
 /**
  * Mindest-Qualität. Identisch zum Sitemap-Filter in
@@ -158,6 +159,8 @@ export async function fetchCandidates(
     .is('title_en', null)
     .gte('start_date', today)
     .eq('publish_status', 'published')
+    // Nur, was die Seite ausspielt: DE/CH-Events kosten sonst Kontingent.
+    .eq('country', SITE_COUNTRY)
     .gte('quality_score', MIN_QUALITY_SCORE)
     .not('title', 'is', null)
     .order('start_date', { ascending: true })

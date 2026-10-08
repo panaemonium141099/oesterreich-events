@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { SITE_COUNTRY } from '@/lib/site-country';
 
 if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
   throw new Error('SUPABASE_SERVICE_ROLE_KEY is required — refusing to fall back to anon key which bypasses RLS');
@@ -25,7 +26,9 @@ export async function GET(
     // lösen wir per UUID-Range-Scan über den PK-Index auf (uuid-Ordnung
     // = Byte-Ordnung = Hex-Präfix-Ordnung). Volle UUIDs wie gehabt.
     const shortId = /^[0-9a-f]{12}$/i.test(id) ? id.toLowerCase() : null;
-    const query = supabase.from('events').select('*');
+    // Länderfilter auf dem gemeinsamen Builder: DE/CH-Events (Eventim)
+    // bleiben in der DB, liefern hier aber in beiden Zweigen 404.
+    const query = supabase.from('events').select('*').eq('country', SITE_COUNTRY);
     const { data: event, error } = shortId
       ? await query
           .gte('id', `${shortId.slice(0, 8)}-${shortId.slice(8, 12)}-0000-0000-000000000000`)

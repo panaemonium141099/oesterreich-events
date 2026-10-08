@@ -23,6 +23,7 @@ import {
 } from '@/lib/email';
 import { reminderToken, reminderMailHtml } from '@/lib/event-reminder';
 import { EVENT_TZ } from '@/lib/utils/event-time';
+import { SITE_COUNTRY } from '@/lib/site-country';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
@@ -114,6 +115,8 @@ async function processWindow(
   //    the parent; publish_status is added as an AND predicate below.
   // publish_status ist seit 2026-04-29 NOT NULL DEFAULT 'published' →
   // kein OR IS NULL nötig; .in() statt .or() für bessere Index-Nutzung.
+  // Nur Events der Seite: gemerkte oder gematchte DE/CH-Events (Eventim)
+  // bleiben in der Tabelle, bekommen aber keine Erinnerung mehr.
   const { data: savedRows } = await supabase
     .from('saved_events')
     .select(`
@@ -122,7 +125,8 @@ async function processWindow(
     `)
     .gte('events.start_date', windowStart)
     .lt('events.start_date', windowEnd)
-    .in('events.publish_status', ['published', 'published_low_confidence']);
+    .in('events.publish_status', ['published', 'published_low_confidence'])
+    .eq('events.country', SITE_COUNTRY);
 
   // 2. Find artist-matched events in the window (same filter).
   const { data: matchedRows } = await supabase
@@ -133,7 +137,8 @@ async function processWindow(
     `)
     .gte('events.start_date', windowStart)
     .lt('events.start_date', windowEnd)
-    .in('events.publish_status', ['published', 'published_low_confidence']);
+    .in('events.publish_status', ['published', 'published_low_confidence'])
+    .eq('events.country', SITE_COUNTRY);
 
   // 3. Build unified target list (deduplicate by user_id + event_id)
   const targetMap = new Map<string, ReminderTarget>();
@@ -334,6 +339,8 @@ async function processAnonEmailReminders(supabase: SupabaseClient<any>, now: Dat
       .contains('windows', [win.key])
       .gte('events.start_date', from.toISOString())
       .lt('events.start_date', to.toISOString())
+      // Nur Events der Seite, wie bei gemerkten Events oben
+      .eq('events.country', SITE_COUNTRY)
       .limit(100);
     if (error) {
       console.error(`[cron/send-reminders] anon ${win.col} query failed:`, error);

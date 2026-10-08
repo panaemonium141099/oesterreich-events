@@ -21,12 +21,15 @@
  */
 import type { Event, EventFilters } from '@/types/events';
 
+// v7: die Seite zeigt nur noch österreichische Events. Der frühere Schalter
+// für Deutschland und die Schweiz stand nicht im filterKey, v6-Einträge
+// können deshalb DE/CH-Events enthalten und dürfen nicht mehr gelesen werden.
 // v6: bumped when the filter contract switched from single-value
 // bundesland/district/category/priceTier to multi-select arrays. The
 // filterKey now stringifies sorted arrays so a cached "Steiermark only"
 // hit can't poison a "Steiermark + Wien" lookup. v5: post-district
 // normalisation. v4: slim payload. v3: full events.
-const CACHE_VERSION = 'v6';
+const CACHE_VERSION = 'v7';
 const TTL_MS = 10 * 60 * 1000; // 10 minutes
 // 8000 slimmed events ≈ 3-4MB JSON. Stays well under the 5MB sessionStorage
 // quota Safari enforces, with headroom for the parser overhead. The list

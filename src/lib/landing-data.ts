@@ -27,6 +27,7 @@ import { STADT_TO_GEMEINDE } from './hubs/city-hubs';
 import { bundeslandDisplayName } from './i18n/bundesland-names';
 import { CATEGORY_MESSAGE_KEYS } from './i18n/category-labels';
 import type { AppLocale } from '@/i18n/routing';
+import { SITE_COUNTRY } from '@/lib/site-country';
 
 const BASE_URL = 'https://lasstreffen.at';
 
@@ -162,11 +163,10 @@ export async function loadBundeslandPage(
   let intro: LandingPageData['intro'];
   if (!category && !timeFilter) {
     const tIntro = (await getTranslations({ locale, namespace: 'HubIntros' })) as Translator;
-    // has()-Guard: NICHT jeder gueltige Bundesland-Slug hat ein kuratiertes
-    // Intro — `at-de-ch` ist eine Pseudo-Region (src/lib/bundeslaender.ts) und
-    // war schon im alten BUNDESLAND_INTROS-Objekt nicht enthalten. Ohne den
-    // Guard rendert next-intl den rohen Key ("HubIntros.at-de-ch.lead") als
-    // sichtbaren Text. Fehlendes Intro = gar kein Intro-Block, exakt wie vorher.
+    // has()-Guard: ein gueltiger Bundesland-Slug ohne kuratiertes Intro
+    // (etwa ein neu aufgenommener Eintrag in src/lib/bundeslaender.ts) darf
+    // nicht den rohen Key ("HubIntros.<slug>.lead") als sichtbaren Text
+    // rendern. Fehlendes Intro = gar kein Intro-Block, exakt wie vorher.
     if (tIntro.has(`${bundesland}.lead`)) {
       intro = {
         lead: tIntro(`${bundesland}.lead`),
@@ -314,7 +314,10 @@ async function queryEvents(
   let query = (supabase.from('events') as any).select(
     'id, title, description, start_date, end_date, location_name, address, bundesland, latitude, longitude, category, image_url, price_text, price_min, price_max, event_score, quality_score, venue_id',
     { count: 'estimated' },
-  );
+  )
+    // Nicht nur über das Bundesland: in Prod tragen 7 DE/CH-Zeilen ein
+    // österreichisches (Eventim/oeticket, z. B. PLZ 76530 Baden-Baden).
+    .eq('country', SITE_COUNTRY);
 
   // Only published, quality-gated, future events.
   // publish_status ist seit 2026-04-29 NOT NULL DEFAULT 'published', kein OR IS NULL nötig.

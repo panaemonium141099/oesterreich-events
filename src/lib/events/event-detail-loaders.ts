@@ -10,10 +10,21 @@
  * resolution. Keeping the loaders in one module guarantees they don't
  * drift, and the unstable_cache tags here are shared so a single
  * `revalidateTag('event')` invalidates both surfaces at once.
+ *
+ * Nur Österreich: Jede Abfrage, die für einen Besucher ein Event auflöst
+ * (Kurz-ID, Slug+Tag, Slug allein, Nachfolger), filtert auf SITE_COUNTRY.
+ * Ein Event aus Deutschland oder der Schweiz kommt so gar nicht erst bei
+ * der Seite an: Vollseite, generateMetadata und Modal enden im 404, die
+ * Lazy-EN-Übersetzung läuft nicht, und eine Dublette kann nicht auf ein
+ * ausländisches Primary weiterleiten. Der Filter steht in der Abfrage
+ * selbst, nicht als Prüfung danach im Aufrufer: sonst gewänne bei gleichem
+ * Slug eine DE-Zeile per event_score das `limit(1)`, und die AT-Zeile käme
+ * nie an.
  */
 import { unstable_cache } from 'next/cache';
 import { createClient } from '@supabase/supabase-js';
 import type { Event } from '@/types/events';
+import { SITE_COUNTRY } from '@/lib/site-country';
 import { extractShortId, buildEventUrlV2 } from '@/lib/utils/slugify';
 import type { FriendAttendee, LineupAct } from '@/components/Events/EventDetailV2';
 import { uniqueSourceRows, type DuplicateSourceRow } from '@/lib/events/also-listed-sources';
@@ -48,8 +59,13 @@ export const getEventByShortId = unstable_cache(
   async (slugParam: string): Promise<Event | null> => {
     if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(slugParam)) {
       const { data, error } = await supabase
-        .from('events').select('*').eq('id', slugParam).single();
-      if (!error && data) return data as Event;
+        .from('events').select('*').eq('id', slugParam)
+        .eq('country', SITE_COUNTRY).single();
+      // Eine volle UUID meint genau dieses Event. Kein Rückfall auf den
+      // 8-Zeichen-Präfix: seit dem Länderfilter verfehlt jede DE/CH-UUID,
+      // und bei einer Präfix-Kollision (Prod: 1 Fall) leitete die Seite
+      // sonst auf ein fremdes österreichisches Event weiter.
+      return !error && data ? (data as Event) : null;
     }
     const shortId = slugParam.slice(0, 8);
 
@@ -68,11 +84,14 @@ export const getEventByShortId = unstable_cache(
     const rangeEnd = `${shortId}-ffff-ffff-ffff-ffffffffffff`;
     const { data, error } = await supabase
       .from('events').select('*')
-      .gte('id', rangeStart).lte('id', rangeEnd).limit(1).single();
+      .gte('id', rangeStart).lte('id', rangeEnd)
+      .eq('country', SITE_COUNTRY).limit(1).single();
     if (error || !data) return null;
     return data as Event;
   },
-  ['event-detail'],
+  // -v2: seit dem Länderfilter liefert der Loader für DE/CH null; ohne
+  // neuen Schlüssel hielte der Cache die alten Zeilen bis zum Ablauf.
+  ['event-detail-v2'],
   { revalidate: 3600, tags: ['event'] },
 );
 
@@ -97,13 +116,14 @@ export const getEventBySlugAndDate = unstable_cache(
     const { data, error } = await supabase
       .from('events').select('*')
       .eq('slug', slug).gte('start_date', dayStart).lt('start_date', dayEnd)
+      .eq('country', SITE_COUNTRY)
       .neq('publish_status', 'duplicate')
       .order('event_score', { ascending: false, nullsFirst: false })
       .limit(1);
     if (error || !data || data.length === 0) return null;
     return data[0] as Event;
   },
-  ['event-by-slug-date'],
+  ['event-by-slug-date-v2'],
   // 300s aligns with the page-level ISR stale-time. Was 3600 but that meant
   // a TVB correction synced into Supabase needed up to an hour to appear
   // even after ISR revalidated, because the page got the stale row from
@@ -124,6 +144,7 @@ export const getEventBySlugOnly = unstable_cache(
     const { data, error } = await supabase
       .from('events').select('*')
       .eq('slug', slug).gte('start_date', today)
+      .eq('country', SITE_COUNTRY)
       .eq('publish_status', 'published')
       .order('event_score', { ascending: false, nullsFirst: false })
       .limit(1);
@@ -141,12 +162,13 @@ export const getEventBySlugOnly = unstable_cache(
     const { data: past } = await supabase
       .from('events').select('*')
       .eq('slug', slug).lt('start_date', today)
+      .eq('country', SITE_COUNTRY)
       .eq('publish_status', 'published')
       .order('start_date', { ascending: false })
       .limit(1);
     return past && past.length > 0 ? (past[0] as Event) : null;
   },
-  ['event-by-slug-only'],
+  ['event-by-slug-only-v2'],
   // 300s — same reason as event-by-slug-date above.
   { revalidate: 300, tags: ['event'] },
 );
@@ -160,6 +182,15 @@ export const getEventBySlugOnly = unstable_cache(
  * der Lookups etwas und die frueher veroeffentlichte URL lief in ein 404
  * statt per 308 zum Primary. Diese Stufe laeuft nur, wenn beide anderen
  * leer sind, und nutzt denselben Index-Pfad (idx_events_slug + Tagesfenster).
+ *
+ * Bewusst ohne Länderfilter: Diese Stufe liefert nur Dubletten, und die
+ * rendert keine Route. Die Vollseite leitet sie zum Primary weiter, das
+ * über den gefilterten getEventByShortId kommt (ausländisches Primary
+ * ergibt 404), Modal und generateMetadata sperren Dubletten ohnehin. So
+ * behält die Slug-URL (/events/{plz-ort}/{datum}/{slug}) einer DE-Dublette
+ * eines österreichischen Events ihren 308. Kurz-ID-URLs ausländischer
+ * Zeilen (ein- und zweiteilig) laufen über den gefilterten
+ * getEventByShortId und enden im 404.
  */
 export const getDuplicateBySlugAndDate = unstable_cache(
   async (slug: string, date: string): Promise<Event | null> => {
@@ -436,6 +467,9 @@ export function buildBundeslandHref(bundesland: string | null): string | null {
  *      über title und ist auf 1 Zeile begrenzt.
  *
  * Beide Zweige sind indexiert und laufen nur auf vergangenen Detailseiten.
+ * Nur österreichische Ausgaben: Tourneen (etwa das Harry-Potter-Konzert)
+ * haben denselben Slug auch in Deutschland, die vergangene Seite
+ * verlinkte sonst eine Ausgabe, die hier 404 liefert.
  */
 export const getSuccessorEvent = unstable_cache(
   async (
@@ -450,6 +484,7 @@ export const getSuccessorEvent = unstable_cache(
         .from('events').select('*')
         .eq('slug', slug).gt('start_date', nowIso)
         .eq('publish_status', 'published').eq('visibility', 'public')
+        .eq('country', SITE_COUNTRY)
         .order('start_date', { ascending: true })
         .limit(1);
       if (data && data.length > 0) return data[0] as Event;
@@ -465,10 +500,11 @@ export const getSuccessorEvent = unstable_cache(
       .eq('location_name', locationName)
       .gt('start_date', nowIso)
       .eq('publish_status', 'published').eq('visibility', 'public')
+      .eq('country', SITE_COUNTRY)
       .order('start_date', { ascending: true })
       .limit(1);
     return data && data.length > 0 ? (data[0] as Event) : null;
   },
-  ['event-successor'],
+  ['event-successor-v2'],
   { revalidate: 3600, tags: ['event'] },
 );

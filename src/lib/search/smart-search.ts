@@ -64,6 +64,7 @@ import {
   VIBES,
   OCCASIONS,
 } from '@/lib/category-classifier/enrichment-taxonomy';
+import { SITE_COUNTRY } from '@/lib/site-country';
 
 const INTENT_MODEL = 'gemini-2.5-flash';
 /** Kandidaten pro Retrieval-Pfad — klein genug für die Micro-Instanz,
@@ -197,10 +198,14 @@ interface HardFilters {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function baseQuery(supabase: SupabaseClient<any>, hard: HardFilters) {
+  // Land IMMER mitfiltern: Anfragen ohne erkannten Ort (und der
+  // Fallback) haben sonst weder Land noch Bundesland als Filter, und
+  // DE/CH-Events aus dem Eventim-Feed (bundesland NULL) würden Kandidaten.
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let q = (supabase.from('events') as any)
     .select(EVENT_COLS)
     .eq('visibility', 'public')
+    .eq('country', SITE_COUNTRY)
     .in('publish_status', ['published', 'published_low_confidence'])
     .gte('start_date', hard.afterIso);
   if (hard.beforeIso) q = q.lte('start_date', hard.beforeIso);

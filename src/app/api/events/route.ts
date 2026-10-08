@@ -4,6 +4,7 @@ import type { EventFilters } from '@/types/events';
 import { POSTGREST_MAX_ROWS } from '@/lib/db/fetch-all';
 import { resolveCategoryParam } from '@/lib/category-classifier/taxonomy';
 import { computeStudentScore, isFreeEvent, MIN_STUDENT_SCORE } from '@/lib/utils/student-score';
+import { SITE_COUNTRY } from '@/lib/site-country';
 
 // Edge-cached: s-maxage in der Response bestimmt die TTL pro URL.
 // Route bleibt automatisch dynamic wegen request.nextUrl.searchParams.
@@ -270,14 +271,6 @@ export async function GET(request: NextRequest) {
   // total response time on warm cache.
   const slimMode = searchParams.get('slim') === 'true';
 
-  // Country filter (default Austria-only). The /map "nur Österreich" toggle off
-  // sends countries=AT,DE,CH to include Eventim's German/Swiss events (all sources).
-  const countriesParam = searchParams.get('countries');
-  const parsedCountries = countriesParam
-    ? countriesParam.split(',').map(s => s.trim().toUpperCase()).filter(c => ['AT', 'DE', 'CH'].includes(c))
-    : [];
-  const countryFilter = parsedCountries.length > 0 ? parsedCountries : ['AT'];
-
   try {
     // Build the query — use untyped Supabase client (no Database generic),
     // so the chained filter methods return Record<string, unknown> rows
@@ -337,10 +330,12 @@ export async function GET(request: NextRequest) {
     const today = new Date().toISOString().slice(0, 10);
     query = query.gte('start_date', today);
 
-    // Country filter (default Austria-only). The /map "nur Österreich" toggle
-    // sends countries=AT,DE,CH to include Eventim's DE/CH events (all sources).
-    // Replaces the old hardcoded AT bbox — `country` is exact + indexed.
-    query = query.in('country', countryFilter);
+    // Nur Events dieser Seite (SITE_COUNTRY). Die DE/CH-Events aus dem
+    // Eventim-Feed bleiben in der DB, erscheinen hier aber nie; ein
+    // ?countries=-Parameter wird ignoriert. Bundesland, Bezirk oder bbox
+    // schließen sie nicht aus (Prod 2026-10-07: 1.007 DE-Events im
+    // österreichischen Rechteck, 36 CH-Events mit österreichischem Bezirk).
+    query = query.eq('country', SITE_COUNTRY);
     // Map-centric: only geocoded events (the old bbox also dropped NULL/0 coords;
     // verified 0 non-null AT events fell outside the old bbox). The viewport bbox,
     // when present, narrows further below.
@@ -451,7 +446,7 @@ export async function GET(request: NextRequest) {
     // RPC returns matching ids; we then narrow with id-IN. Cap on
     // the IN-list because PostgREST URL has a 16 KB header cap — UUIDs
     // are 37 chars so 250 ids ≈ 9 KB plus the rest of the filter URL.
-    // The RPC gets the list's own base filters (future, AT/countries,
+    // The RPC gets the list's own base filters (future, SITE_COUNTRY,
     // coordinates) and orders by start_date, id: the cap must only count
     // showable events and always cut the same way. Without that it cut 250
     // arbitrary ids incl. past events and identical requests returned
@@ -470,7 +465,9 @@ export async function GET(request: NextRequest) {
             q: sanitizedSearch,
             max_ids: SEARCH_MAX_IDS,
             from_date: today,
-            countries: countryFilter,
+            // Nie weglassen: countries=NULL heißt in der RPC "alle Länder",
+            // DE/CH-Treffer würden dann Plätze der 250-ID-Kappe belegen.
+            countries: [SITE_COUNTRY],
             require_coords: true,
           },
         );
@@ -835,6 +832,9 @@ export async function GET(request: NextRequest) {
         unmappedQuery = unmappedQuery.in('publish_status', ['published', 'published_low_confidence']);
       }
       unmappedQuery = unmappedQuery.gte('start_date', today);
+      // Gleicher Länderfilter wie die Hauptabfrage: ohne ihn kamen hier
+      // DE/CH-Events ohne Koordinaten mit (Prod: 1.307 DE, 30 CH).
+      unmappedQuery = unmappedQuery.eq('country', SITE_COUNTRY);
       // Match events where either coordinate is NULL
       unmappedQuery = unmappedQuery.or('latitude.is.null,longitude.is.null');
 

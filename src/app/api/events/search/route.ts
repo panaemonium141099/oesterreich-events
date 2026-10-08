@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { SITE_COUNTRY } from '@/lib/site-country';
 
 if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
   throw new Error('SUPABASE_SERVICE_ROLE_KEY is required');
@@ -36,6 +37,8 @@ export async function GET(request: NextRequest) {
       .from('events')
       .select('id, title, start_date, location_name, image_url, category')
       .eq('visibility', 'public')
+      // Nur Events dieser Seite, DE/CH-Events (Eventim) erscheinen nicht.
+      .eq('country', SITE_COUNTRY)
       .gte('start_date', today)
       .or(`title.ilike.%${sanitized}%,location_name.ilike.%${sanitized}%`)
       .order('start_date', { ascending: true })

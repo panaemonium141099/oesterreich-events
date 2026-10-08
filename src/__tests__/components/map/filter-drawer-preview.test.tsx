@@ -68,15 +68,10 @@ describe('FilterDrawer: Vorschauzahl gilt für den Entwurf', () => {
 });
 
 describe('FilterDrawer: Region', () => {
-  it('bietet die Karten-Pseudo-Region nicht als Bundesland an', () => {
+  it('bietet keine Option für Deutschland oder die Schweiz an', () => {
     setup(undefined);
-    expect(screen.queryByRole('button', { name: 'Österreich, Deutschland, Schweiz' })).toBeNull();
-  });
-
-  it('Deutschland & Schweiz laufen über atOnly', () => {
-    const { onFiltersChange } = setup(undefined);
-    fireEvent.click(first(screen.getAllByRole('button', { name: 'Auch Deutschland & Schweiz' })));
-    fireEvent.click(first(screen.getAllByRole('button', { name: '999 Events anzeigen' })));
-    expect(onFiltersChange).toHaveBeenCalledWith(expect.objectContaining({ atOnly: false }));
+    // Deckt den früheren Chip "Auch Deutschland & Schweiz" und die
+    // Pseudo-Region "Österreich, Deutschland, Schweiz" ab.
+    expect(screen.queryAllByRole('button', { name: /Deutschland|Schweiz/i })).toHaveLength(0);
   });
 });

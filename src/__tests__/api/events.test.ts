@@ -175,7 +175,9 @@ describe('GET /api/events', () => {
     expect(query.gte).toHaveBeenCalledWith('start_date', today);
   });
 
-  it('passes explicit countries to search_event_ids', async () => {
+  // lasstreffen.at ist rein österreichisch: der frühere Karten-Schalter
+  // schickte countries=AT,DE,CH, die API ignoriert den Parameter jetzt.
+  it('ignores countries=AT,DE,CH: search stays Austria-only', async () => {
     const query = createChainableQuery({ data: [], error: null, count: 0 });
     mockFrom.mockReturnValue(query);
 
@@ -183,8 +185,10 @@ describe('GET /api/events', () => {
 
     expect(mockRpc).toHaveBeenCalledWith(
       'search_event_ids',
-      expect.objectContaining({ countries: ['AT', 'DE', 'CH'] }),
+      expect.objectContaining({ countries: ['AT'] }),
     );
+    expect(query.eq).toHaveBeenCalledWith('country', 'AT');
+    expect(query.in).not.toHaveBeenCalledWith('country', expect.anything());
   });
 
   it('skips search filter when sanitized input is empty', async () => {

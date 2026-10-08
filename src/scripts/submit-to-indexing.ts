@@ -85,6 +85,7 @@ function sleep(ms: number): Promise<void> {
 // IndexNow + Google Indexing API now receive canonical 3-segment URLs with
 // date, no legacy shortId-suffix form anymore.
 import { buildEventUrlV2 } from '@/lib/utils/slugify';
+import { SITE_COUNTRY } from '@/lib/site-country';
 
 // ─── Event fetch ─────────────────────────────────────────────────────────
 interface EventRow {
@@ -114,6 +115,9 @@ async function fetchCandidates(): Promise<EventRow[]> {
     .eq('publish_status', 'published')
     .gte('quality_score', 60)  // higher bar than sitemap (40); we don't want
                                  // to spend indexing API quota on borderline rows
+    // Nur Events dieser Seite: DE/CH-Events (Eventim) spielt lasstreffen.at
+    // nicht aus, eine Meldung an Google/IndexNow wäre eine tote URL.
+    .eq('country', SITE_COUNTRY)
     .order('quality_score', { ascending: false })
     .order('id', { ascending: true });
 

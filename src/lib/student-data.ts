@@ -22,6 +22,7 @@ import type { FilterChip } from '@/components/Landing/FilterChips';
 import type { LinkGroup } from '@/components/Landing/InternalLinks';
 import { CATEGORY_MESSAGE_KEYS } from './i18n/category-labels';
 import type { AppLocale } from '@/i18n/routing';
+import { SITE_COUNTRY } from '@/lib/site-country';
 
 /**
  * fn-17: Übersetzer-Handle wie von `getTranslations()` geliefert. Die
@@ -101,6 +102,7 @@ export async function loadStudentIndex(): Promise<StudentIndexData> {
     (supabase.from('events') as any)
       .select('id, title, start_date, end_date, location_name, image_url, category, price_min, price_text, event_score, quality_score, bundesland, address')
       .in('publish_status', ['published', 'published_low_confidence'])
+      .eq('country', SITE_COUNTRY)
       .gte('start_date', todayRange.fromIso)
       .lt('start_date', todayRange.toIso)
       .gte('quality_score', MIN_QUALITY)
@@ -236,6 +238,7 @@ async function loadCandidates(
       'id, title, description, start_date, end_date, location_name, address, bundesland, latitude, longitude, category, image_url, price_text, price_min, price_max, event_score, quality_score, venue_id',
     )
     .in('publish_status', ['published', 'published_low_confidence'])
+    .eq('country', SITE_COUNTRY)
     .gte('start_date', today)
     .gte('quality_score', MIN_QUALITY)
     .eq('bundesland', city.bundesland);

@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { FeedEventMiniCard } from './FeedEventMiniCard';
 import { EventImage } from '@/components/Events/EventImage';
+import { SITE_COUNTRY } from '@/lib/site-country';
 
 interface CreatePostProps {
   userId: string;
@@ -66,6 +67,7 @@ export function CreatePost({ userId, userAvatar, userInitial, onPostCreated }: C
         .select('id, title, start_date, location_name, image_url, category')
         .ilike('title', `%${eventQuery}%`)
         .gte('start_date', new Date().toISOString())
+        .eq('country', SITE_COUNTRY)
         .order('start_date', { ascending: true })
         .limit(5);
       setEventResults(data || []);
