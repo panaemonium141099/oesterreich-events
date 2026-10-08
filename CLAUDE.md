@@ -239,6 +239,14 @@ npm run scrape:festival-lineups | match-artists
   Ende. Mehr als 1000 Zeilen nur über `fetchAllRows`/`forEachPage`
   (`src/lib/db/fetch-all.ts`); Wächter `postgrest-row-cap.test.ts`. So lief
   der Dedup bis 2026-09-24 nur über vergangene Tage.
+- Funktionen in public sind seit 2026-10-08 standardmäßig NICHT öffentlich
+  (Default-Privileges von supabase_admin und postgres, Migration
+  `20261008130000_funktionen_execute_rechte.sql`): neue oder per DROP neu
+  angelegte Funktionen bekommen EXECUTE nur für Eigentümer, postgres und
+  service_role. Öffentliche RPCs brauchen ein ausdrückliches
+  `GRANT EXECUTE ... TO anon, authenticated`. Sperren immer
+  `FROM PUBLIC, anon, authenticated` zusammen, einzeln greift keins.
+  Bedarf je Funktion: `docs/ops/funktionsrechte-prod-stand-2026-10-08.md`.
 - Maintenance-SQL (`ANALYZE`, `CREATE INDEX` nach Bulk-Load) geht NICHT über
   PostgREST/Service-Key — Index-Migrationen liegen als eigene Datei vor und
   werden samt `ANALYZE` im Supabase-Dashboard/MCP ausgeführt (Muster:
