@@ -21,7 +21,7 @@ import { canonicalizeIds } from '@/lib/pipeline/dedup-scorer';
 import { dedupDay, pairKey } from '@/lib/pipeline/dedup-engine';
 import { planDedup, releaseStatus, checkSafetyValve, dropDependentsOfFailedReleases, type DedupPlan } from '@/lib/pipeline/dedup-plan';
 import { isPlausibleEventDay, planningStartDay, viennaDayBoundsUtc, viennaDayOf } from '@/lib/pipeline/dedup-evidence';
-import { isGarbageRow, namedPageKey, type GarbageRowInput } from '@/lib/pipeline/garbage-filter';
+import { isGarbageRow, namedPageKeys, type GarbageRowInput } from '@/lib/pipeline/garbage-filter';
 import { staleVersionIds } from '@/lib/pipeline/dedup-cluster';
 import { fetchAllRows, forEachPage } from '@/lib/db/fetch-all';
 import { reportStepReason } from '@/lib/pipeline/step-reason';
@@ -118,10 +118,7 @@ async function scanGarbage(): Promise<string[]> {
     (page) => { rows.push(...page); },
     { label: 'dedup: Garbage-Scan' },
   );
-  for (const r of rows) {
-    const key = namedPageKey(r);
-    if (key) NAMED_PAGES.add(key);
-  }
+  for (const r of rows) for (const key of namedPageKeys(r)) NAMED_PAGES.add(key);
   const garbageIds = rows.filter(r => r.publish_status !== 'duplicate' && isGarbage(r)).map(r => r.id);
   STALE_IDS = staleVersionIds(rows as unknown as EventRow[]);
   console.log(`  ${STALE_IDS.size} ältere Fassungen von Event-Seiten (gelten wie verwaist)`);

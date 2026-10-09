@@ -55,7 +55,7 @@ import { generateFingerprint } from '@/lib/dedup/fingerprint';
 import { generateEventSlug } from '@/lib/utils/slugify';
 import { scoreAndAdmit } from '@/lib/quality/score-event';
 import { isContactHandleTitle } from '@/lib/scrapers/detail-extract/validate';
-import { isGarbageRow, namedPageKey } from '@/lib/pipeline/garbage-filter';
+import { isGarbageRow, namedPageKeys } from '@/lib/pipeline/garbage-filter';
 import { extractDimsFromUrl } from '@/lib/event-images/extract-dims-from-url';
 import {
   validateAndUpgradeImageUrl,
@@ -1054,7 +1054,7 @@ export function filterValidEvents(events: ScrapedEvent[]): {
   let rejected = 0;
   const rejectionReasons: Record<string, number> = {};
   // Seiten, die im selben Lauf eine Zeile mit echtem Namen liefern (isGarbageRow).
-  const namedPages = new Set(events.map(e => namedPageKey(e)).filter((k): k is string => !!k));
+  const namedPages = new Set(events.flatMap(e => namedPageKeys(e)));
 
   const valid = events.filter(e => {
     // Listing-Parser greifen bei Kontaktbloecken den mailto:/tel:-Anchor

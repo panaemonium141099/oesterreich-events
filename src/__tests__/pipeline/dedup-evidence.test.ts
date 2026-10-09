@@ -279,14 +279,22 @@ describe('staleVersionIds', () => {
   // 10.10. auf den 17.10.; die alte Zeile derselben Seite wurde freigegeben.
   const row = (o: Partial<EventRow>) => ({ id: 'x', source_name: 'q', source_id: 'x', title: 'Radlgruten Challenge',
     source_url: 'https://www.oberdrauburg.at/veranstaltung/radlgruten', last_seen_at: '2026-10-08T07:00:00Z', ...o }) as EventRow;
-  it('ältere Zeile einer Seite mit nur einem Event ist veraltet, auch an einem anderen Tag', () => {
-    const ids = staleVersionIds([row({ id: 'alt', source_id: 'alt', last_seen_at: '2026-09-21T07:00:00Z', start_date: '2026-10-10T08:00:00Z' }),
+  it('ältere Zeile derselben Seite am selben Tag ist veraltet (Titel korrigiert)', () => {
+    const ids = staleVersionIds([row({ id: 'alt', source_id: 'alt', title: '13 Dez. Radlgruten Challenge 13.12.2026', last_seen_at: '2026-09-21T07:00:00Z', start_date: '2026-10-17T08:00:00Z' }),
       row({ id: 'neu', source_id: 'neu', start_date: '2026-10-17T08:00:00Z' })]);
     expect([...ids]).toEqual(['alt']);
   });
+
+  // Prod 2026-10-09: 1.447 Zeilen an anderen Tagen waren meist echte spätere
+  // Termine von Serien-Seiten, die nur den nächsten Termin zeigen.
+  it('an einem anderen Tag nicht veraltet (Serien-Seite zeigt nur den nächsten Termin)', () => {
+    expect(staleVersionIds([row({ id: 'alt', source_id: 'alt', last_seen_at: '2026-09-21T07:00:00Z', start_date: '2026-10-10T08:00:00Z' }),
+      row({ id: 'neu', source_id: 'neu', start_date: '2026-10-17T08:00:00Z' })]).size).toBe(0);
+  });
   it('Seite mit mehreren Events (Veranstalter-Website) und Serienzeilen: nichts veraltet', () => {
-    expect(staleVersionIds([row({ id: 'a', source_id: 'a', title: 'Konzert A', last_seen_at: '2026-09-21T07:00:00Z' }),
-      row({ id: 'b', source_id: 'b', title: 'Konzert B' }), row({ id: 'c', source_id: 'c', title: 'Konzert C' })]).size).toBe(0);
+    const day = { start_date: '2026-10-17T08:00:00Z' };
+    expect(staleVersionIds([row({ id: 'a', source_id: 'a', title: 'Jazzbrunch', last_seen_at: '2026-09-21T07:00:00Z', ...day }),
+      row({ id: 'b', source_id: 'b', title: 'Kabarett Nachtschicht', ...day }), row({ id: 'c', source_id: 'c', title: 'Lesung im Garten', ...day })]).size).toBe(0);
     expect(staleVersionIds([row({ id: 'base', source_id: 'feratel-1', last_seen_at: '2026-10-08T07:00:00Z' }),
       row({ id: 'dated', source_id: 'feratel-1:2026-10-17', last_seen_at: '2026-09-21T07:00:00Z' })]).size).toBe(0);
   });

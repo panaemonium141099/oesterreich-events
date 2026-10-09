@@ -21,17 +21,30 @@ export function normalizeUrlForDedup(url: string | null | undefined): string {
 const LIST_URL_SEGMENTS = new Set([
   'de', 'en', 'at', 'home', 'index', 'index.html', 'index.php', 'shop', 'tickets', 'ticket', 'tour', 'tours',
   'tourdaten', 'dates', 'live', 'events', 'event', 'termine', 'termin', 'veranstaltungen', 'veranstaltung',
-  'veranstaltungskalender', 'kalender', 'programm', 'spielplan', 'konzerte',
+  'veranstaltungskalender', 'veranstaltungstermine', 'kalender', 'eventkalender', 'programm', 'spielplan', 'konzerte',
+  // Blätter-, Monats- und Kategorieseiten von Listen (Stichprobe 2026-10-09)
+  'liste', 'list', 'seite', 'page', 'monat', 'woche', 'event-category', 'kategorie', 'category', 'archiv',
+  'uebersicht', 'übersicht', 'alle', 'aktuelles', 'unsere-gemeinde', 'gemeinde', 'stadt', 'buergerservice',
 ]);
 
+/** Jahr, Jahr-Monat oder Datum als Pfadteil (Monats-/Tagesansicht einer Liste). */
+const DATE_SEGMENT = /^(19|20)\d{2}(-\d{2}){0,2}$/;
+/** Pfadteile, nach denen eine Zahl die Seitenzahl ist („…/liste/seite/2"). */
+const PAGER_WORDS = new Set(['seite', 'page', 'liste', 'list']);
+
+/** Abfrage nur zum Blättern („?pno=2", „?currentpage=3", „?page=2"). */
+const PAGING_QUERY = /^\??(?:(?:pno|page|seite|currentpage|paged|p_page|offset|start)=\d+&?)+$/i;
+
 /**
- * Link auf genau ein Event, nicht auf eine Shop-Startseite oder Tour-/
- * Terminliste („oeticket.com/", „…/tour/2026"), die viele Events teilen.
+ * Link auf genau ein Event, nicht auf eine Shop-Startseite, Tour-/
+ * Terminliste oder Blätterseite („oeticket.com/", „…/tour/2026",
+ * „…/events/liste/seite/2", „…/termine/?pno=2"), die viele Events teilen.
  */
 export function isEventSpecificUrl(normalized: string): boolean {
   let url: URL;
   try { url = new URL(normalized); } catch { return false; }
   const parts = url.pathname.split('/').filter(Boolean).map(s => s.toLowerCase());
-  if (url.search.length > 1) return true;
-  return parts.some(s => !LIST_URL_SEGMENTS.has(s) && !/^(19|20)\d{2}$/.test(s));
+  if (url.search.length > 1 && !PAGING_QUERY.test(url.search)) return true;
+  return parts.some((s, i) => !LIST_URL_SEGMENTS.has(s) && !DATE_SEGMENT.test(s) &&
+    !(/^\d{1,3}$/.test(s) && PAGER_WORDS.has(parts[i - 1] ?? '')));
 }

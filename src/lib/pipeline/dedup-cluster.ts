@@ -7,7 +7,8 @@
 
 import { scoreToPublishStatus, type PublishStatus } from '@/lib/quality/score-event';
 import { isDateOnlyText } from './garbage-filter';
-import { knownStartMs, viennaDayOf } from './dedup-evidence';
+import { knownStartMs, titleRelation, viennaDayOf } from './dedup-evidence';
+import { isEventSpecificUrl, normalizeUrlForDedup } from './event-url';
 import type { EventRow } from './types';
 
 /**
@@ -54,34 +55,39 @@ export function sameSeries(a: EventRow, b: EventRow): boolean {
 }
 
 /**
- * Ältere Fassungen einer Seite, die genau ein Event zeigt: die Quelle liefert
- * dieselbe Detailseite inzwischen als andere Zeile (Titel korrigiert, Termin
- * verschoben: „Radlgruten Challenge" 10.10. → 17.10., Stichprobe 2026-10-09).
- * Solche Zeilen gelten im Dedup wie verwaiste: nie Primary, nie Gegenbeleg,
- * nie freigegeben. Nicht bei Seiten mit mehreren Events (im letzten Besuch
- * mehr als ein Titel, z. B. Veranstalter-Websites) und nicht zwischen Basis-
- * und Terminzeilen einer Serie.
+ * Ältere Fassungen einer Event-Seite: dieselbe Quelle liefert dieselbe
+ * Detailseite für denselben Wiener Tag inzwischen als andere Zeile (Titel
+ * korrigiert oder umbenannt: „13 Dez. Adventsingen 13.12.2026 14:00 Uhr" →
+ * „Adventsingen", „Zankerlschnapsen" → „Zankerltriathlon"). Solche Zeilen
+ * gelten im Dedup wie verwaiste: nie Primary, nie Gegenbeleg, nie
+ * freigegeben. Nur am selben Tag: Serien-Seiten zeigen oft nur den nächsten
+ * Termin, frühere Sichtungen späterer Termine sind echt (Prod 2026-10-09:
+ * 1.447 solche Zeilen). Und nur, wenn die Titel zusammenpassen oder die
+ * Seite im letzten Besuch genau einen Titel trug (keine Veranstalter-Website
+ * mit mehreren Events), nie zwischen Basis- und Terminzeilen einer Serie.
  */
 export function staleVersionIds(rows: EventRow[]): Set<string> {
   const DAY = 86_400_000;
   const seen = (e: EventRow) => (e.last_seen_at ? Date.parse(e.last_seen_at) : NaN);
   const pages = new Map<string, EventRow[]>();
   for (const r of rows) {
-    if (!r.source_url || !r.source_name || isNaN(seen(r))) continue;
-    const key = `${r.source_name}|${r.source_url}`;
+    const url = normalizeUrlForDedup(r.source_url);
+    if (!url || !isEventSpecificUrl(url) || !r.source_name || isNaN(seen(r))) continue;
+    const key = `${r.source_name}|${url}`;
     pages.set(key, [...(pages.get(key) ?? []), r]);
   }
   const out = new Set<string>();
   for (const list of pages.values()) {
     if (list.length < 2) continue;
     const newest = Math.max(...list.map(seen));
-    const lastVisit = list.filter(r => seen(r) >= newest - 12 * 3_600_000);
-    const titles = new Set(lastVisit.map(r => (r.title ?? '').trim().toLowerCase()));
-    if (titles.size !== 1) continue;
+    const lastVisitTitles = new Set(list.filter(r => seen(r) >= newest - 12 * 3_600_000)
+      .map(r => (r.title ?? '').trim().toLowerCase()));
     for (const r of list) {
-      if (seen(r) >= newest - DAY) continue;
-      if (lastVisit.some(n => sameSeries(n, r))) continue;
-      out.add(r.id);
+      const day = viennaDayOf(r);
+      const newer = day ? list.find(n => n !== r && viennaDayOf(n) === day && !sameSeries(n, r) && seen(n) - seen(r) > DAY) : undefined;
+      if (!newer) continue;
+      const t = titleRelation(r, newer);
+      if (t === 'equal' || t === 'near' || t === 'contains' || lastVisitTitles.size === 1) out.add(r.id);
     }
   }
   return out;

@@ -41,7 +41,9 @@ const GARBAGE_TITLES = new Set([
   'springe zur hauptnavigation', 'nach oben', 'skip to content', 'skip to main content',
   // Listen-Überschriften, Knöpfe und Platzhalter (Prod 2026-10-09)
   'alle termine', 'termine', 'veranstaltungen', 'gefundene termine', 'mehr', 'dieser monat', 'this month',
-  'tickets', 'ausverkauft', 'test',
+  'tickets', 'ausverkauft', 'test', 'termin', 'events', 'datum', 'nach oben scrollen', 'weiter', 'eventkalender',
+  'veranstaltungskalender', 'tipp speichern', 'in outlook übernehmen', 'in outlook uebernehmen', 'webcam',
+  'karteninhalte zulassen', 'aktuelles', 'neuigkeiten', 'veranstaltungsdetails',
 ]);
 
 /** Sprungmarken in allen Varianten („Zum Inhalt springen", „Springe zur rechten Spalte"). */
@@ -132,8 +134,10 @@ export function isGarbageTitle(title: string, context: GarbageContext = {}): boo
 
   if (SKIP_LINK.test(normalized) || LABEL_LINE.test(normalized)) return true;
 
+  // Gemeinde-Kacheln: Wochentag, Monat, „Samstag, bis" sind dort nie ein Name.
   if (GEMEINDE_AGGREGATORS.has(context.sourceName ?? '') &&
-      (GEMEINDE_TILE_WORDS.has(normalized) || /^(?:montag|dienstag|mittwoch|donnerstag|freitag|samstag|sonntag) bis$/.test(normalized))) {
+      (GEMEINDE_TILE_WORDS.has(normalized) || /^(?:montag|dienstag|mittwoch|donnerstag|freitag|samstag|sonntag) bis$/.test(normalized) ||
+       isDateOnlyText(normalized))) {
     return true;
   }
 
@@ -170,11 +174,25 @@ export interface GarbageRowInput {
 
 /** Seite + Wiener Tag einer Zeile mit echtem Namen (für isGarbageRow). */
 export function namedPageKey(row: GarbageRowInput): string | null {
+  return namedPageKeys(row)[0] ?? null;
+}
+
+/**
+ * Schlüssel einer Zeile mit echtem Namen: Seite + Wiener Tag, dazu Website +
+ * Beginn-Minute (derselbe Termin an einer Nachbar-URL: „Herbstkonzert" /
+ * „Herbstkonzert_1", Stichprobe 2026-10-09).
+ */
+export function namedPageKeys(row: GarbageRowInput): string[] {
   const url = normalizeUrlForDedup(row.source_url);
-  if (!url || !row.title || !row.start_date) return null;
-  if (isGarbageTitle(row.title, { sourceName: row.source_name, ticketUrl: row.ticket_url })) return null;
+  if (!url || !row.title || !row.start_date) return [];
+  if (isGarbageTitle(row.title, { sourceName: row.source_name, ticketUrl: row.ticket_url })) return [];
   const day = viennaDayKey(row.start_date);
-  return day ? `${url}|${day}` : null;
+  if (!day) return [];
+  return [`${url}|${day}`, `${hostOf(url)}|${new Date(row.start_date).toISOString().slice(0, 16)}`];
+}
+
+function hostOf(url: string): string {
+  try { return new URL(url).hostname.replace(/^www./, ''); } catch { return url; }
 }
 
 /**
@@ -189,7 +207,9 @@ export function isGarbageRow(row: GarbageRowInput, namedPages: ReadonlySet<strin
   if (!row.title || !isGarbageTitle(row.title, { sourceName: row.source_name, ticketUrl: row.ticket_url })) return false;
   const day = viennaDayKey(row.start_date);
   if (!isNamelessDateTitle(row.title) || !hasEventLink(row.source_url) || !day) return true;
-  return namedPages.has(`${normalizeUrlForDedup(row.source_url)}|${day}`);
+  const url = normalizeUrlForDedup(row.source_url);
+  return namedPages.has(`${url}|${day}`) ||
+    namedPages.has(`${hostOf(url)}|${new Date(row.start_date!).toISOString().slice(0, 16)}`);
 }
 
 function viennaDayKey(iso: string | null | undefined): string | null {
