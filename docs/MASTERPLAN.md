@@ -337,12 +337,31 @@ Betrieb, Prod-Daten, Szenarien, je Befund gegengeprüft) fanden:
   10-Minuten-Takt wurden verschmolzen.
 
 Alle Punkte sind als Regeln mit Tests behoben (Golden-Set
-`dedup-golden-2026-10-08`). Probelauf ab Vortag: einmaliger Nachholplan mit
-3.099 neuen Duplikaten, 1.714 Freigaben und 271 Müllzeilen in 230 s (vorher
-400 s über alle Tage). Offen sind eigene Tasks: Parser, die das Datum als
-Titel liefern (173 frische Zeilen in 3 Tagen); Ticketmaster-Zeitzone; der
-Eventim-Affiliate-Link geht verloren, wenn die Eventim-Zeile einen
-Ortskonflikt hat (3 bis 5 Events, Anzeige-Frage).
+`dedup-golden-2026-10-08`). Danach (2026-10-09) prüften vier Runden
+Stichproben jeder geplanten Änderungsart gegen Prod (je 170 bis 230 Fälle,
+Seiten der Quellen mit abgerufen). Falsch versteckte Events fielen von
+3 auf 1 je 50. Weitere Ursachen sind behoben:
+- „Gleiche Quelle" bei Aggregatoren wie gem2go (Grinzens unter Kematen).
+- Feratel-Terminzeilen, die einfroren.
+- Altzeilen mit +1/+2 h neben der frischen Zeile.
+- Adresse als Ortsname.
+- Titel ohne Namen auf der eigenen Event-Seite (bleibt sichtbar).
+- Blätterseiten.
+- Erfundene „heute"-Termine aus dem Gemeinde-Scraper.
+
+Probelauf ab Vortag: einmaliger Nachholplan mit rund 4.900 neuen
+Duplikaten, 2.150 Freigaben (davon 1.636 Rollentausch) und 620 Müllzeilen
+in 270 s (vorher 400 s über alle Tage).
+
+Offen und an der Quelle zu beheben (keine Dedup-Fehler):
+- Gutschein-Produkte mit Platzhalterdatum 31.12.2030 (veranstaltungskalender.net).
+- Müllabfuhr-Termine.
+- gem2go-Titel mit angeklebter Kategorie.
+- Falsch konfigurierte Gemeinde-Kalender: 70905 liest Buch in Vorarlberg,
+  30701 liest Au im Bregenzerwald.
+- Ticketmaster-Zeitzone.
+- Der Eventim-Affiliate-Link geht verloren, wenn die Eventim-Zeile einen
+  Ortskonflikt hat (3 bis 5 Events, Anzeige-Frage).
 
 ## 4. Getroffene Grundsatz-Entscheidungen (2026-07-07)
 
