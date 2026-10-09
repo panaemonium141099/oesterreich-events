@@ -210,9 +210,14 @@ node / next.js
   derselbe Ort (Aggregatoren wie gem2go): Vorgängerversionen nur von
   derselben Event-Seite oder ohne PLZ-/Bezirks-Widerspruch. Absage-Varianten
   („ABGESAGT", „entfällt", „verschoben auf <anderer Tag>") werden nie mit der
-  aktiven Zeile verschmolzen. Müll-Titel (`isGarbageTitle`) verwirft schon der
-  Sync; ein Titel ohne Namen (nur Datum) auf der eigenen Seite genau eines
-  Events bleibt sichtbar (`isGarbageRow`), bis der Scraper den Namen liest.
+  aktiven Zeile verschmolzen. Etiketten (PLZ, Bezirk, Ortsname) sind bei
+  Gemeinde-Kalendern oft die Kalender-Gemeinde, nicht der Veranstaltungsort:
+  sie lösen keine Verbindung bei gleichem, konkretem Titel (≥ 3 Wörter) im
+  Umkreis von 25 km. Müll-Titel (`isGarbageTitle`) verwirft schon der Sync;
+  ein kaputter Titel (Datum, Beschriftung, Sprungmarke) auf der eigenen Seite
+  genau eines Events bleibt sichtbar (`isGarbageRow`, eine Zeile je Seite und
+  Tag), bis der Scraper den Namen liest; Listen-Beschriftungen und
+  Nicht-Event-Seiten (Kontakt, Kalender, „Alle Termine") nie.
   Der Dedup unterdrückt Altbestand erst nach dem Sicherheitsventil (Grenzen:
   1.500 neue Duplikate, 300 sichtbar machende Freigaben, 1.000 Müll; per
   workflow_dispatch freigebbar, Plan als Artefakt). Golden-Sets aus echten

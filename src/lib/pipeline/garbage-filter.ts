@@ -1,7 +1,7 @@
 // src/lib/pipeline/garbage-filter.ts
 
 import { isEventSpecificUrl, normalizeUrlForDedup } from './event-url';
-import { toViennaDate } from '@/lib/utils/event-time';
+import { hasKnownStartTime, toViennaDate, toViennaIso } from '@/lib/utils/event-time';
 
 /**
  * Garbage title filter — identifies non-event pages that scrapers accidentally pick up.
@@ -43,8 +43,49 @@ const GARBAGE_TITLES = new Set([
   'alle termine', 'termine', 'veranstaltungen', 'gefundene termine', 'mehr', 'dieser monat', 'this month',
   'tickets', 'ausverkauft', 'test', 'termin', 'events', 'datum', 'nach oben scrollen', 'weiter', 'eventkalender',
   'veranstaltungskalender', 'tipp speichern', 'in outlook übernehmen', 'in outlook uebernehmen', 'webcam',
-  'karteninhalte zulassen', 'aktuelles', 'neuigkeiten', 'veranstaltungsdetails',
+  'karteninhalte zulassen', 'aktuelles', 'neuigkeiten', 'veranstaltungsdetails', 'tipp speichern in outlook übernehmen',
+  'tipp speichern in outlook uebernehmen', 'mehr lesen', 'kundmachungen', 'aktuelle termine', 'frei willig',
+  // Stichprobe Runde 4 (2026-10-09)
+  'lesen sie mehr', 'mehr information', 'weitere infos', 'mehr anzeigen', 'nächste veranstaltung',
+  'naechste veranstaltung', 'aktuelle veranstaltungen', 'veranstaltungsvorschau', 'weitere termine vorhanden',
+  'reservierung', 'parteienverkehr', 'amtszeiten', 'quicklinks', 'gemeindeamt', 'bürgerservice', 'buergerservice',
 ]);
+
+/**
+ * Seiten, die nie ein Event sind (Kontakt, Impressum, Öffnungszeiten …), und
+ * Beschriftungen von Listen („Alle Termine", „Kalender", „weiter", „Heute").
+ * Alle anderen Beschriftungen („Termin", „Datum", „mehr", Sprungmarken)
+ * können auf der eigenen Seite eines Events stehen, dessen Namen der Parser
+ * verfehlt hat; „willKOMMEN!" ist ein Plaudercafé (Stichprobe Runde 4).
+ */
+const NON_EVENT_PAGES = new Set([
+  'kontakt', 'contact', 'impressum', 'imprint', 'datenschutz', 'datenschutzerklärung', 'datenschutzerklaerung',
+  'privacy', 'privacy policy', 'agb', 'allgemeine geschäftsbedingungen', 'terms', 'oeffnungszeiten', 'offnungszeiten',
+  'öffnungszeiten', 'opening hours', 'anfahrt', 'directions', 'lageplan', 'newsletter', 'registrierung', 'registration',
+  'sign up', 'login', 'anmelden', 'warenkorb', 'cart', 'checkout', 'zahlung', 'payment', 'cookie', 'cookies',
+  'cookie einstellungen', 'sitemap', 'suche', 'search', 'jobs', 'karriere', 'career', 'sponsoren', 'sponsors',
+  'partner', 'presse', 'press', 'downloads', 'galerie', 'gallery', 'fotos', 'photos', 'unterkünfte', 'unterkuenfte',
+  'accommodation', 'webcam', 'karteninhalte zulassen', 'startseite', 'home', 'homepage', 'ueber uns', 'über uns',
+  'about', 'about us', 'test', 'kundmachungen', 'archiv', 'archive',
+  'alle termine', 'termine', 'veranstaltungen', 'gefundene termine', 'gefundene veranstaltungen', 'aktuelle termine',
+  'aktuelle veranstaltungen', 'veranstaltungsvorschau', 'dieser monat', 'this month', 'eventkalender',
+  'veranstaltungskalender', 'kalender', 'calendar', 'events', 'aktuelles', 'neuigkeiten', 'weiter', 'heute', 'morgen',
+  'übermorgen', 'uebermorgen', 'parteienverkehr', 'amtszeiten', 'quicklinks', 'gemeindeamt', 'bürgerservice',
+  'buergerservice', 'suche ab',
+]);
+
+/** Listen-Beschriftung oder Bürozeiten mit Zusatz („Anzahl der Folgetermine 3 …", „von Mo. bis Fr."). */
+const NON_EVENT_PATTERN = /^anzahl der folgetermine|^(?:von )?mo(?:ntag)? bis fr(?:eitag)?$/;
+
+function isNonEventTitle(normalized: string): boolean {
+  return NON_EVENT_PAGES.has(normalized) || NON_EVENT_PATTERN.test(normalized);
+}
+
+/** Adresszeile statt Titel („Traungasse 5-7, 4810 Gmunden, Österreich"). */
+const ADDRESS_TITLE = /^\p{L}[\p{L}.\- ]*\s\d+\s*[a-z]?(?:\s*[-/]\s*\d+)?,\s*(?:A-)?\d{4}\s+\p{L}/iu;
+
+/** Link-Text hinter einer Datumsangabe („… | Alle Termine", „… QR Code öffnen"). */
+const LINK_SUFFIX = / (?:alle termine|qr code (?:öffnen|oeffnen))$/;
 
 /** Sprungmarken in allen Varianten („Zum Inhalt springen", „Springe zur rechten Spalte"). */
 const SKIP_LINK = /^(?:springe |weiter |direkt )?(?:zu[mr]?|zurück zu[mr]?|to) (?:anfang(?: der seite)?|seitenanfang|seitenende|(?:haupt)?inhalt|(?:sub|haupt)?navigation|(?:haupt)?menü|(?:haupt)?menue|suche|footer|(?:rechten|linken) spalte|übersicht|uebersicht|content|main content)(?: springen)?$/;
@@ -59,7 +100,7 @@ const LABEL_LINE = /^\d+ veranstaltung(?:en)? \d*$|^\d{1,2} \d{2} eintritt\b/;
  */
 const GEMEINDE_TILE_WORDS = new Set([
   'montag', 'dienstag', 'mittwoch', 'donnerstag', 'freitag', 'samstag', 'sonntag',
-  'heute', 'morgen', 'gemeindesaal',
+  'heute', 'morgen', 'übermorgen', 'uebermorgen', 'gemeindesaal',
 ]);
 const GEMEINDE_AGGREGATORS = new Set([
   'gemeinden-generic', 'gem2go', 'gemeinde-registry', 'gemeinden', 'gemeinde-fallback',
@@ -76,7 +117,7 @@ const DATE_TOKENS = new Set([
   'januar', 'jaenner', 'jänner', 'jän', 'februar', 'feber', 'maerz', 'märz', 'april', 'mai',
   'juni', 'juli', 'august', 'september', 'oktober', 'november', 'dezember',
   'jan', 'feb', 'mär', 'apr', 'jun', 'jul', 'aug', 'sep', 'sept', 'okt', 'nov', 'dez',
-  'uhr', 'h', 'ab', 'bis', 'von', 'um', 'am', 'und',
+  'uhr', 'h', 'ab', 'bis', 'von', 'um', 'am', 'und', 'beginn', 'einlass', 'jeweils',
 ]);
 
 function normalizeTitle(title: string): string {
@@ -129,8 +170,16 @@ export function isGarbageTitle(title: string, context: GarbageContext = {}): boo
   // (Eventim „Archive", Gasometer) belegt dagegen ein echtes Event.
   if (GARBAGE_TITLES.has(normalized) && !hasEventLink(context.ticketUrl)) return true;
 
-  // Feldbeschriftung statt Titel: "Datum der VeranstaltungMi,"
-  if (normalized.startsWith('datum der veranstaltung')) return true;
+  // Feldbeschriftung statt Titel: "Datum der VeranstaltungMi,", "Anzahl der Folgetermine"
+  if (normalized.startsWith('datum der veranstaltung') || normalized.startsWith('anzahl der folgetermine')) return true;
+
+  // Strukturierte Daten statt Titel ('{"@context": "http://schema.org", …')
+  if (/^\s*\{\s*"@context"/.test(title)) return true;
+
+  // Uhrzeit mit Link-Text („11:00 Uhr bis 00:00 Uhr | Alle Termine")
+  if (LINK_SUFFIX.test(normalized) && isDateOnlyText(normalized.replace(LINK_SUFFIX, ''))) return true;
+
+  if (NON_EVENT_PATTERN.test(normalized) || ADDRESS_TITLE.test(title.trim())) return true;
 
   if (SKIP_LINK.test(normalized) || LABEL_LINE.test(normalized)) return true;
 
@@ -159,11 +208,6 @@ function hasEventLink(url: string | null | undefined): boolean {
   return !!normalized && isEventSpecificUrl(normalized);
 }
 
-/** Titel nur aus Datum/Uhrzeit, kein Name („MI 09.12. 19:30 UHR"). */
-export function isNamelessDateTitle(title: string | null | undefined): boolean {
-  return !!title && /\d/.test(title) && isDateOnlyText(title);
-}
-
 export interface GarbageRowInput {
   title: string | null;
   source_name?: string | null;
@@ -188,28 +232,96 @@ export function namedPageKeys(row: GarbageRowInput): string[] {
   if (isGarbageTitle(row.title, { sourceName: row.source_name, ticketUrl: row.ticket_url })) return [];
   const day = viennaDayKey(row.start_date);
   if (!day) return [];
-  return [`${url}|${day}`, `${hostOf(url)}|${new Date(row.start_date).toISOString().slice(0, 16)}`];
+  return [`${url}|${day}`, minuteKey(url, row.start_date), slugKey(url, day)].filter((k): k is string => !!k);
+}
+
+/** Website + Seiten-Kennung + Tag: dieselbe Event-Seite unter einem anderen
+ *  Pfad („treibhaus.at/karten/…/15129-renaud-garcia-fons" neben
+ *  „/programm/…/15129-renaud-garcia-fons") oder mit Zähler-Anhang
+ *  (Gem2Go „Vortrag_Meine_Seele_staerken_" / „…_staerken_1"). Dateinamen
+ *  wie „veranstaltung.aspx" teilen alle Events und zählen nicht. */
+function slugKey(url: string, day: string): string | null {
+  let last = '';
+  try { last = decodeURIComponent(new URL(url).pathname.split('/').filter(Boolean).pop() ?? ''); } catch { return null; }
+  if (!/^[\p{L}\p{N}_-]{12,}$/u.test(last) || !/[-_]/.test(last)) return null;
+  return `${hostOf(url)}|${last.replace(/[_-]\d{1,3}$/, '').replace(/[_-]+$/, '')}|${day}`;
+}
+
+/** Website + Beginn-Minute, nur bei echter Uhrzeit: Platzhalter-Mitternacht
+ *  teilen alle Termine eines Tages (Stichprobe Runde 4: „mehr" auf der Seite
+ *  der Feuerlöscherüberprüfung galt als Kachelteil der Steinläufer). */
+function minuteKey(url: string, startDate: string): string | null {
+  const minute = realMinute(startDate);
+  return minute ? `${hostOf(url)}|${minute}` : null;
+}
+
+/** Beginn-Minute (UTC), wenn die Uhrzeit echt ist: keine Platzhalter-
+ *  Mitternacht und kein als Uhrzeit gelesenes Datum („04.11." → 04:11). */
+function realMinute(startDate: string | null | undefined): string | null {
+  if (!startDate || !hasKnownStartTime({ start_date: startDate })) return null;
+  const d = new Date(startDate);
+  if (isNaN(d.getTime())) return null;
+  const v = toViennaIso(d);
+  if ((d.getUTCHours() === d.getUTCDate() && d.getUTCMinutes() === d.getUTCMonth() + 1) ||
+      (Number(v.slice(11, 13)) === Number(v.slice(8, 10)) && Number(v.slice(14, 16)) === Number(v.slice(5, 7)))) return null;
+  return d.toISOString().slice(0, 16);
 }
 
 function hostOf(url: string): string {
-  try { return new URL(url).hostname.replace(/^www./, ''); } catch { return url; }
+  try { return new URL(url).hostname.replace(/^www\./, ''); } catch { return url; }
 }
 
 /**
- * Müll-Zeile? Wie isGarbageTitle, mit einer Ausnahme: ein Titel ohne Namen
- * (nur Datum/Uhrzeit) auf der eigenen Seite genau eines Events ist ein
- * echtes Event mit kaputtem Titel (Prod 2026-10-09: Treibhaus „MI 09.12.
- * 19:30 UHR" = Alfred Dorfer, KAPU, Ybbser Adventzauber). Es bleibt sichtbar,
- * außer dieselbe Seite liefert am selben Tag eine Zeile mit Namen
- * (`namedPages`, aus namedPageKey); dann ist es nur ein Kachelteil.
+ * Müll-Zeile? Wie isGarbageTitle, mit einer Ausnahme: ein kaputter Titel
+ * (Datum/Uhrzeit, Beschriftung, Sprungmarke) auf der eigenen Seite genau
+ * eines Events ist ein echtes Event, dessen Namen der Parser verfehlt hat
+ * (Prod 2026-10-09: Treibhaus „MI 09.12. 19:30 UHR" = Alfred Dorfer, Neuberg
+ * „Veranstaltungsdetails" = Fitmarsch). Es bleibt sichtbar, außer der Titel
+ * nennt eine Nicht-Event-Seite (Kontakt, Impressum …) oder dieselbe Seite
+ * liefert am selben Tag eine Zeile mit Namen (`namedPages`, aus
+ * namedPageKeys); dann ist es nur ein Kachelteil.
  */
 export function isGarbageRow(row: GarbageRowInput, namedPages: ReadonlySet<string>): boolean {
   if (!row.title || !isGarbageTitle(row.title, { sourceName: row.source_name, ticketUrl: row.ticket_url })) return false;
   const day = viennaDayKey(row.start_date);
-  if (!isNamelessDateTitle(row.title) || !hasEventLink(row.source_url) || !day) return true;
+  if (isNonEventTitle(normalizeTitle(row.title)) || !hasEventLink(row.source_url) || !day) return true;
   const url = normalizeUrlForDedup(row.source_url);
-  return namedPages.has(`${url}|${day}`) ||
-    namedPages.has(`${hostOf(url)}|${new Date(row.start_date!).toISOString().slice(0, 16)}`);
+  const minute = minuteKey(url, row.start_date!);
+  const slug = slugKey(url, day);
+  return namedPages.has(`${url}|${day}`) || (!!minute && namedPages.has(minute)) || (!!slug && namedPages.has(slug));
+}
+
+/**
+ * Mehrere Zeilen mit kaputtem Titel, die isGarbageRow sichtbar lässt, von
+ * derselben Event-Seite am selben Tag („November" und „Mittwoch,19:00Uhr -
+ * 20:30Uhr", zwei Sprungmarken, „Tickets" neben dem Programm-Eintrag): es
+ * bleibt eine sichtbar (echte Uhrzeit, dann Datums-Titel), bei mehreren echten
+ * Uhrzeiten eine je Uhrzeit. Liefert die Ids der übrigen.
+ */
+export function surplusBrokenTitleIds(rows: Array<GarbageRowInput & { id: string }>, namedPages: ReadonlySet<string>): Set<string> {
+  const groups = new Map<string, Array<GarbageRowInput & { id: string }>>();
+  for (const r of rows) {
+    if (!r.title || !isGarbageTitle(r.title, { sourceName: r.source_name, ticketUrl: r.ticket_url }) || isGarbageRow(r, namedPages)) continue;
+    const url = normalizeUrlForDedup(r.source_url);
+    const day = viennaDayKey(r.start_date)!;
+    const key = slugKey(url, day) ?? `${url}|${day}`;
+    groups.set(key, [...(groups.get(key) ?? []), r]);
+  }
+  const out = new Set<string>();
+  const knownMinute = (r: GarbageRowInput) => realMinute(r.start_date);
+  // Echte Uhrzeit, dann Uhrzeit im Titel, dann sonstiger Datums-Titel.
+  const rank = (r: GarbageRowInput) => (knownMinute(r) ? 4 : 0) +
+    (isDateOnlyText(r.title) ? (/\d{1,2}[:.]\d{2}/.test(r.title ?? '') ? 2 : 1) : 0);
+  for (const list of groups.values()) {
+    if (list.length < 2) continue;
+    const kept: Array<string | null> = [];
+    for (const r of [...list].sort((a, b) => rank(b) - rank(a) || a.id.localeCompare(b.id))) {
+      const t = knownMinute(r);
+      if (kept.length === 0 || (t && kept.every(k => k !== null && k !== t))) kept.push(t);
+      else out.add(r.id);
+    }
+  }
+  return out;
 }
 
 function viennaDayKey(iso: string | null | undefined): string | null {

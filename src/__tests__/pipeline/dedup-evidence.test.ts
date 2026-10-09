@@ -330,4 +330,20 @@ describe('placeEvidence ohne Etiketten', () => {
     const b = e({ location_name: 'Gemeindesaal Buch', postal_code: '6960', latitude: 47.52, longitude: 9.81, location_precision: 'municipality' } as Partial<EventRow>);
     expect(placeEvidence(a, b, { ignoreLabels: true }).relation).not.toBe('conflict');
   });
+
+  // Stichprobe Runde 4 (2026-10-09)
+  it('Ortsname, der die Adresse der anderen Zeile ist, belegt denselben Ort (PLZ und Ort an der Adresse fallen weg)', () => {
+    const a = e({ location_name: 'Auenwerkstatt 1', address: 'Auenwerkstatt 1A-5151 Nußdorf am Haunsberg', postal_code: '5102' } as Partial<EventRow>);
+    const b = e({ location_name: 'Salzach Auen, Weitwörth', address: 'Auenwerkstatt 1', postal_code: '5151' } as Partial<EventRow>);
+    expect(placeEvidence(a, b, { ignoreLabels: true })).toEqual({ relation: 'same', reason: 'address' });
+    const glued = e({ location_name: 'Tullnerbach', address: 'Hauptstraße 473013 Tullnerbach-Lawies', postal_code: '3013' } as Partial<EventRow>);
+    const plain = e({ location_name: 'Gemeindesaal', address: 'Hauptstraße 47', postal_code: '3013' } as Partial<EventRow>);
+    expect(placeEvidence(glued, plain).relation).toBe('same');
+  });
+
+  it('abgekürzter Ortsname („Haibach o.d. Donau") ist eine Ortsangabe, kein anderer Venue', () => {
+    const a = e({ location_name: 'Naturwunda-Halle', postal_code: '4083' } as Partial<EventRow>);
+    const b = e({ location_name: 'Haibach o.d. Donau' } as Partial<EventRow>);
+    expect(placeEvidence(a, b).relation).not.toBe('conflict');
+  });
 });

@@ -6,7 +6,7 @@
 
 import { describe, it, expect } from 'vitest';
 import { dedupDay } from '@/lib/pipeline/dedup-engine';
-import { planDedup, releaseStatus, checkSafetyValve, dropDependentsOfFailedReleases } from '@/lib/pipeline/dedup-plan';
+import { planDedup, releaseStatus, checkSafetyValve, dropDependentsOfFailedReleases, resolvePlanConflicts } from '@/lib/pipeline/dedup-plan';
 import type { EventRow } from '@/lib/pipeline/types';
 
 const PLACE = { location_name: 'Sargfabrik', postal_code: '1140', latitude: 48.1952, longitude: 16.3046, location_precision: 'building' };
@@ -287,6 +287,61 @@ describe('planDedup: Freigabe nur mit Gegenbeleg', () => {
     expect(p.release).toEqual([]);
   });
 
+  // Stichprobe Runde 4 (2026-10-09): 6 von 8 Etiketten-Freigaben falsch.
+  // Gemeinde-Kalender führen Events der Nachbargemeinden unter eigener PLZ
+  // und eigenem Ortsnamen.
+  const town = (o: Partial<EventRow>) => ({ latitude: null, longitude: null, location_precision: 'municipality', last_seen_at: SEEN, ...o } as Partial<EventRow>);
+  it('Kalender-Gemeinde als Etikett: gleicher konkreter Titel in der Nachbargemeinde hält die Verbindung', () => {
+    const p = planWith([
+      ev({ id: 'a', source_name: 'q', title: 'KKM - Vernissage Kloster St. Anna', start_date: '2026-10-06T22:00:00Z', ...town({
+        location_name: 'Götzendorf an der Leitha', postal_code: '2434', district: 'bruck an der leitha', latitude: 48.0133, longitude: 16.5796,
+        publish_status: 'duplicate', duplicate_of: 'b' }) }),
+      ev({ id: 'b', source_name: 'q', title: 'KKM - Vernissage Kloster St. Anna', start_date: '2026-10-07T17:00:00Z', ...town({
+        location_name: 'Mannersdorf am Leithagebirge', postal_code: '2452', district: 'bruck an der leitha', latitude: 47.9731, longitude: 16.6010 }) }),
+    ]);
+    expect(p.release).toEqual([]);
+  });
+
+  it('Kalender-Etikett löst bei Allerweltstitel oder weit entfernter Gemeinde (Roratemesse; Landesaktionstag 60 km)', () => {
+    const rorate = planWith([
+      ev({ id: 'a', source_name: 'q', title: 'Roratemesse', ...town({ location_name: 'Bergland', postal_code: '3254', district: 'melk',
+        latitude: 48.17, longitude: 15.15, publish_status: 'duplicate', duplicate_of: 'b' }) }),
+      ev({ id: 'b', source_name: 'q', title: 'Roratemesse', ...town({ location_name: 'Texingtal', postal_code: '3242', district: 'melk',
+        latitude: 48.09, longitude: 15.30 }) }),
+    ]);
+    expect(rorate.release).toEqual([expect.objectContaining({ id: 'a' })]);
+    const day = planWith([
+      ev({ id: 'a', source_name: 'q', title: 'Kinderlandesfeiertag - Kinder entdecken Niederösterreich', ...town({ location_name: 'Markgrafneusiedl',
+        postal_code: '2282', district: 'gänserndorf', latitude: 48.27, longitude: 16.63, publish_status: 'duplicate', duplicate_of: 'b' }) }),
+      ev({ id: 'b', source_name: 'q', title: 'Kinderlandesfeiertag - Kinder entdecken Niederösterreich', ...town({ location_name: 'Hernstein',
+        postal_code: '2561', district: 'baden', latitude: 47.89, longitude: 16.10 }) }),
+    ]);
+    expect(day.release).toEqual([expect.objectContaining({ id: 'a' })]);
+  });
+
+  it('verschiedene Venue-Namen, aber der eine ist die Adresse des anderen: kein Gegenbeleg', () => {
+    const p = planWith([
+      ev({ id: 'a', source_name: 'q', title: 'Faszination Salzachau: Naturwunder am Flussufer', start_date: '2026-10-06T22:00:00Z', ...town({
+        location_name: 'Auenwerkstatt 1', address: 'Auenwerkstatt 1A-5151 Nußdorf am Haunsberg', postal_code: '5102',
+        publish_status: 'duplicate', duplicate_of: 'b' }) }),
+      ev({ id: 'b', source_name: 'falter', title: 'Faszination Salzachau: Naturwunder am Flussufer', start_date: '2026-10-07T12:00:00Z', ...town({
+        location_name: 'Salzach Auen, Weitwörth', address: 'Auenwerkstatt 1', postal_code: '5151' }) }),
+    ]);
+    expect(p.release).toEqual([]);
+  });
+
+  it('Freigabe trifft einen sichtbaren Zwilling mit falschem PLZ-Etikett: anhängen statt zweite sichtbare Zeile', () => {
+    const stale = primary({ start_date: '2026-06-03T16:00:00Z', last_seen_at: ORPHAN_SEEN });
+    const eventim = ev({ id: 't', source_name: 'Eventim', title: 'THE MAGIC OF ELVIS feat. Jimmy Holmes', last_seen_at: SEEN, start_date: '2026-10-07T19:00:00Z',
+      location_name: 'Konzerthaus Klagenfurt - Großer Saal', postal_code: '9020', district: 'klagenfurt (stadt)', latitude: 46.621, longitude: 14.3137 });
+    const e = dup({ title: 'The Magic of Elvis feat. JIMMY HOLMES', start_date: '2026-10-07T19:00:00Z', location_name: 'Konzerthaus Klagenfurt',
+      postal_code: '1150', latitude: 46.6252, longitude: 14.3069, location_precision: 'municipality' });
+    const p = planDedup([e, eventim], dedupDay([e, eventim], { sourceLastSeen: lastSeen }).clusters,
+      { newClusterId: newId, sourceLastSeen: lastSeen, externalPrimaries: new Map([['b', stale]]) });
+    expect(p.release).toEqual([]);
+    expect(p.markDuplicate).toEqual([expect.objectContaining({ id: 'a', primaryId: 't' })]);
+  });
+
   it('verwaister Primary an einem anderen Tag (schon vorbei): frische Zeile wird freigegeben', () => {
     const stale = primary({ start_date: '2026-10-06T16:30:00Z', last_seen_at: ORPHAN_SEEN });
     const p = planWith([dup({})], new Map([['b', stale]]));
@@ -390,7 +445,8 @@ describe('planDedup: Freigabe nur mit Gegenbeleg', () => {
   it('Duplikat wird selbst Primary eines Clusters: freigeben', () => {
     const p = planWith([
       dup({ duplicate_of: 'weg', quality_score: 90 }),
-      ev({ id: 'c', source_name: 'q', last_seen_at: SEEN }),
+      // Platzhalter-Uhrzeit (Mitternacht Wien): die Zeile mit echter Uhrzeit führt.
+      ev({ id: 'c', source_name: 'q', last_seen_at: SEEN, start_date: '2026-10-06T22:00:00Z' }),
     ]);
     expect(p.release).toEqual([expect.objectContaining({ id: 'a', reason: 'primary_of_cluster' })]);
   });
@@ -430,6 +486,21 @@ describe('dropDependentsOfFailedReleases', () => {
     const safe = dropDependentsOfFailedReleases(p, new Set(['p']));
     expect(safe.markDuplicate.map(m => m.id)).toEqual(['b']);
     expect(safe.primaries.map(m => m.id)).toEqual(['x']);
+  });
+});
+
+describe('resolvePlanConflicts', () => {
+  it('versteckt keine Zeile, die an ihrem eigenen Tag Primary oder freigegeben ist (tagesübergreifender Widerspruch)', () => {
+    const p = {
+      markDuplicate: [
+        { id: 'p', primaryId: 'e', clusterId: 'c', score: 1, isNew: true },
+        { id: 'x', primaryId: 'p', clusterId: 'd', score: 1, isNew: true },
+        { id: 'r', primaryId: 'e', clusterId: 'c', score: 1, isNew: true },
+      ],
+      release: [{ id: 'r', previousPrimaryId: 'q', reason: 'primary_hidden' }],
+      primaries: [{ id: 'e', clusterId: 'c', enrichments: {} }],
+    };
+    expect(resolvePlanConflicts(p).markDuplicate.map(m => m.id)).toEqual(['x']);
   });
 });
 

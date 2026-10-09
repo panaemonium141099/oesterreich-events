@@ -446,18 +446,43 @@ const BUNDESLAENDER = new Set([
 /** Nur Straße und Hausnummer („Karlingerstraße 6", „Hauptplatz 12a"). */
 const ADDRESS_LINE = /^[\p{L}][\p{L}.\- ]*(?:stra(?:ss|ß)e|str\.|gasse|weg|platz|allee|ring|zeile|ufer|kai|steig|promenade)\s*\d+\s*[a-z]?(?:\s*[/-]\s*\d+)?\s*$/iu;
 
+/** Vergleichsschlüssel einer Straßenangabe; PLZ und Ort dahinter fallen weg
+ *  („Auenwerkstatt 1A-5151 Nußdorf", „Hauptstraße 473013 Tullnerbach-Lawies"). */
+function streetKey(raw: string | null | undefined, plz: string | null): string {
+  let street = (raw ?? '').split(',')[0].replace(/\s*(?<![a-z])(?:A|AT)-\d{4}\b.*$/i, '').replace(/\s+\d{4}\s+\p{L}.*$/u, '');
+  const glued = plz ? street.match(/^(.*\d)(\d{4})\s+\p{L}.*$/u) : null;
+  if (glued && glued[2] === plz) street = glued[1];
+  const k = foldText(street).replace(/strasse|str\./g, 'str').replace(/[^a-z0-9]+/g, '');
+  return /\d/.test(k) && k.length >= 5 ? k : '';
+}
+
 /** Straße + Hausnummer zum Vergleich, aus `address` oder einer Adresse als Ortsname. */
 function addressKey(e: EventRow): string[] {
-  const keys: string[] = [];
-  for (const raw of [e.address, ADDRESS_LINE.test((e.location_name ?? '').trim()) ? e.location_name : null]) {
-    const k = foldText((raw ?? '').split(',')[0]).replace(/strasse|str\./g, 'str').replace(/[^a-z0-9]+/g, '');
-    if (/\d/.test(k) && k.length >= 5) keys.push(k);
-  }
-  return keys;
+  const plz = (e.postal_code ?? '').trim() || null;
+  const raws = [e.address, ADDRESS_LINE.test((e.location_name ?? '').trim()) ? e.location_name : null];
+  return raws.map(r => streetKey(r, plz)).filter(Boolean);
+}
+
+/** Ortsname mit Hausnummer („Auenwerkstatt 1"), der die Adresse der anderen
+ *  Zeile ist: Quellen setzen die Straße als Ortsnamen (Stichprobe 2026-10-09). */
+function venueIsAddressOf(a: EventRow, b: EventRow): boolean {
+  const name = (a.location_name ?? '').trim();
+  if (!/^\p{L}[\p{L}.\- ]*\s\d+\s*[a-z]?$/iu.test(name)) return false;
+  const k = streetKey(name, null);
+  return !!k && k === streetKey(b.address, (b.postal_code ?? '').trim() || null);
+}
+
+/** Abgekürzte Ortsnamen („Haibach o.d. Donau", „Bruck a.d. Mur") ausschreiben. */
+function expandPlaceAbbreviations(name: string): string {
+  return name
+    .replace(/\ba\.\s?d\.\s*/gi, 'an der ')
+    .replace(/\bo\.\s?d\.\s*/gi, 'ob der ')
+    .replace(/\bi\.\s?d\.\s*/gi, 'in der ')
+    .replace(/\bb\.\s+(?=\p{Lu})/gu, 'bei ');
 }
 
 function venueFeatures(name: string | null | undefined, plz: string | null): VenueFeatures {
-  const raw = (name ?? '').trim();
+  const raw = expandPlaceAbbreviations((name ?? '').trim());
   const folded = foldText(raw);
   const head = folded.split(',')[0].trim();
   const townLabel = !head || BUNDESLAENDER.has(head.replace(/[^a-z]/g, '')) || isKnownAustrianPlaceName(head);
@@ -630,7 +655,10 @@ export function placeEvidence(a: EventRow, b: EventRow, opts: PlaceOptions = {})
   // derselbe Ort, auch wenn eine Quelle die Adresse als Ortsnamen führt
   // („Arthofer Arena" / „Karlingerstraße 6", Stichprobe 2026-10-09).
   const addrB = new Set(addressKey(b));
-  if ((opts.ignoreLabels || samePlz || !fa.plz || !fb.plz) && addressKey(a).some(k => addrB.has(k))) return { relation: 'same', reason: 'address' };
+  if ((opts.ignoreLabels || samePlz || !fa.plz || !fb.plz) &&
+      (addressKey(a).some(k => addrB.has(k)) || venueIsAddressOf(a, b) || venueIsAddressOf(b, a))) {
+    return { relation: 'same', reason: 'address' };
+  }
 
   if (bothPrecise) {
     if (venue === 'differs') return { relation: 'conflict', reason: 'different_venue' };

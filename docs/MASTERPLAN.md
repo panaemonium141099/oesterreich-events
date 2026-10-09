@@ -337,12 +337,49 @@ Betrieb, Prod-Daten, Szenarien, je Befund gegengeprüft) fanden:
   10-Minuten-Takt wurden verschmolzen.
 
 Alle Punkte sind als Regeln mit Tests behoben (Golden-Set
-`dedup-golden-2026-10-08`). Probelauf ab Vortag: einmaliger Nachholplan mit
-3.099 neuen Duplikaten, 1.714 Freigaben und 271 Müllzeilen in 230 s (vorher
-400 s über alle Tage). Offen sind eigene Tasks: Parser, die das Datum als
-Titel liefern (173 frische Zeilen in 3 Tagen); Ticketmaster-Zeitzone; der
-Eventim-Affiliate-Link geht verloren, wenn die Eventim-Zeile einen
-Ortskonflikt hat (3 bis 5 Events, Anzeige-Frage).
+`dedup-golden-2026-10-08`). Danach (2026-10-09) prüften vier Runden
+Stichproben jeder geplanten Änderungsart gegen Prod (je 170 bis 230 Fälle,
+Seiten der Quellen mit abgerufen). Falsch versteckte Events fielen von
+3 auf 1 je 50. Weitere Ursachen sind behoben:
+- „Gleiche Quelle" bei Aggregatoren wie gem2go (Grinzens unter Kematen).
+- Feratel-Terminzeilen, die einfroren.
+- Altzeilen mit +1/+2 h neben der frischen Zeile.
+- Adresse als Ortsname.
+- Titel ohne Namen auf der eigenen Event-Seite (bleibt sichtbar).
+- Blätterseiten.
+- Erfundene „heute"-Termine aus dem Gemeinde-Scraper.
+
+Runde 4 (Freigaben 66 von 85 richtig, Umhängen 18 von 20, neue Duplikate
+48 von 50, Müll 10 von 20) fand drei weitere Muster, alle behoben: Gemeinde-Kalender setzen ihre
+eigene PLZ und ihren Ortsnamen auch für Events der Nachbargemeinde (6 von 8
+Etiketten-Freigaben falsch, „NÖ-Demenztag" steht in 25 Kalendern); ein
+mitten im Wort abgeschnittener Titel verdrängte die Eventim-Zeile; der
+Müll-Filter verband über die Platzhalter-Mitternacht fremde Events derselben
+Website und hielt Listen-Beschriftungen auf ICS- und Listen-Links für
+eigene Event-Seiten.
+
+Probelauf ab Vortag: einmaliger Nachholplan mit rund 4.850 neuen
+Duplikaten, 2.050 Freigaben (davon rund 1.560 Rollentausch) und knapp 700
+Müllzeilen in 275 s (vorher 400 s über alle Tage).
+
+Offen und an der Quelle zu beheben (keine Dedup-Fehler):
+- Gutschein-Produkte mit Platzhalterdatum 31.12.2030 (veranstaltungskalender.net).
+- Müllabfuhr-Termine.
+- gem2go-Titel mit angeklebter Kategorie.
+- Falsch konfigurierte Gemeinde-Kalender: 70905 liest Buch in Vorarlberg,
+  30701 liest Au im Bregenzerwald.
+- Ticketmaster-Zeitzone.
+- Der Eventim-Affiliate-Link geht verloren, wenn die Eventim-Zeile einen
+  Ortskonflikt hat (3 bis 5 Events, Anzeige-Frage).
+- Titel-Parser, die statt des Namens eine Beschriftung oder das Datum lesen:
+  gemeinde-registry „mehr" (Niederleis), gemeinden-generic
+  „Veranstaltungsdetails"/„Termin" (Neuberg), „mehr Information"
+  (Rettenschöss), Treibhaus, The Loft, BettelAlm, Gänserndorf. Diese Zeilen
+  bleiben auf ihrer eigenen Seite sichtbar, tragen aber keinen Namen.
+- Eventim führt Ticketprodukte desselben Abends als eigene Events
+  („Eintagesticket" / „Kombiticket", Jazz, Wine & More).
+- Kommunale Dienste als Termine (Klimaticket, Dorfservice, Gesunde
+  Gemeinde): Produktfrage, ob sie auf die Seite gehören.
 
 ## 4. Getroffene Grundsatz-Entscheidungen (2026-07-07)
 
