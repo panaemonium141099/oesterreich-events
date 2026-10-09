@@ -322,6 +322,21 @@ export function dropDependentsOfFailedReleases(plan: DedupPlan, failedReleaseIds
   };
 }
 
+/**
+ * Widersprüche zwischen den Tagesplänen auflösen: eine Zeile, die an ihrem
+ * eigenen Tag Primary ist (andere hängen an ihr) oder freigegeben wird, darf
+ * nicht zugleich von einem anderen Tag aus versteckt werden (Altzeile mit
+ * altem Datumsfehler). Im Zweifel bleibt sie, wie ihr eigener Tag sie plant.
+ */
+export function resolvePlanConflicts(plan: DedupPlan): DedupPlan {
+  const asPrimary = new Set([...plan.primaries.map(p => p.id), ...plan.markDuplicate.map(m => m.primaryId)]);
+  const released = new Set(plan.release.map(r => r.id));
+  return {
+    ...plan,
+    markDuplicate: plan.markDuplicate.filter(m => !asPrimary.has(m.id) && !released.has(m.id)),
+  };
+}
+
 export interface SafetyLimits {
   maxNewDuplicates: number;
   maxReleases: number;

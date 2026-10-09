@@ -6,7 +6,7 @@
 
 import { describe, it, expect } from 'vitest';
 import { dedupDay } from '@/lib/pipeline/dedup-engine';
-import { planDedup, releaseStatus, checkSafetyValve, dropDependentsOfFailedReleases } from '@/lib/pipeline/dedup-plan';
+import { planDedup, releaseStatus, checkSafetyValve, dropDependentsOfFailedReleases, resolvePlanConflicts } from '@/lib/pipeline/dedup-plan';
 import type { EventRow } from '@/lib/pipeline/types';
 
 const PLACE = { location_name: 'Sargfabrik', postal_code: '1140', latitude: 48.1952, longitude: 16.3046, location_precision: 'building' };
@@ -430,6 +430,21 @@ describe('dropDependentsOfFailedReleases', () => {
     const safe = dropDependentsOfFailedReleases(p, new Set(['p']));
     expect(safe.markDuplicate.map(m => m.id)).toEqual(['b']);
     expect(safe.primaries.map(m => m.id)).toEqual(['x']);
+  });
+});
+
+describe('resolvePlanConflicts', () => {
+  it('versteckt keine Zeile, die an ihrem eigenen Tag Primary oder freigegeben ist (tagesübergreifender Widerspruch)', () => {
+    const p = {
+      markDuplicate: [
+        { id: 'p', primaryId: 'e', clusterId: 'c', score: 1, isNew: true },
+        { id: 'x', primaryId: 'p', clusterId: 'd', score: 1, isNew: true },
+        { id: 'r', primaryId: 'e', clusterId: 'c', score: 1, isNew: true },
+      ],
+      release: [{ id: 'r', previousPrimaryId: 'q', reason: 'primary_hidden' }],
+      primaries: [{ id: 'e', clusterId: 'c', enrichments: {} }],
+    };
+    expect(resolvePlanConflicts(p).markDuplicate.map(m => m.id)).toEqual(['x']);
   });
 });
 

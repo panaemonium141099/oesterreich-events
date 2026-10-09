@@ -19,7 +19,7 @@ import { dirname, join } from 'node:path';
 import { createClient } from '@supabase/supabase-js';
 import { canonicalizeIds } from '@/lib/pipeline/dedup-scorer';
 import { dedupDay, pairKey } from '@/lib/pipeline/dedup-engine';
-import { planDedup, releaseStatus, checkSafetyValve, dropDependentsOfFailedReleases, type DedupPlan } from '@/lib/pipeline/dedup-plan';
+import { planDedup, releaseStatus, checkSafetyValve, dropDependentsOfFailedReleases, resolvePlanConflicts, type DedupPlan } from '@/lib/pipeline/dedup-plan';
 import { isPlausibleEventDay, planningStartDay, viennaDayBoundsUtc, viennaDayOf } from '@/lib/pipeline/dedup-evidence';
 import { isGarbageRow, namedPageKeys, type GarbageRowInput } from '@/lib/pipeline/garbage-filter';
 import { staleVersionIds } from '@/lib/pipeline/dedup-cluster';
@@ -382,7 +382,7 @@ async function main(): Promise<void> {
   const days = allDays.filter(d => d >= START_DAY);
   console.log(`  ${days.length} Tage ab ${START_DAY} (${allDays.length - days.length} vergangene übersprungen), ${sourceLastSeen.size} Quellen`);
 
-  const plan: DedupPlan = { markDuplicate: [], release: [], primaries: [] };
+  let plan: DedupPlan = { markDuplicate: [], release: [], primaries: [] };
   const logPairs: LogPair[] = [];
   const reasons = new Map<string, number>();
   const report: ReportEntry[] = [];
@@ -397,11 +397,12 @@ async function main(): Promise<void> {
     if (events.length === 0) continue;
 
     const result = dedupDay(events, { manualMerges: manual.merges, manualSplits: manual.splits, sourceLastSeen, staleIds: STALE_IDS });
+    const external = await loadExternalPrimaries(events);
     const dayPlan = planDedup(events, result.clusters, {
       sourceLastSeen,
       staleIds: STALE_IDS,
       manualSplits: manual.splits,
-      externalPrimaries: await loadExternalPrimaries(events),
+      externalPrimaries: external,
     });
     orphans += result.orphanIds.length;
     candidates += result.stats.candidatePairs;
@@ -418,7 +419,8 @@ async function main(): Promise<void> {
     plan.release.push(...dayPlan.release);
     plan.primaries.push(...dayPlan.primaries);
 
-    const byId = new Map(events.map(e => [e.id, e]));
+    // Auch Zeilen anderer Tage (verwaister Primary mit altem Datumsfehler).
+    const byId = new Map([...external, ...events.map(e => [e.id, e] as const)]);
     for (const m of dayPlan.markDuplicate) {
       const e = byId.get(m.id)!;
       const p = byId.get(m.primaryId)!;
@@ -436,6 +438,16 @@ async function main(): Promise<void> {
   }
   process.stderr.write('\n');
 
+  const planned = plan.markDuplicate.length;
+  plan = resolvePlanConflicts(plan);
+  if (plan.markDuplicate.length < planned) {
+    console.log(`  ${planned - plan.markDuplicate.length} tagesübergreifende Widersprüche verworfen`);
+    const kept = new Set(plan.markDuplicate.map(m => `${m.id}>${m.primaryId}`));
+    for (let i = report.length - 1; i >= 0; i--) {
+      const r = report[i];
+      if (r.action !== 'release' && !kept.has(`${r.id}>${r.primaryId}`)) report.splice(i, 1);
+    }
+  }
   const newDuplicates = plan.markDuplicate.filter(m => m.isNew).length;
   console.log('\n=== Plan ===');
   console.log(`  Events geprüft:        ${scanned}`);
