@@ -3,6 +3,7 @@ import { BaseScraper } from './BaseScraper';
 import { categorizeEvent } from '../categorize';
 import type { ScrapedEvent } from '@/types/events';
 import { isEventType } from '../connectors/json-ld-connector';
+import { cardEventName, isNamelessTitle } from './event-title';
 
 interface ClubConfig {
   id: string;
@@ -173,16 +174,21 @@ export class LinzClubsScraper extends BaseScraper {
         try {
           const $el = $(el);
           const href = $el.attr('href') || '';
-          const text = $el.text().trim();
-          if (!text || text.length < 3) return;
+          const linkText = $el.text().trim();
+          if (!linkText || linkText.length < 3) return;
+          // Datums-Link der Kachel: der Name steht in ihrer Überschrift.
+          const text = isNamelessTitle(linkText) ? cardEventName($el) : linkText;
+          if (!text) return;
 
           const $card = $el.closest('article, .event, .event-item, li, div').first();
           const cardText = $card.length ? $card.text() : text;
           const dateStr = this.parseDate(cardText);
           if (!dateStr) return;
 
-          const slug = text.toLowerCase().replace(/\W+/g, '-').slice(0, 60);
-          const sourceId = `linz-clubs-${club.id}-${slug}`;
+          const idOf = (t: string) => `linz-clubs-${club.id}-${t.toLowerCase().replace(/\W+/g, '-').slice(0, 60)}`;
+          // Name aus der Kachel: mit Tag in der ID, sonst fielen Serientermine
+          // (gleicher Name an mehreren Tagen) zu einer Zeile zusammen.
+          const sourceId = text === linkText ? idOf(text) : `${idOf(text)}-${dateStr}`;
           if (seen.has(sourceId)) return;
           seen.add(sourceId);
 
@@ -197,6 +203,8 @@ export class LinzClubsScraper extends BaseScraper {
 
           events.push({
             source_id: sourceId,
+            // Alte ID (Datum als Titel): der Sync übernimmt die Zeile (source-id-migration.ts).
+            ...(text !== linkText ? { previous_source_id: idOf(linkText) } : {}),
             source_name: this.name,
             source_url: sourceUrl,
             title: text,

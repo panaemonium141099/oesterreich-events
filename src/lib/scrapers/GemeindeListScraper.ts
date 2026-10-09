@@ -8,6 +8,7 @@ import { withStammdaten } from './gemeinden/stammdaten';
 import type { ScrapedEvent } from '@/types/events';
 import { detectNextPage, detectMonthNavigation, MAX_PAGES_PER_SITE } from './pagination';
 import { isEventType } from '../connectors/json-ld-connector';
+import { firstText, isNamelessTitle, isTitleCandidate } from './event-title';
 
 // Ortsdaten nur aus der Stammdatei (gemeinden/stammdaten.ts), lazy geladen.
 let listCache: ReturnType<typeof withStammdaten<(typeof GEMEINDEN_LISTE)[number]>> | null = null;
@@ -362,14 +363,15 @@ export class GemeindeListScraper extends BaseScraper {
         const $el = $(el);
         const text = $el.text();
 
-        // Titel extrahieren: h2, h3, h4, .title, a
-        const title = (
-          $el.find('h2, h3, h4').first().text().trim() ||
-          $el.find('.title, .event-title, .termin-title').first().text().trim() ||
-          $el.find('a').first().text().trim()
-        );
+        // Titel extrahieren: h2, h3, h4, .title, a; je Stufe das erste
+        // Element, das mehr als ein Datum trägt.
+        const titleOf = (accept: (t: string) => boolean) =>
+          firstText($el.find('h2, h3, h4'), accept) ||
+          firstText($el.find('.title, .event-title, .termin-title'), accept) ||
+          firstText($el.find('a'), accept);
+        const title = titleOf(isTitleCandidate);
 
-        if (!title || title.length < 3) return;
+        if (!title || title.length < 3 || isNamelessTitle(title)) return;
         if (seenTitles.has(title)) return;
 
         // Datum extrahieren
@@ -387,9 +389,9 @@ export class GemeindeListScraper extends BaseScraper {
         const linkHref = $el.find('a').first().attr('href');
         const eventUrl = linkHref ? this.resolveUrl(linkHref, pageUrl) : pageUrl;
 
-        const slug = this.slugify(title);
         events.push({
-          source_id: `gemeinde-${gemeinde.idKey}-${slug}`,
+          source_id: this.eventId(gemeinde, title),
+          ...this.previousId(gemeinde, titleOf(() => true), title),
           source_name: this.name,
           source_url: eventUrl,
           title,
@@ -419,29 +421,26 @@ export class GemeindeListScraper extends BaseScraper {
       const dateStr = this.extractDateFromText(text);
       if (!dateStr) return;
 
-      // Titel aus der Zeile extrahieren (längste Zelle die kein Datum ist)
-      let title = '';
-      $row.find('td, th').each((__, cell) => {
-        const cellText = $(cell).text().trim();
-        if (cellText.length > title.length && !/^\d{1,2}\.\d{1,2}\.\d{2,4}$/.test(cellText)) {
-          title = cellText;
-        }
-      });
+      // Titel: die Spalte "Veranstaltung", wenn die Tabelle sie benennt,
+      // sonst die längste Zelle, die kein Datum ist. Die Datumszelle mit
+      // Uhrzeit ("09.10.2026 09:00 - 10:30 Uhr", kremsmuenster.at) ist oft
+      // die längste; ohne sie gewänne in solchen Zeilen der Ort.
+      let title = this.titleColumnText($row);
+      if (!title) title = this.longestCell($, $row, isTitleCandidate);
+      if (!title || title.length < 3) title = firstText($row.find('a'), isTitleCandidate);
 
-      // Fallback: Link-Text
-      if (!title || title.length < 3) {
-        title = $row.find('a').first().text().trim();
-      }
-
-      if (!title || title.length < 3 || seenTitles.has(title)) return;
+      if (!title || title.length < 3 || isNamelessTitle(title) || seenTitles.has(title)) return;
       seenTitles.add(title);
 
       const linkHref = $row.find('a').first().attr('href');
       const eventUrl = linkHref ? this.resolveUrl(linkHref, pageUrl) : pageUrl;
 
-      const slug = this.slugify(title);
+      let legacyTitle = this.longestCell($, $row, () => true);
+      if (!legacyTitle || legacyTitle.length < 3) legacyTitle = $row.find('a').first().text().trim();
+
       events.push({
-        source_id: `gemeinde-${gemeinde.idKey}-${slug}`,
+        source_id: this.eventId(gemeinde, title),
+        ...this.previousId(gemeinde, legacyTitle, title),
         source_name: this.name,
         source_url: eventUrl,
         title,
@@ -458,23 +457,33 @@ export class GemeindeListScraper extends BaseScraper {
         const dateStr = this.extractDateFromText(text);
         if (!dateStr) return;
 
-        // Titel: Link-Text oder gesamter Text minus Datum
-        let title = $li.find('a').first().text().trim();
-        if (!title || title.length < 3) {
-          title = text.replace(/\d{1,2}\.\d{1,2}\.\d{2,4}/g, '').trim();
-          // Nimm nur die erste Zeile
-          title = title.split('\n')[0].trim();
+        // Titel: Link-Text oder gesamter Text minus Datum (erste Zeile)
+        const titleOf = (accept: (t: string) => boolean) => {
+          const linkText = firstText($li.find('a'), accept);
+          if (linkText && linkText.length >= 3) return linkText;
+          const line = text.replace(/\d{1,2}\.\d{1,2}\.\d{2,4}/g, '').trim().split('\n')[0].trim();
+          return accept(line) ? line : '';
+        };
+        let title = titleOf(isTitleCandidate);
+        let linkHref = $li.find('a').first().attr('href');
+        if (!title || isNamelessTitle(title)) {
+          // Nur Datum und Uhrzeit im Eintrag (gaenserndorf.at, wien.gv.at:
+          // "9.10.2026, 14 bis 22 Uhr" als Zeile einer Kachel): der Name
+          // ist die verlinkte Überschrift der Kachel.
+          const card = this.cardHeading($li, text);
+          if (!card) return;
+          title = card.title;
+          linkHref = card.href;
         }
 
         if (!title || title.length < 3 || title.length > 200 || seenTitles.has(title)) return;
         seenTitles.add(title);
 
-        const linkHref = $li.find('a').first().attr('href');
         const eventUrl = linkHref ? this.resolveUrl(linkHref, pageUrl) : pageUrl;
 
-        const slug = this.slugify(title);
         events.push({
-          source_id: `gemeinde-${gemeinde.idKey}-${slug}`,
+          source_id: this.eventId(gemeinde, title),
+          ...this.previousId(gemeinde, titleOf(() => true), title),
           source_name: this.name,
           source_url: eventUrl,
           title,
@@ -495,8 +504,8 @@ export class GemeindeListScraper extends BaseScraper {
 
     $('a').each((_, el) => {
       const $a = $(el);
-      const title = $a.text().trim();
-      if (!title || title.length < 3 || title.length > 200) return;
+      const linkText = $a.text().trim();
+      if (!linkText || linkText.length < 3 || linkText.length > 200) return;
 
       // Prüfe ob im Elternelement ein Datum steht
       const parent = $a.parent();
@@ -504,16 +513,23 @@ export class GemeindeListScraper extends BaseScraper {
       const dateStr = this.extractDateFromText(parentText);
       if (!dateStr) return;
 
+      const href = $a.attr('href');
+      // Datums-Kachel als Link (spielberg.at, iCagenda: "09 Okt 2026"): der
+      // Name steht im Link mit demselben Ziel.
+      const title = isNamelessTitle(linkText)
+        ? firstText(parent.find('a').filter((_, x) => !!href && $(x).attr('href') === href), t => !isNamelessTitle(t))
+        : linkText;
+      if (!title || title.length > 200) return;
+
       if (seenTitles.has(title)) return;
       seenTitles.add(title);
 
-      const href = $a.attr('href');
       if (!href || href === '#' || href.startsWith('javascript:')) return;
       const eventUrl = this.resolveUrl(href, pageUrl);
 
-      const slug = this.slugify(title);
       events.push({
-        source_id: `gemeinde-${gemeinde.idKey}-${slug}`,
+        source_id: this.eventId(gemeinde, title),
+        ...this.previousId(gemeinde, linkText, title),
         source_name: this.name,
         source_url: eventUrl,
         title,
@@ -526,6 +542,77 @@ export class GemeindeListScraper extends BaseScraper {
   }
 
   // ─── HILFSFUNKTIONEN ────────────────────────────────────────────────────
+
+  private eventId(gemeinde: GemeindeInfo, title: string): string {
+    return `gemeinde-${gemeinde.idKey}-${this.slugify(title)}`;
+  }
+
+  /** Alte ID einer Zeile, deren Titel der Parser früher anders las (Datum
+   *  statt Name): der Sync schlüsselt sie um (source-id-migration.ts). */
+  private previousId(gemeinde: GemeindeInfo, legacyTitle: string, title: string): { previous_source_id?: string } {
+    if (!legacyTitle || this.eventId(gemeinde, legacyTitle) === this.eventId(gemeinde, title)) return {};
+    return { previous_source_id: this.eventId(gemeinde, legacyTitle) };
+  }
+
+  /** Längste Zelle der Zeile, die `accept` annimmt und kein bloßes Datum ist. */
+  private longestCell($: cheerio.CheerioAPI, $row: cheerio.Cheerio<any>, accept: (t: string) => boolean): string {
+    let title = '';
+    $row.find('td, th').each((_, cell) => {
+      const cellText = $(cell).text().trim();
+      if (cellText.length > title.length && !/^\d{1,2}\.\d{1,2}\.\d{2,4}$/.test(cellText) && accept(cellText)) {
+        title = cellText;
+      }
+    });
+    return title;
+  }
+
+  /** Zelle unter der Kopfzeile "Veranstaltung"/"Titel" derselben Tabelle. */
+  private titleColumnText($row: cheerio.Cheerio<any>): string {
+    const header = $row.closest('table').find('tr').first().children('th, td');
+    const cells = $row.children('td, th');
+    if (header.length !== cells.length) return '';
+    for (let i = 0; i < header.length; i++) {
+      if (!/^(veranstaltung|titel|bezeichnung)$/i.test(header.eq(i).text().trim())) continue;
+      const text = cells.eq(i).text().trim();
+      return isNamelessTitle(text) ? '' : text;
+    }
+    return '';
+  }
+
+  /**
+   * Verlinkte Überschrift der Kachel um einen Eintrag, der nur Datum und
+   * Uhrzeit trägt. Gesucht wird nach oben, solange der Bereich keine
+   * anderen Daten nennt; sonst ist er die Liste, nicht die Kachel.
+   */
+  private cardHeading($el: cheerio.Cheerio<any>, text: string): { title: string; href: string } | null {
+    const own = this.allDates(text);
+    let $up = $el.parent();
+    for (let level = 0; level < 6 && $up.length; level++, $up = $up.parent()) {
+      const upText = $up.text();
+      if (upText.length > 4000) return null;
+      const dates = this.allDates(upText);
+      if (dates.size !== own.size || [...dates].some(d => !own.has(d))) return null;
+      const links = $up.find('h1 a[href], h2 a[href], h3 a[href], h4 a[href], h5 a[href], h6 a[href]');
+      for (let i = 0; i < links.length; i++) {
+        const title = links.eq(i).text().replace(/\s+/g, ' ').trim();
+        if (!isNamelessTitle(title)) return { title, href: links.eq(i).attr('href')! };
+      }
+    }
+    return null;
+  }
+
+  /** Alle Datumsangaben eines Texts (DD.MM.YYYY und DD. Monat YYYY) als YYYY-MM-DD. */
+  private allDates(text: string): Set<string> {
+    const found = new Set<string>();
+    for (const m of text.matchAll(/(\d{1,2})\.(\d{1,2})\.(\d{4})/g)) {
+      found.add(`${m[3]}-${m[2].padStart(2, '0')}-${m[1].padStart(2, '0')}`);
+    }
+    const written = /(\d{1,2})\.\s*(jänner|januar|februar|märz|april|mai|juni|juli|august|september|oktober|november|dezember)\s*(\d{4})/gi;
+    for (const m of text.matchAll(written)) {
+      found.add(`${m[3]}-${this.MONTHS[m[2].toLowerCase()]}-${m[1].padStart(2, '0')}`);
+    }
+    return found;
+  }
 
   /**
    * Extrahiert ein Datum aus einem Text-Block.

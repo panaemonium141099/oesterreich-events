@@ -181,7 +181,11 @@ node / next.js
   (Eventim-exklusiv, data-track="ticket_click")
 - `src/components/Analytics/` — PageviewTracker + ClickTracker (global im Layout)
 - `src/lib/eventim/` — PFT-Feed-Client, Parser, Kategorie/Genre-Mapping, Import
-- `src/lib/scrapers/` — ~144 Scraper (Registry in index.ts; `getScrapersForShard`)
+- `src/lib/scrapers/` — ~144 Scraper (Registry in index.ts; `getScrapersForShard`).
+  Titelwahl in Listen-Parsern über `event-title.ts`: Datum/Uhrzeit ist nie
+  ein Titel (`isNamelessTitle`), übersprungen wird nur in Überschrift/Link,
+  nie im Fettdruck/Fließtext. Ändert sich dadurch die ID, meldet der
+  Scraper die alte als `previous_source_id` (Zeile bleibt erhalten).
 - `src/lib/db/supabase-sync.ts` — EINZIGER Write-Pfad Scraper→Supabase
   (confidence-basierte Upsert-Guards); kein SQLite mehr im Projekt
 - `src/lib/search/smart-query.ts` — Parser/Whitelist/Ranking der Smart-Suche (pur, getestet)
