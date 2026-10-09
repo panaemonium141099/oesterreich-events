@@ -22,6 +22,7 @@ import { extractGem2goDetail } from './gem2go-detail';
 import { isUsableDetailHref } from './gemeinde-event-discovery';
 import { applyGemeindeContext } from './gemeinde-context';
 import { withStammdaten, type GemeindeStammdaten } from './gemeinden/stammdaten';
+import { firstText, isTitleCandidate } from './event-title';
 
 // Die Datei führt nur die Identität der Gemeinde; PLZ, Bezirk und
 // Mittelpunkt ergänzt withStammdaten() aus der Stammdatei.
@@ -278,7 +279,8 @@ export class GenericGemeindeScraper extends BaseScraper {
     // WP Event Manager
     $('div.event_listing, article.type-event_listing, .wpem-event-listing').each((_, el) => {
       const $el = $(el);
-      const title = $el.find('.wpem-heading, .event_listing-title, h3, h2').first().text().trim();
+      const titles = $el.find('.wpem-heading, .event_listing-title, h3, h2');
+      const title = firstText(titles, isTitleCandidate);
       const dateText = $el.find('.event-date, .wpem-event-date, time').first().text().trim();
       const location = $el.find('.event-location, .wpem-event-location').first().text().trim();
       const link = $el.find('a').first().attr('href');
@@ -286,9 +288,11 @@ export class GenericGemeindeScraper extends BaseScraper {
 
       if (!title) return;
       const date = this.parseDate(dateText);
+      const id = (t: string) => `gemeinden-generic-${g.idKey}-${this.slugify(t)}`;
 
       events.push({
-        source_id: `gemeinden-generic-${g.idKey}-${this.slugify(title)}`,
+        source_id: id(title),
+        ...this.previousId(firstText(titles, () => true), title, id),
         source_name: this.name,
         source_url: link ? new URL(link, page.eventPageUrl).href : page.eventPageUrl,
         title,
@@ -303,15 +307,18 @@ export class GenericGemeindeScraper extends BaseScraper {
     if (events.length === 0) {
       $('.tribe-events-list .type-tribe_events, .tribe-common-g-row').each((_, el) => {
         const $el = $(el);
-        const title = $el.find('.tribe-events-list-event-title, .tribe-event-title, h2, h3').first().text().trim();
+        const titles = $el.find('.tribe-events-list-event-title, .tribe-event-title, h2, h3');
+        const title = firstText(titles, isTitleCandidate);
         const dateText = $el.find('.tribe-events-schedule, .tribe-event-date-start, time, abbr').first().text().trim();
         const link = $el.find('a').first().attr('href');
 
         if (!title) return;
         const date = this.parseDate(dateText);
+        const id = (t: string) => `gemeinden-generic-${g.idKey}-${this.slugify(t)}`;
 
         events.push({
-          source_id: `gemeinden-generic-${g.idKey}-${this.slugify(title)}`,
+          source_id: id(title),
+          ...this.previousId(firstText(titles, () => true), title, id),
           source_name: this.name,
           source_url: link ? new URL(link, page.eventPageUrl).href : page.eventPageUrl,
           title,
@@ -334,7 +341,10 @@ export class GenericGemeindeScraper extends BaseScraper {
     // Typo3 wt_eventman, cal, etc.
     $('.event-list-item, .tx-wteventman .event, .tx-cal-event, article.event, .news-list-item').each((_, el) => {
       const $el = $(el);
-      const title = $el.find('h2, h3, .event-title, .news-title, a').first().text().trim();
+      // Erstes Element, das ein Event benennt: der Datums-Link vor der
+      // Überschrift (tx_news-Liste, allerheiligen-wildon.at) ist keins.
+      const titles = $el.find('h2, h3, .event-title, .news-title, a');
+      const title = firstText(titles, isTitleCandidate);
       const dateText = $el.find('.event-date, .date, time, .news-date').first().text().trim();
       const link = $el.find('a').first().attr('href');
       const desc = $el.find('.event-teaser, .event-description, p, .news-teaser').first().text().trim();
@@ -342,9 +352,11 @@ export class GenericGemeindeScraper extends BaseScraper {
       if (!title || title.length < 5) return;
       const date = this.parseDate(dateText);
       if (!date) return; // Must have a valid date for Typo3
+      const id = (t: string) => `gemeinden-generic-${g.idKey}-${this.slugify(t)}`;
 
       events.push({
-        source_id: `gemeinden-generic-${g.idKey}-${this.slugify(title)}`,
+        source_id: id(title),
+        ...this.previousId(firstText(titles, () => true), title, id),
         source_name: this.name,
         source_url: link ? new URL(link, page.eventPageUrl).href : page.eventPageUrl,
         title,
@@ -412,25 +424,28 @@ export class GenericGemeindeScraper extends BaseScraper {
       // Skip past dates
       if (new Date(dateStr) < new Date('2025-01-01')) return;
 
-      // Extract title: try heading first, then first text node, then full text.
-      // Anchors sind absichtlich NACH den Headings und ohne mailto:/tel:
-      // — `find()` liefert Dokumentreihenfolge, nicht Selektorreihenfolge,
-      // sonst gewinnt der Kontakt-Link eines Vereinsblocks gegen die
-      // Ueberschrift und die Mailadresse wird zum Titel.
-      let title = $el.find('h2, h3, h4, h5, h6').first().text().trim()
-        || this.titleElementText($el)
-        || this.firstContentAnchorText($el)
-        || $el.find('strong, b').first().text().trim();
-      if (!title || title.length < 5) {
-        // Use the text but remove the date
-        title = text.replace(/\d{1,2}\.\d{1,2}\.20\d{2}/g, '').trim();
-        // Take first meaningful line
-        const lines = title.split(/\n/).map(l => l.trim()).filter(l => l.length > 3);
-        title = lines[0] || title;
+      let title = this.blockTitle($el, text, isTitleCandidate);
+      let $card: cheerio.Cheerio<any> = $el;
+      if (!title) {
+        // Kachel länger als ein Block (tulln.at: >1000 Zeichen) oder
+        // Datumszeile neben dem Titel (strass-steiermark.gv.at): der Titel
+        // steht im umschließenden Element, das genau dieselben Daten nennt.
+        // Ein Element mit weiteren Daten ist die Liste oder eine Kachel mit
+        // "Von: … Bis: …", dort ist die einzelne Zeile kein Event. Ohne
+        // Überschrift zählt ein Link nur, wenn das Element ein einziges
+        // Ziel verlinkt: der Seitenkopf verlinkt viele und lieferte sonst
+        // "Aktuelles" (gralla.at).
+        let $up = $el.parent().closest(BLOCK);
+        for (let level = 0; level < 3 && $up.length; level++) {
+          const upText = $up.text();
+          if (upText.length > 4000 || !sameDateSet(findDates(upText), dates)) break;
+          title = (firstText($up.find('h2, h3, h4, h5, h6'), isTitleCandidate)
+            || (this.linkTargets($up).size === 1 ? this.firstContentAnchorText($up, isTitleCandidate) : ''))
+            .replace(/\s+/g, ' ').trim();
+          if (title) { $card = $up; break; }
+          $up = $up.parent().closest(BLOCK);
+        }
       }
-
-      // Clean up title
-      title = title.replace(/\s+/g, ' ').trim();
       if (title.length < 5 || title.length > 200) return;
 
       const key = `${dateStr}-${title.substring(0, 30)}`;
@@ -438,14 +453,16 @@ export class GenericGemeindeScraper extends BaseScraper {
       seen.add(key);
 
       // Try to find a link (mailto:/tel: waeren keine Detailseite)
-      const link = this.firstContentAnchorHref($el);
+      const link = this.firstContentAnchorHref($el) ?? this.firstContentAnchorHref($card);
 
       // Try to extract time
       const time = extractTimeOfDay(text);
       const startDate = time ? `${dateStr}T${time}` : dateStr;
+      const id = (t: string) => `gemeinden-generic-${g.idKey}-${this.slugify(t)}-${dateStr}`;
 
       events.push({
-        source_id: `gemeinden-generic-${g.idKey}-${this.slugify(title)}-${dateStr}`,
+        source_id: id(title),
+        ...this.previousId(this.blockTitle($el, text, () => true), title, id),
         source_name: this.name,
         source_url: link ? new URL(link, page.eventPageUrl).href : page.eventPageUrl,
         title,
@@ -460,15 +477,69 @@ export class GenericGemeindeScraper extends BaseScraper {
 
   // ─── Helpers ────────────────────────────────────────────────────────
 
+  /**
+   * Titel eines Datums-Blocks: Überschrift, sonst Titel-Element, Link,
+   * Fettdruck, sonst die erste Textzeile ohne Datum; leer, wenn er kein
+   * Event benennt. Überschrift, Titel-Element und Link nehmen das erste
+   * Element, das `accept` annimmt (der Titel steht oft neben einem
+   * Datums-Element derselben Art), Fettdruck und Textzeile nur das erste:
+   * sonst würde aus "12." die Uhrzeit mit Ort ("09:30 Uhr, Kolm Saigurn").
+   * Mit `() => true` ist es die Titelwahl vor 2026-10, die Datums-
+   * Überschriften ("09.10.2026" vor dem Titel, herzogenburg.at) und
+   * Datums-Links ("Fr Okt 09", ybbs.gv.at) als Titel nahm.
+   */
+  private blockTitle($el: cheerio.Cheerio<any>, text: string, accept: (t: string) => boolean): string {
+    let title = this.cardTitle($el, accept);
+    // Überschrift oder Link der Kachel ist nur ein Datum: dann benennt auch
+    // Fettdruck oder Fließtext kein Event (völkermarkt.gv.at: Überschrift
+    // "10. Oktober …", erste Textzeile "BEITRAG VOM").
+    if (!title && this.cardTitle($el, () => true)) return '';
+    title ||= $el.find('strong, b').first().text().trim();
+    if (!title || title.length < 5) {
+      // Use the text but remove the date, take first meaningful line
+      title = text.replace(/\d{1,2}\.\d{1,2}\.20\d{2}/g, '').trim();
+      const lines = title.split(/\n/).map(l => l.trim()).filter(l => l.length > 3);
+      title = lines[0] || title;
+    }
+    title = title.replace(/\s+/g, ' ').trim();
+    return accept(title) ? title : '';
+  }
+
+  /**
+   * Überschrift, Titel-Element oder Link-Text einer Kachel.
+   * Anchors sind absichtlich NACH den Headings und ohne mailto:/tel:
+   * — `find()` liefert Dokumentreihenfolge, nicht Selektorreihenfolge,
+   * sonst gewinnt der Kontakt-Link eines Vereinsblocks gegen die
+   * Ueberschrift und die Mailadresse wird zum Titel.
+   */
+  private cardTitle($el: cheerio.Cheerio<any>, accept: (t: string) => boolean): string {
+    return firstText($el.find('h2, h3, h4, h5, h6'), accept)
+      || this.titleElementText($el, accept)
+      || this.firstContentAnchorText($el, accept);
+  }
+
+  /** Alte ID einer Zeile, deren Titel der Parser früher anders las: der
+   *  Sync schlüsselt sie um (source-id-migration.ts), Zeilen-ID und Slug
+   *  bleiben erhalten. */
+  private previousId(
+    legacyTitle: string,
+    title: string,
+    id: (t: string) => string,
+  ): { previous_source_id?: string } {
+    const legacy = legacyTitle.replace(/\s+/g, ' ').trim();
+    if (!legacy || id(legacy) === id(title)) return {};
+    return { previous_source_id: id(legacy) };
+  }
+
   /** Text des innersten Elements mit "title"/"header" in der Klasse
    *  (z. B. gem2go-Karten: `.card-title > .bemHeader`), ohne Datum. */
-  private titleElementText($el: cheerio.Cheerio<any>): string {
+  private titleElementText($el: cheerio.Cheerio<any>, accept: (t: string) => boolean): string {
     const sel = '[class*="title" i], [class*="header" i]';
     const nodes = $el.find(sel);
     for (let i = 0; i < nodes.length; i++) {
       if (nodes.eq(i).find(sel).length > 0) continue;
       const text = nodes.eq(i).text().replace(/\s+/g, ' ').trim();
-      if (text.length >= 5 && findDates(text).length === 0) return text;
+      if (text.length >= 5 && findDates(text).length === 0 && accept(text)) return text;
     }
     return '';
   }
@@ -477,7 +548,7 @@ export class GenericGemeindeScraper extends BaseScraper {
    *  Anchors ganz ohne href bleiben zulaessig — die sind reine Wrapper.
    *  Generische Linktexte ("mehr Informationen") und Anchors, die die
    *  ganze Kachel samt Datum umschließen, benennen kein Event. */
-  private firstContentAnchorText($el: cheerio.Cheerio<any>): string {
+  private firstContentAnchorText($el: cheerio.Cheerio<any>, accept: (t: string) => boolean): string {
     const anchors = $el.find('a');
     for (let i = 0; i < anchors.length; i++) {
       const a = anchors.eq(i);
@@ -485,9 +556,20 @@ export class GenericGemeindeScraper extends BaseScraper {
       if (href && !isUsableDetailHref(href)) continue;
       const text = a.text().trim();
       if (GENERIC_LINK_TEXT.test(text) || findDates(text).length > 0) continue;
-      if (text) return text;
+      if (text && accept(text)) return text;
     }
     return '';
+  }
+
+  /** Alle Detail-Ziele (kein mailto:/tel:) der Anchors im Element. */
+  private linkTargets($el: cheerio.Cheerio<any>): Set<string> {
+    const targets = new Set<string>();
+    const anchors = $el.find('a');
+    for (let i = 0; i < anchors.length; i++) {
+      const href = anchors.eq(i).attr('href');
+      if (isUsableDetailHref(href)) targets.add(href!);
+    }
+    return targets;
   }
 
   /** Href des ersten Anchors, der auf eine Detailseite zeigt (kein mailto:/tel:). */

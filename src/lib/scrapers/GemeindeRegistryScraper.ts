@@ -11,6 +11,7 @@ import type { ScrapedEvent } from '@/types/events';
 import { isEventType } from '../connectors/json-ld-connector';
 import { extractGem2goDetail } from './gem2go-detail';
 import { isUsableDetailHref } from './gemeinde-event-discovery';
+import { firstText, isEventList, isNamelessTitle, isTitleCandidate } from './event-title';
 
 export interface PaginationLogEntry {
   gemeinde: string;
@@ -1045,12 +1046,10 @@ export class GemeindeRegistryScraper extends BaseScraper {
         if (!startDate) startDate = this.parseGermanDate(text);
         if (!startDate) return;
 
-        let title = $el.find('h2, h3, h4, h5, h6').first().text().trim()
-          || this.firstContentAnchorText($el)
-          || $el.find('strong, b').first().text().trim();
-
-        if (title) title = this.cleanTitle(title);
-        if (!title || title.length < 3 || title.length > 200) return;
+        const title = this.blockTitle($el, isEventList($el) ? () => true : isTitleCandidate);
+        if (!title || title.length < 3 || title.length > 200 || isNamelessTitle(title)) return;
+        const id = (t: string) => `registry-gen-${Buffer.from(t + startDate).toString('base64').substring(0, 24)}`;
+        const legacyTitle = this.blockTitle($el, () => true);
 
         const dedupeKey = `${startDate}-${title.substring(0, 30)}`;
         if (seen.has(dedupeKey)) return;
@@ -1064,7 +1063,10 @@ export class GemeindeRegistryScraper extends BaseScraper {
         const imageInfo = this.imageFromElement($el.find('img').first(), entry.eventUrl!);
 
         events.push({
-          source_id: `registry-gen-${Buffer.from(title + startDate).toString('base64').substring(0, 24)}`,
+          source_id: id(title),
+          // Alte ID aus der Titelwahl vor 2026-10: der Sync übernimmt die
+          // Zeile (source-id-migration.ts).
+          ...(legacyTitle && id(legacyTitle) !== id(title) ? { previous_source_id: id(legacyTitle) } : {}),
           source_name: this.name,
           source_url: sourceUrl,
           title,
@@ -1247,17 +1249,35 @@ export class GemeindeRegistryScraper extends BaseScraper {
     return date;
   }
 
+  /**
+   * Titel eines Datums-Blocks: Überschrift, sonst Link, sonst Fettdruck.
+   * Überschrift und Link nehmen das erste Element, das `accept` annimmt,
+   * der Fettdruck nur das erste (sonst würde aus "12." die Uhrzeit mit Ort,
+   * raurisertal.at). Mit `() => true` ist es die Titelwahl vor 2026-10,
+   * die die Datums-Überschrift vor dem Titel nahm (ottenschlag.com:
+   * "11.10.2026, 10:00 - 18:00" über "Oktoberfest vom Hilfswerk"). Sind
+   * Überschrift und Link nur ein Datum, benennt auch der Fettdruck kein
+   * Event.
+   */
+  private blockTitle($el: cheerio.Cheerio<any>, accept: (t: string) => boolean): string {
+    const headings = $el.find('h2, h3, h4, h5, h6');
+    let title = firstText(headings, accept) || this.firstContentAnchorText($el, accept);
+    if (!title && (firstText(headings, () => true) || this.firstContentAnchorText($el, () => true))) return '';
+    title ||= $el.find('strong, b').first().text().trim();
+    return title ? this.cleanTitle(title) : '';
+  }
+
   /** Text des ersten Anchors, der kein Kontakt-Link (mailto:/tel:/…) ist.
    *  Ohne diesen Filter gewinnt der mailto:-Anchor eines Vereinsblocks gegen
    *  die Ueberschrift und die Mailadresse landet als Event-Titel in der DB. */
-  private firstContentAnchorText($el: cheerio.Cheerio<any>): string {
+  private firstContentAnchorText($el: cheerio.Cheerio<any>, accept: (t: string) => boolean): string {
     const anchors = $el.find('a');
     for (let i = 0; i < anchors.length; i++) {
       const a = anchors.eq(i);
       const href = a.attr('href');
       if (href && !isUsableDetailHref(href)) continue;
       const text = a.text().trim();
-      if (text) return text;
+      if (text && accept(text)) return text;
     }
     return '';
   }

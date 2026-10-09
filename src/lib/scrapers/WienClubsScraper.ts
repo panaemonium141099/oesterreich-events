@@ -4,6 +4,7 @@ import { categorizeEvent } from '../categorize';
 import { getSharedBrowser } from './puppeteerBrowser';
 import type { ScrapedEvent } from '@/types/events';
 import { isEventType } from '../connectors/json-ld-connector';
+import { firstText, isNamelessTitle, isTitleCandidate } from './event-title';
 
 interface ClubConfig {
   id: string;
@@ -1172,22 +1173,26 @@ export class WienClubsScraper extends BaseScraper {
       const dateStr = this.parseDate(text);
       if (!dateStr) return;
 
-      // Look for a title in nearby elements
+      // Look for a title in nearby elements. Die Überschrift mit dem Datum
+      // selbst ist keiner (bettel-alm.at: h2 "Samstag 31.10. ab 22Uhr" über
+      // h3 "HALLOWEEN PARTY").
       const $parent = $el.parent();
-      const $heading = $parent.find('h1, h2, h3, h4, strong, b').first();
-      let title = $heading.text().trim();
-      if (!title) {
-        title = $parent.text().replace(text, '').trim().split('\n')[0].trim();
-      }
-      if (!title || title.length < 3 || title.length > 200) return;
+      const titleOf = (accept: (t: string) => boolean) =>
+        firstText($parent.find('h1, h2, h3, h4, strong, b'), accept)
+          || $parent.text().replace(text, '').trim().split('\n')[0].trim();
+      const title = titleOf(isTitleCandidate);
+      if (!title || title.length < 3 || title.length > 200 || isNamelessTitle(title)) return;
 
-      const slug = title.toLowerCase().replace(/\W+/g, '-').slice(0, 60);
-      const sourceId = `wien-clubs-${club.id}-${slug}`;
+      const idOf = (t: string) => `wien-clubs-${club.id}-${t.toLowerCase().replace(/\W+/g, '-').slice(0, 60)}`;
+      const sourceId = idOf(title);
       if (seen.has(sourceId)) return;
       seen.add(sourceId);
+      // Alte ID (Datum als Titel): der Sync übernimmt die Zeile (source-id-migration.ts).
+      const previousId = idOf(titleOf(() => true));
 
       events.push({
         source_id: sourceId,
+        ...(previousId !== sourceId ? { previous_source_id: previousId } : {}),
         source_name: this.name,
         source_url: club.url,
         title,
