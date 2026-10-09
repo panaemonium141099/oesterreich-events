@@ -74,16 +74,22 @@ node / next.js
   verwaiste Sockets getimeouteter Scraper den Job stundenlang am Leben.
   Dazu Venues-Job + EIN Post-Processing-Job (`scrape-pipeline.ts
   --skip-scrapers --skip-venues`: normalize → categorize → geocode →
-  master_coords → score → dedup → dedup_audit → withdrawal → artist_matching →
-  indexing → report) mit `if: always()`. `withdrawal` (`withdraw-stale-events.ts`,
-  Regeln in `src/lib/quality/withdrawal.ts`) zieht Events zurück, die ihre
+  master_coords → score → withdrawal → dedup → dedup_audit → security_audit →
+  artist_matching → indexing → report) mit `if: always()`, nie zwei
+  gleichzeitig (`concurrency`). Ein roter Schritt nennt seinen Grund in der
+  Alarm-Mail (`reportStepReason`, `src/lib/pipeline/step-reason.ts`).
+  `withdrawal` (`withdraw-stale-events.ts`, läuft VOR dem Dedup, damit der
+  im selben Lauf neu rechnet; Regeln in `src/lib/quality/withdrawal.ts`)
+  zieht Events zurück, die ihre
   Quelle nicht mehr listet: nur mit Beleg (Detailseite 404/410), wenn
   die Quelle seit 30 Tagen nichts liefert, oder wenn sie dieselbe
   Detailseite am selben Tag unter neuer source_id listet (abgelöst, auch
-  needs_review: Titel-IDs verwaisen bei jeder Parser-Korrektur).
-  „Nicht gesehen" allein ist kein Beleg (Stichprobe: 15 von 125 wirklich
-  weg). Zurückgezogen = `suppressed` + `withdrawn_at`; der Upsert hebt
-  beides auf.
+  needs_review: Titel-IDs verwaisen bei jeder Parser-Korrektur; die
+  Ersatzzeile derselben Seite zählt nicht als Bestätigung, z. B.
+  „ABGESAGT: …"). „Nicht gesehen" allein ist kein Beleg (Stichprobe: 15
+  von 125 wirklich weg). Zurückgezogen = `suppressed` + `withdrawn_at`;
+  der Upsert hebt beides auf. `security_audit` wird rot, sobald eine
+  schreibende SECURITY-DEFINER-Funktion für anon ausführbar ist.
 - **GitHub Actions `import-eventim.yml`** (alle 6 h): PFT-Feed-Import mit
   Affiliate-Links. Secrets: `EVENTIM_FEED_USER`/`EVENTIM_FEED_PASS`.
 - **GitHub Actions `ingest-activities.yml`** (wöchentlich): Deskline-
@@ -189,12 +195,28 @@ node / next.js
 - **Event-Dedup (2026-10):** `src/lib/pipeline/dedup-evidence.ts` (Belege
   Titel/Ort/Zeit als Relation, quellen-unabhängig) → `dedup-scorer.ts`
   (Entscheidungstabelle + Grund) → `dedup-engine.ts` (Wiener Tag, Kandidaten,
-  Mehrdeutigkeits- und Widerspruchsschutz, Primary: sichtbar > Eventim >
-  bisheriger) → `dedup-plan.ts` (Sollzustand → nur Abweichungen, Freigabe,
-  Sicherheitsventil). `src/scripts/dedup.ts` rechnet JEDEN Lauf alle Cluster
-  neu (kein `--reset` mehr nötig); `dedup-audit.ts` macht den Schritt rot,
-  wenn offensichtliche Dubletten sichtbar bleiben. Golden-Set aus echten
-  Prod-Fällen: `src/__tests__/pipeline/dedup-golden.test.ts` — neue
+  Mehrdeutigkeits- und Widerspruchsschutz, Primary: sichtbar > aktuell
+  geliefert > mit Koordinaten > sauberer Titel > Terminzeile statt
+  Serien-Basiszeile > Eventim > echte Uhrzeit > bisheriger) →
+  `dedup-plan.ts` (Sollzustand → nur Abweichungen, Freigabe,
+  Sicherheitsventil). `src/scripts/dedup.ts` rechnet JEDEN Lauf alle
+  Cluster ab dem Wiener Vortag neu (kein `--reset` mehr nötig);
+  `dedup-audit.ts` macht den Schritt rot, wenn offensichtliche Dubletten
+  sichtbar bleiben. Verwaiste Zeilen (Quelle liefert sie > 21 Tage nicht) und
+  ältere Fassungen einer Event-Seite am selben Tag (`staleVersionIds`) sind
+  nie Gegenbeleg und nie Primary; eine frische Zeile hinter einem verwaisten
+  Primary wird Primary oder freigegeben, eine Freigabe neben einem
+  sichtbaren Zwilling hängt sich an ihn. „Dieselbe Quelle" heißt nicht
+  derselbe Ort (Aggregatoren wie gem2go): Vorgängerversionen nur von
+  derselben Event-Seite oder ohne PLZ-/Bezirks-Widerspruch. Absage-Varianten
+  („ABGESAGT", „entfällt", „verschoben auf <anderer Tag>") werden nie mit der
+  aktiven Zeile verschmolzen. Müll-Titel (`isGarbageTitle`) verwirft schon der
+  Sync; ein Titel ohne Namen (nur Datum) auf der eigenen Seite genau eines
+  Events bleibt sichtbar (`isGarbageRow`), bis der Scraper den Namen liest.
+  Der Dedup unterdrückt Altbestand erst nach dem Sicherheitsventil (Grenzen:
+  1.500 neue Duplikate, 300 sichtbar machende Freigaben, 1.000 Müll; per
+  workflow_dispatch freigebbar, Plan als Artefakt). Golden-Sets aus echten
+  Prod-Fällen: `src/__tests__/pipeline/dedup-golden*.test.ts`; neue
   Fehlerfälle dort ergänzen, keine Quellen-Sonderregeln. Vor Regeländerungen
   `npm run dedup -- --dry-run --report r.json` gegen Prod.
 - `src/lib/dedup/` (Fingerprint/Jaro-Winkler, Dedup innerhalb eines Scraper-Laufs), `src/lib/series-detection/`,
@@ -257,6 +279,13 @@ npm run scrape:festival-lineups | match-artists
   `GRANT EXECUTE ... TO anon, authenticated`. Sperren immer
   `FROM PUBLIC, anon, authenticated` zusammen, einzeln greift keins.
   Bedarf je Funktion: `docs/ops/funktionsrechte-prod-stand-2026-10-08.md`.
+  Bis 2026-10-08 konnte jeder über `bulk_update_event_publish` Events
+  verstecken (Einzelrechte aus Supabase-Cloud, per Restore mitgenommen;
+  Sperre `20261008120000_rpc_schreibrechte_anon_entziehen.sql`). Wächter für
+  schreibende SECURITY-DEFINER-Funktionen: `security-definer-grants.test.ts`
+  (Migrationen, anon und authenticated, spätere GRANTs) und RPC
+  `audit_public_write_rpcs` im Pipeline-Schritt `security_audit`
+  (Live-Stand, auch MERGE und Definer-Hüllen).
 - Maintenance-SQL (`ANALYZE`, `CREATE INDEX` nach Bulk-Load) geht NICHT über
   PostgREST/Service-Key — Index-Migrationen liegen als eigene Datei vor und
   werden samt `ANALYZE` im Supabase-Dashboard/MCP ausgeführt (Muster:

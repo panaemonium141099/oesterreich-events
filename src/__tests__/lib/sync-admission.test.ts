@@ -68,6 +68,29 @@ describe('filterValidEvents', () => {
     expect(r.rejectionReasons.invalid_start_date).toBe(1);
   });
 
+  // Prod 2026-10-08: Der Dedup unterdrückte Müll-Titel jede Nacht, der
+  // nächste Upsert rechnete den Status neu und machte sie wieder sichtbar.
+  it('verwirft Müll-Titel schon beim Schreiben (Datum statt Name, Navigation)', () => {
+    const r = filterValidEvents([
+      { ...base, source_id: 'datum', title: 'Samstag, 24.10.2026 , 13:00' },
+      { ...base, source_id: 'nav', title: 'Impressum' },
+      { ...base, source_id: 'kachel', source_name: 'gemeinden-generic', title: 'Mittwoch' },
+      { ...base, source_id: 'name', title: 'Ufo361' },
+    ] as ScrapedEvent[]);
+    expect(r.valid.map(e => e.source_id)).toEqual(['name']);
+    expect(r.rejectionReasons.garbage_title).toBe(3);
+  });
+
+  // Stichprobe 2026-10-09: Treibhaus liefert „MI 09.12. 19:30 UHR" als Titel,
+  // die Zeile ist aber das einzige Abbild der Alfred-Dorfer-Show.
+  it('Titel ohne Namen auf der eigenen Event-Seite wird geschrieben, außer die Seite liefert am Tag einen Namen', () => {
+    const page = 'https://www.treibhaus.at/programm/2026/12/09/15283-alfred-dorfer-gleich';
+    const nameless = { ...base, source_id: 'nameless', title: 'MI 09.12. 19:30 UHR', start_date: '2026-12-09T19:30:00+01:00', source_url: page };
+    expect(filterValidEvents([nameless] as ScrapedEvent[]).valid).toHaveLength(1);
+    const named = { ...nameless, source_id: 'named', title: 'Alfred Dorfer: Gleich' };
+    expect(filterValidEvents([nameless, named] as ScrapedEvent[]).valid.map(e => e.source_id)).toEqual(['named']);
+  });
+
   it('verwirft NICHT wegen fehlender Ortsangabe — darüber entscheidet erst der aufgelöste Ort', () => {
     const r = filterValidEvents([{ ...base, location_name: undefined }]);
     expect(r.valid).toHaveLength(1);

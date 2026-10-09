@@ -298,6 +298,48 @@ describe('dedup-scorer / scorePair', () => {
     expect(result.decision).toBe('merge');
   });
 
+  // Abschlussprüfung 2026-10-08: Tour-Seiten und Shop-Startseiten teilen
+  // viele Events; sie belegen weder denselben Ort noch dasselbe Event.
+  it.each([
+    ['Tour-Seite', 'https://www.pizzera-jaus.at/tour', 'Pizzera & Jaus', 'Pizzera & Jaus'],
+    ['Shop-Startseite', 'https://www.oeticket.com/', 'Pizzera & Jaus', 'Wanda'],
+  ])('gemeinsamer Link auf eine %s ist kein Beleg', (_k, url, ta, tb) => {
+    const a = makeEvent({ id: 'aaa', title: ta, start_date: '2026-06-01T18:00:00Z', ticket_url: url, location_name: 'Stadthalle', postal_code: '1150' });
+    const b = makeEvent({ id: 'bbb', title: tb, start_date: '2026-06-01T18:00:00Z', ticket_url: url, location_name: 'Stadthalle', postal_code: '8010' });
+    expect(scorePair(a, b).decision).toBe('distinct');
+  });
+
+  // Prod 2026-10-08: „Tal des Unheils" führt Eventim als Zeitfenster im
+  // 10-Minuten-Takt, jedes ein eigenes Produkt.
+  it('gleiche Quelle, verschiedene Kennung, 10 Minuten auseinander: verschiedene Programmpunkte', () => {
+    const slot = (id: string, start: string) => makeEvent({ id, title: 'Tal des Unheils', start_date: start, source_name: 'Eventim', source_id: id, location_name: 'Burg Lockenhaus', postal_code: '7442' });
+    expect(scorePair(slot('22091132', '2026-10-31T19:10:00Z'), slot('22091134', '2026-10-31T19:20:00Z')))
+      .toMatchObject({ decision: 'distinct', reason: 'same_source_other_time' });
+  });
+
+  // Stichprobe 2026-10-09: Eventim-Zusatzprodukte tragen eigene Kennung und
+  // anderen Titel, aber den Ticket-Link der Show.
+  it('gleiche Quelle, anderer Titel, aber derselbe Event-Link: dasselbe Event', () => {
+    const t = 'https://www.eventim.at/event/jodokcello-world-tour-halle-f-21040013/';
+    const a = makeEvent({ id: 'aaa', title: 'Jodokcello - VIP Upgrade', start_date: '2026-11-03T19:00:00Z', source_name: 'Eventim', source_id: '21084445', ticket_url: t });
+    const b = makeEvent({ id: 'bbb', title: 'Jodokcello World Tour', start_date: '2026-11-03T19:00:00Z', source_name: 'Eventim', source_id: '21040013', ticket_url: t });
+    expect(scorePair(a, b)).toMatchObject({ decision: 'merge', reason: 'same_ticket_url' });
+  });
+
+  it('gleiche Quelle, eine Minute Versatz ist dieselbe Vorstellung (Zeitfenster haben 10 Minuten)', () => {
+    const at = { title: 'Christine Prayon - Abschiedstour', source_name: 'Eventim', location_name: 'Stadtsaal', postal_code: '1060' };
+    const a = makeEvent({ id: 'aaa', source_id: '19157929', start_date: '2026-11-25T19:01:00Z', ...at });
+    const b = makeEvent({ id: 'bbb', source_id: '20688862', start_date: '2026-11-25T19:00:00Z', ...at });
+    expect(scorePair(a, b).decision).toBe('merge');
+  });
+
+  it('Basis- und Terminzeile derselben Serie am selben Tag: Absage-Vermerk einer Zeile trennt sie nicht', () => {
+    const at = { source_name: 'feratel-deskline', start_date: '2026-10-16T14:00:00Z', location_name: 'Turnsaal', postal_code: '6200' };
+    const base = makeEvent({ id: 'aaa', source_id: 'feratel-93f04ffc', title: 'Konga 4 Tweens', ...at });
+    const dated = makeEvent({ id: 'bbb', source_id: 'feratel-93f04ffc:2026-10-16', title: 'ABGESAGT: Konga 4 Tweens', ...at });
+    expect(scorePair(base, dated).decision).toBe('merge');
+  });
+
   it('completely different events => distinct', () => {
     const a = makeEvent({
       id: 'aaa',

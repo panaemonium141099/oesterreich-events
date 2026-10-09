@@ -866,10 +866,14 @@ export function mergeFeratelDetail(event: ScrapedEvent, detail: FeratelDetail): 
     price_flags: priceFlags,
   };
 
-  // Weitere Termine: Deskline liefert rollierend die naechsten drei; der
-  // erste entspricht dem Listentermin und wird nicht dupliziert.
+  // Termine: Deskline liefert rollierend die naechsten drei. Jeder bekommt
+  // eine eigene Zeile mit Datum in der Kennung, auch der Listentermin: die
+  // Basiszeile (Kennung ohne Datum) wandert mit dem Listentermin weiter, und
+  // ohne eigene Zeile fror der Termin des Listentags ein (Dedup kippte den
+  // Primary, Prod 2026-10-09). Der Dedup verbirgt die Basiszeile hinter der
+  // Terminzeile (dedup-cluster isWanderingBase).
   const out: ScrapedEvent[] = [base];
-  const seenDays = new Set<string>([event.start_date.slice(0, 10)]);
+  const seenDays = new Set<string>();
   for (const occ of detail.occurrences) {
     const startUtc = feratelLocalToUtcIso(occ.localStart);
     if (!startUtc) continue;

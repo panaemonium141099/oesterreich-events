@@ -3,7 +3,8 @@
 /**
  * Nachkontrolle nach dem Dedup: sichtbare Paare, die offensichtlich
  * dasselbe Event sind — gleicher Titel, gleicher Wiener Tag, gleiche oder
- * unbekannte Uhrzeit, derselbe Ort, verschiedene Quellen.
+ * unbekannte Uhrzeit, derselbe Ort, verschiedene Quellen (oder dieselbe
+ * Quelle unter zwei Kennungen zur selben Minute).
  *
  * Der Dedup führt genau solche Paare zusammen. Bleiben welche sichtbar,
  * lief der Dedup nicht, brach ab oder eine neue Quelle/Statusvariante läuft
@@ -14,7 +15,7 @@
  */
 
 import { pairKey } from './dedup-engine';
-import { placeEvidence, timeRelation, titleKey, viennaDayOf } from './dedup-evidence';
+import { knownStartMs, placeEvidence, timeRelation, titleKey, viennaDayOf } from './dedup-evidence';
 import type { EventRow } from './types';
 
 const VISIBLE = new Set(['published', 'published_low_confidence']);
@@ -46,8 +47,15 @@ export function findResidualDuplicates(
       for (let j = i + 1; j < list.length; j++) {
         const a = list[i];
         const b = list[j];
-        if (!a.source_name || a.source_name === b.source_name) continue;
+        if (!a.source_name) continue;
         if (opts.manualSplits?.has(pairKey(a.id, b.id))) continue;
+        // Dieselbe Quelle zählt nur unter zwei Kennungen zur selben Minute
+        // (Feratel-Basiszeile neben der Terminzeile); verschiedene Minuten
+        // sind verschiedene Programmpunkte (Eventim-Zeitfenster).
+        if (a.source_name === b.source_name) {
+          const ta = knownStartMs(a);
+          if (a.source_id === b.source_id || ta === null || ta !== knownStartMs(b)) continue;
+        }
         const time = timeRelation(a, b);
         if (time !== 'exact' && time !== 'unknown') continue;
         if (placeEvidence(a, b).relation !== 'same') continue;

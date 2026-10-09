@@ -1,5 +1,8 @@
 // src/lib/pipeline/garbage-filter.ts
 
+import { isEventSpecificUrl, normalizeUrlForDedup } from './event-url';
+import { toViennaDate } from '@/lib/utils/event-time';
+
 /**
  * Garbage title filter — identifies non-event pages that scrapers accidentally pick up.
  * These get publish_status = 'suppressed' + flag 'garbage_title' before any dedup.
@@ -31,7 +34,23 @@ const GARBAGE_TITLES = new Set([
   // Titel las (Befund 2026-10-06)
   'mehr infos', 'mehr info', 'mehr erfahren', 'weiterlesen',
   'gefundene veranstaltungen', 'suche ab',
+  // Sprungmarken der Seitennavigation (Abschlussprüfung 2026-10-08); Varianten
+  // fängt SKIP_LINK unten
+  'zum footer', 'springe zum footer', 'zum inhalt', 'springe zum inhalt', 'zum hauptinhalt',
+  'springe zum hauptinhalt', 'zur navigation', 'springe zur navigation', 'zur hauptnavigation',
+  'springe zur hauptnavigation', 'nach oben', 'skip to content', 'skip to main content',
+  // Listen-Überschriften, Knöpfe und Platzhalter (Prod 2026-10-09)
+  'alle termine', 'termine', 'veranstaltungen', 'gefundene termine', 'mehr', 'dieser monat', 'this month',
+  'tickets', 'ausverkauft', 'test', 'termin', 'events', 'datum', 'nach oben scrollen', 'weiter', 'eventkalender',
+  'veranstaltungskalender', 'tipp speichern', 'in outlook übernehmen', 'in outlook uebernehmen', 'webcam',
+  'karteninhalte zulassen', 'aktuelles', 'neuigkeiten', 'veranstaltungsdetails',
 ]);
+
+/** Sprungmarken in allen Varianten („Zum Inhalt springen", „Springe zur rechten Spalte"). */
+const SKIP_LINK = /^(?:springe |weiter |direkt )?(?:zu[mr]?|zurück zu[mr]?|to) (?:anfang(?: der seite)?|seitenanfang|seitenende|(?:haupt)?inhalt|(?:sub|haupt)?navigation|(?:haupt)?menü|(?:haupt)?menue|suche|footer|(?:rechten|linken) spalte|übersicht|uebersicht|content|main content)(?: springen)?$/;
+
+/** Kalenderzellen und Preiszeilen statt Titel. */
+const LABEL_LINE = /^\d+ veranstaltung(?:en)? \d*$|^\d{1,2} \d{2} eintritt\b/;
 
 /**
  * Einzelwörter, die bei Gemeinde-Kalendern nie ein Titel sind, sondern ein
@@ -47,50 +66,155 @@ const GEMEINDE_AGGREGATORS = new Set([
 ]);
 
 /**
- * Check if a title (after normalization/lowercasing) is a garbage non-event page.
+ * Wörter reiner Datums- und Uhrzeitangaben. '' steht für ein Token, das nur
+ * aus Ziffern bestand.
  */
-export function isGarbageTitle(title: string, context: { sourceName?: string | null } = {}): boolean {
-  // Badge-Leiste statt Titel: Kartentext wie "Event\n   Pop / Rock\n …"
-  // (partytimer 2026-09). Ein echter Titel bricht nie direkt nach "Event" um.
-  if (/^\s*event[ \t]*[\r\n]/i.test(title)) return true;
+const DATE_TOKENS = new Set([
+  '',
+  'montag', 'dienstag', 'mittwoch', 'donnerstag', 'freitag', 'samstag', 'sonntag',
+  'mo', 'di', 'mi', 'do', 'fr', 'sa', 'so',
+  'januar', 'jaenner', 'jänner', 'jän', 'februar', 'feber', 'maerz', 'märz', 'april', 'mai',
+  'juni', 'juli', 'august', 'september', 'oktober', 'november', 'dezember',
+  'jan', 'feb', 'mär', 'apr', 'jun', 'jul', 'aug', 'sep', 'sept', 'okt', 'nov', 'dez',
+  'uhr', 'h', 'ab', 'bis', 'von', 'um', 'am', 'und',
+]);
 
-  const normalized = title
+function normalizeTitle(title: string): string {
+  return title
     .normalize('NFC')
     .toLowerCase()
     .replace(/[^\p{L}\p{N}\s]/gu, ' ')
     .replace(/\s+/g, ' ')
     .trim();
+}
 
-  // Exact match against blacklist
-  if (GARBAGE_TITLES.has(normalized)) return true;
+/** Uhrzeit („19:30", „19.30") oder Tag.Monat („15.10.") oder ISO-Datum. */
+const DATE_TIME_SHAPE = /\d{1,2}[:.]\d{2}(?!\d)|\d{1,2}\.\s?\d{1,2}\.|\d{4}-\d{2}-\d{2}/;
+
+/**
+ * Nur Datum, Wochentag und Uhrzeit, kein Name: „Samstag, 24.10.2026, 13:00",
+ * „Mi.19:30-21:00Uhr". Ziffern innerhalb eines Worts zählen nicht als Datum
+ * („Ufo361" bleibt ein Name), bloße Zahlen ohne Datums- oder Uhrzeitform
+ * auch nicht („17 & 18", „1984" sind Stücktitel).
+ */
+export function isDateOnlyText(title: string | null | undefined): boolean {
+  const tokens = normalizeTitle(title ?? '').split(' ');
+  if (!tokens.every(t => DATE_TOKENS.has(t.replace(/\d/g, '')))) return false;
+  const onlyNumbers = tokens.every(t => t.replace(/\d/g, '') === '') && tokens.some(t => t !== '');
+  return !onlyNumbers || DATE_TIME_SHAPE.test(title ?? '');
+}
+
+export interface GarbageContext {
+  sourceName?: string | null;
+  /** Ein Link auf genau dieses Event (Ticket-Deeplink) belegt ein Event,
+   *  auch wenn der Titel wie ein Navigationswort aussieht (Band „Archive"). */
+  ticketUrl?: string | null;
+}
+
+/**
+ * Check if a title (after normalization/lowercasing) is a garbage non-event page.
+ */
+export function isGarbageTitle(title: string, context: GarbageContext = {}): boolean {
+  // Badge-Leiste statt Titel: Kartentext wie "Event\n   Pop / Rock\n …"
+  // (partytimer 2026-09). Ein echter Titel bricht nie direkt nach "Event" um.
+  if (/^\s*event[ \t]*[\r\n]/i.test(title)) return true;
+
+  // Dateiname statt Titel (Anhang-Link der Gemeinde-Seite)
+  if (/^\S+\.(pdf|jpe?g|png|gif|docx?|xlsx?)\s*$/i.test(title)) return true;
+
+  const normalized = normalizeTitle(title);
+
+  // Navigationswort statt Titel. Auf Prod (2026-10-08) kamen alle Treffer
+  // von Gemeinde-Seiten ohne Ticket-Link; ein Link auf genau dieses Event
+  // (Eventim „Archive", Gasometer) belegt dagegen ein echtes Event.
+  if (GARBAGE_TITLES.has(normalized) && !hasEventLink(context.ticketUrl)) return true;
 
   // Feldbeschriftung statt Titel: "Datum der VeranstaltungMi,"
   if (normalized.startsWith('datum der veranstaltung')) return true;
 
-  if (GEMEINDE_AGGREGATORS.has(context.sourceName ?? '') && GEMEINDE_TILE_WORDS.has(normalized)) return true;
+  if (SKIP_LINK.test(normalized) || LABEL_LINE.test(normalized)) return true;
 
-  // Too short (< 3 chars after normalization)
-  if (normalized.length < 3) return true;
-
-  // Date-only titles: "15.04.2026 15:00 - 17:00 Uhr", "Mi.19:30-21:00Uhr", etc.
-  // After normalization these become mostly digits+spaces — not real event titles.
-  const withoutDigitsAndSpaces = normalized.replace(/[\d\s]/g, '');
-  if (withoutDigitsAndSpaces.length < 4 && normalized.length > 5) return true;
-
-  // Titles that are just "DD.MM.YYYY" or "DD Mon" patterns
-  if (/^\d{1,2}\s+\w{3,4}\s*$/.test(normalized)) return true;
-
-  // Time-only titles: "00:00", "18:00", "Mi.19:30-21:00Uhr", "10:00 Uhr", etc.
-  // After normalization these are mostly digits, colons, weekday abbreviations.
-  const timeOnly = title.trim().replace(/[\s.,:;\-]/g, '').replace(/Uhr/gi, '');
-  const timeLetters = timeOnly.replace(/[\d]/g, '');
-  // If what remains is just a 2-letter weekday abbreviation (or empty), it's a time-only title
-  if (timeOnly.length >= 3 && timeOnly.length <= 20 &&
-      (timeLetters.length === 0 || /^(?:Mo|Di|Mi|Do|Fr|Sa|So)$/i.test(timeLetters))) {
+  // Gemeinde-Kacheln: Wochentag, Monat, „Samstag, bis" sind dort nie ein Name.
+  if (GEMEINDE_AGGREGATORS.has(context.sourceName ?? '') &&
+      (GEMEINDE_TILE_WORDS.has(normalized) || /^(?:montag|dienstag|mittwoch|donnerstag|freitag|samstag|sonntag) bis$/.test(normalized) ||
+       isDateOnlyText(normalized))) {
     return true;
   }
 
+  // Zeichenrest: ein Zeichen, oder zwei ohne Buchstabe-Ziffer-Paar
+  // („U2", „Ö3" sind Namen).
+  const hasDigit = /\d/.test(normalized);
+  if (normalized.length < 2) return true;
+  if (normalized.length === 2 && !(hasDigit && /\p{L}/u.test(normalized))) return true;
+
+  // Datum/Uhrzeit statt Titel: „15.04.2026 15:00 - 17:00 Uhr", „15 Okt".
+  // Ohne Ziffer ist ein Wochentag ein möglicher Name (Stück „Montag").
+  if (hasDigit && isDateOnlyText(title)) return true;
+
   return false;
+}
+
+function hasEventLink(url: string | null | undefined): boolean {
+  const normalized = normalizeUrlForDedup(url);
+  return !!normalized && isEventSpecificUrl(normalized);
+}
+
+/** Titel nur aus Datum/Uhrzeit, kein Name („MI 09.12. 19:30 UHR"). */
+export function isNamelessDateTitle(title: string | null | undefined): boolean {
+  return !!title && /\d/.test(title) && isDateOnlyText(title);
+}
+
+export interface GarbageRowInput {
+  title: string | null;
+  source_name?: string | null;
+  source_url?: string | null;
+  ticket_url?: string | null;
+  start_date?: string | null;
+}
+
+/** Seite + Wiener Tag einer Zeile mit echtem Namen (für isGarbageRow). */
+export function namedPageKey(row: GarbageRowInput): string | null {
+  return namedPageKeys(row)[0] ?? null;
+}
+
+/**
+ * Schlüssel einer Zeile mit echtem Namen: Seite + Wiener Tag, dazu Website +
+ * Beginn-Minute (derselbe Termin an einer Nachbar-URL: „Herbstkonzert" /
+ * „Herbstkonzert_1", Stichprobe 2026-10-09).
+ */
+export function namedPageKeys(row: GarbageRowInput): string[] {
+  const url = normalizeUrlForDedup(row.source_url);
+  if (!url || !row.title || !row.start_date) return [];
+  if (isGarbageTitle(row.title, { sourceName: row.source_name, ticketUrl: row.ticket_url })) return [];
+  const day = viennaDayKey(row.start_date);
+  if (!day) return [];
+  return [`${url}|${day}`, `${hostOf(url)}|${new Date(row.start_date).toISOString().slice(0, 16)}`];
+}
+
+function hostOf(url: string): string {
+  try { return new URL(url).hostname.replace(/^www./, ''); } catch { return url; }
+}
+
+/**
+ * Müll-Zeile? Wie isGarbageTitle, mit einer Ausnahme: ein Titel ohne Namen
+ * (nur Datum/Uhrzeit) auf der eigenen Seite genau eines Events ist ein
+ * echtes Event mit kaputtem Titel (Prod 2026-10-09: Treibhaus „MI 09.12.
+ * 19:30 UHR" = Alfred Dorfer, KAPU, Ybbser Adventzauber). Es bleibt sichtbar,
+ * außer dieselbe Seite liefert am selben Tag eine Zeile mit Namen
+ * (`namedPages`, aus namedPageKey); dann ist es nur ein Kachelteil.
+ */
+export function isGarbageRow(row: GarbageRowInput, namedPages: ReadonlySet<string>): boolean {
+  if (!row.title || !isGarbageTitle(row.title, { sourceName: row.source_name, ticketUrl: row.ticket_url })) return false;
+  const day = viennaDayKey(row.start_date);
+  if (!isNamelessDateTitle(row.title) || !hasEventLink(row.source_url) || !day) return true;
+  const url = normalizeUrlForDedup(row.source_url);
+  return namedPages.has(`${url}|${day}`) ||
+    namedPages.has(`${hostOf(url)}|${new Date(row.start_date!).toISOString().slice(0, 16)}`);
+}
+
+function viennaDayKey(iso: string | null | undefined): string | null {
+  const d = iso ? new Date(iso) : null;
+  return d && !isNaN(d.getTime()) ? toViennaDate(d) : null;
 }
 
 /**

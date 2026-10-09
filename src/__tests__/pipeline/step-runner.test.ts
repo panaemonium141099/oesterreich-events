@@ -18,6 +18,23 @@ describe('STEP_DEPENDENCIES', () => {
   it('report has no dependencies', () => {
     expect(STEP_DEPENDENCIES.report).toEqual([]);
   });
+
+  // Ein roter Dedup (Sicherheitsventil) schreibt nichts: die Primaries sind
+  // die der Vornacht, Künstler-Abgleich und Indexing können laufen.
+  it('artist_matching und indexing laufen auch bei rotem Dedup', () => {
+    const red: Record<string, StepResult> = { dedup: { status: 'failed', duration_ms: 1, error: 'Sicherheitsventil' } };
+    expect(shouldSkipStep('artist_matching', red)).toBeNull();
+    expect(shouldSkipStep('indexing', red)).toBeNull();
+  });
+});
+
+describe('scrape-pipeline Reihenfolge', () => {
+  it('Rückzug läuft vor dem Dedup (sonst gibt der Dedup erst eine Nacht später frei)', async () => {
+    const { readFileSync } = await import('node:fs');
+    const file = readFileSync('src/scripts/scrape-pipeline.ts', 'utf8');
+    expect(file.indexOf("runStep('withdrawal'")).toBeGreaterThan(-1);
+    expect(file.indexOf("runStep('withdrawal'")).toBeLessThan(file.indexOf("runStep('dedup'"));
+  });
 });
 
 describe('shouldSkipStep', () => {

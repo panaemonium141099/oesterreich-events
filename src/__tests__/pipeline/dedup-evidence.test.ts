@@ -1,7 +1,8 @@
 // src/__tests__/pipeline/dedup-evidence.test.ts
 
 import { describe, it, expect } from 'vitest';
-import { titleRelation, timeRelation, placeRelation, viennaDayOf, viennaDayBoundsUtc, isPlausibleEventDay } from '@/lib/pipeline/dedup-evidence';
+import { titleRelation, timeRelation, placeRelation, placeEvidence, viennaDayOf, viennaDayBoundsUtc, isPlausibleEventDay, isOrphanRow, planningStartDay, hasCancelMarker } from '@/lib/pipeline/dedup-evidence';
+import { staleVersionIds } from '@/lib/pipeline/dedup-cluster';
 import type { EventRow } from '@/lib/pipeline/types';
 
 const e = (o: Partial<EventRow>): EventRow => ({ id: 'x', title: '', start_date: '2026-10-07T17:30:00Z', ...o }) as EventRow;
@@ -83,6 +84,26 @@ describe('viennaDayOf', () => {
     expect(viennaDayOf(e({ start_date: '2026-10-06T22:00:00Z' }))).toBe('2026-10-07');
     expect(viennaDayOf(e({ start_date: '2026-10-07T21:30:00Z' }))).toBe('2026-10-07');
     expect(viennaDayOf(e({ start_date: '2026-10-07T22:30:00Z' }))).toBe('2026-10-08');
+  });
+});
+
+describe('isOrphanRow', () => {
+  const lastSeen = new Map([['q', '2026-10-08T07:00:00Z'], ['Rotes Kreuz Hollabrunn', '2026-09-25T10:00:00Z']]);
+  it('gescrapte Zeile, die die Quelle seit über 21 Tagen nicht liefert, ist verwaist', () => {
+    expect(isOrphanRow(e({ source_name: 'q', source_type: 'scraped', last_seen_at: '2026-08-01T07:00:00Z', start_date: '2026-11-01T18:00:00Z' } as Partial<EventRow>), lastSeen)).toBe(true);
+  });
+  it('Inserate werden nie neu gescrapt und verwaisen deshalb nie', () => {
+    expect(isOrphanRow(e({ source_name: 'Rotes Kreuz Hollabrunn', source_type: 'business', last_seen_at: '2026-08-01T07:00:00Z', start_date: '2026-11-04T18:00:00Z' } as Partial<EventRow>), lastSeen)).toBe(false);
+  });
+});
+
+// Abschlussprüfung 2026-10-08: 303 der 528 geplanten Freigaben lagen an
+// vergangenen Tagen (für niemanden sichtbar) und hielten das
+// Sicherheitsventil dauerhaft zu. Geplant wird ab dem Wiener Vortag.
+describe('planningStartDay', () => {
+  it('ist der Wiener Vortag, auch kurz nach Mitternacht', () => {
+    expect(planningStartDay(new Date('2026-10-08T12:00:00Z'))).toBe('2026-10-07');
+    expect(planningStartDay(new Date('2026-10-07T22:30:00Z'))).toBe('2026-10-07'); // 00:30 Wien am 08.10.
   });
 });
 
@@ -185,5 +206,128 @@ describe('placeRelation', () => {
 
   it('genaue Pins über 1 km auseinander widersprechen sich', () => {
     expect(placeRelation(at({ latitude: 48.2, longitude: 16.3 }), at({ latitude: 48.22, longitude: 16.3 }))).toBe('conflict');
+  });
+
+  // Abschlussprüfung 2026-10-08: Nachbarpfarren mit gemeinsamer PLZ und
+  // Quellen, die nur den Ortsnamen liefern, wurden zusammengeführt.
+  it('verschiedene Gemeinden derselben PLZ im Venue-Namen widersprechen sich', () => {
+    expect(placeRelation(e({ location_name: 'Pfarrkirche Güssing', postal_code: '7540' }), e({ location_name: 'Pfarrkirche Inzenhof', postal_code: '7540' }))).toBe('conflict');
+    expect(placeRelation(e({ location_name: 'Grazer Oper', postal_code: '8010' }), e({ location_name: 'Oper Graz', postal_code: '8010' }))).toBe('same');
+  });
+
+  it('ein bloßes Gattungswort („Pfarrkirche") belegt denselben Ort nur in einer PLZ mit genau einer Gemeinde', () => {
+    expect(placeRelation(e({ location_name: 'Pfarrkirche', postal_code: '7540' }), e({ location_name: 'Pfarrkirche', postal_code: '7540' }))).toBe('town');
+    expect(placeRelation(e({ location_name: 'STADTSAAL', postal_code: '1150' }), e({ location_name: 'STADTSAAL Wien', postal_code: '1150' }))).toBe('same');
+    expect(placeRelation(e({ location_name: 'Pfarrkirche' }), e({ location_name: 'Pfarrkirche' }))).toBe('unknown');
+  });
+
+  it('verschiedene Ortsnamen statt Venue widersprechen sich, gleiche belegen den Ort', () => {
+    expect(placeRelation(e({ location_name: 'Kirchberg an der Raab' }), e({ location_name: 'Feldbach' }))).toBe('conflict');
+    expect(placeRelation(e({ location_name: 'Wien' }), e({ location_name: 'Graz' }))).toBe('conflict');
+    expect(placeRelation(e({ location_name: 'St. Pölten' }), e({ location_name: 'Sankt Pölten' }))).toBe('town');
+  });
+
+  // Gegenprüfung 2026-10-09: Gemeinde-Kalender setzen ihren eigenen
+  // Gemeindenamen als Ort; Namensteile („St.", „See") sind keine Orte.
+  it('Gemeindename als Ortsangabe und Namensteile sind kein Widerspruch', () => {
+    expect(placeRelation(e({ location_name: 'Gaubitsch', postal_code: '2154' }), e({ location_name: 'Unterstinkenbrunn', postal_code: '2154' }))).not.toBe('conflict');
+    expect(placeRelation(e({ location_name: 'Sportplatz St. Sebastian', postal_code: '8630' }), e({ location_name: 'Sportplatz', postal_code: '8630' }))).not.toBe('conflict');
+  });
+
+  it('ein Ortsteil und seine Gemeinde widersprechen sich nicht (Schleinbach / Ulrichskirchen-Schleinbach)', () => {
+    expect(placeRelation(e({ location_name: 'Schleinbach' }), e({ location_name: 'Ulrichskirchen-Schleinbach' }))).not.toBe('conflict');
+    expect(placeRelation(e({ location_name: 'Wieselburg' }), e({ location_name: 'Wieselburg-Land' }))).not.toBe('conflict');
+  });
+
+  it('gleicher Venue-Name mit Ortsnamen („Hauptplatz Haugsdorf") ist derselbe Ort, auch ohne PLZ', () => {
+    expect(placeRelation(e({ location_name: 'Hauptplatz Haugsdorf' }), e({ location_name: 'Hauptplatz Haugsdorf', postal_code: '2054' }))).toBe('same');
+  });
+
+  it('ohne Etiketten (Altzeilen, Freigabe-Prüfung) zählt der gleiche Ortsname', () => {
+    const a = e({ location_name: 'Lessach', postal_code: '5592' });
+    const b = e({ location_name: 'Lessach', postal_code: '5575' });
+    expect(placeEvidence(a, b).relation).toBe('conflict');
+    expect(placeEvidence(a, b, { ignoreLabels: true }).relation).toBe('town');
+  });
+});
+
+describe('titleRelation — Jahreszahlen', () => {
+  const rel = (a: string, b: string) => titleRelation(e({ title: a }), e({ title: b }));
+  it('verschiedene Jahrgänge sind verschiedene Events, eine fehlende Jahreszahl nicht', () => {
+    expect(rel('Jahrgangstreffen 1956', 'Jahrgangstreffen 1966')).toBe('different');
+    expect(rel('Masters of Dirt 2027', 'Masters of Dirt')).toBe('equal');
+    expect(rel('Saisoneröffnung 2026', 'Saisoneröffnung 2025/2026')).not.toBe('different');
+    expect(rel('X Tour 2026/27', 'X Tour 2027')).not.toBe('different');
+  });
+});
+
+describe('hasCancelMarker', () => {
+  it('„verschoben auf <dieser Tag>" ist das verschobene, stattfindende Event', () => {
+    expect(hasCancelMarker(e({ title: 'VERSCHOBEN auf 12.11.: Konzert X', start_date: '2026-11-12T18:00:00Z' }))).toBe(false);
+    expect(hasCancelMarker(e({ title: 'Konzert X - verschoben auf 12.12.', start_date: '2026-11-12T18:00:00Z' }))).toBe(true);
+    expect(hasCancelMarker(e({ title: 'ABGESAGT: Konzert X' }))).toBe(true);
+  });
+
+  it('eine Absage für einen anderen Termin betrifft diese Zeile nicht („Termin 16.9. ABGESAGT" am 16.12.)', () => {
+    expect(hasCancelMarker(e({ title: 'Laaer Babycouch - Termin 16.9. ABGESAGT', start_date: '2026-12-16T08:30:00Z' }))).toBe(false);
+    expect(hasCancelMarker(e({ title: 'Laaer Babycouch - Termin 16.12. ABGESAGT', start_date: '2026-12-16T08:30:00Z' }))).toBe(true);
+  });
+});
+
+describe('staleVersionIds', () => {
+  // Stichprobe 2026-10-09: „Radlgruten Challenge" verschob die Quelle vom
+  // 10.10. auf den 17.10.; die alte Zeile derselben Seite wurde freigegeben.
+  const row = (o: Partial<EventRow>) => ({ id: 'x', source_name: 'q', source_id: 'x', title: 'Radlgruten Challenge',
+    source_url: 'https://www.oberdrauburg.at/veranstaltung/radlgruten', last_seen_at: '2026-10-08T07:00:00Z', ...o }) as EventRow;
+  it('ältere Zeile derselben Seite am selben Tag ist veraltet (Titel korrigiert)', () => {
+    const ids = staleVersionIds([row({ id: 'alt', source_id: 'alt', title: '13 Dez. Radlgruten Challenge 13.12.2026', last_seen_at: '2026-09-21T07:00:00Z', start_date: '2026-10-17T08:00:00Z' }),
+      row({ id: 'neu', source_id: 'neu', start_date: '2026-10-17T08:00:00Z' })]);
+    expect([...ids]).toEqual(['alt']);
+  });
+
+  // Prod 2026-10-09: 1.447 Zeilen an anderen Tagen waren meist echte spätere
+  // Termine von Serien-Seiten, die nur den nächsten Termin zeigen.
+  it('an einem anderen Tag nicht veraltet (Serien-Seite zeigt nur den nächsten Termin)', () => {
+    expect(staleVersionIds([row({ id: 'alt', source_id: 'alt', last_seen_at: '2026-09-21T07:00:00Z', start_date: '2026-10-10T08:00:00Z' }),
+      row({ id: 'neu', source_id: 'neu', start_date: '2026-10-17T08:00:00Z' })]).size).toBe(0);
+  });
+  it('Seite mit mehreren Events (Veranstalter-Website) und Serienzeilen: nichts veraltet', () => {
+    const day = { start_date: '2026-10-17T08:00:00Z' };
+    expect(staleVersionIds([row({ id: 'a', source_id: 'a', title: 'Jazzbrunch', last_seen_at: '2026-09-21T07:00:00Z', ...day }),
+      row({ id: 'b', source_id: 'b', title: 'Kabarett Nachtschicht', ...day }), row({ id: 'c', source_id: 'c', title: 'Lesung im Garten', ...day })]).size).toBe(0);
+    expect(staleVersionIds([row({ id: 'base', source_id: 'feratel-1', last_seen_at: '2026-10-08T07:00:00Z' }),
+      row({ id: 'dated', source_id: 'feratel-1:2026-10-17', last_seen_at: '2026-09-21T07:00:00Z' })]).size).toBe(0);
+  });
+});
+
+describe('placeEvidence ohne Etiketten', () => {
+  it('der Bezirk allein belegt keinen gemeinsamen Ort (Halloween-Party Pfaffenhofen ≠ Telfs)', () => {
+    const a = e({ district: 'innsbruck-land' } as Partial<EventRow>);
+    const b = e({ district: 'innsbruck-land' } as Partial<EventRow>);
+    expect(placeEvidence(a, b, { ignoreLabels: true }).relation).not.toBe('town');
+  });
+
+  it('ohne Etiketten zählt eine gleiche Adresse auch bei falscher PLZ (Heimen 51, Buch)', () => {
+    const a = e({ location_name: 'Gemeindesaal', address: 'Heimen 51', postal_code: '6220' } as Partial<EventRow>);
+    const b = e({ location_name: 'Gemeindesaal', address: 'Heimen 51', postal_code: '6960' } as Partial<EventRow>);
+    expect(placeEvidence(a, b, { ignoreLabels: true }).relation).toBe('same');
+  });
+
+  it('Nachbar-PLZ, die nur mehrere Gemeinden teilen, belegen keinen gemeinsamen Ort (Höhnhart 5251 / Aspach 5252)', () => {
+    const a = e({ location_name: 'Pfarrkirche', postal_code: '5251' } as Partial<EventRow>);
+    const b = e({ location_name: 'Pfarrkirche', postal_code: '5252' } as Partial<EventRow>);
+    expect(placeRelation(a, b)).not.toBe('town');
+  });
+
+  it('Adresse als Ortsname ist kein anderer Venue; gleiche Adresse ist derselbe Ort', () => {
+    const a = e({ location_name: 'Arthofer Arena - Sportplatz Hartkirchen', address: 'Karlingerstraße 6', postal_code: '4081' } as Partial<EventRow>);
+    const b = e({ location_name: 'Karlingerstraße 6', address: 'Karlingerstraße 6', postal_code: '4081' } as Partial<EventRow>);
+    expect(placeRelation(a, b)).toBe('same');
+  });
+
+  it('Gemeinde-Mittelpunkte aus falschen Etiketten widersprechen nicht (gleicher Venue-Name)', () => {
+    const a = e({ location_name: 'Gemeindesaal Buch', postal_code: '6220', latitude: 47.38, longitude: 11.77, location_precision: 'municipality' } as Partial<EventRow>);
+    const b = e({ location_name: 'Gemeindesaal Buch', postal_code: '6960', latitude: 47.52, longitude: 9.81, location_precision: 'municipality' } as Partial<EventRow>);
+    expect(placeEvidence(a, b, { ignoreLabels: true }).relation).not.toBe('conflict');
   });
 });

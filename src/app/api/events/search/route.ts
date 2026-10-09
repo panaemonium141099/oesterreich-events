@@ -37,6 +37,8 @@ export async function GET(request: NextRequest) {
       .from('events')
       .select('id, title, start_date, location_name, image_url, category')
       .eq('visibility', 'public')
+      // Keine verborgenen Duplikate oder zurückgezogenen Events.
+      .in('publish_status', ['published', 'published_low_confidence'])
       // Nur Events dieser Seite, DE/CH-Events (Eventim) erscheinen nicht.
       .eq('country', SITE_COUNTRY)
       .gte('start_date', today)

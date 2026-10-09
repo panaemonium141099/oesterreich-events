@@ -8,8 +8,9 @@
  *   npx tsx src/scripts/scrape-pipeline.ts --trigger github_dispatch --skip-geocoding
  *   npx tsx src/scripts/scrape-pipeline.ts --dry-run --trigger manual
  */
-import { readFileSync, existsSync } from 'fs';
+import { readFileSync, existsSync, rmSync } from 'fs';
 import { join } from 'path';
+import { tmpdir } from 'os';
 
 // Load .env.local (Next.js does this automatically, but tsx does not)
 try {
@@ -74,7 +75,17 @@ function execStep(label: string, cmd: string): void {
   console.log(`\n${'='.repeat(60)}`);
   console.log(`  ${label}`);
   console.log(`${'='.repeat(60)}\n`);
-  execSync(cmd, { stdio: 'inherit', cwd: process.cwd() });
+  // Das Skript kann den Grund eines Fehlschlags hineinschreiben
+  // (reportStepReason); er landet im Schrittfehler und in der Alarm-Mail.
+  const reasonFile = join(tmpdir(), `step-reason-${process.pid}-${Date.now()}.txt`);
+  try {
+    execSync(cmd, { stdio: 'inherit', cwd: process.cwd(), env: { ...process.env, STEP_REASON_FILE: reasonFile } });
+  } catch (err) {
+    const reason = existsSync(reasonFile) ? readFileSync(reasonFile, 'utf8').trim() : '';
+    throw reason ? new Error(`${label}: ${reason}`) : err;
+  } finally {
+    rmSync(reasonFile, { force: true });
+  }
 }
 
 async function main() {
@@ -193,6 +204,15 @@ async function main() {
       }, steps);
     }
 
+    // Vor dem Dedup: was die Quelle nicht mehr listet, zieht der Rückzug
+    // zurück, und der Dedup rechnet die Cluster im selben Lauf neu (sonst
+    // ist ein Event bis zur nächsten Nacht ganz weg). Ein Primary bleibt
+    // stehen, solange ein Duplikat einer anderen Seite noch gelistet wird
+    // (siehe src/lib/quality/withdrawal.ts).
+    steps.withdrawal = await runStep('withdrawal', async () => {
+      execStep('Withdraw events no longer listed', `npx tsx ${envFlag}src/scripts/withdraw-stale-events.ts`);
+    }, steps);
+
     if (!opts.skipDedup) {
       steps.dedup = await runStep('dedup', async () => {
         // Quellenübergreifender Dedup: rechnet alle Cluster je Wiener Tag neu
@@ -208,10 +228,11 @@ async function main() {
       }, steps);
     }
 
-    // Nach dem Dedup: ein Primary bleibt stehen, solange ein Duplikat noch
-    // gelistet wird (siehe src/lib/quality/withdrawal.ts).
-    steps.withdrawal = await runStep('withdrawal', async () => {
-      execStep('Withdraw events no longer listed', `npx tsx ${envFlag}src/scripts/withdraw-stale-events.ts`);
+    // Wächter: keine schreibende SECURITY-DEFINER-Funktion darf für anon
+    // ausführbar sein (sonst kann jeder publish_status ändern). Prüft den
+    // echten Prod-Zustand, nicht nur die Migrationsdateien.
+    steps.security_audit = await runStep('security_audit', async () => {
+      execStep('Audit public write RPCs', `npx tsx ${envFlag}src/scripts/security-audit.ts`);
     }, steps);
 
     steps.artist_matching = await runStep('artist_matching', async () => {

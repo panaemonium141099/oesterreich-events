@@ -86,6 +86,12 @@ export interface EventRow {
   created_at?: string | null;
   /** Letzter Scrape, in dem die Quelle die Zeile noch lieferte. */
   last_seen_at?: string | null;
+  /** 'scraped' | 'business' | 'user' … — nur gescrapte Zeilen können verwaisen. */
+  source_type?: string | null;
+  /** location_resolution.admission.decision ('admit' | 'quarantine' | …). */
+  admission_decision?: string | null;
+  /** Vom Rückzug gesetzt (Quelle listet das Event nicht mehr). */
+  withdrawn_at?: string | null;
 }
 
 /**

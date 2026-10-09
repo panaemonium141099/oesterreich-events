@@ -288,6 +288,9 @@ export class GenericGemeindeScraper extends BaseScraper {
 
       if (!title) return;
       const date = this.parseDate(dateText);
+      // Ohne lesbares Datum kein Event (früher: heutiges Datum, die Zeile wanderte
+      // täglich weiter und erschien als Event von heute; Stichprobe 2026-10-09).
+      if (!date) return;
       const id = (t: string) => `gemeinden-generic-${g.idKey}-${this.slugify(t)}`;
 
       events.push({
@@ -297,7 +300,7 @@ export class GenericGemeindeScraper extends BaseScraper {
         source_url: link ? new URL(link, page.eventPageUrl).href : page.eventPageUrl,
         title,
         description: desc || undefined,
-        start_date: date || new Date().toISOString().split('T')[0],
+        start_date: date,
         location_name: location || g.name,
         category: this.guessCategory(title + ' ' + desc),
       });
@@ -314,6 +317,7 @@ export class GenericGemeindeScraper extends BaseScraper {
 
         if (!title) return;
         const date = this.parseDate(dateText);
+        if (!date) return;
         const id = (t: string) => `gemeinden-generic-${g.idKey}-${this.slugify(t)}`;
 
         events.push({
@@ -322,7 +326,7 @@ export class GenericGemeindeScraper extends BaseScraper {
           source_name: this.name,
           source_url: link ? new URL(link, page.eventPageUrl).href : page.eventPageUrl,
           title,
-          start_date: date || new Date().toISOString().split('T')[0],
+          start_date: date,
           location_name: g.name,
           category: this.guessCategory(title),
         });

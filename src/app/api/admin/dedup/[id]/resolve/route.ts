@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
 import { requireAdmin } from '@/lib/supabase/require-admin';
+import { releaseStatus } from '@/lib/pipeline/dedup-plan';
 
 export async function POST(
   request: NextRequest,
@@ -108,17 +109,21 @@ export async function POST(
         console.error('Clear B error:', clearBError);
       }
 
-      // Restore publish_status based on quality_score for any event that was marked duplicate
+      // Freigeben wie der nächtliche Dedup (releaseStatus): Score → Status,
+      // Quarantäne und Ortskonflikt bleiben zurückgehalten.
       for (const eid of [eventAId, eventBId]) {
         const { data: ev } = await supabase
           .from('events')
-          .select('id,quality_score,publish_status')
+          .select('id,quality_score,publish_status,location_status,admission:location_resolution->admission->>decision')
           .eq('id', eid)
           .single();
 
         if (ev && ev.publish_status === 'duplicate') {
-          const qs = ev.quality_score ?? 0;
-          const newStatus = qs >= 40 ? 'published' : qs >= 20 ? 'published_low_confidence' : 'needs_review';
+          const newStatus = releaseStatus({
+            quality_score: ev.quality_score,
+            location_status: ev.location_status,
+            admission_decision: ev.admission as string | null,
+          });
           await supabase
             .from('events')
             .update({ publish_status: newStatus, duplicate_of: null, dedup_score: null })

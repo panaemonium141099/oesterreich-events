@@ -37,6 +37,26 @@ describe('Mehrdeutige Einträge verbinden keine verschiedenen Events', () => {
     expect(owner.get('u')).toBe('u');
   });
 
+  // Gegenprüfung 2026-10-09: ohne Trennzeichen ist „Kaiser Wiesn Dirndl
+  // Rocker" / „Kaiser Wiesn Die Lauser" für den Titelvergleich „different";
+  // die Ausnahme für Titelvarianten („Detailinfos zu X", „X - VIP Packages")
+  // darf daraus keine Verbindung machen.
+  it('Acts ohne Trennzeichen neben einem Sammeleintrag ohne Uhrzeit bleiben getrennt', () => {
+    const umbrella = ev({ id: 'u', title: 'Kaiser Wiesn', start_date: '2026-09-26T00:00:00Z', source_name: 'q1' });
+    const act1 = ev({ id: 'a1', title: 'Kaiser Wiesn Dirndl Rocker', start_date: '2026-09-26T00:00:00Z', source_name: 'q2' });
+    const act2 = ev({ id: 'a2', title: 'Kaiser Wiesn Die Lauser', start_date: '2026-09-26T00:00:00Z', source_name: 'q3' });
+    const owner = ownerMap([umbrella, act1, act2]);
+    expect(owner.get('a1')).not.toBe(owner.get('a2'));
+  });
+
+  it('zwei Führungen mit verschiedener Uhrzeit neben der Ausstellung ohne Uhrzeit bleiben getrennt', () => {
+    const show = ev({ id: 'x', title: 'Klimt und die Moderne', start_date: '2026-10-20T00:00:00Z', source_name: 'q1' });
+    const t1 = ev({ id: 't1', title: 'Klimt und die Moderne Kuratorenführung', start_date: '2026-10-20T14:00:00Z', source_name: 'q2' });
+    const t2 = ev({ id: 't2', title: 'Klimt und die Moderne Familienführung', start_date: '2026-10-20T14:40:00Z', source_name: 'q3' });
+    const owner = ownerMap([show, t1, t2]);
+    expect(owner.get('t1')).not.toBe(owner.get('t2'));
+  });
+
   it('verschachtelte Titel derselben Aufführung (gleiche Zeit, gleicher Saal) machen den Kurztitel nicht mehrdeutig', () => {
     const shortT = ev({ id: 's', title: 'KI UND K.O.', start_date: '2026-10-10T00:00:00Z', source_name: 'q1' });
     const y = ev({ id: 'y', title: "Theaterabend in Steeg ''KI & K.O.''", start_date: '2026-10-10T16:30:00Z', source_name: 'q2' });
@@ -156,12 +176,83 @@ describe('Primary-Wahl', () => {
     expect(cluster.primaryId).toBe('o');
   });
 
+  it('Datum ohne Jahr am Titelende zählt auch als eingebautes Datum („… am 10.10.")', () => {
+    const at = { start_date: '2026-10-10T17:00:00Z', location_name: 'Musikheim', postal_code: '7000' };
+    const dated = ev({ id: 'd', title: 'Herbstkonzert Musikverein am 10.10.', source_name: 'q1', quality_score: 95, ...at });
+    const clean = ev({ id: 'c', title: 'Herbstkonzert Musikverein', source_name: 'q2', quality_score: 60, ...at });
+    const [cluster] = dedupDay([dated, clean]).clusters;
+    expect(cluster.primaryId).toBe('c');
+  });
+
+  // Stichprobe 2026-10-09: die bisherige Zeile mit Platzhalter-Uhrzeit (17:10
+  // für den 17.10.) blieb Primary, drei aktuelle Zeilen mit 10:00 wurden
+  // verborgen; „Five Finger Death Punch - VIP Package" blieb vor dem Konzert.
+  it('echte Uhrzeit schlägt Platzhalter- oder Datums-Uhrzeit, auch gegen den bisherigen Primary', () => {
+    const at = { location_name: 'Emling 29', postal_code: '4072' };
+    const echo = ev({ id: 'e', title: 'Erntedankfest', start_date: '2026-10-17T15:10:00Z', source_name: 'q1', quality_score: 90, ...at });
+    const real = ev({ id: 'r', title: 'Erntedankfest', start_date: '2026-10-17T08:00:00Z', source_name: 'q2', quality_score: 60,
+      publish_status: 'duplicate', duplicate_of: 'e', ...at });
+    const [cluster] = dedupDay([echo, real]).clusters;
+    expect(cluster.primaryId).toBe('r');
+  });
+
+  it('Zusatzprodukt (VIP Package, Upgrade, Camping) wird nicht Primary vor dem Konzert', () => {
+    const t = 'https://www.eventim.at/event/five-finger-death-punch-stadthalle-21000001/';
+    const vip = ev({ id: 'v', title: 'Five Finger Death Punch - VIP Package', start_date: '2026-11-20T19:00:00Z', source_name: 'Eventim', ticket_url: t, quality_score: 70 });
+    const show = ev({ id: 's', title: 'Five Finger Death Punch', start_date: '2026-11-20T19:00:00Z', source_name: 'Eventim', ticket_url: t, quality_score: 70,
+      publish_status: 'duplicate', duplicate_of: 'v' });
+    const [cluster] = dedupDay([vip, show]).clusters;
+    expect(cluster.primaryId).toBe('s');
+  });
+
+  // Stichprobe 2026-10-09 (Runde 2): eine Zeile ohne Koordinaten wurde
+  // Primary, die Feratel-Zeilen mit Gebäude-Pin verschwanden; ohne Pin fehlt
+  // ein Event in Liste und Karte.
+  it('Zeile mit Koordinaten schlägt Zeile ohne, auch gegen den bisherigen Primary', () => {
+    const noPin = ev({ id: 'n', title: 'Herbstkonzert', start_date: '2026-10-24T17:00:00Z', source_name: 'q1', quality_score: 95,
+      latitude: null, longitude: null, location_precision: null } as Partial<EventRow> & { id: string; title: string; start_date: string; source_name: string });
+    const pin = ev({ id: 'p', title: 'Herbstkonzert', start_date: '2026-10-24T17:00:00Z', source_name: 'q2', quality_score: 60,
+      publish_status: 'duplicate', duplicate_of: 'n' });
+    const [cluster] = dedupDay([noPin, pin]).clusters;
+    expect(cluster.primaryId).toBe('p');
+  });
+
+  it('Feratel-Terminzeile und ihre Basiszeile sind keine Fassungen voneinander (gemeinsame Veranstalter-URL)', () => {
+    const url = 'https://www.wels.at/kulturinwels';
+    const dated = ev({ id: 'd', title: 'Konzert X', start_date: '2026-10-24T17:00:00Z', source_name: 'feratel-deskline', source_id: 'feratel-abc:2026-10-24',
+      source_url: url, last_seen_at: '2026-09-21T03:00:00Z', quality_score: 70 });
+    const base = ev({ id: 'b', title: 'Konzert X', start_date: '2026-10-24T17:00:00Z', source_name: 'feratel-deskline', source_id: 'feratel-abc',
+      source_url: url, last_seen_at: '2026-10-09T03:00:00Z', publish_status: 'duplicate', duplicate_of: 'd', quality_score: 70 });
+    const [cluster] = dedupDay([dated, base]).clusters;
+    expect(cluster.primaryId).toBe('d');
+  });
+
+  it('angeklebter Zusatz oder Uhrzeit vor dem Titel verliert gegen den sauberen Titel derselben Seite', () => {
+    const at = { source_name: 'q1', start_date: '2026-10-20T08:00:00Z' };
+    const clean = ev({ id: 'c', title: 'Frohnleitner Literaturherbst 2026 „Der Kasperl kommt“', ...at, last_seen_at: '2026-10-06T03:00:00Z',
+      source_url: 'https://www.frohnleiten.com/lit', publish_status: 'duplicate', duplicate_of: 'g', quality_score: 70 });
+    const glued = ev({ id: 'g', title: 'Frohnleitner Literaturherbst 2026 „Der Kasperl kommt“Buch & Co. - Bücherei Frohnleiten', ...at,
+      last_seen_at: '2026-10-09T03:00:00Z', source_url: 'https://www.frohnleiten.com/lit', quality_score: 70 });
+    expect(dedupDay([clean, glued]).clusters[0].primaryId).toBe('c');
+    const timed = ev({ id: 't', title: '10:00 Uhr - 16:00 Uhr"Stress lass nach" - Ein Tag für mehr Ruhe', source_name: 'q2', start_date: '2026-10-20T08:00:00Z' });
+    const plain = ev({ id: 'p', title: '"Stress lass nach" - Ein Tag für mehr Ruhe', source_name: 'q3', start_date: '2026-10-20T08:00:00Z',
+      publish_status: 'duplicate', duplicate_of: 't', quality_score: 10 });
+    expect(dedupDay([timed, { ...plain, quality_score: 70 }]).clusters[0].primaryId).toBe('p');
+  });
+
   it('Titel ohne eingebautes Datum wird angezeigt (Prod: „Biodiversitätszentrum … 19.11.2026")', () => {
     const ticket = { ticket_url: 'https://www.ooe.gv.at/v/123' };
     const dated = ev({ id: 'd', title: 'Biodiversitätszentrum Oberösterreich 19.11.2026', start_date: '2026-11-19T17:00:00Z', source_name: 'q1', quality_score: 95, ...ticket });
     const clean = ev({ id: 'c', title: 'Alaskas hocharktische Vogelwelt', start_date: '2026-11-19T17:00:00Z', source_name: 'q2', quality_score: 60, ...ticket });
     const [cluster] = dedupDay([dated, clean]).clusters;
     expect(cluster.primaryId).toBe('c');
+  });
+
+  it('ein Duplikat in Quarantäne wird nicht Primary (sonst kippt der Primary jede Nacht)', () => {
+    const quarantined = ev({ id: 'q', title: 'Konzert X', start_date: '2026-10-08T18:00:00Z', source_name: 'Eventim', quality_score: 99, publish_status: 'duplicate', duplicate_of: 'o', admission_decision: 'quarantine' } as Partial<EventRow> & { id: string; title: string; start_date: string; source_name: string });
+    const ok = ev({ id: 'o', title: 'Konzert X', start_date: '2026-10-08T18:00:00Z', source_name: 'q2', quality_score: 50 });
+    const [cluster] = dedupDay([quarantined, ok]).clusters;
+    expect(cluster.primaryId).toBe('o');
   });
 
   it('sichtbare Zeile vor needs_review', () => {
