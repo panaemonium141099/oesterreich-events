@@ -151,16 +151,31 @@ export function planDedup(events: EventRow[], clusters: ClusterResult[], opts: P
   /** Bisheriger Primary weg oder veraltet: an einen sichtbaren Zwilling
    *  hängen statt eine zweite sichtbare Zeile zu erzeugen (Stichprobe
    *  2026-10-09: Weyer, Ebensee, Schwarzenberg doppelt sichtbar). */
-  const releaseOrAttach = (e: EventRow, previousPrimaryId: string | null, reason: string) => {
+  /** Liefert die Zeile, unter der das Event danach sichtbar ist (oder null). */
+  const releaseOrAttach = (e: EventRow, previousPrimaryId: string | null, reason: string): EventRow | null => {
     const twin = visibleTwin(e);
     if (!twin) {
       pushRelease(e, previousPrimaryId, reason);
-      return;
+      return VISIBLE.has(underlyingStatus(e)) ? e : null;
     }
-    const existing = plan.primaries.find(p => p.id === twin.row.id);
-    const clusterId = existing?.clusterId ?? twin.row.dedup_cluster_id ?? nextId();
-    if (!existing && twin.row.dedup_cluster_id !== clusterId) plan.primaries.push({ id: twin.row.id, clusterId, enrichments: {} });
-    plan.markDuplicate.push({ id: e.id, primaryId: twin.row.id, clusterId, score: twin.score, isNew: false });
+    attach(e, twin.row, twin.score, false);
+    return twin.row;
+  };
+
+  const attach = (dup: EventRow, primary: EventRow, score: number, isNew: boolean) => {
+    const existing = plan.primaries.find(p => p.id === primary.id);
+    const clusterId = existing?.clusterId ?? primary.dedup_cluster_id ?? nextId();
+    if (!existing && (primary.dedup_cluster_id !== clusterId || primary.publish_status === 'duplicate')) {
+      plan.primaries.push({ id: primary.id, clusterId, enrichments: {} });
+    }
+    plan.markDuplicate.push({ id: dup.id, primaryId: primary.id, clusterId, score, isNew });
+    desiredDuplicate.add(dup.id);
+  };
+
+  /** Dieselbe Detailseite derselben Quelle (Link auf genau ein Event). */
+  const sameDetailPage = (a: EventRow, b: EventRow): boolean => {
+    const ua = normalizeUrlForDedup(a.source_url);
+    return a.source_name === b.source_name && !!ua && isEventSpecificUrl(ua) && ua === normalizeUrlForDedup(b.source_url);
   };
 
   for (const e of events) {
@@ -198,19 +213,19 @@ export function planDedup(events: EventRow[], clusters: ClusterResult[], opts: P
     // dedup-engine 1c): Gegenbeleg, Mehrdeutigkeit oder anderer Tag. Die
     // frische Zeile bleibt sonst für immer hinter veralteten Daten verborgen.
     if (isStale(p)) {
-      releaseOrAttach(e, previousPrimaryId, 'primary_orphaned');
-      // Die Altzeile derselben Quelle steht am selben Tag noch sichtbar da
-      // (alter Zeitzonen-Versatz, falsches Etikett): sie wird Duplikat der
-      // frischen Zeile, sonst ist das Event doppelt sichtbar (Stichprobe
-      // 2026-10-09: 52 von 225 Fällen).
+      const shownAs = releaseOrAttach(e, previousPrimaryId, 'primary_orphaned');
+      // Die Altzeile derselben Quelle steht noch sichtbar da (alter Zeitzonen-
+      // Versatz, falsches Etikett, alter Datumsfehler): sie wird Duplikat der
+      // Zeile, unter der das Event jetzt sichtbar ist, sonst ist es doppelt
+      // sichtbar (Stichprobe 2026-10-09: 52 von 225 Fällen). Nur wenn das
+      // Event dann wirklich sichtbar ist (sonst verschwände es ganz).
       const t = titleRelation(e, p);
-      if (byId.has(p.id) && VISIBLE.has(p.publish_status ?? '') && p.source_name === e.source_name &&
-          (t === 'equal' || t === 'near' || t === 'contains') && !desiredDuplicate.has(p.id) && !clusterPrimaries.has(p.id) &&
-          plan.release.some(r => r.id === e.id)) {
-        const clusterId = e.dedup_cluster_id ?? p.dedup_cluster_id ?? nextId();
-        plan.primaries.push({ id: e.id, clusterId, enrichments: {} });
-        plan.markDuplicate.push({ id: p.id, primaryId: e.id, clusterId, score: scorePair(p, e).overallScore, isNew: true });
-        desiredDuplicate.add(p.id);
+      const nested = t === 'equal' || t === 'near' || t === 'contains';
+      const samePage = sameDetailPage(e, p);
+      const linkable = byId.has(p.id) ? (nested || samePage) : (samePage && nested);
+      if (shownAs && linkable && VISIBLE.has(p.publish_status ?? '') && p.source_name === e.source_name &&
+          !desiredDuplicate.has(p.id) && !clusterPrimaries.has(p.id)) {
+        attach(p, shownAs, scorePair(p, shownAs).overallScore, true);
       }
       continue;
     }

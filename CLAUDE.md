@@ -192,17 +192,26 @@ node / next.js
   Titel/Ort/Zeit als Relation, quellen-unabhängig) → `dedup-scorer.ts`
   (Entscheidungstabelle + Grund) → `dedup-engine.ts` (Wiener Tag, Kandidaten,
   Mehrdeutigkeits- und Widerspruchsschutz, Primary: sichtbar > aktuell
-  geliefert > Eventim > bisheriger) → `dedup-plan.ts` (Sollzustand → nur
-  Abweichungen, Freigabe, Sicherheitsventil). `src/scripts/dedup.ts` rechnet
-  JEDEN Lauf alle Cluster neu (kein `--reset` mehr nötig); `dedup-audit.ts`
-  macht den Schritt rot, wenn offensichtliche Dubletten sichtbar bleiben.
-  Verwaiste Zeilen (Quelle liefert sie > 21 Tage nicht) sind nie Gegenbeleg
-  und nie Primary; eine frische Zeile hinter einem verwaisten Primary wird
-  Primary oder freigegeben. Absage-Varianten („ABGESAGT", „entfällt",
-  „verschoben") werden nie mit der aktiven Zeile verschmolzen. Müll-Titel
-  (`isGarbageTitle`, auch reine Datums-Titel) verwirft schon der Sync; der
-  Dedup unterdrückt Altbestand erst nach dem Sicherheitsventil (Grenzen:
-  1.500 neue Duplikate, 300 Freigaben, 1.000 Müll). Golden-Sets aus echten
+  geliefert > mit Koordinaten > sauberer Titel > Terminzeile statt
+  Serien-Basiszeile > Eventim > echte Uhrzeit > bisheriger) →
+  `dedup-plan.ts` (Sollzustand → nur Abweichungen, Freigabe,
+  Sicherheitsventil). `src/scripts/dedup.ts` rechnet JEDEN Lauf alle
+  Cluster ab dem Wiener Vortag neu (kein `--reset` mehr nötig);
+  `dedup-audit.ts` macht den Schritt rot, wenn offensichtliche Dubletten
+  sichtbar bleiben. Verwaiste Zeilen (Quelle liefert sie > 21 Tage nicht) und
+  ältere Fassungen einer Event-Seite am selben Tag (`staleVersionIds`) sind
+  nie Gegenbeleg und nie Primary; eine frische Zeile hinter einem verwaisten
+  Primary wird Primary oder freigegeben, eine Freigabe neben einem
+  sichtbaren Zwilling hängt sich an ihn. „Dieselbe Quelle" heißt nicht
+  derselbe Ort (Aggregatoren wie gem2go): Vorgängerversionen nur von
+  derselben Event-Seite oder ohne PLZ-/Bezirks-Widerspruch. Absage-Varianten
+  („ABGESAGT", „entfällt", „verschoben auf <anderer Tag>") werden nie mit der
+  aktiven Zeile verschmolzen. Müll-Titel (`isGarbageTitle`) verwirft schon der
+  Sync; ein Titel ohne Namen (nur Datum) auf der eigenen Seite genau eines
+  Events bleibt sichtbar (`isGarbageRow`), bis der Scraper den Namen liest.
+  Der Dedup unterdrückt Altbestand erst nach dem Sicherheitsventil (Grenzen:
+  1.500 neue Duplikate, 300 sichtbar machende Freigaben, 1.000 Müll; per
+  workflow_dispatch freigebbar, Plan als Artefakt). Golden-Sets aus echten
   Prod-Fällen: `src/__tests__/pipeline/dedup-golden*.test.ts`; neue
   Fehlerfälle dort ergänzen, keine Quellen-Sonderregeln. Vor Regeländerungen
   `npm run dedup -- --dry-run --report r.json` gegen Prod.

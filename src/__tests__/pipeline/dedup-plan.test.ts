@@ -246,6 +246,36 @@ describe('planDedup: Freigabe nur mit Gegenbeleg', () => {
     expect(p.markDuplicate).toEqual([expect.objectContaining({ id: 'b', primaryId: 'a' })]);
   });
 
+  // Stichprobe 2026-10-09 (Runde 3)
+  it('Altzeile bleibt sichtbar, wenn die frische Zeile selbst zurückgehalten bleibt (sonst ist das Event weg)', () => {
+    const p = planWith([
+      ev({ id: 'a', source_name: 'q', title: 'Eltern-Beratung', start_date: '2026-10-07T14:00:00Z', last_seen_at: SEEN, district: 'lienz',
+        location_status: 'conflict', publish_status: 'duplicate', duplicate_of: 'b' }),
+      ev({ id: 'b', source_name: 'q', title: 'Eltern-Beratung', start_date: '2026-10-07T15:00:00Z', last_seen_at: ORPHAN_SEEN, district: 'osttirol' }),
+    ]);
+    expect(p.markDuplicate.filter(m => m.id === 'b')).toEqual([]);
+  });
+
+  it('Altzeile derselben Detailseite mit leicht geändertem Titel wird Duplikat der frischen Zeile', () => {
+    const url = 'https://www.steiermark.com/de/veranstaltungen/ed_81786888';
+    const p = planWith([
+      ev({ id: 'a', source_name: 'q', title: 'Herbstkonzert in Markt Hartmannsdorf', start_date: '2026-10-07T17:00:00Z', last_seen_at: SEEN,
+        district: 'weiz', source_url: url, publish_status: 'duplicate', duplicate_of: 'b' }),
+      ev({ id: 'b', source_name: 'q', title: 'Herbstwunschkonzert in Markt Hartmannsdorf', start_date: '2026-10-07T19:00:00Z',
+        last_seen_at: ORPHAN_SEEN, district: 'hartberg', source_url: url }),
+    ]);
+    expect(p.markDuplicate).toEqual([expect.objectContaining({ id: 'b', primaryId: 'a' })]);
+  });
+
+  it('Altzeile derselben Detailseite an einem anderen Tag (alter Datumsfehler) wird Duplikat der frischen Zeile', () => {
+    const url = 'https://www.ainet.at/system/web/veranstaltung.aspx?detailonr=226611735-2494';
+    const stale = ev({ id: 'b', source_name: 'q', title: 'Advent im Dorf', start_date: '2026-10-08T16:00:00Z', last_seen_at: ORPHAN_SEEN, source_url: url });
+    const p = planWith([ev({ id: 'a', source_name: 'q', title: 'Advent im Dorf', last_seen_at: SEEN, source_url: url,
+      publish_status: 'duplicate', duplicate_of: 'b' })], new Map([['b', stale]]));
+    expect(p.release).toEqual([expect.objectContaining({ id: 'a' })]);
+    expect(p.markDuplicate).toEqual([expect.objectContaining({ id: 'b', primaryId: 'a' })]);
+  });
+
   it('Etiketten-Widerspruch, aber dieselbe Detailseite derselben Quelle: kein Gegenbeleg (falsch konfigurierte Gemeinde)', () => {
     const url = 'https://www.gemeinde-buch.at/system/web/veranstaltung.aspx?detailonr=225448128-2551';
     const p = planWith([

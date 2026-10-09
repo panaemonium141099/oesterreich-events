@@ -630,7 +630,7 @@ export function placeEvidence(a: EventRow, b: EventRow, opts: PlaceOptions = {})
   // derselbe Ort, auch wenn eine Quelle die Adresse als Ortsnamen führt
   // („Arthofer Arena" / „Karlingerstraße 6", Stichprobe 2026-10-09).
   const addrB = new Set(addressKey(b));
-  if ((samePlz || !fa.plz || !fb.plz) && addressKey(a).some(k => addrB.has(k))) return { relation: 'same', reason: 'address' };
+  if ((opts.ignoreLabels || samePlz || !fa.plz || !fb.plz) && addressKey(a).some(k => addrB.has(k))) return { relation: 'same', reason: 'address' };
 
   if (bothPrecise) {
     if (venue === 'differs') return { relation: 'conflict', reason: 'different_venue' };
@@ -670,7 +670,10 @@ export function placeEvidence(a: EventRow, b: EventRow, opts: PlaceOptions = {})
     }
   }
 
-  const sameGemeinde = fa.gemeinden.size > 0 && [...fa.gemeinden].some(g => fb.gemeinden.has(g));
+  // Verschiedene PLZ, die nur mehrere Gemeinden teilen (5251 Höhnhart / 5252
+  // Aspach), belegen keinen gemeinsamen Ort; eine Seite muss eindeutig sein.
+  const sameGemeinde = fa.gemeinden.size > 0 && [...fa.gemeinden].some(g => fb.gemeinden.has(g)) &&
+    (samePlz || fa.gemeinden.size === 1 || fb.gemeinden.size === 1);
   // Ohne Etiketten zählen auch die daraus abgeleiteten Gemeinde-Mittelpunkte
   // nicht (falsch konfigurierte Gemeinde-Kalender: „Buch in Tirol" für Buch
   // in Vorarlberg, Stichprobe 2026-10-09).

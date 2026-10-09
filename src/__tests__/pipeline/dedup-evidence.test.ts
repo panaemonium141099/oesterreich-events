@@ -307,6 +307,18 @@ describe('placeEvidence ohne Etiketten', () => {
     expect(placeEvidence(a, b, { ignoreLabels: true }).relation).not.toBe('town');
   });
 
+  it('ohne Etiketten zählt eine gleiche Adresse auch bei falscher PLZ (Heimen 51, Buch)', () => {
+    const a = e({ location_name: 'Gemeindesaal', address: 'Heimen 51', postal_code: '6220' } as Partial<EventRow>);
+    const b = e({ location_name: 'Gemeindesaal', address: 'Heimen 51', postal_code: '6960' } as Partial<EventRow>);
+    expect(placeEvidence(a, b, { ignoreLabels: true }).relation).toBe('same');
+  });
+
+  it('Nachbar-PLZ, die nur mehrere Gemeinden teilen, belegen keinen gemeinsamen Ort (Höhnhart 5251 / Aspach 5252)', () => {
+    const a = e({ location_name: 'Pfarrkirche', postal_code: '5251' } as Partial<EventRow>);
+    const b = e({ location_name: 'Pfarrkirche', postal_code: '5252' } as Partial<EventRow>);
+    expect(placeRelation(a, b)).not.toBe('town');
+  });
+
   it('Adresse als Ortsname ist kein anderer Venue; gleiche Adresse ist derselbe Ort', () => {
     const a = e({ location_name: 'Arthofer Arena - Sportplatz Hartkirchen', address: 'Karlingerstraße 6', postal_code: '4081' } as Partial<EventRow>);
     const b = e({ location_name: 'Karlingerstraße 6', address: 'Karlingerstraße 6', postal_code: '4081' } as Partial<EventRow>);
