@@ -1,5 +1,6 @@
 import * as cheerio from 'cheerio';
 import { UniBaseScraper } from './UniBaseScraper';
+import { firstText, isEventList, isNamelessTitle, isTitleCandidate } from '../event-title';
 import type { ScrapedEvent } from '@/types/events';
 
 /**
@@ -97,8 +98,12 @@ abstract class PHBaseScraper extends UniBaseScraper {
     $('article.event, .news-list-item, article, .event-item, [class*="event"], .veranstaltung, .news-item, .termin, li.termine').each((_, el) => {
       try {
         const $el = $(el);
-        const title = $el.find('h2, h3, h4, .title, .event-title').first().text().trim();
-        if (!title || title.length < 3) return;
+        // Eine Überschrift, die nur Monat oder Datum nennt ("Oktober 2026"),
+        // ist kein Titel: dann gilt die nächste, außer der Block ist ein
+        // Abschnitt mit mehreren Events.
+        const titles = $el.find('h2, h3, h4, .title, .event-title');
+        const title = firstText(titles, isEventList($el) ? () => true : isTitleCandidate);
+        if (!title || title.length < 3 || isNamelessTitle(title)) return;
 
         const href = $el.find('a').first().attr('href') || '';
         const sourceUrl = href.startsWith('http') ? href : `${this.baseUrl}${href}`;
@@ -223,6 +228,75 @@ export class PPHAugustinumScraper extends PHBaseScraper {
   protected readonly bundesland = 'steiermark';
   protected readonly defaultLat = 47.0696;
   protected readonly defaultLng = 15.4345;
+
+  /**
+   * Der Kalender ist in Monats-Abschnitte geteilt: Überschrift "Oktober
+   * 2026", darunter je Event ein Listeneintrag mit Datum ("16.10.2026",
+   * "09.-13.11.2026") und Text ("Tagung: Wie Technik Kinder stark macht,
+   * 14.30 - 19.00 Uhr"). Der allgemeine PH-Parser nahm den Abschnitt als
+   * Event und den Monat als Titel (Prod 2026-10-08: "November 2026",
+   * "März 2028"), die Uhrzeit las er aus dem Datum (16.10. → 16:10).
+   */
+  protected parseHtml(html: string): ScrapedEvent[] {
+    const $ = cheerio.load(html);
+    const events: ScrapedEvent[] = [];
+
+    $('.events-month-section').each((_, section) => {
+      const $section = $(section);
+      // Frühere Zeile des Abschnitts (Titel = Monat, Datum = erstes Event):
+      // der Sync gibt sie dem Event am selben Tag (source-id-migration.ts).
+      const month = $section.find('.section-hl').first().text().trim();
+      const previousId = month ? this.makeSourceId(this.slugOf(month)) : undefined;
+
+      $section.find('.events-list > li').each((__, li) => {
+        const $li = $(li);
+        const days = this.dayRange($li.find('.events-date').first().text());
+        const text = $li.find('.events-text').first().text().replace(/\s+/g, ' ').trim();
+        // Die Uhrzeit hängt mit Komma am Namen: ", 14.30 - 19.00 Uhr",
+        // ", ab 15.00 Uhr, Festsaal Augustinum".
+        const cut = text.search(/,\s*(?:ab\s+)?\d{1,2}[.:]\d{2}/);
+        const title = (cut >= 0 ? text.slice(0, cut) : text).trim();
+        if (!days || title.length < 3 || isNamelessTitle(title)) return;
+
+        const time = cut >= 0 ? text.slice(cut).match(/(\d{1,2})[.:](\d{2})(?:\s*[-–]\s*(\d{1,2})[.:](\d{2}))?/) : null;
+        const hm = (h: string, m: string) => `${h.padStart(2, '0')}:${m}:00`;
+        const startDate = time ? `${days.start}T${hm(time[1], time[2])}` : days.start;
+        const endDate = days.end ?? (time?.[3] ? `${days.start}T${hm(time[3], time[4])}` : undefined);
+        const description = $li.find('.accordion-item--content').text().replace(/\s+/g, ' ').trim();
+
+        events.push({
+          ...this.buildEvent({
+            slug: `${this.slugOf(title)}-${days.start}`,
+            title,
+            startDate,
+            endDate,
+            description: description || undefined,
+            sourceUrl: this.eventListUrl,
+          }),
+          ...(previousId ? { previous_source_id: previousId } : {}),
+        });
+      });
+    });
+
+    return events.length > 0 ? events : super.parseHtml(html);
+  }
+
+  private slugOf(text: string): string {
+    return text.toLowerCase().replace(/\W+/g, '-').slice(0, 60);
+  }
+
+  /** "16.10.2026" oder "09.-13.11.2026" / "30.11.-02.12.2026" als YYYY-MM-DD. */
+  private dayRange(text: string): { start: string; end?: string } | null {
+    const m = text.replace(/\s+/g, '').match(/^(\d{1,2})\.(?:(\d{1,2})\.)?(?:[-–](\d{1,2})\.(\d{1,2})\.)?(\d{4})$/);
+    if (!m) return null;
+    const iso = (d: string, mo: string, y: number) => `${y}-${mo.padStart(2, '0')}-${d.padStart(2, '0')}`;
+    const year = Number(m[5]);
+    if (!m[3]) return m[2] ? { start: iso(m[1], m[2], year) } : null;
+    const startMonth = m[2] ?? m[4];
+    // "28.12.-03.01.2027": der Beginn liegt im Vorjahr.
+    const startYear = Number(startMonth) > Number(m[4]) ? year - 1 : year;
+    return { start: iso(m[1], startMonth, startYear), end: iso(m[3], m[4], year) };
+  }
 }
 
 /**
