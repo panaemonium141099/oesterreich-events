@@ -55,6 +55,7 @@ import { generateFingerprint } from '@/lib/dedup/fingerprint';
 import { generateEventSlug } from '@/lib/utils/slugify';
 import { scoreAndAdmit } from '@/lib/quality/score-event';
 import { isContactHandleTitle } from '@/lib/scrapers/detail-extract/validate';
+import { isGarbageTitle } from '@/lib/pipeline/garbage-filter';
 import { extractDimsFromUrl } from '@/lib/event-images/extract-dims-from-url';
 import {
   validateAndUpgradeImageUrl,
@@ -1060,6 +1061,14 @@ export function filterValidEvents(events: ScrapedEvent[]): {
     if (e.title && isContactHandleTitle(e.title)) {
       rejected++;
       rejectionReasons.contact_handle_title = (rejectionReasons.contact_handle_title ?? 0) + 1;
+      return false;
+    }
+    // Datum, Navigation oder Kachel-Teil statt Name: nie schreiben. Sonst
+    // unterdrückt der Dedup die Zeile nachts und der nächste Upsert macht
+    // sie wieder sichtbar (Prod 2026-10-08).
+    if (e.title?.trim() && isGarbageTitle(e.title, { sourceName: e.source_name, ticketUrl: e.ticket_url })) {
+      rejected++;
+      rejectionReasons.garbage_title = (rejectionReasons.garbage_title ?? 0) + 1;
       return false;
     }
 

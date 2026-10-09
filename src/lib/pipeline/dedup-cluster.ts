@@ -5,16 +5,50 @@
  * bildet dedup-engine.ts (mit Mehrdeutigkeits- und Widerspruchsschutz).
  */
 
+import { scoreToPublishStatus, type PublishStatus } from '@/lib/quality/score-event';
+import { isDateOnlyText } from './garbage-filter';
+import { viennaDayOf } from './dedup-evidence';
 import type { EventRow } from './types';
 
-const DATE_WORDS = /\b(montag|dienstag|mittwoch|donnerstag|freitag|samstag|sonntag|mo|di|mi|do|fr|sa|so|januar|jaenner|jänner|februar|maerz|märz|april|mai|juni|juli|august|september|oktober|november|dezember|jan|feb|mär|apr|jun|jul|aug|sep|sept|okt|nov|dez|uhr|ab|bis)\b/gi;
+/**
+ * Status, den eine Zeile ohne Dedup hätte — wie beim Upsert: Quarantäne und
+ * Ortskonflikt (DB-Constraint) bleiben zurückgehalten, sonst entscheidet der
+ * gespeicherte Qualitätsscore.
+ */
+export function underlyingStatus(row: {
+  quality_score?: number | null;
+  admission_decision?: string | null;
+  location_status?: string | null;
+}): PublishStatus {
+  if (row.admission_decision === 'quarantine') return 'needs_review';
+  if (row.location_status === 'conflict') return 'needs_review';
+  return scoreToPublishStatus(row.quality_score ?? 0);
+}
 
-const DATE_IN_TITLE = /\b\d{1,2}\.\s?\d{1,2}\.\s?(\d{2}|\d{4})?\b/;
+/** Wäre die Zeile ohne Dedup öffentlich sichtbar? */
+export function wouldBeVisible(e: EventRow): boolean {
+  if (e.location_status === 'conflict') return false;
+  if (e.publish_status === 'duplicate') {
+    const s = underlyingStatus(e);
+    return s === 'published' || s === 'published_low_confidence';
+  }
+  return e.publish_status !== 'needs_review' && e.publish_status !== 'suppressed';
+}
 
-/** Titel, der nach Abzug von Datum, Wochentag, Uhrzeit und Satzzeichen leer ist. */
+// Endet nicht mit \b: „… am 10.10." hat nach dem Punkt kein Wortzeichen.
+const DATE_IN_TITLE = /\b\d{1,2}\.\s?\d{1,2}\.\s?(\d{2}|\d{4})?(?!\d)/;
+
+/** Die Kennung der Quelle trägt den eigenen Termin (Wiener Tag als
+ *  YYYY-MM-DD oder YYYYMMDD), z. B. „feratel-bccca177:2026-10-14". */
+function idCarriesDate(e: EventRow): boolean {
+  const day = e.source_id && e.start_date ? viennaDayOf(e) : null;
+  return !!day && (e.source_id!.includes(day) || e.source_id!.includes(day.replace(/-/g, '')));
+}
+
+/** Titel, der nach Abzug von Datum, Wochentag, Uhrzeit und Satzzeichen leer
+ *  ist. Gleiches Vokabular wie der Müll-Filter (garbage-filter.ts). */
 export function isDateOnlyTitle(title: string | null | undefined): boolean {
-  const rest = (title ?? '').toLowerCase().replace(DATE_WORDS, ' ').replace(/[^\p{L}]+/gu, '');
-  return rest.length === 0;
+  return isDateOnlyText(title);
 }
 
 // ---------------------------------------------------------------------------
@@ -26,7 +60,9 @@ export function isDateOnlyTitle(title: string | null | undefined): boolean {
  *
  * Criteria (in order):
  * 1. Sichtbar (nicht needs_review/suppressed/Ortskonflikt)
- * 2. Von der Quelle noch geliefert (nicht verwaist)
+ * 2. Von der Quelle noch geliefert (nicht verwaist), bei derselben Seite
+ *    die zuletzt gesehene Fassung, bei Serien die Terminzeile statt der
+ *    wandernden Basiszeile
  * 3. Echter Titel (nicht nur Datum/Uhrzeit)
  * 4. Eventim (Affiliate-Ticketlink)
  * 5. Titel ohne eingebautes Datum
@@ -44,10 +80,24 @@ export function selectPrimary(events: EventRow[], isOrphan: (id: string) => bool
   const pointedAt = new Set(events.map(e => e.duplicate_of).filter((id): id is string => !!id));
   const isCurrentPrimary = (e: EventRow) => (pointedAt.has(e.id) && e.publish_status !== 'duplicate') ? 1 : 0;
   // Zurückgehaltene Zeilen (needs_review/suppressed) dürfen keine sichtbare
-  // Zeile verdrängen — sonst verschwände das Event ganz.
-  // Ortskonflikte dürfen per DB-Constraint nie veröffentlicht werden.
-  const isVisible = (e: EventRow) =>
-    e.publish_status === 'needs_review' || e.publish_status === 'suppressed' || e.location_status === 'conflict' ? 0 : 1;
+  // Zeile verdrängen — sonst verschwände das Event ganz. Bei Duplikaten zählt,
+  // was sie freigegeben wären (sonst kippt der Primary jede Nacht).
+  const isVisible = (e: EventRow) => (wouldBeVisible(e) ? 1 : 0);
+  // Ältere Fassung derselben Seite: die Quelle liefert dieselbe URL
+  // inzwischen als andere Zeile (neuer Titel, neue Kennung). Die zuletzt
+  // gesehene ist die aktuelle (Prod 2026-10-08: Absagen und Titelkorrekturen).
+  const seen = (e: EventRow) => (e.last_seen_at ? Date.parse(e.last_seen_at) : NaN);
+  const isOlderVersion = (e: EventRow) => (events.some(n =>
+    n !== e && !!n.source_url && n.source_url === e.source_url && n.source_name === e.source_name &&
+    seen(n) - seen(e) > 86_400_000 && (wouldBeVisible(n) || !wouldBeVisible(e))) ? 1 : 0);
+
+  // Serien-Basiszeile: dieselbe Quelle führt für den Termin eine eigene Zeile
+  // mit dem Datum in der Kennung (Feratel „…:2026-10-14"). Die Basiszeile
+  // ohne Datum wandert jede Nacht zum nächsten Termin und darf deshalb nie
+  // die kanonische Zeile (und URL) eines Termins sein.
+  const isWanderingBase = (e: EventRow) => (!idCarriesDate(e) && events.some(n =>
+    n !== e && n.source_name === e.source_name && idCarriesDate(n) &&
+    (wouldBeVisible(n) || !wouldBeVisible(e)))) ? 1 : 0;
 
   return events.sort((a, b) => {
     if (isVisible(a) !== isVisible(b)) return isVisible(b) - isVisible(a);
@@ -55,6 +105,8 @@ export function selectPrimary(events: EventRow[], isOrphan: (id: string) => bool
     const freshA = isOrphan(a.id) ? 0 : 1;
     const freshB = isOrphan(b.id) ? 0 : 1;
     if (freshA !== freshB) return freshB - freshA;
+    if (isOlderVersion(a) !== isOlderVersion(b)) return isOlderVersion(a) - isOlderVersion(b);
+    if (isWanderingBase(a) !== isWanderingBase(b)) return isWanderingBase(a) - isWanderingBase(b);
     // Ein „Titel" nur aus Datum/Uhrzeit (Scraper-Artefakt) wird nicht angezeigt.
     const titledA = isDateOnlyTitle(a.title) ? 0 : 1;
     const titledB = isDateOnlyTitle(b.title) ? 0 : 1;

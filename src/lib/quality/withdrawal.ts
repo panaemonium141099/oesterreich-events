@@ -202,12 +202,16 @@ export function planWithdrawals(rows: SightingRow[], options: WithdrawalOptions)
 
   // Primaries mit einem Duplikat, das noch gelistet wird.
   const confirmedElsewhere = new Set<string>();
+  const pageOf = new Map(rows.map((r) => [r.id, `${r.source_name}|${r.source_url}`]));
   // Nur eine eigene Detailseite kann belegen, dass das Event weg ist.
   const urlUses = new Map<string, number>();
   for (const r of rows) {
     // Nur ein verborgenes Duplikat: sichtbare Zeilen mit altem Verweis
     // (Prod 2026-10-07: 79 künftige) zeigen das Event ohnehin selbst.
-    if (r.duplicate_of && r.publish_status === 'duplicate' && ms(r.last_seen_at) >= nowMs - minGapDays * DAY) {
+    // Ein Duplikat von derselben Seite derselben Quelle ist die Ersatzzeile
+    // („ABGESAGT: …", Prod 2026-10-08), keine Bestätigung der alten.
+    if (r.duplicate_of && r.publish_status === 'duplicate' && ms(r.last_seen_at) >= nowMs - minGapDays * DAY &&
+        pageOf.get(r.duplicate_of) !== `${r.source_name}|${r.source_url}`) {
       confirmedElsewhere.add(r.duplicate_of);
     }
     if (r.source_url) urlUses.set(r.source_url, (urlUses.get(r.source_url) ?? 0) + 1);

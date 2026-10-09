@@ -298,6 +298,25 @@ describe('dedup-scorer / scorePair', () => {
     expect(result.decision).toBe('merge');
   });
 
+  // Abschlussprüfung 2026-10-08: Tour-Seiten und Shop-Startseiten teilen
+  // viele Events; sie belegen weder denselben Ort noch dasselbe Event.
+  it.each([
+    ['Tour-Seite', 'https://www.pizzera-jaus.at/tour', 'Pizzera & Jaus', 'Pizzera & Jaus'],
+    ['Shop-Startseite', 'https://www.oeticket.com/', 'Pizzera & Jaus', 'Wanda'],
+  ])('gemeinsamer Link auf eine %s ist kein Beleg', (_k, url, ta, tb) => {
+    const a = makeEvent({ id: 'aaa', title: ta, start_date: '2026-06-01T18:00:00Z', ticket_url: url, location_name: 'Stadthalle', postal_code: '1150' });
+    const b = makeEvent({ id: 'bbb', title: tb, start_date: '2026-06-01T18:00:00Z', ticket_url: url, location_name: 'Stadthalle', postal_code: '8010' });
+    expect(scorePair(a, b).decision).toBe('distinct');
+  });
+
+  // Prod 2026-10-08: „Tal des Unheils" führt Eventim als Zeitfenster im
+  // 10-Minuten-Takt, jedes ein eigenes Produkt.
+  it('gleiche Quelle, verschiedene Kennung, 10 Minuten auseinander: verschiedene Programmpunkte', () => {
+    const slot = (id: string, start: string) => makeEvent({ id, title: 'Tal des Unheils', start_date: start, source_name: 'Eventim', source_id: id, location_name: 'Burg Lockenhaus', postal_code: '7442' });
+    expect(scorePair(slot('22091132', '2026-10-31T19:10:00Z'), slot('22091134', '2026-10-31T19:20:00Z')))
+      .toMatchObject({ decision: 'distinct', reason: 'same_source_other_time' });
+  });
+
   it('completely different events => distinct', () => {
     const a = makeEvent({
       id: 'aaa',

@@ -156,12 +156,27 @@ describe('Primary-Wahl', () => {
     expect(cluster.primaryId).toBe('o');
   });
 
+  it('Datum ohne Jahr am Titelende zählt auch als eingebautes Datum („… am 10.10.")', () => {
+    const at = { start_date: '2026-10-10T17:00:00Z', location_name: 'Musikheim', postal_code: '7000' };
+    const dated = ev({ id: 'd', title: 'Herbstkonzert Musikverein am 10.10.', source_name: 'q1', quality_score: 95, ...at });
+    const clean = ev({ id: 'c', title: 'Herbstkonzert Musikverein', source_name: 'q2', quality_score: 60, ...at });
+    const [cluster] = dedupDay([dated, clean]).clusters;
+    expect(cluster.primaryId).toBe('c');
+  });
+
   it('Titel ohne eingebautes Datum wird angezeigt (Prod: „Biodiversitätszentrum … 19.11.2026")', () => {
     const ticket = { ticket_url: 'https://www.ooe.gv.at/v/123' };
     const dated = ev({ id: 'd', title: 'Biodiversitätszentrum Oberösterreich 19.11.2026', start_date: '2026-11-19T17:00:00Z', source_name: 'q1', quality_score: 95, ...ticket });
     const clean = ev({ id: 'c', title: 'Alaskas hocharktische Vogelwelt', start_date: '2026-11-19T17:00:00Z', source_name: 'q2', quality_score: 60, ...ticket });
     const [cluster] = dedupDay([dated, clean]).clusters;
     expect(cluster.primaryId).toBe('c');
+  });
+
+  it('ein Duplikat in Quarantäne wird nicht Primary (sonst kippt der Primary jede Nacht)', () => {
+    const quarantined = ev({ id: 'q', title: 'Konzert X', start_date: '2026-10-08T18:00:00Z', source_name: 'Eventim', quality_score: 99, publish_status: 'duplicate', duplicate_of: 'o', admission_decision: 'quarantine' } as Partial<EventRow> & { id: string; title: string; start_date: string; source_name: string });
+    const ok = ev({ id: 'o', title: 'Konzert X', start_date: '2026-10-08T18:00:00Z', source_name: 'q2', quality_score: 50 });
+    const [cluster] = dedupDay([quarantined, ok]).clusters;
+    expect(cluster.primaryId).toBe('o');
   });
 
   it('sichtbare Zeile vor needs_review', () => {

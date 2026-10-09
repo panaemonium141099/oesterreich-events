@@ -62,6 +62,9 @@ export async function pickLifecycleEvents(args: PickEventsArgs): Promise<Lifecyc
     .select('id,title,start_date,location_name,address,postal_code,district,bundesland,latitude,longitude,image_url,ticket_url,category')
     .gte('start_date', start.toISOString().slice(0, 10))
     .lte('start_date', end.toISOString().slice(0, 10))
+    // Nur Sichtbares: Duplikate stünden sonst doppelt in der Mail,
+    // zurückgezogene (abgesagte) Events gar nicht mehr auf der Seite.
+    .in('publish_status', ['published', 'published_low_confidence'])
     .not('image_url', 'is', null)
     .order('event_score', { ascending: false, nullsFirst: false })
     .limit(limit * 4); // overfetch — we filter & dedupe client-side

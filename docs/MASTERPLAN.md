@@ -314,6 +314,36 @@ unterdrückten Primaries. Altfehler in `rewire_saved_events_to_primaries`
 1140 tragen Bezirk „tulln"; ntry.at liefert „Österreich" als Ort; einzelne
 Quellen liefern Termine im Jahr 1 bzw. 2919.
 
+**Abschlussprüfung (2026-10-08):** 68 Prüfagenten (Code, Zusammenspiel,
+Betrieb, Prod-Daten, Szenarien, je Befund gegengeprüft) fanden:
+- **Sicherheit (kritisch):** anon konnte zehn schreibende SECURITY-DEFINER-
+  RPCs aufrufen, darunter `bulk_update_event_publish`. Damit konnte jeder
+  Events verstecken oder freischalten. Ursache: Default-Privilegien in
+  `public`; der Hetzner-Restore wich von den Migrationen ab. Gesperrt
+  (Migration `20261008120000_…`), dazu ein Live-Wächter im Pipeline-Schritt
+  `security_audit`.
+- **Erster Nachtlauf vom Ventil gestoppt:** 1.623 neue Duplikate, 517
+  Freigaben. Der Stopp hielt sich selbst, 303 der Freigaben betrafen nur
+  vergangene Tage. Jetzt wird erst ab dem Wiener Vortag geplant, die Grenzen
+  lassen sich per workflow_dispatch freigeben, der Plan liegt als Artefakt
+  vor und die Alarm-Mail nennt den Grund.
+- **Verklemmung:** 433 frische Termine hingen hinter verwaisten Altzeilen.
+  Feratel-Serien-Basiszeilen ohne Datum wanderten jede Nacht weiter und
+  übernahmen kurz vor jedem Termin die URL. „ABGESAGT: X" war unter „X"
+  verborgen. Der Müll-Filter versteckte Ufo361 samt Eventim, und der Upsert
+  machte Müll jede Nacht wieder sichtbar.
+- **Weitere Lücken:** Alte Fehlverbindungen mit Gegenbeleg wurden nie gelöst
+  (gleiche Quelle mit anderem Titel, Nachbarpfarren). Eventim-Zeitfenster im
+  10-Minuten-Takt wurden verschmolzen.
+
+Alle Punkte sind als Regeln mit Tests behoben (Golden-Set
+`dedup-golden-2026-10-08`). Probelauf ab Vortag: einmaliger Nachholplan mit
+3.099 neuen Duplikaten, 1.714 Freigaben und 271 Müllzeilen in 230 s (vorher
+400 s über alle Tage). Offen sind eigene Tasks: Parser, die das Datum als
+Titel liefern (173 frische Zeilen in 3 Tagen); Ticketmaster-Zeitzone; der
+Eventim-Affiliate-Link geht verloren, wenn die Eventim-Zeile einen
+Ortskonflikt hat (3 bis 5 Events, Anzeige-Frage).
+
 ## 4. Getroffene Grundsatz-Entscheidungen (2026-07-07)
 
 1. **Affiliate-ID `J70` ist korrekt** und gehört uns (bestätigt). Eventim-Links im Feed

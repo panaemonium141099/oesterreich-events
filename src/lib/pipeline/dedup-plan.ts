@@ -16,12 +16,12 @@
  * Rein und ohne I/O.
  */
 
-import { computeEnrichments, isDateOnlyTitle } from './dedup-cluster';
+import { computeEnrichments, isDateOnlyTitle, underlyingStatus } from './dedup-cluster';
 import { isGarbageTitle } from './garbage-filter';
 import { newClusterId as defaultClusterId, pairKey, type ClusterResult } from './dedup-engine';
-import { isOrphanRow } from './dedup-evidence';
-import { scorePair } from './dedup-scorer';
-import { scoreToPublishStatus, type PublishStatus } from '@/lib/quality/score-event';
+import { isOrphanRow, placeEvidence } from './dedup-evidence';
+import { LABEL_CONFLICTS, scorePair } from './dedup-scorer';
+import type { PublishStatus } from '@/lib/quality/score-event';
 import type { EventRow } from './types';
 
 export interface MarkDuplicate {
@@ -60,6 +60,9 @@ export interface PlanOptions {
   externalPrimaries?: Map<string, EventRow>;
   manualSplits?: Set<string>;
 }
+
+/** Wie `minGapDays` in withdrawal.ts: so lange gilt ein Duplikat als Bestätigung. */
+const WITHDRAWAL_CONFIRM_MS = 7 * 86_400_000;
 
 function sameValue(a: unknown, b: unknown): boolean {
   if (Array.isArray(a) && Array.isArray(b)) {
@@ -100,7 +103,10 @@ export function planDedup(events: EventRow[], clusters: ClusterResult[], opts: P
     for (const [k, v] of Object.entries(computeEnrichments(primary, duplicates))) {
       if (!sameValue((primary as unknown as Record<string, unknown>)[k], v)) enrichments[k] = v;
     }
-    if (primary.dedup_cluster_id !== clusterId || Object.keys(enrichments).length > 0) {
+    // Ein bisheriges Duplikat als Primary wird freigegeben, und die Freigabe
+    // setzt dedup_cluster_id auf null: die Cluster-Id danach neu schreiben.
+    if (primary.dedup_cluster_id !== clusterId || primary.publish_status === 'duplicate' ||
+        Object.keys(enrichments).length > 0) {
       plan.primaries.push({ id: primary.id, clusterId, enrichments });
     }
   }
@@ -121,20 +127,37 @@ export function planDedup(events: EventRow[], clusters: ClusterResult[], opts: P
     // Altzeilen, Datums- und Müll-Titel bleiben verborgen, egal was mit
     // ihrem Primary ist.
     if (isOrphanRow(e, opts.sourceLastSeen) || isDateOnlyTitle(e.title) ||
-        isGarbageTitle(e.title, { sourceName: e.source_name })) continue;
+        isGarbageTitle(e.title, { sourceName: e.source_name, ticketUrl: e.ticket_url })) continue;
     const p = previousPrimaryId ? (byId.get(previousPrimaryId) ?? opts.externalPrimaries?.get(previousPrimaryId)) : undefined;
     // Der bisherige Primary ist selbst nicht (mehr) sichtbar: dann versteckt
     // die Verbindung ein echtes Event (Prod 2026-10-07: „Wickie, Slime und
     // Paiper" hinter dem als Müll unterdrückten „Event / Party").
     if (!p || p.publish_status === 'suppressed' || p.publish_status === 'needs_review' || p.location_status === 'conflict') {
+      // Zurückgezogen, weil die Quelle es nicht mehr listet: ein Duplikat,
+      // das damals schon eine Woche nicht gesehen war, belegt das Event
+      // nicht (Rückzugsregel: Bestätigung nur binnen 7 Tagen).
+      if (p?.withdrawn_at && e.last_seen_at &&
+          Date.parse(e.last_seen_at) < Date.parse(p.withdrawn_at) - WITHDRAWAL_CONFIRM_MS) continue;
       plan.release.push({ id: e.id, previousPrimaryId, reason: 'primary_hidden' });
       continue;
     }
-    if (isOrphanRow(p, opts.sourceLastSeen)) continue;
+    // Der bisherige Primary ist eine Altzeile, und der Lauf hat die
+    // Verbindung nicht bestätigt (sonst wäre die frische Zeile jetzt Primary,
+    // dedup-engine 1c): Gegenbeleg, Mehrdeutigkeit oder anderer Tag. Die
+    // frische Zeile bleibt sonst für immer hinter veralteten Daten verborgen.
+    if (isOrphanRow(p, opts.sourceLastSeen)) {
+      plan.release.push({ id: e.id, previousPrimaryId, reason: 'primary_orphaned' });
+      continue;
+    }
     const verdict = opts.manualSplits?.has(pairKey(e.id, p.id))
       ? { decision: 'distinct', reason: 'manual_split' }
       : scorePair(e, p);
-    if (verdict.decision === 'distinct' && verdict.reason && RELEASE_REASONS.has(verdict.reason)) {
+    if (verdict.decision !== 'distinct' || !verdict.reason) continue;
+    // Etiketten allein (Bezirk/PLZ/Ortsname) sind bei einzelnen Quellen
+    // falsch; sie lösen nur, wenn auch sonst nichts denselben Ort belegt.
+    const labelOnly = LABEL_CONFLICTS.has(verdict.reason) &&
+      ['same', 'town'].includes(placeEvidence(e, p, { ignoreLabels: true }).relation);
+    if ((RELEASE_REASONS.has(verdict.reason) || LABEL_CONFLICTS.has(verdict.reason)) && !labelOnly) {
       plan.release.push({ id: e.id, previousPrimaryId, reason: verdict.reason });
     }
   }
@@ -143,11 +166,10 @@ export function planDedup(events: EventRow[], clusters: ClusterResult[], opts: P
 
 /**
  * Gegenbelege, die eine bestehende Verbindung lösen (beide Zeilen aktuell
- * geliefert). Bewusst nicht dabei:
- *  - Bezirks-/PLZ-Etiketten: bei einzelnen Quellen falsch (5592 statt 5575
- *    für Lessach)
- *  - gleiche Quelle mit anderem Titel: darunter Navigations-Müll („zum
- *    Footer", „Springe zum Hauptinhalt"), den frühere Läufe versteckt hatten
+ * geliefert). Bezirks-/PLZ-/Ortsnamen-Etiketten (LABEL_CONFLICTS) lösen nur
+ * ohne sonstigen Ortsbeleg: einzelne Quellen tragen falsche (5592 statt 5575
+ * für Lessach). Navigations-Müll derselben Quelle („zum Footer") fängt der
+ * Müll-Filter vorher ab.
  */
 const RELEASE_REASONS = new Set([
   'different_day',
@@ -157,6 +179,8 @@ const RELEASE_REASONS = new Set([
   'different_place',
   'different_venue',
   'same_source_other_time',
+  'same_source_other_title',
+  'cancellation_marker',
   'manual_split',
 ]);
 
@@ -170,15 +194,29 @@ export function releaseStatus(row: {
   admission_decision?: string | null;
   location_status?: string | null;
 }): PublishStatus {
-  if (row.admission_decision === 'quarantine') return 'needs_review';
-  // Wie im Upsert: Ortskonflikte bleiben zurückgehalten (DB-Constraint).
-  if (row.location_status === 'conflict') return 'needs_review';
-  return scoreToPublishStatus(row.quality_score ?? 0);
+  // Eine Quelle der Wahrheit mit der Primary-Wahl (dedup-cluster.wouldBeVisible).
+  return underlyingStatus(row);
+}
+
+/**
+ * Scheitert die Freigabe eines neuen Primary (z. B. DB-Constraint), darf
+ * nichts an ihn gehängt werden: Er bliebe 'duplicate', seine neuen
+ * Duplikate zeigten auf eine unsichtbare Zeile, das ganze Event wäre weg.
+ */
+export function dropDependentsOfFailedReleases(plan: DedupPlan, failedReleaseIds: Set<string>): DedupPlan {
+  if (failedReleaseIds.size === 0) return plan;
+  return {
+    markDuplicate: plan.markDuplicate.filter(m => !failedReleaseIds.has(m.primaryId)),
+    release: plan.release.filter(r => !failedReleaseIds.has(r.id)),
+    primaries: plan.primaries.filter(p => !failedReleaseIds.has(p.id)),
+  };
 }
 
 export interface SafetyLimits {
   maxNewDuplicates: number;
   maxReleases: number;
+  /** Zeilen, die der Müll-Filter neu unterdrücken würde. */
+  maxGarbage?: number;
 }
 
 /**
@@ -186,8 +224,11 @@ export interface SafetyLimits {
  * geladen). Dann schreibt der Lauf nichts und meldet sich laut; ein Mensch
  * prüft den Probelauf und gibt mit höheren Grenzen frei.
  */
-export function checkSafetyValve(plan: DedupPlan, limits: SafetyLimits): string[] {
+export function checkSafetyValve(plan: DedupPlan, limits: SafetyLimits, garbage = 0): string[] {
   const violations: string[] = [];
+  if (limits.maxGarbage !== undefined && garbage > limits.maxGarbage) {
+    violations.push(`${garbage} Müll-Unterdrückungen > Grenze ${limits.maxGarbage}`);
+  }
   const newDuplicates = plan.markDuplicate.filter(m => m.isNew).length;
   if (newDuplicates > limits.maxNewDuplicates) {
     violations.push(`${newDuplicates} neue Duplikate > Grenze ${limits.maxNewDuplicates}`);

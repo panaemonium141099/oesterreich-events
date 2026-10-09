@@ -14,15 +14,16 @@
 // nichts schreiben, Exit 1 (Pipeline-Schritt rot → Alarm). Massenänderungen
 // sind fast immer ein Fehler; ein Mensch prüft den Probelauf und gibt frei.
 
-import { readFileSync, writeFileSync } from 'node:fs';
-import { join } from 'node:path';
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { dirname, join } from 'node:path';
 import { createClient } from '@supabase/supabase-js';
 import { canonicalizeIds } from '@/lib/pipeline/dedup-scorer';
 import { dedupDay, pairKey } from '@/lib/pipeline/dedup-engine';
-import { planDedup, releaseStatus, checkSafetyValve, type DedupPlan } from '@/lib/pipeline/dedup-plan';
-import { isPlausibleEventDay, viennaDayBoundsUtc, viennaDayOf } from '@/lib/pipeline/dedup-evidence';
+import { planDedup, releaseStatus, checkSafetyValve, dropDependentsOfFailedReleases, type DedupPlan } from '@/lib/pipeline/dedup-plan';
+import { isPlausibleEventDay, planningStartDay, viennaDayBoundsUtc, viennaDayOf } from '@/lib/pipeline/dedup-evidence';
 import { isGarbageTitle } from '@/lib/pipeline/garbage-filter';
 import { fetchAllRows, forEachPage } from '@/lib/db/fetch-all';
+import { reportStepReason } from '@/lib/pipeline/step-reason';
 import type { DedupScoreBreakdown, EventRow } from '@/lib/pipeline/types';
 
 /** Nur Ids + Bewertung: das Log braucht keine ganzen Zeilen im Speicher. */
@@ -56,10 +57,14 @@ const supabase = createClient(
 
 const args = process.argv.slice(2);
 const DRY_RUN = args.includes('--dry-run');
-function numArg(name: string, fallback: number): number {
+/** Argument, sonst Umgebungsvariable (Freigabe aus dem CI per
+ *  workflow_dispatch, siehe scrape-events.yml), sonst Standard. */
+function numArg(name: string, fallback: number, envName?: string): number {
   const i = args.indexOf(name);
   const v = i >= 0 ? Number(args[i + 1]) : NaN;
-  return Number.isFinite(v) ? v : fallback;
+  if (Number.isFinite(v)) return v;
+  const e = envName && process.env[envName] ? Number(process.env[envName]) : NaN;
+  return Number.isFinite(e) && e > 0 ? e : fallback;
 }
 function strArg(name: string): string | null {
   const i = args.indexOf(name);
@@ -67,53 +72,61 @@ function strArg(name: string): string | null {
 }
 // Normale Nacht: ein paar hundert neue Dubletten, kaum Freigaben.
 const LIMITS = {
-  maxNewDuplicates: numArg('--max-new-duplicates', 1500),
-  maxReleases: numArg('--max-releases', 300),
+  maxNewDuplicates: numArg('--max-new-duplicates', 1500, 'DEDUP_MAX_NEW_DUPLICATES'),
+  maxReleases: numArg('--max-releases', 300, 'DEDUP_MAX_RELEASES'),
+  // Seit Müll-Titel schon im Sync verworfen werden, kommt kaum neuer dazu.
+  maxGarbage: numArg('--max-garbage', 1000, 'DEDUP_MAX_GARBAGE'),
 };
-const REPORT_PATH = strArg('--report');
+const REPORT_PATH = strArg('--report') ?? process.env.DEDUP_REPORT_PATH ?? null;
+// Vergangene Tage sieht niemand mehr: geplant (und gezählt) wird ab dem Vortag.
+const START_DAY = planningStartDay();
 const CONCURRENCY = 8;
 
 if (args.includes('--reset')) {
   console.log('Hinweis: --reset ist überflüssig — jeder Lauf rechnet alle Cluster neu.');
 }
 
-const EVENT_SELECT = 'id,title,description,start_date,end_date,is_all_day,location_name,address,district,postal_code,bundesland,latitude,longitude,location_precision,source_url,ticket_url,image_url,category,tags,source_id,source_name,venue_id,quality_score,publish_status,content_fingerprint,duplicate_of,dedup_score,dedup_cluster_id,organizer,price_text,created_at,last_seen_at,location_status';
+const EVENT_SELECT = 'id,title,description,start_date,end_date,is_all_day,location_name,address,district,postal_code,bundesland,latitude,longitude,location_precision,source_url,ticket_url,image_url,category,tags,source_id,source_name,venue_id,quality_score,publish_status,content_fingerprint,duplicate_of,dedup_score,dedup_cluster_id,organizer,price_text,created_at,last_seen_at,location_status,source_type,withdrawn_at,admission_decision:location_resolution->admission->>decision';
 
 // ---------------------------------------------------------------------------
 // Phase 1: Garbage cleanup
 // ---------------------------------------------------------------------------
 
-async function cleanupGarbage(): Promise<number> {
-  console.log('\n--- Phase 1: Garbage Cleanup ---');
+const isGarbageRow = (e: { title: string | null; source_name?: string | null; ticket_url?: string | null }) =>
+  !!e.title && isGarbageTitle(e.title, { sourceName: e.source_name, ticketUrl: e.ticket_url });
+
+/** Sichtbare Müll-Zeilen finden. Geschrieben wird erst nach dem
+ *  Sicherheitsventil (suppressGarbage). */
+async function scanGarbage(): Promise<string[]> {
+  console.log('\n--- Phase 1: Garbage-Scan ---');
   const garbageIds: string[] = [];
-  await forEachPage<{ id: string; title: string | null; source_name: string | null }>(
+  await forEachPage<{ id: string; title: string | null; source_name: string | null; ticket_url: string | null }>(
     (from, to) => supabase
       .from('events')
-      .select('id,title,source_name')
+      .select('id,title,source_name,ticket_url')
+      .gte('start_date', viennaDayBoundsUtc(START_DAY)[0])
       .not('publish_status', 'in', '("suppressed","duplicate")')
       .order('id')
       .range(from, to),
     (rows) => {
-      for (const e of rows) {
-        if (e.title && isGarbageTitle(e.title, { sourceName: e.source_name })) garbageIds.push(e.id);
-      }
+      for (const e of rows) if (isGarbageRow(e)) garbageIds.push(e.id);
     },
     { label: 'dedup: Garbage-Scan' },
   );
   console.log(`  Found ${garbageIds.length} garbage events`);
+  return garbageIds;
+}
 
-  if (garbageIds.length > 0 && !DRY_RUN) {
-    for (let i = 0; i < garbageIds.length; i += 200) {
-      const chunk = garbageIds.slice(i, i + 200);
-      const { error } = await supabase
-        .from('events')
-        .update({ publish_status: 'suppressed', quality_score: 0 })
-        .in('id', chunk);
-      if (error) throw new Error(`Garbage update: ${error.message}`);
-    }
-    console.log(`  Suppressed ${garbageIds.length} garbage events`);
+async function suppressGarbage(garbageIds: string[]): Promise<void> {
+  for (let i = 0; i < garbageIds.length; i += 200) {
+    const chunk = garbageIds.slice(i, i + 200);
+    const { error } = await supabase
+      .from('events')
+      .update({ publish_status: 'suppressed', quality_score: 0 })
+      .in('id', chunk);
+    if (error) throw new Error(`Garbage update: ${error.message}`);
   }
-  return garbageIds.length;
+  if (garbageIds.length > 0) console.log(`  Suppressed ${garbageIds.length} garbage events`);
 }
 
 // ---------------------------------------------------------------------------
@@ -183,7 +196,11 @@ async function loadExternalPrimaries(events: EventRow[]): Promise<Map<string, Ev
   for (let i = 0; i < ids.length; i += 200) {
     const { data, error } = await supabase.from('events').select(EVENT_SELECT).in('id', ids.slice(i, i + 200));
     if (error) throw new Error(`dedup: frühere Primaries: ${error.message}`);
-    for (const r of (data ?? []) as unknown as EventRow[]) out.set(r.id, r);
+    // Müll-Zeilen gelten schon als unterdrückt (geschrieben wird erst nach
+    // dem Ventil): ihre Duplikate werden freigegeben.
+    for (const r of (data ?? []) as unknown as EventRow[]) {
+      out.set(r.id, isGarbageRow(r) ? { ...r, publish_status: 'suppressed' } : r);
+    }
   }
   return out;
 }
@@ -218,7 +235,9 @@ async function inPool<T>(items: T[], work: (item: T) => Promise<void>): Promise<
   await Promise.all(workers);
 }
 
-async function applyPlan(plan: DedupPlan, errors: string[]): Promise<void> {
+async function applyPlan(fullPlan: DedupPlan, errors: string[]): Promise<void> {
+  let plan = fullPlan;
+  const failedReleases = new Set<string>();
   // 1. Freigaben: Status wie beim Upsert (Score, Quarantäne bleibt).
   if (plan.release.length > 0) {
     const ids = plan.release.map(r => r.id);
@@ -248,10 +267,14 @@ async function applyPlan(plan: DedupPlan, errors: string[]): Promise<void> {
         // einzeln nachschreiben und nur die echten Ausreißer melden.
         await inPool(chunk, async (id) => {
           const { error: e } = await release([id], status);
-          if (e) errors.push(`Freigabe ${id}: ${e.message}`);
+          if (e) { errors.push(`Freigabe ${id}: ${e.message}`); failedReleases.add(id); }
         });
       }
     }
+    for (const id of ids) if (!statusById.has(id)) failedReleases.add(id);
+    // Wer nicht freigegeben werden konnte, bleibt 'duplicate': nichts daran
+    // hängen, sonst ist das ganze Event unsichtbar (live1: 1.103 Events).
+    plan = dropDependentsOfFailedReleases(plan, failedReleases);
   }
 
   // 2. Primaries vor den Duplikaten: kein Moment, in dem beide verborgen sind.
@@ -338,15 +361,17 @@ interface ReportEntry {
 async function main(): Promise<void> {
   const started = Date.now();
   console.log(`=== Batch Dedup ${DRY_RUN ? '(DRY RUN)' : '(LIVE)'} ===`);
-  console.log(`  Grenzen: ${LIMITS.maxNewDuplicates} neue Duplikate, ${LIMITS.maxReleases} Freigaben`);
+  console.log(`  Grenzen: ${LIMITS.maxNewDuplicates} neue Duplikate, ${LIMITS.maxReleases} Freigaben, ${LIMITS.maxGarbage} Müll`);
 
-  const garbage = await cleanupGarbage();
+  const garbageIds = await scanGarbage();
+  const garbage = garbageIds.length;
   const manual = await loadManualDecisions();
   console.log(`  Manuelle Entscheidungen: ${manual.merges.size} merge, ${manual.splits.size} split`);
 
   console.log('\n--- Phase 2: Cluster je Wiener Tag neu berechnen ---');
-  const { days, sourceLastSeen } = await getViennaDays();
-  console.log(`  ${days.length} Tage, ${sourceLastSeen.size} Quellen`);
+  const { days: allDays, sourceLastSeen } = await getViennaDays();
+  const days = allDays.filter(d => d >= START_DAY);
+  console.log(`  ${days.length} Tage ab ${START_DAY} (${allDays.length - days.length} vergangene übersprungen), ${sourceLastSeen.size} Quellen`);
 
   const plan: DedupPlan = { markDuplicate: [], release: [], primaries: [] };
   const logPairs: LogPair[] = [];
@@ -357,7 +382,8 @@ async function main(): Promise<void> {
 
   for (let i = 0; i < days.length; i++) {
     const day = days[i];
-    const events = await loadEventsForDay(day);
+    // Müll nimmt am Dedup nicht teil: er wird nie Primary und verbirgt nichts.
+    const events = (await loadEventsForDay(day)).filter(e => !isGarbageRow(e));
     scanned += events.length;
     if (events.length === 0) continue;
 
@@ -424,15 +450,17 @@ async function main(): Promise<void> {
     }
   }
   if (REPORT_PATH) {
+    mkdirSync(dirname(REPORT_PATH), { recursive: true });
     writeFileSync(REPORT_PATH, JSON.stringify({ limits: LIMITS, report, reasons: Object.fromEntries(reasons) }, null, 1));
     console.log(`\n  Bericht: ${REPORT_PATH}`);
   }
 
-  const violations = checkSafetyValve(plan, LIMITS);
+  const violations = checkSafetyValve(plan, LIMITS, garbage);
   if (violations.length > 0) {
     console.log(`\n!!! Sicherheitsventil: ${violations.join('; ')}`);
     if (!DRY_RUN) {
       console.log('    Nichts geschrieben. Probelauf prüfen (--dry-run --report …) und mit höheren Grenzen freigeben.');
+      reportStepReason(`Sicherheitsventil, nichts geschrieben: ${violations.join('; ')}`);
       process.exit(1);
     }
   }
@@ -440,6 +468,7 @@ async function main(): Promise<void> {
   const errors: string[] = [];
   if (!DRY_RUN) {
     console.log('\n--- Phase 3: Schreiben ---');
+    await suppressGarbage(garbageIds);
     await applyPlan(plan, errors);
     await writeLog(logPairs, errors);
 
@@ -456,11 +485,13 @@ async function main(): Promise<void> {
   if (errors.length > 0) {
     console.log(`  Fehler: ${errors.length}`);
     for (const err of errors.slice(0, 20)) console.log(`    - ${err}`);
+    reportStepReason(`${errors.length} Schreibfehler, z. B. ${errors[0]}`);
     process.exit(1);
   }
 }
 
 main().catch(err => {
   console.error('Fatal:', err);
+  reportStepReason(`Abbruch: ${err instanceof Error ? err.message : String(err)}`);
   process.exit(1);
 });

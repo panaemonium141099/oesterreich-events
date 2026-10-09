@@ -21,7 +21,9 @@ export const STEP_DEPENDENCIES: Record<string, string[]> = {
   // quality score as a tiebreaker. Writes publish_status='duplicate' and
   // duplicate_of=<primary> on losers; the App filters those out.
   dedup: ['normalize', 'scoring'],
-  artist_matching: ['dedup'],
+  // Nicht von 'dedup' abhängig: ein roter Dedup (Sicherheitsventil) schreibt
+  // nichts, die Primaries der Vornacht gelten weiter.
+  artist_matching: ['normalize'],
   // Enrichment runs AFTER dedup so Claude only processes the canonical
   // events, not the duplicate losers. Relies on the enricher's own
   // resume-safe filter (enrichment_version IS NULL OR != current) to
@@ -30,8 +32,9 @@ export const STEP_DEPENDENCIES: Record<string, string[]> = {
   enrichment: ['dedup'],
   // Indexing submits event URLs to IndexNow (Bing/Yandex) and Google Indexing
   // API. Runs last, after dedup has marked canonical rows, so we don't spend
-  // API quota on duplicates the apps then redirect away from.
-  indexing: ['dedup', 'enrichment'],
+  // API quota on duplicates the apps then redirect away from. A red dedup
+  // (safety valve) wrote nothing, so last night's primaries still hold.
+  indexing: ['normalize'],
   report: [],
 };
 

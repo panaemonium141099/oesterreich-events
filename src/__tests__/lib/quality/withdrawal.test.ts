@@ -171,6 +171,21 @@ describe('planWithdrawals — Quelle listet dieselbe Seite unter neuer Kennung',
     expect(ids(planWithdrawals([old, successor(), stale], { now: NOW }))).toEqual(['alt']);
   });
 
+  it('die eigene Ersatzzeile als verborgenes Duplikat hält die Altzeile nicht („ABGESAGT: …")', () => {
+    // Prod 2026-10-08: „die große 70er Kult-Schlagershow" blieb sichtbar, die
+    // frische Zeile „ABGESAGT: die große 70er Kult-Schlagershow" derselben
+    // Seite hing als Duplikat darunter und galt als Bestätigung.
+    const old = linz({ id: 'alt', title: 'die große 70er Kult-Schlagershow', last_seen_at: daysAgo(9) });
+    const ersatz = successor({ title: 'ABGESAGT: die große 70er Kult-Schlagershow', publish_status: 'duplicate', duplicate_of: 'alt' });
+    expect(ids(planWithdrawals([old, ersatz], { now: NOW }))).toEqual(['alt']);
+  });
+
+  it('ein verborgenes Duplikat einer anderen Quelle hält die Altzeile weiter', () => {
+    const old = linz({ id: 'alt', title: 'Linz-Card', last_seen_at: daysAgo(34) });
+    const fremd = row({ source_name: 'falter', publish_status: 'duplicate', duplicate_of: 'alt' });
+    expect(ids(planWithdrawals([old, successor(), fremd], { now: NOW }))).toEqual([]);
+  });
+
   it('lässt Duplikate und schon unterdrückte Altzeilen stehen', () => {
     const dup = linz({ id: 'dup', title: 'Linz-Card', publish_status: 'duplicate', duplicate_of: 'x', last_seen_at: daysAgo(34) });
     const supp = linz({ id: 'supp', title: 'Familie', publish_status: 'suppressed', last_seen_at: daysAgo(34) });

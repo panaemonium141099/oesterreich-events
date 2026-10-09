@@ -6,7 +6,8 @@
  * aktuellen Scorer (harte Regel seit PR #201). Sagt der Scorer `distinct`,
  * wird die Zusammenführung aufgehoben: `duplicate_of`/`dedup_cluster_id`/
  * `dedup_score` leeren, `publish_status` von `duplicate` zurück auf
- * `published` (der nächste Sync bewertet Ort und Freigabe ohnehin neu),
+ * den Status wie beim nächtlichen Dedup (releaseStatus: Quarantäne und
+ * Ortskonflikt bleiben zurückgehalten),
  * Eintrag `manual_split` im `event_dedup_log`. Bestehende Event-IDs bleiben,
  * es entstehen keine neuen Zeilen.
  *
@@ -14,6 +15,7 @@
  */
 import { createClient } from '@supabase/supabase-js';
 import { scorePair } from '../lib/pipeline/dedup-scorer';
+import { releaseStatus } from '../lib/pipeline/dedup-plan';
 import type { EventRow } from '../lib/pipeline/types';
 
 const argv = process.argv.slice(2);
@@ -21,7 +23,7 @@ const DRY_RUN = argv.includes('--dry-run');
 const limitIdx = argv.indexOf('--limit');
 const LIMIT = limitIdx !== -1 ? parseInt(argv[limitIdx + 1], 10) : Infinity;
 
-const SELECT = 'id,title,description,start_date,end_date,location_name,address,district,postal_code,bundesland,latitude,longitude,source_url,ticket_url,image_url,category,tags,source_id,source_name,venue_id,venue_match_confidence,venue_match_stage,quality_score,publish_status,content_fingerprint,duplicate_of,dedup_score,dedup_cluster_id,organizer,price_text,created_at';
+const SELECT = 'id,title,description,start_date,end_date,location_name,address,district,postal_code,bundesland,latitude,longitude,source_url,ticket_url,image_url,category,tags,source_id,source_name,venue_id,venue_match_confidence,venue_match_stage,quality_score,publish_status,content_fingerprint,duplicate_of,dedup_score,dedup_cluster_id,organizer,price_text,created_at,location_status,admission_decision:location_resolution->admission->>decision';
 
 async function main() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -62,7 +64,7 @@ async function main() {
     split++;
     console.log(`SPLIT ${d.id.slice(0, 8)} „${(d.title ?? '').slice(0, 40)}" ${pa} ${d.source_name} ← ${c.id.slice(0, 8)} ${pb} ${c.source_name}`);
     if (DRY_RUN) continue;
-    const { error } = await sb.from('events').update({ duplicate_of: null, dedup_cluster_id: null, dedup_score: null, publish_status: 'published' }).eq('id', d.id).eq('publish_status', 'duplicate');
+    const { error } = await sb.from('events').update({ duplicate_of: null, dedup_cluster_id: null, dedup_score: null, publish_status: releaseStatus(d) }).eq('id', d.id).eq('publish_status', 'duplicate');
     if (error) { errors++; console.error(error.message); continue; }
     await sb.from('event_dedup_log').upsert({
       event_a_id: d.id, event_b_id: c.id, title_score: s.titleScore, datetime_score: s.datetimeScore, venue_score: s.venueScore,

@@ -1,7 +1,7 @@
 // src/__tests__/pipeline/dedup-evidence.test.ts
 
 import { describe, it, expect } from 'vitest';
-import { titleRelation, timeRelation, placeRelation, viennaDayOf, viennaDayBoundsUtc, isPlausibleEventDay } from '@/lib/pipeline/dedup-evidence';
+import { titleRelation, timeRelation, placeRelation, placeEvidence, viennaDayOf, viennaDayBoundsUtc, isPlausibleEventDay, isOrphanRow, planningStartDay } from '@/lib/pipeline/dedup-evidence';
 import type { EventRow } from '@/lib/pipeline/types';
 
 const e = (o: Partial<EventRow>): EventRow => ({ id: 'x', title: '', start_date: '2026-10-07T17:30:00Z', ...o }) as EventRow;
@@ -83,6 +83,26 @@ describe('viennaDayOf', () => {
     expect(viennaDayOf(e({ start_date: '2026-10-06T22:00:00Z' }))).toBe('2026-10-07');
     expect(viennaDayOf(e({ start_date: '2026-10-07T21:30:00Z' }))).toBe('2026-10-07');
     expect(viennaDayOf(e({ start_date: '2026-10-07T22:30:00Z' }))).toBe('2026-10-08');
+  });
+});
+
+describe('isOrphanRow', () => {
+  const lastSeen = new Map([['q', '2026-10-08T07:00:00Z'], ['Rotes Kreuz Hollabrunn', '2026-09-25T10:00:00Z']]);
+  it('gescrapte Zeile, die die Quelle seit über 21 Tagen nicht liefert, ist verwaist', () => {
+    expect(isOrphanRow(e({ source_name: 'q', source_type: 'scraped', last_seen_at: '2026-08-01T07:00:00Z', start_date: '2026-11-01T18:00:00Z' } as Partial<EventRow>), lastSeen)).toBe(true);
+  });
+  it('Inserate werden nie neu gescrapt und verwaisen deshalb nie', () => {
+    expect(isOrphanRow(e({ source_name: 'Rotes Kreuz Hollabrunn', source_type: 'business', last_seen_at: '2026-08-01T07:00:00Z', start_date: '2026-11-04T18:00:00Z' } as Partial<EventRow>), lastSeen)).toBe(false);
+  });
+});
+
+// Abschlussprüfung 2026-10-08: 303 der 528 geplanten Freigaben lagen an
+// vergangenen Tagen (für niemanden sichtbar) und hielten das
+// Sicherheitsventil dauerhaft zu. Geplant wird ab dem Wiener Vortag.
+describe('planningStartDay', () => {
+  it('ist der Wiener Vortag, auch kurz nach Mitternacht', () => {
+    expect(planningStartDay(new Date('2026-10-08T12:00:00Z'))).toBe('2026-10-07');
+    expect(planningStartDay(new Date('2026-10-07T22:30:00Z'))).toBe('2026-10-07'); // 00:30 Wien am 08.10.
   });
 });
 
@@ -185,5 +205,40 @@ describe('placeRelation', () => {
 
   it('genaue Pins über 1 km auseinander widersprechen sich', () => {
     expect(placeRelation(at({ latitude: 48.2, longitude: 16.3 }), at({ latitude: 48.22, longitude: 16.3 }))).toBe('conflict');
+  });
+
+  // Abschlussprüfung 2026-10-08: Nachbarpfarren mit gemeinsamer PLZ und
+  // Quellen, die nur den Ortsnamen liefern, wurden zusammengeführt.
+  it('verschiedene Gemeinden derselben PLZ im Venue-Namen widersprechen sich', () => {
+    expect(placeRelation(e({ location_name: 'Pfarrkirche Güssing', postal_code: '7540' }), e({ location_name: 'Pfarrkirche Inzenhof', postal_code: '7540' }))).toBe('conflict');
+    expect(placeRelation(e({ location_name: 'Grazer Oper', postal_code: '8010' }), e({ location_name: 'Oper Graz', postal_code: '8010' }))).toBe('same');
+  });
+
+  it('ein bloßes Gattungswort („Pfarrkirche") belegt denselben Ort nur in einer PLZ mit genau einer Gemeinde', () => {
+    expect(placeRelation(e({ location_name: 'Pfarrkirche', postal_code: '7540' }), e({ location_name: 'Pfarrkirche', postal_code: '7540' }))).toBe('town');
+    expect(placeRelation(e({ location_name: 'STADTSAAL', postal_code: '1150' }), e({ location_name: 'STADTSAAL Wien', postal_code: '1150' }))).toBe('same');
+    expect(placeRelation(e({ location_name: 'Pfarrkirche' }), e({ location_name: 'Pfarrkirche' }))).toBe('unknown');
+  });
+
+  it('verschiedene Ortsnamen statt Venue widersprechen sich, gleiche belegen den Ort', () => {
+    expect(placeRelation(e({ location_name: 'Kirchberg an der Raab' }), e({ location_name: 'Feldbach' }))).toBe('conflict');
+    expect(placeRelation(e({ location_name: 'Wien' }), e({ location_name: 'Graz' }))).toBe('conflict');
+    expect(placeRelation(e({ location_name: 'St. Pölten' }), e({ location_name: 'Sankt Pölten' }))).toBe('town');
+  });
+
+  it('ohne Etiketten (Altzeilen, Freigabe-Prüfung) zählt der gleiche Ortsname', () => {
+    const a = e({ location_name: 'Lessach', postal_code: '5592' });
+    const b = e({ location_name: 'Lessach', postal_code: '5575' });
+    expect(placeEvidence(a, b).relation).toBe('conflict');
+    expect(placeEvidence(a, b, { ignoreLabels: true }).relation).toBe('town');
+  });
+});
+
+describe('titleRelation — Jahreszahlen', () => {
+  const rel = (a: string, b: string) => titleRelation(e({ title: a }), e({ title: b }));
+  it('verschiedene Jahrgänge sind verschiedene Events, eine fehlende Jahreszahl nicht', () => {
+    expect(rel('Jahrgangstreffen 1956', 'Jahrgangstreffen 1966')).toBe('different');
+    expect(rel('Masters of Dirt 2027', 'Masters of Dirt')).toBe('equal');
+    expect(rel('Saisoneröffnung 2026', 'Saisoneröffnung 2025/2026')).not.toBe('different');
   });
 });

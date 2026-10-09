@@ -6,7 +6,7 @@ name: Scrape Events Pipeline
 #   1. 6 parallele Scrape-Shards (deterministisch, alphabetisch round-robin)
 #   2. Venue-Ingestion parallel dazu
 #   3. EIN Post-Processing-Job (needs: alle Shards) mit normalize → geocoding
-#      → master_coords → scoring → dedup → artist_matching → indexing → report
+#      → master_coords → scoring → withdrawal → dedup → artist_matching → indexing → report
 # Das 6h-Limit gilt PRO JOB — jeder Shard hat also reichlich Luft.
 
 on:
@@ -29,6 +29,21 @@ on:
         required: false
         default: 'false'
         type: boolean
+      # Freigabe nach einem Sicherheitsventil-Stopp des Dedup: Bericht
+      # (Artefakt scrape-reports/dedup-plan.json) prüfen, dann mit höheren
+      # Grenzen neu starten (am schnellsten mit skip_scrapers).
+      dedup_max_new_duplicates:
+        description: 'Dedup: Grenze neue Duplikate (leer = 1500)'
+        required: false
+        default: ''
+      dedup_max_releases:
+        description: 'Dedup: Grenze Freigaben (leer = 300)'
+        required: false
+        default: ''
+      dedup_max_garbage:
+        description: 'Dedup: Grenze Müll-Unterdrückungen (leer = 1000)'
+        required: false
+        default: ''
 
 # Shard-Kalibrierung 2026-07-08 (erster Lauf): mit 6 Shards à 150 min
 # liefen 2 durch (35/85 min), 4 wurden am Timeout gekillt — die
@@ -128,6 +143,12 @@ jobs:
     if: ${{ always() && (github.event_name == 'schedule' || github.event.inputs.scraper == '') }}
     runs-on: ubuntu-latest
     timeout-minutes: 300
+    # Nie zwei Nachbearbeitungen gleichzeitig: Dedup und Rückzug planen aus
+    # einem Lesestand und schreiben bis zu zehn Minuten später (Abschluss-
+    # prüfung 2026-10-08). Ein zweiter Lauf wartet, statt abzubrechen.
+    concurrency:
+      group: scrape-post-processing
+      cancel-in-progress: false
 
     env:
       SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
@@ -153,7 +174,7 @@ jobs:
         continue-on-error: true
         run: npx tsx src/scripts/scrape-festival-lineups.ts
 
-      - name: Post-processing pipeline (normalize → geocode → score → dedup → indexing → report)
+      - name: Post-processing pipeline (normalize → geocode → score → withdrawal → dedup → indexing → report)
         run: |
           TRIGGER="cron"
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
@@ -167,6 +188,10 @@ jobs:
         env:
           GITHUB_RUN_ID: ${{ github.run_id }}
           GITHUB_RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          DEDUP_REPORT_PATH: reports/dedup-plan.json
+          DEDUP_MAX_NEW_DUPLICATES: ${{ github.event.inputs.dedup_max_new_duplicates }}
+          DEDUP_MAX_RELEASES: ${{ github.event.inputs.dedup_max_releases }}
+          DEDUP_MAX_GARBAGE: ${{ github.event.inputs.dedup_max_garbage }}
 
       - name: Generate scrape report
         if: success()

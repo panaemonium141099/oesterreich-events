@@ -179,7 +179,9 @@ export function dedupDay(events: EventRow[], opts: EngineOptions = {}): DayResul
     const key = pairKey(x.id, y.id);
     const cached = decisions.get(key);
     if (cached) return cached;
-    let d = scorePair(x, y);
+    // Verwaiste Altzeilen tragen oft falsche Bezirks-/PLZ-Etiketten (Altdaten,
+    // tote Quellen): die zählen bei ihnen nicht als Widerspruch.
+    let d = scorePair(x, y, { lenientLabels: orphans.has(x.id) || orphans.has(y.id) });
     if (opts.manualSplits?.has(key)) d = { ...d, decision: 'distinct', reason: 'manual_split', strength: undefined };
     else if (opts.manualMerges?.has(key)) d = { ...d, decision: 'merge', reason: 'manual_merge', strength: 'strong' };
     decisions.set(key, d);
@@ -211,6 +213,54 @@ export function dedupDay(events: EventRow[], opts: EngineOptions = {}): DayResul
     link(y.id, x.id, d);
   }
 
+  // 1b. Vorgängerversion: Eine verwaiste Zeile, für die ihre Quelle am selben
+  //     Tag genau EINE frische Zeile mit gleichem oder verschachteltem Titel
+  //     liefert, ist deren Vorgänger (neue source_id, korrigierte Uhrzeit;
+  //     Prod 2026-10-08: Feratel-Altzeilen mit +1/+2 h versteckten die
+  //     frischen Termine). Zeit- und Ortsabweichungen der Altzeile zählen nicht.
+  const successors = new Map<string, string[]>();
+  for (const [x, y] of pairs) {
+    for (const [o, f] of [[x, y], [y, x]] as const) {
+      if (!orphans.has(o.id) || orphans.has(f.id)) continue;
+      if (!o.source_name || o.source_name !== f.source_name) continue;
+      const t = titleRelation(o, f);
+      if (t !== 'equal' && t !== 'near' && t !== 'contains') continue;
+      successors.set(o.id, [...(successors.get(o.id) ?? []), f.id]);
+    }
+  }
+  for (const [o, list] of successors) {
+    if (list.length !== 1) continue;
+    const f = list[0];
+    if (opts.manualSplits?.has(pairKey(o, f)) || edges.get(o)?.get(f)?.decision === 'merge') continue;
+    const d: DedupScoreBreakdown = {
+      ...decide(byId.get(o)!, byId.get(f)!),
+      decision: 'merge',
+      reason: 'superseded_same_source',
+      strength: 'strong',
+    };
+    evaluated.push({ a: byId.get(o)!, b: byId.get(f)!, breakdown: d });
+    stats.merge++;
+    link(o, f, d);
+    link(f, o, d);
+  }
+
+  // 1c. Bestehende Verbindung einer frischen Zeile zu einem verwaisten
+  //     Primary: bleibt, solange kein Gegenbeleg da ist; der Cluster macht
+  //     dann die frische Zeile zum Primary (Prod 2026-10-08: 433 künftige
+  //     Termine hingen an Altzeilen mit falscher Uhrzeit). Mit Gegenbeleg
+  //     oder ohne Bestätigung gibt planDedup die frische Zeile frei.
+  for (const f of events) {
+    const o = f.publish_status === 'duplicate' && f.duplicate_of ? byId.get(f.duplicate_of) : undefined;
+    if (!o || !orphans.has(o.id) || orphans.has(f.id) || edges.get(f.id)?.has(o.id)) continue;
+    const d = decide(f, o);
+    if (d.decision === 'distinct') continue;
+    const kept: DedupScoreBreakdown = { ...d, decision: 'merge', reason: 'kept_link_orphan_primary', strength: 'weak' };
+    evaluated.push({ a: f, b: o, breakdown: kept });
+    stats.merge++;
+    link(f.id, o.id, kept);
+    link(o.id, f.id, kept);
+  }
+
   // 2. Mehrdeutige Einträge: Nachbarn, die nicht zusammenpassen, heißen,
   //    dass der Eintrag zu mehreren Events passt — dann zu keinem.
   //    Zusammen passen zwei Nachbarn, wenn sie selbst verschmelzen, wenn ihre
@@ -218,7 +268,11 @@ export function dedupDay(events: EventRow[], opts: EngineOptions = {}): DayResul
   //    wenn sie zur selben Minute am selben Ort stattfinden. Nicht zusammen
   //    passen verschiedene Programmpunkte („Kaiser Wiesn – Act A" / „– Act B")
   //    und alles mit hartem Widerspruch.
-  const compatible = (y: EventRow, z: EventRow): boolean => {
+  const nested = (a: EventRow, b: EventRow) => {
+    const t = titleRelation(a, b);
+    return t === 'equal' || t === 'near' || t === 'contains';
+  };
+  const compatible = (x: EventRow, y: EventRow, z: EventRow): boolean => {
     if (orphans.has(y.id) || orphans.has(z.id)) return true;
     const d = decide(y, z);
     if (isHardDistinct(d)) return false;
@@ -226,7 +280,14 @@ export function dedupDay(events: EventRow[], opts: EngineOptions = {}): DayResul
     const t = titleRelation(y, z);
     if (t === 'equal' || t === 'near' || t === 'contains') return true;
     const place = placeRelation(y, z);
-    return timeRelation(y, z) === 'exact' && (place === 'same' || place === 'town');
+    const time = timeRelation(y, z);
+    if (time === 'exact' && (place === 'same' || place === 'town')) return true;
+    // Titelvarianten derselben Show am selben Ort („Detailinfos zu X",
+    // „X: Tourname"), die beide den mehrwortigen Titel von x enthalten
+    // (Prod 2026-10-08: Beatrice Egli, Trivium). Nicht bei „related" (gleicher
+    // Hauptteil, verschiedene Programmpunkte) und nicht bei Einwort-Titeln.
+    return t === 'different' && place === 'same' && time !== 'far' &&
+      titleTokensOf(x).length >= 2 && nested(x, y) && nested(x, z);
   };
   const ambiguous = new Set<string>();
   for (const [x, neighbours] of edges) {
@@ -234,7 +295,7 @@ export function dedupDay(events: EventRow[], opts: EngineOptions = {}): DayResul
     if (list.length < 2) continue;
     outer: for (let i = 0; i < list.length; i++) {
       for (let j = i + 1; j < list.length; j++) {
-        if (!compatible(byId.get(list[i])!, byId.get(list[j])!)) {
+        if (!compatible(byId.get(x)!, byId.get(list[i])!, byId.get(list[j])!)) {
           ambiguous.add(x);
           break outer;
         }
@@ -278,6 +339,9 @@ export function dedupDay(events: EventRow[], opts: EngineOptions = {}): DayResul
     const memberIds = uf.membersOf(root);
     if (memberIds.length < 2) continue;
     const members = memberIds.map(id => byId.get(id)!);
+    // Nur Altzeilen, kein aktuelles Mitglied: nichts daran ändern (sonst
+    // würde eine verwaiste Zeile als Primary wieder sichtbar).
+    if (members.every(m => orphans.has(m.id))) continue;
     const primary = selectPrimary([...members], id => orphans.has(id));
     const scores = new Map<string, number>();
     for (const m of members) {

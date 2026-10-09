@@ -94,6 +94,12 @@ interface VenueFeatures {
   compact: string;
   /** tokens ohne Gattungswörter („Saal", „Pfarrkirche", „St.") */
   core: Set<string>;
+  /** Gemeindenamen zur eigenen PLZ (auch „Wiener"), für den Vergleich mit Zeilen ohne PLZ. */
+  townWords: Set<string>;
+  /** Alle Wörter des Venue-Namens, auch Ortsnamen. */
+  allTokens: string[];
+  /** Ortsname statt Venue („Feldbach", „St. Pölten"), normalisiert; sonst ''. */
+  townKey: string;
 }
 
 interface Features {
@@ -109,6 +115,8 @@ interface Features {
   plz: string | null;
   gemeinden: Set<string>;
   district: string;
+  /** Jahreszahlen im Titel („Jahrgangstreffen 1956"). */
+  years: Set<string>;
 }
 
 const cache = new WeakMap<EventRow, Features>();
@@ -132,6 +140,15 @@ export function viennaDayOf(e: Pick<EventRow, 'start_date'>): string | null {
 export function isPlausibleEventDay(day: string, now: Date = new Date()): boolean {
   const year = Number(day.slice(0, 4));
   return Number.isFinite(year) && year >= 2000 && year <= now.getUTCFullYear() + 5;
+}
+
+/**
+ * Erster Tag, den der Dedup plant: der Wiener Vortag. Ältere Tage sieht
+ * niemand mehr; ihre Änderungen (wandernde Serienzeilen) hielten nur das
+ * Sicherheitsventil zu (Abschlussprüfung 2026-10-08).
+ */
+export function planningStartDay(now: Date = new Date()): string {
+  return viennaDay(new Date(now.getTime() - 86_400_000));
 }
 
 /** UTC-Mitternacht eines Tages; setUTCFullYear statt Date.UTC, das Jahre
@@ -193,6 +210,7 @@ function features(e: EventRow): Features {
     plz,
     gemeinden,
     district: (e.district ?? '').toLowerCase().trim(),
+    years: new Set(folded.match(/(?<!\d)(19|20)\d{2}(?!\d)/g) ?? []),
   };
   cache.set(e, f);
   return f;
@@ -238,6 +256,9 @@ const ORPHAN_AFTER_MS = 21 * 24 * 3_600_000;
  */
 export function isOrphanRow(e: EventRow, sourceLastSeen?: Map<string, string>): boolean {
   if (!e.last_seen_at || !e.source_name || !sourceLastSeen) return false;
+  // Inserate (business/user) werden nie neu gescrapt; ihr last_seen_at ist
+  // die Freigabezeit, kein Lebenszeichen der Quelle.
+  if (e.source_type && e.source_type !== 'scraped') return false;
   const newest = sourceLastSeen.get(e.source_name);
   if (!newest) return false;
   const seen = Date.parse(e.last_seen_at);
@@ -285,6 +306,9 @@ export function titleRelation(a: EventRow, b: EventRow): TitleRelation {
   const fa = features(a);
   const fb = features(b);
   if (!fa.compact || !fb.compact) return 'different';
+  // Jahreszahlen zählen nicht, außer beide Titel nennen verschiedene
+  // („Jahrgangstreffen 1956" / „1966" beim selben Wirt).
+  if (fa.years.size > 0 && fb.years.size > 0 && ![...fa.years].some(y => fb.years.has(y))) return 'different';
   if (fa.compact === fb.compact) return 'equal';
 
   if (fa.numbers === fb.numbers) {
@@ -326,6 +350,13 @@ export function isSpecificTitle(e: EventRow): boolean {
 /** Schlüssel für gleiche Titel (Blocking, Audit). */
 export function titleKey(e: EventRow): string {
   return features(e).compact;
+}
+
+/** Absage oder Verschiebung im Titel („ABGESAGT: …", „… entfällt", „verschoben auf …"). */
+const CANCEL_MARKER = /(^|[^\p{L}])(abgesagt|absage|entf(ä|ae)llt|entfallen|f(ä|ae)llt aus|storniert|verschoben|cancell?ed|postponed)([^\p{L}]|$)/iu;
+
+export function hasCancelMarker(e: Pick<EventRow, 'title'>): boolean {
+  return CANCEL_MARKER.test(e.title ?? '');
 }
 
 export function titleTokensOf(e: EventRow): string[] {
@@ -396,13 +427,33 @@ function venueFeatures(name: string | null | undefined, plz: string | null): Ven
       for (const w of titleTokens(foldText(g.name))) { townWords.add(w); townWords.add(`${w}er`); }
     }
   }
-  const tokens = titleTokens(folded).filter(t => !townWords.has(t));
+  const allTokens = titleTokens(folded);
+  const tokens = allTokens.filter(t => !townWords.has(t));
+  // Bundesländer sind kein Ort (Salzburg Land oder Stadt?), Wien schon.
+  const isTown = !!head && !(BUNDESLAENDER.has(head.replace(/[^a-z]/g, '')) && head !== 'wien') && isKnownAustrianPlaceName(head);
   return {
     townLabel,
     tokens,
     compact: tokens.join(''),
     core: new Set(tokens.filter(t => !GENERIC_VENUE.has(t))),
+    townWords,
+    allTokens,
+    townKey: isTown ? head.replace(/\bst\.?\s+/g, 'sankt ').replace(/[^a-z0-9]+/g, '') : '',
   };
+}
+
+/** Ortsnamen, die ein Venue-Name nennt („Pfarrkirche Güssing" → güssing), „Grazer" als „graz". */
+function namedTowns(v: VenueFeatures, words: Set<string>): Set<string> {
+  return new Set(v.allTokens.filter(t => words.has(t))
+    .map(t => (t.endsWith('er') && words.has(t.slice(0, -2)) ? t.slice(0, -2) : t)));
+}
+
+/** Ortsnamen der GEGENSEITE ebenfalls entfernen: „Wiener Stadthalle" ohne PLZ
+ *  gegen „Wiener Stadthalle Halle D" mit PLZ 1150 ist derselbe Ort. */
+function stripTowns(v: VenueFeatures, other: Set<string>): VenueFeatures {
+  const tokens = v.tokens.filter(t => !other.has(t));
+  if (tokens.length === v.tokens.length) return v;
+  return { ...v, tokens, compact: tokens.join(''), core: new Set(tokens.filter(t => !GENERIC_VENUE.has(t))) };
 }
 
 function containsSequence(long: string[], short: string[]): boolean {
@@ -414,19 +465,29 @@ function containsSequence(long: string[], short: string[]): boolean {
   return false;
 }
 
-type VenueRelation = 'same' | 'related' | 'differs' | 'unknown';
+/** 'generic': gleicher Name, aber nur aus Gattungswörtern („Pfarrkirche"). */
+type VenueRelation = 'same' | 'generic' | 'related' | 'differs' | 'unknown';
 
-function venueRelation(va: VenueFeatures, vb: VenueFeatures): VenueRelation {
+function venueRelation(rawA: VenueFeatures, rawB: VenueFeatures): VenueRelation {
+  // Beide nennen einen Ort, aber verschiedene: Nachbargemeinden mit geteilter
+  // PLZ („Pfarrkirche Güssing" / „Pfarrkirche Inzenhof", beide 7540).
+  const words = new Set([...rawA.townWords, ...rawB.townWords]);
+  const ta = namedTowns(rawA, words);
+  const tb = namedTowns(rawB, words);
+  if (ta.size > 0 && tb.size > 0 && ![...ta].some(t => tb.has(t))) return 'differs';
+  const va = stripTowns(rawA, rawB.townWords);
+  const vb = stripTowns(rawB, rawA.townWords);
   if (va.townLabel || vb.townLabel || !va.compact || !vb.compact) return 'unknown';
-  if (va.compact === vb.compact) return 'same';
+  const same: VenueRelation = va.core.size === 0 && vb.core.size === 0 ? 'generic' : 'same';
+  if (va.compact === vb.compact) return same;
   const [s, l] = va.tokens.length <= vb.tokens.length ? [va, vb] : [vb, va];
-  if (containsSequence(l.tokens, s.tokens)) return 'same';
+  if (containsSequence(l.tokens, s.tokens)) return same;
   const [cs, cl] = va.compact.length <= vb.compact.length ? [va, vb] : [vb, va];
-  if (cs.compact.length >= 5 && cl.compact.includes(cs.compact)) return 'same';
+  if (cs.compact.length >= 5 && cl.compact.includes(cs.compact)) return same;
   // Schreibvariante („Madonnenschlössel" / „Madonnenschlössl")
   if (cs.compact.length >= 6) {
     const budget = Math.max(1, Math.floor(cl.compact.length * 0.1));
-    if (boundedEditDistance(va.compact, vb.compact, budget) <= budget) return 'same';
+    if (boundedEditDistance(va.compact, vb.compact, budget) <= budget) return same;
   }
   if (va.core.size === 0 || vb.core.size === 0) return 'unknown';
   for (const t of va.core) if (vb.core.has(t)) return 'related';
@@ -454,7 +515,13 @@ function plzConflict(fa: Features, fb: Features): string | null {
  *  5. Venue-Name enthält den anderen → derselbe Ort
  *  6. gleicher Ort im weiteren Sinn (PLZ, Gemeinde, Pins ≤ 3 km, Bezirk)
  */
-export function placeEvidence(a: EventRow, b: EventRow): PlaceEvidence {
+export interface PlaceOptions {
+  /** Bezirks-, PLZ- und Ortsnamen-Etiketten überspringen (verwaiste Altzeilen,
+   *  Freigabe-Prüfung): zählt nur, was Venue, Pin und Ortsname belegen. */
+  ignoreLabels?: boolean;
+}
+
+export function placeEvidence(a: EventRow, b: EventRow, opts: PlaceOptions = {}): PlaceEvidence {
   const fa = features(a);
   const fb = features(b);
   const hasCoords = a.latitude != null && a.longitude != null && b.latitude != null && b.longitude != null;
@@ -474,7 +541,7 @@ export function placeEvidence(a: EventRow, b: EventRow): PlaceEvidence {
     if (venue === 'differs') return { relation: 'conflict', reason: 'different_venue' };
     if (dist! <= SAME_PLACE_M) return { relation: 'same', reason: 'coords' };
     if (dist! <= DIFFERENT_PLACE_M) {
-      return venue === 'same' || venue === 'related'
+      return venue === 'same' || venue === 'generic' || venue === 'related'
         ? { relation: 'same', reason: 'coords_venue' }
         : { relation: 'town', reason: 'coords_near' };
     }
@@ -490,11 +557,17 @@ export function placeEvidence(a: EventRow, b: EventRow): PlaceEvidence {
   }
 
   if (venue === 'differs') return { relation: 'conflict', reason: 'different_venue' };
-  if (fa.district && fb.district && fa.district !== fb.district) {
-    return { relation: 'conflict', reason: 'different_district' };
+  const townA = fa.venue.townKey;
+  const townB = fb.venue.townKey;
+  if (!opts.ignoreLabels) {
+    if (fa.district && fb.district && fa.district !== fb.district) {
+      return { relation: 'conflict', reason: 'different_district' };
+    }
+    const plz = plzConflict(fa, fb);
+    if (plz) return { relation: 'conflict', reason: plz };
+    // Nur Ortsnamen statt Venue, verschiedene („Kirchberg an der Raab" / „Feldbach").
+    if (townA && townB && townA !== townB) return { relation: 'conflict', reason: 'different_town' };
   }
-  const plz = plzConflict(fa, fb);
-  if (plz) return { relation: 'conflict', reason: plz };
 
   const sameGemeinde = fa.gemeinden.size > 0 && [...fa.gemeinden].some(g => fb.gemeinden.has(g));
   const resolvedDist = hasResolvedCoords(a) && hasResolvedCoords(b) ? dist : null;
@@ -503,8 +576,12 @@ export function placeEvidence(a: EventRow, b: EventRow): PlaceEvidence {
   }
 
   if (venue === 'same') return { relation: 'same', reason: 'venue_name' };
+  // „Pfarrkirche"/„Pfarrkirche": nur eindeutig, wenn die PLZ genau eine
+  // Gemeinde umfasst (7540 sind sechs Gemeinden mit je einer Pfarrkirche).
+  if (venue === 'generic' && samePlz && fa.gemeinden.size === 1) return { relation: 'same', reason: 'venue_name_generic' };
   if (samePlz) return { relation: 'town', reason: 'plz' };
   if (sameGemeinde) return { relation: 'town', reason: 'gemeinde' };
+  if (townA && townA === townB) return { relation: 'town', reason: 'town_name' };
   if (resolvedDist !== null && resolvedDist <= 3000) return { relation: 'town', reason: 'coords_town' };
   if (fa.district && fa.district === fb.district) return { relation: 'town', reason: 'district' };
   if (venue === 'related') return { relation: 'town', reason: 'venue_related' };

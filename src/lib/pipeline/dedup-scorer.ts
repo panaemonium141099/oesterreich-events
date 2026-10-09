@@ -8,10 +8,12 @@
 
 import { jaroWinkler } from '@/lib/dedup/jaro-winkler';
 import { normalizeTitle, generateFingerprint } from '@/lib/dedup/fingerprint';
-import { normalizeUrl } from '@/lib/pipeline/normalize-url';
+import { isEventSpecificUrl, normalizeUrlForDedup } from './event-url';
 import { haversineDistance } from '@/lib/pipeline/normalize-venue';
 import {
+  hasCancelMarker,
   isPlaceless,
+  knownStartMs,
   isSpecificTitle,
   placeEvidence,
   sameViennaDay,
@@ -20,6 +22,8 @@ import {
   titleTokensOf,
 } from './dedup-evidence';
 import type { EventRow, DedupScoreBreakdown } from './types';
+
+export { normalizeUrlForDedup };
 
 // ---------------------------------------------------------------------------
 // Teilwerte — nur Auskunft für Log und Admin-Prüfansicht
@@ -136,16 +140,6 @@ function computeGeoScore(a: EventRow, b: EventRow, venueScore: number): number {
   return 0;
 }
 
-export function normalizeUrlForDedup(url: string | null | undefined): string {
-  if (!url) return '';
-  try {
-    const normalized = normalizeUrl(url);
-    return normalized ? normalized.toLowerCase() : url.toLowerCase().trim();
-  } catch {
-    return (url ?? '').toLowerCase().trim();
-  }
-}
-
 function computeUrlScore(a: EventRow, b: EventRow): number {
   const ticketA = normalizeUrlForDedup(a.ticket_url);
   const ticketB = normalizeUrlForDedup(b.ticket_url);
@@ -185,14 +179,21 @@ export const HARD_DISTINCT_REASONS = new Set([
   'different_district',
   'different_plz_region',
   'different_gemeinde',
+  'different_town',
   'different_showtime',
   'same_source_other_time',
   'same_source_other_title',
+  'cancellation_marker',
   'manual_split',
 ]);
 
-/** Etiketten-Widersprüche (Bezirk/PLZ), die ein gemeinsamer Ticket-Link aufhebt. */
-const LABEL_CONFLICTS = new Set(['different_district', 'different_plz_region', 'different_gemeinde']);
+/** Etiketten-Widersprüche (Bezirk/PLZ/Ortsname), die ein gemeinsamer Ticket-Link aufhebt. */
+export const LABEL_CONFLICTS = new Set(['different_district', 'different_plz_region', 'different_gemeinde', 'different_town']);
+
+export interface ScoreOptions {
+  /** Bezirks-/PLZ-Widersprüche ignorieren (für verwaiste Altzeilen). */
+  lenientLabels?: boolean;
+}
 
 interface Verdict {
   decision: 'merge' | 'uncertain' | 'distinct';
@@ -220,7 +221,7 @@ export function isHardDistinct(b: Pick<DedupScoreBreakdown, 'decision' | 'reason
  * |                 |  unbekannt), „weak"      |  Titel konkret ist, „weak"  |                        |
  * | Hauptteil gleich| prüfen bei gleicher Zeit | getrennt                    | getrennt               |
  */
-function decide(a: EventRow, b: EventRow): Verdict {
+function decide(a: EventRow, b: EventRow, opts: ScoreOptions = {}): Verdict {
   // Dieselbe Zeile der Quelle (z. B. nach Datumskorrektur doppelt angelegt).
   if (a.source_id && b.source_id && a.source_name && b.source_name &&
       a.source_id === b.source_id && a.source_name === b.source_name) {
@@ -228,7 +229,15 @@ function decide(a: EventRow, b: EventRow): Verdict {
   }
   if (!sameViennaDay(a, b)) return distinct('different_day');
 
-  const place = placeEvidence(a, b);
+  // Absage-Variante neben der aktiven Zeile: zusammengeführt würde eine der
+  // beiden Aussagen verschwinden (Prod 2026-10-08: „ABGESAGT: …" verborgen
+  // unter der aktiven Zeile). Beide bleiben sichtbar; die veraltete Zeile
+  // zieht der Rückzug (abgelöst) zurück.
+  if (hasCancelMarker(a) !== hasCancelMarker(b)) return distinct('cancellation_marker');
+
+  // Altdaten (verwaiste Zeilen) tragen oft falsche Bezirks-/PLZ-Etiketten;
+  // dort zählt nur, was Venue, Pin und Ortsname belegen.
+  const place = placeEvidence(a, b, { ignoreLabels: opts.lenientLabels });
   if (place.relation === 'conflict' && !LABEL_CONFLICTS.has(place.reason)) return distinct(place.reason);
 
   // Zwei echte Uhrzeiten mehr als 2 h auseinander sind zwei Vorstellungen
@@ -240,12 +249,12 @@ function decide(a: EventRow, b: EventRow): Verdict {
   // Dieselbe Quelle listet zwei Einträge: verschiedene echte Uhrzeiten
   // (Messen 08:00 und 09:15) oder verschiedene Titel (Acts eines Festivals)
   // sind verschiedene Programmpunkte (Probelauf 2026-09-24).
+  // Auch Minuten zählen: Eventim führt Zeitfenster im 10-Minuten-Takt als
+  // eigene Produkte („Tal des Unheils" 20:10 / 20:20, Prod 2026-10-08).
   const sameSourceOtherId = !!a.source_name && a.source_name === b.source_name && a.source_id !== b.source_id;
-  if (sameSourceOtherId && time !== 'exact' && time !== 'unknown') return distinct('same_source_other_time');
-
-  const ticketA = normalizeUrlForDedup(a.ticket_url);
-  const ticketB = normalizeUrlForDedup(b.ticket_url);
-  if (ticketA && ticketB && ticketA === ticketB) return merge('same_ticket_url', 'strong');
+  const ta = knownStartMs(a);
+  const tb = knownStartMs(b);
+  if (sameSourceOtherId && ta !== null && tb !== null && ta !== tb) return distinct('same_source_other_time');
 
   // Verschiedene Titel derselben Quelle sind verschiedene Programmpunkte
   // („Kaiser Wiesn – Dirndl Rocker" / „– Die Lauser"). Verschachtelte Titel
@@ -253,6 +262,13 @@ function decide(a: EventRow, b: EventRow): Verdict {
   // gelistet; die prüft die normale Tabelle samt Mehrdeutigkeitsschutz.
   const title = titleRelation(a, b);
   if (sameSourceOtherId && (title === 'different' || title === 'related')) return distinct('same_source_other_title');
+
+  // Ein gemeinsamer Link auf genau ein Event belegt dasselbe Event, auch bei
+  // Datums-Titel oder Venue als Titel (Prod: „Donnerstag, 15.10.2026" neben
+  // dem echten Titel). Shop-Startseiten und Tour-URLs belegen nichts.
+  const ticketA = normalizeUrlForDedup(a.ticket_url);
+  const ticketB = normalizeUrlForDedup(b.ticket_url);
+  if (ticketA && ticketA === ticketB && isEventSpecificUrl(ticketA)) return merge('same_ticket_url', 'strong');
   if (place.relation === 'conflict') return distinct(place.reason);
 
   switch (title) {
@@ -304,7 +320,7 @@ function decide(a: EventRow, b: EventRow): Verdict {
  * Titel zur gleichen Zeit am gleichen Pin bei 0,775 „uncertain" liegen,
  * weil quellenübergreifend URL und Venue-Id fast nie übereinstimmen.
  */
-export function scorePair(a: EventRow, b: EventRow): DedupScoreBreakdown {
+export function scorePair(a: EventRow, b: EventRow, opts: ScoreOptions = {}): DedupScoreBreakdown {
   const titleScore = computeTitleScore(a, b);
   const datetimeScore = computeDatetimeScore(a, b);
   const venueScore = computeVenueScore(a, b);
@@ -317,7 +333,7 @@ export function scorePair(a: EventRow, b: EventRow): DedupScoreBreakdown {
     geoScore * W_GEO +
     urlScore * W_URL;
 
-  const verdict = decide(a, b);
+  const verdict = decide(a, b, opts);
   return {
     titleScore,
     datetimeScore,

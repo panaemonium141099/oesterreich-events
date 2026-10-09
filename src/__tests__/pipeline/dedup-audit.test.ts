@@ -18,6 +18,24 @@ describe('findResidualDuplicates', () => {
     expect(r).toHaveLength(1);
   });
 
+  // Abschlussprüfung 2026-10-08: 210 Paare aus Feratel-Basiszeile und
+  // Terminzeile waren beide sichtbar, das Audit übersprang gleiche Quellen.
+  it('zählt auch dieselbe Quelle unter zwei Kennungen zur selben Minute', () => {
+    const r = findResidualDuplicates([
+      ev({ id: 'a', source_name: 'feratel-deskline', source_id: 'feratel-bccca177' }),
+      ev({ id: 'b', source_name: 'feratel-deskline', source_id: 'feratel-bccca177:2026-10-07' }),
+    ]);
+    expect(r).toHaveLength(1);
+  });
+
+  it('dieselbe Quelle zu verschiedenen Minuten sind verschiedene Programmpunkte', () => {
+    const r = findResidualDuplicates([
+      ev({ id: 'a', source_name: 'Eventim', source_id: '22091132', start_date: '2026-10-07T17:30:00Z' }),
+      ev({ id: 'b', source_name: 'Eventim', source_id: '22091134', start_date: '2026-10-07T17:40:00Z' }),
+    ]);
+    expect(r).toHaveLength(0);
+  });
+
   it('ignoriert erledigte Duplikate', () => {
     const r = findResidualDuplicates([
       ev({ id: 'a', source_name: 'falter' }),

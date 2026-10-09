@@ -17,6 +17,7 @@ import { fetchAllRows } from '@/lib/db/fetch-all';
 import { findResidualDuplicates } from '@/lib/pipeline/dedup-audit';
 import { pairKey } from '@/lib/pipeline/dedup-engine';
 import { toViennaIso } from '@/lib/utils/event-time';
+import { reportStepReason } from '@/lib/pipeline/step-reason';
 import type { EventRow } from '@/lib/pipeline/types';
 
 try {
@@ -94,6 +95,7 @@ async function main(): Promise<void> {
 
   if (residual.length > MAX_RESIDUAL) {
     console.log(`\n!!! ALARM: ${residual.length} Restdubletten > ${MAX_RESIDUAL}. Lief der Dedup? Neue Quelle oder Statusvariante?`);
+    reportStepReason(`${residual.length} sichtbare Restdubletten > Grenze ${MAX_RESIDUAL}`);
     process.exit(1);
   }
 }

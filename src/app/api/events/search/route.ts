@@ -36,6 +36,8 @@ export async function GET(request: NextRequest) {
       .from('events')
       .select('id, title, start_date, location_name, image_url, category')
       .eq('visibility', 'public')
+      // Keine verborgenen Duplikate oder zurückgezogenen Events.
+      .in('publish_status', ['published', 'published_low_confidence'])
       .gte('start_date', today)
       .or(`title.ilike.%${sanitized}%,location_name.ilike.%${sanitized}%`)
       .order('start_date', { ascending: true })
