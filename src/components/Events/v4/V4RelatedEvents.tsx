@@ -8,9 +8,12 @@
  * aus dem statischen Pfad kippen, siehe Kommentar in page.tsx).
  *
  * Query-Disziplin (Micro-DB!): bundesland + start_date nutzen den
- * Composite-Index mit Early-Exit; category ist Residualfilter. Events
- * ohne bundesland (z. B. DE/CH aus dem Eventim-Feed) bekommen keine
- * Sektion — ein unpräfixter Datums-Scan wäre auf der Instanz zu teuer.
+ * Composite-Index mit Early-Exit; category ist Residualfilter. Ohne
+ * ableitbares Bundesland füllt Stufe 3 österreichweit (siehe fetchRelated).
+ *
+ * Nur Österreich: Jede Stufe filtert auf SITE_COUNTRY. Der Filter auf das
+ * Bundesland reicht allein nicht, und Stufe 3 läuft ganz ohne ihn; sonst
+ * landeten DE/CH-Events aus dem Eventim-Feed in der Sektion.
  */
 
 import { getLocale, getTranslations } from 'next-intl/server';
@@ -26,6 +29,7 @@ import { BUNDESLAND_NAMES, type BundeslandId } from '@/lib/districtsAT';
 import { getBundeslandFromPLZ } from '@/lib/location/plz-bundesland';
 import type { Event } from '@/types/events';
 import { formatEventDate } from '@/lib/utils/event-time';
+import { SITE_COUNTRY } from '@/lib/site-country';
 
 /**
  * Effektives Bundesland: DB-Wert, sonst deterministisch aus der PLZ.
@@ -171,6 +175,7 @@ async function fetchRelated(event: Event): Promise<RelatedRow[]> {
       .from('events')
       .select(RELATED_COLS)
       .eq('visibility', 'public')
+      .eq('country', SITE_COUNTRY)
       .in('publish_status', ['published', 'published_low_confidence'])
       .gte('start_date', new Date().toISOString())
       .neq('id', event.id)
@@ -198,6 +203,7 @@ async function fetchRelated(event: Event): Promise<RelatedRow[]> {
 
   // 3. Letzte Stufe: österreichweit — garantiert eine gefüllte Sektion
   //    auch ohne Bundesland/PLZ oder in dünn besiedelten Regionen.
+  //    Ohne Bundesland hält nur der Länderfilter in base() DE/CH fern.
   if (rows.length < 3) {
     const { data, error } = await base(false);
     if (error) console.error('[related] at-wide query failed:', error);

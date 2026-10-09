@@ -365,8 +365,6 @@
   "MapPage": {
     "srTitle": "Event map of Austria — concerts, festivals, markets and events on a map",
     "loadingMap": "Loading map…",
-    "atOnly": "Austria only",
-    "atOnlyTitle": "Show Austria only — off: also Germany & Switzerland",
     "loadingEvents": "Loading events…",
     "eventsCount": "{count} events",
     "legendTickets": "Tickets available",
@@ -411,7 +409,6 @@
     "showEvents": "Show {count} events",
     "showEventsNoCount": "Show events",
     "showEventsApprox": "Show about {count} events",
-    "includeDeCh": "Also Germany & Switzerland",
     "dateFromAria": "From date",
     "dateToAria": "To date",
     "searching": "Searching …",

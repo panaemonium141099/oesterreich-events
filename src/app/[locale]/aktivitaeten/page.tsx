@@ -57,10 +57,9 @@ export function generateMetadata(): Metadata {
   };
 }
 
-/** Echte Bundeslaender fuer die Filter-Chips (ohne die beiden
- *  Karten-Pseudo-Regionen 'all' und 'at-de-ch'). */
+/** Echte Bundeslaender fuer die Filter-Chips (ohne den Karten-Scope 'all'). */
 const BUNDESLAND_OPTIONS = BUNDESLAENDER.filter(
-  (b) => b.id !== 'all' && b.id !== 'at-de-ch',
+  (b) => b.id !== 'all',
 ).map((b) => ({ id: b.id, name: b.name }));
 
 export default async function ActivitiesOverviewPage({

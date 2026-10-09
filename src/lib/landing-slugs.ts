@@ -5,7 +5,7 @@
  * Bundesland slugs, city slugs, category slugs, and time filters.
  */
 
-import { BUNDESLAENDER } from './bundeslaender';
+import { BUNDESLAENDER, bundeslandToId } from './bundeslaender';
 import { addViennaDays, viennaDayStart, viennaToday, viennaWeekday } from './utils/event-time';
 
 // ---------------------------------------------------------------------------
@@ -115,8 +115,13 @@ export function getDateRange(filter: 'heute' | 'wochenende'): {
 // Bundesland Validation
 // ---------------------------------------------------------------------------
 
+// Hub-Seiten gibt es nur für die 9 echten Bundesländer: bundeslandToId kennt
+// genau deren IDs. Der Karten-Scope 'all' und jede Pseudo-Region fallen damit
+// heraus, auch wenn sie in BUNDESLAENDER stehen (bis 2026-10 eine Region
+// Österreich, Deutschland, Schweiz als indexierbare Hub-Seite samt Sitemap).
+// sitemap-core.xml nimmt dieselbe Prüfung, Seite und Sitemap stimmen überein.
 const VALID_BUNDESLAENDER = new Set(
-  BUNDESLAENDER.filter((b) => b.id !== 'all').map((b) => b.id),
+  BUNDESLAENDER.filter((b) => bundeslandToId(b.id) === b.id).map((b) => b.id),
 );
 
 export function isValidBundesland(slug: string): boolean {

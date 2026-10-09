@@ -130,6 +130,12 @@ node / next.js
   gemeinde-config.test.ts` und `scraper-koordinaten.test.ts`. Keine
   neuen PLZ-/Koordinaten-Tabellen anlegen, keine Fix-Skripte: Fehler an der
   Quelle (Stammdaten oder Scraper-Liste) beheben.
+- **Nur Österreich (2026-10-08):** lasstreffen.at spielt ausschließlich
+  Events mit `country = SITE_COUNTRY` (`src/lib/site-country.ts`, 'AT') aus.
+  DE/CH-Events (Eventim) bleiben in der DB und im Import für spätere
+  .de/.ch-Seiten. Jede öffentliche events-Abfrage filtert das Land selbst;
+  Bundesland/Bezirk/Umkreis reichen nicht. Wächter:
+  `src/__tests__/lib/site-country-guard.test.ts` (Ausnahmen mit Begründung).
 - `src/app/page.tsx` — Landing: statische ISR-Shell (KEIN cookies()/auth im
   RSC-Pfad — Personalisierung client-seitig via `/api/me/landing` +
   `PersonalizedMatches`); Datenqueries über cookie-freien Anon-Client
@@ -252,21 +258,33 @@ npm run scrape:festival-lineups | match-artists
   Ende. Mehr als 1000 Zeilen nur über `fetchAllRows`/`forEachPage`
   (`src/lib/db/fetch-all.ts`); Wächter `postgrest-row-cap.test.ts`. So lief
   der Dedup bis 2026-09-24 nur über vergangene Tage.
-- Auf Supabase-Cloud gaben die Default-Privilegien jeder neuen Funktion
-  EXECUTE für anon und authenticated; `REVOKE … FROM PUBLIC` allein entzieht
-  das NICHT. Der Restore auf Hetzner hat diese Einzelrechte mitgenommen (auf
-  Hetzner selbst geben die Default-Privilegien nur postgres/service_role).
-  Jede schreibende SECURITY-DEFINER-Funktion braucht deshalb `REVOKE EXECUTE
-  … FROM PUBLIC, anon, authenticated` (Muster:
-  `20261008120000_rpc_schreibrechte_anon_entziehen.sql`; bis 2026-10-08
-  konnte jeder über `bulk_update_event_publish` Events verstecken). Wächter:
-  `security-definer-grants.test.ts` (Migrationen, beide Rollen, spätere
-  GRANTs) und RPC `audit_public_write_rpcs` im Pipeline-Schritt
-  `security_audit` (Live-Stand, auch MERGE und Definer-Hüllen).
+- Funktionen in public sind seit 2026-10-08 standardmäßig NICHT öffentlich
+  (Default-Privileges von supabase_admin und postgres, Migration
+  `20261008130000_funktionen_execute_rechte.sql`): neue oder per DROP neu
+  angelegte Funktionen bekommen EXECUTE nur für Eigentümer, postgres und
+  service_role. Öffentliche RPCs brauchen ein ausdrückliches
+  `GRANT EXECUTE ... TO anon, authenticated`. Sperren immer
+  `FROM PUBLIC, anon, authenticated` zusammen, einzeln greift keins.
+  Bedarf je Funktion: `docs/ops/funktionsrechte-prod-stand-2026-10-08.md`.
+  Bis 2026-10-08 konnte jeder über `bulk_update_event_publish` Events
+  verstecken (Einzelrechte aus Supabase-Cloud, per Restore mitgenommen;
+  Sperre `20261008120000_rpc_schreibrechte_anon_entziehen.sql`). Wächter für
+  schreibende SECURITY-DEFINER-Funktionen: `security-definer-grants.test.ts`
+  (Migrationen, anon und authenticated, spätere GRANTs) und RPC
+  `audit_public_write_rpcs` im Pipeline-Schritt `security_audit`
+  (Live-Stand, auch MERGE und Definer-Hüllen).
 - Maintenance-SQL (`ANALYZE`, `CREATE INDEX` nach Bulk-Load) geht NICHT über
   PostgREST/Service-Key — Index-Migrationen liegen als eigene Datei vor und
   werden samt `ANALYZE` im Supabase-Dashboard/MCP ausgeführt (Muster:
   `20260724121000_poi_activities_indexes.sql`, `20260727091000_osm_pois_indexes.sql`).
+- API-Rechte in `public` (2026-10-08): Die Default-Privileges geben anon/
+  authenticated auf jede neue Tabelle und View ALLE Rechte, Schutz kommt nur
+  aus RLS. Ein Event-Trigger (`api_rollen_neue_objekte_absichern`) schaltet
+  deshalb bei jedem CREATE TABLE RLS ein und nimmt neuen Views die
+  Schreibrechte. Neue Tabelle, die anon lesen soll → Policy anlegen, sonst
+  liefert sie still nichts. Views laufen mit Owner-Rechten an der RLS vorbei:
+  nie Schreibrechte für anon/authenticated vergeben.
+  Migrationen: `20261008120000_api_rollen_rechte_zurueckschneiden.sql`, `20261008120100_api_rollen_neue_objekte.sql`.
 - Viator-Monetarisierung (fn-18.5) ist gebaut, aber erst scharf, wenn das
   Partner-Konto steht: `VIATOR_API_KEY` muss in BEIDE Stores (GitHub-Actions
   UND Vercel-Env). Ohne Key liefert `/api/activities/[id]/booking` nichts und

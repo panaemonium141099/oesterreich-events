@@ -201,6 +201,8 @@ export default async function EventDetailPage({
 
   const event = await resolveEvent(parseSlugArray(slugArr));
 
+  // Events aus Deutschland oder der Schweiz liefern die Loader gar nicht
+  // erst (Länderfilter in event-detail-loaders.ts), sie enden hier als 404.
   if (!event) {
     notFound();
   }

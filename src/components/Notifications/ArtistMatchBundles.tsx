@@ -39,6 +39,7 @@ import {
   type NotificationRow,
 } from './NotificationsProvider';
 import { EVENT_TZ, toViennaDate, viennaDayDiff, viennaToday } from '@/lib/utils/event-time';
+import { SITE_COUNTRY } from '@/lib/site-country';
 
 interface EventJoin {
   id: string;
@@ -156,6 +157,9 @@ export function ArtistMatchBundles() {
             `)
             .eq('user_id', user.id)
             .gte('events.start_date', todayIso)
+            // Treffer auf DE/CH-Events bleiben in der Tabelle (für spätere
+            // eigene Seiten), erscheinen hier aber nicht
+            .eq('events.country', SITE_COUNTRY)
             .order('created_at', { ascending: false })
             .limit(500),
           supabase

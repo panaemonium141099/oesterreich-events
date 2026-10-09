@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { extractCity } from '@/lib/utils/city';
+import { SITE_COUNTRY } from '@/lib/site-country';
 
 const MIN_QUALITY_SCORE = 50;
 const DEFAULT_LIMIT = 4;
@@ -83,6 +84,9 @@ export async function GET(request: NextRequest) {
     )
     .neq('id', eventId)
     .eq('publish_status', 'published')
+    // Nur Events dieser Seite: die Kategorie allein holt sonst DE/CH-Events
+    // (Eventim) in die Kandidaten.
+    .eq('country', SITE_COUNTRY)
     .gte('quality_score', MIN_QUALITY_SCORE)
     .gte('start_date', today)
     .order('event_score', { ascending: false })

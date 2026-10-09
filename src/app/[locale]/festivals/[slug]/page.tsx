@@ -9,6 +9,7 @@ import { getFestivalEnrichment } from '@/lib/festivals/enrich';
 import type { Festival, FestivalArtist } from '@/types/festivals';
 import { V4FestivalActions } from '@/components/Festivals/V4FestivalActions';
 import { EVENT_TZ, toViennaDate } from '@/lib/utils/event-time';
+import { SITE_COUNTRY } from '@/lib/site-country';
 
 // Dynamic — slug params with non-ASCII (umlauts) were getting served
 // stale 404 responses under Next's default revalidation. Forcing the
@@ -139,6 +140,7 @@ async function fetchParentEvent(parentEventId: string | null): Promise<ParentEve
       .from('events')
       .select('id, slug, start_date, postal_code, address, bundesland, location_name, image_url')
       .eq('id', parentEventId)
+      .eq('country', SITE_COUNTRY)
       .maybeSingle();
     return (data ?? null) as ParentEventRow | null;
   } catch (err) {

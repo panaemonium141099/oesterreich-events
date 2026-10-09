@@ -113,8 +113,6 @@ export function buildEventParams(filters: EventFilters, blIds: string[]): URLSea
   const concrete = blIds.filter((b) => b !== 'all');
   if (concrete.length > 1) params.set('bundeslands', concrete.join(','));
   else params.set('bundesland', concrete[0] ?? 'all');
-  // Country scope — default Austria; toggle off includes DE/CH (all sources).
-  if (filters.atOnly === false) params.set('countries', 'AT,DE,CH');
   // Slim payload — list + markers only need ~17 fields.
   params.set('slim', 'true');
   if (filters.tags && filters.tags.length > 0) params.set('tags', filters.tags.join(','));
@@ -270,15 +268,8 @@ export function useFilteredEvents(
   // events that fell outside the old 6-month horizon.
   const [filters, setFilters] = useState<EventFilters>({ ...initialFilters });
 
-  // Single-state shim for child components taking a `Bundesland` prop. When the
-  // "nur Österreich" toggle is OFF and no specific state is picked, use the
-  // AT+DE+CH pseudo-region so the map mask + view expand to all three countries.
-  const bundesland = useMemo(() => {
-    if (filters.atOnly === false && (bundeslandIds[0] ?? 'all') === 'all') {
-      return BUNDESLAENDER.find((b) => b.id === 'at-de-ch') ?? primaryBundesland;
-    }
-    return primaryBundesland;
-  }, [filters.atOnly, bundeslandIds, primaryBundesland]);
+  // Single-state shim for child components taking a `Bundesland` prop.
+  const bundesland = primaryBundesland;
 
   const [allEvents, setAllEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);

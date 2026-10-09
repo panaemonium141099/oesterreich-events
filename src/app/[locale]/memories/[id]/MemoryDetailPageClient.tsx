@@ -9,6 +9,7 @@ import { toast } from 'sonner';
 import { EventImage } from '@/components/Events/EventImage';
 import { buildEventUrlV2 } from '@/lib/utils/slugify';
 import { EVENT_TZ } from '@/lib/utils/event-time';
+import { SITE_COUNTRY } from '@/lib/site-country';
 
 interface Photo {
   id: string;
@@ -89,6 +90,7 @@ export function MemoryDetailPageClient() {
         .from('events')
         .select('id, title, start_date, location_name, image_url, category, slug, postal_code, address, bundesland')
         .eq('id', m.event_id)
+        .eq('country', SITE_COUNTRY)
         .single();
       event = e;
     }

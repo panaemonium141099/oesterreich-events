@@ -22,6 +22,7 @@ import { newsletterToken, regionLabel, regionToBundeslandFilter, NEWSLETTER_REGI
 import { buildEventUrlV2 } from '@/lib/utils/slugify';
 import { EVENT_TZ, addViennaDays, viennaDayRange, viennaToday, viennaWeekday } from '@/lib/utils/event-time';
 import { formatTime } from '@/lib/utils/date';
+import { SITE_COUNTRY } from '@/lib/site-country';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 300;
@@ -65,6 +66,9 @@ async function fetchWeekendEvents(region: string): Promise<DigestEvent[]> {
     .select('id, slug, title, start_date, location_name, postal_code, address, bundesland, image_url, ticket_url, source_name')
     .eq('visibility', 'public')
     .eq('publish_status', 'published')
+    // Land für jede Region: 'oesterreich' hat keinen Bundesland-Filter und
+    // sortiert sonst österreichweit nach event_score, wo DE-Events oben stehen
+    .eq('country', SITE_COUNTRY)
     .gte('start_date', now.toISOString())
     .lte('start_date', sunday.toISOString())
     .order('event_score', { ascending: false, nullsFirst: false })

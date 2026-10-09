@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { SITE_COUNTRY } from '@/lib/site-country';
 
 const MIN_QUALITY = 40;
 const EVENTS_LIMIT = 20;
@@ -45,6 +46,7 @@ export async function GET(
       { count: 'exact' },
     )
     .eq('venue_id', id)
+    .eq('country', SITE_COUNTRY)
     .in('publish_status', ['published', 'published_low_confidence'])
     .gte('start_date', today)
     .gte('quality_score', MIN_QUALITY)
@@ -78,6 +80,7 @@ export async function GET(
       const { data: venueEventCounts } = await (supabase.from('events') as any)
         .select('venue_id')
         .in('venue_id', candidateIds)
+        .eq('country', SITE_COUNTRY)
         .in('publish_status', ['published', 'published_low_confidence'])
         .gte('start_date', today)
         .gte('quality_score', MIN_QUALITY);
@@ -115,6 +118,7 @@ export async function GET(
           const { data: newEventCounts } = await (supabase.from('events') as any)
             .select('venue_id')
             .in('venue_id', newIds)
+            .eq('country', SITE_COUNTRY)
             .in('publish_status', ['published', 'published_low_confidence'])
             .gte('start_date', today)
             .gte('quality_score', MIN_QUALITY);

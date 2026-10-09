@@ -36,6 +36,7 @@ import { createClient } from '@supabase/supabase-js';
 import { buildEventUrlV2 } from '@/lib/utils/slugify';
 import type { RelatedEventsSpec } from '@/content/blog/types';
 import { EVENT_TZ } from '@/lib/utils/event-time';
+import { SITE_COUNTRY } from '@/lib/site-country';
 
 const MAX_EVENTS = 6;
 /** Sonst zeigt die Sektion sechsmal Wien. */
@@ -181,10 +182,13 @@ async function fetchRelatedEvents(
   const to = spec?.to
     ?? new Date(now.getTime() + DEFAULT_WINDOW_DAYS * 86_400_000).toISOString();
 
+  // Land in der Basis, damit alle drei Stufen es haben: die Ticket-
+  // Füllung zog sonst buchbare Eventim-Termine aus Deutschland nach oben.
   const base = () => supabase
     .from('events')
     .select(SELECT_COLS)
     .eq('visibility', 'public')
+    .eq('country', SITE_COUNTRY)
     .in('publish_status', ['published', 'published_low_confidence'])
     .gte('start_date', from)
     .lte('start_date', to);

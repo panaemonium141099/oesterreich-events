@@ -8,6 +8,7 @@ import { createClient } from '@/lib/supabase/client';
 import { EventImage } from '@/components/Events/EventImage';
 import { buildEventUrlV2 } from '@/lib/utils/slugify';
 import { EVENT_TZ } from '@/lib/utils/event-time';
+import { SITE_COUNTRY } from '@/lib/site-country';
 
 interface SpotifyMatch {
   id: string;
@@ -71,6 +72,7 @@ export function SpotifyMatchesPageClient() {
       .from('events')
       .select('id, title, start_date, location_name, bundesland, image_url, ticket_url, source_url, slug, postal_code, address')
       .in('id', eventIds)
+      .eq('country', SITE_COUNTRY)
       .gte('start_date', new Date().toISOString())
       .order('start_date', { ascending: true });
 

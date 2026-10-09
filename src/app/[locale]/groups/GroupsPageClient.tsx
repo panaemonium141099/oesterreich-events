@@ -29,6 +29,7 @@ import {
 } from '@/components/Planer/primitives';
 import { PlanCard, type PlanCardData } from '@/components/Planer/PlanCard';
 import { CreatePlanFlow } from '@/components/Planer/CreatePlanFlow';
+import { SITE_COUNTRY } from '@/lib/site-country';
 
 // fn-15.5: motion + staggerContainer + riseItem replaced with the
 // global `.stagger-children` CSS helper and plain divs.
@@ -119,6 +120,7 @@ export function GroupsPageClient() {
               .from('events')
               .select('image_url')
               .eq('id', g.linked_event_id)
+              .eq('country', SITE_COUNTRY)
               .single();
             linked_event_image_url = evt?.image_url ?? null;
           }

@@ -31,6 +31,7 @@ import {
 } from 'react';
 import { useAuth } from '@/lib/supabase/auth-context';
 import { createClient } from '@/lib/supabase/client';
+import { SITE_COUNTRY } from '@/lib/site-country';
 
 export interface NotificationRow {
   id: string;
@@ -50,6 +51,8 @@ export interface NotificationRow {
     last_name: string;
     avatar_url: string | null;
   } | null;
+  /** Land des verknüpften Events (nur zum Ausblenden fremder Länder). */
+  event?: { country: string } | null;
 }
 
 export interface NotificationsContextValue {
@@ -108,11 +111,15 @@ export function NotificationsProvider({ children }: ProviderProps) {
     try {
       const { data } = await supabase
         .from('notifications')
-        .select('*, from_user:profiles!notifications_from_user_id_fkey(first_name, last_name, avatar_url)')
+        .select('*, from_user:profiles!notifications_from_user_id_fkey(first_name, last_name, avatar_url), event:events!notifications_event_id_fkey(country)')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false })
         .limit(50);
-      setNotifications((data as NotificationRow[]) ?? []);
+      // Benachrichtigungen zu Events anderer Länder (Künstler-Treffer auf
+      // DE/CH-Konzerte aus der Zeit vor dem Länderfilter) weder zeigen noch
+      // zählen: ihre Event-Seite gibt es hier nicht mehr.
+      const rows = ((data as NotificationRow[]) ?? []).filter(n => !n.event || n.event.country === SITE_COUNTRY);
+      setNotifications(rows);
     } catch {
       // Network blip — leave existing state, will retry on next event
     } finally {

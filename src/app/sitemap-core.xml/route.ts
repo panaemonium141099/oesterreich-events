@@ -27,7 +27,9 @@ import {
   CATEGORY_SLUGS,
   STUDENT_CITIES,
   STUDENT_FILTERS,
+  isValidBundesland,
 } from '@/lib/landing-slugs';
+import { SITE_COUNTRY } from '@/lib/site-country';
 import {
   SITEMAP_BASE_URL as BASE_URL,
   renderUrlset,
@@ -115,7 +117,10 @@ export async function GET(): Promise<NextResponse> {
     });
   };
 
-  const bundeslaender = BUNDESLAENDER.filter((b) => b.id !== 'all');
+  // Nur die 9 echten Bundesländer, dieselbe Prüfung wie die Hub-Seite
+  // (isValidBundesland). Bis 2026-10 stand hier auch die Karten-Pseudo-Region
+  // Österreich, Deutschland, Schweiz mit allen Unterseiten.
+  const bundeslaender = BUNDESLAENDER.filter((b) => isValidBundesland(b.id));
   const categorySlugs = [...CATEGORY_SLUGS.keys()];
   const timeFilters = ['heute', 'wochenende'];
 
@@ -208,11 +213,14 @@ export async function GET(): Promise<NextResponse> {
 
   const supabase = createClient(supabaseUrl, supabaseKey);
 
-  // Venue pages — unique venue_ids that have upcoming published events
+  // Venue pages — unique venue_ids that have upcoming published events.
+  // Nur österreichische Events zählen, sonst landen Venues mit reinen
+  // DE/CH-Terminen (Eventim) in der Sitemap.
   try {
     const { data: activeVenueIds, error: venueError } = await supabase
       .from('events')
       .select('venue_id')
+      .eq('country', SITE_COUNTRY)
       .eq('publish_status', 'published')
       .gte('start_date', today)
       .gte('quality_score', 40)

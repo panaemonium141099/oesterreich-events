@@ -17,6 +17,7 @@ import type { LifecycleCohort } from './cohort-detector';
 import type { LifecycleEmailEvent } from '@/emails/lifecycle-weekend';
 import { buildEventUrlV2 } from '@/lib/utils/slugify';
 import { EVENT_TZ, addViennaDays, viennaDayRange, viennaDayStart, viennaFields, viennaToday, viennaWeekday } from '@/lib/utils/event-time';
+import { SITE_COUNTRY } from '@/lib/site-country';
 
 // Real `events` table columns. There is NO `venue`, NO `start_time`, NO `slug`,
 // NO `city`. The location string the email shows is `location_name` (the venue
@@ -66,6 +67,10 @@ export async function pickLifecycleEvents(args: PickEventsArgs): Promise<Lifecyc
     // zurückgezogene (abgesagte) Events gar nicht mehr auf der Seite.
     .in('publish_status', ['published', 'published_low_confidence'])
     .not('image_url', 'is', null)
+    // Land in beiden Zweigen: ohne Ort läuft die Abfrage über die ganze
+    // Tabelle, und auch eine bbox um einen Ort in Grenznähe (oder eine
+    // IP-Position in DE) schließt DE/CH-Events nicht aus.
+    .eq('country', SITE_COUNTRY)
     .order('event_score', { ascending: false, nullsFirst: false })
     .limit(limit * 4); // overfetch — we filter & dedupe client-side
 

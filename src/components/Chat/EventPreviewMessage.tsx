@@ -6,6 +6,7 @@ import { formatDateCompact, formatTime } from '@/lib/utils/date';
 import Link from 'next/link';
 import { getCategoryBadgeClass } from '@/lib/event-images';
 import { EventImage } from '@/components/Events/EventImage';
+import { SITE_COUNTRY } from '@/lib/site-country';
 
 interface EventData {
   id: string;
@@ -37,6 +38,7 @@ export function EventPreviewMessage({ eventId, isMe }: EventPreviewMessageProps)
         .from('events')
         .select('id, title, start_date, end_date, location_name, image_url, category, source_url, latitude, longitude')
         .eq('id', eventId)
+        .eq('country', SITE_COUNTRY)
         .single();
       if (data) setEvent(data);
       setLoading(false);

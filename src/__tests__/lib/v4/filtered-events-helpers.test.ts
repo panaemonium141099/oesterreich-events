@@ -5,11 +5,11 @@ import type { Event } from '@/types/events';
 const ev = (o: Partial<Event>): Event => ({ id: Math.random().toString(36), title: 'X', start_date: '2026-10-01T18:00:00Z', ...o }) as Event;
 
 describe('buildEventParams', () => {
-  it('sendet Tags, Datum und Länderwahl wie die Liste', () => {
-    const p = buildEventParams({ tags: ['weinfest', 'kirtag'], dateTo: '2026-11-13', atOnly: false }, ['all']);
+  it('sendet Tags und Datum wie die Liste, nie countries (nur Österreich)', () => {
+    const p = buildEventParams({ tags: ['weinfest', 'kirtag'], dateTo: '2026-11-13' }, ['all']);
     expect(p.get('tags')).toBe('weinfest,kirtag');
     expect(p.get('dateTo')).toBe('2026-11-13');
-    expect(p.get('countries')).toBe('AT,DE,CH');
+    expect(p.get('countries')).toBeNull();
     expect(p.get('bundesland')).toBe('all');
   });
   it('mehrere Bundesländer als bundeslands', () => {

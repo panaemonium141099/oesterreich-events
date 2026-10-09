@@ -152,6 +152,8 @@ import { post as bolschoiDonKosakenAdventkonzert2026 } from './posts/bolschoi-do
 import { post as inaRegenRevolutionDerLiebesliederTour2026 } from './posts/ina-regen-revolution-der-liebeslieder-tour-2026';
 import { post as eltonJohnTributeDinnerKonzert2026 } from './posts/elton-john-tribute-dinner-konzert-2026';
 import { post as mcBomberDieSerioeseTour2026 } from './posts/mc-bomber-die-serioese-tour-2026';
+import { post as jazzGrooveFestivalJazzForKids2026 } from './posts/jazz-groove-festival-jazz-for-kids-2026';
+import { post as cafeDelMundoGuitarizeTheWorldTour20262026 } from './posts/cafe-del-mundo-guitarize-the-world-tour-2026-2026';
 // AUTOWRITER-IMPORTS-END
 
 export type { FestivalPost, GalleryImage, FestivalKeyFacts, LineupAct } from './types';
@@ -314,6 +316,8 @@ export const ALL_POSTS: FestivalPost[] = [
   inaRegenRevolutionDerLiebesliederTour2026,
   eltonJohnTributeDinnerKonzert2026,
   mcBomberDieSerioeseTour2026,
+  jazzGrooveFestivalJazzForKids2026,
+  cafeDelMundoGuitarizeTheWorldTour20262026,
   // AUTOWRITER-POSTS-END
 ].sort(
   (a, b) => new Date(b.publishDate).getTime() - new Date(a.publishDate).getTime()
