@@ -33,7 +33,12 @@
  * Reihenfolge: bevorstehende Termine zuerst. Bestehende Event-IDs bleiben.
  *
  * Aufruf:
- *   npx tsx --env-file=.env.local src/scripts/location-backfill.ts --with-raw [--source X] [--limit N] [--dry-run]
+ *   npx tsx --env-file=.env.local src/scripts/location-backfill.ts --with-raw [--source X] [--ids a,b,…] [--limit N] [--dry-run]
+ *
+ * `--ids` grenzt auf einzelne Zeilen ein (höchstens 200, PostgREST trägt die
+ * Liste im Query-String): dieselbe Neu-Entscheidung, ohne den Rest einer
+ * Quelle mitzuschreiben (Prod 2026-10-09: meinbezirk-Lauf hätte für zwei
+ * falsch freigegebene Events 219 Zeilen geschrieben).
  *   npx tsx --env-file=.env.local src/scripts/location-backfill.ts --stale-since 2026-09-14T05:50:00Z [--limit N] [--dry-run]
  */
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
@@ -46,6 +51,8 @@ const DRY_RUN = argv.includes('--dry-run');
 const WITH_RAW = argv.includes('--with-raw');
 const STALE_SINCE = arg('--stale-since');
 const SOURCE = arg('--source');
+const IDS = arg('--ids')?.split(',').map(s => s.trim()).filter(Boolean);
+if (IDS && IDS.length > 200) { console.error('--ids: höchstens 200 IDs je Lauf'); process.exit(2); }
 const LIMIT = arg('--limit') ? parseInt(arg('--limit')!, 10) : Infinity;
 const LEGACY_LABELS = new Set(['exact', 'normalized', 'verified', 'from_title', 'from_description', 'gemini', 'gemini_low', 'nominatim', 'openai']);
 
@@ -60,6 +67,7 @@ async function page(sb: SupabaseClient, afterId: string | null, mode: 'raw' | 's
     .order('id', { ascending: true })
     .limit(500);
   if (SOURCE) q = q.eq('source_name', SOURCE);
+  if (IDS) q = q.in('id', IDS);
   if (afterId) q = q.gt('id', afterId);
   if (mode === 'raw') q = q.not('raw_event_id', 'is', null);
   else q = q.is('raw_event_id', null).lt('last_seen_at', STALE_SINCE!);

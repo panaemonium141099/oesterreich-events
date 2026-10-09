@@ -18,6 +18,7 @@
 
 import * as cheerio from 'cheerio';
 import type { ScrapedEvent } from '@/types/events';
+import { firstText, isNamelessTitle, isTitleCandidate } from './event-title';
 import { categorizeEvent } from '../categorize';
 
 // Score by URL keyword. Collection paths (events ending in /) score higher
@@ -314,6 +315,9 @@ export interface ParsedEvent {
   image_url?: string;
   source_url?: string;
   organizer?: string;
+  /** Titel, den der Parser vor 2026-10 las (Monats-Überschrift statt
+   *  Name): daraus die alte ID, damit der Sync die Zeile übernimmt. */
+  previous_title?: string;
 }
 
 export function parseEventList(html: string, listingUrl: string): ParsedEvent[] {
@@ -418,9 +422,12 @@ export function parseEventList(html: string, listingUrl: string): ParsedEvent[] 
   // Layer 4: generic — repeating articles or list items with date+title
   $('article, li.event, .event, .veranstaltung').each((_, el) => {
     const $el = $(el);
-    const heading = $el.find('h2, h3, h4').first();
-    const title = heading.text().trim();
-    if (!title || title.length < 3) return;
+    // Die Monats-Überschrift eines Abschnitts ("NOVEMBER 2026",
+    // himberg.gv.at) ist kein Titel; der Name steht in der nächsten.
+    const headings = $el.find('h2, h3, h4');
+    const title = firstText(headings, isTitleCandidate);
+    if (!title || title.length < 3 || isNamelessTitle(title)) return;
+    const legacyTitle = headings.first().text().trim();
     const text = $el.text();
     const start = extractGermanDate(text);
     if (!start) return;
@@ -433,6 +440,7 @@ export function parseEventList(html: string, listingUrl: string): ParsedEvent[] 
       start_date: start,
       source_url: detailUrl,
       image_url: fullImg,
+      ...(legacyTitle !== title ? { previous_title: legacyTitle } : {}),
     });
   });
   return dedupeEvents(events);
@@ -673,17 +681,21 @@ export function asScrapedEvent(
   parsed: ParsedEvent,
   gemeinde: { name: string; plz: string; bezirk: string; bundesland: string; lat: number; lng: number; gkz: string },
 ): ScrapedEvent {
-  const slug = parsed.title
-    .toLowerCase()
-    .replace(/[äÄ]/g, 'ae')
-    .replace(/[öÖ]/g, 'oe')
-    .replace(/[üÜ]/g, 'ue')
-    .replace(/ß/g, 'ss')
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '')
-    .slice(0, 50);
+  const id = (title: string) => {
+    const slug = title
+      .toLowerCase()
+      .replace(/[äÄ]/g, 'ae')
+      .replace(/[öÖ]/g, 'oe')
+      .replace(/[üÜ]/g, 'ue')
+      .replace(/ß/g, 'ss')
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '')
+      .slice(0, 50);
+    return `gemeinde-${gemeinde.gkz}-${slug}-${parsed.start_date.slice(0, 10)}`;
+  };
   return {
-    source_id: `gemeinde-${gemeinde.gkz}-${slug}-${parsed.start_date.slice(0, 10)}`,
+    source_id: id(parsed.title),
+    ...(parsed.previous_title ? { previous_source_id: id(parsed.previous_title) } : {}),
     source_name: 'gemeinde-fallback',
     source_url: parsed.source_url ?? null,
     title: parsed.title,
