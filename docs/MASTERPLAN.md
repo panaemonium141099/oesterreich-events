@@ -349,9 +349,18 @@ Seiten der Quellen mit abgerufen). Falsch versteckte Events fielen von
 - Blätterseiten.
 - Erfundene „heute"-Termine aus dem Gemeinde-Scraper.
 
-Probelauf ab Vortag: einmaliger Nachholplan mit rund 4.900 neuen
-Duplikaten, 2.150 Freigaben (davon 1.636 Rollentausch) und 620 Müllzeilen
-in 270 s (vorher 400 s über alle Tage).
+Runde 4 (Freigaben 66 von 85 richtig, Umhängen 18 von 20, neue Duplikate
+48 von 50, Müll 10 von 20) fand drei weitere Muster, alle behoben: Gemeinde-Kalender setzen ihre
+eigene PLZ und ihren Ortsnamen auch für Events der Nachbargemeinde (6 von 8
+Etiketten-Freigaben falsch, „NÖ-Demenztag" steht in 25 Kalendern); ein
+mitten im Wort abgeschnittener Titel verdrängte die Eventim-Zeile; der
+Müll-Filter verband über die Platzhalter-Mitternacht fremde Events derselben
+Website und hielt Listen-Beschriftungen auf ICS- und Listen-Links für
+eigene Event-Seiten.
+
+Probelauf ab Vortag: einmaliger Nachholplan mit rund 4.850 neuen
+Duplikaten, 2.050 Freigaben (davon rund 1.560 Rollentausch) und knapp 700
+Müllzeilen in 275 s (vorher 400 s über alle Tage).
 
 Offen und an der Quelle zu beheben (keine Dedup-Fehler):
 - Gutschein-Produkte mit Platzhalterdatum 31.12.2030 (veranstaltungskalender.net).
@@ -362,6 +371,15 @@ Offen und an der Quelle zu beheben (keine Dedup-Fehler):
 - Ticketmaster-Zeitzone.
 - Der Eventim-Affiliate-Link geht verloren, wenn die Eventim-Zeile einen
   Ortskonflikt hat (3 bis 5 Events, Anzeige-Frage).
+- Titel-Parser, die statt des Namens eine Beschriftung oder das Datum lesen:
+  gemeinde-registry „mehr" (Niederleis), gemeinden-generic
+  „Veranstaltungsdetails"/„Termin" (Neuberg), „mehr Information"
+  (Rettenschöss), Treibhaus, The Loft, BettelAlm, Gänserndorf. Diese Zeilen
+  bleiben auf ihrer eigenen Seite sichtbar, tragen aber keinen Namen.
+- Eventim führt Ticketprodukte desselben Abends als eigene Events
+  („Eintagesticket" / „Kombiticket", Jazz, Wine & More).
+- Kommunale Dienste als Termine (Klimaticket, Dorfservice, Gesunde
+  Gemeinde): Produktfrage, ob sie auf die Seite gehören.
 
 ## 4. Getroffene Grundsatz-Entscheidungen (2026-07-07)
 
