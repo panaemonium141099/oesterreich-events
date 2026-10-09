@@ -311,7 +311,13 @@ async function applyPlan(fullPlan: DedupPlan, errors: string[]): Promise<void> {
 /** Paar-Log für die Admin-Prüfansicht; manuelle Entscheidungen bleiben unberührt,
  *  automatische „uncertain"-Einträge, die nicht mehr zutreffen, fliegen raus. */
 async function writeLog(pairs: LogPair[], errors: string[]): Promise<number> {
-  const auto = pairs.filter(p => !p.breakdown.reason?.startsWith('manual_'));
+  // Ein Paar kann mehrfach geprüft werden (Kandidaten und Vorgängerversion,
+  // beide Richtungen). Ein Upsert-Batch darf jede Zeile nur einmal treffen,
+  // sonst scheitert er ganz („ON CONFLICT DO UPDATE … a second time",
+  // Live-Lauf 2026-10-09: 46 Batches). Der letzte Befund zählt.
+  const byPair = new Map<string, LogPair>();
+  for (const p of pairs) if (!p.breakdown.reason?.startsWith('manual_')) byPair.set(pairKey(p.aId, p.bId), p);
+  const auto = [...byPair.values()];
   let written = 0;
   for (let i = 0; i < auto.length; i += 200) {
     const rows = auto.slice(i, i + 200).map(p => {
