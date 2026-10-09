@@ -43,7 +43,24 @@ const GARBAGE_TITLES = new Set([
   'alle termine', 'termine', 'veranstaltungen', 'gefundene termine', 'mehr', 'dieser monat', 'this month',
   'tickets', 'ausverkauft', 'test', 'termin', 'events', 'datum', 'nach oben scrollen', 'weiter', 'eventkalender',
   'veranstaltungskalender', 'tipp speichern', 'in outlook übernehmen', 'in outlook uebernehmen', 'webcam',
-  'karteninhalte zulassen', 'aktuelles', 'neuigkeiten', 'veranstaltungsdetails',
+  'karteninhalte zulassen', 'aktuelles', 'neuigkeiten', 'veranstaltungsdetails', 'tipp speichern in outlook übernehmen',
+  'tipp speichern in outlook uebernehmen', 'mehr lesen', 'kundmachungen', 'aktuelle termine', 'frei willig',
+]);
+
+/**
+ * Seiten, die nie ein Event sind (Kontakt, Impressum, Öffnungszeiten …). Alle
+ * anderen Beschriftungen („Termin", „Datum", „mehr", Sprungmarken) können auf
+ * der eigenen Seite eines Events stehen, dessen Namen der Parser verfehlt hat.
+ */
+const NON_EVENT_PAGES = new Set([
+  'kontakt', 'contact', 'impressum', 'imprint', 'datenschutz', 'datenschutzerklärung', 'datenschutzerklaerung',
+  'privacy', 'privacy policy', 'agb', 'allgemeine geschäftsbedingungen', 'terms', 'oeffnungszeiten', 'offnungszeiten',
+  'öffnungszeiten', 'opening hours', 'anfahrt', 'directions', 'lageplan', 'newsletter', 'registrierung', 'registration',
+  'sign up', 'login', 'anmelden', 'warenkorb', 'cart', 'checkout', 'zahlung', 'payment', 'cookie', 'cookies',
+  'cookie einstellungen', 'sitemap', 'suche', 'search', 'jobs', 'karriere', 'career', 'sponsoren', 'sponsors',
+  'partner', 'presse', 'press', 'downloads', 'galerie', 'gallery', 'fotos', 'photos', 'unterkünfte', 'unterkuenfte',
+  'accommodation', 'webcam', 'karteninhalte zulassen', 'startseite', 'home', 'homepage', 'ueber uns', 'über uns',
+  'about', 'about us', 'willkommen', 'welcome', 'test', 'kundmachungen', 'archiv', 'archive',
 ]);
 
 /** Sprungmarken in allen Varianten („Zum Inhalt springen", „Springe zur rechten Spalte"). */
@@ -129,8 +146,14 @@ export function isGarbageTitle(title: string, context: GarbageContext = {}): boo
   // (Eventim „Archive", Gasometer) belegt dagegen ein echtes Event.
   if (GARBAGE_TITLES.has(normalized) && !hasEventLink(context.ticketUrl)) return true;
 
-  // Feldbeschriftung statt Titel: "Datum der VeranstaltungMi,"
-  if (normalized.startsWith('datum der veranstaltung')) return true;
+  // Feldbeschriftung statt Titel: "Datum der VeranstaltungMi,", "Anzahl der Folgetermine"
+  if (normalized.startsWith('datum der veranstaltung') || normalized.startsWith('anzahl der folgetermine')) return true;
+
+  // Strukturierte Daten statt Titel ('{"@context": "http://schema.org", …')
+  if (/^\s*\{\s*"@context"/.test(title)) return true;
+
+  // Uhrzeit mit Link-Text („11:00 Uhr bis 00:00 Uhr | Alle Termine")
+  if (/ alle termine$/.test(normalized) && isDateOnlyText(normalized.replace(/ alle termine$/, ''))) return true;
 
   if (SKIP_LINK.test(normalized) || LABEL_LINE.test(normalized)) return true;
 
@@ -157,11 +180,6 @@ export function isGarbageTitle(title: string, context: GarbageContext = {}): boo
 function hasEventLink(url: string | null | undefined): boolean {
   const normalized = normalizeUrlForDedup(url);
   return !!normalized && isEventSpecificUrl(normalized);
-}
-
-/** Titel nur aus Datum/Uhrzeit, kein Name („MI 09.12. 19:30 UHR"). */
-export function isNamelessDateTitle(title: string | null | undefined): boolean {
-  return !!title && /\d/.test(title) && isDateOnlyText(title);
 }
 
 export interface GarbageRowInput {
@@ -192,21 +210,23 @@ export function namedPageKeys(row: GarbageRowInput): string[] {
 }
 
 function hostOf(url: string): string {
-  try { return new URL(url).hostname.replace(/^www./, ''); } catch { return url; }
+  try { return new URL(url).hostname.replace(/^www\./, ''); } catch { return url; }
 }
 
 /**
- * Müll-Zeile? Wie isGarbageTitle, mit einer Ausnahme: ein Titel ohne Namen
- * (nur Datum/Uhrzeit) auf der eigenen Seite genau eines Events ist ein
- * echtes Event mit kaputtem Titel (Prod 2026-10-09: Treibhaus „MI 09.12.
- * 19:30 UHR" = Alfred Dorfer, KAPU, Ybbser Adventzauber). Es bleibt sichtbar,
- * außer dieselbe Seite liefert am selben Tag eine Zeile mit Namen
- * (`namedPages`, aus namedPageKey); dann ist es nur ein Kachelteil.
+ * Müll-Zeile? Wie isGarbageTitle, mit einer Ausnahme: ein kaputter Titel
+ * (Datum/Uhrzeit, Beschriftung, Sprungmarke) auf der eigenen Seite genau
+ * eines Events ist ein echtes Event, dessen Namen der Parser verfehlt hat
+ * (Prod 2026-10-09: Treibhaus „MI 09.12. 19:30 UHR" = Alfred Dorfer, Neuberg
+ * „Veranstaltungsdetails" = Fitmarsch). Es bleibt sichtbar, außer der Titel
+ * nennt eine Nicht-Event-Seite (Kontakt, Impressum …) oder dieselbe Seite
+ * liefert am selben Tag eine Zeile mit Namen (`namedPages`, aus
+ * namedPageKeys); dann ist es nur ein Kachelteil.
  */
 export function isGarbageRow(row: GarbageRowInput, namedPages: ReadonlySet<string>): boolean {
   if (!row.title || !isGarbageTitle(row.title, { sourceName: row.source_name, ticketUrl: row.ticket_url })) return false;
   const day = viennaDayKey(row.start_date);
-  if (!isNamelessDateTitle(row.title) || !hasEventLink(row.source_url) || !day) return true;
+  if (NON_EVENT_PAGES.has(normalizeTitle(row.title)) || !hasEventLink(row.source_url) || !day) return true;
   const url = normalizeUrlForDedup(row.source_url);
   return namedPages.has(`${url}|${day}`) ||
     namedPages.has(`${hostOf(url)}|${new Date(row.start_date!).toISOString().slice(0, 16)}`);

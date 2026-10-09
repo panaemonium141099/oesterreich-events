@@ -118,8 +118,27 @@ describe('isGarbageRow — Titel ohne Namen, aber eigene Event-Seite', () => {
     const named = { ...date, title: 'Herbstkonzert', source_url: 'https://www.mining.at/Herbstkonzert_1' };
     expect(isGarbageRow(date, new Set(namedPageKeys(named)))).toBe(true);
   });
-  it('Navigationswörter bleiben Müll, auch auf einer Event-Seite', () => {
-    expect(isGarbageRow({ ...dorfer, title: 'mehr Informationen' }, new Set())).toBe(true);
+  // Stichprobe Runde 3: auch Beschriftungen statt Namen auf der eigenen
+  // Event-Seite sind das einzige Abbild echter Events (Neuberg
+  // „Veranstaltungsdetails" = Fitmarsch, hard.at „Datum" = Vortrag).
+  it.each(['Veranstaltungsdetails', 'Termin', 'Datum', 'mehr', 'Zum Hauptinhalt springen', 'mehr Informationen'])(
+    'Beschriftung „%s" auf der eigenen Event-Seite ohne Namens-Zeile bleibt sichtbar',
+    (title) => {
+      expect(isGarbageRow({ ...dorfer, title }, new Set())).toBe(false);
+    },
+  );
+  it.each(['Kontakt', 'Impressum', 'Datenschutz', 'Öffnungszeiten', 'Webcam', 'Test'])(
+    'Nicht-Event-Seite „%s" bleibt Müll, auch mit eigener URL',
+    (title) => {
+      expect(isGarbageRow({ ...dorfer, title }, new Set())).toBe(true);
+    },
+  );
+  it.each([
+    'https://www.pyhra.gv.at/kalender?month=202609',
+    'https://paternion.gv.at/unser-paternion/termine',
+    'https://www.ort.at/events-nach-tag/2026-10-16/-',
+  ])('Kalender-Navigation ist keine Event-Seite: %s', (url) => {
+    expect(isGarbageRow({ ...dorfer, source_url: url }, new Set())).toBe(true);
   });
 });
 
@@ -132,6 +151,15 @@ describe('isGarbageTitle — Sprungmarken und Beschriftungen (Prod 2026-10-09)',
     'Termin', 'Events', 'Datum', 'DATUM :', 'Nach oben scrollen', 'weiter »', 'Eventkalender', 'Veranstaltungskalender',
     'Tipp speichern', 'In Outlook übernehmen', 'Webcam', 'Karteninhalte zulassen', 'Aktuelles', 'Neuigkeiten', 'Veranstaltungsdetails',
   ])('%s', (title) => {
+    expect(isGarbageTitle(title)).toBe(true);
+  });
+  it.each([
+    'Anzahl der Folgetermine: 3',
+    '11:00 Uhr bis 00:00 Uhr | Alle Termine',
+    'Tipp speichern/in Outlook übernehmen',
+    '{"@context": "http://schema.org","@type": "Event",',
+    'mehr lesen', 'Kundmachungen', 'Aktuelle Termine', 'FREI:WILLIG',
+  ])('weitere Beschriftung: %s', (title) => {
     expect(isGarbageTitle(title)).toBe(true);
   });
   it('Monatsname allein bei Gemeinde-Aggregatoren', () => {
