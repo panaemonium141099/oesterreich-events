@@ -136,7 +136,9 @@ export function planDedup(events: EventRow[], clusters: ClusterResult[], opts: P
       // Zurückgezogen, weil die Quelle es nicht mehr listet: ein Duplikat,
       // das damals schon eine Woche nicht gesehen war, belegt das Event
       // nicht (Rückzugsregel: Bestätigung nur binnen 7 Tagen).
-      if (p?.withdrawn_at && e.last_seen_at &&
+      // Inserate (business/user) haben keine Sichtungen und gelten immer.
+      const scraped = !e.source_type || e.source_type === 'scraped';
+      if (scraped && p?.withdrawn_at && e.last_seen_at &&
           Date.parse(e.last_seen_at) < Date.parse(p.withdrawn_at) - WITHDRAWAL_CONFIRM_MS) continue;
       plan.release.push({ id: e.id, previousPrimaryId, reason: 'primary_hidden' });
       continue;

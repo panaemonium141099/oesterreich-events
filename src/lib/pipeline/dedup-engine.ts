@@ -17,8 +17,8 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import { canonicalizeIds, isHardDistinct, normalizeUrlForDedup, scorePair } from './dedup-scorer';
-import { isOrphanRow, placeRelation, timeRelation, titleRelation, titleTokensOf, viennaDayOf } from './dedup-evidence';
-import { selectPrimary } from './dedup-cluster';
+import { isOrphanRow, knownStartMs, placeRelation, timeRelation, titleRelation, titleTokensOf, viennaDayOf } from './dedup-evidence';
+import { selectPrimary, wouldBeVisible } from './dedup-cluster';
 import type { DedupScoreBreakdown, EventRow } from './types';
 
 export interface EngineOptions {
@@ -64,6 +64,12 @@ export interface DayResult {
 
 /** Wörter, die an einem Tag in so vielen Titeln stehen, taugen nicht als Block. */
 const MAX_BLOCK = 250;
+
+/** Zusätze, die eine Titelvariante derselben Show macht (Ticket- und Infoseiten). */
+const VARIANT_FILLER = new Set([
+  'detailinfos', 'details', 'detail', 'infos', 'info', 'informationen', 'tickets', 'ticket', 'karten',
+  'vip', 'packages', 'package', 'paket', 'pakete', 'ticket24', 'eintritt', 'vorverkauf',
+]);
 
 export function pairKey(a: string, b: string): string {
   const [x, y] = canonicalizeIds(a, b);
@@ -283,11 +289,20 @@ export function dedupDay(events: EventRow[], opts: EngineOptions = {}): DayResul
     const time = timeRelation(y, z);
     if (time === 'exact' && (place === 'same' || place === 'town')) return true;
     // Titelvarianten derselben Show am selben Ort („Detailinfos zu X",
-    // „X: Tourname"), die beide den mehrwortigen Titel von x enthalten
-    // (Prod 2026-10-08: Beatrice Egli, Trivium). Nicht bei „related" (gleicher
-    // Hauptteil, verschiedene Programmpunkte) und nicht bei Einwort-Titeln.
-    return t === 'different' && place === 'same' && time !== 'far' &&
-      titleTokensOf(x).length >= 2 && nested(x, y) && nested(x, z);
+    // „X - VIP Packages"), die beide den mehrwortigen Titel von x enthalten
+    // (Prod 2026-10-08: Beatrice Egli, Trivium). Eine der beiden fügt nur
+    // Füllwörter hinzu; zwei eigene Zusätze („Kaiser Wiesn Dirndl Rocker" /
+    // „… Die Lauser", Kurator- / Familienführung) sind zwei Programmpunkte.
+    // Nicht bei „related", nicht bei Einwort-Titeln, nicht bei verschiedenen
+    // bekannten Uhrzeiten.
+    if (t !== 'different' || place !== 'same' || time === 'far' || titleTokensOf(x).length < 2) return false;
+    if (!nested(x, y) || !nested(x, z)) return false;
+    const ty = knownStartMs(y);
+    const tz = knownStartMs(z);
+    if (ty !== null && tz !== null && ty !== tz) return false;
+    const base = new Set(titleTokensOf(x));
+    const onlyFiller = (e: EventRow) => titleTokensOf(e).every(w => base.has(w) || VARIANT_FILLER.has(w));
+    return onlyFiller(y) || onlyFiller(z);
   };
   const ambiguous = new Set<string>();
   for (const [x, neighbours] of edges) {
@@ -339,9 +354,10 @@ export function dedupDay(events: EventRow[], opts: EngineOptions = {}): DayResul
     const memberIds = uf.membersOf(root);
     if (memberIds.length < 2) continue;
     const members = memberIds.map(id => byId.get(id)!);
-    // Nur Altzeilen, kein aktuelles Mitglied: nichts daran ändern (sonst
-    // würde eine verwaiste Zeile als Primary wieder sichtbar).
-    if (members.every(m => orphans.has(m.id))) continue;
+    // Kein aktuelles Mitglied, das sichtbar sein darf (nur Altzeilen, oder
+    // die frische Zeile ist zurückgehalten): nichts daran ändern, sonst würde
+    // eine verwaiste Zeile mit veralteten Daten als Primary wieder sichtbar.
+    if (!members.some(m => !orphans.has(m.id) && wouldBeVisible(m))) continue;
     const primary = selectPrimary([...members], id => orphans.has(id));
     const scores = new Map<string, number>();
     for (const m of members) {

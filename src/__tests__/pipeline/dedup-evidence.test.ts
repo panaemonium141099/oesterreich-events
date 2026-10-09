@@ -1,7 +1,7 @@
 // src/__tests__/pipeline/dedup-evidence.test.ts
 
 import { describe, it, expect } from 'vitest';
-import { titleRelation, timeRelation, placeRelation, placeEvidence, viennaDayOf, viennaDayBoundsUtc, isPlausibleEventDay, isOrphanRow, planningStartDay } from '@/lib/pipeline/dedup-evidence';
+import { titleRelation, timeRelation, placeRelation, placeEvidence, viennaDayOf, viennaDayBoundsUtc, isPlausibleEventDay, isOrphanRow, planningStartDay, hasCancelMarker } from '@/lib/pipeline/dedup-evidence';
 import type { EventRow } from '@/lib/pipeline/types';
 
 const e = (o: Partial<EventRow>): EventRow => ({ id: 'x', title: '', start_date: '2026-10-07T17:30:00Z', ...o }) as EventRow;
@@ -226,6 +226,22 @@ describe('placeRelation', () => {
     expect(placeRelation(e({ location_name: 'St. Pölten' }), e({ location_name: 'Sankt Pölten' }))).toBe('town');
   });
 
+  // Gegenprüfung 2026-10-09: Gemeinde-Kalender setzen ihren eigenen
+  // Gemeindenamen als Ort; Namensteile („St.", „See") sind keine Orte.
+  it('Gemeindename als Ortsangabe und Namensteile sind kein Widerspruch', () => {
+    expect(placeRelation(e({ location_name: 'Gaubitsch', postal_code: '2154' }), e({ location_name: 'Unterstinkenbrunn', postal_code: '2154' }))).not.toBe('conflict');
+    expect(placeRelation(e({ location_name: 'Sportplatz St. Sebastian', postal_code: '8630' }), e({ location_name: 'Sportplatz', postal_code: '8630' }))).not.toBe('conflict');
+  });
+
+  it('ein Ortsteil und seine Gemeinde widersprechen sich nicht (Schleinbach / Ulrichskirchen-Schleinbach)', () => {
+    expect(placeRelation(e({ location_name: 'Schleinbach' }), e({ location_name: 'Ulrichskirchen-Schleinbach' }))).not.toBe('conflict');
+    expect(placeRelation(e({ location_name: 'Wieselburg' }), e({ location_name: 'Wieselburg-Land' }))).not.toBe('conflict');
+  });
+
+  it('gleicher Venue-Name mit Ortsnamen („Hauptplatz Haugsdorf") ist derselbe Ort, auch ohne PLZ', () => {
+    expect(placeRelation(e({ location_name: 'Hauptplatz Haugsdorf' }), e({ location_name: 'Hauptplatz Haugsdorf', postal_code: '2054' }))).toBe('same');
+  });
+
   it('ohne Etiketten (Altzeilen, Freigabe-Prüfung) zählt der gleiche Ortsname', () => {
     const a = e({ location_name: 'Lessach', postal_code: '5592' });
     const b = e({ location_name: 'Lessach', postal_code: '5575' });
@@ -240,5 +256,14 @@ describe('titleRelation — Jahreszahlen', () => {
     expect(rel('Jahrgangstreffen 1956', 'Jahrgangstreffen 1966')).toBe('different');
     expect(rel('Masters of Dirt 2027', 'Masters of Dirt')).toBe('equal');
     expect(rel('Saisoneröffnung 2026', 'Saisoneröffnung 2025/2026')).not.toBe('different');
+    expect(rel('X Tour 2026/27', 'X Tour 2027')).not.toBe('different');
+  });
+});
+
+describe('hasCancelMarker', () => {
+  it('„verschoben auf <dieser Tag>" ist das verschobene, stattfindende Event', () => {
+    expect(hasCancelMarker(e({ title: 'VERSCHOBEN auf 12.11.: Konzert X', start_date: '2026-11-12T18:00:00Z' }))).toBe(false);
+    expect(hasCancelMarker(e({ title: 'Konzert X - verschoben auf 12.12.', start_date: '2026-11-12T18:00:00Z' }))).toBe(true);
+    expect(hasCancelMarker(e({ title: 'ABGESAGT: Konzert X' }))).toBe(true);
   });
 });

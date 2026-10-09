@@ -165,6 +165,24 @@ describe('planDedup: Freigabe nur mit Gegenbeleg', () => {
     expect(p.markDuplicate).toEqual([expect.objectContaining({ id: 'b', primaryId: 'a' })]);
   });
 
+  // Gegenprüfung 2026-10-09: Ist die frische Zeile zurückgehalten (Ortskonflikt,
+  // Quarantäne), darf die verborgene Altzeile nicht an ihrer Stelle mit
+  // veralteten Daten sichtbar werden.
+  it('kein frisches sichtbares Mitglied: verborgene Altzeile bleibt verborgen', () => {
+    const p = planWith([
+      dup({ last_seen_at: ORPHAN_SEEN }),
+      primary({ publish_status: 'needs_review', location_status: 'conflict' }),
+    ]);
+    expect(p.release).toEqual([]);
+    expect(p.markDuplicate).toEqual([]);
+  });
+
+  it('Inserat (business) hinter einem zurückgezogenen Primary wird freigegeben, auch ohne frische Sichtung', () => {
+    const withdrawn = primary({ publish_status: 'suppressed', withdrawn_at: '2026-10-07T04:00:00Z' } as Partial<EventRow>);
+    const p = planWith([dup({ source_type: 'business', last_seen_at: '2026-09-11T03:00:00Z' } as Partial<EventRow>)], new Map([['b', withdrawn]]));
+    expect(p.release).toEqual([expect.objectContaining({ id: 'a', reason: 'primary_hidden' })]);
+  });
+
   it('verwaister Primary an einem anderen Tag (schon vorbei): frische Zeile wird freigegeben', () => {
     const stale = primary({ start_date: '2026-10-06T16:30:00Z', last_seen_at: ORPHAN_SEEN });
     const p = planWith([dup({})], new Map([['b', stale]]));

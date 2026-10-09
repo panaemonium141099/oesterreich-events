@@ -37,6 +37,26 @@ describe('Mehrdeutige Einträge verbinden keine verschiedenen Events', () => {
     expect(owner.get('u')).toBe('u');
   });
 
+  // Gegenprüfung 2026-10-09: ohne Trennzeichen ist „Kaiser Wiesn Dirndl
+  // Rocker" / „Kaiser Wiesn Die Lauser" für den Titelvergleich „different";
+  // die Ausnahme für Titelvarianten („Detailinfos zu X", „X - VIP Packages")
+  // darf daraus keine Verbindung machen.
+  it('Acts ohne Trennzeichen neben einem Sammeleintrag ohne Uhrzeit bleiben getrennt', () => {
+    const umbrella = ev({ id: 'u', title: 'Kaiser Wiesn', start_date: '2026-09-26T00:00:00Z', source_name: 'q1' });
+    const act1 = ev({ id: 'a1', title: 'Kaiser Wiesn Dirndl Rocker', start_date: '2026-09-26T00:00:00Z', source_name: 'q2' });
+    const act2 = ev({ id: 'a2', title: 'Kaiser Wiesn Die Lauser', start_date: '2026-09-26T00:00:00Z', source_name: 'q3' });
+    const owner = ownerMap([umbrella, act1, act2]);
+    expect(owner.get('a1')).not.toBe(owner.get('a2'));
+  });
+
+  it('zwei Führungen mit verschiedener Uhrzeit neben der Ausstellung ohne Uhrzeit bleiben getrennt', () => {
+    const show = ev({ id: 'x', title: 'Klimt und die Moderne', start_date: '2026-10-20T00:00:00Z', source_name: 'q1' });
+    const t1 = ev({ id: 't1', title: 'Klimt und die Moderne Kuratorenführung', start_date: '2026-10-20T14:00:00Z', source_name: 'q2' });
+    const t2 = ev({ id: 't2', title: 'Klimt und die Moderne Familienführung', start_date: '2026-10-20T14:40:00Z', source_name: 'q3' });
+    const owner = ownerMap([show, t1, t2]);
+    expect(owner.get('t1')).not.toBe(owner.get('t2'));
+  });
+
   it('verschachtelte Titel derselben Aufführung (gleiche Zeit, gleicher Saal) machen den Kurztitel nicht mehrdeutig', () => {
     const shortT = ev({ id: 's', title: 'KI UND K.O.', start_date: '2026-10-10T00:00:00Z', source_name: 'q1' });
     const y = ev({ id: 'y', title: "Theaterabend in Steeg ''KI & K.O.''", start_date: '2026-10-10T16:30:00Z', source_name: 'q2' });
