@@ -261,14 +261,18 @@ function decide(a: EventRow, b: EventRow, opts: ScoreOptions = {}): Verdict {
   // („Bob Dylan" / „Bob Dylan - VIP Packages") sind dieselbe Show, mehrfach
   // gelistet; die prüft die normale Tabelle samt Mehrdeutigkeitsschutz.
   const title = titleRelation(a, b);
-  if (sameSourceOtherId && (title === 'different' || title === 'related')) return distinct('same_source_other_title');
 
   // Ein gemeinsamer Link auf genau ein Event belegt dasselbe Event, auch bei
   // Datums-Titel oder Venue als Titel (Prod: „Donnerstag, 15.10.2026" neben
-  // dem echten Titel). Shop-Startseiten und Tour-URLs belegen nichts.
+  // dem echten Titel) und bei Zusatzprodukten derselben Quelle („Jodokcello
+  // - VIP Upgrade" mit dem Link der Show). Shop-Startseiten und Tour-URLs
+  // belegen nichts; verschiedene Minuten derselben Quelle sind oben schon
+  // getrennt (Zeitfenster).
   const ticketA = normalizeUrlForDedup(a.ticket_url);
   const ticketB = normalizeUrlForDedup(b.ticket_url);
   if (ticketA && ticketA === ticketB && isEventSpecificUrl(ticketA)) return merge('same_ticket_url', 'strong');
+
+  if (sameSourceOtherId && (title === 'different' || title === 'related')) return distinct('same_source_other_title');
   if (place.relation === 'conflict') return distinct(place.reason);
 
   switch (title) {

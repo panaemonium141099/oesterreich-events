@@ -72,8 +72,8 @@ describe('mergeFeratelDetail', () => {
 
   it('mischt Adresse, Veranstalter, Link, Preis ein und legt die weiteren Termine als eigene Zeilen an', () => {
     const rows = mergeFeratelDetail(event, extractFeratelDetail(RAW));
-    expect(rows).toHaveLength(3);
-    const [first, second, third] = rows;
+    expect(rows).toHaveLength(4);
+    const [first, , second, third] = rows;
     expect(first.source_id).toBe('feratel-abc');
     expect(first.start_date).toBe('2026-09-18T07:00:00.000Z');
     expect(first.source_url).toBe('https://abtenau-info.at/service-2/wochenprogramm-abtenau/');
@@ -92,6 +92,18 @@ describe('mergeFeratelDetail', () => {
     expect(second.end_date).toBe('2026-10-02T09:00:00.000Z');
     expect(third.source_id).toBe('feratel-abc:2026-10-09');
     expect(third.end_date).toBeUndefined();
+  });
+
+  // Prod 2026-10-09: Die Basiszeile (Kennung ohne Datum) wandert mit dem
+  // Listentermin weiter. Ohne eigene Terminzeile für den Listentag fror die
+  // Zeile dieses Tages ein, verwaiste vor dem Termin und der Dedup kippte
+  // den Primary hin und her (Bauernmarkt Stoob, Stricken lernen).
+  it('legt auch für den Listentermin eine Terminzeile mit Datum an', () => {
+    const rows = mergeFeratelDetail(event, extractFeratelDetail(RAW));
+    expect(rows.map(r => r.source_id)).toEqual([
+      'feratel-abc', 'feratel-abc:2026-09-18', 'feratel-abc:2026-10-02', 'feratel-abc:2026-10-09',
+    ]);
+    expect(rows[1].start_date).toBe(rows[0].start_date);
   });
 
   it('Eintritt frei in der Preisangabe setzt das Preis-Flag', () => {

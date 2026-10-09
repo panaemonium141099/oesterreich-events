@@ -21,7 +21,7 @@ import { canonicalizeIds } from '@/lib/pipeline/dedup-scorer';
 import { dedupDay, pairKey } from '@/lib/pipeline/dedup-engine';
 import { planDedup, releaseStatus, checkSafetyValve, dropDependentsOfFailedReleases, type DedupPlan } from '@/lib/pipeline/dedup-plan';
 import { isPlausibleEventDay, planningStartDay, viennaDayBoundsUtc, viennaDayOf } from '@/lib/pipeline/dedup-evidence';
-import { isGarbageTitle } from '@/lib/pipeline/garbage-filter';
+import { isGarbageRow, namedPageKey, type GarbageRowInput } from '@/lib/pipeline/garbage-filter';
 import { fetchAllRows, forEachPage } from '@/lib/db/fetch-all';
 import { reportStepReason } from '@/lib/pipeline/step-reason';
 import type { DedupScoreBreakdown, EventRow } from '@/lib/pipeline/types';
@@ -92,27 +92,34 @@ const EVENT_SELECT = 'id,title,description,start_date,end_date,is_all_day,locati
 // Phase 1: Garbage cleanup
 // ---------------------------------------------------------------------------
 
-const isGarbageRow = (e: { title: string | null; source_name?: string | null; ticket_url?: string | null }) =>
-  !!e.title && isGarbageTitle(e.title, { sourceName: e.source_name, ticketUrl: e.ticket_url });
+/** Seiten + Tage, für die eine Quelle eine Zeile mit echtem Namen liefert
+ *  (auch verborgene Duplikate). Ein Titel ohne Namen auf so einer Seite ist
+ *  ein Kachelteil, sonst ein echtes Event mit kaputtem Titel (isGarbageRow). */
+const NAMED_PAGES = new Set<string>();
+const isGarbage = (e: GarbageRowInput) => isGarbageRow(e, NAMED_PAGES);
 
 /** Sichtbare Müll-Zeilen finden. Geschrieben wird erst nach dem
  *  Sicherheitsventil (suppressGarbage). */
 async function scanGarbage(): Promise<string[]> {
   console.log('\n--- Phase 1: Garbage-Scan ---');
-  const garbageIds: string[] = [];
-  await forEachPage<{ id: string; title: string | null; source_name: string | null; ticket_url: string | null }>(
+  type Row = GarbageRowInput & { id: string; publish_status: string | null };
+  const rows: Row[] = [];
+  await forEachPage<Row>(
     (from, to) => supabase
       .from('events')
-      .select('id,title,source_name,ticket_url')
+      .select('id,title,source_name,source_url,ticket_url,start_date,publish_status')
       .gte('start_date', viennaDayBoundsUtc(START_DAY)[0])
-      .not('publish_status', 'in', '("suppressed","duplicate")')
+      .neq('publish_status', 'suppressed')
       .order('id')
       .range(from, to),
-    (rows) => {
-      for (const e of rows) if (isGarbageRow(e)) garbageIds.push(e.id);
-    },
+    (page) => { rows.push(...page); },
     { label: 'dedup: Garbage-Scan' },
   );
+  for (const r of rows) {
+    const key = namedPageKey(r);
+    if (key) NAMED_PAGES.add(key);
+  }
+  const garbageIds = rows.filter(r => r.publish_status !== 'duplicate' && isGarbage(r)).map(r => r.id);
   console.log(`  Found ${garbageIds.length} garbage events`);
   return garbageIds;
 }
@@ -199,7 +206,7 @@ async function loadExternalPrimaries(events: EventRow[]): Promise<Map<string, Ev
     // Müll-Zeilen gelten schon als unterdrückt (geschrieben wird erst nach
     // dem Ventil): ihre Duplikate werden freigegeben.
     for (const r of (data ?? []) as unknown as EventRow[]) {
-      out.set(r.id, isGarbageRow(r) ? { ...r, publish_status: 'suppressed' } : r);
+      out.set(r.id, isGarbage(r) ? { ...r, publish_status: 'suppressed' } : r);
     }
   }
   return out;
@@ -383,7 +390,7 @@ async function main(): Promise<void> {
   for (let i = 0; i < days.length; i++) {
     const day = days[i];
     // Müll nimmt am Dedup nicht teil: er wird nie Primary und verbirgt nichts.
-    const events = (await loadEventsForDay(day)).filter(e => !isGarbageRow(e));
+    const events = (await loadEventsForDay(day)).filter(e => !isGarbage(e));
     scanned += events.length;
     if (events.length === 0) continue;
 

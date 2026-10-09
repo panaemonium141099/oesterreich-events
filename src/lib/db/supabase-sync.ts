@@ -55,7 +55,7 @@ import { generateFingerprint } from '@/lib/dedup/fingerprint';
 import { generateEventSlug } from '@/lib/utils/slugify';
 import { scoreAndAdmit } from '@/lib/quality/score-event';
 import { isContactHandleTitle } from '@/lib/scrapers/detail-extract/validate';
-import { isGarbageTitle } from '@/lib/pipeline/garbage-filter';
+import { isGarbageRow, namedPageKey } from '@/lib/pipeline/garbage-filter';
 import { extractDimsFromUrl } from '@/lib/event-images/extract-dims-from-url';
 import {
   validateAndUpgradeImageUrl,
@@ -1053,6 +1053,8 @@ export function filterValidEvents(events: ScrapedEvent[]): {
 } {
   let rejected = 0;
   const rejectionReasons: Record<string, number> = {};
+  // Seiten, die im selben Lauf eine Zeile mit echtem Namen liefern (isGarbageRow).
+  const namedPages = new Set(events.map(e => namedPageKey(e)).filter((k): k is string => !!k));
 
   const valid = events.filter(e => {
     // Listing-Parser greifen bei Kontaktbloecken den mailto:/tel:-Anchor
@@ -1065,8 +1067,10 @@ export function filterValidEvents(events: ScrapedEvent[]): {
     }
     // Datum, Navigation oder Kachel-Teil statt Name: nie schreiben. Sonst
     // unterdrückt der Dedup die Zeile nachts und der nächste Upsert macht
-    // sie wieder sichtbar (Prod 2026-10-08).
-    if (e.title?.trim() && isGarbageTitle(e.title, { sourceName: e.source_name, ticketUrl: e.ticket_url })) {
+    // sie wieder sichtbar (Prod 2026-10-08). Ausnahme: ein Titel ohne Namen
+    // auf der eigenen Seite genau eines Events ist ein echtes Event
+    // (isGarbageRow), bis der Scraper den Namen liest.
+    if (e.title?.trim() && isGarbageRow(e, namedPages)) {
       rejected++;
       rejectionReasons.garbage_title = (rejectionReasons.garbage_title ?? 0) + 1;
       return false;

@@ -374,13 +374,16 @@ const CANCELLED = /(abgesagt|absage|entf(ä|ae)llt|entfallen|f(ä|ae)llt aus|sto
 export function hasCancelMarker(e: Pick<EventRow, 'title' | 'start_date'>): boolean {
   const title = e.title ?? '';
   if (!CANCEL_MARKER.test(title)) return false;
+  const day = e.start_date ? viennaDayOf(e) : null;
+  if (!day) return true;
+  const isRowDay = (d: string, m: string) => Number(day.slice(8, 10)) === Number(d) && Number(day.slice(5, 7)) === Number(m);
   // „VERSCHOBEN auf 12.11." am 12.11. ist das verschobene Event an seinem
-  // neuen Termin, keine Absage.
+  // neuen Termin, keine Absage; am alten Termin ist es eine.
   const moved = title.match(/verschoben\s+(?:auf|nach|zum|in den)?\s*(\d{1,2})\.\s?(\d{1,2})\./i);
-  const day = moved && e.start_date ? viennaDayOf(e) : null;
-  if (moved && day && Number(day.slice(8, 10)) === Number(moved[1]) && Number(day.slice(5, 7)) === Number(moved[2])) {
-    return CANCELLED.test(title);
-  }
+  if (moved) return isRowDay(moved[1], moved[2]) ? CANCELLED.test(title) : true;
+  // Die Absage nennt nur andere Termine („Termin 16.9. ABGESAGT" am 16.12.).
+  const dates = [...title.matchAll(/(\d{1,2})\.\s?(\d{1,2})\./g)];
+  if (dates.length > 0 && !dates.some(m => isRowDay(m[1], m[2]))) return false;
   return true;
 }
 
@@ -538,6 +541,23 @@ function venueRelation(rawA: VenueFeatures, rawB: VenueFeatures): VenueRelation 
   return 'differs';
 }
 
+/**
+ * Widerspruch nur aus Bezirk, PLZ-Gebiet/Gemeinde und genauen Pins, ohne
+ * Venue-Namen (für Altzeilen, deren Ortsname oft ein Regionsname ist).
+ */
+export function labelConflict(a: EventRow, b: EventRow): string | null {
+  const fa = features(a);
+  const fb = features(b);
+  if (fa.district && fb.district && fa.district !== fb.district) return 'different_district';
+  const plz = plzConflict(fa, fb);
+  if (plz) return plz;
+  if (fa.precise && fb.precise && a.latitude != null && b.latitude != null &&
+      haversineDistance(a.latitude, a.longitude!, b.latitude, b.longitude!) > MAX_PIN_ERROR_M) {
+    return 'different_place';
+  }
+  return null;
+}
+
 /** Beide Namen sind amtliche Gemeinden, und zwar verschiedene. */
 function differentGemeinden(a: string, b: string): boolean {
   const ga = new Set(gemeindenByName(a).map(g => `${g.name}|${g.bundesland}`));
@@ -627,7 +647,10 @@ export function placeEvidence(a: EventRow, b: EventRow, opts: PlaceOptions = {})
   }
 
   const sameGemeinde = fa.gemeinden.size > 0 && [...fa.gemeinden].some(g => fb.gemeinden.has(g));
-  const resolvedDist = hasResolvedCoords(a) && hasResolvedCoords(b) ? dist : null;
+  // Ohne Etiketten zählen auch die daraus abgeleiteten Gemeinde-Mittelpunkte
+  // nicht (falsch konfigurierte Gemeinde-Kalender: „Buch in Tirol" für Buch
+  // in Vorarlberg, Stichprobe 2026-10-09).
+  const resolvedDist = !opts.ignoreLabels && hasResolvedCoords(a) && hasResolvedCoords(b) ? dist : null;
   if (resolvedDist !== null && resolvedDist > 15_000 && !samePlz && !sameGemeinde) {
     return { relation: 'conflict', reason: 'different_place' };
   }

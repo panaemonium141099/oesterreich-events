@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { isGarbageTitle } from '@/lib/pipeline/garbage-filter';
+import { isGarbageTitle, isGarbageRow, namedPageKey } from '@/lib/pipeline/garbage-filter';
 
 // Befund 2026-10-06: der Gemeinde-Parser (vor #275) machte aus Kachel-Teilen
 // eigene Events. Diese Titel stehen noch in der DB; der nächtliche Dedup
@@ -84,7 +84,44 @@ describe('isGarbageTitle — Navigationswort mit Event-Link', () => {
     expect(isGarbageTitle('Kontakt', { sourceName: 'gemeinden-generic', ticketUrl: 'https://www.tulln.at/' })).toBe(true);
   });
 
-  it('ein Datums-Titel bleibt Müll, auch mit Event-Link (kein Name)', () => {
+  it('ein Datums-Titel bleibt als Titel Müll, auch mit Event-Link (kein Name)', () => {
     expect(isGarbageTitle('Donnerstag, 15.10.2026 , 19:00', { ticketUrl: 'https://www.tulln.at/veranstaltung/4711' })).toBe(true);
+  });
+});
+
+// Stichprobe 2026-10-09: rund 115 Zeilen mit Datum statt Namen waren die
+// einzige Zeile eines echten Events (Treibhaus „MI 09.12. 19:30 UHR" =
+// Alfred Dorfer, KAPU, Ybbser Adventzauber). Unterdrückt wären sie ganz weg.
+describe('isGarbageRow — Titel ohne Namen, aber eigene Event-Seite', () => {
+  const dorfer = { title: 'MI 09.12. 19:30 UHR', source_name: 'innsbruck-clubs', start_date: '2026-12-09T18:30:00Z',
+    source_url: 'https://www.treibhaus.at/programm/2026/12/09/15283-alfred-dorfer-gleich' };
+  it('bleibt sichtbar, solange dieselbe Seite am Tag keine Zeile mit Namen liefert', () => {
+    expect(isGarbageRow(dorfer, new Set())).toBe(false);
+  });
+  it('ist Müll, wenn dieselbe Seite am selben Tag eine Zeile mit Namen liefert', () => {
+    expect(isGarbageRow(dorfer, new Set([namedPageKey({ ...dorfer, title: 'Alfred Dorfer: Gleich' })!]))).toBe(true);
+  });
+  it('Listen- oder Startseite belegt kein Event: Müll', () => {
+    expect(isGarbageRow({ ...dorfer, source_url: 'https://www.bettel-alm.at/' }, new Set())).toBe(true);
+  });
+  it('Navigationswörter bleiben Müll, auch auf einer Event-Seite', () => {
+    expect(isGarbageRow({ ...dorfer, title: 'mehr Informationen' }, new Set())).toBe(true);
+  });
+});
+
+describe('isGarbageTitle — Sprungmarken und Beschriftungen (Prod 2026-10-09)', () => {
+  it.each([
+    'Zum Inhalt springen', 'Zur Navigation springen', 'Zum Hauptinhalt springen', 'Springe zum Anfang der Seite',
+    'Springe zur Subnavigation', 'Springe zur rechten Spalte', 'zum Hauptmenü', 'Zurück zum Seitenanfang',
+    'Weiter zum Inhalt', 'Alle Termine', 'Termine', 'Veranstaltungen', 'Gefundene Termine', 'Mehr', 'Dieser Monat',
+    'This Month', 'Tickets', 'AUSVERKAUFT', 'Test', '0 Veranstaltungen, 18', '19:30, Eintritt: € 15/18/20', '16:00, Eintritt: Frei',
+  ])('%s', (title) => {
+    expect(isGarbageTitle(title)).toBe(true);
+  });
+  it('Wochentag mit „bis" bei Gemeinde-Aggregatoren', () => {
+    expect(isGarbageTitle('Samstag, bis', { sourceName: 'gemeinde-registry' })).toBe(true);
+  });
+  it.each(['Termine der Bibliothek', 'Mehr als Worte', 'Testament – Kabarett'])('echte Titel bleiben: %s', (title) => {
+    expect(isGarbageTitle(title)).toBe(false);
   });
 });

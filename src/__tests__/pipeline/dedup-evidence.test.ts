@@ -266,4 +266,17 @@ describe('hasCancelMarker', () => {
     expect(hasCancelMarker(e({ title: 'Konzert X - verschoben auf 12.12.', start_date: '2026-11-12T18:00:00Z' }))).toBe(true);
     expect(hasCancelMarker(e({ title: 'ABGESAGT: Konzert X' }))).toBe(true);
   });
+
+  it('eine Absage für einen anderen Termin betrifft diese Zeile nicht („Termin 16.9. ABGESAGT" am 16.12.)', () => {
+    expect(hasCancelMarker(e({ title: 'Laaer Babycouch - Termin 16.9. ABGESAGT', start_date: '2026-12-16T08:30:00Z' }))).toBe(false);
+    expect(hasCancelMarker(e({ title: 'Laaer Babycouch - Termin 16.12. ABGESAGT', start_date: '2026-12-16T08:30:00Z' }))).toBe(true);
+  });
+});
+
+describe('placeEvidence ohne Etiketten', () => {
+  it('Gemeinde-Mittelpunkte aus falschen Etiketten widersprechen nicht (gleicher Venue-Name)', () => {
+    const a = e({ location_name: 'Gemeindesaal Buch', postal_code: '6220', latitude: 47.38, longitude: 11.77, location_precision: 'municipality' } as Partial<EventRow>);
+    const b = e({ location_name: 'Gemeindesaal Buch', postal_code: '6960', latitude: 47.52, longitude: 9.81, location_precision: 'municipality' } as Partial<EventRow>);
+    expect(placeEvidence(a, b, { ignoreLabels: true }).relation).not.toBe('conflict');
+  });
 });

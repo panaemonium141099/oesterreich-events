@@ -19,7 +19,7 @@
 import { computeEnrichments, isDateOnlyTitle, underlyingStatus } from './dedup-cluster';
 import { isGarbageTitle } from './garbage-filter';
 import { newClusterId as defaultClusterId, pairKey, type ClusterResult } from './dedup-engine';
-import { isOrphanRow, placeEvidence } from './dedup-evidence';
+import { isOrphanRow, knownStartMs, placeEvidence, titleRelation, titleTokensOf } from './dedup-evidence';
 import { LABEL_CONFLICTS, scorePair } from './dedup-scorer';
 import type { PublishStatus } from '@/lib/quality/score-event';
 import type { EventRow } from './types';
@@ -117,6 +117,42 @@ export function planDedup(events: EventRow[], clusters: ClusterResult[], opts: P
   // Recht versteckt hatten, als Phantome wieder auf (Probelauf 2026-10-07:
   // 11.837 Freigaben, überwiegend verwaiste Zeilen aus behobenen Scraper-Fehlern).
   const clusterPrimaries = new Set(clusters.map(c => c.primaryId));
+  const VISIBLE = new Set(['published', 'published_low_confidence']);
+  const seenMs = (r: EventRow) => (r.last_seen_at ? Date.parse(r.last_seen_at) : NaN);
+
+  /** Sichtbare Zeile desselben Tages, die dasselbe Event sein kann (Titel
+   *  gleich oder enthalten, kein Gegenbeleg) und sichtbar bleibt. */
+  const visibleTwin = (e: EventRow): { row: EventRow; score: number } | null => {
+    let best: { row: EventRow; score: number; rank: number } | null = null;
+    for (const r of events) {
+      if (r.id === e.id || !VISIBLE.has(r.publish_status ?? '') || desiredDuplicate.has(r.id)) continue;
+      if (isOrphanRow(r, opts.sourceLastSeen)) continue;
+      const t = titleRelation(e, r);
+      if (t !== 'equal' && t !== 'near' && t !== 'contains') continue;
+      if (opts.manualSplits?.has(pairKey(e.id, r.id))) continue;
+      const v = scorePair(e, r);
+      if (v.decision === 'distinct') continue;
+      const rank = (v.decision === 'merge' ? 4 : 0) + (r.source_name === 'Eventim' ? 2 : 0) + (r.quality_score ?? 0) / 1000;
+      if (!best || rank > best.rank) best = { row: r, score: v.overallScore, rank };
+    }
+    return best;
+  };
+
+  /** Bisheriger Primary weg oder veraltet: an einen sichtbaren Zwilling
+   *  hängen statt eine zweite sichtbare Zeile zu erzeugen (Stichprobe
+   *  2026-10-09: Weyer, Ebensee, Schwarzenberg doppelt sichtbar). */
+  const releaseOrAttach = (e: EventRow, previousPrimaryId: string | null, reason: string) => {
+    const twin = visibleTwin(e);
+    if (!twin) {
+      plan.release.push({ id: e.id, previousPrimaryId, reason });
+      return;
+    }
+    const existing = plan.primaries.find(p => p.id === twin.row.id);
+    const clusterId = existing?.clusterId ?? twin.row.dedup_cluster_id ?? nextId();
+    if (!existing && twin.row.dedup_cluster_id !== clusterId) plan.primaries.push({ id: twin.row.id, clusterId, enrichments: {} });
+    plan.markDuplicate.push({ id: e.id, primaryId: twin.row.id, clusterId, score: twin.score, isNew: false });
+  };
+
   for (const e of events) {
     if (e.publish_status !== 'duplicate' || desiredDuplicate.has(e.id)) continue;
     const previousPrimaryId = e.duplicate_of ?? null;
@@ -128,6 +164,10 @@ export function planDedup(events: EventRow[], clusters: ClusterResult[], opts: P
     // ihrem Primary ist.
     if (isOrphanRow(e, opts.sourceLastSeen) || isDateOnlyTitle(e.title) ||
         isGarbageTitle(e.title, { sourceName: e.source_name, ticketUrl: e.ticket_url })) continue;
+    // Ältere Fassung derselben Seite (die Quelle liefert die URL inzwischen als
+    // andere Zeile): bleibt verborgen, der Rückzug löst sie ab.
+    if (e.source_url && events.some(n => n !== e && n.source_name === e.source_name && n.source_url === e.source_url &&
+        seenMs(n) - seenMs(e) > 86_400_000)) continue;
     const p = previousPrimaryId ? (byId.get(previousPrimaryId) ?? opts.externalPrimaries?.get(previousPrimaryId)) : undefined;
     // Der bisherige Primary ist selbst nicht (mehr) sichtbar: dann versteckt
     // die Verbindung ein echtes Event (Prod 2026-10-07: „Wickie, Slime und
@@ -140,7 +180,7 @@ export function planDedup(events: EventRow[], clusters: ClusterResult[], opts: P
       const scraped = !e.source_type || e.source_type === 'scraped';
       if (scraped && p?.withdrawn_at && e.last_seen_at &&
           Date.parse(e.last_seen_at) < Date.parse(p.withdrawn_at) - WITHDRAWAL_CONFIRM_MS) continue;
-      plan.release.push({ id: e.id, previousPrimaryId, reason: 'primary_hidden' });
+      releaseOrAttach(e, previousPrimaryId, 'primary_hidden');
       continue;
     }
     // Der bisherige Primary ist eine Altzeile, und der Lauf hat die
@@ -148,22 +188,47 @@ export function planDedup(events: EventRow[], clusters: ClusterResult[], opts: P
     // dedup-engine 1c): Gegenbeleg, Mehrdeutigkeit oder anderer Tag. Die
     // frische Zeile bleibt sonst für immer hinter veralteten Daten verborgen.
     if (isOrphanRow(p, opts.sourceLastSeen)) {
-      plan.release.push({ id: e.id, previousPrimaryId, reason: 'primary_orphaned' });
+      releaseOrAttach(e, previousPrimaryId, 'primary_orphaned');
       continue;
     }
     const verdict = opts.manualSplits?.has(pairKey(e.id, p.id))
       ? { decision: 'distinct', reason: 'manual_split' }
       : scorePair(e, p);
     if (verdict.decision !== 'distinct' || !verdict.reason) continue;
-    // Etiketten allein (Bezirk/PLZ/Ortsname) sind bei einzelnen Quellen
-    // falsch; sie lösen nur, wenn auch sonst nichts denselben Ort belegt.
-    const labelOnly = LABEL_CONFLICTS.has(verdict.reason) &&
-      ['same', 'town'].includes(placeEvidence(e, p, { ignoreLabels: true }).relation);
-    if ((RELEASE_REASONS.has(verdict.reason) || LABEL_CONFLICTS.has(verdict.reason)) && !labelOnly) {
-      plan.release.push({ id: e.id, previousPrimaryId, reason: verdict.reason });
-    }
+    if (!isCounterEvidence(e, p, verdict.reason)) continue;
+    if (verdict.reason === 'different_day') releaseOrAttach(e, previousPrimaryId, 'different_day');
+    else plan.release.push({ id: e.id, previousPrimaryId, reason: verdict.reason });
   }
   return plan;
+}
+
+/**
+ * Reicht der Grund, eine bestehende Verbindung zu lösen? Die Stichprobe
+ * 2026-10-09 fand Freigaben ohne echten Gegenbeleg, die eine zweite
+ * sichtbare Zeile erzeugt hätten:
+ *  - Etiketten (Bezirk/PLZ/Ortsname): bei einzelnen Quellen falsch (5592
+ *    statt 5575 für Lessach, Gemeinde-Kalender mit eigener PLZ); sie lösen
+ *    nur, wenn auch sonst nichts denselben Ort belegt
+ *  - verschiedene Venue-Namen bei gleichem Titel, gleicher Minute und PLZ
+ *    („Schatz.Kammer Burg Kreuzen" / „Panoramagasthof Zur Burgschenke")
+ *  - Titelvarianten desselben Events, die zwei Wörter teilen („Kabarett
+ *    Weinzettl & Rudle" / „Weinzettl & Rudle - Für immer …")
+ */
+function isCounterEvidence(e: EventRow, p: EventRow, reason: string): boolean {
+  if (LABEL_CONFLICTS.has(reason)) {
+    return !['same', 'town'].includes(placeEvidence(e, p, { ignoreLabels: true }).relation);
+  }
+  if (!RELEASE_REASONS.has(reason)) return false;
+  if (reason === 'different_venue') {
+    const t = titleRelation(e, p);
+    const sameMinute = knownStartMs(e) !== null && knownStartMs(e) === knownStartMs(p);
+    return !((t === 'equal' || t === 'near') && sameMinute && !!e.postal_code && e.postal_code === p.postal_code);
+  }
+  if (reason === 'different_title') {
+    const pt = new Set(titleTokensOf(p));
+    return titleTokensOf(e).filter(w => pt.has(w)).length < 2;
+  }
+  return true;
 }
 
 /**

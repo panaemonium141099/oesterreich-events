@@ -1,6 +1,7 @@
 // src/lib/pipeline/garbage-filter.ts
 
 import { isEventSpecificUrl, normalizeUrlForDedup } from './event-url';
+import { toViennaDate } from '@/lib/utils/event-time';
 
 /**
  * Garbage title filter — identifies non-event pages that scrapers accidentally pick up.
@@ -33,11 +34,21 @@ const GARBAGE_TITLES = new Set([
   // Titel las (Befund 2026-10-06)
   'mehr infos', 'mehr info', 'mehr erfahren', 'weiterlesen',
   'gefundene veranstaltungen', 'suche ab',
-  // Sprungmarken der Seitennavigation (Abschlussprüfung 2026-10-08)
+  // Sprungmarken der Seitennavigation (Abschlussprüfung 2026-10-08); Varianten
+  // fängt SKIP_LINK unten
   'zum footer', 'springe zum footer', 'zum inhalt', 'springe zum inhalt', 'zum hauptinhalt',
   'springe zum hauptinhalt', 'zur navigation', 'springe zur navigation', 'zur hauptnavigation',
   'springe zur hauptnavigation', 'nach oben', 'skip to content', 'skip to main content',
+  // Listen-Überschriften, Knöpfe und Platzhalter (Prod 2026-10-09)
+  'alle termine', 'termine', 'veranstaltungen', 'gefundene termine', 'mehr', 'dieser monat', 'this month',
+  'tickets', 'ausverkauft', 'test',
 ]);
+
+/** Sprungmarken in allen Varianten („Zum Inhalt springen", „Springe zur rechten Spalte"). */
+const SKIP_LINK = /^(?:springe |weiter |direkt )?(?:zu[mr]?|zurück zu[mr]?|to) (?:anfang(?: der seite)?|seitenanfang|seitenende|(?:haupt)?inhalt|(?:sub|haupt)?navigation|(?:haupt)?menü|(?:haupt)?menue|suche|footer|(?:rechten|linken) spalte|übersicht|uebersicht|content|main content)(?: springen)?$/;
+
+/** Kalenderzellen und Preiszeilen statt Titel. */
+const LABEL_LINE = /^\d+ veranstaltung(?:en)? \d*$|^\d{1,2} \d{2} eintritt\b/;
 
 /**
  * Einzelwörter, die bei Gemeinde-Kalendern nie ein Titel sind, sondern ein
@@ -119,7 +130,12 @@ export function isGarbageTitle(title: string, context: GarbageContext = {}): boo
   // Feldbeschriftung statt Titel: "Datum der VeranstaltungMi,"
   if (normalized.startsWith('datum der veranstaltung')) return true;
 
-  if (GEMEINDE_AGGREGATORS.has(context.sourceName ?? '') && GEMEINDE_TILE_WORDS.has(normalized)) return true;
+  if (SKIP_LINK.test(normalized) || LABEL_LINE.test(normalized)) return true;
+
+  if (GEMEINDE_AGGREGATORS.has(context.sourceName ?? '') &&
+      (GEMEINDE_TILE_WORDS.has(normalized) || /^(?:montag|dienstag|mittwoch|donnerstag|freitag|samstag|sonntag) bis$/.test(normalized))) {
+    return true;
+  }
 
   // Zeichenrest: ein Zeichen, oder zwei ohne Buchstabe-Ziffer-Paar
   // („U2", „Ö3" sind Namen).
@@ -137,6 +153,48 @@ export function isGarbageTitle(title: string, context: GarbageContext = {}): boo
 function hasEventLink(url: string | null | undefined): boolean {
   const normalized = normalizeUrlForDedup(url);
   return !!normalized && isEventSpecificUrl(normalized);
+}
+
+/** Titel nur aus Datum/Uhrzeit, kein Name („MI 09.12. 19:30 UHR"). */
+export function isNamelessDateTitle(title: string | null | undefined): boolean {
+  return !!title && /\d/.test(title) && isDateOnlyText(title);
+}
+
+export interface GarbageRowInput {
+  title: string | null;
+  source_name?: string | null;
+  source_url?: string | null;
+  ticket_url?: string | null;
+  start_date?: string | null;
+}
+
+/** Seite + Wiener Tag einer Zeile mit echtem Namen (für isGarbageRow). */
+export function namedPageKey(row: GarbageRowInput): string | null {
+  const url = normalizeUrlForDedup(row.source_url);
+  if (!url || !row.title || !row.start_date) return null;
+  if (isGarbageTitle(row.title, { sourceName: row.source_name, ticketUrl: row.ticket_url })) return null;
+  const day = viennaDayKey(row.start_date);
+  return day ? `${url}|${day}` : null;
+}
+
+/**
+ * Müll-Zeile? Wie isGarbageTitle, mit einer Ausnahme: ein Titel ohne Namen
+ * (nur Datum/Uhrzeit) auf der eigenen Seite genau eines Events ist ein
+ * echtes Event mit kaputtem Titel (Prod 2026-10-09: Treibhaus „MI 09.12.
+ * 19:30 UHR" = Alfred Dorfer, KAPU, Ybbser Adventzauber). Es bleibt sichtbar,
+ * außer dieselbe Seite liefert am selben Tag eine Zeile mit Namen
+ * (`namedPages`, aus namedPageKey); dann ist es nur ein Kachelteil.
+ */
+export function isGarbageRow(row: GarbageRowInput, namedPages: ReadonlySet<string>): boolean {
+  if (!row.title || !isGarbageTitle(row.title, { sourceName: row.source_name, ticketUrl: row.ticket_url })) return false;
+  const day = viennaDayKey(row.start_date);
+  if (!isNamelessDateTitle(row.title) || !hasEventLink(row.source_url) || !day) return true;
+  return namedPages.has(`${normalizeUrlForDedup(row.source_url)}|${day}`);
+}
+
+function viennaDayKey(iso: string | null | undefined): string | null {
+  const d = iso ? new Date(iso) : null;
+  return d && !isNaN(d.getTime()) ? toViennaDate(d) : null;
 }
 
 /**

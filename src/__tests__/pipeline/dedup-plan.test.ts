@@ -183,6 +183,48 @@ describe('planDedup: Freigabe nur mit Gegenbeleg', () => {
     expect(p.release).toEqual([expect.objectContaining({ id: 'a', reason: 'primary_hidden' })]);
   });
 
+  // Stichprobe 2026-10-09: gem2go führt hunderte Gemeinden unter einem
+  // Quellennamen. Die Altzeile „Jahreshauptversammlung - OGV Grinzens"
+  // wurde als Vorgängerversion der Kematener JHV verstanden.
+  it('Vorgängerversion nur von derselben Seite oder demselben Ort, nicht aus einer anderen Gemeinde', () => {
+    const orphan = ev({ id: 'o', source_name: 'q', title: 'Jahreshauptversammlung', last_seen_at: ORPHAN_SEEN,
+      source_url: 'https://www.grinzens.gv.at/jhv', location_name: 'Gemeinderäume', postal_code: '6095', latitude: 47.23, longitude: 11.25 });
+    const fresh = ev({ id: 'f', source_name: 'q', title: 'Jahreshauptversammlung', last_seen_at: SEEN,
+      source_url: 'https://www.kematen-krems.at/jhv', location_name: "Green's Restaurant", postal_code: '4531', latitude: 48.11, longitude: 14.19 });
+    const r = dedupDay([orphan, fresh], { sourceLastSeen: lastSeen });
+    expect(r.clusters).toEqual([]);
+  });
+
+  it('Vorgängerversion derselben Seite mit +1 h (Zeitzonen-Altlast) wird verborgen, auch bei mehreren gleichnamigen Zeilen anderswo', () => {
+    const url = 'https://www.alkoven.at/Kinderweihnacht_1';
+    const orphan = ev({ id: 'o', source_name: 'q', title: 'Kinderweihnacht', start_date: '2026-10-07T18:30:00Z', last_seen_at: ORPHAN_SEEN, source_url: url, source_id: '16505' });
+    const fresh = ev({ id: 'f', source_name: 'q', title: 'Kinderweihnacht', start_date: '2026-10-07T17:30:00Z', last_seen_at: SEEN, source_url: url });
+    const other = ev({ id: 'x', source_name: 'q', title: 'Kinderweihnacht', start_date: '2026-10-07T13:00:00Z', last_seen_at: SEEN,
+      source_url: 'https://www.pill.gv.at/k', location_name: 'Turnhalle', postal_code: '6136', latitude: 47.32, longitude: 11.68 });
+    const r = dedupDay([orphan, fresh, other], { sourceLastSeen: lastSeen });
+    expect(r.clusters).toEqual([expect.objectContaining({ primaryId: 'f', memberIds: expect.arrayContaining(['o', 'f']) })]);
+  });
+
+  it('Altzeile derselben Quelle mit genau +1 h am selben Ort wird verborgen (Zeitzonen-Altlast, nicht zwei Vorstellungen)', () => {
+    const orphan = ev({ id: 'o', source_name: 'q', title: 'Adventeinklang am Maluhof', start_date: '2026-10-07T18:30:00Z', last_seen_at: ORPHAN_SEEN });
+    const fresh = ev({ id: 'f', source_name: 'q', title: 'Adventeinklang am Maluhof', start_date: '2026-10-07T17:30:00Z', last_seen_at: SEEN });
+    const r = dedupDay([orphan, fresh], { sourceLastSeen: lastSeen });
+    expect(r.clusters).toEqual([expect.objectContaining({ primaryId: 'f' })]);
+  });
+
+  it('Freigabe in einen sichtbaren Zwilling hinein: stattdessen an ihn hängen', () => {
+    // Primary verwaist an einem anderen Tag; am eigenen Tag steht dasselbe
+    // Event schon sichtbar aus einer anderen Quelle (nur „uncertain").
+    const stale = primary({ start_date: '2026-06-03T16:00:00Z', last_seen_at: ORPHAN_SEEN });
+    const twin = ev({ id: 't', source_name: 'falter2', title: 'Spielenachmittag in der Bibliothek', last_seen_at: SEEN,
+      location_name: 'Bücherei', postal_code: '3335', latitude: null, longitude: null, location_precision: null });
+    const e = dup({ title: 'Spielenachmittag', location_name: 'Bibliothek Weyer', postal_code: '3335', latitude: null, longitude: null, location_precision: null });
+    const p = planDedup([e, twin], dedupDay([e, twin], { sourceLastSeen: lastSeen }).clusters,
+      { newClusterId: newId, sourceLastSeen: lastSeen, externalPrimaries: new Map([['b', stale]]) });
+    expect(p.release).toEqual([]);
+    expect(p.markDuplicate).toEqual([expect.objectContaining({ id: 'a', primaryId: 't', isNew: false })]);
+  });
+
   it('verwaister Primary an einem anderen Tag (schon vorbei): frische Zeile wird freigegeben', () => {
     const stale = primary({ start_date: '2026-10-06T16:30:00Z', last_seen_at: ORPHAN_SEEN });
     const p = planWith([dup({})], new Map([['b', stale]]));

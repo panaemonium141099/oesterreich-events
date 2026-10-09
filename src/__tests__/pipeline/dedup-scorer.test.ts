@@ -317,6 +317,15 @@ describe('dedup-scorer / scorePair', () => {
       .toMatchObject({ decision: 'distinct', reason: 'same_source_other_time' });
   });
 
+  // Stichprobe 2026-10-09: Eventim-Zusatzprodukte tragen eigene Kennung und
+  // anderen Titel, aber den Ticket-Link der Show.
+  it('gleiche Quelle, anderer Titel, aber derselbe Event-Link: dasselbe Event', () => {
+    const t = 'https://www.eventim.at/event/jodokcello-world-tour-halle-f-21040013/';
+    const a = makeEvent({ id: 'aaa', title: 'Jodokcello - VIP Upgrade', start_date: '2026-11-03T19:00:00Z', source_name: 'Eventim', source_id: '21084445', ticket_url: t });
+    const b = makeEvent({ id: 'bbb', title: 'Jodokcello World Tour', start_date: '2026-11-03T19:00:00Z', source_name: 'Eventim', source_id: '21040013', ticket_url: t });
+    expect(scorePair(a, b)).toMatchObject({ decision: 'merge', reason: 'same_ticket_url' });
+  });
+
   it('completely different events => distinct', () => {
     const a = makeEvent({
       id: 'aaa',

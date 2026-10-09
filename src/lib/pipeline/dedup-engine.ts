@@ -17,7 +17,8 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import { canonicalizeIds, isHardDistinct, normalizeUrlForDedup, scorePair } from './dedup-scorer';
-import { isOrphanRow, knownStartMs, placeRelation, timeRelation, titleRelation, titleTokensOf, viennaDayOf } from './dedup-evidence';
+import { isEventSpecificUrl } from './event-url';
+import { isOrphanRow, isSpecificTitle, knownStartMs, labelConflict, placeEvidence, placeRelation, timeRelation, titleRelation, titleTokensOf, viennaDayOf } from './dedup-evidence';
 import { selectPrimary, wouldBeVisible } from './dedup-cluster';
 import type { DedupScoreBreakdown, EventRow } from './types';
 
@@ -171,6 +172,24 @@ class UnionFind {
   }
 }
 
+/**
+ * Dieselbe Listung einer Quelle (Vorgängerversion): beide Links zeigen auf
+ * genau ein Event → dieselbe Seite; sonst (Listen-, Veranstalterseiten)
+ * entscheidet der Ort: kein Widerspruch aus PLZ, Gemeinde, Bezirk oder
+ * genauen Pins (Venue-Namen von Altzeilen sind oft Regionsnamen), und
+ * Ortsbeleg oder derselbe konkrete Titel („Traditionelles Nikolospiel am
+ * Dorfplatz Bad Mitterndorf").
+ */
+function sameListing(o: EventRow, f: EventRow, title: ReturnType<typeof titleRelation>): boolean {
+  const uo = normalizeUrlForDedup(o.source_url);
+  const uf = normalizeUrlForDedup(f.source_url);
+  if (uo && uf && isEventSpecificUrl(uo) && isEventSpecificUrl(uf)) return uo === uf;
+  if (labelConflict(o, f)) return false;
+  const place = placeEvidence(o, f, { ignoreLabels: true }).relation;
+  return place === 'same' || place === 'town' || (o.postal_code != null && o.postal_code === f.postal_code) ||
+    ((title === 'equal' || title === 'near') && isSpecificTitle(o));
+}
+
 export function dedupDay(events: EventRow[], opts: EngineOptions = {}): DayResult {
   const byId = new Map(events.map(e => [e.id, e]));
   // Verwaiste Altzeilen sind kein Gegenbeleg: sie machen weder Einträge
@@ -224,6 +243,10 @@ export function dedupDay(events: EventRow[], opts: EngineOptions = {}): DayResul
   //     liefert, ist deren Vorgänger (neue source_id, korrigierte Uhrzeit;
   //     Prod 2026-10-08: Feratel-Altzeilen mit +1/+2 h versteckten die
   //     frischen Termine). Zeit- und Ortsabweichungen der Altzeile zählen nicht.
+  //     Dieselbe Quelle heißt nicht derselbe Ort: Aggregatoren (gem2go) führen
+  //     hunderte Gemeinden unter einem Namen (Stichprobe 2026-10-09: JHV
+  //     Grinzens wäre unter der JHV Kematen verschwunden). Nachfolger ist nur
+  //     eine Zeile derselben Seite oder, ohne Seitenangabe, desselben Orts.
   const successors = new Map<string, string[]>();
   for (const [x, y] of pairs) {
     for (const [o, f] of [[x, y], [y, x]] as const) {
@@ -231,6 +254,7 @@ export function dedupDay(events: EventRow[], opts: EngineOptions = {}): DayResul
       if (!o.source_name || o.source_name !== f.source_name) continue;
       const t = titleRelation(o, f);
       if (t !== 'equal' && t !== 'near' && t !== 'contains') continue;
+      if (!sameListing(o, f, t)) continue;
       successors.set(o.id, [...(successors.get(o.id) ?? []), f.id]);
     }
   }

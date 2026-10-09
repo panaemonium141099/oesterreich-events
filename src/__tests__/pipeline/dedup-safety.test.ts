@@ -184,6 +184,27 @@ describe('Primary-Wahl', () => {
     expect(cluster.primaryId).toBe('c');
   });
 
+  // Stichprobe 2026-10-09: die bisherige Zeile mit Platzhalter-Uhrzeit (17:10
+  // für den 17.10.) blieb Primary, drei aktuelle Zeilen mit 10:00 wurden
+  // verborgen; „Five Finger Death Punch - VIP Package" blieb vor dem Konzert.
+  it('echte Uhrzeit schlägt Platzhalter- oder Datums-Uhrzeit, auch gegen den bisherigen Primary', () => {
+    const at = { location_name: 'Emling 29', postal_code: '4072' };
+    const echo = ev({ id: 'e', title: 'Erntedankfest', start_date: '2026-10-17T15:10:00Z', source_name: 'q1', quality_score: 90, ...at });
+    const real = ev({ id: 'r', title: 'Erntedankfest', start_date: '2026-10-17T08:00:00Z', source_name: 'q2', quality_score: 60,
+      publish_status: 'duplicate', duplicate_of: 'e', ...at });
+    const [cluster] = dedupDay([echo, real]).clusters;
+    expect(cluster.primaryId).toBe('r');
+  });
+
+  it('Zusatzprodukt (VIP Package, Upgrade, Camping) wird nicht Primary vor dem Konzert', () => {
+    const t = 'https://www.eventim.at/event/five-finger-death-punch-stadthalle-21000001/';
+    const vip = ev({ id: 'v', title: 'Five Finger Death Punch - VIP Package', start_date: '2026-11-20T19:00:00Z', source_name: 'Eventim', ticket_url: t, quality_score: 70 });
+    const show = ev({ id: 's', title: 'Five Finger Death Punch', start_date: '2026-11-20T19:00:00Z', source_name: 'Eventim', ticket_url: t, quality_score: 70,
+      publish_status: 'duplicate', duplicate_of: 'v' });
+    const [cluster] = dedupDay([vip, show]).clusters;
+    expect(cluster.primaryId).toBe('s');
+  });
+
   it('Titel ohne eingebautes Datum wird angezeigt (Prod: „Biodiversitätszentrum … 19.11.2026")', () => {
     const ticket = { ticket_url: 'https://www.ooe.gv.at/v/123' };
     const dated = ev({ id: 'd', title: 'Biodiversitätszentrum Oberösterreich 19.11.2026', start_date: '2026-11-19T17:00:00Z', source_name: 'q1', quality_score: 95, ...ticket });

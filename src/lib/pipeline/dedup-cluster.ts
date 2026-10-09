@@ -7,7 +7,7 @@
 
 import { scoreToPublishStatus, type PublishStatus } from '@/lib/quality/score-event';
 import { isDateOnlyText } from './garbage-filter';
-import { viennaDayOf } from './dedup-evidence';
+import { knownStartMs, viennaDayOf } from './dedup-evidence';
 import type { EventRow } from './types';
 
 /**
@@ -34,6 +34,9 @@ export function wouldBeVisible(e: EventRow): boolean {
   }
   return e.publish_status !== 'needs_review' && e.publish_status !== 'suppressed';
 }
+
+/** Zusatzprodukte einer Show (Eventim führt sie als eigene Produkte). */
+const ADD_ON = /\b(?:vip|package|packages|upgrade|paket|camping|caravan|parken|parking|hotelpaket|fanpaket)\b/i;
 
 // Endet nicht mit \b: „… am 10.10." hat nach dem Punkt kein Wortzeichen.
 const DATE_IN_TITLE = /\b\d{1,2}\.\s?\d{1,2}\.\s?(\d{2}|\d{4})?(?!\d)/;
@@ -122,6 +125,17 @@ export function selectPrimary(events: EventRow[], isOrphan: (id: string) => bool
     const cleanA = DATE_IN_TITLE.test(a.title ?? '') ? 0 : 1;
     const cleanB = DATE_IN_TITLE.test(b.title ?? '') ? 0 : 1;
     if (cleanA !== cleanB) return cleanB - cleanA;
+
+    // Zusatzprodukt („- VIP Package", „Upgrade", „Camping") ist nicht die Show.
+    const mainA = ADD_ON.test(a.title ?? '') ? 0 : 1;
+    const mainB = ADD_ON.test(b.title ?? '') ? 0 : 1;
+    if (mainA !== mainB) return mainB - mainA;
+
+    // Echte Uhrzeit vor Platzhalter- oder Datums-Uhrzeit (17:10 für den 17.10.),
+    // auch gegen den bisherigen Primary (Stichprobe 2026-10-09).
+    const timedA = knownStartMs(a) !== null ? 1 : 0;
+    const timedB = knownStartMs(b) !== null ? 1 : 0;
+    if (timedA !== timedB) return timedB - timedA;
 
     if (isCurrentPrimary(a) !== isCurrentPrimary(b)) return isCurrentPrimary(b) - isCurrentPrimary(a);
 
