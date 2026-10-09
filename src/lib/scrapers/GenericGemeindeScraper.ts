@@ -23,6 +23,7 @@ import { isUsableDetailHref } from './gemeinde-event-discovery';
 import { applyGemeindeContext } from './gemeinde-context';
 import { withStammdaten, type GemeindeStammdaten } from './gemeinden/stammdaten';
 import { firstText, isTitleCandidate } from './event-title';
+import { extractTimeOfDay } from './time-of-day';
 
 // Die Datei führt nur die Identität der Gemeinde; PLZ, Bezirk und
 // Mittelpunkt ergänzt withStammdaten() aus der Stammdatei.
@@ -42,25 +43,6 @@ function findDates(text: string): string[] {
   return [...text.matchAll(DATE_RE)].map(
     m => `${m[3]}-${m[2].padStart(2, '0')}-${m[1].padStart(2, '0')}`,
   );
-}
-
-/**
- * Uhrzeit (HH:MM) aus einem Listen-Eintrag. Datumsangaben werden vorher
- * entfernt: sonst liest "14.10.2026" sich als 14:10 (Prod-Befund
- * 2026-10-06: die Minute war bei fast allen Events der Monat). Ein Punkt
- * als Trenner zählt nur mit folgendem "Uhr" ("19.30 Uhr"), der Doppelpunkt
- * immer. Stunden/Minuten außerhalb des Tages gelten als keine Uhrzeit.
- */
-export function extractTimeOfDay(text: string): string | null {
-  // Datumsfragmente auch ohne Jahr ("9.11.") und mit Jahr entfernen.
-  const withoutDates = text.replace(/\d{1,2}\.\d{1,2}\.(?:\d{2,4})?/g, ' ');
-  const re = /(?<![\d:])(\d{1,2})(?::(\d{2})(?!\d)|\.(\d{2})(?=\s*Uhr))/g;
-  for (const m of withoutDates.matchAll(re)) {
-    const h = Number(m[1]);
-    const min = Number(m[2] ?? m[3]);
-    if (h <= 23 && min <= 59) return `${String(h).padStart(2, '0')}:${String(min).padStart(2, '0')}`;
-  }
-  return null;
 }
 
 /** Linktexte, die kein Event benennen ("mehr Informationen" o. ä.). */
