@@ -1,7 +1,7 @@
 // src/lib/pipeline/garbage-filter.ts
 
 import { isEventSpecificUrl, normalizeUrlForDedup } from './event-url';
-import { hasKnownStartTime, toViennaDate } from '@/lib/utils/event-time';
+import { hasKnownStartTime, toViennaDate, toViennaIso } from '@/lib/utils/event-time';
 
 /**
  * Garbage title filter — identifies non-event pages that scrapers accidentally pick up.
@@ -232,16 +232,39 @@ export function namedPageKeys(row: GarbageRowInput): string[] {
   if (isGarbageTitle(row.title, { sourceName: row.source_name, ticketUrl: row.ticket_url })) return [];
   const day = viennaDayKey(row.start_date);
   if (!day) return [];
-  const minute = minuteKey(url, row.start_date);
-  return minute ? [`${url}|${day}`, minute] : [`${url}|${day}`];
+  return [`${url}|${day}`, minuteKey(url, row.start_date), slugKey(url, day)].filter((k): k is string => !!k);
+}
+
+/** Website + Seiten-Kennung + Tag: dieselbe Event-Seite unter einem anderen
+ *  Pfad („treibhaus.at/karten/…/15129-renaud-garcia-fons" neben
+ *  „/programm/…/15129-renaud-garcia-fons") oder mit Zähler-Anhang
+ *  (Gem2Go „Vortrag_Meine_Seele_staerken_" / „…_staerken_1"). Dateinamen
+ *  wie „veranstaltung.aspx" teilen alle Events und zählen nicht. */
+function slugKey(url: string, day: string): string | null {
+  let last = '';
+  try { last = decodeURIComponent(new URL(url).pathname.split('/').filter(Boolean).pop() ?? ''); } catch { return null; }
+  if (!/^[\p{L}\p{N}_-]{12,}$/u.test(last) || !/[-_]/.test(last)) return null;
+  return `${hostOf(url)}|${last.replace(/[_-]\d{1,3}$/, '').replace(/[_-]+$/, '')}|${day}`;
 }
 
 /** Website + Beginn-Minute, nur bei echter Uhrzeit: Platzhalter-Mitternacht
  *  teilen alle Termine eines Tages (Stichprobe Runde 4: „mehr" auf der Seite
  *  der Feuerlöscherüberprüfung galt als Kachelteil der Steinläufer). */
 function minuteKey(url: string, startDate: string): string | null {
-  if (!hasKnownStartTime({ start_date: startDate })) return null;
-  return `${hostOf(url)}|${new Date(startDate).toISOString().slice(0, 16)}`;
+  const minute = realMinute(startDate);
+  return minute ? `${hostOf(url)}|${minute}` : null;
+}
+
+/** Beginn-Minute (UTC), wenn die Uhrzeit echt ist: keine Platzhalter-
+ *  Mitternacht und kein als Uhrzeit gelesenes Datum („04.11." → 04:11). */
+function realMinute(startDate: string | null | undefined): string | null {
+  if (!startDate || !hasKnownStartTime({ start_date: startDate })) return null;
+  const d = new Date(startDate);
+  if (isNaN(d.getTime())) return null;
+  const v = toViennaIso(d);
+  if ((d.getUTCHours() === d.getUTCDate() && d.getUTCMinutes() === d.getUTCMonth() + 1) ||
+      (Number(v.slice(11, 13)) === Number(v.slice(8, 10)) && Number(v.slice(14, 16)) === Number(v.slice(5, 7)))) return null;
+  return d.toISOString().slice(0, 16);
 }
 
 function hostOf(url: string): string {
@@ -264,7 +287,41 @@ export function isGarbageRow(row: GarbageRowInput, namedPages: ReadonlySet<strin
   if (isNonEventTitle(normalizeTitle(row.title)) || !hasEventLink(row.source_url) || !day) return true;
   const url = normalizeUrlForDedup(row.source_url);
   const minute = minuteKey(url, row.start_date!);
-  return namedPages.has(`${url}|${day}`) || (!!minute && namedPages.has(minute));
+  const slug = slugKey(url, day);
+  return namedPages.has(`${url}|${day}`) || (!!minute && namedPages.has(minute)) || (!!slug && namedPages.has(slug));
+}
+
+/**
+ * Mehrere Zeilen mit kaputtem Titel, die isGarbageRow sichtbar lässt, von
+ * derselben Event-Seite am selben Tag („November" und „Mittwoch,19:00Uhr -
+ * 20:30Uhr", zwei Sprungmarken, „Tickets" neben dem Programm-Eintrag): es
+ * bleibt eine sichtbar (echte Uhrzeit, dann Datums-Titel), bei mehreren echten
+ * Uhrzeiten eine je Uhrzeit. Liefert die Ids der übrigen.
+ */
+export function surplusBrokenTitleIds(rows: Array<GarbageRowInput & { id: string }>, namedPages: ReadonlySet<string>): Set<string> {
+  const groups = new Map<string, Array<GarbageRowInput & { id: string }>>();
+  for (const r of rows) {
+    if (!r.title || !isGarbageTitle(r.title, { sourceName: r.source_name, ticketUrl: r.ticket_url }) || isGarbageRow(r, namedPages)) continue;
+    const url = normalizeUrlForDedup(r.source_url);
+    const day = viennaDayKey(r.start_date)!;
+    const key = slugKey(url, day) ?? `${url}|${day}`;
+    groups.set(key, [...(groups.get(key) ?? []), r]);
+  }
+  const out = new Set<string>();
+  const knownMinute = (r: GarbageRowInput) => realMinute(r.start_date);
+  // Echte Uhrzeit, dann Uhrzeit im Titel, dann sonstiger Datums-Titel.
+  const rank = (r: GarbageRowInput) => (knownMinute(r) ? 4 : 0) +
+    (isDateOnlyText(r.title) ? (/\d{1,2}[:.]\d{2}/.test(r.title ?? '') ? 2 : 1) : 0);
+  for (const list of groups.values()) {
+    if (list.length < 2) continue;
+    const kept: Array<string | null> = [];
+    for (const r of [...list].sort((a, b) => rank(b) - rank(a) || a.id.localeCompare(b.id))) {
+      const t = knownMinute(r);
+      if (kept.length === 0 || (t && kept.every(k => k !== null && k !== t))) kept.push(t);
+      else out.add(r.id);
+    }
+  }
+  return out;
 }
 
 function viennaDayKey(iso: string | null | undefined): string | null {

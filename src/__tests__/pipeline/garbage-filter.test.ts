@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { isGarbageTitle, isGarbageRow, namedPageKey, namedPageKeys } from '@/lib/pipeline/garbage-filter';
+import { isGarbageTitle, isGarbageRow, namedPageKey, namedPageKeys, surplusBrokenTitleIds } from '@/lib/pipeline/garbage-filter';
 
 // Befund 2026-10-06: der Gemeinde-Parser (vor #275) machte aus Kachel-Teilen
 // eigene Events. Diese Titel stehen noch in der DB; der nächtliche Dedup
@@ -163,6 +163,36 @@ describe('isGarbageRow — Titel ohne Namen, aber eigene Event-Seite', () => {
     ['Anzahl der Folgetermine 3 weitere Termine bis zum', 'https://www.mittersill.at/system/web/veranstaltung.aspx?menuonr=123'],
   ])('Listen-Beschriftung oder Listen-Link bleibt Müll: %s', (title, url) => {
     expect(isGarbageRow({ ...dorfer, title, source_name: 'gemeinden-generic', source_url: url }, new Set())).toBe(true);
+  });
+  it.each([
+    'https://www.gmunden.at/kultur-freizeit-tourismus/keramik/veranstaltungen/',
+    'https://www.tulln.at/veranstaltungen/veranstaltungstermine?tx_tulln_events%5B%40widget_1%5D%5BcurrentPage%5D=2&cHash=e13d02dc52d9',
+  ])('Bereichsliste und TYPO3-Blätterseite sind keine Event-Seite: %s', (url) => {
+    expect(isGarbageRow({ ...dorfer, title: '30.09. –', source_url: url }, new Set())).toBe(true);
+  });
+  it('mehrere kaputte Titel derselben Event-Seite am selben Tag: eine Zeile bleibt, je echter Uhrzeit eine', () => {
+    const url = 'https://www.mining.ooe.gv.at/Vortrag_Meine_Seele_staerken_';
+    const month = { id: 'm', title: 'November', source_name: 'gemeinden-generic', start_date: '2026-11-04T03:11:00Z', source_url: url };
+    const time = { ...month, id: 't', title: 'Mittwoch,19:00Uhr - 20:30Uhr', start_date: '2026-11-04T18:00:00Z' };
+    expect([...surplusBrokenTitleIds([month, time], new Set())]).toEqual(['m']);
+    const second = { ...time, id: 's', title: 'Mittwoch,21:00Uhr', start_date: '2026-11-04T20:00:00Z' };
+    expect([...surplusBrokenTitleIds([time, second], new Set())]).toEqual([]);
+    // Beide mit Datums-Uhrzeit (04.11. als 04:11): die Zeile mit Uhrzeit im Titel bleibt.
+    expect([...surplusBrokenTitleIds([month, { ...time, id: 'x', start_date: month.start_date }], new Set())]).toEqual(['m']);
+  });
+  it('Gem2Go-Zähler am Seitennamen: die Zeile mit Namen auf „…_1" macht die kaputten Zeilen zum Kachelteil', () => {
+    const junk = { title: 'Mittwoch,19:00Uhr - 20:30Uhr', source_name: 'gemeinden-generic', start_date: '2026-11-04T03:11:00Z',
+      source_url: 'https://www.mining.ooe.gv.at/Vortrag_Meine_Seele_staerken_' };
+    const named = { title: 'Vortrag "Meine Seele stärken"', source_name: 'gem2go', start_date: '2026-11-04T18:00:00Z',
+      source_url: 'https://www.mining.ooe.gv.at/Vortrag_Meine_Seele_staerken_1' };
+    expect(isGarbageRow(junk, new Set(namedPageKeys(named)))).toBe(true);
+  });
+  it('dieselbe Event-Seite unter anderem Pfad liefert den Namen („Tickets" neben dem Programm-Eintrag)', () => {
+    const tickets = { ...dorfer, title: 'Tickets', start_date: '2026-10-09T00:00:00Z',
+      source_url: 'https://treibhaus.at/karten/2026/10/09/15129-renaud-garcia-fons-blue-maqam' };
+    const named = { ...tickets, title: 'Renaud Garcia-Fons: Blue Maqam',
+      source_url: 'https://treibhaus.at/programm/2026/10/09/15129-renaud-garcia-fons-blue-maqam' };
+    expect(isGarbageRow(tickets, new Set(namedPageKeys(named)))).toBe(true);
   });
 });
 

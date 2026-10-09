@@ -40,8 +40,12 @@ const PAGER_WORDS = new Set(['seite', 'page', 'liste', 'list']);
 const LIST_PARAMS = new Set([
   'pno', 'page', 'seite', 'currentpage', 'paged', 'p_page', 'offset', 'start', 'month', 'monat', 'day', 'tag', 'date',
   'datum', 'year', 'jahr', 'menuonr', 'sprache', 'typ', 'lang', 'language', 'ajaxcalendar', 'mo', 'yr', 'eventdisplay',
-  'view', 'ansicht', 'kategorie', 'category', 'cat',
+  'view', 'ansicht', 'kategorie', 'category', 'cat', 'chash',
 ]);
+
+/** Name eines Abfrage-Parameters, bei TYPO3-Arrays der letzte Teil
+ *  („tx_tulln_events[@widget_1][currentPage]" → „currentpage"). */
+const paramName = (k: string) => k.toLowerCase().replace(/^.*\[([^\]]*)\]$/, '$1');
 
 /** Bild statt Seite (Anhang-Link einer Liste). */
 const IMAGE_PATH = /\.(?:png|jpe?g|gif|webp|svg)$/i;
@@ -56,7 +60,10 @@ export function isEventSpecificUrl(normalized: string): boolean {
   try { url = new URL(normalized); } catch { return false; }
   const parts = url.pathname.split('/').filter(Boolean).map(s => s.toLowerCase());
   if (IMAGE_PATH.test(url.pathname)) return false;
-  if ([...url.searchParams.keys()].some(k => !LIST_PARAMS.has(k.toLowerCase()))) return true;
+  if ([...url.searchParams.keys()].some(k => !LIST_PARAMS.has(paramName(k)))) return true;
+  // Endet der Pfad mit einem Listen-Teil, ist es die Liste eines Bereichs
+  // („…/keramik/veranstaltungen/", „…/aktiv-in-hard/veranstaltungen/").
+  if (LIST_URL_SEGMENTS.has(parts[parts.length - 1] ?? '')) return false;
   // „unser-<ort>" ist ein Navigationsbereich (Kärntner Gemeinde-Websites), ein
   // Pfadteil ohne Buchstaben und Ziffern („-") kein Inhalt.
   return parts.some((s, i) => !LIST_URL_SEGMENTS.has(s) && !DATE_SEGMENT.test(s) && !/^unser-/.test(s) &&

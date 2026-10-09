@@ -21,7 +21,7 @@ import { canonicalizeIds } from '@/lib/pipeline/dedup-scorer';
 import { dedupDay, pairKey } from '@/lib/pipeline/dedup-engine';
 import { planDedup, releaseStatus, checkSafetyValve, dropDependentsOfFailedReleases, resolvePlanConflicts, type DedupPlan } from '@/lib/pipeline/dedup-plan';
 import { isPlausibleEventDay, planningStartDay, viennaDayBoundsUtc, viennaDayOf } from '@/lib/pipeline/dedup-evidence';
-import { isGarbageRow, namedPageKeys, type GarbageRowInput } from '@/lib/pipeline/garbage-filter';
+import { isGarbageRow, namedPageKeys, surplusBrokenTitleIds, type GarbageRowInput } from '@/lib/pipeline/garbage-filter';
 import { staleVersionIds } from '@/lib/pipeline/dedup-cluster';
 import { fetchAllRows, forEachPage } from '@/lib/db/fetch-all';
 import { reportStepReason } from '@/lib/pipeline/step-reason';
@@ -99,7 +99,9 @@ const EVENT_SELECT = 'id,title,description,start_date,end_date,is_all_day,locati
 const NAMED_PAGES = new Set<string>();
 /** Ältere Fassungen einer Seite mit genau einem Event (staleVersionIds). */
 let STALE_IDS = new Set<string>();
-const isGarbage = (e: GarbageRowInput) => isGarbageRow(e, NAMED_PAGES);
+/** Weitere Zeilen mit kaputtem Titel derselben Event-Seite am selben Tag. */
+const SURPLUS_IDS = new Set<string>();
+const isGarbage = (e: GarbageRowInput & { id?: string }) => isGarbageRow(e, NAMED_PAGES) || (!!e.id && SURPLUS_IDS.has(e.id));
 
 /** Sichtbare Müll-Zeilen finden. Geschrieben wird erst nach dem
  *  Sicherheitsventil (suppressGarbage). */
@@ -119,6 +121,7 @@ async function scanGarbage(): Promise<string[]> {
     { label: 'dedup: Garbage-Scan' },
   );
   for (const r of rows) for (const key of namedPageKeys(r)) NAMED_PAGES.add(key);
+  for (const id of surplusBrokenTitleIds(rows.filter(r => r.publish_status !== 'duplicate'), NAMED_PAGES)) SURPLUS_IDS.add(id);
   const garbageIds = rows.filter(r => r.publish_status !== 'duplicate' && isGarbage(r)).map(r => r.id);
   STALE_IDS = staleVersionIds(rows as unknown as EventRow[]);
   console.log(`  ${STALE_IDS.size} ältere Fassungen von Event-Seiten (gelten wie verwaist)`);
