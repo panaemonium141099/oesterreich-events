@@ -1,6 +1,7 @@
 import * as cheerio from 'cheerio';
 import { BaseScraper } from '../BaseScraper';
 import { categorizeEventMulti } from '../../categorize';
+import { extractTimeOfDay } from '../time-of-day';
 import type { ScrapedEvent } from '@/types/events';
 
 /**
@@ -198,17 +199,14 @@ export abstract class UniBaseScraper extends BaseScraper {
   }
 
   /**
-   * Parse date+time into ISO datetime format.
+   * Parse date+time into ISO datetime format. Die Uhrzeit sucht
+   * extractTimeOfDay ohne die Datumsangaben: "16.10.2026" ist nicht 16:10.
    */
   protected parseDatetime(text: string): string | null {
     const date = this.parseDate(text);
     if (!date) return null;
 
-    // Match colon separator (18:30) or dot separator (18.30 Uhr)
-    const timeMatch = text.match(/(\d{1,2})[:\.](\d{2})(?:\s*Uhr)?/);
-    if (timeMatch) {
-      return `${date}T${timeMatch[1].padStart(2, '0')}:${timeMatch[2]}:00`;
-    }
-    return date;
+    const time = extractTimeOfDay(text);
+    return time ? `${date}T${time}:00` : date;
   }
 }
