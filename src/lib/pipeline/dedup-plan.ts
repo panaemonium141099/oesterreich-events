@@ -20,6 +20,7 @@ import { computeEnrichments, isDateOnlyTitle, underlyingStatus } from './dedup-c
 import { isGarbageTitle } from './garbage-filter';
 import { newClusterId as defaultClusterId, pairKey, type ClusterResult } from './dedup-engine';
 import { isOrphanRow, knownStartMs, placeEvidence, titleRelation, titleTokensOf } from './dedup-evidence';
+import { haversineDistance } from './normalize-venue';
 import { LABEL_CONFLICTS, scorePair } from './dedup-scorer';
 import { isEventSpecificUrl, normalizeUrlForDedup } from './event-url';
 import type { PublishStatus } from '@/lib/quality/score-event';
@@ -137,7 +138,10 @@ export function planDedup(events: EventRow[], clusters: ClusterResult[], opts: P
       if (t !== 'equal' && t !== 'near' && t !== 'contains') continue;
       if (opts.manualSplits?.has(pairKey(e.id, r.id))) continue;
       const v = scorePair(e, r);
-      if (v.decision === 'distinct') continue;
+      // Ein Etikett allein (Kalender-Gemeinde, falsche PLZ) trennt nicht, wenn
+      // es auch eine bestehende Verbindung nicht lösen würde (Stichprobe
+      // 2026-10-09: Elvis-Konzert mit PLZ 1150 neben der Eventim-Zeile 9020).
+      if (v.decision === 'distinct' && !(LABEL_CONFLICTS.has(v.reason ?? '') && !isCounterEvidence(e, r, v.reason ?? ''))) continue;
       const rank = (v.decision === 'merge' ? 4 : 0) + (r.source_name === 'Eventim' ? 2 : 0) + (r.quality_score ?? 0) / 1000;
       if (!best || rank > best.rank) best = { row: r, score: v.overallScore, rank };
     }
@@ -251,6 +255,11 @@ export function planDedup(events: EventRow[], clusters: ClusterResult[], opts: P
  *    („Schatz.Kammer Burg Kreuzen" / „Panoramagasthof Zur Burgschenke")
  *  - Titelvarianten desselben Events, die zwei Wörter teilen („Kabarett
  *    Weinzettl & Rudle" / „Weinzettl & Rudle - Für immer …")
+ *  - Gemeinde-Kalender führen Events der Nachbargemeinden unter eigener PLZ
+ *    und eigenem Ortsnamen (Stichprobe Runde 4: „KKM - Vernissage Kloster
+ *    St. Anna" Götzendorf/Mannersdorf, „NÖ-Demenztag 2026" in 25 Kalendern).
+ *    Ein gleicher, konkreter Titel in der Nähe hält die Verbindung; ein
+ *    landesweiter Aktionstag 60 km entfernt nicht.
  */
 function isCounterEvidence(e: EventRow, p: EventRow, reason: string): boolean {
   if (LABEL_CONFLICTS.has(reason)) {
@@ -259,10 +268,16 @@ function isCounterEvidence(e: EventRow, p: EventRow, reason: string): boolean {
     // Tirol" liest gemeinde-buch.at, Buch in Vorarlberg).
     const ue = normalizeUrlForDedup(e.source_url);
     if (e.source_name === p.source_name && ue && isEventSpecificUrl(ue) && ue === normalizeUrlForDedup(p.source_url)) return false;
-    return !['same', 'town'].includes(placeEvidence(e, p, { ignoreLabels: true }).relation);
+    const place = placeEvidence(e, p, { ignoreLabels: true }).relation;
+    if (place === 'same' || place === 'town') return false;
+    if (place === 'unknown' && sameSpecificTitle(e, p) && !farApart(e, p)) return false;
+    return true;
   }
   if (!RELEASE_REASONS.has(reason)) return false;
   if (reason === 'different_venue') {
+    // Verschiedene Venue-Namen, aber dieselbe Adresse („Auenwerkstatt 1" als
+    // Ortsname neben „Salzach Auen, Weitwörth, Auenwerkstatt 1").
+    if (placeEvidence(e, p, { ignoreLabels: true }).relation === 'same') return false;
     const t = titleRelation(e, p);
     const sameMinute = knownStartMs(e) !== null && knownStartMs(e) === knownStartMs(p);
     return !((t === 'equal' || t === 'near') && sameMinute && !!e.postal_code && e.postal_code === p.postal_code);
@@ -272,6 +287,21 @@ function isCounterEvidence(e: EventRow, p: EventRow, reason: string): boolean {
     return titleTokensOf(e).filter(w => pt.has(w)).length < 2;
   }
   return true;
+}
+
+/** Gleicher Titel mit mindestens drei bedeutungstragenden Wörtern
+ *  („Bauernmarkt", „Roratemesse" gibt es in jeder Gemeinde). */
+function sameSpecificTitle(a: EventRow, b: EventRow): boolean {
+  const t = titleRelation(a, b);
+  return (t === 'equal' || t === 'near') && titleTokensOf(a).length >= 3;
+}
+
+/** Nachbargemeinden liegen bis rund 25 km auseinander (Unterstinkenbrunn –
+ *  Mistelbach 20 km); auch Gemeinde-Mittelpunkte zählen. */
+const NEIGHBOUR_M = 25_000;
+function farApart(a: EventRow, b: EventRow): boolean {
+  if (a.latitude == null || a.longitude == null || b.latitude == null || b.longitude == null) return false;
+  return haversineDistance(a.latitude, a.longitude, b.latitude, b.longitude) > NEIGHBOUR_M;
 }
 
 /**

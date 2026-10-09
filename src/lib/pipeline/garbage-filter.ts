@@ -1,7 +1,7 @@
 // src/lib/pipeline/garbage-filter.ts
 
 import { isEventSpecificUrl, normalizeUrlForDedup } from './event-url';
-import { toViennaDate } from '@/lib/utils/event-time';
+import { hasKnownStartTime, toViennaDate } from '@/lib/utils/event-time';
 
 /**
  * Garbage title filter — identifies non-event pages that scrapers accidentally pick up.
@@ -45,12 +45,18 @@ const GARBAGE_TITLES = new Set([
   'veranstaltungskalender', 'tipp speichern', 'in outlook übernehmen', 'in outlook uebernehmen', 'webcam',
   'karteninhalte zulassen', 'aktuelles', 'neuigkeiten', 'veranstaltungsdetails', 'tipp speichern in outlook übernehmen',
   'tipp speichern in outlook uebernehmen', 'mehr lesen', 'kundmachungen', 'aktuelle termine', 'frei willig',
+  // Stichprobe Runde 4 (2026-10-09)
+  'lesen sie mehr', 'mehr information', 'weitere infos', 'mehr anzeigen', 'nächste veranstaltung',
+  'naechste veranstaltung', 'aktuelle veranstaltungen', 'veranstaltungsvorschau', 'weitere termine vorhanden',
+  'reservierung', 'parteienverkehr', 'amtszeiten', 'quicklinks', 'gemeindeamt', 'bürgerservice', 'buergerservice',
 ]);
 
 /**
- * Seiten, die nie ein Event sind (Kontakt, Impressum, Öffnungszeiten …). Alle
- * anderen Beschriftungen („Termin", „Datum", „mehr", Sprungmarken) können auf
- * der eigenen Seite eines Events stehen, dessen Namen der Parser verfehlt hat.
+ * Seiten, die nie ein Event sind (Kontakt, Impressum, Öffnungszeiten …), und
+ * Beschriftungen von Listen („Alle Termine", „Kalender", „weiter", „Heute").
+ * Alle anderen Beschriftungen („Termin", „Datum", „mehr", Sprungmarken)
+ * können auf der eigenen Seite eines Events stehen, dessen Namen der Parser
+ * verfehlt hat; „willKOMMEN!" ist ein Plaudercafé (Stichprobe Runde 4).
  */
 const NON_EVENT_PAGES = new Set([
   'kontakt', 'contact', 'impressum', 'imprint', 'datenschutz', 'datenschutzerklärung', 'datenschutzerklaerung',
@@ -60,8 +66,26 @@ const NON_EVENT_PAGES = new Set([
   'cookie einstellungen', 'sitemap', 'suche', 'search', 'jobs', 'karriere', 'career', 'sponsoren', 'sponsors',
   'partner', 'presse', 'press', 'downloads', 'galerie', 'gallery', 'fotos', 'photos', 'unterkünfte', 'unterkuenfte',
   'accommodation', 'webcam', 'karteninhalte zulassen', 'startseite', 'home', 'homepage', 'ueber uns', 'über uns',
-  'about', 'about us', 'willkommen', 'welcome', 'test', 'kundmachungen', 'archiv', 'archive',
+  'about', 'about us', 'test', 'kundmachungen', 'archiv', 'archive',
+  'alle termine', 'termine', 'veranstaltungen', 'gefundene termine', 'gefundene veranstaltungen', 'aktuelle termine',
+  'aktuelle veranstaltungen', 'veranstaltungsvorschau', 'dieser monat', 'this month', 'eventkalender',
+  'veranstaltungskalender', 'kalender', 'calendar', 'events', 'aktuelles', 'neuigkeiten', 'weiter', 'heute', 'morgen',
+  'übermorgen', 'uebermorgen', 'parteienverkehr', 'amtszeiten', 'quicklinks', 'gemeindeamt', 'bürgerservice',
+  'buergerservice', 'suche ab',
 ]);
+
+/** Listen-Beschriftung oder Bürozeiten mit Zusatz („Anzahl der Folgetermine 3 …", „von Mo. bis Fr."). */
+const NON_EVENT_PATTERN = /^anzahl der folgetermine|^(?:von )?mo(?:ntag)? bis fr(?:eitag)?$/;
+
+function isNonEventTitle(normalized: string): boolean {
+  return NON_EVENT_PAGES.has(normalized) || NON_EVENT_PATTERN.test(normalized);
+}
+
+/** Adresszeile statt Titel („Traungasse 5-7, 4810 Gmunden, Österreich"). */
+const ADDRESS_TITLE = /^\p{L}[\p{L}.\- ]*\s\d+\s*[a-z]?(?:\s*[-/]\s*\d+)?,\s*(?:A-)?\d{4}\s+\p{L}/iu;
+
+/** Link-Text hinter einer Datumsangabe („… | Alle Termine", „… QR Code öffnen"). */
+const LINK_SUFFIX = / (?:alle termine|qr code (?:öffnen|oeffnen))$/;
 
 /** Sprungmarken in allen Varianten („Zum Inhalt springen", „Springe zur rechten Spalte"). */
 const SKIP_LINK = /^(?:springe |weiter |direkt )?(?:zu[mr]?|zurück zu[mr]?|to) (?:anfang(?: der seite)?|seitenanfang|seitenende|(?:haupt)?inhalt|(?:sub|haupt)?navigation|(?:haupt)?menü|(?:haupt)?menue|suche|footer|(?:rechten|linken) spalte|übersicht|uebersicht|content|main content)(?: springen)?$/;
@@ -76,7 +100,7 @@ const LABEL_LINE = /^\d+ veranstaltung(?:en)? \d*$|^\d{1,2} \d{2} eintritt\b/;
  */
 const GEMEINDE_TILE_WORDS = new Set([
   'montag', 'dienstag', 'mittwoch', 'donnerstag', 'freitag', 'samstag', 'sonntag',
-  'heute', 'morgen', 'gemeindesaal',
+  'heute', 'morgen', 'übermorgen', 'uebermorgen', 'gemeindesaal',
 ]);
 const GEMEINDE_AGGREGATORS = new Set([
   'gemeinden-generic', 'gem2go', 'gemeinde-registry', 'gemeinden', 'gemeinde-fallback',
@@ -93,7 +117,7 @@ const DATE_TOKENS = new Set([
   'januar', 'jaenner', 'jänner', 'jän', 'februar', 'feber', 'maerz', 'märz', 'april', 'mai',
   'juni', 'juli', 'august', 'september', 'oktober', 'november', 'dezember',
   'jan', 'feb', 'mär', 'apr', 'jun', 'jul', 'aug', 'sep', 'sept', 'okt', 'nov', 'dez',
-  'uhr', 'h', 'ab', 'bis', 'von', 'um', 'am', 'und',
+  'uhr', 'h', 'ab', 'bis', 'von', 'um', 'am', 'und', 'beginn', 'einlass', 'jeweils',
 ]);
 
 function normalizeTitle(title: string): string {
@@ -153,7 +177,9 @@ export function isGarbageTitle(title: string, context: GarbageContext = {}): boo
   if (/^\s*\{\s*"@context"/.test(title)) return true;
 
   // Uhrzeit mit Link-Text („11:00 Uhr bis 00:00 Uhr | Alle Termine")
-  if (/ alle termine$/.test(normalized) && isDateOnlyText(normalized.replace(/ alle termine$/, ''))) return true;
+  if (LINK_SUFFIX.test(normalized) && isDateOnlyText(normalized.replace(LINK_SUFFIX, ''))) return true;
+
+  if (NON_EVENT_PATTERN.test(normalized) || ADDRESS_TITLE.test(title.trim())) return true;
 
   if (SKIP_LINK.test(normalized) || LABEL_LINE.test(normalized)) return true;
 
@@ -206,7 +232,16 @@ export function namedPageKeys(row: GarbageRowInput): string[] {
   if (isGarbageTitle(row.title, { sourceName: row.source_name, ticketUrl: row.ticket_url })) return [];
   const day = viennaDayKey(row.start_date);
   if (!day) return [];
-  return [`${url}|${day}`, `${hostOf(url)}|${new Date(row.start_date).toISOString().slice(0, 16)}`];
+  const minute = minuteKey(url, row.start_date);
+  return minute ? [`${url}|${day}`, minute] : [`${url}|${day}`];
+}
+
+/** Website + Beginn-Minute, nur bei echter Uhrzeit: Platzhalter-Mitternacht
+ *  teilen alle Termine eines Tages (Stichprobe Runde 4: „mehr" auf der Seite
+ *  der Feuerlöscherüberprüfung galt als Kachelteil der Steinläufer). */
+function minuteKey(url: string, startDate: string): string | null {
+  if (!hasKnownStartTime({ start_date: startDate })) return null;
+  return `${hostOf(url)}|${new Date(startDate).toISOString().slice(0, 16)}`;
 }
 
 function hostOf(url: string): string {
@@ -226,10 +261,10 @@ function hostOf(url: string): string {
 export function isGarbageRow(row: GarbageRowInput, namedPages: ReadonlySet<string>): boolean {
   if (!row.title || !isGarbageTitle(row.title, { sourceName: row.source_name, ticketUrl: row.ticket_url })) return false;
   const day = viennaDayKey(row.start_date);
-  if (NON_EVENT_PAGES.has(normalizeTitle(row.title)) || !hasEventLink(row.source_url) || !day) return true;
+  if (isNonEventTitle(normalizeTitle(row.title)) || !hasEventLink(row.source_url) || !day) return true;
   const url = normalizeUrlForDedup(row.source_url);
-  return namedPages.has(`${url}|${day}`) ||
-    namedPages.has(`${hostOf(url)}|${new Date(row.start_date!).toISOString().slice(0, 16)}`);
+  const minute = minuteKey(url, row.start_date!);
+  return namedPages.has(`${url}|${day}`) || (!!minute && namedPages.has(minute));
 }
 
 function viennaDayKey(iso: string | null | undefined): string | null {

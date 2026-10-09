@@ -240,6 +240,25 @@ describe('Primary-Wahl', () => {
     expect(dedupDay([timed, { ...plain, quality_score: 70 }]).clusters[0].primaryId).toBe('p');
   });
 
+  // Stichprobe Runde 4 (2026-10-09)
+  it('mitten im Wort abgeschnittener Titel verliert gegen den vollständigen (Eventim „…Silver-Garburg")', () => {
+    const at = { start_date: '2027-02-10T17:30:00Z', quality_score: 80 };
+    const eventim = ev({ id: 'e', title: 'Wolfram Berger & Klavierduo Silver-Garburg', source_name: 'Eventim', ...at,
+      publish_status: 'duplicate', duplicate_of: 'r' });
+    const cut = ev({ id: 'r', title: 'Wolfram Berger & Klavierduo Silver-Garbur', source_name: 'gemeinde-registry', ...at });
+    const dots = ev({ id: 'g', title: 'Wolfram Berger & Klavierduo Silver-Garbur ...', source_name: 'gemeinden-generic', ...at,
+      publish_status: 'duplicate', duplicate_of: 'r' });
+    expect(dedupDay([cut, dots, eventim]).clusters[0].primaryId).toBe('e');
+  });
+
+  it('bei Gleichstand bleibt die schon sichtbare Zeile vor einem verborgenen Duplikat (keine neue Event-URL)', () => {
+    const at = { title: 'Schnapser- und Spielerunde der Senioren', start_date: '2026-11-04T00:00:00Z', quality_score: 75 };
+    const shown = ev({ id: 's', source_name: 'gem2go', ...at, created_at: '2026-04-11T00:00:00Z' });
+    const hidden = ev({ id: 'h', source_name: 'gemeinde-registry', ...at, created_at: '2026-04-02T00:00:00Z', publish_status: 'duplicate',
+      duplicate_of: 'other-day' });
+    expect(dedupDay([hidden, shown]).clusters[0].primaryId).toBe('s');
+  });
+
   it('Titel ohne eingebautes Datum wird angezeigt (Prod: „Biodiversitätszentrum … 19.11.2026")', () => {
     const ticket = { ticket_url: 'https://www.ooe.gv.at/v/123' };
     const dated = ev({ id: 'd', title: 'Biodiversitätszentrum Oberösterreich 19.11.2026', start_date: '2026-11-19T17:00:00Z', source_name: 'q1', quality_score: 95, ...ticket });

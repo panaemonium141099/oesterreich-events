@@ -39,12 +39,29 @@ export function wouldBeVisible(e: EventRow): boolean {
 /** Uhrzeit-Spanne vor dem Titel („10:00 Uhr - 16:00 Uhr…"). */
 const LEADING_TIME = /^\s*\d{1,2}[:.]\d{2}\s*(?:uhr)?\s*(?:-|–|bis)\s*\d{1,2}[:.]\d{2}/i;
 
+/** Rest von `long` hinter `short`, wenn `long` mit `short` beginnt (sonst null). */
+function continuation(long: string | null | undefined, short: string | null | undefined): { rest: string; short: string } | null {
+  const l = (long ?? '').trim();
+  const s = (short ?? '').trim().replace(/\s*(?:\.{3}|…)$/, '');
+  if (s.length < 8 || l.length <= s.length || !l.toLowerCase().startsWith(s.toLowerCase())) return null;
+  return { rest: l.slice(s.length), short: s };
+}
+
+/** Kleinbuchstabe mitten im Wort: der kürzere Titel ist abgeschnitten. */
+const midWord = (c: { rest: string; short: string }) => /^\p{Ll}/u.test(c.rest) && /\p{L}$/u.test(c.short);
+
 /** `long` ist `short` mit angeklebtem Text ohne Trennzeichen. */
 function gluedOnto(long: string | null | undefined, short: string | null | undefined): boolean {
-  const l = (long ?? '').trim();
-  const s = (short ?? '').trim();
-  if (s.length < 8 || l.length <= s.length || !l.toLowerCase().startsWith(s.toLowerCase())) return false;
-  return /^[\p{L}\p{N}"„“]/u.test(l.slice(s.length));
+  const c = continuation(long, short);
+  return !!c && !midWord(c) && /^[\p{L}\p{N}"„“]/u.test(c.rest);
+}
+
+/** `short` ist `long`, von der Quelle mitten im Wort abgeschnitten
+ *  („Wolfram Berger & Klavierduo Silver-Garbur" / „…Silver-Garburg",
+ *  Stichprobe 2026-10-09: die gekürzte Zeile verdrängte Eventim). */
+function truncatedFrom(short: string | null | undefined, long: string | null | undefined): boolean {
+  const c = continuation(long, short);
+  return !!c && midWord(c);
 }
 
 /** Basis- und Terminzeile derselben Serie („id" / „id:2026-10-14"). */
@@ -127,7 +144,7 @@ export function isDateOnlyTitle(title: string | null | undefined): boolean {
  * 3. Echter Titel (nicht nur Datum/Uhrzeit)
  * 4. Eventim (Affiliate-Ticketlink)
  * 5. Titel ohne eingebautes Datum
- * 6. Bisheriger Primary (stabile URL)
+ * 6. Bisheriger Primary (stabile URL), sonst schon sichtbare Zeile
  * 7. Highest quality_score
  * 8. Longest meaningful description (> 50 chars)
  * 9. Has image_url
@@ -139,7 +156,11 @@ export function selectPrimary(events: EventRow[], isOrphan: (id: string) => bool
   // kein Duplikat. Er bleibt bei Gleichstand, sonst wechselt die kanonische
   // URL von Nacht zu Nacht (der Dedup rechnet jeden Lauf neu).
   const pointedAt = new Set(events.map(e => e.duplicate_of).filter((id): id is string => !!id));
-  const isCurrentPrimary = (e: EventRow) => (pointedAt.has(e.id) && e.publish_status !== 'duplicate') ? 1 : 0;
+  // Danach eine schon sichtbare Zeile vor einem verborgenen Duplikat:
+  // sonst wechselt die Event-URL ohne Grund (Stichprobe 2026-10-09:
+  // Gem2Go-Detailseite durch die ältere Listenzeile ersetzt).
+  const isCurrentPrimary = (e: EventRow) => (pointedAt.has(e.id) && e.publish_status !== 'duplicate')
+    ? 2 : (e.publish_status === 'published' || e.publish_status === 'published_low_confidence') ? 1 : 0;
   // Zurückgehaltene Zeilen (needs_review/suppressed) dürfen keine sichtbare
   // Zeile verdrängen — sonst verschwände das Event ganz. Bei Duplikaten zählt,
   // was sie freigegeben wären (sonst kippt der Primary jede Nacht).
@@ -157,9 +178,10 @@ export function selectPrimary(events: EventRow[], isOrphan: (id: string) => bool
   // event_map_points filtern auf lat/lng; Stichprobe 2026-10-09).
   const hasPin = (e: EventRow) => (e.latitude != null && e.longitude != null ? 1 : 0);
   // Listen-Text am Titel: angeklebter Zusatz ohne Trennzeichen („…„Der
-  // Kasperl kommt“Buch & Co.") oder Uhrzeit davor („10:00 Uhr - 16:00 Uhr…").
+  // Kasperl kommt“Buch & Co.") oder Uhrzeit davor („10:00 Uhr - 16:00 Uhr…"),
+  // oder ein mitten im Wort abgeschnittener Titel.
   const isUnclean = (e: EventRow) => (LEADING_TIME.test(e.title ?? '') ||
-    events.some(n => n !== e && gluedOnto(e.title, n.title)) ? 1 : 0);
+    events.some(n => n !== e && (gluedOnto(e.title, n.title) || truncatedFrom(e.title, n.title))) ? 1 : 0);
 
   // Serien-Basiszeile: dieselbe Quelle führt für den Termin eine eigene Zeile
   // mit dem Datum in der Kennung (Feratel „…:2026-10-14"). Die Basiszeile

@@ -140,6 +140,30 @@ describe('isGarbageRow — Titel ohne Namen, aber eigene Event-Seite', () => {
   ])('Kalender-Navigation ist keine Event-Seite: %s', (url) => {
     expect(isGarbageRow({ ...dorfer, source_url: url }, new Set())).toBe(true);
   });
+
+  // Stichprobe Runde 4 (2026-10-09)
+  it('Platzhalter-Mitternacht verbindet keine fremden Events derselben Website („mehr" = Feuerlöscherüberprüfung)', () => {
+    const mehr = { title: 'mehr', source_name: 'gemeinde-registry', start_date: '2026-10-10T00:00:00Z',
+      source_url: 'https://www.niederleis.gv.at/Feuerloescherueberpruefung_10' };
+    const other = { ...mehr, title: 'Oberleiser Steinläufer - Termine im Herbst', source_url: 'https://www.niederleis.gv.at/Oberleiser_Steinlaeufer' };
+    expect(isGarbageRow(mehr, new Set(namedPageKeys(other)))).toBe(false);
+  });
+  it('„willKOMMEN!" auf der eigenen Seite ist ein Eventname (Plaudercafé)', () => {
+    expect(isGarbageRow({ ...dorfer, title: 'willKOMMEN!', source_url: 'https://www.gaweinstal.at/willKOMMEN_3' }, new Set())).toBe(false);
+  });
+  it.each([
+    ['Alle Termine', 'https://www.reichersberg.at/system/web/CalendarService.ashx?aID=123'],
+    ['Veranstaltungskalender', 'https://www.raaba-grambach.at/veranstaltungen/listenansicht'],
+    ['Kalender', 'https://www.kirchschlag.at/kalender?ajaxCalendar=1&mo=9&yr=2026'],
+    ['weiter »', 'https://www.werfen.at/de/veranstaltung/abc'],
+    ['von Mo. bis Fr.', 'https://www.hard.at/aktiv-in-hard/veranstaltungen/'],
+    ['Heute', 'https://www.grosshoeflein.at/veranstaltungen/?eventDisplay=past'],
+    ['09.10.2026', 'https://www.paldau.at/kundmachungen'],
+    ['← Zurück zur Übersicht', 'https://www.frantschach.at/fileadmin/plakat.png'],
+    ['Anzahl der Folgetermine 3 weitere Termine bis zum', 'https://www.mittersill.at/system/web/veranstaltung.aspx?menuonr=123'],
+  ])('Listen-Beschriftung oder Listen-Link bleibt Müll: %s', (title, url) => {
+    expect(isGarbageRow({ ...dorfer, title, source_name: 'gemeinden-generic', source_url: url }, new Set())).toBe(true);
+  });
 });
 
 describe('isGarbageTitle — Sprungmarken und Beschriftungen (Prod 2026-10-09)', () => {
@@ -161,6 +185,16 @@ describe('isGarbageTitle — Sprungmarken und Beschriftungen (Prod 2026-10-09)',
     'mehr lesen', 'Kundmachungen', 'Aktuelle Termine', 'FREI:WILLIG',
   ])('weitere Beschriftung: %s', (title) => {
     expect(isGarbageTitle(title)).toBe(true);
+  });
+  it.each([
+    'Lesen Sie mehr', 'mehr Information', 'Parteienverkehr', 'Amtszeiten', 'Quicklinks', 'Nächste Veranstaltung',
+    'Montag,19:00Uhr QR Code öffnen', 'Am , Beginn: 17:00 Uhr', '6.10., 3.11. und , jeweils 18 bis 20 Uhr',
+    'Traungasse 5-7, 4810 Gmunden, Österreich', 'Weitere Termine vorhanden', 'Veranstaltungsvorschau',
+  ])('Beschriftung aus Stichprobe Runde 4: %s', (title) => {
+    expect(isGarbageTitle(title)).toBe(true);
+  });
+  it('„übermorgen" nur bei Gemeinde-Aggregatoren', () => {
+    expect(isGarbageTitle('übermorgen', { sourceName: 'gemeinden-generic' })).toBe(true);
   });
   it('Monatsname allein bei Gemeinde-Aggregatoren', () => {
     expect(isGarbageTitle('OKTOBER', { sourceName: 'gemeinden-generic' })).toBe(true);
